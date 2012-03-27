@@ -88,6 +88,85 @@ static int extractLASFromNITF(NITFDES* psDES, const char* pszLASName)
     return TRUE;
 }
 
+// References:
+//   - NITF 2.1 standard: MIL-STD-2500C (01 May 2006)
+//   - Lidar implementation profile v1.0 (2010-09-07)
+//
+// There must be at least one Image segment ("IM").
+// There must be at least one DES segment ("DE") named LIDARA.
+//
+// You could have multiple image segments and LIDARA segments, but
+// the standard doesn't seem to say anything about how you associate which
+// image segment(s) with which LIDARA segment(s). We will assume only
+// one image segment and only one LIDARA segment.
+//
+
+// return the IID1 field as a string
+static std::string getSegmentIdentifier(NITFFile* psFile, NITFSegmentInfo* psSegInfo)
+{
+    vsi_l_offset curr = VSIFTellL(psFile->fp);
+
+    VSIFSeekL(psFile->fp, psSegInfo->nSegmentHeaderStart + 2, SEEK_SET);
+    char p[11];
+    if (VSIFReadL(p, 1, 10, psFile->fp) != 10)
+    {
+        throw pdal_error("error reading nitf");
+    }
+    p[10] = 0;
+    std::string s = p;
+    
+    VSIFSeekL(psFile->fp, curr, SEEK_SET);
+    return s;
+}
+
+
+static int findIMSegment(NITFFile* psFile)
+{
+    // as per 3.2.3 (pag 19) and 3.2.4 (page 39)
+
+    int iSegment(0);
+    NITFSegmentInfo *psSegInfo = NULL;
+    for(iSegment = 0;  iSegment < psFile->nSegmentCount; iSegment++ )
+    {
+        psSegInfo = psFile->pasSegmentInfo + iSegment;
+
+        if (strncmp(psSegInfo->szSegmentType,"IM",2)==0)
+        {
+            const std::string iid1 = getSegmentIdentifier(psFile, psSegInfo);
+            // BUG: shouldn't allow "None" here!
+            if (iid1 == "INTENSITY " || iid1 == "ELEVATION " || iid1 == "None      ")
+            {
+                return iSegment;
+            }
+        }
+    }    
+
+    throw pdal_error("Unable to find Image segment from NITF file");
+}
+
+
+static int findLIDARASegment(NITFFile* psFile)
+{
+    // as per 3.2.5, page 59
+
+    int iSegment(0);
+    NITFSegmentInfo *psSegInfo = NULL;
+    for(iSegment = 0;  iSegment < psFile->nSegmentCount; iSegment++ )
+    {
+        psSegInfo = psFile->pasSegmentInfo + iSegment;
+        if (strncmp(psSegInfo->szSegmentType,"DE",2)==0)
+        {
+            const std::string iid1 = getSegmentIdentifier(psFile, psSegInfo);
+            if (iid1 == "LIDARA DES")
+            {
+                return iSegment;
+            }
+        }
+    }    
+
+    throw pdal_error("Unable to find LIDARA data extension segment from NITF file");
+}
+
 
 static void extractNITF(const std::string& nitf_filename, std::string& las_filename) 
 {
@@ -99,27 +178,15 @@ static void extractNITF(const std::string& nitf_filename, std::string& las_filen
         //log()->get(logDEBUG) << "Unable to open " << getOptions().getValueOrThrow<std::string>("filename") << " for NITF access" << std::endl;
     }
     
-    int iSegment(0);
-    NITFSegmentInfo *psSegInfo = NULL;
-    for(iSegment = 0;  iSegment < psFile->nSegmentCount; iSegment++ )
-    {
-        psSegInfo = psFile->pasSegmentInfo + iSegment;
-        if( EQUAL(psSegInfo->szSegmentType,"DE")) 
-        {
-            break;
-        }
-    }    
-    
-    if (!psSegInfo)
-    {
-        throw pdal_error("Unable to get LAS DE segment from NITF file!");
-    }
+    int imageSegmentNumber = findIMSegment(psFile);
+    int lidarSegmentNumber = findLIDARASegment(psFile);
 
     //log()->get(logDEBUG) << "NITF Segment DataStart: " << psSegInfo->nSegmentStart 
     //                     << " DataSize: " << psSegInfo->nSegmentSize << std::endl;
 
+
     NITFDES *psDES = NULL;
-    psDES = NITFDESAccess( psFile, iSegment );
+    psDES = NITFDESAccess( psFile, lidarSegmentNumber );
     if( psDES == NULL )
     {
         std::string msg("NITFDESAccess(%d) failed!");
@@ -133,6 +200,10 @@ static void extractNITF(const std::string& nitf_filename, std::string& las_filen
     {
         las_filename = std::string(tempfile);
     }
+
+    NITFDESDeaccess(psDES);
+    
+    NITFClose(psFile);
 
     return;
 }
