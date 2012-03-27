@@ -44,6 +44,7 @@
 namespace pdal
 {
     class PointBuffer;
+    class StreamFactory;
 
     namespace drivers
     {
@@ -87,7 +88,7 @@ public:
 
 private:
     std::string m_nitfFilename;
-    std::string m_lasFilename; // temp file
+    StreamFactory* m_streamFactory;
     pdal::drivers::las::Reader* m_lasReader;
 
     Reader& operator=(const Reader&); // not implemented
