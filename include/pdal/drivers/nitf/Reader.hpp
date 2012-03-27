@@ -98,24 +98,6 @@ private:
 };
 
 
-namespace iterators { namespace sequential {
-
-class PDAL_DLL Reader : public pdal::ReaderSequentialIterator
-{
-public:
-    Reader(pdal::drivers::nitf::Reader const& reader, PointBuffer& buffer);
-
-private:
-    boost::uint64_t skipImpl(boost::uint64_t);
-    boost::uint32_t readBufferImpl(PointBuffer&);
-    bool atEndImpl() const;
-
-    pdal::drivers::nitf::Reader const& m_reader;
-    pdal::ReaderSequentialIterator* m_lasIter;
-};
-
-} } // iterators::sequential
-
 } } } // namespaces
 
 #endif

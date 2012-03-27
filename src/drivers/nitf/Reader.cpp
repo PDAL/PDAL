@@ -68,10 +68,20 @@ namespace pdal { namespace drivers { namespace nitf {
 // We don't support LIDARA segments that are split into multiple DES segments
 // via the DES INDEX mechanism.
 //
-// We store the file header fields, the IM segment fields, and the DES fields.
+// Metadata: we store...
+//    - the file header fields
+//    - the file header TREs
+//    - the IM segment fields
+//    - the IM segment TREs
+//    - the DES fields
+//    - the DES TREs
+// BUG: how should we namespace all the metadata?
 //
-
-
+// Should we honor the IGEOLO field, etc, from the NITF file? Currently we get everything from the LAS file.
+//
+// How should we expose the image segment (if at all)?
+//
+// Need to test on all the other NITF LAS files
 
 
 // ==========================================================================
@@ -97,6 +107,8 @@ Reader::~Reader()
 
 void Reader::addDefaultDimensions()
 {
+    // BUG: fix this
+
     //Dimension x("X", dimension::Float, 8);
     //x.setUUID("9b6a21e7-6ace-45a9-8c66-d9031d07576a");
     //Dimension y("Y", dimension::Float, 8);
@@ -163,42 +175,6 @@ boost::property_tree::ptree Reader::toPTree() const
 
     return tree;
 }
-
-
-
-// == Iterators =============================================================
-
-namespace iterators { namespace sequential {
-
-
-Reader::Reader(const pdal::drivers::nitf::Reader& reader, PointBuffer& buffer)
-    : pdal::ReaderSequentialIterator(reader, buffer)
-    , m_reader(reader)
-{
-    return;
-}
-
-
-boost::uint64_t Reader::skipImpl(boost::uint64_t count)
-{
-     return 0;
-}
-
-
-bool Reader::atEndImpl() const
-{
-     return false;
-}
-
-
-boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
-{
-    return 0;
-}
-
-
-} } // iterators::sequential
-
 
 
 } } } // namespaces

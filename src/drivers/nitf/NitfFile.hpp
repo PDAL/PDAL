@@ -50,6 +50,9 @@ namespace pdal
 
 namespace pdal { namespace drivers { namespace nitf {
 
+//
+// all the processing that is NITF-file specific goes in here
+//
 class PDAL_DLL NitfFile
 {
 public:
