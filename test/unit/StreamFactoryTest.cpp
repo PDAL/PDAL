@@ -39,16 +39,16 @@
 #include <boost/cstdint.hpp>
 #include <iostream>
 
-#include <pdal/StreamManager.hpp>
+#include <pdal/StreamFactory.hpp>
 #include <pdal/FileUtils.hpp>
 
 #include "Support.hpp"
 
 using namespace pdal;
 
-BOOST_AUTO_TEST_SUITE(StreamManagerTest)
+BOOST_AUTO_TEST_SUITE(StreamFactoryTest)
 
-BOOST_AUTO_TEST_CASE(StreamManagerTest_test1)
+BOOST_AUTO_TEST_CASE(test1)
 {
     const std::string wfilename = "temp.txt";
 

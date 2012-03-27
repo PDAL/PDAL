@@ -36,7 +36,7 @@
 #ifdef PDAL_HAVE_GDAL
 
 #include <pdal/PointBuffer.hpp>
-#include <pdal/StreamManager.hpp>
+#include <pdal/StreamFactory.hpp>
 #include <pdal/drivers/las/Reader.hpp>
 
 #include "nitflib.h"

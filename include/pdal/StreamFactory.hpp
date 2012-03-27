@@ -32,8 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_STREAMMANAGER_HPP
-#define INCLUDED_STREAMMANAGER_HPP
+#ifndef INCLUDED_STREAMFACTORY_HPP
+#define INCLUDED_STREAMFACTORY_HPP
 
 #include <pdal/pdal_internal.hpp>
 

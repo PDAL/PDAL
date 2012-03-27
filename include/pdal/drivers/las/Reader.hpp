@@ -38,7 +38,7 @@
 #include <pdal/Reader.hpp>
 #include <pdal/ReaderIterator.hpp>
 
-#include <pdal/StreamManager.hpp>
+#include <pdal/StreamFactory.hpp>
 
 #include <pdal/drivers/las/Support.hpp>
 

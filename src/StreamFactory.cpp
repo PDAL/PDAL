@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/StreamManager.hpp>
+#include <pdal/StreamFactory.hpp>
 #include <pdal/FileUtils.hpp>
 
 namespace pdal
