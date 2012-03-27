@@ -170,29 +170,32 @@ BOOST_AUTO_TEST_CASE(test_wrapped_vsifile_subsequence)
     io::stream<pdal::gdal::VSILFileBuffer> full_stream(vsi_file);
 
     // and make a subset view
-    io::restriction<io::stream<pdal::gdal::VSILFileBuffer> > filt(full_stream, 10, 20);
+    io::restriction<io::stream<pdal::gdal::VSILFileBuffer> > restricted_dev(full_stream, 10, 20);
+    io::stream<io::restriction<io::stream<pdal::gdal::VSILFileBuffer> > > restricted_str(restricted_dev);
+
+    std::istream& str(restricted_str);
 
     // seek to a random spot and read a point
-    filt.seek(5, std::iostream::beg);
-
+    str.seekg(5, std::iostream::beg);
+    
     boost::uint8_t c;
 
-    filt.read((char*)&c, 1);
+    str.read((char*)&c, 1);
     BOOST_CHECK(c == 15);
 
-    filt.read((char*)&c, 1);
+    str.read((char*)&c, 1);
     BOOST_CHECK(c == 16);
 
-    filt.seek(4, std::iostream::cur);
-    filt.read((char*)&c, 1);
+    str.seekg(4, std::iostream::cur);
+    str.read((char*)&c, 1);
     BOOST_CHECK(c == 21);
 
-    filt.seek(-5, std::iostream::end);
-    filt.read((char*)&c, 1);
+    str.seekg(-5, std::iostream::end);
+    str.read((char*)&c, 1);
     BOOST_CHECK(c == 25);
 
-    filt.close();
-
+    restricted_str.close();
+    restricted_dev.close();
     full_stream.close();
 
     VSIFCloseL/*fclose*/(vsi_file);
