@@ -50,48 +50,15 @@ BOOST_AUTO_TEST_SUITE(StreamManagerTest)
 
 BOOST_AUTO_TEST_CASE(StreamManagerTest_test1)
 {
-    const std::string rfilename = Support::datapath("1.2-with-color.las");
     const std::string wfilename = "temp.txt";
 
-    // filename, reading
-    {
-        BOOST_CHECK(FileUtils::fileExists(rfilename));
-        {
-            pdal::IStreamManager rfile(rfilename);
-            rfile.open();
-            BOOST_CHECK(rfile.getFileName() == rfilename);
-            rfile.close();
-        }
-    }
-
-    // filename, reading -- should throw
-    {
-        const std::string silly = "sillyfilenamethatdoesnotexist.xml";
-        BOOST_CHECK(!FileUtils::fileExists(silly));
-
-        {
-            bool ok = false;
-            try
-            {
-                pdal::IStreamManager file(silly);
-                file.open();
-                ok = false;
-            }
-            catch (pdal::pdal_error ex)
-            {
-                ok = true;
-            }
-            BOOST_CHECK(ok);
-        }
-    }
-    
     // filename, writing
     {
         FileUtils::deleteFile(wfilename);
         BOOST_CHECK(!FileUtils::fileExists(wfilename));
 
         {
-            pdal::OStreamManager wfile(wfilename);
+            pdal::OutputStreamManager wfile(wfilename);
             wfile.open();
             BOOST_CHECK(wfile.getFileName() == wfilename);
 
@@ -104,29 +71,14 @@ BOOST_AUTO_TEST_CASE(StreamManagerTest_test1)
         BOOST_CHECK(!FileUtils::fileExists(wfilename));
     }
 
-    // stream, reading
-    {
-        std::istream* istreamname = FileUtils::openFile(rfilename);
-        
-        {
-            pdal::IStreamManager istream(istreamname);
-            istream.open();
-            BOOST_CHECK(istream.istream() == *istreamname);
-            BOOST_CHECK(istream.getFileName() == "");
-            istream.close();
-        }
-
-        FileUtils::closeFile(istreamname);
-    }
-
     // stream, writing
     {
         std::ostream* ostreamname = FileUtils::createFile(wfilename);
         
         {
-            pdal::OStreamManager ostream(ostreamname);
+            pdal::OutputStreamManager ostream(ostreamname);
             ostream.open();
-            BOOST_CHECK(ostream.ostream() == *ostreamname);
+            BOOST_CHECK(&(ostream.ostream()) == ostreamname);
             BOOST_CHECK(ostream.getFileName() == "");
             ostream.close();
         }

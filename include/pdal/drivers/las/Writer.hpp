@@ -95,7 +95,7 @@ protected:
     virtual void writeEnd(boost::uint64_t actualNumPointsWritten);
 
 private:
-    OStreamManager m_streamManager;
+    OutputStreamManager m_streamManager;
 
     LasHeader m_lasHeader;
     boost::uint32_t m_numPointsWritten;

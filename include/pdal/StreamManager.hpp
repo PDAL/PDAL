@@ -150,68 +150,36 @@ private:
 // i.e. stream or filename.  Calling close() is optional (the dtor will do
 // it for you.)
 
-class PDAL_DLL StreamManagerBase
+class PDAL_DLL OutputStreamManager
 {
 public:
     enum Type { Stream, File };
 
-    StreamManagerBase(const std::string& filename, Type type);
-    virtual ~StreamManagerBase() {}
+    OutputStreamManager(const std::string& filename);
+    OutputStreamManager(std::ostream*); // may not be NULL
+    ~OutputStreamManager();
 
-    virtual void open() = 0; // throws
-    virtual void close() = 0;
+    void open(); // throws
+    void close();
 
     // returns "" if stream-based ctor was used
-    virtual const std::string& getFileName() const;
+    const std::string& getFileName() const;
 
     Type getType() const;
     bool isOpen() const;
 
-protected:
-    bool m_isOpen;
-
-private:
-    const Type m_type;
-
-    std::string m_filename;
-
-    StreamManagerBase(const StreamManagerBase&); // nope
-    StreamManagerBase& operator=(const StreamManagerBase&); // nope
-};
-
-
-class PDAL_DLL IStreamManager : public StreamManagerBase
-{
-public:
-    IStreamManager(const std::string& filename);
-    IStreamManager(std::istream*); // may not be NULL
-    ~IStreamManager();
-
-    virtual void open(); // throws
-    virtual void close();
-
-    std::istream& istream();
-
-private:
-    std::istream* m_istream; // not NULL iff we own the stream
-};
-
-
-class PDAL_DLL OStreamManager : public StreamManagerBase
-{
-public:
-    OStreamManager(const std::string& filename);
-    OStreamManager(std::ostream*); // may not be NULL
-    ~OStreamManager();
-
-    virtual void open(); // throws
-    virtual void close();
-
     std::ostream& ostream();
 
 private:
+    const Type m_type;
+    bool m_isOpen;
+    std::string m_filename;
     std::ostream* m_ostream;
+
+    OutputStreamManager(const OutputStreamManager&); // nope
+    OutputStreamManager& operator=(const OutputStreamManager&); // nope
 };
+
 
 } // namespace pdal
 

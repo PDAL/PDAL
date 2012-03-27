@@ -222,142 +222,52 @@ void FilenameSubsetStreamFactory::deallocate(std::istream& stream)
 // --------------------------------------------------------------------
 
 
-StreamManagerBase::StreamManagerBase(const std::string& filename, Type type)
-    : m_isOpen(false)
-    , m_type(type)
+OutputStreamManager::OutputStreamManager(const std::string& filename)
+    : m_type(File)
+    , m_isOpen(false)
     , m_filename(filename)
-{
-    return;
-}
-
-
-const std::string& StreamManagerBase::getFileName() const
-{
-    return m_filename;
-}
-
-
-StreamManagerBase::Type StreamManagerBase::getType() const
-{
-    return m_type;
-}
-
-
-bool StreamManagerBase::isOpen() const
-{
-    return m_isOpen;
-}
-
-// -------------------------------------------------------------------------------
-
-IStreamManager::IStreamManager(const std::string& filename)
-    : StreamManagerBase(filename, File)
-    , m_istream(NULL)
-{
-    return;
-}
-
-
-IStreamManager::IStreamManager(std::istream* istream)
-    : StreamManagerBase("", Stream)
-    , m_istream(istream)
-{
-    return;
-}
-
-
-IStreamManager::~IStreamManager()
-{
-    close();
-    return;
-}
-
-
-void IStreamManager::open()
-{
-    if (m_isOpen)
-        throw pdal_error("cannot re-open file or stream");
-
-    switch (getType())
-    {
-    case File:
-        m_istream = FileUtils::openFile(getFileName(), true);
-        break;
-    case Stream:
-        // nothing to do
-        if (m_istream == NULL)
-            throw pdal_error("invalid stream");
-        break;
-    default:
-        throw pdal_error("cannot open");
-        break;
-    }
-
-    m_isOpen = true;
-
-    return;
-}
-
-
-void IStreamManager::close()
-{
-    if (!m_isOpen) return;
-
-    switch (getType())
-    {
-    case File:
-        FileUtils::closeFile(m_istream);
-        break;
-    case Stream:
-        // nothing to do
-        break;
-    default:
-        throw pdal_error("cannot close");
-        break;
-    }
-
-    m_istream = NULL;
-    m_isOpen = false;
-
-    return;
-}
-
-
-std::istream& IStreamManager::istream()
-{
-    if (!isOpen() || !m_istream)
-        throw pdal_error("invalid stream");
-    return *m_istream;
-}
-
-
-// -------------------------------------------------------------------------------
-
-
-OStreamManager::OStreamManager(const std::string& filename)
-    : StreamManagerBase(filename, File)
     , m_ostream(NULL)
 {
     return;
 }
 
 
-OStreamManager::OStreamManager(std::ostream* ostream)
-    : StreamManagerBase("", Stream)
+OutputStreamManager::OutputStreamManager(std::ostream* ostream)
+    : m_type(Stream)
+    , m_isOpen(false)
+    , m_filename("")
     , m_ostream(ostream)
 {
     return;
 }
 
 
-OStreamManager::~OStreamManager()
+OutputStreamManager::~OutputStreamManager()
 {
     close();
     return;
 }
 
 
-void OStreamManager::open()
+const std::string& OutputStreamManager::getFileName() const
+{
+    return m_filename;
+}
+
+
+OutputStreamManager::Type OutputStreamManager::getType() const
+{
+    return m_type;
+}
+
+
+bool OutputStreamManager::isOpen() const
+{
+    return m_isOpen;
+}
+
+
+void OutputStreamManager::open()
 {
     if (m_isOpen)
         throw pdal_error("cannot re-open file or stream");
@@ -383,7 +293,7 @@ void OStreamManager::open()
 }
 
 
-void OStreamManager::close()
+void OutputStreamManager::close()
 {
     if (!m_isOpen) return;
 
@@ -407,7 +317,7 @@ void OStreamManager::close()
 }
 
 
-std::ostream& OStreamManager::ostream()
+std::ostream& OutputStreamManager::ostream()
 {
     if (!isOpen() || !m_ostream)
         throw pdal_error("invalid stream");
