@@ -116,6 +116,7 @@ void Metadata::createUUID()
 std::ostream& operator<<(std::ostream& ostr, const Metadata& metadata)
 {
     ostr << metadata.getVariant() << std::endl;
+    //ostr << metadata.getNamespace() << ":" << metadata.getName() << "=" << metadata.getVariant() << std::endl;
     return ostr;
 }
 

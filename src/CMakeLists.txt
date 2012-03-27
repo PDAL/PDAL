@@ -317,11 +317,14 @@ set(PDAL_NITF_HEADERS ${PDAL_HEADERS_DIR}/${PDAL_NITF_PATH})
 set(PDAL_NITF_SRC ${PROJECT_SOURCE_DIR}/src/${PDAL_NITF_PATH})
 
 set(PDAL_DRIVERS_NITF_HPP
+  ${PDAL_NITF_SRC}/nitflib.h
+  ${PDAL_NITF_SRC}/NitfFile.hpp
   ${PDAL_NITF_HEADERS}/Reader.hpp
   ${PDAL_NITF_HEADERS}/Writer.hpp
 )
 
 set (PDAL_DRIVERS_NITF_CPP 
+  ${PDAL_NITF_SRC}/NitfFile.cpp
   ${PDAL_NITF_SRC}/Reader.cpp
   ${PDAL_NITF_SRC}/Writer.cpp
 )

@@ -39,6 +39,8 @@
 #include <pdal/StreamFactory.hpp>
 #include <pdal/drivers/las/Reader.hpp>
 
+// local
+#include "NitfFile.hpp"
 #include "nitflib.h"
 
 // gdal
@@ -69,165 +71,7 @@ namespace pdal { namespace drivers { namespace nitf {
 // We store the file header fields, the IM segment fields, and the DES fields.
 //
 
-// return the IID1 field as a string
-static std::string getSegmentIdentifier(NITFFile* psFile, NITFSegmentInfo* psSegInfo)
-{
-    vsi_l_offset curr = VSIFTellL(psFile->fp);
 
-    VSIFSeekL(psFile->fp, psSegInfo->nSegmentHeaderStart + 2, SEEK_SET);
-    char p[11];
-    if (VSIFReadL(p, 1, 10, psFile->fp) != 10)
-    {
-        throw pdal_error("error reading nitf");
-    }
-    p[10] = 0;
-    std::string s = p;
-    
-    VSIFSeekL(psFile->fp, curr, SEEK_SET);
-    return s;
-}
-
-
-// return DESVER as a string
-static std::string getDESVER(NITFFile* psFile, NITFSegmentInfo* psSegInfo)
-{
-    vsi_l_offset curr = VSIFTellL(psFile->fp);
-
-    VSIFSeekL(psFile->fp, psSegInfo->nSegmentHeaderStart + 2 + 25, SEEK_SET);
-    char p[3];
-    if (VSIFReadL(p, 1, 2, psFile->fp) != 2)
-    {
-        throw pdal_error("error reading nitf");
-    }
-    p[2] = 0;
-    std::string s = p;
-    
-    VSIFSeekL(psFile->fp, curr, SEEK_SET);
-    return s;
-}
-
-
-static int findIMSegment(NITFFile* psFile)
-{
-    // as per 3.2.3 (pag 19) and 3.2.4 (page 39)
-
-    int iSegment(0);
-    NITFSegmentInfo *psSegInfo = NULL;
-    for(iSegment = 0;  iSegment < psFile->nSegmentCount; iSegment++ )
-    {
-        psSegInfo = psFile->pasSegmentInfo + iSegment;
-
-        if (strncmp(psSegInfo->szSegmentType,"IM",2)==0)
-        {
-            const std::string iid1 = getSegmentIdentifier(psFile, psSegInfo);
-            // BUG: shouldn't allow "None" here!
-            if (iid1 == "INTENSITY " || iid1 == "ELEVATION " || iid1 == "None      ")
-            {
-                return iSegment;
-            }
-        }
-    }    
-
-    throw pdal_error("Unable to find Image segment from NITF file");
-}
-
-
-static int findLIDARASegment(NITFFile* psFile)
-{
-    // as per 3.2.5, page 59
-
-    int iSegment(0);
-    NITFSegmentInfo *psSegInfo = NULL;
-    for(iSegment = 0;  iSegment < psFile->nSegmentCount; iSegment++ )
-    {
-        psSegInfo = psFile->pasSegmentInfo + iSegment;
-        if (strncmp(psSegInfo->szSegmentType,"DE",2)==0)
-        {
-            const std::string iid1 = getSegmentIdentifier(psFile, psSegInfo);
-            const std::string desver = getDESVER(psFile, psSegInfo);
-            if (iid1 == "LIDARA DES" && desver == "01")
-            {
-                return iSegment;
-            }
-        }
-    }    
-
-    throw pdal_error("Unable to find LIDARA data extension segment from NITF file");
-}
-
-
-static void extractNITF(const std::string& nitf_filename, boost::uint64_t& offset, boost::uint64_t& length) 
-{
-    NITFFile* file = NITFOpen(nitf_filename.c_str(), FALSE);
-    if (!file)
-    {
-        throw pdal_error("unable to open NITF file");
-    }
-    
-    const int imageSegmentNumber = findIMSegment(file);
-    const int lidarSegmentNumber = findLIDARASegment(file);
-
-    //
-    // file header fields
-    //
-    {
-        int cnt = CSLCount(file->papszMetadata);
-        for (int i=0; i<cnt; i++)
-        {
-            char* p = file->papszMetadata[i];
-            //printf("FH %d: %s\n", i, p);
-        }
-    }
-
-    //
-    // IM segment fields
-    //
-    {
-        NITFImage* imageSegment = NITFImageAccess(file, imageSegmentNumber);
-        if (!imageSegment)
-        {
-            throw pdal_error("NITFImageAccess failed");
-        }
-
-        int cnt = CSLCount(imageSegment->papszMetadata);
-        for (int i=0; i<cnt; i++)
-        {
-            char* p = imageSegment->papszMetadata[i];
-            //printf("IM %d: %s\n", i, p);
-        }
-
-        NITFImageDeaccess(imageSegment);
-    }
-
-    //
-    // LIDARA segment fields
-    //
-    {
-        NITFDES* dataSegment = NITFDESAccess(file, lidarSegmentNumber);
-        if (!dataSegment)
-        {
-            throw pdal_error("NITFDESAccess failed");
-        }
-
-        int cnt = CSLCount(dataSegment->papszMetadata);
-        for (int i=0; i<cnt; i++)
-        {
-            char* p = dataSegment->papszMetadata[i];
-            //printf("DES %d: %s\n", i, p);
-        }
-
-        // grab the file offset info
-        NITFSegmentInfo* psSegInfo = dataSegment->psFile->pasSegmentInfo + dataSegment->iSegment;
-        offset = psSegInfo->nSegmentStart;
-        length = psSegInfo->nSegmentSize;
-
-        NITFDESDeaccess(dataSegment);
-    }
-
-    NITFClose(file);
-
-    return;
-}
 
 
 // ==========================================================================
@@ -235,7 +79,7 @@ static void extractNITF(const std::string& nitf_filename, boost::uint64_t& offse
 
 Reader::Reader(const Options& options)
     : pdal::Reader(options)
-    , m_nitfFilename(options.getValueOrThrow<std::string>("filename"))
+    , m_filename(options.getValueOrThrow<std::string>("filename"))
     , m_streamFactory(NULL)
     , m_lasReader(NULL)
 {
@@ -274,9 +118,19 @@ void Reader::initialize()
     pdal::Reader::initialize();
 
     boost::uint64_t offset, length;
-    extractNITF(m_nitfFilename, offset, length);
 
-    m_streamFactory = new FilenameSubsetStreamFactory(m_nitfFilename, offset, length);
+    {
+        NitfFile nitf(m_filename);
+        nitf.open();
+
+        nitf.getLasPosition(offset, length);
+        
+        nitf.extractMetadata(m_metadatums);
+
+        nitf.close();
+    }
+
+    m_streamFactory = new FilenameSubsetStreamFactory(m_filename, offset, length);
 
     m_lasReader = new pdal::drivers::las::Reader(m_streamFactory);
     m_lasReader->initialize();
@@ -298,12 +152,6 @@ pdal::StageSequentialIterator* Reader::createSequentialIterator(PointBuffer& buf
 {
     pdal::StageSequentialIterator* lasIter = m_lasReader->createSequentialIterator(buffer);
     return lasIter;
-}
-
-
-boost::uint32_t Reader::processBuffer(PointBuffer& data, boost::uint64_t index) const
-{
-    return 0;
 }
 
 

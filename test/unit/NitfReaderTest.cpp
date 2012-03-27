@@ -67,6 +67,20 @@ BOOST_AUTO_TEST_CASE(test_one)
 
     BOOST_CHECK_EQUAL(nitf_reader.getDescription(), "NITF Reader");
 
+    // check metadata
+    {
+        const std::vector<Metadata>& metadatums = nitf_reader.getMetadatums();
+        BOOST_CHECK_EQUAL(metadatums.size(), 80u);
+        
+        const Metadata& m = metadatums[4];
+        BOOST_CHECK_EQUAL(m.getName(), "FDT");
+        BOOST_CHECK_EQUAL(m.getNamespace(), "drivers.nitf.reader.FH");
+
+        Metadata& mm = (Metadata&)m; // BUG: remove const, for getValue()
+        const std::string s(mm.getValue<std::string>());
+        BOOST_CHECK_EQUAL(s, "20120323002946");
+    }
+
     const Schema& nitf_schema = nitf_reader.getSchema();
 
     PointBuffer nitf_data(nitf_schema, 750);

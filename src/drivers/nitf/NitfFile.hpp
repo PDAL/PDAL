@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2012, Michael P. Gerlek (mpg@flaxen.com)
 *
 * All rights reserved.
 *
@@ -32,89 +32,56 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_DRIVERS_NITF_READER_HPP
-#define INCLUDED_DRIVERS_NITF_READER_HPP
+#ifndef INCLUDED_DRIVERS_NITF_FILE_HPP
+#define INCLUDED_DRIVERS_NITF_FILE_HPP
 
 #include <pdal/pdal_internal.hpp>
 #ifdef PDAL_HAVE_GDAL
 
-#include <pdal/Reader.hpp>
-#include <pdal/ReaderIterator.hpp>
+#include <vector>
+
+#include "nitflib.h"
 
 namespace pdal
 {
-    class PointBuffer;
-    class StreamFactory;
-
-    namespace drivers
-    {
-        namespace las
-        {
-            class Reader;
-        }
-    }
+    class Metadata;
 }
+
 
 namespace pdal { namespace drivers { namespace nitf {
 
-
-class PDAL_DLL Reader : public pdal::Reader
+class PDAL_DLL NitfFile
 {
 public:
-    SET_STAGE_NAME("drivers.nitf.reader", "NITF Reader")
+    NitfFile(const std::string& filename);
+    ~NitfFile();
 
-    Reader(const Options& options);
-    ~Reader();
-    
-    virtual void initialize();
-    virtual const Options getDefaultOptions() const;
-    virtual void addDefaultDimensions();
- 
-    bool supportsIterator (StageIteratorType t) const
-    {   
-        if (t == StageIterator_Sequential ) return true;
-        if (t == StageIterator_Random ) return true;
-        
-        return false;
-    }
+    void open();
+    void close();
 
-    const std::vector<Metadata>& getMetadatums() const { return m_metadatums; }
+    void getLasPosition(boost::uint64_t& offset, boost::uint64_t& length) const;
 
-    pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
-
-    // for dumping
-    virtual boost::property_tree::ptree toPTree() const;
+    void extractMetadata(std::vector<Metadata>&);
 
 private:
-    std::string m_filename;
-    StreamFactory* m_streamFactory;
-    pdal::drivers::las::Reader* m_lasReader;
+    std::string getSegmentIdentifier(NITFSegmentInfo* psSegInfo);
+    std::string getDESVER(NITFSegmentInfo* psSegInfo);
+    int findIMSegment();
+    int findLIDARASegment();
 
-    std::vector<Metadata> m_metadatums;
+    static void processTREs(int nTREBytes, const char *pszTREData, std::vector<Metadata>& metadatums, const std::string& parentkey);
+    static void processTREs_DES(NITFDES*, std::vector<Metadata>& metadatums, const std::string& parentkey);
+    static void processMetadata(char** papszMetadata, std::vector<Metadata>&, const std::string& parentkey);
 
-    Reader& operator=(const Reader&); // not implemented
-    Reader(const Reader&); // not implemented
+    const std::string m_filename;
+    NITFFile* m_file;
+    int m_imageSegmentNumber;
+    int m_lidarSegmentNumber;
 
+    NitfFile(const NitfFile&); // nope
+    NitfFile& operator=(const NitfFile&); // nope
 };
 
-
-namespace iterators { namespace sequential {
-
-class PDAL_DLL Reader : public pdal::ReaderSequentialIterator
-{
-public:
-    Reader(pdal::drivers::nitf::Reader const& reader, PointBuffer& buffer);
-
-private:
-    boost::uint64_t skipImpl(boost::uint64_t);
-    boost::uint32_t readBufferImpl(PointBuffer&);
-    bool atEndImpl() const;
-
-    pdal::drivers::nitf::Reader const& m_reader;
-    pdal::ReaderSequentialIterator* m_lasIter;
-};
-
-} } // iterators::sequential
 
 } } } // namespaces
 
