@@ -37,15 +37,107 @@
 
 #include <pdal/pdal_internal.hpp>
 
+#include <boost/iostreams/stream.hpp>
+#include <boost/iostreams/device/file.hpp>
+#ifdef PDAL_COMPILER_MSVC
+#  pragma warning(push)
+#  pragma warning(disable: 4512)  // assignment operator could not be generated
+#endif
+#include <boost/iostreams/restrict.hpp>
+#ifdef PDAL_COMPILER_MSVC
+#  pragma warning(pop)
+#endif
+
 #include <string>
 #include <cassert>
 #include <stdexcept>
 #include <cmath>
 #include <ostream>
 #include <istream>
+#include <vector>
 
 namespace pdal
 {
+
+
+class PDAL_DLL StreamFactory
+{
+public:
+    StreamFactory() {}
+    virtual ~StreamFactory() {}
+
+    // returns the stream in the open state
+    virtual std::istream& allocate() = 0;
+
+    // will close the stream for you
+    virtual void deallocate(std::istream&) = 0;
+
+private:
+    StreamFactory(const StreamFactory&); // nope
+    StreamFactory& operator=(const StreamFactory&); // nope
+};
+
+
+// this one can't clone its stream!
+class PDAL_DLL PassthruStreamFactory : public StreamFactory
+{
+public:
+    PassthruStreamFactory(std::istream& s);
+    virtual ~PassthruStreamFactory();
+
+    virtual std::istream& allocate();
+    virtual void deallocate(std::istream&);
+
+private:
+    std::istream& m_istream;
+    bool m_allocated;
+};
+
+
+class PDAL_DLL FilenameStreamFactory : public StreamFactory
+{
+public:
+    FilenameStreamFactory(const std::string& file);
+    virtual ~FilenameStreamFactory();
+
+    virtual std::istream& allocate();
+    virtual void deallocate(std::istream&);
+
+private:
+    const std::string m_filename;
+    std::vector<std::istream*> m_istreams;
+};
+
+class PDAL_DLL FilenameSubsetStreamFactory : public StreamFactory
+{
+public:
+    FilenameSubsetStreamFactory(const std::string& file, boost::uint64_t offset, boost::uint64_t length);
+    virtual ~FilenameSubsetStreamFactory();
+
+    virtual std::istream& allocate();
+    virtual void deallocate(std::istream&);
+
+private:
+    const std::string m_filename;
+    const boost::uint64_t m_offset;
+    const boost::uint64_t m_length;
+
+    typedef boost::iostreams::stream<boost::iostreams::file_source> FStream;
+    typedef boost::iostreams::restriction<FStream> FStreamSlice;
+    typedef boost::iostreams::stream<FStreamSlice> FStreamSliceStream;
+
+    struct StreamSet
+    {
+       StreamSet(std::istream*,FStreamSlice*,FStreamSliceStream*);
+       ~StreamSet();
+       bool match(std::istream&) const;
+       std::istream* stream;
+       FStreamSlice* slice;
+       FStreamSliceStream* streamslice;
+    };
+    std::vector<StreamSet*> m_streams;
+};
+
 
 // Many of our reader & writer classes want to take a filename or a stream
 // in their ctors, which means that we need a common piece of code that

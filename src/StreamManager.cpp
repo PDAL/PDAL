@@ -35,9 +35,191 @@
 #include <pdal/StreamManager.hpp>
 #include <pdal/FileUtils.hpp>
 
-
 namespace pdal
 {
+
+// --------------------------------------------------------------------
+
+PassthruStreamFactory::PassthruStreamFactory(std::istream& s)
+    : StreamFactory()
+    , m_istream(s)
+    , m_allocated(false)
+{
+    return;
+}
+
+PassthruStreamFactory::~PassthruStreamFactory()
+{
+    return;
+}
+
+std::istream& PassthruStreamFactory::allocate()
+{
+    if (m_allocated)
+        throw pdal_error("can't allocate additional stream");
+
+    m_allocated = true;
+    return m_istream;
+}
+
+
+void PassthruStreamFactory::deallocate(std::istream& stream)
+{
+    if (!m_allocated)
+        throw pdal_error("incorrect stream deallocation");
+
+    if (&stream != &m_istream)
+        throw pdal_error("incorrect stream deallocation");
+
+    m_allocated = false;
+}
+
+
+// --------------------------------------------------------------------
+
+FilenameStreamFactory::FilenameStreamFactory(const std::string& name)
+    : StreamFactory()
+    , m_filename(name)
+{
+    return;
+}
+
+FilenameStreamFactory::~FilenameStreamFactory()
+{
+    while (m_istreams.size())
+    {
+        std::istream* s = m_istreams.back();
+        m_istreams.pop_back();
+        if (s)
+        {
+            FileUtils::closeFile(s);
+        }
+    }
+
+    return;
+}
+
+
+std::istream& FilenameStreamFactory::allocate()
+{
+    std::istream* s = FileUtils::openFile(m_filename, true);
+    m_istreams.push_back(s);
+    return *s;
+}
+
+
+void FilenameStreamFactory::deallocate(std::istream& stream)
+{
+    for (unsigned int i=0; i<m_istreams.size(); i++)
+    {
+        if (m_istreams[i] == &stream)
+        {
+            FileUtils::closeFile(m_istreams[i]);
+            m_istreams[i] = NULL;
+            return;
+        }
+    }
+
+    throw pdal_error("incorrect stream deallocation");
+}
+
+
+// --------------------------------------------------------------------
+
+FilenameSubsetStreamFactory::StreamSet::StreamSet(std::istream* a, FStreamSlice* b, FStreamSliceStream* c)
+    : stream(a)
+    , slice(b)
+    , streamslice(c)
+{
+    return;
+}
+
+
+FilenameSubsetStreamFactory::StreamSet::~StreamSet()
+{
+    streamslice->close();
+    delete streamslice;
+
+    slice->close();
+    delete slice;
+
+    FileUtils::closeFile(stream);
+
+    return;
+}
+
+
+bool FilenameSubsetStreamFactory::StreamSet::match(std::istream& s) const
+{
+    std::istream* ss(&s);
+    return ss == streamslice;
+}
+
+
+FilenameSubsetStreamFactory::FilenameSubsetStreamFactory(const std::string& name, boost::uint64_t offset, boost::uint64_t length)
+    : StreamFactory()
+    , m_filename(name)
+    , m_offset(offset)
+    , m_length(length)
+{
+    return;
+}
+
+FilenameSubsetStreamFactory::~FilenameSubsetStreamFactory()
+{
+    namespace io = boost::iostreams;
+
+    for (unsigned int i=0; i<m_streams.size(); i++)
+    {
+        StreamSet* set = m_streams[i];
+        if (set)
+        {
+            delete set;
+            m_streams[i] = NULL;
+        }
+    }
+
+    return;
+}
+
+
+std::istream& FilenameSubsetStreamFactory::allocate()
+{
+    namespace io = boost::iostreams;
+
+    std::istream* file = FileUtils::openFile(m_filename, true);
+
+    FStream* source = dynamic_cast<FStream*>(file);
+    assert(source!=0);
+    
+    FStreamSlice* restricted_device = new FStreamSlice(*source, m_offset, m_length);
+    io::stream<FStreamSlice>* restricted_stream = new io::stream<FStreamSlice>(*restricted_device);
+
+    StreamSet* set = new StreamSet(file, restricted_device, restricted_stream);
+    m_streams.push_back(set);
+
+    return *restricted_stream;
+}
+
+
+void FilenameSubsetStreamFactory::deallocate(std::istream& stream)
+{
+    for (unsigned int i=0; i<m_streams.size(); i++)
+    {
+        StreamSet* set = m_streams[i];
+        if (set && set->match(stream))
+        {
+            delete set;
+            m_streams[i] = NULL;
+            return;
+        }
+    }
+
+    throw pdal_error("incorrect stream deallocation");
+}
+
+
+// --------------------------------------------------------------------
 
 
 StreamManagerBase::StreamManagerBase(const std::string& filename, Type type)

@@ -37,6 +37,7 @@
 
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
+#include <iostream>
 
 #include <pdal/StreamManager.hpp>
 #include <pdal/FileUtils.hpp>
@@ -132,6 +133,116 @@ BOOST_AUTO_TEST_CASE(StreamManagerTest_test1)
 
         FileUtils::closeFile(ostreamname);
         FileUtils::deleteFile(wfilename);
+    }
+
+    return;
+}
+
+
+static void check_contents_sub(std::istream& s)
+{
+    int c;
+    
+    c = s.get();
+    BOOST_CHECK(c == 'd');
+    
+    c = s.get();
+    BOOST_CHECK(c == 'i');
+    
+    c = s.get();
+    BOOST_CHECK(c == 's');
+    
+    c = s.get();
+    BOOST_CHECK(c == 't');
+    
+    c = s.get();
+    BOOST_CHECK(c == -1);
+    
+    BOOST_CHECK(s.eof());
+}
+
+
+static void check_contents(std::istream& s)
+{
+    int c;
+    
+    c = s.get();
+    BOOST_CHECK(c == 'R');
+    
+    c = s.get();
+    BOOST_CHECK(c == 'e');
+    
+    s.seekg(-4, std::ios_base::end);
+
+    std::streamoff e = s.tellg();
+    BOOST_CHECK(e == 78);
+
+    c = s.get();
+    BOOST_CHECK(c == 'n');
+    
+    BOOST_CHECK(!s.eof());
+
+    BOOST_CHECK(s.get() == '.');
+    BOOST_CHECK(s.get() == '.');
+    BOOST_CHECK(s.get() == '.');
+    BOOST_CHECK(s.get() == -1);
+
+    BOOST_CHECK(s.eof());
+
+    return;
+}
+
+
+BOOST_AUTO_TEST_CASE(test2)
+{
+    {
+        const std::string nam = Support::datapath("text.txt");
+        FilenameStreamFactory f(nam);
+
+        std::istream& s1 = f.allocate();
+        std::istream& s2 = f.allocate();
+        std::istream& s3 = f.allocate();
+
+        check_contents(s1);
+        check_contents(s2);
+        check_contents(s3);
+
+        f.deallocate(s3);
+        f.deallocate(s1);
+        // f.deallocate(s2);   // let the dtor do it for us
+    }
+
+    {
+        const std::string nam = Support::datapath("text.txt");
+        std::istream* s = FileUtils::openFile(nam);
+        PassthruStreamFactory f(*s);
+
+        std::istream& s1 = f.allocate();
+
+        BOOST_REQUIRE_THROW(f.allocate(), pdal_error);
+
+        check_contents(s1);
+
+        f.deallocate(s1);
+
+        FileUtils::closeFile(s);
+    }
+
+    {
+        const std::string nam = Support::datapath("text.txt");
+        FilenameSubsetStreamFactory f(nam,2,4);
+
+        std::istream& s1 = f.allocate();
+        std::istream& s2 = f.allocate();
+        std::istream& s3 = f.allocate();
+
+        check_contents_sub(s1);
+        check_contents_sub(s2);
+        check_contents_sub(s3);
+
+        f.deallocate(s1);
+        f.deallocate(s3);
+        // f.deallocate(s2);   // let the dtor do it for us
     }
 
     return;
