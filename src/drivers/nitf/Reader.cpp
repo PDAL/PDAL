@@ -82,6 +82,8 @@ namespace pdal { namespace drivers { namespace nitf {
 // How should we expose the image segment (if at all)?
 //
 // Need to test on all the other NITF LAS files
+//
+// Add to stageFactory, do pipeline support, etc
 
 
 // ==========================================================================
