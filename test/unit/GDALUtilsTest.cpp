@@ -38,7 +38,14 @@
 #include <pdal/FileUtils.hpp>
 #include "Support.hpp"
 
+#ifdef PDAL_COMPILER_MSVC
+#  pragma warning(push)
+#  pragma warning(disable: 4512)  // assignment operator could not be generated
+#endif
 #include <boost/iostreams/restrict.hpp>
+#ifdef PDAL_COMPILER_MSVC
+#  pragma warning(pop)
+#endif
 
 BOOST_AUTO_TEST_SUITE(GDALUtilsTest)
 
@@ -155,7 +162,7 @@ BOOST_AUTO_TEST_CASE(test_wrapped_vsifile_subsequence)
         FILE* fp = fopen(tempfile.c_str(), "wb");
         for (int i=0; i<100; i++)
         {
-            char c = i;
+            char c = (char)i;
             fwrite(&c, 1, 1, fp);
         }
         fclose(fp);
