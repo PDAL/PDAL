@@ -50,20 +50,6 @@
 
 namespace pdal { namespace drivers { namespace nitf {
 
-static int extractLASFromNITF(NITFDES* psDES, boost::uint64_t& offset, boost::uint64_t& length)
-{
-    NITFSegmentInfo* psSegInfo;
-
-    if ( CSLFetchNameValue(psDES->papszMetadata, "NITF_DESID") == NULL )
-        return FALSE;
-
-    psSegInfo = psDES->psFile->pasSegmentInfo + psDES->iSegment;
-
-    offset = psSegInfo->nSegmentStart;
-    length = psSegInfo->nSegmentSize;
-
-    return TRUE;
-}
 
 // References:
 //   - NITF 2.1 standard: MIL-STD-2500C (01 May 2006)
@@ -76,6 +62,11 @@ static int extractLASFromNITF(NITFDES* psDES, boost::uint64_t& offset, boost::ui
 // the standard doesn't seem to say anything about how you associate which
 // image segment(s) with which LIDARA segment(s). We will assume only
 // one image segment and only one LIDARA segment.
+//
+// We don't support LIDARA segments that are split into multiple DES segments
+// via the DES INDEX mechanism.
+//
+// We store the file header fields, the IM segment fields, and the DES fields.
 //
 
 // return the IID1 field as a string
@@ -90,6 +81,25 @@ static std::string getSegmentIdentifier(NITFFile* psFile, NITFSegmentInfo* psSeg
         throw pdal_error("error reading nitf");
     }
     p[10] = 0;
+    std::string s = p;
+    
+    VSIFSeekL(psFile->fp, curr, SEEK_SET);
+    return s;
+}
+
+
+// return DESVER as a string
+static std::string getDESVER(NITFFile* psFile, NITFSegmentInfo* psSegInfo)
+{
+    vsi_l_offset curr = VSIFTellL(psFile->fp);
+
+    VSIFSeekL(psFile->fp, psSegInfo->nSegmentHeaderStart + 2 + 25, SEEK_SET);
+    char p[3];
+    if (VSIFReadL(p, 1, 2, psFile->fp) != 2)
+    {
+        throw pdal_error("error reading nitf");
+    }
+    p[2] = 0;
     std::string s = p;
     
     VSIFSeekL(psFile->fp, curr, SEEK_SET);
@@ -134,7 +144,8 @@ static int findLIDARASegment(NITFFile* psFile)
         if (strncmp(psSegInfo->szSegmentType,"DE",2)==0)
         {
             const std::string iid1 = getSegmentIdentifier(psFile, psSegInfo);
-            if (iid1 == "LIDARA DES")
+            const std::string desver = getDESVER(psFile, psSegInfo);
+            if (iid1 == "LIDARA DES" && desver == "01")
             {
                 return iSegment;
             }
@@ -147,37 +158,73 @@ static int findLIDARASegment(NITFFile* psFile)
 
 static void extractNITF(const std::string& nitf_filename, boost::uint64_t& offset, boost::uint64_t& length) 
 {
-    NITFFile    *psFile;
-    psFile = NITFOpen( nitf_filename.c_str(), FALSE );
-    if (psFile == NULL)
+    NITFFile* file = NITFOpen(nitf_filename.c_str(), FALSE);
+    if (!file)
     {
         throw pdal_error("unable to open NITF file");
-        //log()->get(logDEBUG) << "Unable to open " << getOptions().getValueOrThrow<std::string>("filename") << " for NITF access" << std::endl;
     }
     
-    int imageSegmentNumber = findIMSegment(psFile);
-    int lidarSegmentNumber = findLIDARASegment(psFile);
+    const int imageSegmentNumber = findIMSegment(file);
+    const int lidarSegmentNumber = findLIDARASegment(file);
 
-    //log()->get(logDEBUG) << "NITF Segment DataStart: " << psSegInfo->nSegmentStart 
-    //                     << " DataSize: " << psSegInfo->nSegmentSize << std::endl;
-
-
-    NITFDES *psDES = NULL;
-    psDES = NITFDESAccess( psFile, lidarSegmentNumber );
-    if( psDES == NULL )
+    //
+    // file header fields
+    //
     {
-        std::string msg("NITFDESAccess(%d) failed!");
-        throw pdal_error(msg);
+        int cnt = CSLCount(file->papszMetadata);
+        for (int i=0; i<cnt; i++)
+        {
+            char* p = file->papszMetadata[i];
+            //printf("FH %d: %s\n", i, p);
+        }
     }
-    
-    std::string tempfile = Utils::generate_tempfile();
-    //log()->get(logDEBUG) << "Using " << tempfile << " for NITF->LAS filename" << std::endl;
-    
-    extractLASFromNITF(psDES, offset, length);
 
-    NITFDESDeaccess(psDES);
-    
-    NITFClose(psFile);
+    //
+    // IM segment fields
+    //
+    {
+        NITFImage* imageSegment = NITFImageAccess(file, imageSegmentNumber);
+        if (!imageSegment)
+        {
+            throw pdal_error("NITFImageAccess failed");
+        }
+
+        int cnt = CSLCount(imageSegment->papszMetadata);
+        for (int i=0; i<cnt; i++)
+        {
+            char* p = imageSegment->papszMetadata[i];
+            //printf("IM %d: %s\n", i, p);
+        }
+
+        NITFImageDeaccess(imageSegment);
+    }
+
+    //
+    // LIDARA segment fields
+    //
+    {
+        NITFDES* dataSegment = NITFDESAccess(file, lidarSegmentNumber);
+        if (!dataSegment)
+        {
+            throw pdal_error("NITFDESAccess failed");
+        }
+
+        int cnt = CSLCount(dataSegment->papszMetadata);
+        for (int i=0; i<cnt; i++)
+        {
+            char* p = dataSegment->papszMetadata[i];
+            //printf("DES %d: %s\n", i, p);
+        }
+
+        // grab the file offset info
+        NITFSegmentInfo* psSegInfo = dataSegment->psFile->pasSegmentInfo + dataSegment->iSegment;
+        offset = psSegInfo->nSegmentStart;
+        length = psSegInfo->nSegmentSize;
+
+        NITFDESDeaccess(dataSegment);
+    }
+
+    NITFClose(file);
 
     return;
 }
