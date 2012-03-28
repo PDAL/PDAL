@@ -265,10 +265,10 @@ public:
 */ 
     
     /// return  Metadatas const& for the PointBuffer
-    inline Metadatas const& getMetadata() const { return m_metadata; }
+    inline Metadata const& getMetadata() const { return m_metadata; }
     
-    /// @return Metadatas& for the PointBuffer
-    inline Metadatas& getMetadataRef() { return m_metadata; }
+    /// @return Metadata& for the PointBuffer
+    inline Metadata& getMetadataRef() { return m_metadata; }
 
 /** @name Serialization
 */ 
@@ -307,7 +307,7 @@ private:
     // being dereferenced for every point read otherwise.
     schema::size_type m_byteSize;
     
-    Metadatas m_metadata;
+    Metadata m_metadata;
     
     template<class T> T convertDimension(pdal::Dimension const& dim, void* bytes) const;    
     template<typename Target, typename Source> static Target saturation_cast(Source const& src);

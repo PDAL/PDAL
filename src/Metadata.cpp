@@ -125,7 +125,7 @@ std::ostream& operator<<(std::ostream& ostr, const Entry& metadata)
 
 } // metadata 
 
-void Metadatas::addMetadata(metadata::Entry const& m)
+void Metadata::addMetadata(metadata::Entry const& m)
 {
     metadata::index_by_name& index = m_metadata.get<metadata::name>();
 
@@ -141,7 +141,7 @@ void Metadatas::addMetadata(metadata::Entry const& m)
 }
 
 
-metadata::Entry const& Metadatas::getMetadata(std::string const& t, std::string const& ns) const
+metadata::Entry const& Metadata::getMetadata(std::string const& t, std::string const& ns) const
 {
     metadata::index_by_name const& name_index = m_metadata.get<metadata::name>();
     metadata::index_by_name::const_iterator it = name_index.find(t);
@@ -149,7 +149,7 @@ metadata::Entry const& Metadatas::getMetadata(std::string const& t, std::string 
     metadata::index_by_name::size_type count = name_index.count(t);
 
     std::ostringstream oss;
-    oss << "Entry with name '" << t << "' not found, unable to Metadatas::getMetadata";
+    oss << "Entry with name '" << t << "' not found, unable to Metadata::getMetadata";
 
     if (it != name_index.end()) {
         
@@ -264,7 +264,7 @@ metadata::Entry const& Metadatas::getMetadata(std::string const& t, std::string 
         } else 
         {
             oss.str("");
-            oss << "Entry with name '" << t << "' not found, unable to Metadatas::getMetadata";
+            oss << "Entry with name '" << t << "' not found, unable to Metadata::getMetadata";
             throw metadata_not_found(oss.str());
         }
 
@@ -272,7 +272,7 @@ metadata::Entry const& Metadatas::getMetadata(std::string const& t, std::string 
 
 }
 
-metadata::Entry const& Metadatas::getMetadata(std::size_t t) const
+metadata::Entry const& Metadata::getMetadata(std::size_t t) const
 {
     metadata::index_by_index const& idx = m_metadata.get<metadata::index>();
     
@@ -282,7 +282,7 @@ metadata::Entry const& Metadatas::getMetadata(std::size_t t) const
     return idx.at(t);
 }
 
-boost::optional<metadata::Entry const&> Metadatas::getMetadataOptional(std::size_t t) const
+boost::optional<metadata::Entry const&> Metadata::getMetadataOptional(std::size_t t) const
 {
     try
     {
@@ -294,7 +294,7 @@ boost::optional<metadata::Entry const&> Metadatas::getMetadataOptional(std::size
     }
 }
 
-metadata::Entry const& Metadatas::getMetadata(metadata::id const& t) const
+metadata::Entry const& Metadata::getMetadata(metadata::id const& t) const
 {
     metadata::index_by_uid::const_iterator it = m_metadata.get<metadata::uid>().find(t);
 
@@ -309,7 +309,7 @@ metadata::Entry const& Metadatas::getMetadata(metadata::id const& t) const
 
 }
 
-boost::optional<metadata::Entry const&> Metadatas::getMetadataOptional(metadata::id const& t) const
+boost::optional<metadata::Entry const&> Metadata::getMetadataOptional(metadata::id const& t) const
 {
     try
     {
@@ -322,7 +322,7 @@ boost::optional<metadata::Entry const&> Metadatas::getMetadataOptional(metadata:
 }
 
 
-boost::optional<metadata::Entry const&> Metadatas::getMetadataOptional(std::string const& t, std::string const& ns) const
+boost::optional<metadata::Entry const&> Metadata::getMetadataOptional(std::string const& t, std::string const& ns) const
 {
 
     try
@@ -336,7 +336,7 @@ boost::optional<metadata::Entry const&> Metadatas::getMetadataOptional(std::stri
 
 }
 
-bool Metadatas::setMetadata(metadata::Entry const& m)
+bool Metadata::setMetadata(metadata::Entry const& m)
 {
     metadata::index_by_name& name_index = m_metadata.get<metadata::name>();
     metadata::index_by_name::iterator it = name_index.find(m.getName());
@@ -355,19 +355,19 @@ bool Metadatas::setMetadata(metadata::Entry const& m)
         }
     } else {
         std::ostringstream oss;
-        oss << "Metadata with name '" << m.getName() << "' not found, unable to Metadatas::setMetadata";
+        oss << "Metadata with name '" << m.getName() << "' not found, unable to Metadata::setMetadata";
         throw metadata_not_found(oss.str());
     }
 
     return true;
 }
 
-Metadatas::Metadatas(Metadatas const& other) 
+Metadata::Metadata(Metadata const& other) 
     : m_metadata(other.m_metadata)
 {
 }
 
-Metadatas& Metadatas::operator=(Metadatas const& rhs)
+Metadata& Metadata::operator=(Metadata const& rhs)
 {
     if (&rhs != this)
     {
@@ -376,7 +376,7 @@ Metadatas& Metadatas::operator=(Metadatas const& rhs)
     return *this;
 }
 
-std::vector<metadata::Entry> Metadatas::getEntriesForNamespace(std::string const& ns) const
+std::vector<metadata::Entry> Metadata::getEntriesForNamespace(std::string const& ns) const
 {
     std::vector<metadata::Entry> output;
 

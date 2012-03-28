@@ -159,7 +159,7 @@ BOOST_AUTO_TEST_CASE(test_parent_child)
     m2.setValue<boost::int32_t>(1);
     m1prime.setValue<std::string>("Some other metadata");
     
-    pdal::Metadatas b;
+    pdal::Metadata b;
     
     b.addMetadata(m1);
     b.addMetadata(m2);
@@ -192,13 +192,13 @@ BOOST_AUTO_TEST_CASE(test_metadata_copy)
     m2.setValue<boost::int32_t>(1);
     m1prime.setValue<std::string>("Some other metadata");
     
-    pdal::Metadatas b;
+    pdal::Metadata b;
     
     b.addMetadata(m1);
     b.addMetadata(m1prime);
     b.addMetadata(m2);
     
-    pdal::Metadatas b2;
+    pdal::Metadata b2;
 
     b2.setMetadata(b.getMetadata());
 
@@ -228,7 +228,7 @@ BOOST_AUTO_TEST_CASE(test_metadata_set)
     m2.setValue<boost::int32_t>(1);
     m1prime.setValue<std::string>("Some other metadata");
     
-    pdal::Metadatas b;
+    pdal::Metadata b;
     
     b.addMetadata(m1);
 

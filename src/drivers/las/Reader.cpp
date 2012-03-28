@@ -593,7 +593,7 @@ void Reader::readBufferEndImpl(PointBuffer& buffer)
     
     LasHeader const& header = getReader().getLasHeader();
     
-    Metadatas& metadata = buffer.getMetadataRef();
+    Metadata& metadata = buffer.getMetadataRef();
 
     metadata.addMetadata<bool>(   "compressed", 
                                 header.Compressed(), 

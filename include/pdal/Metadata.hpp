@@ -451,21 +451,21 @@ inline void metadata::Entry::setValue<boost::uuids::uuid>(boost::uuids::uuid con
     
 }
 
-/// Metadatas is a container for Metadata entries. 
-class PDAL_DLL Metadatas
+/// Metadata is a container for Metadata entries. 
+class PDAL_DLL Metadata
 {
 public:
 
 /** @name Constructors
 */  
 
-    Metadatas() {};
+    Metadata() {};
 
     /// Copy constructor
-    Metadatas(const Metadatas&);
-    Metadatas& operator=(const Metadatas&); 
+    Metadata(const Metadata&);
+    Metadata& operator=(const Metadata&); 
 
-    ~Metadatas()
+    ~Metadata()
     {
         return;
     }
@@ -565,7 +565,7 @@ private:
 };
 
 template <class T>
-inline void Metadatas::addMetadata(std::string const& name, T value, std::string const& ns)
+inline void Metadata::addMetadata(std::string const& name, T value, std::string const& ns)
 {
     metadata::Entry m(name, ns);
     m.setValue<T>(value);
@@ -574,7 +574,7 @@ inline void Metadatas::addMetadata(std::string const& name, T value, std::string
 }
 
 template <class T>
-inline void Metadatas::setMetadata(std::string const& name, T value, std::string const& ns)
+inline void Metadata::setMetadata(std::string const& name, T value, std::string const& ns)
 {
     metadata::Entry m(name, ns);
     m.setValue<T>(value);

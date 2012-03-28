@@ -143,7 +143,7 @@ void Stage::setSpatialReference(const SpatialReference& spatialReference)
     m_spatialReference = spatialReference;
 }
 
-Metadatas Stage::getMetadata() const
+Metadata Stage::getMetadata() const
 {
     // the default behaviour is to have no records at all...
     throw pdal_error("no such metadata record");
