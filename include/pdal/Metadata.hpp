@@ -224,7 +224,7 @@ public:
     /// request of the metadata entry. Alternatively, use pdal::Metdata::cast() 
     /// to attempt to explicitly cast the metadata entry to your own type 
     /// via boost::lexical_cast
-    template <class T> inline T getValue() { return boost::get<T>(m_variant); }
+    template <class T> inline T getValue() const { return boost::get<T>(m_variant); }
     
     /// explicitly casts the metadata entry to your type T via boost::lexical_cast
     template <class T> inline T cast() { return boost::lexical_cast<T>(m_variant); }    

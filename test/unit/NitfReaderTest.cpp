@@ -76,8 +76,7 @@ BOOST_AUTO_TEST_CASE(test_one)
         BOOST_CHECK_EQUAL(m.getName(), "FDT");
         BOOST_CHECK_EQUAL(m.getNamespace(), "drivers.nitf.reader.FH");
 
-        Metadata& mm = (Metadata&)m; // BUG: remove const, for getValue()
-        const std::string s(mm.getValue<std::string>());
+        const std::string s(m.getValue<std::string>());
         BOOST_CHECK_EQUAL(s, "20120323002946");
     }
 
