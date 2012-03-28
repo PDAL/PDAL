@@ -36,6 +36,7 @@
 #define INCLUDED_DRIVERS_NITF_FILE_HPP
 
 #include <pdal/pdal_internal.hpp>
+
 #ifdef PDAL_HAVE_GDAL
 
 #include <vector>
@@ -44,7 +45,9 @@
 
 namespace pdal
 {
-    class Metadata;
+    namespace metadata {
+        class Entry;
+    }
 }
 
 
@@ -64,7 +67,7 @@ public:
 
     void getLasPosition(boost::uint64_t& offset, boost::uint64_t& length) const;
 
-    void extractMetadata(std::vector<Metadata>&);
+    void extractMetadata(std::vector<pdal::metadata::Entry>&);
 
 private:
     std::string getSegmentIdentifier(NITFSegmentInfo* psSegInfo);
@@ -72,9 +75,9 @@ private:
     int findIMSegment();
     int findLIDARASegment();
 
-    static void processTREs(int nTREBytes, const char *pszTREData, std::vector<Metadata>& metadatums, const std::string& parentkey);
-    static void processTREs_DES(NITFDES*, std::vector<Metadata>& metadatums, const std::string& parentkey);
-    static void processMetadata(char** papszMetadata, std::vector<Metadata>&, const std::string& parentkey);
+    static void processTREs(int nTREBytes, const char *pszTREData, std::vector<pdal::metadata::Entry>& metadatums, const std::string& parentkey);
+    static void processTREs_DES(NITFDES*, std::vector<pdal::metadata::Entry>& metadatums, const std::string& parentkey);
+    static void processMetadata(char** papszMetadata, std::vector<pdal::metadata::Entry>&, const std::string& parentkey);
 
     const std::string m_filename;
     NITFFile* m_file;

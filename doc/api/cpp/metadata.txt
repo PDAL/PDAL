@@ -6,7 +6,7 @@ pdal::Metadata
 
 
 
-.. doxygenclass:: pdal::Metadata
+.. doxygenclass:: pdal::metadata::Entry
    :members:
 
 .. doxygentypedef:: pdal::metadata::id

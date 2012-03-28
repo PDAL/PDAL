@@ -122,7 +122,7 @@ void NitfFile::getLasPosition(boost::uint64_t& offset, boost::uint64_t& length) 
 }
 
 
-void NitfFile::extractMetadata(std::vector<Metadata>& metadatums)
+void NitfFile::extractMetadata(std::vector<pdal::metadata::Entry>& metadatums)
 {
     //
     // file header fields and TREs
@@ -261,7 +261,7 @@ int NitfFile::findLIDARASegment()
 }
 
 
-void NitfFile::processTREs(int nTREBytes, const char *pszTREData, std::vector<Metadata>& metadatums, const std::string& parentkey)
+void NitfFile::processTREs(int nTREBytes, const char *pszTREData, std::vector<pdal::metadata::Entry>& metadatums, const std::string& parentkey)
 {
     char* szTemp = new char[nTREBytes];
 
@@ -277,7 +277,7 @@ void NitfFile::processTREs(int nTREBytes, const char *pszTREData, std::vector<Me
         strncpy(key, pszTREData, 6);
         key[6] = 0;
 
-        Metadata m(key, s_namespace + "." + parentkey);
+        metadata::Entry m(key, s_namespace + "." + parentkey);
 
         const std::string value(pszTREData + 11);
         //std::vector<boost::uint8_t> data(nThisTRESize);
@@ -298,7 +298,7 @@ void NitfFile::processTREs(int nTREBytes, const char *pszTREData, std::vector<Me
 }
 
 
-void NitfFile::processTREs_DES(NITFDES* dataSegment, std::vector<Metadata>& metadatums, const std::string& parentkey)
+void NitfFile::processTREs_DES(NITFDES* dataSegment, std::vector<pdal::metadata::Entry>& metadatums, const std::string& parentkey)
 {
     char* pabyTREData = NULL;
     int nOffset = 0;
@@ -313,7 +313,7 @@ void NitfFile::processTREs_DES(NITFDES* dataSegment, std::vector<Metadata>& meta
 
         const std::string value(pabyTREData + 11);
 
-        Metadata m(key, s_namespace + "." + parentkey);
+        metadata::Entry m(key, s_namespace + "." + parentkey);
         m.setValue<std::string>(value);
         metadatums.push_back(m);
 
@@ -326,7 +326,7 @@ void NitfFile::processTREs_DES(NITFDES* dataSegment, std::vector<Metadata>& meta
 }
 
 
-void NitfFile::processMetadata(char** papszMetadata, std::vector<Metadata>& metadatums, const std::string& parentkey)
+void NitfFile::processMetadata(char** papszMetadata, std::vector<pdal::metadata::Entry>& metadatums, const std::string& parentkey)
 {
     int cnt = CSLCount(papszMetadata);
     for (int i=0; i<cnt; i++)
@@ -338,7 +338,7 @@ void NitfFile::processMetadata(char** papszMetadata, std::vector<Metadata>& meta
         const std::string key = s.substr(5, sep-5);
         const std::string value = s.substr(sep+1, std::string::npos);
 
-        Metadata m(key, s_namespace + "." + parentkey);
+        metadata::Entry m(key, s_namespace + "." + parentkey);
         m.setValue<std::string>(value);
         metadatums.push_back(m);
     }

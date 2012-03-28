@@ -167,24 +167,24 @@ namespace metadata {
                             pdal::SpatialReference, 
                             pdal::Bounds<double> > Variant;
 
-} // metadata
 
 
-/// Metadata is a container for metadata entries that pdal::Stage and pdal::PointBuffer
+
+/// metadata::Entry is a container for metadata entries that pdal::Stage and pdal::PointBuffer
 /// carry around as part of their internal operations. Bits of information might 
 /// come from a pdal::Reader that opens a file, or a pdal::Filter that processes 
-/// as an intermediate stage, and pdal::Metadata is what is used to hold and 
-/// pass those metadata around.  pdal::Metadata values must be of type pdal::metadata::Variant 
+/// as an intermediate stage, and pdal::metadata::Entry is what is used to hold and 
+/// pass those metadata around.  pdal::metadata::Entry values must be of type pdal::metadata::Variant 
 /// and it is required that they are serializeable to std::string.
 
-/// pdal::Metadata instances also carry with them a map of key/value pairs 
+/// pdal::metadata::Entry instances also carry with them a map of key/value pairs 
 /// called attributes that are metadata about the metadata entry. For example, 
 /// a LAS VLR might have a name of "classification", a pdal::ByteArray for its data, 
 /// and a set of attributes that are "userid":"4321" and "vlrid":"1234". These 
 /// other metadata may be useful given the context, and any auxiliary data 
 /// about the metadata entry should be provided via attributes. It is up to you 
 /// to determine where the line of attribute and new metadata entry exists. 
-class PDAL_DLL Metadata 
+class PDAL_DLL Entry 
 {
 public:
 
@@ -193,13 +193,13 @@ public:
     /// Base constructor
     /// @param name entry name to use for this metadata entry
     /// @param ns namespace to use for this metadata entry
-    Metadata(   std::string const& name, 
-                std::string const& ns);
+    Entry(   std::string const& name, 
+             std::string const& ns);
 
     /// Copy constructor
-    Metadata(const Metadata&);
+    Entry(const Entry&);
 
-    ~Metadata()
+    ~Entry()
     {
         return;
     }
@@ -289,7 +289,7 @@ public:
         m_parentDimensionID = id;
     }
     
-    /// @return the metadata::id of the parent Metadata entry to this one.
+    /// @return the metadata::id of the parent metadata::Entry entry to this one.
     inline metadata::id const& getParent( ) const
     {
         return m_parentDimensionID;
@@ -310,140 +310,141 @@ private:
 };
 
 
-extern PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const Metadata& srs);
+extern PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const metadata::Entry& srs);
 
 
 template <>
-inline void Metadata::setValue<bool>(bool const& v)
+inline void metadata::Entry::setValue<bool>(bool const& v)
 {
     m_variant = v;
     m_type = metadata::Boolean;
 }
 
 template <>
-inline void Metadata::setValue<std::string>(std::string const& v)
+inline void metadata::Entry::setValue<std::string>(std::string const& v)
 {
     m_variant = v;
     m_type = metadata::String;
 }
 
 template <>
-inline void Metadata::setValue<pdal::ByteArray>(pdal::ByteArray const& v)
+inline void metadata::Entry::setValue<pdal::ByteArray>(pdal::ByteArray const& v)
 {
     m_variant = v;
     m_type = metadata::Bytes;
 }
 
 template <>
-inline void Metadata::setValue<float>(float const& v)
+inline void metadata::Entry::setValue<float>(float const& v)
 {
     m_variant = v;
     m_type = metadata::Float;
 }
 
 template <>
-inline void Metadata::setValue<double>(double const& v)
+inline void metadata::Entry::setValue<double>(double const& v)
 {
     m_variant = v;
     m_type = metadata::Double;
 }
 
 template <>
-inline void Metadata::setValue<pdal::SpatialReference>(pdal::SpatialReference const& v)
+inline void metadata::Entry::setValue<pdal::SpatialReference>(pdal::SpatialReference const& v)
 {
     m_variant = v;
     m_type = metadata::SpatialReference;
 }
 
 template <>
-inline void Metadata::setValue<pdal::Bounds<double> >(pdal::Bounds<double> const& v)
+inline void metadata::Entry::setValue<pdal::Bounds<double> >(pdal::Bounds<double> const& v)
 {
     m_variant = v;
     m_type = metadata::Bounds;
 }
 
 template <>
-inline void Metadata::setValue<boost::uint8_t>(boost::uint8_t const& v)
+inline void metadata::Entry::setValue<boost::uint8_t>(boost::uint8_t const& v)
 {
     m_variant = v;
     m_type = metadata::UnsignedInteger;
 }
 
 template <>
-inline void Metadata::setValue<boost::uint16_t>(boost::uint16_t const& v)
+inline void metadata::Entry::setValue<boost::uint16_t>(boost::uint16_t const& v)
 {
     m_variant = v;
     m_type = metadata::UnsignedInteger;
 }
 
 template <>
-inline void Metadata::setValue<boost::uint32_t>(boost::uint32_t const& v)
+inline void metadata::Entry::setValue<boost::uint32_t>(boost::uint32_t const& v)
 {
     m_variant = v;
     m_type = metadata::UnsignedInteger;
 }
 
 template <>
-inline void Metadata::setValue<boost::uint64_t>(boost::uint64_t const& v)
+inline void metadata::Entry::setValue<boost::uint64_t>(boost::uint64_t const& v)
 {
     m_variant = v;
     m_type = metadata::UnsignedInteger;
 }
 
 template <>
-inline void Metadata::setValue<boost::int8_t>(boost::int8_t const& v)
+inline void metadata::Entry::setValue<boost::int8_t>(boost::int8_t const& v)
 {
     m_variant = v;
     m_type = metadata::SignedInteger;
 }
 
 template <>
-inline void Metadata::setValue<boost::int16_t>(boost::int16_t const& v)
+inline void metadata::Entry::setValue<boost::int16_t>(boost::int16_t const& v)
 {
     m_variant = v;
     m_type = metadata::SignedInteger;
 }
 
 template <>
-inline void Metadata::setValue<boost::int32_t>(boost::int32_t const& v)
+inline void metadata::Entry::setValue<boost::int32_t>(boost::int32_t const& v)
 {
     m_variant = v;
     m_type = metadata::SignedInteger;
 }
 
 template <>
-inline void Metadata::setValue<boost::int64_t>(boost::int64_t const& v)
+inline void metadata::Entry::setValue<boost::int64_t>(boost::int64_t const& v)
 {
     m_variant = v;
     m_type = metadata::SignedInteger;
 }
 
 template <>
-inline void Metadata::setValue<boost::uuids::uuid>(boost::uuids::uuid const& v)
+inline void metadata::Entry::setValue<boost::uuids::uuid>(boost::uuids::uuid const& v)
 {
     m_variant = v;
     m_type = metadata::UUID;
 }
 
-namespace metadata {
-
 
     struct name{};
+    struct ns{};
     struct index{};
     struct uid{};
 
     typedef boost::multi_index::multi_index_container<
-      Metadata,
+      metadata::Entry,
       boost::multi_index::indexed_by<
 
         boost::multi_index::random_access<boost::multi_index::tag<index> >,
         // sort by less<string> on GetName
-        boost::multi_index::hashed_non_unique<boost::multi_index::tag<name>, boost::multi_index::const_mem_fun<Metadata,std::string const&,&Metadata::getName> >,
-        boost::multi_index::hashed_non_unique<boost::multi_index::tag<uid>, boost::multi_index::const_mem_fun<Metadata,metadata::id const&,&Metadata::getUUID> >
+        boost::multi_index::hashed_non_unique<boost::multi_index::tag<name>, boost::multi_index::const_mem_fun<metadata::Entry,std::string const&,&metadata::Entry::getName> >,
+        boost::multi_index::hashed_non_unique<boost::multi_index::tag<ns>, boost::multi_index::const_mem_fun<metadata::Entry,std::string const&,&metadata::Entry::getNamespace> >,
+        boost::multi_index::hashed_non_unique<boost::multi_index::tag<uid>, boost::multi_index::const_mem_fun<metadata::Entry,metadata::id const&,&metadata::Entry::getUUID> >
           >
     > MetadataMap;
 
     typedef MetadataMap::index<name>::type index_by_name;
+    typedef MetadataMap::index<ns>::type index_by_namespace;
     typedef MetadataMap::index<index>::type index_by_index;
     typedef MetadataMap::index<uid>::type index_by_uid;
 
@@ -473,75 +474,77 @@ public:
 */  
 
     /// add a Metadata entry to the PointBuffer's metadata map
-    void addMetadata(pdal::Metadata const& entry);
+    void addMetadata(pdal::metadata::Entry const& entry);
 
-    /*! add a new value T metadata for the given Metadata key and namespace. 
-        \param name Metadata entry key to use
-        \param ns namespace to use for Metadata entry.
+    /*! add a new value T metadata for the given metadata::Entry key and namespace. 
+        \param name metadata::Entry entry key to use
+        \param ns namespace to use for metadata::Entry entry.
         \param value the T value to set.
     */   
     template<class T> void addMetadata(std::string const& name, T value, std::string const& ns="");
 
     
-    /// @return a const& to a Metadata entry with the given name and/or namespace
+    /// @return a const& to a metadata::Entry entry with the given name and/or namespace
     /// If none is found, pdal::metadata_not_found is thrown.
     /// @param name name to use when searching
     /// @param ns to use when searching for metadata entry
-    Metadata const& getMetadata(std::string const& name, std::string const& ns="") const;
+    metadata::Entry const& getMetadata(std::string const& name, std::string const& ns="") const;
     
-    /// @return a const& to Metadata entry with given metadata::id. 
+    /// @return a const& to metadata::Entry entry with given metadata::id. 
     /// If none is found, pdal::metadata_not_found is thrown.
     /// @param v metadata::id to search for.
-    Metadata const& getMetadata(metadata::id const& v) const;
+    metadata::Entry const& getMetadata(metadata::id const& v) const;
 
-    /// @return a const& to Metadata with the given index. If the 
+    /// @return a const& to metadata::Entry with the given index. If the 
     /// index is out of range, pdal::metadata_not_found is thrown.
     /// @param index position index to return.
-    Metadata const& getMetadata(std::size_t index) const;
+    metadata::Entry const& getMetadata(std::size_t index) const;
 
-    /// @return the number of Metadata entries in the map
+    /// @return the number of metadata::Entry entries in the map
     inline metadata::MetadataMap::size_type getMetadataCount() const { return m_metadata.get<metadata::index>().size(); }
-
-    /// @return a MetadataMap copy to use for setting the Metadata on another 
+    
+    std::vector<metadata::Entry> getEntriesForNamespace(std::string const& ns) const;
+    
+    /// @return a MetadataMap copy to use for setting the metadata::Entry on another 
     /// PointBuffer with setMetadata()
     /// @param index position index to return.
     inline metadata::MetadataMap const& getMetadata() const { return m_metadata; }
 
-    /// @return a boost::optional-wrapped const& to a Metadata with the given name 
+    /// @return a boost::optional-wrapped const& to a metadata::Entry with the given name 
     /// and namespace. If no matching metadata entry is found, the optional will be empty.
     /// @param name name to use when searching
     /// @param ns namespace to use when searching. If none is given, the first 
-    /// matching Metadata instance with name \b name is returned.
-    boost::optional<Metadata const&> getMetadataOptional(std::string const& name, std::string const& ns="") const;
+    /// matching metadata::Entry instance with name \b name is returned.
+    boost::optional<metadata::Entry const&> getMetadataOptional(std::string const& name, std::string const& ns="") const;
 
-    /// @return a boost::optional-wrapped const& to a Metadata with the given metadata::id.
+    /// @return a boost::optional-wrapped const& to a metadata::Entry with the given metadata::id.
     /// If no matching dimension is found, the optional will be empty.
     /// @param id id to use when searching
-    boost::optional<Metadata const&> getMetadataOptional(metadata::id const& id) const;
+    boost::optional<metadata::Entry const&> getMetadataOptional(metadata::id const& id) const;
     
-    /// @return a boost::optional-wrapped const& to a Metadata with the given
+    /// @return a boost::optional-wrapped const& to a metadata::Entry with the given
     /// index. If the index is out of range, the optional will be empty.
     /// @param index position index to return.
-    boost::optional<Metadata const&> getMetadataOptional(std::size_t index) const;
+    boost::optional<metadata::Entry const&> getMetadataOptional(std::size_t index) const;
 
-    /*! overwrites an existing Metadata with the same name as m
-        \param m the Metadata instance that contains the name and namespace 
+    /*! overwrites an existing metadata::Entry with the same name as m
+        \param m the metadata::Entry instance that contains the name and namespace 
         to overwrite in the PointBuffer.
         \verbatim embed:rst 
         .. note::
                 
             If no namespace is given, the *first* metadata entry with a matching 
-            :cpp:func:`pdal::Metadata::getName()` will be overwritten. To be 
-            sure, have set the namespace of the pdal::Metadata using
-            :cpp:func:`pdal::Metadata::setNamespace()` beforehand.
+            :cpp:func:`pdal::metadata::Entry::getName()` will be overwritten. To be 
+            sure, have set the namespace of the pdal::metadata::Entry using
+            :cpp:func:`pdal::metadata::Entry::setNamespace()` beforehand.
 
         \endverbatim
     */    
-    bool setMetadata(Metadata const& m);
+    bool setMetadata(metadata::Entry const& m);
 
-    /*! reset the value T metadata for the given Metadata key and namespace. 
-        \param name Metadata entry key to use
-        \param ns namespace to use for Metadata entry.
+    /*! reset the value T metadata for the given metadata::Entry key and namespace. 
+        \param name metadata::Entry entry key to use
+        \param ns namespace to use for metadata::Entry entry.
         \param value the T value to set.
     */   
     template<class T> void setMetadata(std::string const& name, T value, std::string const& ns="");
@@ -564,7 +567,7 @@ private:
 template <class T>
 inline void Metadatas::addMetadata(std::string const& name, T value, std::string const& ns)
 {
-    Metadata m(name, ns);
+    metadata::Entry m(name, ns);
     m.setValue<T>(value);
     addMetadata(m);
     return;
@@ -573,7 +576,7 @@ inline void Metadatas::addMetadata(std::string const& name, T value, std::string
 template <class T>
 inline void Metadatas::setMetadata(std::string const& name, T value, std::string const& ns)
 {
-    Metadata m(name, ns);
+    metadata::Entry m(name, ns);
     m.setValue<T>(value);
     setMetadata(m);
     return;

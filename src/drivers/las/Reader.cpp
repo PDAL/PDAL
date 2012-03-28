@@ -691,7 +691,7 @@ void Reader::readBufferEndImpl(PointBuffer& buffer)
         
         std::ostringstream name;
         name << "vlr_" << t;
-        pdal::Metadata entry(name.str(), getReader().getName());
+        pdal::metadata::Entry entry(name.str(), getReader().getName());
         entry.setValue<pdal::ByteArray>(bytearray);
         entry.addAttribute("reserved", boost::lexical_cast<std::string>(v.getReserved()));
         entry.addAttribute("user_id", v.getUserId());

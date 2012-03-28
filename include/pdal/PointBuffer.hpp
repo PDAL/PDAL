@@ -47,42 +47,9 @@
 #include <pdal/Schema.hpp>
 #include <pdal/Metadata.hpp>
 
-#include <boost/optional.hpp>
-#include <boost/multi_index_container.hpp>
-#include <boost/multi_index/member.hpp>
-#include <boost/multi_index/ordered_index.hpp>
-#include <boost/multi_index/hashed_index.hpp>
-#include <boost/multi_index/sequenced_index.hpp>
-#include <boost/multi_index/mem_fun.hpp>
-#include <boost/multi_index/random_access_index.hpp>
-#include <boost/functional/hash.hpp>
-
-
 namespace pdal
 {
 
-namespace pointbuffer {
-
-    struct name{};
-    struct index{};
-    struct uid{};
-
-    typedef boost::multi_index::multi_index_container<
-      Metadata,
-      boost::multi_index::indexed_by<
-
-        boost::multi_index::random_access<boost::multi_index::tag<index> >,
-        // sort by less<string> on GetName
-        boost::multi_index::hashed_non_unique<boost::multi_index::tag<name>, boost::multi_index::const_mem_fun<Metadata,std::string const&,&Metadata::getName> >,
-        boost::multi_index::hashed_non_unique<boost::multi_index::tag<uid>, boost::multi_index::const_mem_fun<Metadata,metadata::id const&,&Metadata::getUUID> >
-          >
-    > MetadataMap;
-
-    typedef MetadataMap::index<name>::type index_by_name;
-    typedef MetadataMap::index<index>::type index_by_index;
-    typedef MetadataMap::index<uid>::type index_by_uid;
-
-}
 
 /// A PointBuffer is the object that is passed through pdal::Stage instances 
 /// to form a pipeline. A PointBuffer is composed of a pdal::Schema that determines 

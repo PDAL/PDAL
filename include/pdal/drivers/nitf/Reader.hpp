@@ -45,7 +45,11 @@ namespace pdal
 {
     class PointBuffer;
     class StreamFactory;
-
+    
+    namespace metadata 
+    { 
+        class Entry;
+    }
     namespace drivers
     {
         namespace las
@@ -78,7 +82,7 @@ public:
         return false;
     }
 
-    const std::vector<Metadata>& getMetadatums() const { return m_metadatums; }
+    const std::vector<pdal::metadata::Entry>& getMetadatums() const { return m_metadatums; }
 
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
 
@@ -90,7 +94,7 @@ private:
     StreamFactory* m_streamFactory;
     pdal::drivers::las::Reader* m_lasReader;
 
-    std::vector<Metadata> m_metadatums;
+    std::vector<pdal::metadata::Entry> m_metadatums;
 
     Reader& operator=(const Reader&); // not implemented
     Reader(const Reader&); // not implemented

@@ -74,7 +74,7 @@ public:
     const Bounds<double>& getBounds() const;
     const SpatialReference& getSpatialReference() const;
 
-    virtual std::vector<Metadata> getMetadata() const;    
+    virtual Metadatas getMetadata() const;    
     
     virtual bool supportsIterator (StageIteratorType) const = 0;
 
