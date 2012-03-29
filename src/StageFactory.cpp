@@ -44,6 +44,11 @@
 #ifdef PDAL_HAVE_ORACLE
 #include <pdal/drivers/oci/Reader.hpp>
 #endif
+
+#ifdef PDAL_HAVE_GDAL
+#include <pdal/drivers/nitf/Reader.hpp>
+#endif
+
 #include <pdal/drivers/pipeline/Reader.hpp>
 #include <pdal/drivers/qfit/Reader.hpp>
 #include <pdal/drivers/terrasolid/Reader.hpp>
@@ -130,6 +135,10 @@ namespace pdal
 #ifdef PDAL_HAVE_ORACLE
     MAKE_READER_CREATOR(OciReader, pdal::drivers::oci::Reader)
 #endif
+#ifdef PDAL_HAVE_GDAL
+    MAKE_READER_CREATOR(NITFReader, pdal::drivers::nitf::Reader)
+#endif
+
     MAKE_READER_CREATOR(PipelineReader, pdal::drivers::pipeline::Reader)
     MAKE_READER_CREATOR(QfitReader, pdal::drivers::qfit::Reader)
     MAKE_READER_CREATOR(TerrasolidReader, pdal::drivers::terrasolid::Reader)
@@ -312,6 +321,10 @@ void StageFactory::registerKnownReaders()
 #ifdef PDAL_HAVE_ORACLE
     REGISTER_READER(OciReader, pdal::drivers::oci::Reader);
 #endif
+#ifdef PDAL_HAVE_GDAL
+    REGISTER_READER(NITFReader, pdal::drivers::nitf::Reader);
+#endif
+
     REGISTER_READER(PipelineReader, pdal::drivers::pipeline::Reader);
     REGISTER_READER(QfitReader, pdal::drivers::qfit::Reader);
     REGISTER_READER(TerrasolidReader, pdal::drivers::terrasolid::Reader);
