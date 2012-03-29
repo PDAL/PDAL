@@ -45,6 +45,7 @@
 
 namespace pdal
 {
+    class Metadata;
     namespace metadata {
         class Entry;
     }
@@ -67,7 +68,7 @@ public:
 
     void getLasPosition(boost::uint64_t& offset, boost::uint64_t& length) const;
 
-    void extractMetadata(std::vector<pdal::metadata::Entry>&);
+    void extractMetadata(pdal::Metadata& m);
 
 private:
     std::string getSegmentIdentifier(NITFSegmentInfo* psSegInfo);
@@ -75,9 +76,9 @@ private:
     int findIMSegment();
     int findLIDARASegment();
 
-    static void processTREs(int nTREBytes, const char *pszTREData, std::vector<pdal::metadata::Entry>& metadatums, const std::string& parentkey);
-    static void processTREs_DES(NITFDES*, std::vector<pdal::metadata::Entry>& metadatums, const std::string& parentkey);
-    static void processMetadata(char** papszMetadata, std::vector<pdal::metadata::Entry>&, const std::string& parentkey);
+    static void processTREs(int nTREBytes, const char *pszTREData, pdal::Metadata& m, const std::string& parentkey);
+    static void processTREs_DES(NITFDES*, pdal::Metadata& m, const std::string& parentkey);
+    static void processMetadata(char** papszMetadata, pdal::Metadata& m, const std::string& parentkey);
 
     const std::string m_filename;
     NITFFile* m_file;

@@ -69,10 +69,12 @@ BOOST_AUTO_TEST_CASE(test_one)
 
     // check metadata
     {
-        const std::vector<metadata::Entry>& metadatums = nitf_reader.getMetadatums();
+        pdal::Metadata metadata = nitf_reader.getMetadata();
         /////////////////////////////////////////////////BOOST_CHECK_EQUAL(metadatums.size(), 80u);
         
-        const metadata::Entry& m = metadatums[4];
+        
+        pdal::metadata::Entry const& m = metadata.getMetadata("FDT", "drivers.nitf.reader.FH");
+
         BOOST_CHECK_EQUAL(m.getName(), "FDT");
         BOOST_CHECK_EQUAL(m.getNamespace(), "drivers.nitf.reader.FH");
 

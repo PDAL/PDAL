@@ -82,8 +82,6 @@ public:
         return false;
     }
 
-    const std::vector<pdal::metadata::Entry>& getMetadatums() const { return m_metadatums; }
-
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
 
     // for dumping
@@ -93,8 +91,6 @@ private:
     std::string m_filename;
     StreamFactory* m_streamFactory;
     pdal::drivers::las::Reader* m_lasReader;
-
-    std::vector<pdal::metadata::Entry> m_metadatums;
 
     Reader& operator=(const Reader&); // not implemented
     Reader(const Reader&); // not implemented

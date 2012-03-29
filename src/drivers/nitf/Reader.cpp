@@ -139,7 +139,7 @@ void Reader::initialize()
 
         nitf.getLasPosition(offset, length);
         
-        nitf.extractMetadata(m_metadatums);
+        nitf.extractMetadata(getMetadataRef());
 
         nitf.close();
     }

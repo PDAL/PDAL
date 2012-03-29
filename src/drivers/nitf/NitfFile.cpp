@@ -122,15 +122,15 @@ void NitfFile::getLasPosition(boost::uint64_t& offset, boost::uint64_t& length) 
 }
 
 
-void NitfFile::extractMetadata(std::vector<pdal::metadata::Entry>& metadatums)
+void NitfFile::extractMetadata(pdal::Metadata& ms)
 {
     //
     // file header fields and TREs
     //
     {
-        processMetadata(m_file->papszMetadata, metadatums, "FH");
+        processMetadata(m_file->papszMetadata, ms, "FH");
 
-        processTREs(m_file->nTREBytes, m_file->pachTRE, metadatums, "FH");
+        processTREs(m_file->nTREBytes, m_file->pachTRE, ms, "FH");
     }
 
     //
@@ -143,9 +143,9 @@ void NitfFile::extractMetadata(std::vector<pdal::metadata::Entry>& metadatums)
             throw pdal_error("NITFImageAccess failed");
         }
 
-        processMetadata(imageSegment->papszMetadata, metadatums, "IM");
+        processMetadata(imageSegment->papszMetadata, ms, "IM");
 
-        processTREs(imageSegment->nTREBytes, imageSegment->pachTRE, metadatums, "IM");
+        processTREs(imageSegment->nTREBytes, imageSegment->pachTRE, ms, "IM");
 
         NITFImageDeaccess(imageSegment);
     }
@@ -160,9 +160,9 @@ void NitfFile::extractMetadata(std::vector<pdal::metadata::Entry>& metadatums)
             throw pdal_error("NITFDESAccess failed");
         }
 
-        processMetadata(dataSegment->papszMetadata, metadatums, "DES");
+        processMetadata(dataSegment->papszMetadata, ms, "DES");
 
-        processTREs_DES(dataSegment, metadatums, "IM");
+        processTREs_DES(dataSegment, ms, "IM");
 
         NITFDESDeaccess(dataSegment);
     }
@@ -261,7 +261,7 @@ int NitfFile::findLIDARASegment()
 }
 
 
-void NitfFile::processTREs(int nTREBytes, const char *pszTREData, std::vector<pdal::metadata::Entry>& metadatums, const std::string& parentkey)
+void NitfFile::processTREs(int nTREBytes, const char *pszTREData, pdal::Metadata& ms, const std::string& parentkey)
 {
     char* szTemp = new char[nTREBytes];
 
@@ -286,7 +286,7 @@ void NitfFile::processTREs(int nTREBytes, const char *pszTREData, std::vector<pd
         //ByteArray value(data);
         m.setValue<std::string>(value);
 
-        metadatums.push_back(m);
+        ms.addMetadata(m);
 
         pszTREData += nThisTRESize + 11;
         nTREBytes -= (nThisTRESize + 11);
@@ -298,7 +298,7 @@ void NitfFile::processTREs(int nTREBytes, const char *pszTREData, std::vector<pd
 }
 
 
-void NitfFile::processTREs_DES(NITFDES* dataSegment, std::vector<pdal::metadata::Entry>& metadatums, const std::string& parentkey)
+void NitfFile::processTREs_DES(NITFDES* dataSegment, pdal::Metadata& ms, const std::string& parentkey)
 {
     char* pabyTREData = NULL;
     int nOffset = 0;
@@ -315,7 +315,7 @@ void NitfFile::processTREs_DES(NITFDES* dataSegment, std::vector<pdal::metadata:
 
         metadata::Entry m(key, s_namespace + "." + parentkey);
         m.setValue<std::string>(value);
-        metadatums.push_back(m);
+        ms.addMetadata(m);
 
         nOffset += 11 + nThisTRESize;
 
@@ -326,7 +326,7 @@ void NitfFile::processTREs_DES(NITFDES* dataSegment, std::vector<pdal::metadata:
 }
 
 
-void NitfFile::processMetadata(char** papszMetadata, std::vector<pdal::metadata::Entry>& metadatums, const std::string& parentkey)
+void NitfFile::processMetadata(char** papszMetadata, pdal::Metadata& ms, const std::string& parentkey)
 {
     int cnt = CSLCount(papszMetadata);
     for (int i=0; i<cnt; i++)
@@ -340,7 +340,7 @@ void NitfFile::processMetadata(char** papszMetadata, std::vector<pdal::metadata:
 
         metadata::Entry m(key, s_namespace + "." + parentkey);
         m.setValue<std::string>(value);
-        metadatums.push_back(m);
+        ms.addMetadata(m);
     }
 
     return;
