@@ -47,42 +47,9 @@
 #include <pdal/Schema.hpp>
 #include <pdal/Metadata.hpp>
 
-#include <boost/optional.hpp>
-#include <boost/multi_index_container.hpp>
-#include <boost/multi_index/member.hpp>
-#include <boost/multi_index/ordered_index.hpp>
-#include <boost/multi_index/hashed_index.hpp>
-#include <boost/multi_index/sequenced_index.hpp>
-#include <boost/multi_index/mem_fun.hpp>
-#include <boost/multi_index/random_access_index.hpp>
-#include <boost/functional/hash.hpp>
-
-
 namespace pdal
 {
 
-namespace pointbuffer {
-
-    struct name{};
-    struct index{};
-    struct uid{};
-
-    typedef boost::multi_index::multi_index_container<
-      Metadata,
-      boost::multi_index::indexed_by<
-
-        boost::multi_index::random_access<boost::multi_index::tag<index> >,
-        // sort by less<string> on GetName
-        boost::multi_index::hashed_non_unique<boost::multi_index::tag<name>, boost::multi_index::const_mem_fun<Metadata,std::string const&,&Metadata::getName> >,
-        boost::multi_index::hashed_non_unique<boost::multi_index::tag<uid>, boost::multi_index::const_mem_fun<Metadata,metadata::id const&,&Metadata::getUUID> >
-          >
-    > MetadataMap;
-
-    typedef MetadataMap::index<name>::type index_by_name;
-    typedef MetadataMap::index<index>::type index_by_index;
-    typedef MetadataMap::index<uid>::type index_by_uid;
-
-}
 
 /// A PointBuffer is the object that is passed through pdal::Stage instances 
 /// to form a pipeline. A PointBuffer is composed of a pdal::Schema that determines 
@@ -295,86 +262,13 @@ public:
     void setDataStride(boost::uint8_t* data, std::size_t pointIndex, boost::uint32_t byteCount);
 
 /** @name Metadata
-*/
-    /// add a Metadata entry to the PointBuffer's metadata map
-    void addMetadata(pdal::Metadata const& entry);
-
-    /*! add a new value T metadata for the given Metadata key and namespace. 
-        \param name Metadata entry key to use
-        \param ns namespace to use for Metadata entry.
-        \param value the T value to set.
-    */   
-    template<class T> void addMetadata(std::string const& name, T value, std::string const& ns="");
-
+*/ 
     
-    /// @return a const& to a Metadata entry with the given name and/or namespace
-    /// If none is found, pdal::metadata_not_found is thrown.
-    /// @param name name to use when searching
-    /// @param ns to use when searching for metadata entry
-    Metadata const& getMetadata(std::string const& name, std::string const& ns="") const;
+    /// return  Metadatas const& for the PointBuffer
+    inline Metadata const& getMetadata() const { return m_metadata; }
     
-    /// @return a const& to Metadata entry with given metadata::id. 
-    /// If none is found, pdal::metadata_not_found is thrown.
-    /// @param v metadata::id to search for.
-    Metadata const& getMetadata(metadata::id const& v) const;
-
-    /// @return a const& to Metadata with the given index. If the 
-    /// index is out of range, pdal::metadata_not_found is thrown.
-    /// @param index position index to return.
-    Metadata const& getMetadata(std::size_t index) const;
-
-    /// @return the number of Metadata entries in the map
-    inline pointbuffer::MetadataMap::size_type getMetadataCount() const { return m_metadata.get<pointbuffer::index>().size(); }
-
-    /// @return a MetadataMap copy to use for setting the Metadata on another 
-    /// PointBuffer with setMetadata()
-    /// @param index position index to return.
-    inline pointbuffer::MetadataMap const& getMetadata() const { return m_metadata; }
-
-    /// @return a boost::optional-wrapped const& to a Metadata with the given name 
-    /// and namespace. If no matching metadata entry is found, the optional will be empty.
-    /// @param name name to use when searching
-    /// @param ns namespace to use when searching. If none is given, the first 
-    /// matching Metadata instance with name \b name is returned.
-    boost::optional<Metadata const&> getMetadataOptional(std::string const& name, std::string const& ns="") const;
-
-    /// @return a boost::optional-wrapped const& to a Metadata with the given metadata::id.
-    /// If no matching dimension is found, the optional will be empty.
-    /// @param id id to use when searching
-    boost::optional<Metadata const&> getMetadataOptional(metadata::id const& id) const;
-    
-    /// @return a boost::optional-wrapped const& to a Metadata with the given
-    /// index. If the index is out of range, the optional will be empty.
-    /// @param index position index to return.
-    boost::optional<Metadata const&> getMetadataOptional(std::size_t index) const;
-
-    /*! overwrites an existing Metadata with the same name as m
-        \param m the Metadata instance that contains the name and namespace 
-        to overwrite in the PointBuffer.
-        \verbatim embed:rst 
-        .. note::
-                
-            If no namespace is given, the *first* metadata entry with a matching 
-            :cpp:func:`pdal::Metadata::getName()` will be overwritten. To be 
-            sure, have set the namespace of the pdal::Metadata using
-            :cpp:func:`pdal::Metadata::setNamespace()` beforehand.
-
-        \endverbatim
-    */    
-    bool setMetadata(Metadata const& m);
-
-    /*! reset the value T metadata for the given Metadata key and namespace. 
-        \param name Metadata entry key to use
-        \param ns namespace to use for Metadata entry.
-        \param value the T value to set.
-    */   
-    template<class T> void setMetadata(std::string const& name, T value, std::string const& ns="");
-
-    
-    /// sets the MetadataMap for the PointBuffer
-    /// @param v MetadataMap instance to use (typically from another PointBuffer)
-    void setMetadata(pointbuffer::MetadataMap const& v) { m_metadata = v; }
-    
+    /// @return Metadata& for the PointBuffer
+    inline Metadata& getMetadataRef() { return m_metadata; }
 
 /** @name Serialization
 */ 
@@ -413,7 +307,7 @@ private:
     // being dereferenced for every point read otherwise.
     schema::size_type m_byteSize;
     
-    pointbuffer::MetadataMap m_metadata;
+    Metadata m_metadata;
     
     template<class T> T convertDimension(pdal::Dimension const& dim, void* bytes) const;    
     template<typename Target, typename Source> static Target saturation_cast(Source const& src);
@@ -614,23 +508,6 @@ inline T PointBuffer::getField(pdal::Dimension const& dim, std::size_t pointInde
     
 }
 
-template <class T>
-inline void PointBuffer::addMetadata(std::string const& name, T value, std::string const& ns)
-{
-    Metadata m(name, ns);
-    m.setValue<T>(value);
-    addMetadata(m);
-    return;
-}
-
-template <class T>
-inline void PointBuffer::setMetadata(std::string const& name, T value, std::string const& ns)
-{
-    Metadata m(name, ns);
-    m.setValue<T>(value);
-    setMetadata(m);
-    return;
-}
 
 PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const PointBuffer&);
 

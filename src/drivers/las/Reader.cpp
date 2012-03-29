@@ -46,6 +46,7 @@
 #include <pdal/drivers/las/VariableLengthRecord.hpp>
 #include "LasHeaderReader.hpp"
 #include <pdal/PointBuffer.hpp>
+#include <pdal/Metadata.hpp>
 #include "ZipPoint.hpp"
 
 #ifdef PDAL_HAVE_GDAL
@@ -65,7 +66,8 @@ namespace pdal { namespace drivers { namespace las {
 
 Reader::Reader(const Options& options)
     : ReaderBase(options)
-    , m_filename(options.getValueOrThrow<std::string>("filename"))
+    , m_streamFactory(new FilenameStreamFactory(options.getValueOrThrow<std::string>("filename")))
+    , m_ownsStreamFactory(true)
 {
     addDefaultDimensions();
     return;
@@ -74,9 +76,31 @@ Reader::Reader(const Options& options)
 
 Reader::Reader(const std::string& filename)
     : ReaderBase(Options::none())
-    , m_filename(filename)
+    , m_streamFactory(new FilenameStreamFactory(filename))
+    , m_ownsStreamFactory(true)
 {
     addDefaultDimensions();
+    return;
+}
+
+
+Reader::Reader(StreamFactory* factory)
+    : ReaderBase(Options::none())
+    , m_streamFactory(factory)
+    , m_ownsStreamFactory(false)
+{
+    addDefaultDimensions();
+    return;
+}
+
+
+Reader::~Reader()
+{
+    if (m_ownsStreamFactory && m_streamFactory!=NULL)
+    {
+        delete m_streamFactory;
+    }
+
     return;
 }
 
@@ -85,9 +109,9 @@ void Reader::initialize()
 {
     pdal::Reader::initialize();
 
-    std::istream* stream = FileUtils::openFile(m_filename);
+    std::istream& stream = m_streamFactory->allocate();
 
-    LasHeaderReader lasHeaderReader(m_lasHeader, *stream);
+    LasHeaderReader lasHeaderReader(m_lasHeader, stream);
     lasHeaderReader.read( *this, getSchemaRef() );
 
     this->setBounds(m_lasHeader.getBounds());
@@ -101,8 +125,10 @@ void Reader::initialize()
         m_lasHeader.getVLRs().constructSRS(srs);
         setSpatialReference(srs);
     }
+    
+    collectMetadata();
 
-    FileUtils::closeFile(stream);
+    m_streamFactory->deallocate(stream);
 
     return;
 }
@@ -116,9 +142,9 @@ const Options Reader::getDefaultOptions() const
 }
 
 
-const std::string& Reader::getFileName() const
+StreamFactory& Reader::getStreamFactory() const
 {
-    return m_filename;
+    return *m_streamFactory;
 }
 
 
@@ -286,6 +312,120 @@ boost::uint32_t Reader::processBuffer(  PointBuffer& data,
     data.setSpatialBounds( lasHeader.getBounds() );
 
     return numPoints;
+}
+
+void Reader::collectMetadata()
+{
+
+    LasHeader const& header = getLasHeader();
+    
+    Metadata& metadata = getMetadataRef();
+
+    metadata.addMetadata<bool>(   "compressed", 
+                                header.Compressed(), 
+                                getName());
+    metadata.addMetadata<boost::uint32_t>("dataformatid", 
+                                        static_cast<boost::uint32_t>(header.getPointFormat()), 
+                                        getName());
+    metadata.addMetadata<boost::uint32_t>("version_major", 
+                                        static_cast<boost::uint32_t>(header.GetVersionMajor()), 
+                                        getName());
+    metadata.addMetadata<boost::uint32_t>("version_minor", 
+                                        static_cast<boost::uint32_t>(header.GetVersionMinor()), 
+                                        getName());
+    metadata.addMetadata<boost::uint32_t>("filesource_id", 
+                                        static_cast<boost::uint32_t>(header.GetFileSourceId()), 
+                                        getName());
+    metadata.addMetadata<boost::uint32_t>("reserved", 
+                                        static_cast<boost::uint32_t>(header.GetReserved()), 
+                                        getName());
+    metadata.addMetadata<boost::uuids::uuid>( "project_id", 
+                                            header.GetProjectId(), 
+                                            getName());
+    metadata.addMetadata<std::string>("system_id", 
+                                    header.GetSystemId(false), 
+                                    getName());
+    metadata.addMetadata<std::string>("software_id", 
+                                    header.GetSoftwareId(false), 
+                                    getName());
+    metadata.addMetadata<boost::uint32_t>("creation_doy", 
+                                        static_cast<boost::uint32_t>(header.GetCreationDOY()), 
+                                        getName());
+    metadata.addMetadata<boost::uint32_t>("creation_year", 
+                                        static_cast<boost::uint32_t>(header.GetCreationYear()), 
+                                        getName());
+    metadata.addMetadata<boost::uint32_t>("header_size", 
+                                        static_cast<boost::uint32_t>(header.GetHeaderSize()), 
+                                        getName());
+    metadata.addMetadata<boost::uint32_t>("dataoffset", 
+                                        static_cast<boost::uint32_t>(header.GetDataOffset()), 
+                                        getName());
+    metadata.addMetadata<double>( "scale_x", 
+                                header.GetScaleX(), 
+                                getName());
+    metadata.addMetadata<double>( "scale_y", 
+                                header.GetScaleY(),
+                                getName());
+    metadata.addMetadata<double>( "scale_z", 
+                                header.GetScaleZ(),
+                                getName());
+    metadata.addMetadata<double>( "offset_x", 
+                                header.GetOffsetX(),
+                                getName());
+    metadata.addMetadata<double>( "offset_y", 
+                                header.GetOffsetY(),
+                                getName());
+    metadata.addMetadata<double>( "offset_z", 
+                                header.GetOffsetZ(),
+                                getName());
+    metadata.addMetadata<double>( "minx", 
+                                header.GetMinX(),
+                                getName());
+    metadata.addMetadata<double>( "miny", 
+                                header.GetMinY(),
+                                getName());
+    metadata.addMetadata<double>( "minz", 
+                                header.GetMinZ(),
+                                getName());
+    metadata.addMetadata<double>( "maxx", 
+                                header.GetMaxX(),
+                                getName());
+    metadata.addMetadata<double>( "maxy", 
+                                header.GetMaxY(),
+                                getName());
+    metadata.addMetadata<double>( "maxz", 
+                                header.GetMaxZ(),
+                                getName());
+    metadata.addMetadata<boost::uint32_t>("count", 
+                                        header.GetPointRecordsCount(),
+                                        getName());
+
+
+    std::vector<VariableLengthRecord> const& vlrs = header.getVLRs().getAll();
+    for (std::vector<VariableLengthRecord>::size_type t = 0;
+         t < vlrs.size();
+         ++t)
+    {
+        VariableLengthRecord const& v = vlrs[t];
+        
+        std::vector<boost::uint8_t> raw_bytes;
+        for (std::size_t i = 0 ; i < v.getLength(); ++i)
+        {
+            raw_bytes.push_back(v.getBytes()[i]);
+        }
+        pdal::ByteArray bytearray(raw_bytes);
+        
+        std::ostringstream name;
+        name << "vlr_" << t;
+        pdal::metadata::Entry entry(name.str(), getName());
+        entry.setValue<pdal::ByteArray>(bytearray);
+        entry.addAttribute("reserved", boost::lexical_cast<std::string>(v.getReserved()));
+        entry.addAttribute("user_id", v.getUserId());
+        entry.addAttribute("record_id", boost::lexical_cast<std::string>(v.getRecordId()));
+        entry.addAttribute("description", v.getDescription());
+
+    }
+    
 }
 
 void Reader::addDefaultDimensions()
@@ -459,16 +599,13 @@ namespace iterators {
 
 Base::Base(pdal::drivers::las::Reader const& reader)
     : m_reader(reader)
-    , m_istream(NULL)
+    , m_istream(m_reader.getStreamFactory().allocate())
     , m_pointDimensions(NULL)
     , m_schema(0)
     , m_zipPoint(NULL)
     , m_unzipper(NULL)
-
 {
-    
-    m_istream = FileUtils::openFile(m_reader.getFileName());
-    m_istream->seekg(m_reader.getPointDataOffset());
+    m_istream.seekg(m_reader.getPointDataOffset());
 
     if (m_reader.isCompressed())
     {
@@ -493,7 +630,7 @@ Base::~Base()
     if (m_pointDimensions) 
         delete m_pointDimensions;
     
-    FileUtils::closeFile(m_istream);
+    m_reader.getStreamFactory().deallocate(m_istream);
 }
 
 
@@ -513,11 +650,11 @@ void Base::initialize()
         m_unzipper.swap(z);
 
         bool stat(false);
-        m_istream->seekg(m_reader.getPointDataOffset(), std::ios::beg);
-        stat = m_unzipper->open(*m_istream, m_zipPoint->GetZipper());
+        m_istream.seekg(m_reader.getPointDataOffset(), std::ios::beg);
+        stat = m_unzipper->open(m_istream, m_zipPoint->GetZipper());
 
         // Martin moves the stream on us 
-        m_zipReadStartPosition = m_istream->tellg();
+        m_zipReadStartPosition = m_istream.tellg();
         if (!stat)
         {
             std::ostringstream oss;
@@ -567,117 +704,6 @@ void Reader::readBufferBeginImpl(PointBuffer& buffer)
     setPointDimensions(buffer);
 } 
 
-void Reader::readBufferEndImpl(PointBuffer& buffer) 
-{
-    
-    LasHeader const& header = getReader().getLasHeader();
-
-    buffer.addMetadata<bool>(   "compressed", 
-                                header.Compressed(), 
-                                getReader().getName());
-    buffer.addMetadata<boost::uint32_t>("dataformatid", 
-                                        static_cast<boost::uint32_t>(header.getPointFormat()), 
-                                        getReader().getName());
-    buffer.addMetadata<boost::uint32_t>("version_major", 
-                                        static_cast<boost::uint32_t>(header.GetVersionMajor()), 
-                                        getReader().getName());
-    buffer.addMetadata<boost::uint32_t>("version_minor", 
-                                        static_cast<boost::uint32_t>(header.GetVersionMinor()), 
-                                        getReader().getName());
-    buffer.addMetadata<boost::uint32_t>("filesource_id", 
-                                        static_cast<boost::uint32_t>(header.GetFileSourceId()), 
-                                        getReader().getName());
-    buffer.addMetadata<boost::uint32_t>("reserved", 
-                                        static_cast<boost::uint32_t>(header.GetReserved()), 
-                                        getReader().getName());
-    buffer.addMetadata<boost::uuids::uuid>( "project_id", 
-                                            header.GetProjectId(), 
-                                            getReader().getName());
-    buffer.addMetadata<std::string>("system_id", 
-                                    header.GetSystemId(true), 
-                                    getReader().getName());
-    buffer.addMetadata<std::string>("software_id", 
-                                    header.GetSoftwareId(true), 
-                                    getReader().getName());
-    buffer.addMetadata<boost::uint32_t>("creation_doy", 
-                                        static_cast<boost::uint32_t>(header.GetCreationDOY()), 
-                                        getReader().getName());
-    buffer.addMetadata<boost::uint32_t>("creation_year", 
-                                        static_cast<boost::uint32_t>(header.GetCreationYear()), 
-                                        getReader().getName());
-    buffer.addMetadata<boost::uint32_t>("header_size", 
-                                        static_cast<boost::uint32_t>(header.GetHeaderSize()), 
-                                        getReader().getName());
-    buffer.addMetadata<boost::uint32_t>("dataoffset", 
-                                        static_cast<boost::uint32_t>(header.GetDataOffset()), 
-                                        getReader().getName());
-    buffer.addMetadata<double>( "scale_x", 
-                                header.GetScaleX(), 
-                                getReader().getName());
-    buffer.addMetadata<double>( "scale_y", 
-                                header.GetScaleY(),
-                                getReader().getName());
-    buffer.addMetadata<double>( "scale_z", 
-                                header.GetScaleZ(),
-                                getReader().getName());
-    buffer.addMetadata<double>( "offset_x", 
-                                header.GetOffsetX(),
-                                getReader().getName());
-    buffer.addMetadata<double>( "offset_y", 
-                                header.GetOffsetY(),
-                                getReader().getName());
-    buffer.addMetadata<double>( "offset_z", 
-                                header.GetOffsetZ(),
-                                getReader().getName());
-    buffer.addMetadata<double>( "minx", 
-                                header.GetMinX(),
-                                getReader().getName());
-    buffer.addMetadata<double>( "miny", 
-                                header.GetMinY(),
-                                getReader().getName());
-    buffer.addMetadata<double>( "minz", 
-                                header.GetMinZ(),
-                                getReader().getName());
-    buffer.addMetadata<double>( "maxx", 
-                                header.GetMaxX(),
-                                getReader().getName());
-    buffer.addMetadata<double>( "maxy", 
-                                header.GetMaxY(),
-                                getReader().getName());
-    buffer.addMetadata<double>( "maxz", 
-                                header.GetMaxZ(),
-                                getReader().getName());
-    buffer.addMetadata<boost::uint32_t>("count", 
-                                        header.GetPointRecordsCount(),
-                                        getReader().getName());
-
-
-    std::vector<VariableLengthRecord> const& vlrs = header.getVLRs().getAll();
-    for (std::vector<VariableLengthRecord>::size_type t = 0;
-         t < vlrs.size();
-         ++t)
-    {
-        VariableLengthRecord const& v = vlrs[t];
-        
-        std::vector<boost::uint8_t> raw_bytes;
-        for (std::size_t i = 0 ; i < v.getLength(); ++i)
-        {
-            raw_bytes.push_back(v.getBytes()[i]);
-        }
-        pdal::ByteArray bytearray(raw_bytes);
-        
-        std::ostringstream name;
-        name << "vlr_" << t;
-        pdal::Metadata entry(name.str(), getReader().getName());
-        entry.setValue<pdal::ByteArray>(bytearray);
-        entry.addAttribute("reserved", boost::lexical_cast<std::string>(v.getReserved()));
-        entry.addAttribute("user_id", v.getUserId());
-        entry.addAttribute("record_id", boost::lexical_cast<std::string>(v.getRecordId()));
-        entry.addAttribute("description", v.getDescription());
-
-    }
-}
-
 boost::uint64_t Reader::skipImpl(boost::uint64_t count)
 {
 #ifdef PDAL_HAVE_LASZIP
@@ -689,11 +715,11 @@ boost::uint64_t Reader::skipImpl(boost::uint64_t count)
     else
     {
         boost::uint64_t delta = Support::getPointDataSize(m_reader.getPointFormat());
-        m_istream->seekg(delta * count, std::ios::cur);
+        m_istream.seekg(delta * count, std::ios::cur);
     }
 #else
         boost::uint64_t delta = Support::getPointDataSize(m_reader.getPointFormat());
-        m_istream->seekg(delta * count, std::ios::cur);
+        m_istream.seekg(delta * count, std::ios::cur);
 #endif
     return count;
 }
@@ -709,14 +735,14 @@ boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
 {
 #ifdef PDAL_HAVE_LASZIP
     return m_reader.processBuffer(  data, 
-                                    *m_istream, 
+                                    m_istream, 
                                     getStage().getNumPoints()-this->getIndex(), 
                                     m_unzipper.get(), 
                                     m_zipPoint.get(),
                                     m_pointDimensions);
 #else
     return m_reader.processBuffer(  data, 
-                                    *m_istream, 
+                                    m_istream, 
                                     getStage().getNumPoints()-this->getIndex(), 
                                     NULL, 
                                     NULL,
@@ -760,12 +786,12 @@ boost::uint64_t Reader::seekImpl(boost::uint64_t count)
     else
     {
         boost::uint64_t delta = Support::getPointDataSize(m_reader.getPointFormat());
-        m_istream->seekg(m_reader.getPointDataOffset() + delta * count);
+        m_istream.seekg(m_reader.getPointDataOffset() + delta * count);
     }
 #else
 
     boost::uint64_t delta = Support::getPointDataSize(m_reader.getPointFormat());
-    m_istream->seekg(m_reader.getPointDataOffset() + delta * count);
+    m_istream.seekg(m_reader.getPointDataOffset() + delta * count);
 
 #endif
 
@@ -777,14 +803,14 @@ boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
 {
 #ifdef PDAL_HAVE_LASZIP
     return m_reader.processBuffer(  data, 
-                                    *m_istream, 
+                                    m_istream, 
                                     getStage().getNumPoints()-this->getIndex(), 
                                     m_unzipper.get(), 
                                     m_zipPoint.get(),
                                     m_pointDimensions);
 #else
     return m_reader.processBuffer(  data, 
-                                    *m_istream, 
+                                    m_istream, 
                                     getStage().getNumPoints()-this->getIndex(), 
                                     NULL, 
                                     NULL,

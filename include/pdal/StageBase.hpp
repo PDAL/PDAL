@@ -202,7 +202,6 @@ public:
     /// @return vector of output stages (may be empty)
     const std::vector<StageBase*>& getOutputs() const;
 
-
     /// Gets the previous stage.
     ///
     /// convenience function: returns the first input stage, as a Stage&
@@ -211,7 +210,6 @@ public:
     ///
     /// @return The previous stage.
     Stage& getPrevStage() const;
-
 
     /// Gets the previous stages.
     ///
@@ -224,10 +222,6 @@ public:
     /// @return null if it fails, else the previous stages.
     std::vector<Stage*> getPrevStages() const;
 
-    /// Gets the options.
-    ///
-    /// @return The options.
-    inline Options getCurrentOptions() const { return m_options; }
 
 protected:
 

@@ -39,7 +39,7 @@
 #include <pdal/drivers/las/Support.hpp>
 #include <pdal/drivers/las/Header.hpp>
 #include <pdal/drivers/las/SummaryData.hpp>
-#include <pdal/StreamManager.hpp>
+#include <pdal/StreamFactory.hpp>
 #include <boost/scoped_ptr.hpp>
 
 
@@ -95,7 +95,7 @@ protected:
     virtual void writeEnd(boost::uint64_t actualNumPointsWritten);
 
 private:
-    OStreamManager m_streamManager;
+    OutputStreamManager m_streamManager;
 
     LasHeader m_lasHeader;
     boost::uint32_t m_numPointsWritten;

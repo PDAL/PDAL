@@ -67,6 +67,21 @@ BOOST_AUTO_TEST_CASE(test_one)
 
     BOOST_CHECK_EQUAL(nitf_reader.getDescription(), "NITF Reader");
 
+    // check metadata
+    {
+        pdal::Metadata metadata = nitf_reader.getMetadata();
+        /////////////////////////////////////////////////BOOST_CHECK_EQUAL(metadatums.size(), 80u);
+        
+        
+        pdal::metadata::Entry const& m = metadata.getMetadata("FDT", "drivers.nitf.reader.FH");
+
+        BOOST_CHECK_EQUAL(m.getName(), "FDT");
+        BOOST_CHECK_EQUAL(m.getNamespace(), "drivers.nitf.reader.FH");
+
+        const std::string s(m.getValue<std::string>());
+        BOOST_CHECK_EQUAL(s, "20120323002946");
+    }
+
     const Schema& nitf_schema = nitf_reader.getSchema();
 
     PointBuffer nitf_data(nitf_schema, 750);

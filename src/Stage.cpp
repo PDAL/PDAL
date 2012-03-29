@@ -35,7 +35,7 @@
 #include <pdal/Stage.hpp>
 
 #include <boost/concept_check.hpp> // ignore_unused_variable_warning
-
+#include <boost/foreach.hpp>
 
 namespace pdal
 {
@@ -143,13 +143,18 @@ void Stage::setSpatialReference(const SpatialReference& spatialReference)
     m_spatialReference = spatialReference;
 }
 
-std::vector<Metadata> Stage::getMetadata() const
+Metadata Stage::getMetadata() const
 {
-    // the default behaviour is to have no records at all...
-    /*boost::ignore_unused_variable_warning(index);*/
-    throw pdal_error("no such metadata record");
-    std::vector<Metadata> output;
-    return output;
+    
+    try
+    {
+        Metadata const& m = getPrevStage().getMetadataRef();
+    
+        return m_metadata + m;
+    } catch (pdal::internal_error const&)
+    {
+        return m_metadata;
+    }
 }
 
 void Stage::setCoreProperties(const Stage& stage)

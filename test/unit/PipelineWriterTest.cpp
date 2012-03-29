@@ -139,7 +139,8 @@ BOOST_AUTO_TEST_CASE(PipelineWriterTest_multioptions)
         reader.readPipeline(Support::temppath("test-multi.xml"));
         manager.getStage()->initialize();
 
-        Options opt = manager.getStage()->getPrevStage().getCurrentOptions();
+        Stage const& stage = manager.getStage()->getPrevStage();
+        Options opt = stage.getOptions();
         
         Option fname = opt.getOption("filename");
 

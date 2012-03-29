@@ -52,7 +52,7 @@ SET(PDAL_UNITTEST_TEST_SRC
     SpatialReferenceTest.cpp
     StageFactoryTest.cpp
     StatsFilterTest.cpp
-    StreamManagerTest.cpp
+    StreamFactoryTest.cpp
     SupportTest.cpp
     TerraSolidTest.cpp
     TextWriterTest.cpp

@@ -38,10 +38,19 @@
 #include <pdal/FileUtils.hpp>
 #include "Support.hpp"
 
+#ifdef PDAL_COMPILER_MSVC
+#  pragma warning(push)
+#  pragma warning(disable: 4512)  // assignment operator could not be generated
+#endif
+#include <boost/iostreams/restrict.hpp>
+#ifdef PDAL_COMPILER_MSVC
+#  pragma warning(pop)
+#endif
+
 BOOST_AUTO_TEST_SUITE(GDALUtilsTest)
 
 
-BOOST_AUTO_TEST_CASE(GDALUtilsTest_1)
+BOOST_AUTO_TEST_CASE(test_wrapped_vsifile_read)
 {
     const int FILESIZE = 10000;  // size of file to use
     const int NUMREPS = 10000; // number of points to check
@@ -59,7 +68,7 @@ BOOST_AUTO_TEST_CASE(GDALUtilsTest_1)
         for (int i=0; i<FILESIZE; i++)
         {
             truth[i] = rand() % 256;
-            fwrite(&truth[i], 1, 1, fp);\
+            fwrite(&truth[i], 1, 1, fp);
         }
         fclose(fp);
     }
@@ -90,7 +99,7 @@ BOOST_AUTO_TEST_CASE(GDALUtilsTest_1)
 }
 
 
-BOOST_AUTO_TEST_CASE(GDALUtilsTest_2)
+BOOST_AUTO_TEST_CASE(GDALUtilsTest_test_vsifile_write)
 {
     const int FILESIZE = 10000;  // size of file to use
 
@@ -137,6 +146,68 @@ BOOST_AUTO_TEST_CASE(GDALUtilsTest_2)
 
     pdal::FileUtils::deleteFile(tempfile_a);
     pdal::FileUtils::deleteFile(tempfile_b);
+
+    return;
+}
+
+
+BOOST_AUTO_TEST_CASE(test_wrapped_vsifile_subsequence)
+{
+    const std::string tempfile = Support::datapath("vsilfile_test.dat");
+
+    pdal::FileUtils::deleteFile(tempfile);
+
+    // create a test file
+    {
+        FILE* fp = fopen(tempfile.c_str(), "wb");
+        for (int i=0; i<100; i++)
+        {
+            char c = (char)i;
+            fwrite(&c, 1, 1, fp);
+        }
+        fclose(fp);
+    }
+
+    namespace io = boost::iostreams;
+
+    // open the test file with VSID
+    VSILFILE* vsi_file = VSIFOpenL/*fopen*/(tempfile.c_str(), "rb");
+
+    // wrap it with an iostream
+    io::stream<pdal::gdal::VSILFileBuffer> full_stream(vsi_file);
+
+    // and make a subset view
+    io::restriction<io::stream<pdal::gdal::VSILFileBuffer> > restricted_dev(full_stream, 10, 20);
+    io::stream<io::restriction<io::stream<pdal::gdal::VSILFileBuffer> > > restricted_str(restricted_dev);
+
+    std::istream& str(restricted_str);
+
+    // seek to a random spot and read a point
+    str.seekg(5, std::iostream::beg);
+    
+    boost::uint8_t c;
+
+    str.read((char*)&c, 1);
+    BOOST_CHECK(c == 15);
+
+    str.read((char*)&c, 1);
+    BOOST_CHECK(c == 16);
+
+    str.seekg(4, std::iostream::cur);
+    str.read((char*)&c, 1);
+    BOOST_CHECK(c == 21);
+
+    str.seekg(-5, std::iostream::end);
+    str.read((char*)&c, 1);
+    BOOST_CHECK(c == 25);
+
+    restricted_str.close();
+    restricted_dev.close();
+    full_stream.close();
+
+    VSIFCloseL/*fclose*/(vsi_file);
+
+    pdal::FileUtils::deleteFile(tempfile);
 
     return;
 }

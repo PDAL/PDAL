@@ -254,7 +254,9 @@ BOOST_AUTO_TEST_CASE(PipelineReaderTest_MultiOptions)
     
     // .getStage gets us the filter stage.  .getPrevStage gets us the reader
     // we wrote our extra options on the reader stage.
-    Options opt = reader.getManager().getStage()->getPrevStage().getCurrentOptions();
+
+    Stage const& stage = reader.getManager().getStage()->getPrevStage();
+    Options const& opt = stage.getOptions();
 
     Option fname = opt.getOption("filename");
 

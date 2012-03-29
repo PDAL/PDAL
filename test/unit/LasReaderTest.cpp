@@ -61,7 +61,6 @@ BOOST_AUTO_TEST_CASE(test_base_options)
         opts.add(opt_filename);
 
         pdal::drivers::las::Reader reader(opts);
-        BOOST_CHECK(reader.getFileName() == file);
         BOOST_CHECK(reader.getVerboseLevel() == 0);
         BOOST_CHECK(reader.isDebug() == false);
     }
@@ -72,7 +71,6 @@ BOOST_AUTO_TEST_CASE(test_base_options)
         opts.add(opt_verbose_string);
         opts.add(opt_debug_string);
         pdal::drivers::las::Reader reader(opts);
-        BOOST_CHECK(reader.getFileName() == file);
         BOOST_CHECK(reader.getVerboseLevel() == 99);
         BOOST_CHECK(reader.isDebug() == true);
     }
@@ -83,7 +81,6 @@ BOOST_AUTO_TEST_CASE(test_base_options)
         opts.add(opt_verbose_uint8);
         opts.add(opt_debug_bool);
         pdal::drivers::las::Reader reader(opts);
-        BOOST_CHECK(reader.getFileName() == file);
         BOOST_CHECK(reader.getVerboseLevel() == 99);
         BOOST_CHECK(reader.isDebug() == true);
     }

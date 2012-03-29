@@ -36,8 +36,11 @@
 #ifdef PDAL_HAVE_GDAL
 
 #include <pdal/PointBuffer.hpp>
+#include <pdal/StreamFactory.hpp>
 #include <pdal/drivers/las/Reader.hpp>
 
+// local
+#include "NitfFile.hpp"
 #include "nitflib.h"
 
 // gdal
@@ -49,93 +52,38 @@
 
 namespace pdal { namespace drivers { namespace nitf {
 
-static int extractLASFromNITF(NITFDES* psDES, const char* pszLASName)
-{
-    NITFSegmentInfo* psSegInfo;
 
-    if ( CSLFetchNameValue(psDES->papszMetadata, "NITF_DESID") == NULL )
-        return FALSE;
-
-    psSegInfo = psDES->psFile->pasSegmentInfo + psDES->iSegment;
-
-    GByte* pabyBuffer;
-
-    pabyBuffer = (GByte*) VSIMalloc((size_t)psSegInfo->nSegmentSize);
-    if (pabyBuffer == NULL)
-    {
-        throw pdal_error("Unable to allocate buffer large enough to extract NITF data!");
-    }
-
-    VSIFSeekL(psDES->psFile->fp, psSegInfo->nSegmentStart, SEEK_SET);
-    if (VSIFReadL(pabyBuffer, 1, (size_t)psSegInfo->nSegmentSize, psDES->psFile->fp) != psSegInfo->nSegmentSize)
-    {
-        VSIFree(pabyBuffer);
-        throw pdal_error("Unable to allocate extract NITF data!");
-    }
-
-    VSILFILE* fp = NULL;
-    fp = VSIFOpenL(pszLASName, "wb");
-    if (fp == NULL)
-    {
-        VSIFree(pabyBuffer);
-        throw pdal_error("Unable to open filename to write!");
-    }
-
-    VSIFWriteL(pabyBuffer, 1, (size_t)psSegInfo->nSegmentSize, fp);
-    VSIFCloseL(fp);
-    VSIFree(pabyBuffer);
-
-    return TRUE;
-}
-
-
-static void extractNITF(const std::string& nitf_filename, std::string& las_filename) 
-{
-    NITFFile    *psFile;
-    psFile = NITFOpen( nitf_filename.c_str(), FALSE );
-    if (psFile == NULL)
-    {
-        throw pdal_error("unable to open NITF file");
-        //log()->get(logDEBUG) << "Unable to open " << getOptions().getValueOrThrow<std::string>("filename") << " for NITF access" << std::endl;
-    }
-    
-    int iSegment(0);
-    NITFSegmentInfo *psSegInfo = NULL;
-    for(iSegment = 0;  iSegment < psFile->nSegmentCount; iSegment++ )
-    {
-        psSegInfo = psFile->pasSegmentInfo + iSegment;
-        if( EQUAL(psSegInfo->szSegmentType,"DE")) 
-        {
-            break;
-        }
-    }    
-    
-    if (!psSegInfo)
-    {
-        throw pdal_error("Unable to get LAS DE segment from NITF file!");
-    }
-
-    //log()->get(logDEBUG) << "NITF Segment DataStart: " << psSegInfo->nSegmentStart 
-    //                     << " DataSize: " << psSegInfo->nSegmentSize << std::endl;
-
-    NITFDES *psDES = NULL;
-    psDES = NITFDESAccess( psFile, iSegment );
-    if( psDES == NULL )
-    {
-        std::string msg("NITFDESAccess(%d) failed!");
-        throw pdal_error(msg);
-    }
-    
-    std::string tempfile = Utils::generate_tempfile();
-    //log()->get(logDEBUG) << "Using " << tempfile << " for NITF->LAS filename" << std::endl;
-    
-    if (extractLASFromNITF(psDES, tempfile.c_str()))
-    {
-        las_filename = std::string(tempfile);
-    }
-
-    return;
-}
+// References:
+//   - NITF 2.1 standard: MIL-STD-2500C (01 May 2006)
+//   - Lidar implementation profile v1.0 (2010-09-07)
+//
+// There must be at least one Image segment ("IM").
+// There must be at least one DES segment ("DE") named LIDARA.
+//
+// You could have multiple image segments and LIDARA segments, but
+// the standard doesn't seem to say anything about how you associate which
+// image segment(s) with which LIDARA segment(s). We will assume only
+// one image segment and only one LIDARA segment.
+//
+// We don't support LIDARA segments that are split into multiple DES segments
+// via the DES INDEX mechanism.
+//
+// Metadata: we store...
+//    - the file header fields
+//    - the file header TREs
+//    - the IM segment fields
+//    - the IM segment TREs
+//    - the DES fields
+//    - the DES TREs
+// BUG: how should we namespace all the metadata?
+//
+// Should we honor the IGEOLO field, etc, from the NITF file? Currently we get everything from the LAS file.
+//
+// How should we expose the image segment (if at all)?
+//
+// Need to test on all the other NITF LAS files
+//
+// Add to stageFactory, do pipeline support, etc
 
 
 // ==========================================================================
@@ -143,8 +91,8 @@ static void extractNITF(const std::string& nitf_filename, std::string& las_filen
 
 Reader::Reader(const Options& options)
     : pdal::Reader(options)
-    , m_nitfFilename(options.getValueOrThrow<std::string>("filename"))
-    , m_lasFilename("")
+    , m_filename(options.getValueOrThrow<std::string>("filename"))
+    , m_streamFactory(NULL)
     , m_lasReader(NULL)
 {
     addDefaultDimensions();
@@ -154,12 +102,15 @@ Reader::Reader(const Options& options)
 
 Reader::~Reader()
 {
+    delete m_streamFactory;
     delete m_lasReader;
 }
 
 
 void Reader::addDefaultDimensions()
 {
+    // BUG: fix this
+
     //Dimension x("X", dimension::Float, 8);
     //x.setUUID("9b6a21e7-6ace-45a9-8c66-d9031d07576a");
     //Dimension y("Y", dimension::Float, 8);
@@ -180,9 +131,22 @@ void Reader::initialize()
 {
     pdal::Reader::initialize();
 
-    extractNITF(m_nitfFilename, m_lasFilename);
+    boost::uint64_t offset, length;
 
-    m_lasReader = new pdal::drivers::las::Reader(m_lasFilename);
+    {
+        NitfFile nitf(m_filename);
+        nitf.open();
+
+        nitf.getLasPosition(offset, length);
+        
+        nitf.extractMetadata(getMetadataRef());
+
+        nitf.close();
+    }
+
+    m_streamFactory = new FilenameSubsetStreamFactory(m_filename, offset, length);
+
+    m_lasReader = new pdal::drivers::las::Reader(m_streamFactory);
     m_lasReader->initialize();
 
     setCoreProperties(*m_lasReader);
@@ -205,12 +169,6 @@ pdal::StageSequentialIterator* Reader::createSequentialIterator(PointBuffer& buf
 }
 
 
-boost::uint32_t Reader::processBuffer(PointBuffer& data, boost::uint64_t index) const
-{
-    return 0;
-}
-
-
 boost::property_tree::ptree Reader::toPTree() const
 {
     boost::property_tree::ptree tree = pdal::Reader::toPTree();
@@ -219,42 +177,6 @@ boost::property_tree::ptree Reader::toPTree() const
 
     return tree;
 }
-
-
-
-// == Iterators =============================================================
-
-namespace iterators { namespace sequential {
-
-
-Reader::Reader(const pdal::drivers::nitf::Reader& reader, PointBuffer& buffer)
-    : pdal::ReaderSequentialIterator(reader, buffer)
-    , m_reader(reader)
-{
-    return;
-}
-
-
-boost::uint64_t Reader::skipImpl(boost::uint64_t count)
-{
-     return 0;
-}
-
-
-bool Reader::atEndImpl() const
-{
-     return false;
-}
-
-
-boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
-{
-    return 0;
-}
-
-
-} } // iterators::sequential
-
 
 
 } } } // namespaces

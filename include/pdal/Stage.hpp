@@ -74,7 +74,7 @@ public:
     const Bounds<double>& getBounds() const;
     const SpatialReference& getSpatialReference() const;
 
-    virtual std::vector<Metadata> getMetadata() const;    
+    virtual Metadata getMetadata() const;    
     
     virtual bool supportsIterator (StageIteratorType) const = 0;
 
@@ -87,6 +87,8 @@ public:
 protected:
     // setters for the core properties
     Schema& getSchemaRef();
+    
+    Metadata& getMetadataRef() { return m_metadata; }
     void setSchema(Schema const&);
     void setNumPoints(boost::uint64_t);
     void setPointCountType(PointCountType);
@@ -106,6 +108,7 @@ private:
     Bounds<double> m_bounds;
     SpatialReference m_spatialReference;
     std::vector<Dimension> m_defaultDimensions;
+    Metadata m_metadata;
 
     Stage& operator=(const Stage&); // not implemented
     Stage(const Stage&); // not implemented

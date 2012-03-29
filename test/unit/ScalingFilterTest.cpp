@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(ScalingFilterTest_test_1)
     reader.initialize();
     
     pdal::filters::Scaling const* filter = static_cast<pdal::filters::Scaling const*>(reader.getManager().getStage());
-    pdal::Options opt = filter->getCurrentOptions();
+    pdal::Options opt = filter->getOptions();
     // std::cout << "filter ops: " << opt << std::endl;
     
     const pdal::Schema& schema = filter->getSchema();
