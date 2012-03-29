@@ -46,6 +46,9 @@
 #include <boost/uuid/random_generator.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
+#include <boost/property_tree/json_parser.hpp>
+
+
 namespace pdal
 {
 
@@ -113,6 +116,29 @@ void Entry::setUUID(std::string const& id)
 void Entry::createUUID()
 {
     m_uuid = boost::uuids::random_generator()();
+}
+
+boost::property_tree::ptree Entry::toPTree() const
+{
+    using boost::property_tree::ptree;
+    ptree dim;
+    dim.put("name", getName());
+    dim.put("namespace", getNamespace());
+    std::ostringstream oss;
+    oss << m_variant;
+    dim.put("value", oss.str());
+    dim.put("type", getType());
+    dim.put("uid", getUUID());
+    
+    for (metadata::MetadataAttributeM::const_iterator i = m_attributes.begin(); i != m_attributes.end(); ++i)
+    {
+        ptree at;
+        at.put(i->first, i->second);
+        dim.add_child("attribute", at);
+    }
+    
+    dim.put("parent", getParent());
+    return dim;
 }
 
 std::ostream& operator<<(std::ostream& ostr, const Entry& metadata)
@@ -376,6 +402,24 @@ Metadata& Metadata::operator=(Metadata const& rhs)
     return *this;
 }
 
+Metadata Metadata::operator+(const Metadata& rhs) const
+{
+    
+    Metadata output;
+    
+    metadata::EntryMap const& idx = rhs.getMetadata();
+    
+    metadata::index_by_index const& datums = idx.get<metadata::index>();
+    
+    for (metadata::index_by_index::const_iterator i = datums.begin();
+         i != datums.end();
+         ++i)
+    {
+        output.addMetadata(*i);
+    }
+    return output;
+}
+
 std::vector<metadata::Entry> Metadata::getEntriesForNamespace(std::string const& ns) const
 {
     std::vector<metadata::Entry> output;
@@ -392,6 +436,20 @@ std::vector<metadata::Entry> Metadata::getEntriesForNamespace(std::string const&
     return output;
 }
 
+boost::property_tree::ptree Metadata::toPTree() const
+{
+    boost::property_tree::ptree tree;
+
+    metadata::index_by_index const& idx = m_metadata.get<metadata::index>();
+
+    for (metadata::index_by_index::const_iterator iter = idx.begin(); iter != idx.end(); ++iter)
+    {
+        const metadata::Entry& entry = *iter;
+        tree.add_child("entry", entry.toPTree());
+    }
+
+    return tree;
+}
 
 } // namespace pdal
 
@@ -407,5 +465,12 @@ namespace std
         ostr << output;
         return ostr;
     }
-    
+
+    std::ostream& operator<<(std::ostream& ostr, const pdal::Metadata& metadata)
+    {
+        boost::property_tree::ptree tree = metadata.toPTree();
+
+        boost::property_tree::write_json(ostr, tree);
+        return ostr;
+    }    
 }

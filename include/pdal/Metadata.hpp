@@ -295,7 +295,9 @@ public:
         return m_parentDimensionID;
     }
 
-
+/// @name Serialization
+    boost::property_tree::ptree toPTree() const;
+    
 /** @name private attributes
 */
 private:
@@ -441,12 +443,12 @@ inline void metadata::Entry::setValue<boost::uuids::uuid>(boost::uuids::uuid con
         boost::multi_index::hashed_non_unique<boost::multi_index::tag<ns>, boost::multi_index::const_mem_fun<metadata::Entry,std::string const&,&metadata::Entry::getNamespace> >,
         boost::multi_index::hashed_non_unique<boost::multi_index::tag<uid>, boost::multi_index::const_mem_fun<metadata::Entry,metadata::id const&,&metadata::Entry::getUUID> >
           >
-    > MetadataMap;
+    > EntryMap;
 
-    typedef MetadataMap::index<name>::type index_by_name;
-    typedef MetadataMap::index<ns>::type index_by_namespace;
-    typedef MetadataMap::index<index>::type index_by_index;
-    typedef MetadataMap::index<uid>::type index_by_uid;
+    typedef EntryMap::index<name>::type index_by_name;
+    typedef EntryMap::index<ns>::type index_by_namespace;
+    typedef EntryMap::index<index>::type index_by_index;
+    typedef EntryMap::index<uid>::type index_by_uid;
 
     
 }
@@ -469,6 +471,11 @@ public:
     {
         return;
     }
+
+/** @name Operators
+*/  
+    /// Addition operator
+    Metadata operator+(const Metadata& rhs) const;
 
 /** @name entry type
 */  
@@ -501,14 +508,14 @@ public:
     metadata::Entry const& getMetadata(std::size_t index) const;
 
     /// @return the number of metadata::Entry entries in the map
-    inline metadata::MetadataMap::size_type getMetadataCount() const { return m_metadata.get<metadata::index>().size(); }
+    inline metadata::EntryMap::size_type getMetadataCount() const { return m_metadata.get<metadata::index>().size(); }
     
     std::vector<metadata::Entry> getEntriesForNamespace(std::string const& ns) const;
     
-    /// @return a MetadataMap copy to use for setting the metadata::Entry on another 
+    /// @return a EntryMap copy to use for setting the metadata::Entry on another 
     /// PointBuffer with setMetadata()
     /// @param index position index to return.
-    inline metadata::MetadataMap const& getMetadata() const { return m_metadata; }
+    inline metadata::EntryMap const& getMetadata() const { return m_metadata; }
 
     /// @return a boost::optional-wrapped const& to a metadata::Entry with the given name 
     /// and namespace. If no matching metadata entry is found, the optional will be empty.
@@ -550,17 +557,18 @@ public:
     template<class T> void setMetadata(std::string const& name, T value, std::string const& ns="");
 
     
-    /// sets the MetadataMap for the PointBuffer
-    /// @param v MetadataMap instance to use (typically from another PointBuffer)
-    void setMetadata(metadata::MetadataMap const& v) { m_metadata = v; }    
-
-
+    /// sets the EntryMap for the PointBuffer
+    /// @param v EntryMap instance to use (typically from another PointBuffer)
+    void setMetadata(metadata::EntryMap const& v) { m_metadata = v; }    
+    
+    /// @name Serialization
+    boost::property_tree::ptree toPTree() const;
 
 /** @name private attributes
 */
 private:
 
-    metadata::MetadataMap m_metadata;    
+    metadata::EntryMap m_metadata;    
     
 };
 
@@ -590,6 +598,8 @@ namespace std
 
 ///
 extern PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const pdal::ByteArray& output);
+extern PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const pdal::Metadata& metadata);
+
 }
 
 #endif

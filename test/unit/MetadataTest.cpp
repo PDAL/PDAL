@@ -38,6 +38,8 @@
 #include <string>
 
 #include <pdal/Metadata.hpp>
+#include <pdal/drivers/las/Reader.hpp>
+#include "Support.hpp"
 
 #include <boost/property_tree/xml_parser.hpp>
 
@@ -241,5 +243,21 @@ BOOST_AUTO_TEST_CASE(test_metadata_set)
     
     return;
 }
+
+BOOST_AUTO_TEST_CASE(test_metadata_stage)
+{
+    pdal::drivers::las::Reader reader(Support::datapath("utm15.las"));
+    BOOST_CHECK(reader.getDescription() == "Las Reader");
+    reader.initialize();
+    
+    pdal::Metadata metadata = reader.getMetadata();
+    
+    // std::cout << metadata << std::endl;
+    
+    return;
+}
+
+
+
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -128,7 +128,8 @@ void StageBase::initialize()
         m_log = boost::shared_ptr<pdal::Log>(new Log(getName(), logname, v));
 
     }
-        m_log->setLevel(static_cast<LogLevel>(m_verbose));
+    
+    m_log->setLevel(static_cast<LogLevel>(m_verbose));
     
     m_initialized = true;
 

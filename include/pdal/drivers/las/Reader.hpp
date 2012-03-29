@@ -119,7 +119,8 @@ private:
     bool m_ownsStreamFactory;
 
     LasHeader m_lasHeader;
-
+    
+    void collectMetadata();
     Reader& operator=(const Reader&); // not implemented
     Reader(const Reader&); // not implemented
 };
@@ -176,8 +177,6 @@ public:
 
 protected:
     virtual void readBufferBeginImpl(PointBuffer&);
-    virtual void readBufferEndImpl(PointBuffer&);
-
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t);
