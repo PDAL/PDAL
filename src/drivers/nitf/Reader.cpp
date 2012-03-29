@@ -69,21 +69,37 @@ namespace pdal { namespace drivers { namespace nitf {
 // via the DES INDEX mechanism.
 //
 // Metadata: we store...
-//    - the file header fields
-//    - the file header TREs
-//    - the IM segment fields
-//    - the IM segment TREs
-//    - the DES fields
-//    - the DES TREs
-// BUG: how should we namespace all the metadata?
+//    - the file header fields    - namespace <root>.FH.fieldname
+//    - the file header TREs      - namespace <root>.FH.TRE.TREname
+//    - the IM segment fields     - namespace <root>.IM.1.fieldname
+//    - the IM segment TREs       - namespace <root>.IM.1.TRE.TREname
+//    - the DES fields            - namespace <root>.DE.1.fieldname
+//    - the DES TREs              - namespace <root>.DE.1.fieldname
+// Note we use a number to indicate which segment is being used,
+// so there is no ambiuity with multisegment NITFs
 //
-// Should we honor the IGEOLO field, etc, from the NITF file? Currently we get everything from the LAS file.
+// We also store some basic info for the IM segment: pixel width,
+// pixel height, and number of bands.
+//    BUG: this is commented out right now (see processImageInfo()),
+//         because NITFImageDeaccess() leaks memory?
+//   
+// We do not parse out the TRE fields; we leave the data as a byte stream
+// (This would be easy enough to do later, at least for those TREs we have documentation on).
 //
-// How should we expose the image segment (if at all)?
+// The dimensions we write out are (precisely) the LAS dimensions; we use the same
+// names, so as not to require upstream stgaes to understand both LAS dimension
+// names and NITF dimension names.
+//
+// BUG: we should provide an option to set the SRS of the Stage using the IGEOLO
+// field, but the GDAL C API doesn't provide an easy way to get the SRS. (When we
+// add this option, the default will be to use NITF.)
 //
 // Need to test on all the other NITF LAS files
 //
-// Add to stageFactory, do pipeline support, etc
+// BUG: need to implement addDefaultDimensions() so it does what LAS does.
+//
+// BUG: findIMSegment() allows "None" as an image type (for now, just to
+// support the autzen test input)
 
 
 // ==========================================================================
@@ -109,21 +125,9 @@ Reader::~Reader()
 
 void Reader::addDefaultDimensions()
 {
-    // BUG: fix this
+    // BUG: implement this to inherit from LAS
 
-    //Dimension x("X", dimension::Float, 8);
-    //x.setUUID("9b6a21e7-6ace-45a9-8c66-d9031d07576a");
-    //Dimension y("Y", dimension::Float, 8);
-    //y.setUUID("2f820b5d-9ad4-46e9-8be8-3cc15c8f9778");
-    //Dimension z("Z", dimension::Float, 8);
-    //z.setUUID("0de362b2-a039-42f2-9287-85964394a22e");
-    //Dimension t("Time", dimension::UnsignedInteger, 8);
-    //t.setUUID("9b705441-3de6-4b16-b706-ebae22bedeb5");
-
-    //addDefaultDimension(x, getName());
-    //addDefaultDimension(y, getName());
-    //addDefaultDimension(z, getName());
-    //addDefaultDimension(t, getName());
+    return;
 }
 
 

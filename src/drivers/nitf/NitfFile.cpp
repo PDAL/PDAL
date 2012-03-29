@@ -128,9 +128,14 @@ void NitfFile::extractMetadata(pdal::Metadata& ms)
     // file header fields and TREs
     //
     {
-        processMetadata(m_file->papszMetadata, ms, "FH");
+        std::stringstream parentkey;
+        parentkey << "FH";
 
-        processTREs(m_file->nTREBytes, m_file->pachTRE, ms, "FH");
+        processMetadata(m_file->papszMetadata, ms, parentkey.str());
+
+        parentkey << ".TRE";
+
+        processTREs(m_file->nTREBytes, m_file->pachTRE, ms, parentkey.str());
     }
 
     //
@@ -142,10 +147,17 @@ void NitfFile::extractMetadata(pdal::Metadata& ms)
         {
             throw pdal_error("NITFImageAccess failed");
         }
+        
+        std::stringstream parentkey;
+        parentkey << "IM." << m_imageSegmentNumber;
 
-        processMetadata(imageSegment->papszMetadata, ms, "IM");
+        processMetadata(imageSegment->papszMetadata, ms, parentkey.str());
 
-        processTREs(imageSegment->nTREBytes, imageSegment->pachTRE, ms, "IM");
+        //processImageInfo(ms, parentkey.str());
+
+        parentkey << ".TRE";
+
+        processTREs(imageSegment->nTREBytes, imageSegment->pachTRE, ms, parentkey.str());
 
         NITFImageDeaccess(imageSegment);
     }
@@ -160,9 +172,14 @@ void NitfFile::extractMetadata(pdal::Metadata& ms)
             throw pdal_error("NITFDESAccess failed");
         }
 
-        processMetadata(dataSegment->papszMetadata, ms, "DES");
+        std::stringstream parentkey;
+        parentkey << "DE." << m_imageSegmentNumber;
 
-        processTREs_DES(dataSegment, ms, "IM");
+        processMetadata(dataSegment->papszMetadata, ms, parentkey.str());
+
+        parentkey << ".TRE";
+
+        processTREs_DES(dataSegment, ms, parentkey.str());
 
         NITFDESDeaccess(dataSegment);
     }
@@ -337,11 +354,40 @@ void NitfFile::processMetadata(char** papszMetadata, pdal::Metadata& ms, const s
         const int sep = s.find('=');
         const std::string key = s.substr(5, sep-5);
         const std::string value = s.substr(sep+1, std::string::npos);
-
         metadata::Entry m(key, s_namespace + "." + parentkey);
         m.setValue<std::string>(value);
         ms.addMetadata(m);
     }
+
+    return;
+}
+
+
+void NitfFile::processImageInfo(pdal::Metadata& ms, const std::string& parentkey)
+{
+    // BUG: NITFImageAccess leaks memory, even if NITFImageDeaccess is called
+    
+    NITFImage* image = NITFImageAccess(m_file, m_imageSegmentNumber);
+
+    std::stringstream value1;
+    value1 << image->nRows;
+    metadata::Entry m1("NROWS", s_namespace + "." + parentkey);
+    m1.setValue<std::string>(value1.str());
+    ms.addMetadata(m1);
+
+    std::stringstream value2;
+    value2 << image->nCols;
+    metadata::Entry m2("NCOLS", s_namespace + "." + parentkey);
+    m2.setValue<std::string>(value2.str());
+    ms.addMetadata(m2);
+
+    std::stringstream value3;
+    value3 << image->nBands;
+    metadata::Entry m3("NBANDS", s_namespace + "." + parentkey);
+    m3.setValue<std::string>(value3.str());
+    ms.addMetadata(m3);
+
+    NITFImageDeaccess(image);
 
     return;
 }
