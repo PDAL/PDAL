@@ -175,7 +175,7 @@ BOOST_AUTO_TEST_CASE(ScalingFilterFloat_test)
         double z = data.getField<double>(dimZ, i);
         boost::uint64_t t = data.getField<boost::uint64_t>(dimTime, i);
 
-        BOOST_CHECK_EQUAL(x, -1234400031);
+        BOOST_CHECK_EQUAL(x, -1234400030);
         BOOST_CHECK_EQUAL(y, -12342999);
         BOOST_CHECK_CLOSE(z, 3.0, 0.00001);
         BOOST_CHECK_EQUAL(t, i*10); // because of scaling
