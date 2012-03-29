@@ -96,6 +96,10 @@ namespace pdal { namespace drivers { namespace nitf {
 //
 // Need to test on all the other NITF LAS files
 //
+// BUG: need to implement addDefaultDimensions() so it does what LAS does.
+//
+// BUG: findIMSegment() allows "None" as an image type (for now, just to
+// support the autzen test input)
 
 
 // ==========================================================================
@@ -121,21 +125,9 @@ Reader::~Reader()
 
 void Reader::addDefaultDimensions()
 {
-    // BUG: fix this
+    // BUG: implement this to inherit from LAS
 
-    //Dimension x("X", dimension::Float, 8);
-    //x.setUUID("9b6a21e7-6ace-45a9-8c66-d9031d07576a");
-    //Dimension y("Y", dimension::Float, 8);
-    //y.setUUID("2f820b5d-9ad4-46e9-8be8-3cc15c8f9778");
-    //Dimension z("Z", dimension::Float, 8);
-    //z.setUUID("0de362b2-a039-42f2-9287-85964394a22e");
-    //Dimension t("Time", dimension::UnsignedInteger, 8);
-    //t.setUUID("9b705441-3de6-4b16-b706-ebae22bedeb5");
-
-    //addDefaultDimension(x, getName());
-    //addDefaultDimension(y, getName());
-    //addDefaultDimension(z, getName());
-    //addDefaultDimension(t, getName());
+    return;
 }
 
 
