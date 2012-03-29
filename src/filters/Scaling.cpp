@@ -275,20 +275,49 @@ void Scaling::writeScaledData(  PointBuffer& buffer,
                                 Dimension const& to_dimension, 
                                 boost::uint32_t pointIndex)
 {
-    double dbl(0.0);
-    float flt(0.0);
-
     if (from_dimension.getInterpretation() == dimension::Float)
     {
         if (from_dimension.getByteSize() == 4)
         {
-            flt = buffer.getField<float>(from_dimension, pointIndex);
-            flt = from_dimension.removeScaling<float>(flt);
-            dbl = boost::numeric_cast<double>(flt);
-        } else if (from_dimension.getByteSize() == 8)
+            float v = buffer.getField<float>(from_dimension, pointIndex);
+            scale(from_dimension,
+                  to_dimension,
+                  v);
+            if (to_dimension.getInterpretation() == dimension::SignedInteger)
+            {
+                if (to_dimension.getByteSize() == 1)
+                    buffer.setField<boost::int8_t>(to_dimension, pointIndex, v);
+                else if (to_dimension.getByteSize() == 2)
+                    buffer.setField<boost::int16_t>(to_dimension, pointIndex, v);                         
+                else if (to_dimension.getByteSize() == 4)
+                    buffer.setField<boost::int32_t>(to_dimension, pointIndex, v); 
+                else if (to_dimension.getByteSize() == 8)
+                    buffer.setField<boost::int64_t>(to_dimension, pointIndex, v);                        
+                else
+                    throw pdal_error("Unable to convert dimension::Float to dimension::SignedInteger of size >8");
+                return;
+            }
+        }
+        else if (from_dimension.getByteSize() == 8)
         {
-            dbl = buffer.getField<double>(from_dimension, pointIndex);
-            dbl = from_dimension.removeScaling<double>(dbl);
+            double v = buffer.getField<double>(from_dimension, pointIndex);
+            scale(from_dimension,
+                  to_dimension,
+                  v);
+            if (to_dimension.getInterpretation() == dimension::SignedInteger)
+            {
+                if (to_dimension.getByteSize() == 1)
+                    buffer.setField<boost::int8_t>(to_dimension, pointIndex, v);
+                else if (to_dimension.getByteSize() == 2)
+                    buffer.setField<boost::int16_t>(to_dimension, pointIndex, v);                         
+                else if (to_dimension.getByteSize() == 4)
+                    buffer.setField<boost::int32_t>(to_dimension, pointIndex, v); 
+                else if (to_dimension.getByteSize() == 8)
+                    buffer.setField<boost::int64_t>(to_dimension, pointIndex, v);                        
+                else
+                    throw pdal_error("Unable to convert dimension::Float to dimension::SignedInteger of size >8");
+                return;
+            }
         }
         else 
         {
@@ -296,36 +325,7 @@ void Scaling::writeScaledData(  PointBuffer& buffer,
             oss << "Unable to interpret Float of size '" << from_dimension.getByteSize() <<"'";
             throw pdal_error(oss.str());
         }
-
-        if (to_dimension.getInterpretation() == dimension::SignedInteger)
-        {
-            if (to_dimension.getByteSize() == 1)
-            {
-                boost::int8_t i = to_dimension.removeScaling<double>(dbl);
-                buffer.setField<boost::int8_t>(to_dimension, pointIndex, i); 
-                return;
-            } else if (to_dimension.getByteSize() == 2)
-            {
-                boost::int16_t i = to_dimension.removeScaling<double>(dbl);
-                buffer.setField<boost::int16_t>(to_dimension, pointIndex, i);                         
-                return;
-            } else if (to_dimension.getByteSize() == 4)
-            {
-                boost::int32_t i = to_dimension.removeScaling<double>(dbl);
-                buffer.setField<boost::int32_t>(to_dimension, pointIndex, i); 
-                return;
-            } else if (to_dimension.getByteSize() == 8)
-            {
-                boost::int64_t i = to_dimension.removeScaling<double>(dbl);
-                buffer.setField<boost::int64_t>(to_dimension, pointIndex, i);                        
-                return;
-            } else
-            {
-                throw pdal_error("Unable to convert dimension::Float to dimension::SignedInteger of size >8");
-            }
-        }
     }
-
 
     if (from_dimension.getInterpretation() == dimension::SignedInteger)
     {
