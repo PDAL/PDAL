@@ -69,21 +69,33 @@ namespace pdal { namespace drivers { namespace nitf {
 // via the DES INDEX mechanism.
 //
 // Metadata: we store...
-//    - the file header fields
-//    - the file header TREs
-//    - the IM segment fields
-//    - the IM segment TREs
-//    - the DES fields
-//    - the DES TREs
-// BUG: how should we namespace all the metadata?
+//    - the file header fields    - namespace <root>.FH.fieldname
+//    - the file header TREs      - namespace <root>.FH.TRE.TREname
+//    - the IM segment fields     - namespace <root>.IM.1.fieldname
+//    - the IM segment TREs       - namespace <root>.IM.1.TRE.TREname
+//    - the DES fields            - namespace <root>.DE.1.fieldname
+//    - the DES TREs              - namespace <root>.DE.1.fieldname
+// Note we use a number to indicate which segment is being used,
+// so there is no ambiuity with multisegment NITFs
 //
-// Should we honor the IGEOLO field, etc, from the NITF file? Currently we get everything from the LAS file.
+// We also store some basic info for the IM segment: pixel width,
+// pixel height, and number of bands.
+//    BUG: this is commented out right now (see processImageInfo()),
+//         because NITFImageDeaccess() leaks memory?
+//   
+// We do not parse out the TRE fields; we leave the data as a byte stream
+// (This would be easy enough to do later, at least for those TREs we have documentation on).
 //
-// How should we expose the image segment (if at all)?
+// The dimensions we write out are (precisely) the LAS dimensions; we use the same
+// names, so as not to require upstream stgaes to understand both LAS dimension
+// names and NITF dimension names.
+//
+// BUG: we should provide an option to set the SRS of the Stage using the IGEOLO
+// field, but the GDAL C API doesn't provide an easy way to get the SRS. (When we
+// add this option, the default will be to use NITF.)
 //
 // Need to test on all the other NITF LAS files
 //
-// Add to stageFactory, do pipeline support, etc
 
 
 // ==========================================================================

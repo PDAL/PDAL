@@ -79,6 +79,7 @@ private:
     static void processTREs(int nTREBytes, const char *pszTREData, pdal::Metadata& m, const std::string& parentkey);
     static void processTREs_DES(NITFDES*, pdal::Metadata& m, const std::string& parentkey);
     static void processMetadata(char** papszMetadata, pdal::Metadata& m, const std::string& parentkey);
+    void processImageInfo(pdal::Metadata& m, const std::string& parentkey);
 
     const std::string m_filename;
     NITFFile* m_file;
