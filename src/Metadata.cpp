@@ -436,6 +436,25 @@ std::vector<metadata::Entry> Metadata::getEntriesForNamespace(std::string const&
     return output;
 }
 
+metadata::EntryMap::size_type Metadata::size(std::string const& ns) const
+{
+
+    std::vector<metadata::Entry> output;
+
+    metadata::index_by_namespace const& idx = m_metadata.get<metadata::ns>();
+    metadata::index_by_namespace::iterator it = idx.find(ns);
+    metadata::index_by_namespace::size_type i(0);
+    
+    while (it != idx.end())
+    {
+        ++i;
+        ++it;
+    }
+
+    return i;
+}
+
+
 boost::property_tree::ptree Metadata::toPTree() const
 {
     boost::property_tree::ptree tree;

@@ -508,7 +508,11 @@ public:
     metadata::Entry const& getMetadata(std::size_t index) const;
 
     /// @return the number of metadata::Entry entries in the map
-    inline metadata::EntryMap::size_type getMetadataCount() const { return m_metadata.get<metadata::index>().size(); }
+    inline metadata::EntryMap::size_type size() const { return m_metadata.get<metadata::index>().size(); }
+
+    /// @return the number of metadata::Entry entries in the map 
+    /// for a given namespace
+    metadata::EntryMap::size_type size(std::string const& ns) const;
     
     std::vector<metadata::Entry> getEntriesForNamespace(std::string const& ns) const;
     
