@@ -287,7 +287,7 @@ void InPlaceReprojection::transform(double& x, double& y, double& z) const
     if (!ret)
     {
         std::ostringstream msg; 
-        msg << "Could not project point for ReprojectionTransform::" << CPLGetLastErrorMsg() << ret;
+        msg << "Could not project point for InPlaceReprojection::" << CPLGetLastErrorMsg() << ret;
         throw pdal_error(msg.str());
     }
 #else
