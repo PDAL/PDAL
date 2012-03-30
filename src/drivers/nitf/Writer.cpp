@@ -46,7 +46,6 @@
 
 namespace pdal { namespace drivers { namespace nitf {
 
-
 Writer::Writer(Stage& prevStage, const Options& options)
     : pdal::drivers::las::Writer(prevStage, options)
 {
@@ -94,6 +93,8 @@ const Options Writer::getDefaultOptions() const
 
 void Writer::writeBegin(boost::uint64_t targetNumPointsToWrite)
 {
+    m_streamManager.ostream().write(s_nitfHeader().c_str(), s_nitfHeader().size());
+
     // call super class
     pdal::drivers::las::Writer::writeBegin(targetNumPointsToWrite);
 }
@@ -123,7 +124,9 @@ void Writer::writeBufferEnd(PointBuffer const& buffer)
 void Writer::writeEnd(boost::uint64_t actualNumPointsWritten)
 {
     // call super class
-    pdal::drivers::las::Writer::writeBegin(actualNumPointsWritten);
+    pdal::drivers::las::Writer::writeEnd(actualNumPointsWritten);
+
+    m_streamManager.ostream().write(s_nitfFooter().c_str(), s_nitfFooter().size());
 }
 
 

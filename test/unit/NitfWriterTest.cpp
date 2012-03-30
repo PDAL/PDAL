@@ -63,11 +63,22 @@ static void compare_contents(const std::string& las_file, const std::string& ntf
     //
     // read the NITF file
     //
+#if 0
     pdal::Option ntf_opt("filename", ntf_file);
     pdal::Options ntf_opts;
     ntf_opts.add(ntf_opt);
 
     pdal::drivers::nitf::Reader ntf_reader(ntf_opts);
+#else
+    const int totalLen = (int)FileUtils::fileSize(ntf_file);
+    const int headerLen = pdal::drivers::nitf::Writer::s_nitfHeader().size();
+    const int footerLen = pdal::drivers::nitf::Writer::s_nitfFooter().size();
+    const int lasStart = headerLen;
+    const int lasLen = totalLen - headerLen - footerLen;
+    FilenameSubsetStreamFactory f(ntf_file, lasStart, lasLen);
+    
+    pdal::drivers::las::Reader ntf_reader(&f);
+#endif
     ntf_reader.initialize();
     const Schema& ntf_schema = ntf_reader.getSchema();
     PointBuffer ntf_data(ntf_schema, 750);
@@ -102,12 +113,15 @@ static void compare_contents(const std::string& las_file, const std::string& ntf
         BOOST_CHECK_CLOSE(ntf_z, las_z, 0.00001);
     }
 
+    delete ntf_iter;
+    delete las_iter;
+
     return;
 }
 
 
 BOOST_AUTO_TEST_CASE(test1)
-{return;
+{
     const std::string las_input(Support::datapath("1.2-with-color.las"));
     const std::string nitf_output(Support::temppath("temp_nitf.ntf"));
     const std::string reference_output(Support::datapath("nitf/write_test1.ntf"));
@@ -130,7 +144,13 @@ BOOST_AUTO_TEST_CASE(test1)
 
         pdal::drivers::nitf::Writer writer(reader, writer_opts);
         writer.initialize();
-
+        {
+            writer.setCompressed(false);
+            writer.setDate(0, 0);
+            writer.setPointFormat(::pdal::drivers::las::PointFormat3);
+            writer.setSystemIdentifier("");
+            writer.setGeneratingSoftware("PDAL-NITF");
+        }
         writer.write(0);
     }
 

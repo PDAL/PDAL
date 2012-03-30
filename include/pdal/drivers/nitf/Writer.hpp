@@ -77,6 +77,9 @@ public:
     // for dumping
     virtual boost::property_tree::ptree toPTree() const;
 
+    static const std::string s_nitfHeader() { return "LAS GOES HERE --->"; }
+    static const std::string s_nitfFooter() { return "<--- LAS WENT THERE"; }
+
 private:
     void ctor();
 
