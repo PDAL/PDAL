@@ -493,10 +493,10 @@ inline T PointBuffer::getField(pdal::Dimension const& dim, std::size_t pointInde
             {
                 if (dim.getByteSize() == 4)
                 {
-                    return boost::numeric_cast<T>(*(float const*)p);
+                    return boost::numeric_cast<T>(*(float const*)(void*)p);
                 }
                 else
-                    return boost::numeric_cast<T>(*( double const*)p);
+                    return boost::numeric_cast<T>(*( double const*)(void*)p);
             }
         }
 
