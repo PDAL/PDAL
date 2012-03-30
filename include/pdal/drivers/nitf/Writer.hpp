@@ -36,6 +36,7 @@
 #define INCLUDED_DRIVERS_NITF_WRITER_HPP
 
 #include <pdal/Writer.hpp>
+#include <pdal/drivers/las/Writer.hpp>
 #include <pdal/StreamFactory.hpp>
 
 
@@ -61,7 +62,7 @@ namespace pdal
 namespace pdal { namespace drivers { namespace nitf {
 
 
-class PDAL_DLL Writer : public pdal::Writer
+class PDAL_DLL Writer : public pdal::drivers::las::Writer
 {
 public:
     SET_STAGE_NAME("drivers.nitf.writer", "NITF Writer")
@@ -73,20 +74,17 @@ public:
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
 
-    virtual boost::uint64_t write(boost::uint64_t targetNumPointsToWrite=0);
-
     // for dumping
     virtual boost::property_tree::ptree toPTree() const;
 
 private:
     void ctor();
 
-    void writeBegin(boost::uint64_t targetNumPointsToWrite);
-    boost::uint32_t writeBuffer(const PointBuffer&);
-    void writeEnd(boost::uint64_t actualNumPointsWritten);
-
-    OutputStreamManager m_streamManager;
-    pdal::drivers::las::Writer* m_lasWriter;
+    virtual void writeBegin(boost::uint64_t targetNumPointsToWrite);
+    virtual void writeBufferBegin(PointBuffer const&);
+    virtual boost::uint32_t writeBuffer(const PointBuffer&);
+    virtual void writeBufferEnd(PointBuffer const&);
+    virtual void writeEnd(boost::uint64_t actualNumPointsWritten);
 
     Writer& operator=(const Writer&); // not implemented
     Writer(const Writer&); // not implemented

@@ -48,9 +48,7 @@ namespace pdal { namespace drivers { namespace nitf {
 
 
 Writer::Writer(Stage& prevStage, const Options& options)
-    : pdal::Writer(prevStage, options)
-    , m_streamManager(options.getOption("filename").getValue<std::string>())
-    , m_lasWriter(NULL)
+    : pdal::drivers::las::Writer(prevStage, options)
 {
     ctor();
     return;
@@ -58,9 +56,7 @@ Writer::Writer(Stage& prevStage, const Options& options)
 
 
 Writer::Writer(Stage& prevStage, std::ostream* ostream)
-    : pdal::Writer(prevStage, Options::none())
-    , m_streamManager(ostream)
-    , m_lasWriter(NULL)
+    : pdal::drivers::las::Writer(prevStage, ostream)
 {
     ctor();
     return;
@@ -69,28 +65,20 @@ Writer::Writer(Stage& prevStage, std::ostream* ostream)
 
 void Writer::ctor()
 {
-    m_streamManager.open();
-    std::ostream& ostr = m_streamManager.ostream();
-    m_lasWriter = new pdal::drivers::las::Writer(getPrevStage(), &ostr);
     return;
 }
 
 
 Writer::~Writer()
 {
-    m_streamManager.close();
-
-    delete m_lasWriter;
-
     return;
 }
 
 
 void Writer::initialize()
 {
-    //pdal::Writer::initialize();
-
-    m_lasWriter->initialize();
+    // call super class
+    pdal::drivers::las::Writer::initialize();
 
     return;
 }
@@ -104,30 +92,38 @@ const Options Writer::getDefaultOptions() const
 }
 
 
-void Writer::writeBegin(boost::uint64_t /*targetNumPointsToWrite*/)
+void Writer::writeBegin(boost::uint64_t targetNumPointsToWrite)
 {
-    // shouldn't be called, since we override write()
-    throw pdal::internal_error("NITF writer protected function was called");
+    // call super class
+    pdal::drivers::las::Writer::writeBegin(targetNumPointsToWrite);
 }
 
 
-boost::uint32_t Writer::writeBuffer(const PointBuffer& /*buffer*/)
+void Writer::writeBufferBegin(PointBuffer const& buffer)
 {
-    // shouldn't be called, since we override write()
-    throw pdal::internal_error("NITF writer protected function was called");
+    // call super class
+    pdal::drivers::las::Writer::writeBufferBegin(buffer);
 }
 
 
-void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
+boost::uint32_t Writer::writeBuffer(const PointBuffer& buffer)
 {
-    // shouldn't be called, since we override write()
-    throw pdal::internal_error("NITF writer protected function was called");
+    // call super class
+    return pdal::drivers::las::Writer::writeBuffer(buffer);
 }
 
 
-boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite)
+void Writer::writeBufferEnd(PointBuffer const& buffer)
 {
-    return m_lasWriter->write(targetNumPointsToWrite);
+    // call super class
+    pdal::drivers::las::Writer::writeBufferEnd(buffer);
+}
+
+
+void Writer::writeEnd(boost::uint64_t actualNumPointsWritten)
+{
+    // call super class
+    pdal::drivers::las::Writer::writeBegin(actualNumPointsWritten);
 }
 
 
