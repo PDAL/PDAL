@@ -88,15 +88,15 @@ public:
     virtual boost::property_tree::ptree toPTree() const;
 
 protected:
-    virtual void writeBufferBegin(PointBuffer const&);
-
     virtual void writeBegin(boost::uint64_t targetNumPointsToWrite);
+    virtual void writeBufferBegin(PointBuffer const&);
     virtual boost::uint32_t writeBuffer(const PointBuffer&);
+    virtual void writeBufferEnd(PointBuffer const&);
     virtual void writeEnd(boost::uint64_t actualNumPointsWritten);
 
-private:
     OutputStreamManager m_streamManager;
 
+private:
     LasHeader m_lasHeader;
     boost::uint32_t m_numPointsWritten;
     SummaryData m_summaryData;

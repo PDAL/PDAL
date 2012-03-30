@@ -274,6 +274,12 @@ void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
 }
 
 
+void Writer::writeBufferEnd(PointBuffer const& /*data*/)
+{
+    return;
+}
+
+
 boost::uint32_t Writer::writeBuffer(const PointBuffer& pointBuffer)
 {
     const Schema& schema = pointBuffer.getSchema();
