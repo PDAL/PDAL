@@ -62,7 +62,7 @@ public:
 
     Writer(Stage& prevStage, const Options&);
     Writer(Stage& prevStage, std::ostream*);
-    ~Writer();
+    virtual ~Writer();
 
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
@@ -107,6 +107,8 @@ private:
 #endif
     
     bool m_headerInitialized;
+    boost::uint64_t m_streamOffset; // the first byte of the LAS file
+
     Writer& operator=(const Writer&); // not implemented
     Writer(const Writer&); // not implemented
 };

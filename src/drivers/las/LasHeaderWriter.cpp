@@ -52,9 +52,10 @@
 namespace pdal { namespace drivers { namespace las {
 
 
-LasHeaderWriter::LasHeaderWriter(LasHeader& header, std::ostream& ostream)
+LasHeaderWriter::LasHeaderWriter(LasHeader& header, std::ostream& ostream, boost::uint64_t firstPos)
     : m_header(header)
     , m_ostream(ostream)
+    , m_firstPos(firstPos)
     , m_wktModeFlag(SpatialReference::eCompoundOK)
 {
     return;
@@ -69,10 +70,6 @@ void LasHeaderWriter::write()
     boost::uint16_t n2 = 0;
     boost::uint32_t n4 = 0;
     
-    // Seek to the beginning
-    // m_ostream.seekp(0, ios::beg);
-    // ios::pos_type begin = m_ostream.tellp();
-
     // Seek to the end
     m_ostream.seekp(0, ios::end);
     // ios::pos_type end = m_ostream.tellp();
@@ -288,7 +285,7 @@ void LasHeaderWriter::WriteVLRs()
 {
     // Seek to the end of the public header block (beginning of the VLRs)
     // to start writing
-    m_ostream.seekp(m_header.GetHeaderSize(), std::ios::beg);
+    m_ostream.seekp(m_firstPos + m_header.GetHeaderSize(), std::ios::beg);
 
     boost::int32_t diff = m_header.GetDataOffset() - GetRequiredHeaderSize();
     
@@ -349,14 +346,14 @@ void LasHeaderWriter::WriteLAS10PadSignature()
     if (diff < 2) {
         m_header.SetDataOffset(m_header.GetDataOffset() + 2);
         // Seek to the location of the data offset in the header and write a new one.
-        m_ostream.seekp(96, std::ios::beg);
+        m_ostream.seekp(m_firstPos + 96, std::ios::beg);
         Utils::write_n(m_ostream, m_header.GetDataOffset(), sizeof(m_header.GetDataOffset()));
     }    
         
     // step back two bytes to write the pad bytes.  We should have already
     // determined by this point if a) they will fit b) they won't overwrite 
     // exiting real data 
-    m_ostream.seekp(m_header.GetDataOffset() - 2, std::ios::beg);
+    m_ostream.seekp(m_firstPos + m_header.GetDataOffset() - 2, std::ios::beg);
     
     // Write the pad bytes.
     boost::uint8_t const sgn1 = 0xCC;

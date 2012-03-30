@@ -56,6 +56,7 @@ Writer::Writer(Stage& prevStage, const Options& options)
     : pdal::Writer(prevStage, options)
     , m_streamManager(options.getOption("filename").getValue<std::string>())
     , m_headerInitialized(false)
+    , m_streamOffset(0)
 {
 
     return;
@@ -67,6 +68,7 @@ Writer::Writer(Stage& prevStage, std::ostream* ostream)
     , m_streamManager(ostream)
     , m_numPointsWritten(0)
     , m_headerInitialized(false)
+    , m_streamOffset(0)
 {
     return;
 }
@@ -187,6 +189,14 @@ void Writer::setHeaderPadding(boost::uint32_t const& v)
     m_lasHeader.SetHeaderPadding(v);
 }
 
+
+void Writer::writeBegin(boost::uint64_t /*targetNumPointsToWrite*/)
+{
+    m_streamOffset = m_streamManager.ostream().tellp();
+    return;
+}
+
+
 void Writer::writeBufferBegin(PointBuffer const& data)
 {
     if (m_headerInitialized) return;
@@ -208,7 +218,7 @@ void Writer::writeBufferBegin(PointBuffer const& data)
 
     m_lasHeader.setSpatialReference(getSpatialReference());
 
-    LasHeaderWriter lasHeaderWriter(m_lasHeader, m_streamManager.ostream());
+    LasHeaderWriter lasHeaderWriter(m_lasHeader, m_streamManager.ostream(), m_streamOffset);
     lasHeaderWriter.write();
     
     m_summaryData.reset();
@@ -249,25 +259,14 @@ void Writer::writeBufferBegin(PointBuffer const& data)
     
 }
 
-void Writer::writeBegin(boost::uint64_t /*targetNumPointsToWrite*/)
-{
-
-}
-
 
 void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
 {
     m_lasHeader.SetPointRecordsCount(m_numPointsWritten);
 
-    //std::streamsize const dataPos = 107; 
-    //m_ostream.seekp(dataPos, std::ios::beg);
-    //LasHeaderWriter lasHeaderWriter(m_lasHeader, m_ostream);
-    //Utils::write_n(m_ostream, m_numPointsWritten, sizeof(m_numPointsWritten));
-
     log()->get(logDEBUG) << "Wrote " << m_numPointsWritten << " points to the LAS file" << std::endl;
-
         
-    m_streamManager.ostream().seekp(0);
+    m_streamManager.ostream().seekp(m_streamOffset);
     Support::rewriteHeader(m_streamManager.ostream(), m_summaryData);
 
     return;

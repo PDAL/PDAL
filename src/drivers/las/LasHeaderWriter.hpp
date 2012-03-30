@@ -54,7 +54,7 @@ class LasHeader;
 class PDAL_DLL LasHeaderWriter
 {
 public:
-    LasHeaderWriter(LasHeader& header, std::ostream&);
+    LasHeaderWriter(LasHeader& header, std::ostream&, boost::uint64_t firstPos);
     void write();
 
     // default is eCompoundOK
@@ -67,6 +67,7 @@ private:
 
     LasHeader& m_header; // note this is not const
     std::ostream& m_ostream;
+    boost::uint64_t m_firstPos;
     SpatialReference::WKTModeFlag m_wktModeFlag;
 
     LasHeaderWriter& operator=(const LasHeaderWriter&); // nope
