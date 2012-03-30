@@ -100,7 +100,8 @@ namespace pdal { namespace drivers { namespace nitf {
 //
 // BUG: findIMSegment() allows "None" as an image type (for now, just to
 // support the autzen test input)
-
+//
+// BUG: fix the reader test that asserts 80 pieces of metadata coming out
 
 // ==========================================================================
 
