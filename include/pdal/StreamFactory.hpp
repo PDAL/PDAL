@@ -159,14 +159,11 @@ public:
 
     std::ostream& ostream();
 
-    boost::uint64_t firstPos() const;
-
 private:
     const bool m_isFileBased;
     bool m_isOpen;
     std::string m_filename;
     std::ostream* m_ostream;
-    boost::uint64_t m_firstPos;
 
     OutputStreamManager(const OutputStreamManager&); // nope
     OutputStreamManager& operator=(const OutputStreamManager&); // nope

@@ -227,7 +227,6 @@ OutputStreamManager::OutputStreamManager(const std::string& filename)
     , m_isOpen(false)
     , m_filename(filename)
     , m_ostream(NULL)
-    , m_firstPos(0)
 {
     return;
 }
@@ -238,7 +237,6 @@ OutputStreamManager::OutputStreamManager(std::ostream* ostream)
     , m_isOpen(false)
     , m_filename("")
     , m_ostream(ostream)
-    , m_firstPos(0)
 {
     return;
 }
@@ -251,12 +249,6 @@ OutputStreamManager::~OutputStreamManager()
 }
 
 
-boost::uint64_t OutputStreamManager::firstPos() const
-{
-    return m_firstPos;
-}
-
-
 void OutputStreamManager::open()
 {
     if (m_isOpen)
@@ -265,14 +257,12 @@ void OutputStreamManager::open()
     if (m_isFileBased)
     {
         m_ostream = FileUtils::createFile(m_filename, true);
-        m_firstPos = 0;
     }
     else
     {
         // nothing to do
         if (m_ostream == NULL)
             throw pdal_error("invalid stream");
-        m_firstPos = m_ostream->tellp();
     }
 
     m_isOpen = true;
