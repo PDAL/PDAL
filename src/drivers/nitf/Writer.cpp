@@ -33,51 +33,101 @@
 ****************************************************************************/
 
 #include <pdal/drivers/nitf/Writer.hpp>
+#include <pdal/drivers/las/Writer.hpp>
 
 #include <pdal/PointBuffer.hpp>
 
+
+// NOTES
+//
+// is it legal to write a LAZ file?
+// syntactically, how do we name all the LAS writer options that we will pass to the las writer?
+//
 
 namespace pdal { namespace drivers { namespace nitf {
 
 
 Writer::Writer(Stage& prevStage, const Options& options)
     : pdal::Writer(prevStage, options)
+    , m_streamManager(options.getOption("filename").getValue<std::string>())
+    , m_lasWriter(NULL)
 {
+    ctor();
+    return;
+}
+
+
+Writer::Writer(Stage& prevStage, std::ostream* ostream)
+    : pdal::Writer(prevStage, Options::none())
+    , m_streamManager(ostream)
+    , m_lasWriter(NULL)
+{
+    ctor();
+    return;
+}
+
+
+void Writer::ctor()
+{
+    m_streamManager.open();
+    std::ostream& ostr = m_streamManager.ostream();
+    m_lasWriter = new pdal::drivers::las::Writer(getPrevStage(), &ostr);
+    return;
+}
+
+
+Writer::~Writer()
+{
+    m_streamManager.close();
+
+    delete m_lasWriter;
+
     return;
 }
 
 
 void Writer::initialize()
 {
-    pdal::Writer::initialize();
+    //pdal::Writer::initialize();
 
-    throw pdal::not_yet_implemented("NITF writer not yet implemented");
+    m_lasWriter->initialize();
+
+    return;
 }
 
 
 const Options Writer::getDefaultOptions() const
 {
+    // BUG: fix this
     Options options;
     return options;
 }
 
 
-
 void Writer::writeBegin(boost::uint64_t /*targetNumPointsToWrite*/)
 {
-    return;
+    // shouldn't be called, since we override write()
+    throw pdal::internal_error("NITF writer protected function was called");
+}
+
+
+boost::uint32_t Writer::writeBuffer(const PointBuffer& /*buffer*/)
+{
+    // shouldn't be called, since we override write()
+    throw pdal::internal_error("NITF writer protected function was called");
 }
 
 
 void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
 {
-    return;
+    // shouldn't be called, since we override write()
+    throw pdal::internal_error("NITF writer protected function was called");
 }
 
 
-boost::uint32_t Writer::writeBuffer(const PointBuffer& /*/PointBuffer*/)
+boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite)
 {
-    return 0;
+    return m_lasWriter->write(targetNumPointsToWrite);
 }
 
 

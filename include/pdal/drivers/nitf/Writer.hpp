@@ -36,6 +36,26 @@
 #define INCLUDED_DRIVERS_NITF_WRITER_HPP
 
 #include <pdal/Writer.hpp>
+#include <pdal/StreamFactory.hpp>
+
+
+namespace pdal
+{
+    class PointBuffer;
+    
+    namespace metadata 
+    { 
+        class Entry;
+    }
+    namespace drivers
+    {
+        namespace las
+        {
+            class Writer;
+        }
+    }
+}
+
 
 
 namespace pdal { namespace drivers { namespace nitf {
@@ -47,17 +67,26 @@ public:
     SET_STAGE_NAME("drivers.nitf.writer", "NITF Writer")
 
     Writer(Stage& prevStage, const Options&);
+    Writer(Stage& prevStage, std::ostream*);
+    ~Writer();
     
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
+
+    virtual boost::uint64_t write(boost::uint64_t targetNumPointsToWrite=0);
 
     // for dumping
     virtual boost::property_tree::ptree toPTree() const;
 
 private:
+    void ctor();
+
     void writeBegin(boost::uint64_t targetNumPointsToWrite);
     boost::uint32_t writeBuffer(const PointBuffer&);
     void writeEnd(boost::uint64_t actualNumPointsWritten);
+
+    OutputStreamManager m_streamManager;
+    pdal::drivers::las::Writer* m_lasWriter;
 
     Writer& operator=(const Writer&); // not implemented
     Writer(const Writer&); // not implemented
