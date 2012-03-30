@@ -223,20 +223,22 @@ void FilenameSubsetStreamFactory::deallocate(std::istream& stream)
 
 
 OutputStreamManager::OutputStreamManager(const std::string& filename)
-    : m_type(File)
+    : m_isFileBased(true)
     , m_isOpen(false)
     , m_filename(filename)
     , m_ostream(NULL)
+    , m_firstPos(0)
 {
     return;
 }
 
 
 OutputStreamManager::OutputStreamManager(std::ostream* ostream)
-    : m_type(Stream)
+    : m_isFileBased(false)
     , m_isOpen(false)
     , m_filename("")
     , m_ostream(ostream)
+    , m_firstPos(0)
 {
     return;
 }
@@ -249,21 +251,9 @@ OutputStreamManager::~OutputStreamManager()
 }
 
 
-const std::string& OutputStreamManager::getFileName() const
+boost::uint64_t OutputStreamManager::firstPos() const
 {
-    return m_filename;
-}
-
-
-OutputStreamManager::Type OutputStreamManager::getType() const
-{
-    return m_type;
-}
-
-
-bool OutputStreamManager::isOpen() const
-{
-    return m_isOpen;
+    return m_firstPos;
 }
 
 
@@ -272,19 +262,17 @@ void OutputStreamManager::open()
     if (m_isOpen)
         throw pdal_error("cannot re-open file or stream");
 
-    switch (getType())
+    if (m_isFileBased)
     {
-    case File:
-        m_ostream = FileUtils::createFile(getFileName(), true);
-        break;
-    case Stream:
+        m_ostream = FileUtils::createFile(m_filename, true);
+        m_firstPos = 0;
+    }
+    else
+    {
         // nothing to do
         if (m_ostream == NULL)
             throw pdal_error("invalid stream");
-        break;
-    default:
-        throw pdal_error("cannot open");
-        break;
+        m_firstPos = m_ostream->tellp();
     }
 
     m_isOpen = true;
@@ -297,17 +285,13 @@ void OutputStreamManager::close()
 {
     if (!m_isOpen) return;
 
-    switch (getType())
+    if (m_isFileBased)
     {
-    case File:
         FileUtils::closeFile(m_ostream);
-        break;
-    case Stream:
+    }
+    else
+    {
         // nothing to do
-        break;
-    default:
-        throw pdal_error("cannot close");
-        break;
     }
 
     m_ostream = NULL;
@@ -319,7 +303,7 @@ void OutputStreamManager::close()
 
 std::ostream& OutputStreamManager::ostream()
 {
-    if (!isOpen() || !m_ostream)
+    if (!m_isOpen || !m_ostream)
         throw pdal_error("invalid stream");
     return *m_ostream;
 }

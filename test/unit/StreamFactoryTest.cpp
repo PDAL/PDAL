@@ -60,7 +60,6 @@ BOOST_AUTO_TEST_CASE(test1)
         {
             pdal::OutputStreamManager wfile(wfilename);
             wfile.open();
-            BOOST_CHECK(wfile.getFileName() == wfilename);
 
             BOOST_CHECK(FileUtils::fileExists(wfilename));
             wfile.close();
@@ -79,7 +78,6 @@ BOOST_AUTO_TEST_CASE(test1)
             pdal::OutputStreamManager ostream(ostreamname);
             ostream.open();
             BOOST_CHECK(&(ostream.ostream()) == ostreamname);
-            BOOST_CHECK(ostream.getFileName() == "");
             ostream.close();
         }
 

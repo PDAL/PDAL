@@ -139,12 +139,9 @@ private:
 };
 
 
-// Many of our reader & writer classes want to take a filename or a stream
+// Many of our writer classes want to take a filename or a stream
 // in their ctors, which means that we need a common piece of code that
 // creates and takes ownership of the stream, if needed.
-//
-// This could, I suppose, evolve into something that even takes in things
-// other than std streams or filenames.
 //
 // You must always call open(), regardless of what kind of ctor you call,
 // i.e. stream or filename.  Calling close() is optional (the dtor will do
@@ -153,8 +150,6 @@ private:
 class PDAL_DLL OutputStreamManager
 {
 public:
-    enum Type { Stream, File };
-
     OutputStreamManager(const std::string& filename);
     OutputStreamManager(std::ostream*); // may not be NULL
     ~OutputStreamManager();
@@ -162,19 +157,16 @@ public:
     void open(); // throws
     void close();
 
-    // returns "" if stream-based ctor was used
-    const std::string& getFileName() const;
-
-    Type getType() const;
-    bool isOpen() const;
-
     std::ostream& ostream();
 
+    boost::uint64_t firstPos() const;
+
 private:
-    const Type m_type;
+    const bool m_isFileBased;
     bool m_isOpen;
     std::string m_filename;
     std::ostream* m_ostream;
+    boost::uint64_t m_firstPos;
 
     OutputStreamManager(const OutputStreamManager&); // nope
     OutputStreamManager& operator=(const OutputStreamManager&); // nope
