@@ -64,7 +64,7 @@ public:
     // and then write them out to wherever.  Returns total number of points
     // actually written.
     // If given number of points is 0, do as many points as the reader supplies to us.
-    boost::uint64_t write(boost::uint64_t targetNumPointsToWrite=0);
+    virtual boost::uint64_t write(boost::uint64_t targetNumPointsToWrite=0);
 
     // for xml serializion of pipelines
     virtual boost::property_tree::ptree serializePipeline() const;
