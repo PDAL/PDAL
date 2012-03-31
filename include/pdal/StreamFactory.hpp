@@ -48,13 +48,11 @@
 #  pragma warning(pop)
 #endif
 
-#include <string>
-#include <cassert>
-#include <stdexcept>
-#include <cmath>
 #include <ostream>
 #include <istream>
 #include <vector>
+#include <map>
+#include <set>
 
 namespace pdal
 {
@@ -105,7 +103,9 @@ public:
 
 private:
     const std::string m_filename;
-    std::vector<std::istream*> m_istreams;
+
+    typedef std::set<std::istream*> Set;
+    Set m_streams;
 };
 
 class PDAL_DLL FilenameSubsetStreamFactory : public StreamFactory
@@ -122,20 +122,22 @@ private:
     const boost::uint64_t m_offset;
     const boost::uint64_t m_length;
 
-    typedef boost::iostreams::stream<boost::iostreams::file_source> FStream;
-    typedef boost::iostreams::restriction<FStream> FStreamSlice;
-    typedef boost::iostreams::stream<FStreamSlice> FStreamSliceStream;
-
     struct StreamSet
     {
-       StreamSet(std::istream*,FStreamSlice*,FStreamSliceStream*);
-       ~StreamSet();
-       bool match(std::istream&) const;
-       std::istream* stream;
-       FStreamSlice* slice;
-       FStreamSliceStream* streamslice;
+    public:
+        StreamSet(const std::string& filename, boost::uint64_t offset, boost::uint64_t length);
+        ~StreamSet();
+        std::istream* stream() { return m_streamslice; }
+    private:
+        typedef boost::iostreams::stream<boost::iostreams::file_source> Stream;
+        typedef boost::iostreams::restriction<Stream> StreamSlice;
+        typedef boost::iostreams::stream<StreamSlice> StreamSliceStream;
+       std::istream* m_stream;
+       StreamSlice* m_slice;
+       StreamSliceStream* m_streamslice;
     };
-    std::vector<StreamSet*> m_streams;
+    typedef std::map<std::istream*,StreamSet*> Map;  // maps streamslice -> set
+    Map m_streams;
 };
 
 

@@ -86,14 +86,13 @@ FilenameStreamFactory::FilenameStreamFactory(const std::string& name)
 
 FilenameStreamFactory::~FilenameStreamFactory()
 {
-    while (m_istreams.size())
+    while (!m_streams.empty())
     {
-        std::istream* s = m_istreams.back();
-        m_istreams.pop_back();
-        if (s)
-        {
-            FileUtils::closeFile(s);
-        }
+        Set::iterator iter = m_streams.begin();
+        std::istream* s = *iter;
+        m_streams.erase(iter);
+        assert(s);
+        FileUtils::closeFile(s);
     }
 
     return;
@@ -103,56 +102,58 @@ FilenameStreamFactory::~FilenameStreamFactory()
 std::istream& FilenameStreamFactory::allocate()
 {
     std::istream* s = FileUtils::openFile(m_filename, true);
-    m_istreams.push_back(s);
+    m_streams.insert(s);
     return *s;
 }
 
 
 void FilenameStreamFactory::deallocate(std::istream& stream)
 {
-    for (unsigned int i=0; i<m_istreams.size(); i++)
-    {
-        if (m_istreams[i] == &stream)
-        {
-            FileUtils::closeFile(m_istreams[i]);
-            m_istreams[i] = NULL;
-            return;
-        }
-    }
+    Set::iterator iter = m_streams.find(&stream);
+    if (iter == m_streams.end())
+        throw pdal_error("incorrect stream deallocation");
+    
+    std::istream* s = *iter;
+    m_streams.erase(iter);
+    FileUtils::closeFile(s);
 
-    throw pdal_error("incorrect stream deallocation");
+    return;
 }
 
 
 // --------------------------------------------------------------------
 
-FilenameSubsetStreamFactory::StreamSet::StreamSet(std::istream* a, FStreamSlice* b, FStreamSliceStream* c)
-    : stream(a)
-    , slice(b)
-    , streamslice(c)
+FilenameSubsetStreamFactory::StreamSet::StreamSet(const std::string& filename, boost::uint64_t offset, boost::uint64_t length)
 {
+    namespace io = boost::iostreams;
+
+    std::istream* file = FileUtils::openFile(filename, true);
+
+    Stream* source = dynamic_cast<Stream*>(file);
+    assert(source!=0);
+    
+    StreamSlice* restricted_device = new StreamSlice(*source, offset, length);
+    io::stream<StreamSlice>* restricted_stream = new io::stream<StreamSlice>(*restricted_device);
+
+    m_stream = file;
+    m_slice = restricted_device;
+    m_streamslice = restricted_stream;
+    
     return;
 }
 
 
 FilenameSubsetStreamFactory::StreamSet::~StreamSet()
 {
-    streamslice->close();
-    delete streamslice;
+    m_streamslice->close();
+    delete m_streamslice;
 
-    slice->close();
-    delete slice;
+    m_slice->close();
+    delete m_slice;
 
-    FileUtils::closeFile(stream);
+    FileUtils::closeFile(m_stream);
 
     return;
-}
-
-
-bool FilenameSubsetStreamFactory::StreamSet::match(std::istream& s) const
-{
-    std::istream* ss(&s);
-    return ss == streamslice;
 }
 
 
@@ -165,18 +166,15 @@ FilenameSubsetStreamFactory::FilenameSubsetStreamFactory(const std::string& name
     return;
 }
 
+
 FilenameSubsetStreamFactory::~FilenameSubsetStreamFactory()
 {
-    namespace io = boost::iostreams;
-
-    for (unsigned int i=0; i<m_streams.size(); i++)
+    while (!m_streams.empty())
     {
-        StreamSet* set = m_streams[i];
-        if (set)
-        {
-            delete set;
-            m_streams[i] = NULL;
-        }
+        Map::iterator iter = m_streams.begin();
+        StreamSet* set = iter->second;
+        m_streams.erase(iter);
+        delete set;
     }
 
     return;
@@ -185,37 +183,27 @@ FilenameSubsetStreamFactory::~FilenameSubsetStreamFactory()
 
 std::istream& FilenameSubsetStreamFactory::allocate()
 {
-    namespace io = boost::iostreams;
-
-    std::istream* file = FileUtils::openFile(m_filename, true);
-
-    FStream* source = dynamic_cast<FStream*>(file);
-    assert(source!=0);
+    StreamSet* set = new StreamSet(m_filename, m_offset, m_length);
     
-    FStreamSlice* restricted_device = new FStreamSlice(*source, m_offset, m_length);
-    io::stream<FStreamSlice>* restricted_stream = new io::stream<FStreamSlice>(*restricted_device);
+    std::istream* stream = set->stream();
+    
+    m_streams.insert(make_pair(stream, set));
 
-    StreamSet* set = new StreamSet(file, restricted_device, restricted_stream);
-    m_streams.push_back(set);
-
-    return *restricted_stream;
+    return *stream;
 }
 
 
 void FilenameSubsetStreamFactory::deallocate(std::istream& stream)
 {
-    for (unsigned int i=0; i<m_streams.size(); i++)
-    {
-        StreamSet* set = m_streams[i];
-        if (set && set->match(stream))
-        {
-            delete set;
-            m_streams[i] = NULL;
-            return;
-        }
-    }
+    Map::iterator iter = m_streams.find(&stream);
+    if (iter == m_streams.end())
+        throw pdal_error("incorrect stream deallocation");
+    
+    StreamSet* s = iter->second;
+    m_streams.erase(iter);
+    delete s;
 
-    throw pdal_error("incorrect stream deallocation");
+    return;
 }
 
 
