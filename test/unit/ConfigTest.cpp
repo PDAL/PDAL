@@ -35,7 +35,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 
-#include <pdal/pdal.hpp>
+#include <pdal/pdal_internal.hpp>
 #include <pdal/pdal_config.hpp>
 
 using namespace pdal;

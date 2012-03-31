@@ -24,7 +24,7 @@ set(PDAL_CPP "")
 #
 set(PDAL_BASE_HPP
   ${PDAL_HEADERS_DIR}/pdal_error.hpp
-  ${PDAL_HEADERS_DIR}/types.hpp
+  ${PDAL_HEADERS_DIR}/pdal_types.hpp
   ${PDAL_HEADERS_DIR}/Bounds.hpp
   ${PDAL_HEADERS_DIR}/Dimension.hpp
   ${PDAL_HEADERS_DIR}/Environment.hpp
@@ -413,8 +413,7 @@ list (APPEND PDAL_HPP ${PDAL_PLANG_HPP} )
 #
 
 set(PDAL_CONFIG_HPP
-  ${PDAL_HEADERS_DIR}/export.hpp
-  ${PDAL_HEADERS_DIR}/pdal.hpp
+  ${PDAL_HEADERS_DIR}/pdal_export.hpp
   ${PDAL_HEADERS_DIR}/pdal_internal.hpp
   ${PDAL_HEADERS_DIR}/pdal_config.hpp
   ${PDAL_HEADERS_DIR}/pdal_defines.h

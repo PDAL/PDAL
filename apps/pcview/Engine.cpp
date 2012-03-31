@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/pdal.hpp>
+#include <pdal/pdal_internal.hpp>
 
 #ifdef PDAL_PLATFORM_WIN32
 #include <windows.h>

@@ -31,7 +31,7 @@
 #ifndef _OCI_WRAPPER_H_INCLUDED
 #define _OCI_WRAPPER_H_INCLUDED
 
-#include <pdal/export.hpp>
+#include <pdal/pdal_export.hpp>
 
 // GDAL supporting types
 

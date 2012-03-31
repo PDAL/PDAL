@@ -35,7 +35,7 @@
 #ifndef INCLUDED_DRIVERS_LAS_VARIABLELENGTHRECORD_HPP
 #define INCLUDED_DRIVERS_LAS_VARIABLELENGTHRECORD_HPP
 
-#include <pdal/export.hpp>
+#include <pdal/pdal_export.hpp>
 
 #include <string>
 #include <vector>

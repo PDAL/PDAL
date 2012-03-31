@@ -39,7 +39,6 @@
 
 #include <pdal/Bounds.hpp>
 #include <boost/cstdint.hpp>
-#include <pdal/pdal.hpp>
 
 namespace pdal
 {

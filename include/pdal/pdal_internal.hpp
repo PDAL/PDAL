@@ -39,9 +39,9 @@
 
 #include <iostream>
 
-#include <pdal/export.hpp>
+#include <pdal/pdal_export.hpp>
 #include <pdal/pdal_defines.h>
-#include <pdal/types.hpp>
+#include <pdal/pdal_types.hpp>
 #include <pdal/pdal_error.hpp>
 
 

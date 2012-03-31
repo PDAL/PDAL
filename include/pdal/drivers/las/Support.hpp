@@ -35,7 +35,7 @@
 #ifndef INCLUDED_DRIVERS_LAS_SUPPORT_HPP
 #define INCLUDED_DRIVERS_LAS_SUPPORT_HPP
 
-#include <pdal/export.hpp>
+#include <pdal/pdal_export.hpp>
 
 #include <pdal/Schema.hpp>
 #include <pdal/Stage.hpp>
