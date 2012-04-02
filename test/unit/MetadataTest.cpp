@@ -50,10 +50,9 @@ BOOST_AUTO_TEST_SUITE(MetadataTest)
 BOOST_AUTO_TEST_CASE(test_construction)
 {
     
-    pdal::metadata::Entry m("test", "testNS");
+    pdal::metadata::Entry m("test");
     
     BOOST_CHECK_EQUAL(m.getName(), "test");
-    BOOST_CHECK_EQUAL(m.getNamespace(), "testNS");
     
     boost::uint32_t u32(32u);
     boost::int32_t i32(-32);
@@ -147,49 +146,12 @@ BOOST_AUTO_TEST_CASE(test_construction)
     return;
 }
 
-
-BOOST_AUTO_TEST_CASE(test_parent_child)
-{
-    pdal::metadata::Entry m1("m1","parent");
-    pdal::metadata::Entry m2("m2", "");
-    pdal::metadata::Entry m1prime("m1", "child");
-    
-    m1.createUUID();
-    m1prime.createUUID();
-    m1prime.setParent(m1.getUUID());
-    m1.setValue<boost::uint32_t>(1u);
-    m2.setValue<boost::int32_t>(1);
-    m1prime.setValue<std::string>("Some other metadata");
-    
-    pdal::Metadata b;
-    
-    b.addMetadata(m1);
-    b.addMetadata(m2);
-    b.addMetadata(m1prime);
-    
-    
-    pdal::metadata::Entry m11 = b.getMetadata("m1", "parent");
-    BOOST_CHECK_EQUAL(m11.getValue<boost::uint32_t>(), 1u);
-    
-    pdal::metadata::Entry m11prime = b.getMetadata("m1");
-    BOOST_CHECK_EQUAL(m11prime.getValue<std::string>(), "Some other metadata");
-    
-    pdal::metadata::Entry m22 = b.getMetadata("m2");
-    BOOST_CHECK_EQUAL(m22.cast<boost::uint32_t>(), 1u);
-    BOOST_CHECK_THROW(m22.getValue<boost::uint32_t>(), boost::bad_get);
-    
-    return;
-}
-
 BOOST_AUTO_TEST_CASE(test_metadata_copy)
 {
-    pdal::metadata::Entry m1("m1","parent");
-    pdal::metadata::Entry m2("m2", "");
-    pdal::metadata::Entry m1prime("m1", "child");
+    pdal::metadata::Entry m1("m1");
+    pdal::metadata::Entry m2("m2");
+    pdal::metadata::Entry m1prime("m1");
     
-    m1.createUUID();
-    m1prime.createUUID();
-    m1prime.setParent(m1.getUUID());
     m1.setValue<boost::uint32_t>(1u);
     m2.setValue<boost::int32_t>(1);
     m1prime.setValue<std::string>("Some other metadata");
@@ -203,10 +165,8 @@ BOOST_AUTO_TEST_CASE(test_metadata_copy)
     pdal::Metadata b2;
 
     b2.setMetadata(b.getMetadata());
-
-    pdal::metadata::Entry m11 = b2.getMetadata("m1", "parent");
-    BOOST_CHECK_EQUAL(m11.getValue<boost::uint32_t>(), 1u);
     
+    // Set will overwrite here
     pdal::metadata::Entry m11prime = b2.getMetadata("m1");
     BOOST_CHECK_EQUAL(m11prime.getValue<std::string>(), "Some other metadata");
     
@@ -219,13 +179,10 @@ BOOST_AUTO_TEST_CASE(test_metadata_copy)
 
 BOOST_AUTO_TEST_CASE(test_metadata_set)
 {
-    pdal::metadata::Entry m1("m1","parent");
-    pdal::metadata::Entry m2("m2", "");
-    pdal::metadata::Entry m1prime("m1", "child");
+    pdal::metadata::Entry m1("m1");
+    pdal::metadata::Entry m2("m2");
+    pdal::metadata::Entry m1prime("m1");
     
-    m1.createUUID();
-    m1prime.createUUID();
-    m1prime.setParent(m1.getUUID());
     m1.setValue<boost::uint32_t>(1u);
     m2.setValue<boost::int32_t>(1);
     m1prime.setValue<std::string>("Some other metadata");

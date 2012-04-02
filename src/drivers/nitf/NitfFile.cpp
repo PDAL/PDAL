@@ -294,7 +294,7 @@ void NitfFile::processTREs(int nTREBytes, const char *pszTREData, pdal::Metadata
         strncpy(key, pszTREData, 6);
         key[6] = 0;
 
-        metadata::Entry m(key, s_namespace + "." + parentkey);
+        metadata::Entry m(s_namespace + "." + parentkey+"."+key);
 
         const std::string value(pszTREData + 11);
         //std::vector<boost::uint8_t> data(nThisTRESize);
@@ -330,7 +330,7 @@ void NitfFile::processTREs_DES(NITFDES* dataSegment, pdal::Metadata& ms, const s
 
         const std::string value(pabyTREData + 11);
 
-        metadata::Entry m(key, s_namespace + "." + parentkey);
+        metadata::Entry m(s_namespace + "." + parentkey+"."+key);
         m.setValue<std::string>(value);
         ms.addMetadata(m);
 
@@ -354,7 +354,7 @@ void NitfFile::processMetadata(char** papszMetadata, pdal::Metadata& ms, const s
         const int sep = s.find('=');
         const std::string key = s.substr(5, sep-5);
         const std::string value = s.substr(sep+1, std::string::npos);
-        metadata::Entry m(key, s_namespace + "." + parentkey);
+        metadata::Entry m(s_namespace + "." + parentkey+"."+key);
         m.setValue<std::string>(value);
         ms.addMetadata(m);
     }
@@ -371,19 +371,19 @@ void NitfFile::processImageInfo(pdal::Metadata& ms, const std::string& parentkey
 
     std::stringstream value1;
     value1 << image->nRows;
-    metadata::Entry m1("NROWS", s_namespace + "." + parentkey);
+    metadata::Entry m1(s_namespace + "." + parentkey+".NROWS");
     m1.setValue<std::string>(value1.str());
     ms.addMetadata(m1);
 
     std::stringstream value2;
     value2 << image->nCols;
-    metadata::Entry m2("NCOLS", s_namespace + "." + parentkey);
+    metadata::Entry m2(s_namespace + "." + parentkey+".NCOLS");
     m2.setValue<std::string>(value2.str());
     ms.addMetadata(m2);
 
     std::stringstream value3;
     value3 << image->nBands;
-    metadata::Entry m3("NBANDS", s_namespace + "." + parentkey);
+    metadata::Entry m3(s_namespace + "." + parentkey+".NBANDS");
     m3.setValue<std::string>(value3.str());
     ms.addMetadata(m3);
 

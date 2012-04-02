@@ -43,6 +43,7 @@
 
 #include <boost/shared_array.hpp>
 #include <boost/variant.hpp>
+#include <boost/variant/recursive_variant.hpp>
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
@@ -64,6 +65,9 @@
 
 namespace pdal
 {
+
+// Forward decl for boost::recursive_variant 
+class Metadata;
 
 /// ByteArray simply wrapps a std::vector<boost::uint8_t> such that it can then 
 /// be dumped to an ostream in a base64 encoding. For now, it makes a copy of the data 
@@ -145,7 +149,9 @@ namespace metadata {
         /// A pdal::SpatialReference instance
         SpatialReference,
         /// A boost::uuids::uuid instance
-        UUID
+        UUID,
+        /// Another metadata entry
+        Metadata
     };
 
 
@@ -165,7 +171,8 @@ namespace metadata {
                             std::string, 
                             pdal::ByteArray, 
                             pdal::SpatialReference, 
-                            pdal::Bounds<double> > Variant;
+                            pdal::Bounds<double>,
+                            boost::recursive_wrapper<pdal::Metadata> > Variant;
 
 
 
@@ -192,9 +199,7 @@ public:
 */  
     /// Base constructor
     /// @param name entry name to use for this metadata entry
-    /// @param ns namespace to use for this metadata entry
-    Entry(   std::string const& name, 
-             std::string const& ns);
+    Entry(   std::string const& name);
 
     /// Copy constructor
     Entry(const Entry&);
@@ -241,30 +246,21 @@ public:
     /// @param name value to use for new name
     inline void setName(std::string const& name) { m_name = name; }
 
-/** @name entry name
-*/  
-    /// returns the name for the metadata entry
-    inline metadata::id const& getUUID() const { return m_uuid; }
-    
-    /// resets the id for the metadata entry
-    /// @param v value to use for new id
-    inline void setUUID(metadata::id const& v) { m_uuid = v; }
-
-    /// resets the id for the metadata entry
-    /// @param v value to use for new id
-    void setUUID(std::string const& v);
-
-    /// creates a random metadata::id for the entry
-    void createUUID();
-    
-/** @name entry namespace
-*/
-    /// returns the namespace for the metadata entry
-    inline std::string const& getNamespace() const { return m_namespace; }
-
-    /// resets the namespace for the metadata entry
-    /// @param ns value to use for new namespace
-    inline void setNamespace(std::string const& ns) { m_namespace = ns; }
+// /** @name entry name
+// */  
+//     /// returns the name for the metadata entry
+//     inline metadata::id const& getUUID() const { return m_uuid; }
+//     
+//     /// resets the id for the metadata entry
+//     /// @param v value to use for new id
+//     inline void setUUID(metadata::id const& v) { m_uuid = v; }
+// 
+//     /// resets the id for the metadata entry
+//     /// @param v value to use for new id
+//     void setUUID(std::string const& v);
+// 
+//     /// creates a random metadata::id for the entry
+//     void createUUID();
     
 /** @name entry attributes
 */
@@ -279,22 +275,6 @@ public:
     /// returns the attribute value for a given attribute key
     std::string getAttribute(std::string const& name) const;    
 
-/** @name Parent/child relationships
-*/
-    /// denotes the parent relationship of this instance to another 
-    /// with a given metadata::id
-    /// @param id the metadata::id of the parent dimension to this instance
-    inline void setParent( metadata::id const& id)
-    { 
-        m_parentDimensionID = id;
-    }
-    
-    /// @return the metadata::id of the parent metadata::Entry entry to this one.
-    inline metadata::id const& getParent( ) const
-    {
-        return m_parentDimensionID;
-    }
-
 /// @name Serialization
     boost::property_tree::ptree toPTree() const;
     
@@ -303,11 +283,8 @@ public:
 private:
     metadata::Variant m_variant;
     std::string m_name;
-    std::string m_namespace;
     metadata::Type m_type;
     metadata::MetadataAttributeM m_attributes;
-    metadata::id m_uuid;
-    metadata::id m_parentDimensionID;
     
 };
 
@@ -429,26 +406,23 @@ inline void metadata::Entry::setValue<boost::uuids::uuid>(boost::uuids::uuid con
 
 
     struct name{};
-    struct ns{};
     struct index{};
-    struct uid{};
-
+    // struct uid{};
+// 
     typedef boost::multi_index::multi_index_container<
       metadata::Entry,
       boost::multi_index::indexed_by<
 
         boost::multi_index::random_access<boost::multi_index::tag<index> >,
         // sort by less<string> on GetName
-        boost::multi_index::hashed_non_unique<boost::multi_index::tag<name>, boost::multi_index::const_mem_fun<metadata::Entry,std::string const&,&metadata::Entry::getName> >,
-        boost::multi_index::hashed_non_unique<boost::multi_index::tag<ns>, boost::multi_index::const_mem_fun<metadata::Entry,std::string const&,&metadata::Entry::getNamespace> >,
-        boost::multi_index::hashed_non_unique<boost::multi_index::tag<uid>, boost::multi_index::const_mem_fun<metadata::Entry,metadata::id const&,&metadata::Entry::getUUID> >
+        boost::multi_index::hashed_unique<boost::multi_index::tag<name>, boost::multi_index::const_mem_fun<metadata::Entry,std::string const&,&metadata::Entry::getName> >
+        // boost::multi_index::hashed_non_unique<boost::multi_index::tag<uid>, boost::multi_index::const_mem_fun<metadata::Entry,metadata::id const&,&metadata::Entry::getUUID> >
           >
     > EntryMap;
 
     typedef EntryMap::index<name>::type index_by_name;
-    typedef EntryMap::index<ns>::type index_by_namespace;
     typedef EntryMap::index<index>::type index_by_index;
-    typedef EntryMap::index<uid>::type index_by_uid;
+    // typedef EntryMap::index<uid>::type index_by_uid;
 
     
 }
@@ -483,24 +457,23 @@ public:
     /// add a Metadata entry to the PointBuffer's metadata map
     void addMetadata(pdal::metadata::Entry const& entry);
 
-    /*! add a new value T metadata for the given metadata::Entry key and namespace. 
+    /*! add a new value T metadata for the given metadata::Entry key. 
         \param name metadata::Entry entry key to use
-        \param ns namespace to use for metadata::Entry entry.
         \param value the T value to set.
     */   
-    template<class T> void addMetadata(std::string const& name, T value, std::string const& ns="");
+    template<class T> void addMetadata(std::string const& name, T value);
 
     
-    /// @return a const& to a metadata::Entry entry with the given name and/or namespace
+    /// @return a const& to a metadata::Entry entry with the given name.
     /// If none is found, pdal::metadata_not_found is thrown.
     /// @param name name to use when searching
     /// @param ns to use when searching for metadata entry
-    metadata::Entry const& getMetadata(std::string const& name, std::string const& ns="") const;
+    metadata::Entry const& getMetadata(std::string const& name) const;
     
-    /// @return a const& to metadata::Entry entry with given metadata::id. 
-    /// If none is found, pdal::metadata_not_found is thrown.
-    /// @param v metadata::id to search for.
-    metadata::Entry const& getMetadata(metadata::id const& v) const;
+    // /// @return a const& to metadata::Entry entry with given metadata::id. 
+    // /// If none is found, pdal::metadata_not_found is thrown.
+    // /// @param v metadata::id to search for.
+    // metadata::Entry const& getMetadata(metadata::id const& v) const;
 
     /// @return a const& to metadata::Entry with the given index. If the 
     /// index is out of range, pdal::metadata_not_found is thrown.
@@ -509,29 +482,18 @@ public:
 
     /// @return the number of metadata::Entry entries in the map
     inline metadata::EntryMap::size_type size() const { return m_metadata.get<metadata::index>().size(); }
-
-    /// @return the number of metadata::Entry entries in the map 
-    /// for a given namespace
-    metadata::EntryMap::size_type size(std::string const& ns) const;
-    
-    std::vector<metadata::Entry> getEntriesForNamespace(std::string const& ns) const;
     
     /// @return a EntryMap copy to use for setting the metadata::Entry on another 
     /// PointBuffer with setMetadata()
     /// @param index position index to return.
     inline metadata::EntryMap const& getMetadata() const { return m_metadata; }
 
-    /// @return a boost::optional-wrapped const& to a metadata::Entry with the given name 
-    /// and namespace. If no matching metadata entry is found, the optional will be empty.
+    /// @return a boost::optional-wrapped const& to a metadata::Entry with the given name
+    /// If no matching metadata entry is found, the optional will be empty.
     /// @param name name to use when searching
-    /// @param ns namespace to use when searching. If none is given, the first 
     /// matching metadata::Entry instance with name \b name is returned.
-    boost::optional<metadata::Entry const&> getMetadataOptional(std::string const& name, std::string const& ns="") const;
+    boost::optional<metadata::Entry const&> getMetadataOptional(std::string const& name) const;
 
-    /// @return a boost::optional-wrapped const& to a metadata::Entry with the given metadata::id.
-    /// If no matching dimension is found, the optional will be empty.
-    /// @param id id to use when searching
-    boost::optional<metadata::Entry const&> getMetadataOptional(metadata::id const& id) const;
     
     /// @return a boost::optional-wrapped const& to a metadata::Entry with the given
     /// index. If the index is out of range, the optional will be empty.
@@ -539,15 +501,13 @@ public:
     boost::optional<metadata::Entry const&> getMetadataOptional(std::size_t index) const;
 
     /*! overwrites an existing metadata::Entry with the same name as m
-        \param m the metadata::Entry instance that contains the name and namespace 
+        \param m the metadata::Entry instance that contains the name
         to overwrite in the PointBuffer.
         \verbatim embed:rst 
-        .. note::
+        .. warning::
                 
             If no namespace is given, the *first* metadata entry with a matching 
-            :cpp:func:`pdal::metadata::Entry::getName()` will be overwritten. To be 
-            sure, have set the namespace of the pdal::metadata::Entry using
-            :cpp:func:`pdal::metadata::Entry::setNamespace()` beforehand.
+            :cpp:func:`pdal::metadata::Entry::getName()` will be overwritten. 
 
         \endverbatim
     */    
@@ -555,10 +515,9 @@ public:
 
     /*! reset the value T metadata for the given metadata::Entry key and namespace. 
         \param name metadata::Entry entry key to use
-        \param ns namespace to use for metadata::Entry entry.
         \param value the T value to set.
     */   
-    template<class T> void setMetadata(std::string const& name, T value, std::string const& ns="");
+    template<class T> void setMetadata(std::string const& name, T value);
 
     
     /// sets the EntryMap for the PointBuffer
@@ -577,18 +536,18 @@ private:
 };
 
 template <class T>
-inline void Metadata::addMetadata(std::string const& name, T value, std::string const& ns)
+inline void Metadata::addMetadata(std::string const& name, T value)
 {
-    metadata::Entry m(name, ns);
+    metadata::Entry m(name);
     m.setValue<T>(value);
     addMetadata(m);
     return;
 }
 
 template <class T>
-inline void Metadata::setMetadata(std::string const& name, T value, std::string const& ns)
+inline void Metadata::setMetadata(std::string const& name, T value)
 {
-    metadata::Entry m(name, ns);
+    metadata::Entry m(name);
     m.setValue<T>(value);
     setMetadata(m);
     return;
@@ -603,7 +562,6 @@ namespace std
 ///
 extern PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const pdal::ByteArray& output);
 extern PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const pdal::Metadata& metadata);
-
 }
 
 #endif

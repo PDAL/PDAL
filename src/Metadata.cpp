@@ -42,9 +42,9 @@
 #include <string>
 
 #include <boost/algorithm/string.hpp>
-#include <boost/uuid/string_generator.hpp>
-#include <boost/uuid/random_generator.hpp>
-#include <boost/uuid/uuid_io.hpp>
+// #include <boost/uuid/string_generator.hpp>
+// #include <boost/uuid/random_generator.hpp>
+// #include <boost/uuid/uuid_io.hpp>
 
 #include <boost/property_tree/json_parser.hpp>
 
@@ -53,14 +53,10 @@ namespace pdal
 {
 
 namespace metadata {
-    
-Entry::Entry( std::string const& name, 
-                    std::string const& ns) 
+
+Entry::Entry( std::string const& name) 
     : m_name(name)
-    , m_namespace(ns) 
     , m_type(metadata::String)
-    , m_uuid(boost::uuids::nil_uuid())
-    , m_parentDimensionID(boost::uuids::nil_uuid())
 {
     return;
 }
@@ -69,10 +65,7 @@ Entry::Entry( std::string const& name,
 Entry::Entry(const Entry& other)
     : m_variant(other.m_variant)
     , m_name(other.m_name)
-    , m_namespace(other.m_namespace)
     , m_type(other.m_type)
-    , m_uuid(other.m_uuid)
-    , m_parentDimensionID(other.m_parentDimensionID)
 {
     return;
 }
@@ -107,28 +100,16 @@ std::string Entry::getAttribute(std::string const& name) const
         return std::string("");
 }
 
-void Entry::setUUID(std::string const& id)
-{
-    boost::uuids::string_generator gen;
-    m_uuid = gen(id);
-}
-
-void Entry::createUUID()
-{
-    m_uuid = boost::uuids::random_generator()();
-}
 
 boost::property_tree::ptree Entry::toPTree() const
 {
     using boost::property_tree::ptree;
     ptree dim;
     dim.put("name", getName());
-    dim.put("namespace", getNamespace());
     std::ostringstream oss;
     oss << m_variant;
     dim.put("value", oss.str());
     dim.put("type", getType());
-    dim.put("uid", getUUID());
     
     for (metadata::MetadataAttributeM::const_iterator i = m_attributes.begin(); i != m_attributes.end(); ++i)
     {
@@ -137,7 +118,6 @@ boost::property_tree::ptree Entry::toPTree() const
         dim.add_child("attribute", at);
     }
     
-    dim.put("parent", getParent());
     return dim;
 }
 
@@ -151,6 +131,9 @@ std::ostream& operator<<(std::ostream& ostr, const Entry& metadata)
 
 } // metadata 
 
+
+
+
 void Metadata::addMetadata(metadata::Entry const& m)
 {
     metadata::index_by_name& index = m_metadata.get<metadata::name>();
@@ -158,143 +141,27 @@ void Metadata::addMetadata(metadata::Entry const& m)
     std::pair<metadata::index_by_name::iterator, bool> q = index.insert(m);
     if (!q.second) 
     {
-        std::ostringstream oss;
-        oss << "Could not insert into schema index because of " << q.first->getName();
-        throw metadata_error(oss.str());
+        index.replace(q.first, m);
     }
 
     return;
 }
 
 
-metadata::Entry const& Metadata::getMetadata(std::string const& t, std::string const& ns) const
+metadata::Entry const& Metadata::getMetadata(std::string const& t) const
 {
     metadata::index_by_name const& name_index = m_metadata.get<metadata::name>();
     metadata::index_by_name::const_iterator it = name_index.find(t);
     
-    metadata::index_by_name::size_type count = name_index.count(t);
-
+    if (it != name_index.end()) {
+        return *it;
+    }
+    
     std::ostringstream oss;
     oss << "Entry with name '" << t << "' not found, unable to Metadata::getMetadata";
 
-    if (it != name_index.end()) {
-        
-        if (ns.size())
-        {
-            while (it != name_index.end())
-            {
-                if (boost::equals(ns, it->getNamespace()))
-                    return *it;
-                ++it;
-            }
-            
-        } 
-        
-        if (count > 1) {
+    throw metadata_not_found(oss.str());
 
-            std::pair<metadata::index_by_name::const_iterator, metadata::index_by_name::const_iterator> ret = name_index.equal_range(t);
-            boost::uint32_t num_parents(0);
-            boost::uint32_t num_children(0);
-            std::map<metadata::id, metadata::id> relationships;
-            
-            // Test to make sure that the number of parent dimensions all with 
-            // the same name is equal to only 1. If there are multiple 
-            // dimensions with the same name, but no relationships defined, 
-            // we are in an error condition
-            for (metadata::index_by_name::const_iterator  o = ret.first; o != ret.second; ++o)
-            {
-                // Put a map together that maps parents to children that 
-                // we are going to walk to find the very last child in the 
-                // graph.
-                std::pair<metadata::id, metadata::id> p( o->getParent(), o->getUUID());
-                relationships.insert(p);
-                
-                // The parent dimension should have a nil parent of its own.
-                // nil_uuid is the default parent of all dimensions as the y
-                // are created
-                if (o->getParent().is_nil()) 
-                {
-                    num_parents++;
-                }
-                else
-                {
-                    num_children++;
-                }
-                
-            }
-            
-            if (num_parents != 1)
-            {
-                std::ostringstream oss;
-                
-                oss << "PointBuffer has multiple dimensions with name '" << t << "', but "
-                       "their parent/child relationships are not coherent. Multiple "
-                       "parents are present.";
-                
-                throw multiple_parent_metadata(oss.str());
-            }
-            
-            metadata::id parent = boost::uuids::nil_uuid();
-            
-            // Starting at the parent (nil uuid), walk the child/parent graph down to the 
-            // end.  When we're done finding dimensions, what's left is the child 
-            // at the end of the graph.
-            std::map<metadata::id, metadata::id>::const_iterator p = relationships.find(parent);
-            pdal::metadata::id child;
-            while (p != relationships.end())
-            {
-                child = p->second;
-                p = relationships.find(p->second);
-            }
-            metadata::index_by_uid::const_iterator pi = m_metadata.get<metadata::uid>().find(child);
-            if (pi != m_metadata.get<metadata::uid>().end())
-            {
-                return *pi;
-            } 
-            else 
-            {
-                std::ostringstream errmsg;
-                errmsg << "Unable to fetch subjugate metadata entry with id '" << child << "' in PointBuffer";
-                throw metadata_not_found(errmsg.str());
-            }
-        }
-        return *it;
-    } else {
-        boost::uuids::uuid ps1;
-        try
-        {
-            boost::uuids::string_generator gen;
-            ps1 = gen(t);
-        } catch (std::runtime_error&)
-        {
-            // invalid string for uuid
-            throw metadata_not_found(oss.str());
-        }
-
-        metadata::index_by_uid::const_iterator i = m_metadata.get<metadata::uid>().find(ps1);
-
-        if (i != m_metadata.get<metadata::uid>().end())
-        {
-            if (ns.size())
-            {
-                while (i != m_metadata.get<metadata::uid>().end())
-                {
-                    if (boost::equals(ns, i->getNamespace()))
-                        return *i;
-                    ++i;
-                }
-            
-            }
-            
-            return *i;
-        } else 
-        {
-            oss.str("");
-            oss << "Entry with name '" << t << "' not found, unable to Metadata::getMetadata";
-            throw metadata_not_found(oss.str());
-        }
-
-    }
 
 }
 
@@ -320,40 +187,39 @@ boost::optional<metadata::Entry const&> Metadata::getMetadataOptional(std::size_
     }
 }
 
-metadata::Entry const& Metadata::getMetadata(metadata::id const& t) const
+// metadata::Entry const& Metadata::getMetadata(metadata::id const& t) const
+// {
+//     metadata::index_by_uid::const_iterator it = m_metadata.get<metadata::uid>().find(t);
+// 
+//     if (it != m_metadata.get<metadata::uid>().end())
+//     {
+//         return *it;
+//     }    
+//     
+//     std::ostringstream oss;
+//     oss << "getMetadata: metadata entry not found with uuid '" << boost::lexical_cast<std::string>(t) << "'";
+//     throw metadata_not_found(oss.str());
+// }
+// 
+// boost::optional<metadata::Entry const&> Metadata::getMetadataOptional(metadata::id const& t) const
+// {
+//     try
+//     {
+//         metadata::Entry const& m = getMetadata(t);
+//         return boost::optional<metadata::Entry const&>(m);
+//     } catch (pdal::metadata_not_found&)
+//     {
+//         return boost::optional<metadata::Entry const&>();
+//     }
+// }
+
+
+boost::optional<metadata::Entry const&> Metadata::getMetadataOptional(std::string const& t) const
 {
-    metadata::index_by_uid::const_iterator it = m_metadata.get<metadata::uid>().find(t);
 
-    if (it != m_metadata.get<metadata::uid>().end())
-    {
-        return *it;
-    }    
-    
-    std::ostringstream oss;
-    oss << "getMetadata: metadata entry not found with uuid '" << boost::lexical_cast<std::string>(t) << "'";
-    throw metadata_not_found(oss.str());
-
-}
-
-boost::optional<metadata::Entry const&> Metadata::getMetadataOptional(metadata::id const& t) const
-{
     try
     {
         metadata::Entry const& m = getMetadata(t);
-        return boost::optional<metadata::Entry const&>(m);
-    } catch (pdal::metadata_not_found&)
-    {
-        return boost::optional<metadata::Entry const&>();
-    }
-}
-
-
-boost::optional<metadata::Entry const&> Metadata::getMetadataOptional(std::string const& t, std::string const& ns) const
-{
-
-    try
-    {
-        metadata::Entry const& m = getMetadata(t, ns);
         return boost::optional<metadata::Entry const&>(m);
     } catch (pdal::metadata_not_found&)
     {
@@ -372,11 +238,11 @@ bool Metadata::setMetadata(metadata::Entry const& m)
     if (it != name_index.end()) {
         while (it != name_index.end())
         {
-            if (boost::equals(m.getNamespace(), it->getNamespace()))
-            {
+            // if (boost::equals(m.getNamespace(), it->getNamespace()))
+            // {
                 name_index.replace(it, m);
                 return true;
-            }
+            // }
             ++it;
         }
     } else {
@@ -420,40 +286,6 @@ Metadata Metadata::operator+(const Metadata& rhs) const
     return output;
 }
 
-std::vector<metadata::Entry> Metadata::getEntriesForNamespace(std::string const& ns) const
-{
-    std::vector<metadata::Entry> output;
-
-    metadata::index_by_namespace const& idx = m_metadata.get<metadata::ns>();
-    metadata::index_by_namespace::iterator it = idx.find(ns);
-
-    while (it != idx.end())
-    {
-        output.push_back(*it);
-        ++it;
-    }
-
-    return output;
-}
-
-metadata::EntryMap::size_type Metadata::size(std::string const& ns) const
-{
-
-    std::vector<metadata::Entry> output;
-
-    metadata::index_by_namespace const& idx = m_metadata.get<metadata::ns>();
-    metadata::index_by_namespace::iterator it = idx.find(ns);
-    metadata::index_by_namespace::size_type i(0);
-    
-    while (it != idx.end())
-    {
-        ++i;
-        ++it;
-    }
-
-    return i;
-}
-
 
 boost::property_tree::ptree Metadata::toPTree() const
 {
@@ -491,5 +323,7 @@ namespace std
 
         boost::property_tree::write_json(ostr, tree);
         return ostr;
-    }    
+    }
+
+    
 }

@@ -73,10 +73,9 @@ BOOST_AUTO_TEST_CASE(test_one)
         /////////////////////////////////////////////////BOOST_CHECK_EQUAL(metadatums.size(), 80u);
         
         
-        pdal::metadata::Entry const& m = metadata.getMetadata("FDT", "drivers.nitf.reader.FH");
+        pdal::metadata::Entry const& m = metadata.getMetadata("drivers.nitf.reader.FH.FDT");
 
-        BOOST_CHECK_EQUAL(m.getName(), "FDT");
-        BOOST_CHECK_EQUAL(m.getNamespace(), "drivers.nitf.reader.FH");
+        BOOST_CHECK_EQUAL(m.getName(), "drivers.nitf.reader.FH.FDT");
 
         const std::string s(m.getValue<std::string>());
         BOOST_CHECK_EQUAL(s, "20120323002946");
