@@ -262,6 +262,10 @@ Reader* PipelineReader::parseElement_Reader(const boost::property_tree::ptree& t
             Option option = parseElement_Option(subtree);
             options.add(option);
         }
+        else if (name == "Metadata")
+        {
+            // FIXME ignored for now
+        }        
         else
         {
             context.addUnknown(name);
@@ -308,6 +312,10 @@ Filter* PipelineReader::parseElement_Filter(const boost::property_tree::ptree& t
         {
             Option option = parseElement_Option(subtree);
             options.add(option);
+        }
+        else if (name == "Metadata")
+        {
+            // FIXME: ignored
         }
         else if (name == "Filter" || name == "MultiFilter" || name == "Reader")
         {
@@ -360,6 +368,10 @@ MultiFilter* PipelineReader::parseElement_MultiFilter(const boost::property_tree
             Option option = parseElement_Option(subtree);
             options.add(option);
         }
+        else if (name == "Metadata")
+        {
+            // FIXME: ignored
+        }        
         else if (name == "Filter" || name == "MultiFilter" || name == "Reader")
         {
             context.addStage();
@@ -440,6 +452,10 @@ Writer* PipelineReader::parseElement_Writer(const boost::property_tree::ptree& t
         {
             Option option = parseElement_Option(subtree);
             options.add(option);
+        }
+        else if (name == "Metadata")
+        {
+            // FIXME
         }
         else if (name == "Filter" || name == "MultiFilter" || name == "Reader")
         {

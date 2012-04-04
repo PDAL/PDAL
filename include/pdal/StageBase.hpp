@@ -40,6 +40,7 @@
 #include <pdal/pdal_internal.hpp>
 #include <pdal/Log.hpp>
 #include <pdal/Options.hpp>
+#include <pdal/Metadata.hpp>
 
 #include <string>
 #include <vector>
@@ -222,6 +223,8 @@ public:
     /// @return null if it fails, else the previous stages.
     std::vector<Stage*> getPrevStages() const;
 
+    virtual Metadata getMetadata() const;    
+
 
 protected:
 
@@ -263,7 +266,9 @@ protected:
     /// @return a vector of StageBase pointers
     static std::vector<StageBase*> makeVector(const std::vector<Stage*>& src);
 
-
+    /// @return a modifiable reference to the metadata for the stage
+    Metadata& getMetadataRef() { return m_metadata; }
+    
 private:
     bool m_initialized;
     Options m_options;
@@ -275,6 +280,7 @@ private:
     std::vector<StageBase*> m_outputs;
     StageOperationType m_dimensionsType;
     LogPtr m_log;
+    Metadata m_metadata;
 
     StageBase& operator=(const StageBase& rhs); // not implemented
     StageBase(const StageBase&); // not implemented

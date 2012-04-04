@@ -143,20 +143,6 @@ void Stage::setSpatialReference(const SpatialReference& spatialReference)
     m_spatialReference = spatialReference;
 }
 
-Metadata Stage::getMetadata() const
-{
-    
-    try
-    {
-        Metadata const& m = getPrevStage().getMetadataRef();
-    
-        return m_metadata + m;
-    } catch (pdal::internal_error const&)
-    {
-        return m_metadata;
-    }
-}
-
 void Stage::setCoreProperties(const Stage& stage)
 {
     this->setSchema(stage.getSchema());

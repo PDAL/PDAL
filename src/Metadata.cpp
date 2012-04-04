@@ -66,6 +66,7 @@ Entry::Entry(const Entry& other)
     : m_variant(other.m_variant)
     , m_name(other.m_name)
     , m_type(other.m_type)
+    , m_attributes(other.m_attributes)
 {
     return;
 }
@@ -100,6 +101,35 @@ std::string Entry::getAttribute(std::string const& name) const
         return std::string("");
 }
 
+std::string Entry::getTypeName() const
+{
+    switch(getType())
+    {
+        case metadata::Boolean:
+            return std::string("boolean");
+        case metadata::SignedInteger:
+            return std::string("integer");
+        case metadata::UnsignedInteger:
+            return std::string("nonNegativeInteger");
+        case metadata::Float:
+            return std::string("float");
+        case metadata::Double:
+            return std::string("double");
+        case metadata::String:
+            return std::string("string");
+        case metadata::Bytes:
+            return std::string("base64Binary");
+        case metadata::Bounds:
+            return std::string("bounds");
+        case metadata::SpatialReference:
+            return std::string("spatialreference");
+        case metadata::UUID:
+            return std::string("uuid");
+        default:
+            return std::string("none");
+    }
+}
+
 
 boost::property_tree::ptree Entry::toPTree() const
 {
@@ -109,18 +139,40 @@ boost::property_tree::ptree Entry::toPTree() const
     std::ostringstream oss;
     oss << m_variant;
     dim.put("value", oss.str());
-    dim.put("type", getType());
+    dim.put("type", getTypeName());
     
     for (metadata::MetadataAttributeM::const_iterator i = m_attributes.begin(); i != m_attributes.end(); ++i)
     {
-        ptree at;
-        at.put(i->first, i->second);
-        dim.add_child("attribute", at);
+        ptree attribute;
+        attribute.put("value", i->second);
+        attribute.put("name", i->first);
+        dim.add_child("attribute", attribute);
     }
     
     return dim;
 }
 
+std::string Entry::to_xml()
+{
+    std::ostringstream oss;
+    
+    using boost::property_tree::ptree;
+    
+    ptree tree = toPTree();
+    
+    oss << "<Entry name=\"" << tree.get<std::string>("name") <<"\" type=\"" << tree.get<std::string>("type") <<"\"";
+    oss << ">";
+    
+    for (metadata::MetadataAttributeM::const_iterator i = m_attributes.begin(); i != m_attributes.end(); ++i)
+    {
+        oss <<"<Attribute name=\"" << i->first <<"\">" << i->second <<"</Attribute>";
+    }    
+
+    oss << "</Entry>";
+    return oss.str();
+    
+    
+}
 std::ostream& operator<<(std::ostream& ostr, const Entry& metadata)
 {
     ostr << metadata.getVariant() << std::endl;
@@ -186,32 +238,6 @@ boost::optional<metadata::Entry const&> Metadata::getMetadataOptional(std::size_
         return boost::optional<metadata::Entry const&>();
     }
 }
-
-// metadata::Entry const& Metadata::getMetadata(metadata::id const& t) const
-// {
-//     metadata::index_by_uid::const_iterator it = m_metadata.get<metadata::uid>().find(t);
-// 
-//     if (it != m_metadata.get<metadata::uid>().end())
-//     {
-//         return *it;
-//     }    
-//     
-//     std::ostringstream oss;
-//     oss << "getMetadata: metadata entry not found with uuid '" << boost::lexical_cast<std::string>(t) << "'";
-//     throw metadata_not_found(oss.str());
-// }
-// 
-// boost::optional<metadata::Entry const&> Metadata::getMetadataOptional(metadata::id const& t) const
-// {
-//     try
-//     {
-//         metadata::Entry const& m = getMetadata(t);
-//         return boost::optional<metadata::Entry const&>(m);
-//     } catch (pdal::metadata_not_found&)
-//     {
-//         return boost::optional<metadata::Entry const&>();
-//     }
-// }
 
 
 boost::optional<metadata::Entry const&> Metadata::getMetadataOptional(std::string const& t) const

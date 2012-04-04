@@ -148,6 +148,12 @@ const Options& StageBase::getOptions() const
 }
 
 
+Metadata StageBase::getMetadata() const
+{
+    return m_metadata;
+}
+
+
 Options& StageBase::getOptions()
 {
     return m_options;

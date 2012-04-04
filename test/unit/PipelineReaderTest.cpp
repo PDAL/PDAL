@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE(PipelineReaderTest_test1)
         PointBuffer data(schema, 2048);
         StageSequentialIterator* iter = stage->createSequentialIterator(data);
         boost::uint32_t np = iter->read(data);
-        BOOST_CHECK(np == 1065);
+        BOOST_CHECK_EQUAL(np, 1065);
 
         delete iter;
     }
@@ -91,7 +91,7 @@ BOOST_AUTO_TEST_CASE(PipelineReaderTest_test2)
         writerStage->initialize();
 
         const boost::uint64_t np = writerStage->write();
-        BOOST_CHECK(np == 1065);
+        BOOST_CHECK_EQUAL(np, 1065);
     }
 
     FileUtils::deleteFile(Support::datapath("pipeline/pdal-compressed.laz"));

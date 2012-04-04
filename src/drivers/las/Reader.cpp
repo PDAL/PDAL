@@ -397,7 +397,8 @@ void Reader::collectMetadata()
         entry.addAttribute("user_id", v.getUserId());
         entry.addAttribute("record_id", boost::lexical_cast<std::string>(v.getRecordId()));
         entry.addAttribute("description", v.getDescription());
-
+        
+        metadata.addMetadata(entry);
     }
     
 }

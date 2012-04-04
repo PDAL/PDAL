@@ -149,9 +149,7 @@ namespace metadata {
         /// A pdal::SpatialReference instance
         SpatialReference,
         /// A boost::uuids::uuid instance
-        UUID,
-        /// Another metadata entry
-        Metadata
+        UUID
     };
 
 
@@ -171,8 +169,7 @@ namespace metadata {
                             std::string, 
                             pdal::ByteArray, 
                             pdal::SpatialReference, 
-                            pdal::Bounds<double>,
-                            boost::recursive_wrapper<pdal::Metadata> > Variant;
+                            pdal::Bounds<double> > Variant;
 
 
 
@@ -218,6 +215,9 @@ public:
     /// @param t pdal::metadata::Type value for the entry
     inline void setType(metadata::Type t) { m_type = t; }
 
+    /// returns a std::string representation of the type
+    std::string getTypeName() const;
+
 /** @name entry value
 */  
     /// sets the pdal::metadata::Variant value for the entry
@@ -246,22 +246,6 @@ public:
     /// @param name value to use for new name
     inline void setName(std::string const& name) { m_name = name; }
 
-// /** @name entry name
-// */  
-//     /// returns the name for the metadata entry
-//     inline metadata::id const& getUUID() const { return m_uuid; }
-//     
-//     /// resets the id for the metadata entry
-//     /// @param v value to use for new id
-//     inline void setUUID(metadata::id const& v) { m_uuid = v; }
-// 
-//     /// resets the id for the metadata entry
-//     /// @param v value to use for new id
-//     void setUUID(std::string const& v);
-// 
-//     /// creates a random metadata::id for the entry
-//     void createUUID();
-    
 /** @name entry attributes
 */
     /// returns the list of attribute keys for the metadata entry
@@ -277,6 +261,10 @@ public:
 
 /// @name Serialization
     boost::property_tree::ptree toPTree() const;
+    
+    // Create a single entry, non-valid xml string to represent the Entry
+    std::string to_xml();
+
     
 /** @name private attributes
 */

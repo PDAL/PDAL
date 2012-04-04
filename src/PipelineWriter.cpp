@@ -42,6 +42,7 @@
 
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/optional.hpp>
+#include <boost/foreach.hpp>
 
 namespace pdal
 {
@@ -111,6 +112,56 @@ void PipelineWriter::write_option_ptree(boost::property_tree::ptree& tree, const
         ++iter;
     }
 
+    return;
+}
+
+
+void PipelineWriter::write_metadata_ptree(boost::property_tree::ptree& tree, const Metadata& mdata)
+{
+    using namespace boost;
+    
+    property_tree::ptree m_tree = mdata.toPTree();
+
+    property_tree::ptree::const_iterator iter = m_tree.begin();
+    
+    property_tree::ptree output;
+    
+    while (iter != m_tree.end())
+    {
+        if (iter->first != "entry")
+            throw pdal_error("malformed Metadata ptree");
+        const property_tree::ptree& e_tree = iter->second;
+
+        property_tree::ptree entry;
+
+        const std::string& name = e_tree.get_child("name").get_value<std::string>();
+        const std::string& value = e_tree.get_child("value").get_value<std::string>();
+        const std::string& type = e_tree.get_child("type").get_value<std::string>();
+        
+        entry.put_value(value);
+        entry.put("<xmlattr>.name", name);
+        entry.put("<xmlattr>.type", type);
+
+        std::pair<property_tree::ptree::const_assoc_iterator, property_tree::ptree::const_assoc_iterator> ret = e_tree.equal_range("attribute");
+
+        for (property_tree::ptree::const_assoc_iterator  o = ret.first; o != ret.second; ++o)
+        {
+            property_tree::ptree const& tree = o->second;
+            std::string const& name =  tree.get_child("name").get_value<std::string>();
+            std::string const& value =  tree.get_child("value").get_value<std::string>();
+
+            boost::property_tree::ptree a;
+            a.put_value(value);
+            a.put("<xmlattr>.name", name);            
+            entry.add_child("attribute", a);
+        }
+        
+        output.add_child("Entry", entry);
+        ++iter;
+    }
+    
+    tree.add_child("Metadata", output);
+    
     return;
 }
 
