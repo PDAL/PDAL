@@ -301,14 +301,25 @@ Metadata Metadata::operator+(const Metadata& rhs) const
     
     metadata::EntryMap const& idx = rhs.getMetadata();
     
-    metadata::index_by_index const& datums = idx.get<metadata::index>();
+    metadata::index_by_index const& that_datums = idx.get<metadata::index>();
     
-    for (metadata::index_by_index::const_iterator i = datums.begin();
-         i != datums.end();
+    for (metadata::index_by_index::const_iterator i = that_datums.begin();
+         i != that_datums.end();
          ++i)
     {
         output.addMetadata(*i);
     }
+
+    
+    metadata::index_by_index const& this_datums = m_metadata.get<metadata::index>();
+    
+    for (metadata::index_by_index::const_iterator i = this_datums.begin();
+         i != this_datums.end();
+         ++i)
+    {
+        output.addMetadata(*i);
+    }
+    
     return output;
 }
 
