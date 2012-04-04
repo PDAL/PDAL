@@ -138,13 +138,14 @@ void Reader::initialize()
 
     boost::uint64_t offset, length;
 
+    Metadata nitf_metadata;
     {
         NitfFile nitf(m_filename);
         nitf.open();
 
         nitf.getLasPosition(offset, length);
         
-        nitf.extractMetadata(getMetadataRef());
+        nitf.extractMetadata(nitf_metadata);
 
         nitf.close();
     }
@@ -153,6 +154,13 @@ void Reader::initialize()
 
     m_lasReader = new pdal::drivers::las::Reader(m_streamFactory);
     m_lasReader->initialize();
+    
+
+    Metadata LAS = m_lasReader->getMetadata();
+    
+    Metadata combined = nitf_metadata + LAS;
+    Metadata& ref = getMetadataRef();
+    ref = combined;
 
     setCoreProperties(*m_lasReader);
 

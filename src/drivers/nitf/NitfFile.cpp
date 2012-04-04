@@ -39,10 +39,12 @@
 
 #include <pdal/Metadata.hpp>
 
+#include <boost/algorithm/string.hpp>
+
 
 namespace pdal { namespace drivers { namespace nitf {
 
-static const std::string s_namespace("drivers.nitf.reader");
+
 
 
 // this is a copy of the GDAL function, because the GDAL function isn't exported
@@ -294,16 +296,22 @@ void NitfFile::processTREs(int nTREBytes, const char *pszTREData, pdal::Metadata
         strncpy(key, pszTREData, 6);
         key[6] = 0;
 
-        metadata::Entry m(s_namespace + "." + parentkey+"."+key);
+        metadata::Entry m(parentkey+"."+key);
 
-        const std::string value(pszTREData + 11);
+        // const std::string value(pszTREData + 11);
+
+        const std::string value(pszTREData, nThisTRESize+1);        
         //std::vector<boost::uint8_t> data(nThisTRESize);
         //boost::uint8_t* p = (boost::uint8_t*)(pszTREData + 11);
         //for (int i=0; i<nThisTRESize; i++) data[i] = p[i];
         //ByteArray value(data);
-        m.setValue<std::string>(value);
 
-        ms.addMetadata(m);
+        if (!boost::iequals(key, "DESDATA"))
+        {
+            metadata::Entry m(parentkey+"."+key);
+            m.setValue<std::string>(value);
+            ms.addMetadata(m);
+        }
 
         pszTREData += nThisTRESize + 11;
         nTREBytes -= (nThisTRESize + 11);
@@ -328,11 +336,14 @@ void NitfFile::processTREs_DES(NITFDES* dataSegment, pdal::Metadata& ms, const s
         strncpy(key, pabyTREData, 6);
         key[6] = 0;
 
-        const std::string value(pabyTREData + 11);
-
-        metadata::Entry m(s_namespace + "." + parentkey+"."+key);
-        m.setValue<std::string>(value);
-        ms.addMetadata(m);
+        const std::string value(pabyTREData, nThisTRESize+1);
+        
+        if (!boost::iequals(key, "DESDATA"))
+        {
+            metadata::Entry m(parentkey+"."+key);
+            m.setValue<std::string>(value);
+            ms.addMetadata(m);
+        }
 
         nOffset += 11 + nThisTRESize;
 
@@ -354,9 +365,14 @@ void NitfFile::processMetadata(char** papszMetadata, pdal::Metadata& ms, const s
         const int sep = s.find('=');
         const std::string key = s.substr(5, sep-5);
         const std::string value = s.substr(sep+1, std::string::npos);
-        metadata::Entry m(s_namespace + "." + parentkey+"."+key);
-        m.setValue<std::string>(value);
-        ms.addMetadata(m);
+
+        if (!boost::iequals(key, "DESDATA"))
+        {
+            metadata::Entry m(parentkey+"."+key);
+            m.setValue<std::string>(value);
+            ms.addMetadata(m);
+        }
+
     }
 
     return;
@@ -371,19 +387,19 @@ void NitfFile::processImageInfo(pdal::Metadata& ms, const std::string& parentkey
 
     std::stringstream value1;
     value1 << image->nRows;
-    metadata::Entry m1(s_namespace + "." + parentkey+".NROWS");
+    metadata::Entry m1(parentkey+".NROWS");
     m1.setValue<std::string>(value1.str());
     ms.addMetadata(m1);
 
     std::stringstream value2;
     value2 << image->nCols;
-    metadata::Entry m2(s_namespace + "." + parentkey+".NCOLS");
+    metadata::Entry m2(parentkey+".NCOLS");
     m2.setValue<std::string>(value2.str());
     ms.addMetadata(m2);
 
     std::stringstream value3;
     value3 << image->nBands;
-    metadata::Entry m3(s_namespace + "." + parentkey+".NBANDS");
+    metadata::Entry m3(parentkey+".NBANDS");
     m3.setValue<std::string>(value3.str());
     ms.addMetadata(m3);
 
