@@ -44,8 +44,6 @@ BOOST_AUTO_TEST_SUITE(PLangTest)
 
 BOOST_AUTO_TEST_CASE(PLangTest_basic)
 {
-    //pdal::plang::PythonEnvironment::startup();
-
     const char* source =
         "import numpy as np\n"
         "def yow(ins,outs):\n"
@@ -57,8 +55,6 @@ BOOST_AUTO_TEST_CASE(PLangTest_basic)
     pdal::plang::Invocation meth(script);
     meth.compile();
     meth.execute();
-
-    //pdal::plang::PythonEnvironment::shutdown();
 
     return;
 }
