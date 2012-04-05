@@ -332,6 +332,28 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_Pipeline)
     return;
 }
 
+BOOST_AUTO_TEST_CASE(PredicateFilterTest_Embed)
+{
+    Option option("filename", Support::datapath("plang/predicate-embed.xml"));
+    Options options(option);
+
+    pdal::drivers::pipeline::Reader reader(options);
+
+    reader.initialize();
+
+    {
+        const Schema& schema = reader.getSchema();
+        PointBuffer data(schema, 2048);
+        StageSequentialIterator* iter = reader.createSequentialIterator(data);
+        boost::uint32_t np = iter->read(data);
+        BOOST_CHECK(np == 1);
+
+        delete iter;
+    }
+
+    return;
+}
+
 
 BOOST_AUTO_TEST_SUITE_END()
 #endif
