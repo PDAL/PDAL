@@ -11,10 +11,10 @@
             lidar/lidar@lidar.hobu.biz/lidar
         </Option>
         <Option name="base_table_name">
-            SIMPLE_CLOUD
+            AUTZEN_BIG_CLOUD
         </Option>
         <Option name="block_table_name">
-            SIMPLE_BLOCKS
+            AUTZEN_BIG_BLOCKS
         </Option>
         <Option name="cloud_column_name">
             CLOUD
@@ -51,6 +51,9 @@
         <Option name="stream_output_precision">
             8
         </Option>
+        <Option name="disable_cloud_trigger">
+            true
+        </Option>
             <Filter type="filters.inplacereprojection">
                 <Option name="out_srs">
                     EPSG:4326
@@ -58,30 +61,30 @@
                 <Option name="scale_x">
                     0.0000001
                 </Option>
+                <Option name="offset_x">
+                    -180.0
+                </Option>                
                 <Option name="scale_y">
                     0.0000001
                 </Option>
                 <Filter type="filters.chipper">
                     <Option name="capacity">
-                        50
+                        25000
                     </Option>
                     <Filter type="filters.cache">
                         <Option name="max_cache_blocks">
                             1
                         </Option>
                         <Option name="cache_block_size">
-                            50
+                            25000
                         </Option>
                         <Reader type="drivers.las.reader">
-                                <Option name="filename">
-                                    ../1.2-with-color.las
-                                </Option>
-                                <Option name="spatialreference">
-                                    EPSG:2926
-                                </Option>
-                                <Option name="log">
-                                    oracle-pipeline-write.log
-                                </Option>    
+                            <Option name="filename">
+                                ../autzen-colorized-1.2-3.las
+                            </Option>
+                            <Option name="spatialreference">
+                                EPSG:2926
+                            </Option>
                         </Reader>
                 </Filter>
             </Filter>

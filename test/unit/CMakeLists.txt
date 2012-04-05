@@ -12,50 +12,50 @@ SET (PDAL_UNITTEST_XMLSCHEMA_TEST XMLSchemaTest.cpp)
 endif()
 
 SET(PDAL_UNITTEST_TEST_SRC
-    pc2pcTest.cpp
-    pcinfoTest.cpp
-    pcpipelineTest.cpp
+    apps/pc2pcTest.cpp
+    apps/pcinfoTest.cpp
+    apps/pcpipelineTest.cpp
     BoundsTest.cpp
-    BPFTest.cpp
-    ByteSwapFilterTest.cpp
-    CacheFilterTest.cpp
-    ChipperTest.cpp
-    ColorFilterTest.cpp
-    ColorizationFilterTest.cpp
+    drivers/bpf/BPFTest.cpp
+    filters/ByteSwapFilterTest.cpp
+    filters/CacheFilterTest.cpp
+    filters/ChipperTest.cpp
+    filters/ColorFilterTest.cpp
+    filters/ColorizationFilterTest.cpp
     ConfigTest.cpp
-    CropFilterTest.cpp
-    DecimationFilterTest.cpp
+    filters/CropFilterTest.cpp
+    filters/DecimationFilterTest.cpp
     DimensionLayoutTest.cpp
     DimensionTest.cpp
     EnvironmentTest.cpp
-    FauxReaderTest.cpp
-    FauxWriterTest.cpp
+    drivers/faux/FauxReaderTest.cpp
+    drivers/faux/FauxWriterTest.cpp
     FileUtilsTest.cpp
-    InPlaceReprojectionFilterTest.cpp
-    LasReaderTest.cpp
-    LasWriterTest.cpp
+    filters/InPlaceReprojectionFilterTest.cpp
+    drivers/las/LasReaderTest.cpp
+    drivers/las/LasWriterTest.cpp
     MetadataTest.cpp
-    MosaicFilterTest.cpp
+    filters/MosaicFilterTest.cpp
     OptionsTest.cpp
     PipelineManagerTest.cpp
-    PipelineReaderTest.cpp
-    PipelineWriterTest.cpp
+    drivers/pipeline/PipelineReaderTest.cpp
+    drivers/pipeline/PipelineWriterTest.cpp
     PointBufferCacheTest.cpp
     PointBufferTest.cpp
-    QFITReaderTest.cpp
+    drivers/qfit/QFITReaderTest.cpp
     RangeTest.cpp
-    ReprojectionFilterTest.cpp
-    ScalingFilterTest.cpp
-    SelectorFilterTest.cpp
+    filters/ReprojectionFilterTest.cpp
+    filters/ScalingFilterTest.cpp
+    filters/SelectorFilterTest.cpp
     SchemaLayoutTest.cpp
     SchemaTest.cpp
     SpatialReferenceTest.cpp
     StageFactoryTest.cpp
-    StatsFilterTest.cpp
+    filters/StatsFilterTest.cpp
     StreamFactoryTest.cpp
     SupportTest.cpp
-    TerraSolidTest.cpp
-    TextWriterTest.cpp
+    drivers/terrasolid/TerraSolidTest.cpp
+    drivers/text/TextWriterTest.cpp
     UserCallbackTest.cpp
     UtilsTest.cpp
     VectorTest.cpp
@@ -63,9 +63,9 @@ SET(PDAL_UNITTEST_TEST_SRC
     )
 
 set(PDAL_PLANG_TEST_SRC
-    PLangTest.cpp
-    PredicateFilterTest.cpp
-    ProgrammableFilterTest.cpp
+    plang/PLangTest.cpp
+    plang/PredicateFilterTest.cpp
+    plang/ProgrammableFilterTest.cpp
 )
 
 SET(PDAL_UNITTEST_TEST_INC
@@ -84,7 +84,7 @@ SET(PDAL_UNITTEST_CONFIG_INC
 
 
 if (WITH_ORACLE)
-    set(PDAL_OCI_TEST_CPP OCITest.cpp)
+    set(PDAL_OCI_TEST_CPP drivers/oci/OCITest.cpp)
 
     FOREACH(file ${PDAL_OCI_TEST_CPP})
             SET(PDAL_UNITTEST_TEST_SRC "${PDAL_UNITTEST_TEST_SRC};${file}" CACHE INTERNAL "source files for test")
@@ -95,8 +95,8 @@ endif (WITH_ORACLE)
 if (WITH_GDAL)
     set(PDAL_GDAL_TEST_CPP
         GDALUtilsTest.cpp
-        NitfReaderTest.cpp
-        NitfWriterTest.cpp
+        drivers/nitf/NitfReaderTest.cpp
+        drivers/nitf/NitfWriterTest.cpp
         )
 
     FOREACH(file ${PDAL_GDAL_TEST_CPP})
@@ -159,23 +159,8 @@ else()
     endif()
 endif()
 
-if(LIBLAS_FOUND)
+
 	TARGET_LINK_LIBRARIES(${PDAL_UNIT_TEST} 
-		${PDAL_LIB_NAME}
-		${LIBLAS_LIBRARY}
-		${ZLIB_LIBRARIES}
-		${TIFF_LIBRARY}
-		${GEOTIFF_LIBRARY}
-		${GDAL_LIBRARY}
-		${SPATIALINDEX_LIBRARY} ${Boost_LIBRARIES})
-else()
-	TARGET_LINK_LIBRARIES(${PDAL_UNIT_TEST} 
-		${PDAL_LIB_NAME}
-		${ZLIB_LIBRARIES}
-		${TIFF_LIBRARY}
-		${GEOTIFF_LIBRARY}
-		${GDAL_LIBRARY}
-		${SPATIALINDEX_LIBRARY} ${Boost_LIBRARIES})
-endif()	
+		${PDAL_LIB_NAME})
 
 ADD_TEST(pdal_test ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/pdal_test ${PROJECT_SOURCE_DIR}/test/data)

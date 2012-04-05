@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Pipeline version="1.0">
+    <Writer type="drivers.las.writer">
+        <Option name="filename">
+            written-from-oracle.las
+        </Option>
+        <Option name="compression">
+            false
+        </Option>
+        <Option name="chunk_size">
+            80000
+        </Option>
+        <Reader type="drivers.oci.reader">
+            <Option name="query">
+                SELECT CLOUD FROM AUTZEN_BIG_CLOUD where ID=1
+            </Option>
+            <Option name="connection">
+                lidar/lidar@oracle.hobu.biz/lidar
+            </Option>
+            <Option name="debug">
+                true
+            </Option>
+        </Reader>
+    </Writer>
+</Pipeline>

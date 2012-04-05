@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Pipeline version="1.0">
+    <Writer type="drivers.las.writer">
+        <Option name="filename">
+            nitf.las
+        </Option>
+            <Reader type="drivers.nitf.reader">
+                <Option name="filename">
+                    ../08350_Baghdad2_Tile_000100_nga.ntf
+                </Option>              
+            </Reader>
+    </Writer>
+</Pipeline>

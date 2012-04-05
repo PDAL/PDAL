@@ -7,20 +7,25 @@
         <Option name="compression">
             false
         </Option>
-
+        <Option name="chunk_size">
+            80000
+        </Option>
                     
                     <Reader type="drivers.oci.reader">
                         <Option name="query">
-                            SELECT CLOUD FROM SIMPLE_CLOUD
+                            
+SELECT l."OBJ_ID", l."BLK_ID", l."BLK_EXTENT", l."BLK_DOMAIN",
+       l."PCBLK_MIN_RES", l."PCBLK_MAX_RES", l."NUM_POINTS",
+       l."NUM_UNSORTED_POINTS", l."PT_SORT_DIM", l."POINTS", b.cloud
+  FROM SIMPLE_BLOCKS l, SIMPLE_CLOUD b
+ WHERE b.id=1 and l.obj_id = b.id
+order by l.obj_id
                         </Option>
                         <Option name="connection">
                             lidar/lidar@oracle.hobu.biz/lidar
                         </Option>
                         <Option name="debug">
                             true
-                        </Option>
-                        <Option name="verbose">
-                            3
                         </Option>
                     </Reader>
 

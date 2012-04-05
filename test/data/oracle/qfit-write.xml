@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Pipeline version="1.0">
+    <Writer type="drivers.oci.writer">
+        <Option name="debug">
+            true
+        </Option>
+        <Option name="verbose">
+            1
+        </Option>
+        <Option name="connection">
+            lidar/lidar@oracle.hobu.biz/lidar
+        </Option>
+        <Option name="base_table_name">
+            QFIT_CLOUD
+        </Option>
+        <Option name="block_table_name">
+            QFIT_BLOCKS
+        </Option>
+        <Option name="cloud_column_name">
+            CLOUD
+        </Option>
+        <Option name="is3d">
+            false
+        </Option>
+        <Option name="solid">
+            false
+        </Option>
+        <Option name="overwrite">
+            false
+        </Option>
+        <Option name="srid">
+            4269
+        </Option>
+        <Option name="base_table_aux_columns">
+        </Option>
+        <Option name="base_table_aux_values">
+        </Option>
+        <Option name="base_table_boundary_column">
+        </Option>
+        <Option name="base_table_boundary_wkt">
+        </Option>
+        <Option name="pre_block_sql">
+        </Option>
+        <Option name="pre_sql">
+        </Option>
+        <Option name="post_block_sql">
+        </Option>
+        <Option name="capacity">
+            50
+        </Option>
+        <Option name="stream_output_precision">
+            8
+        </Option>
+  
+        <Filter type="filters.chipper">
+            <Option name="capacity">
+                50
+            </Option>
+            <Filter type="filters.cache">
+                <Option name="max_cache_blocks">
+                    1
+                </Option>
+                <Option name="cache_block_size">
+                    50
+                </Option>
+                <Reader type="drivers.qfit.reader">
+                    <Option name="filename">
+                        ../qfit/14-word.qi
+                    </Option>
+                    <Option name="debug">
+                        true
+                    </Option>
+                    <Option name="verbose">
+                        1
+                    </Option>
+                    <Option name="flip_coordinates">
+                        true
+                    </Option>
+                    <Option name="convert_z_units">
+                        true
+                    </Option>
+                    <Option name="spatialreference">
+                        EPSG:4269+3855
+                    </Option>
+                </Reader>
+            </Filter>
+        </Filter>
+    </Writer>
+</Pipeline>
