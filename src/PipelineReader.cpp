@@ -540,13 +540,11 @@ bool PipelineReader::parseElement_Pipeline(const boost::property_tree::ptree& tr
     return isWriter;
 }
 
-
-bool PipelineReader::readPipeline(const std::string& filename)
+bool PipelineReader::readPipeline(std::istream& input)
 {
-    m_inputXmlFile = filename;
 
     boost::property_tree::ptree tree;
-    boost::property_tree::xml_parser::read_xml(filename, tree,
+    boost::property_tree::xml_parser::read_xml(input, tree,
         boost::property_tree::xml_parser::no_comments);
 
     boost::optional<boost::property_tree::ptree> opt( tree.get_child_optional("Pipeline") );
@@ -558,6 +556,21 @@ bool PipelineReader::readPipeline(const std::string& filename)
     boost::property_tree::ptree subtree = opt.get();
 
     bool isWriter = parseElement_Pipeline(subtree);
+
+    return isWriter;
+    
+}
+
+
+bool PipelineReader::readPipeline(const std::string& filename)
+{
+    m_inputXmlFile = filename;
+
+    std::istream* input = FileUtils::openFile(filename);
+    
+    bool isWriter = readPipeline(*input);
+    
+    FileUtils::closeFile(input);
 
     m_inputXmlFile = "";
 

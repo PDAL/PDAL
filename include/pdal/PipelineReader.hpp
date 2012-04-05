@@ -63,7 +63,8 @@ public:
     // returns true iff the xml file is a writer pipeline (otherwise it is
     // assumed to be a reader pipeline)
     bool readPipeline(const std::string& filename);
-
+    bool readPipeline(std::istream& input);
+    
 private:
     typedef std::map<std::string, std::string> map_t;
     
