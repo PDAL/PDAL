@@ -39,6 +39,7 @@
 
 #include <pdal/Metadata.hpp>
 #include <pdal/drivers/las/Reader.hpp>
+#include <pdal/drivers/pipeline/Reader.hpp>
 #include "Support.hpp"
 
 #include <boost/property_tree/xml_parser.hpp>
@@ -207,10 +208,20 @@ BOOST_AUTO_TEST_CASE(test_metadata_stage)
     BOOST_CHECK(reader.getDescription() == "Las Reader");
     reader.initialize();
     
-    pdal::Metadata metadata = reader.getMetadata();
+    pdal::Metadata file_metadata = reader.getMetadata();
     
-    // std::cout << metadata << std::endl;
+    BOOST_CHECK_EQUAL(file_metadata.size(), 28);
+
+    pdal::Option option("filename", Support::datapath("pipeline/pipeline_metadata.xml"));
+    pdal::Options options(option);
+
+    pdal::drivers::pipeline::Reader pipeline(options);
+    pipeline.initialize();
+
+    pdal::Metadata pipeline_metadata = pipeline.getMetadata();
     
+    BOOST_CHECK_EQUAL(pipeline_metadata.size(), 28);
+
     return;
 }
 

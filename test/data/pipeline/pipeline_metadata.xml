@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<Pipeline version="1.0">
+    <Reader type="drivers.las.reader">
+        <Option name="filename">
+            utm15.las
+        </Option>
+    </Reader>
+</Pipeline>
