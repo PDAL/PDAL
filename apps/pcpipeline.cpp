@@ -68,6 +68,7 @@ private:
 PcPipeline::PcPipeline(int argc, char* argv[])
     : Application(argc, argv, "pcpipeline")
     , m_inputFile("")
+    , m_usestdin(false)
 {
     return;
 }
