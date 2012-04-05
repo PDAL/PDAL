@@ -6,7 +6,7 @@
             <Option name="function">fff</Option>
             <Reader type="drivers.las.reader">
                 <Option name="filename">
-                    1.2-with-color.las
+                    ../1.2-with-color.las
                 </Option>
             </Reader>
         </Filter>

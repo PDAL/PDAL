@@ -201,7 +201,7 @@ BOOST_AUTO_TEST_CASE(PipelineReaderTest_test4)
     const double postY = 41.577148;
     const double postZ = 16.000000;
     {
-        pdal::drivers::las::Reader reader(Support::datapath("pipeline/utm15.las"));
+        pdal::drivers::las::Reader reader(Support::datapath("utm15.las"));
         reader.initialize();
         const pdal::Bounds<double>& bounds = reader.getBounds();
         const pdal::Bounds<double> ref(preX, preY, preZ, preX, preY, preZ);

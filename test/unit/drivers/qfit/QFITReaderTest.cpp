@@ -179,6 +179,7 @@ BOOST_AUTO_TEST_CASE(test_pipeline)
     const boost::uint64_t np = manager.execute();
 
     BOOST_CHECK_EQUAL(np, 10314u);
+    FileUtils::deleteFile(Support::datapath("qfit/qfit-foo.las"));
 #endif
 
     return;
