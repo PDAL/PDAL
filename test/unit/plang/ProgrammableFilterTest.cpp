@@ -41,6 +41,7 @@
 #include <pdal/filters/Programmable.hpp>
 #include <pdal/drivers/faux/Reader.hpp>
 #include <pdal/drivers/faux/Writer.hpp>
+#include <pdal/drivers/pipeline/Reader.hpp>
 
 BOOST_AUTO_TEST_SUITE(ProgrammableFilterTest)
 
