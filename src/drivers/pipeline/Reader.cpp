@@ -111,7 +111,11 @@ void Reader::addDefaultDimensions()
 
 }
 
-
+Metadata Reader::getMetadata() const
+{
+    return m_stage->getMetadata();
+}
+    
 boost::property_tree::ptree Reader::toPTree() const
 {
     boost::property_tree::ptree tree = pdal::Reader::toPTree();

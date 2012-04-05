@@ -55,6 +55,8 @@ public:
     virtual const Options getDefaultOptions() const;
     virtual void addDefaultDimensions();
     
+    virtual Metadata getMetadata() const;
+    
     bool supportsIterator (StageIteratorType t) const;
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
     pdal::StageRandomIterator* createRandomIterator(PointBuffer& buffer) const;
