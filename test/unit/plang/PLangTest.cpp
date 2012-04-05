@@ -234,11 +234,11 @@ BOOST_AUTO_TEST_CASE(PLangTest_outs)
     double data[5] = {1.0, 2.0, 3.0, 4.0, 5.0};
     meth.extractResult("X", (boost::uint8_t*)data, 5, 8, pdal::dimension::Float, 8);
 
-    BOOST_CHECK(data[0] == 1.0);
-    BOOST_CHECK(data[1] == 1.0);
-    BOOST_CHECK(data[2] == 1.0);
-    BOOST_CHECK(data[3] == 1.0);
-    BOOST_CHECK(data[4] == 1.0);
+    BOOST_CHECK_CLOSE(data[0], 1.0, 0.00001);
+    BOOST_CHECK_CLOSE(data[1], 1.0, 0.00001);
+    BOOST_CHECK_CLOSE(data[2], 1.0, 0.00001);
+    BOOST_CHECK_CLOSE(data[3], 1.0, 0.00001);
+    BOOST_CHECK_CLOSE(data[4], 1.0, 0.00001);
 
     return;
 }
@@ -293,18 +293,18 @@ BOOST_AUTO_TEST_CASE(PLangTest_aliases)
         double data[5];
 
         meth.extractResult("Y", (boost::uint8_t*)data, 5, 8, pdal::dimension::Float, 8);
-        BOOST_CHECK(data[0] == 2.0);
-        BOOST_CHECK(data[1] == 4.0);
-        BOOST_CHECK(data[2] == 6.0);
-        BOOST_CHECK(data[3] == 8.0);
-        BOOST_CHECK(data[4] == 10.0);
+        BOOST_CHECK_CLOSE(data[0], 2.0, 0.00001);
+        BOOST_CHECK_CLOSE(data[1], 4.0, 0.00001);
+        BOOST_CHECK_CLOSE(data[2], 6.0, 0.00001);
+        BOOST_CHECK_CLOSE(data[3], 8.0, 0.00001);
+        BOOST_CHECK_CLOSE(data[4], 10.0, 0.00001);
 
         meth.extractResult("prefix.Y", (boost::uint8_t*)data, 5, 8, pdal::dimension::Float, 8);
-        BOOST_CHECK(data[0] == 2.0);
-        BOOST_CHECK(data[1] == 4.0);
-        BOOST_CHECK(data[2] == 6.0);
-        BOOST_CHECK(data[3] == 8.0);
-        BOOST_CHECK(data[4] == 10.0);
+        BOOST_CHECK_CLOSE(data[0], 2.0, 0.00001);
+        BOOST_CHECK_CLOSE(data[1], 4.0, 0.00001);
+        BOOST_CHECK_CLOSE(data[2], 6.0, 0.00001);
+        BOOST_CHECK_CLOSE(data[3], 8.0, 0.00001);
+        BOOST_CHECK_CLOSE(data[4], 10.0, 0.00001);
     }
 
     {
@@ -391,11 +391,11 @@ BOOST_AUTO_TEST_CASE(PLangTest_reentry)
 
         meth.extractResult("Y", (boost::uint8_t*)outdata1, 5, 8, pdal::dimension::Float, 8);
 
-        BOOST_CHECK(outdata1[0] == 1.0);
-        BOOST_CHECK(outdata1[1] == 2.0);
-        BOOST_CHECK(outdata1[2] == 3.0);
-        BOOST_CHECK(outdata1[3] == 4.0);
-        BOOST_CHECK(outdata1[4] == 5.0);
+        BOOST_CHECK_CLOSE(outdata1[0], 1.0, 0.00001);
+        BOOST_CHECK_CLOSE(outdata1[1], 2.0, 0.00001);
+        BOOST_CHECK_CLOSE(outdata1[2], 3.0, 0.00001);
+        BOOST_CHECK_CLOSE(outdata1[3], 4.0, 0.00001);
+        BOOST_CHECK_CLOSE(outdata1[4], 5.0, 0.00001);
     }
 
     {
@@ -405,11 +405,11 @@ BOOST_AUTO_TEST_CASE(PLangTest_reentry)
 
         meth.extractResult("Y", (boost::uint8_t*)outdata2, 5, 8, pdal::dimension::Float, 8);
 
-        BOOST_CHECK(outdata2[0] == 11.0);
-        BOOST_CHECK(outdata2[1] == 21.0);
-        BOOST_CHECK(outdata2[2] == 31.0);
-        BOOST_CHECK(outdata2[3] == 41.0);
-        BOOST_CHECK(outdata2[4] == 51.0);
+        BOOST_CHECK_CLOSE(outdata2[0], 11.0, 0.00001);
+        BOOST_CHECK_CLOSE(outdata2[1], 21.0, 0.00001);
+        BOOST_CHECK_CLOSE(outdata2[2], 31.0, 0.00001);
+        BOOST_CHECK_CLOSE(outdata2[3], 41.0, 0.00001);
+        BOOST_CHECK_CLOSE(outdata2[4], 51.0, 0.00001);
     }
 
     return;
