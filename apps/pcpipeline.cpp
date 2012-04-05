@@ -43,6 +43,8 @@
 
 #include "Application.hpp"
 
+#include <iostream>
+
 using namespace pdal;
 namespace po = boost::program_options;
 
@@ -59,6 +61,7 @@ private:
 
     std::string m_inputFile;
     std::string m_pipelineFile;
+    bool m_usestdin;
 };
 
 
@@ -72,7 +75,7 @@ PcPipeline::PcPipeline(int argc, char* argv[])
 
 void PcPipeline::validateSwitches()
 {
-    if (m_inputFile == "")
+    if (m_inputFile == "" && ! m_usestdin)
     {
         throw app_usage_error("input file name required");
     }
@@ -88,6 +91,7 @@ void PcPipeline::addSwitches()
     file_options->add_options()
         ("input,i", po::value<std::string>(&m_inputFile)->default_value(""), "input file name")
         ("pipeline-serialization", po::value<std::string>(&m_pipelineFile)->default_value(""), "")
+        ("stdin,s", po::value<bool>(&m_usestdin)->zero_tokens()->implicit_value(true), "Read pipeline XML from stdin")
         ;
 
     addSwitchSet(file_options);
@@ -97,7 +101,7 @@ void PcPipeline::addSwitches()
 
 int PcPipeline::execute()
 {
-    if (!FileUtils::fileExists(m_inputFile))
+    if (!FileUtils::fileExists(m_inputFile) && !m_usestdin)
     {
         throw app_runtime_error("file not found: " + m_inputFile);
     }
@@ -105,7 +109,13 @@ int PcPipeline::execute()
     pdal::PipelineManager manager;
 
     pdal::PipelineReader reader(manager, isDebug(), getVerboseLevel());
-    bool isWriter = reader.readPipeline(m_inputFile);
+    bool isWriter(false);
+    
+    if (!m_usestdin)
+        isWriter = reader.readPipeline(m_inputFile);
+    else
+        isWriter = reader.readPipeline(std::cin);
+        
     if (!isWriter)
         throw app_runtime_error("pipeline file is not a Writer");
 
