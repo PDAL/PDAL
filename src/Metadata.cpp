@@ -57,6 +57,7 @@ namespace metadata {
 Entry::Entry( std::string const& name) 
     : m_name(name)
     , m_type(metadata::String)
+    , m_description("")
 {
     return;
 }
@@ -67,10 +68,23 @@ Entry::Entry(const Entry& other)
     , m_name(other.m_name)
     , m_type(other.m_type)
     , m_attributes(other.m_attributes)
+    , m_description(other.m_description)
 {
     return;
 }
 
+Entry& Entry::operator=(const Entry& rhs)
+{
+    if (&rhs != this)
+    {   
+        m_variant = rhs.m_variant;
+        m_name = rhs.m_name;
+        m_description = rhs.m_description;
+        m_type = rhs.m_type;
+        m_attributes = rhs.m_attributes;
+    }
+    return *this;
+}
 
 std::vector<std::string> Entry::getAttributeNames() const
 {
@@ -130,6 +144,19 @@ std::string Entry::getTypeName() const
     }
 }
 
+boost::optional<Metadata const&> Entry::getMetadata() const
+{
+    if (m_metadata.get())
+        return boost::optional<Metadata const&>(*m_metadata.get());
+    else
+        return boost::optional<Metadata const&>();
+}
+
+void Entry::setMetadata(Metadata const& mdata) 
+{
+    metadata::MetadataPtr p = metadata::MetadataPtr(new Metadata(mdata));
+    m_metadata = p;
+}
 
 boost::property_tree::ptree Entry::toPTree() const
 {
@@ -186,7 +213,7 @@ std::ostream& operator<<(std::ostream& ostr, const Entry& metadata)
 
 
 
-void Metadata::addMetadata(metadata::Entry const& m)
+void Metadata::addEntry(metadata::Entry const& m)
 {
     metadata::index_by_name& index = m_metadata.get<metadata::name>();
 
@@ -200,7 +227,7 @@ void Metadata::addMetadata(metadata::Entry const& m)
 }
 
 
-metadata::Entry const& Metadata::getMetadata(std::string const& t) const
+metadata::Entry const& Metadata::getEntry(std::string const& t) const
 {
     metadata::index_by_name const& name_index = m_metadata.get<metadata::name>();
     metadata::index_by_name::const_iterator it = name_index.find(t);
@@ -217,7 +244,7 @@ metadata::Entry const& Metadata::getMetadata(std::string const& t) const
 
 }
 
-metadata::Entry const& Metadata::getMetadata(std::size_t t) const
+metadata::Entry const& Metadata::getEntry(std::size_t t) const
 {
     metadata::index_by_index const& idx = m_metadata.get<metadata::index>();
     
@@ -227,11 +254,11 @@ metadata::Entry const& Metadata::getMetadata(std::size_t t) const
     return idx.at(t);
 }
 
-boost::optional<metadata::Entry const&> Metadata::getMetadataOptional(std::size_t t) const
+boost::optional<metadata::Entry const&> Metadata::getEntryOptional(std::size_t t) const
 {
     try
     {
-        metadata::Entry const& m = getMetadata(t);
+        metadata::Entry const& m = getEntry(t);
         return boost::optional<metadata::Entry const&>(m);
     } catch (pdal::dimension_not_found&)
     {
@@ -240,12 +267,12 @@ boost::optional<metadata::Entry const&> Metadata::getMetadataOptional(std::size_
 }
 
 
-boost::optional<metadata::Entry const&> Metadata::getMetadataOptional(std::string const& t) const
+boost::optional<metadata::Entry const&> Metadata::getEntryOptional(std::string const& t) const
 {
 
     try
     {
-        metadata::Entry const& m = getMetadata(t);
+        metadata::Entry const& m = getEntry(t);
         return boost::optional<metadata::Entry const&>(m);
     } catch (pdal::metadata_not_found&)
     {
@@ -254,7 +281,7 @@ boost::optional<metadata::Entry const&> Metadata::getMetadataOptional(std::strin
 
 }
 
-bool Metadata::setMetadata(metadata::Entry const& m)
+bool Metadata::setEntry(metadata::Entry const& m)
 {
     metadata::index_by_name& name_index = m_metadata.get<metadata::name>();
     metadata::index_by_name::iterator it = name_index.find(m.getName());
@@ -307,7 +334,7 @@ Metadata Metadata::operator+(const Metadata& rhs) const
          i != that_datums.end();
          ++i)
     {
-        output.addMetadata(*i);
+        output.addEntry(*i);
     }
 
     
@@ -317,7 +344,7 @@ Metadata Metadata::operator+(const Metadata& rhs) const
          i != this_datums.end();
          ++i)
     {
-        output.addMetadata(*i);
+        output.addEntry(*i);
     }
     
     return output;

@@ -321,57 +321,57 @@ void Reader::collectMetadata()
     
     Metadata& metadata = getMetadataRef();
 
-    metadata.addMetadata<bool>(   "compressed", 
+    metadata.addEntry<bool>(   "compressed", 
                                 header.Compressed());
-    metadata.addMetadata<boost::uint32_t>("dataformatid", 
+    metadata.addEntry<boost::uint32_t>("dataformatid", 
                                         static_cast<boost::uint32_t>(header.getPointFormat()));
-    metadata.addMetadata<boost::uint32_t>("version_major", 
+    metadata.addEntry<boost::uint32_t>("version_major", 
                                         static_cast<boost::uint32_t>(header.GetVersionMajor()));
-    metadata.addMetadata<boost::uint32_t>("version_minor", 
+    metadata.addEntry<boost::uint32_t>("version_minor", 
                                         static_cast<boost::uint32_t>(header.GetVersionMinor()));
-    metadata.addMetadata<boost::uint32_t>("filesource_id", 
+    metadata.addEntry<boost::uint32_t>("filesource_id", 
                                         static_cast<boost::uint32_t>(header.GetFileSourceId()));
-    metadata.addMetadata<boost::uint32_t>("reserved", 
+    metadata.addEntry<boost::uint32_t>("reserved", 
                                         static_cast<boost::uint32_t>(header.GetReserved()));
-    metadata.addMetadata<boost::uuids::uuid>( "project_id", 
+    metadata.addEntry<boost::uuids::uuid>( "project_id", 
                                             header.GetProjectId());
-    metadata.addMetadata<std::string>("system_id", 
+    metadata.addEntry<std::string>("system_id", 
                                     header.GetSystemId(false));
-    metadata.addMetadata<std::string>("software_id", 
+    metadata.addEntry<std::string>("software_id", 
                                     header.GetSoftwareId(false));
-    metadata.addMetadata<boost::uint32_t>("creation_doy", 
+    metadata.addEntry<boost::uint32_t>("creation_doy", 
                                         static_cast<boost::uint32_t>(header.GetCreationDOY()));
-    metadata.addMetadata<boost::uint32_t>("creation_year", 
+    metadata.addEntry<boost::uint32_t>("creation_year", 
                                         static_cast<boost::uint32_t>(header.GetCreationYear()));
-    metadata.addMetadata<boost::uint32_t>("header_size", 
+    metadata.addEntry<boost::uint32_t>("header_size", 
                                         static_cast<boost::uint32_t>(header.GetHeaderSize()));
-    metadata.addMetadata<boost::uint32_t>("dataoffset", 
+    metadata.addEntry<boost::uint32_t>("dataoffset", 
                                         static_cast<boost::uint32_t>(header.GetDataOffset()));
-    metadata.addMetadata<double>( "scale_x", 
+    metadata.addEntry<double>( "scale_x", 
                                 header.GetScaleX());
-    metadata.addMetadata<double>( "scale_y", 
+    metadata.addEntry<double>( "scale_y", 
                                 header.GetScaleY());
-    metadata.addMetadata<double>( "scale_z", 
+    metadata.addEntry<double>( "scale_z", 
                                 header.GetScaleZ());
-    metadata.addMetadata<double>( "offset_x", 
+    metadata.addEntry<double>( "offset_x", 
                                 header.GetOffsetX());
-    metadata.addMetadata<double>( "offset_y", 
+    metadata.addEntry<double>( "offset_y", 
                                 header.GetOffsetY());
-    metadata.addMetadata<double>( "offset_z", 
+    metadata.addEntry<double>( "offset_z", 
                                 header.GetOffsetZ());
-    metadata.addMetadata<double>( "minx", 
+    metadata.addEntry<double>( "minx", 
                                 header.GetMinX());
-    metadata.addMetadata<double>( "miny", 
+    metadata.addEntry<double>( "miny", 
                                 header.GetMinY());
-    metadata.addMetadata<double>( "minz", 
+    metadata.addEntry<double>( "minz", 
                                 header.GetMinZ());
-    metadata.addMetadata<double>( "maxx", 
+    metadata.addEntry<double>( "maxx", 
                                 header.GetMaxX());
-    metadata.addMetadata<double>( "maxy", 
+    metadata.addEntry<double>( "maxy", 
                                 header.GetMaxY());
-    metadata.addMetadata<double>( "maxz", 
+    metadata.addEntry<double>( "maxz", 
                                 header.GetMaxZ());
-    metadata.addMetadata<boost::uint32_t>("count", 
+    metadata.addEntry<boost::uint32_t>("count", 
                                         header.GetPointRecordsCount());
 
 
@@ -398,7 +398,7 @@ void Reader::collectMetadata()
         entry.addAttribute("record_id", boost::lexical_cast<std::string>(v.getRecordId()));
         entry.addAttribute("description", v.getDescription());
         
-        metadata.addMetadata(entry);
+        metadata.addEntry(entry);
     }
     
 }

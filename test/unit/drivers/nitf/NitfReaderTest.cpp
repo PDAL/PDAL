@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE(test_one)
         /////////////////////////////////////////////////BOOST_CHECK_EQUAL(metadatums.size(), 80u);
         
         
-        pdal::metadata::Entry const& m = metadata.getMetadata("FH.FDT");
+        pdal::metadata::Entry const& m = metadata.getEntry("FH.FDT");
 
         BOOST_CHECK_EQUAL(m.getName(), "FH.FDT");
 

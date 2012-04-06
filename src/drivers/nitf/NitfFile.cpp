@@ -308,9 +308,7 @@ void NitfFile::processTREs(int nTREBytes, const char *pszTREData, pdal::Metadata
 
         if (!boost::iequals(key, "DESDATA"))
         {
-            metadata::Entry m(parentkey+"."+key);
-            m.setValue<std::string>(value);
-            ms.addMetadata(m);
+            ms.addEntry<std::string>(parentkey+"."+key, value);
         }
 
         pszTREData += nThisTRESize + 11;
@@ -340,9 +338,7 @@ void NitfFile::processTREs_DES(NITFDES* dataSegment, pdal::Metadata& ms, const s
         
         if (!boost::iequals(key, "DESDATA"))
         {
-            metadata::Entry m(parentkey+"."+key);
-            m.setValue<std::string>(value);
-            ms.addMetadata(m);
+            ms.addEntry<std::string>(parentkey+"."+key, value);
         }
 
         nOffset += 11 + nThisTRESize;
@@ -368,9 +364,7 @@ void NitfFile::processMetadata(char** papszMetadata, pdal::Metadata& ms, const s
 
         if (!boost::iequals(key, "DESDATA"))
         {
-            metadata::Entry m(parentkey+"."+key);
-            m.setValue<std::string>(value);
-            ms.addMetadata(m);
+            ms.addEntry<std::string>(parentkey+"."+key, value);
         }
 
     }
@@ -387,21 +381,15 @@ void NitfFile::processImageInfo(pdal::Metadata& ms, const std::string& parentkey
 
     std::stringstream value1;
     value1 << image->nRows;
-    metadata::Entry m1(parentkey+".NROWS");
-    m1.setValue<std::string>(value1.str());
-    ms.addMetadata(m1);
+    ms.addEntry<std::string>(parentkey+".NROWS", value1.str());
 
     std::stringstream value2;
     value2 << image->nCols;
-    metadata::Entry m2(parentkey+".NCOLS");
-    m2.setValue<std::string>(value2.str());
-    ms.addMetadata(m2);
+    ms.addEntry<std::string>(parentkey+".NCOLS", value2.str());
 
     std::stringstream value3;
     value3 << image->nBands;
-    metadata::Entry m3(parentkey+".NBANDS");
-    m3.setValue<std::string>(value3.str());
-    ms.addMetadata(m3);
+    ms.addEntry<std::string>(parentkey+".NBANDS", value3.str());
 
     NITFImageDeaccess(image);
 

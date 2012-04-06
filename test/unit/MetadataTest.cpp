@@ -159,19 +159,19 @@ BOOST_AUTO_TEST_CASE(test_metadata_copy)
     
     pdal::Metadata b;
     
-    b.addMetadata(m1);
-    b.addMetadata(m1prime);
-    b.addMetadata(m2);
+    b.addEntry(m1);
+    b.addEntry(m1prime);
+    b.addEntry(m2);
     
     pdal::Metadata b2;
 
     b2.setMetadata(b.getMetadata());
     
     // Set will overwrite here
-    pdal::metadata::Entry m11prime = b2.getMetadata("m1");
+    pdal::metadata::Entry m11prime = b2.getEntry("m1");
     BOOST_CHECK_EQUAL(m11prime.getValue<std::string>(), "Some other metadata");
     
-    pdal::metadata::Entry m22 = b2.getMetadata("m2");
+    pdal::metadata::Entry m22 = b2.getEntry("m2");
     BOOST_CHECK_EQUAL(m22.cast<boost::uint32_t>(), 1u);
     BOOST_CHECK_THROW(m22.getValue<boost::uint32_t>(), boost::bad_get);
     
@@ -190,14 +190,14 @@ BOOST_AUTO_TEST_CASE(test_metadata_set)
     
     pdal::Metadata b;
     
-    b.addMetadata(m1);
+    b.addEntry(m1);
 
     pdal::metadata::Entry m3(m1);
     BOOST_CHECK_EQUAL(m3.getValue<boost::uint32_t>(), 1u);
     m3.setValue<boost::int64_t>(64);
     BOOST_CHECK_EQUAL(m3.getValue<boost::int64_t>(), 64);
     
-    b.setMetadata(m3);
+    b.setEntry(m3);
     
     return;
 }
@@ -210,7 +210,7 @@ BOOST_AUTO_TEST_CASE(test_metadata_stage)
     
     pdal::Metadata file_metadata = reader.getMetadata();
     
-    BOOST_CHECK_EQUAL(file_metadata.size(), 28);
+    BOOST_CHECK_EQUAL(file_metadata.size(), 28u);
 
     pdal::Option option("filename", Support::datapath("pipeline/pipeline_metadata.xml"));
     pdal::Options options(option);
@@ -220,12 +220,34 @@ BOOST_AUTO_TEST_CASE(test_metadata_stage)
 
     pdal::Metadata pipeline_metadata = pipeline.getMetadata();
     
-    BOOST_CHECK_EQUAL(pipeline_metadata.size(), 28);
+    BOOST_CHECK_EQUAL(pipeline_metadata.size(), 28u);
 
     return;
 }
 
+BOOST_AUTO_TEST_CASE(test_metadata_constructor_no_throw)
+{
+    
+    pdal::Bounds<double> b;
+    pdal::metadata::Entry entry("name", b);
 
+    return;
+}
+
+BOOST_AUTO_TEST_CASE(test_metadata_recursion)
+{
+    
+    pdal::Bounds<double> b;
+    pdal::metadata::Entry entry("name", b);
+
+    pdal::Metadata mdata; mdata.addEntry(entry);
+    
+    entry.setMetadata(mdata);
+    
+    boost::optional<pdal::Metadata const&> m = entry.getMetadata();
+    BOOST_CHECK_EQUAL(m->getEntry("name").getType(), pdal::metadata::Bounds);
+    return;
+}
 
 
 BOOST_AUTO_TEST_SUITE_END()

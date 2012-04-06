@@ -127,7 +127,8 @@ namespace metadata {
     
     typedef std::map<std::string, std::string> MetadataAttributeM;
     typedef boost::uuids::uuid id;
-    
+    typedef boost::shared_ptr<Metadata> MetadataPtr;
+
     enum Type
     {
         /// boolean
@@ -198,13 +199,21 @@ public:
     /// @param name entry name to use for this metadata entry
     Entry(   std::string const& name);
 
-    /// Copy constructor
-    Entry(const Entry&);
-
-    ~Entry()
+    template <typename T>
+    Entry(std::string const& name, const T& value, std::string const& description="")
+        : m_name(name)
+        , m_description(description)
     {
+        // FIXME: This shouldn't be able to throw -- hobu
+        setValue<T>(value);
         return;
     }
+
+    /// Copy constructor
+    Entry(const Entry&);
+    Entry& operator=(const Entry& rhs);
+    
+    ~Entry() {}
 
 /** @name entry type
 */  
@@ -265,6 +274,36 @@ public:
     // Create a single entry, non-valid xml string to represent the Entry
     std::string to_xml();
 
+/** @name description
+*/
+    /// Overwrites the description given in the constructor
+    /// @param description new value to use for the description of the Option
+    inline void setDescription(const std::string& description) 
+    { 
+        m_description = description;
+    }
+    
+    /// @return the description of the Option
+    inline std::string const& getDescription() const { return m_description; }
+
+/// @name pdal::Metadata access
+    
+    /*! \return a boost::optional-wrapped const& of the Metadata set for this Metadata.
+    \verbatim embed:rst 
+    
+    .. note::
+
+            An Entry may have an Metadata map of of 
+            infinite depth (Entry->Metadata->Entry->Metadata...)
+    \endverbatim
+    */ 
+
+    boost::optional<Metadata const&> getMetadata() const;
+    
+    /// sets the Metadata set for this Entry instance
+    /// @param mdata Metadata set to use
+    void setMetadata(Metadata const& mdata);
+   
     
 /** @name private attributes
 */
@@ -273,6 +312,8 @@ private:
     std::string m_name;
     metadata::Type m_type;
     metadata::MetadataAttributeM m_attributes;
+    std::string m_description;
+    metadata::MetadataPtr m_metadata;
     
 };
 
@@ -443,20 +484,20 @@ public:
 */  
 
     /// add a Metadata entry to the PointBuffer's metadata map
-    void addMetadata(pdal::metadata::Entry const& entry);
+    void addEntry(pdal::metadata::Entry const& entry);
 
     /*! add a new value T metadata for the given metadata::Entry key. 
         \param name metadata::Entry entry key to use
         \param value the T value to set.
     */   
-    template<class T> void addMetadata(std::string const& name, T value);
+    template<class T> void addEntry(std::string const& name, T value);
 
     
     /// @return a const& to a metadata::Entry entry with the given name.
     /// If none is found, pdal::metadata_not_found is thrown.
     /// @param name name to use when searching
     /// @param ns to use when searching for metadata entry
-    metadata::Entry const& getMetadata(std::string const& name) const;
+    metadata::Entry const& getEntry(std::string const& name) const;
     
     // /// @return a const& to metadata::Entry entry with given metadata::id. 
     // /// If none is found, pdal::metadata_not_found is thrown.
@@ -466,7 +507,7 @@ public:
     /// @return a const& to metadata::Entry with the given index. If the 
     /// index is out of range, pdal::metadata_not_found is thrown.
     /// @param index position index to return.
-    metadata::Entry const& getMetadata(std::size_t index) const;
+    metadata::Entry const& getEntry(std::size_t index) const;
 
     /// @return the number of metadata::Entry entries in the map
     inline metadata::EntryMap::size_type size() const { return m_metadata.get<metadata::index>().size(); }
@@ -480,13 +521,13 @@ public:
     /// If no matching metadata entry is found, the optional will be empty.
     /// @param name name to use when searching
     /// matching metadata::Entry instance with name \b name is returned.
-    boost::optional<metadata::Entry const&> getMetadataOptional(std::string const& name) const;
+    boost::optional<metadata::Entry const&> getEntryOptional(std::string const& name) const;
 
     
     /// @return a boost::optional-wrapped const& to a metadata::Entry with the given
     /// index. If the index is out of range, the optional will be empty.
     /// @param index position index to return.
-    boost::optional<metadata::Entry const&> getMetadataOptional(std::size_t index) const;
+    boost::optional<metadata::Entry const&> getEntryOptional(std::size_t index) const;
 
     /*! overwrites an existing metadata::Entry with the same name as m
         \param m the metadata::Entry instance that contains the name
@@ -499,13 +540,13 @@ public:
 
         \endverbatim
     */    
-    bool setMetadata(metadata::Entry const& m);
+    bool setEntry(metadata::Entry const& m);
 
     /*! reset the value T metadata for the given metadata::Entry key and namespace. 
         \param name metadata::Entry entry key to use
         \param value the T value to set.
     */   
-    template<class T> void setMetadata(std::string const& name, T value);
+    template<class T> void setEntry(std::string const& name, T value);
 
     
     /// sets the EntryMap for the PointBuffer
@@ -524,20 +565,20 @@ private:
 };
 
 template <class T>
-inline void Metadata::addMetadata(std::string const& name, T value)
+inline void Metadata::addEntry(std::string const& name, T value)
 {
     metadata::Entry m(name);
     m.setValue<T>(value);
-    addMetadata(m);
+    addEntry(m);
     return;
 }
 
 template <class T>
-inline void Metadata::setMetadata(std::string const& name, T value)
+inline void Metadata::setEntry(std::string const& name, T value)
 {
     metadata::Entry m(name);
     m.setValue<T>(value);
-    setMetadata(m);
+    setEntry(m);
     return;
 }
 
