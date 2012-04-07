@@ -444,7 +444,7 @@ inline void metadata::Entry::setValue<boost::uuids::uuid>(boost::uuids::uuid con
 
         boost::multi_index::random_access<boost::multi_index::tag<index> >,
         // sort by less<string> on GetName
-        boost::multi_index::hashed_unique<boost::multi_index::tag<name>, boost::multi_index::const_mem_fun<metadata::Entry,std::string const&,&metadata::Entry::getName> >
+        boost::multi_index::hashed_non_unique<boost::multi_index::tag<name>, boost::multi_index::const_mem_fun<metadata::Entry,std::string const&,&metadata::Entry::getName> >
         // boost::multi_index::hashed_non_unique<boost::multi_index::tag<uid>, boost::multi_index::const_mem_fun<metadata::Entry,metadata::id const&,&metadata::Entry::getUUID> >
           >
     > EntryMap;
