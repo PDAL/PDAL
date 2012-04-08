@@ -42,6 +42,7 @@
 #include <pdal/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/filters/Stats.hpp>
+
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
@@ -65,12 +66,14 @@ private:
     void dumpStats(pdal::filters::Stats& filter) const;
     void dumpSchema(const Stage&) const;
     void dumpStage(const Stage&) const;
+    void dumpMetadata(const Stage&) const;
 
     std::string m_inputFile;
     std::string m_outputFile;
     bool m_showStats;
     bool m_showSchema;
     bool m_showStage;
+    bool m_showMetadata;
     pdal::Options m_options;
     boost::uint64_t m_pointNumber;
     std::ostream* m_outputStream;
@@ -87,6 +90,7 @@ PcInfo::PcInfo(int argc, char* argv[])
     , m_showStats(false)
     , m_showSchema(false)
     , m_showStage(false)
+    , m_showMetadata(false)
     , m_pointNumber((std::numeric_limits<boost::uint64_t>::max)())
     , m_outputStream(0)
 {
@@ -124,6 +128,7 @@ void PcInfo::addSwitches()
         ("point,p", po::value<boost::uint64_t>(&m_pointNumber)->implicit_value(0), "point to dump")
         ("stats,a", po::value<bool>(&m_showStats)->zero_tokens()->implicit_value(true), "dump stats on all points (reads entire dataset)")
         ("schema,s", po::value<bool>(&m_showSchema)->zero_tokens()->implicit_value(true), "dump the schema")
+        ("metadata,m", po::value<bool>(&m_showMetadata)->zero_tokens()->implicit_value(true), "dump the metadata")
         ("stage,r", po::value<bool>(&m_showStage)->zero_tokens()->implicit_value(true), "dump the stage info")
         ("seed", po::value<boost::uint32_t>(&m_seed)->default_value(0), "Seed value for random sample")
         ("sample_size", po::value<boost::uint32_t>(&m_sample_size)->default_value(1000), "Sample size for random sample")
@@ -216,6 +221,15 @@ void PcInfo::dumpStage(const Stage& stage) const
     return;
 }
 
+void PcInfo::dumpMetadata(const Stage& stage) const
+{
+    boost::property_tree::ptree tree = stage.serializePipeline();
+    std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
+
+    boost::property_tree::write_xml(ostr, tree);    
+    return;
+}
+
 
 int PcInfo::execute()
 {
@@ -266,7 +280,11 @@ int PcInfo::execute()
     {
         dumpSchema(*reader);
     }
-
+    
+    if (m_showMetadata)
+    {
+        dumpMetadata(*reader);
+    }
     if (m_showStage)
     {
         dumpStage(*reader);
