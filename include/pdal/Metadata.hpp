@@ -555,7 +555,9 @@ public:
     
     /// @name Serialization
     boost::property_tree::ptree toPTree() const;
-
+    
+    /// XML output
+    std::string to_xml() const;
 /** @name private attributes
 */
 private:

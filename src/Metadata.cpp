@@ -42,10 +42,8 @@
 #include <string>
 
 #include <boost/algorithm/string.hpp>
-// #include <boost/uuid/string_generator.hpp>
-// #include <boost/uuid/random_generator.hpp>
-// #include <boost/uuid/uuid_io.hpp>
 
+#include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
 
@@ -211,7 +209,58 @@ std::ostream& operator<<(std::ostream& ostr, const Entry& metadata)
 } // metadata 
 
 
+std::string Metadata::to_xml() const
+{
+    using namespace boost;
+    
+    property_tree::ptree m_tree = toPTree();
 
+    property_tree::ptree::const_iterator iter = m_tree.begin();
+    
+    property_tree::ptree output;
+    
+    while (iter != m_tree.end())
+    {
+        if (iter->first != "entry")
+            throw pdal_error("malformed Metadata ptree");
+        const property_tree::ptree& e_tree = iter->second;
+
+        property_tree::ptree entry;
+
+        const std::string& name = e_tree.get_child("name").get_value<std::string>();
+        const std::string& value = e_tree.get_child("value").get_value<std::string>();
+        const std::string& type = e_tree.get_child("type").get_value<std::string>();
+        
+        entry.put_value(value);
+        entry.put("<xmlattr>.name", name);
+        entry.put("<xmlattr>.type", type);
+
+        std::pair<property_tree::ptree::const_assoc_iterator, property_tree::ptree::const_assoc_iterator> ret = e_tree.equal_range("attribute");
+
+        for (property_tree::ptree::const_assoc_iterator  o = ret.first; o != ret.second; ++o)
+        {
+            property_tree::ptree const& tree = o->second;
+            std::string const& name =  tree.get_child("name").get_value<std::string>();
+            std::string const& value =  tree.get_child("value").get_value<std::string>();
+
+            boost::property_tree::ptree a;
+            a.put_value(value);
+            a.put("<xmlattr>.name", name);            
+            entry.add_child("attribute", a);
+        }
+        
+        output.add_child("Entry", entry);
+        ++iter;
+    }
+    
+    property_tree::ptree tree;
+    tree.add_child("Metadata", output);
+    
+    std::ostringstream oss;
+    boost::property_tree::xml_parser::write_xml(oss, tree);
+    return oss.str();
+    
+}
 
 void Metadata::addEntry(metadata::Entry const& m)
 {
