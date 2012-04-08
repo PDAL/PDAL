@@ -63,7 +63,9 @@ std::string AppSupport::inferReaderDriver(const std::string& filename, pdal::Opt
     drivers["bin"] = "drivers.terrasolid.reader";
     drivers["qi"] = "drivers.qfit.reader";
     drivers["xml"] = "drivers.pipeline.reader";
-
+    drivers["nitf"] = "drivers.nitf.reader";
+    drivers["ntf"] = "drivers.nitf.reader";
+    
     std::string driver = drivers[ext];
     return driver; // will be "" if not found
 }
