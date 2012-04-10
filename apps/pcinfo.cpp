@@ -79,7 +79,7 @@ private:
     std::ostream* m_outputStream;
     boost::uint32_t m_seed;
     boost::uint32_t m_sample_size;
-
+    bool m_useXML;
 };
 
 
@@ -93,6 +93,7 @@ PcInfo::PcInfo(int argc, char* argv[])
     , m_showMetadata(false)
     , m_pointNumber((std::numeric_limits<boost::uint64_t>::max)())
     , m_outputStream(0)
+    , m_useXML(false)
 {
     return;
 }
@@ -130,6 +131,7 @@ void PcInfo::addSwitches()
         ("schema,s", po::value<bool>(&m_showSchema)->zero_tokens()->implicit_value(true), "dump the schema")
         ("metadata,m", po::value<bool>(&m_showMetadata)->zero_tokens()->implicit_value(true), "dump the metadata")
         ("stage,r", po::value<bool>(&m_showStage)->zero_tokens()->implicit_value(true), "dump the stage info")
+        ("xml", po::value<bool>(&m_useXML)->zero_tokens()->implicit_value(true), "dump XML instead of JSON")
         ("seed", po::value<boost::uint32_t>(&m_seed)->default_value(0), "Seed value for random sample")
         ("sample_size", po::value<boost::uint32_t>(&m_sample_size)->default_value(1000), "Sample size for random sample")
         ;
@@ -161,10 +163,11 @@ void PcInfo::dumpOnePoint(const Stage& stage) const
    
     std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
 
-    ostr << "Point " << m_pointNumber << ":\n";
-    write_json(ostr, tree.get_child("0"));
-    ostr << "\n";
-
+    if (m_useXML)
+        write_xml(ostr, tree.get_child("0"));
+    else
+        write_json(ostr, tree.get_child("0"));
+        
     return;
 }
 
@@ -190,7 +193,10 @@ void PcInfo::dumpStats(pdal::filters::Stats& filter) const
 
     std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
 
-    write_json(ostr, tree);
+    if (m_useXML)
+        write_xml(ostr, tree);
+    else
+        write_json(ostr, tree);
     
     return;
 }
@@ -204,7 +210,10 @@ void PcInfo::dumpSchema(const Stage& stage) const
     
     std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
 
-    boost::property_tree::write_json(ostr, tree);
+    if (m_useXML)
+        write_xml(ostr, tree);
+    else
+        write_json(ostr, tree);
     
     return;
 }
@@ -216,7 +225,10 @@ void PcInfo::dumpStage(const Stage& stage) const
 
     std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
 
-    boost::property_tree::write_json(ostr, tree);
+    if (m_useXML)
+        write_xml(ostr, tree);
+    else
+        write_json(ostr, tree);
 
     return;
 }
@@ -226,7 +238,11 @@ void PcInfo::dumpMetadata(const Stage& stage) const
     boost::property_tree::ptree tree = stage.serializePipeline();
     std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
 
-    boost::property_tree::write_xml(ostr, tree);    
+    if (m_useXML)
+        write_xml(ostr, tree);
+    else
+        write_json(ostr, tree);
+         
     return;
 }
 
