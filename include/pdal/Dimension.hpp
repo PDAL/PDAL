@@ -44,6 +44,7 @@
 
 #include <pdal/pdal_internal.hpp>
 #include <pdal/Utils.hpp>
+#include <pdal/Environment.hpp>
 
 #include <boost/property_tree/ptree.hpp>
 

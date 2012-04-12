@@ -35,13 +35,14 @@
 #include <pdal/Environment.hpp>
 #include <pdal/plang/Environment.hpp>
 
-#include <pdal/plang/Environment.hpp>
 
 namespace pdal {
 
 
 // this is (or, should be) our one and only static
 static Environment* s_environment;
+static boost::random::mt19937 s_rng;
+
 Environment* Environment::get() { return s_environment; }
 
 
@@ -76,6 +77,7 @@ Environment::Environment()
     m_plangEnvironment = new pdal::plang::Environment();
 #endif
 
+    m_rng = new boost::random::mt19937();
     return;
 }
 
@@ -86,6 +88,8 @@ Environment::~Environment()
     delete m_plangEnvironment;
     m_plangEnvironment = NULL;
 #endif
+
+    delete m_rng;
 
     return;
 }
