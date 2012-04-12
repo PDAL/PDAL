@@ -558,6 +558,11 @@ public:
     
     /// XML output
     std::string to_xml() const;
+
+    /// JSON output
+    std::string to_json() const;
+
+
 /** @name private attributes
 */
 private:

@@ -262,6 +262,20 @@ std::string Metadata::to_xml() const
     
 }
 
+
+std::string Metadata::to_json() const
+{
+    using namespace boost;
+    
+    property_tree::ptree tree = toPTree();
+
+    std::ostringstream oss;
+    boost::property_tree::json_parser::write_json(oss, tree);
+
+    return oss.str();
+    
+}
+
 void Metadata::addEntry(metadata::Entry const& m)
 {
     metadata::index_by_name& index = m_metadata.get<metadata::name>();
