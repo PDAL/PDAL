@@ -106,6 +106,17 @@ void PcInfo::validateSwitches()
         throw app_usage_error("input file name required");
     }
 
+    const bool got_something =
+        (m_pointNumber != (std::numeric_limits<boost::uint64_t>::max)()) ||
+        m_showStats ||
+        m_showSchema ||
+        m_showMetadata ||
+        m_showStage;
+    if (!got_something)
+    {
+        throw app_usage_error("no action option specified");
+    }
+
     return;
 }
 
