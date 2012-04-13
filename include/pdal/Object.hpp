@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2012, Howard Butler, hobu.inc@gmail.com
 *
 * All rights reserved.
 *
@@ -32,83 +32,54 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_GDALUTILS_HPP
-#define INCLUDED_GDALUTILS_HPP
+#ifndef INCLUDED_OBJECT_HPP
+#define INCLUDED_OBJECT_HPP
 
 #include <pdal/pdal_internal.hpp>
 
-#include <pdal/Log.hpp>
+#include <boost/property_tree/ptree.hpp>
 
-#include <sstream>
-
-#include <boost/function.hpp>
-#include <boost/bind.hpp>
-
-#ifdef PDAL_HAVE_GDAL
-#include <cpl_port.h>
-#include "gdal.h"
-#include <cpl_vsi.h>
-#endif
 
 namespace pdal
 {
-namespace gdal {
 
 
-class PDAL_DLL Debug
+/// pdal::Object is a base class that provides serialization, allocation, and 
+/// deallocation control for all basic objects inside of PDAL.  
+
+class PDAL_DLL Object
 {
 public:
 
-    Debug(bool isDebug, pdal::LogPtr log);
-    ~Debug();
+/** @name Constructors
+*/  
+    Object(std::string const& type_name) : m_typename(type_name) {};
 
-    static void CPL_STDCALL trampoline(::CPLErr code, int num, char const* msg)
-    {
-#if GDAL_VERSION_MAJOR == 1 && GDAL_VERSION_MINOR >= 9
-        static_cast<Debug*>(CPLGetErrorHandlerUserData())->m_gdal_callback(code, num, msg);
-#else
-        if (code == CE_Failure || code == CE_Fatal) {
-            std::ostringstream oss;
-            oss <<"GDAL Failure number=" << num << ": " << msg;
-            throw gdal_error(oss.str());
-        } else if (code == CE_Debug) {
-            std::clog << " (no log control stdlog) GDAL debug: " << msg << std::endl;
-        } else {
-            return;
-        }
-#endif
-    }
+/** @name Destructor
+*/  
+    virtual ~Object() {};
     
-    void log(::CPLErr code, int num, char const* msg);
-    void error(::CPLErr code, int num, char const* msg);
+    virtual std::string to_xml() const;
+    virtual std::string to_json() const;
+    
+    virtual boost::property_tree::ptree toPTreeImpl() const { return boost::property_tree::ptree(); }
+    
+    boost::property_tree::ptree toPTree() const;
+    inline std::string getTypeName() const { return m_typename; }
+/** @name private attributes
+*/ 
 
 
 private:
-    boost::function<void(CPLErr, int, char const*)> m_gdal_callback;
-    bool m_isDebug;
-    pdal::LogPtr m_log;
+    Object(const Object&);
+    Object& operator =(const Object&);
+
+    std::string m_typename;
+
 };
 
 
-#ifdef PDAL_HAVE_GDAL
-class PDAL_DLL VSILFileBuffer
-{
-public:
-    typedef boost::iostreams::seekable_device_tag category;
-    typedef char char_type;
 
-    VSILFileBuffer(VSILFILE* fp);
-
-    std::streamsize read(char* s, std::streamsize n);
-    std::streamsize write(const char* s, std::streamsize n);
-    std::streampos seek(boost::iostreams::stream_offset off, std::ios_base::seekdir way);
-
-private:
-    VSILFILE* m_fp;
-};
-#endif
-
-
-}} // namespace pdal::gdal
+} // namespace pdal
 
 #endif

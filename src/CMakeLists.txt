@@ -36,6 +36,7 @@ set(PDAL_BASE_HPP
   ${PDAL_HEADERS_DIR}/Metadata.hpp
   ${PDAL_HEADERS_DIR}/MultiFilter.hpp
   ${PDAL_HEADERS_DIR}/MultiFilterIterator.hpp
+  ${PDAL_HEADERS_DIR}/Object.hpp
   ${PDAL_HEADERS_DIR}/Options.hpp
   ${PDAL_HEADERS_DIR}/PipelineManager.hpp
   ${PDAL_HEADERS_DIR}/PipelineReader.hpp
@@ -73,6 +74,7 @@ set(PDAL_BASE_CPP
   Metadata.cpp
   MultiFilter.cpp
   MultiFilterIterator.cpp
+  Object.cpp
   Options.cpp
   PipelineManager.cpp
   PipelineReader.cpp

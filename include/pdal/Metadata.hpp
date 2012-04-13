@@ -37,6 +37,7 @@
 
 #include <pdal/pdal_internal.hpp>
 #include <pdal/Options.hpp>
+#include <pdal/Object.hpp>
 #include <pdal/Bounds.hpp>
 #include <pdal/SpatialReference.hpp>
 
@@ -72,7 +73,7 @@ class Metadata;
 /// ByteArray simply wrapps a std::vector<boost::uint8_t> such that it can then 
 /// be dumped to an ostream in a base64 encoding. For now, it makes a copy of the data 
 /// it is given, and should not be used for slinging big data around.
-class PDAL_DLL ByteArray 
+class PDAL_DLL ByteArray : public Object
 {
 public:
 
@@ -80,14 +81,17 @@ public:
 */  
     /// Constructs a ByteArray instance with the given array of data.
     ByteArray(std::vector<boost::uint8_t> const& data) 
-        : m_bytes(data)
+        : Object("ByteArray")
+        , m_bytes(data)
     {
         return;
     }
 
     /// Copy constructor
     ByteArray(const ByteArray& rhs)
-        : m_bytes(rhs.m_bytes)
+        : Object("ByteArray")
+        , m_bytes(rhs.m_bytes)
+        
     {
         return;
     }
@@ -116,6 +120,8 @@ public:
     /// fetches a reference to the array
     inline std::vector<boost::uint8_t> const& get() const { return m_bytes; }
 
+/// @name serialization
+    boost::property_tree::ptree toPTreeImpl() const;
 /** @name private attributes
 */     
 private:
