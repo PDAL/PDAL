@@ -438,7 +438,7 @@ boost::property_tree::ptree PointBuffer::toPTree() const
                 if (size == 8)
                 {
                     if (!applyScaling)
-                        output += STRINGIFY(int64_t, GETFIELDAS(boost::int64_t));
+                        output += STRINGIFY(boost::int64_t, GETFIELDAS(boost::int64_t));
                     else
                     {
                         boost::int64_t v = GETFIELDAS(boost::int64_t);

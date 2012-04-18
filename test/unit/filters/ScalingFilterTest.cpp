@@ -170,8 +170,8 @@ BOOST_AUTO_TEST_CASE(ScalingFilterFloat_test)
 
     for (boost::uint32_t i=0; i<2; i++)
     {
-        boost::int32_t x = data.getField<int32_t>(dimX, i);
-        boost::int32_t y = data.getField<int32_t>(dimY, i);
+        boost::int32_t x = data.getField<boost::int32_t>(dimX, i);
+        boost::int32_t y = data.getField<boost::int32_t>(dimY, i);
         double z = data.getField<double>(dimZ, i);
         boost::uint64_t t = data.getField<boost::uint64_t>(dimTime, i);
 

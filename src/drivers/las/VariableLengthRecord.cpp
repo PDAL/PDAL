@@ -33,7 +33,7 @@
 ****************************************************************************/
 
 #include <pdal/drivers/las/VariableLengthRecord.hpp>
-
+#include <boost/cstdint.hpp>
 #include <boost/concept_check.hpp> // ignore_unused_variable_warning
 
 #include <pdal/SpatialReference.hpp>
@@ -279,7 +279,7 @@ static bool setSRSFromVLRs_geotiff(const std::vector<VariableLengthRecord>& vlrs
 
         case s_geotiffRecordId_asciiparams:
             {
-                int count = length/sizeof(uint8_t);
+                int count = length/sizeof(boost::uint8_t);
                 geotiff.setKey(s_geotiffRecordId_asciiparams, count, GeotiffSupport::Geotiff_KeyType_ASCII, data);
             }
             gotSomething = true;
@@ -345,8 +345,8 @@ void VariableLengthRecord::setVLRsFromSRS(const SpatialReference& srs, std::vect
     short kvalue = 0;
     double* ddata = 0;
     double dvalue = 0;
-    uint8_t* adata = 0;
-    uint8_t avalue = 0;
+    boost::uint8_t* adata = 0;
+    boost::uint8_t avalue = 0;
     int dtype = 0;
     int dcount = 0;
     int ktype = 0;
@@ -363,16 +363,16 @@ void VariableLengthRecord::setVLRsFromSRS(const SpatialReference& srs, std::vect
     ret = geotiff.getKey(s_geotiffRecordId_directory, &kcount, &ktype, (void**)&kdata);
     if (ret)
     {    
-        uint16_t length = 2 * static_cast<uint16_t>(kcount);
+        boost::uint16_t length = 2 * static_cast<boost::uint16_t>(kcount);
 
-        std::vector<uint8_t> data;
+        std::vector<boost::uint8_t> data;
 
         // Copy the data into the data vector
         for (int i = 0; i < kcount; i++)
         {
             kvalue = kdata[i];
             
-            uint8_t* v = reinterpret_cast<uint8_t*>(&kvalue); 
+            boost::uint8_t* v = reinterpret_cast<boost::uint8_t*>(&kvalue); 
             
             data.push_back(v[0]);
             data.push_back(v[1]);
@@ -385,16 +385,16 @@ void VariableLengthRecord::setVLRsFromSRS(const SpatialReference& srs, std::vect
     ret = geotiff.getKey(s_geotiffRecordId_doubleparams, &dcount, &dtype, (void**)&ddata);
     if (ret)
     {    
-        uint16_t length = 8 * static_cast<uint16_t>(dcount);
+        boost::uint16_t length = 8 * static_cast<boost::uint16_t>(dcount);
         
-        std::vector<uint8_t> data;
+        std::vector<boost::uint8_t> data;
        
         // Copy the data into the data vector
         for (int i=0; i<dcount;i++)
         {
             dvalue = ddata[i];
             
-            uint8_t* v =  reinterpret_cast<uint8_t*>(&dvalue);
+            boost::uint8_t* v =  reinterpret_cast<boost::uint8_t*>(&dvalue);
             
             data.push_back(v[0]);
             data.push_back(v[1]);
@@ -414,9 +414,9 @@ void VariableLengthRecord::setVLRsFromSRS(const SpatialReference& srs, std::vect
     ret = geotiff.getKey(s_geotiffRecordId_asciiparams, &acount, &atype, (void**)&adata);
     if (ret) 
     {                    
-         uint16_t length = static_cast<uint16_t>(acount);
+         boost::uint16_t length = static_cast<boost::uint16_t>(acount);
 
-         std::vector<uint8_t> data;
+         std::vector<boost::uint8_t> data;
 
          // whoa.  If the returned count was 0, it is because there 
          // was a bug in libgeotiff that existed before r1531 where it 
@@ -434,7 +434,7 @@ void VariableLengthRecord::setVLRsFromSRS(const SpatialReference& srs, std::vect
          for (int i=0; i<acount;i++)
          {
              avalue = adata[i];
-             uint8_t* v =  reinterpret_cast<uint8_t*>(&avalue);
+             boost::uint8_t* v =  reinterpret_cast<boost::uint8_t*>(&avalue);
              data.push_back(v[0]);
          }
 
@@ -444,7 +444,7 @@ void VariableLengthRecord::setVLRsFromSRS(const SpatialReference& srs, std::vect
         if (data.size() > (std::numeric_limits<boost::uint16_t>::max()))
         {
             std::ostringstream oss;
-            std::vector<uint8_t>::size_type overrun = data.size() - static_cast<std::vector<uint8_t>::size_type>(std::numeric_limits<boost::uint16_t>::max());
+            std::vector<boost::uint8_t>::size_type overrun = data.size() - static_cast<std::vector<boost::uint8_t>::size_type>(std::numeric_limits<boost::uint16_t>::max());
             oss << "The size of the GeoTIFF GeoAsciiParamsTag, " << data.size() << ", is " << overrun 
                 << " bytes too large to fit inside the maximum size of a VLR which is " 
                 << (std::numeric_limits<boost::uint16_t>::max()) << " bytes.";
