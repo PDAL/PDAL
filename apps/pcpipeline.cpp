@@ -120,10 +120,8 @@ int PcPipeline::execute()
     if (!isWriter)
         throw app_runtime_error("pipeline file is not a Writer");
 
-    const boost::uint64_t np = manager.execute();
+    manager.execute();
 
-    std::cout << "Wrote " << np << " points.\n";
-    
     if (m_pipelineFile.size() > 0)
     {
         pdal::PipelineWriter writer(manager);
