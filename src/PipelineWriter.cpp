@@ -43,6 +43,7 @@
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/optional.hpp>
 #include <boost/foreach.hpp>
+#include <boost/algorithm/string.hpp>
 
 namespace pdal
 {
@@ -174,7 +175,11 @@ void PipelineWriter::writePipeline(const std::string& filename) const
 
     
     const boost::property_tree::xml_parser::xml_writer_settings<char> settings(' ', 4);
-    boost::property_tree::xml_parser::write_xml(filename, tree, std::locale(), settings);
+    
+    if (boost::iequals(filename, "STDOUT"))
+        boost::property_tree::xml_parser::write_xml(std::cout, tree);
+    else
+        boost::property_tree::xml_parser::write_xml(filename, tree, std::locale(), settings);
 
     return;
 }
