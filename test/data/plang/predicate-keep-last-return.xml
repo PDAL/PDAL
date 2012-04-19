@@ -20,11 +20,13 @@ def filter(ins,outs):
     outs['Mask'] = rets
     return True
             </Option>
-            <Reader type="drivers.las.reader">
-                <Option name="filename">
-                    ../autzen.las
-                </Option>
-            </Reader>
+            <Filter type="filters.stats">
+                <Reader type="drivers.las.reader">
+                    <Option name="filename">
+                        ../autzen.las
+                    </Option>
+                </Reader>
+            </Filter>
         </Filter>
     </Writer>
 </Pipeline>
