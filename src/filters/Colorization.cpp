@@ -187,9 +187,8 @@ void Colorization::collectOptions()
 
 
 
-void Colorization::processBuffer(PointBuffer& data) const
+void Colorization::processBuffer(PointBuffer& /* data */) const
 {
-
     return;
 }
 
