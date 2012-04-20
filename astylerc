@@ -11,3 +11,15 @@
 --convert-tabs
 
 --lineend=linux
+
+--suffix=none
+
+--unpad-paren
+
+--indent-switches
+
+--indent-cases
+
+--indent-labels
+
+--pad-header
