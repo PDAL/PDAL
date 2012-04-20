@@ -94,7 +94,7 @@ void Invocation::compile()
     if (!m_bytecode) m_environment.handleError();
 
     assert(m_bytecode);
-    m_module = PyImport_ExecCodeModule(m_script.module(), m_bytecode);
+    m_module = PyImport_ExecCodeModule(const_cast<char*>(m_script.module()), m_bytecode);
     if (!m_module) m_environment.handleError();
 
     m_dictionary = PyModule_GetDict(m_module);
@@ -361,6 +361,8 @@ int Invocation::getPythonDataType(dimension::Interpretation datatype, boost::uin
             return PyArray_ULONGLONG;
         }
         break;
+    default:
+        return -1;
     }
 
     assert(0);
