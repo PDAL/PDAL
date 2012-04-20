@@ -41,27 +41,40 @@
 #include <pdal/Options.hpp>
 
 
-namespace pdal { namespace plang {
+namespace pdal
+{
+namespace plang
+{
 
 
 class PDAL_DLL Script
 {
 public:
-    Script(const std::string& sourceCode, const std::string& moduleName, const std::string& functionName);
+    Script( std::string const& sourceCode,
+            std::string const& moduleName,
+            std::string const& functionName);
     Script(const Options&);
     Script(const Script&);
     ~Script();
 
     // the Py functions want char* or const char* things, not std::string things
-    const char* source() const { return m_source; }
-    const char* module() const { return m_module; }
-    char* module() { return m_module; }
-    const char* function() const { return m_function; }
+    const char* source() const
+    {
+        return m_source.c_str();
+    }
+    const char* module() const
+    {
+        return m_module.c_str();
+    }
+    const char* function() const
+    {
+        return m_function.c_str();
+    }
 
 private:
-    char* m_source;
-    char* m_module;
-    char* m_function;
+    std::string m_source;
+    std::string m_module;
+    std::string m_function;
 
     Script& operator=(Script const& rhs); // nope
 };
@@ -70,7 +83,8 @@ PDAL_DLL std::ostream& operator<<(std::ostream& os, Script const& d);
 
 
 
-} } // namespaces
+}
+} // namespaces
 
 #endif
 

@@ -43,64 +43,51 @@
 #endif
 
 
-namespace pdal { namespace plang {
-
-
-
-static char* copychars(const char* s)
+namespace pdal
 {
-    char* p = new char[strlen(s)+1];
-    strcpy(p, s);
-    return p;
-}
-
+namespace plang
+{
 
 Script::Script(const std::string& source, const std::string& module, const std::string& function)
+    : m_source(source)
+    , m_module(module)
+    , m_function(function)
 {
-    m_source = copychars(source.c_str());
-    m_module = copychars(module.c_str());
-    m_function = copychars(function.c_str());
     return;
 }
-
 
 Script::Script(const Options& options)
 {
     if (options.hasOption("source"))
     {
         const std::string& source = options.getValueOrThrow<std::string>("source");
-        m_source = copychars(source.c_str());
+        m_source = source;
     }
-    else 
+    else
     {
         const std::string& filename = options.getValueOrThrow<std::string>("filename");
         std::string source = FileUtils::readFileIntoString(filename);
-        m_source = copychars(source.c_str());
+        m_source = source;
     }
 
     const std::string& module = options.getValueOrThrow<std::string>("module");
     const std::string& function = options.getValueOrThrow<std::string>("function");
 
-    m_module = copychars(module.c_str());
-    m_function = copychars(function.c_str());
+    m_module = module;
+    m_function = function;
 
     return;
 }
 
-
-Script::Script(const Script& script)
+Script::Script(const Script& other)
+    : m_source(other.m_source)
+    , m_module(other.m_module)
+    , m_function(other.m_function)
 {
-    m_source = copychars(script.source());
-    m_module = copychars(script.module());
-    m_function = copychars(script.function());
 }
-
 
 Script::~Script()
 {
-    delete m_source;
-    delete m_module;
-    delete m_function;
 }
 
 std::ostream& operator<<(std::ostream& os, Script const& script)
@@ -115,6 +102,7 @@ std::ostream& operator<<(std::ostream& os, Script const& script)
     return os;
 }
 
-} } //namespaces
+}
+} //namespaces
 
 #endif
