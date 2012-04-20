@@ -643,7 +643,7 @@ void Base::initialize()
     return;
 }
 
-void Base::read(PointBuffer& data)
+void Base::read(PointBuffer& )
 {
 
 }

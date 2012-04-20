@@ -857,7 +857,7 @@ bool Writer::IsValidWKT(std::string const& input)
     throw pdal_error("GDAL support not available for WKT validation");
 #endif        
 }
-void Writer::writeBegin(boost::uint64_t targetNumPointsToWrite)
+void Writer::writeBegin(boost::uint64_t )
 {
 
     bool bHaveOutputTable = BlockTableExists();
@@ -883,7 +883,7 @@ void Writer::writeBegin(boost::uint64_t targetNumPointsToWrite)
 }
 
 
-void Writer::writeEnd(boost::uint64_t actualNumPointsWritten)
+void Writer::writeEnd(boost::uint64_t )
 {
     m_connection->Commit();
 

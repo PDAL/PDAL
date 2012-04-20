@@ -838,7 +838,7 @@ Reader::~Reader()
 }
 
 
-boost::uint64_t Reader::skipImpl(boost::uint64_t count)
+boost::uint64_t Reader::skipImpl(boost::uint64_t)
 {
 
     return 0;
