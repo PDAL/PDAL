@@ -55,13 +55,13 @@ namespace pdal
 
 
 
-Dimension::Dimension(   std::string const& name, 
-                        dimension::Interpretation interpretation,
-                        dimension::size_type sizeInBytes,
-                        std::string description)
+Dimension::Dimension(std::string const& name,
+                     dimension::Interpretation interpretation,
+                     dimension::size_type sizeInBytes,
+                     std::string description)
     : m_name(name)
     , m_flags(0)
-    , m_endian(pdal::Endian_Little)    
+    , m_endian(pdal::Endian_Little)
     , m_byteSize(sizeInBytes)
     , m_description(description)
     , m_min(0.0)
@@ -69,12 +69,12 @@ Dimension::Dimension(   std::string const& name,
     , m_numericScale(1.0)
     , m_numericOffset(0.0)
     , m_byteOffset(0)
-    , m_position(-1)    
+    , m_position(-1)
     , m_interpretation(interpretation)
     , m_uuid(boost::uuids::nil_uuid())
     , m_namespace(std::string(""))
     , m_parentDimensionID(boost::uuids::nil_uuid())
-    
+
 {
 
     if (!m_name.size())
@@ -82,18 +82,18 @@ Dimension::Dimension(   std::string const& name,
         // Generate a random name from the time
         ::time_t seconds;
         ::time(&seconds);
-        
+
         std::ostringstream oss;
         srand(static_cast<unsigned int>(seconds));
         oss << "unnamed" << rand();
         m_name = oss.str();
-        
+
     }
 
 }
 
 /// copy constructor
-Dimension::Dimension(Dimension const& other) 
+Dimension::Dimension(Dimension const& other)
     : m_name(other.m_name)
     , m_flags(other.m_flags)
     , m_endian(other.m_endian)
@@ -142,20 +142,20 @@ Dimension& Dimension::operator=(Dimension const& rhs)
 bool Dimension::operator==(const Dimension& other) const
 {
     if (boost::iequals(m_name, other.m_name) &&
-        m_flags == other.m_flags &&
-        m_endian == other.m_endian &&
-        m_byteSize == other.m_byteSize &&
-        boost::iequals(m_description, other.m_description) &&
-        Utils::compare_approx(m_min, other.m_min, (std::numeric_limits<double>::min)()) &&
-        Utils::compare_approx(m_max, other.m_max, (std::numeric_limits<double>::min)()) &&
-        Utils::compare_approx(m_numericScale, other.m_numericScale, (std::numeric_limits<double>::min)()) &&
-        Utils::compare_approx(m_numericOffset, other.m_numericOffset, (std::numeric_limits<double>::min)()) &&
-        m_byteOffset == other.m_byteOffset &&
-        m_position == other.m_position &&
-        m_interpretation == other.m_interpretation && 
-        m_uuid == other.m_uuid &&
-        m_parentDimensionID == other.m_parentDimensionID
-        )
+            m_flags == other.m_flags &&
+            m_endian == other.m_endian &&
+            m_byteSize == other.m_byteSize &&
+            boost::iequals(m_description, other.m_description) &&
+            Utils::compare_approx(m_min, other.m_min, (std::numeric_limits<double>::min)()) &&
+            Utils::compare_approx(m_max, other.m_max, (std::numeric_limits<double>::min)()) &&
+            Utils::compare_approx(m_numericScale, other.m_numericScale, (std::numeric_limits<double>::min)()) &&
+            Utils::compare_approx(m_numericOffset, other.m_numericOffset, (std::numeric_limits<double>::min)()) &&
+            m_byteOffset == other.m_byteOffset &&
+            m_position == other.m_position &&
+            m_interpretation == other.m_interpretation &&
+            m_uuid == other.m_uuid &&
+            m_parentDimensionID == other.m_parentDimensionID
+       )
     {
         return true;
     }
@@ -166,7 +166,7 @@ bool Dimension::operator==(const Dimension& other) const
 
 bool Dimension::operator!=(const Dimension& other) const
 {
-  return !(*this==other);
+    return !(*this==other);
 }
 
 boost::property_tree::ptree Dimension::toPTree() const
@@ -178,9 +178,9 @@ boost::property_tree::ptree Dimension::toPTree() const
     dim.put("parent", getParent());
     dim.put("description", getDescription());
     dim.put("bytesize", getByteSize());
-    
+
     std::string e("little");
-    if (getEndianness() == Endian_Big) 
+    if (getEndianness() == Endian_Big)
         e = std::string("big");
     dim.put("endianness", e);
 
@@ -188,13 +188,14 @@ boost::property_tree::ptree Dimension::toPTree() const
     dim.put("maximum", getMaximum());
     dim.put("scale", getNumericScale());
     dim.put("offset", getNumericOffset());
-    
+
     dim.put("scale", getNumericScale());
 
     dim.put("isValid", isValid());
-    
+    dim.put("isIgnored", isIgnored());
+
     std::stringstream oss;
-    
+
     dimension::id t =  getUUID();
     oss << t;
 
@@ -234,7 +235,7 @@ std::string Dimension::getInterpretationName() const
             if (bytesize == 1)
                 type << "uint8_t";
             break;
-        
+
 
         case dimension::SignedInteger:
             if (bytesize == 1)
@@ -250,34 +251,34 @@ std::string Dimension::getInterpretationName() const
             break;
         case dimension::UnsignedInteger:
             if (bytesize == 1)
-               type << "uint8_t";
+                type << "uint8_t";
             else if (bytesize == 2)
-               type << "uint16_t";
+                type << "uint16_t";
             else if (bytesize == 4)
-               type << "uint32_t";
+                type << "uint32_t";
             else if (bytesize == 8)
-               type << "uint64_t";
+                type << "uint64_t";
             else
-               type << "unknown";
+                type << "unknown";
             break;
-    
-       case dimension::Float:
-           if (bytesize == 4)
-               type << "float";
-           else if (bytesize == 8)
-               type << "double";
-           else
-               type << "unknown";
-           break;
-    
+
+        case dimension::Float:
+            if (bytesize == 4)
+                type << "float";
+            else if (bytesize == 8)
+                type << "double";
+            else
+                type << "unknown";
+            break;
+
         case dimension::Pointer:
-           type << "pointer";
-           break;
+            type << "pointer";
+            break;
         case dimension::Undefined:
-           type << "unknown";
-           break;
-    }    
-    
+            type << "unknown";
+            break;
+    }
+
     return type.str();
 }
 
@@ -299,7 +300,7 @@ std::ostream& operator<<(std::ostream& os, pdal::Dimension const& d)
     std::string::size_type size = cur.size();
     std::string::size_type pad_size = 24 - size;
 
-    for (std::string::size_type i=0; i != pad_size; i++ )
+    for (std::string::size_type i=0; i != pad_size; i++)
     {
         pad << " ";
     }
@@ -314,7 +315,7 @@ std::ostream& operator<<(std::ostream& os, pdal::Dimension const& d)
     double offset = tree.get<double>("offset");
     os << " offset: " << offset;
     
-    //os << " offset: " << tree.get<boost::uint32_t>("byteoffset");
+    os << " ignored: " << tree.get<bool>("isIgnored");
     os << std::endl;
 
     return os;

@@ -46,48 +46,36 @@
 
 BOOST_AUTO_TEST_SUITE(SelectorFilterTest)
 
-BOOST_AUTO_TEST_CASE(SelectorFilterTest_test_1)
+BOOST_AUTO_TEST_CASE(test1)
 {
-    pdal::Option option("filename", Support::datapath("pipeline/pipeline_scaling.xml"));
+    pdal::Option option("filename", Support::datapath("pipeline/pipeline_selector.xml"));
     pdal::Options options(option);
 
     pdal::drivers::pipeline::Reader reader(options);
     reader.initialize();
     
-    // pdal::filters::Scaling const* filter = static_cast<pdal::filters::Scaling const*>(reader.getManager().getStage());
-    // pdal::Options opt = filter->getCurrentOptions();
-    // // std::cout << "filter ops: " << opt << std::endl;
-    // 
-    // const pdal::Schema& schema = filter->getSchema();
-    // pdal::PointBuffer data(schema, 1);
-    // 
-    // pdal::StageSequentialIterator* iter = filter->createSequentialIterator(data);
-    // 
-    // boost::uint32_t numRead = iter->read(data);
-    // BOOST_CHECK(numRead == 1);
-    // delete iter;
-    // 
-    // pdal::Schema const& schema2 = data.getSchema();
-    // 
-    // boost::optional<pdal::Dimension const&> scaledDimX = schema2.getDimension("X", "filters.scaling");
-    // boost::optional<pdal::Dimension const&> scaledDimY = schema2.getDimension("Y", "filters.scaling");
-    // 
-    // if (!scaledDimX) throw pdal::pdal_error("Hey, no dimension was selected");
-    // boost::int32_t x = data.getField<boost::int32_t>(*scaledDimX, 0);
-    // boost::int32_t y = data.getField<boost::int32_t>(*scaledDimY, 0);
-    // 
-    // BOOST_CHECK_EQUAL(x, 6370112);
-    // BOOST_CHECK_EQUAL(y, 8490263);
-    // 
-    // boost::optional<pdal::Dimension const&> unscaledDimX = schema2.getDimension("X", "drivers.las.reader");
-    // boost::optional<pdal::Dimension const&> unscaledDimY = schema2.getDimension("Y", "drivers.las.reader");
-    // 
-    // if (!unscaledDimX) throw pdal::pdal_error("Hey, no dimension was selected");
-    // x = data.getField<boost::int32_t>(*unscaledDimX, 0);
-    // y = data.getField<boost::int32_t>(*unscaledDimY, 0);
-    // 
-    // BOOST_CHECK_EQUAL(x, 63701224);
-    // BOOST_CHECK_EQUAL(y, 84902831);
+    pdal::Schema const& schema = reader.getSchema();
+    pdal::PointBuffer data(schema, 1000);
+
+    boost::scoped_ptr<pdal::StageSequentialIterator> iter(reader.createSequentialIterator(data));
+    
+    {
+        boost::uint32_t numRead = iter->read(data);
+        BOOST_CHECK_EQUAL(numRead, 1000u);
+    }
+    
+    pdal::Schema const& new_schema = data.getSchema();
+    
+    // These were ignored. The iterator will modify the schema of the PointBuffer 
+    // to mark these dimension as ignored, and these dimensions will not be 
+    // available to select via getDimension or getDimensionOptional.  They 
+    // will be available to the *entire* list of dimensions for the PointBuffer, 
+    // however
+    BOOST_CHECK_THROW(new_schema.getDimension("Red"), pdal::dimension_not_found);
+    BOOST_CHECK_THROW(new_schema.getDimension("Green"), pdal::dimension_not_found);
+    BOOST_CHECK_THROW(new_schema.getDimension("Blue"), pdal::dimension_not_found);
+    
+    
 
     return;
 }

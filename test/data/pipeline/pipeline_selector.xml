@@ -11,7 +11,7 @@
                 </Option>
             </Options>
         </Option>
-        <Option name="discard">
+        <Option name="ignore">
             <Options>
                 <Option name="dimension">
                     Red

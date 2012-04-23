@@ -12,6 +12,7 @@
         "scale": "0.01",
         "offset": "-0",
         "isValid": "false",
+        "isIgnored": "false",
         "uuid": "2ee118d1-119e-4906-99c3-42934203f872"
     },
     "dimension":
@@ -27,6 +28,7 @@
         "scale": "0.01",
         "offset": "-0",
         "isValid": "false",
+        "isIgnored": "false",
         "uuid": "87707eee-2f30-4979-9987-8ef747e30275"
     },
     "dimension":
@@ -42,6 +44,7 @@
         "scale": "0.01",
         "offset": "-0",
         "isValid": "false",
+        "isIgnored": "false",
         "uuid": "e74b5e41-95e6-4cf2-86ad-e3f5a996da5d"
     },
     "dimension":
@@ -57,6 +60,7 @@
         "scale": "1",
         "offset": "0",
         "isValid": "false",
+        "isIgnored": "false",
         "uuid": "61e90c9a-42fc-46c7-acd3-20d67bd5626f"
     },
     "dimension":
@@ -72,6 +76,7 @@
         "scale": "1",
         "offset": "0",
         "isValid": "false",
+        "isIgnored": "false",
         "uuid": "ffe5e5f8-4cec-4560-abf0-448008f7b89e"
     },
     "dimension":
@@ -87,6 +92,7 @@
         "scale": "1",
         "offset": "0",
         "isValid": "false",
+        "isIgnored": "false",
         "uuid": "7c28bfd4-a9ed-4fb2-b07f-931c076fbaf0"
     },
     "dimension":
@@ -102,6 +108,7 @@
         "scale": "1",
         "offset": "0",
         "isValid": "false",
+        "isIgnored": "false",
         "uuid": "13019a2c-cf88-480d-a995-0162055fe5f9"
     },
     "dimension":
@@ -117,6 +124,7 @@
         "scale": "1",
         "offset": "0",
         "isValid": "false",
+        "isIgnored": "false",
         "uuid": "108c18f2-5cc0-4669-ae9a-f41eb4006ea5"
     },
     "dimension":
@@ -132,6 +140,7 @@
         "scale": "1",
         "offset": "0",
         "isValid": "false",
+        "isIgnored": "false",
         "uuid": "b4c67de9-cef1-432c-8909-7c751b2a4e0b"
     },
     "dimension":
@@ -147,6 +156,7 @@
         "scale": "1",
         "offset": "0",
         "isValid": "false",
+        "isIgnored": "false",
         "uuid": "aaadaf77-e0c9-4df0-81a7-27060794cd69"
     },
     "dimension":
@@ -162,6 +172,7 @@
         "scale": "1",
         "offset": "0",
         "isValid": "false",
+        "isIgnored": "false",
         "uuid": "70eb558e-63d4-4804-b1db-fc2fd716927c"
     },
     "dimension":
@@ -177,6 +188,7 @@
         "scale": "1",
         "offset": "0",
         "isValid": "false",
+        "isIgnored": "false",
         "uuid": "4e42e96a-6af0-4fdd-81cb-6216ff47bf6b"
     },
     "dimension":
@@ -192,6 +204,7 @@
         "scale": "1",
         "offset": "0",
         "isValid": "false",
+        "isIgnored": "false",
         "uuid": "aec43586-2711-4e59-9df0-65aca78a4ffc"
     },
     "dimension":
@@ -207,6 +220,7 @@
         "scale": "1",
         "offset": "0",
         "isValid": "false",
+        "isIgnored": "false",
         "uuid": "a42ce297-6aa2-4a62-bd29-2db19ba862d5"
     },
     "dimension":
@@ -222,6 +236,7 @@
         "scale": "1",
         "offset": "0",
         "isValid": "false",
+        "isIgnored": "false",
         "uuid": "7752759d-5713-48cd-9842-51db350cc979"
     },
     "dimension":
@@ -237,6 +252,7 @@
         "scale": "1",
         "offset": "0",
         "isValid": "false",
+        "isIgnored": "false",
         "uuid": "5c1a99c8-1829-4d5b-8735-4f6f393a7970"
     }
 }

@@ -45,10 +45,13 @@
 
 namespace pdal
 {
-    class PointBuffer;
+class PointBuffer;
 }
 
-namespace pdal { namespace filters {
+namespace pdal
+{
+namespace filters
+{
 
 class PDAL_DLL Selector: public Filter
 {
@@ -61,28 +64,40 @@ public:
     virtual const Options getDefaultOptions() const;
     virtual void initialize();
 
-    bool supportsIterator (StageIteratorType t) const
-    {   
-        if (t == StageIterator_Sequential ) return true;
+    bool supportsIterator(StageIteratorType t) const
+    {
+        if (t == StageIterator_Sequential) return true;
 
         return false;
     }
 
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const { return NULL; }
+    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const
+    {
+        return NULL;
+    }
 
     void processBuffer(const PointBuffer& srcData, PointBuffer& dstData) const;
     
+    inline std::vector<std::string> const& getIgnoredDimensionNames() const { return m_ignoredDimensions; }
+    inline std::vector<std::string> const& getKeptDimensionNames() const { return m_keepDimensions; }
+
 private:
     void checkImpedance();
-    
+
 
     Selector& operator=(const Selector&); // not implemented
     Selector(const Selector&); // not implemented
+    
+    std::vector<std::string> m_ignoredDimensions;
+    std::vector<std::string> m_keepDimensions;
 };
 
 
-namespace iterators { namespace sequential {
+namespace iterators
+{
+namespace sequential
+{
 
 
 class PDAL_DLL Selector : public pdal::FilterSequentialIterator
@@ -96,13 +111,15 @@ private:
     boost::uint32_t readBufferImpl(PointBuffer&);
     bool atEndImpl() const;
     void alterSchema(pdal::PointBuffer&);
-    const pdal::filters::Selector& m_scalingFilter;
+    const pdal::filters::Selector& m_selectorFilter;
 
 };
 
 
-} } // namespaces
+}
+} // namespaces
 
-} } // namespaces
+}
+} // namespaces
 
 #endif
