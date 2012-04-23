@@ -71,8 +71,8 @@ BOOST_AUTO_TEST_CASE(test_one)
     {
         pdal::Metadata metadata = nitf_reader.getMetadata();
         /////////////////////////////////////////////////BOOST_CHECK_EQUAL(metadatums.size(), 80u);
-        
-        
+
+
         pdal::metadata::Entry const& m = metadata.getEntry("FH.FDT");
 
         BOOST_CHECK_EQUAL(m.getName(), "FH.FDT");
@@ -84,7 +84,7 @@ BOOST_AUTO_TEST_CASE(test_one)
     const Schema& nitf_schema = nitf_reader.getSchema();
 
     PointBuffer nitf_data(nitf_schema, 750);
- 
+
     StageSequentialIterator* nitf_iter = nitf_reader.createSequentialIterator(nitf_data);
     const boost::uint32_t nitf_numRead = nitf_iter->read(nitf_data);
 
@@ -100,7 +100,7 @@ BOOST_AUTO_TEST_CASE(test_one)
     const Schema& las_schema = las_reader.getSchema();
 
     PointBuffer las_data(las_schema, 750);
- 
+
     StageSequentialIterator* las_iter = las_reader.createSequentialIterator(las_data);
     const boost::uint32_t las_numRead = las_iter->read(las_data);
 
@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE(test_one)
     Dimension const& nitf_dimX = nitf_schema.getDimension("X");
     Dimension const& nitf_dimY = nitf_schema.getDimension("Y");
     Dimension const& nitf_dimZ = nitf_schema.getDimension("Z");
-    
+
     Dimension const& las_dimX = las_schema.getDimension("X");
     Dimension const& las_dimY = las_schema.getDimension("Y");
     Dimension const& las_dimZ = las_schema.getDimension("Z");

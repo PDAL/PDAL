@@ -44,7 +44,10 @@
 
 #include <Python.h>
 
-namespace pdal { namespace plang {
+namespace pdal
+{
+namespace plang
+{
 
 
 Environment::Environment()
@@ -57,8 +60,8 @@ Environment::Environment()
     Invocation::numpy_init();
 
     // load traceback stuff we need for error handling
-    m_tracebackModule = PyImport_ImportModule( "traceback" );
-    if (!m_tracebackModule) 
+    m_tracebackModule = PyImport_ImportModule("traceback");
+    if (!m_tracebackModule)
     {
         throw python_error("unable to load traceback module");
     }
@@ -71,7 +74,7 @@ Environment::Environment()
         throw python_error("unable to find traceback function");
     }
 
-    if (!PyCallable_Check(m_tracebackFunction)) 
+    if (!PyCallable_Check(m_tracebackFunction))
     {
         throw python_error("invalid traceback function");
     }
@@ -141,6 +144,7 @@ void Environment::handleError()
 }
 
 
-} } //namespaces
+}
+} //namespaces
 
 #endif

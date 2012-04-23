@@ -112,7 +112,7 @@ void FilenameStreamFactory::deallocate(std::istream& stream)
     Set::iterator iter = m_streams.find(&stream);
     if (iter == m_streams.end())
         throw pdal_error("incorrect stream deallocation");
-    
+
     std::istream* s = *iter;
     m_streams.erase(iter);
     FileUtils::closeFile(s);
@@ -131,14 +131,14 @@ FilenameSubsetStreamFactory::StreamSet::StreamSet(const std::string& filename, b
 
     Stream* source = dynamic_cast<Stream*>(file);
     assert(source!=0);
-    
+
     StreamSlice* restricted_device = new StreamSlice(*source, offset, length);
     io::stream<StreamSlice>* restricted_stream = new io::stream<StreamSlice>(*restricted_device);
 
     m_stream = file;
     m_slice = restricted_device;
     m_streamslice = restricted_stream;
-    
+
     return;
 }
 
@@ -184,9 +184,9 @@ FilenameSubsetStreamFactory::~FilenameSubsetStreamFactory()
 std::istream& FilenameSubsetStreamFactory::allocate()
 {
     StreamSet* set = new StreamSet(m_filename, m_offset, m_length);
-    
+
     std::istream* stream = set->stream();
-    
+
     m_streams.insert(make_pair(stream, set));
 
     return *stream;
@@ -198,7 +198,7 @@ void FilenameSubsetStreamFactory::deallocate(std::istream& stream)
     Map::iterator iter = m_streams.find(&stream);
     if (iter == m_streams.end())
         throw pdal_error("incorrect stream deallocation");
-    
+
     StreamSet* s = iter->second;
     m_streams.erase(iter);
     delete s;

@@ -105,52 +105,52 @@ BOOST_AUTO_TEST_CASE(PipelineReaderTest_test3)
     // missing Type
     PipelineManager manager01;
     PipelineReader reader01(manager01);
-    BOOST_CHECK_THROW( reader01.readPipeline(Support::datapath("pipeline/bad/pipeline_bad01.xml")), pipeline_xml_error);
+    BOOST_CHECK_THROW(reader01.readPipeline(Support::datapath("pipeline/bad/pipeline_bad01.xml")), pipeline_xml_error);
 
     // missing child of filter
     PipelineManager manager02;
     PipelineReader reader02(manager02);
-    BOOST_CHECK_THROW( reader02.readPipeline(Support::datapath("pipeline/bad/pipeline_bad02.xml")), pipeline_xml_error);
+    BOOST_CHECK_THROW(reader02.readPipeline(Support::datapath("pipeline/bad/pipeline_bad02.xml")), pipeline_xml_error);
 
     // missing child of multifilter
     PipelineManager manager03;
     PipelineReader reader03(manager03);
-    BOOST_CHECK_THROW( reader03.readPipeline(Support::datapath("pipeline/bad/pipeline_bad03.xml")), pipeline_xml_error);
+    BOOST_CHECK_THROW(reader03.readPipeline(Support::datapath("pipeline/bad/pipeline_bad03.xml")), pipeline_xml_error);
 
     // missing child of writer
     PipelineManager manager04;
     PipelineReader reader04(manager04);
-    BOOST_CHECK_THROW( reader04.readPipeline(Support::datapath("pipeline/bad/pipeline_bad04.xml")), pipeline_xml_error);
+    BOOST_CHECK_THROW(reader04.readPipeline(Support::datapath("pipeline/bad/pipeline_bad04.xml")), pipeline_xml_error);
 
     // extra child of filter
     PipelineManager manager05;
     PipelineReader reader05(manager05);
-    BOOST_CHECK_THROW( reader05.readPipeline(Support::datapath("pipeline/bad/pipeline_bad05.xml")), pipeline_xml_error);
+    BOOST_CHECK_THROW(reader05.readPipeline(Support::datapath("pipeline/bad/pipeline_bad05.xml")), pipeline_xml_error);
 
     // extra child of writer
     PipelineManager manager06;
     PipelineReader reader06(manager06);
-    BOOST_CHECK_THROW( reader06.readPipeline(Support::datapath("pipeline/bad/pipeline_bad06.xml")), pipeline_xml_error);
+    BOOST_CHECK_THROW(reader06.readPipeline(Support::datapath("pipeline/bad/pipeline_bad06.xml")), pipeline_xml_error);
 
     // child of reader
     PipelineManager manager07;
     PipelineReader reader07(manager07);
-    BOOST_CHECK_THROW( reader07.readPipeline(Support::datapath("pipeline/bad/pipeline_bad07.xml")), pipeline_xml_error);
+    BOOST_CHECK_THROW(reader07.readPipeline(Support::datapath("pipeline/bad/pipeline_bad07.xml")), pipeline_xml_error);
 
     // unknown element
     PipelineManager manager08;
     PipelineReader reader08(manager08);
-    BOOST_CHECK_THROW( reader08.readPipeline(Support::datapath("pipeline/bad/pipeline_bad08.xml")), pipeline_xml_error);
+    BOOST_CHECK_THROW(reader08.readPipeline(Support::datapath("pipeline/bad/pipeline_bad08.xml")), pipeline_xml_error);
 
     // no Pipeline for writer xml
     PipelineManager manager09;
     PipelineReader reader09(manager09);
-    BOOST_CHECK_THROW( reader08.readPipeline(Support::datapath("pipeline/bad/pipeline_bad09.xml")), pipeline_xml_error);
+    BOOST_CHECK_THROW(reader08.readPipeline(Support::datapath("pipeline/bad/pipeline_bad09.xml")), pipeline_xml_error);
 
     // no Pipeline for reader xml
     PipelineManager manager10;
     PipelineReader reader10(manager10);
-    BOOST_CHECK_THROW( reader10.readPipeline(Support::datapath("pipeline/bad/pipeline_bad10.xml")), pipeline_xml_error);
+    BOOST_CHECK_THROW(reader10.readPipeline(Support::datapath("pipeline/bad/pipeline_bad10.xml")), pipeline_xml_error);
 
     // try to make a reader pipeline from a writer pipeline xml file
     PipelineManager managerW;
@@ -167,11 +167,11 @@ BOOST_AUTO_TEST_CASE(PipelineReaderTest_test3)
     // comments are ok
     PipelineManager managerComments1;
     PipelineReader readerComments1(managerComments1);
-    BOOST_CHECK_NO_THROW( readerComments1.readPipeline(Support::datapath("pipeline/pipeline_readcomments.xml")));
+    BOOST_CHECK_NO_THROW(readerComments1.readPipeline(Support::datapath("pipeline/pipeline_readcomments.xml")));
 
     PipelineManager managerComments2;
     PipelineReader readerComments2(managerComments2);
-    BOOST_CHECK_NO_THROW( readerComments2.readPipeline(Support::datapath("pipeline/pipeline_writecomments.xml")));
+    BOOST_CHECK_NO_THROW(readerComments2.readPipeline(Support::datapath("pipeline/pipeline_writecomments.xml")));
 
     return;
 }
@@ -251,7 +251,7 @@ BOOST_AUTO_TEST_CASE(PipelineReaderTest_MultiOptions)
     pdal::drivers::pipeline::Reader reader(options);
 
     reader.initialize();
-    
+
     // .getStage gets us the filter stage.  .getPrevStage gets us the reader
     // we wrote our extra options on the reader stage.
 
@@ -261,9 +261,9 @@ BOOST_AUTO_TEST_CASE(PipelineReaderTest_MultiOptions)
     Option fname = opt.getOption("filename");
 
     boost::optional<Options const&> more = fname.getOptions();
-    
+
     Option meaning_of_life = more->getOption("somemore");
-    
+
     BOOST_CHECK_EQUAL(meaning_of_life.getValue<int>(), 42);
 
     return;

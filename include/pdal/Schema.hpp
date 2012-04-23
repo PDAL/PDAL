@@ -69,24 +69,25 @@
 namespace pdal
 {
 
-namespace schema {
-struct name{};
-struct position{};
-struct index{};
-struct uid{};
+namespace schema
+{
+struct name {};
+struct position {};
+struct index {};
+struct uid {};
 
 typedef boost::multi_index::multi_index_container<
-  Dimension,
-  boost::multi_index::indexed_by<
-    // sort by Dimension::operator<
-    boost::multi_index::ordered_non_unique<boost::multi_index::tag<position>, boost::multi_index::identity<Dimension> >,
-    
-    // Random access
-    boost::multi_index::random_access<boost::multi_index::tag<index> >,
-    // sort by less<string> on GetName
-    boost::multi_index::hashed_non_unique<boost::multi_index::tag<name>, boost::multi_index::const_mem_fun<Dimension,std::string const&,&Dimension::getName> >,
-    boost::multi_index::hashed_non_unique<boost::multi_index::tag<uid>, boost::multi_index::const_mem_fun<Dimension,dimension::id const&,&Dimension::getUUID> >
-      >
+Dimension,
+boost::multi_index::indexed_by<
+// sort by Dimension::operator<
+boost::multi_index::ordered_non_unique<boost::multi_index::tag<position>, boost::multi_index::identity<Dimension> >,
+
+// Random access
+boost::multi_index::random_access<boost::multi_index::tag<index> >,
+// sort by less<string> on GetName
+boost::multi_index::hashed_non_unique<boost::multi_index::tag<name>, boost::multi_index::const_mem_fun<Dimension,std::string const&,&Dimension::getName> >,
+boost::multi_index::hashed_non_unique<boost::multi_index::tag<uid>, boost::multi_index::const_mem_fun<Dimension,dimension::id const&,&Dimension::getUUID> >
+>
 > Map;
 
 typedef Map::index<name>::type index_by_name;
@@ -98,8 +99,8 @@ typedef boost::uint32_t size_type;
 
 }
 
-/// A pdal::Schema is a composition of pdal::Dimension instances that form 
-/// a point cloud. 
+/// A pdal::Schema is a composition of pdal::Dimension instances that form
+/// a point cloud.
 class PDAL_DLL Schema
 {
 public:
@@ -107,14 +108,14 @@ public:
 /// @name Constructors
     /// An empty constructor with no Dimension instances
     Schema();
-    
+
     /// construct an instanct given the order and dimensions in the dimensions vector
     /// @param dimensions the list of dimensions (and their order) to use to construct the Schema
     Schema(std::vector<Dimension> const& dimensions);
-    
+
     /// Copy constructor
     Schema(Schema const& other);
-    
+
     /// Assignment constructor
     Schema& operator=(Schema const& rhs);
 
@@ -128,47 +129,50 @@ public:
     /// adds (copies) a Dimension instance to the Schema
     /// @param dim a Dimension that is copied and added to the end of the Schema
     void appendDimension(Dimension const& dim);
-    
+
     /*! overwrites an existing Dimension with the same name as dim
-        \param dim the Dimension instance that contains the name and namespace 
+        \param dim the Dimension instance that contains the name and namespace
         to overwrite in the Schema.
-        \verbatim embed:rst 
+        \verbatim embed:rst
         .. note::
-                
-            If no namespace is given, the *first* dimension with a matching 
-            :cpp:func:`pdal::Dimension::getName()` will be overwritten. To be 
+
+            If no namespace is given, the *first* dimension with a matching
+            :cpp:func:`pdal::Dimension::getName()` will be overwritten. To be
             sure, have set the namespace of the pdal::Dimension using
             :cpp:func:`pdal::Dimension::setNamespace()` beforehand.
 
         \endverbatim
-    */    
+    */
     bool setDimension(Dimension const& dim);
-    
+
     /// @return the boost::multi_index map that contains the Dimension instances
-    inline schema::Map const& getDimensions() const { return m_index; }
+    inline schema::Map const& getDimensions() const
+    {
+        return m_index;
+    }
 
 /// @name Dimension access
-    /// @return a const& to a Dimension with the given name and namespace. If 
+    /// @return a const& to a Dimension with the given name and namespace. If
     /// no matching dimension is found, pdal::dimension_not_found is thrown.
     /// @param name name to use when searching
-    /// @param ns namespace to use when searching. If none is given, the first 
+    /// @param ns namespace to use when searching. If none is given, the first
     /// matching Dimension instance with name \b name is returned.
     const Dimension& getDimension(std::string const& name, std::string const& ns="") const;
-    
-    /// @return a const& to a Dimension with the given dimension::id. If 
+
+    /// @return a const& to a Dimension with the given dimension::id. If
     /// no matching dimension is found, pdal::dimension_not_found is thrown.
     /// @param id id to use when searching
     const Dimension& getDimension(dimension::id const& id) const;
-    
-    /// @return a const& to Dimension with the given index. If the 
+
+    /// @return a const& to Dimension with the given index. If the
     /// index is out of range, pdal::dimension_not_found is thrown.
     /// @param index position index to return.
     const Dimension& getDimension(std::size_t index) const;
-    
-    /// @return a boost::optional-wrapped const& to a Dimension with the given name 
+
+    /// @return a boost::optional-wrapped const& to a Dimension with the given name
     /// and namespace. If no matching dimension is found, the optional will be empty.
     /// @param name name to use when searching
-    /// @param ns namespace to use when searching. If none is given, the first 
+    /// @param ns namespace to use when searching. If none is given, the first
     /// matching Dimension instance with name \b name is returned.
     boost::optional<Dimension const&> getDimensionOptional(std::string const& name, std::string const& ns="") const;
 
@@ -176,7 +180,7 @@ public:
     /// If no matching dimension is found, the optional will be empty.
     /// @param id id to use when searching
     boost::optional<Dimension const&> getDimensionOptional(dimension::id const& id) const;
-    
+
     /// @return a boost::optional-wrapped const& to a Dimension with the given
     /// index. If the index is out of range, the optional will be empty.
     /// @param index position index to return.
@@ -196,8 +200,8 @@ public:
 
 /// @name Summary and serialization
     /// @return  a boost::property_tree representing the Schema
-    /*! 
-        \verbatim embed:rst 
+    /*!
+        \verbatim embed:rst
         ::
 
             lo:
@@ -209,26 +213,26 @@ public:
         \endverbatim
     */
     boost::property_tree::ptree toPTree() const;
-    
+
     /// dumps a string representation of the Schema instance to std::cout
     void dump() const;
-    
-    /// Deserialize a Schema instance from the given xml and validate against the 
+
+    /// Deserialize a Schema instance from the given xml and validate against the
     /// given xsd
     /// @param xml xml data to ingest
     /// @param xsd xsd document to use for validation
     static Schema from_xml(std::string const& xml, std::string const& xsd);
-    
+
     /// Deserialize a Schema instance from the given xml
     /// @param xml xml data to ingest
     static Schema from_xml(std::string const& xml);
-    
+
     /// @return serialized Schema instance as xml
     static std::string to_xml(Schema const& schema);
 
 /// @name Private Attributes
 private:
-    
+
     schema::size_type m_byteSize;
 
     schema::Map m_index;

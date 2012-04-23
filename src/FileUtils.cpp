@@ -50,7 +50,7 @@ std::istream* FileUtils::openFile(std::string const& filename, bool asBinary)
 
     std::ios::openmode mode = std::ios::in;
     if (asBinary)
-      mode |= std::ios::binary;
+        mode |= std::ios::binary;
 
     namespace io = boost::iostreams;
     io::stream<io::file_source>* ifs = new io::stream<io::file_source>();
@@ -64,7 +64,7 @@ std::ostream* FileUtils::createFile(std::string const& filename, bool asBinary)
 {
     std::ios::openmode mode = std::ios::out;
     if (asBinary)
-      mode  |= std::ios::binary;
+        mode  |= std::ios::binary;
 
     namespace io = boost::iostreams;
     io::stream<io::file_sink>* ofs = new io::stream<io::file_sink>();
@@ -110,26 +110,26 @@ bool FileUtils::deleteFile(const std::string& file)
 {
     if (!fileExists(file))
         return false;
-        
+
     return boost::filesystem::remove(file);
 }
 
 
 void FileUtils::renameFile(const std::string& dest, const std::string& src)
 {
-  boost::filesystem::rename(src, dest);
+    boost::filesystem::rename(src, dest);
 }
 
 
 bool FileUtils::fileExists(const std::string& file)
 {
-  return boost::filesystem::exists(file);
+    return boost::filesystem::exists(file);
 }
 
 
 boost::uintmax_t FileUtils::fileSize(const std::string& file)
 {
-  return boost::filesystem::file_size(file);
+    return boost::filesystem::file_size(file);
 }
 
 
@@ -146,7 +146,7 @@ std::string FileUtils::readFileIntoString(const std::string& filename)
 std::string FileUtils::addTrailingSlash(const std::string& path)
 {
     std::string ret = path;
-    
+
     if (ret[ret.size() - 1] != '/')
         ret += "/";
 
@@ -180,12 +180,12 @@ std::string FileUtils::toAbsolutePath(const std::string& filename)
 
 // if the filename is an absolute path, just return it
 // otherwise, make it absolute (relative to base dir) and return that
-// 
+//
 // note: if base dir is not absolute, first make it absolute via toAbsolutePath(base)
 std::string FileUtils::toAbsolutePath(const std::string& filename, const std::string base)
 {
     const std::string newbase = toAbsolutePath(base);
-    
+
 #if BOOST_VERSION >= 104600 && BOOST_FILESYSTEM_VERSION >= 3
     const boost::filesystem::path p = boost::filesystem::absolute(filename, newbase);
 #else

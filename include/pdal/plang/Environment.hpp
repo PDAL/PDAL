@@ -54,7 +54,10 @@ struct _object;
 typedef _object PyObject;
 #endif
 
-namespace pdal { namespace plang {
+namespace pdal
+{
+namespace plang
+{
 
 
 // this is a singleton: only create it once, and keep it around forever
@@ -65,7 +68,7 @@ public:
     ~Environment();
 
     void handleError();
-    
+
 private:
     PyObject* m_tracebackModule;
     PyObject* m_tracebackDictionary;
@@ -73,7 +76,8 @@ private:
 };
 
 
-} } // namespaces
+}
+} // namespaces
 
 #endif
 

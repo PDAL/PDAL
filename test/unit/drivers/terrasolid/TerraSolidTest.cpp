@@ -57,9 +57,9 @@ BOOST_AUTO_TEST_SUITE(TerraSolidReaderTest)
 
 
 void Check_Point(const pdal::PointBuffer& data,
-                       std::size_t index, 
-                       double xref, double yref, double zref,
-                       double tref)
+                 std::size_t index,
+                 double xref, double yref, double zref,
+                 double tref)
 {
     const ::pdal::Schema& schema = data.getSchema();
 
@@ -67,7 +67,7 @@ void Check_Point(const pdal::PointBuffer& data,
     pdal::Dimension const& dimY = schema.getDimension("Y");
     pdal::Dimension const& dimZ = schema.getDimension("Z");
     pdal::Dimension const& dimTime = schema.getDimension("Time");
-    
+
     boost::int32_t x = data.getField<boost::int32_t>(dimX, index);
     boost::int32_t y = data.getField<boost::int32_t>(dimY, index);
     boost::int32_t z = data.getField<boost::int32_t>(dimZ, index);
@@ -78,13 +78,13 @@ void Check_Point(const pdal::PointBuffer& data,
     double z0 = dimZ.applyScaling<boost::int32_t>(z);
     double t0 = dimTime.applyScaling<boost::uint32_t>(t);
 
-  
+
     // std::cout.setf(std::ios_base::fixed, std::ios_base::floatfield);
     // std::cout.precision(6);
     // std::cout << "expected x: " << xref << " y: " << yref << " z: " << zref << " t: " << tref << std::endl;
-    // 
+    //
     // std::cout << "actual   x: " << x0 << " y: " << y0 << " z: " << z0 << " t0: " << t0 << std::endl;
-    
+
     Compare(x0, xref);
     Compare(y0, yref);
     Compare(z0, zref);
@@ -96,7 +96,7 @@ BOOST_AUTO_TEST_CASE(test_tsolid)
 
     std::string filename = Support::datapath("terrasolid/20020715-time-color.bin");
 
-    
+
     pdal::Option fname("filename", filename, "filename to read");
     pdal::Options options;
     // pdal::Option debug("debug", true, "");
@@ -116,9 +116,9 @@ BOOST_AUTO_TEST_CASE(test_tsolid)
     const Schema& schema = reader.getSchema();
 
     PointBuffer data(schema, 3);
-    
+
     pdal::StageSequentialIterator* iter = reader.createSequentialIterator(data);
-    
+
     {
         boost::uint32_t numRead = iter->read(data);
         BOOST_CHECK_EQUAL(numRead, 3u);

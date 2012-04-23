@@ -82,7 +82,7 @@ char* Utils::getenv(const char* env)
 std::string Utils::getenv(std::string const& name)
 {
     char* value = ::getenv(name.c_str());
-    if(value != 0)
+    if (value != 0)
         return std::string(value);
     else
         return std::string("");
@@ -110,7 +110,7 @@ void Utils::eatwhitespace(std::istream& s)
     }
     return;
 }
-    
+
 
 bool Utils::eatcharacter(std::istream& s, char x)
 {
@@ -127,17 +127,17 @@ boost::uint32_t Utils::getStreamPrecision(double scale)
 {
     double frac = 0;
     double integer = 0;
-    
+
     frac = std::modf(scale, &integer);
     double precision = std::fabs(std::floor(std::log10(frac)));
-    
-    // FIXME: This should test that precision actually ends up being a 
+
+    // FIXME: This should test that precision actually ends up being a
     // whole number
     boost::uint32_t output = static_cast<boost::uint32_t>(precision);
     return output;
 }
 
-boost::uint32_t Utils::safeconvert64to32(boost::uint64_t x64) 
+boost::uint32_t Utils::safeconvert64to32(boost::uint64_t x64)
 {
     if (x64 > (std::numeric_limits<boost::uint32_t>::max)())
     {
@@ -151,12 +151,12 @@ boost::uint32_t Utils::safeconvert64to32(boost::uint64_t x64)
 std::string Utils::generate_filename()
 {
     boost::filesystem::path path = boost::filesystem::unique_path("%%%%%%%%%%%%%%%%");
-    
+
     std::ostringstream oss;
     boost::filesystem::path fullpath = path;
     oss << fullpath;
     std::string output(oss.str());
-    
+
     boost::algorithm::erase_all(output, "\"");
     return output;
 }
@@ -165,12 +165,12 @@ std::string Utils::generate_tempfile()
 {
     boost::filesystem::path path = boost::filesystem::unique_path("%%%%%%%%%%%%%%%%");
     boost::filesystem::path tempdir = boost::filesystem::temp_directory_path();
-    
+
     std::ostringstream oss;
     boost::filesystem::path fullpath = tempdir/path;
     oss << fullpath;
     std::string output(oss.str());
-    
+
     boost::algorithm::erase_all(output, "\"");
     return output;
 }
@@ -206,38 +206,38 @@ void* Utils::getDLLSymbol(std::string const& library, std::string const& name)
      * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
      * DEALINGS IN THE SOFTWARE.
      ****************************************************************************/
-    
+
     void* pLibrary = NULL;
     void* pSymbol = NULL;
 
 #ifdef DLL_LOAD_UNIX
     pLibrary = dlopen(library.c_str(), RTLD_LAZY);
-    if( pLibrary == NULL )
+    if (pLibrary == NULL)
     {
         std::ostringstream oss;
-        oss << "Unable to open '" << library <<"' with error " << dlerror(); 
+        oss << "Unable to open '" << library <<"' with error " << dlerror();
         throw pdal_error(oss.str());
     }
-    
-    pSymbol = dlsym( pLibrary, name.c_str() );
+
+    pSymbol = dlsym(pLibrary, name.c_str());
 #if (defined(__APPLE__) && defined(__MACH__))
     /* On mach-o systems, C symbols have a leading underscore and depending
      * on how dlcompat is configured it may or may not add the leading
      * underscore.  So if dlsym() fails add an underscore and try again.
      */
-    if( pSymbol == NULL )
+    if (pSymbol == NULL)
     {
         std::ostringstream prefixed;
         prefixed << "_" << name;
-        pSymbol = dlsym( pLibrary, prefixed.str().c_str() );
+        pSymbol = dlsym(pLibrary, prefixed.str().c_str());
     }
 #endif
-    
+
     if (pSymbol == NULL)
     {
         std::ostringstream oss;
         oss << "Opened library '" << library << "', but unable to open symbol "
-               "'" << name << "' with error " << dlerror();
+            "'" << name << "' with error " << dlerror();
         throw pdal_error(oss.str());
     }
 
@@ -246,28 +246,28 @@ void* Utils::getDLLSymbol(std::string const& library, std::string const& name)
 #ifdef DLL_LOAD_WINDOWS
 
     pLibrary = LoadLibrary(library.c_str());
-    if( pLibrary == NULL )
+    if (pLibrary == NULL)
     {
         LPVOID      lpMsgBuf = NULL;
         int         nLastError = GetLastError();
-        
-        FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER 
-                       | FORMAT_MESSAGE_FROM_SYSTEM
-                       | FORMAT_MESSAGE_IGNORE_INSERTS,
-                       NULL, nLastError,
-                       MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), 
-                       (LPTSTR) &lpMsgBuf, 0, NULL );
-        
+
+        FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER
+                      | FORMAT_MESSAGE_FROM_SYSTEM
+                      | FORMAT_MESSAGE_IGNORE_INSERTS,
+                      NULL, nLastError,
+                      MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                      (LPTSTR) &lpMsgBuf, 0, NULL);
+
         std::ostringstream oss;
-        oss << "Can't load requested DLL '" << library << 
-               " with error code " << nLastError << 
-               " and message \"" <<  (const char *) lpMsgBuf <<"\"";
+        oss << "Can't load requested DLL '" << library <<
+            " with error code " << nLastError <<
+            " and message \"" << (const char *) lpMsgBuf <<"\"";
         throw pdal_error(oss.str());
     }
 
-    pSymbol = (void *) GetProcAddress( (HINSTANCE) pLibrary, name.c_str() );
+    pSymbol = (void *) GetProcAddress((HINSTANCE) pLibrary, name.c_str());
 
-    if( pSymbol == NULL )
+    if (pSymbol == NULL)
     {
         std::ostringstream oss;
         oss << "Can't find requested entry point '" << name <<"'";
@@ -288,10 +288,10 @@ void* Utils::getDLLSymbol(std::string const& library, std::string const& name)
 
 
 
-std::string Utils::base64_encode(std::vector<boost::uint8_t> const& bytes) 
+std::string Utils::base64_encode(std::vector<boost::uint8_t> const& bytes)
 {
 
-    /* 
+    /*
         base64.cpp and base64.h
 
         Copyright (C) 2004-2008 René Nyffenegger
@@ -317,38 +317,40 @@ std::string Utils::base64_encode(std::vector<boost::uint8_t> const& bytes)
         René Nyffenegger rene.nyffenegger@adp-gmbh.ch
 
     */
-    
+
     unsigned char const* bytes_to_encode = &(bytes.front());
-    
-    unsigned int in_len = bytes.size(); 
-    
-    const std::string base64_chars = 
-                 "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                 "abcdefghijklmnopqrstuvwxyz"
-                 "0123456789+/";    
+
+    unsigned int in_len = bytes.size();
+
+    const std::string base64_chars =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "abcdefghijklmnopqrstuvwxyz"
+        "0123456789+/";
     std::string ret;
     int i = 0;
     int j = 0;
     boost::uint8_t char_array_3[3];
     boost::uint8_t char_array_4[4];
 
-    while (in_len--) {
+    while (in_len--)
+    {
         char_array_3[i++] = *(bytes_to_encode++);
-        if (i == 3) {
+        if (i == 3)
+        {
             char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
             char_array_4[1] = ((char_array_3[0] & 0x03) << 4) + ((char_array_3[1] & 0xf0) >> 4);
             char_array_4[2] = ((char_array_3[1] & 0x0f) << 2) + ((char_array_3[2] & 0xc0) >> 6);
             char_array_4[3] = char_array_3[2] & 0x3f;
 
-            for(i = 0; (i <4) ; i++)
+            for (i = 0; (i <4) ; i++)
                 ret += base64_chars[char_array_4[i]];
-                i = 0;
-            }
+            i = 0;
+        }
     }
 
     if (i)
     {
-        for(j = i; j < 3; j++)
+        for (j = i; j < 3; j++)
             char_array_3[j] = '\0';
 
         char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
@@ -359,70 +361,74 @@ std::string Utils::base64_encode(std::vector<boost::uint8_t> const& bytes)
         for (j = 0; (j < i + 1); j++)
             ret += base64_chars[char_array_4[j]];
 
-        while((i++ < 3))
+        while ((i++ < 3))
             ret += '=';
     }
 
-  return ret;
+    return ret;
 
 }
 
-static inline bool is_base64(unsigned char c) {
-  return (isalnum(c) || (c == '+') || (c == '/'));
-}
-
-
-std::vector<boost::uint8_t> Utils::base64_decode(std::string const& encoded_string) 
+static inline bool is_base64(unsigned char c)
 {
-    const std::string base64_chars = 
-                 "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                 "abcdefghijklmnopqrstuvwxyz"
-                 "0123456789+/";
-    
-  std::string::size_type in_len = encoded_string.size();
-  int i = 0;
-  int j = 0;
-  int in_ = 0;
-  unsigned char char_array_4[4], char_array_3[3];
-  std::vector<boost::uint8_t> ret;
+    return (isalnum(c) || (c == '+') || (c == '/'));
+}
 
-  // while (in_len-- && 
-  //       ( encoded_string[in_] != '=') && 
-  //       ( isalnum(encoded_string[in_]) || (encoded_string[in_] == '+') || (encoded_string[in_] == '/'))
-  //       )  
 
-while (in_len-- && ( encoded_string[in_] != '=') && is_base64(encoded_string[in_]))  
-  {
-    char_array_4[i++] = encoded_string[in_]; in_++;
-    if (i ==4) {
-      for (i = 0; i <4; i++)
-        char_array_4[i] = static_cast<unsigned char>(base64_chars.find(char_array_4[i]));
+std::vector<boost::uint8_t> Utils::base64_decode(std::string const& encoded_string)
+{
+    const std::string base64_chars =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "abcdefghijklmnopqrstuvwxyz"
+        "0123456789+/";
 
-      char_array_3[0] = (char_array_4[0] << 2) + ((char_array_4[1] & 0x30) >> 4);
-      char_array_3[1] = ((char_array_4[1] & 0xf) << 4) + ((char_array_4[2] & 0x3c) >> 2);
-      char_array_3[2] = ((char_array_4[2] & 0x3) << 6) + char_array_4[3];
+    std::string::size_type in_len = encoded_string.size();
+    int i = 0;
+    int j = 0;
+    int in_ = 0;
+    unsigned char char_array_4[4], char_array_3[3];
+    std::vector<boost::uint8_t> ret;
 
-      for (i = 0; (i < 3); i++)
-        ret.push_back( char_array_3[i]);
-      i = 0;
+    // while (in_len-- &&
+    //       ( encoded_string[in_] != '=') &&
+    //       ( isalnum(encoded_string[in_]) || (encoded_string[in_] == '+') || (encoded_string[in_] == '/'))
+    //       )
+
+    while (in_len-- && (encoded_string[in_] != '=') && is_base64(encoded_string[in_]))
+    {
+        char_array_4[i++] = encoded_string[in_];
+        in_++;
+        if (i ==4)
+        {
+            for (i = 0; i <4; i++)
+                char_array_4[i] = static_cast<unsigned char>(base64_chars.find(char_array_4[i]));
+
+            char_array_3[0] = (char_array_4[0] << 2) + ((char_array_4[1] & 0x30) >> 4);
+            char_array_3[1] = ((char_array_4[1] & 0xf) << 4) + ((char_array_4[2] & 0x3c) >> 2);
+            char_array_3[2] = ((char_array_4[2] & 0x3) << 6) + char_array_4[3];
+
+            for (i = 0; (i < 3); i++)
+                ret.push_back(char_array_3[i]);
+            i = 0;
+        }
     }
-  }
 
-  if (i) {
-    for (j = i; j <4; j++)
-      char_array_4[j] = 0;
+    if (i)
+    {
+        for (j = i; j <4; j++)
+            char_array_4[j] = 0;
 
-    for (j = 0; j <4; j++)
-      char_array_4[j] = static_cast<unsigned char>(base64_chars.find(char_array_4[j]));
+        for (j = 0; j <4; j++)
+            char_array_4[j] = static_cast<unsigned char>(base64_chars.find(char_array_4[j]));
 
-    char_array_3[0] = (char_array_4[0] << 2) + ((char_array_4[1] & 0x30) >> 4);
-    char_array_3[1] = ((char_array_4[1] & 0xf) << 4) + ((char_array_4[2] & 0x3c) >> 2);
-    char_array_3[2] = ((char_array_4[2] & 0x3) << 6) + char_array_4[3];
+        char_array_3[0] = (char_array_4[0] << 2) + ((char_array_4[1] & 0x30) >> 4);
+        char_array_3[1] = ((char_array_4[1] & 0xf) << 4) + ((char_array_4[2] & 0x3c) >> 2);
+        char_array_3[2] = ((char_array_4[2] & 0x3) << 6) + char_array_4[3];
 
-    for (j = 0; (j < i - 1); j++) ret.push_back( char_array_3[j]);
-  }
+        for (j = 0; (j < i - 1); j++) ret.push_back(char_array_3[j]);
+    }
 
-  return ret;
+    return ret;
 }
 
 

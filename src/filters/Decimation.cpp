@@ -36,7 +36,10 @@
 
 #include <pdal/PointBuffer.hpp>
 
-namespace pdal { namespace filters {
+namespace pdal
+{
+namespace filters
+{
 
 
 Decimation::Decimation(Stage& prevStage, const Options& options)
@@ -59,7 +62,7 @@ void Decimation::initialize()
 {
     Filter::initialize();
 
-    this->setNumPoints( this->getNumPoints() / m_step );
+    this->setNumPoints(this->getNumPoints() / m_step);
 
     return;
 }
@@ -90,22 +93,22 @@ boost::uint32_t Decimation::processBuffer(PointBuffer& dstData, const PointBuffe
     // find start point
     if ((srcStartIndex+srcIndex) % m_step != 0)
     {
-        srcIndex += m_step - ( (srcStartIndex+srcIndex) % m_step ) ;
+        srcIndex += m_step - ((srcStartIndex+srcIndex) % m_step) ;
         assert((srcStartIndex+srcIndex) % m_step == 0);
     }
 
     while (srcIndex < numSrcPoints)
     {
         assert((srcStartIndex+srcIndex) % m_step == 0);
-        
+
         dstData.copyPointFast(dstIndex, srcIndex, srcData);
         dstData.setNumPoints(dstIndex+1);
         ++dstIndex;
         ++numPointsAdded;
-        
+
         srcIndex += m_step;
     }
-    
+
     assert(dstIndex <= dstData.getCapacity());
 
     return numPointsAdded;
@@ -119,7 +122,10 @@ pdal::StageSequentialIterator* Decimation::createSequentialIterator(PointBuffer&
 
 
 
-namespace iterators { namespace sequential {
+namespace iterators
+{
+namespace sequential
+{
 
 
 Decimation::Decimation(const pdal::filters::Decimation& filter, PointBuffer& buffer)
@@ -169,7 +175,7 @@ boost::uint32_t Decimation::readBufferImpl(PointBuffer& dstData)
         // we got no data, and there is no more to get -- exit the loop
         if (numSrcPointsRead == 0) break;
 
-        // copy points from src (prev stage) into dst (our stage), 
+        // copy points from src (prev stage) into dst (our stage),
         // based on the CropFilter's rules (i.e. its bounds)
         const boost::uint32_t numPointsAdded = m_filter.processBuffer(dstData, srcData, srcStartIndex);
 
@@ -183,5 +189,7 @@ boost::uint32_t Decimation::readBufferImpl(PointBuffer& dstData)
 
 
 
-} } // iterators::sequential
-} } // namespaces
+}
+} // iterators::sequential
+}
+} // namespaces

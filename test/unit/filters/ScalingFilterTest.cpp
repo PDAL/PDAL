@@ -56,29 +56,29 @@ BOOST_AUTO_TEST_CASE(ScalingFilterTest_test_1)
 
     pdal::drivers::pipeline::Reader reader(options);
     reader.initialize();
-    
+
     pdal::filters::Scaling const* filter = static_cast<pdal::filters::Scaling const*>(reader.getManager().getStage());
     pdal::Options opt = filter->getOptions();
     // std::cout << "filter ops: " << opt << std::endl;
-    
+
     const pdal::Schema& schema = filter->getSchema();
     pdal::PointBuffer data(schema, 1);
 
     pdal::StageSequentialIterator* iter = filter->createSequentialIterator(data);
-    
+
     boost::uint32_t numRead = iter->read(data);
     BOOST_CHECK(numRead == 1);
     delete iter;
-    
+
     pdal::Schema const& schema2 = data.getSchema();
-    
+
     boost::optional<pdal::Dimension const&> scaledDimX = schema2.getDimension("X", "filters.scaling");
     boost::optional<pdal::Dimension const&> scaledDimY = schema2.getDimension("Y", "filters.scaling");
 
     if (!scaledDimX) throw pdal::pdal_error("Hey, no dimension was selected");
     boost::int32_t x = data.getField<boost::int32_t>(*scaledDimX, 0);
     boost::int32_t y = data.getField<boost::int32_t>(*scaledDimY, 0);
-    
+
     BOOST_CHECK_EQUAL(x, 6370112);
     BOOST_CHECK_EQUAL(y, 8490263);
 
@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE(ScalingFilterTest_test_1)
     if (!unscaledDimX) throw pdal::pdal_error("Hey, no dimension was selected");
     x = data.getField<boost::int32_t>(*unscaledDimX, 0);
     y = data.getField<boost::int32_t>(*unscaledDimY, 0);
-    
+
     BOOST_CHECK_EQUAL(x, 63701224);
     BOOST_CHECK_EQUAL(y, 84902831);
 
@@ -109,7 +109,7 @@ BOOST_AUTO_TEST_CASE(ScalingFilterFloat_test)
     opts.add(opt2);
     opts.add(opt3);
     opts.add(opt4);
-    
+
     Option scalex("scale", 0.00001f, "fpscale");
     Option offsetx("offset", 12345, "offset");
     Option xdim("dimension", "X", "dimension to scale");
@@ -156,7 +156,7 @@ BOOST_AUTO_TEST_CASE(ScalingFilterFloat_test)
     const Schema& schema = scaling.getSchema();
 
     PointBuffer data(schema, 750);
- 
+
     StageSequentialIterator* iter = scaling.createSequentialIterator(data);
     boost::uint32_t numRead = iter->read(data);
 

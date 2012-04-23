@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_SUITE(ByteSwapFilterTest)
 BOOST_AUTO_TEST_CASE(test_swapping)
 {
     Bounds<double> srcBounds(0.0, 0.0, 0.0, 10.0, 100.0, 1000.0);
-    
+
     boost::uint32_t buffer_size = 20;
     pdal::drivers::faux::Reader reader(srcBounds, buffer_size, pdal::drivers::faux::Reader::Ramp);
 
@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(test_swapping)
     BOOST_CHECK_EQUAL(filter.getName(), "filters.byteswap");
 
     filter.initialize();
-    
+
     Schema const& readerSchema = reader.getSchema();
     boost::optional<Dimension const&> readerdimX = readerSchema.getDimension("X");
     boost::optional<Dimension const&> readerdimY = readerSchema.getDimension("Y");
@@ -75,14 +75,14 @@ BOOST_AUTO_TEST_CASE(test_swapping)
     BOOST_CHECK_EQUAL(readerdimY->getEndianness(), pdal::Endian_Little);
     BOOST_CHECK_EQUAL(readerdimZ->getEndianness(), pdal::Endian_Little);
     BOOST_CHECK_EQUAL(readerdimTime->getEndianness(), pdal::Endian_Little);
-    
+
 
     Schema const& filterSchema = filter.getSchema();
     boost::optional<Dimension const&> filterdimX = filterSchema.getDimension("X");
     boost::optional<Dimension const&> filterdimY = filterSchema.getDimension("Y");
     boost::optional<Dimension const&> filterdimZ = filterSchema.getDimension("Z");
     boost::optional<Dimension const&> filterdimTime = filterSchema.getDimension("Time");
-    
+
     BOOST_CHECK_EQUAL(filterdimX->getEndianness(), pdal::Endian_Big);
     BOOST_CHECK_EQUAL(filterdimY->getEndianness(), pdal::Endian_Big);
     BOOST_CHECK_EQUAL(filterdimZ->getEndianness(), pdal::Endian_Big);
@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE(test_swapping)
 
 
     const Schema& schema = filter.getSchema();
-    
+
     PointBuffer flipped(schema, buffer_size);
     boost::scoped_ptr<StageSequentialIterator> flipped_iter(filter.createSequentialIterator(flipped));
     const boost::uint32_t fliped_read = flipped_iter->read(flipped);
@@ -100,7 +100,7 @@ BOOST_AUTO_TEST_CASE(test_swapping)
     boost::scoped_ptr<StageSequentialIterator> unflipped_iter(reader.createSequentialIterator(unflipped));
     const boost::uint32_t unfliped_read = unflipped_iter->read(unflipped);
     BOOST_CHECK_EQUAL(unfliped_read, buffer_size);
-    
+
 
     boost::optional<Dimension const&> unflippeddimX = unflipped.getSchema().getDimension("X");
     boost::optional<Dimension const&> unflippeddimY = unflipped.getSchema().getDimension("Y");
@@ -111,7 +111,7 @@ BOOST_AUTO_TEST_CASE(test_swapping)
     boost::optional<Dimension const&> flippeddimY = flipped.getSchema().getDimension("Y");
     boost::optional<Dimension const&> flippeddimZ = flipped.getSchema().getDimension("Z");
     boost::optional<Dimension const&> flippeddimTime = flipped.getSchema().getDimension("Time");
-    
+
     for (boost::uint32_t i = 0 ; i < buffer_size; ++i)
     {
 
@@ -119,7 +119,7 @@ BOOST_AUTO_TEST_CASE(test_swapping)
         double unflipped_y = unflipped.getField<double>(*unflippeddimY, i);
         double unflipped_z = unflipped.getField<double>(*unflippeddimZ, i);
         boost::uint64_t unflipped_t = unflipped.getField<boost::uint64_t>(*unflippeddimTime, i);
-        
+
 
         double flipped_x = flipped.getField<double>(*flippeddimX, i);
         double flipped_y = flipped.getField<double>(*flippeddimY, i);
@@ -136,7 +136,7 @@ BOOST_AUTO_TEST_CASE(test_swapping)
 
         double reflipped_z = flipped_z;
         SWAP_ENDIANNESS(reflipped_z);
-        BOOST_CHECK_EQUAL(unflipped_z, reflipped_z);        
+        BOOST_CHECK_EQUAL(unflipped_z, reflipped_z);
 
         boost::uint64_t reflipped_t = flipped_t;
         SWAP_ENDIANNESS(reflipped_t);

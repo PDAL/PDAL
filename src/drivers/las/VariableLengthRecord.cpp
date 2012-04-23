@@ -40,7 +40,12 @@
 #include "GeotiffSupport.hpp"
 
 
-namespace pdal { namespace drivers { namespace las {
+namespace pdal
+{
+namespace drivers
+{
+namespace las
+{
 
 static const std::string s_geotiffUserId = "LASF_Projection";
 static const boost::uint16_t s_geotiffRecordId_directory = 34735;
@@ -49,7 +54,7 @@ static const boost::uint16_t s_geotiffRecordId_asciiparams = 34737;
 static const std::string s_geotiffDescriptionId_directory = "GeoTIFF GeoKeyDirectoryTag";
 static const std::string s_geotiffDescriptionId_doubleparams = "GeoTIFF GeoDoubleParamsTag";
 static const std::string s_geotiffDescriptionId_asciiparams = "GeoTIFF GeoAsciiParamsTag";
-        
+
 static const std::string s_wktUserId = "liblas";
 static const boost::uint16_t s_wktRecordId = 2112;
 static const std::string s_wktDescription = "OGR variant of OpenGIS WKT SRS";
@@ -57,11 +62,11 @@ static const std::string s_wktDescription = "OGR variant of OpenGIS WKT SRS";
 //const int VariableLengthRecord::s_headerLength = 54;
 
 VariableLengthRecord::VariableLengthRecord(boost::uint16_t reserved,
-                                           std::string userId, 
-                                           boost::uint16_t recordId,
-                                           std::string description,
-                                           const boost::uint8_t* bytes,
-                                           std::size_t length)
+        std::string userId,
+        boost::uint16_t recordId,
+        std::string description,
+        const boost::uint8_t* bytes,
+        std::size_t length)
     : m_reserved(0xAABB)
     , m_userId(userId)
     , m_recordId(recordId)
@@ -205,7 +210,7 @@ static bool setSRSFromVLRs_wkt(const std::vector<VariableLengthRecord>& vlrs, Sp
     for (std::size_t i = 0; i < vlrs.size(); ++i)
     {
         const VariableLengthRecord& vlr = vlrs[i];
-        
+
         if (vlr.isMatch(s_wktUserId, s_wktRecordId))
         {
             const boost::uint8_t* data = vlr.getBytes();
@@ -233,11 +238,11 @@ static bool setSRSFromVLRs_geotiff(const std::vector<VariableLengthRecord>& vlrs
     // first we try to get the 2212 VLR
 
     // nothing is going to happen here if we don't have any vlrs describing
-    // srs information on the spatialreference.  
+    // srs information on the spatialreference.
     for (std::size_t i = 0; i < vlrs.size(); ++i)
     {
         const VariableLengthRecord& vlr = vlrs[i];
-        
+
         if (!vlr.isMatch(s_geotiffUserId))
             continue;
 
@@ -250,44 +255,44 @@ static bool setSRSFromVLRs_geotiff(const std::vector<VariableLengthRecord>& vlrs
 
         switch (vlr.getRecordId())
         {
-        case s_geotiffRecordId_directory:
-            {
-                int count = length / sizeof(short);
-                // discard invalid "zero" geotags some software emits.
-                while( count > 4 
-                    && data[count-1] == 0
-                    && data[count-2] == 0
-                    && data[count-3] == 0
-                    && data[count-4] == 0 )
+            case s_geotiffRecordId_directory:
                 {
-                    count -= 4;
-                    data[3] -= 1;
+                    int count = length / sizeof(short);
+                    // discard invalid "zero" geotags some software emits.
+                    while (count > 4
+                            && data[count-1] == 0
+                            && data[count-2] == 0
+                            && data[count-3] == 0
+                            && data[count-4] == 0)
+                    {
+                        count -= 4;
+                        data[3] -= 1;
+                    }
+
+                    geotiff.setKey(s_geotiffRecordId_directory, count, GeotiffSupport::Geotiff_KeyType_SHORT, data);
                 }
+                gotSomething = true;
+                break;
 
-                geotiff.setKey(s_geotiffRecordId_directory, count, GeotiffSupport::Geotiff_KeyType_SHORT, data);
-            }
-            gotSomething = true;
-            break;
+            case s_geotiffRecordId_doubleparams:
+                {
+                    int count = length / sizeof(double);
+                    geotiff.setKey(s_geotiffRecordId_doubleparams, count, GeotiffSupport::Geotiff_KeyType_DOUBLE, data);
+                }
+                gotSomething = true;
+                break;
 
-        case s_geotiffRecordId_doubleparams:
-            {
-                int count = length / sizeof(double);
-                geotiff.setKey(s_geotiffRecordId_doubleparams, count, GeotiffSupport::Geotiff_KeyType_DOUBLE, data);
-            }        
-            gotSomething = true;
-            break;
+            case s_geotiffRecordId_asciiparams:
+                {
+                    int count = length/sizeof(boost::uint8_t);
+                    geotiff.setKey(s_geotiffRecordId_asciiparams, count, GeotiffSupport::Geotiff_KeyType_ASCII, data);
+                }
+                gotSomething = true;
+                break;
 
-        case s_geotiffRecordId_asciiparams:
-            {
-                int count = length/sizeof(boost::uint8_t);
-                geotiff.setKey(s_geotiffRecordId_asciiparams, count, GeotiffSupport::Geotiff_KeyType_ASCII, data);
-            }
-            gotSomething = true;
-            break;
-
-        default:
-            // ummm....?
-            break;
+            default:
+                // ummm....?
+                break;
         }
 
         delete[] data;
@@ -362,7 +367,7 @@ void VariableLengthRecord::setVLRsFromSRS(const SpatialReference& srs, std::vect
 
     ret = geotiff.getKey(s_geotiffRecordId_directory, &kcount, &ktype, (void**)&kdata);
     if (ret)
-    {    
+    {
         boost::uint16_t length = 2 * static_cast<boost::uint16_t>(kcount);
 
         std::vector<boost::uint8_t> data;
@@ -371,9 +376,9 @@ void VariableLengthRecord::setVLRsFromSRS(const SpatialReference& srs, std::vect
         for (int i = 0; i < kcount; i++)
         {
             kvalue = kdata[i];
-            
-            boost::uint8_t* v = reinterpret_cast<boost::uint8_t*>(&kvalue); 
-            
+
+            boost::uint8_t* v = reinterpret_cast<boost::uint8_t*>(&kvalue);
+
             data.push_back(v[0]);
             data.push_back(v[1]);
         }
@@ -384,18 +389,18 @@ void VariableLengthRecord::setVLRsFromSRS(const SpatialReference& srs, std::vect
 
     ret = geotiff.getKey(s_geotiffRecordId_doubleparams, &dcount, &dtype, (void**)&ddata);
     if (ret)
-    {    
+    {
         boost::uint16_t length = 8 * static_cast<boost::uint16_t>(dcount);
-        
+
         std::vector<boost::uint8_t> data;
-       
+
         // Copy the data into the data vector
-        for (int i=0; i<dcount;i++)
+        for (int i=0; i<dcount; i++)
         {
             dvalue = ddata[i];
-            
+
             boost::uint8_t* v =  reinterpret_cast<boost::uint8_t*>(&dvalue);
-            
+
             data.push_back(v[0]);
             data.push_back(v[1]);
             data.push_back(v[2]);
@@ -403,64 +408,64 @@ void VariableLengthRecord::setVLRsFromSRS(const SpatialReference& srs, std::vect
             data.push_back(v[4]);
             data.push_back(v[5]);
             data.push_back(v[6]);
-            data.push_back(v[7]);   
-        }        
+            data.push_back(v[7]);
+        }
 
         VariableLengthRecord record(0, s_geotiffUserId, s_geotiffRecordId_doubleparams, s_geotiffDescriptionId_doubleparams, &data[0], length);
 
         vlrs.push_back(record);
     }
-    
+
     ret = geotiff.getKey(s_geotiffRecordId_asciiparams, &acount, &atype, (void**)&adata);
-    if (ret) 
-    {                    
-         boost::uint16_t length = static_cast<boost::uint16_t>(acount);
+    if (ret)
+    {
+        boost::uint16_t length = static_cast<boost::uint16_t>(acount);
 
-         std::vector<boost::uint8_t> data;
+        std::vector<boost::uint8_t> data;
 
-         // whoa.  If the returned count was 0, it is because there 
-         // was a bug in libgeotiff that existed before r1531 where it 
-         // didn't calculate the string length for an ASCII geotiff tag.
-         // We need to throw an exception in this case because we're
-         // screwed, and if we don't we'll end up writing bad GeoTIFF keys.
-         if (!acount)
-         {
-             throw std::runtime_error("GeoTIFF ASCII key with no returned size. " 
-                                      "Upgrade your libgeotiff to a version greater "
-                                      "than r1531 (libgeotiff 1.2.6)");
-         }
+        // whoa.  If the returned count was 0, it is because there
+        // was a bug in libgeotiff that existed before r1531 where it
+        // didn't calculate the string length for an ASCII geotiff tag.
+        // We need to throw an exception in this case because we're
+        // screwed, and if we don't we'll end up writing bad GeoTIFF keys.
+        if (!acount)
+        {
+            throw std::runtime_error("GeoTIFF ASCII key with no returned size. "
+                                     "Upgrade your libgeotiff to a version greater "
+                                     "than r1531 (libgeotiff 1.2.6)");
+        }
 
-         // Copy the data into the data vector
-         for (int i=0; i<acount;i++)
-         {
-             avalue = adata[i];
-             boost::uint8_t* v =  reinterpret_cast<boost::uint8_t*>(&avalue);
-             data.push_back(v[0]);
-         }
+        // Copy the data into the data vector
+        for (int i=0; i<acount; i++)
+        {
+            avalue = adata[i];
+            boost::uint8_t* v =  reinterpret_cast<boost::uint8_t*>(&avalue);
+            data.push_back(v[0]);
+        }
 
-         VariableLengthRecord record(0, s_geotiffUserId, s_geotiffRecordId_asciiparams, s_geotiffDescriptionId_asciiparams, &data[0], length);
+        VariableLengthRecord record(0, s_geotiffUserId, s_geotiffRecordId_asciiparams, s_geotiffDescriptionId_asciiparams, &data[0], length);
 
 
         if (data.size() > (std::numeric_limits<boost::uint16_t>::max()))
         {
             std::ostringstream oss;
             std::vector<boost::uint8_t>::size_type overrun = data.size() - static_cast<std::vector<boost::uint8_t>::size_type>(std::numeric_limits<boost::uint16_t>::max());
-            oss << "The size of the GeoTIFF GeoAsciiParamsTag, " << data.size() << ", is " << overrun 
-                << " bytes too large to fit inside the maximum size of a VLR which is " 
+            oss << "The size of the GeoTIFF GeoAsciiParamsTag, " << data.size() << ", is " << overrun
+                << " bytes too large to fit inside the maximum size of a VLR which is "
                 << (std::numeric_limits<boost::uint16_t>::max()) << " bytes.";
             throw std::runtime_error(oss.str());
 
         }
 
-         vlrs.push_back(record);
+        vlrs.push_back(record);
     }
 #endif
     boost::ignore_unused_variable_warning(modeFlag);
 
-    std::string wkt = srs.getWKT( SpatialReference::eCompoundOK );
+    std::string wkt = srs.getWKT(SpatialReference::eCompoundOK);
 
     // Add a WKT VLR if we have a WKT definition.
-    if( wkt != "" )
+    if (wkt != "")
     {
         const boost::uint8_t* wkt_bytes = reinterpret_cast<const boost::uint8_t*>(wkt.c_str());
 
@@ -470,15 +475,15 @@ void VariableLengthRecord::setVLRsFromSRS(const SpatialReference& srs, std::vect
         {
             std::ostringstream oss;
             std::vector<boost::uint8_t>::size_type overrun = len - static_cast<std::vector<boost::uint8_t>::size_type>(std::numeric_limits<boost::uint16_t>::max());
-            oss << "The size of the wkt, " << len << ", is " << overrun 
-                << " bytes too large to fit inside the maximum size of a VLR which is " 
+            oss << "The size of the wkt, " << len << ", is " << overrun
+                << " bytes too large to fit inside the maximum size of a VLR which is "
                 << std::numeric_limits<boost::uint16_t>::max() << " bytes.";
-            throw std::runtime_error(oss.str()); 
+            throw std::runtime_error(oss.str());
         }
 
         VariableLengthRecord wkt_record(0, s_wktUserId, s_wktRecordId, s_wktDescription, wkt_bytes, len);
 
-        vlrs.push_back( wkt_record );
+        vlrs.push_back(wkt_record);
     }
 
     return;
@@ -488,8 +493,8 @@ void VariableLengthRecord::setVLRsFromSRS(const SpatialReference& srs, std::vect
 void VariableLengthRecord::clearVLRs(GeoVLRType eType, std::vector<VariableLengthRecord>& vlrs)
 {
     std::vector<VariableLengthRecord>::iterator it;
-    
-    for (it = vlrs.begin(); it != vlrs.end(); )
+
+    for (it = vlrs.begin(); it != vlrs.end();)
     {
         VariableLengthRecord const& vlr = *it;
         bool wipe = false;
@@ -498,17 +503,17 @@ void VariableLengthRecord::clearVLRs(GeoVLRType eType, std::vector<VariableLengt
         {
             wipe = true;
         }
-        else if (eType == eGeoTIFF && 
-                 (s_geotiffRecordId_directory == vlr.getRecordId() || 
-                  s_geotiffRecordId_doubleparams == vlr.getRecordId() || 
+        else if (eType == eGeoTIFF &&
+                 (s_geotiffRecordId_directory == vlr.getRecordId() ||
+                  s_geotiffRecordId_doubleparams == vlr.getRecordId() ||
                   s_geotiffRecordId_asciiparams == vlr.getRecordId()))
         {
             wipe = true;
         }
 
-        if( wipe )
+        if (wipe)
         {
-            it = vlrs.erase( it );
+            it = vlrs.erase(it);
         }
         else
         {
@@ -551,13 +556,13 @@ bool VariableLengthRecord::isGeoVLR() const
 
 //--------------------------------------------------------------------------------------
 
-void VLRList::add(VariableLengthRecord const& v) 
+void VLRList::add(VariableLengthRecord const& v)
 {
     m_list.push_back(v);
 }
 
 
-const VariableLengthRecord& VLRList::get(boost::uint32_t index) const 
+const VariableLengthRecord& VLRList::get(boost::uint32_t index) const
 {
     return m_list[index];
 }
@@ -581,8 +586,8 @@ std::vector<VariableLengthRecord>& VLRList::getAll()
 }
 
 
-void VLRList::remove(boost::uint32_t index) 
-{    
+void VLRList::remove(boost::uint32_t index)
+{
     if (index >= m_list.size())
         throw std::out_of_range("index is out of range");
 
@@ -601,10 +606,10 @@ static bool sameVLRs(const std::string& userId, boost::uint16_t recordId, const 
 
 void VLRList::remove(const std::string& name, boost::uint16_t id)
 {
-    m_list.erase( std::remove_if( m_list.begin(), 
+    m_list.erase(std::remove_if(m_list.begin(),
                                 m_list.end(),
-                                boost::bind( &sameVLRs, name, id, _1 ) ),
-                m_list.end());
+                                boost::bind(&sameVLRs, name, id, _1)),
+                 m_list.end());
 
     return;
 }
@@ -614,7 +619,7 @@ boost::uint32_t VLRList::count() const
 {
     return m_list.size();
 }
-    
+
 
 void VLRList::constructSRS(SpatialReference& srs) const
 {
@@ -628,4 +633,6 @@ void VLRList::addVLRsFromSRS(const SpatialReference& srs, SpatialReference::WKTM
     VariableLengthRecord::setVLRsFromSRS(srs, m_list, modeFlag);
 }
 
-} } } // namespaces
+}
+}
+} // namespaces

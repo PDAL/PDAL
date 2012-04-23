@@ -39,12 +39,18 @@
 
 
 #include <pdal/Environment.hpp>
-struct PDALConfig 
+struct PDALConfig
 {
-    PDALConfig()   { ::pdal::Environment::startup(); }
-    ~PDALConfig()  { ::pdal::Environment::shutdown(); }
+    PDALConfig()
+    {
+        ::pdal::Environment::startup();
+    }
+    ~PDALConfig()
+    {
+        ::pdal::Environment::shutdown();
+    }
 };
-BOOST_GLOBAL_FIXTURE( PDALConfig )
+BOOST_GLOBAL_FIXTURE(PDALConfig)
 
 
 #include "TestConfig.hpp"
@@ -69,7 +75,7 @@ BOOST_GLOBAL_FIXTURE(TestConfig)
 //     --log_format=X (-f X)   # X = xml|hrf
 //     --log_level=X (-l X)    # X = error|message|all|... (default=error)
 //     --log_sink=X (-k X)     # X = filename
-//     
+//
 //     --report_format=X (-o X)
 //     --report_level=X (-r X)
 //     --report_sink=X (-e X)

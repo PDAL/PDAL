@@ -50,7 +50,7 @@ void Filter::initialize()
 {
     Stage::initialize();
 
-    // by default, we set our core properties to be the same as those 
+    // by default, we set our core properties to be the same as those
     // of the previous stage
     this->setCoreProperties(getPrevStage());
 
@@ -63,7 +63,7 @@ boost::property_tree::ptree Filter::serializePipeline() const
     boost::property_tree::ptree tree;
 
     tree.add("<xmlattr>.type", getName());
-    
+
     PipelineWriter::write_option_ptree(tree, getOptions());
     PipelineWriter::write_metadata_ptree(tree, getMetadata());
 
@@ -71,7 +71,7 @@ boost::property_tree::ptree Filter::serializePipeline() const
     boost::property_tree::ptree subtree = stage.serializePipeline();
 
     tree.add_child(subtree.begin()->first, subtree.begin()->second);
-    
+
     boost::property_tree::ptree root;
     root.add_child("Filter", tree);
 

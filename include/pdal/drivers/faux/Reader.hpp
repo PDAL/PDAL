@@ -41,21 +41,26 @@
 
 namespace pdal
 {
-    class PointBuffer;
+class PointBuffer;
 }
 
-namespace pdal { namespace drivers { namespace faux {
+namespace pdal
+{
+namespace drivers
+{
+namespace faux
+{
 
 
 // The FauxReader doesn't read from disk, but instead just makes up data for its
-// points.  The reader is constructed with a given bounding box and a given 
+// points.  The reader is constructed with a given bounding box and a given
 // number of points.
 //
 // This reader knows about 4 fields (Dimensions):
 //    X,Y,Z - floats
 //    Time  - uint64
 //
-// It supports a few modes: 
+// It supports a few modes:
 //   - "random" generates points that are randomly distributed within the given bounding box
 //   - "constant" generates its points to always be at the minimum of the bounding box
 //   - "ramp" generates its points as a linear ramp from the minimum of the bbox to the maximum
@@ -77,18 +82,18 @@ public:
     Reader(const Options& options);
     Reader(const Bounds<double>&, boost::uint64_t numPoints, Mode mode);
     Reader(const Bounds<double>&, boost::uint64_t numPoints, Mode mode, const std::vector<Dimension>& dimensions);
-    
+
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
     virtual void addDefaultDimensions();
-    
+
     Mode getMode() const;
-    
-    bool supportsIterator (StageIteratorType t) const
-    {   
-        if (t == StageIterator_Sequential ) return true;
-        if (t == StageIterator_Random ) return true;
-        
+
+    bool supportsIterator(StageIteratorType t) const
+    {
+        if (t == StageIterator_Sequential) return true;
+        if (t == StageIterator_Random) return true;
+
         return false;
     }
 
@@ -113,7 +118,10 @@ private:
 };
 
 
-namespace iterators { namespace sequential {
+namespace iterators
+{
+namespace sequential
+{
 
 class PDAL_DLL Reader : public pdal::ReaderSequentialIterator
 {
@@ -128,10 +136,14 @@ private:
     pdal::drivers::faux::Reader const& m_reader;
 };
 
-} } // iterators::sequential
+}
+} // iterators::sequential
 
-namespace iterators { namespace random {
-    
+namespace iterators
+{
+namespace random
+{
+
 class PDAL_DLL Reader : public pdal::ReaderRandomIterator
 {
 public:
@@ -144,9 +156,12 @@ private:
     pdal::drivers::faux::Reader const& m_reader;
 };
 
-} } // iterators::random
+}
+} // iterators::random
 
-} } } // namespaces
+}
+}
+} // namespaces
 
 
 #endif

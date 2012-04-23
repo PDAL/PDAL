@@ -37,7 +37,12 @@
 #include <pdal/PipelineReader.hpp>
 
 
-namespace pdal { namespace drivers { namespace pipeline {
+namespace pdal
+{
+namespace drivers
+{
+namespace pipeline
+{
 
 
 Reader::Reader(const Options& options)
@@ -72,7 +77,7 @@ void Reader::initialize()
     m_stage = m_manager->getStage();
     m_stage->initialize();
 
-    setSchema( m_stage->getSchema() );
+    setSchema(m_stage->getSchema());
 
     setNumPoints(m_stage->getNumPoints());
     setPointCountType(m_stage->getPointCountType());
@@ -89,8 +94,8 @@ const Options Reader::getDefaultOptions() const
     return options;
 }
 
-bool Reader::supportsIterator (StageIteratorType t) const
-{   
+bool Reader::supportsIterator(StageIteratorType t) const
+{
     return m_stage->supportsIterator(t);
 }
 
@@ -115,7 +120,7 @@ Metadata Reader::getMetadata() const
 {
     return m_stage->getMetadata();
 }
-    
+
 boost::property_tree::ptree Reader::toPTree() const
 {
     boost::property_tree::ptree tree = pdal::Reader::toPTree();
@@ -125,4 +130,6 @@ boost::property_tree::ptree Reader::toPTree() const
     return tree;
 }
 
-} } } // namespaces
+}
+}
+} // namespaces

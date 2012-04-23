@@ -36,7 +36,10 @@
 
 #include <pdal/PointBuffer.hpp>
 
-namespace pdal { namespace filters {
+namespace pdal
+{
+namespace filters
+{
 
 
 Color::Color(Stage& prevStage, const Options& options)
@@ -60,7 +63,7 @@ void Color::addDefaultDimensions()
     Dimension red("Red", dimension::UnsignedInteger, 2);
     red.setUUID("de62488f-5559-440f-bb60-d74db2c78c63");
     addDefaultDimension(red, getName());
-    
+
     Dimension green("Green", dimension::UnsignedInteger, 2);
     green.setUUID("6c3ebeb4-ffc0-4b57-9b4a-479939631599");
     addDefaultDimension(green, getName());
@@ -90,12 +93,12 @@ void Color::processBuffer(PointBuffer& data) const
     const boost::uint32_t numPoints = data.getNumPoints();
 
     const Schema& schema = data.getSchema();
-    
+
     boost::optional<Dimension const&> dimZ = schema.getDimensionOptional("Z");
     boost::optional<Dimension const&> dimRed = schema.getDimensionOptional("Red");
     boost::optional<Dimension const&> dimGreen = schema.getDimensionOptional("Green");
     boost::optional<Dimension const&> dimBlue = schema.getDimensionOptional("Blue");
-    
+
     if (!dimZ) throw pdal_error("Unable to get 'Z' dimension for colorization!");
 
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
@@ -202,7 +205,10 @@ pdal::StageSequentialIterator* Color::createSequentialIterator(PointBuffer& buff
 }
 
 
-namespace iterators { namespace sequential {
+namespace iterators
+{
+namespace sequential
+{
 
 
 Color::Color(const pdal::filters::Color& filter, PointBuffer& buffer)
@@ -235,6 +241,8 @@ bool Color::atEndImpl() const
     return getPrevIterator().atEnd();
 }
 
-} } // iterators::sequential
+}
+} // iterators::sequential
 
-} } // pdal::filters
+}
+} // pdal::filters

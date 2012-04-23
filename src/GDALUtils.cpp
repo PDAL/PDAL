@@ -41,23 +41,23 @@
 #endif
 
 
-// This is cheap hackery.  GDALUtils is the first file compiled, and 
-// we want to make sure we have the correct boost before we go and 
-// compile a bunch of junk.  boost::phoenix has a sub-namespace 
-// called boostphoenix that gets renamed pdalboostphoenix as part of the 
+// This is cheap hackery.  GDALUtils is the first file compiled, and
+// we want to make sure we have the correct boost before we go and
+// compile a bunch of junk.  boost::phoenix has a sub-namespace
+// called boostphoenix that gets renamed pdalboostphoenix as part of the
 // bcp extraction process.  If the user is using embedded boost, we can
-// know right away based on this sub-namespace.  All of the boost 
-// headers do boost=pdalboostphoenix; for a top namespace, however, so 
-// merely testing that is no good.  If someone has a better sub-namespace 
-// than the one out of phoenix which probably includes half of boost in the 
+// know right away based on this sub-namespace.  All of the boost
+// headers do boost=pdalboostphoenix; for a top namespace, however, so
+// merely testing that is no good.  If someone has a better sub-namespace
+// than the one out of phoenix which probably includes half of boost in the
 // process, please switch this.
 #include <boost/spirit/include/phoenix_object.hpp>
 
 #ifdef PDAL_EMBED_BOOST
-// If this fails, it is because we've included a boost that is not 
-// the embedded one ahead of the one in our tree.  Maybe the user 
-// forgot to clean up the CMakeCache.txt or something, or it is 
-// legitimately the wrong one. 
+// If this fails, it is because we've included a boost that is not
+// the embedded one ahead of the one in our tree.  Maybe the user
+// forgot to clean up the CMakeCache.txt or something, or it is
+// legitimately the wrong one.
 namespace pho = boost::pdalboostphoenix;
 #else
 namespace pho = boost::phoenix;
@@ -70,8 +70,8 @@ namespace gdal
 {
 
 Debug::Debug(bool isDebug, pdal::LogPtr log)
-: m_isDebug(isDebug)
-, m_log(log)
+    : m_isDebug(isDebug)
+    , m_log(log)
 {
     if (m_isDebug)
     {
@@ -79,7 +79,7 @@ Debug::Debug(bool isDebug, pdal::LogPtr log)
         if (gdal_debug == 0)
         {
             pdal::Utils::putenv("CPL_DEBUG=ON");
-        }        
+        }
         m_gdal_callback = boost::bind(&Debug::log, this, _1, _2, _3);
     }
     else
@@ -92,21 +92,26 @@ Debug::Debug(bool isDebug, pdal::LogPtr log)
     CPLPushErrorHandlerEx(&Debug::trampoline, this);
 #else
     CPLPushErrorHandler(&Debug::trampoline);
-#endif    
+#endif
 }
 
 void Debug::log(::CPLErr code, int num, char const* msg)
 {
     std::ostringstream oss;
-    
-    if (code == CE_Failure || code == CE_Fatal) {
+
+    if (code == CE_Failure || code == CE_Fatal)
+    {
         oss <<"GDAL Failure number=" << num << ": " << msg;
         throw pdal::gdal_error(oss.str());
-    } else if (code == CE_Debug) {
+    }
+    else if (code == CE_Debug)
+    {
         oss << "GDAL debug: " << msg;
         m_log->get(logDEBUG) << oss.str() << std::endl;
         return;
-    } else {
+    }
+    else
+    {
         return;
     }
 }
@@ -114,10 +119,13 @@ void Debug::log(::CPLErr code, int num, char const* msg)
 void Debug::error(::CPLErr code, int num, char const* msg)
 {
     std::ostringstream oss;
-    if (code == CE_Failure || code == CE_Fatal) {
+    if (code == CE_Failure || code == CE_Fatal)
+    {
         oss <<"GDAL Failure number=" << num << ": " << msg;
         throw pdal::gdal_error(oss.str());
-    } else {
+    }
+    else
+    {
         return;
     }
 }
@@ -154,7 +162,7 @@ std::streamsize VSILFileBuffer::read(char* s, std::streamsize n)
 std::streamsize VSILFileBuffer::write(const char* s, std::streamsize n)
 {
     // Write up to n characters from the buffer
-    // s to the output sequence, returning the 
+    // s to the output sequence, returning the
     // number of characters written
     size_t result = VSIFWriteL/*fwrite*/(s, 1, (size_t)n, m_fp);
     if (static_cast<std::streamsize>(result) != n)
@@ -163,10 +171,10 @@ std::streamsize VSILFileBuffer::write(const char* s, std::streamsize n)
 }
 
 
-std::streampos VSILFileBuffer::seek(boost::iostreams::stream_offset off, std::ios_base::seekdir way) 
+std::streampos VSILFileBuffer::seek(boost::iostreams::stream_offset off, std::ios_base::seekdir way)
 {
-    // Advances the read/write head by off characters, 
-    // returning the new position, where the offset is 
+    // Advances the read/write head by off characters,
+    // returning the new position, where the offset is
     // calculated from:
     //  - the start of the sequence if way == ios_base::beg
     //  - the current position if way == ios_base::cur
@@ -187,4 +195,5 @@ std::streampos VSILFileBuffer::seek(boost::iostreams::stream_offset off, std::io
 }
 #endif
 
-}} // namespace pdal::gdal
+}
+} // namespace pdal::gdal

@@ -56,13 +56,13 @@ public:
 
     Range()
         : m_minimum((std::numeric_limits<T>::max)())
-        , m_maximum((std::numeric_limits<T>::min)()) 
+        , m_maximum((std::numeric_limits<T>::min)())
     {
     }
 
     Range(T minimum, T maximum)
         : m_minimum(minimum)
-        , m_maximum(maximum) 
+        , m_maximum(maximum)
     {
     }
 
@@ -115,7 +115,7 @@ public:
     bool equal(Range const& other) const
     {
         if (!Utils::compare_distance(m_minimum, other.m_minimum) ||
-            !Utils::compare_distance(m_maximum, other.m_maximum))
+                !Utils::compare_distance(m_maximum, other.m_maximum))
         {
             return false;
         }
@@ -140,7 +140,7 @@ public:
 
     bool empty(void) const
     {
-        return Utils::compare_distance(m_minimum, (std::numeric_limits<T>::max)()) && 
+        return Utils::compare_distance(m_minimum, (std::numeric_limits<T>::max)()) &&
                Utils::compare_distance(m_maximum, (std::numeric_limits<T>::min)());
     }
 

@@ -43,14 +43,17 @@
 
 namespace pdal
 {
-    class PointBuffer;
-    namespace gdal
-    {
-        class Debug;
-    }
+class PointBuffer;
+namespace gdal
+{
+class Debug;
+}
 }
 
-namespace pdal { namespace filters {
+namespace pdal
+{
+namespace filters
+{
 
 class PDAL_DLL Reprojection : public Filter
 {
@@ -59,23 +62,26 @@ public:
 
     Reprojection(Stage& prevStage, const Options&);
     Reprojection(Stage& prevStage,
-                       const SpatialReference& outSRS);
+                 const SpatialReference& outSRS);
     Reprojection(Stage& prevStage,
-                       const SpatialReference& inSRS,
-                       const SpatialReference& outSRS);
+                 const SpatialReference& inSRS,
+                 const SpatialReference& outSRS);
 
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
 
-    bool supportsIterator (StageIteratorType t) const
-    {   
-        if (t == StageIterator_Sequential ) return true;
+    bool supportsIterator(StageIteratorType t) const
+    {
+        if (t == StageIterator_Sequential) return true;
 
         return false;
     }
 
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const { return NULL; }
+    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const
+    {
+        return NULL;
+    }
 
     void processBuffer(PointBuffer& data) const;
 
@@ -100,7 +106,10 @@ private:
 };
 
 
-namespace iterators { namespace sequential {
+namespace iterators
+{
+namespace sequential
+{
 
 
 class PDAL_DLL Reprojection : public pdal::FilterSequentialIterator
@@ -117,8 +126,10 @@ private:
 };
 
 
-} } // iterators::sequential
+}
+} // iterators::sequential
 
-} } // namespaces
+}
+} // namespaces
 
 #endif

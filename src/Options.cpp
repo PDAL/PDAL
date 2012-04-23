@@ -58,7 +58,7 @@ Option::Option(const boost::property_tree::ptree& tree)
     , m_description("")
 {
     using namespace boost::property_tree;
-    
+
     m_name = tree.get<std::string>("Name");
     m_value = tree.get<std::string>("Value");
     m_description = tree.count("Description") ? tree.get<std::string>("Description") : "";
@@ -95,7 +95,7 @@ boost::optional<Options const&> Option::getOptions() const
         return boost::optional<Options const&>();
 }
 
-void Option::setOptions(Options const& options) 
+void Option::setOptions(Options const& options)
 {
     options::OptionsPtr p = options::OptionsPtr(new Options(options));
     m_options = p;
@@ -105,8 +105,8 @@ void Option::setOptions(Options const& options)
 // explicit specialization:
 //   boost::lexical_cast only understands "0" and "1" for bools,
 //   so we handle those situations explicitly
-template<> bool Option::getValue() const 
-{ 
+template<> bool Option::getValue() const
+{
     if (m_value=="true") return true;
     if (m_value=="false") return false;
     return boost::lexical_cast<bool>(m_value);
@@ -115,8 +115,8 @@ template<> bool Option::getValue() const
 
 // explicit specialization:
 //   if we want to get out a (const ref) string, we don't need lexical_cast
-template<> const std::string& Option::getValue() const 
-{ 
+template<> const std::string& Option::getValue() const
+{
     return m_value;
 }
 
@@ -125,7 +125,7 @@ template<> const std::string& Option::getValue() const
 //   if insert a bool, we don't want it to be "0" or "1" (which is
 //   what lexical_cast would do)
 template<> void Option::setValue(const bool& value)
-{ 
+{
     m_value = value ? "true" : "false";
 }
 
@@ -133,7 +133,7 @@ template<> void Option::setValue(const bool& value)
 // explicit specialization:
 //   if we want to insert a string, we don't need lexical_cast
 template<> void Option::setValue(const std::string& value)
-{ 
+{
     m_value = value;
 }
 #endif
@@ -158,8 +158,8 @@ Options::Options(const Option& opt)
 Options::Options(const boost::property_tree::ptree& tree)
 {
     for (boost::property_tree::ptree::const_iterator iter = tree.begin();
-         iter != tree.end();
-         ++iter)
+            iter != tree.end();
+            ++iter)
     {
         assert(iter->first == "Option");
         Option opt(iter->second);
@@ -209,13 +209,13 @@ std::vector<Option> Options::getOptions(std::string const& name) const
     std::pair<std::multimap<std::string,Option>::const_iterator,std::multimap<std::string,Option>::const_iterator> ret;
     std::vector<Option> output;
     ret = m_options.equal_range(name);
-    std::multimap<std::string, Option>::const_iterator it;    
+    std::multimap<std::string, Option>::const_iterator it;
     for (it = ret.first; it != ret.second; ++it)
     {
         output.push_back((*it).second);
     }
     return output;
-    
+
 }
 
 // the empty options set
@@ -255,7 +255,7 @@ boost::property_tree::ptree Options::toPTree() const
         boost::property_tree::ptree subtree = option.toPTree();
         tree.add_child("Option", subtree);
     }
-    
+
     return tree;
 }
 

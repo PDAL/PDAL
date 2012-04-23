@@ -55,7 +55,12 @@
 //#include <cstdlib> // std::size_t
 //#include <cassert>
 
-namespace pdal { namespace drivers { namespace las {
+namespace pdal
+{
+namespace drivers
+{
+namespace las
+{
 
 static const char* laszip_userid("laszip encoded");
 static boost::uint16_t laszip_recordid = 22204;
@@ -80,7 +85,7 @@ ZipPoint::ZipPoint(PointFormat format, const std::vector<VariableLengthRecord>& 
             break;
         }
     }
-    
+
     if (vlr)
     {
         bool ok(false);
@@ -89,12 +94,13 @@ ZipPoint::ZipPoint(PointFormat format, const std::vector<VariableLengthRecord>& 
         {
             std::ostringstream oss;
             const char* err = m_zip->get_error();
-            if (err==NULL) err="(unknown error)";            
+            if (err==NULL) err="(unknown error)";
             oss << "Error unpacking zip VLR data: " << std::string(err);
             throw pdal_error(oss.str());
         }
 
-    } else
+    }
+    else
     {
 
         if (!m_zip->setup((boost::uint8_t)format, Support::getPointDataSize(format)))
@@ -102,7 +108,7 @@ ZipPoint::ZipPoint(PointFormat format, const std::vector<VariableLengthRecord>& 
             std::ostringstream oss;
             const char* err = m_zip->get_error();
             if (err==NULL) err="(unknown error)";
-            oss << "Error setting up LASzip for format " << format <<": " << err; 
+            oss << "Error setting up LASzip for format " << format <<": " << err;
             throw pdal_error(oss.str());
         }
     }
@@ -131,16 +137,16 @@ void ZipPoint::ConstructItems()
     // create the point data
     unsigned int point_offset = 0;
     m_lz_point = new unsigned char*[m_zip->num_items];
-    
-    boost::scoped_array<boost::uint8_t> d( new boost::uint8_t[ m_lz_point_size ] );
+
+    boost::scoped_array<boost::uint8_t> d(new boost::uint8_t[ m_lz_point_size ]);
     m_lz_point_data.swap(d);
     for (unsigned i = 0; i < m_zip->num_items; i++)
     {
         m_lz_point[i] = &(m_lz_point_data[point_offset]);
         point_offset += m_zip->items[i].size;
     }
-    
-    assert (point_offset == m_lz_point_size);
+
+    assert(point_offset == m_lz_point_size);
     return;
 }
 
@@ -168,6 +174,8 @@ bool ZipPoint::IsZipVLR(const VariableLengthRecord& vlr) const
 }
 
 
-} } } // namespaces
+}
+}
+} // namespaces
 
 #endif // PDAL_HAVE_LASZIP

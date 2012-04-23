@@ -72,7 +72,7 @@ public:
     /// Flags are composed with composed with Point::DataMemberFlag.
     /// Testing flags example: bool timeValid = e.who() & Point::eTime;
     unsigned int who() const
-   {
+    {
         return m_who;
     }
 
@@ -134,7 +134,7 @@ public:
 };
 
 
-// use this for situations where indeterminate point counts prevent some 
+// use this for situations where indeterminate point counts prevent some
 // operation from happening
 class indeterminate_count_error : public pdal_error
 {
@@ -229,7 +229,7 @@ public:
     {}
 };
 
-/// Used for pdal::Bounds 
+/// Used for pdal::Bounds
 class bounds_error : public pdal_error
 {
 public:

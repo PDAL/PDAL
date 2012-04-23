@@ -152,7 +152,7 @@ BOOST_AUTO_TEST_CASE(test_math)
     BOOST_CHECK(r1.getMaximum() == 75);
     BOOST_CHECK(r1.length() == 33);
 }
-    
+
 BOOST_AUTO_TEST_CASE(test_ranges)
 {
     Range<boost::uint8_t> r1(11,22);
@@ -199,7 +199,7 @@ BOOST_AUTO_TEST_CASE(test_output)
 {
     const Range<int> r1(1,2);
     const Range<double> r2(1.1,2.2);
-  
+
     std::stringstream ss1(std::stringstream::in | std::stringstream::out);
     std::stringstream ss2(std::stringstream::in | std::stringstream::out);
 
@@ -220,7 +220,7 @@ BOOST_AUTO_TEST_CASE(RangeTest_ptree)
 {
     const Range<int> r1(23,56);
     std::stringstream ss1(std::stringstream::in | std::stringstream::out);
-  
+
     boost::property_tree::ptree tree = r1.toPTree();
     boost::property_tree::write_xml(ss1, tree);
 
@@ -252,9 +252,9 @@ BOOST_AUTO_TEST_CASE(test_lexicalcast_whitespace)
 {
     const Range<double> b1 = boost::lexical_cast< Range<double> >("[1,101]");
     const Range<double> b2 = boost::lexical_cast< Range<double> >("[1, 101] ");
-    
+
     BOOST_CHECK_EQUAL(b1, b2);
-    
+
     return;
 }
 

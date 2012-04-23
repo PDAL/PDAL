@@ -46,7 +46,7 @@ BOOST_AUTO_TEST_CASE(test_file_ops)
 {
     std::string tmp1 = "unittest1.tmp";
     std::string tmp2 = "unittest2.tmp";
-    
+
     // first, clean up from any previous test run
     FileUtils::deleteFile(tmp1);
     FileUtils::deleteFile(tmp2);

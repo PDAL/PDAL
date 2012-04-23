@@ -44,37 +44,40 @@
 #include <pdal/GDALUtils.hpp>
 #endif
 
-namespace pdal { namespace filters {
+namespace pdal
+{
+namespace filters
+{
 
 
 #ifdef PDAL_HAVE_GDAL
-    struct OGRSpatialReferenceDeleter
+struct OGRSpatialReferenceDeleter
+{
+    template <typename T>
+    void operator()(T* ptr)
     {
-       template <typename T>
-       void operator()(T* ptr)
-       {
-           ::OSRDestroySpatialReference(ptr);
-       }
-    };
+        ::OSRDestroySpatialReference(ptr);
+    }
+};
 
-    struct OSRTransformDeleter
+struct OSRTransformDeleter
+{
+    template <typename T>
+    void operator()(T* ptr)
     {
-       template <typename T>
-       void operator()(T* ptr)
-       {
-           ::OCTDestroyCoordinateTransformation(ptr);
-       }
-    };
+        ::OCTDestroyCoordinateTransformation(ptr);
+    }
+};
 
 
-    struct GDALSourceDeleter
+struct GDALSourceDeleter
+{
+    template <typename T>
+    void operator()(T* ptr)
     {
-       template <typename T>
-       void operator()(T* ptr)
-       {
-           ::GDALClose(ptr);
-       }
-    };
+        ::GDALClose(ptr);
+    }
+};
 #endif
 
 
@@ -102,7 +105,7 @@ InPlaceReprojection::InPlaceReprojection(Stage& prevStage, const Options& option
     {
         m_inferInputSRS = true;
     }
-    
+
     return;
 }
 
@@ -120,43 +123,43 @@ void InPlaceReprojection::initialize()
 
 #ifdef PDAL_HAVE_GDAL
 
-    m_gdal_debug = boost::shared_ptr<pdal::gdal::Debug>( new pdal::gdal::Debug(isDebug(), log()));
-    
+    m_gdal_debug = boost::shared_ptr<pdal::gdal::Debug>(new pdal::gdal::Debug(isDebug(), log()));
+
     m_in_ref_ptr = ReferencePtr(OSRNewSpatialReference(0), OGRSpatialReferenceDeleter());
     m_out_ref_ptr = ReferencePtr(OSRNewSpatialReference(0), OGRSpatialReferenceDeleter());
-    
+
     int result = OSRSetFromUserInput(m_in_ref_ptr.get(), m_inSRS.getWKT(pdal::SpatialReference::eCompoundOK).c_str());
-    if (result != OGRERR_NONE) 
+    if (result != OGRERR_NONE)
     {
-        std::ostringstream msg; 
-        msg << "Could not import input spatial reference for InPlaceReprojection:: " 
-            << CPLGetLastErrorMsg() << " code: " << result 
+        std::ostringstream msg;
+        msg << "Could not import input spatial reference for InPlaceReprojection:: "
+            << CPLGetLastErrorMsg() << " code: " << result
             << " wkt: '" << m_inSRS.getWKT() << "'";
         throw std::runtime_error(msg.str());
     }
-    
+
     result = OSRSetFromUserInput(m_out_ref_ptr.get(), m_outSRS.getWKT(pdal::SpatialReference::eCompoundOK).c_str());
-    if (result != OGRERR_NONE) 
+    if (result != OGRERR_NONE)
     {
-        std::ostringstream msg; 
-        msg << "Could not import output spatial reference for InPlaceReprojection:: " 
-            << CPLGetLastErrorMsg() << " code: " << result 
+        std::ostringstream msg;
+        msg << "Could not import output spatial reference for InPlaceReprojection:: "
+            << CPLGetLastErrorMsg() << " code: " << result
             << " wkt: '" << m_outSRS.getWKT() << "'";
         std::string message(msg.str());
         throw std::runtime_error(message);
     }
-    m_transform_ptr = TransformPtr(OCTNewCoordinateTransformation( m_in_ref_ptr.get(), m_out_ref_ptr.get()), OSRTransformDeleter());
-    
+    m_transform_ptr = TransformPtr(OCTNewCoordinateTransformation(m_in_ref_ptr.get(), m_out_ref_ptr.get()), OSRTransformDeleter());
+
     if (!m_transform_ptr.get())
     {
-        std::ostringstream msg; 
+        std::ostringstream msg;
         msg << "Could not construct CoordinateTransformation in InPlaceReprojection:: ";
         std::string message(msg.str());
         throw std::runtime_error(message);
-    }    
-    
+    }
+
 #endif
-    
+
     setSpatialReference(m_outSRS);
 
     updateBounds();
@@ -190,7 +193,7 @@ const Options InPlaceReprojection::getDefaultOptions() const
     options.add(x_offset);
     options.add(y_offset);
     options.add(z_offset);
-        
+
     return options;
 }
 
@@ -205,13 +208,15 @@ void InPlaceReprojection::updateBounds()
     double maxx = oldBounds.getMaximum(0);
     double maxy = oldBounds.getMaximum(1);
     double maxz = oldBounds.getMaximum(2);
-    
-    try {
+
+    try
+    {
 
         transform(minx, miny, minz);
         transform(maxx, maxy, maxz);
-        
-    } catch (pdal::pdal_error&) 
+
+    }
+    catch (pdal::pdal_error&)
     {
         return;
     }
@@ -229,7 +234,7 @@ void InPlaceReprojection::checkImpedance()
     Schema& schema = this->getSchemaRef();
 
     schema::index_by_index const& dims = schema.getDimensions().get<schema::index>();
-          
+
     const std::string x_name = getOptions().getValueOrDefault<std::string>("x_dim", "X");
     const std::string y_name = getOptions().getValueOrDefault<std::string>("y_dim", "Y");
     const std::string z_name = getOptions().getValueOrDefault<std::string>("z_dim", "Z");
@@ -271,7 +276,7 @@ void InPlaceReprojection::checkImpedance()
         }
         new_dimensions.push_back(d);
     }
-    
+
     schema = Schema(new_dimensions);
     return;
 }
@@ -283,10 +288,10 @@ void InPlaceReprojection::transform(double& x, double& y, double& z) const
 #ifdef PDAL_HAVE_GDAL
     int ret = 0;
 
-    ret = OCTTransform(m_transform_ptr.get(), 1, &x, &y, &z);    
+    ret = OCTTransform(m_transform_ptr.get(), 1, &x, &y, &z);
     if (!ret)
     {
-        std::ostringstream msg; 
+        std::ostringstream msg;
         msg << "Could not project point for InPlaceReprojection::" << CPLGetLastErrorMsg() << ret;
         throw pdal_error(msg.str());
     }
@@ -295,16 +300,16 @@ void InPlaceReprojection::transform(double& x, double& y, double& z) const
     boost::ignore_unused_variable_warning(y);
     boost::ignore_unused_variable_warning(z);
 #endif
- 
+
     return;
 }
 
-double InPlaceReprojection::getScaledValue( PointBuffer& data, 
-                                            Dimension const& d, 
-                                            std::size_t pointIndex) const
+double InPlaceReprojection::getScaledValue(PointBuffer& data,
+        Dimension const& d,
+        std::size_t pointIndex) const
 {
     double output(0.0);
-        
+
     float flt(0.0);
     boost::int8_t i8(0);
     boost::uint8_t u8(0);
@@ -314,7 +319,7 @@ double InPlaceReprojection::getScaledValue( PointBuffer& data,
     boost::uint32_t u32(0);
     boost::int64_t i64(0);
     boost::uint64_t u64(0);
-    
+
     boost::uint32_t size = d.getByteSize();
     switch (d.getInterpretation())
     {
@@ -322,7 +327,7 @@ double InPlaceReprojection::getScaledValue( PointBuffer& data,
             if (size == 4)
             {
                 flt = data.getField<float>(d, pointIndex);
-                output = static_cast<double>(flt);                
+                output = static_cast<double>(flt);
             }
             if (size == 8)
             {
@@ -353,7 +358,7 @@ double InPlaceReprojection::getScaledValue( PointBuffer& data,
                 output = d.applyScaling<boost::int64_t>(i64);
             }
             break;
-            
+
         case dimension::UnsignedInteger:
         case dimension::UnsignedByte:
             if (size == 1)
@@ -381,14 +386,14 @@ double InPlaceReprojection::getScaledValue( PointBuffer& data,
         case dimension::Pointer:    // stored as 64 bits, even on a 32-bit box
         case dimension::Undefined:
             throw pdal_error("Dimension data type unable to be reprojected");
-    }    
-    
+    }
+
     return output;
 }
-void InPlaceReprojection::setScaledValue(PointBuffer& data, 
-                                               double value, 
-                                               Dimension const& d, 
-                                               std::size_t pointIndex) const
+void InPlaceReprojection::setScaledValue(PointBuffer& data,
+        double value,
+        Dimension const& d,
+        std::size_t pointIndex) const
 {
 
     float flt(0.0);
@@ -400,7 +405,7 @@ void InPlaceReprojection::setScaledValue(PointBuffer& data,
     boost::uint32_t u32(0);
     boost::int64_t i64(0);
     boost::uint64_t u64(0);
-    
+
 
     boost::uint32_t size = d.getByteSize();
     switch (d.getInterpretation())
@@ -440,7 +445,7 @@ void InPlaceReprojection::setScaledValue(PointBuffer& data,
                 data.setField<boost::int64_t>(d, pointIndex, i64);
             }
             break;
-            
+
         case dimension::UnsignedInteger:
         case dimension::UnsignedByte:
             if (size == 1)
@@ -469,9 +474,9 @@ void InPlaceReprojection::setScaledValue(PointBuffer& data,
         case dimension::Undefined:
             throw pdal_error("Dimension data type unable to be reprojected");
 
-    }    
-        
-    
+    }
+
+
 }
 
 void InPlaceReprojection::processBuffer(PointBuffer& data) const
@@ -479,29 +484,29 @@ void InPlaceReprojection::processBuffer(PointBuffer& data) const
     const boost::uint32_t numPoints = data.getNumPoints();
 
     const Schema& schema = this->getSchema();
-    
+
     Dimension const& d_x = schema.getDimension(getOptions().getValueOrDefault<std::string>("x_dim", "X"));
     Dimension const& d_y = schema.getDimension(getOptions().getValueOrDefault<std::string>("y_dim", "Y"));
     Dimension const& d_z = schema.getDimension(getOptions().getValueOrDefault<std::string>("z_dim", "Z"));
-    
+
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
         double x = getScaledValue(data, m_x, pointIndex);
         double y = getScaledValue(data, m_y, pointIndex);
         double z = getScaledValue(data, m_z, pointIndex);
-        
+
         // std::cout << "input: " << x << " y: " << y << " z: " << z << std::endl;
         this->transform(x,y,z);
         // std::cout << "output: " << x << " y: " << y << " z: " << z << std::endl;
-        
+
         setScaledValue(data, x, d_x, pointIndex);
         setScaledValue(data, y, d_y, pointIndex);
         setScaledValue(data, z, d_z, pointIndex);
 
-        // std::cout << "set: " << getScaledValue(data, d_x, pointIndex, indexX) 
-        //           << " y: " << getScaledValue(data, d_y, pointIndex, indexY) 
+        // std::cout << "set: " << getScaledValue(data, d_x, pointIndex, indexX)
+        //           << " y: " << getScaledValue(data, d_y, pointIndex, indexY)
         //           << " z: " << getScaledValue(data, d_z, pointIndex, indexZ) << std::endl;
-        
+
         data.setNumPoints(pointIndex+1);
     }
 
@@ -515,7 +520,10 @@ pdal::StageSequentialIterator* InPlaceReprojection::createSequentialIterator(Poi
 }
 
 
-namespace iterators { namespace sequential {
+namespace iterators
+{
+namespace sequential
+{
 
 
 InPlaceReprojection::InPlaceReprojection(const pdal::filters::InPlaceReprojection& filter, PointBuffer& buffer)
@@ -548,7 +556,9 @@ bool InPlaceReprojection::atEndImpl() const
     return getPrevIterator().atEnd();
 }
 
-} } // iterators::sequential
+}
+} // iterators::sequential
 
 
-} } // namespaces
+}
+} // namespaces

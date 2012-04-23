@@ -37,7 +37,12 @@
 #include <pdal/PointBuffer.hpp>
 
 
-namespace pdal { namespace drivers { namespace faux {
+namespace pdal
+{
+namespace drivers
+{
+namespace faux
+{
 
 
 Writer::Writer(Stage& prevStage, const Options& options)
@@ -135,4 +140,6 @@ boost::property_tree::ptree Writer::toPTree() const
     return tree;
 }
 
-} } } // namespaces
+}
+}
+} // namespaces

@@ -95,7 +95,7 @@ BOOST_AUTO_TEST_CASE(PLangTest_runtime_error)
 
     pdal::plang::Invocation meth(script);
     meth.compile();
-    
+
     BOOST_REQUIRE_THROW(meth.execute(), pdal::python_error);
 
     return;
@@ -114,9 +114,9 @@ BOOST_AUTO_TEST_CASE(PLangTest_toofewinputs)
 
     pdal::plang::Invocation meth(script);
     meth.compile();
-    
+
     BOOST_REQUIRE_THROW(meth.execute(), pdal::python_error);
-    
+
     return;
 }
 
@@ -133,9 +133,9 @@ BOOST_AUTO_TEST_CASE(PLangTest_toomanyinputs)
 
     pdal::plang::Invocation meth(script);
     meth.compile();
-    
+
     BOOST_REQUIRE_THROW(meth.execute(), pdal::python_error);
-    
+
     return;
 }
 
@@ -152,9 +152,9 @@ BOOST_AUTO_TEST_CASE(PLangTest_returnvoid)
 
     pdal::plang::Invocation meth(script);
     meth.compile();
-    
+
     BOOST_REQUIRE_THROW(meth.execute(), pdal::python_error);
-    
+
     return;
 }
 
@@ -171,9 +171,9 @@ BOOST_AUTO_TEST_CASE(PLangTest_returnint)
 
     pdal::plang::Invocation meth(script);
     meth.compile();
-    
+
     BOOST_REQUIRE_THROW(meth.execute(), pdal::python_error);
-    
+
     return;
 }
 
@@ -201,7 +201,7 @@ BOOST_AUTO_TEST_CASE(PLangTest_ins)
 
     pdal::plang::Invocation meth(script);
     meth.compile();
-    
+
     meth.insertArgument("X", (boost::uint8_t*)data, 5, 8, pdal::dimension::Float, 8);
 
     meth.execute();
@@ -226,9 +226,9 @@ BOOST_AUTO_TEST_CASE(PLangTest_outs)
 
     pdal::plang::Invocation meth(script);
     meth.compile();
-    
+
     meth.execute();
-    
+
     BOOST_CHECK(meth.hasOutputVariable("X"));
 
     double data[5] = {1.0, 2.0, 3.0, 4.0, 5.0};
@@ -330,7 +330,7 @@ BOOST_AUTO_TEST_CASE(PLangTest_returntrue)
 
     pdal::plang::Invocation meth(script);
     meth.compile();
-    
+
     bool sts = meth.execute();
     BOOST_CHECK(sts);
 
@@ -349,7 +349,7 @@ BOOST_AUTO_TEST_CASE(PLangTest_returnfalse)
 
     pdal::plang::Invocation meth(script);
     meth.compile();
-    
+
     bool sts = meth.execute();
     BOOST_CHECK(!sts);
 
@@ -383,7 +383,7 @@ BOOST_AUTO_TEST_CASE(PLangTest_reentry)
 
     pdal::plang::Invocation meth(script);
     meth.compile();
-    
+
     {
         meth.insertArgument("X", (boost::uint8_t*)indata1, 5, 8, pdal::dimension::Float, 8);
 

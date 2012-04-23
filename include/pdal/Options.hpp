@@ -51,13 +51,14 @@ namespace pdal
 class Options;
 class Option;
 
-namespace options {
+namespace options
+{
 typedef std::multimap<std::string, Option> map_t;
 typedef boost::shared_ptr<Options> OptionsPtr;
 }
 
-/*! 
-    \verbatim embed:rst 
+/*!
+    \verbatim embed:rst
      An Option is just a record with three fields: name, value, and description.
      The value is stored as a string, and we rely on boost::lexical_cast to do the
      serialization magic for us.  This means that an object you insert as an option
@@ -69,20 +70,20 @@ typedef boost::shared_ptr<Options> OptionsPtr;
 
      Dumped as XML, it looks like this although of course that's not valid
      XML, since it has no single root element.
-     
+
      ::
-     
+
          <?xml...>
          <Name>myname</Name>
          <Value>17</Value>
          <Description>my descr</Description>
-     
+
      .. warning::
-            
+
             you should avoid using int8/uint8 types, as these tend to get confused
             with chars.
     \endverbatim
-*/ 
+*/
 
 class PDAL_DLL Option
 {
@@ -98,7 +99,7 @@ public:
     {
         return;
     }
-    
+
     /// Primary constructor
     template <typename T>
     Option(std::string const& name, const T& value, std::string const& description="")
@@ -136,26 +137,26 @@ public:
 
     /// Construct from an existing boost::property_tree
     Option(const boost::property_tree::ptree& tree);
-    
+
 /// @name Equality
     /// Equality
     bool equals(const Option& rhs) const
     {
-        if (m_name == rhs.getName() && 
-            m_value == rhs.getValue<std::string>() && 
-            m_description == rhs.getDescription() && m_options == rhs.m_options)
+        if (m_name == rhs.getName() &&
+                m_value == rhs.getValue<std::string>() &&
+                m_description == rhs.getDescription() && m_options == rhs.m_options)
         {
             return true;
         }
         return false;
     }
-    
+
     /// Equality operator
     bool operator==(const Option& rhs) const
     {
         return equals(rhs);
     }
-    
+
     /// Inequality operator
     bool operator!=(const Option& rhs) const
     {
@@ -166,87 +167,96 @@ public:
 
     /// Overwrites the name given in the constructor
     /// @param name new value to use for the name of the Option
-    inline void setName(const std::string& name) { m_name = name; }
-    
+    inline void setName(const std::string& name)
+    {
+        m_name = name;
+    }
+
     /// @return the name for the Option instance
-    inline std::string const& getName() const { return m_name; }
-    
+    inline std::string const& getName() const
+    {
+        return m_name;
+    }
+
     /// Overwrites the description given in the constructor
     /// @param description new value to use for the description of the Option
-    inline void setDescription(const std::string& description) 
-    { 
+    inline void setDescription(const std::string& description)
+    {
         m_description = description;
     }
-    
+
     /// @return the description of the Option
-    inline std::string const& getDescription() const { return m_description; }
-    
+    inline std::string const& getDescription() const
+    {
+        return m_description;
+    }
+
     /// @return the value of the Option as casted by boost::lexical_cast
     template<typename T> inline T getValue() const
-    { 
+    {
         return boost::lexical_cast<T>(m_value);
     }
 
     /// sets the value of the Option to T after boost::lexical_cast'ing it to a std::string
     template<typename T> void setValue(const T& value)
-    { 
+    {
         m_value = boost::lexical_cast<std::string>(value);
     }
 
 /// @name pdal::Options access
-    
+
     /*! \return a boost::optional-wrapped const& of the Options set for this Option.
-    \verbatim embed:rst 
-    
+    \verbatim embed:rst
+
     .. note::
 
-            An Option may have an Options map of of 
+            An Option may have an Options map of of
             infinite depth (Option->Options->Option->Options...)
     \endverbatim
-    */ 
+    */
 
     boost::optional<Options const&> getOptions() const;
-    
+
     /// sets the Options set for this Option instance
     /// @param op Options set to use
     void setOptions(Options const& op);
 
-    
+
 /// @name Windows specializations
 #if defined(PDAL_COMPILER_MSVC)
 
-    /// explicit specialization to return actual bools in the case that 
+    /// explicit specialization to return actual bools in the case that
     /// the string value of the Option is "true" or "false"
-    template<> bool getValue() const 
-    { 
+    template<> bool getValue() const
+    {
         if (m_value=="true") return true;
         if (m_value=="false") return false;
         return boost::lexical_cast<bool>(m_value);
     }
 
     /// explicit specialization to return a (const ref) string so we don't need lexical_cast
-    template<> const std::string& getValue() const 
-    { 
+    template<> const std::string& getValue() const
+    {
         return m_value;
     }
 
-    /// explicit specialization to insert a bool as "true" and "false" rather 
+    /// explicit specialization to insert a bool as "true" and "false" rather
     /// than "0" or "1" (which is what lexical_cast would do)
     template<> void setValue(const bool& value)
-    { 
+    {
         m_value = value ? "true" : "false";
     }
 
     /// explicit specialization to insert a string so no lexical_cast happens
     template<> void setValue(const std::string& value)
-    { 
+    {
         m_value = value;
     }
 #endif
 
 /// @name Summary and serialization
 
-    /// @return a boost::property_tree::ptree representation 
+    /// @return a boost::property_tree::ptree representation
     /// of the Option instance
     boost::property_tree::ptree toPTree() const;
 
@@ -262,14 +272,14 @@ private:
 /// @name Specializations
 #if !defined(PDAL_COMPILER_VC10)
 
-/// explicit specialization to return actual bools in the case that 
+/// explicit specialization to return actual bools in the case that
 /// the string value of the Option is "true" or "false"
 template<> bool Option::getValue() const;
 
 /// explicit specialization to return a (const ref) string so we don't need lexical_cast
 template<> const std::string& Option::getValue() const;
 
-/// explicit specialization to insert a bool as "true" and "false" rather 
+/// explicit specialization to insert a bool as "true" and "false" rather
 /// than "0" or "1" (which is what lexical_cast would do)
 template<> void Option::setValue(const bool& value);
 
@@ -277,14 +287,14 @@ template<> void Option::setValue(const bool& value);
 template<> void Option::setValue(const std::string& value);
 #endif
 
-/*! 
-    \verbatim embed:rst 
+/*!
+    \verbatim embed:rst
      An Options object is just a map of names to Option objects.
 
      Dumped as XML, an Options object with two Option objects looks like this:
-     
+
      ::
-     
+
         <?xml...>
         <Option>
           <Name>myname</name>
@@ -297,7 +307,7 @@ template<> void Option::setValue(const std::string& value);
           <Description>my descr2</description>
         </Option>
     \endverbatim
-*/ 
+*/
 class PDAL_DLL Options
 {
 public:
@@ -398,9 +408,9 @@ public:
         }
         catch (option_not_found)
         {
-           result = defaultValue;
+            result = defaultValue;
         }
-        
+
         return result;
     }
 
@@ -409,7 +419,7 @@ public:
 
     // returns a ptree for the whole option block
     boost::property_tree::ptree toPTree() const;
-   
+
     // the empty options list
     // BUG: this should be a member variable, not a function, but doing so causes vs2010 to fail to link
     static const Options& none();

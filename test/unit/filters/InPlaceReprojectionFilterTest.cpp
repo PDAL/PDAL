@@ -57,11 +57,11 @@ static void getPoint(const pdal::PointBuffer& data, double& x, double& y, double
     Dimension const& dim_x = schema.getDimension("X");
     Dimension const& dim_y = schema.getDimension("Y");
     Dimension const& dim_z = schema.getDimension("Z");
-    
+
     const boost::int32_t xraw = data.getField<boost::int32_t>(dim_x, 0);
     const boost::int32_t yraw = data.getField<boost::int32_t>(dim_y, 0);
     const boost::int32_t zraw = data.getField<boost::int32_t>(dim_z, 0);
-    
+
     x = dim_x.applyScaling<boost::int32_t>(xraw);
     y = dim_y.applyScaling<boost::int32_t>(yraw);
     z = dim_z.applyScaling<boost::int32_t>(zraw);
@@ -101,24 +101,24 @@ BOOST_AUTO_TEST_CASE(InPlaceReprojectionFilterTest_test_1)
         pdal::Option z_dim("z_dim", std::string("Z"), "Dimension name to use for 'Z' data");
         pdal::Option x_scale("scale_x", 0.0000001f, "Scale for output X data in the case when 'X' dimension data are to be scaled.  Defaults to '1.0'.  If not set, the Dimensions's scale will be used");
         pdal::Option y_scale("scale_y", 0.0000001f, "Scale for output Y data in the case when 'Y' dimension data are to be scaled.  Defaults to '1.0'.  If not set, the Dimensions's scale will be used");
-    // pdal::Option z_scale("scale_z", 1.0, "Scale for output Z data in the case when 'Z' dimension data are to be scaled.  Defaults to '1.0'.  If not set, the Dimensions's scale will be used");
-    // pdal::Option x_offset("offset_x", 0.0, "Offset for output X data in the case when 'X' dimension data are to be scaled.  Defaults to '0.0'.  If not set, the Dimensions's scale will be used");
-    // pdal::Option y_offset("offset_y", 0.0, "Offset for output Y data in the case when 'Y' dimension data are to be scaled.  Defaults to '0.0'.  If not set, the Dimensions's scale will be used");
-    // pdal::Option z_offset("offset_z", 0.0, "Offset for output Z data in the case when 'Z' dimension data are to be scaled.  Defaults to '0.0'.  If not set, the Dimensions's scale will be used");
-    // options.add(in_srs);
-    options.add(out_srs);
-    options.add(x_dim);
-    options.add(y_dim);
-    options.add(z_dim);
-    options.add(x_scale);
-    options.add(y_scale);
-    // options.add(z_scale);
-    // options.add(x_offset);
-    // options.add(y_offset);
-    // options.add(z_offset);
+        // pdal::Option z_scale("scale_z", 1.0, "Scale for output Z data in the case when 'Z' dimension data are to be scaled.  Defaults to '1.0'.  If not set, the Dimensions's scale will be used");
+        // pdal::Option x_offset("offset_x", 0.0, "Offset for output X data in the case when 'X' dimension data are to be scaled.  Defaults to '0.0'.  If not set, the Dimensions's scale will be used");
+        // pdal::Option y_offset("offset_y", 0.0, "Offset for output Y data in the case when 'Y' dimension data are to be scaled.  Defaults to '0.0'.  If not set, the Dimensions's scale will be used");
+        // pdal::Option z_offset("offset_z", 0.0, "Offset for output Z data in the case when 'Z' dimension data are to be scaled.  Defaults to '0.0'.  If not set, the Dimensions's scale will be used");
+        // options.add(in_srs);
+        options.add(out_srs);
+        options.add(x_dim);
+        options.add(y_dim);
+        options.add(z_dim);
+        options.add(x_scale);
+        options.add(y_scale);
+        // options.add(z_scale);
+        // options.add(x_offset);
+        // options.add(y_offset);
+        // options.add(z_offset);
 
         pdal::filters::InPlaceReprojection reprojectionFilter(reader, options);
-        
+
         reprojectionFilter.initialize();
 
         const pdal::Schema& schema = reprojectionFilter.getSchema();

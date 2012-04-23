@@ -45,7 +45,12 @@
 pdal::Writer* createTextWriter(pdal::Stage& prevStage, const pdal::Options& options);
 
 
-namespace pdal { namespace drivers { namespace text {
+namespace pdal
+{
+namespace drivers
+{
+namespace text
+{
 
 
 class text_driver_error : public pdal_error
@@ -91,15 +96,17 @@ private:
     Writer& operator=(const Writer&); // not implemented
     Writer(const Writer&); // not implemented
 
-    std::string getStringRepresentation( PointBuffer const& data, 
-                                         Dimension const& d, 
-                                         std::size_t pointIndex) const;
-    
+    std::string getStringRepresentation(PointBuffer const& data,
+                                        Dimension const& d,
+                                        std::size_t pointIndex) const;
+
     void WriteHeader(pdal::Schema const& schema);
     FileStreamPtr m_stream;
     bool m_wrote_header;
 };
 
-} } } // namespaces
+}
+}
+} // namespaces
 
 #endif

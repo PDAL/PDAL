@@ -67,7 +67,7 @@ boost::property_tree::ptree Reader::serializePipeline() const
 
     PipelineWriter::write_option_ptree(tree, getOptions());
     PipelineWriter::write_metadata_ptree(tree, getMetadata());
-    
+
     boost::property_tree::ptree root;
     root.add_child("Reader", tree);
 

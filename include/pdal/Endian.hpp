@@ -8,14 +8,14 @@
  *
  * This file has been stolen from <boost/endian.hpp> and
  * modified for libLAS purposes.
- * 
+ *
  * (C) Copyright Mateusz Loskot 2007, mateusz@loskot.net
  * (C) Copyright Caleb Epstein 2005
  * (C) Copyright John Maddock 2006
  * Distributed under the Boost  Software License, Version 1.0.
  * (See accompanying file LICENSE_1_0.txt or copy at
  * http://www.boost.org/LICENSE_1_0.txt)
- * 
+ *
  * Revision History
  * 06 Feb 2006 - Initial Revision
  * 09 Nov 2006 - fixed variant and version bits for v4 guids
@@ -37,7 +37,7 @@
  * representations about the suitability of this software for any
  * purpose.  It is provided "as is" without express or implied warranty.
  *
- * 
+ *
  *
  * Copyright notice reproduced from <boost/detail/limits.hpp>, from
  * which this code was originally taken.

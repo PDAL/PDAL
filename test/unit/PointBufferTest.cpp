@@ -80,22 +80,22 @@ PointBuffer* makeTestBuffer()
     PointBuffer* data = new PointBuffer(schema, capacity);
 
     BOOST_CHECK(data->getCapacity() == capacity);
-    
+
     Dimension const& dimC = data->getSchema().getDimension("Classification");
     Dimension const& dimX = data->getSchema().getDimension("X");
     Dimension const& dimY = data->getSchema().getDimension("Y");
-    
+
     // write the data into the buffer
     for (boost::uint32_t i=0; i<data->getCapacity(); i++)
     {
-      const boost::uint8_t x = static_cast<boost::uint8_t>(i)+1;
-      const boost::int32_t y = i*10;
-      const double z = i * 100;
+        const boost::uint8_t x = static_cast<boost::uint8_t>(i)+1;
+        const boost::int32_t y = i*10;
+        const double z = i * 100;
 
-      data->setField(dimC, i, x);
-      data->setField(dimX, i, y);
-      data->setField(dimY, i, z);
-      data->setNumPoints(i+1);
+        data->setField(dimC, i, x);
+        data->setField(dimX, i, y);
+        data->setField(dimY, i, z);
+        data->setNumPoints(i+1);
 
     }
     BOOST_CHECK(data->getCapacity() ==17);
@@ -109,18 +109,18 @@ static void verifyTestBuffer(const PointBuffer& data)
     Dimension const& dimC = data.getSchema().getDimension("Classification");
     Dimension const& dimX = data.getSchema().getDimension("X");
     Dimension const& dimY = data.getSchema().getDimension("Y");
-        
+
     // read the data back out
     for (int i=0; i<17; i++)
     {
-      const boost::uint8_t x = data.getField<boost::uint8_t>(dimC, i);
-      const boost::int32_t y = data.getField<boost::int32_t>(dimX, i);
-      const double z = data.getField<double>(dimY, i);
+        const boost::uint8_t x = data.getField<boost::uint8_t>(dimC, i);
+        const boost::int32_t y = data.getField<boost::int32_t>(dimX, i);
+        const double z = data.getField<double>(dimY, i);
 
-      BOOST_CHECK(x == i+1);
-      BOOST_CHECK(y == i*10);
+        BOOST_CHECK(x == i+1);
+        BOOST_CHECK(y == i*10);
 
-      BOOST_CHECK(Utils::compare_approx(z, static_cast<double>(i)*100.0, (std::numeric_limits<double>::min)()) == true);
+        BOOST_CHECK(Utils::compare_approx(z, static_cast<double>(i)*100.0, (std::numeric_limits<double>::min)()) == true);
 
     }
 }
@@ -136,7 +136,7 @@ BOOST_AUTO_TEST_CASE(test_get_set)
 BOOST_AUTO_TEST_CASE(test_copy)
 {
     PointBuffer* data = makeTestBuffer();
-   
+
     PointBuffer d2(data->getSchema(), 19);
 
     d2.copyPointFast(0, 10, *data);
@@ -146,40 +146,40 @@ BOOST_AUTO_TEST_CASE(test_copy)
     Dimension const& dimC = d2.getSchema().getDimension("Classification");
     Dimension const& dimX = d2.getSchema().getDimension("X");
     Dimension const& dimY = d2.getSchema().getDimension("Y");
-    
+
     // read the data back out
     {
-      const boost::uint8_t x = d2.getField<boost::uint8_t>(dimC, 0);
-      const boost::int32_t y = d2.getField<boost::int32_t>(dimX, 0);
-      const double z = d2.getField<double>(dimY, 0);
+        const boost::uint8_t x = d2.getField<boost::uint8_t>(dimC, 0);
+        const boost::int32_t y = d2.getField<boost::int32_t>(dimX, 0);
+        const double z = d2.getField<double>(dimY, 0);
 
-      int ii = 10;
+        int ii = 10;
 
 
-      BOOST_CHECK(x == ii+1);
-      BOOST_CHECK(y == ii*10);
-      BOOST_CHECK(Utils::compare_approx(z, ii*100.0, (std::numeric_limits<double>::min)()) == true);
+        BOOST_CHECK(x == ii+1);
+        BOOST_CHECK(y == ii*10);
+        BOOST_CHECK(Utils::compare_approx(z, ii*100.0, (std::numeric_limits<double>::min)()) == true);
     }
     for (int i=1; i<18; i++)
     {
-      const boost::uint8_t x = d2.getField<boost::uint8_t>(dimC, i);
-      const boost::int32_t y = d2.getField<boost::int32_t>(dimX, i);
-      const double z = d2.getField<double>(dimY, i);
+        const boost::uint8_t x = d2.getField<boost::uint8_t>(dimC, i);
+        const boost::int32_t y = d2.getField<boost::int32_t>(dimX, i);
+        const double z = d2.getField<double>(dimY, i);
 
-      int ii = i-1;
-      BOOST_CHECK(x == ii+1);
-      BOOST_CHECK(y == ii*10);
-      BOOST_CHECK(Utils::compare_approx(z, ii*100.0, (std::numeric_limits<double>::min)()) == true);
+        int ii = i-1;
+        BOOST_CHECK(x == ii+1);
+        BOOST_CHECK(y == ii*10);
+        BOOST_CHECK(Utils::compare_approx(z, ii*100.0, (std::numeric_limits<double>::min)()) == true);
     }
     {
-      const boost::uint8_t x = d2.getField<boost::uint8_t>(dimC, 18);
-      const boost::int32_t y = d2.getField<boost::int32_t>(dimX, 18);
-      const double z = d2.getField<double>(dimY, 18);
+        const boost::uint8_t x = d2.getField<boost::uint8_t>(dimC, 18);
+        const boost::int32_t y = d2.getField<boost::int32_t>(dimX, 18);
+        const double z = d2.getField<double>(dimY, 18);
 
-      int ii = 11;
-      BOOST_CHECK(x == ii+1);
-      BOOST_CHECK(y == ii*10);
-      BOOST_CHECK(Utils::compare_approx(z, ii*100.0, (std::numeric_limits<double>::min)()) == true);
+        int ii = 11;
+        BOOST_CHECK(x == ii+1);
+        BOOST_CHECK(y == ii*10);
+        BOOST_CHECK(Utils::compare_approx(z, ii*100.0, (std::numeric_limits<double>::min)()) == true);
     }
 
     delete data;
@@ -188,7 +188,7 @@ BOOST_AUTO_TEST_CASE(test_copy)
 BOOST_AUTO_TEST_CASE(test_copy_constructor)
 {
     PointBuffer* data = makeTestBuffer();
-    
+
     PointBuffer d2(*data);
     verifyTestBuffer(d2);
     delete data;
@@ -197,7 +197,7 @@ BOOST_AUTO_TEST_CASE(test_copy_constructor)
 BOOST_AUTO_TEST_CASE(test_assignment_constructor)
 {
     PointBuffer* data = makeTestBuffer();
-    
+
     PointBuffer d2 = *data;
     verifyTestBuffer(d2);
     delete data;
@@ -209,7 +209,7 @@ BOOST_AUTO_TEST_CASE(PointBufferTest_ptree)
     PointBuffer* data = makeTestBuffer();
 
     std::stringstream ss1(std::stringstream::in | std::stringstream::out);
-  
+
     boost::property_tree::ptree tree = data->toPTree();
 
     delete data;

@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE(DecimationFilterTest_test1)
     BOOST_CHECK(numRead == 3);
 
     Dimension const& dimT = data.getSchema().getDimension("Time");
-    
+
     boost::uint64_t t0 = data.getField<boost::uint64_t>(dimT, 0);
     boost::uint64_t t1 = data.getField<boost::uint64_t>(dimT, 1);
     boost::uint64_t t2 = data.getField<boost::uint64_t>(dimT, 2);
@@ -101,7 +101,7 @@ BOOST_AUTO_TEST_CASE(DecimationFilterTest_test_options)
 
     BOOST_CHECK(numRead == 3);
 
-    
+
     Dimension const& dimT = data.getSchema().getDimension("Time");
     boost::uint64_t t0 = data.getField<boost::uint64_t>(dimT, 0);
     boost::uint64_t t1 = data.getField<boost::uint64_t>(dimT, 1);

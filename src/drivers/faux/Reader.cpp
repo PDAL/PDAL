@@ -39,7 +39,12 @@
 #include <boost/algorithm/string.hpp>
 
 
-namespace pdal { namespace drivers { namespace faux {
+namespace pdal
+{
+namespace drivers
+{
+namespace faux
+{
 
 
 static Reader::Mode string2mode(const std::string& str)
@@ -73,7 +78,7 @@ Reader::Reader(const Bounds<double>& bounds, boost::uint64_t numPoints, Mode mod
 }
 
 Reader::Reader(const Bounds<double>& bounds, boost::uint64_t numPoints, Mode mode, const std::vector<Dimension>& dimensions)
-    : pdal::Reader( Options::none())
+    : pdal::Reader(Options::none())
     , m_bounds(bounds)
     , m_numPoints(numPoints)
     , m_mode(mode)
@@ -114,7 +119,7 @@ void Reader::initialize()
 
     Schema& schema = getSchemaRef();
     schema = Schema(getDefaultDimensions());
-    
+
     setNumPoints(m_numPoints);
     setPointCountType(PointCount_Fixed);
 
@@ -161,7 +166,7 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, boost::uint64_t index) 
     if (numPointsAvailable < numPointsWanted)
         numPointsWanted = numPointsAvailable;
 
-    const Bounds<double>& bounds = getBounds(); 
+    const Bounds<double>& bounds = getBounds();
     const std::vector< Range<double> >& dims = bounds.dimensions();
     const double minX = dims[0].getMinimum();
     const double maxX = dims[0].getMaximum();
@@ -169,19 +174,19 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, boost::uint64_t index) 
     const double maxY = dims[1].getMaximum();
     const double minZ = dims[2].getMinimum();
     const double maxZ = dims[2].getMaximum();
-    
+
     const double numDeltas = (double)getNumPoints() - 1.0;
     const double delX = (maxX - minX) / numDeltas;
     const double delY = (maxY - minY) / numDeltas;
     const double delZ = (maxZ - minZ) / numDeltas;
-    
+
     const Dimension& dimX = schema.getDimension("X", getName());
     const Dimension& dimY = schema.getDimension("Y", getName());
     const Dimension& dimZ = schema.getDimension("Z", getName());
     const Dimension& dimTime = schema.getDimension("Time", getName());
 
     boost::uint64_t time = index;
-    
+
     const Reader::Mode mode = getMode();
 
     boost::uint32_t cnt = 0;
@@ -194,24 +199,24 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, boost::uint64_t index) 
         double z;
         switch (mode)
         {
-        case Reader::Random:
-            x = Utils::random(minX, maxX);
-            y = Utils::random(minY, maxY);
-            z = Utils::random(minZ, maxZ);
-            break;
-        case Reader::Constant:
-            x = minX;
-            y = minY;
-            z = minZ;
-            break;
-        case Reader::Ramp:
-            x = minX + delX * pointIndex;
-            y = minY + delY * pointIndex;
-            z = minZ + delZ * pointIndex;
-            break;
-        default:
-            throw pdal_error("invalid mode in FauxReader");
-            break;
+            case Reader::Random:
+                x = Utils::random(minX, maxX);
+                y = Utils::random(minY, maxY);
+                z = Utils::random(minZ, maxZ);
+                break;
+            case Reader::Constant:
+                x = minX;
+                y = minY;
+                z = minZ;
+                break;
+            case Reader::Ramp:
+                x = minX + delX * pointIndex;
+                y = minY + delY * pointIndex;
+                z = minZ + delZ * pointIndex;
+                break;
+            default:
+                throw pdal_error("invalid mode in FauxReader");
+                break;
         }
 
         data.setField<double>(dimX, pointIndex, x);
@@ -220,12 +225,12 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, boost::uint64_t index) 
         data.setField<boost::uint64_t>(dimTime, pointIndex, time);
 
         ++time;
-        
+
         ++cnt;
         data.setNumPoints(cnt);
         assert(cnt <= data.getCapacity());
     }
-    
+
     return cnt;
 }
 
@@ -239,7 +244,10 @@ boost::property_tree::ptree Reader::toPTree() const
     return tree;
 }
 
-namespace iterators { namespace sequential {
+namespace iterators
+{
+namespace sequential
+{
 
 
 
@@ -253,7 +261,7 @@ Reader::Reader(const pdal::drivers::faux::Reader& reader, PointBuffer& buffer)
 
 boost::uint64_t Reader::skipImpl(boost::uint64_t count)
 {
-     return count;
+    return count;
 }
 
 
@@ -272,9 +280,13 @@ boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
 }
 
 
-} } // iterators::sequential
+}
+} // iterators::sequential
 
-namespace iterators { namespace random {
+namespace iterators
+{
+namespace random
+{
 
 Reader::Reader(const pdal::drivers::faux::Reader& reader, PointBuffer& buffer)
     : pdal::ReaderRandomIterator(reader, buffer)
@@ -286,7 +298,7 @@ Reader::Reader(const pdal::drivers::faux::Reader& reader, PointBuffer& buffer)
 
 boost::uint64_t Reader::seekImpl(boost::uint64_t count)
 {
-     return count;
+    return count;
 }
 
 
@@ -295,7 +307,10 @@ boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
     return m_reader.processBuffer(data, getIndex());
 }
 
-} } // iterators::random
+}
+} // iterators::random
 
 
-} } } // namespaces
+}
+}
+} // namespaces

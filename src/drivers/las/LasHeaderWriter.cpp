@@ -2,7 +2,7 @@
  * $Id$
  *
  * Project:  libLAS - http://liblas.org - A BSD library for LAS format data.
- * Purpose:  LAS header class 
+ * Purpose:  LAS header class
  * Author:   Mateusz Loskot, mateusz@loskot.net
  *
  ******************************************************************************
@@ -10,33 +10,33 @@
  * Copyright (c) 2008, Phil Vachon
  *
  * All rights reserved.
- * 
- * Redistribution and use in source and binary forms, with or without 
- * modification, are permitted provided that the following 
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following
  * conditions are met:
- * 
- *     * Redistributions of source code must retain the above copyright 
+ *
+ *     * Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright 
- *       notice, this list of conditions and the following disclaimer in 
- *       the documentation and/or other materials provided 
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in
+ *       the documentation and/or other materials provided
  *       with the distribution.
- *     * Neither the name of the Martin Isenburg or Iowa Department 
- *       of Natural Resources nor the names of its contributors may be 
- *       used to endorse or promote products derived from this software 
+ *     * Neither the name of the Martin Isenburg or Iowa Department
+ *       of Natural Resources nor the names of its contributors may be
+ *       used to endorse or promote products derived from this software
  *       without specific prior written permission.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS 
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE 
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, 
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, 
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS 
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED 
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
- * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY 
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+ * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
@@ -49,7 +49,12 @@
 #include <boost/scoped_ptr.hpp>
 
 
-namespace pdal { namespace drivers { namespace las {
+namespace pdal
+{
+namespace drivers
+{
+namespace las
+{
 
 
 LasHeaderWriter::LasHeaderWriter(LasHeader& header, std::ostream& ostream, boost::uint64_t firstPos)
@@ -69,7 +74,7 @@ void LasHeaderWriter::write()
     boost::uint8_t n1 = 0;
     boost::uint16_t n2 = 0;
     boost::uint32_t n4 = 0;
-    
+
     // Seek to the end
     m_ostream.seekp(0, ios::end);
     // ios::pos_type end = m_ostream.tellp();
@@ -80,7 +85,7 @@ void LasHeaderWriter::write()
     {
         // Rewrite the georeference VLR entries if they exist
         m_header.getVLRs().remove("liblas", 2112);
-        
+
         // Wipe the GeoTIFF-related VLR records off of the Header
         m_header.getVLRs().remove("LASF_Projection", 34735);
         m_header.getVLRs().remove("LASF_Projection", 34736);
@@ -107,58 +112,66 @@ void LasHeaderWriter::write()
 
     {
         boost::uint32_t padding_before_calculations = m_header.GetHeaderPadding();
-        boost::int32_t existing_padding = m_header.GetDataOffset() - 
-                                  (m_header.getVLRBlockSize() + 
-                                   m_header.GetHeaderSize());
+        boost::int32_t existing_padding = m_header.GetDataOffset() -
+                                          (m_header.getVLRBlockSize() +
+                                           m_header.GetHeaderSize());
 
-        if (existing_padding < 0) 
+        if (existing_padding < 0)
         {
             boost::int32_t d = abs(existing_padding);
-            
-            // If our required VLR space is larger than we have 
-            // room for, we have no padding.  AddVLRs will take care 
+
+            // If our required VLR space is larger than we have
+            // room for, we have no padding.  AddVLRs will take care
             // of incrementing up the space it needs.
             if (static_cast<boost::int32_t>(m_header.getVLRBlockSize()) > d)
             {
                 m_header.SetHeaderPadding(0);
-            } else {
+            }
+            else
+            {
                 m_header.SetHeaderPadding(d - m_header.getVLRBlockSize());
             }
-        } else {
+        }
+        else
+        {
             // cast is safe, we've already checked for < 0
             if (static_cast<boost::uint32_t>(existing_padding) >= m_header.GetHeaderPadding())
             {
                 m_header.SetHeaderPadding(existing_padding);
             }
-            else {
+            else
+            {
                 m_header.SetHeaderPadding(m_header.GetHeaderPadding() + existing_padding);
             }
 
         }
 
-    m_header.SetDataOffset( m_header.GetHeaderSize() + 
-                            m_header.getVLRBlockSize() + 
-                            m_header.GetHeaderPadding() + padding_before_calculations);
+        m_header.SetDataOffset(m_header.GetHeaderSize() +
+                               m_header.getVLRBlockSize() +
+                               m_header.GetHeaderPadding() + padding_before_calculations);
 
     }
-    
 
 
-        // 1. File Signature
+
+    // 1. File Signature
     std::string const filesig(m_header.GetFileSignature());
     assert(filesig.size() == 4);
     Utils::write_n(m_ostream, filesig.c_str(), 4);
-    
+
     // 2. File SourceId / Reserved
-    if (m_header.GetVersionMinor()  ==  0) {
+    if (m_header.GetVersionMinor()  ==  0)
+    {
         n4 = m_header.GetReserved();
-        Utils::write_n(m_ostream, n4, sizeof(n4));         
-    } else if (m_header.GetVersionMinor()  >  0) {
+        Utils::write_n(m_ostream, n4, sizeof(n4));
+    }
+    else if (m_header.GetVersionMinor()  >  0)
+    {
         n2 = m_header.GetFileSourceId();
-        Utils::write_n(m_ostream, n2, sizeof(n2));                
+        Utils::write_n(m_ostream, n2, sizeof(n2));
         n2 = m_header.GetReserved();
-        Utils::write_n(m_ostream, n2, sizeof(n2));        
-    } 
+        Utils::write_n(m_ostream, n2, sizeof(n2));
+    }
 
     // 3-6. GUID data
     {
@@ -183,7 +196,7 @@ void LasHeaderWriter::write()
     n1 = m_header.GetVersionMajor();
     assert(1 == n1);
     Utils::write_n(m_ostream, n1, sizeof(n1));
-    
+
     // 8. Version minor
     n1 = m_header.GetVersionMinor();
     Utils::write_n(m_ostream, n1, sizeof(n1));
@@ -192,7 +205,7 @@ void LasHeaderWriter::write()
     std::string sysid(m_header.GetSystemId(true));
     assert(sysid.size() == 32);
     Utils::write_n(m_ostream, sysid.c_str(), 32);
-    
+
     // 10. Generating Software ID
     std::string softid(m_header.GetSoftwareId(true));
     assert(softid.size() == 32);
@@ -212,7 +225,7 @@ void LasHeaderWriter::write()
     Utils::write_n(m_ostream, n2, sizeof(n2));
 
     // 14. Offset to data
-    n4 = m_header.GetDataOffset();        
+    n4 = m_header.GetDataOffset();
     Utils::write_n(m_ostream, n4, sizeof(n4));
 
     // 15. Number of variable length records
@@ -269,13 +282,14 @@ void LasHeaderWriter::write()
     WriteVLRs();
 
     // if we have padding, we should write it
-    if (m_header.GetHeaderPadding() > 0) {
+    if (m_header.GetHeaderPadding() > 0)
+    {
         m_ostream.seekp(m_header.GetHeaderSize() + m_header.getVLRBlockSize(), std::ios::end);
         Utils::write_n(m_ostream, "\0", m_header.GetHeaderPadding());
     }
 
     // Write the 1.0 pad signature if we need to.
-    WriteLAS10PadSignature(); 
+    WriteLAS10PadSignature();
 
     return;
 }
@@ -288,8 +302,9 @@ void LasHeaderWriter::WriteVLRs()
     m_ostream.seekp(m_firstPos + m_header.GetHeaderSize(), std::ios::beg);
 
     boost::int32_t diff = m_header.GetDataOffset() - GetRequiredHeaderSize();
-    
-    if (diff < 0) {
+
+    if (diff < 0)
+    {
         std::ostringstream oss;
         oss << "Header is not large enough to contain VLRs.  Data offset is ";
         oss << m_header.GetDataOffset() << " while the required total size ";
@@ -314,10 +329,11 @@ void LasHeaderWriter::WriteVLRs()
         delete[] description_data;
     }
 
-    // if we had more room than we need for the VLRs, we need to pad that with 
+    // if we had more room than we need for the VLRs, we need to pad that with
     // 0's.  We must also not forget to add the 1.0 pad bytes to the end of this
     // but the impl should be the one doing that, not us.
-    if (diff > 0) {
+    if (diff > 0)
+    {
         Utils::write_n(m_ostream, "\0", diff);
     }
 
@@ -333,28 +349,30 @@ std::size_t LasHeaderWriter::GetRequiredHeaderSize() const
 
 void LasHeaderWriter::WriteLAS10PadSignature()
 {
-    // Only write pad signature bytes for LAS 1.0 files.  Any other files 
-    // will not get the pad bytes and we are *not* allowing anyone to 
+    // Only write pad signature bytes for LAS 1.0 files.  Any other files
+    // will not get the pad bytes and we are *not* allowing anyone to
     // override this either - hobu
-    
-    if (m_header.GetVersionMinor() > 0) {
+
+    if (m_header.GetVersionMinor() > 0)
+    {
         return;
     }
 
     boost::int32_t diff = (boost::int32_t)m_header.GetDataOffset() - (boost::int32_t)GetRequiredHeaderSize();
 
-    if (diff < 2) {
+    if (diff < 2)
+    {
         m_header.SetDataOffset(m_header.GetDataOffset() + 2);
         // Seek to the location of the data offset in the header and write a new one.
         m_ostream.seekp(m_firstPos + 96, std::ios::beg);
         Utils::write_n(m_ostream, m_header.GetDataOffset(), sizeof(m_header.GetDataOffset()));
-    }    
-        
+    }
+
     // step back two bytes to write the pad bytes.  We should have already
-    // determined by this point if a) they will fit b) they won't overwrite 
-    // exiting real data 
+    // determined by this point if a) they will fit b) they won't overwrite
+    // exiting real data
     m_ostream.seekp(m_firstPos + m_header.GetDataOffset() - 2, std::ios::beg);
-    
+
     // Write the pad bytes.
     boost::uint8_t const sgn1 = 0xCC;
     boost::uint8_t const sgn2 = 0xDD;
@@ -363,4 +381,6 @@ void LasHeaderWriter::WriteLAS10PadSignature()
 }
 
 
-} } } // namespaces
+}
+}
+} // namespaces

@@ -99,9 +99,9 @@
 
 namespace pdal
 {
-    //
-    // macros for creating the various stage types
-    //
+//
+// macros for creating the various stage types
+//
 #define MAKE_READER_CREATOR(T, FullT) \
     Reader* create_##T(const Options& options) \
         { return new FullT(options); }
@@ -115,9 +115,9 @@ namespace pdal
     Writer* create_##T(Stage& prevStage, const Options& options) \
         { return new FullT(prevStage, options); }
 
-    //
-    // macros to register the stage creators
-    //
+//
+// macros to register the stage creators
+//
 #define REGISTER_WRITER(T, FullT) \
     registerWriter(FullT::s_getName(), create_##T)
 #define REGISTER_READER(T, FullT) \
@@ -127,61 +127,61 @@ namespace pdal
 #define REGISTER_MULTIFILTER(T, FullT) \
     registerMultiFilter(FullT::s_getName(), create_##T)
 
-    //
-    // define the functions to create the readers
-    //
-    MAKE_READER_CREATOR(FauxReader, pdal::drivers::faux::Reader)
-    MAKE_READER_CREATOR(LasReader, pdal::drivers::las::Reader)
+//
+// define the functions to create the readers
+//
+MAKE_READER_CREATOR(FauxReader, pdal::drivers::faux::Reader)
+MAKE_READER_CREATOR(LasReader, pdal::drivers::las::Reader)
 #ifdef PDAL_HAVE_ORACLE
-    MAKE_READER_CREATOR(OciReader, pdal::drivers::oci::Reader)
+MAKE_READER_CREATOR(OciReader, pdal::drivers::oci::Reader)
 #endif
 #ifdef PDAL_HAVE_GDAL
-    MAKE_READER_CREATOR(NITFReader, pdal::drivers::nitf::Reader)
+MAKE_READER_CREATOR(NITFReader, pdal::drivers::nitf::Reader)
 #endif
 
-    MAKE_READER_CREATOR(PipelineReader, pdal::drivers::pipeline::Reader)
-    MAKE_READER_CREATOR(QfitReader, pdal::drivers::qfit::Reader)
-    MAKE_READER_CREATOR(TerrasolidReader, pdal::drivers::terrasolid::Reader)
+MAKE_READER_CREATOR(PipelineReader, pdal::drivers::pipeline::Reader)
+MAKE_READER_CREATOR(QfitReader, pdal::drivers::qfit::Reader)
+MAKE_READER_CREATOR(TerrasolidReader, pdal::drivers::terrasolid::Reader)
 
-    //
-    // define the functions to create the filters
-    //
-    MAKE_FILTER_CREATOR(ByteSwap, pdal::filters::ByteSwap)
-    MAKE_FILTER_CREATOR(Cache, pdal::filters::Cache)
-    MAKE_FILTER_CREATOR(Chipper, pdal::filters::Chipper)
-    MAKE_FILTER_CREATOR(Color, pdal::filters::Color)
-    MAKE_FILTER_CREATOR(Colorization, pdal::filters::Colorization)
-    MAKE_FILTER_CREATOR(Crop, pdal::filters::Crop)
-    MAKE_FILTER_CREATOR(Decimation, pdal::filters::Decimation)
-    MAKE_FILTER_CREATOR(InPlaceReprojection, pdal::filters::InPlaceReprojection)
+//
+// define the functions to create the filters
+//
+MAKE_FILTER_CREATOR(ByteSwap, pdal::filters::ByteSwap)
+MAKE_FILTER_CREATOR(Cache, pdal::filters::Cache)
+MAKE_FILTER_CREATOR(Chipper, pdal::filters::Chipper)
+MAKE_FILTER_CREATOR(Color, pdal::filters::Color)
+MAKE_FILTER_CREATOR(Colorization, pdal::filters::Colorization)
+MAKE_FILTER_CREATOR(Crop, pdal::filters::Crop)
+MAKE_FILTER_CREATOR(Decimation, pdal::filters::Decimation)
+MAKE_FILTER_CREATOR(InPlaceReprojection, pdal::filters::InPlaceReprojection)
 
 #ifdef PDAL_HAVE_PYTHON
-    MAKE_FILTER_CREATOR(Predicate, pdal::filters::Predicate)
-    MAKE_FILTER_CREATOR(Programmable, pdal::filters::Programmable)
+MAKE_FILTER_CREATOR(Predicate, pdal::filters::Predicate)
+MAKE_FILTER_CREATOR(Programmable, pdal::filters::Programmable)
 #endif
 
-    MAKE_FILTER_CREATOR(Reprojection, pdal::filters::Reprojection)
-    MAKE_FILTER_CREATOR(Scaling, pdal::filters::Scaling)
-    MAKE_FILTER_CREATOR(Selector, pdal::filters::Selector)
-    MAKE_FILTER_CREATOR(Stats, pdal::filters::Stats)
+MAKE_FILTER_CREATOR(Reprojection, pdal::filters::Reprojection)
+MAKE_FILTER_CREATOR(Scaling, pdal::filters::Scaling)
+MAKE_FILTER_CREATOR(Selector, pdal::filters::Selector)
+MAKE_FILTER_CREATOR(Stats, pdal::filters::Stats)
 
-    //
-    // define the functions to create the multifilters
-    //
-    MAKE_MULTIFILTER_CREATOR(Mosaic, pdal::filters::Mosaic)
+//
+// define the functions to create the multifilters
+//
+MAKE_MULTIFILTER_CREATOR(Mosaic, pdal::filters::Mosaic)
 
-    //
-    // define the functions to create the writers
-    //
-    MAKE_WRITER_CREATOR(FauxWriter, pdal::drivers::faux::Writer)
-    MAKE_WRITER_CREATOR(LasWriter, pdal::drivers::las::Writer)
-    MAKE_WRITER_CREATOR(TextWriter, pdal::drivers::text::Writer)
+//
+// define the functions to create the writers
+//
+MAKE_WRITER_CREATOR(FauxWriter, pdal::drivers::faux::Writer)
+MAKE_WRITER_CREATOR(LasWriter, pdal::drivers::las::Writer)
+MAKE_WRITER_CREATOR(TextWriter, pdal::drivers::text::Writer)
 #ifdef PDAL_HAVE_ORACLE
-    MAKE_WRITER_CREATOR(OciWriter, pdal::drivers::oci::Writer)
+MAKE_WRITER_CREATOR(OciWriter, pdal::drivers::oci::Writer)
 #endif
 
 #ifdef PDAL_HAVE_P2G
-    MAKE_WRITER_CREATOR(P2GWriter, pdal::drivers::p2g::Writer)
+MAKE_WRITER_CREATOR(P2GWriter, pdal::drivers::p2g::Writer)
 #endif
 
 
@@ -191,7 +191,7 @@ StageFactory::StageFactory()
     registerKnownFilters();
     registerKnownMultiFilters();
     registerKnownWriters();
-    
+
     loadPlugins();
     return;
 }
@@ -200,7 +200,8 @@ StageFactory::StageFactory()
 Reader* StageFactory::createReader(const std::string& type, const Options& options)
 {
     ReaderCreator* f = getReaderCreator(type);
-    if (!f) {
+    if (!f)
+    {
         std::ostringstream oss;
         oss << "Unable to create reader for type '" << type << "'. Does a driver with this type name exist?";
         throw pdal_error(oss.str());
@@ -213,7 +214,8 @@ Reader* StageFactory::createReader(const std::string& type, const Options& optio
 Filter* StageFactory::createFilter(const std::string& type, Stage& prevStage, const Options& options)
 {
     FilterCreator* f = getFilterCreator(type);
-    if (!f) {
+    if (!f)
+    {
         std::ostringstream oss;
         oss << "Unable to create filter for type '" << type << "'. Does a driver with this type name exist?";
         throw pdal_error(oss.str());
@@ -227,12 +229,13 @@ Filter* StageFactory::createFilter(const std::string& type, Stage& prevStage, co
 MultiFilter* StageFactory::createMultiFilter(const std::string& type, const std::vector<Stage*>& prevStages, const Options& options)
 {
     MultiFilterCreator* f = getMultiFilterCreator(type);
-    if (!f) {
+    if (!f)
+    {
         std::ostringstream oss;
         oss << "Unable to create multifilter for type '" << type << "'. Does a driver with this type name exist?";
         throw pdal_error(oss.str());
     }
-    
+
     MultiFilter* stage = f(prevStages, options);
     return stage;
 }
@@ -241,7 +244,8 @@ MultiFilter* StageFactory::createMultiFilter(const std::string& type, const std:
 Writer* StageFactory::createWriter(const std::string& type, Stage& prevStage, const Options& options)
 {
     WriterCreator* f = getWriterCreator(type);
-    if (!f) {
+    if (!f)
+    {
         std::ostringstream oss;
         oss << "Unable to create writer for type '" << type << "'. Does a driver with this type name exist?";
         throw pdal_error(oss.str());
@@ -356,7 +360,7 @@ void StageFactory::registerKnownFilters()
 
 
 void StageFactory::registerKnownMultiFilters()
-{   
+{
     REGISTER_MULTIFILTER(Mosaic, pdal::filters::Mosaic);
 }
 
@@ -379,52 +383,52 @@ void StageFactory::registerKnownWriters()
 void StageFactory::loadPlugins()
 {
     using namespace boost::filesystem;
-    
+
     typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-    
+
     std::string driver_path("PDAL_DRIVER_PATH");
     std::string pluginDir = Utils::getenv(driver_path);
 
-    // Only filenames that start with libpdal_plugin are candidates to be loaded 
+    // Only filenames that start with libpdal_plugin are candidates to be loaded
     // at runtime.  PDAL plugins are to be named in a specified form:
-    
+
     // libpdal_plugin_{stagetype}_{name}
-    
+
     // For example, libpdal_plugin_writer_text or libpdal_plugin_filter_color
 
-    
+
     // If we don't have a driver path, we're not loading anything
-    // FIXME: support setting the plugin name directly from the 
+    // FIXME: support setting the plugin name directly from the
     // PipelineReader
-    
+
     if (pluginDir.size() == 0) return;
-    
+
     directory_iterator dir(pluginDir), it, end;
-    
+
     std::map<path, path> pluginFilenames;
-    
-    // Collect candidate filenames in the above form. Prefer symlink files 
+
+    // Collect candidate filenames in the above form. Prefer symlink files
     // over hard files if their basenames are the same.
     for (it = dir; it != end; ++it)
     {
         path p = it->path();
-        
+
         if (boost::algorithm::istarts_with(p.filename().string(), "libpdal_plugin"))
         {
             path extension = p.extension();
             if (boost::algorithm::iends_with(extension.string(), "DLL") ||
-                boost::algorithm::iends_with(extension.string(), "DYLIB") ||
-                boost::algorithm::iends_with(extension.string(), "SO"))
+                    boost::algorithm::iends_with(extension.string(), "DYLIB") ||
+                    boost::algorithm::iends_with(extension.string(), "SO"))
             {
                 std::string basename;
 
-                // Step through the stems until the extension of the stem 
-                // is empty. This is our basename.  For example, 
-                // libpdal_plugin_writer_text.0.dylib will basename down to 
-                // libpdal_plugin_writer_text and so will 
+                // Step through the stems until the extension of the stem
+                // is empty. This is our basename.  For example,
+                // libpdal_plugin_writer_text.0.dylib will basename down to
+                // libpdal_plugin_writer_text and so will
                 // libpdal_plugin_writer_text.dylib
                 // copy the path so we can modify in place
-                path t = p; 
+                path t = p;
                 for (; !t.extension().empty(); t = t.stem())
                 {
                     if (t.stem().extension().empty())
@@ -435,15 +439,16 @@ void StageFactory::loadPlugins()
 
                 if (pluginFilenames.find(basename) == pluginFilenames.end())
                 {
-                    // We haven't already loaded a plugin with this basename, 
+                    // We haven't already loaded a plugin with this basename,
                     // load it.
                     pluginFilenames.insert(std::pair<path, path>(basename, p));
-                } else
+                }
+                else
                 {
-                    // We already have a filename with the basename of this 
+                    // We already have a filename with the basename of this
                     // file.  If the basename of our current file is a symlink
-                    // we're going to replace what's in the map with ours because 
-                    // we are going to presume that a symlink'd file is more 
+                    // we're going to replace what's in the map with ours because
+                    // we are going to presume that a symlink'd file is more
                     // cannonical than a hard file of the same name.
                     std::map<path, path>::iterator i = pluginFilenames.find(basename);
                     if (it->symlink_status().type() == symlink_file)
@@ -455,30 +460,30 @@ void StageFactory::loadPlugins()
             }
         }
     }
-    
+
     std::map<std::string, std::string> registerMethods;
-    
+
     for (std::map<path, path>::iterator t = pluginFilenames.begin();
-         t!= pluginFilenames.end(); t ++)
+            t!= pluginFilenames.end(); t ++)
     {
-        // Basenames must be in the following form: 
+        // Basenames must be in the following form:
         // libpdal_plugin_writer_text or libpdal_plugin_filter_color
-        // The last two tokens are the stage type and the stage name.  
+        // The last two tokens are the stage type and the stage name.
         path basename = t->first;
         path filename = t->second;
-        
+
         void* pRegister;
-        
+
         std::string methodName = "PDALRegister_" + boost::algorithm::ireplace_first_copy(basename.string(), "libpdal_plugin_", "");
 
         // std::cout << "Loading: " << methodName << " from dll "<< t->first << " with path: " << t->second <<std::endl;
-        
+
         pRegister = Utils::getDLLSymbol(filename.string(), methodName);
         if (pRegister != NULL)
         {
             ((void (*)(void*)) pRegister)(this);
         }
-        
+
     }
 }
 

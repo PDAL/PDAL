@@ -44,30 +44,36 @@ namespace pdal
 {
 
 
-/// pdal::Object is a base class that provides serialization, allocation, and 
-/// deallocation control for all basic objects inside of PDAL.  
+/// pdal::Object is a base class that provides serialization, allocation, and
+/// deallocation control for all basic objects inside of PDAL.
 
 class PDAL_DLL Object
 {
 public:
 
-/** @name Constructors
-*/  
+    /** @name Constructors
+    */
     Object(std::string const& type_name) : m_typename(type_name) {};
 
-/** @name Destructor
-*/  
+    /** @name Destructor
+    */
     virtual ~Object() {};
-    
+
     virtual std::string to_xml() const;
     virtual std::string to_json() const;
-    
-    virtual boost::property_tree::ptree toPTreeImpl() const { return boost::property_tree::ptree(); }
-    
+
+    virtual boost::property_tree::ptree toPTreeImpl() const
+    {
+        return boost::property_tree::ptree();
+    }
+
     boost::property_tree::ptree toPTree() const;
-    inline std::string getTypeName() const { return m_typename; }
-/** @name private attributes
-*/ 
+    inline std::string getTypeName() const
+    {
+        return m_typename;
+    }
+    /** @name private attributes
+    */
 
 
 private:

@@ -55,34 +55,37 @@ BOOST_AUTO_TEST_CASE(ColorizationFilterTest_test_1)
     {
 
         pdal::drivers::las::Reader reader(Support::datapath("autzen-point-format-3.las"));
-        
+
         pdal::Options options;
 
         pdal::Option red("dimension", "Red", "");
         pdal::Option b0("band",1, "");
         pdal::Option s0("scale", 1.0f, "scale factor for this dimension");
         pdal::Options redO;
-        redO.add(b0); redO.add(s0);
+        redO.add(b0);
+        redO.add(s0);
         red.setOptions(redO);
-    
+
         pdal::Option green("dimension", "Green", "");
         pdal::Option b1("band",2, "");
         pdal::Option s1("scale", 1.0f, "scale factor for this dimension");
         pdal::Options greenO;
-        greenO.add(b1); greenO.add(s1);
+        greenO.add(b1);
+        greenO.add(s1);
         green.setOptions(greenO);
 
         pdal::Option blue("dimension", "Blue", "");
         pdal::Option b2("band",3, "");
         pdal::Option s2("scale", 255.0f, "scale factor for this dimension");
         pdal::Options blueO;
-        blueO.add(b2); blueO.add(s2);
+        blueO.add(b2);
+        blueO.add(s2);
         blue.setOptions(blueO);
-        
+
         pdal::Option datasource("raster", Support::datapath("autzen.jpg"), "raster to read");
         // pdal::Option verbose("verbose", 7, "");
         // pdal::Option debug("debug", true, "");
-        
+
         pdal::Options reader_options;
         reader_options.add(red);
         reader_options.add(green);
@@ -90,11 +93,11 @@ BOOST_AUTO_TEST_CASE(ColorizationFilterTest_test_1)
         reader_options.add(datasource);
         // reader_options.add(debug);
         // reader_options.add(verbose);
-        
+
         pdal::filters::Colorization filter(reader, reader_options);
-        
+
         filter.initialize();
-        
+
         const pdal::Schema& schema = filter.getSchema();
         pdal::PointBuffer data(schema, 1);
 
@@ -108,11 +111,11 @@ BOOST_AUTO_TEST_CASE(ColorizationFilterTest_test_1)
         pdal::Dimension const& dimRed = s.getDimension("Red");
         pdal::Dimension const& dimGreen = s.getDimension("Green");
         pdal::Dimension const& dimBlue = s.getDimension("Blue");
-    
+
         boost::uint16_t r = data.getField<boost::uint16_t>(dimRed, 0);
         boost::uint16_t g = data.getField<boost::uint16_t>(dimGreen, 0);
         boost::uint16_t b = data.getField<boost::uint16_t>(dimBlue, 0);
-    
+
         BOOST_CHECK_EQUAL(r, 210u);
         BOOST_CHECK_EQUAL(g, 205u);
         BOOST_CHECK_EQUAL(b, 47175u); // We scaled this up to 16bit by multiplying by 255

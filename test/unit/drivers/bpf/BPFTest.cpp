@@ -47,15 +47,15 @@ BOOST_AUTO_TEST_SUITE(BPFReaderTest)
 
 BOOST_AUTO_TEST_CASE(BPFTest_test)
 {
-    
-    
+
+
     std::string p = Support::binpath("/../../bpf/test/pipeline_bpf.xml");
-    
-    // BPF driver is a (closed source) plugin. If the pipeline file for its 
+
+    // BPF driver is a (closed source) plugin. If the pipeline file for its
     // example data isn't alongside the PDAL source tree, we skip the test.
     if (!pdal::FileUtils::fileExists(p))
         return;
-    // BPF driver is a (closed source) plugin. If we don't have PDAL_DRIVER_PATH 
+    // BPF driver is a (closed source) plugin. If we don't have PDAL_DRIVER_PATH
     // set, we aren't going to bother trying to run the test.
     std::string drivers;
     std::string driver_path("PDAL_DRIVER_PATH");
@@ -64,13 +64,13 @@ BOOST_AUTO_TEST_CASE(BPFTest_test)
         return;
 
     pdal::PipelineManager manager;
-    
-    
+
+
     pdal::Option option("filename", p);
-    
+
     pdal::PipelineReader reader(manager, false, 0);
     reader.readPipeline(option.getValue<std::string>());
-    
+
     pdal::Stage* stage = manager.getStage();
     BOOST_CHECK(stage != NULL);
     stage->initialize();
@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE(BPFTest_test)
     }
 
     // BOOST_CHECK_EQUAL(np, 106u);
-        
+
     return;
 }
 

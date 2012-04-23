@@ -48,81 +48,84 @@
 
 struct XMLDocDeleter
 {
-   template <typename T>
-   void operator()(T* ptr)
-   {
-       ::xmlFreeDoc(ptr);
-   }
+    template <typename T>
+    void operator()(T* ptr)
+    {
+        ::xmlFreeDoc(ptr);
+    }
 };
 
 struct SchemaParserCtxDeleter
 {
-   template <typename T>
-   void operator()(T* ptr)
-   {
-       ::xmlSchemaFreeParserCtxt(ptr);
-   }
+    template <typename T>
+    void operator()(T* ptr)
+    {
+        ::xmlSchemaFreeParserCtxt(ptr);
+    }
 };
 
 struct SchemaDeleter
 {
-   template <typename T>
-   void operator()(T* ptr)
-   {
-       ::xmlSchemaFree(ptr);
-   }
+    template <typename T>
+    void operator()(T* ptr)
+    {
+        ::xmlSchemaFree(ptr);
+    }
 };
 
 struct SchemaValidCtxtDeleter
 {
-   template <typename T>
-   void operator()(T* ptr)
-   {
-       ::xmlSchemaFreeValidCtxt(ptr);
-   }
+    template <typename T>
+    void operator()(T* ptr)
+    {
+        ::xmlSchemaFreeValidCtxt(ptr);
+    }
 };
 
 struct WriterDeleter
 {
-   template <typename T>
-   void operator()(T* ptr)
-   {
-       ::xmlFreeTextWriter(ptr);
-   }
+    template <typename T>
+    void operator()(T* ptr)
+    {
+        ::xmlFreeTextWriter(ptr);
+    }
 };
 
 struct BufferDeleter
 {
-   template <typename T>
-   void operator()(T* ptr)
-   {
-       ::xmlBufferFree(ptr);
-   }
+    template <typename T>
+    void operator()(T* ptr)
+    {
+        ::xmlBufferFree(ptr);
+    }
 };
 
 struct xmlCharDeleter
 {
-   template <typename T>
-   void operator()(T* ptr)
-   {
-       ::xmlFree(ptr);
-   }
+    template <typename T>
+    void operator()(T* ptr)
+    {
+        ::xmlFree(ptr);
+    }
 };
 
 
 static bool sort_dimensions(pdal::Dimension const& a, pdal::Dimension const& b)
 {
-   return a < b;
+    return a < b;
 }
 
-namespace pdal { namespace schema {
+namespace pdal
+{
+namespace schema
+{
 
 
 void OCISchemaStructuredErrorHandler
-    (void * userData, xmlErrorPtr error)
+(void * userData, xmlErrorPtr error)
 {
     boost::ignore_unused_variable_warning(userData);
- 
+
     std::ostringstream oss;
 
     oss << "XML error: '" << error->message <<"' ";
@@ -146,7 +149,7 @@ void OCISchemaStructuredErrorHandler
 }
 
 void OCISchemaParserStructuredErrorHandler
-    (void * userData, xmlErrorPtr error)
+(void * userData, xmlErrorPtr error)
 {
     boost::ignore_unused_variable_warning(userData);
 
@@ -158,7 +161,7 @@ void OCISchemaParserStructuredErrorHandler
 }
 
 void OCISchemaValidationStructuredErrorHandler
-    (void * userData, xmlErrorPtr error)
+(void * userData, xmlErrorPtr error)
 {
     boost::ignore_unused_variable_warning(userData);
 
@@ -170,7 +173,7 @@ void OCISchemaValidationStructuredErrorHandler
 }
 
 void OCISchemaValidityError
-    (void * ctx, const char* message, ... )
+(void * ctx, const char* message, ...)
 {
     boost::ignore_unused_variable_warning(ctx);
 
@@ -191,7 +194,7 @@ void OCISchemaValidityError
 }
 
 void OCISchemaValidityDebug
-    (void * ctx, const char* message, ... )
+(void * ctx, const char* message, ...)
 {
     boost::ignore_unused_variable_warning(ctx);
 
@@ -213,7 +216,7 @@ void OCISchemaValidityDebug
 
 
 void OCISchemaGenericErrorHandler
-    (void * ctx, const char* message, ... )
+(void * ctx, const char* message, ...)
 {
     boost::ignore_unused_variable_warning(ctx);
 
@@ -239,10 +242,10 @@ void OCISchemaGenericErrorHandler
 // http://xmlsoft.org/html/libxml-parser.html#xmlParserOption
 
 
-void Reader::Initialize() 
+void Reader::Initialize()
 {
     if (m_xml.size() == 0) throw schema_generic_error("Inputted XML has no size, is there data there?");
-    
+
     // if (m_xsd.size() == 0) throw schema_generic_error("Inputted XSD has no size, is there data there?");
 
 
@@ -253,31 +256,31 @@ void Reader::Initialize()
 
 
     m_doc = DocPtr(
-                   xmlReadMemory(m_xml.c_str(), m_xml.size(), NULL, NULL, m_doc_options),
-                   XMLDocDeleter());
-                   
+                xmlReadMemory(m_xml.c_str(), m_xml.size(), NULL, NULL, m_doc_options),
+                XMLDocDeleter());
+
     if (m_xsd.size())
     {
         m_schema_doc = DocPtr(
-                            xmlReadMemory(m_xsd.c_str(), m_xsd.size(), NULL, NULL, m_doc_options),
-                             XMLDocDeleter());
+                           xmlReadMemory(m_xsd.c_str(), m_xsd.size(), NULL, NULL, m_doc_options),
+                           XMLDocDeleter());
 
         m_schema_parser_ctx = SchemaParserCtxtPtr(
-                                xmlSchemaNewDocParserCtxt(static_cast<xmlDocPtr>(m_schema_doc.get())),
-                                SchemaParserCtxDeleter());
+                                  xmlSchemaNewDocParserCtxt(static_cast<xmlDocPtr>(m_schema_doc.get())),
+                                  SchemaParserCtxDeleter());
 
         xmlSchemaSetParserStructuredErrors(static_cast<xmlSchemaParserCtxtPtr>(m_schema_parser_ctx.get()),
-                                            &OCISchemaParserStructuredErrorHandler,
-                                            m_global_context);
+                                           &OCISchemaParserStructuredErrorHandler,
+                                           m_global_context);
 
 
         m_schema_ptr = SchemaPtr(
-                        xmlSchemaParse(static_cast<xmlSchemaParserCtxtPtr>(m_schema_parser_ctx.get())),
-                        SchemaDeleter());
+                           xmlSchemaParse(static_cast<xmlSchemaParserCtxtPtr>(m_schema_parser_ctx.get())),
+                           SchemaDeleter());
 
         m_schema_valid_ctx = SchemaValidCtxtPtr(
-                                xmlSchemaNewValidCtxt(static_cast<xmlSchemaPtr>(m_schema_ptr.get())),
-                                SchemaValidCtxtDeleter());
+                                 xmlSchemaNewValidCtxt(static_cast<xmlSchemaPtr>(m_schema_ptr.get())),
+                                 SchemaValidCtxtDeleter());
 
         xmlSchemaSetValidErrors(static_cast<xmlSchemaValidCtxtPtr>(m_schema_valid_ctx.get()),
                                 &OCISchemaValidityError,
@@ -285,21 +288,21 @@ void Reader::Initialize()
                                 m_global_context);
 
         int valid_schema = xmlSchemaValidateDoc(static_cast<xmlSchemaValidCtxtPtr>(m_schema_valid_ctx.get()),
-                                                  static_cast<xmlDocPtr>(m_doc.get()));
+                                                static_cast<xmlDocPtr>(m_doc.get()));
 
         if (valid_schema != 0)
             throw schema_error("Document did not validate against schema!");
-        
+
     }
 
-    
+
 }
 
 Reader::Reader(std::string const& xml, std::string const &xsd)
-: m_doc_options(XML_PARSE_NONET)
-, m_field_position(512)
+    : m_doc_options(XML_PARSE_NONET)
+    , m_field_position(512)
 {
-    
+
     m_xml = xml;
     m_xsd = xsd;
     Initialize();
@@ -309,19 +312,19 @@ Reader::Reader(std::string const& xml, std::string const &xsd)
 
 Reader::Reader(std::istream* xml, std::istream *xsd) : m_doc_options(XML_PARSE_NONET)
 {
-    
+
     if (!xml)
         throw schema_generic_error("pdal::schema::Reader: xml istream pointer was null!");
-    
+
     std::istream::pos_type size;
 
     std::vector<char> data;
     xml->seekg(0, std::ios::end);
     size = xml->tellg();
     data.resize(static_cast<std::vector<char>::size_type>(size));
-    xml->seekg (0, std::ios::beg);
-    xml->read (&data.front(), size);
-    xml->seekg (0, std::ios::beg);
+    xml->seekg(0, std::ios::beg);
+    xml->read(&data.front(), size);
+    xml->seekg(0, std::ios::beg);
 
     m_xml = std::string(&data[0], data.size());
 
@@ -334,8 +337,8 @@ Reader::Reader(std::istream* xml, std::istream *xsd) : m_doc_options(XML_PARSE_N
         xsd->seekg(0, std::ios::end);
         size = xsd->tellg();
         data.resize(static_cast<std::vector<char>::size_type>(size));
-        xsd->seekg (0, std::ios::beg);
-        xsd->read (&data.front(), size);
+        xsd->seekg(0, std::ios::beg);
+        xsd->read(&data.front(), size);
         xsd->seekg(0, std::ios::end);
 
         m_xsd = std::string(&data[0], data.size());
@@ -355,8 +358,10 @@ print_element_names(xmlNode * a_node)
 {
     xmlNode *cur_node = NULL;
 
-    for (cur_node = a_node; cur_node; cur_node = cur_node->next) {
-        if (cur_node->type == XML_ELEMENT_NODE) {
+    for (cur_node = a_node; cur_node; cur_node = cur_node->next)
+    {
+        if (cur_node->type == XML_ELEMENT_NODE)
+        {
             printf("node type: Element, name: %s\n", cur_node->name);
         }
 
@@ -371,7 +376,7 @@ std::string Reader::remapOldNames(std::string const& input)
 
     if (boost::iequals(input, "Unnamed field 513") || boost::iequals(input, "Chipper Block ID"))
         return std::string("Chipper:BlockID");
-    
+
     return input;
 }
 
@@ -391,7 +396,7 @@ void Reader::Load()
     xmlNode* dimension = root->children;
 
 
-    while(dimension != NULL)
+    while (dimension != NULL)
     {
         // printf("node name: %s\n", (const char*)dimension->name);
         if (dimension->type != XML_ELEMENT_NODE || !boost::iequals((const char*)dimension->name, "dimension"))
@@ -415,7 +420,7 @@ void Reader::Load()
         double maximum(0.0);
         EndianType endianness = Endian_Little;
 
-        while(properties != NULL)
+        while (properties != NULL)
         {
             if (properties->type != XML_ELEMENT_NODE)
             {
@@ -427,8 +432,8 @@ void Reader::Load()
             {
                 CharPtr n = CharPtr(
                                 xmlNodeListGetString(doc, properties->children, 1),
-                                xmlCharDeleter());                
-                            // xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
+                                xmlCharDeleter());
+                // xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
                 if (!n) throw schema_loading_error("Unable to fetch name!");
                 name = std::string((const char*)n.get());
                 name = remapOldNames(name);
@@ -520,12 +525,12 @@ void Reader::Load()
             {
                 xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
                 if (!n) throw schema_loading_error("Unable to fetch endianness value!");
-                
+
                 if (boost::iequals((const char*) n, "big"))
                     endianness = Endian_Big;
                 else
                     endianness = Endian_Little;
-                    
+
                 xmlFree(n);
                 // std::cout << "Dimension endianness: " << endianness << std::endl;
             }
@@ -535,7 +540,7 @@ void Reader::Load()
         }
 
         dimension::Interpretation interp = GetDimensionType(interpretation);
-        
+
         Dimension d(name, interp, size, description);
         d.createUUID();
         if (! Utils::compare_distance(scale, 0.0))
@@ -554,7 +559,7 @@ void Reader::Load()
         {
             d.setMaximum(maximum);
         }
-        
+
         d.setEndianness(endianness);
 
         d.setPosition(position);
@@ -578,36 +583,36 @@ dimension::Interpretation Reader::GetDimensionType(std::string const& interpreta
 {
 
     if (boost::iequals(interpretation, "int8_t") ||
-        boost::iequals(interpretation, "int8"))
+            boost::iequals(interpretation, "int8"))
         return dimension::SignedInteger;
 
     if (boost::iequals(interpretation, "uint8_t") ||
-        boost::iequals(interpretation, "uint8"))
+            boost::iequals(interpretation, "uint8"))
         return dimension::UnsignedInteger;
 
     if (boost::iequals(interpretation, "int16_t") ||
-        boost::iequals(interpretation, "int16"))
+            boost::iequals(interpretation, "int16"))
         return dimension::SignedInteger;
 
     if (boost::iequals(interpretation, "uint16_t") ||
-        boost::iequals(interpretation, "uint16"))
+            boost::iequals(interpretation, "uint16"))
         return dimension::UnsignedInteger;
 
 
     if (boost::iequals(interpretation, "int32_t") ||
-        boost::iequals(interpretation, "int32"))
+            boost::iequals(interpretation, "int32"))
         return dimension::SignedInteger;
 
     if (boost::iequals(interpretation, "uint32_t") ||
-        boost::iequals(interpretation, "uint32"))
+            boost::iequals(interpretation, "uint32"))
         return dimension::UnsignedInteger;
 
     if (boost::iequals(interpretation, "int64_t") ||
-        boost::iequals(interpretation, "int64"))
+            boost::iequals(interpretation, "int64"))
         return dimension::SignedInteger;
 
     if (boost::iequals(interpretation, "uint64_t") ||
-        boost::iequals(interpretation, "uint64"))
+            boost::iequals(interpretation, "uint64"))
         return dimension::UnsignedInteger;
 
     if (boost::iequals(interpretation, "float"))
@@ -622,35 +627,35 @@ dimension::Interpretation Reader::GetDimensionType(std::string const& interpreta
 
 
 Writer::Writer(pdal::Schema const& schema)
- : m_schema(schema) {}
+    : m_schema(schema) {}
 
 std::string Writer::getXML()
 {
     BufferPtr buffer = BufferPtr(xmlBufferCreate(), BufferDeleter());
-    
+
     xmlBufferPtr b = static_cast<xmlBuffer*>(buffer.get());
     TextWriterPtr writer = TextWriterPtr(xmlNewTextWriterMemory(b, 0), WriterDeleter());
 
     write(writer);
 
-    xmlTextWriterPtr w = static_cast<xmlTextWriterPtr>(writer.get());     
+    xmlTextWriterPtr w = static_cast<xmlTextWriterPtr>(writer.get());
     xmlTextWriterFlush(w);
     // printf("xml: %s", (const char *) b->content);
     return std::string((const char *) b->content, b->size);
-    
+
 }
 
 void Writer::write(TextWriterPtr writer)
 {
 
-    xmlTextWriterPtr w = static_cast<xmlTextWriterPtr>(writer.get()); 
-    
+    xmlTextWriterPtr w = static_cast<xmlTextWriterPtr>(writer.get());
+
     xmlTextWriterSetIndent(w, 1);
     xmlTextWriterStartDocument(w, NULL, "utf-8", NULL);
     xmlTextWriterStartElementNS(w, BAD_CAST "pc", BAD_CAST "PointCloudSchema", NULL);
     xmlTextWriterWriteAttributeNS(w, BAD_CAST "xmlns", BAD_CAST "pc", NULL, BAD_CAST "http://pointcloud.org/schemas/PC/1.0");
     xmlTextWriterWriteAttributeNS(w, BAD_CAST "xmlns", BAD_CAST "xsi", NULL, BAD_CAST "http://www.w3.org/2001/XMLSchema-instance");
-    
+
     writeSchema(writer);
     xmlTextWriterEndElement(w);
     xmlTextWriterEndDocument(w);
@@ -660,10 +665,10 @@ boost::uint32_t GetStreamPrecision(double scale)
 {
     double frac = 0;
     double integer = 0;
-    
+
     frac = std::modf(scale, &integer);
     double precision = std::fabs(std::floor(std::log10(frac)));
-    
+
     boost::uint32_t output = static_cast<boost::uint32_t>(precision);
     return output;
 }
@@ -671,37 +676,37 @@ boost::uint32_t GetStreamPrecision(double scale)
 void Writer::writeSchema(TextWriterPtr writer)
 {
 
-    xmlTextWriterPtr w = static_cast<xmlTextWriterPtr>(writer.get()); 
-    
+    xmlTextWriterPtr w = static_cast<xmlTextWriterPtr>(writer.get());
+
     // const std::vector<Dimension>& dims = m_schema.getDimensions();
 
     schema::index_by_index const& dims = m_schema.getDimensions().get<schema::index>();
-        
+
     for (boost::uint32_t i = 0; i < dims.size(); i++)
     {
         Dimension const& dim = dims[i];
         xmlTextWriterStartElementNS(w, BAD_CAST "pc", BAD_CAST "dimension", NULL);
-        
+
         std::ostringstream position;
         position << i+1;
         xmlTextWriterWriteElementNS(w, BAD_CAST "pc", BAD_CAST "position", NULL, BAD_CAST position.str().c_str());
-        
+
         std::ostringstream size;
         size << dim.getByteSize();
         xmlTextWriterWriteElementNS(w, BAD_CAST "pc", BAD_CAST "size", NULL, BAD_CAST size.str().c_str());
-        
+
         std::ostringstream description;
         description << dim.getDescription();
         if (description.str().size())
             xmlTextWriterWriteElementNS(w, BAD_CAST "pc", BAD_CAST "description", NULL, BAD_CAST description.str().c_str());
-        
+
         std::ostringstream name;
         name << dim.getName();
         if (name.str().size())
             xmlTextWriterWriteElementNS(w, BAD_CAST "pc", BAD_CAST "name", NULL, BAD_CAST name.str().c_str());
-        
+
         xmlTextWriterWriteElementNS(w, BAD_CAST "pc", BAD_CAST "interpretation", NULL, BAD_CAST dim.getInterpretationName().c_str());
-        
+
         double minimum = dim.getMinimum();
         if (!Utils::compare_distance<double>(minimum, 0.0))
         {
@@ -713,9 +718,9 @@ void Writer::writeSchema(TextWriterPtr writer)
 
             xmlTextWriterWriteAttributeNS(w, BAD_CAST "pc", BAD_CAST "units", NULL, BAD_CAST "double");
             xmlTextWriterWriteAttributeNS(w, BAD_CAST "pc", BAD_CAST "value", NULL, BAD_CAST mn.str().c_str());
-            xmlTextWriterEndElement(w);            
+            xmlTextWriterEndElement(w);
         }
-        
+
 
         double maximum = dim.getMaximum();
         if (!Utils::compare_distance<double>(minimum, 0.0))
@@ -728,7 +733,7 @@ void Writer::writeSchema(TextWriterPtr writer)
 
             xmlTextWriterWriteAttributeNS(w, BAD_CAST "pc", BAD_CAST "units", NULL, BAD_CAST "double");
             xmlTextWriterWriteAttributeNS(w, BAD_CAST "pc", BAD_CAST "value", NULL, BAD_CAST mn.str().c_str());
-            xmlTextWriterEndElement(w);            
+            xmlTextWriterEndElement(w);
 
         }
 
@@ -741,7 +746,7 @@ void Writer::writeSchema(TextWriterPtr writer)
             out << scale;
             xmlTextWriterWriteElementNS(w, BAD_CAST "pc", BAD_CAST "scale", NULL, BAD_CAST out.str().c_str());
 
-        }        
+        }
 
         double offset = dim.getNumericOffset();
         if (!Utils::compare_distance<double>(offset, 0.0))
@@ -752,7 +757,7 @@ void Writer::writeSchema(TextWriterPtr writer)
             out << offset;
             xmlTextWriterWriteElementNS(w, BAD_CAST "pc", BAD_CAST "offset", NULL, BAD_CAST out.str().c_str());
 
-        }        
+        }
 
         xmlTextWriterWriteElementNS(w, BAD_CAST "pc", BAD_CAST "active", NULL, BAD_CAST "true");
 
@@ -760,8 +765,9 @@ void Writer::writeSchema(TextWriterPtr writer)
 
         xmlTextWriterFlush(w);
     }
-    
+
 }
 
 
-} } // namespaces
+}
+} // namespaces

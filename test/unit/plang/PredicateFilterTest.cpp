@@ -54,17 +54,17 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test1)
     pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Ramp);
 
     // keep all points where x less than 1.0
-    const pdal::Option source("source", 
-        // "X < 1.0"
-        "import numpy as np\n"
-        "def yow1(ins,outs):\n"
-        "  X = ins['X']\n"
-        "  Mask = np.less(X, 1.0)\n"
-        "  #print X\n"
-        "  #print Mask\n"
-        "  outs['Mask'] = Mask\n"
-        "  return True\n"
-        );
+    const pdal::Option source("source",
+                              // "X < 1.0"
+                              "import numpy as np\n"
+                              "def yow1(ins,outs):\n"
+                              "  X = ins['X']\n"
+                              "  Mask = np.less(X, 1.0)\n"
+                              "  #print X\n"
+                              "  #print Mask\n"
+                              "  outs['Mask'] = Mask\n"
+                              "  return True\n"
+                             );
     const pdal::Option module("module", "MyModule1");
     const pdal::Option function("function", "yow1");
     pdal::Options opts;
@@ -106,16 +106,16 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test2)
     Bounds<double> bounds(0.0, 0.0, 0.0, 2.0, 2.0, 2.0);
     pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Ramp);
 
-    const pdal::Option source("source", 
-        // "Y > 1.0"
-        "import numpy as np\n"
-        "def yow2(ins,outs):\n"
-        "  Y = ins['Y']\n"
-        "  Mask = np.greater(Y, 1.0)\n"
-        "  #print Mask\n"
-        "  outs['Mask'] = Mask\n"
-        "  return True\n"
-        );
+    const pdal::Option source("source",
+                              // "Y > 1.0"
+                              "import numpy as np\n"
+                              "def yow2(ins,outs):\n"
+                              "  Y = ins['Y']\n"
+                              "  Mask = np.greater(Y, 1.0)\n"
+                              "  #print Mask\n"
+                              "  outs['Mask'] = Mask\n"
+                              "  return True\n"
+                             );
     const pdal::Option module("module", "MyModule1");
     const pdal::Option function("function", "yow2");
     pdal::Options opts;
@@ -158,17 +158,17 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test3)
     pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Ramp);
 
     // keep all points where x less than 1.0
-    const pdal::Option source1("source", 
-        // "X < 1.0"
-        "import numpy as np\n"
-        "def yow1(ins,outs):\n"
-        "  X = ins['X']\n"
-        "  Mask = np.less(X, 1.0)\n"
-        "  #print X\n"
-        "  #print Mask\n"
-        "  outs['Mask'] = Mask\n"
-        "  return True\n"
-        );
+    const pdal::Option source1("source",
+                               // "X < 1.0"
+                               "import numpy as np\n"
+                               "def yow1(ins,outs):\n"
+                               "  X = ins['X']\n"
+                               "  Mask = np.less(X, 1.0)\n"
+                               "  #print X\n"
+                               "  #print Mask\n"
+                               "  outs['Mask'] = Mask\n"
+                               "  return True\n"
+                              );
     const pdal::Option module1("module", "MyModule1");
     const pdal::Option function1("function", "yow1");
     pdal::Options opts1;
@@ -179,17 +179,17 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test3)
     pdal::filters::Predicate filter1(reader, opts1);
 
     // keep all points where y greater than 0.5
-    const pdal::Option source2("source", 
-        // "Y > 0.5"
-        "import numpy as np\n"
-        "def yow2(ins,outs):\n"
-        "  Y = ins['Y']\n"
-        "  Mask = np.greater(Y, 0.5)\n"
-        "  #print X\n"
-        "  #print Mask\n"
-        "  outs['Mask'] = Mask\n"
-        "  return True\n"
-        );
+    const pdal::Option source2("source",
+                               // "Y > 0.5"
+                               "import numpy as np\n"
+                               "def yow2(ins,outs):\n"
+                               "  Y = ins['Y']\n"
+                               "  Mask = np.greater(Y, 0.5)\n"
+                               "  #print X\n"
+                               "  #print Mask\n"
+                               "  outs['Mask'] = Mask\n"
+                               "  return True\n"
+                              );
     const pdal::Option module2("module", "MyModule2");
     const pdal::Option function2("function", "yow2");
     pdal::Options opts2;
@@ -231,16 +231,16 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test4)
     Bounds<double> bounds(0.0, 0.0, 0.0, 2.0, 2.0, 2.0);
     pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Ramp);
 
-    const pdal::Option source("source", 
-        // "Y > 0.5"
-        "import numpy as np\n"
-        "def yow2(ins,outs):\n"
-        "  Y = ins['Y']\n"
-        "  Mask = np.greater(Y, 0.5)\n"
-        "  #print Mask\n"
-        "  outs['Mask'] = Mask\n"
-        "  return True\n"
-        );
+    const pdal::Option source("source",
+                              // "Y > 0.5"
+                              "import numpy as np\n"
+                              "def yow2(ins,outs):\n"
+                              "  Y = ins['Y']\n"
+                              "  Mask = np.greater(Y, 0.5)\n"
+                              "  #print Mask\n"
+                              "  outs['Mask'] = Mask\n"
+                              "  return True\n"
+                             );
     const pdal::Option module("module", "MyModule1");
     const pdal::Option function("function", "yow2");
     pdal::Options opts;
@@ -249,18 +249,18 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test4)
     opts.add(function);
 
     pdal::filters::Predicate filter(reader, opts);
-    
+
     filter.initialize();
 
     const Schema& schema = filter.getSchema();
     PointBuffer data(schema, 1000);
-    
+
     boost::scoped_ptr<pdal::StageSequentialIterator> iter(filter.createSequentialIterator(data));
     {
         boost::uint32_t numRead = iter->read(data);
         BOOST_CHECK(numRead == 750);
     }
-    
+
     pdal::filters::iterators::sequential::Predicate* iterator = static_cast<pdal::filters::iterators::sequential::Predicate*>(iter.get());
 
     const boost::uint64_t processed = iterator->getNumPointsProcessed();
@@ -279,16 +279,16 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test5)
     Bounds<double> bounds(0.0, 0.0, 0.0, 2.0, 2.0, 2.0);
     pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Ramp);
 
-    const pdal::Option source("source", 
-        // "Y > 0.5"
-        "import numpy as np\n"
-        "def yow2(ins,outs):\n"
-        "  Y = ins['Y']\n"
-        "  Mask = np.greater(Y, 0.5)\n"
-        "  #print Mask\n"
-        "  outs['xxxMaskxxx'] = Mask # delierbately rong\n"
-        "  return True\n"
-        );
+    const pdal::Option source("source",
+                              // "Y > 0.5"
+                              "import numpy as np\n"
+                              "def yow2(ins,outs):\n"
+                              "  Y = ins['Y']\n"
+                              "  Mask = np.greater(Y, 0.5)\n"
+                              "  #print Mask\n"
+                              "  outs['xxxMaskxxx'] = Mask # delierbately rong\n"
+                              "  return True\n"
+                             );
     const pdal::Option module("module", "MyModule1");
     const pdal::Option function("function", "yow2");
     pdal::Options opts;
@@ -297,16 +297,16 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test5)
     opts.add(function);
 
     pdal::filters::Predicate filter(reader, opts);
-    
+
     filter.initialize();
 
     const Schema& schema = filter.getSchema();
     PointBuffer data(schema, 1000);
-    
+
     boost::scoped_ptr<pdal::StageSequentialIterator> iter(filter.createSequentialIterator(data));
 
     BOOST_REQUIRE_THROW(iter->read(data), pdal::python_error);
-    
+
     return;
 }
 

@@ -39,7 +39,10 @@
 
 #include <pdal/PointBuffer.hpp>
 
-namespace pdal { namespace filters {
+namespace pdal
+{
+namespace filters
+{
 
 
 Programmable::Programmable(Stage& prevStage, const Options& options)
@@ -59,7 +62,7 @@ Programmable::~Programmable()
 void Programmable::initialize()
 {
     Filter::initialize();
-    
+
     m_script = new pdal::plang::Script(getOptions());
 
     log()->get(logDEBUG)  << "script " << *m_script << std::endl;
@@ -93,7 +96,7 @@ void Programmable::processBuffer(PointBuffer& data, pdal::plang::BufferedInvocat
     python.beginChunk(data);
 
     python.execute();
-    
+
     python.endChunk(data);
 
     return;
@@ -109,7 +112,10 @@ pdal::StageSequentialIterator* Programmable::createSequentialIterator(PointBuffe
 //---------------------------------------------------------------------------
 
 
-namespace iterators { namespace sequential {
+namespace iterators
+{
+namespace sequential
+{
 
 
 Programmable::Programmable(const pdal::filters::Programmable& filter, PointBuffer& buffer)
@@ -166,8 +172,10 @@ bool Programmable::atEndImpl() const
     return getPrevIterator().atEnd();
 }
 
-} } // iterators::sequential
+}
+} // iterators::sequential
 
-} } // pdal::filters
+}
+} // pdal::filters
 
 #endif

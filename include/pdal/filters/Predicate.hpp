@@ -44,7 +44,10 @@
 #include <pdal/plang/BufferedInvocation.hpp>
 
 
-namespace pdal { namespace filters {
+namespace pdal
+{
+namespace filters
+{
 
 class PDAL_DLL Predicate : public Filter
 {
@@ -57,19 +60,25 @@ public:
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
 
-    bool supportsIterator (StageIteratorType t) const
-    {   
-        if (t == StageIterator_Sequential ) return true;
+    bool supportsIterator(StageIteratorType t) const
+    {
+        if (t == StageIterator_Sequential) return true;
 
         return false;
     }
 
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const { return NULL; }
+    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const
+    {
+        return NULL;
+    }
 
     boost::uint32_t processBuffer(PointBuffer& srcData, PointBuffer& dstData, pdal::plang::BufferedInvocation&) const;
 
-    const pdal::plang::Script& getScript() const { return *m_script; }
+    const pdal::plang::Script& getScript() const
+    {
+        return *m_script;
+    }
 
 private:
     pdal::plang::Script* m_script;
@@ -79,8 +88,11 @@ private:
 };
 
 
-namespace iterators { namespace sequential {
-    
+namespace iterators
+{
+namespace sequential
+{
+
 
 class PDAL_DLL Predicate : public pdal::FilterSequentialIterator
 {
@@ -90,8 +102,14 @@ public:
 
     void read();
 
-    boost::uint64_t getNumPointsProcessed() const { return m_numPointsProcessed; }
-    boost::uint64_t getNumPointsPassed() const { return m_numPointsPassed; }
+    boost::uint64_t getNumPointsProcessed() const
+    {
+        return m_numPointsProcessed;
+    }
+    boost::uint64_t getNumPointsPassed() const
+    {
+        return m_numPointsPassed;
+    }
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t);
@@ -108,11 +126,13 @@ private:
     boost::uint64_t m_numPointsPassed;
 };
 
-} } // iterators::sequential
+}
+} // iterators::sequential
 
 
 
-} } // pdal::filteers
+}
+} // pdal::filteers
 
 #endif
 

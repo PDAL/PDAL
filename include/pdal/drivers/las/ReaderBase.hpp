@@ -38,7 +38,12 @@
 #include <pdal/Reader.hpp>
 
 
-namespace pdal { namespace drivers { namespace las {
+namespace pdal
+{
+namespace drivers
+{
+namespace las
+{
 
 
 // this class gives the interfaces for the LAS-specific header data access functions -- we use
@@ -50,13 +55,15 @@ public:
     virtual ~ReaderBase() {}
 
     virtual void addDefaultDimensions() = 0;
-    
+
     virtual PointFormat getPointFormat() const = 0;
     virtual boost::uint8_t getVersionMajor() const = 0;
     virtual boost::uint8_t getVersionMinor() const = 0;
 };
 
 
-} } } // namespaces
+}
+}
+} // namespaces
 
 #endif

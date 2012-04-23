@@ -40,10 +40,10 @@
 namespace pdal
 {
 
-// This is the abstract base class used for out-of-band interactions 
+// This is the abstract base class used for out-of-band interactions
 // between the executing pipeline and the main app:
 //   - recording and reporting a "hearbeat"
-//   - recording and reporting percent-complete 
+//   - recording and reporting percent-complete
 //   - requesting the pipeline to be interrupted
 //
 // (The heartbeat feature can be used when the pipeline can't report
@@ -72,7 +72,7 @@ public:
     // interrupts, and call the user's callback function.
     //
     // percentComplete should be in range [0..100]
-    // 
+    //
     // returns true if everything is okay, or false if an interrupt has been requested
     inline bool check(double percentComplete)
     {
@@ -85,7 +85,7 @@ public:
         const bool status = !getInterruptFlag();
         return status;
     }
-    
+
     // The pipeline calls this to report the progress in an indeterminate way, check for
     // interrupts, and call the user's callback function.
     //
@@ -108,7 +108,7 @@ public:
     // any desired actions.
     //
     // Examples of things you might do here include printing the percent done,
-    // printing a '.' representing a heartbeat, checking some external condition 
+    // printing a '.' representing a heartbeat, checking some external condition
     // to raise the interrupt flag, etc.
     inline virtual void callback()
     {

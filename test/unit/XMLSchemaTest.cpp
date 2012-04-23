@@ -65,26 +65,27 @@ std::string ReadXML(std::string filename)
     std::ifstream::pos_type size;
     // char* data;
     std::vector<char> data;
-    if (infile->good()){
+    if (infile->good())
+    {
         infile->seekg(0, std::ios::end);
         size = infile->tellg();
         data.resize(static_cast<std::vector<char>::size_type>(size));
         // data = new char [size];
-        infile->seekg (0, std::ios::beg);
-        infile->read (&data.front(), size);
+        infile->seekg(0, std::ios::beg);
+        infile->read(&data.front(), size);
         // infile->close();
 
         // delete[] data;
         delete infile;
         return std::string(&data[0], data.size());
-        // return data; 
-    } 
-    else 
-    {   
+        // return data;
+    }
+    else
+    {
         throw pdal_error("unable to open file!");
         // return data;
     }
-    
+
 }
 
 
@@ -97,40 +98,40 @@ BOOST_AUTO_TEST_CASE(test_schema_read)
 {
     // std::istream* xml_stream = Utils::openFile(TestConfig::g_data_path+"schemas/8-dimension-schema.xml");
     // std::istream* xsd_stream = Utils::openFile(TestConfig::g_data_path+"/schemas/LAS.xsd");
-    
+
     std::string xml = ReadXML(TestConfig::g_data_path+"../../schemas/8-dimension-schema.xml");
     std::string xsd = ReadXML(TestConfig::g_data_path+"../../schemas/LAS.xsd");
     pdal::schema::Reader reader(xml, xsd);
-    
+
     pdal::Schema schema = reader.getSchema();
-    
+
     pdal::schema::Writer writer(schema);
     std::string xml_output = writer.getXML();
-    
+
     pdal::schema::Reader reader2(xml_output, xsd);
     pdal::Schema schema2 = reader2.getSchema();
 
     schema::index_by_index const& dims1 = schema.getDimensions().get<schema::index>();
     schema::index_by_index const& dims2 = schema2.getDimensions().get<schema::index>();
-    
+
     // const std::vector<pdal::Dimension>& dims1 = schema.getDimensions();
     // const std::vector<pdal::Dimension>& dims2 = schema2.getDimensions();
-    
+
     BOOST_CHECK_EQUAL(dims1.size(), dims2.size());
-    
+
     for (boost::uint32_t i = 0; i < dims2.size(); ++i)
     {
         pdal::Dimension const& dim1 = dims1[i];
         pdal::Dimension const& dim2 = dims2[i];
-        
+
         BOOST_CHECK_EQUAL(dim1.getName(), dim2.getName());
         BOOST_CHECK_EQUAL(dim1.getInterpretation(), dim2.getInterpretation());
         BOOST_CHECK_EQUAL(dim1.getByteSize(), dim2.getByteSize());
-    
+
         BOOST_CHECK_EQUAL(dim1.getDescription(), dim2.getDescription());
-        
+
     }
-    
+
 }
 
 

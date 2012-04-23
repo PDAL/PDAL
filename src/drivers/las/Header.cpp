@@ -2,7 +2,7 @@
  * $Id$
  *
  * Project:  libLAS - http://liblas.org - A BSD library for LAS format data.
- * Purpose:  LAS header class 
+ * Purpose:  LAS header class
  * Author:   Mateusz Loskot, mateusz@loskot.net
  *
  ******************************************************************************
@@ -10,33 +10,33 @@
  * Copyright (c) 2008, Phil Vachon
  *
  * All rights reserved.
- * 
- * Redistribution and use in source and binary forms, with or without 
- * modification, are permitted provided that the following 
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following
  * conditions are met:
- * 
- *     * Redistributions of source code must retain the above copyright 
+ *
+ *     * Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright 
- *       notice, this list of conditions and the following disclaimer in 
- *       the documentation and/or other materials provided 
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in
+ *       the documentation and/or other materials provided
  *       with the distribution.
- *     * Neither the name of the Martin Isenburg or Iowa Department 
- *       of Natural Resources nor the names of its contributors may be 
- *       used to endorse or promote products derived from this software 
+ *     * Neither the name of the Martin Isenburg or Iowa Department
+ *       of Natural Resources nor the names of its contributors may be
+ *       used to endorse or promote products derived from this software
  *       without specific prior written permission.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS 
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE 
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, 
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, 
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS 
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED 
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
- * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY 
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+ * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
@@ -46,9 +46,14 @@
 
 #include <pdal/Stage.hpp>
 
-namespace pdal { namespace drivers { namespace las {
+namespace pdal
+{
+namespace drivers
+{
+namespace las
+{
 
-    
+
 // BUG: should be std::string
 char const* const LasHeader::FileSignature = "LASF";
 char const* const LasHeader::SystemIdentifier = "PDAL";
@@ -134,7 +139,7 @@ void LasHeader::SetVersionMinor(boost::uint8_t v)
 {
     if (v > eVersionMinorMax)
         throw std::out_of_range("version minor out of range");
-    
+
     m_versionMinor = v;
 
 
@@ -184,7 +189,7 @@ void LasHeader::SetSoftwareId(std::string const& v)
 {
     if (v.size() > eSoftwareIdSize)
         throw std::invalid_argument("generating software id too long");
-    
+
 //    m_softwareId = v;
     std::fill(m_softwareId, m_softwareId + eSoftwareIdSize, 0);
     std::strncpy(m_softwareId, v.c_str(), eSoftwareIdSize);
@@ -237,16 +242,16 @@ void LasHeader::SetDataOffset(boost::uint32_t v)
 {
     // boost::uint32_t const dataSignatureSize = 2;
     // boost::uint16_t const hsize = GetHeaderSize();
-    // 
+    //
     // if ( (m_versionMinor == 0 && v < hsize + dataSignatureSize) ||
     //      (m_versionMinor == 1 && v < hsize) ||
     //      (m_versionMinor == 2 && v < hsize) )
     // {
     //     throw std::out_of_range("data offset out of range");
     // }
-    
+
     m_dataOffset = v;
-    
+
 }
 
 pdal::drivers::las::PointFormat LasHeader::getPointFormat() const
@@ -368,7 +373,7 @@ boost::uint32_t LasHeader::GetHeaderPadding() const
     return m_headerPadding;
 }
 
-void LasHeader::SetHeaderPadding( boost::uint32_t v) 
+void LasHeader::SetHeaderPadding(boost::uint32_t v)
 {
     m_headerPadding = v;
 }
@@ -381,7 +386,7 @@ void LasHeader::initialize()
 
     m_versionMajor = 1;
     m_versionMinor = 2;
-    
+
     m_createDOY = m_createYear = 0;
     std::time_t now;
     std::time(&now);
@@ -439,7 +444,7 @@ std::size_t LasHeader::getVLRBlockSize() const
     std::size_t vlr_total_size = 0;
 
     VLRList const& vlrs = m_vlrList;
-    
+
     for (boost::uint32_t i = 0; i < m_vlrList.count(); ++i)
     {
         VariableLengthRecord const & vlr = vlrs.get(i);
@@ -474,33 +479,33 @@ bool LasHeader::Compressed() const
     return m_isCompressed;
 }
 
-boost::property_tree::ptree LasHeader::GetPTree( ) const
+boost::property_tree::ptree LasHeader::GetPTree() const
 {
     using boost::property_tree::ptree;
     ptree pt;
-    
+
     pt.put("filesignature", GetFileSignature());
     pt.put("projectdid", GetProjectId());
     pt.put("systemid", GetSystemId());
     pt.put("softwareid", GetSoftwareId());
-    
-    
+
+
     std::ostringstream version;
     version << static_cast<int>(GetVersionMajor());
     version <<".";
     version << static_cast<int>(GetVersionMinor());
     pt.put("version", version.str());
-    
+
     pt.put("filesourceid", GetFileSourceId());
     pt.put("reserved", GetReserved());
 
     //////ptree srs = GetSRS().GetPTree();
     //////pt.add_child("srs", srs);
-    
+
     std::ostringstream date;
     date << GetCreationDOY() << "/" << GetCreationYear();
     pt.put("date", date.str());
-    
+
     pt.put("size", GetHeaderSize());
     pt.put("dataoffset", GetDataOffset());
 
@@ -511,39 +516,40 @@ boost::property_tree::ptree LasHeader::GetPTree( ) const
 
     ptree return_count;
     LasHeader::RecordsByReturnArray returns = GetPointRecordsByReturnCount();
-    for (boost::uint32_t i=0; i< 5; i++){
+    for (boost::uint32_t i=0; i< 5; i++)
+    {
         ptree r;
         r.put("id", i);
         r.put("count", returns[i]);
         return_count.add_child("return", r);
     }
     pt.add_child("returns", return_count);
-    
+
     pt.put("scale.x", GetScaleX());
     pt.put("scale.y", GetScaleY());
     pt.put("scale.z", GetScaleZ());
-    
+
     pt.put("offset.x", GetOffsetX());
     pt.put("offset.y", GetOffsetY());
     pt.put("offset.z", GetOffsetZ());
-    
+
     pt.put("minimum.x", GetMinX());
     pt.put("minimum.y", GetMinY());
     pt.put("minimum.z", GetMinZ());
-    
+
     pt.put("maximum.x", GetMaxX());
     pt.put("maximum.y", GetMaxY());
     pt.put("maximum.z", GetMaxZ());
 
-    
+
     ////for (boost::uint32_t i=0; i< GetRecordsCount(); i++) {
     ////    pt.add_child("vlrs.vlr", GetVLR(i).GetPTree());
-    ////}    
+    ////}
 
-    //////Schema const& schema = getSchema(); 
-    //////ptree t = schema.GetPTree(); 
+    //////Schema const& schema = getSchema();
+    //////ptree t = schema.GetPTree();
     //////pt.add_child("schema",  t);
-    
+
     return pt;
 }
 
@@ -559,4 +565,6 @@ std::ostream& operator<<(std::ostream& ostr, const LasHeader& header)
 
 
 
-} } } // namespaces
+}
+}
+} // namespaces

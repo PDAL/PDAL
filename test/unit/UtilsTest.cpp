@@ -61,12 +61,12 @@ BOOST_AUTO_TEST_CASE(test_random)
         const double x = Utils::random(rangeMin, rangeMax);
         BOOST_CHECK(x >= rangeMin);
         BOOST_CHECK(x <= rangeMax);
-     
+
         sum += x;
     }
 
     sum = sum / iters;
-    
+
     BOOST_CHECK(sum <= avg + 0.1*avg);
     BOOST_CHECK(sum >= avg - 0.1*avg);
 }
@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE(test_random)
 BOOST_AUTO_TEST_CASE(test_comparators)
 {
     bool ok;
-    
+
     {
         ok = Utils::compare_distance<float>(1.000001f, 1.0f);
         BOOST_CHECK(!ok);
@@ -152,7 +152,7 @@ BOOST_AUTO_TEST_CASE(test_field_read_write)
 
     BOOST_CHECK(x==one);
     BOOST_CHECK(Utils::compare_approx(y, two, std::numeric_limits<double>::min()) == true);
-    
+
     return;
 }
 
@@ -160,17 +160,17 @@ BOOST_AUTO_TEST_CASE(test_field_read_write)
 BOOST_AUTO_TEST_CASE(test_base64)
 {
     std::vector<boost::uint8_t> data;
-    for(int i=0;i<2;i++) data.push_back((boost::uint8_t)i);
+    for (int i=0; i<2; i++) data.push_back((boost::uint8_t)i);
 
     boost::uint32_t begin_size(0);
     for (std::vector<boost::uint8_t>::size_type i = 0; i < data.size(); ++i)
     {
         begin_size = begin_size + data[i];
     }
-    
+
     std::string encoded = Utils::base64_encode(data);
     std::vector<boost::uint8_t> decoded = Utils::base64_decode(encoded);
-    
+
     boost::uint32_t size(0);
     for (std::vector<boost::uint8_t>::size_type i = 0; i < decoded.size(); ++i)
     {
@@ -179,8 +179,8 @@ BOOST_AUTO_TEST_CASE(test_base64)
 
     BOOST_CHECK_EQUAL(decoded.size(), data.size());
     BOOST_CHECK_EQUAL(size, begin_size);
-    
-    
+
+
     return;
 }
 

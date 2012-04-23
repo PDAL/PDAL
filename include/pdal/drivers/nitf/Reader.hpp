@@ -43,23 +43,28 @@
 
 namespace pdal
 {
-    class PointBuffer;
-    class StreamFactory;
-    
-    namespace metadata 
-    { 
-        class Entry;
-    }
-    namespace drivers
-    {
-        namespace las
-        {
-            class Reader;
-        }
-    }
+class PointBuffer;
+class StreamFactory;
+
+namespace metadata
+{
+class Entry;
+}
+namespace drivers
+{
+namespace las
+{
+class Reader;
+}
+}
 }
 
-namespace pdal { namespace drivers { namespace nitf {
+namespace pdal
+{
+namespace drivers
+{
+namespace nitf
+{
 
 
 class PDAL_DLL Reader : public pdal::Reader
@@ -69,16 +74,16 @@ public:
 
     Reader(const Options& options);
     ~Reader();
-    
+
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
     virtual void addDefaultDimensions();
- 
-    bool supportsIterator (StageIteratorType t) const
-    {   
-        if (t == StageIterator_Sequential ) return true;
-        if (t == StageIterator_Random ) return true;
-        
+
+    bool supportsIterator(StageIteratorType t) const
+    {
+        if (t == StageIterator_Sequential) return true;
+        if (t == StageIterator_Random) return true;
+
         return false;
     }
 
@@ -98,7 +103,9 @@ private:
 };
 
 
-} } } // namespaces
+}
+}
+} // namespaces
 
 #endif
 

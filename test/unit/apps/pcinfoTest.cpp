@@ -85,7 +85,8 @@ BOOST_AUTO_TEST_CASE(pcinfo_test_common_opts)
 
 
 BOOST_AUTO_TEST_CASE(pcinfo_test_switches)
-{return;
+{
+    return;
     const std::string cmd = appName();
 
     std::string inputLas = Support::datapath("apps/simple.las");
@@ -94,7 +95,7 @@ BOOST_AUTO_TEST_CASE(pcinfo_test_switches)
     std::string output;
 
     int stat = 0;
-    
+
     // does the default work?
     stat = Support::run_command(cmd + " " + inputLas, output);
     BOOST_CHECK_EQUAL(stat, 0);
@@ -143,9 +144,9 @@ BOOST_AUTO_TEST_CASE(pcinfo_test_dumps)
     int stat = 0;
 
     std::ostringstream command;
-    
+
     // dump a single point to json
-    
+
     std::string pt_test = Support::temppath("pcinfo_point.txt");
     command << cmd + " --output=" + pt_test + " --point=1 " + inputLas;
     stat = Support::run_command(command.str(), output);
@@ -157,7 +158,7 @@ BOOST_AUTO_TEST_CASE(pcinfo_test_dumps)
 
     // dump summary of all points to json
     command.str("");
-    
+
     std::string stats_test = Support::temppath("pcinfo_stats.txt");
     command << cmd + " --output=" + stats_test + " --stats " + inputLas + " --seed 1234";
     stat = Support::run_command(command.str(), output);
@@ -175,7 +176,7 @@ BOOST_AUTO_TEST_CASE(pcinfo_test_dumps)
 
     // dump schema to json
     command.str("");
-    
+
     std::string schema_test = Support::temppath("pcinfo_schema.txt");
     command << cmd + " --output=" + schema_test + " --schema " + inputLas;
     stat = Support::run_command(command.str(), output);
@@ -187,7 +188,7 @@ BOOST_AUTO_TEST_CASE(pcinfo_test_dumps)
 
     // dump stage info to json
     command.str("");
-    
+
     std::string stage_test = Support::temppath("pcinfo_stage.txt");
     command << cmd + " --output=" + stage_test + " --stage " + inputLas;
     stat = Support::run_command(command.str(), output);

@@ -159,7 +159,7 @@ boost::uint32_t StageIterator::readBuffer(PointBuffer& buffer)
 
     boost::uint32_t numRead = 0;
 
-    
+
     numRead = readBufferImpl(buffer);
 
     m_index += numRead;
@@ -176,7 +176,7 @@ void StageIterator::readBufferEnd(PointBuffer& buffer)
     }
 
     readBufferEndImpl(buffer);
-    
+
     m_readBufferBeginPerformed = false;
 
     return;
@@ -216,7 +216,7 @@ boost::uint64_t StageIterator::naiveSkipImpl(boost::uint64_t count)
         const boost::uint32_t thisCount = static_cast<boost::uint32_t>(thisCount64);
 
         PointBuffer junk(getStage().getSchema(), thisCount);
-        
+
         const boost::uint32_t numRead = read(junk);
         if (numRead == 0) break; // end of file or something
 

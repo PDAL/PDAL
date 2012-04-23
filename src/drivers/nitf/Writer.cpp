@@ -44,7 +44,12 @@
 // syntactically, how do we name all the LAS writer options that we will pass to the las writer?
 //
 
-namespace pdal { namespace drivers { namespace nitf {
+namespace pdal
+{
+namespace drivers
+{
+namespace nitf
+{
 
 Writer::Writer(Stage& prevStage, const Options& options)
     : pdal::drivers::las::Writer(prevStage, options)
@@ -139,4 +144,6 @@ boost::property_tree::ptree Writer::toPTree() const
     return tree;
 }
 
-} } } // namespaces
+}
+}
+} // namespaces

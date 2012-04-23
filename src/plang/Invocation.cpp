@@ -50,7 +50,10 @@
 // a backdoor function numpy_init() which gets called from Environment::startup().
 #include <numpy/arrayobject.h>
 
-namespace pdal { namespace plang {
+namespace pdal
+{
+namespace plang
+{
 
 
 void Invocation::numpy_init()
@@ -106,7 +109,7 @@ void Invocation::compile()
     }
 
     if (!PyCallable_Check(m_function)) m_environment.handleError();
-  
+
     return;
 }
 
@@ -137,17 +140,17 @@ void Invocation::resetArguments()
 
     m_varsIn = PyDict_New();
     m_varsOut = PyDict_New();
-    
+
     return;
 }
 
 
-void Invocation::insertArgument(const std::string& name, 
-                                   boost::uint8_t* data, 
-                                   boost::uint32_t data_len, 
-                                   boost::uint32_t data_stride,                                  
-                                   dimension::Interpretation dataType, 
-                                   boost::uint32_t numBytes)
+void Invocation::insertArgument(const std::string& name,
+                                boost::uint8_t* data,
+                                boost::uint32_t data_len,
+                                boost::uint32_t data_stride,
+                                dimension::Interpretation dataType,
+                                boost::uint32_t numBytes)
 {
     npy_intp mydims = data_len;
     int nd = 1;
@@ -157,24 +160,24 @@ void Invocation::insertArgument(const std::string& name,
     int flags = NPY_CARRAY; // NPY_BEHAVED
 
     const int pyDataType = getPythonDataType(dataType, numBytes);
-        
+
     PyObject* pyArray = PyArray_New(&PyArray_Type, nd, dims, pyDataType, strides, data, 0, flags, NULL);
-    
+
     m_pyInputArrays.push_back(pyArray);
 
     PyDict_SetItemString(m_varsIn, name.c_str(), pyArray);
-    
+
     return;
 }
 
 
-void Invocation::extractResult(const std::string& name, 
-                                  boost::uint8_t* dst, 
-                                  boost::uint32_t data_len, 
-                                  boost::uint32_t data_stride,                                  
-                                  dimension::Interpretation dataType, 
-                                  boost::uint32_t numBytes)
-{      
+void Invocation::extractResult(const std::string& name,
+                               boost::uint8_t* dst,
+                               boost::uint32_t data_len,
+                               boost::uint32_t data_stride,
+                               dimension::Interpretation dataType,
+                               boost::uint32_t numBytes)
+{
     PyObject* xarr = PyDict_GetItemString(m_varsOut, name.c_str());
     if (!xarr)
     {
@@ -189,7 +192,7 @@ void Invocation::extractResult(const std::string& name,
 
     npy_intp one=0;
     const int pyDataType = getPythonDataType(dataType, numBytes);
-    
+
     boost::uint8_t* p = dst;
 
     if (pyDataType == PyArray_DOUBLE)
@@ -294,11 +297,11 @@ void Invocation::extractResult(const std::string& name,
 void Invocation::getOutputNames(std::vector<std::string>& names)
 {
     names.clear();
-    
+
     PyObject *key, *value;
     Py_ssize_t pos = 0;
 
-    while (PyDict_Next(m_varsOut, &pos, &key, &value)) 
+    while (PyDict_Next(m_varsOut, &pos, &key, &value))
     {
         char* p = PyString_AsString(key);
         names.push_back(p);
@@ -312,57 +315,57 @@ int Invocation::getPythonDataType(dimension::Interpretation datatype, boost::uin
 {
     switch (datatype)
     {
-    case dimension::SignedByte:
-        switch (siz)
-        {
-        case 1:
-            return PyArray_BYTE;
-        }
-        break;
-    case dimension::UnsignedByte:
-        switch (siz)
-        {
-        case 1:
-            return PyArray_UBYTE;
-        }
-        break;
-    case dimension::Float:
-        switch (siz)
-        {
-        case 4:
-            return PyArray_FLOAT;
-        case 8:
-            return PyArray_DOUBLE;
-        }
-        break;
-    case dimension::SignedInteger:
-        switch (siz)
-        {
-        case 1:
-            return PyArray_BYTE;
-        case 2:
-            return PyArray_SHORT;
-        case 4:
-            return PyArray_INT;
-        case 8:
-            return PyArray_LONGLONG;
-        }
-        break;
-    case dimension::UnsignedInteger:
-        switch (siz)
-        {
-        case 1:
-            return PyArray_UBYTE;
-        case 2:
-            return PyArray_USHORT;
-        case 4:
-            return PyArray_UINT;
-        case 8:
-            return PyArray_ULONGLONG;
-        }
-        break;
-    default:
-        return -1;
+        case dimension::SignedByte:
+            switch (siz)
+            {
+                case 1:
+                    return PyArray_BYTE;
+            }
+            break;
+        case dimension::UnsignedByte:
+            switch (siz)
+            {
+                case 1:
+                    return PyArray_UBYTE;
+            }
+            break;
+        case dimension::Float:
+            switch (siz)
+            {
+                case 4:
+                    return PyArray_FLOAT;
+                case 8:
+                    return PyArray_DOUBLE;
+            }
+            break;
+        case dimension::SignedInteger:
+            switch (siz)
+            {
+                case 1:
+                    return PyArray_BYTE;
+                case 2:
+                    return PyArray_SHORT;
+                case 4:
+                    return PyArray_INT;
+                case 8:
+                    return PyArray_LONGLONG;
+            }
+            break;
+        case dimension::UnsignedInteger:
+            switch (siz)
+            {
+                case 1:
+                    return PyArray_UBYTE;
+                case 2:
+                    return PyArray_USHORT;
+                case 4:
+                    return PyArray_UINT;
+                case 8:
+                    return PyArray_ULONGLONG;
+            }
+            break;
+        default:
+            return -1;
     }
 
     assert(0);
@@ -373,9 +376,9 @@ int Invocation::getPythonDataType(dimension::Interpretation datatype, boost::uin
 
 bool Invocation::hasOutputVariable(const std::string& name) const
 {
-   PyObject* obj = PyDict_GetItemString(m_varsOut, name.c_str());
+    PyObject* obj = PyDict_GetItemString(m_varsOut, name.c_str());
 
-   return (obj!=NULL);
+    return (obj!=NULL);
 }
 
 
@@ -409,6 +412,7 @@ bool Invocation::execute()
 }
 
 
-} } //namespaces
+}
+} //namespaces
 
 #endif

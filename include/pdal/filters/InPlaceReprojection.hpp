@@ -43,14 +43,17 @@
 
 namespace pdal
 {
-    class PointBuffer;
-    namespace gdal
-    {
-        class Debug;
-    }
+class PointBuffer;
+namespace gdal
+{
+class Debug;
+}
 }
 
-namespace pdal { namespace filters {
+namespace pdal
+{
+namespace filters
+{
 
 
 class PDAL_DLL InPlaceReprojection : public Filter
@@ -60,23 +63,26 @@ public:
 
     InPlaceReprojection(Stage& prevStage, const Options&);
     InPlaceReprojection(Stage& prevStage,
-                       const SpatialReference& outSRS);
+                        const SpatialReference& outSRS);
     InPlaceReprojection(Stage& prevStage,
-                       const SpatialReference& inSRS,
-                       const SpatialReference& outSRS);
+                        const SpatialReference& inSRS,
+                        const SpatialReference& outSRS);
 
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
 
-    bool supportsIterator (StageIteratorType t) const
-    {   
-        if (t == StageIterator_Sequential ) return true;
+    bool supportsIterator(StageIteratorType t) const
+    {
+        if (t == StageIterator_Sequential) return true;
 
         return false;
     }
 
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const { return NULL; }
+    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const
+    {
+        return NULL;
+    }
 
     void processBuffer(PointBuffer& data) const;
 
@@ -84,13 +90,13 @@ private:
     void updateBounds();
     void checkImpedance();
     void transform(double& x, double& y, double& z) const;
-    double getScaledValue(  PointBuffer& data, 
-                            Dimension const& d, 
-                            std::size_t pointIndex) const;
-    void setScaledValue(PointBuffer& data, 
-                          double value, 
-                          Dimension const& d, 
+    double getScaledValue(PointBuffer& data,
+                          Dimension const& d,
                           std::size_t pointIndex) const;
+    void setScaledValue(PointBuffer& data,
+                        double value,
+                        Dimension const& d,
+                        std::size_t pointIndex) const;
 
     SpatialReference m_inSRS;
     SpatialReference m_outSRS;
@@ -101,11 +107,11 @@ private:
     ReferencePtr m_in_ref_ptr;
     ReferencePtr m_out_ref_ptr;
     TransformPtr m_transform_ptr;
-    
+
     Dimension m_x;
     Dimension m_y;
     Dimension m_z;
-    
+
     double m_x_scale;
     double m_y_scale;
     double m_z_scale;
@@ -113,12 +119,15 @@ private:
     double m_y_offset;
     double m_z_offset;
     boost::shared_ptr<pdal::gdal::Debug> m_gdal_debug;
-    
+
     InPlaceReprojection& operator=(const InPlaceReprojection&); // not implemented
     InPlaceReprojection(const InPlaceReprojection&); // not implemented
 };
 
-namespace iterators { namespace sequential {
+namespace iterators
+{
+namespace sequential
+{
 
 
 class PDAL_DLL InPlaceReprojection : public pdal::FilterSequentialIterator
@@ -135,9 +144,11 @@ private:
 };
 
 
-} } // iterators::sequential
+}
+} // iterators::sequential
 
 
-} } // namespaces
+}
+} // namespaces
 
 #endif

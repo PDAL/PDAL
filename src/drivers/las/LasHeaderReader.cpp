@@ -2,7 +2,7 @@
  * $Id$
  *
  * Project:  libLAS - http://liblas.org - A BSD library for LAS format data.
- * Purpose:  LAS header class 
+ * Purpose:  LAS header class
  * Author:   Mateusz Loskot, mateusz@loskot.net
  *
  ******************************************************************************
@@ -10,33 +10,33 @@
  * Copyright (c) 2008, Phil Vachon
  *
  * All rights reserved.
- * 
- * Redistribution and use in source and binary forms, with or without 
- * modification, are permitted provided that the following 
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following
  * conditions are met:
- * 
- *     * Redistributions of source code must retain the above copyright 
+ *
+ *     * Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright 
- *       notice, this list of conditions and the following disclaimer in 
- *       the documentation and/or other materials provided 
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in
+ *       the documentation and/or other materials provided
  *       with the distribution.
- *     * Neither the name of the Martin Isenburg or Iowa Department 
- *       of Natural Resources nor the names of its contributors may be 
- *       used to endorse or promote products derived from this software 
+ *     * Neither the name of the Martin Isenburg or Iowa Department
+ *       of Natural Resources nor the names of its contributors may be
+ *       used to endorse or promote products derived from this software
  *       without specific prior written permission.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS 
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE 
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, 
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, 
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS 
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED 
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
- * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY 
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+ * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
@@ -52,8 +52,13 @@
 #include <boost/scoped_array.hpp>
 #include <boost/concept_check.hpp> // ignore_unused_variable_warning
 
-namespace pdal { namespace drivers { namespace las {
-    
+namespace pdal
+{
+namespace drivers
+{
+namespace las
+{
+
 
 LasHeaderReader::LasHeaderReader(LasHeader& header, std::istream& istream)
     : m_header(header)
@@ -136,10 +141,10 @@ void LasHeaderReader::read(Stage& stage, Schema& schema)
 
     // 15. Offset to data
     Utils::read_n(n4, m_istream, sizeof(n4));
-    
+
     if (n4 < m_header.GetHeaderSize())
     {
-        std::ostringstream msg; 
+        std::ostringstream msg;
         msg <<  "The offset to the start of point data, "
             << n4 << ", is smaller than the header size, "
             << m_header.GetHeaderSize() << ".  This is "
@@ -187,20 +192,20 @@ void LasHeaderReader::read(Stage& stage, Schema& schema)
         const pdal::drivers::las::PointFormat format = (pdal::drivers::las::PointFormat)n1;
         m_header.setPointFormat(format);
         pdal::drivers::las::Support::registerFields(stage, schema, format);
-    } 
+    }
     else
     {
         throw std::domain_error("invalid point data format");
     }
-    
+
     // 18. Point Data Record Length
     Utils::read_n(n2, m_istream, sizeof(n2));
-    // FIXME: We currently only use the DataFormatId, this needs to 
+    // FIXME: We currently only use the DataFormatId, this needs to
     // adjust the schema based on the difference between the DataRecordLength
-    // and the base size of the pointformat.  If we have an XML schema in the 
+    // and the base size of the pointformat.  If we have an XML schema in the
     // form of a VLR in the file, we'll use that to apportion the liblas::Schema.
-    // Otherwise, all bytes after the liblas::Schema::GetBaseByteSize will be 
-    // a simple uninterpreted byte field. 
+    // Otherwise, all bytes after the liblas::Schema::GetBaseByteSize will be
+    // a simple uninterpreted byte field.
     // SetDataRecordLength(n2);
 
     // 19. Number of point records
@@ -208,16 +213,16 @@ void LasHeaderReader::read(Stage& stage, Schema& schema)
     m_header.SetPointRecordsCount(n4);
 
     // 20. Number of points by return
-    // A few versions of the spec had this as 7, but 
-    // https://lidarbb.cr.usgs.gov/index.php?showtopic=11388 says 
+    // A few versions of the spec had this as 7, but
+    // https://lidarbb.cr.usgs.gov/index.php?showtopic=11388 says
     // it is supposed to always be 5
-    std::size_t const return_count_length = 5; 
+    std::size_t const return_count_length = 5;
     for (std::size_t i = 0; i < return_count_length; ++i)
     {
         boost::uint32_t count = 0;
         Utils::read_n(count, m_istream, sizeof(boost::uint32_t));
         m_header.SetPointRecordsByReturnCount(i, count);
-    }  
+    }
 
     // 21-23. Scale factors
     double xScale, yScale, zScale;
@@ -253,14 +258,14 @@ void LasHeaderReader::read(Stage& stage, Schema& schema)
     // m_header.SetMin(x2, y2, z2);
 
     {
-        // We're going to check the two bytes off the end of the header to 
-        // see if they're pad bytes anyway.  Some softwares, notably older QTModeler, 
+        // We're going to check the two bytes off the end of the header to
+        // see if they're pad bytes anyway.  Some softwares, notably older QTModeler,
         // write 1.0-style pad bytes off the end of their header but state that the
-        // offset is actually 2 bytes back.  We need to set the dataoffset 
-        // appropriately in those cases anyway. 
+        // offset is actually 2 bytes back.  We need to set the dataoffset
+        // appropriately in those cases anyway.
         m_istream.seekg(m_header.GetDataOffset());
 
-        if (hasLAS10PadSignature()) 
+        if (hasLAS10PadSignature())
         {
             std::streamsize const current_pos = m_istream.tellg();
             m_istream.seekg(current_pos + 2);
@@ -274,24 +279,24 @@ void LasHeaderReader::read(Stage& stage, Schema& schema)
     }
 
 #ifdef PDAL_HAVE_LASZIP
-    
+
     if (m_header.Compressed())
     {
         ZipPoint zp(m_header.getPointFormat(), m_header.getVLRs().getAll());
         LASzip* laszip = zp.GetZipper();
         std::ostringstream zip_version;
-        zip_version <<"LASzip Version " 
-                    << (int)laszip->version_major << "." 
+        zip_version <<"LASzip Version "
+                    << (int)laszip->version_major << "."
                     << (int)laszip->version_minor << "r"
-                    << (int)laszip->version_revision << " c" 
+                    << (int)laszip->version_revision << " c"
                     << (int)laszip->compressor;
-        if (laszip->compressor == LASZIP_COMPRESSOR_CHUNKED) 
+        if (laszip->compressor == LASZIP_COMPRESSOR_CHUNKED)
             zip_version << " "<< (int)laszip->chunk_size << ":";
         else
             zip_version << ":";
-        for (int i = 0; i < (int)laszip->num_items; i++) 
-            zip_version <<" "<< laszip->items[i].get_name()<<" "<<  (int)laszip->items[i].version;
-    
+        for (int i = 0; i < (int)laszip->num_items; i++)
+            zip_version <<" "<< laszip->items[i].get_name()<<" "<< (int)laszip->items[i].version;
+
         m_header.setCompressionInfo(zip_version.str());
     }
 #endif
@@ -313,20 +318,20 @@ bool LasHeaderReader::hasLAS10PadSignature()
 {
     boost::uint8_t const sgn1 = 0xCC;
     boost::uint8_t const sgn2 = 0xDD;
-    boost::uint8_t pad1 = 0x0; 
+    boost::uint8_t pad1 = 0x0;
     boost::uint8_t pad2 = 0x0;
 
     std::streamsize const current_pos = m_istream.tellg();
-    
-    // If our little test reads off the end of the file (in the case 
-    // of a file with just a header and no points), we'll try to put the 
+
+    // If our little test reads off the end of the file (in the case
+    // of a file with just a header and no points), we'll try to put the
     // borken dishes back up in the cabinet
     try
     {
         Utils::read_n(pad1, m_istream, sizeof(boost::uint8_t));
         Utils::read_n(pad2, m_istream, sizeof(boost::uint8_t));
     }
-    catch (std::out_of_range& e) 
+    catch (std::out_of_range& e)
     {
         boost::ignore_unused_variable_warning(e);
         m_istream.seekg(current_pos, std::ios::beg);
@@ -336,23 +341,23 @@ bool LasHeaderReader::hasLAS10PadSignature()
     {
         boost::ignore_unused_variable_warning(e);
         m_istream.seekg(current_pos, std::ios::beg);
-        return false;        
+        return false;
     }
 
     // BUG: endianness
     //LIBLAS_SWAP_BYTES(pad1);
     //LIBLAS_SWAP_BYTES(pad2);
-    
+
     // Put the stream back where we found it
     m_istream.seekg(current_pos, std::ios::beg);
-    
-    // Let's check both ways in case people were 
-    // careless with their swapping.  This will do no good 
+
+    // Let's check both ways in case people were
+    // careless with their swapping.  This will do no good
     // when we go to read point data though.
     bool found = false;
     if (sgn1 == pad2 && sgn2 == pad1) found = true;
     if (sgn1 == pad1 && sgn2 == pad2) found = true;
-    
+
     return found;
 }
 
@@ -396,7 +401,7 @@ void LasHeaderReader::readOneVLR()
     }
 
     VariableLengthRecord vlr(reserved, userId, recordId, description, data, recordLenAfterHeader);
-    
+
     m_header.getVLRs().add(vlr);
 
     delete[] data;
@@ -423,20 +428,20 @@ void LasHeaderReader::readAllVLRs()
 
     //SpatialReference srs = m_header.getVLRs().constructSRS();
     //m_header.setSpatialReference(srs);
-    
+
     //////// Go fetch the schema from the VLRs if we've got one.
     //////try {
     //////    liblas::Schema schema(GetVLRs());
     //////    SetSchema(schema);
 
-    //////} catch (std::runtime_error const& e) 
+    //////} catch (std::runtime_error const& e)
     //////{
     //////    // Create one from the PointFormat if we don't have
-    //////    // one in the VLRs.  Create a custom dimension on the schema 
-    //////    // That comprises the rest of the bytes after the end of the 
+    //////    // one in the VLRs.  Create a custom dimension on the schema
+    //////    // That comprises the rest of the bytes after the end of the
     //////    // required dimensions.
     //////    liblas::Schema schema(GetDataFormatId());
-    //////    
+    //////
     //////    // FIXME: handle custom bytes here.
     //////    SetSchema(schema);
     //////    boost::ignore_unused_variable_warning(e);
@@ -448,25 +453,25 @@ void LasHeaderReader::readAllVLRs()
 
 void LasHeaderReader::validate()
 {
-    // Check that the point count actually describes the number of points 
-    // in the file.  If it doesn't, we're going to throw an error telling 
-    // the user why.  It may also be a problem that the dataoffset is 
-    // really what is wrong, but there's no real way to know that unless 
+    // Check that the point count actually describes the number of points
+    // in the file.  If it doesn't, we're going to throw an error telling
+    // the user why.  It may also be a problem that the dataoffset is
+    // really what is wrong, but there's no real way to know that unless
     // you go start mucking around in the bytes with hexdump or od
-        
+
     // LAS 1.3 specification no longer mandates that the end of the file is the
     // end of the points. See http://trac.liblas.org/ticket/147 for more details
-    // on this issue and why the seek can be trouble in the windows case.  
-    // If you are having trouble properly seeking to the end of the stream on 
-    // windows, use boost's iostreams or similar, which do not have an overflow 
+    // on this issue and why the seek can be trouble in the windows case.
+    // If you are having trouble properly seeking to the end of the stream on
+    // windows, use boost's iostreams or similar, which do not have an overflow
     // problem.
-    
-    if (m_header.GetVersionMinor() < 3 && !m_header.Compressed() ) 
+
+    if (m_header.GetVersionMinor() < 3 && !m_header.Compressed())
     {
-        // Seek to the beginning 
+        // Seek to the beginning
         m_istream.seekg(0, std::ios::beg);
         std::ios::pos_type beginning = m_istream.tellg();
-    
+
         // Seek to the end
         m_istream.seekg(0, std::ios::end);
         std::ios::pos_type end = m_istream.tellg();
@@ -475,29 +480,30 @@ void LasHeaderReader::validate()
         std::ios::off_type length = static_cast<std::ios::off_type>(m_header.GetDataRecordLength());
         std::ios::off_type point_bytes = end - offset;
 
-        // Figure out how many points we have and whether or not we have 
+        // Figure out how many points we have and whether or not we have
         // extra slop in there.
         std::ios::off_type count = point_bytes / length;
         std::ios::off_type remainder = point_bytes % length;
-        
 
-        if ( m_header.GetPointRecordsCount() != static_cast<boost::uint32_t>(count)) {
-  
-                std::ostringstream msg; 
-                msg <<  "The number of points in the header that was set "
-                        "by the software '" << m_header.GetSoftwareId() <<
-                        "' does not match the actual number of points in the file "
-                        "as determined by subtracting the data offset (" 
-                        <<m_header.GetDataOffset() << ") from the file length (" 
-                        << size <<  ") and dividing by the point record length (" 
-                        << m_header.GetDataRecordLength() << ")."
-                        " It also does not perfectly contain an exact number of"
-                        " point data and we cannot infer a point count."
-                        " Calculated number of points: " << count << 
-                        " Header-specified number of points: " 
-                        << m_header.GetPointRecordsCount() <<
-                        " Point data remainder: " << remainder;
-                throw std::runtime_error(msg.str());                
+
+        if (m_header.GetPointRecordsCount() != static_cast<boost::uint32_t>(count))
+        {
+
+            std::ostringstream msg;
+            msg <<  "The number of points in the header that was set "
+                "by the software '" << m_header.GetSoftwareId() <<
+                "' does not match the actual number of points in the file "
+                "as determined by subtracting the data offset ("
+                <<m_header.GetDataOffset() << ") from the file length ("
+                << size <<  ") and dividing by the point record length ("
+                << m_header.GetDataRecordLength() << ")."
+                " It also does not perfectly contain an exact number of"
+                " point data and we cannot infer a point count."
+                " Calculated number of points: " << count <<
+                " Header-specified number of points: "
+                << m_header.GetPointRecordsCount() <<
+                " Point data remainder: " << remainder;
+            throw std::runtime_error(msg.str());
 
         }
     }
@@ -505,4 +511,6 @@ void LasHeaderReader::validate()
 
 
 
-} } } // namespaces
+}
+}
+} // namespaces

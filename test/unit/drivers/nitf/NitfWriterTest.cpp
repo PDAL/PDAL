@@ -76,7 +76,7 @@ static void compare_contents(const std::string& las_file, const std::string& ntf
     const int lasStart = headerLen;
     const int lasLen = totalLen - headerLen - footerLen;
     FilenameSubsetStreamFactory f(ntf_file, lasStart, lasLen);
-    
+
     pdal::drivers::las::Reader ntf_reader(&f);
 #endif
     ntf_reader.initialize();
@@ -84,7 +84,7 @@ static void compare_contents(const std::string& las_file, const std::string& ntf
     PointBuffer ntf_data(ntf_schema, 750);
     StageSequentialIterator* ntf_iter = ntf_reader.createSequentialIterator(ntf_data);
     const boost::uint32_t ntf_numRead = ntf_iter->read(ntf_data);
- 
+
     //
     // compare the two buffers
     //
@@ -93,7 +93,7 @@ static void compare_contents(const std::string& las_file, const std::string& ntf
     Dimension const& ntf_dimX = ntf_schema.getDimension("X");
     Dimension const& ntf_dimY = ntf_schema.getDimension("Y");
     Dimension const& ntf_dimZ = ntf_schema.getDimension("Z");
-    
+
     Dimension const& las_dimX = las_schema.getDimension("X");
     Dimension const& las_dimY = las_schema.getDimension("Y");
     Dimension const& las_dimZ = las_schema.getDimension("Z");
@@ -127,7 +127,7 @@ BOOST_AUTO_TEST_CASE(test1)
     const std::string reference_output(Support::datapath("nitf/write_test1.ntf"));
 
     FileUtils::deleteFile(nitf_output);
-  
+
     //
     // write the NITF
     //

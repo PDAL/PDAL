@@ -36,7 +36,10 @@
 
 #include <pdal/filters/PointBufferCache.hpp>
 
-namespace pdal { namespace filters {
+namespace pdal
+{
+namespace filters
+{
 
 
 Cache::Cache(Stage& prevStage, const Options& options)
@@ -100,7 +103,7 @@ void Cache::addToCache(boost::uint64_t pointIndex, const PointBuffer& data) cons
 {
     PointBuffer* block = new PointBuffer(data.getSchema(), m_cacheBlockSize);
     block->copyPointsFast(0, 0, data, m_cacheBlockSize);
-    
+
     m_cache->insert(pointIndex, block);
 
     return;
@@ -118,9 +121,9 @@ const PointBuffer* Cache::lookupInCache(boost::uint64_t pointIndex) const
 
 
 void Cache::getCacheStats(boost::uint64_t& numCacheLookupMisses,
-                                boost::uint64_t& numCacheLookupHits,
-                                boost::uint64_t& numCacheInsertMisses,
-                                boost::uint64_t& numCacheInsertHits) const
+                          boost::uint64_t& numCacheLookupHits,
+                          boost::uint64_t& numCacheInsertMisses,
+                          boost::uint64_t& numCacheInsertHits) const
 {
     m_cache->getCacheStats(numCacheLookupMisses,
                            numCacheLookupHits,
@@ -175,7 +178,10 @@ pdal::StageRandomIterator* Cache::createRandomIterator(PointBuffer& buffer) cons
 }
 
 
-namespace iterators { namespace sequential {
+namespace iterators
+{
+namespace sequential
+{
 
 
 Cache::Cache(const pdal::filters::Cache& filter, PointBuffer& buffer)
@@ -215,8 +221,8 @@ boost::uint32_t Cache::readBufferImpl(PointBuffer& data)
         // if they asked for a full block and we got a full block,
         // and the block we got is properly aligned and not already cached,
         // then let's cache it!
-        const bool isCacheable = (data.getCapacity() == cacheBlockSize) && 
-                                 (numRead == cacheBlockSize) && 
+        const bool isCacheable = (data.getCapacity() == cacheBlockSize) &&
+                                 (numRead == cacheBlockSize) &&
                                  (currentPointIndex % cacheBlockSize == 0);
         if (isCacheable && (m_filter.lookupInCache(currentPointIndex) == NULL))
         {
@@ -234,7 +240,7 @@ boost::uint32_t Cache::readBufferImpl(PointBuffer& data)
     {
         // A hit! A palpable hit!
         data.copyPointFast(0,  currentPointIndex % cacheBlockSize, *block);
-        
+
         m_filter.updateStats(0, 1);
 
         return 1;
@@ -246,10 +252,14 @@ boost::uint32_t Cache::readBufferImpl(PointBuffer& data)
 
     return numRead;
 }
-} } // iterators::sequential
+}
+} // iterators::sequential
 
 
-namespace iterators { namespace random {
+namespace iterators
+{
+namespace random
+{
 
 
 
@@ -284,8 +294,8 @@ boost::uint32_t Cache::readBufferImpl(PointBuffer& data)
         // if they asked for a full block and we got a full block,
         // and the block we got is properly aligned and not already cached,
         // then let's cache it!
-        const bool isCacheable = (data.getCapacity() == cacheBlockSize) && 
-                                 (numRead == cacheBlockSize) && 
+        const bool isCacheable = (data.getCapacity() == cacheBlockSize) &&
+                                 (numRead == cacheBlockSize) &&
                                  (currentPointIndex % cacheBlockSize == 0);
         if (isCacheable && (m_filter.lookupInCache(currentPointIndex) == NULL))
         {
@@ -303,7 +313,7 @@ boost::uint32_t Cache::readBufferImpl(PointBuffer& data)
     {
         // A hit! A palpable hit!
         data.copyPointFast(0,  currentPointIndex % cacheBlockSize, *block);
-        
+
         m_filter.updateStats(0, 1);
 
         return 1;
@@ -317,9 +327,11 @@ boost::uint32_t Cache::readBufferImpl(PointBuffer& data)
 }
 
 
-} } // iterators::random
+}
+} // iterators::random
 
 
 
-    
-} } // namespaces
+
+}
+} // namespaces

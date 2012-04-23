@@ -38,7 +38,12 @@
 #include <pdal/Writer.hpp>
 
 
-namespace pdal { namespace drivers { namespace faux {
+namespace pdal
+{
+namespace drivers
+{
+namespace faux
+{
 
 
 //
@@ -53,20 +58,47 @@ public:
     SET_STAGE_NAME("drivers.faux.writer", "Faux Writer")
 
     Writer(Stage& prevStage, const Options&);
-    
+
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
 
     // retrieve the summary info
-    double getMinX() const { return m_minimumX; }
-    double getMinY() const { return m_minimumY; }
-    double getMinZ() const { return m_minimumZ; }
-    double getMaxX() const { return m_maximumX; }
-    double getMaxY() const { return m_maximumY; }
-    double getMaxZ() const { return m_maximumZ; }
-    double getAvgX() const { return m_averageX; }
-    double getAvgY() const { return m_averageY; }
-    double getAvgZ() const { return m_averageZ; }
+    double getMinX() const
+    {
+        return m_minimumX;
+    }
+    double getMinY() const
+    {
+        return m_minimumY;
+    }
+    double getMinZ() const
+    {
+        return m_minimumZ;
+    }
+    double getMaxX() const
+    {
+        return m_maximumX;
+    }
+    double getMaxY() const
+    {
+        return m_maximumY;
+    }
+    double getMaxZ() const
+    {
+        return m_maximumZ;
+    }
+    double getAvgX() const
+    {
+        return m_averageX;
+    }
+    double getAvgY() const
+    {
+        return m_averageY;
+    }
+    double getAvgZ() const
+    {
+        return m_averageZ;
+    }
 
     // for dumping
     virtual boost::property_tree::ptree toPTree() const;
@@ -91,7 +123,9 @@ private:
 };
 
 
-} } } // namespaces
+}
+}
+} // namespaces
 
 
 #endif

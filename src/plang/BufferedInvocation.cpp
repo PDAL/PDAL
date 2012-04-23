@@ -42,7 +42,10 @@
 #  pragma warning(disable: 4505)  // unreferenced local function has been removed
 #endif
 
-namespace pdal { namespace plang {
+namespace pdal
+{
+namespace plang
+{
 
 
 BufferedInvocation::BufferedInvocation(const Script& script)
@@ -93,7 +96,7 @@ void BufferedInvocation::endChunk(PointBuffer& buffer)
         schema::Map map = schema.getDimensions();
         schema::index_by_name& name_index = map.get<schema::name>();
         schema::index_by_name::const_iterator it = name_index.find(names[i]);
-        if (it != name_index.end()) 
+        if (it != name_index.end())
         {
             const Dimension& dim = *it;
             const std::string& name = dim.getName();
@@ -116,6 +119,7 @@ void BufferedInvocation::endChunk(PointBuffer& buffer)
 }
 
 
-} } //namespaces
+}
+} //namespaces
 
 #endif

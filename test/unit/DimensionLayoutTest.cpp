@@ -50,17 +50,17 @@ BOOST_AUTO_TEST_CASE(DimensionLayoutTest_ptree)
     DimensionLayout l1(d1);
 
     std::stringstream ss1(std::stringstream::in | std::stringstream::out);
-  
+
     boost::property_tree::ptree tree = l1.toPTree();
     boost::property_tree::write_xml(ss1, tree);
 
     std::string out1 = ss1.str();
 
     static std::string xml_header = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
-    std::string ref = xml_header + 
-        "<dimension><name>X</name><datatype>Int32</datatype>"
-        "<description>x coordinate as a long integer. You must use the scale and offset information of the header to determine the double value.</description>"
-        "<bytesize>4</bytesize><endianness>little</endianness><scale>0</scale><isValid>false</isValid></dimension><byteoffset>0</byteoffset><position>0</position>";
+    std::string ref = xml_header +
+                      "<dimension><name>X</name><datatype>Int32</datatype>"
+                      "<description>x coordinate as a long integer. You must use the scale and offset information of the header to determine the double value.</description>"
+                      "<bytesize>4</bytesize><endianness>little</endianness><scale>0</scale><isValid>false</isValid></dimension><byteoffset>0</byteoffset><position>0</position>";
 
     boost::algorithm::erase_all(out1, "\n");
     boost::algorithm::erase_all(ref, "\n");

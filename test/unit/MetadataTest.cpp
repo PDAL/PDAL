@@ -50,11 +50,11 @@ BOOST_AUTO_TEST_SUITE(MetadataTest)
 
 BOOST_AUTO_TEST_CASE(test_construction)
 {
-    
+
     pdal::metadata::Entry m("test");
-    
+
     BOOST_CHECK_EQUAL(m.getName(), "test");
-    
+
     boost::uint32_t u32(32u);
     boost::int32_t i32(-32);
     boost::uint64_t u64(64u);
@@ -63,42 +63,42 @@ BOOST_AUTO_TEST_CASE(test_construction)
     boost::uint8_t u8(8);
     boost::int16_t i16(-16);
     boost::uint16_t u16(16);
-    
+
     std::vector<boost::uint8_t> v;
-    for(boost::uint8_t i=0; i < 100; i++) v.push_back(i);
-    
+    for (boost::uint8_t i=0; i < 100; i++) v.push_back(i);
+
     pdal::ByteArray bytes(v);
-        
+
     pdal::Bounds<double> b(1.1,2.2,3.3,101.1,102.2,103.3);
-    
+
     m.setValue<boost::uint32_t>(u32);
-    
+
     m.addAttribute("some_id", "some_value");
     m.addAttribute("another_id", "another_value");
-    
+
     std::vector<std::string> names = m.getAttributeNames();
     BOOST_CHECK_EQUAL(names.size(), 2u);
-    
+
     BOOST_CHECK_EQUAL(m.getAttribute("some_id"), "some_value");
     BOOST_CHECK_EQUAL(m.getAttribute("another_id"), "another_value");
-    
+
     BOOST_CHECK_EQUAL(m.getValue<boost::uint32_t>(), 32u);
     BOOST_CHECK_EQUAL(m.getType(), pdal::metadata::UnsignedInteger);
-    
+
     BOOST_CHECK_THROW(m.getValue<boost::int32_t>(), boost::bad_get);
 
-    BOOST_CHECK_EQUAL(m.cast<boost::int32_t>(), 32); 
+    BOOST_CHECK_EQUAL(m.cast<boost::int32_t>(), 32);
     m.setValue<pdal::ByteArray>(bytes);
     BOOST_CHECK_EQUAL(m.getType(), pdal::metadata::Bytes);
-    
+
     std::string base64("AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygpKissLS4vMDEyMzQ1Njc4OTo7PD0+P0BBQkNERUZHSElKS0xNTk9QUVJTVFVWV1hZWltcXV5fYGFiYw==");
-    BOOST_CHECK_EQUAL( boost::lexical_cast<std::string>(m.getValue<pdal::ByteArray>()), base64);
+    BOOST_CHECK_EQUAL(boost::lexical_cast<std::string>(m.getValue<pdal::ByteArray>()), base64);
     BOOST_CHECK_THROW(m.getValue<boost::int32_t>(), boost::bad_get);
-    
+
     pdal::SpatialReference ref("EPSG:4326");
-    m.setValue<pdal::SpatialReference>(ref);    
+    m.setValue<pdal::SpatialReference>(ref);
     BOOST_CHECK_EQUAL(m.getType(), pdal::metadata::SpatialReference);
-    
+
     pdal::SpatialReference ref2 = m.getValue<pdal::SpatialReference>();
     // std::string ref_text("GEOGCS[\"WGS 84\","
     //     DATUM[\"WGS_1984\","
@@ -119,7 +119,7 @@ BOOST_AUTO_TEST_CASE(test_construction)
     m.setValue<boost::int16_t>(i16);
     BOOST_CHECK_EQUAL(m.getValue<boost::int16_t>(), -16);
     BOOST_CHECK_EQUAL(m.getType(), pdal::metadata::SignedInteger);
-    
+
     m.setValue<boost::int32_t>(i32);
     BOOST_CHECK_EQUAL(m.getValue<boost::int32_t>(), -32);
     BOOST_CHECK_EQUAL(m.getType(), pdal::metadata::SignedInteger);
@@ -135,7 +135,7 @@ BOOST_AUTO_TEST_CASE(test_construction)
     m.setValue<boost::uint16_t>(u16);
     BOOST_CHECK_EQUAL(m.getValue<boost::uint16_t>(), 16u);
     BOOST_CHECK_EQUAL(m.getType(), pdal::metadata::UnsignedInteger);
-    
+
     m.setValue<boost::uint32_t>(u32);
     BOOST_CHECK_EQUAL(m.getValue<boost::uint32_t>(), 32u);
     BOOST_CHECK_EQUAL(m.getType(), pdal::metadata::UnsignedInteger);
@@ -152,29 +152,29 @@ BOOST_AUTO_TEST_CASE(test_metadata_copy)
     pdal::metadata::Entry m1("m1");
     pdal::metadata::Entry m2("m2");
     pdal::metadata::Entry m1prime("m1");
-    
+
     m1.setValue<boost::uint32_t>(1u);
     m2.setValue<boost::int32_t>(1);
     m1prime.setValue<std::string>("Some other metadata");
-    
+
     pdal::Metadata b;
-    
+
     b.addEntry(m1);
     b.addEntry(m1prime);
     b.addEntry(m2);
-    
+
     pdal::Metadata b2;
 
     b2.setMetadata(b.getMetadata());
-    
+
     // Set will overwrite here
     pdal::metadata::Entry m11prime = b2.getEntry("m1");
     BOOST_CHECK_EQUAL(m11prime.getValue<std::string>(), "Some other metadata");
-    
+
     pdal::metadata::Entry m22 = b2.getEntry("m2");
     BOOST_CHECK_EQUAL(m22.cast<boost::uint32_t>(), 1u);
     BOOST_CHECK_THROW(m22.getValue<boost::uint32_t>(), boost::bad_get);
-    
+
     return;
 }
 
@@ -183,22 +183,22 @@ BOOST_AUTO_TEST_CASE(test_metadata_set)
     pdal::metadata::Entry m1("m1");
     pdal::metadata::Entry m2("m2");
     pdal::metadata::Entry m1prime("m1");
-    
+
     m1.setValue<boost::uint32_t>(1u);
     m2.setValue<boost::int32_t>(1);
     m1prime.setValue<std::string>("Some other metadata");
-    
+
     pdal::Metadata b;
-    
+
     b.addEntry(m1);
 
     pdal::metadata::Entry m3(m1);
     BOOST_CHECK_EQUAL(m3.getValue<boost::uint32_t>(), 1u);
     m3.setValue<boost::int64_t>(64);
     BOOST_CHECK_EQUAL(m3.getValue<boost::int64_t>(), 64);
-    
+
     b.setEntry(m3);
-    
+
     return;
 }
 
@@ -207,9 +207,9 @@ BOOST_AUTO_TEST_CASE(test_metadata_stage)
     pdal::drivers::las::Reader reader(Support::datapath("utm15.las"));
     BOOST_CHECK(reader.getDescription() == "Las Reader");
     reader.initialize();
-    
+
     pdal::Metadata file_metadata = reader.getMetadata();
-    
+
     BOOST_CHECK_EQUAL(file_metadata.size(), 28u);
 
     pdal::Option option("filename", Support::datapath("pipeline/pipeline_metadata.xml"));
@@ -219,7 +219,7 @@ BOOST_AUTO_TEST_CASE(test_metadata_stage)
     pipeline.initialize();
 
     pdal::Metadata pipeline_metadata = pipeline.getMetadata();
-    
+
     BOOST_CHECK_EQUAL(pipeline_metadata.size(), 28u);
 
     return;
@@ -227,7 +227,7 @@ BOOST_AUTO_TEST_CASE(test_metadata_stage)
 
 BOOST_AUTO_TEST_CASE(test_metadata_constructor_no_throw)
 {
-    
+
     pdal::Bounds<double> b;
     pdal::metadata::Entry entry("name", b);
 
@@ -236,14 +236,15 @@ BOOST_AUTO_TEST_CASE(test_metadata_constructor_no_throw)
 
 BOOST_AUTO_TEST_CASE(test_metadata_recursion)
 {
-    
+
     pdal::Bounds<double> b;
     pdal::metadata::Entry entry("name", b);
 
-    pdal::Metadata mdata; mdata.addEntry(entry);
-    
+    pdal::Metadata mdata;
+    mdata.addEntry(entry);
+
     entry.setMetadata(mdata);
-    
+
     boost::optional<pdal::Metadata const&> m = entry.getMetadata();
     BOOST_CHECK_EQUAL(m->getEntry("name").getType(), pdal::metadata::Bounds);
     return;

@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_SUITE(PointBufferCacheTest)
 BOOST_AUTO_TEST_CASE(test1)
 {
     Schema schema;
-    
+
     Dimension d1("X", dimension::SignedInteger, 4);
     schema.appendDimension(d1);
 
@@ -49,12 +49,12 @@ BOOST_AUTO_TEST_CASE(test1)
     // write the data into the buffer
     for (int i=0; i<10; i++)
     {
-      item0->setField(dimX0, i, i);
-      item1->setField(dimX1, i, i+10);
-      item2->setField(dimX2, i, i+20);
-      //item3->setField(i, 0, i+30);
-      item4->setField(dimX4, i, i+40);
-      //item5->setField(i, 0, i+50);
+        item0->setField(dimX0, i, i);
+        item1->setField(dimX1, i, i+10);
+        item2->setField(dimX2, i, i+20);
+        //item3->setField(i, 0, i+30);
+        item4->setField(dimX4, i, i+40);
+        //item5->setField(i, 0, i+50);
     }
 
     PointBufferCache lru(2);
@@ -66,17 +66,17 @@ BOOST_AUTO_TEST_CASE(test1)
     BOOST_CHECK(lru.lookup(0) == NULL);      // lookup miss
     BOOST_CHECK(lru.lookup(10) == item1);    // lookup hit
     BOOST_CHECK(lru.lookup(20) == item2);    // lookup hit
-     
-    { 
-        std::vector<boost::uint64_t> actual; 
-        lru.get_keys(std::back_inserter(actual)); 
-        BOOST_CHECK(actual.size() == 2); 
+
+    {
+        std::vector<boost::uint64_t> actual;
+        lru.get_keys(std::back_inserter(actual));
+        BOOST_CHECK(actual.size() == 2);
         BOOST_CHECK(actual[0] == 20);
         BOOST_CHECK(actual[1] == 10);
     }
 
     lru.insert(40,item4);        // insert miss
-     
+
     BOOST_CHECK(lru.lookup(0) == NULL);    // lookup miss
     BOOST_CHECK(lru.lookup(10) == NULL);   // lookup miss
     BOOST_CHECK(lru.lookup(20) == item2);  // lookup hit

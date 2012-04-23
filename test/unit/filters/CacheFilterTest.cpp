@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(test1)
 
     iter1->read(dataBig);
     BOOST_CHECK(dataBig.getField<boost::uint64_t>(dataBig.getSchema().getDimension("Time"), 0) == 1024);
-   // BOOST_CHECK(cache.getIndex() == 2048);
+    // BOOST_CHECK(cache.getIndex() == 2048);
     BOOST_CHECK(cache.getNumPointsRequested() == 2048);
     BOOST_CHECK(cache.getNumPointsRead() == 2048);
 
@@ -125,7 +125,7 @@ BOOST_AUTO_TEST_CASE(CacheFilterTest_test_options)
 
     iter1->read(dataBig);
     BOOST_CHECK(dataBig.getField<boost::uint64_t>(dataBig.getSchema().getDimension("Time"), 0) == 1024);
-   // BOOST_CHECK(cache.getIndex() == 2048);
+    // BOOST_CHECK(cache.getIndex() == 2048);
     BOOST_CHECK(cache.getNumPointsRequested() == 2048);
     BOOST_CHECK(cache.getNumPointsRead() == 2048);
 

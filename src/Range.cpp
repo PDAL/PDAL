@@ -35,7 +35,7 @@
 #include <pdal/Range.hpp>
 
 
-namespace pdal 
+namespace pdal
 {
 
 
@@ -44,7 +44,7 @@ std::istream& operator>>(std::istream& istr, Range<double>& range)
     double low, high;
 
     Utils::eatwhitespace(istr);
-    
+
     if (!Utils::eatcharacter(istr,'['))
         throw pdal_error("Range parser failed finding expected '[' character");
 
@@ -58,7 +58,7 @@ std::istream& operator>>(std::istream& istr, Range<double>& range)
         throw pdal_error("Range parser failed finding expected ',' character");
 
     Utils::eatwhitespace(istr);
-    
+
     istr >> high;
 
     if (!Utils::eatcharacter(istr,']'))

@@ -42,7 +42,10 @@
 #include <pdal/StageIterator.hpp>
 
 
-namespace pdal { namespace filters {
+namespace pdal
+{
+namespace filters
+{
 
 
 // this doesn't derive from Stage since it takes more than one stage as input
@@ -57,17 +60,20 @@ public:
 
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
-    
-    bool supportsIterator (StageIteratorType t) const
-    {   
-        if (t == StageIterator_Sequential ) return true;
+
+    bool supportsIterator(StageIteratorType t) const
+    {
+        if (t == StageIterator_Sequential) return true;
         if (t == StageIterator_Random) return false; // BUG: could be true
 
         return false;
     }
-    
+
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const { return NULL; }
+    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const
+    {
+        return NULL;
+    }
 
 private:
     Mosaic& operator=(const Mosaic&); // not implemented
@@ -76,7 +82,10 @@ private:
 
 
 
-namespace iterators { namespace sequential {
+namespace iterators
+{
+namespace sequential
+{
 
 class PDAL_DLL Mosaic : public pdal::MultiFilterSequentialIterator
 {
@@ -91,8 +100,10 @@ private:
 };
 
 
-} } // iterators::sequential
+}
+} // iterators::sequential
 
-} } // namespaces
+}
+} // namespaces
 
 #endif

@@ -68,7 +68,12 @@
         }} while(false)
 #endif
 
-namespace pdal { namespace drivers { namespace qfit {
+namespace pdal
+{
+namespace drivers
+{
+namespace qfit
+{
 
 
 enum QFIT_Format_Type
@@ -92,12 +97,12 @@ class PointDimensions
 {
 public:
     PointDimensions(const Schema& schema, std::string const& ns);
-    
+
     pdal::Dimension const* Time;
     pdal::Dimension const* X;
     pdal::Dimension const* Y;
     pdal::Dimension const* Z;
-    
+
     pdal::Dimension const* StartPulse;
     pdal::Dimension const* ReflectedPulse;
     pdal::Dimension const* ScanAngleRank;
@@ -106,9 +111,9 @@ public:
     pdal::Dimension const* PDOP;
     pdal::Dimension const* PulseWidth;
     pdal::Dimension const* GPSTime;
-    
+
     pdal::Dimension const* PassiveSignal;
-    
+
     pdal::Dimension const* PassiveX;
     pdal::Dimension const* PassiveY;
     pdal::Dimension const* PassiveZ;
@@ -129,26 +134,32 @@ public:
 
     Reader(const Options& options);
     ~Reader();
-    
+
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
     virtual void addDefaultDimensions();
-    
+
     std::string getFileName() const;
 
-    bool supportsIterator (StageIteratorType t) const
-    {   
-        if (t == StageIterator_Sequential ) return true;
-        if (t == StageIterator_Random ) return true;
-        
+    bool supportsIterator(StageIteratorType t) const
+    {
+        if (t == StageIterator_Sequential) return true;
+        if (t == StageIterator_Random) return true;
+
         return false;
     }
-    
+
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
     pdal::StageRandomIterator* createRandomIterator(PointBuffer& buffer) const;
-    
-    std::size_t getPointDataOffset() const { return m_offset; }
-    boost::uint32_t getPointDataSize() const { return m_size; }
+
+    std::size_t getPointDataOffset() const
+    {
+        return m_offset;
+    }
+    boost::uint32_t getPointDataSize() const
+    {
+        return m_size;
+    }
 
     // this is called by the stage's iterator
     boost::uint32_t processBuffer(PointBuffer& PointBuffer, std::istream& stream, boost::uint64_t numPointsLeft) const;
@@ -157,7 +168,10 @@ public:
     virtual boost::property_tree::ptree toPTree() const;
 
 protected:
-    inline QFIT_Format_Type getFormat() const { return m_format; }
+    inline QFIT_Format_Type getFormat() const
+    {
+        return m_format;
+    }
 
 private:
 
@@ -170,15 +184,17 @@ private:
     bool m_flip_x;
     double m_scale_z;
     bool m_littleEndian;
-    
+
     void registerFields();
 
 
 };
 
-namespace iterators {
+namespace iterators
+{
 
-namespace sequential {
+namespace sequential
+{
 
 class Reader : public pdal::ReaderSequentialIterator
 {
@@ -195,10 +211,11 @@ private:
     std::istream* m_istream;
 };
 
-    
+
 } // sequential
 
-namespace random {
+namespace random
+{
 
 class Reader : public pdal::ReaderRandomIterator
 {
@@ -216,7 +233,9 @@ private:
 
 } // random
 } // iterators
-}}} // namespace pdal::driver::qfit
+}
+}
+} // namespace pdal::driver::qfit
 
 
 #endif // INCLUDED_PDAL_DRIVER_QFIT_READER_HPP

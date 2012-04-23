@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_las)
     FileUtils::deleteFile(temp_filename);
 
     pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
-    
+
     std::ostream* ofs = FileUtils::createFile(Support::temppath(temp_filename));
 
     {
@@ -97,7 +97,7 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_laz)
     FileUtils::deleteFile("laszip/LasWriterTest_test_simple_laz.laz");
 
     pdal::drivers::las::Reader reader(Support::datapath("laszip/basefile.las"));
-    
+
     std::ostream* ofs = FileUtils::createFile(Support::temppath("LasWriterTest_test_simple_laz.laz"));
 
     {
@@ -126,8 +126,8 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_laz)
     // these two files only differ by the description string in the VLR.
     // This now skips the entire LASzip VLR for comparison.
     const boost::uint32_t numdiffs = Support::diff_files(Support::temppath("LasWriterTest_test_simple_laz.laz"),
-                                                         Support::datapath("laszip/laszip-generated.laz"),
-                                                         227, 106);
+                                     Support::datapath("laszip/laszip-generated.laz"),
+                                     227, 106);
     BOOST_CHECK(numdiffs==0);
 
     if (numdiffs==0)
@@ -145,7 +145,7 @@ static void test_a_format(const std::string& refFile, boost::uint8_t majorVersio
     FileUtils::deleteFile("temp.las");
 
     pdal::drivers::las::Reader reader(Support::datapath("1.2_3.las"));
-    
+
     std::ostream* ofs = FileUtils::createFile(Support::temppath("temp.las"));
 
     {
@@ -162,7 +162,7 @@ static void test_a_format(const std::string& refFile, boost::uint8_t majorVersio
         writer.setFormatVersion(majorVersion, minorVersion);
         writer.setSystemIdentifier("libLAS");
         writer.setGeneratingSoftware("libLAS 1.2");
-        
+
         boost::uuids::uuid u = boost::lexical_cast<boost::uuids::uuid>("8388f1b8-aa1b-4108-bca3-6bc68e7b062e");
         writer.setProjectId(u);
 
@@ -188,7 +188,7 @@ BOOST_AUTO_TEST_CASE(test_different_formats)
 {
     test_a_format("1.0_0.las", 1, 0, 0);
     test_a_format("1.0_1.las", 1, 0, 1);
-    
+
     test_a_format("1.1_0.las", 1, 1, 0);
     test_a_format("1.1_1.las", 1, 1, 1);
 

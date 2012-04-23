@@ -35,9 +35,12 @@
 #include <pdal/drivers/las/SummaryData.hpp>
 
 
-namespace pdal { 
-namespace drivers { 
-namespace las {
+namespace pdal
+{
+namespace drivers
+{
+namespace las
+{
 
 
 SummaryData::SummaryData()
@@ -169,4 +172,6 @@ std::ostream& operator<<(std::ostream& ostr, const SummaryData& data)
 }
 
 
-} } } // namespaces
+}
+}
+} // namespaces

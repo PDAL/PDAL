@@ -43,8 +43,13 @@
 #include <pdal/SpatialReference.hpp>
 
 
-namespace pdal { namespace drivers { namespace las {
-    
+namespace pdal
+{
+namespace drivers
+{
+namespace las
+{
+
 
 class PDAL_DLL VariableLengthRecord
 {
@@ -59,10 +64,22 @@ public:
     VariableLengthRecord(const VariableLengthRecord&);
     ~VariableLengthRecord();
 
-    boost::uint16_t getReserved() const { return m_reserved; }
-    std::string getUserId() const { return m_userId; }
-    boost::uint16_t getRecordId() const { return m_recordId; }
-    std::string getDescription() const { return m_description; }
+    boost::uint16_t getReserved() const
+    {
+        return m_reserved;
+    }
+    std::string getUserId() const
+    {
+        return m_userId;
+    }
+    boost::uint16_t getRecordId() const
+    {
+        return m_recordId;
+    }
+    std::string getDescription() const
+    {
+        return m_description;
+    }
 
     bool isGeoVLR() const;
     enum GeoVLRType
@@ -81,7 +98,7 @@ public:
     const boost::uint8_t* getBytes() const;
     std::size_t getLength() const;
     std::size_t getTotalSize() const;
-    
+
     enum { s_headerLength = 54 };
 
     static void setSRSFromVLRs(const std::vector<VariableLengthRecord>& vlrs, SpatialReference& srs);
@@ -104,7 +121,7 @@ private:
     std::string m_userId; // always stored as 16 bytes (padded with 0's)
     boost::uint16_t m_recordId;
     std::string m_description; // always stored as 16 bytes (padded with 0's)
-    
+
     boost::uint8_t* m_bytes;
     std::size_t m_length;
 };
@@ -114,10 +131,10 @@ class PDAL_DLL VLRList
 {
 public:
     void add(const VariableLengthRecord& v);
-    
+
     const VariableLengthRecord& get(boost::uint32_t index) const;
     VariableLengthRecord& get(boost::uint32_t index);
-    
+
     const std::vector<VariableLengthRecord>& getAll() const;
     std::vector<VariableLengthRecord>& getAll();
 
@@ -130,10 +147,12 @@ public:
     void addVLRsFromSRS(const SpatialReference& srs, SpatialReference::WKTModeFlag modeFlag);
 
 private:
-   std::vector<VariableLengthRecord> m_list;
+    std::vector<VariableLengthRecord> m_list;
 };
 
 
-} } } // namespace
+}
+}
+} // namespace
 
 #endif

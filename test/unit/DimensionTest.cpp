@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(test_ctor)
     Dimension d2(d1);
     BOOST_CHECK_EQUAL(d1.getInterpretation(), d2.getInterpretation());
     BOOST_CHECK_EQUAL(d1.getNamespace(), d2.getNamespace());
-    
+
     Dimension d3 = d1;
     BOOST_CHECK_EQUAL(d1.getInterpretation(), d3.getInterpretation());
     BOOST_CHECK_EQUAL(d1.getNamespace(), d3.getNamespace());
@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE(test_ctor)
     BOOST_CHECK(d1 != d4);
     BOOST_CHECK(d4 != d1);
 
-    
+
 }
 
 BOOST_AUTO_TEST_CASE(test_parents)
@@ -82,7 +82,7 @@ BOOST_AUTO_TEST_CASE(test_parents)
     Dimension parent("X", dimension::SignedInteger, 4);
     parent.setNamespace("parent");
     parent.createUUID();
-    
+
     Dimension child("X", dimension::Float, 4);
     child.setNamespace("child");
     child.createUUID();
@@ -95,20 +95,20 @@ BOOST_AUTO_TEST_CASE(test_parents)
     child2.setParent(child.getUUID());
 
     Dimension another("Y", dimension::SignedInteger, 4);
-    
+
     Schema schema;
     schema.appendDimension(child);
     schema.appendDimension(parent);
     schema.appendDimension(another);
     schema.appendDimension(child2);
-    
+
     BOOST_CHECK(child.getParent() == parent.getUUID());
-    
+
     // The parent-child relationship will case getDimension
-    // to return the child dim with name 'X', not the 
+    // to return the child dim with name 'X', not the
     // first-added parent dim
     Dimension const& c2 = schema.getDimension("X");
-    
+
     BOOST_CHECK(c2.getUUID() == child2.getUUID());
 }
 
@@ -120,23 +120,23 @@ BOOST_AUTO_TEST_CASE(DimensionTest_ptree)
     boost::uuids::string_generator gen;
     std::string id("9bf8d966-0c0d-4c94-a14e-bce97e860bde");
     dimension::id uuid = gen(id);
-    
+
     d1.setUUID(uuid);
-    
-    
+
+
     boost::property_tree::ptree tree = d1.toPTree();
-    
+
     boost::uint32_t size = tree.get<boost::uint32_t>("bytesize");
     BOOST_CHECK_EQUAL(size, 4u);
-    
+
     std::string name = tree.get<std::string>("name");
     BOOST_CHECK_EQUAL(name, "X");
-    
+
     BOOST_CHECK_CLOSE(tree.get<double>("scale"), 1.0f, 0.00001f);
     BOOST_CHECK_CLOSE(tree.get<double>("offset"), 0.0f, 0.00001f);
     BOOST_CHECK_CLOSE(tree.get<double>("maximum"), 0.0f, 0.00001f);
     BOOST_CHECK_CLOSE(tree.get<double>("minimum"), 0.0f, 0.00001f);
-    
+
     BOOST_CHECK_EQUAL(tree.get<std::string>("namespace"), "");
 
     BOOST_CHECK_EQUAL(tree.get<std::string>("uuid"), "9bf8d966-0c0d-4c94-a14e-bce97e860bde");

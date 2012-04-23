@@ -64,7 +64,8 @@ namespace filters
 
 class PDAL_DLL Chipper;
 
-namespace chipper {
+namespace chipper
+{
 
 enum Direction
 {
@@ -81,7 +82,9 @@ public:
     boost::uint32_t m_oindex;
 
     bool operator < (const PtRef& pt) const
-        { return m_pos < pt.m_pos; }
+    {
+        return m_pos < pt.m_pos;
+    }
 };
 
 struct PDAL_DLL RefList
@@ -91,21 +94,35 @@ public:
     Direction m_dir;
 
     RefList(Direction dir = DIR_NONE) : m_dir(dir)
-        {}
+    {}
     std::vector<PtRef>::size_type size() const
-        { return m_vec.size(); }
+    {
+        return m_vec.size();
+    }
     void reserve(std::vector<PtRef>::size_type n)
-        { m_vec.reserve(n); }
+    {
+        m_vec.reserve(n);
+    }
     void resize(std::vector<PtRef>::size_type n)
-        { m_vec.resize(n); }
+    {
+        m_vec.resize(n);
+    }
     void push_back(const PtRef& ref)
-        { m_vec.push_back(ref); }
+    {
+        m_vec.push_back(ref);
+    }
     std::vector<PtRef>::iterator begin()
-        { return m_vec.begin(); }
+    {
+        return m_vec.begin();
+    }
     std::vector<PtRef>::iterator end()
-        { return m_vec.end(); }
+    {
+        return m_vec.end();
+    }
     PtRef& operator[](boost::uint32_t pos)
-        { return m_vec[pos]; }
+    {
+        return m_vec[pos];
+    }
     std::string Dir()
     {
         if (m_dir == DIR_X)
@@ -118,7 +135,7 @@ public:
 };
 
 
- 
+
 class PDAL_DLL Block
 {
     friend class pdal::filters::Chipper;
@@ -128,17 +145,23 @@ private:
     boost::uint32_t m_left;
     boost::uint32_t m_right;
     pdal::Bounds<double> m_bounds;
-    
+
     // double m_xmin;
     // double m_ymin;
     // double m_xmax;
     // double m_ymax;
 
 public:
-    std::vector<boost::uint32_t> GetIDs() const; 
-    pdal::Bounds<double> const& GetBounds() const {return m_bounds;} 
-    void SetBounds(pdal::Bounds<double> const& bounds) {m_bounds = bounds;}
-    void GetBuffer( boost::scoped_ptr<StageRandomIterator>& iterator, PointBuffer& buffer, boost::uint32_t block_id, Dimension const& dimPoint, Dimension const& dimBlock) const;    
+    std::vector<boost::uint32_t> GetIDs() const;
+    pdal::Bounds<double> const& GetBounds() const
+    {
+        return m_bounds;
+    }
+    void SetBounds(pdal::Bounds<double> const& bounds)
+    {
+        m_bounds = bounds;
+    }
+    void GetBuffer(boost::scoped_ptr<StageRandomIterator>& iterator, PointBuffer& buffer, boost::uint32_t block_id, Dimension const& dimPoint, Dimension const& dimBlock) const;
     // double GetXmin() const
     //     { return m_xmin; }
     // double GetYmin() const
@@ -149,7 +172,7 @@ public:
     //     { return m_ymax; }
 };
 
-} // namespace chipper 
+} // namespace chipper
 
 class PDAL_DLL Chipper : public pdal::Filter
 {
@@ -161,16 +184,20 @@ public:
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
     virtual void addDefaultDimensions();
-    
+
     void Chip();
     std::vector<chipper::Block>::size_type GetBlockCount() const
-        { return m_blocks.size(); }
+    {
+        return m_blocks.size();
+    }
     const chipper::Block& GetBlock(std::vector<chipper::Block>::size_type i) const
-        { return m_blocks[i]; }
+    {
+        return m_blocks[i];
+    }
 
-    bool supportsIterator (StageIteratorType t) const
-    {   
-        if (t == StageIterator_Sequential ) return true;
+    bool supportsIterator(StageIteratorType t) const
+    {
+        if (t == StageIterator_Sequential) return true;
         return false;
     }
 
@@ -182,17 +209,17 @@ private:
     void Partition(boost::uint32_t size);
     void Split(chipper::RefList& xvec, chipper::RefList& yvec, chipper::RefList& spare);
     void DecideSplit(chipper::RefList& v1, chipper::RefList& v2, chipper::RefList& spare,
-        boost::uint32_t left, boost::uint32_t right);
+                     boost::uint32_t left, boost::uint32_t right);
     void Split(chipper::RefList& wide, chipper::RefList& narrow,chipper::RefList& spare,
-        boost::uint32_t left, boost::uint32_t right);
+               boost::uint32_t left, boost::uint32_t right);
     void FinalSplit(chipper::RefList& wide, chipper::RefList& narrow,
-        boost::uint32_t pleft, boost::uint32_t pcenter);
+                    boost::uint32_t pleft, boost::uint32_t pcenter);
     void Emit(chipper::RefList& wide, boost::uint32_t widemin, boost::uint32_t widemax,
-        chipper::RefList& narrow, boost::uint32_t narrowmin, boost::uint32_t narrowmax );
+              chipper::RefList& narrow, boost::uint32_t narrowmin, boost::uint32_t narrowmax);
 
     void checkImpedance();
-    
-    
+
+
     boost::uint32_t m_threshold;
     std::vector<chipper::Block> m_blocks;
     std::vector<boost::uint32_t> m_partitions;
@@ -204,7 +231,10 @@ private:
     Chipper(const Chipper&); // not implemented
 };
 
-namespace iterators { namespace sequential {
+namespace iterators
+{
+namespace sequential
+{
 
 class PDAL_DLL Chipper : public pdal::FilterSequentialIterator
 {
@@ -221,12 +251,13 @@ private:
     boost::uint64_t m_currentPointCount;
 
     boost::scoped_ptr<StageRandomIterator> m_random_iterator;
-    
-    
+
+
 };
 
-} } // iterators::sequential
-    
+}
+} // iterators::sequential
+
 
 
 } // namespace filters

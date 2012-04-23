@@ -56,11 +56,14 @@
 #include <boost/concept_check.hpp>
 #include <boost/function.hpp>
 
-namespace pdal { namespace schema {
+namespace pdal
+{
+namespace schema
+{
 
 
-void OCISchemaGenericErrorHandler (void * ctx, const char* message, ...);
-void OCISchemaStructuredErrorHandler (void * userData, xmlErrorPtr error);
+void OCISchemaGenericErrorHandler(void * ctx, const char* message, ...);
+void OCISchemaStructuredErrorHandler(void * userData, xmlErrorPtr error);
 
 class schema_error : public pdal_error
 {
@@ -112,11 +115,11 @@ public:
 };
 
 
-// We're going to put all of our libxml2 primatives into shared_ptrs 
-// that have custom deleters that clean up after themselves so we 
-// have a good chance at having clean exception-safe code    
+// We're going to put all of our libxml2 primatives into shared_ptrs
+// that have custom deleters that clean up after themselves so we
+// have a good chance at having clean exception-safe code
 typedef boost::shared_ptr<void> DocPtr;
-typedef boost::shared_ptr<void> SchemaParserCtxtPtr;    
+typedef boost::shared_ptr<void> SchemaParserCtxtPtr;
 typedef boost::shared_ptr<void> SchemaPtr;
 typedef boost::shared_ptr<void> SchemaValidCtxtPtr;
 typedef boost::shared_ptr<void> TextWriterPtr;
@@ -130,7 +133,10 @@ public:
     Reader(std::istream* xml, std::istream* schema);
     ~Reader();
 
-    inline pdal::Schema getSchema() { return m_schema; }
+    inline pdal::Schema getSchema()
+    {
+        return m_schema;
+    }
 
 
 protected:
@@ -138,9 +144,9 @@ protected:
     void Initialize();
     void Load();
     dimension::Interpretation GetDimensionType(std::string const& interpretation);
-    
+
 private:
-    
+
     Reader& operator=(const Reader&); // not implemented
     Reader(const Reader&); // not implemented;
 
@@ -149,23 +155,23 @@ private:
 
     DocPtr m_doc;
     DocPtr m_schema_doc;
-    
+
     SchemaParserCtxtPtr m_schema_parser_ctx;
     SchemaPtr m_schema_ptr;
     SchemaValidCtxtPtr m_schema_valid_ctx;
-    
+
     xmlParserOption m_doc_options;
 
-    
+
     void* m_global_context;
     pdal::Schema m_schema;
-    
+
     std::string m_xml;
     std::string m_xsd;
-    
+
     boost::uint32_t m_field_position;
-    
-    
+
+
 
 };
 
@@ -182,26 +188,27 @@ public:
 protected:
 
 
-    
+
 private:
-    
+
     Writer& operator=(const Writer&); // not implemented
     Writer(const Writer&); // not implemented;
 
 
-    
+
 
     void write(TextWriterPtr w);
     void writeSchema(TextWriterPtr w);
     void* m_global_context;
     pdal::Schema const& m_schema;
-    
-    
+
+
 
 };
 
 
 
-}} // namespaces
+}
+} // namespaces
 
 #endif

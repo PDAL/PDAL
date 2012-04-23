@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE(test_paths)
     std::string yow;
     *istr >> yow;
     FileUtils::closeFile(istr);
-    
+
     // does the temp path work?
     const std::string temp_file_ok = Support::temppath("README.txt");
     BOOST_CHECK(FileUtils::fileExists(temp_file_ok));
@@ -219,13 +219,13 @@ BOOST_AUTO_TEST_CASE(test_diff_text_file)
 
 
 BOOST_AUTO_TEST_CASE(test_run_command)
-{    
+{
     // amazingly, this command works under both dos *and* unix shells
     const std::string cmd = "echo foo";
 
     std::string output;
     const int stat = Support::run_command(cmd, output);
-    
+
     BOOST_CHECK_EQUAL(output.substr(0, 3), "foo");
     BOOST_CHECK_EQUAL(stat, 0);
 

@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE(test_equals)
     Vector<int> b(10,20);
     Vector<int> c(10,30);
     Vector<int> d(10,20,30);
-    
+
     BOOST_CHECK(a==a);
     BOOST_CHECK(a==b);
     BOOST_CHECK(b==a);
@@ -129,7 +129,7 @@ BOOST_AUTO_TEST_CASE(test_math)
 BOOST_AUTO_TEST_CASE(test_dump)
 {
     Vector<int> v(1,2,3);
-  
+
     std::ostringstream s;
     s << v;
 
@@ -143,7 +143,7 @@ BOOST_AUTO_TEST_CASE(VectorTest_ptree)
     const Vector<int> v(12,23,34);
 
     std::stringstream ss1(std::stringstream::in | std::stringstream::out);
-  
+
     boost::property_tree::ptree tree = v.toPTree();
     boost::property_tree::write_xml(ss1, tree);
 

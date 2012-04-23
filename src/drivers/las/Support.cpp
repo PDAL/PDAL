@@ -36,16 +36,21 @@
 #include <pdal/drivers/las/SummaryData.hpp>
 
 
-namespace pdal { namespace drivers { namespace las {
+namespace pdal
+{
+namespace drivers
+{
+namespace las
+{
 
 void Support::registerFields(Stage& stage, Schema& schema, PointFormat format)
 {
     std::ostringstream text;
-    
+
     std::vector<pdal::Dimension> const& d = stage.getDefaultDimensions();
-    
+
     Schema dimensions(d);
-    
+
     schema.appendDimension(dimensions.getDimension("X", stage.getName()));
     schema.appendDimension(dimensions.getDimension("Y", stage.getName()));
     schema.appendDimension(dimensions.getDimension("Z", stage.getName()));
@@ -76,7 +81,7 @@ void Support::registerFields(Stage& stage, Schema& schema, PointFormat format)
 
     // if (hasWave(format))
     // {
-    //      
+    //
     //     schema.appendDimension(Dimension(DimensionId::Las_WavePacketDescriptorIndex));
     //     schema.appendDimension(Dimension(DimensionId::Las_WaveformDataOffset));
     //     schema.appendDimension(Dimension(DimensionId::Las_ReturnPointWaveformLocation));
@@ -84,18 +89,18 @@ void Support::registerFields(Stage& stage, Schema& schema, PointFormat format)
     //     schema.appendDimension(Dimension(DimensionId::Las_WaveformYt));
     //     schema.appendDimension(Dimension(DimensionId::Las_WaveformZt));
     // }
-    
+
     return;
 }
 
 
-void Support::setScaling(   Schema& schema, 
-                            double scaleX, 
-                            double scaleY, 
-                            double scaleZ, 
-                            double offsetX, 
-                            double offsetY, 
-                            double offsetZ)
+void Support::setScaling(Schema& schema,
+                         double scaleX,
+                         double scaleY,
+                         double scaleZ,
+                         double offsetX,
+                         double offsetY,
+                         double offsetZ)
 {
     Dimension dimX = schema.getDimension("X");
     Dimension dimY = schema.getDimension("Y");
@@ -108,7 +113,7 @@ void Support::setScaling(   Schema& schema,
     dimX.setNumericOffset(offsetX);
     dimY.setNumericOffset(offsetY);
     dimZ.setNumericOffset(offsetZ);
-    
+
     schema.setDimension(dimX);
     schema.setDimension(dimY);
     schema.setDimension(dimZ);
@@ -139,12 +144,16 @@ boost::uint16_t Support::getPointDataSize(PointFormat pointFormat)
 {
     switch (pointFormat)
     {
-    case PointFormat0: return 20;
-    case PointFormat1: return 28;
-    case PointFormat2: return 26;
-    case PointFormat3: return 34;
-    default:
-        throw invalid_format("point format unsupported");
+        case PointFormat0:
+            return 20;
+        case PointFormat1:
+            return 28;
+        case PointFormat2:
+            return 26;
+        case PointFormat3:
+            return 34;
+        default:
+            throw invalid_format("point format unsupported");
     }
 
 }
@@ -155,7 +164,7 @@ PointDimensions::PointDimensions(const Schema& schema, std::string const& ns)
     X = &schema.getDimension("X", ns);
     Y = &schema.getDimension("Y", ns);
     Z = &schema.getDimension("Z", ns);
-    
+
     try
     {
         Intensity = &schema.getDimension("Intensity");
@@ -164,7 +173,7 @@ PointDimensions::PointDimensions(const Schema& schema, std::string const& ns)
     {
         Intensity = 0;
     }
-    
+
     try
     {
         ReturnNumber = &schema.getDimension("ReturnNumber");
@@ -235,7 +244,7 @@ PointDimensions::PointDimensions(const Schema& schema, std::string const& ns)
     catch (pdal::dimension_not_found&)
     {
         PointSourceId = 0;
-    }   
+    }
 
     try
     {
@@ -252,7 +261,7 @@ PointDimensions::PointDimensions(const Schema& schema, std::string const& ns)
     catch (pdal::dimension_not_found&)
     {
         Red = 0;
-    }  
+    }
 
     try
     {
@@ -261,7 +270,7 @@ PointDimensions::PointDimensions(const Schema& schema, std::string const& ns)
     catch (pdal::dimension_not_found&)
     {
         Green = 0;
-    }   
+    }
 
     try
     {
@@ -270,9 +279,9 @@ PointDimensions::PointDimensions(const Schema& schema, std::string const& ns)
     catch (pdal::dimension_not_found&)
     {
         Blue = 0;
-    }    
+    }
 
-        
+
     // WavePacketDescriptorIndex = (Support::hasWave(format) ? schema.getDimensionIndex(DimensionId::Las_WavePacketDescriptorIndex) : 0);
     // WaveformDataOffset = (Support::hasWave(format) ? schema.getDimensionIndex(DimensionId::Las_WaveformDataOffset) : 0);
     // ReturnPointWaveformLocation = (Support::hasWave(format) ? schema.getDimensionIndex(DimensionId::Las_ReturnPointWaveformLocation) : 0);
@@ -327,4 +336,6 @@ void Support::rewriteHeader(std::ostream& stream, const SummaryData& data)
 }
 
 
-} } } // namespaces
+}
+}
+} // namespaces

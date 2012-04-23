@@ -56,7 +56,7 @@ private:
 public:
     typedef T value_type;
     typedef typename std::vector< T >::size_type size_type;
-    
+
     Vector()
     {
         return;
@@ -111,12 +111,12 @@ public:
 
     const T& operator[](const std::size_t index) const
     {
-      return m_data[index];
+        return m_data[index];
     }
 
     T& operator[](const std::size_t index)
     {
-      return m_data[index];
+        return m_data[index];
     }
 
     T get(std::size_t index) const
@@ -139,11 +139,11 @@ public:
     {
         m_data.push_back(v);
     }
-    
+
     bool equal(Vector const& other) const
     {
         if (this->size() != other.size())
-          return false;
+            return false;
 
         for (std::size_t i=0; i<m_data.size(); i++)
         {

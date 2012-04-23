@@ -55,9 +55,9 @@
 namespace pdal
 {
 
-/// Bounds is for manipulating n-dimensional ranges of data.  Typically 
-/// used for defining the spatial extents of XYZ data, this class can also be 
-/// used for defining bounds of other dimensions.  
+/// Bounds is for manipulating n-dimensional ranges of data.  Typically
+/// used for defining the spatial extents of XYZ data, this class can also be
+/// used for defining bounds of other dimensions.
 template <typename T>
 class PDAL_DLL Bounds
 {
@@ -69,23 +69,23 @@ private:
 
 public:
 
-/** @name Constructors
-*/  
+    /** @name Constructors
+    */
 
-    /// Constructs an empty Bounds instance 
+    /// Constructs an empty Bounds instance
     /// with no dimensions
     Bounds<T>()
     {
         m_ranges.resize(0);
     }
-    
+
     /// Copy constructor
     Bounds(Bounds const& other)
         : m_ranges(other.m_ranges)
     {
     }
 
-    /// Constructs a Bounds instance from a vector 
+    /// Constructs a Bounds instance from a vector
     /// of Range
     Bounds(RangeVector const& ranges)
         :
@@ -94,12 +94,12 @@ public:
     }
 
     /// Convenience constructor for typical 3D case
-    Bounds( T minx,
-            T miny,
-            T minz,
-            T maxx,
-            T maxy,
-            T maxz)
+    Bounds(T minx,
+           T miny,
+           T minz,
+           T maxx,
+           T maxy,
+           T maxz)
     {
         m_ranges.resize(3);
 
@@ -114,12 +114,12 @@ public:
         assert(verify());
 
     }
-    
+
     /// Convenience constructor for typical 2D case
-    Bounds( T minx,
-            T miny,
-            T maxx,
-            T maxy)
+    Bounds(T minx,
+           T miny,
+           T maxx,
+           T maxy)
     {
 
         m_ranges.resize(2);
@@ -133,25 +133,25 @@ public:
         assert(verify());
     }
 
-    /// Convenience constructor for Vector of minimum and maximum 
+    /// Convenience constructor for Vector of minimum and maximum
     /// values.
     Bounds(const Vector<T>& minimum, const Vector<T>& maximum)
     {
         assert(minimum.size() == maximum.size());
 
         m_ranges.resize(minimum.size());
-    
+
         for (std::size_t i=0; i<minimum.size(); i++)
         {
             m_ranges[i].setMinimum(minimum[i]);
             m_ranges[i].setMaximum(maximum[i]);
-        }    
+        }
 
         assert(verify());
     }
 
-/** @name Data manipulation
-*/ 
+    /** @name Data manipulation
+    */
 
     T getMinimum(std::size_t const& index) const
     {
@@ -197,32 +197,32 @@ public:
         m_ranges[index].setMaximum(v);
     }
 
-    Vector<T> getMinimum() 
+    Vector<T> getMinimum()
     {
         std::vector<T> vec;
-    
+
         for (std::size_t i=0; i<m_ranges.size(); i++)
         {
             vec.push_back(m_ranges[i].getMinimum());
         }
-    
+
         return Vector<T>(vec);
     }
 
-    Vector<T> getMaximum() 
+    Vector<T> getMaximum()
     {
         std::vector<T> vec;
-    
+
         for (std::size_t i=0; i<m_ranges.size(); i++)
         {
             vec.push_back(m_ranges[i].getMaximum());
         }
-    
+
         return Vector<T>(vec);
     }
 
-/** @name Equality
-*/ 
+    /** @name Equality
+    */
     inline bool operator==(Bounds<T> const& rhs) const
     {
         return equal(rhs);
@@ -233,8 +233,8 @@ public:
         return (!equal(rhs));
     }
 
-/** @name Identity
-*/ 
+    /** @name Identity
+    */
     Bounds<T>& operator=(Bounds<T> const& rhs)
     {
         if (&rhs != this)
@@ -244,8 +244,8 @@ public:
         return *this;
     }
 
-/** @name Data queries
-*/ 
+    /** @name Data queries
+    */
     /// The vector of Range<T> for the Bounds
     RangeVector const& dimensions() const
     {
@@ -263,7 +263,7 @@ public:
     {
         if (size() != other.size())
         {
-          return false;
+            return false;
         }
         for (std::size_t i = 0; i < size(); i++)
         {
@@ -285,7 +285,7 @@ public:
 
         for (std::size_t i = 0; i < size(); i++)
         {
-            if ( m_ranges[i].overlaps(other.m_ranges[i]) )
+            if (m_ranges[i].overlaps(other.m_ranges[i]))
                 return true;
         }
 
@@ -301,7 +301,7 @@ public:
         for (std::size_t i = 0; i < size(); i++)
         {
             // As soon as it is not contains, we're false
-            if (! m_ranges[i].contains(point[i]) )
+            if (! m_ranges[i].contains(point[i]))
                 return false;
         }
         return true;
@@ -313,7 +313,7 @@ public:
         for (std::size_t i = 0; i < size(); i++)
         {
             // As soon as it is not contains, we're false
-            if (! m_ranges[i].contains(other.m_ranges[i]) )
+            if (! m_ranges[i].contains(other.m_ranges[i]))
                 return false;
         }
         return true;
@@ -323,7 +323,7 @@ public:
     void shift(std::vector<T> deltas)
     {
         std::size_t i;
-        if( size() != deltas.size())
+        if (size() != deltas.size())
         {
             std::ostringstream msg;
             msg << "pdal::Bounds::shift: Delta vector size, " << deltas.size()
@@ -340,7 +340,7 @@ public:
     void scale(std::vector<T> deltas)
     {
         std::size_t i;
-        if( size() != deltas.size())
+        if (size() != deltas.size())
         {
             std::ostringstream msg;
             msg << "pdal::Bounds::scale: Delta vector size, " << deltas.size()
@@ -395,13 +395,13 @@ public:
         return output;
     }
 
-    /// Returns true if the pdal::Bounds<T>::size() is 0 or 
+    /// Returns true if the pdal::Bounds<T>::size() is 0 or
     /// all dimensions within the bounds are empty.
     bool empty() const
     {
         if (size()==0)
         {
-          return true;
+            return true;
         }
 
         for (std::size_t i = 0; i < size(); i++)
@@ -413,19 +413,19 @@ public:
         }
         return false;
     }
-    
-    /// Verifies that the minimums and maximums of each dimension within the 
+
+    /// Verifies that the minimums and maximums of each dimension within the
     /// bounds are not inverted (allows min == +inf and max == -inf, however).
     bool verify()
     {
         for (std::size_t d = 0; d < size(); ++d)
         {
-            if (getMinimum(d) > getMaximum(d) )
+            if (getMinimum(d) > getMaximum(d))
             {
 
                 // Allow infinity bounds
                 if (!Utils::compare_distance<T>(getMinimum(d), (std::numeric_limits<T>::max)()) &&
-                    !Utils::compare_distance<T>(getMaximum(d), -(std::numeric_limits<T>::min)()))
+                        !Utils::compare_distance<T>(getMaximum(d), -(std::numeric_limits<T>::min)()))
                 {
                     std::ostringstream msg;
                     msg << "pdal::Bounds::verify: Minimum point at dimension " << d
@@ -438,8 +438,8 @@ public:
         return true;
     }
 
-/** @name Default extent
-*/ 
+    /** @name Default extent
+    */
     /// Returns a staticly-allocated Bounds extent that represents infinity
     static const Bounds<T>& getDefaultSpatialExtent()
     {
@@ -449,9 +449,9 @@ public:
         return v;
     }
 
-/** @name Summary and serialization
-*/ 
-    /// Outputs a string-based boost::property_tree::ptree representation 
+    /** @name Summary and serialization
+    */
+    /// Outputs a string-based boost::property_tree::ptree representation
     /// of the Bounds instance
     boost::property_tree::ptree toPTree() const
     {

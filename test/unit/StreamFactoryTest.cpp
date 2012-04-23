@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(test1)
             BOOST_CHECK(FileUtils::fileExists(wfilename));
             wfile.close();
         }
-     
+
         // cleanup
         FileUtils::deleteFile(wfilename);
         BOOST_CHECK(!FileUtils::fileExists(wfilename));
@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE(test1)
     // stream, writing
     {
         std::ostream* ostreamname = FileUtils::createFile(wfilename);
-        
+
         {
             pdal::OutputStreamManager ostream(ostreamname);
             ostream.open();
@@ -92,22 +92,22 @@ BOOST_AUTO_TEST_CASE(test1)
 static void check_contents_sub(std::istream& s)
 {
     int c;
-    
+
     c = s.get();
     BOOST_CHECK(c == 'd');
-    
+
     c = s.get();
     BOOST_CHECK(c == 'i');
-    
+
     c = s.get();
     BOOST_CHECK(c == 's');
-    
+
     c = s.get();
     BOOST_CHECK(c == 't');
-    
+
     c = s.get();
     BOOST_CHECK(c == -1);
-    
+
     BOOST_CHECK(s.eof());
 }
 
@@ -115,13 +115,13 @@ static void check_contents_sub(std::istream& s)
 static void check_contents(std::istream& s)
 {
     int c;
-    
+
     c = s.get();
     BOOST_CHECK(c == 'R');
-    
+
     c = s.get();
     BOOST_CHECK(c == 'e');
-    
+
     s.seekg(-4, std::ios_base::end);
 
     std::streamoff e = s.tellg();
@@ -129,7 +129,7 @@ static void check_contents(std::istream& s)
 
     c = s.get();
     BOOST_CHECK(c == 'n');
-    
+
     BOOST_CHECK(!s.eof());
 
     BOOST_CHECK(s.get() == '.');

@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(PipelineWriterTest_test1)
 
         writer.writePipeline(Support::temppath("test.xml"));
     }
-    
+
     // we can't compare top the reference fiel directly, since the filename
     // paths are now absolute and not relative -- instead, we'll round trip once
     // more and compare that way
@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE(PipelineWriterTest_test1)
 
         writer.writePipeline(Support::temppath("test2.xml"));
     }
-    
+
     bool filesSame = Support::compare_text_files(Support::temppath("test.xml"), Support::temppath("test2.xml"));
     BOOST_CHECK(filesSame);
     if (filesSame)
@@ -115,7 +115,7 @@ BOOST_AUTO_TEST_CASE(PipelineWriterTest_attr_test)
         BOOST_CHECK_EQUAL(tree.get<std::string>("x.<xmlattr>.b"), "bbb");
         BOOST_CHECK_EQUAL(tree.get<std::string>("child2"), "two");
     }
-    
+
     return;
 }
 
@@ -141,16 +141,16 @@ BOOST_AUTO_TEST_CASE(PipelineWriterTest_multioptions)
 
         Stage const& stage = manager.getStage()->getPrevStage();
         Options opt = stage.getOptions();
-        
+
         Option fname = opt.getOption("filename");
 
         boost::optional<Options const&> more = fname.getOptions();
-    
+
         Option meaning_of_life = more->getOption("somemore");
-    
+
         BOOST_CHECK_EQUAL(meaning_of_life.getValue<int>(), 42);
-    }    
-    
+    }
+
     FileUtils::deleteFile(Support::temppath("test-multi.xml"));
     return;
 }

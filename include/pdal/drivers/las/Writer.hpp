@@ -43,7 +43,12 @@
 #include <boost/scoped_ptr.hpp>
 
 
-namespace pdal { namespace drivers { namespace las {
+namespace pdal
+{
+namespace drivers
+{
+namespace las
+{
 
 
 //
@@ -70,15 +75,15 @@ public:
     void setFormatVersion(boost::uint8_t majorVersion, boost::uint8_t minorVersion);
     void setPointFormat(PointFormat);
     void setDate(boost::uint16_t dayOfYear, boost::uint16_t year);
-    
+
     void setProjectId(const boost::uuids::uuid&);
 
     // up to 32 chars (default is "PDAL")
-    void setSystemIdentifier(const std::string& systemId); 
-    
+    void setSystemIdentifier(const std::string& systemId);
+
     // up to 32 chars (default is "PDAL x.y.z")
     void setGeneratingSoftware(const std::string& softwareId);
-    
+
     void setHeaderPadding(boost::uint32_t const& v);
 
     // default false
@@ -105,7 +110,7 @@ private:
     boost::scoped_ptr<LASzipper> m_zipper;
     boost::scoped_ptr<ZipPoint> m_zipPoint;
 #endif
-    
+
     bool m_headerInitialized;
     boost::uint64_t m_streamOffset; // the first byte of the LAS file
 
@@ -113,6 +118,8 @@ private:
     Writer(const Writer&); // not implemented
 };
 
-} } } // namespaces
+}
+}
+} // namespaces
 
 #endif

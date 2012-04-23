@@ -38,11 +38,15 @@
 #include <pdal/Filter.hpp>
 #include <pdal/FilterIterator.hpp>
 
-namespace pdal { 
-    class PointBuffer;
+namespace pdal
+{
+class PointBuffer;
 }
 
-namespace pdal { namespace filters {
+namespace pdal
+{
+namespace filters
+{
 
 
 // we keep only 1 out of every step points; if step=100, we get 1% of the file
@@ -57,15 +61,18 @@ public:
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
 
-    bool supportsIterator (StageIteratorType t) const
-    {   
-        if (t == StageIterator_Sequential ) return true;
+    bool supportsIterator(StageIteratorType t) const
+    {
+        if (t == StageIterator_Sequential) return true;
 
         return false;
     }
-    
+
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const { return NULL; }
+    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const
+    {
+        return NULL;
+    }
 
     boost::uint32_t getStep() const;
 
@@ -79,7 +86,10 @@ private:
 };
 
 
-namespace iterators { namespace sequential {
+namespace iterators
+{
+namespace sequential
+{
 
 
 class PDAL_DLL Decimation : public pdal::FilterSequentialIterator
@@ -96,8 +106,10 @@ private:
 };
 
 
-} } // namespaces
+}
+} // namespaces
 
-} } // namespaces
+}
+} // namespaces
 
 #endif

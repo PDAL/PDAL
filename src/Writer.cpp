@@ -156,14 +156,14 @@ boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite)
 
     const Schema& schema = getPrevStage().getSchema();
     PointBuffer buffer(schema, m_chunkSize);
-    
+
     boost::scoped_ptr<StageSequentialIterator> iter(getPrevStage().createSequentialIterator(buffer));
-    
+
     if (!iter) throw pdal_error("Unable to obtain iterator from previous stage!");
 
     // if we don't have an SRS, try to forward the one from the prev stage
     if (m_spatialReference.empty()) m_spatialReference = getPrevStage().getSpatialReference();
-    
+
     writeBegin(targetNumPointsToWrite);
 
     iter->readBegin();
@@ -171,8 +171,8 @@ boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite)
 
 
     //
-    // The user has requested a specific number of points: proceed a 
-    // chunk at a time until we reach that number.  (If that number 
+    // The user has requested a specific number of points: proceed a
+    // chunk at a time until we reach that number.  (If that number
     // is 0, we proceed until no more points can be read.)
     //
     // If the user requests an interrupt while we're running, we'll throw.
@@ -186,11 +186,11 @@ boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite)
         if (targetNumPointsToWrite != 0)
         {
             const boost::uint64_t numRemainingPointsToRead = targetNumPointsToWrite - actualNumPointsWritten;
-        
+
             const boost::uint64_t numPointsToReadThisChunk64 = std::min<boost::uint64_t>(numRemainingPointsToRead, m_chunkSize);
             // this case is safe because m_chunkSize is a uint32
             const boost::uint32_t numPointsToReadThisChunk = static_cast<boost::uint32_t>(numPointsToReadThisChunk64);
-            
+
             // we are reusing the buffer, so we may need to adjust the capacity for the last (and likely undersized) chunk
             if (buffer.getCapacity() != numPointsToReadThisChunk)
             {
@@ -250,12 +250,12 @@ boost::property_tree::ptree Writer::serializePipeline() const
     tree.add("<xmlattr>.type", getName());
 
     PipelineWriter::write_option_ptree(tree, getOptions());
-    
+
     const Stage& stage = getPrevStage();
     boost::property_tree::ptree subtree = stage.serializePipeline();
 
     tree.add_child(subtree.begin()->first, subtree.begin()->second);
-    
+
     boost::property_tree::ptree root;
     root.add_child("Writer", tree);
 

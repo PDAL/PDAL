@@ -66,57 +66,57 @@ bool Support::compare_stage_data(pdal::Stage const& a, pdal::Stage const& b)
     pdal::Schema const& a_schema = a.getSchema();
     pdal::Schema const& b_schema = b.getSchema();
     if (a_schema != b_schema) return false;
-    
+
     boost::uint64_t a_num_points64 = a.getNumPoints();
     boost::uint64_t b_num_points64 = b.getNumPoints();
     if (a_num_points64 > std::numeric_limits<boost::uint32_t>::max() ||
-        b_num_points64 > std::numeric_limits<boost::uint32_t>::max())
+            b_num_points64 > std::numeric_limits<boost::uint32_t>::max())
         throw pdal::pdal_error("unable to do compare_stage_data for > 2^32 points");
     boost::uint32_t a_num_points = static_cast<boost::uint32_t>(a_num_points64);
     boost::uint32_t b_num_points = static_cast<boost::uint32_t>(b_num_points64);
     if (a_num_points != b_num_points) return false;
-    
-  
+
+
     // if we don't have any sizes here, we'll just use a small default
     if (a_num_points == 0) a_num_points = 1024;
     if (b_num_points == 0) b_num_points = 1024;
-    
+
     pdal::PointBuffer a_data(a_schema, a_num_points);
     pdal::PointBuffer b_data(b_schema, b_num_points);
 
     pdal::StageSequentialIterator* a_itr = a.createSequentialIterator(a_data);
     pdal::StageSequentialIterator* b_itr = b.createSequentialIterator(b_data);
-    
+
     if (!a_itr) throw pdal::pdal_error("unable to create sequential iterator for compare_stage_data for stage a");
     if (!b_itr) throw pdal::pdal_error("unable to create sequential iterator for compare_stage_data for stage b");
 
-  
-  
+
+
     {
         boost::uint32_t a_numRead = a_itr->read(a_data);
         boost::uint32_t b_numRead = b_itr->read(b_data);
         if (a_numRead != b_numRead) return false;
-        
+
         boost::uint8_t const* a_bytes = a_data.getData(0);
         boost::uint8_t const* b_bytes = b_data.getData(0);
-        
+
         boost::uint64_t a_length = a_data.getBufferByteLength();
         // boost::uint64_t b_length = b_data.getBufferByteLength();
-    
+
         for (boost::uintmax_t i=0; i<a_length; i++)
         {
-            if (*a_bytes != *b_bytes) 
+            if (*a_bytes != *b_bytes)
             {
                 return false;
             }
             ++a_bytes;
             ++b_bytes;
         }
-        
+
     }
-    
+
     return true;
-    
+
 }
 
 std::string Support::datapath(const std::string& file)
@@ -169,7 +169,7 @@ std::string Support::exename(const std::string& name)
 boost::uint32_t Support::diff_text_files(const std::string& file1, const std::string& file2, boost::int32_t ignoreLine1)
 {
     if (!pdal::FileUtils::fileExists(file1) ||
-        !pdal::FileUtils::fileExists(file2))
+            !pdal::FileUtils::fileExists(file2))
         return std::numeric_limits<boost::uint32_t>::max();
 
     std::istream* str1 = pdal::FileUtils::openFile(file1, false);
@@ -250,7 +250,7 @@ boost::uint32_t Support::diff_files(const std::string& file1, const std::string&
                                     boost::uint32_t* ignorable_start, boost::uint32_t* ignorable_length, boost::uint32_t num_ignorables)
 {
     if (!pdal::FileUtils::fileExists(file1) ||
-        !pdal::FileUtils::fileExists(file2))
+            !pdal::FileUtils::fileExists(file2))
         return std::numeric_limits<boost::uint32_t>::max();
 
     boost::uintmax_t len1x = pdal::FileUtils::fileSize(file1);
@@ -280,7 +280,7 @@ boost::uint32_t Support::diff_files(const std::string& file1, const std::string&
     const size_t maxlen = (len1 > len2) ? len1 : len2;
     for (size_t i=0; i<minlen; i++)
     {
-        if (*p != *q) 
+        if (*p != *q)
         {
             if (num_ignorables == 0)
             {
@@ -347,11 +347,11 @@ bool Support::compare_text_files(const std::string& file1, const std::string& fi
 #define Compare(x,y)    BOOST_CHECK(pdal::Utils::compare_approx((x),(y),0.001));
 
 void Support::check_pN(const pdal::PointBuffer& data,
-                       std::size_t index, 
+                       std::size_t index,
                        double xref, double yref, double zref)
 {
     const ::pdal::Schema& schema = data.getSchema();
-    
+
     pdal::Dimension const& dimX = schema.getDimension("X");
     pdal::Dimension const& dimY = schema.getDimension("Y");
     pdal::Dimension const& dimZ = schema.getDimension("Z");
@@ -363,7 +363,7 @@ void Support::check_pN(const pdal::PointBuffer& data,
     double x0 = dimX.applyScaling<boost::int32_t>(x0raw);
     double y0 = dimY.applyScaling<boost::int32_t>(y0raw);
     double z0 = dimZ.applyScaling<boost::int32_t>(z0raw);
-    
+
     Compare(x0, xref);
     Compare(y0, yref);
     Compare(z0, zref);
@@ -371,7 +371,7 @@ void Support::check_pN(const pdal::PointBuffer& data,
 
 
 void Support::check_pN(const pdal::PointBuffer& data,
-                       std::size_t index, 
+                       std::size_t index,
                        double xref, double yref, double zref,
                        double tref,
                        boost::uint16_t rref, boost::uint16_t gref, boost::uint16_t bref)
@@ -379,21 +379,21 @@ void Support::check_pN(const pdal::PointBuffer& data,
     check_pN(data, index, xref, yref, zref);
 
     const ::pdal::Schema& schema = data.getSchema();
-    
-    
+
+
     boost::optional<pdal::Dimension const&> dimTime = schema.getDimensionOptional("Time");
 
     if (dimTime)
     {
         double t0 = data.getField<double>(*dimTime, index);
         BOOST_CHECK_EQUAL(t0, tref);
-        
+
     }
 
     boost::optional<pdal::Dimension const&> dimRed = schema.getDimensionOptional("Red");
     boost::optional<pdal::Dimension const&> dimGreen = schema.getDimensionOptional("Green");
     boost::optional<pdal::Dimension const&> dimBlue = schema.getDimensionOptional("Blue");
-    
+
     if (dimRed)
     {
         boost::uint16_t r0 = data.getField<boost::uint16_t>(*dimRed, index);
@@ -453,11 +453,11 @@ void Support::compareBounds(const pdal::Bounds<double>& p, const pdal::Bounds<do
 
 //#ifdef PDAL_COMPILER_MSVC
 // http://www.codepedia.com/1/CppStringReplace
-std::string Support::replaceAll(std::string result, 
-                                const std::string& replaceWhat, 
+std::string Support::replaceAll(std::string result,
+                                const std::string& replaceWhat,
                                 const std::string& replaceWithWhat)
 {
-    while(1)
+    while (1)
     {
         const int pos = result.find(replaceWhat);
         if (pos==-1) break;
@@ -471,7 +471,7 @@ std::string Support::replaceAll(std::string result,
 static FILE* portable_popen(const std::string& command, const std::string& mode)
 {
     FILE* fp = 0;
-    
+
 #ifdef PDAL_PLATFORM_WIN32
     const std::string dos_command = Support::replaceAll(command, "/", "\\");
     fp = _popen(dos_command.c_str(), mode.c_str());
@@ -521,17 +521,17 @@ int Support::run_command(const std::string& cmd, std::string& output)
 {
     const int maxbuf = 4096;
     char buf[maxbuf];
-        
+
     output = "";
-    
+
     FILE* fp = portable_popen(cmd.c_str(), "r");
-    
+
     while (!feof(fp))
     {
         if (fgets(buf, maxbuf, fp) == NULL)
         {
             if (feof(fp)) break;
-            if (ferror(fp)) break;                
+            if (ferror(fp)) break;
         }
 
         output += buf;

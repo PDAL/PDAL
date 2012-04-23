@@ -85,7 +85,7 @@ public:
 
     // if the filename is an absolute path, just return it
     // otherwise, make it absolute (relative to base dir) and return that
-    // 
+    //
     // note: if base dir is not absolute, first make it absolute via toAbsolutePath(base)
     static std::string toAbsolutePath(const std::string& filename, const std::string base);
 

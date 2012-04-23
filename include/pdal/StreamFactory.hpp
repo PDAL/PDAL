@@ -127,14 +127,17 @@ private:
     public:
         StreamSet(const std::string& filename, boost::uint64_t offset, boost::uint64_t length);
         ~StreamSet();
-        std::istream* stream() { return m_streamslice; }
+        std::istream* stream()
+        {
+            return m_streamslice;
+        }
     private:
         typedef boost::iostreams::stream<boost::iostreams::file_source> Stream;
         typedef boost::iostreams::restriction<Stream> StreamSlice;
         typedef boost::iostreams::stream<StreamSlice> StreamSliceStream;
-       std::istream* m_stream;
-       StreamSlice* m_slice;
-       StreamSliceStream* m_streamslice;
+        std::istream* m_stream;
+        StreamSlice* m_slice;
+        StreamSliceStream* m_streamslice;
     };
     typedef std::map<std::istream*,StreamSet*> Map;  // maps streamslice -> set
     Map m_streams;

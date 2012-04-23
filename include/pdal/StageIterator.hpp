@@ -65,7 +65,7 @@ public:
     boost::uint32_t read(PointBuffer& buffer);
 
     // These functions just call into the corresponding 'Impls that the derived stage
-    // provides, plus some of them do a little internal bookkeeping we don't want to have 
+    // provides, plus some of them do a little internal bookkeeping we don't want to have
     // to make the derived stages keep track of.
     //
     // Mortal users are not intended to use these functions.  For read workflows, just
@@ -90,15 +90,18 @@ public:
     // may be read (and atEnd() should be true).
     //
     // All stages have the notion of a current point number, even for stages
-    // that are not really "ordered", in that the index just starts at zero 
+    // that are not really "ordered", in that the index just starts at zero
     // and increments by N every time another N points are read
     boost::uint64_t getIndex() const;
 
     // used to control intermediate buffering needed by some stages
     void setChunkSize(boost::uint32_t size);
     boost::uint32_t getChunkSize() const;
-    
-    PointBuffer& getBuffer() { return m_buffer; }
+
+    PointBuffer& getBuffer()
+    {
+        return m_buffer;
+    }
 
 protected:
     virtual void readBeginImpl() {}
@@ -108,7 +111,7 @@ protected:
     virtual void readEndImpl() {}
 
     // This is provided as a sample implementation that some stages could use
-    // to implement their own skip or seek functions. It uses the read() call 
+    // to implement their own skip or seek functions. It uses the read() call
     // to advance "count" points forward, so it is not at all optimal.
     boost::uint64_t naiveSkipImpl(boost::uint64_t count);
 

@@ -44,7 +44,10 @@
 #include <pdal/plang/Environment.hpp>
 #include <pdal/plang/Script.hpp>
 
-namespace pdal { namespace plang {
+namespace pdal
+{
+namespace plang
+{
 
 
 class PDAL_DLL Invocation
@@ -60,17 +63,17 @@ public:
 
     // creates a Python variable pointing to a (one dimensional) C array
     // adds the new variable to the arguments dictionary
-    void insertArgument(const std::string& name, 
-                        boost::uint8_t* data, 
-                        boost::uint32_t data_len, 
-                        boost::uint32_t data_stride,                                  
-                        dimension::Interpretation dataType, 
+    void insertArgument(const std::string& name,
+                        boost::uint8_t* data,
+                        boost::uint32_t data_len,
+                        boost::uint32_t data_stride,
+                        dimension::Interpretation dataType,
                         boost::uint32_t numBytes);
-    void extractResult(const std::string& name, 
-                       boost::uint8_t* data, 
-                       boost::uint32_t data_len, 
-                       boost::uint32_t data_stride,                                  
-                       dimension::Interpretation dataType, 
+    void extractResult(const std::string& name,
+                       boost::uint8_t* data,
+                       boost::uint32_t data_len,
+                       boost::uint32_t data_stride,
+                       dimension::Interpretation dataType,
                        boost::uint32_t numBytes);
 
     bool hasOutputVariable(const std::string& name) const;
@@ -112,7 +115,8 @@ private:
 };
 
 
-} } // namespaces
+}
+} // namespaces
 
 #endif
 

@@ -51,13 +51,18 @@ typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
 
 #include <cpl_port.h>
 
-// 
-// 
+//
+//
 // void CPL_STDCALL OCIGDALErrorHandler(CPLErr eErrClass, int err_no, const char *msg);
 // void CPL_STDCALL OCIGDALDebugErrorHandler(CPLErr eErrClass, int err_no, const char *msg);
 
 
-namespace pdal { namespace drivers { namespace oci {
+namespace pdal
+{
+namespace drivers
+{
+namespace oci
+{
 
 typedef boost::shared_ptr<OWConnection> Connection ;
 typedef boost::shared_ptr<OWStatement> Statement ;
@@ -91,7 +96,7 @@ public:
 class OracleDriver
 {
 public:
-    OracleDriver(const Options& options) 
+    OracleDriver(const Options& options)
         : m_options(options)
     {
 
@@ -111,18 +116,18 @@ public:
 
         std::string password = connection.substr(slash_pos+1, at_pos-slash_pos-1);
         std::string instance = connection.substr(at_pos+1);
-    
+
         Connection con = boost::make_shared<OWConnection>(username.c_str(),password.c_str(),instance.c_str());
-    
+
         if (!con->Succeeded())
         {
             throw connection_failed("Oracle connection failed");
         }
-        
+
         return con;
-    
+
     }
-    
+
 private:
     Options const& m_options;
 
@@ -145,12 +150,12 @@ enum QueryType
 
 class Block
 {
-    
+
 public:
-    
+
     Block(Connection connection);
     ~Block() ;
-    
+
     boost::int32_t           obj_id;
     boost::int32_t           blk_id;
     sdo_geometry*   blk_extent;
@@ -174,7 +179,9 @@ typedef boost::shared_ptr<Block> BlockPtr;
 
 
 
-}}} // namespace pdal::driver::oci
+}
+}
+} // namespace pdal::driver::oci
 
 
 #endif

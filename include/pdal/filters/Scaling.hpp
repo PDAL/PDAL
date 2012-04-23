@@ -45,12 +45,16 @@
 
 namespace pdal
 {
-    class PointBuffer;
+class PointBuffer;
 }
 
-namespace pdal { namespace filters {
+namespace pdal
+{
+namespace filters
+{
 
-namespace scaling {
+namespace scaling
+{
 
 struct PDAL_DLL Scaler
 {
@@ -75,30 +79,39 @@ public:
     virtual const Options getDefaultOptions() const;
     virtual void initialize();
 
-    bool supportsIterator (StageIteratorType t) const
-    {   
-        if (t == StageIterator_Sequential ) return true;
+    bool supportsIterator(StageIteratorType t) const
+    {
+        if (t == StageIterator_Sequential) return true;
 
         return false;
     }
 
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const { return NULL; }
+    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const
+    {
+        return NULL;
+    }
 
-    std::vector<scaling::Scaler> const& getScalers() const { return m_scalers; }
+    std::vector<scaling::Scaler> const& getScalers() const
+    {
+        return m_scalers;
+    }
 
 private:
     void checkImpedance();
-    
+
 
     Scaling& operator=(const Scaling&); // not implemented
     Scaling(const Scaling&); // not implemented
-    
+
     std::vector<scaling::Scaler> m_scalers;
 };
 
 
-namespace iterators { namespace sequential {
+namespace iterators
+{
+namespace sequential
+{
 
 
 class PDAL_DLL Scaling : public pdal::FilterSequentialIterator
@@ -115,13 +128,13 @@ private:
     dimension::Interpretation getInterpretation(std::string const& t) const;
     const pdal::filters::Scaling& m_scalingFilter;
 
-    void writeScaledData(   PointBuffer& buffer, 
-                            Dimension const& from_dimension, 
-                            Dimension const& to_dimension, 
-                            boost::uint32_t pointIndex);
-    template<class T> void scale(   Dimension const& from_dimension,
-                                    Dimension const& to_dimension, 
-                                    T& value) const;
+    void writeScaledData(PointBuffer& buffer,
+                         Dimension const& from_dimension,
+                         Dimension const& to_dimension,
+                         boost::uint32_t pointIndex);
+    template<class T> void scale(Dimension const& from_dimension,
+                                 Dimension const& to_dimension,
+                                 T& value) const;
     std::map<dimension::id, dimension::id> m_scale_map;
 };
 
@@ -132,37 +145,37 @@ private:
 #endif
 
 template <class T>
-inline void Scaling::scale( Dimension const& from_dimension,
-                            Dimension const& to_dimension,
-                            T& value) const
+inline void Scaling::scale(Dimension const& from_dimension,
+                           Dimension const& to_dimension,
+                           T& value) const
 {
-    
+
     double v = static_cast<double>(value);
     double out = (v*from_dimension.getNumericScale() + from_dimension.getNumericOffset() - to_dimension.getNumericOffset())/to_dimension.getNumericScale();
 
     T output = static_cast<T>(out);
 
-    if (std::numeric_limits<T>::is_exact) // 
+    if (std::numeric_limits<T>::is_exact) //
     {
         if (output > (std::numeric_limits<T>::max)())
         {
             std::ostringstream oss;
-            oss << "filter.Scaling: scale and/or offset combination causes " 
-                   "re-scaled value to be greater than std::numeric_limits::max for dimension '" << to_dimension.getName() << "'. " <<
-                   "value is: " << output << " and max() is: " << (std::numeric_limits<T>::max)();        
-        } 
-        else if (output < (std::numeric_limits<T>::min)() )
+            oss << "filter.Scaling: scale and/or offset combination causes "
+                "re-scaled value to be greater than std::numeric_limits::max for dimension '" << to_dimension.getName() << "'. " <<
+                "value is: " << output << " and max() is: " << (std::numeric_limits<T>::max)();
+        }
+        else if (output < (std::numeric_limits<T>::min)())
         {
             std::ostringstream oss;
-            oss << "filter.Scaling: scale and/or offset combination causes " 
-                   "re-scaled value to be less than std::numeric_limits::min for dimension '" << to_dimension.getName() << "'. " <<
-                   "value is: " << output << " and min() is: " << (std::numeric_limits<T>::min)();
+            oss << "filter.Scaling: scale and/or offset combination causes "
+                "re-scaled value to be less than std::numeric_limits::min for dimension '" << to_dimension.getName() << "'. " <<
+                "value is: " << output << " and min() is: " << (std::numeric_limits<T>::min)();
             throw std::out_of_range(oss.str());
 
         }
     }
     value = output;
-    
+
     return;
 }
 
@@ -170,8 +183,10 @@ inline void Scaling::scale( Dimension const& from_dimension,
 #  pragma warning(pop)
 #endif
 
-} } // namespaces
+}
+} // namespaces
 
-} } // namespaces
+}
+} // namespaces
 
 #endif

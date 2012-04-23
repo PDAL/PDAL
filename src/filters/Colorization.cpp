@@ -46,18 +46,21 @@
 #include <pdal/GDALUtils.hpp>
 #endif
 
-namespace pdal { namespace filters {
+namespace pdal
+{
+namespace filters
+{
 
 
 #ifdef PDAL_HAVE_GDAL
-    struct GDALSourceDeleter
+struct GDALSourceDeleter
+{
+    template <typename T>
+    void operator()(T* ptr)
     {
-       template <typename T>
-       void operator()(T* ptr)
-       {
-           ::GDALClose(ptr);
-       }
-    };
+        ::GDALClose(ptr);
+    }
+};
 #endif
 
 Colorization::Colorization(Stage& prevStage, const Options& options)
@@ -74,22 +77,22 @@ void Colorization::initialize()
 
 #ifdef PDAL_HAVE_GDAL
     GDALAllRegister();
-    
-    m_gdal_debug = boost::shared_ptr<pdal::gdal::Debug>( new pdal::gdal::Debug(isDebug(), log()));
+
+    m_gdal_debug = boost::shared_ptr<pdal::gdal::Debug>(new pdal::gdal::Debug(isDebug(), log()));
     m_forward_transform.assign(0.0);
     m_inverse_transform.assign(0.0);
-    
-    std::string filename = getOptions().getValueOrThrow<std::string>("raster");
-    
-    log()->get(logDEBUG) << "Using " << filename << " for raster" << std::endl;
-    m_ds = colorization::DataSourcePtr(GDALOpen(filename.c_str(), GA_ReadOnly ), GDALSourceDeleter());
 
-    if (GDALGetGeoTransform( m_ds.get(), &(m_forward_transform.front()) ) != CE_None )
+    std::string filename = getOptions().getValueOrThrow<std::string>("raster");
+
+    log()->get(logDEBUG) << "Using " << filename << " for raster" << std::endl;
+    m_ds = colorization::DataSourcePtr(GDALOpen(filename.c_str(), GA_ReadOnly), GDALSourceDeleter());
+
+    if (GDALGetGeoTransform(m_ds.get(), &(m_forward_transform.front())) != CE_None)
     {
         throw pdal_error("unable to fetch forward geotransform for raster!");
     }
 
-    GDALInvGeoTransform( &(m_forward_transform.front()), &(m_inverse_transform.front()) );    
+    GDALInvGeoTransform(&(m_forward_transform.front()), &(m_inverse_transform.front()));
 
 #endif
     return;
@@ -107,25 +110,28 @@ const Options Colorization::getDefaultOptions() const
     pdal::Option b0("band",1, "");
     pdal::Option s0("scale", 1.0f, "scale factor for this dimension");
     pdal::Options redO;
-    redO.add(b0); redO.add(s0);
+    redO.add(b0);
+    redO.add(s0);
     red.setOptions(redO);
-    
+
     pdal::Option green("dimension", "Green", "");
     pdal::Option b1("band",2, "");
     pdal::Option s1("scale", 1.0f, "scale factor for this dimension");
     pdal::Options greenO;
-    greenO.add(b1); greenO.add(s1);
+    greenO.add(b1);
+    greenO.add(s1);
     green.setOptions(greenO);
 
     pdal::Option blue("dimension", "Blue", "");
     pdal::Option b2("band",3, "");
     pdal::Option s2("scale", 1.0f, "scale factor for this dimension");
     pdal::Options blueO;
-    blueO.add(b2); blueO.add(s2);
+    blueO.add(b2);
+    blueO.add(s2);
     blue.setOptions(blueO);
-    
+
     pdal::Option reproject("reproject", false, "Reproject the input data into the same coordinate system as the raster?");
-    
+
     options.add(x);
     options.add(y);
     options.add(red);
@@ -133,7 +139,7 @@ const Options Colorization::getDefaultOptions() const
     options.add(blue);
     options.add(reproject);
 
-        
+
     return options;
 }
 
@@ -144,14 +150,14 @@ void Colorization::collectOptions()
 
     std::vector<Option> dimensions = options.getOptions("dimension");
     std::vector<Option>::const_iterator i;
-    
+
     if (dimensions.size() == 0)
     {
-        // No dimension mappings were given. We'll just assume 
+        // No dimension mappings were given. We'll just assume
         // Red => 1
         // Green => 2
         // Blue => 3
-        
+
         m_band_map.insert(std::pair<std::string, boost::uint32_t>("Red", 1));
         m_scale_map.insert(std::pair<std::string, double>("Red", 1.0));
         m_band_map.insert(std::pair<std::string, boost::uint32_t>("Green", 2));
@@ -159,7 +165,7 @@ void Colorization::collectOptions()
         m_band_map.insert(std::pair<std::string, boost::uint32_t>("Blue", 3));
         m_scale_map.insert(std::pair<std::string, double>("Blue", 1.0));
         log()->get(logDEBUG) << "No dimension mappings were given. Using default mappings." << std::endl;
-        
+
         return;
     }
     for (i = dimensions.begin(); i != dimensions.end(); ++i)
@@ -172,12 +178,14 @@ void Colorization::collectOptions()
         {
             band_id = dimensionOptions->getValueOrThrow<boost::uint32_t>("band");
             scale = dimensionOptions->getValueOrDefault<double>("scale", 1.0);
-        } else {
+        }
+        else
+        {
             std::ostringstream oss;
             oss << "No band and scaling information given for dimension '" << name<< "'";
             throw pdal_error(oss.str());
         }
-        
+
         m_band_map.insert(std::pair<std::string, boost::uint32_t>(name, band_id));
         m_scale_map.insert(std::pair<std::string, double>(name, scale));
     }
@@ -199,7 +207,10 @@ pdal::StageSequentialIterator* Colorization::createSequentialIterator(PointBuffe
 }
 
 
-namespace iterators { namespace sequential {
+namespace iterators
+{
+namespace sequential
+{
 
 
 Colorization::Colorization(const pdal::filters::Colorization& filter, PointBuffer& buffer)
@@ -212,17 +223,17 @@ Colorization::Colorization(const pdal::filters::Colorization& filter, PointBuffe
 void Colorization::readBufferBeginImpl(PointBuffer& buffer)
 {
     // Cache dimension positions
-    
+
     pdal::Schema const& schema = buffer.getSchema();
     m_dimX = &(schema.getDimension(m_stage.getOptions().getValueOrDefault<std::string>("x_dim", "X")));
     m_dimY = &(schema.getDimension(m_stage.getOptions().getValueOrDefault<std::string>("y_dim", "Y")));
-    
+
     std::map<std::string, boost::uint32_t> band_map = m_stage.getBandMap();
     std::map<std::string, double> scale_map = m_stage.getScaleMap();
-    
-    for(std::map<std::string, boost::uint32_t>::const_iterator i = band_map.begin(); 
-        i != band_map.end();
-        ++i)
+
+    for (std::map<std::string, boost::uint32_t>::const_iterator i = band_map.begin();
+            i != band_map.end();
+            ++i)
     {
         pdal::Dimension const* dim = &(schema.getDimension(i->first));
         m_dimensions.push_back(dim);
@@ -235,37 +246,37 @@ void Colorization::readBufferBeginImpl(PointBuffer& buffer)
     }
 
 
-} 
+}
 
-// Determines the pixel/line position given an x/y.  
+// Determines the pixel/line position given an x/y.
 // No reprojection is done at this time.
 bool Colorization::getPixelAndLinePosition(double x,
-                                           double y,
-                                           boost::array<double, 6> const& inverse,
-                                           boost::int32_t& pixel,
-                                           boost::int32_t& line,
-                                           colorization::DataSourcePtr ds)
+        double y,
+        boost::array<double, 6> const& inverse,
+        boost::int32_t& pixel,
+        boost::int32_t& line,
+        colorization::DataSourcePtr ds)
 {
 #ifdef PDAL_HAVE_GDAL
     pixel = (boost::int32_t) std::floor(
-        inverse[0] 
-        + inverse[1] * x
-        + inverse[2] * y );
+                inverse[0]
+                + inverse[1] * x
+                + inverse[2] * y);
     line = (boost::int32_t) std::floor(
-        inverse[3] 
-        + inverse[4] * x
-        + inverse[5] * y );
- 
-    if( pixel < 0 || line < 0 
-        || pixel >= GDALGetRasterXSize( ds.get() )
-        || line  >= GDALGetRasterYSize( ds.get() )
-        )
+               inverse[3]
+               + inverse[4] * x
+               + inverse[5] * y);
+
+    if (pixel < 0 || line < 0
+            || pixel >= GDALGetRasterXSize(ds.get())
+            || line  >= GDALGetRasterYSize(ds.get())
+       )
     {
         // The x, y is not coincident with this raster
         return false;
     }
 #endif
-    
+
     return true;
 }
 
@@ -277,9 +288,9 @@ boost::uint32_t Colorization::readBufferImpl(PointBuffer& data)
 #ifdef PDAL_HAVE_GDAL
 
     boost::array<double, 6> inverse = m_stage.getInverseTransform();
-    
+
     colorization::DataSourcePtr ds = m_stage.getDataSource();
-    
+
     boost::int32_t pixel(0);
     boost::int32_t line(0);
     double x(0.0);
@@ -288,36 +299,36 @@ boost::uint32_t Colorization::readBufferImpl(PointBuffer& data)
 
     boost::array<double, 2> pix;
     pix.assign(0.0);
-    
+
     for (boost::uint32_t pointIndex=0; pointIndex<numRead; pointIndex++)
     {
         x = getScaledValue(data, *m_dimX, pointIndex);
         y = getScaledValue(data, *m_dimY, pointIndex);
-        
-        fetched = getPixelAndLinePosition(x, y, inverse, pixel, line, ds );
+
+        fetched = getPixelAndLinePosition(x, y, inverse, pixel, line, ds);
         if (!fetched)
             continue;
 
-        for( std::vector<boost::int32_t>::size_type i = 0; 
-             i < m_bands.size(); i++ )
-             {
-                 GDALRasterBandH hBand = GDALGetRasterBand( ds.get(), m_bands[i] );
-                 if (hBand == NULL) 
-                 {
-                     std::ostringstream oss;
-                     oss << "Unable to get band " << m_bands[i] << " from data source!";
-                     throw pdal_error(oss.str());
-                 }
-                 if( GDALRasterIO( hBand, GF_Read, pixel, line, 1, 1, 
-                                   &pix[0], 1, 1, GDT_CFloat64, 0, 0) == CE_None )
-                 {
+        for (std::vector<boost::int32_t>::size_type i = 0;
+                i < m_bands.size(); i++)
+        {
+            GDALRasterBandH hBand = GDALGetRasterBand(ds.get(), m_bands[i]);
+            if (hBand == NULL)
+            {
+                std::ostringstream oss;
+                oss << "Unable to get band " << m_bands[i] << " from data source!";
+                throw pdal_error(oss.str());
+            }
+            if (GDALRasterIO(hBand, GF_Read, pixel, line, 1, 1,
+                             &pix[0], 1, 1, GDT_CFloat64, 0, 0) == CE_None)
+            {
 
-                     double output = pix[0];
-                     output = output * m_scales[i];
-                     setScaledValue(data, output, *m_dimensions[i], pointIndex);
-                 }             
-             }
-        
+                double output = pix[0];
+                output = output * m_scales[i];
+                setScaledValue(data, output, *m_dimensions[i], pointIndex);
+            }
+        }
+
     }
 
 #endif
@@ -337,12 +348,12 @@ bool Colorization::atEndImpl() const
     return getPrevIterator().atEnd();
 }
 
-double Colorization::getScaledValue( PointBuffer& data, 
-                                    Dimension const& d, 
+double Colorization::getScaledValue(PointBuffer& data,
+                                    Dimension const& d,
                                     std::size_t pointIndex) const
 {
     double output(0.0);
-        
+
     float flt(0.0);
     boost::int8_t i8(0);
     boost::uint8_t u8(0);
@@ -352,7 +363,7 @@ double Colorization::getScaledValue( PointBuffer& data,
     boost::uint32_t u32(0);
     boost::int64_t i64(0);
     boost::uint64_t u64(0);
-    
+
     boost::uint32_t size = d.getByteSize();
     switch (d.getInterpretation())
     {
@@ -360,7 +371,7 @@ double Colorization::getScaledValue( PointBuffer& data,
             if (size == 4)
             {
                 flt = data.getField<float>(d, pointIndex);
-                output = static_cast<double>(flt);                
+                output = static_cast<double>(flt);
             }
             if (size == 8)
             {
@@ -391,7 +402,7 @@ double Colorization::getScaledValue( PointBuffer& data,
                 output = d.applyScaling<boost::int64_t>(i64);
             }
             break;
-            
+
         case dimension::UnsignedInteger:
         case dimension::UnsignedByte:
             if (size == 1)
@@ -419,16 +430,16 @@ double Colorization::getScaledValue( PointBuffer& data,
         case dimension::Pointer:    // stored as 64 bits, even on a 32-bit box
         case dimension::Undefined:
             throw pdal_error("Dimension data type unable to be reprojected");
-    }    
-    
+    }
+
     return output;
 }
 
 
-void Colorization::setScaledValue(PointBuffer& data, 
-                                               double value, 
-                                               Dimension const& d, 
-                                               std::size_t pointIndex) const
+void Colorization::setScaledValue(PointBuffer& data,
+                                  double value,
+                                  Dimension const& d,
+                                  std::size_t pointIndex) const
 {
 
     float flt(0.0);
@@ -440,7 +451,7 @@ void Colorization::setScaledValue(PointBuffer& data,
     boost::uint32_t u32(0);
     boost::int64_t i64(0);
     boost::uint64_t u64(0);
-    
+
 
     boost::uint32_t size = d.getByteSize();
     switch (d.getInterpretation())
@@ -480,7 +491,7 @@ void Colorization::setScaledValue(PointBuffer& data,
                 data.setField<boost::int64_t>(d, pointIndex, i64);
             }
             break;
-            
+
         case dimension::UnsignedInteger:
         case dimension::UnsignedByte:
             if (size == 1)
@@ -512,7 +523,9 @@ void Colorization::setScaledValue(PointBuffer& data,
     }
 }
 
-} } // iterators::sequential
+}
+} // iterators::sequential
 
 
-} } // namespaces
+}
+} // namespaces

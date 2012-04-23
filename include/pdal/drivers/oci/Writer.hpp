@@ -43,7 +43,12 @@
 
 #include "common.hpp"
 
-namespace pdal { namespace drivers { namespace oci {
+namespace pdal
+{
+namespace drivers
+{
+namespace oci
+{
 
 class PDAL_DLL Writer : public pdal::Writer, pdal::drivers::oci::OracleDriver
 {
@@ -57,12 +62,21 @@ public:
     virtual const Options getDefaultOptions() const;
 
     void run(std::ostringstream const& command);
-    inline void setBounds(pdal::Bounds<double> bounds) {m_bounds = bounds; }
-    inline pdal::Bounds<double>  getBounds() const { return m_bounds; }
-    
-    inline Connection getConnection() const { return m_connection;}
+    inline void setBounds(pdal::Bounds<double> bounds)
+    {
+        m_bounds = bounds;
+    }
+    inline pdal::Bounds<double>  getBounds() const
+    {
+        return m_bounds;
+    }
 
-        // for dumping
+    inline Connection getConnection() const
+    {
+        return m_connection;
+    }
+
+    // for dumping
     virtual boost::property_tree::ptree toPTree() const;
 
 protected:
@@ -87,17 +101,17 @@ private:
     void RunFileSQL(std::string const& filename);
     bool IsGeographic(boost::int32_t srid);
     std::string LoadSQLData(std::string const& filename);
-    
-    bool FillOraclePointBuffer(PointBuffer const& buffer, 
-                             std::vector<boost::uint8_t>& point_data);
+
+    bool FillOraclePointBuffer(PointBuffer const& buffer,
+                               std::vector<boost::uint8_t>& point_data);
     bool WriteBlock(PointBuffer const& buffer);
 
     void SetOrdinates(Statement statement,
-                      OCIArray* ordinates, 
+                      OCIArray* ordinates,
                       pdal::Bounds<double> const& extent);
     void SetElements(Statement statement,
                      OCIArray* elem_info);
-    
+
     template<typename T> T getDefaultedOption(std::string const& option_name) const
     {
         T default_value = getDefaultOptions().getOption(option_name).getValue<T>();
@@ -111,10 +125,10 @@ private:
     boost::int32_t getPCID() const;
     void UpdatePCExtent();
     std::string ShutOff_SDO_PC_Trigger();
-    void TurnOn_SDO_PC_Trigger(std::string trigger_name);    
+    void TurnOn_SDO_PC_Trigger(std::string trigger_name);
     pdal::Bounds<double> CalculateBounds(PointBuffer const& buffer);
     bool IsValidWKT(std::string const& wkt);
-    
+
     pdal::Bounds<double> m_bounds; // Bounds of the entire point cloud
     Connection m_connection;
     bool m_doCreateIndex;
@@ -137,10 +151,12 @@ private:
     std::string m_base_table_boundary_wkt;
     boost::shared_ptr<pdal::gdal::Debug> m_gdal_debug;
     std::string m_trigger_name;
-    
+
 };
 
-}}} // namespace pdal::driver::oci
+}
+}
+} // namespace pdal::driver::oci
 
 
 #endif // INCLUDED_OCIWRITER_HPP

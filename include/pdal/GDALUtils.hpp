@@ -52,7 +52,8 @@
 
 namespace pdal
 {
-namespace gdal {
+namespace gdal
+{
 
 
 class PDAL_DLL Debug
@@ -67,18 +68,23 @@ public:
 #if GDAL_VERSION_MAJOR == 1 && GDAL_VERSION_MINOR >= 9
         static_cast<Debug*>(CPLGetErrorHandlerUserData())->m_gdal_callback(code, num, msg);
 #else
-        if (code == CE_Failure || code == CE_Fatal) {
+        if (code == CE_Failure || code == CE_Fatal)
+        {
             std::ostringstream oss;
             oss <<"GDAL Failure number=" << num << ": " << msg;
             throw gdal_error(oss.str());
-        } else if (code == CE_Debug) {
+        }
+        else if (code == CE_Debug)
+        {
             std::clog << " (no log control stdlog) GDAL debug: " << msg << std::endl;
-        } else {
+        }
+        else
+        {
             return;
         }
 #endif
     }
-    
+
     void log(::CPLErr code, int num, char const* msg);
     void error(::CPLErr code, int num, char const* msg);
 
@@ -109,6 +115,7 @@ private:
 #endif
 
 
-}} // namespace pdal::gdal
+}
+} // namespace pdal::gdal
 
 #endif

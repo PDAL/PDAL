@@ -98,7 +98,7 @@ BOOST_AUTO_TEST_CASE(test_sequential)
     const Schema& schema = reader.getSchema();
 
     PointBuffer data(schema, 3);
-    
+
     pdal::StageSequentialIterator* iter = reader.createSequentialIterator(data);
 
     {
@@ -133,7 +133,7 @@ BOOST_AUTO_TEST_CASE(test_random)
     const Schema& schema = reader.getSchema();
 
     PointBuffer data(schema, 3);
-    
+
     pdal::StageRandomIterator* iter = reader.createRandomIterator(data);
 
     {
@@ -162,7 +162,7 @@ BOOST_AUTO_TEST_CASE(test_random)
 
         Support::check_p0_p1_p2(data);
     }
-    
+
     delete iter;
 
     return;
@@ -179,7 +179,7 @@ BOOST_AUTO_TEST_CASE(test_random_laz)
     const Schema& schema = reader.getSchema();
 
     PointBuffer data(schema, 3);
-    
+
     pdal::StageRandomIterator* iter = reader.createRandomIterator(data);
 
     {
@@ -208,7 +208,7 @@ BOOST_AUTO_TEST_CASE(test_random_laz)
 
         Support::check_p0_p1_p2(data);
     }
-    
+
     delete iter;
 
     return;
@@ -247,7 +247,7 @@ BOOST_AUTO_TEST_CASE(test_two_iters)
         boost::uint32_t numRead = iter->read(data);
         BOOST_CHECK(numRead == 1065);
         BOOST_CHECK(iter->getIndex() == 1065);
-        
+
         Support::check_p0_p1_p2(data);
 
         delete iter;
@@ -478,7 +478,7 @@ BOOST_AUTO_TEST_CASE(test_iterator_checks)
 }
 
 static void test_a_format(const std::string& file, boost::uint8_t majorVersion, boost::uint8_t minorVersion, int pointFormat,
-                              double xref, double yref, double zref, double tref, boost::uint16_t rref,  boost::uint16_t gref,  boost::uint16_t bref)
+                          double xref, double yref, double zref, double tref, boost::uint16_t rref,  boost::uint16_t gref,  boost::uint16_t bref)
 {
     pdal::drivers::las::Reader reader(Support::datapath(file));
     reader.initialize();
@@ -490,7 +490,7 @@ static void test_a_format(const std::string& file, boost::uint8_t majorVersion, 
     const Schema& schema = reader.getSchema();
 
     PointBuffer data(schema, 1);
-    
+
     pdal::StageSequentialIterator* iter = reader.createSequentialIterator(data);
 
     {
@@ -507,7 +507,7 @@ BOOST_AUTO_TEST_CASE(test_different_formats)
 {
     test_a_format("1.0_0.las", 1, 0, 0, 470692.440000, 4602888.900000, 16.000000, 0, 0, 0, 0);
     test_a_format("1.0_1.las", 1, 0, 1, 470692.440000, 4602888.900000, 16.000000, 1205902800.000000, 0, 0, 0);
-    
+
     test_a_format("1.1_0.las", 1, 1, 0, 470692.440000, 4602888.900000, 16.000000, 0, 0, 0, 0);
     test_a_format("1.1_1.las", 1, 1, 1, 470692.440000, 4602888.900000, 16.000000, 1205902800.000000, 0, 0, 0);
 

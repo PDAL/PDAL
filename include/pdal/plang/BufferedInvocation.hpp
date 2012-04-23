@@ -40,7 +40,10 @@
 
 #include <pdal/plang/Invocation.hpp>
 
-namespace pdal { namespace plang {
+namespace pdal
+{
+namespace plang
+{
 
 
 
@@ -57,7 +60,8 @@ private:
 };
 
 
-} } // namespaces
+}
+} // namespaces
 
 #endif
 

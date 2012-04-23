@@ -41,10 +41,13 @@
 
 namespace pdal
 {
-    class PointBuffer;
+class PointBuffer;
 }
 
-namespace pdal { namespace filters {
+namespace pdal
+{
+namespace filters
+{
 
 // removes any points outside of the given range
 // updates the header accordingly
@@ -59,15 +62,18 @@ public:
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
 
-    bool supportsIterator (StageIteratorType t) const
-    {   
-        if (t == StageIterator_Sequential ) return true;
+    bool supportsIterator(StageIteratorType t) const
+    {
+        if (t == StageIterator_Sequential) return true;
 
         return false;
     }
-    
+
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const { return NULL; }
+    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const
+    {
+        return NULL;
+    }
 
     // returns number of points accepted into the data buffer (which may be less than data.getNumPoints(),
     // if we're calling this routine multiple times with the same buffer
@@ -83,7 +89,10 @@ private:
 };
 
 
-namespace iterators { namespace sequential {
+namespace iterators
+{
+namespace sequential
+{
 
 
 class PDAL_DLL Crop : public pdal::FilterSequentialIterator
@@ -100,8 +109,10 @@ private:
 };
 
 
-} } // namespaces
+}
+} // namespaces
 
-} } // namespaces
+}
+} // namespaces
 
 #endif

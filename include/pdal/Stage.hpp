@@ -67,24 +67,33 @@ public:
 
     // core properties of all stages
     const Schema& getSchema() const;
-    virtual std::vector<Dimension> const& getDefaultDimensions() const {return m_defaultDimensions;}
+    virtual std::vector<Dimension> const& getDefaultDimensions() const
+    {
+        return m_defaultDimensions;
+    }
     virtual boost::uint64_t getNumPoints() const;
     PointCountType getPointCountType() const;
     const Bounds<double>& getBounds() const;
     const SpatialReference& getSpatialReference() const;
 
-    virtual bool supportsIterator (StageIteratorType) const = 0;
+    virtual bool supportsIterator(StageIteratorType) const = 0;
 
-    virtual StageSequentialIterator* createSequentialIterator(PointBuffer&) const { return NULL; }
-    virtual StageRandomIterator* createRandomIterator(PointBuffer&) const  { return NULL; }
+    virtual StageSequentialIterator* createSequentialIterator(PointBuffer&) const
+    {
+        return NULL;
+    }
+    virtual StageRandomIterator* createRandomIterator(PointBuffer&) const
+    {
+        return NULL;
+    }
 
     // for dumping
     virtual boost::property_tree::ptree toPTree() const;
-    
+
 protected:
     // setters for the core properties
     Schema& getSchemaRef();
-    
+
 
     void setSchema(Schema const&);
     void setNumPoints(boost::uint64_t);

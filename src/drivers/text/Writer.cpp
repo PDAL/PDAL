@@ -59,14 +59,19 @@ pdal::Writer* createTextWriter(pdal::Stage& prevStage, const pdal::Options& opti
 #endif
 
 
-namespace pdal { namespace drivers { namespace text {
+namespace pdal
+{
+namespace drivers
+{
+namespace text
+{
 
 
 struct FileStreamDeleter
 {
 
-       template <typename T>
-       void operator()(T* ptr)
+    template <typename T>
+    void operator()(T* ptr)
     {
         ptr->flush();
         FileUtils::closeFile(ptr);
@@ -92,13 +97,13 @@ Writer::~Writer()
 void Writer::initialize()
 {
     pdal::Writer::initialize();
-    
+
     std::string filename = getOptions().getValueOrThrow<std::string>("filename");
-    
-    // This is so the stream gets closed down if we throw any sort of 
+
+    // This is so the stream gets closed down if we throw any sort of
     // exception
     m_stream = FileStreamPtr(FileUtils::createFile(filename, true), FileStreamDeleter());
-    
+
     return;
 }
 
@@ -107,18 +112,18 @@ void Writer::initialize()
 const Options Writer::getDefaultOptions() const
 {
     Options options;
-    
+
     Option delimiter("delimiter", ",", "Delimiter to use for writing text");
     Option newline("newline", "\n", "Newline character to use for additional lines");
     Option quote_header("quote_header", true, "Write dimension names in quotes");
     Option filename("filename", "", "Filename to write CSV file to");
-    
-    
+
+
     options.add(filename);
     options.add(delimiter);
     options.add(newline);
     options.add(quote_header);
-    
+
     return options;
 }
 
@@ -140,12 +145,12 @@ void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
 void Writer::WriteHeader(pdal::Schema const& schema)
 {
 
-    schema::index_by_index const& dims = schema.getDimensions().get<schema::index>(); 
-    
+    schema::index_by_index const& dims = schema.getDimensions().get<schema::index>();
+
     bool isQuoted = getOptions().getValueOrDefault<bool>("quote_header", true);
     std::string newline = getOptions().getValueOrDefault<std::string>("newline", "\n");
     std::string delimiter = getOptions().getValueOrDefault<std::string>("delimiter",",");
-    
+
     schema::index_by_index::const_iterator iter = dims.begin();
     while (iter != dims.end())
     {
@@ -161,16 +166,16 @@ void Writer::WriteHeader(pdal::Schema const& schema)
             *m_stream << delimiter;
     }
     *m_stream << newline;
-    
+
     return;
 }
 
-std::string Writer::getStringRepresentation( PointBuffer const& data, 
-                                             Dimension const& d, 
-                                             std::size_t pointIndex) const
+std::string Writer::getStringRepresentation(PointBuffer const& data,
+        Dimension const& d,
+        std::size_t pointIndex) const
 {
     std::ostringstream output;
-        
+
     float flt(0.0);
     boost::int8_t i8(0);
     boost::uint8_t u8(0);
@@ -180,11 +185,11 @@ std::string Writer::getStringRepresentation( PointBuffer const& data,
     boost::uint32_t u32(0);
     boost::int64_t i64(0);
     boost::uint64_t u64(0);
-    
+
     boost::uint32_t size = d.getByteSize();
 
     bool bHaveScaling = !Utils::compare_distance(d.getNumericScale(), 0.0);
-    
+
     if (bHaveScaling)
     {
         output.setf(std::ios::fixed, std::ios::floatfield);
@@ -196,7 +201,7 @@ std::string Writer::getStringRepresentation( PointBuffer const& data,
             if (size == 4)
             {
                 flt = data.getField<float>(d, pointIndex);
-                output << static_cast<double>(flt);                
+                output << static_cast<double>(flt);
             }
             if (size == 8)
             {
@@ -227,7 +232,7 @@ std::string Writer::getStringRepresentation( PointBuffer const& data,
                 output << d.applyScaling<boost::int64_t>(i64);
             }
             break;
-            
+
         case dimension::UnsignedInteger:
         case dimension::UnsignedByte:
             if (size == 1)
@@ -255,8 +260,8 @@ std::string Writer::getStringRepresentation( PointBuffer const& data,
         case dimension::Pointer:    // stored as 64 bits, even on a 32-bit box
         case dimension::Undefined:
             break;
-    }    
-    
+    }
+
     return output.str();
 }
 
@@ -264,7 +269,7 @@ std::string Writer::getStringRepresentation( PointBuffer const& data,
 
 boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
 {
-    
+
     if (!m_wrote_header)
     {
         WriteHeader(data.getSchema());
@@ -275,10 +280,10 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
     std::string delimiter = getOptions().getValueOrDefault<std::string>("delimiter",",");
 
     boost::uint32_t pointIndex(0);
-    
+
     pdal::Schema const& schema = data.getSchema();
-    schema::index_by_index const& dims = schema.getDimensions().get<schema::index>(); 
-    
+    schema::index_by_index const& dims = schema.getDimensions().get<schema::index>();
+
     while (pointIndex != data.getNumPoints())
     {
 
@@ -287,7 +292,7 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
         {
             if (iter->isIgnored())
                 continue;
-                
+
             *m_stream << getStringRepresentation(data, *iter, pointIndex);
 
             iter++;
@@ -295,13 +300,13 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
                 *m_stream << delimiter;
         }
         *m_stream << newline;
-        
+
         pointIndex++;
 
     }
 
-    
- 
+
+
     return data.getNumPoints();
 }
 
@@ -316,4 +321,6 @@ boost::property_tree::ptree Writer::toPTree() const
 }
 
 
-} } } // namespaces
+}
+}
+} // namespaces

@@ -39,7 +39,10 @@
 
 #include <pdal/PointBuffer.hpp>
 
-namespace pdal { namespace filters {
+namespace pdal
+{
+namespace filters
+{
 
 
 Predicate::Predicate(Stage& prevStage, const Options& options)
@@ -59,7 +62,7 @@ Predicate::~Predicate()
 void Predicate::initialize()
 {
     Filter::initialize();
-    
+
     m_script = new pdal::plang::Script(getOptions());
 
     log()->get(logDEBUG)  << "script " << *m_script << std::endl;
@@ -92,7 +95,7 @@ boost::uint32_t Predicate::processBuffer(PointBuffer& srcData, PointBuffer& dstD
     python.beginChunk(srcData);
 
     python.execute();
-    
+
     if (!python.hasOutputVariable("Mask"))
     {
         throw python_error("Mask variable not set in predicate filter function");
@@ -138,7 +141,10 @@ pdal::StageSequentialIterator* Predicate::createSequentialIterator(PointBuffer& 
 //---------------------------------------------------------------------------
 
 
-namespace iterators { namespace sequential {
+namespace iterators
+{
+namespace sequential
+{
 
 Predicate::Predicate(const pdal::filters::Predicate& filter, PointBuffer& buffer)
     : pdal::FilterSequentialIterator(filter, buffer)
@@ -175,7 +181,7 @@ void Predicate::readBeginImpl()
     {
         createParser();
     }
-    
+
     m_numPointsProcessed = m_numPointsPassed = 0;
 
     return;
@@ -213,8 +219,10 @@ bool Predicate::atEndImpl() const
     return getPrevIterator().atEnd();
 }
 
-} } // iterators::sequential
+}
+} // iterators::sequential
 
-} } // pdal::filters
+}
+} // pdal::filters
 
 #endif

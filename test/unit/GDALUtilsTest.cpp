@@ -126,7 +126,7 @@ BOOST_AUTO_TEST_CASE(GDALUtilsTest_test_vsifile_write)
 
         fwrite(truth, 1, 34, fp_a);
         VSIFWriteL(truth, 1, 34, fp_b);
-        
+
         fseek(fp_a, 342, SEEK_END);
         VSIFSeekL(fp_b, 342, SEEK_END);
 
@@ -184,7 +184,7 @@ BOOST_AUTO_TEST_CASE(test_wrapped_vsifile_subsequence)
 
     // seek to a random spot and read a point
     str.seekg(5, std::iostream::beg);
-    
+
     boost::uint8_t c;
 
     str.read((char*)&c, 1);

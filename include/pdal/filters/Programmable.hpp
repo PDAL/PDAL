@@ -43,7 +43,10 @@
 #include <pdal/plang/BufferedInvocation.hpp>
 
 
-namespace pdal { namespace filters {
+namespace pdal
+{
+namespace filters
+{
 
 class ProgrammableFilterSequentialIterator;
 
@@ -58,19 +61,25 @@ public:
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
 
-    bool supportsIterator (StageIteratorType t) const
-    {   
-        if (t == StageIterator_Sequential ) return true;
+    bool supportsIterator(StageIteratorType t) const
+    {
+        if (t == StageIterator_Sequential) return true;
 
         return false;
     }
 
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const { return NULL; }
+    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const
+    {
+        return NULL;
+    }
 
     void processBuffer(PointBuffer& data, pdal::plang::BufferedInvocation& python) const;
 
-    const pdal::plang::Script& getScript() const { return *m_script; }
+    const pdal::plang::Script& getScript() const
+    {
+        return *m_script;
+    }
 
 private:
     pdal::plang::Script* m_script;
@@ -80,8 +89,11 @@ private:
 };
 
 
-namespace iterators { namespace sequential {
-    
+namespace iterators
+{
+namespace sequential
+{
+
 
 class PDAL_DLL Programmable : public pdal::FilterSequentialIterator
 {
@@ -95,18 +107,20 @@ private:
     bool atEndImpl() const;
 
     void createParser();
-    
+
     const pdal::filters::Programmable& m_programmableFilter;
 
     pdal::plang::Environment* m_pythonEnv;
     pdal::plang::BufferedInvocation* m_pythonMethod;
 };
 
-} } // iterators::sequential
+}
+} // iterators::sequential
 
 
 
-} } // pdal::filteers
+}
+} // pdal::filteers
 
 #endif
 

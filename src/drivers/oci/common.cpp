@@ -40,7 +40,12 @@
 #include <pdal/Bounds.hpp>
 #include <pdal/Utils.hpp>
 
-namespace pdal { namespace drivers { namespace oci {
+namespace pdal
+{
+namespace drivers
+{
+namespace oci
+{
 
 Block::Block(Connection connection)
     : num_points(0)
@@ -67,7 +72,9 @@ Block::~Block()
 
 
 
-}}} // namespace pdal::driver::oci
+}
+}
+} // namespace pdal::driver::oci
 
 
 

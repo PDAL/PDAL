@@ -44,7 +44,7 @@
 
 namespace pdal
 {
-    
+
 PipelineManager::PipelineManager()
     : m_lastStage(NULL)
     , m_lastWriter(NULL)

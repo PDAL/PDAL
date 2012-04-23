@@ -37,7 +37,10 @@
 #include <pdal/PointBuffer.hpp>
 #include <sstream>
 
-namespace pdal { namespace filters {
+namespace pdal
+{
+namespace filters
+{
 
 
 Crop::Crop(Stage& prevStage, const Options& options)
@@ -106,8 +109,8 @@ boost::uint32_t Crop::processBuffer(PointBuffer& dstData, const PointBuffer& src
         double x(0.0);
         double y(0.0);
         double z(0.0);
-        
-        if (dimX->getInterpretation() == dimension::SignedInteger )
+
+        if (dimX->getInterpretation() == dimension::SignedInteger)
         {
             boost::int32_t xi = srcData.getField<boost::int32_t>(*dimX, srcIndex);
             boost::int32_t yi = srcData.getField<boost::int32_t>(*dimY, srcIndex);
@@ -116,7 +119,7 @@ boost::uint32_t Crop::processBuffer(PointBuffer& dstData, const PointBuffer& src
             x = dimX->applyScaling(xi);
             y = dimY->applyScaling(yi);
             z = dimZ->applyScaling(zi);
-            
+
         }
         else if (dimX->getInterpretation() == dimension::UnsignedInteger)
         {
@@ -127,17 +130,18 @@ boost::uint32_t Crop::processBuffer(PointBuffer& dstData, const PointBuffer& src
             x = dimX->applyScaling(xi);
             y = dimY->applyScaling(yi);
             z = dimZ->applyScaling(zi);
-            
-        } else
+
+        }
+        else
         {
             x = srcData.getField<double>(*dimX, srcIndex);
             y = srcData.getField<double>(*dimY, srcIndex);
             z = srcData.getField<double>(*dimZ, srcIndex);
 
         }
-     
+
         Vector<double> point(x,y,z);
-    
+
         if (bounds.contains(point))
         {
             dstData.copyPointFast(dstIndex, srcIndex, srcData);
@@ -159,7 +163,10 @@ pdal::StageSequentialIterator* Crop::createSequentialIterator(PointBuffer& buffe
 }
 
 
-namespace iterators { namespace sequential {
+namespace iterators
+{
+namespace sequential
+{
 
 
 Crop::Crop(const pdal::filters::Crop& filter, PointBuffer& buffer)
@@ -200,7 +207,7 @@ boost::uint32_t Crop::readBufferImpl(PointBuffer& dstData)
         // we got no data, and there is no more to get -- exit the loop
         if (numSrcPointsRead == 0) break;
 
-        // copy points from src (prev stage) into dst (our stage), 
+        // copy points from src (prev stage) into dst (our stage),
         // based on the CropFilter's rules (i.e. its bounds)
         const boost::uint32_t numPointsProcessed = m_cropFilter.processBuffer(dstData, srcData);
 
@@ -222,6 +229,8 @@ bool Crop::atEndImpl() const
 }
 
 
-} } // iterators::sequential
+}
+} // iterators::sequential
 
-} } // namespaces
+}
+} // namespaces

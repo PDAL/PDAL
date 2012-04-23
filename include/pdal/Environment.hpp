@@ -39,10 +39,12 @@
 
 #include <boost/random/mersenne_twister.hpp>
 
-namespace pdal {
+namespace pdal
+{
 
-namespace plang {
-    class Environment;
+namespace plang
+{
+class Environment;
 }
 
 
@@ -58,11 +60,17 @@ public:
 
 #ifdef PDAL_HAVE_PYTHON
     // get the plang (python) environment
-    plang::Environment* getPLangEnvironment() { return m_plangEnvironment; }
+    plang::Environment* getPLangEnvironment()
+    {
+        return m_plangEnvironment;
+    }
 #endif
-    
-    boost::random::mt19937* getRNG() { return m_rng; }
-    
+
+    boost::random::mt19937* getRNG()
+    {
+        return m_rng;
+    }
+
 private:
     // ctor and dtor are only called via startup()/shutdown()
     Environment();
@@ -73,7 +81,7 @@ private:
 #endif
 
     boost::random::mt19937* m_rng;
-    
+
     Environment(const Environment&); // nope
     Environment& operator=(const Environment&); // nope
 };

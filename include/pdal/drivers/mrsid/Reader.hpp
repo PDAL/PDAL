@@ -44,14 +44,19 @@
 
 namespace pdal
 {
-    class PointBuffer;
+class PointBuffer;
 }
 namespace LizardTech
 {
-    class PointSource;
+class PointSource;
 }
 
-namespace pdal { namespace drivers { namespace mrsid {
+namespace pdal
+{
+namespace drivers
+{
+namespace mrsid
+{
 
 
 // The MrSIDReader wraps LT's PointSource abstraction
@@ -64,15 +69,15 @@ public:
     virtual ~Reader();
     Reader(const Options& options);
     Reader(LizardTech::PointSource *ps);
-    
+
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
     virtual void addDefaultDimensions();
 
-    bool supportsIterator (StageIteratorType t) const
-    {   
-        if (t == StageIterator_Sequential ) return true;
-        
+    bool supportsIterator(StageIteratorType t) const
+    {
+        if (t == StageIterator_Sequential) return true;
+
         return false;
     }
 
@@ -86,16 +91,18 @@ public:
 
 private:
     LizardTech::PointSource *m_PS;
-    LizardTech::PointIterator *m_iter; 
+    LizardTech::PointIterator *m_iter;
     int SchemaToPointInfo(const Schema &schema, LizardTech::PointInfo &pointInfo) const;
     Dimension LTChannelToPDalDimension(const LizardTech::ChannelInfo & channel, pdal::Schema const& dimensions) const;
     Reader& operator=(const Reader&); // not implemented
     Reader(const Reader&); // not implemented
 };
 
-namespace iterators {
+namespace iterators
+{
 
-namespace sequential {
+namespace sequential
+{
 
 class Reader : public pdal::ReaderSequentialIterator
 {
@@ -111,8 +118,9 @@ private:
 };
 
 } // sequential
-    
-namespace random {
+
+namespace random
+{
 
 class Reader : public pdal::ReaderRandomIterator
 {
@@ -131,7 +139,9 @@ private:
 } // iterators
 
 
-} } } // namespaces
+}
+}
+} // namespaces
 
 
 #endif

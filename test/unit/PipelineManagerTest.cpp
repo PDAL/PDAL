@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE(PipelineManagerTest_test1)
 
         writer->initialize();
 
-        const boost::uint64_t np = writer->write( reader->getNumPoints() );
+        const boost::uint64_t np = writer->write(reader->getNumPoints());
         BOOST_CHECK(np == 1065);
     }
 
@@ -113,7 +113,7 @@ BOOST_AUTO_TEST_CASE(PipelineManagerTest_test2)
 
         // check all the prev/next stage linkages
 
-        const boost::uint64_t np = writer->write( 0 );
+        const boost::uint64_t np = writer->write(0);
         BOOST_CHECK(np == 1065 * 2);
 
         std::vector<StageBase*> reader1_inputs = reader1->getInputs();
@@ -127,7 +127,7 @@ BOOST_AUTO_TEST_CASE(PipelineManagerTest_test2)
         std::vector<StageBase*> multifilter_outputs = multifilter->getOutputs();
         std::vector<StageBase*> filter_outputs = filter->getOutputs();
         std::vector<StageBase*> writer_outputs = writer->getOutputs();
-        
+
         BOOST_CHECK(reader1_inputs.size() == 0);
         BOOST_CHECK(reader2_inputs.size() == 0);
         BOOST_CHECK(multifilter_inputs.size() == 2);

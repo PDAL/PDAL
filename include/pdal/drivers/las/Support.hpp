@@ -52,8 +52,13 @@ typedef struct LASzipH *LASzip;
 typedef struct LASunzipperH *LASunzipper;
 #endif
 
-namespace pdal { namespace drivers { namespace las {
-    
+namespace pdal
+{
+namespace drivers
+{
+namespace las
+{
+
 class SummaryData;
 class ZipPoint;
 
@@ -72,11 +77,11 @@ class PDAL_DLL PointDimensions
 {
 public:
     PointDimensions(const Schema& schema, std::string const& ns);
-    
+
     pdal::Dimension const* X;
     pdal::Dimension const* Y;
     pdal::Dimension const* Z;
-    
+
     pdal::Dimension const* Intensity;
     pdal::Dimension const* ReturnNumber;
     pdal::Dimension const* NumberOfReturns;
@@ -86,9 +91,9 @@ public:
     pdal::Dimension const* ScanAngleRank;
     pdal::Dimension const* UserData;
     pdal::Dimension const* PointSourceId;
-    
+
     pdal::Dimension const* Time;
-    
+
     pdal::Dimension const* Red;
     pdal::Dimension const* Green;
     pdal::Dimension const* Blue;
@@ -111,6 +116,8 @@ public:
 };
 
 
-} } } // namespace
+}
+}
+} // namespace
 
 #endif

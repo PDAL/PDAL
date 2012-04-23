@@ -42,24 +42,29 @@
 
 namespace pdal
 {
-    class PointBuffer;
-    
-    namespace metadata 
-    { 
-        class Entry;
-    }
-    namespace drivers
-    {
-        namespace las
-        {
-            class Writer;
-        }
-    }
+class PointBuffer;
+
+namespace metadata
+{
+class Entry;
+}
+namespace drivers
+{
+namespace las
+{
+class Writer;
+}
+}
 }
 
 
 
-namespace pdal { namespace drivers { namespace nitf {
+namespace pdal
+{
+namespace drivers
+{
+namespace nitf
+{
 
 
 class PDAL_DLL Writer : public pdal::drivers::las::Writer
@@ -70,15 +75,21 @@ public:
     Writer(Stage& prevStage, const Options&);
     Writer(Stage& prevStage, std::ostream*);
     ~Writer();
-    
+
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
 
     // for dumping
     virtual boost::property_tree::ptree toPTree() const;
 
-    static const std::string s_nitfHeader() { return "LAS GOES HERE --->"; }
-    static const std::string s_nitfFooter() { return "<--- LAS WENT THERE"; }
+    static const std::string s_nitfHeader()
+    {
+        return "LAS GOES HERE --->";
+    }
+    static const std::string s_nitfFooter()
+    {
+        return "<--- LAS WENT THERE";
+    }
 
 private:
     void ctor();
@@ -94,7 +105,9 @@ private:
 };
 
 
-} } } // namespaces
+}
+}
+} // namespaces
 
 
 #endif

@@ -46,7 +46,12 @@
 
 #include <vector>
 
-namespace pdal { namespace drivers { namespace oci {
+namespace pdal
+{
+namespace drivers
+{
+namespace oci
+{
 
 
 
@@ -61,57 +66,74 @@ public:
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
     virtual void addDefaultDimensions();
- 
-    bool supportsIterator (StageIteratorType t) const
-    {   
-        if (t == StageIterator_Sequential ) return true;
+
+    bool supportsIterator(StageIteratorType t) const
+    {
+        if (t == StageIterator_Sequential) return true;
         return false;
     }
 
-    boost::uint64_t getNumPoints() const { return 0; }
-    
+    boost::uint64_t getNumPoints() const
+    {
+        return 0;
+    }
+
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
-    
-    Connection getConnection () const { return m_connection;}
-    Statement getStatement () const { return m_statement;}
-    BlockPtr getBlock() const { return m_block; }
+
+    Connection getConnection() const
+    {
+        return m_connection;
+    }
+    Statement getStatement() const
+    {
+        return m_statement;
+    }
+    BlockPtr getBlock() const
+    {
+        return m_block;
+    }
     std::string getQuery() const;
     void defineBlock(Statement statement, BlockPtr block) const;
-    
-        
-    QueryType getQueryType() const {return m_querytype; }
+
+
+    QueryType getQueryType() const
+    {
+        return m_querytype;
+    }
     Schema fetchSchema(Statement statement, sdo_pc* pc, boost::uint32_t& capacity) const;
     pdal::SpatialReference fetchSpatialReference(Statement statement, sdo_pc* pc) const;
     // for dumping
     virtual boost::property_tree::ptree toPTree() const;
 
-    
+
 private:
 
     Reader& operator=(const Reader&); // not implemented
     Reader(const Reader&); // not implemented
-    // 
-    
+    //
+
     QueryType describeQueryType() ;
 
     Connection m_connection;
     Statement m_statement;
     QueryType m_querytype;
-    
+
     BlockPtr m_block;
     boost::uint32_t m_capacity;
-    
+
     // Fields in the form of NAME:TYPE
     std::map<std::string, int> m_fields;
-    
+
     boost::shared_ptr<pdal::gdal::Debug> m_gdal_debug;
-  
+
 
 };
 
-namespace iterators {
+namespace iterators
+{
 
-namespace sequential {
+namespace sequential
+{
 
 
 typedef boost::shared_ptr<PointBuffer> BufferPtr;
@@ -125,10 +147,10 @@ public:
 
 protected:
     const pdal::drivers::oci::Reader& getReader() const;
-    
+
     boost::uint32_t myReadBuffer(PointBuffer& data);
     boost::uint32_t unpackOracleData(PointBuffer& data);
-    
+
     boost::uint32_t myReadClouds(PointBuffer& data);
     boost::uint32_t myReadBlocks(PointBuffer& data);
 
@@ -149,19 +171,19 @@ protected:
 
 private:
     const pdal::drivers::oci::Reader& m_reader;
-    
+
     Statement getNextCloud(BlockPtr block, boost::int32_t& cloud_id);
-    void read(  PointBuffer& data, 
-                Statement statement,
-                BlockPtr block,
-                boost::uint32_t howMany, 
-                boost::uint32_t whichPoint, 
-                boost::uint32_t whichBlobPosition);
-    
+    void read(PointBuffer& data,
+              Statement statement,
+              BlockPtr block,
+              boost::uint32_t howMany,
+              boost::uint32_t whichPoint,
+              boost::uint32_t whichBlobPosition);
+
     pdal::Bounds<double> getBounds(Statement statement, BlockPtr block);
     IteratorBase& operator=(const IteratorBase&); // not implemented
     IteratorBase(const IteratorBase&); // not implemented;
-    
+
 
 };
 
@@ -178,11 +200,13 @@ private:
     bool atEndImpl() const;
 };
 
-    
-} // sequential 
+
+} // sequential
 
 } // iterators
-}}} // namespace pdal::driver::oci
+}
+}
+} // namespace pdal::driver::oci
 
 
 #endif // INCLUDED_PDAL_DRIVER_OCI_READER_HPP

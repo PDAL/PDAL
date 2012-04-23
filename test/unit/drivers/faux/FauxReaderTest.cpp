@@ -62,18 +62,18 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_sequential_iter)
     const Schema& schema = reader.getSchema();
 
     PointBuffer data(schema, 750);
- 
+
     StageSequentialIterator* iter = reader.createSequentialIterator(data);
     boost::uint32_t numRead = iter->read(data);
 
     BOOST_CHECK_EQUAL(numRead, 750u);
-    
+
     Schema const& buffer_schema = data.getSchema();
     Dimension const& dimX = buffer_schema.getDimension("X");
     Dimension const& dimY = buffer_schema.getDimension("Y");
     Dimension const& dimZ = buffer_schema.getDimension("Z");
     Dimension const& dimTime = buffer_schema.getDimension("Time");
-    
+
     for (boost::uint32_t i=0; i<numRead; i++)
     {
         double x = data.getField<double>(dimX, i);
@@ -114,7 +114,7 @@ BOOST_AUTO_TEST_CASE(FauxReaderTest_test_options)
     const Schema& schema = reader.getSchema();
 
     PointBuffer data(schema, 750);
- 
+
     StageSequentialIterator* iter = reader.createSequentialIterator(data);
     boost::uint32_t numRead = iter->read(data);
 
@@ -280,16 +280,16 @@ BOOST_AUTO_TEST_CASE(test_random_mode)
         double y = data.getField<double>(dimY, i);
         double z = data.getField<double>(dimZ, i);
         boost::uint64_t t = data.getField<boost::uint64_t>(dimTime, i);
-            
+
         BOOST_CHECK_GE(x, 1.0);
         BOOST_CHECK_LE(x, 101.0);
-        
+
         BOOST_CHECK_GE(y, 2.0);
         BOOST_CHECK_LE(y, 102.0);
-        
+
         BOOST_CHECK_GE(z, 3.0);
         BOOST_CHECK_LE(z, 103.0);
-        
+
         BOOST_CHECK_EQUAL(t, i);
         // BOOST_CHECK(x >= 1.0 && x <= 101.0);
         // BOOST_CHECK(y >= 2.0 && y <= 102.0);
@@ -423,11 +423,11 @@ BOOST_AUTO_TEST_CASE(test_iterator_checks)
     Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 152.0, 203.0);
     pdal::drivers::faux::Reader reader(bounds, 750, pdal::drivers::faux::Reader::Ramp);
     reader.initialize();
-    
+
     const Schema& schema = reader.getSchema();
 
     PointBuffer data(schema, 750);
-    
+
     BOOST_CHECK_EQUAL(reader.supportsIterator(StageIterator_Sequential), true);
     BOOST_CHECK_EQUAL(reader.supportsIterator(StageIterator_Random) , true);
 

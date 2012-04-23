@@ -56,7 +56,7 @@ private:
 public:
     PipelineReader(PipelineManager&, bool debug=false, boost::uint32_t verbose=0);
     ~PipelineReader();
-   
+
     // Use this to fill in a pipeline manager with an XML file that
     // contains a <Writer> as the last pipeline stage.
     //
@@ -64,10 +64,10 @@ public:
     // assumed to be a reader pipeline)
     bool readPipeline(const std::string& filename);
     bool readPipeline(std::istream& input);
-    
+
 private:
     typedef std::map<std::string, std::string> map_t;
-    
+
     bool parseElement_Pipeline(const boost::property_tree::ptree&);
     Stage* parseElement_anystage(const std::string& name, const boost::property_tree::ptree& subtree);
     Reader* parseElement_Reader(const boost::property_tree::ptree& tree);

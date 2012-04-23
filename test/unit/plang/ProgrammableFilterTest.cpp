@@ -54,21 +54,21 @@ BOOST_AUTO_TEST_CASE(ProgrammableFilterTest_test1)
     pdal::drivers::faux::Reader reader(bounds, 10, pdal::drivers::faux::Reader::Ramp);
 
     const pdal::Option source("source",
-        "import numpy as np\n"
-        "def myfunc(ins,outs):\n"
-        "  X = ins['X']\n"
-        "  Y = ins['Y']\n"
-        "  Z = ins['Z']\n"
-        "  #print ins['X']\n"
-        "  X = X + 10.0\n"
-        "  # Y: leave as-is, don't export back out\n"
-        "  # Z: goofiness to make it a numpy array of a constant\n"
-        "  Z = np.zeros(X.size) + 3.14\n"
-        "  outs['X'] = X\n"
-        "  #print outs['X']\n"
-        "  outs['Z'] = Z\n"
-        "  return True\n"
-        );
+                              "import numpy as np\n"
+                              "def myfunc(ins,outs):\n"
+                              "  X = ins['X']\n"
+                              "  Y = ins['Y']\n"
+                              "  Z = ins['Z']\n"
+                              "  #print ins['X']\n"
+                              "  X = X + 10.0\n"
+                              "  # Y: leave as-is, don't export back out\n"
+                              "  # Z: goofiness to make it a numpy array of a constant\n"
+                              "  Z = np.zeros(X.size) + 3.14\n"
+                              "  outs['X'] = X\n"
+                              "  #print outs['X']\n"
+                              "  outs['Z'] = Z\n"
+                              "  return True\n"
+                             );
     const pdal::Option module("module", "MyModule");
     const pdal::Option function("function", "myfunc");
     pdal::Options opts;

@@ -49,12 +49,17 @@
 
 namespace pdal
 {
-    class PointBuffer;
+class PointBuffer;
 }
 
 
 
-namespace pdal { namespace drivers { namespace las {
+namespace pdal
+{
+namespace drivers
+{
+namespace las
+{
 
 class LasHeader;
 class PointDimensions;
@@ -69,18 +74,18 @@ public:
     Reader(const std::string&);
     Reader(StreamFactory* factory);
     ~Reader();
-    
+
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
     virtual void addDefaultDimensions();
 
     StreamFactory& getStreamFactory() const;
 
-    bool supportsIterator (StageIteratorType t) const
-    {   
-        if (t == StageIterator_Sequential ) return true;
-        if (t == StageIterator_Random ) return true;
-        
+    bool supportsIterator(StageIteratorType t) const
+    {
+        if (t == StageIterator_Sequential) return true;
+        if (t == StageIterator_Random) return true;
+
         return false;
     }
 
@@ -88,12 +93,12 @@ public:
     pdal::StageRandomIterator* createRandomIterator(PointBuffer& buffer) const;
 
     // this is called by the stage's iterator
-    boost::uint32_t processBuffer(  PointBuffer& PointBuffer, 
-                                    std::istream& stream, 
-                                    boost::uint64_t numPointsLeft, 
-                                    LASunzipper* unzipper, 
-                                    ZipPoint* zipPoint,
-                                    PointDimensions* dimensions) const;
+    boost::uint32_t processBuffer(PointBuffer& PointBuffer,
+                                  std::istream& stream,
+                                  boost::uint64_t numPointsLeft,
+                                  LASunzipper* unzipper,
+                                  ZipPoint* zipPoint,
+                                  PointDimensions* dimensions) const;
 
     PointFormat getPointFormat() const;
     boost::uint8_t getVersionMajor() const;
@@ -109,24 +114,31 @@ public:
     // for dumping
     virtual boost::property_tree::ptree toPTree() const;
 
-    const LasHeader& getLasHeader() const { return m_lasHeader; }
+    const LasHeader& getLasHeader() const
+    {
+        return m_lasHeader;
+    }
 
 protected:
-    LasHeader& getLasHeaderRef() { return m_lasHeader; }
+    LasHeader& getLasHeaderRef()
+    {
+        return m_lasHeader;
+    }
 
 private:
     StreamFactory* m_streamFactory;
     bool m_ownsStreamFactory;
 
     LasHeader m_lasHeader;
-    
+
     void collectMetadata();
     Reader& operator=(const Reader&); // not implemented
     Reader(const Reader&); // not implemented
 };
 
 
-namespace iterators {
+namespace iterators
+{
 
 class Base
 {
@@ -137,7 +149,7 @@ public:
 
 private:
     void initialize();
-    
+
 protected:
     const pdal::drivers::las::Reader& m_reader;
     std::istream& m_istream;
@@ -146,8 +158,11 @@ protected:
     Schema const* m_schema;
 
     void setPointDimensions(PointBuffer& buffer);
-    inline pdal::drivers::las::Reader const& getReader() { return m_reader;} 
-    
+    inline pdal::drivers::las::Reader const& getReader()
+    {
+        return m_reader;
+    }
+
 public:
 
 #ifdef PDAL_HAVE_LASZIP
@@ -167,7 +182,8 @@ private:
 
 };
 
-namespace sequential {
+namespace sequential
+{
 
 class Reader : public Base, public pdal::ReaderSequentialIterator
 {
@@ -188,7 +204,8 @@ private:
 
 } // sequential
 
-namespace random {
+namespace random
+{
 
 class Reader : public Base, public pdal::ReaderRandomIterator
 {
@@ -211,6 +228,8 @@ private:
 
 } // iterators
 
-} } } // namespaces
+}
+}
+} // namespaces
 
 #endif

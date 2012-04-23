@@ -39,9 +39,12 @@
 
 #include <ostream>
 
-namespace pdal {
-namespace drivers {
-namespace las {
+namespace pdal
+{
+namespace drivers
+{
+namespace las
+{
 
 class PDAL_DLL SummaryData
 {
@@ -84,6 +87,8 @@ private:
 PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const SummaryData&);
 
 
-} } } // namespaces
+}
+}
+} // namespaces
 
 #endif

@@ -67,20 +67,20 @@
 namespace pdal
 {
 
-// Forward decl for boost::recursive_variant 
+// Forward decl for boost::recursive_variant
 class Metadata;
 
-/// ByteArray simply wrapps a std::vector<boost::uint8_t> such that it can then 
-/// be dumped to an ostream in a base64 encoding. For now, it makes a copy of the data 
+/// ByteArray simply wrapps a std::vector<boost::uint8_t> such that it can then
+/// be dumped to an ostream in a base64 encoding. For now, it makes a copy of the data
 /// it is given, and should not be used for slinging big data around.
 class PDAL_DLL ByteArray : public Object
 {
 public:
 
-/** @name Constructors
-*/  
+    /** @name Constructors
+    */
     /// Constructs a ByteArray instance with the given array of data.
-    ByteArray(std::vector<boost::uint8_t> const& data) 
+    ByteArray(std::vector<boost::uint8_t> const& data)
         : Object("ByteArray")
         , m_bytes(data)
     {
@@ -91,7 +91,7 @@ public:
     ByteArray(const ByteArray& rhs)
         : Object("ByteArray")
         , m_bytes(rhs.m_bytes)
-        
+
     {
         return;
     }
@@ -112,98 +112,105 @@ public:
         return *this;
     }
 
-/** @name Data manipulation
-*/     
-    /// resets the array 
-    inline void set(std::vector<boost::uint8_t> const& input) { m_bytes = input; }
-    
+    /** @name Data manipulation
+    */
+    /// resets the array
+    inline void set(std::vector<boost::uint8_t> const& input)
+    {
+        m_bytes = input;
+    }
+
     /// fetches a reference to the array
-    inline std::vector<boost::uint8_t> const& get() const { return m_bytes; }
+    inline std::vector<boost::uint8_t> const& get() const
+    {
+        return m_bytes;
+    }
 
 /// @name serialization
     boost::property_tree::ptree toPTreeImpl() const;
-/** @name private attributes
-*/     
+    /** @name private attributes
+    */
 private:
-    
+
     std::vector<boost::uint8_t> m_bytes;
 };
 
-namespace metadata {
-    
-    typedef std::map<std::string, std::string> MetadataAttributeM;
-    typedef boost::uuids::uuid id;
-    typedef boost::shared_ptr<Metadata> MetadataPtr;
+namespace metadata
+{
 
-    enum Type
-    {
-        /// boolean
-        Boolean,
-        /// equivalent to int32_t
-        SignedInteger, 
-        /// equivalent to uint32_t
-        UnsignedInteger, 
-        /// equivalent to float
-        Float, 
-        /// equivalent to double
-        Double, 
-        /// equivalent to std::string
-        String,
-        /// raw binary data in the form std::vector<boost::uint8_t>
-        Bytes, 
-        /// A pdal::Bounds instance
-        Bounds, 
-        /// A pdal::SpatialReference instance
-        SpatialReference,
-        /// A boost::uuids::uuid instance
-        UUID
-    };
+typedef std::map<std::string, std::string> MetadataAttributeM;
+typedef boost::uuids::uuid id;
+typedef boost::shared_ptr<Metadata> MetadataPtr;
+
+enum Type
+{
+    /// boolean
+    Boolean,
+    /// equivalent to int32_t
+    SignedInteger,
+    /// equivalent to uint32_t
+    UnsignedInteger,
+    /// equivalent to float
+    Float,
+    /// equivalent to double
+    Double,
+    /// equivalent to std::string
+    String,
+    /// raw binary data in the form std::vector<boost::uint8_t>
+    Bytes,
+    /// A pdal::Bounds instance
+    Bounds,
+    /// A pdal::SpatialReference instance
+    SpatialReference,
+    /// A boost::uuids::uuid instance
+    UUID
+};
 
 
-    typedef boost::variant< 
-                            bool,
-                            float,
-                            double,
-                            boost::int8_t,
-                            boost::uint8_t,
-                            boost::int16_t,
-                            boost::uint16_t,
-                            boost::int32_t,
-                            boost::uint32_t,
-                            boost::int64_t,
-                            boost::uint64_t,
-                            boost::uuids::uuid,
-                            std::string, 
-                            pdal::ByteArray, 
-                            pdal::SpatialReference, 
-                            pdal::Bounds<double> > Variant;
+typedef boost::variant<
+bool,
+float,
+double,
+boost::int8_t,
+boost::uint8_t,
+boost::int16_t,
+boost::uint16_t,
+boost::int32_t,
+boost::uint32_t,
+boost::int64_t,
+boost::uint64_t,
+boost::uuids::uuid,
+std::string,
+pdal::ByteArray,
+pdal::SpatialReference,
+pdal::Bounds<double> > Variant;
 
 
 
 
 /// metadata::Entry is a container for metadata entries that pdal::Stage and pdal::PointBuffer
-/// carry around as part of their internal operations. Bits of information might 
-/// come from a pdal::Reader that opens a file, or a pdal::Filter that processes 
-/// as an intermediate stage, and pdal::metadata::Entry is what is used to hold and 
-/// pass those metadata around.  pdal::metadata::Entry values must be of type pdal::metadata::Variant 
+/// carry around as part of their internal operations. Bits of information might
+/// come from a pdal::Reader that opens a file, or a pdal::Filter that processes
+/// as an intermediate stage, and pdal::metadata::Entry is what is used to hold and
+/// pass those metadata around.  pdal::metadata::Entry values must be of type pdal::metadata::Variant
 /// and it is required that they are serializeable to std::string.
 
-/// pdal::metadata::Entry instances also carry with them a map of key/value pairs 
-/// called attributes that are metadata about the metadata entry. For example, 
-/// a LAS VLR might have a name of "classification", a pdal::ByteArray for its data, 
-/// and a set of attributes that are "userid":"4321" and "vlrid":"1234". These 
-/// other metadata may be useful given the context, and any auxiliary data 
-/// about the metadata entry should be provided via attributes. It is up to you 
-/// to determine where the line of attribute and new metadata entry exists. 
-class PDAL_DLL Entry 
+/// pdal::metadata::Entry instances also carry with them a map of key/value pairs
+/// called attributes that are metadata about the metadata entry. For example,
+/// a LAS VLR might have a name of "classification", a pdal::ByteArray for its data,
+/// and a set of attributes that are "userid":"4321" and "vlrid":"1234". These
+/// other metadata may be useful given the context, and any auxiliary data
+/// about the metadata entry should be provided via attributes. It is up to you
+/// to determine where the line of attribute and new metadata entry exists.
+class PDAL_DLL Entry
 {
 public:
 
-/** @name Constructors
-*/  
+    /** @name Constructors
+    */
     /// Base constructor
     /// @param name entry name to use for this metadata entry
-    Entry(   std::string const& name);
+    Entry(std::string const& name);
 
     template <typename T>
     Entry(std::string const& name, const T& value, std::string const& description="")
@@ -218,101 +225,125 @@ public:
     /// Copy constructor
     Entry(const Entry&);
     Entry& operator=(const Entry& rhs);
-    
+
     ~Entry() {}
 
-/** @name entry type
-*/  
+    /** @name entry type
+    */
     /// returns the pdal::metadata::Type for the metadata entry
-    inline metadata::Type getType() const { return m_type; }
-    
+    inline metadata::Type getType() const
+    {
+        return m_type;
+    }
+
     /// sets the pdal::metadata::Type for the metadata entry
     /// @param t pdal::metadata::Type value for the entry
-    inline void setType(metadata::Type t) { m_type = t; }
+    inline void setType(metadata::Type t)
+    {
+        m_type = t;
+    }
 
     /// returns a std::string representation of the type
     std::string getTypeName() const;
 
-/** @name entry value
-*/  
+    /** @name entry value
+    */
     /// sets the pdal::metadata::Variant value for the entry
     /// @param v value of type pdal::metadata::Variant to set for the entry
-    template <class T> inline void setValue(T const& v); 
-    
-    /// gets the metadata entry value as type T.  Throws boost::bad_cast if 
-    /// unable to do so.  Use pdal::metdata::Type to determine which type T to 
-    /// request of the metadata entry. Alternatively, use pdal::Metdata::cast() 
-    /// to attempt to explicitly cast the metadata entry to your own type 
+    template <class T> inline void setValue(T const& v);
+
+    /// gets the metadata entry value as type T.  Throws boost::bad_cast if
+    /// unable to do so.  Use pdal::metdata::Type to determine which type T to
+    /// request of the metadata entry. Alternatively, use pdal::Metdata::cast()
+    /// to attempt to explicitly cast the metadata entry to your own type
     /// via boost::lexical_cast
-    template <class T> inline T getValue() const { return boost::get<T>(m_variant); }
-    
+    template <class T> inline T getValue() const
+    {
+        return boost::get<T>(m_variant);
+    }
+
     /// explicitly casts the metadata entry to your type T via boost::lexical_cast
-    template <class T> inline T cast() const { return boost::lexical_cast<T>(m_variant); }    
+    template <class T> inline T cast() const
+    {
+        return boost::lexical_cast<T>(m_variant);
+    }
 
-    /// returns the pdal::metadata::Variant instance 
-    inline metadata::Variant const& getVariant() const { return m_variant; }
+    /// returns the pdal::metadata::Variant instance
+    inline metadata::Variant const& getVariant() const
+    {
+        return m_variant;
+    }
 
-/** @name entry name
-*/  
+    /** @name entry name
+    */
     /// returns the name for the metadata entry
-    inline std::string const& getName() const { return m_name; }
-    
+    inline std::string const& getName() const
+    {
+        return m_name;
+    }
+
     /// resets the name for the metadata entry
     /// @param name value to use for new name
-    inline void setName(std::string const& name) { m_name = name; }
+    inline void setName(std::string const& name)
+    {
+        m_name = name;
+    }
 
-/** @name entry attributes
-*/
+    /** @name entry attributes
+    */
     /// returns the list of attribute keys for the metadata entry
     std::vector<std::string> getAttributeNames() const;
-    
+
     /// adds a new metadata key/value pair to the metadata entry
     /// @param name to use for the attribute pair
     /// @param value to use for the attribute pair
     void addAttribute(std::string const& name, std::string const value);
-    
+
     /// returns the attribute value for a given attribute key
-    std::string getAttribute(std::string const& name) const;    
+    std::string getAttribute(std::string const& name) const;
 
 /// @name Serialization
     boost::property_tree::ptree toPTree() const;
-    
+
     // Create a single entry, non-valid xml string to represent the Entry
     std::string to_xml();
 
-/** @name description
-*/
+    /** @name description
+    */
     /// Overwrites the description given in the constructor
     /// @param description new value to use for the description of the Option
-    inline void setDescription(const std::string& description) 
-    { 
+    inline void setDescription(const std::string& description)
+    {
         m_description = description;
     }
-    
+
     /// @return the description of the Option
-    inline std::string const& getDescription() const { return m_description; }
+    inline std::string const& getDescription() const
+    {
+        return m_description;
+    }
 
 /// @name pdal::Metadata access
-    
+
     /*! \return a boost::optional-wrapped const& of the Metadata set for this Metadata.
-    \verbatim embed:rst 
-    
+    \verbatim embed:rst
+
     .. note::
 
-            An Entry may have an Metadata map of of 
+            An Entry may have an Metadata map of of
             infinite depth (Entry->Metadata->Entry->Metadata...)
     \endverbatim
-    */ 
+    */
 
     boost::optional<Metadata const&> getMetadata() const;
-    
+
     /// sets the Metadata set for this Entry instance
     /// @param mdata Metadata set to use
     void setMetadata(Metadata const& mdata);
-   
-    
-/** @name private attributes
-*/
+
+
+    /** @name private attributes
+    */
 private:
     metadata::Variant m_variant;
     std::string m_name;
@@ -320,7 +351,7 @@ private:
     metadata::MetadataAttributeM m_attributes;
     std::string m_description;
     metadata::MetadataPtr m_metadata;
-    
+
 };
 
 
@@ -440,88 +471,94 @@ inline void metadata::Entry::setValue<boost::uuids::uuid>(boost::uuids::uuid con
 }
 
 
-    struct name{};
-    struct index{};
-    // struct uid{};
-// 
-    typedef boost::multi_index::multi_index_container<
-      metadata::Entry,
-      boost::multi_index::indexed_by<
+struct name {};
+struct index {};
+// struct uid{};
+//
+typedef boost::multi_index::multi_index_container<
+metadata::Entry,
+         boost::multi_index::indexed_by<
 
-        boost::multi_index::random_access<boost::multi_index::tag<index> >,
-        // sort by less<string> on GetName
-        boost::multi_index::hashed_non_unique<boost::multi_index::tag<name>, boost::multi_index::const_mem_fun<metadata::Entry,std::string const&,&metadata::Entry::getName> >
-        // boost::multi_index::hashed_non_unique<boost::multi_index::tag<uid>, boost::multi_index::const_mem_fun<metadata::Entry,metadata::id const&,&metadata::Entry::getUUID> >
-          >
-    > EntryMap;
+         boost::multi_index::random_access<boost::multi_index::tag<index> >,
+         // sort by less<string> on GetName
+         boost::multi_index::hashed_non_unique<boost::multi_index::tag<name>, boost::multi_index::const_mem_fun<metadata::Entry,std::string const&,&metadata::Entry::getName> >
+         // boost::multi_index::hashed_non_unique<boost::multi_index::tag<uid>, boost::multi_index::const_mem_fun<metadata::Entry,metadata::id const&,&metadata::Entry::getUUID> >
+         >
+         > EntryMap;
 
-    typedef EntryMap::index<name>::type index_by_name;
-    typedef EntryMap::index<index>::type index_by_index;
-    // typedef EntryMap::index<uid>::type index_by_uid;
+typedef EntryMap::index<name>::type index_by_name;
+typedef EntryMap::index<index>::type index_by_index;
+// typedef EntryMap::index<uid>::type index_by_uid;
 
-    
+
 }
 
-/// Metadata is a container for Metadata entries. 
+/// Metadata is a container for Metadata entries.
 class PDAL_DLL Metadata
 {
 public:
 
-/** @name Constructors
-*/  
+    /** @name Constructors
+    */
 
     Metadata() {};
 
     /// Copy constructor
     Metadata(const Metadata&);
-    Metadata& operator=(const Metadata&); 
+    Metadata& operator=(const Metadata&);
 
     ~Metadata()
     {
         return;
     }
 
-/** @name Operators
-*/  
+    /** @name Operators
+    */
     /// Addition operator
     Metadata operator+(const Metadata& rhs) const;
 
-/** @name entry type
-*/  
+    /** @name entry type
+    */
 
     /// add a Metadata entry to the PointBuffer's metadata map
     void addEntry(pdal::metadata::Entry const& entry);
 
-    /*! add a new value T metadata for the given metadata::Entry key. 
+    /*! add a new value T metadata for the given metadata::Entry key.
         \param name metadata::Entry entry key to use
         \param value the T value to set.
-    */   
+    */
     template<class T> void addEntry(std::string const& name, T value);
 
-    
+
     /// @return a const& to a metadata::Entry entry with the given name.
     /// If none is found, pdal::metadata_not_found is thrown.
     /// @param name name to use when searching
     /// @param ns to use when searching for metadata entry
     metadata::Entry const& getEntry(std::string const& name) const;
-    
-    // /// @return a const& to metadata::Entry entry with given metadata::id. 
+
+    // /// @return a const& to metadata::Entry entry with given metadata::id.
     // /// If none is found, pdal::metadata_not_found is thrown.
     // /// @param v metadata::id to search for.
     // metadata::Entry const& getMetadata(metadata::id const& v) const;
 
-    /// @return a const& to metadata::Entry with the given index. If the 
+    /// @return a const& to metadata::Entry with the given index. If the
     /// index is out of range, pdal::metadata_not_found is thrown.
     /// @param index position index to return.
     metadata::Entry const& getEntry(std::size_t index) const;
 
     /// @return the number of metadata::Entry entries in the map
-    inline metadata::EntryMap::size_type size() const { return m_metadata.get<metadata::index>().size(); }
-    
-    /// @return a EntryMap copy to use for setting the metadata::Entry on another 
+    inline metadata::EntryMap::size_type size() const
+    {
+        return m_metadata.get<metadata::index>().size();
+    }
+
+    /// @return a EntryMap copy to use for setting the metadata::Entry on another
     /// PointBuffer with setMetadata()
     /// @param index position index to return.
-    inline metadata::EntryMap const& getMetadata() const { return m_metadata; }
+    inline metadata::EntryMap const& getMetadata() const
+    {
+        return m_metadata;
+    }
 
     /// @return a boost::optional-wrapped const& to a metadata::Entry with the given name
     /// If no matching metadata entry is found, the optional will be empty.
@@ -529,7 +566,7 @@ public:
     /// matching metadata::Entry instance with name \b name is returned.
     boost::optional<metadata::Entry const&> getEntryOptional(std::string const& name) const;
 
-    
+
     /// @return a boost::optional-wrapped const& to a metadata::Entry with the given
     /// index. If the index is out of range, the optional will be empty.
     /// @param index position index to return.
@@ -538,30 +575,33 @@ public:
     /*! overwrites an existing metadata::Entry with the same name as m
         \param m the metadata::Entry instance that contains the name
         to overwrite in the PointBuffer.
-        \verbatim embed:rst 
+        \verbatim embed:rst
         .. warning::
-                
-            If no namespace is given, the *first* metadata entry with a matching 
-            :cpp:func:`pdal::metadata::Entry::getName()` will be overwritten. 
+
+            If no namespace is given, the *first* metadata entry with a matching
+            :cpp:func:`pdal::metadata::Entry::getName()` will be overwritten.
 
         \endverbatim
-    */    
+    */
     bool setEntry(metadata::Entry const& m);
 
-    /*! reset the value T metadata for the given metadata::Entry key and namespace. 
+    /*! reset the value T metadata for the given metadata::Entry key and namespace.
         \param name metadata::Entry entry key to use
         \param value the T value to set.
-    */   
+    */
     template<class T> void setEntry(std::string const& name, T value);
 
-    
+
     /// sets the EntryMap for the PointBuffer
     /// @param v EntryMap instance to use (typically from another PointBuffer)
-    void setMetadata(metadata::EntryMap const& v) { m_metadata = v; }    
-    
+    void setMetadata(metadata::EntryMap const& v)
+    {
+        m_metadata = v;
+    }
+
     /// @name Serialization
     boost::property_tree::ptree toPTree() const;
-    
+
     /// XML output
     std::string to_xml() const;
 
@@ -569,12 +609,12 @@ public:
     std::string to_json() const;
 
 
-/** @name private attributes
-*/
+    /** @name private attributes
+    */
 private:
 
-    metadata::EntryMap m_metadata;    
-    
+    metadata::EntryMap m_metadata;
+
 };
 
 template <class T>

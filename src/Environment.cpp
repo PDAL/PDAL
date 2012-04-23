@@ -36,14 +36,18 @@
 #include <pdal/plang/Environment.hpp>
 
 
-namespace pdal {
+namespace pdal
+{
 
 
 // this is (or, should be) our one and only static
 static Environment* s_environment;
 static boost::random::mt19937 s_rng;
 
-Environment* Environment::get() { return s_environment; }
+Environment* Environment::get()
+{
+    return s_environment;
+}
 
 
 void Environment::startup()

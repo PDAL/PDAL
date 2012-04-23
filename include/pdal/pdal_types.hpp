@@ -37,7 +37,8 @@
 
 #include <pdal/pdal_internal.hpp>
 
-namespace pdal {
+namespace pdal
+{
 
 enum EndianType
 {
@@ -59,7 +60,7 @@ enum StageIteratorType
     StageIterator_Block = (1u << 2),
     StageIterator_Unknown = (1u << 8)
 };
-    
+
 
 
 enum StageOperationType
@@ -69,15 +70,15 @@ enum StageOperationType
     STageOperation_Id = (1u << 2)
 };
 
-enum LogLevel 
+enum LogLevel
 {
-    logERROR = 0, 
-    logWARNING, 
-    logINFO, 
-    logDEBUG, 
+    logERROR = 0,
+    logWARNING,
+    logINFO,
+    logDEBUG,
     logDEBUG1,
-    logDEBUG2, 
-    logDEBUG3, 
+    logDEBUG2,
+    logDEBUG3,
     logDEBUG4,
     logDEBUG5
 };

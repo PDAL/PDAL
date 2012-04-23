@@ -158,16 +158,16 @@ BOOST_AUTO_TEST_CASE(test_clip)
 
     Bounds<int> r4(2,4,6,8);
     r1.clip(r4);
-    
+
     BOOST_CHECK(r1==r4);
 
     Bounds<int> r5(20,40,60,80);
     r1.clip(r5);
- 
+
     // BUG: seems wrong -- need to better define semantics of clip, etc
     // .clip() can make an invalid bounds, this should be fixed.
     Bounds<int> r6(20,6, 40,8);
-    
+
     BOOST_CHECK(r1.getMinimum(0) == 20);
     BOOST_CHECK(r1.getMaximum(0) == 6);
     BOOST_CHECK(r1.getMinimum(1) == 40);
@@ -180,12 +180,12 @@ BOOST_AUTO_TEST_CASE(test_intersect)
     Bounds<int> r2(1,1,11,11);
     Bounds<int> r3(100,100,101,101);
     Bounds<int> r4(2,4,6,8);
-    
+
     BOOST_CHECK(r1.overlaps(r1));
-    
+
     BOOST_CHECK(r1.overlaps(r2));
     BOOST_CHECK(r2.overlaps(r1));
-    
+
     BOOST_CHECK(!r1.overlaps(r3));
     BOOST_CHECK(!r3.overlaps(r1));
 
@@ -206,7 +206,7 @@ BOOST_AUTO_TEST_CASE(test_grow)
     Bounds<int> r2(0,1,10,201);
 
     r1.grow(r2);
-  
+
     Bounds<int> r3(0,1,100,201);
     BOOST_CHECK(r1 == r3);
 
@@ -226,7 +226,7 @@ BOOST_AUTO_TEST_CASE(test_grow)
 BOOST_AUTO_TEST_CASE(test_static)
 {
     Bounds<boost::uint8_t> t = Bounds<boost::uint8_t>::getDefaultSpatialExtent();
-    
+
     std::vector<boost::uint8_t> minv;
     minv.push_back(0);
     minv.push_back(0);
@@ -241,25 +241,25 @@ BOOST_AUTO_TEST_CASE(test_static)
 }
 
 
- BOOST_AUTO_TEST_CASE(test_output)
- {
-     const Bounds<int> b2(1,2,101,102);
-     const Bounds<double> b3(1.1,2.2,3.3,101.1,102.2,103.3);
-     
-     std::stringstream ss2(std::stringstream::in | std::stringstream::out);
-     std::stringstream ss3(std::stringstream::in | std::stringstream::out);
- 
-     ss2 << b2;
-     ss3 << b3;
- 
-     const std::string out2 = ss2.str();
-     const std::string out3 = ss3.str();
- 
-     BOOST_CHECK_EQUAL(out2, "([1, 101], [2, 102])");
-     BOOST_CHECK_EQUAL(out3, "([1.1, 101.1], [2.2, 102.2], [3.3, 103.3])");
- 
-     return;
- }
+BOOST_AUTO_TEST_CASE(test_output)
+{
+    const Bounds<int> b2(1,2,101,102);
+    const Bounds<double> b3(1.1,2.2,3.3,101.1,102.2,103.3);
+
+    std::stringstream ss2(std::stringstream::in | std::stringstream::out);
+    std::stringstream ss3(std::stringstream::in | std::stringstream::out);
+
+    ss2 << b2;
+    ss3 << b3;
+
+    const std::string out2 = ss2.str();
+    const std::string out3 = ss3.str();
+
+    BOOST_CHECK_EQUAL(out2, "([1, 101], [2, 102])");
+    BOOST_CHECK_EQUAL(out3, "([1.1, 101.1], [2.2, 102.2], [3.3, 103.3])");
+
+    return;
+}
 
 
 BOOST_AUTO_TEST_CASE(BoundsTest_ptree)
@@ -267,7 +267,7 @@ BOOST_AUTO_TEST_CASE(BoundsTest_ptree)
     const Bounds<int> b2(1,2,101,102);
 
     std::stringstream ss1(std::stringstream::in | std::stringstream::out);
-  
+
     boost::property_tree::ptree tree = b2.toPTree();
     boost::property_tree::write_xml(ss1, tree);
 
@@ -285,15 +285,15 @@ BOOST_AUTO_TEST_CASE(BoundsTest_ptree)
 BOOST_AUTO_TEST_CASE(test_input)
 {
     std::stringstream ss("([1.1, 101.1], [2.2, 102.2], [3.3, 103.3])", std::stringstream::in | std::stringstream::out);
-    
+
     Bounds<double> rr;
     ss >> rr;
-    
+
     Bounds<double> r(1.1,2.2,3.3,101.1,102.2,103.3);
     BOOST_CHECK(r == rr);
 
     std::stringstream empty2_s("", std::stringstream::in | std::stringstream::out);
-      
+
     Bounds<double> empty2;
     empty2_s >> empty2;
     BOOST_CHECK_EQUAL(true, empty2.empty());
@@ -306,9 +306,9 @@ BOOST_AUTO_TEST_CASE(test_lexicalcast_whitespace)
 {
     const Bounds<double> b1 = boost::lexical_cast< Bounds<double> >("([1,101],[2,102],[3,103])");
     const Bounds<double> b2 = boost::lexical_cast< Bounds<double> >("([1, 101], [2, 102], [3, 103])");
-    
+
     BOOST_CHECK_EQUAL(b1, b2);
-    
+
     return;
 }
 

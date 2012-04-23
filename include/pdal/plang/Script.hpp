@@ -50,9 +50,9 @@ namespace plang
 class PDAL_DLL Script
 {
 public:
-    Script( std::string const& sourceCode,
-            std::string const& moduleName,
-            std::string const& functionName);
+    Script(std::string const& sourceCode,
+           std::string const& moduleName,
+           std::string const& functionName);
     Script(const Options&);
     Script(const Script&);
     ~Script();

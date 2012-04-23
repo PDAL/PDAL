@@ -37,7 +37,10 @@
 #include <pdal/Bounds.hpp>
 #include <pdal/PointBuffer.hpp>
 
-namespace pdal { namespace filters {
+namespace pdal
+{
+namespace filters
+{
 
 
 
@@ -71,7 +74,7 @@ void Mosaic::initialize()
             throw impedance_invalid("mosaicked stages must have same schema");
         if (stage.getPointCountType() == PointCount_Unknown)
             pointCountType0 = PointCount_Unknown;
-        
+
         totalPoints += stage.getNumPoints();
 
         bigbox.grow(stage.getBounds());
@@ -79,7 +82,7 @@ void Mosaic::initialize()
 
     if (pointCountType0 == PointCount_Unknown)
         totalPoints = 0;
-    
+
     setCoreProperties(stage0);
     setPointCountType(pointCountType0);
     setNumPoints(totalPoints);
@@ -101,7 +104,10 @@ pdal::StageSequentialIterator* Mosaic::createSequentialIterator(PointBuffer& buf
 }
 
 
-namespace iterators { namespace sequential {
+namespace iterators
+{
+namespace sequential
+{
 
 
 Mosaic::Mosaic(const pdal::filters::Mosaic& filter, PointBuffer& buffer)
@@ -167,14 +173,14 @@ boost::uint32_t Mosaic::readBufferImpl(PointBuffer& destData)
         m_prevIterator = m_prevIterators[m_iteratorIndex];
 
         // read as much as we can into temp buffer
-        PointBuffer tmp(destData.getSchema(), totalNumPointsToRead-totalNumPointsRead); 
+        PointBuffer tmp(destData.getSchema(), totalNumPointsToRead-totalNumPointsRead);
         boost::uint32_t numRead = m_prevIterator->read(tmp);
         totalNumPointsRead += numRead;
 
         // concat the temp buffer on to end of real dest buffer
         destData.copyPointsFast(destPointIndex, 0, tmp, numRead);
         destPointIndex += numRead;
-        destData.setNumPoints( destData.getNumPoints() + numRead );
+        destData.setNumPoints(destData.getNumPoints() + numRead);
 
         if (m_prevIterator->atEnd())
         {
@@ -190,6 +196,8 @@ boost::uint32_t Mosaic::readBufferImpl(PointBuffer& destData)
 }
 
 
-} } // iterators::sequential
+}
+} // iterators::sequential
 
-} } // namespaces
+}
+} // namespaces

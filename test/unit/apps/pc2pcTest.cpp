@@ -123,8 +123,8 @@ BOOST_AUTO_TEST_CASE(pc2pc_test_switches)
     std::string output;
 
     int stat = 0;
-    
-    // We don't generally test the outputted files against a reference file, because 
+
+    // We don't generally test the outputted files against a reference file, because
     // we don't want to have to update the reference files everytime we change the driver
     // implementation -- those issues are covered by the unit tests for the drivers.
     // Instead, here we just check certain rough characteristics of the outputted file.
@@ -143,7 +143,7 @@ BOOST_AUTO_TEST_CASE(pc2pc_test_switches)
     BOOST_CHECK(fileIsOkay(outputLas));
     BOOST_CHECK(fileIsCompressed(outputLas));
 #endif
-    
+
 #ifdef PDAL_HAVE_LASZIP
     // does "--output foo.laz" make a compressed output?
     stat = Support::run_command(cmd + " --input=" + inputLas + " --output=" + outputLaz, output);

@@ -40,7 +40,12 @@
 #include <boost/scoped_ptr.hpp>
 
 
-namespace pdal { namespace drivers { namespace pipeline {
+namespace pdal
+{
+namespace drivers
+{
+namespace pipeline
+{
 
 
 class PDAL_DLL Reader : public pdal::Reader
@@ -54,10 +59,10 @@ public:
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
     virtual void addDefaultDimensions();
-    
+
     virtual Metadata getMetadata() const;
-    
-    bool supportsIterator (StageIteratorType t) const;
+
+    bool supportsIterator(StageIteratorType t) const;
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
     pdal::StageRandomIterator* createRandomIterator(PointBuffer& buffer) const;
 
@@ -67,8 +72,14 @@ public:
     // for dumping
     virtual boost::property_tree::ptree toPTree() const;
 
-    PipelineManager const& getManager() { return *m_manager.get(); }
-    PipelineManager& getManagerRef() { return *m_manager.get(); }
+    PipelineManager const& getManager()
+    {
+        return *m_manager.get();
+    }
+    PipelineManager& getManagerRef()
+    {
+        return *m_manager.get();
+    }
 
 private:
     std::string m_filename;
@@ -80,7 +91,9 @@ private:
 };
 
 
-} } } // namespaces
+}
+}
+} // namespaces
 
 
 #endif

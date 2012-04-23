@@ -64,7 +64,7 @@ public:
 
     // for xml serializion of pipelines
     virtual boost::property_tree::ptree serializePipeline() const;
-    
+
     // for dumping
     virtual boost::property_tree::ptree toPTree() const;
 };

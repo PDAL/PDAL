@@ -59,7 +59,7 @@ class Options;
 // string (the stage type name) and an Options block.
 //
 // We keep a list of (stage type name, creation function) pairs, which
-// acts as a registry of creator functions.  The list is initialized with 
+// acts as a registry of creator functions.  The list is initialized with
 // the core stages we know about (I wish C++ had anonymous functions.).
 // We allow the user to add his own "external" drivers to the registry list
 // as well.
@@ -75,7 +75,7 @@ public:
     typedef Filter* FilterCreator(Stage& prevStage, const Options&);
     typedef MultiFilter* MultiFilterCreator(const std::vector<Stage*>& prevStages, const Options&);
     typedef Writer* WriterCreator(Stage& prevStage, const Options&);
-    
+
     typedef std::map<std::string, ReaderCreator*> ReaderCreatorList;
     typedef std::map<std::string, FilterCreator*> FilterCreatorList;
     typedef std::map<std::string, MultiFilterCreator*> MultiFilterCreatorList;
@@ -93,7 +93,7 @@ public:
     void registerFilter(const std::string& type, FilterCreator* f);
     void registerMultiFilter(const std::string& type, MultiFilterCreator* f);
     void registerWriter(const std::string& type, WriterCreator* f);
-    
+
     void loadPlugins();
 
 private:

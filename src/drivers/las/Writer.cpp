@@ -49,7 +49,12 @@
 
 #include <iostream>
 
-namespace pdal { namespace drivers { namespace las {
+namespace pdal
+{
+namespace drivers
+{
+namespace las
+{
 
 
 Writer::Writer(Stage& prevStage, const Options& options)
@@ -97,13 +102,13 @@ void Writer::initialize()
     {
         setSpatialReference(getOptions().getValueOrThrow<std::string>("a_srs"));
     }
-    
+
     setPointFormat(static_cast<PointFormat>(getOptions().getValueOrDefault<boost::uint32_t>("format", 3)));
     setFormatVersion((boost::uint8_t)getOptions().getValueOrDefault<boost::uint32_t>("major_version", 1),
                      (boost::uint8_t)getOptions().getValueOrDefault<boost::uint32_t>("minor_version", 2));
     setDate((boost::uint16_t)getOptions().getValueOrDefault<boost::uint32_t>("year", 0),
             (boost::uint16_t)getOptions().getValueOrDefault<boost::uint32_t>("day_of_year", 0));
-    
+
     setHeaderPadding(getOptions().getValueOrDefault<boost::uint32_t>("header_padding", 0));
     setSystemIdentifier(getOptions().getValueOrDefault<std::string>("system_id", LasHeader::SystemIdentifier));
     setGeneratingSoftware(getOptions().getValueOrDefault<std::string>("software_id", LasHeader::SoftwareIdentifier));
@@ -172,7 +177,7 @@ void Writer::setProjectId(const boost::uuids::uuid& id)
 }
 
 
-void Writer::setSystemIdentifier(const std::string& systemId) 
+void Writer::setSystemIdentifier(const std::string& systemId)
 {
     m_lasHeader.SetSystemId(systemId);
 }
@@ -201,7 +206,7 @@ void Writer::writeBufferBegin(PointBuffer const& data)
 {
     if (m_headerInitialized) return;
 
-    m_lasHeader.setBounds( getPrevStage().getBounds() );
+    m_lasHeader.setBounds(getPrevStage().getBounds());
 
     const Schema& schema = data.getSchema();
 
@@ -214,13 +219,13 @@ void Writer::writeBufferBegin(PointBuffer const& data)
 
     std::cout.setf(std::ios_base::fixed, std::ios_base::floatfield);
     std::cout.precision(8);
-    
+
 
     m_lasHeader.setSpatialReference(getSpatialReference());
 
     LasHeaderWriter lasHeaderWriter(m_lasHeader, m_streamManager.ostream(), m_streamOffset);
     lasHeaderWriter.write();
-    
+
     m_summaryData.reset();
 
     if (m_lasHeader.Compressed())
@@ -256,7 +261,7 @@ void Writer::writeBufferBegin(PointBuffer const& data)
     m_headerInitialized = true;
 
     return;
-    
+
 }
 
 
@@ -265,7 +270,7 @@ void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
     m_lasHeader.SetPointRecordsCount(m_numPointsWritten);
 
     log()->get(logDEBUG) << "Wrote " << m_numPointsWritten << " points to the LAS file" << std::endl;
-        
+
     m_streamManager.ostream().seekp(m_streamOffset);
     Support::rewriteHeader(m_streamManager.ostream(), m_summaryData);
 
@@ -299,40 +304,40 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& pointBuffer)
         const boost::int32_t x = pointBuffer.getField<boost::int32_t>(*dimensions.X, pointIndex);
         const boost::int32_t y = pointBuffer.getField<boost::int32_t>(*dimensions.Y, pointIndex);
         const boost::int32_t z = pointBuffer.getField<boost::int32_t>(*dimensions.Z, pointIndex);
-        
+
         // std::clog << "x: " << x << " y: " << y << " z: " << z << std::endl;
         // std::clog << "positions.X: " << positions.X << " positions.Y: " << positions.Y << " positions.Z: " << positions.Z << std::endl;
-        
+
         boost::uint16_t intensity(0);
         if (dimensions.Intensity)
             intensity = pointBuffer.getField<boost::uint16_t>(*dimensions.Intensity, pointIndex);
-        
-        boost::uint8_t returnNumber(0); 
+
+        boost::uint8_t returnNumber(0);
         if (dimensions.ReturnNumber)
             returnNumber = pointBuffer.getField<boost::uint8_t>(*dimensions.ReturnNumber, pointIndex);
-        
+
         boost::uint8_t numberOfReturns(0);
         if (dimensions.NumberOfReturns)
             numberOfReturns = pointBuffer.getField<boost::uint8_t>(*dimensions.NumberOfReturns, pointIndex);
-        
+
         boost::uint8_t scanDirectionFlag(0);
         if (dimensions.ScanDirectionFlag)
             scanDirectionFlag = pointBuffer.getField<boost::uint8_t>(*dimensions.ScanDirectionFlag, pointIndex);
-        
+
         boost::uint8_t edgeOfFlightLine(0);
         if (dimensions.EdgeOfFlightLine)
             edgeOfFlightLine = pointBuffer.getField<boost::uint8_t>(*dimensions.EdgeOfFlightLine, pointIndex);
 
         boost::uint8_t bits = returnNumber | (numberOfReturns<<3) | (scanDirectionFlag << 6) | (edgeOfFlightLine << 7);
-        
+
         boost::uint8_t classification(0);
         if (dimensions.Classification)
             classification = pointBuffer.getField<boost::uint8_t>(*dimensions.Classification, pointIndex);
-        
+
         boost::int8_t scanAngleRank(0);
         if (dimensions.ScanAngleRank)
             scanAngleRank = pointBuffer.getField<boost::int8_t>(*dimensions.ScanAngleRank, pointIndex);
-        
+
         boost::uint8_t userData(0);
         if (dimensions.UserData)
             userData = pointBuffer.getField<boost::uint8_t>(*dimensions.UserData, pointIndex);
@@ -354,8 +359,8 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& pointBuffer)
         if (Support::hasTime(pointFormat))
         {
             double time(0.0);
-            
-            if (dimensions.Time) 
+
+            if (dimensions.Time)
                 time = pointBuffer.getField<double>(*dimensions.Time, pointIndex);
 
             Utils::write_field<double>(p, time);
@@ -366,17 +371,17 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& pointBuffer)
             boost::uint16_t red(0);
             boost::uint16_t green(0);
             boost::uint16_t blue(0);
-            
+
             if (dimensions.Red)
                 red = pointBuffer.getField<boost::uint16_t>(*dimensions.Red, pointIndex);
             if (dimensions.Green)
                 green = pointBuffer.getField<boost::uint16_t>(*dimensions.Green, pointIndex);
             if (dimensions.Blue)
                 blue = pointBuffer.getField<boost::uint16_t>(*dimensions.Blue, pointIndex);
-            
+
             Utils::write_field<boost::uint16_t>(p, red);
             Utils::write_field<boost::uint16_t>(p, green);
-            Utils::write_field<boost::uint16_t>(p, blue);                
+            Utils::write_field<boost::uint16_t>(p, blue);
         }
 
 #ifdef PDAL_HAVE_LASZIP
@@ -402,7 +407,7 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& pointBuffer)
             Utils::write_n(m_streamManager.ostream(), buf, Support::getPointDataSize(pointFormat));
         }
 #else
-            Utils::write_n(m_streamManager.ostream(), buf, Support::getPointDataSize(pointFormat));
+        Utils::write_n(m_streamManager.ostream(), buf, Support::getPointDataSize(pointFormat));
 
 #endif
         ++numValidPoints;
@@ -427,4 +432,6 @@ boost::property_tree::ptree Writer::toPTree() const
     return tree;
 }
 
-} } } // namespaces
+}
+}
+} // namespaces

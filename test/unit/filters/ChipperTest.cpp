@@ -57,11 +57,11 @@ BOOST_AUTO_TEST_CASE(test_construction)
 
     {
         // need to scope the writer, so that's it dtor can use the stream
-        
+
         pdal::Options options;
         pdal::Option capacity("capacity", 15, "capacity");
         options.add(capacity);
-        
+
         pdal::filters::Chipper chipper(reader, options);
         chipper.initialize();
 
@@ -71,26 +71,26 @@ BOOST_AUTO_TEST_CASE(test_construction)
         boost::uint32_t num_blocks = chipper.GetBlockCount();
         BOOST_CHECK(num_points == 1065);
         BOOST_CHECK(num_blocks==71);
-        
-        
+
+
         pdal::Bounds<double> const& bounds = chipper.GetBlock(0).GetBounds();
 
-        
+
         std::vector< Range<double> > ranges = bounds.dimensions();
-        
+
         pdal::Range<double> x = ranges[0];
         pdal::Range<double> y = ranges[1];
-        
-        BOOST_CHECK_CLOSE (x.getMinimum(), 635674.0, 0.05);
-        BOOST_CHECK_CLOSE (x.getMaximum(), 635994.0, 0.05);
-        BOOST_CHECK_CLOSE (y.getMinimum(), 848992.0, 0.05);
-        BOOST_CHECK_CLOSE (y.getMaximum(), 849427.0, 0.05);
+
+        BOOST_CHECK_CLOSE(x.getMinimum(), 635674.0, 0.05);
+        BOOST_CHECK_CLOSE(x.getMaximum(), 635994.0, 0.05);
+        BOOST_CHECK_CLOSE(y.getMinimum(), 848992.0, 0.05);
+        BOOST_CHECK_CLOSE(y.getMaximum(), 849427.0, 0.05);
 
         std::vector<boost::uint32_t> ids = chipper.GetBlock(70).GetIDs();
 
         BOOST_CHECK(ids.size() == 15);
-        BOOST_CHECK(ids[14] == 1050 );
-        
+        BOOST_CHECK(ids[14] == 1050);
+
         PointBuffer buffer(chipper.getSchema(), 15);
         pdal::Schema const& schema = buffer.getSchema();
         Dimension const& dimPoint = schema.getDimension("PointID");
@@ -98,19 +98,19 @@ BOOST_AUTO_TEST_CASE(test_construction)
         Dimension const& dimX = schema.getDimension("X");
         Dimension const& dimY = schema.getDimension("Y");
         Dimension const& dimZ = schema.getDimension("Z");
-        
+
         boost::scoped_ptr<StageRandomIterator> iter(reader.createRandomIterator(buffer));
         chipper.GetBlock(20).GetBuffer(iter, buffer, 20, dimPoint, dimBlock);
 
-        // 
+        //
         // std::cout << buffer.getField<boost::int32_t>(0, 0) << std::endl;
         // std::cout << buffer.getField<boost::int32_t>(1, 0) << std::endl;
         // std::cout << buffer.getField<boost::int32_t>(2, 0) << std::endl;
-        // 
+        //
         // std::cout << buffer.getField<boost::int32_t>(0, 1) << std::endl;
         // std::cout << buffer.getField<boost::int32_t>(1, 1) << std::endl;
         // std::cout << buffer.getField<boost::int32_t>(2, 1) << std::endl;
-        // 
+        //
         // std::cout << buffer.getField<boost::int32_t>(0, 2) << std::endl;
         // std::cout << buffer.getField<boost::int32_t>(1, 2) << std::endl;
         // std::cout << buffer.getField<boost::int32_t>(2, 2) << std::endl;
@@ -119,12 +119,12 @@ BOOST_AUTO_TEST_CASE(test_construction)
         BOOST_CHECK_EQUAL(buffer.getField<boost::int32_t>(dimX, 0), 63763550);
         BOOST_CHECK_EQUAL(buffer.getField<boost::int32_t>(dimX, 1), 63765279);
         BOOST_CHECK_EQUAL(buffer.getField<boost::int32_t>(dimX, 2), 63771207);
-        
+
         // Check Y's of first three points in block 20
         BOOST_CHECK_EQUAL(buffer.getField<boost::int32_t>(dimY, 0), 84992418);
         BOOST_CHECK_EQUAL(buffer.getField<boost::int32_t>(dimY, 1), 85005705);
         BOOST_CHECK_EQUAL(buffer.getField<boost::int32_t>(dimY, 2), 85005840);
-        
+
         // Check Z's of first three points in block 20
         BOOST_CHECK_EQUAL(buffer.getField<boost::int32_t>(dimZ, 0), 42664);
         BOOST_CHECK_EQUAL(buffer.getField<boost::int32_t>(dimZ, 1), 43579);

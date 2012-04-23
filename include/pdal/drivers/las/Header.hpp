@@ -2,7 +2,7 @@
  * $Id$
  *
  * Project:  libLAS - http://liblas.org - A BSD library for LAS format data.
- * Purpose:  LAS header class 
+ * Purpose:  LAS header class
  * Author:   Mateusz Loskot, mateusz@loskot.net
  *
  ******************************************************************************
@@ -10,33 +10,33 @@
  * Copyright (c) 2008, Phil Vachon
  *
  * All rights reserved.
- * 
- * Redistribution and use in source and binary forms, with or without 
- * modification, are permitted provided that the following 
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following
  * conditions are met:
- * 
- *     * Redistributions of source code must retain the above copyright 
+ *
+ *     * Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright 
- *       notice, this list of conditions and the following disclaimer in 
- *       the documentation and/or other materials provided 
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in
+ *       the documentation and/or other materials provided
  *       with the distribution.
- *     * Neither the name of the Martin Isenburg or Iowa Department 
- *       of Natural Resources nor the names of its contributors may be 
- *       used to endorse or promote products derived from this software 
+ *     * Neither the name of the Martin Isenburg or Iowa Department
+ *       of Natural Resources nor the names of its contributors may be
+ *       used to endorse or promote products derived from this software
  *       without specific prior written permission.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS 
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE 
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, 
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, 
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS 
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED 
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
- * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY 
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+ * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
@@ -55,14 +55,19 @@
 #include <pdal/drivers/las/Support.hpp>
 #include <pdal/drivers/las/VariableLengthRecord.hpp>
 
-namespace pdal { namespace drivers { namespace las {
+namespace pdal
+{
+namespace drivers
+{
+namespace las
+{
 
 
 class PDAL_DLL LasHeader
 {
 public:
     /// Version numbers of the ASPRS LAS Specification.
-    /// Numerical representation of versions is calculated according to 
+    /// Numerical representation of versions is calculated according to
     /// following formula: <em>major * 100000 + minor</em>
     enum LASVersion
     {
@@ -207,10 +212,10 @@ public:
     /// Standard version of the public header block is 227 bytes long.
     boost::uint16_t GetHeaderSize() const;
 
-    /// Sets the header size.  Note that this is not the same as the offset to 
-    /// point data. 
+    /// Sets the header size.  Note that this is not the same as the offset to
+    /// point data.
     void SetHeaderSize(boost::uint16_t v);
-    
+
     /// Get number of bytes from the beginning to the first point record.
     boost::uint32_t GetDataOffset() const;
 
@@ -225,21 +230,21 @@ public:
     /// Set identifier of point data (record) format.
     void setPointFormat(PointFormat v);
 
-    /// The length in bytes of each point.  All points in the file are 
-    /// considered to be fixed in size, and the PointFormatName is used 
-    /// to determine the fixed portion of the dimensions in the point.  Any 
-    /// other byte space in the point record beyond the liblas::Schema::GetBaseByteSize() 
-    /// can be used for other, optional, dimensions.  If no schema is 
+    /// The length in bytes of each point.  All points in the file are
+    /// considered to be fixed in size, and the PointFormatName is used
+    /// to determine the fixed portion of the dimensions in the point.  Any
+    /// other byte space in the point record beyond the liblas::Schema::GetBaseByteSize()
+    /// can be used for other, optional, dimensions.  If no schema is
     /// available for the file in the form of a liblas.org VLR schema record,
     /// These extra bytes are available via liblas::Point::GetExtraData().
     boost::uint16_t GetDataRecordLength() const;
-    
+
     /// Get total number of point records stored in the LAS file.
     boost::uint32_t GetPointRecordsCount() const;
 
     /// Set number of point records that will be stored in a new LAS file.
     void SetPointRecordsCount(boost::uint32_t v);
-    
+
     /// Get array of the total point records per return.
     RecordsByReturnArray const& GetPointRecordsByReturnCount() const;
 
@@ -248,13 +253,13 @@ public:
     /// \param index - subscript (0-4) of array element being updated.
     /// \param v - new value to assign to array element identified by index.
     void SetPointRecordsByReturnCount(std::size_t index, boost::uint32_t v);
-    
+
     /// Get scale factor for X coordinate.
     double GetScaleX() const;
 
     /// Get scale factor for Y coordinate.
     double GetScaleY() const;
-    
+
     /// Get scale factor for Z coordinate.
     double GetScaleZ() const;
 
@@ -263,10 +268,10 @@ public:
 
     /// Get X coordinate offset.
     double GetOffsetX() const;
-    
+
     /// Get Y coordinate offset.
     double GetOffsetY() const;
-    
+
     /// Get Z coordinate offset.
     double GetOffsetZ() const;
 
@@ -291,18 +296,24 @@ public:
     /// Get maximum value of extent of Z coordinate.
     double GetMinZ() const;
 
-    const Bounds<double>& getBounds() const { return m_bounds; }
-    void setBounds(const Bounds<double>& bounds) { m_bounds = bounds; }
+    const Bounds<double>& getBounds() const
+    {
+        return m_bounds;
+    }
+    void setBounds(const Bounds<double>& bounds)
+    {
+        m_bounds = bounds;
+    }
 
     const VLRList& getVLRs() const;
     VLRList& getVLRs();
 
     std::size_t getVLRBlockSize() const;
 
-    /// Returns a property_tree that contains 
+    /// Returns a property_tree that contains
     /// all of the header data in a structured format.
     boost::property_tree::ptree GetPTree() const;
-    
+
     /// Returns true iff the file is compressed (laszip),
     /// as determined by the high bit in the point type
     bool Compressed() const;
@@ -316,10 +327,16 @@ public:
     void SetHeaderPadding(boost::uint32_t v);
     boost::uint32_t GetHeaderPadding() const;
 
-    inline std::string const& getCompressionInfo() const { return m_compressionInfo; }
-    inline void setCompressionInfo(std::string const& info) { m_compressionInfo = info; }
-    
-    
+    inline std::string const& getCompressionInfo() const
+    {
+        return m_compressionInfo;
+    }
+    inline void setCompressionInfo(std::string const& info)
+    {
+        m_compressionInfo = info;
+    }
+
+
 private:
     typedef Vector<double> PointScales;
     typedef Vector<double> PointOffsets;
@@ -334,14 +351,14 @@ private:
         eProjectId4Size = 8,
         eSystemIdSize = 32,
         eSoftwareIdSize = 32,
-        eHeaderSize = 227, 
+        eHeaderSize = 227,
         eFileSourceIdMax = 65535
     };
 
     // TODO (low-priority): replace static-size char arrays
     // with std::string and return const-reference to string object.
-    
-    
+
+
     //
     // Private data members
     //
@@ -363,7 +380,7 @@ private:
     PointOffsets m_offsets;
     bool m_isCompressed;
     boost::uint32_t m_headerPadding;
-    
+
     PointFormat m_pointFormat;
 
     Bounds<double> m_bounds;
@@ -372,13 +389,15 @@ private:
 
     SpatialReference m_spatialReference;
     std::string m_compressionInfo;
-    
+
     LasHeader& operator=(const LasHeader&); // nope
     LasHeader(const LasHeader&); // nope
 };
 
 PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const LasHeader&);
 
-} } } // namespace
+}
+}
+} // namespace
 
 #endif

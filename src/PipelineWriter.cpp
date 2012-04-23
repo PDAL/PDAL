@@ -47,7 +47,7 @@
 
 namespace pdal
 {
-    
+
 PipelineWriter::PipelineWriter(const PipelineManager& manager)
     : m_manager(manager)
 {
@@ -69,7 +69,7 @@ static boost::property_tree::ptree generateTreeFromStageBase(const StageBase& st
     boost::property_tree::ptree tree;
 
     boost::property_tree::ptree& attrtree = tree.add_child("Pipeline", subtree);
-    
+
     attrtree.put("<xmlattr>.version", "1.0");
 
     return tree;
@@ -81,13 +81,13 @@ void PipelineWriter::write_option_ptree(boost::property_tree::ptree& tree, const
     boost::property_tree::ptree m_tree = opts.toPTree();
 
     boost::property_tree::ptree::const_iterator iter = m_tree.begin();
-    
+
     while (iter != m_tree.end())
     {
         if (iter->first != "Option")
             throw pdal_error("malformed Options ptree");
         const boost::property_tree::ptree& optionTree = iter->second;
-        
+
         // we want to create this:
         //      ...
         //      <Option name="file">foo.las</Option>
@@ -95,13 +95,13 @@ void PipelineWriter::write_option_ptree(boost::property_tree::ptree& tree, const
 
         const std::string& name = optionTree.get_child("Name").get_value<std::string>();
         const std::string& value = optionTree.get_child("Value").get_value<std::string>();
-        
+
         boost::property_tree::ptree& subtree = tree.add("Option", value);
         subtree.put("<xmlattr>.name", name);
-        
+
         using namespace boost::property_tree;
         using namespace boost;
-        
+
         optional<ptree const&> moreOptions = optionTree.get_child_optional("Options");
 
         if (moreOptions)
@@ -109,7 +109,7 @@ void PipelineWriter::write_option_ptree(boost::property_tree::ptree& tree, const
             ptree newOpts;
             write_option_ptree(newOpts, moreOptions.get());
             subtree.put_child("Options", newOpts);
-        } 
+        }
         ++iter;
     }
 
@@ -120,13 +120,13 @@ void PipelineWriter::write_option_ptree(boost::property_tree::ptree& tree, const
 void PipelineWriter::write_metadata_ptree(boost::property_tree::ptree& tree, const Metadata& mdata)
 {
     using namespace boost;
-    
+
     property_tree::ptree m_tree = mdata.toPTree();
 
     property_tree::ptree::const_iterator iter = m_tree.begin();
-    
+
     property_tree::ptree output;
-    
+
     while (iter != m_tree.end())
     {
         if (iter->first != "entry")
@@ -138,7 +138,7 @@ void PipelineWriter::write_metadata_ptree(boost::property_tree::ptree& tree, con
         const std::string& name = e_tree.get_child("name").get_value<std::string>();
         const std::string& value = e_tree.get_child("value").get_value<std::string>();
         const std::string& type = e_tree.get_child("type").get_value<std::string>();
-        
+
         entry.put_value(value);
         entry.put("<xmlattr>.name", name);
         entry.put("<xmlattr>.type", type);
@@ -153,16 +153,16 @@ void PipelineWriter::write_metadata_ptree(boost::property_tree::ptree& tree, con
 
             boost::property_tree::ptree a;
             a.put_value(value);
-            a.put("<xmlattr>.name", name);            
+            a.put("<xmlattr>.name", name);
             entry.add_child("attribute", a);
         }
-        
+
         output.add_child("Entry", entry);
         ++iter;
     }
-    
+
     tree.add_child("Metadata", output);
-    
+
     return;
 }
 
@@ -170,12 +170,12 @@ void PipelineWriter::write_metadata_ptree(boost::property_tree::ptree& tree, con
 void PipelineWriter::writePipeline(const std::string& filename) const
 {
     const StageBase* stage = m_manager.isWriterPipeline() ? (StageBase*)m_manager.getWriter() : (StageBase*)m_manager.getStage();
-    
+
     boost::property_tree::ptree tree = generateTreeFromStageBase(*stage);
 
-    
+
     const boost::property_tree::xml_parser::xml_writer_settings<char> settings(' ', 4);
-    
+
     if (boost::iequals(filename, "STDOUT"))
         boost::property_tree::xml_parser::write_xml(std::cout, tree);
     else

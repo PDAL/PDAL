@@ -42,16 +42,21 @@
 #include <boost/algorithm/string.hpp>
 
 
-namespace pdal { namespace drivers { namespace nitf {
+namespace pdal
+{
+namespace drivers
+{
+namespace nitf
+{
 
 
 
 
 // this is a copy of the GDAL function, because the GDAL function isn't exported
-static char* myNITFGetField(char *pszTarget, const char *pszSource, 
+static char* myNITFGetField(char *pszTarget, const char *pszSource,
                             int nStart, int nLength)
 {
-    memcpy( pszTarget, pszSource + nStart, nLength );
+    memcpy(pszTarget, pszSource + nStart, nLength);
     pszTarget[nLength] = '\0';
 
     return pszTarget;
@@ -85,7 +90,7 @@ void NitfFile::open()
     {
         throw pdal_error("unable to open NITF file");
     }
-    
+
     m_imageSegmentNumber = findIMSegment();
     m_lidarSegmentNumber = findLIDARASegment();
 
@@ -149,7 +154,7 @@ void NitfFile::extractMetadata(pdal::Metadata& ms)
         {
             throw pdal_error("NITFImageAccess failed");
         }
-        
+
         std::stringstream parentkey;
         parentkey << "IM." << m_imageSegmentNumber;
 
@@ -206,7 +211,7 @@ std::string NitfFile::getSegmentIdentifier(NITFSegmentInfo* psSegInfo)
     }
     p[10] = 0;
     std::string s = p;
-    
+
     VSIFSeekL(m_file->fp, curr, SEEK_SET);
     return s;
 }
@@ -225,7 +230,7 @@ std::string NitfFile::getDESVER(NITFSegmentInfo* psSegInfo)
     }
     p[2] = 0;
     std::string s = p;
-    
+
     VSIFSeekL(m_file->fp, curr, SEEK_SET);
     return s;
 }
@@ -237,7 +242,7 @@ int NitfFile::findIMSegment()
 
     int iSegment(0);
     NITFSegmentInfo *psSegInfo = NULL;
-    for(iSegment = 0;  iSegment < m_file->nSegmentCount; iSegment++ )
+    for (iSegment = 0;  iSegment < m_file->nSegmentCount; iSegment++)
     {
         psSegInfo = m_file->pasSegmentInfo + iSegment;
 
@@ -250,7 +255,7 @@ int NitfFile::findIMSegment()
                 return iSegment;
             }
         }
-    }    
+    }
 
     throw pdal_error("Unable to find Image segment from NITF file");
 }
@@ -262,7 +267,7 @@ int NitfFile::findLIDARASegment()
 
     int iSegment(0);
     NITFSegmentInfo *psSegInfo = NULL;
-    for(iSegment = 0;  iSegment < m_file->nSegmentCount; iSegment++ )
+    for (iSegment = 0;  iSegment < m_file->nSegmentCount; iSegment++)
     {
         psSegInfo = m_file->pasSegmentInfo + iSegment;
         if (strncmp(psSegInfo->szSegmentType,"DE",2)==0)
@@ -274,7 +279,7 @@ int NitfFile::findLIDARASegment()
                 return iSegment;
             }
         }
-    }    
+    }
 
     throw pdal_error("Unable to find LIDARA data extension segment from NITF file");
 }
@@ -284,9 +289,9 @@ void NitfFile::processTREs(int nTREBytes, const char *pszTREData, pdal::Metadata
 {
     char* szTemp = new char[nTREBytes];
 
-    while( nTREBytes > 10 )
+    while (nTREBytes > 10)
     {
-        int nThisTRESize = atoi(myNITFGetField(szTemp, pszTREData, 6, 5 ));
+        int nThisTRESize = atoi(myNITFGetField(szTemp, pszTREData, 6, 5));
         if (nThisTRESize < 0 || nThisTRESize > nTREBytes - 11)
         {
             break;
@@ -300,7 +305,7 @@ void NitfFile::processTREs(int nTREBytes, const char *pszTREData, pdal::Metadata
 
         // const std::string value(pszTREData + 11);
 
-        const std::string value(pszTREData, nThisTRESize+1);        
+        const std::string value(pszTREData, nThisTRESize+1);
         //std::vector<boost::uint8_t> data(nThisTRESize);
         //boost::uint8_t* p = (boost::uint8_t*)(pszTREData + 11);
         //for (int i=0; i<nThisTRESize; i++) data[i] = p[i];
@@ -328,14 +333,14 @@ void NitfFile::processTREs_DES(NITFDES* dataSegment, pdal::Metadata& ms, const s
     char szTREName[7];
     int nThisTRESize;
 
-    while (NITFDESGetTRE( dataSegment, nOffset, szTREName, &pabyTREData, &nThisTRESize))
+    while (NITFDESGetTRE(dataSegment, nOffset, szTREName, &pabyTREData, &nThisTRESize))
     {
         char key[7];
         strncpy(key, pabyTREData, 6);
         key[6] = 0;
 
         const std::string value(pabyTREData, nThisTRESize+1);
-        
+
         if (!boost::iequals(key, "DESDATA"))
         {
             ms.addEntry<std::string>(parentkey+"."+key, value);
@@ -376,7 +381,7 @@ void NitfFile::processMetadata(char** papszMetadata, pdal::Metadata& ms, const s
 void NitfFile::processImageInfo(pdal::Metadata& ms, const std::string& parentkey)
 {
     // BUG: NITFImageAccess leaks memory, even if NITFImageDeaccess is called
-    
+
     NITFImage* image = NITFImageAccess(m_file, m_imageSegmentNumber);
 
     std::stringstream value1;
@@ -396,5 +401,7 @@ void NitfFile::processImageInfo(pdal::Metadata& ms, const std::string& parentkey
     return;
 }
 
-} } } // namespaces
+}
+}
+} // namespaces
 #endif

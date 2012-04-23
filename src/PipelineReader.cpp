@@ -49,7 +49,7 @@
 
 namespace pdal
 {
-    
+
 // ------------------------------------------------------------------------
 
 // this class helps keep tracks of what child nodes we've seen, so we
@@ -76,7 +76,7 @@ public:
     {
         ++m_numStages;
     }
-    
+
     void addUnknown(const std::string& name)
     {
         throw pipeline_xml_error("unknown child of element: " + name);
@@ -154,7 +154,7 @@ Option PipelineReader::parseElement_Option(const boost::property_tree::ptree& tr
     //     </option>
     // this function will process the element and return an Option from it
 
-    // boost::property_tree::xml_parser::write_xml(std::cout, tree);    
+    // boost::property_tree::xml_parser::write_xml(std::cout, tree);
     map_t attrs;
     collect_attributes(attrs, tree);
 
@@ -168,10 +168,11 @@ Option PipelineReader::parseElement_Option(const boost::property_tree::ptree& tr
 
 
     optional<ptree const&> moreOptions = tree.get_child_optional("Options");
-    
-    if (moreOptions) {
+
+    if (moreOptions)
+    {
         ptree::const_iterator iter = moreOptions->begin();
-        
+
         Options options;
         while (iter != moreOptions->end())
         {
@@ -241,7 +242,7 @@ Stage* PipelineReader::parseElement_anystage(const std::string& name, const boos
 Reader* PipelineReader::parseElement_Reader(const boost::property_tree::ptree& tree)
 {
     Options options(m_baseOptions);
-    
+
     StageParserContext context(StageParserContext::None);
 
     map_t attrs;
@@ -265,7 +266,7 @@ Reader* PipelineReader::parseElement_Reader(const boost::property_tree::ptree& t
         else if (name == "Metadata")
         {
             // FIXME ignored for now
-        }        
+        }
         else
         {
             context.addUnknown(name);
@@ -371,7 +372,7 @@ MultiFilter* PipelineReader::parseElement_MultiFilter(const boost::property_tree
         else if (name == "Metadata")
         {
             // FIXME: ignored
-        }        
+        }
         else if (name == "Filter" || name == "MultiFilter" || name == "Reader")
         {
             context.addStage();
@@ -403,8 +404,8 @@ MultiFilter* PipelineReader::parseElement_MultiFilter(const boost::property_tree
 void PipelineReader::parse_attributes(map_t& attrs, const boost::property_tree::ptree& tree)
 {
     for (boost::property_tree::ptree::const_iterator iter = tree.begin();
-        iter != tree.end();
-        ++iter)
+            iter != tree.end();
+            ++iter)
     {
         std::string name = iter->first;
         std::string value = tree.get<std::string>(name);
@@ -437,7 +438,7 @@ Writer* PipelineReader::parseElement_Writer(const boost::property_tree::ptree& t
 
     map_t attrs;
     collect_attributes(attrs, tree);
-           
+
     boost::property_tree::ptree::const_iterator iter = tree.begin();
     while (iter != tree.end())
     {
@@ -510,7 +511,7 @@ bool PipelineReader::parseElement_Pipeline(const boost::property_tree::ptree& tr
     {
         const std::string& name = iter->first;
         const boost::property_tree::ptree subtree = iter->second;
-        
+
         if (name == "Reader" || name == "Filter" || name == "MultiFilter")
         {
             stage = parseElement_anystage(name, subtree);
@@ -531,7 +532,7 @@ bool PipelineReader::parseElement_Pipeline(const boost::property_tree::ptree& tr
 
         ++iter;
     }
-    
+
     if (writer && stage)
     {
         throw pipeline_xml_error("extra nodes at front of writer pipeline");
@@ -545,9 +546,9 @@ bool PipelineReader::readPipeline(std::istream& input)
 
     boost::property_tree::ptree tree;
     boost::property_tree::xml_parser::read_xml(input, tree,
-        boost::property_tree::xml_parser::no_comments);
+            boost::property_tree::xml_parser::no_comments);
 
-    boost::optional<boost::property_tree::ptree> opt( tree.get_child_optional("Pipeline") );
+    boost::optional<boost::property_tree::ptree> opt(tree.get_child_optional("Pipeline"));
     if (!opt.is_initialized())
     {
         throw pipeline_xml_error("root element is not Pipeline");
@@ -558,7 +559,7 @@ bool PipelineReader::readPipeline(std::istream& input)
     bool isWriter = parseElement_Pipeline(subtree);
 
     return isWriter;
-    
+
 }
 
 
@@ -567,9 +568,9 @@ bool PipelineReader::readPipeline(const std::string& filename)
     m_inputXmlFile = filename;
 
     std::istream* input = FileUtils::openFile(filename);
-    
+
     bool isWriter = readPipeline(*input);
-    
+
     FileUtils::closeFile(input);
 
     m_inputXmlFile = "";

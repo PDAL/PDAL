@@ -55,7 +55,10 @@
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_int_distribution.hpp>
 
-namespace pdal { namespace filters {
+namespace pdal
+{
+namespace filters
+{
 
 namespace stats
 {
@@ -68,49 +71,64 @@ typedef boost::accumulators::accumulator_set<double, boost::accumulators::featur
 #else
 typedef boost::accumulators::accumulator_set<double, boost::accumulators::features< boost::accumulators::tag::density > > density_accumulator ;
 #endif
-typedef boost::accumulators::accumulator_set<double, boost::accumulators::features<     boost::accumulators::droppable<boost::accumulators::tag::mean>, 
-                                                                                        boost::accumulators::droppable<boost::accumulators::tag::max>, 
-                                                                                        boost::accumulators::droppable<boost::accumulators::tag::min>,
-                                                                                        boost::accumulators::droppable<boost::accumulators::tag::count> > > summary_accumulator;
+typedef boost::accumulators::accumulator_set<double, boost::accumulators::features<     boost::accumulators::droppable<boost::accumulators::tag::mean>,
+        boost::accumulators::droppable<boost::accumulators::tag::max>,
+        boost::accumulators::droppable<boost::accumulators::tag::min>,
+        boost::accumulators::droppable<boost::accumulators::tag::count> > > summary_accumulator;
 class PDAL_DLL Summary
 {
 public:
 
-    double minimum() const { return boost::accumulators::min(m_summary); }
-    double maximum() const { return boost::accumulators::max(m_summary); }
-    double average() const { return boost::accumulators::mean(m_summary); }
-    boost::uint64_t count() const { return boost::accumulators::count(m_summary); }
-    histogram_type histogram() const { return boost::accumulators::density(m_histogram); }
+    double minimum() const
+    {
+        return boost::accumulators::min(m_summary);
+    }
+    double maximum() const
+    {
+        return boost::accumulators::max(m_summary);
+    }
+    double average() const
+    {
+        return boost::accumulators::mean(m_summary);
+    }
+    boost::uint64_t count() const
+    {
+        return boost::accumulators::count(m_summary);
+    }
+    histogram_type histogram() const
+    {
+        return boost::accumulators::density(m_histogram);
+    }
 
     boost::property_tree::ptree toPTree() const;
 
 private:
     summary_accumulator m_summary;
-    density_accumulator m_histogram;                                                                              
+    density_accumulator m_histogram;
     std::vector<double> m_sample;
     boost::uint32_t m_sample_size;
     boost::random::mt19937 m_rng;
     boost::random::uniform_int_distribution<> m_distribution;
 public:
-    
-    Summary(    boost::uint32_t num_bins=20,
-                boost::uint32_t sample_size=1000,
-                boost::uint32_t cache_size=1000,
-                boost::uint32_t seed=0)
-    : m_histogram(  boost::accumulators::tag::density::num_bins = num_bins, 
-                    boost::accumulators::tag::density::cache_size = cache_size)
-    , m_sample_size(sample_size)
-    , m_distribution(0, cache_size)
+
+    Summary(boost::uint32_t num_bins=20,
+            boost::uint32_t sample_size=1000,
+            boost::uint32_t cache_size=1000,
+            boost::uint32_t seed=0)
+        : m_histogram(boost::accumulators::tag::density::num_bins = num_bins,
+                      boost::accumulators::tag::density::cache_size = cache_size)
+        , m_sample_size(sample_size)
+        , m_distribution(0, cache_size)
     {
         if (seed != 0)
         {
             m_rng.seed(seed);
             m_distribution.reset();
         }
-        
+
         return;
     }
-    
+
     void reset()
     {
         m_summary.drop<boost::accumulators::tag::mean>();
@@ -125,7 +143,7 @@ public:
     {
         m_summary(static_cast<double>(value));
         m_histogram(static_cast<double>(value));
-        
+
         int sample = m_distribution(m_rng);
         if (static_cast<boost::uint32_t>(sample) < m_sample_size)
             m_sample.push_back(static_cast<double>(value));
@@ -134,7 +152,7 @@ public:
 
 };
 
-typedef boost::shared_ptr<Summary> SummaryPtr; 
+typedef boost::shared_ptr<Summary> SummaryPtr;
 
 } // namespace stats
 
@@ -152,16 +170,19 @@ public:
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
 
-    bool supportsIterator (StageIteratorType t) const
-    {   
-        if (t == StageIterator_Sequential ) return true;
-        if (t == StageIterator_Random ) return true;
-        if (t == StageIterator_Block ) return true;
+    bool supportsIterator(StageIteratorType t) const
+    {
+        if (t == StageIterator_Sequential) return true;
+        if (t == StageIterator_Random) return true;
+        if (t == StageIterator_Block) return true;
         return false;
     }
 
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator(PointBuffer& ) const { return 0; } // BUG: add this
+    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const
+    {
+        return 0;    // BUG: add this
+    }
 
     void processBuffer(PointBuffer& data) const;
 
@@ -187,7 +208,10 @@ private:
 
 
 
-namespace iterators { namespace sequential {
+namespace iterators
+{
+namespace sequential
+{
 
 typedef boost::shared_ptr<Dimension> DimensionPtr;
 
@@ -208,7 +232,7 @@ private:
     bool atEndImpl() const;
 
     const pdal::filters::Stats& m_statsFilter;
-    
+
     std::vector<DimensionPtr> m_dimensions;
 
     double getValue(PointBuffer& data, Dimension& dim, boost::uint32_t pointIndex);
@@ -217,8 +241,10 @@ private:
 };
 
 
-} } // iterators::sequential
+}
+} // iterators::sequential
 
-} } // namespaces
+}
+} // namespaces
 
 #endif

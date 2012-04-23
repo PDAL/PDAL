@@ -45,23 +45,27 @@
 
 namespace pdal
 {
-    class PointBuffer;
-    namespace gdal
-    {
-        class Debug;
-    }
+class PointBuffer;
+namespace gdal
+{
+class Debug;
+}
 }
 
-namespace pdal { namespace filters {
+namespace pdal
+{
+namespace filters
+{
 
-namespace colorization {
-    
+namespace colorization
+{
+
 typedef boost::shared_ptr<void> DataSourcePtr;
 
 } // colorization
 
-// Provides GDAL-based raster overlay that places output data in 
-// specified dimensions. It also supports scaling the data by a multiplier 
+// Provides GDAL-based raster overlay that places output data in
+// specified dimensions. It also supports scaling the data by a multiplier
 // on a per-dimension basis.
 class PDAL_DLL Colorization : public Filter
 {
@@ -73,42 +77,63 @@ public:
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
 
-    bool supportsIterator (StageIteratorType t) const
-    {   
-        if (t == StageIterator_Sequential ) return true;
+    bool supportsIterator(StageIteratorType t) const
+    {
+        if (t == StageIterator_Sequential) return true;
 
         return false;
     }
 
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const { return NULL; }
+    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const
+    {
+        return NULL;
+    }
 
     void processBuffer(PointBuffer& data) const;
-    
-    boost::array<double, 6> getForwardTransform() const { return m_forward_transform; }
-    boost::array<double, 6> getInverseTransform() const { return m_inverse_transform; }
-    colorization::DataSourcePtr getDataSource() const { return m_ds; }
-    std::map<std::string, boost::uint32_t> getBandMap() const { return m_band_map; }
-    std::map<std::string, double> getScaleMap() const { return m_scale_map; }
+
+    boost::array<double, 6> getForwardTransform() const
+    {
+        return m_forward_transform;
+    }
+    boost::array<double, 6> getInverseTransform() const
+    {
+        return m_inverse_transform;
+    }
+    colorization::DataSourcePtr getDataSource() const
+    {
+        return m_ds;
+    }
+    std::map<std::string, boost::uint32_t> getBandMap() const
+    {
+        return m_band_map;
+    }
+    std::map<std::string, double> getScaleMap() const
+    {
+        return m_scale_map;
+    }
 
 private:
     void collectOptions();
 
-    colorization::DataSourcePtr m_ds; 
+    colorization::DataSourcePtr m_ds;
     boost::shared_ptr<pdal::gdal::Debug> m_gdal_debug;
-    
+
     std::map<std::string, boost::uint32_t> m_band_map;
     std::map<std::string, double> m_scale_map;
     boost::array<double, 6> m_forward_transform;
     boost::array<double, 6> m_inverse_transform;
     boost::uint32_t m_scale;
 
-    
+
     Colorization& operator=(const Colorization&); // not implemented
     Colorization(const Colorization&); // not implemented
 };
 
-namespace iterators { namespace sequential {
+namespace iterators
+{
+namespace sequential
+{
 
 
 class PDAL_DLL Colorization : public pdal::FilterSequentialIterator
@@ -118,25 +143,25 @@ public:
 
 protected:
     virtual void readBufferBeginImpl(PointBuffer&);
-    
+
 private:
     boost::uint64_t skipImpl(boost::uint64_t);
     boost::uint32_t readBufferImpl(PointBuffer&);
     bool atEndImpl() const;
-    double getScaledValue(  PointBuffer& data, 
-                            Dimension const& d, 
-                            std::size_t pointIndex) const;
-    void setScaledValue(PointBuffer& data, 
-                          double value, 
-                          Dimension const& d, 
+    double getScaledValue(PointBuffer& data,
+                          Dimension const& d,
                           std::size_t pointIndex) const;
+    void setScaledValue(PointBuffer& data,
+                        double value,
+                        Dimension const& d,
+                        std::size_t pointIndex) const;
     bool getPixelAndLinePosition(double x,
                                  double y,
                                  boost::array<double, 6> const& inverse,
                                  boost::int32_t& pixel,
                                  boost::int32_t& line,
                                  colorization::DataSourcePtr ds);
-                            
+
     Dimension const* m_dimX;
     Dimension const* m_dimY;
 
@@ -147,9 +172,11 @@ private:
 };
 
 
-} } // iterators::sequential
+}
+} // iterators::sequential
 
 
-} } // namespaces
+}
+} // namespaces
 
 #endif

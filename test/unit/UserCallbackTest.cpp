@@ -64,8 +64,8 @@ class Worker
 {
 public:
     Worker(UserCallback& cb)
-      : m_cb(cb)
-      , m_ticks(0)
+        : m_cb(cb)
+        , m_ticks(0)
     {
     }
 

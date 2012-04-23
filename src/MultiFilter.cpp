@@ -69,7 +69,7 @@ boost::property_tree::ptree MultiFilter::serializePipeline() const
 
         tree.add_child(subtree.begin()->first, subtree.begin()->second);
     }
-  
+
     boost::property_tree::ptree root;
     root.add_child("MultiFilter", tree);
 

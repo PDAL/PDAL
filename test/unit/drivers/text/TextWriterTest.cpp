@@ -47,14 +47,14 @@ BOOST_AUTO_TEST_SUITE(TextWriterTest)
 
 BOOST_AUTO_TEST_CASE(TextWriterTest_test_1)
 {
-    
-    // Only needed for testing using the text driver as a plugin, which 
+
+    // Only needed for testing using the text driver as a plugin, which
     // is not going to be enabled by default.
-    
+
     // std::ostringstream oss;
     // std::string p = Support::binpath();
     // oss << "PDAL_DRIVER_PATH="<<p;
-    // 
+    //
     // // We need to keep a copy of this string alive for the duration.
     // std::string path = oss.str();
     // Utils::putenv(path.c_str() );
@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE(TextWriterTest_test_1)
     reader.readPipeline(option.getValue<std::string>());
 
     const boost::uint64_t np = manager.execute();
-    
+
 
     BOOST_CHECK_EQUAL(np, 106u);
 

@@ -88,7 +88,7 @@ StageBase::StageBase(const std::vector<StageBase*>& inputs, const Options& optio
 
     if (m_debug)
         if (m_verbose == 0) m_verbose = 1;
-        
+
     return;
 }
 
@@ -116,21 +116,23 @@ void StageBase::initialize()
     m_verbose = m_options.getValueOrDefault<boost::uint32_t>("verbose", 0);
     if (m_debug)
         if (m_verbose == 0) m_verbose = 1;
-        
+
     std::string logname = m_options.getValueOrDefault<std::string>("log", "stdlog");
 
     std::vector<StageBase*> const&  inputs = getInputs();
     if (inputs.size() == 0)
     {
         m_log = boost::shared_ptr<pdal::Log>(new Log(getName(), logname, 0));
-    } else {
+    }
+    else
+    {
         std::ostream* v= getPrevStage().log()->getLogStream();
         m_log = boost::shared_ptr<pdal::Log>(new Log(getName(), logname, v));
 
     }
-    
+
     m_log->setLevel(static_cast<LogLevel>(m_verbose));
-    
+
     m_initialized = true;
 
     return;
@@ -167,7 +169,7 @@ bool StageBase::isDebug() const
 
 
 bool StageBase::isVerbose() const
-{   
+{
     return m_verbose > 0;
 }
 
@@ -237,7 +239,7 @@ void StageBase::dump() const
 std::ostream& operator<<(std::ostream& ostr, const StageBase& stage)
 {
     boost::property_tree::ptree tree = stage.toPTree();
-    
+
     boost::property_tree::write_json(ostr, tree);
 
     return ostr;

@@ -40,10 +40,13 @@
 
 namespace pdal
 {
-    class PointBuffer;
+class PointBuffer;
 }
 
-namespace pdal { namespace filters {
+namespace pdal
+{
+namespace filters
+{
 
 // adds three new u8 fields (R,G,B) for the colourization of the Z axis
 // the color is done as a ramp from the declared Z min/max values in the header
@@ -58,19 +61,22 @@ public:
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
     virtual void addDefaultDimensions();
-    
+
     void getColor_F32_U8(float value, boost::uint8_t& red, boost::uint8_t& green, boost::uint8_t& blue) const;
     void getColor_F64_U16(double value, boost::uint16_t& red, boost::uint16_t& green, boost::uint16_t& blue) const;
 
-    bool supportsIterator (StageIteratorType t) const
-    {   
-        if (t == StageIterator_Sequential ) return true;
+    bool supportsIterator(StageIteratorType t) const
+    {
+        if (t == StageIterator_Sequential) return true;
 
         return false;
     }
 
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const { return NULL; }
+    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const
+    {
+        return NULL;
+    }
 
     void processBuffer(PointBuffer& data) const;
 
@@ -84,7 +90,10 @@ private:
 
 
 
-namespace iterators { namespace sequential {
+namespace iterators
+{
+namespace sequential
+{
 
 
 class PDAL_DLL Color : public pdal::FilterSequentialIterator
@@ -101,8 +110,10 @@ private:
 };
 
 
-} } // namespaces
+}
+} // namespaces
 
-} } // namespaces
+}
+} // namespaces
 
 #endif

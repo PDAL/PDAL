@@ -38,12 +38,14 @@
 #include <pdal/Filter.hpp>
 #include <pdal/FilterIterator.hpp>
 
-namespace pdal {
+namespace pdal
+{
 
 class PointBufferCache;
 class PointBuffer;
-    
-namespace filters {
+
+namespace filters
+{
 
 //
 // This is just a very simple MRU cache filter. It has the following constraints:
@@ -91,10 +93,10 @@ public:
                        boost::uint64_t& numCacheInsertMisses,
                        boost::uint64_t& numCacheInsertHits) const;
 
-    bool supportsIterator (StageIteratorType t) const
-    {   
-        if (t == StageIterator_Sequential ) return true;
-        if (t == StageIterator_Random ) return true;
+    bool supportsIterator(StageIteratorType t) const
+    {
+        if (t == StageIterator_Sequential) return true;
+        if (t == StageIterator_Random) return true;
 
         return false;
     }
@@ -119,7 +121,10 @@ private:
     Cache(const Cache&); // not implemented
 };
 
-namespace iterators { namespace sequential {
+namespace iterators
+{
+namespace sequential
+{
 
 class PDAL_DLL Cache : public pdal::FilterSequentialIterator
 {
@@ -134,10 +139,14 @@ private:
     const pdal::filters::Cache& m_filter;
 };
 
-} } // iterators::sequential
+}
+} // iterators::sequential
 
 
-namespace iterators { namespace random {
+namespace iterators
+{
+namespace random
+{
 
 class PDAL_DLL Cache : public pdal::FilterRandomIterator
 {
@@ -152,8 +161,10 @@ private:
 };
 
 
-} } // iterators::random
+}
+} // iterators::random
 
-} } // namespaces
+}
+} // namespaces
 
 #endif

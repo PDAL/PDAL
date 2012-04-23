@@ -92,7 +92,7 @@ BOOST_AUTO_TEST_CASE(SchemaLayoutTest_ptree)
     SchemaLayout sl1(s1);
 
     std::stringstream ss1(std::stringstream::in | std::stringstream::out);
-  
+
     boost::property_tree::ptree tree = sl1.toPTree();
     boost::property_tree::write_xml(ss1, tree);
 
@@ -100,13 +100,13 @@ BOOST_AUTO_TEST_CASE(SchemaLayoutTest_ptree)
 
     static std::string xml_header = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
     std::string ref = xml_header + "<dimensionlayout>"
-        "<dimension><name>X</name><datatype>Int32</datatype>"
-        "<description>x coordinate as a long integer. You must use the scale and offset information of the header to determine the double value.</description>"
-        "<bytesize>4</bytesize><endianness>little</endianness><scale>0</scale><isValid>false</isValid></dimension><byteoffset>0</byteoffset><position>0</position>"
-        "</dimensionlayout>"
-        "<dimensionlayout><dimension><name>Y</name><datatype>Int32</datatype>"
-        "<description>y coordinate as a long integer. You must use the scale and offset information of the header to determine the double value.</description>"
-        "<bytesize>4</bytesize><endianness>little</endianness><scale>0</scale><isValid>false</isValid></dimension><byteoffset>4</byteoffset><position>1</position></dimensionlayout>";
+                      "<dimension><name>X</name><datatype>Int32</datatype>"
+                      "<description>x coordinate as a long integer. You must use the scale and offset information of the header to determine the double value.</description>"
+                      "<bytesize>4</bytesize><endianness>little</endianness><scale>0</scale><isValid>false</isValid></dimension><byteoffset>0</byteoffset><position>0</position>"
+                      "</dimensionlayout>"
+                      "<dimensionlayout><dimension><name>Y</name><datatype>Int32</datatype>"
+                      "<description>y coordinate as a long integer. You must use the scale and offset information of the header to determine the double value.</description>"
+                      "<bytesize>4</bytesize><endianness>little</endianness><scale>0</scale><isValid>false</isValid></dimension><byteoffset>4</byteoffset><position>1</position></dimensionlayout>";
 
     boost::algorithm::erase_all(out1, "\n");
     boost::algorithm::erase_all(ref, "\n");

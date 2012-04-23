@@ -59,7 +59,7 @@ class PDAL_DLL Utils
 public:
     static void random_seed(unsigned int seed);
     static double random(double minimum, double maximum);
-    
+
     // compares two values to within the datatype's epsilon
     template<class T>
     static bool compare_distance(const T& actual, const T& expected)
@@ -90,7 +90,7 @@ public:
         dest += sizeof(T);
         return;
     }
-    
+
     template<class T>
     static inline T read_field(boost::uint8_t*& src)
     {
@@ -136,9 +136,10 @@ public:
         dest.write(p, num);
         assert(check_stream_state(dest));
     }
-    
+
     // From http://stackoverflow.com/questions/485525/round-for-float-in-c
-    static inline double sround(double r) {
+    static inline double sround(double r)
+    {
         return (r > 0.0) ? floor(r + 0.5) : ceil(r - 0.5);
     }
 
@@ -154,14 +155,14 @@ public:
     static bool eatcharacter(std::istream& s, char x);
 
     static boost::uint32_t getStreamPrecision(double scale);
-    
+
     static boost::uint32_t safeconvert64to32(boost::uint64_t x64);
 
     // Generates a random temporary filename
     static std::string generate_filename();
     static std::string generate_tempfile();
 
-    static void* getDLLSymbol( std::string const& library, std::string const& name);
+    static void* getDLLSymbol(std::string const& library, std::string const& name);
     static std::string base64_encode(std::vector<boost::uint8_t> const& bytes);
     static std::vector<boost::uint8_t> base64_decode(std::string const& input);
 
@@ -195,7 +196,7 @@ private:
     static inline bool check_stream_state(std::basic_ios<C, T>& srtm)
     {
         // Test stream state bits
-        if (srtm.eof()) 
+        if (srtm.eof())
             throw std::out_of_range("end of file encountered");
         else if (srtm.fail())
             throw std::runtime_error("non-fatal I/O error occured");

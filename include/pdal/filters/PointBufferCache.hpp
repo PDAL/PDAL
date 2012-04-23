@@ -74,8 +74,8 @@ public:
     {
         for (cache_type::left_iterator it =_cache.left.begin(); it != _cache.left.end(); ++it)
         {
-           PointBuffer* data = it->info;
-           delete data;
+            PointBuffer* data = it->info;
+            delete data;
         }
         return;
     }
@@ -97,7 +97,7 @@ public:
             _cache.right.relocate(
                 _cache.right.end(),
                 _cache.project_right(it)
-                );
+            );
             ++m_numCacheLookupHits;
             return it->info;
         }
@@ -137,7 +137,7 @@ public:
     template <typename IT> void get_keys(IT dst) const
     {
         typename cache_type::right_const_reverse_iterator src
-        =_cache.right.rbegin();
+            =_cache.right.rbegin();
         while (src!=_cache.right.rend())
         {
             dst=(*src).second;

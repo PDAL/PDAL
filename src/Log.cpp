@@ -38,13 +38,13 @@
 #include <ostream>
 #include <sstream>
 
-namespace pdal 
+namespace pdal
 {
 
 
-Log::Log(std::string const& leaderString, 
-         std::string const& outputName, 
-         std::ostream* v) 
+Log::Log(std::string const& leaderString,
+         std::string const& outputName,
+         std::ostream* v)
     : m_level(logERROR)
     , m_deleteStreamOnCleanup(false)
     , m_leader(leaderString)
@@ -55,18 +55,22 @@ Log::Log(std::string const& leaderString,
         if (boost::iequals(outputName, "stdlog"))
         {
             m_log = &std::clog;
-        } else if (boost::iequals(outputName, "stderr"))
+        }
+        else if (boost::iequals(outputName, "stderr"))
         {
             m_log = &std::cerr;
-        } else if (boost::iequals(outputName, "stdout"))
+        }
+        else if (boost::iequals(outputName, "stdout"))
         {
             m_log = &std::cout;
-        } else 
+        }
+        else
         {
             m_log = FileUtils::createFile(outputName);
             m_deleteStreamOnCleanup = true;
         }
-    } else
+    }
+    else
     {
         m_log = v;
     }
@@ -75,13 +79,13 @@ Log::Log(std::string const& leaderString,
 
 Log::~Log()
 {
-    
+
     if (m_deleteStreamOnCleanup)
     {
         m_log->flush();
         delete m_log;
     }
-    
+
     m_log = 0;
 }
 
@@ -103,7 +107,8 @@ std::ostream& Log::get(LogLevel level)
         *m_log << "(" << m_leader << " "<< getLevelString(level) <<": " << level << "): ";
         *m_log << std::string(level > logDEBUG ? 0 : level - logDEBUG, '\t');
         return *m_log;
-    } else
+    }
+    else
     {
         return m_null_stream;
     }
@@ -113,7 +118,7 @@ std::ostream& Log::get(LogLevel level)
 std::string Log::getLevelString(LogLevel level) const
 {
     std::ostringstream output;
-    
+
     switch (level)
     {
         case logERROR:
@@ -129,7 +134,7 @@ std::string Log::getLevelString(LogLevel level) const
         default:
             output << "DEBUG";
     }
-    
+
     return output.str();
 }
 } // namespace

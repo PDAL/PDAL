@@ -50,7 +50,12 @@
 #include "cpl_string.h"
 
 
-namespace pdal { namespace drivers { namespace nitf {
+namespace pdal
+{
+namespace drivers
+{
+namespace nitf
+{
 
 
 // References:
@@ -82,7 +87,7 @@ namespace pdal { namespace drivers { namespace nitf {
 // pixel height, and number of bands.
 //    BUG: this is commented out right now (see processImageInfo()),
 //         because NITFImageDeaccess() leaks memory?
-//   
+//
 // We do not parse out the TRE fields; we leave the data as a byte stream
 // (This would be easy enough to do later, at least for those TREs we have documentation on).
 //
@@ -144,7 +149,7 @@ void Reader::initialize()
         nitf.open();
 
         nitf.getLasPosition(offset, length);
-        
+
         nitf.extractMetadata(nitf_metadata);
 
         nitf.close();
@@ -154,10 +159,10 @@ void Reader::initialize()
 
     m_lasReader = new pdal::drivers::las::Reader(m_streamFactory);
     m_lasReader->initialize();
-    
+
 
     Metadata LAS = m_lasReader->getMetadata();
-    
+
     Metadata combined = nitf_metadata + LAS;
     Metadata& ref = getMetadataRef();
     ref = combined;
@@ -192,5 +197,7 @@ boost::property_tree::ptree Reader::toPTree() const
 }
 
 
-} } } // namespaces
+}
+}
+} // namespaces
 #endif

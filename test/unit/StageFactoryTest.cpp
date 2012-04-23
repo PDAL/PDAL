@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE(StageFactoryTest_test1)
 
     writer->initialize();
 
-    const boost::uint64_t np = writer->write( reader->getNumPoints() );
+    const boost::uint64_t np = writer->write(reader->getNumPoints());
     BOOST_CHECK(np == 1065);
 
     delete writer;

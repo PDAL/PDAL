@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE(test_option_writing)
     boost::property_tree::xml_parser::write_xml(ostr_i, tree_i);
     const std::string str_i = ostr_i.str();
     BOOST_CHECK(str_i == ref_i);
-   
+
     const boost::property_tree::ptree tree_s = option_s.toPTree();
     boost::property_tree::xml_parser::write_xml(ostr_s, tree_s);
     const std::string str_s = ostr_s.str();
@@ -136,7 +136,7 @@ BOOST_AUTO_TEST_CASE(test_options_copy_ctor)
     opts.add(opt_s);
 
     pdal::Options copy(opts);
-    
+
     opt_i.setOptions(copy);
 
     BOOST_CHECK(copy.hasOption("my_int"));
@@ -161,7 +161,7 @@ BOOST_AUTO_TEST_CASE(test_options_multi)
 
     pdal::Option const& i = o->getOption("a");
     BOOST_CHECK_EQUAL(i.getValue<int>(), 1);
-    
+
     pdal::Option const& s = o->getOption("b");
     BOOST_CHECK_EQUAL(s.getValue<std::string>(), "2");
 
@@ -238,7 +238,7 @@ BOOST_AUTO_TEST_CASE(test_valid_options)
 
     {
         pdal::Options optI;
-        
+
         optI.add("foo", 19, "foo as an int");
         ok = optI.hasOption("foo");
         BOOST_CHECK(ok);
@@ -249,16 +249,16 @@ BOOST_AUTO_TEST_CASE(test_valid_options)
         optI.add("foo", "nineteen", "foo as a string");
         ok = optI.hasOption("foo");
         BOOST_CHECK(ok);
-        
-        
-        // Options is backed by a std::multimap, 
-        // Adding new options will mean the first will 
+
+
+        // Options is backed by a std::multimap,
+        // Adding new options will mean the first will
         // continue to be returned.
         const int i2 = optI.getValueOrThrow<int>("foo");
         BOOST_CHECK(i2 == 19);
-        
+
         std::vector<pdal::Option> options = optI.getOptions("foo");
-        
+
         BOOST_CHECK(options[1].getValue<std::string>() == "nineteen");
     }
 
@@ -293,7 +293,7 @@ BOOST_AUTO_TEST_CASE(Options_test_bool)
     bool bv = b.getValue<bool>();
     bool cv = c.getValue<bool>();
     bool dv = d.getValue<bool>();
-    
+
     BOOST_CHECK_EQUAL(av, true);
     BOOST_CHECK_EQUAL(bv, false);
     BOOST_CHECK_EQUAL(cv, true);
