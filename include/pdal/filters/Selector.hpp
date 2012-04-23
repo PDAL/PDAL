@@ -58,7 +58,6 @@ class PDAL_DLL Selector: public Filter
 public:
     SET_STAGE_NAME("filters.selector", "Dimension Selection Filter")
 
-
     Selector(Stage& prevStage, const Options&);
 
     virtual const Options getDefaultOptions() const;
@@ -79,9 +78,10 @@ public:
 
     void processBuffer(const PointBuffer& srcData, PointBuffer& dstData) const;
     
-    inline std::vector<std::string> const& getIgnoredDimensionNames() const { return m_ignoredDimensions; }
-    inline std::vector<std::string> const& getKeptDimensionNames() const { return m_keepDimensions; }
-
+    inline std::map<std::string, bool> const& getIgnoredMap() const { return m_ignoredMap; }
+    
+    inline bool doIgnoreUnspecifiedDimensions() const { return m_ignoreDefault; }
+    
 private:
     void checkImpedance();
 
@@ -89,8 +89,8 @@ private:
     Selector& operator=(const Selector&); // not implemented
     Selector(const Selector&); // not implemented
     
-    std::vector<std::string> m_ignoredDimensions;
-    std::vector<std::string> m_keepDimensions;
+    std::map<std::string, bool> m_ignoredMap;
+    bool m_ignoreDefault;
 };
 
 

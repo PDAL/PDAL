@@ -8,6 +8,9 @@
             true
         </Option>
         <Filter type="filters.selector">
+            <Option name="ignore_default">
+                true
+            </Option>
             <Option name="ignore">
                 <Options>
                     <Option name="dimension">
@@ -21,6 +24,20 @@
                     </Option>
                 </Options>
             </Option>
+            <Option name="keep">
+                <Options>
+                    <Option name="dimension">
+                        X
+                    </Option>
+                    <Option name="dimension">
+                        Y
+                    </Option>
+                    <Option name="dimension">
+                        Z
+                    </Option>
+                </Options>
+            </Option>
+
             <Filter type="filters.crop">
                 <Option name="bounds">
                     ([0,1000000],[0,1000000],[0,1000000])
