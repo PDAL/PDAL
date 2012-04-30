@@ -488,24 +488,31 @@ void InPlaceReprojection::processBuffer(PointBuffer& data) const
     Dimension const& d_x = schema.getDimension(getOptions().getValueOrDefault<std::string>("x_dim", "X"));
     Dimension const& d_y = schema.getDimension(getOptions().getValueOrDefault<std::string>("y_dim", "Y"));
     Dimension const& d_z = schema.getDimension(getOptions().getValueOrDefault<std::string>("z_dim", "Z"));
-
+    
+    bool logOutput = log()->getLevel() > logDEBUG4;
+    
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
         double x = getScaledValue(data, m_x, pointIndex);
         double y = getScaledValue(data, m_y, pointIndex);
         double z = getScaledValue(data, m_z, pointIndex);
-
-        // std::cout << "input: " << x << " y: " << y << " z: " << z << std::endl;
+        
+        if (logOutput)
+            log()->get(logDEBUG5) << "input: " << x << " y: " << y << " z: " << z << std::endl;
         this->transform(x,y,z);
-        // std::cout << "output: " << x << " y: " << y << " z: " << z << std::endl;
+        if (logOutput)
+            log()->get(logDEBUG5) << "output: " << x << " y: " << y << " z: " << z << std::endl;
 
         setScaledValue(data, x, d_x, pointIndex);
         setScaledValue(data, y, d_y, pointIndex);
         setScaledValue(data, z, d_z, pointIndex);
-
-        // std::cout << "set: " << getScaledValue(data, d_x, pointIndex, indexX)
-        //           << " y: " << getScaledValue(data, d_y, pointIndex, indexY)
-        //           << " z: " << getScaledValue(data, d_z, pointIndex, indexZ) << std::endl;
+        
+        if (logOutput)
+        {
+            log()->get(logDEBUG5) << "scaled: " << getScaledValue(data, d_x, pointIndex)
+                  << " y: " << getScaledValue(data, d_y, pointIndex)
+                  << " z: " << getScaledValue(data, d_z, pointIndex) << std::endl;
+        }
 
         data.setNumPoints(pointIndex+1);
     }
