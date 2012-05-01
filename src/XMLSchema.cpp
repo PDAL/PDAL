@@ -41,6 +41,7 @@
 #include <algorithm>
 
 #include <boost/algorithm/string.hpp>
+#include <boost/uuid/uuid_io.hpp>
 
 #include <string.h>
 #include <stdlib.h>
@@ -414,6 +415,8 @@ void Reader::Load()
         boost::uint32_t position(1);
         std::string description;
         std::string interpretation;
+        std::string uuid;
+        std::string parent_uuid;
         double offset(0.0);
         double scale(0.0);
         double minimum(0.0);
@@ -534,6 +537,23 @@ void Reader::Load()
                 xmlFree(n);
                 // std::cout << "Dimension endianness: " << endianness << std::endl;
             }
+            if (boost::iequals((const char*)properties->name, "uuid"))
+            {
+                xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
+                if (!n) throw schema_loading_error("Unable to fetch uuid value!");
+                uuid = std::string((const char*)n);
+                
+                xmlFree(n);
+            }
+
+            if (boost::iequals((const char*)properties->name, "parent_uuid"))
+            {
+                xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
+                if (!n) throw schema_loading_error("Unable to fetch uuid value!");
+                parent_uuid = std::string((const char*)n);
+                
+                xmlFree(n);
+            }
 
             // printf("property name: %s\n", properties->name);
             properties = properties->next;
@@ -542,7 +562,13 @@ void Reader::Load()
         dimension::Interpretation interp = GetDimensionType(interpretation);
 
         Dimension d(name, interp, size, description);
-        d.createUUID();
+        if (uuid.size())
+            d.setUUID(uuid);
+        if (parent_uuid.size())
+        {
+            boost::uuids::string_generator gen;
+            d.setParent(gen(parent_uuid));
+        }
         if (! Utils::compare_distance(scale, 0.0))
         {
             d.setNumericScale(scale);
@@ -760,6 +786,16 @@ void Writer::writeSchema(TextWriterPtr writer)
         }
 
         xmlTextWriterWriteElementNS(w, BAD_CAST "pc", BAD_CAST "active", NULL, BAD_CAST "true");
+
+        std::ostringstream uuid;
+        uuid << dim.getUUID();
+        if (uuid.str().size())
+            xmlTextWriterWriteElementNS(w, BAD_CAST "pc", BAD_CAST "uuid", NULL, BAD_CAST uuid.str().c_str());
+
+        std::ostringstream parent;
+        parent << dim.getParent();
+        if (parent.str().size())
+            xmlTextWriterWriteElementNS(w, BAD_CAST "pc", BAD_CAST "parent_uuid", NULL, BAD_CAST parent.str().c_str());
 
         xmlTextWriterEndElement(w);
 

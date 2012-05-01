@@ -127,7 +127,10 @@
                         Describes the storage endianness of the dimension.
                     </xs:documentation>
                 </xs:annotation>
-            </xs:element>          
+            </xs:element>
+            <xs:element minOccurs="0" name="uuid" type="xs:string"/>
+            <xs:element minOccurs="0" name="parent_uuid" type="xs:string"/>
+
         </xs:all>
     </xs:complexType>
     
