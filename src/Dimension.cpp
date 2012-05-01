@@ -298,8 +298,10 @@ std::ostream& operator<<(std::ostream& os, pdal::Dimension const& d)
     std::ostringstream pad;
     std::string const& cur = quoted_name.str();
     std::string::size_type size = cur.size();
-    std::string::size_type pad_size = 24 - size;
-
+    std::string::size_type buffer(24);
+    std::string::size_type pad_size = buffer - size;
+    if (size > buffer) 
+        pad_size = 4;
     for (std::string::size_type i=0; i != pad_size; i++)
     {
         pad << " ";
