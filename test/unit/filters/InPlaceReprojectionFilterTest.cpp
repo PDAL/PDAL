@@ -57,7 +57,7 @@ static void getPoint(const pdal::PointBuffer& data, double& x, double& y, double
     Dimension const& dim_x = schema.getDimension("X");
     Dimension const& dim_y = schema.getDimension("Y");
     Dimension const& dim_z = schema.getDimension("Z");
-
+    
     const boost::int32_t xraw = data.getField<boost::int32_t>(dim_x, 0);
     const boost::int32_t yraw = data.getField<boost::int32_t>(dim_y, 0);
     const boost::int32_t zraw = data.getField<boost::int32_t>(dim_z, 0);
@@ -94,7 +94,11 @@ BOOST_AUTO_TEST_CASE(InPlaceReprojectionFilterTest_test_1)
         pdal::drivers::las::Reader reader(Support::datapath("utm15.las"));
 
         pdal::Options options;
-
+        
+        pdal::Option debug("debug", true, "");
+        pdal::Option verbose("verbose", 9, "");
+        // options.add(debug);
+        // options.add(verbose);
         pdal::Option out_srs("out_srs",out_ref.getWKT(), "Output SRS to reproject to");
         pdal::Option x_dim("x_dim", std::string("X"), "Dimension name to use for 'X' data");
         pdal::Option y_dim("y_dim", std::string("Y"), "Dimension name to use for 'Y' data");
@@ -123,22 +127,26 @@ BOOST_AUTO_TEST_CASE(InPlaceReprojectionFilterTest_test_1)
 
         const pdal::Schema& schema = reprojectionFilter.getSchema();
         pdal::PointBuffer data(schema, 1);
+        
 
         pdal::StageSequentialIterator* iter = reprojectionFilter.createSequentialIterator(data);
+
         boost::uint32_t numRead = iter->read(data);
         BOOST_CHECK(numRead == 1);
-        delete iter;
+
 
         const pdal::Bounds<double> newBounds_ref(postX, postY, postZ, postX, postY, postZ);
-        const pdal::Bounds<double>& newBounds = reprojectionFilter.getBounds();
+        const pdal::Bounds<double>& newBounds = data.getSpatialBounds();
         Support::compareBounds(newBounds_ref, newBounds);
 
         double x=0, y=0, z=0;
         getPoint(data, x, y, z);
 
-        BOOST_CHECK_CLOSE(x, postX, 1);
-        BOOST_CHECK_CLOSE(y, postY, 1);
-        BOOST_CHECK_CLOSE(z, postZ, 1);
+        BOOST_CHECK_CLOSE(x, postX, 0.0001);
+        BOOST_CHECK_CLOSE(y, postY, 0.0001);
+        BOOST_CHECK_CLOSE(z, postZ, 0.0001);
+        delete iter;
+
     }
 
 
