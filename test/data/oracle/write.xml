@@ -8,7 +8,7 @@
             1
         </Option>
         <Option name="connection">
-            lidar/lidar@oracle.hobu.biz/lidar
+            lidar/lidar@lidar.hobu.biz/lidar
         </Option>
         <Option name="base_table_name">
             SIMPLE_CLOUD
@@ -27,6 +27,9 @@
         </Option>
         <Option name="overwrite">
             false
+        </Option>
+        <Option name="disable_cloud_trigger">
+            true
         </Option>
         <Option name="srid">
             4269
@@ -79,9 +82,9 @@
                                 <Option name="spatialreference">
                                     EPSG:2926
                                 </Option>
-                                <Option name="log">
+                                <!-- <Option name="log">
                                     oracle-pipeline-write.log
-                                </Option>    
+                                </Option>     -->
                         </Reader>
                 </Filter>
             </Filter>

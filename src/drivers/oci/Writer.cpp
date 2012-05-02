@@ -64,6 +64,7 @@ Writer::Writer(Stage& prevStage, const Options& options)
     , m_gtype(0)
     , m_is3d(false)
     , m_issolid(false)
+    , m_sdo_pc_is_initialized(false)
 {
 
     m_connection = connect();
@@ -220,6 +221,8 @@ const Options Writer::getDefaultOptions() const
                                                     the cumulated bounds of all of the block data are used.");
 
     Option pc_id("pc_id", -1, "Point Cloud id");
+    
+    Option pack("pack_ignored_fields", true, "Pack ignored dimensions out of the data buffer that is written");
 
     options.add(is3d);
     options.add(solid);
@@ -244,6 +247,7 @@ const Options Writer::getDefaultOptions() const
     options.add(post_block_sql);
     options.add(base_table_bounds);
     options.add(pc_id);
+    options.add(pack);
     return options;
 }
 
@@ -658,7 +662,7 @@ std::string Writer::CreatePCElemInfo()
 
 }
 
-void Writer::CreatePCEntry()
+void Writer::CreatePCEntry(Schema const& buffer_schema)
 {
 
 
@@ -809,7 +813,34 @@ void Writer::CreatePCEntry()
     OCILobLocator* boundary_locator ;
 
     std::string schema_data;
-    schema_data = pdal::Schema::to_xml(getPrevStage().getSchema());
+
+    bool pack = getOptions().getValueOrDefault<bool>("pack_ignored_fields", true);
+    if (pack)
+    {
+        schema::index_by_index const& idx = buffer_schema.getDimensions().get<schema::index>();
+
+        boost::uint32_t position(0);
+        
+        pdal::Schema clean_schema;
+        schema::index_by_index::size_type i(0);
+        for (i = 0; i < idx.size(); ++i)
+        {
+            if (! idx[i].isIgnored())
+            {
+                
+                Dimension d(idx[i]);
+                d.setPosition(position);
+                clean_schema.appendDimension(d);
+                position++;
+            }
+        }
+        schema_data = pdal::Schema::to_xml(clean_schema);
+            
+    } else
+    {
+        schema_data = pdal::Schema::to_xml(buffer_schema);
+        
+    }
     // std::cout << m_stage.getSchema() << std::endl;
     // std::ostream* output= FileUtils::createFile("oracle-write-schema.xml",true);
     // *output << schema_data <<std::endl;
@@ -913,6 +944,20 @@ bool Writer::IsValidWKT(std::string const& input)
     throw pdal_error("GDAL support not available for WKT validation");
 #endif
 }
+
+void Writer::writeBufferBegin(PointBuffer const& data)
+{
+    if (m_sdo_pc_is_initialized) return;
+
+    CreatePCEntry(data.getSchema());
+    m_trigger_name = ShutOff_SDO_PC_Trigger();
+    
+    m_sdo_pc_is_initialized = true;
+
+    return;
+
+}
+
 void Writer::writeBegin(boost::uint64_t)
 {
 
@@ -932,9 +977,9 @@ void Writer::writeBegin(boost::uint64_t)
         m_doCreateIndex = true;
         CreateBlockTable();
     }
-
-    CreatePCEntry();
-    m_trigger_name = ShutOff_SDO_PC_Trigger();
+    // 
+    // CreatePCEntry();
+    // m_trigger_name = ShutOff_SDO_PC_Trigger();
     return;
 }
 
@@ -1039,15 +1084,53 @@ pdal::Bounds<double> Writer::CalculateBounds(PointBuffer const& buffer)
     return output;
 
 }
+
+void Writer::PackPointData(PointBuffer const& buffer,
+                           boost::uint8_t** point_data,
+                           boost::uint32_t& point_data_len,
+                           boost::uint32_t& schema_byte_size)
+
+{
+    // Creates a new buffer that has the ignored dimensions removed from 
+    // it.
+    
+    schema::index_by_index const& idx = buffer.getSchema().getDimensions().get<schema::index>();
+
+    schema_byte_size = 0;
+    schema::index_by_index::size_type i(0);
+    for (i = 0; i < idx.size(); ++i)
+    {
+        if (! idx[i].isIgnored())
+            schema_byte_size = schema_byte_size+idx[i].getByteSize();
+    }
+    
+    log()->get(logDEBUG) << "Packed schema byte size " << schema_byte_size;
+
+    point_data_len = buffer.getNumPoints() * schema_byte_size;
+    *point_data = new boost::uint8_t[point_data_len];
+    
+    boost::uint8_t* current_position = *point_data;
+    
+    for (boost::uint32_t i = 0; i < buffer.getNumPoints(); ++i)
+    {
+        boost::uint8_t* data = buffer.getData(i);
+        for (boost::uint32_t d = 0; d < idx.size(); ++d)
+        {
+            if (! idx[d].isIgnored())
+            {
+                memcpy(current_position, data, idx[d].getByteSize());
+                current_position = current_position+idx[d].getByteSize();
+            }
+            data = data + idx[d].getByteSize();
+                
+        }
+    }
+    
+}
+
 bool Writer::WriteBlock(PointBuffer const& buffer)
 {
-
-    boost::uint8_t* point_data = buffer.getData(0);
-
-
     bool bUsePartition = m_block_table_partition_column.size() != 0;
-
-    // std::vector<boost::uint32_t> ids = block.GetIDs();
 
     // Pluck the block id out of the first point in the buffer
     pdal::Schema const& schema = buffer.getSchema();
@@ -1055,7 +1138,6 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
 
     boost::int32_t block_id  = buffer.getField<boost::int32_t>(blockDim, 0);
 
-    // SWAP_ENDIANNESS(block_id); //We've already swapped these data, but we need to write a real number here.
     std::ostringstream oss;
     std::ostringstream partition;
 
@@ -1063,13 +1145,6 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     {
         partition << "," << m_block_table_partition_column;
     }
-
-
-
-    // EnableTracing(connection);
-
-
-
 
     oss << "INSERT INTO "<< m_block_table_name <<
         "(OBJ_ID, BLK_ID, NUM_POINTS, POINTS,   "
@@ -1118,8 +1193,22 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     // std::vector<liblas::uint8_t> data;
     // bool gotdata = GetResultData(result, reader, data, 3);
     // if (! gotdata) throw std::runtime_error("unable to fetch point data byte array");
+    // boost::uint8_t* point_data = buffer.getData(0);
+    boost::uint8_t* point_data;
+    boost::uint32_t point_data_length;
+    boost::uint32_t schema_byte_size;
+    
+    bool pack = getOptions().getValueOrDefault<bool>("pack_ignored_fields", true);
+    if (pack)
+        PackPointData(buffer, &point_data, point_data_length, schema_byte_size);
+    else
+    {
+        point_data = buffer.getData(0);
+        point_data_length = buffer.getSchema().getByteSize() * buffer.getNumPoints();
+    }
 
-    statement->Bind((char*)point_data,(long)(buffer.getSchema().getByteSize()*buffer.getNumPoints()));
+    // statement->Bind((char*)point_data,(long)(buffer.getSchema().getByteSize()*buffer.getNumPoints()));
+    statement->Bind((char*)point_data,(long)(point_data_length));
 
     // :5
     long* p_gtype = (long*) malloc(1 * sizeof(long));

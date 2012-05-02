@@ -81,6 +81,8 @@ public:
 
 protected:
     virtual void writeBegin(boost::uint64_t targetNumPointsToWrite);
+    virtual void writeBufferBegin(PointBuffer const&);
+    
     virtual boost::uint32_t writeBuffer(const PointBuffer&);
     virtual void writeEnd(boost::uint64_t actualNumPointsWritten);
 
@@ -94,7 +96,7 @@ private:
     void CreateBlockIndex();
     void CreateBlockTable();
     void CreateSDOEntry();
-    void CreatePCEntry();
+    void CreatePCEntry(Schema const& buffer_schema);
     long GetGType();
     std::string CreatePCElemInfo();
     bool BlockTableExists();
@@ -117,6 +119,11 @@ private:
         T default_value = getDefaultOptions().getOption(option_name).getValue<T>();
         return getOptions().getValueOrDefault<T>(option_name, default_value);
     }
+
+    void PackPointData( PointBuffer const& buffer,
+                        boost::uint8_t** point_data,
+                        boost::uint32_t& point_data_len,
+                        boost::uint32_t& schema_byte_size);
 
 
 
@@ -151,6 +158,7 @@ private:
     std::string m_base_table_boundary_wkt;
     boost::shared_ptr<pdal::gdal::Debug> m_gdal_debug;
     std::string m_trigger_name;
+    bool m_sdo_pc_is_initialized;
 
 };
 

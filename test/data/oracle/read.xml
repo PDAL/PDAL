@@ -11,8 +11,11 @@
             <Option name="query">
                 SELECT CLOUD FROM SIMPLE_CLOUD
             </Option>
+            <Option name="xml_schema_dump">
+                oracle-schema.xml
+            </Option>
             <Option name="connection">
-                lidar/lidar@oracle.hobu.biz/lidar
+                lidar/lidar@lidar.hobu.biz/lidar
             </Option>
             <Option name="debug">
                 true
