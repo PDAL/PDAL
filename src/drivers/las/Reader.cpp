@@ -61,6 +61,7 @@
 #define EQUAL(a,b) (_stricmp(a,b)==0)
 #endif
 
+
 namespace pdal
 {
 namespace drivers
@@ -226,6 +227,15 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data,
     {
         throw pdal_error("No dimension positions are available!");
     }
+
+    if (!dimensions->X)
+            throw pdal_error("No X dimension position available!");
+    if (!dimensions->Y)
+            throw pdal_error("No Y dimension position available!");
+    if (!dimensions->Z)
+            throw pdal_error("No Z dimension position available!");
+
+    
     if (zipPoint)
     {
 #ifdef PDAL_HAVE_LASZIP
@@ -277,15 +287,10 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data,
             const boost::uint8_t numReturns = (flags >> 3) & 0x07;
             const boost::uint8_t scanDirFlag = (flags >> 6) & 0x01;
             const boost::uint8_t flight = (flags >> 7) & 0x01;
-            
-            if (dimensions->X)
-                data.setField<boost::uint32_t>(*dimensions->X, pointIndex, x);
 
-            if (dimensions->Y)
-                data.setField<boost::uint32_t>(*dimensions->Y, pointIndex, y);
-
-            if (dimensions->Z)
-                data.setField<boost::uint32_t>(*dimensions->Z, pointIndex, z);
+            data.setField<boost::int32_t>(*dimensions->X, pointIndex, x);
+            data.setField<boost::int32_t>(*dimensions->Y, pointIndex, y);
+            data.setField<boost::int32_t>(*dimensions->Z, pointIndex, z);
 
             if (dimensions->Intensity)
                 data.setField<boost::uint16_t>(*dimensions->Intensity, pointIndex, intensity);
@@ -341,7 +346,7 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data,
 
         data.setNumPoints(pointIndex+1);
     }
-
+    
     delete[] buf;
 
     data.setSpatialBounds(lasHeader.getBounds());
@@ -453,7 +458,7 @@ void Reader::addDefaultDimensions()
     addDefaultDimension(y, getName());
 
     Dimension z("Z", dimension::SignedInteger, 4,
-                "x coordinate as a long integer. You must use the scale and "
+                "Z coordinate as a long integer. You must use the scale and "
                 "offset information of the header to determine the double value.");
     z.setUUID("e74b5e41-95e6-4cf2-86ad-e3f5a996da5d");
     addDefaultDimension(z, getName());
