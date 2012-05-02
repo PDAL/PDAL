@@ -357,9 +357,20 @@ boost::optional<Dimension const&> Schema::getDimensionOptional(std::string const
 
 bool Schema::setDimension(Dimension const& dim)
 {
+    // Try setting based on UUID first if it's there and not null.
+    if (dim.getUUID() != boost::uuids::nil_uuid())
+    {
+        schema::index_by_uid& id_index = m_index.get<schema::uid>();
+        schema::index_by_uid::const_iterator id = id_index.find(dim.getUUID());
+        if (id != id_index.end())
+        {
+            id_index.replace(id, dim);
+            return true;
+        }
+    }
+
     schema::index_by_name& name_index = m_index.get<schema::name>();
     schema::index_by_name::iterator it = name_index.find(dim.getName());
-
     // FIXME: If there are two dimensions with the same name here, we're
     // screwed if they both have the same namespace too
     if (it != name_index.end())
