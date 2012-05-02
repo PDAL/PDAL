@@ -42,6 +42,7 @@
 #include <pdal/Schema.hpp>
 
 #include <boost/uuid/string_generator.hpp>
+#include <boost/uuid/uuid_io.hpp>
 
 using namespace pdal;
 
@@ -58,10 +59,16 @@ BOOST_AUTO_TEST_CASE(test_ctor)
     Dimension d2(d1);
     BOOST_CHECK_EQUAL(d1.getInterpretation(), d2.getInterpretation());
     BOOST_CHECK_EQUAL(d1.getNamespace(), d2.getNamespace());
+    BOOST_CHECK_EQUAL(d1.getUUID(), d2.getUUID());
+    BOOST_CHECK_EQUAL(d1.getParent(), d2.getParent());
+    BOOST_CHECK_EQUAL(d1.getPosition(), d2.getPosition());
 
     Dimension d3 = d1;
     BOOST_CHECK_EQUAL(d1.getInterpretation(), d3.getInterpretation());
     BOOST_CHECK_EQUAL(d1.getNamespace(), d3.getNamespace());
+    BOOST_CHECK_EQUAL(d1.getUUID(), d3.getUUID());
+    BOOST_CHECK_EQUAL(d1.getParent(), d3.getParent());
+    BOOST_CHECK_EQUAL(d1.getPosition(), d3.getPosition());
 
     BOOST_CHECK(d1 == d1);
     BOOST_CHECK(d1 == d2);
