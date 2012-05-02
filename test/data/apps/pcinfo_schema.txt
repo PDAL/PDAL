@@ -11,7 +11,8 @@
         "maximum": "0",
         "scale": "0.01",
         "offset": "-0",
-        "isValid": "false",
+        "position": "0",
+        "byteoffset": "0",
         "isIgnored": "false",
         "uuid": "2ee118d1-119e-4906-99c3-42934203f872"
     },
@@ -27,7 +28,8 @@
         "maximum": "0",
         "scale": "0.01",
         "offset": "-0",
-        "isValid": "false",
+        "position": "1",
+        "byteoffset": "4",
         "isIgnored": "false",
         "uuid": "87707eee-2f30-4979-9987-8ef747e30275"
     },
@@ -36,14 +38,15 @@
         "name": "Z",
         "namespace": "drivers.las.reader",
         "parent": "00000000-0000-0000-0000-000000000000",
-        "description": "x coordinate as a long integer. You must use the scale and offset information of the header to determine the double value.",
+        "description": "Z coordinate as a long integer. You must use the scale and offset information of the header to determine the double value.",
         "bytesize": "4",
         "endianness": "little",
         "minimum": "0",
         "maximum": "0",
         "scale": "0.01",
         "offset": "-0",
-        "isValid": "false",
+        "position": "2",
+        "byteoffset": "8",
         "isIgnored": "false",
         "uuid": "e74b5e41-95e6-4cf2-86ad-e3f5a996da5d"
     },
@@ -59,7 +62,8 @@
         "maximum": "0",
         "scale": "1",
         "offset": "0",
-        "isValid": "false",
+        "position": "3",
+        "byteoffset": "12",
         "isIgnored": "false",
         "uuid": "61e90c9a-42fc-46c7-acd3-20d67bd5626f"
     },
@@ -75,7 +79,8 @@
         "maximum": "0",
         "scale": "1",
         "offset": "0",
-        "isValid": "false",
+        "position": "4",
+        "byteoffset": "14",
         "isIgnored": "false",
         "uuid": "ffe5e5f8-4cec-4560-abf0-448008f7b89e"
     },
@@ -91,7 +96,8 @@
         "maximum": "0",
         "scale": "1",
         "offset": "0",
-        "isValid": "false",
+        "position": "5",
+        "byteoffset": "15",
         "isIgnored": "false",
         "uuid": "7c28bfd4-a9ed-4fb2-b07f-931c076fbaf0"
     },
@@ -107,7 +113,8 @@
         "maximum": "0",
         "scale": "1",
         "offset": "0",
-        "isValid": "false",
+        "position": "6",
+        "byteoffset": "16",
         "isIgnored": "false",
         "uuid": "13019a2c-cf88-480d-a995-0162055fe5f9"
     },
@@ -123,7 +130,8 @@
         "maximum": "0",
         "scale": "1",
         "offset": "0",
-        "isValid": "false",
+        "position": "7",
+        "byteoffset": "17",
         "isIgnored": "false",
         "uuid": "108c18f2-5cc0-4669-ae9a-f41eb4006ea5"
     },
@@ -139,7 +147,8 @@
         "maximum": "0",
         "scale": "1",
         "offset": "0",
-        "isValid": "false",
+        "position": "8",
+        "byteoffset": "18",
         "isIgnored": "false",
         "uuid": "b4c67de9-cef1-432c-8909-7c751b2a4e0b"
     },
@@ -155,7 +164,8 @@
         "maximum": "0",
         "scale": "1",
         "offset": "0",
-        "isValid": "false",
+        "position": "9",
+        "byteoffset": "19",
         "isIgnored": "false",
         "uuid": "aaadaf77-e0c9-4df0-81a7-27060794cd69"
     },
@@ -171,7 +181,8 @@
         "maximum": "0",
         "scale": "1",
         "offset": "0",
-        "isValid": "false",
+        "position": "10",
+        "byteoffset": "20",
         "isIgnored": "false",
         "uuid": "70eb558e-63d4-4804-b1db-fc2fd716927c"
     },
@@ -187,7 +198,8 @@
         "maximum": "0",
         "scale": "1",
         "offset": "0",
-        "isValid": "false",
+        "position": "11",
+        "byteoffset": "21",
         "isIgnored": "false",
         "uuid": "4e42e96a-6af0-4fdd-81cb-6216ff47bf6b"
     },
@@ -203,7 +215,8 @@
         "maximum": "0",
         "scale": "1",
         "offset": "0",
-        "isValid": "false",
+        "position": "12",
+        "byteoffset": "23",
         "isIgnored": "false",
         "uuid": "aec43586-2711-4e59-9df0-65aca78a4ffc"
     },
@@ -219,7 +232,8 @@
         "maximum": "0",
         "scale": "1",
         "offset": "0",
-        "isValid": "false",
+        "position": "13",
+        "byteoffset": "31",
         "isIgnored": "false",
         "uuid": "a42ce297-6aa2-4a62-bd29-2db19ba862d5"
     },
@@ -235,7 +249,8 @@
         "maximum": "0",
         "scale": "1",
         "offset": "0",
-        "isValid": "false",
+        "position": "14",
+        "byteoffset": "33",
         "isIgnored": "false",
         "uuid": "7752759d-5713-48cd-9842-51db350cc979"
     },
@@ -251,7 +266,8 @@
         "maximum": "0",
         "scale": "1",
         "offset": "0",
-        "isValid": "false",
+        "position": "15",
+        "byteoffset": "35",
         "isIgnored": "false",
         "uuid": "5c1a99c8-1829-4d5b-8735-4f6f393a7970"
     }
