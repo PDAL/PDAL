@@ -359,8 +359,6 @@ inline void PointBuffer::setField(pdal::Dimension const& dim, std::size_t pointI
         throw buffer_error("This dimension has no identified position in a schema. Use the setRawField method to access an arbitrary byte position.");
     }
     
-    if (dim.isIgnored()) return;
-
     std::size_t offset = (pointIndex * m_byteSize) + dim.getByteOffset();
     assert(offset + sizeof(T) <= m_byteSize * m_capacity);
     boost::uint8_t* p = m_data.get() + offset;
