@@ -422,7 +422,7 @@ pdal::Schema Reader::fetchSchema(Statement statement, sdo_pc* pc, boost::uint32_
     std::string write_schema_file = getOptions().getValueOrDefault<std::string>("xml_schema_dump", std::string(""));
     if (write_schema_file.size() > 0)
     {
-        std::ostream* out = FileUtils::createFile("schema-xml.xml");
+        std::ostream* out = FileUtils::createFile(write_schema_file);
         out->write(pc_schema, strlen(pc_schema));
         delete out;
     }
