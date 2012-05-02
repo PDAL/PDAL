@@ -213,8 +213,7 @@ const Dimension& Schema::getDimension(std::string const& t, std::string const& n
             {
                 if (boost::equals(ns, it->getNamespace()))
                 {
-                    if (!it->isIgnored())
-                        return *it;
+                    return *it;
                 }
                 
                 ++it;
@@ -292,10 +291,7 @@ const Dimension& Schema::getDimension(std::string const& t, std::string const& n
             }
         }
         // we don't have a ns or we don't have multiples, return what we found
-        if (!it->isIgnored())
-            return *it;
-        else
-            throw dimension_not_found(oss.str());
+        return *it;
     }
     else
     {
@@ -321,8 +317,7 @@ const Dimension& Schema::getDimension(std::string const& t, std::string const& n
                 {
                     if (boost::equals(ns, i->getNamespace()))
                     {
-                        if (!i->isIgnored())
-                            return *i;
+                        return *i;
                     }
 
                     ++i;
@@ -391,18 +386,20 @@ bool Schema::setDimension(Dimension const& dim)
 
 const Dimension& Schema::getDimension(dimension::id const& t) const
 {
+    /// getDimension for a dimension::id will not respect the isIgnored setting 
+    /// of the dimension.  Stages that wish to operate with dimensions with exacting 
+    /// specificity should take care to use uuids as their keys rather than 
+    /// names.
     schema::index_by_uid::const_iterator it = m_index.get<schema::uid>().find(t);
 
     if (it != m_index.get<schema::uid>().end())
     {
-        if (!it->isIgnored())
-            return *it;
+        return *it;
     }
 
     std::ostringstream oss;
     oss << "getDimension: dimension not found with uuid '" << boost::lexical_cast<std::string>(t) << "'";
     throw dimension_not_found(oss.str());
-
 }
 
 boost::optional<Dimension const&> Schema::getDimensionOptional(dimension::id const& t) const
