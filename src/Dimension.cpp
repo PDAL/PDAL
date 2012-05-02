@@ -191,7 +191,8 @@ boost::property_tree::ptree Dimension::toPTree() const
 
     dim.put("scale", getNumericScale());
 
-    dim.put("isValid", isValid());
+    dim.put("position", getPosition());
+    dim.put("byteoffset", getByteOffset());
     dim.put("isIgnored", isIgnored());
 
     std::stringstream oss;
