@@ -170,6 +170,7 @@ const Options InPlaceReprojection::getDefaultOptions() const
     Option x_offset("offset_x", 0.0f, "Offset for output X data in the case when 'X' dimension data are to be scaled.  Defaults to '0.0'.  If not set, the Dimensions's scale will be used");
     Option y_offset("offset_y", 0.0f, "Offset for output Y data in the case when 'Y' dimension data are to be scaled.  Defaults to '0.0'.  If not set, the Dimensions's scale will be used");
     Option z_offset("offset_z", 0.0f, "Offset for output Z data in the case when 'Z' dimension data are to be scaled.  Defaults to '0.0'.  If not set, the Dimensions's scale will be used");
+    Option ignore_old_dimensions("ignore_old_dimensions", true, "Mark old, unprojected dimensions as ignored");
     options.add(in_srs);
     options.add(out_srs);
     options.add(x);
@@ -181,6 +182,7 @@ const Options InPlaceReprojection::getDefaultOptions() const
     options.add(x_offset);
     options.add(y_offset);
     options.add(z_offset);
+    options.add(ignore_old_dimensions);
 
     return options;
 }
@@ -384,44 +386,8 @@ void InPlaceReprojection::setScaledValue(PointBuffer& data,
 
 }
 
-void InPlaceReprojection::processBuffer(PointBuffer& data) const
+void InPlaceReprojection::processBuffer(PointBuffer& ) const
 {
-    // const boost::uint32_t numPoints = data.getNumPoints();
-    // 
-    // const Schema& schema = this->getSchema();
-    // 
-    // Dimension const& d_x = schema.getDimension(getOptions().getValueOrDefault<std::string>("x_dim", "X"));
-    // Dimension const& d_y = schema.getDimension(getOptions().getValueOrDefault<std::string>("y_dim", "Y"));
-    // Dimension const& d_z = schema.getDimension(getOptions().getValueOrDefault<std::string>("z_dim", "Z"));
-    // 
-    // bool logOutput = log()->getLevel() > logDEBUG4;
-    // 
-    // for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
-    // {
-    //     double x = getScaledValue(data, m_x, pointIndex);
-    //     double y = getScaledValue(data, m_y, pointIndex);
-    //     double z = getScaledValue(data, m_z, pointIndex);
-    //     
-    //     if (logOutput)
-    //         log()->get(logDEBUG5) << "input: " << x << " y: " << y << " z: " << z << std::endl;
-    //     this->transform(x,y,z);
-    //     if (logOutput)
-    //         log()->get(logDEBUG5) << "output: " << x << " y: " << y << " z: " << z << std::endl;
-    // 
-    //     setScaledValue(data, x, d_x, pointIndex);
-    //     setScaledValue(data, y, d_y, pointIndex);
-    //     setScaledValue(data, z, d_z, pointIndex);
-    //     
-    //     if (logOutput)
-    //     {
-    //         log()->get(logDEBUG5) << "scaled: " << getScaledValue(data, d_x, pointIndex)
-    //               << " y: " << getScaledValue(data, d_y, pointIndex)
-    //               << " z: " << getScaledValue(data, d_z, pointIndex) << std::endl;
-    //     }
-    // 
-    //     data.setNumPoints(pointIndex+1);
-    // }
-
     return;
 }
 
@@ -449,8 +415,6 @@ InPlaceReprojection::InPlaceReprojection(const pdal::filters::InPlaceReprojectio
     , m_reprojectionFilter(filter)
 {
     alterSchema(buffer);
-    m_reprojectionFilter.log()->get(logDEBUG2) << "iterators::sequential alterSchema! " << std::endl;
-
     return;
 }
 
@@ -459,10 +423,14 @@ void InPlaceReprojection::alterSchema(PointBuffer& buffer)
 
     Schema schema = buffer.getSchema();
 
-
     const std::string x_name = m_reprojectionFilter.getOptions().getValueOrDefault<std::string>("x_dim", "X");
     const std::string y_name = m_reprojectionFilter.getOptions().getValueOrDefault<std::string>("y_dim", "Y");
     const std::string z_name = m_reprojectionFilter.getOptions().getValueOrDefault<std::string>("z_dim", "Z");
+
+    m_reprojectionFilter.log()->get(logDEBUG2) << "x_dim '" << x_name <<"' requested" << std::endl;
+    m_reprojectionFilter.log()->get(logDEBUG2) << "y_dim '" << y_name <<"' requested" << std::endl;
+    m_reprojectionFilter.log()->get(logDEBUG2) << "z_dim '" << z_name <<"' requested" << std::endl;
+
 
     boost::optional<Dimension const&> p_x = schema.getDimensionOptional(x_name);
     if (p_x)
@@ -477,11 +445,14 @@ void InPlaceReprojection::alterSchema(PointBuffer& buffer)
         to_dimension.createUUID();
         to_dimension.setNamespace(m_reprojectionFilter.getName());
         to_dimension.setParent(p_x->getUUID());
+        schema.appendDimension(to_dimension);
 
         m_new_x_id = to_dimension.getUUID();
         m_old_x_id = p_x->getUUID();
-        schema.appendDimension(to_dimension);
+        
     }
+
+
 
     boost::optional<Dimension const&> p_y = schema.getDimensionOptional(y_name);
     if (p_y)
@@ -496,10 +467,10 @@ void InPlaceReprojection::alterSchema(PointBuffer& buffer)
         to_dimension.createUUID();
         to_dimension.setNamespace(m_reprojectionFilter.getName());
         to_dimension.setParent(p_y->getUUID());
+        schema.appendDimension(to_dimension);
 
         m_new_y_id = to_dimension.getUUID();
         m_old_y_id = p_y->getUUID();
-        schema.appendDimension(to_dimension);
     }
 
     boost::optional<Dimension const&> p_z = schema.getDimensionOptional(z_name);
@@ -515,12 +486,46 @@ void InPlaceReprojection::alterSchema(PointBuffer& buffer)
         to_dimension.createUUID();
         to_dimension.setNamespace(m_reprojectionFilter.getName());
         to_dimension.setParent(p_z->getUUID());
+        schema.appendDimension(to_dimension);
 
         m_new_z_id = to_dimension.getUUID();
         m_old_z_id = p_z->getUUID();
-        schema.appendDimension(to_dimension);
+        
     }
-    
+
+    bool markIgnored = m_reprojectionFilter.getOptions().getValueOrDefault<bool>("ignore_old_dimensions", true);
+    if (markIgnored)
+    {
+        boost::optional<Dimension const&> x_dim = schema.getDimensionOptional(m_old_x_id);
+        if (x_dim)
+        {
+
+            Dimension x(*x_dim);
+            boost::uint32_t flags = x.getFlags();
+            x.setFlags(flags | dimension::IsIgnored);
+            schema.setDimension(x);
+        }
+
+        boost::optional<Dimension const&> y_dim = schema.getDimensionOptional(m_old_y_id);
+        if (y_dim)
+        {
+
+            Dimension y(*y_dim);
+            boost::uint32_t flags = y.getFlags();
+            y.setFlags(flags | dimension::IsIgnored);
+            schema.setDimension(y);
+        }
+
+        boost::optional<Dimension const&> z_dim = schema.getDimensionOptional(m_old_z_id);
+        if (z_dim)
+        {
+
+            Dimension z(*z_dim);
+            boost::uint32_t flags = z.getFlags();
+            z.setFlags(flags | dimension::IsIgnored);
+            schema.setDimension(z);
+        }
+    } 
 
     buffer = PointBuffer(schema, buffer.getCapacity());
     
@@ -529,19 +534,19 @@ boost::uint32_t InPlaceReprojection::readBufferImpl(PointBuffer& buffer)
 {
 
     const Schema& schema = buffer.getSchema();
-
+    
     const boost::uint32_t numPoints = getPrevIterator().read(buffer);
-
+    
     Dimension const& old_x = schema.getDimension(m_old_x_id);
     Dimension const& old_y = schema.getDimension(m_old_y_id);
     Dimension const& old_z = schema.getDimension(m_old_z_id);
-    
+
     Dimension const& new_x = schema.getDimension(m_new_x_id);
     Dimension const& new_y = schema.getDimension(m_new_y_id);
     Dimension const& new_z = schema.getDimension(m_new_z_id);
-
-    bool logOutput = m_reprojectionFilter.log()->getLevel() > logDEBUG4;
     
+    bool logOutput = m_reprojectionFilter.log()->getLevel() > logDEBUG4;
+    m_reprojectionFilter.log()->floatPrecision(8);
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
         double x = m_reprojectionFilter.getScaledValue(buffer, old_x, pointIndex);
@@ -567,9 +572,9 @@ boost::uint32_t InPlaceReprojection::readBufferImpl(PointBuffer& buffer)
     
         buffer.setNumPoints(pointIndex+1);
     }
+    m_reprojectionFilter.log()->clearFloat();
 
     updateBounds(buffer);
-
 
     return numPoints;
 }
