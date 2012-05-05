@@ -10,16 +10,33 @@
         <Option name="chunk_size">
             80000
         </Option>
+            <Filter type="filters.inplacereprojection">
+                <Option name="out_srs">
+                    EPSG:4326+4326
+                </Option>
+                <Option name="scale_x">
+                    0.0000001
+                </Option>
+                <Option name="scale_y">
+                    0.0000001
+                </Option>
+                <Option name="debug">
+                    true
+                </Option>
+                <Option name="verbose">
+                    6
+                </Option>        
         <Reader type="drivers.oci.reader">
             <Option name="query">
                 SELECT CLOUD FROM AUTZEN_BIG_CLOUD where ID=1
             </Option>
             <Option name="connection">
-                lidar/lidar@oracle.hobu.biz/lidar
+                lidar/lidar@lidar.hobu.biz/lidar
             </Option>
             <Option name="debug">
                 true
             </Option>
         </Reader>
+    </Filter>
     </Writer>
 </Pipeline>
