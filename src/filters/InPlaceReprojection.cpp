@@ -444,11 +444,22 @@ void InPlaceReprojection::alterSchema(PointBuffer& buffer)
         to_dimension.setNumericOffset(offset);
         to_dimension.createUUID();
         to_dimension.setNamespace(m_reprojectionFilter.getName());
-        to_dimension.setParent(p_x->getUUID());
-        schema.appendDimension(to_dimension);
 
+        if (m_old_y_id == boost::uuids::nil_uuid())
+        {
+            Dimension new_x(*p_x);
+            new_x.createUUID();
+            to_dimension.setParent(new_x.getUUID());
+            schema.setDimension(new_x);
+            m_old_x_id = new_x.getUUID();
+
+        } else {
+            to_dimension.setParent(p_x->getUUID());
+            m_old_x_id = p_x->getUUID();
+        }
+
+        schema.appendDimension(to_dimension);
         m_new_x_id = to_dimension.getUUID();
-        m_old_x_id = p_x->getUUID();
         
     }
 
@@ -465,12 +476,24 @@ void InPlaceReprojection::alterSchema(PointBuffer& buffer)
         to_dimension.setNumericScale(scale);
         to_dimension.setNumericOffset(offset);
         to_dimension.createUUID();
+
+        if (m_old_y_id == boost::uuids::nil_uuid())
+        {
+            Dimension new_y(*p_y);
+            new_y.createUUID();
+            to_dimension.setParent(new_y.getUUID());
+            schema.setDimension(new_y);
+            m_old_y_id = new_y.getUUID();
+
+        } else {
+            to_dimension.setParent(p_y->getUUID());
+            m_old_y_id = p_y->getUUID();
+        }
+        
         to_dimension.setNamespace(m_reprojectionFilter.getName());
-        to_dimension.setParent(p_y->getUUID());
         schema.appendDimension(to_dimension);
 
         m_new_y_id = to_dimension.getUUID();
-        m_old_y_id = p_y->getUUID();
     }
 
     boost::optional<Dimension const&> p_z = schema.getDimensionOptional(z_name);
@@ -484,13 +507,23 @@ void InPlaceReprojection::alterSchema(PointBuffer& buffer)
         to_dimension.setNumericScale(scale);
         to_dimension.setNumericOffset(offset);
         to_dimension.createUUID();
+
+        if (m_old_z_id == boost::uuids::nil_uuid())
+        {
+            Dimension new_z(*p_z);
+            new_z.createUUID();
+            to_dimension.setParent(new_z.getUUID());
+            schema.setDimension(new_z);
+            m_old_z_id = new_z.getUUID();
+        } else {
+            to_dimension.setParent(p_z->getUUID());
+            m_old_z_id = p_z->getUUID();
+        }
+
         to_dimension.setNamespace(m_reprojectionFilter.getName());
-        to_dimension.setParent(p_z->getUUID());
         schema.appendDimension(to_dimension);
 
         m_new_z_id = to_dimension.getUUID();
-        m_old_z_id = p_z->getUUID();
-        
     }
 
     bool markIgnored = m_reprojectionFilter.getOptions().getValueOrDefault<bool>("ignore_old_dimensions", true);
@@ -536,7 +569,7 @@ boost::uint32_t InPlaceReprojection::readBufferImpl(PointBuffer& buffer)
     const Schema& schema = buffer.getSchema();
     
     const boost::uint32_t numPoints = getPrevIterator().read(buffer);
-    
+
     Dimension const& old_x = schema.getDimension(m_old_x_id);
     Dimension const& old_y = schema.getDimension(m_old_y_id);
     Dimension const& old_z = schema.getDimension(m_old_z_id);
