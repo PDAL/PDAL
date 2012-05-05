@@ -154,7 +154,7 @@ protected:
     boost::uint32_t myReadClouds(PointBuffer& data);
     boost::uint32_t myReadBlocks(PointBuffer& data);
 
-    BufferPtr fetchPointBuffer(Statement statment, sdo_pc* pc, boost::uint32_t capacity);
+    BufferPtr fetchPointBuffer(Statement statment, sdo_pc* pc);
 
     Statement m_block_statement;
     Statement m_statement;
@@ -163,23 +163,26 @@ protected:
     BlockPtr m_block;
     BlockPtr m_cloud_block;
     boost::int32_t m_active_cloud_id;
-    BufferPtr m_new_buffer;
-    bool bGetNewBuffer;
-    bool bReadFirstCloud;
+    BufferPtr m_oracle_buffer;
     BufferMap m_buffers;
+    boost::uint32_t m_buffer_position;
 
 
 private:
     const pdal::drivers::oci::Reader& m_reader;
 
     Statement getNextCloud(BlockPtr block, boost::int32_t& cloud_id);
-    void read(PointBuffer& data,
-              Statement statement,
-              BlockPtr block,
-              boost::uint32_t howMany,
-              boost::uint32_t whichPoint,
-              boost::uint32_t whichBlobPosition);
-
+    void readBlob(Statement statement,
+                  BlockPtr block,
+                  boost::uint32_t howMany);
+    void fillUserBuffer(PointBuffer& user_buffer);
+    
+    void copyOracleData(PointBuffer& source, 
+                        PointBuffer& destination, 
+                        Dimension const& dest_dim, 
+                        boost::uint32_t source_starting_position, 
+                        boost::uint32_t destination_starting_position,
+                        boost::uint32_t howMany);
     pdal::Bounds<double> getBounds(Statement statement, BlockPtr block);
     IteratorBase& operator=(const IteratorBase&); // not implemented
     IteratorBase(const IteratorBase&); // not implemented;

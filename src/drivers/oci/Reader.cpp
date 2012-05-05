@@ -503,9 +503,8 @@ IteratorBase::IteratorBase(const pdal::drivers::oci::Reader& reader)
     , m_at_end(false)
     , m_block(BlockPtr(new Block(reader.getConnection())))
     , m_active_cloud_id(0)
-    , m_new_buffer(BufferPtr())
-    , bGetNewBuffer(false)
-    , bReadFirstCloud(true)
+    , m_oracle_buffer(BufferPtr())
+    , m_buffer_position(0)
     , m_reader(reader)
 
 {
@@ -535,12 +534,6 @@ Statement IteratorBase::getNextCloud(BlockPtr block, boost::int32_t& cloud_id)
     BlockPtr cloud_block = m_reader.getBlock();
     Statement cloud_statement = m_reader.getStatement();
 
-    // bool bDidRead(true);
-    // if(!bReadFirstCloud)
-    //     bDidRead = cloud_statement->Fetch();
-    // bReadFirstCloud = false;
-    // if (!bDidRead) return Statement();
-
     cloud_id = cloud_statement->GetInteger(&cloud_block->pc->pc_id);
     std::string cloud_table = std::string(cloud_statement->GetString(cloud_block->pc->blk_table));
     select_blocks
@@ -568,14 +561,10 @@ const pdal::drivers::oci::Reader& IteratorBase::getReader() const
     return m_reader;
 }
 
-void IteratorBase::read(PointBuffer& data,
-                        Statement statement,
-                        BlockPtr block,
-                        boost::uint32_t howMany,
-                        boost::uint32_t whichPoint,
-                        boost::uint32_t whichBlobPosition)
+void IteratorBase::readBlob(Statement statement,
+                            BlockPtr block,
+                            boost::uint32_t howMany)
 {
-
     boost::uint32_t nAmountRead = 0;
     boost::uint32_t nBlobLength = statement->GetBlobLength(block->locator);
 
@@ -584,7 +573,7 @@ void IteratorBase::read(PointBuffer& data,
         block->chunk->resize(nBlobLength);
     }
 
-    getReader().log()->get(logDEBUG4) << "IteratorBase::read expected nBlobLength: " << nBlobLength << std::endl;
+    getReader().log()->get(logDEBUG4) << "IteratorBase::readBlob expected nBlobLength: " << nBlobLength << std::endl;
 
     bool read_all_data = statement->ReadBlob(block->locator,
                          (void*)(&(*block->chunk)[0]),
@@ -592,14 +581,82 @@ void IteratorBase::read(PointBuffer& data,
                          &nAmountRead);
     if (!read_all_data) throw pdal_error("Did not read all blob data!");
 
-    getReader().log()->get(logDEBUG4) << "IteratorBase::read actual nAmountRead: " << nAmountRead  << std::endl;
+    getReader().log()->get(logDEBUG4) << "IteratorBase::readBlob actual nAmountRead: " << nAmountRead  << std::endl;
 
-    data.getSchema().getByteSize();
-    boost::uint32_t howMuchToRead = howMany * data.getSchema().getByteSize();
-    data.setDataStride(&(*block->chunk)[whichBlobPosition], whichPoint, howMuchToRead);
+    Schema const& oracle_schema = m_oracle_buffer->getSchema();
 
-    data.setNumPoints(data.getNumPoints() + howMany);
+    boost::uint32_t howMuchToRead = howMany * oracle_schema.getByteSize();
+    m_oracle_buffer->setDataStride(&(*block->chunk)[0], 0, howMuchToRead);
 
+    m_oracle_buffer->setNumPoints(howMany);    
+}
+
+void IteratorBase::fillUserBuffer(PointBuffer& user_buffer)
+{
+
+    Schema const& user_schema = user_buffer.getSchema();
+    schema::index_by_index const& idx = user_schema.getDimensions().get<schema::index>();
+
+    boost::int32_t numUserSpace = user_buffer.getCapacity() - user_buffer.getNumPoints();
+    if (numUserSpace <= 0)
+        return;
+    boost::int32_t numOraclePoints = m_oracle_buffer->getNumPoints() - m_buffer_position;
+    
+    schema::index_by_index::size_type i(0);
+    for (i = 0; i < idx.size(); ++i)
+    {
+        copyOracleData( *m_oracle_buffer, 
+                        user_buffer, 
+                        idx[i], 
+                        m_buffer_position, 
+                        user_buffer.getNumPoints(), 
+                        (std::min)(numOraclePoints,numUserSpace));
+    }
+
+    if (numOraclePoints > numUserSpace)
+        m_buffer_position = m_buffer_position + numUserSpace;
+    else if (numOraclePoints < numUserSpace)
+        m_buffer_position = 0;
+    
+    boost::uint32_t howManyThisRead = (std::min)(numUserSpace, numOraclePoints);
+    user_buffer.setNumPoints(howManyThisRead + user_buffer.getNumPoints());
+}
+
+void IteratorBase::copyOracleData(  PointBuffer& source, 
+                                    PointBuffer& destination, 
+                                    Dimension const& dest_dim, 
+                                    boost::uint32_t source_starting_position, 
+                                    boost::uint32_t destination_starting_position,
+                                    boost::uint32_t howMany)
+{
+    
+    boost::optional<Dimension const&> source_dim = source.getSchema().getDimensionOptional(dest_dim.getName());
+    
+    if (!source_dim)
+    {
+        return;
+    }
+
+    for (boost::uint32_t i = 0; i < howMany; ++i)
+    {
+        if (dest_dim.getInterpretation() == source_dim->getInterpretation() &&
+            dest_dim.getByteSize() == source_dim->getByteSize())
+        {
+            boost::uint8_t* source_position = source.getData(source_starting_position+i) + source_dim->getByteOffset();
+            boost::uint8_t* destination_position = destination.getData(destination_starting_position + i) + dest_dim.getByteOffset();
+            memcpy(destination_position, source_position, source_dim->getByteSize());
+        }
+        else
+        {
+            PointBuffer::scaleData( source, 
+                                    destination, 
+                                    *source_dim, 
+                                    dest_dim, 
+                                    source_starting_position + i,
+                                    destination_starting_position + i);
+        }
+    }
+    
 }
 
 boost::uint32_t IteratorBase::myReadBuffer(PointBuffer& data)
@@ -612,7 +669,7 @@ boost::uint32_t IteratorBase::myReadBuffer(PointBuffer& data)
     return 0;
 }
 
-boost::uint32_t IteratorBase::myReadClouds(PointBuffer& data)
+boost::uint32_t IteratorBase::myReadClouds(PointBuffer& user_buffer)
 {
     boost::uint32_t numRead(0);
 
@@ -621,11 +678,9 @@ boost::uint32_t IteratorBase::myReadClouds(PointBuffer& data)
     bool bReadCloud(true);
     while (bReadCloud)
     {
-        m_new_buffer = fetchPointBuffer(m_statement, getReader().getBlock()->pc, data.getCapacity());
+        m_oracle_buffer = fetchPointBuffer(m_statement, getReader().getBlock()->pc);
 
-        bGetNewBuffer = true;
-
-        boost::uint32_t numReadThisCloud = myReadBlocks(data);
+        boost::uint32_t numReadThisCloud = myReadBlocks(user_buffer);
         numRead = numRead + numReadThisCloud;
 
         getReader().log()->get(logDEBUG2) << "Read " << numReadThisCloud << " points from myReadBlocks" << std::endl;
@@ -658,9 +713,9 @@ boost::uint32_t IteratorBase::myReadClouds(PointBuffer& data)
     return numRead;
 }
 
-BufferPtr IteratorBase::fetchPointBuffer(Statement statement, sdo_pc* pc, boost::uint32_t capacity)
+BufferPtr IteratorBase::fetchPointBuffer(Statement statement, sdo_pc* pc)
 {
-    boost::int32_t id = m_statement->GetInteger(&pc->pc_id);
+    boost::int32_t id = statement->GetInteger(&pc->pc_id);
     BufferMap::const_iterator i = m_buffers.find(id);
 
     if (i != m_buffers.end())
@@ -673,16 +728,16 @@ BufferPtr IteratorBase::fetchPointBuffer(Statement statement, sdo_pc* pc, boost:
         boost::uint32_t block_capacity(0);
         Schema schema = m_reader.fetchSchema(statement, pc, block_capacity);
 
-        if (block_capacity > capacity)
-        {
-            std::ostringstream oss;
-            oss << "Block capacity, " << block_capacity <<", is too large to fit in "
-                << "buffer of size " << capacity<<". Increase buffer capacity with writer's \"chunk_size\" option "
-                << "or increase the read buffer size";
-            throw buffer_too_small(oss.str());
-        }
+        // if (block_capacity > capacity)
+        // {
+        //     std::ostringstream oss;
+        //     oss << "Block capacity, " << block_capacity <<", is too large to fit in "
+        //         << "buffer of size " << capacity<<". Increase buffer capacity with writer's \"chunk_size\" option "
+        //         << "or increase the read buffer size";
+        //     throw buffer_too_small(oss.str());
+        // }
 
-        BufferPtr output  = BufferPtr(new PointBuffer(schema, capacity));
+        BufferPtr output  = BufferPtr(new PointBuffer(schema, block_capacity));
         std::pair<int, BufferPtr> p(id, output);
         m_buffers.insert(p);
         getReader().log()->get(logDEBUG2) << "IteratorBase::fetchPointBuffer: creating new PointBuffer with id " << id << std::endl;
@@ -690,28 +745,28 @@ BufferPtr IteratorBase::fetchPointBuffer(Statement statement, sdo_pc* pc, boost:
         return p.second;
     }
 }
-boost::uint32_t IteratorBase::myReadBlocks(PointBuffer& data)
+boost::uint32_t IteratorBase::myReadBlocks(PointBuffer& user_buffer)
 {
     boost::uint32_t numPointsRead = 0;
 
-
-    if (bGetNewBuffer)
-    {
-
-        getReader().log()->get(logDEBUG2) << "IteratorBase::myReadBlocks: Switching buffer to m_new_buffer with id " << m_active_cloud_id << std::endl;
-        data = *m_new_buffer;
-        bGetNewBuffer = false;
-    }
-    data.setNumPoints(0);
+    user_buffer.setNumPoints(0);
 
     bool bDidRead = false;
-
-
-    if (m_block->num_points > static_cast<boost::int32_t>(data.getCapacity()))
+    
+    if (!m_oracle_buffer) 
+    {
+        m_oracle_buffer = fetchPointBuffer(m_statement, m_block->pc);
+        boost::int32_t current_cloud_id(0);
+        current_cloud_id  = m_statement->GetInteger(&m_block->pc->pc_id);
+        m_active_cloud_id = current_cloud_id;
+    }
+    
+    // This shouldn't ever happen
+    if (m_block->num_points > static_cast<boost::int32_t>(m_oracle_buffer->getCapacity()))
     {
         std::ostringstream oss;
         oss << "Block size, " << m_block->num_points <<", is too large to fit in "
-            << "buffer of size " << data.getCapacity() <<". Increase buffer capacity with writer's \"chunk_size\" option "
+            << "buffer of size " << user_buffer.getCapacity() <<". Increase buffer capacity with writer's \"chunk_size\" option "
             << "or increase the read buffer size";
         throw buffer_too_small(oss.str());
     }
@@ -728,7 +783,7 @@ boost::uint32_t IteratorBase::myReadBlocks(PointBuffer& data)
             return 0;
         }
 
-        data.setSpatialBounds(getBounds(m_statement, m_block));
+        user_buffer.setSpatialBounds(getBounds(m_statement, m_block));
 
     }
     else
@@ -748,37 +803,30 @@ boost::uint32_t IteratorBase::myReadBlocks(PointBuffer& data)
     while (bDidRead)
     {
         boost::uint32_t numReadThisBlock = m_block->num_points;
-        boost::uint32_t numSpaceLeftThisBlock = data.getCapacity() - data.getNumPoints();
+        boost::uint32_t numSpaceLeftThisBuffer = user_buffer.getCapacity() - user_buffer.getNumPoints();
 
         getReader().log()->get(logDEBUG4) << "IteratorBase::myReadBlocks:" "numReadThisBlock: "
                                           << numReadThisBlock << " numSpaceLeftThisBlock: "
-                                          << numSpaceLeftThisBlock << " total numPointsRead: "
+                                          << numSpaceLeftThisBuffer << " total numPointsRead: "
                                           << numPointsRead << std::endl;
-
-        if (numReadThisBlock > numSpaceLeftThisBlock)
-        {
-            // We're done.  We still have more data, but the
-            // user is going to have to request another buffer.
-            // We're not going to fill the buffer up to *exactly*
-            // the number of points the user requested.
-            // If the buffer's capacity isn't large enough to hold
-            // an oracle block, they're just not going to get anything
-            // back right now (FIXME)
-            getReader().log()->get(logDEBUG3) << "IteratorBase::myReadBlocks: numReadThisBlock > numSpaceLeftThisBlock. Coming back around." << std::endl;
-            break;
-
-        }
 
         numPointsRead = numPointsRead + numReadThisBlock;
 
-        read(data, m_statement, m_block, numReadThisBlock, data.getNumPoints(), 0);
-
-        bDidRead = m_statement->Fetch();
-        if (!bDidRead)
+        readBlob(m_statement, m_block, m_block->num_points);
+        fillUserBuffer(user_buffer);
+        if (m_buffer_position != 0)
         {
-            getReader().log()->get(logDEBUG3) << "IteratorBase::myReadBlocks: done reading block. Read " << numPointsRead << " points" << std::endl;
-            m_at_end = true;
-            return numPointsRead;
+            return user_buffer.getNumPoints();
+        } 
+        else
+        {
+            bDidRead = m_statement->Fetch();
+            if (!bDidRead)
+            {
+                getReader().log()->get(logDEBUG3) << "IteratorBase::myReadBlocks: done reading block. Read " << numPointsRead << " points" << std::endl;
+                m_at_end = true;
+                return user_buffer.getNumPoints();
+            }
         }
 
 
@@ -793,9 +841,8 @@ boost::uint32_t IteratorBase::myReadBlocks(PointBuffer& data)
 
             if (current_cloud_id != m_active_cloud_id)
             {
-                m_new_buffer = fetchPointBuffer(m_statement, m_block->pc, data.getCapacity());
+                m_oracle_buffer = fetchPointBuffer(m_statement, m_block->pc);
 
-                bGetNewBuffer = true;
                 m_active_cloud_id = current_cloud_id;
                 return numPointsRead;
             }
