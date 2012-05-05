@@ -841,24 +841,12 @@ void Writer::CreatePCEntry(Schema const& buffer_schema)
         schema_data = pdal::Schema::to_xml(buffer_schema);
         
     }
-    // std::cout << m_stage.getSchema() << std::endl;
-    // std::ostream* output= FileUtils::createFile("oracle-write-schema.xml",true);
-    // *output << schema_data <<std::endl;
-    // FileUtils::closeFile(output);
 
     char* schema = (char*) malloc(schema_data.size() * sizeof(char) + 1);
     strncpy(schema, schema_data.c_str(), schema_data.size());
     schema[schema_data.size()] = '\0';
     statement->WriteCLob(&schema_locator, schema);
     statement->Bind(&schema_locator);
-
-
-    // if (header_data->size() != 0)
-    // {
-    //     OCILobLocator** locator =(OCILobLocator**) VSIMalloc( sizeof(OCILobLocator*) * 1 );
-    //     statement->Define( locator, 1 );
-    //     statement->Bind((char*)&(header_data[0]),(long)header_data->size());
-    // }
 
     std::ostringstream wkt_s;
 
