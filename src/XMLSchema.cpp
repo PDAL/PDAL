@@ -589,6 +589,11 @@ void Reader::Load()
         d.setEndianness(endianness);
 
         d.setPosition(position);
+        
+        if (d.getUUID() == boost::uuids::nil_uuid())
+        {
+            d.createUUID();
+        }
         layouts.push_back(d);
 
         dimension = dimension->next;
