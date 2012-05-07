@@ -10,6 +10,9 @@
         <Option name="chunk_size">
             80000
         </Option>
+        <Option name="xml_schema_dump">
+            schema-document.xml
+        </Option>
             <Filter type="filters.inplacereprojection">
                 <Option name="out_srs">
                     EPSG:4326+4326

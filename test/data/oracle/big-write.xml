@@ -11,10 +11,10 @@
             lidar/lidar@lidar.hobu.biz/lidar
         </Option>
         <Option name="base_table_name">
-            AUTZEN_BIG_CLOUD
+            AUTZEN_COPY_CLOUD
         </Option>
         <Option name="block_table_name">
-            AUTZEN_BIG_BLOCKS
+            AUTZEN_COPY_BLOCKS
         </Option>
         <Option name="cloud_column_name">
             CLOUD
@@ -46,7 +46,7 @@
         <Option name="post_block_sql">
         </Option>
         <Option name="capacity">
-            50
+            25000
         </Option>
         <Option name="stream_output_precision">
             8
@@ -54,6 +54,10 @@
         <Option name="disable_cloud_trigger">
             true
         </Option>
+        <Option name="pack_ignored_fields">
+            false
+        </Option>
+
             <Filter type="filters.inplacereprojection">
                 <Option name="out_srs">
                     EPSG:4326
