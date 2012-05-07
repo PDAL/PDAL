@@ -126,6 +126,9 @@ class PDAL_DLL InPlaceReprojection : public pdal::FilterSequentialIterator
 public:
     InPlaceReprojection(const pdal::filters::InPlaceReprojection& filter, PointBuffer& buffer);
 
+protected:
+    virtual void readBufferBeginImpl(PointBuffer&);
+
 private:
     boost::uint64_t skipImpl(boost::uint64_t);
     boost::uint32_t readBufferImpl(PointBuffer&);
@@ -142,7 +145,7 @@ private:
     dimension::id m_old_x_id;
     dimension::id m_old_y_id;
     dimension::id m_old_z_id;
-    
+    bool alteredSchema;
     void updateBounds(PointBuffer&);
     
 

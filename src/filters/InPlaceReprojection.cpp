@@ -412,9 +412,9 @@ InPlaceReprojection::InPlaceReprojection(const pdal::filters::InPlaceReprojectio
     , m_old_x_id(boost::uuids::nil_uuid())
     , m_old_y_id(boost::uuids::nil_uuid())
     , m_old_z_id(boost::uuids::nil_uuid())
+    , alteredSchema(false)
     , m_reprojectionFilter(filter)
 {
-    alterSchema(buffer);
     return;
 }
 
@@ -458,6 +458,9 @@ void InPlaceReprojection::alterSchema(PointBuffer& buffer)
             m_old_x_id = p_x->getUUID();
         }
 
+        m_reprojectionFilter.log()->get(logDEBUG2) << "uuid for " << x_name << " is "  << m_old_x_id<< std::endl;
+        m_reprojectionFilter.log()->get(logDEBUG2) << "parent uuid for " << x_name << " is "  <<to_dimension.getUUID() << std::endl;
+
         schema.appendDimension(to_dimension);
         m_new_x_id = to_dimension.getUUID();
         
@@ -489,7 +492,10 @@ void InPlaceReprojection::alterSchema(PointBuffer& buffer)
             to_dimension.setParent(p_y->getUUID());
             m_old_y_id = p_y->getUUID();
         }
-        
+
+        m_reprojectionFilter.log()->get(logDEBUG2) << "uuid for " << y_name << " is "  << m_old_y_id<< std::endl;
+        m_reprojectionFilter.log()->get(logDEBUG2) << "parent uuid for " << y_name << " is "  <<to_dimension.getUUID() << std::endl;
+           
         to_dimension.setNamespace(m_reprojectionFilter.getName());
         schema.appendDimension(to_dimension);
 
@@ -515,10 +521,15 @@ void InPlaceReprojection::alterSchema(PointBuffer& buffer)
             to_dimension.setParent(new_z.getUUID());
             schema.setDimension(new_z);
             m_old_z_id = new_z.getUUID();
+         
         } else {
             to_dimension.setParent(p_z->getUUID());
             m_old_z_id = p_z->getUUID();
         }
+
+        m_reprojectionFilter.log()->get(logDEBUG2) << "uuid for " << z_name << " is "  << m_old_z_id<< std::endl;
+        m_reprojectionFilter.log()->get(logDEBUG2) << "parent uuid for " << z_name << " is "  <<to_dimension.getUUID() << std::endl;
+   
 
         to_dimension.setNamespace(m_reprojectionFilter.getName());
         schema.appendDimension(to_dimension);
@@ -563,13 +574,26 @@ void InPlaceReprojection::alterSchema(PointBuffer& buffer)
     buffer = PointBuffer(schema, buffer.getCapacity());
     
 }
+
+void InPlaceReprojection::readBufferBeginImpl(PointBuffer& buffer)
+{
+    if (!alteredSchema)
+    {
+        alterSchema(buffer);
+        alteredSchema = true;
+    }
+
+}
+
 boost::uint32_t InPlaceReprojection::readBufferImpl(PointBuffer& buffer)
 {
 
-    const Schema& schema = buffer.getSchema();
     
     const boost::uint32_t numPoints = getPrevIterator().read(buffer);
 
+    const Schema& schema = buffer.getSchema();
+    
+    std::cout << schema << std::endl;
     Dimension const& old_x = schema.getDimension(m_old_x_id);
     Dimension const& old_y = schema.getDimension(m_old_y_id);
     Dimension const& old_z = schema.getDimension(m_old_z_id);
