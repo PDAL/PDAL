@@ -697,6 +697,7 @@ boost::uint32_t IteratorBase::myReadClouds(PointBuffer& user_buffer)
                 m_block = BlockPtr(new Block(getReader().getConnection()));
                 m_statement = getNextCloud(m_block, m_active_cloud_id);
                 m_at_end = false;
+                continue;
 
             }
             return numRead;
