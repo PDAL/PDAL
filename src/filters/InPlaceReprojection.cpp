@@ -592,8 +592,7 @@ boost::uint32_t InPlaceReprojection::readBufferImpl(PointBuffer& buffer)
     const boost::uint32_t numPoints = getPrevIterator().read(buffer);
 
     const Schema& schema = buffer.getSchema();
-    
-    std::cout << schema << std::endl;
+
     Dimension const& old_x = schema.getDimension(m_old_x_id);
     Dimension const& old_y = schema.getDimension(m_old_y_id);
     Dimension const& old_z = schema.getDimension(m_old_z_id);
