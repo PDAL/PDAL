@@ -1099,17 +1099,59 @@ void Writer::PackPointData(PointBuffer const& buffer,
     
     boost::uint8_t* current_position = *point_data;
     
+    // for (boost::uint32_t i = 0; i < buffer.getNumPoints(); ++i)
+    // {
+    //     boost::uint8_t* data = buffer.getData(i);
+    //     for (boost::uint32_t d = 0; d < idx.size(); ++d)
+    //     {
+    //         if (! idx[d].isIgnored())
+    //         {
+    //             memcpy(current_position, data, idx[d].getByteSize());
+    //             current_position = current_position+idx[d].getByteSize();
+    //         }
+    //         data = data + idx[d].getByteSize();
+    //             
+    //     }
+    // }
+
+    // Create a vector of two element vectors that states how long of a byte
+    // run to copy for the point based on whether or not the ignored/used 
+    // flag of the dimension switches. This is to a) eliminate panning through 
+    // the dimension multi_index repeatedly per point, and to b) eliminate 
+    // tons of small memcpy in exchange for larger ones.
+    std::vector< std::vector< boost::uint32_t> > runs;
+    bool switched = idx[0].isIgnored(); // start at with the first dimension
+    for (boost::uint32_t d = 0; d < idx.size(); ++d)
+    {
+        std::vector<boost::uint32_t> t;
+        if ( idx[d].isIgnored())
+        { 
+            t.push_back(0);
+            t.push_back(idx[d].getByteSize());
+        } 
+        else
+        {
+            t.push_back(1);
+            t.push_back(idx[d].getByteSize());
+        }
+        
+        runs.push_back(t);
+    }
+    
     for (boost::uint32_t i = 0; i < buffer.getNumPoints(); ++i)
     {
         boost::uint8_t* data = buffer.getData(i);
-        for (boost::uint32_t d = 0; d < idx.size(); ++d)
+        for (std::vector< std::vector<boost::uint32_t> >::size_type d=0; d < runs.size(); d++)
+        // for (boost::uint32_t d = 0; d < idx.size(); ++d)
         {
-            if (! idx[d].isIgnored())
+            boost::uint32_t isUsed = runs[d][0];
+            boost::uint32_t byteSize = runs[d][1];
+            if (isUsed != 0)
             {
-                memcpy(current_position, data, idx[d].getByteSize());
-                current_position = current_position+idx[d].getByteSize();
+                memcpy(current_position, data, byteSize);
+                current_position = current_position+byteSize;
             }
-            data = data + idx[d].getByteSize();
+            data = data + byteSize;
                 
         }
     }
