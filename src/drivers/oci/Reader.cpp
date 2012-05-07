@@ -35,6 +35,7 @@
 #include <pdal/drivers/oci/Reader.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/FileUtils.hpp>
+#include <pdal/Utils.hpp>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
@@ -288,14 +289,7 @@ QueryType Reader::describeQueryType()
         iCol++;
     }
     log()->get(logDEBUG)  << oss.str() << std::endl;
-    // if ( hType == SQLT_NTY)
-    // {
-    //     std::cout << "Field " << szFieldName << " is SQLT_NTY with type name " << szTypeName  << std::endl;
-    //     if (boost::iequals(szTypeName, "SDO_PC"))
-    //         return QUERY_SDO_PC;
-    //     if (boost::iequals(szTypeName, "SDO_PC_BLK_TYPE"))
-    //         return QUERY_SDO_PC_BLK_TYPE;
-    // }
+
     bool bHaveSDO_PC(false);
     if (objects.find("SDO_PC") != objects.end()) bHaveSDO_PC = true;
     bool bHaveSDO_PC_BLK_TYPE(false);
@@ -368,18 +362,6 @@ pdal::SpatialReference Reader::fetchSpatialReference(Statement statement, sdo_pc
     // Fetch the WKT for the SRID to set the coordinate system of this stage
     int srid = statement->GetInteger(&(pc->pc_geometry.sdo_srid));
 
-    // std::ostringstream select_wkt;
-    // select_wkt
-    //     << "SELECT WKTEXT3D from MDSYS.CS_SRS WHERE SRID = " << srid;
-    //
-    // int wkt_length = 3999;
-    // char* wkt = (char*) malloc (sizeof(char*) * wkt_length);
-    // Statement get_wkt(m_connection->CreateStatement(select_wkt.str().c_str()));
-    // get_wkt->Define( wkt, wkt_length );
-    // get_wkt->Execute();
-    // std::string s_wkt(wkt);
-    // free(wkt);
-
     std::ostringstream oss;
     oss <<"EPSG:" << srid;
 
@@ -424,7 +406,7 @@ pdal::Schema Reader::fetchSchema(Statement statement, sdo_pc* pc, boost::uint32_
     {
         std::ostream* out = FileUtils::createFile(write_schema_file);
         out->write(pc_schema, strlen(pc_schema));
-        delete out;
+        FileUtils::closeFile(out);
     }
 
 
@@ -640,8 +622,13 @@ void IteratorBase::copyOracleData(  PointBuffer& source,
     for (boost::uint32_t i = 0; i < howMany; ++i)
     {
         if (dest_dim.getInterpretation() == source_dim->getInterpretation() &&
-            dest_dim.getByteSize() == source_dim->getByteSize())
+            dest_dim.getByteSize() == source_dim->getByteSize() && 
+            pdal::Utils::compare_distance(dest_dim.getNumericScale(), source_dim->getNumericScale()) &&
+            pdal::Utils::compare_distance(dest_dim.getNumericOffset(), source_dim->getNumericOffset()) &&
+            dest_dim.getEndianness() == source_dim->getEndianness() 
+            )
         {
+            // FIXME: This test could produce false positives
             boost::uint8_t* source_position = source.getData(source_starting_position+i) + source_dim->getByteOffset();
             boost::uint8_t* destination_position = destination.getData(destination_starting_position + i) + dest_dim.getByteOffset();
             memcpy(destination_position, source_position, source_dim->getByteSize());
