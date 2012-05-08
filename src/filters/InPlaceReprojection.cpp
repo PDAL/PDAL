@@ -86,6 +86,12 @@ InPlaceReprojection::InPlaceReprojection(Stage& prevStage, const Options& option
     : pdal::Filter(prevStage, options)
     , m_outSRS(options.getValueOrThrow<pdal::SpatialReference>("out_srs"))
     , m_inferInputSRS(false)
+    , m_new_x_id(boost::uuids::nil_uuid())
+    , m_new_y_id(boost::uuids::nil_uuid())
+    , m_new_z_id(boost::uuids::nil_uuid())
+    , m_old_x_id(boost::uuids::nil_uuid())
+    , m_old_y_id(boost::uuids::nil_uuid())
+    , m_old_z_id(boost::uuids::nil_uuid())    
 {
     if (options.hasOption("in_srs"))
     {
@@ -150,11 +156,94 @@ void InPlaceReprojection::initialize()
 #endif
 
     setSpatialReference(m_outSRS);
-
+    
+    Schema& s = getSchemaRef();
+    s = alterSchema(s);
 
     return;
 }
 
+
+void InPlaceReprojection::setDimension( std::string const& name, 
+                                        dimension::id& old_id,
+                                        dimension::id& new_id,
+                                        Schema& schema,
+                                        std::string const& scale_option_name,
+                                        std::string const& offset_option_name)
+{
+
+
+    boost::optional<Dimension const&> old_dim = schema.getDimensionOptional(name);
+    if (old_dim)
+    {
+        log()->get(logDEBUG2) << "found '" << name <<"' dimension" << std::endl;
+
+        double scale = getOptions().getValueOrDefault<double>(scale_option_name, old_dim->getNumericScale());
+        double offset = getOptions().getValueOrDefault<double>(offset_option_name, old_dim->getNumericOffset());
+        Dimension derived(*old_dim);
+        derived.setNumericScale(scale);
+        derived.setNumericOffset(offset);
+        derived.createUUID();
+        derived.setNamespace(getName());
+        
+
+            log()->get(logDEBUG2) << "uuid for " << name << " was nil" << std::endl;
+            Dimension new_dim(*old_dim);
+            new_dim.createUUID();
+            new_dim.setParent(boost::uuids::nil_uuid());
+            derived.setParent(new_dim.getUUID());
+            schema.setDimension(new_dim);
+            old_id = new_dim.getUUID();
+        // 
+        // } else {
+        //     derived.setParent(old_dim->getUUID());
+        //     old_id = old_dim->getUUID();
+        // }
+
+        log()->get(logDEBUG2) << "uuid for " << name << " is "  << old_dim->getUUID() << std::endl;
+        log()->get(logDEBUG2) << "child uuid for " << name << " is "  << derived.getUUID() << std::endl;
+
+        schema.appendDimension(derived);
+        new_id = derived.getUUID();
+        
+    }
+    
+    bool markIgnored = getOptions().getValueOrDefault<bool>("ignore_old_dimensions", true);
+    if (markIgnored)
+    {
+        boost::optional<Dimension const&> dim = schema.getDimensionOptional(old_id);
+        if (dim)
+        {
+            log()->get(logDEBUG2) << "marking " << name << " as ignored with uuid "  << old_id << std::endl;
+
+            Dimension d(*dim);
+            boost::uint32_t flags = d.getFlags();
+            d.setFlags(flags | dimension::IsIgnored);
+            schema.setDimension(d);
+        }
+    }
+    
+}
+
+Schema InPlaceReprojection::alterSchema(Schema& schema)
+{
+
+
+    const std::string x_name = getOptions().getValueOrDefault<std::string>("x_dim", "X");
+    const std::string y_name = getOptions().getValueOrDefault<std::string>("y_dim", "Y");
+    const std::string z_name = getOptions().getValueOrDefault<std::string>("z_dim", "Z");
+
+    log()->get(logDEBUG2) << "x_dim '" << x_name <<"' requested" << std::endl;
+    log()->get(logDEBUG2) << "y_dim '" << y_name <<"' requested" << std::endl;
+    log()->get(logDEBUG2) << "z_dim '" << z_name <<"' requested" << std::endl;
+
+    setDimension(x_name, m_old_x_id, m_new_x_id, schema, "scale_x", "offset_x");
+    setDimension(y_name, m_old_y_id, m_new_y_id, schema, "scale_y", "offset_y");
+    setDimension(z_name, m_old_z_id, m_new_z_id, schema, "scale_z", "offset_z");
+    
+    return schema;
+    
+}
 
 const Options InPlaceReprojection::getDefaultOptions() const
 {
@@ -406,183 +495,13 @@ namespace sequential
 
 InPlaceReprojection::InPlaceReprojection(const pdal::filters::InPlaceReprojection& filter, PointBuffer& buffer)
     : pdal::FilterSequentialIterator(filter, buffer)
-    , m_new_x_id(boost::uuids::nil_uuid())
-    , m_new_y_id(boost::uuids::nil_uuid())
-    , m_new_z_id(boost::uuids::nil_uuid())
-    , m_old_x_id(boost::uuids::nil_uuid())
-    , m_old_y_id(boost::uuids::nil_uuid())
-    , m_old_z_id(boost::uuids::nil_uuid())
-    , alteredSchema(false)
     , m_reprojectionFilter(filter)
 {
     return;
 }
 
-void InPlaceReprojection::alterSchema(PointBuffer& buffer)
-{
-
-    Schema schema = buffer.getSchema();
-
-    const std::string x_name = m_reprojectionFilter.getOptions().getValueOrDefault<std::string>("x_dim", "X");
-    const std::string y_name = m_reprojectionFilter.getOptions().getValueOrDefault<std::string>("y_dim", "Y");
-    const std::string z_name = m_reprojectionFilter.getOptions().getValueOrDefault<std::string>("z_dim", "Z");
-
-    m_reprojectionFilter.log()->get(logDEBUG2) << "x_dim '" << x_name <<"' requested" << std::endl;
-    m_reprojectionFilter.log()->get(logDEBUG2) << "y_dim '" << y_name <<"' requested" << std::endl;
-    m_reprojectionFilter.log()->get(logDEBUG2) << "z_dim '" << z_name <<"' requested" << std::endl;
-
-
-    boost::optional<Dimension const&> p_x = schema.getDimensionOptional(x_name);
-    if (p_x)
-    {
-        m_reprojectionFilter.log()->get(logDEBUG2) << "found '" << x_name <<"' dimension" << std::endl;
-
-        double scale = m_reprojectionFilter.getOptions().getValueOrDefault<double>("scale_x", p_x->getNumericScale());
-        double offset = m_reprojectionFilter.getOptions().getValueOrDefault<double>("offset_x", p_x->getNumericOffset());
-        Dimension to_dimension(*p_x);
-        to_dimension.setNumericScale(scale);
-        to_dimension.setNumericOffset(offset);
-        to_dimension.createUUID();
-        to_dimension.setNamespace(m_reprojectionFilter.getName());
-
-        if (m_old_y_id == boost::uuids::nil_uuid())
-        {
-            Dimension new_x(*p_x);
-            new_x.createUUID();
-            to_dimension.setParent(new_x.getUUID());
-            schema.setDimension(new_x);
-            m_old_x_id = new_x.getUUID();
-
-        } else {
-            to_dimension.setParent(p_x->getUUID());
-            m_old_x_id = p_x->getUUID();
-        }
-
-        m_reprojectionFilter.log()->get(logDEBUG2) << "uuid for " << x_name << " is "  << m_old_x_id<< std::endl;
-        m_reprojectionFilter.log()->get(logDEBUG2) << "parent uuid for " << x_name << " is "  <<to_dimension.getUUID() << std::endl;
-
-        schema.appendDimension(to_dimension);
-        m_new_x_id = to_dimension.getUUID();
-        
-    }
-
-
-
-    boost::optional<Dimension const&> p_y = schema.getDimensionOptional(y_name);
-    if (p_y)
-    {
-        m_reprojectionFilter.log()->get(logDEBUG2) << "found '" << y_name <<"' dimension" << std::endl;
-
-        double scale = m_reprojectionFilter.getOptions().getValueOrDefault<double>("scale_y", p_y->getNumericScale());
-        double offset = m_reprojectionFilter.getOptions().getValueOrDefault<double>("offset_y", p_y->getNumericOffset());
-        Dimension to_dimension(*p_y);
-        to_dimension.setNumericScale(scale);
-        to_dimension.setNumericOffset(offset);
-        to_dimension.createUUID();
-
-        if (m_old_y_id == boost::uuids::nil_uuid())
-        {
-            Dimension new_y(*p_y);
-            new_y.createUUID();
-            to_dimension.setParent(new_y.getUUID());
-            schema.setDimension(new_y);
-            m_old_y_id = new_y.getUUID();
-
-        } else {
-            to_dimension.setParent(p_y->getUUID());
-            m_old_y_id = p_y->getUUID();
-        }
-
-        m_reprojectionFilter.log()->get(logDEBUG2) << "uuid for " << y_name << " is "  << m_old_y_id<< std::endl;
-        m_reprojectionFilter.log()->get(logDEBUG2) << "parent uuid for " << y_name << " is "  <<to_dimension.getUUID() << std::endl;
-           
-        to_dimension.setNamespace(m_reprojectionFilter.getName());
-        schema.appendDimension(to_dimension);
-
-        m_new_y_id = to_dimension.getUUID();
-    }
-
-    boost::optional<Dimension const&> p_z = schema.getDimensionOptional(z_name);
-    if (p_z)
-    {
-        m_reprojectionFilter.log()->get(logDEBUG2) << "found '" << z_name <<"' dimension" << std::endl;
-
-        double scale = m_reprojectionFilter.getOptions().getValueOrDefault<double>("scale_z", p_z->getNumericScale());
-        double offset = m_reprojectionFilter.getOptions().getValueOrDefault<double>("offset_z", p_z->getNumericOffset());
-        Dimension to_dimension(*p_z);
-        to_dimension.setNumericScale(scale);
-        to_dimension.setNumericOffset(offset);
-        to_dimension.createUUID();
-
-        if (m_old_z_id == boost::uuids::nil_uuid())
-        {
-            Dimension new_z(*p_z);
-            new_z.createUUID();
-            to_dimension.setParent(new_z.getUUID());
-            schema.setDimension(new_z);
-            m_old_z_id = new_z.getUUID();
-         
-        } else {
-            to_dimension.setParent(p_z->getUUID());
-            m_old_z_id = p_z->getUUID();
-        }
-
-        m_reprojectionFilter.log()->get(logDEBUG2) << "uuid for " << z_name << " is "  << m_old_z_id<< std::endl;
-        m_reprojectionFilter.log()->get(logDEBUG2) << "parent uuid for " << z_name << " is "  <<to_dimension.getUUID() << std::endl;
-   
-
-        to_dimension.setNamespace(m_reprojectionFilter.getName());
-        schema.appendDimension(to_dimension);
-
-        m_new_z_id = to_dimension.getUUID();
-    }
-
-    bool markIgnored = m_reprojectionFilter.getOptions().getValueOrDefault<bool>("ignore_old_dimensions", true);
-    if (markIgnored)
-    {
-        boost::optional<Dimension const&> x_dim = schema.getDimensionOptional(m_old_x_id);
-        if (x_dim)
-        {
-
-            Dimension x(*x_dim);
-            boost::uint32_t flags = x.getFlags();
-            x.setFlags(flags | dimension::IsIgnored);
-            schema.setDimension(x);
-        }
-
-        boost::optional<Dimension const&> y_dim = schema.getDimensionOptional(m_old_y_id);
-        if (y_dim)
-        {
-
-            Dimension y(*y_dim);
-            boost::uint32_t flags = y.getFlags();
-            y.setFlags(flags | dimension::IsIgnored);
-            schema.setDimension(y);
-        }
-
-        boost::optional<Dimension const&> z_dim = schema.getDimensionOptional(m_old_z_id);
-        if (z_dim)
-        {
-
-            Dimension z(*z_dim);
-            boost::uint32_t flags = z.getFlags();
-            z.setFlags(flags | dimension::IsIgnored);
-            schema.setDimension(z);
-        }
-    } 
-
-    buffer = PointBuffer(schema, buffer.getCapacity());
-    
-}
-
 void InPlaceReprojection::readBufferBeginImpl(PointBuffer& buffer)
 {
-    if (!alteredSchema)
-    {
-        alterSchema(buffer);
-        alteredSchema = true;
-    }
-
 }
 
 boost::uint32_t InPlaceReprojection::readBufferImpl(PointBuffer& buffer)
@@ -592,14 +511,14 @@ boost::uint32_t InPlaceReprojection::readBufferImpl(PointBuffer& buffer)
     const boost::uint32_t numPoints = getPrevIterator().read(buffer);
 
     const Schema& schema = buffer.getSchema();
+    
+    Dimension const& old_x = schema.getDimension(m_reprojectionFilter.getOldXId());
+    Dimension const& old_y = schema.getDimension(m_reprojectionFilter.getOldYId());
+    Dimension const& old_z = schema.getDimension(m_reprojectionFilter.getOldZId());
 
-    Dimension const& old_x = schema.getDimension(m_old_x_id);
-    Dimension const& old_y = schema.getDimension(m_old_y_id);
-    Dimension const& old_z = schema.getDimension(m_old_z_id);
-
-    Dimension const& new_x = schema.getDimension(m_new_x_id);
-    Dimension const& new_y = schema.getDimension(m_new_y_id);
-    Dimension const& new_z = schema.getDimension(m_new_z_id);
+    Dimension const& new_x = schema.getDimension(m_reprojectionFilter.getNewXId());
+    Dimension const& new_y = schema.getDimension(m_reprojectionFilter.getNewYId());
+    Dimension const& new_z = schema.getDimension(m_reprojectionFilter.getNewZId());
     
     bool logOutput = m_reprojectionFilter.log()->getLevel() > logDEBUG4;
     m_reprojectionFilter.log()->floatPrecision(8);

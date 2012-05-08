@@ -95,10 +95,26 @@ public:
                         std::size_t pointIndex) const;
 
     void transform(double& x, double& y, double& z) const;
+    
+    dimension::id const& getOldXId() const { return m_old_x_id; }
+    dimension::id const& getOldYId() const { return m_old_y_id; }
+    dimension::id const& getOldZId() const { return m_old_z_id; }
+
+    dimension::id const& getNewXId() const { return m_new_x_id; }
+    dimension::id const& getNewYId() const { return m_new_y_id; }
+    dimension::id const& getNewZId() const { return m_new_z_id; }
+
 
 private:
-
-
+    
+    Schema alterSchema(Schema & s);
+    void setDimension( std::string const& name, 
+                       dimension::id& old_id,
+                       dimension::id& new_id,
+                       Schema& schema,
+                       std::string const& scale_option_name,
+                       std::string const& offset_option_name);
+                       
     SpatialReference m_inSRS;
     SpatialReference m_outSRS;
     bool m_inferInputSRS;
@@ -109,6 +125,14 @@ private:
     ReferencePtr m_out_ref_ptr;
     TransformPtr m_transform_ptr;
 
+    dimension::id m_new_x_id;
+    dimension::id m_new_y_id;
+    dimension::id m_new_z_id;
+
+    dimension::id m_old_x_id;
+    dimension::id m_old_y_id;
+    dimension::id m_old_z_id;
+    
     boost::shared_ptr<pdal::gdal::Debug> m_gdal_debug;
 
     InPlaceReprojection& operator=(const InPlaceReprojection&); // not implemented
@@ -134,20 +158,11 @@ private:
     boost::uint32_t readBufferImpl(PointBuffer&);
     bool atEndImpl() const;
 
-    void alterSchema(pdal::PointBuffer&);
-
     std::map<dimension::id, dimension::id> m_dimension_map;
     
-    dimension::id m_new_x_id;
-    dimension::id m_new_y_id;
-    dimension::id m_new_z_id;
 
-    dimension::id m_old_x_id;
-    dimension::id m_old_y_id;
-    dimension::id m_old_z_id;
-    bool alteredSchema;
     void updateBounds(PointBuffer&);
-    
+
 
     const pdal::filters::InPlaceReprojection& m_reprojectionFilter;
 };
