@@ -12,7 +12,7 @@
 #include "Redirector.hpp"
 
 #ifdef PDAL_COMPILER_MSVC
-//#  pragma warning(disable: 4127)  // conditional expression is constant
+#  pragma warning(disable: 4127)  // conditional expression is constant
 #endif
 
 #include <Python.h>
@@ -21,17 +21,18 @@ namespace pdal
 {
 namespace plang
 {
-namespace emb
-{
 
+PyObject* Redirector::g_stdout;
+PyObject* Redirector::g_stdout_saved;
 
 struct Stdout
 {
     PyObject_HEAD
-    stdout_write_type write;
+    Redirector::stdout_write_type write;
 };
 
-PyObject* Stdout_write(PyObject* self, PyObject* args)
+
+static PyObject* Stdout_write(PyObject* self, PyObject* args)
 {
     std::size_t written(0);
     Stdout* selfimpl = reinterpret_cast<Stdout*>(self);
@@ -48,23 +49,26 @@ PyObject* Stdout_write(PyObject* self, PyObject* args)
     return PyLong_FromSize_t(written);
 }
 
-PyObject* Stdout_flush(PyObject* self, PyObject* args)
+
+static PyObject* Stdout_flush(PyObject* /*self*/, PyObject* /*args*/)
 {
     // no-op
     return Py_BuildValue("");
 }
 
-PyMethodDef Stdout_methods[] =
+
+static PyMethodDef Stdout_methods[] =
 {
     {"write", Stdout_write, METH_VARARGS, "sys.stdout.write"},
     {"flush", Stdout_flush, METH_VARARGS, "sys.stdout.write"},
     {0, 0, 0, 0} // sentinel
 };
 
-PyTypeObject StdoutType =
+
+static PyTypeObject StdoutType =
 {
     PyVarObject_HEAD_INIT(0, 0)
-    "emb.StdoutType", /* tp_name */
+    "redirector.StdoutType", /* tp_name */
     sizeof(Stdout), /* tp_basicsize */
     0, /* tp_itemsize */
     0, /* tp_dealloc */
@@ -83,7 +87,7 @@ PyTypeObject StdoutType =
     0, /* tp_setattro */
     0, /* tp_as_buffer */
     Py_TPFLAGS_DEFAULT, /* tp_flags */
-    "emb.Stdout objects", /* tp_doc */
+    "redirector.Stdout objects", /* tp_doc */
     0, /* tp_traverse */
     0, /* tp_clear */
     0, /* tp_richcompare */
@@ -103,36 +107,34 @@ PyTypeObject StdoutType =
     0, /* tp_new */
 };
 
-/***PyModuleDef embmodule =
+
+
+PyMODINIT_FUNC redirector_init(void)
 {
-    PyModuleDef_HEAD_INIT,
-    "emb", 0, -1, 0,
-};***/
+    Redirector::init();
+}
 
-// Internal state
-PyObject* g_stdout;
-PyObject* g_stdout_saved;
 
-PyMODINIT_FUNC /***PyInit_emb***/init(void)
+void Redirector::init()
 {
     g_stdout = 0;
     g_stdout_saved = 0;
 
     StdoutType.tp_new = PyType_GenericNew;
     if (PyType_Ready(&StdoutType) < 0)
-        return /***0***/;
+        return;
 
-    /***PyObject* m = PyModule_Create(&embmodule);***/
-    PyObject* m = Py_InitModule3("emb", 0, 0);
+    PyObject* m = Py_InitModule3("redirector", 0, 0);
     if (m)
     {
         Py_INCREF(&StdoutType);
         PyModule_AddObject(m, "Stdout", reinterpret_cast<PyObject*>(&StdoutType));
     }
-    return /***m***/;
+    return;
 }
 
-void set_stdout(stdout_write_type write)
+
+void Redirector::set_stdout(stdout_write_type write)
 {
     if (!g_stdout)
     {
@@ -145,7 +147,8 @@ void set_stdout(stdout_write_type write)
     PySys_SetObject("stdout", g_stdout);
 }
 
-void reset_stdout()
+
+void Redirector::reset_stdout()
 {
     if (g_stdout_saved)
         PySys_SetObject("stdout", g_stdout_saved);
@@ -156,9 +159,7 @@ void reset_stdout()
 
 
 
-} // namespace emb
-
-}
 } //namespaces
+}
 
 #endif

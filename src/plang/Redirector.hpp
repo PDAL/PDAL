@@ -32,20 +32,28 @@ namespace pdal
 {
 namespace plang
 {
-namespace emb
+
+    
+PyMODINIT_FUNC redirector_init(void);
+
+class Redirector
 {
+public:
+    typedef std::function<void(std::string)> stdout_write_type;
 
-typedef std::function<void(std::string)> stdout_write_type;
-void set_stdout(stdout_write_type write);
-void reset_stdout();
+    static void init();
+    static void set_stdout(stdout_write_type write);
+    static void reset_stdout();
 
-PyMODINIT_FUNC /***PyInit_emb***/init(void);
+private:
+    // Internal state
+    static PyObject* g_stdout;
+    static PyObject* g_stdout_saved;
+};
 
 
-} // emb namespace
-
-}
 } // namespaces
+}
 
 #endif
 
