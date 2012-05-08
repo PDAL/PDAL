@@ -95,23 +95,15 @@ void Writer::initialize()
     pdal::Writer::initialize();
 
     m_streamManager.open();
-
+        
     setCompressed(getOptions().getValueOrDefault("compression", false));
 
     if (getOptions().hasOption("a_srs"))
     {
         setSpatialReference(getOptions().getValueOrThrow<std::string>("a_srs"));
-    }
+    } 
+    
 
-    setPointFormat(static_cast<PointFormat>(getOptions().getValueOrDefault<boost::uint32_t>("format", 3)));
-    setFormatVersion((boost::uint8_t)getOptions().getValueOrDefault<boost::uint32_t>("major_version", 1),
-                     (boost::uint8_t)getOptions().getValueOrDefault<boost::uint32_t>("minor_version", 2));
-    setDate((boost::uint16_t)getOptions().getValueOrDefault<boost::uint32_t>("year", 0),
-            (boost::uint16_t)getOptions().getValueOrDefault<boost::uint32_t>("day_of_year", 0));
-
-    setHeaderPadding(getOptions().getValueOrDefault<boost::uint32_t>("header_padding", 0));
-    setSystemIdentifier(getOptions().getValueOrDefault<std::string>("system_id", LasHeader::SystemIdentifier));
-    setGeneratingSoftware(getOptions().getValueOrDefault<std::string>("software_id", LasHeader::SoftwareIdentifier));
     return;
 }
 
@@ -130,6 +122,7 @@ const Options Writer::getDefaultOptions() const
     Option system_id("system_id", LasHeader::SystemIdentifier, "System ID for this file");
     Option software_id("software_id", LasHeader::SoftwareIdentifier, "Software ID for this file");
     Option header_padding("header_padding", 0, "Header padding (space between end of VLRs and beginning of point data)");
+    Option set_metadata("forward_metadata", false, "forward metadata into the file as necessary");
 
     options.add(major_version);
     options.add(minor_version);
@@ -223,6 +216,88 @@ void Writer::writeBufferBegin(PointBuffer const& data)
 
     m_lasHeader.setSpatialReference(getSpatialReference());
 
+
+    bool useMetadata = getOptions().getValueOrDefault<bool>("forward_metadata", false);
+
+    pdal::Metadata metadata = getPrevStage().collectMetadata();
+    
+    boost::optional<pdal::metadata::Entry const&> format = metadata.getEntryOptional("dataformatid");
+    if (format && useMetadata)
+    {
+        setPointFormat(static_cast<PointFormat>(format->cast<boost::uint32_t>()));
+    } 
+    else 
+    {
+        setPointFormat(static_cast<PointFormat>(getOptions().getValueOrDefault<boost::uint32_t>("format", 3)));        
+    }
+
+    boost::optional<pdal::metadata::Entry const&> major = metadata.getEntryOptional("version_major");
+    boost::optional<pdal::metadata::Entry const&> minor = metadata.getEntryOptional("version_minor");
+    if (minor && useMetadata)
+    {
+        setFormatVersion((boost::uint8_t)getOptions().getValueOrDefault<boost::uint32_t>("major_version", 1),
+                         minor->cast<boost::uint32_t>());
+    } 
+    else 
+    {
+        setFormatVersion((boost::uint8_t)getOptions().getValueOrDefault<boost::uint32_t>("major_version", 1),
+                         (boost::uint8_t)getOptions().getValueOrDefault<boost::uint32_t>("minor_version", 2));     
+    }
+    
+     
+
+    boost::optional<pdal::metadata::Entry const&> year = metadata.getEntryOptional("creation_year");
+    boost::optional<pdal::metadata::Entry const&> day = metadata.getEntryOptional("creation_doy");
+    if (year && day && useMetadata)
+    {
+        setFormatVersion((boost::uint8_t)getOptions().getValueOrDefault<boost::uint32_t>("major_version", 1),
+                         minor->cast<boost::uint32_t>());
+        log()->get(logDEBUG) << "Setting version to " << getOptions().getValueOrDefault<boost::uint32_t>("major_version", 1)
+                             << ", " << minor->cast<boost::uint32_t>() << std::endl;
+
+    } 
+    else 
+    {
+        if (!getOptions().getValueOrDefault<bool>("todays_date", false))
+        {
+            setDate((boost::uint16_t)getOptions().getValueOrDefault<boost::uint32_t>("year", 0),
+                    (boost::uint16_t)getOptions().getValueOrDefault<boost::uint32_t>("day_of_year", 0)); 
+            
+        }
+    }
+
+    boost::optional<pdal::metadata::Entry const&> software_id = metadata.getEntryOptional("software_id");
+    if (software_id && useMetadata)
+    {
+        try 
+        {
+            setGeneratingSoftware(software_id->cast<std::string>());
+        } catch (std::bad_cast&) {}
+    } 
+    else 
+    {
+        setGeneratingSoftware(getOptions().getValueOrDefault<std::string>("software_id", LasHeader::SoftwareIdentifier));
+    }    
+
+    boost::optional<pdal::metadata::Entry const&> system_id = metadata.getEntryOptional("system_id");
+    if (system_id && useMetadata)
+    {
+        try 
+        {
+            setSystemIdentifier(system_id->cast<std::string>());
+        } catch (std::bad_cast&) {}
+    } 
+    else 
+    {
+        setSystemIdentifier(getOptions().getValueOrDefault<std::string>("system_id", LasHeader::SystemIdentifier));
+    }    
+    
+
+
+    setHeaderPadding(getOptions().getValueOrDefault<boost::uint32_t>("header_padding", 0));
+
+
+
     LasHeaderWriter lasHeaderWriter(m_lasHeader, m_streamManager.ostream(), m_streamOffset);
     lasHeaderWriter.write();
 
@@ -258,6 +333,9 @@ void Writer::writeBufferBegin(PointBuffer const& data)
         throw pdal_error("LASzip compression is not enabled for this compressed file!");
 #endif
     }
+
+
+    
     m_headerInitialized = true;
 
     return;
