@@ -230,7 +230,7 @@ public:
     std::vector<Stage*> getPrevStages() const;
 
     virtual Metadata getMetadata() const;
-
+    virtual Metadata collectMetadata() const;
 
 protected:
 
