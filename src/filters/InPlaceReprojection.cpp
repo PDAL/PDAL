@@ -500,7 +500,7 @@ InPlaceReprojection::InPlaceReprojection(const pdal::filters::InPlaceReprojectio
     return;
 }
 
-void InPlaceReprojection::readBufferBeginImpl(PointBuffer& buffer)
+void InPlaceReprojection::readBufferBeginImpl(PointBuffer& )
 {
 }
 
