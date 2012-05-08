@@ -43,6 +43,7 @@
 #endif
 
 #include <Python.h>
+#include "Redirector.hpp"
 
 namespace pdal
 {
@@ -55,6 +56,10 @@ Environment::Environment()
     , m_tracebackDictionary(NULL)
     , m_tracebackFunction(NULL)
 {
+#if 0
+    /**/PyImport_AppendInittab("emb", /***emb::PyInit_emb***/emb::init);
+#endif
+
     Py_Initialize();
 
     Invocation::numpy_init();
@@ -78,6 +83,32 @@ Environment::Environment()
     {
         throw python_error("invalid traceback function");
     }
+
+#if 0
+    /**/
+    PyImport_ImportModule("emb");
+
+    PyRun_SimpleString("print(\'hello to console\')");
+
+    // here comes the ***magic***
+    std::string buffer;
+    {
+        // switch sys.stdout to custom handler
+        emb::stdout_write_type write = [&buffer] (std::string s) { buffer += s; };
+        emb::set_stdout(write);
+        PyRun_SimpleString("print(\'hello to buffer\')");
+        PyRun_SimpleString("print(3.14)");
+        PyRun_SimpleString("print(\'still talking to buffer\')");
+        emb::reset_stdout();
+    }
+
+    PyRun_SimpleString("print(\'hello to console again\')");
+    ////////////////Py_Finalize();
+
+    // output what was written to buffer object
+    std::clog << buffer << std::endl;
+    /**/
+#endif
 
     return;
 }

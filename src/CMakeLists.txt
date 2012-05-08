@@ -397,6 +397,7 @@ set(PDAL_PLANG_HPP
   ${PDAL_PLANG_HEADERS}/BufferedInvocation.hpp
   ${PDAL_PLANG_HEADERS}/Environment.hpp
   ${PDAL_PLANG_HEADERS}/Invocation.hpp
+  ${PDAL_PLANG_SRC}/Redirector.hpp
   ${PDAL_PLANG_HEADERS}/Script.hpp
 )
 
@@ -404,6 +405,7 @@ set (PDAL_PLANG_CPP
   ${PDAL_PLANG_SRC}/BufferedInvocation.cpp
   ${PDAL_PLANG_SRC}/Environment.cpp
   ${PDAL_PLANG_SRC}/Invocation.cpp
+  ${PDAL_PLANG_SRC}/Redirector.cpp
   ${PDAL_PLANG_SRC}/Script.cpp
 )
 
