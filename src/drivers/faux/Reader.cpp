@@ -276,6 +276,7 @@ bool Reader::atEndImpl() const
 
 boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
 {
+    m_reader.log()->get(logDEBUG5) << "Reading a point buffer of " << data.getCapacity() << " points." << std::endl;
     return m_reader.processBuffer(data, getIndex());
 }
 
