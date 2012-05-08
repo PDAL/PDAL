@@ -62,6 +62,7 @@ private:
     std::string m_inputFile;
     std::string m_pipelineFile;
     bool m_usestdin;
+    bool m_validate;
 };
 
 
@@ -69,6 +70,7 @@ PcPipeline::PcPipeline(int argc, char* argv[])
     : Application(argc, argv, "pcpipeline")
     , m_inputFile("")
     , m_usestdin(false)
+    , m_validate(false)
 {
     return;
 }
@@ -93,6 +95,7 @@ void PcPipeline::addSwitches()
         ("input,i", po::value<std::string>(&m_inputFile)->default_value(""), "input file name")
         ("pipeline-serialization", po::value<std::string>(&m_pipelineFile)->default_value(""), "")
         ("stdin,s", po::value<bool>(&m_usestdin)->zero_tokens()->implicit_value(true), "Read pipeline XML from stdin")
+        ("validate", po::value<bool>(&m_validate)->zero_tokens()->implicit_value(true), "Validate the pipeline (including serialization), but do not execute writing of points")
         ;
 
     addSwitchSet(file_options);
@@ -120,7 +123,11 @@ int PcPipeline::execute()
     if (!isWriter)
         throw app_runtime_error("pipeline file is not a Writer");
 
-    manager.execute();
+    if (!manager.isWriterPipeline())
+        throw pdal_error("This pipeline does not have a writer, unable to execute");
+    manager.getWriter()->initialize();
+    
+    if (!m_validate) manager.getWriter()->write(0);
 
     if (m_pipelineFile.size() > 0)
     {
