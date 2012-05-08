@@ -135,8 +135,8 @@ Options getOptions()
     Option a_srs("spatialreference", "EPSG:2926", "");
     options.add(a_srs);
     
-    Option pack("pack_ignored_fields", false, "");
-    // options.add(pack);
+    Option pack("pack_ignored_fields", true, "");
+    options.add(pack);
     
     Option xml_schema_dump("xml_schema_dump", "oracle-xml-schema-dump.xml", "");
     options.add(xml_schema_dump);
@@ -370,33 +370,45 @@ BOOST_AUTO_TEST_CASE(read_view_reproj)
     Option& y_scale = options.getOptionByRef("scale_y");
     y_scale.setValue<float>(0.01f);
 
+    Option& srs = options.getOptionByRef("spatialreference"); 
+    srs.setValue<std::string>("EPSG:4326");
+
 
     
     pdal::drivers::oci::Reader reader_reader(options);
     pdal::filters::InPlaceReprojection reproj(reader_reader, options);
     reproj.initialize();
 
-    pdal::PointBuffer data(reproj.getSchema(), chunk_size+30);
-    boost::scoped_ptr<pdal::StageSequentialIterator> iter(reproj.createSequentialIterator(data));
+    pdal::PointBuffer data3(reproj.getSchema(), chunk_size+30);
+    boost::scoped_ptr<pdal::StageSequentialIterator> iter(reproj.createSequentialIterator(data3));
 
 
     boost::uint32_t numTotal(0);
     boost::uint32_t numRead(0);
 
-    pdal::PointBuffer data3(reproj.getSchema(), 100);
     numRead = iter->read(data3);
-    BOOST_CHECK_EQUAL(numRead, 100u);
-    numTotal = numRead + numTotal;
 
-    while (numRead !=0)
-    {
-        numRead = iter->read(data3);
-        numTotal = numRead + numTotal;
+    BOOST_CHECK_EQUAL(numRead, 10u);
+    
+    pdal::Schema const& schema = data3.getSchema();
+    
+    pdal::Dimension const& dimX = schema.getDimension("X");
+    pdal::Dimension const& dimY = schema.getDimension("Y");
+    pdal::Dimension const& dimZ = schema.getDimension("Z");
+    pdal::Dimension const& dimIntensity = schema.getDimension("Intensity");
+    pdal::Dimension const& dimRed = schema.getDimension("Red");
 
-    }
+    boost::int32_t x = data3.getField<boost::int32_t>(dimX, 0);
+    boost::int32_t y = data3.getField<boost::int32_t>(dimY, 0);
+    boost::int32_t z = data3.getField<boost::int32_t>(dimZ, 0);
+    boost::uint16_t intensity = data3.getField<boost::uint16_t>(dimIntensity, 6);
+    boost::uint16_t red = data3.getField<boost::uint16_t>(dimRed, 6);
 
-    BOOST_CHECK_EQUAL(numRead, 0u);
-    BOOST_CHECK_EQUAL(numTotal, 1065u);
+    BOOST_CHECK_EQUAL(x, -1250367506);
+    BOOST_CHECK_EQUAL(y, 492519663);
+    BOOST_CHECK_EQUAL(z, 12931);
+    BOOST_CHECK_EQUAL(intensity, 67);
+    BOOST_CHECK_EQUAL(red, 113);
 
 }
 
