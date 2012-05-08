@@ -383,7 +383,7 @@ BOOST_AUTO_TEST_CASE(read_view_reproj)
     boost::scoped_ptr<pdal::StageSequentialIterator> iter(reproj.createSequentialIterator(data3));
 
 
-    boost::uint32_t numTotal(0);
+    //boost::uint32_t numTotal(0);
     boost::uint32_t numRead(0);
 
     numRead = iter->read(data3);
