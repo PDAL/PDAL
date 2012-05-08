@@ -21,7 +21,7 @@
 
 #include <boost/cstdint.hpp>
 #include <boost/variant.hpp>
-
+#include <functional>
 #include <vector>
 #include <iostream>
 
