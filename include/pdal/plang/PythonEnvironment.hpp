@@ -69,6 +69,9 @@ public:
 
     void handleError();
 
+    void set_stdout(std::ostream* s);
+    void restore_stdout();
+
 private:
     PyObject* m_tracebackModule;
     PyObject* m_tracebackDictionary;

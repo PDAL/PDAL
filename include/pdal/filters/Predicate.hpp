@@ -115,6 +115,7 @@ private:
     boost::uint64_t skipImpl(boost::uint64_t);
     void readBeginImpl();
     boost::uint32_t readBufferImpl(PointBuffer&);
+    void readEndImpl();
     bool atEndImpl() const;
 
     void createParser();

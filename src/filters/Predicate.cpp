@@ -188,6 +188,12 @@ void Predicate::readBeginImpl()
 }
 
 
+void Predicate::readEndImpl()
+{
+    return;
+}
+
+
 boost::uint32_t Predicate::readBufferImpl(PointBuffer& dstData)
 {
     // read in a full block of points

@@ -124,6 +124,18 @@ PythonEnvironment::~PythonEnvironment()
 }
 
 
+void PythonEnvironment::set_stdout(std::ostream* s)
+{
+    return;
+}
+
+
+void PythonEnvironment::restore_stdout()
+{
+    return;
+}
+
+
 void PythonEnvironment::handleError()
 {
     // get exception info

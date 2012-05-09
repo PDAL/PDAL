@@ -180,4 +180,68 @@ BOOST_AUTO_TEST_CASE(test_two)
 }
 
 
+BOOST_AUTO_TEST_CASE(test_three)
+{return;
+    // verify we can redirect the stdout inside the python script
+
+    FileUtils::deleteFile(Support::temppath("mylog.txt"));
+
+    Options reader_opts;
+    {
+        const Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
+        Option opt1("bounds", bounds);
+        Option opt2("num_points", 1000);
+        Option opt3("mode", "constant");
+
+        reader_opts.add(opt1);
+        reader_opts.add(opt2);
+        reader_opts.add(opt3);
+
+        Option optlog("log", Support::temppath("mylog.txt"));
+        reader_opts.add(optlog);
+    }
+
+    Options xfilter_opts;
+    {
+        const pdal::Option source("source",
+            "import numpy as np\n"
+            "def xfunc(ins,outs):\n"
+            "  X = ins['X']\n"
+            "  print \"Hi!\"\n"
+            "  X = X + 1.0\n"
+            "  outs['X'] = X\n"
+            "  return True\n"
+            );
+        const pdal::Option module("module", "xModule");
+        const pdal::Option function("function", "xfunc");
+        xfilter_opts.add(source);
+        xfilter_opts.add(module);
+        xfilter_opts.add(function);
+    }
+
+    {
+        drivers::faux::Reader reader(reader_opts);
+        filters::Programmable xfilter(reader, xfilter_opts);
+
+        xfilter.initialize();
+
+        const Schema& schema = xfilter.getSchema();
+        PointBuffer data(schema, 750);
+
+        StageSequentialIterator* iter = xfilter.createSequentialIterator(data);
+        boost::uint32_t numRead = iter->read(data);
+
+        BOOST_CHECK_EQUAL(numRead, 750u);
+
+        delete iter;
+    }
+
+    bool ok = Support::compare_text_files(Support::temppath("mylog.txt"), Support::datapath("log_py.txt"));
+//    BOOST_CHECK(ok);
+
+    FileUtils::deleteFile(Support::temppath("mylog.txt"));
+    
+    return;
+}
+
 BOOST_AUTO_TEST_SUITE_END()

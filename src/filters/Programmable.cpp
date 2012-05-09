@@ -145,13 +145,25 @@ void Programmable::createParser()
 }
 
 
-boost::uint32_t Programmable::readBufferImpl(PointBuffer& data)
+void Programmable::readBeginImpl()
 {
     if (!m_pythonMethod)
     {
         createParser();
     }
 
+    return;
+}
+
+
+void Programmable::readEndImpl()
+{
+    return;
+}
+
+
+boost::uint32_t Programmable::readBufferImpl(PointBuffer& data)
+{
     m_programmableFilter.log()->get(logDEBUG5)  << "Python script " << m_programmableFilter.getScript() << " processing " << data.getCapacity() << " points." << std::endl;
 
     const boost::uint32_t numRead = getPrevIterator().read(data);
