@@ -32,8 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/Environment.hpp>
-#include <pdal/plang/Environment.hpp>
+#include <pdal/GlobalEnvironment.hpp>
+#include <pdal/plang/PythonEnvironment.hpp>
 
 
 namespace pdal
@@ -41,28 +41,28 @@ namespace pdal
 
 
 // this is (or, should be) our one and only static
-static Environment* s_environment;
+static GlobalEnvironment* s_environment;
 static boost::random::mt19937 s_rng;
 
-Environment* Environment::get()
+GlobalEnvironment* GlobalEnvironment::get()
 {
     return s_environment;
 }
 
 
-void Environment::startup()
+void GlobalEnvironment::startup()
 {
     // not threadsafe yet!
     if (!s_environment)
     {
-        s_environment = new Environment();
+        s_environment = new GlobalEnvironment();
     }
 
     return;
 }
 
 
-void Environment::shutdown()
+void GlobalEnvironment::shutdown()
 {
     // not threadsafe yet!
     if (s_environment)
@@ -75,10 +75,10 @@ void Environment::shutdown()
 }
 
 
-Environment::Environment()
+GlobalEnvironment::GlobalEnvironment()
 {
 #ifdef PDAL_HAVE_PYTHON
-    m_plangEnvironment = new pdal::plang::Environment();
+    m_plangEnvironment = new pdal::plang::PythonEnvironment();
 #endif
 
     m_rng = new boost::random::mt19937();
@@ -86,7 +86,7 @@ Environment::Environment()
 }
 
 
-Environment::~Environment()
+GlobalEnvironment::~GlobalEnvironment()
 {
 #ifdef PDAL_HAVE_PYTHON
     delete m_plangEnvironment;

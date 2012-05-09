@@ -32,8 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef PDAL_ENVIRONMENT_H
-#define PDAL_ENVIRONMENT_H
+#ifndef PDAL_GLOBAL_ENVIRONMENT_H
+#define PDAL_GLOBAL_ENVIRONMENT_H
 
 #include <pdal/pdal_internal.hpp>
 
@@ -44,23 +44,23 @@ namespace pdal
 
 namespace plang
 {
-class Environment;
+class PythonEnvironment;
 }
 
 
 // this is a singleton: only create it once, and keep it around forever
-class PDAL_DLL Environment
+class PDAL_DLL GlobalEnvironment
 {
 public:
     static void startup();
     static void shutdown();
 
-    // return the singleton Environment object
-    static Environment* get();
+    // return the singleton GlobalEnvironment object
+    static GlobalEnvironment* get();
 
 #ifdef PDAL_HAVE_PYTHON
     // get the plang (python) environment
-    plang::Environment* getPLangEnvironment()
+    plang::PythonEnvironment* getPLangEnvironment()
     {
         return m_plangEnvironment;
     }
@@ -73,17 +73,17 @@ public:
 
 private:
     // ctor and dtor are only called via startup()/shutdown()
-    Environment();
-    ~Environment();
+    GlobalEnvironment();
+    ~GlobalEnvironment();
 
 #ifdef PDAL_HAVE_PYTHON
-    plang::Environment* m_plangEnvironment;
+    plang::PythonEnvironment* m_plangEnvironment;
 #endif
 
     boost::random::mt19937* m_rng;
 
-    Environment(const Environment&); // nope
-    Environment& operator=(const Environment&); // nope
+    GlobalEnvironment(const GlobalEnvironment&); // nope
+    GlobalEnvironment& operator=(const GlobalEnvironment&); // nope
 };
 
 

@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2012, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
 *
 * All rights reserved.
 *
@@ -13,7 +13,7 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Consulting LLC nor the
+*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
 *       names of its contributors may be used to endorse or promote
 *       products derived from this software without specific prior
 *       written permission.
@@ -31,27 +31,26 @@
 * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 * OF SUCH DAMAGE.
 ****************************************************************************/
- 
-#include <boost/test/unit_test.hpp>
 
-#include <pdal/GlobalEnvironment.hpp>
-#include "Support.hpp"
+#ifndef PDAL_THREAD_ENVIRONMENT_H
+#define PDAL_THREAD_ENVIRONMENT_H
 
-BOOST_AUTO_TEST_SUITE(EnvironmentTest)
+#include <pdal/pdal_internal.hpp>
 
-
-BOOST_AUTO_TEST_CASE(EnvironmentTest_1)
+namespace pdal
 {
-    ::pdal::GlobalEnvironment* pdal_env = ::pdal::GlobalEnvironment::get();
-    BOOST_CHECK(pdal_env != NULL);
 
-#ifdef PDAL_HAVE_PYTHON
-    ::pdal::plang::PythonEnvironment* plang_env = pdal_env->getPLangEnvironment();
-    BOOST_CHECK(plang_env != NULL);
+class PDAL_DLL ThreadEnvironment
+{
+public:
+    ThreadEnvironment();
+    ~ThreadEnvironment();
+
+    ThreadEnvironment(const ThreadEnvironment&); // nope
+    ThreadEnvironment& operator=(const ThreadEnvironment&); // nope
+};
+
+
+} // namespaces
+
 #endif
-
-    return;
-}
-
-
-BOOST_AUTO_TEST_SUITE_END()

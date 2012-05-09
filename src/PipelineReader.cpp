@@ -569,7 +569,17 @@ bool PipelineReader::readPipeline(const std::string& filename)
 
     std::istream* input = FileUtils::openFile(filename);
 
-    bool isWriter = readPipeline(*input);
+    bool isWriter = false;
+
+    try
+    {
+        isWriter = readPipeline(*input);
+    }
+    catch (...)
+    {
+        FileUtils::closeFile(input);
+        throw;
+    }
 
     FileUtils::closeFile(input);
 

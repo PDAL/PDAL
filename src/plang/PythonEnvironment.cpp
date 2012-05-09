@@ -35,7 +35,7 @@
 #include <pdal/pdal_internal.hpp>
 #ifdef PDAL_HAVE_PYTHON
 
-#include <pdal/plang/Environment.hpp>
+#include <pdal/plang/PythonEnvironment.hpp>
 #include <pdal/plang/Invocation.hpp>
 
 #ifdef PDAL_COMPILER_MSVC
@@ -43,6 +43,7 @@
 #endif
 
 #include <Python.h>
+#include "Redirector.hpp"
 
 namespace pdal
 {
@@ -50,11 +51,13 @@ namespace plang
 {
 
 
-Environment::Environment()
+PythonEnvironment::PythonEnvironment()
     : m_tracebackModule(NULL)
     , m_tracebackDictionary(NULL)
     , m_tracebackFunction(NULL)
 {
+    PyImport_AppendInittab("redirector", redirector_init);
+
     Py_Initialize();
 
     Invocation::numpy_init();
@@ -79,11 +82,30 @@ Environment::Environment()
         throw python_error("invalid traceback function");
     }
 
+    PyImport_ImportModule("redirector");
+
+#if 0
+    PyRun_SimpleString("print(\'hello to console\')");
+
+    {
+        // switch sys.stdout to custom handler
+        Redirector::stdout_write_type* write = mywriterfunction;
+        Redirector::set_stdout(write);
+        PyRun_SimpleString("print(\'hello to buffer\')");
+        Redirector::reset_stdout();
+    }
+
+    PyRun_SimpleString("print(\'hello to console again\')");
+
+    // output what was written to buffer object
+    std::clog << s_buffer << std::endl;
+#endif
+
     return;
 }
 
 
-Environment::~Environment()
+PythonEnvironment::~PythonEnvironment()
 {
     Py_XDECREF(m_tracebackFunction);
 
@@ -95,7 +117,30 @@ Environment::~Environment()
 }
 
 
-void Environment::handleError()
+static void my2argwriterfunction(std::ostream* ostr, const std::string& mssg)
+{
+    *ostr << mssg;
+}
+
+
+void PythonEnvironment::set_stdout(std::ostream* ostr)
+{
+    Redirector::stdout_write_type my1argwriterfunction = boost::bind(&my2argwriterfunction, ostr, _1);
+    Redirector::set_stdout(my1argwriterfunction);
+
+    return;
+}
+
+
+void PythonEnvironment::reset_stdout()
+{
+    Redirector::reset_stdout();
+
+    return;
+}
+
+
+void PythonEnvironment::handleError()
 {
     // get exception info
     PyObject *type, *value, *traceback;

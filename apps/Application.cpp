@@ -37,7 +37,7 @@
 #include <boost/timer.hpp>
 
 #include <pdal/pdal_config.hpp>
-#include <pdal/Environment.hpp>
+#include <pdal/GlobalEnvironment.hpp>
 
 #include "Application.hpp"
 
@@ -93,7 +93,7 @@ int Application::do_startup()
 {
     try
     {
-        pdal::Environment::startup();
+        pdal::GlobalEnvironment::startup();
     }
     catch (std::exception const& e)
     {
@@ -151,7 +151,7 @@ int Application::do_shutdown()
 {
     try
     {
-        pdal::Environment::shutdown();
+        pdal::GlobalEnvironment::shutdown();
     }
     catch (std::exception const& e)
     {

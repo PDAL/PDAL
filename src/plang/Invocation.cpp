@@ -33,7 +33,7 @@
 ****************************************************************************/
 
 #include <pdal/pdal_internal.hpp>
-#include <pdal/Environment.hpp>
+#include <pdal/GlobalEnvironment.hpp>
 
 #ifdef PDAL_HAVE_PYTHON
 
@@ -68,7 +68,7 @@ void Invocation::numpy_init()
 
 Invocation::Invocation(const Script& script)
     : m_script(script)
-    , m_environment(*pdal::Environment::get()->getPLangEnvironment())
+    , m_environment(*pdal::GlobalEnvironment::get()->getPLangEnvironment())
     , m_bytecode(NULL)
     , m_module(NULL)
     , m_dictionary(NULL)

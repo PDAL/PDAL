@@ -32,8 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef PDAL_PLANG_ENVIRONMENT_H
-#define PDAL_PLANG_ENVIRONMENT_H
+#ifndef PDAL_PLANG_PYTHON_ENVIRONMENT_H
+#define PDAL_PLANG_PYTHON_ENVIRONMENT_H
 
 #include <pdal/pdal_internal.hpp>
 #ifdef PDAL_HAVE_PYTHON
@@ -61,13 +61,16 @@ namespace plang
 
 
 // this is a singleton: only create it once, and keep it around forever
-class PDAL_DLL Environment
+class PDAL_DLL PythonEnvironment
 {
 public:
-    Environment();
-    ~Environment();
+    PythonEnvironment();
+    ~PythonEnvironment();
 
     void handleError();
+
+    void set_stdout(std::ostream* ostr);
+    void reset_stdout();
 
 private:
     PyObject* m_tracebackModule;
