@@ -64,15 +64,15 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_las)
         // need to scope the writer, so that's it dtor can use the stream
         pdal::drivers::las::Writer writer(reader, ofs);
         BOOST_CHECK(writer.getDescription() == "Las Writer");
-        writer.initialize();
-
-        const boost::uint64_t numPoints = reader.getNumPoints();
-
         writer.setCompressed(false);
         writer.setDate(0, 0);
         writer.setPointFormat(::pdal::drivers::las::PointFormat3);
         writer.setSystemIdentifier("");
         writer.setGeneratingSoftware("TerraScan");
+
+        writer.initialize();
+
+        const boost::uint64_t numPoints = reader.getNumPoints();
 
         writer.write(numPoints);
     }
@@ -105,14 +105,14 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_laz)
 
         // need to scope the writer, so that's it dtor can use the stream
         pdal::drivers::las::Writer writer(reader, ofs);
-        writer.initialize();
-
         writer.setCompressed(true);
         writer.setDate(0, 0);
         writer.setPointFormat(::pdal::drivers::las::PointFormat3);
         writer.setSystemIdentifier("");
         writer.setGeneratingSoftware("TerraScan");
         writer.setHeaderPadding(2);
+
+        writer.initialize();
 
         writer.write(numPoints);
     }
@@ -154,8 +154,6 @@ static void test_a_format(const std::string& refFile, boost::uint8_t majorVersio
         // need to scope the writer, so that's it dtor can use the stream
         pdal::drivers::las::Writer writer(reader, ofs);
         BOOST_CHECK(writer.getDescription() == "Las Writer");
-        writer.initialize();
-
         writer.setCompressed(false);
         writer.setDate(78, 2008);
         writer.setPointFormat((::pdal::drivers::las::PointFormat)pointFormat);
@@ -165,6 +163,8 @@ static void test_a_format(const std::string& refFile, boost::uint8_t majorVersio
 
         boost::uuids::uuid u = boost::lexical_cast<boost::uuids::uuid>("8388f1b8-aa1b-4108-bca3-6bc68e7b062e");
         writer.setProjectId(u);
+
+        writer.initialize();
 
         writer.write(numPoints);
     }
