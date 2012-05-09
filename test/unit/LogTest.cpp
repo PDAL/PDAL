@@ -88,7 +88,9 @@ BOOST_AUTO_TEST_CASE(test_one)
 
 
 BOOST_AUTO_TEST_CASE(test_two)
-{return;
+{
+    // test commented out for now because it doesn't seem to do what mpg thought it was supposed to do
+#if 0
     Options reader_opts;
     {
         const Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
@@ -143,7 +145,7 @@ BOOST_AUTO_TEST_CASE(test_two)
     
         Option optlog("log", Support::temppath("logtest_3.txt"));
         yfilter_opts.add(optlog);
- }
+    }
 
     {
         drivers::faux::Reader reader(reader_opts);
@@ -173,7 +175,7 @@ BOOST_AUTO_TEST_CASE(test_two)
     FileUtils::deleteFile(Support::temppath("logtest_1.txt"));
     FileUtils::deleteFile(Support::temppath("logtest_2.txt"));
     FileUtils::deleteFile(Support::temppath("logtest_3.txt"));
-
+#endif
     return;
 }
 
