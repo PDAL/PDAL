@@ -43,7 +43,7 @@
 
 #include "Support.hpp"
 
-BOOST_AUTO_TEST_SUITE(BPFReaderTest)
+BOOST_AUTO_TEST_SUITE(BPFTest)
 
 BOOST_AUTO_TEST_CASE(BPFTest_test)
 {
