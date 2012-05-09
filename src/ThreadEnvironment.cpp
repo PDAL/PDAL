@@ -31,27 +31,24 @@
 * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 * OF SUCH DAMAGE.
 ****************************************************************************/
- 
-#include <boost/test/unit_test.hpp>
 
-#include <pdal/GlobalEnvironment.hpp>
-#include "Support.hpp"
-
-BOOST_AUTO_TEST_SUITE(EnvironmentTest)
+#include <pdal/ThreadEnvironment.hpp>
 
 
-BOOST_AUTO_TEST_CASE(EnvironmentTest_1)
+namespace pdal
 {
-    ::pdal::GlobalEnvironment* pdal_env = ::pdal::GlobalEnvironment::get();
-    BOOST_CHECK(pdal_env != NULL);
 
-#ifdef PDAL_HAVE_PYTHON
-    ::pdal::plang::PythonEnvironment* plang_env = pdal_env->getPLangEnvironment();
-    BOOST_CHECK(plang_env != NULL);
-#endif
 
+ThreadEnvironment::ThreadEnvironment()
+{
     return;
 }
 
 
-BOOST_AUTO_TEST_SUITE_END()
+ThreadEnvironment::~ThreadEnvironment()
+{
+    return;
+}
+
+
+} //namespaces

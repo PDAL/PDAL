@@ -32,71 +32,53 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/Environment.hpp>
-#include <pdal/plang/Environment.hpp>
+#ifndef PDAL_PLANG_PYTHON_ENVIRONMENT_H
+#define PDAL_PLANG_PYTHON_ENVIRONMENT_H
 
+#include <pdal/pdal_internal.hpp>
+#ifdef PDAL_HAVE_PYTHON
+
+#include <pdal/pdal_internal.hpp>
+#include <pdal/PointBuffer.hpp>
+
+#include <boost/cstdint.hpp>
+#include <boost/variant.hpp>
+
+#include <vector>
+#include <iostream>
+
+// forward declare PyObject so we don't need the python headers everywhere
+// see: http://mail.python.org/pipermail/python-dev/2003-August/037601.html
+#ifndef PyObject_HEAD
+struct _object;
+typedef _object PyObject;
+#endif
 
 namespace pdal
 {
-
-
-// this is (or, should be) our one and only static
-static Environment* s_environment;
-static boost::random::mt19937 s_rng;
-
-Environment* Environment::get()
+namespace plang
 {
-    return s_environment;
+
+
+// this is a singleton: only create it once, and keep it around forever
+class PDAL_DLL PythonEnvironment
+{
+public:
+    PythonEnvironment();
+    ~PythonEnvironment();
+
+    void handleError();
+
+private:
+    PyObject* m_tracebackModule;
+    PyObject* m_tracebackDictionary;
+    PyObject *m_tracebackFunction;
+};
+
+
 }
+} // namespaces
 
-
-void Environment::startup()
-{
-    // not threadsafe yet!
-    if (!s_environment)
-    {
-        s_environment = new Environment();
-    }
-
-    return;
-}
-
-
-void Environment::shutdown()
-{
-    // not threadsafe yet!
-    if (s_environment)
-    {
-        delete s_environment;
-        s_environment = NULL;
-    }
-
-    return;
-}
-
-
-Environment::Environment()
-{
-#ifdef PDAL_HAVE_PYTHON
-    m_plangEnvironment = new pdal::plang::Environment();
 #endif
 
-    m_rng = new boost::random::mt19937();
-    return;
-}
-
-
-Environment::~Environment()
-{
-#ifdef PDAL_HAVE_PYTHON
-    delete m_plangEnvironment;
-    m_plangEnvironment = NULL;
 #endif
-
-    delete m_rng;
-
-    return;
-}
-
-
-} //namespaces

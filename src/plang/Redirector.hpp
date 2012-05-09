@@ -16,15 +16,6 @@
 #include <pdal/pdal_internal.hpp>
 #ifdef PDAL_HAVE_PYTHON
 
-#include <pdal/pdal_internal.hpp>
-#include <pdal/PointBuffer.hpp>
-
-#include <boost/cstdint.hpp>
-#include <boost/variant.hpp>
-#include <functional>
-#include <vector>
-#include <iostream>
-
 #include <Python.h>
 
 
@@ -39,10 +30,10 @@ PyMODINIT_FUNC redirector_init(void);
 class Redirector
 {
 public:
-    typedef std::function<void(std::string)> stdout_write_type;
+    typedef void (stdout_write_type)(const std::string&);
 
     static void init();
-    static void set_stdout(stdout_write_type write);
+    static void set_stdout(stdout_write_type* write);
     static void reset_stdout();
 
 private:

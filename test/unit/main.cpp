@@ -38,16 +38,16 @@
 #include <pdal/pdal_internal.hpp>
 
 
-#include <pdal/Environment.hpp>
+#include <pdal/GlobalEnvironment.hpp>
 struct PDALConfig
 {
     PDALConfig()
     {
-        ::pdal::Environment::startup();
+        ::pdal::GlobalEnvironment::startup();
     }
     ~PDALConfig()
     {
-        ::pdal::Environment::shutdown();
+        ::pdal::GlobalEnvironment::shutdown();
     }
 };
 BOOST_GLOBAL_FIXTURE(PDALConfig)

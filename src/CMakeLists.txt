@@ -27,11 +27,11 @@ set(PDAL_BASE_HPP
   ${PDAL_HEADERS_DIR}/pdal_types.hpp
   ${PDAL_HEADERS_DIR}/Bounds.hpp
   ${PDAL_HEADERS_DIR}/Dimension.hpp
-  ${PDAL_HEADERS_DIR}/Environment.hpp
   ${PDAL_HEADERS_DIR}/FileUtils.hpp
   ${PDAL_HEADERS_DIR}/Filter.hpp
   ${PDAL_HEADERS_DIR}/FilterIterator.hpp
   ${PDAL_HEADERS_DIR}/GDALUtils.hpp
+  ${PDAL_HEADERS_DIR}/GlobalEnvironment.hpp
   ${PDAL_HEADERS_DIR}/Log.hpp
   ${PDAL_HEADERS_DIR}/Metadata.hpp
   ${PDAL_HEADERS_DIR}/MultiFilter.hpp
@@ -52,6 +52,7 @@ set(PDAL_BASE_HPP
   ${PDAL_HEADERS_DIR}/StageFactory.hpp
   ${PDAL_HEADERS_DIR}/StageIterator.hpp
   ${PDAL_HEADERS_DIR}/StreamFactory.hpp
+  ${PDAL_HEADERS_DIR}/ThreadEnvironment.hpp
   ${PDAL_HEADERS_DIR}/UserCallback.hpp
   ${PDAL_HEADERS_DIR}/Utils.hpp
   ${PDAL_HEADERS_DIR}/Vector.hpp  
@@ -66,10 +67,10 @@ endif()
 set(PDAL_BASE_CPP
   Bounds.cpp
   Dimension.cpp
-  Environment.cpp
   FileUtils.cpp
   Filter.cpp
   FilterIterator.cpp
+  GlobalEnvironment.cpp
   Log.cpp
   Metadata.cpp
   MultiFilter.cpp
@@ -90,6 +91,7 @@ set(PDAL_BASE_CPP
   StageFactory.cpp
   StageIterator.cpp
   StreamFactory.cpp
+  ThreadEnvironment.cpp
   UserCallback.cpp
   Utils.cpp
   Vector.cpp  
@@ -395,7 +397,7 @@ set(PDAL_PLANG_SRC ${PROJECT_SOURCE_DIR}/src/${PDAL_PLANG_PATH})
 
 set(PDAL_PLANG_HPP
   ${PDAL_PLANG_HEADERS}/BufferedInvocation.hpp
-  ${PDAL_PLANG_HEADERS}/Environment.hpp
+  ${PDAL_PLANG_HEADERS}/PythonEnvironment.hpp
   ${PDAL_PLANG_HEADERS}/Invocation.hpp
   ${PDAL_PLANG_SRC}/Redirector.hpp
   ${PDAL_PLANG_HEADERS}/Script.hpp
@@ -403,7 +405,7 @@ set(PDAL_PLANG_HPP
 
 set (PDAL_PLANG_CPP 
   ${PDAL_PLANG_SRC}/BufferedInvocation.cpp
-  ${PDAL_PLANG_SRC}/Environment.cpp
+  ${PDAL_PLANG_SRC}/PythonEnvironment.cpp
   ${PDAL_PLANG_SRC}/Invocation.cpp
   ${PDAL_PLANG_SRC}/Redirector.cpp
   ${PDAL_PLANG_SRC}/Script.cpp

@@ -212,7 +212,7 @@ void Dimension::setUUID(std::string const& id)
 
 void Dimension::createUUID()
 {
-    boost::uuids::basic_random_generator<boost::mt19937> gen(pdal::Environment::get()->getRNG());
+    boost::uuids::basic_random_generator<boost::mt19937> gen(pdal::GlobalEnvironment::get()->getRNG());
     m_uuid = gen();
 }
 void Dimension::dump() const

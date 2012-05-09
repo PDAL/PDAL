@@ -41,7 +41,7 @@
 #include <pdal/pdal_internal.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/Options.hpp>
-#include <pdal/plang/Environment.hpp>
+#include <pdal/plang/PythonEnvironment.hpp>
 #include <pdal/plang/Script.hpp>
 
 namespace pdal
@@ -98,7 +98,7 @@ private:
     void cleanup();
 
     Script m_script;
-    ::pdal::plang::Environment& m_environment;
+    ::pdal::plang::PythonEnvironment& m_environment;
 
     PyObject* m_bytecode;
     PyObject* m_module;

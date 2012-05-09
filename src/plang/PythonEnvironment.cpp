@@ -35,7 +35,7 @@
 #include <pdal/pdal_internal.hpp>
 #ifdef PDAL_HAVE_PYTHON
 
-#include <pdal/plang/Environment.hpp>
+#include <pdal/plang/PythonEnvironment.hpp>
 #include <pdal/plang/Invocation.hpp>
 
 #ifdef PDAL_COMPILER_MSVC
@@ -51,7 +51,14 @@ namespace plang
 {
 
 
-Environment::Environment()
+static std::string s_buffer;
+static void mywriterfunction(const std::string& s)
+{
+    s_buffer += s;
+}
+
+
+PythonEnvironment::PythonEnvironment()
     : m_tracebackModule(NULL)
     , m_tracebackDictionary(NULL)
     , m_tracebackFunction(NULL)
@@ -87,10 +94,9 @@ Environment::Environment()
 #if 0
     PyRun_SimpleString("print(\'hello to console\')");
 
-    std::string buffer;
     {
         // switch sys.stdout to custom handler
-        Redirector::stdout_write_type write = [&buffer] (std::string s) { buffer += s; };
+        Redirector::stdout_write_type* write = mywriterfunction;
         Redirector::set_stdout(write);
         PyRun_SimpleString("print(\'hello to buffer\')");
         Redirector::reset_stdout();
@@ -99,14 +105,14 @@ Environment::Environment()
     PyRun_SimpleString("print(\'hello to console again\')");
 
     // output what was written to buffer object
-    std::clog << buffer << std::endl;
+    std::clog << s_buffer << std::endl;
 #endif
 
     return;
 }
 
 
-Environment::~Environment()
+PythonEnvironment::~PythonEnvironment()
 {
     Py_XDECREF(m_tracebackFunction);
 
@@ -118,7 +124,7 @@ Environment::~Environment()
 }
 
 
-void Environment::handleError()
+void PythonEnvironment::handleError()
 {
     // get exception info
     PyObject *type, *value, *traceback;
