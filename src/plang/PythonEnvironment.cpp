@@ -45,6 +45,10 @@
 #include <Python.h>
 #include "Redirector.hpp"
 
+// http://www.linuxjournal.com/article/3641
+// http://www.codeproject.com/Articles/11805/Embedding-Python-in-C-C-Part-I
+// http://stackoverflow.com/questions/6596016/python-threads-in-c
+
 namespace pdal
 {
 namespace plang
@@ -55,6 +59,7 @@ PythonEnvironment::PythonEnvironment()
     : m_tracebackModule(NULL)
     , m_tracebackDictionary(NULL)
     , m_tracebackFunction(NULL)
+    , m_redirector(new Redirector())
 {
     PyImport_AppendInittab("redirector", redirector_init);
 
@@ -84,29 +89,14 @@ PythonEnvironment::PythonEnvironment()
 
     PyImport_ImportModule("redirector");
 
-#if 0
-    PyRun_SimpleString("print(\'hello to console\')");
-
-    {
-        // switch sys.stdout to custom handler
-        Redirector::stdout_write_type* write = mywriterfunction;
-        Redirector::set_stdout(write);
-        PyRun_SimpleString("print(\'hello to buffer\')");
-        Redirector::reset_stdout();
-    }
-
-    PyRun_SimpleString("print(\'hello to console again\')");
-
-    // output what was written to buffer object
-    std::clog << s_buffer << std::endl;
-#endif
-
     return;
 }
 
 
 PythonEnvironment::~PythonEnvironment()
 {
+    delete m_redirector;
+
     Py_XDECREF(m_tracebackFunction);
 
     Py_XDECREF(m_tracebackModule);
@@ -117,16 +107,9 @@ PythonEnvironment::~PythonEnvironment()
 }
 
 
-static void my2argwriterfunction(std::ostream* ostr, const std::string& mssg)
-{
-    *ostr << mssg;
-}
-
-
 void PythonEnvironment::set_stdout(std::ostream* ostr)
 {
-    Redirector::stdout_write_type my1argwriterfunction = boost::bind(&my2argwriterfunction, ostr, _1);
-    Redirector::set_stdout(my1argwriterfunction);
+    m_redirector->set_stdout(ostr);
 
     return;
 }
@@ -134,7 +117,7 @@ void PythonEnvironment::set_stdout(std::ostream* ostr)
 
 void PythonEnvironment::reset_stdout()
 {
-    Redirector::reset_stdout();
+    m_redirector->reset_stdout();
 
     return;
 }
