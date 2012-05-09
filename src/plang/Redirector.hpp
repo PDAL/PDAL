@@ -32,17 +32,21 @@ PyMODINIT_FUNC redirector_init(void);
 class Redirector
 {
 public:
-    typedef boost::function<void(std::string)> stdout_write_type;
-    //typedef void (stdout_write_type)(const std::string&);
+    Redirector();
+    ~Redirector();
 
     static void init();
-    static void set_stdout(stdout_write_type write);
-    static void reset_stdout();
+    void set_stdout(std::ostream* ostr);
+    void reset_stdout();
+
+    typedef boost::function<void(std::string)> stdout_write_type;
 
 private:
+    void set_stdout(stdout_write_type write);
+
     // Internal state
-    static PyObject* g_stdout;
-    static PyObject* g_stdout_saved;
+    PyObject* m_stdout;
+    PyObject* m_stdout_saved;
 };
 
 

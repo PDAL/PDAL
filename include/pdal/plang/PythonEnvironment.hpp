@@ -59,8 +59,10 @@ namespace pdal
 namespace plang
 {
 
+class Redirector;
 
-// this is a singleton: only create it once, and keep it around forever
+
+// there is one PythonEnvironment object per GlobalEnvironment object
 class PDAL_DLL PythonEnvironment
 {
 public:
@@ -69,6 +71,7 @@ public:
 
     void handleError();
 
+    // these just forward into the Redirector class
     void set_stdout(std::ostream* ostr);
     void reset_stdout();
 
@@ -76,6 +79,8 @@ private:
     PyObject* m_tracebackModule;
     PyObject* m_tracebackDictionary;
     PyObject *m_tracebackFunction;
+
+    Redirector* m_redirector;
 };
 
 

@@ -22,9 +22,6 @@ namespace pdal
 namespace plang
 {
 
-PyObject* Redirector::g_stdout;
-PyObject* Redirector::g_stdout_saved;
-
 struct Stdout
 {
     PyObject_HEAD
@@ -108,6 +105,19 @@ static PyTypeObject StdoutType =
 };
 
 
+Redirector::Redirector()
+    : m_stdout(NULL)
+    , m_stdout_saved(NULL)
+{
+    return;
+}
+
+
+Redirector::~Redirector()
+{
+    return;
+}
+
 
 PyMODINIT_FUNC redirector_init(void)
 {
@@ -117,9 +127,6 @@ PyMODINIT_FUNC redirector_init(void)
 
 void Redirector::init()
 {
-    g_stdout = 0;
-    g_stdout_saved = 0;
-
     StdoutType.tp_new = PyType_GenericNew;
     if (PyType_Ready(&StdoutType) < 0)
         return;
@@ -134,27 +141,42 @@ void Redirector::init()
 }
 
 
+static void my2argwriterfunction(std::ostream* ostr, const std::string& mssg)
+{
+    *ostr << mssg;
+}
+
+
+void Redirector::set_stdout(std::ostream* ostr)
+{
+    stdout_write_type my1argwriterfunction = boost::bind(&my2argwriterfunction, ostr, _1);
+    this->set_stdout(my1argwriterfunction);
+
+    return;
+}
+
+
 void Redirector::set_stdout(stdout_write_type write)
 {
-    if (!g_stdout)
+    if (!m_stdout)
     {
-        g_stdout_saved = PySys_GetObject("stdout"); // borrowed
-        g_stdout = StdoutType.tp_new(&StdoutType, 0, 0);
+        m_stdout_saved = PySys_GetObject("stdout"); // borrowed
+        m_stdout = StdoutType.tp_new(&StdoutType, 0, 0);
     }
 
-    Stdout* impl = reinterpret_cast<Stdout*>(g_stdout);
+    Stdout* impl = reinterpret_cast<Stdout*>(m_stdout);
     impl->write = write;
-    PySys_SetObject("stdout", g_stdout);
+    PySys_SetObject("stdout", m_stdout);
 }
 
 
 void Redirector::reset_stdout()
 {
-    if (g_stdout_saved)
-        PySys_SetObject("stdout", g_stdout_saved);
+    if (m_stdout_saved)
+        PySys_SetObject("stdout", m_stdout_saved);
 
-    Py_XDECREF(g_stdout);
-    g_stdout = 0;
+    Py_XDECREF(m_stdout);
+    m_stdout = 0;
 }
 
 
