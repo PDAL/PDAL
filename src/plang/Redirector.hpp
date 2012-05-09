@@ -18,6 +18,8 @@
 
 #include <Python.h>
 
+#include <boost/function.hpp>
+#include <boost/bind.hpp>
 
 namespace pdal
 {
@@ -30,10 +32,11 @@ PyMODINIT_FUNC redirector_init(void);
 class Redirector
 {
 public:
-    typedef void (stdout_write_type)(const std::string&);
+    typedef boost::function<void(std::string)> stdout_write_type;
+    //typedef void (stdout_write_type)(const std::string&);
 
     static void init();
-    static void set_stdout(stdout_write_type* write);
+    static void set_stdout(stdout_write_type write);
     static void reset_stdout();
 
 private:

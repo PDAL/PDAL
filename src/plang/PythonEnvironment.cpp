@@ -51,13 +51,6 @@ namespace plang
 {
 
 
-static std::string s_buffer;
-static void mywriterfunction(const std::string& s)
-{
-    s_buffer += s;
-}
-
-
 PythonEnvironment::PythonEnvironment()
     : m_tracebackModule(NULL)
     , m_tracebackDictionary(NULL)
@@ -124,14 +117,25 @@ PythonEnvironment::~PythonEnvironment()
 }
 
 
-void PythonEnvironment::set_stdout(std::ostream* s)
+static void my2argwriterfunction(std::ostream* ostr, const std::string& mssg)
 {
+    *ostr << mssg;
+}
+
+
+void PythonEnvironment::set_stdout(std::ostream* ostr)
+{
+    Redirector::stdout_write_type my1argwriterfunction = boost::bind(&my2argwriterfunction, ostr, _1);
+    Redirector::set_stdout(my1argwriterfunction);
+
     return;
 }
 
 
-void PythonEnvironment::restore_stdout()
+void PythonEnvironment::reset_stdout()
 {
+    Redirector::reset_stdout();
+
     return;
 }
 

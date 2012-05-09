@@ -152,12 +152,15 @@ void Programmable::readBeginImpl()
         createParser();
     }
 
+    pdal::GlobalEnvironment::get()->getPLangEnvironment()->set_stdout( m_programmableFilter.log()->getLogStream() );
+
     return;
 }
 
 
 void Programmable::readEndImpl()
 {
+    pdal::GlobalEnvironment::get()->getPLangEnvironment()->reset_stdout( );
     return;
 }
 

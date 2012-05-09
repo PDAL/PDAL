@@ -181,7 +181,7 @@ BOOST_AUTO_TEST_CASE(test_two)
 
 
 BOOST_AUTO_TEST_CASE(test_three)
-{return;
+{
     // verify we can redirect the stdout inside the python script
 
     FileUtils::deleteFile(Support::temppath("mylog.txt"));
@@ -237,7 +237,7 @@ BOOST_AUTO_TEST_CASE(test_three)
     }
 
     bool ok = Support::compare_text_files(Support::temppath("mylog.txt"), Support::datapath("log_py.txt"));
-//    BOOST_CHECK(ok);
+    BOOST_CHECK(ok);
 
     FileUtils::deleteFile(Support::temppath("mylog.txt"));
     

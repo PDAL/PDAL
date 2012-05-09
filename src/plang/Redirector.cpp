@@ -28,7 +28,7 @@ PyObject* Redirector::g_stdout_saved;
 struct Stdout
 {
     PyObject_HEAD
-    Redirector::stdout_write_type* write;
+    Redirector::stdout_write_type write;
 };
 
 
@@ -36,7 +36,7 @@ static PyObject* Stdout_write(PyObject* self, PyObject* args)
 {
     std::size_t written(0);
     Stdout* selfimpl = reinterpret_cast<Stdout*>(self);
-    //if (selfimpl->write)
+    if (selfimpl->write)
     {
         char* data;
         if (!PyArg_ParseTuple(args, "s", &data))
@@ -134,7 +134,7 @@ void Redirector::init()
 }
 
 
-void Redirector::set_stdout(stdout_write_type* write)
+void Redirector::set_stdout(stdout_write_type write)
 {
     if (!g_stdout)
     {

@@ -184,12 +184,16 @@ void Predicate::readBeginImpl()
 
     m_numPointsProcessed = m_numPointsPassed = 0;
 
+    pdal::GlobalEnvironment::get()->getPLangEnvironment()->set_stdout( m_predicateFilter.log()->getLogStream() );
+
     return;
 }
 
 
 void Predicate::readEndImpl()
 {
+    pdal::GlobalEnvironment::get()->getPLangEnvironment()->reset_stdout( );
+
     return;
 }
 
