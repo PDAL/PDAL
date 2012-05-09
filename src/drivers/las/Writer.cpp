@@ -63,7 +63,14 @@ Writer::Writer(Stage& prevStage, const Options& options)
     , m_headerInitialized(false)
     , m_streamOffset(0)
 {
+    setGeneratingSoftware(options.getValueOrDefault<std::string>("software_id", LasHeader::SoftwareIdentifier));
+    setDate((boost::uint16_t)options.getValueOrDefault<boost::uint32_t>("year", 0),
+             (boost::uint16_t)options.getValueOrDefault<boost::uint32_t>("day_of_year", 0)); 
+    setPointFormat(static_cast<PointFormat>(options.getValueOrDefault<boost::uint32_t>("format", 3)));        
+    setSystemIdentifier(options.getValueOrDefault<std::string>("system_id", LasHeader::SystemIdentifier));
 
+    setHeaderPadding(options.getValueOrDefault<boost::uint32_t>("header_padding", 0));
+    
     return;
 }
 
@@ -75,6 +82,13 @@ Writer::Writer(Stage& prevStage, std::ostream* ostream)
     , m_headerInitialized(false)
     , m_streamOffset(0)
 {
+    setGeneratingSoftware(getOptions().getValueOrDefault<std::string>("software_id", LasHeader::SoftwareIdentifier));
+    setDate((boost::uint16_t)getOptions().getValueOrDefault<boost::uint32_t>("year", 0),
+             (boost::uint16_t)getOptions().getValueOrDefault<boost::uint32_t>("day_of_year", 0)); 
+    setPointFormat(static_cast<PointFormat>(getOptions().getValueOrDefault<boost::uint32_t>("format", 3)));        
+    setSystemIdentifier(getOptions().getValueOrDefault<std::string>("system_id", LasHeader::SystemIdentifier));
+
+    setHeaderPadding(getOptions().getValueOrDefault<boost::uint32_t>("header_padding", 0));
     return;
 }
 
@@ -102,7 +116,6 @@ void Writer::initialize()
     {
         setSpatialReference(getOptions().getValueOrThrow<std::string>("a_srs"));
     } 
-    
 
     return;
 }
@@ -207,15 +220,16 @@ void Writer::writeBufferBegin(PointBuffer const& data)
     const Dimension& dimY = schema.getDimension("Y");
     const Dimension& dimZ = schema.getDimension("Z");
 
-    m_lasHeader.SetScale(dimX.getNumericScale(), dimY.getNumericScale(), dimZ.getNumericScale());
-    m_lasHeader.SetOffset(dimX.getNumericOffset(), dimY.getNumericOffset(), dimZ.getNumericOffset());
+    m_lasHeader.SetScale(	dimX.getNumericScale(), 
+							dimY.getNumericScale(), 
+							dimZ.getNumericScale());
+    m_lasHeader.SetOffset(	dimX.getNumericOffset(), 
+							dimY.getNumericOffset(), 
+							dimZ.getNumericOffset());
 
     std::cout.setf(std::ios_base::fixed, std::ios_base::floatfield);
     std::cout.precision(8);
-
-
     m_lasHeader.setSpatialReference(getSpatialReference());
-
 
     bool useMetadata = getOptions().getValueOrDefault<bool>("forward_metadata", false);
 
@@ -225,46 +239,32 @@ void Writer::writeBufferBegin(PointBuffer const& data)
     if (format && useMetadata)
     {
         setPointFormat(static_cast<PointFormat>(format->cast<boost::uint32_t>()));
+        log()->get(logDEBUG) << "Setting point format to " 
+                             << format->cast<boost::uint32_t>() 
+                             << "from metadata" << std::endl;
     } 
-    else 
-    {
-        setPointFormat(static_cast<PointFormat>(getOptions().getValueOrDefault<boost::uint32_t>("format", 3)));        
-    }
-
     boost::optional<pdal::metadata::Entry const&> major = metadata.getEntryOptional("version_major");
     boost::optional<pdal::metadata::Entry const&> minor = metadata.getEntryOptional("version_minor");
     if (minor && useMetadata)
     {
         setFormatVersion((boost::uint8_t)getOptions().getValueOrDefault<boost::uint32_t>("major_version", 1),
                          minor->cast<boost::uint32_t>());
+        log()->get(logDEBUG) << "Setting version to " 
+              << getOptions().getValueOrDefault<boost::uint32_t>("major_version", 1) 
+              << ", " << minor->cast<boost::uint32_t>() 
+              << "from metadata" << std::endl;
     } 
-    else 
-    {
-        setFormatVersion((boost::uint8_t)getOptions().getValueOrDefault<boost::uint32_t>("major_version", 1),
-                         (boost::uint8_t)getOptions().getValueOrDefault<boost::uint32_t>("minor_version", 2));     
-    }
-    
-     
 
     boost::optional<pdal::metadata::Entry const&> year = metadata.getEntryOptional("creation_year");
     boost::optional<pdal::metadata::Entry const&> day = metadata.getEntryOptional("creation_doy");
     if (year && day && useMetadata)
     {
-        setFormatVersion((boost::uint8_t)getOptions().getValueOrDefault<boost::uint32_t>("major_version", 1),
-                         minor->cast<boost::uint32_t>());
-        log()->get(logDEBUG) << "Setting version to " << getOptions().getValueOrDefault<boost::uint32_t>("major_version", 1)
-                             << ", " << minor->cast<boost::uint32_t>() << std::endl;
-
+        setDate(year->cast<boost::uint32_t>(), day->cast<boost::uint32_t>());
+        log()->get(logDEBUG) << "Setting date to format " 
+                             << day->cast<boost::uint32_t>() << "/"
+                             << year->cast<boost::uint32_t>() 
+                             << "from metadata" << std::endl;
     } 
-    else 
-    {
-        if (!getOptions().getValueOrDefault<bool>("todays_date", false))
-        {
-            setDate((boost::uint16_t)getOptions().getValueOrDefault<boost::uint32_t>("year", 0),
-                    (boost::uint16_t)getOptions().getValueOrDefault<boost::uint32_t>("day_of_year", 0)); 
-            
-        }
-    }
 
     boost::optional<pdal::metadata::Entry const&> software_id = metadata.getEntryOptional("software_id");
     if (software_id && useMetadata)
@@ -272,12 +272,11 @@ void Writer::writeBufferBegin(PointBuffer const& data)
         try 
         {
             setGeneratingSoftware(software_id->cast<std::string>());
+            log()->get(logDEBUG) << "Setting generating software to " 
+                                 << software_id->cast<std::string>()
+                                 << "from metadata" << std::endl;
         } catch (std::bad_cast&) {}
     } 
-    else 
-    {
-        setGeneratingSoftware(getOptions().getValueOrDefault<std::string>("software_id", LasHeader::SoftwareIdentifier));
-    }    
 
     boost::optional<pdal::metadata::Entry const&> system_id = metadata.getEntryOptional("system_id");
     if (system_id && useMetadata)
@@ -285,19 +284,12 @@ void Writer::writeBufferBegin(PointBuffer const& data)
         try 
         {
             setSystemIdentifier(system_id->cast<std::string>());
+            log()->get(logDEBUG) << "Setting system identifier to " 
+                                 << system_id->cast<std::string>()
+                                 << "from metadata" << std::endl;
         } catch (std::bad_cast&) {}
     } 
-    else 
-    {
-        setSystemIdentifier(getOptions().getValueOrDefault<std::string>("system_id", LasHeader::SystemIdentifier));
-    }    
-    
-
-
-    setHeaderPadding(getOptions().getValueOrDefault<boost::uint32_t>("header_padding", 0));
-
-
-
+   
     LasHeaderWriter lasHeaderWriter(m_lasHeader, m_streamManager.ostream(), m_streamOffset);
     lasHeaderWriter.write();
 
