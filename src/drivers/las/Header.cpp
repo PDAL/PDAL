@@ -44,7 +44,6 @@
 
 #include <boost/uuid/uuid_io.hpp>
 
-#include <pdal/Stage.hpp>
 
 namespace pdal
 {
@@ -60,7 +59,7 @@ char const* const LasHeader::SystemIdentifier = "PDAL";
 char const* const LasHeader::SoftwareIdentifier = "PDAL 0.1.0";
 
 LasHeader::LasHeader()
-    : m_scales(0.01,0.01,0.01)
+    : m_scales(1.0,1.0,1.0)
 {
     // BUG: set default here -- m_schema(LasSchema::ePointFormat3)
     initialize();
