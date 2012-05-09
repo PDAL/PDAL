@@ -179,6 +179,8 @@ BOOST_AUTO_TEST_CASE(test_two)
     return;
 }
 
+#ifdef PDAL_HAVE_PYTHON
+
 
 BOOST_AUTO_TEST_CASE(test_three)
 {
@@ -243,5 +245,7 @@ BOOST_AUTO_TEST_CASE(test_three)
     
     return;
 }
+
+#endif
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -832,7 +832,7 @@ boost::uint32_t IteratorBase::myReadBlocks(PointBuffer& user_buffer)
                 m_oracle_buffer = fetchPointBuffer(m_statement, m_block->pc);
 
                 m_active_cloud_id = current_cloud_id;
-                return numPointsRead;
+                return user_buffer.getNumPoints();
             }
         }
     }
