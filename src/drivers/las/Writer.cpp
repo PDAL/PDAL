@@ -70,6 +70,12 @@ Writer::Writer(Stage& prevStage, const Options& options)
     setSystemIdentifier(options.getValueOrDefault<std::string>("system_id", LasHeader::SystemIdentifier));
 
     setHeaderPadding(options.getValueOrDefault<boost::uint32_t>("header_padding", 0));
+
+    if (options.hasOption("a_srs"))
+    {
+        setSpatialReference(options.getValueOrThrow<std::string>("a_srs"));
+    } 
+    setCompressed(options.getValueOrDefault("compression", false));
     
     return;
 }
@@ -89,6 +95,11 @@ Writer::Writer(Stage& prevStage, std::ostream* ostream)
     setSystemIdentifier(getOptions().getValueOrDefault<std::string>("system_id", LasHeader::SystemIdentifier));
 
     setHeaderPadding(getOptions().getValueOrDefault<boost::uint32_t>("header_padding", 0));
+    if (getOptions().hasOption("a_srs"))
+    {
+        setSpatialReference(getOptions().getValueOrThrow<std::string>("a_srs"));
+    } 
+    setCompressed(getOptions().getValueOrDefault("compression", false));
     return;
 }
 
@@ -109,13 +120,7 @@ void Writer::initialize()
     pdal::Writer::initialize();
 
     m_streamManager.open();
-        
-    setCompressed(getOptions().getValueOrDefault("compression", false));
 
-    if (getOptions().hasOption("a_srs"))
-    {
-        setSpatialReference(getOptions().getValueOrThrow<std::string>("a_srs"));
-    } 
 
     return;
 }
