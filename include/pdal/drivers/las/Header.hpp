@@ -238,6 +238,7 @@ public:
     /// available for the file in the form of a liblas.org VLR schema record,
     /// These extra bytes are available via liblas::Point::GetExtraData().
     boost::uint16_t GetDataRecordLength() const;
+	void SetDataRecordLength(boost::uint16_t v);
 
     /// Get total number of point records stored in the LAS file.
     boost::uint32_t GetPointRecordsCount() const;
@@ -380,7 +381,7 @@ private:
     PointOffsets m_offsets;
     bool m_isCompressed;
     boost::uint32_t m_headerPadding;
-
+    boost::uint16_t m_dataRecordLength; 
     PointFormat m_pointFormat;
 
     Bounds<double> m_bounds;

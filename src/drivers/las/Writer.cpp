@@ -63,30 +63,11 @@ Writer::Writer(Stage& prevStage, const Options& options)
     , m_headerInitialized(false)
     , m_streamOffset(0)
 {
-    setGeneratingSoftware(options.getValueOrDefault<std::string>("software_id", LasHeader::SoftwareIdentifier));
-    setDate((boost::uint16_t)options.getValueOrDefault<boost::uint32_t>("creation_year", 0),
-             (boost::uint16_t)options.getValueOrDefault<boost::uint32_t>("creation_doy", 0)); 
-    setPointFormat(static_cast<PointFormat>(options.getValueOrDefault<boost::uint32_t>("format", 3)));        
-    setSystemIdentifier(options.getValueOrDefault<std::string>("system_id", LasHeader::SystemIdentifier));
-
-    setHeaderPadding(options.getValueOrDefault<boost::uint32_t>("header_padding", 0));
-
-    if (options.hasOption("a_srs"))
-    {
-        setSpatialReference(options.getValueOrDefault<std::string>("a_srs",""));
-    } 
-    setCompressed(options.getValueOrDefault("compression", false));
-    
-    return;
+    setOptions();
+	return;
 }
 
-
-Writer::Writer(Stage& prevStage, std::ostream* ostream)
-    : pdal::Writer(prevStage, Options::none())
-    , m_streamManager(ostream)
-    , m_numPointsWritten(0)
-    , m_headerInitialized(false)
-    , m_streamOffset(0)
+void Writer::setOptions() 
 {
     setGeneratingSoftware(getOptions().getValueOrDefault<std::string>("software_id", LasHeader::SoftwareIdentifier));
     setDate((boost::uint16_t)getOptions().getValueOrDefault<boost::uint32_t>("year", 0),
@@ -100,7 +81,24 @@ Writer::Writer(Stage& prevStage, std::ostream* ostream)
         setSpatialReference(getOptions().getValueOrDefault<std::string>("a_srs",""));
     } 
     setCompressed(getOptions().getValueOrDefault("compression", false));
-    return;
+    m_lasHeader.SetFileSourceId(getOptions().getValueOrDefault<boost::uint16_t>("filesourceid", 0));   
+	try
+	{
+		boost::uint16_t record_length = getOptions().getValueOrThrow<boost::uint16_t>("datarecordlength");
+    	m_lasHeader.SetDataRecordLength(record_length);
+	} catch (pdal::option_not_found&) {};
+ 
+
+}
+Writer::Writer(Stage& prevStage, std::ostream* ostream)
+    : pdal::Writer(prevStage, Options::none())
+    , m_streamManager(ostream)
+    , m_numPointsWritten(0)
+    , m_headerInitialized(false)
+    , m_streamOffset(0)
+{
+    setOptions();
+	return;
 }
 
 
@@ -138,6 +136,7 @@ const Options Writer::getDefaultOptions() const
     Option year("creation_year", 2011, "4-digit year value for file");
     Option system_id("system_id", LasHeader::SystemIdentifier, "System ID for this file");
     Option software_id("software_id", LasHeader::SoftwareIdentifier, "Software ID for this file");
+    Option filesourceid("filesourceid", 0, "File Source ID for this file");
     Option header_padding("header_padding", 0, "Header padding (space between end of VLRs and beginning of point data)");
     Option set_metadata("forward_metadata", false, "forward metadata into the file as necessary");
 
@@ -312,6 +311,17 @@ void Writer::writeBufferBegin(PointBuffer const& data)
             m_lasHeader.SetReserved(reserved->cast<boost::uint16_t>());
             log()->get(logDEBUG) << "Setting reserved to " 
                                  << reserved->cast<boost::uint16_t>()
+                                 << "from metadata" << std::endl;
+        } catch (std::bad_cast&) {}
+    } 
+    boost::optional<pdal::metadata::Entry const&> filesourceid = metadata.getEntryOptional("filesourceid");
+    if (filesourceid && useMetadata)
+    {
+        try 
+        {
+            m_lasHeader.SetFileSourceId(filesourceid->cast<boost::uint16_t>());
+            log()->get(logDEBUG) << "Setting file source id to " 
+                                 << filesourceid->cast<boost::uint16_t>()
                                  << "from metadata" << std::endl;
         } catch (std::bad_cast&) {}
     } 

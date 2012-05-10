@@ -260,13 +260,23 @@ pdal::drivers::las::PointFormat LasHeader::getPointFormat() const
 
 void LasHeader::setPointFormat(pdal::drivers::las::PointFormat v)
 {
+	pdal::drivers::las::PointFormat old = m_pointFormat;
+	boost::uint16_t oldpad = m_dataRecordLength - Support::getPointDataSize(old);
     m_pointFormat = v;
+	m_dataRecordLength = Support::getPointDataSize(v) + oldpad;
 }
 
+void LasHeader::SetDataRecordLength(boost::uint16_t v)
+{
+	boost::uint16_t requiredsize = Support::getPointDataSize(m_pointFormat);
+	if (requiredsize < v)
+        throw std::invalid_argument("record size too small to hold current point format required size");
+	m_dataRecordLength = v;
+}
 boost::uint16_t LasHeader::GetDataRecordLength() const
 {
-    // No matter what the schema says, this must be a short in size.
-    return pdal::drivers::las::Support::getPointDataSize(m_pointFormat);
+	return m_dataRecordLength;
+    //return pdal::drivers::las::Support::getPointDataSize(m_pointFormat);
 }
 
 boost::uint32_t LasHeader::GetPointRecordsCount() const
@@ -406,24 +416,22 @@ void LasHeader::initialize()
 
     std::memset(m_signature, 0, eFileSignatureSize);
     std::strncpy(m_signature, FileSignature, eFileSignatureSize);
-//    m_signature = Header::FileSignature;
 
     std::memset(m_systemId, 0, eSystemIdSize);
     std::strncpy(m_systemId, SystemIdentifier, eSystemIdSize);
-//    m_systemId = Header::SystemIdentifier;
 
     std::memset(m_softwareId, 0, eSoftwareIdSize);
     std::strncpy(m_softwareId, SoftwareIdentifier, eSoftwareIdSize);
-//    m_softwareId = Header::SoftwareIdentifier;
 
     m_pointRecordsByReturn.resize(ePointsByReturnSize);
 
     // Zero scale value is useless, so we need to use a small value.
-    SetScale(0.01, 0.01, 0.01);
+    SetScale(1.0, 1.0, 1.0);
 
     m_isCompressed = false;
     m_headerPadding = 0;
     m_compressionInfo = std::string("");
+	m_dataRecordLength = Support::getPointDataSize(m_pointFormat);
 }
 
 

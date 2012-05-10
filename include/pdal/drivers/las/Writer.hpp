@@ -113,6 +113,7 @@ private:
 
     bool m_headerInitialized;
     boost::uint64_t m_streamOffset; // the first byte of the LAS file
+	void setOptions();
 
     Writer& operator=(const Writer&); // not implemented
     Writer(const Writer&); // not implemented
