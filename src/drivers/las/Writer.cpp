@@ -73,7 +73,7 @@ Writer::Writer(Stage& prevStage, const Options& options)
 
     if (options.hasOption("a_srs"))
     {
-        setSpatialReference(options.getValueOrThrow<std::string>("a_srs"));
+        setSpatialReference(options.getValueOrDefault<std::string>("a_srs",""));
     } 
     setCompressed(options.getValueOrDefault("compression", false));
     
@@ -97,7 +97,7 @@ Writer::Writer(Stage& prevStage, std::ostream* ostream)
     setHeaderPadding(getOptions().getValueOrDefault<boost::uint32_t>("header_padding", 0));
     if (getOptions().hasOption("a_srs"))
     {
-        setSpatialReference(getOptions().getValueOrThrow<std::string>("a_srs"));
+        setSpatialReference(getOptions().getValueOrDefault<std::string>("a_srs",""));
     } 
     setCompressed(getOptions().getValueOrDefault("compression", false));
     return;
