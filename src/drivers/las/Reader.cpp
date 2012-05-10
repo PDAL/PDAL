@@ -354,7 +354,7 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data,
     return numPoints;
 }
 
-void Reader::collectMetadata()
+void Reader::readMetadata()
 {
 
     LasHeader const& header = getLasHeader();
@@ -718,7 +718,8 @@ Reader::~Reader()
 
 void Reader::readBufferBeginImpl(PointBuffer& buffer)
 {
-    setPointDimensions(buffer);
+    if (!m_pointDimensions)
+        setPointDimensions(buffer);
 }
 
 boost::uint64_t Reader::skipImpl(boost::uint64_t count)

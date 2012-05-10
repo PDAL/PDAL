@@ -130,8 +130,8 @@ private:
     bool m_ownsStreamFactory;
 
     LasHeader m_lasHeader;
+	void readMetadata();
 
-    void collectMetadata();
     Reader& operator=(const Reader&); // not implemented
     Reader(const Reader&); // not implemented
 };
