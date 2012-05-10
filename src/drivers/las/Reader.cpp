@@ -132,7 +132,7 @@ void Reader::initialize()
         setSpatialReference(srs);
     }
 
-    collectMetadata();
+    readMetadata();
 
     m_streamFactory->deallocate(stream);
 
