@@ -151,7 +151,7 @@ struct token_assigner {
 template<>
 struct token_assigner<single_pass_traversal_tag> {
     template<typename Iterator, typename Token>
-    static void assign( Iterator b, Iterator e, Token& t )  {}
+    static void assign( Iterator /*b*/, Iterator /*e*/, Token& /*t*/ )  {}
 
     template<typename Iterator, typename Token>
     static void append_move( Iterator& b, Token& t )        { t += *b; ++b; }

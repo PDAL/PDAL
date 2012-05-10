@@ -139,7 +139,7 @@ class relation_info_hook : public
 
     #ifndef BOOST_BIMAP_DISABLE_SERIALIZATION
     template< class Archive >
-    void serialize(Archive & ar, const unsigned int version)
+    void serialize(Archive & ar, const unsigned int /*version*/)
     {
         ar & ::pdalboost::serialization::make_nvp("left" , base_::left );
         ar & ::pdalboost::serialization::make_nvp("right", base_::right);
@@ -185,7 +185,7 @@ class relation_info_hook<TA,TB,::pdalboost::mpl::na,force_mutable> :
 
     #ifndef BOOST_BIMAP_DISABLE_SERIALIZATION
     template< class Archive >
-    void serialize(Archive & ar, const unsigned int version)
+    void serialize(Archive & ar, const unsigned int /*version*/)
     {
         ar & ::pdalboost::serialization::make_nvp("left" , base_::left );
         ar & ::pdalboost::serialization::make_nvp("right", base_::right);

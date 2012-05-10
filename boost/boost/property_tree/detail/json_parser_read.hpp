@@ -112,7 +112,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespac
         {
             context &c;
             a_char(context &c): c(c) { }
-            void operator()(It b, It e) const
+            void operator()(It b, It /*e*/) const
             {
                 c.string += *b;
             }

@@ -414,7 +414,7 @@ namespace
 //                                                                                      //
 //--------------------------------------------------------------------------------------//
 
-  bool not_found_error(int errval)
+  bool not_found_error(int /*errval*/)
   {
     return errno == ENOENT || errno == ENOTDIR;
   }
@@ -1659,7 +1659,7 @@ namespace detail
   }
   
   BOOST_FILESYSTEM_DECL
-  path system_complete(const path& p, system::error_code* ec)
+  path system_complete(const path& p, system::error_code* /*ec*/)
   {
 #   ifdef BOOST_POSIX_API
     return (p.empty() || p.is_absolute())
