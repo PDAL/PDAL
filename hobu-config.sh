@@ -5,6 +5,8 @@ LIBXML2_HOME=$USR_LOCAL
 GEOTIFF_HOME=$USR_LOCAL
 SO_EXT=dylib
 EMBED=ON
+CC=/Users/hobu/bin/clang
+CXX=/Users/hobu/bin/clang++
 
 cmake   -G "Unix Makefiles"  \
         -DCMAKE_BUILD_TYPE=Debug \
