@@ -2147,7 +2147,7 @@ int OWParseEPSG(const char* pszText)
 /*                            Convert Data type description                  */
 /*****************************************************************************/
 
-const GDALDataType OWGetDataType(const char* pszCellDepth)
+GDALDataType OWGetDataType(const char* pszCellDepth)
 {
     unsigned int i;
 
