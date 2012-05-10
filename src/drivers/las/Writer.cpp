@@ -64,8 +64,8 @@ Writer::Writer(Stage& prevStage, const Options& options)
     , m_streamOffset(0)
 {
     setGeneratingSoftware(options.getValueOrDefault<std::string>("software_id", LasHeader::SoftwareIdentifier));
-    setDate((boost::uint16_t)options.getValueOrDefault<boost::uint32_t>("year", 0),
-             (boost::uint16_t)options.getValueOrDefault<boost::uint32_t>("day_of_year", 0)); 
+    setDate((boost::uint16_t)options.getValueOrDefault<boost::uint32_t>("creation_year", 0),
+             (boost::uint16_t)options.getValueOrDefault<boost::uint32_t>("creation_doy", 0)); 
     setPointFormat(static_cast<PointFormat>(options.getValueOrDefault<boost::uint32_t>("format", 3)));        
     setSystemIdentifier(options.getValueOrDefault<std::string>("system_id", LasHeader::SystemIdentifier));
 
@@ -121,7 +121,6 @@ void Writer::initialize()
 
     m_streamManager.open();
 
-
     return;
 }
 
@@ -135,8 +134,8 @@ const Options Writer::getDefaultOptions() const
     Option format("format", PointFormat3, "Point format to write");
     Option major_version("major_version", 1, "LAS Major version");
     Option minor_version("minor_version", 2, "LAS Minor version");
-    Option day_of_year("day_of_year", 0, "Day of Year for file");
-    Option year("year", 2011, "4-digit year value for file");
+    Option day_of_year("creation_doy", 0, "Day of Year for file");
+    Option year("creation_year", 2011, "4-digit year value for file");
     Option system_id("system_id", LasHeader::SystemIdentifier, "System ID for this file");
     Option software_id("software_id", LasHeader::SoftwareIdentifier, "Software ID for this file");
     Option header_padding("header_padding", 0, "Header padding (space between end of VLRs and beginning of point data)");
@@ -291,6 +290,28 @@ void Writer::writeBufferBegin(PointBuffer const& data)
             setSystemIdentifier(system_id->cast<std::string>());
             log()->get(logDEBUG) << "Setting system identifier to " 
                                  << system_id->cast<std::string>()
+                                 << "from metadata" << std::endl;
+        } catch (std::bad_cast&) {}
+    } 
+    boost::optional<pdal::metadata::Entry const&> project_id = metadata.getEntryOptional("project_id");
+    if (project_id && useMetadata)
+    {
+        try 
+        {
+            m_lasHeader.SetProjectId(boost::lexical_cast<boost::uuids::uuid>(project_id->cast<std::string>()));
+            log()->get(logDEBUG) << "Setting project_id to " 
+                                 << project_id->cast<std::string>()
+                                 << "from metadata" << std::endl;
+        } catch (std::bad_cast&) {}
+    } 
+    boost::optional<pdal::metadata::Entry const&> reserved = metadata.getEntryOptional("reserved");
+    if (reserved && useMetadata)
+    {
+        try 
+        {
+            m_lasHeader.SetReserved(reserved->cast<boost::uint16_t>());
+            log()->get(logDEBUG) << "Setting reserved to " 
+                                 << reserved->cast<boost::uint16_t>()
                                  << "from metadata" << std::endl;
         } catch (std::bad_cast&) {}
     } 
