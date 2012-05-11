@@ -210,6 +210,56 @@ void Writer::writeBegin(boost::uint64_t /*targetNumPointsToWrite*/)
     return;
 }
 
+bool Writer::doForwardThisMetadata(std::string const& name) const
+{
+    // <Reader type="drivers.las.writer">
+    //     <Option name="metadata">
+    //         <Options>
+    //             <Option name="dataformatid">
+    //             true
+    //             </Option>
+    //             <Option name="filesourceid">
+    //             true
+    //             </Option>
+    //             <Option name="year">
+    //             true
+    //             </Option>
+    //             <Option name="day_of_year">
+    //             true
+    //             </Option>
+    //         </Options>
+    //     </Option>
+    // </Reader>
+
+
+    Options const& options = getOptions();
+
+
+    Option doMetadata;
+    try
+    {
+        
+        doMetadata = options.getOption("metadata");
+    } catch (pdal::option_not_found&) { return false; }
+    
+    boost::optional<Options const&> meta = doMetadata.getOptions();
+    try
+    {
+        if (meta)
+        {
+            try
+            {
+                meta->getOption(name);
+            } catch (pdal::option_not_found&) { return false;}
+            
+            if (meta->getOption(name).getValue<bool>())
+                return true;
+            return false;
+        }
+    } catch (pdal::option_not_found&) { return false; }
+    
+    return false;
+}
 
 void Writer::writeBufferBegin(PointBuffer const& data)
 {
@@ -230,102 +280,110 @@ void Writer::writeBufferBegin(PointBuffer const& data)
 							dimY.getNumericOffset(), 
 							dimZ.getNumericOffset());
 
-    std::cout.setf(std::ios_base::fixed, std::ios_base::floatfield);
-    std::cout.precision(8);
     m_lasHeader.setSpatialReference(getSpatialReference());
-
-    bool useMetadata = getOptions().getValueOrDefault<bool>("forward_metadata", false);
-
-    pdal::Metadata metadata = getPrevStage().collectMetadata();
     
-    boost::optional<pdal::metadata::Entry const&> format = metadata.getEntryOptional("dataformatid");
-    if (format && useMetadata)
+    bool useMetadata;
+    try
     {
-        setPointFormat(static_cast<PointFormat>(format->cast<boost::uint32_t>()));
-        log()->get(logDEBUG) << "Setting point format to " 
-                             << format->cast<boost::uint32_t>() 
-                             << "from metadata" << std::endl;
-    } 
-    boost::optional<pdal::metadata::Entry const&> major = metadata.getEntryOptional("version_major");
-    boost::optional<pdal::metadata::Entry const&> minor = metadata.getEntryOptional("version_minor");
-    if (minor && useMetadata)
+        getOptions().getOption("metadata");
+        useMetadata = true;
+    } catch (pdal::option_not_found&)
     {
-        setFormatVersion((boost::uint8_t)getOptions().getValueOrDefault<boost::uint32_t>("major_version", 1),
-                         minor->cast<boost::uint32_t>());
-        log()->get(logDEBUG) << "Setting version to " 
-              << getOptions().getValueOrDefault<boost::uint32_t>("major_version", 1) 
-              << ", " << minor->cast<boost::uint32_t>() 
-              << "from metadata" << std::endl;
-    } 
+        useMetadata = false;
+    }
+    
+    if (useMetadata)
+    {
+        pdal::Metadata metadata = getPrevStage().collectMetadata();
+    
+        boost::optional<pdal::metadata::Entry const&> format = metadata.getEntryOptional("dataformatid");
+        if (format && doForwardThisMetadata("dataformatid"))
+        {
+            setPointFormat(static_cast<PointFormat>(format->cast<boost::uint32_t>()));
+            log()->get(logDEBUG) << "Setting point format to " 
+                                 << format->cast<boost::uint32_t>() 
+                                 << "from metadata" << std::endl;
+        } 
+        boost::optional<pdal::metadata::Entry const&> major = metadata.getEntryOptional("version_major");
+        boost::optional<pdal::metadata::Entry const&> minor = metadata.getEntryOptional("version_minor");
+        if (minor && doForwardThisMetadata("version_minor") && doForwardThisMetadata("version_major"))
+        {
+            setFormatVersion((boost::uint8_t)getOptions().getValueOrDefault<boost::uint32_t>("major_version", 1),
+                             minor->cast<boost::uint32_t>());
+            log()->get(logDEBUG) << "Setting version to " 
+                  << getOptions().getValueOrDefault<boost::uint32_t>("major_version", 1) 
+                  << ", " << minor->cast<boost::uint32_t>() 
+                  << "from metadata" << std::endl;
+        } 
 
-    boost::optional<pdal::metadata::Entry const&> year = metadata.getEntryOptional("creation_year");
-    boost::optional<pdal::metadata::Entry const&> day = metadata.getEntryOptional("creation_doy");
-    if (year && day && useMetadata)
-    {
-        setDate(year->cast<boost::uint32_t>(), day->cast<boost::uint32_t>());
-        log()->get(logDEBUG) << "Setting date to format " 
-                             << day->cast<boost::uint32_t>() << "/"
-                             << year->cast<boost::uint32_t>() 
-                             << "from metadata" << std::endl;
-    } 
+        boost::optional<pdal::metadata::Entry const&> year = metadata.getEntryOptional("creation_year");
+        boost::optional<pdal::metadata::Entry const&> day = metadata.getEntryOptional("creation_doy");
+        if (year && day && doForwardThisMetadata("creation_doy") && doForwardThisMetadata("creation_year"))
+        {
+            setDate(year->cast<boost::uint32_t>(), day->cast<boost::uint32_t>());
+            log()->get(logDEBUG) << "Setting date to format " 
+                                 << day->cast<boost::uint32_t>() << "/"
+                                 << year->cast<boost::uint32_t>() 
+                                 << "from metadata" << std::endl;
+        } 
 
-    boost::optional<pdal::metadata::Entry const&> software_id = metadata.getEntryOptional("software_id");
-    if (software_id && useMetadata)
-    {
-        try 
+        boost::optional<pdal::metadata::Entry const&> software_id = metadata.getEntryOptional("software_id");
+        if (software_id && doForwardThisMetadata("software_id"))
         {
-            setGeneratingSoftware(software_id->cast<std::string>());
-            log()->get(logDEBUG) << "Setting generating software to " 
-                                 << software_id->cast<std::string>()
-                                 << "from metadata" << std::endl;
-        } catch (std::bad_cast&) {}
-    } 
+            try 
+            {
+                setGeneratingSoftware(software_id->cast<std::string>());
+                log()->get(logDEBUG) << "Setting generating software to " 
+                                     << software_id->cast<std::string>()
+                                     << "from metadata" << std::endl;
+            } catch (std::bad_cast&) {}
+        } 
 
-    boost::optional<pdal::metadata::Entry const&> system_id = metadata.getEntryOptional("system_id");
-    if (system_id && useMetadata)
-    {
-        try 
+        boost::optional<pdal::metadata::Entry const&> system_id = metadata.getEntryOptional("system_id");
+        if (system_id && doForwardThisMetadata("system_id"))
         {
-            setSystemIdentifier(system_id->cast<std::string>());
-            log()->get(logDEBUG) << "Setting system identifier to " 
-                                 << system_id->cast<std::string>()
-                                 << "from metadata" << std::endl;
-        } catch (std::bad_cast&) {}
-    } 
-    boost::optional<pdal::metadata::Entry const&> project_id = metadata.getEntryOptional("project_id");
-    if (project_id && useMetadata)
-    {
-        try 
+            try 
+            {
+                setSystemIdentifier(system_id->cast<std::string>());
+                log()->get(logDEBUG) << "Setting system identifier to " 
+                                     << system_id->cast<std::string>()
+                                     << "from metadata" << std::endl;
+            } catch (std::bad_cast&) {}
+        } 
+        boost::optional<pdal::metadata::Entry const&> project_id = metadata.getEntryOptional("project_id");
+        if (project_id && doForwardThisMetadata("project_id"))
         {
-            m_lasHeader.SetProjectId(boost::lexical_cast<boost::uuids::uuid>(project_id->cast<std::string>()));
-            log()->get(logDEBUG) << "Setting project_id to " 
-                                 << project_id->cast<std::string>()
-                                 << "from metadata" << std::endl;
-        } catch (std::bad_cast&) {}
-    } 
-    boost::optional<pdal::metadata::Entry const&> reserved = metadata.getEntryOptional("reserved");
-    if (reserved && useMetadata)
-    {
-        try 
+            try 
+            {
+                m_lasHeader.SetProjectId(boost::lexical_cast<boost::uuids::uuid>(project_id->cast<std::string>()));
+                log()->get(logDEBUG) << "Setting project_id to " 
+                                     << project_id->cast<std::string>()
+                                     << "from metadata" << std::endl;
+            } catch (std::bad_cast&) {}
+        } 
+        boost::optional<pdal::metadata::Entry const&> reserved = metadata.getEntryOptional("reserved");
+        if (reserved && doForwardThisMetadata("reserved"))
         {
-            m_lasHeader.SetReserved(reserved->cast<boost::uint16_t>());
-            log()->get(logDEBUG) << "Setting reserved to " 
-                                 << reserved->cast<boost::uint16_t>()
-                                 << "from metadata" << std::endl;
-        } catch (std::bad_cast&) {}
-    } 
-    boost::optional<pdal::metadata::Entry const&> filesourceid = metadata.getEntryOptional("filesourceid");
-    if (filesourceid && useMetadata)
-    {
-        try 
+            try 
+            {
+                m_lasHeader.SetReserved(reserved->cast<boost::uint16_t>());
+                log()->get(logDEBUG) << "Setting reserved to " 
+                                     << reserved->cast<boost::uint16_t>()
+                                     << "from metadata" << std::endl;
+            } catch (std::bad_cast&) {}
+        } 
+        boost::optional<pdal::metadata::Entry const&> filesourceid = metadata.getEntryOptional("filesourceid");
+        if (filesourceid && doForwardThisMetadata("filesourceid"))
         {
-            m_lasHeader.SetFileSourceId(filesourceid->cast<boost::uint16_t>());
-            log()->get(logDEBUG) << "Setting file source id to " 
-                                 << filesourceid->cast<boost::uint16_t>()
-                                 << "from metadata" << std::endl;
-        } catch (std::bad_cast&) {}
-    } 
-   
+            try 
+            {
+                m_lasHeader.SetFileSourceId(filesourceid->cast<boost::uint16_t>());
+                log()->get(logDEBUG) << "Setting file source id to " 
+                                     << filesourceid->cast<boost::uint16_t>()
+                                     << "from metadata" << std::endl;
+            } catch (std::bad_cast&) {}
+        } 
+    } // useMetadata
     LasHeaderWriter lasHeaderWriter(m_lasHeader, m_streamManager.ostream(), m_streamOffset);
     lasHeaderWriter.write();
 
