@@ -87,9 +87,8 @@ void Writer::setOptions()
 		boost::uint16_t record_length = getOptions().getValueOrThrow<boost::uint16_t>("datarecordlength");
     	m_lasHeader.SetDataRecordLength(record_length);
 	} catch (pdal::option_not_found&) {};
- 
-
 }
+
 Writer::Writer(Stage& prevStage, std::ostream* ostream)
     : pdal::Writer(prevStage, Options::none())
     , m_streamManager(ostream)
@@ -101,7 +100,6 @@ Writer::Writer(Stage& prevStage, std::ostream* ostream)
 	return;
 }
 
-
 Writer::~Writer()
 {
 #ifdef PDAL_HAVE_LASZIP
@@ -112,7 +110,6 @@ Writer::~Writer()
     return;
 }
 
-
 void Writer::initialize()
 {
     pdal::Writer::initialize();
@@ -121,7 +118,6 @@ void Writer::initialize()
 
     return;
 }
-
 
 const Options Writer::getDefaultOptions() const
 {
@@ -153,12 +149,10 @@ const Options Writer::getDefaultOptions() const
     return options;
 }
 
-
 void Writer::setCompressed(bool v)
 {
     m_lasHeader.SetCompressed(v);
 }
-
 
 void Writer::setFormatVersion(boost::uint8_t majorVersion, boost::uint8_t minorVersion)
 {
@@ -166,12 +160,10 @@ void Writer::setFormatVersion(boost::uint8_t majorVersion, boost::uint8_t minorV
     m_lasHeader.SetVersionMinor(minorVersion);
 }
 
-
 void Writer::setPointFormat(PointFormat pointFormat)
 {
     m_lasHeader.setPointFormat(pointFormat);
 }
-
 
 void Writer::setDate(boost::uint16_t dayOfYear, boost::uint16_t year)
 {
@@ -179,30 +171,25 @@ void Writer::setDate(boost::uint16_t dayOfYear, boost::uint16_t year)
     m_lasHeader.SetCreationYear(year);
 }
 
-
 void Writer::setProjectId(const boost::uuids::uuid& id)
 {
     m_lasHeader.SetProjectId(id);
 }
-
 
 void Writer::setSystemIdentifier(const std::string& systemId)
 {
     m_lasHeader.SetSystemId(systemId);
 }
 
-
 void Writer::setGeneratingSoftware(const std::string& softwareId)
 {
     m_lasHeader.SetSoftwareId(softwareId);
 }
 
-
 void Writer::setHeaderPadding(boost::uint32_t const& v)
 {
     m_lasHeader.SetHeaderPadding(v);
 }
-
 
 void Writer::writeBegin(boost::uint64_t /*targetNumPointsToWrite*/)
 {
@@ -428,7 +415,6 @@ void Writer::writeBufferBegin(PointBuffer const& data)
 
 }
 
-
 void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
 {
     m_lasHeader.SetPointRecordsCount(m_numPointsWritten);
@@ -441,12 +427,10 @@ void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
     return;
 }
 
-
 void Writer::writeBufferEnd(PointBuffer const& /*data*/)
 {
     return;
 }
-
 
 boost::uint32_t Writer::writeBuffer(const PointBuffer& pointBuffer)
 {
@@ -586,7 +570,6 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& pointBuffer)
     return numValidPoints;
 }
 
-
 boost::property_tree::ptree Writer::toPTree() const
 {
     boost::property_tree::ptree tree = pdal::Writer::toPTree();
@@ -599,3 +582,4 @@ boost::property_tree::ptree Writer::toPTree() const
 }
 }
 } // namespaces
+
