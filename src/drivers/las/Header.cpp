@@ -81,6 +81,7 @@ LasHeader::LasHeader(LasHeader const& other) :
     m_dataRecordLength(other.m_dataRecordLength),
     m_pointFormat(other.m_pointFormat),
     m_bounds(other.m_bounds),
+    m_vlrList(other.m_vlrList),
     m_spatialReference(other.m_spatialReference),
     m_compressionInfo(other.m_compressionInfo)
 {
@@ -132,7 +133,7 @@ LasHeader& LasHeader::operator=(LasHeader const& rhs)
      m_dataRecordLength = rhs.m_dataRecordLength; 
      m_pointFormat = rhs.m_pointFormat;
      m_compressionInfo = rhs.m_compressionInfo;
-
+     m_vlrList = rhs.m_vlrList;
  }
  return *this;
 }
