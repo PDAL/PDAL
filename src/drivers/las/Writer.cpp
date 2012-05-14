@@ -69,11 +69,14 @@ Writer::Writer(Stage& prevStage, const Options& options)
 
 void Writer::setOptions() 
 {
-    setGeneratingSoftware(getOptions().getValueOrDefault<std::string>("software_id", LasHeader::SoftwareIdentifier));
-    m_lasHeader.SetCreationDOY((boost::uint16_t)getOptions().getValueOrDefault<boost::uint32_t>("day_of_year", 0));
-    m_lasHeader.SetCreationYear((boost::uint16_t)getOptions().getValueOrDefault<boost::uint32_t>("year", 0));
-    m_lasHeader.setPointFormat(static_cast<PointFormat>(getOptions().getValueOrDefault<boost::uint32_t>("format", 3)));        
-    m_lasHeader.SetSystemId(getOptions().getValueOrDefault<std::string>("system_id", LasHeader::SystemIdentifier));
+	setGeneratingSoftware(getOptions().getValueOrDefault<std::string>("software_id",
+				LasHeader::SoftwareIdentifier));
+
+	m_lasHeader.SetCreationDOY((boost::uint16_t)getOptions().getValueOrDefault<boost::uint32_t>("day_of_year", 0));
+	m_lasHeader.SetCreationYear((boost::uint16_t)getOptions().getValueOrDefault<boost::uint32_t>("year", 0));
+	m_lasHeader.setPointFormat(static_cast<PointFormat>(getOptions().getValueOrDefault<boost::uint32_t>("format", 3)));        
+	m_lasHeader.SetSystemId(getOptions().getValueOrDefault<std::string>("system_id",
+				LasHeader::SystemIdentifier));
 
     m_lasHeader.SetHeaderPadding(getOptions().getValueOrDefault<boost::uint32_t>("header_padding", 0));
     if (getOptions().hasOption("a_srs"))
@@ -283,30 +286,37 @@ void Writer::writeBufferBegin(PointBuffer const& data)
     {
         pdal::Metadata metadata = getPrevStage().collectMetadata();
     
-        boost::optional<pdal::metadata::Entry const&> format = metadata.getEntryOptional("dataformatid");
+		boost::optional<pdal::metadata::Entry const&> format =
+			metadata.getEntryOptional("dataformatid");
+
         if (format && doForwardThisMetadata("dataformatid"))
         {
-            setPointFormat(static_cast<PointFormat>(format->cast<boost::uint32_t>()));
-            log()->get(logDEBUG) << "Setting point format to " 
+			setPointFormat(static_cast<PointFormat>(format->cast<boost::uint32_t>()));
+			log()->get(logDEBUG) << "Setting point format to " 
                                  << format->cast<boost::uint32_t>() 
                                  << "from metadata" << std::endl;
         } 
-        boost::optional<pdal::metadata::Entry const&> major = metadata.getEntryOptional("version_major");
-        boost::optional<pdal::metadata::Entry const&> minor = metadata.getEntryOptional("version_minor");
-        if (minor && doForwardThisMetadata("version_minor") && doForwardThisMetadata("version_major"))
-        {
-            setFormatVersion((boost::uint8_t)getOptions().getValueOrDefault<boost::uint32_t>("major_version", 1),
-                             minor->cast<boost::uint32_t>());
+		boost::optional<pdal::metadata::Entry const&> major =
+			metadata.getEntryOptional("version_major");
+		boost::optional<pdal::metadata::Entry const&> minor =
+			metadata.getEntryOptional("version_minor");
+		if (minor && doForwardThisMetadata("version_minor") &&
+				doForwardThisMetadata("version_major")) 
+		{
+            setFormatVersion((boost::uint8_t)getOptions().getValueOrDefault<boost::uint32_t>("major_version", 1), minor->cast<boost::uint32_t>());
             log()->get(logDEBUG) << "Setting version to " 
                   << getOptions().getValueOrDefault<boost::uint32_t>("major_version", 1) 
                   << ", " << minor->cast<boost::uint32_t>() 
                   << "from metadata" << std::endl;
         } 
 
-        boost::optional<pdal::metadata::Entry const&> year = metadata.getEntryOptional("creation_year");
-        boost::optional<pdal::metadata::Entry const&> day = metadata.getEntryOptional("creation_doy");
-        if (year && day && doForwardThisMetadata("creation_doy") && doForwardThisMetadata("creation_year"))
-        {
+		boost::optional<pdal::metadata::Entry const&> year =
+			metadata.getEntryOptional("creation_year");
+		boost::optional<pdal::metadata::Entry const&> day =
+			metadata.getEntryOptional("creation_doy");
+		if (year && day && doForwardThisMetadata("creation_doy") &&
+				doForwardThisMetadata("creation_year")) 
+		{
             setDate(year->cast<boost::uint32_t>(), day->cast<boost::uint32_t>());
             log()->get(logDEBUG) << "Setting date to format " 
                                  << day->cast<boost::uint32_t>() << "/"
