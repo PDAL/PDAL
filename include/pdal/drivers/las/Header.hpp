@@ -397,8 +397,7 @@ private:
     SpatialReference m_spatialReference;
     std::string m_compressionInfo;
 
-    LasHeader& operator=(const LasHeader&); // nope
-    // LasHeader(const LasHeader&); // nope
+    LasHeader& operator=(LasHeader const& rhs);
 };
 
 PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const LasHeader&);

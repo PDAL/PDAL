@@ -72,12 +72,12 @@ VariableLengthRecord::VariableLengthRecord(boost::uint16_t reserved,
     , m_recordId(recordId)
     , m_description(description)
     , m_bytes(0)
-    , m_length(length)
+    , m_vlr_length(length)
 {
     boost::ignore_unused_variable_warning(reserved);
 
-    m_bytes = new boost::uint8_t[m_length];
-    memcpy(m_bytes, bytes, m_length);
+    m_bytes = new boost::uint8_t[m_vlr_length];
+    memcpy(m_bytes, bytes, m_vlr_length);
 
     return;
 }
@@ -89,10 +89,10 @@ VariableLengthRecord::VariableLengthRecord(const VariableLengthRecord& rhs)
     , m_recordId(rhs.m_recordId)
     , m_description(rhs.m_description)
     , m_bytes(0)
-    , m_length(rhs.m_length)
+    , m_vlr_length(rhs.m_vlr_length)
 {
-    m_bytes = new boost::uint8_t[m_length];
-    memcpy(m_bytes, rhs.getBytes(), m_length);
+    m_bytes = new boost::uint8_t[m_vlr_length];
+    memcpy(m_bytes, rhs.getBytes(), m_vlr_length);
     return;
 }
 
@@ -101,7 +101,7 @@ VariableLengthRecord::~VariableLengthRecord()
 {
     delete[] m_bytes;
     m_bytes = 0;
-    m_length = 0;
+    m_vlr_length = 0;
     return;
 }
 
@@ -110,10 +110,10 @@ VariableLengthRecord& VariableLengthRecord::operator=(const VariableLengthRecord
 {
     if (&rhs != this)
     {
-        m_length = rhs.m_length;
+        m_vlr_length = rhs.m_vlr_length;
         delete[] m_bytes;
-        m_bytes = new boost::uint8_t[m_length];
-        memcpy(m_bytes, rhs.m_bytes, m_length);
+        m_bytes = new boost::uint8_t[m_vlr_length];
+        memcpy(m_bytes, rhs.m_bytes, m_vlr_length);
 
         m_reserved = rhs.m_reserved;
         m_recordId = rhs.m_recordId;
@@ -134,8 +134,8 @@ bool VariableLengthRecord::operator==(const VariableLengthRecord& rhs) const
     if (m_userId != rhs.m_userId) return false;
     if (m_description != rhs.m_description) return false;
 
-    if (m_length != rhs.m_length) return false;
-    for (std::size_t i=0; i<m_length; i++)
+    if (m_vlr_length != rhs.m_vlr_length) return false;
+    for (std::size_t i=0; i<m_vlr_length; i++)
     {
         if (m_bytes[i] != rhs.m_bytes[i]) return false;
     }
@@ -178,7 +178,7 @@ const boost::uint8_t* VariableLengthRecord::getBytes() const
 
 std::size_t VariableLengthRecord::getLength() const
 {
-    return m_length;
+    return m_vlr_length;
 }
 
 std::size_t VariableLengthRecord::getTotalSize() const
@@ -189,9 +189,17 @@ std::size_t VariableLengthRecord::getTotalSize() const
     // RecordLength after Header 2 bytes
     // Description 32 bytes
     // Data length -- size of the data's vector * the size of uint8_t
-    std::size_t const sum = 2 + 16 + 2 + 2 + 32 + m_length * sizeof(boost::uint8_t);
+    // std::size_t sum = 2 + 16 + 2 + 2 + 32 + m_vlr_length * sizeof(boost::uint8_t);
+    std::size_t sum = sizeof(m_reserved) + 
+                            eUserIdSize + 
+                            sizeof(m_recordId) + 
+                            sizeof(m_vlr_length) + 
+                            eDescriptionSize + 
+                            m_vlr_length * sizeof(boost::uint8_t);
     return sum;
+    
 }
+
 
 bool VariableLengthRecord::isMatch(const std::string& userId) const
 {

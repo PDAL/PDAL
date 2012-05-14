@@ -81,7 +81,8 @@ LasHeader::LasHeader(LasHeader const& other) :
     m_dataRecordLength(other.m_dataRecordLength),
     m_pointFormat(other.m_pointFormat),
     m_bounds(other.m_bounds),
-    m_spatialReference(other.m_spatialReference)
+    m_spatialReference(other.m_spatialReference),
+    m_compressionInfo(other.m_compressionInfo)
 {
     void* p = 0;
 
@@ -97,49 +98,44 @@ LasHeader::LasHeader(LasHeader const& other) :
     // std::vector<VariableRecord>(other.m_vlrs).swap(m_vlrs);
 
 }
-// 
-// Header& Header::operator=(Header const& rhs)
-// {
-//     if (&rhs != this)
-//     {
-//         void* p = 0;
-//         p = std::memcpy(m_signature, rhs.m_signature, eFileSignatureSize);
-//         assert(p == m_signature);
-//         m_sourceId = rhs.m_sourceId;
-//         m_reserved = rhs.m_reserved;
-//         m_projectId1 = rhs.m_projectId1;
-//         m_projectId2 = rhs.m_projectId2;
-//         m_projectId3 = rhs.m_projectId3;
-//         p = std::memcpy(m_projectId4, rhs.m_projectId4, eProjectId4Size); 
-//         assert(p == m_projectId4);
-//         m_versionMajor = rhs.m_versionMajor;
-//         m_versionMinor = rhs.m_versionMinor;
-//         p = std::memcpy(m_systemId, rhs.m_systemId, eSystemIdSize);
-//         assert(p == m_systemId);
-//         p = std::memcpy(m_softwareId, rhs.m_softwareId, eSoftwareIdSize);
-//         assert(p == m_softwareId);
-//         m_createDOY = rhs.m_createDOY;
-//         m_createYear = rhs.m_createYear;
-//         m_headerSize = rhs.m_headerSize;
-//         m_dataOffset = rhs.m_dataOffset;
-//         m_recordsCount = rhs.m_recordsCount;
-//         m_pointRecordsCount = rhs.m_pointRecordsCount;
-//         
-//         std::vector<uint32_t>(rhs.m_pointRecordsByReturn).swap(m_pointRecordsByReturn);
-//         assert(ePointsByReturnSize >= m_pointRecordsByReturn.size());
-// 
-//         std::vector<VariableRecord>(rhs.m_vlrs).swap(m_vlrs);
-//         m_scales = rhs.m_scales;
-//         m_offsets = rhs.m_offsets;
-//         m_extent = rhs.m_extent;
-//         m_srs = rhs.m_srs;
-//         m_schema = rhs.m_schema;
-//         m_isCompressed = rhs.m_isCompressed;
-//         m_headerPadding = rhs.m_headerPadding;
-// 
-//     }
-//     return *this;
-// }
+
+LasHeader& LasHeader::operator=(LasHeader const& rhs)
+{
+ if (&rhs != this)
+ {
+	 void* p = 0;
+	 p = std::memcpy(m_signature, rhs.m_signature, eFileSignatureSize);
+	 assert(p == m_signature);
+	 m_sourceId = rhs.m_sourceId;
+	 m_reserved = rhs.m_reserved;
+	 m_versionMajor = rhs.m_versionMajor;
+	 m_versionMinor = rhs.m_versionMinor;
+	 p = std::memcpy(m_systemId, rhs.m_systemId, eSystemIdSize);
+	 assert(p == m_systemId);
+	 p = std::memcpy(m_softwareId, rhs.m_softwareId, eSoftwareIdSize);
+	 assert(p == m_softwareId);
+	 m_createDOY = rhs.m_createDOY;
+	 m_createYear = rhs.m_createYear;
+	 m_headerSize = rhs.m_headerSize;
+	 m_dataOffset = rhs.m_dataOffset;
+	 m_pointRecordsCount = rhs.m_pointRecordsCount;
+	 
+	 std::vector<uint32_t>(rhs.m_pointRecordsByReturn).swap(m_pointRecordsByReturn);
+	 assert(ePointsByReturnSize >= m_pointRecordsByReturn.size());
+
+	 m_scales = rhs.m_scales;
+	 m_offsets = rhs.m_offsets;
+	 m_bounds = rhs.m_bounds;
+	 m_spatialReference = rhs.m_spatialReference;
+	 m_isCompressed = rhs.m_isCompressed;
+	 m_headerPadding = rhs.m_headerPadding;
+     m_dataRecordLength = rhs.m_dataRecordLength; 
+     m_pointFormat = rhs.m_pointFormat;
+     m_compressionInfo = rhs.m_compressionInfo;
+
+ }
+ return *this;
+}
 
 
 

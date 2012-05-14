@@ -39,6 +39,7 @@
 
 #include <string>
 #include <vector>
+#include <boost/array.hpp>
 
 #include <pdal/SpatialReference.hpp>
 
@@ -64,23 +65,20 @@ public:
     VariableLengthRecord(const VariableLengthRecord&);
     ~VariableLengthRecord();
 
-    boost::uint16_t getReserved() const
+    inline boost::uint16_t getReserved() const
     {
         return m_reserved;
     }
-    std::string getUserId() const
-    {
-        return m_userId;
-    }
-    boost::uint16_t getRecordId() const
-    {
-        return m_recordId;
-    }
-    std::string getDescription() const
-    {
-        return m_description;
-    }
 
+
+    inline std::string getUserId() const { return m_userId;}
+    inline void setUserId(std::string const& v) { m_userId = v; }
+    
+    inline boost::uint16_t getRecordId() const { return m_recordId; }
+
+    std::string getDescription() const { return m_description; }
+    inline void setDescription(std::string const& v) { m_description = v; } 
+    
     bool isGeoVLR() const;
     enum GeoVLRType
     {
@@ -122,8 +120,11 @@ private:
     boost::uint16_t m_recordId;
     std::string m_description; // always stored as 16 bytes (padded with 0's)
 
+    // std::vector<boost::uint8_t> m_data;
+
+    
     boost::uint8_t* m_bytes;
-    std::size_t m_length;
+    boost::uint16_t m_vlr_length;
 };
 
 
