@@ -1,5 +1,5 @@
 @echo off
-
+ 
 :: This configure script is designed for the default Windows world, which means
 :: you have OSGeo4W installed, including Oracle and GDAL and LASzip.
 
