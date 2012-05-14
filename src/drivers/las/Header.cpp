@@ -75,13 +75,12 @@ LasHeader::LasHeader(LasHeader const& other) :
     m_headerSize(other.m_headerSize),
     m_dataOffset(other.m_dataOffset),
     m_pointRecordsCount(other.m_pointRecordsCount),
-    m_dataRecordLength(other.m_dataRecordLength),
-    m_scales(other.m_scales),
     m_offsets(other.m_offsets),
-    m_pointFormat(other.m_pointFormat),
-    m_bounds(other.m_bounds),
     m_isCompressed(other.m_isCompressed),
     m_headerPadding(other.m_headerPadding),
+    m_dataRecordLength(other.m_dataRecordLength),
+    m_pointFormat(other.m_pointFormat),
+    m_bounds(other.m_bounds),
     m_spatialReference(other.m_spatialReference)
 {
     void* p = 0;
