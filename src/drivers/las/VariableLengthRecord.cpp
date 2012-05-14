@@ -477,7 +477,7 @@ void VariableLengthRecord::setVLRsFromSRS(const SpatialReference& srs, std::vect
     {
         const boost::uint8_t* wkt_bytes = reinterpret_cast<const boost::uint8_t*>(wkt.c_str());
 
-        boost::uint16_t len = static_cast<boost::uint16_t>(strlen((const char*)wkt_bytes));
+        boost::uint32_t len = static_cast<boost::uint32_t>(strlen((const char*)wkt_bytes));
 
         if (len > std::numeric_limits<boost::uint16_t>::max())
         {
