@@ -172,8 +172,8 @@ enum Type
 };
 
 
-typedef boost::variant< boost::blank,
-                        bool,
+typedef boost::variant< bool,
+                        boost::blank,
                         float,
                         double,
                         boost::int8_t,
