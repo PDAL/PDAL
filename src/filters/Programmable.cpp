@@ -153,7 +153,7 @@ void Programmable::readBeginImpl()
         createParser();
     }
 
-    pdal::TheGlobalEnvironment::get().getPythonEnvironment().set_stdout( m_programmableFilter.log()->getLogStream() );
+    pdal::GlobalEnvironment::get().getPythonEnvironment().set_stdout( m_programmableFilter.log()->getLogStream() );
 
     return;
 }
@@ -161,7 +161,7 @@ void Programmable::readBeginImpl()
 
 void Programmable::readEndImpl()
 {
-    pdal::TheGlobalEnvironment::get().getPythonEnvironment().reset_stdout( );
+    pdal::GlobalEnvironment::get().getPythonEnvironment().reset_stdout( );
     return;
 }
 

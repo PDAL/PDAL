@@ -43,41 +43,14 @@
 namespace pdal
 {
 
-//namespace plang
-//{
-//class PythonEnvironment;
-//}
-
 
 class PDAL_DLL GlobalEnvironment
 {
 public:
-    static GlobalEnvironment& get()
-    {
-        boost::call_once(init, flag);
-        return *t;
-    }
+    static GlobalEnvironment& get();
+    static void startup();
+    static void shutdown();
 
-    static void startup()
-    {
-        get();
-    }
-    static void shutdown()
-    {
-        delete t;
-        t = 0;
-    }
-
-private:
-    static void init() // never throws
-    {
-        t = new GlobalEnvironment();
-    }
-
-    GlobalEnvironment();
-    ~GlobalEnvironment();
-
-public:
     // create a new thread context
     void createThreadEnvironment(boost::thread::id);
 
@@ -90,20 +63,16 @@ public:
     //
 #ifdef PDAL_HAVE_PYTHON
     // get the plang (python) environment
-    plang::PythonEnvironment& getPythonEnvironment()
-    {
-        return getThreadEnvironment().getPythonEnvironment();
-    }
+    plang::PythonEnvironment& getPythonEnvironment();
 #endif
 
-    boost::random::mt19937* getRNG()
-    {
-        return getThreadEnvironment().getRNG();
-    }
+    boost::random::mt19937* getRNG();
 
 private:
-    static GlobalEnvironment* t;
-    static boost::once_flag flag;
+    GlobalEnvironment();
+    ~GlobalEnvironment();
+
+    static void init();
 
     typedef std::map<boost::thread::id, ThreadEnvironment*> thread_map;
     thread_map m_threadMap;
@@ -112,7 +81,6 @@ private:
     GlobalEnvironment& operator=(const GlobalEnvironment&); // nope
 };
 
-typedef GlobalEnvironment TheGlobalEnvironment;
 
 } // namespaces
 

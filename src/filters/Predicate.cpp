@@ -185,7 +185,7 @@ void Predicate::readBeginImpl()
 
     m_numPointsProcessed = m_numPointsPassed = 0;
 
-    pdal::TheGlobalEnvironment::get().getPythonEnvironment().set_stdout( m_predicateFilter.log()->getLogStream() );
+    pdal::GlobalEnvironment::get().getPythonEnvironment().set_stdout( m_predicateFilter.log()->getLogStream() );
 
     return;
 }
@@ -193,7 +193,7 @@ void Predicate::readBeginImpl()
 
 void Predicate::readEndImpl()
 {
-    pdal::TheGlobalEnvironment::get().getPythonEnvironment().reset_stdout( );
+    pdal::GlobalEnvironment::get().getPythonEnvironment().reset_stdout( );
 
     return;
 }

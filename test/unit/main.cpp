@@ -43,11 +43,11 @@ struct PDALConfig
 {
     PDALConfig()
     {
-        ::pdal::TheGlobalEnvironment::startup();
+        ::pdal::GlobalEnvironment::startup();
     }
     ~PDALConfig()
     {
-        ::pdal::TheGlobalEnvironment::shutdown();
+        ::pdal::GlobalEnvironment::shutdown();
     }
 };
 BOOST_GLOBAL_FIXTURE(PDALConfig)

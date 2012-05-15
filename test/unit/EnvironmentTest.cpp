@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_SUITE(EnvironmentTest)
 
 BOOST_AUTO_TEST_CASE(EnvironmentTest_1)
 {
-    ::pdal::GlobalEnvironment& pdal_env = ::pdal::TheGlobalEnvironment::get();
+    ::pdal::GlobalEnvironment& pdal_env = ::pdal::GlobalEnvironment::get();
 
 #ifdef PDAL_HAVE_PYTHON
     ::pdal::plang::PythonEnvironment& python_env = pdal_env.getPythonEnvironment();
