@@ -303,7 +303,8 @@ void Writer::writeBufferBegin(PointBuffer const& data)
 		if (minor && doForwardThisMetadata("version_minor") &&
 				doForwardThisMetadata("version_major")) 
 		{
-            setFormatVersion((boost::uint8_t)getOptions().getValueOrDefault<boost::uint32_t>("major_version", 1), minor->cast<boost::uint32_t>());
+            setFormatVersion((boost::uint8_t)getOptions().getValueOrDefault<boost::uint32_t>("major_version", 1),
+                             (boost::uint8_t)minor->cast<boost::uint32_t>());
             log()->get(logDEBUG) << "Setting version to " 
                   << getOptions().getValueOrDefault<boost::uint32_t>("major_version", 1) 
                   << ", " << minor->cast<boost::uint32_t>() 
@@ -317,7 +318,7 @@ void Writer::writeBufferBegin(PointBuffer const& data)
 		if (year && day && doForwardThisMetadata("creation_doy") &&
 				doForwardThisMetadata("creation_year")) 
 		{
-            setDate(year->cast<boost::uint32_t>(), day->cast<boost::uint32_t>());
+            setDate((boost::uint16_t)year->cast<boost::uint32_t>(), (boost::uint16_t)day->cast<boost::uint32_t>());
             log()->get(logDEBUG) << "Setting date to format " 
                                  << day->cast<boost::uint32_t>() << "/"
                                  << year->cast<boost::uint32_t>() 
