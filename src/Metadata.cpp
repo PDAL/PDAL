@@ -98,7 +98,6 @@ std::vector<std::string> Entry::getAttributeNames() const
     return output;
 }
 
-
 void Entry::addAttribute(std::string const& name, std::string const value)
 {
     std::pair<std::string, std::string> p(name, value);
@@ -136,6 +135,8 @@ std::string Entry::getTypeName() const
             return std::string("bounds");
         case metadata::SpatialReference:
             return std::string("spatialreference");
+        case metadata::MData:
+            return std::string("metadata");
         case metadata::UUID:
             return std::string("uuid");
         default:

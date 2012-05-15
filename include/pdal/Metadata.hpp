@@ -163,7 +163,9 @@ enum Type
     /// A pdal::SpatialReference instance
     SpatialReference,
     /// A boost::uuids::uuid instance
-    UUID
+    UUID,
+    /// A pdal::Metadata instance
+    MData
 };
 
 
