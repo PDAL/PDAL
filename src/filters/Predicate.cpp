@@ -37,6 +37,7 @@
 
 #include <pdal/filters/Predicate.hpp>
 
+#include <pdal/GlobalEnvironment.hpp>
 #include <pdal/PointBuffer.hpp>
 
 namespace pdal

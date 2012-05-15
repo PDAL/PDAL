@@ -35,6 +35,7 @@
 #include <pdal/pdal_internal.hpp>
 #ifdef PDAL_HAVE_PYTHON
 
+#include <pdal/GlobalEnvironment.hpp>
 #include <pdal/filters/Programmable.hpp>
 
 #include <pdal/PointBuffer.hpp>

@@ -41,6 +41,8 @@
 
 #include <pdal/Dimension.hpp>
 
+#include <pdal/GlobalEnvironment.hpp>
+
 #include <boost/algorithm/string.hpp>
 #include <boost/uuid/string_generator.hpp>
 #include <boost/uuid/random_generator.hpp>
