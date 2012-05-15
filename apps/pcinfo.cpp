@@ -287,6 +287,9 @@ int PcInfo::execute()
     Option sample_size("sample_size", m_sample_size, "sample size for random sample");
     m_options.add(sample_size);
     
+    Option exact_count("exact_count", "Classification", "use exact counts for classification stats");
+    m_options.add(exact_count);
+    
     pdal::Options options = m_options + readerOptions;
     
     pdal::filters::Stats* filter = new pdal::filters::Stats(*reader, options);

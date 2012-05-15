@@ -78,6 +78,25 @@ boost::property_tree::ptree Summary::toPTree() const
     };
 
     tree.add("sample", sample.str());
+    
+    
+    if (m_doExact == true)
+    {
+        
+        boost::property_tree::ptree counts;
+        for (std::map<boost::int32_t, boost::uint32_t>::const_iterator i = m_counts.begin();
+             i != m_counts.end(); ++i)
+        {
+            boost::property_tree::ptree bin;
+            bin.add("value", i->first);
+            bin.add("count", i->second);
+            std::ostringstream binname;
+            binname << "count-" <<i->first;
+            counts.add_child(binname.str(), bin);
+            
+        }
+        tree.add_child("counts", counts);
+    }
     return tree;
 }
 
@@ -320,6 +339,19 @@ void Stats::readBufferBeginImpl(PointBuffer& buffer)
 
     if (m_stats.size() == 0)
     {
+        Options const& options = getStage().getOptions();
+
+        std::vector<Option> dimension_names = options.getOptions("exact_count");
+        
+        std::map<std::string, bool> exact_dimensions;
+        for (std::vector<Option>::const_iterator i = dimension_names.begin();
+        i != dimension_names.end(); ++i)
+        {
+            getStage().log()->get(logDEBUG2) << "Using exact histogram counts for '" << i->getValue<std::string>() << "'" << std::endl;
+            std::pair<std::string,bool> p(i->getValue<std::string>(), true);
+            exact_dimensions.insert(p);
+        }
+        
         Schema const& schema = buffer.getSchema();
 
         boost::uint64_t numPoints = getStage().getPrevStage().getNumPoints();
@@ -328,7 +360,7 @@ void Stats::readBufferBeginImpl(PointBuffer& buffer)
 
         try
         {
-            stats_cache_size = getStage().getOptions().getValueOrThrow<boost::uint32_t>("stats_cache_size");
+            stats_cache_size = options.getValueOrThrow<boost::uint32_t>("stats_cache_size");
             getStage().log()->get(logDEBUG2) << "Using " << stats_cache_size << "for histogram cache size set from option" << std::endl;
 
         }
@@ -346,14 +378,14 @@ void Stats::readBufferBeginImpl(PointBuffer& buffer)
             }
         }
 
-        boost::uint32_t sample_size = getStage().getOptions().getValueOrDefault<boost::uint32_t>("sample_size", 1000);
-        boost::uint32_t seed = getStage().getOptions().getValueOrDefault<boost::uint32_t>("seed", 0);
+        boost::uint32_t sample_size = options.getValueOrDefault<boost::uint32_t>("sample_size", 1000);
+        boost::uint32_t seed = options.getValueOrDefault<boost::uint32_t>("seed", 0);
 
         getStage().log()->get(logDEBUG2) << "Using " << sample_size << " for sample size" << std::endl;
         getStage().log()->get(logDEBUG2) << "Using " << seed << " for sample seed" << std::endl;
 
 
-        boost::uint32_t bin_count = getStage().getOptions().getValueOrDefault<boost::uint32_t>("num_bins", 20);
+        boost::uint32_t bin_count = options.getValueOrDefault<boost::uint32_t>("num_bins", 20);
 
         schema::index_by_index const& dims = schema.getDimensions().get<schema::index>();
 
@@ -361,7 +393,15 @@ void Stats::readBufferBeginImpl(PointBuffer& buffer)
         {
             DimensionPtr d = boost::shared_ptr<Dimension>(new Dimension(*iter));
             getStage().log()->get(logDEBUG2) << "Cumulating stats for dimension " << d->getName() << std::endl;
-            stats::SummaryPtr c = boost::shared_ptr<stats::Summary>(new stats::Summary(bin_count, sample_size, stats_cache_size));
+            
+            std::map<std::string, bool>::const_iterator exact = exact_dimensions.find(d->getName());
+            bool doExact(false);
+            if (exact != exact_dimensions.end())
+            {
+                getStage().log()->get(logDEBUG2) << "Cumulating exact stats for dimension " << d->getName() << std::endl;
+                doExact = true;
+            }
+            stats::SummaryPtr c = boost::shared_ptr<stats::Summary>(new stats::Summary(bin_count, sample_size, stats_cache_size, seed, doExact));
 
             std::pair<DimensionPtr, stats::SummaryPtr> p(d,c);
             m_dimensions.push_back(d);
