@@ -109,23 +109,28 @@ private:
     boost::uint32_t m_sample_size;
     boost::random::mt19937 m_rng;
     boost::random::uniform_int_distribution<> m_distribution;
+    std::map<boost::int32_t, boost::uint32_t> m_counts;
+    bool m_doExact;
+    
 public:
 
     Summary(boost::uint32_t num_bins=20,
             boost::uint32_t sample_size=1000,
             boost::uint32_t cache_size=1000,
-            boost::uint32_t seed=0)
+            boost::uint32_t seed=0,
+            bool doExact=false)
         : m_histogram(boost::accumulators::tag::density::num_bins = num_bins,
                       boost::accumulators::tag::density::cache_size = cache_size)
         , m_sample_size(sample_size)
         , m_distribution(0, cache_size)
+        , m_doExact(doExact)
     {
         if (seed != 0)
         {
             m_rng.seed(seed);
             m_distribution.reset();
         }
-
+        
         return;
     }
 
@@ -136,6 +141,7 @@ public:
         m_summary.drop<boost::accumulators::tag::max>();
         m_summary.drop<boost::accumulators::tag::min>();
         m_histogram.drop<boost::accumulators::tag::density>();
+        m_counts.clear();
         return;
     }
 
@@ -147,6 +153,20 @@ public:
         int sample = m_distribution(m_rng);
         if (static_cast<boost::uint32_t>(sample) < m_sample_size)
             m_sample.push_back(static_cast<double>(value));
+
+        if (m_doExact == true)
+        {
+            std::map<boost::int32_t, boost::uint32_t>::iterator i = m_counts.find(static_cast<boost::int32_t>(value));
+            if ( i == m_counts.end())
+            {
+                std::pair<boost::int32_t, boost::uint32_t> p(value, 1);
+                m_counts.insert(p);
+            } else 
+            {
+                i->second++;
+            }
+        }
+        
         return;
     }
 

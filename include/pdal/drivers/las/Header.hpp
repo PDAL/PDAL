@@ -97,8 +97,7 @@ public:
     LasHeader(LasHeader const& other);
 
     /// Assignment operator.
-    // LasHeader& operator=(LasHeader const& rhs);
-
+    LasHeader& operator=(LasHeader const& rhs);
 
     /// Official signature of ASPRS LAS file format, always \b "LASF".
     static char const* const FileSignature;
@@ -397,8 +396,7 @@ private:
     SpatialReference m_spatialReference;
     std::string m_compressionInfo;
 
-    LasHeader& operator=(const LasHeader&); // nope
-    // LasHeader(const LasHeader&); // nope
+    // LasHeader& operator=(LasHeader const& rhs);
 };
 
 PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const LasHeader&);
