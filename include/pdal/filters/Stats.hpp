@@ -159,7 +159,7 @@ public:
             std::map<boost::int32_t, boost::uint32_t>::iterator i = m_counts.find(static_cast<boost::int32_t>(value));
             if ( i == m_counts.end())
             {
-                std::pair<boost::int32_t, boost::uint32_t> p(value, 1);
+                std::pair<boost::int32_t, boost::uint32_t> p(static_cast<boost::int32_t>(value), 1);
                 m_counts.insert(p);
             } else 
             {
