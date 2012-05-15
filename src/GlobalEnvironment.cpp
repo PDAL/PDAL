@@ -39,9 +39,43 @@
 namespace pdal
 {
 
-GlobalEnvironment* GlobalEnvironment::t = 0;
-boost::once_flag GlobalEnvironment::flag = BOOST_ONCE_INIT;
 
+//
+// static functions
+//
+
+static GlobalEnvironment* t = 0;
+static boost::once_flag flag = BOOST_ONCE_INIT;
+
+GlobalEnvironment& GlobalEnvironment::get()
+{
+    boost::call_once(init, flag);
+    return *t;
+}
+
+
+void GlobalEnvironment::startup()
+{
+    get();
+}
+
+
+void GlobalEnvironment::shutdown()
+{
+    delete t;
+    t = 0;
+}
+
+
+void GlobalEnvironment::init()
+{
+    t = new GlobalEnvironment();
+}
+
+
+// 
+// regular member functions
+//
 
 GlobalEnvironment::GlobalEnvironment()
 {
@@ -83,6 +117,18 @@ ThreadEnvironment& GlobalEnvironment::getThreadEnvironment(boost::thread::id id)
     ThreadEnvironment* threadEnv = iter->second;
 
     return *threadEnv;
+}
+
+#ifdef PDAL_HAVE_PYTHON
+plang::PythonEnvironment& GlobalEnvironment::getPythonEnvironment()
+{
+    return getThreadEnvironment().getPythonEnvironment();
+}
+#endif
+
+boost::random::mt19937* GlobalEnvironment::getRNG()
+{
+    return getThreadEnvironment().getRNG();
 }
 
 

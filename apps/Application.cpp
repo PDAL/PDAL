@@ -93,7 +93,7 @@ int Application::do_startup()
 {
     try
     {
-        pdal::TheGlobalEnvironment::startup();
+        pdal::GlobalEnvironment::startup();
     }
     catch (std::exception const& e)
     {
@@ -151,7 +151,7 @@ int Application::do_shutdown()
 {
     try
     {
-        pdal::TheGlobalEnvironment::shutdown();
+        pdal::GlobalEnvironment::shutdown();
     }
     catch (std::exception const& e)
     {

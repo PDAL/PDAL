@@ -68,7 +68,7 @@ void Invocation::numpy_init()
 
 Invocation::Invocation(const Script& script)
     : m_script(script)
-    , m_environment(pdal::TheGlobalEnvironment::get().getPythonEnvironment())
+    , m_environment(pdal::GlobalEnvironment::get().getPythonEnvironment())
     , m_bytecode(NULL)
     , m_module(NULL)
     , m_dictionary(NULL)
