@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2012, Michael P. Gerlek (mpg@flaxen.com)
 *
 * All rights reserved.
 *
@@ -36,8 +36,10 @@
 #define PDAL_GLOBAL_ENVIRONMENT_H
 
 #include <pdal/pdal_internal.hpp>
+#include <pdal/Singleton.hpp>
+#include <pdal/ThreadEnvironment.hpp>
 
-#include <boost/random/mersenne_twister.hpp>
+#include <map>
 
 namespace pdal
 {
@@ -48,44 +50,44 @@ class PythonEnvironment;
 }
 
 
-// this is a singleton: only create it once, and keep it around forever
 class PDAL_DLL GlobalEnvironment
 {
 public:
-    static void startup();
-    static void shutdown();
+    GlobalEnvironment();
+    ~GlobalEnvironment();
 
-    // return the singleton GlobalEnvironment object
-    static GlobalEnvironment* get();
+    // create a new thread context
+    void createThreadEnvironment(boost::thread::id);
 
+    // returns the thread context for a thread
+    // with no args, returns the not-a-thread thread environment
+    ThreadEnvironment& getThreadEnvironment(boost::thread::id=boost::thread::id());
+
+    //
+    // forwarded functions
+    //
 #ifdef PDAL_HAVE_PYTHON
     // get the plang (python) environment
-    plang::PythonEnvironment* getPLangEnvironment()
+    plang::PythonEnvironment& getPythonEnvironment()
     {
-        return m_plangEnvironment;
+        return getThreadEnvironment().getPythonEnvironment();
     }
 #endif
 
     boost::random::mt19937* getRNG()
     {
-        return m_rng;
+        return getThreadEnvironment().getRNG();
     }
 
 private:
-    // ctor and dtor are only called via startup()/shutdown()
-    GlobalEnvironment();
-    ~GlobalEnvironment();
-
-#ifdef PDAL_HAVE_PYTHON
-    plang::PythonEnvironment* m_plangEnvironment;
-#endif
-
-    boost::random::mt19937* m_rng;
+    typedef std::map<boost::thread::id, ThreadEnvironment*> thread_map;
+    thread_map m_threadMap;
 
     GlobalEnvironment(const GlobalEnvironment&); // nope
     GlobalEnvironment& operator=(const GlobalEnvironment&); // nope
 };
 
+typedef Singleton<GlobalEnvironment> TheGlobalEnvironment;
 
 } // namespaces
 

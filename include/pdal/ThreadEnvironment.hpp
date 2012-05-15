@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2012, Michael P. Gerlek (mpg@flaxen.com)
 *
 * All rights reserved.
 *
@@ -37,14 +37,40 @@
 
 #include <pdal/pdal_internal.hpp>
 
+#include <boost/random/mersenne_twister.hpp>
+#include <pdal/plang/PythonEnvironment.hpp>
+#include <boost/thread.hpp>
+
 namespace pdal
 {
 
 class PDAL_DLL ThreadEnvironment
 {
 public:
-    ThreadEnvironment();
+    ThreadEnvironment(boost::thread::id);
     ~ThreadEnvironment();
+
+#ifdef PDAL_HAVE_PYTHON
+    // get the plang (python) environment
+    plang::PythonEnvironment& getPythonEnvironment()
+    {
+        return *m_pythonEnvironment;
+    }
+#endif
+
+    boost::random::mt19937* getRNG()
+    {
+        return m_rng;
+    }
+
+private:
+    const boost::thread::id m_threadId;
+
+#ifdef PDAL_HAVE_PYTHON
+    plang::PythonEnvironment* m_pythonEnvironment;
+#endif
+
+    boost::random::mt19937* m_rng;
 
     ThreadEnvironment(const ThreadEnvironment&); // nope
     ThreadEnvironment& operator=(const ThreadEnvironment&); // nope
