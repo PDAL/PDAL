@@ -309,7 +309,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
   template <>
   struct assign_or_plus_equal<std::input_iterator_tag> {
     template<class Iterator, class Token>
-    static void assign(Iterator /*b*/, Iterator /*e*/, Token &/*t*/) { }
+    static void assign(Iterator b, Iterator e, Token &t) { }
     template<class Token, class Value> 
     static void plus_equal(Token &t, const Value &v) {
       t += v;

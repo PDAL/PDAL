@@ -91,13 +91,13 @@ struct set_view_iterator : public set_view_iterator_base<CoreIterator>::type
     friend class ::pdalboost::serialization::access;
 
     template< class Archive >
-    void save(Archive & ar, const unsigned int /*version*/) const
+    void save(Archive & ar, const unsigned int version) const
     {
         ar << ::pdalboost::serialization::make_nvp("mi_iterator",this->base());
     }
 
     template< class Archive >
-    void load(Archive & ar, const unsigned int /*version*/)
+    void load(Archive & ar, const unsigned int version)
     {
         CoreIterator iter;
         ar >> ::pdalboost::serialization::make_nvp("mi_iterator",iter);
@@ -167,13 +167,13 @@ struct const_set_view_iterator : public const_set_view_iterator_base<CoreIterato
     friend class ::pdalboost::serialization::access;
 
     template< class Archive >
-    void save(Archive & ar, const unsigned int /*version*/) const
+    void save(Archive & ar, const unsigned int version) const
     {
         ar << ::pdalboost::serialization::make_nvp("mi_iterator",this->base());
     }
 
     template< class Archive >
-    void load(Archive & ar, const unsigned int /*version*/)
+    void load(Archive & ar, const unsigned int version)
     {
         CoreIterator iter;
         ar >> ::pdalboost::serialization::make_nvp("mi_iterator",iter);

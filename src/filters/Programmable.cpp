@@ -35,6 +35,7 @@
 #include <pdal/pdal_internal.hpp>
 #ifdef PDAL_HAVE_PYTHON
 
+#include <pdal/GlobalEnvironment.hpp>
 #include <pdal/filters/Programmable.hpp>
 
 #include <pdal/PointBuffer.hpp>
@@ -152,7 +153,7 @@ void Programmable::readBeginImpl()
         createParser();
     }
 
-    pdal::GlobalEnvironment::get()->getPLangEnvironment()->set_stdout( m_programmableFilter.log()->getLogStream() );
+    pdal::GlobalEnvironment::get().getPythonEnvironment().set_stdout( m_programmableFilter.log()->getLogStream() );
 
     return;
 }
@@ -160,7 +161,7 @@ void Programmable::readBeginImpl()
 
 void Programmable::readEndImpl()
 {
-    pdal::GlobalEnvironment::get()->getPLangEnvironment()->reset_stdout( );
+    pdal::GlobalEnvironment::get().getPythonEnvironment().reset_stdout( );
     return;
 }
 

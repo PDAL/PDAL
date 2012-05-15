@@ -39,12 +39,12 @@
 #ifdef PDAL_HAVE_PYTHON
 
 #include <pdal/pdal_internal.hpp>
-#include <pdal/PointBuffer.hpp>
+//#include <pdal/PointBuffer.hpp>
 
-#include <boost/cstdint.hpp>
-#include <boost/variant.hpp>
+//#include <boost/cstdint.hpp>
+//#include <boost/variant.hpp>
 
-#include <vector>
+//#include <vector>
 #include <iostream>
 
 // forward declare PyObject so we don't need the python headers everywhere

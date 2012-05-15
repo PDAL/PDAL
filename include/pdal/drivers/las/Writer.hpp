@@ -114,6 +114,7 @@ private:
     bool m_headerInitialized;
     boost::uint64_t m_streamOffset; // the first byte of the LAS file
 	void setOptions();
+    bool doForwardThisMetadata(std::string const& name) const;
 
     Writer& operator=(const Writer&); // not implemented
     Writer(const Writer&); // not implemented

@@ -63,7 +63,8 @@ BOOST_AUTO_TEST_CASE(test_construction)
     boost::uint8_t u8(8);
     boost::int16_t i16(-16);
     boost::uint16_t u16(16);
-
+    
+    
     std::vector<boost::uint8_t> v;
     for (boost::uint8_t i=0; i < 100; i++) v.push_back(i);
 

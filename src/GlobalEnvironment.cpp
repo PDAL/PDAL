@@ -40,62 +40,95 @@ namespace pdal
 {
 
 
-// this is (or, should be) our one and only static
-static GlobalEnvironment* s_environment;
-static boost::random::mt19937 s_rng;
+//
+// static functions
+//
 
-GlobalEnvironment* GlobalEnvironment::get()
+static GlobalEnvironment* t = 0;
+static boost::once_flag flag = BOOST_ONCE_INIT;
+
+GlobalEnvironment& GlobalEnvironment::get()
 {
-    return s_environment;
+    boost::call_once(init, flag);
+    return *t;
 }
 
 
 void GlobalEnvironment::startup()
 {
-    // not threadsafe yet!
-    if (!s_environment)
-    {
-        s_environment = new GlobalEnvironment();
-    }
-
-    return;
+    get();
 }
 
 
 void GlobalEnvironment::shutdown()
 {
-    // not threadsafe yet!
-    if (s_environment)
-    {
-        delete s_environment;
-        s_environment = NULL;
-    }
-
-    return;
+    delete t;
+    t = 0;
 }
 
 
+void GlobalEnvironment::init()
+{
+    t = new GlobalEnvironment();
+}
+
+
+// 
+// regular member functions
+//
+
 GlobalEnvironment::GlobalEnvironment()
 {
-#ifdef PDAL_HAVE_PYTHON
-    m_plangEnvironment = new pdal::plang::PythonEnvironment();
-#endif
+    // this should be the not-a-thread thread environment
+    (void) createThreadEnvironment(boost::thread::id());
 
-    m_rng = new boost::random::mt19937();
     return;
 }
 
 
 GlobalEnvironment::~GlobalEnvironment()
 {
-#ifdef PDAL_HAVE_PYTHON
-    delete m_plangEnvironment;
-    m_plangEnvironment = NULL;
-#endif
-
-    delete m_rng;
+    while (m_threadMap.size())
+    {
+        thread_map::iterator iter = m_threadMap.begin();
+        ThreadEnvironment* env = iter->second;
+        delete env;
+        m_threadMap.erase(iter);
+    }
 
     return;
+}
+
+
+void GlobalEnvironment::createThreadEnvironment(boost::thread::id id)
+{
+    ThreadEnvironment* threadEnv = new ThreadEnvironment(id);
+
+    m_threadMap.insert( std::make_pair(id, threadEnv ) );
+}
+
+
+ThreadEnvironment& GlobalEnvironment::getThreadEnvironment(boost::thread::id id)
+{
+    thread_map::iterator iter =  m_threadMap.find(id);
+    if (iter == m_threadMap.end())
+        throw pdal_error("bad thread id!");
+
+    ThreadEnvironment* threadEnv = iter->second;
+
+    return *threadEnv;
+}
+
+#ifdef PDAL_HAVE_PYTHON
+plang::PythonEnvironment& GlobalEnvironment::getPythonEnvironment()
+{
+    return getThreadEnvironment().getPythonEnvironment();
+}
+#endif
+
+boost::random::mt19937* GlobalEnvironment::getRNG()
+{
+    return getThreadEnvironment().getRNG();
 }
 
 

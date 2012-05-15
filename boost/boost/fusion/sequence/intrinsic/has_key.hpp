@@ -68,7 +68,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespac
 
     template <typename Key, typename Sequence>
     inline typename result_of::has_key<Sequence, Key>::type
-    has_key(Sequence const& /*seq*/)
+    has_key(Sequence const& seq)
     {
         typedef typename result_of::has_key<Sequence, Key>::type result;
         return result();

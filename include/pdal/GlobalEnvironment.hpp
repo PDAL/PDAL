@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2012, Michael P. Gerlek (mpg@flaxen.com)
 *
 * All rights reserved.
 *
@@ -36,51 +36,46 @@
 #define PDAL_GLOBAL_ENVIRONMENT_H
 
 #include <pdal/pdal_internal.hpp>
-
-#include <boost/random/mersenne_twister.hpp>
+#include <pdal/ThreadEnvironment.hpp>
+#include <boost/thread/once.hpp>
+#include <map>
 
 namespace pdal
 {
 
-namespace plang
-{
-class PythonEnvironment;
-}
 
-
-// this is a singleton: only create it once, and keep it around forever
 class PDAL_DLL GlobalEnvironment
 {
 public:
+    static GlobalEnvironment& get();
     static void startup();
     static void shutdown();
 
-    // return the singleton GlobalEnvironment object
-    static GlobalEnvironment* get();
+    // create a new thread context
+    void createThreadEnvironment(boost::thread::id);
 
+    // returns the thread context for a thread
+    // with no args, returns the not-a-thread thread environment
+    ThreadEnvironment& getThreadEnvironment(boost::thread::id=boost::thread::id());
+
+    //
+    // forwarded functions
+    //
 #ifdef PDAL_HAVE_PYTHON
     // get the plang (python) environment
-    plang::PythonEnvironment* getPLangEnvironment()
-    {
-        return m_plangEnvironment;
-    }
+    plang::PythonEnvironment& getPythonEnvironment();
 #endif
 
-    boost::random::mt19937* getRNG()
-    {
-        return m_rng;
-    }
+    boost::random::mt19937* getRNG();
 
 private:
-    // ctor and dtor are only called via startup()/shutdown()
     GlobalEnvironment();
     ~GlobalEnvironment();
 
-#ifdef PDAL_HAVE_PYTHON
-    plang::PythonEnvironment* m_plangEnvironment;
-#endif
+    static void init();
 
-    boost::random::mt19937* m_rng;
+    typedef std::map<boost::thread::id, ThreadEnvironment*> thread_map;
+    thread_map m_threadMap;
 
     GlobalEnvironment(const GlobalEnvironment&); // nope
     GlobalEnvironment& operator=(const GlobalEnvironment&); // nope

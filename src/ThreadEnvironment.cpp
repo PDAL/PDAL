@@ -39,14 +39,28 @@ namespace pdal
 {
 
 
-ThreadEnvironment::ThreadEnvironment()
+ThreadEnvironment::ThreadEnvironment(boost::thread::id id)
+    : m_threadId(id)
 {
+#ifdef PDAL_HAVE_PYTHON
+    m_pythonEnvironment = new pdal::plang::PythonEnvironment();
+#endif
+
+    m_rng = new boost::random::mt19937();
+
     return;
 }
 
 
 ThreadEnvironment::~ThreadEnvironment()
 {
+#ifdef PDAL_HAVE_PYTHON
+    delete m_pythonEnvironment;
+    m_pythonEnvironment = NULL;
+#endif
+
+    delete m_rng;
+
     return;
 }
 

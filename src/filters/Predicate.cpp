@@ -37,6 +37,7 @@
 
 #include <pdal/filters/Predicate.hpp>
 
+#include <pdal/GlobalEnvironment.hpp>
 #include <pdal/PointBuffer.hpp>
 
 namespace pdal
@@ -184,7 +185,7 @@ void Predicate::readBeginImpl()
 
     m_numPointsProcessed = m_numPointsPassed = 0;
 
-    pdal::GlobalEnvironment::get()->getPLangEnvironment()->set_stdout( m_predicateFilter.log()->getLogStream() );
+    pdal::GlobalEnvironment::get().getPythonEnvironment().set_stdout( m_predicateFilter.log()->getLogStream() );
 
     return;
 }
@@ -192,7 +193,7 @@ void Predicate::readBeginImpl()
 
 void Predicate::readEndImpl()
 {
-    pdal::GlobalEnvironment::get()->getPLangEnvironment()->reset_stdout( );
+    pdal::GlobalEnvironment::get().getPythonEnvironment().reset_stdout( );
 
     return;
 }

@@ -41,6 +41,8 @@
 
 #include <pdal/Dimension.hpp>
 
+#include <pdal/GlobalEnvironment.hpp>
+
 #include <boost/algorithm/string.hpp>
 #include <boost/uuid/string_generator.hpp>
 #include <boost/uuid/random_generator.hpp>
@@ -212,7 +214,8 @@ void Dimension::setUUID(std::string const& id)
 
 void Dimension::createUUID()
 {
-    boost::uuids::basic_random_generator<boost::mt19937> gen(pdal::GlobalEnvironment::get()->getRNG());
+    GlobalEnvironment& env = pdal::GlobalEnvironment::get();
+    boost::uuids::basic_random_generator<boost::mt19937> gen(env.getRNG());
     m_uuid = gen();
 }
 void Dimension::dump() const

@@ -47,9 +47,9 @@
 
 #include <boost/uuid/uuid.hpp>
 #include <boost/property_tree/ptree.hpp>
+#include <boost/array.hpp>
 
 #include <pdal/Schema.hpp>
-#include <pdal/Vector.hpp>
 #include <pdal/Bounds.hpp>
 #include <pdal/SpatialReference.hpp>
 #include <pdal/drivers/las/Support.hpp>
@@ -93,6 +93,12 @@ public:
 
     LasHeader();
 
+    /// Copy constructor.
+    LasHeader(LasHeader const& other);
+
+    /// Assignment operator.
+    LasHeader& operator=(LasHeader const& rhs);
+
     /// Official signature of ASPRS LAS file format, always \b "LASF".
     static char const* const FileSignature;
 
@@ -102,8 +108,7 @@ public:
     /// Default software identifier used by libLAS, always \b "libLAS X.Y".
     static char const* const SoftwareIdentifier;
 
-    /// Array of 5 elements - numbers of points recorded by each return.
-    /// \todo TODO: Consider replacing with boost::array<T, 5>
+    /// Array of 5 or 7 elements - numbers of points recorded by each return.
     typedef std::vector<boost::uint32_t> RecordsByReturnArray;
 
     /// Get ASPRS LAS file signature.
@@ -339,8 +344,8 @@ public:
 
 
 private:
-    typedef Vector<double> PointScales;
-    typedef Vector<double> PointOffsets;
+    typedef boost::array<double, 3> PointScales;
+    typedef boost::array<double, 3> PointOffsets;
 
     void initialize();
 
@@ -391,8 +396,7 @@ private:
     SpatialReference m_spatialReference;
     std::string m_compressionInfo;
 
-    LasHeader& operator=(const LasHeader&); // nope
-    LasHeader(const LasHeader&); // nope
+    // LasHeader& operator=(LasHeader const& rhs);
 };
 
 PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const LasHeader&);
