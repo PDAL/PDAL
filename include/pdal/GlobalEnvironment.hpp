@@ -36,26 +36,48 @@
 #define PDAL_GLOBAL_ENVIRONMENT_H
 
 #include <pdal/pdal_internal.hpp>
-#include <pdal/Singleton.hpp>
 #include <pdal/ThreadEnvironment.hpp>
-
+#include <boost/thread/once.hpp>
 #include <map>
 
 namespace pdal
 {
 
-namespace plang
-{
-class PythonEnvironment;
-}
+//namespace plang
+//{
+//class PythonEnvironment;
+//}
 
 
 class PDAL_DLL GlobalEnvironment
 {
 public:
+    static GlobalEnvironment& get()
+    {
+        boost::call_once(init, flag);
+        return *t;
+    }
+
+    static void startup()
+    {
+        get();
+    }
+    static void shutdown()
+    {
+        delete t;
+        t = 0;
+    }
+
+private:
+    static void init() // never throws
+    {
+        t = new GlobalEnvironment();
+    }
+
     GlobalEnvironment();
     ~GlobalEnvironment();
 
+public:
     // create a new thread context
     void createThreadEnvironment(boost::thread::id);
 
@@ -80,6 +102,9 @@ public:
     }
 
 private:
+    static GlobalEnvironment* t;
+    static boost::once_flag flag;
+
     typedef std::map<boost::thread::id, ThreadEnvironment*> thread_map;
     thread_map m_threadMap;
 
@@ -87,7 +112,7 @@ private:
     GlobalEnvironment& operator=(const GlobalEnvironment&); // nope
 };
 
-typedef Singleton<GlobalEnvironment> TheGlobalEnvironment;
+typedef GlobalEnvironment TheGlobalEnvironment;
 
 } // namespaces
 
