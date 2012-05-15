@@ -164,7 +164,7 @@ boost::uint8_t* VariableLengthRecord::string2bytes(boost::uint32_t len, const st
     assert(str.length() <= len);
     for (boost::uint32_t i=0; i<str.length(); i++)
     {
-        bytes[i] = (boost::uint8_t)str[i];
+        bytes[i] = static_cast<boost::uint8_t>(str[i]);
     }
     return bytes;
 }
@@ -489,7 +489,7 @@ void VariableLengthRecord::setVLRsFromSRS(const SpatialReference& srs, std::vect
             throw std::runtime_error(oss.str());
         }
 
-        VariableLengthRecord wkt_record(0, s_wktUserId, s_wktRecordId, s_wktDescription, wkt_bytes, (boost::uint16_t)len);
+        VariableLengthRecord wkt_record(0, s_wktUserId, s_wktRecordId, s_wktDescription, wkt_bytes, static_cast<boost::uint16_t>(len));
 
         vlrs.push_back(wkt_record);
     }
