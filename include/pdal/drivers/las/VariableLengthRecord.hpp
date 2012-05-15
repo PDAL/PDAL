@@ -61,7 +61,7 @@ public:
                          boost::uint16_t recordId,
                          std::string description,
                          const boost::uint8_t* bytes,
-                         std::size_t len);
+                         boost::uint16_t len);
     VariableLengthRecord(const VariableLengthRecord&);
     ~VariableLengthRecord();
 

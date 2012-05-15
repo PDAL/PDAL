@@ -157,7 +157,17 @@ VariableLengthRecord ZipPoint::ConstructVLR() const
     int num;
     m_zip->pack(data, num);
 
-    VariableLengthRecord vlr(0xAABB, laszip_userid, laszip_recordid, laszip_description, data, num);
+    if (num > std::numeric_limits<boost::uint16_t>::max())
+    {
+        std::ostringstream oss;
+        std::vector<boost::uint8_t>::size_type overrun = num - static_cast<std::vector<boost::uint8_t>::size_type>(std::numeric_limits<boost::uint16_t>::max());
+        oss << "The size of the wkt, " << num << ", is " << overrun
+            << " bytes too large to fit inside the maximum size of a VLR which is "
+            << std::numeric_limits<boost::uint16_t>::max() << " bytes.";
+        throw std::runtime_error(oss.str());
+    }
+    
+    VariableLengthRecord vlr(0xAABB, laszip_userid, laszip_recordid, laszip_description, data, (boost::uint16_t)num);
 
     return vlr;
 }
