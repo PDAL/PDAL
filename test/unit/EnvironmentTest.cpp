@@ -46,9 +46,9 @@ BOOST_AUTO_TEST_CASE(EnvironmentTest_1)
 
 #ifdef PDAL_HAVE_PYTHON
     ::pdal::plang::PythonEnvironment& python_env = pdal_env.getPythonEnvironment();
-#endif
 
     (void)python_env;
+#endif
 
     return;
 }
