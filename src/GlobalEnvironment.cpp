@@ -39,6 +39,9 @@
 namespace pdal
 {
 
+GlobalEnvironment* GlobalEnvironment::t = 0;
+boost::once_flag GlobalEnvironment::flag = BOOST_ONCE_INIT;
+
 
 GlobalEnvironment::GlobalEnvironment()
 {
