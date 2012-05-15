@@ -98,7 +98,6 @@ std::vector<std::string> Entry::getAttributeNames() const
     return output;
 }
 
-
 void Entry::addAttribute(std::string const& name, std::string const value)
 {
     std::pair<std::string, std::string> p(name, value);
@@ -136,6 +135,8 @@ std::string Entry::getTypeName() const
             return std::string("bounds");
         case metadata::SpatialReference:
             return std::string("spatialreference");
+        case metadata::MData:
+            return std::string("metadata");
         case metadata::UUID:
             return std::string("uuid");
         default:
@@ -369,19 +370,10 @@ bool Metadata::setEntry(metadata::Entry const& m)
     metadata::index_by_name& name_index = m_metadata.get<metadata::name>();
     metadata::index_by_name::iterator it = name_index.find(m.getName());
 
-    // FIXME: If there are two metadata with the same name here, we're
-    // screwed if they both have the same namespace too
     if (it != name_index.end())
     {
-        while (it != name_index.end())
-        {
-            // if (boost::equals(m.getNamespace(), it->getNamespace()))
-            // {
-            name_index.replace(it, m);
-            return true;
-            // }
-            ++it;
-        }
+        name_index.replace(it, m);
+        return true;
     }
     else
     {
