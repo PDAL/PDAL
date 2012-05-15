@@ -45,6 +45,7 @@
 #include <boost/shared_array.hpp>
 #include <boost/variant.hpp>
 #include <boost/variant/recursive_variant.hpp>
+#include <boost/blank.hpp>
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
@@ -165,11 +166,14 @@ enum Type
     /// A boost::uuids::uuid instance
     UUID,
     /// A pdal::Metadata instance
-    MData
+    MData,
+    /// Nothing
+    Blank
 };
 
 
-typedef boost::variant< bool,
+typedef boost::variant< boost::blank,
+                        bool,
                         float,
                         double,
                         boost::int8_t,
@@ -190,20 +194,23 @@ typedef boost::variant< bool,
 
 
 
-/// metadata::Entry is a container for metadata entries that pdal::Stage and pdal::PointBuffer
-/// carry around as part of their internal operations. Bits of information might
-/// come from a pdal::Reader that opens a file, or a pdal::Filter that processes
-/// as an intermediate stage, and pdal::metadata::Entry is what is used to hold and
-/// pass those metadata around.  pdal::metadata::Entry values must be of type pdal::metadata::Variant
-/// and it is required that they are serializeable to std::string.
+/// metadata::Entry is a container for metadata entries that pdal::Stage and
+/// pdal::PointBuffer carry around as part of their internal operations. Bits of
+/// information might come from a pdal::Reader that opens a file, or a
+/// pdal::Filter that processes as an intermediate stage, and
+/// pdal::metadata::Entry is what is used to hold and pass those metadata
+/// around.  pdal::metadata::Entry values must be of type
+/// pdal::metadata::Variant and it is required that they are serializeable to
+/// std::string.
 
-/// pdal::metadata::Entry instances also carry with them a map of key/value pairs
-/// called attributes that are metadata about the metadata entry. For example,
-/// a LAS VLR might have a name of "classification", a pdal::ByteArray for its data,
-/// and a set of attributes that are "userid":"4321" and "vlrid":"1234". These
-/// other metadata may be useful given the context, and any auxiliary data
-/// about the metadata entry should be provided via attributes. It is up to you
-/// to determine where the line of attribute and new metadata entry exists.
+/// pdal::metadata::Entry instances also carry with them a map of key/value
+/// pairs called attributes that are metadata about the metadata entry. For
+/// example, a LAS VLR might have a name of "classification", a pdal::ByteArray
+/// for its data, and a set of attributes that are "userid":"4321" and
+/// "vlrid":"1234". These other metadata may be useful given the context, and
+/// any auxiliary data about the metadata entry should be provided via
+/// attributes. It is up to you to determine where the line of attribute and new
+/// metadata entry exists.
 class PDAL_DLL Entry
 {
 public:
@@ -219,8 +226,14 @@ public:
         : m_name(name)
         , m_description(description)
     {
-        // FIXME: This shouldn't be able to throw -- hobu
-        setValue<T>(value);
+        try
+        {
+            setValue<T>(value);
+        } catch (...)
+        {
+            m_variant = 0;
+            m_type = metadata::Blank;
+        }
         return;
     }
 
@@ -472,6 +485,13 @@ inline void metadata::Entry::setValue<boost::uuids::uuid>(boost::uuids::uuid con
     m_type = metadata::UUID;
 }
 
+template <>
+inline void metadata::Entry::setValue<pdal::Metadata>(pdal::Metadata const& v)
+{
+    m_variant = v;
+    m_type = metadata::MData;
+}
+
 
 struct name {};
 struct index {};
@@ -483,7 +503,7 @@ metadata::Entry,
 
          boost::multi_index::random_access<boost::multi_index::tag<index> >,
          // sort by less<string> on GetName
-         boost::multi_index::hashed_non_unique<boost::multi_index::tag<name>, boost::multi_index::const_mem_fun<metadata::Entry,std::string const&,&metadata::Entry::getName> >
+         boost::multi_index::hashed_unique<boost::multi_index::tag<name>, boost::multi_index::const_mem_fun<metadata::Entry,std::string const&,&metadata::Entry::getName> >
          // boost::multi_index::hashed_non_unique<boost::multi_index::tag<uid>, boost::multi_index::const_mem_fun<metadata::Entry,metadata::id const&,&metadata::Entry::getUUID> >
          >
          > EntryMap;
