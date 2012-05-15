@@ -65,9 +65,13 @@ public:
     /// @param leaderString A string to presage all log entries with
     /// @param outputName A filename or one of 'stdout', 'stdlog', or 'stderr'
     ///                   to use for outputting log information.
-    /// @param v An existing std::ostream to use for logging instead of the
-    ///          the instance creating its own
-    Log(std::string const& leaderString, std::string const& outputName, std::ostream* v);
+    Log(std::string const& leaderString, std::string const& outputName);
+
+    /// Constructs a pdal::Log instance.
+    /// @param leaderString A string to presage all log entries with
+    /// @param v An existing std::ostream to use for logging (instead of the
+    ///          the instance creating its own)
+    Log(std::string const& leaderString, std::ostream* v);
 
     /** @name Destructor
     */

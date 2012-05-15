@@ -117,18 +117,25 @@ void StageBase::initialize()
     if (m_debug)
         if (m_verbose == 0) m_verbose = 1;
 
-    std::string logname = m_options.getValueOrDefault<std::string>("log", "stdlog");
 
     std::vector<StageBase*> const&  inputs = getInputs();
     if (inputs.size() == 0)
     {
-        m_log = boost::shared_ptr<pdal::Log>(new Log(getName(), logname, 0));
+        std::string logname = m_options.getValueOrDefault<std::string>("log", "stdlog");
+        m_log = boost::shared_ptr<pdal::Log>(new Log(getName(), logname));
     }
     else
     {
-        std::ostream* v= getPrevStage().log()->getLogStream();
-        m_log = boost::shared_ptr<pdal::Log>(new Log(getName(), logname, v));
-
+        if (m_options.hasOption("log"))
+        {
+            std::string logname = m_options.getValueOrThrow<std::string>("log");
+            m_log = boost::shared_ptr<pdal::Log>(new Log(getName(), logname));
+        }
+        else
+        {
+            std::ostream* v = getPrevStage().log()->getLogStream();
+            m_log = boost::shared_ptr<pdal::Log>(new Log(getName(), v));
+        }
     }
 
     m_log->setLevel(static_cast<LogLevel>(m_verbose));

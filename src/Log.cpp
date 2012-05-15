@@ -43,39 +43,44 @@ namespace pdal
 
 
 Log::Log(std::string const& leaderString,
-         std::string const& outputName,
+         std::string const& outputName)
+    : m_level(logERROR)
+    , m_deleteStreamOnCleanup(false)
+    , m_leader(leaderString)
+{
+    if (boost::iequals(outputName, "stdlog"))
+    {
+        m_log = &std::clog;
+    }
+    else if (boost::iequals(outputName, "stderr"))
+    {
+        m_log = &std::cerr;
+    }
+    else if (boost::iequals(outputName, "stdout"))
+    {
+        m_log = &std::cout;
+    }
+    else
+    {
+        m_log = FileUtils::createFile(outputName);
+        m_deleteStreamOnCleanup = true;
+    }
+
+    m_null_stream.open(sink());
+}
+
+
+Log::Log(std::string const& leaderString,
          std::ostream* v)
     : m_level(logERROR)
     , m_deleteStreamOnCleanup(false)
     , m_leader(leaderString)
 {
-    // If we were handed a log stream, we're going to use that.
-    if (v == 0)
-    {
-        if (boost::iequals(outputName, "stdlog"))
-        {
-            m_log = &std::clog;
-        }
-        else if (boost::iequals(outputName, "stderr"))
-        {
-            m_log = &std::cerr;
-        }
-        else if (boost::iequals(outputName, "stdout"))
-        {
-            m_log = &std::cout;
-        }
-        else
-        {
-            m_log = FileUtils::createFile(outputName);
-            m_deleteStreamOnCleanup = true;
-        }
-    }
-    else
-    {
-        m_log = v;
-    }
+    m_log = v;
+
     m_null_stream.open(sink());
 }
+
 
 Log::~Log()
 {
