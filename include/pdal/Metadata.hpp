@@ -652,13 +652,11 @@ inline void Metadata::addEntry(std::string const& name, T value)
     try
     {
         m.setValue<T>(value);
-        addEntry(m);
-
     } catch (...)
     {
         m.setValue<boost::blank>(boost::blank());
-        addEntry(m);
     }
+    addEntry(m);
     return;
 }
 
@@ -669,13 +667,11 @@ inline void Metadata::setEntry(std::string const& name, T value)
     try
     {
         m.setValue<T>(value);
-        setEntry(m);
-
     } catch (...)
     {
         m.setValue<boost::blank>(boost::blank());
-        setEntry(m);
     }
+    setEntry(m);
 
     return;
 }
