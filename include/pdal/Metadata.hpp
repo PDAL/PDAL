@@ -657,6 +657,7 @@ inline void Metadata::addEntry(std::string const& name, T value)
     } catch (...)
     {
         m.setValue<boost::blank>(boost::blank());
+        addEntry(m);
     }
     return;
 }
@@ -673,6 +674,7 @@ inline void Metadata::setEntry(std::string const& name, T value)
     } catch (...)
     {
         m.setValue<boost::blank>(boost::blank());
+        setEntry(m);
     }
 
     return;
