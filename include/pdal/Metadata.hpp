@@ -223,17 +223,10 @@ public:
 
     template <typename T>
     Entry(std::string const& name, const T& value, std::string const& description="")
-        : m_name(name)
+        : m_variant(value)
+        , m_name(name)
         , m_description(description)
     {
-        try
-        {
-            setValue<T>(value);
-        } catch (...)
-        {
-            m_variant = 0;
-            m_type = metadata::Blank;
-        }
         return;
     }
 
