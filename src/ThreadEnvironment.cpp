@@ -56,10 +56,11 @@ ThreadEnvironment::~ThreadEnvironment()
 {
 #ifdef PDAL_HAVE_PYTHON
     delete m_pythonEnvironment;
-    m_pythonEnvironment = NULL;
+    m_pythonEnvironment = 0;
 #endif
 
     delete m_rng;
+    m_rng = 0;
 
     return;
 }
