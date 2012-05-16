@@ -62,7 +62,9 @@ void GlobalEnvironment::startup()
 
 void GlobalEnvironment::shutdown()
 {
-    delete t;
+    // Shutdown could be called multiple times?
+    if (t != 0)
+        delete t;
     t = 0;
 }
 
