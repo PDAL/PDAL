@@ -479,7 +479,7 @@ void LasHeader::initialize()
     m_sourceId = m_reserved = boost::uint16_t();
     m_projectGuid = boost::uuids::nil_uuid();
 
-    m_dataOffset = eHeaderSize; // excluding 2 bytes of Point Data Start Signature
+    m_dataOffset = eHeaderSize; 
     m_pointRecordsCount = 0;
 
     std::memset(m_signature, 0, eFileSignatureSize);
@@ -493,7 +493,6 @@ void LasHeader::initialize()
 
     m_pointRecordsByReturn.resize(ePointsByReturnSize);
 
-    // Zero scale value is useless, so we need to use a small value.
     SetScale(1.0, 1.0, 1.0);
 
     m_isCompressed = false;
