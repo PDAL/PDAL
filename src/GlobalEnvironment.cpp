@@ -64,8 +64,11 @@ void GlobalEnvironment::shutdown()
 {
     // Shutdown could be called multiple times?
     if (t != 0)
+    {
         delete t;
-    t = 0;
+        t = 0;
+    }
+    
 }
 
 
@@ -105,7 +108,8 @@ GlobalEnvironment::~GlobalEnvironment()
 void GlobalEnvironment::createThreadEnvironment(boost::thread::id id)
 {
     ThreadEnvironment* threadEnv = new ThreadEnvironment(id);
-
+    
+    // FIXME: What happens if the id is already in the map?
     m_threadMap.insert( std::make_pair(id, threadEnv ) );
 }
 
