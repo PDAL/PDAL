@@ -54,9 +54,11 @@ namespace metadata
 {
 
 Entry::Entry(std::string const& name)
-    : m_name(name)
-    , m_type(metadata::String)
+    : m_variant(boost::blank())
+    , m_name(name)
+    , m_type(metadata::Blank)
     , m_description("")
+    
 {
     return;
 }
