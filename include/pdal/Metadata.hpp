@@ -74,7 +74,7 @@ class Metadata;
 /// ByteArray simply wrapps a std::vector<boost::uint8_t> such that it can then
 /// be dumped to an ostream in a base64 encoding. For now, it makes a copy of the data
 /// it is given, and should not be used for slinging big data around.
-class PDAL_DLL ByteArray : public Object
+class PDAL_DLL ByteArray
 {
 public:
 
@@ -82,25 +82,21 @@ public:
     */
     /// Constructs a ByteArray instance with the given array of data.
     ByteArray(std::vector<boost::uint8_t> const& data)
-        : Object("ByteArray")
-        , m_bytes(data)
+        : m_bytes(data)
     {
         return;
     }
 
     /// Copy constructor
     ByteArray(const ByteArray& rhs)
-        : Object("ByteArray")
-        , m_bytes(rhs.m_bytes)
+        : m_bytes(rhs.m_bytes)
 
     {
-        return;
     }
 
     /// Destructor
     ~ByteArray()
     {
-        return;
     }
 
     /// Assignment operator
