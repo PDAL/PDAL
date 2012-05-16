@@ -84,7 +84,6 @@ public:
     ByteArray(std::vector<boost::uint8_t> const& data)
         : m_bytes(data)
     {
-        return;
     }
 
     /// Copy constructor
@@ -94,13 +93,8 @@ public:
     {
     }
 
-    /// Destructor
-    ~ByteArray()
-    {
-    }
-
     /// Assignment operator
-    ByteArray& operator=(ByteArray const& rhs)
+    inline ByteArray& operator=(ByteArray const& rhs)
     {
         if (&rhs != this)
         {
@@ -123,8 +117,7 @@ public:
         return m_bytes;
     }
 
-/// @name serialization
-    boost::property_tree::ptree toPTreeImpl() const;
+
     /** @name private attributes
     */
 private:

@@ -213,22 +213,6 @@ std::ostream& operator<<(std::ostream& ostr, const Entry& metadata)
 } // metadata
 
 
-boost::property_tree::ptree ByteArray::toPTreeImpl() const
-{
-    using namespace boost;
-
-    property_tree::ptree tree;
-
-    std::ostringstream data;
-    data << *this;
-
-    tree.put("data", data.str());
-    tree.put("size", m_bytes.size());
-    return tree;
-}
-
-
-
 std::string Metadata::to_xml() const
 {
     using namespace boost;
