@@ -492,6 +492,12 @@ inline void metadata::Entry::setValue<pdal::Metadata>(pdal::Metadata const& v)
     m_type = metadata::MData;
 }
 
+template <>
+inline void metadata::Entry::setValue<boost::blank>(boost::blank const& v)
+{
+    m_variant = v;
+    m_type = metadata::Blank;
+}
 
 struct name {};
 struct index {};
@@ -643,8 +649,15 @@ template <class T>
 inline void Metadata::addEntry(std::string const& name, T value)
 {
     metadata::Entry m(name);
-    m.setValue<T>(value);
-    addEntry(m);
+    try
+    {
+        m.setValue<T>(value);
+        addEntry(m);
+
+    } catch (...)
+    {
+        m.setValue<boost::blank>(boost::blank());
+    }
     return;
 }
 
@@ -652,8 +665,16 @@ template <class T>
 inline void Metadata::setEntry(std::string const& name, T value)
 {
     metadata::Entry m(name);
-    m.setValue<T>(value);
-    setEntry(m);
+    try
+    {
+        m.setValue<T>(value);
+        setEntry(m);
+
+    } catch (...)
+    {
+        m.setValue<boost::blank>(boost::blank());
+    }
+
     return;
 }
 
