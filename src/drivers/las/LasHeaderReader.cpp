@@ -83,8 +83,8 @@ void LasHeaderReader::read(Stage& stage, Schema& schema)
     double z2 = 0;
 
     // BUG: these two were std::string, but the read_n() failed until I made them char[]
-    char buff[32];
-    char fsig[4];
+    char buff[32] =  {'\0'};
+    char fsig[4] =  {'\0'};
 
     m_istream.seekg(0);
 
@@ -102,7 +102,7 @@ void LasHeaderReader::read(Stage& stage, Schema& schema)
 
     // 4-7. Project ID
     {
-        boost::uint8_t d[16];
+        boost::uint8_t d[16] = {0};
         Utils::read_n(d, m_istream, 16);
         boost::uuids::uuid u;
         for (int i=0; i<16; i++)
