@@ -199,7 +199,9 @@ BOOST_AUTO_TEST_CASE(test_metadata_set)
     BOOST_CHECK_EQUAL(m3.getValue<boost::int64_t>(), 64);
 
     b.setEntry(m3);
-
+    
+    b.addEntry("uuid", boost::uuids::nil_uuid());
+    
     return;
 }
 
@@ -232,22 +234,6 @@ BOOST_AUTO_TEST_CASE(test_metadata_constructor_no_throw)
     pdal::Bounds<double> b;
     pdal::metadata::Entry entry("name", b);
 
-    return;
-}
-
-BOOST_AUTO_TEST_CASE(test_metadata_recursion)
-{
-
-    pdal::Bounds<double> b;
-    pdal::metadata::Entry entry("name", b);
-
-    pdal::Metadata mdata;
-    mdata.addEntry(entry);
-
-    entry.setMetadata(mdata);
-
-    boost::optional<pdal::Metadata const&> m = entry.getMetadata();
-    BOOST_CHECK_EQUAL(m->getEntry("name").getType(), pdal::metadata::Bounds);
     return;
 }
 
