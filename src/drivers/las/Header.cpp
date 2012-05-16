@@ -477,7 +477,7 @@ void LasHeader::initialize()
     m_headerSize = eHeaderSize;
 
     m_sourceId = m_reserved = boost::uint16_t();
-    memset(m_projectGuid.data, 0, 16);
+    m_projectGuid = boost::uuids::nil_uuid();
 
     m_dataOffset = eHeaderSize; // excluding 2 bytes of Point Data Start Signature
     m_pointRecordsCount = 0;
