@@ -37,7 +37,6 @@
 
 #include <pdal/pdal_internal.hpp>
 #include <pdal/Options.hpp>
-#include <pdal/Object.hpp>
 #include <pdal/Bounds.hpp>
 #include <pdal/SpatialReference.hpp>
 
