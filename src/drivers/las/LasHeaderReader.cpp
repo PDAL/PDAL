@@ -90,7 +90,7 @@ void LasHeaderReader::read(Stage& stage, Schema& schema)
 
     // 1. File Signature
     Utils::read_n(fsig, m_istream, 4);
-    m_header.SetFileSignature(fsig);
+    m_header.SetFileSignature(std::string(fsig, 4));
 
     // 2. File Source ID
     Utils::read_n(n2, m_istream, sizeof(n2));
