@@ -291,9 +291,9 @@ void Writer::writeBufferBegin(PointBuffer const& data)
 
         if (format && doForwardThisMetadata("dataformatid"))
         {
-			setPointFormat(static_cast<PointFormat>(format->cast<boost::uint32_t>()));
+			setPointFormat(static_cast<PointFormat>(format->get_value<boost::uint32_t>()));
 			log()->get(logDEBUG) << "Setting point format to " 
-                                 << format->cast<boost::uint32_t>() 
+                                 << format->get_value<boost::uint32_t>() 
                                  << "from metadata" << std::endl;
         } 
 		boost::optional<pdal::metadata::Entry const&> major =
@@ -304,10 +304,10 @@ void Writer::writeBufferBegin(PointBuffer const& data)
 				doForwardThisMetadata("version_major")) 
 		{
             setFormatVersion((boost::uint8_t)getOptions().getValueOrDefault<boost::uint32_t>("major_version", 1),
-                             (boost::uint8_t)minor->cast<boost::uint32_t>());
+                             (boost::uint8_t)minor->get_value<boost::uint32_t>());
             log()->get(logDEBUG) << "Setting version to " 
                   << getOptions().getValueOrDefault<boost::uint32_t>("major_version", 1) 
-                  << ", " << minor->cast<boost::uint32_t>() 
+                  << ", " << minor->get_value<boost::uint32_t>() 
                   << "from metadata" << std::endl;
         } 
 
@@ -318,10 +318,10 @@ void Writer::writeBufferBegin(PointBuffer const& data)
 		if (year && day && doForwardThisMetadata("creation_doy") &&
 				doForwardThisMetadata("creation_year")) 
 		{
-            setDate((boost::uint16_t)year->cast<boost::uint32_t>(), (boost::uint16_t)day->cast<boost::uint32_t>());
+            setDate((boost::uint16_t)year->get_value<boost::uint32_t>(), (boost::uint16_t)day->get_value<boost::uint32_t>());
             log()->get(logDEBUG) << "Setting date to format " 
-                                 << day->cast<boost::uint32_t>() << "/"
-                                 << year->cast<boost::uint32_t>() 
+                                 << day->get_value<boost::uint32_t>() << "/"
+                                 << year->get_value<boost::uint32_t>() 
                                  << "from metadata" << std::endl;
         } 
 
@@ -330,9 +330,9 @@ void Writer::writeBufferBegin(PointBuffer const& data)
         {
             try 
             {
-                setGeneratingSoftware(software_id->cast<std::string>());
+                setGeneratingSoftware(software_id->get_value<std::string>());
                 log()->get(logDEBUG) << "Setting generating software to " 
-                                     << software_id->cast<std::string>()
+                                     << software_id->get_value<std::string>()
                                      << "from metadata" << std::endl;
             } catch (std::bad_cast&) {}
         } 
@@ -342,9 +342,9 @@ void Writer::writeBufferBegin(PointBuffer const& data)
         {
             try 
             {
-                setSystemIdentifier(system_id->cast<std::string>());
+                setSystemIdentifier(system_id->get_value<std::string>());
                 log()->get(logDEBUG) << "Setting system identifier to " 
-                                     << system_id->cast<std::string>()
+                                     << system_id->get_value<std::string>()
                                      << "from metadata" << std::endl;
             } catch (std::bad_cast&) {}
         } 
@@ -353,9 +353,9 @@ void Writer::writeBufferBegin(PointBuffer const& data)
         {
             try 
             {
-                m_lasHeader.SetProjectId(boost::lexical_cast<boost::uuids::uuid>(project_id->cast<std::string>()));
+                m_lasHeader.SetProjectId(boost::lexical_cast<boost::uuids::uuid>(project_id->get_value<std::string>()));
                 log()->get(logDEBUG) << "Setting project_id to " 
-                                     << project_id->cast<std::string>()
+                                     << project_id->get_value<std::string>()
                                      << "from metadata" << std::endl;
             } catch (std::bad_cast&) {}
         } 
@@ -364,9 +364,9 @@ void Writer::writeBufferBegin(PointBuffer const& data)
         {
             try 
             {
-                m_lasHeader.SetReserved(reserved->cast<boost::uint16_t>());
+                m_lasHeader.SetReserved(reserved->get_value<boost::uint16_t>());
                 log()->get(logDEBUG) << "Setting reserved to " 
-                                     << reserved->cast<boost::uint16_t>()
+                                     << reserved->get_value<boost::uint16_t>()
                                      << "from metadata" << std::endl;
             } catch (std::bad_cast&) {}
         } 
@@ -375,9 +375,9 @@ void Writer::writeBufferBegin(PointBuffer const& data)
         {
             try 
             {
-                m_lasHeader.SetFileSourceId(filesourceid->cast<boost::uint16_t>());
+                m_lasHeader.SetFileSourceId(filesourceid->get_value<boost::uint16_t>());
                 log()->get(logDEBUG) << "Setting file source id to " 
-                                     << filesourceid->cast<boost::uint16_t>()
+                                     << filesourceid->get_value<boost::uint16_t>()
                                      << "from metadata" << std::endl;
             } catch (std::bad_cast&) {}
         } 

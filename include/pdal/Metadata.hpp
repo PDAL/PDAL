@@ -199,7 +199,7 @@ typedef boost::variant< bool,
 /// any auxiliary data about the metadata entry should be provided via
 /// attributes. It is up to you to determine where the line of attribute and new
 /// metadata entry exists.
-class PDAL_DLL Entry
+class PDAL_DLL Entry : public boost::property_tree::ptree
 {
 public:
 
@@ -211,8 +211,7 @@ public:
 
     template <typename T>
     Entry(std::string const& name, const T& value, std::string const& description="")
-        : m_variant(value)
-        , m_name(name)
+        : m_name(name)
         , m_description(description)
     {
         return;
@@ -220,7 +219,6 @@ public:
 
     /// Copy constructor
     Entry(const Entry&);
-    Entry& operator=(const Entry& rhs);
 
     ~Entry() {}
 
@@ -255,19 +253,7 @@ public:
     /// via boost::lexical_cast
     template <class T> inline T getValue() const
     {
-        return boost::get<T>(m_variant);
-    }
-
-    /// explicitly casts the metadata entry to your type T via boost::lexical_cast
-    template <class T> inline T cast() const
-    {
-        return boost::lexical_cast<T>(m_variant);
-    }
-
-    /// returns the pdal::metadata::Variant instance
-    inline metadata::Variant const& getVariant() const
-    {
-        return m_variant;
+        return get_value<T>();
     }
 
     /** @name entry name
@@ -341,7 +327,6 @@ public:
     /** @name private attributes
     */
 private:
-    metadata::Variant m_variant;
     std::string m_name;
     metadata::Type m_type;
     metadata::MetadataAttributeM m_attributes;
@@ -357,127 +342,127 @@ extern PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const metadata::Ent
 template <>
 inline void metadata::Entry::setValue<bool>(bool const& v)
 {
-    m_variant = v;
     m_type = metadata::Boolean;
+    put_value(v);
 }
 
 template <>
 inline void metadata::Entry::setValue<std::string>(std::string const& v)
 {
-    m_variant = v;
     m_type = metadata::String;
+    put_value(v);
 }
 
 template <>
 inline void metadata::Entry::setValue<pdal::ByteArray>(pdal::ByteArray const& v)
 {
-    m_variant = v;
     m_type = metadata::Bytes;
+    put_value(v);
 }
 
 template <>
 inline void metadata::Entry::setValue<float>(float const& v)
 {
-    m_variant = v;
     m_type = metadata::Float;
+    put_value(v);
 }
 
 template <>
 inline void metadata::Entry::setValue<double>(double const& v)
 {
-    m_variant = v;
     m_type = metadata::Double;
+    put_value(v);
 }
 
 template <>
 inline void metadata::Entry::setValue<pdal::SpatialReference>(pdal::SpatialReference const& v)
 {
-    m_variant = v;
     m_type = metadata::SpatialReference;
+    put_value(v);
 }
 
 template <>
 inline void metadata::Entry::setValue<pdal::Bounds<double> >(pdal::Bounds<double> const& v)
 {
-    m_variant = v;
     m_type = metadata::Bounds;
+    put_value(v);
 }
 
 template <>
 inline void metadata::Entry::setValue<boost::uint8_t>(boost::uint8_t const& v)
 {
-    m_variant = v;
     m_type = metadata::UnsignedInteger;
+    put_value(v);
 }
 
 template <>
 inline void metadata::Entry::setValue<boost::uint16_t>(boost::uint16_t const& v)
 {
-    m_variant = v;
     m_type = metadata::UnsignedInteger;
+    put_value(v);
 }
 
 template <>
 inline void metadata::Entry::setValue<boost::uint32_t>(boost::uint32_t const& v)
 {
-    m_variant = v;
     m_type = metadata::UnsignedInteger;
+    put_value(v);
 }
 
 template <>
 inline void metadata::Entry::setValue<boost::uint64_t>(boost::uint64_t const& v)
 {
-    m_variant = v;
     m_type = metadata::UnsignedInteger;
+    put_value(v);
 }
 
 template <>
 inline void metadata::Entry::setValue<boost::int8_t>(boost::int8_t const& v)
 {
-    m_variant = v;
     m_type = metadata::SignedInteger;
+    put_value(v);
 }
 
 template <>
 inline void metadata::Entry::setValue<boost::int16_t>(boost::int16_t const& v)
 {
-    m_variant = v;
     m_type = metadata::SignedInteger;
+    put_value(v);
 }
 
 template <>
 inline void metadata::Entry::setValue<boost::int32_t>(boost::int32_t const& v)
 {
-    m_variant = v;
     m_type = metadata::SignedInteger;
+    put_value(v);
 }
 
 template <>
 inline void metadata::Entry::setValue<boost::int64_t>(boost::int64_t const& v)
 {
-    m_variant = v;
     m_type = metadata::SignedInteger;
+    put_value(v);
 }
 
 template <>
 inline void metadata::Entry::setValue<boost::uuids::uuid>(boost::uuids::uuid const& v)
 {
-    m_variant = v;
     m_type = metadata::UUID;
+    put_value(v);
 }
 
 template <>
 inline void metadata::Entry::setValue<pdal::Metadata>(pdal::Metadata const& v)
 {
-    m_variant = v;
     m_type = metadata::MData;
+    put_value(v);
 }
 
 template <>
 inline void metadata::Entry::setValue<boost::blank>(boost::blank const& v)
 {
-    m_variant = v;
     m_type = metadata::Blank;
+    put_value(v);
 }
 
 struct name {};

@@ -54,7 +54,7 @@ namespace metadata
 {
 
 Entry::Entry(std::string const& name)
-    : m_variant(boost::blank())
+    : boost::property_tree::ptree()
     , m_name(name)
     , m_type(metadata::Blank)
     , m_description("")
@@ -65,7 +65,7 @@ Entry::Entry(std::string const& name)
 
 
 Entry::Entry(const Entry& other)
-    : m_variant(other.m_variant)
+    : boost::property_tree::ptree(other)
     , m_name(other.m_name)
     , m_type(other.m_type)
     , m_attributes(other.m_attributes)
@@ -74,18 +74,6 @@ Entry::Entry(const Entry& other)
     return;
 }
 
-Entry& Entry::operator=(const Entry& rhs)
-{
-    if (&rhs != this)
-    {
-        m_variant = rhs.m_variant;
-        m_name = rhs.m_name;
-        m_description = rhs.m_description;
-        m_type = rhs.m_type;
-        m_attributes = rhs.m_attributes;
-    }
-    return *this;
-}
 
 std::vector<std::string> Entry::getAttributeNames() const
 {
@@ -166,8 +154,7 @@ boost::property_tree::ptree Entry::toPTree() const
     ptree dim;
     dim.put("name", getName());
     std::ostringstream oss;
-    oss << m_variant;
-    dim.put("value", oss.str());
+    dim.put("value", get_value<std::string>());
     dim.put("type", getTypeName());
 
     for (metadata::MetadataAttributeM::const_iterator i = m_attributes.begin(); i != m_attributes.end(); ++i)
@@ -204,7 +191,7 @@ std::string Entry::to_xml()
 }
 std::ostream& operator<<(std::ostream& ostr, const Entry& metadata)
 {
-    ostr << metadata.getVariant() << std::endl;
+    ostr << metadata.get_value<std::string>() << std::endl;
     //ostr << metadata.getNamespace() << ":" << metadata.getName() << "=" << metadata.getVariant() << std::endl;
     return ostr;
 }
@@ -285,9 +272,13 @@ void Metadata::addEntry(metadata::Entry const& m)
     metadata::index_by_name& index = m_metadata.get<metadata::name>();
 
     std::pair<metadata::index_by_name::iterator, bool> q = index.insert(m);
+    // if insert failed because an entry of the same name already exists, 
+    // overwrite it
     if (!q.second)
     {
-        index.replace(q.first, m);
+        bool didSet = setEntry(m);
+        if (!didSet)
+            throw pdal_error("Unable to addEntry because same name exists!");
     }
 
     return;
@@ -358,17 +349,17 @@ bool Metadata::setEntry(metadata::Entry const& m)
 
     if (it != name_index.end())
     {
-        name_index.replace(it, m);
+        bool didReplace = name_index.replace(it, m);
+        if (!didReplace) 
+            return false;
         return true;
     }
     else
     {
-        std::ostringstream oss;
-        oss << "Metadata with name '" << m.getName() << "' not found, unable to Metadata::setMetadata";
-        throw metadata_not_found(oss.str());
+        return false;
     }
 
-    return true;
+    return false;
 }
 
 Metadata::Metadata(Metadata const& other)

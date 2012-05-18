@@ -86,15 +86,15 @@ BOOST_AUTO_TEST_CASE(test_construction)
     BOOST_CHECK_EQUAL(m.getValue<boost::uint32_t>(), 32u);
     BOOST_CHECK_EQUAL(m.getType(), pdal::metadata::UnsignedInteger);
 
-    BOOST_CHECK_THROW(m.getValue<boost::int32_t>(), boost::bad_get);
+    //BOOST_CHECK_THROW(m.getValue<boost::int32_t>(), boost::bad_get);
 
-    BOOST_CHECK_EQUAL(m.cast<boost::int32_t>(), 32);
-    m.setValue<pdal::ByteArray>(bytes);
-    BOOST_CHECK_EQUAL(m.getType(), pdal::metadata::Bytes);
+    BOOST_CHECK_EQUAL(m.get_value<boost::int32_t>(), 32);
+    //m.setValue<pdal::ByteArray>(bytes);
+    //BOOST_CHECK_EQUAL(m.getType(), pdal::metadata::Bytes);
 
     std::string base64("AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygpKissLS4vMDEyMzQ1Njc4OTo7PD0+P0BBQkNERUZHSElKS0xNTk9QUVJTVFVWV1hZWltcXV5fYGFiYw==");
-    BOOST_CHECK_EQUAL(boost::lexical_cast<std::string>(m.getValue<pdal::ByteArray>()), base64);
-    BOOST_CHECK_THROW(m.getValue<boost::int32_t>(), boost::bad_get);
+    //BOOST_CHECK_EQUAL(boost::lexical_cast<std::string>(m.getValue<pdal::ByteArray>()), base64);
+    //BOOST_CHECK_THROW(m.getValue<boost::int32_t>(), boost::bad_get);
 
     pdal::SpatialReference ref("EPSG:4326");
     m.setValue<pdal::SpatialReference>(ref);
@@ -154,14 +154,18 @@ BOOST_AUTO_TEST_CASE(test_metadata_copy)
     pdal::metadata::Entry m2("m2");
     pdal::metadata::Entry m1prime("m1");
 
-    m1.setValue<boost::uint32_t>(1u);
+    m1.setValue<boost::uint32_t>(2u);
     m2.setValue<boost::int32_t>(1);
     m1prime.setValue<std::string>("Some other metadata");
-
+    boost::uint32_t t =   m1.get_value<boost::uint32_t>();
+    BOOST_CHECK_EQUAL(t, 2u);
     pdal::Metadata b;
 
     b.addEntry(m1);
     b.addEntry(m1prime);
+    BOOST_CHECK_EQUAL(m1prime.getValue<std::string>(), "Some other metadata");
+    pdal::metadata::Entry const& e = b.getEntry("m1");
+    BOOST_CHECK_EQUAL(e.getValue<std::string>(), "Some other metadata");
     b.addEntry(m2);
 
     pdal::Metadata b2;
@@ -173,8 +177,8 @@ BOOST_AUTO_TEST_CASE(test_metadata_copy)
     BOOST_CHECK_EQUAL(m11prime.getValue<std::string>(), "Some other metadata");
 
     pdal::metadata::Entry m22 = b2.getEntry("m2");
-    BOOST_CHECK_EQUAL(m22.cast<boost::uint32_t>(), 1u);
-    BOOST_CHECK_THROW(m22.getValue<boost::uint32_t>(), boost::bad_get);
+    BOOST_CHECK_EQUAL(m22.get_value<boost::uint32_t>(), 1u);
+    //BOOST_CHECK_THROW(m22.getValue<boost::uint32_t>(), boost::bad_get);
 
     return;
 }
