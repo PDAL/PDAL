@@ -127,7 +127,6 @@ private:
 namespace metadata
 {
 
-typedef std::map<std::string, std::string> MetadataAttributeM;
 typedef boost::uuids::uuid id;
 typedef boost::shared_ptr<Metadata> MetadataPtr;
 
@@ -211,30 +210,26 @@ public:
 
     template <typename T>
     Entry(std::string const& name, const T& value, std::string const& description="")
-        : m_name(name)
-        , m_description(description)
     {
-        return;
+        setName(name);
+        setDescription(description);
+        put_value(value);
     }
 
-    /// Copy constructor
-    Entry(const Entry&);
-
-    ~Entry() {}
 
     /** @name entry type
     */
     /// returns the pdal::metadata::Type for the metadata entry
     inline metadata::Type getType() const
     {
-        return m_type;
+        return static_cast<metadata::Type>(boost::property_tree::ptree::get<boost::uint32_t>("type"));
     }
 
     /// sets the pdal::metadata::Type for the metadata entry
     /// @param t pdal::metadata::Type value for the entry
     inline void setType(metadata::Type t)
     {
-        m_type = t;
+        boost::property_tree::ptree::put("type", t);
     }
 
     /// returns a std::string representation of the type
@@ -242,47 +237,24 @@ public:
 
     /** @name entry value
     */
-    /// sets the pdal::metadata::Variant value for the entry
     /// @param v value of type pdal::metadata::Variant to set for the entry
-    template <class T> inline void setValue(T const& v);
-
-    /// gets the metadata entry value as type T.  Throws boost::bad_cast if
-    /// unable to do so.  Use pdal::metdata::Type to determine which type T to
-    /// request of the metadata entry. Alternatively, use pdal::Metdata::cast()
-    /// to attempt to explicitly cast the metadata entry to your own type
-    /// via boost::lexical_cast
-    template <class T> inline T getValue() const
-    {
-        return get_value<T>();
-    }
+    template <class T> inline void put_value(T const& v);
 
     /** @name entry name
     */
     /// returns the name for the metadata entry
-    inline std::string const& getName() const
+    inline std::string getName() const
     {
-        return m_name;
+        return boost::property_tree::ptree::get<std::string>("name");
     }
 
     /// resets the name for the metadata entry
     /// @param name value to use for new name
     inline void setName(std::string const& name)
     {
-        m_name = name;
+        boost::property_tree::ptree::put("name", name);
     }
 
-    /** @name entry attributes
-    */
-    /// returns the list of attribute keys for the metadata entry
-    std::vector<std::string> getAttributeNames() const;
-
-    /// adds a new metadata key/value pair to the metadata entry
-    /// @param name to use for the attribute pair
-    /// @param value to use for the attribute pair
-    void addAttribute(std::string const& name, std::string const value);
-
-    /// returns the attribute value for a given attribute key
-    std::string getAttribute(std::string const& name) const;
 
 /// @name Serialization
     boost::property_tree::ptree toPTree() const;
@@ -296,174 +268,148 @@ public:
     /// @param description new value to use for the description of the Option
     inline void setDescription(const std::string& description)
     {
-        m_description = description;
+        boost::property_tree::ptree::put("description", description);
     }
 
     /// @return the description of the Option
-    inline std::string const& getDescription() const
+    inline std::string getDescription() const
     {
-        return m_description;
+        return  boost::property_tree::ptree::get<std::string>("description");;
     }
-
-/// @name pdal::Metadata access
-
-    /*! \return a boost::optional-wrapped const& of the Metadata set for this Metadata.
-    \verbatim embed:rst
-
-    .. note::
-
-            An Entry may have an Metadata map of of
-            infinite depth (Entry->Metadata->Entry->Metadata...)
-    \endverbatim
-    */
-
-    boost::optional<Metadata const&> getMetadata() const;
-
-    /// sets the Metadata set for this Entry instance
-    /// @param mdata Metadata set to use
-    void setMetadata(Metadata const& mdata);
-
-
-    /** @name private attributes
-    */
-private:
-    std::string m_name;
-    metadata::Type m_type;
-    metadata::MetadataAttributeM m_attributes;
-    std::string m_description;
-    metadata::MetadataPtr m_metadata;
 
 };
 
 
 extern PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const metadata::Entry& srs);
 
-
 template <>
-inline void metadata::Entry::setValue<bool>(bool const& v)
+inline void metadata::Entry::put_value<bool>(bool const& v)
 {
-    m_type = metadata::Boolean;
-    put_value(v);
+    setType(metadata::Boolean);
+    boost::property_tree::ptree::put_value(v);
 }
 
 template <>
-inline void metadata::Entry::setValue<std::string>(std::string const& v)
+inline void metadata::Entry::put_value<std::string>(std::string const& v)
 {
-    m_type = metadata::String;
-    put_value(v);
+    setType(metadata::String);
+    boost::property_tree::ptree::put_value(v);
 }
 
 template <>
-inline void metadata::Entry::setValue<pdal::ByteArray>(pdal::ByteArray const& v)
+inline void metadata::Entry::put_value<pdal::ByteArray>(pdal::ByteArray const& v)
 {
-    m_type = metadata::Bytes;
-    put_value(v);
+    setType(metadata::Bytes);
+    boost::property_tree::ptree::put_value(v);
 }
 
 template <>
-inline void metadata::Entry::setValue<float>(float const& v)
+inline void metadata::Entry::put_value<float>(float const& v)
 {
-    m_type = metadata::Float;
-    put_value(v);
+    setType(metadata::Float);
+    boost::property_tree::ptree::put_value(v);
 }
 
 template <>
-inline void metadata::Entry::setValue<double>(double const& v)
+inline void metadata::Entry::put_value<double>(double const& v)
 {
-    m_type = metadata::Double;
-    put_value(v);
+    setType(metadata::Double);
+    boost::property_tree::ptree::put_value(v);
 }
 
 template <>
-inline void metadata::Entry::setValue<pdal::SpatialReference>(pdal::SpatialReference const& v)
+inline void metadata::Entry::put_value<pdal::SpatialReference>(pdal::SpatialReference const& v)
 {
-    m_type = metadata::SpatialReference;
-    put_value(v);
+    setType(metadata::SpatialReference);
+    boost::property_tree::ptree::put_value(v);
 }
 
 template <>
-inline void metadata::Entry::setValue<pdal::Bounds<double> >(pdal::Bounds<double> const& v)
+inline void metadata::Entry::put_value<pdal::Bounds<double> >(pdal::Bounds<double> const& v)
 {
-    m_type = metadata::Bounds;
-    put_value(v);
+    setType(metadata::Bounds);
+    boost::property_tree::ptree::put_value(v);
 }
 
 template <>
-inline void metadata::Entry::setValue<boost::uint8_t>(boost::uint8_t const& v)
+inline void metadata::Entry::put_value<boost::uint8_t>(boost::uint8_t const& v)
 {
-    m_type = metadata::UnsignedInteger;
-    put_value(v);
+    setType(metadata::UnsignedInteger);
+    boost::property_tree::ptree::put_value(v);
 }
 
 template <>
-inline void metadata::Entry::setValue<boost::uint16_t>(boost::uint16_t const& v)
+inline void metadata::Entry::put_value<boost::uint16_t>(boost::uint16_t const& v)
 {
-    m_type = metadata::UnsignedInteger;
-    put_value(v);
+    setType(metadata::UnsignedInteger);
+    boost::property_tree::ptree::put_value(v);
 }
 
 template <>
-inline void metadata::Entry::setValue<boost::uint32_t>(boost::uint32_t const& v)
+inline void metadata::Entry::put_value<boost::uint32_t>(boost::uint32_t const& v)
 {
-    m_type = metadata::UnsignedInteger;
-    put_value(v);
+    setType(metadata::UnsignedInteger);
+    boost::property_tree::ptree::put_value(v);
 }
 
 template <>
-inline void metadata::Entry::setValue<boost::uint64_t>(boost::uint64_t const& v)
+inline void metadata::Entry::put_value<boost::uint64_t>(boost::uint64_t const& v)
 {
-    m_type = metadata::UnsignedInteger;
-    put_value(v);
+    setType(metadata::UnsignedInteger);
+    boost::property_tree::ptree::put_value(v);
 }
 
 template <>
-inline void metadata::Entry::setValue<boost::int8_t>(boost::int8_t const& v)
+inline void metadata::Entry::put_value<boost::int8_t>(boost::int8_t const& v)
 {
-    m_type = metadata::SignedInteger;
-    put_value(v);
+    setType(metadata::SignedInteger);
+    boost::property_tree::ptree::put_value(v);
 }
 
 template <>
-inline void metadata::Entry::setValue<boost::int16_t>(boost::int16_t const& v)
+inline void metadata::Entry::put_value<boost::int16_t>(boost::int16_t const& v)
 {
-    m_type = metadata::SignedInteger;
-    put_value(v);
+    setType(metadata::SignedInteger);
+    boost::property_tree::ptree::put_value(v);
 }
 
 template <>
-inline void metadata::Entry::setValue<boost::int32_t>(boost::int32_t const& v)
+inline void metadata::Entry::put_value<boost::int32_t>(boost::int32_t const& v)
 {
-    m_type = metadata::SignedInteger;
-    put_value(v);
+    setType(metadata::SignedInteger);
+    boost::property_tree::ptree::put_value(v);
 }
 
 template <>
-inline void metadata::Entry::setValue<boost::int64_t>(boost::int64_t const& v)
+inline void metadata::Entry::put_value<boost::int64_t>(boost::int64_t const& v)
 {
-    m_type = metadata::SignedInteger;
-    put_value(v);
+    setType(metadata::SignedInteger);
+    boost::property_tree::ptree::put_value(v);
 }
 
 template <>
-inline void metadata::Entry::setValue<boost::uuids::uuid>(boost::uuids::uuid const& v)
+inline void metadata::Entry::put_value<boost::uuids::uuid>(boost::uuids::uuid const& v)
 {
-    m_type = metadata::UUID;
-    put_value(v);
+    setType(metadata::UUID);
+    boost::property_tree::ptree::put_value(v);
 }
 
 template <>
-inline void metadata::Entry::setValue<pdal::Metadata>(pdal::Metadata const& v)
+inline void metadata::Entry::put_value<pdal::Metadata>(pdal::Metadata const& v)
 {
-    m_type = metadata::MData;
-    put_value(v);
+    setType(metadata::MData);
+    boost::property_tree::ptree::put_value(v);
 }
 
 template <>
-inline void metadata::Entry::setValue<boost::blank>(boost::blank const& v)
+inline void metadata::Entry::put_value<boost::blank>(boost::blank const& v)
 {
-    m_type = metadata::Blank;
-    put_value(v);
+    setType(metadata::Blank);
+    boost::property_tree::ptree::put_value(v);
 }
+
+
+
 
 struct name {};
 struct index {};
@@ -475,7 +421,7 @@ metadata::Entry,
 
          boost::multi_index::random_access<boost::multi_index::tag<index> >,
          // sort by less<string> on GetName
-         boost::multi_index::hashed_unique<boost::multi_index::tag<name>, boost::multi_index::const_mem_fun<metadata::Entry,std::string const&,&metadata::Entry::getName> >
+         boost::multi_index::hashed_unique<boost::multi_index::tag<name>, boost::multi_index::const_mem_fun<metadata::Entry,std::string,&metadata::Entry::getName> >
          // boost::multi_index::hashed_non_unique<boost::multi_index::tag<uid>, boost::multi_index::const_mem_fun<metadata::Entry,metadata::id const&,&metadata::Entry::getUUID> >
          >
          > EntryMap;
@@ -617,10 +563,10 @@ inline void Metadata::addEntry(std::string const& name, T value)
     metadata::Entry m(name);
     try
     {
-        m.setValue<T>(value);
+        m.put_value<T>(value);
     } catch (...)
     {
-        m.setValue<boost::blank>(boost::blank());
+        m.put_value<boost::blank>(boost::blank());
     }
     addEntry(m);
     return;
@@ -632,10 +578,10 @@ inline void Metadata::setEntry(std::string const& name, T value)
     metadata::Entry m(name);
     try
     {
-        m.setValue<T>(value);
+        m.put_value<T>(value);
     } catch (...)
     {
-        m.setValue<boost::blank>(boost::blank());
+        m.put_value<boost::blank>(boost::blank());
     }
     setEntry(m);
 

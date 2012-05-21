@@ -432,11 +432,23 @@ void Reader::readMetadata()
         std::ostringstream name;
         name << "vlr_" << t;
         pdal::metadata::Entry entry(name.str());
-        entry.setValue<pdal::ByteArray>(bytearray);
-        entry.addAttribute("reserved", boost::lexical_cast<std::string>(v.getReserved()));
-        entry.addAttribute("user_id", v.getUserId());
-        entry.addAttribute("record_id", boost::lexical_cast<std::string>(v.getRecordId()));
-        entry.addAttribute("description", v.getDescription());
+        entry.put_value<pdal::ByteArray>(bytearray);
+        
+        pdal::metadata::Entry reserved("reserved");
+        entry.put<boost::uint32_t>("reserved", v.getReserved());
+        
+        pdal::metadata::Entry user_id("user_id");
+        user_id.put<std::string>("user_id", v.getUserId());
+        
+        pdal::metadata::Entry record_id("record_id");
+        record_id.put<boost::uint32_t>("record_id", v.getRecordId());
+        
+        pdal::metadata::Entry description("description");
+        description.put<std::string>("description", v.getDescription());
+        // entry.addAttribute("reserved", boost::lexical_cast<std::string>(v.getReserved()));
+        // entry.addAttribute("user_id", v.getUserId());
+        // entry.addAttribute("record_id", boost::lexical_cast<std::string>(v.getRecordId()));
+        // entry.addAttribute("description", v.getDescription());
 
         metadata.addEntry(entry);
     }

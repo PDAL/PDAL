@@ -55,53 +55,12 @@ namespace metadata
 
 Entry::Entry(std::string const& name)
     : boost::property_tree::ptree()
-    , m_name(name)
-    , m_type(metadata::Blank)
-    , m_description("")
     
 {
+    setName(name);
     return;
 }
 
-
-Entry::Entry(const Entry& other)
-    : boost::property_tree::ptree(other)
-    , m_name(other.m_name)
-    , m_type(other.m_type)
-    , m_attributes(other.m_attributes)
-    , m_description(other.m_description)
-{
-    return;
-}
-
-
-std::vector<std::string> Entry::getAttributeNames() const
-{
-    std::vector<std::string> output;
-    metadata::MetadataAttributeM::const_iterator i = m_attributes.begin();
-    while (i != m_attributes.end())
-    {
-        output.push_back(i->first);
-        ++i;
-    }
-
-    return output;
-}
-
-void Entry::addAttribute(std::string const& name, std::string const value)
-{
-    std::pair<std::string, std::string> p(name, value);
-    m_attributes.insert(p);
-}
-
-std::string Entry::getAttribute(std::string const& name) const
-{
-    metadata::MetadataAttributeM::const_iterator p = m_attributes.find(name);
-    if (p != m_attributes.end())
-        return p->second;
-    else
-        return std::string("");
-}
 
 std::string Entry::getTypeName() const
 {
@@ -134,68 +93,42 @@ std::string Entry::getTypeName() const
     }
 }
 
-boost::optional<Metadata const&> Entry::getMetadata() const
-{
-    if (m_metadata.get())
-        return boost::optional<Metadata const&>(*m_metadata.get());
-    else
-        return boost::optional<Metadata const&>();
-}
 
-void Entry::setMetadata(Metadata const& mdata)
-{
-    metadata::MetadataPtr p = metadata::MetadataPtr(new Metadata(mdata));
-    m_metadata = p;
-}
-
-boost::property_tree::ptree Entry::toPTree() const
-{
-    using boost::property_tree::ptree;
-    ptree dim;
-    dim.put("name", getName());
-    std::ostringstream oss;
-    dim.put("value", get_value<std::string>());
-    dim.put("type", getTypeName());
-
-    for (metadata::MetadataAttributeM::const_iterator i = m_attributes.begin(); i != m_attributes.end(); ++i)
-    {
-        ptree attribute;
-        attribute.put("value", i->second);
-        attribute.put("name", i->first);
-        dim.add_child("attribute", attribute);
-    }
-
-    return dim;
-}
-
-std::string Entry::to_xml()
-{
-    std::ostringstream oss;
-
-    using boost::property_tree::ptree;
-
-    ptree tree = toPTree();
-
-    oss << "<Entry name=\"" << tree.get<std::string>("name") <<"\" type=\"" << tree.get<std::string>("type") <<"\"";
-    oss << ">";
-
-    for (metadata::MetadataAttributeM::const_iterator i = m_attributes.begin(); i != m_attributes.end(); ++i)
-    {
-        oss <<"<Attribute name=\"" << i->first <<"\">" << i->second <<"</Attribute>";
-    }
-
-    oss << "</Entry>";
-    return oss.str();
-
-
-}
-std::ostream& operator<<(std::ostream& ostr, const Entry& metadata)
-{
-    ostr << metadata.get_value<std::string>() << std::endl;
-    //ostr << metadata.getNamespace() << ":" << metadata.getName() << "=" << metadata.getVariant() << std::endl;
-    return ostr;
-}
-
+// boost::property_tree::ptree Entry::toPTree() const
+// {
+//     using boost::property_tree::ptree;
+//     ptree dim;
+//     dim.put("name", getName());
+//     std::ostringstream oss;
+//     dim.put("value", get_value<std::string>());
+//     dim.put("type", getTypeName());
+// 
+//     return dim;
+// }
+// 
+// std::string Entry::to_xml()
+// {
+//     std::ostringstream oss;
+// 
+//     using boost::property_tree::ptree;
+// 
+//     ptree tree = toPTree();
+// 
+//     oss << "<Entry name=\"" << tree.get<std::string>("name") <<"\" type=\"" << tree.get<std::string>("type") <<"\"";
+//     oss << ">";
+// 
+//     oss << "</Entry>";
+//     return oss.str();
+// 
+// 
+// }
+// std::ostream& operator<<(std::ostream& ostr, const Entry& metadata)
+// {
+//     ostr << metadata.get_value<std::string>() << std::endl;
+//     //ostr << metadata.getNamespace() << ":" << metadata.getName() << "=" << metadata.getVariant() << std::endl;
+//     return ostr;
+// }
+// 
 
 } // metadata
 
@@ -226,19 +159,6 @@ std::string Metadata::to_xml() const
         entry.put("<xmlattr>.name", name);
         entry.put("<xmlattr>.type", type);
 
-        std::pair<property_tree::ptree::const_assoc_iterator, property_tree::ptree::const_assoc_iterator> ret = e_tree.equal_range("attribute");
-
-        for (property_tree::ptree::const_assoc_iterator  o = ret.first; o != ret.second; ++o)
-        {
-            property_tree::ptree const& tree = o->second;
-            std::string const& name =  tree.get_child("name").get_value<std::string>();
-            std::string const& value =  tree.get_child("value").get_value<std::string>();
-
-            boost::property_tree::ptree a;
-            a.put_value(value);
-            a.put("<xmlattr>.name", name);
-            entry.add_child("attribute", a);
-        }
 
         output.add_child("Entry", entry);
         ++iter;
@@ -415,7 +335,7 @@ boost::property_tree::ptree Metadata::toPTree() const
     for (metadata::index_by_index::const_iterator iter = idx.begin(); iter != idx.end(); ++iter)
     {
         const metadata::Entry& entry = *iter;
-        tree.add_child("entry", entry.toPTree());
+        // tree.add_child("entry", entry.toPTree());
     }
 
     return tree;

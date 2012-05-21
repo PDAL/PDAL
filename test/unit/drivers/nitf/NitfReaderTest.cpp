@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE(test_one)
 
         BOOST_CHECK_EQUAL(m.getName(), "FH.FDT");
 
-        const std::string s(m.getValue<std::string>());
+        const std::string s(m.get_value<std::string>());
         BOOST_CHECK_EQUAL(s, "20120323002946");
     }
 
