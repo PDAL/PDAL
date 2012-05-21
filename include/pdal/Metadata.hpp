@@ -84,6 +84,10 @@ public:
         : m_bytes(data)
     {
     }
+    
+    ByteArray()
+    {
+    }
 
     /// Copy constructor
     ByteArray(const ByteArray& rhs)
@@ -596,6 +600,8 @@ namespace std
 
 ///
 extern PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const pdal::ByteArray& output);
+extern PDAL_DLL std::istream& operator>>(std::istream& istr, pdal::ByteArray& output);
+
 extern PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const pdal::Metadata& metadata);
 }
 

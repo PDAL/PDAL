@@ -356,6 +356,18 @@ std::ostream& operator<<(std::ostream& ostr, const pdal::ByteArray& data)
     return ostr;
 }
 
+std::istream& operator>>(std::istream& istr, pdal::ByteArray& output)
+{
+    
+    std::string data;
+    istr >> data;
+    std::vector<boost::uint8_t> d = pdal::Utils::base64_decode(data);
+    
+    output.set(d);
+    return istr;
+}
+
+
 std::ostream& operator<<(std::ostream& ostr, const pdal::Metadata& metadata)
 {
     boost::property_tree::ptree tree = metadata.toPTree();
