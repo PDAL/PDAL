@@ -143,7 +143,7 @@ void Reader::initialize()
 
     boost::uint64_t offset, length;
 
-    Metadata nitf_metadata;
+    Metadata nitf_metadata(getName());
     {
         NitfFile nitf(m_filename);
         nitf.open();
