@@ -639,7 +639,8 @@ void Base::initialize()
         m_unzipper.swap(z);
 
         bool stat(false);
-        m_istream.seekg(m_reader.getLasHeader().GetDataOffset(), std::ios::beg);
+
+        m_istream.seekg(static_cast<std::streampos>(m_reader.getLasHeader().GetDataOffset()), std::ios::beg);
         stat = m_unzipper->open(m_istream, m_zipPoint->GetZipper());
 
         // Martin moves the stream on us
@@ -688,6 +689,12 @@ Reader::~Reader()
 {
     return;
 }
+
+void Reader::readBeginImpl()
+{
+
+}
+
 
 void Reader::readBufferBeginImpl(PointBuffer& buffer)
 {
@@ -761,10 +768,14 @@ Reader::~Reader()
     return;
 }
 
+void Reader::readBufferBeginImpl(PointBuffer& buffer)
+{
+
+}
 void Reader::readBeginImpl()
 {
-    // We'll assume you're not changing the schema per-read call
-    setPointDimensions(getBuffer());
+    if (!m_pointDimensions)
+        setPointDimensions(getBuffer());
 }
 
 boost::uint64_t Reader::seekImpl(boost::uint64_t count)
