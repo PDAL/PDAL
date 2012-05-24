@@ -47,6 +47,8 @@
 
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/json_parser.hpp>
+#include <pdal/FileUtils.hpp>
+
 namespace pdal
 {
 
@@ -123,6 +125,10 @@ boost::property_tree::ptree PipelineWriter::get_metadata_entry(boost::property_t
     using namespace boost;
 
     property_tree::ptree entry;
+    
+    // std::ostream* ofile = FileUtils::createFile("metadata.xml");
+    // boost::property_tree::write_xml(*ofile, input);
+    // FileUtils::closeFile(ofile);
     const std::string& name = input.get_child("name").get_value<std::string>();
     const std::string& value = input.get_child("value").get_value<std::string>();
     const std::string& tname = input.get_child("typename").get_value<std::string>();
@@ -130,9 +136,7 @@ boost::property_tree::ptree PipelineWriter::get_metadata_entry(boost::property_t
     entry.put_value(value);
     entry.put("<xmlattr>.name", name);
     entry.put("<xmlattr>.typename", tname);
-    // std::cout << "test: " << std::endl;
-    // boost::property_tree::write_xml(std::cout, input);
-    // std::cout << std::endl;
+
     boost::optional<property_tree::ptree const&> entries = input.get_child_optional("entries");
     if (entries)
     {
@@ -161,9 +165,6 @@ void PipelineWriter::write_metadata_ptree(boost::property_tree::ptree& tree, con
     property_tree::ptree output = get_metadata_entry(t);
 
     tree.add_child("Metadata", output);
-    // std::ostream* afile=FileUtils::createFile("junk.xml");
-    // boost::property_tree::write_xml(*afile, output);
-    // FileUtils::closeFile(afile);
 
     return;
 }
