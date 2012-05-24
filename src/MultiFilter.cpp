@@ -48,6 +48,9 @@ MultiFilter::MultiFilter(const std::vector<Stage*>& prevStages, const Options& o
 
 void MultiFilter::initialize()
 {
+    Metadata& m = getMetadataRef();
+    m.setName(getName());
+    
     Stage::initialize();
 
     return;

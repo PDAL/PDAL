@@ -163,9 +163,9 @@ void Reader::initialize()
 
     Metadata LAS = m_lasReader->getMetadata();
 
-    Metadata combined = nitf_metadata + LAS;
+    nitf_metadata.addMetadata(LAS);
     Metadata& ref = getMetadataRef();
-    ref = combined;
+    ref = nitf_metadata;
 
     setCoreProperties(*m_lasReader);
 

@@ -50,19 +50,28 @@
 namespace pdal
 {
 
-namespace metadata
-{
-
-Entry::Entry(std::string const& name)
-    : boost::property_tree::ptree()
+Metadata::Metadata()
     
 {
-    setName(name);
+    setName("root");
+    setType(metadata::Blank);
+    setValue<boost::blank>(boost::blank());
     return;
 }
 
+Metadata::Metadata(Metadata const& other)
+: m_tree(other.m_tree)
+{}
 
-std::string Entry::getTypeName() const
+Metadata::Metadata(std::string const& name)
+{
+    setType(metadata::Blank);
+    setValue<boost::blank>(boost::blank());
+    setName(name);
+}
+
+
+std::string Metadata::getTypeName() const
 {
     switch (getType())
     {
@@ -88,258 +97,14 @@ std::string Entry::getTypeName() const
             return std::string("metadata");
         case metadata::UUID:
             return std::string("uuid");
+        case metadata::Blank:
+            return std::string("blank");
         default:
             return std::string("none");
     }
 }
 
 
-// boost::property_tree::ptree Entry::toPTree() const
-// {
-//     using boost::property_tree::ptree;
-//     ptree dim;
-//     dim.put("name", getName());
-//     std::ostringstream oss;
-//     dim.put("value", get_value<std::string>());
-//     dim.put("type", getTypeName());
-// 
-//     return dim;
-// }
-// 
-// std::string Entry::to_xml()
-// {
-//     std::ostringstream oss;
-// 
-//     using boost::property_tree::ptree;
-// 
-//     ptree tree = toPTree();
-// 
-//     oss << "<Entry name=\"" << tree.get<std::string>("name") <<"\" type=\"" << tree.get<std::string>("type") <<"\"";
-//     oss << ">";
-// 
-//     oss << "</Entry>";
-//     return oss.str();
-// 
-// 
-// }
-// std::ostream& operator<<(std::ostream& ostr, const Entry& metadata)
-// {
-//     ostr << metadata.get_value<std::string>() << std::endl;
-//     //ostr << metadata.getNamespace() << ":" << metadata.getName() << "=" << metadata.getVariant() << std::endl;
-//     return ostr;
-// }
-// 
-
-} // metadata
-
-
-std::string Metadata::to_xml() const
-{
-    using namespace boost;
-
-    property_tree::ptree m_tree = toPTree();
-
-    property_tree::ptree::const_iterator iter = m_tree.begin();
-
-    property_tree::ptree output;
-
-    while (iter != m_tree.end())
-    {
-        if (iter->first != "entry")
-            throw pdal_error("malformed Metadata ptree");
-        const property_tree::ptree& e_tree = iter->second;
-
-        property_tree::ptree entry;
-
-        const std::string& name = e_tree.get_child("name").get_value<std::string>();
-        const std::string& value = e_tree.get_child("value").get_value<std::string>();
-        const std::string& type = e_tree.get_child("type").get_value<std::string>();
-
-        entry.put_value(value);
-        entry.put("<xmlattr>.name", name);
-        entry.put("<xmlattr>.type", type);
-
-
-        output.add_child("Entry", entry);
-        ++iter;
-    }
-
-    property_tree::ptree tree;
-    tree.add_child("Metadata", output);
-
-    std::ostringstream oss;
-    boost::property_tree::xml_parser::write_xml(oss, tree);
-    return oss.str();
-
-}
-
-
-std::string Metadata::to_json() const
-{
-    using namespace boost;
-
-    property_tree::ptree tree = toPTree();
-
-    std::ostringstream oss;
-    boost::property_tree::json_parser::write_json(oss, tree);
-
-    return oss.str();
-
-}
-
-void Metadata::addEntry(metadata::Entry const& m)
-{
-    metadata::index_by_name& index = m_metadata.get<metadata::name>();
-
-    std::pair<metadata::index_by_name::iterator, bool> q = index.insert(m);
-    // if insert failed because an entry of the same name already exists, 
-    // overwrite it
-    if (!q.second)
-    {
-        bool didSet = setEntry(m);
-        if (!didSet)
-            throw pdal_error("Unable to addEntry because same name exists!");
-    }
-
-    return;
-}
-
-
-metadata::Entry const& Metadata::getEntry(std::string const& t) const
-{
-    metadata::index_by_name const& name_index = m_metadata.get<metadata::name>();
-    metadata::index_by_name::const_iterator it = name_index.find(t);
-
-    if (it != name_index.end())
-    {
-        return *it;
-    }
-
-    std::ostringstream oss;
-    oss << "Entry with name '" << t << "' not found, unable to Metadata::getMetadata";
-
-    throw metadata_not_found(oss.str());
-
-
-}
-
-metadata::Entry const& Metadata::getEntry(std::size_t t) const
-{
-    metadata::index_by_index const& idx = m_metadata.get<metadata::index>();
-
-    if (t >= idx.size())
-        throw dimension_not_found("Index position is not valid");
-
-    return idx.at(t);
-}
-
-boost::optional<metadata::Entry const&> Metadata::getEntryOptional(std::size_t t) const
-{
-    try
-    {
-        metadata::Entry const& m = getEntry(t);
-        return boost::optional<metadata::Entry const&>(m);
-    }
-    catch (pdal::dimension_not_found&)
-    {
-        return boost::optional<metadata::Entry const&>();
-    }
-}
-
-
-boost::optional<metadata::Entry const&> Metadata::getEntryOptional(std::string const& t) const
-{
-
-    try
-    {
-        metadata::Entry const& m = getEntry(t);
-        return boost::optional<metadata::Entry const&>(m);
-    }
-    catch (pdal::metadata_not_found&)
-    {
-        return boost::optional<metadata::Entry const&>();
-    }
-
-}
-
-bool Metadata::setEntry(metadata::Entry const& m)
-{
-    metadata::index_by_name& name_index = m_metadata.get<metadata::name>();
-    metadata::index_by_name::iterator it = name_index.find(m.getName());
-
-    if (it != name_index.end())
-    {
-        bool didReplace = name_index.replace(it, m);
-        if (!didReplace) 
-            return false;
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-
-    return false;
-}
-
-Metadata::Metadata(Metadata const& other)
-    : m_metadata(other.m_metadata)
-{
-}
-
-Metadata& Metadata::operator=(Metadata const& rhs)
-{
-    if (&rhs != this)
-    {
-        m_metadata = rhs.m_metadata;
-    }
-    return *this;
-}
-
-Metadata Metadata::operator+(const Metadata& rhs) const
-{
-
-    Metadata output;
-
-    metadata::EntryMap const& idx = rhs.getMetadata();
-
-    metadata::index_by_index const& that_datums = idx.get<metadata::index>();
-
-    for (metadata::index_by_index::const_iterator i = that_datums.begin();
-            i != that_datums.end();
-            ++i)
-    {
-        output.addEntry(*i);
-    }
-
-
-    metadata::index_by_index const& this_datums = m_metadata.get<metadata::index>();
-
-    for (metadata::index_by_index::const_iterator i = this_datums.begin();
-            i != this_datums.end();
-            ++i)
-    {
-        output.addEntry(*i);
-    }
-
-    return output;
-}
-
-
-boost::property_tree::ptree Metadata::toPTree() const
-{
-    boost::property_tree::ptree tree;
-
-    metadata::index_by_index const& idx = m_metadata.get<metadata::index>();
-
-    for (metadata::index_by_index::const_iterator iter = idx.begin(); iter != idx.end(); ++iter)
-    {
-        const metadata::Entry& entry = *iter;
-        // tree.add_child("entry", entry.toPTree());
-    }
-
-    return tree;
-}
 
 } // namespace pdal
 
@@ -371,7 +136,7 @@ std::istream& operator>>(std::istream& istr, pdal::ByteArray& output)
 std::ostream& operator<<(std::ostream& ostr, const pdal::Metadata& metadata)
 {
     boost::property_tree::ptree tree = metadata.toPTree();
-
+    
     boost::property_tree::write_json(ostr, tree);
     return ostr;
 }

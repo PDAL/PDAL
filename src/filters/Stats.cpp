@@ -111,13 +111,13 @@ Stats::Stats(Stage& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
 {
     Metadata& metadata = getMetadataRef();
-    metadata.addEntry<boost::uint32_t>("sample_size",
+    metadata.addMetadata<boost::uint32_t>("sample_size",
                                        getOptions().getValueOrDefault<boost::uint32_t>("sample_size", 1000));
-    metadata.addEntry<boost::uint32_t>("seed",
+    metadata.addMetadata<boost::uint32_t>("seed",
                                        getOptions().getValueOrDefault<boost::uint32_t>("seed", 0));
-    metadata.addEntry<boost::uint32_t>("num_bins",
+    metadata.addMetadata<boost::uint32_t>("num_bins",
                                        getOptions().getValueOrDefault<boost::uint32_t>("num_bins", 20));
-    metadata.addEntry<boost::uint32_t>("stats_cache_size",
+    metadata.addMetadata<boost::uint32_t>("stats_cache_size",
                                        getOptions().getValueOrDefault<boost::uint32_t>("num_bins", 20));
 
     return;
@@ -128,13 +128,13 @@ Stats::Stats(Stage& prevStage)
     : Filter(prevStage, Options::none())
 {
     Metadata& metadata = getMetadataRef();
-    metadata.addEntry<boost::uint32_t>("sample_size",
+    metadata.addMetadata<boost::uint32_t>("sample_size",
                                        getOptions().getValueOrDefault<boost::uint32_t>("sample_size", 1000));
-    metadata.addEntry<boost::uint32_t>("seed",
+    metadata.addMetadata<boost::uint32_t>("seed",
                                        getOptions().getValueOrDefault<boost::uint32_t>("seed", 0));
-    metadata.addEntry<boost::uint32_t>("num_bins",
+    metadata.addMetadata<boost::uint32_t>("num_bins",
                                        getOptions().getValueOrDefault<boost::uint32_t>("num_bins", 20));
-    metadata.addEntry<boost::uint32_t>("stats_cache_size",
+    metadata.addMetadata<boost::uint32_t>("stats_cache_size",
                                        getOptions().getValueOrDefault<boost::uint32_t>("num_bins", 20));
 
     return;

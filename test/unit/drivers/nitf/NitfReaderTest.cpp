@@ -49,6 +49,8 @@
 #pragma GCC diagnostic ignored "-Wsign-compare"
 #endif
 
+#include <boost/property_tree/xml_parser.hpp>
+
 using namespace pdal;
 
 BOOST_AUTO_TEST_SUITE(NitfReaderTest)
@@ -71,14 +73,7 @@ BOOST_AUTO_TEST_CASE(test_one)
     {
         pdal::Metadata metadata = nitf_reader.getMetadata();
         /////////////////////////////////////////////////BOOST_CHECK_EQUAL(metadatums.size(), 80u);
-
-
-        pdal::metadata::Entry const& m = metadata.getEntry("FH.FDT");
-
-        BOOST_CHECK_EQUAL(m.getName(), "FH.FDT");
-
-        const std::string s(m.get_value<std::string>());
-        BOOST_CHECK_EQUAL(s, "20120323002946");
+        BOOST_CHECK_EQUAL(metadata.toPTree().get<std::string>("entries.FH.FDT.value"), "20120323002946");
     }
 
     const Schema& nitf_schema = nitf_reader.getSchema();

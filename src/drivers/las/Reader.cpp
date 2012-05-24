@@ -62,6 +62,9 @@
 #endif
 
 
+#include <boost/property_tree/xml_parser.hpp>
+#include <boost/property_tree/json_parser.hpp>
+
 namespace pdal
 {
 namespace drivers
@@ -361,57 +364,57 @@ void Reader::readMetadata()
 
     Metadata& metadata = getMetadataRef();
 
-    metadata.addEntry<bool>("compressed",
+    metadata.addMetadata<bool>("compressed",
                             header.Compressed());
-    metadata.addEntry<boost::uint32_t>("dataformatid",
+    metadata.addMetadata<boost::uint32_t>("dataformatid",
                                        static_cast<boost::uint32_t>(header.getPointFormat()));
-    metadata.addEntry<boost::uint32_t>("version_major",
+    metadata.addMetadata<boost::uint32_t>("version_major",
                                        static_cast<boost::uint32_t>(header.GetVersionMajor()));
-    metadata.addEntry<boost::uint32_t>("version_minor",
+    metadata.addMetadata<boost::uint32_t>("version_minor",
                                        static_cast<boost::uint32_t>(header.GetVersionMinor()));
-    metadata.addEntry<boost::uint32_t>("filesource_id",
+    metadata.addMetadata<boost::uint32_t>("filesource_id",
                                        static_cast<boost::uint32_t>(header.GetFileSourceId()));
-    metadata.addEntry<boost::uint32_t>("reserved",
+    metadata.addMetadata<boost::uint32_t>("reserved",
                                        static_cast<boost::uint32_t>(header.GetReserved()));
-    metadata.addEntry<boost::uuids::uuid>("project_id",
+    metadata.addMetadata<boost::uuids::uuid>("project_id",
                                           header.GetProjectId());
-    metadata.addEntry<std::string>("system_id",
+    metadata.addMetadata<std::string>("system_id",
                                    header.GetSystemId(false));
-    metadata.addEntry<std::string>("software_id",
+    metadata.addMetadata<std::string>("software_id",
                                    header.GetSoftwareId(false));
-    metadata.addEntry<boost::uint32_t>("creation_doy",
+    metadata.addMetadata<boost::uint32_t>("creation_doy",
                                        static_cast<boost::uint32_t>(header.GetCreationDOY()));
-    metadata.addEntry<boost::uint32_t>("creation_year",
+    metadata.addMetadata<boost::uint32_t>("creation_year",
                                        static_cast<boost::uint32_t>(header.GetCreationYear()));
-    metadata.addEntry<boost::uint32_t>("header_size",
+    metadata.addMetadata<boost::uint32_t>("header_size",
                                        static_cast<boost::uint32_t>(header.GetHeaderSize()));
-    metadata.addEntry<boost::uint32_t>("dataoffset",
+    metadata.addMetadata<boost::uint32_t>("dataoffset",
                                        static_cast<boost::uint32_t>(header.GetDataOffset()));
-    metadata.addEntry<double>("scale_x",
+    metadata.addMetadata<double>("scale_x",
                               header.GetScaleX());
-    metadata.addEntry<double>("scale_y",
+    metadata.addMetadata<double>("scale_y",
                               header.GetScaleY());
-    metadata.addEntry<double>("scale_z",
+    metadata.addMetadata<double>("scale_z",
                               header.GetScaleZ());
-    metadata.addEntry<double>("offset_x",
+    metadata.addMetadata<double>("offset_x",
                               header.GetOffsetX());
-    metadata.addEntry<double>("offset_y",
+    metadata.addMetadata<double>("offset_y",
                               header.GetOffsetY());
-    metadata.addEntry<double>("offset_z",
+    metadata.addMetadata<double>("offset_z",
                               header.GetOffsetZ());
-    metadata.addEntry<double>("minx",
+    metadata.addMetadata<double>("minx",
                               header.GetMinX());
-    metadata.addEntry<double>("miny",
+    metadata.addMetadata<double>("miny",
                               header.GetMinY());
-    metadata.addEntry<double>("minz",
+    metadata.addMetadata<double>("minz",
                               header.GetMinZ());
-    metadata.addEntry<double>("maxx",
+    metadata.addMetadata<double>("maxx",
                               header.GetMaxX());
-    metadata.addEntry<double>("maxy",
+    metadata.addMetadata<double>("maxy",
                               header.GetMaxY());
-    metadata.addEntry<double>("maxz",
+    metadata.addMetadata<double>("maxz",
                               header.GetMaxZ());
-    metadata.addEntry<boost::uint32_t>("count",
+    metadata.addMetadata<boost::uint32_t>("count",
                                        header.GetPointRecordsCount());
 
 
@@ -431,26 +434,19 @@ void Reader::readMetadata()
 
         std::ostringstream name;
         name << "vlr_" << t;
-        pdal::metadata::Entry entry(name.str());
-        entry.put_value<pdal::ByteArray>(bytearray);
+        pdal::Metadata entry(name.str(), bytearray);
         
-        pdal::metadata::Entry reserved("reserved");
-        entry.put<boost::uint32_t>("reserved", v.getReserved());
-        
-        pdal::metadata::Entry user_id("user_id");
-        user_id.put<std::string>("user_id", v.getUserId());
-        
-        pdal::metadata::Entry record_id("record_id");
-        record_id.put<boost::uint32_t>("record_id", v.getRecordId());
-        
-        pdal::metadata::Entry description("description");
-        description.put<std::string>("description", v.getDescription());
-        // entry.addAttribute("reserved", boost::lexical_cast<std::string>(v.getReserved()));
-        // entry.addAttribute("user_id", v.getUserId());
-        // entry.addAttribute("record_id", boost::lexical_cast<std::string>(v.getRecordId()));
-        // entry.addAttribute("description", v.getDescription());
+        entry.addMetadata<boost::uint32_t>("reserved", v.getReserved());        
+        entry.addMetadata<std::string>("user_id", v.getUserId());
+        entry.addMetadata<boost::uint32_t>("record_id", v.getRecordId());
+        entry.addMetadata<std::string>("description", v.getDescription());
 
-        metadata.addEntry(entry);
+        
+        std::ostringstream n;
+        n << "vlr." << v.getUserId() << "." << v.getRecordId();
+        metadata.addMetadata(entry);
+        // boost::property_tree::write_json(std::cout, entry.toPTree());
+        
     }
 
 }

@@ -58,7 +58,7 @@ public:
 
     static void write_option_ptree(boost::property_tree::ptree& tree, const Options& opts);
     static void write_metadata_ptree(boost::property_tree::ptree& tree, const Metadata& mdata);
-
+    static boost::property_tree::ptree get_metadata_entry(boost::property_tree::ptree const& input);
 private:
     const PipelineManager& m_manager;
 

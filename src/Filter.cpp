@@ -42,12 +42,16 @@ namespace pdal
 Filter::Filter(Stage& prevStage, const Options& options)
     : Stage(StageBase::makeVector(prevStage), options)
 {
+
     return;
 }
 
 
 void Filter::initialize()
 {
+    Metadata& m = getMetadataRef();
+    m.setName(getName());
+    
     Stage::initialize();
 
     // by default, we set our core properties to be the same as those

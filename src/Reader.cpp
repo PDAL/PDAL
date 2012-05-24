@@ -40,8 +40,9 @@ namespace pdal
 
 Reader::Reader(const Options& options)
     : Stage(StageBase::makeVector(), options)
+    
 {
-    return;
+
 }
 
 
@@ -53,6 +54,9 @@ Reader::~Reader()
 
 void Reader::initialize()
 {
+    Metadata& m = getMetadataRef();
+    m.setName(getName());
+    
     Stage::initialize();
 
     return;

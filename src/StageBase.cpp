@@ -167,7 +167,8 @@ Metadata StageBase::collectMetadata() const
     try
     {
         Metadata const& m = getPrevStage().getMetadata();
-        return m_metadata + m;
+        return m;
+        // return m_metadata + m;
     } catch (pdal::internal_error const&)
     {
         return m_metadata;

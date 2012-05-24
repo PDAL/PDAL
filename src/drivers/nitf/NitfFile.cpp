@@ -301,11 +301,11 @@ void NitfFile::processTREs(int nTREBytes, const char *pszTREData, pdal::Metadata
         strncpy(key, pszTREData, 6);
         key[6] = 0;
 
-        metadata::Entry m(parentkey+"."+key);
+        const std::string value(pszTREData, nThisTRESize+1);
+        Metadata m(parentkey+"."+key, value);
 
         // const std::string value(pszTREData + 11);
 
-        const std::string value(pszTREData, nThisTRESize+1);
         //std::vector<boost::uint8_t> data(nThisTRESize);
         //boost::uint8_t* p = (boost::uint8_t*)(pszTREData + 11);
         //for (int i=0; i<nThisTRESize; i++) data[i] = p[i];
@@ -313,7 +313,7 @@ void NitfFile::processTREs(int nTREBytes, const char *pszTREData, pdal::Metadata
 
         if (!boost::iequals(key, "DESDATA"))
         {
-            ms.addEntry<std::string>(parentkey+"."+key, value);
+            ms.addMetadata<std::string>(parentkey+"."+key, value);
         }
 
         pszTREData += nThisTRESize + 11;
@@ -343,7 +343,7 @@ void NitfFile::processTREs_DES(NITFDES* dataSegment, pdal::Metadata& ms, const s
 
         if (!boost::iequals(key, "DESDATA"))
         {
-            ms.addEntry<std::string>(parentkey+"."+key, value);
+            ms.addMetadata<std::string>(parentkey+"."+key, value);
         }
 
         nOffset += 11 + nThisTRESize;
@@ -369,7 +369,7 @@ void NitfFile::processMetadata(char** papszMetadata, pdal::Metadata& ms, const s
 
         if (!boost::iequals(key, "DESDATA"))
         {
-            ms.addEntry<std::string>(parentkey+"."+key, value);
+            ms.addMetadata<std::string>(parentkey+"."+key, value);
         }
 
     }
@@ -386,15 +386,15 @@ void NitfFile::processImageInfo(pdal::Metadata& ms, const std::string& parentkey
 
     std::stringstream value1;
     value1 << image->nRows;
-    ms.addEntry<std::string>(parentkey+".NROWS", value1.str());
+    ms.addMetadata<std::string>(parentkey+".NROWS", value1.str());
 
     std::stringstream value2;
     value2 << image->nCols;
-    ms.addEntry<std::string>(parentkey+".NCOLS", value2.str());
+    ms.addMetadata<std::string>(parentkey+".NCOLS", value2.str());
 
     std::stringstream value3;
     value3 << image->nBands;
-    ms.addEntry<std::string>(parentkey+".NBANDS", value3.str());
+    ms.addMetadata<std::string>(parentkey+".NBANDS", value3.str());
 
     NITFImageDeaccess(image);
 

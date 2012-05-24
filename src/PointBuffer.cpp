@@ -50,6 +50,7 @@ PointBuffer::PointBuffer(const Schema& schema, boost::uint32_t capacity)
     , m_capacity(capacity)
     , m_bounds(Bounds<double>::getDefaultSpatialExtent())
     , m_byteSize(schema.getByteSize())
+    , m_metadata("pointbuffer")
 {
 
     return;
@@ -62,6 +63,7 @@ PointBuffer::PointBuffer(PointBuffer const& other)
     , m_capacity(other.m_capacity)
     , m_bounds(other.m_bounds)
     , m_byteSize(other.m_byteSize)
+    , m_metadata(other.m_metadata)
 {
     if (other.m_data)
     {
@@ -84,7 +86,7 @@ PointBuffer& PointBuffer::operator=(PointBuffer const& rhs)
         if (rhs.m_data.get())
             memcpy(m_data.get(), rhs.m_data.get(), m_byteSize*m_capacity);
 
-
+        m_metadata = rhs.m_metadata;
     }
     return *this;
 }

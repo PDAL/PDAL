@@ -45,6 +45,8 @@
 #include <boost/foreach.hpp>
 #include <boost/algorithm/string.hpp>
 
+#include <boost/property_tree/xml_parser.hpp>
+#include <boost/property_tree/json_parser.hpp>
 namespace pdal
 {
 
@@ -116,52 +118,52 @@ void PipelineWriter::write_option_ptree(boost::property_tree::ptree& tree, const
     return;
 }
 
-
-void PipelineWriter::write_metadata_ptree(boost::property_tree::ptree& tree, const Metadata& mdata)
+boost::property_tree::ptree PipelineWriter::get_metadata_entry(boost::property_tree::ptree const& input)
 {
     using namespace boost;
 
-    property_tree::ptree m_tree = mdata.toPTree();
+    property_tree::ptree entry;
+    const std::string& name = input.get_child("name").get_value<std::string>();
+    const std::string& value = input.get_child("value").get_value<std::string>();
+    const std::string& tname = input.get_child("typename").get_value<std::string>();
 
-    property_tree::ptree::const_iterator iter = m_tree.begin();
-
-    property_tree::ptree output;
-
-    while (iter != m_tree.end())
+    entry.put_value(value);
+    entry.put("<xmlattr>.name", name);
+    entry.put("<xmlattr>.typename", tname);
+    // std::cout << "test: " << std::endl;
+    // boost::property_tree::write_xml(std::cout, input);
+    // std::cout << std::endl;
+    boost::optional<property_tree::ptree const&> entries = input.get_child_optional("entries");
+    if (entries)
     {
-        if (iter->first != "entry")
-            throw pdal_error("malformed Metadata ptree");
-        const property_tree::ptree& e_tree = iter->second;
-
-        property_tree::ptree entry;
-
-        const std::string& name = e_tree.get_child("name").get_value<std::string>();
-        const std::string& value = e_tree.get_child("value").get_value<std::string>();
-        const std::string& type = e_tree.get_child("type").get_value<std::string>();
-
-        entry.put_value(value);
-        entry.put("<xmlattr>.name", name);
-        entry.put("<xmlattr>.type", type);
-
-        std::pair<property_tree::ptree::const_assoc_iterator, property_tree::ptree::const_assoc_iterator> ret = e_tree.equal_range("attribute");
-
-        for (property_tree::ptree::const_assoc_iterator  o = ret.first; o != ret.second; ++o)
+        property_tree::ptree::const_iterator iter = entries->begin();
+        while (iter != entries->end())
         {
-            property_tree::ptree const& tree = o->second;
-            std::string const& name =  tree.get_child("name").get_value<std::string>();
-            std::string const& value =  tree.get_child("value").get_value<std::string>();
 
-            boost::property_tree::ptree a;
-            a.put_value(value);
-            a.put("<xmlattr>.name", name);
-            entry.add_child("attribute", a);
+            property_tree::ptree e = get_metadata_entry(iter->second);
+            entry.add_child("Entry", e);
+            
+            ++iter;
         }
 
-        output.add_child("Entry", entry);
-        ++iter;
     }
+    return entry;
+         
+    
+}
+
+void PipelineWriter::write_metadata_ptree(boost::property_tree::ptree& tree, const Metadata& m)
+{
+    using namespace boost;
+
+    property_tree::ptree t = m.toPTree();
+
+    property_tree::ptree output = get_metadata_entry(t);
 
     tree.add_child("Metadata", output);
+    // std::ostream* afile=FileUtils::createFile("junk.xml");
+    // boost::property_tree::write_xml(*afile, output);
+    // FileUtils::closeFile(afile);
 
     return;
 }
