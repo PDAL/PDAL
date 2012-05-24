@@ -50,15 +50,8 @@
 #include <boost/uuid/uuid_io.hpp>
 
 #include <boost/optional.hpp>
-#include <boost/multi_index_container.hpp>
-#include <boost/multi_index/member.hpp>
-#include <boost/multi_index/ordered_index.hpp>
-#include <boost/multi_index/hashed_index.hpp>
-#include <boost/multi_index/sequenced_index.hpp>
-#include <boost/multi_index/mem_fun.hpp>
-#include <boost/multi_index/random_access_index.hpp>
-#include <boost/functional/hash.hpp>
 
+#include <boost/algorithm/string.hpp>
 
 
 #include <vector>
@@ -400,10 +393,8 @@ inline void Metadata::setValue<boost::blank>(boost::blank const& v)
 inline void Metadata::addMetadata(  Metadata const& m)
 {
     
-    m_tree.add_child("entries."+m.getName(), m.toPTree());
-    // m_tree.put(m.getName()+ ".value", m.getValue<T>());
-    // m_tree.put(m.getName()+ ".description", m.getDescription());
-    // m_tree.put(m.getName()+ ".type", m.getTypeName()); 
+    std::string n = boost::algorithm::ireplace_all_copy(m.getName(), ".", "_");
+    m_tree.add_child("entries."+n, m.toPTree());
 }
 
 template <typename T>
