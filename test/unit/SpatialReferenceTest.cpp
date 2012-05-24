@@ -136,7 +136,7 @@ BOOST_AUTO_TEST_CASE(test_read_srs)
 
     const pdal::SpatialReference& ref = reader.getSpatialReference();
 
-    BOOST_CHECK(reader.getVLRs().size() == 3);
+    BOOST_CHECK(reader.getLasHeader().getVLRs().getAll().size() == 3);
 
     const std::string ret_wkt = ref.getWKT();
     const std::string ret_proj4 = ref.getProj4();
@@ -349,7 +349,7 @@ BOOST_AUTO_TEST_CASE(test_writing_vlr)
 
         pdal::SpatialReference result_ref = reader.getSpatialReference();
 
-        const std::vector<pdal::drivers::las::VariableLengthRecord>& vlrs = reader.getVLRs();
+        const std::vector<pdal::drivers::las::VariableLengthRecord>& vlrs = reader.getLasHeader().getVLRs().getAll();
         BOOST_CHECK(vlrs.size() == 4);
 
         {

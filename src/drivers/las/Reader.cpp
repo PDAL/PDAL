@@ -157,41 +157,6 @@ StreamFactory& Reader::getStreamFactory() const
 }
 
 
-PointFormat Reader::getPointFormat() const
-{
-    return m_lasHeader.getPointFormat();
-}
-
-
-boost::uint8_t Reader::getVersionMajor() const
-{
-    return m_lasHeader.GetVersionMajor();
-}
-
-
-boost::uint8_t Reader::getVersionMinor() const
-{
-    return m_lasHeader.GetVersionMinor();
-}
-
-
-const std::vector<VariableLengthRecord>& Reader::getVLRs() const
-{
-    return m_lasHeader.getVLRs().getAll();
-}
-
-
-boost::uint64_t Reader::getPointDataOffset() const
-{
-    return m_lasHeader.GetDataOffset();
-}
-
-
-bool Reader::isCompressed() const
-{
-    return m_lasHeader.Compressed();
-}
-
 
 pdal::StageSequentialIterator* Reader::createSequentialIterator(PointBuffer& buffer) const
 {
@@ -609,7 +574,7 @@ boost::property_tree::ptree Reader::toPTree() const
 {
     boost::property_tree::ptree tree = pdal::Reader::toPTree();
 
-    tree.add("Compression", this->isCompressed());
+    tree.add("Compression", this->getLasHeader().Compressed());
     // add more stuff here specific to this stage type
 
     return tree;
@@ -629,9 +594,9 @@ Base::Base(pdal::drivers::las::Reader const& reader)
     , m_zipPoint(NULL)
     , m_unzipper(NULL)
 {
-    m_istream.seekg(m_reader.getPointDataOffset());
+    m_istream.seekg(m_reader.getLasHeader().GetDataOffset());
 
-    if (m_reader.isCompressed())
+    if (m_reader.getLasHeader().Compressed())
     {
 #ifdef PDAL_HAVE_LASZIP
         initialize();
@@ -663,8 +628,8 @@ void Base::initialize()
 #ifdef PDAL_HAVE_LASZIP
     if (!m_zipPoint)
     {
-        PointFormat format = m_reader.getPointFormat();
-        boost::scoped_ptr<ZipPoint> z(new ZipPoint(format, m_reader.getVLRs()));
+        PointFormat format = m_reader.getLasHeader().getPointFormat();
+        boost::scoped_ptr<ZipPoint> z(new ZipPoint(format, getReader().getLasHeader().getVLRs().getAll()));
         m_zipPoint.swap(z);
     }
 
@@ -674,7 +639,7 @@ void Base::initialize()
         m_unzipper.swap(z);
 
         bool stat(false);
-        m_istream.seekg(m_reader.getPointDataOffset(), std::ios::beg);
+        m_istream.seekg(m_reader.getLasHeader().GetDataOffset(), std::ios::beg);
         stat = m_unzipper->open(m_istream, m_zipPoint->GetZipper());
 
         // Martin moves the stream on us
@@ -740,11 +705,11 @@ boost::uint64_t Reader::skipImpl(boost::uint64_t count)
     }
     else
     {
-        boost::uint64_t delta = Support::getPointDataSize(m_reader.getPointFormat());
+        boost::uint64_t delta = Support::getPointDataSize(m_reader.getLasHeader().getPointFormat());
         m_istream.seekg(delta * count, std::ios::cur);
     }
 #else
-    boost::uint64_t delta = Support::getPointDataSize(m_reader.getPointFormat());
+    boost::uint64_t delta = Support::getPointDataSize(m_reader.getLasHeader().getPointFormat());
     m_istream.seekg(delta * count, std::ios::cur);
 #endif
     return count;
@@ -812,13 +777,13 @@ boost::uint64_t Reader::seekImpl(boost::uint64_t count)
     }
     else
     {
-        boost::uint64_t delta = Support::getPointDataSize(m_reader.getPointFormat());
-        m_istream.seekg(m_reader.getPointDataOffset() + delta * count);
+        boost::uint64_t delta = Support::getPointDataSize(m_reader.getLasHeader().getPointFormat());
+        m_istream.seekg(m_reader.getLasHeader().GetDataOffset() + delta * count);
     }
 #else
 
-    boost::uint64_t delta = Support::getPointDataSize(m_reader.getPointFormat());
-    m_istream.seekg(m_reader.getPointDataOffset() + delta * count);
+    boost::uint64_t delta = Support::getPointDataSize(m_reader.getLasHeader().getPointFormat());
+    m_istream.seekg(m_reader.getLasHeader().GetDataOffset() + delta * count);
 
 #endif
 

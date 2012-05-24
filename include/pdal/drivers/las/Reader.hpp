@@ -100,17 +100,6 @@ public:
                                   ZipPoint* zipPoint,
                                   PointDimensions* dimensions) const;
 
-    PointFormat getPointFormat() const;
-    boost::uint8_t getVersionMajor() const;
-    boost::uint8_t getVersionMinor() const;
-
-    boost::uint64_t getPointDataOffset() const;
-
-    // we shouldn't have to expose this
-    const std::vector<VariableLengthRecord>& getVLRs() const;
-
-    bool isCompressed() const;
-
     // for dumping
     virtual boost::property_tree::ptree toPTree() const;
 

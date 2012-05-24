@@ -483,9 +483,9 @@ static void test_a_format(const std::string& file, boost::uint8_t majorVersion, 
     pdal::drivers::las::Reader reader(Support::datapath(file));
     reader.initialize();
 
-    BOOST_CHECK(reader.getPointFormat() == pointFormat);
-    BOOST_CHECK(reader.getVersionMajor() == majorVersion);
-    BOOST_CHECK(reader.getVersionMinor() == minorVersion);
+    BOOST_CHECK(reader.getLasHeader().getPointFormat() == pointFormat);
+    BOOST_CHECK(reader.getLasHeader().GetVersionMajor() == majorVersion);
+    BOOST_CHECK(reader.getLasHeader().GetVersionMinor() == minorVersion);
 
     const Schema& schema = reader.getSchema();
 
@@ -525,7 +525,7 @@ BOOST_AUTO_TEST_CASE(test_vlr)
     pdal::drivers::las::Reader reader(Support::datapath("lots_of_vlr.las"));
     reader.initialize();
 
-    BOOST_CHECK(reader.getVLRs().size() == 390);
+    BOOST_CHECK(reader.getLasHeader().getVLRs().getAll().size() == 390);
 
     return;
 }

@@ -99,7 +99,7 @@ static bool fileIsCompressed(const std::string& name)
 {
     pdal::drivers::las::Reader reader(name);
     reader.initialize();
-    return reader.isCompressed();
+    return reader.getLasHeader().Compressed();
 }
 
 

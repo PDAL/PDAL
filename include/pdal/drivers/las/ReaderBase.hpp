@@ -55,10 +55,6 @@ public:
     virtual ~ReaderBase() {}
 
     virtual void addDefaultDimensions() = 0;
-
-    virtual PointFormat getPointFormat() const = 0;
-    virtual boost::uint8_t getVersionMajor() const = 0;
-    virtual boost::uint8_t getVersionMinor() const = 0;
 };
 
 
