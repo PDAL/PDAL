@@ -227,6 +227,11 @@ public:
     /// @param v value of type pdal::metadata::Variant to set for the entry
     template <class T> inline void setValue(T const& v);
     template <class T> inline T getValue() const { return m_tree.get<T>("value"); } 
+    template <class T> inline T getValue(std::string const& path) const { return m_tree.get<T>("entries."+path+".value"); } 
+    template <class T> inline boost::optional<T> getValueOptional(std::string const& path) const 
+    { 
+        return m_tree.get_optional<T>("entries." + path+".value"); 
+    } 
 
     /** @name entry name
     */
