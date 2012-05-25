@@ -115,7 +115,7 @@ private:
     boost::uint64_t m_streamOffset; // the first byte of the LAS file
 	void setOptions();
     bool doForwardThisMetadata(std::string const& name) const;
-
+    void setVLRsFromMetadata(LasHeader& header, Metadata const& metadata, Options const& opts);
     Writer& operator=(const Writer&); // not implemented
     Writer(const Writer&); // not implemented
 };

@@ -194,11 +194,29 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_metadata)
     pdal::Option filename("filename", temp_filename);
     pdal::Option metadata_option("metadata", "");
     pdal::Option software_id("software_id", "forward");
+    pdal::Option system_id("system_id", "forward");
+    pdal::Option creation_doy("creation_doy", "forward");
+    pdal::Option creation_year("creation_year", "forward");
+
+    pdal::Option polygon("vlr", "forward");
+    pdal::Option record_id("record_id", 1234);
+    pdal::Option user_id("user_id", "hobu");
+    
+    pdal::Options vlr_opts;
+    vlr_opts.add(record_id);
+    vlr_opts.add(user_id);
+    polygon.setOptions(vlr_opts);
+    
+
     pdal::Option debug("debug", true);
     pdal::Option verbosity("verbose", 7);
 
     pdal::Options moptions;
     moptions.add(software_id);
+    moptions.add(system_id);
+    moptions.add(creation_doy);
+    moptions.add(creation_year);
+    moptions.add(polygon);
     metadata_option.setOptions(moptions);
 
     options.add(metadata_option);
@@ -206,7 +224,7 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_metadata)
     // options.add(debug);
     // options.add(verbosity);
     
-    pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
+    pdal::drivers::las::Reader reader(Support::datapath("interesting.las"));
 
     {
         pdal::drivers::las::Writer writer(reader, options);
@@ -223,7 +241,10 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_metadata)
     
     pdal::drivers::las::LasHeader const& h = reader2.getLasHeader();
     
-    BOOST_CHECK_EQUAL(h.GetSoftwareId(), "TerraScan");
+    BOOST_CHECK_EQUAL(h.GetSoftwareId(), "HOBU-GENERATING");
+    BOOST_CHECK_EQUAL(h.GetSystemId(), "HOBU-SYSTEMID");
+    BOOST_CHECK_EQUAL(h.GetCreationDOY(), 145u);
+    BOOST_CHECK_EQUAL(h.GetCreationYear(), 2012u);
     
     
     FileUtils::deleteFile(temp_filename);
