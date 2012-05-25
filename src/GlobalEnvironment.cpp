@@ -56,19 +56,26 @@ GlobalEnvironment& GlobalEnvironment::get()
 
 void GlobalEnvironment::startup()
 {
+    if (t != 0) // sanity check
+    {
+        throw pdal_error("attempt to reinitialize global environment");
+    }
+
     get();
 }
 
 
 void GlobalEnvironment::shutdown()
 {
-    // Shutdown could be called multiple times?
-    if (t != 0)
+    if (t == 0) // sanity check
     {
-        delete t;
-        t = 0;
+        throw pdal_error("bad global shutdown call -- was called more than once or was called without corresponding startup");
     }
-    
+
+    delete t;
+    t = 0;
+
+    return;
 }
 
 
@@ -118,7 +125,11 @@ void GlobalEnvironment::createThreadEnvironment(boost::thread::id id)
 {
     ThreadEnvironment* threadEnv = new ThreadEnvironment(id);
     
-    // FIXME: What happens if the id is already in the map?
+    if (m_threadMap.find(id) != m_threadMap.end())
+    {
+        throw pdal_error("thread already registered");
+    }
+
     m_threadMap.insert( std::make_pair(id, threadEnv ) );
 }
 
