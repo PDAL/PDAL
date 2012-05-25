@@ -68,7 +68,9 @@ static const char* laszip_description = "http://laszip.org";
 
 
 ZipPoint::ZipPoint(PointFormat format, const std::vector<VariableLengthRecord>& vlrs)
-    : m_lz_point(NULL)
+    : his_vlr_num(0)
+    , his_vlr_data(0)
+    , m_lz_point(NULL)
     , m_lz_point_size(0)
 {
 
@@ -175,7 +177,7 @@ VariableLengthRecord ZipPoint::ConstructVLR() const
 
 bool ZipPoint::IsZipVLR(const VariableLengthRecord& vlr) const
 {
-    if (laszip_userid == vlr.getUserId() && laszip_description == vlr.getDescription())
+    if (laszip_userid == vlr.getUserId() && laszip_recordid == vlr.getRecordId())
     {
         return true;
     }
