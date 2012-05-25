@@ -101,7 +101,7 @@ void LasHeaderWriter::write()
         if (m_header.Compressed())
         {
 #ifdef PDAL_HAVE_LASZIP
-            ZipPoint zpd(m_header.getPointFormat(), m_header.getVLRs().getAll());
+            ZipPoint zpd(m_header.getPointFormat(), m_header.getVLRs().getAll(), false);
             VariableLengthRecord v = zpd.ConstructVLR();
             m_header.getVLRs().add(v);
 #else

@@ -67,8 +67,11 @@ static boost::uint16_t laszip_recordid = 22204;
 static const char* laszip_description = "http://laszip.org";
 
 
-ZipPoint::ZipPoint(PointFormat format, const std::vector<VariableLengthRecord>& vlrs)
-    : his_vlr_num(0)
+ZipPoint::ZipPoint( PointFormat format, 
+                    const std::vector<VariableLengthRecord>& vlrs, 
+                    bool isReadMode)
+    : m_readMode(isReadMode)
+    , his_vlr_num(0)
     , his_vlr_data(0)
     , m_lz_point(NULL)
     , m_lz_point_size(0)
@@ -87,7 +90,7 @@ ZipPoint::ZipPoint(PointFormat format, const std::vector<VariableLengthRecord>& 
             break;
         }
     }
-
+    
     if (vlr)
     {
         bool ok(false);
@@ -104,6 +107,12 @@ ZipPoint::ZipPoint(PointFormat format, const std::vector<VariableLengthRecord>& 
     }
     else
     {
+        if (m_readMode)
+        {
+            std::ostringstream oss;
+            oss << "Unable to find LASzip VLR, but the file was opened in read mode!";
+            throw pdal_error(oss.str());
+        }
 
         if (!m_zip->setup((boost::uint8_t)format, Support::getPointDataSize(format)))
         {
@@ -169,7 +178,12 @@ VariableLengthRecord ZipPoint::ConstructVLR() const
         throw std::runtime_error(oss.str());
     }
     
-    VariableLengthRecord vlr(0xAABB, laszip_userid, laszip_recordid, laszip_description, data, (boost::uint16_t)num);
+    VariableLengthRecord vlr(0xAABB, 
+                             laszip_userid, 
+                             laszip_recordid, 
+                             laszip_description, 
+                             data, 
+                             (boost::uint16_t)num);
 
     return vlr;
 }
@@ -177,7 +191,8 @@ VariableLengthRecord ZipPoint::ConstructVLR() const
 
 bool ZipPoint::IsZipVLR(const VariableLengthRecord& vlr) const
 {
-    if (laszip_userid == vlr.getUserId() && laszip_recordid == vlr.getRecordId())
+    if (laszip_userid == vlr.getUserId() && 
+        laszip_recordid == vlr.getRecordId())
     {
         return true;
     }

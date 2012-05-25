@@ -629,7 +629,7 @@ void Base::initialize()
     if (!m_zipPoint)
     {
         PointFormat format = m_reader.getLasHeader().getPointFormat();
-        boost::scoped_ptr<ZipPoint> z(new ZipPoint(format, getReader().getLasHeader().getVLRs().getAll()));
+        boost::scoped_ptr<ZipPoint> z(new ZipPoint(format, getReader().getLasHeader().getVLRs().getAll(), true));
         m_zipPoint.swap(z);
     }
 

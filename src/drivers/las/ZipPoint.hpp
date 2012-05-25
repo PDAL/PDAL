@@ -51,7 +51,7 @@ class VariableLengthRecord;
 class ZipPoint
 {
 public:
-    ZipPoint(PointFormat, const std::vector<VariableLengthRecord>& vlrs);
+    ZipPoint(PointFormat, const std::vector<VariableLengthRecord>& vlrs, bool isReadMode);
     ~ZipPoint();
 
     VariableLengthRecord ConstructVLR() const;
@@ -70,6 +70,7 @@ private:
 public: // for now
     // LASzip::pack() allocates/sets vlr_data and vlr_num for us, and deletes it for us  ["his"]
     // LASzip::unpack() just reads from the vlr_data we give it (we allocate and delete)  ["our"]
+    bool m_readMode;
     int his_vlr_num;
     unsigned char* his_vlr_data;
 
