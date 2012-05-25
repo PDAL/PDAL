@@ -56,29 +56,29 @@ Options makeFilterOptions(int threadNum, int filterNum, bool log)
     id << "T" << threadNum << "F" << filterNum;
 
     ostringstream function_id;
-    function_id << "function_" << id;
+    function_id << "function_" << id.str();
     ostringstream module_id;
-    function_id << "module_" << id;
+    function_id << "module_" << id.str();
 
     ostringstream script;
     script <<
         "import numpy as np\n"
-        "def " << function_id << "(ins,outs):\n"
-        "  print 'hi1 " << id << "'\n"
+        "def " << function_id.str() << "(ins,outs):\n"
+        "  #print 'hi1 " << id.str() << "'\n"
         "  X = ins['X']\n"
-        "  print 'hi2 " << id << "'\n"
+        "  #print 'hi2 " << id.str() << "'\n"
         "  X = X + 1.0\n"
-        "  print 'hi2 " << id << "'\n"
+        "  #print 'hi2 " << id.str() << "'\n"
         "  outs['X'] = X\n"
-        "  print 'hi4 " << id << "'\n"
+        "  #print 'hi4 " << id.str() << "'\n"
         "  return True\n"
         ;
 
     Options opts;
     {
-        const pdal::Option source("source", script);
-        const pdal::Option module("module", module_id);
-        const pdal::Option function("function", function_id);
+        const pdal::Option source("source", script.str());
+        const pdal::Option module("module", module_id.str());
+        const pdal::Option function("function", function_id.str());
         opts.add(source);
         opts.add(module);
         opts.add(function);
@@ -118,7 +118,7 @@ Options makeReaderOptions()
 
 BOOST_AUTO_TEST_CASE(test_parallel)
 {
-    return;
+    //return;
 
 #define TEN 10
     Options opts[TEN][TEN];
@@ -167,6 +167,11 @@ BOOST_AUTO_TEST_CASE(test_parallel)
     {
         delete iters[threadId];
         delete datas[threadId];
+
+        for (int filterId=0; filterId<TEN; filterId++)
+        {
+            delete stages[threadId][filterId];
+        }
     }
 
     //    bool ok = Support::compare_text_files(Support::temppath("mylog.txt"), Support::datapath("logtest.txt"));
