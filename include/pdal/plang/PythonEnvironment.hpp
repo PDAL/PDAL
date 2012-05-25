@@ -75,12 +75,18 @@ public:
     void set_stdout(std::ostream* ostr);
     void reset_stdout();
 
+    void gil_lock();
+    void gil_unlock();
+
 private:
     PyObject* m_tracebackModule;
     PyObject* m_tracebackDictionary;
     PyObject *m_tracebackFunction;
 
     Redirector* m_redirector;
+
+    // this is a casted PyGILState_STATE enum (we don't want to include <pystate.h> here)
+    int m_gilstate; 
 };
 
 

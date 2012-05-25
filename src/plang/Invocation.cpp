@@ -388,6 +388,8 @@ bool Invocation::execute()
     {
         throw python_error("no code has been compiled");
     }
+    
+    m_environment.gil_lock();
 
     Py_INCREF(m_varsIn);
     Py_INCREF(m_varsOut);
@@ -407,6 +409,8 @@ bool Invocation::execute()
     {
         sts = true;
     }
+
+    m_environment.gil_unlock();
 
     return sts;
 }

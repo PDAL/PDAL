@@ -43,6 +43,8 @@
 #endif
 
 #include <Python.h>
+#include <pystate.h>
+
 #include "Redirector.hpp"
 
 // http://www.linuxjournal.com/article/3641
@@ -169,6 +171,22 @@ void PythonEnvironment::handleError()
     throw python_error(mssg);
 
     return;
+}
+    
+
+void PythonEnvironment::gil_lock()
+{
+    PyGILState_STATE gstate;
+    gstate = PyGILState_Ensure();
+
+    m_gilstate = (int)gstate;
+}
+
+
+void PythonEnvironment::gil_unlock()
+{
+    PyGILState_STATE gstate = (PyGILState_STATE)m_gilstate; 
+    PyGILState_Release(gstate);
 }
 
 
