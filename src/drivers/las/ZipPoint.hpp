@@ -56,10 +56,6 @@ public:
 
     VariableLengthRecord ConstructVLR() const;
 
-    // this will return false iff we find a laszip VLR and it doesn't match
-    // the point format this object was constructed with
-    // bool ValidateVLR(const VariableLengthRecord& vlr) const;
-
     bool IsZipVLR(const VariableLengthRecord& vlr) const;
     
     LASzip* GetZipper() const { return m_zip.get(); }
