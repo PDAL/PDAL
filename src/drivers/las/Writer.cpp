@@ -335,7 +335,6 @@ void Writer::writeBufferBegin(PointBuffer const& data)
         boost::optional<std::string> software_id = m.getValueOptional<std::string>("software_id");
         if (software_id && doForwardThisMetadata("software_id"))
         {
-            std::cout << "software_id: " << software_id << std::endl;
             m_lasHeader.SetSoftwareId(*software_id);
             // setGeneratingSoftware(*software_id);
             log()->get(logDEBUG) << "Setting generating software to '" 
