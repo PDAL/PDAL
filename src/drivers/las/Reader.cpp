@@ -61,9 +61,12 @@
 #define EQUAL(a,b) (_stricmp(a,b)==0)
 #endif
 
-
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/json_parser.hpp>
+
+#if defined(max) && defined(PDAL_PLATFORM_WIN32)
+#undef max
+#endif
 
 namespace pdal
 {
