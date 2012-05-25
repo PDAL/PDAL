@@ -64,19 +64,19 @@ Writer::Writer(Stage& prevStage, const Options& options)
     , m_streamOffset(0)
 {
     setOptions();
-	return;
+    return;
 }
 
 void Writer::setOptions() 
 {
-	setGeneratingSoftware(getOptions().getValueOrDefault<std::string>("software_id",
-				LasHeader::SoftwareIdentifier));
+    setGeneratingSoftware(getOptions().getValueOrDefault<std::string>("software_id",
+                LasHeader::SoftwareIdentifier));
 
-	m_lasHeader.SetCreationDOY((boost::uint16_t)getOptions().getValueOrDefault<boost::uint32_t>("day_of_year", 0));
-	m_lasHeader.SetCreationYear((boost::uint16_t)getOptions().getValueOrDefault<boost::uint32_t>("year", 0));
-	m_lasHeader.setPointFormat(static_cast<PointFormat>(getOptions().getValueOrDefault<boost::uint32_t>("format", 3)));        
-	m_lasHeader.SetSystemId(getOptions().getValueOrDefault<std::string>("system_id",
-				LasHeader::SystemIdentifier));
+    m_lasHeader.SetCreationDOY((boost::uint16_t)getOptions().getValueOrDefault<boost::uint32_t>("day_of_year", 0));
+    m_lasHeader.SetCreationYear((boost::uint16_t)getOptions().getValueOrDefault<boost::uint32_t>("year", 0));
+    m_lasHeader.setPointFormat(static_cast<PointFormat>(getOptions().getValueOrDefault<boost::uint32_t>("format", 3)));        
+    m_lasHeader.SetSystemId(getOptions().getValueOrDefault<std::string>("system_id",
+                LasHeader::SystemIdentifier));
 
     m_lasHeader.SetHeaderPadding(getOptions().getValueOrDefault<boost::uint32_t>("header_padding", 0));
     if (getOptions().hasOption("a_srs"))
@@ -85,11 +85,11 @@ void Writer::setOptions()
     } 
     m_lasHeader.SetCompressed(getOptions().getValueOrDefault("compression", false));
     m_lasHeader.SetFileSourceId(getOptions().getValueOrDefault<boost::uint16_t>("filesourceid", 0));   
-	try
-	{
-		boost::uint16_t record_length = getOptions().getValueOrThrow<boost::uint16_t>("datarecordlength");
-    	m_lasHeader.SetDataRecordLength(record_length);
-	} catch (pdal::option_not_found&) {};
+    try
+    {
+        boost::uint16_t record_length = getOptions().getValueOrThrow<boost::uint16_t>("datarecordlength");
+        m_lasHeader.SetDataRecordLength(record_length);
+    } catch (pdal::option_not_found&) {};
 }
 
 Writer::Writer(Stage& prevStage, std::ostream* ostream)
@@ -100,7 +100,7 @@ Writer::Writer(Stage& prevStage, std::ostream* ostream)
     , m_streamOffset(0)
 {
     setOptions();
-	return;
+    return;
 }
 
 Writer::~Writer()
@@ -263,12 +263,12 @@ void Writer::writeBufferBegin(PointBuffer const& data)
     const Dimension& dimY = schema.getDimension("Y");
     const Dimension& dimZ = schema.getDimension("Z");
 
-    m_lasHeader.SetScale(	dimX.getNumericScale(), 
-							dimY.getNumericScale(), 
-							dimZ.getNumericScale());
-    m_lasHeader.SetOffset(	dimX.getNumericOffset(), 
-							dimY.getNumericOffset(), 
-							dimZ.getNumericOffset());
+    m_lasHeader.SetScale(   dimX.getNumericScale(), 
+                            dimY.getNumericScale(), 
+                            dimZ.getNumericScale());
+    m_lasHeader.SetOffset(  dimX.getNumericOffset(), 
+                            dimY.getNumericOffset(), 
+                            dimZ.getNumericOffset());
 
     m_lasHeader.setSpatialReference(getSpatialReference());
     
@@ -287,24 +287,24 @@ void Writer::writeBufferBegin(PointBuffer const& data)
         pdal::Metadata m = getPrevStage().collectMetadata();
         
         boost::property_tree::ptree const& metadata = m.toPTree();
-		boost::optional<std::string> format =
-			metadata.get_optional<std::string>("dataformatid");
+        boost::optional<std::string> format =
+            metadata.get_optional<std::string>("dataformatid");
 
         if (format && doForwardThisMetadata("dataformatid"))
         {
             boost::uint32_t v = boost::lexical_cast<boost::uint32_t>(*format) ;
-			setPointFormat(static_cast<PointFormat>(v));
-			log()->get(logDEBUG) << "Setting point format to " 
+            setPointFormat(static_cast<PointFormat>(v));
+            log()->get(logDEBUG) << "Setting point format to " 
                                  << v 
                                  << "from metadata" << std::endl;
         } 
-		boost::optional<std::string> major =
-			metadata.get_optional<std::string>("version_major");
-		boost::optional<std::string> minor =
-			metadata.get_optional<std::string>("version_minor");
-		if (minor && doForwardThisMetadata("version_minor") &&
-				doForwardThisMetadata("version_major")) 
-		{
+        boost::optional<std::string> major =
+            metadata.get_optional<std::string>("version_major");
+        boost::optional<std::string> minor =
+            metadata.get_optional<std::string>("version_minor");
+        if (minor && doForwardThisMetadata("version_minor") &&
+                doForwardThisMetadata("version_major")) 
+        {
             boost::uint32_t ma = getOptions().getValueOrDefault<boost::uint32_t>("major_version", 1);
             boost::uint32_t mi = boost::lexical_cast<boost::uint32_t>(*minor);
             setFormatVersion((boost::uint8_t)ma,
@@ -315,13 +315,13 @@ void Writer::writeBufferBegin(PointBuffer const& data)
                   << "from metadata" << std::endl;
         } 
 
-		boost::optional<std::string> year =
-			metadata.get_optional<std::string>("creation_year");
-		boost::optional<std::string> day =
-			metadata.get_optional<std::string>("creation_doy");
-		if (year && day && doForwardThisMetadata("creation_doy") &&
-				doForwardThisMetadata("creation_year")) 
-		{
+        boost::optional<std::string> year =
+            metadata.get_optional<std::string>("creation_year");
+        boost::optional<std::string> day =
+            metadata.get_optional<std::string>("creation_doy");
+        if (year && day && doForwardThisMetadata("creation_doy") &&
+                doForwardThisMetadata("creation_year")) 
+        {
             boost::uint16_t y = boost::lexical_cast<boost::uint16_t>(year);
             boost::uint16_t d = boost::lexical_cast<boost::uint16_t>(day);
             setDate(y, d);
@@ -402,7 +402,7 @@ void Writer::writeBufferBegin(PointBuffer const& data)
         if (!m_zipPoint)
         {
             PointFormat format = m_lasHeader.getPointFormat();
-            boost::scoped_ptr<ZipPoint> z(new ZipPoint(format, m_lasHeader.getVLRs().getAll()));
+            boost::scoped_ptr<ZipPoint> z(new ZipPoint(format, m_lasHeader.getVLRs().getAll(), false));
             m_zipPoint.swap(z);
         }
 
