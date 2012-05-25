@@ -37,6 +37,7 @@
 
 #include <pdal/pdal_internal.hpp>
 #include <pdal/ThreadEnvironment.hpp>
+#include <pdal/plang/PythonEnvironment.hpp>
 #include <boost/thread/once.hpp>
 #include <map>
 
@@ -58,14 +59,12 @@ public:
     // with no args, returns the not-a-thread thread environment
     ThreadEnvironment& getThreadEnvironment(boost::thread::id=boost::thread::id());
 
-    //
-    // forwarded functions
-    //
 #ifdef PDAL_HAVE_PYTHON
     // get the plang (python) environment
     plang::PythonEnvironment& getPythonEnvironment();
 #endif
 
+    // forwarded function
     boost::random::mt19937* getRNG();
 
 private:
@@ -76,6 +75,10 @@ private:
 
     typedef std::map<boost::thread::id, ThreadEnvironment*> thread_map;
     thread_map m_threadMap;
+
+#ifdef PDAL_HAVE_PYTHON
+    plang::PythonEnvironment* m_pythonEnvironment;
+#endif
 
     GlobalEnvironment(const GlobalEnvironment&); // nope
     GlobalEnvironment& operator=(const GlobalEnvironment&); // nope

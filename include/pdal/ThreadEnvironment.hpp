@@ -38,7 +38,6 @@
 #include <pdal/pdal_internal.hpp>
 
 #include <boost/random/mersenne_twister.hpp>
-#include <pdal/plang/PythonEnvironment.hpp>
 #include <boost/thread.hpp>
 
 namespace pdal
@@ -50,14 +49,6 @@ public:
     ThreadEnvironment(boost::thread::id);
     ~ThreadEnvironment();
 
-#ifdef PDAL_HAVE_PYTHON
-    // get the plang (python) environment
-    plang::PythonEnvironment& getPythonEnvironment()
-    {
-        return *m_pythonEnvironment;
-    }
-#endif
-
     boost::random::mt19937* getRNG()
     {
         return m_rng;
@@ -65,10 +56,6 @@ public:
 
 private:
     const boost::thread::id m_threadId;
-
-#ifdef PDAL_HAVE_PYTHON
-    plang::PythonEnvironment* m_pythonEnvironment;
-#endif
 
     boost::random::mt19937* m_rng;
 

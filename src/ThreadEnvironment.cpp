@@ -42,10 +42,6 @@ namespace pdal
 ThreadEnvironment::ThreadEnvironment(boost::thread::id id)
     : m_threadId(id)
 {
-#ifdef PDAL_HAVE_PYTHON
-    m_pythonEnvironment = new pdal::plang::PythonEnvironment();
-#endif
-
     m_rng = new boost::random::mt19937();
 
     return;
@@ -54,11 +50,6 @@ ThreadEnvironment::ThreadEnvironment(boost::thread::id id)
 
 ThreadEnvironment::~ThreadEnvironment()
 {
-#ifdef PDAL_HAVE_PYTHON
-    delete m_pythonEnvironment;
-    m_pythonEnvironment = 0;
-#endif
-
     delete m_rng;
     m_rng = 0;
 

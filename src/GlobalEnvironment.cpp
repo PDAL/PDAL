@@ -87,6 +87,10 @@ GlobalEnvironment::GlobalEnvironment()
     // this should be the not-a-thread thread environment
     (void) createThreadEnvironment(boost::thread::id());
 
+#ifdef PDAL_HAVE_PYTHON
+    m_pythonEnvironment = new pdal::plang::PythonEnvironment();
+#endif
+
     return;
 }
 
@@ -100,6 +104,11 @@ GlobalEnvironment::~GlobalEnvironment()
         delete env;
         m_threadMap.erase(iter);
     }
+
+#ifdef PDAL_HAVE_PYTHON
+    delete m_pythonEnvironment;
+    m_pythonEnvironment = 0;
+#endif
 
     return;
 }
@@ -125,12 +134,14 @@ ThreadEnvironment& GlobalEnvironment::getThreadEnvironment(boost::thread::id id)
     return *threadEnv;
 }
 
+
 #ifdef PDAL_HAVE_PYTHON
 plang::PythonEnvironment& GlobalEnvironment::getPythonEnvironment()
 {
-    return getThreadEnvironment().getPythonEnvironment();
+    return *m_pythonEnvironment;
 }
 #endif
+
 
 boost::random::mt19937* GlobalEnvironment::getRNG()
 {
