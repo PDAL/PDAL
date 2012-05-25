@@ -184,6 +184,53 @@ static void test_a_format(const std::string& refFile, boost::uint8_t majorVersio
     return;
 }
 
+BOOST_AUTO_TEST_CASE(LasWriterTest_test_metadata)
+{
+    // remove file from earlier run, if needed
+    std::string temp_filename(Support::temppath("temp-LasWriterTest_test_metadata.las"));
+    FileUtils::deleteFile(temp_filename);
+
+    pdal::Options options;
+    pdal::Option filename("filename", temp_filename);
+    pdal::Option metadata_option("metadata", "");
+    pdal::Option software_id("software_id", "forward");
+    pdal::Option debug("debug", true);
+    pdal::Option verbosity("verbose", 7);
+
+    pdal::Options moptions;
+    moptions.add(software_id);
+    metadata_option.setOptions(moptions);
+
+    options.add(metadata_option);
+    options.add(filename);
+    // options.add(debug);
+    // options.add(verbosity);
+    
+    pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
+
+    {
+        pdal::drivers::las::Writer writer(reader, options);
+        writer.initialize();
+
+        const boost::uint64_t numPoints = reader.getNumPoints();
+
+        writer.write(numPoints);
+    }
+
+
+    pdal::drivers::las::Reader reader2(options);
+    reader2.initialize();
+    
+    pdal::drivers::las::LasHeader const& h = reader2.getLasHeader();
+    
+    BOOST_CHECK_EQUAL(h.GetSoftwareId(), "TerraScan");
+    
+    
+    FileUtils::deleteFile(temp_filename);
+
+    return;
+}
+
 BOOST_AUTO_TEST_CASE(test_different_formats)
 {
     test_a_format("1.0_0.las", 1, 0, 0);

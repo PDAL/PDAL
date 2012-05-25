@@ -224,7 +224,6 @@ bool Writer::doForwardThisMetadata(std::string const& name) const
 
     Options const& options = getOptions();
 
-
     Option doMetadata;
     try
     {
@@ -242,7 +241,8 @@ bool Writer::doForwardThisMetadata(std::string const& name) const
                 meta->getOption(name);
             } catch (pdal::option_not_found&) { return false;}
             
-            if (meta->getOption(name).getValue<bool>())
+            std::string value = meta->getOption(name).getValue<std::string>();
+            if (boost::algorithm::iequals(value,"FORWARD"))
                 return true;
             return false;
         }
@@ -287,8 +287,9 @@ void Writer::writeBufferBegin(PointBuffer const& data)
         pdal::Metadata m = getPrevStage().collectMetadata();
         
         boost::property_tree::ptree const& metadata = m.toPTree();
+        // std::cout << m << std::endl;
         boost::optional<std::string> format =
-            metadata.get_optional<std::string>("dataformatid");
+            m.getValueOptional<std::string>("dataformatid");
 
         if (format && doForwardThisMetadata("dataformatid"))
         {
@@ -331,16 +332,15 @@ void Writer::writeBufferBegin(PointBuffer const& data)
                                  << "from metadata" << std::endl;
         } 
 
-        boost::optional<std::string> software_id = metadata.get_optional<std::string>("software_id");
+        boost::optional<std::string> software_id = m.getValueOptional<std::string>("software_id");
         if (software_id && doForwardThisMetadata("software_id"))
         {
-            try 
-            {
-                setGeneratingSoftware(*software_id);
-                log()->get(logDEBUG) << "Setting generating software to " 
-                                     << *software_id
-                                     << "from metadata" << std::endl;
-            } catch (std::bad_cast&) {}
+            std::cout << "software_id: " << software_id << std::endl;
+            m_lasHeader.SetSoftwareId(*software_id);
+            // setGeneratingSoftware(*software_id);
+            log()->get(logDEBUG) << "Setting generating software to '" 
+                                 << *software_id
+                                 << "' from metadata" << std::endl;
         } 
 
         boost::optional<std::string> system_id = metadata.get_optional<std::string>("system_id");
