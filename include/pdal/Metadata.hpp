@@ -198,7 +198,7 @@ public:
     
     void addMetadata(  Metadata const& m); 
 
-    inline boost::property_tree::ptree toPTree() const 
+    inline boost::property_tree::ptree const& toPTree() const 
     {
         return m_tree; 
     } 
