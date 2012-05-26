@@ -227,14 +227,24 @@ void Writer::setVLRsFromMetadata(LasHeader& header, Metadata const& metadata, Op
                 boost::uint32_t metadata_record_id = m->second.get<boost::uint32_t>("entries.record_id.value");
                 std::string option_user_id = vo->getOption("user_id").getValue<std::string>();
                 std::string metadata_user_id = m->second.get<std::string>("entries.user_id.value");
-                
+                // boost::property_tree::write_xml(std::cout, m->second);
                 // std::cout << "record id option: " << option_record_id << " metadata: " << metadata_record_id << std::endl;
                 // std::cout << "user id option: " << option_user_id << " metadata: "<< metadata_user_id << std::endl;
                 
                 if (option_record_id == metadata_record_id &&
                     option_user_id == metadata_user_id)
                 {
-                    // std::cout << "copy the thing! "<<std::endl;
+                    std::string vlr_data = m->second.get_value<std::string>();
+                    std::vector<boost::uint8_t> data = Utils::base64_decode(vlr_data);
+                    std::string description = m->second.get<std::string>("entries.description.value");
+                    pdal::drivers::las::VariableLengthRecord vlr(   0xAABB, 
+                                                                    metadata_user_id, 
+                                                                    metadata_record_id, 
+                                                                    description, 
+                                                                    &data[0], 
+                                                                    vlr_data.size());
+                    header.getVLRs().add(vlr);
+                    
                 }
             }
         }

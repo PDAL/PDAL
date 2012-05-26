@@ -246,6 +246,12 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_metadata)
     BOOST_CHECK_EQUAL(h.GetCreationDOY(), 145u);
     BOOST_CHECK_EQUAL(h.GetCreationYear(), 2012u);
     
+    pdal::drivers::las::VLRList const& vlrs = h.getVLRs();
+    BOOST_CHECK_EQUAL(vlrs.count(), 5);
+    pdal::drivers::las::VariableLengthRecord const& r = vlrs.get(0);
+    
+    BOOST_CHECK_EQUAL(r.getRecordId(), 1234);
+    BOOST_CHECK_EQUAL(r.getUserId(), "hobu");
     
     FileUtils::deleteFile(temp_filename);
 
