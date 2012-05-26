@@ -79,9 +79,6 @@ void LasHeaderWriter::write()
     m_ostream.seekp(0, ios::end);
     // ios::pos_type end = m_ostream.tellp();
 
-    // we initially have no VLRs
-    assert(m_header.getVLRs().count() == 0);
-
     {
         // Rewrite the georeference VLR entries if they exist
         m_header.getVLRs().remove("liblas", 2112);
