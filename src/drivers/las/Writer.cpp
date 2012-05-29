@@ -257,16 +257,27 @@ bool Writer::doForwardThisMetadata(std::string const& name) const
     //     <Option name="metadata">
     //         <Options>
     //             <Option name="dataformatid">
-    //             true
+    //             3
     //             </Option>
     //             <Option name="filesourceid">
-    //             true
+    //             forward
     //             </Option>
     //             <Option name="year">
-    //             true
+    //             forward
     //             </Option>
     //             <Option name="day_of_year">
-    //             true
+    //             forward
+    //             </Option>
+    //             <Option name="vlr">
+    //             forward
+    //             <Options>
+    //                 <Option name="user_id">
+    //                 hobu
+    //                 </Option>
+    //                 <Option name="record">
+    //                 1234
+    //                 </Option>
+    //             </Options>
     //             </Option>
     //         </Options>
     //     </Option>
@@ -336,17 +347,30 @@ void Writer::writeBufferBegin(PointBuffer const& data)
     {
         pdal::Metadata m = getPrevStage().collectMetadata().getMetadata("drivers.las.reader");
         
-        boost::optional<std::string> format =
-            m.getValueOptional<std::string>("dataformatid");
+        boost::optional<std::string const&> dataformatid = getOptions().getMetadataOption<std::string>("dataformatid");
+        
+        if (dataformatid)
+        {            
+            if (boost::algorithm::iequals(*dataformatid, "FORWARD"))
+            {
+                boost::optional<std::string> format =
+                    m.getValueOptional<std::string>("dataformatid");
+                boost::uint32_t v = boost::lexical_cast<boost::uint32_t>(*format) ;
+                setPointFormat(static_cast<PointFormat>(v));
+                log()->get(logDEBUG) << "Setting point format to " 
+                                     << v 
+                                     << "from metadata" << std::endl;                
+            } 
+            else
+            {
+                boost::uint32_t v = boost::lexical_cast<boost::uint32_t>(*dataformatid) ;
+                setPointFormat(static_cast<PointFormat>(v));
+                log()->get(logDEBUG) << "Setting point format to " 
+                                     << v 
+                                     << "from options" << std::endl;                
+            }
+        }
 
-        if (format && doForwardThisMetadata("dataformatid"))
-        {
-            boost::uint32_t v = boost::lexical_cast<boost::uint32_t>(*format) ;
-            setPointFormat(static_cast<PointFormat>(v));
-            log()->get(logDEBUG) << "Setting point format to " 
-                                 << v 
-                                 << "from metadata" << std::endl;
-        } 
         boost::optional<std::string> major =
             m.getValueOptional<std::string>("version_major");
         boost::optional<std::string> minor =
