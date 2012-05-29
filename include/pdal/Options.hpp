@@ -414,6 +414,7 @@ public:
         return result;
     }
 
+
     // returns true iff the option name is valid
     bool hasOption(std::string const& name) const;
 
@@ -427,9 +428,73 @@ public:
     void dump() const;
 
     std::vector<Option> getOptions(std::string const& name) const;
+
+
+    template<typename T>
+    boost::optional<T const&> getMetadataOption(std::string const& name) const
+    {
+        // <Reader type="drivers.las.writer">
+        //     <Option name="metadata">
+        //         <Options>
+        //             <Option name="dataformatid">
+        //             3
+        //             </Option>
+        //             <Option name="filesourceid">
+        //             forward
+        //             </Option>
+        //             <Option name="year">
+        //             forward
+        //             </Option>
+        //             <Option name="day_of_year">
+        //             forward
+        //             </Option>
+        //             <Option name="vlr">
+        //             forward
+        //             <Options>
+        //                 <Option name="user_id">
+        //                 hobu
+        //                 </Option>
+        //                 <Option name="record">
+        //                 1234
+        //                 </Option>
+        //             </Options>
+        //             </Option>
+        //         </Options>
+        //     </Option>
+        // </Reader>
+
+        Option const* doMetadata(0);
+        try
+        {
+
+            doMetadata = &getOption("metadata");
+        } catch (pdal::option_not_found&) { return false; }
+
+        boost::optional<Options const&> meta = doMetadata->getOptions();
+        try
+        {
+            if (meta)
+            {
+                try
+                {
+                    meta->getOption(name);
+                } catch (pdal::option_not_found&) { return boost::optional<T const&>(); }
+
+                return meta->getOption(name).getValue<T>();
+                // if (boost::algorithm::iequals(value,"FORWARD"))
+                //     return true;
+                return boost::optional<T const&>();
+            }
+        } catch (pdal::option_not_found&) { return boost::optional<T const&>(); }
+
+        return boost::optional<T const&>();
+    }
+
+
 private:
     options::map_t m_options;
 };
+
 
 
 PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const Options&);
