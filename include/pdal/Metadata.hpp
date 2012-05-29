@@ -385,7 +385,7 @@ template <>
 inline void Metadata::setValue<pdal::Metadata>(pdal::Metadata const& v)
 {
     setType(metadata::MData);
-    m_tree.put("value",v);
+    m_tree.add_child("value",v.toPTree());
 }
 
 template <>
