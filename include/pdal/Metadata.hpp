@@ -184,6 +184,7 @@ public:
     Metadata();
     Metadata(std::string const& name);
     Metadata(Metadata const& other);
+    Metadata(boost::property_tree::ptree const& tree);
 
     template <typename T>
     Metadata(std::string const& name, const T& value, std::string const& description="")
@@ -196,7 +197,8 @@ public:
     template <typename T>
     void addMetadata(std::string const& name, const T& value, std::string const& description="");
     
-    void addMetadata(  Metadata const& m); 
+    void addMetadata( Metadata const& m); 
+    Metadata operator+(const Metadata& rhs) const;
 
     inline boost::property_tree::ptree const& toPTree() const 
     {
@@ -232,6 +234,12 @@ public:
     { 
         return m_tree.get_optional<T>("entries." + path+".value"); 
     } 
+
+    inline Metadata getMetadata(std::string const& path) const 
+    { 
+        return Metadata(m_tree.get_child(path)); 
+    } 
+
 
     /** @name entry name
     */

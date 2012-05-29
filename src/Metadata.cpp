@@ -70,6 +70,18 @@ Metadata::Metadata(std::string const& name)
     setName(name);
 }
 
+Metadata::Metadata(boost::property_tree::ptree const& tree)
+: m_tree(tree)
+{}
+
+Metadata Metadata::operator+(const Metadata& rhs) const
+{
+    boost::property_tree::ptree tree = this->toPTree();
+    tree.add_child(rhs.getName(), rhs.toPTree());
+    return Metadata(tree);
+    
+}
+
 
 std::string Metadata::getTypeName() const
 {

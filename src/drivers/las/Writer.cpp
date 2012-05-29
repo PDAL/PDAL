@@ -334,7 +334,7 @@ void Writer::writeBufferBegin(PointBuffer const& data)
     
     if (useMetadata)
     {
-        pdal::Metadata m = getPrevStage().collectMetadata();
+        pdal::Metadata m = getPrevStage().collectMetadata().getMetadata("drivers.las.reader");
         
         boost::property_tree::ptree const& metadata = m.toPTree();
         boost::optional<std::string> format =
