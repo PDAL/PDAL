@@ -89,11 +89,11 @@ const Options Predicate::getDefaultOptions() const
 }
 
 
-boost::uint32_t Predicate::processBuffer(PointBuffer& srcData, PointBuffer& dstData, pdal::plang::BufferedInvocation& python) const
+boost::uint32_t Predicate::processBuffer(PointBuffer& data, pdal::plang::BufferedInvocation& python) const
 {
     python.resetArguments();
 
-    python.beginChunk(srcData);
+    python.beginChunk(data);
 
     python.execute();
 
@@ -102,17 +102,20 @@ boost::uint32_t Predicate::processBuffer(PointBuffer& srcData, PointBuffer& dstD
         throw python_error("Mask variable not set in predicate filter function");
     }
 
-    boost::uint8_t* mask = new boost::uint8_t[srcData.getNumPoints()];
-    python.extractResult("Mask", (boost::uint8_t*)mask, srcData.getNumPoints(), 1, pdal::dimension::UnsignedByte, 1);
+    boost::uint8_t* mask = new boost::uint8_t[data.getNumPoints()];
+    
+    PointBuffer dstData(data.getSchema(), data.getCapacity());
+    
+    python.extractResult("Mask", (boost::uint8_t*)mask, data.getNumPoints(), 1, pdal::dimension::UnsignedByte, 1);
 
     boost::uint8_t* dst = dstData.getData(0);
-    boost::uint8_t* src = srcData.getData(0);
+    boost::uint8_t* src = data.getData(0);
 
     const Schema& schema = dstData.getSchema();
     boost::uint32_t numBytes = schema.getByteSize();
-    assert(numBytes == srcData.getSchema().getByteSize());
+    assert(numBytes == data.getSchema().getByteSize());
 
-    boost::uint32_t numSrcPoints = srcData.getNumPoints();
+    boost::uint32_t numSrcPoints = data.getNumPoints();
     boost::uint32_t count = 0;
     for (boost::uint32_t srcIndex=0; srcIndex<numSrcPoints; srcIndex++)
     {
@@ -121,11 +124,14 @@ boost::uint32_t Predicate::processBuffer(PointBuffer& srcData, PointBuffer& dstD
             memcpy(dst, src, numBytes);
             dst += numBytes;
             ++count;
+            dstData.setNumPoints(count);
         }
         src += numBytes;
     }
 
-    dstData.setNumPoints(count);
+    
+    data.copyPointsFast(0, 0, dstData, count);
+    data.setNumPoints(count);
 
     delete[] mask;
 
@@ -202,16 +208,16 @@ void Predicate::readEndImpl()
 boost::uint32_t Predicate::readBufferImpl(PointBuffer& dstData)
 {
     // read in a full block of points
-    PointBuffer srcData(dstData.getSchema(), (boost::uint32_t)dstData.getBufferByteCapacity());
 
-    const boost::uint32_t numRead = getPrevIterator().read(srcData);
+    const boost::uint32_t numRead = getPrevIterator().read(dstData);
     if (numRead > 0)
     {
-        // copy the valid points from the src block to the dst block
-        m_predicateFilter.processBuffer(srcData, dstData, *m_pythonMethod);
+        m_numPointsProcessed = dstData.getNumPoints();
+
+        // copies the points as they pass in-place
+        m_predicateFilter.processBuffer(dstData, *m_pythonMethod);
     }
 
-    m_numPointsProcessed = srcData.getNumPoints();
     m_numPointsPassed = dstData.getNumPoints();
 
     return dstData.getNumPoints();

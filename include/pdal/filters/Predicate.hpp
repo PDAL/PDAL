@@ -73,7 +73,7 @@ public:
         return NULL;
     }
 
-    boost::uint32_t processBuffer(PointBuffer& srcData, PointBuffer& dstData, pdal::plang::BufferedInvocation&) const;
+    boost::uint32_t processBuffer(PointBuffer& data, pdal::plang::BufferedInvocation&) const;
 
     const pdal::plang::Script& getScript() const
     {
