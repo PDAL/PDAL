@@ -274,14 +274,14 @@ bool Writer::doForwardThisMetadata(std::string const& name) const
 
     Options const& options = getOptions();
 
-    Option doMetadata;
+    Option const* doMetadata(0);
     try
     {
         
-        doMetadata = options.getOption("metadata");
+        doMetadata = &options.getOption("metadata");
     } catch (pdal::option_not_found&) { return false; }
     
-    boost::optional<Options const&> meta = doMetadata.getOptions();
+    boost::optional<Options const&> meta = doMetadata->getOptions();
     try
     {
         if (meta)
@@ -336,7 +336,6 @@ void Writer::writeBufferBegin(PointBuffer const& data)
     {
         pdal::Metadata m = getPrevStage().collectMetadata().getMetadata("drivers.las.reader");
         
-        boost::property_tree::ptree const& metadata = m.toPTree();
         boost::optional<std::string> format =
             m.getValueOptional<std::string>("dataformatid");
 
