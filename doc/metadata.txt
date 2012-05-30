@@ -1,0 +1,297 @@
+.. _metadata:
+
+******************************************************************************
+Metadata
+******************************************************************************
+
+:Author: Howard Butler
+:Contact: hobu.inc at gmail dot com
+:Date: 5/30/2012
+
+Metadata is an important component of any data processing story. PDAL attempts 
+to allow users to operate with metadata in a relatively free-form way, with its 
+main Metadata utility, :cpp:class:`pdal::Metadata`, being a lightly wrapped 
+`boost::property_tree`_.
+
+The basic structure of a :cpp:class:`pdal::Metadata` instance is the following 
+tree structure:
+
+.. code-block:: javascript
+
+    {
+        "type": "blank",
+        "value": "",
+        "name": "name"
+    }
+
+A more interesting metadata tree might come from the :cpp:class:`pdal::drivers::las::Reader`:
+
+.. code-block:: json
+
+    {
+        "name": "drivers.las.reader",
+        "type": "blank",
+        "value": "",
+        "entries":
+        {
+            "compressed":
+            {
+                "name": "compressed",
+                "description": "",
+                "type": "boolean",
+                "value": "false"
+            },
+            "dataformatid":
+            {
+                "name": "dataformatid",
+                "description": "",
+                "type": "nonNegativeInteger",
+                "value": "3"
+            },
+            "version_major":
+            {
+                "name": "version_major",
+                "description": "",
+                "type": "nonNegativeInteger",
+                "value": "1"
+            },
+            "version_minor":
+            {
+                "name": "version_minor",
+                "description": "",
+                "type": "nonNegativeInteger",
+                "value": "2"
+            },
+            "filesource_id":
+            {
+                "name": "filesource_id",
+                "description": "",
+                "type": "nonNegativeInteger",
+                "value": "0"
+            },
+            "reserved":
+            {
+                "name": "reserved",
+                "description": "",
+                "type": "nonNegativeInteger",
+                "value": "0"
+            },
+            "project_id":
+            {
+                "name": "project_id",
+                "description": "",
+                "type": "uuid",
+                "value": "b8f18883-1baa-0841-bca3-6bc68e7b062e"
+            },
+            "system_id":
+            {
+                "name": "system_id",
+                "description": "",
+                "type": "string",
+                "value": "libLAS"
+            },
+            "software_id":
+            {
+                "name": "software_id",
+                "description": "",
+                "type": "string",
+                "value": "libLAS 1.2"
+            },
+            "creation_doy":
+            {
+                "name": "creation_doy",
+                "description": "",
+                "type": "nonNegativeInteger",
+                "value": "78"
+            },
+            "creation_year":
+            {
+                "name": "creation_year",
+                "description": "",
+                "type": "nonNegativeInteger",
+                "value": "2008"
+            },
+            "header_size":
+            {
+                "name": "header_size",
+                "description": "",
+                "type": "nonNegativeInteger",
+                "value": "227"
+            },
+            "dataoffset":
+            {
+                "name": "dataoffset",
+                "description": "",
+                "type": "nonNegativeInteger",
+                "value": "438"
+            },
+            "scale_x":
+            {
+                "name": "scale_x",
+                "description": "",
+                "type": "double",
+                "value": "0.01"
+            },
+            "scale_y":
+            {
+                "name": "scale_y",
+                "description": "",
+                "type": "double",
+                "value": "0.01"
+            },
+            "scale_z":
+            {
+                "name": "scale_z",
+                "description": "",
+                "type": "double",
+                "value": "0.01"
+            },
+            "offset_x":
+            {
+                "name": "offset_x",
+                "description": "",
+                "type": "double",
+                "value": "0"
+            },
+            "offset_y":
+            {
+                "name": "offset_y",
+                "description": "",
+                "type": "double",
+                "value": "0"
+            },
+            "offset_z":
+            {
+                "name": "offset_z",
+                "description": "",
+                "type": "double",
+                "value": "0"
+            },
+            "minx":
+            {
+                "name": "minx",
+                "description": "",
+                "type": "double",
+                "value": "470692.447538"
+            },
+            "miny":
+            {
+                "name": "miny",
+                "description": "",
+                "type": "double",
+                "value": "4602888.904642"
+            },
+            "minz":
+            {
+                "name": "minz",
+                "description": "",
+                "type": "double",
+                "value": "16"
+            },
+            "maxx":
+            {
+                "name": "maxx",
+                "description": "",
+                "type": "double",
+                "value": "470692.447538"
+            },
+            "maxy":
+            {
+                "name": "maxy",
+                "description": "",
+                "type": "double",
+                "value": "4602888.904642"
+            },
+            "maxz":
+            {
+                "name": "maxz",
+                "description": "",
+                "type": "double",
+                "value": "16"
+            },
+            "count":
+            {
+                "name": "count",
+                "description": "",
+                "type": "nonNegativeInteger",
+                "value": "1"
+            },
+            "vlr_0":
+            {
+                "name": "vlr_0",
+                "description": "",
+                "type": "base64Binary",
+                "value": "AQABAAAABwAABAAAAQABAAEEAAABAAEAAgSxhyEAAAABCLGHBgAhAAYIAAABAI4jAAwAAAEAI2kEDAAAAQApIw==",
+                "entries":
+                {
+                    "reserved":
+                    {
+                        "name": "reserved",
+                        "description": "",
+                        "type": "nonNegativeInteger",
+                        "value": "43707"
+                    },
+                    "user_id":
+                    {
+                        "name": "user_id",
+                        "description": "",
+                        "type": "string",
+                        "value": "LASF_Projection"
+                    },
+                    "record_id":
+                    {
+                        "name": "record_id",
+                        "description": "",
+                        "type": "nonNegativeInteger",
+                        "value": "34735"
+                    },
+                    "description":
+                    {
+                        "name": "description",
+                        "description": "",
+                        "type": "string",
+                        "value": ""
+                    }
+                }
+            },
+            "vlr_1":
+            {
+                "name": "vlr_1",
+                "description": "",
+                "type": "base64Binary",
+                "value": "VVRNIFpvbmUgMTUsIE5vcnRoZXJuIEhlbWlzcGhlcmV8TkFEODN8",
+                "entries":
+                {
+                    "reserved":
+                    {
+                        "name": "reserved",
+                        "description": "",
+                        "type": "nonNegativeInteger",
+                        "value": "43707"
+                    },
+                    "user_id":
+                    {
+                        "name": "user_id",
+                        "description": "",
+                        "type": "string",
+                        "value": "LASF_Projection"
+                    },
+                    "record_id":
+                    {
+                        "name": "record_id",
+                        "description": "",
+                        "type": "nonNegativeInteger",
+                        "value": "34737"
+                    },
+                    "description":
+                    {
+                        "name": "description",
+                        "description": "",
+                        "type": "string",
+                        "value": ""
+                    }
+                }
+            }
+        }
+    }
+.. _`boost::property_tree`: http://www.boost.org/doc/libs/release/libs/property_tree/

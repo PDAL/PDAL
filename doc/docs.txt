@@ -19,6 +19,7 @@ Contents:
    development/index
    other/index
    api/index
+   metadata
   
 Indices and tables
 ==================
