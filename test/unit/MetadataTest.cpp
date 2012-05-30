@@ -77,20 +77,20 @@ BOOST_AUTO_TEST_CASE(test_construction)
 
 
     BOOST_CHECK_EQUAL(m.getValue<boost::uint32_t>(), 32u);
-    BOOST_CHECK_EQUAL(m.getType(), pdal::metadata::UnsignedInteger);
+    BOOST_CHECK_EQUAL(m.getType(), "nonNegativeInteger");
 
     //BOOST_CHECK_THROW(m.getValue<boost::int32_t>(), boost::bad_get);
 
     BOOST_CHECK_EQUAL(m.getValue<boost::int32_t>(), 32);
     m.setValue<pdal::ByteArray>(bytes);
-    BOOST_CHECK_EQUAL(m.getType(), pdal::metadata::Bytes);
+    BOOST_CHECK_EQUAL(m.getType(), "base64Binary");
 
     std::string base64("AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygpKissLS4vMDEyMzQ1Njc4OTo7PD0+P0BBQkNERUZHSElKS0xNTk9QUVJTVFVWV1hZWltcXV5fYGFiYw==");
     BOOST_CHECK_EQUAL(boost::lexical_cast<std::string>(m.getValue<pdal::ByteArray>()), base64);
 
     pdal::SpatialReference ref("EPSG:4326");
     m.setValue<pdal::SpatialReference>(ref);
-    BOOST_CHECK_EQUAL(m.getType(), pdal::metadata::SpatialReference);
+    BOOST_CHECK_EQUAL(m.getType(), "spatialreference");
 
     pdal::SpatialReference ref2 = m.getValue<pdal::SpatialReference>();
     // std::string ref_text("GEOGCS[\"WGS 84\","
@@ -107,35 +107,35 @@ BOOST_AUTO_TEST_CASE(test_construction)
     // std::cout << boost::lexical_cast<std::string>(m.getValue<pdal::SpatialReference>());
     m.setValue<boost::int8_t>(i8);
     BOOST_CHECK_EQUAL(m.getValue<boost::int8_t>(), -8);
-    BOOST_CHECK_EQUAL(m.getType(), pdal::metadata::SignedInteger);
+    BOOST_CHECK_EQUAL(m.getType(), "integer");
 
     m.setValue<boost::int16_t>(i16);
     BOOST_CHECK_EQUAL(m.getValue<boost::int16_t>(), -16);
-    BOOST_CHECK_EQUAL(m.getType(), pdal::metadata::SignedInteger);
+    BOOST_CHECK_EQUAL(m.getType(), "integer");
 
     m.setValue<boost::int32_t>(i32);
     BOOST_CHECK_EQUAL(m.getValue<boost::int32_t>(), -32);
-    BOOST_CHECK_EQUAL(m.getType(), pdal::metadata::SignedInteger);
+    BOOST_CHECK_EQUAL(m.getType(), "integer");
 
     m.setValue<boost::int64_t>(i64);
     BOOST_CHECK_EQUAL(m.getValue<boost::int64_t>(), -64);
-    BOOST_CHECK_EQUAL(m.getType(), pdal::metadata::SignedInteger);
+    BOOST_CHECK_EQUAL(m.getType(), "integer");
 
     m.setValue<boost::uint8_t>(u8);
     BOOST_CHECK_EQUAL(m.getValue<boost::uint8_t>(), 8u);
-    BOOST_CHECK_EQUAL(m.getType(), pdal::metadata::UnsignedInteger);
+    BOOST_CHECK_EQUAL(m.getType(), "nonNegativeInteger");
 
     m.setValue<boost::uint16_t>(u16);
     BOOST_CHECK_EQUAL(m.getValue<boost::uint16_t>(), 16u);
-    BOOST_CHECK_EQUAL(m.getType(), pdal::metadata::UnsignedInteger);
+    BOOST_CHECK_EQUAL(m.getType(), "nonNegativeInteger");
 
     m.setValue<boost::uint32_t>(u32);
     BOOST_CHECK_EQUAL(m.getValue<boost::uint32_t>(), 32u);
-    BOOST_CHECK_EQUAL(m.getType(), pdal::metadata::UnsignedInteger);
+    BOOST_CHECK_EQUAL(m.getType(), "nonNegativeInteger");
 
     m.setValue<boost::uint64_t>(u64);
     BOOST_CHECK_EQUAL(m.getValue<boost::uint64_t>(), 64u);
-    BOOST_CHECK_EQUAL(m.getType(), pdal::metadata::UnsignedInteger);
+    BOOST_CHECK_EQUAL(m.getType(), "nonNegativeInteger");
 
     return;
 }

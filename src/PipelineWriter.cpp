@@ -131,11 +131,11 @@ boost::property_tree::ptree PipelineWriter::get_metadata_entry(boost::property_t
     // FileUtils::closeFile(ofile);
     const std::string& name = input.get_child("name").get_value<std::string>();
     const std::string& value = input.get_child("value").get_value<std::string>();
-    const std::string& tname = input.get_child("typename").get_value<std::string>();
+    const std::string& tname = input.get_child("type").get_value<std::string>();
 
     entry.put_value(value);
     entry.put("<xmlattr>.name", name);
-    entry.put("<xmlattr>.typename", tname);
+    entry.put("<xmlattr>.type", tname);
 
     boost::optional<property_tree::ptree const&> entries = input.get_child_optional("entries");
     if (entries)

@@ -54,7 +54,7 @@ Metadata::Metadata()
     
 {
     setName("root");
-    setType(metadata::Blank);
+    setType("blank");
     setValue<boost::blank>(boost::blank());
     return;
 }
@@ -65,7 +65,7 @@ Metadata::Metadata(Metadata const& other)
 
 Metadata::Metadata(std::string const& name)
 {
-    setType(metadata::Blank);
+    setType("blank");
     setValue<boost::blank>(boost::blank());
     setName(name);
 }
@@ -81,40 +81,80 @@ Metadata Metadata::operator+(const Metadata& rhs) const
     return Metadata(tree);
     
 }
-
-
-std::string Metadata::getTypeName() const
-{
-    switch (getType())
-    {
-        case metadata::Boolean:
-            return std::string("boolean");
-        case metadata::SignedInteger:
-            return std::string("integer");
-        case metadata::UnsignedInteger:
-            return std::string("nonNegativeInteger");
-        case metadata::Float:
-            return std::string("float");
-        case metadata::Double:
-            return std::string("double");
-        case metadata::String:
-            return std::string("string");
-        case metadata::Bytes:
-            return std::string("base64Binary");
-        case metadata::Bounds:
-            return std::string("bounds");
-        case metadata::SpatialReference:
-            return std::string("spatialreference");
-        case metadata::MData:
-            return std::string("metadata");
-        case metadata::UUID:
-            return std::string("uuid");
-        case metadata::Blank:
-            return std::string("blank");
-        default:
-            return std::string("none");
-    }
-}
+// 
+// 
+// std::string Metadata::getTypeName(metadata::Type t)
+// {
+//     switch (t)
+//     {
+//         case metadata::Boolean:
+//             return std::string("boolean");
+//         case metadata::SignedInteger:
+//             return std::string("integer");
+//         case metadata::UnsignedInteger:
+//             return std::string("nonNegativeInteger");
+//         case metadata::Float:
+//             return std::string("float");
+//         case metadata::Double:
+//             return std::string("double");
+//         case metadata::String:
+//             return std::string("string");
+//         case metadata::Bytes:
+//             return std::string("base64Binary");
+//         case metadata::Bounds:
+//             return std::string("bounds");
+//         case metadata::SpatialReference:
+//             return std::string("spatialreference");
+//         case metadata::MData:
+//             return std::string("metadata");
+//         case metadata::UUID:
+//             return std::string("uuid");
+//         case metadata::Blank:
+//             return std::string("blank");
+//         default:
+//             return std::string("none");
+//     }
+// }
+// 
+// 
+// metadata::Type Metadata::getTypeId(std::string const& type_name)
+// {
+//     if (boost::algorithm::iequals(type_name, "BOOLEAN"))
+//         return metadata::Boolean;
+// 
+//     if (boost::algorithm::iequals(type_name, "INTEGER"))
+//         return metadata::SignedInteger;
+// 
+//     if (boost::algorithm::iequals(type_name, "NONNEGATIVEINTEGER"))
+//         return metadata::UnsignedInteger;
+// 
+//     if (boost::algorithm::iequals(type_name, "FLOAT"))
+//         return metadata::Float;
+// 
+//     if (boost::algorithm::iequals(type_name, "DOUBLE"))
+//         return metadata::Double;
+// 
+//     if (boost::algorithm::iequals(type_name, "BASE64BINARY"))
+//         return metadata::Bytes;
+// 
+//     if (boost::algorithm::iequals(type_name, "BOUNDS"))
+//         return metadata::Bounds;
+// 
+//     if (boost::algorithm::iequals(type_name, "SPATIALREFERENCE"))
+//         return metadata::SpatialReference;
+// 
+//     if (boost::algorithm::iequals(type_name, "METADATA"))
+//         return metadata::MData;
+// 
+//     if (boost::algorithm::iequals(type_name, "UUID"))
+//         return metadata::UUID;
+// 
+//     if (boost::algorithm::iequals(type_name, "BLANK"))
+//         return metadata::Blank;
+//     
+//     return metadata::Blank;
+// 
+// }
 
 
 
