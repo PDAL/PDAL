@@ -118,6 +118,37 @@ private:
     void setVLRsFromMetadata(LasHeader& header, Metadata const& metadata, Options const& opts);
     Writer& operator=(const Writer&); // not implemented
     Writer(const Writer&); // not implemented
+
+
+    template<typename T>
+    T getMetadataOption(   pdal::Options const& options, 
+                                    pdal::Metadata const& metadata, 
+                                    std::string const& name,
+                                    T default_value) const
+    {
+        boost::optional<std::string> candidate = options.getMetadataOption<std::string>(name);
+        if (!candidate)
+        {
+            return default_value;
+        }
+            
+        if (boost::algorithm::iequals(*candidate, "FORWARD"))
+        {
+            boost::optional<std::string> m =
+                metadata.getValueOptional<std::string>(name);
+            if (m)
+            {
+                T v = boost::lexical_cast<T>(*m) ;                
+                return v;
+            }
+        } 
+        else
+        {
+            T v = boost::lexical_cast<T>(*candidate) ;
+            return v;
+        }
+        return default_value;
+    }    
 };
 
 }
