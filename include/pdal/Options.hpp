@@ -431,7 +431,7 @@ public:
 
 
     template<typename T>
-    boost::optional<T const&> getMetadataOption(std::string const& name) const
+    boost::optional<T> getMetadataOption(std::string const& name) const
     {
         // <Reader type="drivers.las.writer">
         //     <Option name="metadata">
@@ -468,26 +468,20 @@ public:
         {
 
             doMetadata = &getOption("metadata");
-        } catch (pdal::option_not_found&) { return false; }
+        } catch (pdal::option_not_found&) { return boost::optional<T>(); }
 
         boost::optional<Options const&> meta = doMetadata->getOptions();
-        try
+        if (meta)
         {
-            if (meta)
+            try
             {
-                try
-                {
-                    meta->getOption(name);
-                } catch (pdal::option_not_found&) { return boost::optional<T const&>(); }
+                meta->getOption(name);
+                } catch (pdal::option_not_found&) { return boost::optional<T>(); }
 
-                return meta->getOption(name).getValue<T>();
-                // if (boost::algorithm::iequals(value,"FORWARD"))
-                //     return true;
-                return boost::optional<T const&>();
-            }
-        } catch (pdal::option_not_found&) { return boost::optional<T const&>(); }
+            return boost::optional<T>(meta->getOption(name).getValue<T>());
+        }
 
-        return boost::optional<T const&>();
+        return boost::optional<T>();
     }
 
 
