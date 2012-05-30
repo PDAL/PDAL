@@ -347,121 +347,75 @@ void Writer::writeBufferBegin(PointBuffer const& data)
     {
         pdal::Metadata m = getPrevStage().collectMetadata().getMetadata("drivers.las.reader");
         
-        boost::optional<std::string const&> dataformatid = getOptions().getMetadataOption<std::string>("dataformatid");
-        
-        if (dataformatid)
-        {            
-            if (boost::algorithm::iequals(*dataformatid, "FORWARD"))
-            {
-                boost::optional<std::string> format =
-                    m.getValueOptional<std::string>("dataformatid");
-                boost::uint32_t v = boost::lexical_cast<boost::uint32_t>(*format) ;
-                setPointFormat(static_cast<PointFormat>(v));
-                log()->get(logDEBUG) << "Setting point format to " 
-                                     << v 
-                                     << "from metadata" << std::endl;                
-            } 
-            else
-            {
-                boost::uint32_t v = boost::lexical_cast<boost::uint32_t>(*dataformatid) ;
-                setPointFormat(static_cast<PointFormat>(v));
-                log()->get(logDEBUG) << "Setting point format to " 
-                                     << v 
-                                     << "from options" << std::endl;                
-            }
-        }
+        // Default to PointFormat 3 if not forwarded from a previous metadata 
+        // or given in a metadata option
+        boost::uint32_t v = getMetadataOption<boost::uint32_t>(getOptions(), m, "dataformatid", 3);
+        setPointFormat(static_cast<PointFormat>(v));
+        log()->get(logDEBUG) << "Setting point format to " 
+                             << v 
+                             << " from metadata " << std::endl;
+                         
 
-        boost::optional<std::string> major =
-            m.getValueOptional<std::string>("version_major");
-        boost::optional<std::string> minor =
-            m.getValueOptional<std::string>("version_minor");
-        if (minor && doForwardThisMetadata("version_minor") &&
-                doForwardThisMetadata("version_major")) 
-        {
-            boost::uint32_t ma = getOptions().getValueOrDefault<boost::uint32_t>("major_version", 1);
+        boost::uint32_t minor = getMetadataOption<boost::uint32_t>(getOptions(), m, "minor_version", 2);
 
-            boost::uint32_t mi = boost::lexical_cast<boost::uint32_t>(*minor);
+        setFormatVersion(1, static_cast<boost::uint8_t>(minor));
+        log()->get(logDEBUG) << "Setting version to " 
+            << "1." << minor
+            << " from metadata " << std::endl;
 
-            setFormatVersion((boost::uint8_t)ma,
-                             (boost::uint8_t)mi);
-            log()->get(logDEBUG) << "Setting version to " 
-                  << ma
-                  << ", " << mi
-                  << "from metadata" << std::endl;
-        } 
+        boost::uint32_t year = getMetadataOption<boost::uint32_t>(getOptions(), m, "creation_year", 0);
+        boost::uint32_t day = getMetadataOption<boost::uint32_t>(getOptions(), m, "creation_doy", 0);
+        setDate(static_cast<boost::uint16_t>(day), static_cast<boost::uint16_t>(year));
+        log()->get(logDEBUG) << "Setting date to format " 
+                           << day << "/"
+                           << year 
+                           << "from metadata " << std::endl;
 
-        boost::optional<std::string> year =
-            m.getValueOptional<std::string>("creation_year");
-        boost::optional<std::string> day =
-            m.getValueOptional<std::string>("creation_doy");
-        if (year && day && doForwardThisMetadata("creation_doy") &&
-                doForwardThisMetadata("creation_year")) 
-        {
-            boost::uint16_t y = boost::lexical_cast<boost::uint16_t>(*year);
-            boost::uint16_t d = boost::lexical_cast<boost::uint16_t>(*day);
-            setDate(d, y);
-            log()->get(logDEBUG) << "Setting date to format " 
-                                 << d << "/"
-                                 << y 
-                                 << "from metadata" << std::endl;
-        } 
+        std::string software_id = getMetadataOption<std::string>(   getOptions(), 
+                                                                    m, 
+                                                                    "software_id", 
+                                                                    pdal::drivers::las::LasHeader::SoftwareIdentifier);
+        setGeneratingSoftware(software_id);
+        log()->get(logDEBUG) << "Setting generating software to '" 
+                               << software_id
+                               << "' from metadata " << std::endl;
 
-        boost::optional<std::string> software_id =
-            m.getValueOptional<std::string>("software_id");
+        std::string system_id = getMetadataOption<std::string>( getOptions(), 
+                                                                m, 
+                                                                "system_id", 
+                                                                pdal::drivers::las::LasHeader::SystemIdentifier);
+        setSystemIdentifier(system_id);
+        log()->get(logDEBUG) << "Setting system identifier to " 
+                           << system_id
+                           << "from metadata " << std::endl;
 
-        if (software_id && doForwardThisMetadata("software_id"))
-        {
-            setGeneratingSoftware(*software_id);
-            log()->get(logDEBUG) << "Setting generating software to '" 
-                                 << *software_id
-                                 << "' from metadata" << std::endl;
-        } 
+        boost::uuids::uuid project_id = getMetadataOption<boost::uuids::uuid>( getOptions(), 
+                                                                m, 
+                                                                "project_id", 
+                                                                boost::uuids::nil_uuid());
+        m_lasHeader.SetProjectId(project_id);
+        log()->get(logDEBUG) << "Setting project_id to " 
+                           << project_id
+                           << "from metadata " << std::endl;
 
-        boost::optional<std::string> system_id =
-            m.getValueOptional<std::string>("system_id");
+        boost::uint16_t reserved = getMetadataOption<boost::uint16_t>( getOptions(), 
+                                                                m, 
+                                                                "reserved", 
+                                                                0);
+        m_lasHeader.SetReserved(reserved);
+        log()->get(logDEBUG) << "Setting reserved to " 
+                             << reserved
+                             << "from metadata " << std::endl;
 
-        if (system_id && doForwardThisMetadata("system_id"))
-        {
-            setSystemIdentifier(*system_id);
-            log()->get(logDEBUG) << "Setting system identifier to " 
-                                 << *system_id
-                                 << "from metadata" << std::endl;
-        } 
-        boost::optional<std::string> project_id =
-            m.getValueOptional<std::string>("project_id");
 
-        if (project_id && doForwardThisMetadata("project_id"))
-        {
-            boost::uuids::uuid id = boost::lexical_cast<boost::uuids::uuid>(*project_id);
-            m_lasHeader.SetProjectId(id);
-            log()->get(logDEBUG) << "Setting project_id to " 
-                                 << *project_id
-                                 << "from metadata" << std::endl;
-        } 
-
-        boost::optional<std::string> reserved =
-            m.getValueOptional<std::string>("reserved");
-
-        if (reserved && doForwardThisMetadata("reserved"))
-        {
-            boost::uint16_t r = boost::lexical_cast<boost::uint16_t>(*reserved);
-            m_lasHeader.SetReserved(r);
-            log()->get(logDEBUG) << "Setting reserved to " 
-                                 << r
-                                 << "from metadata" << std::endl;
-        } 
-
-        boost::optional<std::string> filesourceid =
-            m.getValueOptional<std::string>("filesourceid");
-
-        if (filesourceid && doForwardThisMetadata("filesourceid"))
-        {
-            boost::uint16_t f = boost::lexical_cast<boost::uint16_t>(*filesourceid);
-            m_lasHeader.SetFileSourceId(f);
-            log()->get(logDEBUG) << "Setting file source id to " 
-                                 << f
-                                 << "from metadata" << std::endl;
-        } 
+        boost::uint16_t filesourceid = getMetadataOption<boost::uint16_t>( getOptions(), 
+                                                                m, 
+                                                                "filesourceid", 
+                                                                0);
+        m_lasHeader.SetFileSourceId(filesourceid);
+        log()->get(logDEBUG) << "Setting file source id to " 
+                             << filesourceid
+                             << "from metadata " << std::endl;
 
         if (doForwardThisMetadata("vlr"))
         {
