@@ -333,57 +333,102 @@ void Reader::readMetadata()
     Metadata& metadata = getMetadataRef();
 
     metadata.addMetadata<bool>("compressed",
-                            header.Compressed());
-    metadata.addMetadata<boost::uint32_t>("dataformatid",
-                                       static_cast<boost::uint32_t>(header.getPointFormat()));
-    metadata.addMetadata<boost::uint32_t>("version_major",
-                                       static_cast<boost::uint32_t>(header.GetVersionMajor()));
-    metadata.addMetadata<boost::uint32_t>("version_minor",
-                                       static_cast<boost::uint32_t>(header.GetVersionMinor()));
-    metadata.addMetadata<boost::uint32_t>("filesource_id",
-                                       static_cast<boost::uint32_t>(header.GetFileSourceId()));
-    metadata.addMetadata<boost::uint32_t>("reserved",
-                                       static_cast<boost::uint32_t>(header.GetReserved()));
-    metadata.addMetadata<boost::uuids::uuid>("project_id",
-                                          header.GetProjectId());
-    metadata.addMetadata<std::string>("system_id",
-                                   header.GetSystemId(false));
-    metadata.addMetadata<std::string>("software_id",
-                                   header.GetSoftwareId(false));
-    metadata.addMetadata<boost::uint32_t>("creation_doy",
-                                       static_cast<boost::uint32_t>(header.GetCreationDOY()));
-    metadata.addMetadata<boost::uint32_t>("creation_year",
-                                       static_cast<boost::uint32_t>(header.GetCreationYear()));
-    metadata.addMetadata<boost::uint32_t>("header_size",
-                                       static_cast<boost::uint32_t>(header.GetHeaderSize()));
-    metadata.addMetadata<boost::uint32_t>("dataoffset",
-                                       static_cast<boost::uint32_t>(header.GetDataOffset()));
-    metadata.addMetadata<double>("scale_x",
-                              header.GetScaleX());
-    metadata.addMetadata<double>("scale_y",
-                              header.GetScaleY());
-    metadata.addMetadata<double>("scale_z",
-                              header.GetScaleZ());
-    metadata.addMetadata<double>("offset_x",
-                              header.GetOffsetX());
-    metadata.addMetadata<double>("offset_y",
-                              header.GetOffsetY());
-    metadata.addMetadata<double>("offset_z",
-                              header.GetOffsetZ());
-    metadata.addMetadata<double>("minx",
-                              header.GetMinX());
-    metadata.addMetadata<double>("miny",
-                              header.GetMinY());
-    metadata.addMetadata<double>("minz",
-                              header.GetMinZ());
-    metadata.addMetadata<double>("maxx",
-                              header.GetMaxX());
-    metadata.addMetadata<double>("maxy",
-                              header.GetMaxY());
-    metadata.addMetadata<double>("maxz",
-                              header.GetMaxZ());
-    metadata.addMetadata<boost::uint32_t>("count",
-                                       header.GetPointRecordsCount());
+                                header.Compressed(),
+                                "true if this LAS file is compressed");
+    metadata.addMetadata<boost::uint32_t>(  "dataformatid",
+                                            static_cast<boost::uint32_t>(header.getPointFormat()),
+                                            "The Point Format ID as specified in the LAS specification");
+    metadata.addMetadata<boost::uint32_t>(  "version_major",
+                                            static_cast<boost::uint32_t>(header.GetVersionMajor()),
+                                            "The major LAS version for the file, always 1 for now");
+    metadata.addMetadata<boost::uint32_t>(  "version_minor",
+                                            static_cast<boost::uint32_t>(header.GetVersionMinor()),
+                                            "The minor LAS version for the file");
+    metadata.addMetadata<boost::uint32_t>(  "filesource_id",
+                                            static_cast<boost::uint32_t>(header.GetFileSourceId()),
+                                            "File Source ID (Flight Line Number if this file was derived from an original flight line): This field should be set to a value between 1 and 65,535, inclusive. A value of zero (0) is interpreted to mean that an ID has not been assigned. In this case, processing software is free to assign any valid number. Note that this scheme allows a LIDAR project to contain up to 65,535 unique sources. A source can be considered an original flight line or it can be the result of merge and/or extract operations."
+                                            );
+    metadata.addMetadata<boost::uint32_t>(  "reserved",
+                                            static_cast<boost::uint32_t>(header.GetReserved()),
+                                            "Global Encoding: This is a bit field used to indicate certain global properties about the file. In LAS 1.2 (the version in which this field was introduced), only the low bit is defined (this is the bit, that if set, would have the unsigned integer yield a value of 1)."
+                                            );
+    metadata.addMetadata<boost::uuids::uuid>(   "project_id",
+                                                header.GetProjectId(),
+                                                "Project ID (GUID data): The four fields that comprise a complete Globally Unique Identifier (GUID) are now reserved for use as a Project Identifier (Project ID). The field remains optional. The time of assignment of the Project ID is at the discretion of processing software. The Project ID should be the same for all files that are associated with a unique project. By assigning a Project ID and using a File Source ID (defined above) every file within a project and every point within a file can be uniquely identified, globally."
+                                                );
+    metadata.addMetadata<std::string>(  "system_id",
+                                        header.GetSystemId(false));
+    metadata.addMetadata<std::string>(  "software_id",
+                                        header.GetSoftwareId(false),
+                                        "This information is ASCII data describing the generating software itself. This field provides a mechanism for specifying which generating software package and version was used during LAS file creation (e.g. \"TerraScan V-10.8\", \"REALM V-4.2\" and etc.)."
+                                        );
+    metadata.addMetadata<boost::uint32_t>(  "creation_doy",
+                                            static_cast<boost::uint32_t>(header.GetCreationDOY()),
+                                            "Day, expressed as an unsigned short, on which this file was created. Day is computed as the Greenwich Mean Time (GMT) day. January 1 is considered day 1."
+                                            );
+    metadata.addMetadata<boost::uint32_t>(  "creation_year",
+                                            static_cast<boost::uint32_t>(header.GetCreationYear()),
+                                            "The year, expressed as a four digit number, in which the file was created."
+                                            );
+    metadata.addMetadata<boost::uint32_t>(  "header_size",
+                                            static_cast<boost::uint32_t>(header.GetHeaderSize()),
+                                            "The size, in bytes, of the Public Header Block itself. In the event that the header is extended by a software application through the addition of data at the end of the header, the Header Size field must be updated with the new header size. Extension of the Public Header Block is discouraged; the Variable Length Records should be used whenever possible to add custom header data. In the event a generating software package adds data to the Public Header Block, this data must be placed at the end of the structure and the Header Size must be updated to reflect the new size."
+                                            );
+    metadata.addMetadata<boost::uint32_t>(  "dataoffset",
+                                            static_cast<boost::uint32_t>(header.GetDataOffset()),
+                                            "The actual number of bytes from the beginning of the file to the first field of the first point record data field. This data offset must be updated if any software adds data from the Public Header Block or adds/removes data to/from the Variable Length Records."
+                                            );
+    metadata.addMetadata<double>(   "scale_x",
+                                    header.GetScaleX(),
+                                    "The scale factor fields contain a double floating point value that is used to scale the corresponding X, Y, and Z long values within the point records. The corresponding X, Y, and Z scale factor must be multiplied by the X, Y, or Z point record value to get the actual X, Y, or Z coordinate. For example, if the X, Y, and Z coordinates are intended to have two decimal point values, then each scale factor will contain the number 0.01."
+                                    );
+    metadata.addMetadata<double>(   "scale_y",
+                                    header.GetScaleY(),
+                                    "The scale factor fields contain a double floating point value that is used to scale the corresponding X, Y, and Z long values within the point records. The corresponding X, Y, and Z scale factor must be multiplied by the X, Y, or Z point record value to get the actual X, Y, or Z coordinate. For example, if the X, Y, and Z coordinates are intended to have two decimal point values, then each scale factor will contain the number 0.01."
+                                    );
+    metadata.addMetadata<double>(   "scale_z",
+                                    header.GetScaleZ(),
+                                    "The scale factor fields contain a double floating point value that is used to scale the corresponding X, Y, and Z long values within the point records. The corresponding X, Y, and Z scale factor must be multiplied by the X, Y, or Z point record value to get the actual X, Y, or Z coordinate. For example, if the X, Y, and Z coordinates are intended to have two decimal point values, then each scale factor will contain the number 0.01."
+                                    );
+    metadata.addMetadata<double>(   "offset_x",
+                                    header.GetOffsetX(),
+                                    "The offset fields should be used to set the overall offset for the point records. In general these numbers will be zero, but for certain cases the resolution of the point data may not be large enough for a given projection system. However, it should always be assumed that these numbers are used."
+                                    );
+    metadata.addMetadata<double>(   "offset_y",
+                                    header.GetOffsetY(),
+                                    "The offset fields should be used to set the overall offset for the point records. In general these numbers will be zero, but for certain cases the resolution of the point data may not be large enough for a given projection system. However, it should always be assumed that these numbers are used."
+                                    );
+    metadata.addMetadata<double>(   "offset_z",
+                                    header.GetOffsetZ(),
+                                    "The offset fields should be used to set the overall offset for the point records. In general these numbers will be zero, but for certain cases the resolution of the point data may not be large enough for a given projection system. However, it should always be assumed that these numbers are used."
+                                    );
+    metadata.addMetadata<double>(   "minx",
+                                    header.GetMinX(),
+                                    "The max and min data fields are the actual unscaled extents of the LAS point file data, specified in the coordinate system of the LAS data."
+                                    );
+    metadata.addMetadata<double>(   "miny",
+                                    header.GetMinY(),
+                                    "The max and min data fields are the actual unscaled extents of the LAS point file data, specified in the coordinate system of the LAS data."
+                                    );
+    metadata.addMetadata<double>(   "minz",
+                                    header.GetMinZ(),
+                                    "The max and min data fields are the actual unscaled extents of the LAS point file data, specified in the coordinate system of the LAS data."
+                                    );
+    metadata.addMetadata<double>(   "maxx",
+                                    header.GetMaxX(),
+                                    "The max and min data fields are the actual unscaled extents of the LAS point file data, specified in the coordinate system of the LAS data."
+                                    );
+    metadata.addMetadata<double>(   "maxy",
+                                    header.GetMaxY(),
+                                    "The max and min data fields are the actual unscaled extents of the LAS point file data, specified in the coordinate system of the LAS data."
+                                    );
+    metadata.addMetadata<double>(   "maxz",
+                                    header.GetMaxZ(),
+                                    "The max and min data fields are the actual unscaled extents of the LAS point file data, specified in the coordinate system of the LAS data."
+                                    );
+    metadata.addMetadata<boost::uint32_t>(  "count",
+                                            header.GetPointRecordsCount(),
+                                            "This field contains the total number of point records within the file.");
 
 
     std::vector<VariableLengthRecord> const& vlrs = header.getVLRs().getAll();
@@ -404,16 +449,16 @@ void Reader::readMetadata()
         name << "vlr_" << t;
         pdal::Metadata entry(name.str(), bytearray);
         
-        entry.addMetadata<boost::uint32_t>("reserved", v.getReserved());        
-        entry.addMetadata<std::string>("user_id", v.getUserId());
-        entry.addMetadata<boost::uint32_t>("record_id", v.getRecordId());
+        entry.addMetadata<boost::uint32_t>("reserved", v.getReserved(), "Two bytes of padded, unused space. Some softwares expect the values of these bytes to be 0xAABB as specified in the 1.0 version of the LAS specification");        
+        entry.addMetadata<std::string>("user_id", v.getUserId(), "The User ID field is ASCII character data that identifies the user which created the variable length record. It is possible to have many Variable Length Records from different sources with different User IDs. If the character data is less than 16 characters, the remaining data must be null. The User ID must be registered with the LAS specification managing body. The management of these User IDs ensures that no two individuals accidentally use the same User ID. The specification will initially use two IDs: one for globally specified records (LASF_Spec), and another for projection types (LASF_Projection). Keys may be requested at http://www.asprs.org/lasform/keyform.html.");
+        entry.addMetadata<boost::uint32_t>("record_id", v.getRecordId(), "The Record ID is dependent upon the User ID. There can be 0 to 65535 Record IDs for every User ID. The LAS specification manages its own Record IDs (User IDs owned by the specification), otherwise Record IDs will be managed by the owner of the given User ID. Thus each User ID is allowed to assign 0 to 65535 Record IDs in any manner they desire. Publicizing the meaning of a given Record ID is left to the owner of the given User ID. Unknown User ID/Record ID combinations should be ignored.");
         entry.addMetadata<std::string>("description", v.getDescription());
+        entry.setDescription(v.getDescription());
 
         
         std::ostringstream n;
         n << "vlr." << v.getUserId() << "." << v.getRecordId();
         metadata.addMetadata(entry);
-        // boost::property_tree::write_json(std::cout, entry.toPTree());
         
     }
 
