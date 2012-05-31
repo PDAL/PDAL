@@ -145,7 +145,7 @@ boost::property_tree::ptree PipelineWriter::get_metadata_entry(boost::property_t
         {
 
             property_tree::ptree e = get_metadata_entry(iter->second);
-            entry.add_child("Entry", e);
+            entry.add_child("Metadata", e);
             
             ++iter;
         }
