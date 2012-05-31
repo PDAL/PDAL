@@ -207,7 +207,7 @@ BOOST_AUTO_TEST_CASE(test_metadata_stage)
 
     pdal::Metadata file_metadata = reader.getMetadata();
 
-    BOOST_CHECK_EQUAL(file_metadata.toPTree().get_child("entries").size(), 28u);
+    BOOST_CHECK_EQUAL(file_metadata.toPTree().get_child("metadata").size(), 28u);
 
     pdal::Option option("filename", Support::datapath("pipeline/pipeline_metadata.xml"));
     pdal::Options options(option);
@@ -221,7 +221,7 @@ BOOST_AUTO_TEST_CASE(test_metadata_stage)
     
     // boost::property_tree::write_xml(std::cout, pipeline_metadata.toPTree());
 
-    BOOST_CHECK_EQUAL(pipeline_metadata.toPTree().get_child("entries").size(), 28u);
+    BOOST_CHECK_EQUAL(pipeline_metadata.toPTree().get_child("metadata").size(), 28u);
 
     return;
 }

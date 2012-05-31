@@ -137,7 +137,7 @@ boost::property_tree::ptree PipelineWriter::get_metadata_entry(boost::property_t
     entry.put("<xmlattr>.name", name);
     entry.put("<xmlattr>.type", tname);
 
-    boost::optional<property_tree::ptree const&> entries = input.get_child_optional("entries");
+    boost::optional<property_tree::ptree const&> entries = input.get_child_optional("metadata");
     if (entries)
     {
         property_tree::ptree::const_iterator iter = entries->begin();

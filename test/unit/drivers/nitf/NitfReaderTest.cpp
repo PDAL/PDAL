@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE(test_one)
     {
         pdal::Metadata metadata = nitf_reader.getMetadata();
         /////////////////////////////////////////////////BOOST_CHECK_EQUAL(metadatums.size(), 80u);
-        BOOST_CHECK_EQUAL(metadata.toPTree().get<std::string>("entries.FH_FDT.value"), "20120323002946");
+        BOOST_CHECK_EQUAL(metadata.toPTree().get<std::string>("metadata.FH_FDT.value"), "20120323002946");
     }
 
     const Schema& nitf_schema = nitf_reader.getSchema();

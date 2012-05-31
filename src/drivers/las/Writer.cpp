@@ -202,7 +202,7 @@ void Writer::writeBegin(boost::uint64_t /*targetNumPointsToWrite*/)
 
 void Writer::setVLRsFromMetadata(LasHeader& header, Metadata const& metadata, Options const& opts)
 {
-    boost::property_tree::ptree const& entries = metadata.toPTree().get_child("entries");
+    boost::property_tree::ptree const& entries = metadata.toPTree().get_child("metadata");
     
     std::vector<pdal::Option> options = opts.getOptions("vlr");
     std::vector<pdal::Option>::const_iterator o;
@@ -224,9 +224,9 @@ void Writer::setVLRsFromMetadata(LasHeader& header, Metadata const& metadata, Op
             if (boost::algorithm::istarts_with(m->first, "vlr_"))
             {
                 boost::uint32_t option_record_id = vo->getOption("record_id").getValue<boost::uint32_t>();
-                boost::uint32_t metadata_record_id = m->second.get<boost::uint32_t>("entries.record_id.value");
+                boost::uint32_t metadata_record_id = m->second.get<boost::uint32_t>("metadata.record_id.value");
                 std::string option_user_id = vo->getOption("user_id").getValue<std::string>();
-                std::string metadata_user_id = m->second.get<std::string>("entries.user_id.value");
+                std::string metadata_user_id = m->second.get<std::string>("metadata.user_id.value");
                 // boost::property_tree::write_xml(std::cout, m->second);
                 // std::cout << "record id option: " << option_record_id << " metadata: " << metadata_record_id << std::endl;
                 // std::cout << "user id option: " << option_user_id << " metadata: "<< metadata_user_id << std::endl;
@@ -236,7 +236,7 @@ void Writer::setVLRsFromMetadata(LasHeader& header, Metadata const& metadata, Op
                 {
                     std::string vlr_data = m->second.get_value<std::string>();
                     std::vector<boost::uint8_t> data = Utils::base64_decode(vlr_data);
-                    std::string description = m->second.get<std::string>("entries.description.value");
+                    std::string description = m->second.get<std::string>("metadata.description.value");
                     pdal::drivers::las::VariableLengthRecord vlr(   0xAABB, 
                                                                     metadata_user_id, 
                                                                     metadata_record_id, 

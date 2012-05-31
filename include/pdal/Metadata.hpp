@@ -237,13 +237,13 @@ public:
         \verbatim embed:rst
         .. note::
 
-            The path given here is the sub-path inside of the `entries` node 
+            The path given here is the sub-path inside of the `metadata` node 
             of the boost::property_tree::ptree.  It is not a full node path.
         \endverbatim
     */
     template <class T> inline T getValue(std::string const& path) const 
     { 
-        return m_tree.get<T>("entries."+path+".value"); 
+        return m_tree.get<T>("metadata."+path+".value"); 
     } 
     
     /*! \return a boost::optional-wrapped instance for the given sub-path.
@@ -251,13 +251,13 @@ public:
         \verbatim embed:rst
         .. note::
 
-            The path given here is the sub-path inside of the `entries` node 
+            The path given here is the sub-path inside of the `metadata` node 
             of the boost::property_tree::ptree.  It is not a full node path.
         \endverbatim
     */
     template <class T> inline boost::optional<T> getValueOptional(std::string const& path) const 
     { 
-        return m_tree.get_optional<T>("entries." + path+".value"); 
+        return m_tree.get_optional<T>("metadata." + path+".value"); 
     } 
 
     /// @return a Metadata instance at a given path (in 
@@ -441,7 +441,7 @@ inline void Metadata::addMetadata(  Metadata const& m)
 {
     
     std::string n = boost::algorithm::ireplace_all_copy(m.getName(), ".", "_");
-    m_tree.add_child("entries."+n, m.toPTree());
+    m_tree.add_child("metadata."+n, m.toPTree());
 }
 
 template <typename T>
