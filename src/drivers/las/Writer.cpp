@@ -499,7 +499,7 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& pointBuffer)
 
     boost::uint32_t numValidPoints = 0;
 
-    boost::uint8_t buf[1024]; // BUG: fixed size
+    boost::uint8_t buf[64]; // BUG: fixed size
     
     bool hasColor = Support::hasColor(pointFormat);
     bool hasTime = Support::hasTime(pointFormat);
