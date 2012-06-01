@@ -609,10 +609,10 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& pointBuffer)
         }
         else
         {
-            Utils::write_n(m_streamManager.ostream(), buf, Support::getPointDataSize(pointFormat));
+            Utils::write_n(m_streamManager.ostream(), buf, m_lasHeader.GetDataRecordLength());
         }
 #else
-        Utils::write_n(m_streamManager.ostream(), buf, Support::getPointDataSize(pointFormat));
+        Utils::write_n(m_streamManager.ostream(), buf, m_lasHeader.GetDataRecordLength());
 
 #endif
         ++numValidPoints;
