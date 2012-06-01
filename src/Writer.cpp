@@ -191,6 +191,11 @@ boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite)
             // this case is safe because m_chunkSize is a uint32
             const boost::uint32_t numPointsToReadThisChunk = static_cast<boost::uint32_t>(numPointsToReadThisChunk64);
 
+            // we are reusing the buffer, so we may need to adjust the capacity for the last (and likely undersized) chunk
+            if (buffer.getCapacity() != numPointsToReadThisChunk)
+            {
+                buffer.resize(numPointsToReadThisChunk);
+            }
         }
 
         // read...
