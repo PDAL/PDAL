@@ -82,7 +82,7 @@ BOOST_AUTO_TEST_CASE(test_2)
 
     boost::uint64_t numWritten = writer.write(750);
 
-    BOOST_CHECK(numWritten == 750);
+    BOOST_CHECK_EQUAL(numWritten, 750);
 
     // test all the values to +/- 10%
     BOOST_CHECK(Utils::compare_approx<double>(writer.getMinX(), 1.0, 10.0));
