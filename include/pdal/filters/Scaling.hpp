@@ -119,6 +119,9 @@ class PDAL_DLL Scaling : public pdal::FilterSequentialIterator
 public:
     Scaling(const pdal::filters::Scaling& filter, PointBuffer& buffer);
 
+protected:
+    virtual void readBufferBeginImpl(PointBuffer&);
+    
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t);
@@ -136,6 +139,8 @@ private:
                                  Dimension const& to_dimension,
                                  T& value) const;
     std::map<dimension::id, dimension::id> m_scale_map;
+    std::map<boost::optional<pdal::Dimension const&>, boost::optional<pdal::Dimension const&> > m_dimension_map;
+    
 };
 
 #ifdef PDAL_COMPILER_MSVC

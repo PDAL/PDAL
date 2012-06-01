@@ -191,6 +191,7 @@ void Scaling::alterSchema(PointBuffer& buffer)
                                                    << " datatype: " << to_dimension.getInterpretation() << "/" << to_dimension.getByteSize()
                                                    << std::endl;
             std::pair<dimension::id, dimension::id> p(from_dimension->getUUID(), to_dimension.getUUID());
+            
             m_scalingFilter.log()->get(logDEBUG4) << "scale map size was " << m_scale_map.size() << std::endl;
             m_scale_map.insert(p);
             m_scalingFilter.log()->get(logDEBUG3) << "scale map size is: " << m_scale_map.size() << std::endl;
@@ -199,21 +200,17 @@ void Scaling::alterSchema(PointBuffer& buffer)
     }
 
 
+    std::map<dimension::id, dimension::id>::const_iterator d;
+    for (d = m_scale_map.begin(); d != m_scale_map.end(); ++d)
     {
-        {
-            std::map<dimension::id, dimension::id>::const_iterator d;
-            for (d = m_scale_map.begin(); d != m_scale_map.end(); ++d)
-            {
-                Dimension const& from_dimension = schema.getDimension(d->first);
-                Dimension const& to_dimension = schema.getDimension(d->second);
-                m_scalingFilter.log()->get(logDEBUG4) << "Map wants to do: " << from_dimension.getName()
-                                                      << " [" << from_dimension.getInterpretation() << "/" << from_dimension.getByteSize() << "]"
-                                                      << " to scale: " << to_dimension.getNumericScale()
-                                                      << " offset: " << to_dimension.getNumericOffset()
-                                                      << " datatype: " << to_dimension.getInterpretation() << "/" << to_dimension.getByteSize()
-                                                      << std::endl;
-            }
-        }
+        Dimension const& from_dimension = schema.getDimension(d->first);
+        Dimension const& to_dimension = schema.getDimension(d->second);
+        m_scalingFilter.log()->get(logDEBUG4) << "Map wants to do: " << from_dimension.getName()
+                                              << " [" << from_dimension.getInterpretation() << "/" << from_dimension.getByteSize() << "]"
+                                              << " to scale: " << to_dimension.getNumericScale()
+                                              << " offset: " << to_dimension.getNumericOffset()
+                                              << " datatype: " << to_dimension.getInterpretation() << "/" << to_dimension.getByteSize()
+                                              << std::endl;
     }
 
 
@@ -251,6 +248,24 @@ dimension::Interpretation Scaling::getInterpretation(std::string const& t) const
 
 }
 
+void Scaling::readBufferBeginImpl(PointBuffer& buffer)
+{
+    pdal::Schema const& schema = buffer.getSchema();
+    std::map<dimension::id, dimension::id>::const_iterator d;
+    for (d = m_scale_map.begin(); d != m_scale_map.end(); ++d)
+    {
+        boost::optional<pdal::Dimension const&> fr = schema.getDimensionOptional(d->first);
+        boost::optional<pdal::Dimension const&> to = schema.getDimensionOptional(d->second);
+        
+        if (!fr) throw pdal_error("from dimension is not found on schema!");
+        if (!to) throw pdal_error("to dimension is not found on schema!");
+        
+        std::pair<boost::optional<pdal::Dimension const&>, boost::optional<pdal::Dimension const&> > g(fr, to);
+        m_dimension_map.insert(g);
+
+    }
+}
+
 boost::uint32_t Scaling::readBufferImpl(PointBuffer& buffer)
 {
     const Schema& schema = buffer.getSchema();
@@ -259,11 +274,14 @@ boost::uint32_t Scaling::readBufferImpl(PointBuffer& buffer)
 
     for (boost::uint32_t pointIndex=0; pointIndex<numRead; pointIndex++)
     {
-        std::map<dimension::id, dimension::id>::const_iterator d;
-        for (d = m_scale_map.begin(); d != m_scale_map.end(); ++d)
+        std::map<boost::optional<pdal::Dimension const&>, boost::optional<pdal::Dimension const&> >::const_iterator d;
+        
+        for (d = m_dimension_map.begin(); d != m_dimension_map.end(); ++d)
         {
-            Dimension const& from_dimension = schema.getDimension(d->first);
-            Dimension const& to_dimension = schema.getDimension(d->second);
+            boost::optional<pdal::Dimension const&> f = d->first;
+            boost::optional<pdal::Dimension const&> t = d->second;
+            Dimension const& from_dimension = *f;
+            Dimension const& to_dimension = *t;
             writeScaledData(buffer, from_dimension, to_dimension, pointIndex);
         }
     }
