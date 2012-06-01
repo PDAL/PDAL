@@ -54,7 +54,8 @@ public:
 
     // create a new thread context
     void createThreadEnvironment(boost::thread::id);
-
+    void createPythonEnvironment();
+    
     // returns the thread context for a thread
     // with no args, returns the not-a-thread thread environment
     ThreadEnvironment& getThreadEnvironment(boost::thread::id=boost::thread::id());

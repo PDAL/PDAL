@@ -90,13 +90,10 @@ void GlobalEnvironment::init()
 //
 
 GlobalEnvironment::GlobalEnvironment()
+: m_pythonEnvironment(0)
 {
     // this should be the not-a-thread thread environment
     (void) createThreadEnvironment(boost::thread::id());
-
-#ifdef PDAL_HAVE_PYTHON
-    m_pythonEnvironment = new pdal::plang::PythonEnvironment();
-#endif
 
     return;
 }
@@ -113,13 +110,18 @@ GlobalEnvironment::~GlobalEnvironment()
     }
 
 #ifdef PDAL_HAVE_PYTHON
-    delete m_pythonEnvironment;
+    if (m_pythonEnvironment)
+        delete m_pythonEnvironment;
     m_pythonEnvironment = 0;
 #endif
 
     return;
 }
 
+void GlobalEnvironment::createPythonEnvironment()
+{
+    m_pythonEnvironment = new pdal::plang::PythonEnvironment();
+}
 
 void GlobalEnvironment::createThreadEnvironment(boost::thread::id id)
 {
@@ -149,6 +151,8 @@ ThreadEnvironment& GlobalEnvironment::getThreadEnvironment(boost::thread::id id)
 #ifdef PDAL_HAVE_PYTHON
 plang::PythonEnvironment& GlobalEnvironment::getPythonEnvironment()
 {
+    if (!m_pythonEnvironment)
+        (void) createPythonEnvironment();
     return *m_pythonEnvironment;
 }
 #endif
