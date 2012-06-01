@@ -11,7 +11,7 @@ Contents:
    :maxdepth: 2
    
    download
-   building/index
+   compilation/index
    tutorial/index
    apps
    community
