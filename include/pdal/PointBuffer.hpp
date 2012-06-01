@@ -510,7 +510,7 @@ inline T PointBuffer::getField(pdal::Dimension const& dim, std::size_t pointInde
         throw buffer_error("This dimension has no identified position in a schema.");
     }
 
-    std::size_t offset = (pointIndex * m_schema.getByteSize()) + dim.getByteOffset();
+    std::size_t offset = (pointIndex * m_byteSize) + dim.getByteOffset();
 
     if (offset + sizeof(T) > m_byteSize * m_capacity)
     {
