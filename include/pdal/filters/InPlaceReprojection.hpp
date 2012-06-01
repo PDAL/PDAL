@@ -156,10 +156,7 @@ protected:
 private:
     boost::uint64_t skipImpl(boost::uint64_t);
     boost::uint32_t readBufferImpl(PointBuffer&);
-    bool atEndImpl() const;
-
-    std::map<dimension::id, dimension::id> m_dimension_map;
-    
+    bool atEndImpl() const;    
 
     void updateBounds(PointBuffer&);
 
