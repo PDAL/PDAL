@@ -294,7 +294,9 @@ public:
     {
         return m_metadata;
     }
-
+    
+    void resize(boost::uint32_t const& capacity);
+    
     /** @name Serialization
     */
     /*! returns a boost::property_tree containing the point records, which is

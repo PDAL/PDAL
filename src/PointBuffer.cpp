@@ -91,6 +91,13 @@ PointBuffer& PointBuffer::operator=(PointBuffer const& rhs)
     return *this;
 }
 
+void PointBuffer::resize(boost::uint32_t const& capacity)
+{
+    m_capacity = capacity;
+    boost::scoped_array<boost::uint8_t> data(new boost::uint8_t[ m_schema.getByteSize()*m_capacity ]);
+    m_data.swap(data);    
+}
+
 const Bounds<double>& PointBuffer::getSpatialBounds() const
 {
     return m_bounds;
