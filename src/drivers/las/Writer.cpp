@@ -500,7 +500,11 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& pointBuffer)
     boost::uint32_t numValidPoints = 0;
 
     boost::uint8_t buf[1024]; // BUG: fixed size
-
+    
+    bool hasColor = Support::hasColor(pointFormat);
+    bool hasTime = Support::hasTime(pointFormat);
+    boost::uint16_t record_length = m_lasHeader.GetDataRecordLength();
+    
     for (boost::uint32_t pointIndex=0; pointIndex<pointBuffer.getNumPoints(); pointIndex++)
     {
         boost::uint8_t* p = buf;
@@ -561,7 +565,7 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& pointBuffer)
         Utils::write_field<boost::uint8_t>(p, userData);
         Utils::write_field<boost::uint16_t>(p, pointSourceId);
 
-        if (Support::hasTime(pointFormat))
+        if (hasTime)
         {
             double time(0.0);
 
@@ -571,7 +575,7 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& pointBuffer)
             Utils::write_field<double>(p, time);
         }
 
-        if (Support::hasColor(pointFormat))
+        if (hasColor)
         {
             boost::uint16_t red(0);
             boost::uint16_t green(0);
@@ -609,10 +613,10 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& pointBuffer)
         }
         else
         {
-            Utils::write_n(m_streamManager.ostream(), buf, m_lasHeader.GetDataRecordLength());
+            Utils::write_n(m_streamManager.ostream(), buf, record_length);
         }
 #else
-        Utils::write_n(m_streamManager.ostream(), buf, m_lasHeader.GetDataRecordLength());
+        Utils::write_n(m_streamManager.ostream(), buf, record_length);
 
 #endif
         ++numValidPoints;
