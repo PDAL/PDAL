@@ -174,8 +174,10 @@ void PcInfo::dumpOnePoint(const Stage& stage) const
    
     std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
 
+    boost::property_tree::ptree output;
+    output.add_child("point", tree.get_child("0"));
     if (m_useXML)
-        write_xml(ostr, tree.get_child("0"));
+        write_xml(ostr, output);
     else
         write_json(ostr, tree.get_child("0"));
         
