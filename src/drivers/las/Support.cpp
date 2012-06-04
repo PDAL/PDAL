@@ -168,6 +168,7 @@ PointDimensions::PointDimensions(const Schema& schema, std::string const& ns)
     try
     {
         Intensity = &schema.getDimension("Intensity");
+        if (Intensity->isIgnored()) Intensity = 0;
     }
     catch (pdal::dimension_not_found&)
     {
@@ -177,6 +178,7 @@ PointDimensions::PointDimensions(const Schema& schema, std::string const& ns)
     try
     {
         ReturnNumber = &schema.getDimension("ReturnNumber");
+        if (ReturnNumber->isIgnored()) ReturnNumber = 0;
     }
     catch (pdal::dimension_not_found&)
     {
@@ -186,6 +188,7 @@ PointDimensions::PointDimensions(const Schema& schema, std::string const& ns)
     try
     {
         NumberOfReturns = &schema.getDimension("NumberOfReturns");
+        if (NumberOfReturns->isIgnored()) NumberOfReturns = 0;
     }
     catch (pdal::dimension_not_found&)
     {
@@ -195,6 +198,7 @@ PointDimensions::PointDimensions(const Schema& schema, std::string const& ns)
     try
     {
         ScanDirectionFlag = &schema.getDimension("ScanDirectionFlag");
+        if (ScanDirectionFlag->isIgnored()) ScanDirectionFlag = 0;
     }
     catch (pdal::dimension_not_found&)
     {
@@ -204,6 +208,7 @@ PointDimensions::PointDimensions(const Schema& schema, std::string const& ns)
     try
     {
         EdgeOfFlightLine = &schema.getDimension("EdgeOfFlightLine");
+        if (EdgeOfFlightLine->isIgnored()) EdgeOfFlightLine = 0;
     }
     catch (pdal::dimension_not_found&)
     {
@@ -213,6 +218,7 @@ PointDimensions::PointDimensions(const Schema& schema, std::string const& ns)
     try
     {
         Classification = &schema.getDimension("Classification");
+        if (Classification->isIgnored()) Classification = 0;
     }
     catch (pdal::dimension_not_found&)
     {
@@ -222,6 +228,7 @@ PointDimensions::PointDimensions(const Schema& schema, std::string const& ns)
     try
     {
         ScanAngleRank = &schema.getDimension("ScanAngleRank");
+        if (ScanAngleRank->isIgnored()) ScanAngleRank = 0;
     }
     catch (pdal::dimension_not_found&)
     {
@@ -231,6 +238,7 @@ PointDimensions::PointDimensions(const Schema& schema, std::string const& ns)
     try
     {
         UserData = &schema.getDimension("UserData");
+        if (UserData->isIgnored()) UserData = 0;
     }
     catch (pdal::dimension_not_found&)
     {
@@ -240,6 +248,7 @@ PointDimensions::PointDimensions(const Schema& schema, std::string const& ns)
     try
     {
         PointSourceId = &schema.getDimension("PointSourceId");
+        if (PointSourceId->isIgnored()) PointSourceId = 0;
     }
     catch (pdal::dimension_not_found&)
     {
@@ -249,6 +258,7 @@ PointDimensions::PointDimensions(const Schema& schema, std::string const& ns)
     try
     {
         Time = &schema.getDimension("Time");
+        if (Time->isIgnored()) Time = 0;
     }
     catch (pdal::dimension_not_found&)
     {
@@ -257,6 +267,7 @@ PointDimensions::PointDimensions(const Schema& schema, std::string const& ns)
     try
     {
         Red = &schema.getDimension("Red");
+        if (Red->isIgnored()) Red = 0;
     }
     catch (pdal::dimension_not_found&)
     {
@@ -266,6 +277,7 @@ PointDimensions::PointDimensions(const Schema& schema, std::string const& ns)
     try
     {
         Green = &schema.getDimension("Green");
+        if (Green->isIgnored()) Green = 0;
     }
     catch (pdal::dimension_not_found&)
     {
@@ -275,6 +287,7 @@ PointDimensions::PointDimensions(const Schema& schema, std::string const& ns)
     try
     {
         Blue = &schema.getDimension("Blue");
+        if (Blue->isIgnored()) Blue = 0;
     }
     catch (pdal::dimension_not_found&)
     {

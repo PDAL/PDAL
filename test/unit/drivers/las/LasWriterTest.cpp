@@ -42,6 +42,9 @@
 #include <pdal/drivers/faux/Reader.hpp>
 #include <pdal/drivers/las/Writer.hpp>
 #include <pdal/drivers/las/Reader.hpp>
+#include <pdal/filters/Selector.hpp>
+
+#include <pdal/PointBuffer.hpp>
 
 #include "Support.hpp"
 
@@ -247,12 +250,100 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_metadata)
     BOOST_CHECK_EQUAL(h.GetCreationYear(), 2012u);
     
     pdal::drivers::las::VLRList const& vlrs = h.getVLRs();
-    BOOST_CHECK_EQUAL(vlrs.count(), 5);
+    BOOST_CHECK_EQUAL(vlrs.count(), 5u);
     pdal::drivers::las::VariableLengthRecord const& r = vlrs.get(0);
     
-    BOOST_CHECK_EQUAL(r.getRecordId(), 1234);
+    BOOST_CHECK_EQUAL(r.getRecordId(), 1234u);
     BOOST_CHECK_EQUAL(r.getUserId(), "hobu");
     
+    FileUtils::deleteFile(temp_filename);
+
+    return;
+}
+
+BOOST_AUTO_TEST_CASE(LasWriterTest_test_ignored_dimensions)
+{
+    // remove file from earlier run, if needed
+    std::string temp_filename(Support::temppath("temp-LasWriterTest_test_ignored_dimensions.las"));
+    FileUtils::deleteFile(temp_filename);
+
+    pdal::Options options;
+    pdal::Option filename("filename", temp_filename);
+    pdal::Option debug("debug", true);
+    pdal::Option verbosity("verbose", 7);
+
+    pdal::Option ignored;
+    pdal::Options mignored;
+    pdal::Option keep;
+    pdal::Options mkeep;
+    
+    mkeep.add(pdal::Option("dimension", "X"));
+    mkeep.add(pdal::Option("dimension", "Y"));
+    
+    mignored.add(pdal::Option("dimension", "Red"));
+    mignored.add(pdal::Option("dimension", "Green"));
+    mignored.add(pdal::Option("dimension", "Blue"));
+    
+    keep.setOptions(mkeep);
+    ignored.setOptions(mignored);
+
+    options.add(ignored);
+    options.add(filename);
+    options.add(debug);
+    // options.add(keep);
+    // options.add(verbosity);
+    
+    pdal::drivers::las::Reader reader(Support::datapath("interesting.las"));
+
+    {
+        pdal::filters::Selector selector(reader, options);
+        pdal::drivers::las::Writer writer(selector, options);
+        writer.initialize();
+
+        const boost::uint64_t numPoints = reader.getNumPoints();
+
+        writer.write(numPoints);
+    }
+
+
+    {
+        pdal::drivers::las::Reader reader2(options);
+        reader2.initialize();
+
+        const Schema& schema2 = reader2.getSchema();
+
+        PointBuffer altered(schema2, 1);
+
+        pdal::StageSequentialIterator* iter = reader2.createSequentialIterator(altered);
+    
+        iter->read(altered);
+
+    
+        pdal::Dimension const& dimRed = schema2.getDimension("Red");
+        pdal::Dimension const& dimX = schema2.getDimension("X");
+        boost::uint16_t r = altered.getField<boost::uint16_t>(dimRed, 0);
+        BOOST_CHECK_EQUAL(r, 0u);
+        boost::int32_t x = altered.getField<boost::int32_t>(dimX, 0);
+        BOOST_CHECK_EQUAL(x, 63701224);
+    }
+    
+    {
+        
+        pdal::drivers::las::Reader reader3(Support::datapath("interesting.las"));
+        reader3.initialize();
+        const Schema& schema1 = reader3.getSchema();
+        PointBuffer original(schema1, 1);
+        pdal::StageSequentialIterator* iter2 = reader.createSequentialIterator(original);
+    
+        iter2->read(original);
+        
+        pdal::Dimension const& dimRed2 = schema1.getDimension("Red");
+        pdal::Dimension const& dimX2 = schema1.getDimension("X");
+        boost::uint16_t r2 = original.getField<boost::uint16_t>(dimRed2, 0);
+        BOOST_CHECK_EQUAL(r2, 68u);
+        boost::int32_t x2 = original.getField<boost::int32_t>(dimX2, 0);
+        BOOST_CHECK_EQUAL(x2, 63701224);
+    }
     FileUtils::deleteFile(temp_filename);
 
     return;
