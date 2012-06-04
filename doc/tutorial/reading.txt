@@ -1,7 +1,65 @@
 .. _reading:
 
-=====================
+===============================================================================
 Reading with PDAL
-=====================
+===============================================================================
 
-to be written
+This tutorial will be presented in two parts -- the first being an introduction
+to the command-line utilities that can be used to perform processing operations
+with PDAL, and the second being an introductory C++ tutorial of how to use the
+:ref:`PDAL API <cppapi>` to accomplish similar tasks. 
+
+Introduction
+------------------------------------------------------------------------------
+
+PDAL is both a C++ library and a collection of command-line utilities for 
+data processing operations.  While it is similar to `LAStools`_ in a few 
+aspects, and borrows some of its lineage in others, the PDAL library 
+is an attempt to construct a library that is primarily intended as a 
+data translation library first, and a exploitation and filtering library 
+second.  PDAL exists to provide an abstract API for software developers 
+wishing to navigate the multitude of point cloud formats that are out there. 
+Its value and niche is explicitly modeled after the hugely successful `GDAL`_ 
+library, which provides an abstract API for data formats in the GIS raster 
+data space.
+
+.. _`GDAL`: http://www.gdal.org
+.. _`LAStools`: http://lastools.org
+
+A basic example
+------------------------------------------------------------------------------
+
+Our first example to demonstrate PDAL's utility will be to simply query an
+`ASPRS LAS`_ file to determine the data that are in it in the very first point.
+
+
+::
+
+    $ pcinfo interesting.las -p 0
+
+.. code-block:: javascript
+
+    {
+        "X": "637012",
+        "Y": "849028",
+        "Z": "431",
+        "Intensity": "143",
+        "ReturnNumber": "1",
+        "NumberOfReturns": "1",
+        "ScanDirectionFlag": "1",
+        "EdgeOfFlightLine": "0",
+        "Classification": "1",
+        "ScanAngleRank": "-9",
+        "UserData": "132",
+        "PointSourceId": "7326",
+        "Time": "245380.78254962614",
+        "Red": "68",
+        "Green": "77",
+        "Blue": "88"
+    }
+
+.. note::
+    `interesting.las`_ can be found on github.
+
+.. _`interesting.las`: https://github.com/PDAL/PDAL/blob/master/test/data/interesting.las?raw=true
+.. _`ASPRS LAS`: http://www.asprs.org/a/society/committees/standards/lidar_exchange_format.html
