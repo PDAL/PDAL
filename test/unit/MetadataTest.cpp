@@ -209,7 +209,7 @@ BOOST_AUTO_TEST_CASE(test_metadata_stage)
 
     BOOST_CHECK_EQUAL(file_metadata.toPTree().get_child("metadata").size(), 31u);
 
-    pdal::Option option("filename", Support::datapath("pipeline/pipeline_metadata.xml"));
+    pdal::Option option("filename", Support::datapath("pipeline/pipeline_metadata_reader.xml"));
     pdal::Options options(option);
 
     pdal::drivers::pipeline::Reader pipeline(options);
