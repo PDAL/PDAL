@@ -72,8 +72,8 @@ void Writer::setOptions()
     setGeneratingSoftware(getOptions().getValueOrDefault<std::string>("software_id",
                 LasHeader::SoftwareIdentifier));
 
-    m_lasHeader.SetCreationDOY((boost::uint16_t)getOptions().getValueOrDefault<boost::uint32_t>("day_of_year", 0));
-    m_lasHeader.SetCreationYear((boost::uint16_t)getOptions().getValueOrDefault<boost::uint32_t>("year", 0));
+    m_lasHeader.SetCreationDOY((boost::uint16_t)getOptions().getValueOrDefault<boost::uint32_t>("creation_doy", 0));
+    m_lasHeader.SetCreationYear((boost::uint16_t)getOptions().getValueOrDefault<boost::uint32_t>("creation_year", 0));
     m_lasHeader.setPointFormat(static_cast<PointFormat>(getOptions().getValueOrDefault<boost::uint32_t>("format", 3)));        
     m_lasHeader.SetSystemId(getOptions().getValueOrDefault<std::string>("system_id",
                 LasHeader::SystemIdentifier));
@@ -84,7 +84,7 @@ void Writer::setOptions()
         setSpatialReference(getOptions().getValueOrDefault<std::string>("a_srs",""));
     } 
     m_lasHeader.SetCompressed(getOptions().getValueOrDefault("compression", false));
-    m_lasHeader.SetFileSourceId(getOptions().getValueOrDefault<boost::uint16_t>("filesourceid", 0));   
+    m_lasHeader.SetFileSourceId(getOptions().getValueOrDefault<boost::uint16_t>("filesource_id", 0));   
     try
     {
         boost::uint16_t record_length = getOptions().getValueOrThrow<boost::uint16_t>("datarecordlength");
@@ -135,7 +135,7 @@ const Options Writer::getDefaultOptions() const
     Option year("creation_year", 2011, "4-digit year value for file");
     Option system_id("system_id", LasHeader::SystemIdentifier, "System ID for this file");
     Option software_id("software_id", LasHeader::SoftwareIdentifier, "Software ID for this file");
-    Option filesourceid("filesourceid", 0, "File Source ID for this file");
+    Option filesourceid("filesource_id", 0, "File Source ID for this file");
     Option header_padding("header_padding", 0, "Header padding (space between end of VLRs and beginning of point data)");
     Option set_metadata("forward_metadata", false, "forward metadata into the file as necessary");
 
@@ -279,16 +279,16 @@ bool Writer::doForwardThisMetadata(std::string const& name) const
     // <Reader type="drivers.las.writer">
     //     <Option name="metadata">
     //         <Options>
-    //             <Option name="dataformatid">
+    //             <Option name="dataformat_id">
     //             3
     //             </Option>
-    //             <Option name="filesourceid">
+    //             <Option name="filesource_id">
     //             forward
     //             </Option>
-    //             <Option name="year">
+    //             <Option name="creation_year">
     //             forward
     //             </Option>
-    //             <Option name="day_of_year">
+    //             <Option name="creation_doy">
     //             forward
     //             </Option>
     //             <Option name="vlr">
@@ -372,7 +372,7 @@ void Writer::writeBufferBegin(PointBuffer const& data)
         
         // Default to PointFormat 3 if not forwarded from a previous metadata 
         // or given in a metadata option
-        boost::uint32_t v = getMetadataOption<boost::uint32_t>(getOptions(), m, "dataformatid", 3);
+        boost::uint32_t v = getMetadataOption<boost::uint32_t>(getOptions(), m, "dataformat_id", 3);
         setPointFormat(static_cast<PointFormat>(v));
         log()->get(logDEBUG) << "Setting point format to " 
                              << v 
@@ -431,13 +431,13 @@ void Writer::writeBufferBegin(PointBuffer const& data)
                              << " from metadata " << std::endl;
 
 
-        boost::uint16_t filesourceid = getMetadataOption<boost::uint16_t>( getOptions(), 
+        boost::uint16_t filesource_id = getMetadataOption<boost::uint16_t>( getOptions(), 
                                                                 m, 
-                                                                "filesourceid", 
+                                                                "filesource_id", 
                                                                 0);
-        m_lasHeader.SetFileSourceId(filesourceid);
+        m_lasHeader.SetFileSourceId(filesource_id);
         log()->get(logDEBUG) << "Setting file source id to " 
-                             << filesourceid
+                             << filesource_id
                              << " from metadata " << std::endl;
 
         if (doForwardThisMetadata("vlr"))

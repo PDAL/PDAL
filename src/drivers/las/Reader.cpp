@@ -335,13 +335,13 @@ void Reader::readMetadata()
     metadata.addMetadata<bool>("compressed",
                                 header.Compressed(),
                                 "true if this LAS file is compressed");
-    metadata.addMetadata<boost::uint32_t>(  "dataformatid",
+    metadata.addMetadata<boost::uint32_t>(  "dataformat_id",
                                             static_cast<boost::uint32_t>(header.getPointFormat()),
                                             "The Point Format ID as specified in the LAS specification");
-    metadata.addMetadata<boost::uint32_t>(  "version_major",
+    metadata.addMetadata<boost::uint32_t>(  "major_version",
                                             static_cast<boost::uint32_t>(header.GetVersionMajor()),
                                             "The major LAS version for the file, always 1 for now");
-    metadata.addMetadata<boost::uint32_t>(  "version_minor",
+    metadata.addMetadata<boost::uint32_t>(  "minor_version",
                                             static_cast<boost::uint32_t>(header.GetVersionMinor()),
                                             "The minor LAS version for the file");
     metadata.addMetadata<boost::uint32_t>(  "filesource_id",
