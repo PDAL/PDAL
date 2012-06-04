@@ -35,7 +35,7 @@ Our first example to demonstrate PDAL's utility will be to simply query an
 
 ::
 
-    $ pcinfo interesting.las -p 0
+    $ pcinfo interesting.las -p 0 
 
 .. code-block:: javascript
 
@@ -60,6 +60,38 @@ Our first example to demonstrate PDAL's utility will be to simply query an
 
 .. note::
     `interesting.las`_ can be found on github.
+
+XML output
+................................................................................
+
+XML output of this same point is as simple as adding the appropriate 
+switch:
+
+::
+
+    $ pcinfo interesting.las -p 0 --xml
+
+.. code-block:: xml
+
+    <?xml version="1.0" encoding="utf-8"?>
+    <point>
+      <X>637012</X>
+      <Y>849028</Y>
+      <Z>431</Z>
+      <Intensity>143</Intensity>
+      <ReturnNumber>1</ReturnNumber>
+      <NumberOfReturns>1</NumberOfReturns>
+      <ScanDirectionFlag>1</ScanDirectionFlag>
+      <EdgeOfFlightLine>0</EdgeOfFlightLine>
+      <Classification>1</Classification>
+      <ScanAngleRank>-9</ScanAngleRank>
+      <UserData>132</UserData>
+      <PointSourceId>7326</PointSourceId>
+      <Time>245380.78254962614</Time>
+      <Red>68</Red>
+      <Green>77</Green>
+      <Blue>88</Blue>
+    </point>
 
 .. _`interesting.las`: https://github.com/PDAL/PDAL/blob/master/test/data/interesting.las?raw=true
 .. _`ASPRS LAS`: http://www.asprs.org/a/society/committees/standards/lidar_exchange_format.html
