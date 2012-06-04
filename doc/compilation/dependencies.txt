@@ -107,7 +107,7 @@ LAS driver.  Obtain `GeoTIFF`_ from the same place you got `GDAL`_.
 Proj.4
 ------------------------------------------------------------------------------
 
-Proj.4_ is the projection engine that PDAL uses for the :ref:`reprojection filter<reprojection>`.
+Proj.4_ is the projection engine that PDAL uses for the :cpp::class:`pdal::filters::InPlaceReprojection`.
 
 * Proj.4 4.9.0+ is required.
 

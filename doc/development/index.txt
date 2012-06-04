@@ -30,9 +30,8 @@ Contents:
    io
    options
    pipeline
-   pipelinexml
-   plang
    projectmanagement
+   source
    stages
    testing
    usecases

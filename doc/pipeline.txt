@@ -156,6 +156,45 @@ PDAL. Readers follow the pattern of ``drivers.las.reader`` or
     you must look through the headers in ``./include/pdal/drivers`` and
     ``./include/pdal/filters``
 
+Options
+------------------------------------------------------------------------------
+
+Options are the mechanism that PDAL uses to inform :cpp:class:`pdal::Stage` 
+entities how to process data. A stage option can itself have options, going 
+on ad infinitum. The following example is one that describes how the 
+:cpp:class:`pdal::filters::Scaling` filter defines its options to denote which 
+dimensions it must operate on.
+
+::
+
+    <?xml version="1.0" encoding="utf-8"?>
+    <Pipeline version="1.0">
+        <Filter type="filters.scaling">
+            <Option name="dimension">
+                X
+                <Options>
+                    <Option name="scale">0.1</Option>
+                    <Option name="offset">1.0</Option>
+                </Options>
+            </Option>
+            <Option name="dimension">
+                Y
+                <Options>
+                    <Option name="scale">0.1</Option>
+                    <Option name="offset">2.0</Option>
+                </Options>
+            </Option>
+            <!-- <Option name="debug">true</Option>
+            <Option name="verbose">7</Option>    -->  
+            <Reader type="drivers.las.reader">
+                <Option name="filename">
+                    ../1.2-with-color.las
+                </Option>
+            </Reader>
+        </Filter>
+    </Pipeline>
+
+
 Syntax Specification
 ------------------------------------------------------------------------------
 
@@ -236,4 +275,5 @@ Syntax Specification
     The schema is intended to be something that can be validated via XSD,
     although we don't do that today.  (There is an XSD file in the schemas
     directory.)
+
 
