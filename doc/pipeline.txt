@@ -195,6 +195,21 @@ dimensions it must operate on.
     </Pipeline>
 
 
+Options need not be uniquely named. In this example, we have the dimension 
+option added multiple times for both the ``X`` and ``Y`` dimensions. In this 
+way, it is possible to define an option type called "dimension" that applies 
+for both. Stages can then ask an option instance for options with the name 
+``dimension``, and do with it what is necessary beyond that point.
+
+.. note::
+
+    :ref:`metadata` is quite similar to `Options`_ except that Option/Options
+    instances are used to denote an action to be done during a stage rather
+    than simply a data value to be set or fetched.  PDAL is indeed still hazy
+    here and there is ample room to clean this up, but the general gestalt is
+    that you use Options to tell a Stage what to do, and you use Metadata to
+    set a value or data member for something related to a stage.
+
 Syntax Specification
 ------------------------------------------------------------------------------
 
