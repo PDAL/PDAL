@@ -247,7 +247,7 @@ void Writer::setVLRsFromMetadata(LasHeader& header, Metadata const& metadata, Op
                                                                         metadata_record_id, 
                                                                         description, 
                                                                         &data[0], 
-                                                                        data.size());
+                                                                        static_cast<boost::uint16_t>(data.size()));
                         header.getVLRs().add(vlr);
                         log()->get(logDEBUG) << "Forwarding VLR from metadata with user_id='" << option_user_id 
                                              << "' and record_id='" << option_record_id << "'"<< std::endl;                    
@@ -266,7 +266,7 @@ void Writer::setVLRsFromMetadata(LasHeader& header, Metadata const& metadata, Op
                                                             record_id, 
                                                             description, 
                                                             &data[0], 
-                                                            data.size());
+                                                            static_cast<boost::uint16_t>(data.size()));
             header.getVLRs().add(vlr);            
             log()->get(logDEBUG) << "Setting VLR from metadata with user_id='" << user_id 
                                  << "' and record_id='" << record_id << "'"<< std::endl;
