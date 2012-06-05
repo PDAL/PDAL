@@ -419,7 +419,7 @@ boost::property_tree::ptree PointBuffer::toPTree() const
                         {
                             boost::int8_t v = GETFIELDAS(boost::int8_t);
                             double d = dimension.applyScaling<boost::int8_t>(v);
-                            output += STRINGIFY(boost::int32_t, d);
+                            output += STRINGIFY(double, d);
                         }
                     }
                     if (size == 2)
@@ -430,7 +430,7 @@ boost::property_tree::ptree PointBuffer::toPTree() const
                         {
                             boost::int16_t v = GETFIELDAS(boost::int16_t);
                             double d = dimension.applyScaling<boost::int16_t>(v);
-                            output += STRINGIFY(boost::int16_t, d);
+                            output += STRINGIFY(double, d);
                         }
                     }
                     if (size == 4)
@@ -441,7 +441,7 @@ boost::property_tree::ptree PointBuffer::toPTree() const
                         {
                             boost::int32_t v = GETFIELDAS(boost::int32_t);
                             double d = dimension.applyScaling<boost::int32_t>(v);
-                            output += STRINGIFY(boost::int32_t, d);
+                            output += STRINGIFY(double, d);
                         }
                     }
                     if (size == 8)
@@ -452,7 +452,7 @@ boost::property_tree::ptree PointBuffer::toPTree() const
                         {
                             boost::int64_t v = GETFIELDAS(boost::int64_t);
                             double d = dimension.applyScaling<boost::int64_t>(v);
-                            output += STRINGIFY(boost::int64_t, d);
+                            output += STRINGIFY(double, d);
                         }
                     }
                     break;
@@ -466,7 +466,7 @@ boost::property_tree::ptree PointBuffer::toPTree() const
                         {
                             boost::uint8_t v = GETFIELDAS(boost::uint8_t);
                             double d = dimension.applyScaling<boost::uint8_t>(v);
-                            output += STRINGIFY(boost::uint32_t, d);
+                            output += STRINGIFY(double, d);
                         }
                     }
                     if (size == 2)
@@ -477,7 +477,7 @@ boost::property_tree::ptree PointBuffer::toPTree() const
                         {
                             boost::uint16_t v = GETFIELDAS(boost::uint16_t);
                             double d = dimension.applyScaling<boost::uint16_t>(v);
-                            output += STRINGIFY(boost::uint16_t, d);
+                            output += STRINGIFY(double, d);
                         }
                     }
                     if (size == 4)
@@ -488,18 +488,18 @@ boost::property_tree::ptree PointBuffer::toPTree() const
                         {
                             boost::uint32_t v = GETFIELDAS(boost::uint32_t);
                             double d = dimension.applyScaling<boost::uint32_t>(v);
-                            output += STRINGIFY(boost::uint32_t, d);
+                            output += STRINGIFY(double, d);
                         }
                     }
                     if (size == 8)
                     {
                         if (!applyScaling)
-                            output += STRINGIFY(boost::uint64_t, GETFIELDAS(boost::uint64_t));
+                            output += STRINGIFY(double, GETFIELDAS(boost::uint64_t));
                         else
                         {
                             boost::uint64_t v = GETFIELDAS(boost::uint64_t);
                             double d = dimension.applyScaling<boost::uint64_t>(v);
-                            output += STRINGIFY(boost::uint64_t, d);
+                            output += STRINGIFY(double, d);
                         }
                     }
                     break;
