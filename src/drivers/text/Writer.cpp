@@ -189,7 +189,8 @@ std::string Writer::getStringRepresentation(PointBuffer const& data,
     boost::uint32_t size = d.getByteSize();
 
     bool bHaveScaling = !Utils::compare_distance(d.getNumericScale(), 0.0);
-
+    
+    // FIXME: Allow selective scaling of requested dimensions
     if (bHaveScaling)
     {
         output.setf(std::ios::fixed, std::ios::floatfield);
