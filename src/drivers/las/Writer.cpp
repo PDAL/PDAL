@@ -227,8 +227,8 @@ void Writer::setVLRsFromMetadata(LasHeader& header, Metadata const& metadata, Op
             {
                 if (boost::algorithm::istarts_with(m->first, "vlr_"))
                 {
-                    boost::uint32_t option_record_id = vo->getOption("record_id").getValue<boost::uint32_t>();
-                    boost::uint32_t metadata_record_id = m->second.get<boost::uint32_t>("metadata.record_id.value");
+                    boost::uint16_t option_record_id = vo->getOption("record_id").getValue<boost::uint16_t>();
+                    boost::uint16_t metadata_record_id = m->second.get<boost::uint16_t>("metadata.record_id.value");
                     std::string option_user_id = vo->getOption("user_id").getValue<std::string>();
                     std::string metadata_user_id = m->second.get<std::string>("metadata.user_id.value");
                     // boost::property_tree::write_xml(std::cout, m->second);
@@ -257,7 +257,7 @@ void Writer::setVLRsFromMetadata(LasHeader& header, Metadata const& metadata, Op
         }
         else 
         {
-            boost::uint32_t record_id = vo->getValueOrDefault<boost::uint32_t>("record_id", 4321);
+            boost::uint16_t record_id = vo->getValueOrDefault<boost::uint16_t>("record_id", 4321);
             std::string user_id = vo->getValueOrDefault<std::string>("user_id", "PDALUSERID");
             std::string description = vo->getValueOrDefault<std::string>("description", "PDAL default VLR description");
             std::vector<boost::uint8_t> data = Utils::base64_decode(o->getValue<std::string>());
