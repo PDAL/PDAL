@@ -268,8 +268,6 @@ void Scaling::readBufferBeginImpl(PointBuffer& buffer)
 
 boost::uint32_t Scaling::readBufferImpl(PointBuffer& buffer)
 {
-    const Schema& schema = buffer.getSchema();
-
     const boost::uint32_t numRead = getPrevIterator().read(buffer);
 
     for (boost::uint32_t pointIndex=0; pointIndex<numRead; pointIndex++)
