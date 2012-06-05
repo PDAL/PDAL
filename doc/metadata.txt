@@ -152,6 +152,8 @@ A more interesting metadata tree might come from the
         }
     }
     
+.. _metadataxml:
+
 :ref:`Pipeline` XML representation
 ------------------------------------------------------------------------------
 
