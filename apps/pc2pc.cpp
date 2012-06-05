@@ -116,6 +116,9 @@ void Pc2Pc::addSwitches()
         ;
 
     addSwitchSet(file_options);
+    
+    addPositionalSwitch("input", 1);
+    addPositionalSwitch("output", 1);    
 }
 
 
