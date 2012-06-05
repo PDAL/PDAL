@@ -532,7 +532,7 @@ inline T PointBuffer::getField(pdal::Dimension const& dim, std::size_t pointInde
     {
         if (dim.getInterpretation() == dimension::Float)
         {
-            if (!typeid(T).name() == 'i') // if we're integer, go check
+            if (!std::strcmp(typeid(T).name(),"i")) // if we're integer, go check
             {
                 if (dim.getByteSize() == 4)
                 {
