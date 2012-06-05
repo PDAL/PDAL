@@ -61,14 +61,6 @@ Writer::Writer(Stage& prevStage, const Options& options)
 }
 
 
-Writer::Writer(Stage& prevStage, std::ostream* ostream)
-    : pdal::drivers::las::Writer(prevStage, ostream)
-{
-    ctor();
-    return;
-}
-
-
 void Writer::ctor()
 {
     return;
@@ -86,6 +78,8 @@ void Writer::initialize()
     // call super class
     pdal::drivers::las::Writer::initialize();
 
+    m_filename = getOptions().getValueOrThrow<std::string>("filename");
+
     return;
 }
 
@@ -100,12 +94,12 @@ const Options Writer::getDefaultOptions() const
 
 void Writer::writeBegin(boost::uint64_t targetNumPointsToWrite)
 {
-    m_streamManager.ostream().write(s_nitfHeader().c_str(), s_nitfHeader().size());
-
     // call super class
     pdal::drivers::las::Writer::writeBegin(targetNumPointsToWrite);
 
-    //mpg::NITFCreate("x", 1, 1, 1, 1, NULL, NULL);
+  //  mpg::NITFCreate(m_filename.c_str(), 1, 1, 1, 1, NULL, NULL);
+
+    return;
 }
 
 
@@ -135,7 +129,7 @@ void Writer::writeEnd(boost::uint64_t actualNumPointsWritten)
     // call super class
     pdal::drivers::las::Writer::writeEnd(actualNumPointsWritten);
 
-    m_streamManager.ostream().write(s_nitfFooter().c_str(), s_nitfFooter().size());
+    return;
 }
 
 

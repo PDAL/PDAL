@@ -73,7 +73,6 @@ public:
     SET_STAGE_NAME("drivers.nitf.writer", "NITF Writer")
 
     Writer(Stage& prevStage, const Options&);
-    Writer(Stage& prevStage, std::ostream*);
     ~Writer();
 
     virtual void initialize();
@@ -81,15 +80,6 @@ public:
 
     // for dumping
     virtual boost::property_tree::ptree toPTree() const;
-
-    static const std::string s_nitfHeader()
-    {
-        return "LAS GOES HERE --->";
-    }
-    static const std::string s_nitfFooter()
-    {
-        return "<--- LAS WENT THERE";
-    }
 
 private:
     void ctor();
@@ -99,6 +89,10 @@ private:
     virtual boost::uint32_t writeBuffer(const PointBuffer&);
     virtual void writeBufferEnd(PointBuffer const&);
     virtual void writeEnd(boost::uint64_t actualNumPointsWritten);
+
+    std::string m_filename;
+
+    Writer(Stage& prevStage, std::ostream*); // NOT SUPPORTED!
 
     Writer& operator=(const Writer&); // not implemented
     Writer(const Writer&); // not implemented
