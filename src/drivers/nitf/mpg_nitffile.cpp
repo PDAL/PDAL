@@ -1833,7 +1833,7 @@ const NITFSeries* NITFGetSeriesInfo(const char* pszFilename)
 /*      Collect attachment, display level and location info into the    */
 /*      segmentinfo structures.                                         */
 /************************************************************************/
-
+#if 0
 int NITFCollectAttachments( NITFFile *psFile )
 
 {
@@ -1975,7 +1975,7 @@ int NITFReconcileAttachments( NITFFile *psFile )
     else
         return NITFReconcileAttachments( psFile );
 }
-
+#endif
 /************************************************************************/
 /*                        NITFFindValFromEnd()                          */
 /************************************************************************/

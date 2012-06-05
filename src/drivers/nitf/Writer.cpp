@@ -32,11 +32,6 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/pdal_internal.hpp>
-#ifdef PDAL_COMPILER_MSVC
-#pragma warning(disable: 4806)  // until we fix PointBuffer.hpp
-#endif
-
 #include <pdal/drivers/nitf/Writer.hpp>
 #include <pdal/drivers/las/Writer.hpp>
 
@@ -110,7 +105,7 @@ void Writer::writeBegin(boost::uint64_t targetNumPointsToWrite)
     // call super class
     pdal::drivers::las::Writer::writeBegin(targetNumPointsToWrite);
 
-    mpg::NITFCreate("x", 1, 1, 1, 1, NULL, NULL);
+    //mpg::NITFCreate("x", 1, 1, 1, 1, NULL, NULL);
 }
 
 

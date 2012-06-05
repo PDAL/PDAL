@@ -329,7 +329,9 @@ set(PDAL_DRIVERS_NITF_HPP
 )
 
 set (PDAL_DRIVERS_NITF_CPP 
+  ${PDAL_NITF_SRC}/mpg_nitfdes.cpp
   ${PDAL_NITF_SRC}/mpg_nitffile.cpp
+  ${PDAL_NITF_SRC}/mpg_nitfimage.cpp
   ${PDAL_NITF_SRC}/NitfFile.cpp
   ${PDAL_NITF_SRC}/Reader.cpp
   ${PDAL_NITF_SRC}/Writer.cpp
