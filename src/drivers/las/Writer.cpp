@@ -213,16 +213,13 @@ void Writer::setVLRsFromMetadata(LasHeader& header, Metadata const& metadata, Op
         if (!boost::algorithm::iequals(o->getName(), "VLR"))
             continue;
         
-        
         boost::optional<pdal::Options const&> vo = o->getOptions();
         if (!vo) 
             throw pdal_error("VLR option given, but no sub options available to specify which VLRs to copy!");
 
-        boost::property_tree::ptree::const_iterator m;
-        
         if (boost::algorithm::iequals(o->getValue<std::string>(), "FORWARD"))
         {
-            
+            boost::property_tree::ptree::const_iterator m;
             for (m = entries.begin(); m != entries.end(); ++m)
             {
                 if (boost::algorithm::istarts_with(m->first, "vlr_"))
@@ -231,14 +228,10 @@ void Writer::setVLRsFromMetadata(LasHeader& header, Metadata const& metadata, Op
                     boost::uint16_t metadata_record_id = m->second.get<boost::uint16_t>("metadata.record_id.value");
                     std::string option_user_id = vo->getOption("user_id").getValue<std::string>();
                     std::string metadata_user_id = m->second.get<std::string>("metadata.user_id.value");
-                    // boost::property_tree::write_xml(std::cout, m->second);
-                    // std::cout << "record id option: " << option_record_id << " metadata: " << metadata_record_id << std::endl;
-                    // std::cout << "user id option: " << option_user_id << " metadata: "<< metadata_user_id << std::endl;
-                
+  
                     if (option_record_id == metadata_record_id &&
                         option_user_id == metadata_user_id)
                     {
-                        
                         std::string vlr_data = m->second.get_value<std::string>();
                         std::vector<boost::uint8_t> data = Utils::base64_decode(vlr_data);
                         std::string description = m->second.get<std::string>("metadata.description.value");
