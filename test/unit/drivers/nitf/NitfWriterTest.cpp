@@ -132,7 +132,6 @@ BOOST_AUTO_TEST_CASE(test1)
         pdal::drivers::las::Reader reader(reader_opts);
 
         pdal::drivers::nitf::Writer writer(reader, writer_opts);
-        writer.initialize();
         {
             writer.setCompressed(false);
             writer.setDate(0, 0);
@@ -140,6 +139,8 @@ BOOST_AUTO_TEST_CASE(test1)
             writer.setSystemIdentifier("");
             writer.setGeneratingSoftware("PDAL-NITF");
         }
+        writer.initialize();
+
         writer.write(0);
     }
 
