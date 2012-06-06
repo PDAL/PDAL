@@ -37,14 +37,13 @@ IF(WIN32)
 ENDIF()
 
 
-FIND_FILE(P2G_INCLUDE_DIR
-  config.h
-  PATH_PREFIX include
+FIND_PATH(P2G_INCLUDE_DIR
+  points2grid/config.h
   PATHS
+  /usr/include
+  /usr/local/include
   /tmp/lasjunk
   ${OSGEO4W_ROOT_DIR}/include
-  PATH_SUFFIXES points2grid
-  NO_DEFAULT_PATH
   )
 
 if(WIN32)
