@@ -56,6 +56,7 @@
 #include <pdal/drivers/faux/Writer.hpp>
 #include <pdal/drivers/las/Writer.hpp>
 #include <pdal/drivers/text/Writer.hpp>
+#include <pdal/drivers/pcd/Writer.hpp>
 
 #ifdef PDAL_HAVE_ORACLE
 #include <pdal/drivers/oci/Writer.hpp>
@@ -176,6 +177,7 @@ MAKE_MULTIFILTER_CREATOR(Mosaic, pdal::filters::Mosaic)
 MAKE_WRITER_CREATOR(FauxWriter, pdal::drivers::faux::Writer)
 MAKE_WRITER_CREATOR(LasWriter, pdal::drivers::las::Writer)
 MAKE_WRITER_CREATOR(TextWriter, pdal::drivers::text::Writer)
+MAKE_WRITER_CREATOR(PCDWriter, pdal::drivers::pcd::Writer)
 #ifdef PDAL_HAVE_ORACLE
 MAKE_WRITER_CREATOR(OciWriter, pdal::drivers::oci::Writer)
 #endif
@@ -370,6 +372,7 @@ void StageFactory::registerKnownWriters()
     REGISTER_WRITER(FauxWriter, pdal::drivers::faux::Writer);
     REGISTER_WRITER(LasWriter, pdal::drivers::las::Writer);
     REGISTER_WRITER(TextWriter, pdal::drivers::text::Writer);
+    REGISTER_WRITER(PCDWriter, pdal::drivers::pcd::Writer);
 #ifdef PDAL_HAVE_ORACLE
     REGISTER_WRITER(OciWriter, pdal::drivers::oci::Writer);
 #endif
