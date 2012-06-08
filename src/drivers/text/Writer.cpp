@@ -155,7 +155,10 @@ void Writer::WriteHeader(pdal::Schema const& schema)
     while (iter != dims.end())
     {
         if (iter->isIgnored())
+        {
+            iter++;
             continue;
+        }
         if (isQuoted)
             *m_stream << "\"";
         *m_stream << iter->getName();
@@ -292,7 +295,10 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
         while (iter != dims.end())
         {
             if (iter->isIgnored())
+            {
+                iter++;
                 continue;
+            }
 
             *m_stream << getStringRepresentation(data, *iter, pointIndex);
 
