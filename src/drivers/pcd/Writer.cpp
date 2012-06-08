@@ -144,12 +144,12 @@ void Writer::WriteHeader(pdal::Schema const& schema)
     *m_stream << "# .PCD v.7 - Point Cloud Data file format" << std::endl;
 
     *m_stream << "VERSION 0.7" << std::endl;    
-    *m_stream << "FIELDS x y z" << std::endl;
-    *m_stream << "SIZE 8 8 8" << std::endl;
-    *m_stream << "TYPE d d d" << std::endl;
+    *m_stream << "FIELDS x y z r g b" << std::endl;
+    *m_stream << "SIZE 4 4 4 2 2 2" << std::endl;
+    *m_stream << "TYPE f f f u u u" << std::endl;
 
     boost::uint64_t width = getPrevStage().getNumPoints();
-    *m_stream << "COUNT 1 1 1" << std::endl;
+    *m_stream << "COUNT 1 1 1 1 1 1" << std::endl;
     *m_stream << "WIDTH " << width << std::endl;
     
     *m_stream << "HEIGHT 1" << std::endl;
@@ -300,6 +300,23 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
         *m_stream << getStringRepresentation(data, y, pointIndex);
         *m_stream << " ";
         *m_stream << getStringRepresentation(data, z, pointIndex);
+        *m_stream << " ";
+        
+        std::string color;
+        if (dimRed)
+            color = getStringRepresentation(data, *dimRed, pointIndex);
+        *m_stream << color;
+        *m_stream << " ";
+
+        if (dimGreen)
+            color = getStringRepresentation(data, *dimRed, pointIndex);
+        *m_stream << color;
+        *m_stream << " ";
+
+        if (dimBlue)
+            color = getStringRepresentation(data, *dimBlue, pointIndex);
+        *m_stream << color;
+        *m_stream << " ";
         
         *m_stream << "\n";
 
