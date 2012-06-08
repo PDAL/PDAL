@@ -70,6 +70,7 @@ private:
     std::string m_srs;
     bool m_bCompress;
     boost::uint32_t m_chunkSize;
+    boost::uint64_t m_numPointsToWrite;    
 };
 
 
@@ -80,6 +81,7 @@ Pc2Pc::Pc2Pc(int argc, char* argv[])
     , m_srs("")
     , m_bCompress(false)
     , m_chunkSize(0)
+    , m_numPointsToWrite(0)
 {
     return;
 }
@@ -113,6 +115,7 @@ void Pc2Pc::addSwitches()
         ("a_srs", po::value<std::string>(&m_srs)->default_value(""), "Assign output coordinate system (if supported by output format)")
         ("compress,z", po::value<bool>(&m_bCompress)->zero_tokens()->implicit_value(true), "Compress output data (if supported by output format)")
         ("chunk_size", po::value<boost::uint32_t>(&m_chunkSize), "Size of buffer, for blocked/chunked/tiled transfers")
+        ("count", po::value<boost::uint64_t>(&m_numPointsToWrite)->default_value(0), "How many points should we write?")
         ;
 
     addSwitchSet(file_options);
@@ -168,7 +171,7 @@ int Pc2Pc::execute()
         (pdal::UserCallback*)(new PercentageCallback));
     writer->setUserCallback(callback.get());
 
-    const boost::uint64_t numPointsRead = writer->write(numPointsToRead);
+    const boost::uint64_t numPointsRead = writer->write(m_numPointsToWrite);
 
     std::cout << "Wrote " << numPointsRead << " points\n";
 
