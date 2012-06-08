@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Howard Butler, hobu.inc@gmail.com
+* Copyright (c) 2012, Howard Butler, hobu.inc@gmail.com
 *
 * All rights reserved.
 *
@@ -41,7 +41,7 @@
 #include <boost/algorithm/string.hpp>
 
 
-#ifdef USE_PDAL_PLUGIN_TEXT
+#ifdef USE_PDAL_PLUGIN_PCD
 PDAL_C_START
 
 PDAL_DLL void PDALRegister_writer_pcd(void* factory)
@@ -140,16 +140,40 @@ void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
 void Writer::WriteHeader(pdal::Schema const& schema)
 {
 
+    boost::optional<Dimension const&> dimRed = schema.getDimensionOptional("Red");
+    boost::optional<Dimension const&> dimGreen = schema.getDimensionOptional("Green");
+    boost::optional<Dimension const&> dimBlue = schema.getDimensionOptional("Blue");
+    
+    bool bHaveColor(false);
+    
+    if (dimRed && dimGreen && dimBlue)
+        bHaveColor = true;
 
     *m_stream << "# .PCD v.7 - Point Cloud Data file format" << std::endl;
 
     *m_stream << "VERSION 0.7" << std::endl;    
-    *m_stream << "FIELDS x y z r g b" << std::endl;
-    *m_stream << "SIZE 4 4 4 2 2 2" << std::endl;
-    *m_stream << "TYPE f f f u u u" << std::endl;
+
+    *m_stream << "FIELDS x y z";
+    if (bHaveColor)
+        *m_stream << " r g b";
+    *m_stream << std::endl;
+    
+    *m_stream << "SIZE 4 4 4";
+    if (bHaveColor)
+        *m_stream << " 1 1 1";
+    *m_stream << std::endl;
+    
+    *m_stream << "TYPE f f f";
+    if (bHaveColor)
+        *m_stream << " f";
+    *m_stream << std::endl;
+    
+    *m_stream << "COUNT 1 1 1";
+    if (bHaveColor)
+        *m_stream << " 1 1 1";
+    *m_stream << std::endl;    
 
     boost::uint64_t width = getPrevStage().getNumPoints();
-    *m_stream << "COUNT 1 1 1 1 1 1" << std::endl;
     *m_stream << "WIDTH " << width << std::endl;
     
     *m_stream << "HEIGHT 1" << std::endl;
@@ -278,8 +302,11 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
     boost::optional<Dimension const&> dimBlue = schema.getDimensionOptional("Blue");
 
     boost::uint32_t pointIndex(0);
-
-
+    
+    bool bHaveColor(false);
+    if (dimRed && dimGreen && dimBlue)
+        bHaveColor = true;
+        
     while (pointIndex != data.getNumPoints())
     {
         // double output;
@@ -303,20 +330,26 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
         *m_stream << " ";
         
         std::string color;
-        if (dimRed)
+        if (bHaveColor) 
+        {
+            // boost::uint16_t red = data.getField<boost::uint16_t>(*dimRed, pointIndex);
+            // boost::uint16_t green = data.getField<boost::uint16_t>(*dimGreen, pointIndex);
+            // boost::uint16_t blue = data.getField<boost::uint16_t>(*dimBlue, pointIndex);
+            // 
+            std::string color;
             color = getStringRepresentation(data, *dimRed, pointIndex);
-        *m_stream << color;
-        *m_stream << " ";
+            *m_stream << color;
+            *m_stream << " ";
 
-        if (dimGreen)
             color = getStringRepresentation(data, *dimRed, pointIndex);
-        *m_stream << color;
-        *m_stream << " ";
+            *m_stream << color;
+            *m_stream << " ";
 
-        if (dimBlue)
             color = getStringRepresentation(data, *dimBlue, pointIndex);
-        *m_stream << color;
-        *m_stream << " ";
+            *m_stream << color;
+            *m_stream << " ";
+        }
+
         
         *m_stream << "\n";
 
