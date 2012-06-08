@@ -145,6 +145,9 @@ void Writer::WriteHeader(pdal::Schema const& schema)
     boost::optional<Dimension const&> dimBlue = schema.getDimensionOptional("Blue");
     
     bool bHaveColor(false);
+    bool bRGBPacked  = getOptions().getValueOrDefault<bool>("pack_rgb", true);
+
+    
     
     if (dimRed && dimGreen && dimBlue)
         bHaveColor = true;
@@ -155,22 +158,42 @@ void Writer::WriteHeader(pdal::Schema const& schema)
 
     *m_stream << "FIELDS x y z";
     if (bHaveColor)
-        *m_stream << " r g b";
+    {
+        if(bRGBPacked)
+            *m_stream << " rgb";
+        else
+            *m_stream << " r g b";
+    }
     *m_stream << std::endl;
     
     *m_stream << "SIZE 4 4 4";
     if (bHaveColor)
-        *m_stream << " 1 1 1";
+    {
+        if(bRGBPacked)
+            *m_stream << " 1";
+        else
+            *m_stream << " 1 1 1";
+    }
     *m_stream << std::endl;
     
     *m_stream << "TYPE f f f";
     if (bHaveColor)
-        *m_stream << " f";
+    {
+        if(bRGBPacked)
+            *m_stream << " f";
+        else
+            *m_stream << " u u u";
+    }
     *m_stream << std::endl;
     
     *m_stream << "COUNT 1 1 1";
     if (bHaveColor)
-        *m_stream << " 1 1 1";
+    {
+        if(bRGBPacked)
+            *m_stream << " 1";
+        else
+            *m_stream << " 1 1 1";
+    }
     *m_stream << std::endl;    
 
     boost::uint64_t width = getPrevStage().getNumPoints();
@@ -307,21 +330,10 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
     if (dimRed && dimGreen && dimBlue)
         bHaveColor = true;
         
+    bool bRGBPacked = getOptions().getValueOrDefault<bool>("pack_rgb", true);
+        
     while (pointIndex != data.getNumPoints())
     {
-        // double output;
-        // boost::int32_t i32 = data.getField<boost::int32_t>(x, pointIndex);
-        // output = x.applyScaling<boost::int32_t>(i32);
-        // *m_stream << output;
-        // 
-        // i32 = data.getField<boost::int32_t>(y, pointIndex);
-        // output = y.applyScaling<boost::int32_t>(i32);
-        // *m_stream << output;
-        // 
-        // i32 = data.getField<boost::int32_t>(z, pointIndex);
-        // output = z.applyScaling<boost::int32_t>(i32);
-        // *m_stream << output;
-        
         *m_stream << getStringRepresentation(data, x, pointIndex);
         *m_stream << " ";
         *m_stream << getStringRepresentation(data, y, pointIndex);
@@ -332,24 +344,31 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
         std::string color;
         if (bHaveColor) 
         {
-            // boost::uint16_t red = data.getField<boost::uint16_t>(*dimRed, pointIndex);
-            // boost::uint16_t green = data.getField<boost::uint16_t>(*dimGreen, pointIndex);
-            // boost::uint16_t blue = data.getField<boost::uint16_t>(*dimBlue, pointIndex);
-            // 
-            std::string color;
-            color = getStringRepresentation(data, *dimRed, pointIndex);
-            *m_stream << color;
-            *m_stream << " ";
+            if (bRGBPacked)
+            {
+                boost::uint16_t r = data.getField<boost::uint16_t>(*dimRed, pointIndex);
+                boost::uint16_t g = data.getField<boost::uint16_t>(*dimGreen, pointIndex);
+                boost::uint16_t b = data.getField<boost::uint16_t>(*dimBlue, pointIndex);
+                int rgb =  ((int)r) << 16 | ((int)g) << 8 | ((int)b);
+                m_stream->precision(8);
+                *m_stream << static_cast<float>(rgb);
+            }
+            else
+            {
+                std::string color;
+                color = getStringRepresentation(data, *dimRed, pointIndex);
+                *m_stream << color;
+                *m_stream << " ";
 
-            color = getStringRepresentation(data, *dimRed, pointIndex);
-            *m_stream << color;
-            *m_stream << " ";
+                color = getStringRepresentation(data, *dimGreen, pointIndex);
+                *m_stream << color;
+                *m_stream << " ";
 
-            color = getStringRepresentation(data, *dimBlue, pointIndex);
-            *m_stream << color;
-            *m_stream << " ";
+                color = getStringRepresentation(data, *dimBlue, pointIndex);
+                *m_stream << color;
+                *m_stream << " ";
+            }
         }
-
         
         *m_stream << "\n";
 
