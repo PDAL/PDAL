@@ -93,6 +93,7 @@ std::string AppSupport::inferWriterDriver(const std::string& filename, pdal::Opt
     drivers["laz"] = "drivers.las.writer";
     drivers["xyz"] = "drivers.text.writer";
     drivers["txt"] = "drivers.text.writer";
+    drivers["pcd"] = "drivers.pcd.writer";
 
     std::string driver = drivers[ext];
     return driver; // will be "" if not found
