@@ -45,6 +45,7 @@
 
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/json_parser.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include "AppSupport.hpp"
 #include "Application.hpp"
@@ -167,7 +168,8 @@ void PcInfo::dumpOnePoint(const Stage& stage) const
     const boost::uint32_t numRead = iter->read(data);
     if (numRead != 1)
     {
-        throw app_runtime_error("problem reading point number " + m_pointNumber);
+        throw app_runtime_error("problem reading point number " 
+            + boost::lexical_cast<std::string>(m_pointNumber) );
     }
 
     boost::property_tree::ptree tree = data.toPTree();
