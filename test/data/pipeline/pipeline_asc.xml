@@ -19,6 +19,9 @@
                         Y
                     </Option>
                     <Option name="dimension">
+                        Z
+                    </Option>
+                    <Option name="dimension">
                         Red
                     </Option>
                     <Option name="dimension">
