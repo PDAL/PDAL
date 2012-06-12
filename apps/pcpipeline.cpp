@@ -63,6 +63,7 @@ private:
     std::string m_pipelineFile;
     bool m_usestdin;
     bool m_validate;
+    boost::uint64_t m_numPointsToWrite;
 };
 
 
@@ -71,6 +72,7 @@ PcPipeline::PcPipeline(int argc, char* argv[])
     , m_inputFile("")
     , m_usestdin(false)
     , m_validate(false)
+    , m_numPointsToWrite(0)
 {
     return;
 }
@@ -96,6 +98,8 @@ void PcPipeline::addSwitches()
         ("pipeline-serialization", po::value<std::string>(&m_pipelineFile)->default_value(""), "")
         ("stdin,s", po::value<bool>(&m_usestdin)->zero_tokens()->implicit_value(true), "Read pipeline XML from stdin")
         ("validate", po::value<bool>(&m_validate)->zero_tokens()->implicit_value(true), "Validate the pipeline (including serialization), but do not execute writing of points")
+        ("count", po::value<boost::uint64_t>(&m_numPointsToWrite)->default_value(0), "How many points should we write?")
+
         ;
 
     addSwitchSet(file_options);
@@ -127,7 +131,7 @@ int PcPipeline::execute()
         throw pdal_error("This pipeline does not have a writer, unable to execute");
     manager.getWriter()->initialize();
     
-    if (!m_validate) manager.getWriter()->write(0);
+    if (!m_validate) manager.getWriter()->write(m_numPointsToWrite);
 
     if (m_pipelineFile.size() > 0)
     {

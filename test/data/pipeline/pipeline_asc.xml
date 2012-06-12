@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Pipeline version="1.0">
+    <Writer type="drivers.text.writer">
+        <Option name="filename">
+            autzen-stadium.txt
+        </Option>
+        <Option name="delimiter"> </Option>
+        <Option name="write_header">false</Option>
+        <Filter type="filters.selector">
+            <Option name="ignore_default">
+                true
+            </Option>
+            <Option name="keep">
+                <Options>
+                    <Option name="dimension">
+                        X
+                    </Option>
+                    <Option name="dimension">
+                        Y
+                    </Option>
+                    <Option name="dimension">
+                        Z
+                    </Option>
+                    <Option name="dimension">
+                        Red
+                    </Option>
+                    <Option name="dimension">
+                        Green
+                    </Option>
+                    <Option name="dimension">
+                        Blue
+                    </Option>
+                </Options>
+            </Option>
+            <Reader type="drivers.las.reader">
+                <Option name="filename">
+                    ../autzen-stadium.las
+                </Option>
+            </Reader>
+        </Filter>
+    </Writer>
+</Pipeline>

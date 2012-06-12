@@ -148,14 +148,24 @@ void Writer::WriteHeader(pdal::Schema const& schema)
     schema::index_by_index const& dims = schema.getDimensions().get<schema::index>();
 
     bool isQuoted = getOptions().getValueOrDefault<bool>("quote_header", true);
+    bool bWriteHeader = getOptions().getValueOrDefault<bool>("write_header", true);
     std::string newline = getOptions().getValueOrDefault<std::string>("newline", "\n");
     std::string delimiter = getOptions().getValueOrDefault<std::string>("delimiter",",");
-
+    
+    if (!bWriteHeader)
+        return;
+        
+    if (delimiter.size() == 0)
+        delimiter = " ";
+        
     schema::index_by_index::const_iterator iter = dims.begin();
     while (iter != dims.end())
     {
         if (iter->isIgnored())
+        {
+            iter++;
             continue;
+        }
         if (isQuoted)
             *m_stream << "\"";
         *m_stream << iter->getName();
@@ -279,7 +289,9 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
 
     std::string newline = getOptions().getValueOrDefault<std::string>("newline", "\n");
     std::string delimiter = getOptions().getValueOrDefault<std::string>("delimiter",",");
-
+    if (delimiter.size() == 0)
+        delimiter = " ";
+        
     boost::uint32_t pointIndex(0);
 
     pdal::Schema const& schema = data.getSchema();
@@ -292,7 +304,10 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
         while (iter != dims.end())
         {
             if (iter->isIgnored())
+            {
+                iter++;
                 continue;
+            }
 
             *m_stream << getStringRepresentation(data, *iter, pointIndex);
 

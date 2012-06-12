@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Howard Butler, hobu.inc@gmail.com
+* Copyright (c) 2012, Howard Butler, hobu.inc@gmail.com
 *
 * All rights reserved.
 *
@@ -41,7 +41,7 @@
 #include <boost/algorithm/string.hpp>
 
 
-#ifdef USE_PDAL_PLUGIN_TEXT
+#ifdef USE_PDAL_PLUGIN_PCD
 PDAL_C_START
 
 PDAL_DLL void PDALRegister_writer_pcd(void* factory)
@@ -140,16 +140,63 @@ void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
 void Writer::WriteHeader(pdal::Schema const& schema)
 {
 
+    boost::optional<Dimension const&> dimRed = schema.getDimensionOptional("Red");
+    boost::optional<Dimension const&> dimGreen = schema.getDimensionOptional("Green");
+    boost::optional<Dimension const&> dimBlue = schema.getDimensionOptional("Blue");
+    
+    bool bHaveColor(false);
+    bool bRGBPacked  = getOptions().getValueOrDefault<bool>("pack_rgb", true);
+
+    
+    
+    if (dimRed && dimGreen && dimBlue)
+        bHaveColor = true;
 
     *m_stream << "# .PCD v.7 - Point Cloud Data file format" << std::endl;
 
     *m_stream << "VERSION 0.7" << std::endl;    
-    *m_stream << "FIELDS x y z r g b" << std::endl;
-    *m_stream << "SIZE 4 4 4 2 2 2" << std::endl;
-    *m_stream << "TYPE f f f u u u" << std::endl;
+
+    *m_stream << "FIELDS x y z";
+    if (bHaveColor)
+    {
+        if(bRGBPacked)
+            *m_stream << " rgb";
+        else
+            *m_stream << " r g b";
+    }
+    *m_stream << std::endl;
+    
+    *m_stream << "SIZE 4 4 4";
+    if (bHaveColor)
+    {
+        if(bRGBPacked)
+            *m_stream << " 1";
+        else
+            *m_stream << " 1 1 1";
+    }
+    *m_stream << std::endl;
+    
+    *m_stream << "TYPE f f f";
+    if (bHaveColor)
+    {
+        if(bRGBPacked)
+            *m_stream << " f";
+        else
+            *m_stream << " u u u";
+    }
+    *m_stream << std::endl;
+    
+    *m_stream << "COUNT 1 1 1";
+    if (bHaveColor)
+    {
+        if(bRGBPacked)
+            *m_stream << " 1";
+        else
+            *m_stream << " 1 1 1";
+    }
+    *m_stream << std::endl;    
 
     boost::uint64_t width = getPrevStage().getNumPoints();
-    *m_stream << "COUNT 1 1 1 1 1 1" << std::endl;
     *m_stream << "WIDTH " << width << std::endl;
     
     *m_stream << "HEIGHT 1" << std::endl;
@@ -278,23 +325,15 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
     boost::optional<Dimension const&> dimBlue = schema.getDimensionOptional("Blue");
 
     boost::uint32_t pointIndex(0);
-
-
+    
+    bool bHaveColor(false);
+    if (dimRed && dimGreen && dimBlue)
+        bHaveColor = true;
+        
+    bool bRGBPacked = getOptions().getValueOrDefault<bool>("pack_rgb", true);
+        
     while (pointIndex != data.getNumPoints())
     {
-        // double output;
-        // boost::int32_t i32 = data.getField<boost::int32_t>(x, pointIndex);
-        // output = x.applyScaling<boost::int32_t>(i32);
-        // *m_stream << output;
-        // 
-        // i32 = data.getField<boost::int32_t>(y, pointIndex);
-        // output = y.applyScaling<boost::int32_t>(i32);
-        // *m_stream << output;
-        // 
-        // i32 = data.getField<boost::int32_t>(z, pointIndex);
-        // output = z.applyScaling<boost::int32_t>(i32);
-        // *m_stream << output;
-        
         *m_stream << getStringRepresentation(data, x, pointIndex);
         *m_stream << " ";
         *m_stream << getStringRepresentation(data, y, pointIndex);
@@ -303,20 +342,33 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
         *m_stream << " ";
         
         std::string color;
-        if (dimRed)
-            color = getStringRepresentation(data, *dimRed, pointIndex);
-        *m_stream << color;
-        *m_stream << " ";
+        if (bHaveColor) 
+        {
+            if (bRGBPacked)
+            {
+                boost::uint16_t r = data.getField<boost::uint16_t>(*dimRed, pointIndex);
+                boost::uint16_t g = data.getField<boost::uint16_t>(*dimGreen, pointIndex);
+                boost::uint16_t b = data.getField<boost::uint16_t>(*dimBlue, pointIndex);
+                int rgb =  ((int)r) << 16 | ((int)g) << 8 | ((int)b);
+                m_stream->precision(8);
+                *m_stream << static_cast<float>(rgb);
+            }
+            else
+            {
+                std::string color;
+                color = getStringRepresentation(data, *dimRed, pointIndex);
+                *m_stream << color;
+                *m_stream << " ";
 
-        if (dimGreen)
-            color = getStringRepresentation(data, *dimRed, pointIndex);
-        *m_stream << color;
-        *m_stream << " ";
+                color = getStringRepresentation(data, *dimGreen, pointIndex);
+                *m_stream << color;
+                *m_stream << " ";
 
-        if (dimBlue)
-            color = getStringRepresentation(data, *dimBlue, pointIndex);
-        *m_stream << color;
-        *m_stream << " ";
+                color = getStringRepresentation(data, *dimBlue, pointIndex);
+                *m_stream << color;
+                *m_stream << " ";
+            }
+        }
         
         *m_stream << "\n";
 
