@@ -522,36 +522,7 @@ inline T PointBuffer::getField(pdal::Dimension const& dim, std::size_t pointInde
     assert(offset + sizeof(T) <= m_byteSize * m_capacity);
     boost::uint8_t const* p = m_data.get() + offset;
 
-    // The user could be asking for data from a floating point dimension
-    // as an integer. In that case, simply returning a casted int from those
-    // bytes is not the number we want. We don't want to test *every* dimension
-    // combination either, as this code is definitely in the critical path.
-    // For now, we'll only test if the getInterpretation == dimension::Float,
-    // which shouldn't be the most common dimension-fetching scenario.
-    if (sizeof(T) == dim.getByteSize())
-    {
-        if (dim.getInterpretation() == dimension::Float)
-        {
-            const char* n = typeid(T).name();
-            if (n == 0)
-                throw pdal_error("Unable to get typeid(T).name() for type T");
-                
-            unsigned int v = n[0];
-            if (v == 105) // if we're integer ('i'), go check
-            {
-                if (dim.getByteSize() == 4)
-                {
-                    return boost::numeric_cast<T>(*(float const*)(void*)p);
-                }
-                else
-                    return boost::numeric_cast<T>(*(double const*)(void*)p);
-            }
-        }
-
-        return *(T const*)(void const*)p;
-    }
-
-    return convertDimension<T>(dim, (void *)p);
+    return *(T const*)(void const*)p;
 }
 
 
