@@ -274,10 +274,10 @@ public:
 
     static void scaleData(PointBuffer& source_buffer,
                           PointBuffer& destination_buffer,
-                   Dimension const& source_dimension,
-                   Dimension const& destination_dimension,
-                   boost::uint32_t source_index,
-                   boost::uint32_t destination_index);
+                          Dimension const& source_dimension,
+                          Dimension const& destination_dimension,
+                          boost::uint32_t source_index,
+                          boost::uint32_t destination_index);
 
 
     /** @name Metadata
