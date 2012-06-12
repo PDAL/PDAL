@@ -142,7 +142,8 @@ static void do_callback(boost::uint64_t pointsWritten, boost::uint64_t pointsToW
     return;
 }
 
-boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite)
+boost::uint64_t Writer::write(  boost::uint64_t targetNumPointsToWrite,
+                                boost::uint64_t startingPosition)
 {
     if (!isInitialized())
     {
@@ -158,7 +159,10 @@ boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite)
     PointBuffer buffer(schema, m_chunkSize);
 
     boost::scoped_ptr<StageSequentialIterator> iter(getPrevStage().createSequentialIterator(buffer));
-
+    
+    if (startingPosition)
+        iter->skip(startingPosition);
+        
     if (!iter) throw pdal_error("Unable to obtain iterator from previous stage!");
 
     // if we don't have an SRS, try to forward the one from the prev stage
