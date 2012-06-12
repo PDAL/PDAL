@@ -167,7 +167,9 @@ void PcInfo::dumpOnePoint(const Stage& stage) const
     const boost::uint32_t numRead = iter->read(data);
     if (numRead != 1)
     {
-        throw app_runtime_error("problem reading point number " + m_pointNumber);
+        std::ostringstream oss;
+        oss << "problem reading point number " << m_pointNumber;
+        throw app_runtime_error(oss.str());
     }
 
     boost::property_tree::ptree tree = data.toPTree();
