@@ -110,7 +110,7 @@ public:
     template <typename T>
     static inline void read_n(T& dest, std::istream& src, std::streamsize const& num)
     {
-        if (!src)
+        if (!src.good())
             throw std::runtime_error("detail::liblas::read_n<T> input stream is not readable");
 
         char* p = as_buffer(dest);
@@ -125,7 +125,7 @@ public:
     template <typename T>
     static inline void write_n(std::ostream& dest, T const& src, std::streamsize const& num)
     {
-        if (!dest)
+        if (!dest.good())
             throw std::runtime_error("detail::liblas::write_n<T>: output stream is not writable");
 
         // BUG: Fix little-endian
@@ -133,7 +133,8 @@ public:
         //LIBLAS_SWAP_BYTES_N(tmp, num);
 
         char const* p = as_bytes(tmp);
-        dest.write(p, num);
+        dest.rdbuf()->sputn(p, num);
+        // dest.write(p, num);
         assert(check_stream_state(dest));
     }
 
