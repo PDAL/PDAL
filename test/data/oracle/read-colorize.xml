@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Pipeline version="1.0">
+    <Writer type="drivers.las.writer">
+        <Option name="filename">
+            written-from-oracle.las
+        </Option>
+        <Option name="compression">
+            false
+        </Option>
+        <Filter type="filters.colorization">
+            <Option name="dimension">
+                Red
+                <Options>
+                    <Option name="band">
+                        0
+                    </Option>
+                    <Option name="scale">
+                        1.0
+                    </Option>
+                </Options>
+            </Option>
+            <Option name="dimension">
+                Green
+                <Options>
+                    <Option name="band">
+                        0
+                    </Option>
+                    <Option name="scale">
+                        1.0
+                    </Option>
+                </Options>
+            </Option>
+            <Option name="dimension">
+                Blue
+                <Options>
+                    <Option name="band">
+                        0
+                    </Option>
+                    <Option name="scale">
+                        256
+                    </Option>
+                </Options>
+            </Option>
+            <Option name="raster">
+                ../autzen.jpg
+            </Option>
+            <Reader type="drivers.oci.reader">
+                <Option name="query">
+                    SELECT CLOUD FROM SIMPLE_CLOUD
+                </Option>
+                <Option name="xml_schema_dump">
+                    oracle-schema.xml
+                </Option>
+                <Option name="connection">
+                    lidar/lidar@lidar.hobu.biz/lidar
+                </Option>
+                <Option name="debug">
+                    true
+                </Option>
+                <Option name="verbose">
+                    3
+                </Option>
+            </Reader>
+        </Filter>
+    </Writer>
+</Pipeline>
