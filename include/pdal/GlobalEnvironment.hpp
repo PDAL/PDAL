@@ -77,9 +77,7 @@ private:
     typedef std::map<boost::thread::id, ThreadEnvironment*> thread_map;
     thread_map m_threadMap;
 
-#ifdef PDAL_HAVE_PYTHON
     plang::PythonEnvironment* m_pythonEnvironment;
-#endif
 
     GlobalEnvironment(const GlobalEnvironment&); // nope
     GlobalEnvironment& operator=(const GlobalEnvironment&); // nope

@@ -36,7 +36,6 @@
 #define PDAL_PLANG_PYTHON_ENVIRONMENT_H
 
 #include <pdal/pdal_internal.hpp>
-#ifdef PDAL_HAVE_PYTHON
 
 #include <pdal/pdal_internal.hpp>
 //#include <pdal/PointBuffer.hpp>
@@ -61,6 +60,8 @@ namespace plang
 
 class Redirector;
 
+
+#ifdef PDAL_HAVE_PYTHON
 
 // there is one PythonEnvironment object per GlobalEnvironment object
 class PDAL_DLL PythonEnvironment
@@ -90,9 +91,16 @@ private:
 };
 
 
+#else
+
+typedef struct PythonEnvironmentHS *PythonEnvironment;
+
+#endif
+
 }
 } // namespaces
 
-#endif
+
+
 
 #endif
