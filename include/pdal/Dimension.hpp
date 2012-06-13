@@ -438,6 +438,118 @@ public:
         }
         return output;
     }
+    
+
+    template <class T>
+    inline T convert(void* data) const
+
+    {
+
+        T output(0);
+
+        float flt(0.0);
+        double dbl(0.0);
+        boost::int8_t i8(0);
+        boost::uint8_t u8(0);
+        boost::int16_t i16(0);
+        boost::uint16_t u16(0);
+        boost::int32_t i32(0);
+        boost::uint32_t u32(0);
+        boost::int64_t i64(0);
+        boost::uint64_t u64(0);
+
+        switch (this->getInterpretation())
+        {
+            case dimension::SignedByte:
+                i8 = *(boost::int8_t*)(void*)data;
+                output = Utils::saturation_cast<T, boost::int8_t>(i8);
+                break;
+            case dimension::UnsignedByte:
+                u8 = *(boost::uint8_t*)(void*)data;
+                output = Utils::saturation_cast<T, boost::uint8_t>(u8);
+                break;
+
+            case dimension::SignedInteger:
+                if (this->getByteSize() == 1)
+                {
+                    i8 = *(boost::int8_t*)(void*)data;
+                    output = Utils::saturation_cast<T, boost::int8_t>(i8);
+                }
+                else if (this->getByteSize() == 2)
+                {
+                    i16 = *(boost::int16_t*)(void*)data;
+                    output = Utils::saturation_cast<T, boost::int16_t>(i16);
+
+                }
+                else if (this->getByteSize() == 4)
+                {
+                    i32 = *(boost::int32_t*)(void*)data;
+                    output = Utils::saturation_cast<T, boost::int32_t>(i32);
+                }
+                else if (this->getByteSize() == 8)
+                {
+                    i64 = *(boost::int64_t*)(void*)data;
+                    output = Utils::saturation_cast<T, boost::int64_t>(i64);
+                }
+                else
+                {
+                    throw buffer_error("getField::Unhandled datatype size for SignedInteger");
+                }
+                break;
+            case dimension::UnsignedInteger:
+                if (this->getByteSize() == 1)
+                {
+                    u8 = *(boost::uint8_t*)(void*)data;
+                    output = Utils::saturation_cast<T, boost::uint8_t>(u8);
+                }
+                else if (this->getByteSize() == 2)
+                {
+                    u16 = *(boost::uint16_t*)(void*)data;
+                    output = Utils::saturation_cast<T, boost::uint16_t>(u16);
+
+                }
+                else if (this->getByteSize() == 4)
+                {
+                    u32 = *(boost::uint32_t*)(void*)data;
+                    output = Utils::saturation_cast<T, boost::uint32_t>(u32);
+                }
+                else if (this->getByteSize() == 8)
+                {
+                    u64 = *(boost::uint64_t*)(void*)data;
+                    output = Utils::saturation_cast<T, boost::uint64_t>(u64);
+                }
+                else
+                {
+                    throw buffer_error("getField::Unhandled datatype size for UnsignedInteger");
+                }
+
+                break;
+            case dimension::Float:
+                if (this->getByteSize() == 4)
+                {
+                    flt = *(float*)(void*)data;
+                    output = Utils::saturation_cast<T, float>(flt);
+                }
+                else if (this->getByteSize() == 8)
+                {
+                    dbl = *(double*)(void*)data;
+                    output = Utils::saturation_cast<T, double>(dbl);
+                }
+                else
+                {
+                    throw buffer_error("getField::Unhandled datatype size for Float");
+                }
+                break;
+
+            case dimension::Pointer:
+                break;
+            default:
+                throw buffer_error("Undefined interpretation for getField");
+        }
+
+        return output;
+
+    }
 
 /// @name Private Attributes
 private:
