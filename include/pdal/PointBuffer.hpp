@@ -39,8 +39,6 @@
 #include <boost/cstdint.hpp>
 #include <boost/scoped_array.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/numeric/conversion/cast.hpp>
-#include <boost/type_traits.hpp>
 #include <boost/algorithm/string.hpp>
 
 #include <pdal/pdal_internal.hpp>
@@ -170,7 +168,7 @@ public:
             will simply be saturated.
         \endverbatim
     */
-    template<class T> T getField(Dimension const& dim, std::size_t pointIndex) const;
+    template<class T> T const& getField(Dimension const& dim, std::size_t pointIndex) const;
 
     /*! set the value T for a given pdal::Dimension dim at pointIndex i.
         \param dim pdal::Dimension instance describing the dimension to select
@@ -336,31 +334,10 @@ private:
 
     Metadata m_metadata;
 
-    template<class T> T convertDimension(pdal::Dimension const& dim, void* bytes) const;
-    template<typename Target, typename Source> static Target saturation_cast(Source const& src);
     template<class T> static void scale(Dimension const& source_dimension,
                                  Dimension const& destination_dimension,
                                  T& value);
 };
-
-template<typename Target, typename Source>
-inline Target PointBuffer::saturation_cast(Source const& src)
-{
-
-    try
-    {
-        return boost::numeric_cast<Target>(src);
-    }
-    catch (boost::numeric::negative_overflow const&)
-    {
-        return std::numeric_limits<Target>::min();
-    }
-    catch (boost::numeric::positive_overflow const&)
-    {
-        return std::numeric_limits<Target>::max();
-    }
-
-}
 
 template <class T>
 inline void PointBuffer::setField(pdal::Dimension const& dim, std::size_t pointIndex, T value)
@@ -391,118 +368,7 @@ inline void PointBuffer::setField(pdal::Dimension const& dim, std::size_t pointI
 }
 
 template <class T>
-inline T PointBuffer::convertDimension(pdal::Dimension const& dim, void* p) const
-
-{
-
-    T output(0);
-
-    float flt(0.0);
-    double dbl(0.0);
-    boost::int8_t i8(0);
-    boost::uint8_t u8(0);
-    boost::int16_t i16(0);
-    boost::uint16_t u16(0);
-    boost::int32_t i32(0);
-    boost::uint32_t u32(0);
-    boost::int64_t i64(0);
-    boost::uint64_t u64(0);
-
-    switch (dim.getInterpretation())
-    {
-        case dimension::SignedByte:
-            i8 = *(boost::int8_t*)(void*)p;
-            output = saturation_cast<T, boost::int8_t>(i8);
-            break;
-        case dimension::UnsignedByte:
-            u8 = *(boost::uint8_t*)(void*)p;
-            output = saturation_cast<T, boost::uint8_t>(u8);
-            break;
-
-        case dimension::SignedInteger:
-            if (dim.getByteSize() == 1)
-            {
-                i8 = *(boost::int8_t*)(void*)p;
-                output = saturation_cast<T, boost::int8_t>(i8);
-            }
-            else if (dim.getByteSize() == 2)
-            {
-                i16 = *(boost::int16_t*)(void*)p;
-                output = saturation_cast<T, boost::int16_t>(i16);
-
-            }
-            else if (dim.getByteSize() == 4)
-            {
-                i32 = *(boost::int32_t*)(void*)p;
-                output = saturation_cast<T, boost::int32_t>(i32);
-            }
-            else if (dim.getByteSize() == 8)
-            {
-                i64 = *(boost::int64_t*)(void*)p;
-                output = saturation_cast<T, boost::int64_t>(i64);
-            }
-            else
-            {
-                throw buffer_error("getField::Unhandled datatype size for SignedInteger");
-            }
-            break;
-        case dimension::UnsignedInteger:
-            if (dim.getByteSize() == 1)
-            {
-                u8 = *(boost::uint8_t*)(void*)p;
-                output = saturation_cast<T, boost::uint8_t>(u8);
-            }
-            else if (dim.getByteSize() == 2)
-            {
-                u16 = *(boost::uint16_t*)(void*)p;
-                output = saturation_cast<T, boost::uint16_t>(u16);
-
-            }
-            else if (dim.getByteSize() == 4)
-            {
-                u32 = *(boost::uint32_t*)(void*)p;
-                output = saturation_cast<T, boost::uint32_t>(u32);
-            }
-            else if (dim.getByteSize() == 8)
-            {
-                u64 = *(boost::uint64_t*)(void*)p;
-                output = saturation_cast<T, boost::uint64_t>(u64);
-            }
-            else
-            {
-                throw buffer_error("getField::Unhandled datatype size for UnsignedInteger");
-            }
-
-            break;
-        case dimension::Float:
-            if (dim.getByteSize() == 4)
-            {
-                flt = *(float*)(void*)p;
-                output = saturation_cast<T, float>(flt);
-            }
-            else if (dim.getByteSize() == 8)
-            {
-                dbl = *(double*)(void*)p;
-                output = saturation_cast<T, double>(dbl);
-            }
-            else
-            {
-                throw buffer_error("getField::Unhandled datatype size for Float");
-            }
-            break;
-
-        case dimension::Pointer:
-            break;
-        default:
-            throw buffer_error("Undefined interpretation for getField");
-    }
-
-    return output;
-
-}
-
-template <class T>
-inline T PointBuffer::getField(pdal::Dimension const& dim, std::size_t pointIndex) const
+inline  T const& PointBuffer::getField(pdal::Dimension const& dim, std::size_t pointIndex) const
 {
     if (dim.getPosition() == -1)
     {
@@ -512,17 +378,22 @@ inline T PointBuffer::getField(pdal::Dimension const& dim, std::size_t pointInde
 
     std::size_t offset = (pointIndex * m_byteSize) + dim.getByteOffset();
 
+#ifdef DEBUG
+    // This test ends up being somewhat expensive when run for every field 
+    // for every point. 
     if (offset + sizeof(T) > m_byteSize * m_capacity)
     {
         std::ostringstream oss;
         oss << "Offset for given dimension is off the end of the buffer!";
         throw buffer_error(oss.str());
     }
+#endif
 
     assert(offset + sizeof(T) <= m_byteSize * m_capacity);
-    boost::uint8_t const* p = m_data.get() + offset;
 
-    return *(T const*)(void const*)p;
+    boost::uint8_t const* p = m_data.get() + offset;
+    T const& output = *(T const*)(void const*)p;
+    return output;
 }
 
 
