@@ -164,18 +164,18 @@ void PercentageCallback::callback()
     
     if (pdal::Utils::compare_distance<double>(currPerc, 100.0))
     {
-        std::cout << "100\n";
+        std::cout << ".100" << std::endl;
         m_done = true;
     }
     else if (currPerc >= m_lastMajorPerc + 10.0)
     {
-        std::cout << (int)currPerc;
+        std::cout << (int)currPerc << std::flush;
         m_lastMajorPerc = currPerc;
         m_lastMinorPerc = currPerc;
     }
     else if (currPerc >= m_lastMinorPerc + 2.0)
     {
-        std::cout << '.';
+        std::cout << '.' << std::flush;
         m_lastMinorPerc = currPerc;
     }
 
