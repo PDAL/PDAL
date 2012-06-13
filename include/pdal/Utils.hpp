@@ -50,6 +50,7 @@
 
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string/erase.hpp>
+#include <boost/numeric/conversion/cast.hpp>
 
 namespace pdal
 {
@@ -142,6 +143,26 @@ public:
     static inline double sround(double r)
     {
         return (r > 0.0) ? floor(r + 0.5) : ceil(r - 0.5);
+    }
+
+
+    template<typename Target, typename Source>
+    static inline Target saturation_cast(Source const& src)
+    {
+
+        try
+        {
+            return boost::numeric_cast<Target>(src);
+        }
+        catch (boost::numeric::negative_overflow const&)
+        {
+            return std::numeric_limits<Target>::min();
+        }
+        catch (boost::numeric::positive_overflow const&)
+        {
+            return std::numeric_limits<Target>::max();
+        }
+
     }
 
     static char* getenv(const char* env);
