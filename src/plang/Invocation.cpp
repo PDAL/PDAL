@@ -47,7 +47,7 @@
 
 // This file can only be included once, otherwise we get wierd runtime errors,
 // even if we define NO_IMPORT and stuff, so we include it only here, and provide
-// a backdoor function numpy_init() which gets called from Environment::startup().
+// a backdoor function numpy_init() which gets called from GlobalEnvironment::startup().
 #include <numpy/arrayobject.h>
 
 namespace pdal
@@ -105,7 +105,9 @@ void Invocation::compile()
     m_function = PyDict_GetItemString(m_dictionary, m_script.function());
     if (!m_function)
     {
-        throw python_error("unable to find target function in module");
+        std::ostringstream oss;
+        oss << "unable to find target function '" << m_script.function() << "' in module";
+        throw python_error(oss.str());
     }
 
     if (!PyCallable_Check(m_function)) m_environment.handleError();
