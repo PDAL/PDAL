@@ -168,7 +168,7 @@ public:
             will simply be saturated.
         \endverbatim
     */
-    template<class T> T const& getField(Dimension const& dim, std::size_t pointIndex) const;
+    template<class T> T const& getField(Dimension const& dim, boost::uint32_t pointIndex) const;
 
     /*! set the value T for a given pdal::Dimension dim at pointIndex i.
         \param dim pdal::Dimension instance describing the dimension to select
@@ -368,7 +368,7 @@ inline void PointBuffer::setField(pdal::Dimension const& dim, std::size_t pointI
 }
 
 template <class T>
-inline  T const& PointBuffer::getField(pdal::Dimension const& dim, std::size_t pointIndex) const
+inline  T const& PointBuffer::getField(pdal::Dimension const& dim, boost::uint32_t pointIndex) const
 {
     if (dim.getPosition() == -1)
     {
