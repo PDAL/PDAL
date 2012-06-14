@@ -148,14 +148,18 @@ ThreadEnvironment& GlobalEnvironment::getThreadEnvironment(boost::thread::id id)
 }
 
 
-#ifdef PDAL_HAVE_PYTHON
 plang::PythonEnvironment& GlobalEnvironment::getPythonEnvironment()
 {
+#ifdef PDAL_HAVE_PYTHON
     if (!m_pythonEnvironment)
         (void) createPythonEnvironment();
-    return *m_pythonEnvironment;
-}
 #endif
+
+    if (m_pythonEnvironment)
+        return *m_pythonEnvironment;
+    else
+        throw pdal_error("Unable to initialize the Python environment!");
+}
 
 
 boost::random::mt19937* GlobalEnvironment::getRNG()
