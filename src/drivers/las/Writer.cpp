@@ -416,7 +416,7 @@ void Writer::writeBufferBegin(PointBuffer const& data)
 
         boost::uint16_t reserved = getMetadataOption<boost::uint16_t>( getOptions(), 
                                                                 m, 
-                                                                "reserved", 
+                                                                "global_encoding", 
                                                                 0);
         m_lasHeader.SetReserved(reserved);
         log()->get(logDEBUG) << "Setting reserved to " 

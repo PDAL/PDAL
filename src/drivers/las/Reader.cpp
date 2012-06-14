@@ -348,7 +348,7 @@ void Reader::readMetadata()
                                             static_cast<boost::uint32_t>(header.GetFileSourceId()),
                                             "File Source ID (Flight Line Number if this file was derived from an original flight line): This field should be set to a value between 1 and 65,535, inclusive. A value of zero (0) is interpreted to mean that an ID has not been assigned. In this case, processing software is free to assign any valid number. Note that this scheme allows a LIDAR project to contain up to 65,535 unique sources. A source can be considered an original flight line or it can be the result of merge and/or extract operations."
                                             );
-    metadata.addMetadata<boost::uint32_t>(  "reserved",
+    metadata.addMetadata<boost::uint32_t>(  "global_encoding",
                                             static_cast<boost::uint32_t>(header.GetReserved()),
                                             "Global Encoding: This is a bit field used to indicate certain global properties about the file. In LAS 1.2 (the version in which this field was introduced), only the low bit is defined (this is the bit, that if set, would have the unsigned integer yield a value of 1)."
                                             );
