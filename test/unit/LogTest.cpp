@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE(test_one)
     const Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
 
     Option opt1("bounds", bounds);
-    Option opt2("log", Support::temppath("mylog.txt"));
+    Option opt2("log", Support::temppath("mylog_one.txt"));
     Option opt3("num_points", 1000);
     Option opt4("mode", "constant");
 
@@ -78,10 +78,14 @@ BOOST_AUTO_TEST_CASE(test_one)
         delete iter;
     }
 
-    bool ok = Support::compare_text_files(Support::temppath("mylog.txt"), Support::datapath("logtest.txt"));
+    bool ok = Support::compare_text_files(Support::temppath("mylog_one.txt"), Support::datapath("logtest.txt"));
     BOOST_CHECK(ok);
 
-    FileUtils::deleteFile(Support::temppath("mylog.txt"));
+    if (ok)
+    {
+        FileUtils::deleteFile(Support::temppath("mylog_one.txt"));
+    }
+    
 
     return;
 }
@@ -94,7 +98,7 @@ BOOST_AUTO_TEST_CASE(test_two_a)
     {
         const Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
         Option opt1("bounds", bounds);
-        Option opt2("log", Support::temppath("logtest_1.txt"));
+        Option opt2("log", Support::temppath("logtest_123.txt"));
         Option opt3("num_points", 1000);
         Option opt4("mode", "constant");
 
@@ -168,14 +172,18 @@ BOOST_AUTO_TEST_CASE(test_two_a)
         delete iter;
     }
 
-    bool ok1 = Support::compare_text_files(Support::temppath("logtest_1.txt"), Support::datapath("logtest_123.txt"));
+    bool ok1 = Support::compare_text_files(Support::temppath("logtest_123.txt"), Support::datapath("logtest_123.txt"));
     BOOST_CHECK(ok1);
     //bool ok2 = Support::compare_text_files(Support::temppath("logtest_2.txt"), Support::datapath("logtest_2.txt"));
     //BOOST_CHECK(ok2);
     //bool ok3 = Support::compare_text_files(Support::temppath("logtest_3.txt"), Support::datapath("logtest_3.txt"));
     //BOOST_CHECK(ok3);
-
-    FileUtils::deleteFile(Support::temppath("logtest_1.txt"));
+    if (ok1)
+    {
+        FileUtils::deleteFile(Support::temppath("logtest_123.txt"));
+    }
+    
+    
     //FileUtils::deleteFile(Support::temppath("logtest_2.txt"));
     //FileUtils::deleteFile(Support::temppath("logtest_3.txt"));
 
@@ -189,7 +197,7 @@ BOOST_AUTO_TEST_CASE(test_two_b)
     {
         const Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
         Option opt1("bounds", bounds);
-        Option opt2("log", Support::temppath("logtest_1.txt"));
+        Option opt2("log", Support::temppath("logtest_test_two_b_1.txt"));
         Option opt3("num_points", 1000);
         Option opt4("mode", "constant");
 
@@ -216,7 +224,7 @@ BOOST_AUTO_TEST_CASE(test_two_b)
         xfilter_opts.add(module);
         xfilter_opts.add(function);
     
-        Option optlog("log", Support::temppath("logtest_2.txt"));
+        Option optlog("log", Support::temppath("logtest_test_two_b_2.txt"));
         xfilter_opts.add(optlog);
     }
 
@@ -237,7 +245,7 @@ BOOST_AUTO_TEST_CASE(test_two_b)
         yfilter_opts.add(module);
         yfilter_opts.add(function);
     
-        Option optlog("log", Support::temppath("logtest_3.txt"));
+        Option optlog("log", Support::temppath("logtest_test_two_b_3.txt"));
         yfilter_opts.add(optlog);
     }
 
@@ -263,16 +271,27 @@ BOOST_AUTO_TEST_CASE(test_two_b)
         delete iter;
     }
 
-    bool ok1 = Support::compare_text_files(Support::temppath("logtest_1.txt"), Support::datapath("logtest_1.txt"));
+    bool ok1 = Support::compare_text_files(Support::temppath("logtest_test_two_b_1.txt"), Support::datapath("logtest_1.txt"));
     BOOST_CHECK(ok1);
-    bool ok2 = Support::compare_text_files(Support::temppath("logtest_2.txt"), Support::datapath("logtest_2.txt"));
+    bool ok2 = Support::compare_text_files(Support::temppath("logtest_test_two_b_2.txt"), Support::datapath("logtest_2.txt"));
     BOOST_CHECK(ok2);
-    bool ok3 = Support::compare_text_files(Support::temppath("logtest_3.txt"), Support::datapath("logtest_3.txt"));
+    bool ok3 = Support::compare_text_files(Support::temppath("logtest_test_two_b_3.txt"), Support::datapath("logtest_3.txt"));
     BOOST_CHECK(ok3);
 
-    FileUtils::deleteFile(Support::temppath("logtest_1.txt"));
-    FileUtils::deleteFile(Support::temppath("logtest_2.txt"));
-    FileUtils::deleteFile(Support::temppath("logtest_3.txt"));
+    if (ok1)
+    {
+        FileUtils::deleteFile(Support::temppath("logtest_test_two_b_1.txt"));
+    }
+
+    if (ok2)
+    {
+        FileUtils::deleteFile(Support::temppath("logtest_test_two_b_2.txt"));
+    }
+
+    if (ok3)
+    {
+        FileUtils::deleteFile(Support::temppath("logtest_test_two_b_3.txt"));
+    }        
 
     return;
 }
@@ -281,8 +300,6 @@ BOOST_AUTO_TEST_CASE(test_two_b)
 BOOST_AUTO_TEST_CASE(test_three)
 {
     // verify we can redirect the stdout inside the python script
-
-    FileUtils::deleteFile(Support::temppath("mylog.txt"));
 
     Options reader_opts;
     {
@@ -295,7 +312,7 @@ BOOST_AUTO_TEST_CASE(test_three)
         reader_opts.add(opt2);
         reader_opts.add(opt3);
 
-        Option optlog("log", Support::temppath("mylog.txt"));
+        Option optlog("log", Support::temppath("mylog_three.txt"));
         reader_opts.add(optlog);
     }
 
@@ -334,10 +351,15 @@ BOOST_AUTO_TEST_CASE(test_three)
         delete iter;
     }
 
-    bool ok = Support::compare_text_files(Support::temppath("mylog.txt"), Support::datapath("log_py.txt"));
+    bool ok = Support::compare_text_files(Support::temppath("mylog_three.txt"), Support::datapath("log_py.txt"));
     BOOST_CHECK(ok);
 
-    FileUtils::deleteFile(Support::temppath("mylog.txt"));
+    if (ok)
+    {
+        FileUtils::deleteFile(Support::temppath("mylog_three.txt"));
+    }
+    
+   
     
     return;
 }
