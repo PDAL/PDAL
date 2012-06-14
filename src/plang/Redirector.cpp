@@ -21,7 +21,7 @@ namespace pdal
 {
 namespace plang
 {
-
+ 
 struct Stdout
 {
     PyObject_HEAD
@@ -169,20 +169,20 @@ void Redirector::set_stdout(stdout_write_type write)
 {
     if (!m_stdout)
     {
-        m_stdout_saved = PySys_GetObject("stdout"); // borrowed
+        m_stdout_saved = PySys_GetObject(const_cast<char*>("stdout")); // borrowed
         m_stdout = StdoutType.tp_new(&StdoutType, 0, 0);
     }
 
     Stdout* impl = reinterpret_cast<Stdout*>(m_stdout);
     impl->write = write;
-    PySys_SetObject("stdout", m_stdout);
+    PySys_SetObject(const_cast<char*>("stdout"), m_stdout);
 }
 
 
 void Redirector::reset_stdout()
 {
     if (m_stdout_saved)
-        PySys_SetObject("stdout", m_stdout_saved);
+        PySys_SetObject(const_cast<char*>("stdout"), m_stdout_saved);
 
     Py_XDECREF(m_stdout);
     m_stdout = 0;
