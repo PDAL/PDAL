@@ -110,7 +110,7 @@ std::ostream& Log::get(LogLevel level)
     if (level <= m_level)
     {
         *m_log << "(" << m_leader << " "<< getLevelString(level) <<": " << level << "): ";
-        *m_log << std::string(level > logDEBUG ? 0 : level - logDEBUG, '\t');
+        *m_log << std::string(level < logDEBUG ? 0 : level - logDEBUG, '\t');
         return *m_log;
     }
     else
