@@ -237,7 +237,10 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data,
     {
         Utils::read_n(buf, stream, pointByteCount * numPoints);
     }
-
+	
+	pdal::Bounds<double> bounds;
+	pdal::Vector<double> point(0.0, 0.0, 0.0);
+	bool bFirstPoint(true);
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
         boost::uint8_t* p = buf + pointByteCount * pointIndex;
@@ -247,6 +250,24 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data,
             const boost::int32_t x = Utils::read_field<boost::int32_t>(p);
             const boost::int32_t y = Utils::read_field<boost::int32_t>(p);
             const boost::int32_t z = Utils::read_field<boost::int32_t>(p);
+
+			
+			
+			double X = dimensions->X->applyScaling(x);
+			double Y = dimensions->Y->applyScaling(y);
+			double Z = dimensions->Z->applyScaling(z);
+			
+			if (bFirstPoint)
+			{
+				bounds = pdal::Bounds<double>(X, Y, Z, X, Y, Z);
+				bFirstPoint = false;
+			}
+			
+			point.set(0, X);
+			point.set(1, Y);
+			point.set(2, Z);
+			bounds.grow(point);
+			
             const boost::uint16_t intensity = Utils::read_field<boost::uint16_t>(p);
             const boost::uint8_t flags = Utils::read_field<boost::uint8_t>(p);
             const boost::uint8_t classification = Utils::read_field<boost::uint8_t>(p);
@@ -320,7 +341,7 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data,
     
     delete[] buf;
 
-    data.setSpatialBounds(lasHeader.getBounds());
+    data.setSpatialBounds(bounds);
 
     return numPoints;
 }
