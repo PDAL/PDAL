@@ -246,6 +246,16 @@ if(WITH_GDAL)
   mark_as_advanced(CLEAR GDAL_INCLUDE_DIR) 
   mark_as_advanced(CLEAR GDAL_LIBRARY)
   message(STATUS "...building with GDAL")
+
+  find_package(GEOS 3.3)
+  if (GEOS_FOUND)
+    set(PDAL_HAVE_GEOS 1)
+    include_directories(${GEOS_INCLUDE_DIR})
+    message(STATUS "...GEOS found and used in addition to GDAL")
+  else()
+    set(GDAL_LIBRARY "") 
+  endif()
+
 else()
   set(GDAL_LIBRARY "") 
 endif()
@@ -275,6 +285,8 @@ if(WITH_GEOTIFF)
     endif()
   endif()
 endif()
+
+
 
 if(WITH_GDAL)
   if (NOT GEOTIFF_FOUND)

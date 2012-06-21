@@ -28,6 +28,7 @@
 #cmakedefine PDAL_HAVE_LASZIP
 #cmakedefine PDAL_HAVE_ORACLE
 #cmakedefine PDAL_HAVE_GDAL
+#cmakedefine PDAL_HAVE_GEOS
 #cmakedefine PDAL_HAVE_LIBXML2
 #cmakedefine PDAL_HAVE_LIBGEOTIFF
 #cmakedefine PDAL_HAVE_MRSID
