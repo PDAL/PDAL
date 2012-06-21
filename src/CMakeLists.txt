@@ -528,7 +528,8 @@ if (WIN32)
     ${LASZIP_LIBRARY}
     ${LIBXML2_LIBRARIES}
     ${PYTHON_LIBRARY}
-    ${P2G_LIBRARY})
+    ${P2G_LIBRARY}
+    ${GEOS_LIBRARY})
 else()
   target_link_libraries(${APPS_CPP_DEPENDENCIES}
     ${PDAL_LIB_NAME}
@@ -540,7 +541,8 @@ else()
     ${LASZIP_LIBRARY}
     ${LIBXML2_LIBRARIES}
     ${PYTHON_LIBRARY}
-    ${P2G_LIBRARY})
+    ${P2G_LIBRARY}
+    ${GEOS_LIBRARY})
 endif()
 
 message(STATUS "Using boost lib: ${Boost_LIBRARIES}")
