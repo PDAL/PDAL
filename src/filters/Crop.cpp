@@ -36,7 +36,7 @@
 
 #include <pdal/PointBuffer.hpp>
 #include <sstream>
-
+#include <cstdarg>
 
 namespace pdal
 {
