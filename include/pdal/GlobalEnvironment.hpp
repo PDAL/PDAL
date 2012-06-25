@@ -60,10 +60,8 @@ public:
     // with no args, returns the not-a-thread thread environment
     ThreadEnvironment& getThreadEnvironment(boost::thread::id=boost::thread::id());
 
-#ifdef PDAL_HAVE_PYTHON
     // get the plang (python) environment
     plang::PythonEnvironment& getPythonEnvironment();
-#endif
 
     // forwarded function
     boost::random::mt19937* getRNG();
