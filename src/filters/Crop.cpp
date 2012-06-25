@@ -459,6 +459,7 @@ boost::uint32_t Crop::readBufferImpl(PointBuffer& data)
     const boost::uint32_t numPointsAchieved = outputData.getNumPoints();
     
     data.resize(outputData.getNumPoints());
+    data.setNumPoints(0);
     data.copyPointsFast(0, 0, outputData, outputData.getNumPoints());
     data.setNumPoints(outputData.getNumPoints());
     m_cropFilter.log()->get(logDEBUG3) << "Copying " << outputData.getNumPoints() << " at end of readBufferImpl" << std::endl;
