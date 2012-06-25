@@ -144,7 +144,7 @@ ELSE(WIN32)
         #MESSAGE("DBG  GEOS_LIBRARY=${GEOS_LIBRARY}")
       
       ELSE(GEOS_CONFIG)
-        MESSAGE("FindGEOS.cmake: geos-config not found. Please set it manually. GEOS_CONFIG=${GEOS_CONFIG}")
+        MESSAGE("FindGEOS.cmake: geos-config not found. Please set it manually if you would also like it configured. GEOS_CONFIG=${GEOS_CONFIG}")
       ENDIF(GEOS_CONFIG)
     ENDIF(NOT GEOS_INCLUDE_DIR OR NOT GEOS_LIBRARY OR NOT GEOS_CONFIG)
   ENDIF(UNIX)
@@ -163,8 +163,6 @@ IF (GEOS_FOUND)
 
 ELSE (GEOS_FOUND)
 
-   MESSAGE(GEOS_INCLUDE_DIR=${GEOS_INCLUDE_DIR})
-   MESSAGE(GEOS_LIBRARY=${GEOS_LIBRARY})
-   MESSAGE(FATAL_ERROR "Could not find GEOS")
+   message(STATUS "Could not find GEOS")
 
 ENDIF (GEOS_FOUND)

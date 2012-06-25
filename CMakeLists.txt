@@ -253,7 +253,7 @@ if(WITH_GDAL)
     include_directories(${GEOS_INCLUDE_DIR})
     message(STATUS "...GEOS found and used in addition to GDAL")
   else()
-    set(GDAL_LIBRARY "") 
+    set(GEOS_LIBRARY "") 
   endif()
 
 else()
