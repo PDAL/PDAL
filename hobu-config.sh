@@ -1,7 +1,8 @@
 USR_LOCAL="/usr/local"
+USR="/usr"
 TIFF_HOME=$USR_LOCAL
 LASZIP_HOME=$USR_LOCAL
-LIBXML2_HOME=$USR_LOCAL
+LIBXML2_HOME=$USR
 GEOTIFF_HOME=$USR_LOCAL
 SO_EXT=dylib
 EMBED=ON
@@ -14,7 +15,7 @@ cmake   -G "Unix Makefiles"  \
         -DPDAL_EMBED_BOOST=${EMBED} \
         -DWITH_GDAL=ON \
         -DWITH_ICONV=ON \
-        -DWITH_ORACLE=ON \
+        -DWITH_ORACLE=OFF \
         -DWITH_GEOTIFF=ON \
         -DWITH_LASZIP=ON \
         -DWITH_LIBXML2=ON \

@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(test_static_options)
     BOOST_CHECK(opts.hasOption("bounds"));
     BOOST_CHECK(!opts.hasOption("metes"));
     const boost::property_tree::ptree& pt = opts.toPTree();
-    BOOST_CHECK(pt.size() == 1);
+    BOOST_CHECK(pt.size() == 3);
 
     return;
 }

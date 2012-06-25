@@ -37,7 +37,12 @@
 
 #include <pdal/drivers/faux/Reader.hpp>
 #include <pdal/drivers/faux/Writer.hpp>
+#include <pdal/drivers/las/Reader.hpp>
 #include <pdal/filters/Crop.hpp>
+#include <pdal/FileUtils.hpp>
+#include <pdal/PointBuffer.hpp>
+#include <pdal/StageIterator.hpp>
+#include "Support.hpp"
 
 using namespace pdal;
 
@@ -58,6 +63,7 @@ BOOST_AUTO_TEST_CASE(test_crop)
     writer.initialize();
 
     boost::uint64_t numWritten = writer.write(1000);
+    BOOST_CHECK_EQUAL(numWritten, 333);
 
     // 1000 * 1/3 = 333, plus or minus a bit for rounding
     BOOST_CHECK(Utils::compare_approx<double>(static_cast<double>(numWritten), 333, 6));
@@ -72,20 +78,60 @@ BOOST_AUTO_TEST_CASE(test_crop)
     const double avgY = writer.getAvgY();
     const double avgZ = writer.getAvgZ();
 
-    const double delX = 10.0 / 999.0;
-    const double delY = 100.0 / 999.0;
-    const double delZ = 1000.0 / 999.0;
+    const double delX = 10.0 / 999.0 * 100.0;
+    const double delY = 100.0 / 999.0 * 100.0;
+    const double delZ = 1000.0 / 999.0 * 100.0;
 
-    BOOST_CHECK(Utils::compare_approx<double>(minX, 3.33333, delX));
-    BOOST_CHECK(Utils::compare_approx<double>(minY, 33.33333, delY));
-    BOOST_CHECK(Utils::compare_approx<double>(minZ, 333.33333, delZ));
-    BOOST_CHECK(Utils::compare_approx<double>(maxX, 6.66666, delX));
-    BOOST_CHECK(Utils::compare_approx<double>(maxY, 66.66666, delY));
-    BOOST_CHECK(Utils::compare_approx<double>(maxZ, 666.66666, delZ));
-    BOOST_CHECK(Utils::compare_approx<double>(avgX, 5.00000, delX));
-    BOOST_CHECK(Utils::compare_approx<double>(avgY, 50.00000, delY));
-    BOOST_CHECK(Utils::compare_approx<double>(avgZ, 500.00000, delZ));
+    BOOST_CHECK_CLOSE(minX, 3.33333, delX);
+    BOOST_CHECK_CLOSE(minY, 33.33333, delY);
+    BOOST_CHECK_CLOSE(minZ, 333.33333, delZ);
+    BOOST_CHECK_CLOSE(maxX, 6.66666, delX);
+    BOOST_CHECK_CLOSE(maxY, 66.66666, delY);
+    BOOST_CHECK_CLOSE(maxZ, 666.66666, delZ);
+    BOOST_CHECK_CLOSE(avgX, 5.00000, delX);
+    BOOST_CHECK_CLOSE(avgY, 50.00000, delY);
+    BOOST_CHECK_CLOSE(avgZ, 500.00000, delZ);
 
+    return;
+}
+
+
+BOOST_AUTO_TEST_CASE(test_crop_polygon)
+{
+
+#ifdef PDAL_HAVE_GEOS
+    pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
+
+    pdal::Options options;
+    
+    pdal::Option debug("debug", true, "");
+    pdal::Option verbose("verbose", 9, "");
+    // options.add(debug);
+    // options.add(verbose);
+    
+    std::istream* wkt_stream = FileUtils::openFile(Support::datapath("autzen-selection.wkt"));
+
+    std::stringstream buffer;
+    buffer << wkt_stream->rdbuf();
+
+    std::string wkt(buffer.str());
+
+    pdal::Option polygon("polygon", wkt, "");
+    
+    options.add(polygon);
+
+
+    pdal::filters::Crop crop(reader, options);
+    crop.initialize();
+
+    pdal::PointBuffer data(crop.getSchema(), 1000);
+    
+    pdal::StageSequentialIterator* iter = crop.createSequentialIterator(data);
+
+    boost::uint32_t numRead = iter->read(data);
+    BOOST_CHECK_EQUAL(numRead, 47);
+ 
+#endif
     return;
 }
 

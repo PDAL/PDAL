@@ -39,13 +39,15 @@
 #include <pdal/FilterIterator.hpp>
 #include <pdal/Bounds.hpp>
 
-namespace pdal
-{
-class PointBuffer;
-}
+#ifdef PDAL_HAVE_GEOS
+#include <geos_c.h>
+#endif
 
 namespace pdal
 {
+
+class PointBuffer;
+
 namespace filters
 {
 
@@ -58,7 +60,8 @@ public:
 
     Crop(Stage& prevStage, const Options&);
     Crop(Stage& prevStage, Bounds<double> const& bounds);
-
+    ~Crop();
+    
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
 
@@ -77,13 +80,32 @@ public:
 
     // returns number of points accepted into the data buffer (which may be less than data.getNumPoints(),
     // if we're calling this routine multiple times with the same buffer
-    boost::uint32_t processBuffer(PointBuffer& dstData, const PointBuffer& srcData) const;
+    boost::uint32_t processBuffer(PointBuffer const& srcData, PointBuffer& dstData) const;
 
     const Bounds<double>& getBounds() const;
+
+    double getScaledValue(PointBuffer const& data,
+                          Dimension const& d,
+                          std::size_t pointIndex) const;
+
 
 private:
     Bounds<double> m_bounds;
 
+#ifdef PDAL_HAVE_GEOS
+	GEOSContextHandle_t m_geosEnvironment;
+    GEOSGeometry* m_geosGeometry; 
+    GEOSPreparedGeometry const* m_geosPreparedGeometry;
+#else   
+    void* m_geosEnvironment;
+    void* m_geosGeometry;
+    void* m_geosPreparedGeometry;
+    
+    typedef struct GEOSGeometry* GEOSGeometryHS;
+#endif
+
+    Bounds <double> computeBounds(GEOSGeometry const* geometry);
+    
     Crop& operator=(const Crop&); // not implemented
     Crop(const Crop&); // not implemented
 };
@@ -109,10 +131,10 @@ private:
 };
 
 
-}
-} // namespaces
+} // sequential
+} // iterators
 
-}
-} // namespaces
+} // filters
+} // pdal
 
 #endif
