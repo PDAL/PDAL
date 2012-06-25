@@ -77,12 +77,13 @@ namespace filters
 
 Crop::Crop(Stage& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
+    , bCropOutside(false)
     , m_geosEnvironment(0)
     , m_geosGeometry(0)
     , m_geosPreparedGeometry(0)
 {
     m_bounds = options.getValueOrDefault<Bounds<double> >("bounds", Bounds<double>());
-
+    bCropOutside = options.getValueOrDefault<bool>("outside", false);
     return;
 }
 
@@ -90,6 +91,7 @@ Crop::Crop(Stage& prevStage, const Options& options)
 Crop::Crop(Stage& prevStage, Bounds<double> const& bounds)
     : Filter(prevStage, Options::none())
     , m_bounds(bounds)
+    , bCropOutside(false)
     , m_geosEnvironment(0)
     , m_geosGeometry(0)
     , m_geosPreparedGeometry(0)
@@ -347,7 +349,7 @@ boost::uint32_t Crop::processBuffer(PointBuffer const& srcData, PointBuffer& dst
             // by itself.
             Vector<double> p(x,y,z);
 
-            if (filter_bounds.contains(p))
+            if (!bCropOutside && filter_bounds.contains(p))
             {
                 dstData.copyPointFast(copy_index, index, srcData);
                 dstData.setNumPoints(copy_index+1);
@@ -370,7 +372,7 @@ boost::uint32_t Crop::processBuffer(PointBuffer const& srcData, PointBuffer& dst
             GEOSGeometry* p = GEOSGeom_createPoint_r(m_geosEnvironment, coords);
             if (!p) throw pdal_error("unable to allocate candidate test point");
             
-            if (static_cast<bool>(GEOSPreparedContains_r(m_geosEnvironment, m_geosPreparedGeometry, p)) == true)
+            if (static_cast<bool>(GEOSPreparedContains_r(m_geosEnvironment, m_geosPreparedGeometry, p)) == !bCropOutside)
             {
                 dstData.copyPointFast(copy_index, index, srcData);
                 dstData.setNumPoints(copy_index + 1);
@@ -455,6 +457,8 @@ boost::uint32_t Crop::readBufferImpl(PointBuffer& data)
     }
 
     const boost::uint32_t numPointsAchieved = outputData.getNumPoints();
+    
+    data.resize(outputData.getNumPoints());
     data.copyPointsFast(0, 0, outputData, outputData.getNumPoints());
     data.setNumPoints(outputData.getNumPoints());
     m_cropFilter.log()->get(logDEBUG3) << "Copying " << outputData.getNumPoints() << " at end of readBufferImpl" << std::endl;

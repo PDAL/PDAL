@@ -30,6 +30,9 @@
                 422.6396484375,636889.412951239268295 851528.512293258565478
                 422.7001953125))
             </Option>
+            <Option name="outside">
+                true
+            </Option>
             <Reader type="drivers.las.reader">
                 <Option name="filename">
                     ../autzen-colorized-1.2-3.las

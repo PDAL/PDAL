@@ -91,6 +91,7 @@ public:
 
 private:
     Bounds<double> m_bounds;
+    bool bCropOutside;
 
 #ifdef PDAL_HAVE_GEOS
 	GEOSContextHandle_t m_geosEnvironment;
