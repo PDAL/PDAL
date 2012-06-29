@@ -286,7 +286,7 @@ if(WITH_GEOTIFF)
   endif()
 endif()
 
-
+find_package(Flann 1.7)
 
 if(WITH_GDAL)
   if (NOT GEOTIFF_FOUND)
