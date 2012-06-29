@@ -38,8 +38,12 @@
 #include <boost/uuid/uuid_io.hpp>
 
 #include <pdal/PointBuffer.hpp>
+
 #include <pdal/drivers/nitf/Reader.hpp>
 #include <pdal/drivers/las/Reader.hpp>
+#include <pdal/filters/Chipper.hpp>
+#include <pdal/drivers/pipeline/Reader.hpp>
+
 #include "Support.hpp"
 
 #include <iostream>
@@ -132,6 +136,37 @@ BOOST_AUTO_TEST_CASE(test_one)
 
     return;
 }
+
+
+BOOST_AUTO_TEST_CASE(test_chipper)
+{
+    //
+    // read NITF
+    //
+
+    pdal::Option option("filename", Support::datapath("nitf/chipper.xml"));
+    pdal::Options options(option);
+
+    pdal::drivers::pipeline::Reader reader(options);
+    reader.initialize();
+    
+    
+    pdal::filters::Chipper* chipper = static_cast<pdal::filters::Chipper*>(reader.getManager().getStage());
+
+    const Schema& schema = reader.getSchema();
+    
+    PointBuffer data(schema, 25);
+    
+    StageSequentialIterator* iter = reader.createSequentialIterator(data);
+    const boost::uint32_t num_read = iter->read(data);
+    
+    
+    boost::uint32_t num_blocks = chipper->GetBlockCount();
+    BOOST_CHECK_EQUAL(num_blocks, 8u);
+ 
+    return;
+}
+
 
 
 BOOST_AUTO_TEST_SUITE_END()
