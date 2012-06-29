@@ -143,7 +143,9 @@ BOOST_AUTO_TEST_CASE(test1)
 
         writer.write(0);
     }
-
+    
+    FileUtils::deleteFile(nitf_output);
+    
 
     return;
 
