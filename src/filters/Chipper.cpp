@@ -535,6 +535,13 @@ boost::uint32_t Chipper::readBufferImpl(PointBuffer& buffer)
 
     // Don't create this every GetBuffer call
     boost::scoped_ptr<StageRandomIterator> iter(m_chipper.getPrevStage().createRandomIterator(buffer));
+    
+    if (!iter)
+    {
+        std::ostringstream oss;
+        oss << "Unable to create random iterator from stage of type '" << m_chipper.getPrevStage().getName() << "'";
+        throw pdal_error(oss.str());
+    }
     m_random_iterator.swap(iter);
 
     block.GetBuffer(m_random_iterator, buffer, m_currentBlockId, pointID, blockID);
