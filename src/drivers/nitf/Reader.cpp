@@ -182,8 +182,12 @@ const Options Reader::getDefaultOptions() const
 
 pdal::StageSequentialIterator* Reader::createSequentialIterator(PointBuffer& buffer) const
 {
-    pdal::StageSequentialIterator* lasIter = m_lasReader->createSequentialIterator(buffer);
-    return lasIter;
+    return m_lasReader->createSequentialIterator(buffer);
+}
+
+pdal::StageRandomIterator* Reader::createRandomIterator(PointBuffer& buffer) const
+{
+    return m_lasReader->createRandomIterator(buffer);
 }
 
 

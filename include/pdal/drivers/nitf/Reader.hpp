@@ -46,10 +46,6 @@ namespace pdal
 class PointBuffer;
 class StreamFactory;
 
-namespace metadata
-{
-class Entry;
-}
 namespace drivers
 {
 namespace las
@@ -88,6 +84,7 @@ public:
     }
 
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
+    pdal::StageRandomIterator* createRandomIterator(PointBuffer& buffer) const;
 
     // for dumping
     virtual boost::property_tree::ptree toPTree() const;
