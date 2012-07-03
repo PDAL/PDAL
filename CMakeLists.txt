@@ -287,6 +287,13 @@ if(WITH_GEOTIFF)
 endif()
 
 find_package(Flann 1.7)
+if (FLANN_FOUND)
+  mark_as_advanced(CLEAR FLANN_INCLUDE_DIR) 
+  mark_as_advanced(CLEAR FLANN_LIBRARY) 
+  include_directories(${FLANN_INCLUDE_DIR})
+  set(PDAL_HAVE_FLANN 1)
+endif()
+
 
 if(WITH_GDAL)
   if (NOT GEOTIFF_FOUND)

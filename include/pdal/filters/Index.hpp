@@ -38,8 +38,11 @@
 #include <pdal/Filter.hpp>
 #include <pdal/FilterIterator.hpp>
 
-#include <boost/shared_ptr.hpp>
-#include <boost/array.hpp>
+#include <boost/scoped_array.hpp>
+
+#ifdef PDAL_HAVE_FLANN
+#include <flann/flann.hpp>
+#endif
 
 
 namespace pdal
@@ -88,15 +91,37 @@ class PDAL_DLL Index : public pdal::FilterSequentialIterator
 {
 public:
     Index(const pdal::filters::Index& filter, PointBuffer& buffer);
-
+    
+    std::vector<boost::uint32_t> query(double const& x, double const& y, double const& z, double distance, boost::uint32_t count=1);
+    
 protected:
     virtual void readBufferBeginImpl(PointBuffer&);
+    virtual void readEndImpl();
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t);
     boost::uint32_t readBufferImpl(PointBuffer&);
     bool atEndImpl() const;
+
+    double getScaledValue(PointBuffer& data,
+                          Dimension const& d,
+                          std::size_t pointIndex) const;    
     const pdal::filters::Index& m_stage;
+
+    boost::scoped_array<float> m_query_data;    
+    boost::scoped_array<float> m_distance_data;
+    boost::scoped_array<int> m_indice_data;
+
+    flann::Index<flann::L2<float> >* m_index;
+    flann::Matrix<float>* m_dataset;
+    flann::Matrix<int>* m_indices;
+    flann::Matrix<float>* m_query;
+    flann::Matrix<float>* m_distances;
+    
+    pdal::Dimension const* m_xDim;
+    pdal::Dimension const* m_yDim;
+    pdal::Dimension const* m_zDim;
+    
 };
 
 

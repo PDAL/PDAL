@@ -40,11 +40,6 @@
 
 #include <pdal/PointBuffer.hpp>
 
-#ifdef PDAL_HAVE_GDAL
-#include <gdal.h>
-#include <ogr_spatialref.h>
-#include <pdal/GDALUtils.hpp>
-#endif
 
 namespace pdal
 {
@@ -73,40 +68,15 @@ const Options Index::getDefaultOptions() const
 
     Option x("x_dim", std::string("X"), "Dimension name to use for 'X' data");
     Option y("y_dim", std::string("Y"), "Dimension name to use for 'Y' data");
+    Option z("z_dim", std::string("Z"), "Dimension name to use for 'Z' data");
 
-    pdal::Option red("dimension", "Red", "");
-    pdal::Option b0("band",1, "");
-    pdal::Option s0("scale", 1.0f, "scale factor for this dimension");
-    pdal::Options redO;
-    redO.add(b0);
-    redO.add(s0);
-    red.setOptions(redO);
+    Option filename("filename", "", "Filename to store the index in");
 
-    pdal::Option green("dimension", "Green", "");
-    pdal::Option b1("band",2, "");
-    pdal::Option s1("scale", 1.0f, "scale factor for this dimension");
-    pdal::Options greenO;
-    greenO.add(b1);
-    greenO.add(s1);
-    green.setOptions(greenO);
-
-    pdal::Option blue("dimension", "Blue", "");
-    pdal::Option b2("band",3, "");
-    pdal::Option s2("scale", 1.0f, "scale factor for this dimension");
-    pdal::Options blueO;
-    blueO.add(b2);
-    blueO.add(s2);
-    blue.setOptions(blueO);
-
-    pdal::Option reproject("reproject", false, "Reproject the input data into the same coordinate system as the raster?");
 
     options.add(x);
     options.add(y);
-    options.add(red);
-    options.add(green);
-    options.add(blue);
-    options.add(reproject);
-
+    options.add(z);
+    options.add(filename);
 
     return options;
 }
@@ -134,7 +104,16 @@ namespace sequential
 Index::Index(const pdal::filters::Index& filter, PointBuffer& buffer)
     : pdal::FilterSequentialIterator(filter, buffer)
     , m_stage(filter)
+    , m_index(0)
+    , m_dataset(0)
+    , m_indices(0)
+    , m_query(0)
+    , m_distances(0)
+    , m_xDim(0)
+    , m_yDim(0)
+    , m_zDim(0)
 {
+    
     return;
 }
 
@@ -143,17 +122,154 @@ void Index::readBufferBeginImpl(PointBuffer& buffer)
     // Cache dimension positions
 
     pdal::Schema const& schema = buffer.getSchema();
- 
+    
+    std::string x_name = m_stage.getOptions().getValueOrDefault<std::string>("x_dim", "X");
+    std::string y_name = m_stage.getOptions().getValueOrDefault<std::string>("x_dim", "Y");
+    std::string z_name = m_stage.getOptions().getValueOrDefault<std::string>("x_dim", "Z");
+    
+    m_xDim = &schema.getDimension(x_name);
+    m_yDim = &schema.getDimension(y_name);
+    m_zDim = &schema.getDimension(z_name);
+    
+    
+    if (!m_stage.getNumPoints())
+        throw pdal_error("Unable to create index from pipeline that has an indeterminate number of points!");
+        
 
+    boost::scoped_array<float> data(new float[ m_stage.getNumPoints() *3 ]);
+    m_query_data.swap(data);
+    m_dataset = new flann::Matrix<float>(m_query_data.get(), m_stage.getNumPoints(), 3);
+    
 }
 
+std::vector<boost::uint32_t> Index::query(double const& x, double const& y, double const& z, double distance, boost::uint32_t count)
+{
+
+    boost::scoped_array<float> distances(new float[ count *3 ]);
+    m_distance_data.swap(distances);
+    m_distances = new flann::Matrix<float>(m_distance_data.get(), count, 3);
+
+    boost::scoped_array<int> indices(new int[ m_stage.getNumPoints() *3 ]);
+    m_indice_data.swap(indices);
+    m_indices = new flann::Matrix<int>(m_indice_data.get(), m_stage.getNumPoints(), 3);
+    
+    std::vector<boost::uint32_t> output;
+    
+    return output;
+}
 
 
 boost::uint32_t Index::readBufferImpl(PointBuffer& data)
 {
     const boost::uint32_t numRead = getPrevIterator().read(data);
 
+    for (boost::uint32_t pointIndex=0; pointIndex<numRead; pointIndex++)
+    {
+        float x = static_cast<float>(getScaledValue(data, *m_xDim, pointIndex));
+        float y = static_cast<float>(getScaledValue(data, *m_yDim, pointIndex));
+        float z = static_cast<float>(getScaledValue(data, *m_zDim, pointIndex));
+        
+        m_query_data[pointIndex] = x;
+        m_query_data[pointIndex+1] = y;
+        m_query_data[pointIndex+2] = z;
+        
+    }
+    
     return numRead;
+}
+
+double Index::getScaledValue(PointBuffer& data,
+        Dimension const& d,
+        std::size_t pointIndex) const
+{
+    double output(0.0);
+
+    float flt(0.0);
+    boost::int8_t i8(0);
+    boost::uint8_t u8(0);
+    boost::int16_t i16(0);
+    boost::uint16_t u16(0);
+    boost::int32_t i32(0);
+    boost::uint32_t u32(0);
+    boost::int64_t i64(0);
+    boost::uint64_t u64(0);
+
+    boost::uint32_t size = d.getByteSize();
+    switch (d.getInterpretation())
+    {
+        case dimension::Float:
+            if (size == 4)
+            {
+                flt = data.getField<float>(d, pointIndex);
+                output = static_cast<double>(flt);
+            }
+            if (size == 8)
+            {
+                output = data.getField<double>(d, pointIndex);
+            }
+            break;
+
+        case dimension::SignedInteger:
+        case dimension::SignedByte:
+            if (size == 1)
+            {
+                i8 = data.getField<boost::int8_t>(d, pointIndex);
+                output = d.applyScaling<boost::int8_t>(i8);
+            }
+            if (size == 2)
+            {
+                i16 = data.getField<boost::int16_t>(d, pointIndex);
+                output = d.applyScaling<boost::int16_t>(i16);
+            }
+            if (size == 4)
+            {
+                i32 = data.getField<boost::int32_t>(d, pointIndex);
+                output = d.applyScaling<boost::int32_t>(i32);
+            }
+            if (size == 8)
+            {
+                i64 = data.getField<boost::int64_t>(d, pointIndex);
+                output = d.applyScaling<boost::int64_t>(i64);
+            }
+            break;
+
+        case dimension::UnsignedInteger:
+        case dimension::UnsignedByte:
+            if (size == 1)
+            {
+                u8 = data.getField<boost::uint8_t>(d, pointIndex);
+                output = d.applyScaling<boost::uint8_t>(u8);
+            }
+            if (size == 2)
+            {
+                u16 = data.getField<boost::uint16_t>(d, pointIndex);
+                output = d.applyScaling<boost::uint16_t>(u16);
+            }
+            if (size == 4)
+            {
+                u32 = data.getField<boost::uint32_t>(d, pointIndex);
+                output = d.applyScaling<boost::uint32_t>(u32);
+            }
+            if (size == 8)
+            {
+                u64 = data.getField<boost::uint64_t>(d, pointIndex);
+                output = d.applyScaling<boost::uint64_t>(u64);
+            }
+            break;
+
+        case dimension::Pointer:    // stored as 64 bits, even on a 32-bit box
+        case dimension::Undefined:
+            throw pdal_error("Dimension data type unable to be reprojected");
+    }
+
+    return output;
+}
+void Index::readEndImpl()
+{
+    
+    // Build the index
+    m_index = new flann::Index<flann::L2<float> >(*m_dataset, flann::KDTreeIndexParams(4));
+    m_index->buildIndex();
 }
 
 
