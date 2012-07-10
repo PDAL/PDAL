@@ -104,11 +104,13 @@ namespace sequential
 Index::Index(const pdal::filters::Index& filter, PointBuffer& buffer)
     : pdal::FilterSequentialIterator(filter, buffer)
     , m_stage(filter)
+#ifdef PDAL_HAVE_FLANN    
     , m_index(0)
     , m_dataset(0)
     , m_indices(0)
     , m_query(0)
     , m_distances(0)
+#endif
     , m_xDim(0)
     , m_yDim(0)
     , m_zDim(0)
@@ -136,14 +138,18 @@ void Index::readBufferBeginImpl(PointBuffer& buffer)
         throw pdal_error("Unable to create index from pipeline that has an indeterminate number of points!");
         
 
+#ifdef PDAL_HAVE_FLANN    
+
     boost::scoped_array<float> data(new float[ m_stage.getNumPoints() *3 ]);
     m_query_data.swap(data);
     m_dataset = new flann::Matrix<float>(m_query_data.get(), m_stage.getNumPoints(), 3);
+#endif
     
 }
 
 std::vector<boost::uint32_t> Index::query(double const& x, double const& y, double const& z, double distance, boost::uint32_t count)
 {
+#ifdef PDAL_HAVE_FLANN    
 
     boost::scoped_array<float> distances(new float[ count *3 ]);
     m_distance_data.swap(distances);
@@ -152,7 +158,7 @@ std::vector<boost::uint32_t> Index::query(double const& x, double const& y, doub
     boost::scoped_array<int> indices(new int[ m_stage.getNumPoints() *3 ]);
     m_indice_data.swap(indices);
     m_indices = new flann::Matrix<int>(m_indice_data.get(), m_stage.getNumPoints(), 3);
-    
+#endif    
     std::vector<boost::uint32_t> output;
     
     return output;
@@ -266,10 +272,13 @@ double Index::getScaledValue(PointBuffer& data,
 }
 void Index::readEndImpl()
 {
+
+#ifdef PDAL_HAVE_FLANN    
     
     // Build the index
     m_index = new flann::Index<flann::L2<float> >(*m_dataset, flann::KDTreeIndexParams(4));
     m_index->buildIndex();
+#endif
 }
 
 

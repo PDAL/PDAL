@@ -111,13 +111,13 @@ private:
     boost::scoped_array<float> m_query_data;    
     boost::scoped_array<float> m_distance_data;
     boost::scoped_array<int> m_indice_data;
-
+#ifdef PDAL_HAVE_FLANN
     flann::Index<flann::L2<float> >* m_index;
     flann::Matrix<float>* m_dataset;
     flann::Matrix<int>* m_indices;
     flann::Matrix<float>* m_query;
     flann::Matrix<float>* m_distances;
-    
+#endif      
     pdal::Dimension const* m_xDim;
     pdal::Dimension const* m_yDim;
     pdal::Dimension const* m_zDim;
