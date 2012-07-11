@@ -33,6 +33,7 @@
 ****************************************************************************/
 
 #include <pdal/Stage.hpp>
+#include <pdal/SpatialReference.hpp>
 
 #include <boost/concept_check.hpp> // ignore_unused_variable_warning
 #include <boost/foreach.hpp>
@@ -141,6 +142,18 @@ const SpatialReference& Stage::getSpatialReference() const
 void Stage::setSpatialReference(const SpatialReference& spatialReference)
 {
     m_spatialReference = spatialReference;
+
+
+    boost::optional<SpatialReference> ref = m_metadata.getValueOptional<SpatialReference>("spatialreference");
+    if (!ref)
+    {
+        m_metadata.deleteMetadata("spatialreference");
+        m_metadata.addMetadata<pdal::SpatialReference>("spatialreference",
+                                                    spatialReference,
+                                                    "SRS of this stage");
+        
+    }
+ 
 }
 
 void Stage::setCoreProperties(const Stage& stage)
