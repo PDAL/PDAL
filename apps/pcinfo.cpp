@@ -283,8 +283,12 @@ int PcInfo::execute()
     Option sample_size("sample_size", m_sample_size, "sample size for random sample");
     m_options.add(sample_size);
     
-    Option exact_count("exact_count", "Classification", "use exact counts for classification stats");
-    m_options.add(exact_count);
+    Option cls("exact_count", "Classification", "use exact counts for classification stats");
+    Option rn("exact_count", "ReturnNumber", "use exact counts for ReturnNumber stats");
+    Option nr("exact_count", "NumberOfReturns", "use exact counts for ReturnNumber stats");
+    m_options.add(cls);
+    m_options.add(rn);
+    m_options.add(nr);
     
     pdal::Options options = m_options + readerOptions;
     
