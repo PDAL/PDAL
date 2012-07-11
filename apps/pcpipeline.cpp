@@ -61,7 +61,6 @@ private:
 
     std::string m_inputFile;
     std::string m_pipelineFile;
-    bool m_usestdin;
     bool m_validate;
     boost::uint64_t m_numPointsToWrite;
     boost::uint64_t m_numSkipPoints;
@@ -71,7 +70,6 @@ private:
 PcPipeline::PcPipeline(int argc, char* argv[])
     : Application(argc, argv, "pcpipeline")
     , m_inputFile("")
-    , m_usestdin(false)
     , m_validate(false)
     , m_numPointsToWrite(0)
     , m_numSkipPoints(0)
@@ -82,7 +80,10 @@ PcPipeline::PcPipeline(int argc, char* argv[])
 
 void PcPipeline::validateSwitches()
 {
-    if (m_inputFile == "" && ! m_usestdin)
+    if (m_usestdin)
+        m_inputFile = "STDIN";
+        
+    if (m_inputFile == "")
     {
         throw app_usage_error("input file name required");
     }
@@ -98,7 +99,6 @@ void PcPipeline::addSwitches()
     file_options->add_options()
         ("input,i", po::value<std::string>(&m_inputFile)->default_value(""), "input file name")
         ("pipeline-serialization", po::value<std::string>(&m_pipelineFile)->default_value(""), "")
-        ("stdin,s", po::value<bool>(&m_usestdin)->zero_tokens()->implicit_value(true), "Read pipeline XML from stdin")
         ("validate", po::value<bool>(&m_validate)->zero_tokens()->implicit_value(true), "Validate the pipeline (including serialization), but do not execute writing of points")
         ("count", po::value<boost::uint64_t>(&m_numPointsToWrite)->default_value(0), "How many points should we write?")
         ("skip", po::value<boost::uint64_t>(&m_numSkipPoints)->default_value(0), "How many points should we skip?")
@@ -112,7 +112,7 @@ void PcPipeline::addSwitches()
 
 int PcPipeline::execute()
 {
-    if (!FileUtils::fileExists(m_inputFile) && !m_usestdin)
+    if (!FileUtils::fileExists(m_inputFile))
     {
         throw app_runtime_error("file not found: " + m_inputFile);
     }
@@ -120,12 +120,8 @@ int PcPipeline::execute()
     pdal::PipelineManager manager;
 
     pdal::PipelineReader reader(manager, isDebug(), getVerboseLevel());
-    bool isWriter(false);
-    
-    if (!m_usestdin)
-        isWriter = reader.readPipeline(m_inputFile);
-    else
-        isWriter = reader.readPipeline(std::cin);
+    bool isWriter = reader.readPipeline(m_inputFile);
+
         
     if (!isWriter)
         throw app_runtime_error("pipeline file is not a Writer");

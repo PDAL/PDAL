@@ -69,7 +69,6 @@ private:
     void dumpMetadata(const Stage&) const;
 
     std::string m_inputFile;
-    std::string m_outputFile;
     bool m_showStats;
     bool m_showSchema;
     bool m_showStage;
@@ -86,7 +85,6 @@ private:
 PcInfo::PcInfo(int argc, char* argv[])
     : Application(argc, argv, "pcinfo")
     , m_inputFile("")
-    , m_outputFile("")
     , m_showStats(false)
     , m_showSchema(false)
     , m_showStage(false)
@@ -101,10 +99,6 @@ PcInfo::PcInfo(int argc, char* argv[])
 
 void PcInfo::validateSwitches()
 {
-    if (m_inputFile == "")
-    {
-        throw app_usage_error("input file name required");
-    }
 
     const bool got_something =
         (m_pointNumber != (std::numeric_limits<boost::uint64_t>::max)()) ||
@@ -129,7 +123,6 @@ void PcInfo::addSwitches()
 
     file_options->add_options()
         ("input,i", po::value<std::string>(&m_inputFile)->default_value(""), "input file name")
-        ("output,o", po::value<std::string>(&m_outputFile)->default_value(""), "output file name")
         ;
 
     addSwitchSet(file_options);
@@ -268,17 +261,12 @@ void PcInfo::dumpMetadata(const Stage& stage) const
 
 int PcInfo::execute()
 {
-    if (m_outputFile != "")
-    {
-        m_outputStream = FileUtils::createFile(m_outputFile);
-        if (!m_outputStream)
-        {
-            throw app_runtime_error("cannot open output file: " + m_outputFile);
-        }
-    }
+
 
     Options readerOptions;
     {
+        if (m_usestdin)
+            m_inputFile = "STDIN";
         readerOptions.add<std::string>("filename", m_inputFile);
         readerOptions.add<bool>("debug", isDebug());
         readerOptions.add<boost::uint32_t>("verbose", getVerboseLevel());

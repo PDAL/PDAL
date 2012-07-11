@@ -103,6 +103,8 @@ protected:
     void addSwitchSet(boost::program_options::options_description* options);
     void addPositionalSwitch(const char* name, int max_count);
 
+
+
 private:
     int innerRun();
     void parseSwitches();
@@ -131,6 +133,9 @@ private:
 
     Application& operator=(const Application&); // not implemented
     Application(const Application&); // not implemented
+
+protected:
+    bool m_usestdin;
 };
 
 #endif

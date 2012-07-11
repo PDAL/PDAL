@@ -55,6 +55,7 @@ Application::Application(int argc, char* argv[], const std::string& appName)
     , m_argv(argv)
     , m_appName(appName)
     , m_hardCoreDebug(false)
+    , m_usestdin(false)
 {
     return;
 }
@@ -306,10 +307,12 @@ void Application::addBasicSwitchSet()
     basic_options->add_options()
         ("help,h", po::value<bool>(&m_showHelp)->zero_tokens()->implicit_value(true), "produce help message")
         ("debug,d", po::value<bool>(&m_isDebug)->zero_tokens()->implicit_value(true), "Enable debug mode")
-        ("developer-debug", po::value<bool>(&m_hardCoreDebug)->zero_tokens()->implicit_value(true), "Enable developer debug mode (don't trap segfaults)")
+        ("developer-debug", po::value<bool>(&m_hardCoreDebug)->zero_tokens()->implicit_value(true), "Enable developer debug mode (don't trap exceptions so segfaults are thrown)")
         ("verbose,v", po::value<boost::uint32_t>(&m_verboseLevel)->default_value(0), "Set verbose message level")
         ("version", po::value<bool>(&m_showVersion)->zero_tokens()->implicit_value(true), "Show version info")
         ("timer", po::value<bool>(&m_showTime)->zero_tokens()->implicit_value(true), "Show execution time")
+        ("stdin,s", po::value<bool>(&m_usestdin)->zero_tokens()->implicit_value(true), "Read pipeline XML from stdin")
+
         ;
 
     addSwitchSet(basic_options);
