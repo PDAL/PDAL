@@ -242,8 +242,10 @@ void PcInfo::dumpStage(const Stage& stage) const
 
     std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
 
+    boost::property_tree::ptree output;
+    output.add_child("stage", tree);
     if (m_useXML)
-        write_xml(ostr, tree);
+        write_xml(ostr, output);
     else
         write_json(ostr, tree);
 
