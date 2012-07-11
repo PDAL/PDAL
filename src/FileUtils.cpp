@@ -38,6 +38,8 @@
 #include <boost/iostreams/stream.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/version.hpp>
+#include <boost/algorithm/string.hpp>
+#include <iostream>
 
 namespace pdal
 {
@@ -45,6 +47,9 @@ namespace pdal
 
 std::istream* FileUtils::openFile(std::string const& filename, bool asBinary)
 {
+    if (boost::algorithm::iequals(filename, "STDIN"))
+        return &std::cin;
+        
     if (!FileUtils::fileExists(filename))
         throw pdal_error("File not found: " + filename);
 
@@ -121,9 +126,9 @@ void FileUtils::renameFile(const std::string& dest, const std::string& src)
 }
 
 
-bool FileUtils::fileExists(const std::string& file)
+bool FileUtils::fileExists(const std::string& name)
 {
-    return boost::filesystem::exists(file);
+    return boost::filesystem::exists(name) || boost::algorithm::iequals(name, "STDIN");
 }
 
 
