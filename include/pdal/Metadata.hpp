@@ -42,8 +42,6 @@
 
 
 #include <boost/shared_array.hpp>
-#include <boost/variant.hpp>
-#include <boost/variant/recursive_variant.hpp>
 #include <boost/blank.hpp>
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
@@ -263,10 +261,28 @@ public:
     /// @return a Metadata instance at a given path (in 
     /// boost::property_tree::ptree parlance).
     inline Metadata getMetadata(std::string const& path) const 
-    { 
+    {
+        boost::optional<boost::property_tree::ptree const&> t = m_tree.get_child_optional(path); 
+        if (!t)
+        {
+            std::ostringstream oss;
+            oss << "Metadata with path '" << path << "' is not found on this instance";
+            throw metadata_not_found(oss.str());            
+        }
         return Metadata(m_tree.get_child(path)); 
     } 
-
+    
+    inline bool deleteMetadata(std::string const& path)
+    {
+        boost::optional<boost::property_tree::ptree&> t = m_tree.get_child_optional("metadata."+ path);
+        if (t)
+        {
+            boost::property_tree::ptree& m = m_tree.get_child("metadata");
+            m.erase(path);
+            return true;
+        }
+        return false;
+    }
 
     /** @name name
     */
