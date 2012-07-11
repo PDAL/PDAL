@@ -174,11 +174,11 @@ boost::uint32_t Index::readBufferImpl(PointBuffer& data)
         float x = static_cast<float>(getScaledValue(data, *m_xDim, pointIndex));
         float y = static_cast<float>(getScaledValue(data, *m_yDim, pointIndex));
         float z = static_cast<float>(getScaledValue(data, *m_zDim, pointIndex));
-        
+#ifdef PDAL_HAVE_FLANN        
         m_query_data[pointIndex] = x;
         m_query_data[pointIndex+1] = y;
         m_query_data[pointIndex+2] = z;
-        
+#endif        
     }
     
     return numRead;
