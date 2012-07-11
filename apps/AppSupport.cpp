@@ -47,11 +47,6 @@
 std::string AppSupport::inferReaderDriver(const std::string& filename, pdal::Options& options)
 {
     std::string ext = boost::filesystem::extension(filename);
-    if (ext == "") return "";
-    ext = ext.substr(1, ext.length()-1);
-    if (ext == "") return "";
-
-    boost::to_lower(ext);
 
     pdal::Option& fn = options.getOptionByRef("filename");
     fn.setValue<std::string>(filename);
@@ -66,6 +61,16 @@ std::string AppSupport::inferReaderDriver(const std::string& filename, pdal::Opt
     drivers["nitf"] = "drivers.nitf.reader";
     drivers["ntf"] = "drivers.nitf.reader";
     
+    if (boost::algorithm::iequals(filename, "STDIN"))
+    {
+        return drivers["xml"];
+    }
+    
+    if (ext == "") return "";
+    ext = ext.substr(1, ext.length()-1);
+    if (ext == "") return "";
+
+    boost::to_lower(ext);
     std::string driver = drivers[ext];
     return driver; // will be "" if not found
 }
@@ -112,7 +117,7 @@ pdal::Stage* AppSupport::makeReader(pdal::Options& options)
     std::string driver = AppSupport::inferReaderDriver(inputFile, options);
     if (driver == "")
     {
-        throw app_runtime_error("Cannot determine file type of " + inputFile);
+        throw app_runtime_error("Cannot determine input file type of " + inputFile);
     }
 
     pdal::StageFactory factory;
@@ -133,7 +138,7 @@ pdal::Writer* AppSupport::makeWriter(pdal::Options& options, pdal::Stage& stage)
     std::string driver = AppSupport::inferWriterDriver(outputFile, options);
     if (driver == "")
     {
-        throw app_runtime_error("Cannot determine file type of " + outputFile);
+        throw app_runtime_error("Cannot determine output file type of " + outputFile);
     }
         
     pdal::StageFactory factory;
