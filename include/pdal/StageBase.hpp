@@ -62,6 +62,7 @@ class Stage;
 // both Stages and Writers have a few common properties, so
 class PDAL_DLL StageBase
 {
+    friend class Stage;
 public:
 
     /// Constructor.
