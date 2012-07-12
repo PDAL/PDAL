@@ -522,6 +522,9 @@ static int portable_pclose(FILE* fp)
 // all signals --  p_catch_system_errors, and throws unittest errors when it sees 
 // them. We can use --catch_system_errors=no as part of the invocation, or manually 
 // turn them off in the execution monitor. -- hobu 7/12/2012
+//  boost::unit_test::unit_test_monitor.p_catch_system_errors.set (false);
+// #include <boost/test/unit_test_monitor.hpp>
+
 int Support::run_command(const std::string& cmd, std::string& output)
 {
     const int maxbuf = 4096;
