@@ -148,19 +148,21 @@ BOOST_AUTO_TEST_CASE(pcinfo_test_dumps)
     // dump a single point to json
 
     std::string pt_test = Support::temppath("pcinfo_point.txt");
-    command << cmd + " --output=" + pt_test + " --point=1 " + inputLas;
+    command << cmd + " --point=1 " + inputLas + " > " + pt_test;
     stat = Support::run_command(command.str(), output);
     BOOST_CHECK_EQUAL(stat, 0);
     were_equal = Support::compare_text_files(pt_test, Support::datapath("apps/pcinfo_point.txt"));
     BOOST_CHECK(were_equal);
     if (were_equal)
         pdal::FileUtils::deleteFile(pt_test);
+    else
+        std::cout << command.str() << std::endl;
 
     // dump summary of all points to json
     command.str("");
 
     std::string stats_test = Support::temppath("pcinfo_stats.txt");
-    command << cmd + " --output=" + stats_test + " --stats " + inputLas + " --seed 1234";
+    command << cmd + " --stats " + inputLas + " --seed 1234" +" > " + stats_test; 
     stat = Support::run_command(command.str(), output);
     BOOST_CHECK_EQUAL(stat, 0);
 #if defined(PDAL_PLATFORM_WIN32) // && (PDAL_BUILD_TYPE=="Debug")
@@ -178,19 +180,21 @@ BOOST_AUTO_TEST_CASE(pcinfo_test_dumps)
     command.str("");
 
     std::string schema_test = Support::temppath("pcinfo_schema.txt");
-    command << cmd + " --output=" + schema_test + " --schema " + inputLas;
+    command << cmd + " --schema " + inputLas +" > " + schema_test;
     stat = Support::run_command(command.str(), output);
     BOOST_CHECK_EQUAL(stat, 0);
     were_equal = Support::compare_text_files(schema_test, Support::datapath("apps/pcinfo_schema.txt"));
     BOOST_CHECK(were_equal);
     if (were_equal)
         pdal::FileUtils::deleteFile(schema_test);
+    else
+        std::cout << command.str() << std::endl;
 
     // dump stage info to json
     command.str("");
 
     std::string stage_test = Support::temppath("pcinfo_stage.txt");
-    command << cmd + " --output=" + stage_test + " --stage " + inputLas;
+    command << cmd + " --stage " + inputLas +" > " + stage_test;
     stat = Support::run_command(command.str(), output);
     BOOST_CHECK_EQUAL(stat, 0);
 
@@ -203,6 +207,8 @@ BOOST_AUTO_TEST_CASE(pcinfo_test_dumps)
 #endif
     if (check == 0u)
         pdal::FileUtils::deleteFile(stage_test);
+    else
+        std::cout << command.str() << std::endl;
 
     return;
 }
