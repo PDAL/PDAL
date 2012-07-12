@@ -517,6 +517,11 @@ static int portable_pclose(FILE* fp)
 //
 // This problem shows up on mpg's Ubuntu 11.4 machine (gcc 4.5.2, boost 1.47.0)
 // as well as on Hobu's machine.
+
+// Boost's unit test system has a flag on the execution monitor that catches 
+// all signals --  p_catch_system_errors, and throws unittest errors when it sees 
+// them. We can use --catch_system_errors=no as part of the invocation, or manually 
+// turn them off in the execution monitor. -- hobu 7/12/2012
 int Support::run_command(const std::string& cmd, std::string& output)
 {
     const int maxbuf = 4096;
