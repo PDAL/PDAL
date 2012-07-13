@@ -319,7 +319,10 @@ int PcInfo::execute()
     {
         dumpStage(*reader);
     }
-
+    
+    std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
+    ostr << std::endl;
+    
     delete filter;
     delete reader;
 
@@ -327,7 +330,7 @@ int PcInfo::execute()
     {
         FileUtils::closeFile(m_outputStream);
     }
-
+    
     return 0;
 }
 
