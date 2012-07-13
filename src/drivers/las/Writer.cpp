@@ -361,7 +361,16 @@ void Writer::writeBufferBegin(PointBuffer const& data)
     
     if (useMetadata)
     {
-        pdal::Metadata m = getPrevStage().collectMetadata().getMetadata("drivers.las.reader");
+        pdal::Metadata m;
+        
+        try
+        {
+            m = getPrevStage().collectMetadata().getMetadata("drivers.las.reader");
+        } catch (pdal::metadata_not_found const&)
+        {
+            // If there's nothing already prepopulated with the las.reader's metadata, we're 
+            // just going to take what ever was set in the options (if there was any)
+        }
         
         // Default to PointFormat 3 if not forwarded from a previous metadata 
         // or given in a metadata option
