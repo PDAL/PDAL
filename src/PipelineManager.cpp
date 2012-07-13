@@ -88,6 +88,17 @@ PipelineManager::~PipelineManager()
     return;
 }
 
+void PipelineManager::removeWriter()
+{
+    while (m_writers.size())
+    {
+        Writer* writer = m_writers.back();
+        m_writers.pop_back();
+        delete writer;
+    }
+    
+    m_lastWriter = 0;
+}
 
 Reader* PipelineManager::addReader(const std::string& type, const Options& options)
 {

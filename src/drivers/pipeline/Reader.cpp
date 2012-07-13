@@ -72,7 +72,7 @@ void Reader::initialize()
     bool isWriter = xmlreader.readPipeline(m_filename);
     if (isWriter)
     {
-        throw pdal_error("pipeline file is not a Reader");
+        m_manager->removeWriter();
     }
     m_stage = m_manager->getStage();
     m_stage->initialize();
