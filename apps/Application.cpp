@@ -56,6 +56,7 @@ Application::Application(int argc, char* argv[], const std::string& appName)
     , m_appName(appName)
     , m_hardCoreDebug(false)
     , m_usestdin(false)
+    , m_chunkSize(0)
 {
     return;
 }
@@ -312,6 +313,7 @@ void Application::addBasicSwitchSet()
         ("version", po::value<bool>(&m_showVersion)->zero_tokens()->implicit_value(true), "Show version info")
         ("timer", po::value<bool>(&m_showTime)->zero_tokens()->implicit_value(true), "Show execution time")
         ("stdin,s", po::value<bool>(&m_usestdin)->zero_tokens()->implicit_value(true), "Read pipeline XML from stdin")
+        ("chunk_size", po::value<boost::uint32_t>(&m_chunkSize), "Size of read buffer")
 
         ;
 

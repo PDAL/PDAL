@@ -69,7 +69,6 @@ private:
     std::string m_outputFile;
     std::string m_srs;
     bool m_bCompress;
-    boost::uint32_t m_chunkSize;
     boost::uint64_t m_numPointsToWrite; 
     boost::uint64_t m_numSkipPoints;
 };
@@ -81,7 +80,6 @@ Pc2Pc::Pc2Pc(int argc, char* argv[])
     , m_outputFile("")
     , m_srs("")
     , m_bCompress(false)
-    , m_chunkSize(0)
     , m_numPointsToWrite(0)
     , m_numSkipPoints(0)
 {
@@ -116,7 +114,6 @@ void Pc2Pc::addSwitches()
         ("output,o", po::value<std::string>(&m_outputFile)->default_value(""), "output file name")
         ("a_srs", po::value<std::string>(&m_srs)->default_value(""), "Assign output coordinate system (if supported by output format)")
         ("compress,z", po::value<bool>(&m_bCompress)->zero_tokens()->implicit_value(true), "Compress output data (if supported by output format)")
-        ("chunk_size", po::value<boost::uint32_t>(&m_chunkSize), "Size of buffer, for blocked/chunked/tiled transfers")
         ("count", po::value<boost::uint64_t>(&m_numPointsToWrite)->default_value(0), "How many points should we write?")
         ("skip", po::value<boost::uint64_t>(&m_numSkipPoints)->default_value(0), "How many points should we skip?")
         ;

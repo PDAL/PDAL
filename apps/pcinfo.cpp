@@ -185,7 +185,9 @@ void PcInfo::dumpStats(pdal::filters::Stats& filter) const
 
     const Schema& schema = filter.getSchema();
 
-    PointBuffer data(schema);
+    boost::uint32_t chunkSize = m_chunkSize != 0 ? m_chunkSize : 1048576; 
+
+    PointBuffer data(schema, chunkSize);
 
     boost::scoped_ptr<StageSequentialIterator> iter(filter.createSequentialIterator(data));
 
