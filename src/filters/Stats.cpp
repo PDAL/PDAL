@@ -391,6 +391,7 @@ void Stats::readBufferBeginImpl(PointBuffer& buffer)
 
         for (schema::index_by_index::const_iterator iter = dims.begin(); iter != dims.end(); ++iter)
         {
+            if (iter->isIgnored()) continue;
             DimensionPtr d = boost::shared_ptr<Dimension>(new Dimension(*iter));
             getStage().log()->get(logDEBUG2) << "Cumulating stats for dimension " << d->getName() << std::endl;
             
