@@ -378,7 +378,7 @@ void Stats::readBufferBeginImpl(PointBuffer& buffer)
             }
         }
 
-        boost::uint32_t sample_size = options.getValueOrDefault<boost::uint32_t>("sample_size", 1000);
+        boost::uint32_t sample_size = options.getValueOrDefault<boost::uint32_t>("sample_size", 100000);
         boost::uint32_t seed = options.getValueOrDefault<boost::uint32_t>("seed", 0);
 
         getStage().log()->get(logDEBUG2) << "Using " << sample_size << " for sample size" << std::endl;
