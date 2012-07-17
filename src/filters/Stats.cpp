@@ -118,7 +118,7 @@ Stats::Stats(Stage& prevStage, const Options& options)
     metadata.addMetadata<boost::uint32_t>("num_bins",
                                        getOptions().getValueOrDefault<boost::uint32_t>("num_bins", 20));
     metadata.addMetadata<boost::uint32_t>("stats_cache_size",
-                                       getOptions().getValueOrDefault<boost::uint32_t>("num_bins", 20));
+                                       getOptions().getValueOrDefault<boost::uint32_t>("stats_cache_size", 1000000));
 
     return;
 }
