@@ -97,6 +97,7 @@ public:
 protected:
     virtual void readBufferBeginImpl(PointBuffer&);
     virtual void readEndImpl();
+    virtual void readBeginImpl();
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t);
@@ -107,16 +108,12 @@ private:
                           Dimension const& d,
                           std::size_t pointIndex) const;    
     const pdal::filters::Index& m_stage;
+    
+    std::vector<float> m_data;
 
-    boost::scoped_array<float> m_query_data;    
-    boost::scoped_array<float> m_distance_data;
-    boost::scoped_array<int> m_indice_data;
 #ifdef PDAL_HAVE_FLANN
     flann::Index<flann::L2<float> >* m_index;
-    flann::Matrix<float>* m_dataset;
-    flann::Matrix<int>* m_indices;
-    flann::Matrix<float>* m_query;
-    flann::Matrix<float>* m_distances;
+    flann::Matrix<float>* m_dataset;    
 #endif      
     pdal::Dimension const* m_xDim;
     pdal::Dimension const* m_yDim;

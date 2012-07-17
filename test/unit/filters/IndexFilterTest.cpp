@@ -60,12 +60,28 @@ BOOST_AUTO_TEST_CASE(test_1)
     // std::cout << "filter ops: " << opt << std::endl;
 
     const pdal::Schema& schema = filter->getSchema();
-    pdal::PointBuffer data(schema, 1);
+    pdal::PointBuffer data(schema, 20);
 
-    pdal::StageSequentialIterator* iter = filter->createSequentialIterator(data);
+    pdal::StageSequentialIterator* it = filter->createSequentialIterator(data);
 
-    boost::uint32_t numRead = iter->read(data);
-    BOOST_CHECK(numRead == 1);
+    boost::uint32_t numRead = it->read(data);
+    BOOST_CHECK(numRead == 20);
+    
+    pdal::filters::iterators::sequential::Index* iter = dynamic_cast<pdal::filters::iterators::sequential::Index*>(it);
+    
+    unsigned k = 8;
+    
+    // If the query distance is 0, just return the k nearest neighbors
+    std::vector<boost::uint32_t> ids = iter->query(636199, 849238, 428.05, 0.0, k);
+    
+    BOOST_CHECK_EQUAL(ids.size(), k);
+    BOOST_CHECK_EQUAL(ids[0], 8);
+    BOOST_CHECK_EQUAL(ids[4], 10);
+
+    std::vector<boost::uint32_t> dist_ids = iter->query(636199, 849238, 428.05, 100.0, k);
+    
+    BOOST_CHECK_EQUAL(dist_ids.size(), 3);
+    BOOST_CHECK_EQUAL(dist_ids[0], 8);
  
 }
 
