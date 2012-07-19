@@ -48,6 +48,7 @@
 
 #include "AppSupport.hpp"
 #include "Application.hpp"
+#include <cstdarg>
 
 #ifdef PDAL_HAVE_GEOS
 #include <geos_c.h>
