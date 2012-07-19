@@ -75,10 +75,23 @@ public:
 
     void processBuffer(PointBuffer& data) const;
 
+    inline void setDimensions(boost::uint32_t dimensions) 
+    {
+        if (!(dimensions == 2) && !(dimensions == 3))
+            throw pdal_error("Dimension count must be 2 or 3 for index queries");
+        m_dimensions = dimensions; 
+    }
+    
+    inline boost::uint32_t getDimensions() const 
+    { 
+        return m_dimensions; 
+    }
+
 private:
 
     Index& operator=(const Index&); // not implemented
     Index(const Index&); // not implemented
+    boost::uint32_t m_dimensions;    
 };
 
 namespace iterators
@@ -94,6 +107,7 @@ public:
     
     std::vector<boost::uint32_t> query(double const& x, double const& y, double const& z, double distance, boost::uint32_t count=1);
     
+
 protected:
     virtual void readBufferBeginImpl(PointBuffer&);
     virtual void readEndImpl();
@@ -110,6 +124,7 @@ private:
     const pdal::filters::Index& m_stage;
     
     std::vector<float> m_data;
+
 
 #ifdef PDAL_HAVE_FLANN
     flann::Index<flann::L2<float> >* m_index;
