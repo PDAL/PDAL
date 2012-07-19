@@ -88,6 +88,8 @@ public:
                           Dimension const& d,
                           std::size_t pointIndex) const;
 
+    inline boost::uint32_t getDimensions() const { return m_dimensions; }
+    inline void setDimensions(boost::uint32_t const& dimensions) { m_dimensions = dimensions; }
 
 private:
     Bounds<double> m_bounds;
@@ -101,9 +103,10 @@ private:
     void* m_geosEnvironment;
     void* m_geosGeometry;
     void* m_geosPreparedGeometry;
-    
     typedef struct GEOSGeometry* GEOSGeometryHS;
 #endif
+
+    boost::uint32_t m_dimensions;
 
     Bounds <double> computeBounds(GEOSGeometry const* geometry);
     

@@ -81,6 +81,7 @@ Crop::Crop(Stage& prevStage, const Options& options)
     , m_geosEnvironment(0)
     , m_geosGeometry(0)
     , m_geosPreparedGeometry(0)
+    , m_dimensions(3)
 {
     m_bounds = options.getValueOrDefault<Bounds<double> >("bounds", Bounds<double>());
     bCropOutside = options.getValueOrDefault<bool>("outside", false);
@@ -95,6 +96,7 @@ Crop::Crop(Stage& prevStage, Bounds<double> const& bounds)
     , m_geosEnvironment(0)
     , m_geosGeometry(0)
     , m_geosPreparedGeometry(0)
+    , m_dimensions(3)
 {
     return;
 }
@@ -127,7 +129,8 @@ void Crop::initialize()
         m_geosGeometry = GEOSGeomFromWKT_r(m_geosEnvironment, wkt.c_str());
         if (!m_geosGeometry)
             throw pdal_error("unable to import polygon WKT");
-            
+        
+        // std::cout << GEOSGeomToWKT_r(m_geosEnvironment, m_geosGeometry) << std::endl;
         int gtype = GEOSGeomTypeId_r(m_geosEnvironment, m_geosGeometry);
         if (!(gtype == GEOS_POLYGON || gtype == GEOS_MULTIPOLYGON))
         {
@@ -190,6 +193,9 @@ Bounds<double> Crop::computeBounds(GEOSGeometry const* geometry)
     
     boost::uint32_t count(0);
     int ret(0);
+    ret = GEOSCoordSeq_getDimensions_r(m_geosEnvironment, coords, &m_dimensions);
+    log()->get(logDEBUG) << "Inputted WKT had " << m_dimensions << " dimensions" <<std::endl;
+    
     ret = GEOSCoordSeq_getSize_r(m_geosEnvironment, coords, &count);
     pdal::Vector<double> p(0.0, 0.0, 0.0);
     for (unsigned i=0; i < count; ++i)
@@ -199,10 +205,12 @@ Bounds<double> Crop::computeBounds(GEOSGeometry const* geometry)
         double z;
         ret = GEOSCoordSeq_getOrdinate_r(m_geosEnvironment, coords, i, 0, &x);
         ret = GEOSCoordSeq_getOrdinate_r(m_geosEnvironment, coords, i, 1, &y);
-        ret = GEOSCoordSeq_getOrdinate_r(m_geosEnvironment, coords, i, 2, &z);        
+        if (m_dimensions > 2)
+            ret = GEOSCoordSeq_getOrdinate_r(m_geosEnvironment, coords, i, 2, &z);        
         p.set(0, x);
         p.set(1, y);
-        p.set(2, z);
+        if (m_dimensions > 2)
+            p.set(2, z);
         if (bFirst)
         {
             output = Bounds<double>(p, p);
