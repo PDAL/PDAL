@@ -33,8 +33,10 @@
 ****************************************************************************/
 
 #include <pdal/GlobalEnvironment.hpp>
-#include <pdal/plang/PythonEnvironment.hpp>
 
+#ifdef PDAL_HAVE_PYTHON
+#include <pdal/plang/PythonEnvironment.hpp>
+#endif
 
 namespace pdal
 {
@@ -90,7 +92,9 @@ void GlobalEnvironment::init()
 //
 
 GlobalEnvironment::GlobalEnvironment()
+#ifdef PDAL_HAVE_PYTHON
 : m_pythonEnvironment(0)
+#endif
 {
     // this should be the not-a-thread thread environment
     (void) createThreadEnvironment(boost::thread::id());
@@ -118,10 +122,12 @@ GlobalEnvironment::~GlobalEnvironment()
     return;
 }
 
+#ifdef PDAL_HAVE_PYTHON
 void GlobalEnvironment::createPythonEnvironment()
 {
     m_pythonEnvironment = new pdal::plang::PythonEnvironment();
 }
+#endif
 
 void GlobalEnvironment::createThreadEnvironment(boost::thread::id id)
 {
