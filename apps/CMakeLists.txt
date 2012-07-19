@@ -24,6 +24,7 @@ include_directories(
 set(PC2PC pc2pc)
 set(PCINFO pcinfo)
 set(PCPIPELINE pcpipeline)
+set(PCQUERY pcquery)
 
 set(COMMON_APP_SOURCES Application.cpp Application.hpp AppSupport.cpp AppSupport.hpp)
 
@@ -57,6 +58,11 @@ if(PCPIPELINE)
     target_link_libraries(${PCPIPELINE} ${PDAL_LIB_NAME} ${Boost_LIBRARIES})
 endif()
 
+if(PCQUERY)
+    add_executable(${PCQUERY} pcquery.cpp ${COMMON_APP_SOURCES})
+    target_link_libraries(${PCQUERY} ${PDAL_LIB_NAME} ${Boost_LIBRARIES})
+endif()
+
 #------------------------------------------------------------------------------
 # Targets installation
 #------------------------------------------------------------------------------
@@ -75,7 +81,7 @@ if(UNIX)
     set(PKGCFG_LIB_DIR "${PDAL_LIB_SUBDIR}")
     set(PKGCFG_REQUIRES  "")
     set(PKGCFG_VERSION ${VERSION})
-    set(PKGCFG_LINK_FLAGS "-llas -llas_c")
+    set(PKGCFG_LINK_FLAGS "-lpdal")
     set(PKGCFG_COMPILE_FLAGS "")
     if(LIBXML2_FOUND)
       set(PKGCFG_REQUIRES "${PKGCFG_REQUIRES} libxml-2.0")
