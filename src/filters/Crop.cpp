@@ -391,7 +391,7 @@ boost::uint32_t Crop::processBuffer(PointBuffer const& srcData, PointBuffer& dst
 #endif
     }
     
-    return dstData.getNumPoints();
+    return srcData.getNumPoints();
 }
 
 
@@ -427,50 +427,63 @@ boost::uint32_t Crop::readBufferImpl(PointBuffer& data)
     // We will read from our previous stage until we get that amount (or
     // until the previous stage runs out of points).
 
-    boost::uint32_t numPointsNeeded = data.getCapacity();
+    boost::uint32_t originalCapacity = data.getCapacity();
+    boost::int64_t numPointsNeeded = static_cast<boost::int64_t>(data.getCapacity());
     assert(data.getNumPoints() == 0);
 
     PointBuffer outputData(data.getSchema(), numPointsNeeded);
-    PointBuffer dstData(data.getSchema(), numPointsNeeded);
+    PointBuffer tmpData(data.getSchema(), numPointsNeeded);
 
-    m_cropFilter.log()->get(logDEBUG3) << "Fetching for block of size: " << numPointsNeeded << std::endl;
-
+    m_cropFilter.log()->get(logDEBUG2) << "Fetching for block of size: " << numPointsNeeded << std::endl;
+    
     while (numPointsNeeded > 0)
     {
-        if (getPrevIterator().atEnd()) break;
+        if (getPrevIterator().atEnd()) 
+        {
+            m_cropFilter.log()->get(logDEBUG2) << "previous iterator is .atEnd, stopping"  
+                                               << std::endl;
+            break;
+        }
+        
 
         // read from prev stage
         data.resize(numPointsNeeded);
         const boost::uint32_t numSrcPointsRead = getPrevIterator().read(data);
-        m_cropFilter.log()->get(logDEBUG3) << "Read  block of size: " << numSrcPointsRead << " from previous iterator -- data.getNumPoints():" << data.getNumPoints() << std::endl;
+        m_cropFilter.log()->get(logDEBUG3) << "Fetched " 
+                                           << numSrcPointsRead << " from previous iterator. "  
+                                           << std::endl;
 
-        dstData.resize(numSrcPointsRead);
+        tmpData.resize(numSrcPointsRead);
         
         assert(numSrcPointsRead <= numPointsNeeded);
 
+
         // we got no data, and there is no more to get -- exit the loop
-        if (numSrcPointsRead == 0) break;
 
-        // copy points from src (prev stage) into dst (our stage),
-        // based on the CropFilter's rules (i.e. its bounds)
-        const boost::uint32_t numPointsProcessed = m_cropFilter.processBuffer(data, dstData);
-        m_cropFilter.log()->get(logDEBUG3) << "Processed " << numPointsProcessed << " in intersection filter" << std::endl;
-        m_cropFilter.log()->get(logDEBUG3) << dstData.getNumPoints() << " passed intersection filter" << std::endl;
 
-        outputData.copyPointsFast(outputData.getNumPoints(), 0, dstData, dstData.getNumPoints());
-        outputData.setNumPoints(outputData.getNumPoints() + dstData.getNumPoints());
 
-        numPointsNeeded -= numPointsProcessed;
+        m_cropFilter.log()->get(logDEBUG3) << tmpData.getNumPoints() << " passed intersection filter" << std::endl;
+
+        outputData.copyPointsFast(outputData.getNumPoints(), 0, tmpData, tmpData.getNumPoints());
+        outputData.setNumPoints(outputData.getNumPoints() + tmpData.getNumPoints());
+
+        numPointsNeeded -= outputData.getNumPoints() ;
         m_cropFilter.log()->get(logDEBUG3) << numPointsNeeded << " left to read this block" << std::endl;
+        if ( numPointsNeeded <= 0)
+        {
+            m_cropFilter.log()->get(logDEBUG2) << "numPointsNeeded <=0, stopping"  
+                                               << std::endl;
+            break;
+        }        
     }
 
     const boost::uint32_t numPointsAchieved = outputData.getNumPoints();
     
-    data.resize(outputData.getNumPoints());
+    data.resize(originalCapacity);
     data.setNumPoints(0);
     data.copyPointsFast(0, 0, outputData, outputData.getNumPoints());
     data.setNumPoints(outputData.getNumPoints());
-    m_cropFilter.log()->get(logDEBUG3) << "Copying " << outputData.getNumPoints() << " at end of readBufferImpl" << std::endl;
+    m_cropFilter.log()->get(logDEBUG2) << "Copying " << outputData.getNumPoints() << " at end of readBufferImpl" << std::endl;
 
     return numPointsAchieved;
 
