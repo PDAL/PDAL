@@ -344,12 +344,16 @@ boost::uint32_t Crop::processBuffer(PointBuffer const& srcData, PointBuffer& dst
     int ret(0);
     
     boost::uint32_t copy_index(0);
+    bool logOutput = log()->getLevel() > logDEBUG4;
     for (boost::uint32_t index=0; index<count; index++)
     {
         // need to scale the values
         double x = getScaledValue(srcData, dimX, index);
         double y = getScaledValue(srcData, dimY, index);
         double z = getScaledValue(srcData, dimZ, index);
+
+        if (logOutput)
+            log()->get(logDEBUG5) << "input: " << x << " y: " << y << " z: " << z << std::endl;
 
         if (wkt.empty())
         {
@@ -362,6 +366,8 @@ boost::uint32_t Crop::processBuffer(PointBuffer const& srcData, PointBuffer& dst
                 dstData.copyPointFast(copy_index, index, srcData);
                 dstData.setNumPoints(copy_index+1);
                 ++copy_index;
+                if (logOutput)
+                    log()->get(logDEBUG5) << "point is inside polygon!" << std::endl;                
             }            
         }
 #ifdef PDAL_HAVE_GEOS
@@ -385,6 +391,8 @@ boost::uint32_t Crop::processBuffer(PointBuffer const& srcData, PointBuffer& dst
                 dstData.copyPointFast(copy_index, index, srcData);
                 dstData.setNumPoints(copy_index + 1);
                 ++copy_index;
+                if (logOutput)
+                    log()->get(logDEBUG5) << "point is inside polygon!" << std::endl;                
             }
             GEOSGeom_destroy_r(m_geosEnvironment, p);
         }
