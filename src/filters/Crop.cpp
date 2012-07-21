@@ -461,11 +461,19 @@ boost::uint32_t Crop::readBufferImpl(PointBuffer& data)
         // we got no data, and there is no more to get -- exit the loop
 
 
+        // copy points from src (prev stage) into dst (our stage),
+        // based on the CropFilter's rules (i.e. its bounds)
+        const boost::uint32_t numPointsProcessed = m_cropFilter.processBuffer(data, tmpData);
+        m_cropFilter.log()->get(logDEBUG3) << "Processed " << numPointsProcessed << " in intersection filter" << std::endl;
+
 
         m_cropFilter.log()->get(logDEBUG3) << tmpData.getNumPoints() << " passed intersection filter" << std::endl;
-
-        outputData.copyPointsFast(outputData.getNumPoints(), 0, tmpData, tmpData.getNumPoints());
-        outputData.setNumPoints(outputData.getNumPoints() + tmpData.getNumPoints());
+        
+        if (tmpData.getNumPoints() > 0)
+        {
+            outputData.copyPointsFast(outputData.getNumPoints(), 0, tmpData, tmpData.getNumPoints());
+            outputData.setNumPoints(outputData.getNumPoints() + tmpData.getNumPoints());
+        }
 
         numPointsNeeded -= outputData.getNumPoints() ;
         m_cropFilter.log()->get(logDEBUG3) << numPointsNeeded << " left to read this block" << std::endl;
