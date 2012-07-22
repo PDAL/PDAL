@@ -345,6 +345,7 @@ boost::uint32_t Crop::processBuffer(PointBuffer const& srcData, PointBuffer& dst
     
     boost::uint32_t copy_index(0);
     bool logOutput = log()->getLevel() > logDEBUG4;
+    log()->floatPrecision(8);    
     for (boost::uint32_t index=0; index<count; index++)
     {
         // need to scale the values
