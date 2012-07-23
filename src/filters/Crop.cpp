@@ -328,14 +328,14 @@ boost::uint32_t Crop::processBuffer(PointBuffer const& srcData, PointBuffer& dst
     dstData.setNumPoints(0);
     
     if (buffer_bounds.empty())
-        log()->get(logDEBUG5) << "Buffer bounds was empty, reader did not set!" << std::endl;\
+        log()->get(logDEBUG2) << "Buffer bounds was empty, reader did not set!" << std::endl;\
         
     // Not all readers set the buffer bounds, so we can't always believe them
     if (!buffer_bounds.empty() && 
         !buffer_bounds.overlaps(filter_bounds))
     {
         // If the bounds doesn't overlap, we don't copy any points
-        log()->get(logDEBUG5) << "Entire PointBuffer::getSpatialBounds failed to intersect" <<std::endl;
+        log()->get(logDEBUG2) << "Entire PointBuffer::getSpatialBounds failed to intersect" <<std::endl;
         return 0;
     }
 
