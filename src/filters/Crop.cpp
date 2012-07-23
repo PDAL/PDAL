@@ -130,13 +130,21 @@ void Crop::initialize()
         if (!m_geosGeometry)
             throw pdal_error("unable to import polygon WKT");
         
-        // std::cout << GEOSGeomToWKT_r(m_geosEnvironment, m_geosGeometry) << std::endl;
         int gtype = GEOSGeomTypeId_r(m_geosEnvironment, m_geosGeometry);
         if (!(gtype == GEOS_POLYGON || gtype == GEOS_MULTIPOLYGON))
         {
             throw pdal_error("input WKT was not a POLYGON or MULTIPOLYGON");
         }
-        log()->get(logDEBUG2) << "Ingested WKT for filters.crop: " << wkt <<std::endl;
+        log()->get(logDEBUG2) << "Ingested WKT for filters.crop: " << GEOSGeomToWKT_r(m_geosEnvironment, m_geosGeometry) <<std::endl;
+        
+        char* reason = GEOSisValidReason_r(m_geosEnvironment, m_geosGeometry);
+        if (reason != 0)
+        {
+            std::ostringstream oss;
+            oss << "WKT is invalid: " << std::string(reason) << std::endl;
+            throw pdal_error(oss.str());
+        }
+        
         m_geosPreparedGeometry = GEOSPrepare_r(m_geosEnvironment, m_geosGeometry);
         if (!m_geosPreparedGeometry)
             throw pdal_error("unable to prepare geometry for index-accellerated intersection");
