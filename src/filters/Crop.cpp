@@ -137,11 +137,14 @@ void Crop::initialize()
         }
         log()->get(logDEBUG2) << "Ingested WKT for filters.crop: " << GEOSGeomToWKT_r(m_geosEnvironment, m_geosGeometry) <<std::endl;
         
-        char* reason = GEOSisValidReason_r(m_geosEnvironment, m_geosGeometry);
-        if (reason != 0)
+        bool bValid(false);
+        bValid = static_cast<bool>(GEOSisValid_r(m_geosEnvironment, m_geosGeometry));
+        if (!bValid)
         {
+            char* reason = GEOSisValidReason_r(m_geosEnvironment, m_geosGeometry);
             std::ostringstream oss;
             oss << "WKT is invalid: " << std::string(reason) << std::endl;
+            GEOSFree_r(m_geosEnvironment, reason);
             throw pdal_error(oss.str());
         }
         
