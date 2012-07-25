@@ -31,8 +31,9 @@
                 422.7001953125))
             </Option>
             <Option name="outside">
-                true
+                false
             </Option>
+            <Option name="x_dim">drivers.las.reader.X</Option>    
             <Reader type="drivers.las.reader">
                 <Option name="filename">
                     ../autzen-colorized-1.2-3.las
