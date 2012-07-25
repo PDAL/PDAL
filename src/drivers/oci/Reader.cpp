@@ -65,8 +65,82 @@ Reader::Reader(const Options& options)
 
 }
 
+
 boost::uint64_t Reader::getNumPoints() const
 {
+    if (m_cachedPointCount != 0) return m_cachedPointCount;
+    
+    if (m_querytype == QUERY_SDO_PC)
+    {
+        std::ostringstream block_query;
+        std::ostringstream cloud_query;
+        
+        Statement statement = Statement(m_connection->CreateStatement(getQuery().c_str()));
+        statement->Execute(0);
+                
+        BlockPtr block = BlockPtr(new Block(m_connection));        
+        defineBlock(statement, block);
+
+        bool bDidRead = statement->Fetch();
+        if (!bDidRead) 
+            throw pdal_error("Unable to fetch a cloud in getNumPoints!");
+        
+        boost::int64_t total_count(0);        
+        while(bDidRead)
+        {
+            boost::int32_t pc_id = statement->GetInteger(&block->pc->pc_id);
+            std::string blocks_table = std::string(statement->GetString(block->pc->blk_table));
+            std::ostringstream select_count;
+            select_count
+                    << "select sum(NUM_POINTS) from "
+                    << blocks_table << "  WHERE OBJ_ID = "
+                    << pc_id;
+
+
+            Statement output = Statement(getConnection()->CreateStatement(select_count.str().c_str()));
+
+            output->Execute(0);
+            
+            boost::int64_t count;
+            output->Define(&(count));
+            bool bDidReadBlockCount = output->Fetch();
+            if (!bDidReadBlockCount) 
+                throw pdal_error("Unable to fetch a point count for view!");   
+
+            if (count < 0)
+            {
+                throw pdal_error("getNumPoints returned a count < 0!");
+            }
+            
+            total_count = total_count + count;
+            
+            bDidRead = statement->Fetch();
+        }        
+        m_cachedPointCount = static_cast<boost::uint64_t>(total_count);     
+        return m_cachedPointCount;        
+
+        
+    }
+    else
+    {
+        std::ostringstream query;
+        query << "select sum(num_points) from (" << getQuery() << ")";
+        Statement statement = Statement(m_connection->CreateStatement(query.str().c_str()));
+        statement->Execute(0);
+        boost::int64_t count;
+        statement->Define(&(count));
+        bool bDidRead = statement->Fetch();
+        if (!bDidRead) 
+            throw pdal_error("Unable to fetch a point count for view!");   
+        
+        if (count < 0)
+        {
+            throw pdal_error("getNumPoints returned a count < 0!");
+        }
+        
+        m_cachedPointCount = static_cast<boost::uint64_t>(count);     
+        return m_cachedPointCount;
+    }    
     return m_cachedPointCount;
 }
 

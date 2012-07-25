@@ -110,6 +110,7 @@ private:
     //
 
     QueryType describeQueryType() ;
+    
 
     Connection m_connection;
     Statement m_statement;
@@ -122,7 +123,7 @@ private:
     std::map<std::string, int> m_fields;
 
     boost::shared_ptr<pdal::gdal::Debug> m_gdal_debug;
-    boost::uint64_t m_cachedPointCount;
+    mutable boost::uint64_t m_cachedPointCount;
 
 
 };
