@@ -50,6 +50,8 @@
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/concept_check.hpp> // ignore_unused_variable_warning
 #include <boost/algorithm/string.hpp>
+#include <boost/tokenizer.hpp>
+
 
 #ifdef PDAL_HAVE_LIBXML2
 #include <pdal/XMLSchema.hpp>
@@ -190,8 +192,20 @@ boost::optional<Dimension const&> Schema::getDimensionOptional(std::size_t t) co
     }
 }
 
-const Dimension& Schema::getDimension(std::string const& t, std::string const& ns) const
+const Dimension& Schema::getDimension(std::string const& name, std::string const& namespc) const
 {
+    
+    std::size_t dot_position = name.find_last_of(".");
+
+    std::string ns(namespc);
+    std::string t(name);
+    if (dot_position != std::string::npos && namespc.empty())
+    {
+        // We were given a dotted name instead of a name + ns.  Let's split them up.
+        ns = name.substr(0,dot_position);
+        t = name.substr(dot_position+1 /*skip the '.'*/, name.size());
+    } 
+
     schema::index_by_name const& name_index = m_index.get<schema::name>();
     schema::index_by_name::const_iterator it = name_index.find(t);
 
@@ -200,10 +214,7 @@ const Dimension& Schema::getDimension(std::string const& t, std::string const& n
     std::ostringstream oss;
     oss << "Dimension with name '" << t << "' not found, unable to Schema::getDimension";
 
-    // FIXME: If there are two dimensions with the same name here, we're
-    // scrwed
 
-    // std::cout << "finding dimension with name " << t << " and ns: " << ns << std::endl;
     if (it != name_index.end())
     {
 
