@@ -18,13 +18,16 @@ SELECT l."OBJ_ID", l."BLK_ID", l."BLK_EXTENT", l."BLK_DOMAIN",
        l."PCBLK_MIN_RES", l."PCBLK_MAX_RES", l."NUM_POINTS",
        l."NUM_UNSORTED_POINTS", l."PT_SORT_DIM", l."POINTS", b.cloud
   FROM SIMPLE_BLOCKS l, SIMPLE_CLOUD b
- WHERE b.id=1 and l.obj_id = b.id
+ WHERE l.obj_id = b.id
 order by l.obj_id
                         </Option>
                         <Option name="connection">
-                            lidar/lidar@oracle.hobu.biz/lidar
+                            grid/grid@localhost/orcl
                         </Option>
                         <Option name="debug">
+                            true
+                        </Option>
+                        <Option name="populate_pointsourceid">
                             true
                         </Option>
                     </Reader>

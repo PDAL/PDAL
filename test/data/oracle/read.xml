@@ -9,13 +9,13 @@
         </Option>
         <Reader type="drivers.oci.reader">
             <Option name="query">
-                SELECT CLOUD FROM SIMPLE_CLOUD
+                SELECT CLOUD FROM SIMPLE_CLOUD where id in (1,2)
             </Option>
             <Option name="xml_schema_dump">
                 oracle-schema.xml
             </Option>
             <Option name="connection">
-                lidar/lidar@lidar.hobu.biz/lidar
+                grid/grid@localhost/orcl
             </Option>
             <Option name="debug">
                 true
