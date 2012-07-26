@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_las)
     {
         // need to scope the writer, so that's it dtor can use the stream
         pdal::drivers::las::Writer writer(reader, ofs);
-        BOOST_CHECK(writer.getDescription() == "Las Writer");
+        BOOST_CHECK_EQUAL(writer.getDescription(), "Las Writer");
         writer.initialize();
 
         const boost::uint64_t numPoints = reader.getNumPoints();
@@ -83,7 +83,7 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_las)
     FileUtils::closeFile(ofs);
 
     bool filesSame = Support::compare_files(Support::temppath(temp_filename), Support::datapath("simple.las"));
-    BOOST_CHECK(filesSame);
+    BOOST_CHECK_EQUAL(filesSame, true);
 
     if (filesSame)
     {
@@ -131,7 +131,7 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_laz)
     const boost::uint32_t numdiffs = Support::diff_files(Support::temppath("LasWriterTest_test_simple_laz.laz"),
                                      Support::datapath("laszip/laszip-generated.laz"),
                                      227, 106);
-    BOOST_CHECK(numdiffs==0);
+    BOOST_CHECK_EQUAL(numdiffs, 0);
 
     if (numdiffs==0)
     {
@@ -156,7 +156,7 @@ static void test_a_format(const std::string& refFile, boost::uint8_t majorVersio
 
         // need to scope the writer, so that's it dtor can use the stream
         pdal::drivers::las::Writer writer(reader, ofs);
-        BOOST_CHECK(writer.getDescription() == "Las Writer");
+        BOOST_CHECK_EQUAL(writer.getDescription(), "Las Writer");
 
         writer.setCompressed(false);
         writer.setDate(78, 2008);
