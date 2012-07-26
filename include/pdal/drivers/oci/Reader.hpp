@@ -81,15 +81,15 @@ public:
     {
         return m_connection;
     }
-    Statement getStatement() const
+    Statement getInitialQueryStatement() const
     {
-        return m_statement;
+        return m_initialQueryStatement;
     }
     BlockPtr getBlock() const
     {
         return m_block;
     }
-    std::string getQuery() const;
+    std::string getQueryString() const;
     void defineBlock(Statement statement, BlockPtr block) const;
 
 
@@ -99,8 +99,6 @@ public:
     }
     Schema fetchSchema(Statement statement, sdo_pc* pc, boost::uint32_t& capacity) const;
     pdal::SpatialReference fetchSpatialReference(Statement statement, sdo_pc* pc) const;
-    // for dumping
-    virtual boost::property_tree::ptree toPTree() const;
 
 
 private:
@@ -113,7 +111,7 @@ private:
     
 
     Connection m_connection;
-    Statement m_statement;
+    Statement m_initialQueryStatement;
     QueryType m_querytype;
 
     BlockPtr m_block;
@@ -156,8 +154,10 @@ protected:
     BufferPtr fetchPointBuffer(Statement statment, sdo_pc* pc);
 
     Statement m_block_statement;
-    Statement m_statement;
+    Statement m_initialQueryStatement;
     bool m_at_end;
+    bool m_at_end_of_blocks;
+    bool m_at_end_of_clouds;
     QueryType m_querytype;
     BlockPtr m_block;
     BlockPtr m_cloud_block;

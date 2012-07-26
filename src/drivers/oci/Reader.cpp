@@ -75,7 +75,7 @@ boost::uint64_t Reader::getNumPoints() const
         std::ostringstream block_query;
         std::ostringstream cloud_query;
         
-        Statement statement = Statement(m_connection->CreateStatement(getQuery().c_str()));
+        Statement statement = Statement(m_connection->CreateStatement(getQueryString().c_str()));
         statement->Execute(0);
                 
         BlockPtr block = BlockPtr(new Block(m_connection));        
@@ -124,7 +124,7 @@ boost::uint64_t Reader::getNumPoints() const
     else
     {
         std::ostringstream query;
-        query << "select sum(num_points) from (" << getQuery() << ")";
+        query << "select sum(num_points) from (" << getQueryString() << ")";
         Statement statement = Statement(m_connection->CreateStatement(query.str().c_str()));
         statement->Execute(0);
         boost::int64_t count;
@@ -152,20 +152,20 @@ void Reader::initialize()
     m_connection = connect();
     m_block = BlockPtr(new Block(m_connection));
 
-    if (getQuery().size() == 0)
+    if (getQueryString().size() == 0)
         throw pdal_error("'query' statement is empty. No data can be read from pdal::drivers::oci::Reader");
 
-    m_statement = Statement(m_connection->CreateStatement(getQuery().c_str()));
+    m_initialQueryStatement = Statement(m_connection->CreateStatement(getQueryString().c_str()));
 
-    m_statement->Execute(0);
+    m_initialQueryStatement->Execute(0);
 
     m_querytype = describeQueryType();
 
     if (m_querytype == QUERY_SDO_PC)
     {
-        defineBlock(m_statement, m_block);
+        defineBlock(m_initialQueryStatement, m_block);
 
-        bool bDidRead = m_statement->Fetch();
+        bool bDidRead = m_initialQueryStatement->Fetch();
 
         if (!bDidRead) throw pdal_error("Unable to fetch a point cloud entry entry!");
 
@@ -177,19 +177,19 @@ void Reader::initialize()
         catch (pdal_error const&)
         {
             // If one wasn't set on the options, we'll ignore at this
-            setSpatialReference(fetchSpatialReference(m_statement, m_block->pc));
+            setSpatialReference(fetchSpatialReference(m_initialQueryStatement, m_block->pc));
 
         }
 
         Schema& schema = getSchemaRef();
-        schema = fetchSchema(m_statement, m_block->pc, m_capacity);
+        schema = fetchSchema(m_initialQueryStatement, m_block->pc, m_capacity);
     }
 
     else if (m_querytype == QUERY_SDO_BLK_PC_VIEW)
     {
 
-        defineBlock(m_statement, m_block);
-        bool bDidRead = m_statement->Fetch();
+        defineBlock(m_initialQueryStatement, m_block);
+        bool bDidRead = m_initialQueryStatement->Fetch();
 
         if (!bDidRead) throw pdal_error("Unable to fetch a point cloud entry entry!");
         Schema& schema = getSchemaRef();
@@ -202,11 +202,11 @@ void Reader::initialize()
         catch (pdal_error const&)
         {
             // If one wasn't set on the options, we'll ignore at this
-            setSpatialReference(fetchSpatialReference(m_statement, m_block->pc));
+            setSpatialReference(fetchSpatialReference(m_initialQueryStatement, m_block->pc));
 
         }
 
-        schema = fetchSchema(m_statement, m_block->pc, m_capacity);
+        schema = fetchSchema(m_initialQueryStatement, m_block->pc, m_capacity);
 
     }
 
@@ -323,7 +323,7 @@ const Options Reader::getDefaultOptions() const
 
 
 
-std::string Reader::getQuery() const
+std::string Reader::getQueryString() const
 {
     return getOptions().getValueOrThrow<std::string>("query");
 }
@@ -348,7 +348,7 @@ QueryType Reader::describeQueryType()
     std::ostringstream oss;
 
     std::map<std::string, std::string> objects;
-    while (m_statement->GetNextField(iCol, szFieldName, &hType, &nSize, &nPrecision, &nScale, szTypeName))
+    while (m_initialQueryStatement->GetNextField(iCol, szFieldName, &hType, &nSize, &nPrecision, &nScale, szTypeName))
     {
 
         std::pair<std::string, int> p(szFieldName, hType);
@@ -377,7 +377,7 @@ QueryType Reader::describeQueryType()
     if (!bHaveSDO_PC && !bHaveSDO_PC_BLK_TYPE)
     {
         std::ostringstream oss;
-        oss << "Select statement '" << getQuery() << "' does not fetch a SDO_PC object"
+        oss << "Select statement '" << getQueryString() << "' does not fetch a SDO_PC object"
             " or SDO_PC_BLK_TYPE";
         throw pdal_error(oss.str());
 
@@ -460,9 +460,9 @@ pdal::Schema Reader::fetchSchema(Statement statement, sdo_pc* pc, boost::uint32_
     OCILobLocator* metadata = NULL;
     select_schema
             << "DECLARE" << std::endl
-            << "PC_TABLE VARCHAR2(32) := '" << m_statement->GetString(pc->base_table) << "';" << std::endl
-            << "PC_ID NUMBER := " << m_statement->GetInteger(&(pc->pc_id)) << ";" << std::endl
-            << "PC_COLUMN VARCHAR2(32) := '" << m_statement->GetString(pc->base_column) << "';" << std::endl
+            << "PC_TABLE VARCHAR2(32) := '" << m_initialQueryStatement->GetString(pc->base_table) << "';" << std::endl
+            << "PC_ID NUMBER := " << m_initialQueryStatement->GetInteger(&(pc->pc_id)) << ";" << std::endl
+            << "PC_COLUMN VARCHAR2(32) := '" << m_initialQueryStatement->GetString(pc->base_column) << "';" << std::endl
             << "BEGIN" << std::endl
             << std::endl
             << "EXECUTE IMMEDIATE" << std::endl
@@ -541,7 +541,7 @@ pdal::Schema Reader::fetchSchema(Statement statement, sdo_pc* pc, boost::uint32_
         
         if (iter->getNamespace().size() == 0)
         {
-            log()->get(logDEBUG4) << "setting namespace for dimension0 " << iter->getName() << " to "  << getName() << std::endl;
+            log()->get(logDEBUG4) << "setting namespace for dimension " << iter->getName() << " to "  << getName() << std::endl;
             
 
             Dimension d(*iter);
@@ -567,15 +567,6 @@ pdal::StageSequentialIterator* Reader::createSequentialIterator(PointBuffer& buf
     return new pdal::drivers::oci::iterators::sequential::Reader(*this, buffer);
 }
 
-
-boost::property_tree::ptree Reader::toPTree() const
-{
-    boost::property_tree::ptree tree = pdal::Reader::toPTree();
-
-    return tree;
-}
-
-
 namespace iterators
 {
 namespace sequential
@@ -583,8 +574,10 @@ namespace sequential
 
 
 IteratorBase::IteratorBase(const pdal::drivers::oci::Reader& reader)
-    : m_statement(Statement())
+    : m_initialQueryStatement(Statement())
     , m_at_end(false)
+    , m_at_end_of_blocks(false)
+    , m_at_end_of_clouds(false)
     , m_block(BlockPtr(new Block(reader.getConnection())))
     , m_active_cloud_id(0)
     , m_oracle_buffer(BufferPtr())
@@ -597,15 +590,15 @@ IteratorBase::IteratorBase(const pdal::drivers::oci::Reader& reader)
 
     if (m_querytype == QUERY_SDO_PC)
     {
-        m_statement = getNextCloud(m_block, m_active_cloud_id);
+        m_initialQueryStatement = getNextCloud(m_block, m_active_cloud_id);
     }
 
     if (m_querytype == QUERY_SDO_BLK_PC_VIEW)
     {
-        m_statement = reader.getStatement();
+        m_initialQueryStatement = reader.getInitialQueryStatement();
         m_block = reader.getBlock();
 
-        m_active_cloud_id = m_statement->GetInteger(&m_block->pc->pc_id);
+        m_active_cloud_id = m_initialQueryStatement->GetInteger(&m_block->pc->pc_id);
     }
 
     return;
@@ -616,7 +609,7 @@ Statement IteratorBase::getNextCloud(BlockPtr block, boost::int32_t& cloud_id)
 
     std::ostringstream select_blocks;
     BlockPtr cloud_block = m_reader.getBlock();
-    Statement cloud_statement = m_reader.getStatement();
+    Statement cloud_statement = m_reader.getInitialQueryStatement();
 
     cloud_id = cloud_statement->GetInteger(&cloud_block->pc->pc_id);
     std::string cloud_table = std::string(cloud_statement->GetString(cloud_block->pc->blk_table));
@@ -783,7 +776,7 @@ boost::uint32_t IteratorBase::myReadClouds(PointBuffer& user_buffer)
     bool bReadCloud(true);
     while (bReadCloud)
     {
-        m_oracle_buffer = fetchPointBuffer(m_statement, getReader().getBlock()->pc);
+        m_oracle_buffer = fetchPointBuffer(m_initialQueryStatement, getReader().getBlock()->pc);
 
         boost::uint32_t numReadThisCloud = myReadBlocks(user_buffer);
         numRead = numRead + numReadThisCloud;
@@ -794,13 +787,13 @@ boost::uint32_t IteratorBase::myReadClouds(PointBuffer& user_buffer)
         {
             getReader().log()->get(logDEBUG2) << "At end of current block and trying to fetch another cloud " << std::endl;
 
-            bReadCloud = getReader().getStatement()->Fetch();
+            bReadCloud = getReader().getInitialQueryStatement()->Fetch();
 
             if (bReadCloud)
             {
                 getReader().log()->get(logDEBUG2) << "Fetched another cloud " << std::endl;
                 m_block = BlockPtr(new Block(getReader().getConnection()));
-                m_statement = getNextCloud(m_block, m_active_cloud_id);
+                m_initialQueryStatement = getNextCloud(m_block, m_active_cloud_id);
                 m_at_end = false;
                 continue;
 
@@ -861,9 +854,9 @@ boost::uint32_t IteratorBase::myReadBlocks(PointBuffer& user_buffer)
     
     if (!m_oracle_buffer) 
     {
-        m_oracle_buffer = fetchPointBuffer(m_statement, m_block->pc);
+        m_oracle_buffer = fetchPointBuffer(m_initialQueryStatement, m_block->pc);
         boost::int32_t current_cloud_id(0);
-        current_cloud_id  = m_statement->GetInteger(&m_block->pc->pc_id);
+        current_cloud_id  = m_initialQueryStatement->GetInteger(&m_block->pc->pc_id);
         m_active_cloud_id = current_cloud_id;
     }
     
@@ -882,14 +875,14 @@ boost::uint32_t IteratorBase::myReadBlocks(PointBuffer& user_buffer)
         // We still have a block of data from the last readBuffer call
         // that was partially read.
         getReader().log()->get(logDEBUG3) << "IteratorBase::myReadBlocks: fetching first block" << std::endl;
-        bDidRead = m_statement->Fetch();
+        bDidRead = m_initialQueryStatement->Fetch();
         if (!bDidRead)
         {
             m_at_end = true;
             return 0;
         }
 
-        user_buffer.setSpatialBounds(getBounds(m_statement, m_block));
+        user_buffer.setSpatialBounds(getBounds(m_initialQueryStatement, m_block));
 
     }
     else
@@ -918,7 +911,7 @@ boost::uint32_t IteratorBase::myReadBlocks(PointBuffer& user_buffer)
 
         numPointsRead = numPointsRead + numReadThisBlock;
 
-        readBlob(m_statement, m_block, m_block->num_points);
+        readBlob(m_initialQueryStatement, m_block, m_block->num_points);
         fillUserBuffer(user_buffer);
         if (m_buffer_position != 0)
         {
@@ -926,7 +919,7 @@ boost::uint32_t IteratorBase::myReadBlocks(PointBuffer& user_buffer)
         } 
         else
         {
-            bDidRead = m_statement->Fetch();
+            bDidRead = m_initialQueryStatement->Fetch();
             if (!bDidRead)
             {
                 getReader().log()->get(logDEBUG3) << "IteratorBase::myReadBlocks: done reading block. Read " << numPointsRead << " points" << std::endl;
@@ -939,7 +932,7 @@ boost::uint32_t IteratorBase::myReadBlocks(PointBuffer& user_buffer)
         if (m_querytype == QUERY_SDO_BLK_PC_VIEW)
         {
             boost::int32_t current_cloud_id(0);
-            current_cloud_id  = m_statement->GetInteger(&m_block->pc->pc_id);
+            current_cloud_id  = m_initialQueryStatement->GetInteger(&m_block->pc->pc_id);
 
             getReader().log()->get(logDEBUG3) << "IteratorBase::myReadBlocks: current_cloud_id: "
                                               << current_cloud_id << " m_active_cloud_id: "
@@ -947,7 +940,7 @@ boost::uint32_t IteratorBase::myReadBlocks(PointBuffer& user_buffer)
 
             if (current_cloud_id != m_active_cloud_id)
             {
-                m_oracle_buffer = fetchPointBuffer(m_statement, m_block->pc);
+                m_oracle_buffer = fetchPointBuffer(m_initialQueryStatement, m_block->pc);
 
                 m_active_cloud_id = current_cloud_id;
                 return user_buffer.getNumPoints();
@@ -1008,10 +1001,10 @@ Reader::~Reader()
 }
 
 
-boost::uint64_t Reader::skipImpl(boost::uint64_t)
+boost::uint64_t Reader::skipImpl(boost::uint64_t count)
 {
 
-    return 0;
+    return naiveSkipImpl(count);
 }
 
 
