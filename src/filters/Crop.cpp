@@ -346,6 +346,9 @@ boost::uint32_t Crop::processBuffer(PointBuffer const& srcData, PointBuffer& dst
     
     boost::uint32_t count = srcData.getNumPoints();
 
+    bool logOutput = log()->getLevel() > logDEBUG4;
+    log()->floatPrecision(8);
+    
     const std::string x_name = getOptions().getValueOrDefault<std::string>("x_dim", "X");
     const std::string y_name = getOptions().getValueOrDefault<std::string>("y_dim", "Y");
     const std::string z_name = getOptions().getValueOrDefault<std::string>("z_dim", "Z");
@@ -359,12 +362,17 @@ boost::uint32_t Crop::processBuffer(PointBuffer const& srcData, PointBuffer& dst
     Dimension const& dimY = schema.getDimension(y_name);
     Dimension const& dimZ = schema.getDimension(z_name);
     
+    if (logOutput)
+    {
+        std::cout << "x_dim '" << x_name <<"' fetched: " << dimX << std::endl;
+        std::cout << "y_dim '" << x_name <<"' fetched: " << dimY << std::endl;
+        std::cout << "z_dim '" << x_name <<"' fetched: " << dimZ << std::endl;
+    }
+    
     std::string wkt = getOptions().getValueOrDefault<std::string>("polygon", "");
     int ret(0);
     
     boost::uint32_t copy_index(0);
-    bool logOutput = log()->getLevel() > logDEBUG4;
-    log()->floatPrecision(8);    
     for (boost::uint32_t index=0; index<count; index++)
     {
         // need to scale the values
