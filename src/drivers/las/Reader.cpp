@@ -837,7 +837,7 @@ Reader::~Reader()
     return;
 }
 
-void Reader::readBufferBeginImpl(PointBuffer& buffer)
+void Reader::readBufferBeginImpl(PointBuffer& /* buffer*/)
 {
 
 }
