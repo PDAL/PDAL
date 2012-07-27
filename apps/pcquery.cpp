@@ -121,12 +121,14 @@ void PcQuery::validateSwitches()
     
     if (m_wkt.size())
     {
+#ifdef PDAL_HAVE_GEOS
         // read the WKT using GEOS
         m_geosEnvironment = initGEOS_r(pcquery::_GEOSWarningHandler, pcquery::_GEOSErrorHandler);
         GEOSWKTReader* reader = GEOSWKTReader_create_r(m_geosEnvironment);
         GEOSGeometry* geom = GEOSWKTReader_read_r(m_geosEnvironment, reader, m_wkt.c_str());
         if (!geom)
             throw app_runtime_error("unable to ingest given WKT string");
+#endif
             
     }
     return;
