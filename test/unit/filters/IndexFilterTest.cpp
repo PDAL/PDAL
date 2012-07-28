@@ -85,6 +85,8 @@ BOOST_AUTO_TEST_CASE(test_3d)
     BOOST_CHECK_EQUAL(dist_ids[0], 8u);
 #endif
 
+    delete it;
+
     return;
 }
 
@@ -129,6 +131,8 @@ BOOST_AUTO_TEST_CASE(test_2d)
     BOOST_CHECK_EQUAL(dist_ids.size(), 3u);
     BOOST_CHECK_EQUAL(dist_ids[0], 8u);
 #endif
+
+    delete it;
 
     return;
 }
