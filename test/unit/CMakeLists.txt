@@ -56,7 +56,7 @@ SET(PDAL_UNITTEST_TEST_SRC
     filters/StatsFilterTest.cpp
     StreamFactoryTest.cpp
     SupportTest.cpp
-    drivers/terrasolid/TerraSolidTest.cpp
+    drivers/terrasolid/TerraSolidReaderTest.cpp
     drivers/text/TextWriterTest.cpp
 	ThreadTest.cpp
     UserCallbackTest.cpp
