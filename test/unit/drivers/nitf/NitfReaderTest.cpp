@@ -164,6 +164,8 @@ BOOST_AUTO_TEST_CASE(test_chipper)
     boost::uint32_t num_blocks = chipper->GetBlockCount();
     BOOST_CHECK_EQUAL(num_blocks, 8u);
  
+    delete iter;
+
     return;
 }
 
