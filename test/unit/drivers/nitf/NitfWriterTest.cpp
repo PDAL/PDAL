@@ -44,6 +44,7 @@ using namespace pdal;
 
 BOOST_AUTO_TEST_SUITE(NitfWriterTest)
 
+#if 0
 static void compare_contents(const std::string& las_file, const std::string& ntf_file)
 {
     //
@@ -107,7 +108,7 @@ static void compare_contents(const std::string& las_file, const std::string& ntf
 
     return;
 }
-
+#endif
 
 BOOST_AUTO_TEST_CASE(test1)
 {
