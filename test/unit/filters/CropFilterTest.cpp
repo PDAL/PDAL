@@ -37,6 +37,7 @@
 
 #include <pdal/drivers/faux/Reader.hpp>
 #include <pdal/drivers/faux/Writer.hpp>
+#include <pdal/filters/InPlaceReprojection.hpp>
 #include <pdal/drivers/las/Reader.hpp>
 #include <pdal/filters/Crop.hpp>
 #include <pdal/FileUtils.hpp>
@@ -122,6 +123,67 @@ BOOST_AUTO_TEST_CASE(test_crop_polygon)
 
 
     pdal::filters::Crop crop(reader, options);
+    crop.initialize();
+
+    pdal::PointBuffer data(crop.getSchema(), 1000);
+    
+    pdal::StageSequentialIterator* iter = crop.createSequentialIterator(data);
+
+    boost::uint32_t numRead = iter->read(data);
+    BOOST_CHECK_EQUAL(numRead, 47);
+ 
+#endif
+    return;
+}
+
+BOOST_AUTO_TEST_CASE(test_crop_polygon_reprojection)
+{
+
+#ifdef PDAL_HAVE_GEOS
+
+
+    pdal::Options options;
+
+
+
+    pdal::Option in_srs("spatialreference","EPSG:2993", "Input SRS");
+    pdal::Option out_srs("out_srs","EPSG:4326", "Output SRS to reproject to");
+    pdal::Option x_dim("x_dim", std::string("drivers.las.reader.X"), "Dimension name to use for 'X' data");
+    pdal::Option y_dim("y_dim", std::string("drivers.las.reader.Y"), "Dimension name to use for 'Y' data");
+    pdal::Option z_dim("z_dim", std::string("drivers.las.reader.Z"), "Dimension name to use for 'Z' data");
+    pdal::Option x_scale("scale_x", 0.0000001f, "Scale for output X data in the case when 'X' dimension data are to be scaled.  Defaults to '1.0'.  If not set, the Dimensions's scale will be used");
+    pdal::Option y_scale("scale_y", 0.0000001f, "Scale for output Y data in the case when 'Y' dimension data are to be scaled.  Defaults to '1.0'.  If not set, the Dimensions's scale will be used");
+    pdal::Option filename("filename", Support::datapath("1.2-with-color.las"));
+
+    
+    pdal::Option debug("debug", true, "");
+    pdal::Option verbose("verbose", 9, "");
+    // options.add(debug);
+    // options.add(verbose);
+    options.add(in_srs);
+    options.add(out_srs);
+    options.add(x_dim);
+    options.add(y_dim);
+    options.add(z_dim);
+    options.add(x_scale);
+    options.add(y_scale);
+    options.add(filename);
+    
+    std::istream* wkt_stream = FileUtils::openFile(Support::datapath("autzen-selection.wkt"));
+
+    std::stringstream buffer;
+    buffer << wkt_stream->rdbuf();
+
+    std::string wkt(buffer.str());
+
+    pdal::Option polygon("polygon", wkt, "");
+    
+    options.add(polygon);
+
+
+    pdal::drivers::las::Reader reader(options);
+    pdal::filters::InPlaceReprojection reprojection(reader, options);
+    pdal::filters::Crop crop(reprojection, options);
     crop.initialize();
 
     pdal::PointBuffer data(crop.getSchema(), 1000);
