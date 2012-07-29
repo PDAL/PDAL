@@ -91,13 +91,13 @@ BOOST_AUTO_TEST_CASE(test_parents)
     parent.createUUID();
 
     Dimension child("X", dimension::Float, 4);
-    child.setNamespace("child");
+    child.setNamespace("a.child");
     child.createUUID();
     dimension::id const& p = parent.getUUID();
     child.setParent(p);
 
     Dimension child2("X", dimension::Float, 8);
-    child2.setNamespace("child2");
+    child2.setNamespace("a.child2");
     child2.createUUID();
     child2.setParent(child.getUUID());
 
@@ -109,14 +109,18 @@ BOOST_AUTO_TEST_CASE(test_parents)
     schema.appendDimension(another);
     schema.appendDimension(child2);
 
-    BOOST_CHECK(child.getParent() == parent.getUUID());
+    BOOST_CHECK_EQUAL(child.getParent(), parent.getUUID());
 
     // The parent-child relationship will case getDimension
     // to return the child dim with name 'X', not the
     // first-added parent dim
     Dimension const& c2 = schema.getDimension("X");
 
-    BOOST_CHECK(c2.getUUID() == child2.getUUID());
+    BOOST_CHECK_EQUAL(c2.getUUID(), child2.getUUID());
+    
+    Dimension const& d = schema.getDimension("a.child2.X");
+    BOOST_CHECK_EQUAL(d.getNamespace(), "a.child2");
+    BOOST_CHECK_EQUAL(d.getName(), "X");
 }
 
 
