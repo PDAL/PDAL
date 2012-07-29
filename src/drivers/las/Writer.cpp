@@ -235,11 +235,17 @@ void Writer::setVLRsFromMetadata(LasHeader& header, Metadata const& metadata, Op
                         std::string vlr_data = m->second.get_value<std::string>();
                         std::vector<boost::uint8_t> data = Utils::base64_decode(vlr_data);
                         std::string description = m->second.get<std::string>("metadata.description.value");
+                        
+                        // In case the VLR is 0 in size
+                        boost::uint8_t* bytes = 0;
+                        if (data.size() > 0)
+                            bytes = &data[0];
+
                         pdal::drivers::las::VariableLengthRecord vlr(   0xAABB, 
                                                                         metadata_user_id, 
                                                                         metadata_record_id, 
                                                                         description, 
-                                                                        &data[0], 
+                                                                        bytes, 
                                                                         static_cast<boost::uint16_t>(data.size()));
                         header.getVLRs().add(vlr);
                         log()->get(logDEBUG) << "Forwarding VLR from metadata with user_id='" << option_user_id 
