@@ -469,7 +469,7 @@ pdal::Schema Reader::fetchSchema(Statement statement, sdo_pc* pc, boost::uint32_
             {
                 d.createUUID();
             }            
-            d.setNamespace(getName())
+            d.setNamespace(getName());
             schema.setDimension(d);        
         }
     }
