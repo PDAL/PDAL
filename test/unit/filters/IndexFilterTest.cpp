@@ -67,6 +67,7 @@ BOOST_AUTO_TEST_CASE(test_3d)
     boost::uint32_t numRead = it->read(data);
     BOOST_CHECK(numRead == 20);
     
+#ifdef PDAL_HAVE_FLANN   
     pdal::filters::iterators::sequential::Index* iter = dynamic_cast<pdal::filters::iterators::sequential::Index*>(it);
     
     unsigned k = 8;
@@ -75,14 +76,18 @@ BOOST_AUTO_TEST_CASE(test_3d)
     std::vector<boost::uint32_t> ids = iter->query(636199, 849238, 428.05, 0.0, k);
     
     BOOST_CHECK_EQUAL(ids.size(), k);
-    BOOST_CHECK_EQUAL(ids[0], 8);
-    BOOST_CHECK_EQUAL(ids[4], 10);
+    BOOST_CHECK_EQUAL(ids[0], 8u);
+    BOOST_CHECK_EQUAL(ids[4], 10u);
 
     std::vector<boost::uint32_t> dist_ids = iter->query(636199, 849238, 428.05, 100.0, k);
     
-    BOOST_CHECK_EQUAL(dist_ids.size(), 3);
-    BOOST_CHECK_EQUAL(dist_ids[0], 8);
- 
+    BOOST_CHECK_EQUAL(dist_ids.size(), 3u);
+    BOOST_CHECK_EQUAL(dist_ids[0], 8u);
+#endif
+
+    delete it;
+
+    return;
 }
 
 BOOST_AUTO_TEST_CASE(test_2d)
@@ -109,6 +114,7 @@ BOOST_AUTO_TEST_CASE(test_2d)
     boost::uint32_t numRead = it->read(data);
     BOOST_CHECK(numRead == 20);
     
+#ifdef PDAL_HAVE_FLANN   
     pdal::filters::iterators::sequential::Index* iter = dynamic_cast<pdal::filters::iterators::sequential::Index*>(it);
     
     unsigned k = 8;
@@ -117,14 +123,18 @@ BOOST_AUTO_TEST_CASE(test_2d)
     std::vector<boost::uint32_t> ids = iter->query(636199, 849238, 0.0, 0.0, k);
     
     BOOST_CHECK_EQUAL(ids.size(), k);
-    BOOST_CHECK_EQUAL(ids[0], 8);
-    BOOST_CHECK_EQUAL(ids[4], 10);
+    BOOST_CHECK_EQUAL(ids[0], 8u);
+    BOOST_CHECK_EQUAL(ids[4], 10u);
 
     std::vector<boost::uint32_t> dist_ids = iter->query(636199, 849238, 0.0, 100.0, k);
     
-    BOOST_CHECK_EQUAL(dist_ids.size(), 3);
-    BOOST_CHECK_EQUAL(dist_ids[0], 8);
- 
+    BOOST_CHECK_EQUAL(dist_ids.size(), 3u);
+    BOOST_CHECK_EQUAL(dist_ids[0], 8u);
+#endif
+
+    delete it;
+
+    return;
 }
 
 

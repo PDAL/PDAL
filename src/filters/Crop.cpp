@@ -176,12 +176,12 @@ const Options Crop::getDefaultOptions() const
 {
     Options options;
     Option bounds("bounds",Bounds<double>(),"bounds to crop to");
-	Option polygon("polygon", std::string(""), "WKT POLYGON() string to use to filter points");
-	
-	Option inside("inside", true, "keep points that are inside or outside the given polygon");
-	
-	options.add(inside);
-	options.add(polygon);
+    Option polygon("polygon", std::string(""), "WKT POLYGON() string to use to filter points");
+    
+    Option inside("inside", true, "keep points that are inside or outside the given polygon");
+    
+    options.add(inside);
+    options.add(polygon);
     options.add(bounds);
     return options;
 }
@@ -195,9 +195,10 @@ const Bounds<double>& Crop::getBounds() const
 Bounds<double> Crop::computeBounds(GEOSGeometry const* geometry)
 {
     Bounds<double> output;
-    bool bFirst(true);
 
 #ifdef PDAL_HAVE_GEOS
+    bool bFirst(true);
+
     GEOSGeometry const* ring = GEOSGetExteriorRing_r(m_geosEnvironment, geometry);
     
     GEOSCoordSequence const* coords = GEOSGeom_getCoordSeq_r(m_geosEnvironment, ring);
@@ -230,6 +231,8 @@ Bounds<double> Crop::computeBounds(GEOSGeometry const* geometry)
         output.grow(p);
         
     }
+#else
+    boost::ignore_unused_variable_warning(geometry);
 #endif
     return output;
 }
@@ -367,7 +370,6 @@ boost::uint32_t Crop::processBuffer(PointBuffer const& srcData, PointBuffer& dst
     log()->get(logDEBUG2) << "z_dim '" << x_name <<"' fetched: " << dimZ << std::endl;
     
     std::string wkt = getOptions().getValueOrDefault<std::string>("polygon", "");
-    int ret(0);
     
     boost::uint32_t copy_index(0);
     for (boost::uint32_t index=0; index<count; index++)
@@ -398,6 +400,8 @@ boost::uint32_t Crop::processBuffer(PointBuffer const& srcData, PointBuffer& dst
 #ifdef PDAL_HAVE_GEOS
         else
         {
+            int ret(0);
+
             // precise filtering based on the geometry
             GEOSCoordSequence* coords = GEOSCoordSeq_create_r(m_geosEnvironment, 1, 3);
             if (!coords) throw pdal_error("unable to allocate coordinate sequence");

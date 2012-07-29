@@ -52,7 +52,7 @@
 
 using namespace pdal;
 
-BOOST_AUTO_TEST_SUITE(QfitReaderTest)
+BOOST_AUTO_TEST_SUITE(QFITReaderTest)
 
 
 #define Compare(x,y)    BOOST_CHECK_CLOSE(x,y,0.00001);

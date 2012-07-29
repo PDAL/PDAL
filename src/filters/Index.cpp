@@ -205,7 +205,12 @@ std::vector<boost::uint32_t> Index::query(double const& x, double const& y, doub
             
         }
     }
-    
+#else
+    boost::ignore_unused_variable_warning(x);
+    boost::ignore_unused_variable_warning(y);
+    boost::ignore_unused_variable_warning(z);
+    boost::ignore_unused_variable_warning(distance);
+    boost::ignore_unused_variable_warning(k);
 #endif    
     
     return output;
@@ -224,12 +229,13 @@ boost::uint32_t Index::readBufferImpl(PointBuffer& data)
         m_stage.log()->get(logDEBUG2) << "inserting data into index data array of capacity: " << data.getCapacity() << std::endl;
     }
     
+#ifdef PDAL_HAVE_FLANN        
     for (boost::uint32_t pointIndex=0; pointIndex<numRead; pointIndex++)
     {
         float x = static_cast<float>(getScaledValue(data, *m_xDim, pointIndex));
         float y = static_cast<float>(getScaledValue(data, *m_yDim, pointIndex));
         float z = static_cast<float>(getScaledValue(data, *m_zDim, pointIndex));
-#ifdef PDAL_HAVE_FLANN        
+
         m_data.push_back(x);
         m_data.push_back(y);
         if (m_stage.getDimensions() > 2)
@@ -239,8 +245,8 @@ boost::uint32_t Index::readBufferImpl(PointBuffer& data)
         {
             m_stage.log()->get(logDEBUG4) << "index: " << pointIndex << " x: " << x << " y: " << y <<  " z: " << z << std::endl;
         }
-#endif        
     }
+#endif        
     
     return numRead;
 }
