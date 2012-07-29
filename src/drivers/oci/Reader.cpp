@@ -452,6 +452,28 @@ pdal::Schema Reader::fetchSchema(Statement statement, sdo_pc* pc, boost::uint32_
 
     Schema schema = Schema::from_xml(pc_schema_xml);
 
+    schema::index_by_index const& dims = schema.getDimensions().get<schema::index>();
+
+    for (schema::index_by_index::const_iterator iter = dims.begin(); iter != dims.end(); ++iter)
+    {
+        // For dimensions that do not have namespaces, we'll set the namespace 
+        // to the namespace of the current stage
+        
+        if (iter->getNamespace().size() == 0)
+        {
+            log()->get(logDEBUG4) << "setting namespace for dimension0 " << iter->getName() << " to "  << getName() << std::endl;
+            
+
+            Dimension d(*iter);
+            if (iter->getUUID().is_nil())
+            {
+                d.createUUID();
+            }            
+            d.setNamespace(getName())
+            schema.setDimension(d);        
+        }
+    }
+
     return schema;
 }
 
