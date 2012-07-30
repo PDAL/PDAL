@@ -317,7 +317,11 @@ std::string Utils::base64_encode(std::vector<boost::uint8_t> const& bytes)
         René Nyffenegger rene.nyffenegger@adp-gmbh.ch
 
     */
-
+        
+    if (!bytes.size())
+    {
+        return std::string("");
+    }
     unsigned char const* bytes_to_encode = &(bytes.front());
 
     unsigned int in_len = bytes.size();
