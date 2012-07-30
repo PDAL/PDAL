@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(pcinfoTest_no_input)
     int stat = Support::run_command(cmd, output);
     BOOST_CHECK_EQUAL(stat, 1);
 
-    const std::string expected = "Usage error: input file name required";
+    const std::string expected = "Usage error: no action option specified";
     BOOST_CHECK_EQUAL(output.substr(0, expected.length()), expected);
 
     return;
@@ -86,45 +86,58 @@ BOOST_AUTO_TEST_CASE(pcinfo_test_common_opts)
 
 BOOST_AUTO_TEST_CASE(pcinfo_test_switches)
 {
-#if 0
+#if 1
     const std::string cmd = appName();
 
     std::string inputLas = Support::datapath("apps/simple.las");
     std::string inputLaz = Support::datapath("apps/simple.laz");
 
     std::string output;
+    std::string expected;
 
     int stat = 0;
 
     // does the default work?
     stat = Support::run_command(cmd + " " + inputLas, output);
-    BOOST_CHECK_EQUAL(stat, 0);
+    BOOST_CHECK_EQUAL(stat, 1);
+    expected = "Usage error: no action option specified";
+    BOOST_CHECK_EQUAL(output.substr(0, expected.length()), expected);
 
     // does --input work?
     stat = Support::run_command(cmd + " --input=" + inputLas, output);
-    BOOST_CHECK_EQUAL(stat, 0);
+    BOOST_CHECK_EQUAL(stat, 1);
+    expected = "Usage error: no action option specified";
+    BOOST_CHECK_EQUAL(output.substr(0, expected.length()), expected);
 
     // does -i work?
     stat = Support::run_command(cmd + " -i " + inputLas, output);
-    BOOST_CHECK_EQUAL(stat, 0);
+    BOOST_CHECK_EQUAL(stat, 1);
+    expected = "Usage error: no action option specified";
+    BOOST_CHECK_EQUAL(output.substr(0, expected.length()), expected);
 
 #ifdef PDAL_HAVE_LASZIP
     // does it work for .laz?
     stat = Support::run_command(cmd + " " + inputLaz, output);
-    BOOST_CHECK_EQUAL(stat, 0);
+    BOOST_CHECK_EQUAL(stat, 1);
+    expected = "Usage error: no action option specified";
+    BOOST_CHECK_EQUAL(output.substr(0, expected.length()), expected);
 #endif
 
 #ifdef PDAL_HAVE_LIBLAS
     // does --liblas work?
     stat = Support::run_command(cmd + " --liblas " + inputLas, output);
-    BOOST_CHECK_EQUAL(stat, 0);
+    BOOST_CHECK_EQUAL(stat, 1);
+    expected = "Usage error: no action option specified";
+    BOOST_CHECK_EQUAL(output.substr(0, expected.length()), expected);
 #endif
 
 #ifdef PDAL_HAVE_LIBLAS
 #ifdef PDAL_HAVE_LASZIP
     // does --liblas work for .laz too?
     stat = Support::run_command(cmd + " --liblas " + inputLaz, output);
-    BOOST_CHECK_EQUAL(stat, 0);
+    BOOST_CHECK_EQUAL(stat, 1);
+    expected = "Usage error: no action option specified";
+    BOOST_CHECK_EQUAL(output.substr(0, expected.length()), expected);
 #endif
 #endif
 #endif
@@ -165,7 +178,7 @@ BOOST_AUTO_TEST_CASE(pcinfo_test_dumps)
     command << cmd + " --stats " + inputLas + " --seed 1234" +" > " + stats_test; 
     stat = Support::run_command(command.str(), output);
     BOOST_CHECK_EQUAL(stat, 0);
-#if defined(PDAL_PLATFORM_WIN32) // && (PDAL_BUILD_TYPE=="Debug")
+#if defined(PDAL_PLATFORM_WIN32)
     were_equal = Support::compare_text_files(stats_test, Support::datapath("apps/pcinfo_stats-win32.txt"));
 #else
     were_equal = Support::compare_text_files(stats_test, Support::datapath("apps/pcinfo_stats.txt"));
