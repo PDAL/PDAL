@@ -26,7 +26,6 @@ SET(PDAL_UNITTEST_TEST_SRC
     ConfigTest.cpp
     filters/CropFilterTest.cpp
     filters/DecimationFilterTest.cpp
-    DimensionLayoutTest.cpp
     DimensionTest.cpp
     EnvironmentTest.cpp
     drivers/faux/FauxReaderTest.cpp
@@ -46,7 +45,6 @@ SET(PDAL_UNITTEST_TEST_SRC
     PointBufferTest.cpp
     drivers/qfit/QFITReaderTest.cpp
     RangeTest.cpp
-    filters/ReprojectionFilterTest.cpp
     filters/ScalingFilterTest.cpp
     filters/SelectorFilterTest.cpp
     SchemaLayoutTest.cpp
