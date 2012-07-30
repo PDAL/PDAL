@@ -325,6 +325,8 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_ignored_dimensions)
         BOOST_CHECK_EQUAL(r, 0u);
         boost::int32_t x = altered.getField<boost::int32_t>(dimX, 0);
         BOOST_CHECK_EQUAL(x, 63701224);
+
+        delete iter;
     }
     
     {
@@ -343,7 +345,10 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_ignored_dimensions)
         BOOST_CHECK_EQUAL(r2, 68u);
         boost::int32_t x2 = original.getField<boost::int32_t>(dimX2, 0);
         BOOST_CHECK_EQUAL(x2, 63701224);
+
+        delete iter2;
     }
+
     FileUtils::deleteFile(temp_filename);
 
     return;
