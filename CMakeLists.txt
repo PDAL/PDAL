@@ -413,6 +413,22 @@ if(WITH_MRSID)
     endif()
 endif()
 
+
+# CARIS/BDB support - optional, default=OFF
+set(WITH_CARIS FALSE CACHE BOOL "Choose if CARIS/BDB support should be built")
+if(WITH_CARIS)
+     set(CARIS_FOUND 1)
+#    set(MRSID_ROOT "/Users/hobu/installs/mrsid/Lidar_DSDK" CACHE STRING "Root directory of MrSID install")
+#    find_package(MrSID)
+#    if(MRSID_FOUND)
+#        set(CMAKE_REQUIRED_LIBRARIES ${MRSID_LIBRARY})
+#        include_directories(${MRSID_INCLUDE_DIR})
+#        add_definitions(-DHAVE_MRSID=1)
+        set(PDAL_HAVE_CARIS 1)
+#    endif()
+endif()
+
+
 # Points2Grid
 # Points2Grid support - optional, default=OFF
 set(WITH_P2G FALSE CACHE BOOL "Choose if Points2Grid support should be built")

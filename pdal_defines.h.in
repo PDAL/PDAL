@@ -24,6 +24,7 @@
 /*
  * availability of 3rd-party libraries
  */
+#cmakedefine PDAL_HAVE_CARIS
 #cmakedefine PDAL_HAVE_GEOS
 #cmakedefine PDAL_HAVE_GDAL
 #cmakedefine PDAL_HAVE_FLANN

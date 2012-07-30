@@ -11,6 +11,10 @@ add_subdirectory(faux)
 add_subdirectory(las)
 add_subdirectory(liblas)
 
+if(CARIS_FOUND)
+    add_subdirectory(caris)
+endif()
+
 if(MRSID_FOUND)
     add_subdirectory(mrsid)
 endif()

@@ -25,6 +25,11 @@ rem set PDAL_EMBED_BOOST=OFF
 rem set BOOST_DIR=c:\utils\boost_1_49_0
 set BOOST_DIR=%PDAL_DIR%\boost
 
+:: CARIS
+set CARIS_ENABLED=ON
+set CARIS_INCLUDE_DIR=%CARIS_DIR%\include
+set CARIS_LIBRARY=%CARIS_DIR%\caris.lib
+
 :: GDAL
 set GDAL_ENABLED=ON
 set GDAL_INCLUDE_DIR=%OSGEO4W_DIR%\apps\gdal-dev\include
@@ -83,6 +88,7 @@ if %USERDOMAIN% == PDC set FREEGLUT_ENABLED=ON
 
 rem if EXIST CMakeCache.txt del CMakeCache.txt
 cmake -G %GENERATOR% ^
+    -DWITH_CARIS=%CARIS_ENABLED% ^
     -DWITH_GDAL=%GDAL_ENABLED% ^
     -DWITH_GEOTIFF=%GEOTIFF_ENABLED% ^
     -DWITH_ORACLE=%ORACLE_ENABLED% ^
