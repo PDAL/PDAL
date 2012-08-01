@@ -466,10 +466,13 @@ boost::uint32_t Crop::readBufferImpl(PointBuffer& data)
 
     boost::uint32_t originalCapacity = data.getCapacity();
     boost::int64_t numPointsNeeded = static_cast<boost::int64_t>(data.getCapacity());
-    assert(data.getNumPoints() == 0);
 
-    PointBuffer outputData(data.getSchema(), numPointsNeeded);
-    PointBuffer tmpData(data.getSchema(), numPointsNeeded);
+    if (numPointsNeeded <=0 )
+        throw pdal_error("numPointsNeeded is <=0!");
+        
+    // we've established numPointsNeeded is > 0
+    PointBuffer outputData(data.getSchema(), static_cast<boost::uint32_t>(numPointsNeeded));
+    PointBuffer tmpData(data.getSchema(), static_cast<boost::uint32_t>(numPointsNeeded));
 
     m_cropFilter.log()->get(logDEBUG2) << "Fetching for block of size: " << numPointsNeeded << std::endl;
     
@@ -484,7 +487,9 @@ boost::uint32_t Crop::readBufferImpl(PointBuffer& data)
         
 
         // read from prev stage
-        data.resize(numPointsNeeded);
+        if (numPointsNeeded <=0)
+            throw pdal_error("unable resize PointBuffer to <=0 points in size!");
+        data.resize(static_cast<boost::uint32_t>(numPointsNeeded));
         const boost::uint32_t numSrcPointsRead = getPrevIterator().read(data);
         m_cropFilter.log()->get(logDEBUG3) << "Fetched " 
                                            << numSrcPointsRead << " from previous iterator. "  
