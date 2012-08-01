@@ -51,8 +51,6 @@ static std::string appName()
     return app;
 }
 
-
-#ifdef PDAL_COMPILER_MSVC
 BOOST_AUTO_TEST_CASE(pcinfoTest_no_input)
 {
     const std::string cmd = appName();
@@ -66,7 +64,6 @@ BOOST_AUTO_TEST_CASE(pcinfoTest_no_input)
 
     return;
 }
-#endif
 
 
 BOOST_AUTO_TEST_CASE(pcinfo_test_common_opts)
@@ -86,7 +83,6 @@ BOOST_AUTO_TEST_CASE(pcinfo_test_common_opts)
 
 BOOST_AUTO_TEST_CASE(pcinfo_test_switches)
 {
-#if 1
     const std::string cmd = appName();
 
     std::string inputLas = Support::datapath("apps/simple.las");
@@ -123,24 +119,6 @@ BOOST_AUTO_TEST_CASE(pcinfo_test_switches)
     BOOST_CHECK_EQUAL(output.substr(0, expected.length()), expected);
 #endif
 
-#ifdef PDAL_HAVE_LIBLAS
-    // does --liblas work?
-    stat = Support::run_command(cmd + " --liblas " + inputLas, output);
-    BOOST_CHECK_EQUAL(stat, 1);
-    expected = "Usage error: no action option specified";
-    BOOST_CHECK_EQUAL(output.substr(0, expected.length()), expected);
-#endif
-
-#ifdef PDAL_HAVE_LIBLAS
-#ifdef PDAL_HAVE_LASZIP
-    // does --liblas work for .laz too?
-    stat = Support::run_command(cmd + " --liblas " + inputLaz, output);
-    BOOST_CHECK_EQUAL(stat, 1);
-    expected = "Usage error: no action option specified";
-    BOOST_CHECK_EQUAL(output.substr(0, expected.length()), expected);
-#endif
-#endif
-#endif
     return;
 }
 
