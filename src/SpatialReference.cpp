@@ -272,6 +272,22 @@ const std::string& SpatialReference::getName() const
     return name;
 }
 
+bool SpatialReference::isGeographic() const
+{
+#ifdef PDAL_SRS_ENABLED
+
+    OGRSpatialReferenceH current = OSRNewSpatialReference(getWKT(eCompoundOK, false).c_str());
+    
+    bool geog = static_cast<bool>(OSRIsGeographic(current));
+    
+    OSRDestroySpatialReference(current);
+
+#else
+    boost::ignore_unused_variable_warning(v);
+    throw std::runtime_error("GDAL is not available, SpatialReference could not determine if isGeographic");
+#endif
+}
+
 
 boost::property_tree::ptree SpatialReference::toPTree() const
 {

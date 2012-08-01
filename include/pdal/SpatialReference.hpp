@@ -113,7 +113,8 @@ public:
 
     boost::property_tree::ptree toPTree() const;
     void dump() const;
-
+    
+    bool isGeographic() const; 
     const std::string& getDescription() const;
     const std::string& getName() const;
 
