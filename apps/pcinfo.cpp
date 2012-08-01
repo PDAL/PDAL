@@ -218,10 +218,13 @@ void PcInfo::dumpSchema(const Stage& stage) const
 {
     const Schema& schema = stage.getSchema();
 
-    boost::property_tree::ptree tree = schema.toPTree();
+    boost::property_tree::ptree schema_tree = schema.toPTree();
     
     std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
 
+    boost::property_tree::ptree tree;
+    tree.add_child("schema", schema_tree);
+    
     if (m_useXML)
         write_xml(ostr, tree);
     else
