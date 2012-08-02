@@ -43,7 +43,7 @@
 
 #include <pdal/filters/Cache.hpp>
 #include <pdal/filters/Chipper.hpp>
-#include <pdal/Filters/Crop.hpp>
+#include <pdal/filters/Crop.hpp>
 #include <pdal/filters/InPlaceReprojection.hpp>
 #include <pdal/filters/Scaling.hpp>
 #include <pdal/SpatialReference.hpp>
@@ -224,8 +224,6 @@ int Pc2Pc::execute()
             crop_stage = new pdal::filters::Crop(*next_stage, readerOptions);
             next_stage = crop_stage;
         }
-
-
         
         final_stage = next_stage;
     }
