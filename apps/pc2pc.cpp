@@ -214,6 +214,7 @@ int Pc2Pc::execute()
                 buffer << wkt_stream->rdbuf();
 
                 m_wkt = buffer.str();
+                FileUtils::closeFile(wkt_stream);
                 
             } catch (pdal::pdal_error const&)
             {
