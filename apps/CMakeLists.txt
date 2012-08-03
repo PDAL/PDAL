@@ -25,6 +25,7 @@ set(PC2PC pc2pc)
 set(PCINFO pcinfo)
 set(PCPIPELINE pcpipeline)
 set(PCQUERY pcquery)
+set(PCEQUAL pcequal)
 
 set(COMMON_APP_SOURCES Application.cpp Application.hpp AppSupport.cpp AppSupport.hpp)
 
@@ -61,6 +62,11 @@ endif()
 if(PCQUERY)
     add_executable(${PCQUERY} pcquery.cpp ${COMMON_APP_SOURCES})
     target_link_libraries(${PCQUERY} ${PDAL_LIB_NAME} ${Boost_LIBRARIES})
+endif()
+
+if(PCEQUAL)
+    add_executable(${PCEQUAL} pcequal.cpp ${COMMON_APP_SOURCES})
+    target_link_libraries(${PCEQUAL} ${PDAL_LIB_NAME} ${Boost_LIBRARIES})
 endif()
 
 #------------------------------------------------------------------------------
