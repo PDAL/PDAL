@@ -567,7 +567,7 @@ if (WIN32)
     ${PYTHON_LIBRARY}
     ${P2G_LIBRARY}
     ${GEOS_LIBRARY}
-    ${FLANN_LIBRARY})
+    ${FLANN_LIBRARIES})
 else()
   target_link_libraries(${APPS_CPP_DEPENDENCIES}
     ${PDAL_LIB_NAME}
@@ -581,7 +581,7 @@ else()
     ${PYTHON_LIBRARY}
     ${P2G_LIBRARY}
     ${GEOS_LIBRARY}
-    ${FLANN_LIBRARY})
+    ${FLANN_LIBRARIES})
 endif()
 
 message(STATUS "Using boost lib: ${Boost_LIBRARIES}")
