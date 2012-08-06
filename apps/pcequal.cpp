@@ -65,6 +65,22 @@ public:
     double y;
     double z;
     boost::uint64_t id;
+    
+    bool equal(Point const& other)
+    {
+        return (Utils::compare_distance(x, other.x) && 
+                Utils::compare_distance(y, other.y) && 
+                Utils::compare_distance(z, other.z));
+        
+    }
+    bool operator==(Point const& other)
+    {
+        return equal(other);
+    }
+    bool operator!=(Point const& other)
+    {
+        return !equal(other);
+    }    
 };
 
 class PcEqual : public Application
@@ -79,7 +95,7 @@ private:
     void validateSwitches(); // overrride
     
     void readPoints(std::vector<Point>* points,
-                                boost::scoped_ptr<StageSequentialIterator>& iter,
+                                StageSequentialIterator* iter,
                                 PointBuffer& data);    
     std::string m_sourceFile;
     std::string m_candidateFile;
@@ -102,7 +118,9 @@ PcEqual::PcEqual(int argc, char* argv[])
 
 void PcEqual::validateSwitches()
 {
-    
+    if( m_chunkSize == 0)
+        m_chunkSize = 1048576;     
+
     return;
 }
 
@@ -138,7 +156,7 @@ void PcEqual::addSwitches()
 
 
 void PcEqual::readPoints(   std::vector<Point>* points,
-                            boost::scoped_ptr<StageSequentialIterator>& iter,
+                            StageSequentialIterator* iter,
                             PointBuffer& data)
 {
     const Schema& schema = data.getSchema();
@@ -154,9 +172,9 @@ void PcEqual::readPoints(   std::vector<Point>* points,
         
         for (boost::uint32_t i = 0; i < data.getNumPoints(); ++i)
         {
-            boost::int32_t xi = data.getField<boost::uint32_t>(dimX, i);
-            boost::int32_t yi = data.getField<boost::uint32_t>(dimY, i);
-            boost::int32_t zi = data.getField<boost::uint32_t>(dimZ, i);
+            boost::int32_t xi = data.getField<boost::int32_t>(dimX, i);
+            boost::int32_t yi = data.getField<boost::int32_t>(dimY, i);
+            boost::int32_t zi = data.getField<boost::int32_t>(dimZ, i);
             
             Point p;
             p.x = dimX.applyScaling<boost::int32_t>(xi);
@@ -173,32 +191,40 @@ void PcEqual::readPoints(   std::vector<Point>* points,
 
 }
 
+std::ostream& writeHeader(std::ostream& strm)
+{
+    strm << "\"ID\", \"DeltaX\", \"DeltaY\", \"DeltaZ\"" << std::endl;
+    return strm;
+    
+}
+
 int PcEqual::execute()
 {
 
-
-    Options sourceOptions;
-    {
-        sourceOptions.add<std::string>("filename", m_sourceFile);
-        sourceOptions.add<bool>("debug", isDebug());
-        sourceOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
-    }
-
-    Stage* source = AppSupport::makeReader(sourceOptions);
-    source->initialize();
-    
     std::vector<Point>* source_points = new std::vector<Point>();
-    source_points->reserve(source->getNumPoints());
-    boost::uint32_t chunkSize = m_chunkSize != 0 ? m_chunkSize : 1048576; 
-    PointBuffer source_data(source->getSchema(), chunkSize);
-    boost::scoped_ptr<StageSequentialIterator> reader_iter(source->createSequentialIterator(source_data));
-
-    readPoints(source_points, reader_iter, source_data);
-
-    std::cout << "read " << source_points->size() << " source points" << std::endl;
+    std::vector<Point>* candidate_points = new std::vector<Point>();
     
-    delete source;
+    {
+        Options sourceOptions;
+        {
+            sourceOptions.add<std::string>("filename", m_sourceFile);
+            sourceOptions.add<bool>("debug", isDebug());
+            sourceOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
+        }
+        Stage* source = AppSupport::makeReader(sourceOptions);
+        source->initialize();
 
+        source_points->reserve(source->getNumPoints());
+
+        PointBuffer source_data(source->getSchema(), m_chunkSize);
+        StageSequentialIterator* reader_iter = source->createSequentialIterator(source_data);
+
+        readPoints(source_points, reader_iter, source_data);
+
+        delete reader_iter;
+        delete source;
+        
+    }    
 
     Options candidateOptions;
     {
@@ -208,30 +234,95 @@ int PcEqual::execute()
     }
 
     Stage* candidate = AppSupport::makeReader(candidateOptions);
-
-
     pdal::filters::Index* index_filter = new pdal::filters::Index(*candidate, candidateOptions);
     index_filter->initialize();    
 
-    std::vector<Point>* candidate_points = new std::vector<Point>();
+
     candidate_points->reserve(candidate->getNumPoints());
 
-    PointBuffer candidate_data(candidate->getSchema(), chunkSize);
-    boost::scoped_ptr<StageSequentialIterator> index_iter(candidate->createSequentialIterator(candidate_data));
+    PointBuffer candidate_data(candidate->getSchema(), m_chunkSize);
+    StageSequentialIterator* index_iter = index_filter->createSequentialIterator(candidate_data);
     readPoints(candidate_points, index_iter, candidate_data);
 
-    std::cout << "read " << candidate_points->size() << " candidate points" << std::endl;
-    
-    delete index_filter;
 
-    std::cout << std::endl;
 
     if (candidate_points->size() != source_points->size())
     {
         throw app_runtime_error("Source and candidate files do not have the same point count!");
     }
     
+    pdal::filters::iterators::sequential::Index* idx = dynamic_cast<pdal::filters::iterators::sequential::Index*>(index_iter);
+    if (!idx)
+    {
+        throw app_runtime_error("unable to cast iterator to Index iterator!");
+    }
     
+
+    Stage* candidates = AppSupport::makeReader(candidateOptions);
+    candidates->initialize();    
+
+    PointBuffer candidates_data(candidates->getSchema(), 1);
+    StageRandomIterator* random_iterator = candidates->createRandomIterator(candidates_data);
+    
+    
+    Schema const& schema = candidates_data.getSchema();
+    Dimension const& dimX = schema.getDimension("X");
+    Dimension const& dimY = schema.getDimension("Y");
+    Dimension const& dimZ = schema.getDimension("Z");
+    
+    bool bWroteHeader(false);
+    for (std::size_t i = 0; i <  source_points->size(); ++i)
+    {
+        Point& source = (*source_points)[i];
+        
+        std::vector<boost::uint32_t> ids = idx->query(source.x, source.y, source.z, 0.0, 1);
+
+        if (ids.size())
+            random_iterator->seek(ids[0]);
+        else
+            throw app_runtime_error("unable to find point for id" + i );
+        
+        random_iterator->read(candidates_data);
+        boost::int32_t xi = candidates_data.getField<boost::int32_t>(dimX, 0);
+        boost::int32_t yi = candidates_data.getField<boost::int32_t>(dimY, 0);
+        boost::int32_t zi = candidates_data.getField<boost::int32_t>(dimZ, 0);
+        
+        Point p;
+        p.x = dimX.applyScaling<boost::int32_t>(xi);
+        p.y = dimY.applyScaling<boost::int32_t>(yi);
+        p.z = dimZ.applyScaling<boost::int32_t>(zi);
+        
+        double xd = source.x - p.x;
+        double yd = source.y - p.y;
+        double zd = source.z - p.z;
+        
+        if (!bWroteHeader)
+        {
+            writeHeader(std::cout);
+            bWroteHeader = true;
+        }
+        std::cout << i << ",";
+        boost::uint32_t precision = Utils::getStreamPrecision(dimX.getNumericScale());
+        std::cout.setf(std::ios_base::fixed, std::ios_base::floatfield);
+        std::cout.precision(precision);
+        std::cout << xd << ",";
+
+        precision = Utils::getStreamPrecision(dimY.getNumericScale());
+        std::cout.precision(precision);
+        std::cout << yd << ",";
+
+        precision = Utils::getStreamPrecision(dimZ.getNumericScale());
+        std::cout.precision(precision);
+        std::cout << zd;
+        
+        std::cout << std::endl;
+
+        
+        
+    }
+
+    delete index_iter;
+    delete index_filter;    
     delete candidate_points;
     delete source_points;
     
