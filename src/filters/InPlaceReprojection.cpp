@@ -69,15 +69,6 @@ struct OSRTransformDeleter
     }
 };
 
-
-struct GDALSourceDeleter
-{
-    template <typename T>
-    void operator()(T* ptr)
-    {
-        ::GDALClose(ptr);
-    }
-};
 #endif
 
 
