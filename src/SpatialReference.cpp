@@ -281,7 +281,8 @@ bool SpatialReference::isGeographic() const
     bool geog = static_cast<bool>(OSRIsGeographic(current));
     
     OSRDestroySpatialReference(current);
-
+    
+    return geog;
 #else
     boost::ignore_unused_variable_warning(v);
     throw std::runtime_error("GDAL is not available, SpatialReference could not determine if isGeographic");
