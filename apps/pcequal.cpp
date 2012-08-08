@@ -193,7 +193,7 @@ void PcEqual::readPoints(   std::vector<Point>* points,
 
 std::ostream& writeHeader(std::ostream& strm)
 {
-    strm << "\"ID\", \"DeltaX\", \"DeltaY\", \"DeltaZ\"" << std::endl;
+    strm << "\"ID\",\"DeltaX\",\"DeltaY\",\"DeltaZ\"" << std::endl;
     return strm;
     
 }
