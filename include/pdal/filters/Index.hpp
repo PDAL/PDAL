@@ -75,14 +75,14 @@ public:
 
     void processBuffer(PointBuffer& data) const;
 
-    inline void setDimensions(boost::uint32_t dimensions) 
+    inline void setNumDimensions(boost::uint32_t dimensions) 
     {
         if (!(dimensions == 2) && !(dimensions == 3))
             throw pdal_error("Dimension count must be 2 or 3 for index queries");
         m_dimensions = dimensions; 
     }
     
-    inline boost::uint32_t getDimensions() const 
+    inline boost::uint32_t getNumDimensions() const 
     { 
         return m_dimensions; 
     }
@@ -127,7 +127,7 @@ private:
 
 
 #ifdef PDAL_HAVE_FLANN
-    flann::Index<flann::L2<float> >* m_index;
+    flann::KDTreeSingleIndex<flann::L2_Simple<float> >* m_index;
     flann::Matrix<float>* m_dataset;    
 #endif      
     pdal::Dimension const* m_xDim;

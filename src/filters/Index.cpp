@@ -138,7 +138,7 @@ void Index::readBufferBeginImpl(PointBuffer& buffer)
 
         m_stage.log()->get(logDEBUG2) << "Indexing PointBuffer with X: '" << x_name 
                                       << "' Y: '" << y_name 
-                                      << "' Z: '" << z_name << " with " <<  m_stage.getDimensions() << " dimensions" << std::endl;
+                                      << "' Z: '" << z_name << " with " <<  m_stage.getNumDimensions() << " dimensions" << std::endl;
         m_xDim = &schema.getDimension(x_name);
         m_yDim = &schema.getDimension(y_name);
         m_zDim = &schema.getDimension(z_name);
@@ -162,10 +162,10 @@ std::vector<boost::uint32_t> Index::query(double const& x, double const& y, doub
     std::vector<int> indices;
     indices.resize(k);
     
-    std::vector<float> query(m_stage.getDimensions());
+    std::vector<float> query(m_stage.getNumDimensions());
     query[0] = x;
     query[1] = y;
-    if (m_stage.getDimensions() > 2)
+    if (m_stage.getNumDimensions() > 2)
         query[2] = z;
 
     bool logOutput = m_stage.log()->getLevel() > logDEBUG4;
@@ -178,7 +178,7 @@ std::vector<boost::uint32_t> Index::query(double const& x, double const& y, doub
     flann::Matrix<float> k_distances_mat (&distances[0], 1, k);
 
     
-    m_index->knnSearch (flann::Matrix<float> (&query[0], 1, m_stage.getDimensions()),
+    m_index->knnSearch (flann::Matrix<float> (&query[0], 1, m_stage.getNumDimensions()),
                              k_indices_mat, k_distances_mat,
                              k, flann::SearchParams(128));
     
@@ -238,7 +238,7 @@ boost::uint32_t Index::readBufferImpl(PointBuffer& data)
 
         m_data.push_back(x);
         m_data.push_back(y);
-        if (m_stage.getDimensions() > 2)
+        if (m_stage.getNumDimensions() > 2)
             m_data.push_back(z);
         
         if (logOutput)
@@ -343,8 +343,10 @@ void Index::readEndImpl()
 #ifdef PDAL_HAVE_FLANN    
     
     // Build the index
-    m_dataset = new flann::Matrix<float>(&m_data[0], m_stage.getNumPoints(), m_stage.getDimensions());
-    m_index = new flann::Index<flann::L2<float> >(*m_dataset, flann::KDTreeIndexParams(4));
+    m_dataset = new flann::Matrix<float>(&(m_data.front()), m_stage.getNumPoints(), m_stage.getNumDimensions());
+    m_stage.log()->get(logDEBUG2) << "Building index for size " << m_data.size()  <<std::endl;
+    
+    m_index = new flann::KDTreeSingleIndex<flann::L2_Simple<float> >(*m_dataset, flann::KDTreeIndexParams(4));
     m_index->buildIndex();
     m_stage.log()->get(logDEBUG2) << "Built index" <<std::endl;
     
