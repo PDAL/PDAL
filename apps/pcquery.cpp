@@ -50,6 +50,10 @@
 #include "Application.hpp"
 #include <cstdarg>
 
+#include <boost/tokenizer.hpp>
+#define SEPARATORS ",| "
+typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
+
 #ifdef PDAL_HAVE_GEOS
 #include <geos_c.h>
 
@@ -97,8 +101,14 @@ private:
     void addSwitches(); // overrride
     void validateSwitches(); // overrride
 
+    void readPoints(
+                                StageSequentialIterator* iter,
+                                PointBuffer& data);
+                                
     std::string m_inputFile;
     std::string m_wkt;
+    std::string m_point;
+    
 
 #ifdef PDAL_HAVE_GEOS
 	GEOSContextHandle_t m_geosEnvironment;
@@ -111,6 +121,7 @@ private:
 PcQuery::PcQuery(int argc, char* argv[])
     : Application(argc, argv, "pcquery")
     , m_inputFile("")
+    , m_point("")
 {
     return;
 }
@@ -144,7 +155,7 @@ void PcQuery::addSwitches()
 
     file_options->add_options()
         ("input,i", po::value<std::string>(&m_inputFile)->default_value(""), "input file name")
-        ("point", po::value< std::vector<float> >()->multitoken(), "A 2d or 3d point to use for querying")
+        ("point", po::value< std::string>(&m_point), "A 2d or 3d point to use for querying")
         ("wkt", po::value<std::string>(&m_wkt)->default_value(""), "WKT object to use for querying")
         ;
 
@@ -171,8 +182,6 @@ int PcQuery::execute()
 
     Options readerOptions;
     {
-        if (m_usestdin)
-            m_inputFile = "STDIN";
         readerOptions.add<std::string>("filename", m_inputFile);
         readerOptions.add<bool>("debug", isDebug());
         readerOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
@@ -183,14 +192,71 @@ int PcQuery::execute()
     
 
     pdal::Options options = m_options + readerOptions;
+    options.add<boost::uint32_t>("dimensions", 2);
     
     pdal::filters::Index* filter = new pdal::filters::Index(*reader, options);
 
     filter->initialize();
 
 
-    
-    
+    PointBuffer data(filter->getSchema(), m_chunkSize);
+    StageSequentialIterator* iter = filter->createSequentialIterator(data);
+
+    readPoints(iter, data);
+
+    pdal::filters::iterators::sequential::Index* idx = dynamic_cast<pdal::filters::iterators::sequential::Index*>(iter);
+    if (!idx)
+    {
+        throw app_runtime_error("unable to cast iterator to Index iterator!");
+    }
+
+    if (m_point.size())
+    {
+        boost::char_separator<char> sep(SEPARATORS);
+        tokenizer tokens(m_point, sep);
+        std::vector<double> values;
+        for (tokenizer::iterator t = tokens.begin(); t != tokens.end(); ++t) {
+            values.push_back(boost::lexical_cast<double>(*t));
+        }
+        
+        if (values.size() < 2)
+            throw app_runtime_error("--points must be two or three values");
+        double x = values[0];
+        double y = values[1];
+        
+        double z(0.0);
+        if (values.size() > 2)
+            z = values[2];
+        std::vector<boost::uint32_t> ids = idx->query(x, y, z, 0.0, 1);
+        
+        if (ids.size())
+        {
+            PointBuffer data(reader->getSchema(), 1);
+            StageRandomIterator* iterator = reader->createRandomIterator(data);
+            iterator->seek(ids[0]);
+
+            Schema const& schema = data.getSchema();
+            Dimension const& dimX = schema.getDimension("X");
+            Dimension const& dimY = schema.getDimension("Y");
+            Dimension const& dimZ = schema.getDimension("Z");
+            iterator->read(data);
+            boost::int32_t xi = data.getField<boost::int32_t>(dimX, 0);
+            boost::int32_t yi = data.getField<boost::int32_t>(dimY, 0);
+            boost::int32_t zi = data.getField<boost::int32_t>(dimZ, 0);            
+            double x = dimX.applyScaling<boost::int32_t>(xi);
+            double y = dimY.applyScaling<boost::int32_t>(yi);
+            double z = dimZ.applyScaling<boost::int32_t>(zi);
+            std::cout.precision(8);
+            std::cout << x << "," << y << "," << z << std::endl;
+        }
+        else
+        {
+            throw app_runtime_error("Candidate point not found!");
+            
+        }
+
+    }
+
     std::cout << std::endl;
     
     delete filter;
@@ -201,6 +267,24 @@ int PcQuery::execute()
     return 0;
 }
 
+void PcQuery::readPoints(   StageSequentialIterator* iter,
+                            PointBuffer& data)
+{
+    const Schema& schema = data.getSchema();
+    
+    Dimension const& dimX = schema.getDimension("X");
+    Dimension const& dimY = schema.getDimension("Y");
+    Dimension const& dimZ = schema.getDimension("Z");
+
+    boost::uint64_t id = 0;
+    while (!iter->atEnd())
+    {
+        const boost::uint32_t numRead = iter->read(data);
+        
+        
+    }
+
+}
 
 int main(int argc, char* argv[])
 {
