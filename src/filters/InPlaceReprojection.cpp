@@ -159,8 +159,8 @@ void InPlaceReprojection::setDimension( std::string const& name,
                                         dimension::id& old_id,
                                         dimension::id& new_id,
                                         Schema& schema,
-                                        std::string const& scale_option_name,
-                                        std::string const& offset_option_name)
+                                        double scale,
+                                        double offset)
 {
 
 
@@ -169,27 +169,20 @@ void InPlaceReprojection::setDimension( std::string const& name,
     {
         log()->get(logDEBUG2) << "found '" << name <<"' dimension" << std::endl;
 
-        double scale = getOptions().getValueOrDefault<double>(scale_option_name, old_dim->getNumericScale());
-        double offset = getOptions().getValueOrDefault<double>(offset_option_name, old_dim->getNumericOffset());
         Dimension derived(*old_dim);
         derived.setNumericScale(scale);
         derived.setNumericOffset(offset);
         derived.createUUID();
         derived.setNamespace(getName());
         
+        log()->get(logDEBUG2) << "uuid for " << name << " was nil" << std::endl;
+        Dimension new_dim(*old_dim);
+        new_dim.createUUID();
+        new_dim.setParent(boost::uuids::nil_uuid());
+        derived.setParent(new_dim.getUUID());
+        schema.setDimension(new_dim);
+        old_id = new_dim.getUUID();
 
-            log()->get(logDEBUG2) << "uuid for " << name << " was nil" << std::endl;
-            Dimension new_dim(*old_dim);
-            new_dim.createUUID();
-            new_dim.setParent(boost::uuids::nil_uuid());
-            derived.setParent(new_dim.getUUID());
-            schema.setDimension(new_dim);
-            old_id = new_dim.getUUID();
-        // 
-        // } else {
-        //     derived.setParent(old_dim->getUUID());
-        //     old_id = old_dim->getUUID();
-        // }
 
         log()->get(logDEBUG2) << "uuid for " << name << " is "  << old_dim->getUUID() << std::endl;
         log()->get(logDEBUG2) << "child uuid for " << name << " is "  << derived.getUUID() << std::endl;
@@ -216,6 +209,26 @@ void InPlaceReprojection::setDimension( std::string const& name,
     
 }
 
+void InPlaceReprojection::reprojectOffsets( double& offset_x,
+                                            double& offset_y)
+{
+
+#ifdef PDAL_HAVE_GDAL
+    int ret = 0;
+
+    ret = OCTTransform(m_transform_ptr.get(), 1, &offset_x, &offset_y, 0);
+    if (!ret)
+    {
+        std::ostringstream msg;
+        msg << "Could not project offset for InPlaceReprojection::" << CPLGetLastErrorMsg() << ret;
+        throw pdal_error(msg.str());
+    }
+#else
+
+#endif
+
+}
+
 Schema InPlaceReprojection::alterSchema(Schema& schema)
 {
 
@@ -228,9 +241,23 @@ Schema InPlaceReprojection::alterSchema(Schema& schema)
     log()->get(logDEBUG2) << "y_dim '" << y_name <<"' requested" << std::endl;
     log()->get(logDEBUG2) << "z_dim '" << z_name <<"' requested" << std::endl;
 
-    setDimension(x_name, m_old_x_id, m_new_x_id, schema, "scale_x", "offset_x");
-    setDimension(y_name, m_old_y_id, m_new_y_id, schema, "scale_y", "offset_y");
-    setDimension(z_name, m_old_z_id, m_new_z_id, schema, "scale_z", "offset_z");
+    double offset_x = getOptions().getValueOrDefault<double>("offset_x", schema.getDimension(x_name).getNumericOffset());
+    double offset_y = getOptions().getValueOrDefault<double>("offset_y", schema.getDimension(y_name).getNumericOffset());
+    double offset_z = getOptions().getValueOrDefault<double>("offset_z", schema.getDimension(z_name).getNumericOffset());
+
+    log()->floatPrecision(8);
+
+    log()->get(logDEBUG2) << "original offset x,y: " << offset_x <<"," << offset_y << std::endl;
+    reprojectOffsets(offset_x, offset_y);
+    log()->get(logDEBUG2) << "reprojected offset x,y: " << offset_x <<"," << offset_y << std::endl;
+
+    double scale_x = getOptions().getValueOrDefault<double>("scale_x", schema.getDimension(x_name).getNumericScale());
+    double scale_y = getOptions().getValueOrDefault<double>("scale_y", schema.getDimension(y_name).getNumericScale());
+    double scale_z = getOptions().getValueOrDefault<double>("scale_z", schema.getDimension(z_name).getNumericScale());
+
+    setDimension(x_name, m_old_x_id, m_new_x_id, schema, scale_x, offset_x);
+    setDimension(y_name, m_old_y_id, m_new_y_id, schema, scale_y, offset_y);
+    setDimension(z_name, m_old_z_id, m_new_z_id, schema, scale_z, offset_z);
     
     return schema;
     

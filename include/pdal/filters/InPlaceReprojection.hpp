@@ -112,8 +112,8 @@ private:
                        dimension::id& old_id,
                        dimension::id& new_id,
                        Schema& schema,
-                       std::string const& scale_option_name,
-                       std::string const& offset_option_name);
+                       double scale,
+                       double offset);
                        
     SpatialReference m_inSRS;
     SpatialReference m_outSRS;
@@ -137,6 +137,8 @@ private:
 
     InPlaceReprojection& operator=(const InPlaceReprojection&); // not implemented
     InPlaceReprojection(const InPlaceReprojection&); // not implemented
+    
+    void reprojectOffsets( double& offset_x, double& offset_y);
 };
 
 namespace iterators
