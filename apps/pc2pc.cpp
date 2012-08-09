@@ -50,10 +50,15 @@
 #include <pdal/Bounds.hpp>
 
 #include <boost/property_tree/xml_parser.hpp>
+#include <boost/tokenizer.hpp>
 
 #include "AppSupport.hpp"
 
 #include "Application.hpp"
+
+#define SEPARATORS ",| "
+
+typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
 
 using namespace pdal;
 
@@ -77,6 +82,8 @@ private:
     pdal::SpatialReference m_output_srs;
     pdal::Bounds<double> m_bounds;
     std::string m_wkt;
+    std::string m_scales;
+    std::string m_offsets;
 };
 
 
@@ -90,6 +97,8 @@ Pc2Pc::Pc2Pc(int argc, char* argv[])
     , m_input_srs(pdal::SpatialReference())
     , m_output_srs(pdal::SpatialReference())
     , m_wkt("")
+    , m_scales("")
+    , m_offsets("")
 {
     return;
 }
@@ -127,6 +136,8 @@ void Pc2Pc::addSwitches()
         ("skip", po::value<boost::uint64_t>(&m_numSkipPoints)->default_value(0), "How many points should we skip?")
         ("bounds", po::value<pdal::Bounds<double> >(&m_bounds), "Extent (in XYZ to clip output to)")
         ("polygon", po::value<std::string >(&m_wkt), "POLYGON WKT to use for precise crop of data (2d or 3d)")
+        ("scale", po::value< string >(&m_scales), "A comma-separated or quoted, space-separated list of scales to set on the output file: \n--scale 0.1,0.1,0.00001\n--scale \"0.1 0.1 0.00001\"")
+        ("offset", po::value< string >(&m_offsets), "A comma-separated or quoted, space-separated list of offsets to set on the output file: \n--offset 0,0,0\n--offset \"1234 5678 91011\"")
         ;
 
     addSwitchSet(file_options);
@@ -185,14 +196,58 @@ int Pc2Pc::execute()
         if (!m_output_srs.empty())
         {
             readerOptions.add<std::string >("out_srs", m_output_srs.getWKT());
-            if (m_output_srs.isGeographic())
+
+            boost::char_separator<char> sep(SEPARATORS);
+            std::vector<double> offsets;
+            tokenizer off_tokens(m_offsets, sep);
+            for (tokenizer::iterator t = off_tokens.begin(); t != off_tokens.end(); ++t) {
+                offsets.push_back(boost::lexical_cast<double>(*t));
+            }
+
+            std::vector<double> scales;
+            tokenizer scale_tokens(m_scales, sep);
+            for (tokenizer::iterator t = scale_tokens.begin(); t != scale_tokens.end(); ++t) {
+                scales.push_back(boost::lexical_cast<double>(*t));
+            }
+            
+            if (scales.size())
             {
-                readerOptions.add<double >("scale_x", 0.0000001);
-                readerOptions.add<double >("scale_y", 0.0000001);                
-            } else
+                if (scales.size() <= 1)
+                {
+                    readerOptions.add<double >("scale_x", scales[0]);
+                    
+                }
+                else if (scales.size() <= 2)
+                {
+                    readerOptions.add<double >("scale_x", scales[0]);
+                    readerOptions.add<double >("scale_y", scales[1]);
+                }
+                else if (scales.size() <= 3)
+                {
+                    readerOptions.add<double >("scale_x", scales[0]);
+                    readerOptions.add<double >("scale_y", scales[1]);
+                    readerOptions.add<double >("scale_z", scales[2]);
+                }
+            }
+
+            if (offsets.size())
             {
-                readerOptions.add<double >("scale_x", 0.01);
-                readerOptions.add<double >("scale_y", 0.01);
+                if (offsets.size() <= 1)
+                {
+                    readerOptions.add<double >("offset_x", offsets[0]);
+                    
+                }
+                else if (offsets.size() <= 2)
+                {
+                    readerOptions.add<double >("offset_x", offsets[0]);
+                    readerOptions.add<double >("offset_y", offsets[1]);
+                }
+                else if (offsets.size() <= 3)
+                {
+                    readerOptions.add<double >("offset_x", offsets[0]);
+                    readerOptions.add<double >("offset_y", offsets[1]);
+                    readerOptions.add<double >("offset_z", offsets[2]);
+                }
             }
             reprojection_stage = new pdal::filters::InPlaceReprojection(*next_stage, readerOptions);
             next_stage = reprojection_stage;
