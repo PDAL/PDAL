@@ -102,7 +102,7 @@ BOOST_AUTO_TEST_CASE(test_2d)
     reader.initialize();
     pdal::filters::Index* filter = static_cast<pdal::filters::Index*>(reader.getManager().getStage());
     
-    filter->setDimensions(2);
+    filter->setNumDimensions(2);
 
     // std::cout << "filter ops: " << opt << std::endl;
 
