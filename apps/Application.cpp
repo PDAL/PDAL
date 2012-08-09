@@ -56,7 +56,7 @@ Application::Application(int argc, char* argv[], const std::string& appName)
     , m_appName(appName)
     , m_hardCoreDebug(false)
     , m_usestdin(false)
-    , m_chunkSize(0)
+    , m_chunkSize(1048576)
 {
     return;
 }
