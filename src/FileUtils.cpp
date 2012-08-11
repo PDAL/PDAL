@@ -47,7 +47,7 @@ namespace pdal
 
 std::istream* FileUtils::openFile(std::string const& filename, bool asBinary)
 {
-    if (boost::algorithm::iequals(filename, "STDIN"))
+    if (boost::algorithm::ifind_first(filename, "STDIN"))
         return &std::cin;
         
     if (!FileUtils::fileExists(filename))
@@ -71,7 +71,7 @@ std::ostream* FileUtils::createFile(std::string const& filename, bool asBinary)
     if (asBinary)
         mode  |= std::ios::binary;
 
-    if (boost::algorithm::iequals(filename, "STDOUT"))
+    if (boost::algorithm::ifind_first(filename, "STDOUT"))
         return &std::cout;
 
 
