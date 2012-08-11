@@ -71,6 +71,10 @@ std::ostream* FileUtils::createFile(std::string const& filename, bool asBinary)
     if (asBinary)
         mode  |= std::ios::binary;
 
+    if (boost::algorithm::iequals(filename, "STDOUT"))
+        return &std::cout;
+
+
     namespace io = boost::iostreams;
     io::stream<io::file_sink>* ofs = new io::stream<io::file_sink>();
     ofs->open(filename.c_str(), mode);
