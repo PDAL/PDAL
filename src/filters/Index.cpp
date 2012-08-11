@@ -119,10 +119,6 @@ Index::Index(const pdal::filters::Index& filter, PointBuffer& buffer)
     return;
 }
 
-void Index::readBeginImpl()
-{
-    
-}
 
 void Index::readBufferBeginImpl(PointBuffer& buffer)
 {
@@ -224,10 +220,7 @@ boost::uint32_t Index::readBufferImpl(PointBuffer& data)
     bool logOutput = m_stage.log()->getLevel() > logDEBUG4;
     m_stage.log()->floatPrecision(8);
 
-    if (logOutput)
-    {
-        m_stage.log()->get(logDEBUG2) << "inserting data into index data array of capacity: " << data.getCapacity() << std::endl;
-    }
+    m_stage.log()->get(logDEBUG2) << "inserting data into index data array of capacity: " << data.getCapacity() << std::endl;
     
 #ifdef PDAL_HAVE_FLANN        
     for (boost::uint32_t pointIndex=0; pointIndex<numRead; pointIndex++)
@@ -239,7 +232,14 @@ boost::uint32_t Index::readBufferImpl(PointBuffer& data)
         m_data.push_back(x);
         m_data.push_back(y);
         if (m_stage.getNumDimensions() > 2)
+        {
             m_data.push_back(z);
+            if (logOutput)
+            {
+                m_stage.log()->get(logDEBUG4) << "adding z to index :"  << z << std::endl;
+            }
+            
+        }
         
         if (logOutput)
         {
@@ -337,14 +337,14 @@ double Index::getScaledValue(PointBuffer& data,
 
     return output;
 }
-void Index::readEndImpl()
+void Index::build()
 {
 
 #ifdef PDAL_HAVE_FLANN    
     
     // Build the index
     m_dataset = new flann::Matrix<float>(&(m_data.front()), m_stage.getNumPoints(), m_stage.getNumDimensions());
-    m_stage.log()->get(logDEBUG2) << "Building index for size " << m_data.size()  <<std::endl;
+    m_stage.log()->get(logDEBUG2) << "Building index for size " << m_data.size()  <<" for points: " << m_stage.getNumPoints() <<std::endl;
     
     m_index = new flann::KDTreeSingleIndex<flann::L2_Simple<float> >(*m_dataset, flann::KDTreeIndexParams(4));
     m_index->buildIndex();

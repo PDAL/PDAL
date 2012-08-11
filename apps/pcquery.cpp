@@ -209,7 +209,9 @@ int PcQuery::execute()
     {
         throw app_runtime_error("unable to cast iterator to Index iterator!");
     }
-
+    
+    idx->build();
+    
     if (m_point.size())
     {
         boost::char_separator<char> sep(SEPARATORS);

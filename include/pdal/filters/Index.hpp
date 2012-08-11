@@ -108,10 +108,8 @@ public:
     std::vector<boost::uint32_t> query(double const& x, double const& y, double const& z, double distance, boost::uint32_t count=1);
     
 
-protected:
     virtual void readBufferBeginImpl(PointBuffer&);
-    virtual void readEndImpl();
-    virtual void readBeginImpl();
+    void build();
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t);
