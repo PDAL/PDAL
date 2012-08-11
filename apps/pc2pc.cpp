@@ -304,7 +304,7 @@ int Pc2Pc::execute()
 
     const boost::uint64_t numPointsRead = writer->write(m_numPointsToWrite, m_numSkipPoints);
 
-    std::cout << "Wrote " << numPointsRead << " points\n";
+    std::cerr << "Wrote " << numPointsRead << " points\n";
 
     delete writer;
     delete final_stage;

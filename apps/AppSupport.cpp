@@ -79,9 +79,7 @@ std::string AppSupport::inferReaderDriver(const std::string& filename, pdal::Opt
 std::string AppSupport::inferWriterDriver(const std::string& filename, pdal::Options& options)
 {
     std::string ext = boost::filesystem::extension(filename);
-    if (ext == "") return "";
-    ext = ext.substr(1, ext.length()-1);
-    if (ext == "") return "";
+
 
     boost::to_lower(ext);
 
@@ -100,6 +98,16 @@ std::string AppSupport::inferWriterDriver(const std::string& filename, pdal::Opt
     drivers["txt"] = "drivers.text.writer";
     drivers["pcd"] = "drivers.pcd.writer";
 
+    if (boost::algorithm::iequals(filename, "STDOUT"))
+    {
+        return drivers["txt"];
+    }
+
+    if (ext == "") return drivers["txt"];
+    ext = ext.substr(1, ext.length()-1);
+    if (ext == "") return drivers["txt"];
+
+    boost::to_lower(ext);
     std::string driver = drivers[ext];
     return driver; // will be "" if not found
 }
@@ -169,18 +177,18 @@ void PercentageCallback::callback()
     
     if (pdal::Utils::compare_distance<double>(currPerc, 100.0))
     {
-        std::cout << ".100" << std::endl;
+        std::cerr << ".100" << std::endl;
         m_done = true;
     }
     else if (currPerc >= m_lastMajorPerc + 10.0)
     {
-        std::cout << (int)currPerc << std::flush;
+        std::cerr << (int)currPerc << std::flush;
         m_lastMajorPerc = currPerc;
         m_lastMinorPerc = currPerc;
     }
     else if (currPerc >= m_lastMinorPerc + 2.0)
     {
-        std::cout << '.' << std::flush;
+        std::cerr << '.' << std::flush;
         m_lastMinorPerc = currPerc;
     }
 
@@ -196,7 +204,7 @@ HeartbeatCallback::HeartbeatCallback()
 
 void HeartbeatCallback::callback()
 {
-    std::cout << '.';
+    std::cerr << '.';
 
     return;
 }
