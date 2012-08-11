@@ -152,9 +152,18 @@ void Writer::WriteHeader(pdal::Schema const& schema)
     std::string newline = getOptions().getValueOrDefault<std::string>("newline", "\n");
     std::string delimiter = getOptions().getValueOrDefault<std::string>("delimiter",",");
     
+    log()->get(logDEBUG) << "Writing to filename: " << getOptions().getValueOrThrow<std::string>("filename") << std::endl;
+    
     if (!bWriteHeader)
+    {
+        log()->get(logDEBUG) << "Not writing header" << std::endl;
+        m_wrote_header = true;
         return;
         
+    }
+    log()->get(logDEBUG) << "Writing header" << std::endl;
+    
+    
     if (delimiter.size() == 0)
         delimiter = " ";
         
