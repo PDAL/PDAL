@@ -86,7 +86,8 @@ void Scaling::checkImpedance()
         if (dimensionOptions)
         {
             scaler.scale = dimensionOptions->getValueOrDefault<double>("scale", 1.0);
-            scaler.offset = dimensionOptions->getValueOrDefault<double>("offset", 0.0);
+            Dimension const& dim = getSchema().getDimension(scaler.name);
+            scaler.offset = dimensionOptions->getValueOrDefault<double>("offset", dim.getNumericOffset());
             scaler.type = dimensionOptions->getValueOrDefault<std::string>("type", "SignedInteger");
             scaler.size = dimensionOptions->getValueOrDefault<boost::uint32_t>("size", 4);
         }
