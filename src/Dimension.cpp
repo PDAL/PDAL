@@ -322,6 +322,10 @@ std::ostream& operator<<(std::ostream& os, pdal::Dimension const& d)
     os << " offset: " << offset;
     
     os << " ignored: " << tree.get<bool>("isIgnored");
+
+    os << " uid: " << tree.get<std::string>("uuid");
+    os << " parent: " << tree.get<std::string>("parent");
+
     os << std::endl;
 
     return os;
