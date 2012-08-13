@@ -229,6 +229,9 @@ const Dimension& Schema::getDimension(std::string const& name, std::string const
                 
                 ++it;
             }
+            std::ostringstream errmsg;
+            errmsg << "Unable to find dimension with name '" << t << "' and namespace  '" << ns << "' in schema";
+            throw dimension_not_found(errmsg.str());
 
         }
 
