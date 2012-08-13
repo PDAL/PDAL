@@ -151,6 +151,7 @@ void InPlaceReprojection::initialize()
     Schema& s = getSchemaRef();
     s = alterSchema(s);
 
+
     return;
 }
 
@@ -164,33 +165,30 @@ void InPlaceReprojection::setDimension( std::string const& name,
 {
 
 
-    boost::optional<Dimension const&> old_dim = schema.getDimensionOptional(name);
-    if (old_dim)
-    {
-        log()->get(logDEBUG2) << "found '" << name <<"' dimension" << std::endl;
+    Dimension const& old_dim = schema.getDimension(name);
 
-        Dimension derived(*old_dim);
-        derived.setNumericScale(scale);
-        derived.setNumericOffset(offset);
-        derived.createUUID();
-        derived.setNamespace(getName());
-        
-        log()->get(logDEBUG2) << "uuid for " << name << " was nil" << std::endl;
-        Dimension new_dim(*old_dim);
-        new_dim.createUUID();
-        new_dim.setParent(boost::uuids::nil_uuid());
-        derived.setParent(new_dim.getUUID());
-        schema.setDimension(new_dim);
-        old_id = new_dim.getUUID();
+    log()->get(logDEBUG2) << "found '" << name <<"' dimension" << old_dim << std::endl;
+
+    Dimension derived(old_dim);
+    derived.setNumericScale(scale);
+    derived.setNumericOffset(offset);
+    derived.createUUID();
+    derived.setNamespace(getName());
+
+    Dimension new_dim(old_dim);
+
+    derived.setParent(new_dim.getUUID());
+    schema.setDimension(new_dim);
+    
+    old_id = new_dim.getUUID();
 
 
-        log()->get(logDEBUG2) << "uuid for " << name << " is "  << old_dim->getUUID() << std::endl;
-        log()->get(logDEBUG2) << "child uuid for " << name << " is "  << derived.getUUID() << std::endl;
+    log()->get(logDEBUG2) << "uuid for " << name << " is "  << old_dim.getUUID() << std::endl;
+    log()->get(logDEBUG2) << "child uuid for " << name << " is "  << derived.getUUID() << std::endl;
 
-        schema.appendDimension(derived);
-        new_id = derived.getUUID();
-        
-    }
+    schema.appendDimension(derived);
+    new_id = derived.getUUID();
+
     
     bool markIgnored = getOptions().getValueOrDefault<bool>("ignore_old_dimensions", true);
     if (markIgnored)
