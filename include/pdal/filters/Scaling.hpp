@@ -96,15 +96,22 @@ public:
     {
         return m_scalers;
     }
-
+    
+    std::map<dimension::id, dimension::id> const& getScaleMap() const { return m_scale_map; }
+    dimension::Interpretation getInterpretation(std::string const& t) const;
+    
 private:
     void checkImpedance();
-
+    
+    Schema alterSchema(Schema const& schema);
 
     Scaling& operator=(const Scaling&); // not implemented
     Scaling(const Scaling&); // not implemented
 
     std::vector<scaling::Scaler> m_scalers;
+
+    std::map<dimension::id, dimension::id> m_scale_map;
+;
 };
 
 
@@ -127,8 +134,8 @@ private:
     boost::uint64_t skipImpl(boost::uint64_t);
     boost::uint32_t readBufferImpl(PointBuffer&);
     bool atEndImpl() const;
-    void alterSchema(pdal::PointBuffer&);
-    dimension::Interpretation getInterpretation(std::string const& t) const;
+
+
     const pdal::filters::Scaling& m_scalingFilter;
 
     void writeScaledData(PointBuffer& buffer,
@@ -138,8 +145,8 @@ private:
     template<class T> void scale(Dimension const& from_dimension,
                                  Dimension const& to_dimension,
                                  T& value) const;
-    std::map<dimension::id, dimension::id> m_scale_map;
-    std::map<boost::optional<pdal::Dimension const&>, boost::optional<pdal::Dimension const&> > m_dimension_map;
+
+                             std::map<boost::optional<pdal::Dimension const&>, boost::optional<pdal::Dimension const&> > m_dimension_map;
     
 };
 

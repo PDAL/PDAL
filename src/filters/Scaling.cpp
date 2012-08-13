@@ -62,6 +62,10 @@ void Scaling::initialize()
 
     checkImpedance();
 
+    
+    Schema& s = getSchemaRef();
+    s = alterSchema(s);
+
     return;
 }
 
@@ -108,34 +112,20 @@ const Options Scaling::getDefaultOptions() const
 }
 
 
-namespace iterators
-{
-namespace sequential
-{
-
-
-Scaling::Scaling(const pdal::filters::Scaling& filter, PointBuffer& buffer)
-    : pdal::FilterSequentialIterator(filter, buffer)
-    , m_scalingFilter(filter)
-{
-    alterSchema(buffer);
-    m_scalingFilter.log()->get(logDEBUG4) << "iterators::sequential alterSchema! " << std::endl;
-
-    return;
-}
-
-void Scaling::alterSchema(PointBuffer& buffer)
+Schema Scaling::alterSchema(Schema const& input_schema)
 {
     typedef std::multimap<dimension::Interpretation, dimension::Interpretation>::const_iterator MapIterator;
 
     typedef std::pair<MapIterator, MapIterator> MapPair;
-    std::vector<scaling::Scaler> const& scalers = m_scalingFilter.getScalers();
+    std::vector<scaling::Scaler> const& scalers = getScalers();
 
     std::vector<scaling::Scaler>::const_iterator i;
 
     // Only certain scaling conversions are allowed. If we're not one of the
     // defined conversions, we're going to complain.
-
+    
+    Schema schema(input_schema);
+    
     std::multimap<dimension::Interpretation, dimension::Interpretation> allowed_conversions;
     allowed_conversions.insert(std::make_pair(dimension::Float, dimension::Float));
     allowed_conversions.insert(std::make_pair(dimension::Float, dimension::SignedInteger));
@@ -144,7 +134,6 @@ void Scaling::alterSchema(PointBuffer& buffer)
     allowed_conversions.insert(std::make_pair(dimension::SignedInteger, dimension::Float));
     allowed_conversions.insert(std::make_pair(dimension::SignedInteger, dimension::SignedInteger));
 
-    Schema schema = buffer.getSchema();
 
     // Loop through the options that the filter.Scaler collected. For each
     // dimension described, create a new dimension with the given parameters.
@@ -162,7 +151,7 @@ void Scaling::alterSchema(PointBuffer& buffer)
             to_dimension.setNumericScale(i->scale);
             to_dimension.setNumericOffset(i->offset);
             to_dimension.createUUID();
-            to_dimension.setNamespace(m_scalingFilter.getName());
+            to_dimension.setNamespace(getName());
             to_dimension.setParent(from_dimension->getUUID());
 
             MapPair f = allowed_conversions.equal_range(from_dimension->getInterpretation());
@@ -184,7 +173,7 @@ void Scaling::alterSchema(PointBuffer& buffer)
             if (!found)
                 throw pdal_error("Scaling between types is not supported");
 
-            m_scalingFilter.log()->get(logDEBUG4)  << "Rescaling dimension " << from_dimension->getName()
+            log()->get(logDEBUG2)  << "Rescaling dimension " << from_dimension->getName()
                                                    << " [" << from_dimension->getInterpretation() << "/" << from_dimension->getByteSize() << "]"
                                                    << " to scale: " << to_dimension.getNumericScale()
                                                    << " offset: " << to_dimension.getNumericOffset()
@@ -192,9 +181,9 @@ void Scaling::alterSchema(PointBuffer& buffer)
                                                    << std::endl;
             std::pair<dimension::id, dimension::id> p(from_dimension->getUUID(), to_dimension.getUUID());
             
-            m_scalingFilter.log()->get(logDEBUG4) << "scale map size was " << m_scale_map.size() << std::endl;
             m_scale_map.insert(p);
-            m_scalingFilter.log()->get(logDEBUG3) << "scale map size is: " << m_scale_map.size() << std::endl;
+            log()->get(logDEBUG2) << "scaling dimension with id '" << from_dimension->getUUID() 
+                                  << "' to dimension with id: '" << to_dimension.getUUID() <<"'" << std::endl;
             schema.appendDimension(to_dimension);
         }
     }
@@ -205,7 +194,7 @@ void Scaling::alterSchema(PointBuffer& buffer)
     {
         Dimension const& from_dimension = schema.getDimension(d->first);
         Dimension const& to_dimension = schema.getDimension(d->second);
-        m_scalingFilter.log()->get(logDEBUG4) << "Map wants to do: " << from_dimension.getName()
+        log()->get(logDEBUG2) << "Map wants to do: " << from_dimension.getName()
                                               << " [" << from_dimension.getInterpretation() << "/" << from_dimension.getByteSize() << "]"
                                               << " to scale: " << to_dimension.getNumericScale()
                                               << " offset: " << to_dimension.getNumericOffset()
@@ -213,8 +202,8 @@ void Scaling::alterSchema(PointBuffer& buffer)
                                               << std::endl;
     }
 
+    return schema;
 
-    buffer = PointBuffer(schema, buffer.getCapacity());
 }
 
 dimension::Interpretation Scaling::getInterpretation(std::string const& t) const
@@ -248,11 +237,27 @@ dimension::Interpretation Scaling::getInterpretation(std::string const& t) const
 
 }
 
+namespace iterators
+{
+namespace sequential
+{
+
+
+Scaling::Scaling(const pdal::filters::Scaling& filter, PointBuffer& buffer)
+    : pdal::FilterSequentialIterator(filter, buffer)
+    , m_scalingFilter(filter)
+{
+    return;
+}
+
+
+
 void Scaling::readBufferBeginImpl(PointBuffer& buffer)
 {
     pdal::Schema const& schema = buffer.getSchema();
     std::map<dimension::id, dimension::id>::const_iterator d;
-    for (d = m_scale_map.begin(); d != m_scale_map.end(); ++d)
+    std::map<dimension::id, dimension::id> const& scale_map = m_scalingFilter.getScaleMap();
+    for (d = scale_map.begin(); d != scale_map.end(); ++d)
     {
         boost::optional<pdal::Dimension const&> fr = schema.getDimensionOptional(d->first);
         boost::optional<pdal::Dimension const&> to = schema.getDimensionOptional(d->second);
