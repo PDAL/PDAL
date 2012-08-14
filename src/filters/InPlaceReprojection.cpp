@@ -167,12 +167,11 @@ void InPlaceReprojection::setDimension( std::string const& name,
 
     Dimension const& old_dim = schema.getDimension(name);
 
-    log()->get(logDEBUG2) << "found '" << name <<"' dimension" << old_dim << std::endl;
+    log()->get(logDEBUG2) << "found '" << name <<"' dimension " << old_dim << std::endl;
 
-    Dimension derived(old_dim);
+    Dimension derived(old_dim.getName(), old_dim.getInterpretation(), old_dim.getByteSize(), old_dim.getDescription());
     derived.setNumericScale(scale);
     derived.setNumericOffset(offset);
-    derived.setUUID(boost::uuids::nil_uuid());
     derived.createUUID();
     derived.setNamespace(getName());
     derived.setParent(old_dim.getUUID());
