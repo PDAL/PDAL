@@ -180,25 +180,22 @@ void InPlaceReprojection::setDimension( std::string const& name,
     old_id = old_dim.getUUID();
     new_id = derived.getUUID();
 
-    log()->get(logDEBUG2) << "source dimension: " << old_dim << std::endl;
+    log()->get(logDEBUG2) << "source    dimension: " << old_dim << std::endl;
     log()->get(logDEBUG2) << "derived dimension: " << derived << std::endl;
 
-    log()->get(logDEBUG2) << "source id: " << old_id << std::endl;
+    log()->get(logDEBUG2) << "source  id: " << old_id << std::endl;
     log()->get(logDEBUG2) << "derived id: " << new_id << std::endl;
     
     bool markIgnored = getOptions().getValueOrDefault<bool>("ignore_old_dimensions", true);
     if (markIgnored)
     {
-        boost::optional<Dimension const&> dim = schema.getDimensionOptional(old_id);
-        if (dim)
-        {
-            log()->get(logDEBUG2) << "marking " << name << " as ignored with uuid "  << old_id << std::endl;
+        Dimension const& dim = schema.getDimension(old_id);
+        log()->get(logDEBUG2) << "marking " << name << " as ignored with uuid "  << old_id << std::endl;
 
-            Dimension d(*dim);
-            boost::uint32_t flags = d.getFlags();
-            d.setFlags(flags | dimension::IsIgnored);
-            schema.setDimension(d);
-        }
+        Dimension d(dim);
+        boost::uint32_t flags = d.getFlags();
+        d.setFlags(flags | dimension::IsIgnored);
+        schema.setDimension(d);
     }
     
 }
