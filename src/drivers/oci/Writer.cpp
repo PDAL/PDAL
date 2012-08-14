@@ -831,6 +831,10 @@ void Writer::CreatePCEntry(Schema const& buffer_schema)
                 
                 Dimension d(idx[i]);
                 d.setPosition(position);
+                
+                // Wipe off parent/child relationships if we're ignoring 
+                // same-named dimensions
+                d.setParent(boost::uuids::nil_uuid());
                 clean_schema.appendDimension(d);
                 position++;
             }
