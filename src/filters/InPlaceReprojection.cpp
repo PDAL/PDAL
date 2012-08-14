@@ -232,9 +232,17 @@ Schema InPlaceReprojection::alterSchema(Schema& schema)
     log()->get(logDEBUG2) << "y_dim '" << y_name <<"' requested" << std::endl;
     log()->get(logDEBUG2) << "z_dim '" << z_name <<"' requested" << std::endl;
 
-    double offset_x = getOptions().getValueOrDefault<double>("offset_x", schema.getDimension(x_name).getNumericOffset());
-    double offset_y = getOptions().getValueOrDefault<double>("offset_y", schema.getDimension(y_name).getNumericOffset());
-    double offset_z = getOptions().getValueOrDefault<double>("offset_z", schema.getDimension(z_name).getNumericOffset());
+    Dimension const& dimX = schema.getDimension(x_name);
+    Dimension const& dimY = schema.getDimension(y_name);
+    Dimension const& dimZ = schema.getDimension(z_name);
+    
+    log()->get(logDEBUG3) << "Fetched x_name: " << dimX;
+    log()->get(logDEBUG3) << "Fetched y_name: " << dimY;
+    log()->get(logDEBUG3) << "Fetched z_name: " << dimZ;
+    
+    double offset_x = getOptions().getValueOrDefault<double>("offset_x", dimX.getNumericOffset());
+    double offset_y = getOptions().getValueOrDefault<double>("offset_y", dimY.getNumericOffset());
+    double offset_z = getOptions().getValueOrDefault<double>("offset_z", dimZ.getNumericOffset());
 
     log()->floatPrecision(8);
 
@@ -242,9 +250,9 @@ Schema InPlaceReprojection::alterSchema(Schema& schema)
     reprojectOffsets(offset_x, offset_y);
     log()->get(logDEBUG2) << "reprojected offset x,y: " << offset_x <<"," << offset_y << std::endl;
 
-    double scale_x = getOptions().getValueOrDefault<double>("scale_x", schema.getDimension(x_name).getNumericScale());
-    double scale_y = getOptions().getValueOrDefault<double>("scale_y", schema.getDimension(y_name).getNumericScale());
-    double scale_z = getOptions().getValueOrDefault<double>("scale_z", schema.getDimension(z_name).getNumericScale());
+    double scale_x = getOptions().getValueOrDefault<double>("scale_x", dimX.getNumericScale());
+    double scale_y = getOptions().getValueOrDefault<double>("scale_y", dimY.getNumericScale());
+    double scale_z = getOptions().getValueOrDefault<double>("scale_z", dimZ.getNumericScale());
 
     setDimension(x_name, m_old_x_id, m_new_x_id, schema, scale_x, offset_x);
     setDimension(y_name, m_old_y_id, m_new_y_id, schema, scale_y, offset_y);
@@ -529,8 +537,23 @@ boost::uint32_t InPlaceReprojection::readBufferImpl(PointBuffer& buffer)
     Dimension const& new_y = schema.getDimension(m_reprojectionFilter.getNewYId());
     Dimension const& new_z = schema.getDimension(m_reprojectionFilter.getNewZId());
     
-    bool logOutput = m_reprojectionFilter.log()->getLevel() > logDEBUG4;
+    bool logOutput = m_reprojectionFilter.log()->getLevel() > logDEBUG3;
     m_reprojectionFilter.log()->floatPrecision(8);
+
+    if (logOutput)
+    {
+        m_reprojectionFilter.log()->get(logDEBUG3) << "old_x: " << old_x;
+        m_reprojectionFilter.log()->get(logDEBUG3) << "old_y: " << old_y;
+        m_reprojectionFilter.log()->get(logDEBUG3) << "old_z: " << old_z;
+
+        m_reprojectionFilter.log()->get(logDEBUG3) << "new_x: " << new_x;
+        m_reprojectionFilter.log()->get(logDEBUG3) << "new_y: " << new_y;
+        m_reprojectionFilter.log()->get(logDEBUG3) << "new_z: " << new_z;
+        
+    }
+
+    logOutput = m_reprojectionFilter.log()->getLevel() > logDEBUG3;
+
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
         double x = m_reprojectionFilter.getScaledValue(buffer, old_x, pointIndex);
