@@ -109,6 +109,7 @@ pdal::StageSequentialIterator* Scaling::createSequentialIterator(PointBuffer& bu
 const Options Scaling::getDefaultOptions() const
 {
     Options options;
+    Option ignore_old_dimensions("ignore_old_dimensions", true, "Mark old, unscaled dimensions as ignored");    
     return options;
 }
 
@@ -189,12 +190,24 @@ Schema Scaling::alterSchema(Schema const& input_schema)
         }
     }
 
-
+    bool markIgnored = getOptions().getValueOrDefault<bool>("ignore_old_dimensions", true);
     std::map<dimension::id, dimension::id>::const_iterator d;
     for (d = m_scale_map.begin(); d != m_scale_map.end(); ++d)
     {
         Dimension const& from_dimension = schema.getDimension(d->first);
         Dimension const& to_dimension = schema.getDimension(d->second);
+        
+        if (markIgnored)
+        {
+            log()->get(logDEBUG2) << "marking " << from_dimension.getName() << " as ignored with uuid "  <<  from_dimension.getUUID() << std::endl;
+
+            Dimension d(from_dimension);
+            boost::uint32_t flags = d.getFlags();
+            d.setFlags(flags | dimension::IsIgnored);
+            schema.setDimension(d);
+        }
+
+
         log()->get(logDEBUG2) << "Map wants to do: " << from_dimension.getName()
                                               << " [" << from_dimension.getInterpretation() << "/" << from_dimension.getByteSize() << "]"
                                               << " to scale: " << to_dimension.getNumericScale()
