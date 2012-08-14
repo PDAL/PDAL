@@ -174,20 +174,14 @@ void InPlaceReprojection::setDimension( std::string const& name,
     derived.setNumericOffset(offset);
     derived.createUUID();
     derived.setNamespace(getName());
-
-    Dimension new_dim(old_dim);
-
-    derived.setParent(new_dim.getUUID());
-    schema.setDimension(new_dim);
-    
-    old_id = new_dim.getUUID();
-
-
-    log()->get(logDEBUG2) << "uuid for " << name << " is "  << old_dim.getUUID() << std::endl;
-    log()->get(logDEBUG2) << "child uuid for " << name << " is "  << derived.getUUID() << std::endl;
-
+    derived.setParent(old_dim.getUUID());
     schema.appendDimension(derived);
+
+    old_id = old_dim.getUUID();
     new_id = derived.getUUID();
+
+    log()->get(logDEBUG2) << "source dimension: " << old_dim << std::endl;
+    log()->get(logDEBUG2) << "derived dimension: " << derived << std::endl;
 
     
     bool markIgnored = getOptions().getValueOrDefault<bool>("ignore_old_dimensions", true);
