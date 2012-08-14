@@ -172,6 +172,7 @@ void InPlaceReprojection::setDimension( std::string const& name,
     Dimension derived(old_dim);
     derived.setNumericScale(scale);
     derived.setNumericOffset(offset);
+    derived.setUUID(boost::uuids::nil_uuid());
     derived.createUUID();
     derived.setNamespace(getName());
     derived.setParent(old_dim.getUUID());
