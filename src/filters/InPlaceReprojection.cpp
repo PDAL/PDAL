@@ -183,6 +183,8 @@ void InPlaceReprojection::setDimension( std::string const& name,
     log()->get(logDEBUG2) << "source dimension: " << old_dim << std::endl;
     log()->get(logDEBUG2) << "derived dimension: " << derived << std::endl;
 
+    log()->get(logDEBUG2) << "source id: " << old_id << std::endl;
+    log()->get(logDEBUG2) << "derived id: " << new_id << std::endl;
     
     bool markIgnored = getOptions().getValueOrDefault<bool>("ignore_old_dimensions", true);
     if (markIgnored)
