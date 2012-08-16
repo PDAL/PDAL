@@ -101,7 +101,8 @@ private:
     std::string m_candidateFile;
     std::string m_wkt;
 
-
+    std::ostream* m_outputStream;
+    std::string m_outputFileName;
 	
     pdal::Options m_options;
 };
@@ -111,6 +112,8 @@ PcEqual::PcEqual(int argc, char* argv[])
     : Application(argc, argv, "pcquery")
     , m_sourceFile("")
     , m_candidateFile("")
+    , m_outputStream(0)
+    , m_outputFileName("")
 {
     return;
 }
@@ -135,6 +138,7 @@ void PcEqual::addSwitches()
     file_options->add_options()
         ("source", po::value<std::string>(&m_sourceFile), "source file name")
         ("candidate", po::value<std::string>(&m_candidateFile), "candidate file name")
+        ("output", po::value<std::string>(&m_outputFileName), "output file name")
         ;
 
     addSwitchSet(file_options);
@@ -149,6 +153,7 @@ void PcEqual::addSwitches()
 
     addPositionalSwitch("source", 1);
     addPositionalSwitch("candidate", 2);
+    addPositionalSwitch("output", 3);
 
     return;
 }
@@ -271,6 +276,14 @@ int PcEqual::execute()
     Dimension const& dimZ = schema.getDimension("Z");
     
     bool bWroteHeader(false);
+    
+    if (m_outputFileName.size())
+    {
+        m_outputStream = FileUtils::createFile(m_outputFileName);
+    }
+    std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
+    
+    idx->build();
     for (std::size_t i = 0; i <  source_points->size(); ++i)
     {
         Point& source = (*source_points)[i];
@@ -298,33 +311,36 @@ int PcEqual::execute()
         
         if (!bWroteHeader)
         {
-            writeHeader(std::cout);
+            writeHeader(ostr);
             bWroteHeader = true;
         }
-        std::cout << i << ",";
+        ostr << i << ",";
         boost::uint32_t precision = Utils::getStreamPrecision(dimX.getNumericScale());
-        std::cout.setf(std::ios_base::fixed, std::ios_base::floatfield);
-        std::cout.precision(precision);
-        std::cout << xd << ",";
+        ostr.setf(std::ios_base::fixed, std::ios_base::floatfield);
+        ostr.precision(precision);
+        ostr << xd << ",";
 
         precision = Utils::getStreamPrecision(dimY.getNumericScale());
-        std::cout.precision(precision);
-        std::cout << yd << ",";
+        ostr.precision(precision);
+        ostr << yd << ",";
 
         precision = Utils::getStreamPrecision(dimZ.getNumericScale());
-        std::cout.precision(precision);
-        std::cout << zd;
+        ostr.precision(precision);
+        ostr << zd;
         
-        std::cout << std::endl;
+        ostr << std::endl;
 
-        
-        
     }
 
     delete index_iter;
     delete index_filter;    
     delete candidate_points;
     delete source_points;
+
+    if (m_outputStream)
+    {
+        FileUtils::closeFile(m_outputStream);
+    }
     
     return 0;
 }
