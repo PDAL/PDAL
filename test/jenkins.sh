@@ -9,7 +9,7 @@ else
     CMAKE_OPTS="$CMAKE_OPTS -C test/BuildSetup.jenkins ."
 fi
 export ORACLE_HOME="/u01/app/oracle/product/11.2.0/dbhome_1"
-export PATH="/var/lib/jenkins/local/bin:$PATH"
+export PATH="/var/lib/jenkins/bin:$PATH"
 echo "running: cmake $CMAKE_OPTS"
 eval cmake $CMAKE_OPTS
 make
