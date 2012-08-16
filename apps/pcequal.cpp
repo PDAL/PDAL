@@ -248,7 +248,7 @@ int PcEqual::execute()
 
     if (candidate_points->size() != source_points->size())
     {
-        throw app_runtime_error("Source and candidate files do not have the same point count!");
+        std::cerr << "Source and candidate files do not have the same point count, testing each source point only!";
     }
     
     pdal::filters::iterators::sequential::Index* idx = dynamic_cast<pdal::filters::iterators::sequential::Index*>(index_iter);
