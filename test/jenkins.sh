@@ -3,6 +3,8 @@
 # "clean" == git clean -fdx
 
 CMAKE_OPTS="-G \"Unix Makefiles\""
+
+rm "CMakeCache.txt"
 if [ "$1" == "PDAL-embed-boost" ]; then
     CMAKE_OPTS="$CMAKE_OPTS -C test/BuildSetup-embed.jenkins ."
 else
