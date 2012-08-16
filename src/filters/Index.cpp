@@ -174,6 +174,10 @@ std::vector<boost::uint32_t> Index::query(double const& x, double const& y, doub
     flann::Matrix<float> k_distances_mat (&distances[0], 1, k);
 
     
+    if( !m_index)
+    {
+        throw pdal_error("Index is not initialized!");
+    }
     m_index->knnSearch (flann::Matrix<float> (&query[0], 1, m_stage.getNumDimensions()),
                              k_indices_mat, k_distances_mat,
                              k, flann::SearchParams(128));
