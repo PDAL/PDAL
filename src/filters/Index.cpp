@@ -386,8 +386,10 @@ void Index::build()
 
 Index::~Index()
 {
+#ifdef PDAL_HAVE_FLANN    
     if (m_index)
         delete m_index;
+#endif
 }
 
 boost::uint64_t Index::skipImpl(boost::uint64_t count)
