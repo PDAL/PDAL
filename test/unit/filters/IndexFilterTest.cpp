@@ -49,6 +49,7 @@ BOOST_AUTO_TEST_SUITE(IndexFilterTest)
 
 BOOST_AUTO_TEST_CASE(test_3d)
 {
+#ifdef PDAL_HAVE_FLANN      
     pdal::Option option("filename", Support::datapath("pipeline/pipeline_index.xml"));
     pdal::Options options(option);
 
@@ -67,44 +68,49 @@ BOOST_AUTO_TEST_CASE(test_3d)
     boost::uint32_t numRead = it->read(data);
     BOOST_CHECK(numRead == 20);
     
-#ifdef PDAL_HAVE_FLANN   
+ 
     pdal::filters::iterators::sequential::Index* iter = dynamic_cast<pdal::filters::iterators::sequential::Index*>(it);
     
+    iter->build();
     unsigned k = 8;
     
     // If the query distance is 0, just return the k nearest neighbors
     std::vector<boost::uint32_t> ids = iter->query(636199, 849238, 428.05, 0.0, k);
     
     BOOST_CHECK_EQUAL(ids.size(), k);
-    BOOST_CHECK_EQUAL(ids[0], 8u);
-    BOOST_CHECK_EQUAL(ids[4], 10u);
+    if (ids.size())
+    {
+        BOOST_CHECK_EQUAL(ids[0], 8u);
+        BOOST_CHECK_EQUAL(ids[4], 10u);    
+    }
 
     std::vector<boost::uint32_t> dist_ids = iter->query(636199, 849238, 428.05, 100.0, k);
-    
-    BOOST_CHECK_EQUAL(dist_ids.size(), 3u);
-    BOOST_CHECK_EQUAL(dist_ids[0], 8u);
-#endif
+
+    if (dist_ids.size())
+    {
+        BOOST_CHECK_EQUAL(dist_ids.size(), 3u);
+        BOOST_CHECK_EQUAL(dist_ids[0], 8u);        
+    }
 
     delete it;
+#endif
 
     return;
 }
 
-BOOST_AUTO_TEST_CASE(test_2d)
+
+BOOST_AUTO_TEST_CASE(test_new2d)
 {
+#ifdef PDAL_HAVE_FLANN      
     pdal::Option option("filename", Support::datapath("pipeline/pipeline_index.xml"));
     pdal::Options options(option);
 
     pdal::drivers::pipeline::Reader reader(options);
-
-
-
     reader.initialize();
-    pdal::filters::Index* filter = static_cast<pdal::filters::Index*>(reader.getManager().getStage());
-    
-    filter->setNumDimensions(2);
 
-    // std::cout << "filter ops: " << opt << std::endl;
+    pdal::filters::Index * filter = static_cast<pdal::filters::Index *>(reader.getManager().getStage());
+
+    filter->setNumDimensions(2);
 
     const pdal::Schema& schema = filter->getSchema();
     pdal::PointBuffer data(schema, 20);
@@ -114,30 +120,36 @@ BOOST_AUTO_TEST_CASE(test_2d)
     boost::uint32_t numRead = it->read(data);
     BOOST_CHECK(numRead == 20);
     
-#ifdef PDAL_HAVE_FLANN   
+ 
     pdal::filters::iterators::sequential::Index* iter = dynamic_cast<pdal::filters::iterators::sequential::Index*>(it);
     
+    iter->build();
     unsigned k = 8;
     
     // If the query distance is 0, just return the k nearest neighbors
-    std::vector<boost::uint32_t> ids = iter->query(636199, 849238, 0.0, 0.0, k);
+    std::vector<boost::uint32_t> ids = iter->query(636199, 849238, 428.05, 0.0, k);
     
     BOOST_CHECK_EQUAL(ids.size(), k);
-    BOOST_CHECK_EQUAL(ids[0], 8u);
-    BOOST_CHECK_EQUAL(ids[4], 10u);
-
-    std::vector<boost::uint32_t> dist_ids = iter->query(636199, 849238, 0.0, 100.0, k);
     
-    BOOST_CHECK_EQUAL(dist_ids.size(), 3u);
-    BOOST_CHECK_EQUAL(dist_ids[0], 8u);
-#endif
+    if (ids.size())
+    {
+        BOOST_CHECK_EQUAL(ids[0], 8u);
+        BOOST_CHECK_EQUAL(ids[4], 10u);    
+    }
+
+    std::vector<boost::uint32_t> dist_ids = iter->query(636199, 849238, 428.05, 100.0, k);
+    
+    if (dist_ids.size())
+    {
+        BOOST_CHECK_EQUAL(dist_ids.size(), 3u);
+        BOOST_CHECK_EQUAL(dist_ids[0], 8u);        
+    }
 
     delete it;
+#endif
 
     return;
 }
-
-
 
 
 BOOST_AUTO_TEST_SUITE_END()

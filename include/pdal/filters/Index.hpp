@@ -56,7 +56,6 @@ public:
     SET_STAGE_NAME("filters.index", "Generates a spatial index to support range and spatial queries")
 
     Index(Stage& prevStage, const Options&);
-
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
 
@@ -75,17 +74,15 @@ public:
 
     void processBuffer(PointBuffer& data) const;
 
-    inline void setNumDimensions(boost::uint32_t dimensions) 
+    void setNumDimensions(boost::uint32_t dimensions) 
     {
         if (!(dimensions == 2) && !(dimensions == 3))
             throw pdal_error("Dimension count must be 2 or 3 for index queries");
         m_dimensions = dimensions; 
     }
     
-    inline boost::uint32_t getNumDimensions() const 
-    { 
-        return m_dimensions; 
-    }
+    boost::uint32_t getNumDimensions() const;
+
 
 private:
 
@@ -104,6 +101,7 @@ class PDAL_DLL Index : public pdal::FilterSequentialIterator
 {
 public:
     Index(const pdal::filters::Index& filter, PointBuffer& buffer);
+    virtual ~Index();
     
     std::vector<boost::uint32_t> query(double const& x, double const& y, double const& z, double distance, boost::uint32_t count=1);
     

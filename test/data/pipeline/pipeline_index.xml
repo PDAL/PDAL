@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Pipeline version="1.0">
     <Filter type="filters.index">
+        <!-- <Option name="dimensions">
+             2
+         </Option>        --> 
         <!-- <Option name="debug">
              true
          </Option>

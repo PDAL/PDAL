@@ -51,6 +51,7 @@ namespace filters
 
 Index::Index(Stage& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
+    , m_dimensions(3)
 {
     return;
 }
@@ -58,12 +59,14 @@ Index::Index(Stage& prevStage, const Options& options)
 void Index::initialize()
 {
     Filter::initialize();
-
-    m_dimensions = getOptions().getValueOrDefault<boost::uint32_t>("dimensions", 3);
-
+    setNumDimensions(getOptions().getValueOrDefault<boost::uint32_t>("dimensions", 3));
     return;
 }
 
+boost::uint32_t Index::getNumDimensions() const
+{ 
+    return m_dimensions; 
+}
 
 const Options Index::getDefaultOptions() const
 {
@@ -72,19 +75,15 @@ const Options Index::getDefaultOptions() const
     Option x("x_dim", std::string("X"), "Dimension name to use for 'X' data");
     Option y("y_dim", std::string("Y"), "Dimension name to use for 'Y' data");
     Option z("z_dim", std::string("Z"), "Dimension name to use for 'Z' data");
-
-    Option filename("filename", "", "Filename to store the index in");
-
+    Option no_dims("dimensions", 3, "Number of dimensions to use for index");
 
     options.add(x);
     options.add(y);
     options.add(z);
-    options.add(filename);
+    options.add(no_dims);
 
     return options;
 }
-
-
 
 void Index::processBuffer(PointBuffer& /* data */) const
 {
@@ -151,56 +150,73 @@ std::vector<boost::uint32_t> Index::query(double const& x, double const& y, doub
     std::vector<boost::uint32_t> output;
     
 #ifdef PDAL_HAVE_FLANN   
+
+    if( !m_index)
+    {
+        throw pdal_error("Index is not initialized! Unable to query!");
+    }
+    m_stage.log()->get(logDEBUG2)   << "Searching for x: " 
+                                    << x << " y: " << y << " z: " << z 
+                                    << " with distance threshold " << distance << std::endl;
+
     
-    std::vector<float> distances;
-    distances.resize(k);
+    boost::uint32_t num_dimensions(m_stage.getNumDimensions());
+    std::vector<float> distances_vec;
+    distances_vec.resize(k);
     
-    std::vector<int> indices;
-    indices.resize(k);
+    std::vector<boost::int32_t> indices_vec;
+    indices_vec.resize(k);
+    indices_vec.assign(indices_vec.size(), -1);
     
-    std::vector<float> query(m_stage.getNumDimensions());
-    query[0] = x;
-    query[1] = y;
-    if (m_stage.getNumDimensions() > 2)
-        query[2] = z;
+    std::vector<float> query_vec(num_dimensions);
+    query_vec[0] = x;
+    query_vec[1] = y;
+    if (num_dimensions > 2)
+        query_vec[2] = z;
+
+
+    flann::Matrix<int> indices_mat (&indices_vec[0], 1, k);
+    flann::Matrix<float> distances_mat (&distances_vec[0], 1, k);
+    flann::Matrix<float> query_mat(&query_vec[0], 1, num_dimensions);
+    
+    m_index->knnSearch (    query_mat,
+                            indices_mat, 
+                            distances_mat,
+                            k, 
+                            flann::SearchParams(128));
 
     bool logOutput = m_stage.log()->getLevel() > logDEBUG4;
     m_stage.log()->floatPrecision(8);
-    
-    if (logOutput)
-        m_stage.log()->get(logDEBUG2) << "Searching for x: " << x << " y: " << y << " z: " << z << " with distance threshold " << distance << std::endl;
 
-    flann::Matrix<int> k_indices_mat (&indices[0], 1, k);
-    flann::Matrix<float> k_distances_mat (&distances[0], 1, k);
-
-    
-    if( !m_index)
-    {
-        throw pdal_error("Index is not initialized!");
-    }
-    m_index->knnSearch (flann::Matrix<float> (&query[0], 1, m_stage.getNumDimensions()),
-                             k_indices_mat, k_distances_mat,
-                             k, flann::SearchParams(128));
-    
     for(unsigned i=0; i < k; ++i)
     {
         // if distance is 0, just return the nearest one, otherwise filter by distance
         if (Utils::compare_distance<float>((float)distance, 0))
         {
             if (logOutput)
-                m_stage.log()->get(logDEBUG4) << "Query found: " << "index: " << indices[i] << " distance: " << distances[i] <<std::endl;
-
-            output.push_back(indices[i]);
+            {
+                m_stage.log()->get(logDEBUG4) << "0-query found: " 
+                                              << "index: " << indices_vec[i] 
+                                              << " distance: " 
+                                              << distances_vec[i] <<std::endl;
+            }
+            
+            if (indices_vec[i] != -1)
+                output.push_back(indices_vec[i]);
             
         } else 
         {
-            if (::sqrt(distances[i]) < distance)
+            if (::sqrt(distances_vec[i]) < distance)
             {
                 if (logOutput)
-                    m_stage.log()->get(logDEBUG4) << "Query found: " << "index: " << indices[i] << " distance: " << distances[i] <<std::endl;
-            
-                output.push_back(indices[i]);
-                
+                {
+                    m_stage.log()->get(logDEBUG4)   << "Query found: " 
+                                                    << "index: " << indices_vec[i] 
+                                                    << " distance: " 
+                                                    << distances_vec[i] <<std::endl;
+                }
+                if (indices_vec[i] != -1)
+                    output.push_back(indices_vec[i]);
             }
             
         }
@@ -227,6 +243,8 @@ boost::uint32_t Index::readBufferImpl(PointBuffer& data)
     m_stage.log()->get(logDEBUG2) << "inserting data into index data array of capacity: " << data.getCapacity() << std::endl;
     
 #ifdef PDAL_HAVE_FLANN        
+    
+    boost::uint32_t num_dimensions(m_stage.getNumDimensions());
     for (boost::uint32_t pointIndex=0; pointIndex<numRead; pointIndex++)
     {
         float x = static_cast<float>(getScaledValue(data, *m_xDim, pointIndex));
@@ -235,19 +253,23 @@ boost::uint32_t Index::readBufferImpl(PointBuffer& data)
 
         m_data.push_back(x);
         m_data.push_back(y);
-        if (m_stage.getNumDimensions() > 2)
+        if (num_dimensions > 2)
         {
             m_data.push_back(z);
             if (logOutput)
             {
-                m_stage.log()->get(logDEBUG4) << "adding z to index :"  << z << std::endl;
+                m_stage.log()->get(logDEBUG4) << "adding z to index"  << z << std::endl;
             }
             
         }
         
         if (logOutput)
         {
-            m_stage.log()->get(logDEBUG4) << "index: " << pointIndex << " x: " << x << " y: " << y <<  " z: " << z << std::endl;
+            m_stage.log()->get(logDEBUG4) << "index: " 
+                                          << pointIndex 
+                                          << " x: " << x 
+                                          << " y: " << y 
+                                          << " z: " << z << std::endl;
         }
     }
 #endif        
@@ -347,16 +369,26 @@ void Index::build()
 #ifdef PDAL_HAVE_FLANN    
     
     // Build the index
-    m_dataset = new flann::Matrix<float>(&(m_data.front()), m_stage.getNumPoints(), m_stage.getNumDimensions());
+
+    // flann::Logger::setLevel(flann::FLANN_LOG_DEBUG);
+    // flann::Logger::setDestination("flannlog.log");
+
+    m_dataset = new flann::Matrix<float>(&m_data[0], m_stage.getNumPoints(), m_stage.getNumDimensions());
     m_stage.log()->get(logDEBUG2) << "Building index for size " << m_data.size()  <<" for points: " << m_stage.getNumPoints() <<std::endl;
     
     m_index = new flann::KDTreeSingleIndex<flann::L2_Simple<float> >(*m_dataset, flann::KDTreeIndexParams(4));
+    
     m_index->buildIndex();
-    m_stage.log()->get(logDEBUG2) << "Built index" <<std::endl;
+    m_stage.log()->get(logDEBUG2) << "Built index with memory: " << m_index->usedMemory() << " with size: " << m_index->size() << " veclen: " << m_index->veclen() << std::endl;
     
 #endif
 }
 
+Index::~Index()
+{
+    if (m_index)
+        delete m_index;
+}
 
 boost::uint64_t Index::skipImpl(boost::uint64_t count)
 {
