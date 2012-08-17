@@ -270,7 +270,7 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data,
 			
             const boost::uint16_t intensity = Utils::read_field<boost::uint16_t>(p);
             const boost::uint8_t flags = Utils::read_field<boost::uint8_t>(p);
-            const boost::uint8_t classification = Utils::read_field<boost::uint8_t>(p);
+            const boost::uint8_t classification = Utils::read_field<boost::uint8_t>(p) & 31;
             const boost::int8_t scanAngleRank = Utils::read_field<boost::int8_t>(p);
             const boost::uint8_t user = Utils::read_field<boost::uint8_t>(p);
             const boost::uint16_t pointSourceId = Utils::read_field<boost::uint16_t>(p);
