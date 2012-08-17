@@ -82,8 +82,8 @@ std::string AppSupport::inferWriterDriver(const std::string& filename, pdal::Opt
 
 
     boost::to_lower(ext);
-
-    if (ext == "laz")
+    
+    if (boost::algorithm::iequals(ext,".laz"))
     {
         options.add("compression", true);
     }

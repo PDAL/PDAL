@@ -152,13 +152,6 @@ BOOST_AUTO_TEST_CASE(pc2pc_test_switches)
     BOOST_CHECK(fileIsCompressed(outputLaz));
 #endif
 
-#ifdef PDAL_HAVE_LASZIP
-    // does "--input foo.laz" make an uncompressed output?
-//BUG    stat = Support::run_command(cmd + " --input=" + inputLaz + " --output=" + outputLas, output);
-//BUG    BOOST_CHECK_EQUAL(stat, 0);
-//BUG    BOOST_CHECK(fileIsOkay(outputLas));
-//BUG    BOOST_CHECK(!fileIsCompressed(outputLas));
-#endif
 
 #ifdef PDAL_HAVE_LIBLAS
     // does --liblas work?
