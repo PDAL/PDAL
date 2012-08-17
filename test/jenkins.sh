@@ -15,4 +15,4 @@ export PATH="/var/lib/jenkins/bin:$PATH"
 echo "running: cmake $CMAKE_OPTS"
 eval cmake $CMAKE_OPTS
 make
-./bin/pdal_test test/data
+./bin/pdal_test test/data --catch_system_errors=no
