@@ -20,12 +20,35 @@
                 <Option name="verbose">
                     6
                 </Option>
+                <Filter type="filters.predicate">
+                    <Option name="function">filter</Option>
+                    <Option name="source">
+import numpy as np
+
+def filter(ins,outs):
+    cls = ins['Classification']
+
+    keep_classes = [1]
+
+    # Use the first test for our base array.
+    keep = np.equal(cls, keep_classes[0])
+
+    # For 1:n, test each predicate and join back
+    # to our existing predicate array
+    for k in range(1,len(keep_classes)):
+        t = np.equal(cls, keep_classes[k])
+        keep = keep + t
+
+    outs['Mask'] = keep
+    return True
+</Option>
+                <Option name="module">anything</Option>
                 <Reader type="drivers.las.reader">
                     <Option name="filename">
                         ../1.2-with-color.las
                     </Option>
                     <Option name="spatialreference">
-                        ../1.2-with-color.las.wkt
+                        EPSG:2993
                     </Option>
                     <Option name="debug">
                         true
@@ -35,5 +58,6 @@
                     </Option>
                 </Reader>
         </Filter>
+    </Filter>
     </Writer>
 </Pipeline>
