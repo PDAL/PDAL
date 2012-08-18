@@ -4,7 +4,7 @@
 
 CMAKE_OPTS="-G \"Unix Makefiles\""
 
-rm "CMakeCache.txt"
+
 if [ "$1" == "PDAL-embed-boost" ]; then
     CMAKE_OPTS="$CMAKE_OPTS -C test/BuildSetup-embed.jenkins ."
 else
@@ -14,6 +14,5 @@ fi
 export PATH="/var/lib/jenkins/bin:$PATH"
 echo "running: cmake $CMAKE_OPTS"
 eval cmake $CMAKE_OPTS
-make clean
 make
 ./bin/pdal_test test/data --catch_system_errors=no
