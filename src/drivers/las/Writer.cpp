@@ -210,7 +210,8 @@ void Writer::setVLRsFromMetadata(LasHeader& header, Metadata const& metadata, Op
     // boost::property_tree::write_xml(std::cout, metadata.toPTree());
     for (o = options.begin(); o != options.end(); ++o)
     {
-        if (!boost::algorithm::iequals(o->getName(), "VLR"))
+        if (!boost::algorithm::istarts_with(o->getName(), "vlr"))
+        // if (!boost::algorithm::iequals(o->getName(), "VLR"))
             continue;
         
         boost::optional<pdal::Options const&> vo = o->getOptions();
