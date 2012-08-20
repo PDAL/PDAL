@@ -138,7 +138,7 @@ private:
     InPlaceReprojection& operator=(const InPlaceReprojection&); // not implemented
     InPlaceReprojection(const InPlaceReprojection&); // not implemented
     
-    void reprojectOffsets( double& offset_x, double& offset_y);
+    void reprojectOffsets( double& offset_x, double& offset_y, double& offset_z);
 };
 
 namespace iterators

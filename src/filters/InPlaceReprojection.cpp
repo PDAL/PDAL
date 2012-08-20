@@ -201,13 +201,18 @@ void InPlaceReprojection::setDimension( std::string const& name,
 }
 
 void InPlaceReprojection::reprojectOffsets( double& offset_x,
-                                            double& offset_y)
+                                            double& offset_y,
+                                            double& offset_z)
 {
 
 #ifdef PDAL_HAVE_GDAL
     int ret = 0;
-
-    ret = OCTTransform(m_transform_ptr.get(), 1, &offset_x, &offset_y, 0);
+    
+    double dummy_x(0.0);
+    bool doOffsetZ = getOptions().getValueOrDefault<bool>("do_offset_z", false);
+    
+    double* x = doOffsetZ ? &offset_x : &dummy_x;
+    ret = OCTTransform(m_transform_ptr.get(), 1, &offset_x, &offset_y, x);
     if (!ret)
     {
         std::ostringstream msg;
@@ -247,7 +252,7 @@ Schema InPlaceReprojection::alterSchema(Schema& schema)
     log()->floatPrecision(8);
 
     log()->get(logDEBUG2) << "original offset x,y: " << offset_x <<"," << offset_y << std::endl;
-    reprojectOffsets(offset_x, offset_y);
+    reprojectOffsets(offset_x, offset_y, offset_z);
     log()->get(logDEBUG2) << "reprojected offset x,y: " << offset_x <<"," << offset_y << std::endl;
 
     double scale_x = getOptions().getValueOrDefault<double>("scale_x", dimX.getNumericScale());
@@ -277,6 +282,7 @@ const Options InPlaceReprojection::getDefaultOptions() const
     Option y_offset("offset_y", 0.0f, "Offset for output Y data in the case when 'Y' dimension data are to be scaled.  Defaults to '0.0'.  If not set, the Dimensions's scale will be used");
     Option z_offset("offset_z", 0.0f, "Offset for output Z data in the case when 'Z' dimension data are to be scaled.  Defaults to '0.0'.  If not set, the Dimensions's scale will be used");
     Option ignore_old_dimensions("ignore_old_dimensions", true, "Mark old, unprojected dimensions as ignored");
+    Option do_offset_z("do_offset_z", false, "Should we re-offset Z data");    
     options.add(in_srs);
     options.add(out_srs);
     options.add(x);
@@ -289,6 +295,7 @@ const Options InPlaceReprojection::getDefaultOptions() const
     options.add(y_offset);
     options.add(z_offset);
     options.add(ignore_old_dimensions);
+    options.add(do_offset_z);
 
     return options;
 }
@@ -538,10 +545,11 @@ boost::uint32_t InPlaceReprojection::readBufferImpl(PointBuffer& buffer)
     Dimension const& new_z = schema.getDimension(m_reprojectionFilter.getNewZId());
     
     bool logOutput = m_reprojectionFilter.log()->getLevel() > logDEBUG3;
-    m_reprojectionFilter.log()->floatPrecision(8);
+    
 
     if (logOutput)
     {
+        m_reprojectionFilter.log()->floatPrecision(8);
         m_reprojectionFilter.log()->get(logDEBUG3) << "old_x: " << old_x;
         m_reprojectionFilter.log()->get(logDEBUG3) << "old_y: " << old_y;
         m_reprojectionFilter.log()->get(logDEBUG3) << "old_z: " << old_z;
@@ -579,7 +587,8 @@ boost::uint32_t InPlaceReprojection::readBufferImpl(PointBuffer& buffer)
     
         buffer.setNumPoints(pointIndex+1);
     }
-    m_reprojectionFilter.log()->clearFloat();
+    if (logOutput)
+        m_reprojectionFilter.log()->clearFloat();
 
     updateBounds(buffer);
 
