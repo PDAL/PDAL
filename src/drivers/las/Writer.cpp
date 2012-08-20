@@ -449,13 +449,13 @@ void Writer::writeBufferBegin(PointBuffer const& data)
                              << filesource_id
                              << " from metadata " << std::endl;
 
-        if (doForwardThisMetadata("vlr"))
-        {
+        // if (doForwardThisMetadata("vlr"))
+        // {
             boost::optional<pdal::Options const&> opts = \
                             getOptions().getOption("metadata").getOptions();
             if (opts)
                 setVLRsFromMetadata(m_lasHeader, m, *opts);
-        }
+        // }
 
     } // useMetadata
 
