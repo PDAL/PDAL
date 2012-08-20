@@ -202,8 +202,16 @@ void Writer::writeBegin(boost::uint64_t /*targetNumPointsToWrite*/)
 
 void Writer::setVLRsFromMetadata(LasHeader& header, Metadata const& metadata, Options const& opts)
 {
-    boost::property_tree::ptree const& entries = metadata.toPTree().get_child("metadata");
     
+    boost::property_tree::ptree entries;
+    try
+    {
+        entries = metadata.toPTree().get_child("metadata");
+        
+    } catch (boost::property_tree::ptree_bad_path const& e)\
+    {
+        return;
+    }
     std::vector<pdal::Option> options = opts.getOptions("vlr");
     std::vector<pdal::Option>::const_iterator o;
 
