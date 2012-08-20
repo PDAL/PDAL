@@ -223,17 +223,17 @@ void Writer::setVLRsFromMetadata(LasHeader& header, Metadata const& metadata, Op
             boost::property_tree::ptree::const_iterator m;
             for (m = entries.begin(); m != entries.end(); ++m)
             {
-                if (boost::algorithm::istarts_with(m->first, "vlr_"))
+                if (boost::algorithm::istarts_with(m->first, "vlr"))
                 {
                     boost::uint16_t option_record_id = vo->getOption("record_id").getValue<boost::uint16_t>();
                     boost::uint16_t metadata_record_id = m->second.get<boost::uint16_t>("metadata.record_id.value");
                     std::string option_user_id = vo->getOption("user_id").getValue<std::string>();
                     std::string metadata_user_id = m->second.get<std::string>("metadata.user_id.value");
-  
+                    
                     if (option_record_id == metadata_record_id &&
                         option_user_id == metadata_user_id)
                     {
-                        std::string vlr_data = m->second.get_value<std::string>();
+                        std::string vlr_data = m->second.get<std::string>("value");
                         std::vector<boost::uint8_t> data = Utils::base64_decode(vlr_data);
                         std::string description = m->second.get<std::string>("metadata.description.value");
                         
@@ -250,7 +250,7 @@ void Writer::setVLRsFromMetadata(LasHeader& header, Metadata const& metadata, Op
                                                                         static_cast<boost::uint16_t>(data.size()));
                         header.getVLRs().add(vlr);
                         log()->get(logDEBUG) << "Forwarding VLR from metadata with user_id='" << option_user_id 
-                                             << "' and record_id='" << option_record_id << "'"<< std::endl;                    
+                                             << "' and record_id='" << option_record_id << "'"<< " with size: " << data.size()<< std::endl;                    
                     }
                 }
             }
@@ -269,7 +269,7 @@ void Writer::setVLRsFromMetadata(LasHeader& header, Metadata const& metadata, Op
                                                             static_cast<boost::uint16_t>(data.size()));
             header.getVLRs().add(vlr);            
             log()->get(logDEBUG) << "Setting VLR from metadata with user_id='" << user_id 
-                                 << "' and record_id='" << record_id << "'"<< std::endl;
+                                 << "' and record_id='" << record_id << "'"<< " with size: " << data.size() << std::endl;
         }
     }
 }

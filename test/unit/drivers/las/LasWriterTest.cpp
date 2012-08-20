@@ -255,6 +255,7 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_metadata)
     
     BOOST_CHECK_EQUAL(r.getRecordId(), 1234u);
     BOOST_CHECK_EQUAL(r.getUserId(), "hobu");
+    BOOST_CHECK_EQUAL(r.getLength(), 28);    
     
     FileUtils::deleteFile(temp_filename);
 
