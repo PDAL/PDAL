@@ -200,6 +200,69 @@ StageFactory::StageFactory()
     return;
 }
 
+std::string StageFactory::inferReaderDriver(const std::string& filename, pdal::Options& options)
+{
+    std::string ext = boost::filesystem::extension(filename);
+
+    pdal::Option& fn = options.getOptionByRef("filename");
+    fn.setValue<std::string>(filename);
+
+    std::map<std::string, std::string> drivers;
+    drivers["las"] = "drivers.las.reader";
+    drivers["laz"] = "drivers.las.reader";
+    drivers["bin"] = "drivers.terrasolid.reader";
+    drivers["qi"] = "drivers.qfit.reader";
+    drivers["xml"] = "drivers.pipeline.reader";
+    drivers["nitf"] = "drivers.nitf.reader";
+    drivers["ntf"] = "drivers.nitf.reader";
+    
+    if (boost::algorithm::iequals(filename, "STDIN"))
+    {
+        return drivers["xml"];
+    }
+    
+    if (ext == "") return "";
+    ext = ext.substr(1, ext.length()-1);
+    if (ext == "") return "";
+
+    boost::to_lower(ext);
+    std::string driver = drivers[ext];
+    return driver; // will be "" if not found
+}
+
+std::string StageFactory::inferWriterDriver(const std::string& filename, pdal::Options& options)
+{
+    std::string ext = boost::filesystem::extension(filename);
+
+    boost::to_lower(ext);
+    
+    if (boost::algorithm::iequals(ext,".laz"))
+    {
+        options.add("compression", true);
+    }
+
+    options.add<std::string>("filename", filename);
+
+    std::map<std::string, std::string> drivers;
+    drivers["las"] = "drivers.las.writer";
+    drivers["laz"] = "drivers.las.writer";
+    drivers["xyz"] = "drivers.text.writer";
+    drivers["txt"] = "drivers.text.writer";
+    drivers["pcd"] = "drivers.pcd.writer";
+
+    if (boost::algorithm::iequals(filename, "STDOUT"))
+    {
+        return drivers["txt"];
+    }
+
+    if (ext == "") return drivers["txt"];
+    ext = ext.substr(1, ext.length()-1);
+    if (ext == "") return drivers["txt"];
+
+    boost::to_lower(ext);
+    std::string driver = drivers[ext];
+    return driver; // will be "" if not found
+}
 
 Reader* StageFactory::createReader(const std::string& type, const Options& options)
 {

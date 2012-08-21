@@ -84,6 +84,19 @@ public:
 public:
     StageFactory();
 
+    // infer the driver to use based on filename extension
+    // returns "" if no driver found
+    //
+    // this may also add on an option to pass to the driver, such as the filename
+    static std::string inferReaderDriver(const std::string& filename, pdal::Options& options);
+
+    // infer the driver to use based on filename extension
+    // returns "" if no driver found
+    // 
+    // this may also add on an option to pass to the driver, such as the filename
+    // (or something inferred from the extension, such as .laz means we need to use compress=true)
+    static std::string inferWriterDriver(const std::string& filename, pdal::Options& options);
+
     Reader* createReader(const std::string& type, const Options& options);
     Filter* createFilter(const std::string& type, Stage& prevStage, const Options& options);
     MultiFilter* createMultiFilter(const std::string& type, const std::vector<Stage*>& prevStages, const Options& options);
