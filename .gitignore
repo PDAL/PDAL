@@ -63,6 +63,7 @@ doc/doxygen/xml
 test/temp/*.txt
 test/temp/*.las
 test/temp/*.laz
+test/data/local
 
 #
 # OS X stuff

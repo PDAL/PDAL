@@ -35,12 +35,12 @@
             </Option>
             <Option name="x_dim">drivers.las.reader.X</Option>    
             <Reader type="drivers.las.reader">
-                <Option name="filename">
-                    ../autzen-colorized-1.2-3.las
-                </Option>
                 <!-- <Option name="filename">
-                    ../1.2-with-color.las
+                    ../autzen-colorized-1.2-3.las
                 </Option> -->
+                <Option name="filename">
+                    ../1.2-with-color.las
+                </Option>
             </Reader>
         </Filter>
     </Writer>
