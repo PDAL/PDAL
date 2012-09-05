@@ -72,6 +72,8 @@ public:
 private:
     void addSwitches();
     void validateSwitches();
+    Stage* makeReader(Options readerOptions);
+    void forwardMetadata(Options & options, Metadata metadata);
 
     std::string m_inputFile;
     std::string m_outputFile;
@@ -84,6 +86,7 @@ private:
     std::string m_wkt;
     std::string m_scales;
     std::string m_offsets;
+    bool m_bForwardMetadata;
 };
 
 
@@ -99,6 +102,7 @@ Pc2Pc::Pc2Pc(int argc, char* argv[])
     , m_wkt("")
     , m_scales("")
     , m_offsets("")
+    , m_bForwardMetadata(false)
 {
     return;
 }
@@ -138,6 +142,7 @@ void Pc2Pc::addSwitches()
         ("polygon", po::value<std::string >(&m_wkt), "POLYGON WKT to use for precise crop of data (2d or 3d)")
         ("scale", po::value< string >(&m_scales), "A comma-separated or quoted, space-separated list of scales to set on the output file: \n--scale 0.1,0.1,0.00001\n--scale \"0.1 0.1 0.00001\"")
         ("offset", po::value< string >(&m_offsets), "A comma-separated or quoted, space-separated list of offsets to set on the output file: \n--offset 0,0,0\n--offset \"1234 5678 91011\"")
+        ("metadata,m", po::value< bool >(&m_bForwardMetadata)->implicit_value(true), "Forward metadata (VLRs, header entries, etc) from previous stages")
         ;
 
     addSwitchSet(file_options);
@@ -146,42 +151,20 @@ void Pc2Pc::addSwitches()
     addPositionalSwitch("output", 1);    
 }
 
-
-int Pc2Pc::execute()
+Stage* Pc2Pc::makeReader(Options readerOptions)
 {
-    Options readerOptions;
-    {
-        readerOptions.add<std::string>("filename", m_inputFile);
-        readerOptions.add<bool>("debug", isDebug());
-        readerOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
 
-        if (!m_input_srs.empty())
-        {
-            readerOptions.add<std::string>("spatialreference", m_input_srs.getWKT());
-        }
+    if (isDebug())
+    {
+        readerOptions.add<bool>("debug", true);
+        boost::uint32_t verbosity(getVerboseLevel());
+        if (!verbosity)
+            verbosity = 1;
+        
+        readerOptions.add<boost::uint32_t>("verbose", verbosity);
+        readerOptions.add<std::string>("log", "STDERR");
     }
 
-    Options writerOptions;
-    {
-        writerOptions.add<std::string>("filename", m_outputFile);
-        writerOptions.add<bool>("debug", isDebug());
-        writerOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
-
-        if (!m_input_srs.empty())
-        {
-            writerOptions.add<std::string>("spatialreference", m_input_srs.getWKT());
-        }
-
-        if (m_bCompress)
-        {
-            writerOptions.add<bool>("compression", true);
-        }
-
-        if (m_chunkSize != 0)
-        {
-            writerOptions.add<boost::uint32_t>("chunk_size", m_chunkSize);
-        }
-    }
 
     Stage* reader_stage = AppSupport::makeReader(readerOptions);
     
@@ -283,9 +266,72 @@ int Pc2Pc::execute()
         
         final_stage = next_stage;
     }
-    
+
     if (final_stage == 0) 
         final_stage = reader_stage;
+    
+    return final_stage;    
+
+}
+
+void Pc2Pc::forwardMetadata(Options& options, Metadata metadata)
+{
+    // boost::property_tree::ptree::const_iterator m;
+    // Metadata mdata = metadata.getMetadata("drivers.las.reader");
+    // boost::property_tree::ptree const& entries = mdata.toPTree();
+    // Option metadata_opt;
+    // boost::property_tree::xml_parser::write_xml(std::cout, entries);
+    // for (m = entries.begin(); m != entries.end(); ++m)
+    // {
+    //     std::string const& name = m->first;
+    //     std::string value = m->second.get_value<std::string>();
+    // }            
+
+}
+
+
+int Pc2Pc::execute()
+{
+    Options readerOptions;
+    {
+        readerOptions.add<std::string>("filename", m_inputFile);
+        readerOptions.add<bool>("debug", isDebug());
+        readerOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
+        if (!m_input_srs.empty())
+        {
+            readerOptions.add<std::string>("spatialreference", m_input_srs.getWKT());
+        }
+    }
+
+    Options writerOptions;
+    {
+        writerOptions.add<std::string>("filename", m_outputFile);
+        writerOptions.add<bool>("debug", isDebug());
+        writerOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
+
+        if (!m_input_srs.empty())
+        {
+            writerOptions.add<std::string>("spatialreference", m_input_srs.getWKT());
+        }
+
+        if (m_bCompress)
+        {
+            writerOptions.add<bool>("compression", true);
+        }
+
+        if (m_chunkSize != 0)
+        {
+            writerOptions.add<boost::uint32_t>("chunk_size", m_chunkSize);
+        }
+        if (m_bForwardMetadata)
+        {
+            writerOptions.add<bool>("forward_metadata", true);
+        }
+
+    }
+
+    
+    Stage* final_stage = makeReader(readerOptions);    
     
     Writer* writer = AppSupport::makeWriter(writerOptions, *final_stage);
 
