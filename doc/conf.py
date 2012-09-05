@@ -129,7 +129,7 @@ html_theme_options = {
     'github_repo': 'PDAL',
     'twitter_username': 'pointcloudpipe',
     'home_url': 'http://pointcloud.org',
-    'disqus_shortname': 'scotchmedia',
+    'disqus_shortname': 'pdal',
 }
 
 # Add any paths that contain custom themes here, relative to this directory.
