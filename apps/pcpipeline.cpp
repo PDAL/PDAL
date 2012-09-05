@@ -128,6 +128,7 @@ int PcPipeline::execute()
 
     if (!manager.isWriterPipeline())
         throw pdal_error("This pipeline does not have a writer, unable to execute");
+        
     manager.getWriter()->initialize();
     
     if (!m_validate) manager.getWriter()->write(m_numPointsToWrite, m_numSkipPoints);
