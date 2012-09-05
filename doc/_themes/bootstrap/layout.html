@@ -124,7 +124,7 @@
 {%- block header %}
 
     <div class="navbar navbar-static-top">
-        <div class="row">
+        <div class="navbar-inner">
             <div class="container">
 
                 {%- block headerlogo %}
@@ -141,42 +141,44 @@
                 {%- endblock %}
 
                 {%- block relbar1 %}{{ relbar() }}{% endblock %}
+
+
+                <ul class="quick-links">
+                    <li>
+                        <a href="{{ pathto('docs') }}" title="Documentation">Docs</a> 
+                    </li>
+                    <li class="divider">&middot;</li>
+                    <li>
+                        <a href="https://github.com/{{ theme_github_user }}/{{ theme_github_repo }}/">github</a>
+                    </li>
+                    <li class="divider">&middot;</li>
+                    <li>
+                        <a href="https://github.com/{{ theme_github_user }}/{{ theme_github_repo }}/issues">Bugs</a>
+                    </li>
+                    <li class="divider">&middot;</li>
+                    <li>
+                        <a href="{{ pathto('faq') }}" title="FAQ">FAQ</a> 
+                    </li>
+                    <li class="divider">&middot;</li>
+
+                    <li>
+                        <a href="{{ pathto('download') }}" title="Home">Download</a>
+                    </li>
+                    <li class="divider">&middot;</li>
+
+                    <li>
+                        <a href="{{ pathto('community') }}" title="Mailing Lists">Mailing Lists</a>
+                    </li>
+
+                    <li class="plusone-container">
+                        <g:plusone size="medium"></g:plusone>
+                    </li>
+                </ul>
+
             </div>
         </div>
     </div>
 {% endblock %}
-
-<ul class="quick-links">
-    <li>
-        <a href="{{ pathto('docs') }}" title="Documentation">Docs</a> 
-    </li>
-    <li class="divider">&middot;</li>
-    <li>
-        <a href="https://github.com/{{ theme_github_user }}/{{ theme_github_repo }}/">github</a>
-    </li>
-    <li class="divider">&middot;</li>
-    <li>
-        <a href="https://github.com/{{ theme_github_user }}/{{ theme_github_repo }}/issues">Bugs</a>
-    </li>
-    <li class="divider">&middot;</li>
-    <li>
-        <a href="{{ pathto('faq') }}" title="FAQ">FAQ</a> 
-    </li>
-    <li class="divider">&middot;</li>
-
-    <li>
-        <a href="{{ pathto('download') }}" title="Home">Download</a>
-    </li>
-    <li class="divider">&middot;</li>
-
-    <li>
-        <a href="{{ pathto('community') }}" title="Mailing Lists">Mailing Lists</a>
-    </li>
-
-    <li class="plusone-container">
-        <g:plusone size="medium"></g:plusone>
-    </li>
-</ul>
 
 {%- block content %}
     {%- block sidebar1 %} {# possible location for sidebar #} {% endblock %}
