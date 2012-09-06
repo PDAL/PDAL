@@ -238,7 +238,7 @@ void ShellScriptCallback::callback()
     else if (currPerc >= m_lastMajorPerc + 10.0)
     {
         std::string output;
-        int stat = pdal::Utils::run_shell_command(m_command, output);
+        int stat = pdal::Utils::run_shell_command(m_command + " " + boost::lexical_cast<std::string>(static_cast<int>(currPerc)), output);
     }
     else if (currPerc >= m_lastMinorPerc + 2.0)
     {
