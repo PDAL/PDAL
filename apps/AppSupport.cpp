@@ -160,9 +160,9 @@ pdal::Writer* AppSupport::makeWriter(pdal::Options& options, pdal::Stage& stage)
 }
 
 
-PercentageCallback::PercentageCallback()
-    : m_lastMajorPerc(-10.0)
-    , m_lastMinorPerc(-2.0)
+PercentageCallback::PercentageCallback(double major, double minor)
+    : m_lastMajorPerc(-1 * major)
+    , m_lastMinorPerc(-1 * minor)
     , m_done(false)
 {
     return;
@@ -177,7 +177,7 @@ void PercentageCallback::callback()
     
     if (pdal::Utils::compare_distance<double>(currPerc, 100.0))
     {
-        std::cerr << ".100" << std::endl;
+        std::cerr << "100" << std::endl;
         m_done = true;
     }
     else if (currPerc >= m_lastMajorPerc + 10.0)
@@ -195,6 +195,56 @@ void PercentageCallback::callback()
     return;
 }
 
+ShellScriptCallback::ShellScriptCallback(std::vector<std::string> const& command)
+{
+    double major(10.0);
+    double minor(2.0);
+    
+    if (!command.size())
+        m_command = "";
+    else
+    {
+        m_command = command[0];
+
+        if (command.size() == 3)
+        {
+            major = boost::lexical_cast<double>(command[1]);
+            minor = boost::lexical_cast<double>(command[2]);
+        } 
+        else if (command.size() == 2)
+        {
+            major = boost::lexical_cast<double>(command[1]);
+        }
+    }
+
+    PercentageCallback(major, minor);
+
+    return;
+}
+
+
+void ShellScriptCallback::callback()
+{
+    if (m_done) return;
+
+    double currPerc = getPercentComplete();
+    
+    if (pdal::Utils::compare_distance<double>(currPerc, 100.0))
+    {
+        m_done = true;
+    }
+    else if (currPerc >= m_lastMajorPerc + 10.0)
+    {
+        std::string output;
+        int stat = pdal::Utils::run_shell_command(m_command, output);
+    }
+    else if (currPerc >= m_lastMinorPerc + 2.0)
+    {
+        m_lastMinorPerc = currPerc;
+    }
+
+    return;
+}
 
 HeartbeatCallback::HeartbeatCallback()
 {

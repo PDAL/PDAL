@@ -40,7 +40,7 @@
 #include <pdal/GlobalEnvironment.hpp>
 
 #include "Application.hpp"
-
+#include <vector>
 using namespace pdal;
 namespace po = boost::program_options;
 
@@ -314,7 +314,7 @@ void Application::addBasicSwitchSet()
         ("timer", po::value<bool>(&m_showTime)->zero_tokens()->implicit_value(true), "Show execution time")
         ("stdin,s", po::value<bool>(&m_usestdin)->zero_tokens()->implicit_value(true), "Read pipeline XML from stdin")
         ("chunk_size", po::value<boost::uint32_t>(&m_chunkSize), "Size of read buffer")
-
+        ("heartbeat", po::value< std::vector<std::string> >(&m_heartbeat_shell_command), "Shell command to run for every progress heartbeat")
         ;
 
     addSwitchSet(basic_options);

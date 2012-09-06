@@ -77,9 +77,9 @@ private:
 class PercentageCallback : public pdal::UserCallback
 {
 public:
-    PercentageCallback();
+    PercentageCallback(double major=10.0, double minor=2.0);
     virtual void callback();
-private:
+protected:
     double m_lastMajorPerc;
     double m_lastMinorPerc;
     bool m_done;
@@ -92,6 +92,15 @@ public:
     HeartbeatCallback();
     virtual void callback();
 private:
+};
+
+class ShellScriptCallback : public PercentageCallback
+{
+public:
+    ShellScriptCallback(std::vector<std::string> const& command);
+    virtual void callback();
+private:
+    std::string m_command;
 };
 
 #endif

@@ -343,10 +343,30 @@ int Pc2Pc::execute()
     writer->initialize();
 
     const boost::uint64_t numPointsToRead = final_stage->getNumPoints();
-    boost::scoped_ptr<pdal::UserCallback> callback((numPointsToRead == 0) ? 
-        (pdal::UserCallback*)(new HeartbeatCallback) :
-        (pdal::UserCallback*)(new PercentageCallback));
-    writer->setUserCallback(callback.get());
+    
+    if (m_numPointsToWrite == 0)
+        m_numPointsToWrite = numPointsToRead;
+        
+    std::cerr << "Requested to read " << numPointsToRead << " points" << std::endl;
+    std::cerr << "Requested to write " << m_numPointsToWrite << " points" << std::endl;
+    
+    pdal::UserCallback* callback;
+    if (m_numPointsToWrite == 0)
+    {
+        if (!getProgressShellCommand().size())
+            callback = static_cast<pdal::UserCallback*>(new HeartbeatCallback);
+        else
+            callback = static_cast<pdal::UserCallback*>(new ShellScriptCallback(getProgressShellCommand()));
+    }
+    else
+    {
+        if (!getProgressShellCommand().size())
+            callback = static_cast<pdal::UserCallback*>(new PercentageCallback);
+        else
+            callback = static_cast<pdal::UserCallback*>(new ShellScriptCallback(getProgressShellCommand()));
+        
+    }
+    writer->setUserCallback(callback);
 
     const boost::uint64_t numPointsRead = writer->write(m_numPointsToWrite, m_numSkipPoints);
 

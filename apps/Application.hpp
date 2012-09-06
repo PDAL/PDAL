@@ -103,8 +103,9 @@ protected:
     void addSwitchSet(boost::program_options::options_description* options);
     void addPositionalSwitch(const char* name, int max_count);
 
-
-
+    void setProgressShellCommand(std::vector<std::string> const& command) { m_heartbeat_shell_command = command; }
+    std::vector<std::string> getProgressShellCommand() { return m_heartbeat_shell_command; }
+    
 private:
     int innerRun();
     void parseSwitches();
@@ -126,7 +127,8 @@ private:
     char** m_argv;
     const std::string m_appName;
     bool m_hardCoreDebug;
-
+    std::vector<std::string> m_heartbeat_shell_command;
+    
     std::vector<boost::program_options::options_description*> m_options;
     boost::program_options::positional_options_description m_positionalOptions;
     boost::program_options::variables_map m_variablesMap;
