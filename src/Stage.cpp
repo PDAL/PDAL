@@ -111,7 +111,14 @@ void Stage::setSchema(const Schema& schema)
 
 boost::uint64_t Stage::getNumPoints() const
 {
-    return m_numPoints;
+    try
+    {
+        return getPrevStage().getNumPoints();
+    } catch (pdal::internal_error const&)
+    {
+        return m_numPoints;
+    }
+    
 }
 
 
