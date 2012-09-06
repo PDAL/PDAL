@@ -197,8 +197,8 @@ void PercentageCallback::callback()
 
 ShellScriptCallback::ShellScriptCallback(std::vector<std::string> const& command)
 {
-    double major(10.0);
-    double minor(2.0);
+    double major_tick(10.0);
+    double minor_tick(2.0);
     
     if (!command.size())
     {
@@ -210,16 +210,16 @@ ShellScriptCallback::ShellScriptCallback(std::vector<std::string> const& command
 
         if (command.size() == 3)
         {
-            major = boost::lexical_cast<double>(command[1]);
-            minor = boost::lexical_cast<double>(command[2]);
+            major_tick = boost::lexical_cast<double>(command[1]);
+            minor_tick = boost::lexical_cast<double>(command[2]);
         } 
         else if (command.size() == 2)
         {
-            major = boost::lexical_cast<double>(command[1]);
+            major_tick = boost::lexical_cast<double>(command[1]);
         }
     }
 
-    PercentageCallback(major, minor);
+    PercentageCallback(major_tick, minor_tick);
 
     return;
 }
