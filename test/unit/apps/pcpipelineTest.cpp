@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(pcpipelineTest_no_input)
     const std::string cmd = appName();
 
     std::string output;
-    int stat = Support::run_command(cmd, output);
+    int stat = pdal::Utils::run_shell_command(cmd, output);
     BOOST_CHECK_EQUAL(stat, 1);
 
     const std::string expected = "Usage error: input file name required";
@@ -74,10 +74,10 @@ BOOST_AUTO_TEST_CASE(pcpipelineTest_test_common_opts)
     const std::string cmd = appName();
 
     std::string output;
-    int stat = Support::run_command(cmd + " -h", output);
+    int stat = pdal::Utils::run_shell_command(cmd + " -h", output);
     BOOST_CHECK_EQUAL(stat, 0);
 
-    stat = Support::run_command(cmd + " --version", output);
+    stat = pdal::Utils::run_shell_command(cmd + " --version", output);
     BOOST_CHECK_EQUAL(stat, 0);
 
     return;

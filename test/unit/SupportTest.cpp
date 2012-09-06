@@ -224,7 +224,7 @@ BOOST_AUTO_TEST_CASE(test_run_command)
     const std::string cmd = "echo foo";
 
     std::string output;
-    const int stat = Support::run_command(cmd, output);
+    const int stat = pdal::Utils::run_shell_command(cmd, output);
 
     BOOST_CHECK_EQUAL(output.substr(0, 3), "foo");
     BOOST_CHECK_EQUAL(stat, 0);

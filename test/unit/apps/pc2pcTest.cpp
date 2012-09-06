@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(pc2pcTest_test_no_input)
     const std::string cmd = appName();
 
     std::string output;
-    int stat = Support::run_command(cmd, output);
+    int stat = pdal::Utils::run_shell_command(cmd, output);
     BOOST_CHECK_EQUAL(stat, 1);
 
     const std::string expected = "Usage error: --input";
@@ -77,10 +77,10 @@ BOOST_AUTO_TEST_CASE(pc2pcTest_test_common_opts)
     const std::string cmd = appName();
 
     std::string output;
-    int stat = Support::run_command(cmd + " -h", output);
+    int stat = pdal::Utils::run_shell_command(cmd + " -h", output);
     BOOST_CHECK_EQUAL(stat, 0);
 
-    stat = Support::run_command(cmd + " --version", output);
+    stat = pdal::Utils::run_shell_command(cmd + " --version", output);
     BOOST_CHECK_EQUAL(stat, 0);
 
     return;
@@ -130,7 +130,7 @@ BOOST_AUTO_TEST_CASE(pc2pc_test_switches)
     // Instead, here we just check certain rough characteristics of the outputted file.
 
     // do --input and --output work?
-    stat = Support::run_command(cmd + " --input=" + inputLas + " --output=" + outputLas, output);
+    stat = pdal::Utils::run_shell_command(cmd + " --input=" + inputLas + " --output=" + outputLas, output);
     BOOST_CHECK_EQUAL(stat, 0);
     BOOST_CHECK(fileIsOkay(outputLas));
     BOOST_CHECK(!fileIsCompressed(outputLas));
@@ -138,7 +138,7 @@ BOOST_AUTO_TEST_CASE(pc2pc_test_switches)
 
 #ifdef PDAL_HAVE_LASZIP
     // does --compress make a compressed file?
-    stat = Support::run_command(cmd + " --input=" + inputLas + " --output=" + outputLas + " --compress", output);
+    stat = pdal::Utils::run_shell_command(cmd + " --input=" + inputLas + " --output=" + outputLas + " --compress", output);
     BOOST_CHECK_EQUAL(stat, 0);
     BOOST_CHECK(fileIsOkay(outputLas));
     BOOST_CHECK(fileIsCompressed(outputLas));
@@ -146,7 +146,7 @@ BOOST_AUTO_TEST_CASE(pc2pc_test_switches)
 
 #ifdef PDAL_HAVE_LASZIP
     // does "--output foo.laz" make a compressed output?
-    stat = Support::run_command(cmd + " --input=" + inputLas + " --output=" + outputLaz, output);
+    stat = pdal::Utils::run_shell_command(cmd + " --input=" + inputLas + " --output=" + outputLaz, output);
     BOOST_CHECK_EQUAL(stat, 0);
     BOOST_CHECK(fileIsOkay(outputLaz));
     BOOST_CHECK(fileIsCompressed(outputLaz));
@@ -155,7 +155,7 @@ BOOST_AUTO_TEST_CASE(pc2pc_test_switches)
 
 #ifdef PDAL_HAVE_LIBLAS
     // does --liblas work?
-    stat = Support::run_command(cmd + " --input=" + inputLas + " --output=" + outputLas + " --liblas", output);
+    stat = pdal::Utils::run_shell_command(cmd + " --input=" + inputLas + " --output=" + outputLas + " --liblas", output);
     BOOST_CHECK_EQUAL(stat, 0);
     BOOST_CHECK(fileIsOkay(outputLas));
     BOOST_CHECK(!fileIsCompressed(outputLas));
@@ -164,7 +164,7 @@ BOOST_AUTO_TEST_CASE(pc2pc_test_switches)
 #ifdef PDAL_HAVE_LIBLAS
 #ifdef PDAL_HAVE_LASZIP
     // do --liblas and --compress work together?
-    stat = Support::run_command(cmd + " --input=" + inputLas + " --output=" + outputLas + " --compress --liblas", output);
+    stat = pdal::Utils::run_shell_command(cmd + " --input=" + inputLas + " --output=" + outputLas + " --compress --liblas", output);
     BOOST_CHECK_EQUAL(stat, 0);
     BOOST_CHECK(fileIsOkay(outputLas));
     BOOST_CHECK(fileIsCompressed(outputLas));
@@ -173,7 +173,7 @@ BOOST_AUTO_TEST_CASE(pc2pc_test_switches)
 
 #ifdef PDAL_HAVE_GDAL
     // does --a_srs add an SRS?
-    stat = Support::run_command(cmd + " --input=" + inputLas + " --output=" + outputLas + " --a_srs=epsg:4326", output);
+    stat = pdal::Utils::run_shell_command(cmd + " --input=" + inputLas + " --output=" + outputLas + " --a_srs=epsg:4326", output);
     BOOST_CHECK_EQUAL(stat, 0);
     BOOST_CHECK(fileIsOkay(outputLas));
     BOOST_CHECK(fileHasSrs(outputLas));

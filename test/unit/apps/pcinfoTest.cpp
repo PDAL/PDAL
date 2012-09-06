@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE(pcinfoTest_no_input)
     const std::string cmd = appName();
 
     std::string output;
-    int stat = Support::run_command(cmd, output);
+    int stat = pdal::Utils::run_shell_command(cmd, output);
     BOOST_CHECK_EQUAL(stat, 1);
 
     const std::string expected = "Usage error: no action option specified";
@@ -71,10 +71,10 @@ BOOST_AUTO_TEST_CASE(pcinfo_test_common_opts)
     const std::string cmd = appName();
 
     std::string output;
-    int stat = Support::run_command(cmd + " -h", output);
+    int stat = pdal::Utils::run_shell_command(cmd + " -h", output);
     BOOST_CHECK_EQUAL(stat, 0);
 
-    stat = Support::run_command(cmd + " --version", output);
+    stat = pdal::Utils::run_shell_command(cmd + " --version", output);
     BOOST_CHECK_EQUAL(stat, 0);
 
     return;
@@ -94,26 +94,26 @@ BOOST_AUTO_TEST_CASE(pcinfo_test_switches)
     int stat = 0;
 
     // does the default work?
-    stat = Support::run_command(cmd + " " + inputLas, output);
+    stat = pdal::Utils::run_shell_command(cmd + " " + inputLas, output);
     BOOST_CHECK_EQUAL(stat, 1);
     expected = "Usage error: no action option specified";
     BOOST_CHECK_EQUAL(output.substr(0, expected.length()), expected);
 
     // does --input work?
-    stat = Support::run_command(cmd + " --input=" + inputLas, output);
+    stat = pdal::Utils::run_shell_command(cmd + " --input=" + inputLas, output);
     BOOST_CHECK_EQUAL(stat, 1);
     expected = "Usage error: no action option specified";
     BOOST_CHECK_EQUAL(output.substr(0, expected.length()), expected);
 
     // does -i work?
-    stat = Support::run_command(cmd + " -i " + inputLas, output);
+    stat = pdal::Utils::run_shell_command(cmd + " -i " + inputLas, output);
     BOOST_CHECK_EQUAL(stat, 1);
     expected = "Usage error: no action option specified";
     BOOST_CHECK_EQUAL(output.substr(0, expected.length()), expected);
 
 #ifdef PDAL_HAVE_LASZIP
     // does it work for .laz?
-    stat = Support::run_command(cmd + " " + inputLaz, output);
+    stat = pdal::Utils::run_shell_command(cmd + " " + inputLaz, output);
     BOOST_CHECK_EQUAL(stat, 1);
     expected = "Usage error: no action option specified";
     BOOST_CHECK_EQUAL(output.substr(0, expected.length()), expected);
@@ -140,7 +140,7 @@ BOOST_AUTO_TEST_CASE(pcinfo_test_dumps)
 
     std::string pt_test = Support::temppath("pcinfo_point.txt");
     command << cmd + " --point=1 " + inputLas + " > " + pt_test;
-    stat = Support::run_command(command.str(), output);
+    stat = pdal::Utils::run_shell_command(command.str(), output);
     BOOST_CHECK_EQUAL(stat, 0);
     were_equal = Support::compare_text_files(pt_test, Support::datapath("apps/pcinfo_point.txt"));
     BOOST_CHECK(were_equal);
@@ -154,7 +154,7 @@ BOOST_AUTO_TEST_CASE(pcinfo_test_dumps)
 
     std::string stats_test = Support::temppath("pcinfo_stats.txt");
     command << cmd + " --stats " + inputLas + " --seed 1234" +" > " + stats_test; 
-    stat = Support::run_command(command.str(), output);
+    stat = pdal::Utils::run_shell_command(command.str(), output);
     BOOST_CHECK_EQUAL(stat, 0);
 #if defined(PDAL_PLATFORM_WIN32)
     were_equal = Support::compare_text_files(stats_test, Support::datapath("apps/pcinfo_stats-win32.txt"));
@@ -172,7 +172,7 @@ BOOST_AUTO_TEST_CASE(pcinfo_test_dumps)
 
     std::string schema_test = Support::temppath("pcinfo_schema.txt");
     command << cmd + " --schema " + inputLas +" > " + schema_test;
-    stat = Support::run_command(command.str(), output);
+    stat = pdal::Utils::run_shell_command(command.str(), output);
     BOOST_CHECK_EQUAL(stat, 0);
     were_equal = Support::compare_text_files(schema_test, Support::datapath("apps/pcinfo_schema.txt"));
     BOOST_CHECK(were_equal);
@@ -186,7 +186,7 @@ BOOST_AUTO_TEST_CASE(pcinfo_test_dumps)
 
     std::string stage_test = Support::temppath("pcinfo_stage.txt");
     command << cmd + " --stage " + inputLas +" > " + stage_test;
-    stat = Support::run_command(command.str(), output);
+    stat = pdal::Utils::run_shell_command(command.str(), output);
     BOOST_CHECK_EQUAL(stat, 0);
 
 #ifdef PDAL_HAVE_GDAL

@@ -39,6 +39,7 @@
 
 #include <pdal/Bounds.hpp>
 #include <boost/cstdint.hpp>
+#include <pdal/Utils.hpp>
 
 namespace pdal
 {
@@ -121,7 +122,7 @@ public:
     // executes "cmd" via popen, copying stdout into output and returning the status code
     //
     // note: under windows, all "/" characrters in cmd will be converted to "\\" for you
-    static int run_command(const std::string& cmd, std::string& output);
+    // static int run_command(const std::string& cmd, std::string& output);
     
     static std::string replaceAll(std::string result, 
                                            const std::string& replaceWhat, 

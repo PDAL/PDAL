@@ -187,7 +187,11 @@ public:
     static void* getDLLSymbol(std::string const& library, std::string const& name);
     static std::string base64_encode(std::vector<boost::uint8_t> const& bytes);
     static std::vector<boost::uint8_t> base64_decode(std::string const& input);
-
+    
+    static FILE* portable_popen(const std::string& command, const std::string& mode);
+    static int portable_pclose(FILE* fp);
+    static int run_shell_command(const std::string& cmd, std::string& output);
+    
 private:
     template<typename T>
     static inline char* as_buffer(T& data)
