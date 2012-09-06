@@ -201,7 +201,9 @@ ShellScriptCallback::ShellScriptCallback(std::vector<std::string> const& command
     double minor(2.0);
     
     if (!command.size())
-        m_command = "";
+    {
+        m_command = "";        
+    }
     else
     {
         m_command = command[0];
