@@ -396,8 +396,21 @@ void Writer::writeBufferBegin(PointBuffer const& data)
             << "1." << minor
             << " from metadata " << std::endl;
 
-        boost::uint32_t year = getMetadataOption<boost::uint32_t>(getOptions(), m, "creation_year", 0);
-        boost::uint32_t day = getMetadataOption<boost::uint32_t>(getOptions(), m, "creation_doy", 0);
+
+        std::time_t now;
+        std::time(&now);
+        std::tm* ptm = std::gmtime(&now);
+        boost::uint32_t day(0);
+        boost::uint32_t year(0);
+        if (0 != ptm)
+        {
+            day = static_cast<boost::uint16_t>(ptm->tm_yday);
+            year = static_cast<boost::uint16_t>(ptm->tm_year + 1900);
+        }
+
+        year = getMetadataOption<boost::uint32_t>(getOptions(), m, "creation_year", year);
+        day = getMetadataOption<boost::uint32_t>(getOptions(), m, "creation_doy", day);
+
         setDate(static_cast<boost::uint16_t>(day), static_cast<boost::uint16_t>(year));
         log()->get(logDEBUG) << "Setting date to format " 
                            << day << "/"
