@@ -141,7 +141,7 @@ void Reader::initialize()
 {
     pdal::Reader::initialize();
 
-    boost::uint64_t offset, length;
+    boost::uint64_t offset(0), length(0);
 
     Metadata nitf_metadata(getName());
     {
