@@ -130,7 +130,34 @@ int PcPipeline::execute()
         throw pdal_error("This pipeline does not have a writer, unable to execute");
         
     manager.getWriter()->initialize();
+
+
+    const boost::uint64_t numPointsToRead = manager.getStage()->getNumPoints();
     
+    if (m_numPointsToWrite == 0)
+        m_numPointsToWrite = numPointsToRead;
+        
+    std::cerr << "Requested to read " << numPointsToRead << " points" << std::endl;
+    std::cerr << "Requested to write " << m_numPointsToWrite << " points" << std::endl;
+    
+    pdal::UserCallback* callback;
+    if (m_numPointsToWrite == 0)
+    {
+        if (!getProgressShellCommand().size())
+            callback = static_cast<pdal::UserCallback*>(new HeartbeatCallback);
+        else
+            callback = static_cast<pdal::UserCallback*>(new ShellScriptCallback(getProgressShellCommand()));
+    }
+    else
+    {
+        if (!getProgressShellCommand().size())
+            callback = static_cast<pdal::UserCallback*>(new PercentageCallback);
+        else
+            callback = static_cast<pdal::UserCallback*>(new ShellScriptCallback(getProgressShellCommand()));
+        
+    }
+
+    manager.getWriter()->setUserCallback(callback);
     if (!m_validate) manager.getWriter()->write(m_numPointsToWrite, m_numSkipPoints);
 
     if (m_pipelineFile.size() > 0)
