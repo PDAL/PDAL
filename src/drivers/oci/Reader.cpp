@@ -609,14 +609,28 @@ void IteratorBase::fillUserBuffer(PointBuffer& user_buffer)
     schema::index_by_index::size_type i(0);
     for (i = 0; i < idx.size(); ++i)
     {
-        copyOracleData( *m_oracle_buffer, 
-                        user_buffer, 
-                        idx[i], 
-                        m_buffer_position, 
-                        user_buffer.getNumPoints(), 
-                        (std::min)(numOraclePoints,numUserSpace));
+            copyOracleData( *m_oracle_buffer, 
+                            user_buffer, 
+                            idx[i], 
+                            m_buffer_position, 
+                            user_buffer.getNumPoints(), 
+                            (std::min)(numOraclePoints,numUserSpace));
+
     }
 
+    bool bSetPointSourceId = getOptions().getValueOrDefault<bool>("populate_pointsourceid", false);
+    if (bSetPointSourceId)
+    {
+        Dimension const* point_source_field = user_buffer.getDimensionOptional("PointSourceId").get();
+        if (point_source_field)
+        {
+            for (boost::uint32_t i = 0; i < (std::min)(numOraclePoints,numUserSpace), ++i)
+            {
+                user_buffer.setField(*point_source_field, i, m_active_cloud_id);
+            }            
+        }
+    }
+        
     if (numOraclePoints > numUserSpace)
         m_buffer_position = m_buffer_position + numUserSpace;
     else if (numOraclePoints < numUserSpace)
