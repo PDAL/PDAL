@@ -71,6 +71,11 @@ Colorization::Colorization(Stage& prevStage, const Options& options)
 
 Colorization::~Colorization()
 {
+    if (m_ds != 0)
+        GDALClose(m_ds);
+        
+    GDALDestroyDriverManager();	
+    
     if (m_gdal_debug)
         delete m_gdal_debug;
 }
@@ -90,9 +95,9 @@ void Colorization::initialize()
     std::string filename = getOptions().getValueOrThrow<std::string>("raster");
 
     log()->get(logDEBUG) << "Using " << filename << " for raster" << std::endl;
-    m_ds = colorization::DataSourcePtr(GDALOpen(filename.c_str(), GA_ReadOnly), GDALSourceDeleter());
+    m_ds = GDALOpen(filename.c_str(), GA_ReadOnly);
 
-    if (GDALGetGeoTransform(m_ds.get(), &(m_forward_transform.front())) != CE_None)
+    if (GDALGetGeoTransform(m_ds, &(m_forward_transform.front())) != CE_None)
     {
         throw pdal_error("unable to fetch forward geotransform for raster!");
     }
@@ -260,7 +265,7 @@ bool Colorization::getPixelAndLinePosition(double x,
         boost::array<double, 6> const& inverse,
         boost::int32_t& pixel,
         boost::int32_t& line,
-        colorization::DataSourcePtr ds)
+        void* ds)
 {
 #ifdef PDAL_HAVE_GDAL
     pixel = (boost::int32_t) std::floor(
@@ -273,8 +278,8 @@ bool Colorization::getPixelAndLinePosition(double x,
                + inverse[5] * y);
 
     if (pixel < 0 || line < 0
-            || pixel >= GDALGetRasterXSize(ds.get())
-            || line  >= GDALGetRasterYSize(ds.get())
+            || pixel >= GDALGetRasterXSize(ds)
+            || line  >= GDALGetRasterYSize(ds)
        )
     {
         // The x, y is not coincident with this raster
@@ -294,7 +299,7 @@ boost::uint32_t Colorization::readBufferImpl(PointBuffer& data)
 
     boost::array<double, 6> inverse = m_stage.getInverseTransform();
 
-    colorization::DataSourcePtr ds = m_stage.getDataSource();
+    void* ds = m_stage.getDataSource();
 
     boost::int32_t pixel(0);
     boost::int32_t line(0);
@@ -317,7 +322,7 @@ boost::uint32_t Colorization::readBufferImpl(PointBuffer& data)
         for (std::vector<boost::int32_t>::size_type i = 0;
                 i < m_bands.size(); i++)
         {
-            GDALRasterBandH hBand = GDALGetRasterBand(ds.get(), m_bands[i]);
+            GDALRasterBandH hBand = GDALGetRasterBand(ds, m_bands[i]);
             if (hBand == NULL)
             {
                 std::ostringstream oss;

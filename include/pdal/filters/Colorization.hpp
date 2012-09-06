@@ -101,7 +101,7 @@ public:
     {
         return m_inverse_transform;
     }
-    colorization::DataSourcePtr getDataSource() const
+    void* getDataSource() const
     {
         return m_ds;
     }
@@ -117,7 +117,7 @@ public:
 private:
     void collectOptions();
 
-    colorization::DataSourcePtr m_ds;
+    void* m_ds;
     pdal::gdal::Debug* m_gdal_debug;
 
     std::map<std::string, boost::uint32_t> m_band_map;
@@ -161,7 +161,7 @@ private:
                                  boost::array<double, 6> const& inverse,
                                  boost::int32_t& pixel,
                                  boost::int32_t& line,
-                                 colorization::DataSourcePtr ds);
+                                 void* ds);
 
     Dimension const* m_dimX;
     Dimension const* m_dimY;
