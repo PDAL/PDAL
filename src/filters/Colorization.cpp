@@ -69,6 +69,11 @@ Colorization::Colorization(Stage& prevStage, const Options& options)
     return;
 }
 
+Colorization::~Colorization()
+{
+    if (m_gdal_debug)
+        delete m_gdal_debug;
+}
 void Colorization::initialize()
 {
     Filter::initialize();
@@ -78,7 +83,7 @@ void Colorization::initialize()
 #ifdef PDAL_HAVE_GDAL
     GDALAllRegister();
 
-    m_gdal_debug = boost::shared_ptr<pdal::gdal::Debug>(new pdal::gdal::Debug(isDebug(), log()));
+    m_gdal_debug = new pdal::gdal::Debug(isDebug(), log());
     m_forward_transform.assign(0.0);
     m_inverse_transform.assign(0.0);
 

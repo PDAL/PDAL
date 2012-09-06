@@ -73,6 +73,7 @@ public:
     SET_STAGE_NAME("filters.colorization", "Fetch color information from a GDAL datasource")
 
     Colorization(Stage& prevStage, const Options&);
+    ~Colorization();
 
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
@@ -117,7 +118,7 @@ private:
     void collectOptions();
 
     colorization::DataSourcePtr m_ds;
-    boost::shared_ptr<pdal::gdal::Debug> m_gdal_debug;
+    pdal::gdal::Debug* m_gdal_debug;
 
     std::map<std::string, boost::uint32_t> m_band_map;
     std::map<std::string, double> m_scale_map;
