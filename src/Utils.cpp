@@ -50,6 +50,8 @@
 #define DLL_LOAD_WINDOWS
 #endif
 
+#include <stdio.h>
+
 namespace pdal
 {
 
