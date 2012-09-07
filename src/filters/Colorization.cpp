@@ -96,6 +96,8 @@ void Colorization::initialize()
 
     log()->get(logDEBUG) << "Using " << filename << " for raster" << std::endl;
     m_ds = GDALOpen(filename.c_str(), GA_ReadOnly);
+    if (!m_ds)
+        throw pdal_error("Unable to open GDAL datasource!");
 
     if (GDALGetGeoTransform(m_ds, &(m_forward_transform.front())) != CE_None)
     {
