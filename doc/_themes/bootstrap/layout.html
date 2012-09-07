@@ -217,16 +217,6 @@
                 {% trans last_updated=last_updated|e %}Last updated
                     on {{ last_updated }}.{% endtrans %}
             {%- endif %}
-            {%- if show_sphinx %}
-                {% trans sphinx_version=sphinx_version|e %}Created using <a
-                        href="http://sphinx.pocoo.org/">Sphinx</a> {{ sphinx_version }}
-                    .{% endtrans %}
-                Theme <a href="https://github.com/scotch/sphinx-bootstrap">Sphinx-Bootstrap</a>
-                adapted from
-                <a href="http://twitter.github.com/bootstrap/">Twitter's
-                    Bootstrap</a> by <a href="http://www.scotchmedia.com">Scotch
-                Media</a>
-            {%- endif %}
         </div>
     </div>
 {%- endblock %}
