@@ -618,18 +618,18 @@ void IteratorBase::fillUserBuffer(PointBuffer& user_buffer)
 
     }
 
-    bool bSetPointSourceId = getOptions().getValueOrDefault<bool>("populate_pointsourceid", false);
-    if (bSetPointSourceId)
-    {
-        Dimension const* point_source_field = user_buffer.getDimensionOptional("PointSourceId").get();
-        if (point_source_field)
-        {
-            for (boost::uint32_t i = 0; i < (std::min)(numOraclePoints,numUserSpace), ++i)
-            {
-                user_buffer.setField(*point_source_field, i, m_active_cloud_id);
-            }            
-        }
-    }
+    // bool bSetPointSourceId = getOptions().getValueOrDefault<bool>("populate_pointsourceid", false);
+    // if (bSetPointSourceId)
+    // {
+    //     Dimension const* point_source_field = user_buffer.getDimensionOptional("PointSourceId").get();
+    //     if (point_source_field)
+    //     {
+    //         for (boost::uint32_t i = 0; i < (std::min)(numOraclePoints,numUserSpace), ++i)
+    //         {
+    //             user_buffer.setField(*point_source_field, i, m_active_cloud_id);
+    //         }            
+    //     }
+    // }
         
     if (numOraclePoints > numUserSpace)
         m_buffer_position = m_buffer_position + numUserSpace;
