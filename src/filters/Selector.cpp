@@ -40,6 +40,8 @@
 #include <map>
 
 #include <boost/algorithm/string.hpp>
+#include <boost/uuid/string_generator.hpp>
+#include <boost/uuid/random_generator.hpp>
 
 namespace pdal
 {
@@ -111,6 +113,69 @@ void Selector::checkImpedance()
     {
     }
 
+    try
+    {
+        Option create = options.getOption("create");
+        boost::optional<Options const&> create_options = create.getOptions();
+    
+        if (create_options)
+        {
+            std::vector<Option> create_dimensions = create_options->getOptions("dimension");
+            for (i = create_dimensions.begin(); i != create_dimensions.end(); ++i)
+            {
+                Option const& o = *i;
+                boost::optional<Options const&> dim_opts = o.getOptions();
+                
+                if (!dim_opts)
+                    throw pdal_error("create dimension option has no sub options!");
+                Options const& ops = *dim_opts;
+                std::string name;
+                boost::uint32_t size(0);
+                std::string description;
+                std::string interpretation;
+                dimension::id uuid;
+                dimension::id parent_uuid;
+                double offset(0.0);
+                double scale(0.0);
+                double minimum(0.0);
+                double maximum(0.0);
+                EndianType endianness = Endian_Little;
+                
+                name = o.getValue<std::string>();
+                scale = ops.getValueOrDefault<double>("scale", 1.0);
+                offset = ops.getValueOrDefault<double>("offset", 0.0);
+                size = ops.getValueOrDefault<boost::uint32_t>("size", 1);
+                
+                description = ops.getValueOrDefault<std::string>("description", "");
+                interpretation = ops.getValueOrThrow<std::string>("interpretation");
+
+                std::string endy = ops.getValueOrDefault<std::string>("endianness", "little");
+                if (boost::iequals(endy, "big"))
+                    endianness = Endian_Big;
+                
+                uuid = ops.getValueOrDefault<dimension::id>("uuid", boost::uuids::random_generator()());
+                parent_uuid = ops.getValueOrDefault<dimension::id>("parent_uuid",  boost::uuids::nil_uuid());
+
+                minimum = ops.getValueOrDefault<double>("minimum", 0.0);
+                maximum = ops.getValueOrDefault<double>("maximum", 0.0);
+                
+                dimension::Interpretation interp = Dimension::getInterpretation(interpretation);
+
+                Dimension d(name, interp, size, description);
+                d.setUUID(uuid);
+                d.setParent(parent_uuid);
+                d.setNumericScale(scale);
+                d.setNumericOffset(offset);
+                d.setMinimum(minimum);
+                d.setMaximum(maximum);
+                m_createDimensions.push_back(d);
+            }
+        }
+    }
+    catch (option_not_found&)
+    {
+    }
+
     return;
 }
 
@@ -172,6 +237,15 @@ void Selector::alterSchema(PointBuffer& buffer)
     //     }
     // }
     // 
+
+    std::vector<Dimension> const& new_dimensions = m_selectorFilter.getCreatedDimensions();
+    if (new_dimensions.size())
+    {
+        for (std::vector<Dimension>::const_iterator i = new_dimensions.begin(); i != new_dimensions.end(); ++i)
+        {
+            new_schema.appendDimension(*i);
+        }
+    }
 
     schema::Map dimensions = original_schema.getDimensions();
     schema::index_by_index const& dims = dimensions.get<schema::index>();

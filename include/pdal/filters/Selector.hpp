@@ -81,6 +81,7 @@ public:
     inline std::map<std::string, bool> const& getIgnoredMap() const { return m_ignoredMap; }
     
     inline bool doIgnoreUnspecifiedDimensions() const { return m_ignoreDefault; }
+    std::vector<Dimension> const& getCreatedDimensions() const { return m_createDimensions; }
     
 private:
     void checkImpedance();
@@ -91,6 +92,7 @@ private:
     
     std::map<std::string, bool> m_ignoredMap;
     bool m_ignoreDefault;
+    std::vector<Dimension> m_createDimensions;
 };
 
 

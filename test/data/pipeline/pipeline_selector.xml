@@ -24,6 +24,39 @@
                 </Option>
             </Options>
         </Option>
+        <Option name="create">
+            <Options>
+                <Option name="dimension">
+                    Greenish
+                    <Options>
+                        <Option name="type">
+                            uint16_t
+                        </Option>
+                        <Option name="size">
+                            2
+                        </Option>
+                        <Option name="description">
+                            This is the dimensions description
+                        </Option>
+                        <Option name="endianness">
+                            big
+                        </Option>
+                        <Option name="uuid">
+                            1f528897-a723-4a9c-8e5a-cae9b071d0b5
+                        </Option>
+                        <Option name="parent_uuid">
+                            7752759d-5713-48cd-9842-51db350cc979
+                        </Option>
+                        <Option name="scale">
+                            1e-7
+                        </Option>
+                        <Option name="offset">
+                            10.6
+                        </Option>
+                    </Options
+                </Option>
+            </Options>
+        </Option>        
         <Reader type="drivers.las.reader">
             <Option name="filename">
                 ../1.2-with-color.las
