@@ -559,7 +559,7 @@ void Reader::Load()
             properties = properties->next;
         }
 
-        dimension::Interpretation interp = GetDimensionType(interpretation);
+        dimension::Interpretation interp = Dimension::getInterpretation(interpretation);
 
         Dimension d(name, interp, size, description);
         if (uuid.size())
@@ -610,51 +610,6 @@ void Reader::Load()
 
 }
 
-dimension::Interpretation Reader::GetDimensionType(std::string const& interpretation)
-{
-
-    if (boost::iequals(interpretation, "int8_t") ||
-            boost::iequals(interpretation, "int8"))
-        return dimension::SignedInteger;
-
-    if (boost::iequals(interpretation, "uint8_t") ||
-            boost::iequals(interpretation, "uint8"))
-        return dimension::UnsignedInteger;
-
-    if (boost::iequals(interpretation, "int16_t") ||
-            boost::iequals(interpretation, "int16"))
-        return dimension::SignedInteger;
-
-    if (boost::iequals(interpretation, "uint16_t") ||
-            boost::iequals(interpretation, "uint16"))
-        return dimension::UnsignedInteger;
-
-
-    if (boost::iequals(interpretation, "int32_t") ||
-            boost::iequals(interpretation, "int32"))
-        return dimension::SignedInteger;
-
-    if (boost::iequals(interpretation, "uint32_t") ||
-            boost::iequals(interpretation, "uint32"))
-        return dimension::UnsignedInteger;
-
-    if (boost::iequals(interpretation, "int64_t") ||
-            boost::iequals(interpretation, "int64"))
-        return dimension::SignedInteger;
-
-    if (boost::iequals(interpretation, "uint64_t") ||
-            boost::iequals(interpretation, "uint64"))
-        return dimension::UnsignedInteger;
-
-    if (boost::iequals(interpretation, "float"))
-        return dimension::Float;
-
-    if (boost::iequals(interpretation, "double"))
-        return dimension::Float;
-
-
-    return dimension::Undefined;
-}
 
 
 Writer::Writer(pdal::Schema const& schema)

@@ -143,7 +143,6 @@ protected:
 
     void Initialize();
     void Load();
-    dimension::Interpretation GetDimensionType(std::string const& interpretation);
 
 private:
 

@@ -439,6 +439,7 @@ public:
         return output;
     }
     
+    static dimension::Interpretation getInterpretation(std::string const& interpretation_name);
 
     template <class T>
     inline T convert(void* data) const
