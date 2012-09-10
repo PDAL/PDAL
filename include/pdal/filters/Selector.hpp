@@ -75,8 +75,6 @@ public:
     {
         return NULL;
     }
-
-    void processBuffer(const PointBuffer& srcData, PointBuffer& dstData) const;
     
     inline std::map<std::string, bool> const& getIgnoredMap() const { return m_ignoredMap; }
     

@@ -179,13 +179,6 @@ void Selector::checkImpedance()
     return;
 }
 
-
-void Selector::processBuffer(const PointBuffer& /*srcData*/, PointBuffer& /*dstData*/) const
-{
-    return;
-}
-
-
 pdal::StageSequentialIterator* Selector::createSequentialIterator(PointBuffer& buffer) const
 {
     return new pdal::filters::iterators::sequential::Selector(*this, buffer);
@@ -211,7 +204,7 @@ Selector::Selector(const pdal::filters::Selector& filter, PointBuffer& buffer)
     , m_selectorFilter(filter)
 {
     alterSchema(buffer);
-    m_selectorFilter.log()->get(logDEBUG4) << "iterators::sequential alterSchema! " << std::endl;
+    m_selectorFilter.log()->get(logDEBUG4) << "iterator has modified schema" << std::endl;
 
     return;
 }
@@ -219,25 +212,10 @@ Selector::Selector(const pdal::filters::Selector& filter, PointBuffer& buffer)
 void Selector::alterSchema(PointBuffer& buffer)
 {
     Schema const& original_schema = buffer.getSchema();
-
-    Schema new_schema = buffer.getSchema();
     
-    std::map<std::string, bool> const& ignoredMap = m_selectorFilter.getIgnoredMap();
-    // for (std::map<std::string, bool>::const_iterator i = ignoredMap.begin();
-    //     i != ignoredMap.end(); ++i)
-    // {
-    //     boost::optional<Dimension const&> d = original_schema.getDimensionOptional(i->first);
-    //     if (d)
-    //     {
-    //         Dimension d2(*d);
-    //         boost::uint32_t flags = d2.getFlags();
-    //         if (i->second)
-    //             d2.setFlags(flags | dimension::IsIgnored);
-    //         new_schema.setDimension(d2);
-    //     }
-    // }
-    // 
-
+    // Add new dimensions to the schema first in case we wanted to ignore them 
+    // or something silly like that.
+    Schema new_schema = buffer.getSchema();
     std::vector<Dimension> const& new_dimensions = m_selectorFilter.getCreatedDimensions();
     if (new_dimensions.size())
     {
@@ -247,6 +225,7 @@ void Selector::alterSchema(PointBuffer& buffer)
         }
     }
 
+    std::map<std::string, bool> const& ignoredMap = m_selectorFilter.getIgnoredMap();
     schema::Map dimensions = original_schema.getDimensions();
     schema::index_by_index const& dims = dimensions.get<schema::index>();
     for (schema::index_by_index::const_iterator t = dims.begin(); 
@@ -265,9 +244,7 @@ void Selector::alterSchema(PointBuffer& buffer)
                 d2.setFlags(flags | dimension::IsIgnored);
                 new_schema.setDimension(d2);
             }
-        }
-        
-        else { // didn't find it in our map of specified dimensions
+        } else { // didn't find it in our map of specified dimensions
             
             if (m_selectorFilter.doIgnoreUnspecifiedDimensions())
             {
@@ -280,7 +257,6 @@ void Selector::alterSchema(PointBuffer& buffer)
         }
 
     }
-
     buffer = PointBuffer(new_schema, buffer.getCapacity());
 }
 
@@ -288,7 +264,6 @@ void Selector::alterSchema(PointBuffer& buffer)
 boost::uint32_t Selector::readBufferImpl(PointBuffer& buffer)
 {
     const boost::uint32_t numRead = getPrevIterator().read(buffer);
-
     return numRead;
 }
 
