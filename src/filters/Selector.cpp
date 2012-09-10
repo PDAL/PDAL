@@ -147,7 +147,7 @@ void Selector::checkImpedance()
                 size = ops.getValueOrDefault<boost::uint32_t>("size", 1);
                 
                 description = ops.getValueOrDefault<std::string>("description", "");
-                interpretation = ops.getValueOrThrow<std::string>("interpretation");
+                interpretation = ops.getValueOrDefault<std::string>("interpretation", "int32_t");
 
                 std::string endy = ops.getValueOrDefault<std::string>("endianness", "little");
                 if (boost::iequals(endy, "big"))

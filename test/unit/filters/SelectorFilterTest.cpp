@@ -64,17 +64,27 @@ BOOST_AUTO_TEST_CASE(test1)
         BOOST_CHECK_EQUAL(numRead, 1000u);
     }
     
-    // pdal::Schema const& new_schema = data.getSchema();
+    
+    pdal::Schema const& new_schema = data.getSchema();
+    
+    // std::cout << new_schema << std::endl;
+    
+    BOOST_CHECK_EQUAL(new_schema.getDimension("Red").isIgnored(), true);
+    BOOST_CHECK_EQUAL(new_schema.getDimension("Green").isIgnored(), true);
+    BOOST_CHECK_EQUAL(new_schema.getDimension("Blue").isIgnored(), true);
+    
+    // ignore by default is true because not set on the pipeline
+    BOOST_CHECK_EQUAL(new_schema.getDimension("PointSourceId").isIgnored(), true); 
 
-    // FIXME: not done yet
-    // BOOST_CHECK_THROW(new_schema.getDimension("Red"), pdal::dimension_not_found);
-    // BOOST_CHECK_THROW(new_schema.getDimension("Green"), pdal::dimension_not_found);
-    // BOOST_CHECK_THROW(new_schema.getDimension("Blue"), pdal::dimension_not_found);
-    
-    
+    // We explicitly kept X
+    BOOST_CHECK_EQUAL(new_schema.getDimension("X").isIgnored(), false);
+
+    // We created Greenish
+    BOOST_CHECK_EQUAL(new_schema.getDimension("Greenish").isIgnored(), false);
 
     return;
 }
+
 
 
 
