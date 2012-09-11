@@ -217,11 +217,26 @@ void Selector::alterSchema(PointBuffer& buffer)
     // or something silly like that.
     Schema new_schema = buffer.getSchema();
     std::vector<Dimension> const& new_dimensions = m_selectorFilter.getCreatedDimensions();
+    
+    bool bOverwriteExistingDimensions = m_selectorFilter.getOptions().getValueOrDefault<bool>("overwite_existing_dimensions", true);
     if (new_dimensions.size())
     {
         for (std::vector<Dimension>::const_iterator i = new_dimensions.begin(); i != new_dimensions.end(); ++i)
         {
-            new_schema.appendDimension(*i);
+            boost::optional<Dimension const&> old_dim = original_schema.getDimensionOptional(i->getName());
+            bool bFoundDimension(false);
+            if (old_dim)
+                bFoundDimension = true;
+
+            if (!bFoundDimension )
+            {
+                new_schema.appendDimension(*i);
+            } else if (bOverwriteExistingDimensions)
+            {
+                Dimension new_dim(*i);
+                new_dim.setParent(old_dim->getUUID());
+                new_schema.appendDimension(new_dim);
+            }
         }
     }
 

@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Pipeline version="1.0">
     <Filter type="filters.selector">
+        <Option name="overwite_existing_dimensions">
+            false
+        </Option>
         <Option name="keep">
             <Options>
                 <Option name="dimension">
@@ -55,6 +58,35 @@
                         </Option>
                     </Options>
                 </Option>
+                <Option name="dimension">
+                    Green
+                    <Options>
+                        <Option name="type">
+                            uint16_t
+                        </Option>
+                        <Option name="size">
+                            2
+                        </Option>
+                        <Option name="description">
+                            This is the dimensions description
+                        </Option>
+                        <Option name="endianness">
+                            big
+                        </Option>
+                        <Option name="uuid">
+                            aabbc982-17c3-4c18-8c76-e3a9b344af86
+                        </Option>
+                        <Option name="parent_uuid">
+                            7752759d-5713-48cd-9842-51db350cc979
+                        </Option>
+                        <Option name="scale">
+                            1e-7
+                        </Option>
+                        <Option name="offset">
+                            10.6
+                        </Option>
+                    </Options>
+                </Option>                
             </Options>
         </Option>        
         <Reader type="drivers.las.reader">
