@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<xs:schema xmlns:pc="http://pointcloud.org/schemas/PC/1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema" attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://pointcloud.org/schemas/PC/1.0" version="1.0">
+<xs:schema xmlns:pc="http://pointcloud.org/schemas/PC/1.1" xmlns:xs="http://www.w3.org/2001/XMLSchema" attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://pointcloud.org/schemas/PC/1.1" version="1.1">
 
     <xs:simpleType name="interpretationType">
         <xs:annotation>
@@ -128,18 +128,40 @@
                     </xs:documentation>
                 </xs:annotation>
             </xs:element>
-            <xs:element minOccurs="0" name="uuid" type="xs:string"/>
-            <xs:element minOccurs="0" name="parent_uuid" type="xs:string"/>
+            <xs:element minOccurs="0" name="uuid" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>
+                        A dimension may use a UUID as a unique identifier globally 
+                        for all dimensions of a specified type. PDAL uses UUIDs to be able 
+                        to determine which formats produced the specified dimension in 
+                        situations where that information is helpful.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element minOccurs="0" name="parent_uuid" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>
+                        In addition to a uuid, a parent_uuid might also be specified to 
+                        express the parent/child relationship of two dimensions. PDAL 
+                        uses uuid/parent_uuid to describe dimensions that are derivatives 
+                        of each other. For example, they may have the same name and other 
+                        attributes, but the parent/child relationship describes which one 
+                        to use under certain circumstances.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
 
         </xs:all>
     </xs:complexType>
     
-  
     <xs:element name="PointCloudSchema">
         <xs:complexType>
             <xs:sequence>
                 <xs:element maxOccurs="unbounded" minOccurs="1" name="dimension" type="pc:dimensionType"/>
+                <xs:element name="metadata" minOccurs="0" maxOccurs="1" type="xs:anyType"/>
             </xs:sequence>
         </xs:complexType>
     </xs:element>
+
+    
 </xs:schema>
