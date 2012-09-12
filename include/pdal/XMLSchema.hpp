@@ -180,7 +180,8 @@ class PDAL_DLL Writer
 public:
     Writer(pdal::Schema const& schema);
     ~Writer() {}
-
+    
+    void setMetadata(boost::property_tree::ptree const& tree) { m_metadata = tree; }
     std::string getXML();
 
 
@@ -200,6 +201,7 @@ private:
     void writeSchema(TextWriterPtr w);
     void* m_global_context;
     pdal::Schema const& m_schema;
+    boost::property_tree::ptree m_metadata;
 
 
 

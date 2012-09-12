@@ -42,6 +42,7 @@
 #include <pdal/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/filters/Stats.hpp>
+#include <pdal/XMLSchema.hpp>
 
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/json_parser.hpp>
@@ -67,12 +68,14 @@ private:
     void dumpSchema(const Stage&) const;
     void dumpStage(const Stage&) const;
     void dumpMetadata(const Stage&) const;
+    void dumpSDO_PCMetadata(Stage const&) const;
 
     std::string m_inputFile;
     bool m_showStats;
     bool m_showSchema;
     bool m_showStage;
     bool m_showMetadata;
+    bool m_showSDOPCMetadata;
     pdal::Options m_options;
     boost::uint64_t m_pointNumber;
     std::ostream* m_outputStream;
@@ -89,6 +92,7 @@ PcInfo::PcInfo(int argc, char* argv[])
     , m_showSchema(false)
     , m_showStage(false)
     , m_showMetadata(false)
+    , m_showSDOPCMetadata(false)
     , m_pointNumber((std::numeric_limits<boost::uint64_t>::max)())
     , m_outputStream(0)
     , m_useXML(false)
@@ -105,6 +109,7 @@ void PcInfo::validateSwitches()
         m_showStats ||
         m_showSchema ||
         m_showMetadata ||
+        m_showSDOPCMetadata ||
         m_showStage;
     if (!got_something)
     {
@@ -134,6 +139,7 @@ void PcInfo::addSwitches()
         ("stats,a", po::value<bool>(&m_showStats)->zero_tokens()->implicit_value(true), "dump stats on all points (reads entire dataset)")
         ("schema,s", po::value<bool>(&m_showSchema)->zero_tokens()->implicit_value(true), "dump the schema")
         ("metadata,m", po::value<bool>(&m_showMetadata)->zero_tokens()->implicit_value(true), "dump the metadata")
+        ("sdo_pc", po::value<bool>(&m_showSDOPCMetadata)->zero_tokens()->implicit_value(true), "dump the SDO_PC Oracle Metadata")
         ("stage,r", po::value<bool>(&m_showStage)->zero_tokens()->implicit_value(true), "dump the stage info")
         ("xml", po::value<bool>(&m_useXML)->zero_tokens()->implicit_value(true), "dump XML instead of JSON")
         ("seed", po::value<boost::uint32_t>(&m_seed)->default_value(0), "Seed value for random sample")
@@ -233,6 +239,19 @@ void PcInfo::dumpSchema(const Stage& stage) const
     return;
 }
 
+void PcInfo::dumpSDO_PCMetadata(const Stage& stage) const
+{
+    boost::property_tree::ptree metadata = stage.serializePipeline();
+
+    const Schema& schema = stage.getSchema();
+    
+    std::string xml = pdal::Schema::to_xml(schema, &metadata);  
+    
+    std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
+    
+    ostr << xml;
+    
+}
 
 void PcInfo::dumpStage(const Stage& stage) const
 {
@@ -323,6 +342,11 @@ int PcInfo::execute()
     if (m_showStage)
     {
         dumpStage(*reader);
+    }
+    
+    if (m_showSDOPCMetadata)
+    {
+        dumpSDO_PCMetadata(*reader);
     }
     
     std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;

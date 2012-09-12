@@ -476,11 +476,14 @@ Schema Schema::from_xml(std::string const& xml)
 #endif
 }
 
-std::string Schema::to_xml(Schema const& schema)
+std::string Schema::to_xml(Schema const& schema, boost::property_tree::ptree const* metadata)
 {
 #ifdef PDAL_HAVE_LIBXML2
 
     pdal::schema::Writer writer(schema);
+    
+    if (metadata)
+        writer.setMetadata(*metadata);
 
     return writer.getXML();
 

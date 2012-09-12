@@ -228,7 +228,7 @@ public:
     static Schema from_xml(std::string const& xml);
 
     /// @return serialized Schema instance as xml
-    static std::string to_xml(Schema const& schema);
+    static std::string to_xml(Schema const& schema, boost::property_tree::ptree const* metadata=0);
 
 /// @name Private Attributes
 private:

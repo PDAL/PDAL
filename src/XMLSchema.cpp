@@ -41,7 +41,9 @@
 #include <algorithm>
 
 #include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/erase.hpp>
 #include <boost/uuid/uuid_io.hpp>
+#include <boost/property_tree/xml_parser.hpp>
 
 #include <string.h>
 #include <stdlib.h>
@@ -639,32 +641,35 @@ void Writer::write(TextWriterPtr writer)
     xmlTextWriterSetIndent(w, 1);
     xmlTextWriterStartDocument(w, NULL, "utf-8", NULL);
     xmlTextWriterStartElementNS(w, BAD_CAST "pc", BAD_CAST "PointCloudSchema", NULL);
-    xmlTextWriterWriteAttributeNS(w, BAD_CAST "xmlns", BAD_CAST "pc", NULL, BAD_CAST "http://pointcloud.org/schemas/PC/1.0");
+    xmlTextWriterWriteAttributeNS(w, BAD_CAST "xmlns", BAD_CAST "pc", NULL, BAD_CAST "http://pointcloud.org/schemas/PC/1.1");
     xmlTextWriterWriteAttributeNS(w, BAD_CAST "xmlns", BAD_CAST "xsi", NULL, BAD_CAST "http://www.w3.org/2001/XMLSchema-instance");
 
     writeSchema(writer);
+
+    if (m_metadata.size())
+    {
+        xmlTextWriterStartElementNS(w, BAD_CAST "pc", BAD_CAST "metadata", NULL);
+                
+        std::ostringstream oss;
+        boost::property_tree::xml_parser::write_xml(oss, m_metadata);
+        std::string xml = oss.str();
+        
+        // wipe off write_xml's xml declaration
+        boost::algorithm::erase_all(xml, "<?xml version=\"1.0\" encoding=\"utf-8\"?>");
+        xmlTextWriterWriteRawLen(w, BAD_CAST xml.c_str(), xml.size());
+        xmlTextWriterEndElement(w);
+    }
+    
+
     xmlTextWriterEndElement(w);
     xmlTextWriterEndDocument(w);
 }
 
-boost::uint32_t GetStreamPrecision(double scale)
-{
-    double frac = 0;
-    double integer = 0;
-
-    frac = std::modf(scale, &integer);
-    double precision = std::fabs(std::floor(std::log10(frac)));
-
-    boost::uint32_t output = static_cast<boost::uint32_t>(precision);
-    return output;
-}
 
 void Writer::writeSchema(TextWriterPtr writer)
 {
 
     xmlTextWriterPtr w = static_cast<xmlTextWriterPtr>(writer.get());
-
-    // const std::vector<Dimension>& dims = m_schema.getDimensions();
 
     schema::index_by_index const& dims = m_schema.getDimensions().get<schema::index>();
 
@@ -728,7 +733,7 @@ void Writer::writeSchema(TextWriterPtr writer)
         {
             std::ostringstream out;
             out.setf(std::ios_base::fixed, std::ios_base::floatfield);
-            out.precision(GetStreamPrecision(scale));
+            out.precision(Utils::getStreamPrecision(scale));
             out << scale;
             xmlTextWriterWriteElementNS(w, BAD_CAST "pc", BAD_CAST "scale", NULL, BAD_CAST out.str().c_str());
 
