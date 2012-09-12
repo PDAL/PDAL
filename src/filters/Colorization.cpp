@@ -65,6 +65,8 @@ struct GDALSourceDeleter
 
 Colorization::Colorization(Stage& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
+    , m_ds(0)
+    , m_gdal_debug(0)
 {
     return;
 }
@@ -72,7 +74,10 @@ Colorization::Colorization(Stage& prevStage, const Options& options)
 Colorization::~Colorization()
 {
     if (m_ds != 0)
+    {
         GDALClose(m_ds);
+        m_ds = 0;
+    }
         
     GDALDestroyDriverManager();	
     
@@ -96,7 +101,7 @@ void Colorization::initialize()
 
     log()->get(logDEBUG) << "Using " << filename << " for raster" << std::endl;
     m_ds = GDALOpen(filename.c_str(), GA_ReadOnly);
-    if (!m_ds)
+    if (m_ds == NULL)
         throw pdal_error("Unable to open GDAL datasource!");
 
     if (GDALGetGeoTransform(m_ds, &(m_forward_transform.front())) != CE_None)
