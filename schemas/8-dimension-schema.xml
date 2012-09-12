@@ -176,39 +176,71 @@
     <pc:uuid>5c1a99c8-1829-4d5b-8735-4f6f393a7970</pc:uuid>
     <pc:parent_uuid>00000000-0000-0000-0000-000000000000</pc:parent_uuid>
   </pc:dimension>
+  <pc:dimension>
+    <pc:position>17</pc:position>
+    <pc:size>4</pc:size>
+    <pc:description>X coordinate as a long integer. You must use the scale and offset information of the header to determine the double value.</pc:description>
+    <pc:name>X</pc:name>
+    <pc:interpretation>int32_t</pc:interpretation>
+    <pc:scale>0.0000001</pc:scale>
+    <pc:offset>-125.300328603644</pc:offset>
+    <pc:active>true</pc:active>
+    <pc:uuid>20963cd1-c9b2-4d58-a4dd-04fca514855c</pc:uuid>
+    <pc:parent_uuid>2ee118d1-119e-4906-99c3-42934203f872</pc:parent_uuid>
+  </pc:dimension>
+  <pc:dimension>
+    <pc:position>18</pc:position>
+    <pc:size>4</pc:size>
+    <pc:description>Y coordinate as a long integer. You must use the scale and offset information of the header to determine the double value.</pc:description>
+    <pc:name>Y</pc:name>
+    <pc:interpretation>int32_t</pc:interpretation>
+    <pc:scale>0.0000001</pc:scale>
+    <pc:offset>41.644766671927</pc:offset>
+    <pc:active>true</pc:active>
+    <pc:uuid>22d087e8-4afd-4c1a-972f-f5d6c43f1f31</pc:uuid>
+    <pc:parent_uuid>87707eee-2f30-4979-9987-8ef747e30275</pc:parent_uuid>
+  </pc:dimension>
+  <pc:dimension>
+    <pc:position>19</pc:position>
+    <pc:size>4</pc:size>
+    <pc:description>Z coordinate as a long integer. You must use the scale and offset information of the header to determine the double value.</pc:description>
+    <pc:name>Z</pc:name>
+    <pc:interpretation>int32_t</pc:interpretation>
+    <pc:scale>0.01</pc:scale>
+    <pc:active>true</pc:active>
+    <pc:uuid>24da1c38-8e57-4257-8e88-f71dae6ff68b</pc:uuid>
+    <pc:parent_uuid>e74b5e41-95e6-4cf2-86ad-e3f5a996da5d</pc:parent_uuid>
+  </pc:dimension>
   <pc:metadata>
-    <Reader type="drivers.las.reader">
+    <Reader type="drivers.pipeline.reader">
       <Option name="debug">false</Option>
-      <Option name="filename">1.2-with-color.las</Option>
+      <Option name="filename">pipeline_reproject.xml</Option>
       <Option name="verbose">0</Option>
-      <Metadata name="drivers.las.reader" type="blank">
-        <Metadata name="spatialreference" type="spatialreference"/>
-        <Metadata name="compressed" type="boolean">false</Metadata>
-        <Metadata name="dataformat_id" type="nonNegativeInteger">3</Metadata>
-        <Metadata name="major_version" type="nonNegativeInteger">1</Metadata>
-        <Metadata name="minor_version" type="nonNegativeInteger">2</Metadata>
-        <Metadata name="filesource_id" type="nonNegativeInteger">0</Metadata>
-        <Metadata name="global_encoding" type="nonNegativeInteger">0</Metadata>
-        <Metadata name="project_id" type="uuid">00000000-0000-0000-0000-000000000000</Metadata>
-        <Metadata name="system_id" type="string"/>
-        <Metadata name="software_id" type="string">TerraScan</Metadata>
-        <Metadata name="creation_doy" type="nonNegativeInteger">0</Metadata>
-        <Metadata name="creation_year" type="nonNegativeInteger">0</Metadata>
-        <Metadata name="header_size" type="nonNegativeInteger">227</Metadata>
-        <Metadata name="dataoffset" type="nonNegativeInteger">229</Metadata>
-        <Metadata name="scale_x" type="double">0.01</Metadata>
-        <Metadata name="scale_y" type="double">0.01</Metadata>
-        <Metadata name="scale_z" type="double">0.01</Metadata>
-        <Metadata name="offset_x" type="double">-0</Metadata>
-        <Metadata name="offset_y" type="double">-0</Metadata>
-        <Metadata name="offset_z" type="double">-0</Metadata>
-        <Metadata name="minx" type="double">635619.85</Metadata>
-        <Metadata name="miny" type="double">848899.7000000001</Metadata>
-        <Metadata name="minz" type="double">406.59</Metadata>
-        <Metadata name="maxx" type="double">638982.55</Metadata>
-        <Metadata name="maxy" type="double">853535.4300000001</Metadata>
-        <Metadata name="maxz" type="double">586.38</Metadata>
-        <Metadata name="count" type="nonNegativeInteger">1065</Metadata>
+      <Metadata name="filters.inplacereprojection" type="blank">
+        <Metadata name="spatialreference" type="spatialreference">PROJCS["NAD83(HARN) / Oregon Lambert",
+    GEOGCS["NAD83(HARN)",
+        DATUM["NAD83_High_Accuracy_Reference_Network",
+            SPHEROID["GRS 1980",6378137,298.257222101,
+                AUTHORITY["EPSG","7019"]],
+            TOWGS84[0,0,0,0,0,0,0],
+            AUTHORITY["EPSG","6152"]],
+        PRIMEM["Greenwich",0,
+            AUTHORITY["EPSG","8901"]],
+        UNIT["degree",0.0174532925199433,
+            AUTHORITY["EPSG","9122"]],
+        AUTHORITY["EPSG","4152"]],
+    PROJECTION["Lambert_Conformal_Conic_2SP"],
+    PARAMETER["standard_parallel_1",43],
+    PARAMETER["standard_parallel_2",45.5],
+    PARAMETER["latitude_of_origin",41.75],
+    PARAMETER["central_meridian",-120.5],
+    PARAMETER["false_easting",400000],
+    PARAMETER["false_northing",0],
+    UNIT["metre",1,
+        AUTHORITY["EPSG","9001"]],
+    AXIS["X",EAST],
+    AXIS["Y",NORTH],
+    AUTHORITY["EPSG","2993"]]</Metadata>
       </Metadata>
     </Reader>
   </pc:metadata>
