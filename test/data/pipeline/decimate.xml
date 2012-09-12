@@ -5,7 +5,7 @@
     <Option name="write_header">false</Option>
     <Option name="filename">sometext.txt</Option>
     <Filter type="filters.colorization">
-      <Option name="raster">../autzent.tif</Option>
+      <Option name="raster">./autzen.tif</Option>
       <Option name="dimension">Red<Options><Option name="band">1</Option><Option name="scale">1</Option></Options></Option>
       <Option name="dimension">Green<Options><Option name="band">2</Option><Option name="scale">1</Option></Options></Option>
       <Option name="dimension">Blue<Options><Option name="band">3</Option><Option name="scale">1</Option></Options></Option>
