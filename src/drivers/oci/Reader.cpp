@@ -60,8 +60,14 @@ Reader::Reader(const Options& options)
     , OracleDriver(getOptions())
     , m_querytype(QUERY_UNKNOWN)
     , m_capacity(0)
+    , m_cachedPointCount(0)
 {
 
+}
+
+boost::uint64_t Reader::getNumPoints() const
+{
+    return m_cachedPointCount;
 }
 
 void Reader::initialize()

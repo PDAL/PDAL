@@ -72,11 +72,8 @@ public:
         if (t == StageIterator_Sequential) return true;
         return false;
     }
-
-    boost::uint64_t getNumPoints() const
-    {
-        return 0;
-    }
+    
+    virtual boost::uint64_t getNumPoints() const;
 
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
 
@@ -125,6 +122,7 @@ private:
     std::map<std::string, int> m_fields;
 
     boost::shared_ptr<pdal::gdal::Debug> m_gdal_debug;
+    boost::uint64_t m_cachedPointCount;
 
 
 };
