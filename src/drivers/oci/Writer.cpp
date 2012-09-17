@@ -360,8 +360,13 @@ void Writer::CreateBlockIndex()
     index_name.str("");
     index_name <<  block_table_name <<"_objectid_idx";
     name = index_name.str().substr(0,29);
-    oss << "CREATE INDEX " << name <<" on "
-        << block_table_name << "(OBJ_ID,BLK_ID) COMPRESS 2" ;
+    oss << "ALTER TABLE "<< block_table_name <<  "ADD 
+    CONSTRAINT "<< name <<  "
+     PRIMARY KEY (OBJ_ID, BLK_ID)
+     ENABLE
+     VALIDATE"
+    // oss << "CREATE INDEX " << name <<" on "
+    //     << block_table_name << "(OBJ_ID,BLK_ID) COMPRESS 2" ;
     run(oss);
     oss.str("");
 
