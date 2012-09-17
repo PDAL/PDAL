@@ -165,6 +165,7 @@ Metadata StageBase::getMetadata() const
 Metadata StageBase::collectMetadata() const
 {
     Metadata output(m_metadata);
+    output = output + m_metadata;
 
     try
     {
