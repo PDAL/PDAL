@@ -224,6 +224,8 @@ private:
 
     Stats& operator=(const Stats&); // not implemented
     Stats(const Stats&); // not implemented
+    
+    void addMetadata();
 };
 
 
