@@ -35,7 +35,7 @@
 #include <pdal/drivers/pipeline/Reader.hpp>
 
 #include <pdal/PipelineReader.hpp>
-
+#include <pdal/PipelineWriter.hpp>
 
 namespace pdal
 {
@@ -119,6 +119,11 @@ void Reader::addDefaultDimensions()
 Metadata Reader::getMetadata() const
 {
     return m_stage->getMetadata();
+}
+
+boost::property_tree::ptree Reader::serializePipeline() const
+{
+    return m_stage->serializePipeline();
 }
 
 boost::property_tree::ptree Reader::toPTree() const

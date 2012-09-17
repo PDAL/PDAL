@@ -62,6 +62,9 @@ public:
 
     virtual Metadata getMetadata() const;
 
+    // for xml serializion of pipelines
+    virtual boost::property_tree::ptree serializePipeline() const;
+    
     bool supportsIterator(StageIteratorType t) const;
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
     pdal::StageRandomIterator* createRandomIterator(PointBuffer& buffer) const;
