@@ -41,6 +41,10 @@
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
+#include <boost/tokenizer.hpp>
+
+#include <vector>
+#include <string>
 
 pdal::Writer* createTextWriter(pdal::Stage& prevStage, const pdal::Options& options);
 
@@ -52,6 +56,7 @@ namespace drivers
 namespace text
 {
 
+typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
 
 class text_driver_error : public pdal_error
 {
@@ -101,6 +106,7 @@ private:
                                         std::size_t pointIndex) const;
 
     void WriteHeader(pdal::Schema const& schema);
+    std::vector<std::string> getDimensionOrder(pdal::Schema const& schema) const;
     FileStreamPtr m_stream;
     bool m_wrote_header;
 };

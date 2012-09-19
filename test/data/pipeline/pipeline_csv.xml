@@ -4,6 +4,12 @@
         <Option name="filename">
             ../../temp/autzen-point-format-3.txt
         </Option>
+        <Option name="order">
+            Red,Green,X,Y,Blue,Z
+        </Option>
+        <Option name="keep_unspecified">
+            false
+        </Option>        
         <Reader type="drivers.las.reader">
             <Option name="filename">
                 ../autzen-point-format-3.las

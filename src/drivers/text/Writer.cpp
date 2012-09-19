@@ -37,9 +37,10 @@
 
 #include <iostream>
 #include <algorithm>
+#include <map>
 
 #include <boost/algorithm/string.hpp>
-
+#include <boost/algorithm/string/erase.hpp>
 
 #ifdef USE_PDAL_PLUGIN_TEXT
 PDAL_C_START
@@ -142,6 +143,81 @@ void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
     return;
 }
 
+std::vector<std::string> Writer::getDimensionOrder(Schema const& schema) const
+{
+    boost::char_separator<char> separator(",");
+    std::string dimension_order = getOptions().getValueOrDefault<std::string>("order", "");
+    
+    boost::erase_all(dimension_order, " "); // Wipe off spaces
+    std::vector<std::string> output;
+    if (dimension_order.size())
+    {   
+        
+        // Put all the names in a map. We'll add the names in order to our 
+        // output list as we find them, and we'll remove those that we've added 
+        // from the map as we go. We'll then add what's left at the end based on 
+        // whether or not the user wants to do so.
+        std::map<std::string, bool> all_names;
+        schema::index_by_index const& dims = schema.getDimensions().get<schema::index>();
+        schema::index_by_index::const_iterator iter = dims.begin();
+        while (iter != dims.end())
+        {
+            all_names.insert(std::pair<std::string, bool>(iter->getName(), true));
+            ++iter;
+        }
+                
+        tokenizer parameters(dimension_order, separator);
+        for (tokenizer::iterator t = parameters.begin(); t != parameters.end(); ++t)
+        {
+            boost::optional<Dimension const&> d = schema.getDimensionOptional(*t);
+            if (d)
+            {
+                if (boost::iequals(d->getName(), *t))
+                {
+                    output.push_back(d->getName());
+                    
+                    std::map<std::string, bool>::iterator i = all_names.find(d->getName());
+                    all_names.erase(i);
+                }
+            } 
+            else
+            {
+                std::ostringstream oss;
+                oss << "Dimension not found with name '" << *t <<"'";
+                throw pdal::dimension_not_found(oss.str());
+            }
+        }
+        
+        bool bKeep = getOptions().getValueOrDefault<bool>("keep_unspecified", true);
+        if (bKeep)
+        {
+            std::map<std::string, bool>::const_iterator i = all_names.begin();
+            while (i!= all_names.end())
+            {
+                output.push_back(i->first);
+                ++i;
+            }
+        } 
+        else
+        {
+            return output;
+        }
+    }
+    else
+    {
+        // No order was specified, just use the order of the schema
+        schema::index_by_index const& dims = schema.getDimensions().get<schema::index>();
+        schema::index_by_index::const_iterator iter = dims.begin();
+        while (iter != dims.end())
+        {
+            output.push_back(iter->getName());
+            ++iter;
+        }        
+    }
+    
+    return output;
+    
+}
 void Writer::WriteHeader(pdal::Schema const& schema)
 {
 
@@ -151,6 +227,8 @@ void Writer::WriteHeader(pdal::Schema const& schema)
     bool bWriteHeader = getOptions().getValueOrDefault<bool>("write_header", true);
     std::string newline = getOptions().getValueOrDefault<std::string>("newline", "\n");
     std::string delimiter = getOptions().getValueOrDefault<std::string>("delimiter",",");
+    
+
     
     log()->get(logDEBUG) << "Writing to filename: " << getOptions().getValueOrThrow<std::string>("filename") << std::endl;
     
@@ -163,25 +241,41 @@ void Writer::WriteHeader(pdal::Schema const& schema)
     }
     log()->get(logDEBUG) << "Writing header" << std::endl;
     
+    std::string order = getOptions().getValueOrDefault<std::string>("order", "");
+    boost::erase_all(order, " "); // Wipe off spaces
+    
+    log()->get(logDEBUG) << "Dimension order specified '" << order << "'" << std::endl;
+    
+    std::vector<std::string> dimensions = getDimensionOrder(schema);
+    std::ostringstream oss;
+    oss << "Dimension order obtained '";
+    for (std::vector<std::string>::const_iterator i = dimensions.begin(); i != dimensions.end(); ++i)
+    {
+        if (i != dimensions.begin())
+            oss <<  ",";
+        oss <<*i;
+    }
+    log()->get(logDEBUG) << oss.str() << std::endl;
     
     if (delimiter.size() == 0)
         delimiter = " ";
         
-    schema::index_by_index::const_iterator iter = dims.begin();
-    while (iter != dims.end())
+    std::vector<std::string>::const_iterator iter = dimensions.begin();
+    while (iter != dimensions.end())
     {
-        if (iter->isIgnored())
+        Dimension const& d = schema.getDimension(*iter);
+        if (d.isIgnored())
         {
             iter++;
             continue;
         }
         if (isQuoted)
             *m_stream << "\"";
-        *m_stream << iter->getName();
+        *m_stream << *iter;
         if (isQuoted)
             *m_stream<< "\"";
         iter++;
-        if (iter != dims.end())
+        if (iter != dimensions.end())
             *m_stream << delimiter;
     }
     *m_stream << newline;
@@ -304,24 +398,29 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
     boost::uint32_t pointIndex(0);
 
     pdal::Schema const& schema = data.getSchema();
-    schema::index_by_index const& dims = schema.getDimensions().get<schema::index>();
+
+    std::string order = getOptions().getValueOrDefault<std::string>("order", "");
+    boost::erase_all(order, " "); // Wipe off spaces
+    
+    std::vector<std::string> dimensions = getDimensionOrder(schema);
 
     while (pointIndex != data.getNumPoints())
     {
 
-        schema::index_by_index::const_iterator iter = dims.begin();
-        while (iter != dims.end())
+        std::vector<std::string>::const_iterator iter = dimensions.begin();
+        while (iter != dimensions.end())
         {
-            if (iter->isIgnored())
+            Dimension const& d = schema.getDimension(*iter);
+            if (d.isIgnored())
             {
                 iter++;
                 continue;
             }
 
-            *m_stream << getStringRepresentation(data, *iter, pointIndex);
+            *m_stream << getStringRepresentation(data, d, pointIndex);
 
             iter++;
-            if (iter != dims.end())
+            if (iter != dimensions.end())
                 *m_stream << delimiter;
         }
         *m_stream << newline;
