@@ -391,6 +391,27 @@ set (PDAL_DRIVERS_PCD_CPP
 list (APPEND PDAL_CPP ${PDAL_DRIVERS_PCD_CPP} )
 list (APPEND PDAL_HPP ${PDAL_DRIVERS_PCD_HPP} )
 
+#
+# drivers/soci
+#
+set(PDAL_SOCI_PATH drivers/soci)
+set(PDAL_SOCI_HEADERS ${PDAL_HEADERS_DIR}/${PDAL_SOCI_PATH})
+set(PDAL_SOCI_SRC ${PROJECT_SOURCE_DIR}/src/${PDAL_SOCI_PATH})
+
+set(PDAL_DRIVERS_SOCI_HPP
+  ${PDAL_SOCI_HEADERS}/Writer.hpp
+)
+
+set (PDAL_DRIVERS_SOCI_CPP 
+  ${PDAL_SOCI_SRC}/Writer.cpp
+)
+
+if (SOCI_FOUND)
+    list (APPEND PDAL_CPP ${PDAL_DRIVERS_SOCI_CPP} )
+    list (APPEND PDAL_HPP ${PDAL_DRIVERS_SOCI_HPP} )
+endif()
+
+
 
 #
 # filters
@@ -567,7 +588,8 @@ if (WIN32)
     ${PYTHON_LIBRARY}
     ${P2G_LIBRARY}
     ${GEOS_LIBRARY}
-    ${FLANN_LIBRARIES})
+    ${FLANN_LIBRARIES}
+    ${SOCI_LIBRARY})
 else()
   target_link_libraries(${APPS_CPP_DEPENDENCIES}
     ${PDAL_LIB_NAME}
@@ -581,7 +603,8 @@ else()
     ${PYTHON_LIBRARY}
     ${P2G_LIBRARY}
     ${GEOS_LIBRARY}
-    ${FLANN_LIBRARIES})
+    ${FLANN_LIBRARIES} 
+    ${SOCI_LIBRARY})
 endif()
 
 message(STATUS "Using boost lib: ${Boost_LIBRARIES}")

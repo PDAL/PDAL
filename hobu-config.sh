@@ -21,6 +21,7 @@ cmake   -G "Unix Makefiles"  \
         -DWITH_LIBXML2=ON \
         -DWITH_PYTHON=ON \
         -DWITH_FLANN=ON \
+        -DWITH_SOCI=ON \
         -DGEOTIFF_INCLUDE_DIR=${GEOTIFF_HOME}/include/ \
         -DGEOTIFF_LIBRARY=${GEOTIFF_HOME}/lib/libgeotiff.${SO_EXT} \
         -DICONV_INCLUDE_DIR=/usr/include \

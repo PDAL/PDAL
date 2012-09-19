@@ -66,6 +66,12 @@
 #include <pdal/drivers/p2g/Writer.hpp>
 #endif
 
+
+#ifdef PDAL_HAVE_SOCI
+#include <pdal/drivers/soci/Writer.hpp>
+#endif
+
+
 #include <pdal/filters/ByteSwap.hpp>
 #include <pdal/filters/Cache.hpp>
 #include <pdal/filters/Chipper.hpp>
@@ -186,6 +192,10 @@ MAKE_WRITER_CREATOR(OciWriter, pdal::drivers::oci::Writer)
 
 #ifdef PDAL_HAVE_P2G
 MAKE_WRITER_CREATOR(P2GWriter, pdal::drivers::p2g::Writer)
+#endif
+
+#ifdef PDAL_HAVE_SOCI
+MAKE_WRITER_CREATOR(SociWriter, pdal::drivers::soci::Writer)
 #endif
 
 
@@ -445,6 +455,10 @@ void StageFactory::registerKnownWriters()
 
 #ifdef PDAL_HAVE_P2G
     REGISTER_WRITER(P2GWriter, pdal::drivers::p2g::Writer);
+#endif
+
+#ifdef PDAL_HAVE_SOCI
+    REGISTER_WRITER(SociWriter, pdal::drivers::soci::Writer);
 #endif
 
 }

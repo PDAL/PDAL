@@ -304,6 +304,16 @@ if(WITH_GDAL)
   endif()
 endif()
 
+set(WITH_SOCI FALSE CACHE BOOL "Choose if SOCI database support should be built")
+if (WITH_SOCI)
+find_package(Soci 3.1.0)
+if (SOCI_FOUND)
+  mark_as_advanced(CLEAR SOCI_INCLUDE_DIRS) 
+  mark_as_advanced(CLEAR SOCI_LIBRARY) 
+  include_directories(${SOCI_INCLUDE_DIRS})
+  set(PDAL_HAVE_SOCI 1)
+endif()
+endif()
 
 
 #------------------------------------------------------------------------------
