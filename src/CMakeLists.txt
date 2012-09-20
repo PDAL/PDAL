@@ -604,7 +604,8 @@ else()
     ${P2G_LIBRARY}
     ${GEOS_LIBRARY}
     ${FLANN_LIBRARIES} 
-    ${SOCI_LIBRARY})
+    ${SOCI_LIBRARY}
+    ${SOCI_postgresql_PLUGIN})
 endif()
 
 message(STATUS "Using boost lib: ${Boost_LIBRARIES}")
