@@ -319,6 +319,7 @@ public:
     */
     boost::property_tree::ptree toPTree() const;
 
+    pdal::Bounds<double> calculateBounds(PointBuffer const& buffer);
     /** @name private attributes
     */
 private:

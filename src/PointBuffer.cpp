@@ -130,6 +130,42 @@ void PointBuffer::getData(boost::uint8_t** data, std::size_t* array_size) const
     memcpy(*data, m_data.get(), *array_size);
 }
 
+
+pdal::Bounds<double> PointBuffer::calculateBounds(PointBuffer const& buffer)
+{
+    pdal::Schema const& schema = getSchema();
+
+    pdal::Bounds<double> output;
+
+    boost::optional<Dimension const&> dimX = schema.getDimension("X");
+    boost::optional<Dimension const&> dimY = schema.getDimension("Y");
+    boost::optional<Dimension const&> dimZ = schema.getDimension("Z");
+
+
+    bool first = true;
+    for (boost::uint32_t pointIndex=0; pointIndex<buffer.getNumPoints(); pointIndex++)
+    {
+        const boost::int32_t xi = getField<boost::int32_t>(*dimX, pointIndex);
+        const boost::int32_t yi = getField<boost::int32_t>(*dimY, pointIndex);
+        const boost::int32_t zi = getField<boost::int32_t>(*dimZ, pointIndex);
+
+        const double xd = dimX->applyScaling(xi);
+        const double yd = dimY->applyScaling(yi);
+        const double zd = dimZ->applyScaling(zi);
+
+        Vector<double> v(xd, yd, zd);
+        if (first)
+        {
+            output = pdal::Bounds<double>(xd, yd, zd, xd, yd, zd);
+            first = false;
+        }
+        output.grow(v);
+    }
+
+    return output;
+
+}
+
 //
 // void PointBuffer::addMetadata(Metadata const& m)
 // {
