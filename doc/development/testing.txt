@@ -29,6 +29,38 @@ Unit tests should not be long-running.  (As of this writing, a full test
 run executes 163 tests in under 10 seconds in Debug mode on mpg's little
 laptop.  This is good.)
 
+To run the unit tests, issue the following command from your build directory::
+
+  $ make test
+
+Your output should resemble the following::
+
+  Running tests...
+  Test project /path/to/pdal/build
+      Start 1: pdal_test
+  1/1 Test #1: pdal_test ........................   Passed    3.53 sec
+
+  100% tests passed, 0 tests failed out of 1
+
+  Total Test time (real) =   4.79 sec
+
+Alternately, one can run the unit tests directly::
+
+  $ bin/pdal_test ../../test/data/ --catch_system_errors=no
+
+Again, the output should resemble the following::
+
+  Running 198 test cases...
+  0.100
+  Wrote 1065 points
+  0.100
+  Wrote 1065 points
+  0.100
+  Wrote 1065 points
+  0.100
+  Wrote 1065 points
+
+  *** No errors detected
 
 Test Data
 =========
