@@ -39,7 +39,9 @@
 #include <boost/filesystem.hpp>
 #include <boost/version.hpp>
 #include <boost/algorithm/string.hpp>
+
 #include <iostream>
+#include <sstream>
 
 namespace pdal
 {
@@ -221,6 +223,46 @@ bool FileUtils::isAbsolutePath(const std::string& path)
 #else
     return boost::filesystem::path(path).is_complete();
 #endif
+}
+
+std::string FileUtils::readFileAsString(std::string const& filename)
+{
+    if (!FileUtils::fileExists(filename))
+    {
+        std::ostringstream oss;
+        oss << filename << " does not exist";
+        throw pdal_error(oss.str());
+    }
+
+    std::istream::pos_type size;
+    std::istream* input = FileUtils::openFile(filename, true);
+
+
+    if (input->good())
+    {
+        std::string output;
+        std::string line;
+        while (input->good())
+        {
+            getline(*input, line);
+            if (output.size())
+            {
+                output = output + "\n" + line;
+            }
+            else
+            {
+                output = line;
+            }
+        }
+
+        return output;
+    }
+    else
+    {
+        FileUtils::closeFile(input);
+        return std::string("");
+    }
+
 }
 
 

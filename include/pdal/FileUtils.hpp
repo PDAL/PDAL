@@ -88,6 +88,8 @@ public:
     //
     // note: if base dir is not absolute, first make it absolute via toAbsolutePath(base)
     static std::string toAbsolutePath(const std::string& filename, const std::string base);
+    
+    static std::string readFileAsString(std::string const& filename);
 
 private:
     static std::string addTrailingSlash(const std::string& path);
