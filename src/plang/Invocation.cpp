@@ -61,7 +61,12 @@ void Invocation::numpy_init()
     // this macro is defined be NumPy and must be included
     if (_import_array() < 0)
     {
-        throw python_error("unable to initialize NumPy");
+        PyObject *ptype, *pvalue, *ptraceback;
+        PyErr_Fetch(&ptype, &pvalue, &ptraceback);
+        char *message = PyString_AsString(pvalue);
+        std::ostringstream oss;
+        oss << "unable to initialize NumPy with error '" << std::string(message) << "'";
+        throw python_error(oss.str());
     }
 }
 
