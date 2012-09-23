@@ -3,19 +3,21 @@
   <Writer type="drivers.text.writer">
     <Option name="delimiter">,</Option>
     <Option name="write_header">false</Option>
-    <Option name="filename">sometext.txt</Option>
+    <Option name="filename">junk</Option>
+    <Option name="chunk_size">10</Option>
     <Filter type="filters.colorization">
       <Option name="raster">./autzen.tif</Option>
       <Option name="dimension">Red<Options><Option name="band">1</Option><Option name="scale">1</Option></Options></Option>
       <Option name="dimension">Green<Options><Option name="band">2</Option><Option name="scale">1</Option></Options></Option>
       <Option name="dimension">Blue<Options><Option name="band">3</Option><Option name="scale">1</Option></Options></Option>
       <Filter type="filters.inplacereprojection">
-        <Option name="out_srs">EPSG:26918</Option>
+        <Option name="out_srs">EPSG:26910</Option>
         <Option name="scale_x">0.01</Option>
         <Option name="scale_z">0.01</Option>
         <Option name="scale_y">0.01</Option>
         <Filter type="filters.decimation">
-          <Option name="step">10</Option>
+          <Option name="step">2</Option>
+          <Option name="offset">1</Option>
           <Filter type="filters.selector">
             <Option name="create">
               <Options>
