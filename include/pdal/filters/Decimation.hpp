@@ -104,7 +104,6 @@ private:
 
     const pdal::filters::Decimation& m_filter;
     boost::int64_t m_startingIndex;
-    bool bDidOffset;
 };
 
 
