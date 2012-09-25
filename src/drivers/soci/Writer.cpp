@@ -153,14 +153,20 @@ void Writer::writeBegin(boost::uint64_t /*targetNumPointsToWrite*/)
     std::string cloud_table = getOptions().getValueOrThrow<std::string>("cloud_table");
     std::string cloud_column = getOptions().getValueOrThrow<std::string>("cloud_column");
 
-    bool bHaveOutputTable = BlockTableExists(block_table);
-
+    bool bHaveBlockTable = CheckTableExists(block_table);
+    bool bHaveCloudTable = CheckTableExists(cloud_table);
+    
     if (getOptions().getValueOrDefault<bool>("overwrite", true))
     {
-        if (bHaveOutputTable)
+        if (bHaveBlockTable)
         {
             DeleteBlockTable(cloud_table, cloud_column, block_table);
-            bHaveOutputTable = false;
+            bHaveBlockTable = false;
+        }
+        if (bHaveCloudTable)
+        {
+            DeleteCloudTable(cloud_table, cloud_column);
+            bHaveCloudTable = false;
         }
     }
     
@@ -178,8 +184,13 @@ void Writer::writeBegin(boost::uint64_t /*targetNumPointsToWrite*/)
         ::soci::statement st = m_session->prepare << sql;
         st.execute();
     }
-
-    if (!bHaveOutputTable)
+    
+    if (!bHaveCloudTable)
+    {
+        CreateCloudTable(cloud_table, getOptions().getValueOrDefault<boost::uint32_t>("srid", 4326));        
+    }
+    
+    if (!bHaveBlockTable)
     {
         m_doCreateIndex = true;
         CreateBlockTable(block_table, getOptions().getValueOrDefault<boost::uint32_t>("srid", 4326));
@@ -188,7 +199,7 @@ void Writer::writeBegin(boost::uint64_t /*targetNumPointsToWrite*/)
     return;
 }
 
-bool Writer::BlockTableExists(std::string const& name)
+bool Writer::CheckTableExists(std::string const& name)
 {
 
     std::ostringstream oss;
@@ -317,19 +328,96 @@ void Writer::DeleteBlockTable(std::string const& cloud_table_name,
 
 }
 
-void Writer::CreateIndexes(std::string const& name, bool is3d )
+
+void Writer::CreateCloudTable(std::string const& name, boost::uint32_t srid)
+{
+    std::ostringstream oss;
+    
+
+    if (m_type == Database_Postgresql)
+    {
+        oss << "CREATE TABLE " << boost::to_lower_copy(name) 
+            << " (id INTEGER,"
+            << " schema XML"
+            << ")";
+
+        ::soci::statement create = m_session->prepare << oss.str();
+        create.execute();
+        oss.str("");
+        
+        {
+            oss << "SELECT AddGeometryColumn('', '" << boost::to_lower_copy(name) 
+                << "'," << "'extent'" << "," 
+                << srid << ", 'POLYGON', 2)";
+            ::soci::statement geom = m_session->prepare << oss.str();
+            geom.execute();
+            oss.str("");
+            
+        }
+    }
+}
+
+void Writer::DeleteCloudTable(std::string const& cloud_table_name,
+                              std::string const& cloud_column_name)
+{
+    std::ostringstream oss;
+
+    // Delete all the items from the table first
+    oss << "DELETE FROM " << cloud_table_name;
+    ::soci::statement st = m_session->prepare << oss.str();
+    st.execute();
+
+    oss.str("");
+    
+    // Go drop the table
+    if (m_type == Database_Oracle)
+    {
+        // We need to clean up the geometry column before dropping the table
+        // Oracle upper cases the table name when inserting it in the
+        // USER_SDO_GEOM_METADATA.  
+        oss << "DELETE FROM USER_SDO_GEOM_METADATA WHERE TABLE_NAME='" << boost::to_upper_copy(cloud_table_name) << "'" ;
+        ::soci::statement st = m_session->prepare << oss.str();
+        st.execute();
+        oss.str("");
+                
+        oss << "DROP TABLE " << cloud_table_name;    
+        ::soci::statement drop = m_session->prepare << oss.str();
+        drop.execute();
+        oss.str("");
+    } else if (m_type == Database_Postgresql)
+    {
+        // We need to clean up the geometry column before dropping the table
+        oss << "SELECT DropGeometryColumn('" << boost::to_lower_copy(cloud_table_name) << "', 'extent')";    
+        ::soci::statement column = m_session->prepare << oss.str();
+        column.execute();
+        oss.str("");
+
+        oss << "DROP TABLE " << boost::to_lower_copy(cloud_table_name);    
+        ::soci::statement drop = m_session->prepare << oss.str();
+        drop.execute();
+        oss.str("");
+    }
+
+}
+
+
+void Writer::CreateIndexes( std::string const& table_name, 
+                            std::string const& spatial_column_name, 
+                            bool is3d,
+                            bool isBlockTable )
 {
     std::ostringstream oss;
 
     std::ostringstream index_name_ss;
-    index_name_ss << name << "_cloud_idx";
+    index_name_ss << table_name << "_cloud_idx";
     std::string index_name = index_name_ss.str().substr(0,29);
     
     // Spatial indexes
     if (m_type == Database_Oracle)
     {
         oss << "CREATE INDEX "<< index_name << " on "
-            << name << "(blk_extent) INDEXTYPE IS MDSYS.SPATIAL_INDEX";
+            << table_name << "(" << spatial_column_name 
+            << ") INDEXTYPE IS MDSYS.SPATIAL_INDEX";
         if (is3d)
         {
             oss <<" PARAMETERS('sdo_indx_dims=3')";
@@ -340,7 +428,7 @@ void Writer::CreateIndexes(std::string const& name, bool is3d )
     } else if (m_type == Database_Postgresql)
     {
         oss << "CREATE INDEX "<< index_name << " on "
-            << boost::to_lower_copy(name) << " USING GIST (blk_extent)";
+            << boost::to_lower_copy(table_name) << " USING GIST ("<< boost::to_lower_copy(spatial_column_name) << ")";
         ::soci::statement st = m_session->prepare << oss.str();
         st.execute();
         oss.str("");        
@@ -348,18 +436,36 @@ void Writer::CreateIndexes(std::string const& name, bool is3d )
     }
 
     // Primary key
-    index_name_ss.str("");
-    index_name_ss <<  name <<"_objectid_idx";
-    index_name = index_name_ss.str().substr(0,29);
-    oss << "ALTER TABLE "<< name <<  " ADD CONSTRAINT "<< index_name <<  
-        "  PRIMARY KEY (OBJ_ID, BLK_ID)";
-    if (m_type == Database_Oracle)
-    {
-        oss <<" ENABLE VALIDATE";
-    }
     
-    ::soci::statement primary = m_session->prepare << oss.str();
-    primary.execute();
+    if (isBlockTable)
+    {
+        index_name_ss.str("");
+        index_name_ss <<  table_name <<"_objectid_idx";
+        index_name = index_name_ss.str().substr(0,29);
+        oss << "ALTER TABLE "<< table_name <<  " ADD CONSTRAINT "<< index_name <<  
+            "  PRIMARY KEY (OBJ_ID, BLK_ID)";
+        if (m_type == Database_Oracle)
+        {
+            oss <<" ENABLE VALIDATE";
+        }
+
+        ::soci::statement primary = m_session->prepare << oss.str();
+        primary.execute();
+        
+    }
+    else
+    {
+        index_name_ss.str("");
+        index_name_ss <<  table_name <<"_objectid_idx";
+        index_name = index_name_ss.str().substr(0,29);
+        oss << "ALTER TABLE "<< table_name <<  " ADD CONSTRAINT "<< index_name <<  
+            "  PRIMARY KEY (ID)";
+
+
+        ::soci::statement primary = m_session->prepare << oss.str();
+        primary.execute();
+        
+    }
 }
 
 Schema Writer::getPackedSchema( Schema const& schema) const
@@ -511,10 +617,13 @@ void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
     if (m_doCreateIndex)
     {
         std::string block_table_name = getOptions().getValueOrThrow<std::string>("block_table");
+        std::string cloud_table_name = getOptions().getValueOrThrow<std::string>("cloud_table");
         boost::uint32_t srid = getOptions().getValueOrThrow<boost::uint32_t>("srid");
         bool is3d = getOptions().getValueOrDefault<bool>("is3d", false);
         
-        CreateIndexes(block_table_name, is3d);
+        CreateIndexes(block_table_name, "blk_extent", is3d);
+        if (m_type == Database_Postgresql)
+            CreateIndexes(cloud_table_name, "extent", is3d, false);
     }
     
     if (m_type == Database_Oracle)

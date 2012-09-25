@@ -133,12 +133,17 @@ private:
     Writer(const Writer&); // not implemented
 
     void CreateBlockTable(std::string const& name, boost::uint32_t srid);
-    bool BlockTableExists(std::string const& name);
+    void CreateCloudTable(std::string const& name, boost::uint32_t srid);    
+    bool CheckTableExists(std::string const& name);
     void DeleteBlockTable(std::string const& cloud_table_name,
                           std::string const& cloud_column_name, 
                           std::string const& block_table_name);
-    void CreateIndexes(std::string const& name,
-                       bool is3d);
+    void DeleteCloudTable(std::string const& cloud_table_name,
+                          std::string const& cloud_column_name);                          
+    void CreateIndexes(std::string const& table_name, 
+                       std::string const& spatial_column_name, 
+                       bool is3d,
+                       bool isBlockTable=true);
     void CreateSDOEntry(std::string const& block_table, 
                         boost::uint32_t srid, 
                         pdal::Bounds<double> bounds,
