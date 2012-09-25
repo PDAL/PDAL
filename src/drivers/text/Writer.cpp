@@ -175,36 +175,10 @@ std::vector<boost::tuple<std::string, std::string> >  Writer::getDimensionOrder(
             {
                 if (boost::iequals(d->getName(), *t))
                 {
-                    schema::index_by_name::size_type count = name_index.count(d->getName());     
-                    
-                    if (count > 1)
-                    {
-                        std::pair<schema::index_by_name::const_iterator, schema::index_by_name::const_iterator> ret = name_index.equal_range(d->getName());
+                    output.push_back( boost::tuple<std::string, std::string>(d->getName(), d->getNamespace()));
 
-                        for (schema::index_by_name::const_iterator  o = ret.first; o != ret.second; ++o)
-                        {
-                            // If we have to or more dimensions of the same name
-                            // FIXME: this needs the logic out of pdal::Schema to get the *last* child, 
-                            // as this only gets the first one it finds. It still isn't right
-                            if (!o->getParent().is_nil())
-                            {
-                                output.push_back( boost::tuple<std::string, std::string>(o->getName(), o->getNamespace()));
-
-                                std::map<std::string, bool>::iterator i = all_names.find(o->getName());
-                                all_names.erase(i);
-                                break;
-                            }
-                        }                        
-
-                    } 
-                    else
-                    {
-                        output.push_back( boost::tuple<std::string, std::string>(d->getName(), d->getNamespace()));
-
-                        std::map<std::string, bool>::iterator i = all_names.find(d->getName());
-                        all_names.erase(i);
-                        
-                    }
+                    std::map<std::string, bool>::iterator i = all_names.find(d->getName());
+                    all_names.erase(i);
                 }
             } 
             else
