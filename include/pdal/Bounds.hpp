@@ -437,7 +437,33 @@ public:
         }
         return true;
     }
+    
+    /// Returns the Bounds<T> instance as WKT
+    std::string toWKT(boost::uint32_t precision = 8) const
+    {
+        std::stringstream oss;
+        oss.precision(precision);
+        
+        oss << "POLYGON ((";
+        
+        for (typename RangeVector::size_type i = 0; i < m_ranges.size(); ++i)
+        {
+            oss << getMinimum(i) << " " << getMaximum(i);
+            if (m_ranges.size()-1 == i)
+            {
+               // last coordinates need to be the first coordinates
+                oss << ", " << getMaximum(0) << " " << getMaximum(0);
+            } else
+            {
+                oss << ", ";
 
+            }
+        }
+        oss << "))";
+        return oss.str();
+    }
+    
+    
     /** @name Default extent
     */
     /// Returns a staticly-allocated Bounds extent that represents infinity
