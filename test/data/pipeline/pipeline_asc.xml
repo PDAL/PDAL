@@ -2,10 +2,12 @@
 <Pipeline version="1.0">
     <Writer type="drivers.text.writer">
         <Option name="filename">
-            autzen-stadium.txt
+            STDOUT
         </Option>
         <Option name="delimiter"> </Option>
-        <Option name="write_header">false</Option>
+        <Option name="write_header">true</Option>
+        <Option name="order">X,Y,Z,Red,Green,Blue</Option>
+        <Option name="keep_unspecified">true</Option>
         <Filter type="filters.selector">
             <Option name="ignore_default">
                 true
@@ -32,11 +34,25 @@
                     </Option>
                 </Options>
             </Option>
+            <Filter type="filters.inplacereprojection">
+                <Option name="out_srs">
+                    EPSG:4326+4326
+                </Option>
+                <Option name="scale_x">
+                    0.0000001
+                </Option>
+                <Option name="scale_y">
+                    0.0000001
+                </Option>
             <Reader type="drivers.las.reader">
                 <Option name="filename">
-                    ../autzen-stadium.las
+                    ../1.2-with-color.las
+                </Option>
+                <Option name="spatialreference">
+                    EPSG:2993
                 </Option>
             </Reader>
         </Filter>
+    </Filter>
     </Writer>
 </Pipeline>

@@ -106,7 +106,7 @@ private:
                                         std::size_t pointIndex) const;
 
     void WriteHeader(pdal::Schema const& schema);
-    std::vector<std::string> getDimensionOrder(pdal::Schema const& schema) const;
+    std::vector<boost::tuple<std::string, std::string> >  getDimensionOrder(pdal::Schema const& schema) const;
     FileStreamPtr m_stream;
     bool m_wrote_header;
 };

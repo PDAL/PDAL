@@ -143,13 +143,13 @@ void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
     return;
 }
 
-std::vector<std::string> Writer::getDimensionOrder(Schema const& schema) const
+std::vector<boost::tuple<std::string, std::string> >  Writer::getDimensionOrder(Schema const& schema) const
 {
     boost::char_separator<char> separator(",");
     std::string dimension_order = getOptions().getValueOrDefault<std::string>("order", "");
     
     boost::erase_all(dimension_order, " "); // Wipe off spaces
-    std::vector<std::string> output;
+    std::vector<boost::tuple<std::string, std::string> >  output;
     if (dimension_order.size())
     {   
         
@@ -160,6 +160,7 @@ std::vector<std::string> Writer::getDimensionOrder(Schema const& schema) const
         std::map<std::string, bool> all_names;
         schema::index_by_index const& dims = schema.getDimensions().get<schema::index>();
         schema::index_by_index::const_iterator iter = dims.begin();
+        schema::index_by_name const& name_index = schema.getDimensions().get<schema::name>();
         while (iter != dims.end())
         {
             all_names.insert(std::pair<std::string, bool>(iter->getName(), true));
@@ -174,10 +175,36 @@ std::vector<std::string> Writer::getDimensionOrder(Schema const& schema) const
             {
                 if (boost::iequals(d->getName(), *t))
                 {
-                    output.push_back(d->getName());
+                    schema::index_by_name::size_type count = name_index.count(d->getName());     
                     
-                    std::map<std::string, bool>::iterator i = all_names.find(d->getName());
-                    all_names.erase(i);
+                    if (count > 1)
+                    {
+                        std::pair<schema::index_by_name::const_iterator, schema::index_by_name::const_iterator> ret = name_index.equal_range(d->getName());
+
+                        for (schema::index_by_name::const_iterator  o = ret.first; o != ret.second; ++o)
+                        {
+                            // If we have to or more dimensions of the same name
+                            // FIXME: this needs the logic out of pdal::Schema to get the *last* child, 
+                            // as this only gets the first one it finds. It still isn't right
+                            if (!o->getParent().is_nil())
+                            {
+                                output.push_back( boost::tuple<std::string, std::string>(o->getName(), o->getNamespace()));
+
+                                std::map<std::string, bool>::iterator i = all_names.find(o->getName());
+                                all_names.erase(i);
+                                break;
+                            }
+                        }                        
+
+                    } 
+                    else
+                    {
+                        output.push_back( boost::tuple<std::string, std::string>(d->getName(), d->getNamespace()));
+
+                        std::map<std::string, bool>::iterator i = all_names.find(d->getName());
+                        all_names.erase(i);
+                        
+                    }
                 }
             } 
             else
@@ -246,24 +273,31 @@ void Writer::WriteHeader(pdal::Schema const& schema)
     
     log()->get(logDEBUG) << "Dimension order specified '" << order << "'" << std::endl;
     
-    std::vector<std::string> dimensions = getDimensionOrder(schema);
+    std::vector<boost::tuple<std::string, std::string> > dimensions = getDimensionOrder(schema);
     std::ostringstream oss;
     oss << "Dimension order obtained '";
-    for (std::vector<std::string>::const_iterator i = dimensions.begin(); i != dimensions.end(); ++i)
+    for (std::vector<boost::tuple<std::string, std::string> >::const_iterator i = dimensions.begin(); i != dimensions.end(); ++i)
     {
+        Dimension const& d = schema.getDimension(i->get<0>(), i->get<1>());
+        if (d.isIgnored())
+        {
+            i++;
+            continue;
+        }
+                
         if (i != dimensions.begin())
             oss <<  ",";
-        oss <<*i;
+        oss <<i->get<0>();
     }
     log()->get(logDEBUG) << oss.str() << std::endl;
     
     if (delimiter.size() == 0)
         delimiter = " ";
         
-    std::vector<std::string>::const_iterator iter = dimensions.begin();
+    std::vector<boost::tuple<std::string, std::string> >::const_iterator iter = dimensions.begin();
     while (iter != dimensions.end())
     {
-        Dimension const& d = schema.getDimension(*iter);
+        Dimension const& d = schema.getDimension(iter->get<0>(), iter->get<1>());
         if (d.isIgnored())
         {
             iter++;
@@ -271,7 +305,7 @@ void Writer::WriteHeader(pdal::Schema const& schema)
         }
         if (isQuoted)
             *m_stream << "\"";
-        *m_stream << *iter;
+        *m_stream << iter->get<0>();
         if (isQuoted)
             *m_stream<< "\"";
         iter++;
@@ -402,15 +436,16 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
     std::string order = getOptions().getValueOrDefault<std::string>("order", "");
     boost::erase_all(order, " "); // Wipe off spaces
     
-    std::vector<std::string> dimensions = getDimensionOrder(schema);
+    std::vector<boost::tuple<std::string, std::string> > dimensions = getDimensionOrder(schema);
 
     while (pointIndex != data.getNumPoints())
     {
+        std::vector<boost::tuple<std::string, std::string> >::const_iterator iter =  dimensions.begin();
 
-        std::vector<std::string>::const_iterator iter = dimensions.begin();
         while (iter != dimensions.end())
         {
-            Dimension const& d = schema.getDimension(*iter);
+            
+            Dimension const& d = schema.getDimension(iter->get<0>(), iter->get<1>());
             if (d.isIgnored())
             {
                 iter++;
