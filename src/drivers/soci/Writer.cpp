@@ -250,16 +250,19 @@ void Writer::CreateBlockTable(std::string const& name, boost::uint32_t srid)
             << " (obj_id INTEGER,"
             << " blk_id INTEGER,"
             << " num_points INTEGER,"
-            << " points oid"
+            << " points bytea"
             << ")";
 
         m_session->once << oss.str();
         oss.str("");
         
         {
+            bool is3d = getOptions().getValueOrDefault<bool>("is3d", false);
+            boost::uint32_t nDim = is3d ? 3 : 2;
+
             oss << "SELECT AddGeometryColumn('', '" << boost::to_lower_copy(name) 
                 << "'," << "'blk_extent'" << "," 
-                << srid << ", 'POLYGON', 3)";
+                << srid << ", 'POLYGON', " << nDim << ")";
             m_session->once << oss.str();
             oss.str("");
         }
@@ -341,9 +344,12 @@ void Writer::CreateCloudTable(std::string const& name, boost::uint32_t srid)
         m_session->once << oss.str();
         oss.str("");
         {
+            bool is3d = getOptions().getValueOrDefault<bool>("is3d", false);
+            boost::uint32_t nDim = is3d ? 3 : 2;
+            
             oss << "SELECT AddGeometryColumn('', '" << boost::to_lower_copy(name) 
                 << "'," << "'extent'" << "," 
-                << srid << ", 'POLYGON', 3)";
+                << srid << ", 'POLYGON', " << nDim << ")";
             m_session->once << oss.str();
             oss.str("");
         }
@@ -725,7 +731,10 @@ void Writer::CreateCloud(Schema const& buffer_schema)
         if (bounds.size())
         {
             boost::uint32_t srid = getOptions().getValueOrDefault<boost::uint32_t>("srid", 4326);
-            oss << "UPDATE " << boost::to_lower_copy(cloud_table)  << " SET extent=ST_GeometryFromText(:wkt,:srid) where ID=:id";
+            bool is3d = getOptions().getValueOrDefault<bool>("is3d", false);
+            std::string force = is3d ? "ST_Force_3D" : "ST_Force_2D";
+            
+            oss << "UPDATE " << boost::to_lower_copy(cloud_table)  << " SET extent="<< force << "(ST_GeometryFromText(:wkt,:srid)) where ID=:id";
             m_session->once << oss.str(), ::soci::use(bounds, "wkt"), ::soci::use(srid,"srid"), ::soci::use(id, "id");
             
         }
@@ -769,24 +778,37 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     boost::int64_t num_points = static_cast<boost::int64_t>(buffer.getNumPoints());
     if (m_type == Database_Postgresql)
     {
+        bool is3d = getOptions().getValueOrDefault<bool>("is3d", false);
+        std::string force = is3d ? "ST_Force_3D" : "ST_Force_2D";
+        
         std::stringstream oss;
         oss << "INSERT INTO " << boost::to_lower_copy(block_table) 
-            << " (obj_id, blk_id, num_points, points) VALUES (" 
-            << " :obj_id, :blk_id, :num_points, lo_creat(-1))";
+            << " (obj_id, blk_id, num_points, points, blk_extent) VALUES (" 
+            << " :obj_id, :blk_id, :num_points, :hex, " << force << "(ST_GeometryFromText(:extent,:srid)))";
 
         // m_session->begin();
-
-        ::soci::statement st = (m_session->prepare << oss.str(), ::soci::use(obj_id, "obj_id"), ::soci::use(blk_id, "blk_id"), ::soci::use(num_points, "num_points"));
+        
+        std::stringstream hex_str;
+        for (unsigned i = 0; i != point_data_length; ++i)
+        {
+            hex_str << std::hex << (int)point_data[i];
+        }
+        std::string hex = hex_str.str();
+        boost::uint32_t srid = getOptions().getValueOrDefault<boost::uint32_t>("srid", 4326);
+        
+        std::string extent = buffer.calculateBounds(is3d).toWKT();
+        log()->get(logDEBUG) << "extent: " << extent << std::endl;
+        ::soci::statement st = (m_session->prepare << oss.str(), ::soci::use(obj_id, "obj_id"), ::soci::use(blk_id, "blk_id"), ::soci::use(num_points, "num_points"), ::soci::use(hex,"hex"), ::soci::use(extent, "extent"), ::soci::use(srid, "srid"));
         st.execute(true);
         oss.str("");
         
-        ::soci::blob blob(*m_session);
-        ::soci::indicator ind;
-        oss << "SELECT POINTS from "<< boost::to_lower_copy(block_table) << " WHERE BLK_ID =:blk_id and obj_id = :obj_id";
-        m_session->once << oss.str(), ::soci::into(blob, ind), ::soci::use(blk_id), ::soci::use(obj_id);
-        assert(blob.get_len() == 0);
-        
-        blob.write(0, (const char*)point_data, point_data_length);
+        // ::soci::blob blob(*m_session);
+        // ::soci::indicator ind;
+        // oss << "SELECT POINTS from "<< boost::to_lower_copy(block_table) << " WHERE BLK_ID =:blk_id and obj_id = :obj_id";
+        // m_session->once << oss.str(), ::soci::into(blob, ind), ::soci::use(blk_id), ::soci::use(obj_id);
+        // assert(blob.get_len() == 0);
+        // 
+        // blob.write(0, (const char*)point_data, point_data_length);
 
         // m_session->commit();
     }
