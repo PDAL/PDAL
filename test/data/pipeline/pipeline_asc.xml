@@ -32,6 +32,9 @@
                     <Option name="dimension">
                         Blue
                     </Option>
+                    <Option name="dimension">
+                        PointSourceId
+                    </Option>                    
                 </Options>
             </Option>
             <Filter type="filters.inplacereprojection">

@@ -173,7 +173,7 @@ std::vector<boost::tuple<std::string, std::string> >  Writer::getDimensionOrder(
             boost::optional<Dimension const&> d = schema.getDimensionOptional(*t);
             if (d)
             {
-                if (boost::iequals(d->getName(), *t))
+                if (boost::equals(d->getName(), *t))
                 {
                     output.push_back( boost::tuple<std::string, std::string>(d->getName(), d->getNamespace()));
 
@@ -195,7 +195,7 @@ std::vector<boost::tuple<std::string, std::string> >  Writer::getDimensionOrder(
             std::map<std::string, bool>::const_iterator i = all_names.begin();
             while (i!= all_names.end())
             {
-                output.push_back(i->first);
+                output.push_back( boost::tuple<std::string, std::string>(i->first, ""));
                 ++i;
             }
         } 
@@ -248,15 +248,24 @@ void Writer::WriteHeader(pdal::Schema const& schema)
     log()->get(logDEBUG) << "Dimension order specified '" << order << "'" << std::endl;
     
     std::vector<boost::tuple<std::string, std::string> > dimensions = getDimensionOrder(schema);
+    log()->get(logDEBUG) << "dimensions.size(): " << dimensions.size( ) <<std::endl;
     std::ostringstream oss;
     oss << "Dimension order obtained '";
-    for (std::vector<boost::tuple<std::string, std::string> >::const_iterator i = dimensions.begin(); i != dimensions.end(); ++i)
+    for (std::vector<boost::tuple<std::string, std::string> >::const_iterator i = dimensions.begin(); i != dimensions.end(); i++)
     {
-        Dimension const& d = schema.getDimension(i->get<0>(), i->get<1>());
+        
+        
+        std::string name = i->get<0>();
+        std::string namespc = i->get<1>();
+        
+        Dimension const& d = schema.getDimension(name, namespc);
         if (d.isIgnored())
         {
             i++;
-            continue;
+            if (i == dimensions.end())
+                break;
+            else
+                continue;
         }
                 
         if (i != dimensions.begin())
@@ -275,7 +284,10 @@ void Writer::WriteHeader(pdal::Schema const& schema)
         if (d.isIgnored())
         {
             iter++;
-            continue;
+            if (iter == dimensions.end())
+                break;
+            else
+                continue;
         }
         if (isQuoted)
             *m_stream << "\"";
