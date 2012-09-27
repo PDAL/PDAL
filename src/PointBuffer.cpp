@@ -131,7 +131,7 @@ void PointBuffer::getData(boost::uint8_t** data, std::size_t* array_size) const
 }
 
 
-pdal::Bounds<double> PointBuffer::calculateBounds(PointBuffer const& buffer)
+pdal::Bounds<double> PointBuffer::calculateBounds(bool is3d) const
 {
     pdal::Schema const& schema = getSchema();
 
@@ -143,23 +143,35 @@ pdal::Bounds<double> PointBuffer::calculateBounds(PointBuffer const& buffer)
 
 
     bool first = true;
-    for (boost::uint32_t pointIndex=0; pointIndex<buffer.getNumPoints(); pointIndex++)
+    for (boost::uint32_t pointIndex=0; pointIndex<getNumPoints(); pointIndex++)
     {
-        const boost::int32_t xi = getField<boost::int32_t>(*dimX, pointIndex);
-        const boost::int32_t yi = getField<boost::int32_t>(*dimY, pointIndex);
-        const boost::int32_t zi = getField<boost::int32_t>(*dimZ, pointIndex);
+        boost::int32_t xi = getField<boost::int32_t>(*dimX, pointIndex);
+        boost::int32_t yi = getField<boost::int32_t>(*dimY, pointIndex);
+        boost::int32_t zi = getField<boost::int32_t>(*dimZ, pointIndex);
 
-        const double xd = dimX->applyScaling(xi);
-        const double yd = dimY->applyScaling(yi);
-        const double zd = dimZ->applyScaling(zi);
-
-        Vector<double> v(xd, yd, zd);
-        if (first)
+        double xd = dimX->applyScaling(xi);
+        double yd = dimY->applyScaling(yi);
+        
+        if (is3d)
         {
-            output = pdal::Bounds<double>(xd, yd, zd, xd, yd, zd);
-            first = false;
+            double zd = dimZ->applyScaling(zi);
+            Vector<double> v(xd, yd, zd);
+            if (first)
+            {
+                output = pdal::Bounds<double>(xd, yd, zd, xd, yd, zd);
+                first = false;
+            }
+            output.grow(v);
+        } else 
+        {
+            Vector<double> v(xd, yd);
+            if (first)
+            {
+                output = pdal::Bounds<double>(xd, yd, xd, yd);
+                first = false;
+            }
+            output.grow(v);
         }
-        output.grow(v);
     }
 
     return output;
