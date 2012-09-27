@@ -446,18 +446,21 @@ public:
         
         oss << "POLYGON ((";
         
-        for (typename RangeVector::size_type i = 0; i < m_ranges.size(); ++i)
+        if (m_ranges.size() == 2)
         {
-            oss << getMinimum(i) << " " << getMaximum(i);
-            if (m_ranges.size()-1 == i)
-            {
-               // last coordinates need to be the first coordinates
-                oss << ", " << getMaximum(0) << " " << getMaximum(0);
-            } else
-            {
-                oss << ", ";
-
-            }
+            oss << getMinimum(0) << " " << getMinimum(1) << ", ";
+            oss << getMinimum(0) << " " << getMaximum(1) << ", ";
+            oss << getMaximum(0) << " " << getMaximum(1) << ", ";
+            oss << getMaximum(0) << " " << getMinimum(1) << ", ";
+            oss << getMinimum(0) << " " << getMinimum(1);
+            
+        } else if (m_ranges.size() == 3)
+        {
+            oss << getMinimum(0) << " " << getMinimum(1) << " " << getMaximum(2) <<", ";
+            oss << getMinimum(0) << " " << getMaximum(1) << " " << getMaximum(2) << ", ";
+            oss << getMaximum(0) << " " << getMaximum(1) << " " << getMaximum(2) << ", ";
+            oss << getMaximum(0) << " " << getMinimum(1) << " " << getMaximum(2) << ", ";
+            oss << getMinimum(0) << " " << getMinimum(1) << " " << getMaximum(2);
         }
         oss << "))";
         return oss.str();
