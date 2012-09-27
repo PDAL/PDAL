@@ -79,6 +79,7 @@ Writer::Writer(Stage& prevStage, const Options& options)
     , m_type(Database_Postgresql)
     , m_doCreateIndex(false)
     , m_bounds(Bounds<double>())
+    , m_sdo_pc_is_initialized(false)
 
 {
 
@@ -152,7 +153,9 @@ void Writer::writeBegin(boost::uint64_t /*targetNumPointsToWrite*/)
     std::string block_table = getOptions().getValueOrThrow<std::string>("block_table");
     std::string cloud_table = getOptions().getValueOrThrow<std::string>("cloud_table");
     std::string cloud_column = getOptions().getValueOrThrow<std::string>("cloud_column");
-
+    
+    m_session->begin();
+    
     bool bHaveBlockTable = CheckTableExists(block_table);
     bool bHaveCloudTable = CheckTableExists(cloud_table);
     
@@ -181,8 +184,7 @@ void Writer::writeBegin(boost::uint64_t /*targetNumPointsToWrite*/)
             // filename to open, we'll use that instead.
             sql = pre_sql;
         }
-        ::soci::statement st = m_session->prepare << sql;
-        st.execute();
+        m_session->once << sql;
     }
     
     if (!bHaveCloudTable)
@@ -239,8 +241,7 @@ void Writer::CreateBlockTable(std::string const& name, boost::uint32_t srid)
         // We just create a new block table as a copy of 
         // the SDO_PC_BLK_TYPE
         oss << "CREATE TABLE " << name << " AS SELECT * FROM MDSYS.SDO_PC_BLK_TABLE";
-        ::soci::statement st = m_session->prepare << oss.str();
-        st.execute();
+        m_session->once << oss.str();
         oss.str("");
     }
     else if (m_type == Database_Postgresql)
@@ -249,21 +250,18 @@ void Writer::CreateBlockTable(std::string const& name, boost::uint32_t srid)
             << " (obj_id INTEGER,"
             << " blk_id INTEGER,"
             << " num_points INTEGER,"
-            << " points BYTEA"
+            << " points oid"
             << ")";
 
-        ::soci::statement create = m_session->prepare << oss.str();
-        create.execute();
+        m_session->once << oss.str();
         oss.str("");
         
         {
             oss << "SELECT AddGeometryColumn('', '" << boost::to_lower_copy(name) 
                 << "'," << "'blk_extent'" << "," 
-                << srid << ", 'POLYGON', 2)";
-            ::soci::statement geom = m_session->prepare << oss.str();
-            geom.execute();
+                << srid << ", 'POLYGON', 3)";
+            m_session->once << oss.str();
             oss.str("");
-            
         }
     }
 }
@@ -276,9 +274,7 @@ void Writer::DeleteBlockTable(std::string const& cloud_table_name,
 
     // Delete all the items from the table first
     oss << "DELETE FROM " << block_table_name;
-    ::soci::statement st = m_session->prepare << oss.str();
-    st.execute();
-
+    m_session->once << oss.str();
     oss.str("");
 
     // Drop the table's dependencies 
@@ -292,8 +288,7 @@ void Writer::DeleteBlockTable(std::string const& cloud_table_name,
             "', '"
             << boost::to_upper_copy(cloud_column_name) <<
             "'); end;";
-        ::soci::statement st = m_session->prepare << oss.str();
-        st.execute();
+        m_session->once << oss.str();
         oss.str("");
     }
     
@@ -304,25 +299,22 @@ void Writer::DeleteBlockTable(std::string const& cloud_table_name,
         // Oracle upper cases the table name when inserting it in the
         // USER_SDO_GEOM_METADATA.  
         oss << "DELETE FROM USER_SDO_GEOM_METADATA WHERE TABLE_NAME='" << boost::to_upper_copy(block_table_name) << "'" ;
-        ::soci::statement st = m_session->prepare << oss.str();
-        st.execute();
+        m_session->once << oss.str();
         oss.str("");
                 
         oss << "DROP TABLE " << block_table_name;    
-        ::soci::statement drop = m_session->prepare << oss.str();
-        drop.execute();
+        m_session->once << oss.str();
         oss.str("");
+
     } else if (m_type == Database_Postgresql)
     {
         // We need to clean up the geometry column before dropping the table
         oss << "SELECT DropGeometryColumn('" << boost::to_lower_copy(block_table_name) << "', 'blk_extent')";    
-        ::soci::statement column = m_session->prepare << oss.str();
-        column.execute();
+        m_session->once << oss.str();
         oss.str("");
 
         oss << "DROP TABLE " << boost::to_lower_copy(block_table_name);    
-        ::soci::statement drop = m_session->prepare << oss.str();
-        drop.execute();
+        m_session->once << oss.str();
         oss.str("");
     }
 
@@ -336,23 +328,24 @@ void Writer::CreateCloudTable(std::string const& name, boost::uint32_t srid)
 
     if (m_type == Database_Postgresql)
     {
+        oss << "CREATE SEQUENCE " << boost::to_lower_copy(name)<<"_id_seq";    
+        m_session->once << oss.str();
+        oss.str("");
+
         oss << "CREATE TABLE " << boost::to_lower_copy(name) 
-            << " (id INTEGER,"
-            << " schema XML"
+            << " (id INTEGER DEFAULT NEXTVAL('"  << boost::to_lower_copy(name)<<"_id_seq"  <<"'),"
+            << " schema XML,"
+            << " block_table varchar(64)"
             << ")";
 
-        ::soci::statement create = m_session->prepare << oss.str();
-        create.execute();
+        m_session->once << oss.str();
         oss.str("");
-        
         {
             oss << "SELECT AddGeometryColumn('', '" << boost::to_lower_copy(name) 
                 << "'," << "'extent'" << "," 
-                << srid << ", 'POLYGON', 2)";
-            ::soci::statement geom = m_session->prepare << oss.str();
-            geom.execute();
+                << srid << ", 'POLYGON', 3)";
+            m_session->once << oss.str();
             oss.str("");
-            
         }
     }
 }
@@ -364,38 +357,75 @@ void Writer::DeleteCloudTable(std::string const& cloud_table_name,
 
     // Delete all the items from the table first
     oss << "DELETE FROM " << cloud_table_name;
-    ::soci::statement st = m_session->prepare << oss.str();
-    st.execute();
-
+    m_session->once << oss.str();
     oss.str("");
     
     // Go drop the table
     if (m_type == Database_Oracle)
     {
-        // We need to clean up the geometry column before dropping the table
-        // Oracle upper cases the table name when inserting it in the
-        // USER_SDO_GEOM_METADATA.  
-        oss << "DELETE FROM USER_SDO_GEOM_METADATA WHERE TABLE_NAME='" << boost::to_upper_copy(cloud_table_name) << "'" ;
-        ::soci::statement st = m_session->prepare << oss.str();
-        st.execute();
+
+        try
+        {
+            // We need to clean up the geometry column before dropping the table
+            // Oracle upper cases the table name when inserting it in the
+            // USER_SDO_GEOM_METADATA.  
+            oss << "DELETE FROM USER_SDO_GEOM_METADATA WHERE TABLE_NAME='" << boost::to_upper_copy(cloud_table_name) << "'" ;
+            m_session->once << oss.str();   
+            oss.str("");
+        } catch (::soci::soci_error const& e)
+        {
+            
+        }
+
         oss.str("");
                 
-        oss << "DROP TABLE " << cloud_table_name;    
-        ::soci::statement drop = m_session->prepare << oss.str();
-        drop.execute();
+        try
+        {
+            oss << "DROP TABLE " << cloud_table_name;    
+            m_session->once << oss.str();
+            oss.str("");
+        } catch (::soci::soci_error const& e)
+        {
+            
+        }
         oss.str("");
+
     } else if (m_type == Database_Postgresql)
     {
         // We need to clean up the geometry column before dropping the table
-        oss << "SELECT DropGeometryColumn('" << boost::to_lower_copy(cloud_table_name) << "', 'extent')";    
-        ::soci::statement column = m_session->prepare << oss.str();
-        column.execute();
+
+        try
+        {
+            oss << "SELECT DropGeometryColumn('" << boost::to_lower_copy(cloud_table_name) << "', 'extent')";    
+            m_session->once << oss.str();       
+        } catch (::soci::soci_error const& e)
+        {
+            
+        }
         oss.str("");
 
-        oss << "DROP TABLE " << boost::to_lower_copy(cloud_table_name);    
-        ::soci::statement drop = m_session->prepare << oss.str();
-        drop.execute();
+
+        try
+        {
+            oss << "DROP TABLE " << boost::to_lower_copy(cloud_table_name);    
+            m_session->once << oss.str();
+        } catch (::soci::soci_error const& e)
+        {
+            
+        }
         oss.str("");
+
+
+        try
+        {
+            oss << "DROP SEQUENCE " << boost::to_lower_copy(cloud_table_name)<<"_id_seq";    
+            m_session->once << oss.str();       
+        } catch (::soci::soci_error const& e)
+        {
+            
+        }
+        oss.str("");
+        
     }
 
 }
@@ -422,17 +452,14 @@ void Writer::CreateIndexes( std::string const& table_name,
         {
             oss <<" PARAMETERS('sdo_indx_dims=3')";
         }            
-        ::soci::statement st = m_session->prepare << oss.str();
-        st.execute();
+        m_session->once << oss.str();
         oss.str("");        
     } else if (m_type == Database_Postgresql)
     {
         oss << "CREATE INDEX "<< index_name << " on "
             << boost::to_lower_copy(table_name) << " USING GIST ("<< boost::to_lower_copy(spatial_column_name) << ")";
-        ::soci::statement st = m_session->prepare << oss.str();
-        st.execute();
+        m_session->once << oss.str();
         oss.str("");        
-        
     }
 
     // Primary key
@@ -449,8 +476,7 @@ void Writer::CreateIndexes( std::string const& table_name,
             oss <<" ENABLE VALIDATE";
         }
 
-        ::soci::statement primary = m_session->prepare << oss.str();
-        primary.execute();
+        m_session->once << oss.str();
         
     }
     else
@@ -462,9 +488,7 @@ void Writer::CreateIndexes( std::string const& table_name,
             "  PRIMARY KEY (ID)";
 
 
-        ::soci::statement primary = m_session->prepare << oss.str();
-        primary.execute();
-        
+        m_session->once << oss.str();
     }
 }
 
@@ -506,7 +530,7 @@ std::string Writer::loadWKT(std::string const& filename_or_wkt) const
             if (!IsValidWKT(filename_or_wkt))
             {
                 std::ostringstream oss;
-                oss << "WKT for base_table_boundary_wkt was not valid and '" << filename_or_wkt
+                oss << "WKT for not valid and '" << filename_or_wkt
                     << "' doesn't exist as a file";
                 throw pdal::pdal_error(oss.str());
             }
@@ -518,7 +542,7 @@ std::string Writer::loadWKT(std::string const& filename_or_wkt) const
             if (!IsValidWKT(wkt))
             {
                 std::ostringstream oss;
-                oss << "WKT for base_table_boundary_wkt was from file '" << filename_or_wkt
+                oss << "WKT for was from file '" << filename_or_wkt
                     << "' is not valid";
                 throw pdal::pdal_error(oss.str());
             }
@@ -604,8 +628,7 @@ void Writer::CreateSDOEntry(std::string const& block_table,
     }
     oss << ")," << s_srid.str() << ")";
 
-    ::soci::statement st = m_session->prepare << oss.str();
-    st.execute();
+    m_session->once << oss.str();
 
     oss.str("");
 
@@ -636,16 +659,334 @@ void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
                         m_bounds,
                         is3d);
     }
+    
+    m_session->commit();
     return;
 }
 
-
-boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
+void Writer::writeBufferBegin(PointBuffer const& data)
 {
+    if (m_sdo_pc_is_initialized) return;
 
-    return data.getNumPoints();
+    CreateCloud(data.getSchema());
+    m_sdo_pc_is_initialized = true;
+
+    return;
+
 }
 
+void Writer::CreateCloud(Schema const& buffer_schema)
+{
+    std::string cloud_table = getOptions().getValueOrThrow<std::string>("cloud_table");
+    std::string block_table = getOptions().getValueOrThrow<std::string>("block_table");
+    
+    std::ostringstream oss;
+    
+    pdal::Schema output_schema(buffer_schema);
+    bool pack = getOptions().getValueOrDefault<bool>("pack_ignored_fields", true);
+    if (pack)
+    {
+        output_schema = getPackedSchema(buffer_schema);
+    }
+    
+    std::string bounds = getOptions().getValueOrDefault<std::string>("cloud_boundary_wkt", "");
+    if (bounds.size())
+    {
+        log()->get(logDEBUG2) << "have cloud_boundary_wkt of size " << bounds.size() << std::endl;
+        bounds = loadWKT(bounds);
+        
+    }
+    
+    if (m_type == Database_Postgresql)
+    {
+
+        oss << "INSERT INTO " << boost::to_lower_copy(cloud_table)  << "(id, block_table, schema) VALUES (DEFAULT,'" << boost::to_lower_copy(block_table)  << "',:xml) RETURNING ID";
+        std::string xml = pdal::Schema::to_xml(output_schema);
+        m_session->once << oss.str(), ::soci::use(xml);
+        oss.str("");
+        
+        int id;
+        oss << "SELECT CURRVAL('"<< boost::to_lower_copy(cloud_table)  <<"_id_seq')";
+        (m_session->once << oss.str(), ::soci::into(id));
+        oss.str("");
+        
+        log()->get(logDEBUG) << "Point cloud id was " << id << std::endl;
+        try
+        {
+            Option& pc_id = getOptions().getOptionByRef("pc_id");
+            pc_id.setValue(id);
+        }
+        catch (pdal::option_not_found&)
+        {
+            Option pc_id("pc_id", id, "Point Cloud Id");
+            getOptions().add(pc_id);
+        }
+        
+        if (bounds.size())
+        {
+            boost::uint32_t srid = getOptions().getValueOrDefault<boost::uint32_t>("srid", 4326);
+            oss << "UPDATE " << boost::to_lower_copy(cloud_table)  << " SET extent=ST_GeometryFromText(:wkt,:srid) where ID=:id";
+            m_session->once << oss.str(), ::soci::use(bounds, "wkt"), ::soci::use(srid,"srid"), ::soci::use(id, "id");
+            
+        }
+    }
+}
+
+boost::uint32_t Writer::writeBuffer(const PointBuffer& buffer)
+{
+    boost::uint32_t numPoints = buffer.getNumPoints();
+
+    WriteBlock(buffer);
+
+    return numPoints;
+}
+
+bool Writer::WriteBlock(PointBuffer const& buffer)
+{
+
+    boost::uint8_t* point_data;
+    boost::uint32_t point_data_length;
+    boost::uint32_t schema_byte_size;
+    
+    
+    bool pack = getOptions().getValueOrDefault<bool>("pack_ignored_fields", true);
+    if (pack)
+        PackPointData(buffer, &point_data, point_data_length, schema_byte_size);
+    else
+    {
+        point_data = buffer.getData(0);
+        point_data_length = buffer.getSchema().getByteSize() * buffer.getNumPoints();
+    }
+    
+    std::string block_table = getOptions().getValueOrThrow<std::string>("block_table");
+
+    // // Pluck the block id out of the first point in the buffer
+    pdal::Schema const& schema = buffer.getSchema();
+    Dimension const& blockDim = schema.getDimension("BlockID");
+    
+    boost::int32_t blk_id  = buffer.getField<boost::int32_t>(blockDim, 0);    
+    boost::int32_t obj_id = getOptions().getValueOrThrow<boost::int32_t>("pc_id");
+    boost::int64_t num_points = static_cast<boost::int64_t>(buffer.getNumPoints());
+    if (m_type == Database_Postgresql)
+    {
+        std::stringstream oss;
+        oss << "INSERT INTO " << boost::to_lower_copy(block_table) 
+            << " (obj_id, blk_id, num_points, points) VALUES (" 
+            << " :obj_id, :blk_id, :num_points, lo_creat(-1))";
+
+        // m_session->begin();
+
+        ::soci::statement st = (m_session->prepare << oss.str(), ::soci::use(obj_id, "obj_id"), ::soci::use(blk_id, "blk_id"), ::soci::use(num_points, "num_points"));
+        st.execute(true);
+        oss.str("");
+        
+        ::soci::blob blob(*m_session);
+        ::soci::indicator ind;
+        oss << "SELECT POINTS from "<< boost::to_lower_copy(block_table) << " WHERE BLK_ID =:blk_id and obj_id = :obj_id";
+        m_session->once << oss.str(), ::soci::into(blob, ind), ::soci::use(blk_id), ::soci::use(obj_id);
+        assert(blob.get_len() == 0);
+        
+        blob.write(0, (const char*)point_data, point_data_length);
+
+        // m_session->commit();
+    }
+    // bool bUsePartition = m_block_table_partition_column.size() != 0;
+    // 
+    // // Pluck the block id out of the first point in the buffer
+    // pdal::Schema const& schema = buffer.getSchema();
+    // Dimension const& blockDim = schema.getDimension("BlockID");
+    // 
+    // boost::int32_t block_id  = buffer.getField<boost::int32_t>(blockDim, 0);
+    // 
+    // std::ostringstream oss;
+    // std::ostringstream partition;
+    // 
+    // if (bUsePartition)
+    // {
+    //     partition << "," << m_block_table_partition_column;
+    // }
+    // 
+    // oss << "INSERT INTO "<< m_block_table_name <<
+    //     "(OBJ_ID, BLK_ID, NUM_POINTS, POINTS,   "
+    //     "PCBLK_MIN_RES, BLK_EXTENT, PCBLK_MAX_RES, NUM_UNSORTED_POINTS, PT_SORT_DIM";
+    // if (bUsePartition)
+    //     oss << partition.str();
+    // oss << ") "
+    //     "VALUES ( :1, :2, :3, :4, 1, mdsys.sdo_geometry(:5, :6, null,:7, :8)"
+    //     ", 1, 0, 1";
+    // if (bUsePartition)
+    //     oss << ", :9";
+    // 
+    // oss <<")";
+    // 
+    // // TODO: If gotdata == false below, this memory probably leaks --mloskot
+    // OCILobLocator** locator =(OCILobLocator**) VSIMalloc(sizeof(OCILobLocator*) * 1);
+    // 
+    // Statement statement = Statement(m_connection->CreateStatement(oss.str().c_str()));
+    // 
+    // 
+    // long* p_pc_id = (long*) malloc(1 * sizeof(long));
+    // p_pc_id[0] = m_pc_id;
+    // 
+    // long* p_result_id = (long*) malloc(1 * sizeof(long));
+    // p_result_id[0] = (long)block_id;
+    // 
+    // long* p_num_points = (long*) malloc(1 * sizeof(long));
+    // p_num_points[0] = (long)buffer.getNumPoints();
+    // 
+    // // std::cout << "point count on write: " << buffer.getNumPoints() << std::endl;
+    // 
+    // 
+    // // :1
+    // statement->Bind(&m_pc_id);
+    // 
+    // // :2
+    // statement->Bind(p_result_id);
+    // 
+    // // :3
+    // statement->Bind(p_num_points);
+    // 
+    // // :4
+    // statement->Define(locator, 1);
+    // 
+    // 
+    // // std::vector<liblas::uint8_t> data;
+    // // bool gotdata = GetResultData(result, reader, data, 3);
+    // // if (! gotdata) throw std::runtime_error("unable to fetch point data byte array");
+    // // boost::uint8_t* point_data = buffer.getData(0);
+    // boost::uint8_t* point_data;
+    // boost::uint32_t point_data_length;
+    // boost::uint32_t schema_byte_size;
+    // 
+    // bool pack = getOptions().getValueOrDefault<bool>("pack_ignored_fields", true);
+    // if (pack)
+    //     PackPointData(buffer, &point_data, point_data_length, schema_byte_size);
+    // else
+    // {
+    //     point_data = buffer.getData(0);
+    //     point_data_length = buffer.getSchema().getByteSize() * buffer.getNumPoints();
+    // }
+    // 
+    // // statement->Bind((char*)point_data,(long)(buffer.getSchema().getByteSize()*buffer.getNumPoints()));
+    // statement->Bind((char*)point_data,(long)(point_data_length));
+    // 
+    // // :5
+    // long* p_gtype = (long*) malloc(1 * sizeof(long));
+    // p_gtype[0] = m_gtype;
+    // 
+    // statement->Bind(p_gtype);
+    // 
+    // // :6
+    // long* p_srid  = 0;
+    // 
+    // 
+    // if (m_srid != 0)
+    // {
+    //     p_srid = (long*) malloc(1 * sizeof(long));
+    //     p_srid[0] = m_srid;
+    // }
+    // statement->Bind(p_srid);
+    // 
+    // // :7
+    // OCIArray* sdo_elem_info=0;
+    // m_connection->CreateType(&sdo_elem_info, m_connection->GetElemInfoType());
+    // SetElements(statement, sdo_elem_info);
+    // statement->Bind(&sdo_elem_info, m_connection->GetElemInfoType());
+    // 
+    // // :8
+    // OCIArray* sdo_ordinates=0;
+    // m_connection->CreateType(&sdo_ordinates, m_connection->GetOrdinateType());
+    // 
+    // // x0, x1, y0, y1, z0, z1, bUse3d
+    // pdal::Bounds<double> bounds = CalculateBounds(buffer);
+    // SetOrdinates(statement, sdo_ordinates, bounds);
+    // statement->Bind(&sdo_ordinates, m_connection->GetOrdinateType());
+    // 
+    // // :9
+    // long* p_partition_d = 0;
+    // if (bUsePartition)
+    // {
+    //     p_partition_d = (long*) malloc(1 * sizeof(long));
+    //     p_partition_d[0] = m_block_table_partition_value;
+    //     statement->Bind(p_partition_d);
+    // }
+    // 
+    // try
+    // {
+    //     statement->Execute();
+    // }
+    // catch (std::runtime_error const& e)
+    // {
+    //     std::ostringstream oss;
+    //     oss << "Failed to insert block # into '" << m_block_table_name << "' table. Does the table exist? "  << std::endl << e.what() << std::endl;
+    //     throw std::runtime_error(oss.str());
+    // }
+    // 
+    // oss.str("");
+    // 
+    // 
+    // OWStatement::Free(locator, 1);
+    // 
+    // if (p_pc_id != 0) free(p_pc_id);
+    // if (p_result_id != 0) free(p_result_id);
+    // if (p_num_points != 0) free(p_num_points);
+    // if (p_gtype != 0) free(p_gtype);
+    // if (p_srid != 0) free(p_srid);
+    // if (p_partition_d != 0) free(p_partition_d);
+    // 
+    // m_connection->DestroyType(&sdo_elem_info);
+    // m_connection->DestroyType(&sdo_ordinates);
+
+
+
+
+    return true;
+}
+
+
+void Writer::PackPointData(PointBuffer const& buffer,
+                           boost::uint8_t** point_data,
+                           boost::uint32_t& point_data_len,
+                           boost::uint32_t& schema_byte_size)
+
+{
+    // Creates a new buffer that has the ignored dimensions removed from 
+    // it.
+    
+    schema::index_by_index const& idx = buffer.getSchema().getDimensions().get<schema::index>();
+
+    schema_byte_size = 0;
+    schema::index_by_index::size_type i(0);
+    for (i = 0; i < idx.size(); ++i)
+    {
+        if (! idx[i].isIgnored())
+            schema_byte_size = schema_byte_size+idx[i].getByteSize();
+    }
+    
+    log()->get(logDEBUG) << "Packed schema byte size " << schema_byte_size << std::endl;;
+
+    point_data_len = buffer.getNumPoints() * schema_byte_size;
+    *point_data = new boost::uint8_t[point_data_len];
+    
+    boost::uint8_t* current_position = *point_data;
+    
+    for (boost::uint32_t i = 0; i < buffer.getNumPoints(); ++i)
+    {
+        boost::uint8_t* data = buffer.getData(i);
+        for (boost::uint32_t d = 0; d < idx.size(); ++d)
+        {
+            if (! idx[d].isIgnored())
+            {
+                memcpy(current_position, data, idx[d].getByteSize());
+                current_position = current_position+idx[d].getByteSize();
+            }
+            data = data + idx[d].getByteSize();
+                
+        }
+    }
+
+    
+}
 
 }
 }

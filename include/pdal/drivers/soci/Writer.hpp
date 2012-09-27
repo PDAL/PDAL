@@ -124,6 +124,8 @@ public:
 
 protected:
     virtual void writeBegin(boost::uint64_t targetNumPointsToWrite);
+    virtual void writeBufferBegin(PointBuffer const&);
+
     virtual boost::uint32_t writeBuffer(const PointBuffer&);
     virtual void writeEnd(boost::uint64_t actualNumPointsWritten);
 
@@ -151,6 +153,13 @@ private:
     Schema getPackedSchema( Schema const& schema) const;
     bool IsValidWKT(std::string const& wkt) const;
     std::string loadWKT(std::string const& filename_or_wkt) const;
+    void CreateCloud(Schema const& buffer_schema);    
+
+    void PackPointData( PointBuffer const& buffer,
+                        boost::uint8_t** point_data,
+                        boost::uint32_t& point_data_len,
+                        boost::uint32_t& schema_byte_size);
+    bool WriteBlock(PointBuffer const& buffer);                        
     
 #ifdef PDAL_HAVE_SOCI
     ::soci::session* m_session;
@@ -161,6 +170,7 @@ private:
     Database_Type m_type;
     bool m_doCreateIndex;
     pdal::Bounds<double> m_bounds; // Bounds of the entire point cloud    
+    bool m_sdo_pc_is_initialized;
 };
 
 }
