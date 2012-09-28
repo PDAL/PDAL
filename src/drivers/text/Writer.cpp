@@ -211,7 +211,8 @@ std::vector<boost::tuple<std::string, std::string> >  Writer::getDimensionOrder(
         schema::index_by_index::const_iterator iter = dims.begin();
         while (iter != dims.end())
         {
-            output.push_back(iter->getName());
+            if (!iter->isIgnored())
+                output.push_back(iter->getName());
             ++iter;
         }        
     }
