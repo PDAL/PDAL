@@ -73,6 +73,7 @@ Colorization::Colorization(Stage& prevStage, const Options& options)
 
 Colorization::~Colorization()
 {
+#ifdef PDAL_HAVE_GDAL
     if (m_ds != 0)
     {
         GDALClose(m_ds);
@@ -83,7 +84,9 @@ Colorization::~Colorization()
     
     if (m_gdal_debug)
         delete m_gdal_debug;
+#endif
 }
+
 void Colorization::initialize()
 {
     Filter::initialize();
