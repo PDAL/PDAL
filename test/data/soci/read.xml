@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Pipeline version="1.0">
+    <Writer type="drivers.las.writer">
+        <Option name="filename">
+            written-from-oracle.las
+        </Option>
+        <Option name="compression">
+            false
+        </Option>
+        <Reader type="drivers.soci.reader">
+            <Option name="query">
+                SELECT CLOUD FROM SIMPLE_CLOUD where id in (1,2)
+            </Option>
+            <Option name="xml_schema_dump">
+                oracle-schema.xml
+            </Option>
+            <Option name="connection">
+                host='localhost' dbname='lidar' user='hobu'
+            </Option>
+            <Option name="debug">
+                true
+            </Option>
+            <Option name="verbose">
+                3
+            </Option>
+        </Reader>
+    </Writer>
+</Pipeline>

@@ -528,7 +528,7 @@ Schema Writer::getPackedSchema( Schema const& schema) const
     return clean_schema;    
 }
 
-std::string Writer::loadWKT(std::string const& filename_or_wkt) const
+std::string Writer::loadGeometryWKT(std::string const& filename_or_wkt) const
 {
     std::ostringstream wkt_s;
 
@@ -536,7 +536,7 @@ std::string Writer::loadWKT(std::string const& filename_or_wkt) const
     {
         if (!FileUtils::fileExists(filename_or_wkt))
         {
-            if (!IsValidWKT(filename_or_wkt))
+            if (!IsValidGeometryWKT(filename_or_wkt))
             {
                 std::ostringstream oss;
                 oss << "WKT for not valid and '" << filename_or_wkt
@@ -548,7 +548,7 @@ std::string Writer::loadWKT(std::string const& filename_or_wkt) const
         else
         {
             std::string wkt = FileUtils::readFileAsString(filename_or_wkt);
-            if (!IsValidWKT(wkt))
+            if (!IsValidGeometryWKT(wkt))
             {
                 std::ostringstream oss;
                 oss << "WKT for was from file '" << filename_or_wkt
@@ -561,7 +561,7 @@ std::string Writer::loadWKT(std::string const& filename_or_wkt) const
     return wkt_s.str();
 }
 
-bool Writer::IsValidWKT(std::string const& input) const
+bool Writer::IsValidGeometryWKT(std::string const& input) const
 {
 #ifdef PDAL_HAVE_GDAL
 
@@ -702,7 +702,7 @@ void Writer::CreateCloud(Schema const& buffer_schema)
     if (bounds.size())
     {
         log()->get(logDEBUG2) << "have cloud_boundary_wkt of size " << bounds.size() << std::endl;
-        bounds = loadWKT(bounds);
+        bounds = loadGeometryWKT(bounds);
         
     }
     

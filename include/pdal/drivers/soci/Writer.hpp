@@ -151,8 +151,8 @@ private:
                         pdal::Bounds<double> bounds,
                         bool is3d);
     Schema getPackedSchema( Schema const& schema) const;
-    bool IsValidWKT(std::string const& wkt) const;
-    std::string loadWKT(std::string const& filename_or_wkt) const;
+    bool IsValidGeometryWKT(std::string const& wkt) const;
+    std::string loadGeometryWKT(std::string const& filename_or_wkt) const;
     void CreateCloud(Schema const& buffer_schema);    
 
     void PackPointData( PointBuffer const& buffer,
