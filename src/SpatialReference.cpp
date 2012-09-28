@@ -284,7 +284,6 @@ bool SpatialReference::isGeographic() const
     
     return geog;
 #else
-    boost::ignore_unused_variable_warning(v);
     throw std::runtime_error("GDAL is not available, SpatialReference could not determine if isGeographic");
 #endif
 }

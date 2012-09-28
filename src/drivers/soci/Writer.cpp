@@ -152,7 +152,7 @@ void Writer::writeBegin(boost::uint64_t /*targetNumPointsToWrite*/)
 {
     std::string block_table = getOptions().getValueOrThrow<std::string>("block_table");
     std::string cloud_table = getOptions().getValueOrThrow<std::string>("cloud_table");
-    std::string cloud_column = getOptions().getValueOrThrow<std::string>("cloud_column");
+    std::string cloud_column = getOptions().getValueOrDefault<std::string>("cloud_column", "id");
     
     m_session->begin();
     
@@ -246,8 +246,12 @@ void Writer::CreateBlockTable(std::string const& name, boost::uint32_t srid)
     }
     else if (m_type == Database_Postgresql)
     {
+        std::string cloud_column = getOptions().getValueOrDefault<std::string>("cloud_column", "id");
+        std::string cloud_table = getOptions().getValueOrThrow<std::string>("cloud_table");
+        
         oss << "CREATE TABLE " << boost::to_lower_copy(name) 
-            << " (obj_id INTEGER,"
+            << "(" << boost::to_lower_copy(cloud_column)  << " INTEGER REFERENCES " << boost::to_lower_copy(cloud_table)  <<","
+            // << " obj_id INTEGER,"
             << " blk_id INTEGER,"
             << " num_points INTEGER,"
             << " points bytea"
@@ -261,7 +265,7 @@ void Writer::CreateBlockTable(std::string const& name, boost::uint32_t srid)
             boost::uint32_t nDim = is3d ? 3 : 2;
 
             oss << "SELECT AddGeometryColumn('', '" << boost::to_lower_copy(name) 
-                << "'," << "'blk_extent'" << "," 
+                << "'," << "'extent'" << "," 
                 << srid << ", 'POLYGON', " << nDim << ")";
             m_session->once << oss.str();
             oss.str("");
@@ -312,7 +316,7 @@ void Writer::DeleteBlockTable(std::string const& cloud_table_name,
     } else if (m_type == Database_Postgresql)
     {
         // We need to clean up the geometry column before dropping the table
-        oss << "SELECT DropGeometryColumn('" << boost::to_lower_copy(block_table_name) << "', 'blk_extent')";    
+        oss << "SELECT DropGeometryColumn('" << boost::to_lower_copy(block_table_name) << "', 'extent')";    
         m_session->once << oss.str();
         oss.str("");
 
@@ -334,11 +338,13 @@ void Writer::CreateCloudTable(std::string const& name, boost::uint32_t srid)
         oss << "CREATE SEQUENCE " << boost::to_lower_copy(name)<<"_id_seq";    
         m_session->once << oss.str();
         oss.str("");
-
+        
+        std::string cloud_column = getOptions().getValueOrDefault<std::string>("cloud_column", "id");
         oss << "CREATE TABLE " << boost::to_lower_copy(name) 
-            << " (id INTEGER DEFAULT NEXTVAL('"  << boost::to_lower_copy(name)<<"_id_seq"  <<"'),"
+            << " (" << boost::to_lower_copy(cloud_column) << " INTEGER DEFAULT NEXTVAL('"  << boost::to_lower_copy(name)<<"_id_seq"  <<"'),"
             << " schema XML,"
-            << " block_table varchar(64)"
+            << " block_table varchar(64),"
+            << " PRIMARY KEY ("<< boost::to_lower_copy(cloud_column) <<")"
             << ")";
 
         m_session->once << oss.str();
@@ -475,8 +481,11 @@ void Writer::CreateIndexes( std::string const& table_name,
         index_name_ss.str("");
         index_name_ss <<  table_name <<"_objectid_idx";
         index_name = index_name_ss.str().substr(0,29);
+
+        std::string cloud_column = getOptions().getValueOrDefault<std::string>("cloud_column", "id");
+
         oss << "ALTER TABLE "<< table_name <<  " ADD CONSTRAINT "<< index_name <<  
-            "  PRIMARY KEY (OBJ_ID, BLK_ID)";
+            "  PRIMARY KEY ("<<boost::to_lower_copy(cloud_column) <<", BLK_ID)";
         if (m_type == Database_Oracle)
         {
             oss <<" ENABLE VALIDATE";
@@ -487,14 +496,8 @@ void Writer::CreateIndexes( std::string const& table_name,
     }
     else
     {
-        index_name_ss.str("");
-        index_name_ss <<  table_name <<"_objectid_idx";
-        index_name = index_name_ss.str().substr(0,29);
-        oss << "ALTER TABLE "<< table_name <<  " ADD CONSTRAINT "<< index_name <<  
-            "  PRIMARY KEY (ID)";
 
 
-        m_session->once << oss.str();
     }
 }
 
@@ -622,7 +625,7 @@ void Writer::CreateSDOEntry(std::string const& block_table,
 
 
     oss <<  "INSERT INTO user_sdo_geom_metadata VALUES ('" << block_table <<
-        "','blk_extent', MDSYS.SDO_DIM_ARRAY(";
+        "','extent', MDSYS.SDO_DIM_ARRAY(";
 
     oss << "MDSYS.SDO_DIM_ELEMENT('X', " << e.getMinimum(0) << "," << e.getMaximum(0) <<"," << tolerance << "),"
         "MDSYS.SDO_DIM_ELEMENT('Y', " << e.getMinimum(1) << "," << e.getMaximum(1) <<"," << tolerance << ")";
@@ -650,7 +653,7 @@ void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
         boost::uint32_t srid = getOptions().getValueOrThrow<boost::uint32_t>("srid");
         bool is3d = getOptions().getValueOrDefault<bool>("is3d", false);
         
-        CreateIndexes(block_table_name, "blk_extent", is3d);
+        CreateIndexes(block_table_name, "extent", is3d);
         if (m_type == Database_Postgresql)
             CreateIndexes(cloud_table_name, "extent", is3d, false);
     }
@@ -705,16 +708,39 @@ void Writer::CreateCloud(Schema const& buffer_schema)
     
     if (m_type == Database_Postgresql)
     {
-
-        oss << "INSERT INTO " << boost::to_lower_copy(cloud_table)  << "(id, block_table, schema) VALUES (DEFAULT,'" << boost::to_lower_copy(block_table)  << "',:xml) RETURNING ID";
-        std::string xml = pdal::Schema::to_xml(output_schema);
-        m_session->once << oss.str(), ::soci::use(xml);
-        oss.str("");
+        // strk: create table tabref( ref regclass );
+        // [11:32am] strk: insert into tabref values ('geometry_columns');
+        // [11:33am] strk: select ref from tableref;
+        // [11:33am] strk: select ref::oid from tableref;
+        // [11:33am] strk: create table dropme (a int);
+        // [11:33am] strk: insert into tabref values ('dropme');
+        // [11:34am] strk: select ref, ref::oid from tableref;
+        // [11:34am] strk: drop table dropme;
+        // [11:34am] strk: -- oops, is this what you want ?
+        // [11:34am] strk: select ref, ref::oid from tableref;
+        // [11:34am] strk: create table dropme (a int);
+        // [11:34am] strk: select ref, ref::oid from tableref; -- no, it's not back
+        // [11:35am] hobu: thanks
+        // [11:35am] hobu: not quite a pointer, but close enough
+        // [11:36am] strk: it's really a pointer, just maybe a too "hard" one
+        // [11:36am] strk: not a soft pointer
+        // [11:36am] strk: it's not a string, is an oid
+        // [11:36am] strk: looks like a string with the default output
+        // [11:36am] strk: try changing your search_path
+        // [11:36am] strk: the canonical text output should also change to include the pointed-to path
         
-        int id;
-        oss << "SELECT CURRVAL('"<< boost::to_lower_copy(cloud_table)  <<"_id_seq')";
-        (m_session->once << oss.str(), ::soci::into(id));
+        long id;
+        std::string cloud_column = getOptions().getValueOrDefault<std::string>("cloud_column", "id");        
+        oss << "INSERT INTO " << boost::to_lower_copy(cloud_table)  << "(" << boost::to_lower_copy(cloud_column) << ", block_table, schema) VALUES (DEFAULT,'" << boost::to_lower_copy(block_table)  << "',:xml) RETURNING " << boost::to_lower_copy(cloud_column);
+        std::string xml = pdal::Schema::to_xml(output_schema);
+        m_session->once << oss.str(), ::soci::use(xml), ::soci::into(id);
         oss.str("");
+
+        // 
+        // int id;
+        // oss << "SELECT CURRVAL('"<< boost::to_lower_copy(cloud_table)  <<"_id_seq')";
+        // (m_session->once << oss.str(), ::soci::into(id));
+        // oss.str("");
         
         log()->get(logDEBUG) << "Point cloud id was " << id << std::endl;
         try
@@ -734,7 +760,7 @@ void Writer::CreateCloud(Schema const& buffer_schema)
             bool is3d = getOptions().getValueOrDefault<bool>("is3d", false);
             std::string force = is3d ? "ST_Force_3D" : "ST_Force_2D";
             
-            oss << "UPDATE " << boost::to_lower_copy(cloud_table)  << " SET extent="<< force << "(ST_GeometryFromText(:wkt,:srid)) where ID=:id";
+            oss << "UPDATE " << boost::to_lower_copy(cloud_table)  << " SET extent="<< force << "(ST_GeometryFromText(:wkt,:srid)) where "<<boost::to_lower_copy(cloud_column) <<"=:id";
             m_session->once << oss.str(), ::soci::use(bounds, "wkt"), ::soci::use(srid,"srid"), ::soci::use(id, "id");
             
         }
@@ -778,12 +804,13 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     boost::int64_t num_points = static_cast<boost::int64_t>(buffer.getNumPoints());
     if (m_type == Database_Postgresql)
     {
+        std::string cloud_column = getOptions().getValueOrDefault<std::string>("cloud_column", "id");
         bool is3d = getOptions().getValueOrDefault<bool>("is3d", false);
         std::string force = is3d ? "ST_Force_3D" : "ST_Force_2D";
         
         std::stringstream oss;
         oss << "INSERT INTO " << boost::to_lower_copy(block_table) 
-            << " (obj_id, blk_id, num_points, points, blk_extent) VALUES (" 
+            << " ("<< boost::to_lower_copy(cloud_column) <<", blk_id, num_points, points, extent) VALUES (" 
             << " :obj_id, :blk_id, :num_points, :hex, " << force << "(ST_GeometryFromText(:extent,:srid)))";
 
         // m_session->begin();
