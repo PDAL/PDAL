@@ -39,6 +39,7 @@
 #include <pdal/ReaderIterator.hpp>
 #include <pdal/GDALUtils.hpp>
 
+#include <pdal/drivers/soci/common.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/scoped_array.hpp>
 
@@ -93,7 +94,8 @@ private:
     Reader(const Reader&); // not implemented
     //
 
-
+    Database_Type m_database_type;
+        
     // Connection m_connection;
     // Statement m_initialQueryStatement;
     // QueryType m_querytype;

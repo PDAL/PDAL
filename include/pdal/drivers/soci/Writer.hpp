@@ -35,16 +35,9 @@
 #ifndef INCLUDED_DRIVERS_SOCI_WRITER_HPP
 #define INCLUDED_DRIVERS_SOCI_WRITER_HPP
 
-#include <pdal/Writer.hpp>
 
-#ifdef PDAL_HAVE_SOCI
-#include <boost-optional.h>
-#include <boost-tuple.h>
-#include <boost-fusion.h>
-#include <boost-gregorian-date.h>
-#include <soci/soci.h>
-#include <soci/postgresql/soci-postgresql.h>
-#endif
+#include <pdal/Writer.hpp>
+#include <pdal/drivers/soci/common.hpp>
 
 pdal::Writer* createSociWriter(pdal::Stage& prevStage, const pdal::Options& options);
 
@@ -64,50 +57,7 @@ PDAL_DLL void PDALRegister_writer_soci(void* factory);
 PDAL_C_END
 #endif
 
-enum Database_Type
-{
-    Database_Postgresql,
-    Database_Oracle,
-    Database_Unknown = 128
-};
 
-// class PDAL_DLL Table 
-// {
-// public:
-// 
-// 
-//     Table(  std::string const& name, 
-//             ::soci::session* session);
-//     
-//     inline std::string const getName() const { return m_name; }
-//     
-//     virtual void create() = 0;
-//     virtual void destroy() = 0;
-//     virtual bool exists() = 0;
-// 
-// private:
-//     std::string m_name;
-//     ::soci::session* m_session;
-// };
-// 
-// class PDAL_DLL Postgresql : public Table
-// {
-// public:
-//     Postgresql( std::string const& name, 
-//                 ::soci::session* session);   
-//     
-//     virtual void create() {};
-//     virtual void destroy() {};
-//     virtual bool exists() { return true; }
-// };
-
-class soci_driver_error : public pdal_error
-{
-public:
-    soci_driver_error(std::string const& msg)
-        : pdal_error(msg)
-    {}
-};
 
 class PDAL_DLL Writer : public pdal::Writer
 {

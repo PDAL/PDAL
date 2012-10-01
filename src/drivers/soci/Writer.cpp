@@ -76,7 +76,7 @@ namespace soci
 Writer::Writer(Stage& prevStage, const Options& options)
     : pdal::Writer(prevStage, options)
     , m_session(0)
-    , m_type(Database_Postgresql)
+    , m_type(DATABASE_POSTGRESQL)
     , m_doCreateIndex(false)
     , m_bounds(Bounds<double>())
     , m_sdo_pc_is_initialized(false)
@@ -105,9 +105,9 @@ void Writer::initialize()
     
     std::string connection_type = getOptions().getValueOrDefault<std::string>("type", "postgresql");
     if (boost::iequals(connection_type, "oracle"))
-        m_type = Database_Oracle;
+        m_type = DATABASE_ORACLE;
     else if (boost::iequals(connection_type, "postgresql"))
-        m_type = Database_Postgresql;
+        m_type = DATABASE_POSTGRESQL;
     else
         m_type = Database_Unknown;
     
@@ -120,7 +120,7 @@ void Writer::initialize()
 
     try
     {
-        if (m_type == Database_Postgresql)
+        if (m_type == DATABASE_POSTGRESQL)
             m_session = new ::soci::session(::soci::postgresql, connection);
         
         log()->get(logDEBUG) << "Connected to database" << std::endl;
@@ -206,9 +206,9 @@ bool Writer::CheckTableExists(std::string const& name)
 
     std::ostringstream oss;
     
-    if (m_type == Database_Oracle)
+    if (m_type == DATABASE_ORACLE)
         oss << "select table_name from user_tables";
-    else if (m_type == Database_Postgresql)
+    else if (m_type == DATABASE_POSTGRESQL)
         oss << "SELECT tablename FROM pg_tables";
 
     log()->get(logDEBUG) << "checking for " << name << " existence ... " << std::endl;
@@ -236,7 +236,7 @@ void Writer::CreateBlockTable(std::string const& name, boost::uint32_t srid)
 {
     std::ostringstream oss;
     
-    if (m_type == Database_Oracle) 
+    if (m_type == DATABASE_ORACLE) 
     {
         // We just create a new block table as a copy of 
         // the SDO_PC_BLK_TYPE
@@ -244,7 +244,7 @@ void Writer::CreateBlockTable(std::string const& name, boost::uint32_t srid)
         m_session->once << oss.str();
         oss.str("");
     }
-    else if (m_type == Database_Postgresql)
+    else if (m_type == DATABASE_POSTGRESQL)
     {
         std::string cloud_column = getOptions().getValueOrDefault<std::string>("cloud_column", "id");
         std::string cloud_table = getOptions().getValueOrThrow<std::string>("cloud_table");
@@ -285,7 +285,7 @@ void Writer::DeleteBlockTable(std::string const& cloud_table_name,
     oss.str("");
 
     // Drop the table's dependencies 
-    if (m_type == Database_Oracle)
+    if (m_type == DATABASE_ORACLE)
     {
         // These need to be uppercase to satisfy the PLSQL function
         oss << "declare\n"
@@ -300,7 +300,7 @@ void Writer::DeleteBlockTable(std::string const& cloud_table_name,
     }
     
     // Go drop the table
-    if (m_type == Database_Oracle)
+    if (m_type == DATABASE_ORACLE)
     {
         // We need to clean up the geometry column before dropping the table
         // Oracle upper cases the table name when inserting it in the
@@ -313,7 +313,7 @@ void Writer::DeleteBlockTable(std::string const& cloud_table_name,
         m_session->once << oss.str();
         oss.str("");
 
-    } else if (m_type == Database_Postgresql)
+    } else if (m_type == DATABASE_POSTGRESQL)
     {
         // We need to clean up the geometry column before dropping the table
         oss << "SELECT DropGeometryColumn('" << boost::to_lower_copy(block_table_name) << "', 'extent')";    
@@ -333,7 +333,7 @@ void Writer::CreateCloudTable(std::string const& name, boost::uint32_t srid)
     std::ostringstream oss;
     
 
-    if (m_type == Database_Postgresql)
+    if (m_type == DATABASE_POSTGRESQL)
     {
         oss << "CREATE SEQUENCE " << boost::to_lower_copy(name)<<"_id_seq";    
         m_session->once << oss.str();
@@ -373,7 +373,7 @@ void Writer::DeleteCloudTable(std::string const& cloud_table_name,
     oss.str("");
     
     // Go drop the table
-    if (m_type == Database_Oracle)
+    if (m_type == DATABASE_ORACLE)
     {
 
         try
@@ -402,7 +402,7 @@ void Writer::DeleteCloudTable(std::string const& cloud_table_name,
         }
         oss.str("");
 
-    } else if (m_type == Database_Postgresql)
+    } else if (m_type == DATABASE_POSTGRESQL)
     {
         // We need to clean up the geometry column before dropping the table
 
@@ -455,7 +455,7 @@ void Writer::CreateIndexes( std::string const& table_name,
     std::string index_name = index_name_ss.str().substr(0,29);
     
     // Spatial indexes
-    if (m_type == Database_Oracle)
+    if (m_type == DATABASE_ORACLE)
     {
         oss << "CREATE INDEX "<< index_name << " on "
             << table_name << "(" << spatial_column_name 
@@ -466,7 +466,7 @@ void Writer::CreateIndexes( std::string const& table_name,
         }            
         m_session->once << oss.str();
         oss.str("");        
-    } else if (m_type == Database_Postgresql)
+    } else if (m_type == DATABASE_POSTGRESQL)
     {
         oss << "CREATE INDEX "<< index_name << " on "
             << boost::to_lower_copy(table_name) << " USING GIST ("<< boost::to_lower_copy(spatial_column_name) << ")";
@@ -486,7 +486,7 @@ void Writer::CreateIndexes( std::string const& table_name,
 
         oss << "ALTER TABLE "<< table_name <<  " ADD CONSTRAINT "<< index_name <<  
             "  PRIMARY KEY ("<<boost::to_lower_copy(cloud_column) <<", BLK_ID)";
-        if (m_type == Database_Oracle)
+        if (m_type == DATABASE_ORACLE)
         {
             oss <<" ENABLE VALIDATE";
         }
@@ -654,11 +654,11 @@ void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
         bool is3d = getOptions().getValueOrDefault<bool>("is3d", false);
         
         CreateIndexes(block_table_name, "extent", is3d);
-        if (m_type == Database_Postgresql)
+        if (m_type == DATABASE_POSTGRESQL)
             CreateIndexes(cloud_table_name, "extent", is3d, false);
     }
     
-    if (m_type == Database_Oracle)
+    if (m_type == DATABASE_ORACLE)
     {
         std::string block_table_name = getOptions().getValueOrThrow<std::string>("block_table");
         boost::uint32_t srid = getOptions().getValueOrThrow<boost::uint32_t>("srid");
@@ -706,7 +706,7 @@ void Writer::CreateCloud(Schema const& buffer_schema)
         
     }
     
-    if (m_type == Database_Postgresql)
+    if (m_type == DATABASE_POSTGRESQL)
     {
         // strk: create table tabref( ref regclass );
         // [11:32am] strk: insert into tabref values ('geometry_columns');
@@ -802,7 +802,7 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     boost::int32_t blk_id  = buffer.getField<boost::int32_t>(blockDim, 0);    
     boost::int32_t obj_id = getOptions().getValueOrThrow<boost::int32_t>("pc_id");
     boost::int64_t num_points = static_cast<boost::int64_t>(buffer.getNumPoints());
-    if (m_type == Database_Postgresql)
+    if (m_type == DATABASE_POSTGRESQL)
     {
         std::string cloud_column = getOptions().getValueOrDefault<std::string>("cloud_column", "id");
         bool is3d = getOptions().getValueOrDefault<bool>("is3d", false);
