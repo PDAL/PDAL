@@ -165,6 +165,18 @@ void Reader::initialize()
     Schema& schema = getSchemaRef();
     schema = fetchSchema(query);
 
+    try
+    {
+        setSpatialReference(getOptions().getValueOrThrow<pdal::SpatialReference>("spatialreference"));
+
+    }
+    catch (pdal::option_not_found const&)
+    {
+        // If one wasn't set on the options, we'll ignore at this
+        setSpatialReference(fetchSpatialReference(query));
+
+    }
+
 }
 
 
@@ -305,21 +317,45 @@ QueryType Reader::describeQueryType(std::string const& query) const
 
 }
 
-// 
-// pdal::SpatialReference Reader::fetchSpatialReference(Statement statement, sdo_pc* pc) const
-// {
-//     // Fetch the WKT for the SRID to set the coordinate system of this stage
-//     int srid = statement->GetInteger(&(pc->pc_geometry.sdo_srid));
-// 
-//     std::ostringstream oss;
-//     oss <<"EPSG:" << srid;
-// 
-//     if (srid)
-//         return pdal::SpatialReference(oss.str());
-//     else
-//         return pdal::SpatialReference();
-// }
-// 
+
+pdal::SpatialReference Reader::fetchSpatialReference(std::string const& query) const
+{
+    // Fetch the WKT for the SRID to set the coordinate system of this stage
+    log()->get(logDEBUG) << "Fetching schema object" << std::endl;
+
+    std::ostringstream query_oss;
+    query_oss << "select ST_SRID(extent)::integer as code from (" << query << ") as query";
+    // query_oss << "SELECT ST_SRID(extent)::integer as code from cloud";
+
+    ::soci::row r;
+    ::soci::indicator ind;
+    boost::int64_t srid;
+    ::soci::statement clouds = (m_session->prepare << query_oss.str(), ::soci::into(srid, ind));
+    clouds.execute();
+    
+    bool bDidRead = clouds.fetch();
+    
+    if (!bDidRead)
+        throw pdal_error("Unable to fetch srid for query");
+
+    if (ind == ::soci::i_null)
+    {
+        log()->get(logDEBUG) << "No SRID was selected for query" << std::endl;
+        return pdal::SpatialReference();
+        
+    }
+
+
+    log()->get(logDEBUG) << "query returned " << srid << std::endl;    
+    std::ostringstream oss;
+    oss <<"EPSG:" << srid;
+
+    if (srid >= 0)
+        return pdal::SpatialReference(oss.str());
+    else
+        return pdal::SpatialReference();
+}
+
 pdal::Schema Reader::fetchSchema(std::string const& query) const
 {
     log()->get(logDEBUG) << "Fetching schema object" << std::endl;

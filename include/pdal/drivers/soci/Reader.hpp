@@ -83,7 +83,7 @@ public:
     QueryType describeQueryType(std::string const& query) const;
     
     pdal::Schema fetchSchema(std::string const& query) const;
-    // pdal::SpatialReference fetchSpatialReference(Statement statement, sdo_pc* pc) const;
+    pdal::SpatialReference fetchSpatialReference(std::string const& query) const;
 
 
 private:
