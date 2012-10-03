@@ -76,15 +76,13 @@ public:
 
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
 
-    // std::string getQueryString() const;
-    // void defineBlock(Statement statement, BlockPtr block) const;
-    // 
-    // 
-    // QueryType getQueryType() const
-    // {
-    //     return m_querytype;
-    // }
-    // Schema fetchSchema(Statement statement, sdo_pc* pc, boost::uint32_t& capacity) const;
+    QueryType getQueryType() const
+    {
+        return m_query_type;
+    }
+    QueryType describeQueryType(std::string const& query) const;
+    
+    pdal::Schema fetchSchema(std::string const& query) const;
     // pdal::SpatialReference fetchSpatialReference(Statement statement, sdo_pc* pc) const;
 
 
@@ -94,7 +92,8 @@ private:
     Reader(const Reader&); // not implemented
     //
 
-    Database_Type m_database_type;
+    DatabaseType m_database_type;
+    QueryType m_query_type;
         
     // Connection m_connection;
     // Statement m_initialQueryStatement;
@@ -109,6 +108,12 @@ private:
     // boost::shared_ptr<pdal::gdal::Debug> m_gdal_debug;
     mutable boost::uint64_t m_cachedPointCount;
 
+
+    #ifdef PDAL_HAVE_SOCI
+        ::soci::session* m_session;
+    #else
+        void* m_session;
+    #endif
 
 };
 

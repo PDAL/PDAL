@@ -11,17 +11,12 @@
             <Option name="query">
                 select  cloud.cloud_id, 
                         cloud.schema, 
-                        cloud.block_table, 
-                        blocks.cloud_id, 
-                        blocks.block_id, 
-                        blocks.num_points,
-                        blocks.points,
-                        ST_AsText(cloud.extent) as extent 
+                        cloud.block_table,
+                        ST_AsText(cloud.extent) as extent
                 from 
-                    cloud, blocks 
+                    cloud
                 where 
-                    blocks.cloud_id = 1 and
-                    blocks.cloud_id = cloud.cloud_id
+                    cloud.cloud_id in (1,2)
             </Option>
             <Option name="type">
                 postgresql

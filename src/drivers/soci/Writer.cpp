@@ -76,7 +76,7 @@ namespace soci
 Writer::Writer(Stage& prevStage, const Options& options)
     : pdal::Writer(prevStage, options)
     , m_session(0)
-    , m_type(DATABASE_POSTGRESQL)
+    , m_type(DATABASE_UNKNOWN)
     , m_doCreateIndex(false)
     , m_bounds(Bounds<double>())
     , m_sdo_pc_is_initialized(false)
@@ -103,21 +103,13 @@ void Writer::initialize()
         throw soci_driver_error("unable to connect to database, no connection string was given!");
     }
     
-    std::string connection_type = getOptions().getValueOrDefault<std::string>("type", "postgresql");
-    if (boost::iequals(connection_type, "oracle"))
-        m_type = DATABASE_ORACLE;
-    else if (boost::iequals(connection_type, "postgresql"))
-        m_type = DATABASE_POSTGRESQL;
-    else
-        m_type = Database_Unknown;
-    
-    if (m_type == Database_Unknown)
+    m_type = getDatabaseConnectionType(getOptions().getValueOrThrow<std::string>("type"));
+    if (m_type == DATABASE_UNKNOWN)
     {
         std::stringstream oss;
-        oss << "Database connection type '" << connection_type << "' is unknown or not configured";
+        oss << "Database connection type '" << getOptions().getValueOrThrow<std::string>("type") << "' is unknown or not configured";
         throw soci_driver_error(oss.str());
     }
-
     try
     {
         if (m_type == DATABASE_POSTGRESQL)
@@ -252,7 +244,7 @@ void Writer::CreateBlockTable(std::string const& name, boost::uint32_t srid)
         oss << "CREATE TABLE " << boost::to_lower_copy(name) 
             << "(" << boost::to_lower_copy(cloud_column)  << " INTEGER REFERENCES " << boost::to_lower_copy(cloud_table)  <<","
             // << " obj_id INTEGER,"
-            << " blk_id INTEGER,"
+            << " block_id INTEGER,"
             << " num_points INTEGER,"
             << " points bytea"
             << ")";
@@ -485,7 +477,7 @@ void Writer::CreateIndexes( std::string const& table_name,
         std::string cloud_column = getOptions().getValueOrDefault<std::string>("cloud_column", "id");
 
         oss << "ALTER TABLE "<< table_name <<  " ADD CONSTRAINT "<< index_name <<  
-            "  PRIMARY KEY ("<<boost::to_lower_copy(cloud_column) <<", BLK_ID)";
+            "  PRIMARY KEY ("<<boost::to_lower_copy(cloud_column) <<", block_id)";
         if (m_type == DATABASE_ORACLE)
         {
             oss <<" ENABLE VALIDATE";
@@ -810,8 +802,8 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
         
         std::stringstream oss;
         oss << "INSERT INTO " << boost::to_lower_copy(block_table) 
-            << " ("<< boost::to_lower_copy(cloud_column) <<", blk_id, num_points, points, extent) VALUES (" 
-            << " :obj_id, :blk_id, :num_points, :hex, " << force << "(ST_GeometryFromText(:extent,:srid)))";
+            << " ("<< boost::to_lower_copy(cloud_column) <<", block_id, num_points, points, extent) VALUES (" 
+            << " :obj_id, :block_id, :num_points, :hex, " << force << "(ST_GeometryFromText(:extent,:srid)))";
 
         // m_session->begin();
         
@@ -825,13 +817,13 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
         
         std::string extent = buffer.calculateBounds(is3d).toWKT();
         log()->get(logDEBUG) << "extent: " << extent << std::endl;
-        ::soci::statement st = (m_session->prepare << oss.str(), ::soci::use(obj_id, "obj_id"), ::soci::use(blk_id, "blk_id"), ::soci::use(num_points, "num_points"), ::soci::use(hex,"hex"), ::soci::use(extent, "extent"), ::soci::use(srid, "srid"));
+        ::soci::statement st = (m_session->prepare << oss.str(), ::soci::use(obj_id, "obj_id"), ::soci::use(blk_id, "block_id"), ::soci::use(num_points, "num_points"), ::soci::use(hex,"hex"), ::soci::use(extent, "extent"), ::soci::use(srid, "srid"));
         st.execute(true);
         oss.str("");
         
         // ::soci::blob blob(*m_session);
         // ::soci::indicator ind;
-        // oss << "SELECT POINTS from "<< boost::to_lower_copy(block_table) << " WHERE BLK_ID =:blk_id and obj_id = :obj_id";
+        // oss << "SELECT POINTS from "<< boost::to_lower_copy(block_table) << " WHERE block_id =:blk_id and obj_id = :obj_id";
         // m_session->once << oss.str(), ::soci::into(blob, ind), ::soci::use(blk_id), ::soci::use(obj_id);
         // assert(blob.get_len() == 0);
         // 

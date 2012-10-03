@@ -45,6 +45,7 @@
 #endif
 
 #include <pdal/pdal_error.hpp>
+#include <pdal/Options.hpp>
 
 namespace pdal
 {
@@ -62,20 +63,35 @@ namespace soci
     };
 
 
-    enum Database_Type
+    enum DatabaseType
     {
         DATABASE_POSTGRESQL,
         DATABASE_ORACLE,
-        Database_Unknown = 128
+        DATABASE_UNKNOWN = 128
     };
 
     enum QueryType
     {
-        QUERY_SDO_PC = 0,
-        QUERY_SDO_PC_BLK_TYPE,
-        QUERY_SDO_BLK_PC_VIEW,
+        QUERY_CLOUD = 0,
+        QUERY_BLOCKS_PLUS_CLOUD_VIEW,
         QUERY_UNKNOWN = 512
     };
+
+
+inline DatabaseType getDatabaseConnectionType(std::string const& connection_type)
+{
+    DatabaseType output;
+
+    if (boost::iequals(connection_type, "oracle"))
+        output = DATABASE_ORACLE;
+    else if (boost::iequals(connection_type, "postgresql"))
+        output = DATABASE_POSTGRESQL;
+    else
+        output = DATABASE_UNKNOWN;
+    
+    return output;
+    
+}
 
 
 }

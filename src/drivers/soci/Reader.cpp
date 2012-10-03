@@ -57,6 +57,8 @@ namespace soci
 
 Reader::Reader(const Options& options)
     : pdal::Reader(options)
+    , m_database_type(DATABASE_UNKNOWN)
+    , m_query_type(QUERY_UNKNOWN)
     , m_cachedPointCount(0)
 {
 
@@ -66,78 +68,65 @@ Reader::Reader(const Options& options)
 boost::uint64_t Reader::getNumPoints() const
 {
     if (m_cachedPointCount != 0) return m_cachedPointCount;
-    // 
-    // if (m_querytype == QUERY_SDO_PC)
-    // {
-    //     std::ostringstream block_query;
-    //     std::ostringstream cloud_query;
-    //     
-    //     Statement statement = Statement(m_connection->CreateStatement(getQueryString().c_str()));
-    //     statement->Execute(0);
-    //             
-    //     BlockPtr block = BlockPtr(new Block(m_connection));        
-    //     defineBlock(statement, block);
-    // 
-    //     bool bDidRead = statement->Fetch();
-    //     if (!bDidRead) 
-    //         throw pdal_error("Unable to fetch a cloud in getNumPoints!");
-    //     
-    //     boost::int64_t total_count(0);        
-    //     while(bDidRead)
-    //     {
-    //         boost::int32_t pc_id = statement->GetInteger(&block->pc->pc_id);
-    //         std::string blocks_table = std::string(statement->GetString(block->pc->blk_table));
-    //         std::ostringstream select_count;
-    //         select_count
-    //                 << "select sum(NUM_POINTS) from "
-    //                 << blocks_table << "  WHERE OBJ_ID = "
-    //                 << pc_id;
-    // 
-    // 
-    //         Statement output = Statement(getConnection()->CreateStatement(select_count.str().c_str()));
-    // 
-    //         output->Execute(0);
-    //         
-    //         boost::int64_t count;
-    //         output->Define(&(count));
-    //         bool bDidReadBlockCount = output->Fetch();
-    //         if (!bDidReadBlockCount) 
-    //             throw pdal_error("Unable to fetch a point count for view!");   
-    // 
-    //         if (count < 0)
-    //         {
-    //             throw pdal_error("getNumPoints returned a count < 0!");
-    //         }
-    //         
-    //         total_count = total_count + count;
-    //         
-    //         bDidRead = statement->Fetch();
-    //     }        
-    //     m_cachedPointCount = static_cast<boost::uint64_t>(total_count);     
-    //     return m_cachedPointCount;        
-    // 
-    //     
-    // }
-    // else
-    // {
-    //     std::ostringstream query;
-    //     query << "select sum(num_points) from (" << getQueryString() << ")";
-    //     Statement statement = Statement(m_connection->CreateStatement(query.str().c_str()));
-    //     statement->Execute(0);
-    //     boost::int64_t count;
-    //     statement->Define(&(count));
-    //     bool bDidRead = statement->Fetch();
-    //     if (!bDidRead) 
-    //         throw pdal_error("Unable to fetch a point count for view!");   
-    //     
-    //     if (count < 0)
-    //     {
-    //         throw pdal_error("getNumPoints returned a count < 0!");
-    //     }
-    //     
-    //     m_cachedPointCount = static_cast<boost::uint64_t>(count);     
-    //     return m_cachedPointCount;
-    // }    
+
+    std::string const& query = getOptions().getValueOrThrow<std::string>("query");      
+    if (m_query_type == QUERY_CLOUD)
+    {
+        std::ostringstream block_query;
+        std::ostringstream cloud_query;
+        
+        ::soci::row r;
+        ::soci::statement clouds = (m_session->prepare << query, ::soci::into(r));
+        clouds.execute();
+            
+        bool bDidRead = clouds.fetch();
+        if (!bDidRead) 
+            throw pdal_error("Unable to fetch a cloud in getNumPoints!");
+        
+        boost::int64_t total_count(0);        
+        while(bDidRead)
+        {
+            std::stringstream blocks_query;
+            
+            std::string block_table = r.get<std::string>("block_table");
+            boost::int32_t cloud_id = r.get<boost::int32_t>("cloud_id");
+            
+            blocks_query  << "select sum(num_points) from " << block_table 
+                << " where cloud_id=" << cloud_id;
+
+            boost::int64_t count;
+            *m_session << blocks_query.str(), ::soci::into(count);
+            
+            if (count < 0)
+            {
+                throw pdal_error("getNumPoints returned a count < 0!");
+            }
+            
+            total_count = total_count + count;
+            
+            bDidRead = clouds.fetch();
+        }        
+        m_cachedPointCount = static_cast<boost::uint64_t>(total_count);     
+        return m_cachedPointCount;        
+            
+        
+    }
+    else if (m_query_type == QUERY_BLOCKS_PLUS_CLOUD_VIEW)
+    {
+        std::ostringstream query_oss;
+        query_oss << "select sum(num_points) from (" << query << ") as summation";
+
+        boost::int64_t count;
+        *m_session << query_oss.str(), ::soci::into(count);
+        
+        if (count < 0)
+        {
+            throw pdal_error("getNumPoints returned a count < 0!");
+        }
+        
+        m_cachedPointCount = static_cast<boost::uint64_t>(count);     
+        return m_cachedPointCount;
+    }    
     return m_cachedPointCount;
 }
 
@@ -145,12 +134,36 @@ void Reader::initialize()
 {
     pdal::Reader::initialize();
 
-    // if (getQueryString().size() == 0)
-    //     throw pdal_error("'query' statement is empty. No data can be read from pdal::drivers::soci::Reader");
+    std::string const& query = getOptions().getValueOrThrow<std::string>("query");
+    std::string const& connection = getOptions().getValueOrThrow<std::string>("connection");
+        
+    m_database_type = getDatabaseConnectionType(getOptions().getValueOrThrow<std::string>("type"));
+    if (m_database_type == DATABASE_UNKNOWN)
+    {
+        std::stringstream oss;
+        oss << "Database connection type '" << getOptions().getValueOrThrow<std::string>("type") << "' is unknown or not configured";
+        throw soci_driver_error(oss.str());
+    }
+    
+    try
+    {
+        if (m_database_type == DATABASE_POSTGRESQL)
+            m_session = new ::soci::session(::soci::postgresql, connection);
+        
+        log()->get(logDEBUG) << "Connected to database" << std::endl;
+        
+    } catch (::soci::soci_error const& e)
+    {
+        std::stringstream oss;
+        oss << "Unable to connect to database with error '" << e.what() << "'";
+        throw pdal_error(oss.str());
+    }
 
+    m_session->set_log_stream(&(log()->get(logDEBUG2)));    
+    m_query_type = describeQueryType(query);
 
-        Schema& schema = getSchemaRef();
-        // schema = fetchSchema(m_initialQueryStatement, m_block->pc, m_capacity);
+    Schema& schema = getSchemaRef();
+    schema = fetchSchema(query);
 
 }
 
@@ -184,121 +197,114 @@ const Options Reader::getDefaultOptions() const
     return options;
 }
 
-
-
-// std::string Reader::getQueryString() const
-// {
-//     return getOptions().getValueOrThrow<std::string>("query");
-// }
-
 Reader::~Reader()
 {
     return;
 }
-// 
-// QueryType Reader::describeQueryType()
-// {
-// 
-//     int   iCol = 0;
-//     char  szFieldName[OWNAME];
-//     int   hType = 0;
-//     int   nSize = 0;
-//     int   nPrecision = 0;
-//     signed short nScale = 0;
-//     char szTypeName[OWNAME];
-// 
-// 
-//     std::ostringstream oss;
-// 
-//     std::map<std::string, std::string> objects;
-//     while (m_initialQueryStatement->GetNextField(iCol, szFieldName, &hType, &nSize, &nPrecision, &nScale, szTypeName))
-//     {
-// 
-//         std::pair<std::string, int> p(szFieldName, hType);
-//         m_fields.insert(p);
-// 
-//         if (hType == SQLT_NTY)
-//         {
-//             std::pair<std::string, std::string> p(szTypeName, szFieldName);
-//             oss << "Typed Field " << std::string(szFieldName) << " with type " << hType << " and typename " << std::string(szTypeName) << std::endl;
-// 
-//             objects.insert(p);
-//         }
-//         else
-//         {
-//             oss << "Field " << std::string(szFieldName) << " with type " << hType << std::endl;
-// 
-//         }
-//         iCol++;
-//     }
-//     log()->get(logDEBUG)  << oss.str() << std::endl;
-// 
-//     bool bHaveSDO_PC(false);
-//     if (objects.find("SDO_PC") != objects.end()) bHaveSDO_PC = true;
-//     bool bHaveSDO_PC_BLK_TYPE(false);
-//     if (objects.find("SDO_PC_BLK_TYPE") != objects.end()) bHaveSDO_PC_BLK_TYPE = true;
-//     if (!bHaveSDO_PC && !bHaveSDO_PC_BLK_TYPE)
-//     {
-//         std::ostringstream oss;
-//         oss << "Select statement '" << getQueryString() << "' does not fetch a SDO_PC object"
-//             " or SDO_PC_BLK_TYPE";
-//         throw pdal_error(oss.str());
-// 
-//     }
-// 
-//     typedef std::pair<std::string, bool> SB;
-//     std::map<std::string, bool> block_fields;
-// 
-//     // We must have all of these field names present to be considered block
-//     // data.
-//     block_fields.insert(SB("OBJ_ID", false));
-//     block_fields.insert(SB("BLK_ID", false));
-//     block_fields.insert(SB("BLK_EXTENT", false));
-//     block_fields.insert(SB("BLK_DOMAIN", false));
-//     block_fields.insert(SB("PCBLK_MIN_RES", false));
-//     block_fields.insert(SB("PCBLK_MAX_RES", false));
-//     block_fields.insert(SB("NUM_POINTS", false));
-//     block_fields.insert(SB("NUM_UNSORTED_POINTS", false));
-//     block_fields.insert(SB("PT_SORT_DIM", false));
-//     block_fields.insert(SB("POINTS", false));
-// 
-//     std::map<std::string, int>::const_iterator i = m_fields.begin();
-// 
-//     bool bHasBlockFields(false);
-//     for (i = m_fields.begin(); i != m_fields.end(); ++i)
-//     {
-//         std::map<std::string, bool>::iterator t = block_fields.find(i->first);
-//         if (t != block_fields.end())
-//             t->second = true;
-//     }
-// 
-//     std::map<std::string, bool>::const_iterator q;
-// 
-//     for (q = block_fields.begin(); q != block_fields.end(); ++q)
-//     {
-//         if (q->second == false)
-//         {
-//             bHasBlockFields = false;
-//             break;
-//         }
-//         bHasBlockFields = true;
-//     }
-// 
-//     if (bHaveSDO_PC && bHasBlockFields)
-//     {
-//         log()->get(logDEBUG) << "Query type is QUERY_SDO_BLK_PC_VIEW" << std::endl;
-//         return QUERY_SDO_BLK_PC_VIEW;
-//     }
-//     if (bHaveSDO_PC)
-//     {
-//         log()->get(logDEBUG) << "Query type is QUERY_SDO_PC" << std::endl;
-//         return QUERY_SDO_PC;
-//     }
-// 
-//     log()->get(logDEBUG) << "Query type is QUERY_UNKNOWN" << std::endl;
-//     return QUERY_UNKNOWN;
-// 
-// }
+
+QueryType Reader::describeQueryType(std::string const& query) const
+{
+
+    typedef std::pair<std::string, bool> SB;
+    std::map<std::string, bool> block_fields;
+    std::map<std::string, bool> cloud_fields;
+    // 
+    // // We must have all of these field names present to be considered block
+    // // data.
+    if (m_database_type == DATABASE_ORACLE)
+    {
+        block_fields.insert(SB("OBJ_ID", false));
+        block_fields.insert(SB("BLK_ID", false));
+        block_fields.insert(SB("BLK_EXTENT", false));
+        block_fields.insert(SB("BLK_DOMAIN", false));
+        block_fields.insert(SB("PCBLK_MIN_RES", false));
+        block_fields.insert(SB("PCBLK_MAX_RES", false));
+        block_fields.insert(SB("NUM_POINTS", false));
+        block_fields.insert(SB("NUM_UNSORTED_POINTS", false));
+        block_fields.insert(SB("PT_SORT_DIM", false));
+        block_fields.insert(SB("POINTS", false));
+        
+    } else if (m_database_type == DATABASE_POSTGRESQL)
+    {
+        block_fields.insert(SB("CLOUD_ID", false));
+        block_fields.insert(SB("BLOCK_ID", false));
+        block_fields.insert(SB("NUM_POINTS", false));
+        block_fields.insert(SB("POINTS", false));
+        block_fields.insert(SB("EXTENT", false));
+    }
+
+    if (m_database_type == DATABASE_ORACLE)
+    {
+        cloud_fields.insert(SB("OBJ_ID", false));
+        
+    } else if (m_database_type == DATABASE_POSTGRESQL)
+    {
+        cloud_fields.insert(SB("BLOCK_TABLE", false));
+        cloud_fields.insert(SB("SCHEMA", false));
+        cloud_fields.insert(SB("CLOUD_ID", false));
+        cloud_fields.insert(SB("EXTENT", false));
+    }
+    
+    ::soci::row r;
+    *m_session << query, ::soci::into(r);
+    
+    for(std::size_t i = 0; i != r.size(); ++i)
+    {
+        ::soci::column_properties const& props = r.get_properties(i);
+        std::string const& name = boost::to_upper_copy(props.get_name());
+        log()->get(logDEBUG3) << "Query returned field name: " << name << std::endl;        
+        std::map<std::string, bool>::iterator b = block_fields.find(name);
+        if (b != block_fields.end())
+        {
+            b->second = true;
+        }
+        std::map<std::string, bool>::iterator c = cloud_fields.find(name);
+        if (c != cloud_fields.end())
+        {
+            c->second = true;
+        }        
+        
+    }
+    
+    bool bHasBlockFields(false);
+    std::map<std::string, bool>::const_iterator q;
+    for (q = block_fields.begin(); q != block_fields.end(); ++q)
+    {
+        if (q->second == false)
+        {
+            bHasBlockFields = false;
+            break;
+        }
+        bHasBlockFields = true;
+    }
+
+    bool bHasCloudFields(false);
+    for (q = cloud_fields.begin(); q != cloud_fields.end(); ++q)
+    {
+        if (q->second == false)
+        {
+            bHasCloudFields = false;
+            break;
+        }
+        bHasCloudFields = true;
+    }
+
+    if (bHasBlockFields && bHasCloudFields)
+    {
+        log()->get(logDEBUG) << "Query type is QUERY_BLOCKS_PLUS_CLOUD_VIEW" << std::endl;
+        return QUERY_BLOCKS_PLUS_CLOUD_VIEW;
+    }
+
+    if (bHasCloudFields)
+    {
+        log()->get(logDEBUG) << "Query type is QUERY_CLOUD" << std::endl;
+        return QUERY_CLOUD;
+    }
+
+    return QUERY_UNKNOWN;
+
+}
+
 // 
 // pdal::SpatialReference Reader::fetchSpatialReference(Statement statement, sdo_pc* pc) const
 // {
@@ -314,111 +320,44 @@ Reader::~Reader()
 //         return pdal::SpatialReference();
 // }
 // 
-// pdal::Schema Reader::fetchSchema(Statement statement, sdo_pc* pc, boost::uint32_t& capacity) const
-// {
-//     log()->get(logDEBUG) << "Fetching schema from SDO_PC object" << std::endl;
-// 
-//     // Fetch the XML that defines the schema for this point cloud
-//     std::ostringstream select_schema;
-//     OCILobLocator* metadata = NULL;
-//     select_schema
-//             << "DECLARE" << std::endl
-//             << "PC_TABLE VARCHAR2(32) := '" << m_initialQueryStatement->GetString(pc->base_table) << "';" << std::endl
-//             << "PC_ID NUMBER := " << m_initialQueryStatement->GetInteger(&(pc->pc_id)) << ";" << std::endl
-//             << "PC_COLUMN VARCHAR2(32) := '" << m_initialQueryStatement->GetString(pc->base_column) << "';" << std::endl
-//             << "BEGIN" << std::endl
-//             << std::endl
-//             << "EXECUTE IMMEDIATE" << std::endl
-//             << " 'SELECT T.'||PC_COLUMN||'.PC_OTHER_ATTRS.getClobVal(), T.'||PC_COLUMN||'.PTN_PARAMS FROM '||pc_table||' T WHERE T.ID='||PC_ID INTO :metadata, :capacity;"
-//             << std::endl
-//             << "END;"
-//             << std::endl;
-//     Statement get_schema(m_connection->CreateStatement(select_schema.str().c_str()));
-//     get_schema->BindName(":metadata", &metadata);
-// 
-//     int ptn_params_length = 1024;
-//     char* ptn_params = (char*) malloc(sizeof(char*) * ptn_params_length);
-//     ptn_params[ptn_params_length-1] = '\0'; //added trailing null to fix ORA-01480
-//     get_schema->BindName(":capacity", ptn_params, ptn_params_length);
-//     get_schema->Execute();
-// 
-//     char* pc_schema = get_schema->ReadCLob(metadata);
-// 
-//     std::string write_schema_file = getOptions().getValueOrDefault<std::string>("xml_schema_dump", std::string(""));
-//     if (write_schema_file.size() > 0)
-//     {
-//         std::ostream* out = FileUtils::createFile(write_schema_file);
-//         out->write(pc_schema, strlen(pc_schema));
-//         FileUtils::closeFile(out);
-//     }
-// 
-// 
-//     // Fetch the block capacity from the point cloud object so we
-//     // can use it later.
-//     // PTN_PARAMS is like:
-//     // 'blk_capacity=1000,work_tablespace=my_work_ts'
-//     int block_capacity = 0;
-//     boost::char_separator<char> sep_space(" ");
-//     boost::char_separator<char> sep_equal("=");
-// 
-//     std::string s_cap(ptn_params);
-//     tokenizer parameters(s_cap, sep_space);
-//     for (tokenizer::iterator t = parameters.begin(); t != parameters.end(); ++t)
-//     {
-//         tokenizer parameter((*t), sep_equal);
-// 
-//         for (tokenizer::iterator c = parameter.begin(); c != parameter.end(); ++c)
-//         {
-//             if (boost::iequals(c->c_str(), "blk_capacity"))
-//             {
-//                 tokenizer::iterator d = ++c;
-//                 block_capacity = atoi(d->c_str());
-//             }
-//         }
-//     }
-// 
-//     if (block_capacity < 1)
-//     {
-//         std::ostringstream oss;
-//         oss << "Invalid block capacity for point cloud object in Oracle: " << block_capacity;
-//         throw pdal_error(oss.str());
-//     }
-// 
-//     capacity = block_capacity;
-// 
-//     std::string pc_schema_xml(pc_schema);
-//     if (pc_schema)
-//         CPLFree(pc_schema);
-// 
-//     if (ptn_params)
-//         free(ptn_params);
-// 
-//     Schema schema = Schema::from_xml(pc_schema_xml);
-// 
-//     schema::index_by_index const& dims = schema.getDimensions().get<schema::index>();
-// 
-//     for (schema::index_by_index::const_iterator iter = dims.begin(); iter != dims.end(); ++iter)
-//     {
-//         // For dimensions that do not have namespaces, we'll set the namespace 
-//         // to the namespace of the current stage
-//         
-//         if (iter->getNamespace().size() == 0)
-//         {
-//             log()->get(logDEBUG4) << "setting namespace for dimension " << iter->getName() << " to "  << getName() << std::endl;
-//             
-// 
-//             Dimension d(*iter);
-//             if (iter->getUUID().is_nil())
-//             {
-//                 d.createUUID();
-//             }            
-//             d.setNamespace(getName());
-//             schema.setDimension(d);        
-//         }
-//     }
-// 
-//     return schema;
-// }
+pdal::Schema Reader::fetchSchema(std::string const& query) const
+{
+    log()->get(logDEBUG) << "Fetching schema object" << std::endl;
+
+    ::soci::row r;
+    ::soci::statement clouds = (m_session->prepare << query, ::soci::into(r));
+    clouds.execute();
+        
+    bool bDidRead = clouds.fetch();
+    
+    std::string xml = r.get<std::string>("schema");    
+
+    Schema schema = Schema::from_xml(xml);
+
+    schema::index_by_index const& dims = schema.getDimensions().get<schema::index>();
+
+    for (schema::index_by_index::const_iterator iter = dims.begin(); iter != dims.end(); ++iter)
+    {
+        // For dimensions that do not have namespaces, we'll set the namespace 
+        // to the namespace of the current stage
+        
+        if (iter->getNamespace().size() == 0)
+        {
+            log()->get(logDEBUG4) << "setting namespace for dimension " << iter->getName() << " to "  << getName() << std::endl;
+            
+
+            Dimension d(*iter);
+            if (iter->getUUID().is_nil())
+            {
+                d.createUUID();
+            }            
+            d.setNamespace(getName());
+            schema.setDimension(d);        
+        }
+    }
+
+    return schema;
+}
 
 void Reader::addDefaultDimensions()
 {

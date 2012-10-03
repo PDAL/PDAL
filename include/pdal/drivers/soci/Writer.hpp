@@ -117,7 +117,7 @@ private:
     void* m_session;
 #endif
 
-    Database_Type m_type;
+    DatabaseType m_type;
     bool m_doCreateIndex;
     pdal::Bounds<double> m_bounds; // Bounds of the entire point cloud    
     bool m_sdo_pc_is_initialized;
