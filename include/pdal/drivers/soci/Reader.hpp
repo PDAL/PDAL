@@ -82,6 +82,7 @@ public:
     }
     QueryType describeQueryType(std::string const& query) const;
     
+    inline DatabaseType getDatabaseType() const { return m_database_type; }
     pdal::Schema fetchSchema(std::string const& query) const;
     pdal::SpatialReference fetchSpatialReference(std::string const& query) const;
 
@@ -124,6 +125,9 @@ namespace sequential
 {
 
 
+    typedef boost::shared_ptr<PointBuffer> BufferPtr;
+    typedef std::map<int, BufferPtr> BufferMap;
+
 class IteratorBase
 {
 public:
@@ -133,35 +137,42 @@ public:
 protected:
     const pdal::drivers::soci::Reader& getReader() const;
 
-    // boost::uint32_t myReadBuffer(PointBuffer& data);
+    boost::uint32_t myReadBuffer(PointBuffer& data);
     // boost::uint32_t unpackOracleData(PointBuffer& data);
     // 
-    // boost::uint32_t myReadClouds(PointBuffer& data);
-    // boost::uint32_t myReadBlocks(PointBuffer& data);
+    boost::uint32_t myReadClouds(PointBuffer& data);
+    boost::uint32_t myReadBlocks(PointBuffer& data, ::soci::statement& statement, ::soci::row& row);
     // 
-    // BufferPtr fetchPointBuffer(Statement statment, sdo_pc* pc);
-    // 
-    // Statement m_block_statement;
-    // Statement m_initialQueryStatement;
-    // bool m_at_end;
-    // bool m_at_end_of_blocks;
-    // bool m_at_end_of_clouds;
-    // QueryType m_querytype;
-    // BlockPtr m_block;
-    // BlockPtr m_cloud_block;
-    // boost::int32_t m_active_cloud_id;
-    // BufferPtr m_oracle_buffer;
-    // BufferMap m_buffers;
-    // boost::uint32_t m_buffer_position;
+    BufferPtr fetchPointBuffer( boost::int32_t const& cloud_id,
+                                std::string const& schema_xml);
+
+    bool m_at_end;
+
+    DatabaseType m_database_type;
+    QueryType m_query_type;    
+
+    boost::int32_t m_active_cloud_id;
+    BufferPtr m_active_buffer;
+    BufferMap m_buffers;
+    boost::uint32_t m_buffer_position;
+
 
 
 private:
     const pdal::drivers::soci::Reader& m_reader;
 
-    // Statement getNextCloud(BlockPtr block, boost::int32_t& cloud_id);
-    // void readBlob(Statement statement,
-    //               BlockPtr block,
-    //               boost::uint32_t howMany);
+    #ifdef PDAL_HAVE_SOCI
+        ::soci::session* m_session;
+    #else
+        void* m_session;
+    #endif
+
+    
+    ::soci::statement getNextCloud(   std::string const& cloud_table_name, 
+                                      boost::int32_t& cloud_id,
+                                      ::soci::row& r);
+    void readBlob(::soci::row& block,
+                  boost::uint32_t howMany);
     // void fillUserBuffer(PointBuffer& user_buffer);
     // 
     // void copyOracleData(PointBuffer& source, 

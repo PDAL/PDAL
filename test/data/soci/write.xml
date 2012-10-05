@@ -17,13 +17,13 @@
             CLOUD_ID
         </Option>
         <Option name="overwrite">
-            true
+            false
         </Option>
         <Option name="cloud_boundary_wkt">
             ./autzen-selection.wkt
         </Option>
         <Option name="srid">
-            4269
+            4326
         </Option>
         <Option name="capacity">
             50

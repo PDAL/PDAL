@@ -62,6 +62,22 @@ namespace soci
         {}
     };
 
+    class connection_failed : public soci_driver_error
+    {
+    public:
+        connection_failed(std::string const& msg)
+            : soci_driver_error(msg)
+        {}
+    };
+
+    class buffer_too_small : public soci_driver_error
+    {
+    public:
+        buffer_too_small(std::string const& msg)
+            : soci_driver_error(msg)
+        {}
+    };
+
 
     enum DatabaseType
     {
@@ -93,6 +109,30 @@ inline DatabaseType getDatabaseConnectionType(std::string const& connection_type
     
 }
 
+inline ::soci::session* connectToDataBase(std::string const& connection, DatabaseType dtype)
+{
+    ::soci::session* output(0);
+    if (dtype == DATABASE_UNKNOWN)
+    {
+        std::stringstream oss;
+        oss << "Database connection type '" << dtype << "' is unknown or not configured";
+        throw soci_driver_error(oss.str());
+    }
+    
+    try
+    {
+        if (dtype == DATABASE_POSTGRESQL)
+            output = new ::soci::session(::soci::postgresql, connection);
+
+    } catch (::soci::soci_error const& e)
+    {
+        std::stringstream oss;
+        oss << "Unable to connect to database with error '" << e.what() << "'";
+        throw connection_failed(oss.str());
+    }
+    
+    return output;
+}
 
 }
 }

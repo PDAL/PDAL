@@ -12,7 +12,8 @@
                 select  cloud.cloud_id, 
                         cloud.schema, 
                         cloud.block_table,
-                        ST_AsText(cloud.extent) as extent
+                        ST_AsText(cloud.extent) as extent,
+                        ST_SRID(cloud.extent) as srid
                 from 
                     cloud
                 where 

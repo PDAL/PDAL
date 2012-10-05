@@ -803,16 +803,16 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
         std::stringstream oss;
         oss << "INSERT INTO " << boost::to_lower_copy(block_table) 
             << " ("<< boost::to_lower_copy(cloud_column) <<", block_id, num_points, points, extent) VALUES (" 
-            << " :obj_id, :block_id, :num_points, :hex, " << force << "(ST_GeometryFromText(:extent,:srid)))";
+            << " :obj_id, :block_id, :num_points, decode(:hex, 'hex'), " << force << "(ST_GeometryFromText(:extent,:srid)))";
 
-        // m_session->begin();
         
-        std::stringstream hex_str;
-        for (unsigned i = 0; i != point_data_length; ++i)
+        std::vector<boost::uint8_t> block_data;
+        for (boost::uint32_t i = 0; i < point_data_length; ++i )
         {
-            hex_str << std::hex << (int)point_data[i];
+            block_data.push_back(point_data[i]);
         }
-        std::string hex = hex_str.str();
+        std::string hex = Utils::binary_to_hex_string(block_data);
+        std::cout << "hex: " << hex.substr(0, 30) << std::endl;
         boost::uint32_t srid = getOptions().getValueOrDefault<boost::uint32_t>("srid", 4326);
         
         std::string extent = buffer.calculateBounds(is3d).toWKT();
