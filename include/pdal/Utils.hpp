@@ -144,7 +144,32 @@ public:
     {
         return (r > 0.0) ? floor(r + 0.5) : ceil(r - 0.5);
     }
+    
+    static inline std::vector<boost::uint8_t> hex_string_to_binary(std::string const& source)
+    {
+        // Stolen from http://stackoverflow.com/questions/7363774/c-converting-binary-data-to-a-hex-string-and-back
+        static int nibbles[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0, 0, 10, 11, 12, 13, 14, 15 };
+        std::vector<unsigned char> retval;
+        for (std::string::const_iterator it = source.begin(); it < source.end(); it += 2) {
+            unsigned char v = 0;
+            if (std::isxdigit(*it))
+                v = nibbles[std::toupper(*it) - '0'] << 4;
+            if (it + 1 < source.end() && std::isxdigit(*(it + 1)))
+                v += nibbles[std::toupper(*(it + 1)) - '0'];
+            retval.push_back(v);
+        }
+        return retval;
+    }
 
+    static inline std::string binary_to_hex_string(const std::vector<unsigned char>& source)
+    {
+        static char syms[] = "0123456789ABCDEF";
+        std::stringstream ss;
+        for (std::vector<unsigned char>::const_iterator it = source.begin(); it != source.end(); it++)
+            ss << syms[((*it >> 4) & 0xf)] << syms[*it & 0xf];
+
+        return ss.str();
+    }
 
     template<typename Target, typename Source>
     static inline Target saturation_cast(Source const& src)
