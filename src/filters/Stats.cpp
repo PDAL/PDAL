@@ -59,17 +59,17 @@ boost::property_tree::ptree Summary::toPTree() const
     tree.put("average", average());
 
     boost::property_tree::ptree bins;
-    histogram_type hist = histogram();
-    for (boost::int32_t i = 0; i < hist.size(); ++i)
-    {
-        boost::property_tree::ptree bin;
-        bin.add("lower_bound", hist[i].first);
-        bin.add("count", Utils::sround(hist[i].second*cnt));
-        std::ostringstream binname;
-        binname << "bin-" <<i;
-        bins.add_child(binname.str(), bin);
-    }
-    tree.add_child("histogram", bins);
+    // histogram_type hist = histogram();
+    // for (boost::int32_t i = 0; i < hist.size(); ++i)
+    // {
+    //     boost::property_tree::ptree bin;
+    //     bin.add("lower_bound", hist[i].first);
+    //     bin.add("count", Utils::sround(hist[i].second*cnt));
+    //     std::ostringstream binname;
+    //     binname << "bin-" <<i;
+    //     bins.add_child(binname.str(), bin);
+    // }
+    // tree.add_child("histogram", bins);
 
     std::ostringstream sample;
     for (std::vector<double>::size_type i =0; i < m_sample.size(); ++i)
