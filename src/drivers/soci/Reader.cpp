@@ -491,97 +491,99 @@ void IteratorBase::readBlob(::soci::row& block,
     m_active_buffer->setNumPoints(howMany);    
 }
 
-// void IteratorBase::fillUserBuffer(PointBuffer& user_buffer)
-// {
-// 
-//     Schema const& user_schema = user_buffer.getSchema();
-//     schema::index_by_index const& idx = user_schema.getDimensions().get<schema::index>();
-// 
-//     boost::int32_t numUserSpace = user_buffer.getCapacity() - user_buffer.getNumPoints();
-//     if (numUserSpace <= 0)
-//         return;
-//     boost::int32_t numOraclePoints = m_active_buffer->getNumPoints() - m_buffer_position;
-//     
-//     schema::index_by_index::size_type i(0);
-//     for (i = 0; i < idx.size(); ++i)
-//     {
-//             copyOracleData( *m_active_buffer, 
-//                             user_buffer, 
-//                             idx[i], 
-//                             m_buffer_position, 
-//                             user_buffer.getNumPoints(), 
-//                             (std::min)(numOraclePoints,numUserSpace));
-// 
-//     }
-// 
-//     bool bSetPointSourceId = getReader().getOptions().getValueOrDefault<bool>("populate_pointsourceid", false);
-//     if (bSetPointSourceId)
-//     {  
-//         Dimension const* point_source_field = &(user_buffer.getSchema().getDimensionOptional("PointSourceId").get());
-//         if (point_source_field)
-//         {  
-//             for (boost::int32_t i = 0; i < numUserSpace; ++i)
-//             {  
-//                 if (i < 0)
-//                     throw pdal_error("point_source_field point index is less than 0!");
-//                 user_buffer.setField(*point_source_field, i, m_active_cloud_id);
-//             }
-//         }
-//     }
-//         
-//     if (numOraclePoints > numUserSpace)
-//         m_buffer_position = m_buffer_position + numUserSpace;
-//     else if (numOraclePoints < numUserSpace)
-//         m_buffer_position = 0;
-//     
-//     boost::uint32_t howManyThisRead = (std::min)(numUserSpace, numOraclePoints);
-//     user_buffer.setNumPoints(howManyThisRead + user_buffer.getNumPoints());
-// }
-// 
-// void IteratorBase::copyOracleData(  PointBuffer& source, 
-//                                     PointBuffer& destination, 
-//                                     Dimension const& dest_dim, 
-//                                     boost::uint32_t source_starting_position, 
-//                                     boost::uint32_t destination_starting_position,
-//                                     boost::uint32_t howMany)
-// {
-//     
-//     boost::optional<Dimension const&> source_dim = source.getSchema().getDimensionOptional(dest_dim.getName());
-//     
-//     if (!source_dim)
-//     {
-//         return;
-//     }
-// 
-//     for (boost::uint32_t i = 0; i < howMany; ++i)
-//     {
-//         if (dest_dim.getInterpretation() == source_dim->getInterpretation() &&
-//             dest_dim.getByteSize() == source_dim->getByteSize() && 
-//             pdal::Utils::compare_distance(dest_dim.getNumericScale(), source_dim->getNumericScale()) &&
-//             pdal::Utils::compare_distance(dest_dim.getNumericOffset(), source_dim->getNumericOffset()) &&
-//             dest_dim.getEndianness() == source_dim->getEndianness() 
-//             )
-//         {
-//             // FIXME: This test could produce false positives
-//             boost::uint8_t* source_position = source.getData(source_starting_position+i) + source_dim->getByteOffset();
-//             boost::uint8_t* destination_position = destination.getData(destination_starting_position + i) + dest_dim.getByteOffset();
-//             memcpy(destination_position, source_position, source_dim->getByteSize());
-//         }
-//         else
-//         {
-//             PointBuffer::scaleData( source, 
-//                                     destination, 
-//                                     *source_dim, 
-//                                     dest_dim, 
-//                                     source_starting_position + i,
-//                                     destination_starting_position + i);
-//         }
-//     }
-//     
-// }
-// 
+void IteratorBase::fillUserBuffer(PointBuffer& user_buffer)
+{
+
+    Schema const& user_schema = user_buffer.getSchema();
+    schema::index_by_index const& idx = user_schema.getDimensions().get<schema::index>();
+
+    boost::int32_t numUserSpace = user_buffer.getCapacity() - user_buffer.getNumPoints();
+    if (numUserSpace < 0)
+        throw pdal_error("We ran out of space!");
+
+    boost::int32_t numOraclePoints = m_active_buffer->getNumPoints() - m_buffer_position;
+    
+    schema::index_by_index::size_type i(0);
+    for (i = 0; i < idx.size(); ++i)
+    {
+            copyDatabaseData( *m_active_buffer, 
+                            user_buffer, 
+                            idx[i], 
+                            m_buffer_position, 
+                            user_buffer.getNumPoints(), 
+                            (std::min)(numOraclePoints,numUserSpace));
+
+    }
+
+    bool bSetPointSourceId = getReader().getOptions().getValueOrDefault<bool>("populate_pointsourceid", false);
+    if (bSetPointSourceId)
+    {  
+        Dimension const* point_source_field = &(user_buffer.getSchema().getDimensionOptional("PointSourceId").get());
+        if (point_source_field)
+        {  
+            for (boost::int32_t i = 0; i < numUserSpace; ++i)
+            {  
+                if (i < 0)
+                    throw soci_driver_error("point_source_field point index is less than 0!");
+                user_buffer.setField(*point_source_field, i, m_active_cloud_id);
+            }
+        }
+    }
+        
+    if (numOraclePoints > numUserSpace)
+        m_buffer_position = m_buffer_position + numUserSpace;
+    else if (numOraclePoints < numUserSpace)
+        m_buffer_position = 0;
+    
+    boost::uint32_t howManyThisRead = (std::min)(numUserSpace, numOraclePoints);
+    user_buffer.setNumPoints(howManyThisRead + user_buffer.getNumPoints());
+}
+
+void IteratorBase::copyDatabaseData(  PointBuffer& source, 
+                                      PointBuffer& destination, 
+                                      Dimension const& dest_dim, 
+                                      boost::uint32_t source_starting_position, 
+                                      boost::uint32_t destination_starting_position,
+                                      boost::uint32_t howMany)
+{
+    
+    boost::optional<Dimension const&> source_dim = source.getSchema().getDimensionOptional(dest_dim.getName());
+    
+    if (!source_dim)
+    {
+        return;
+    }
+
+    for (boost::uint32_t i = 0; i < howMany; ++i)
+    {
+        if (dest_dim.getInterpretation() == source_dim->getInterpretation() &&
+            dest_dim.getByteSize() == source_dim->getByteSize() && 
+            pdal::Utils::compare_distance(dest_dim.getNumericScale(), source_dim->getNumericScale()) &&
+            pdal::Utils::compare_distance(dest_dim.getNumericOffset(), source_dim->getNumericOffset()) &&
+            dest_dim.getEndianness() == source_dim->getEndianness() 
+            )
+        {
+            // FIXME: This test could produce false positives
+            boost::uint8_t* source_position = source.getData(source_starting_position+i) + source_dim->getByteOffset();
+            boost::uint8_t* destination_position = destination.getData(destination_starting_position + i) + dest_dim.getByteOffset();
+            memcpy(destination_position, source_position, source_dim->getByteSize());
+        }
+        else
+        {
+            PointBuffer::scaleData( source, 
+                                    destination, 
+                                    *source_dim, 
+                                    dest_dim, 
+                                    source_starting_position + i,
+                                    destination_starting_position + i);
+        }
+    }
+    
+}
+
 boost::uint32_t IteratorBase::myReadBuffer(PointBuffer& data)
 {
+        std::cout << "we have: " << data.getNumPoints() <<  " for capcity: " << data.getCapacity() << std::endl;
     if (getReader().getQueryType() == QUERY_CLOUD)
         return myReadClouds(data);
     if (getReader().getQueryType() == QUERY_BLOCKS_PLUS_CLOUD_VIEW)
@@ -589,6 +591,7 @@ boost::uint32_t IteratorBase::myReadBuffer(PointBuffer& data)
         std::string const& query = getReader().getOptions().getValueOrThrow<std::string>("query");
         ::soci::statement blocks = m_session->prepare << query;
         ::soci::row block;
+
         return myReadBlocks(data, blocks, block);
     }
 
@@ -610,6 +613,7 @@ boost::uint32_t IteratorBase::myReadClouds(PointBuffer& user_buffer)
         getReader().log()->get(logDEBUG2) << "Fetched buffer with cloud id: " << cloud.get<int>("cloud_id") << " for myReadClouds" << std::endl;
     else
         getReader().log()->get(logDEBUG) << "unable to fetch initial cloud!" << std::endl;
+        
     while (bReadCloud)
     {
         
@@ -667,9 +671,8 @@ boost::uint32_t IteratorBase::myReadBlocks(PointBuffer& user_buffer, ::soci::sta
 {
     boost::uint32_t numPointsRead = 0;
     
-    user_buffer.setNumPoints(0);
+    // user_buffer.setNumPoints(0);
 
-    
     if (!m_active_buffer) 
     {
         m_active_buffer = fetchPointBuffer(block.get<int>("cloud_id"), block.get<std::string>("schema"));
@@ -731,7 +734,7 @@ boost::uint32_t IteratorBase::myReadBlocks(PointBuffer& user_buffer, ::soci::sta
         numPointsRead = numPointsRead + numReadThisBlock;
     
         readBlob(block, numSpaceLeftThisBuffer);
-        // fillUserBuffer(user_buffer);
+        fillUserBuffer(user_buffer);
         // if (m_buffer_position != 0)
         // {
         //     return user_buffer.getNumPoints();

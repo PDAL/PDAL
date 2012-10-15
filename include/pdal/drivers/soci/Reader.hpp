@@ -173,14 +173,14 @@ private:
                                       ::soci::row& r);
     void readBlob(::soci::row& block,
                   boost::uint32_t howMany);
-    // void fillUserBuffer(PointBuffer& user_buffer);
+    void fillUserBuffer(PointBuffer& user_buffer);
     // 
-    // void copyOracleData(PointBuffer& source, 
-    //                     PointBuffer& destination, 
-    //                     Dimension const& dest_dim, 
-    //                     boost::uint32_t source_starting_position, 
-    //                     boost::uint32_t destination_starting_position,
-    //                     boost::uint32_t howMany);
+    void copyDatabaseData(PointBuffer& source, 
+                          PointBuffer& destination, 
+                          Dimension const& dest_dim, 
+                          boost::uint32_t source_starting_position, 
+                          boost::uint32_t destination_starting_position,
+                          boost::uint32_t howMany);
     // pdal::Bounds<double> getBounds(Statement statement, BlockPtr block);
     IteratorBase& operator=(const IteratorBase&); // not implemented
     IteratorBase(const IteratorBase&); // not implemented;
