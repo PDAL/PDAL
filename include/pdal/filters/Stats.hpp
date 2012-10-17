@@ -209,19 +209,6 @@ public:
     void processBuffer(PointBuffer& data) const;
 
 
-
-    // return a tree like this:
-    //    X:
-    //        cout: 100
-    //        min: 1.0
-    //        max: 100.0
-    //    Y:
-    //        cout: 100
-    //        min: 11.0
-    //        max: 110.0
-    //
-    // boost::property_tree::ptree toStatsPTree() const;
-
 private:
 
     Stats& operator=(const Stats&); // not implemented
