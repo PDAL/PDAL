@@ -47,6 +47,26 @@ namespace filters
 namespace stats
 {
 
+pdal::Metadata Summary::toMetadata() const
+{
+    boost::uint32_t cnt = static_cast<boost::uint32_t>(count());
+    Metadata output;
+    output.addMetadata("count", cnt, "count");
+    output.addMetadata("minimum", minimum(), "minimum");
+    output.addMetadata("maximum", maximum(), "maximum");
+    output.addMetadata("average", average(), "average");
+
+    std::ostringstream sample;
+    for (std::vector<double>::size_type i =0; i < m_sample.size(); ++i)
+    {
+        sample << m_sample[i] << " ";
+    };
+    
+    output.addMetadata("sample", sample.str(), "sample");
+    
+    return output;
+
+}
 
 boost::property_tree::ptree Summary::toPTree() const
 {
@@ -58,7 +78,7 @@ boost::property_tree::ptree Summary::toPTree() const
     tree.put("maximum", maximum());
     tree.put("average", average());
 
-    boost::property_tree::ptree bins;
+    // boost::property_tree::ptree bins;
     // histogram_type hist = histogram();
     // for (boost::int32_t i = 0; i < hist.size(); ++i)
     // {
@@ -327,6 +347,15 @@ bool Stats::atEndImpl() const
     return getPrevIterator().atEnd();
 }
 
+void Stats::readBufferEndImpl(PointBuffer& buffer)
+{
+    pdal::Metadata& metadata = buffer.getMetadataRef();
+    pdal::Metadata stats = toMetadata();
+    stats.setName(getStage().getName());
+    metadata.setMetadata(stats);
+    
+}
+
 void Stats::readBufferBeginImpl(PointBuffer& buffer)
 {
     // We'll assume you're not changing the schema per-read call
@@ -407,6 +436,30 @@ void Stats::readBufferBeginImpl(PointBuffer& buffer)
 
 }
 
+pdal::Metadata Stats::toMetadata() const
+{
+    pdal::Metadata output;
+
+    std::vector<DimensionPtr>::const_iterator p;
+    boost::uint32_t position(0);
+    for (p = m_dimensions.begin(); p != m_dimensions.end(); ++p)
+    {
+        std::multimap<DimensionPtr, stats::SummaryPtr>::const_iterator i;
+        DimensionPtr d = *p;
+        i = m_stats.find(d);
+        if (i == m_stats.end())
+            throw pdal_error("unable to find dimension in summary!");
+        const stats::SummaryPtr stat = i->second;
+
+        pdal::Metadata sub = stat->toMetadata();
+        sub.setName(d->getName());
+        sub.addMetadata("position", position);
+        output.addMetadata(sub);
+        position++;
+    }
+
+    return output;
+}
 boost::property_tree::ptree Stats::toPTree() const
 {
     boost::property_tree::ptree tree;

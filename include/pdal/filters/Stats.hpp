@@ -101,7 +101,8 @@ public:
     // }
 
     boost::property_tree::ptree toPTree() const;
-
+    pdal::Metadata toMetadata() const;
+    
 private:
     summary_accumulator m_summary;
     // density_accumulator m_histogram;
@@ -111,7 +112,6 @@ private:
     boost::random::uniform_int_distribution<> m_distribution;
     std::map<boost::int32_t, boost::uint32_t> m_counts;
     bool m_doExact;
-    bool m_doHistogram;
     
 public:
 
@@ -119,15 +119,13 @@ public:
             boost::uint32_t sample_size=1000,
             boost::uint32_t cache_size=1000,
             boost::uint32_t seed=0,
-            bool doExact=false,
-            bool doHistogram=false)
+            bool doExact=false)
         : 
         // m_histogram(boost::accumulators::tag::density::num_bins = num_bins,
         //               boost::accumulators::tag::density::cache_size = cache_size)
-         m_sample_size(sample_size)
+        m_sample_size(sample_size)
         , m_distribution(0, cache_size)
         , m_doExact(doExact)
-        , m_doHistogram(doHistogram)
     {
         if (seed != 0)
         {
@@ -152,9 +150,7 @@ public:
     template<class T> inline void insert(T value)
     {
         m_summary(static_cast<double>(value));
-        
-        // if (m_doHistogram)
-        //     m_histogram(static_cast<double>(value));
+        // m_histogram(static_cast<double>(value));
 
         int sample = m_distribution(m_rng);
         if (static_cast<boost::uint32_t>(sample) < m_sample_size)
@@ -248,12 +244,13 @@ class PDAL_DLL Stats : public pdal::FilterSequentialIterator
 public:
     Stats(const pdal::filters::Stats& filter, PointBuffer& buffer);
     boost::property_tree::ptree toPTree() const;
+    pdal::Metadata toMetadata() const;
     stats::Summary const& getStats(Dimension const& dim) const;
     void reset();
 
 protected:
     virtual void readBufferBeginImpl(PointBuffer&);
-
+    virtual void readBufferEndImpl(PointBuffer&);
 private:
     boost::uint64_t skipImpl(boost::uint64_t);
     boost::uint32_t readBufferImpl(PointBuffer&);
