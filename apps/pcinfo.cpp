@@ -205,10 +205,10 @@ void PcInfo::dumpStats(pdal::filters::Stats& filter) const
         totRead += numRead;
     }
 
-    boost::property_tree::ptree stats_tree = static_cast<pdal::filters::iterators::sequential::Stats*>(iter.get())->toPTree();
+    pdal::Metadata output = static_cast<pdal::filters::iterators::sequential::Stats*>(iter.get())->toMetadata();
     
     boost::property_tree::ptree tree;
-    tree.add_child("stats", stats_tree);
+    tree.add_child("stats", output.toPTree());
     std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
 
     if (m_useXML)
