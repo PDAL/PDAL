@@ -47,6 +47,7 @@ namespace pdal
 {
 
 class PipelineManager;
+class PointBuffer;
 
 class PDAL_DLL PipelineWriter
 {
@@ -55,12 +56,17 @@ public:
     ~PipelineWriter();
 
     void writePipeline(const std::string& filename) const;
+    inline void setPointBuffer(PointBuffer const* buffer) { m_buffer = buffer; }
 
     static void write_option_ptree(boost::property_tree::ptree& tree, const Options& opts);
     static void write_metadata_ptree(boost::property_tree::ptree& tree, const Metadata& mdata);
     static boost::property_tree::ptree get_metadata_entry(boost::property_tree::ptree const& input);
 private:
     const PipelineManager& m_manager;
+    
+    // The user can set a PointBuffer on the PipelineWriter and
+    // information from it will be written into the XML
+    PointBuffer const* m_buffer;
 
     PipelineWriter& operator=(const PipelineWriter&); // not implemented
     PipelineWriter(const PipelineWriter&); // not implemented

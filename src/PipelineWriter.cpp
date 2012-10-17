@@ -39,6 +39,7 @@
 #include <pdal/Reader.hpp>
 #include <pdal/Writer.hpp>
 #include <pdal/PipelineManager.hpp>
+#include <pdal/PointBuffer.hpp>
 
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/optional.hpp>
@@ -54,6 +55,7 @@ namespace pdal
 
 PipelineWriter::PipelineWriter(const PipelineManager& manager)
     : m_manager(manager)
+    , m_buffer(0)
 {
 
     return;
@@ -175,7 +177,15 @@ void PipelineWriter::writePipeline(const std::string& filename) const
     const StageBase* stage = m_manager.isWriterPipeline() ? (StageBase*)m_manager.getWriter() : (StageBase*)m_manager.getStage();
 
     boost::property_tree::ptree tree = generateTreeFromStageBase(*stage);
-
+    
+    if (m_buffer)
+    {
+        boost::property_tree::ptree metadata_tree;
+        
+        write_metadata_ptree(metadata_tree, m_buffer->getMetadata());
+        boost::property_tree::ptree & child = tree.get_child("Pipeline");
+        child.add_child("PointBuffer", metadata_tree);
+    }
 
     const boost::property_tree::xml_parser::xml_writer_settings<char> settings(' ', 4);
 
