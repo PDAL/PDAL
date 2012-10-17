@@ -163,6 +163,7 @@ int PcPipeline::execute()
     if (m_pipelineFile.size() > 0)
     {
         pdal::PipelineWriter writer(manager);
+        writer.setPointBuffer( manager.getWriter()->getPointBuffer());
         writer.writePipeline(m_pipelineFile);
     }
     return 0;
