@@ -52,7 +52,7 @@ class PDAL_DLL Writer : public StageBase
 {
 public:
     Writer(Stage& prevStage, const Options& options);
-    virtual ~Writer() {}
+    virtual ~Writer();
 
     virtual void initialize();
 
@@ -76,6 +76,7 @@ public:
 
     // for dumping
     virtual boost::property_tree::ptree toPTree() const;
+    virtual PointBuffer const* getPointBuffer() const { return m_buffer; }
 
 protected:
     // this is called once before the loop with all the writeBuffer calls
@@ -100,6 +101,7 @@ private:
     static const boost::uint32_t s_defaultChunkSize;
     SpatialReference m_spatialReference;
     UserCallback* m_userCallback;
+    PointBuffer* m_buffer;
 
     Writer& operator=(const Writer&); // not implemented
     Writer(const Writer&); // not implemented
