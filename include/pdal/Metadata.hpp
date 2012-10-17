@@ -186,7 +186,11 @@ public:
     
     /// Add a new Metadata instance to this instance.
     void addMetadata( Metadata const& m);
-
+    
+    /// Overwrites the existing metadata entry with the given @name, otherwise simply
+    /// adds a new one
+    /// @param value the Metadata instance to overwrite.
+    void setMetadata( Metadata const& m);
 
     
     /// @name Operators
@@ -453,11 +457,18 @@ inline void Metadata::setValue<boost::blank>(boost::blank const& v)
     m_tree.put("value",v);
 }
 
-inline void Metadata::addMetadata(  Metadata const& m)
+inline void Metadata::addMetadata( Metadata const& m)
 {
     
     std::string n = boost::algorithm::ireplace_all_copy(m.getName(), ".", "_");
     m_tree.add_child("metadata."+n, m.toPTree());
+}
+
+inline void Metadata::setMetadata( Metadata const& m)
+{
+    std::string n = boost::algorithm::ireplace_all_copy(m.getName(), ".", "_");    
+    deleteMetadata(n);
+    addMetadata(m);
 }
 
 template <typename T>
