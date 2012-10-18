@@ -65,6 +65,8 @@ public:
 
     // forwarded function
     boost::random::mt19937* getRNG();
+    
+    void getGDALEnvironment();
 
 private:
     GlobalEnvironment();
@@ -73,9 +75,10 @@ private:
     static void init();
 
     typedef std::map<boost::thread::id, ThreadEnvironment*> thread_map;
-    thread_map m_threadMap;
 
+    thread_map m_threadMap;
     plang::PythonEnvironment* m_pythonEnvironment;
+    bool m_bIsGDALInitialized;
 
     GlobalEnvironment(const GlobalEnvironment&); // nope
     GlobalEnvironment& operator=(const GlobalEnvironment&); // nope

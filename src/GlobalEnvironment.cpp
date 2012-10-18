@@ -98,20 +98,27 @@ void GlobalEnvironment::init()
 //
 
 GlobalEnvironment::GlobalEnvironment()
-#ifdef PDAL_HAVE_PYTHON
 : m_pythonEnvironment(0)
-#endif
+, m_bIsGDALInitialized(false)
 {
     // this should be the not-a-thread thread environment
     (void) createThreadEnvironment(boost::thread::id());
 
-#ifdef PDAL_HAVE_GDAL
-    (void) GDALAllRegister();
-#endif
+
 
     return;
 }
 
+void GlobalEnvironment::getGDALEnvironment()
+{
+#ifdef PDAL_HAVE_GDAL
+    if (!m_bIsGDALInitialized)
+    {
+        (void) GDALAllRegister();
+        m_bIsGDALInitialized = true;        
+    }
+#endif    
+}
 
 GlobalEnvironment::~GlobalEnvironment()
 {
@@ -130,7 +137,11 @@ GlobalEnvironment::~GlobalEnvironment()
 #endif
 
 #ifdef PDAL_HAVE_GDAL
-    (void) GDALDestroyDriverManager();
+    if (m_bIsGDALInitialized)
+    {
+        (void) GDALDestroyDriverManager();
+        m_bIsGDALInitialized = false;
+    }
 #endif
 
     return;

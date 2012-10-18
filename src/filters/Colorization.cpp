@@ -39,6 +39,7 @@
 #include <algorithm>
 
 #include <pdal/PointBuffer.hpp>
+#include <pdal/GlobalEnvironment.hpp>
 
 #ifdef PDAL_HAVE_GDAL
 #include <gdal.h>
@@ -93,7 +94,8 @@ void Colorization::initialize()
     collectOptions();
 
 #ifdef PDAL_HAVE_GDAL
-
+    
+    pdal::GlobalEnvironment::get().getGDALEnvironment();
     m_gdal_debug = new pdal::gdal::Debug(isDebug(), log());
     m_forward_transform.assign(0.0);
     m_inverse_transform.assign(0.0);
