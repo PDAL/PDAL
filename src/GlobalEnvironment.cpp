@@ -38,6 +38,12 @@
 #include <pdal/plang/PythonEnvironment.hpp>
 #endif
 
+#ifdef PDAL_HAVE_GDAL
+#include <gdal.h>
+#include <ogr_spatialref.h>
+#include <pdal/GDALUtils.hpp>
+#endif
+
 namespace pdal
 {
 
@@ -99,6 +105,10 @@ GlobalEnvironment::GlobalEnvironment()
     // this should be the not-a-thread thread environment
     (void) createThreadEnvironment(boost::thread::id());
 
+#ifdef PDAL_HAVE_GDAL
+    (void) GDALAllRegister();
+#endif
+
     return;
 }
 
@@ -117,6 +127,10 @@ GlobalEnvironment::~GlobalEnvironment()
     if (m_pythonEnvironment)
         delete m_pythonEnvironment;
     m_pythonEnvironment = 0;
+#endif
+
+#ifdef PDAL_HAVE_GDAL
+    (void) GDALDestroyDriverManager();
 #endif
 
     return;
