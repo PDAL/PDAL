@@ -65,7 +65,7 @@ public:
 
     static void CPL_STDCALL trampoline(::CPLErr code, int num, char const* msg)
     {
-#if GDAL_VERSION_MAJOR == 1 && GDAL_VERSION_MINOR >= 9
+#if ((GDAL_VERSION_MAJOR == 1 && GDAL_VERSION_MINOR >= 9) || (GDAL_VERSION_MAJOR > 1)) 
         static_cast<Debug*>(CPLGetErrorHandlerUserData())->m_gdal_callback(code, num, msg);
 #else
         if (code == CE_Failure || code == CE_Fatal)
@@ -76,7 +76,7 @@ public:
         }
         else if (code == CE_Debug)
         {
-            std::clog << " (no log control stdlog) GDAL debug: " << msg << std::endl;
+            std::clog << " (no log control stdlog) GDAL debug pdal::gdal::Debug: " << msg << std::endl;
         }
         else
         {

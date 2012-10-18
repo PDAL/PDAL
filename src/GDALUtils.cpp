@@ -64,7 +64,7 @@ Debug::Debug(bool isDebug, pdal::LogPtr log)
     }
 
 
-#if GDAL_VERSION_MAJOR == 1 && GDAL_VERSION_MINOR >= 9
+#if ((GDAL_VERSION_MAJOR == 1 && GDAL_VERSION_MINOR >= 9) || (GDAL_VERSION_MAJOR > 1)) 
     CPLPushErrorHandlerEx(&Debug::trampoline, this);
 #else
     CPLPushErrorHandler(&Debug::trampoline);
