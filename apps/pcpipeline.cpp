@@ -64,6 +64,7 @@ private:
     bool m_validate;
     boost::uint64_t m_numPointsToWrite;
     boost::uint64_t m_numSkipPoints;
+    bool m_bSingleBuffer;
 };
 
 
@@ -73,6 +74,7 @@ PcPipeline::PcPipeline(int argc, char* argv[])
     , m_validate(false)
     , m_numPointsToWrite(0)
     , m_numSkipPoints(0)
+    , m_bSingleBuffer(false)
 {
     return;
 }
@@ -102,7 +104,8 @@ void PcPipeline::addSwitches()
         ("validate", po::value<bool>(&m_validate)->zero_tokens()->implicit_value(true), "Validate the pipeline (including serialization), but do not execute writing of points")
         ("count", po::value<boost::uint64_t>(&m_numPointsToWrite)->default_value(0), "How many points should we write?")
         ("skip", po::value<boost::uint64_t>(&m_numSkipPoints)->default_value(0), "How many points should we skip?")
-
+        ("single-buffer", po::value<bool>(&m_bSingleBuffer)->zero_tokens()->implicit_value(true), "Attempt to process the pipeline using a single buffer instead of piece-wise.")
+        
         ;
 
     addSwitchSet(file_options);
@@ -136,8 +139,17 @@ int PcPipeline::execute()
     
     if (m_numPointsToWrite == 0)
         m_numPointsToWrite = numPointsToRead;
+    
+    if (m_bSingleBuffer)
+    {
+        std::cerr << "Requested to read " << numPointsToRead << " points as a single buffer" << std::endl;
+        manager.getWriter()->setChunkSize(numPointsToRead + 1000);
+    }
+    else
+    {
+        std::cerr << "Requested to read " << numPointsToRead << " points" << std::endl;
+    }
         
-    std::cerr << "Requested to read " << numPointsToRead << " points" << std::endl;
     std::cerr << "Requested to write " << m_numPointsToWrite << " points" << std::endl;
     
     pdal::UserCallback* callback;
