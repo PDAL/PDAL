@@ -64,7 +64,7 @@ private:
     bool m_validate;
     boost::uint64_t m_numPointsToWrite;
     boost::uint64_t m_numSkipPoints;
-    bool m_bSingleBuffer;
+    boost::uint32_t m_bufferCapacity;
 };
 
 
@@ -74,7 +74,7 @@ PcPipeline::PcPipeline(int argc, char* argv[])
     , m_validate(false)
     , m_numPointsToWrite(0)
     , m_numSkipPoints(0)
-    , m_bSingleBuffer(false)
+    , m_bufferCapacity(0)
 {
     return;
 }
@@ -104,7 +104,7 @@ void PcPipeline::addSwitches()
         ("validate", po::value<bool>(&m_validate)->zero_tokens()->implicit_value(true), "Validate the pipeline (including serialization), but do not execute writing of points")
         ("count", po::value<boost::uint64_t>(&m_numPointsToWrite)->default_value(0), "How many points should we write?")
         ("skip", po::value<boost::uint64_t>(&m_numSkipPoints)->default_value(0), "How many points should we skip?")
-        ("single-buffer", po::value<bool>(&m_bSingleBuffer)->zero_tokens()->implicit_value(true), "Attempt to process the pipeline using a single buffer instead of piece-wise.")
+        ("buffer-capacity", po::value<boost::uint32_t>(&m_bufferCapacity)->default_value(0), "Use a specified buffer capacity rather than attempting to read the entire pipeline in a single buffer")
         
         ;
 
@@ -140,33 +140,25 @@ int PcPipeline::execute()
     if (m_numPointsToWrite == 0)
         m_numPointsToWrite = numPointsToRead;
     
-    if (m_bSingleBuffer)
-    {
-        std::cerr << "Requested to read " << numPointsToRead << " points as a single buffer" << std::endl;
-        manager.getWriter()->setChunkSize(numPointsToRead + 1000);
-    }
+    if (m_bufferCapacity != 0)
+        manager.getWriter()->setChunkSize(m_bufferCapacity);
     else
-    {
-        std::cerr << "Requested to read " << numPointsToRead << " points" << std::endl;
-    }
-        
+        manager.getWriter()->setChunkSize(numPointsToRead + 1000);
+
+    std::cerr << "Requested to read " << numPointsToRead << " points" << std::endl;
     std::cerr << "Requested to write " << m_numPointsToWrite << " points" << std::endl;
+    std::cerr << "Buffer capacity is " << manager.getWriter()->getChunkSize() << std::endl;
     
     pdal::UserCallback* callback;
     if (m_numPointsToWrite == 0)
     {
         if (!getProgressShellCommand().size())
-            callback = static_cast<pdal::UserCallback*>(new HeartbeatCallback);
+            if (m_numPointsToWrite == 0)
+                callback = static_cast<pdal::UserCallback*>(new HeartbeatCallback);
+            else
+                callback = static_cast<pdal::UserCallback*>(new PercentageCallback);
         else
             callback = static_cast<pdal::UserCallback*>(new ShellScriptCallback(getProgressShellCommand()));
-    }
-    else
-    {
-        if (!getProgressShellCommand().size())
-            callback = static_cast<pdal::UserCallback*>(new PercentageCallback);
-        else
-            callback = static_cast<pdal::UserCallback*>(new ShellScriptCallback(getProgressShellCommand()));
-        
     }
 
     manager.getWriter()->setUserCallback(callback);
