@@ -319,10 +319,6 @@ int Pc2Pc::execute()
             writerOptions.add<bool>("compression", true);
         }
 
-        if (m_chunkSize != 0)
-        {
-            writerOptions.add<boost::uint32_t>("chunk_size", m_chunkSize);
-        }
         if (m_bForwardMetadata)
         {
             writerOptions.add<bool>("forward_metadata", true);
@@ -346,26 +342,25 @@ int Pc2Pc::execute()
     
     if (m_numPointsToWrite == 0)
         m_numPointsToWrite = numPointsToRead;
+
+    if (m_chunkSize != 0)
+        writer->setChunkSize(m_chunkSize);
+    else
+        writer->setChunkSize(numPointsToRead);
+        
         
     std::cerr << "Requested to read " << numPointsToRead << " points" << std::endl;
     std::cerr << "Requested to write " << m_numPointsToWrite << " points" << std::endl;
-    
+    std::cerr << "Buffer capacity is " << writer->getChunkSize() << std::endl;
+        
     pdal::UserCallback* callback;
-    if (m_numPointsToWrite == 0)
-    {
-        if (!getProgressShellCommand().size())
+    if (!getProgressShellCommand().size())
+        if (m_numPointsToWrite == 0)
             callback = static_cast<pdal::UserCallback*>(new HeartbeatCallback);
         else
-            callback = static_cast<pdal::UserCallback*>(new ShellScriptCallback(getProgressShellCommand()));
-    }
-    else
-    {
-        if (!getProgressShellCommand().size())
             callback = static_cast<pdal::UserCallback*>(new PercentageCallback);
-        else
-            callback = static_cast<pdal::UserCallback*>(new ShellScriptCallback(getProgressShellCommand()));
-        
-    }
+    else
+        callback = static_cast<pdal::UserCallback*>(new ShellScriptCallback(getProgressShellCommand()));
     writer->setUserCallback(callback);
 
     const boost::uint64_t numPointsRead = writer->write(m_numPointsToWrite, m_numSkipPoints);

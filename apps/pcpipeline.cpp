@@ -64,7 +64,6 @@ private:
     bool m_validate;
     boost::uint64_t m_numPointsToWrite;
     boost::uint64_t m_numSkipPoints;
-    boost::uint32_t m_bufferCapacity;
 };
 
 
@@ -74,7 +73,6 @@ PcPipeline::PcPipeline(int argc, char* argv[])
     , m_validate(false)
     , m_numPointsToWrite(0)
     , m_numSkipPoints(0)
-    , m_bufferCapacity(0)
 {
     return;
 }
@@ -103,9 +101,7 @@ void PcPipeline::addSwitches()
         ("pipeline-serialization", po::value<std::string>(&m_pipelineFile)->default_value(""), "")
         ("validate", po::value<bool>(&m_validate)->zero_tokens()->implicit_value(true), "Validate the pipeline (including serialization), but do not execute writing of points")
         ("count", po::value<boost::uint64_t>(&m_numPointsToWrite)->default_value(0), "How many points should we write?")
-        ("skip", po::value<boost::uint64_t>(&m_numSkipPoints)->default_value(0), "How many points should we skip?")
-        ("buffer-capacity", po::value<boost::uint32_t>(&m_bufferCapacity)->default_value(0), "Use a specified buffer capacity rather than attempting to read the entire pipeline in a single buffer")
-        
+        ("skip", po::value<boost::uint64_t>(&m_numSkipPoints)->default_value(0), "How many points should we skip?")        
         ;
 
     addSwitchSet(file_options);
@@ -140,26 +136,24 @@ int PcPipeline::execute()
     if (m_numPointsToWrite == 0)
         m_numPointsToWrite = numPointsToRead;
     
-    if (m_bufferCapacity != 0)
-        manager.getWriter()->setChunkSize(m_bufferCapacity);
+    if (m_chunkSize != 0)
+        manager.getWriter()->setChunkSize(m_chunkSize);
     else
-        manager.getWriter()->setChunkSize(numPointsToRead + 1000);
+        manager.getWriter()->setChunkSize(numPointsToRead);
 
     std::cerr << "Requested to read " << numPointsToRead << " points" << std::endl;
     std::cerr << "Requested to write " << m_numPointsToWrite << " points" << std::endl;
     std::cerr << "Buffer capacity is " << manager.getWriter()->getChunkSize() << std::endl;
     
     pdal::UserCallback* callback;
-    if (m_numPointsToWrite == 0)
-    {
-        if (!getProgressShellCommand().size())
-            if (m_numPointsToWrite == 0)
-                callback = static_cast<pdal::UserCallback*>(new HeartbeatCallback);
-            else
-                callback = static_cast<pdal::UserCallback*>(new PercentageCallback);
+
+    if (!getProgressShellCommand().size())
+        if (m_numPointsToWrite == 0)
+            callback = static_cast<pdal::UserCallback*>(new HeartbeatCallback);
         else
-            callback = static_cast<pdal::UserCallback*>(new ShellScriptCallback(getProgressShellCommand()));
-    }
+            callback = static_cast<pdal::UserCallback*>(new PercentageCallback);
+    else
+        callback = static_cast<pdal::UserCallback*>(new ShellScriptCallback(getProgressShellCommand()));
 
     manager.getWriter()->setUserCallback(callback);
     if (!m_validate) manager.getWriter()->write(m_numPointsToWrite, m_numSkipPoints);
