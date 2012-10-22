@@ -81,7 +81,8 @@ struct FileStreamDeleter
 
 Writer::Writer(Stage& prevStage, const Options& options)
     : pdal::Writer(prevStage, options)
-    , m_wrote_header(false)
+    , bWroteHeader(false)
+    , bWroteFirstPoint(false)
 
 {
 
@@ -137,9 +138,22 @@ void Writer::writeBegin(boost::uint64_t /*targetNumPointsToWrite*/)
 
 void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
 {
+    std::string outputType = getOptions().getValueOrDefault<std::string>("format", "csv");
+    bool bGeoJSON = boost::iequals(outputType, "GEOJSON");
+    {
+        *m_stream << "]}";
+        std::string callback = getOptions().getValueOrDefault<std::string>("jscallback", "");
+        
+        if (callback.size())
+        {
+            *m_stream  <<")";
+        }        
+    }
+
     m_stream.reset();
     m_stream = FileStreamPtr();
-    m_wrote_header = false;
+    bWroteHeader = false;
+    bWroteFirstPoint = false;
     return;
 }
 
@@ -237,7 +251,7 @@ void Writer::WriteHeader(pdal::Schema const& schema)
     if (!bWriteHeader)
     {
         log()->get(logDEBUG) << "Not writing header" << std::endl;
-        m_wrote_header = true;
+        bWroteHeader = true;
         return;
         
     }
@@ -274,6 +288,23 @@ void Writer::WriteHeader(pdal::Schema const& schema)
         oss <<i->get<0>();
     }
     log()->get(logDEBUG) << oss.str() << std::endl;
+    
+    // If we're bGeoJSON, we're just going to write the preamble for FeatureCollection, 
+    // and let the rest happen in writeBuffer
+    std::string outputType = getOptions().getValueOrDefault<std::string>("format", "csv");
+    bool bGeoJSON = boost::iequals(outputType, "GEOJSON");
+    if (bGeoJSON)
+    {
+        std::string callback = getOptions().getValueOrDefault<std::string>("jscallback", "");
+        
+        if (callback.size())
+        {
+            *m_stream << callback <<"(";
+        }
+        *m_stream << "{ \"type\": \"FeatureCollection\", \"features\": [";
+        return;
+    }
+    
     
     if (delimiter.size() == 0)
         delimiter = " ";
@@ -405,10 +436,14 @@ std::string Writer::getStringRepresentation(PointBuffer const& data,
 boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
 {
 
-    if (!m_wrote_header)
+    std::string outputType = getOptions().getValueOrDefault<std::string>("format", "csv");
+    bool bCSV = boost::iequals(outputType, "CSV");
+    bool bGeoJSON = boost::iequals(outputType, "GEOJSON");
+
+    if (!bWroteHeader)
     {
         WriteHeader(data.getSchema());
-        m_wrote_header = true;
+        bWroteHeader = true;
     }
 
     std::string newline = getOptions().getValueOrDefault<std::string>("newline", "\n");
@@ -425,45 +460,97 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
     
     std::vector<boost::tuple<std::string, std::string> > dimensions = getDimensionOrder(schema);
 
-    while (pointIndex != data.getNumPoints())
+        
+    if (bCSV)
     {
-        std::vector<boost::tuple<std::string, std::string> >::const_iterator iter =  dimensions.begin();
-
-        while (iter != dimensions.end())
+        while (pointIndex != data.getNumPoints())
         {
-            
-            Dimension const& d = schema.getDimension(iter->get<0>(), iter->get<1>());
-            if (d.isIgnored())
+            std::vector<boost::tuple<std::string, std::string> >::const_iterator iter =  dimensions.begin();
+
+            while (iter != dimensions.end())
             {
+
+                Dimension const& d = schema.getDimension(iter->get<0>(), iter->get<1>());
+                if (d.isIgnored())
+                {
+                    iter++;
+                    continue;
+                }
+
+                *m_stream << getStringRepresentation(data, d, pointIndex);
+
                 iter++;
-                continue;
+                if (iter != dimensions.end())
+                    *m_stream << delimiter;
+            }
+            *m_stream << newline;
+
+            pointIndex++;
+            if (!bWroteFirstPoint)
+            {
+                bWroteFirstPoint = true;
             }
 
-            *m_stream << getStringRepresentation(data, d, pointIndex);
+        }        
+    } else if (bGeoJSON)
+    {
+        while (pointIndex != data.getNumPoints())
+        {
+            Dimension const& dimX = schema.getDimension("X");
+            Dimension const& dimY = schema.getDimension("Y");
+            Dimension const& dimZ = schema.getDimension("Z");
+            
+            if (bWroteFirstPoint)
+                *m_stream << ",";
+                
+            *m_stream << "{ \"type\":\"Feature\",\"geometry\": { \"type\": \"Point\", \"coordinates\": [";
+            *m_stream << getStringRepresentation(data, dimX, pointIndex) << ",";
+            *m_stream << getStringRepresentation(data, dimY, pointIndex) << ",";
+            *m_stream << getStringRepresentation(data, dimZ, pointIndex) << "]},";
+            
+            *m_stream << "\"properties\": {";
 
-            iter++;
-            if (iter != dimensions.end())
-                *m_stream << delimiter;
+            std::vector<boost::tuple<std::string, std::string> >::const_iterator iter =  dimensions.begin();
+
+            while (iter != dimensions.end())
+            {
+
+                Dimension const& d = schema.getDimension(iter->get<0>(), iter->get<1>());
+                if (d.isIgnored())
+                {
+                    iter++;
+                    continue;
+                }
+
+                *m_stream << "\"" << iter->get<0>() << "\":";
+                
+
+                *m_stream << "\"" << getStringRepresentation(data, d, pointIndex) <<"\"";
+                
+                iter++;
+                if (iter != dimensions.end())
+                    *m_stream << delimiter;
+            }
+            
+            
+            *m_stream << "}"; // end properties
+
+            *m_stream << "}"; // end feature
+            
+            pointIndex++;
+            if (!bWroteFirstPoint)
+            {
+                bWroteFirstPoint = true;
+            }
+            
+            
         }
-        *m_stream << newline;
-
-        pointIndex++;
-
+                    
     }
 
 
 
     return data.getNumPoints();
-}
-
-
-boost::property_tree::ptree Writer::toPTree() const
-{
-    boost::property_tree::ptree tree = pdal::Writer::toPTree();
-
-    // add stuff here specific to this stage type
-
-    return tree;
 }
 
 

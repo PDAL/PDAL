@@ -87,10 +87,6 @@ public:
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
 
-    // for dumping
-    virtual boost::property_tree::ptree toPTree() const;
-
-
 protected:
     virtual void writeBegin(boost::uint64_t targetNumPointsToWrite);
     virtual boost::uint32_t writeBuffer(const PointBuffer&);
@@ -108,7 +104,8 @@ private:
     void WriteHeader(pdal::Schema const& schema);
     std::vector<boost::tuple<std::string, std::string> >  getDimensionOrder(pdal::Schema const& schema) const;
     FileStreamPtr m_stream;
-    bool m_wrote_header;
+    bool bWroteHeader;
+    bool bWroteFirstPoint;
 };
 
 }
