@@ -44,11 +44,9 @@
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
 
-#ifdef PDAL_HAVE_GDAL
 #include <cpl_port.h>
 #include "gdal.h"
 #include <cpl_vsi.h>
-#endif
 
 namespace pdal
 {
@@ -96,7 +94,6 @@ private:
 };
 
 
-#ifdef PDAL_HAVE_GDAL
 class PDAL_DLL VSILFileBuffer
 {
 public:
@@ -112,7 +109,6 @@ public:
 private:
     VSILFILE* m_fp;
 };
-#endif
 
 
 }
