@@ -37,7 +37,7 @@
 
 #include <pdal/Reader.hpp>
 #include <pdal/ReaderIterator.hpp>
-#include <pdal/GDALUtils.hpp>
+
 
 #include <pdal/drivers/soci/common.hpp>
 #include <boost/scoped_ptr.hpp>
