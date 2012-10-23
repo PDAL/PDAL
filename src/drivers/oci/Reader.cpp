@@ -61,6 +61,7 @@ Reader::Reader(const Options& options)
     , m_querytype(QUERY_UNKNOWN)
     , m_capacity(0)
     , m_cachedPointCount(0)
+    , m_gdal_debug(0)
 {
 
 }
@@ -148,7 +149,7 @@ void Reader::initialize()
 {
     pdal::Reader::initialize();
 
-    m_gdal_debug = boost::shared_ptr<pdal::gdal::Debug>(new pdal::gdal::Debug(isDebug(), log()));
+    m_gdal_debug = new pdal::gdal::Debug(isDebug(), log());
     m_connection = connect();
     m_block = BlockPtr(new Block(m_connection));
 
