@@ -21,6 +21,8 @@
 #              | grep '^#' \
 #              | sed -e 's/.*boost/boost/' -e 's/>.*//' \
 #              | sort -u`
+#    2.5 Make bcp
+#        ./b2 tools/bcp
 #    3. Run bcp.
 #        $ cd $BOOST_ROOT
 #        $ ../boost/boost_1_48_0/dist/bin/bcp --namespace=pdalboost --namespace-alias $BOOST_HEADERS build boost --boost=/home/oracle/boost/boost_1_48_0/
