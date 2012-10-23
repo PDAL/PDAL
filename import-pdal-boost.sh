@@ -42,7 +42,7 @@
 #@echo "see comments for instructions"
 #exit 1
 
-export BOOST_HOME=/home/oracle/boost/boost_1_48_0/
+export BOOST_HOME=/home/hobu/release/boost_1_51_0/
 export TARGET=./boost
 export BOOST_HEADERS=`find src include test apps \( -name '*.[cChH]' -o -name '*.[cChH][pPxX][pPxX]' -o -name '*.[cChH][cChH]' \) -exec grep 'include.*boost' {} \; | grep '^#' | sed -e 's/.*boost/boost/' -e 's/>.*//' | sort -u`
 export BOOST_HEADERS="$BOOST_HEADERS boost/parameter/aux_/overloads.hpp"
@@ -53,11 +53,12 @@ echo $BOOST_HEADERS
 $BOOST_HOME/dist/bin/bcp --namespace=$NAMESPACE \
                          --namespace-alias \
                          $BOOST_HEADERS \
+                         filesystem iostreams fusion \
                          build \
                          boost \
                          --boost=$BOOST_HOME
 
 #put back our boost-specific patches
-git cherry-pick 285ac1bc226c90deae027ae548559b1f5870cad5
-git cherry-pick 22422680a000e4ff1534a3c5ff117f8f967b86f0
+#git cherry-pick 285ac1bc226c90deae027ae548559b1f5870cad5
+#git cherry-pick 22422680a000e4ff1534a3c5ff117f8f967b86f0
 git checkout boost/CMakeLists.txt
