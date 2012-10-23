@@ -152,10 +152,10 @@ public:
         std::vector<unsigned char> retval;
         for (std::string::const_iterator it = source.begin(); it < source.end(); it += 2) {
             unsigned char v = 0;
-            if (std::isxdigit(*it))
-                v = nibbles[std::toupper(*it) - '0'] << 4;
-            if (it + 1 < source.end() && std::isxdigit(*(it + 1)))
-                v += nibbles[std::toupper(*(it + 1)) - '0'];
+            if (::isxdigit(*it))
+                v = nibbles[::toupper(*it) - '0'] << 4;
+            if (it + 1 < source.end() && ::isxdigit(*(it + 1)))
+                v += nibbles[::toupper(*(it + 1)) - '0'];
             retval.push_back(v);
         }
         return retval;
@@ -216,7 +216,12 @@ public:
     static FILE* portable_popen(const std::string& command, const std::string& mode);
     static int portable_pclose(FILE* fp);
     static int run_shell_command(const std::string& cmd, std::string& output);
-    
+   
+    static std::string replaceAll(std::string result, 
+                                  const std::string& replaceWhat, 
+                                  const std::string& replaceWithWhat);
+
+ 
 private:
     template<typename T>
     static inline char* as_buffer(T& data)

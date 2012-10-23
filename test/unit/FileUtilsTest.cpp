@@ -35,6 +35,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <pdal/FileUtils.hpp>
+#include <pdal/Utils.hpp>
 #include "Support.hpp"
 
 using namespace pdal;
@@ -114,7 +115,7 @@ static const std::string drive = "";
 
 static std::string normalize(const std::string p)
 {
-    return Support::replaceAll(p, "\\", "/");
+    return Utils::replaceAll(p, "\\", "/");
 }
 
 static void compare_paths(const std::string a, const std::string b)
