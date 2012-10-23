@@ -69,10 +69,10 @@ public:
         Debug* debug = static_cast<Debug*>(CPLGetErrorHandlerUserData());
         if (!debug)
             return;
-        
+
+        if (!debug->m_log->get()) return;
         debug->m_gdal_callback(code, num, msg);
         
-        if (!debug->m_log->get()) return;
 #else
         if (code == CE_Failure || code == CE_Fatal)
         {
