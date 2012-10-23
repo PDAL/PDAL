@@ -76,7 +76,7 @@ Colorization::~Colorization()
 {
 #ifdef PDAL_HAVE_GDAL
 
-    if (m_gdal_debug)
+    if (m_gdal_debug != 0)
         delete m_gdal_debug;
         
     if (m_ds != 0)
@@ -99,7 +99,9 @@ void Colorization::initialize()
 #ifdef PDAL_HAVE_GDAL
     
     pdal::GlobalEnvironment::get().getGDALEnvironment();
-    m_gdal_debug = new pdal::gdal::Debug(isDebug(), log());
+    
+    if (m_gdal_debug == 0)
+        m_gdal_debug = new pdal::gdal::Debug(isDebug(), log());
     m_forward_transform.assign(0.0);
     m_inverse_transform.assign(0.0);
 
