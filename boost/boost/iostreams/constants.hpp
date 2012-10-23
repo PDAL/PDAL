@@ -28,7 +28,7 @@
 
 #include <boost/iostreams/detail/ios.hpp>  // streamsize.
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace iostreams {
 
 const std::streamsize default_device_buffer_size = 
     BOOST_IOSTREAMS_DEFAULT_DEVICE_BUFFER_SIZE; 

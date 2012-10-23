@@ -12,7 +12,7 @@
 #include <string>
 #include <cassert>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
     class environment_iterator 
         : public eof_iterator<environment_iterator, 

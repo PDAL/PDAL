@@ -52,7 +52,8 @@
         return TRUE;
     }
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
     void pdalboosttss_cleanup_implemented()
     {
         /*

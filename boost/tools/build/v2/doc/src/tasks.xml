@@ -28,7 +28,7 @@ exe hello : hello.cpp some_library.lib /some_project//library
           : &lt;threading&gt;multi
           ;
 </programlisting>
-      This will create an executable file from the sources -- in this case, one
+      This will create an executable file from the sources&mdash;in this case, one
       C++ file, one library file present in the same directory, and another
       library that is created by Boost.Build. Generally, sources can include C
       and C++ files, object files and libraries. Boost.Build will automatically
@@ -54,6 +54,11 @@ exe hello : hello.cpp some_library.lib /some_project//library
   <section id="bbv2.tasks.libraries">
     <title>Libraries</title>
 
+    <indexterm>
+      <primary>library</primary>
+      <secondary>target</secondary>
+    </indexterm>
+
     <para>
       Library targets are created using the <code>lib</code> rule, which
       follows the <link linkend="bbv2.main-target-rule-syntax">common syntax
@@ -63,66 +68,71 @@ lib helpers : helpers.cpp ;
 </programlisting>
       This will define a library target named <code>helpers</code> built from
       the <code>helpers.cpp</code> source file.
+      It can be either a static library or a shared library,
+      depending on the value of the <link linkend="bbv2.overview.builtins.features.link">&lt;link&gt;</link> feature.
     </para>
     <para>
-      Depending on the given &lt;link&gt; feature value the library will be
-      either static or shared.
-    </para>
-    <para>
-      Library targets may be used to represent:
+      Library targets can represent:
       <itemizedlist>
         <listitem>
           <para>
-            <code>Built libraries</code> that get built from specified sources,
-            as is the one in the example above. <!-- add link -->
+            Libraries that should be built from source,
+            as in the example above.
           </para>
         </listitem>
         <listitem>
           <para>
-            <code>Prebuilt libraries</code> which already exist on the system
-            and are just supposed to be used by the build system. Such
-            libraries may be searched for by the tools using them (typically
-            linkers referencing the library using the <option>-l</option>
-            option) or their path may be known in advance by the build system.
-            <!-- We need examples for this. -->
+            Prebuilt libraries which already exist on the system.
+            Such libraries can be searched for by the tools using them (typically
+            with the linker's <option>-l</option> option) or their paths can be
+            known in advance by the build system.
           </para>
         </listitem>
       </itemizedlist>
     </para>
 
     <para>
-      The syntax for these case is given below:
+      The syntax for prebuilt libraries is given below:
 <programlisting>
 lib z : : &lt;name&gt;z &lt;search&gt;/home/ghost ;
 lib compress : : &lt;file&gt;/opt/libs/compress.a ;
 </programlisting>
-      The <code>name</code> property specifies the name that should be passed to
-      the <option>-l</option> option, and the <code>file</code> property
-      specifies the file location. The <varname>search</varname> feature
-      specifies paths in which to search for the library. That feature can be
-      specified several times or it can be omitted, in which case only the
-      default compiler paths will be searched.
+      The <code>name</code> property specifies the name of the library
+      without the standard prefixes and suffixes.  For example, depending
+      on the system, <code>z</code> could refer to a file called
+      z.so, libz.a, or z.lib, etc.  The <code>search</code> feature
+      specifies paths in which to search for the library in addition
+      to the default compiler paths. <code>search</code> can be specified
+      several times or it can be omitted, in which case only the default
+      compiler paths will be searched. The <code>file</code> property
+      specifies the file location.
     </para>
 
     <para>
-      The difference between using the <varname>file</varname> feature as
-      opposed to the <varname>name</varname> feature together with the <varname>
-      search</varname> feature is that <varname>file</varname> is more precise.
-      A specific file will be used as opposed to the <varname>search</varname>
-      feature only adding a library path, or the <varname>name</varname> feature
-      giving only the basic name of the library. The search rules are specific
-      to the linker used. For example, given these definition:
+      The difference between using the <code>file</code> feature and
+      using a combination of the <code>name</code> and <code>search</code>
+      features is that <code>file</code> is more precise.
+      
+      <warning>
+        <para>
+          The value of the <code>search</code> feature is just added to the
+          linker search path.  When linking to multiple libraries,
+          the paths specified by <code>search</code> are combined without
+          regard to which <code>lib</code> target each path came from.
+          Thus, given
 <programlisting>
-lib a : : &lt;variant&gt;release &lt;file&gt;/pool/release/a.so ;
-lib a : : &lt;variant&gt;debug &lt;file&gt;/pool/debug/a.so ;
-lib b : : &lt;variant&gt;release &lt;file&gt;/pool/release/b.so ;
-lib b : : &lt;variant&gt;debug &lt;file&gt;/pool/debug/b.so ;
+lib a : : &lt;name&gt;a &lt;search&gt;/pool/release ;
+lib b : : &lt;name&gt;b &lt;search&gt;/pool/debug ;
 </programlisting>
-      It is possible to use a release version of <code>a</code> and debug
-      version of <code>b</code>. Had we used the <varname>name</varname> and
-      <varname>search</varname> features, the linker would have always picked
-      either the release or the debug versions.
-      <!-- explain -->
+          If /pool/release/a.so, /pool/release/b.so, /pool/debug/a.so,
+          and /pool/release/b.so all exist, the linker will probably
+          take both <code>a</code> and <code>b</code> from the same
+          directory, instead of finding <code>a</code> in /pool/release
+          and <code>b</code> in /pool/debug.  If you need to distinguish
+          between multiple libraries with the same name, it's safer
+          to use <code>file</code>.
+        </para>
+      </warning>
     </para>
 
     <para>
@@ -154,18 +164,18 @@ lib png : z : &lt;name&gt;png ;
 
     <note>
       <para>
-        When a library has a shared library defined as its source, or a static
-        library has another static library defined as its source then any target
+        When a library has a shared library as a source, or a static
+        library has another static library as a source then any target
         linking to the first library with automatically link to its source
         library as well.
       </para>
       <para>
-        On the other hand, when a shared library has a static library defined as
-        its source then the first library will be built so that it completely
+        On the other hand, when a shared library has a static library as
+        a source then the first library will be built so that it completely
         includes the second one.
       </para>
       <para>
-        If you do not want shared libraries to include all libraries specified
+        If you do not want a shared library to include all the libraries specified
         in its sources (especially statically linked ones), you would need to
         use the following:
 <programlisting>
@@ -173,18 +183,16 @@ lib b : a.cpp ;
 lib a : a.cpp : &lt;use&gt;b : : &lt;library&gt;b ;
 </programlisting>
         This specifies that library <code>a</code> uses library <code>b</code>,
-        and causes all executables that link to <code>a</code> also link to
-        <code>b</code>. In this case, even for shared linking, the
-        <code>a</code> library will not even refer to <code>b</code>.
+        and causes all executables that link to <code>a</code> to link to
+        <code>b</code> also. In this case, even for shared linking, the
+        <code>a</code> library will not refer to <code>b</code>.
       </para>
     </note>
 
     <para>
-      One Boost.Build feature that is often very useful for defining library
-      targets are usage requirements. <!-- Rephrase that. But then, it is much
-      too late for an introduction of usage requirements - you have already
-      discussed them many times. Also, add references to the sections describing
-      requirements and usage-requirements here. --> For example, imagine that
+      <!-- FIXME: After adding a full subsection on usage requirements, link to it  -->
+      <link linkend="bbv2.overview.targets">Usage requirements</link> are often
+      very useful for defining library targets. For example, imagine that
       you want you build a <code>helpers</code> library and its interface is
       described in its <code>helpers.hpp</code> header file located in the same
       directory as the <code>helpers.cpp</code> source file. Then you could add
@@ -203,7 +211,7 @@ lib helpers : helpers.cpp : : : &lt;include&gt;. ;
     <title>Alias</title>
 
     <para>
-      The <functionname>alias</functionname> rule gives an alternative name to a
+      The <code language="jam">alias</code> rule gives an alternative name to a
       group of targets. For example, to give the name <filename>core</filename>
       to a group of three other targets with the following code:
 <programlisting>
@@ -384,8 +392,8 @@ unit-test helpers_test : helpers_test.cpp helpers ;
     </para>
 
     <para>
-      The <functionname>unit-test</functionname> rule behaves like the
-      <functionname>exe</functionname> rule, but after the executable is created
+      The <code language="jam">unit-test</code> rule behaves like the
+      <link linkend="bbv2.tasks.programs">exe</link> rule, but after the executable is created
       it is also run. If the executable returns an error code, the build system
       will also return an error and will try running the executable on the next
       invocation until it runs successfully. This behaviour ensures that you can
@@ -476,8 +484,8 @@ boost-test(<replaceable>test-type</replaceable>) <replaceable>path</replaceable>
     </para>
 
     <para>
-      It is possible to process the list of tests, the output of bjam during
-      command run, and the presense/absense of the <filename>*.test</filename>
+      It is possible to process the list of tests, Boost.Build output
+      and the presense/absense of the <filename>*.test</filename>
       files created when test passes into human-readable status table of tests.
       Such processing utilities are not included in Boost.Build.
     </para>
@@ -487,33 +495,33 @@ boost-test(<replaceable>test-type</replaceable>) <replaceable>path</replaceable>
     <title>Custom commands</title>
 
     <para>
-      When you use most of main target rules, Boost.Build automatically figures
-      what commands to run and it what order. As soon as you want to use new
+      For most main target rules, Boost.Build automatically figures out
+      the commands to run.  When you want to use new
       file types or support new tools, one approach is to extend Boost.Build to
-      smoothly support them, as documented in <xref linkend="bbv2.extender"/>.
-      However, if there is only a single place where the new tool is used, it
-      might be easier to just explicitly specify the commands to run.
+      support them smoothly, as documented in <xref linkend="bbv2.extender"/>.
+      However, if the new tool is only used in a single place, it
+      might be easier just to specify the commands to run explicitly.
     </para>
 
     <para>
       <!-- This paragraph requires links to where the terms 'virtual target' &
       'target' are defined. -->
-      Three main target rules can be used for that. The <functionname>make
-      </functionname> rule allows you to construct a single file from any number
-      of source file, by running a command you specify. The <functionname>
-      notfile</functionname> rule allows you to run an arbitrary command,
-      without creating any files. And finaly, the <functionname>generate
-      </functionname> rule allows you to describe transformation using
-      Boost.Build's virtual targets. This is higher-level than file names that
-      the <functionname>make</functionname> rule operates with and allows you to
+      Three main target rules can be used for that. The <code language="jam">make
+      </code> rule allows you to construct a single file from any number
+      of source file, by running a command you specify. The <code language="jam">
+      notfile</code> rule allows you to run an arbitrary command,
+      without creating any files. And finaly, the <code language="jam">generate
+      </code> rule allows you to describe a transformation using
+      Boost.Build's virtual targets. This is higher-level than the file names that
+      the <code language="jam">make</code> rule operates with and allows you to
       create more than one target, create differently named targets depending on
       properties or use more than one tool.
     </para>
 
     <para>
-      The <functionname>make</functionname> rule is used when you want to create
+      The <code language="jam">make</code> rule is used when you want to create
       one file from a number of sources using some specific command. The
-      <functionname>notfile</functionname> is used to unconditionally run a
+      <code language="jam">notfile</code> is used to unconditionally run a
       command.
     </para>
 
@@ -524,8 +532,8 @@ boost-test(<replaceable>test-type</replaceable>) <replaceable>path</replaceable>
     them to become accessible. -->
 
     <para>
-      Suppose you want to create file <filename>file.out</filename> from file
-      <filename>file.in</filename> by running command <command>
+      Suppose you want to create the file <filename>file.out</filename> from
+      the file <filename>file.in</filename> by running the command <command>
       in2out</command>. Here is how you would do this in Boost.Build:
 <programlisting>
 make file.out : file.in : @in2out ;
@@ -534,7 +542,7 @@ actions in2out
     in2out $(&lt;) $(&gt;)
 }
 </programlisting>
-      If you run <command>bjam</command> and <filename>file.out</filename> does
+      If you run <command>b2</command> and <filename>file.out</filename> does
       not exist, Boost.Build will run the <command>in2out</command> command to
       create that file. For more details on specifying actions, see <xref
       linkend="bbv2.overview.jam_language.actions"/>.
@@ -543,7 +551,7 @@ actions in2out
     <para>
       It could be that you just want to run some command unconditionally, and
       that command does not create any specific files. For that you can use the
-      <functionname>notfile</functionname> rule. For example:
+      <code language="jam">notfile</code> rule. For example:
 <programlisting>
 notfile echo_something : @echo ;
 actions echo
@@ -551,7 +559,7 @@ actions echo
     echo "something"
 }
 </programlisting>
-      The only difference from the <functionname>make</functionname> rule is
+      The only difference from the <code language="jam">make</code> rule is
       that the name of the target is not considered a name of a file, so
       Boost.Build will unconditionally run the action.
     </para>
@@ -559,9 +567,9 @@ actions echo
     <para>
       <!-- This paragraph requires links to where terms like 'virtual target',
       'target', 'project-target' & 'property-set' are defined. -->
-      The <functionname>generate</functionname> rule is used when you want to
+      The <code language="jam">generate</code> rule is used when you want to
       express transformations using Boost.Build's virtual targets, as opposed to
-      just filenames. The <functionname>generate</functionname> rule has the
+      just filenames. The <code language="jam">generate</code> rule has the
       standard main target rule signature, but you are required to specify the
       <literal>generating-rule</literal> property. The value of the property
       should be in the form <literal>
@@ -620,7 +628,7 @@ rule generating-rule ( project name : property-set : sources * )
 cpp-pch pch : pch.hpp ;
 exe main : main.cpp pch ;
 </programlisting>
-          You can use the <functionname>c-pch</functionname> rule if you want to
+          You can use the <code language="jam">c-pch</code> rule if you want to
           use the precompiled header in C programs.
         </para></listitem>
     </orderedlist>
@@ -704,7 +712,7 @@ exe main : main.cpp pch ;
       Making this mechanism work across main target boundaries is possible, but
       imposes certain overhead. For that reason, if there is implicit dependency
       on files from other main targets, the <literal>&lt;implicit-dependency&gt;
-      </literal> [ link ] feature must be used, for example:
+      </literal> feature must be used, for example:
 <programlisting>
 lib parser : parser.y ;
 exe app : app.cpp : &lt;implicit-dependency&gt;parser ;
@@ -735,7 +743,7 @@ using gcc : arm : arm-none-linux-gnueabi-g++ ;
       just request that this compiler version to be used:
     </para>
 <screen>
-bjam toolset=gcc-arm
+b2 toolset=gcc-arm
 </screen>
 
     <para>
@@ -745,9 +753,9 @@ bjam toolset=gcc-arm
     </para>
 <screen>
 # On windows box
-bjam toolset=gcc-arm <emphasis role="bold">target-os=linux</emphasis>
+b2 toolset=gcc-arm <emphasis role="bold">target-os=linux</emphasis>
 # On Linux box
-bjam toolset=gcc-mingw <emphasis role="bold">target-os=windows</emphasis>
+b2 toolset=gcc-mingw <emphasis role="bold">target-os=windows</emphasis>
 </screen>
     <para>
       For the complete list of allowed opeating system names, please see the documentation for 

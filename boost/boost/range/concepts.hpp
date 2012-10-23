@@ -56,7 +56,7 @@
  * details about concept checks.
  */
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
     namespace range_detail {
 

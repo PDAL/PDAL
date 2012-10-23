@@ -18,7 +18,7 @@
 #include <boost/mpl/void.hpp>          
 #include <boost/type_traits/is_convertible.hpp>         
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams {namespace detail {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace iostreams {namespace detail {
     
 template< typename T, typename Tag1, typename Tag2,
           typename Tag3 = mpl::void_, typename Tag4 = mpl::void_,

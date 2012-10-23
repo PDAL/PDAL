@@ -31,7 +31,7 @@
 # include <boost/detail/iterator.hpp>
 # include <utility>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace detail {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace detail {
 
 template <class ForwardIter, class Tp>
 ForwardIter lower_bound(ForwardIter first, ForwardIter last,

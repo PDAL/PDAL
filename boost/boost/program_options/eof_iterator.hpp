@@ -8,7 +8,7 @@
 
 #include <boost/iterator/iterator_facade.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
     /** The 'eof_iterator' class is useful for constructing forward iterators 
         in cases where iterator extract data from some source and it's easy 

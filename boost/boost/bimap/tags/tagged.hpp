@@ -18,7 +18,7 @@
 
 #include <boost/config.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace bimaps {
 
 /// \brief A light non-invasive idiom to tag a type.

@@ -63,7 +63,7 @@ class Property(object):
                    (other._feature, other._value, other._condition))
                            
 
-def create_from_string(s, allow_condition=False):
+def create_from_string(s, allow_condition=False,allow_missing_value=False):
 
     condition = []
     import types
@@ -92,7 +92,7 @@ def create_from_string(s, allow_condition=False):
         f = feature.get(feature_name)        
 
         value = get_value(s)
-        if not value:
+        if not value and not allow_missing_value:
             get_manager().errors()("Invalid property '%s' -- no value specified" % s)
 
 

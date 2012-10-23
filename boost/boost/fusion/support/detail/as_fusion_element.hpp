@@ -10,7 +10,7 @@
 
 #include <boost/ref.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion { namespace detail
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion { namespace detail
 {
     template <typename T>
     struct as_fusion_element

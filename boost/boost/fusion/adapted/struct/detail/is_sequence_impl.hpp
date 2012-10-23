@@ -12,7 +12,7 @@
 
 #include <boost/mpl/bool.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion { namespace extension
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion { namespace extension
 {
     template<typename>
     struct is_sequence_impl;

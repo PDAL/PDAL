@@ -11,7 +11,7 @@
 #include <boost/program_options/config.hpp>
 
 #define BOOST_UTF8_BEGIN_NAMESPACE \
-     namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace program_options { namespace detail {
+     namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace program_options { namespace detail {
 
 #define BOOST_UTF8_END_NAMESPACE }}}
 #define BOOST_UTF8_DECL BOOST_PROGRAM_OPTIONS_DECL

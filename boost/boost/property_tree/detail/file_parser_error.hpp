@@ -13,7 +13,7 @@
 #include <boost/property_tree/ptree.hpp>
 #include <string>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace property_tree
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace property_tree
 {
 
     //! File parse error

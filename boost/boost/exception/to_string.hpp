@@ -16,7 +16,9 @@
 #include <boost/exception/detail/is_output_streamable.hpp>
 #include <sstream>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace
+pdalboost
+    {
     namespace
     to_string_detail
         {

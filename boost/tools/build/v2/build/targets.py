@@ -1290,7 +1290,8 @@ class TypedTarget (BasicTarget):
             
     def construct (self, name, source_targets, prop_set):
 
-        r = generators.construct (self.project_, name, self.type_, 
+        r = generators.construct (self.project_, os.path.splitext(name)[0],
+                                  self.type_, 
                                   prop_set.add_raw(['<main-target-type>' + self.type_]),
                                   source_targets, True)
 

@@ -22,7 +22,7 @@
 #include <boost/mpl/if.hpp>
 #include <boost/ref.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams { namespace detail {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace iostreams { namespace detail {
                     
 //------------------Definition of wrap/unwrap traits--------------------------//
 

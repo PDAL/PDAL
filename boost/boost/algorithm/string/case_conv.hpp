@@ -29,7 +29,7 @@
     desired case using provided locales.
 */
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
     namespace algorithm {
 
 //  to_lower  -----------------------------------------------//

@@ -9,7 +9,7 @@
 # include <boost/type_traits/add_const.hpp>
 # include <boost/mpl/apply.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace detail {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace detail {
 
 // A utility for creating unary function objects that play nicely with
 // pdalboost::result_of and that handle the forwarding problem.

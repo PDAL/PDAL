@@ -24,7 +24,7 @@
 
 #include <boost/algorithm/string/replace.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
 namespace units {
 
@@ -71,7 +71,7 @@ std::string simplify_typename(const L& /*source*/)
 
 #else // BOOST_UNITS_USE_DEMANGLING
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
 namespace units {
 

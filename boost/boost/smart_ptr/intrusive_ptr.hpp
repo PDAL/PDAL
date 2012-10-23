@@ -30,7 +30,8 @@
 #endif
 
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 
 //
 //  intrusive_ptr
@@ -283,6 +284,15 @@ template<class E, class T, class Y> std::basic_ostream<E, T> & operator<< (std::
 #endif // __GNUC__ < 3
 
 #endif // !defined(BOOST_NO_IOSTREAM)
+
+// hash_value
+
+template< class T > struct hash;
+
+template< class T > std::size_t hash_value( pdalboost::intrusive_ptr<T> const & p )
+{
+    return pdalboost::hash< T* >()( p.get() );
+}
 
 } // namespace pdalboost
 

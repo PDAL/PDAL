@@ -16,7 +16,7 @@
 #include <boost/optional.hpp>
 #include <string>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace property_tree
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace property_tree
 {
 
     /// Simple implementation of the Translator concept. It does no translation.

@@ -18,7 +18,7 @@
 #define BOOST_TYPEOF_sizer_item(z, n, _)\
     char item ## n[V::item ## n ::value];
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace type_of {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace type_of {
     template<class V>
     struct sizer
     {
@@ -33,7 +33,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespac
 #undef BOOST_TYPEOF_sizer_item
 
 //
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace type_of {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace type_of {
 # ifdef BOOST_NO_SFINAE
     template<class V, class T>
     sizer<typename encode_type<V, T>::type> encode(const T&);
@@ -50,7 +50,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespac
 # endif
 }}
 //
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace type_of {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace type_of {
 
     template<class V>
     struct decode_begin
@@ -74,7 +74,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespac
 
 //offset_vector is used to delay the insertion of data into the vector in order to allow
 //encoding to be done in many steps
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace type_of {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace type_of {
     template<typename V,typename Offset>
     struct offset_vector {
     };
@@ -107,7 +107,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespac
 #endif
 
 #ifdef __BORLANDC__
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace type_of {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace type_of {
     template<typename Pos,typename Iter>
     struct generic_typeof_fraction_iter {
         typedef generic_typeof_fraction_iter<Pos,Iter> self_t;

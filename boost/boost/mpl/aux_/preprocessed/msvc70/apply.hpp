@@ -9,7 +9,7 @@
 // Preprocessed version of "boost/mpl/apply.hpp" header
 // -- DO NOT modify by hand!
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace mpl {
 
 template<
       typename F

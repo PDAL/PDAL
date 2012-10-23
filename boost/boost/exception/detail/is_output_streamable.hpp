@@ -14,7 +14,9 @@
 
 #include <ostream>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace
+pdalboost
+    {
     namespace
     to_string_detail
         {

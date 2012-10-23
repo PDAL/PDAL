@@ -20,7 +20,7 @@
     Defines concepts used in string_algo library
 */
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
     namespace algorithm {
 
         //! Finder concept

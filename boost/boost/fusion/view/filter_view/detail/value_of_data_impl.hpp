@@ -10,7 +10,7 @@
 
 #include <boost/fusion/iterator/value_of_data.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion { namespace extension
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion { namespace extension
 {
     template <typename>
     struct value_of_data_impl;

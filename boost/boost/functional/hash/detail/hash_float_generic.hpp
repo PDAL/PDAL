@@ -24,7 +24,8 @@
 #endif
 #endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
     namespace hash_detail
     {
         inline void hash_float_combine(std::size_t& seed, std::size_t value)

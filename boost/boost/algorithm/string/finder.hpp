@@ -31,7 +31,7 @@
     for finders provided in this library.
 */
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
     namespace algorithm {
 
 //  Finder generators ------------------------------------------//

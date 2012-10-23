@@ -8,7 +8,7 @@
 #ifndef BOOST_FUSION_ALGORITHM_ITERATION_FOLD_FWD_HPP
 #define BOOST_FUSION_ALGORITHM_ITERATION_FOLD_FWD_HPP
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion
 {
     namespace result_of
     {

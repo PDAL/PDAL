@@ -70,7 +70,7 @@ the next step will be:
 
 /// \brief The namespace where all the boost libraries lives.
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
 /// \brief Boost.Bimap library namespace
 /**
@@ -415,7 +415,7 @@ class bimap
 #include <boost/multi_index/detail/unbounded.hpp>
 
 // Bring the most used namespaces directly to the user main namespace
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace bimaps {
 
 using ::pdalboost::bimaps::tags::tagged;

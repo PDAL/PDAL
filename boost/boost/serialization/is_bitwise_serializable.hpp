@@ -24,7 +24,7 @@
 #include <boost/mpl/bool.hpp>
 #include <boost/type_traits/is_arithmetic.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace serialization {
     template<class T>
     struct is_bitwise_serializable
@@ -36,7 +36,7 @@ namespace serialization {
 
 // define a macro to make explicit designation of this more transparent
 #define BOOST_IS_BITWISE_SERIALIZABLE(T)              \
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{                                     \
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {                                     \
 namespace serialization {                             \
 template<>                                            \
 struct is_bitwise_serializable< T > : mpl::true_ {};  \

@@ -17,7 +17,7 @@
 #include <boost/fusion/iterator/value_of_data.hpp>
 #include <boost/fusion/iterator/detail/segmented_equal_to.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion
 {
     struct nil;
 

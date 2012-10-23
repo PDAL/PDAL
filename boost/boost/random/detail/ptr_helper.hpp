@@ -17,7 +17,7 @@
 #include <boost/config.hpp>
 
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace random {
 namespace detail {
 
@@ -66,7 +66,7 @@ struct ptr_helper<T*>
 //
 #ifdef BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION
 # define BOOST_RANDOM_PTR_HELPER_SPEC(T)                \
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace random { namespace detail { \
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace random { namespace detail { \
 template<>                                              \
 struct ptr_helper<T&>                                   \
 {                                                       \

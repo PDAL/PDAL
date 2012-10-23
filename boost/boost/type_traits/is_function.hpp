@@ -31,7 +31,7 @@
 // except that some compilers erroneously allow conversions from
 // function pointers to void*.
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
 #if !defined( __CODEGEARC__ )
 

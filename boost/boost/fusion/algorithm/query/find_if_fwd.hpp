@@ -11,7 +11,7 @@
 #include <boost/type_traits/is_const.hpp>
 
 // Forward declaration of find_if algorithm
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion
 {
     namespace result_of
     {

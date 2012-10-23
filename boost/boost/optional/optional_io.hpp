@@ -30,7 +30,8 @@
 #include "boost/optional/optional.hpp"
 #include "boost/utility/value_init.hpp"
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 
 #if defined (BOOST_NO_TEMPLATED_STREAMS)
 template<class T>

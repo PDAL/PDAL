@@ -30,7 +30,7 @@
 #else
 # define BOOST_IOSTREAMS_CHAR_TRAITS(ch) pdalboost::iostreams::detail::char_traits
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams { namespace detail {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace iostreams { namespace detail {
 
 struct char_traits  {
     typedef char            char_type;

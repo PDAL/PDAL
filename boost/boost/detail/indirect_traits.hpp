@@ -30,7 +30,7 @@
 #   include <boost/detail/is_function_ref_tester.hpp>
 #  endif 
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace detail {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace detail {
 
 namespace indirect_traits {
 

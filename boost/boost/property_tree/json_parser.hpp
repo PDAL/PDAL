@@ -19,7 +19,7 @@
 #include <string>
 #include <locale>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace property_tree { namespace json_parser
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace property_tree { namespace json_parser
 {
 
     /**
@@ -129,7 +129,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespac
 
 } } }
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace property_tree
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace property_tree
 {
     using json_parser::read_json;
     using json_parser::write_json;

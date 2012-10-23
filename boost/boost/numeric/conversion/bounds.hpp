@@ -12,7 +12,7 @@
 
 #include "boost/numeric/conversion/detail/bounds.hpp"
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace numeric 
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace numeric 
 {
 
 template<class N>

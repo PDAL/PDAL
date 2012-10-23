@@ -8,7 +8,7 @@
 # include <boost/detail/workaround.hpp>
 # include <boost/concept/detail/backward_compatibility.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace concepts { 
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace concepts { 
 
 # if BOOST_WORKAROUND(__GNUC__, == 2)
 

@@ -21,7 +21,7 @@
 #include <boost/bimap/container_adaptor/map_adaptor.hpp>
 #include <boost/bimap/detail/map_view_base.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace bimaps {
 namespace views {
 

@@ -18,7 +18,8 @@
 //  http://www.boost.org/LICENSE_1_0.txt)
 
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 
 //
 // Enum values are chosen so that code that needs to insert

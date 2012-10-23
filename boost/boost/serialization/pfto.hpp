@@ -40,7 +40,7 @@
 // have a "wrapped" argument type.  This solves a problem with VC 6.0
 // (and perhaps others) while implementing templated constructors.
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace serialization {
 
 template<class T>

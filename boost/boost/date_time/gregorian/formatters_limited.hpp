@@ -6,7 +6,7 @@
  * Boost Software License, Version 1.0. (See accompanying
  * file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
  * Author: Jeff Garland, Bart Garst
- * $Date: 2008-02-27 15:00:24 -0500 (Wed, 27 Feb 2008) $
+ * $Date: 2008-02-27 12:00:24 -0800 (Wed, 27 Feb 2008) $
  */
 
 #include "boost/date_time/gregorian/gregorian_types.hpp"
@@ -15,7 +15,7 @@
 #include "boost/date_time/date_format_simple.hpp"
 #include "boost/date_time/compiler_config.hpp"
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace gregorian {
 
   //! To YYYY-mmm-DD string where mmm 3 char month name. Example:  2002-Jan-01

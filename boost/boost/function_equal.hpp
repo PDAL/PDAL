@@ -10,7 +10,7 @@
 #ifndef BOOST_FUNCTION_EQUAL_HPP
 #define BOOST_FUNCTION_EQUAL_HPP
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
 template<typename F, typename G>
   bool function_equal_impl(const F& f, const G& g, long)

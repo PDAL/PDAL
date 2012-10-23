@@ -41,7 +41,7 @@
 // **************               prg_exec_monitor_main          ************** //
 // ************************************************************************** //
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ 
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { 
 
 int BOOST_TEST_DECL prg_exec_monitor_main( int (*cpp_main)( int argc, char* argv[] ), int argc, char* argv[] );
 

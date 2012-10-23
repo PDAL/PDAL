@@ -32,7 +32,8 @@
 # include <boost/concept/usage.hpp>
 # include <boost/concept/detail/concept_def.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 
   //
   // Backward compatibility
@@ -343,11 +344,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
       // in class without a constructor [-Wuninitialized])
       UnaryFunction();
 #endif
-#if defined(BOOST_MSVC) /* mpg */
-       // not implemented
-      UnaryFunction();
-      UnaryFunction& operator=(const UnaryFunction&);
-#endif
+
       Func f;
       Arg arg;
   };
@@ -1055,11 +1052,11 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
         c.swap(c);
       }
 
-      void const_constraints(const C& c) {
-        ci = c.begin();
-        ci = c.end();
-        n = c.size();
-        b = c.empty();
+      void const_constraints(const C& cc) {
+        ci = cc.begin();
+        ci = cc.end();
+        n = cc.size();
+        b = cc.empty();
       }
 
     private:

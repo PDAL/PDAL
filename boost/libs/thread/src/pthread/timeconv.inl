@@ -20,8 +20,8 @@ const int NANOSECONDS_PER_MICROSECOND = 1000;
 inline void to_time(int milliseconds, pdalboost::xtime& xt)
 {
     int res = 0;
-    res = pdalboost::xtime_get(&xt, pdalboost::TIME_UTC);
-    BOOST_ASSERT(res == pdalboost::TIME_UTC);
+    res = pdalboost::xtime_get(&xt, pdalboost::TIME_UTC_);
+    BOOST_ASSERT(res == pdalboost::TIME_UTC_); (void)res;
 
     xt.sec += (milliseconds / MILLISECONDS_PER_SECOND);
     xt.nsec += ((milliseconds % MILLISECONDS_PER_SECOND) *
@@ -33,7 +33,6 @@ inline void to_time(int milliseconds, pdalboost::xtime& xt)
         xt.nsec -= NANOSECONDS_PER_SECOND;
     }
 }
-
 #if defined(BOOST_HAS_PTHREADS)
 inline void to_timespec(const pdalboost::xtime& xt, timespec& ts)
 {
@@ -57,8 +56,8 @@ inline void to_timespec_duration(const pdalboost::xtime& xt, timespec& ts)
 {
     pdalboost::xtime cur;
     int res = 0;
-    res = pdalboost::xtime_get(&cur, pdalboost::TIME_UTC);
-    BOOST_ASSERT(res == pdalboost::TIME_UTC);
+    res = pdalboost::xtime_get(&cur, pdalboost::TIME_UTC_);
+    BOOST_ASSERT(res == pdalboost::TIME_UTC_); (void)res;
 
     if (pdalboost::xtime_cmp(xt, cur) <= 0)
     {
@@ -88,8 +87,8 @@ inline void to_duration(pdalboost::xtime xt, int& milliseconds)
 {
     pdalboost::xtime cur;
     int res = 0;
-    res = pdalboost::xtime_get(&cur, pdalboost::TIME_UTC);
-    BOOST_ASSERT(res == pdalboost::TIME_UTC);
+    res = pdalboost::xtime_get(&cur, pdalboost::TIME_UTC_);
+    BOOST_ASSERT(res == pdalboost::TIME_UTC_); (void)res;
 
     if (pdalboost::xtime_cmp(xt, cur) <= 0)
         milliseconds = 0;
@@ -110,8 +109,8 @@ inline void to_microduration(pdalboost::xtime xt, int& microseconds)
 {
     pdalboost::xtime cur;
     int res = 0;
-    res = pdalboost::xtime_get(&cur, pdalboost::TIME_UTC);
-    BOOST_ASSERT(res == pdalboost::TIME_UTC);
+    res = pdalboost::xtime_get(&cur, pdalboost::TIME_UTC_);
+    BOOST_ASSERT(res == pdalboost::TIME_UTC_); (void)res;
 
     if (pdalboost::xtime_cmp(xt, cur) <= 0)
         microseconds = 0;

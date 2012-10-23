@@ -12,7 +12,7 @@
 // should be the last #include
 #include <boost/type_traits/detail/bool_trait_def.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
 //* is a type T a floating-point type described in the standard (3.9.1p8)
 BOOST_TT_AUX_BOOL_TRAIT_DEF1(is_float,T,false)

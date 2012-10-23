@@ -12,7 +12,7 @@
 #include <boost/fusion/algorithm/transformation/insert_range.hpp>
 #include <boost/fusion/sequence/convert.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace mpl
 {
     template <typename Tag>
     struct insert_range_impl;

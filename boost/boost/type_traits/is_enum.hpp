@@ -31,7 +31,7 @@
 // should be the last #include
 #include <boost/type_traits/detail/bool_trait_def.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
 #ifndef BOOST_IS_ENUM
 #if !(defined(__BORLANDC__) && (__BORLANDC__ <= 0x551))

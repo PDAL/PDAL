@@ -23,7 +23,7 @@
 
 using namespace std;
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace detail {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace detail {
 
     /* Internal function to actually perform conversion.
        The logic in from_8_bit and to_8_bit function is exactly
@@ -82,7 +82,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespac
     }           
 }}
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
 #ifndef BOOST_NO_STD_WSTRING
     BOOST_PROGRAM_OPTIONS_DECL std::wstring 

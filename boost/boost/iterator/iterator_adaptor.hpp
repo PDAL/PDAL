@@ -31,7 +31,8 @@
 
 #include <boost/iterator/iterator_traits.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
   // Used as a default template argument internally, merely to
   // indicate "use the default", this can also be passed by users
   // explicitly in order to specify that the default should be used.

@@ -7,7 +7,7 @@
 #if !defined(FUSION_IS_VIEW_03202006_0018)
 #define FUSION_IS_VIEW_03202006_0018
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion { namespace detail
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion { namespace detail
 {
     template <typename T>
     struct fusion_is_view

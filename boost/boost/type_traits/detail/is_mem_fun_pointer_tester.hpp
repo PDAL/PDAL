@@ -23,7 +23,7 @@
 #   include <boost/preprocessor/comma_if.hpp>
 #endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace type_traits {
 
 no_type BOOST_TT_DECL is_mem_fun_pointer_tester(...);

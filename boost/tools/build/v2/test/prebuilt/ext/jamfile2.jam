@@ -1,9 +1,9 @@
 
-import modules ;
+import os ;
 
 local dll-suffix = so ;
 local prefix = "" ;
-if [ modules.peek : OS ] in CYGWIN NT
+if [ os.name ] in CYGWIN NT
 {
    if [ MATCH ^(gcc) : $toolset ]
    {

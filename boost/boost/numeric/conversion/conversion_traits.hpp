@@ -14,7 +14,7 @@
 #include "boost/detail/workaround.hpp"
 #include "boost/config.hpp"
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace numeric
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace numeric
 {
 
 template<class T, class S>

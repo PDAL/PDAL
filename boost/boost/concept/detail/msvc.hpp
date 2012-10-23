@@ -13,7 +13,7 @@
 # endif
 
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace concepts {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace concepts {
 
 
 template <class Model>

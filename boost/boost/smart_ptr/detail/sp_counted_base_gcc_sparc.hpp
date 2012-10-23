@@ -22,7 +22,8 @@
 #include <boost/detail/sp_typeinfo.hpp>
 #include <inttypes.h> // int32_t
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 
 namespace detail
 {

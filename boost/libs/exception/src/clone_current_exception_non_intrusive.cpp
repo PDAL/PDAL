@@ -266,7 +266,9 @@ namespace
         }
     }
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace
+pdalboost
+    {
     namespace
     exception_detail
         {
@@ -301,7 +303,9 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 #include <boost/config.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace
+pdalboost
+    {
     namespace
     exception_detail
         {

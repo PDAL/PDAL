@@ -6,7 +6,7 @@
 
     This is an auto-generated file. Do not edit!
 ==============================================================================*/
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion
 {
     struct void_;
     struct fusion_sequence_tag;
@@ -36,7 +36,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespac
             : vec(rhs.vec) {}
         template <typename Sequence>
         vector(Sequence const& rhs)
-            : vec(rhs) {}
+            : vec(BOOST_FUSION_VECTOR_COPY_INIT()) {}
         
         
         
@@ -156,6 +156,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespac
             return vec.at_impl(mpl::int_<I::value>());
         }
     private:
+        BOOST_FUSION_VECTOR_CTOR_HELPER()
         vector_n vec;
     };
 }}

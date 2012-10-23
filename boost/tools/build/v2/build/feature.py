@@ -557,10 +557,12 @@ def expand_composite(property):
             result.extend(expand_composite(p))
     return result
 
-
+@bjam_signature((['feature'], ['properties', '*']))
 def get_values (feature, properties):
     """ Returns all values of the given feature specified by the given property set.
     """
+    if feature[0] != '<':
+     feature = '<' + feature + '>'
     result = []
     for p in properties:
         if get_grist (p) == feature:

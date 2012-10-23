@@ -48,7 +48,7 @@
 #include <boost/bimap/set_of.hpp>
 #include <boost/bimap/unconstrained_set_of.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace bimaps {
 
 /// \brief Library details

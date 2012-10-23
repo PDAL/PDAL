@@ -23,7 +23,7 @@
 #include <boost/type_traits/is_convertible.hpp>
 #include <boost/utility/base_from_member.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams { namespace detail {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace iostreams { namespace detail {
 
 template<typename Device, typename Tr>
 struct stream_traits {
@@ -31,7 +31,7 @@ struct stream_traits {
     typedef Tr                                                 traits_type;
     typedef typename category_of<Device>::type                 mode;
     typedef typename
-            iostreams::select< // Dismbiguation required for Tru64.
+            iostreams::select< // Disambiguation required for Tru64.
                 mpl::and_<
                     is_convertible<mode, input>,
                     is_convertible<mode, output>
@@ -43,7 +43,7 @@ struct stream_traits {
                 BOOST_IOSTREAMS_BASIC_OSTREAM(char_type, traits_type)
             >::type stream_type;
     typedef typename
-            iostreams::select< // Dismbiguation required for Tru64.
+            iostreams::select< // Disambiguation required for Tru64.
                 mpl::and_<
                     is_convertible<mode, input>,
                     is_convertible<mode, output>
@@ -57,7 +57,7 @@ struct stream_traits {
 };
 
 // By encapsulating initialization in a base, we can define the macro
-// BOOST_IOSTREAMS_DEFINE_FORWARDING_FUNCTIONS to generate constuctors
+// BOOST_IOSTREAMS_DEFINE_FORWARDING_FUNCTIONS to generate constructors
 // without base member initializer lists.
 template< typename Device,
           typename Tr =
@@ -90,13 +90,13 @@ public:
 # include <boost/iostreams/detail/broken_overload_resolution/stream.hpp>
 #else
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace iostreams {
 
 //
 // Template name: stream.
 // Description: A iostream which reads from and writes to an instance of a
 //      designated device type.
-// Template paramters:
+// Template parameters:
 //      Device - A device type.
 //      Alloc - The allocator type.
 //

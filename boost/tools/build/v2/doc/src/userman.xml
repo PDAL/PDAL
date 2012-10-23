@@ -3,7 +3,7 @@
   "http://www.boost.org/tools/boostbook/dtd/boostbook.dtd">
 
 <part xmlns:xi="http://www.w3.org/2001/XInclude"
-      id="bbv2" last-revision="$Date: 2011-01-25 13:06:12 -0500 (Tue, 25 Jan 2011) $">
+      id="bbv2" last-revision="$Date: 2011-01-25 10:06:12 -0800 (Tue, 25 Jan 2011) $">
   <partinfo>
     <copyright>
       <year>2006</year>

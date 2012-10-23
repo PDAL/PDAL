@@ -12,7 +12,7 @@
 
 #include <cassert>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace program_options {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace program_options {
 
     positional_options_description::positional_options_description()
     {}
@@ -34,7 +34,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespac
     positional_options_description::max_total_count() const
     {
         return m_trailing.empty() ? 
-          m_names.size() : (std::numeric_limits<unsigned>::max)();
+          static_cast<unsigned>(m_names.size()) : (std::numeric_limits<unsigned>::max)();
     }
     
     const std::string& 

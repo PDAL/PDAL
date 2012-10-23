@@ -224,7 +224,7 @@ def symlink(name, project, source, ps):
     return virtual_target.FileTarget(name, source.type(), project, a, exact=True)
 
 def relink_file(project, source, ps):
-    action = source.action()
+    action = source[0].action()
     cloned_action = virtual_target.clone_action(action, project, "", ps)
     targets = cloned_action.targets()
     # We relink only on Unix, where exe or shared lib is always a single file.

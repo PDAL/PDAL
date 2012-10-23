@@ -20,7 +20,7 @@
 #include "boost/numeric/conversion/detail/udt_builtin_mixture.hpp"
 #include "boost/numeric/conversion/detail/is_subranged.hpp"
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace numeric { namespace convdetail
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace numeric { namespace convdetail
 {
   //-------------------------------------------------------------------
   // Implementation of the Conversion Traits for T != S

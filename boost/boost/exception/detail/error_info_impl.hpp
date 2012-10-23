@@ -14,7 +14,9 @@
 
 #include <string>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace
+pdalboost
+    {
     namespace
     exception_detail
         {
@@ -28,6 +30,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
             protected:
 
+            virtual
             ~error_info_base() throw()
                 {
                 }

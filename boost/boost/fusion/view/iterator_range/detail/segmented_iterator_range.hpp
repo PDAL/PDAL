@@ -21,6 +21,8 @@
 #include <boost/fusion/iterator/equal_to.hpp>
 #include <boost/fusion/container/list/detail/reverse_cons.hpp>
 #include <boost/fusion/iterator/detail/segment_sequence.hpp>
+#include <boost/fusion/support/is_sequence.hpp>
+#include <boost/utility/enable_if.hpp>
 
 //  Invariants:
 //  - Each segmented iterator has a stack
@@ -30,7 +32,7 @@
 //  - The front of each range in the stack (besides the
 //    topmost) is the range above it
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion
 {
     template <typename First, typename Last>
     struct iterator_range;
@@ -39,14 +41,29 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespac
     {
         template <typename Sequence, typename T>
         struct push_back;
+
+        template <typename Sequence, typename T>
+        struct push_front;
     }
 
     template <typename Sequence, typename T>
-    typename result_of::push_back<Sequence const, T>::type
+    typename
+        lazy_enable_if<
+            traits::is_sequence<Sequence>
+          , result_of::push_back<Sequence const, T>
+        >::type
     push_back(Sequence const& seq, T const& x);
+
+    template <typename Sequence, typename T>
+    typename
+        lazy_enable_if<
+            traits::is_sequence<Sequence>
+          , result_of::push_front<Sequence const, T>
+        >::type
+    push_front(Sequence const& seq, T const& x);
 }}
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion { namespace detail
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion { namespace detail
 {
     //auto make_segment_sequence_front(stack_begin)
     //{

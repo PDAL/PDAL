@@ -18,7 +18,8 @@
 //  http://www.boost.org/LICENSE_1_0.txt
 
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 
 template< class T > struct is_placeholder
 {

@@ -26,7 +26,7 @@
 #  pragma warning (disable: 4512) // assignment operator could not be generated.
 #endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion
 {
     struct single_view_tag;
     struct random_access_traversal_tag;

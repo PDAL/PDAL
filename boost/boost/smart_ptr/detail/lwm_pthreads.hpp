@@ -20,7 +20,8 @@
 #include <boost/assert.hpp>
 #include <pthread.h>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 
 namespace detail
 {

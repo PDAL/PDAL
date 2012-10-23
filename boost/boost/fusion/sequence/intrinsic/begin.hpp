@@ -16,7 +16,7 @@
 #include <boost/fusion/support/is_segmented.hpp>
 #include <boost/fusion/sequence/intrinsic/detail/segmented_begin.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion
 {
     // Special tags:
     struct sequence_facade_tag; // iterator facade tag

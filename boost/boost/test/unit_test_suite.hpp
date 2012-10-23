@@ -190,7 +190,7 @@ static pdalboost::unit_test::ut_detail::global_fixture_impl<F> BOOST_JOIN( gf_, 
 // **************         BOOST_AUTO_TEST_CASE_FIXTURE         ************** //
 // ************************************************************************** //
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace unit_test { namespace ut_detail {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace unit_test { namespace ut_detail {
 
 struct nil_t {};
 

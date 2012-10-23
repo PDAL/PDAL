@@ -11,7 +11,7 @@
 #include <boost/fusion/iterator/advance.hpp>
 #include <boost/fusion/iterator/deref.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion
 {
     struct iterator_range_tag;
 
@@ -33,7 +33,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespac
                 static type
                 call(Seq& s)
                 {
-                    return * advance<N>(s.first);
+                    return * fusion::advance<N>(s.first);
                 }
             };
         };

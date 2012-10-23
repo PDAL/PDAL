@@ -31,7 +31,7 @@
 // reference. -end note ]
 //----------------------------------------------------------------------------//
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
 namespace type_traits_detail {
 

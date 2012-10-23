@@ -17,7 +17,7 @@
 #include <boost/algorithm/string/sequence_traits.hpp>
 #include <boost/algorithm/string/detail/sequence.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
     namespace algorithm {
         namespace detail {
 

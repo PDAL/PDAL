@@ -8,7 +8,7 @@
 #include <boost/type_traits/msvc/typeof.hpp>
 #include <boost/type_traits/is_pointer.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
     namespace detail {
         template<int IsPointer>
         struct remove_pointer_impl_typeof {

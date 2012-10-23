@@ -27,7 +27,8 @@
 #pragma warning(disable:4127 4244)  // Conditional expression is constant
 #endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 namespace math
 {
 

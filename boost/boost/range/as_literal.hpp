@@ -29,7 +29,8 @@
 #include <cwchar>
 #endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
     namespace range_detail
     {
         inline std::size_t length( const char* s )
@@ -73,7 +74,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 #endif
 
         template< class T >
-        inline long is_char_ptr( T /* r */ )
+        inline long is_char_ptr( const T& /* r */ )
         {
             return 0L;
         }

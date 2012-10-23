@@ -20,7 +20,7 @@
 #include "boost/mpl/bool.hpp"
 #include "boost/mpl/identity.hpp"
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace numeric { namespace convdetail
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace numeric { namespace convdetail
 {
    template< class T1, class T2>
    struct equal_to

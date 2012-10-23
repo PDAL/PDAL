@@ -39,7 +39,7 @@
 //
 // For example, program_options library might contain:
 //    #define BOOST_UTF8_BEGIN_NAMESPACE <backslash character> 
-//             namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace program_options {
+//             namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace program_options {
 //    #define BOOST_UTF8_END_NAMESPACE }}
 //    #define BOOST_UTF8_DECL BOOST_PROGRAM_OPTIONS_DECL
 //    #include "../../detail/utf8/utf8_codecvt.cpp"

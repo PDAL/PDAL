@@ -23,12 +23,15 @@ import re
 import bjam
 
 from b2.tools import unix, common, rc, pch, builtin
-from b2.build import feature, type, toolset, generators
+from b2.build import feature, type, toolset, generators, property_set
+from b2.build.property import Property
 from b2.util.utility import os_name, on_windows
 from b2.manager import get_manager
 from b2.build.generators import Generator
 from b2.build.toolset import flags
 from b2.util.utility import to_seq
+
+
 
 __debug = None
 
@@ -222,12 +225,12 @@ class GccPchGenerator(pch.PchGenerator):
         # Find the header in sources. Ignore any CPP sources.
         header = None
         for s in sources:
-            if type.is_derived(s.type, 'H'):
+            if type.is_derived(s.type(), 'H'):
                 header = s
 
         # Error handling: Base header file name should be the same as the base
         # precompiled header name.
-        header_name = header.name
+        header_name = header.name()
         header_basename = os.path.basename(header_name).rsplit('.', 1)[0]
         if header_basename != name:
             location = project.project_module
@@ -239,14 +242,15 @@ class GccPchGenerator(pch.PchGenerator):
 
         # return result of base class and pch-file property as usage-requirements
         # FIXME: what about multiple results from generator.run?
-        return (property_set.create('<pch-file>' + pch_file[0], '<cflags>-Winvalid-pch'),
+        return (property_set.create([Property('pch-file', pch_file[0]),
+                                     Property('cflags', '-Winvalid-pch')]),
                 pch_file)
 
     # Calls the base version specifying source's name as the name of the created
     # target. As result, the PCH will be named whatever.hpp.gch, and not
     # whatever.gch.
     def generated_targets(self, sources, prop_set, project, name = None):
-        name = sources[0].name
+        name = sources[0].name()
         return Generator.generated_targets(self, sources,
             prop_set, project, name)
 

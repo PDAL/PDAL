@@ -15,7 +15,7 @@
 // See http://www.boost.org/libs/mpl for documentation.
 
 // $Id: apply_wrap.hpp 49272 2008-10-11 06:50:46Z agurtovoy $
-// $Date: 2008-10-11 02:50:46 -0400 (Sat, 11 Oct 2008) $
+// $Date: 2008-10-10 23:50:46 -0700 (Fri, 10 Oct 2008) $
 // $Revision: 49272 $
 
 #if !defined(BOOST_MPL_PREPROCESSING_MODE)
@@ -52,7 +52,7 @@
 #   include <boost/preprocessor/iterate.hpp>
 
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace mpl {
 
 // local macros, #undef-ined at the end of the header
 #   define AUX778076_APPLY_WRAP_PARAMS(n, param) \

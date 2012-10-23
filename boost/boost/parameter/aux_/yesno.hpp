@@ -8,7 +8,7 @@
 
 #include <boost/mpl/bool.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace parameter { namespace aux {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace parameter { namespace aux {
 
 // types used with the "sizeof trick" to capture the results of
 // overload resolution at compile-time.

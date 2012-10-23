@@ -26,7 +26,7 @@
 #define BOOST_INTERNAL_IS_POD(T) BOOST_IS_POD(T)
 #endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
 // forward declaration, needed by 'is_pod_array_helper' template below
 template< typename T > struct is_POD;

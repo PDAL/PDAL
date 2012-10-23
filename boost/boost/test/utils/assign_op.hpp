@@ -15,7 +15,7 @@
 #ifndef BOOST_TEST_ASSIGN_OP_033005GER
 #define BOOST_TEST_ASSIGN_OP_033005GER
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
 namespace unit_test {
 

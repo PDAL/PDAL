@@ -31,9 +31,9 @@
 //
 
 // forward declaration
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ struct use_default; }
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { struct use_default; }
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace detail  {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace detail  {
 
 struct input_output_iterator_tag
   : std::input_iterator_tag

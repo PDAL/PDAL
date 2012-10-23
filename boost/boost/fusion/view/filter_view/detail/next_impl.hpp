@@ -16,7 +16,7 @@
 #include <boost/mpl/bind.hpp>
 #include <boost/mpl/placeholders.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion
 {
     struct filter_view_iterator_tag;
 

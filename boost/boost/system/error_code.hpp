@@ -31,7 +31,8 @@
 
 #include <boost/config/abi_prefix.hpp> // must be the last #include
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
   namespace system
   {
 

@@ -22,7 +22,8 @@
 #include <boost/config.hpp>
 #include <boost/is_placeholder.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 
 template< int I > struct arg
 {

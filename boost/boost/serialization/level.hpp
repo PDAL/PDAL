@@ -33,7 +33,7 @@
 
 #include <boost/serialization/level_enum.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace serialization {
 
 struct basic_traits;
@@ -106,7 +106,7 @@ inline bool operator>=(implementation_level< T > t, enum level_type l)
 // specify the level of serialization implementation for the class
 // require that class info saved when versioning is used
 #define BOOST_CLASS_IMPLEMENTATION(T, E)                 \
-    namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{                                    \
+    namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {                                    \
     namespace serialization {                            \
     template <>                                          \
     struct implementation_level_impl< const T >                     \

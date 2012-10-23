@@ -37,7 +37,7 @@
     array, null-terminated c-strings (and more) using the same interface.
 */
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
     namespace algorithm {
 
 //  collection_traits template class -----------------------------------------//

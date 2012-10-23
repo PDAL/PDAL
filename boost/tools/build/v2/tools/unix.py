@@ -58,8 +58,8 @@ class UnixSearchedLibGenerator (builtin.SearchedLibGenerator):
     def optional_properties (self):
         return self.requirements ()
               
-    def run (self, project, name, prop_set, sources, multiple):
-        result = SearchedLibGenerator.run (project, name, prop_set, sources, multiple)
+    def run (self, project, name, prop_set, sources):
+        result = SearchedLibGenerator.run (project, name, prop_set, sources)
         
         set_library_order (sources, prop_set, result)
         
@@ -69,10 +69,10 @@ class UnixPrebuiltLibGenerator (generators.Generator):
     def __init__ (self, id, composing, source_types, target_types_and_names, requirements):
         generators.Generator.__init__ (self, id, composing, source_types, target_types_and_names, requirements)
 
-    def run (self, project, name, prop_set, sources, multiple):
+    def run (self, project, name, prop_set, sources):
         f = prop_set.get ('<file>')
         set_library_order_aux (f, sources)
-        return (f, sources)
+        return f + sources
 
 ### # The derived toolset must specify their own rules and actions.
 # FIXME: restore?

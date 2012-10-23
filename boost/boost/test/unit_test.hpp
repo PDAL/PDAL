@@ -41,7 +41,7 @@
 // **************                  unit_test_main              ************** //
 // ************************************************************************** //
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace unit_test {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace unit_test {
 
 int BOOST_TEST_DECL unit_test_main( init_unit_test_func init_func, int argc, char* argv[] );
 

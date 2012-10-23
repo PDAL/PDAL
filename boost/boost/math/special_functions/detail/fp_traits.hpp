@@ -78,7 +78,7 @@ With these techniques, the code could be simplified.
 
 //------------------------------------------------------------------------------
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace math {
 namespace detail {
 
@@ -101,11 +101,11 @@ struct ieee_copy_leading_bits_tag : public ieee_tag {};
 // These helper functions are used only when numeric_limits<>
 // members are not compile time constants:
 //
-inline bool is_generic_tag_false(const generic_tag<false>&)
+inline bool is_generic_tag_false(const generic_tag<false>*)
 {
    return true;
 }
-inline bool is_generic_tag_false(...)
+inline bool is_generic_tag_false(const void*)
 {
    return false;
 }

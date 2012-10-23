@@ -12,7 +12,7 @@
 #include <boost/serialization/split_free.hpp>
 #include <boost/serialization/is_bitwise_serializable.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ 
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { 
 namespace serialization {
 
 //BOOST_STRONG_TYPEDEF(std::size_t, collection_size_type)

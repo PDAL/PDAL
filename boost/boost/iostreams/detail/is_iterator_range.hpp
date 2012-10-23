@@ -15,7 +15,7 @@
 // Must come last.
 #include <boost/iostreams/detail/config/disable_warnings.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ 
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { 
 
 # if !BOOST_WORKAROUND(BOOST_MSVC, <= 1300) //---------------------------------//
 

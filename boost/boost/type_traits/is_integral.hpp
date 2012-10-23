@@ -14,7 +14,7 @@
 // should be the last #include
 #include <boost/type_traits/detail/bool_trait_def.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
 //* is a type T an [cv-qualified-] integral type described in the standard (3.9.1p3)
 // as an extention we include long long, as this is likely to be added to the

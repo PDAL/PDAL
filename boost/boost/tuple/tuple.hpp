@@ -17,7 +17,7 @@
 // Work around a compiler bug.
 // pdalboost::python::tuple has to be seen by the compiler before the
 // pdalboost::tuple class template.
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace python { class tuple; }}
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace python { class tuple; }}
 #endif
 
 #include "boost/config.hpp"
@@ -34,7 +34,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespac
 
 #endif // BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{    
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {    
 
 using tuples::tuple;
 using tuples::make_tuple;

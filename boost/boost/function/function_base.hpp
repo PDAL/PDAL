@@ -86,7 +86,7 @@
                        Type>::type
 #endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
   namespace detail {
     namespace function {
       class X;

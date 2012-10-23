@@ -28,7 +28,7 @@
 // Must come last.
 #include <boost/iostreams/detail/config/disable_warnings.hpp>  // MSVC.
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams { namespace detail {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace iostreams { namespace detail {
 
 template<typename T, typename Tr, typename Alloc, typename Mode>
 struct stream_buffer_traits {
@@ -49,7 +49,7 @@ struct stream_buffer_traits {
 # include <boost/iostreams/detail/broken_overload_resolution/stream_buffer.hpp>
 #else
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace iostreams {
 
 template< typename T,
           typename Tr =

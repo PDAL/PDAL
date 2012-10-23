@@ -29,7 +29,7 @@
 #include <boost/random/detail/seed_impl.hpp>
 #include <boost/random/detail/generator_seed_seq.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace random {
 
 /**

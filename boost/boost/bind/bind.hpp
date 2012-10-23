@@ -45,7 +45,8 @@
 # pragma warning(disable: 4512) // assignment operator could not be generated
 #endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 
 template<class T> class weak_ptr;
 
@@ -1679,7 +1680,7 @@ template< class R, class T > struct add_cref< R (T::*) (), 1 >
     typedef void type;
 };
 
-#if !( defined(__IBMCPP__) && BOOST_WORKAROUND( __IBMCPP__, BOOST_TESTED_AT(600) ) )
+#if !defined(__IBMCPP__) || __IBMCPP_FUNC_CV_TMPL_ARG_DEDUCTION
 
 template< class R, class T > struct add_cref< R (T::*) () const, 1 >
 {

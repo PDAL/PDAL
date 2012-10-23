@@ -4,20 +4,36 @@
 # Distributed under the Boost Software License, Version 1.0. 
 # (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt) 
 
+# util
+import assert ;
+import container ;
 import indirect ;
-import string ;
 import numbers ;
-import sequence ;
-import "class" ;
+import order ;
 import os ;
 import path ;
+import print ;
+import regex ;
+import sequence ;
+import set ;
+import string ;
+import utility ;
+
+# kernel
+import "class" ;
+import errors ;
+import modules ;
+
+# build
+import build-request ;
 import feature ;
 import property ;
-import build-request ;
-import container ;
-import print ;
-import common ;
+import toolset ;
+import type ;
+import version ;
 
+# tools
+import common ;
 
 actions nothing { }
 nothing all ;

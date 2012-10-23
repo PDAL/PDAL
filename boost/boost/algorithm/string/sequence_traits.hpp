@@ -31,7 +31,7 @@
     header which contains specializations for all stl containers.
 */
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
     namespace algorithm {
 
 //  sequence traits  -----------------------------------------------//

@@ -12,7 +12,7 @@
 #ifndef BOOST_NO_RESULT_OF
 
 # include <boost/utility/result_of.hpp>
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace parameter { namespace aux { 
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace parameter { namespace aux { 
 template <class F>
 struct result_of0 : result_of<F()>
 {};
@@ -21,7 +21,7 @@ struct result_of0 : result_of<F()>
 
 #else
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace parameter { namespace aux { 
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace parameter { namespace aux { 
 template <class F>
 struct result_of0
 {

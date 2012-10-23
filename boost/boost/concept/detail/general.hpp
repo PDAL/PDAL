@@ -14,7 +14,7 @@
 
 // This implementation works on Comeau and GCC, all the way back to
 // 2.95
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace concepts {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace concepts {
 
 template <class ModelFn>
 struct requirement_;

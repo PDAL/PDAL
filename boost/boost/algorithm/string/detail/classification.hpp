@@ -22,7 +22,7 @@
 #include <boost/algorithm/string/predicate_facade.hpp>
 #include <boost/type_traits/remove_const.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
     namespace algorithm {
         namespace detail {
 
@@ -126,7 +126,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
                     }
 
                     // Use fixed storage
-                    ::memcpy(DestStorage, SrcStorage, sizeof(set_value_type)*m_Size);
+                    ::std::memcpy(DestStorage, SrcStorage, sizeof(set_value_type)*m_Size);
                 }
 
                 // Destructor
@@ -206,7 +206,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
                     }
 
                     // Copy the data
-                    ::memcpy(DestStorage, SrcStorage, sizeof(set_value_type)*m_Size);
+                    ::std::memcpy(DestStorage, SrcStorage, sizeof(set_value_type)*m_Size);
 
                     return *this;
                 }

@@ -112,7 +112,7 @@ namespace std { using ::memset; using ::sprintf; }
 
 //____________________________________________________________________________//
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
 namespace debug {
 

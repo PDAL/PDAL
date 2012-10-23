@@ -9,7 +9,7 @@
 
 #include <boost/fusion/iterator/deref.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion { namespace detail
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion { namespace detail
 {
     struct adapt_deref_traits
     {

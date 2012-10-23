@@ -19,7 +19,7 @@
 #include <boost/multi_index/ordered_index_fwd.hpp>
 #include <memory>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost{
 
 namespace multi_index{
 

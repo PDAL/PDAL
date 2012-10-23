@@ -10,7 +10,7 @@
 
 #include <boost/parameter/keyword.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace accumulators
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace accumulators
 {
 
 // The weight of a single sample

@@ -23,7 +23,8 @@
 # pragma warn -8026     // Functions with excep. spec. are not expanded inline
 #endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 
 // The standard library that comes with Borland C++ 5.5.1, 5.6.4
 // defines std::exception and its members as having C calling

@@ -21,7 +21,7 @@
 #include <boost/type_traits/is_const.hpp>
 #include <boost/utility/enable_if.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion
 {
     namespace result_of
     {

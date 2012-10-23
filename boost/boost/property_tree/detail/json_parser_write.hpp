@@ -17,7 +17,7 @@
 #include <ostream>
 #include <iomanip>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace property_tree { namespace json_parser
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace property_tree { namespace json_parser
 {
 
     // Create necessary escape sequences from illegal characters
@@ -33,7 +33,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespac
             // We escape everything outside ASCII, because this code can't
             // handle high unicode characters.
             if (*b == 0x20 || *b == 0x21 || (*b >= 0x23 && *b <= 0x2E) ||
-                (*b >= 0x30 && *b <= 0x5B) || (*b >= 0x5D))
+                (*b >= 0x30 && *b <= 0x5B) || (*b >= 0x5D && *b <= 0xFF))
                 result += *b;
             else if (*b == Ch('\b')) result += Ch('\\'), result += Ch('b');
             else if (*b == Ch('\f')) result += Ch('\\'), result += Ch('f');

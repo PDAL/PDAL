@@ -11,7 +11,7 @@
 #include <boost/fusion/iterator/equal_to.hpp>
 #include <boost/mpl/if.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion
 {
     struct joint_view_iterator_tag;
 

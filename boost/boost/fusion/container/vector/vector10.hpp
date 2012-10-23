@@ -34,7 +34,7 @@
 #include <boost/preprocessor/repetition/enum_binary_params.hpp>
 #include <boost/preprocessor/repetition/repeat_from_to.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion
 {
     struct vector_tag;
     struct fusion_sequence_tag;
@@ -78,7 +78,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespac
 #pragma wave option(preserve: 1)
 #endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion
 {
 
 // expand vector1 to vector10

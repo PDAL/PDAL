@@ -15,7 +15,7 @@
 
 #include <boost/multi_index/detail/ord_index_args.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost{
 
 namespace multi_index{
 

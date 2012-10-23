@@ -18,7 +18,8 @@
 #include <cstddef>           // std::ptrdiff_t
 #include <boost/config.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 # if defined(BOOST_NO_STD_ITERATOR) && !defined(BOOST_MSVC_STD_ITERATOR)
   template <class Category, class T,
     class Distance = std::ptrdiff_t,

@@ -9,7 +9,7 @@
 
 #ifdef BOOST_NO_SFINAE
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace type_of {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace type_of {
 
     template<class T> 
         T& ensure_obj(const T&);
@@ -21,7 +21,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespac
 #include <boost/type_traits/is_function.hpp> 
 #include <boost/utility/enable_if.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace type_of {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace type_of {
 # ifdef BOOST_NO_SFINAE
     template<class T> 
     T& ensure_obj(const T&);

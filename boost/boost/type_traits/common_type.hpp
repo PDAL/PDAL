@@ -63,7 +63,7 @@
 //                                                                            //
 //----------------------------------------------------------------------------//
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
 // prototype
 #if !defined(BOOST_NO_VARIADIC_TEMPLATES)

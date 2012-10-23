@@ -36,7 +36,7 @@ namespace std { using ::log10; }
 
 //____________________________________________________________________________//
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
 namespace unit_test {
 

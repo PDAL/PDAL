@@ -1,11 +1,11 @@
-<?xml version="1.0" standalone="yes"?>
-<!DOCTYPE library PUBLIC "-//Boost//DTD BoostBook XML V1.0//EN"
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//Boost//DTD BoostBook XML V1.0//EN"
      "http://www.boost.org/tools/boostbook/dtd/boostbook.dtd">
 
 <chapter id="bbv2.faq">
   <title>Frequently Asked Questions</title>
 
-  <section>
+  <section id="bbv2.faq.featurevalue">
     <title>
       How do I get the current value of feature in Jamfile?
     </title>
@@ -13,7 +13,7 @@
     <para>
       This is not possible, since Jamfile does not have "current" value of any
       feature, be it toolset, build variant or anything else. For a single
-      invocation of <filename>bjam</filename>, any given main target can be
+      run of Boost.Build, any given main target can be
       built with several property sets. For example, user can request two build
       variants on the command line. Or one library is built as shared when used
       from one application, and as static when used from another. Each Jamfile
@@ -41,7 +41,7 @@
     </itemizedlist>
   </section>
 
-  <section>
+  <section id="bbv2.faq.duplicate">
     <title>
       I am getting a "Duplicate name of actual target" error. What does that
       mean?
@@ -174,7 +174,7 @@ exe a : a.cpp : &lt;include&gt;$(SOME_LIBRARY_PATH) ;
     </para>
   </section>
 
-  <section>
+  <section id="bbv2.faq.proporder">
     <title>
       How to control properties order?
     </title>
@@ -203,7 +203,7 @@ exe a : a.cpp : &lt;include&gt;a&amp;&amp;b ;
     </para>
   </section>
 
-  <section>
+  <section id="bbv2.faq.liborder">
     <title>
       How to control the library linking order on Unix?
     </title>
@@ -257,7 +257,7 @@ local gtk_includes = [ SHELL "gtk-config --cflags" ] ;
     </para>
   </section>
 
-  <section>
+  <section id="bbv2.faq.projectroot">
     <title>
       How to get the project root (a.k.a. Jamroot) location?
     </title>
@@ -272,7 +272,7 @@ path-constant TOP : . ;
     </para>
   </section>
 
-  <section>
+  <section id="bbv2.faq.flags">
     <title>
       How to change compilation flags for one file?
     </title>

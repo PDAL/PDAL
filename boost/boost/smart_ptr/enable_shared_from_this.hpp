@@ -18,7 +18,8 @@
 #include <boost/assert.hpp>
 #include <boost/config.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 
 template<class T> class enable_shared_from_this
 {

@@ -8,7 +8,7 @@
 #include <boost/type_traits/msvc/typeof.hpp>
 #include <boost/type_traits/is_array.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
     template<typename T>
     struct remove_all_extents;
 

@@ -40,7 +40,8 @@
 */
 
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
     namespace iterator_range_detail
     {
         //

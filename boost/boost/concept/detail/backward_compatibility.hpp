@@ -4,7 +4,8 @@
 #ifndef BOOST_CONCEPT_BACKWARD_COMPATIBILITY_DWA200968_HPP
 # define BOOST_CONCEPT_BACKWARD_COMPATIBILITY_DWA200968_HPP
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
   namespace concepts {}
 
 # if defined(BOOST_HAS_CONCEPTS) && !defined(BOOST_CONCEPT_NO_BACKWARD_KEYWORD)

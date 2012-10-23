@@ -32,7 +32,7 @@
 
 
 /** Boost namespace */
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ 
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { 
 /** Namespace for the library. */
 namespace program_options {
 
@@ -101,6 +101,16 @@ namespace program_options {
             it's a short name with prepended '-'.
         */
         const std::string& key(const std::string& option) const;
+
+
+        /** Returns the canonical name for the option description to enable the user to
+            recognised a matching option.
+            1) For short options ('-', '/'), returns the short name prefixed.
+            2) For long options ('--' / '-') returns the long name prefixed
+            3) All other cases, returns the long name (if present) or the short name,
+                unprefixed.
+        */
+        std::string canonical_display_name(int canonical_option_style = 0) const;
 
         const std::string& long_name() const;
 

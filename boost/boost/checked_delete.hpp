@@ -21,7 +21,8 @@
 //  See http://www.boost.org/libs/utility/checked_delete.html for documentation.
 //
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 
 // verify that types are complete for increased safety
 

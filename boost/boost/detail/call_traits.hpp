@@ -27,7 +27,7 @@
 #include <boost/type_traits/is_pointer.hpp>
 #include <boost/detail/workaround.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost{
 
 namespace detail{
 

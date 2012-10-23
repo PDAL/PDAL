@@ -15,7 +15,7 @@
 #include <boost/iostreams/detail/ios.hpp> // streamsize.
 #include <boost/iostreams/categories.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace iostreams {
 
 template<typename Container>
 class back_insert_device {

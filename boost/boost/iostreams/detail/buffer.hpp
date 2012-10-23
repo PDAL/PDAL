@@ -23,14 +23,14 @@
 #include <boost/mpl/if.hpp>
 #include <boost/type_traits/is_same.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams { namespace detail {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace iostreams { namespace detail {
 
 //----------------Buffers-----------------------------------------------------//
 
 //
 // Template name: buffer
 // Description: Character buffer.
-// Template paramters:
+// Template parameters:
 //     Ch - The character type.
 //     Alloc - The Allocator type.
 //
@@ -69,7 +69,7 @@ void swap(basic_buffer<Ch, Alloc>& lhs, basic_buffer<Ch, Alloc>& rhs)
 // Template name: buffer
 // Description: Character buffer with two pointers accessible via ptr() and
 //      eptr().
-// Template paramters:
+// Template parameters:
 //     Ch - A character type.
 //
 template< typename Ch,

@@ -7,7 +7,7 @@
 #if !defined(FUSION_SINGLE_VIEW_SIZE_IMPL_JUL_07_2011_1348PM)
 #define FUSION_SINGLE_VIEW_SIZE_IMPL_JUL_07_2011_1348PM
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion
 {
     struct single_view_tag;
 

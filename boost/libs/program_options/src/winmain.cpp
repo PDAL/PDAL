@@ -7,8 +7,10 @@
 #include <boost/program_options/parsers.hpp>
 #include <cctype>
 
+using std::size_t;
+
 #ifdef _WIN32
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace program_options {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace program_options {
 
     // Take a command line string and splits in into tokens, according
     // to the rules windows command line processor uses.
@@ -89,7 +91,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespac
     {
         std::vector<std::wstring> result;
         std::vector<std::string> aux = split_winmain(to_internal(cmdline));
-        for (unsigned i = 0, e = aux.size(); i < e; ++i)
+        for (size_t i = 0, e = aux.size(); i < e; ++i)
             result.push_back(from_utf8(aux[i]));
         return result;        
     }

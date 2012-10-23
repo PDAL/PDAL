@@ -34,7 +34,8 @@
 # define BOOST_LIGHTWEIGHT_TEST_OSTREAM std::cerr
 #endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 
 namespace detail
 {

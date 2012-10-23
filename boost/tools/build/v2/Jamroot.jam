@@ -38,7 +38,7 @@ package.install-data boost-build-core
     [ path.glob-tree $(SELF)/build : *.jam *.py ]
     [ path.glob-tree $(SELF)/kernel : *.jam *.py ]
     [ path.glob-tree $(SELF)/util : *.jam *.py ]
-    [ path.glob-tree $(SELF)/tools : *.jam *.py ]
+    [ path.glob-tree $(SELF)/tools : *.jam *.py *.xml *.xsl *.doxyfile *.hpp ]
     $(e2)
   : # What is the root of the directory
     <install-source-root>.

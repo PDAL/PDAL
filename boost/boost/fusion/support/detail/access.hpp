@@ -10,12 +10,12 @@
 #include <boost/type_traits/add_const.hpp>
 #include <boost/type_traits/add_reference.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion { namespace detail
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion { namespace detail
 {
     template <typename T>
     struct ref_result
     {
-        typedef typename add_reference<typename T::type>::type type;
+        typedef typename add_reference<T>::type type;
     };
 
     template <typename T>
@@ -23,7 +23,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespac
     {
         typedef typename 
             add_reference<
-                typename add_const<typename T::type>::type
+                typename add_const<T>::type
             >::type 
         type;
     };

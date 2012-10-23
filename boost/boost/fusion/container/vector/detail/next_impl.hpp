@@ -9,7 +9,7 @@
 
 #include <boost/fusion/container/vector/vector_iterator.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion
 {
     struct vector_iterator_tag;
     template <typename Vector, int N>

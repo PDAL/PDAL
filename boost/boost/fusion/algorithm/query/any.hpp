@@ -12,7 +12,7 @@
 #include <boost/fusion/support/category_of.hpp>
 #include <boost/fusion/algorithm/query/detail/any.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion
 {
     namespace result_of
     {

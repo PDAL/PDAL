@@ -86,7 +86,7 @@
     return ::pdalboost::itest::mock_object<>::prototype();  \
 /**/
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
 namespace itest { // interaction-based testing
 

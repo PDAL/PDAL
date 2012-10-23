@@ -26,7 +26,7 @@
 #include <boost/type_traits/is_base_and_derived.hpp>
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace spirit {
 
 BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
 

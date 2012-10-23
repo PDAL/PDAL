@@ -55,7 +55,7 @@
 #define BOOST_MULTI_INDEX_RND_INDEX_CHECK_INVARIANT
 #endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost{
 
 namespace multi_index{
 

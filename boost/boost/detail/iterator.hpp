@@ -74,7 +74,7 @@
   && !defined(BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION) \
   && !defined(BOOST_MSVC_STD_ITERATOR)
     
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace detail {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace detail {
 
 // Define a new template so it can be specialized
 template <class Iterator>
@@ -92,7 +92,7 @@ using std::distance;
 
 // This is the case where everything conforms except BOOST_NO_STD_ITERATOR_TRAITS
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace detail {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace detail {
 
 // Rogue Wave Standard Library fools itself into thinking partial
 // specialization is missing on some platforms (e.g. Sun), so fails to
@@ -150,7 +150,7 @@ struct iterator_traits<T const*>
 // should be the last #include
 # include "boost/type_traits/detail/bool_trait_def.hpp"
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace detail {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace detail {
 
 BOOST_MPL_HAS_XXX_TRAIT_DEF(value_type)
 BOOST_MPL_HAS_XXX_TRAIT_DEF(reference)
@@ -447,7 +447,7 @@ template <> struct iterator_traits<int>
 
 #  endif // workarounds
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace detail {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace detail {
 
 namespace iterator_traits_
 {

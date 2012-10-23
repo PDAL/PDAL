@@ -20,14 +20,14 @@ class BjamAction:
         self.function = function
             
     def __call__(self, targets, sources, property_set):
-        if self.function:
-            self.function(targets, sources, property_set)
 
         # Bjam actions defined from Python have only the command
         # to execute, and no associated jam procedural code. So
         # passing 'property_set' to it is not necessary.
         bjam_interface.call("set-update-action", self.action_name,
                             targets, sources, [])
+        if self.function:
+            self.function(targets, sources, property_set)
 
 class BjamNativeAction:
     """Class representing bjam action defined by Jam code.
@@ -132,7 +132,12 @@ class Engine:
         bjam_flags = reduce(operator.or_,
                             (action_modifiers[flag] for flag in flags), 0)
 
-        bjam_interface.define_action(action_name, command, bound_list, bjam_flags)
+        # We allow command to be empty so that we can define 'action' as pure
+        # python function that would do some conditional logic and then relay
+        # to other actions.
+        assert command or function
+        if command:
+            bjam_interface.define_action(action_name, command, bound_list, bjam_flags)
 
         self.actions[action_name] = BjamAction(action_name, function)
 

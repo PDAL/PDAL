@@ -1,8 +1,9 @@
 // Copyright (C) 2001-2003
 // William E. Kempf
 // Copyright (C) 2007-8 Anthony Williams
+// (C) Copyright 2011 Vicente J. Botet Escriba
 //
-//  Distributed under the Boost Software License, Version 1.0. (See accompanying 
+//  Distributed under the Boost Software License, Version 1.0. (See accompanying
 //  file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #include <boost/thread/detail/config.hpp>
@@ -14,7 +15,7 @@
 #include <boost/thread/once.hpp>
 #include <boost/thread/tss.hpp>
 #include <boost/throw_exception.hpp>
-#ifdef __linux__
+#ifdef __GLIBC__
 #include <sys/sysinfo.h>
 #elif defined(__APPLE__) || defined(__FreeBSD__)
 #include <sys/types.h>
@@ -23,9 +24,10 @@
 #include <unistd.h>
 #endif
 
-#include "timeconv.inl"
+#include <libs/thread/src/pthread/timeconv.inl>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
     namespace detail
     {
         thread_data_base::~thread_data_base()
@@ -44,7 +46,11 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
         namespace
         {
+#ifdef BOOST_THREAD_PROVIDES_ONCE_CXX11
+          pdalboost::once_flag current_thread_tls_init_flag;
+#else
             pdalboost::once_flag current_thread_tls_init_flag=BOOST_ONCE_INIT;
+#endif
             pthread_key_t current_thread_tls_key;
 
             extern "C"
@@ -85,14 +91,31 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
                     }
                 }
             }
-    
+
+#if defined BOOST_THREAD_PATCH
+
+            struct  delete_current_thread_tls_key_on_dlclose_t
+            {
+                delete_current_thread_tls_key_on_dlclose_t()
+                {
+                }
+                ~delete_current_thread_tls_key_on_dlclose_t()
+                {
+                    if (current_thread_tls_init_flag.epoch!=BOOST_ONCE_INITIAL_FLAG_VALUE)
+                    {
+                        pthread_key_delete(current_thread_tls_key);
+                    }
+                }
+            };
+            delete_current_thread_tls_key_on_dlclose_t delete_current_thread_tls_key_on_dlclose;
+#endif
 
             void create_current_thread_tls_key()
             {
                 BOOST_VERIFY(!pthread_key_create(&current_thread_tls_key,&tls_destructor));
             }
         }
-        
+
         pdalboost::detail::thread_data_base* get_current_thread_data()
         {
             pdalboost::call_once(current_thread_tls_init_flag,create_current_thread_tls_key);
@@ -105,7 +128,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
             BOOST_VERIFY(!pthread_setspecific(current_thread_tls_key,new_data));
         }
     }
-    
+
     namespace
     {
         extern "C"
@@ -115,16 +138,20 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
                 pdalboost::detail::thread_data_ptr thread_info = static_cast<pdalboost::detail::thread_data_base*>(param)->self;
                 thread_info->self.reset();
                 detail::set_current_thread_data(thread_info.get());
-                try
+#ifndef BOOST_NO_EXCEPTIONS
+                try // BOOST_NO_EXCEPTIONS protected
+#endif
                 {
                     thread_info->run();
                 }
-                catch(thread_interrupted const&)
+#ifndef BOOST_NO_EXCEPTIONS
+                catch(thread_interrupted const&) // BOOST_NO_EXCEPTIONS protected
                 {
                 }
+#endif
 // Removed as it stops the debugger identifying the cause of the exception
 // Unhandled exceptions still cause the application to terminate
-//                 catch(...)
+//                 catch(...) // BOOST_NO_EXCEPTIONS protected
 //                 {
 //                     std::terminate();
 //                 }
@@ -145,7 +172,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
             {
                 interrupt_enabled=false;
             }
-            
+
             void run()
             {}
 
@@ -176,7 +203,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     }
 
 
-    thread::thread()
+    thread::thread() BOOST_NOEXCEPT
     {}
 
     void thread::start_thread()
@@ -186,14 +213,46 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
         if (res != 0)
         {
             thread_info->self.reset();
-            pdalboost::throw_exception(thread_resource_error());
+            pdalboost::throw_exception(thread_resource_error(res, "boost thread: failed in pthread_create"));
         }
     }
 
-    thread::~thread()
+    void thread::start_thread(const attributes& attr)
     {
-        detach();
+        thread_info->self=thread_info;
+        const attributes::native_handle_type* h = attr.native_handle();
+        int res = pthread_create(&thread_info->thread_handle, h, &thread_proxy, thread_info.get());
+        if (res != 0)
+        {
+            thread_info->self.reset();
+            pdalboost::throw_exception(thread_resource_error());
+        }
+        int detached_state;
+        res = pthread_attr_getdetachstate(h, &detached_state);
+        if (res != 0)
+        {
+            thread_info->self.reset();
+            pdalboost::throw_exception(thread_resource_error());
+        }
+        if (PTHREAD_CREATE_DETACHED==detached_state)
+        {
+          detail::thread_data_ptr local_thread_info;
+          thread_info.swap(local_thread_info);
+
+          if(local_thread_info)
+          {
+              //lock_guard<mutex> lock(local_thread_info->data_mutex);
+              if(!local_thread_info->join_started)
+              {
+                  //BOOST_VERIFY(!pthread_detach(local_thread_info->thread_handle));
+                  local_thread_info->join_started=true;
+                  local_thread_info->joined=true;
+              }
+          }
+        }
     }
+
+
 
     detail::thread_data_ptr thread::get_thread_info BOOST_PREVENT_MACRO_SUBSTITUTION () const
     {
@@ -202,11 +261,15 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
     void thread::join()
     {
+        if (this_thread::get_id() == get_id())
+        {
+            pdalboost::throw_exception(thread_resource_error(system::errc::resource_deadlock_would_occur, "boost thread: trying joining itself"));
+        }
         detail::thread_data_ptr const local_thread_info=(get_thread_info)();
         if(local_thread_info)
         {
             bool do_join=false;
-            
+
             {
                 unique_lock<mutex> lock(local_thread_info->data_mutex);
                 while(!local_thread_info->done)
@@ -214,7 +277,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
                     local_thread_info->done_condition.wait(lock);
                 }
                 do_join=!local_thread_info->join_started;
-                
+
                 if(do_join)
                 {
                     local_thread_info->join_started=true;
@@ -235,7 +298,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
                 local_thread_info->joined=true;
                 local_thread_info->done_condition.notify_all();
             }
-            
+
             if(thread_info==local_thread_info)
             {
                 thread_info.reset();
@@ -243,24 +306,28 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
         }
     }
 
-    bool thread::timed_join(system_time const& wait_until)
+    bool thread::do_try_join_until(struct timespec const &timeout)
     {
+        if (this_thread::get_id() == get_id())
+        {
+            pdalboost::throw_exception(thread_resource_error(system::errc::resource_deadlock_would_occur, "boost thread: trying joining itself"));
+        }
         detail::thread_data_ptr const local_thread_info=(get_thread_info)();
         if(local_thread_info)
         {
             bool do_join=false;
-            
+
             {
                 unique_lock<mutex> lock(local_thread_info->data_mutex);
                 while(!local_thread_info->done)
                 {
-                    if(!local_thread_info->done_condition.timed_wait(lock,wait_until))
+                    if(!local_thread_info->done_condition.do_timed_wait(lock,timeout))
                     {
                         return false;
                     }
                 }
                 do_join=!local_thread_info->join_started;
-                
+
                 if(do_join)
                 {
                     local_thread_info->join_started=true;
@@ -281,7 +348,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
                 local_thread_info->joined=true;
                 local_thread_info->done_condition.notify_all();
             }
-            
+
             if(thread_info==local_thread_info)
             {
                 thread_info.reset();
@@ -290,17 +357,17 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
         return true;
     }
 
-    bool thread::joinable() const
+    bool thread::joinable() const BOOST_NOEXCEPT
     {
         return (get_thread_info)();
     }
 
 
-    void thread::detach()
+    void thread::detach() BOOST_NOEXCEPT
     {
         detail::thread_data_ptr local_thread_info;
         thread_info.swap(local_thread_info);
-        
+
         if(local_thread_info)
         {
             lock_guard<mutex> lock(local_thread_info->data_mutex);
@@ -315,20 +382,24 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
     namespace this_thread
     {
-        
+
+#ifdef __DECXXX
+        /// Workaround of DECCXX issue of incorrect template substitution
+        template<>
+#endif
         void sleep(const system_time& st)
         {
             detail::thread_data_base* const thread_info=detail::get_current_thread_data();
-        
+
             if(thread_info)
             {
                 unique_lock<mutex> lk(thread_info->sleep_mutex);
-                while(thread_info->sleep_condition.timed_wait(lk,st));
+                while(thread_info->sleep_condition.timed_wait(lk,st)) {}
             }
             else
             {
                 xtime const xt=get_xtime(st);
-            
+
                 for (int foo=0; foo < 5; ++foo)
                 {
 #   if defined(BOOST_HAS_PTHREAD_DELAY_NP)
@@ -338,7 +409,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 #   elif defined(BOOST_HAS_NANOSLEEP)
                     timespec ts;
                     to_timespec_duration(xt, ts);
-                
+
                     //  nanosleep takes a timespec that is an offset, not
                     //  an absolute time.
                     nanosleep(&ts, 0);
@@ -349,14 +420,41 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
                     cond.timed_wait(lock, xt);
 #   endif
                     xtime cur;
-                    xtime_get(&cur, TIME_UTC);
+                    xtime_get(&cur, TIME_UTC_);
                     if (xtime_cmp(xt, cur) <= 0)
                         return;
                 }
             }
         }
 
-        void yield()
+#ifdef BOOST_THREAD_USES_CHRONO
+        void
+        sleep_for(const chrono::nanoseconds& ns)
+        {
+            using namespace chrono;
+            if (ns >= nanoseconds::zero())
+            {
+                timespec ts;
+                ts.tv_sec = static_cast<long>(duration_cast<seconds>(ns).count());
+                ts.tv_nsec = static_cast<long>((ns - seconds(ts.tv_sec)).count());
+
+#   if defined(BOOST_HAS_PTHREAD_DELAY_NP)
+                BOOST_VERIFY(!pthread_delay_np(&ts));
+#   elif defined(BOOST_HAS_NANOSLEEP)
+                //  nanosleep takes a timespec that is an offset, not
+                //  an absolute time.
+                nanosleep(&ts, 0);
+#   else
+                mutex mx;
+                mutex::scoped_lock lock(mx);
+                condition_variable cond;
+                cond.wait_for(lock, ns);
+#   endif
+            }
+        }
+#endif
+
+        void yield() BOOST_NOEXCEPT
         {
 #   if defined(BOOST_HAS_SCHED_YIELD)
             BOOST_VERIFY(!sched_yield());
@@ -364,13 +462,12 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
             BOOST_VERIFY(!pthread_yield());
 #   else
             xtime xt;
-            xtime_get(&xt, TIME_UTC);
+            xtime_get(&xt, TIME_UTC_);
             sleep(xt);
 #   endif
         }
     }
-
-    unsigned thread::hardware_concurrency()
+    unsigned thread::hardware_concurrency() BOOST_NOEXCEPT
     {
 #if defined(PTW32_VERSION) || defined(__hpux)
         return pthread_num_processors_np();
@@ -381,15 +478,19 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 #elif defined(BOOST_HAS_UNISTD_H) && defined(_SC_NPROCESSORS_ONLN)
         int const count=sysconf(_SC_NPROCESSORS_ONLN);
         return (count>0)?count:0;
-#elif defined(_GNU_SOURCE)
+#elif defined(__GLIBC__)
         return get_nprocs();
 #else
         return 0;
 #endif
     }
 
-    thread::id thread::get_id() const
+    thread::id thread::get_id() const BOOST_NOEXCEPT
     {
+    #if defined BOOST_THREAD_PROVIDES_BASIC_THREAD_ID
+        //return local_thread_info->thread_handle;
+        return const_cast<thread*>(this)->native_handle();
+    #else
         detail::thread_data_ptr const local_thread_info=(get_thread_info)();
         if(local_thread_info)
         {
@@ -397,8 +498,9 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
         }
         else
         {
-            return id();
+                return id();
         }
+    #endif
     }
 
     void thread::interrupt()
@@ -416,7 +518,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
         }
     }
 
-    bool thread::interruption_requested() const
+    bool thread::interruption_requested() const BOOST_NOEXCEPT
     {
         detail::thread_data_ptr const local_thread_info=(get_thread_info)();
         if(local_thread_info)
@@ -443,19 +545,24 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
             return pthread_t();
         }
     }
-    
-    
+
+
 
     namespace this_thread
     {
-        thread::id get_id()
+        thread::id get_id() BOOST_NOEXCEPT
         {
+        #if defined BOOST_THREAD_PROVIDES_BASIC_THREAD_ID
+             return pthread_self();
+        #else
             pdalboost::detail::thread_data_base* const thread_info=get_or_make_current_thread_data();
             return thread::id(thread_info?thread_info->shared_from_this():detail::thread_data_ptr());
+        #endif
         }
 
         void interruption_point()
         {
+#ifndef BOOST_NO_EXCEPTIONS
             pdalboost::detail::thread_data_base* const thread_info=detail::get_current_thread_data();
             if(thread_info && thread_info->interrupt_enabled)
             {
@@ -466,15 +573,16 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
                     throw thread_interrupted();
                 }
             }
+#endif
         }
-        
-        bool interruption_enabled()
+
+        bool interruption_enabled() BOOST_NOEXCEPT
         {
             pdalboost::detail::thread_data_base* const thread_info=detail::get_current_thread_data();
             return thread_info && thread_info->interrupt_enabled;
         }
-        
-        bool interruption_requested()
+
+        bool interruption_requested() BOOST_NOEXCEPT
         {
             pdalboost::detail::thread_data_base* const thread_info=detail::get_current_thread_data();
             if(!thread_info)
@@ -488,7 +596,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
             }
         }
 
-        disable_interruption::disable_interruption():
+        disable_interruption::disable_interruption() BOOST_NOEXCEPT:
             interruption_was_enabled(interruption_enabled())
         {
             if(interruption_was_enabled)
@@ -496,8 +604,8 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
                 detail::get_current_thread_data()->interrupt_enabled=false;
             }
         }
-        
-        disable_interruption::~disable_interruption()
+
+        disable_interruption::~disable_interruption() BOOST_NOEXCEPT
         {
             if(detail::get_current_thread_data())
             {
@@ -505,15 +613,15 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
             }
         }
 
-        restore_interruption::restore_interruption(disable_interruption& d)
+        restore_interruption::restore_interruption(disable_interruption& d) BOOST_NOEXCEPT
         {
             if(d.interruption_was_enabled)
             {
                 detail::get_current_thread_data()->interrupt_enabled=true;
             }
         }
-        
-        restore_interruption::~restore_interruption()
+
+        restore_interruption::~restore_interruption() BOOST_NOEXCEPT
         {
             if(detail::get_current_thread_data())
             {
@@ -569,7 +677,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
             detail::thread_data_base* const current_thread_data(get_or_make_current_thread_data());
             current_thread_data->tss_data.erase(key);
         }
-        
+
         void set_tss_data(void const* key,
                           pdalboost::shared_ptr<tss_cleanup_function> func,
                           void* tss_data,bool cleanup_existing)

@@ -22,7 +22,7 @@
 #include <boost/type_traits/is_convertible.hpp>
 #endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost{
 
 template<class T> class reference_wrapper; /* fwd decl. */
 

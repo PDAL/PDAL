@@ -22,7 +22,7 @@
                     // installation instructions here:
                     // http://boost.org/libs/iostreams/doc/index.html?path=7
                     
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace iostreams {
 
 namespace bzip2 {
 

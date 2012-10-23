@@ -22,7 +22,7 @@
 #include <boost/fusion/sequence/intrinsic/end.hpp>
 #include <boost/fusion/support/category_of.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion { 
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion { 
     struct random_access_traversal_tag;
 namespace detail
 {

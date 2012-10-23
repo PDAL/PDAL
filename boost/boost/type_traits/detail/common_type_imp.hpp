@@ -46,7 +46,8 @@
 #include <boost/type_traits/remove_reference.hpp>
 #include <boost/utility/declval.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 
 namespace detail_type_traits_common_type
 {

@@ -106,7 +106,7 @@ namespace pdalboost_optional_detail
 }
 
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
 class in_place_factory_base ;
 class typed_in_place_factory_base ;

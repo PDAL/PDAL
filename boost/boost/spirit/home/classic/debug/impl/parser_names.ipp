@@ -33,7 +33,7 @@ std::string BOOST_SPIRIT_GETSTRING(std::strstream& ss)
 #define BOOST_SPIRIT_SSTREAM std::stringstream
 #endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace spirit {
 
 BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
 

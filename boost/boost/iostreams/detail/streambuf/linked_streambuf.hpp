@@ -21,7 +21,7 @@
 // Must come last.
 #include <boost/iostreams/detail/config/disable_warnings.hpp> // MSVC.
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams { namespace detail {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace iostreams { namespace detail {
 
 template<typename Self, typename Ch, typename Tr, typename Alloc, typename Mode>
 class chain_base;

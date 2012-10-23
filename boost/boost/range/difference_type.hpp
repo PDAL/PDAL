@@ -19,7 +19,8 @@
 #include <boost/range/iterator.hpp>
 #include <boost/iterator/iterator_traits.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
     template< class T >
     struct range_difference : iterator_difference< typename range_iterator<T>::type >
     { };

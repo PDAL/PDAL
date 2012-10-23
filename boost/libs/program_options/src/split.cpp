@@ -11,7 +11,7 @@
 #include <string>
 #include <vector>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace program_options { namespace detail {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace program_options { namespace detail {
 
    template< class charT >
    std::vector<std::basic_string<charT> > 
@@ -38,7 +38,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespac
    
 }}}   // namespace
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace program_options {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace program_options {
 
    // Take a command line string and splits in into tokens, according
    // to the given collection of seperators chars.

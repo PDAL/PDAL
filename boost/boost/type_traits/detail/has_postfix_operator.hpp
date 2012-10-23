@@ -29,7 +29,7 @@
 #   pragma warning ( disable : 4244 4913 )
 #endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace detail {
 
 // This namespace ensures that argument-dependent name lookup does not mess things up.

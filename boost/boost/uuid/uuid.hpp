@@ -54,7 +54,7 @@ namespace std {
 } //namespace std
 #endif //BOOST_NO_STDC_NAMESPACE
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace uuids {
 
 struct uuid
@@ -206,7 +206,7 @@ inline std::size_t hash_value(uuid const& u) /* throw() */
 
 #ifndef BOOST_UUID_NO_TYPE_TRAITS
 // type traits specializations
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
 template <>
 struct is_pod<uuids::uuid> : true_type {};

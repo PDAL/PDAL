@@ -12,7 +12,7 @@
 #ifndef BOOST_NONE_T_17SEP2003_HPP
 #define BOOST_NONE_T_17SEP2003_HPP
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
 namespace detail { struct none_helper{}; }
 

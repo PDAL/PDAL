@@ -21,7 +21,7 @@
 #   include "boost/preprocessor/comma_if.hpp"
 #endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace detail {
 namespace is_function_ref_tester_ {
 

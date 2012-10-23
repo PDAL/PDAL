@@ -8,13 +8,10 @@
 #if !defined(BOOST_FUSION_TAG_OF_FWD_31122005_1445)
 #define BOOST_FUSION_TAG_OF_FWD_31122005_1445
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion
 {
     namespace traits
     {
-        template <typename Sequence, typename Active = void>
-        struct tag_of_fallback;
-
         template<typename T, typename Active = void>
         struct tag_of;
     }

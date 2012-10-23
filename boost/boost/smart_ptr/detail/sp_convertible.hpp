@@ -31,7 +31,8 @@
 
 #if !defined( BOOST_SP_NO_SP_CONVERTIBLE )
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 
 namespace detail
 {

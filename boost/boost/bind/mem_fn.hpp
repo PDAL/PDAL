@@ -25,7 +25,8 @@
 #include <boost/get_pointer.hpp>
 #include <boost/detail/workaround.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 
 #if defined(BOOST_NO_VOID_RETURNS)
 

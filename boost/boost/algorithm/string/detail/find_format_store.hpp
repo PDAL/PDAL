@@ -14,7 +14,7 @@
 #include <boost/algorithm/string/config.hpp>
 #include <boost/range/iterator_range.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
     namespace algorithm {
         namespace detail {
 

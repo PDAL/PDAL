@@ -17,11 +17,9 @@ t.run_build_system()
 # The second invocation should do nothing, and produce no warning. The previous
 # invocation might have printed executed actions and other things, so it is not
 # easy to check if warning was issued or not.
-t.run_build_system()
-t.fail_test(find(t.stdout(), "warning: Unused source { b.X } in main target ./a") == -1)
+t.run_build_system(stdout="")
 
-t.run_build_system("-sGENERATE_ONLY_UNUSABLE=1")
-t.fail_test(find(t.stdout(), "warning: Unused source { b.X } in main target ./a") == -1)
+t.run_build_system("-sGENERATE_ONLY_UNUSABLE=1", stdout="")
 
 # Now check that even if main target generates nothing, its usage requirements
 # are still propagated to dependants.

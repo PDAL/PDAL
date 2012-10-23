@@ -202,7 +202,7 @@ namespace { void _set_se_translator( void* ) {} }
 
 //____________________________________________________________________________//
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
 // ************************************************************************** //
 // **************                  report_error                ************** //

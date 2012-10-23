@@ -10,7 +10,8 @@
 #define BOOST_SPIRIT_PARSER_CONTEXT_HPP
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
     namespace spirit
     {
     BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN

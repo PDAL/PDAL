@@ -20,7 +20,7 @@
 
 #include <boost/serialization/pfto.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
 namespace archive {
 namespace detail {

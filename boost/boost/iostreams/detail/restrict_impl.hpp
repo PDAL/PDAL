@@ -49,14 +49,14 @@
 
 # include <boost/iostreams/detail/config/disable_warnings.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace iostreams {
 
 namespace detail {
 
 //
 // Template name: restricted_indirect_device.
 // Description: Provides an restricted view of an indirect Device.
-// Template paramters:
+// Template parameters:
 //      Device - An indirect model of Device that models either Source or
 //          SeekableDevice.
 //
@@ -88,7 +88,7 @@ private:
 //
 // Template name: restricted_direct_device.
 // Description: Provides an restricted view of a Direct Device.
-// Template paramters:
+// Template parameters:
 //      Device - A model of Direct and Device.
 //
 template<typename Device>
@@ -118,7 +118,7 @@ private:
 //
 // Template name: restricted_filter.
 // Description: Provides an restricted view of a Filter.
-// Template paramters:
+// Template parameters:
 //      Filter - An indirect model of Filter.
 //
 template<typename Filter>
@@ -374,7 +374,7 @@ restricted_filter<Filter>::restricted_filter
 
 #elif defined(BOOST_IOSTREAMS_RESTRICT)
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace iostreams {
 
 //--------------Implementation of restrict/slice------------------------------//
 

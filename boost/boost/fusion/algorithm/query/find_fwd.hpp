@@ -10,7 +10,7 @@
 #include <boost/utility/enable_if.hpp>
 #include <boost/type_traits/is_const.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion
 {
     namespace result_of
     {

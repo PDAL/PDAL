@@ -17,7 +17,7 @@
 #include <boost/mpl/empty.hpp>
 #include <boost/mpl/is_sequence.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost{
 
 namespace multi_index{
 
