@@ -5,7 +5,7 @@
 #ifndef BOOST_TYPEOF_UNSUPPORTED_HPP_INCLUDED
 #define BOOST_TYPEOF_UNSUPPORTED_HPP_INCLUDED
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace type_of {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace type_of {
     struct typeof_emulation_is_unsupported_on_this_compiler {};
 }}
 

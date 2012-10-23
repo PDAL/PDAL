@@ -3,7 +3,7 @@
  * Boost Software License, Version 1.0. (See accompanying
  * file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
  * Author: Jeff Garland, Bart Garst
- * $Date: 2008-11-23 06:13:35 -0500 (Sun, 23 Nov 2008) $
+ * $Date: 2008-11-23 03:13:35 -0800 (Sun, 23 Nov 2008) $
  */
 
 
@@ -24,7 +24,7 @@
 #include "boost/date_time/gregorian/parsers.hpp"
 
 #include "greg_names.hpp"
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace gregorian {
 
   /*! Returns a shared pointer to a map of Month strings & numbers.

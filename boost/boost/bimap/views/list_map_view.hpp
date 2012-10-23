@@ -25,7 +25,7 @@
 #include <boost/bimap/relation/support/data_extractor.hpp>
 #include <boost/bimap/relation/detail/to_mutable_relation_functor.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace bimaps {
 namespace views {
 

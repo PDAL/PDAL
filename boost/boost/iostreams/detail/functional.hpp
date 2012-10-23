@@ -24,7 +24,7 @@
 #include <boost/iostreams/close.hpp>
 #include <boost/iostreams/detail/ios.hpp> // BOOST_IOS
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams { namespace detail {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace iostreams { namespace detail {
 
     // Function objects and object generators for invoking
     // pdalboost::iostreams::close

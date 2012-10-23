@@ -22,7 +22,7 @@
 #include <boost/mpl/placeholders.hpp>
 #include <boost/mpl/bool.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace bimaps {
 namespace detail {
 

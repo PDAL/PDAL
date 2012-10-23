@@ -12,7 +12,8 @@
 
 #include <boost/bimap/bimap.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
     using ::pdalboost::bimaps::bimap;
 }
 

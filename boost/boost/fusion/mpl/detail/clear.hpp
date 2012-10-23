@@ -13,7 +13,7 @@
 #include <boost/fusion/container/set/set_fwd.hpp>
 #include <boost/fusion/container/deque/deque_fwd.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion
 {
     struct cons_tag;
     struct map_tag;

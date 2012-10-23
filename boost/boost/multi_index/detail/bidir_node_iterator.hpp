@@ -21,7 +21,7 @@
 #include <boost/serialization/split_member.hpp>
 #endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost{
 
 namespace multi_index{
 

@@ -60,7 +60,7 @@
   #endif
 #endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
 template<class T>
 class initialized

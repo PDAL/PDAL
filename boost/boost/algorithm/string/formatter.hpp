@@ -29,7 +29,7 @@
     This header contains generator functions for the Formatters provided in this library.
 */
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
     namespace algorithm {
 
 // generic formatters  ---------------------------------------------------------------//

@@ -19,7 +19,8 @@
 #include <boost/range/end.hpp>
 #include <boost/range/difference_type.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost 
+{
 
     template< class T >
     inline BOOST_DEDUCED_TYPENAME range_difference<T>::type 

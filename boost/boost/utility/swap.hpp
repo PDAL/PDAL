@@ -43,7 +43,8 @@ namespace pdalboost_swap_impl
   }
 }
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
   template<class T1, class T2>
   void swap(T1& left, T2& right)
   {

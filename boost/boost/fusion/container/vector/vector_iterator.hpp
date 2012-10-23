@@ -18,7 +18,7 @@
 #include <boost/type_traits/add_const.hpp>
 #include <boost/mpl/int.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion
 {
     struct vector_iterator_tag;
     struct random_access_traversal_tag;

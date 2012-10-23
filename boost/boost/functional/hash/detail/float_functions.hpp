@@ -20,7 +20,7 @@
 //
 // The following tries to automatically detect which are available.
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
     namespace hash_detail {
 
         // Returned by dummy versions of the float functions.
@@ -108,7 +108,7 @@ namespace pdalboost_hash_detect_float_functions {                           \
     pdalboost::hash_detail::not_found c99_func(Float, type2);               \
 }                                                                       \
                                                                         \
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{                                                       \
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {                                                       \
     namespace hash_detail {                                             \
         namespace c99_func##_detect {                                   \
             using namespace std;                                        \
@@ -169,7 +169,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{         
 }
 
 #define BOOST_HASH_CALL_FLOAT_MACRO(cpp_func, c99_func, type1, type2)   \
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{                                                       \
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {                                                       \
     namespace hash_detail {                                             \
                                                                         \
         template <>                                                     \
@@ -210,7 +210,8 @@ BOOST_HASH_CALL_FLOAT_FUNC(frexp, frexpl, long double, int*)
 #undef BOOST_HASH_CALL_FLOAT_FUNC
 
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
     namespace hash_detail
     {
         template <typename Float1, typename Float2>

@@ -24,7 +24,7 @@
 #include <boost/iostreams/traits.hpp>
 #include <boost/static_assert.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams { namespace detail {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace iostreams { namespace detail {
 
 template<typename T>
 class filter_adapter {

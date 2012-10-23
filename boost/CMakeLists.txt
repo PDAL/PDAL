@@ -25,17 +25,14 @@ set(PDALBOOST_SOURCES
     ./libs/date_time/src/gregorian/greg_month.cpp
     ./libs/date_time/src/gregorian/greg_weekday.cpp
     ./libs/exception/src/clone_current_exception_non_intrusive.cpp
-    ./libs/filesystem/v2/src/v2_operations.cpp
-    ./libs/filesystem/v2/src/v2_path.cpp
-    ./libs/filesystem/v2/src/v2_portability.cpp
-    ./libs/filesystem/v3/src/codecvt_error_category.cpp
-    ./libs/filesystem/v3/src/operations.cpp
-    ./libs/filesystem/v3/src/path.cpp
-    ./libs/filesystem/v3/src/path_traits.cpp
-    ./libs/filesystem/v3/src/portability.cpp
-    ./libs/filesystem/v3/src/unique_path.cpp
-    ./libs/filesystem/v3/src/utf8_codecvt_facet.cpp
-    ./libs/filesystem/v3/src/windows_file_codecvt.cpp
+    ./libs/filesystem
+    ./libs/filesystem/src/windows_file_codecvt.hpp
+    ./libs/filesystem/src/path_traits.cpp
+    ./libs/filesystem/src/unique_path.cpp
+    ./libs/filesystem/src/codecvt_error_category.cpp
+    ./libs/filesystem/src/path.cpp
+    ./libs/filesystem/src/operations.cpp
+    ./libs/filesystem/src/utf8_codecvt_facet.cpp
     ./libs/iostreams/src/file_descriptor.cpp
     ./libs/iostreams/src/mapped_file.cpp
     ./libs/program_options/src/cmdline.cpp
@@ -75,6 +72,8 @@ set(PDALBOOST_SOURCES
 if(WIN32)
   list(APPEND 
        ./libs/thread/src/win32/thread.cpp
+       ./libs/filesystem/src/windows_file_codecvt.hpp
+       ./libs/filesystem/src/windows_file_codecvt.cpp
        ./libs/thread/src/win32/tss_dll.cpp
        ./libs/thread/src/win32/tss_pe.cpp)
 else()

@@ -35,7 +35,8 @@
 #include <boost/call_traits.hpp>
 #endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 #ifdef BOOST_MSVC6_MEMBER_TEMPLATES
 //
 // use member templates to emulate

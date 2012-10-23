@@ -24,7 +24,7 @@
 #pragma option push -Vx- -Ve-
 #endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
 template <typename T> struct alignment_of;
 

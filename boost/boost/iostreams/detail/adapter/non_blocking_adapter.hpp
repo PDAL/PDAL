@@ -14,7 +14,7 @@
 #include <boost/iostreams/traits.hpp>
 #include <boost/iostreams/write.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace iostreams {
 
 template<typename Device>
 class non_blocking_adapter {

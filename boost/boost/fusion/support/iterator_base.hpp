@@ -7,7 +7,7 @@
 #if !defined(FUSION_ITERATOR_BASE_05042005_1008)
 #define FUSION_ITERATOR_BASE_05042005_1008
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion
 {
     struct iterator_root {};
 

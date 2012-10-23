@@ -30,7 +30,7 @@
 # include <unistd.h>        // sysconf.
 #endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace iostreams {
 
 namespace detail {
 

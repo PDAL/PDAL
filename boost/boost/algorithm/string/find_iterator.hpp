@@ -30,7 +30,7 @@
     match depending on the iterator used.
 */
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
     namespace algorithm { 
 
 //  find_iterator -----------------------------------------------//

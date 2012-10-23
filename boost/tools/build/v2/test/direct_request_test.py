@@ -4,9 +4,42 @@ import BoostBuild
 
 t = BoostBuild.Tester()
 
-
 # First check some startup.
-t.set_tree("direct-request-test")
+
+t.write("jamroot.jam", "")
+
+t.write("jamfile.jam", """
+exe a : a.cpp b ;
+lib b : b.cpp ;
+""")
+
+t.write("a.cpp", """
+void
+# ifdef _WIN32
+__declspec(dllimport)
+# endif 
+foo();
+
+int main() 
+{
+    foo();
+}
+""")
+
+t.write("b.cpp", """
+#ifdef MACROS
+void
+# ifdef _WIN32
+__declspec(dllexport)
+# endif 
+foo() {}
+#endif
+
+# ifdef _WIN32
+int __declspec(dllexport) force_implib_creation;
+# endif 
+""")
+
 t.run_build_system(extra_args="define=MACROS")
 t.expect_addition("bin/$toolset/debug/" 
                   * (BoostBuild.List("a.obj b.obj b.dll a.exe")))
@@ -19,11 +52,11 @@ t.expect_addition("bin/$toolset/debug/"
                   * (BoostBuild.List("a.obj b.obj b.dll a.exe")))
 
 
-# When building release version, the 'define' should not apply: we will have
-# direct build request 'release <define>MACROS' and a real build property
-# 'debug'.
-t.copy("jamfile2.jam", "jamfile.jam")
-t.copy("b_inverse.cpp", "b.cpp")
+# When building release version, the 'define' still applies.
+t.write("jamfile.jam", """
+exe a : a.cpp b : <variant>debug ;
+lib b : b.cpp ;
+""")
 t.rm("bin")
 t.run_build_system(extra_args="release define=MACROS")
 

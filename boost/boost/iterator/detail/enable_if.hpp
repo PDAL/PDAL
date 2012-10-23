@@ -18,7 +18,8 @@
 // 23/02/03 thw
 //
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 
   namespace iterators
   {

@@ -12,7 +12,9 @@
 #pragma warning(push,1)
 #endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace
+pdalboost
+    {
     template <class E>
     inline
     E *

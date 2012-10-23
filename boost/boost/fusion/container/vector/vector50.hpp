@@ -54,7 +54,7 @@
 #pragma wave option(preserve: 1)
 #endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion
 {
     struct vector_tag;
     struct fusion_sequence_tag;

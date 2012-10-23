@@ -28,7 +28,7 @@
 #include <boost/bimap/relation/member_at.hpp>
 
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace bimaps {
 namespace relation {
 

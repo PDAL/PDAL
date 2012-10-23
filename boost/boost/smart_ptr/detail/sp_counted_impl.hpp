@@ -37,7 +37,8 @@
 
 #include <cstddef>          // std::size_t
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 
 #if defined(BOOST_SP_ENABLE_DEBUG_HOOKS)
 

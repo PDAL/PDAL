@@ -6,7 +6,7 @@
 #ifndef BOOST_TYPE_DWA20010120_HPP
 # define BOOST_TYPE_DWA20010120_HPP
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
   // Just a simple "type envelope". Useful in various contexts, mostly to work
   // around some MSVC deficiencies.

@@ -9,7 +9,7 @@
 
 #include <boost/type_traits/is_convertible.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion
 {
     struct cons_tag;
 

@@ -30,7 +30,7 @@
 
 //____________________________________________________________________________//
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
 // ************************************************************************** //
 // **************            basic_wrap_stringstream           ************** //

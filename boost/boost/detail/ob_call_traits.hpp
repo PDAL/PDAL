@@ -30,7 +30,7 @@
 #include <boost/type_traits/composite_traits.hpp>
 #endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost{
 
 #ifdef BOOST_MSVC6_MEMBER_TEMPLATES
 //

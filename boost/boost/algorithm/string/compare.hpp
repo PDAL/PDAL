@@ -21,7 +21,7 @@
     of the algorithms.
 */
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
     namespace algorithm {
 
         //  is_equal functor  -----------------------------------------------//

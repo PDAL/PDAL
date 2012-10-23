@@ -34,7 +34,7 @@
 // Must come last.
 #include <boost/config/abi_prefix.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace iostreams {
 
 //------------------Definition of mapped_file_base and mapped_file_params-----//
 

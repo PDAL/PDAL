@@ -11,7 +11,8 @@
 #include <boost/utility.hpp>
 #include <boost/iterator/iterator_adaptor.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 
   //
   //

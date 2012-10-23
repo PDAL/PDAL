@@ -11,7 +11,7 @@
 #include <boost/mpl/bool.hpp>
 #include <boost/fusion/iterator/equal_to.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion
 {
     struct nil;
 

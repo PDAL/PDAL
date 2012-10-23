@@ -48,7 +48,7 @@
 #define BOOST_MULTI_INDEX_INDEXED_BY_TEMPLATE_PARM(z,n,var) \
   typename BOOST_PP_CAT(var,n) BOOST_PP_EXPR_IF(n,=mpl::na)
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost{
 
 namespace multi_index{
 

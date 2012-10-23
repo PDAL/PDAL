@@ -6,7 +6,7 @@
  * Boost Software License, Version 1.0. (See accompanying
  * file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
  * Author: Jeff Garland, Bart Garst
- * $Date: 2009-06-04 07:52:28 -0400 (Thu, 04 Jun 2009) $
+ * $Date: 2009-06-04 04:52:28 -0700 (Thu, 04 Jun 2009) $
  */
 
 #include <cstdlib> //for MCW 7.2 std::abs(long long)
@@ -19,7 +19,7 @@
 #include <boost/date_time/wrapping_int.hpp>
 #include <boost/date_time/compiler_config.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace posix_time {
 
 //Remove the following line if you want 64 bit millisecond resolution time

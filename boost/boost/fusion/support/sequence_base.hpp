@@ -10,7 +10,7 @@
 
 #include <boost/mpl/begin_end_fwd.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion
 {
     namespace detail
     {
@@ -42,7 +42,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespac
     struct fusion_sequence_tag;
 }}
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace mpl
 {
     // Deliberately break mpl::begin, so it doesn't lie that a Fusion sequence
     // is not an MPL sequence by returning mpl::void_.

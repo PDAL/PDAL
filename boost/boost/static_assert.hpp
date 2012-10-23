@@ -48,7 +48,7 @@
 #  define BOOST_STATIC_ASSERT( B ) static_assert(B, #B)
 #else
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost{
 
 // HP aCC cannot deal with missing names for template value parameters
 template <bool x> struct STATIC_ASSERTION_FAILURE;

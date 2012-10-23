@@ -10,7 +10,7 @@
 # include <boost/type_traits/is_convertible.hpp>
 # include <boost/type_traits/is_reference.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace parameter { 
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace parameter { 
 
 namespace aux 
 {

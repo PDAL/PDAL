@@ -94,7 +94,7 @@
 #   pragma warning( disable : 4284 ) // complaint about return type of 
 #endif                               // operator-> not begin a UDT
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace detail {
 
 template <typename T> class empty_base {
@@ -117,7 +117,8 @@ template <typename T> class empty_base {
 // these templates must go in the global namespace.
 
 #ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 #endif
 
 //  Basic operator classes (contributed by Dave Abrahams) ------------------//
@@ -716,7 +717,7 @@ struct random_access_iteratable
 // template argument is being used for base class chaining, or is specifying a
 // 2nd argument type.
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 // A type parameter is used instead of a plain bool because Borland's compiler
 // didn't cope well with the more obvious non-type template parameter.
 namespace detail {
@@ -827,7 +828,7 @@ BOOST_OPERATOR_TEMPLATE1(template_name##1)
 
 #endif // BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
     
 BOOST_OPERATOR_TEMPLATE(less_than_comparable)
 BOOST_OPERATOR_TEMPLATE(equality_comparable)

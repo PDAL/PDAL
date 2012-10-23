@@ -22,7 +22,8 @@
 #include <boost/type_traits/remove_const.hpp>
 #include <boost/mpl/eval_if.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 
 #if BOOST_WORKAROUND(BOOST_MSVC, == 1310)
 

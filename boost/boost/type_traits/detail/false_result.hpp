@@ -11,7 +11,7 @@
 
 #include <boost/config.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace type_traits {
 
 // Utility class which always "returns" false

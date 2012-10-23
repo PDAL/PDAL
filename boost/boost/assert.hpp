@@ -36,7 +36,8 @@
 
 #include <boost/current_function.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
   void assertion_failed(char const * expr,
                         char const * function, char const * file, long line); // user defined
 } // namespace pdalboost
@@ -64,7 +65,8 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
   #include <boost/current_function.hpp>
 
-  namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+  namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+  {
     void assertion_failed_msg(char const * expr, char const * msg,
                               char const * function, char const * file, long line); // user defined
   } // namespace pdalboost
@@ -86,7 +88,8 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     # define BOOST_ASSERT_MSG_OSTREAM std::cerr
     #endif
 
-    namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ 
+    namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+    { 
       namespace assertion 
       { 
         namespace detail

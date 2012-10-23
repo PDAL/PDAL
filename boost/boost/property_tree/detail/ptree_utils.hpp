@@ -18,7 +18,7 @@
 #include <algorithm>
 #include <locale>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace property_tree { namespace detail
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace property_tree { namespace detail
 {
 
     template<class T>

@@ -24,7 +24,7 @@
 #include <boost/iostreams/operations.hpp> 
 #include <boost/mpl/if.hpp> 
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams { namespace detail {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace iostreams { namespace detail {
 
 template<typename Mode, typename T>
 class mode_adapter {

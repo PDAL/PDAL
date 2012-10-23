@@ -12,7 +12,7 @@
 // See http://www.boost.org/libs/mpl for documentation.
 
 // $Id: insert_impl.hpp 55751 2009-08-24 04:11:00Z agurtovoy $
-// $Date: 2009-08-24 00:11:00 -0400 (Mon, 24 Aug 2009) $
+// $Date: 2009-08-23 21:11:00 -0700 (Sun, 23 Aug 2009) $
 // $Revision: 55751 $
 
 #include <boost/mpl/insert_fwd.hpp>
@@ -23,7 +23,7 @@
 #include <boost/mpl/aux_/na.hpp>
 #include <boost/mpl/aux_/config/typeof.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace mpl {
 
 namespace aux {
 template< typename Map, typename Pair > 

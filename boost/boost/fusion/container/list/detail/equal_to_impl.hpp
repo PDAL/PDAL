@@ -11,7 +11,7 @@
 #include <boost/mpl/equal_to.hpp>
 #include <boost/mpl/and.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion
 {
     struct cons_iterator_tag;
 

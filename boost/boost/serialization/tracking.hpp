@@ -31,7 +31,7 @@
 #include <boost/serialization/tracking_enum.hpp>
 #include <boost/serialization/type_info_implementation.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace serialization {
 
 struct basic_traits;
@@ -93,7 +93,7 @@ inline bool operator>=(tracking_level< T > t, enum tracking_type l)
 // wrap it in your own type so its not a primitive anymore.  Then it will compile
 // without problem.
 #define BOOST_CLASS_TRACKING(T, E)           \
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{                            \
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {                            \
 namespace serialization {                    \
 template<>                                   \
 struct tracking_level< T >                   \

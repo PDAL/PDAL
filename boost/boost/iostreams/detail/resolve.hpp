@@ -40,7 +40,7 @@
 // Must come last.
 #include <boost/iostreams/detail/config/disable_warnings.hpp> // VC7.1 C4224.
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams { namespace detail {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace iostreams { namespace detail {
 
 //------------------Definition of resolve-------------------------------------//
 

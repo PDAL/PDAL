@@ -8,7 +8,7 @@
 #include <boost/type_traits/msvc/typeof.hpp>
 #include <boost/type_traits/is_reference.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
     namespace detail {
         template<bool IsReference>
         struct remove_reference_impl_typeof {

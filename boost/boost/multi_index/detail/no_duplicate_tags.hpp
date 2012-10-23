@@ -17,7 +17,7 @@
 #include <boost/mpl/fold.hpp>
 #include <boost/mpl/set/set0.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost{
 
 namespace multi_index{
 

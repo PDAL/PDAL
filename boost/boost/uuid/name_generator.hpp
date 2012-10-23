@@ -21,7 +21,7 @@ namespace std {
 } //namespace std
 #endif //BOOST_NO_STDC_NAMESPACE
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace uuids {
 
 // generate a name-based uuid

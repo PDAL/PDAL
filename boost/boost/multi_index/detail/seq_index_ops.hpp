@@ -21,7 +21,7 @@
 #include <boost/type_traits/alignment_of.hpp> 
 #include <cstddef>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost{
 
 namespace multi_index{
 

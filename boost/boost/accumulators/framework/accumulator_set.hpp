@@ -31,7 +31,7 @@
 #include <boost/fusion/include/for_each.hpp>
 #include <boost/fusion/include/filter_view.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace accumulators
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace accumulators
 {
 
 namespace detail

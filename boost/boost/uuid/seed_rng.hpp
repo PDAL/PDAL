@@ -56,11 +56,11 @@ namespace std {
 #endif
 
 // forward declare random number generators
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace random {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace random {
 class random_device;
 }} //namespace pdalboost::random
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace uuids {
 namespace detail {
 
@@ -79,7 +79,7 @@ public:
         : rd_index_(5)
         , random_(std::fopen( "/dev/urandom", "rb" ))
     {}
-    
+
     ~seed_rng()
     {
         if (random_) {
@@ -139,7 +139,11 @@ private:
         }
 
         {
-            unsigned int rn[] = { std::rand(), std::rand(), std::rand() };
+            unsigned int rn[] =
+                { static_cast<unsigned int>(std::rand())
+                , static_cast<unsigned int>(std::rand())
+                , static_cast<unsigned int>(std::rand())
+                };
             sha.process_bytes( (unsigned char const*)rn, sizeof( rn ) );
         }
 
@@ -149,7 +153,12 @@ private:
 
             if(random_)
             {
-                std::fread( buffer, 1, 20, random_ );
+                // the not_used variable is to suppress warnings
+#if defined(__GNUC__)
+                __attribute__((unused))
+#endif
+                size_t not_used = 0;
+                not_used = std::fread( buffer, 1, 20, random_ );
             }
 
             // using an uninitialized buffer[] if fopen fails
@@ -184,7 +193,7 @@ private:
     unsigned int rd_[5];
     int rd_index_;
     std::FILE * random_;
-    
+
 private: // make seed_rng noncopyable
     seed_rng(seed_rng const&);
     seed_rng& operator=(seed_rng const&);
@@ -207,7 +216,7 @@ class generator_iterator
       , single_pass_traversal_tag
       , typename Generator::result_type const&
     > super_t;
-    
+
  public:
     generator_iterator() : m_g(NULL) {}
     generator_iterator(Generator* g) : m_g(g), m_value((*m_g)()) {}

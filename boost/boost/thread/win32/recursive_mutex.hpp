@@ -3,28 +3,26 @@
 
 //  recursive_mutex.hpp
 //
-//  (C) Copyright 2006-7 Anthony Williams 
+//  (C) Copyright 2006-7 Anthony Williams
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
 //  accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 
 
-#include <boost/utility.hpp>
-#include "basic_recursive_mutex.hpp"
+#include <boost/thread/win32/basic_recursive_mutex.hpp>
 #include <boost/thread/exceptions.hpp>
 #include <boost/thread/locks.hpp>
 
 #include <boost/config/abi_prefix.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
     class recursive_mutex:
         public ::pdalboost::detail::basic_recursive_mutex
     {
-    private:
-        recursive_mutex(recursive_mutex const&);
-        recursive_mutex& operator=(recursive_mutex const&);        
     public:
+        BOOST_THREAD_NO_COPYABLE(recursive_mutex)
         recursive_mutex()
         {
             ::pdalboost::detail::basic_recursive_mutex::initialize();
@@ -43,10 +41,8 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     class recursive_timed_mutex:
         public ::pdalboost::detail::basic_recursive_timed_mutex
     {
-    private:
-        recursive_timed_mutex(recursive_timed_mutex const&);
-        recursive_timed_mutex& operator=(recursive_timed_mutex const&);        
     public:
+        BOOST_THREAD_NO_COPYABLE(recursive_timed_mutex)
         recursive_timed_mutex()
         {
             ::pdalboost::detail::basic_recursive_timed_mutex::initialize();

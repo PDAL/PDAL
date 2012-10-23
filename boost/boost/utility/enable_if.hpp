@@ -21,7 +21,8 @@
 
 #ifndef BOOST_NO_SFINAE
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
  
   template <bool B, class T = void>
   struct enable_if_c {
@@ -72,7 +73,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 #else
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
   namespace detail { typedef void enable_if_default_T; }
 

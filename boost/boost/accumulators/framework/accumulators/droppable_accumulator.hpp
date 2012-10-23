@@ -15,7 +15,7 @@
 #include <boost/accumulators/framework/depends_on.hpp> // for feature_of
 #include <boost/accumulators/framework/parameters/accumulator.hpp> // for accumulator
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace accumulators
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace accumulators
 {
 
     template<typename Accumulator>

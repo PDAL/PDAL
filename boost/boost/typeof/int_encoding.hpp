@@ -9,7 +9,7 @@
 #include <boost/mpl/size_t.hpp>
 #include <boost/config.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace type_of {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace type_of {
 
     template<class T> struct get_unsigned
     {

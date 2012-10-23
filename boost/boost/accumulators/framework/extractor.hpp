@@ -24,7 +24,7 @@
 #include <boost/accumulators/accumulators_fwd.hpp>
 #include <boost/accumulators/framework/parameters/accumulator.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace accumulators
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace accumulators
 {
 
 namespace detail

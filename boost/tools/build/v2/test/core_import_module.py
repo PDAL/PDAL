@@ -15,6 +15,11 @@ module a
     {
         ECHO R1 ;
     }
+
+    local rule l1 ( )
+    {
+        ECHO A.L1 ;
+    }
 }
 module a2
 {
@@ -25,6 +30,11 @@ module a2
 }
 IMPORT a2 : r2 : : a2.r2 ;
 
+rule a.l1 ( )
+{
+    ECHO L1 ;
+}
+
 module b
 {
     IMPORT_MODULE a : b ;
@@ -34,6 +44,11 @@ module b
         a.r1 ;
         # Call rule in global scope
         a2.r2 ;
+        # Call rule in global scope.  Doesn't find local rule
+        a.l1 ;
+        # Make l1 visible
+        EXPORT a : l1 ;
+        a.l1 ;
     }
 }
 
@@ -57,6 +72,8 @@ do-nothing all ;
 
 t.run_build_system("-fcode", stdout="""R1
 R2
+L1
+A.L1
 CTEST
 """)
 

@@ -12,7 +12,7 @@
 
 #include <boost/mpl/if.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
 template <bool b, class T, class U>
 struct conditional : public mpl::if_c<b, T, U>

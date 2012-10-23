@@ -35,7 +35,7 @@
 #include <boost/bimap/views/unconstrained_map_view.hpp>
 #include <boost/bimap/views/unconstrained_set_view.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace bimaps {
 
 /// \brief Set Type Specification

@@ -17,7 +17,9 @@
 #include <boost/exception/detail/type_info.hpp>
 #include <boost/shared_ptr.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace
+pdalboost
+    {
     namespace
     exception_detail
         {

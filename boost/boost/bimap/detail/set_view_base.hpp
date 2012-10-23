@@ -27,7 +27,7 @@
 #include <boost/bimap/relation/mutant_relation.hpp>
 #include <boost/bimap/container_adaptor/support/iterator_facade_converters.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace bimaps {
 namespace detail {
 

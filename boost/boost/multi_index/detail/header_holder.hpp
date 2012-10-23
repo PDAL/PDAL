@@ -15,7 +15,7 @@
 
 #include <boost/noncopyable.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost{
 
 namespace multi_index{
 

@@ -21,7 +21,7 @@
 #include <boost/range/empty.hpp>
 #include <boost/range/as_literal.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
     namespace algorithm {
         namespace detail {
 

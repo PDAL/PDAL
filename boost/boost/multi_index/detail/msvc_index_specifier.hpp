@@ -24,7 +24,7 @@
 
 #include <boost/mpl/aux_/msvc_never_true.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost{
 
 namespace multi_index{
 

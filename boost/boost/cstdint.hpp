@@ -97,7 +97,8 @@ typedef ::uintfast64_t uint_fast64_t;
 
 #endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 
   using ::int8_t;             
   using ::int_least8_t;       
@@ -140,7 +141,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 // FreeBSD and Tru64 have an <inttypes.h> that contains much of what we need.
 # include <inttypes.h>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
   using ::int8_t;             
   typedef int8_t int_least8_t;       
@@ -190,7 +191,8 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 # include <limits.h>         // needed for limits macros
 
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 
 //  These are fairly safe guesses for some 16-bit, and most 32-bit and 64-bit
 //  platforms.  For other systems, they will have to be hand tailored.

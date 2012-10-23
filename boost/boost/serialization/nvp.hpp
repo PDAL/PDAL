@@ -35,7 +35,7 @@
 #include <boost/serialization/traits.hpp>
 #include <boost/serialization/wrapper.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace serialization {
 
 template<class T>

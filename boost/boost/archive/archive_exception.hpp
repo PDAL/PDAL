@@ -34,7 +34,7 @@
 
 #include <boost/archive/detail/abi_prefix.hpp> // must be the last header
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace archive {
 
 //////////////////////////////////////////////////////////////////////

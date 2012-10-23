@@ -43,7 +43,7 @@
 #   pragma warning ( disable : 4018 4244 4547 4800 4804 4805 4913 )
 #endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace detail {
 
 // This namespace ensures that argument-dependent name lookup does not mess things up.

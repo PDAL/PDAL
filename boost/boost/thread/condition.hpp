@@ -8,7 +8,8 @@
 
 #include <boost/thread/condition_variable.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
     typedef condition_variable_any condition;
 }
 

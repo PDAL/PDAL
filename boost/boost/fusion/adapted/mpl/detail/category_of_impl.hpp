@@ -13,7 +13,7 @@
 #include <boost/mpl/is_sequence.hpp>
 #include <boost/static_assert.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion {
 
     namespace detail
     {

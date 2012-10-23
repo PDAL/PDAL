@@ -14,7 +14,7 @@
 // should be the last #include
 #include <boost/type_traits/detail/bool_trait_def.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
 BOOST_TT_AUX_BOOL_TRAIT_DEF1(is_rvalue_reference,T,false)
 #ifndef BOOST_NO_RVALUE_REFERENCES

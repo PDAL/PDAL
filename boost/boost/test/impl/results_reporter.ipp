@@ -37,7 +37,7 @@ typedef ::pdalboost::io::ios_base_all_saver io_saver_type;
 
 //____________________________________________________________________________//
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
 namespace unit_test {
 

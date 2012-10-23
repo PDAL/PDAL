@@ -58,7 +58,7 @@ template<class T, class Iter> struct decode_template_impl;
 
 BOOST_TYPEOF_END_ENCODE_NS
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace type_of {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace type_of {
 
     template<class V, class T> struct encode_template
         : BOOST_TYPEOF_ENCODE_NS_QUALIFIER::encode_template_impl<V, T>

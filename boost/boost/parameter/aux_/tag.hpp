@@ -7,7 +7,7 @@
 # include <boost/parameter/aux_/unwrap_cv_reference.hpp>
 # include <boost/parameter/aux_/tagged_argument.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace parameter { namespace aux { 
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace parameter { namespace aux { 
 
 template <class Keyword, class ActualArg
 #if BOOST_WORKAROUND(__BORLANDC__, BOOST_TESTED_AT(0x564))

@@ -43,7 +43,7 @@
     } \
     /**/
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace iostreams {
 
 template<typename Pipeline, typename Component>
 struct pipeline;

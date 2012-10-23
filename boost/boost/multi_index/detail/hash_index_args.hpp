@@ -24,7 +24,7 @@
 #include <boost/type_traits/is_same.hpp>
 #include <functional>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost{
 
 namespace multi_index{
 

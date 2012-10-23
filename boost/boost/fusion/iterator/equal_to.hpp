@@ -14,7 +14,7 @@
 #include <boost/mpl/and.hpp>
 #include <boost/utility/enable_if.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion
 {
     // Special tags:
     struct iterator_facade_tag; // iterator facade tag
@@ -74,7 +74,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespac
     {
         template <typename Iter1, typename Iter2>
         inline typename
-        enable_if<
+        pdalboost::enable_if<
             mpl::and_<is_fusion_iterator<Iter1>, is_fusion_iterator<Iter2> >
             , bool
             >::type
@@ -85,7 +85,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespac
 
         template <typename Iter1, typename Iter2>
         inline typename
-        enable_if<
+        pdalboost::enable_if<
             mpl::and_<is_fusion_iterator<Iter1>, is_fusion_iterator<Iter2> >
             , bool
             >::type

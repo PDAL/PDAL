@@ -71,10 +71,6 @@
 #  endif
 #endif
 
-#if defined(_STLPORT_VERSION) && ((_STLPORT_VERSION < 0x500) || (_STLPORT_VERSION >= 0x520))
-#  define BOOST_NO_STD_UNORDERED
-#endif
-
 #if defined(_STLPORT_VERSION) && (_STLPORT_VERSION >= 0x520)
 #  define BOOST_HAS_TR1_UNORDERED_SET
 #  define BOOST_HAS_TR1_UNORDERED_MAP
@@ -207,31 +203,34 @@ namespace std{ using _STLP_VENDOR_CSTD::strcmp; using _STLP_VENDOR_CSTD::strcpy;
 #  include <algorithm> // for std::min and std::max
 #  define BOOST_USING_STD_MIN() ((void)0)
 #  define BOOST_USING_STD_MAX() ((void)0)
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ using std::min; using std::max; }
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { using std::min; using std::max; }
 #endif
 
 //  C++0x headers not yet implemented
 //
-#  define BOOST_NO_0X_HDR_ARRAY
-#  define BOOST_NO_0X_HDR_CHRONO
-#  define BOOST_NO_0X_HDR_CODECVT
-#  define BOOST_NO_0X_HDR_CONDITION_VARIABLE
-#  define BOOST_NO_0X_HDR_FORWARD_LIST
-#  define BOOST_NO_0X_HDR_FUTURE
-#  define BOOST_NO_0X_HDR_INITIALIZER_LIST
-#  define BOOST_NO_0X_HDR_MUTEX
-#  define BOOST_NO_0X_HDR_RANDOM
-#  define BOOST_NO_0X_HDR_RATIO
-#  define BOOST_NO_0X_HDR_REGEX
-#  define BOOST_NO_0X_HDR_SYSTEM_ERROR
-#  define BOOST_NO_0X_HDR_THREAD
-#  define BOOST_NO_0X_HDR_TUPLE
-#  define BOOST_NO_0X_HDR_TYPE_TRAITS
-#  define BOOST_NO_0X_HDR_TYPEINDEX
-#  define BOOST_NO_STD_UNORDERED        // deprecated; see following
-#  define BOOST_NO_0X_HDR_UNORDERED_MAP
-#  define BOOST_NO_0X_HDR_UNORDERED_SET
-#  define BOOST_NO_NUMERIC_LIMITS_LOWEST
+#  define BOOST_NO_CXX11_HDR_ARRAY
+#  define BOOST_NO_CXX11_HDR_CHRONO
+#  define BOOST_NO_CXX11_HDR_CODECVT
+#  define BOOST_NO_CXX11_HDR_CONDITION_VARIABLE
+#  define BOOST_NO_CXX11_HDR_FORWARD_LIST
+#  define BOOST_NO_CXX11_HDR_FUTURE
+#  define BOOST_NO_CXX11_HDR_INITIALIZER_LIST
+#  define BOOST_NO_CXX11_HDR_MUTEX
+#  define BOOST_NO_CXX11_HDR_RANDOM
+#  define BOOST_NO_CXX11_HDR_RATIO
+#  define BOOST_NO_CXX11_HDR_REGEX
+#  define BOOST_NO_CXX11_HDR_SYSTEM_ERROR
+#  define BOOST_NO_CXX11_HDR_THREAD
+#  define BOOST_NO_CXX11_HDR_TUPLE
+#  define BOOST_NO_CXX11_HDR_TYPE_TRAITS
+#  define BOOST_NO_CXX11_HDR_TYPEINDEX
+#  define BOOST_NO_CXX11_HDR_UNORDERED_MAP
+#  define BOOST_NO_CXX11_HDR_UNORDERED_SET
+#  define BOOST_NO_CXX11_NUMERIC_LIMITS
+#  define BOOST_NO_CXX11_ALLOCATOR
+#  define BOOST_NO_CXX11_ATOMIC_SMART_PTR
+#  define BOOST_NO_CXX11_SMART_PTR
+#  define BOOST_NO_CXX11_HDR_FUNCTIONAL
 
 #define BOOST_STDLIB "STLPort standard library version " BOOST_STRINGIZE(__SGI_STL_PORT)
 

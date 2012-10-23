@@ -10,7 +10,7 @@
 
 #include <boost/mpl/int.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion
 {
     struct single_view_tag;
 

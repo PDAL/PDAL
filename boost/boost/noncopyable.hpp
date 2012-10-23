@@ -9,7 +9,7 @@
 #ifndef BOOST_NONCOPYABLE_HPP_INCLUDED
 #define BOOST_NONCOPYABLE_HPP_INCLUDED
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
 //  Private copy constructor and copy assignment ensure classes derived from
 //  class noncopyable cannot be copied.

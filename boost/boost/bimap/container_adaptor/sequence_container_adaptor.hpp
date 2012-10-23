@@ -28,7 +28,7 @@
 #include <boost/call_traits.hpp>
 #include <boost/operators.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace bimaps {
 namespace container_adaptor {
 

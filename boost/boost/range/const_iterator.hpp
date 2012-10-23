@@ -26,7 +26,8 @@
 #include <cstddef>
 #include <utility>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
     //////////////////////////////////////////////////////////////////////////
     // default
     //////////////////////////////////////////////////////////////////////////

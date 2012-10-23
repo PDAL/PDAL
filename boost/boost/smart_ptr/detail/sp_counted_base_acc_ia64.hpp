@@ -18,7 +18,8 @@
 #include <boost/detail/sp_typeinfo.hpp>
 #include <machine/sys/inline.h>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 
 namespace detail
 {

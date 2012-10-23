@@ -19,7 +19,7 @@
 #include <boost/spirit/home/classic/core/nil.hpp>  // for nil_t
 #include <boost/detail/iterator.hpp> // for pdalboost::detail::iterator_traits
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace spirit {
 
 BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
 

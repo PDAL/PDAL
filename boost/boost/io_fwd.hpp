@@ -12,7 +12,8 @@
 #include <iosfwd>  // for std::char_traits (declaration)
 
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 namespace io
 {
 

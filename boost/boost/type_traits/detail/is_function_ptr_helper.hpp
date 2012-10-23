@@ -23,7 +23,7 @@
 #   include <boost/preprocessor/comma_if.hpp>
 #endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace type_traits {
 
 template <class R>

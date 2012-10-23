@@ -26,7 +26,7 @@
     into generic functors. 
 */
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
     namespace algorithm {
 
 //  classification functor generator -------------------------------------//

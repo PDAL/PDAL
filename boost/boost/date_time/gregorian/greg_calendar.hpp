@@ -6,7 +6,7 @@
  * Boost Software License, Version 1.0. (See accompanying
  * file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
  * Author: Jeff Garland
- * $Date: 2010-01-10 14:17:23 -0500 (Sun, 10 Jan 2010) $
+ * $Date: 2010-01-10 11:17:23 -0800 (Sun, 10 Jan 2010) $
  */
 
 #include <boost/cstdint.hpp>
@@ -16,7 +16,7 @@
 #include <boost/date_time/gregorian/greg_ymd.hpp>
 #include <boost/date_time/int_adapter.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace gregorian {
 
   //!An internal date representation that includes infinities, not a date

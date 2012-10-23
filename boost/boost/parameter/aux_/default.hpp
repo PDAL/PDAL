@@ -8,7 +8,7 @@
 
 # include <boost/detail/workaround.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace parameter { namespace aux {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace parameter { namespace aux {
 
 // A wrapper for the default value passed by the user when resolving
 // the value of the parameter with the given Keyword
@@ -20,11 +20,6 @@ struct default_
     {}
 
     Value& value;
-
-#if defined(BOOST_MSVC) /* mpg */
-       // not implemented
-      default_& operator=(const default_&);
-#endif
 };
 
 //

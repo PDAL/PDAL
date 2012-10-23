@@ -18,7 +18,7 @@
 #include <boost/multi_index/detail/rnd_index_ptr_array.hpp>
 #include <functional>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost{
 
 namespace multi_index{
 

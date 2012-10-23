@@ -20,7 +20,8 @@ enum boost_foreach_argument_dependent_lookup_hack
     boost_foreach_argument_dependent_lookup_hack_value
 };
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 
 namespace foreach
 {

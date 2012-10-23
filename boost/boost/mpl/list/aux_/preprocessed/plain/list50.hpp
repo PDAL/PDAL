@@ -9,7 +9,7 @@
 // Preprocessed version of "boost/mpl/list/list50.hpp" header
 // -- DO NOT modify by hand!
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace mpl {
 
 template<
       typename T0, typename T1, typename T2, typename T3, typename T4

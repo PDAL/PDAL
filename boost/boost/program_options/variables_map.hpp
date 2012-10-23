@@ -21,7 +21,7 @@
 #   pragma warning (disable:4251) // 'pdalboost::program_options::variable_value::v' : class 'pdalboost::any' needs to have dll-interface to be used by clients of class 'pdalboost::program_options::variable_value
 #endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace program_options {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace program_options {
 
     template<class charT>
     class basic_parsed_options;
@@ -153,6 +153,9 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespac
         // Resolve conflict between inherited operators.
         const variable_value& operator[](const std::string& name) const
         { return abstract_variables_map::operator[](name); }
+
+        // Override to clear some extra fields.
+        void clear(); 
         
         void notify();
 
@@ -171,8 +174,10 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespac
                           bool utf8);
         
         /** Names of required options, filled by parser which has
-            access to options_description. */
-        std::set<std::string> m_required;
+            access to options_description.
+            The map values are the "canonical" names for each corresponding option.
+            This is useful in creating diagnostic messages when the option is absent. */
+        std::map<std::string, std::string> m_required;
     };
 
 
@@ -207,5 +212,9 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespac
     }
 
 }}
+
+#if defined(BOOST_MSVC)
+#   pragma warning (pop)
+#endif
 
 #endif

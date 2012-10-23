@@ -14,7 +14,7 @@
 #include "boost/config.hpp"
 #include "boost/mpl/if.hpp"
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace numeric { namespace boundsdetail
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace numeric { namespace boundsdetail
 {
   template<class N>
   class Integral

@@ -27,7 +27,7 @@
 #include <boost/mpl/bool.hpp>
 #include <boost/mpl/or.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion
 {
     struct void_;
     struct cons_tag;
@@ -88,7 +88,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespac
         template <typename Sequence>
         cons(
             Sequence const& seq
-          , typename disable_if<
+          , typename pdalboost::disable_if<
                 mpl::or_<
                     is_convertible<Sequence, cons> // use copy ctor instead
                   , is_convertible<Sequence, Car>  // use copy to car instead
@@ -119,7 +119,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespac
         }
 
         template <typename Sequence>
-        typename disable_if<is_convertible<Sequence, Car>, cons&>::type
+        typename pdalboost::disable_if<is_convertible<Sequence, Car>, cons&>::type
         operator=(Sequence const& seq)
         {
             typedef typename result_of::begin<Sequence const>::type Iterator;

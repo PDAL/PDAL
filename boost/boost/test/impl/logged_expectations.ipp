@@ -38,7 +38,7 @@
 
 //____________________________________________________________________________//
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
 using namespace ::pdalboost::unit_test;
 

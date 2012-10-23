@@ -37,7 +37,7 @@
 #define BOOST_INTERNAL_IS_EMPTY(T) BOOST_IS_EMPTY(T)
 #endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
 namespace detail {
 

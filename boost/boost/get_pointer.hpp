@@ -11,7 +11,7 @@
 // rather than including <memory> directly:
 # include <boost/config/no_tr1/memory.hpp>  // std::auto_ptr
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ 
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { 
 
 // get_pointer(p) extracts a ->* capable pointer from p
 

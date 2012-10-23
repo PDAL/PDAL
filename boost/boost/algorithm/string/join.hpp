@@ -25,7 +25,7 @@
     by providing a predicate.
 */
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
     namespace algorithm {
 
 //  join --------------------------------------------------------------//

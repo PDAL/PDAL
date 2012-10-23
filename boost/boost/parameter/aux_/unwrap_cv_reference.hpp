@@ -11,9 +11,9 @@
 #include <boost/mpl/identity.hpp>
 #include <boost/mpl/eval_if.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ template<class T> class reference_wrapper; }
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { template<class T> class reference_wrapper; }
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace parameter { namespace aux {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace parameter { namespace aux {
 
 //
 // reference_wrapper support -- because of the forwarding problem,

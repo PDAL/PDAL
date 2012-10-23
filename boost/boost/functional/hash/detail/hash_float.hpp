@@ -6,8 +6,6 @@
 #if !defined(BOOST_FUNCTIONAL_HASH_DETAIL_HASH_FLOAT_HEADER)
 #define BOOST_FUNCTIONAL_HASH_DETAIL_HASH_FLOAT_HEADER
 
-#pragma GCC diagnostic ignored "-Wfloat-equal"
-
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
 # pragma once
 #endif
@@ -56,7 +54,8 @@
 
 #include <boost/config/no_tr1/cmath.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
     namespace hash_detail
     {
         template <class T>
@@ -83,13 +82,28 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 #else // !BOOST_HASH_USE_FPCLASSIFY
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
     namespace hash_detail
     {
         template <class T>
+        inline bool is_zero(T v)
+        {
+#if !defined(__GNUC__)
+            return v == 0;
+#else
+            // GCC's '-Wfloat-equal' will complain about comparing
+            // v to 0, but because it disables warnings for system
+            // headers it won't complain if you use std::equal_to to
+            // compare with 0. Resulting in this silliness:
+            return std::equal_to<T>()(v, 0);
+#endif
+        }
+
+        template <class T>
         inline std::size_t float_hash_value(T v)
         {
-            return v == 0 ? 0 : float_hash_impl(v);
+            return pdalboost::hash_detail::is_zero(v) ? 0 : float_hash_impl(v);
         }
     }
 }

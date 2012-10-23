@@ -16,8 +16,10 @@
 #include <boost/fusion/sequence/intrinsic/begin.hpp>
 #include <boost/fusion/sequence/intrinsic/end.hpp>
 #include <boost/fusion/adapted/mpl/mpl_iterator.hpp>
+#include <boost/fusion/support/is_sequence.hpp>
+#include <boost/utility/enable_if.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion
 {
     namespace result_of
     {
@@ -38,8 +40,12 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespac
     }
 
     template <typename Sequence, typename Position, typename T>
-    inline typename result_of::insert<
-        Sequence const, Position, T>::type
+    inline 
+    typename
+        lazy_enable_if<
+            traits::is_sequence<Sequence>
+          , result_of::insert<Sequence const, Position, T>
+        >::type
     insert(Sequence const& seq, Position const& pos, T const& x)
     {
         typedef result_of::insert<

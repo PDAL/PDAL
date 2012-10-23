@@ -11,7 +11,7 @@
 #include <boost/utility/enable_if.hpp>
 #include <boost/fusion/support/is_sequence.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion
 {
     namespace extension
     {

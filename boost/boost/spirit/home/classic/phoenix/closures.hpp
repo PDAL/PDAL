@@ -19,7 +19,7 @@
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace pdalboostphoenix {
+namespace pdalboostphoenix {} namespace phoenix = pdalboostphoenix; namespace pdalboostphoenix {
 
 #if BOOST_WORKAROUND(BOOST_MSVC, >= 1400)
 #pragma warning(push)

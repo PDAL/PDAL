@@ -33,7 +33,8 @@
 #include <boost/numeric/conversion/converter.hpp>
 #include <boost/numeric/conversion/numeric_cast_traits.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
     template <typename Target, typename Source> 
     inline Target numeric_cast( Source arg )
     {

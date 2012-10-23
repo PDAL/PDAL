@@ -27,7 +27,7 @@
 # include <boost/call_traits.hpp>
 #endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams { namespace detail {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace iostreams { namespace detail {
 
 template<typename T>
 class single_object_holder {

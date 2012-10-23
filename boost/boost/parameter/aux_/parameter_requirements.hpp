@@ -6,7 +6,7 @@
 #ifndef PARAMETER_REQUIREMENTS_050331_HPP
 #define PARAMETER_REQUIREMENTS_050331_HPP
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace parameter { namespace aux {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace parameter { namespace aux {
 
 // Used to pass static information about parameter requirements
 // through the satisfies() overload set (below).  The

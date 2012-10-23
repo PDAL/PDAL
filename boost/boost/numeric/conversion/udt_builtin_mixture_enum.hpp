@@ -10,7 +10,7 @@
 #ifndef BOOST_NUMERIC_CONVERSION_UDT_BUILTIN_MIXTURE_ENUM_FLC_12NOV2002_HPP
 #define BOOST_NUMERIC_CONVERSION_UDT_BUILTIN_MIXTURE_ENUM_FLC_12NOV2002_HPP
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace numeric
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace numeric
 {
   enum udt_builtin_mixture_enum
   {

@@ -19,7 +19,8 @@
 //  http://www.boost.org/libs/utility/current_function.html
 //
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 
 namespace detail
 {

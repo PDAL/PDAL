@@ -14,7 +14,7 @@
 
 #include <iterator>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
 //  Helper functions for classes like bidirectional iterators not supporting
 //  operator+ and operator-

@@ -50,7 +50,8 @@
     /**/
 
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 
 //  Base-from-member class template  -----------------------------------------//
 

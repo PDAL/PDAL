@@ -15,7 +15,7 @@
 #ifndef BOOST_RANDOM_DETAIL_GENERATOR_SEED_SEQ_HPP_INCLUDED
 #define BOOST_RANDOM_DETAIL_GENERATOR_SEED_SEQ_HPP_INCLUDED
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace random {
 namespace detail {
 

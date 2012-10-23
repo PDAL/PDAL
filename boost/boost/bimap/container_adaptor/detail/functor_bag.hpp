@@ -35,7 +35,7 @@
 #include <boost/mpl/inherit_linearly.hpp>
 #include <boost/mpl/inherit.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace bimaps {
 namespace container_adaptor {
 namespace detail {

@@ -26,7 +26,8 @@
 //  See http://www.boost.org/libs/bind/ref.html for documentation.
 //
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 
 template<class T> class reference_wrapper
 { 
@@ -117,7 +118,8 @@ AUX_REFERENCE_WRAPPER_METAFUNCTIONS_DEF(reference_wrapper<T> const volatile)
 
 #include <boost/type.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 
 namespace detail
 {

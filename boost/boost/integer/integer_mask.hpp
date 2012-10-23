@@ -32,7 +32,8 @@
 #pragma GCC system_header
 #endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 
 
 //  Specified single-bit mask class declaration  -----------------------------//

@@ -19,7 +19,8 @@
 # include <memory>          // for std::auto_ptr
 #endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 
 // Debug hooks
 

@@ -18,7 +18,7 @@
 #include <boost/iostreams/detail/ios.hpp> // openmode, streamsize.
 #include <boost/iostreams/positioning.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace iostreams {
 
 template<typename Ch, typename Mode>
 class basic_null_device {

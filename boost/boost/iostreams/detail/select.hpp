@@ -35,7 +35,7 @@
 #include <boost/mpl/if.hpp>
 #include <boost/mpl/void.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams { 
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace iostreams { 
 
 typedef mpl::true_ else_;
 

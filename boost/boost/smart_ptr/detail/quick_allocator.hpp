@@ -27,7 +27,8 @@
 #include <new>              // ::operator new, ::operator delete
 #include <cstddef>          // std::size_t
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 
 namespace detail
 {

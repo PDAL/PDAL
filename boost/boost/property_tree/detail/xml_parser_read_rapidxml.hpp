@@ -17,7 +17,7 @@
 #include <boost/property_tree/detail/rapidxml.hpp>
 #include <vector>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace property_tree { namespace xml_parser
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace property_tree { namespace xml_parser
 {
 
     template<class Ptree, class Ch>
@@ -44,7 +44,8 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespac
                     {
                         Ptree &pt_attr = pt_attr_root.push_back(
                             std::make_pair(attr->name(), Ptree()))->second;
-                        pt_attr.data() = attr->value();
+                        pt_attr.data() = std::basic_string<Ch>(attr->value(),
+                                                            attr->value_size());
                     }
                 }
 
@@ -63,7 +64,8 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespac
                     pt.push_back(std::make_pair(xmltext<Ch>(),
                                                 Ptree(node->value())));
                 else
-                    pt.data() += node->value();
+                    pt.data() += std::basic_string<Ch>(node->value(),
+                                                       node->value_size());
             }
             break;
 
@@ -72,7 +74,8 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespac
             {
                 if (!(flags & no_comments))
                     pt.push_back(std::make_pair(xmlcomment<Ch>(),
-                                                Ptree(node->value())));
+                                    Ptree(std::basic_string<Ch>(node->value(),
+                                                         node->value_size()))));
             }
             break;
 

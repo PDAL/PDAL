@@ -68,7 +68,9 @@ def reset ():
 reset ()
 
 # FIXME: --ignore-toolset-requirements
-# FIXME: using
+def using(toolset_module, *args):
+     loaded_toolset_module= get_manager().projects().load_module(toolset_module, [os.getcwd()]);
+     loaded_toolset_module.init(*args)
     
 # FIXME push-checking-for-flags-module ....
 # FIXME: investigate existing uses of 'hack-hack' parameter
@@ -115,8 +117,8 @@ def flags(rule_or_module, variable_name, condition, values = []):
                           is specified, then the value of 'feature' 
                           will be added.
     """
-    caller = bjam.caller()[:-1]
-    if not '.' in rule_or_module and caller.startswith("Jamfile"):
+    caller = bjam.caller()
+    if not '.' in rule_or_module and caller and caller[:-1].startswith("Jamfile"):
         # Unqualified rule name, used inside Jamfile. Most likely used with
         # 'make' or 'notfile' rules. This prevents setting flags on the entire
         # Jamfile module (this will be considered as rule), but who cares?
@@ -142,7 +144,7 @@ def flags(rule_or_module, variable_name, condition, values = []):
         transformed = []
         for c in condition:
             # FIXME: 'split' might be a too raw tool here.
-            pl = [property.create_from_string(s) for s in c.split('/')]
+            pl = [property.create_from_string(s,False,True) for s in c.split('/')]
             pl = feature.expand_subfeatures(pl);
             transformed.append(property_set.create(pl))
         condition = transformed
@@ -378,7 +380,6 @@ def add_requirements(requirements):
     
     #if ! $(.ignore-requirements)
     #{
-    print "XXXX", requirements
     __requirements.extend(requirements)
     #}
          

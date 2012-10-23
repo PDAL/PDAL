@@ -82,7 +82,7 @@
             typedef v_iter<V, mpl::int_<n + 1> > next;\
         };
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace type_of {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace type_of {
 
     template<class V, class Increase_BOOST_TYPEOF_LIMIT_SIZE> struct v_iter; // not defined
 #     define  BOOST_PP_LOCAL_MACRO  BOOST_TYPEOF_spec_iter
@@ -112,7 +112,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespac
             BOOST_PP_REPEAT_FROM_TO(n, BOOST_TYPEOF_PP_NEXT_SIZE, BOOST_TYPEOF_typedef_fake_item, ~)\
         };
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace type_of {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace type_of {
 
 #     define  BOOST_PP_LOCAL_MACRO  BOOST_TYPEOF_define_vector
 #     define  BOOST_PP_LOCAL_LIMITS \
@@ -136,7 +136,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespac
             > type;\
         };
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace type_of {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace type_of {
 
 #   if   BOOST_TYPEOF_LIMIT_SIZE < 50
     template<class V, class T> struct push_back {

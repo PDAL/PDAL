@@ -39,7 +39,8 @@
 #include <boost/static_assert.hpp>
 #endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
   namespace math
   {
     namespace tools

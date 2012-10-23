@@ -9,7 +9,7 @@
 
 # include <boost/mpl/aux_/lambda_support.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace detail { 
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace detail { 
 //
 // Returns the minimum category type or error_type
 // if T1 and T2 are unrelated.

@@ -10,6 +10,7 @@ import virtual-target ;
 import "class" : new ;
 import modules ;
 import targets ;
+import project ;
 
 
 type.register X : x ;
@@ -21,21 +22,23 @@ class test-target-class : basic-target
         basic-target.__init__ $(name) : $(project) ;
     }
         
-    rule construct ( source-targets * : property-set )
+    rule construct ( name : source-targets * : property-set )
     {
         if [ modules.peek : GENERATE_NOTHING ]
         {
-            return ;
+            return [ property-set.empty ] ;
         }
         else if [ modules.peek : GENERATE_ONLY_UNUSABLE ] 
         {
-            return [ virtual-target.from-file b.x : $(self.project) ] 
+            return [ property-set.empty ]
+              [ virtual-target.from-file b.x : . : $(self.project) ] 
               ;             
         }
         else
         {            
-            return [ virtual-target.from-file b.x : $(self.project) ] 
-              [ virtual-target.from-file b.cpp : $(self.project) ] 
+            return [ property-set.empty ]
+              [ virtual-target.from-file b.x : . : $(self.project) ] 
+              [ virtual-target.from-file b.cpp : . : $(self.project) ] 
                 ; 
         }        
     }
@@ -48,7 +51,7 @@ class test-target-class : basic-target
 
 rule make-b-main-target
 {
-    local project = [ CALLER_MODULE ] ;    
+    local project = [ project.current ] ;    
     
     targets.main-target-alternative 
       [ new test-target-class b : $(project) ] ;

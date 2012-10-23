@@ -12,7 +12,7 @@
 #include <boost/mpl/bool.hpp>
 #include <boost/type_traits/is_same.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams { namespace detail {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace iostreams { namespace detail {
 
 template<typename Device, typename U>
 struct forward_impl {

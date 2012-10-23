@@ -13,7 +13,8 @@
 #include <boost/config.hpp>
 #include <boost/range/config.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
     namespace range_detail
     {
 

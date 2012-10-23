@@ -19,7 +19,8 @@
 
 #include <cstddef>            // for std::ptrdiff_t
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 
 // Debug hooks
 

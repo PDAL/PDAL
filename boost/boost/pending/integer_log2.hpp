@@ -23,7 +23,7 @@
 #include "boost/config.hpp"
 
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
  namespace detail {
 
   template <typename T>

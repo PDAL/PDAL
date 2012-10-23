@@ -9,7 +9,7 @@
 // Preprocessed version of "boost/mpl/divides.hpp" header
 // -- DO NOT modify by hand!
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace mpl {
 
 template<
       typename Tag1
@@ -111,7 +111,7 @@ BOOST_MPL_AUX_NA_SPEC2(2, 5, divides)
 
 }}
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace mpl {
 template<>
 struct divides_impl< integral_c_tag,integral_c_tag >
 {

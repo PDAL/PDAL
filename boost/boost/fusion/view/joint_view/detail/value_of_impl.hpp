@@ -9,7 +9,7 @@
 
 #include <boost/fusion/iterator/detail/adapt_value_traits.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion
 {
     struct joint_view_iterator_tag;
 

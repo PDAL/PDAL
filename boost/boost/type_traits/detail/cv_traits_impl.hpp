@@ -20,11 +20,11 @@
 
 
 #if !(BOOST_WORKAROUND(__GNUC__,== 3) && BOOST_WORKAROUND(__GNUC_MINOR__, <= 2))
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace detail {
 #else
 #include <boost/type_traits/detail/yes_no_type.hpp>
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace type_traits {
 namespace gcc8503 {
 #endif

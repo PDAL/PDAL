@@ -18,7 +18,8 @@
 #include <boost/range/begin.hpp>
 #include <boost/range/reverse_iterator.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 
 #ifdef BOOST_NO_FUNCTION_TEMPLATE_ORDERING
 

@@ -34,7 +34,7 @@ namespace std { using ::strlen; }
 # include <string.h>
 #endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams { namespace detail {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace iostreams { namespace detail {
 
 inline BOOST_IOSTREAMS_FAILURE system_failure(const char* msg)
 {

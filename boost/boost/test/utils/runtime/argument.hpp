@@ -27,7 +27,7 @@
 // STL
 #include <cassert>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
 namespace BOOST_RT_PARAM_NAMESPACE {
 

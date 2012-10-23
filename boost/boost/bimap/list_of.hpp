@@ -37,7 +37,7 @@
 #include <boost/bimap/views/list_map_view.hpp>
 #include <boost/bimap/views/list_set_view.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace bimaps {
 
 

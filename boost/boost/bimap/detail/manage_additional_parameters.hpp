@@ -28,7 +28,7 @@
 
 #include <boost/bimap/detail/is_set_type_of.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace bimaps {
 
 template< class Type >

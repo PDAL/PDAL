@@ -16,7 +16,7 @@
 #include <ostream>
 #include <iomanip>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace property_tree { namespace xml_parser
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace property_tree { namespace xml_parser
 {
     template<class Ch>
     void write_xml_indent(std::basic_ostream<Ch> &stream,
@@ -115,8 +115,11 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespac
                 // Write attributes
                 if (optional<const Ptree &> attribs = pt.get_child_optional(xmlattr<Ch>()))
                     for (It it = attribs.get().begin(); it != attribs.get().end(); ++it)
-                        stream << Ch(' ') << it->first << Ch('=') << 
-                                  Ch('"') << it->second.template get_value<std::basic_string<Ch> >() << Ch('"');
+                        stream << Ch(' ') << it->first << Ch('=')
+                               << Ch('"')
+                               << encode_char_entities(
+                                    it->second.template get_value<std::basic_string<Ch> >())
+                               << Ch('"');
 
                 if ( has_attrs_only )
                 {

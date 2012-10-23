@@ -17,7 +17,7 @@
 #include <boost/shared_ptr.hpp>
 #include <limits>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace uuids {
 
 // generate a random-based uuid

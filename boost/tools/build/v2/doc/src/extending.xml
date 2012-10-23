@@ -76,17 +76,20 @@
         in Jamfile, such as metatarget kind, name, sources and properties,
         and can be called with specific properties to generate concrete
         targets. At the code level it is represented by an instance of
-        class derived from <classname>abstract-target</classname>. 
+        class derived from <link linkend="bbv2.reference.class.abstract-target">abstract-target</link>. 
         <footnote><para>This name is historic, and will be eventuall changed to 
         <code>metatarget</code></para></footnote>
         </para>
         
-        <para>The <methodname>generate</methodname> method takes the build properties
-        (as an instance of the <classname>property-set</classname> class) and returns
+        <para>The <link linkend="bbv2.reference.class.abstract-target.generate">generate</link>
+        method takes the build properties
+        (as an instance of the <link linkend="bbv2.reference.class.property-set">
+        property-set</link> class) and returns
         a list containing:</para>
         <itemizedlist>
           <listitem><para>As front element&mdash;Usage-requirements from this invocation
-          (an instance of <classname>property-set</classname>)</para></listitem>
+          (an instance of <link linkend="bbv2.reference.class.property-set">
+          property-set</link>)</para></listitem>
           <listitem><para>As subsequent elements&mdash;created concrete targets (
           instances of the <classname>virtual-target</classname> class.)</para></listitem>
         </itemizedlist>
@@ -96,47 +99,52 @@
         <code>targets.generate-from-reference</code> function can both
         lookup and generate a metatarget.</para>
         
-        <para>The <classname>abstract-target</classname> class has three immediate
-        derived classes:</para>
+        <para>The <link linkend="bbv2.reference.class.abstract-target">abstract-target</link>
+        class has three immediate derived classes:</para>
         <itemizedlist>
           
-          <listitem><para><classname>project-target</classname> that
+          <listitem><para><link linkend="bbv2.reference.class.project-target">project-target</link> that
           corresponds to a project and is not intended for further
-          subclassing. The <methodname>generate</methodname> method of this
+          subclassing. The <link linkend="bbv2.reference.class.project-target.generate">
+          generate</link> method of this
           class builds all targets in the project that are not marked as
           explicit.</para></listitem>
           
-          <listitem><para><classname>main-target</classname> corresponds to a target in a project
+          <listitem><para><link linkend="bbv2.reference.class.main-target">main-target</link>
+          corresponds to a target in a project
           and contains one or more target alternatives. This class also should not be 
-          subclassed. The <methodname>generate</methodname> method of this class selects 
-          an alternative to build, and calls the <methodname>generate</methodname> method of that
-          alternative.</para></listitem>
+          subclassed. The <link linkend="bbv2.reference.class.main-target.generate">generate</link>
+          method of this class selects an alternative to build, and calls the
+          <link linkend="bbv2.reference.class.basic-target.generate">generate</link>
+          method of that alternative.</para></listitem>
           
-          <listitem><para><classname>basic-target</classname> corresponds to a
-          specific target alternative. This is base class, with a number of
-          derived classes.  The <methodname>generate</methodname> method
+          <listitem><para><link linkend="bbv2.reference.class.basic-target">basic-target</link>
+          corresponds to a specific target alternative. This is base class,
+          with a number of derived classes.  The
+          <link linkend="bbv2.reference.class.basic-target.generate">generate</link> method
           processes the target requirements and requested build properties to
           determine final properties for the target, builds all sources, and
-          finally calls the abstract <classname>construct</classname> method with the list
-          of source virtual targets, and the final properties.
+          finally calls the abstract
+          <link linkend="bbv2.reference.class.basic-target.construct">construct</link>
+          method with the list of source virtual targets, and the final properties.
           </para></listitem>
           
         </itemizedlist>
         
-        <para>The instances of the <classname>project-target</classname> and
-        <classname>main-target</classname> classes are created
+        <para>The instances of the <link linkend="bbv2.reference.class.project-target">project-target</link> and
+        <link linkend="bbv2.reference.class.main-target">main-target</link> classes are created
         implicitly&mdash;when loading a new Jamfiles, or when a new target
         alternative with as-yet unknown name is created.  The instances of the
-        classes derived from <classname>basic-target</classname> are typically
-        created when Jamfile calls a <firstterm>metatarget rule</firstterm>,
+        classes derived from <link linkend="bbv2.reference.class.basic-target">basic-target</link>
+        are typically created when Jamfile calls a <firstterm>metatarget rule</firstterm>,
         such as such as <code>exe</code>.
         </para>
         
         <para>It it permissible to create a custom class derived from
-        <classname>basic-target</classname> and create new metatarget rule
+        <link linkend="bbv2.reference.class.basic-target">basic-target</link> and create new metatarget rule
         that creates instance of such target. However, in the majority
-        of cases, a specific subclass of <classname>basic-target</classname>&mdash;
-        <classname>typed-target</classname> is used. That class is associated
+        of cases, a specific subclass of <link linkend="bbv2.reference.class.basic-target">basic-target</link>&mdash;
+        <link linkend="bbv2.reference.class.typed-target">typed-target</link> is used. That class is associated
         with a <firstterm>type</firstterm> and relays to <firstterm>generators</firstterm>
         to construct concrete targets of that type. This process will be explained below.
         When a new type is declared, a new metatarget rule is automatically defined.
@@ -153,8 +161,8 @@
         subclass is <classname>file-target</classname>. A file target is associated
         with an action that creates it&mdash; an instance of the <classname>action</classname>
         class. The action, in turn, hold a list of source targets. It also holds the 
-        <classname>property-set</classname> instance with the build properties that
-        should be used for the action.</para>
+        <link linkend="bbv2.reference.class.property-set">property-set</link>
+        instance with the build properties that should be used for the action.</para>
 
         <para>Here's an example of creating a target from another target, <code>source</code></para>
 <programlisting>
@@ -200,11 +208,12 @@ return [ sequence.transform virtual-target.register : $(targets) ] ;
         fact, Boost.Build defines concept of target type and
         <indexterm><primary>generators</primary></indexterm>
         <firstterm>generators</firstterm>, and has special metatarget class
-        <classname>typed-target</classname>.  Target type is merely an
+        <link linkend="bbv2.reference.class.typed-target">typed-target</link>.  Target type is merely an
         identifier. It is associated with a set of file extensions that
         correspond to that type. Generator is an abstraction of a tool. It advertises
         the types it produces and, if called with a set of input target, tries to construct
-        output targets of the advertised types. Finally, <classname>typed-target</classname>
+        output targets of the advertised types. Finally,
+        <link linkend="bbv2.reference.class.typed-target">typed-target</link>
         is associated with specific target type, and relays the generator (or generators)
         for that type.
         </para>
@@ -393,7 +402,7 @@ import type ;
 type.register VERBATIM : verbatim ;
 </programlisting>
 
-      <para>The first parameter to <functionname>type.register</functionname> gives
+      <para>The first parameter to <link linkend="bbv2.reference.modules.type.register">type.register</link> gives
       the name of the declared type. By convention, it's uppercase. The second
       parameter is the suffix for files of this type. So, if Boost.Build sees
       <filename>code.verbatim</filename> in a list of sources, it knows that it's of
@@ -1031,8 +1040,8 @@ feature.compose &lt;parallelism&gt;fake : &lt;library&gt;/mpi//fake/&lt;parallel
   <section id="bbv2.extending.rules">
     <title>Main target rules</title>
     <para>
-      A main target rule (e.g “<functionname>exe</functionname>”
-      Or “<functionname>lib</functionname>”) creates a top-level target. It's quite likely that you'll want to declare your own and
+      A main target rule (e.g “<link linkend="bbv2.tasks.programs">exe</link>”
+      Or “<link linkend="bbv2.tasks.libraries">lib</link>”) creates a top-level target. It's quite likely that you'll want to declare your own and
       there are two ways to do that.
       <!-- Why did "that" get changed to "this" above? -->
     </para>

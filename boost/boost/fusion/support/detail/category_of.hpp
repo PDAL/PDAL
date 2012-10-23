@@ -7,7 +7,7 @@
 #if !defined(FUSION_CATEGORY_OF_07212005_1025)
 #define FUSION_CATEGORY_OF_07212005_1025
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion { namespace detail
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion { namespace detail
 {
     template <typename T>
     struct fusion_category_of

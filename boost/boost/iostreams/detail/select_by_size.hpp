@@ -74,7 +74,7 @@
 #include <boost/type_traits/alignment_of.hpp>
 #include <boost/type_traits/type_with_alignment.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace utility {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace utility {
 
 template<int N>
 struct case_ { char c[(N + 1) * alignment_of<detail::max_align>::value]; };
@@ -89,7 +89,7 @@ struct select_by_size {
 
 */              // End alternate implementation.
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams { namespace detail {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace iostreams { namespace detail {
 
 //--------------Definition of case_-------------------------------------------//
 
@@ -109,7 +109,7 @@ template<unsigned Size> struct select_by_size;
 // Sepecializes select_by_size for sizeof(case<n-1>). The decrement is used
 // here because the preprocessor library doesn't handle negative integers.
 #define SELECT_BY_SIZE_SPEC(n) \
-    namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams { namespace detail { \
+    namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace iostreams { namespace detail { \
       static const int BOOST_PP_CAT(sizeof_case_, n) = sizeof(case_<n - 1>); \
       template<> \
       struct select_by_size< BOOST_PP_CAT(sizeof_case_, n) > { \

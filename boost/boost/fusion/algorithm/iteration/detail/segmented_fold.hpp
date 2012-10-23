@@ -10,7 +10,7 @@
 #include <boost/fusion/algorithm/iteration/fold_fwd.hpp>
 #include <boost/fusion/support/segmented_fold_until.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion { namespace detail
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion { namespace detail
 {
     template <typename Fun>
     struct segmented_fold_fun

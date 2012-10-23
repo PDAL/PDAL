@@ -37,7 +37,7 @@ BOOST_STATIC_ASSERT(BOOST_SPIRIT_RULE_SCANNERTYPE_LIMIT > 0);
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace spirit {
 
 BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
 

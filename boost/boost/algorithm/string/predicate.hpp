@@ -34,7 +34,7 @@
     All predicates provide the strong exception guarantee.
 */
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
     namespace algorithm {
 
 //  starts_with predicate  -----------------------------------------------//

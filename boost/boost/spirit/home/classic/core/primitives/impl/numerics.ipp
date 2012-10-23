@@ -13,7 +13,7 @@
 #include <boost/config/no_tr1/cmath.hpp>
 #include <limits>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace spirit {
 
 BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
 

@@ -19,7 +19,7 @@
 #include <boost/typeof/std/complex.hpp>
 #include <boost/accumulators/numeric/functional_fwd.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace numeric { namespace operators
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace numeric { namespace operators
 {
     // So that the stats compile when Sample type is std::complex
     template<typename T, typename U>
@@ -48,7 +48,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespac
 
 }}} // namespace pdalboost::numeric::operators
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace numeric
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace numeric
 {
     namespace detail
     {

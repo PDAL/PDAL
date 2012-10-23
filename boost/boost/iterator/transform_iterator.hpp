@@ -30,7 +30,8 @@
 #include <boost/iterator/detail/config_def.hpp>
 
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
   template <class UnaryFunction, class Iterator, class Reference = use_default, class Value = use_default>
   class transform_iterator;
 
@@ -45,7 +46,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
         // the function.
         typedef typename ia_dflt_help<
             Reference
-          , result_of<UnaryFunc(typename std::iterator_traits<Iterator>::reference)>
+          , result_of<const UnaryFunc(typename std::iterator_traits<Iterator>::reference)>
         >::type reference;
 
         // To get the default for Value: remove any reference on the

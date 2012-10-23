@@ -23,7 +23,7 @@
 #include <boost/mpl/aux_/na.hpp>
 #include <boost/call_traits.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace bimaps {
 namespace container_adaptor {
 
@@ -82,6 +82,7 @@ class map_adaptor :
     public:
 
     typedef BOOST_DEDUCED_TYPENAME Iterator::value_type::second_type data_type;
+    typedef data_type mapped_type;
 
     // Access -----------------------------------------------------------------
 

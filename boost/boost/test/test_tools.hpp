@@ -300,7 +300,7 @@ do {                                                                \
 #define BOOST_MESSAGE( M )                  BOOST_TEST_MESSAGE( M )
 #define BOOST_CHECKPOINT( M )               BOOST_TEST_CHECKPOINT( M )
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
 namespace test_tools {
 
@@ -338,7 +338,7 @@ struct print_log_value {
 //____________________________________________________________________________//
 
 #define BOOST_TEST_DONT_PRINT_LOG_VALUE( the_type )         \
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace test_tools {                    \
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace test_tools {                    \
 template<>                                                  \
 struct print_log_value<the_type > {                         \
     void operator()( std::ostream&, the_type const& ) {}    \

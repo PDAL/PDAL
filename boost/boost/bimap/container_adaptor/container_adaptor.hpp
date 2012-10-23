@@ -33,7 +33,7 @@
 
 
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace bimaps {
 
 /// \brief Container Adaptor toolbox, easy way to build new containers from existing ones.

@@ -12,7 +12,7 @@
 #include <boost/fusion/algorithm/transformation/push_front.hpp>
 #include <boost/fusion/sequence/convert.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace mpl
 {
     template <typename Tag>
     struct push_front_impl;

@@ -28,7 +28,7 @@
 #include <boost/optional.hpp>
 #include <utility>                  // for std::pair
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace property_tree
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace property_tree
 {
 
     /**

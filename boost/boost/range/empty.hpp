@@ -19,7 +19,8 @@
 #include <boost/range/begin.hpp>
 #include <boost/range/end.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ 
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost 
+{ 
 
     template< class T >
     inline bool empty( const T& r )

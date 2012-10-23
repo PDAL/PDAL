@@ -18,7 +18,8 @@
 #include <boost/range/detail/detail_str.hpp>
 #include <boost/range/iterator_range.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
     template< class Range >
     inline iterator_range<BOOST_DEDUCED_TYPENAME range_iterator<Range>::type> 
     as_literal( Range& r )

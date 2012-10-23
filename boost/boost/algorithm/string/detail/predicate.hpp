@@ -14,7 +14,7 @@
 #include <iterator>
 #include <boost/algorithm/string/find.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
     namespace algorithm {
         namespace detail {
 
