@@ -35,7 +35,7 @@
 #ifndef EXPORT_HPP_INCLUDED
 #define EXPORT_HPP_INCLUDED
 
-#include <pdal/pdal_defines.h>
+#include "pdal_defines.h"
 
 #ifndef PDAL_DLL
 #if defined(PDAL_COMPILER_MSVC) && !defined(PDAL_DISABLE_DLL)

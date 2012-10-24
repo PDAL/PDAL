@@ -442,7 +442,7 @@ FILE* Utils::portable_popen(const std::string& command, const std::string& mode)
     FILE* fp = 0;
 
 #ifdef PDAL_PLATFORM_WIN32
-    const std::string dos_command = Support::replaceAll(command, "/", "\\");
+    const std::string dos_command = Utils::replaceAll(command, "/", "\\");
     fp = _popen(dos_command.c_str(), mode.c_str());
 #else
     fp = popen(command.c_str(), mode.c_str());
@@ -518,5 +518,21 @@ int Utils::run_shell_command(const std::string& cmd, std::string& output)
 
     return stat;
 }
+
+//#ifdef PDAL_COMPILER_MSVC
+// http://www.codepedia.com/1/CppStringReplace
+std::string Utils::replaceAll(std::string result,
+                              const std::string& replaceWhat,
+                              const std::string& replaceWithWhat)
+{
+    while (1)
+    {
+        const int pos = result.find(replaceWhat);
+        if (pos==-1) break;
+        result.replace(pos,replaceWhat.size(),replaceWithWhat);
+    }
+    return result;
+}
+//#endif
 
 } // namespace pdal
