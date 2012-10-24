@@ -140,6 +140,7 @@ void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
 {
     std::string outputType = getOptions().getValueOrDefault<std::string>("format", "csv");
     bool bGeoJSON = boost::iequals(outputType, "GEOJSON");
+    if (bGeoJSON)
     {
         *m_stream << "]}";
         std::string callback = getOptions().getValueOrDefault<std::string>("jscallback", "");

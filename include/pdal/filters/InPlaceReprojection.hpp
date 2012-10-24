@@ -68,6 +68,7 @@ public:
                         const SpatialReference& inSRS,
                         const SpatialReference& outSRS);
 
+    ~InPlaceReprojection();
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
 
@@ -133,7 +134,7 @@ private:
     dimension::id m_old_y_id;
     dimension::id m_old_z_id;
     
-    boost::shared_ptr<pdal::gdal::Debug> m_gdal_debug;
+    pdal::gdal::Debug*  m_gdal_debug;
 
     InPlaceReprojection& operator=(const InPlaceReprojection&); // not implemented
     InPlaceReprojection(const InPlaceReprojection&); // not implemented

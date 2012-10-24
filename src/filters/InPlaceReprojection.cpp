@@ -82,7 +82,8 @@ InPlaceReprojection::InPlaceReprojection(Stage& prevStage, const Options& option
     , m_new_z_id(boost::uuids::nil_uuid())
     , m_old_x_id(boost::uuids::nil_uuid())
     , m_old_y_id(boost::uuids::nil_uuid())
-    , m_old_z_id(boost::uuids::nil_uuid())    
+    , m_old_z_id(boost::uuids::nil_uuid())
+    , m_gdal_debug(0)
 {
     if (options.hasOption("in_srs"))
     {
@@ -97,7 +98,12 @@ InPlaceReprojection::InPlaceReprojection(Stage& prevStage, const Options& option
     return;
 }
 
-
+InPlaceReprojection::~InPlaceReprojection()
+{
+    if (m_gdal_debug != 0)
+        delete m_gdal_debug;
+    
+}
 void InPlaceReprojection::initialize()
 {
     Filter::initialize();
@@ -108,8 +114,9 @@ void InPlaceReprojection::initialize()
     }
 
 #ifdef PDAL_HAVE_GDAL
-
-    m_gdal_debug = boost::shared_ptr<pdal::gdal::Debug>(new pdal::gdal::Debug(isDebug(), log()));
+    
+    if (m_gdal_debug == 0)
+        m_gdal_debug = new pdal::gdal::Debug(isDebug(), log());
 
     m_in_ref_ptr = ReferencePtr(OSRNewSpatialReference(0), OGRSpatialReferenceDeleter());
     m_out_ref_ptr = ReferencePtr(OSRNewSpatialReference(0), OGRSpatialReferenceDeleter());
