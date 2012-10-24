@@ -36,6 +36,8 @@
 #include <pdal/Utils.hpp>
 #include <boost/bind/placeholders.hpp>
 
+#include <map>
+
 #ifdef PDAL_COMPILER_MSVC
 #  pragma warning(disable: 4127)  // conditional expression is constant
 #endif
@@ -144,12 +146,21 @@ void GlobalDebug::log(::CPLErr code, int num, char const* msg)
     {
         oss << "Global GDAL debug: " << msg;
         std::vector<LogPtr>::const_iterator i;
+        
+        std::map<std::ostream*, LogPtr> streams;
         for (i = m_logs.begin(); i != m_logs.end(); ++i)
         {
-            if ((*i)->getLevel() > logDEBUG)
-                (*i)->get(logDEBUG) << oss.str() << std::endl;
-            
+            streams.insert(std::pair<std::ostream*, LogPtr>((*i)->getLogStream(), *i));
         }
+        
+        std::map<std::ostream*, LogPtr>::const_iterator t;
+        for (t = streams.begin(); t != streams.end(); t++)
+        {
+            LogPtr l = t->second;
+            if (l->getLevel() > logDEBUG)
+                l->get(logDEBUG) << oss.str() << std::endl;            
+        }
+
         return;
     }
     else
@@ -158,6 +169,11 @@ void GlobalDebug::log(::CPLErr code, int num, char const* msg)
     }
 }
 
+GlobalDebug::~GlobalDebug()
+{
+    CPLPopErrorHandler();
+
+}
 
 
 //----------------------------------------------------------------------------

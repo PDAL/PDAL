@@ -111,9 +111,7 @@ public:
     
     void addLog(LogPtr alog) { m_logs.push_back(alog); }
     
-    ~GlobalDebug()
-    {
-    }
+    ~GlobalDebug();
 
     
     void log(::CPLErr code, int num, char const* msg);
