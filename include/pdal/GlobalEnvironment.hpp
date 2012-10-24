@@ -38,8 +38,19 @@
 #include <pdal/pdal_internal.hpp>
 #include <pdal/ThreadEnvironment.hpp>
 #include <pdal/plang/PythonEnvironment.hpp>
+
 #include <boost/thread/once.hpp>
+
 #include <map>
+#include <sstream>
+
+namespace pdal
+{
+namespace gdal
+{
+class GlobalDebug;
+}
+}
 
 namespace pdal
 {
@@ -67,6 +78,8 @@ public:
     boost::random::mt19937* getRNG();
     
     void getGDALEnvironment();
+    
+    pdal::gdal::GlobalDebug* getGDALDebug();
 
 private:
     GlobalEnvironment();
@@ -79,7 +92,8 @@ private:
     thread_map m_threadMap;
     plang::PythonEnvironment* m_pythonEnvironment;
     bool m_bIsGDALInitialized;
-
+    pdal::gdal::GlobalDebug* m_gdal_debug;
+    
     GlobalEnvironment(const GlobalEnvironment&); // nope
     GlobalEnvironment& operator=(const GlobalEnvironment&); // nope
 };

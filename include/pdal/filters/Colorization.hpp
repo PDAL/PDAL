@@ -48,7 +48,7 @@ namespace pdal
 class PointBuffer;
 namespace gdal
 {
-class Debug;
+class GlobalDebug;
 }
 }
 
@@ -118,7 +118,6 @@ private:
     void collectOptions();
 
     void* m_ds;
-    pdal::gdal::Debug* m_gdal_debug;
 
     std::map<std::string, boost::uint32_t> m_band_map;
     std::map<std::string, double> m_scale_map;

@@ -67,7 +67,6 @@ struct GDALSourceDeleter
 Colorization::Colorization(Stage& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
     , m_ds(0)
-    , m_gdal_debug(0)
 {
     return;
 }
@@ -76,9 +75,7 @@ Colorization::~Colorization()
 {
 #ifdef PDAL_HAVE_GDAL
 
-    if (m_gdal_debug != 0)
-        delete m_gdal_debug;
-        
+
     if (m_ds != 0)
     {
         GDALClose(m_ds);
@@ -100,8 +97,8 @@ void Colorization::initialize()
     
     pdal::GlobalEnvironment::get().getGDALEnvironment();
     
-    if (m_gdal_debug == 0)
-        m_gdal_debug = new pdal::gdal::Debug(isDebug(), log());
+    pdal::GlobalEnvironment::get().getGDALDebug()->addLog(log());
+
     m_forward_transform.assign(0.0);
     m_inverse_transform.assign(0.0);
 

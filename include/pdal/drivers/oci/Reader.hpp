@@ -120,7 +120,6 @@ private:
     // Fields in the form of NAME:TYPE
     std::map<std::string, int> m_fields;
 
-    pdal::gdal::Debug* m_gdal_debug;
     mutable boost::uint64_t m_cachedPointCount;
 
 

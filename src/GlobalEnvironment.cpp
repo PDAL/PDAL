@@ -39,8 +39,6 @@
 #endif
 
 #ifdef PDAL_HAVE_GDAL
-#include <gdal.h>
-#include <ogr_spatialref.h>
 #include <pdal/GDALUtils.hpp>
 #endif
 
@@ -100,14 +98,15 @@ void GlobalEnvironment::init()
 GlobalEnvironment::GlobalEnvironment()
 : m_pythonEnvironment(0)
 , m_bIsGDALInitialized(false)
+, m_gdal_debug(0)
 {
     // this should be the not-a-thread thread environment
     (void) createThreadEnvironment(boost::thread::id());
 
-
-
     return;
 }
+
+
 
 void GlobalEnvironment::getGDALEnvironment()
 {
@@ -141,6 +140,9 @@ GlobalEnvironment::~GlobalEnvironment()
     {
         (void) GDALDestroyDriverManager();
         m_bIsGDALInitialized = false;
+        
+        if (m_gdal_debug)
+            delete m_gdal_debug;
     }
 #endif
 
@@ -192,6 +194,15 @@ plang::PythonEnvironment& GlobalEnvironment::getPythonEnvironment()
         throw pdal_error("Unable to initialize the Python environment!");
 }
 
+pdal::gdal::GlobalDebug* GlobalEnvironment::getGDALDebug()
+{
+    getGDALEnvironment();
+    
+    if (m_gdal_debug == 0)
+        m_gdal_debug = new pdal::gdal::GlobalDebug();
+    
+    return m_gdal_debug;
+}
 
 boost::random::mt19937* GlobalEnvironment::getRNG()
 {

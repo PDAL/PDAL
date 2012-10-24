@@ -61,7 +61,6 @@ Reader::Reader(const Options& options)
     , m_querytype(QUERY_UNKNOWN)
     , m_capacity(0)
     , m_cachedPointCount(0)
-    , m_gdal_debug(0)
 {
 
 }
@@ -149,7 +148,7 @@ void Reader::initialize()
 {
     pdal::Reader::initialize();
 
-    m_gdal_debug = new pdal::gdal::Debug(isDebug(), log());
+    pdal::GlobalEnvironment::get().getGDALDebug()->addLog(log()
     m_connection = connect();
     m_block = BlockPtr(new Block(m_connection));
 
@@ -331,9 +330,6 @@ std::string Reader::getQueryString() const
 
 Reader::~Reader()
 {
-    if (m_gdal_debug != 0)
-        delete m_gdal_debug;
-        
     return;
 }
 

@@ -46,7 +46,7 @@ namespace pdal
 class PointBuffer;
 namespace gdal
 {
-class Debug;
+class GlobalDebug;
 }
 }
 
@@ -134,8 +134,6 @@ private:
     dimension::id m_old_y_id;
     dimension::id m_old_z_id;
     
-    pdal::gdal::Debug*  m_gdal_debug;
-
     InPlaceReprojection& operator=(const InPlaceReprojection&); // not implemented
     InPlaceReprojection(const InPlaceReprojection&); // not implemented
     
