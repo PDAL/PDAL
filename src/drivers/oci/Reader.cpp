@@ -149,7 +149,7 @@ void Reader::initialize()
 {
     pdal::Reader::initialize();
 
-    pdal::GlobalEnvironment::get().getGDALDebug()->addLog(log()
+    pdal::GlobalEnvironment::get().getGDALDebug()->addLog(log());
     m_connection = connect();
     m_block = BlockPtr(new Block(m_connection));
 
