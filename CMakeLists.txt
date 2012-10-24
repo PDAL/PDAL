@@ -288,13 +288,13 @@ endif()
 
 set(WITH_FLANN FALSE CACHE BOOL "Choose if FLANN support should be built")
 if (WITH_FLANN)
-find_package(Flann 1.7)
-if (FLANN_FOUND)
-  mark_as_advanced(CLEAR FLANN_INCLUDE_DIR) 
-  mark_as_advanced(CLEAR FLANN_LIBRARY) 
-  include_directories(${FLANN_INCLUDE_DIR})
-  set(PDAL_HAVE_FLANN 1)
-endif()
+  find_package(Flann 1.7)
+  if (FLANN_FOUND)
+    mark_as_advanced(CLEAR FLANN_INCLUDE_DIR) 
+    mark_as_advanced(CLEAR FLANN_LIBRARY) 
+    include_directories(${FLANN_INCLUDE_DIR})
+    set(PDAL_HAVE_FLANN 1)
+  endif()
 endif()
 
 if(WITH_GDAL)
@@ -374,6 +374,10 @@ if(WITH_LIBXML2)
         include_directories(${LIBXML2_INCLUDE_DIR})
         set(PDAL_HAVE_LIBXML2 1)
     endif()
+endif()
+
+if(NOT LIBXML2_FOUND)
+  message(STATUS "libxml2 not selected or not found, pcinfo will not be build")
 endif()
 
 # Oracle support - optional, default=OFF
@@ -534,7 +538,14 @@ set(PDAL_DATA_DIR ${PDAL_DATA_SUBDIR})
 install(FILES AUTHORS.txt LICENSE.txt
   DESTINATION ${PDAL_DATA_DIR}/doc)
 
+#------------------------------------------------------------------------------
+# generate the pdal_config.h header
+#------------------------------------------------------------------------------
 
+configure_file(
+  "${PROJECT_SOURCE_DIR}/pdal_defines.h.in"
+  "${CMAKE_BINARY_DIR}/pdal_defines.h")
+include_directories(${CMAKE_BINARY_DIR})
 
 #------------------------------------------------------------------------------
 # subdirectory controls
@@ -606,10 +617,4 @@ include(CPack)
 #add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
 
 
-#------------------------------------------------------------------------------
-# finally, generate the pdal_config.h header
-#------------------------------------------------------------------------------
 
-configure_file(
-  "${PROJECT_SOURCE_DIR}/pdal_defines.h.in"
-  "${PROJECT_SOURCE_DIR}/include/pdal/pdal_defines.h")
