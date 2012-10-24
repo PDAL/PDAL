@@ -503,7 +503,7 @@ set(PDAL_CONFIG_HPP
   ${PDAL_HEADERS_DIR}/pdal_export.hpp
   ${PDAL_HEADERS_DIR}/pdal_internal.hpp
   ${PDAL_HEADERS_DIR}/pdal_config.hpp
-  ${CMAKE_BINARY_DIR}/pdal_defines.h
+  ${PROJECT_BINARY_DIR}/pdal_defines.h
 )
 
 set (PDAL_CONFIG_CPP 
@@ -656,3 +656,6 @@ install(TARGETS ${PDAL_LIB_NAME} ${PDAL_C_LIB_NAME} ${PDAL_CSV_WRITER_NAME}
 install(DIRECTORY ${PDAL_HEADERS_DIR}
   DESTINATION ${PDAL_INCLUDE_DIR}
   FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp")
+
+install(FILES "${PROJECT_BINARY_DIR}/pdal_defines.h"
+  DESTINATION "${PDAL_INCLUDE_DIR}/pdal")

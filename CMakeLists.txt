@@ -544,8 +544,8 @@ install(FILES AUTHORS.txt LICENSE.txt
 
 configure_file(
   "${PROJECT_SOURCE_DIR}/pdal_defines.h.in"
-  "${CMAKE_BINARY_DIR}/pdal_defines.h")
-include_directories(${CMAKE_BINARY_DIR})
+  "${PROJECT_BINARY_DIR}/pdal_defines.h")
+include_directories(${PROJECT_BINARY_DIR})
 
 #------------------------------------------------------------------------------
 # subdirectory controls
