@@ -331,6 +331,9 @@ std::string Reader::getQueryString() const
 
 Reader::~Reader()
 {
+    if (m_gdal_debug != 0)
+        delete m_gdal_debug;
+        
     return;
 }
 
