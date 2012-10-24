@@ -50,9 +50,6 @@
 namespace pdal
 {
 
-const boost::uint32_t Writer::s_defaultChunkSize = 1048576; // 2^20
-
-
 Writer::Writer(Stage& prevStage, const Options& options)
     : StageBase(StageBase::makeVector(prevStage), options)
     , m_chunkSize(options.getValueOrDefault("chunk_size", s_defaultChunkSize))
