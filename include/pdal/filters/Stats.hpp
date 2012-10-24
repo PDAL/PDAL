@@ -256,6 +256,24 @@ private:
 }
 } // iterators::sequential
 
+namespace random
+{
+
+class PDAL_DLL Stats :  public pdal::FilterRandomIterator
+{
+public:
+    Stats(const pdal::filters::Stats& filter, PointBuffer& buffer);
+    ~Stats();
+
+protected:
+    virtual boost::uint64_t seekImpl(boost::uint64_t);
+    virtual boost::uint32_t readBufferImpl(PointBuffer&);
+
+};
+
+
+} // random
+
 }
 } // namespaces
 

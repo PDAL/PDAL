@@ -504,7 +504,42 @@ void Stats::reset()
 }
 
 }
-} // iterators::sequential
 
+} // sequential
+
+namespace random
+{
+
+Stats::Stats(const pdal::filters::Stats& filter, PointBuffer& buffer)
+    : pdal::FilterRandomIterator(filter, buffer)
+{
+    return;
 }
+
+
+Stats::~Stats()
+{
+    return;
+}
+
+boost::uint64_t Stats::seekImpl(boost::uint64_t count)
+{
+    
+    return getPrevIterator().seek(count);
+}
+
+
+boost::uint32_t Stats::readBufferImpl(PointBuffer& data)
+{
+    return getPrevIterator().read(data);
+}
+
+
+} // random
+
+
+} // iterators
+
+
+
 } // namespaces
