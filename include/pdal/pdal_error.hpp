@@ -123,6 +123,16 @@ public:
     {}
 };
 
+// for when a stage doesn't provide the requested iterator
+class iterator_not_found : public pdal_error
+{
+public:
+
+    iterator_not_found(std::string const& msg)
+        : pdal_error(msg)
+    {}
+};
+
 
 // use this for attempts to use a feature not compiled in, e.g. laszip or gdal
 class configuration_error : public pdal_error
