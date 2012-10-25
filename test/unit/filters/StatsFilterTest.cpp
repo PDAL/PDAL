@@ -37,6 +37,9 @@
 #include <boost/scoped_ptr.hpp>
 
 #include <pdal/drivers/faux/Reader.hpp>
+#include <pdal/drivers/las/Reader.hpp>
+#include "Support.hpp"
+
 #include <pdal/filters/Stats.hpp>
 
 #ifdef PDAL_COMPILER_GCC
@@ -92,4 +95,52 @@ BOOST_AUTO_TEST_CASE(StatsFilterTest_test1)
     return;
 }
 
+
+
+
+BOOST_AUTO_TEST_CASE(test_random_iterator)
+{
+    pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
+    BOOST_CHECK(reader.getDescription() == "Las Reader");
+
+    pdal::filters::Stats filter(reader, Options::none());    
+    filter.initialize();
+
+    const Schema& schema = reader.getSchema();
+
+    PointBuffer data(schema, 3);
+
+    pdal::StageRandomIterator* iter = reader.createRandomIterator(data);
+
+    {
+        boost::uint32_t numRead = iter->read(data);
+        BOOST_CHECK(numRead == 3);
+
+        Support::check_p0_p1_p2(data);
+    }
+
+    // Can we seek it? Yes, we can!
+    iter->seek(100);
+    {
+        BOOST_CHECK(iter->getIndex() == 100);
+        boost::uint32_t numRead = iter->read(data);
+        BOOST_CHECK(numRead == 3);
+
+        Support::check_p100_p101_p102(data);
+    }
+
+    // Can we seek to beginning? Yes, we can!
+    iter->seek(0);
+    {
+        BOOST_CHECK(iter->getIndex() == 0);
+        boost::uint32_t numRead = iter->read(data);
+        BOOST_CHECK(numRead == 3);
+
+        Support::check_p0_p1_p2(data);
+    }
+
+    delete iter;
+
+    return;
+}
 BOOST_AUTO_TEST_SUITE_END()
