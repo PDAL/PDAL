@@ -175,6 +175,8 @@ int PcPipeline::execute()
         writer.setPointBuffer( manager.getWriter()->getPointBuffer());
         writer.writePipeline(m_pipelineFile);
     }
+    
+    delete callback;
     return 0;
 }
 

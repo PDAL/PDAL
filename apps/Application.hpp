@@ -88,6 +88,7 @@ public:
 protected:
     // this is protected; your derived class ctor will be the public entry point
     Application(int argc, char* argv[], const std::string& appName);
+    ~Application();
 
     // implement this, with calls to addOptionSet()
     virtual void addSwitches() {}

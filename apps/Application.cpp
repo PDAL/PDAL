@@ -61,6 +61,17 @@ Application::Application(int argc, char* argv[], const std::string& appName)
     return;
 }
 
+Application::~Application()
+{
+    if (m_options.size())
+    {
+        typedef std::vector<boost::program_options::options_description*>::const_iterator  Iter;
+        for (Iter i = m_options.begin(); i != m_options.end(); ++i)
+        {
+            delete (*i);
+        }        
+    }
+}
 
 int Application::do_switches()
 {
@@ -319,7 +330,7 @@ void Application::addBasicSwitchSet()
         ;
 
     addSwitchSet(basic_options);
-
+    
     return;
 }
 
