@@ -45,7 +45,7 @@ namespace pdal
 
 PointBuffer::PointBuffer(const Schema& schema, boost::uint32_t capacity)
     : m_schema(schema)
-    , m_data(new boost::uint8_t[m_schema.getByteSize() * capacity])
+    , m_data(new boost::uint8_t[schema.getByteSize() * capacity])
     , m_numPoints(0)
     , m_capacity(capacity)
     , m_bounds(Bounds<double>::getDefaultSpatialExtent())
@@ -58,7 +58,7 @@ PointBuffer::PointBuffer(const Schema& schema, boost::uint32_t capacity)
 
 PointBuffer::PointBuffer(PointBuffer const& other)
     : m_schema(other.getSchema())
-    , m_data(new boost::uint8_t[m_schema.getByteSize() * other.m_capacity])
+    , m_data(new boost::uint8_t[other.getSchema().getByteSize() * other.m_capacity])
     , m_numPoints(other.m_numPoints)
     , m_capacity(other.m_capacity)
     , m_bounds(other.m_bounds)
@@ -67,7 +67,7 @@ PointBuffer::PointBuffer(PointBuffer const& other)
 {
     if (other.m_data)
     {
-        memcpy(m_data.get(), other.m_data.get(), m_schema.getByteSize()*m_capacity);
+        memcpy(m_data.get(), other.m_data.get(), other.getSchema().getByteSize()*m_capacity);
     }
 
 }
@@ -80,7 +80,7 @@ PointBuffer& PointBuffer::operator=(PointBuffer const& rhs)
         m_numPoints = rhs.getNumPoints();
         m_capacity = rhs.getCapacity();
         m_bounds = rhs.getSpatialBounds();
-        boost::scoped_array<boost::uint8_t> data(new boost::uint8_t[ m_schema.getByteSize()*m_capacity ]);
+        boost::scoped_array<boost::uint8_t> data(new boost::uint8_t[ m_schema.getByteSize()*m_capacity ]());
         m_data.swap(data);
         m_byteSize = rhs.m_byteSize;
         if (rhs.m_data.get())
@@ -91,10 +91,19 @@ PointBuffer& PointBuffer::operator=(PointBuffer const& rhs)
     return *this;
 }
 
+void PointBuffer::reset(Schema const& new_schema)
+{
+    m_schema = new_schema;
+    boost::scoped_array<boost::uint8_t> data(new boost::uint8_t[ m_schema.getByteSize()*m_capacity ]());
+    m_data.swap(data);
+    m_numPoints = 0;
+    m_byteSize = new_schema.getByteSize();    
+}
+
 void PointBuffer::resize(boost::uint32_t const& capacity)
 {
     m_capacity = capacity;
-    boost::scoped_array<boost::uint8_t> data(new boost::uint8_t[ m_schema.getByteSize()*m_capacity ]);
+    boost::scoped_array<boost::uint8_t> data(new boost::uint8_t[ m_schema.getByteSize()*m_capacity ]());
     m_data.swap(data);    
 }
 

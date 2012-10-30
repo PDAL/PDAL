@@ -85,6 +85,8 @@ public:
 
     /// Destructor.
     ~PointBuffer() {};
+    
+    void reset(Schema const& new_schema);
 
     /** @name Attribute access
     */
