@@ -214,7 +214,7 @@ Selector::Selector(const pdal::filters::Selector& filter, PointBuffer& buffer)
 
 void Selector::alterSchema(PointBuffer& buffer)
 {
-    Schema const& original_schema = buffer.getSchema();
+    Schema original_schema = buffer.getSchema();
     
     // Add new dimensions to the schema first in case we wanted to ignore them 
     // or something silly like that.
@@ -275,7 +275,8 @@ void Selector::alterSchema(PointBuffer& buffer)
         }
 
     }
-    buffer = PointBuffer(new_schema, buffer.getCapacity());
+
+    buffer.reset(new_schema);
 }
 
 
