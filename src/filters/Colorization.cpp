@@ -293,9 +293,10 @@ bool Colorization::getPixelAndLinePosition(double x,
         throw pdal_error("Unable to get X or Y size from raster!");
     }
 
-    if (pixel < 0 || line < 0
-            || pixel >= xs
-            || line  >= ys
+    if (pixel < 0 || 
+        line < 0 || 
+        pixel >= xs || 
+        line  >= ys
        )
     {
         // The x, y is not coincident with this raster
