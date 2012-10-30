@@ -54,7 +54,6 @@ Writer::Writer(Stage& prevStage, const Options& options)
     : StageBase(StageBase::makeVector(prevStage), options)
     , m_chunkSize(options.getValueOrDefault("chunk_size", s_defaultChunkSize))
     , m_userCallback(0)
-    , m_buffer(0)
 {
     return;
 }
@@ -65,12 +64,6 @@ void Writer::initialize()
     StageBase::initialize();
 
     return;
-}
-
-Writer::~Writer()
-{
-    if (m_buffer != 0)
-        delete m_buffer;
 }
 
 
@@ -160,9 +153,9 @@ boost::uint64_t Writer::write(  boost::uint64_t targetNumPointsToWrite,
     do_callback(0.0, callback);
 
     const Schema& schema = getPrevStage().getSchema();
-    m_buffer = new PointBuffer (schema, m_chunkSize);
+    PointBuffer buffer(schema, m_chunkSize);
 
-    boost::scoped_ptr<StageSequentialIterator> iter(getPrevStage().createSequentialIterator(*m_buffer));
+    boost::scoped_ptr<StageSequentialIterator> iter(getPrevStage().createSequentialIterator(buffer));
     
     if (startingPosition)
         iter->skip(startingPosition);
@@ -200,28 +193,28 @@ boost::uint64_t Writer::write(  boost::uint64_t targetNumPointsToWrite,
             const boost::uint32_t numPointsToReadThisChunk = static_cast<boost::uint32_t>(numPointsToReadThisChunk64);
 
             // we are reusing the buffer, so we may need to adjust the capacity for the last (and likely undersized) chunk
-            if (m_buffer->getCapacity() != numPointsToReadThisChunk)
+            if (buffer.getCapacity() != numPointsToReadThisChunk)
             {
-                m_buffer->resize(numPointsToReadThisChunk);
+                buffer.resize(numPointsToReadThisChunk);
             }
         }
 
         // read...
-        iter->readBufferBegin(*m_buffer);
-        const boost::uint32_t numPointsReadThisChunk = iter->readBuffer(*m_buffer);
-        iter->readBufferEnd(*m_buffer);
+        iter->readBufferBegin(buffer);
+        const boost::uint32_t numPointsReadThisChunk = iter->readBuffer(buffer);
+        iter->readBufferEnd(buffer);
 
-        assert(numPointsReadThisChunk == m_buffer->getNumPoints());
-        assert(numPointsReadThisChunk <= m_buffer->getCapacity());
+        assert(numPointsReadThisChunk == buffer.getNumPoints());
+        assert(numPointsReadThisChunk <= buffer.getCapacity());
 
         // have we reached the end yet?
         if (numPointsReadThisChunk == 0) break;
 
         // write...
-        writeBufferBegin(*m_buffer);
-        const boost::uint32_t numPointsWrittenThisChunk = writeBuffer(*m_buffer);
+        writeBufferBegin(buffer);
+        const boost::uint32_t numPointsWrittenThisChunk = writeBuffer(buffer);
         assert(numPointsWrittenThisChunk == numPointsReadThisChunk);
-        writeBufferEnd(*m_buffer);
+        writeBufferEnd(buffer);
 
         // update count
         actualNumPointsWritten += numPointsWrittenThisChunk;
@@ -235,7 +228,7 @@ boost::uint64_t Writer::write(  boost::uint64_t targetNumPointsToWrite,
         }
 
         // reset the buffer, so we can use it again
-        m_buffer->setNumPoints(0);
+        buffer.setNumPoints(0);
     }
 
     iter->readEnd();
