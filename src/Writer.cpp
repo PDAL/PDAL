@@ -239,13 +239,15 @@ boost::uint64_t Writer::write(  boost::uint64_t targetNumPointsToWrite,
     }
 
     iter->readEnd();
-
+    
     writeEnd(actualNumPointsWritten);
 
     assert((targetNumPointsToWrite == 0) || (actualNumPointsWritten <= targetNumPointsToWrite));
 
     do_callback(100.0, callback);
 
+    delete iter;
+    
     return actualNumPointsWritten;
 }
 
