@@ -152,8 +152,11 @@ void Selector::checkImpedance()
                 std::string endy = ops.getValueOrDefault<std::string>("endianness", "little");
                 if (boost::iequals(endy, "big"))
                     endianness = Endian_Big;
-                
-                uuid = ops.getValueOrDefault<dimension::id>("uuid", boost::uuids::random_generator()());
+
+                boost::mt19937 ran;
+                boost::uuids::basic_random_generator<boost::mt19937> gen(&ran);
+                boost::uuids::uuid a_random_one = gen();                
+                uuid = ops.getValueOrDefault<dimension::id>("uuid", a_random_one);
                 parent_uuid = ops.getValueOrDefault<dimension::id>("parent_uuid",  boost::uuids::nil_uuid());
 
                 minimum = ops.getValueOrDefault<double>("minimum", 0.0);
