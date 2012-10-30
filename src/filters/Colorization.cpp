@@ -66,25 +66,12 @@ struct GDALSourceDeleter
 
 Colorization::Colorization(Stage& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
-    , m_ds(0)
 {
     return;
 }
 
 Colorization::~Colorization()
 {
-#ifdef PDAL_HAVE_GDAL
-
-
-    if (m_ds != 0)
-    {
-        GDALClose(m_ds);
-        m_ds = 0;
-    }
-        
-
-
-#endif
 }
 
 void Colorization::initialize()
@@ -98,23 +85,6 @@ void Colorization::initialize()
     pdal::GlobalEnvironment::get().getGDALEnvironment();
     
     pdal::GlobalEnvironment::get().getGDALDebug()->addLog(log());
-
-    m_forward_transform.assign(0.0);
-    m_inverse_transform.assign(0.0);
-
-    std::string filename = getOptions().getValueOrThrow<std::string>("raster");
-
-    log()->get(logDEBUG) << "Using " << filename << " for raster" << std::endl;
-    m_ds = GDALOpen(filename.c_str(), GA_ReadOnly);
-    if (m_ds == NULL)
-        throw pdal_error("Unable to open GDAL datasource!");
-
-    if (GDALGetGeoTransform(m_ds, &(m_forward_transform.front())) != CE_None)
-    {
-        throw pdal_error("unable to fetch forward geotransform for raster!");
-    }
-
-    GDALInvGeoTransform(&(m_forward_transform.front()), &(m_inverse_transform.front()));
 
 #endif
     return;
@@ -215,14 +185,6 @@ void Colorization::collectOptions()
     return;
 }
 
-
-
-void Colorization::processBuffer(PointBuffer& /* data */) const
-{
-    return;
-}
-
-
 pdal::StageSequentialIterator* Colorization::createSequentialIterator(PointBuffer& buffer) const
 {
     return new pdal::filters::iterators::sequential::Colorization(*this, buffer);
@@ -239,7 +201,37 @@ Colorization::Colorization(const pdal::filters::Colorization& filter, PointBuffe
     : pdal::FilterSequentialIterator(filter, buffer)
     , m_stage(filter)
 {
+
+    m_forward_transform.assign(0.0);
+    m_inverse_transform.assign(0.0);
+
+    std::string filename = filter.getOptions().getValueOrThrow<std::string>("raster");
+
+    filter.log()->get(logDEBUG) << "Using " << filename << " for raster" << std::endl;
+    m_ds = GDALOpen(filename.c_str(), GA_ReadOnly);
+    if (m_ds == NULL)
+        throw pdal_error("Unable to open GDAL datasource!");
+    
+    if (GDALGetGeoTransform(m_ds, &(m_forward_transform.front())) != CE_None)
+    {
+        throw pdal_error("unable to fetch forward geotransform for raster!");
+    }
+
+    GDALInvGeoTransform(&(m_forward_transform.front()), &(m_inverse_transform.front()));
+
+    
     return;
+}
+
+Colorization::~Colorization()
+{
+
+    if (m_ds != 0)
+    {
+        GDALClose(m_ds);
+        m_ds = 0;
+    }
+    
 }
 
 void Colorization::readBufferBeginImpl(PointBuffer& buffer)
@@ -252,7 +244,11 @@ void Colorization::readBufferBeginImpl(PointBuffer& buffer)
 
     std::map<std::string, boost::uint32_t> band_map = m_stage.getBandMap();
     std::map<std::string, double> scale_map = m_stage.getScaleMap();
-
+    
+    m_dimensions.clear();
+    m_bands.clear();
+    m_scales.clear();
+    
     for (std::map<std::string, boost::uint32_t>::const_iterator i = band_map.begin();
             i != band_map.end();
             ++i)
@@ -277,7 +273,7 @@ bool Colorization::getPixelAndLinePosition(double x,
         boost::array<double, 6> const& inverse,
         boost::int32_t& pixel,
         boost::int32_t& line,
-        void* ds)
+        GDALDatasetH ds)
 {
 #ifdef PDAL_HAVE_GDAL
     pixel = (boost::int32_t) std::floor(
@@ -288,10 +284,18 @@ bool Colorization::getPixelAndLinePosition(double x,
                inverse[3]
                + inverse[4] * x
                + inverse[5] * y);
+    
+    int xs = GDALGetRasterXSize(ds);
+    int ys = GDALGetRasterYSize(ds);
+    
+    if (!xs || !ys)
+    {
+        throw pdal_error("Unable to get X or Y size from raster!");
+    }
 
     if (pixel < 0 || line < 0
-            || pixel >= GDALGetRasterXSize(ds)
-            || line  >= GDALGetRasterYSize(ds)
+            || pixel >= xs
+            || line  >= ys
        )
     {
         // The x, y is not coincident with this raster
@@ -309,10 +313,6 @@ boost::uint32_t Colorization::readBufferImpl(PointBuffer& data)
 
 #ifdef PDAL_HAVE_GDAL
 
-    boost::array<double, 6> inverse = m_stage.getInverseTransform();
-
-    void* ds = m_stage.getDataSource();
-
     boost::int32_t pixel(0);
     boost::int32_t line(0);
     double x(0.0);
@@ -327,14 +327,14 @@ boost::uint32_t Colorization::readBufferImpl(PointBuffer& data)
         x = getScaledValue(data, *m_dimX, pointIndex);
         y = getScaledValue(data, *m_dimY, pointIndex);
 
-        fetched = getPixelAndLinePosition(x, y, inverse, pixel, line, ds);
+        fetched = getPixelAndLinePosition(x, y, m_inverse_transform, pixel, line, m_ds);
         if (!fetched)
             continue;
 
         for (std::vector<boost::int32_t>::size_type i = 0;
                 i < m_bands.size(); i++)
         {
-            GDALRasterBandH hBand = GDALGetRasterBand(ds, m_bands[i]);
+            GDALRasterBandH hBand = GDALGetRasterBand(m_ds, m_bands[i]);
             if (hBand == NULL)
             {
                 std::ostringstream oss;

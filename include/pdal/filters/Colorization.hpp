@@ -42,6 +42,11 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/array.hpp>
 
+#ifdef PDAL_HAVE_GDAL
+#include <gdal.h>
+#include <ogr_spatialref.h>
+#include <pdal/GDALUtils.hpp>
+#endif
 
 namespace pdal
 {
@@ -91,20 +96,6 @@ public:
         return NULL;
     }
 
-    void processBuffer(PointBuffer& data) const;
-
-    boost::array<double, 6> getForwardTransform() const
-    {
-        return m_forward_transform;
-    }
-    boost::array<double, 6> getInverseTransform() const
-    {
-        return m_inverse_transform;
-    }
-    void* getDataSource() const
-    {
-        return m_ds;
-    }
     std::map<std::string, boost::uint32_t> getBandMap() const
     {
         return m_band_map;
@@ -117,14 +108,8 @@ public:
 private:
     void collectOptions();
 
-    void* m_ds;
-
     std::map<std::string, boost::uint32_t> m_band_map;
     std::map<std::string, double> m_scale_map;
-    boost::array<double, 6> m_forward_transform;
-    boost::array<double, 6> m_inverse_transform;
-    boost::uint32_t m_scale;
-
 
     Colorization& operator=(const Colorization&); // not implemented
     Colorization(const Colorization&); // not implemented
@@ -140,7 +125,7 @@ class PDAL_DLL Colorization : public pdal::FilterSequentialIterator
 {
 public:
     Colorization(const pdal::filters::Colorization& filter, PointBuffer& buffer);
-
+    ~Colorization();
 protected:
     virtual void readBufferBeginImpl(PointBuffer&);
 
@@ -169,6 +154,16 @@ private:
     std::vector<boost::uint32_t> m_bands;
     std::vector<double> m_scales;
     const pdal::filters::Colorization& m_stage;
+
+    boost::array<double, 6> m_forward_transform;
+    boost::array<double, 6> m_inverse_transform;
+
+#ifdef PDAL_HAVE_GDAL
+    GDALDatasetH m_ds;
+#else
+    void* m_ds;
+#endif
+    
 };
 
 
