@@ -353,6 +353,7 @@ Reader::Reader(std::istream* xml, std::istream *xsd) : m_doc_options(XML_PARSE_N
 
 Reader::~Reader()
 {
+  xmlCleanupParser();    
 }
 
 
