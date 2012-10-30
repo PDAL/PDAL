@@ -60,6 +60,7 @@ namespace las
 Writer::Writer(Stage& prevStage, const Options& options)
     : pdal::Writer(prevStage, options)
     , m_streamManager(options.getOption("filename").getValue<std::string>())
+    , m_numPointsWritten(0)
     , m_headerInitialized(false)
     , m_streamOffset(0)
 {
