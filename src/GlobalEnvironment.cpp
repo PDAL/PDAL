@@ -138,11 +138,11 @@ GlobalEnvironment::~GlobalEnvironment()
 #ifdef PDAL_HAVE_GDAL
     if (m_bIsGDALInitialized)
     {
-        (void) GDALDestroyDriverManager();
-        m_bIsGDALInitialized = false;
-        
         if (m_gdal_debug)
             delete m_gdal_debug;
+            
+        (void) GDALDestroyDriverManager();
+        m_bIsGDALInitialized = false;
     }
 #endif
 
