@@ -52,100 +52,100 @@ using namespace pdal;
 
 BOOST_AUTO_TEST_SUITE(StatsFilterTest)
 
-// BOOST_AUTO_TEST_CASE(StatsFilterTest_test1)
-// {
-//     Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
-//     pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Constant);
-// 
-//     pdal::filters::Stats filter(reader, Options::none());
-//     BOOST_CHECK_EQUAL(filter.getName(), "filters.stats");
-//     BOOST_CHECK_EQUAL(filter.getDescription(), "Statistics Filter");
-//     filter.initialize();
-// 
-//     const Schema& schema = filter.getSchema();
-//     PointBuffer data(schema, 1000);
-// 
-//     boost::scoped_ptr<pdal::StageSequentialIterator> iter(filter.createSequentialIterator(data));
-//     {
-//         boost::uint32_t numRead = iter->read(data);
-//         BOOST_CHECK_EQUAL(numRead, 1000u);
-// 
-//     }
-// 
-//     pdal::filters::iterators::sequential::Stats* iterator = static_cast<pdal::filters::iterators::sequential::Stats*>(iter.get());
-// 
-//     const pdal::filters::stats::Summary& statsX = iterator->getStats(schema.getDimension("X"));
-//     const pdal::filters::stats::Summary& statsY = iterator->getStats(schema.getDimension("Y"));
-//     const pdal::filters::stats::Summary& statsZ = iterator->getStats(schema.getDimension("Z"));
-// 
-//     BOOST_CHECK_EQUAL(statsX.count(), 1000u);
-//     BOOST_CHECK_EQUAL(statsY.count(), 1000u);
-//     BOOST_CHECK_EQUAL(statsZ.count(), 1000u);
-// 
-//     BOOST_CHECK_CLOSE(statsX.minimum(), 1.0, 0.0001);
-//     BOOST_CHECK_CLOSE(statsY.minimum(), 2.0, 0.0001);
-//     BOOST_CHECK_CLOSE(statsZ.minimum(), 3.0, 0.0001);
-// 
-//     BOOST_CHECK_CLOSE(statsX.maximum(), 1.0, 0.0001);
-//     BOOST_CHECK_CLOSE(statsY.maximum(), 2.0, 0.0001);
-//     BOOST_CHECK_CLOSE(statsZ.maximum(), 3.0, 0.0001);
-// 
-//     BOOST_CHECK_CLOSE(statsX.average(), 1.0, 0.0001);
-//     BOOST_CHECK_CLOSE(statsY.average(), 2.0, 0.0001);
-//     BOOST_CHECK_CLOSE(statsZ.average(), 3.0, 0.0001);
-// 
-//     return;
-// }
-// 
-// 
-// 
-// 
-// BOOST_AUTO_TEST_CASE(test_random_iterator)
-// {
-//     pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
-//     BOOST_CHECK(reader.getDescription() == "Las Reader");
-// 
-//     pdal::filters::Stats filter(reader, Options::none());    
-//     filter.initialize();
-// 
-//     const Schema& schema = reader.getSchema();
-// 
-//     PointBuffer data(schema, 3);
-// 
-//     pdal::StageRandomIterator* iter = reader.createRandomIterator(data);
-// 
-//     {
-//         boost::uint32_t numRead = iter->read(data);
-//         BOOST_CHECK(numRead == 3);
-// 
-//         Support::check_p0_p1_p2(data);
-//     }
-// 
-//     // Can we seek it? Yes, we can!
-//     iter->seek(100);
-//     {
-//         BOOST_CHECK(iter->getIndex() == 100);
-//         boost::uint32_t numRead = iter->read(data);
-//         BOOST_CHECK(numRead == 3);
-// 
-//         Support::check_p100_p101_p102(data);
-//     }
-// 
-//     // Can we seek to beginning? Yes, we can!
-//     iter->seek(0);
-//     {
-//         BOOST_CHECK(iter->getIndex() == 0);
-//         boost::uint32_t numRead = iter->read(data);
-//         BOOST_CHECK(numRead == 3);
-// 
-//         Support::check_p0_p1_p2(data);
-//     }
-// 
-//     delete iter;
-// 
-//     return;
-// }
-// 
+BOOST_AUTO_TEST_CASE(StatsFilterTest_test1)
+{
+    Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
+    pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Constant);
+
+    pdal::filters::Stats filter(reader, Options::none());
+    BOOST_CHECK_EQUAL(filter.getName(), "filters.stats");
+    BOOST_CHECK_EQUAL(filter.getDescription(), "Statistics Filter");
+    filter.initialize();
+
+    const Schema& schema = filter.getSchema();
+    PointBuffer data(schema, 1000);
+
+    boost::scoped_ptr<pdal::StageSequentialIterator> iter(filter.createSequentialIterator(data));
+    {
+        boost::uint32_t numRead = iter->read(data);
+        BOOST_CHECK_EQUAL(numRead, 1000u);
+
+    }
+
+    pdal::filters::iterators::sequential::Stats* iterator = static_cast<pdal::filters::iterators::sequential::Stats*>(iter.get());
+
+    const pdal::filters::stats::Summary& statsX = iterator->getStats(schema.getDimension("X"));
+    const pdal::filters::stats::Summary& statsY = iterator->getStats(schema.getDimension("Y"));
+    const pdal::filters::stats::Summary& statsZ = iterator->getStats(schema.getDimension("Z"));
+
+    BOOST_CHECK_EQUAL(statsX.count(), 1000u);
+    BOOST_CHECK_EQUAL(statsY.count(), 1000u);
+    BOOST_CHECK_EQUAL(statsZ.count(), 1000u);
+
+    BOOST_CHECK_CLOSE(statsX.minimum(), 1.0, 0.0001);
+    BOOST_CHECK_CLOSE(statsY.minimum(), 2.0, 0.0001);
+    BOOST_CHECK_CLOSE(statsZ.minimum(), 3.0, 0.0001);
+
+    BOOST_CHECK_CLOSE(statsX.maximum(), 1.0, 0.0001);
+    BOOST_CHECK_CLOSE(statsY.maximum(), 2.0, 0.0001);
+    BOOST_CHECK_CLOSE(statsZ.maximum(), 3.0, 0.0001);
+
+    BOOST_CHECK_CLOSE(statsX.average(), 1.0, 0.0001);
+    BOOST_CHECK_CLOSE(statsY.average(), 2.0, 0.0001);
+    BOOST_CHECK_CLOSE(statsZ.average(), 3.0, 0.0001);
+
+    return;
+}
+
+
+
+
+BOOST_AUTO_TEST_CASE(test_random_iterator)
+{
+    pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
+    BOOST_CHECK(reader.getDescription() == "Las Reader");
+
+    pdal::filters::Stats filter(reader, Options::none());    
+    filter.initialize();
+
+    const Schema& schema = reader.getSchema();
+
+    PointBuffer data(schema, 3);
+
+    pdal::StageRandomIterator* iter = reader.createRandomIterator(data);
+
+    {
+        boost::uint32_t numRead = iter->read(data);
+        BOOST_CHECK(numRead == 3);
+
+        Support::check_p0_p1_p2(data);
+    }
+
+    // Can we seek it? Yes, we can!
+    iter->seek(100);
+    {
+        BOOST_CHECK(iter->getIndex() == 100);
+        boost::uint32_t numRead = iter->read(data);
+        BOOST_CHECK(numRead == 3);
+
+        Support::check_p100_p101_p102(data);
+    }
+
+    // Can we seek to beginning? Yes, we can!
+    iter->seek(0);
+    {
+        BOOST_CHECK(iter->getIndex() == 0);
+        boost::uint32_t numRead = iter->read(data);
+        BOOST_CHECK(numRead == 3);
+
+        Support::check_p0_p1_p2(data);
+    }
+
+    delete iter;
+
+    return;
+}
+
 
 BOOST_AUTO_TEST_CASE(InPlaceReprojectionFilterTest_test_1)
 {
