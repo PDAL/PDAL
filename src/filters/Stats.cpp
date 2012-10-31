@@ -414,9 +414,8 @@ void Stats::readBufferBeginImpl(PointBuffer& buffer)
 
         for (schema::index_by_index::const_iterator iter = dims.begin(); iter != dims.end(); ++iter)
         {
-            if (iter->isIgnored()) continue;
             DimensionPtr d = boost::shared_ptr<Dimension>(new Dimension(*iter));
-            getStage().log()->get(logDEBUG2) << "Cumulating stats for dimension " << d->getName() << std::endl;
+            getStage().log()->get(logDEBUG2) << "Cumulating stats for dimension " << d->getName() << " with namespace: " << d->getNamespace() << std::endl;
             
             std::map<std::string, bool>::const_iterator exact = exact_dimensions.find(d->getName());
             bool doExact(false);
@@ -453,6 +452,7 @@ pdal::Metadata Stats::toMetadata() const
 
         pdal::Metadata sub = stat->toMetadata();
         sub.setName(d->getName());
+        sub.addMetadata("namespace", d->getNamespace());
         sub.addMetadata("position", position);
         output.addMetadata(sub);
         position++;
