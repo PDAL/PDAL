@@ -121,22 +121,23 @@ BOOST_AUTO_TEST_CASE(test_find)
     x1.setParent(x.getUUID());
     y1.setParent(y.getUUID());
 
-
     Schema s;
     s.appendDimension(x);
     s.appendDimension(y);
     s.appendDimension(x1);
     s.appendDimension(y1);
     
-    std::cout << s << std::endl;
-    
-    Dimension const& first = s.getDimension("X");
-    BOOST_CHECK_EQUAL(first.getNamespace(), "first");
-    BOOST_CHECK_EQUAL(first.getName(), "X");
+    Dimension const& second = s.getDimension("X");
+    BOOST_CHECK_EQUAL(second.getNamespace(), "second");
+    BOOST_CHECK_EQUAL(second.getName(), "X");
 
-    // BOOST_CHECK_EQUAL(s.getDimension("Y").getNamespace(), "");
-    // BOOST_CHECK_EQUAL(s.getDimension("Y").getName(), "Y");
+    Dimension const& second_ns = s.getDimension("second.X");
+    BOOST_CHECK_EQUAL(second_ns.getNamespace(), "second");
+    BOOST_CHECK_EQUAL(second_ns.getName(), "X");
 
+    Dimension const& first_ns = s.getDimension("first.X");
+    BOOST_CHECK_EQUAL(first_ns.getNamespace(), "first");
+    BOOST_CHECK_EQUAL(first_ns.getName(), "X");
 
 }
 
