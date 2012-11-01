@@ -99,4 +99,47 @@ BOOST_AUTO_TEST_CASE(SchemaTest_ptree)
 }
 
 
+BOOST_AUTO_TEST_CASE(test_find)
+{
+    Dimension x("X", dimension::SignedInteger, 4);
+    Dimension y("Y", dimension::SignedInteger, 4);
+    Dimension x1("X", dimension::SignedInteger, 4);
+    Dimension y1("Y", dimension::SignedInteger, 4);
+    
+    x.createUUID();
+    x.setNamespace("first");
+    
+    y.createUUID();
+    y.setNamespace("first");
+    
+    x1.createUUID();
+    x1.setNamespace("second");
+    
+    y1.createUUID();
+    y1.setNamespace("second");
+    
+    x1.setParent(x.getUUID());
+    y1.setParent(y.getUUID());
+
+
+    Schema s;
+    s.appendDimension(x);
+    s.appendDimension(y);
+    s.appendDimension(x1);
+    s.appendDimension(y1);
+    
+    std::cout << s << std::endl;
+    
+    Dimension const& first = s.getDimension("X");
+    BOOST_CHECK_EQUAL(first.getNamespace(), "first");
+    BOOST_CHECK_EQUAL(first.getName(), "X");
+
+    // BOOST_CHECK_EQUAL(s.getDimension("Y").getNamespace(), "");
+    // BOOST_CHECK_EQUAL(s.getDimension("Y").getName(), "Y");
+
+
+}
+
+
+
 BOOST_AUTO_TEST_SUITE_END()
