@@ -207,10 +207,12 @@ public:
     }
 
     void processBuffer(PointBuffer& data) const;
-
+    
+    std::vector<std::string> const& getDimensionNames() const { return m_dimension_names; }
 
 private:
-
+    
+    std::vector<std::string> m_dimension_names;
     Stats& operator=(const Stats&); // not implemented
     Stats(const Stats&); // not implemented
     
