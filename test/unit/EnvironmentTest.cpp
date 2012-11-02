@@ -36,6 +36,7 @@
 #include <boost/uuid/string_generator.hpp>
 #include <boost/uuid/random_generator.hpp>
 #include <boost/uuid/uuid_io.hpp>
+#include <boost/random/mersenne_twister.hpp>
 
 #include <pdal/GlobalEnvironment.hpp>
 #include "Support.hpp"
@@ -60,6 +61,26 @@ BOOST_AUTO_TEST_CASE(EnvironmentTest_1)
 boost::test_tools::predicate_result
 compare_uuids( boost::uuids::uuid const& a, boost::uuids::uuid const& b )
 {
+    if (a.is_nil())
+    {
+        boost::test_tools::predicate_result res( false );
+
+        res.message() << "UUID a was nil";
+
+        return res;
+    
+    }
+
+    if (b.is_nil())
+    {
+        boost::test_tools::predicate_result res( false );
+
+        res.message() << "UUID b was nil";
+
+        return res;
+    
+    }
+
     if (a == b)
     {
         boost::test_tools::predicate_result res( false );
@@ -89,6 +110,22 @@ BOOST_AUTO_TEST_CASE(EnvironmentTest_rng)
     boost::uuids::uuid d = gen1();    
 
     BOOST_CHECK( compare_uuids(c, d));
+    
+    boost::uuids::uuid e;
+    boost::uuids::uuid f;
+    {
+        boost::mt19937 rng;
+        boost::uuids::basic_random_generator<boost::mt19937> gen(&rng);
+        e = gen();    
+    }
+    {
+        boost::mt19937 rng;
+        boost::uuids::basic_random_generator<boost::mt19937> gen(&rng);
+        f = gen();    
+    }
+
+    BOOST_CHECK(compare_uuids(e, f));    
+    
     return;
 }
 
