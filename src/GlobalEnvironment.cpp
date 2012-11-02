@@ -206,7 +206,11 @@ pdal::gdal::GlobalDebug* GlobalEnvironment::getGDALDebug()
 
 boost::random::mt19937* GlobalEnvironment::getRNG()
 {
-    return getThreadEnvironment().getRNG();
+    boost::random::mt19937* rng = getThreadEnvironment().getRNG();
+    if (!rng)
+        throw pdal_error("ThreadEnvironment RNG was null!");
+        
+    return rng;
 }
 
 
