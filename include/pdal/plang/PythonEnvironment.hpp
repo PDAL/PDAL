@@ -63,14 +63,16 @@ class Redirector;
 
 #ifdef PDAL_HAVE_PYTHON
 
+
+
+std::string getPythonTraceback();
+
 // there is one PythonEnvironment object per GlobalEnvironment object
 class PDAL_DLL PythonEnvironment
 {
 public:
     PythonEnvironment();
     ~PythonEnvironment();
-
-    void handleError();
 
     // these just forward into the Redirector class
     void set_stdout(std::ostream* ostr);
@@ -80,9 +82,6 @@ public:
     void gil_unlock();
 
 private:
-    PyObject* m_tracebackModule;
-    PyObject* m_tracebackDictionary;
-    PyObject *m_tracebackFunction;
 
     Redirector* m_redirector;
 

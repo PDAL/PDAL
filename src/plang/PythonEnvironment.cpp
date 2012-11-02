@@ -58,36 +58,13 @@ namespace plang
 
 
 PythonEnvironment::PythonEnvironment()
-    : m_tracebackModule(NULL)
-    , m_tracebackDictionary(NULL)
-    , m_tracebackFunction(NULL)
-    , m_redirector(new Redirector())
+    : m_redirector(new Redirector())
 {
     PyImport_AppendInittab("redirector", redirector_init);
 
     Py_Initialize();
 
     Invocation::numpy_init();
-
-    // load traceback stuff we need for error handling
-    m_tracebackModule = PyImport_ImportModule("traceback");
-    if (!m_tracebackModule)
-    {
-        throw python_error("unable to load traceback module");
-    }
-
-    m_tracebackDictionary = PyModule_GetDict(m_tracebackModule);
-
-    m_tracebackFunction = PyDict_GetItemString(m_tracebackDictionary, "format_exception");
-    if (!m_tracebackFunction)
-    {
-        throw python_error("unable to find traceback function");
-    }
-
-    if (!PyCallable_Check(m_tracebackFunction))
-    {
-        throw python_error("invalid traceback function");
-    }
 
     PyImport_ImportModule("redirector");
 
@@ -98,10 +75,6 @@ PythonEnvironment::PythonEnvironment()
 PythonEnvironment::~PythonEnvironment()
 {
     delete m_redirector;
-
-    Py_XDECREF(m_tracebackFunction);
-
-    Py_XDECREF(m_tracebackModule);
 
     Py_Finalize();
 
@@ -124,56 +97,6 @@ void PythonEnvironment::reset_stdout()
     return;
 }
 
-
-void PythonEnvironment::handleError()
-{
-    // get exception info
-    PyObject *type, *value, *traceback;
-    PyErr_Fetch(&type, &value, &traceback);
-    PyErr_NormalizeException(&type, &value, &traceback);
-
-    std::string mssg = "";
-    if (traceback)
-    {
-        // create an argument for "format exception"
-        PyObject* args = PyTuple_New(3);
-        PyTuple_SetItem(args, 0, type);
-        PyTuple_SetItem(args, 1, value);
-        PyTuple_SetItem(args, 2, traceback);
-
-        // get a list of string describing what went wrong
-        PyObject* output = PyObject_CallObject(m_tracebackFunction, args);
-
-        // print error message
-        int i, n = PyList_Size(output);
-        for (i=0; i<n; i++) mssg += PyString_AsString(PyList_GetItem(output, i));
-
-        // clean up
-        Py_XDECREF(args);
-        Py_XDECREF(output);
-    }
-    else if (value != NULL)
-    {
-        PyObject *s = PyObject_Str(value);
-        const char* text = PyString_AS_STRING(s);
-        Py_DECREF(s);
-        mssg += text;
-    }
-    else
-    {
-        mssg = "unknown error";
-    }
-
-    Py_XDECREF(value);
-    Py_XDECREF(type);
-    Py_XDECREF(traceback);
-
-    throw python_error(mssg);
-
-    return;
-}
-    
-
 void PythonEnvironment::gil_lock()
 {
     PyGILState_STATE gstate;
@@ -190,6 +113,76 @@ void PythonEnvironment::gil_unlock()
 }
 
 
+std::string getPythonTraceback()
+{
+    PyObject* tracebackModule;
+    PyObject* tracebackDictionary;
+    PyObject* tracebackFunction;
+    tracebackModule = PyImport_ImportModule("traceback");
+    if (!tracebackModule)
+    {
+        throw python_error("unable to load traceback module while importing numpy inside PDAL");
+    }
+
+    tracebackDictionary = PyModule_GetDict(tracebackModule);
+
+    tracebackFunction = PyDict_GetItemString(tracebackDictionary, "format_exception");
+    if (!tracebackFunction)
+    {
+        throw python_error("unable to find traceback function while importing numpy inside PDAL");
+    }
+
+    if (!PyCallable_Check(tracebackFunction))
+    {
+        throw python_error("invalid traceback function while importing numpy inside PDAL");
+    }
+    
+    
+    // get exception info
+    PyObject *type, *value, *traceback;
+    PyErr_Fetch(&type, &value, &traceback);
+    PyErr_NormalizeException(&type, &value, &traceback);
+
+    std::ostringstream mssg;
+    if (traceback)
+    {
+        // create an argument for "format exception"
+        PyObject* args = PyTuple_New(3);
+        PyTuple_SetItem(args, 0, type);
+        PyTuple_SetItem(args, 1, value);
+        PyTuple_SetItem(args, 2, traceback);
+
+        // get a list of string describing what went wrong
+        PyObject* output = PyObject_CallObject(tracebackFunction, args);
+
+        // print error message
+        int i, n = PyList_Size(output);
+        for (i=0; i<n; i++) mssg << PyString_AsString(PyList_GetItem(output, i));
+
+        // clean up
+        Py_XDECREF(args);
+        Py_XDECREF(output);
+    }
+    else if (value != NULL)
+    {
+        PyObject *s = PyObject_Str(value);
+        const char* text = PyString_AS_STRING(s);
+        Py_DECREF(s);
+        mssg << text;
+    }
+    else
+    {
+        mssg << "unknown error";
+    }
+
+    Py_XDECREF(value);
+    Py_XDECREF(type);
+    Py_XDECREF(traceback);
+
+    return mssg.str();
+}
+
+	
 }
 } //namespaces
 
