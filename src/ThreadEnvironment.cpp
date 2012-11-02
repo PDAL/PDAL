@@ -33,7 +33,8 @@
 ****************************************************************************/
 
 #include <pdal/ThreadEnvironment.hpp>
-
+#include <ctime>
+#include <boost/date_time/posix_time/posix_time.hpp>
 
 namespace pdal
 {
@@ -41,8 +42,12 @@ namespace pdal
 
 ThreadEnvironment::ThreadEnvironment(boost::thread::id id)
     : m_threadId(id)
+    , m_rng(0)
 {
-    m_rng = new boost::random::mt19937();
+    boost::posix_time::ptime epoch(boost::gregorian::date(1970,1,1));
+    boost::posix_time::ptime now = boost::posix_time::second_clock::local_time();
+    boost::int64_t anumber = (now-epoch).ticks();
+    m_rng = new boost::random::mt19937(std::time(0));
 
     return;
 }
