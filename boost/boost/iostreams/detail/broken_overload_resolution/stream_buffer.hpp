@@ -11,7 +11,7 @@
 #include <boost/iostreams/detail/broken_overload_resolution/forward.hpp>
 #include <boost/throw_exception.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace iostreams {
 
 template< typename T, 
           typename Tr = 

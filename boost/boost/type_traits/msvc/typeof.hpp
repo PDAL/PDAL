@@ -8,7 +8,7 @@
 #include <boost/config.hpp>
 #include <boost/detail/workaround.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace detail {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace detail {
 # if BOOST_WORKAROUND(BOOST_MSVC,==1300)
         template<typename ID>
         struct msvc_extract_type

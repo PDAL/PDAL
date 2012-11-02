@@ -12,7 +12,8 @@
 
 #if defined(BOOST_HAS_WINTHREADS)
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
     BOOST_THREAD_DECL void __cdecl pdalbooston_process_enter(void);
         //Function to be called when the exe or dll
             //that uses Boost.Threads first starts

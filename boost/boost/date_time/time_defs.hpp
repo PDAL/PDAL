@@ -6,7 +6,7 @@
  * Boost Software License, Version 1.0. (See accompanying
  * file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
  * Author: Jeff Garland 
- * $Date: 2008-11-12 14:37:53 -0500 (Wed, 12 Nov 2008) $
+ * $Date: 2008-11-12 11:37:53 -0800 (Wed, 12 Nov 2008) $
  */
 
 
@@ -16,7 +16,7 @@
   reprsentations.
 */
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace date_time {
 
   //!Defines some nice types for handling time level resolutions

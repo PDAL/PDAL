@@ -37,7 +37,8 @@
 #include <functional>       // std::less
 #include <new>              // std::bad_alloc
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 
 namespace detail
 {

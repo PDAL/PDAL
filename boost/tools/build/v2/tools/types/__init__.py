@@ -5,6 +5,7 @@ __all__ = [
     'html',
     'lib',
     'obj',
+    'preprocessed',
     'rsp',
 ]
 

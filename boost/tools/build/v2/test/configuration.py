@@ -47,6 +47,14 @@ import feature ;
 feature.extend toolset : %s ;
 rule init ( ) { }
 """ % toolsetName )
+
+    # Python version of same dummy toolset.
+    t.write(toolsetName + ".py", """
+from b2.build import feature
+feature.extend('toolset', ['%s'])
+def init(): pass
+""" % toolsetName )
+    
     t.write("jamroot.jam", "using %s ;" % toolsetName)
 
     t.run_build_system()

@@ -28,7 +28,7 @@
 // Must come last.
 #include <boost/iostreams/detail/config/disable_warnings.hpp>  // MSVC.
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams { namespace detail {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace iostreams { namespace detail {
 
 // Used for simulated tag dispatch.
 template<typename Traversal> struct range_adapter_impl;
@@ -36,7 +36,7 @@ template<typename Traversal> struct range_adapter_impl;
 //
 // Template name: range_adapter
 // Description: Device based on an instance of pdalboost::iterator_range.
-// Template paramters:
+// Template parameters:
 //     Mode - A mode tag.
 //     Range - An instance of iterator_range.
 //

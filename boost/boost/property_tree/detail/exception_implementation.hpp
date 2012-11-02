@@ -11,7 +11,7 @@
 #ifndef BOOST_PROPERTY_TREE_DETAIL_EXCEPTIONS_IMPLEMENTATION_HPP_INCLUDED
 #define BOOST_PROPERTY_TREE_DETAIL_EXCEPTIONS_IMPLEMENTATION_HPP_INCLUDED
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace property_tree
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace property_tree
 {
 
     namespace detail
@@ -53,7 +53,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespac
     }
 
     template<class D> inline
-    D ptree_bad_data::data()
+    D ptree_bad_data::data() const
     {
         return pdalboost::any_cast<D>(m_data);
     }
@@ -73,7 +73,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespac
     }
 
     template<class P> inline
-    P ptree_bad_path::path()
+    P ptree_bad_path::path() const
     {
         return pdalboost::any_cast<P>(m_path);
     }

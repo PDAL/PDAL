@@ -11,7 +11,7 @@
 // See http://www.boost.org/libs/mpl for documentation.
 
 // $Id: eval_if.hpp 61921 2010-05-11 21:33:24Z neilgroves $
-// $Date: 2010-05-11 17:33:24 -0400 (Tue, 11 May 2010) $
+// $Date: 2010-05-11 14:33:24 -0700 (Tue, 11 May 2010) $
 // $Revision: 61921 $
 
 #include <boost/mpl/if.hpp>
@@ -21,7 +21,7 @@
 #include <boost/mpl/aux_/config/gcc.hpp>
 #include <boost/mpl/aux_/config/workaround.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace mpl {
 
 template<
       typename BOOST_MPL_AUX_NA_PARAM(C)

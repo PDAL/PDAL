@@ -95,7 +95,8 @@
 # include <boost/type_traits/remove_const.hpp>
 #endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 
 // forward declarations for iterator_range
 template<typename T>
@@ -192,7 +193,8 @@ template<typename T>
 inline pdalboost::foreach::is_noncopyable<T> *
 boost_foreach_is_noncopyable(T *&, BOOST_FOREACH_TAG_DEFAULT) { return 0; }
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 
 namespace foreach_detail_
 {

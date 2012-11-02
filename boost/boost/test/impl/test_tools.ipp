@@ -49,7 +49,7 @@ namespace std { using ::wcscmp; }
 #endif
 # endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
 namespace test_tools {
 

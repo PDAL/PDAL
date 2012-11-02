@@ -11,7 +11,7 @@
 // See http://www.boost.org/libs/mpl for documentation.
 
 // $Id: multiplies.hpp 49267 2008-10-11 06:19:02Z agurtovoy $
-// $Date: 2008-10-11 02:19:02 -0400 (Sat, 11 Oct 2008) $
+// $Date: 2008-10-10 23:19:02 -0700 (Fri, 10 Oct 2008) $
 // $Revision: 49267 $
 
 #include <boost/mpl/times.hpp>
@@ -23,7 +23,7 @@
 
 // backward compatibility header, deprecated
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace mpl {
 
 #if !defined(BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION)
 #   define AUX778076_OP_ARITY BOOST_MPL_LIMIT_METAFUNCTION_ARITY

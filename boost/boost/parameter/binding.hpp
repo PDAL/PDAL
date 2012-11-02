@@ -15,7 +15,7 @@
 #  include <boost/mpl/eval_if.hpp>
 # endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace parameter { 
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace parameter { 
 
 // A metafunction that, given an argument pack, returns the type of
 // the parameter identified by the given keyword.  If no such

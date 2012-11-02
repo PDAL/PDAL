@@ -17,7 +17,7 @@
 #include <boost/iterator/iterator_categories.hpp>
 #include <boost/function.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
     namespace algorithm { 
         namespace detail {
 

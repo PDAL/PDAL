@@ -18,7 +18,8 @@
 #include <iterator>
 #include <boost/io/ios_state.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
   namespace io
   {
     namespace detail { template <class String, class Char> struct quoted_proxy; }

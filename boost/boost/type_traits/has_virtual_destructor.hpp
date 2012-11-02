@@ -14,7 +14,7 @@
 // should be the last #include
 #include <boost/type_traits/detail/bool_trait_def.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
 #ifdef BOOST_HAS_VIRTUAL_DESTRUCTOR
 BOOST_TT_AUX_BOOL_TRAIT_DEF1(has_virtual_destructor,T,BOOST_HAS_VIRTUAL_DESTRUCTOR(T))

@@ -31,7 +31,7 @@
     or \c std::list<pdalboost::iterator_range<std::string::iterator>>
 */
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
     namespace algorithm {
 
 //  find_all  ------------------------------------------------------------//

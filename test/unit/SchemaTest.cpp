@@ -99,4 +99,48 @@ BOOST_AUTO_TEST_CASE(SchemaTest_ptree)
 }
 
 
+BOOST_AUTO_TEST_CASE(test_find)
+{
+    Dimension x("X", dimension::SignedInteger, 4);
+    Dimension y("Y", dimension::SignedInteger, 4);
+    Dimension x1("X", dimension::SignedInteger, 4);
+    Dimension y1("Y", dimension::SignedInteger, 4);
+    
+    x.createUUID();
+    x.setNamespace("first");
+    
+    y.createUUID();
+    y.setNamespace("first");
+    
+    x1.createUUID();
+    x1.setNamespace("second");
+    
+    y1.createUUID();
+    y1.setNamespace("second");
+    
+    x1.setParent(x.getUUID());
+    y1.setParent(y.getUUID());
+
+    Schema s;
+    s.appendDimension(x);
+    s.appendDimension(y);
+    s.appendDimension(x1);
+    s.appendDimension(y1);
+    
+    Dimension const& second = s.getDimension("X");
+    BOOST_CHECK_EQUAL(second.getNamespace(), "second");
+    BOOST_CHECK_EQUAL(second.getName(), "X");
+
+    Dimension const& second_ns = s.getDimension("second.X");
+    BOOST_CHECK_EQUAL(second_ns.getNamespace(), "second");
+    BOOST_CHECK_EQUAL(second_ns.getName(), "X");
+
+    Dimension const& first_ns = s.getDimension("first.X");
+    BOOST_CHECK_EQUAL(first_ns.getNamespace(), "first");
+    BOOST_CHECK_EQUAL(first_ns.getName(), "X");
+
+}
+
+
+
 BOOST_AUTO_TEST_SUITE_END()

@@ -12,7 +12,7 @@
 #ifndef BOOST_SYSTEM_LOCAL_FREE_ON_EXIT_HPP
 #define BOOST_SYSTEM_LOCAL_FREE_ON_EXIT_HPP
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace system {
 namespace detail {
 

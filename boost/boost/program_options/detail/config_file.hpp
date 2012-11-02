@@ -17,9 +17,7 @@
 #include <boost/program_options/eof_iterator.hpp>
 
 #include <boost/detail/workaround.hpp>
-#if BOOST_WORKAROUND(__MWERKS__, BOOST_TESTED_AT(0x3202))
 #include <boost/program_options/detail/convert.hpp>
-#endif
 
 #if BOOST_WORKAROUND(__DECCXX_VER, BOOST_TESTED_AT(60590042))
 #include <istream> // std::getline
@@ -31,7 +29,7 @@
 
 
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace program_options { namespace detail {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace program_options { namespace detail {
 
     /** Standalone parser for config files in ini-line format.
         The parser is a model of single-pass lvalue iterator, and

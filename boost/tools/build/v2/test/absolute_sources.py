@@ -26,6 +26,7 @@ t.write("empty.cpp", "\n")
 
 t.run_build_system()
 t.expect_addition("bin/$toolset/debug/hello.exe")
+t.rm(".")
 
 # Test a contrived case. There, absolute name is used in a standalone project
 # (not Jamfile). Moreover, the target with an absolute name is returned by

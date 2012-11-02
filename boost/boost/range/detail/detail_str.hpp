@@ -14,7 +14,8 @@
 #include <boost/config.hpp> // BOOST_MSVC
 #include <boost/range/iterator.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost 
+{
     
     namespace range_detail
     {
@@ -137,7 +138,8 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 #include <boost/range/detail/value_type.hpp>
 #include <boost/range/detail/common.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost 
+{
     
     namespace range_detail
     {

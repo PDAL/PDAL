@@ -45,7 +45,7 @@ rule boost-build ( location ? )
 boost-build build-system ;
 </programlisting>
 
-        In this case, running bjam anywhere in the project tree will
+        In this case, running <command>b2</command> anywhere in the project tree will
         automatically find the build system.</para>
 
       <para>The default <filename>bootstrap.jam</filename>, after loading some standard
@@ -126,7 +126,7 @@ boost-build build-system ;
         <link linkend="bbv2.main-target-rule-syntax">common syntax</link>.</para></listitem>
       </varlistentry>
 
-      <varlistentry>
+      <varlistentry id="bbv2.reference.rules.glob">
         <term><literal>glob</literal></term>
 
         <listitem><para>The <code>glob</code> rule takes a list shell pattern
@@ -178,7 +178,7 @@ ECHO [ glob-tree *.cpp : .svn ] ;
         </para></listitem>
       </varlistentry>
 
-      <varlistentry>
+      <varlistentry id="bbv2.reference.rules.explicit">
         <term><literal>explicit</literal></term>
 
         <listitem><para>The <literal>explicit</literal> rule takes a single
@@ -227,13 +227,13 @@ constant VERSION : 1.34.0 ;
 
         <listitem><para>Same as <literal>constant</literal> except that
         the value is treated as path relative to Jamfile location. For example,
-        if <command>bjam</command> is invoked in the current directory,
+        if <command>b2</command> is invoked in the current directory,
         and Jamfile in <filename>helper</filename> subdirectory has:
         <programlisting>
 path-constant DATA : data/a.txt ;
         </programlisting>
         then the variable <varname>DATA</varname> will be set to
-        <literal>helper/data/a.txt</literal>, and if <command>bjam</command>
+        <literal>helper/data/a.txt</literal>, and if <command>b2</command>
         is invoked from the <filename>helper</filename> directory, then
         the variable <varname>DATA</varname> will be set to
         <literal>data/a.txt</literal>.
@@ -411,7 +411,7 @@ path-constant DATA : data/a.txt ;
             feature, except that it takes effect only for linking. When you want
             to link all targets in a Jamfile to certain library, the
             <code>&lt;library&gt;</code> feature is preferred over
-            <code>&lt;source&gt;X</code> -- the latter will add the library to
+            <code>&lt;source&gt;X</code>&mdash;the latter will add the library to
             all targets, even those that have nothing to do with libraries.
           </simpara>
         </listitem>
@@ -451,6 +451,20 @@ path-constant DATA : data/a.txt ;
             out this motivation.
             ====================================================================
             -->
+          </simpara>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry><term><anchor id="bbv2.builtin.features.implicit-dependency"/>
+        <literal>implicit-dependency</literal></term>
+        <indexterm><primary>implicit-dependency</primary></indexterm>
+
+        <listitem>
+          <simpara>
+            Indicates that the target named by the value of this feature
+            may produce files that are included by the sources of the
+            target being declared.  See <xref linkend="bbv2.reference.generated_headers"/>
+            for more information.
           </simpara>
         </listitem>
       </varlistentry>
@@ -1761,6 +1775,194 @@ using fop : <optional><replaceable>fop-command</replaceable></optional> : <optio
 
     </section>
 
+  <section id="bbv2.reference.modules">
+    <title>Builtin modules</title>
+
+    <para>
+      This section describes the modules that are provided
+      by Boost.Build.  The import rule allows rules from
+      one module to be used in another module or Jamfile.
+    </para>
+    
+    <section id="bbv2.reference.modules.modules">
+      <title>modules</title>
+      <indexterm><primary>modules</primary></indexterm>
+
+      <para>
+        The <code>modules</code> module defines basic functionality
+        for handling modules.
+      </para>
+
+      <para>
+        A module defines a number of rules that can be used in other
+        modules.  Modules can contain code at the top level to initialize
+        the module.  This code is executed the first time the
+        module is loaded.
+        <note>
+          <para>
+            A Jamfile is a special kind of module which is managed by
+            the build system.  Although they cannot be loaded directly
+            by users, the other features of modules are still useful
+            for Jamfiles.
+          </para>
+        </note>
+      </para>
+
+      <para>
+        Each module has its own namespaces for variables and rules.  If two
+        modules A and B both use a variable named X, each one gets its own
+        copy of X.  They won't interfere with each other in any way.
+        Similarly, importing rules into one module has no effect on any other
+        module.
+      </para>
+
+      <para>
+        Every module has two special variables.
+        <code>$(__file__)</code> contains the name of the file that
+        the module was loaded from and <code>$(__name__)</code>
+        contains the name of the module.
+        <note><para><code>$(__file__)</code> does not contain
+        the full path to the file.  If you need this, use
+        <code>modules.binding</code>.</para></note>
+      </para>
+      
+      <orderedlist>
+
+        <listitem id="bbv2.reference.modules.modules.binding">
+          <indexterm zone="bbv2.reference.modules.modules.binding"><primary>binding</primary></indexterm>
+          <code language="jam">rule binding ( module-name )</code>
+          <para>Returns the filesystem binding of the given module.</para>
+          <para>For example, a module can get its own location with:
+          <programlisting language="jam">me = [ modules.binding $(__name__) ] ;</programlisting>
+          </para>
+        </listitem>
+
+        <listitem id="bbv2.reference.modules.modules.poke">
+          <indexterm zone="bbv2.reference.modules.modules.poke"><primary>poke</primary></indexterm>
+          <code language="jam">rule poke ( module-name ? : variables + : value * )</code>
+          <para>Sets the module-local value of a variable.</para>
+          <para>For example, to set a variable in the global module:
+          <programlisting language="jam">modules.poke : ZLIB_INCLUDE : /usr/local/include ;</programlisting>
+          </para>
+        </listitem>
+
+        <listitem id="bbv2.reference.modules.modules.peek">
+          <indexterm zone="bbv2.reference.modules.modules.peek"><primary>peek</primary></indexterm>
+          <code language="jam">rule peek ( module-name ? : variables + )</code>
+          <para>Returns the module-local value of a variable.</para>
+          <para>
+            For example, to read a variable from the global module:
+            <programlisting language="jam">local ZLIB_INCLUDE = [ modules.peek : ZLIB_INCLUDE ] ;</programlisting>
+          </para>
+        </listitem>
+
+        <listitem id="bbv2.reference.modules.modules.call-in">
+          <indexterm zone="bbv2.reference.modules.modules.call-in"><primary>call-in</primary></indexterm>
+          <code language="jam">rule call-in ( module-name ? : rule-name args * : * ) </code>
+          <para>Call the given rule locally in the given module. Use
+          this for rules accepting rule names as arguments, so that
+          the passed rule may be invoked in the context of the rule's
+          caller (for example, if the rule accesses module globals or
+          is a local rule).
+          <note><para>rules called this way may accept at most
+          8 parameters.</para></note></para>
+          <para>Example:
+<programlisting language="jam">
+rule filter ( f : values * )
+{
+    local m = [ CALLER_MODULE ] ;
+    local result ;
+    for v in $(values)
+    {
+        if [ modules.call-in $(m) : $(f) $(v) ]
+        {
+            result += $(v) ;
+        }
+    }
+    return result ;
+}
+</programlisting>
+          </para>
+        </listitem>
+
+        <listitem id="bbv2.reference.modules.modules.load">
+          <indexterm zone="bbv2.reference.modules.modules.load"><primary>load</primary></indexterm>
+          <code language="jam">rule load ( module-name : filename ? : search * )</code>
+          <para>Load the indicated module if it is not already loaded.</para>
+          <variablelist>
+            <varlistentry>
+              <term><literal>module-name</literal></term>
+              <listitem><para>Name of module to load.</para></listitem>
+            </varlistentry>
+          </variablelist>
+          <variablelist>
+            <varlistentry>
+              <term><literal>filename</literal></term>
+              <listitem><para>(partial) path to file; Defaults to <code>$(module-name).jam</code></para></listitem>
+            </varlistentry>
+          </variablelist>
+          <variablelist>
+            <varlistentry>
+              <term><literal>search</literal></term>
+              <listitem><para>Directories in which to search for filename.
+                  Defaults to <code>$(BOOST_BUILD_PATH)</code>.</para></listitem>
+            </varlistentry>
+          </variablelist>
+        </listitem>
+
+        <listitem id="bbv2.reference.modules.modules.import">
+          <indexterm zone="bbv2.reference.modules.modules.import"><primary>import</primary></indexterm>
+          <code language="jam">rule import ( module-names + : rules-opt * : rename-opt * )</code>
+          <para>Load the indicated module and import rule names into the
+          current module. Any members of <code>rules-opt</code> will be
+          available without qualification in the caller's module. Any
+          members of <code>rename-opt</code> will be taken as the names
+          of the rules in the caller's module, in place of the names they
+          have in the imported module.  If <code>rules-opt = '*'</code>,
+          all rules from the indicated module are imported into the
+          caller's module. If <code>rename-opt</code> is supplied, it must have the
+          same number of elements as <code>rules-opt</code>.</para>
+          <note><para>The <literal>import</literal> rule is available
+          without qualification in all modules.</para></note>
+          <para>Examples:
+<programlisting language="jam">
+import path ;
+import path : * ;
+import path : join ;
+import path : native make : native-path make-path ;
+</programlisting>
+          </para>
+        </listitem>
+
+        <listitem id="bbv2.reference.modules.modules.clone-rules">
+          <indexterm zone="bbv2.reference.modules.modules.clone-rules"><primary>clone-rules</primary></indexterm>
+          <code language="jam">rule clone-rules ( source-module target-module )</code>
+          <para>Define exported copies in <code>$(target-module)</code>
+          of all rules exported from <code>$(source-module)</code>. Also
+          make them available in the global module with qualification,
+          so that it is just as though the rules were defined originally
+          in <code>$(target-module)</code>.</para>
+        </listitem>
+
+      </orderedlist>
+
+    </section>
+
+    <xi:include href="path.xml"/>
+    <xi:include href="type.xml"/>
+  
+  </section>
+
+  <section id="bbv2.reference.class">
+    <title>Builtin classes</title>
+    <xi:include href="abstract-target.xml"/>
+    <xi:include href="project-target.xml"/>
+    <xi:include href="main-target.xml"/>
+    <xi:include href="basic-target.xml"/>
+    <xi:include href="typed-target.xml"/>
+    <xi:include href="property-set.xml"/>
+  </section>
+
   <section id="bbv2.reference.buildprocess">
     <title>Build process</title>
 
@@ -1883,7 +2085,46 @@ exe a : a.cpp
 </programlisting>
       </para>
 
-  </section>
+    </section>
+    
+    <section id="bbv2.reference.buildprocess.targetpath">
+      <title>Target Paths</title>
+
+      <para>Several factors determine the location of a concrete
+      file target.  All files in a project are built under
+      the directory bin unless this is overriden by the build-dir project
+      attribute.  Under bin is a path that depends on the properties
+      used to build each target.  This path is uniquely determined by
+      all non-free, non-incidental properties.  For example,
+      given a property set containing:
+      <code>&lt;toolset&gt;gcc &lt;toolset-gcc:version&gt;4.6.1 &lt;variant&gt;debug
+      &lt;warnings&gt;all &lt;define&gt;_DEBUG &lt;include&gt;/usr/local/include
+      &lt;link&gt;static</code>,
+      the path will be gcc-4.6.1/debug/link-static.  &lt;warnings&gt; is an
+      incidental feature and &lt;define&gt; and &lt;include&gt; are
+      free features, so they do not affect the path.</para>
+      
+      <para>Sometimes the paths produced by Boost.Build can become excessively
+      long.  There are a couple of command line options that can help with this.
+      --abbreviate-paths reduces each element to no more than five characters.
+      For example, link-static becomes lnk-sttc.  The --hash option reduces the
+      path to a single directory using an MD5 hash.</para>
+      
+      <para>There are two features that affect the build
+      directory.  The &lt;location&gt; feature completely
+      overrides the default build directory.  For example,
+      <programlisting>exe a : a.cpp : &lt;location&gt;. ;</programlisting>
+      builds all the files produced by <code>a</code>
+      in the directory of the Jamfile.  This is generally
+      discouraged, as it precludes variant builds.</para>
+    
+      <para>The &lt;location-prefix&gt; feature adds a
+      prefix to the path, under the project's build
+      directory.  For example,
+      <programlisting>exe a : a.cpp : &lt;location-prefix&gt;subdir ;</programlisting>
+      will create the files for <code>a</code> in bin/subdir/gcc-4.6.1/debug</para>
+    
+    </section>
 
   </section>
 
@@ -1985,7 +2226,7 @@ exe a : a.cpp
             <para>Non-incidental features are assumed to affect build
               products, so the files for targets whose build specification
               differs in non-incidental features are placed in different
-              directories as described in "target paths" below. [ where? ]
+              directories as described in <xref linkend="bbv2.reference.buildprocess.targetpath"/>.
             </para>
           </listitem>
 
@@ -2041,14 +2282,11 @@ exe a : a.cpp
           <listitem>
             <para><emphasis>symmetric</emphasis></para>
 
-            <para>A symmetric feature's default value is not automatically
-              included in <link linkend=
-                "bbv2.reference.variants">build variants</link>.  Normally
-              a feature only generates a subvariant directory when its
-              value differs from the value specified by the build variant,
+            <para>Normally a feature only generates a subvariant directory
+              when its value differs from its default value,
               leading to an assymmetric subvariant directory structure for
-              certain values of the feature. A symmetric feature, when
-              relevant to the toolset, always generates a corresponding
+              certain values of the feature. A symmetric feature
+              always generates a corresponding
               subvariant directory.</para>
           </listitem>
 
@@ -2123,24 +2361,6 @@ rule feature ( name : allowed-values * : attributes * )
 
       </section>
     </section>
-
-    <section id="bbv2.reference.variants">
-      <title>Build Variants</title>
-
-      <para>
-        A build variant, or (simply variant) is a special kind of composite
-        feature that automatically incorporates the default values of
-        features that . Typically you'll want at least two separate
-        variants: one for debugging, and one for your release code. [
-        Volodya says: "Yea, we'd need to mention that it's a composite
-        feature and describe how they are declared, in pacticular that
-        default values of non-optional features are incorporated into
-        build variant automagically. Also, do we wan't some variant
-        inheritance/extension/templates. I don't remember how it works in
-        V1, so can't document this for V2.". Will clean up soon -DWA ]
-      </para>
-
-      </section>
 
     <section id="bbv2.reference.variants.proprefine">
       <title>Property refinement</title>

@@ -33,7 +33,7 @@
 
 // class to be used to simplify testing of ostream-based output operations
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
 namespace test_tools {
 

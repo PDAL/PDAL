@@ -15,7 +15,9 @@
 #include <locale>
 #include <functional>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+#include <boost/type_traits/make_unsigned.hpp>
+
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
     namespace algorithm {
         namespace detail {
 
@@ -37,7 +39,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
                 CharT operator ()( CharT Ch ) const
                 {
                     #if defined(__BORLANDC__) && (__BORLANDC__ >= 0x560) && (__BORLANDC__ <= 0x564) && !defined(_USE_OLD_RW_STL)
-                        return std::tolower( Ch);
+                        return std::tolower( static_cast<typename pdalboost::make_unsigned <CharT>::type> ( Ch ));
                     #else
                         return std::tolower<CharT>( Ch, *m_Loc );
                     #endif
@@ -57,7 +59,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
                 CharT operator ()( CharT Ch ) const
                 {
                     #if defined(__BORLANDC__) && (__BORLANDC__ >= 0x560) && (__BORLANDC__ <= 0x564) && !defined(_USE_OLD_RW_STL)
-                        return std::toupper( Ch);
+                        return std::toupper( static_cast<typename pdalboost::make_unsigned <CharT>::type> ( Ch ));
                     #else
                         return std::toupper<CharT>( Ch, *m_Loc );
                     #endif

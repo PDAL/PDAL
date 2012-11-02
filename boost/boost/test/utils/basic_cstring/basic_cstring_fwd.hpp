@@ -18,7 +18,7 @@
 
 #include <boost/detail/workaround.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
 namespace unit_test {
 

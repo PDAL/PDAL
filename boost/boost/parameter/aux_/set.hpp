@@ -13,7 +13,7 @@
 #  include <boost/mpl/set/set0.hpp>
 #  include <boost/mpl/has_key.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace parameter { namespace aux {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace parameter { namespace aux {
 
 typedef mpl::set0<> set0;
 
@@ -39,7 +39,7 @@ struct has_key_
 #  include <boost/mpl/not.hpp>
 #  include <boost/mpl/push_front.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace parameter { namespace aux {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace parameter { namespace aux {
 
 typedef mpl::list0<> set0;
 

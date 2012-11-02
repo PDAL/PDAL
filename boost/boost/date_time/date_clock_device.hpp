@@ -6,13 +6,13 @@
  * Boost Software License, Version 1.0. (See accompanying
  * file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
  * Author: Jeff Garland, Bart Garst
- * $Date: 2008-02-27 15:00:24 -0500 (Wed, 27 Feb 2008) $
+ * $Date: 2008-02-27 12:00:24 -0800 (Wed, 27 Feb 2008) $
  */
 
 #include "boost/date_time/c_time.hpp"
 
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace date_time {
 
   //! A clock providing day level services based on C time_t capabilities

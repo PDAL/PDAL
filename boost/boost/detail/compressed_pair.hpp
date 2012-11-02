@@ -31,7 +31,8 @@
 # pragma warning(push)
 # pragma warning(disable:4512)
 #endif 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 
 template <class T1, class T2>
 class compressed_pair;

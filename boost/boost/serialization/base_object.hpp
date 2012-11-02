@@ -38,7 +38,7 @@
 #include <boost/serialization/force_include.hpp>
 #include <boost/serialization/void_cast_fwd.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace serialization {
 
 namespace detail

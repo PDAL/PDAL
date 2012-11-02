@@ -41,7 +41,6 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/uuid/string_generator.hpp>
-#include <boost/uuid/random_generator.hpp>
 
 namespace pdal
 {
@@ -152,8 +151,8 @@ void Selector::checkImpedance()
                 std::string endy = ops.getValueOrDefault<std::string>("endianness", "little");
                 if (boost::iequals(endy, "big"))
                     endianness = Endian_Big;
-                
-                uuid = ops.getValueOrDefault<dimension::id>("uuid", boost::uuids::random_generator()());
+           
+                uuid = ops.getValueOrDefault<dimension::id>("uuid", boost::uuids::nil_uuid());
                 parent_uuid = ops.getValueOrDefault<dimension::id>("parent_uuid",  boost::uuids::nil_uuid());
 
                 minimum = ops.getValueOrDefault<double>("minimum", 0.0);
@@ -163,6 +162,9 @@ void Selector::checkImpedance()
 
                 Dimension d(name, interp, size, description);
                 d.setUUID(uuid);
+                
+                if (d.getUUID().is_nil())
+                    d.createUUID();
                 d.setParent(parent_uuid);
                 d.setNumericScale(scale);
                 d.setNumericOffset(offset);
@@ -211,7 +213,7 @@ Selector::Selector(const pdal::filters::Selector& filter, PointBuffer& buffer)
 
 void Selector::alterSchema(PointBuffer& buffer)
 {
-    Schema const& original_schema = buffer.getSchema();
+    Schema original_schema = buffer.getSchema();
     
     // Add new dimensions to the schema first in case we wanted to ignore them 
     // or something silly like that.
@@ -272,7 +274,8 @@ void Selector::alterSchema(PointBuffer& buffer)
         }
 
     }
-    buffer = PointBuffer(new_schema, buffer.getCapacity());
+
+    buffer.reset(new_schema);
 }
 
 

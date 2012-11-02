@@ -18,7 +18,7 @@
 #include <memory>               // for std::allocator
 #include <string>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace property_tree
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace property_tree
 {
     namespace detail {
         template <typename T> struct less_nocase;

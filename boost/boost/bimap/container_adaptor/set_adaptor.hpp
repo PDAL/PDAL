@@ -22,7 +22,7 @@
 #include <boost/mpl/vector.hpp>
 #include <boost/mpl/aux_/na.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace bimaps {
 namespace container_adaptor {
 

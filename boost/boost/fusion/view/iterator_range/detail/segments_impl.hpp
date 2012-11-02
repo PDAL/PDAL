@@ -12,7 +12,7 @@
 #include <boost/fusion/support/is_segmented.hpp>
 #include <boost/fusion/view/iterator_range/detail/segmented_iterator_range.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion
 {
     struct iterator_range_tag;
 

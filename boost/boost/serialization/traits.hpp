@@ -32,7 +32,7 @@
 #include <boost/serialization/level_enum.hpp>
 #include <boost/serialization/tracking_enum.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace serialization {
 
 // common base class used to detect appended traits class

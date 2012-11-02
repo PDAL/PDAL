@@ -12,7 +12,7 @@
 #include <boost/fusion/adapted/mpl/detail/end_impl.hpp>
 #include <boost/fusion/iterator/mpl/fusion_iterator.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace mpl
 {
     template <typename Tag>
     struct end_impl;

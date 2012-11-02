@@ -76,9 +76,9 @@ public:
 
     // for dumping
     virtual boost::property_tree::ptree toPTree() const;
-    virtual PointBuffer const* getPointBuffer() const { return m_buffer; }
+    virtual PointBuffer const* getPointBuffer() const { return m_writer_buffer; }
 
-    static const boost::uint32_t s_defaultChunkSize;
+    static const boost::uint32_t s_defaultChunkSize = 1048576;
 
 protected:
     // this is called once before the loop with all the writeBuffer calls
@@ -103,7 +103,7 @@ private:
 
     SpatialReference m_spatialReference;
     UserCallback* m_userCallback;
-    PointBuffer* m_buffer;
+    PointBuffer* m_writer_buffer;
 
     Writer& operator=(const Writer&); // not implemented
     Writer(const Writer&); // not implemented

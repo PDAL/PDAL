@@ -15,7 +15,7 @@
 // See http://www.boost.org/libs/mpl for documentation.
 
 // $Id: template_arity.hpp 61584 2010-04-26 18:48:26Z agurtovoy $
-// $Date: 2010-04-26 14:48:26 -0400 (Mon, 26 Apr 2010) $
+// $Date: 2010-04-26 11:48:26 -0700 (Mon, 26 Apr 2010) $
 // $Revision: 61584 $
 
 #include <boost/mpl/aux_/config/ttp.hpp>
@@ -61,7 +61,7 @@
 
 #   define AUX778076_ARITY BOOST_PP_INC(BOOST_MPL_LIMIT_METAFUNCTION_ARITY)
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl { namespace aux {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace mpl { namespace aux {
 
 template< BOOST_MPL_AUX_NTTP_DECL(int, N) > struct arity_tag
 {
@@ -131,7 +131,7 @@ struct template_arity
 
 #   include <boost/mpl/aux_/config/eti.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl { namespace aux {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace mpl { namespace aux {
 
 template< bool >
 struct template_arity_impl

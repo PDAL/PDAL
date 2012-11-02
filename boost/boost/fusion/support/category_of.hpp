@@ -11,7 +11,7 @@
 #include <boost/fusion/support/tag_of.hpp>
 #include <boost/type_traits/is_base_of.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion
 {
     // Special tags:
     struct boost_tuple_tag; // pdalboost::tuples::tuple tag

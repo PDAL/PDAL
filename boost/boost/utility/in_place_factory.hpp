@@ -15,7 +15,7 @@
 
 #include <boost/utility/detail/in_place_factory_prefix.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
 class in_place_factory_base {} ;
 

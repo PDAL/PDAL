@@ -53,7 +53,7 @@ def reset ():
     if OS == "NT":
         # On Windows the case and capitalization of PATH is not always predictable, so
         # let's find out what variable name was really set.
-        for n in sys.environ:
+        for n in os.environ:
             if n.lower() == "path":
                 __executable_path_variable = n
                 break
@@ -99,7 +99,7 @@ class Configurations(object):
     def __init__(self):
         self.used_ = set()
         self.all_ = set()
-        self.params = {}
+        self.params_ = {}
 
     def register(self, id):
         """
@@ -113,7 +113,7 @@ class Configurations(object):
             errors.error("common: the configuration '$(id)' is in use")
 
         if id not in self.all_:
-            self.all_ += [id]
+            self.all_.add(id)
 
             # Indicate that a new configuration has been added.
             return True
@@ -133,7 +133,7 @@ class Configurations(object):
             errors.error("common: the configuration '$(id)' is not known")
 
         if id not in self.used_:
-            self.used_ += [id]
+            self.used_.add(id)
 
             # indicate that the configuration has been marked as 'used'
             return True
@@ -150,7 +150,7 @@ class Configurations(object):
 
     def get(self, id, param):
         """ Returns the value of a configuration parameter. """
-        self.params_.getdefault(param, {}).getdefault(id, None)
+        return self.params_.get(param, {}).get(id)
 
     def set (self, id, param, value):
         """ Sets the value of a configuration parameter. """
@@ -294,6 +294,8 @@ def get_invocation_command_nodefault(
             #print "warning: initialized from" [ errors.nearest-user-location ] ;
     else:
         command = check_tool(user_provided_command)
+        assert(isinstance(command, list))
+        command=' '.join(command)
         if not command and __debug_configuration:
             print "warning: toolset", toolset, "initialization:"
             print "warning: can't find user-provided command", user_provided_command
@@ -347,7 +349,9 @@ def get_absolute_tool_path(command):
         programs = path.programs_path()
         m = path.glob(programs, [command, command + '.exe' ])
         if not len(m):
-            print "Could not find:", command, "in", programs
+            if __debug_configuration:
+                print "Could not find:", command, "in", programs
+            return None
         return os.path.dirname(m[0])
 
 # ported from trunk@47174

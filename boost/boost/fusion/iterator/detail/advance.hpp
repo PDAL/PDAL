@@ -14,7 +14,7 @@
 #include <boost/fusion/iterator/next.hpp>
 #include <boost/fusion/iterator/prior.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion { namespace advance_detail
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion { namespace advance_detail
 {
     // Default advance implementation, perform next(i)
     // or prior(i) N times.

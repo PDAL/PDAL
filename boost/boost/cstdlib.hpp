@@ -14,7 +14,8 @@
 
 #include <cstdlib>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
    //  The intent is to propose the following for addition to namespace std
    //  in the C++ Standard Library, and to then deprecate EXIT_SUCCESS and
    //  EXIT_FAILURE.  As an implementation detail, this header defines the

@@ -14,7 +14,7 @@
 #include <boost/fusion/sequence/intrinsic/end.hpp>
 #include <boost/mpl/not.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion
 {
     struct void_;
 

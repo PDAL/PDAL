@@ -8,7 +8,7 @@
 #ifndef BOOST_FUSION_ADAPTED_STRUCT_DETAIL_DEREF_IMPL_HPP
 #define BOOST_FUSION_ADAPTED_STRUCT_DETAIL_DEREF_IMPL_HPP
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion { namespace extension
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion { namespace extension
 {
     template <typename>
     struct deref_impl;

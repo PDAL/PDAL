@@ -13,7 +13,7 @@
 #include <boost/fusion/support/tag_of.hpp>
 #include <boost/fusion/support/detail/access.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion
 {
     // Special tags:
     struct sequence_facade_tag;

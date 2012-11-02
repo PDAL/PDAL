@@ -25,7 +25,7 @@
 
 #include <boost/bimap/set_of.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace bimaps {
 namespace detail {
 

@@ -29,7 +29,7 @@
 namespace std { using ::fpos_t; }
 #endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace iostreams {
                     
 //------------------Definition of stream_offset-------------------------------//
 

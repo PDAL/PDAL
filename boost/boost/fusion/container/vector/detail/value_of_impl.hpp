@@ -9,7 +9,7 @@
 
 #include <boost/mpl/at.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion
 {
     struct vector_iterator_tag;
 

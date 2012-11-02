@@ -29,7 +29,7 @@
     part(s) of the input according to set of searching and replace criteria.
 */
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
     namespace algorithm {
 
 //  replace_range --------------------------------------------------------------------//

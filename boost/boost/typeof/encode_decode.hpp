@@ -19,7 +19,7 @@
 
 #else
 
-#   define BOOST_TYPEOF_BEGIN_ENCODE_NS namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace type_of {
+#   define BOOST_TYPEOF_BEGIN_ENCODE_NS namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace type_of {
 #   define BOOST_TYPEOF_END_ENCODE_NS }}
 #   define BOOST_TYPEOF_ENCODE_NS_QUALIFIER pdalboost::type_of
 
@@ -44,7 +44,7 @@ struct decode_nested_template_helper_impl;
 
 BOOST_TYPEOF_END_ENCODE_NS
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace type_of {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace type_of {
 
     template<class V, class T>
     struct encode_type : BOOST_TYPEOF_ENCODE_NS_QUALIFIER::encode_type_impl<V, T>

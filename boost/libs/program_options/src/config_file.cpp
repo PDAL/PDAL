@@ -16,7 +16,7 @@
 #include <fstream>
 #include <cassert>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace program_options { namespace detail {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace program_options { namespace detail {
 
     using namespace std;
 
@@ -57,7 +57,9 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespac
                     bad_prefixes = true;
             }
             if (bad_prefixes)
-                pdalboost::throw_exception(error("bad prefixes"));
+                pdalboost::throw_exception(error("options '" + string(name) + "' and '" +
+                                             *i + "*' will both match the same "
+                                             "arguments from the configuration file"));
             allowed_prefixes.insert(s);
         }
     }
@@ -117,7 +119,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespac
                     break;
 
                 } else {
-                    pdalboost::throw_exception(invalid_syntax(s, invalid_syntax::unrecognized_line));
+                    pdalboost::throw_exception(invalid_config_file_syntax(s, invalid_syntax::unrecognized_line));
                 }
             }
         }

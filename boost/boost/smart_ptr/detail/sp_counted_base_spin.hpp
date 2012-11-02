@@ -21,7 +21,8 @@
 #include <boost/detail/sp_typeinfo.hpp>
 #include <boost/smart_ptr/detail/spinlock_pool.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 
 namespace detail
 {

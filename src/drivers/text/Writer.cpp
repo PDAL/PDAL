@@ -140,6 +140,7 @@ void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
 {
     std::string outputType = getOptions().getValueOrDefault<std::string>("format", "csv");
     bool bGeoJSON = boost::iequals(outputType, "GEOJSON");
+    if (bGeoJSON)
     {
         *m_stream << "]}";
         std::string callback = getOptions().getValueOrDefault<std::string>("jscallback", "");
@@ -268,8 +269,6 @@ void Writer::WriteHeader(pdal::Schema const& schema)
     oss << "Dimension order obtained '";
     for (std::vector<boost::tuple<std::string, std::string> >::const_iterator i = dimensions.begin(); i != dimensions.end(); i++)
     {
-        
-        
         std::string name = i->get<0>();
         std::string namespc = i->get<1>();
         
@@ -467,9 +466,12 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
         {
             std::vector<boost::tuple<std::string, std::string> >::const_iterator iter =  dimensions.begin();
 
+            bool bWroteFirstProperty(false);
             while (iter != dimensions.end())
             {
-
+                if (bWroteFirstProperty)
+                    *m_stream << delimiter;
+                    
                 Dimension const& d = schema.getDimension(iter->get<0>(), iter->get<1>());
                 if (d.isIgnored())
                 {
@@ -480,8 +482,12 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
                 *m_stream << getStringRepresentation(data, d, pointIndex);
 
                 iter++;
-                if (iter != dimensions.end())
-                    *m_stream << delimiter;
+
+                if (!bWroteFirstProperty)
+                {
+                    bWroteFirstProperty = true;
+                }
+
             }
             *m_stream << newline;
 
@@ -511,10 +517,13 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
             *m_stream << "\"properties\": {";
 
             std::vector<boost::tuple<std::string, std::string> >::const_iterator iter =  dimensions.begin();
-
+            
+            bool bWroteFirstProperty(false);
             while (iter != dimensions.end())
             {
-
+                if (bWroteFirstProperty)
+                    *m_stream << delimiter;
+                
                 Dimension const& d = schema.getDimension(iter->get<0>(), iter->get<1>());
                 if (d.isIgnored())
                 {
@@ -528,8 +537,11 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
                 *m_stream << "\"" << getStringRepresentation(data, d, pointIndex) <<"\"";
                 
                 iter++;
-                if (iter != dimensions.end())
-                    *m_stream << delimiter;
+
+                if (!bWroteFirstProperty)
+                {
+                    bWroteFirstProperty = true;
+                }
             }
             
             

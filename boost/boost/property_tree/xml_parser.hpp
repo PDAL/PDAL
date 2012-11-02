@@ -22,7 +22,7 @@
 #include <string>
 #include <locale>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace property_tree { namespace xml_parser
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace property_tree { namespace xml_parser
 {
 
     /**
@@ -140,7 +140,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespac
 
 } } }
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace property_tree
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace property_tree
 {
     using xml_parser::read_xml;
     using xml_parser::write_xml;

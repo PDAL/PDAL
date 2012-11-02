@@ -10,7 +10,8 @@
 # include <boost/detail/workaround.hpp>
 # include <boost/mpl/int.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
     namespace type_of
     {
 

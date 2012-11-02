@@ -11,8 +11,10 @@
 #include <boost/fusion/algorithm/iteration/detail/for_each.hpp>
 #include <boost/fusion/algorithm/iteration/detail/segmented_for_each.hpp>
 #include <boost/fusion/support/is_segmented.hpp>
+#include <boost/fusion/support/is_sequence.hpp>
+#include <boost/utility/enable_if.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion
 {
     namespace result_of
     {
@@ -24,14 +26,24 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespac
     }
 
     template <typename Sequence, typename F>
-    inline void
+    inline
+    typename
+        enable_if<
+            traits::is_sequence<Sequence>
+          , void
+        >::type
     for_each(Sequence& seq, F const& f)
     {
         detail::for_each(seq, f, typename traits::is_segmented<Sequence>::type());
     }
 
     template <typename Sequence, typename F>
-    inline void
+    inline
+    typename
+        enable_if<
+            traits::is_sequence<Sequence>
+          , void
+        >::type
     for_each(Sequence const& seq, F const& f)
     {
         detail::for_each(seq, f, typename traits::is_segmented<Sequence>::type());

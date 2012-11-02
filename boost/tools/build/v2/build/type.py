@@ -81,7 +81,7 @@ def register (type, suffixes = [], base_type = None):
     __types [type] = entry
     
     if base_type:
-        __types [base_type]['derived'].append (type)
+        __types.setdefault(base_type, {}).setdefault('derived', []).append(type)
 
     if len (suffixes) > 0:
         # Generated targets of 'type' will use the first of 'suffixes'

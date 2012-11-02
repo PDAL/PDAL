@@ -11,7 +11,8 @@
 
 #include <boost/config/abi_prefix.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
     namespace detail
     {
         struct tss_cleanup_function

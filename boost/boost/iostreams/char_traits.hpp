@@ -26,7 +26,7 @@
 namespace std { using ::wint_t; }
 #endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace iostreams {
 
 // Dinkumware that comes with QNX Momentics 6.3.0, 4.0.2, incorrectly defines
 // the EOF and WEOF macros to not std:: qualify the wint_t type (and so does

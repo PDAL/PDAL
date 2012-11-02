@@ -15,7 +15,7 @@
 #include <boost/accumulators/framework/accumulator_base.hpp>
 #include <boost/accumulators/framework/accumulators/reference_accumulator.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace accumulators { namespace impl
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace accumulators { namespace impl
 {
 
     //////////////////////////////////////////////////////////////////////////

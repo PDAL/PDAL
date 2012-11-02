@@ -17,7 +17,8 @@
 #include <boost/range/detail/common.hpp>
 #include <boost/range/detail/remove_extent.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost 
+{
     namespace range_detail
     {
         template< typename T >

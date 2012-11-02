@@ -10,7 +10,7 @@
 #include <boost/mpl/empty.hpp>
 #include <boost/fusion/sequence/intrinsic/empty.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace mpl
 {
     template <typename Tag>
     struct empty_impl;

@@ -22,7 +22,7 @@
 #include <boost/noncopyable.hpp>
 #include <cstddef>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost{
 
 namespace multi_index{
 

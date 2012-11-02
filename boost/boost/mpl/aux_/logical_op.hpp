@@ -8,7 +8,7 @@
 // See http://www.boost.org/libs/mpl for documentation.
 
 // $Id: logical_op.hpp 49267 2008-10-11 06:19:02Z agurtovoy $
-// $Date: 2008-10-11 02:19:02 -0400 (Sat, 11 Oct 2008) $
+// $Date: 2008-10-10 23:19:02 -0700 (Fri, 10 Oct 2008) $
 // $Revision: 49267 $
 
 // NO INCLUDE GUARDS, THE HEADER IS INTENDED FOR MULTIPLE INCLUSION!
@@ -33,7 +33,7 @@
 #include <boost/preprocessor/inc.hpp>
 #include <boost/preprocessor/cat.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace mpl {
 
 #   define AUX778076_PARAMS(param, sub) \
     BOOST_MPL_PP_PARAMS( \

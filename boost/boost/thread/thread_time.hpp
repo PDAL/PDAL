@@ -12,7 +12,8 @@
 
 #include <boost/config/abi_prefix.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
     typedef pdalboost::posix_time::ptime system_time;
     
     inline system_time get_system_time()

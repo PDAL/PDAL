@@ -40,6 +40,7 @@
 #include <pdal/Log.hpp>
 
 #include <sstream>
+#include <vector>
 
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
@@ -63,8 +64,16 @@ public:
 
     static void CPL_STDCALL trampoline(::CPLErr code, int num, char const* msg)
     {
-#if ((GDAL_VERSION_MAJOR == 1 && GDAL_VERSION_MINOR >= 9) || (GDAL_VERSION_MAJOR > 1)) 
-        static_cast<Debug*>(CPLGetErrorHandlerUserData())->m_gdal_callback(code, num, msg);
+#if ((GDAL_VERSION_MAJOR == 1 && GDAL_VERSION_MINOR >= 9) || (GDAL_VERSION_MAJOR > 1))
+
+
+        Debug* debug = static_cast<Debug*>(CPLGetErrorHandlerUserData());
+        if (!debug)
+            return;
+
+        // if (!debug->m_log->get()) return;
+        debug->m_gdal_callback(code, num, msg);
+        
 #else
         if (code == CE_Failure || code == CE_Fatal)
         {
@@ -85,12 +94,61 @@ public:
 
     void log(::CPLErr code, int num, char const* msg);
     void error(::CPLErr code, int num, char const* msg);
-
+    
+    inline LogPtr getLogger() const { return m_log; }
+    inline void setLogger(LogPtr logger) { m_log = logger; }
 
 private:
     boost::function<void(CPLErr, int, char const*)> m_gdal_callback;
     bool m_isDebug;
     pdal::LogPtr m_log;
+};
+
+class PDAL_DLL GlobalDebug 
+{
+public:
+    GlobalDebug();
+    
+    void addLog(LogPtr alog) { m_logs.push_back(alog); }
+    
+    ~GlobalDebug();
+
+    
+    void log(::CPLErr code, int num, char const* msg);
+    void error(::CPLErr code, int num, char const* msg);
+    
+    static void CPL_STDCALL trampoline(::CPLErr code, int num, char const* msg)
+        {
+    #if ((GDAL_VERSION_MAJOR == 1 && GDAL_VERSION_MINOR >= 9) || (GDAL_VERSION_MAJOR > 1))
+
+
+            GlobalDebug* debug = static_cast<GlobalDebug*>(CPLGetErrorHandlerUserData());
+            if (!debug)
+                return;
+
+            debug->m_gdal_callback(code, num, msg);
+
+    #else
+            if (code == CE_Failure || code == CE_Fatal)
+            {
+                std::ostringstream oss;
+                oss <<"GDAL Failure number=" << num << ": " << msg;
+                throw gdal_error(oss.str());
+            }
+            else if (code == CE_Debug)
+            {
+                std::clog << " (no log control stdlog) GDAL debug pdal::gdal::Debug: " << msg << std::endl;
+            }
+            else
+            {
+                return;
+            }
+    #endif
+        }
+    
+private:
+    std::vector<LogPtr> m_logs;
+    boost::function<void(CPLErr, int, char const*)> m_gdal_callback;    
 };
 
 

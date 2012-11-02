@@ -29,7 +29,7 @@
     Result of finding is then used by a Formatter object to generate the replacement.
 */
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
     namespace algorithm {
 
 // generic replace  -----------------------------------------------------------------//

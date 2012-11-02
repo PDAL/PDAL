@@ -21,7 +21,8 @@
 //  Users can detect this situation by checking BOOST_AC_USE_PTHREADS.
 //
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 
 namespace detail
 {

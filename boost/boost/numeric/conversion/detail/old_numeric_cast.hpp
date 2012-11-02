@@ -66,7 +66,8 @@
 #  define BOOST_EXPLICIT_DEFAULT_TARGET
 # endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
   using numeric::bad_numeric_cast;
 
 //  LEGACY numeric_cast [only for some old broken compilers] --------------------------------------//

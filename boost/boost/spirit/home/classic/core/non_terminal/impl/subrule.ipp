@@ -10,7 +10,7 @@
 #if !defined(BOOST_SPIRIT_SUBRULE_IPP)
 #define BOOST_SPIRIT_SUBRULE_IPP
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace spirit {
 
 BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
 

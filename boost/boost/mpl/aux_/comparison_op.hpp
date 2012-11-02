@@ -10,7 +10,7 @@
 // See http://www.boost.org/libs/mpl for documentation.
 
 // $Id: comparison_op.hpp 49267 2008-10-11 06:19:02Z agurtovoy $
-// $Date: 2008-10-11 02:19:02 -0400 (Sat, 11 Oct 2008) $
+// $Date: 2008-10-10 23:19:02 -0700 (Fri, 10 Oct 2008) $
 // $Revision: 49267 $
 
 #if !defined(BOOST_MPL_PREPROCESSING_MODE)
@@ -39,7 +39,7 @@
 #   include <boost/mpl/aux_/config/integral.hpp>
 #   include <boost/preprocessor/cat.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace mpl {
 
 // MSVC workaround: implement less in terms of greater
 #if 0 AUX778076_OP_TOKEN 1 && !(1 AUX778076_OP_TOKEN 0) && !(0 AUX778076_OP_TOKEN 0)

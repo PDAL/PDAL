@@ -15,7 +15,7 @@
 // should be the last #include
 #include <boost/type_traits/detail/type_trait_def.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
 // * convert a type T to volatile type - add_volatile<T>
 // this is not required since the result is always

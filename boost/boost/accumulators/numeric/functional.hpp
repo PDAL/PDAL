@@ -56,7 +56,7 @@ namespace std
 }
 #endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace numeric
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace numeric
 {
     namespace functional
     {

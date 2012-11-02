@@ -19,7 +19,7 @@
 // Should be the last #include
 #include <boost/type_traits/detail/type_trait_def.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
 namespace type_traits { namespace detail {
 

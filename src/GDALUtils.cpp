@@ -36,6 +36,8 @@
 #include <pdal/Utils.hpp>
 #include <boost/bind/placeholders.hpp>
 
+#include <map>
+
 #ifdef PDAL_COMPILER_MSVC
 #  pragma warning(disable: 4127)  // conditional expression is constant
 #endif
@@ -107,6 +109,67 @@ void Debug::error(::CPLErr code, int num, char const* msg)
 }
 
 Debug::~Debug()
+{
+    CPLPopErrorHandler();
+
+}
+
+GlobalDebug::GlobalDebug()
+{
+
+    const char* gdal_debug = ::pdal::Utils::getenv("CPL_DEBUG");
+    if (gdal_debug == 0)
+    {
+        pdal::Utils::putenv("CPL_DEBUG=ON");
+    }
+    m_gdal_callback = boost::bind(&GlobalDebug::log, this, _1, _2, _3);
+
+
+#if ((GDAL_VERSION_MAJOR == 1 && GDAL_VERSION_MINOR >= 9) || (GDAL_VERSION_MAJOR > 1)) 
+    CPLPushErrorHandlerEx(&GlobalDebug::trampoline, this);
+#else
+    CPLPushErrorHandler(&GlobalDebug::trampoline);
+#endif
+}
+
+
+void GlobalDebug::log(::CPLErr code, int num, char const* msg)
+{
+    std::ostringstream oss;
+
+    if (code == CE_Failure || code == CE_Fatal)
+    {
+        oss <<"GDAL Failure number=" << num << ": " << msg;
+        throw pdal::gdal_error(oss.str());
+    }
+    else if (code == CE_Debug)
+    {
+        oss << "Global GDAL debug: " << msg;
+        std::vector<LogPtr>::const_iterator i;
+        
+        std::map<std::ostream*, LogPtr> streams;
+        for (i = m_logs.begin(); i != m_logs.end(); ++i)
+        {
+            streams.insert(std::pair<std::ostream*, LogPtr>((*i)->getLogStream(), *i));
+        }
+        
+        std::map<std::ostream*, LogPtr>::const_iterator t;
+        for (t = streams.begin(); t != streams.end(); t++)
+        {
+            LogPtr l = t->second;
+            if (l->getLevel() > logDEBUG)
+                l->get(logDEBUG) << oss.str() << std::endl;            
+        }
+
+        return;
+    }
+    else
+    {
+        return;
+    }
+}
+
+GlobalDebug::~GlobalDebug()
 {
     CPLPopErrorHandler();
 

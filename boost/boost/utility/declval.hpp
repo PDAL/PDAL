@@ -13,6 +13,7 @@
 //----------------------------------------------------------------------------//
 
 #include <boost/type_traits/add_rvalue_reference.hpp>
+//#include <boost/type_traits/add_lvalue_reference.hpp>
 
 //----------------------------------------------------------------------------//
 //                                                                            //
@@ -34,11 +35,15 @@
 //                                                                            //
 //----------------------------------------------------------------------------//
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
+//#if !defined(BOOST_NO_RVALUE_REFERENCES)
     template <typename T>
-    typename add_rvalue_reference<T>::type declval(); //noexcept; // as unevaluated operand
-
+    typename add_rvalue_reference<T>::type declval() BOOST_NOEXCEPT; // as unevaluated operand
+//#else
+//    template <typename T>
+//    typename add_lvalue_reference<T>::type declval() BOOST_NOEXCEPT; // as unevaluated operand
+//#endif
 }  // namespace pdalboost
 
 #endif  // BOOST_TYPE_TRAITS_EXT_DECLVAL__HPP

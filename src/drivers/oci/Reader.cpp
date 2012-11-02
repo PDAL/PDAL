@@ -36,6 +36,7 @@
 #include <pdal/PointBuffer.hpp>
 #include <pdal/FileUtils.hpp>
 #include <pdal/Utils.hpp>
+#include <pdal/GlobalEnvironment.hpp>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
@@ -148,7 +149,7 @@ void Reader::initialize()
 {
     pdal::Reader::initialize();
 
-    m_gdal_debug = boost::shared_ptr<pdal::gdal::Debug>(new pdal::gdal::Debug(isDebug(), log()));
+    pdal::GlobalEnvironment::get().getGDALDebug()->addLog(log());
     m_connection = connect();
     m_block = BlockPtr(new Block(m_connection));
 
@@ -663,6 +664,14 @@ void IteratorBase::readBlob(Statement statement,
     Schema const& oracle_schema = m_oracle_buffer->getSchema();
 
     boost::uint32_t howMuchToRead = howMany * oracle_schema.getByteSize();
+    
+    if (howMany > m_oracle_buffer->getCapacity())
+    {
+        std::ostringstream oss;
+        oss << "blob size is larger than oracle buffer size! howMany: " << howMany << " m_oracle_buffer->getCapacity(): " << m_oracle_buffer->getCapacity();
+        throw pdal_error(oss.str());
+    }
+    
     m_oracle_buffer->setDataStride(&(*block->chunk)[0], 0, howMuchToRead);
 
     m_oracle_buffer->setNumPoints(howMany);    

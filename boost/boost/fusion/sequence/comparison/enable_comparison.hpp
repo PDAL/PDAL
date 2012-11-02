@@ -15,7 +15,7 @@
 #include <boost/fusion/support/is_sequence.hpp>
 #include <boost/fusion/sequence/intrinsic/size.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion { namespace traits
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion { namespace traits
 {
     template <typename Seq1, typename Seq2, typename Enable = void>
     struct enable_equality

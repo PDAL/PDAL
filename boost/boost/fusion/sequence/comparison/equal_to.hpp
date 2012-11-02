@@ -20,7 +20,7 @@
 #  pragma warning (disable: 4100) // unreferenced formal parameter
 #endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion
 {
     template <typename Seq1, typename Seq2>
     inline bool
@@ -37,7 +37,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespac
     {
         template <typename Seq1, typename Seq2>
         inline typename
-            enable_if<
+            pdalboost::enable_if<
                 traits::enable_equality<Seq1, Seq2>
               , bool
             >::type

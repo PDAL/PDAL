@@ -11,7 +11,7 @@
 #include <boost/fusion/support/tag_of.hpp>
 #include <boost/fusion/mpl/detail/clear.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace mpl
 {
     template <typename Tag>
     struct clear_impl;

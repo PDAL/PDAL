@@ -48,7 +48,8 @@ extern "C" void _mm_pause();
 # include <windows.h>
 #endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 
 namespace detail
 {
@@ -87,7 +88,8 @@ inline void yield( unsigned k )
 #include <sched.h>
 #include <time.h>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 
 namespace detail
 {
@@ -128,7 +130,8 @@ inline void yield( unsigned k )
 
 #else
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 
 namespace detail
 {

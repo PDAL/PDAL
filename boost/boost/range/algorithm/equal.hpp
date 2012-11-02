@@ -14,7 +14,8 @@
 #include <boost/range/concepts.hpp>
 #include <iterator>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
     namespace range_detail
     {
         // An implementation of equality comparison that is optimized for iterator
@@ -30,7 +31,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
                                 IteratorCategoryTag1,
                                 IteratorCategoryTag2 )
         {
-            do
+            while (true)
             {
                 // If we have reached the end of the left range then this is
                 // the end of the loop. They are equal if and only if we have
@@ -45,7 +46,12 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
                     return false;
 
                 // continue looping if and only if the values are equal
-            } while(*first1++ == *first2++);
+                if (*first1 != *first2)
+                    break;
+
+                ++first1;
+                ++first2;
+            }
 
             // Reaching this line in the algorithm indicates that a value
             // inequality has been detected.
@@ -65,7 +71,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
                                 IteratorCategoryTag1,
                                 IteratorCategoryTag2 )
         {
-            do
+            while (true)
             {
                 // If we have reached the end of the left range then this is
                 // the end of the loop. They are equal if and only if we have
@@ -80,7 +86,12 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
                     return false;
 
                 // continue looping if and only if the values are equal
-            } while(pred(*first1++, *first2++));
+                if (!pred(*first1, *first2))
+                    break;
+
+                ++first1;
+                ++first2;
+            }
 
             // Reaching this line in the algorithm indicates that a value
             // inequality has been detected.
@@ -181,7 +192,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
         }
 
     } // namespace range
-    using range::equal;
+    using ::pdalboost::range::equal;
 } // namespace pdalboost
 
 #endif // include guard

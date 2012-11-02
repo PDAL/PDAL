@@ -17,7 +17,8 @@
 
 #include <boost/range/reverse_iterator.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
     //
     // This interface is deprecated, use range_reverse_iterator<T>
     //

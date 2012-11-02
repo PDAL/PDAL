@@ -36,7 +36,7 @@
 #pragma warning(disable:4227) // qualifier applied to reference type ignored
 #endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace tuples {
 
     // null_type denotes the end of a list built with "cons"

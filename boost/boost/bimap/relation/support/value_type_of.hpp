@@ -38,7 +38,7 @@ See also member_at, get().
 \ingroup relation_group
                                                                     **/
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace bimaps {
 namespace relation {
 namespace support {

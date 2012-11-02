@@ -14,7 +14,7 @@
 // Work around a compiler bug.
 // pdalboost::python::objects::function has to be seen by the compiler before the
 // pdalboost::function class template.
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace python { namespace objects {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace python { namespace objects {
   class function;
 }}}
 #endif
@@ -25,7 +25,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespac
 #  define BOOST_FUNCTION_NO_FUNCTION_TYPE_SYNTAX
 #endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
   class bad_function_call;
 
 #if !defined(BOOST_FUNCTION_NO_FUNCTION_TYPE_SYNTAX)

@@ -18,7 +18,7 @@
 #include <vector>
 #include <typeinfo>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace program_options {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace program_options {
 
     /** Class which specifies how the option's value is to be parsed
         and converted into C++ types.
@@ -227,6 +227,13 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespac
             return this;
         }
 
+        /** Specifies the name used to to the value in help message.  */
+        typed_value* value_name(const std::string& name)
+        {
+            m_value_name = name;
+            return this;
+        }
+
         /** Specifies an implicit value, which will be used
             if the option is given, but without an adjacent value.
             Using this implies that an explicit value is optional, but if
@@ -261,13 +268,21 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespac
             return this;
         }
 
-        /** Specifies that the value can span multiple tokens. */
+        /** Specifies that the value can span multiple tokens. 
+        */
         typed_value* multitoken()
         {
             m_multitoken = true;
             return this;
         }
 
+        /** Specifies that no tokens may be provided as the value of
+            this option, which means that only presense of the option
+            is significant. For such option to be useful, either the
+            'validate' function should be specialized, or the 
+            'implicit_value' method should be also used. In most
+            cases, you can use the 'bool_switch' function instead of
+            using this method. */
         typed_value* zero_tokens() 
         {
             m_zero_tokens = true;
@@ -346,6 +361,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespac
         
         // Default value is stored as pdalboost::any and not
         // as pdalboost::optional to avoid unnecessary instantiations.
+        std::string m_value_name;
         pdalboost::any m_default_value;
         std::string m_default_value_as_text;
         pdalboost::any m_implicit_value;

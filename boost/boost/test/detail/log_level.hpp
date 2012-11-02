@@ -15,7 +15,7 @@
 #ifndef BOOST_TEST_LOG_LEVEL_HPP_011605GER
 #define BOOST_TEST_LOG_LEVEL_HPP_011605GER
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace unit_test {
 
 // ************************************************************************** //

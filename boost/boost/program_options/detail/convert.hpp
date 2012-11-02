@@ -27,7 +27,7 @@ namespace std
 }    
 #endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
     /** Converts from local 8 bit encoding into wchar_t string using
         the specified locale facet. */
@@ -89,7 +89,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 #else
 #include <vector>
 #include <string>
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost{
    namespace program_options{
         BOOST_PROGRAM_OPTIONS_DECL std::string to_internal(const std::string&);
 

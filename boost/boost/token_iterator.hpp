@@ -24,7 +24,8 @@
 #include<boost/token_functions.hpp>
 #include<utility>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
   template <class TokenizerFunc, class Iterator, class Type>
   class token_iterator
       : public iterator_facade<

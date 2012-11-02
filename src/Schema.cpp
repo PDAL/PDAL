@@ -50,7 +50,6 @@
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/concept_check.hpp> // ignore_unused_variable_warning
 #include <boost/algorithm/string.hpp>
-#include <boost/tokenizer.hpp>
 
 
 #ifdef PDAL_HAVE_LIBXML2

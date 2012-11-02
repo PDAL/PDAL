@@ -50,7 +50,7 @@
 namespace std { using ::time_t; }
 #endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace iostreams {
                     
 //------------------Definitions of constants----------------------------------//
 

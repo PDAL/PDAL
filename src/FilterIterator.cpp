@@ -52,18 +52,31 @@ FilterSequentialIterator::FilterSequentialIterator(const Filter& filter, PointBu
 
 FilterSequentialIterator::~FilterSequentialIterator()
 {
-    delete m_prevIterator;
+    if (m_prevIterator)
+        delete m_prevIterator;
 }
 
 
 StageSequentialIterator& FilterSequentialIterator::getPrevIterator()
 {
+    if (!m_prevIterator)
+    {
+        std::ostringstream oss;
+        oss << "Non-const sequential iterator for stage of type '" <<  m_filter.getPrevStage().getName() << "' is not available";
+        throw iterator_not_found(oss.str());
+    }
     return *m_prevIterator;
 }
 
 
 const StageSequentialIterator& FilterSequentialIterator::getPrevIterator() const
 {
+    if (!m_prevIterator)
+    {
+        std::ostringstream oss;
+        oss << "Const sequential iterator for stage of type '" <<  m_filter.getPrevStage().getName() << "' is not available";
+        throw iterator_not_found(oss.str());
+    }    
     return *m_prevIterator;
 }
 
@@ -82,18 +95,31 @@ FilterRandomIterator::FilterRandomIterator(const Filter& filter, PointBuffer& bu
 
 FilterRandomIterator::~FilterRandomIterator()
 {
-    delete m_prevIterator;
+    if (m_prevIterator)
+        delete m_prevIterator;
 }
 
 
 StageRandomIterator& FilterRandomIterator::getPrevIterator()
 {
+    if (!m_prevIterator)
+    {
+        std::ostringstream oss;
+        oss << "Non-const random iterator for stage of type '" <<  m_filter.getPrevStage().getName() << "' is not available";
+        throw iterator_not_found(oss.str());
+    }    
     return *m_prevIterator;
 }
 
 
 const StageRandomIterator& FilterRandomIterator::getPrevIterator() const
 {
+    if (!m_prevIterator)
+    {
+        std::ostringstream oss;
+        oss << "Const random terator for stage of type '" <<  m_filter.getPrevStage().getName() << "' is not available";
+        throw iterator_not_found(oss.str());
+    }    
     return *m_prevIterator;
 }
 

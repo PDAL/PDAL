@@ -33,9 +33,13 @@
 ****************************************************************************/
  
 #include <boost/test/unit_test.hpp>
+#include <boost/uuid/string_generator.hpp>
+#include <boost/uuid/random_generator.hpp>
+#include <boost/uuid/uuid_io.hpp>
 
 #include <pdal/GlobalEnvironment.hpp>
 #include "Support.hpp"
+
 
 BOOST_AUTO_TEST_SUITE(EnvironmentTest)
 
@@ -53,5 +57,39 @@ BOOST_AUTO_TEST_CASE(EnvironmentTest_1)
     return;
 }
 
+boost::test_tools::predicate_result
+compare_uuids( boost::uuids::uuid const& a, boost::uuids::uuid const& b )
+{
+    if (a == b)
+    {
+        boost::test_tools::predicate_result res( false );
+
+        res.message() << "UUID A and B are equal with value '" << a << "'";
+
+        return res;
+    }
+
+    return true;
+}
+
+
+BOOST_AUTO_TEST_CASE(EnvironmentTest_rng)
+{
+    ::pdal::GlobalEnvironment& env = ::pdal::GlobalEnvironment::get();
+
+    boost::uuids::basic_random_generator<boost::mt19937> gen1(env.getRNG());
+    boost::uuids::uuid a = gen1();
+    
+    boost::uuids::basic_random_generator<boost::mt19937> gen2(env.getRNG());
+    boost::uuids::uuid b = gen2();    
+
+    BOOST_CHECK( compare_uuids(a, b));
+    
+    boost::uuids::uuid c = gen1();    
+    boost::uuids::uuid d = gen1();    
+
+    BOOST_CHECK( compare_uuids(c, d));
+    return;
+}
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -58,7 +58,7 @@ namespace parameter_
   }; 
 } // namespace parameter_
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
 template<class T> class reference_wrapper;
 

@@ -10,7 +10,7 @@
 #include <boost/mpl/assert.hpp>
 #include <boost/mpl/bool.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion
 {
     struct iterator_range_tag;
 

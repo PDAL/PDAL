@@ -16,7 +16,7 @@
 
 #include <boost/limits.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace random {
 namespace detail {
 

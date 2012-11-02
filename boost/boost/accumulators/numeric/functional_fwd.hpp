@@ -14,7 +14,7 @@
 #include <boost/type_traits/is_same.hpp>
 #include <boost/type_traits/is_const.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace numeric
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace numeric
 {
     // For using directives -- this namespace may be re-opened elsewhere
     namespace operators

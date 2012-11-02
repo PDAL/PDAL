@@ -19,7 +19,7 @@
 #include "boost/date_time/time_iterator.hpp"
 #include "boost/date_time/dst_rules.hpp"
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
 //!Defines a non-adjusted time system with nano-second resolution and stable calculation properties
 namespace posix_time {

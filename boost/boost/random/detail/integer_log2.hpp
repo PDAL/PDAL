@@ -7,7 +7,7 @@
  *
  * See http://www.boost.org for most recent version including documentation.
  *
- * $Id: integer_log2.hpp 73268 2011-07-21 07:49:59Z danieljames $
+ * $Id: integer_log2.hpp 76145 2011-12-24 19:05:17Z danieljames $
  *
  */
 
@@ -18,7 +18,7 @@
 #include <boost/limits.hpp>
 #include <boost/pending/integer_log2.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace random {
 namespace detail {
 
@@ -35,13 +35,26 @@ namespace detail {
 template<int Shift>
 struct integer_log2_impl
 {
+#if defined(BOOST_NO_CONSTEXPR)
     template<class T>
-    BOOST_RANDOM_DETAIL_CONSTEXPR static int apply(T t, int accum,
-            int update = 0)
+    BOOST_RANDOM_DETAIL_CONSTEXPR static int apply(T t, int accum)
     {
-        return update = ((t >> Shift) != 0) * Shift,
-            integer_log2_impl<Shift / 2>::apply(t >> update, accum + update);
+        int update = ((t >> Shift) != 0) * Shift;
+        return integer_log2_impl<Shift / 2>::apply(t >> update, accum + update);
     }
+#else
+    template<class T>
+    BOOST_RANDOM_DETAIL_CONSTEXPR static int apply2(T t, int accum, int update)
+    {
+        return integer_log2_impl<Shift / 2>::apply(t >> update, accum + update);
+    }
+
+    template<class T>
+    BOOST_RANDOM_DETAIL_CONSTEXPR static int apply(T t, int accum)
+    {
+        return apply2(t, accum, ((t >> Shift) != 0) * Shift);
+    }
+#endif
 };
 
 template<>

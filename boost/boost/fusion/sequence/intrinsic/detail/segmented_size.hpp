@@ -18,7 +18,7 @@
 #include <boost/fusion/mpl/end.hpp>
 #include <boost/fusion/support/is_segmented.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion { namespace detail
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion { namespace detail
 {
     ///////////////////////////////////////////////////////////////////////////
     // calculates the size of any segmented data structure.

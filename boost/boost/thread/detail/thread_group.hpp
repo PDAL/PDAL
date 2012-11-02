@@ -16,7 +16,8 @@
 #pragma warning(disable:4251)
 #endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
     class thread_group
     {
     private:

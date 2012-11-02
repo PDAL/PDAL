@@ -9,7 +9,13 @@ EMBED=ON
 CC=/Users/hobu/bin/clang
 CXX=/Users/hobu/bin/clang++
 
-cmake   -G "Unix Makefiles"  \
+CONFIG="Unix Makefiles"
+
+if ! [ -z "$1" ]; then
+    CONFIG="$1"
+fi
+
+cmake   -G "$CONFIG"  \
         -DCMAKE_BUILD_TYPE=Debug \
         -DCMAKE_INSTALL_PREFIX=/Users/hobu \
         -DPDAL_EMBED_BOOST=${EMBED} \

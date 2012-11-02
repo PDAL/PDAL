@@ -10,7 +10,7 @@
 
 #include <boost/fusion/iterator/key_of.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion { namespace extension
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion { namespace extension
 {
     template <typename>
     struct key_of_impl;

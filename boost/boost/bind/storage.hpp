@@ -29,7 +29,8 @@
 # pragma warning(disable: 4512) // assignment operator could not be generated
 #endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 
 namespace _bi
 {

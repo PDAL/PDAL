@@ -37,7 +37,7 @@ struct opposite_tag
 \ingroup relation_group
                                                                     **/
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace bimaps {
 namespace relation {
 namespace support {

@@ -21,7 +21,8 @@
 #include <string>     // for std::char_traits
 
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 namespace io
 {
 

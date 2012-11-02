@@ -30,7 +30,7 @@
 # include <boost/iostreams/detail/vc6/read.hpp>
 #else // #if BOOST_WORKAROUND(BOOST_MSVC, < 1300) //--------------------------//
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace iostreams {
 
 namespace detail {
 

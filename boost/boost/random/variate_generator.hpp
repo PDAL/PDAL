@@ -19,7 +19,7 @@
 
 #include <boost/random/detail/disable_warnings.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
 /// \cond hide_private_members
 

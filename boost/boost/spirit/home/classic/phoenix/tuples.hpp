@@ -26,7 +26,7 @@
 #endif
 
 #if defined(__BORLANDC__) && (__BORLANDC__ <= 0x561)
-namespace pdalboostphoenix { namespace borland_only
+namespace pdalboostphoenix {} namespace phoenix = pdalboostphoenix; namespace pdalboostphoenix { namespace borland_only
 {
     namespace ftors
     {
@@ -66,7 +66,7 @@ namespace pdalboostphoenix { namespace borland_only
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace pdalboostphoenix {
+namespace pdalboostphoenix {} namespace phoenix = pdalboostphoenix; namespace pdalboostphoenix {
 
 ///////////////////////////////////////////////////////////////////////////////
 //

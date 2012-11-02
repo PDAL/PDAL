@@ -18,7 +18,7 @@
 
 #include <boost/config.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace bimaps {
 namespace views {
 
@@ -29,7 +29,7 @@ class unconstrained_map_view
 {
     public:
     template< class T >
-    unconstrained_map_view(const T & t) {}
+    unconstrained_map_view(const T &) {}
 
     typedef void reference;
     typedef void const_reference;

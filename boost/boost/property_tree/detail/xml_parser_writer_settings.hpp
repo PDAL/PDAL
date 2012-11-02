@@ -14,7 +14,7 @@
 #include <string>
 #include <boost/property_tree/detail/ptree_utils.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace property_tree { namespace xml_parser
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace property_tree { namespace xml_parser
 {
     
     // Naively convert narrow string to another character type

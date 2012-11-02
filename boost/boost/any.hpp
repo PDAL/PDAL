@@ -30,7 +30,8 @@
 #include <cstring>
 # endif 
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
     class any
     {
     public: // structors

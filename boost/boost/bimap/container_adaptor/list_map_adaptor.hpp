@@ -29,7 +29,7 @@
 #include <boost/mpl/aux_/na.hpp>
 #include <boost/mpl/if.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace bimaps {
 namespace container_adaptor {
 
@@ -134,6 +134,7 @@ class list_map_adaptor :
 
     typedef BOOST_DEDUCED_TYPENAME Iterator::value_type::first_type  key_type;
     typedef BOOST_DEDUCED_TYPENAME Iterator::value_type::second_type data_type;
+    typedef data_type mapped_type;
 
     protected:
 

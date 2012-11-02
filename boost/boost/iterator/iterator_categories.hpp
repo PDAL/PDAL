@@ -21,7 +21,7 @@
 
 # include <boost/static_assert.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
 //
 // Traversal Categories

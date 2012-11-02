@@ -20,7 +20,7 @@
 #include <cstddef> // NULL
 #include <boost/serialization/force_include.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace serialization {
 namespace void_cast_detail{
 class void_caster;

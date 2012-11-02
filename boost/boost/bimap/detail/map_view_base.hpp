@@ -38,7 +38,7 @@
 #include <boost/bimap/detail/modifier_adaptor.hpp>
 #include <boost/bimap/detail/debug/static_error.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace bimaps {
 
 namespace detail {

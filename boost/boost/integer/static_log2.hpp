@@ -18,7 +18,7 @@
 
 #include "boost/integer_fwd.hpp" // for pdalboost::intmax_t
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
  namespace detail {
 

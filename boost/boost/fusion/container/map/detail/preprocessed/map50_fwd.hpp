@@ -6,7 +6,7 @@
 
     This is an auto-generated file. Do not edit!
 ==============================================================================*/
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion
 {
     struct void_;
     struct map_tag;

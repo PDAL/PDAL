@@ -18,7 +18,7 @@
 #include <boost/iostreams/filter/gzip.hpp>
 #include <boost/throw_exception.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace iostreams {
 
 //------------------Implementation of gzip_header-----------------------------//
 
@@ -62,7 +62,7 @@ void gzip_header::process(char c)
     case s_os:
         os_ = value;
         if (flags_ & gzip::flags::extra) {
-            state_ = s_extra;
+            state_ = s_xlen;
         } else if (flags_ & gzip::flags::name) {
             state_ = s_name;
         } else if (flags_ & gzip::flags::comment) {

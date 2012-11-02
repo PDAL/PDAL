@@ -78,7 +78,7 @@ extern "C"
 #endif // BOOST_SPIRIT_FILEITERATOR_STD
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace spirit {
 
 BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
 

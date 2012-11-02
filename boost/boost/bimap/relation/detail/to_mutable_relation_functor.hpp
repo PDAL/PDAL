@@ -22,7 +22,7 @@
 #include <boost/bimap/relation/detail/mutant.hpp>
 #include <boost/bimap/relation/mutant_relation.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace bimaps {
 namespace relation {
 namespace detail {

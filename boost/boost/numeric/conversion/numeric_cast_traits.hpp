@@ -11,7 +11,7 @@
 
 #include <boost/numeric/conversion/converter_policies.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace numeric {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace numeric {
 
     template <typename Target, typename Source, typename EnableIf = void>
     struct numeric_cast_traits

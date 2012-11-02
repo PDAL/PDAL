@@ -56,7 +56,7 @@
 // will be converted to "const unsigned long" and a match will be made with 
 // one of the default template functions below.
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace serialization {
 
 BOOST_STRONG_TYPEDEF(unsigned int, version_type)

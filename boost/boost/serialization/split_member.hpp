@@ -22,7 +22,7 @@
 
 #include <boost/serialization/access.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace archive {
     namespace detail {
         template<class Archive> class interface_oarchive;

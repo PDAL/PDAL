@@ -39,7 +39,7 @@
 #include <boost/bimap/views/map_view.hpp>
 #include <boost/bimap/views/set_view.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace bimaps {
 
 /// \brief Set Type Specification

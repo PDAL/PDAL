@@ -10,7 +10,7 @@ if exist ".\engine\bin.ntx86\bjam.exe" del engine\bin.ntx86\bjam.exe
 if exist ".\engine\bin.ntx86_64\bjam.exe" del engine\bin.ntx86_64\bjam.exe
 cd engine
 
-call .\build.bat %* > ..\..\bootstrap.log
+call .\build.bat %* > ..\bootstrap.log
 @ECHO OFF
 cd ..
 

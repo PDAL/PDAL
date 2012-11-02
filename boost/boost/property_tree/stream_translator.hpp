@@ -23,7 +23,7 @@
 #include <locale>
 #include <limits>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace property_tree
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace property_tree
 {
 
     template <typename Ch, typename Traits, typename E, typename Enabler = void>

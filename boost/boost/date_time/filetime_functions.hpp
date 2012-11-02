@@ -6,7 +6,7 @@
  * Boost Software License, Version 1.0. (See accompanying
  * file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
  * Author: Jeff Garland, Bart Garst
- * $Date: 2011-11-13 01:10:55 -0500 (Sun, 13 Nov 2011) $
+ * $Date: 2012-07-27 11:15:55 -0700 (Fri, 27 Jul 2012) $
  */
 
 /*! @file filetime_functions.hpp
@@ -27,7 +27,7 @@
 #include <boost/date_time/time.hpp>
 #include <boost/date_time/date_defs.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
 namespace date_time {
 

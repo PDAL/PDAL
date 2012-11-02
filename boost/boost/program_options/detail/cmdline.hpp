@@ -27,7 +27,7 @@
 #   pragma warning (disable:4251) // class 'std::vector<_Ty>' needs to have dll-interface to be used by clients of class 'pdalboost::program_options::positional_options_description'
 #endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace program_options { namespace detail {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace program_options { namespace detail {
 
     /** Command line parser class. Main requirements were:
         - Powerful enough to support all common uses.
@@ -81,6 +81,18 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespac
         cmdline(int argc, const char*const * argv);
 
         void style(int style);
+
+        /** returns the canonical option prefix associated with the command_line_style
+         *  In order of precedence:
+         *      allow_long           : allow_long
+         *      allow_long_disguise  : allow_long_disguise
+         *      allow_dash_for_short : allow_short | allow_dash_for_short
+         *      allow_slash_for_short: allow_short | allow_slash_for_short
+         *  
+         *      This is mainly used for the diagnostic messages in exceptions
+        */ 
+        int         get_canonical_option_prefix();
+
         void allow_unregistered();
 
         void set_options_description(const options_description& desc);

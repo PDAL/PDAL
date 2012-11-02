@@ -25,7 +25,7 @@
 
 #include <boost/type_traits/is_base_and_derived.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ 
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { 
 namespace serialization {
 
 struct basic_traits;
@@ -78,7 +78,7 @@ const int version<T>::value;
 // specify the current version number for the class
 // version numbers limited to 8 bits !!!
 #define BOOST_CLASS_VERSION(T, N)                                      \
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{                                                      \
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {                                                      \
 namespace serialization {                                              \
 template<>                                                             \
 struct version<T >                                                     \

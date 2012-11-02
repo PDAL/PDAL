@@ -15,7 +15,7 @@
 #include <boost/type_traits/is_same.hpp>
 #include <boost/fusion/support/tag_of.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion
 {
     struct random_access_traversal_tag;
 

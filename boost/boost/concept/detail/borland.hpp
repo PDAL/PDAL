@@ -7,7 +7,7 @@
 # include <boost/preprocessor/cat.hpp>
 # include <boost/concept/detail/backward_compatibility.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace concepts {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace concepts {
 
 template <class ModelFnPtr>
 struct require;

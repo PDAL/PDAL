@@ -20,6 +20,7 @@
 #include <boost/integer_traits.hpp>  // for pdalboost::::pdalboost::integer_traits
 #include <boost/limits.hpp>          // for ::std::numeric_limits
 #include <boost/cstdint.hpp>         // for pdalboost::int64_t and BOOST_NO_INTEGRAL_INT64_T
+#include <boost/static_assert.hpp>
 
 //
 // We simply cannot include this header on gcc without getting copious warnings of the kind:
@@ -33,7 +34,8 @@
 #pragma GCC system_header
 #endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 
   //  Helper templates  ------------------------------------------------------//
 
@@ -50,6 +52,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
   //  convert category to type 
   template< int Category > struct int_least_helper {}; // default is empty
+  template< int Category > struct uint_least_helper {}; // default is empty
 
   //  specializatons: 1=long, 2=int, 3=short, 4=signed char,
   //     6=unsigned long, 7=unsigned int, 8=unsigned short, 9=unsigned char
@@ -64,14 +67,14 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
   template<> struct int_least_helper<4> { typedef short least; };
   template<> struct int_least_helper<5> { typedef signed char least; };
 #ifdef BOOST_HAS_LONG_LONG
-  template<> struct int_least_helper<6> { typedef pdalboost::ulong_long_type least; };
+  template<> struct uint_least_helper<1> { typedef pdalboost::ulong_long_type least; };
 #elif defined(BOOST_HAS_MS_INT64)
-  template<> struct int_least_helper<6> { typedef unsigned __int64 least; };
+  template<> struct uint_least_helper<1> { typedef unsigned __int64 least; };
 #endif
-  template<> struct int_least_helper<7> { typedef unsigned long least; };
-  template<> struct int_least_helper<8> { typedef unsigned int least; };
-  template<> struct int_least_helper<9> { typedef unsigned short least; };
-  template<> struct int_least_helper<10> { typedef unsigned char least; };
+  template<> struct uint_least_helper<2> { typedef unsigned long least; };
+  template<> struct uint_least_helper<3> { typedef unsigned int least; };
+  template<> struct uint_least_helper<4> { typedef unsigned short least; };
+  template<> struct uint_least_helper<5> { typedef unsigned char least; };
 
   template <int Bits>
   struct exact_signed_base_helper{};
@@ -110,10 +113,12 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
   template< int Bits >   // bits (including sign) required
   struct int_t : public detail::exact_signed_base_helper<Bits>
   {
+      BOOST_STATIC_ASSERT_MSG(Bits <= (int)(sizeof(pdalboost::intmax_t) * CHAR_BIT),
+         "No suitable signed integer type with the requested number of bits is available.");
       typedef typename detail::int_least_helper
         <
 #ifdef BOOST_HAS_LONG_LONG
-          (Bits-1 <= (int)(sizeof(pdalboost::long_long_type) * CHAR_BIT)) +
+          (Bits <= (int)(sizeof(pdalboost::long_long_type) * CHAR_BIT)) +
 #else
            1 +
 #endif
@@ -129,6 +134,8 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
   template< int Bits >   // bits required
   struct uint_t : public detail::exact_unsigned_base_helper<Bits>
   {
+     BOOST_STATIC_ASSERT_MSG(Bits <= (int)(sizeof(pdalboost::uintmax_t) * CHAR_BIT),
+         "No suitable unsigned integer type with the requested number of bits is available.");
 #if (defined(__BORLANDC__) || defined(__CODEGEAR__)) && defined(BOOST_NO_INTEGRAL_INT64_T)
      // It's really not clear why this workaround should be needed... shrug I guess!  JM
      BOOST_STATIC_CONSTANT(int, s = 
@@ -139,11 +146,10 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
           (Bits <= ::std::numeric_limits<unsigned char>::digits));
      typedef typename detail::int_least_helper< ::pdalboost::uint_t<Bits>::s>::least least;
 #else
-      typedef typename detail::int_least_helper
+      typedef typename detail::uint_least_helper
         < 
-          5 +
 #ifdef BOOST_HAS_LONG_LONG
-          (Bits-1 <= (int)(sizeof(pdalboost::long_long_type) * CHAR_BIT)) +
+          (Bits <= (int)(sizeof(pdalboost::long_long_type) * CHAR_BIT)) +
 #else
            1 +
 #endif
@@ -216,7 +222,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
      // It's really not clear why this workaround should be needed... shrug I guess!  JM
 #if defined(BOOST_NO_INTEGRAL_INT64_T)
       BOOST_STATIC_CONSTANT(unsigned, which = 
-           6 +
+           1 +
           (MaxValue <= ::pdalboost::integer_traits<unsigned long>::const_max) +
           (MaxValue <= ::pdalboost::integer_traits<unsigned int>::const_max) +
           (MaxValue <= ::pdalboost::integer_traits<unsigned short>::const_max) +
@@ -224,18 +230,17 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
       typedef typename detail::int_least_helper< ::pdalboost::uint_value_t<MaxValue>::which>::least least;
 #else // BOOST_NO_INTEGRAL_INT64_T
       BOOST_STATIC_CONSTANT(unsigned, which = 
-           5 +
+           1 +
           (MaxValue <= ::pdalboost::integer_traits<pdalboost::ulong_long_type>::const_max) +
           (MaxValue <= ::pdalboost::integer_traits<unsigned long>::const_max) +
           (MaxValue <= ::pdalboost::integer_traits<unsigned int>::const_max) +
           (MaxValue <= ::pdalboost::integer_traits<unsigned short>::const_max) +
           (MaxValue <= ::pdalboost::integer_traits<unsigned char>::const_max));
-      typedef typename detail::int_least_helper< ::pdalboost::uint_value_t<MaxValue>::which>::least least;
+      typedef typename detail::uint_least_helper< ::pdalboost::uint_value_t<MaxValue>::which>::least least;
 #endif // BOOST_NO_INTEGRAL_INT64_T
 #else
-      typedef typename detail::int_least_helper
+      typedef typename detail::uint_least_helper
         < 
-          5 +
 #if !defined(BOOST_NO_INTEGRAL_INT64_T) && defined(BOOST_HAS_LONG_LONG)
           (MaxValue <= ::pdalboost::integer_traits<pdalboost::ulong_long_type>::const_max) +
 #else

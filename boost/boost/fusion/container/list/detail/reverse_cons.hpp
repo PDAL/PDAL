@@ -9,7 +9,7 @@
 
 #include <boost/fusion/container/list/cons_fwd.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion { namespace detail
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion { namespace detail
 {
     ////////////////////////////////////////////////////////////////////////////
     template<typename Cons, typename State = nil>

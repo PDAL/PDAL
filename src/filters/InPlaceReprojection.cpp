@@ -37,6 +37,7 @@
 #include <boost/concept_check.hpp> // ignore_unused_variable_warning
 
 #include <pdal/PointBuffer.hpp>
+#include <pdal/GlobalEnvironment.hpp>
 
 #ifdef PDAL_HAVE_GDAL
 #include <gdal.h>
@@ -82,7 +83,7 @@ InPlaceReprojection::InPlaceReprojection(Stage& prevStage, const Options& option
     , m_new_z_id(boost::uuids::nil_uuid())
     , m_old_x_id(boost::uuids::nil_uuid())
     , m_old_y_id(boost::uuids::nil_uuid())
-    , m_old_z_id(boost::uuids::nil_uuid())    
+    , m_old_z_id(boost::uuids::nil_uuid())
 {
     if (options.hasOption("in_srs"))
     {
@@ -97,7 +98,10 @@ InPlaceReprojection::InPlaceReprojection(Stage& prevStage, const Options& option
     return;
 }
 
-
+InPlaceReprojection::~InPlaceReprojection()
+{
+    
+}
 void InPlaceReprojection::initialize()
 {
     Filter::initialize();
@@ -108,8 +112,8 @@ void InPlaceReprojection::initialize()
     }
 
 #ifdef PDAL_HAVE_GDAL
-
-    m_gdal_debug = boost::shared_ptr<pdal::gdal::Debug>(new pdal::gdal::Debug(isDebug(), log()));
+    
+    pdal::GlobalEnvironment::get().getGDALDebug()->addLog(log());
 
     m_in_ref_ptr = ReferencePtr(OSRNewSpatialReference(0), OGRSpatialReferenceDeleter());
     m_out_ref_ptr = ReferencePtr(OSRNewSpatialReference(0), OGRSpatialReferenceDeleter());

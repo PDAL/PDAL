@@ -62,7 +62,7 @@ namespace env = rt::env;
 namespace std { using ::getenv; using ::strncmp; using ::strcmp; }
 # endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
 namespace unit_test {
 

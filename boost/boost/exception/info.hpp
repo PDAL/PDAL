@@ -19,7 +19,9 @@
 #include <boost/config.hpp>
 #include <map>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace
+pdalboost
+    {
     template <class Tag,class T>
     inline
     typename enable_if<has_to_string<T>,std::string>::type
@@ -95,7 +97,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
                     {
                     shared_ptr<error_info_base> const & p = i->second;
 #ifndef BOOST_NO_RTTI
-                    BOOST_ASSERT( BOOST_EXCEPTION_DYNAMIC_TYPEID(*p).type_==ti.type_ );
+                    BOOST_ASSERT( *BOOST_EXCEPTION_DYNAMIC_TYPEID(*p).type_==*ti.type_ );
 #endif
                     return p;
                     }

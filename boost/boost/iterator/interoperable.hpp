@@ -14,7 +14,8 @@
 
 # include <boost/iterator/detail/config_def.hpp> // must appear last
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 
   //
   // Meta function that determines whether two

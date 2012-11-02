@@ -11,8 +11,8 @@ feature.feature auto-index : off "on" ;
 feature.feature auto-index-internal : off "on" ;
 feature.feature auto-index-verbose : off "on" ;
 feature.feature auto-index-no-duplicates : off "on" ;
-feature.feature auto-index-script : : free ;
-feature.feature auto-index-prefix : : free ;
+feature.feature auto-index-script : : free path ;
+feature.feature auto-index-prefix : : free path ;
 feature.feature auto-index-type : : free ;
 feature.feature auto-index-section-names : "on" off ;
 

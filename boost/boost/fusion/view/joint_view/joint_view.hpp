@@ -24,7 +24,7 @@
 #include <boost/mpl/inherit.hpp>
 #include <boost/mpl/identity.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion
 {
     struct joint_view_tag;
     struct forward_traversal_tag;

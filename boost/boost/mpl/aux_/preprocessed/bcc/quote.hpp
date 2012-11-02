@@ -9,7 +9,7 @@
 // *Preprocessed* version of the main "quote.hpp" header
 // -- DO NOT modify by hand!
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace mpl {
 
 template< typename T, bool has_type_ >
 struct quote_impl

@@ -28,7 +28,7 @@
     part(s) of the input according to a searching criteria.
 */
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
     namespace algorithm {
 
 //  erase_range -------------------------------------------------------//

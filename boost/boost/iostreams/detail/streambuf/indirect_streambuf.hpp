@@ -41,7 +41,7 @@
 // Must come last.
 #include <boost/iostreams/detail/config/disable_warnings.hpp>  // MSVC, BCC 5.x
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams { namespace detail {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace iostreams { namespace detail {
 
 //
 // Description: The implementation of basic_streambuf used by chains.

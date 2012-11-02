@@ -15,7 +15,8 @@
 # include <boost/config.hpp>
 # include <boost/detail/workaround.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 
 namespace detail
 {

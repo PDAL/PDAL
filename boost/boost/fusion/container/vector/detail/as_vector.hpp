@@ -20,7 +20,7 @@
 #include <boost/fusion/iterator/deref.hpp>
 #include <boost/fusion/iterator/next.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion { namespace detail
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion { namespace detail
 {
     template <int size>
     struct as_vector;
@@ -63,7 +63,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespac
 #pragma wave option(preserve: 1)
 #endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion { namespace detail
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion { namespace detail
 {
 
 #define BOOST_FUSION_NEXT_ITERATOR(z, n, data)                                  \

@@ -29,7 +29,7 @@
 #include <boost/iostreams/detail/config/disable_warnings.hpp>  // MSVC.
 
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams { namespace detail {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace iostreams { namespace detail {
 
 template<typename Category> struct device_wrapper_impl;
 template<typename Category> struct flt_wrapper_impl;

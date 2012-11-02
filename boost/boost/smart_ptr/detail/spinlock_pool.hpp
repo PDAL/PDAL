@@ -25,7 +25,8 @@
 #include <boost/smart_ptr/detail/spinlock.hpp>
 #include <cstddef>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 
 namespace detail
 {

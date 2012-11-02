@@ -45,35 +45,35 @@ link_directories(${Boost_LIBRARY_DIRS})
 
 # Build pcinfo
 if(PCINFO)
-    if(WITH_LIBXML2)
+    if(LIBXML2_FOUND)
         list(APPEND PDAL_UTILITIES ${PCINFO})
         add_executable(${PCINFO} pcinfo.cpp ${COMMON_APP_SOURCES})
         target_link_libraries(${PCINFO} ${PDAL_LIB_NAME} ${Boost_LIBRARIES})
-    endif()
-endif()
+    endif(LIBXML2_FOUND)
+endif(PCINFO)
 
 if(PC2PC)
     list(APPEND PDAL_UTILITIES ${PC2PC})
     add_executable(${PC2PC} pc2pc.cpp ${COMMON_APP_SOURCES})
-    target_link_libraries(${PC2PC} ${PDAL_LIB_NAME} ${Boost_LIBRARIES})
+    target_link_libraries(${PC2PC} ${PDAL_LIB_NAME} ${Boost_LIBRARIES} ${Boost_FILESYSTEM_LIBRARY})
 endif()
 
 if(PCPIPELINE)
     list(APPEND PDAL_UTILITIES ${PCPIPELINE})
     add_executable(${PCPIPELINE} pcpipeline.cpp ${COMMON_APP_SOURCES})
-    target_link_libraries(${PCPIPELINE} ${PDAL_LIB_NAME} ${Boost_LIBRARIES})
+    target_link_libraries(${PCPIPELINE} ${PDAL_LIB_NAME} ${Boost_LIBRARIES} ${Boost_FILESYSTEM_LIBRARY})
 endif()
 
 if(PCQUERY)
     list(APPEND PDAL_UTILITIES ${PCQUERY})
     add_executable(${PCQUERY} pcquery.cpp ${COMMON_APP_SOURCES})
-    target_link_libraries(${PCQUERY} ${PDAL_LIB_NAME} ${Boost_LIBRARIES})
+    target_link_libraries(${PCQUERY} ${PDAL_LIB_NAME} ${Boost_LIBRARIES} ${Boost_FILESYSTEM_LIBRARY})
 endif()
 
 if(PCEQUAL)
     list(APPEND PDAL_UTILITIES ${PCEQUAL})
     add_executable(${PCEQUAL} pcequal.cpp ${COMMON_APP_SOURCES})
-    target_link_libraries(${PCEQUAL} ${PDAL_LIB_NAME} ${Boost_LIBRARIES})
+    target_link_libraries(${PCEQUAL} ${PDAL_LIB_NAME} ${Boost_LIBRARIES} ${Boost_FILESYSTEM_LIBRARY})
 endif()
 
 #------------------------------------------------------------------------------

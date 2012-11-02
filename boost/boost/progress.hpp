@@ -25,7 +25,7 @@
 #include <iostream>           // for ostream, cout, etc
 #include <string>             // for string
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
 //  progress_timer  ----------------------------------------------------------//
 

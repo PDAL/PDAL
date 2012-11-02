@@ -11,7 +11,7 @@
 #include <boost/type_traits/is_pointer.hpp>
 #include <boost/type_traits/is_array.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
     namespace detail {
         template<bool IsPointer,bool IsArray,bool IsConst,bool IsVolatile>
         struct remove_const_impl_typeof {

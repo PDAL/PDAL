@@ -21,7 +21,7 @@
 #include <boost/spirit/home/classic/core/non_terminal/impl/grammar.ipp>
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace spirit {
 
 BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
 

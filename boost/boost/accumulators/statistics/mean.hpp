@@ -18,7 +18,7 @@
 #include <boost/accumulators/statistics/count.hpp>
 #include <boost/accumulators/statistics/sum.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace accumulators
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace accumulators
 {
 
 namespace impl

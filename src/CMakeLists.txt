@@ -503,7 +503,7 @@ set(PDAL_CONFIG_HPP
   ${PDAL_HEADERS_DIR}/pdal_export.hpp
   ${PDAL_HEADERS_DIR}/pdal_internal.hpp
   ${PDAL_HEADERS_DIR}/pdal_config.hpp
-  ${PDAL_HEADERS_DIR}/pdal_defines.h
+  ${PROJECT_BINARY_DIR}/pdal_defines.h
 )
 
 set (PDAL_CONFIG_CPP 
@@ -616,14 +616,14 @@ message(STATUS "Using boost lib: ${Boost_LIBRARIES}")
 if (WIN32)
 	if (CMAKE_VERSION VERSION_GREATER 2.8.6)
 		target_link_libraries(${APPS_CPP_DEPENDENCIES}
-                       LINK_PRIVATE general ${Boost_LIBRARIES})
+                       LINK_PRIVATE general ${Boost_LIBRARIES} ${Boost_FILESYSTEM_LIBRARY})
 	else()
 		target_link_libraries(${APPS_CPP_DEPENDENCIES}
-                        ${Boost_LIBRARIES})
+                        ${Boost_LIBRARIES} ${Boost_FILESYSTEM_LIBRARY})
 	endif()
 else()
 	target_link_libraries(${APPS_CPP_DEPENDENCIES}
-                      ${Boost_LIBRARIES})
+                      ${Boost_LIBRARIES} ${Boost_FILESYSTEM_LIBRARY})
 
 endif(WIN32)
 
@@ -656,3 +656,6 @@ install(TARGETS ${PDAL_LIB_NAME} ${PDAL_C_LIB_NAME} ${PDAL_CSV_WRITER_NAME}
 install(DIRECTORY ${PDAL_HEADERS_DIR}
   DESTINATION ${PDAL_INCLUDE_DIR}
   FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp")
+
+install(FILES "${PROJECT_BINARY_DIR}/pdal_defines.h"
+  DESTINATION "${PDAL_INCLUDE_DIR}/pdal")

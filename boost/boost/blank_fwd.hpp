@@ -13,7 +13,7 @@
 #ifndef BOOST_BLANK_FWD_HPP
 #define BOOST_BLANK_FWD_HPP
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
 struct blank;
 

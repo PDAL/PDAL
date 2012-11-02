@@ -25,7 +25,7 @@
 #include <boost/throw_exception.hpp>
 #include <boost/type_traits/is_convertible.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace iostreams {
 
 namespace detail {
 

@@ -5,7 +5,7 @@
 
 // Seems like Boostbook does like classes outside of namespaces,
 // and won't generate anything for them.
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
 /// A class
 class A {

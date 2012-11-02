@@ -11,7 +11,7 @@ t = BoostBuild.Tester()
 
 t.set_tree("test2")
 
-file_list = 'bin/foo/$toolset/debug/runtime-link-dynamic/' * \
+file_list = 'bin/$toolset/debug/' * \
     BoostBuild.List("foo foo.o")
 
 t.run_build_system("-sBOOST_BUILD_PATH=" + t.original_workdir + "/..")
@@ -22,4 +22,4 @@ t.write("foo.cpp", "int main() {}\n")
 t.run_build_system("-d2 -sBOOST_BUILD_PATH=" + t.original_workdir + "/..")
 t.expect_touch(file_list)
 
-t.pass_test()
+t.cleanup()

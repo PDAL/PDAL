@@ -8,7 +8,7 @@
 #include <boost/type_traits/msvc/typeof.hpp>
 #include <boost/type_traits/is_array.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
     namespace detail {
         template<bool IsArray>
         struct remove_extent_impl_typeof {

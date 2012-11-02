@@ -12,7 +12,7 @@
 #include <boost/fusion/support/tag_of.hpp>
 #include <boost/fusion/sequence/intrinsic_fwd.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion { namespace detail
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion { namespace detail
 {
     struct segment_sequence_tag {};
 

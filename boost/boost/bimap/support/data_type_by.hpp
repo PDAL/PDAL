@@ -51,7 +51,7 @@ See also member_at.
 \ingroup bimap_group
                                                                     **/
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace bimaps {
 namespace support {
 

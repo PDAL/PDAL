@@ -10,7 +10,7 @@
 #include <boost/parameter/aux_/tag.hpp>
 #include <boost/parameter/aux_/default.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace parameter {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace parameter {
 
 // Instances of unique specializations of keyword<...> serve to
 // associate arguments with parameter names.  For example:

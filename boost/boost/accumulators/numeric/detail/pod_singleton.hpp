@@ -4,7 +4,7 @@
 #ifndef BOOST_DETAIL_POD_SINGLETON_DWA200655_HPP
 # define BOOST_DETAIL_POD_SINGLETON_DWA200655_HPP
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace detail {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace detail {
 
 template<typename T>
 struct pod_singleton

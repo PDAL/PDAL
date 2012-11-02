@@ -41,7 +41,7 @@
 
 #include "boost/detail/workaround.hpp" // needed for BOOST_WORKAROUND
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace tuples {
 
 // -- null_type --------------------------------------------------------

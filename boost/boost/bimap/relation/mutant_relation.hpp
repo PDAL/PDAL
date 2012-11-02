@@ -21,7 +21,10 @@
 #include <boost/mpl/vector.hpp>
 #include <boost/operators.hpp>
 #include <boost/call_traits.hpp>
-#include <boost/serialization/nvp.hpp>
+
+#ifndef BOOST_BIMAP_DISABLE_SERIALIZATION
+  #include <boost/serialization/nvp.hpp>
+#endif // BOOST_BIMAP_DISABLE_SERIALIZATION
 
 #include <boost/functional/hash/hash.hpp>
 
@@ -39,7 +42,7 @@
 #include <boost/bimap/relation/symmetrical_base.hpp>
 #include <boost/bimap/relation/support/get.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace bimaps {
 namespace relation {
 

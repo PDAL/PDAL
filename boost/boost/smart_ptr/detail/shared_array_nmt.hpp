@@ -24,7 +24,8 @@
 #include <functional>       // for std::less
 #include <new>              // for std::bad_alloc
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 
 template<class T> class shared_array
 {

@@ -21,7 +21,8 @@
 #include <boost/detail/sp_typeinfo.hpp>
 #include <pthread.h>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 
 namespace detail
 {

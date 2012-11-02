@@ -26,7 +26,7 @@
 #include <boost/preprocessor/repetition/enum_binary_params.hpp>
 #include <boost/preprocessor/facilities/intercept.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace parameter {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace parameter {
 
 // Forward declaration for aux::arg_list, below.
 template<class T> struct keyword;

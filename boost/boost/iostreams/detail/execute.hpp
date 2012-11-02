@@ -43,7 +43,7 @@
 #include <boost/preprocessor/punctuation/comma_if.hpp>
 #include <boost/utility/result_of.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams { namespace detail {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace iostreams { namespace detail {
 
 // Helper for class template execute_traits.
 template<typename Result>

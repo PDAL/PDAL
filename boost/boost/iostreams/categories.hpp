@@ -15,7 +15,7 @@
 # pragma once
 #endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace iostreams {
 
 //------------------Tags for dispatch according to i/o mode-------------------//
 

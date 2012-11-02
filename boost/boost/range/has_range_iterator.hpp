@@ -13,9 +13,10 @@
 #include <boost/mpl/bool.hpp>
 #include <boost/mpl/has_xxx.hpp>
 #include <boost/range/iterator.hpp>
-#include <boost/utility.hpp>
+#include <boost/utility/enable_if.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
     namespace range_detail
     {
         BOOST_MPL_HAS_XXX_TRAIT_DEF(type)

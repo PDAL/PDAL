@@ -18,7 +18,7 @@
 #include <boost/algorithm/string/detail/find_format_store.hpp>
 #include <boost/algorithm/string/detail/replace_storage.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
     namespace algorithm {
         namespace detail {
 

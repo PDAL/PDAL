@@ -15,7 +15,8 @@
 
 #include <boost/config/abi_prefix.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
     namespace detail
     {
         inline struct timespec get_timespec(pdalboost::system_time const& abs_time)

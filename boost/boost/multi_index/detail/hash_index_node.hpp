@@ -18,7 +18,7 @@
 #include <boost/multi_index/detail/prevent_eti.hpp>
 #include <functional>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost{
 
 namespace multi_index{
 

@@ -15,7 +15,7 @@
 #include <boost/type_traits/is_convertible.hpp>
 #include <boost/type_traits/is_same.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion
 {
     // Special tags:
     struct non_fusion_tag;
@@ -59,9 +59,11 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespac
     {
         template <typename T>
         struct is_sequence
-          : extension::is_sequence_impl<
+          : mpl::bool_<
+                (bool)extension::is_sequence_impl<
                 typename fusion::detail::tag_of<T>::type
-            >::template apply<T>
+                >::template apply<T>::type::value
+            >
         {};
 
         template <typename Sequence, typename Enable = void>

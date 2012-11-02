@@ -11,7 +11,7 @@
 #include <boost/fusion/iterator/segmented_iterator.hpp>
 #include <boost/fusion/container/list/cons.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion { namespace detail
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion { namespace detail
 {
     //auto segmented_end( seq )
     //{

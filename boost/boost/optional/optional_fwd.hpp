@@ -15,7 +15,7 @@
 #ifndef BOOST_OPTIONAL_OPTIONAL_FWD_FLC_19NOV2002_HPP
 #define BOOST_OPTIONAL_OPTIONAL_FWD_FLC_19NOV2002_HPP
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
 template<class T> class optional ;
 

@@ -17,7 +17,7 @@
 #include <boost/math/special_functions/math_fwd.hpp>
 #include <boost/math/special_functions/detail/fp_traits.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace math{ 
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost{ namespace math{ 
 
 namespace detail {
 

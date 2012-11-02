@@ -400,6 +400,9 @@ class Generator:
 
         dir = os.path.dirname(fullname)
         name = os.path.basename(fullname)
+        idx = name.find(".")
+        if idx != -1:
+            name = name[:idx]
 
         if dir and not ".." in dir and not os.path.isabs(dir):
             # Relative path is always relative to the source
@@ -470,9 +473,6 @@ class Generator:
         post = self.name_postfix_
         for t in self.target_types_:
             basename = os.path.basename(name)
-            idx = basename.find(".")
-            if idx != -1:
-                basename = basename[:idx]
             generated_name = pre[0] + basename + post[0]
             generated_name = os.path.join(os.path.dirname(name), generated_name)
             pre = pre[1:]
@@ -692,7 +692,7 @@ def override (overrider_id, overridee_id):
     after computing the list of viable generators, before
     running any of them."""
     
-    __overrides.get(overrider_id, []).append(overridee_id)
+    __overrides.setdefault(overrider_id, []).append(overridee_id)
 
 def __viable_source_types_real (target_type):
     """ Returns a list of source type which can possibly be converted
@@ -974,7 +974,7 @@ def find_viable_generators (target_type, prop_set):
     
     # Generators which are overriden
     overriden_ids = [] 
-       
+
     for g in viable_generators:
         id = g.id ()
         
@@ -988,13 +988,7 @@ def find_viable_generators (target_type, prop_set):
     if all_overrides:
         viable_generators = all_overrides
 
-    result = []
-    for g in viable_generators:
-        if not g.id () in overriden_ids:
-            result.append (g)
-
-        
-    return result
+    return [g for g in viable_generators if not g.id() in overriden_ids]
     
 def __construct_really (project, name, target_type, prop_set, sources):
     """ Attempts to construct target by finding viable generators, running them
@@ -1004,7 +998,7 @@ def __construct_really (project, name, target_type, prop_set, sources):
                     
     result = []
 
-    project.manager ().logger ().log (__name__, "*** %d viable generators" % len (viable_generators))
+    dout("      *** %d viable generators" % len (viable_generators))
 
     generators_that_succeeded = []
     
@@ -1086,4 +1080,18 @@ def construct (project, name, target_type, prop_set, sources, top_level=False):
         __active_generators = saved_active
 
     return result
-    
+
+def add_usage_requirements (result, raw_properties):
+    if result:
+        if isinstance (result[0], property_set.PropertySet):
+          return (result[0].add_raw(raw_properties), result[1])
+        else:
+          return (propery_set.create(raw-properties), result) 
+        #if [ class.is-a $(result[1]) : property-set ]
+        #{
+        #    return [ $(result[1]).add-raw $(raw-properties) ] $(result[2-]) ;
+        #}
+        #else
+        #{
+        #    return [ property-set.create $(raw-properties) ] $(result) ;
+        #}

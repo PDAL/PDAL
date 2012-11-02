@@ -25,7 +25,9 @@
 
 #ifndef BOOST_NO_EXCEPTIONS
 #include <boost/exception/current_exception_cast.hpp>
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace
+pdalboost
+    {
     namespace
     exception_detail
         {
@@ -46,7 +48,9 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     }
 #endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace
+pdalboost
+    {
     namespace
     exception_detail
         {

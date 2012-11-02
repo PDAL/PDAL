@@ -22,7 +22,7 @@
 #include <boost/bimap/detail/set_view_base.hpp>
 #include <boost/bimap/detail/map_view_base.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 namespace bimaps {
 namespace views {
 

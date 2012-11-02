@@ -8,7 +8,7 @@
 # include <boost/detail/iterator.hpp>
 # include <boost/detail/workaround.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ 
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { 
 
 // Unfortunately, g++ 2.95.x chokes when we define a class template
 // iterator_category which has the same name as its

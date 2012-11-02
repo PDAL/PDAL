@@ -8,7 +8,7 @@
 #if !defined(FUSION_VALUE_OF_IMPL_07172005_0838)
 #define FUSION_VALUE_OF_IMPL_07172005_0838
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion
 {
     struct cons_iterator_tag;
 

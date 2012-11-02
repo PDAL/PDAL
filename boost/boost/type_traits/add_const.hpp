@@ -15,7 +15,7 @@
 // should be the last #include
 #include <boost/type_traits/detail/type_trait_def.hpp>
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
 // * convert a type T to const type - add_const<T>
 // this is not required since the result is always

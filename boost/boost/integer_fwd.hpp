@@ -17,7 +17,8 @@
 #include <boost/cstdint.hpp>  // For intmax_t
 
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
+{
 
 #ifdef BOOST_NO_INTEGRAL_INT64_T
      typedef unsigned long static_log2_argument_type;

@@ -5,7 +5,7 @@
  * accompanying file LICENSE_1_0.txt or copy at
  * http://www.boost.org/LICENSE_1_0.txt)
  *
- * $Id: integer_traits.hpp 75471 2011-11-13 06:10:55Z jewillco $
+ * $Id: integer_traits.hpp 79771 2012-07-27 18:15:55Z jewillco $
  *
  * Idea by Beman Dawes, Ed Brey, Steve Cleary, and Nathan Myers
  */
@@ -39,7 +39,7 @@
 #pragma GCC system_header
 #endif
 
-namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 template<class T>
 class integer_traits : public std::numeric_limits<T>
 {
