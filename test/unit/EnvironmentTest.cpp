@@ -111,20 +111,22 @@ BOOST_AUTO_TEST_CASE(EnvironmentTest_rng)
 
     BOOST_CHECK( compare_uuids(c, d));
     
-    boost::uuids::uuid e;
-    boost::uuids::uuid f;
-    {
-        boost::mt19937 rng;
-        boost::uuids::basic_random_generator<boost::mt19937> gen(&rng);
-        e = gen();    
-    }
-    {
-        boost::mt19937 rng;
-        boost::uuids::basic_random_generator<boost::mt19937> gen(&rng);
-        f = gen();    
-    }
-
-    BOOST_CHECK(compare_uuids(e, f));    
+    // This stuff should fail because both RNGs end up being initialized with 
+    // the same seed (nothing)
+    // boost::uuids::uuid e;
+    // boost::uuids::uuid f;
+    // {
+    //     boost::mt19937 rng;
+    //     boost::uuids::basic_random_generator<boost::mt19937> gen(&rng);
+    //     e = gen();    
+    // }
+    // {
+    //     boost::mt19937 rng;
+    //     boost::uuids::basic_random_generator<boost::mt19937> gen(&rng);
+    //     f = gen();    
+    // }
+    // 
+    // BOOST_CHECK(compare_uuids(e, f));    
     
     return;
 }
