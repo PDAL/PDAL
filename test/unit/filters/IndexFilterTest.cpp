@@ -150,3 +150,5 @@ BOOST_AUTO_TEST_SUITE(IndexFilterTest)
 // 
 //     return;
 // }
+
+}
