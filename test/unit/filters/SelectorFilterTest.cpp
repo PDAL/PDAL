@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_SUITE(SelectorFilterTest)
 
 BOOST_AUTO_TEST_CASE(test1)
 {
-    pdal::Option option("filename", Support::datapath("pipeline/pipeline_selector.xml"));
+    pdal::Option option("filename", Support::datapath("filters/selector.xml"));
     pdal::Options options(option);
 
     pdal::drivers::pipeline::Reader reader(options);
