@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_SUITE(ScalingFilterTest)
 
 BOOST_AUTO_TEST_CASE(ScalingFilterTest_test_1)
 {
-    pdal::Option option("filename", Support::datapath("pipeline/pipeline_scaling.xml"));
+    pdal::Option option("filename", Support::datapath("filters/scaling.xml"));
     pdal::Options options(option);
 
     pdal::drivers::pipeline::Reader reader(options);

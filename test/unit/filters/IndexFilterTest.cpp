@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_SUITE(IndexFilterTest)
 BOOST_AUTO_TEST_CASE(test_3d)
 {
 #ifdef PDAL_HAVE_FLANN      
-    pdal::Option option("filename", Support::datapath("pipeline/pipeline_index.xml"));
+    pdal::Option option("filename", Support::datapath("filters/index.xml"));
     pdal::Options options(option);
 
     pdal::drivers::pipeline::Reader reader(options);
@@ -102,7 +102,7 @@ BOOST_AUTO_TEST_CASE(test_3d)
 BOOST_AUTO_TEST_CASE(test_new2d)
 {
 #ifdef PDAL_HAVE_FLANN      
-    pdal::Option option("filename", Support::datapath("pipeline/pipeline_index.xml"));
+    pdal::Option option("filename", Support::datapath("filters/index.xml"));
     pdal::Options options(option);
 
     pdal::drivers::pipeline::Reader reader(options);
