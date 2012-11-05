@@ -61,73 +61,8 @@ void Invocation::numpy_init()
     // this macro is defined be NumPy and must be included
     if (_import_array() < 0)
     {
-        PyObject* tracebackModule;
-        PyObject* tracebackDictionary;
-        PyObject* tracebackFunction;
-        tracebackModule = PyImport_ImportModule("traceback");
-        if (!tracebackModule)
-        {
-            throw python_error("unable to load traceback module while importing numpy inside PDAL");
-        }
-
-        tracebackDictionary = PyModule_GetDict(tracebackModule);
-
-        tracebackFunction = PyDict_GetItemString(tracebackDictionary, "format_exception");
-        if (!tracebackFunction)
-        {
-            throw python_error("unable to find traceback function while importing numpy inside PDAL");
-        }
-
-        if (!PyCallable_Check(tracebackFunction))
-        {
-            throw python_error("invalid traceback function while importing numpy inside PDAL");
-        }
-        
-        
-        // get exception info
-        PyObject *type, *value, *traceback;
-        PyErr_Fetch(&type, &value, &traceback);
-        PyErr_NormalizeException(&type, &value, &traceback);
-
-        std::string mssg = "";
-        if (traceback)
-        {
-            // create an argument for "format exception"
-            PyObject* args = PyTuple_New(3);
-            PyTuple_SetItem(args, 0, type);
-            PyTuple_SetItem(args, 1, value);
-            PyTuple_SetItem(args, 2, traceback);
-
-            // get a list of string describing what went wrong
-            PyObject* output = PyObject_CallObject(tracebackFunction, args);
-
-            // print error message
-            int i, n = PyList_Size(output);
-            for (i=0; i<n; i++) mssg += PyString_AsString(PyList_GetItem(output, i));
-
-            // clean up
-            Py_XDECREF(args);
-            Py_XDECREF(output);
-        }
-        else if (value != NULL)
-        {
-            PyObject *s = PyObject_Str(value);
-            const char* text = PyString_AS_STRING(s);
-            Py_DECREF(s);
-            mssg += text;
-        }
-        else
-        {
-            mssg = "unknown error";
-        }
-
-        Py_XDECREF(value);
-        Py_XDECREF(type);
-        Py_XDECREF(traceback);
-
-
         std::ostringstream oss;
-        oss << "unable to initialize NumPy with error '" << std::string(mssg) << "'";
+        oss << "unable to initialize NumPy with error '" << getPythonTraceback() << "'";
         throw python_error(oss.str());
     }
 }
@@ -161,11 +96,11 @@ Invocation::~Invocation()
 void Invocation::compile()
 {
     m_bytecode = Py_CompileString(m_script.source(), m_script.module(), Py_file_input);
-    if (!m_bytecode) m_environment.handleError();
+    if (!m_bytecode) throw python_error(getPythonTraceback());
 
     assert(m_bytecode);
     m_module = PyImport_ExecCodeModule(const_cast<char*>(m_script.module()), m_bytecode);
-    if (!m_module) m_environment.handleError();
+    if (!m_module) throw python_error(getPythonTraceback());
 
     m_dictionary = PyModule_GetDict(m_module);
 
@@ -177,7 +112,7 @@ void Invocation::compile()
         throw python_error(oss.str());
     }
 
-    if (!PyCallable_Check(m_function)) m_environment.handleError();
+    if (!PyCallable_Check(m_function)) throw python_error(getPythonTraceback());
 
     return;
 }
@@ -467,7 +402,7 @@ bool Invocation::execute()
     PyTuple_SetItem(m_scriptArgs, 1, m_varsOut);
 
     m_scriptResult = PyObject_CallObject(m_function, m_scriptArgs);
-    if (!m_scriptResult) m_environment.handleError();
+    if (!m_scriptResult) throw python_error(getPythonTraceback());
 
     if (!PyBool_Check(m_scriptResult))
     {

@@ -81,7 +81,7 @@ public:
         m_dimensions = dimensions; 
     }
     
-    boost::uint32_t getNumDimensions() const;
+    boost::uint32_t const& getNumDimensions() const;
 
 
 private:

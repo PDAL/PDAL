@@ -63,7 +63,7 @@ void Index::initialize()
     return;
 }
 
-boost::uint32_t Index::getNumDimensions() const
+boost::uint32_t const& Index::getNumDimensions() const
 { 
     return m_dimensions; 
 }
@@ -244,7 +244,6 @@ boost::uint32_t Index::readBufferImpl(PointBuffer& data)
     
 #ifdef PDAL_HAVE_FLANN        
     
-    boost::uint32_t num_dimensions(m_stage.getNumDimensions());
     for (boost::uint32_t pointIndex=0; pointIndex<numRead; pointIndex++)
     {
         float x = static_cast<float>(getScaledValue(data, *m_xDim, pointIndex));
@@ -253,7 +252,7 @@ boost::uint32_t Index::readBufferImpl(PointBuffer& data)
 
         m_data.push_back(x);
         m_data.push_back(y);
-        if (num_dimensions > 2)
+        if (m_stage.getNumDimensions() > 2)
         {
             m_data.push_back(z);
             if (logOutput)
