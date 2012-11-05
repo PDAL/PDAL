@@ -131,4 +131,52 @@ BOOST_AUTO_TEST_CASE(EnvironmentTest_rng)
     return;
 }
 
+
+boost::test_tools::predicate_result
+check_uuid_map( std::map<boost::uuids::uuid, int> ids)
+{
+    typedef std::map<boost::uuids::uuid, int>::const_iterator Iterator;
+    
+    for (Iterator i = ids.begin(); i != ids.end(); i++)
+    {
+        if (i->second > 1)
+        {
+            boost::test_tools::predicate_result res( false );
+
+            res.message() << "UUID '" << i->first << "' has a count of " << i->second << " when it should be 1!";
+
+            return res;            
+        }
+    }
+    
+    return true;
+    
+}
+
+BOOST_AUTO_TEST_CASE(test_uuid_collision)
+{
+    std::map<boost::uuids::uuid, int> ids;
+    typedef std::map<boost::uuids::uuid, int>::iterator Iterator;
+    pdal::GlobalEnvironment& env = pdal::GlobalEnvironment::get();
+    boost::uuids::basic_random_generator<boost::mt19937> gen(env.getRNG());
+    
+    boost::uint32_t test_size(10000);
+    
+    for (unsigned i = 0; i < test_size; ++i)
+    {
+        boost::uuids::uuid id = gen();
+        Iterator it = ids.find(id);
+        if (it != ids.end())
+        {
+            it->second++;
+        } else
+        {
+            ids.insert(std::pair<boost::uuids::uuid, int>(id, 1));
+        }
+    }
+
+
+}
+
+
 BOOST_AUTO_TEST_SUITE_END()
