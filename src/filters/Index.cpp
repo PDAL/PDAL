@@ -371,8 +371,10 @@ void Index::build()
 
     // flann::Logger::setLevel(flann::FLANN_LOG_DEBUG);
     // flann::Logger::setDestination("flannlog.log");
-
-    m_dataset = new flann::Matrix<float>(&m_data[0], m_stage.getNumPoints(), m_stage.getNumDimensions());
+    
+    boost::uint32_t num_points =  m_stage.getNumPoints();
+    boost::uint32_t num_dims = m_stage.getNumDimensions();
+    m_dataset = new flann::Matrix<float>(&m_data[0], num_points, num_dims);
     m_stage.log()->get(logDEBUG2) << "Building index for size " << m_data.size()  <<" for points: " << m_stage.getNumPoints() <<std::endl;
     
     m_index = new flann::KDTreeSingleIndex<flann::L2_Simple<float> >(*m_dataset, flann::KDTreeIndexParams(4));

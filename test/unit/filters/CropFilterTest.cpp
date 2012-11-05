@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(test_crop)
     writer.initialize();
 
     boost::uint64_t numWritten = writer.write(1000);
-    BOOST_CHECK_EQUAL(numWritten, 333);
+    BOOST_CHECK_EQUAL(numWritten, 333u);
 
     // 1000 * 1/3 = 333, plus or minus a bit for rounding
     BOOST_CHECK(Utils::compare_approx<double>(static_cast<double>(numWritten), 333, 6));
@@ -130,8 +130,11 @@ BOOST_AUTO_TEST_CASE(test_crop_polygon)
     pdal::StageSequentialIterator* iter = crop.createSequentialIterator(data);
 
     boost::uint32_t numRead = iter->read(data);
-    BOOST_CHECK_EQUAL(numRead, 47);
- 
+    BOOST_CHECK_EQUAL(numRead, 47u);
+    
+    delete iter;
+    FileUtils::closeFile(wkt_stream);
+    
 #endif
     return;
 }
@@ -191,8 +194,12 @@ BOOST_AUTO_TEST_CASE(test_crop_polygon_reprojection)
     pdal::StageSequentialIterator* iter = crop.createSequentialIterator(data);
 
     boost::uint32_t numRead = iter->read(data);
-    BOOST_CHECK_EQUAL(numRead, 47);
- 
+    BOOST_CHECK_EQUAL(numRead, 47u);
+    
+    delete iter;
+    
+    FileUtils::closeFile(wkt_stream);
+    
 #endif
     return;
 }

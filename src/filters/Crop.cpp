@@ -135,7 +135,10 @@ void Crop::initialize()
         {
             throw pdal_error("input WKT was not a POLYGON or MULTIPOLYGON");
         }
-        log()->get(logDEBUG2) << "Ingested WKT for filters.crop: " << GEOSGeomToWKT_r(m_geosEnvironment, m_geosGeometry) <<std::endl;
+        
+        char* out_wkt = GEOSGeomToWKT_r(m_geosEnvironment, m_geosGeometry);
+        log()->get(logDEBUG2) << "Ingested WKT for filters.crop: " << std::string(out_wkt) <<std::endl;
+        GEOSFree_r(m_geosEnvironment, out_wkt);
         
         bool bValid(false);
         bValid = static_cast<bool>(GEOSisValid_r(m_geosEnvironment, m_geosGeometry));
