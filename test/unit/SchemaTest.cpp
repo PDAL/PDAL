@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_CASE(SchemaTest_ptree)
     Dimension d1("X", dimension::SignedInteger, 4);
     d1.setUUID("ff7f0000-a896-c109-0000-000026d09d81");
     Dimension d2("Y", dimension::SignedInteger, 4);
-    d2.setUUID("ff7f0000-a896-c109-0000-000026d09d81");
+    d2.setUUID("3b48c5eb-6db3-4d58-98cc-7880b940dbba");
     Schema s1;
     s1.appendDimension(d1);
     s1.appendDimension(d2);
@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE(SchemaTest_ptree)
 
     boost::algorithm::erase_all(out1, "\n");
     static std::string xml_header = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
-    std::string ref = xml_header + "<dimension><name>X</name><namespace/><parent>00000000-0000-0000-0000-000000000000</parent><description/><bytesize>4</bytesize><endianness>little</endianness><minimum>0</minimum><maximum>0</maximum><scale>1</scale><offset>0</offset><position>0</position><byteoffset>0</byteoffset><isIgnored>false</isIgnored><uuid>ff7f0000-a896-c109-0000-000026d09d81</uuid></dimension><dimension><name>Y</name><namespace/><parent>00000000-0000-0000-0000-000000000000</parent><description/><bytesize>4</bytesize><endianness>little</endianness><minimum>0</minimum><maximum>0</maximum><scale>1</scale><offset>0</offset><position>1</position><byteoffset>4</byteoffset><isIgnored>false</isIgnored><uuid>ff7f0000-a896-c109-0000-000026d09d81</uuid></dimension>";
+    std::string ref = xml_header + "<dimension><name>X</name><namespace/><parent>00000000-0000-0000-0000-000000000000</parent><description/><bytesize>4</bytesize><endianness>little</endianness><minimum>0</minimum><maximum>0</maximum><scale>1</scale><offset>0</offset><position>0</position><byteoffset>0</byteoffset><isIgnored>false</isIgnored><uuid>ff7f0000-a896-c109-0000-000026d09d81</uuid></dimension><dimension><name>Y</name><namespace/><parent>00000000-0000-0000-0000-000000000000</parent><description/><bytesize>4</bytesize><endianness>little</endianness><minimum>0</minimum><maximum>0</maximum><scale>1</scale><offset>0</offset><position>1</position><byteoffset>4</byteoffset><isIgnored>false</isIgnored><uuid>3b48c5eb-6db3-4d58-98cc-7880b940dbba</uuid></dimension>";
 
     boost::algorithm::erase_all(ref, "\n");
     BOOST_CHECK_EQUAL(ref, out1);
