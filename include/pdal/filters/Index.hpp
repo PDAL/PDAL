@@ -120,6 +120,7 @@ private:
     const pdal::filters::Index& m_stage;
     
     std::vector<float> m_data;
+    std::vector<float>::size_type m_numIndexPoints;
 
 
 #ifdef PDAL_HAVE_FLANN

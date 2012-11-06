@@ -106,6 +106,7 @@ namespace sequential
 Index::Index(const pdal::filters::Index& filter, PointBuffer& buffer)
     : pdal::FilterSequentialIterator(filter, buffer)
     , m_stage(filter)
+    , m_numIndexPoints(0)
 #ifdef PDAL_HAVE_FLANN    
     , m_index(0)
     , m_dataset(0)
@@ -123,13 +124,13 @@ void Index::readBufferBeginImpl(PointBuffer& buffer)
 {
     // Cache dimension positions
 
-    if (!m_xDim && !m_yDim && !m_zDim)
+    if (!m_xDim || !m_yDim || !m_zDim)
     {
         pdal::Schema const& schema = buffer.getSchema();
 
         std::string x_name = m_stage.getOptions().getValueOrDefault<std::string>("x_dim", "X");
-        std::string y_name = m_stage.getOptions().getValueOrDefault<std::string>("x_dim", "Y");
-        std::string z_name = m_stage.getOptions().getValueOrDefault<std::string>("x_dim", "Z");
+        std::string y_name = m_stage.getOptions().getValueOrDefault<std::string>("y_dim", "Y");
+        std::string z_name = m_stage.getOptions().getValueOrDefault<std::string>("z_dim", "Z");
 
         m_stage.log()->get(logDEBUG2) << "Indexing PointBuffer with X: '" << x_name 
                                       << "' Y: '" << y_name 
@@ -261,7 +262,7 @@ boost::uint32_t Index::readBufferImpl(PointBuffer& data)
             }
             
         }
-        
+        m_numIndexPoints++;
         if (logOutput)
         {
             m_stage.log()->get(logDEBUG4) << "index: " 
@@ -372,9 +373,8 @@ void Index::build()
     // flann::Logger::setLevel(flann::FLANN_LOG_DEBUG);
     // flann::Logger::setDestination("flannlog.log");
     
-    boost::uint32_t num_points =  m_stage.getNumPoints();
     boost::uint32_t num_dims = m_stage.getNumDimensions();
-    m_dataset = new flann::Matrix<float>(&m_data[0], num_points, num_dims);
+    m_dataset = new flann::Matrix<float>(&m_data[0], m_numIndexPoints, num_dims);
     m_stage.log()->get(logDEBUG2) << "Building index for size " << m_data.size()  <<" for points: " << m_stage.getNumPoints() <<std::endl;
     
     m_index = new flann::KDTreeSingleIndex<flann::L2_Simple<float> >(*m_dataset, flann::KDTreeIndexParams(4));
