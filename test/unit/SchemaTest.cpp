@@ -48,8 +48,10 @@ BOOST_AUTO_TEST_SUITE(SchemaTest)
 BOOST_AUTO_TEST_CASE(test_ctor)
 {
     Dimension d1("X", dimension::SignedInteger, 4);
+    d1.createUUID();
     Dimension d2("Y", dimension::SignedInteger, 4);
-
+    d2.createUUID();
+    
     Schema s1;
     s1.appendDimension(d1);
     s1.appendDimension(d2);

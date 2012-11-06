@@ -156,6 +156,15 @@ void Schema::appendDimension(const Dimension& dim)
 
     d.setPosition(m_index.size());
 
+    schema::index_by_uid const& id_index = m_index.get<schema::uid>();
+    schema::index_by_uid::size_type id_count = id_index.count(d.getUUID());
+    
+    if (id_count >0)
+    {
+        std::ostringstream oss;
+        oss << "Dimension with uuid '" << d.getUUID() << "' already exists with name '" << d.getName() << "' and namespace '" << d.getNamespace() << "'";
+        throw duplicate_dimension_id(oss.str());
+    }
     std::pair<schema::index_by_position::iterator, bool> q = position_index.insert(d);
     if (!q.second)
     {

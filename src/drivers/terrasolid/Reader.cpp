@@ -519,7 +519,7 @@ void Reader::addDefaultDimensions()
 
     Dimension blue("Blue", dimension::UnsignedInteger, 1,
                    "Blue color value 0 - 256 ");
-    blue.setUUID("c9cd71ef-1ce0-48c2-99f8-5b283e598eac");
+    blue.setUUID("649f383f-8a7a-4658-ac2a-e1e36cfed05e");
     addDefaultDimension(blue, getName());
 
     Dimension time("Time", dimension::UnsignedInteger, 4,

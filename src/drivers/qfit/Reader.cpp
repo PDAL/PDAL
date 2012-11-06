@@ -733,7 +733,7 @@ void Reader::addDefaultDimensions()
 
     Dimension reflected_pulse("ReflectedPulse", dimension::SignedInteger, 4,
                               "Start Pulse Signal Strength (relative)");
-    reflected_pulse.setUUID("81e73eec-d342-471c-bcb2-6a534a7334ec");
+    reflected_pulse.setUUID("8526cc21-3fe6-4876-84c7-3303384f56b1");
     addDefaultDimension(reflected_pulse, getName());
 
     Dimension scan_angle("ScanAngleRank", dimension::SignedInteger, 4,
@@ -762,7 +762,7 @@ void Reader::addDefaultDimensions()
 
     Dimension width("PulseWidth", dimension::SignedInteger, 4,
                     "Laser received pulse width (digitizer samples)");
-    width.setUUID("03d1b370-0d96-4c9a-ba3e-bfd5baffc926");
+    width.setUUID("1ec1ec5d-b77f-4a3b-8382-d83d0f8e96b8");
     addDefaultDimension(width, getName());
 
     Dimension gpstime("GPSTime", dimension::SignedInteger, 4,

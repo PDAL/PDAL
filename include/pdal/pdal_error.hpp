@@ -173,6 +173,15 @@ public:
     {}
 };
 
+class duplicate_dimension_id : public pdal_error
+{
+public:
+
+    duplicate_dimension_id(std::string const& msg)
+        : pdal_error(msg)
+    {}
+};
+
 class metadata_not_found : public pdal_error
 {
 public:
