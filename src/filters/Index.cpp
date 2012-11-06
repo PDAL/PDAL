@@ -390,6 +390,9 @@ Index::~Index()
 #ifdef PDAL_HAVE_FLANN    
     if (m_index)
         delete m_index;
+    
+    if (m_dataset)
+        delete m_dataset;
 #endif
 }
 
