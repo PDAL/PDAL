@@ -174,7 +174,8 @@ BOOST_AUTO_TEST_CASE(test_uuid_collision)
             ids.insert(std::pair<boost::uuids::uuid, int>(id, 1));
         }
     }
-
+    
+    BOOST_CHECK(check_uuid_map(ids));
 
 }
 
