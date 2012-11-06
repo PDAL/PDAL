@@ -161,8 +161,8 @@ boost::uint64_t Writer::write(  boost::uint64_t targetNumPointsToWrite,
 
     const Schema& schema = getPrevStage().getSchema();
     m_writer_buffer = new PointBuffer (schema, m_chunkSize);
-
-    StageSequentialIterator* iter = getPrevStage().createSequentialIterator(*m_writer_buffer);
+    
+    boost::scoped_ptr<StageSequentialIterator> iter(getPrevStage().createSequentialIterator(*m_writer_buffer));
     
     if (startingPosition)
         iter->skip(startingPosition);
@@ -246,7 +246,6 @@ boost::uint64_t Writer::write(  boost::uint64_t targetNumPointsToWrite,
 
     do_callback(100.0, callback);
 
-    delete iter;
     
     return actualNumPointsWritten;
 }
