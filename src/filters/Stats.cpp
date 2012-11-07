@@ -68,7 +68,28 @@ pdal::Metadata Summary::toMetadata() const
     };
     
     output.addMetadata("sample", sample.str(), "sample");
-    
+
+    if (m_doExact == true)
+    {
+        Metadata counts;
+        counts.setType("metadata");
+        counts.setName("counts");
+
+        for (std::map<boost::int32_t, boost::uint32_t>::const_iterator i = m_counts.begin();
+             i != m_counts.end(); ++i)
+        {
+            Metadata bin;
+            std::ostringstream binname;
+            binname << "count-" <<i->first;
+            bin.setName(binname.str());
+            bin.setType("metadata");
+            bin.addMetadata("value", i->first);
+            bin.addMetadata("count", i->second);
+            counts.addMetadata(bin);
+        }
+
+        output.addMetadata(counts);
+    }
     return output;
 
 }
@@ -170,8 +191,6 @@ void Stats::initialize()
     Filter::initialize();
 
     std::string names = getOptions().getValueOrDefault<std::string>("dimensions", "");
-    
-    
     if (names.size())
     {
         log()->get(logDEBUG) << "Using explicit list of dimension names'" << names << "'"<<std::endl;        
@@ -183,6 +202,21 @@ void Stats::initialize()
         {
             log()->get(logDEBUG) << "adding '" << *t << "' as dimension name to cumulate stats for" << std::endl;
             m_dimension_names.push_back(*t);
+        }
+    }
+
+    std::string exact = getOptions().getValueOrDefault<std::string>("exact_dimensions", "");
+    if (exact.size())
+    {
+        log()->get(logDEBUG) << "Calculating histogram statistics for exact names '" << names << "'"<<std::endl;        
+        boost::char_separator<char> seps(" ,");
+
+
+        tokenizer parameters(exact, seps);
+        for (tokenizer::iterator t = parameters.begin(); t != parameters.end(); ++t)
+        {
+            log()->get(logDEBUG) << "adding '" << *t << "' as exact dimension name to cumulate stats for" << std::endl;
+            m_exact_dimension_names.push_back(*t);
         }
     }
 
@@ -388,14 +422,14 @@ void Stats::readBufferBeginImpl(PointBuffer& buffer)
     {
         Options const& options = getStage().getOptions();
 
-        std::vector<Option> dimension_names = options.getOptions("exact_count");
+        std::vector<std::string> dimension_names = m_statsFilter.getExactDimensionNames();
         
         std::map<std::string, bool> exact_dimensions;
-        for (std::vector<Option>::const_iterator i = dimension_names.begin();
+        for (std::vector<std::string>::const_iterator i = dimension_names.begin();
         i != dimension_names.end(); ++i)
         {
-            getStage().log()->get(logDEBUG2) << "Using exact histogram counts for '" << i->getValue<std::string>() << "'" << std::endl;
-            std::pair<std::string,bool> p(i->getValue<std::string>(), true);
+            getStage().log()->get(logDEBUG2) << "Using exact histogram counts for '" << *i << "'" << std::endl;
+            std::pair<std::string,bool> p(*i, true);
             exact_dimensions.insert(p);
         }
         
