@@ -121,7 +121,6 @@ void Invocation::compile()
 
 void Invocation::cleanup()
 {
-    Py_XDECREF(m_bytecode);     
     Py_XDECREF(m_varsIn);
     Py_XDECREF(m_varsOut);
 
@@ -136,6 +135,8 @@ void Invocation::cleanup()
     }
 
     m_pyInputArrays.clear();
+
+    Py_XDECREF(m_bytecode);
 
     return;
 }
