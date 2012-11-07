@@ -41,7 +41,7 @@ master_doc = 'docs'
 
 # General information about the project.
 project = u'PDAL'
-copyright = u'2011, Howard Butler, Michael Gerlek and others'
+copyright = u'2012, Howard Butler, Michael Gerlek and others'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
