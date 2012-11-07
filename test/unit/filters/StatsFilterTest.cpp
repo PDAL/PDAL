@@ -293,7 +293,7 @@ BOOST_AUTO_TEST_CASE(test_pointbuffer_stats)
     pdal::Options options;
     
     pdal::Option dimensions("dimensions", "X,drivers.las.reader.Y Z filters.inplacereprojection.X, Classification", "");
-    pdal::Option exact_dimensions("exact_dimensions", "Classification", "");
+    pdal::Option exact_dimensions("exact_dimensions", "Classification, X", "");
 
     pdal::Option debug("debug", true, "");
     pdal::Option verbose("verbose", 5, "");
@@ -341,7 +341,7 @@ BOOST_AUTO_TEST_CASE(test_pointbuffer_stats)
     
     pdal::Metadata m = data.getMetadata();
     
-    BOOST_CHECK_EQUAL(m.toPTree().get<int>("metadata.filters_stats.metadata.Classification.metadata.counts.metadata.count-1.metadata.value.value"), 1);
+    BOOST_CHECK_EQUAL(m.toPTree().get<int>("metadata.filters_stats.metadata.Classification.metadata.counts.metadata.count-1.metadata.count.value"), 737);
 
 
     return;
