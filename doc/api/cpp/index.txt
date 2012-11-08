@@ -9,6 +9,7 @@ C++ API
    :maxdepth: 2
    
    dimension
+   drivers
    bounds
    log
    metadata
