@@ -187,7 +187,7 @@ pdal::StageSequentialIterator* Selector::createSequentialIterator(PointBuffer& b
 }
 
 
-const Options Selector::getDefaultOptions() const
+Options Selector::getDefaultOptions()
 {
     Options options;
     Option ignore("ignore", "DimensionName", "An Options set with entries of name 'dimension' names to ignore");

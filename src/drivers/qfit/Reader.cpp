@@ -411,7 +411,7 @@ void Reader::initialize()
 }
 
 
-const Options Reader::getDefaultOptions() const
+Options Reader::getDefaultOptions()
 {
     Options options;
     Option filename("filename", "", "file to read from");

@@ -80,8 +80,8 @@ public:
     ~Writer();
 
     virtual void initialize();
-    virtual const Options getDefaultOptions() const;
-
+    static Options getDefaultOptions();
+    
     // for dumping
     virtual boost::property_tree::ptree toPTree() const;
 

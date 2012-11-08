@@ -68,7 +68,7 @@ public:
     ~Writer();
 
     virtual void initialize();
-    virtual const Options getDefaultOptions() const;
+    static Options getDefaultOptions();
 
 
 

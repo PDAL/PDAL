@@ -295,7 +295,7 @@ void Reader::defineBlock(Statement statement, BlockPtr block) const
 
 }
 
-const Options Reader::getDefaultOptions() const
+Options Reader::getDefaultOptions()
 {
     Options options;
 

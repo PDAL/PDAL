@@ -84,9 +84,8 @@ void Writer::initialize()
 }
 
 
-const Options Writer::getDefaultOptions() const
+Options Writer::getDefaultOptions()
 {
-    // BUG: fix this
     Options options;
     return options;
 }

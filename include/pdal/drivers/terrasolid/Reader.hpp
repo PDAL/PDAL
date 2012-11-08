@@ -142,7 +142,7 @@ public:
     ~Reader();
 
     virtual void initialize();
-    virtual const Options getDefaultOptions() const;
+    static Options getDefaultOptions();
     static std::vector<Dimension> getDefaultDimensions();
 
     std::string getFileName() const;

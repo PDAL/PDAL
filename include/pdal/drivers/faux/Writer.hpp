@@ -60,7 +60,7 @@ public:
     Writer(Stage& prevStage, const Options&);
 
     virtual void initialize();
-    virtual const Options getDefaultOptions() const;
+    static Options getDefaultOptions();;
 
     // retrieve the summary info
     double getMinX() const

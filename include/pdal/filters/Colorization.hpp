@@ -81,7 +81,7 @@ public:
     ~Colorization();
 
     virtual void initialize();
-    virtual const Options getDefaultOptions() const;
+    static Options getDefaultOptions();
 
     bool supportsIterator(StageIteratorType t) const
     {

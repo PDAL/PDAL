@@ -72,7 +72,7 @@ void Predicate::initialize()
 }
 
 
-const Options Predicate::getDefaultOptions() const
+Options Predicate::getDefaultOptions()
 {
     Options options;
 

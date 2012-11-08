@@ -84,7 +84,7 @@ void Color::initialize()
 }
 
 
-const Options Color::getDefaultOptions() const
+Options Color::getDefaultOptions()
 {
     Options options;
     return options;

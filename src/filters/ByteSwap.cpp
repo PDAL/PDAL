@@ -103,7 +103,7 @@ void ByteSwap::initialize()
 }
 
 
-const Options ByteSwap::getDefaultOptions() const
+Options ByteSwap::getDefaultOptions()
 {
     Options options;
     return options;

@@ -59,7 +59,7 @@ public:
     ~Writer();
 
     virtual void initialize();
-    virtual const Options getDefaultOptions() const;
+    static Options getDefaultOptions();
 
     void run(std::ostringstream const& command);
     inline void setBounds(pdal::Bounds<double> bounds)

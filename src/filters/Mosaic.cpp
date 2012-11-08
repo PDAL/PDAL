@@ -91,7 +91,7 @@ void Mosaic::initialize()
 }
 
 
-const Options Mosaic::getDefaultOptions() const
+Options Mosaic::getDefaultOptions()
 {
     Options options;
     return options;

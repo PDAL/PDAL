@@ -91,7 +91,7 @@ void Colorization::initialize()
 }
 
 
-const Options Colorization::getDefaultOptions() const
+Options Colorization::getDefaultOptions()
 {
     Options options;
 

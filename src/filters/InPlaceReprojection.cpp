@@ -271,7 +271,7 @@ Schema InPlaceReprojection::alterSchema(Schema& schema)
     
 }
 
-const Options InPlaceReprojection::getDefaultOptions() const
+Options InPlaceReprojection::getDefaultOptions()
 {
     Options options;
     Option in_srs("in_srs", std::string(""),"Input SRS to use to override -- fetched from previous stage if not present");

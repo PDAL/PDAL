@@ -182,7 +182,7 @@ void Reprojection::initialize()
 }
 
 
-const Options Reprojection::getDefaultOptions() const
+Options Reprojection::getDefaultOptions()
 {
     Options options;
     return options;

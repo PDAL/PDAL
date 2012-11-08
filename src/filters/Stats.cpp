@@ -225,7 +225,7 @@ void Stats::initialize()
 }
 
 
-const Options Stats::getDefaultOptions() const
+Options Stats::getDefaultOptions()
 {
     Options options;
     Option sample_size("sample_size", 1000, "Number of points to return for uniform random 'sample'");

@@ -65,7 +65,7 @@ public:
     ~Cache();
 
     virtual void initialize();
-    virtual const Options getDefaultOptions() const;
+    static Options getDefaultOptions();
 
     boost::uint32_t getCacheBlockSize() const;
 

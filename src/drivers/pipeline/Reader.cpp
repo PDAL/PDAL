@@ -88,7 +88,7 @@ void Reader::initialize()
 }
 
 
-const Options Reader::getDefaultOptions() const
+Options Reader::getDefaultOptions()
 {
     Options options;
     return options;

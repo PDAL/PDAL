@@ -74,7 +74,7 @@ void Decimation::initialize()
 }
 
 
-const Options Decimation::getDefaultOptions() const
+Options Decimation::getDefaultOptions()
 {
     Options options;
     return options;

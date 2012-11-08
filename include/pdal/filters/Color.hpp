@@ -59,7 +59,7 @@ public:
     Color(Stage& prevStage);
 
     virtual void initialize();
-    virtual const Options getDefaultOptions() const;
+    static Options getDefaultOptions();
     static std::vector<Dimension> getDefaultDimensions();
 
     void getColor_F32_U8(float value, boost::uint8_t& red, boost::uint8_t& green, boost::uint8_t& blue) const;

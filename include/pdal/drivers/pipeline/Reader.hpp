@@ -57,7 +57,7 @@ public:
     ~Reader();
 
     virtual void initialize();
-    virtual const Options getDefaultOptions() const;
+    static Options getDefaultOptions();
 
     virtual Metadata getMetadata() const;
 

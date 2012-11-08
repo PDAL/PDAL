@@ -76,7 +76,7 @@ public:
 
     Scaling(Stage& prevStage, const Options&);
 
-    virtual const Options getDefaultOptions() const;
+    static Options getDefaultOptions();
     virtual void initialize();
 
     bool supportsIterator(StageIteratorType t) const

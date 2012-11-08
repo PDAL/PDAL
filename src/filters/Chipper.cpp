@@ -150,7 +150,7 @@ void Chipper::initialize()
 }
 
 
-const Options Chipper::getDefaultOptions() const
+Options Chipper::getDefaultOptions()
 {
     Options options;
     Option capacity("capacity", 5000, "Tile capacity");

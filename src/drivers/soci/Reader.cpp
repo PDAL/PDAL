@@ -183,18 +183,17 @@ void Reader::initialize()
 
 
 
-const Options Reader::getDefaultOptions() const
+Options Reader::getDefaultOptions()
 {
     Options options;
 
     Option connection("connection",
                       "",
-                      "Oracle connection string to connect to database");
+                      "Connection string to connect to database");
 
     Option query("query",
                  "",
-                 "SELECT statement that returns an SDO_PC object \
-                 as its first and only queried item.");
+                 "SELECT statement that returns point cloud");
 
     Option capacity("capacity",
                     0,

@@ -72,7 +72,7 @@ void Programmable::initialize()
 }
 
 
-const Options Programmable::getDefaultOptions() const
+Options Programmable::getDefaultOptions()
 {
     Options options;
 

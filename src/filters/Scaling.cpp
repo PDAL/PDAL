@@ -106,7 +106,7 @@ pdal::StageSequentialIterator* Scaling::createSequentialIterator(PointBuffer& bu
 }
 
 
-const Options Scaling::getDefaultOptions() const
+Options Scaling::getDefaultOptions()
 {
     Options options;
     Option ignore_old_dimensions("ignore_old_dimensions", true, "Mark old, unscaled dimensions as ignored");    

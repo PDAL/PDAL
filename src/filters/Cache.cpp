@@ -82,7 +82,7 @@ void Cache::initialize()
 }
 
 
-const Options Cache::getDefaultOptions() const
+Options Cache::getDefaultOptions()
 {
     Options options;
     Option max_cache_blocks("max_cache_blocks", 1);

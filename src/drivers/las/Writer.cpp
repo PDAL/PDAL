@@ -123,7 +123,7 @@ void Writer::initialize()
     return;
 }
 
-const Options Writer::getDefaultOptions() const
+Options Writer::getDefaultOptions()
 {
     Options options;
 

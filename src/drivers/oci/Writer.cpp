@@ -115,7 +115,7 @@ void Writer::initialize()
 
 }
 
-const Options Writer::getDefaultOptions() const
+Options Writer::getDefaultOptions()
 {
     Options options;
 

@@ -175,7 +175,7 @@ void Crop::initialize()
 }
 
 
-const Options Crop::getDefaultOptions() const
+Options Crop::getDefaultOptions()
 {
     Options options;
     Option bounds("bounds",Bounds<double>(),"bounds to crop to");

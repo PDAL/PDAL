@@ -85,7 +85,7 @@ public:
     ~Writer();
 
     virtual void initialize();
-    virtual const Options getDefaultOptions() const;
+    static Options getDefaultOptions();
 
 protected:
     virtual void writeBegin(boost::uint64_t targetNumPointsToWrite);

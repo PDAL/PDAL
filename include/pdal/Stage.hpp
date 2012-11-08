@@ -87,10 +87,6 @@ public:
     // for dumping
     virtual boost::property_tree::ptree toPTree() const;
 
-    static std::vector<Dimension> getDefaultDimensions()
-    {
-        return std::vector<Dimension>();
-    }
 
 protected:
     // setters for the core properties

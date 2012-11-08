@@ -68,7 +68,7 @@ boost::uint32_t const& Index::getNumDimensions() const
     return m_dimensions; 
 }
 
-const Options Index::getDefaultOptions() const
+Options Index::getDefaultOptions()
 {
     Options options;
 

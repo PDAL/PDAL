@@ -51,6 +51,7 @@ namespace pdal
 
 
 class Stage;
+class Dimension;
 
 //
 // supported options:
@@ -157,7 +158,16 @@ public:
     /// to call initialize(), so it should be a fast/safe operation.
     ///
     /// @return The default options.
-    virtual const Options getDefaultOptions() const = 0;
+    static Options getDefaultOptions()
+    {
+        return Options();
+    }
+    
+    /// Gets the default dimensions that a give stage produces
+    static std::vector<Dimension> getDefaultDimensions()
+    {
+        return std::vector<Dimension>();
+    }
 
     /// Gets the name.
     ///
