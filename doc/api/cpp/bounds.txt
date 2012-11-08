@@ -6,7 +6,3 @@ pdal::Bounds
 
 .. doxygenclass:: pdal::Bounds
    :members:
-
-# .. doxygendiagram:: pdal::Bounds
-#     :html-path: ./doxygen/html
-#     :no-link: 

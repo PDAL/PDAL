@@ -55,9 +55,17 @@
 namespace pdal
 {
 
-/// Bounds is for manipulating n-dimensional ranges of data.  Typically
-/// used for defining the spatial extents of XYZ data, this class can also be
-/// used for defining bounds of other dimensions.
+
+/*! 
+    \verbatim embed:rst
+    
+    Bounds is for manipulating n-dimensional ranges of data.  Typically 
+    used for defining the spatial extents of XYZ data, this class can also be
+    used for defining bounds of other dimensions.
+    
+    \endverbatim
+*/
+
 template <typename T>
 class PDAL_DLL Bounds
 {
@@ -150,22 +158,30 @@ public:
         assert(verify());
     }
 
-    /** @name Data manipulation
-    */
+    /// @name Properties
 
+    /*! Gets the minimum value of the Range at the given index
+        \param index the Range index to set the minimum value at
+        \verbatim embed:rst
+        .. note::
+
+            If `index` is greater than :cpp:func:`size()`, 
+            a default value of ``0.0`` will be returned.
+        \endverbatim
+    */
     T getMinimum(std::size_t const& index) const
     {
         if (m_ranges.size() <= index)
         {
-            // std::ostringstream msg;
-            // msg << "Bounds dimensions, " << ranges.size() <<", is less "
-            //     << "than the given index, " << index;
-            // throw pdal::bounds_error(msg.str());
             return 0;
         }
         return m_ranges[index].getMinimum();
     }
 
+    
+    /// Sets the minimum value of the Range at the given index
+    /// @param index the Range index to set the minimum value at
+    /// @param v the value to set for the minimum
     void setMinimum(std::size_t const& index, T v)
     {
         if (m_ranges.size() <= index)
@@ -175,19 +191,27 @@ public:
         m_ranges[index].setMinimum(v);
     }
 
+    /*! Gets the maximum value of the Range at the given index
+        \param index index the Range index to fetch the maximum value from.
+        \verbatim embed:rst
+        .. note::
+
+            If `index` is greater than :cpp:func:`size()`, 
+            a default value of ``0.0`` will be returned.
+        \endverbatim
+    */
     T getMaximum(std::size_t const& index) const
     {
         if (m_ranges.size() <= index)
         {
-            // std::ostringstream msg;
-            // msg << "Bounds dimensions, " << m_ranges.size() <<", is less "
-            //     << "than the given index, " << index;
-            // throw pdal::bounds_error(msg.str());
             return 0;
         }
         return m_ranges[index].getMaximum();
     }
 
+    /// Sets the maximum value of the Range at the given index
+    /// @param index the Range index to set the maximum value at
+    /// @param v the value to set for the maximum
     void setMaximum(std::size_t const& index, T v)
     {
         if (m_ranges.size() <= index)
@@ -196,7 +220,8 @@ public:
         }
         m_ranges[index].setMaximum(v);
     }
-
+    
+    /// A Vector of minimum values for each Range of the Bounds
     Vector<T> getMinimum()
     {
         std::vector<T> vec;
@@ -208,7 +233,8 @@ public:
 
         return Vector<T>(vec);
     }
-
+    
+    /// A Vector of maximum values for each Range of the Bounds
     Vector<T> getMaximum()
     {
         std::vector<T> vec;
@@ -221,32 +247,7 @@ public:
         return Vector<T>(vec);
     }
 
-    /** @name Equality
-    */
-    inline bool operator==(Bounds<T> const& rhs) const
-    {
-        return equal(rhs);
-    }
-
-    inline bool operator!=(Bounds<T> const& rhs) const
-    {
-        return (!equal(rhs));
-    }
-
-    /** @name Identity
-    */
-    Bounds<T>& operator=(Bounds<T> const& rhs)
-    {
-        if (&rhs != this)
-        {
-            m_ranges = rhs.m_ranges;
-        }
-        return *this;
-    }
-
-    /** @name Data queries
-    */
-    /// The vector of Range<T> for the Bounds
+    /// The composite vector of Range<T> for the Bounds
     RangeVector const& dimensions() const
     {
         return m_ranges;
@@ -257,8 +258,53 @@ public:
     {
         return m_ranges.size();
     }
+    
+    /// Calculate a n-dimensional volume for the Bounds instance
+    T volume() const
+    {
+        T output = T(1);
+        for (std::size_t i = 0; i < size(); i++)
+        {
+            output = output * m_ranges[i].length();
+        }
 
-    /// Is this Bounds equal to other?
+        return output;
+    }
+
+    /// Returns true if the pdal::Bounds<T>::size() is 0 or
+    /// all dimensions within the bounds are empty.
+    bool empty() const
+    {
+        if (size()==0)
+        {
+            return true;
+        }
+
+        for (std::size_t i = 0; i < size(); i++)
+        {
+            if (m_ranges[i].empty())
+            {
+                return true;
+            }
+        }
+        return false;
+    }    
+
+    /// @name Equality
+
+    /// Equality operator
+    inline bool operator==(Bounds<T> const& rhs) const
+    {
+        return equal(rhs);
+    }
+
+    /// Inequality operator
+    inline bool operator!=(Bounds<T> const& rhs) const
+    {
+        return (!equal(rhs));
+    }
+
+    /// Logical equality test -- used by == and != operators.
     bool equal(Bounds<T> const& other) const
     {
         if (size() != other.size())
@@ -274,6 +320,20 @@ public:
         }
         return true;
     }
+
+    /// @name Assignment
+
+    /// Assignment operator
+    Bounds<T>& operator=(Bounds<T> const& rhs)
+    {
+        if (&rhs != this)
+        {
+            m_ranges = rhs.m_ranges;
+        }
+        return *this;
+    }
+
+    /// @name Algebraic operations
 
     /// Synonym for intersects for now
     bool overlaps(Bounds const& other) const
@@ -319,6 +379,8 @@ public:
         return true;
     }
 
+    /// @name Transformation
+    
     /// Shift each dimension by a vector of deltas
     void shift(std::vector<T> deltas)
     {
@@ -383,36 +445,7 @@ public:
         }
     }
 
-    /// Calculate a n-dimensional volume for the Bounds instance
-    T volume() const
-    {
-        T output = T(1);
-        for (std::size_t i = 0; i < size(); i++)
-        {
-            output = output * m_ranges[i].length();
-        }
 
-        return output;
-    }
-
-    /// Returns true if the pdal::Bounds<T>::size() is 0 or
-    /// all dimensions within the bounds are empty.
-    bool empty() const
-    {
-        if (size()==0)
-        {
-            return true;
-        }
-
-        for (std::size_t i = 0; i < size(); i++)
-        {
-            if (m_ranges[i].empty())
-            {
-                return true;
-            }
-        }
-        return false;
-    }
 
     /// Verifies that the minimums and maximums of each dimension within the
     /// bounds are not inverted (allows min == +inf and max == -inf, however).
@@ -437,35 +470,6 @@ public:
         }
         return true;
     }
-    
-    /// Returns the Bounds<T> instance as WKT
-    std::string toWKT(boost::uint32_t precision = 8) const
-    {
-        std::stringstream oss;
-        oss.precision(precision);
-        
-        oss << "POLYGON ((";
-        
-        if (m_ranges.size() == 2)
-        {
-            oss << getMinimum(0) << " " << getMinimum(1) << ", ";
-            oss << getMinimum(0) << " " << getMaximum(1) << ", ";
-            oss << getMaximum(0) << " " << getMaximum(1) << ", ";
-            oss << getMaximum(0) << " " << getMinimum(1) << ", ";
-            oss << getMinimum(0) << " " << getMinimum(1);
-            
-        } else if (m_ranges.size() == 3)
-        {
-            oss << getMinimum(0) << " " << getMinimum(1) << " " << getMaximum(2) <<", ";
-            oss << getMinimum(0) << " " << getMaximum(1) << " " << getMaximum(2) << ", ";
-            oss << getMaximum(0) << " " << getMaximum(1) << " " << getMaximum(2) << ", ";
-            oss << getMaximum(0) << " " << getMinimum(1) << " " << getMaximum(2) << ", ";
-            oss << getMinimum(0) << " " << getMinimum(1) << " " << getMaximum(2);
-        }
-        oss << "))";
-        return oss.str();
-    }
-    
     
     /** @name Default extent
     */
@@ -493,10 +497,36 @@ public:
         return tree;
     }
 
-    /// Outputs a string representation of the Bounds instance to std::cout
-    void dump() const
+    /// Returns the Bounds<T> instance as OGC WKT
+    /// @param precision the numerical precision to use for the output stream 
+    /// describing the number of decimal places each point in the WKT will have
+    /// @param dimensions override the dimensionality of the WKT. Defaults to 
+    /// 0, and if not set, dimensionality of the WKT is determined by Bounds<T>::size()
+    std::string toWKT(boost::uint32_t precision = 8, boost::uint32_t dimensions=0) const
     {
-        std::cout << *this;
+        std::stringstream oss;
+        oss.precision(precision);
+        
+        oss << "POLYGON ((";
+        
+        if (m_ranges.size() == 2 || (dimensions != 0 && dimensions == 2))
+        {
+            oss << getMinimum(0) << " " << getMinimum(1) << ", ";
+            oss << getMinimum(0) << " " << getMaximum(1) << ", ";
+            oss << getMaximum(0) << " " << getMaximum(1) << ", ";
+            oss << getMaximum(0) << " " << getMinimum(1) << ", ";
+            oss << getMinimum(0) << " " << getMinimum(1);
+            
+        } else if (m_ranges.size() == 3 || (dimensions != 0 && dimensions == 3))
+        {
+            oss << getMinimum(0) << " " << getMinimum(1) << " " << getMaximum(2) <<", ";
+            oss << getMinimum(0) << " " << getMaximum(1) << " " << getMaximum(2) << ", ";
+            oss << getMaximum(0) << " " << getMaximum(1) << " " << getMaximum(2) << ", ";
+            oss << getMaximum(0) << " " << getMinimum(1) << " " << getMaximum(2) << ", ";
+            oss << getMinimum(0) << " " << getMinimum(1) << " " << getMaximum(2);
+        }
+        oss << "))";
+        return oss.str();
     }
 };
 
