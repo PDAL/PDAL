@@ -85,7 +85,7 @@ public:
 
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
-    virtual void addDefaultDimensions();
+    static std::vector<Dimension> getDefaultDimensions();
 
     Mode getMode() const;
 

@@ -58,7 +58,6 @@ public:
 
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
-    virtual void addDefaultDimensions();
 
     virtual Metadata getMetadata() const;
 

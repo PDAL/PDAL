@@ -558,10 +558,6 @@ pdal::Schema Reader::fetchSchema(Statement statement, sdo_pc* pc, boost::uint32_
     return schema;
 }
 
-void Reader::addDefaultDimensions()
-{
-
-}
 
 pdal::StageSequentialIterator* Reader::createSequentialIterator(PointBuffer& buffer) const
 {

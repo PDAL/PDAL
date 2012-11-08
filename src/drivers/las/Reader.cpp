@@ -81,7 +81,6 @@ Reader::Reader(const Options& options)
     , m_streamFactory(new FilenameStreamFactory(options.getValueOrThrow<std::string>("filename")))
     , m_ownsStreamFactory(true)
 {
-    addDefaultDimensions();
     return;
 }
 
@@ -91,7 +90,6 @@ Reader::Reader(const std::string& filename)
     , m_streamFactory(new FilenameStreamFactory(filename))
     , m_ownsStreamFactory(true)
 {
-    addDefaultDimensions();
     return;
 }
 
@@ -101,7 +99,6 @@ Reader::Reader(StreamFactory* factory)
     , m_streamFactory(factory)
     , m_ownsStreamFactory(false)
 {
-    addDefaultDimensions();
     return;
 }
 
@@ -485,25 +482,29 @@ void Reader::readMetadata()
 
 }
 
-void Reader::addDefaultDimensions()
+std::vector<Dimension> Reader::getDefaultDimensions()
 {
+    std::vector<Dimension> output;
     Dimension x("X", dimension::SignedInteger, 4,
                 "X coordinate as a long integer. You must use the scale "
                 "and offset information of the header to determine the double value.");
     x.setUUID("2ee118d1-119e-4906-99c3-42934203f872");
-    addDefaultDimension(x, getName());
+    x.setNamespace(s_getName());
+    output.push_back(x);
 
     Dimension y("Y", dimension::SignedInteger, 4,
                 "Y coordinate as a long integer. You must use the scale "
                 "and offset information of the header to determine the double value.");
     y.setUUID("87707eee-2f30-4979-9987-8ef747e30275");
-    addDefaultDimension(y, getName());
+    y.setNamespace(s_getName());
+    output.push_back(y);
 
     Dimension z("Z", dimension::SignedInteger, 4,
                 "Z coordinate as a long integer. You must use the scale and "
                 "offset information of the header to determine the double value.");
     z.setUUID("e74b5e41-95e6-4cf2-86ad-e3f5a996da5d");
-    addDefaultDimension(z, getName());
+    z.setNamespace(s_getName());
+    output.push_back(z);
 
     Dimension time("Time", dimension::Float, 8,
                    "The GPS Time is the double floating point time tag value at "
@@ -512,14 +513,16 @@ void Reader::addDefaultDimensions()
                    "Time if the Global Encoding low bit is set (see Global Encoding "
                    "in the Public Header Block description).");
     time.setUUID("aec43586-2711-4e59-9df0-65aca78a4ffc");
-    addDefaultDimension(time, getName());
+    time.setNamespace(s_getName());
+    output.push_back(time);
 
     Dimension intensity("Intensity", dimension::UnsignedInteger, 2,
                         "The intensity value is the integer representation of the pulse "
                         "return magnitude. This value is optional and system specific. "
                         "However, it should always be included if available.");
     intensity.setUUID("61e90c9a-42fc-46c7-acd3-20d67bd5626f");
-    addDefaultDimension(intensity, getName());
+    intensity.setNamespace(s_getName());
+    output.push_back(intensity);
 
     Dimension return_number("ReturnNumber", dimension::UnsignedInteger, 1,
                             "Return Number: The Return Number is the pulse return number for "
@@ -528,7 +531,8 @@ void Reader::addDefaultDimensions()
                             "return will have a Return Number of one, the second a Return "
                             "Number of two, and so on up to five returns.");
     return_number.setUUID("ffe5e5f8-4cec-4560-abf0-448008f7b89e");
-    addDefaultDimension(return_number, getName());
+    return_number.setNamespace(s_getName());
+    output.push_back(return_number);
 
     Dimension number_of_returns("NumberOfReturns", dimension::UnsignedInteger, 1,
                                 "Number of Returns (for this emitted pulse): The Number of Returns "
@@ -536,7 +540,8 @@ void Reader::addDefaultDimensions()
                                 "a laser data point may be return two (Return Number) within a "
                                 "total number of five returns.");
     number_of_returns.setUUID("7c28bfd4-a9ed-4fb2-b07f-931c076fbaf0");
-    addDefaultDimension(number_of_returns, getName());
+    number_of_returns.setNamespace(s_getName());
+    output.push_back(number_of_returns);
 
     Dimension scan_direction("ScanDirectionFlag", dimension::UnsignedInteger, 1,
                              "The Scan Direction Flag denotes the direction at which the "
@@ -546,14 +551,16 @@ void Reader::addDefaultDimensions()
                              "is a scan moving from the left side of the in-track direction to "
                              "the right side and negative the opposite).");
     scan_direction.setUUID("13019a2c-cf88-480d-a995-0162055fe5f9");
-    addDefaultDimension(scan_direction, getName());
+    scan_direction.setNamespace(s_getName());
+    output.push_back(scan_direction);
 
     Dimension edge("EdgeOfFlightLine", dimension::UnsignedInteger, 1,
                    "The Edge of Flight Line data bit has a value of 1 only when "
                    "the point is at the end of a scan. It is the last point on "
                    "a given scan line before it changes direction.");
     edge.setUUID("108c18f2-5cc0-4669-ae9a-f41eb4006ea5");
-    addDefaultDimension(edge, getName());
+    edge.setNamespace(s_getName());
+    output.push_back(edge);
 
     Dimension classification("Classification", dimension::UnsignedInteger, 1,
                              "Classification in LAS 1.0 was essentially user defined and optional. "
@@ -565,7 +572,8 @@ void Reader::addDefaultDimensions()
                              "bit encoded field with the lower five bits used for class and the "
                              "three high bits used for flags.");
     classification.setUUID("b4c67de9-cef1-432c-8909-7c751b2a4e0b");
-    addDefaultDimension(classification, getName());
+    classification.setNamespace(s_getName());
+    output.push_back(classification);
 
     Dimension scan_angle("ScanAngleRank", dimension::SignedInteger, 1,
                          "The Scan Angle Rank is a signed one-byte number with a "
@@ -578,12 +586,14 @@ void Reader::addDefaultDimensions()
                          "and 90 degrees to the left side of the aircraft in the "
                          "direction of flight.");
     scan_angle.setUUID("aaadaf77-e0c9-4df0-81a7-27060794cd69");
-    addDefaultDimension(scan_angle, getName());
+    scan_angle.setNamespace(s_getName());
+    output.push_back(scan_angle);
 
     Dimension user_data("UserData", dimension::UnsignedInteger, 1,
                         "This field may be used at the users discretion");
     user_data.setUUID("70eb558e-63d4-4804-b1db-fc2fd716927c");
-    addDefaultDimension(user_data, getName());
+    user_data.setNamespace(s_getName());
+    output.push_back(user_data);
 
     Dimension point_source("PointSourceId", dimension::UnsignedInteger, 2,
                            "This value indicates the file from which this point originated. "
@@ -596,47 +606,57 @@ void Reader::addDefaultDimensions()
                            "ID equal to the File Source ID of the file containing this point "
                            "at some time during processing. ");
     point_source.setUUID("4e42e96a-6af0-4fdd-81cb-6216ff47bf6b");
-    addDefaultDimension(point_source, getName());
-
+    point_source.setNamespace(s_getName());
+    output.push_back(point_source);
+    
     Dimension packet_descriptor("WavePacketDescriptorIndex", dimension::UnsignedInteger, 1);
     packet_descriptor.setUUID("1d095eb0-099f-4800-abb6-2272be486f81");
-    addDefaultDimension(packet_descriptor, getName());
+    packet_descriptor.setNamespace(s_getName());
+    output.push_back(packet_descriptor);
 
     Dimension packet_offset("WaveformDataOffset", dimension::UnsignedInteger, 8);
     packet_offset.setUUID("6dee8edf-0c2a-4554-b999-20c9d5f0e7b9");
-    addDefaultDimension(packet_offset, getName());
-
+    packet_offset.setNamespace(s_getName());
+    output.push_back(packet_offset);
+    
     Dimension return_point("ReturnPointWaveformLocation", dimension::UnsignedInteger, 4);
     return_point.setUUID("f0f37962-2563-4c3e-858d-28ec15a1103f");
-    addDefaultDimension(return_point, getName());
-
+    return_point.setNamespace(s_getName());
+    output.push_back(return_point);
+    
     Dimension wave_x("WaveformXt", dimension::Float, 4);
     wave_x.setUUID("c0ec76eb-9121-4127-b3d7-af92ef871a2d");
-    addDefaultDimension(wave_x, getName());
-
+    wave_x.setNamespace(s_getName());
+    output.push_back(wave_x);
+    
     Dimension wave_y("WaveformYt", dimension::Float, 4);
     wave_y.setUUID("b3f5bb56-3c25-42eb-9476-186bb6b78e3c");
-    addDefaultDimension(wave_y, getName());
+    wave_y.setNamespace(s_getName());
+    output.push_back(wave_y);
 
     Dimension wave_z("WaveformZt", dimension::Float, 4);
     wave_z.setUUID("7499ae66-462f-4d0b-a449-6e5c721fb087");
-    addDefaultDimension(wave_z, getName());
+    wave_z.setNamespace(s_getName());
+    output.push_back(wave_z);
 
     Dimension red("Red", dimension::UnsignedInteger, 2,
                   "The red image channel value associated with this point");
     red.setUUID("a42ce297-6aa2-4a62-bd29-2db19ba862d5");
-    addDefaultDimension(red, getName());
+    red.setNamespace(s_getName());
+    output.push_back(red);
 
     Dimension blue("Blue", dimension::UnsignedInteger, 2,
                    "The blue image channel value associated with this point");
     blue.setUUID("5c1a99c8-1829-4d5b-8735-4f6f393a7970");
-    addDefaultDimension(blue, getName());
-
+    blue.setNamespace(s_getName());
+    output.push_back(blue);
+    
     Dimension green("Green", dimension::UnsignedInteger, 2,
                     "The green image channel value associated with this point");
     green.setUUID("7752759d-5713-48cd-9842-51db350cc979");
-    addDefaultDimension(green, getName());
-
+    green.setNamespace(s_getName());
+    output.push_back(green);
+    return output;
 }
 
 boost::property_tree::ptree Reader::toPTree() const

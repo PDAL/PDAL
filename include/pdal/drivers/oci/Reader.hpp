@@ -65,7 +65,6 @@ public:
 
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
-    virtual void addDefaultDimensions();
 
     bool supportsIterator(StageIteratorType t) const
     {

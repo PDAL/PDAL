@@ -142,7 +142,6 @@ void Chipper::initialize()
 {
     Filter::initialize();
 
-    addDefaultDimensions();
     checkImpedance();
     setPointCountType(PointCount_Fixed);
     setNumPoints(0);
@@ -474,17 +473,23 @@ void Chipper::checkImpedance()
     return;
 }
 
-void Chipper::addDefaultDimensions()
+std::vector<Dimension> Chipper::getDefaultDimensions()
 {
+    std::vector<Dimension> output;
     Dimension pid("PointID", dimension::UnsignedInteger, 4,
                   "Point ID within the chipper block for this point");
     pid.setUUID("a5e90806-b12d-431f-8a26-584672853375");
-    addDefaultDimension(pid, getName());
+    pid.setNamespace(s_getName());
+    output.push_back(pid);
+
 
     Dimension bid("BlockID", dimension::UnsignedInteger, 4,
                   "Block ID of the chipper block for this point");
     bid.setUUID("289657d3-3193-42da-b9a8-2c6dba73facf");
-    addDefaultDimension(bid, getName());
+    bid.setNamespace(s_getName());
+    output.push_back(bid);
+    
+    return output;
 }
 
 

@@ -62,7 +62,8 @@ Reader::Reader(const Options& options)
     , m_numPoints(options.getValueOrThrow<boost::uint64_t>("num_points"))
     , m_mode(string2mode(options.getValueOrThrow<std::string>("mode")))
 {
-    addDefaultDimensions();
+    Schema& schema = getSchemaRef();
+    schema = Schema(getDefaultDimensions());    
     return;
 }
 
@@ -73,7 +74,9 @@ Reader::Reader(const Bounds<double>& bounds, boost::uint64_t numPoints, Mode mod
     , m_numPoints(numPoints)
     , m_mode(mode)
 {
-    addDefaultDimensions();
+    Schema& schema = getSchemaRef();
+    schema = Schema(getDefaultDimensions());
+        
     return;
 }
 
@@ -83,42 +86,41 @@ Reader::Reader(const Bounds<double>& bounds, boost::uint64_t numPoints, Mode mod
     , m_numPoints(numPoints)
     , m_mode(mode)
 {
-    if (dimensions.size() == 0)
-    {
-        throw; // BUG
-    }
-
-    for (boost::uint32_t i=0; i < dimensions.size(); i++)
-    {
-        const Dimension& dim = dimensions[i];
-        addDefaultDimension(dim, getName());
-    }
+    Schema& schema = getSchemaRef();
+    schema = Schema(dimensions);
+    
     return;
 }
 
-void Reader::addDefaultDimensions()
+std::vector<Dimension> Reader::getDefaultDimensions()
 {
+    std::vector<Dimension> output;
     Dimension x("X", dimension::Float, 8);
     x.setUUID("c74a80bd-8eca-4ab6-9e90-972738e122f0");
+    x.setNamespace(s_getName());
+    output.push_back(x);
+    
     Dimension y("Y", dimension::Float, 8);
     y.setUUID("1b102a72-daa5-4a81-8a23-8aa907350473");
+    y.setNamespace(s_getName());
+    output.push_back(y);
+
     Dimension z("Z", dimension::Float, 8);
     z.setUUID("fb54cf8c-1a01-45d1-a92e-75b7d487ac54");
+    z.setNamespace(s_getName());
+    output.push_back(z);
+
     Dimension t("Time", dimension::UnsignedInteger, 8);
     t.setUUID("96b94034-3d25-4e72-b474-ccbdb14d53f6");
+    t.setNamespace(s_getName());
+    output.push_back(t);
 
-    addDefaultDimension(x, getName());
-    addDefaultDimension(y, getName());
-    addDefaultDimension(z, getName());
-    addDefaultDimension(t, getName());
+    return output;
 }
 
 void Reader::initialize()
 {
     pdal::Reader::initialize();
-
-    Schema& schema = getSchemaRef();
-    schema = Schema(getDefaultDimensions());
 
     setNumPoints(m_numPoints);
     setPointCountType(PointCount_Fixed);

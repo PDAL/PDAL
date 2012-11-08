@@ -32,6 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <pdal/drivers/las/Reader.hpp>
 #include <pdal/drivers/las/Support.hpp>
 #include <pdal/drivers/las/SummaryData.hpp>
 
@@ -43,14 +44,14 @@ namespace drivers
 namespace las
 {
 
-void Support::registerFields(Stage& stage, Schema& schema, PointFormat format)
+void Support::registerFields(Reader& stage, Schema& schema, PointFormat format)
 {
     std::ostringstream text;
 
     std::vector<pdal::Dimension> const& d = stage.getDefaultDimensions();
 
     Schema dimensions(d);
-
+    
     schema.appendDimension(dimensions.getDimension("X", stage.getName()));
     schema.appendDimension(dimensions.getDimension("Y", stage.getName()));
     schema.appendDimension(dimensions.getDimension("Z", stage.getName()));

@@ -60,7 +60,7 @@ public:
 
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
-    virtual void addDefaultDimensions();
+    static std::vector<Dimension> getDefaultDimensions();
 
     void getColor_F32_U8(float value, boost::uint8_t& red, boost::uint8_t& green, boost::uint8_t& blue) const;
     void getColor_F64_U16(double value, boost::uint16_t& red, boost::uint16_t& green, boost::uint16_t& blue) const;

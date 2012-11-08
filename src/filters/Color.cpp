@@ -45,7 +45,6 @@ namespace filters
 Color::Color(Stage& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
 {
-    addDefaultDimensions();
     return;
 }
 
@@ -53,24 +52,28 @@ Color::Color(Stage& prevStage, const Options& options)
 Color::Color(Stage& prevStage)
     : Filter(prevStage, Options::none())
 {
-    addDefaultDimensions();
     return;
 }
 
-void Color::addDefaultDimensions()
+std::vector<Dimension> Color::getDefaultDimensions()
 {
-
+    std::vector<Dimension> output;
     Dimension red("Red", dimension::UnsignedInteger, 2);
     red.setUUID("de62488f-5559-440f-bb60-d74db2c78c63");
-    addDefaultDimension(red, getName());
+    red.setNamespace(s_getName());
+    output.push_back(red);
 
     Dimension green("Green", dimension::UnsignedInteger, 2);
     green.setUUID("6c3ebeb4-ffc0-4b57-9b4a-479939631599");
-    addDefaultDimension(green, getName());
+    green.setNamespace(s_getName());
+    output.push_back(green);
 
     Dimension blue("Blue", dimension::UnsignedInteger, 2);
     blue.setUUID("7cdd9ec4-a209-4f14-ad55-1eda94aec750");
-    addDefaultDimension(blue, getName());
+    blue.setNamespace(s_getName());
+    output.push_back(blue);
+    
+    return output;
 
 }
 

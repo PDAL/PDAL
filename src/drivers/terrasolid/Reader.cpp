@@ -170,8 +170,6 @@ Reader::Reader(const Options& options)
 
     }
 
-    addDefaultDimensions();
-
     registerFields();
 
     m_offset = 56;
@@ -445,82 +443,99 @@ boost::property_tree::ptree Reader::toPTree() const
     return tree;
 }
 
-void Reader::addDefaultDimensions()
+std::vector<Dimension> Reader::getDefaultDimensions()
 {
+    std::vector<Dimension> output;
+    
     Dimension alpha("Alpha", dimension::UnsignedInteger, 1,
                     "The alpha image channel value associated with this point");
     alpha.setUUID("f3806ee6-e82e-45af-89bd-59b20cda8ffa");
-    addDefaultDimension(alpha, getName());
+    alpha.setNamespace(s_getName());
+    output.push_back(alpha);
 
     Dimension classification("Classification", dimension::UnsignedInteger, 1,
                              "Classification code 0-255");
     classification.setUUID("845e23ca-fc4b-4dfc-aa71-a40cc2927421");
-    addDefaultDimension(classification, getName());
+    classification.setNamespace(s_getName());
+    output.push_back(classification);
 
     Dimension point_source("PointSourceId", dimension::UnsignedInteger, 1,
                            "Flightline number 0-255");
     point_source.setUUID("68c03b56-4248-4cca-ade5-33e90d5c5563");
-    addDefaultDimension(point_source, getName());
+    point_source.setNamespace(s_getName());
+    output.push_back(point_source);
 
     Dimension point_source2("PointSourceId", dimension::UnsignedInteger, 2,
                             "Flightline number 0-65536");
     point_source2.setUUID("7193bb9f-3ca2-491f-ba18-594321493789");
-    addDefaultDimension(point_source2, getName());
+    point_source2.setNamespace(s_getName());
+    output.push_back(point_source2);
 
     Dimension return_number("ReturnNumber", dimension::UnsignedInteger, 1,
                             "Echo/Return Number.  0 - Only echo. 1 - First of many echo. 2 - Intermediate echo. 3 - Last of many echo.");
     return_number.setUUID("465a9a7e-1e04-47b0-97b6-4f826411bc71");
-    addDefaultDimension(return_number, getName());
+    return_number.setNamespace(s_getName());
+    output.push_back(return_number);
 
     Dimension return_number2("ReturnNumber", dimension::UnsignedInteger, 2,
                              "Echo/Return Number.  0 - Only echo. 1 - First of many echo. 2 - Intermediate echo. 3 - Last of many echo.");
     return_number2.setUUID("43a1c59d-02ae-4a05-85af-526fae890eb9");
-    addDefaultDimension(return_number2, getName());
+    return_number2.setNamespace(s_getName());
+    output.push_back(return_number2);
 
     Dimension flag("Flag", dimension::UnsignedInteger, 1,
                    "Runtime flag (view visibility)");
     flag.setUUID("583a5904-ee67-47a7-9fba-2f46daf11441");
-    addDefaultDimension(flag, getName());
+    flag.setNamespace(s_getName());
+    output.push_back(flag);
 
     Dimension mark("Mark", dimension::UnsignedInteger, 1,
                    "Runtime flag");
     mark.setUUID("e889747c-2f19-4244-b282-b0b223868401");
-    addDefaultDimension(mark, getName());
+    mark.setNamespace(s_getName());
+    output.push_back(mark);
 
     Dimension intensity("Intensity", dimension::UnsignedInteger, 2,
                         "Runtime flag");
     intensity.setUUID("beaa015b-20dd-4922-bf1d-da6972596fe6");
-    addDefaultDimension(intensity, getName());
+    intensity.setNamespace(s_getName());
+    output.push_back(intensity);
 
     Dimension x("X", dimension::SignedInteger, 4,
                 "X dimension as a scaled integer");
     x.setUUID("64e530ee-7304-4d6a-9fe4-231b6c960e69");
-    addDefaultDimension(x, getName());
+    x.setNamespace(s_getName());
+    output.push_back(x);
 
     Dimension y("Y", dimension::SignedInteger, 4,
                 "Y dimension as a scaled integer");
     y.setUUID("9b4fce29-2846-45fa-be0c-f50228407f05");
-    addDefaultDimension(y, getName());
+    y.setNamespace(s_getName());
+    output.push_back(y);
 
     Dimension z("Z", dimension::SignedInteger, 4,
                 "Z dimension as a scaled integer");
     z.setUUID("464cd1f6-5bec-4610-9f25-79e839ee39a6");
-    addDefaultDimension(z, getName());
+    z.setNamespace(s_getName());
+    output.push_back(z);
 
     Dimension red("Red", dimension::UnsignedInteger, 1,
                   "Red color value 0 - 256 ");
     red.setUUID("2157fd43-a492-40e4-a27c-7c37b48bd55c");
-    addDefaultDimension(red, getName());
+    red.setNamespace(s_getName());
+    output.push_back(red);
 
     Dimension green("Green", dimension::UnsignedInteger, 1,
                     "Green color value 0 - 256 ");
     green.setUUID("c9cd71ef-1ce0-48c2-99f8-5b283e598eac");
-    addDefaultDimension(green, getName());
+    green.setNamespace(s_getName());
+    output.push_back(green);
 
     Dimension blue("Blue", dimension::UnsignedInteger, 1,
                    "Blue color value 0 - 256 ");
     blue.setUUID("649f383f-8a7a-4658-ac2a-e1e36cfed05e");
-    addDefaultDimension(blue, getName());
+    blue.setNamespace(s_getName());
+    output.push_back(blue);
 
     Dimension time("Time", dimension::UnsignedInteger, 4,
                    "32 bit integer time stamps. Time stamps are assumed to be "
@@ -529,7 +544,9 @@ void Reader::addDefaultDimensions()
     time.setNumericScale(0.0002);
     time.setNumericOffset(0.0);
     time.setUUID("0dcda772-56da-47f6-b04a-edad72361da9");
-    addDefaultDimension(time, getName());
+    time.setNamespace(s_getName());
+    output.push_back(time);
+    return output;
 }
 
 
@@ -622,4 +639,4 @@ boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
 
 }
 }
-} // namespace pdal::driver::oci
+} // namespace pdal::driver::terrasolid

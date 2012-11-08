@@ -111,11 +111,6 @@ pdal::StageRandomIterator* Reader::createRandomIterator(PointBuffer& buffer) con
     return m_stage->createRandomIterator(buffer);
 }
 
-void Reader::addDefaultDimensions()
-{
-
-}
-
 Metadata Reader::getMetadata() const
 {
     return m_stage->getMetadata();

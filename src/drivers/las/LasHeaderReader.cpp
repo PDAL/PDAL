@@ -44,6 +44,7 @@
 #include "LasHeaderReader.hpp"
 #include <pdal/Stage.hpp>
 
+#include <pdal/drivers/las/Reader.hpp>
 #include <pdal/drivers/las/Header.hpp>
 #include <pdal/drivers/las/VariableLengthRecord.hpp>
 #include "ZipPoint.hpp"
@@ -69,7 +70,7 @@ LasHeaderReader::LasHeaderReader(LasHeader& header, std::istream& istream)
 }
 
 
-void LasHeaderReader::read(Stage& stage, Schema& schema)
+void LasHeaderReader::read(Reader& stage, Schema& schema)
 {
     // Helper variables
     boost::uint8_t n1 = 0;

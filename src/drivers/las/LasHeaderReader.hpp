@@ -49,7 +49,11 @@
 
 namespace pdal {
     class Schema;
-    class Stage;
+namespace drivers {
+namespace las {
+    class Reader;
+}
+}
 }
 
 namespace pdal { namespace drivers { namespace las {
@@ -61,7 +65,7 @@ class PDAL_DLL LasHeaderReader
 public:
     LasHeaderReader(LasHeader& header, std::istream& istream);
 
-    void read(Stage&, Schema&);
+    void read(Reader&, Schema&);
 
 private:
     LasHeader& m_header;

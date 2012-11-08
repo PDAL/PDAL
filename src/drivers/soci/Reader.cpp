@@ -399,11 +399,6 @@ pdal::Schema Reader::fetchSchema(std::string const& query) const
     return schema;
 }
 
-void Reader::addDefaultDimensions()
-{
-
-}
-
 pdal::StageSequentialIterator* Reader::createSequentialIterator(PointBuffer& buffer) const
 {
     return new pdal::drivers::soci::iterators::sequential::Reader(*this, buffer);

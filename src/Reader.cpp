@@ -88,10 +88,4 @@ boost::property_tree::ptree Reader::toPTree() const
     return tree;
 }
 
-void Reader::addDefaultDimensions()
-{
-
-}
-
-
 } // namespace pdal

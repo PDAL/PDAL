@@ -67,10 +67,7 @@ public:
 
     // core properties of all stages
     const Schema& getSchema() const;
-    virtual std::vector<Dimension> const& getDefaultDimensions() const
-    {
-        return m_defaultDimensions;
-    }
+    
     virtual boost::uint64_t getNumPoints() const;
     PointCountType getPointCountType() const;
     const Bounds<double>& getBounds() const;
@@ -90,6 +87,11 @@ public:
     // for dumping
     virtual boost::property_tree::ptree toPTree() const;
 
+    static std::vector<Dimension> getDefaultDimensions()
+    {
+        return std::vector<Dimension>();
+    }
+
 protected:
     // setters for the core properties
     Schema& getSchemaRef();
@@ -100,8 +102,6 @@ protected:
     void setPointCountType(PointCountType);
     void setBounds(Bounds<double> const&);
     void setSpatialReference(SpatialReference const&);
-    void addDefaultDimension(Dimension const&, std::string const&);
-    virtual void addDefaultDimensions();
 
     // convenience function, for doing a "copy ctor" on all the core props
     // (used by the Filter stage, for example)
@@ -113,7 +113,6 @@ private:
     PointCountType m_pointCountType;
     Bounds<double> m_bounds;
     SpatialReference m_spatialReference;
-    std::vector<Dimension> m_defaultDimensions;
 
     Stage& operator=(const Stage&); // not implemented
     Stage(const Stage&); // not implemented

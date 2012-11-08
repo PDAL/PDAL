@@ -117,7 +117,6 @@ Reader::Reader(const Options& options)
     , m_streamFactory(NULL)
     , m_lasReader(NULL)
 {
-    addDefaultDimensions();
     return;
 }
 
@@ -129,13 +128,10 @@ Reader::~Reader()
 }
 
 
-void Reader::addDefaultDimensions()
+std::vector<Dimension> getDefaultDimensions()
 {
-    // BUG: implement this to inherit from LAS
-
-    return;
+    return pdal::drivers::las::Reader::getDefaultDimensions();
 }
-
 
 void Reader::initialize()
 {

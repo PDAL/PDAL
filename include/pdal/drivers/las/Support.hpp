@@ -38,7 +38,7 @@
 #include <pdal/pdal_export.hpp>
 
 #include <pdal/Schema.hpp>
-#include <pdal/Stage.hpp>
+
 
 #include <iostream>
 
@@ -59,6 +59,7 @@ namespace drivers
 namespace las
 {
 
+class Reader;
 class SummaryData;
 class ZipPoint;
 
@@ -102,7 +103,7 @@ public:
 class PDAL_DLL Support
 {
 public:
-    static void registerFields(Stage& stage, Schema& schema, PointFormat pointFormat);
+    static void registerFields(Reader& stage, Schema& schema, PointFormat pointFormat);
     static void setScaling(Schema& schema, double scaleX, double scaleY, double scaleZ, double offsetX, double offsetY, double offsetZ);
 
     static bool hasTime(PointFormat);

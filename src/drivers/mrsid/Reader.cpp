@@ -326,72 +326,91 @@ boost::property_tree::ptree Reader::toPTree() const
     return tree;
 }
 
-void Reader::addDefaultDimensions()
+std::vector<Dimension> Reader::getDefaultDimensions()
 {
+    std::vector<Dimension> output;
+        
     Dimension x("X", dimension::Float, 8);
     x.setUUID("8c54ff0c-234f-43a2-8959-d9681ad1dea3");
-    addDefaultDimension(x, getName());
+    x.setNamespace(getName());
+    output.push_back(x);
 
     Dimension y("Y", dimension::Float, 8);
     y.setUUID("9cee971b-2505-40cd-b7e9-f32c399afac7");
-    addDefaultDimension(y, getName());
+    y.setNamespace(getName());
+    output.push_back(y);
 
     Dimension z("Z", dimension::Float, 8);
     z.setUUID("89dc4e36-6166-4bc8-bf95-5660657b0ea6");
-    addDefaultDimension(z, getName());
+    z.setNamespace(getName());
+    output.push_back(z);
 
     Dimension t("Time", dimension::Float, 8);
     t.setUUID("3aea2826-4a6e-4c1b-ae27-7b2f24763ce1");
-    addDefaultDimension(t, getName());
+    t.setNamespace(getName());
+    output.push_back(t);
 
     Dimension blue("Blue", dimension::UnsignedInteger, 2);
     blue.setUUID("f69977e3-23e8-4483-91b6-14cad981e9fd");
-    addDefaultDimension(blue, getName());
+    blue.setNamespace(getName());
+    output.push_back(blue);
 
     Dimension red("Red", dimension::UnsignedInteger, 2);
     red.setUUID("40a02a80-c399-42f0-a587-a286635b446e");
-    addDefaultDimension(red, getName());
+    red.setNamespace(getName());
+    output.push_back(red);
 
     Dimension green("Green", dimension::UnsignedInteger, 2);
     green.setUUID("b329df2d-44f1-4f35-8993-d183dacaa1ff");
-    addDefaultDimension(green, getName());
+    green.setNamespace(getName());
+    output.push_back(green);
 
     Dimension cls("Classification", dimension::UnsignedInteger, 1);
     cls.setUUID("ba1e2af8-6dfd-46a7-972a-ecc00f68914d");
-    addDefaultDimension(cls, getName());
+    cls.setNamespace(getName());
+    output.push_back(cls);
 
     Dimension edge("EdgeOfFlightLine", dimension::UnsignedInteger, 1);
     edge.setUUID("daed3bfc-650d-4265-93a7-d8093cbd75a0");
-    addDefaultDimension(edge, getName());
+    edge.setNamespace(getName());
+    output.push_back(edge);
 
     Dimension intensity("Intensity", dimension::UnsignedInteger, 2);
     intensity.setUUID("a43332a8-26b3-4609-a2b1-ddfda30e0565");
-    addDefaultDimension(intensity, getName());
+    intensity.setNamespace(getName());
+    output.push_back(intensity);
 
     Dimension num_returns("NumberOfReturns", dimension::UnsignedInteger, 1);
     num_returns.setUUID("fa7c5d56-fb2b-4f81-9126-f183000c3cd8");
-    addDefaultDimension(num_returns, getName());
+    num_returns.setNamespace(getName());
+    output.push_back(num_returns);
 
     Dimension return_no("ReturnNumber", dimension::UnsignedInteger, 1);
     return_no.setUUID("e38cc121-8d26-482a-8920-c5599b2cdd19");
-    addDefaultDimension(return_no, getName());
-
+    return_no.setNamespace(getName());
+    output.push_back(return_no);
+    
     Dimension scan_angle("ScanAngleRank", dimension::UnsignedInteger, 1);
     scan_angle.setUUID("5d816875-10a5-4048-ad9d-fd3b8d065a6a");
-    addDefaultDimension(scan_angle, getName());
+    scan_angle.setNamespace(getName());
+    output.push_back(scan_angle);
 
     Dimension scan_dir("ScanDirectionFlag", dimension::UnsignedInteger, 1);
     scan_dir.setUUID("d1054379-8bf6-4685-abfc-1f0ec37aa819");
-    addDefaultDimension(scan_dir, getName());
+    scan_dir.setNamespace(getName());
+    output.push_back(scan_dir);
 
     Dimension ptsource("PointSourceId", dimension::UnsignedInteger, 2);
     ptsource.setUUID("be6e71af-b2f7-4107-a902-96e2fb71343f");
-    addDefaultDimension(ptsource, getName());
-
+    ptsource.setNamespace(getName());
+    output.push_back(ptsource);
+    
     Dimension userdata("UserData", dimension::UnsignedInteger, 1);
     userdata.setUUID("551ca4be-cb6e-47a4-93a9-e403e9a06a8a");
-    addDefaultDimension(userdata, getName());
-
+    userdata.setNamespace(getName());
+    output.push_back(userdata);
+    
+    return output;
 }
 
 

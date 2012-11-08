@@ -282,8 +282,6 @@ Reader::Reader(const Options& options)
     m_flip_x = getOptions().getValueOrDefault("flip_coordinates", true);
     m_scale_z = getOptions().getValueOrDefault("scale_z", 1.0);
 
-    addDefaultDimensions();
-
     std::istream* str = FileUtils::openFile(filename);
 
     if (str == 0)
@@ -699,13 +697,15 @@ boost::property_tree::ptree Reader::toPTree() const
     return tree;
 }
 
-void Reader::addDefaultDimensions()
+std::vector<Dimension> Reader::getDefaultDimensions()
 {
-
+    std::vector<Dimension> output;
+    
     Dimension time("Time", dimension::SignedInteger, 4,
                    "Relative Time (msec from start of data file)");
     time.setUUID("adfc310a-111d-437b-b76b-5a1805eab8ad");
-    addDefaultDimension(time, getName());
+    time.setNamespace(s_getName());
+    output.push_back(time);
 
     double xy_scale = 1/1000000.0;
 
@@ -713,84 +713,101 @@ void Reader::addDefaultDimensions()
                 "Laser Spot Latitude (degrees X 1,000,000).");
     y.setUUID("bf8e431c-86a6-4b6e-90d8-c23c3ad1fb90");
     y.setNumericScale(xy_scale);
-    addDefaultDimension(y, getName());
+    y.setNamespace(s_getName());
+    output.push_back(y);
 
     Dimension x("X", dimension::SignedInteger, 4,
                 "Laser Spot Longitude (degrees X 1,000,000).");
     x.setUUID("1e524a69-e239-4e7a-aea1-ef697895a3c0");
     x.setNumericScale(xy_scale);
-    addDefaultDimension(x, getName());
+    x.setNamespace(s_getName());
+    output.push_back(x);
 
     Dimension z("Z", dimension::SignedInteger, 4,
                 "Elevation (millimeters)");
     z.setUUID("cadb2807-c14f-4ce3-8b7a-b393a91a9f10");
-    addDefaultDimension(z, getName());
+    z.setNamespace(s_getName());
+    output.push_back(z);
 
     Dimension start_pulse("StartPulse", dimension::SignedInteger, 4,
                           "Start Pulse Signal Strength (relative)");
     start_pulse.setUUID("4830d76f-c736-4b09-9121-e751323438f3");
-    addDefaultDimension(start_pulse, getName());
+    start_pulse.setNamespace(s_getName());
+    output.push_back(start_pulse);
 
     Dimension reflected_pulse("ReflectedPulse", dimension::SignedInteger, 4,
                               "Start Pulse Signal Strength (relative)");
     reflected_pulse.setUUID("8526cc21-3fe6-4876-84c7-3303384f56b1");
-    addDefaultDimension(reflected_pulse, getName());
+    reflected_pulse.setNamespace(s_getName());
+    output.push_back(reflected_pulse);
 
     Dimension scan_angle("ScanAngleRank", dimension::SignedInteger, 4,
                          "Scan Azimuth (degrees X 1,000)");
     scan_angle.setUUID("81e73eec-d342-471c-bcb2-6a534a7334ec");
     scan_angle.setNumericScale(1.0/1000.0);
-    addDefaultDimension(scan_angle, getName());
+    scan_angle.setNamespace(s_getName());
+    output.push_back(scan_angle);
 
     Dimension pitch("Pitch", dimension::SignedInteger, 4,
                     "Pitch (degrees X 1,000)");
     pitch.setUUID("6aa8f3b8-1c88-49b4-844c-cc76a7186e8c");
     pitch.setNumericScale(1.0/1000.0);
-    addDefaultDimension(pitch, getName());
+    pitch.setNamespace(s_getName());
+    output.push_back(pitch);
 
     Dimension roll("Roll", dimension::SignedInteger, 4,
                    "Roll (degrees X 1,000)");
     roll.setUUID("bec65174-21a9-40e4-a7a9-d5d207f72464");
     roll.setNumericScale(1.0/1000.0);
-    addDefaultDimension(roll, getName());
+    roll.setNamespace(s_getName());
+    output.push_back(roll);
 
     Dimension pdop("PDOP", dimension::SignedInteger, 4,
                    "GPS PDOP (dilution of precision) (X 10)");
     pdop.setUUID("03d1b370-0d96-4c9a-ba3e-bfd5baffc926");
     pdop.setNumericScale(1.0/10.0);
-    addDefaultDimension(pdop, getName());
+    pdop.setNamespace(s_getName());
+    output.push_back(pdop);
 
     Dimension width("PulseWidth", dimension::SignedInteger, 4,
                     "Laser received pulse width (digitizer samples)");
     width.setUUID("1ec1ec5d-b77f-4a3b-8382-d83d0f8e96b8");
-    addDefaultDimension(width, getName());
+    width.setNamespace(s_getName());
+    output.push_back(width);
 
     Dimension gpstime("GPSTime", dimension::SignedInteger, 4,
                       "GPS Time packed (example: 153320100 = 15h 33m 20s 100ms)");
     gpstime.setUUID("bcd3e53f-c869-438a-9da9-b5a1ee0d324a");
-    addDefaultDimension(gpstime, getName());
+    gpstime.setNamespace(s_getName());
+    output.push_back(gpstime);
 
     Dimension passive_signal("PassiveSignal", dimension::SignedInteger, 4,
                              "Passive Signal (relative)");
     passive_signal.setUUID("015a27b2-2fe1-44b6-b5ab-0ee16c2d43e2");
-    addDefaultDimension(passive_signal, getName());
+    passive_signal.setNamespace(s_getName());
+    output.push_back(passive_signal);
 
     Dimension passive_y("PassiveY", dimension::SignedInteger, 4,
                         "Passive Footprint Latitude (degrees X 1,000,000)");
     passive_y.setUUID("b2a4863b-b580-40a5-b5e7-117d80221240");
     passive_y.setNumericScale(xy_scale);
-    addDefaultDimension(passive_y, getName());
+    passive_y.setNamespace(s_getName());
+    output.push_back(passive_y);
 
     Dimension passive_x("PassiveX", dimension::SignedInteger, 4,
                         "Passive Footprint Longitude (degrees X 1,000,000)");
     passive_x.setUUID("6884be08-c9ee-4d7f-83a7-cb4c9cad4745");
     passive_x.setNumericScale(xy_scale);
-    addDefaultDimension(passive_x, getName());
+    passive_x.setNamespace(s_getName());
+    output.push_back(passive_x);
 
     Dimension passive_z("PassiveZ", dimension::SignedInteger, 4,
                         "Passive Footprint Synthesized Elevation (millimeters)");
     passive_z.setUUID("0d3dec08-188d-4c2e-84d2-bb6881d40c7e");
-    addDefaultDimension(passive_z, getName());
+    passive_z.setNamespace(s_getName());
+    output.push_back(passive_z);
+    
+    return output;
 }
 
 

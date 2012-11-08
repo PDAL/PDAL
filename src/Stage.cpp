@@ -174,21 +174,6 @@ void Stage::setCoreProperties(const Stage& stage)
     return;
 }
 
-void Stage::addDefaultDimension(Dimension const& dim, std::string const& nmspace)
-{
-    m_defaultDimensions.push_back(dim);
-    std::vector<Dimension>::reverse_iterator r = m_defaultDimensions.rbegin();
-    if (r == m_defaultDimensions.rend())
-    {
-        throw pdal_error("Unable to get last default dimension!");
-    }
-    r->setNamespace(nmspace);
-}
-
-void Stage::addDefaultDimensions()
-{
-}
-
 boost::property_tree::ptree Stage::toPTree() const
 {
     boost::property_tree::ptree tree = StageBase::toPTree();
