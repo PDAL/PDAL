@@ -63,9 +63,16 @@ namespace pdal
 namespace dimension
 {
 
-
+/// Explicit, 64-bit UUID for the Dimension. A random one is created 
+/// for each new Dimension instance, but it can be explicitly set if 
+/// desired.
 typedef boost::uuids::uuid id;
 
+
+/// Dimension flags to denote behaviors of the instance such as 
+/// whether to ignore the data or not. Currently, only IsIgnored is 
+/// used and respected to any degree by drivers such as 
+/// pdal::filters::InPlaceReprojection and pdal::drivers::oci::Writer.
 enum Flags
 {
     Invalid   = 0x0,
@@ -75,8 +82,16 @@ enum Flags
     IsIgnored = 0x8
 };
 
+/// Size type for Dimension. It can be negative, and a ``-1`` value 
+/// is used as an indicator of dimension position not being set.
 typedef boost::int32_t size_type;
 
+
+/// Interpretation for a Dimension denotes what *kind* of data type the 
+/// values stored in the dimension should be interpreted as. It can be used
+/// in combination with Dimension::getByteSize() to determine the 
+/// explicity type/size of the Dimension (such as the ``cstint.h``-style 
+/// values `uint32_t` or `int64_t`).
 enum Interpretation
 {
     SignedByte,
@@ -90,26 +105,33 @@ enum Interpretation
 
 } // dimension
 
+/*! 
+    
+    A Dimension is the description of a single data field in a
+    Schema. It is composed of a name, interpretation, a uuid (dimension::id), and a
+    size. Upon creation, the dimension::id is set to a random value (this can 
+    be overridden, and it is expected that each dimension added to a Schema have a 
+    unique dimension::id. When a dimension is added to a Schema, two more
+    properties are also modified: the position (index) of this dimension in the schema's list of
+    dimensions, and the byte offset where the dimension is stored in the
+    PointBuffer's raw bytes
 
-/// A pdal::Dimension is the description of a single data field in a pdal::Schema.
-/// A pdal::Dimension is composed of a name, interpretation, and a size.
-/// When a dimension is added to a pdal::Schema, it also gets two more properties: the position (index)
-/// of this dimension in the schema's list of dimensions, and the byte offset where the dimension
-/// is stored in the PointBuffer's raw bytes
+    Some other text goes here that describes something else
+*/
 class PDAL_DLL Dimension
 {
 public:
 
     /** @name Constructors
     */
-    /// Base constructor for pdal::Dimension
+    /// Base constructor for Dimension
     /// @param name the name to use for the dimension.
     /// Typically "X" or "Y" or "Interesting Scanner Attribute"
-    /// @param interpretation the pdal::dimension::Interpretation to use for the
+    /// @param interpretation the dimension::Interpretation to use for the
     /// dimension.
-    /// @param sizeInBytes the size of the pdal::Dimension in bytes. No
+    /// @param sizeInBytes the size of the Dimension in bytes. No
     /// less-than-a-byte dimensions are allowed.
-    /// @param description a string description of the dimension.
+    /// @param description a string description of the dimension. (defaults to empty)
     Dimension(std::string const& name,
               dimension::Interpretation interpretation,
               dimension::size_type sizeInBytes,
@@ -121,7 +143,7 @@ public:
     /// Assignment constructor
     Dimension& operator=(Dimension const& rhs);
 
-    /** @name Equality and Comparisons
+    /** @name Equality and comparisons operators
     */
     /// Equality
     bool operator==(const Dimension& other) const;
@@ -155,14 +177,14 @@ public:
     }
 
     /// @return dimension attribute flags (isValid, isRead, isWritten, isIgnored, etc)
-    /// composition of pdal::dimension::Flags
+    /// composition of dimension::Flags
     boost::uint32_t getFlags() const
     {
         return m_flags;
     }
 
-    /// sets the dimension attribute flags (isValid, isRead, etc) of pdal::dimension::Flags
-    /// @param flags composited pdal::dimension::Flags
+    /// sets the dimension attribute flags (isValid, isRead, etc) of dimension::Flags
+    /// @param flags composited dimension::Flags
     void setFlags(boost::uint32_t flags)
     {
         m_flags = flags;
@@ -251,6 +273,118 @@ public:
         m_max = max;
     }
 
+    /// Gets the endianness of this intance (defaults to little)
+    inline EndianType getEndianness() const
+    {
+        return m_endian;
+    }
+
+    /// Sets the endianness of this Dimension
+    /// \param v EndianType value to set for the dimension
+    inline void setEndianness(EndianType v)
+    {
+        m_endian = v;
+    }
+
+    /// @return the byte offset of the Dimension instance within the
+    /// context of a Schema. Schema will set this value when
+    /// adding the Dimension to itself so as to not require calculating
+    /// it for every lookup.
+    inline std::size_t getByteOffset() const
+    {
+        return m_byteOffset;
+    }
+
+    /// sets the byte offset of the Dimension
+    /// @param v the value to set
+    inline void setByteOffset(std::size_t v)
+    {
+        m_byteOffset = v;
+    }
+
+    /// @return the position of the Dimension within a Schema.
+    /// If the instance is not in a Schema instance, this value is
+    /// initialized to -1.
+    inline dimension::size_type getPosition() const
+    {
+        return m_position;
+    }
+
+    /// Sets the position of the Dimension instance within a Schema
+    inline void setPosition(dimension::size_type v)
+    {
+        m_position = v;
+    }
+
+/// @name Summary and serialization
+    /// @return a boost::property_tree::ptree representation
+    /// of the Dimension instance
+    boost::property_tree::ptree toPTree() const;
+
+    std::string getInterpretationName() const;
+
+/// @name Identification
+
+    /// @return the dimension::id for the Dimension instance.
+    /// This value is the nil UUID by default.
+    inline dimension::id const& getUUID() const
+    {
+        return m_uuid;
+    }
+
+    /// sets the dimension::id from a string representation of the UUID.
+    /// @param id
+    void setUUID(std::string const& id);
+
+    /// sets the dimension::id from an existing dimension::id (copied)
+    inline void setUUID(dimension::id const& id)
+    {
+        m_uuid = id;
+    }
+
+    /// creates and sets the dimension::id for the instance
+    void createUUID();
+
+    /// denotes the parent relationship of this instance to another
+    /// with a given dimension::id. By default, the parent of an instance 
+    /// is the nil uuid.
+    /// @param id the dimension::id of the parent dimension to this instance
+    inline void setParent(dimension::id const& id)
+    {
+        m_parentDimensionID = id;
+    }
+
+    /// @return the dimension::id of the parent dimension to this one.
+    inline dimension::id const& getParent() const
+    {
+        return m_parentDimensionID;
+    }
+
+/// @name Namespaces
+    /// sets the namespace for this instance
+    /// @param name value to set. Typically this is a Stage::getName()
+    inline void setNamespace(std::string const& name)
+    {
+        m_namespace = name;
+    }
+
+    /// @return the namespace for this instance
+    inline std::string const& getNamespace() const
+    {
+        return m_namespace;
+    }
+
+    /// @return the fully qualified (namespace.name) name for this instance.
+    inline std::string getFQName() const
+    {
+        return m_namespace + "." + m_name;
+    }
+
+/** @name Data Scaling
+    Scale and offset of Dimension instances are available to describe
+    the conversion of these dimensions to floating point values.
+*/
+
     /// @return the numerical scale value for this dimension as a double. The
     /// default value is \b 1.0
     inline double getNumericScale() const
@@ -273,120 +407,7 @@ public:
     {
         m_numericOffset = v;
     }
-
-    /// Gets the endianness of this intance (defaults to little)
-    inline EndianType getEndianness() const
-    {
-        return m_endian;
-    }
-
-    /// Sets the endianness of this Dimension
-    /// \param v EndianType value to set for the dimension
-    inline void setEndianness(EndianType v)
-    {
-        m_endian = v;
-    }
-
-    /// @return the byte offset of the pdal::Dimension instance within the
-    /// context of a pdal::Schema. pdal::Schema will set this value when
-    /// adding the pdal::Dimension to itself so as to not require calculating
-    /// it for every lookup.
-    inline std::size_t getByteOffset() const
-    {
-        return m_byteOffset;
-    }
-
-    /// sets the byte offset of the pdal::Dimension
-    /// @param v the value to set
-    inline void setByteOffset(std::size_t v)
-    {
-        m_byteOffset = v;
-    }
-
-    /// @return the position of the pdal::Dimension within a pdal::Schema.
-    /// If the instance is not in a pdal::Schema instance, this value is
-    /// initialized to -1.
-    inline dimension::size_type getPosition() const
-    {
-        return m_position;
-    }
-
-    /// Sets the position of the pdal::Dimension instance within a pdal::Schema
-    inline void setPosition(dimension::size_type v)
-    {
-        m_position = v;
-    }
-
-/// @name Summary and serialization
-    /// @return a boost::property_tree::ptree representation
-    /// of the pdal::Dimension instance
-    boost::property_tree::ptree toPTree() const;
-
-    /// Outputs a string representation of the Dimension instance to std::cout
-    void dump() const;
-
-    std::string getInterpretationName() const;
-
-/// @name Identification
-
-    /// @return the pdal::dimension::id for the pdal::Dimension instance.
-    /// This value is the nil UUID by default.
-    inline dimension::id const& getUUID() const
-    {
-        return m_uuid;
-    }
-
-    /// sets the dimension::id from a string representation of the UUID.
-    /// @param id
-    void setUUID(std::string const& id);
-
-    /// sets the dimension::id from an existing dimension::id (copied)
-    inline void setUUID(dimension::id const& id)
-    {
-        m_uuid = id;
-    }
-
-    /// creates and sets the dimension::id for the instance
-    void createUUID();
-
-    /// denotes the parent relationship of this instance to another
-    /// with a given dimension::id
-    /// @param id the dimension::id of the parent dimension to this instance
-    inline void setParent(dimension::id const& id)
-    {
-        m_parentDimensionID = id;
-    }
-
-    /// @return the dimension::id of the parent dimension to this one.
-    inline dimension::id const& getParent() const
-    {
-        return m_parentDimensionID;
-    }
-
-/// @name Namespaces
-    /// sets the namespace for this instance
-    /// @param name value to set. Typically this is a pdal::Stage::getName()
-    inline void setNamespace(std::string const& name)
-    {
-        m_namespace = name;
-    }
-
-    /// @return the namespace for this instance
-    inline std::string const& getNamespace() const
-    {
-        return m_namespace;
-    }
-
-    /// @return the fully qualified (namespace.name) name for this instance.
-    inline std::string getFQName() const
-    {
-        return m_namespace + "." + m_name;
-    }
-
-
-
-    /** @name Data Scaling
-    */
+    
     /// Applies the scale and offset values from the dimension to a the given value
     /// @param v The value of type T to scale.
     /// @return v scaled by getNumericOffset() and getNumericScale() values.
@@ -408,8 +429,8 @@ public:
     /*!    \verbatim embed:rst
         .. warning::
 
-            If the value will overflow the datatype ``T`` that is given,
-            an std::out_of_range exception will be thrown.
+            If the value will overflow the give ``T``,
+            a std::out_of_range exception will be thrown.
         \endverbatim
     */
     template<class T>
@@ -422,14 +443,14 @@ public:
             if (output > (std::numeric_limits<T>::max)())
             {
                 std::ostringstream oss;
-                oss << "filter.Scaling: scale and/or offset combination causes "
+                oss << "Dimension::removeScaling: scale and/or offset combination causes "
                     "re-scaled value to be greater than std::numeric_limits::max for dimension '" << getName() << "'. " <<
                     "value is: " << output << " and max() is: " << (std::numeric_limits<T>::max)();
             }
             else if (output < (std::numeric_limits<T>::min)())
             {
                 std::ostringstream oss;
-                oss << "filter.Scaling: scale and/or offset combination causes "
+                oss << "Dimension::removeScaling: scale and/or offset combination causes "
                     "re-scaled value to be less than std::numeric_limits::min for dimension '" << getName() << "'. " <<
                     "value is: " << output << " and min() is: " << (std::numeric_limits<T>::min)();
                 throw std::out_of_range(oss.str());
@@ -439,8 +460,16 @@ public:
         return output;
     }
     
+    /// Return the dimension::Interpretation for a given stdint.h-style type name 
+    /// such as `int32_t` or `uint8_t`.
     static dimension::Interpretation getInterpretation(std::string const& interpretation_name);
-
+    
+    
+    /// Converts the a pointer to a value to the data type described 
+    /// by the Dimension instance.
+    /// @param data a pointer to the data value to be used. The value is 
+    /// casted via a Utils::saturation_cast so if it overflows, it will be 
+    /// the max (or min) value of the Dimension's type.
     template <class T>
     inline T convert(void* data) const
 

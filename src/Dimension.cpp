@@ -231,11 +231,6 @@ void Dimension::createUUID()
     // m_uuid = boost::uuids::random_generator()();
 }
 
-void Dimension::dump() const
-{
-    std::cout << *this;
-}
-
 std::string Dimension::getInterpretationName() const
 {
     std::ostringstream type;
