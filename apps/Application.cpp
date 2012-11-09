@@ -57,6 +57,7 @@ Application::Application(int argc, char* argv[], const std::string& appName)
     , m_hardCoreDebug(false)
     , m_usestdin(false)
     , m_chunkSize(0)
+    , m_reportDebug(false)
 {
     return;
 }
@@ -126,6 +127,13 @@ int Application::do_startup()
 
 int Application::do_execution()
 {
+    
+    if (m_reportDebug)
+    {
+        std::cout << "PDAL's build debug status is '" << PDAL_BUILD_TYPE << "'" << std::endl;
+        return 1;
+    }
+    
     if (m_hardCoreDebug)
     {
         int status = innerRun();
@@ -319,6 +327,7 @@ void Application::addBasicSwitchSet()
     basic_options->add_options()
         ("help,h", po::value<bool>(&m_showHelp)->zero_tokens()->implicit_value(true), "produce help message")
         ("debug,d", po::value<bool>(&m_isDebug)->zero_tokens()->implicit_value(true), "Enable debug mode")
+        ("report-debug", po::value<bool>(&m_reportDebug)->zero_tokens()->implicit_value(true), "Report PDAL compilation DEBUG status")
         ("developer-debug", po::value<bool>(&m_hardCoreDebug)->zero_tokens()->implicit_value(true), "Enable developer debug mode (don't trap exceptions so segfaults are thrown)")
         ("verbose,v", po::value<boost::uint32_t>(&m_verboseLevel)->default_value(0), "Set verbose message level")
         ("version", po::value<bool>(&m_showVersion)->zero_tokens()->implicit_value(true), "Show version info")
