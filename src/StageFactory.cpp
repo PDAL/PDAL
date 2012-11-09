@@ -563,18 +563,9 @@ void StageFactory::loadPlugins()
         // The last two tokens are the stage type and the stage name.
         path basename = t->first;
         path filename = t->second;
-
-        void* pRegister;
-
+        
         std::string methodName = "PDALRegister_" + boost::algorithm::ireplace_first_copy(basename.string(), "libpdal_plugin_", "");
-
-        // std::cout << "Loading: " << methodName << " from dll "<< t->first << " with path: " << t->second <<std::endl;
-
-        pRegister = Utils::getDLLSymbol(filename.string(), methodName);
-        if (pRegister != NULL)
-        {
-            ((void (*)(void*)) pRegister)(this);
-        }
+        Utils::registerPlugin((void*)this, filename.string(), methodName);
 
     }
 }
