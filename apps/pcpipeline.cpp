@@ -38,7 +38,10 @@
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineWriter.hpp>
 #include <pdal/FileUtils.hpp>
+#include <pdal/PointBuffer.hpp>
+#include <pdal/StageIterator.hpp>
 
+#include <boost/scoped_ptr.hpp>
 #include "AppSupport.hpp"
 
 #include "Application.hpp"
@@ -58,7 +61,8 @@ public:
 private:
     void addSwitches();
     void validateSwitches();
-
+    pdal::PointBuffer* dummyWrite(pdal::PipelineManager& manager);
+    
     std::string m_inputFile;
     std::string m_pipelineFile;
     bool m_validate;
@@ -108,6 +112,17 @@ void PcPipeline::addSwitches()
     addPositionalSwitch("input", 1);
 }
 
+pdal::PointBuffer* PcPipeline::dummyWrite(pdal::PipelineManager& manager)
+{
+    const Stage* stage = manager.getStage();
+    const Schema& schema = stage->getSchema();
+    
+    boost::uint32_t count = stage->getNumPoints();
+    pdal::PointBuffer* buffer = new PointBuffer(schema, count);    
+    boost::scoped_ptr<StageSequentialIterator> iter(stage->createSequentialIterator(*buffer));
+    boost::uint32_t numRead = iter->read(*buffer);
+    return buffer;
+}
 
 int PcPipeline::execute()
 {
@@ -167,15 +182,29 @@ int PcPipeline::execute()
         callback = static_cast<pdal::UserCallback*>(new ShellScriptCallback(getProgressShellCommand()));
 
     manager.getWriter()->setUserCallback(callback);
-    if (!m_validate) manager.getWriter()->write(m_numPointsToWrite, m_numSkipPoints);
-
+    
+    PointBuffer* dummy(0);
+    if (!m_validate) 
+        manager.getWriter()->write(m_numPointsToWrite, m_numSkipPoints);
+    else
+    {
+        // If we chose to validate, we'll do a dummy read of all of the data
+        dummy = dummyWrite(manager);
+    }
+    
     if (m_pipelineFile.size() > 0)
     {
         pdal::PipelineWriter writer(manager);
-        writer.setPointBuffer( manager.getWriter()->getPointBuffer());
+        if (!m_validate)
+            writer.setPointBuffer( manager.getWriter()->getPointBuffer());
+        else
+            writer.setPointBuffer(dummy);
         writer.writePipeline(m_pipelineFile);
     }
     
+    if (dummy)
+        delete dummy;
+        
     delete callback;
     return 0;
 }
