@@ -47,7 +47,7 @@ PDAL_C_START
 PDAL_DLL void PDALRegister_writer_pcd(void* factory)
 {
     pdal::StageFactory& f = *(pdal::StageFactory*) factory;
-    f.registerWriter(pdal::drivers::pcd::Writer::s_getName(), createTextWriter);
+    f.registerWriter(pdal::drivers::pcd::Writer::s_getName(), createPCDWriter);
 }
 
 PDAL_C_END

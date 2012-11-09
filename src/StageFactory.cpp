@@ -190,7 +190,11 @@ MAKE_MULTIFILTER_CREATOR(Mosaic, pdal::filters::Mosaic)
 MAKE_WRITER_CREATOR(FauxWriter, pdal::drivers::faux::Writer)
 MAKE_WRITER_CREATOR(LasWriter, pdal::drivers::las::Writer)
 MAKE_WRITER_CREATOR(TextWriter, pdal::drivers::text::Writer)
+
+#ifndef USE_PDAL_PLUGIN_PCD
 MAKE_WRITER_CREATOR(PCDWriter, pdal::drivers::pcd::Writer)
+#endif
+
 #ifdef PDAL_HAVE_ORACLE
 MAKE_WRITER_CREATOR(OciWriter, pdal::drivers::oci::Writer)
 #endif
@@ -457,7 +461,10 @@ void StageFactory::registerKnownWriters()
     REGISTER_WRITER(FauxWriter, pdal::drivers::faux::Writer);
     REGISTER_WRITER(LasWriter, pdal::drivers::las::Writer);
     REGISTER_WRITER(TextWriter, pdal::drivers::text::Writer);
+#ifndef USE_PDAL_PLUGIN_PCD
     REGISTER_WRITER(PCDWriter, pdal::drivers::pcd::Writer);
+#endif
+
 #ifdef PDAL_HAVE_ORACLE
     REGISTER_WRITER(OciWriter, pdal::drivers::oci::Writer);
 #endif
