@@ -47,6 +47,26 @@
 #include <ogr_api.h>
 #endif
 
+
+
+#ifdef USE_PDAL_PLUGIN_OCI
+PDAL_C_START
+
+PDAL_DLL void PDALRegister_oci_text(void* factory)
+{
+    pdal::StageFactory& f = *(pdal::StageFactory*) factory;
+    f.registerWriter(pdal::drivers::soci::Writer::s_getName(), createOciWriter);
+}
+
+PDAL_C_END
+
+pdal::Writer* createOciWriter(pdal::Stage& prevStage, const pdal::Options& options)
+{
+    return new pdal::drivers::oci::Writer(prevStage, options);
+}
+#endif
+
+
 namespace pdal
 {
 namespace drivers

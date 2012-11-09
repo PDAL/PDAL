@@ -241,8 +241,10 @@ set (PDAL_DRIVERS_OCI_CPP
 )
    
 if (ORACLE_FOUND)
+if (NOT USE_PDAL_PLUGIN_OCI)
     list (APPEND PDAL_CPP ${PDAL_DRIVERS_OCI_CPP} )
     list (APPEND PDAL_HPP ${PDAL_DRIVERS_OCI_HPP} )
+endif()
 endif()
 
 
@@ -582,11 +584,24 @@ endif()
 
 add_library(${PDAL_LIB_NAME} SHARED ${PDAL_SOURCES})
 
+set (SOCI_LIBRARIES ${SOCI_LIBRARY} ${SOCI_postgresql_PLUGIN})
+
+if (WITH_SOCI)
+if (NOT USE_PDAL_PLUGIN_SOCI)
+target_link_libraries(${APPS_CPP_DEPENDENCIES} ${SOCI_LIBRARIES})
+endif()
+endif()
+
+if (WITH_ORACLE)
+if (NOT USE_PDAL_PLUGIN_OCI)
+target_link_libraries(${APPS_CPP_DEPENDENCIES} ${ORACLE_LIBRARY})
+endif()
+endif()
+
 if (WIN32)
   target_link_libraries(${APPS_CPP_DEPENDENCIES} LINK_PUBLIC general
     ${PDAL_LIB_NAME}
     ${TIFF_LIBRARY}
-    ${ORACLE_LIBRARY}
     ${MRSID_LIBRARY}
     ${GEOTIFF_LIBRARY}
     ${GDAL_LIBRARY}
@@ -595,13 +610,11 @@ if (WIN32)
     ${PYTHON_LIBRARY}
     ${P2G_LIBRARY}
     ${GEOS_LIBRARY}
-    ${FLANN_LIBRARIES}
-    ${SOCI_LIBRARY})
+    ${FLANN_LIBRARIES})
 else()
   target_link_libraries(${APPS_CPP_DEPENDENCIES}
     ${PDAL_LIB_NAME}
     ${TIFF_LIBRARY}
-    ${ORACLE_LIBRARY}
     ${MRSID_LIBRARY}
     ${GEOTIFF_LIBRARY}
     ${GDAL_LIBRARY}
@@ -610,9 +623,7 @@ else()
     ${PYTHON_LIBRARY}
     ${P2G_LIBRARY}
     ${GEOS_LIBRARY}
-    ${FLANN_LIBRARIES} 
-    ${SOCI_LIBRARY}
-    ${SOCI_postgresql_PLUGIN})
+    ${FLANN_LIBRARIES})
 endif()
 
 message(STATUS "Using boost lib: ${Boost_LIBRARIES}")
@@ -658,7 +669,76 @@ if (USE_PDAL_PLUGIN_PCD)
       INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib")
     endif()
 endif()
-   
+
+if (WITH_SOCI)
+if (USE_PDAL_PLUGIN_SOCI)
+    set(PDAL_SOCI_WRITER_LIB_NAME pdal_plugin_writer_soci)
+    add_library(${PDAL_SOCI_WRITER_LIB_NAME} SHARED ${PDAL_SOCI_SRC}/Writer.cpp)
+    target_link_libraries(${PDAL_SOCI_WRITER_LIB_NAME}
+                          ${PDAL_LIB_NAME}
+                          ${SOCI_LIBRARIES})
+    set_target_properties(${PDAL_SOCI_WRITER_LIB_NAME}
+    PROPERTIES SOVERSION "${PDAL_LIB_SOVERSION}" )
+    if (APPLE)
+    set_target_properties(
+      ${PDAL_SOCI_WRITER_LIB_NAME}
+      PROPERTIES
+      INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib")
+    endif()
+
+    set(PDAL_SOCI_READER_LIB_NAME pdal_plugin_reader_soci)
+    add_library(${PDAL_SOCI_READER_LIB_NAME} SHARED ${PDAL_SOCI_SRC}/Reader.cpp)
+    target_link_libraries(${PDAL_SOCI_READER_LIB_NAME}
+                          ${PDAL_LIB_NAME}
+                          ${SOCI_LIBRARIES})
+    set_target_properties(${PDAL_SOCI_READER_LIB_NAME}
+    PROPERTIES SOVERSION "${PDAL_LIB_SOVERSION}" )
+    if (APPLE)
+    set_target_properties(
+      ${PDAL_SOCI_READER_LIB_NAME}
+      PROPERTIES
+      INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib")
+    endif()
+    
+endif()
+endif()
+
+if (WITH_ORACLE)
+if (USE_PDAL_PLUGIN_OCI)
+    set(PDAL_OCI_WRITER_LIB_NAME pdal_plugin_writer_oci)
+    add_library(${PDAL_OCI_WRITER_LIB_NAME} SHARED ${PDAL_ORACLE_SRC}/oci_wrapper.cpp
+                                                    ${PDAL_ORACLE_SRC}/common.cpp
+                                                    ${PDAL_ORACLE_SRC}/Writer.cpp)
+    target_link_libraries(${PDAL_OCI_WRITER_LIB_NAME}
+                          ${PDAL_LIB_NAME}
+                          ${ORACLE_LIBRARY})
+    set_target_properties(${PDAL_OCI_WRITER_LIB_NAME}
+    PROPERTIES SOVERSION "${PDAL_LIB_SOVERSION}" )
+    if (APPLE)
+    set_target_properties(
+      ${PDAL_OCI_WRITER_LIB_NAME}
+      PROPERTIES
+      INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib")
+    endif()
+
+    set(PDAL_OCI_READER_LIB_NAME pdal_plugin_reader_oci)
+    add_library(${PDAL_SOCI_READER_LIB_NAME} SHARED ${PDAL_ORACLE_SRC}/oci_wrapper.cpp
+                                                    ${PDAL_ORACLE_SRC}/common.cpp
+                                                    ${PDAL_ORACLE_SRC}/Reader.cpp)
+    target_link_libraries(${PDAL_OCI_READER_LIB_NAME}
+                          ${PDAL_LIB_NAME}
+                          ${ORACLE_LIBRARY})
+    set_target_properties(${PDAL_OCI_READER_LIB_NAME}
+    PROPERTIES SOVERSION "${PDAL_LIB_SOVERSION}" )
+    if (APPLE)
+    set_target_properties(
+      ${PDAL_OCI_READER_LIB_NAME}
+      PROPERTIES
+      INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib")
+    endif()
+    
+endif()
+endif()
 ###############################################################################
 # Targets installation
 

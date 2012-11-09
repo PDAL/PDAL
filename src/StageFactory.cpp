@@ -68,8 +68,10 @@
 
 
 #ifdef PDAL_HAVE_SOCI
+#ifndef USE_PDAL_PLUGIN_SOCI
 #include <pdal/drivers/soci/Reader.hpp>
 #include <pdal/drivers/soci/Writer.hpp>
+#endif
 #endif
 
 
@@ -149,7 +151,9 @@ MAKE_READER_CREATOR(NITFReader, pdal::drivers::nitf::Reader)
 #endif
 
 #ifdef PDAL_HAVE_SOCI
+#ifndef USE_PDAL_PLUGIN_SOCI
 MAKE_READER_CREATOR(SociReader, pdal::drivers::soci::Reader)
+#endif
 #endif
 
 MAKE_READER_CREATOR(PipelineReader, pdal::drivers::pipeline::Reader)
@@ -204,7 +208,9 @@ MAKE_WRITER_CREATOR(P2GWriter, pdal::drivers::p2g::Writer)
 #endif
 
 #ifdef PDAL_HAVE_SOCI
+#ifndef USE_PDAL_PLUGIN_SOCI
 MAKE_WRITER_CREATOR(SociWriter, pdal::drivers::soci::Writer)
+#endif
 #endif
 
 
@@ -416,7 +422,9 @@ void StageFactory::registerKnownReaders()
 #endif
 
 #ifdef PDAL_HAVE_SOCI
+#ifndef USE_PDAL_PLUGIN_SOCI
     REGISTER_READER(SociReader, pdal::drivers::soci::Reader);
+#endif
 #endif
 
     REGISTER_READER(PipelineReader, pdal::drivers::pipeline::Reader);
@@ -474,7 +482,9 @@ void StageFactory::registerKnownWriters()
 #endif
 
 #ifdef PDAL_HAVE_SOCI
+#ifndef USE_PDAL_PLUGIN_SOCI
     REGISTER_WRITER(SociWriter, pdal::drivers::soci::Writer);
+#endif
 #endif
 
 }
