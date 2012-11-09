@@ -129,6 +129,7 @@ private:
     const std::string m_appName;
     bool m_hardCoreDebug;
     std::vector<std::string> m_heartbeat_shell_command;
+    bool m_reportDebug;
     
     std::vector<boost::program_options::options_description*> m_options;
     boost::program_options::positional_options_description m_positionalOptions;
