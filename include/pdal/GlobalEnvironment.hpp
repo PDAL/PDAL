@@ -81,6 +81,8 @@ public:
     
     pdal::gdal::GlobalDebug* getGDALDebug();
 
+    pdal::StageFactory* getStageFactory();
+
 private:
     GlobalEnvironment();
     ~GlobalEnvironment();

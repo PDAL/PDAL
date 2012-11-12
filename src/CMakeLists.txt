@@ -340,9 +340,10 @@ set (PDAL_DRIVERS_TEXT_CPP
   ${PDAL_TEXT_SRC}/Writer.cpp
 )
 
-list (APPEND PDAL_CPP ${PDAL_DRIVERS_TEXT_CPP} )
-list (APPEND PDAL_HPP ${PDAL_DRIVERS_TEXT_HPP} )
-
+if (NOT USE_PDAL_PLUGIN_TEXT)
+    list (APPEND PDAL_CPP ${PDAL_DRIVERS_TEXT_CPP} )
+    list (APPEND PDAL_HPP ${PDAL_DRIVERS_TEXT_HPP} )
+endif()
 
 #
 # drivers/nitf
@@ -653,7 +654,20 @@ if (APPLE)
 endif()
 
 
-
+if (USE_PDAL_PLUGIN_TEXT)
+    set(PDAL_TEXT_WRITER_LIB_NAME pdal_plugin_writer_text)
+    add_library(${PDAL_TEXT_WRITER_LIB_NAME} SHARED ${PDAL_DRIVERS_TEXT_CPP} ${PDAL_DRIVERS_TEXT_HPP})
+    target_link_libraries(${PDAL_TEXT_WRITER_LIB_NAME}
+                          ${PDAL_LIB_NAME})
+    set_target_properties(${PDAL_TEXT_WRITER_LIB_NAME}
+    PROPERTIES SOVERSION "${PDAL_LIB_SOVERSION}" )
+    if (APPLE)
+    set_target_properties(
+      ${PDAL_TEXT_WRITER_LIB_NAME}
+      PROPERTIES
+      INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib")
+    endif()
+endif()
 
 if (USE_PDAL_PLUGIN_PCD)
     set(PDAL_PCD_WRITER_LIB_NAME pdal_plugin_writer_pcd)
