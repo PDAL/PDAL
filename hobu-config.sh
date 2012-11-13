@@ -28,9 +28,6 @@ cmake   -G "$CONFIG"  \
         -DWITH_PYTHON=ON \
         -DWITH_FLANN=ON \
         -DWITH_SOCI=ON \
-        -DUSE_PDAL_PLUGIN_SOCI=ON \
-        -DUSE_PDAL_PLUGIN_PCD=ON \
-        -DUSE_PDAL_PLUGIN_ORACLE=ON \
         -DGEOTIFF_INCLUDE_DIR=${GEOTIFF_HOME}/include/ \
         -DGEOTIFF_LIBRARY=${GEOTIFF_HOME}/lib/libgeotiff.${SO_EXT} \
         -DICONV_INCLUDE_DIR=/usr/include \
@@ -40,3 +37,9 @@ cmake   -G "$CONFIG"  \
         -DLIBXML2_LIBRARIES=${LIBXML2_HOME}/lib/libxml2.${SO_EXT} \
         -DTIFF_INCLUDE_DIR=/${TIFF_HOME}/include \
         -DTIFF_LIBRARY=${TIFF_HOME}/lib/libtiff.${SO_EXT}
+
+
+    # -DUSE_PDAL_PLUGIN_SOCI=ON \
+    # -DUSE_PDAL_PLUGIN_PCD=ON \
+    # -DUSE_PDAL_PLUGIN_OCI=ON \
+    # -DUSE_PDAL_PLUGIN_TEXT=ON \
