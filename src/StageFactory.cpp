@@ -117,7 +117,9 @@ namespace pdal
 MAKE_READER_CREATOR(FauxReader, pdal::drivers::faux::Reader)
 MAKE_READER_CREATOR(LasReader, pdal::drivers::las::Reader)
 #ifdef PDAL_HAVE_ORACLE
+#ifndef USE_PDAL_PLUGIN_OCI
 MAKE_READER_CREATOR(OciReader, pdal::drivers::oci::Reader)
+#endif
 #endif
 #ifdef PDAL_HAVE_GDAL
 MAKE_READER_CREATOR(NITFReader, pdal::drivers::nitf::Reader)
@@ -176,7 +178,9 @@ MAKE_WRITER_CREATOR(PCDWriter, pdal::drivers::pcd::Writer)
 #endif
 
 #ifdef PDAL_HAVE_ORACLE
+#ifndef USE_PDAL_PLUGIN_OCI
 MAKE_WRITER_CREATOR(OciWriter, pdal::drivers::oci::Writer)
+#endif
 #endif
 
 #ifdef PDAL_HAVE_P2G
@@ -391,7 +395,9 @@ void StageFactory::registerKnownReaders()
     REGISTER_READER(FauxReader, pdal::drivers::faux::Reader);
     REGISTER_READER(LasReader, pdal::drivers::las::Reader);
 #ifdef PDAL_HAVE_ORACLE
+#ifndef USE_PDAL_PLUGIN_OCI
     REGISTER_READER(OciReader, pdal::drivers::oci::Reader);
+#endif
 #endif
 #ifdef PDAL_HAVE_GDAL
     REGISTER_READER(NITFReader, pdal::drivers::nitf::Reader);
@@ -454,7 +460,9 @@ void StageFactory::registerKnownWriters()
 #endif
 
 #ifdef PDAL_HAVE_ORACLE
+#ifndef USE_PDAL_PLUGIN_OCI
     REGISTER_WRITER(OciWriter, pdal::drivers::oci::Writer);
+#endif
 #endif
 
 #ifdef PDAL_HAVE_P2G
