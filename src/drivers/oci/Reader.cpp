@@ -37,6 +37,7 @@
 #include <pdal/FileUtils.hpp>
 #include <pdal/Utils.hpp>
 #include <pdal/GlobalEnvironment.hpp>
+#include <pdal/pdal_macros.hpp>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
@@ -46,6 +47,12 @@
 
 #include <iostream>
 #include <map>
+
+
+#ifdef USE_PDAL_PLUGIN_OCI
+MAKE_READER_CREATOR(ociWriter, pdal::drivers::oci::Writer)
+CREATE_READER_PLUGIN(oci, pdal::drivers::oci::Writer)
+#endif
 
 
 namespace pdal

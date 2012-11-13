@@ -48,22 +48,9 @@
 #endif
 
 
-
 #ifdef USE_PDAL_PLUGIN_OCI
-PDAL_C_START
-
-PDAL_DLL void PDALRegister_oci_text(void* factory)
-{
-    pdal::StageFactory& f = *(pdal::StageFactory*) factory;
-    f.registerWriter(pdal::drivers::soci::Writer::s_getName(), createOciWriter);
-}
-
-PDAL_C_END
-
-pdal::Writer* createOciWriter(pdal::Stage& prevStage, const pdal::Options& options)
-{
-    return new pdal::drivers::oci::Writer(prevStage, options);
-}
+MAKE_WRITER_CREATOR(ociWriter, pdal::drivers::oci::Writer)
+CREATE_WRITER_PLUGIN(oci, pdal::drivers::oci::Writer)
 #endif
 
 

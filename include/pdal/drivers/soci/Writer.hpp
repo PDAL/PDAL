@@ -39,8 +39,6 @@
 #include <pdal/Writer.hpp>
 #include <pdal/drivers/soci/common.hpp>
 
-pdal::Writer* createSociWriter(pdal::Stage& prevStage, const pdal::Options& options);
-
 
 namespace pdal
 {
@@ -48,15 +46,6 @@ namespace drivers
 {
 namespace soci
 {
-
-#ifdef USE_PDAL_PLUGIN_SOCI
-PDAL_C_START
-
-PDAL_DLL void PDALRegister_writer_soci(void* factory);
-
-PDAL_C_END
-#endif
-
 
 
 class PDAL_DLL Writer : public pdal::Writer

@@ -76,6 +76,8 @@ public:
     // for writer pipelines, this convenience function calls getWriter()->write() so that
     // the user doesn't even need to know anything about the Writer class
     boost::uint64_t execute();
+    
+    void registerPluginIfExists( const Options& options );
 
 private:
     StageFactory m_factory;

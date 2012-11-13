@@ -46,7 +46,7 @@
 #include <vector>
 #include <string>
 
-pdal::Writer* createTextWriter(pdal::Stage& prevStage, const pdal::Options& options);
+// pdal::Writer* createTextWriter(pdal::Stage& prevStage, const pdal::Options& options);
 
 
 namespace pdal

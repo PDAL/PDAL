@@ -35,6 +35,7 @@
 #include <pdal/drivers/soci/Writer.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/StageFactory.hpp>
+#include <pdal/pdal_macros.hpp>
 #include <pdal/FileUtils.hpp>
 
 #include <boost/algorithm/string.hpp>
@@ -45,21 +46,10 @@
 #include <gdal.h>
 #include <ogr_api.h>
 #endif
+
 #ifdef USE_PDAL_PLUGIN_SOCI
-PDAL_C_START
-
-PDAL_DLL void PDALRegister_writer_soci(void* factory)
-{
-    pdal::StageFactory& f = *(pdal::StageFactory*) factory;
-    f.registerWriter(pdal::drivers::soci::Writer::s_getName(), createSociWriter);
-}
-
-PDAL_C_END
-
-pdal::Writer* createSociWriter(pdal::Stage& prevStage, const pdal::Options& options)
-{
-    return new pdal::drivers::soci::Writer(prevStage, options);
-}
+MAKE_WRITER_CREATOR(sociWriter, pdal::drivers::soci::Writer)
+CREATE_WRITER_PLUGIN(soci, pdal::drivers::soci::Writer)
 #endif
 
 

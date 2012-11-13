@@ -41,21 +41,10 @@
 #include <boost/algorithm/string.hpp>
 
 
+
 #ifdef USE_PDAL_PLUGIN_PCD
-PDAL_C_START
-
-PDAL_DLL void PDALRegister_writer_pcd(void* factory)
-{
-    pdal::StageFactory& f = *(pdal::StageFactory*) factory;
-    f.registerWriter(pdal::drivers::pcd::Writer::s_getName(), createPCDWriter);
-}
-
-PDAL_C_END
-
-pdal::Writer* createPCDWriter(pdal::Stage& prevStage, const pdal::Options& options)
-{
-    return new pdal::drivers::pcd::Writer(prevStage, options);
-}
+MAKE_WRITER_CREATOR(pcdWriter, pdal::drivers::pcd::Writer)
+CREATE_WRITER_PLUGIN(pcd, pdal::drivers::pcd::Writer)
 #endif
 
 

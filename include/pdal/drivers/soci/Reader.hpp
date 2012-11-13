@@ -45,9 +45,6 @@
 
 #include <vector>
 
-pdal::Reader* createSociReader( const pdal::Options& options);
-
-
 
 namespace pdal
 {

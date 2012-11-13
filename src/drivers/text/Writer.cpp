@@ -34,6 +34,7 @@
 
 #include <pdal/drivers/text/Writer.hpp>
 #include <pdal/PointBuffer.hpp>
+#include <pdal/pdal_macros.hpp>
 
 #include <iostream>
 #include <algorithm>
@@ -42,21 +43,10 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/erase.hpp>
 
+
 #ifdef USE_PDAL_PLUGIN_TEXT
-PDAL_C_START
-
-PDAL_DLL void PDALRegister_writer_text(void* factory)
-{
-    pdal::StageFactory& f = *(pdal::StageFactory*) factory;
-    f.registerWriter(pdal::drivers::text::Writer::s_getName(), createTextWriter);
-}
-
-PDAL_C_END
-
-pdal::Writer* createTextWriter(pdal::Stage& prevStage, const pdal::Options& options)
-{
-    return new pdal::drivers::text::Writer(prevStage, options);
-}
+MAKE_WRITER_CREATOR(textWriter, pdal::drivers::text::Writer)
+CREATE_WRITER_PLUGIN(text, pdal::drivers::text::Writer)
 #endif
 
 

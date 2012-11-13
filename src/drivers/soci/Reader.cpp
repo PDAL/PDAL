@@ -48,22 +48,12 @@
 #include <map>
 
 
+
 #ifdef USE_PDAL_PLUGIN_SOCI
-PDAL_C_START
-
-PDAL_DLL void PDALRegister_reader_soci(void* factory)
-{
-    pdal::StageFactory& f = *(pdal::StageFactory*) factory;
-    f.registerReader(pdal::drivers::soci::Reader::s_getName(), createSociReader);
-}
-
-PDAL_C_END
-
-pdal::Reader* createSociReader(const pdal::Options& options)
-{
-    return new pdal::drivers::soci::Reader(options);
-}
+MAKE_READER_CREATOR(sociReader, pdal::drivers::soci::Reader)
+CREATE_READER_PLUGIN(soci, pdal::drivers::soci::Reader)
 #endif
+
 
 namespace pdal
 {

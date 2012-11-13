@@ -110,33 +110,6 @@
 
 namespace pdal
 {
-//
-// macros for creating the various stage types
-//
-#define MAKE_READER_CREATOR(T, FullT) \
-    Reader* create_##T(const Options& options) \
-        { return new FullT(options); }
-#define MAKE_FILTER_CREATOR(T, FullT) \
-    Filter* create_##T(Stage& prevStage, const Options& options) \
-        { return new FullT(prevStage, options); }
-#define MAKE_MULTIFILTER_CREATOR(T, FullT) \
-    MultiFilter* create_##T(const std::vector<Stage*>& prevStages, const Options& options) \
-        { return new FullT(prevStages, options); }
-#define MAKE_WRITER_CREATOR(T, FullT) \
-    Writer* create_##T(Stage& prevStage, const Options& options) \
-        { return new FullT(prevStage, options); }
-
-//
-// macros to register the stage creators
-//
-#define REGISTER_WRITER(T, FullT) \
-    registerWriter(FullT::s_getName(), create_##T)
-#define REGISTER_READER(T, FullT) \
-    registerReader(FullT::s_getName(), create_##T)
-#define REGISTER_FILTER(T, FullT) \
-    registerFilter(FullT::s_getName(), create_##T)
-#define REGISTER_MULTIFILTER(T, FullT) \
-    registerMultiFilter(FullT::s_getName(), create_##T)
 
 //
 // define the functions to create the readers
