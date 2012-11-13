@@ -736,7 +736,7 @@ if (USE_PDAL_PLUGIN_OCI)
     endif()
 
     set(PDAL_OCI_READER_LIB_NAME pdal_plugin_reader_oci)
-    add_library(${PDAL_SOCI_READER_LIB_NAME} SHARED ${PDAL_ORACLE_SRC}/oci_wrapper.cpp
+    add_library(${PDAL_OCI_READER_LIB_NAME} SHARED ${PDAL_ORACLE_SRC}/oci_wrapper.cpp
                                                     ${PDAL_ORACLE_SRC}/common.cpp
                                                     ${PDAL_ORACLE_SRC}/Reader.cpp)
     target_link_libraries(${PDAL_OCI_READER_LIB_NAME}

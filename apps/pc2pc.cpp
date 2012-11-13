@@ -36,10 +36,6 @@
 
 #include <pdal/drivers/las/Reader.hpp>
 #include <pdal/drivers/las/Writer.hpp>
-#ifdef PDAL_HAVE_ORACLE
-#include <pdal/drivers/oci/Writer.hpp>
-#include <pdal/drivers/oci/Reader.hpp>
-#endif
 
 #include <pdal/filters/Cache.hpp>
 #include <pdal/filters/Chipper.hpp>
