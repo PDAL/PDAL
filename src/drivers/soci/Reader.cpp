@@ -36,6 +36,7 @@
 #include <pdal/PointBuffer.hpp>
 #include <pdal/FileUtils.hpp>
 #include <pdal/Utils.hpp>
+#include <pdal/StageFactory.hpp>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
@@ -46,6 +47,23 @@
 #include <iostream>
 #include <map>
 
+
+#ifdef USE_PDAL_PLUGIN_SOCI
+PDAL_C_START
+
+PDAL_DLL void PDALRegister_reader_soci(void* factory)
+{
+    pdal::StageFactory& f = *(pdal::StageFactory*) factory;
+    f.registerReader(pdal::drivers::soci::Reader::s_getName(), createSociReader);
+}
+
+PDAL_C_END
+
+pdal::Reader* createSociReader(const pdal::Options& options)
+{
+    return new pdal::drivers::soci::Reader(options);
+}
+#endif
 
 namespace pdal
 {

@@ -42,8 +42,18 @@
 #include <boost/scoped_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
 
+
+
+#ifdef USE_PDAL_PLUGIN_PCD
+
 pdal::Writer* createPCDWriter(pdal::Stage& prevStage, const pdal::Options& options);
 
+PDAL_C_START
+
+PDAL_DLL void PDALRegister_writer_pcd(void* factory);
+
+PDAL_C_END
+#endif
 
 namespace pdal
 {
@@ -61,13 +71,6 @@ public:
     {}
 };
 
-#ifdef USE_PDAL_PLUGIN_PCD
-PDAL_C_START
-
-PDAL_DLL void PDALRegister_writer_pcd(void* factory);
-
-PDAL_C_END
-#endif
 
 typedef boost::shared_ptr<std::ostream> FileStreamPtr;
 

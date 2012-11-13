@@ -48,7 +48,7 @@
 #ifdef USE_PDAL_PLUGIN_SOCI
 PDAL_C_START
 
-PDAL_DLL void PDALRegister_soci_text(void* factory)
+PDAL_DLL void PDALRegister_writer_soci(void* factory)
 {
     pdal::StageFactory& f = *(pdal::StageFactory*) factory;
     f.registerWriter(pdal::drivers::soci::Writer::s_getName(), createSociWriter);
