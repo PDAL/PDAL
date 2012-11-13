@@ -5,7 +5,7 @@
             ../../temp/autzen-point-format-3.txt
         </Option>
         <Option name="plugin">
-            ../../../../libpdal_plugin_writer_text.dylib
+            ../../bin/libpdal_plugin_writer_text.dylib
         </Option>        
         <Option name="order">
             Red,Green,X,Y,Blue,Z
