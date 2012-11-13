@@ -392,8 +392,8 @@ set (PDAL_DRIVERS_PCD_CPP
 )
 
 if (NOT USE_PDAL_PLUGIN_PCD)
-list (APPEND PDAL_CPP ${PDAL_DRIVERS_PCD_CPP} )
-list (APPEND PDAL_HPP ${PDAL_DRIVERS_PCD_HPP} )
+    list (APPEND PDAL_CPP ${PDAL_DRIVERS_PCD_CPP} )
+    list (APPEND PDAL_HPP ${PDAL_DRIVERS_PCD_HPP} )
 endif()
 
 #
@@ -671,7 +671,7 @@ endif()
 
 if (USE_PDAL_PLUGIN_PCD)
     set(PDAL_PCD_WRITER_LIB_NAME pdal_plugin_writer_pcd)
-    add_library(${PDAL_PCD_WRITER_LIB_NAME} SHARED ${PDAL_PCD_SRC})
+    add_library(${PDAL_PCD_WRITER_LIB_NAME} SHARED ${PDAL_DRIVERS_PCD_CPP})
     target_link_libraries(${PDAL_PCD_WRITER_LIB_NAME}
                           ${PDAL_LIB_NAME})
     set_target_properties(${PDAL_PCD_WRITER_LIB_NAME}
