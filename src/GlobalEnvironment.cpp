@@ -213,14 +213,4 @@ boost::random::mt19937* GlobalEnvironment::getRNG()
     return rng;
 }
 
-pdal::StageFactory* GlobalEnvironment::getStageFactory()
-{
-    pdal::StageFactory* factory = getThreadEnvironment().getStageFactory();
-    if (!factory)
-        throw pdal_error("ThreadEnvironment StageFactory was null!");
-        
-    return factory;
-}
-
-
 } //namespaces

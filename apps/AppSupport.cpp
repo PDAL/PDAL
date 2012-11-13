@@ -41,8 +41,6 @@
 #include <pdal/Utils.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineReader.hpp>
-#include <pdal/GlobalEnvironment.hpp>
-
 
 pdal::Stage* AppSupport::makeReader(pdal::Options& options)
 {
@@ -53,7 +51,7 @@ pdal::Stage* AppSupport::makeReader(pdal::Options& options)
         throw app_runtime_error("file not found: " + inputFile);
     }
 
-    pdal::StageFactory* factory = pdal::GlobalEnvironment::get().getStageFactory();
+    pdal::StageFactory* factory = new pdal::StageFactory;
     std::string driver = factory->inferReaderDriver(inputFile, options);
     if (driver == "")
     {
@@ -74,7 +72,7 @@ pdal::Writer* AppSupport::makeWriter(pdal::Options& options, pdal::Stage& stage)
 {
     const std::string outputFile = options.getValueOrThrow<std::string>("filename");
 
-    pdal::StageFactory* factory = pdal::GlobalEnvironment::get().getStageFactory();
+    pdal::StageFactory* factory = new pdal::StageFactory;
     std::string driver = factory->inferWriterDriver(outputFile, options);
     if (driver == "")
     {

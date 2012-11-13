@@ -45,7 +45,6 @@ namespace pdal
 ThreadEnvironment::ThreadEnvironment(boost::thread::id id)
     : m_threadId(id)
     , m_rng(0)
-    , m_factory(new StageFactory())
 {
     boost::posix_time::ptime epoch(boost::gregorian::date(1970,1,1));
     boost::posix_time::ptime now = boost::posix_time::second_clock::local_time();
@@ -64,11 +63,6 @@ ThreadEnvironment::~ThreadEnvironment()
         m_rng = 0;
     }
 
-    if (m_factory != 0)
-    {
-        delete m_factory;
-        m_factory = 0;
-    }
     return;
 }
 

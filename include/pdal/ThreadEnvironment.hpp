@@ -56,16 +56,10 @@ public:
         return m_rng;
     }
     
-    StageFactory* getStageFactory()
-    {
-        return m_factory;
-    }
-    
 private:
     const boost::thread::id m_threadId;
 
     boost::random::mt19937* m_rng;
-    StageFactory* m_factory;
 
     ThreadEnvironment(const ThreadEnvironment&); // nope
     ThreadEnvironment& operator=(const ThreadEnvironment&); // nope
