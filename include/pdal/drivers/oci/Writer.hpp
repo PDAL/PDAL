@@ -39,7 +39,16 @@
 #include <pdal/Bounds.hpp>
 #include <pdal/GDALUtils.hpp>
 
+pdal::Writer* createOciWriter(pdal::Stage& prevStage, const pdal::Options& options);
 
+
+#ifdef USE_PDAL_PLUGIN_OCI
+PDAL_C_START
+
+PDAL_DLL void PDALRegister_writer_oci(void* factory);
+
+PDAL_C_END
+#endif
 
 #include "common.hpp"
 

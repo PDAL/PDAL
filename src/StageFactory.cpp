@@ -68,8 +68,10 @@
 
 
 #ifdef PDAL_HAVE_SOCI
+#ifndef USE_PDAL_PLUGIN_SOCI
 #include <pdal/drivers/soci/Reader.hpp>
 #include <pdal/drivers/soci/Writer.hpp>
+#endif
 #endif
 
 
@@ -108,33 +110,6 @@
 
 namespace pdal
 {
-//
-// macros for creating the various stage types
-//
-#define MAKE_READER_CREATOR(T, FullT) \
-    Reader* create_##T(const Options& options) \
-        { return new FullT(options); }
-#define MAKE_FILTER_CREATOR(T, FullT) \
-    Filter* create_##T(Stage& prevStage, const Options& options) \
-        { return new FullT(prevStage, options); }
-#define MAKE_MULTIFILTER_CREATOR(T, FullT) \
-    MultiFilter* create_##T(const std::vector<Stage*>& prevStages, const Options& options) \
-        { return new FullT(prevStages, options); }
-#define MAKE_WRITER_CREATOR(T, FullT) \
-    Writer* create_##T(Stage& prevStage, const Options& options) \
-        { return new FullT(prevStage, options); }
-
-//
-// macros to register the stage creators
-//
-#define REGISTER_WRITER(T, FullT) \
-    registerWriter(FullT::s_getName(), create_##T)
-#define REGISTER_READER(T, FullT) \
-    registerReader(FullT::s_getName(), create_##T)
-#define REGISTER_FILTER(T, FullT) \
-    registerFilter(FullT::s_getName(), create_##T)
-#define REGISTER_MULTIFILTER(T, FullT) \
-    registerMultiFilter(FullT::s_getName(), create_##T)
 
 //
 // define the functions to create the readers
@@ -149,7 +124,9 @@ MAKE_READER_CREATOR(NITFReader, pdal::drivers::nitf::Reader)
 #endif
 
 #ifdef PDAL_HAVE_SOCI
+#ifndef USE_PDAL_PLUGIN_SOCI
 MAKE_READER_CREATOR(SociReader, pdal::drivers::soci::Reader)
+#endif
 #endif
 
 MAKE_READER_CREATOR(PipelineReader, pdal::drivers::pipeline::Reader)
@@ -189,8 +166,15 @@ MAKE_MULTIFILTER_CREATOR(Mosaic, pdal::filters::Mosaic)
 //
 MAKE_WRITER_CREATOR(FauxWriter, pdal::drivers::faux::Writer)
 MAKE_WRITER_CREATOR(LasWriter, pdal::drivers::las::Writer)
+
+#ifndef USE_PDAL_PLUGIN_TEXT
 MAKE_WRITER_CREATOR(TextWriter, pdal::drivers::text::Writer)
+#endif
+
+#ifndef USE_PDAL_PLUGIN_PCD
 MAKE_WRITER_CREATOR(PCDWriter, pdal::drivers::pcd::Writer)
+#endif
+
 #ifdef PDAL_HAVE_ORACLE
 MAKE_WRITER_CREATOR(OciWriter, pdal::drivers::oci::Writer)
 #endif
@@ -200,7 +184,9 @@ MAKE_WRITER_CREATOR(P2GWriter, pdal::drivers::p2g::Writer)
 #endif
 
 #ifdef PDAL_HAVE_SOCI
+#ifndef USE_PDAL_PLUGIN_SOCI
 MAKE_WRITER_CREATOR(SociWriter, pdal::drivers::soci::Writer)
+#endif
 #endif
 
 
@@ -412,7 +398,9 @@ void StageFactory::registerKnownReaders()
 #endif
 
 #ifdef PDAL_HAVE_SOCI
+#ifndef USE_PDAL_PLUGIN_SOCI
     REGISTER_READER(SociReader, pdal::drivers::soci::Reader);
+#endif
 #endif
 
     REGISTER_READER(PipelineReader, pdal::drivers::pipeline::Reader);
@@ -456,8 +444,15 @@ void StageFactory::registerKnownWriters()
 {
     REGISTER_WRITER(FauxWriter, pdal::drivers::faux::Writer);
     REGISTER_WRITER(LasWriter, pdal::drivers::las::Writer);
+
+#ifndef USE_PDAL_PLUGIN_TEXT    
     REGISTER_WRITER(TextWriter, pdal::drivers::text::Writer);
+#endif
+
+#ifndef USE_PDAL_PLUGIN_PCD
     REGISTER_WRITER(PCDWriter, pdal::drivers::pcd::Writer);
+#endif
+
 #ifdef PDAL_HAVE_ORACLE
     REGISTER_WRITER(OciWriter, pdal::drivers::oci::Writer);
 #endif
@@ -467,7 +462,9 @@ void StageFactory::registerKnownWriters()
 #endif
 
 #ifdef PDAL_HAVE_SOCI
+#ifndef USE_PDAL_PLUGIN_SOCI
     REGISTER_WRITER(SociWriter, pdal::drivers::soci::Writer);
+#endif
 #endif
 
 }
@@ -563,21 +560,31 @@ void StageFactory::loadPlugins()
         // The last two tokens are the stage type and the stage name.
         path basename = t->first;
         path filename = t->second;
-
-        void* pRegister;
-
-        std::string methodName = "PDALRegister_" + boost::algorithm::ireplace_first_copy(basename.string(), "libpdal_plugin_", "");
-
-        // std::cout << "Loading: " << methodName << " from dll "<< t->first << " with path: " << t->second <<std::endl;
-
-        pRegister = Utils::getDLLSymbol(filename.string(), methodName);
-        if (pRegister != NULL)
-        {
-            ((void (*)(void*)) pRegister)(this);
-        }
+        
+        registerPlugin(filename.string());
+        // std::string methodName = "PDALRegister_" + boost::algorithm::ireplace_first_copy(basename.string(), "libpdal_plugin_", "");
+        // Utils::registerPlugin((void*)this, filename.string(), methodName);
 
     }
 }
 
+void StageFactory::registerPlugin(std::string const& filename)
+{
+    using namespace boost::filesystem;
+    path basename;
+
+    path t = path(filename);
+    for (; !t.extension().empty(); t = t.stem())
+    {
+        if (t.stem().extension().empty())
+        {
+            basename = t.stem().string();
+        }
+    }    
+    
+    std::string methodName = "PDALRegister_" + boost::algorithm::ireplace_first_copy(basename.string(), "libpdal_plugin_", "");
+    Utils::registerPlugin((void*)this, filename, methodName);
+    
+}
 
 } // namespace pdal

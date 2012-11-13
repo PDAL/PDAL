@@ -37,3 +37,9 @@ cmake   -G "$CONFIG"  \
         -DLIBXML2_LIBRARIES=${LIBXML2_HOME}/lib/libxml2.${SO_EXT} \
         -DTIFF_INCLUDE_DIR=/${TIFF_HOME}/include \
         -DTIFF_LIBRARY=${TIFF_HOME}/lib/libtiff.${SO_EXT}
+
+
+    # -DUSE_PDAL_PLUGIN_SOCI=ON \
+    # -DUSE_PDAL_PLUGIN_PCD=ON \
+    # -DUSE_PDAL_PLUGIN_OCI=ON \
+    # -DUSE_PDAL_PLUGIN_TEXT=ON \

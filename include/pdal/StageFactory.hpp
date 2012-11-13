@@ -36,6 +36,7 @@
 #define INCLUDED_STAGEFACTORY_HPP
 
 #include <pdal/pdal_internal.hpp>
+#include <pdal/pdal_macros.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/Reader.hpp>
 #include <pdal/Filter.hpp>
@@ -108,6 +109,7 @@ public:
     void registerWriter(const std::string& type, WriterCreator* f);
 
     void loadPlugins();
+    void registerPlugin(std::string const& filename);
 
 private:
     // callers take ownership of returned stages

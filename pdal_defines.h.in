@@ -29,7 +29,6 @@
 #cmakedefine PDAL_HAVE_GDAL
 #cmakedefine PDAL_HAVE_FLANN
 #cmakedefine PDAL_HAVE_LASZIP
-#cmakedefine PDAL_HAVE_LIBLAS
 #cmakedefine PDAL_HAVE_LIBXML2
 #cmakedefine PDAL_HAVE_LIBGEOTIFF
 #cmakedefine PDAL_HAVE_MRSID
@@ -37,6 +36,16 @@
 #cmakedefine PDAL_HAVE_P2G
 #cmakedefine PDAL_HAVE_PYTHON
 #cmakedefine PDAL_HAVE_SOCI
+
+/* 
+ * plugins
+ */
+#cmakedefine USE_PDAL_PLUGIN_PCD
+#cmakedefine USE_PDAL_PLUGIN_TEXT
+#cmakedefine USE_PDAL_PLUGIN_SOCI
+#cmakedefine USE_PDAL_PLUGIN_OCI
+#cmakedefine USE_PDAL_PLUGIN_MRSID
+#cmakedefine USE_PDAL_PLUGIN_CARIS
 
 
 /*

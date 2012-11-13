@@ -38,6 +38,7 @@
 #include <pdal/MultiFilter.hpp>
 #include <pdal/Reader.hpp>
 #include <pdal/Writer.hpp>
+#include <pdal/Utils.hpp>
 
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/optional.hpp>
@@ -102,6 +103,8 @@ void PipelineManager::removeWriter()
 
 Reader* PipelineManager::addReader(const std::string& type, const Options& options)
 {
+    registerPluginIfExists(options);
+        
     Reader* stage = m_factory.createReader(type, options);
     m_readers.push_back(stage);
     m_lastStage = stage;
@@ -111,6 +114,8 @@ Reader* PipelineManager::addReader(const std::string& type, const Options& optio
 
 Filter* PipelineManager::addFilter(const std::string& type, Stage& prevStage, const Options& options)
 {
+    registerPluginIfExists(options);
+        
     Filter* stage = m_factory.createFilter(type, prevStage, options);
     m_filters.push_back(stage);
     m_lastStage = stage;
@@ -120,17 +125,28 @@ Filter* PipelineManager::addFilter(const std::string& type, Stage& prevStage, co
 
 MultiFilter* PipelineManager::addMultiFilter(const std::string& type, const std::vector<Stage*>& prevStages, const Options& options)
 {
+    registerPluginIfExists(options);
+        
     MultiFilter* stage = m_factory.createMultiFilter(type, prevStages, options);
     m_multifilters.push_back(stage);
     m_lastStage = stage;
     return stage;
 }
 
+void PipelineManager::registerPluginIfExists( const Options& options )
+{
+    if (options.hasOption("plugin"))
+    {
+        m_factory.registerPlugin(options.getValueOrThrow<std::string>("plugin"));
+    }
+}
 
 Writer* PipelineManager::addWriter(const std::string& type, Stage& prevStage, const Options& options)
 {
     m_isWriterPipeline = true;
-
+    
+    registerPluginIfExists(options);
+    
     Writer* writer = m_factory.createWriter(type, prevStage, options);
     m_writers.push_back(writer);
     m_lastWriter = writer;

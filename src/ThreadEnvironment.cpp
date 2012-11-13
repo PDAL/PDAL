@@ -33,6 +33,8 @@
 ****************************************************************************/
 
 #include <pdal/ThreadEnvironment.hpp>
+#include <pdal/StageFactory.hpp>
+
 #include <ctime>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
@@ -48,15 +50,18 @@ ThreadEnvironment::ThreadEnvironment(boost::thread::id id)
     boost::posix_time::ptime now = boost::posix_time::second_clock::local_time();
     boost::int64_t anumber = (now-epoch).ticks();
     m_rng = new boost::random::mt19937(anumber);
-
+    
     return;
 }
 
 
 ThreadEnvironment::~ThreadEnvironment()
 {
-    delete m_rng;
-    m_rng = 0;
+    if (m_rng != 0)
+    {
+        delete m_rng;
+        m_rng = 0;
+    }
 
     return;
 }

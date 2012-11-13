@@ -75,6 +75,23 @@ double Utils::random(double minimum, double maximum)
     return t;
 }
 
+void Utils::registerPlugin(void* stageFactoryPtr, std::string const& filename, std::string const& method)
+{
+    void* pRegister;
+
+    pRegister = Utils::getDLLSymbol(filename, method);
+    if (pRegister != NULL)
+    {
+        ((void (*)(void*)) pRegister)(stageFactoryPtr);
+    } else
+    {
+        std::ostringstream oss;
+        oss << "Unable to register shared library '" << filename << "' with method name '" << method << "'";
+        throw pdal_error(oss.str());
+    }
+}
+
+
 
 char* Utils::getenv(const char* env)
 {
@@ -280,9 +297,6 @@ void* Utils::getDLLSymbol(std::string const& library, std::string const& name)
 #endif
     return pSymbol;
 }
-
-
-
 
 
 

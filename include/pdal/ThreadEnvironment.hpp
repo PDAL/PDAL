@@ -43,6 +43,8 @@
 namespace pdal
 {
 
+class StageFactory;
+
 class PDAL_DLL ThreadEnvironment
 {
 public:
@@ -53,7 +55,7 @@ public:
     {
         return m_rng;
     }
-
+    
 private:
     const boost::thread::id m_threadId;
 

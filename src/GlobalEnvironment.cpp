@@ -213,5 +213,4 @@ boost::random::mt19937* GlobalEnvironment::getRNG()
     return rng;
 }
 
-
 } //namespaces
