@@ -41,8 +41,11 @@
 
 #include <pdal/drivers/faux/Reader.hpp>
 #include <pdal/drivers/las/Reader.hpp>
+
 #ifdef PDAL_HAVE_ORACLE
+#ifndef USE_PDAL_PLUGIN_OCI
 #include <pdal/drivers/oci/Reader.hpp>
+#endif
 #endif
 
 #ifdef PDAL_HAVE_GDAL
@@ -59,7 +62,9 @@
 #include <pdal/drivers/pcd/Writer.hpp>
 
 #ifdef PDAL_HAVE_ORACLE
+#ifndef USE_PDAL_PLUGIN_OCI
 #include <pdal/drivers/oci/Writer.hpp>
+#endif
 #endif
 
 #ifdef PDAL_HAVE_P2G
