@@ -49,6 +49,7 @@ using namespace pdal;
 
 BOOST_AUTO_TEST_SUITE(TextWriterTest)
 
+#ifndef USE_PDAL_PLUGIN_TEXT
 BOOST_AUTO_TEST_CASE(TextWriterTest_test_1)
 {
 
@@ -143,6 +144,6 @@ BOOST_AUTO_TEST_CASE(TextWriterTest_geojson)
 
     return;
 }
-
+#endif
 
 BOOST_AUTO_TEST_SUITE_END()
