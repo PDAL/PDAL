@@ -72,6 +72,22 @@
     } \
     PDAL_C_END \
 
+#define CREATE_FILTER_PLUGIN(DriverName, DriverFullType) \
+    PDAL_C_START PDAL_DLL void PDALRegister_filter_##DriverName(void* factory) \
+    { \
+        pdal::StageFactory& f = *(pdal::StageFactory*) factory; \
+        f.registerFilter(DriverFullType::s_getName(), create_##DriverName##Filter); \
+    } \
+    PDAL_C_END \
+
+#define CREATE_MULTIFILTER_PLUGIN(DriverName, DriverFullType) \
+    PDAL_C_START PDAL_DLL void PDALRegister_multifilter_##DriverName(void* factory) \
+    { \
+        pdal::StageFactory& f = *(pdal::StageFactory*) factory; \
+        f.registerMultiFilter(DriverFullType::s_getName(), create_##DriverName##MultiFilter); \
+    } \
+    PDAL_C_END \    
+
 #define CREATE_WRITER_PLUGIN(DriverName, DriverFullType) \
     PDAL_C_START PDAL_DLL void PDALRegister_writer_##DriverName(void* factory) \
     { \
