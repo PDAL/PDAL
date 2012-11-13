@@ -588,11 +588,30 @@ void StageFactory::loadPlugins()
         path basename = t->first;
         path filename = t->second;
         
-        std::string methodName = "PDALRegister_" + boost::algorithm::ireplace_first_copy(basename.string(), "libpdal_plugin_", "");
-        Utils::registerPlugin((void*)this, filename.string(), methodName);
+        registerPlugin(filename.string());
+        // std::string methodName = "PDALRegister_" + boost::algorithm::ireplace_first_copy(basename.string(), "libpdal_plugin_", "");
+        // Utils::registerPlugin((void*)this, filename.string(), methodName);
 
     }
 }
 
+void StageFactory::registerPlugin(std::string const& filename)
+{
+    using namespace boost::filesystem;
+    path basename;
+
+    path t = path(filename);
+    for (; !t.extension().empty(); t = t.stem())
+    {
+        if (t.stem().extension().empty())
+        {
+            basename = t.stem().string();
+        }
+    }    
+    
+    std::string methodName = "PDALRegister_" + boost::algorithm::ireplace_first_copy(basename.string(), "libpdal_plugin_", "");
+    Utils::registerPlugin((void*)this, filename, methodName);
+    
+}
 
 } // namespace pdal

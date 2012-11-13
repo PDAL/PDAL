@@ -108,6 +108,7 @@ public:
     void registerWriter(const std::string& type, WriterCreator* f);
 
     void loadPlugins();
+    void registerPlugin(std::string const& filename);
 
 private:
     // callers take ownership of returned stages

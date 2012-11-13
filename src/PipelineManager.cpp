@@ -38,6 +38,7 @@
 #include <pdal/MultiFilter.hpp>
 #include <pdal/Reader.hpp>
 #include <pdal/Writer.hpp>
+#include <pdal/Utils.hpp>
 
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/optional.hpp>
@@ -130,7 +131,11 @@ MultiFilter* PipelineManager::addMultiFilter(const std::string& type, const std:
 Writer* PipelineManager::addWriter(const std::string& type, Stage& prevStage, const Options& options)
 {
     m_isWriterPipeline = true;
-
+    
+    if (options.hasOption("plugin"))
+    {
+        m_factory.registerPlugin(options.getValueOrThrow<std::string>("plugin"));
+    }
     Writer* writer = m_factory.createWriter(type, prevStage, options);
     m_writers.push_back(writer);
     m_lastWriter = writer;
