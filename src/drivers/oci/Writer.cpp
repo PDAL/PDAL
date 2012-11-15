@@ -37,6 +37,7 @@
 #include <pdal/Bounds.hpp>
 #include <pdal/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
+#include <pdal/StageFactory.hpp>
 
 #include <pdal/drivers/oci/Writer.hpp>
 
