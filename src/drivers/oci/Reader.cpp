@@ -50,8 +50,8 @@
 
 
 #ifdef USE_PDAL_PLUGIN_OCI
-MAKE_READER_CREATOR(ociWriter, pdal::drivers::oci::Writer)
-CREATE_READER_PLUGIN(oci, pdal::drivers::oci::Writer)
+MAKE_READER_CREATOR(ociReader, pdal::drivers::oci::Reader)
+CREATE_READER_PLUGIN(oci, pdal::drivers::oci::Reader)
 #endif
 
 
