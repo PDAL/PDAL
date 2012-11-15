@@ -456,27 +456,24 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
         {
             std::vector<boost::tuple<std::string, std::string> >::const_iterator iter =  dimensions.begin();
 
-            bool bWroteFirstProperty(false);
+            bool bWroteProperty(false);
             while (iter != dimensions.end())
             {
-                if (bWroteFirstProperty)
+                if (bWroteProperty)
                     *m_stream << delimiter;
                     
                 Dimension const& d = schema.getDimension(iter->get<0>(), iter->get<1>());
                 if (d.isIgnored())
                 {
                     iter++;
+                    bWroteProperty = false;
                     continue;
                 }
 
                 *m_stream << getStringRepresentation(data, d, pointIndex);
-
+                
+                bWroteProperty = true;
                 iter++;
-
-                if (!bWroteFirstProperty)
-                {
-                    bWroteFirstProperty = true;
-                }
 
             }
             *m_stream << newline;
@@ -508,16 +505,17 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
 
             std::vector<boost::tuple<std::string, std::string> >::const_iterator iter =  dimensions.begin();
             
-            bool bWroteFirstProperty(false);
+            bool bWroteProperty(false);
             while (iter != dimensions.end())
             {
-                if (bWroteFirstProperty)
+                if (bWroteProperty)
                     *m_stream << delimiter;
                 
                 Dimension const& d = schema.getDimension(iter->get<0>(), iter->get<1>());
                 if (d.isIgnored())
                 {
                     iter++;
+                    bWroteProperty = false;
                     continue;
                 }
 
@@ -527,11 +525,7 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
                 *m_stream << "\"" << getStringRepresentation(data, d, pointIndex) <<"\"";
                 
                 iter++;
-
-                if (!bWroteFirstProperty)
-                {
-                    bWroteFirstProperty = true;
-                }
+                bWroteProperty = true;
             }
             
             
