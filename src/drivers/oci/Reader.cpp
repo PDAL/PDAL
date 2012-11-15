@@ -38,6 +38,7 @@
 #include <pdal/Utils.hpp>
 #include <pdal/GlobalEnvironment.hpp>
 #include <pdal/pdal_macros.hpp>
+#include <pdal/StageFactory.hpp>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
