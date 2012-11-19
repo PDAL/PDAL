@@ -225,29 +225,31 @@ std::vector<boost::tuple<std::string, std::string> >  Writer::getDimensionOrder(
     return output;
     
 }
-void Writer::WriteHeader(pdal::Schema const& schema)
+
+void Writer::WriteGeoJSONHeader(pdal::Schema const& schema)
 {
+    std::string callback = getOptions().getValueOrDefault<std::string>("jscallback", "");
+    
+    if (callback.size())
+    {
+        *m_stream << callback <<"(";
+    }
+    *m_stream << "{ \"type\": \"FeatureCollection\", \"features\": [";
+    return;
+}
 
-    schema::index_by_index const& dims = schema.getDimensions().get<schema::index>();
-
+void Writer::WriteCSVHeader(pdal::Schema const& schema)
+{
     bool isQuoted = getOptions().getValueOrDefault<bool>("quote_header", true);
-    bool bWriteHeader = getOptions().getValueOrDefault<bool>("write_header", true);
     std::string newline = getOptions().getValueOrDefault<std::string>("newline", "\n");
     std::string delimiter = getOptions().getValueOrDefault<std::string>("delimiter",",");
     
+    // Spaces get stripped off, so if the user set a space, 
+    // we'll get a 0-sized value. We'll set to space in that 
+    // instance. This means you can't use \n as a delimiter.
+    if (delimiter.size() == 0)
+        delimiter = " ";    
 
-    
-    log()->get(logDEBUG) << "Writing to filename: " << getOptions().getValueOrThrow<std::string>("filename") << std::endl;
-    
-    if (!bWriteHeader)
-    {
-        log()->get(logDEBUG) << "Not writing header" << std::endl;
-        bWroteHeader = true;
-        return;
-        
-    }
-    log()->get(logDEBUG) << "Writing header" << std::endl;
-    
     std::string order = getOptions().getValueOrDefault<std::string>("order", "");
     boost::erase_all(order, " "); // Wipe off spaces
     
@@ -277,34 +279,21 @@ void Writer::WriteHeader(pdal::Schema const& schema)
         oss <<i->get<0>();
     }
     log()->get(logDEBUG) << oss.str() << std::endl;
-    
-    // If we're bGeoJSON, we're just going to write the preamble for FeatureCollection, 
-    // and let the rest happen in writeBuffer
-    std::string outputType = getOptions().getValueOrDefault<std::string>("format", "csv");
-    bool bGeoJSON = boost::iequals(outputType, "GEOJSON");
-    if (bGeoJSON)
-    {
-        std::string callback = getOptions().getValueOrDefault<std::string>("jscallback", "");
-        
-        if (callback.size())
-        {
-            *m_stream << callback <<"(";
-        }
-        *m_stream << "{ \"type\": \"FeatureCollection\", \"features\": [";
-        return;
-    }
-    
-    
-    if (delimiter.size() == 0)
-        delimiter = " ";
-        
+
+
     std::vector<boost::tuple<std::string, std::string> >::const_iterator iter = dimensions.begin();
+
+    bool bWroteProperty(false);    
     while (iter != dimensions.end())
     {
+        if (bWroteProperty)
+            *m_stream << delimiter;
+                    
         Dimension const& d = schema.getDimension(iter->get<0>(), iter->get<1>());
         if (d.isIgnored())
         {
             iter++;
+            bWroteProperty = false;            
             if (iter == dimensions.end())
                 break;
             else
@@ -316,10 +305,129 @@ void Writer::WriteHeader(pdal::Schema const& schema)
         if (isQuoted)
             *m_stream<< "\"";
         iter++;
-        if (iter != dimensions.end())
-            *m_stream << delimiter;
+        bWroteProperty = true;        
     }
     *m_stream << newline;
+
+    
+}
+
+void Writer::WritePCDHeader(pdal::Schema const& schema)
+{
+
+    boost::optional<Dimension const&> dimRed = schema.getDimensionOptional("Red");
+    boost::optional<Dimension const&> dimGreen = schema.getDimensionOptional("Green");
+    boost::optional<Dimension const&> dimBlue = schema.getDimensionOptional("Blue");
+    
+    bool bHaveColor(false);
+    bool bRGBPacked  = getOptions().getValueOrDefault<bool>("pack_rgb", true);
+
+    
+    
+    if (dimRed && dimGreen && dimBlue)
+        bHaveColor = true;
+
+    *m_stream << "# .PCD v.7 - Point Cloud Data file format" << std::endl;
+
+    *m_stream << "VERSION 0.7" << std::endl;    
+
+    *m_stream << "FIELDS x y z";
+    if (bHaveColor)
+    {
+        if(bRGBPacked)
+            *m_stream << " rgb";
+        else
+            *m_stream << " r g b";
+    }
+    *m_stream << std::endl;
+    
+    *m_stream << "SIZE 4 4 4";
+    if (bHaveColor)
+    {
+        if(bRGBPacked)
+            *m_stream << " 1";
+        else
+            *m_stream << " 1 1 1";
+    }
+    *m_stream << std::endl;
+    
+    *m_stream << "TYPE f f f";
+    if (bHaveColor)
+    {
+        if(bRGBPacked)
+            *m_stream << " f";
+        else
+            *m_stream << " u u u";
+    }
+    *m_stream << std::endl;
+    
+    *m_stream << "COUNT 1 1 1";
+    if (bHaveColor)
+    {
+        if(bRGBPacked)
+            *m_stream << " 1";
+        else
+            *m_stream << " 1 1 1";
+    }
+    *m_stream << std::endl;    
+
+    boost::uint64_t width = getPrevStage().getNumPoints();
+    *m_stream << "WIDTH " << width << std::endl;
+    
+    *m_stream << "HEIGHT 1" << std::endl;
+    *m_stream << "VIEWPOINT 0 0 0 1 0 0 0" << std::endl;
+    *m_stream << "POINTS " << width << std::endl;
+    
+    *m_stream << "DATA ascii" << std::endl;
+    return;
+}
+
+void Writer::WriteHeader(pdal::Schema const& schema)
+{
+
+    schema::index_by_index const& dims = schema.getDimensions().get<schema::index>();
+
+    bool isQuoted = getOptions().getValueOrDefault<bool>("quote_header", true);
+    bool bWriteHeader = getOptions().getValueOrDefault<bool>("write_header", true);
+    std::string newline = getOptions().getValueOrDefault<std::string>("newline", "\n");
+    std::string delimiter = getOptions().getValueOrDefault<std::string>("delimiter",",");
+    
+    // Spaces get stripped off, so if the user set a space, 
+    // we'll get a 0-sized value. We'll set to space in that 
+    // instance. This means you can't use \n as a delimiter.
+    if (delimiter.size() == 0)
+        delimiter = " ";    
+
+    if (!bWriteHeader)
+    {
+        log()->get(logDEBUG) << "Not writing header" << std::endl;
+        bWroteHeader = true;
+        return;
+        
+    }
+    
+    log()->get(logDEBUG) << "Writing header to filename: " << getOptions().getValueOrThrow<std::string>("filename") << std::endl;
+    
+
+    
+    // If we're bGeoJSON, we're just going to write the preamble for FeatureCollection, 
+    // and let the rest happen in writeBuffer
+    std::string outputType = getOptions().getValueOrDefault<std::string>("format", "csv");
+    bool bGeoJSON = boost::iequals(outputType, "GEOJSON");
+    if (bGeoJSON)
+    {
+        WriteGeoJSONHeader(schema);
+        return;
+    }
+
+    bool bCSV = boost::iequals(outputType, "CSV");
+    if (bCSV)
+    {
+        WriteCSVHeader(schema);
+        return;
+    }
+        
+
 
     return;
 }
@@ -342,7 +450,7 @@ std::string Writer::getStringRepresentation(PointBuffer const& data,
 
     boost::uint32_t size = d.getByteSize();
 
-    bool bHaveScaling = !Utils::compare_distance(d.getNumericScale(), 0.0);
+    bool bHaveScaling = !Utils::compare_distance(d.getNumericScale(), 1.0);
     
     // FIXME: Allow selective scaling of requested dimensions
     if (bHaveScaling)
@@ -421,20 +529,8 @@ std::string Writer::getStringRepresentation(PointBuffer const& data,
 }
 
 
-
-boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
+void Writer::WriteCSVBuffer(const PointBuffer& data)
 {
-
-    std::string outputType = getOptions().getValueOrDefault<std::string>("format", "csv");
-    bool bCSV = boost::iequals(outputType, "CSV");
-    bool bGeoJSON = boost::iequals(outputType, "GEOJSON");
-
-    if (!bWroteHeader)
-    {
-        WriteHeader(data.getSchema());
-        bWroteHeader = true;
-    }
-
     std::string newline = getOptions().getValueOrDefault<std::string>("newline", "\n");
     std::string delimiter = getOptions().getValueOrDefault<std::string>("delimiter",",");
     if (delimiter.size() == 0)
@@ -448,100 +544,194 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
     boost::erase_all(order, " "); // Wipe off spaces
     
     std::vector<boost::tuple<std::string, std::string> > dimensions = getDimensionOrder(schema);
+    
+    while (pointIndex != data.getNumPoints())
+    {
+        std::vector<boost::tuple<std::string, std::string> >::const_iterator iter =  dimensions.begin();
 
+        bool bWroteProperty(false);
+        while (iter != dimensions.end())
+        {
+            if (bWroteProperty)
+                *m_stream << delimiter;
+                
+            Dimension const& d = schema.getDimension(iter->get<0>(), iter->get<1>());
+            if (d.isIgnored())
+            {
+                iter++;
+                bWroteProperty = false;
+                continue;
+            }
+
+            *m_stream << getStringRepresentation(data, d, pointIndex);
+            
+            bWroteProperty = true;
+            iter++;
+
+        }
+        *m_stream << newline;
+
+        pointIndex++;
+        if (!bWroteFirstPoint)
+        {
+            bWroteFirstPoint = true;
+        }
+
+    }    
+}
+
+void Writer::WritePCDBuffer(const PointBuffer& data)
+{
+    pdal::Schema const& schema = data.getSchema();
+    
+    Dimension const& x = schema.getDimension("X");
+    Dimension const& y = schema.getDimension("Y");
+    Dimension const& z = schema.getDimension("Z");
+    
+    boost::optional<Dimension const&> dimRed = schema.getDimensionOptional("Red");
+    boost::optional<Dimension const&> dimGreen = schema.getDimensionOptional("Green");
+    boost::optional<Dimension const&> dimBlue = schema.getDimensionOptional("Blue");
+
+    boost::uint32_t pointIndex(0);
+    
+    bool bHaveColor(false);
+    if (dimRed && dimGreen && dimBlue)
+        bHaveColor = true;
+        
+    bool bRGBPacked = getOptions().getValueOrDefault<bool>("pack_rgb", true);
+        
+    while (pointIndex != data.getNumPoints())
+    {
+        *m_stream << getStringRepresentation(data, x, pointIndex);
+        *m_stream << " ";
+        *m_stream << getStringRepresentation(data, y, pointIndex);
+        *m_stream << " ";
+        *m_stream << getStringRepresentation(data, z, pointIndex);
+        *m_stream << " ";
+        
+        std::string color;
+        if (bHaveColor) 
+        {
+            if (bRGBPacked)
+            {
+                boost::uint16_t r = data.getField<boost::uint16_t>(*dimRed, pointIndex);
+                boost::uint16_t g = data.getField<boost::uint16_t>(*dimGreen, pointIndex);
+                boost::uint16_t b = data.getField<boost::uint16_t>(*dimBlue, pointIndex);
+                int rgb =  ((int)r) << 16 | ((int)g) << 8 | ((int)b);
+                m_stream->precision(8);
+                *m_stream << static_cast<float>(rgb);
+            }
+            else
+            {
+                std::string color;
+                color = getStringRepresentation(data, *dimRed, pointIndex);
+                *m_stream << color;
+                *m_stream << " ";
+
+                color = getStringRepresentation(data, *dimGreen, pointIndex);
+                *m_stream << color;
+                *m_stream << " ";
+
+                color = getStringRepresentation(data, *dimBlue, pointIndex);
+                *m_stream << color;
+                *m_stream << " ";
+            }
+        }
+        
+        *m_stream << "\n";
+
+        pointIndex++;
+
+    }
+
+}
+
+void Writer::WriteGeoJSONBuffer(const PointBuffer& data)
+{
+    boost::uint32_t pointIndex(0);    
+    pdal::Schema const& schema = data.getSchema();
+    while (pointIndex != data.getNumPoints())
+    {
+        Dimension const& dimX = schema.getDimension("X");
+        Dimension const& dimY = schema.getDimension("Y");
+        Dimension const& dimZ = schema.getDimension("Z");
+        
+        if (bWroteFirstPoint)
+            *m_stream << ",";
+            
+        *m_stream << "{ \"type\":\"Feature\",\"geometry\": { \"type\": \"Point\", \"coordinates\": [";
+        *m_stream << getStringRepresentation(data, dimX, pointIndex) << ",";
+        *m_stream << getStringRepresentation(data, dimY, pointIndex) << ",";
+        *m_stream << getStringRepresentation(data, dimZ, pointIndex) << "]},";
+        
+        *m_stream << "\"properties\": {";
+
+        std::vector<boost::tuple<std::string, std::string> > dimensions = getDimensionOrder(schema);
+        std::vector<boost::tuple<std::string, std::string> >::const_iterator iter =  dimensions.begin();
+        
+        bool bWroteProperty(false);
+        while (iter != dimensions.end())
+        {
+            if (bWroteProperty)
+                *m_stream << ",";
+            
+            Dimension const& d = schema.getDimension(iter->get<0>(), iter->get<1>());
+            if (d.isIgnored())
+            {
+                iter++;
+                bWroteProperty = false;
+                continue;
+            }
+
+            *m_stream << "\"" << iter->get<0>() << "\":";
+            
+
+            *m_stream << "\"" << getStringRepresentation(data, d, pointIndex) <<"\"";
+            
+            iter++;
+            bWroteProperty = true;
+        }
+        
+        
+        *m_stream << "}"; // end properties
+
+        *m_stream << "}"; // end feature
+        
+        pointIndex++;
+        if (!bWroteFirstPoint)
+        {
+            bWroteFirstPoint = true;
+        }
+        
+        
+    }    
+}
+
+boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
+{
+
+    std::string outputType = getOptions().getValueOrDefault<std::string>("format", "csv");
+    bool bCSV = boost::iequals(outputType, "CSV");
+    bool bGeoJSON = boost::iequals(outputType, "GEOJSON");
+    bool bPCD = boost::iequals(outputType, "PCD");    
+
+    if (!bWroteHeader)
+    {
+        WriteHeader(data.getSchema());
+        bWroteHeader = true;
+    }
         
     if (bCSV)
     {
-        while (pointIndex != data.getNumPoints())
-        {
-            std::vector<boost::tuple<std::string, std::string> >::const_iterator iter =  dimensions.begin();
-
-            bool bWroteProperty(false);
-            while (iter != dimensions.end())
-            {
-                if (bWroteProperty)
-                    *m_stream << delimiter;
-                    
-                Dimension const& d = schema.getDimension(iter->get<0>(), iter->get<1>());
-                if (d.isIgnored())
-                {
-                    iter++;
-                    bWroteProperty = false;
-                    continue;
-                }
-
-                *m_stream << getStringRepresentation(data, d, pointIndex);
-                
-                bWroteProperty = true;
-                iter++;
-
-            }
-            *m_stream << newline;
-
-            pointIndex++;
-            if (!bWroteFirstPoint)
-            {
-                bWroteFirstPoint = true;
-            }
-
-        }        
+        WriteCSVBuffer(data);
+    
     } else if (bGeoJSON)
     {
-        while (pointIndex != data.getNumPoints())
-        {
-            Dimension const& dimX = schema.getDimension("X");
-            Dimension const& dimY = schema.getDimension("Y");
-            Dimension const& dimZ = schema.getDimension("Z");
-            
-            if (bWroteFirstPoint)
-                *m_stream << ",";
-                
-            *m_stream << "{ \"type\":\"Feature\",\"geometry\": { \"type\": \"Point\", \"coordinates\": [";
-            *m_stream << getStringRepresentation(data, dimX, pointIndex) << ",";
-            *m_stream << getStringRepresentation(data, dimY, pointIndex) << ",";
-            *m_stream << getStringRepresentation(data, dimZ, pointIndex) << "]},";
-            
-            *m_stream << "\"properties\": {";
-
-            std::vector<boost::tuple<std::string, std::string> >::const_iterator iter =  dimensions.begin();
-            
-            bool bWroteProperty(false);
-            while (iter != dimensions.end())
-            {
-                if (bWroteProperty)
-                    *m_stream << delimiter;
-                
-                Dimension const& d = schema.getDimension(iter->get<0>(), iter->get<1>());
-                if (d.isIgnored())
-                {
-                    iter++;
-                    bWroteProperty = false;
-                    continue;
-                }
-
-                *m_stream << "\"" << iter->get<0>() << "\":";
-                
-
-                *m_stream << "\"" << getStringRepresentation(data, d, pointIndex) <<"\"";
-                
-                iter++;
-                bWroteProperty = true;
-            }
-            
-            
-            *m_stream << "}"; // end properties
-
-            *m_stream << "}"; // end feature
-            
-            pointIndex++;
-            if (!bWroteFirstPoint)
-            {
-                bWroteFirstPoint = true;
-            }
-            
-            
-        }
+        WriteGeoJSONBuffer(data);
                     
+    } else if (bPCD)
+    {
+        WritePCDBuffer(data);
     }
 
 

@@ -374,28 +374,6 @@ if (GDAL_FOUND)
     list (APPEND PDAL_HPP ${PDAL_DRIVERS_NITF_HPP} )
 endif()
 
-
-
-#
-# drivers/pcd
-#
-set(PDAL_PCD_PATH drivers/pcd)
-set(PDAL_PCD_HEADERS ${PDAL_HEADERS_DIR}/${PDAL_PCD_PATH})
-set(PDAL_PCD_SRC ${PROJECT_SOURCE_DIR}/src/${PDAL_PCD_PATH})
-
-set(PDAL_DRIVERS_PCD_HPP
-  ${PDAL_PCD_HEADERS}/Writer.hpp
-)
-
-set (PDAL_DRIVERS_PCD_CPP 
-  ${PDAL_PCD_SRC}/Writer.cpp
-)
-
-if (NOT USE_PDAL_PLUGIN_PCD)
-    list (APPEND PDAL_CPP ${PDAL_DRIVERS_PCD_CPP} )
-    list (APPEND PDAL_HPP ${PDAL_DRIVERS_PCD_HPP} )
-endif()
-
 #
 # drivers/soci
 #
@@ -664,21 +642,6 @@ if (USE_PDAL_PLUGIN_TEXT)
     if (APPLE)
     set_target_properties(
       ${PDAL_TEXT_WRITER_LIB_NAME}
-      PROPERTIES
-      INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib")
-    endif()
-endif()
-
-if (USE_PDAL_PLUGIN_PCD)
-    set(PDAL_PCD_WRITER_LIB_NAME pdal_plugin_writer_pcd)
-    add_library(${PDAL_PCD_WRITER_LIB_NAME} SHARED ${PDAL_DRIVERS_PCD_CPP})
-    target_link_libraries(${PDAL_PCD_WRITER_LIB_NAME}
-                          ${PDAL_LIB_NAME})
-    set_target_properties(${PDAL_PCD_WRITER_LIB_NAME}
-    PROPERTIES SOVERSION "${PDAL_LIB_SOVERSION}" )
-    if (APPLE)
-    set_target_properties(
-      ${PDAL_PCD_WRITER_LIB_NAME}
       PROPERTIES
       INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib")
     endif()

@@ -102,6 +102,15 @@ private:
                                         std::size_t pointIndex) const;
 
     void WriteHeader(pdal::Schema const& schema);
+    
+    void WriteGeoJSONHeader(pdal::Schema const& schema);
+    void WriteCSVHeader(pdal::Schema const& schema);
+    void WritePCDHeader(pdal::Schema const& schema);
+    
+    void WriteCSVBuffer(const PointBuffer& data);
+    void WriteGeoJSONBuffer(const PointBuffer& data);
+    void WritePCDBuffer(const PointBuffer& data);
+    
     std::vector<boost::tuple<std::string, std::string> >  getDimensionOrder(pdal::Schema const& schema) const;
     FileStreamPtr m_stream;
     bool bWroteHeader;

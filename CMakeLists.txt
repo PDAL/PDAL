@@ -485,7 +485,6 @@ if(WITH_PYTHON)
   endif()
 endif()
 
-set (USE_PDAL_PLUGIN_PCD FALSE CACHE BOOL "Build the PCD driver as a plugin rather than embedding")
 set (USE_PDAL_PLUGIN_TEXT FALSE CACHE BOOL "Build the text driver as a plugin rather than embedding")
 set (USE_PDAL_PLUGIN_SOCI FALSE CACHE BOOL "Build the soci driver as a plugin rather than embedding")
 set (USE_PDAL_PLUGIN_OCI FALSE CACHE BOOL "Build the oci driver as a plugin rather than embedding")
