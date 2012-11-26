@@ -25,17 +25,6 @@ Development Source
 Binaries
 ------------------------------------------------------------------------------
 
-.. _windows:
-
-Windows
-..............................................................................
-
-
-`OSGeo4W`_
-    OSGeo4W is a binary distribution of a broad set of Open Source geospatial
-    software for Win32 environments (Windows XP, Vista, etc). OSGeo4W includes
-    GDAL/OGR, GRASS, MapServer, OpenEV, uDig, as well as many other packages
-    (about 70 as of summer 2008).
     
 
     
