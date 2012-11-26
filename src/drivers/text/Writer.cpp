@@ -549,23 +549,22 @@ void Writer::WriteCSVBuffer(const PointBuffer& data)
     {
         std::vector<boost::tuple<std::string, std::string> >::const_iterator iter =  dimensions.begin();
 
-        bool bWroteProperty(false);
+        bool bFirstProperty(true);
         while (iter != dimensions.end())
         {
-            if (bWroteProperty)
+            if (!bFirstProperty)
                 *m_stream << delimiter;
                 
             Dimension const& d = schema.getDimension(iter->get<0>(), iter->get<1>());
             if (d.isIgnored())
             {
                 iter++;
-                bWroteProperty = false;
                 continue;
             }
 
             *m_stream << getStringRepresentation(data, d, pointIndex);
             
-            bWroteProperty = true;
+            bFirstProperty = false;
             iter++;
 
         }
@@ -669,19 +668,18 @@ void Writer::WriteGeoJSONBuffer(const PointBuffer& data)
         std::vector<boost::tuple<std::string, std::string> > dimensions = getDimensionOrder(schema);
         std::vector<boost::tuple<std::string, std::string> >::const_iterator iter =  dimensions.begin();
         
-        bool bWroteProperty(false);
+        bool bFirstProperty(true);
         while (iter != dimensions.end())
         {
-            if (bWroteProperty)
-                *m_stream << ",";
-            
             Dimension const& d = schema.getDimension(iter->get<0>(), iter->get<1>());
             if (d.isIgnored())
             {
                 iter++;
-                bWroteProperty = false;
                 continue;
             }
+
+            if (!bFirstProperty)
+                *m_stream << ",";
 
             *m_stream << "\"" << iter->get<0>() << "\":";
             
@@ -689,7 +687,7 @@ void Writer::WriteGeoJSONBuffer(const PointBuffer& data)
             *m_stream << "\"" << getStringRepresentation(data, d, pointIndex) <<"\"";
             
             iter++;
-            bWroteProperty = true;
+            bFirstProperty = false;
         }
         
         
