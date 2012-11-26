@@ -59,7 +59,6 @@
 #include <pdal/drivers/faux/Writer.hpp>
 #include <pdal/drivers/las/Writer.hpp>
 #include <pdal/drivers/text/Writer.hpp>
-#include <pdal/drivers/pcd/Writer.hpp>
 
 #ifdef PDAL_HAVE_ORACLE
 #ifndef USE_PDAL_PLUGIN_OCI
@@ -178,10 +177,6 @@ MAKE_WRITER_CREATOR(LasWriter, pdal::drivers::las::Writer)
 MAKE_WRITER_CREATOR(TextWriter, pdal::drivers::text::Writer)
 #endif
 
-#ifndef USE_PDAL_PLUGIN_PCD
-MAKE_WRITER_CREATOR(PCDWriter, pdal::drivers::pcd::Writer)
-#endif
-
 #ifdef PDAL_HAVE_ORACLE
 #ifndef USE_PDAL_PLUGIN_OCI
 MAKE_WRITER_CREATOR(OciWriter, pdal::drivers::oci::Writer)
@@ -258,7 +253,6 @@ std::string StageFactory::inferWriterDriver(const std::string& filename, pdal::O
     drivers["laz"] = "drivers.las.writer";
     drivers["xyz"] = "drivers.text.writer";
     drivers["txt"] = "drivers.text.writer";
-    drivers["pcd"] = "drivers.pcd.writer";
 
     if (boost::algorithm::iequals(filename, "STDOUT"))
     {
@@ -458,10 +452,6 @@ void StageFactory::registerKnownWriters()
 
 #ifndef USE_PDAL_PLUGIN_TEXT    
     REGISTER_WRITER(TextWriter, pdal::drivers::text::Writer);
-#endif
-
-#ifndef USE_PDAL_PLUGIN_PCD
-    REGISTER_WRITER(PCDWriter, pdal::drivers::pcd::Writer);
 #endif
 
 #ifdef PDAL_HAVE_ORACLE
