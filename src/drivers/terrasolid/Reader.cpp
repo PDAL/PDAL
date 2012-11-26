@@ -220,15 +220,15 @@ void Reader::registerFields()
     double xyz_scale = 1/static_cast<double>(m_header->Units);
     Dimension x = dimensions.getDimension("X");
     x.setNumericScale(xyz_scale);
-    x.setNumericOffset(m_header->OrgX);
+    x.setNumericOffset(-m_header->OrgX);
 
     Dimension y = dimensions.getDimension("Y");
     y.setNumericScale(xyz_scale);
-    y.setNumericOffset(m_header->OrgY);
+    y.setNumericOffset(-m_header->OrgY);
 
     Dimension z = dimensions.getDimension("Z");
     z.setNumericScale(xyz_scale);
-    z.setNumericOffset(m_header->OrgZ);
+    z.setNumericOffset(-m_header->OrgZ);
 
     if (m_format == TERRASOLID_Format_1)
     {
