@@ -432,11 +432,12 @@ void Writer::WriteHeader(pdal::Schema const& schema)
     return;
 }
 
-std::string Writer::getStringRepresentation(PointBuffer const& data,
+void Writer::putStringRepresentation(PointBuffer const& data,
         Dimension const& d,
-        std::size_t pointIndex) const
+        std::size_t pointIndex,
+        std::ostream& output)
 {
-    std::ostringstream output;
+
 
     float flt(0.0);
     boost::int8_t i8(0);
@@ -449,7 +450,10 @@ std::string Writer::getStringRepresentation(PointBuffer const& data,
     boost::uint64_t u64(0);
 
     boost::uint32_t size = d.getByteSize();
-
+    
+    std::streamsize old_precision = output.precision();
+    std::ios_base::fmtflags  flags = output.flags();
+    
     bool bHaveScaling = !Utils::compare_distance(d.getNumericScale(), 1.0);
     
     // FIXME: Allow selective scaling of requested dimensions
@@ -524,8 +528,15 @@ std::string Writer::getStringRepresentation(PointBuffer const& data,
         case dimension::Undefined:
             break;
     }
+    
 
-    return output.str();
+    if (bHaveScaling)
+    {
+        output.precision(old_precision);
+        output.unsetf(std::ios::fixed);
+        output.unsetf(std::ios::floatfield);
+    }
+
 }
 
 
@@ -562,7 +573,7 @@ void Writer::WriteCSVBuffer(const PointBuffer& data)
                 continue;
             }
 
-            *m_stream << getStringRepresentation(data, d, pointIndex);
+            putStringRepresentation(data, d, pointIndex, *m_stream);
             
             bFirstProperty = false;
             iter++;
@@ -601,11 +612,11 @@ void Writer::WritePCDBuffer(const PointBuffer& data)
         
     while (pointIndex != data.getNumPoints())
     {
-        *m_stream << getStringRepresentation(data, x, pointIndex);
+        putStringRepresentation(data, x, pointIndex, *m_stream);
         *m_stream << " ";
-        *m_stream << getStringRepresentation(data, y, pointIndex);
+        putStringRepresentation(data, y, pointIndex, *m_stream);
         *m_stream << " ";
-        *m_stream << getStringRepresentation(data, z, pointIndex);
+        putStringRepresentation(data, z, pointIndex, *m_stream);
         *m_stream << " ";
         
         std::string color;
@@ -622,17 +633,13 @@ void Writer::WritePCDBuffer(const PointBuffer& data)
             }
             else
             {
-                std::string color;
-                color = getStringRepresentation(data, *dimRed, pointIndex);
-                *m_stream << color;
+                putStringRepresentation(data, *dimRed, pointIndex, *m_stream);
                 *m_stream << " ";
 
-                color = getStringRepresentation(data, *dimGreen, pointIndex);
-                *m_stream << color;
+                putStringRepresentation(data, *dimGreen, pointIndex, *m_stream);
                 *m_stream << " ";
 
-                color = getStringRepresentation(data, *dimBlue, pointIndex);
-                *m_stream << color;
+                putStringRepresentation(data, *dimBlue, pointIndex, *m_stream);
                 *m_stream << " ";
             }
         }
@@ -649,30 +656,45 @@ void Writer::WriteGeoJSONBuffer(const PointBuffer& data)
 {
     boost::uint32_t pointIndex(0);    
     pdal::Schema const& schema = data.getSchema();
+    std::vector<boost::tuple<std::string, std::string> > ordering = getDimensionOrder(schema);
+    std::vector<boost::tuple<std::string, std::string> >::const_iterator ord =  ordering.begin();
+    
+    std::vector<Dimension const*> dimensions;
+    bool bFirstProperty(true);
+    while (ord != ordering.end())
+    {
+        Dimension const& d = schema.getDimension(ord->get<0>(), ord->get<1>());
+        dimensions.push_back(&d);
+        ord++;
+    }
+    Dimension const& dimX = schema.getDimension("X");
+    Dimension const& dimY = schema.getDimension("Y");
+    Dimension const& dimZ = schema.getDimension("Z");
+
     while (pointIndex != data.getNumPoints())
     {
-        Dimension const& dimX = schema.getDimension("X");
-        Dimension const& dimY = schema.getDimension("Y");
-        Dimension const& dimZ = schema.getDimension("Z");
+
         
         if (bWroteFirstPoint)
             *m_stream << ",";
             
         *m_stream << "{ \"type\":\"Feature\",\"geometry\": { \"type\": \"Point\", \"coordinates\": [";
-        *m_stream << getStringRepresentation(data, dimX, pointIndex) << ",";
-        *m_stream << getStringRepresentation(data, dimY, pointIndex) << ",";
-        *m_stream << getStringRepresentation(data, dimZ, pointIndex) << "]},";
+        putStringRepresentation(data, dimX, pointIndex, *m_stream );
+        *m_stream << ",";
+        putStringRepresentation(data, dimY, pointIndex, *m_stream ); 
+        *m_stream << ",";
+        putStringRepresentation(data, dimZ, pointIndex, *m_stream );
+        *m_stream << "]},";
         
         *m_stream << "\"properties\": {";
 
-        std::vector<boost::tuple<std::string, std::string> > dimensions = getDimensionOrder(schema);
-        std::vector<boost::tuple<std::string, std::string> >::const_iterator iter =  dimensions.begin();
+        std::vector<Dimension const* >::const_iterator iter =  dimensions.begin();
         
         bool bFirstProperty(true);
         while (iter != dimensions.end())
         {
-            Dimension const& d = schema.getDimension(iter->get<0>(), iter->get<1>());
-            if (d.isIgnored())
+            Dimension const* d = *iter;
+            if (d->isIgnored())
             {
                 iter++;
                 continue;
@@ -681,10 +703,12 @@ void Writer::WriteGeoJSONBuffer(const PointBuffer& data)
             if (!bFirstProperty)
                 *m_stream << ",";
 
-            *m_stream << "\"" << iter->get<0>() << "\":";
+            *m_stream << "\"" << d->getName() << "\":";
             
 
-            *m_stream << "\"" << getStringRepresentation(data, d, pointIndex) <<"\"";
+            *m_stream << "\"";
+            putStringRepresentation(data, *d, pointIndex, *m_stream );
+            *m_stream <<"\"";
             
             iter++;
             bFirstProperty = false;

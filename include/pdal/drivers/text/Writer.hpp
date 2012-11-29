@@ -97,9 +97,10 @@ private:
     Writer& operator=(const Writer&); // not implemented
     Writer(const Writer&); // not implemented
 
-    std::string getStringRepresentation(PointBuffer const& data,
+    void putStringRepresentation(PointBuffer const& data,
                                         Dimension const& d,
-                                        std::size_t pointIndex) const;
+                                        std::size_t pointIndex,
+                                        std::ostream& strm);
 
     void WriteHeader(pdal::Schema const& schema);
     
