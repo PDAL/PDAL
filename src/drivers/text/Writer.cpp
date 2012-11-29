@@ -481,22 +481,34 @@ void Writer::putStringRepresentation(PointBuffer const& data,
             if (size == 1)
             {
                 i8 = data.getField<boost::int8_t>(d, pointIndex);
-                output << d.applyScaling<boost::int8_t>(i8);
+                if (bHaveScaling)                
+                    output << d.applyScaling<boost::int8_t>(i8);
+                else
+                    output << i8;
             }
             if (size == 2)
             {
                 i16 = data.getField<boost::int16_t>(d, pointIndex);
-                output << d.applyScaling<boost::int16_t>(i16);
+                if (bHaveScaling)
+                    output << d.applyScaling<boost::int16_t>(i16);
+                else
+                    output << i16;
             }
             if (size == 4)
             {
                 i32 = data.getField<boost::int32_t>(d, pointIndex);
-                output << d.applyScaling<boost::int32_t>(i32);
+                if (bHaveScaling)
+                    output << d.applyScaling<boost::int32_t>(i32);
+                else
+                    output << i32;
             }
             if (size == 8)
             {
                 i64 = data.getField<boost::int64_t>(d, pointIndex);
-                output << d.applyScaling<boost::int64_t>(i64);
+                if (bHaveScaling)
+                    output << d.applyScaling<boost::int64_t>(i64);
+                else
+                    output << i64;
             }
             break;
 
@@ -505,22 +517,34 @@ void Writer::putStringRepresentation(PointBuffer const& data,
             if (size == 1)
             {
                 u8 = data.getField<boost::uint8_t>(d, pointIndex);
-                output << d.applyScaling<boost::uint8_t>(u8);
+                if (bHaveScaling)
+                    output << d.applyScaling<boost::uint8_t>(u8);
+                else
+                    output << u8;
             }
             if (size == 2)
             {
                 u16 = data.getField<boost::uint16_t>(d, pointIndex);
-                output << d.applyScaling<boost::uint16_t>(u16);
+                if (bHaveScaling)
+                    output << d.applyScaling<boost::uint16_t>(u16);
+                else
+                    output << u16;
             }
             if (size == 4)
             {
                 u32 = data.getField<boost::uint32_t>(d, pointIndex);
-                output << d.applyScaling<boost::uint32_t>(u32);
+                if (bHaveScaling)
+                    output << d.applyScaling<boost::uint32_t>(u32);
+                else
+                    output << u32;
             }
             if (size == 8)
             {
                 u64 = data.getField<boost::uint64_t>(d, pointIndex);
-                output << d.applyScaling<boost::uint64_t>(u64);
+                if (bHaveScaling)
+                    output << d.applyScaling<boost::uint64_t>(u64);
+                else
+                    output << u64;
             }
             break;
 
