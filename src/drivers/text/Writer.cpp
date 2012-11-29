@@ -484,7 +484,7 @@ void Writer::putStringRepresentation(PointBuffer const& data,
                 if (bHaveScaling)                
                     output << d.applyScaling<boost::int8_t>(i8);
                 else
-                    output << i8;
+                    output << boost::lexical_cast<std::string>(static_cast<boost::int32_t>(i8));
             }
             if (size == 2)
             {
@@ -520,7 +520,7 @@ void Writer::putStringRepresentation(PointBuffer const& data,
                 if (bHaveScaling)
                     output << d.applyScaling<boost::uint8_t>(u8);
                 else
-                    output << u8;
+                    output << boost::lexical_cast<std::string>(static_cast<boost::uint32_t>(u8));
             }
             if (size == 2)
             {
