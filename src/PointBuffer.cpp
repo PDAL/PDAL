@@ -93,18 +93,28 @@ PointBuffer& PointBuffer::operator=(PointBuffer const& rhs)
 
 void PointBuffer::reset(Schema const& new_schema)
 {
+    boost::uint32_t old_size = m_schema.getByteSize();
+    boost::uint32_t new_size = m_schema.getByteSize();
+    
     m_schema = new_schema;
-    boost::scoped_array<boost::uint8_t> data(new boost::uint8_t[ m_schema.getByteSize()*m_capacity ]());
-    m_data.swap(data);
+    
+    if (new_size != old_size)
+    {
+        boost::scoped_array<boost::uint8_t> data(new boost::uint8_t[ m_schema.getByteSize()*m_capacity ]());
+        m_data.swap(data);
+    }
     m_numPoints = 0;
     m_byteSize = new_schema.getByteSize();    
 }
 
 void PointBuffer::resize(boost::uint32_t const& capacity)
 {
-    m_capacity = capacity;
-    boost::scoped_array<boost::uint8_t> data(new boost::uint8_t[ m_schema.getByteSize()*m_capacity ]());
-    m_data.swap(data);    
+    if (capacity != m_capacity)
+    {
+        m_capacity = capacity;
+        boost::scoped_array<boost::uint8_t> data(new boost::uint8_t[ m_schema.getByteSize()*m_capacity ]());
+        m_data.swap(data);        
+    }
 }
 
 const Bounds<double>& PointBuffer::getSpatialBounds() const
