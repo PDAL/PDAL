@@ -1169,7 +1169,7 @@ void OWStatement::Define(long long* pnData)
                               (ub4) nNextCol,
                               (dvoid*) pnData,
                               (sb4) sizeof(long long),
-                              (ub2) SQLT_INT,
+                              (ub2) SQLT_NUM,
                               (void*) NULL,
                               (ub2*) NULL,
                               (ub2*) NULL,
