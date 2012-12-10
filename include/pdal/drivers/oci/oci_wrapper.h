@@ -430,6 +430,7 @@ public:
     void                Bind( char* pszData, int nSize = OWNAME );
     void                Define( int* pnData );
     void                Define( long* pnData );
+    void                Define( long long* pnData );
     void                Define( double* pnData );
     void                Define( char* pszData, int nSize = OWNAME );
     void                Define( OCILobLocator** pphLocator );

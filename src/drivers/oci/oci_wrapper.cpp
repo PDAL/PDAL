@@ -1157,6 +1157,25 @@ void OWStatement::Define(long* pnData)
                               (ub4) OCI_DEFAULT), hError);
 }
 
+void OWStatement::Define(long long* pnData)
+{
+    OCIDefine* hDefine = NULL;
+
+    nNextCol++;
+
+    CheckError(OCIDefineByPos(hStmt,
+                              &hDefine,
+                              hError,
+                              (ub4) nNextCol,
+                              (dvoid*) pnData,
+                              (sb4) sizeof(long long),
+                              (ub2) SQLT_INT,
+                              (void*) NULL,
+                              (ub2*) NULL,
+                              (ub2*) NULL,
+                              (ub4) OCI_DEFAULT), hError);
+}
+
 void OWStatement::Define(double* pfdData)
 {
     OCIDefine* hDefine = NULL;
