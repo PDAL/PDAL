@@ -146,7 +146,7 @@ private:
                                  Dimension const& to_dimension,
                                  T& value) const;
 
-                             std::map<boost::optional<pdal::Dimension const&>, boost::optional<pdal::Dimension const&> > m_dimension_map;
+    std::map<boost::optional<pdal::Dimension const&>, boost::optional<pdal::Dimension const&> > m_dimension_map;
     
 };
 
@@ -169,14 +169,14 @@ inline void Scaling::scale(Dimension const& from_dimension,
 
     if (std::numeric_limits<T>::is_exact) //
     {
-        if (output >= (std::numeric_limits<T>::max)())
+        if (output == (std::numeric_limits<T>::max)())
         {
             std::ostringstream oss;
             oss << "filter.Scaling: scale and/or offset combination causes "
                 "re-scaled value to be greater than std::numeric_limits::max for dimension '" << to_dimension.getName() << "'. " <<
                 "value is: " << output << " and max() is: " << (std::numeric_limits<T>::max)();
         }
-        else if (output <= (std::numeric_limits<T>::min)())
+        else if (output == (std::numeric_limits<T>::min)())
         {
             std::ostringstream oss;
             oss << "filter.Scaling: scale and/or offset combination causes "
