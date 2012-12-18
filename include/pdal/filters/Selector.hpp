@@ -71,10 +71,7 @@ public:
     }
 
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const
-    {
-        return NULL;
-    }
+    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const;
     
     inline std::map<std::string, bool> const& getIgnoredMap() const { return m_ignoredMap; }
     
@@ -96,30 +93,57 @@ private:
 
 namespace iterators
 {
+
+namespace selector
+{
+
+class PDAL_DLL IteratorBase
+{
+public:
+    IteratorBase(pdal::filters::Selector const& filter, PointBuffer& buffer);
+
+protected:
+    void alterSchema(pdal::PointBuffer&);
+    pdal::filters::Selector const& m_selectorFilter;
+};
+} // selector
+    
 namespace sequential
 {
 
-
-class PDAL_DLL Selector : public pdal::FilterSequentialIterator
+class PDAL_DLL Selector : public pdal::FilterSequentialIterator, public selector::IteratorBase
 {
 public:
     Selector(const pdal::filters::Selector& filter, PointBuffer& buffer);
-
-
 private:
     boost::uint64_t skipImpl(boost::uint64_t);
     boost::uint32_t readBufferImpl(PointBuffer&);
     bool atEndImpl() const;
-    void alterSchema(pdal::PointBuffer&);
-    const pdal::filters::Selector& m_selectorFilter;
+};
+
+} // sequential
+
+namespace random
+{
+    
+class PDAL_DLL Selector : public pdal::FilterRandomIterator, public selector::IteratorBase
+{
+public:
+    Selector(const pdal::filters::Selector& filter, PointBuffer& buffer);
+    virtual ~Selector() {};
+
+protected:
+    virtual boost::uint32_t readBufferImpl(PointBuffer& buffer);
+    
+    virtual boost::uint64_t seekImpl(boost::uint64_t);
 
 };
 
+} // namespace random
 
-}
-} // namespaces
+} // iterators
 
-}
-} // namespaces
+} // filters
+} // pdal
 
 #endif
