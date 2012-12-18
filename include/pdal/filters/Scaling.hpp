@@ -82,6 +82,7 @@ public:
     bool supportsIterator(StageIteratorType t) const
     {
         if (t == StageIterator_Sequential) return true;
+        if (t == StageIterator_Random) return true;
 
         return false;
     }
