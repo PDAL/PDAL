@@ -503,40 +503,62 @@ void InPlaceReprojection::setScaledValue(PointBuffer& data,
 
 }
 
-void InPlaceReprojection::processBuffer(PointBuffer& ) const
-{
-    return;
-}
-
-
 pdal::StageSequentialIterator* InPlaceReprojection::createSequentialIterator(PointBuffer& buffer) const
 {
     return new pdal::filters::iterators::sequential::InPlaceReprojection(*this, buffer);
 }
 
+pdal::StageRandomIterator* InPlaceReprojection::createRandomIterator(PointBuffer& buffer) const
+{
+    return new pdal::filters::iterators::random::InPlaceReprojection(*this, buffer);
+}
+
 
 namespace iterators
 {
-namespace sequential
-{
 
-
-InPlaceReprojection::InPlaceReprojection(const pdal::filters::InPlaceReprojection& filter, PointBuffer& buffer)
-    : pdal::FilterSequentialIterator(filter, buffer)
-    , m_reprojectionFilter(filter)
+namespace inplacereprojection
 {
+    
+IteratorBase::IteratorBase( pdal::filters::InPlaceReprojection const& filter, 
+                            PointBuffer& buffer)
+: m_reprojectionFilter(filter)
+{
+    
+}
+
+void IteratorBase::updateBounds(PointBuffer& buffer)
+{
+    const Bounds<double>& oldBounds = buffer.getSpatialBounds();
+
+    double minx = oldBounds.getMinimum(0);
+    double miny = oldBounds.getMinimum(1);
+    double minz = oldBounds.getMinimum(2);
+    double maxx = oldBounds.getMaximum(0);
+    double maxy = oldBounds.getMaximum(1);
+    double maxz = oldBounds.getMaximum(2);
+
+    try
+    {
+
+        m_reprojectionFilter.transform(minx, miny, minz);
+        m_reprojectionFilter.transform(maxx, maxy, maxz);
+
+    }
+    catch (pdal::pdal_error&)
+    {
+        return;
+    }
+
+    Bounds<double> newBounds(minx, miny, minz, maxx, maxy, maxz);
+
+    buffer.setSpatialBounds(newBounds);
+
     return;
 }
 
-void InPlaceReprojection::readBufferBeginImpl(PointBuffer& )
+void IteratorBase::projectData(PointBuffer& buffer, boost::uint32_t numPoints)
 {
-}
-
-boost::uint32_t InPlaceReprojection::readBufferImpl(PointBuffer& buffer)
-{
-
-    
-    const boost::uint32_t numPoints = getPrevIterator().read(buffer);
 
     const Schema& schema = buffer.getSchema();
     
@@ -594,40 +616,32 @@ boost::uint32_t InPlaceReprojection::readBufferImpl(PointBuffer& buffer)
     if (logOutput)
         m_reprojectionFilter.log()->clearFloat();
 
-    updateBounds(buffer);
+    updateBounds(buffer);    
+}
+
+} // inplacereprojection
+
+namespace sequential
+{
+
+
+InPlaceReprojection::InPlaceReprojection(const pdal::filters::InPlaceReprojection& filter, PointBuffer& buffer)
+    : pdal::FilterSequentialIterator(filter, buffer)
+    , inplacereprojection::IteratorBase(filter, buffer)
+{
+    return;
+}
+
+boost::uint32_t InPlaceReprojection::readBufferImpl(PointBuffer& buffer)
+{
+    
+    const boost::uint32_t numPoints = getPrevIterator().read(buffer);
+    
+    InPlaceReprojection::projectData(buffer, numPoints);
 
     return numPoints;
 }
 
-void InPlaceReprojection::updateBounds(PointBuffer& buffer)
-{
-    const Bounds<double>& oldBounds = buffer.getSpatialBounds();
-
-    double minx = oldBounds.getMinimum(0);
-    double miny = oldBounds.getMinimum(1);
-    double minz = oldBounds.getMinimum(2);
-    double maxx = oldBounds.getMaximum(0);
-    double maxy = oldBounds.getMaximum(1);
-    double maxz = oldBounds.getMaximum(2);
-
-    try
-    {
-
-        m_reprojectionFilter.transform(minx, miny, minz);
-        m_reprojectionFilter.transform(maxx, maxy, maxz);
-
-    }
-    catch (pdal::pdal_error&)
-    {
-        return;
-    }
-
-    Bounds<double> newBounds(minx, miny, minz, maxx, maxy, maxz);
-
-    buffer.setSpatialBounds(newBounds);
-
-    return;
-}
 
 boost::uint64_t InPlaceReprojection::skipImpl(boost::uint64_t count)
 {
@@ -641,9 +655,42 @@ bool InPlaceReprojection::atEndImpl() const
     return getPrevIterator().atEnd();
 }
 
-}
-} // iterators::sequential
+} // sequential
+
+namespace random
+{
 
 
+InPlaceReprojection::InPlaceReprojection(const pdal::filters::InPlaceReprojection& filter, PointBuffer& buffer)
+    : pdal::FilterRandomIterator(filter, buffer)
+    , inplacereprojection::IteratorBase(filter, buffer)
+{
+    return;
 }
+
+boost::uint32_t InPlaceReprojection::readBufferImpl(PointBuffer& buffer)
+{
+    
+    pdal::StageRandomIterator& iterator = getPrevIterator();
+    
+    const boost::uint32_t numPoints = iterator.read(buffer);
+    
+    InPlaceReprojection::projectData(buffer, numPoints);
+
+    return numPoints;
+}
+
+
+boost::uint64_t InPlaceReprojection::seekImpl(boost::uint64_t count)
+{
+    
+    return getPrevIterator().seek(count);
+}
+
+} // random
+
+
+
+} // filters
+} // pdal
 } // namespaces
