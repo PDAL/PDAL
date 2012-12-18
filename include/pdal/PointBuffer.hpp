@@ -829,14 +829,14 @@ inline void PointBuffer::scale(Dimension const& source_dimension,
 
     if (std::numeric_limits<T>::is_exact) //
     {
-        if (output == (std::numeric_limits<T>::max)())
+        if (Utils::compare_distance<T>(output, (std::numeric_limits<T>::max)()))
         {
             std::ostringstream oss;
             oss << "PointBuffer::scale: scale and/or offset combination causes "
                 "re-scaled value to be greater than std::numeric_limits::max for dimension '" << destination_dimension.getName() << "'. " <<
                 "value is: " << output << " and max() is: " << (std::numeric_limits<T>::max)();
         }
-        else if (output == (std::numeric_limits<T>::min)())
+        else if (Utils::compare_distance<T>(output, (std::numeric_limits<T>::min)()))
         {
             std::ostringstream oss;
             oss << "PointBuffer::scale: scale and/or offset combination causes "
