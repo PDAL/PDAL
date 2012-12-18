@@ -263,7 +263,7 @@ namespace sequential
 
 Scaling::Scaling(const pdal::filters::Scaling& filter, PointBuffer& buffer)
     : pdal::FilterSequentialIterator(filter, buffer)
-    , IteratorBase(filter, buffer)
+    , scaling::IteratorBase(filter, buffer)
 {
     return;
 }
@@ -297,7 +297,7 @@ namespace random
 
 Scaling::Scaling(const pdal::filters::Scaling& filter, PointBuffer& buffer)
     : pdal::FilterRandomIterator(filter, buffer)
-    , IteratorBase(filter, buffer)
+    , scaling::IteratorBase(filter, buffer)
 {
     return;
 }
@@ -320,6 +320,9 @@ boost::uint32_t Scaling::readBufferImpl(PointBuffer& buffer)
 
 } // random
 
+namespace scaling
+{
+    
 IteratorBase::IteratorBase(const pdal::filters::Scaling& filter, PointBuffer& buffer)
     : m_scalingFilter(filter)
 {
@@ -771,6 +774,7 @@ void IteratorBase::writeScaledData(PointBuffer& buffer,
 #  pragma warning(pop)
 #endif
 
+} // scaling
 
 } // iterators
 

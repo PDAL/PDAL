@@ -117,6 +117,9 @@ namespace iterators
 {
     
 
+namespace scaling
+{
+    
 class PDAL_DLL IteratorBase
 {
 
@@ -140,41 +143,29 @@ protected:
 
     void scaleData(PointBuffer& buffer, boost::uint32_t numRead);
 
-    
-    
 };
+
+} // scaling
 
 namespace sequential
 {
 
 
-class PDAL_DLL Scaling : public pdal::FilterSequentialIterator, public IteratorBase
+class PDAL_DLL Scaling : public pdal::FilterSequentialIterator, public scaling::IteratorBase
 {
 public:
     Scaling(const pdal::filters::Scaling& filter, PointBuffer& buffer);
 
 protected:
 
-    inline virtual void readBufferBeginImpl(PointBuffer& buffer) { IteratorBase::readBufferBeginImpl(buffer); }
+    inline virtual void readBufferBeginImpl(PointBuffer& buffer) { scaling::IteratorBase::readBufferBeginImpl(buffer); }
     virtual boost::uint32_t readBufferImpl(PointBuffer& buffer);
     
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t);
     bool atEndImpl() const;
-    
-    // const pdal::filters::Scaling& m_scalingFilter;
-    // 
-    // void writeScaledData(PointBuffer& buffer,
-    //                      Dimension const& from_dimension,
-    //                      Dimension const& to_dimension,
-    //                      boost::uint32_t pointIndex);
-    // template<class T> void scale(Dimension const& from_dimension,
-    //                              Dimension const& to_dimension,
-    //                              T& value) const;
-    // 
-    // std::map<boost::optional<pdal::Dimension const&>, boost::optional<pdal::Dimension const&> > m_dimension_map;
-    
+
 };
 
 } // namespace sequential
@@ -182,14 +173,14 @@ private:
 namespace random
 {
     
-class PDAL_DLL Scaling : public pdal::FilterRandomIterator, public IteratorBase
+class PDAL_DLL Scaling : public pdal::FilterRandomIterator, public scaling::IteratorBase
 {
 public:
     Scaling(const pdal::filters::Scaling& filter, PointBuffer& buffer);
     virtual ~Scaling() {};
 
 protected:
-    inline virtual void readBufferBeginImpl(PointBuffer& buffer) { IteratorBase::readBufferBeginImpl(buffer); }
+    inline virtual void readBufferBeginImpl(PointBuffer& buffer) { scaling::IteratorBase::readBufferBeginImpl(buffer); }
     virtual boost::uint32_t readBufferImpl(PointBuffer& buffer);
     
     virtual boost::uint64_t seekImpl(boost::uint64_t);
@@ -205,7 +196,7 @@ protected:
 #endif
 
 template <class T>
-inline void IteratorBase::scale(Dimension const& from_dimension,
+inline void scaling::IteratorBase::scale(Dimension const& from_dimension,
                            Dimension const& to_dimension,
                            T& value) const
 {
