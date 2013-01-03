@@ -33,6 +33,8 @@
 ****************************************************************************/
 
 #include "NitfFile.hpp"
+
+
 #ifdef PDAL_HAVE_GDAL
 
 #include "cpl_string.h"
