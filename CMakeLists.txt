@@ -178,6 +178,8 @@ endif(APPLE)
 # settings for Boost dependencies
 #------------------------------------------------------------------------------
 
+find_package(Threads)
+
 if (NOT PDAL_EMBED_BOOST)
   find_package(Boost 1.48 COMPONENTS program_options thread iostreams filesystem system unit_test_framework random)
 endif()
