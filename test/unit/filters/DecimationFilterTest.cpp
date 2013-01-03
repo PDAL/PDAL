@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(DecimationFilterTest_test1)
     StageSequentialIterator* iter = filter.createSequentialIterator(data);
     boost::uint32_t numRead = iter->read(data);
 
-    BOOST_CHECK(numRead == 3);
+    BOOST_CHECK_EQUAL(numRead, 3);
 
     Dimension const& dimT = data.getSchema().getDimension("Time");
 
@@ -71,9 +71,9 @@ BOOST_AUTO_TEST_CASE(DecimationFilterTest_test1)
     boost::uint64_t t1 = data.getField<boost::uint64_t>(dimT, 1);
     boost::uint64_t t2 = data.getField<boost::uint64_t>(dimT, 2);
 
-    BOOST_CHECK(t0 == 0);
-    BOOST_CHECK(t1 == 10);
-    BOOST_CHECK(t2 == 20);
+    BOOST_CHECK_EQUAL(t0, 0);
+    BOOST_CHECK_EQUAL(t1, 10);
+    BOOST_CHECK_EQUAL(t2, 20);
 
     delete iter;
 
@@ -99,22 +99,67 @@ BOOST_AUTO_TEST_CASE(DecimationFilterTest_test_options)
     StageSequentialIterator* iter = filter.createSequentialIterator(data);
     boost::uint32_t numRead = iter->read(data);
 
-    BOOST_CHECK(numRead == 3);
-
-
+    BOOST_CHECK_EQUAL(numRead, 3);
+    BOOST_CHECK_EQUAL(data.getCapacity(), 3);
+    BOOST_CHECK_EQUAL(data.getNumPoints(), 3);
+    
     Dimension const& dimT = data.getSchema().getDimension("Time");
     boost::uint64_t t0 = data.getField<boost::uint64_t>(dimT, 0);
     boost::uint64_t t1 = data.getField<boost::uint64_t>(dimT, 1);
     boost::uint64_t t2 = data.getField<boost::uint64_t>(dimT, 2);
 
-    BOOST_CHECK(t0 == 0);
-    BOOST_CHECK(t1 == 10);
-    BOOST_CHECK(t2 == 20);
+    BOOST_CHECK_EQUAL(t0, 0);
+    BOOST_CHECK_EQUAL(t1, 10);
+    BOOST_CHECK_EQUAL(t2, 20);
 
     delete iter;
 
     return;
 }
 
+
+BOOST_AUTO_TEST_CASE(DecimationFilterTest_test_random)
+{
+    Bounds<double> srcBounds(0.0, 0.0, 0.0, 100.0, 100.0, 100.0);
+
+    pdal::drivers::faux::Reader reader(srcBounds, 1000, pdal::drivers::faux::Reader::Random);
+
+    pdal::Option step("step", "10");
+    pdal::Option offset("offset", 1);
+    pdal::Options opts;
+    opts.add(step);
+    opts.add(offset);
+    pdal::Option debug("debug", true, "");
+    pdal::Option verbose("verbose", 9, "");
+    opts.add(debug);
+    opts.add(verbose);
+    pdal::filters::Decimation filter(reader, opts);
+    BOOST_CHECK(filter.getDescription() == "Decimation Filter");
+    filter.initialize();
+
+    const Schema& schema = filter.getSchema();
+
+    PointBuffer data(schema, 3);
+
+    StageRandomIterator* iter = filter.createRandomIterator(data);
+    iter->seek(7);
+    boost::uint32_t numRead = iter->read(data);
+
+    BOOST_CHECK(numRead == 3);
+
+    Dimension const& dimT = data.getSchema().getDimension("Time");
+
+    boost::uint64_t t0 = data.getField<boost::uint64_t>(dimT, 0);
+    boost::uint64_t t1 = data.getField<boost::uint64_t>(dimT, 1);
+    boost::uint64_t t2 = data.getField<boost::uint64_t>(dimT, 2);
+
+    BOOST_CHECK_EQUAL(t0, 8);
+    BOOST_CHECK_EQUAL(t1, 18);
+    BOOST_CHECK_EQUAL(t2, 28);
+
+    delete iter;
+
+    return;
+}
 
 BOOST_AUTO_TEST_SUITE_END()
