@@ -617,7 +617,7 @@ if (WIN32)
 	endif()
 else()
 	target_link_libraries(${APPS_CPP_DEPENDENCIES}
-                      ${Boost_LIBRARIES} ${Boost_FILESYSTEM_LIBRARY})
+                      ${Boost_LIBRARIES} )
 
 endif(WIN32)
 
