@@ -37,7 +37,9 @@
 
 #include <pdal/PointBuffer.hpp>
 
-#include "mpg_nitflib.hpp"
+#include "NitfFile.hpp"
+#include "nitflib.h"
+
 
 
 // NOTES

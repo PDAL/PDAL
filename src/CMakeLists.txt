@@ -353,7 +353,6 @@ set(PDAL_NITF_HEADERS ${PDAL_HEADERS_DIR}/${PDAL_NITF_PATH})
 set(PDAL_NITF_SRC ${PROJECT_SOURCE_DIR}/src/${PDAL_NITF_PATH})
 
 set(PDAL_DRIVERS_NITF_HPP
-  ${PDAL_NITF_SRC}/mpg_nitflib.hpp
   ${PDAL_NITF_SRC}/nitflib.h
   ${PDAL_NITF_SRC}/NitfFile.hpp
   ${PDAL_NITF_HEADERS}/Reader.hpp
@@ -361,9 +360,6 @@ set(PDAL_DRIVERS_NITF_HPP
 )
 
 set (PDAL_DRIVERS_NITF_CPP 
-  ${PDAL_NITF_SRC}/mpg_nitfdes.cpp
-  ${PDAL_NITF_SRC}/mpg_nitffile.cpp
-  ${PDAL_NITF_SRC}/mpg_nitfimage.cpp
   ${PDAL_NITF_SRC}/NitfFile.cpp
   ${PDAL_NITF_SRC}/Reader.cpp
   ${PDAL_NITF_SRC}/Writer.cpp
