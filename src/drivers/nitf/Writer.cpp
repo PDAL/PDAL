@@ -37,9 +37,19 @@
 
 #include <pdal/PointBuffer.hpp>
 
+#ifdef PDAL_HAVE_GDAL
 #include "NitfFile.hpp"
 #include "nitflib.h"
 
+
+#include "gdal.h"
+#include "cpl_vsi.h"
+#include "cpl_conv.h"
+#include "cpl_string.h"
+
+#if ((GDAL_VERSION_MAJOR == 1 && GDAL_VERSION_MINOR < 10) || (GDAL_VERSION_MAJOR < 1))
+#error "NITF support requires GDAL 1.10 or GDAL 2.0+"
+#endif
 
 
 // NOTES
@@ -146,3 +156,5 @@ boost::property_tree::ptree Writer::toPTree() const
 }
 }
 } // namespaces
+
+#endif
