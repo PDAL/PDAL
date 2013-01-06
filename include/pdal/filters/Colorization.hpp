@@ -124,7 +124,9 @@ namespace sequential
 class PDAL_DLL Colorization : public pdal::FilterSequentialIterator
 {
 public:
+#ifdef PDAL_HAVE_GDAL
     Colorization(const pdal::filters::Colorization& filter, PointBuffer& buffer);
+#endif
     ~Colorization();
 protected:
     virtual void readBufferBeginImpl(PointBuffer&);
