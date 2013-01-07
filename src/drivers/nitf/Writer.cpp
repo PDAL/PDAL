@@ -67,17 +67,10 @@ namespace nitf
 
 Writer::Writer(Stage& prevStage, const Options& options)
     : pdal::drivers::las::Writer(prevStage, options)
-{
-    ctor();
-    return;
-}
-
-
-void Writer::ctor()
+    , m_bCreatedFile(false)
 {
     return;
 }
-
 
 Writer::~Writer()
 {
@@ -108,7 +101,7 @@ void Writer::writeBegin(boost::uint64_t targetNumPointsToWrite)
     // call super class
     pdal::drivers::las::Writer::writeBegin(targetNumPointsToWrite);
 
-  //  mpg::NITFCreate(m_filename.c_str(), 1, 1, 1, 1, NULL, NULL);
+    NITFCreate(m_filename.c_str(), 1, 1, 1, 1, NULL, NULL);
 
     return;
 }

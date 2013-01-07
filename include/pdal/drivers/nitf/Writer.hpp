@@ -82,7 +82,6 @@ public:
     virtual boost::property_tree::ptree toPTree() const;
 
 private:
-    void ctor();
 
     virtual void writeBegin(boost::uint64_t targetNumPointsToWrite);
     virtual void writeBufferBegin(PointBuffer const&);
@@ -96,6 +95,8 @@ private:
 
     Writer& operator=(const Writer&); // not implemented
     Writer(const Writer&); // not implemented
+    
+    bool m_bCreatedFile;
 };
 
 
