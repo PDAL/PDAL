@@ -36,6 +36,7 @@
 #include <pdal/drivers/las/Writer.hpp>
 
 #include <pdal/PointBuffer.hpp>
+#include <pdal/GlobalEnvironment.hpp>
 
 #ifdef PDAL_HAVE_GDAL
 #include "NitfFile.hpp"
@@ -100,8 +101,13 @@ void Writer::writeBegin(boost::uint64_t targetNumPointsToWrite)
 {
     // call super class
     pdal::drivers::las::Writer::writeBegin(targetNumPointsToWrite);
-
-    NITFCreate(m_filename.c_str(), 1, 1, 1, 1, NULL, NULL);
+    
+    // char pszPVType[4] = "INT";
+    // pszPVType[3] = 0;
+    // char** options = NULL;
+    // NITFCreate(m_filename.c_str(), 1, 1, 1, 1, pszPVType, options);
+    
+    
 
     return;
 }
@@ -125,6 +131,40 @@ void Writer::writeBufferEnd(PointBuffer const& buffer)
 {
     // call super class
     pdal::drivers::las::Writer::writeBufferEnd(buffer);
+    
+    GlobalEnvironment::get().getGDALEnvironment();
+    GDALDriverH hDriver = GDALGetDriverByName( "NITF" );
+    if (hDriver == NULL)
+        throw pdal_error("NITF driver was null!");
+        
+    GDALDatasetH ds;   
+
+    char **papszMetadata = NULL;
+    papszMetadata = CSLAddNameValue( papszMetadata, "NITF_DESID", "LIDARA DES" );
+    papszMetadata = CSLAddNameValue( papszMetadata, "NITF_DESVER", "01" );
+    
+    char **papszOptions = NULL;
+
+    papszOptions = CSLSetNameValue( papszOptions, "CLEVEL", "05" );    
+
+    papszOptions = CSLSetNameValue( papszOptions, "FSCTLH", "FO" );    
+    papszOptions = CSLSetNameValue( papszOptions, "FDT", "20120323002946" );    
+    papszOptions = CSLSetNameValue( papszOptions, "OSTAID", "PDAL" );    
+    papszOptions = CSLSetNameValue( papszOptions, "FTITLE", "Some LiDAR data we're storing" );
+    papszOptions = CSLSetNameValue( papszOptions, "FSCLAS", "S" );
+    
+    
+
+    ds = GDALCreate( hDriver, m_filename.c_str(), 1, 1, 1, GDT_Byte, 
+                             papszOptions );
+
+    GDALRasterBandH band = GDALGetRasterBand(ds, 1);
+    GByte* buf  = (GByte*) CPLMalloc( 1 );
+    int eErr = GDALRasterIO(band,
+                  GF_Write,
+                  0, 0, 1,
+                  1, buf, 1, 1, GDT_Byte, 0, 0);    
+    GDALClose(ds);
 }
 
 
