@@ -120,17 +120,19 @@ BOOST_AUTO_TEST_CASE(ColorizationFilterTest_test_1)
 // capability of computing fast level 2, 4, and 8 overviews. This 
 // means the results are numerically, if not visually, different
 // than before.
-#if ((GDAL_VERSION_MAJOR == 1 && GDAL_VERSION_MINOR >= 10))
-        BOOST_CHECK_EQUAL(r, 195u);
-        BOOST_CHECK_EQUAL(g, 176u);
-        BOOST_CHECK_EQUAL(b, 36720u); // We scaled this up to 16bit by multiplying by 255
-
-#else
+// 1-15-13 -- maybe this is gone now? I get the original results 
+// with a trunk 1.10 build... hobu
+// #if ((GDAL_VERSION_MAJOR == 1 && GDAL_VERSION_MINOR >= 10))
+//         BOOST_CHECK_EQUAL(r, 195u);
+//         BOOST_CHECK_EQUAL(g, 176u);
+//         BOOST_CHECK_EQUAL(b, 36720u); // We scaled this up to 16bit by multiplying by 255
+// 
+// #else
         BOOST_CHECK_EQUAL(r, 210u);
         BOOST_CHECK_EQUAL(g, 205u);
         BOOST_CHECK_EQUAL(b, 47175u); // We scaled this up to 16bit by multiplying by 255
 
-#endif
+// #endif
 
     }
 
