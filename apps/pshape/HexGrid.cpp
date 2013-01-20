@@ -1,8 +1,7 @@
-//ABELL
-#include <iostream>
 
 #include "HexGrid.hpp"
 #include "Point.hpp"
+#include "Segment.hpp"
 
 using namespace std;
 
@@ -14,7 +13,11 @@ void HexGrid::addPoint(Point p)
     Hexagon *h = findHexagon(p);
     cerr << "Point x/y - Hex x/y = " << p.m_x << "/" << p.m_y << " - " <<
         h->x() << "/" << h->y() << "\n";
-    h->increment();
+    h->incrementIf(m_dense_limit);
+    if (h->dense(m_dense_limit) && h->less(m_min))
+    {
+        m_min = h;
+    }
 }
 
 //  first point (origin) and start of column 0
@@ -129,6 +132,13 @@ Hexagon *HexGrid::findHexagon(Point p)
         }
     }
 
+    return getHexagon(x, y);
+}
+
+// Get the hexagon at position x, y.  If it doesn't exist, create it.
+// Never returns NULL.
+Hexagon *HexGrid::getHexagon(int x, int y)
+{
     // Stick a hexagon into the map if necessary.
     HexMap::value_type hexpair(Hexagon::key(x, y), Hexagon(x, y));
     HexMap::iterator it = m_hexes.insert(hexpair).first;
@@ -136,5 +146,37 @@ Hexagon *HexGrid::findHexagon(Point p)
     // Return a pointer to the located hexagon.
     return &it->second;
 }
+
+// Walk the outside of the hexagons to make a path.  Hexagon sides are labeled:
+//
+//     __0_
+//  1 /    \ 5
+//   /      \
+//   \      /
+//  2 \____/ 4
+//      3
+//
+void HexGrid::findShapes()
+{
+    if (!m_min)
+    {
+        cerr << "No areas of sufficient density - no shapes.\n"
+            "Decrease density or area size.";
+    }
+
+    Path p;
+    Segment first(m_min, 0);
+    Segment cur(first);
+    do {
+        p.push_back(cur);
+        Segment next = cur.rightAntiClockwise(this);
+        if ( !next.hex()->dense(m_dense_limit) )
+        {
+            next = cur.leftAntiClockwise(this); 
+        }
+        cur = next;
+    } while (cur != first);
+}
+
 
 } //namespace

@@ -72,7 +72,8 @@ void process()
     }
 
     double hexsize = computeHexSize(samples);
-    HexGrid grid(hexsize);
+    //ABELL - Need to do something about the density calculation.
+    HexGrid grid(hexsize, 10);
     for (int i = 0; i < samples.size(); ++i)
     {
         grid.addPoint(samples[i]);
@@ -81,8 +82,8 @@ void process()
     {
         grid.addPoint(Point(x, y));
     }
-/**
     grid.findShapes();
+/**
     grid.extractShapes();
 **/
 }
