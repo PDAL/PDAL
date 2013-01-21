@@ -542,6 +542,8 @@ set(PDAL_SOURCES
   ${PDAL_HPP}
   ${PDAL_CPP})
 
+SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "../pdal_defines.h;../include/pdal/pdal_defines.h")
+
 # NOTE:
 # This hack is required to correctly link static into shared library.
 # Such practice is not recommended as not portable, instead each library,
