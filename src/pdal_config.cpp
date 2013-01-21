@@ -44,7 +44,7 @@
 #include <pdal/pdal_config.hpp>
 
 #include <sstream>
-#include "pdal_defines.h"
+#include <pdal/pdal_defines.h>
 
 #ifdef PDAL_HAVE_LIBGEOTIFF
 #include <geotiff.h>
