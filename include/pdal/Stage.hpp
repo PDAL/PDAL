@@ -105,7 +105,7 @@ protected:
 
 private:
     Schema m_schema;
-    boost::uint64_t m_numPoints;
+    mutable boost::uint64_t m_numPoints;
     PointCountType m_pointCountType;
     Bounds<double> m_bounds;
     SpatialReference m_spatialReference;
