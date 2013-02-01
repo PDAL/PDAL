@@ -736,7 +736,7 @@ void IteratorBase::copyOracleData(  PointBuffer& source,
                                     boost::uint32_t howMany)
 {
     
-    boost::optional<Dimension const&> source_dim = source.getSchema().getDimensionOptional(dest_dim.getName());
+    boost::optional<Dimension const&> source_dim = source.getSchema().getDimensionOptional(dest_dim.getName(), dest_dim.getNamespace());
     
     if (!source_dim)
     {
