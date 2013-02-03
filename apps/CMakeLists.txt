@@ -3,11 +3,14 @@
 #
 # (based originally on the libLAS files copyright Mateusz Loskot)
 
+cmake_minimum_required(VERSION 2.8)
+
 
 if(FREEGLUT_FOUND)
   subdirs(pcview)
 endif()
 
+set(PDAL_SOURCE_DIR ../src)
 
 #------------------------------------------------------------------------------
 # includes
@@ -29,7 +32,7 @@ set(PCEQUAL pcequal)
 
 set(COMMON_APP_SOURCES Application.cpp Application.hpp AppSupport.cpp AppSupport.hpp)
 
-set(PDAL_UTILITIES)
+set(PDAL_UTILITIES ${PCINFO} )
 #    ${PCPIPELINE} ${PCINFO} ${PC2PC} ${PCVIEW})
 
 
@@ -116,7 +119,7 @@ if(UNIX)
     set(exec_prefix ${CMAKE_INSTALL_PREFIX}/bin)
     set(libdir ${CMAKE_INSTALL_PREFIX}/lib)
 
-    GET_DIRECTORY_PROPERTY(PDAL_DEFINITIONS DIRECTORY ${PDAL_SOURCE_DIR}/ COMPILE_DEFINITIONS)   
+    get_directory_property(PDAL_DEFINITIONS DIRECTORY ${PDAL_SOURCE_DIR}/ COMPILE_DEFINITIONS)   
 
     set(PDAL_CONFIG_DEFINITIONS "")
     foreach(definition ${PDAL_DEFINITIONS})
