@@ -196,9 +196,8 @@ plang::PythonEnvironment& GlobalEnvironment::getPythonEnvironment()
 
 pdal::gdal::GlobalDebug* GlobalEnvironment::getGDALDebug()
 {
-#ifdef PDAL_HAVE_GDAL
     getGDALEnvironment();
-    
+#ifdef PDAL_HAVE_GDAL 
     if (m_gdal_debug == 0)
         m_gdal_debug = new pdal::gdal::GlobalDebug();
     

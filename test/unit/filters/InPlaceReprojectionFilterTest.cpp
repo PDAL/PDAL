@@ -61,7 +61,11 @@ static void getPoint(const pdal::PointBuffer& data, double& x, double& y, double
     const boost::int32_t xraw = data.getField<boost::int32_t>(dim_x, 0);
     const boost::int32_t yraw = data.getField<boost::int32_t>(dim_y, 0);
     const boost::int32_t zraw = data.getField<boost::int32_t>(dim_z, 0);
-
+    
+    // 
+    // std::cout << "xraw: " << xraw << " yraw: " << yraw << " zraw: " << zraw << std::endl;
+    // 
+    // std::cout << data << std::endl;
     x = dim_x.applyScaling<boost::int32_t>(xraw);
     y = dim_y.applyScaling<boost::int32_t>(yraw);
     z = dim_z.applyScaling<boost::int32_t>(zraw);
@@ -153,6 +157,81 @@ BOOST_AUTO_TEST_CASE(InPlaceReprojectionFilterTest_test_1)
     return;
 }
 
+
+
+// Test reprojecting UTM 15 to DD with a filter randomly
+BOOST_AUTO_TEST_CASE(InPlaceReprojectionFilterTest_test_2)
+{
+    const char* epsg4326_wkt = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4326\"]]";
+
+    const double postX = -117.251688323;
+    const double postY = 49.34165044;
+    const double postZ = 446.390;
+
+
+    {
+        const pdal::SpatialReference out_ref(epsg4326_wkt);
+
+
+        pdal::Options options;
+        
+        pdal::Option debug("debug", true, "");
+        pdal::Option verbose("verbose", 9, "");
+        // options.add(debug);
+        // options.add(verbose);
+        pdal::Option in_srs("spatialreference","EPSG:2993", "Output SRS to reproject to");
+
+        pdal::Option out_srs("out_srs",out_ref.getWKT(), "Output SRS to reproject to");
+        pdal::Option x_dim("x_dim", std::string("X"), "Dimension name to use for 'X' data");
+        pdal::Option y_dim("y_dim", std::string("Y"), "Dimension name to use for 'Y' data");
+        pdal::Option z_dim("z_dim", std::string("Z"), "Dimension name to use for 'Z' data");
+        pdal::Option x_scale("scale_x", 0.0000001f, "Scale for output X data in the case when 'X' dimension data are to be scaled.  Defaults to '1.0'.  If not set, the Dimensions's scale will be used");
+        pdal::Option y_scale("scale_y", 0.0000001f, "Scale for output Y data in the case when 'Y' dimension data are to be scaled.  Defaults to '1.0'.  If not set, the Dimensions's scale will be used");
+        
+        pdal::Option filename("filename", Support::datapath("1.2-with-color.las"), "filename");
+        options.add(out_srs);
+        options.add(in_srs);
+        options.add(x_dim);
+        options.add(y_dim);
+        options.add(z_dim);
+        options.add(x_scale);
+        options.add(y_scale);
+        options.add(filename);
+        pdal::drivers::las::Reader reader(options);
+
+        pdal::filters::InPlaceReprojection reprojectionFilter(reader, options);
+
+        reprojectionFilter.initialize();
+
+        const pdal::Schema& schema = reprojectionFilter.getSchema();
+        pdal::PointBuffer data(schema, 1);
+        
+
+        pdal::StageRandomIterator* iter = reprojectionFilter.createRandomIterator(data);
+        
+        if (iter==NULL) throw std::runtime_error("could not create random iterator from InPlaceReprojectionFilter!");
+        iter->seek(1);
+        boost::uint32_t numRead = iter->read(data);
+        BOOST_CHECK(numRead == 1);
+
+
+        const pdal::Bounds<double> newBounds_ref(postX, postY, postZ, postX, postY, postZ);
+        const pdal::Bounds<double>& newBounds = data.getSpatialBounds();
+        Support::compareBounds(newBounds_ref, newBounds);
+
+        double x=0, y=0, z=0;
+        getPoint(data, x, y, z);
+
+        BOOST_CHECK_CLOSE(x, postX, 0.0001);
+        BOOST_CHECK_CLOSE(y, postY, 0.0001);
+        BOOST_CHECK_CLOSE(z, postZ, 0.0001);
+        delete iter;
+
+    }
+
+
+    return;
+}
 #endif
 
 BOOST_AUTO_TEST_SUITE_END()

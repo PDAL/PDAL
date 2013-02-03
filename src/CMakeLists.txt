@@ -593,6 +593,8 @@ if (WIN32)
 else()
   target_link_libraries(${APPS_CPP_DEPENDENCIES}
     ${PDAL_LIB_NAME}
+    ${CMAKE_THREAD_LIBS_INIT}
+    ${CMAKE_DL_LIBS}
     ${TIFF_LIBRARY}
     ${MRSID_LIBRARY}
     ${GEOTIFF_LIBRARY}
@@ -617,7 +619,7 @@ if (WIN32)
 	endif()
 else()
 	target_link_libraries(${APPS_CPP_DEPENDENCIES}
-                      ${Boost_LIBRARIES} ${Boost_FILESYSTEM_LIBRARY})
+                      ${Boost_LIBRARIES} )
 
 endif(WIN32)
 

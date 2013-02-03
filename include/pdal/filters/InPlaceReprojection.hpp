@@ -75,17 +75,12 @@ public:
     bool supportsIterator(StageIteratorType t) const
     {
         if (t == StageIterator_Sequential) return true;
-
+        if (t == StageIterator_Random) return true;
         return false;
     }
 
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const
-    {
-        return NULL;
-    }
-
-    void processBuffer(PointBuffer& data) const;
+    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const;
 
     double getScaledValue(PointBuffer& data,
                           Dimension const& d,
@@ -142,32 +137,67 @@ private:
 
 namespace iterators
 {
+
+namespace inplacereprojection
+{
+
+class PDAL_DLL IteratorBase
+{
+public:
+    IteratorBase(pdal::filters::InPlaceReprojection const& filter, PointBuffer& buffer);
+
+protected:
+    pdal::filters::InPlaceReprojection const& m_reprojectionFilter;      
+    void updateBounds(PointBuffer&);
+
+    void projectData(PointBuffer& buffer, boost::uint32_t numRead); 
+};
+
+} // inplacereprojection
+    
 namespace sequential
 {
 
 
-class PDAL_DLL InPlaceReprojection : public pdal::FilterSequentialIterator
+class PDAL_DLL InPlaceReprojection : public pdal::FilterSequentialIterator, public inplacereprojection::IteratorBase
 {
 public:
     InPlaceReprojection(const pdal::filters::InPlaceReprojection& filter, PointBuffer& buffer);
-
-protected:
-    virtual void readBufferBeginImpl(PointBuffer&);
+    ~InPlaceReprojection(){};
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t);
     boost::uint32_t readBufferImpl(PointBuffer&);
     bool atEndImpl() const;    
 
-    void updateBounds(PointBuffer&);
-
-
-    const pdal::filters::InPlaceReprojection& m_reprojectionFilter;
 };
 
 
-}
-} // iterators::sequential
+
+} // sequential
+
+namespace random
+{
+
+class PDAL_DLL InPlaceReprojection : public pdal::FilterRandomIterator, public inplacereprojection::IteratorBase
+{
+public:
+    InPlaceReprojection(const pdal::filters::InPlaceReprojection& filter, PointBuffer& buffer);
+    virtual ~InPlaceReprojection(){};
+
+protected:
+    virtual boost::uint32_t readBufferImpl(PointBuffer& buffer);
+
+    
+    virtual boost::uint64_t seekImpl(boost::uint64_t);
+
+
+};    
+    
+    
+} // random
+
+} // iterators
 
 
 }

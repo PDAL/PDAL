@@ -143,6 +143,15 @@ public:
     {}
 };
 
+// thrown when seeking off the end of a stage
+class invalid_seek_error : public pdal_error
+{
+public:
+    invalid_seek_error(std::string const& msg)
+        : pdal_error(msg)
+    {}
+};
+
 
 // use this for situations where indeterminate point counts prevent some
 // operation from happening

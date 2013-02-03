@@ -21,7 +21,22 @@ public:
        m_x -= p.m_x;
        m_y -= p.m_y;
     }
+
+    Point& operator += (const Point& p)
+    {
+        m_x += p.m_x;
+        m_y += p.m_y;
+        return *this;
+    }
+    friend Point operator + (Point p1, const Point& p2);
+
 };
+
+inline Point operator + (Point p1, const Point& p2)
+{
+    p1 += p2;
+    return p1;
+}
 
 } // namespace
 

@@ -110,7 +110,7 @@ boost::uint64_t Reader::getNumPoints() const
 
             output->Execute(0);
             
-            boost::int64_t count;
+            boost::int32_t count(0);
             output->Define(&(count));
             bool bDidReadBlockCount = output->Fetch();
             if (!bDidReadBlockCount) 

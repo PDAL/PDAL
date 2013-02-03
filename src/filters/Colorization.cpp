@@ -205,6 +205,7 @@ Colorization::Colorization(const pdal::filters::Colorization& filter, PointBuffe
     m_forward_transform.assign(0.0);
     m_inverse_transform.assign(0.0);
 
+#ifdef PDAL_HAVE_GDAL
     std::string filename = filter.getOptions().getValueOrThrow<std::string>("raster");
 
     filter.log()->get(logDEBUG) << "Using " << filename << " for raster" << std::endl;
@@ -219,19 +220,21 @@ Colorization::Colorization(const pdal::filters::Colorization& filter, PointBuffe
 
     GDALInvGeoTransform(&(m_forward_transform.front()), &(m_inverse_transform.front()));
 
-    
+#endif 
+
     return;
 }
 #ifdef PDAL_HAVE_GDAL
 
 Colorization::~Colorization()
 {
-
+#ifdef PDAL_HAVE_GDAL
     if (m_ds != 0)
     {
         GDALClose(m_ds);
         m_ds = 0;
     }
+#endif
     
 }
 
@@ -274,7 +277,7 @@ bool Colorization::getPixelAndLinePosition(double x,
         boost::array<double, 6> const& inverse,
         boost::int32_t& pixel,
         boost::int32_t& line,
-        GDALDatasetH ds)
+        void* ds)
 {
 #ifdef PDAL_HAVE_GDAL
     pixel = (boost::int32_t) std::floor(

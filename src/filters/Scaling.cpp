@@ -101,10 +101,13 @@ void Scaling::checkImpedance()
 
 pdal::StageSequentialIterator* Scaling::createSequentialIterator(PointBuffer& buffer) const
 {
-    log()->get(logDEBUG4) << "Scaling::createSequentialIterator" << std::endl;
     return new pdal::filters::iterators::sequential::Scaling(*this, buffer);
 }
 
+pdal::StageRandomIterator* Scaling::createRandomIterator(PointBuffer& buffer) const
+{
+    return new pdal::filters::iterators::random::Scaling(*this, buffer);
+}
 
 Options Scaling::getDefaultOptions()
 {
@@ -253,20 +256,80 @@ dimension::Interpretation Scaling::getInterpretation(std::string const& t) const
 
 namespace iterators
 {
+
 namespace sequential
 {
 
 
 Scaling::Scaling(const pdal::filters::Scaling& filter, PointBuffer& buffer)
     : pdal::FilterSequentialIterator(filter, buffer)
-    , m_scalingFilter(filter)
+    , scaling::IteratorBase(filter, buffer)
 {
     return;
 }
 
+boost::uint64_t Scaling::skipImpl(boost::uint64_t count)
+{
+    getPrevIterator().skip(count);
+    return count;
+}
 
 
-void Scaling::readBufferBeginImpl(PointBuffer& buffer)
+bool Scaling::atEndImpl() const
+{
+    return getPrevIterator().atEnd();
+}
+
+boost::uint32_t Scaling::readBufferImpl(PointBuffer& buffer)
+{
+    const boost::uint32_t numRead = getPrevIterator().read(buffer);
+    
+    IteratorBase::scaleData(buffer, numRead);
+
+    return numRead;
+}
+
+
+} // sequential
+
+namespace random
+{
+
+Scaling::Scaling(const pdal::filters::Scaling& filter, PointBuffer& buffer)
+    : pdal::FilterRandomIterator(filter, buffer)
+    , scaling::IteratorBase(filter, buffer)
+{
+    return;
+}
+
+boost::uint64_t Scaling::seekImpl(boost::uint64_t count)
+{
+    
+    return getPrevIterator().seek(count);
+}
+
+boost::uint32_t Scaling::readBufferImpl(PointBuffer& buffer)
+{
+    const boost::uint32_t numRead = getPrevIterator().read(buffer);
+
+    IteratorBase::scaleData(buffer, numRead);
+
+    return numRead;
+}
+
+
+} // random
+
+namespace scaling
+{
+    
+IteratorBase::IteratorBase(const pdal::filters::Scaling& filter, PointBuffer& buffer)
+    : m_scalingFilter(filter)
+{
+    return;
+}
+
+void IteratorBase::readBufferBeginImpl(PointBuffer& buffer)
 {
     pdal::Schema const& schema = buffer.getSchema();
     std::map<dimension::id, dimension::id>::const_iterator d;
@@ -285,10 +348,8 @@ void Scaling::readBufferBeginImpl(PointBuffer& buffer)
     }
 }
 
-boost::uint32_t Scaling::readBufferImpl(PointBuffer& buffer)
+void IteratorBase::scaleData(PointBuffer& buffer, boost::uint32_t numRead)
 {
-    const boost::uint32_t numRead = getPrevIterator().read(buffer);
-
     for (boost::uint32_t pointIndex=0; pointIndex<numRead; pointIndex++)
     {
         std::map<boost::optional<pdal::Dimension const&>, boost::optional<pdal::Dimension const&> >::const_iterator d;
@@ -302,8 +363,8 @@ boost::uint32_t Scaling::readBufferImpl(PointBuffer& buffer)
             writeScaledData(buffer, from_dimension, to_dimension, pointIndex);
         }
     }
-    return numRead;
 }
+
 
 
 #ifdef PDAL_COMPILER_MSVC
@@ -313,7 +374,7 @@ boost::uint32_t Scaling::readBufferImpl(PointBuffer& buffer)
 #  pragma warning(disable: 4244)  // conversion from T1 to T2, possible loss of data
 #endif
 
-void Scaling::writeScaledData(PointBuffer& buffer,
+void IteratorBase::writeScaledData(PointBuffer& buffer,
                               Dimension const& from_dimension,
                               Dimension const& to_dimension,
                               boost::uint32_t pointIndex)
@@ -713,21 +774,9 @@ void Scaling::writeScaledData(PointBuffer& buffer,
 #  pragma warning(pop)
 #endif
 
+} // scaling
 
-boost::uint64_t Scaling::skipImpl(boost::uint64_t count)
-{
-    getPrevIterator().skip(count);
-    return count;
-}
-
-
-bool Scaling::atEndImpl() const
-{
-    return getPrevIterator().atEnd();
-}
-
-}
-} // iterators::sequential
+} // iterators
 
 
 }

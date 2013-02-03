@@ -82,16 +82,14 @@ public:
     bool supportsIterator(StageIteratorType t) const
     {
         if (t == StageIterator_Sequential) return true;
+        if (t == StageIterator_Random) return true;
 
         return false;
     }
 
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const
-    {
-        return NULL;
-    }
-
+    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const;
+    
     std::vector<scaling::Scaler> const& getScalers() const
     {
         return m_scalers;
@@ -117,27 +115,19 @@ private:
 
 namespace iterators
 {
-namespace sequential
-{
-
-
-class PDAL_DLL Scaling : public pdal::FilterSequentialIterator
-{
-public:
-    Scaling(const pdal::filters::Scaling& filter, PointBuffer& buffer);
-
-protected:
-    virtual void readBufferBeginImpl(PointBuffer&);
     
 
-private:
-    boost::uint64_t skipImpl(boost::uint64_t);
-    boost::uint32_t readBufferImpl(PointBuffer&);
-    bool atEndImpl() const;
+namespace scaling
+{
+    
+class PDAL_DLL IteratorBase
+{
 
+public:
+    IteratorBase(const pdal::filters::Scaling& filter, PointBuffer& buffer);    
 
+protected:
     const pdal::filters::Scaling& m_scalingFilter;
-
     void writeScaledData(PointBuffer& buffer,
                          Dimension const& from_dimension,
                          Dimension const& to_dimension,
@@ -147,9 +137,58 @@ private:
                                  T& value) const;
 
     std::map<boost::optional<pdal::Dimension const&>, boost::optional<pdal::Dimension const&> > m_dimension_map;
-    
+
+    void readBufferBeginImpl(PointBuffer&);
+    boost::uint32_t readBufferImpl(PointBuffer&);    
+
+    void scaleData(PointBuffer& buffer, boost::uint32_t numRead);
+
 };
 
+} // scaling
+
+namespace sequential
+{
+
+
+class PDAL_DLL Scaling : public pdal::FilterSequentialIterator, public scaling::IteratorBase
+{
+public:
+    Scaling(const pdal::filters::Scaling& filter, PointBuffer& buffer);
+
+protected:
+
+    inline virtual void readBufferBeginImpl(PointBuffer& buffer) { scaling::IteratorBase::readBufferBeginImpl(buffer); }
+    virtual boost::uint32_t readBufferImpl(PointBuffer& buffer);
+    
+
+private:
+    boost::uint64_t skipImpl(boost::uint64_t);
+    bool atEndImpl() const;
+
+};
+
+} // namespace sequential
+
+namespace random
+{
+    
+class PDAL_DLL Scaling : public pdal::FilterRandomIterator, public scaling::IteratorBase
+{
+public:
+    Scaling(const pdal::filters::Scaling& filter, PointBuffer& buffer);
+    virtual ~Scaling() {};
+
+protected:
+    inline virtual void readBufferBeginImpl(PointBuffer& buffer) { scaling::IteratorBase::readBufferBeginImpl(buffer); }
+    virtual boost::uint32_t readBufferImpl(PointBuffer& buffer);
+    
+    virtual boost::uint64_t seekImpl(boost::uint64_t);
+
+};
+
+} // namespace random
+    
 #ifdef PDAL_COMPILER_MSVC
 // when template T is know, std::numeric_limits<T>::is_exact is a constant...
 #  pragma warning(push)
@@ -157,7 +196,7 @@ private:
 #endif
 
 template <class T>
-inline void Scaling::scale(Dimension const& from_dimension,
+inline void scaling::IteratorBase::scale(Dimension const& from_dimension,
                            Dimension const& to_dimension,
                            T& value) const
 {
@@ -169,14 +208,14 @@ inline void Scaling::scale(Dimension const& from_dimension,
 
     if (std::numeric_limits<T>::is_exact) //
     {
-        if (output == (std::numeric_limits<T>::max)())
+        if (Utils::compare_distance<T>(output, (std::numeric_limits<T>::max)()))
         {
             std::ostringstream oss;
             oss << "filter.Scaling: scale and/or offset combination causes "
                 "re-scaled value to be greater than std::numeric_limits::max for dimension '" << to_dimension.getName() << "'. " <<
                 "value is: " << output << " and max() is: " << (std::numeric_limits<T>::max)();
         }
-        else if (output == (std::numeric_limits<T>::min)())
+        else if (Utils::compare_distance<T>(output, (std::numeric_limits<T>::min)()))
         {
             std::ostringstream oss;
             oss << "filter.Scaling: scale and/or offset combination causes "
@@ -196,7 +235,7 @@ inline void Scaling::scale(Dimension const& from_dimension,
 #endif
 
 }
-} // namespaces
+
 
 }
 } // namespaces

@@ -178,10 +178,14 @@ endif(APPLE)
 # settings for Boost dependencies
 #------------------------------------------------------------------------------
 
+<<<<<<< HEAD
 message("BOOST FUN")
 if (DEFINED PDAL_EMBED_BOOST)
 message("PDAL EMBED DEFINED")
 endif()
+=======
+find_package(Threads)
+>>>>>>> fixme
 
 if (NOT PDAL_EMBED_BOOST)
 #  set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "/usr/local/boost_1_52_0/boost")

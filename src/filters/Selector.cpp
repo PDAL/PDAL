@@ -186,6 +186,10 @@ pdal::StageSequentialIterator* Selector::createSequentialIterator(PointBuffer& b
     return new pdal::filters::iterators::sequential::Selector(*this, buffer);
 }
 
+pdal::StageRandomIterator* Selector::createRandomIterator(PointBuffer& buffer) const
+{
+    return new pdal::filters::iterators::random::Selector(*this, buffer);
+}
 
 Options Selector::getDefaultOptions()
 {
@@ -197,29 +201,25 @@ Options Selector::getDefaultOptions()
 
 namespace iterators
 {
-namespace sequential
+    
+namespace selector
 {
 
-
-Selector::Selector(const pdal::filters::Selector& filter, PointBuffer& buffer)
-    : pdal::FilterSequentialIterator(filter, buffer)
-    , m_selectorFilter(filter)
+IteratorBase::IteratorBase(pdal::filters::Selector const& filter, PointBuffer& buffer)
+: m_selectorFilter(filter)
 {
-    alterSchema(buffer);
-    m_selectorFilter.log()->get(logDEBUG4) << "iterator has modified schema" << std::endl;
-
-    return;
+    
 }
 
-void Selector::alterSchema(PointBuffer& buffer)
+void IteratorBase::alterSchema(PointBuffer& buffer)
 {
     Schema original_schema = buffer.getSchema();
-    
+
     // Add new dimensions to the schema first in case we wanted to ignore them 
     // or something silly like that.
     Schema new_schema = buffer.getSchema();
     std::vector<Dimension> const& new_dimensions = m_selectorFilter.getCreatedDimensions();
-    
+
     bool bOverwriteExistingDimensions = m_selectorFilter.getOptions().getValueOrDefault<bool>("overwite_existing_dimensions", true);
     if (new_dimensions.size())
     {
@@ -249,7 +249,7 @@ void Selector::alterSchema(PointBuffer& buffer)
          t != dims.end(); 
          ++t)
     {
-        
+
         std::map<std::string, bool>::const_iterator ignored = ignoredMap.find(t->getName());
         if (ignored != ignoredMap.end())
         {
@@ -262,7 +262,7 @@ void Selector::alterSchema(PointBuffer& buffer)
                 new_schema.setDimension(d2);
             }
         } else { // didn't find it in our map of specified dimensions
-            
+
             if (m_selectorFilter.doIgnoreUnspecifiedDimensions())
             {
                 // set to ignored
@@ -277,6 +277,23 @@ void Selector::alterSchema(PointBuffer& buffer)
 
     buffer.reset(new_schema);
 }
+    
+} // selector
+
+namespace sequential
+{
+
+
+Selector::Selector(const pdal::filters::Selector& filter, PointBuffer& buffer)
+    : pdal::FilterSequentialIterator(filter, buffer)
+    , selector::IteratorBase(filter, buffer)
+{
+    alterSchema(buffer);
+    m_selectorFilter.log()->get(logDEBUG4) << "iterator has modified schema" << std::endl;
+
+    return;
+}
+
 
 
 boost::uint32_t Selector::readBufferImpl(PointBuffer& buffer)
@@ -298,8 +315,33 @@ bool Selector::atEndImpl() const
     return getPrevIterator().atEnd();
 }
 
+} // sequential
+
+namespace random
+{
+Selector::Selector(const pdal::filters::Selector& filter, PointBuffer& buffer)
+    : pdal::FilterRandomIterator(filter, buffer)
+    , selector::IteratorBase(filter, buffer)
+{
+    return;
 }
-} // iterators::sequential
+
+boost::uint64_t Selector::seekImpl(boost::uint64_t count)
+{
+
+    return getPrevIterator().seek(count);
+}
+
+boost::uint32_t Selector::readBufferImpl(PointBuffer& buffer)
+{
+    const boost::uint32_t numRead = getPrevIterator().read(buffer);
+
+    return numRead;
+}    
+
+} // random
+
+} // iterators
 
 
 }
