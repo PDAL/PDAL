@@ -2,6 +2,7 @@
 #define INCLUDED_PSHAPE_HEXAGON_HPP
 
 //ABELL - Assertions that int isn't bigger than int32_t
+#include <stdint.h>
 
 namespace Pshape
 {
@@ -22,7 +23,7 @@ public:
 
     void incrementIf(int dense_limit)
     {
-        if (m_count <= dense_limit)
+        if (m_count < dense_limit)
         {
             m_count++;
         }
@@ -41,14 +42,17 @@ public:
     int y() const
         { return m_y; }
 
-    bool yodd() const
-        { return (y() % 2 == 1); }
+    bool xodd() const
+        { return (x() % 2 != 0); }
 
-    bool yeven() const
-        { return !yodd(); }
+    bool xeven() const
+        { return !xodd(); }
 
     bool dense(int dense_limit) const
         { return m_count >= dense_limit; }
+
+   int count() const
+       { return m_count; } 
 
     bool less(Hexagon *h) const
     {
@@ -60,11 +64,11 @@ public:
         {
             return false;
         }
-        if (yeven() && h->yodd())
+        if (xeven() && h->xodd())
         {
             return true;
         }
-        if (yodd() && h->yeven())
+        if (xodd() && h->xeven())
         {
             return false;
         }

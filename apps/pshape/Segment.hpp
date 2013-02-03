@@ -28,6 +28,9 @@ public:
     Hexagon *hex()
         { return m_hex; }
 
+    int side()
+        { return m_side; }
+
     Segment rightAntiClockwise(HexGrid *grid);
     Segment leftAntiClockwise(HexGrid *grid);
 

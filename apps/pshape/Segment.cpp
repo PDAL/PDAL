@@ -19,7 +19,7 @@ Segment Segment::rightAntiClockwise(HexGrid *grid)
     next.m_side = nextside[m_side];
     int x = m_hex->x();
     int y = m_hex->y();
-    if ( m_hex->yeven() )
+    if ( m_hex->xeven() )
     {
         x += evenx[m_side];
         y += eveny[m_side];
@@ -58,7 +58,7 @@ bool operator == (const Segment& s1, const Segment &s2)
     {
         int xinc;
         int yinc;
-        if (s1.m_hex->yeven())
+        if (s1.m_hex->xeven())
         {
             xinc = evenx[s1.m_side];
             yinc = eveny[s1.m_side];

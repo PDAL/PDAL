@@ -1,4 +1,6 @@
 
+#include <iostream>
+
 #include "HexGrid.hpp"
 #include "Point.hpp"
 #include "Segment.hpp"
@@ -11,9 +13,8 @@ namespace Pshape
 void HexGrid::addPoint(Point p)
 {
     Hexagon *h = findHexagon(p);
-    cerr << "Point x/y - Hex x/y = " << p.m_x << "/" << p.m_y << " - " <<
-        h->x() << "/" << h->y() << "\n";
-    h->incrementIf(m_dense_limit);
+//    h->incrementIf(m_dense_limit);
+    h->increment();
     if (h->dense(m_dense_limit) && h->less(m_min))
     {
         m_min = h;
@@ -66,6 +67,7 @@ Hexagon *HexGrid::findHexagon(Point p)
         // to the hexagon in the map.
         HexMap::value_type hexpair(Hexagon::key(0, 0), Hexagon(0, 0));
         HexMap::iterator it = m_hexes.insert(hexpair).first;
+        m_min = &it->second;
         return &it->second;
     }
 
@@ -141,10 +143,24 @@ Hexagon *HexGrid::getHexagon(int x, int y)
 {
     // Stick a hexagon into the map if necessary.
     HexMap::value_type hexpair(Hexagon::key(x, y), Hexagon(x, y));
-    HexMap::iterator it = m_hexes.insert(hexpair).first;
+    std::pair<HexMap::iterator,bool> retval;
+    retval = m_hexes.insert(hexpair);
+    HexMap::iterator it = retval.first;
+
+    Hexagon *hex_p = &(it->second);
 
     // Return a pointer to the located hexagon.
-    return &it->second;
+    return hex_p;
+}
+
+void HexGrid::drawHexagons()
+{
+    HexMap::iterator it;
+    for (it = m_hexes.begin(); it != m_hexes.end(); ++it)
+    {
+        Hexagon *hex_p = &(it->second);
+        m_draw.drawHexagon(hex_p);
+    }
 }
 
 // Walk the outside of the hexagons to make a path.  Hexagon sides are labeled:
@@ -169,6 +185,7 @@ void HexGrid::findShapes()
     Segment cur(first);
     do {
         p.push_back(cur);
+        m_draw.drawSegment(cur);
         Segment next = cur.rightAntiClockwise(this);
         if ( !next.hex()->dense(m_dense_limit) )
         {
@@ -178,5 +195,14 @@ void HexGrid::findShapes()
     } while (cur != first);
 }
 
+void HexGrid::dumpInfo()
+{
+    int count = 0;
+    for (HexMap::iterator it = m_hexes.begin(); it != m_hexes.end(); ++it)
+    {
+        Hexagon& hex = it->second;
+        count += hex.count();
+    }
+}
 
 } //namespace
