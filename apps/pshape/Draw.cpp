@@ -5,7 +5,7 @@
 
 #include "Hexagon.hpp"
 #include "HexGrid.hpp"
-#include "Point.hpp"
+#include "Mathpair.hpp"
 #include "Segment.hpp"
 
 using namespace std;
@@ -68,7 +68,7 @@ void Draw::drawHexagon(Hexagon *hex_p, bool fill)
     {
         cairo_fill(m_cairo_p);
     }
-    if ( hex_p->dense(m_grid_p->denseLimit()) )
+    if ( hex_p->dense() )
     {
         cairo_set_source_rgb(m_cairo_p, .3, .3, 0);
         cairo_fill(m_cairo_p);

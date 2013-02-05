@@ -11,25 +11,10 @@ Segment Segment::rightAntiClockwise(HexGrid *grid)
 {
     Segment next;
     static int nextside[] = { 5, 0, 1, 2, 3, 4 };
-    static int evenx[] = { -1, -1, 0, 1, 1, 0 };
-    static int eveny[] = { -1, 0, 1, 0, -1, -1 };
-    static int oddx[] = { -1, -1, 0, 1, 1, 0 };
-    static int oddy[] = { 0, 1, 1, 1, 0, -1 };
 
     next.m_side = nextside[m_side];
-    int x = m_hex->x();
-    int y = m_hex->y();
-    if ( m_hex->xeven() )
-    {
-        x += evenx[m_side];
-        y += eveny[m_side];
-    }
-    else
-    {
-        x += oddx[m_side];
-        y += oddy[m_side];
-    }
-    next.m_hex = grid->getHexagon(x, y);
+    Coord coord = m_hex->neighborCoord(m_side);
+    next.m_hex = grid->getHexagon(coord.m_x, coord.m_y);
     return next;
 }
 

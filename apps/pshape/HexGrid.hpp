@@ -4,7 +4,7 @@
 #include <boost/unordered_map.hpp>
 
 #include "Hexagon.hpp"
-#include "Point.hpp"
+#include "Mathpair.hpp"
 #include "Draw.hpp"
 
 namespace Pshape
@@ -28,12 +28,16 @@ public:
         m_offsets[5] = Point(2 * m_width / 3, 0);
     }
 
+    bool dense(Hexagon *h);
     void addPoint(Point p);
     void findShapes();
     void extractShapes();
     void dumpInfo();
     void drawHexagons();
     Hexagon *getHexagon(int x, int y);
+    Hexagon *getHexagon(const Coord& c)
+        { return getHexagon(c.m_x, c.m_y); }
+
     double width()
         { return m_width; }
     double height()

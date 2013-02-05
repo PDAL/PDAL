@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include "HexGrid.hpp"
-#include "Point.hpp"
+#include "Mathpair.hpp"
 #include "Segment.hpp"
 
 using namespace std;
@@ -9,14 +9,36 @@ using namespace std;
 namespace Pshape
 {
 
+bool HexGrid::dense(Hexagon *h)
+{
+    return h->count() >= m_dense_limit;
+}
+
 void HexGrid::addPoint(Point p)
 {
     Hexagon *h = findHexagon(p);
-//    h->incrementIf(m_dense_limit);
-    h->increment();
-    if (h->dense(m_dense_limit) && h->less(m_min))
+    if (!h->dense())
     {
-        m_min = h;
+        h->increment();
+        if (dense(h))
+        {
+            h->setDense();
+            if (h->less(m_min))
+            {
+                m_min = h;
+            }
+            // Go through the neighbors, telling each one that we are now
+            // dense.  If you draw out a honeycomb of hexes and label the
+            // sides, you'll see that shared sides of adjoining hexes always
+            // are have side numbers that are offset by three from the same
+            // side in it's neighbor.
+            for (int i = 0; i < 6; ++i)
+            {
+                Coord c = h->neighborCoord(i);
+                Hexagon *neighbor = getHexagon(c);
+                neighbor->setDenseNeighbor(i + 3 % 6);
+            }
+        }
     }
 }
 
@@ -185,7 +207,7 @@ void HexGrid::findShapes()
         p.push_back(cur);
         m_draw.drawSegment(cur);
         Segment next = cur.rightAntiClockwise(this);
-        if ( !next.hex()->dense(m_dense_limit) )
+        if ( !next.hex()->dense() )
         {
             next = cur.leftAntiClockwise(this); 
         }

@@ -4,7 +4,7 @@
 
 #include "../AppSupport.hpp"
 #include "HexGrid.hpp"
-#include "Point.hpp"
+#include "Mathpair.hpp"
 
 #include "pdal/PointBuffer.hpp"
 #include "pdal/Reader.hpp"

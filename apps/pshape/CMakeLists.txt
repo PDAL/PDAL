@@ -3,6 +3,7 @@ include_directories (. ../../include ../..)
 
 set( sources
     Draw.cpp
+    Hexagon.cpp
     HexGrid.cpp
     Processor.cpp
     Segment.cpp
@@ -11,9 +12,9 @@ set( sources
 
 set( headers
     Draw.hpp
-    Point.hpp
     Hexagon.hpp
     HexGrid.hpp
+    Mathpair.hpp
     Segment.hpp
     ../AppSupport.hpp
 )

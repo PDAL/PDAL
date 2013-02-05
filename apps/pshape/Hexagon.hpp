@@ -4,13 +4,16 @@
 //ABELL - Assertions that int isn't bigger than int32_t
 #include <stdint.h>
 
+#include "Mathpair.hpp"
+
 namespace Pshape
 {
 
 class Hexagon
 {
 public:
-    Hexagon(int x, int y) : m_x(x), m_y(y), m_count(0)
+    Hexagon(int x, int y) : m_x(x), m_y(y), m_count(0), m_dense(false),
+        m_dense_neighbors(0)
         {}
 
     uint64_t key()
@@ -20,14 +23,6 @@ public:
 
     void increment()
        { m_count++; }
-
-    void incrementIf(int dense_limit)
-    {
-        if (m_count < dense_limit)
-        {
-            m_count++;
-        }
-    }
 
     static uint64_t key(int32_t x, int32_t y)
     {
@@ -48,37 +43,31 @@ public:
     bool xeven() const
         { return !xodd(); }
 
-    bool dense(int dense_limit) const
-        { return m_count >= dense_limit; }
+    void setDense()
+        { m_dense = true; }
 
-   int count() const
-       { return m_count; } 
+    bool dense() const
+        { return m_dense; }
 
-    bool less(Hexagon *h) const
-    {
-        if (y() < h->y())
-        {
-            return true;
-        }
-        if (y() > h->y())
-        {
-            return false;
-        }
-        if (xeven() && h->xodd())
-        {
-            return true;
-        }
-        if (xodd() && h->xeven())
-        {
-            return false;
-        }
-        return x() < h->x();
-    }
+    int count() const
+        { return m_count; } 
+
+    void setDenseNeighbor(int dir)
+        { m_dense_neighbors |= (1 << dir); }
+
+    // We're surrounded by dense neighbors when the six low bits are set.
+    bool surrounded() const
+        { return (m_dense && (m_dense_neighbors == 0x3F)); }
+
+    bool less(Hexagon *h) const;
+    Coord neighborCoord(int dir) const;
 
 private:
     int32_t m_x;
     int32_t m_y;
     int m_count;
+    bool m_dense;
+    int m_dense_neighbors;
 };
 
 } // namespace

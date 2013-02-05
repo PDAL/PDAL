@@ -4,12 +4,13 @@
 #include <cairo/cairo-xlib.h>
 #include <X11/Xlib.h>
 
+#include "Mathpair.hpp"
+
 namespace Pshape
 {
 
 class HexGrid;
 class Hexagon;
-class Point;
 class Segment;
 
 class Draw
