@@ -112,13 +112,10 @@ public:
     static inline void read_n(T& dest, std::istream& src, std::streamsize const& num)
     {
         if (!src.good())
-            throw std::runtime_error("detail::liblas::read_n<T> input stream is not readable");
+            throw std::runtime_error("pdal::Utils::read_n<T> input stream is not readable");
 
         char* p = as_buffer(dest);
         src.read(p, num);
-
-        // BUG: Fix little-endian
-        //LIBLAS_SWAP_BYTES_N(dest, num);
 
         assert(check_stream_state(src));
     }
@@ -127,15 +124,13 @@ public:
     static inline void write_n(std::ostream& dest, T const& src, std::streamsize const& num)
     {
         if (!dest.good())
-            throw std::runtime_error("detail::liblas::write_n<T>: output stream is not writable");
+            throw std::runtime_error("pdal::Utils::write_n<T>: output stream is not writable");
 
-        // BUG: Fix little-endian
         T& tmp = const_cast<T&>(src);
-        //LIBLAS_SWAP_BYTES_N(tmp, num);
 
         char const* p = as_bytes(tmp);
         dest.rdbuf()->sputn(p, num);
-        // dest.write(p, num);
+
         assert(check_stream_state(dest));
     }
 

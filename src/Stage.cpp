@@ -111,14 +111,29 @@ void Stage::setSchema(const Schema& schema)
 
 boost::uint64_t Stage::getNumPoints() const
 {
-    try
-    {
-        return getPrevStage().getNumPoints();
-    } catch (pdal::internal_error const&)
-    {
-        return m_numPoints;
-    }
+    // The Stage's getNumPoints() can't change. If it is 0, we'll try to 
+    // forward the getPrevStage()'s count. This will continue down the 
+    // pipeline until a count is returned. If the end stage does 
+    // actually return a 0 because the Stage has an unknown or indefinite
+    // point count, this will ask and return 0 every time.
     
+    // We will cache this value on the stage once we've returned 
+    // it because the point count of a stage is not expected to change.
+    // m_numPoints is mutable to support the setting of its value 
+    // to cache the previous stage's value.
+    if (m_numPoints == 0)
+    {
+        try
+        {
+            m_numPoints = getPrevStage().getNumPoints();
+            return m_numPoints;
+        } catch (pdal::internal_error const&)
+        {
+            return m_numPoints;
+        }
+        
+    }
+    return m_numPoints;
 }
 
 

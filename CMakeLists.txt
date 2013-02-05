@@ -561,8 +561,7 @@ install(FILES AUTHORS.txt LICENSE.txt
 
 configure_file(
   "${PROJECT_SOURCE_DIR}/pdal_defines.h.in"
-  "${PROJECT_BINARY_DIR}/pdal_defines.h")
-include_directories(${PROJECT_BINARY_DIR})
+  "${PDAL_INCLUDE_DIR}/pdal/pdal_defines.h")
 
 #------------------------------------------------------------------------------
 # subdirectory controls

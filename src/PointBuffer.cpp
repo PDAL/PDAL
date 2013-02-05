@@ -98,11 +98,9 @@ void PointBuffer::reset(Schema const& new_schema)
     
     m_schema = new_schema;
     
-    if (new_size != old_size)
-    {
-        boost::scoped_array<boost::uint8_t> data(new boost::uint8_t[ m_schema.getByteSize()*m_capacity ]());
-        m_data.swap(data);
-    }
+    boost::scoped_array<boost::uint8_t> data(new boost::uint8_t[ m_schema.getByteSize()*m_capacity ]());
+    m_data.swap(data);
+
     m_numPoints = 0;
     m_byteSize = new_schema.getByteSize();    
 }

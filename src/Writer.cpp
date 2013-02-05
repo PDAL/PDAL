@@ -160,7 +160,20 @@ boost::uint64_t Writer::write(  boost::uint64_t targetNumPointsToWrite,
     do_callback(0.0, callback);
 
     const Schema& schema = getPrevStage().getSchema();
-    m_writer_buffer = new PointBuffer (schema, m_chunkSize);
+    
+    if (m_writer_buffer == 0)
+    {
+        boost::uint64_t capacity(targetNumPointsToWrite);
+        if (capacity == 0)
+        {
+            capacity = m_chunkSize;
+        } else
+        {
+            capacity = (std::min)(static_cast<boost::uint64_t>(m_chunkSize), targetNumPointsToWrite) ;
+        }
+        m_writer_buffer = new PointBuffer (schema, capacity);
+        
+    }
     
     boost::scoped_ptr<StageSequentialIterator> iter(getPrevStage().createSequentialIterator(*m_writer_buffer));
     
@@ -200,7 +213,7 @@ boost::uint64_t Writer::write(  boost::uint64_t targetNumPointsToWrite,
             const boost::uint32_t numPointsToReadThisChunk = static_cast<boost::uint32_t>(numPointsToReadThisChunk64);
 
             // we are reusing the buffer, so we may need to adjust the capacity for the last (and likely undersized) chunk
-            if (m_writer_buffer->getCapacity() != numPointsToReadThisChunk)
+            if (m_writer_buffer->getCapacity() < numPointsToReadThisChunk)
             {
                 m_writer_buffer->resize(numPointsToReadThisChunk);
             }
