@@ -196,7 +196,7 @@ namespace iterators
 namespace sequential
 {
 
-#ifdef PDAL_HAVE_GDAL
+
 Colorization::Colorization(const pdal::filters::Colorization& filter, PointBuffer& buffer)
     : pdal::FilterSequentialIterator(filter, buffer)
     , m_stage(filter)
@@ -224,7 +224,6 @@ Colorization::Colorization(const pdal::filters::Colorization& filter, PointBuffe
 
     return;
 }
-#ifdef PDAL_HAVE_GDAL
 
 Colorization::~Colorization()
 {
