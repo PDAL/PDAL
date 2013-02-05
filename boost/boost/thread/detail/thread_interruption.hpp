@@ -9,6 +9,8 @@
 #include <boost/thread/detail/config.hpp>
 #include <boost/thread/detail/delete.hpp>
 
+#if defined BOOST_THREAD_PROVIDES_INTERRUPTIONS
+
 namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
 {
     namespace this_thread
@@ -33,4 +35,5 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
     }
 }
 
-#endif
+#endif // BOOST_THREAD_PROVIDES_INTERRUPTIONS
+#endif // header

@@ -14,7 +14,9 @@
 #include <boost/thread/win32/thread_primitives.hpp>
 #include <boost/thread/win32/interlocked_read.hpp>
 #include <boost/thread/thread_time.hpp>
+#if defined BOOST_THREAD_USES_DATETIME
 #include <boost/thread/xtime.hpp>
+#endif
 #include <boost/detail/interlocked.hpp>
 #ifdef BOOST_THREAD_USES_CHRONO
 #include <boost/chrono/system_clocks.hpp>
@@ -58,7 +60,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
             }
 
 
-            bool try_lock()
+            bool try_lock() BOOST_NOEXCEPT
             {
                 return !win32::interlocked_bit_test_and_set(&active_count,lock_flag_bit);
             }
@@ -118,6 +120,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
             }
 
 
+#if defined BOOST_THREAD_USES_DATETIME
             bool timed_lock(::pdalboost::system_time const& wait_until)
             {
                 if(try_lock())
@@ -147,7 +150,6 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
                 return true;
             }
 
-
             template<typename Duration>
             bool timed_lock(Duration const& timeout)
             {
@@ -158,7 +160,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
             {
                 return timed_lock(system_time(timeout));
             }
-
+#endif
 #ifdef BOOST_THREAD_USES_CHRONO
             template <class Rep, class Period>
             bool try_lock_for(const chrono::duration<Rep, Period>& rel_time)

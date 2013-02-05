@@ -3,7 +3,7 @@
  * Boost Software License, Version 1.0. (See accompanying
  * file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
  * Author: Jeff Garland, Bart Garst
- * $Date: 2008-11-26 13:07:14 -0800 (Wed, 26 Nov 2008) $
+ * $Date: 2012-10-10 12:05:03 -0700 (Wed, 10 Oct 2012) $
  */
 
 #include "boost/date_time/posix_time/posix_time_duration.hpp"
@@ -176,7 +176,16 @@ main()
   }
 #endif  
 
-  time_duration t_11(3600,0,0); 
+  // Test for overflows (ticket #3471)
+  {
+    ptime start(pdalboost::gregorian::date(2000, 1, 1));
+    ptime end(pdalboost::gregorian::date(2000, 5, 1));
+    time_duration td = end - start;
+    ptime end2 = start + microseconds(td.total_microseconds());
+    check("microseconds constructor overflow", end == end2);
+  }
+
+  time_duration t_11(3600,0,0);
   check("3600 hours   ",  t_11.hours() == 3600);
   check("total seconds 3600 hours",  t_11.total_seconds() == 12960000);
 

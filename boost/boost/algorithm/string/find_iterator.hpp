@@ -132,7 +132,10 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
             // increment
             void increment()
             {
-                m_Match=this->do_find(m_Match.end(),m_End);
+                if(m_Match.begin() == m_Match.end())
+                    m_Match=this->do_find(m_Match.end(),m_End);
+                else
+                    m_Match=this->do_find(m_Match.begin()+1,m_End);
             }
 
             // comparison

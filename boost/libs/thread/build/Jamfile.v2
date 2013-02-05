@@ -1,4 +1,4 @@
-# $Id: Jamfile.v2 79373 2012-07-09 05:55:01Z viboes $
+# $Id: Jamfile.v2 82491 2013-01-14 17:17:50Z viboes $
 # Copyright 2006-2007 Roland Schwarz.
 # Copyright 2007 Anthony Williams
 # Copyright 2011-2012 Vicente J.Botet Escriba.
@@ -47,7 +47,10 @@ project boost/thread
       -<tag>@$(BOOST_JAMROOT_MODULE)%$(BOOST_JAMROOT_MODULE).tag
       <tag>@$(__name__).tag
       <toolset>gcc:<cxxflags>-Wno-long-long
-      <define>BOOST_SYSTEM_NO_DEPRECATED
+      #<define>BOOST_THREAD_THROW_IF_PRECONDITION_NOT_SATISFIED
+      #<define>BOOST_SYSTEM_NO_DEPRECATED
+      #<define>BOOST_THREAD_DONT_PROVIDE_INTERRUPTIONS 
+      
       <library>/boost/system//pdalboost_system
        #-pedantic -ansi -std=gnu++0x -Wextra -fpermissive
         <warnings>all
@@ -59,7 +62,7 @@ project boost/thread
 
         <toolset>darwin:<cxxflags>-Wextra
         <toolset>darwin:<cxxflags>-pedantic
-        <toolset>darwin:<cxxflags>-ansi
+        #<toolset>darwin:<cxxflags>-ansi
         <toolset>darwin:<cxxflags>-fpermissive
         <toolset>darwin:<cxxflags>-Wno-long-long
 
@@ -69,7 +72,7 @@ project boost/thread
 
         <toolset>clang:<cxxflags>-Wextra
         <toolset>clang:<cxxflags>-pedantic
-        <toolset>clang:<cxxflags>-ansi
+        #<toolset>clang:<cxxflags>-ansi
         #<toolset>clang:<cxxflags>-fpermissive
         <toolset>clang:<cxxflags>-Wno-long-long
 
@@ -90,6 +93,18 @@ project boost/thread
         <toolset>clang-3.0:<cxxflags>-Wno-delete-non-virtual-dtor
         #<toolset>clang-3.0:<cxxflags>-Wno-unused-function
         #<toolset>clang-3.0:<cxxflags>-Wno-unused-variable
+        
+# Note: Some of the remarks from the Intel compiler are disabled
+# remark #193: zero used for undefined preprocessing identifier "XXX"
+# remark #304: access control not specified ("public" by default)
+# remark #593: variable "XXX" was set but never used
+# remark #1418: external function definition with no prior declaration
+# remark #2415: variable "XXX" of static storage duration was declared but never referenced
+
+        <toolset>intel:<cxxflags>-wd193,304,383,444
+        <toolset>intel:<cxxflags>-wd593,981
+        <toolset>intel:<cxxflags>-wd1418
+        <toolset>intel:<cxxflags>-wd2415 
 
 
     # : default-build <threading>multi
@@ -98,7 +113,9 @@ project boost/thread
       #<link>shared:<define>BOOST_THREAD_DYN_LINK=1
       <link>static:<define>BOOST_THREAD_BUILD_LIB=1
       <link>shared:<define>BOOST_THREAD_BUILD_DLL=1
-      <define>BOOST_SYSTEM_NO_DEPRECATED
+      #<define>BOOST_THREAD_THROW_IF_PRECONDITION_NOT_SATISFIED
+      #<define>BOOST_SYSTEM_NO_DEPRECATED
+      #<define>BOOST_THREAD_DONT_PROVIDE_INTERRUPTIONS 
       <library>/boost/system//pdalboost_system
     ;
 
@@ -208,7 +225,7 @@ rule usage-requirements ( properties * )
         }
     }
 
-    if ! <toolset>vacpp in $(properties) || <toolset-vacpp:version>11.1 in $(properties)
+    if ! <toolset>vacpp in $(properties) || <toolset-vacpp:version>11.1 in $(properties) || <toolset-vacpp:version>12.1.0.1 in $(properties)  
     {
       result += <library>/boost/chrono//boost_chrono ;
     }
@@ -236,10 +253,7 @@ rule requirements ( properties * )
             }
         }
     }
-    if ! <toolset>vacpp in $(properties) || <toolset-vacpp:version>11.1 in $(properties)
-    {
-      result += <library>/boost/chrono//boost_chrono ;
-    }
+    result += <define>BOOST_THREAD_DONT_USE_CHRONO ;
 
     return $(result) ;
 }

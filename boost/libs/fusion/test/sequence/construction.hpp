@@ -57,7 +57,7 @@ test()
 
     FUSION_SEQUENCE<> empty0;
 
-#ifndef TR1_TUPLE_TEST
+#ifndef NO_CONSTRUCT_FROM_NIL
     FUSION_SEQUENCE<> empty1(empty);
 #endif
 

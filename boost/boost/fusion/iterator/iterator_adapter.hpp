@@ -23,8 +23,8 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
         iterator_base_type;
         iterator_base_type iterator_base;
 
-        iterator_adapter(iterator_base_type const& iterator_base)
-            : iterator_base(iterator_base) {}
+        iterator_adapter(iterator_base_type const& iterator_base_)
+            : iterator_base(iterator_base_) {}
 
         // default implementation
         template <typename I1, typename I2>
