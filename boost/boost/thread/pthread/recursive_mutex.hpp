@@ -9,7 +9,9 @@
 #include <pthread.h>
 #include <boost/throw_exception.hpp>
 #include <boost/thread/exceptions.hpp>
-#include <boost/thread/locks.hpp>
+#if defined BOOST_THREAD_PROVIDES_NESTED_LOCKS
+#include <boost/thread/lock_types.hpp>
+#endif
 #include <boost/thread/thread_time.hpp>
 #include <boost/assert.hpp>
 #ifndef _WIN32
@@ -110,7 +112,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
             BOOST_VERIFY(!pthread_mutex_unlock(&m));
         }
 
-        bool try_lock()
+        bool try_lock() BOOST_NOEXCEPT
         {
             int const res=pthread_mutex_trylock(&m);
             BOOST_ASSERT(!res || res==EBUSY);
@@ -167,8 +169,10 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
 
 #endif
 
+#if defined BOOST_THREAD_PROVIDES_NESTED_LOCKS
         typedef unique_lock<recursive_mutex> scoped_lock;
         typedef detail::try_lock_wrapper<recursive_mutex> scoped_try_lock;
+#endif
     };
 
     typedef recursive_mutex recursive_try_mutex;
@@ -232,11 +236,13 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
 #endif
         }
 
+#if defined BOOST_THREAD_USES_DATETIME
         template<typename TimeDuration>
         bool timed_lock(TimeDuration const & relative_time)
         {
             return timed_lock(get_system_time()+relative_time);
         }
+#endif
 
 #ifdef BOOST_USE_PTHREAD_RECURSIVE_TIMEDLOCK
         void lock()
@@ -294,7 +300,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
             BOOST_VERIFY(!pthread_cond_signal(&cond));
         }
 
-        bool try_lock()
+        bool try_lock() BOOST_NOEXCEPT
         {
             pdalboost::pthread::pthread_mutex_scoped_lock const local_lock(&m);
             if(is_locked && !pthread_equal(owner,pthread_self()))
@@ -334,12 +340,13 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
 
 #endif
 
+#if defined BOOST_THREAD_USES_DATETIME
         bool timed_lock(system_time const & abs_time)
         {
-            struct timespec const ts=detail::get_timespec(abs_time);
+            struct timespec const ts=detail::to_timespec(abs_time);
             return do_try_lock_until(ts);
         }
-
+#endif
 #ifdef BOOST_THREAD_USES_CHRONO
         template <class Rep, class Period>
         bool try_lock_for(const chrono::duration<Rep, Period>& rel_time)
@@ -363,12 +370,9 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
         }
         bool try_lock_until(const chrono::time_point<chrono::system_clock, chrono::nanoseconds>& tp)
         {
-          using namespace chrono;
-          nanoseconds d = tp.time_since_epoch();
-          timespec ts;
-          seconds s = duration_cast<seconds>(d);
-          ts.tv_sec = static_cast<long>(s.count());
-          ts.tv_nsec = static_cast<long>((d - s).count());
+          //using namespace chrono;
+          chrono::nanoseconds d = tp.time_since_epoch();
+          timespec ts = pdalboost::detail::to_timespec(d);
           return do_try_lock_until(ts);
         }
 #endif
@@ -380,9 +384,11 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
             return &m;
         }
 
+#if defined BOOST_THREAD_PROVIDES_NESTED_LOCKS
         typedef unique_lock<recursive_timed_mutex> scoped_timed_lock;
         typedef detail::try_lock_wrapper<recursive_timed_mutex> scoped_try_lock;
         typedef scoped_timed_lock scoped_lock;
+#endif
     };
 
 }

@@ -58,7 +58,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
                 {
                     // Copy the beginning of the sequence
                     Output = std::copy( LastMatch, M.begin(), Output );
-                    // Copy formated result
+                    // Copy formatted result
                     Output = std::copy( ::pdalboost::begin(M.format_result()), ::pdalboost::end(M.format_result()), Output );
 
                     // Proceed to the next match
@@ -134,9 +134,9 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
                 while( M )
                 {
                     // Copy the beginning of the sequence
-                    insert( Output, ::pdalboost::end(Output), LastMatch, M.begin() );
-                    // Copy formated result
-                    insert( Output, ::pdalboost::end(Output), M.format_result() );
+                    pdalboost::algorithm::detail::insert( Output, ::pdalboost::end(Output), LastMatch, M.begin() );
+                    // Copy formatted result
+                    pdalboost::algorithm::detail::insert( Output, ::pdalboost::end(Output), M.format_result() );
 
                     // Proceed to the next match
                     LastMatch=M.end();
@@ -218,7 +218,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
                     // Adjust search iterator
                     SearchIt=M.end();
 
-                    // Copy formated replace to the storage
+                    // Copy formatted replace to the storage
                     ::pdalboost::algorithm::detail::copy_to_storage( Storage, M.format_result() );
 
                     // Find range for a next match

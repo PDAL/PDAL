@@ -7,17 +7,31 @@
 // (C) Copyright 2011-2012 Vicente J. Botet Escriba
 
 #include <boost/thread/detail/config.hpp>
-#include <boost/intrusive_ptr.hpp>
 #include <boost/thread/thread_time.hpp>
 #include <boost/thread/win32/thread_primitives.hpp>
 #include <boost/thread/win32/thread_heap_alloc.hpp>
+
+#include <boost/intrusive_ptr.hpp>
 #ifdef BOOST_THREAD_USES_CHRONO
 #include <boost/chrono/system_clocks.hpp>
 #endif
+
+#include <map>
+#include <vector>
+#include <utility>
+
 #include <boost/config/abi_prefix.hpp>
+
+#ifdef BOOST_MSVC
+#pragma warning(push)
+#pragma warning(disable:4251)
+#endif
 
 namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
 {
+  class condition_variable;
+  class mutex;
+
   class thread_attributes {
   public:
       thread_attributes() BOOST_NOEXCEPT {
@@ -58,32 +72,58 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
 
     namespace detail
     {
+        struct future_object_base;
+        struct tss_cleanup_function;
         struct thread_exit_callback_node;
-        struct tss_data_node;
+        struct tss_data_node
+        {
+            pdalboost::shared_ptr<pdalboost::detail::tss_cleanup_function> func;
+            void* value;
+
+            tss_data_node(pdalboost::shared_ptr<pdalboost::detail::tss_cleanup_function> func_,
+                          void* value_):
+                func(func_),value(value_)
+            {}
+        };
 
         struct thread_data_base;
         void intrusive_ptr_add_ref(thread_data_base * p);
         void intrusive_ptr_release(thread_data_base * p);
 
-        struct BOOST_SYMBOL_VISIBLE thread_data_base
+        struct BOOST_THREAD_DECL thread_data_base
         {
             long count;
             detail::win32::handle_manager thread_handle;
-            detail::win32::handle_manager interruption_handle;
             pdalboost::detail::thread_exit_callback_node* thread_exit_callbacks;
-            pdalboost::detail::tss_data_node* tss_data;
-            bool interruption_enabled;
+            std::map<void const*,pdalboost::detail::tss_data_node> tss_data;
             unsigned id;
+            typedef std::vector<std::pair<condition_variable*, mutex*>
+            //, hidden_allocator<std::pair<condition_variable*, mutex*> >
+            > notify_list_t;
+            notify_list_t notify;
+
+            typedef std::vector<shared_ptr<future_object_base> > async_states_t;
+            async_states_t async_states_;
+//#if defined BOOST_THREAD_PROVIDES_INTERRUPTIONS
+            // These data must be at the end so that the access to the other fields doesn't change
+            // when BOOST_THREAD_PROVIDES_INTERRUPTIONS is defined
+            // Another option is to have them always
+            detail::win32::handle_manager interruption_handle;
+            bool interruption_enabled;
+//#endif
 
             thread_data_base():
                 count(0),thread_handle(detail::win32::invalid_handle_value),
-                interruption_handle(create_anonymous_event(detail::win32::manual_reset_event,detail::win32::event_initially_reset)),
-                thread_exit_callbacks(0),tss_data(0),
-                interruption_enabled(true),
-                id(0)
+                thread_exit_callbacks(0),tss_data(),
+                id(0),
+                notify(),
+                async_states_()
+//#if defined BOOST_THREAD_PROVIDES_INTERRUPTIONS
+                , interruption_handle(create_anonymous_event(detail::win32::manual_reset_event,detail::win32::event_initially_reset))
+                , interruption_enabled(true)
+//#endif
             {}
-            virtual ~thread_data_base()
-            {}
+            virtual ~thread_data_base();
 
             friend void intrusive_ptr_add_ref(thread_data_base * p)
             {
@@ -98,15 +138,28 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
                 }
             }
 
+#if defined BOOST_THREAD_PROVIDES_INTERRUPTIONS
             void interrupt()
             {
                 BOOST_VERIFY(detail::win32::SetEvent(interruption_handle)!=0);
             }
-
+#endif
             typedef detail::win32::handle native_handle_type;
 
             virtual void run()=0;
+
+            void notify_all_pdalboostat_thread_exit(condition_variable* cv, mutex* m)
+            {
+              notify.push_back(std::pair<condition_variable*, mutex*>(cv, m));
+            }
+
+            void make_ready_pdalboostat_thread_exit(shared_ptr<future_object_base> as)
+            {
+              async_states_.push_back(as);
+            }
+
         };
+        BOOST_THREAD_DECL thread_data_base* get_current_thread_data();
 
         typedef pdalboost::intrusive_ptr<detail::thread_data_base> thread_data_ptr;
 
@@ -205,7 +258,6 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
         {
             interruptible_wait(detail::win32::invalid_handle_value,abs_time);
         }
-
         template<typename TimeDuration>
         inline BOOST_SYMBOL_VISIBLE void sleep(TimeDuration const& rel_time)
         {
@@ -224,6 +276,10 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
     }
 
 }
+
+#ifdef BOOST_MSVC
+#pragma warning(pop)
+#endif
 
 #include <boost/config/abi_suffix.hpp>
 

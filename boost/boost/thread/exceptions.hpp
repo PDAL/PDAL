@@ -28,8 +28,10 @@
 namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
 {
 
+#if defined BOOST_THREAD_PROVIDES_INTERRUPTIONS
     class BOOST_SYMBOL_VISIBLE thread_interrupted
     {};
+#endif
 
     class BOOST_SYMBOL_VISIBLE thread_exception:
         public system::system_error

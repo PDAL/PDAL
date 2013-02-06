@@ -3,7 +3,7 @@
  * Boost Software License, Version 1.0. (See accompanying
  * file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
  * Author: Jeff Garland, Bart Garst
- * $Date: 2009-06-04 01:24:49 -0700 (Thu, 04 Jun 2009) $
+ * $Date: 2012-09-30 16:25:22 -0700 (Sun, 30 Sep 2012) $
  */
 
 #include "boost/date_time/gregorian/gregorian.hpp"
@@ -79,7 +79,7 @@ int main(){
 
     date_input_facet* f = new date_input_facet();
     f->get(sitr, str_end, ss, m);
-    check("No extra characters consumed", m = greg_month(Mar) && *sitr == '.');
+    check("No extra characters consumed", m == greg_month(Mar) && *sitr == '.');
   }
  
   // set up initial objects

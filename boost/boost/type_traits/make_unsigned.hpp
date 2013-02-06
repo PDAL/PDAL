@@ -72,7 +72,15 @@ struct make_unsigned_imp
                      is_same<t_no_cv, long>,
                      unsigned long,
 #if defined(BOOST_HAS_LONG_LONG)
+#ifdef BOOST_HAS_INT128
+                     typename mpl::if_c<
+                        sizeof(t_no_cv) == sizeof(pdalboost::ulong_long_type), 
+                        pdalboost::ulong_long_type, 
+                        pdalboost::uint128_type
+                     >::type
+#else
                      pdalboost::ulong_long_type
+#endif
 #elif defined(BOOST_HAS_MS_INT64)
                      unsigned __int64
 #else
@@ -96,7 +104,15 @@ struct make_unsigned_imp
                      sizeof(t_no_cv) == sizeof(unsigned long),
                      unsigned long,
 #if defined(BOOST_HAS_LONG_LONG)
+#ifdef BOOST_HAS_INT128
+                     typename mpl::if_c<
+                        sizeof(t_no_cv) == sizeof(pdalboost::ulong_long_type), 
+                        pdalboost::ulong_long_type, 
+                        pdalboost::uint128_type
+                     >::type
+#else
                      pdalboost::ulong_long_type
+#endif
 #elif defined(BOOST_HAS_MS_INT64)
                      unsigned __int64
 #else

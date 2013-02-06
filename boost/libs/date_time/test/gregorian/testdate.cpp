@@ -6,6 +6,7 @@
  */
 
 #include <iostream>
+#include <boost/cstdint.hpp>
 #include "boost/date_time/gregorian/gregorian.hpp"
 #include "../testfrmwk.hpp"
 
@@ -227,11 +228,14 @@ main()
 
   // most of this testing is in the gregorian_calendar tests
   std::cout << d15.julian_day() << std::endl;
-  check_equal("check julian day   ", d15.julian_day(), 2232400);
+  check_equal("check julian day   ", d15.julian_day(), 
+      static_cast<pdalboost::uint32_t>(2232400));
   check_equal("check modjulian day   ", d15.modjulian_day(), -167601);
   date d16(2004,2,29);
-  check_equal("check julian day   ", d16.julian_day(), 2453065);
-  check_equal("check modjulian day   ", d16.modjulian_day(), 53064);
+  check_equal("check julian day   ", d16.julian_day(), 
+      static_cast<pdalboost::uint32_t>(2453065));
+  check_equal("check modjulian day   ", d16.modjulian_day(), 
+      static_cast<pdalboost::uint32_t>(53064));
 
   // most of this testing is in the gregorian_calendar tests
   date d31(2000, Jun, 1);
@@ -281,6 +285,7 @@ main()
     date d(neg_infin);
     tm d_tm = to_tm(d);
     check("Exception not thrown (special_value to_tm)", false);
+    std::cout << d_tm.tm_sec << std::endl; //does nothing useful but stops compiler from complaining about unused d_tm
   }catch(std::out_of_range& e){
     check("Caught expected exception (special_value to_tm)", true);
   }catch(...){

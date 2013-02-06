@@ -8,6 +8,10 @@
 # bring in rules for testing
 import testing ;
 
+project
+    : requirements
+    ;
+
 {
     test-suite fusion :
 
@@ -76,6 +80,7 @@ import testing ;
     [ run sequence/deque_iterator.cpp :  :  :  : ]
     [ run sequence/deque_make.cpp :  :  :  : ]
     [ run sequence/deque_misc.cpp :  :  :  : ]
+    [ run sequence/deque_move.cpp :  :  :  : ]
     [ run sequence/deque_mutate.cpp :  :  :  : ]
     [ run sequence/deque_tie.cpp :  :  :  : ]
     [ run sequence/deque_value_at.cpp :  :  :  : ]
@@ -109,6 +114,7 @@ import testing ;
     [ run sequence/vector_iterator.cpp :  :  :  : ]
     [ run sequence/vector_make.cpp :  :  :  : ]
     [ run sequence/vector_misc.cpp :  :  :  : ]
+    [ run sequence/vector_move.cpp :  :  :  : ]
     [ run sequence/vector_mutate.cpp :  :  :  : ]
     [ run sequence/vector_n.cpp :  :  :  : ]
     [ run sequence/vector_tie.cpp :  :  :  : ]

@@ -12,6 +12,7 @@
 #include <boost/throw_exception.hpp>
 
 #include <boost/thread/mutex.hpp>
+#include <boost/thread/lock_types.hpp>
 #include <boost/thread/condition_variable.hpp>
 #include <string>
 #include <stdexcept>
@@ -33,7 +34,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
 
         bool wait()
         {
-            pdalboost::mutex::scoped_lock lock(m_mutex);
+            pdalboost::unique_lock<pdalboost::mutex> lock(m_mutex);
             unsigned int gen = m_generation;
 
             if (--m_count == 0)

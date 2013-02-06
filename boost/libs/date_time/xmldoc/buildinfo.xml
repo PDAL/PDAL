@@ -21,7 +21,7 @@
   <anchor id="overview" />
   <bridgehead renderas="sect3">Overview</bridgehead>
   <para>
-    The library has a few functions that require the creation of a library file (mostly to_string, from_string functions).  Most library users can make effective use of the library WITHOUT building the library, but simply including the required headers. If the library is needed, the Jamfile in the build directory will produce a "static" library (libboost_date_time) and a "dynamic/shared" library (boost_date_time) that contains these functions. 
+    The library has a few functions that require the creation of a library file (mostly to_string, from_string functions).  Most library users can make effective use of the library WITHOUT building the library, but simply including the required headers. If the library is needed, the Jamfile in the build directory will produce a "static" library (libboost_date_time) and a "dynamic/shared" library (boost_date_time) that contains these functions. Note that to use the library without the library (particularly on windows) may require using the BOOST_DATE_TIME_NO_LIB flag to the compilation options.
   </para>
   
   <anchor id="compile_options" />

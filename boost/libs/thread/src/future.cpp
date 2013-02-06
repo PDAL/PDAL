@@ -7,7 +7,7 @@
 #ifndef BOOST_NO_EXCEPTIONS
 
 
-#include <boost/thread/future.hpp>
+#include <boost/thread/future_error_code.hpp>
 
 namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
 {
@@ -19,12 +19,12 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
       public pdalboost::system::error_category
     {
     public:
-        virtual const char* name() const; //BOOST_NOEXCEPT;
+        virtual const char* name() const BOOST_NOEXCEPT;
         virtual std::string message(int ev) const;
     };
 
     const char*
-    future_error_category::name() const //BOOST_NOEXCEPT
+    future_error_category::name() const BOOST_NOEXCEPT
     {
         return "future";
     }
@@ -51,7 +51,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
   }
 
   const system::error_category&
-  future_category()
+  future_category() BOOST_NOEXCEPT
   {
       static thread_detail::future_error_category f;
       return f;

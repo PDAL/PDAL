@@ -48,15 +48,23 @@ set(PDALBOOST_SOURCES
     ./libs/program_options/src/value_semantic.cpp
     ./libs/program_options/src/variables_map.cpp
     ./libs/program_options/src/winmain.cpp
-    ./libs/serialization/src/archive_exception.cpp
-    ./libs/serialization/src/basic_archive.cpp
-    ./libs/serialization/src/basic_iarchive.cpp
-    ./libs/serialization/src/basic_iserializer.cpp
-    ./libs/serialization/src/basic_oarchive.cpp
-    ./libs/serialization/src/basic_oserializer.cpp
-    ./libs/serialization/src/basic_pointer_iserializer.cpp
-    ./libs/serialization/src/basic_pointer_oserializer.cpp
-    ./libs/serialization/src/basic_serializer_map.cpp
+    ./libs/regex/src/c_regex_traits.cpp
+    ./libs/regex/src/cpp_regex_traits.cpp
+    ./libs/regex/src/cregex.cpp
+    ./libs/regex/src/fileiter.cpp
+    ./libs/regex/src/icu.cpp
+    ./libs/regex/src/instances.cpp
+    ./libs/regex/src/posix_api.cpp
+    ./libs/regex/src/regex.cpp
+    ./libs/regex/src/regex_debug.cpp
+    ./libs/regex/src/regex_raw_buffer.cpp
+    ./libs/regex/src/regex_traits_defaults.cpp
+    ./libs/regex/src/static_mutex.cpp
+    ./libs/regex/src/usinstances.cpp
+    ./libs/regex/src/w32_regex_traits.cpp
+    ./libs/regex/src/wc_regex_traits.cpp
+    ./libs/regex/src/wide_posix_api.cpp
+    ./libs/regex/src/winstances.cpp
     ./libs/serialization/src/basic_text_iprimitive.cpp
     ./libs/serialization/src/basic_text_oprimitive.cpp
     ./libs/serialization/src/basic_text_wiprimitive.cpp
@@ -86,6 +94,8 @@ set(PDALBOOST_SOURCES
     ./libs/serialization/src/xml_oarchive.cpp
     ./libs/serialization/src/xml_wgrammar.cpp
     ./libs/serialization/src/xml_wiarchive.cpp
+    ./libs/smart_ptr/src/sp_collector.cpp
+    ./libs/smart_ptr/src/sp_debug_hooks.cpp
     ./libs/system/src/error_code.cpp
     ./libs/test/src/compiler_log_formatter.cpp
     ./libs/test/src/cpp_main.cpp
@@ -114,10 +124,12 @@ if(WIN32)
        ./libs/thread/src/win32/thread.cpp
        ./libs/filesystem/src/windows_file_codecvt.hpp
        ./libs/filesystem/src/windows_file_codecvt.cpp
+       ./libs/thread/src/future.cpp
        ./libs/thread/src/win32/tss_dll.cpp
        ./libs/thread/src/win32/tss_pe.cpp)
 else()
   list(APPEND PDALBOOST_SOURCES
+       ./libs/thread/src/future.cpp
        ./libs/thread/src/pthread/once.cpp
        ./libs/thread/src/pthread/thread.cpp)
 endif(WIN32)
