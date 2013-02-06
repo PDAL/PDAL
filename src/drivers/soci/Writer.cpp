@@ -220,14 +220,63 @@ bool Writer::CheckTableExists(std::string const& name)
 void Writer::CreatePCSchema(Schema const& buffer_schema, boost::uint32_t srid)
 {
     pdal::Schema output_schema(buffer_schema);
-    std::string xml = pdal::Schema::to_xml(output_schema);
+    bool bCreatePCPointSchema = true;
+    long pcid;
     
-    std::ostringstream oss;
+    // Check exsisting schema docs to avoid duplication
+    long schema_count;
+    m_session->once << "SELECT count(pcid) FROM pointcloud_formats", ::soci::into(schema_count);
     
-    oss << "INSERT INTO pointcloud_formats (pcid, srid, schema) VALUES (" << "1" << ", " << srid << ", :xml)";
+    if (schema_count > 0)
+    {
+        std::vector<std::string> pg_schemas(schema_count);
+        std::vector<long> pg_schema_ids(schema_count);
+        m_session->once << "SELECT pcid, schema FROM pointcloud_formats", ::soci::into(pg_schema_ids), ::soci::into(pg_schemas);
+        
+        for(int i=0; i<schema_count; ++i)
+        {
+            if (pdal::Schema::from_xml(pg_schemas[i]) == output_schema)
+            {
+                bCreatePCPointSchema = false;
+                pcid = pg_schema_ids[i];
+                break;
+            }
+        }
+    }
     
-    m_session->once << oss.str(), ::soci::use(xml);
-    oss.str("");
+    if (bCreatePCPointSchema)
+    {
+        std::string id_gen;
+        if (schema_count == 0)
+        {
+            id_gen = "1";
+        } else
+        {
+            id_gen = "SELECT max(pcid) + 1 FROM pointcloud_formats";
+        }
+        
+        std::string xml = pdal::Schema::to_xml(output_schema);
+        std::ostringstream oss;
+        
+        oss << "INSERT INTO pointcloud_formats (pcid, srid, schema) VALUES ((" << id_gen << "), " << srid << ", :xml) RETURNING pcid";
+        
+        m_session->once << oss.str(), ::soci::use(xml), ::soci::into(pcid);
+        oss.str("");
+    }
+    
+    log()->get(logDEBUG) << "Point cloud id was " << pcid << std::endl;
+    try
+    {
+        Option& pc_id = getOptions().getOptionByRef("pc_id");
+        pc_id.setValue(pcid);
+    }
+    catch (pdal::option_not_found&)
+    {
+        Option pc_id("pc_id", pcid, "Point Cloud Id");
+        getOptions().add(pc_id);
+    }
+    
+    
 }
 
 void Writer::CreateBlockTable(std::string const& name, boost::uint32_t srid)
