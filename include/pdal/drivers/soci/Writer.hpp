@@ -98,7 +98,10 @@ private:
                         boost::uint8_t** point_data,
                         boost::uint32_t& point_data_len,
                         boost::uint32_t& schema_byte_size);
-    bool WriteBlock(PointBuffer const& buffer);                        
+    bool WriteBlock(PointBuffer const& buffer);
+    
+    // Postgres PCPoint
+    void CreatePCSchema(Schema const& buffer_schema, boost::uint32_t srid);
     
 #ifdef PDAL_HAVE_SOCI
     ::soci::session* m_session;
@@ -110,6 +113,7 @@ private:
     bool m_doCreateIndex;
     pdal::Bounds<double> m_bounds; // Bounds of the entire point cloud    
     bool m_sdo_pc_is_initialized;
+    bool m_use_PCPoint;
 };
 
 }

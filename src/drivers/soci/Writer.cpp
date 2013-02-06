@@ -113,7 +113,7 @@ void Writer::initialize()
         oss << "Unable to connect to database with error '" << e.what() << "'";
         throw pdal_error(oss.str());
     }
-    
+    m_use_PCPoint = getOptions().getValueOrDefault<bool>("use_pcpoint", false);
     m_session->set_log_stream(&(log()->get(logDEBUG2)));
     return;
 }
@@ -132,29 +132,6 @@ Options Writer::getDefaultOptions()
 
 void Writer::writeBegin(boost::uint64_t /*targetNumPointsToWrite*/)
 {
-    std::string block_table = getOptions().getValueOrThrow<std::string>("block_table");
-    std::string cloud_table = getOptions().getValueOrThrow<std::string>("cloud_table");
-    std::string cloud_column = getOptions().getValueOrDefault<std::string>("cloud_column", "id");
-    
-    m_session->begin();
-    
-    bool bHaveBlockTable = CheckTableExists(block_table);
-    bool bHaveCloudTable = CheckTableExists(cloud_table);
-    
-    if (getOptions().getValueOrDefault<bool>("overwrite", true))
-    {
-        if (bHaveBlockTable)
-        {
-            DeleteBlockTable(cloud_table, cloud_column, block_table);
-            bHaveBlockTable = false;
-        }
-        if (bHaveCloudTable)
-        {
-            DeleteCloudTable(cloud_table, cloud_column);
-            bHaveCloudTable = false;
-        }
-    }
-    
     std::string pre_sql = getOptions().getValueOrDefault<std::string>("pre_sql", "");
     if (pre_sql.size())
     {
@@ -169,17 +146,43 @@ void Writer::writeBegin(boost::uint64_t /*targetNumPointsToWrite*/)
         m_session->once << sql;
     }
     
-    if (!bHaveCloudTable)
+    if (!m_use_PCPoint)
     {
+        std::string block_table = getOptions().getValueOrThrow<std::string>("block_table");
+        std::string cloud_table = getOptions().getValueOrThrow<std::string>("cloud_table");
+        std::string cloud_column = getOptions().getValueOrDefault<std::string>("cloud_column", "id");
+        
+        m_session->begin();
+        
+        bool bHaveBlockTable = CheckTableExists(block_table);
+        bool bHaveCloudTable = CheckTableExists(cloud_table);
+        
+        if (getOptions().getValueOrDefault<bool>("overwrite", true))
+        {
+            if (bHaveBlockTable)
+            {
+                DeleteBlockTable(cloud_table, cloud_column, block_table);
+                bHaveBlockTable = false;
+            }
+            if (bHaveCloudTable)
+            {
+                DeleteCloudTable(cloud_table, cloud_column);
+                bHaveCloudTable = false;
+            }
+        }
+        
+        if (!bHaveCloudTable)
+        {
         CreateCloudTable(cloud_table, getOptions().getValueOrDefault<boost::uint32_t>("srid", 4326));        
+        }
+        
+        if (!bHaveBlockTable)
+        {
+            m_doCreateIndex = true;
+            CreateBlockTable(block_table, getOptions().getValueOrDefault<boost::uint32_t>("srid", 4326));
+        }
     }
     
-    if (!bHaveBlockTable)
-    {
-        m_doCreateIndex = true;
-        CreateBlockTable(block_table, getOptions().getValueOrDefault<boost::uint32_t>("srid", 4326));
-    }
-        
     return;
 }
 
@@ -212,6 +215,19 @@ bool Writer::CheckTableExists(std::string const& name)
 
     return false;
 
+}
+
+void Writer::CreatePCSchema(Schema const& buffer_schema, boost::uint32_t srid)
+{
+    pdal::Schema output_schema(buffer_schema);
+    std::string xml = pdal::Schema::to_xml(output_schema);
+    
+    std::ostringstream oss;
+    
+    oss << "INSERT INTO pointcloud_formats (pcid, srid, schema) VALUES (" << "1" << ", " << srid << ", :xml)";
+    
+    m_session->once << oss.str(), ::soci::use(xml);
+    oss.str("");
 }
 
 void Writer::CreateBlockTable(std::string const& name, boost::uint32_t srid)
@@ -659,7 +675,14 @@ void Writer::writeBufferBegin(PointBuffer const& data)
 {
     if (m_sdo_pc_is_initialized) return;
 
-    CreateCloud(data.getSchema());
+    if (m_use_PCPoint)
+    {
+        CreatePCSchema(data.getSchema(), getOptions().getValueOrDefault<boost::uint32_t>("srid", 4326));
+    } else
+    {
+        CreateCloud(data.getSchema());
+    }
+    
     m_sdo_pc_is_initialized = true;
 
     return;
