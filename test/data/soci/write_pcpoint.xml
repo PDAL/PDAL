@@ -11,7 +11,7 @@
             CLOUD
         </Option>
         <Option name="block_table">
-            BLOCKS
+            PCBLOCKS
         </Option>
         <Option name="cloud_column">
             CLOUD_ID
@@ -33,6 +33,9 @@
         </Option>
         <Option name="is3d">
             true
+        </Option>
+        <Option name="pack_ignored_fields">
+            false
         </Option>        
             <Filter type="filters.inplacereprojection">
                 <Option name="out_srs">

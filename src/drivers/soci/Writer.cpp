@@ -39,6 +39,7 @@
 #include <pdal/FileUtils.hpp>
 
 #include <boost/algorithm/string.hpp>
+#include <boost/format.hpp>
 
 #include <sstream>
 
@@ -138,49 +139,53 @@ void Writer::writeBegin(boost::uint64_t /*targetNumPointsToWrite*/)
         std::string sql = FileUtils::readFileAsString(pre_sql);
         if (!sql.size())
         {
-            // if there was no file to read because the data in pre_sql was 
-            // actually the sql code the user wanted to run instead of the 
+            // if there was no file to read because the data in pre_sql was
+            // actually the sql code the user wanted to run instead of the
             // filename to open, we'll use that instead.
             sql = pre_sql;
         }
         m_session->once << sql;
     }
     
+    std::string block_table = getOptions().getValueOrThrow<std::string>("block_table");
+    std::string cloud_table = getOptions().getValueOrThrow<std::string>("cloud_table");
+    std::string cloud_column = getOptions().getValueOrDefault<std::string>("cloud_column", "id");
+    
+    m_session->begin();
+    bool bHaveBlockTable = CheckTableExists(block_table);
+    bool bHaveCloudTable;
     if (!m_use_PCPoint)
     {
-        std::string block_table = getOptions().getValueOrThrow<std::string>("block_table");
-        std::string cloud_table = getOptions().getValueOrThrow<std::string>("cloud_table");
-        std::string cloud_column = getOptions().getValueOrDefault<std::string>("cloud_column", "id");
-        
-        m_session->begin();
-        
-        bool bHaveBlockTable = CheckTableExists(block_table);
-        bool bHaveCloudTable = CheckTableExists(cloud_table);
-        
-        if (getOptions().getValueOrDefault<bool>("overwrite", true))
+        bHaveCloudTable = CheckTableExists(cloud_table);
+    } else
+    {
+        // Stop the cloud table from being created for PCPoints, as it is not needed
+        bHaveCloudTable = true;
+    }
+    
+    if (getOptions().getValueOrDefault<bool>("overwrite", true))
+    {
+        if (bHaveBlockTable)
         {
-            if (bHaveBlockTable)
-            {
-                DeleteBlockTable(cloud_table, cloud_column, block_table);
-                bHaveBlockTable = false;
-            }
-            if (bHaveCloudTable)
-            {
-                DeleteCloudTable(cloud_table, cloud_column);
-                bHaveCloudTable = false;
-            }
+            DeleteBlockTable(cloud_table, cloud_column, block_table);
+            bHaveBlockTable = false;
         }
-        
-        if (!bHaveCloudTable)
+        if (bHaveCloudTable && !m_use_PCPoint)
         {
-        CreateCloudTable(cloud_table, getOptions().getValueOrDefault<boost::uint32_t>("srid", 4326));        
+            DeleteCloudTable(cloud_table, cloud_column);
+            bHaveCloudTable = false;
         }
-        
-        if (!bHaveBlockTable)
-        {
-            m_doCreateIndex = true;
-            CreateBlockTable(block_table, getOptions().getValueOrDefault<boost::uint32_t>("srid", 4326));
-        }
+    }
+    
+    if (!bHaveCloudTable)
+    {
+        CreateCloudTable(cloud_table, getOptions().getValueOrDefault<boost::uint32_t>("srid", 4326));
+    }
+    
+    if (!bHaveBlockTable)
+    {
+        m_doCreateIndex = true;
+        CreateBlockTable(block_table, getOptions().getValueOrDefault<boost::uint32_t>("srid", 4326));
     }
     
     return;
@@ -283,9 +288,9 @@ void Writer::CreateBlockTable(std::string const& name, boost::uint32_t srid)
 {
     std::ostringstream oss;
     
-    if (m_type == DATABASE_ORACLE) 
+    if (m_type == DATABASE_ORACLE)
     {
-        // We just create a new block table as a copy of 
+        // We just create a new block table as a copy of
         // the SDO_PC_BLK_TYPE
         oss << "CREATE TABLE " << name << " AS SELECT * FROM MDSYS.SDO_PC_BLK_TABLE";
         m_session->once << oss.str();
@@ -293,29 +298,37 @@ void Writer::CreateBlockTable(std::string const& name, boost::uint32_t srid)
     }
     else if (m_type == DATABASE_POSTGRESQL)
     {
-        std::string cloud_column = getOptions().getValueOrDefault<std::string>("cloud_column", "id");
-        std::string cloud_table = getOptions().getValueOrThrow<std::string>("cloud_table");
-        
-        oss << "CREATE TABLE " << boost::to_lower_copy(name) 
+        if (m_use_PCPoint)
+        {
+            oss << "CREATE TABLE " << boost::to_lower_copy(name) << " (pa PCPATCH)";
+            m_session->once << oss.str();
+            oss.str("");
+        } else
+        {
+            std::string cloud_column = getOptions().getValueOrDefault<std::string>("cloud_column", "id");
+            std::string cloud_table = getOptions().getValueOrThrow<std::string>("cloud_table");
+            
+            oss << "CREATE TABLE " << boost::to_lower_copy(name)
             << "(" << boost::to_lower_copy(cloud_column)  << " INTEGER REFERENCES " << boost::to_lower_copy(cloud_table)  <<","
             // << " obj_id INTEGER,"
             << " block_id INTEGER,"
             << " num_points INTEGER,"
             << " points bytea"
             << ")";
-
-        m_session->once << oss.str();
-        oss.str("");
-        
-        {
-            bool is3d = getOptions().getValueOrDefault<bool>("is3d", false);
-            boost::uint32_t nDim = is3d ? 3 : 2;
-
-            oss << "SELECT AddGeometryColumn('', '" << boost::to_lower_copy(name) 
-                << "'," << "'extent'" << "," 
-                << srid << ", 'POLYGON', " << nDim << ")";
+            
             m_session->once << oss.str();
             oss.str("");
+            
+            {
+                bool is3d = getOptions().getValueOrDefault<bool>("is3d", false);
+                boost::uint32_t nDim = is3d ? 3 : 2;
+                
+                oss << "SELECT AddGeometryColumn('', '" << boost::to_lower_copy(name)
+                << "'," << "'extent'" << "," 
+                << srid << ", 'POLYGON', " << nDim << ")";
+                m_session->once << oss.str();
+                oss.str("");
+            }
         }
     }
 }
@@ -695,14 +708,17 @@ void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
     
     if (m_doCreateIndex)
     {
-        std::string block_table_name = getOptions().getValueOrThrow<std::string>("block_table");
-        std::string cloud_table_name = getOptions().getValueOrThrow<std::string>("cloud_table");
-        boost::uint32_t srid = getOptions().getValueOrThrow<boost::uint32_t>("srid");
-        bool is3d = getOptions().getValueOrDefault<bool>("is3d", false);
-        
-        CreateIndexes(block_table_name, "extent", is3d);
-        if (m_type == DATABASE_POSTGRESQL)
-            CreateIndexes(cloud_table_name, "extent", is3d, false);
+        if (!m_use_PCPoint)
+        {
+            std::string block_table_name = getOptions().getValueOrThrow<std::string>("block_table");
+            std::string cloud_table_name = getOptions().getValueOrThrow<std::string>("cloud_table");
+            boost::uint32_t srid = getOptions().getValueOrThrow<boost::uint32_t>("srid");
+            bool is3d = getOptions().getValueOrDefault<bool>("is3d", false);
+            
+            CreateIndexes(block_table_name, "extent", is3d);
+            if (m_type == DATABASE_POSTGRESQL)
+                CreateIndexes(cloud_table_name, "extent", is3d, false);
+        }
     }
     
     if (m_type == DATABASE_ORACLE)
@@ -856,42 +872,75 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     boost::int32_t blk_id  = buffer.getField<boost::int32_t>(blockDim, 0);    
     boost::int32_t obj_id = getOptions().getValueOrThrow<boost::int32_t>("pc_id");
     boost::int64_t num_points = static_cast<boost::int64_t>(buffer.getNumPoints());
+    
     if (m_type == DATABASE_POSTGRESQL)
     {
-        std::string cloud_column = getOptions().getValueOrDefault<std::string>("cloud_column", "id");
-        bool is3d = getOptions().getValueOrDefault<bool>("is3d", false);
-        std::string force = is3d ? "ST_Force_3D" : "ST_Force_2D";
-        
-        std::stringstream oss;
-        oss << "INSERT INTO " << boost::to_lower_copy(block_table) 
-            << " ("<< boost::to_lower_copy(cloud_column) <<", block_id, num_points, points, extent) VALUES (" 
-            << " :obj_id, :block_id, :num_points, decode(:hex, 'hex'), " << force << "(ST_GeometryFromText(:extent,:srid)))";
-
-        
-        std::vector<boost::uint8_t> block_data;
-        for (boost::uint32_t i = 0; i < point_data_length; ++i )
+        if (m_use_PCPoint)
         {
-            block_data.push_back(point_data[i]);
-        }
-        std::string hex = Utils::binary_to_hex_string(block_data);
-        std::cout << "hex: " << hex.substr(0, 30) << std::endl;
-        boost::uint32_t srid = getOptions().getValueOrDefault<boost::uint32_t>("srid", 4326);
-        
-        std::string extent = buffer.calculateBounds(is3d).toWKT();
-        log()->get(logDEBUG) << "extent: " << extent << std::endl;
-        ::soci::statement st = (m_session->prepare << oss.str(), ::soci::use(obj_id, "obj_id"), ::soci::use(blk_id, "block_id"), ::soci::use(num_points, "num_points"), ::soci::use(hex,"hex"), ::soci::use(extent, "extent"), ::soci::use(srid, "srid"));
-        st.execute(true);
-        oss.str("");
-        
-        // ::soci::blob blob(*m_session);
-        // ::soci::indicator ind;
-        // oss << "SELECT POINTS from "<< boost::to_lower_copy(block_table) << " WHERE block_id =:blk_id and obj_id = :obj_id";
-        // m_session->once << oss.str(), ::soci::into(blob, ind), ::soci::use(blk_id), ::soci::use(obj_id);
-        // assert(blob.get_len() == 0);
-        // 
-        // blob.write(0, (const char*)point_data, point_data_length);
+            std::stringstream oss;
+            oss << "INSERT INTO " << boost::to_lower_copy(block_table) << " (pa) VALUES (:hex)";
+            
+            std::vector<boost::uint8_t> block_data;
+            for (boost::uint32_t i = 0; i < point_data_length; ++i)
+            {
+                block_data.push_back(point_data[i]);
+            }
+            
+//            std::vector<unsigned char> options;
+            std::stringstream options;
+            #ifdef BOOST_LITTLE_ENDIAN
+                options << boost::format("%02x") % 0;
+            #elif BOOST_BIG_ENDIAN
+                options << boost::format("%02x") % 1;
+            #endif
+            options << boost::format("%08x") % obj_id;
+            // TODO: Read a flag from the pipeline and support compression
+            boost::uint32_t compression = 0;
+            options << boost::format("%08x") % compression;
+            options << boost::format("%08x") % num_points;
 
-        // m_session->commit();
+            std::stringstream hex;
+            hex << options.str() << Utils::binary_to_hex_string(block_data);
+            ::soci::statement st = (m_session->prepare << oss.str(), ::soci::use(hex.str(),"hex"));
+            st.execute(true);
+            oss.str("");
+        } else
+        {
+            std::string cloud_column = getOptions().getValueOrDefault<std::string>("cloud_column", "id");
+            bool is3d = getOptions().getValueOrDefault<bool>("is3d", false);
+            std::string force = is3d ? "ST_Force_3D" : "ST_Force_2D";
+            
+            std::stringstream oss;
+            oss << "INSERT INTO " << boost::to_lower_copy(block_table)
+            << " ("<< boost::to_lower_copy(cloud_column) <<", block_id, num_points, points, extent) VALUES ("
+            << " :obj_id, :block_id, :num_points, decode(:hex, 'hex'), " << force << "(ST_GeometryFromText(:extent,:srid)))";
+            
+            
+            std::vector<boost::uint8_t> block_data;
+            for (boost::uint32_t i = 0; i < point_data_length; ++i )
+            {
+                block_data.push_back(point_data[i]);
+            }
+            std::string hex = Utils::binary_to_hex_string(block_data);
+            std::cout << "hex: " << hex.substr(0, 30) << std::endl;
+            boost::uint32_t srid = getOptions().getValueOrDefault<boost::uint32_t>("srid", 4326);
+            
+            std::string extent = buffer.calculateBounds(is3d).toWKT();
+            log()->get(logDEBUG) << "extent: " << extent << std::endl;
+            ::soci::statement st = (m_session->prepare << oss.str(), ::soci::use(obj_id, "obj_id"), ::soci::use(blk_id, "block_id"), ::soci::use(num_points, "num_points"), ::soci::use(hex,"hex"), ::soci::use(extent, "extent"), ::soci::use(srid, "srid"));
+            st.execute(true);
+            oss.str("");
+            
+            // ::soci::blob blob(*m_session);
+            // ::soci::indicator ind;
+            // oss << "SELECT POINTS from "<< boost::to_lower_copy(block_table) << " WHERE block_id =:blk_id and obj_id = :obj_id";
+            // m_session->once << oss.str(), ::soci::into(blob, ind), ::soci::use(blk_id), ::soci::use(obj_id);
+            // assert(blob.get_len() == 0);
+            //
+            // blob.write(0, (const char*)point_data, point_data_length);
+            
+            // m_session->commit();
+        }
     }
     // bool bUsePartition = m_block_table_partition_column.size() != 0;
     // 
