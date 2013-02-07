@@ -31,6 +31,7 @@ bool readtest(double& x, double& y)
 {
     static int cnt = 0;
 
+    /**
     static double buf[][2] =
     {
         { 0.0, 0.0 },
@@ -52,6 +53,15 @@ bool readtest(double& x, double& y)
         { -1.0, 3.0 },
         { -1.0, 6.0 },
         { -1.0, 9.0 },
+    };
+    **/
+
+    static double buf[][2] =
+    {
+        { 0.0, 0.0 },
+        { 5.0, 5.0 },
+        { 5.0, 20.0 },
+        { 12.0, 14.0 }
     };
 
     static int num = sizeof(buf) / sizeof(buf[0]);
@@ -134,7 +144,7 @@ bool read(double& x, double& y)
     {
         in.open("fastpoints.small");
     }
-    if (in.eof())
+    if (in.eof() || i == 100000)
     {
         in.close();
         done = true;

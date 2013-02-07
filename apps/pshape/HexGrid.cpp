@@ -27,16 +27,19 @@ void HexGrid::addPoint(Point p)
             {
                 m_min = h;
             }
-            // Go through the neighbors, telling each one that we are now
-            // dense.  If you draw out a honeycomb of hexes and label the
-            // sides, you'll see that shared sides of adjoining hexes always
-            // are have side numbers that are offset by three from the same
-            // side in it's neighbor.
-            for (int i = 0; i < 6; ++i)
+            if (h->positiveRoot())
             {
-                Coord c = h->neighborCoord(i);
-                Hexagon *neighbor = getHexagon(c);
-                neighbor->setDenseNeighbor(i + 3 % 6);
+                m_pos_roots.insert(h);
+            }
+
+            // We only mark dense neighbors for hexes above and below
+            // (the ones on sides 0 and 3).
+            Coord c = h->neighborCoord(3);
+            Hexagon *neighbor = getHexagon(c);
+            neighbor->setDenseNeighbor(0);
+            if (neighbor->dense() && !neighbor->positiveRoot())
+            {
+                m_pos_roots.erase(neighbor);
             }
         }
     }
@@ -88,6 +91,7 @@ Hexagon *HexGrid::findHexagon(Point p)
         // to the hexagon in the map.
         HexMap::value_type hexpair(Hexagon::key(0, 0), Hexagon(0, 0));
         HexMap::iterator it = m_hexes.insert(hexpair).first;
+        m_min = &it->second;
         return &it->second;
     }
 
@@ -194,20 +198,58 @@ void HexGrid::drawHexagons()
 //
 void HexGrid::findShapes()
 {
+//    if (m_pos_roots.empty())
     if (!m_min)
     {
         cerr << "No areas of sufficient density - no shapes.\n"
             "Decrease density or area size.";
+        return;
     }
 
+    /**
+    while (m_pos_roots.size())
+    {
+        findShape(*m_pos_roots.begin());
+    }
+    **/
+//    findShape(m_min);
+    findShape(m_min);
+
+    /**
+    while (m_neg_roots.size())
+    {
+        findHole(*m_neg_roots.begin())
+    }
+    **/
+}
+
+void HexGrid::findShape(Hexagon *hex)
+{
     Path p;
-    Segment first(m_min, 0);
+    Segment first(hex, 0);
+    Segment cur(first);
+    do {
+        p.push_back(cur);
+        m_draw.drawSegment(cur);
+        Segment next = cur.leftClockwise(this);
+        if ( !next.hex()->dense() )
+        {
+            next = cur.rightClockwise(this); 
+        }
+        cur = next;
+    } while (cur != first);
+}
+
+void HexGrid::findHole(Hexagon *hex)
+{
+    Path p;
+    Segment first(hex, 0);
     Segment cur(first);
     do {
         p.push_back(cur);
         m_draw.drawSegment(cur);
         Segment next = cur.rightAntiClockwise(this);
-        if ( !next.hex()->dense() )
+        if ( next.hex()->dense() )
         {
             next = cur.leftAntiClockwise(this); 
         }

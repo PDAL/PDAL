@@ -2,6 +2,7 @@
 #define INCLUDED_PSHAPE_HEX_GRID_HPP
 
 #include <boost/unordered_map.hpp>
+#include <boost/unordered_set.hpp>
 
 #include "Hexagon.hpp"
 #include "Mathpair.hpp"
@@ -16,8 +17,7 @@ class HexGrid
 {
 public:
     HexGrid(double height, int dense_limit) :
-        m_height(height), m_min( NULL ), m_dense_limit(dense_limit),
-        m_draw(this)
+        m_height(height), m_dense_limit(dense_limit), m_draw(this), m_min(NULL)
     {
         m_width = (3 / (2 * SQRT_3)) * m_height;
         m_offsets[0] = Point(0, 0);
@@ -51,6 +51,8 @@ public:
 
 private:
     Hexagon *findHexagon(Point p);
+    void findShape(Hexagon *hex);
+    void findHole(Hexagon *hex);
 
     /// Height of the hexagons in the grid (2x apothem)
     double m_height;
@@ -63,12 +65,17 @@ private:
     /// Map of hexagons based on keys.
     typedef boost::unordered_map<uint64_t, Hexagon> HexMap;
     HexMap m_hexes;
-    /// Minimum hexagon (see Hexagon::less())
-    Hexagon *m_min;
+    /// Set of root hexagons for positive paths.
+    typedef boost::unordered_set<Hexagon *> HexSet;
+    HexSet m_pos_roots;
+    /// Set of root hexagon for negative paths (holes).
+    HexSet m_neg_roots;
     /// Number of points that must like in a hexagon for it to be interesting.
     int m_dense_limit;
     /// Drawing interface.
     Draw m_draw;
+    /// Minimum hex.
+    Hexagon *m_min;
 };
 
 } // namespace

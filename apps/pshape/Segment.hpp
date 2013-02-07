@@ -1,6 +1,7 @@
 #ifndef INCLUDED_PSHAPE_SEGMENT_HPP
 #define INCLUDED_PSHAPE_SEGMENT_HPP
 
+#include <iostream>
 #include <stdlib.h>
 #include <vector>
 
@@ -33,9 +34,12 @@ public:
 
     Segment rightAntiClockwise(HexGrid *grid);
     Segment leftAntiClockwise(HexGrid *grid);
+    Segment rightClockwise(HexGrid *grid);
+    Segment leftClockwise(HexGrid *grid);
 
     friend bool operator == (const Segment& s1, const Segment &s2);
     friend bool operator != (const Segment& s1, const Segment &s2);
+    friend std::ostream& operator << (std::ostream& os, const Segment &s);
 };
 
 typedef std::vector<Segment> Path;
