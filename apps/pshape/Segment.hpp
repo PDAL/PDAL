@@ -32,6 +32,8 @@ public:
     int side()
         { return m_side; }
 
+    bool possibleRoot(HexGrid *grid);
+
     Segment rightAntiClockwise(HexGrid *grid);
     Segment leftAntiClockwise(HexGrid *grid);
     Segment rightClockwise(HexGrid *grid);

@@ -73,16 +73,21 @@ void Draw::drawHexagon(Hexagon *hex_p, bool fill)
         cairo_set_source_rgb(m_cairo_p, .3, .3, 0);
         cairo_fill(m_cairo_p);
     }
+    if ( hex_p->possibleRoot())
+    {
+        Segment s(hex_p, 0);
+        drawSegment(s, Color(1, 0, 0));
+    }
     
     cairo_stroke(m_cairo_p);
     cairo_surface_flush(m_surface_p);
     XFlush(m_dpy_p);
 }
 
-void Draw::drawSegment(Segment s)
+void Draw::drawSegment(Segment s, Color c)
 {
     cairo_set_line_width(m_cairo_p, 2);
-    cairo_set_source_rgb(m_cairo_p, 0, 0, 1);
+    cairo_set_source_rgb(m_cairo_p, c.m_red, c.m_blue, c.m_green);
 
     Hexagon *hex_p = s.hex();
     Point pos;

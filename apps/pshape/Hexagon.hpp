@@ -59,19 +59,14 @@ public:
     bool surrounded() const
         { return (m_dense && (m_dense_neighbors == 0x3F)); }
 
-    bool positiveRoot() const
+    bool possibleRoot() const
     {
         const int TOP = (1 << 0);     // Top is side 0.
         return (m_dense && ((m_dense_neighbors & TOP) == 0) );
     }
 
-    bool negativeRoot() const
-    {
-        const int BOTTOM = (1 << 3);  // Bottom is side 3.
-        return (m_dense && ((m_dense_neighbors & BOTTOM) == 0) );
-    }
-
     bool less(Hexagon *h) const;
+    bool yless(Hexagon *h) const;
     Coord neighborCoord(int dir) const;
 
 private:

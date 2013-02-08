@@ -5,6 +5,17 @@
 namespace Pshape
 {
 
+// The segment is normalized if necessary.
+bool Segment::possibleRoot(HexGrid *grid)
+{
+    if (m_side == 3)
+    {
+        m_side = 0;
+        m_hex = grid->getHexagon(m_hex->x(), m_hex->y() + 1);
+    }
+    return m_hex->possibleRoot() && (m_side == 0);
+}
+
 // When we're traversing a hexagon counter-clockwise, determine
 // the next segment we'll traverse assume we're taking a right turn.
 Segment Segment::rightAntiClockwise(HexGrid *grid)

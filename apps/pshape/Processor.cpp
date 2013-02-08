@@ -144,7 +144,7 @@ bool read(double& x, double& y)
     {
         in.open("fastpoints.small");
     }
-    if (in.eof() || i == 100000)
+    if (in.eof() || i == 500000)
     {
         in.close();
         done = true;

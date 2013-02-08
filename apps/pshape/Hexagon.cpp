@@ -33,6 +33,19 @@ bool Hexagon::less(Hexagon *h) const
     return x() < h->x();
 }
 
+bool Hexagon::yless(Hexagon *h) const
+{
+    if (y() < h->y())
+    {
+        return true;
+    }
+    if (y() > h->y())
+    {
+        return false;
+    }
+    return (xeven() && h->xodd());
+}
+
 // Find the x and Y in hex coordinates of the hexagon next to this hexagon
 // in the direction specified.
 Coord Hexagon::neighborCoord(int dir) const

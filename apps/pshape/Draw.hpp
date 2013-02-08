@@ -13,6 +13,17 @@ class HexGrid;
 class Hexagon;
 class Segment;
 
+struct Color
+{
+    Color(double red, double blue, double green) :
+        m_red(red), m_blue(blue), m_green(green)
+    {}
+
+    double m_red;
+    double m_blue;
+    double m_green;
+};
+
 class Draw
 {
 public:
@@ -20,7 +31,7 @@ public:
     ~Draw();
 
     void drawHexagon(Hexagon *hex_p, bool fill = false);
-    void drawSegment(Segment s);
+    void drawSegment(Segment s, Color c = Color(0, 0, 1));
     void drawPoint(Point p);
 
 private:
