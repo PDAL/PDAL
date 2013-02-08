@@ -713,7 +713,11 @@ void Writer::CreateCloud(Schema const& buffer_schema)
         
         long id;
         std::string cloud_column = getOptions().getValueOrDefault<std::string>("cloud_column", "id");        
-        oss << "INSERT INTO " << boost::to_lower_copy(cloud_table)  << "(" << boost::to_lower_copy(cloud_column) << ", block_table, schema) VALUES (DEFAULT,'" << boost::to_lower_copy(block_table)  << "',:xml) RETURNING " << boost::to_lower_copy(cloud_column);
+        oss << "INSERT INTO " << boost::to_lower_copy(cloud_table)  
+			<< "(" << boost::to_lower_copy(cloud_column) 
+			<< ", block_table, schema) VALUES (DEFAULT,'" 
+			<< boost::to_lower_copy(block_table)  
+			<< "',:xml) RETURNING " << boost::to_lower_copy(cloud_column);
         std::string xml = pdal::Schema::to_xml(output_schema);
         m_session->once << oss.str(), ::soci::use(xml), ::soci::into(id);
         oss.str("");
@@ -742,8 +746,13 @@ void Writer::CreateCloud(Schema const& buffer_schema)
             bool is3d = getOptions().getValueOrDefault<bool>("is3d", false);
             std::string force = is3d ? "ST_Force_3D" : "ST_Force_2D";
             
-            oss << "UPDATE " << boost::to_lower_copy(cloud_table)  << " SET extent="<< force << "(ST_GeometryFromText(:wkt,:srid)) where "<<boost::to_lower_copy(cloud_column) <<"=:id";
-            m_session->once << oss.str(), ::soci::use(bounds, "wkt"), ::soci::use(srid,"srid"), ::soci::use(id, "id");
+            oss << "UPDATE " 
+				<< boost::to_lower_copy(cloud_table) 
+				<< " SET extent="<< force 
+				<< "(ST_GeometryFromText(:wkt,:srid)) where "
+				<< boost::to_lower_copy(cloud_column) <<"=:id";
+            
+			m_session->once << oss.str(), ::soci::use(bounds, "wkt"), ::soci::use(srid,"srid"), ::soci::use(id, "id");
             
         }
     }
@@ -802,11 +811,11 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
             block_data.push_back(point_data[i]);
         }
         std::string hex = Utils::binary_to_hex_string(block_data);
-        std::cout << "hex: " << hex.substr(0, 30) << std::endl;
+        //std::cout << "hex: " << hex.substr(0, 30) << std::endl;
         boost::uint32_t srid = getOptions().getValueOrDefault<boost::uint32_t>("srid", 4326);
         
         std::string extent = buffer.calculateBounds(is3d).toWKT();
-        log()->get(logDEBUG) << "extent: " << extent << std::endl;
+        //log()->get(logDEBUG) << "extent: " << extent << std::endl;
         ::soci::statement st = (m_session->prepare << oss.str(), ::soci::use(obj_id, "obj_id"), ::soci::use(blk_id, "block_id"), ::soci::use(num_points, "num_points"), ::soci::use(hex,"hex"), ::soci::use(extent, "extent"), ::soci::use(srid, "srid"));
         st.execute(true);
         oss.str("");
