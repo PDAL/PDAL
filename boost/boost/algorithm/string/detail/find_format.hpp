@@ -56,7 +56,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
                 // Copy the beginning of the sequence
                 Output = std::copy( ::pdalboost::begin(Input), ::pdalboost::begin(M), Output );
                 // Format find result
-                // Copy formated result
+                // Copy formatted result
                 Output = std::copy( ::pdalboost::begin(M.format_result()), ::pdalboost::end(M.format_result()), Output );
                 // Copy the rest of the sequence
                 Output = std::copy( M.end(), ::pdalboost::end(Input), Output );
@@ -118,11 +118,11 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
 
                 InputT Output;
                 // Copy the beginning of the sequence
-                insert( Output, ::pdalboost::end(Output), ::pdalboost::begin(Input), M.begin() );
-                // Copy formated result
-                insert( Output, ::pdalboost::end(Output), M.format_result() );
+                pdalboost::algorithm::detail::insert( Output, ::pdalboost::end(Output), ::pdalboost::begin(Input), M.begin() );
+                // Copy formatted result
+                pdalboost::algorithm::detail::insert( Output, ::pdalboost::end(Output), M.format_result() );
                 // Copy the rest of the sequence
-                insert( Output, ::pdalboost::end(Output), M.end(), ::pdalboost::end(Input) );
+                pdalboost::algorithm::detail::insert( Output, ::pdalboost::end(Output), M.end(), ::pdalboost::end(Input) );
 
                 return Output;
             }

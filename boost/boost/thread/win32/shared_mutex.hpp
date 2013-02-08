@@ -136,12 +136,12 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
             BOOST_VERIFY(timed_lock_shared(::pdalboost::detail::get_system_time_sentinel()));
         }
 
+#if defined BOOST_THREAD_USES_DATETIME
         template<typename TimeDuration>
         bool timed_lock_shared(TimeDuration const & relative_time)
         {
             return timed_lock_shared(get_system_time()+relative_time);
         }
-
         bool timed_lock_shared(pdalboost::system_time const& wait_until)
         {
             for(;;)
@@ -220,6 +220,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
                 BOOST_ASSERT(res==0);
             }
         }
+#endif
 
 #ifdef BOOST_THREAD_USES_CHRONO
         template <class Rep, class Period>

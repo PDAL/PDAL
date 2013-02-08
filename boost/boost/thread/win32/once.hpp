@@ -18,6 +18,7 @@
 #include <boost/detail/interlocked.hpp>
 #include <boost/thread/win32/thread_primitives.hpp>
 #include <boost/thread/win32/interlocked_read.hpp>
+#include <boost/detail/no_exceptions_support.hpp>
 
 #include <boost/config/abi_prefix.hpp>
 
@@ -157,9 +158,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
             status=BOOST_INTERLOCKED_COMPARE_EXCHANGE(&flag.status,running_value,0);
             if(!status)
             {
-#ifndef BOOST_NO_EXCEPTIONS
-                try // BOOST_NO_EXCEPTIONS protected
-#endif
+                BOOST_TRY
                 {
                     if(!event_handle)
                     {
@@ -187,8 +186,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
                     }
                     break;
                 }
-#ifndef BOOST_NO_EXCEPTIONS
-                catch(...) // BOOST_NO_EXCEPTIONS protected
+                BOOST_CATCH(...)
                 {
                     BOOST_INTERLOCKED_EXCHANGE(&flag.status,0);
                     if(!event_handle)
@@ -199,9 +197,9 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
                     {
                         ::pdalboost::detail::win32::SetEvent(event_handle);
                     }
-                    throw; // BOOST_NO_EXCEPTIONS protected
+                    BOOST_RETHROW
                 }
-#endif
+                BOOST_CATCH_END
             }
 
             if(!counted)
