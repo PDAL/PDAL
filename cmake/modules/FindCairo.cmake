@@ -9,6 +9,8 @@
 #  CAIRO_LIBRARIES - The libraries needed to use CAIRO
 #  CAIRO_VERSION - This is set to $major.$minor.$revision (eg. 0.9.8)
 
+# Taken from https://raw.github.com/Eyescale/Lunchbox/master/CMake/FindCairo.cmake
+# if a cmake-official FindCairo shows up, we'll use that -- hobu 2/10/2013
 #=============================================================================
 # Copyright 2012 Dmitry Baryshnikov <polimax at mail dot ru>
 #
