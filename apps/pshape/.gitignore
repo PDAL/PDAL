@@ -1,2 +1,5 @@
 pshape
 *.swp
+core
+fastpoints
+fastpoints.*

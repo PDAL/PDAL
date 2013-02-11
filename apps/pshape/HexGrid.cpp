@@ -27,16 +27,20 @@ void HexGrid::addPoint(Point p)
             {
                 m_min = h;
             }
-            // Go through the neighbors, telling each one that we are now
-            // dense.  If you draw out a honeycomb of hexes and label the
-            // sides, you'll see that shared sides of adjoining hexes always
-            // are have side numbers that are offset by three from the same
-            // side in it's neighbor.
-            for (int i = 0; i < 6; ++i)
+            m_miny = std::min(m_miny, h->y() - 1);
+            if (h->possibleRoot())
             {
-                Coord c = h->neighborCoord(i);
-                Hexagon *neighbor = getHexagon(c);
-                neighbor->setDenseNeighbor(i + 3 % 6);
+                m_pos_roots.insert(h);
+            }
+
+            // We only mark dense neighbors for hexes above and below
+            // (the ones on sides 0 and 3).
+            Coord c = h->neighborCoord(3);
+            Hexagon *neighbor = getHexagon(c);
+            neighbor->setDenseNeighbor(0);
+            if (neighbor->dense() && !neighbor->possibleRoot())
+            {
+                m_pos_roots.erase(neighbor);
             }
         }
     }
@@ -88,6 +92,7 @@ Hexagon *HexGrid::findHexagon(Point p)
         // to the hexagon in the map.
         HexMap::value_type hexpair(Hexagon::key(0, 0), Hexagon(0, 0));
         HexMap::iterator it = m_hexes.insert(hexpair).first;
+        m_min = &it->second;
         return &it->second;
     }
 
@@ -194,25 +199,89 @@ void HexGrid::drawHexagons()
 //
 void HexGrid::findShapes()
 {
-    if (!m_min)
+    if (m_pos_roots.empty())
     {
         cerr << "No areas of sufficient density - no shapes.\n"
             "Decrease density or area size.";
+        return;
     }
 
+    while (m_pos_roots.size())
+    {
+        Hexagon *h = *m_pos_roots.begin();
+        Orientation orient = calcOrientation(h);
+        if (orient == CLOCKWISE)
+        {
+            findShape(h);
+        }
+        else
+        {
+            findHole(getHexagon(h->x(), h->y() - 1));
+        }
+    }
+}
+
+void HexGrid::findShape(Hexagon *hex)
+{
     Path p;
-    Segment first(m_min, 0);
+    Segment first(hex, 0);
     Segment cur(first);
     do {
+        cleanPossibleRoot(cur);
+        p.push_back(cur);
+        m_draw.drawSegment(cur);
+        Segment next = cur.leftClockwise(this);
+        if ( !next.hex()->dense() )
+        {
+            next = cur.rightClockwise(this); 
+        }
+        cur = next;
+    } while (cur != first);
+}
+
+void HexGrid::findHole(Hexagon *hex)
+{
+using namespace std;
+    Path p;
+    Segment first(hex, 3);
+    Segment cur(first);
+    do {
+        cleanPossibleRoot(cur);
         p.push_back(cur);
         m_draw.drawSegment(cur);
         Segment next = cur.rightAntiClockwise(this);
-        if ( !next.hex()->dense() )
+        if ( next.hex()->dense() )
         {
             next = cur.leftAntiClockwise(this); 
         }
         cur = next;
     } while (cur != first);
+}
+
+void HexGrid::cleanPossibleRoot(Segment s)
+{
+    if (s.possibleRoot(this))
+    {
+        m_pos_roots.erase(s.hex());
+    }
+}
+
+// Determine if this root hexagon is part of a hole (anticlockwise) or
+// a regular polygon (clockwise)
+Orientation HexGrid::calcOrientation(Hexagon *h)
+{
+    int crossings = 0;
+
+    int y = h->y();
+    for (int y = h->y() - 1; y >= m_miny; y--)
+    {
+        Hexagon *test = getHexagon(h->x(), y);
+        if (test->possibleRoot())
+        {
+            crossings++;
+        }
+    }
+    return ((crossings % 2) ? ANTICLOCKWISE : CLOCKWISE);
 }
 
 void HexGrid::dumpInfo()
