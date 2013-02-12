@@ -123,7 +123,9 @@ IteratorBase::IteratorBase( pdal::filters::HexBin const& filter,
                             PointBuffer& buffer)
 : m_filter(filter)
 {
-    
+    Schema const& schema = buffer.getSchema();
+    m_dim_x = &schema.getDimension("X");
+    m_dim_y = &schema.getDimension("Y");
 }
 
 
@@ -146,11 +148,37 @@ boost::uint32_t HexBin::readBufferImpl(PointBuffer& buffer)
     
     const boost::uint32_t numPoints = getPrevIterator().read(buffer);
     
-    // HexBin::projectData(buffer, numPoints);
-
+    
+    for (boost::uint32_t i = 0; i < buffer.getNumPoints(); ++i)
+    {
+        int32_t xi = buffer.getField<int32_t>(*m_dim_x, i);
+        int32_t yi = buffer.getField<int32_t>(*m_dim_y, i);
+        double x = m_dim_x->applyScaling<int32_t>(xi);
+        double y = m_dim_y->applyScaling<int32_t>(yi);
+        m_samples.push_back(Pshape::Point(x,y));
+    }
+        
     return numPoints;
 }
 
+void HexBin::readBufferEndImpl(PointBuffer&)
+{
+
+    // double hexsize = Pshape::computeHexSize(samples);
+    double hexsize =5 ;
+    int dense_limit = 10;
+    m_grid = new Pshape::HexGrid(hexsize, dense_limit);
+    for (std::vector<Pshape::Point>::size_type i = 0; i < m_samples.size(); ++i)
+    {
+        m_grid->addPoint(m_samples[i]);
+    }
+
+    m_grid->drawHexagons();
+//    grid.dumpInfo();
+    m_grid->findShapes();
+    
+}
+    
 
 boost::uint64_t HexBin::skipImpl(boost::uint64_t count)
 {

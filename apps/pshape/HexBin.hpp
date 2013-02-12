@@ -40,6 +40,8 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include <Mathpair.hpp>
+#include <HexGrid.hpp>
 
 namespace pdal
 {
@@ -98,7 +100,12 @@ public:
 
 protected:
     pdal::filters::HexBin const& m_filter;
-
+    Dimension const* m_dim_x;
+    Dimension const* m_dim_y;
+    
+    std::vector<Pshape::Point> m_samples;
+    Pshape::HexGrid* m_grid;
+    
 };
 
 } // inplacereprojection
@@ -113,6 +120,10 @@ public:
     HexBin(const pdal::filters::HexBin& filter, PointBuffer& buffer);
     ~HexBin(){};
 
+protected:
+    // virtual void readBufferBeginImpl(PointBuffer&);
+    virtual void readBufferEndImpl(PointBuffer&);
+    
 private:
     boost::uint64_t skipImpl(boost::uint64_t);
     boost::uint32_t readBufferImpl(PointBuffer&);
