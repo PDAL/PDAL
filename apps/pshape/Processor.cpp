@@ -163,7 +163,7 @@ void process()
     int cnt = 0;
     double x, y;
 
-    while (read(x, y) && (cnt < SAMPLE_COUNT))
+    while (readlas(x, y) && (cnt < SAMPLE_COUNT))
     {
         samples.push_back(Point(x,y));
         cnt++;
@@ -178,7 +178,7 @@ void process()
     {
         grid.addPoint(samples[i]);
     }
-    while (read(x, y))
+    while (readlas(x, y))
     {
         grid.addPoint(Point(x, y));
     }
@@ -188,8 +188,8 @@ void process()
 /**
     grid.extractShapes();
 **/
-    while (true)
-        ;
+    // while (true)
+    //     ;
 }
 
 } //namespace Pshape

@@ -1,10 +1,15 @@
 link_directories( ../../bin )
-include_directories (. ../../include ../..)
+
+find_package(X11)
+find_package(cairo)
+
+
+include_directories (. ../../include ${X11_X11_INCLUDE_PATH})
 
 set( sources
     Draw.cpp
-    Hexagon.cpp
     HexGrid.cpp
+    Hexagon.cpp
     Processor.cpp
     Segment.cpp
     ../AppSupport.cpp
@@ -19,11 +24,23 @@ set( headers
     ../AppSupport.hpp
 )
 
+
+set(APPS_CPP_DEPENDENCIES
+    ${PDAL_LIB_NAME}
+    ${X11_X11_LIB}
+    ${TIFF_LIBRARY}
+    ${GEOTIFF_LIBRARY}
+    ${GDAL_LIBRARY}
+    ${SPATIALINDEX_LIBRARY}
+    ${LASZIP_LIBRARY}
+    ${Boost_LIBRARIES}
+    ${FREEGLUT_LIBRARY})
+
+
 set( libs
-    libpdal.so
-    libcairo.so
-    libX11.so
+    ${CAIRO_LIBRARIES}
+    ${X11_X11_LIB}
 )
 
 add_executable(pshape ${sources} ${headers} )
-target_link_libraries(pshape ${libs})
+target_link_libraries(pshape ${libs}  ${APPS_CPP_DEPENDENCIES})
