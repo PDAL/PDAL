@@ -37,6 +37,7 @@
 #include <pdal/StageFactory.hpp>
 #include <pdal/pdal_macros.hpp>
 #include <pdal/FileUtils.hpp>
+#include <pdal/Endian.hpp>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
@@ -871,7 +872,7 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     
     boost::int32_t blk_id  = buffer.getField<boost::int32_t>(blockDim, 0);    
     boost::int32_t obj_id = getOptions().getValueOrThrow<boost::int32_t>("pc_id");
-    boost::int64_t num_points = static_cast<boost::int64_t>(buffer.getNumPoints());
+    boost::int32_t num_points = static_cast<boost::int32_t>(buffer.getNumPoints());
     
     if (m_type == DATABASE_POSTGRESQL)
     {
@@ -886,16 +887,20 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
                 block_data.push_back(point_data[i]);
             }
             
-//            std::vector<unsigned char> options;
-            std::stringstream options;
-            #ifdef BOOST_LITTLE_ENDIAN
-                options << boost::format("%02x") % 0;
-            #elif BOOST_BIG_ENDIAN
-                options << boost::format("%02x") % 1;
-            #endif
-            options << boost::format("%08x") % obj_id;
             // TODO: Read a flag from the pipeline and support compression
             boost::uint32_t compression = 0;
+            
+            std::stringstream options;
+            #ifdef BOOST_LITTLE_ENDIAN
+                options << boost::format("%02x") % 1;
+                SWAP_ENDIANNESS(obj_id);
+                SWAP_ENDIANNESS(compression);
+                SWAP_ENDIANNESS(num_points);
+            #elif BOOST_BIG_ENDIAN
+                options << boost::format("%02x") % 0;
+            #endif
+            
+            options << boost::format("%08x") % obj_id;
             options << boost::format("%08x") % compression;
             options << boost::format("%08x") % num_points;
 
