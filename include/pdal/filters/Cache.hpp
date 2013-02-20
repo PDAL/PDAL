@@ -67,7 +67,8 @@ public:
     virtual void initialize();
     static Options getDefaultOptions();
 
-    boost::uint32_t getCacheBlockSize() const;
+    inline boost::uint32_t getCacheBlockSize() const { return m_cacheBlockSize; }
+    inline boost::uint32_t getMaxCacheBlocks() const { return m_maxCacheBlocks; }
 
     // this is const only because the m_cache itself is mutable
     void addToCache(boost::uint64_t pointIndex, const PointBuffer& data) const;
