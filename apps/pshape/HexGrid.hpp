@@ -4,26 +4,22 @@
 #include <boost/unordered_map.hpp>
 #include <boost/unordered_set.hpp>
 
+#include "Draw.hpp"
 #include "Hexagon.hpp"
 #include "Mathpair.hpp"
-#include "Draw.hpp"
+#include "Path.hpp"
+#include "Segment.hpp"
 
 namespace Pshape
 {
 
 static const double SQRT_3 = 1.732050808; 
 
-enum Orientation
-{
-    CLOCKWISE,
-    ANTICLOCKWISE
-};
-
 class HexGrid
 {
 public:
     HexGrid(double height, int dense_limit) :
-        m_height(height), m_dense_limit(dense_limit), m_draw(this), m_min(NULL),
+        m_height(height), m_dense_limit(dense_limit), m_draw(this),
         m_miny(1)
     {
         m_width = (3 / (2 * SQRT_3)) * m_height;
@@ -38,6 +34,7 @@ public:
     bool dense(Hexagon *h);
     void addPoint(Point p);
     void findShapes();
+    void findParentPaths();
     void extractShapes();
     void dumpInfo();
     void drawHexagons();
@@ -60,8 +57,9 @@ private:
     Hexagon *findHexagon(Point p);
     void findShape(Hexagon *hex);
     void findHole(Hexagon *hex);
-    Orientation calcOrientation(Hexagon *hex);
-    void cleanPossibleRoot(Segment s);
+    void cleanPossibleRoot(Segment s, Path *p);
+    void findParentPath(Path *p);
+    void markNeighborBelow(Hexagon *hex);
 
     /// Height of the hexagons in the grid (2x apothem)
     double m_height;
@@ -74,15 +72,18 @@ private:
     /// Map of hexagons based on keys.
     typedef boost::unordered_map<uint64_t, Hexagon> HexMap;
     HexMap m_hexes;
-    /// Set of root hexagons for positive paths.
+    /// Set of dense hexagons with non-dense neighbors above.
     typedef boost::unordered_set<Hexagon *> HexSet;
     HexSet m_pos_roots;
+    /// Map of roots and their associated paths.
+    typedef boost::unordered_map<Hexagon *, Path *> HexPathMap;
+    HexPathMap m_hex_paths;
+    /// List of paths
+    std::vector<Path *> m_paths;
     /// Number of points that must like in a hexagon for it to be interesting.
     int m_dense_limit;
     /// Drawing interface.
     Draw m_draw;
-    /// Minimum hex.
-    Hexagon *m_min;
     /// Minimum y - 1.
     int m_miny;
 };

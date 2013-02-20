@@ -182,9 +182,11 @@ void process()
     {
         grid.addPoint(Point(x, y));
     }
+cerr << "Drawing hexes!\n";
     grid.drawHexagons();
 //    grid.dumpInfo();
     grid.findShapes();
+    grid.findParentPaths();
 /**
     grid.extractShapes();
 **/
