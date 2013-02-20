@@ -353,7 +353,6 @@ set(PDAL_NITF_HEADERS ${PDAL_HEADERS_DIR}/${PDAL_NITF_PATH})
 set(PDAL_NITF_SRC ${PROJECT_SOURCE_DIR}/src/${PDAL_NITF_PATH})
 
 set(PDAL_DRIVERS_NITF_HPP
-  ${PDAL_NITF_SRC}/mpg_nitflib.hpp
   ${PDAL_NITF_SRC}/nitflib.h
   ${PDAL_NITF_SRC}/NitfFile.hpp
   ${PDAL_NITF_HEADERS}/Reader.hpp
@@ -361,9 +360,6 @@ set(PDAL_DRIVERS_NITF_HPP
 )
 
 set (PDAL_DRIVERS_NITF_CPP 
-  ${PDAL_NITF_SRC}/mpg_nitfdes.cpp
-  ${PDAL_NITF_SRC}/mpg_nitffile.cpp
-  ${PDAL_NITF_SRC}/mpg_nitfimage.cpp
   ${PDAL_NITF_SRC}/NitfFile.cpp
   ${PDAL_NITF_SRC}/Reader.cpp
   ${PDAL_NITF_SRC}/Writer.cpp
@@ -488,7 +484,7 @@ set(PDAL_CONFIG_HPP
   ${PDAL_HEADERS_DIR}/pdal_export.hpp
   ${PDAL_HEADERS_DIR}/pdal_internal.hpp
   ${PDAL_HEADERS_DIR}/pdal_config.hpp
-  ${PROJECT_BINARY_DIR}/pdal_defines.h
+  ${PROJECT_BINARY_DIR}/include/pdal/pdal_defines.h
 )
 
 set (PDAL_CONFIG_CPP 
@@ -545,6 +541,9 @@ set (APPS_CPP_DEPENDENCIES "${PDAL_LIB_NAME}" CACHE INTERNAL "libraries to link"
 set(PDAL_SOURCES
   ${PDAL_HPP}
   ${PDAL_CPP})
+
+# see https://github.com/PDAL/PDAL/issues/108 for discussion on this
+#SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "../pdal_defines.h;../include/pdal/pdal_defines.h")
 
 # NOTE:
 # This hack is required to correctly link static into shared library.
@@ -730,5 +729,5 @@ install(DIRECTORY ${PDAL_HEADERS_DIR}
   DESTINATION ${PDAL_INCLUDE_DIR}
   FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp")
 
-install(FILES "${PROJECT_BINARY_DIR}/pdal_defines.h"
-  DESTINATION "${PDAL_INCLUDE_DIR}/pdal")
+install(FILES "${PROJECT_BINARY_DIR}/include/pdal/pdal_defines.h"
+	DESTINATION "${PDAL_INCLUDE_DIR}/pdal")

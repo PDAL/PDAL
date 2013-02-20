@@ -12,7 +12,9 @@
 #include <boost/static_assert.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/condition_variable.hpp>
+#if defined BOOST_THREAD_PROVIDES_INTERRUPTIONS
 #include <boost/thread/detail/thread_interruption.hpp>
+#endif
 #ifdef BOOST_THREAD_USES_CHRONO
 #include <boost/chrono/system_clocks.hpp>
 #include <boost/chrono/ceil.hpp>
@@ -63,8 +65,10 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
 
         void lock_shared()
         {
+#if defined BOOST_THREAD_PROVIDES_INTERRUPTIONS
             pdalboost::this_thread::disable_interruption do_not_disturb;
-            pdalboost::mutex::scoped_lock lk(state_change);
+#endif
+            pdalboost::unique_lock<pdalboost::mutex> lk(state_change);
 
             while(state.exclusive || state.exclusive_waiting_blocked)
             {
@@ -75,7 +79,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
 
         bool try_lock_shared()
         {
-            pdalboost::mutex::scoped_lock lk(state_change);
+            pdalboost::unique_lock<pdalboost::mutex> lk(state_change);
 
             if(state.exclusive || state.exclusive_waiting_blocked)
             {
@@ -88,10 +92,13 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
             }
         }
 
+#if defined BOOST_THREAD_USES_DATETIME
         bool timed_lock_shared(system_time const& timeout)
         {
+#if defined BOOST_THREAD_PROVIDES_INTERRUPTIONS
             pdalboost::this_thread::disable_interruption do_not_disturb;
-            pdalboost::mutex::scoped_lock lk(state_change);
+#endif
+            pdalboost::unique_lock<pdalboost::mutex> lk(state_change);
 
             while(state.exclusive || state.exclusive_waiting_blocked)
             {
@@ -109,6 +116,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
         {
             return timed_lock_shared(get_system_time()+relative_time);
         }
+#endif
 #ifdef BOOST_THREAD_USES_CHRONO
         template <class Rep, class Period>
         bool try_lock_shared_for(const chrono::duration<Rep, Period>& rel_time)
@@ -118,8 +126,10 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
         template <class Clock, class Duration>
         bool try_lock_shared_until(const chrono::time_point<Clock, Duration>& abs_time)
         {
+#if defined BOOST_THREAD_PROVIDES_INTERRUPTIONS
           pdalboost::this_thread::disable_interruption do_not_disturb;
-          pdalboost::mutex::scoped_lock lk(state_change);
+#endif
+          pdalboost::unique_lock<pdalboost::mutex> lk(state_change);
 
           while(state.exclusive || state.exclusive_waiting_blocked)
           {
@@ -134,7 +144,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
 #endif
         void unlock_shared()
         {
-            pdalboost::mutex::scoped_lock lk(state_change);
+            pdalboost::unique_lock<pdalboost::mutex> lk(state_change);
             bool const last_reader=!--state.shared_count;
 
             if(last_reader)
@@ -155,8 +165,10 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
 
         void lock()
         {
+#if defined BOOST_THREAD_PROVIDES_INTERRUPTIONS
             pdalboost::this_thread::disable_interruption do_not_disturb;
-            pdalboost::mutex::scoped_lock lk(state_change);
+#endif
+            pdalboost::unique_lock<pdalboost::mutex> lk(state_change);
 
             while(state.shared_count || state.exclusive)
             {
@@ -166,10 +178,13 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
             state.exclusive=true;
         }
 
+#if defined BOOST_THREAD_USES_DATETIME
         bool timed_lock(system_time const& timeout)
         {
+#if defined BOOST_THREAD_PROVIDES_INTERRUPTIONS
             pdalboost::this_thread::disable_interruption do_not_disturb;
-            pdalboost::mutex::scoped_lock lk(state_change);
+#endif
+            pdalboost::unique_lock<pdalboost::mutex> lk(state_change);
 
             while(state.shared_count || state.exclusive)
             {
@@ -194,7 +209,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
         {
             return timed_lock(get_system_time()+relative_time);
         }
-
+#endif
 #ifdef BOOST_THREAD_USES_CHRONO
         template <class Rep, class Period>
         bool try_lock_for(const chrono::duration<Rep, Period>& rel_time)
@@ -204,8 +219,10 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
         template <class Clock, class Duration>
         bool try_lock_until(const chrono::time_point<Clock, Duration>& abs_time)
         {
+#if defined BOOST_THREAD_PROVIDES_INTERRUPTIONS
           pdalboost::this_thread::disable_interruption do_not_disturb;
-          pdalboost::mutex::scoped_lock lk(state_change);
+#endif
+          pdalboost::unique_lock<pdalboost::mutex> lk(state_change);
 
           while(state.shared_count || state.exclusive)
           {
@@ -228,7 +245,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
 
         bool try_lock()
         {
-            pdalboost::mutex::scoped_lock lk(state_change);
+            pdalboost::unique_lock<pdalboost::mutex> lk(state_change);
 
             if(state.shared_count || state.exclusive)
             {
@@ -244,7 +261,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
 
         void unlock()
         {
-            pdalboost::mutex::scoped_lock lk(state_change);
+            pdalboost::unique_lock<pdalboost::mutex> lk(state_change);
             state.exclusive=false;
             state.exclusive_waiting_blocked=false;
             release_waiters();
@@ -252,8 +269,10 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
 
         void lock_upgrade()
         {
+#if defined BOOST_THREAD_PROVIDES_INTERRUPTIONS
             pdalboost::this_thread::disable_interruption do_not_disturb;
-            pdalboost::mutex::scoped_lock lk(state_change);
+#endif
+            pdalboost::unique_lock<pdalboost::mutex> lk(state_change);
             while(state.exclusive || state.exclusive_waiting_blocked || state.upgrade)
             {
                 shared_cond.wait(lk);
@@ -262,10 +281,13 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
             state.upgrade=true;
         }
 
+#if defined BOOST_THREAD_USES_DATETIME
         bool timed_lock_upgrade(system_time const& timeout)
         {
+#if defined BOOST_THREAD_PROVIDES_INTERRUPTIONS
             pdalboost::this_thread::disable_interruption do_not_disturb;
-            pdalboost::mutex::scoped_lock lk(state_change);
+#endif
+            pdalboost::unique_lock<pdalboost::mutex> lk(state_change);
             while(state.exclusive || state.exclusive_waiting_blocked || state.upgrade)
             {
                 if(!shared_cond.timed_wait(lk,timeout))
@@ -287,7 +309,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
         {
             return timed_lock_upgrade(get_system_time()+relative_time);
         }
-
+#endif
 #ifdef BOOST_THREAD_USES_CHRONO
         template <class Rep, class Period>
         bool try_lock_upgrade_for(const chrono::duration<Rep, Period>& rel_time)
@@ -297,8 +319,10 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
         template <class Clock, class Duration>
         bool try_lock_upgrade_until(const chrono::time_point<Clock, Duration>& abs_time)
         {
+#if defined BOOST_THREAD_PROVIDES_INTERRUPTIONS
           pdalboost::this_thread::disable_interruption do_not_disturb;
-          pdalboost::mutex::scoped_lock lk(state_change);
+#endif
+          pdalboost::unique_lock<pdalboost::mutex> lk(state_change);
           while(state.exclusive || state.exclusive_waiting_blocked || state.upgrade)
           {
               if(cv_status::timeout == shared_cond.wait_until(lk,abs_time))
@@ -317,7 +341,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
 #endif
         bool try_lock_upgrade()
         {
-            pdalboost::mutex::scoped_lock lk(state_change);
+            pdalboost::unique_lock<pdalboost::mutex> lk(state_change);
             if(state.exclusive || state.exclusive_waiting_blocked || state.upgrade)
             {
                 return false;
@@ -332,7 +356,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
 
         void unlock_upgrade()
         {
-            pdalboost::mutex::scoped_lock lk(state_change);
+            pdalboost::unique_lock<pdalboost::mutex> lk(state_change);
             state.upgrade=false;
             bool const last_reader=!--state.shared_count;
 
@@ -348,8 +372,10 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
         // Upgrade <-> Exclusive
         void unlock_upgrade_and_lock()
         {
+#if defined BOOST_THREAD_PROVIDES_INTERRUPTIONS
             pdalboost::this_thread::disable_interruption do_not_disturb;
-            pdalboost::mutex::scoped_lock lk(state_change);
+#endif
+            pdalboost::unique_lock<pdalboost::mutex> lk(state_change);
             --state.shared_count;
             while(state.shared_count)
             {
@@ -361,7 +387,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
 
         void unlock_and_lock_upgrade()
         {
-            pdalboost::mutex::scoped_lock lk(state_change);
+            pdalboost::unique_lock<pdalboost::mutex> lk(state_change);
             state.exclusive=false;
             state.upgrade=true;
             ++state.shared_count;
@@ -371,7 +397,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
 
         bool try_unlock_upgrade_and_lock()
         {
-          pdalboost::mutex::scoped_lock lk(state_change);
+          pdalboost::unique_lock<pdalboost::mutex> lk(state_change);
           if(    !state.exclusive
               && !state.exclusive_waiting_blocked
               && state.upgrade
@@ -398,8 +424,10 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
         try_unlock_upgrade_and_lock_until(
                           const chrono::time_point<Clock, Duration>& abs_time)
         {
+#if defined BOOST_THREAD_PROVIDES_INTERRUPTIONS
           pdalboost::this_thread::disable_interruption do_not_disturb;
-          pdalboost::mutex::scoped_lock lk(state_change);
+#endif
+          pdalboost::unique_lock<pdalboost::mutex> lk(state_change);
           if (state.shared_count != 1)
           {
               for (;;)
@@ -422,7 +450,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
         // Shared <-> Exclusive
         void unlock_and_lock_shared()
         {
-            pdalboost::mutex::scoped_lock lk(state_change);
+            pdalboost::unique_lock<pdalboost::mutex> lk(state_change);
             state.exclusive=false;
             ++state.shared_count;
             state.exclusive_waiting_blocked=false;
@@ -432,7 +460,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
 #ifdef BOOST_THREAD_PROVIDES_SHARED_MUTEX_UPWARDS_CONVERSIONS
         bool try_unlock_shared_and_lock()
         {
-          pdalboost::mutex::scoped_lock lk(state_change);
+          pdalboost::unique_lock<pdalboost::mutex> lk(state_change);
           if(    !state.exclusive
               && !state.exclusive_waiting_blocked
               && !state.upgrade
@@ -458,8 +486,10 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
             try_unlock_shared_and_lock_until(
                           const chrono::time_point<Clock, Duration>& abs_time)
         {
+#if defined BOOST_THREAD_PROVIDES_INTERRUPTIONS
           pdalboost::this_thread::disable_interruption do_not_disturb;
-          pdalboost::mutex::scoped_lock lk(state_change);
+#endif
+          pdalboost::unique_lock<pdalboost::mutex> lk(state_change);
           if (state.shared_count != 1)
           {
               for (;;)
@@ -483,7 +513,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
         // Shared <-> Upgrade
         void unlock_upgrade_and_lock_shared()
         {
-            pdalboost::mutex::scoped_lock lk(state_change);
+            pdalboost::unique_lock<pdalboost::mutex> lk(state_change);
             state.upgrade=false;
             state.exclusive_waiting_blocked=false;
             release_waiters();
@@ -492,7 +522,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
 #ifdef BOOST_THREAD_PROVIDES_SHARED_MUTEX_UPWARDS_CONVERSIONS
         bool try_unlock_shared_and_lock_upgrade()
         {
-          pdalboost::mutex::scoped_lock lk(state_change);
+          pdalboost::unique_lock<pdalboost::mutex> lk(state_change);
           if(    !state.exclusive
               && !state.exclusive_waiting_blocked
               && !state.upgrade
@@ -517,8 +547,10 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
             try_unlock_shared_and_lock_upgrade_until(
                           const chrono::time_point<Clock, Duration>& abs_time)
         {
+#if defined BOOST_THREAD_PROVIDES_INTERRUPTIONS
           pdalboost::this_thread::disable_interruption do_not_disturb;
-          pdalboost::mutex::scoped_lock lk(state_change);
+#endif
+          pdalboost::unique_lock<pdalboost::mutex> lk(state_change);
           if(    state.exclusive
               || state.exclusive_waiting_blocked
               || state.upgrade

@@ -2,7 +2,7 @@
  * Subject to the Boost Software License, Version 1.0. 
  * (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
  * Author: Jeff Garland, Bart Garst
- * $Date: 2008-11-26 13:07:14 -0800 (Wed, 26 Nov 2008) $
+ * $Date: 2012-09-22 09:21:43 -0700 (Sat, 22 Sep 2012) $
  */
 
 
@@ -288,6 +288,8 @@ main()
         local_date_time ldt(not_a_date_time);
         tm ldt_tm = to_tm(ldt);
         check("Exception not thrown (special_value to_tm)", false);
+	//does nothing useful but stops compiler from complaining about unused ldt_tm
+	std::cout << ldt_tm.tm_sec << std::endl; 
       }catch(std::out_of_range& e){
         check("Caught expected exception (special_value to_tm)", true);
       }catch(...){

@@ -3,18 +3,24 @@
 // Distributed under the Boost Software License, Version 1.0. (See
 // accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
-// (C) Copyright 2007-10 Anthony Williams
-// (C) Copyright 20011-12 Vicente J. Botet Escriba
+// (C) Copyright 2007-2010 Anthony Williams
+// (C) Copyright 20011-2012 Vicente J. Botet Escriba
 
 #include <boost/thread/detail/config.hpp>
+
 #include <boost/thread/exceptions.hpp>
 #ifndef BOOST_NO_IOSTREAM
 #include <ostream>
 #endif
 #include <boost/thread/detail/move.hpp>
 #include <boost/thread/mutex.hpp>
+#if defined BOOST_THREAD_USES_DATETIME
 #include <boost/thread/xtime.hpp>
+#endif
 #include <boost/thread/detail/thread_heap_alloc.hpp>
+#include <boost/thread/detail/make_tuple_indices.hpp>
+#include <boost/thread/detail/invoke.hpp>
+#include <boost/thread/detail/is_convertible.hpp>
 #include <boost/assert.hpp>
 #include <list>
 #include <algorithm>
@@ -34,6 +40,9 @@
 #include <boost/chrono/ceil.hpp>
 #endif
 
+#if defined(BOOST_THREAD_PROVIDES_VARIADIC_THREAD)
+#include <tuple>
+#endif
 #include <boost/config/abi_prefix.hpp>
 
 #ifdef BOOST_MSVC
@@ -46,13 +55,45 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
 
     namespace detail
     {
+
+#if defined(BOOST_THREAD_PROVIDES_VARIADIC_THREAD)
+
+      template<typename F, class ...ArgTypes>
+      class thread_data:
+          public detail::thread_data_base
+      {
+      public:
+          BOOST_THREAD_NO_COPYABLE(thread_data)
+#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
+            thread_data(BOOST_THREAD_RV_REF(F) f_, BOOST_THREAD_RV_REF(ArgTypes)... args_):
+              fp(pdalboost::forward<F>(f_), pdalboost::forward<ArgTypes>(args_)...)
+            {}
+#endif
+          template <std::size_t ...Indices>
+          void run2(tuple_indices<Indices...>)
+          {
+
+              invoke(std::move(std::get<0>(fp)), std::move(std::get<Indices>(fp))...);
+          }
+          void run()
+          {
+              typedef typename make_tuple_indices<std::tuple_size<std::tuple<F, ArgTypes...> >::value, 1>::type index_type;
+
+              run2(index_type());
+          }
+
+      private:
+          std::tuple<typename decay<F>::type, typename decay<ArgTypes>::type...> fp;
+      };
+#else // defined(BOOST_THREAD_PROVIDES_VARIADIC_THREAD)
+
         template<typename F>
         class thread_data:
             public detail::thread_data_base
         {
         public:
             BOOST_THREAD_NO_COPYABLE(thread_data)
-#ifndef BOOST_NO_RVALUE_REFERENCES
+#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
               thread_data(BOOST_THREAD_RV_REF(F) f_):
                 f(pdalboost::forward<F>(f_))
               {}
@@ -69,10 +110,13 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
                 f(f_)
             {}
 #endif
+            //thread_data() {}
+
             void run()
             {
                 f();
             }
+
         private:
             F f;
         };
@@ -110,6 +154,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
                 f();
             }
         };
+#endif
     }
 
     class BOOST_THREAD_DECL thread
@@ -120,24 +165,55 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
       BOOST_THREAD_MOVABLE_ONLY(thread)
     private:
 
+        struct dummy;
+
         void release_handle();
 
         detail::thread_data_ptr thread_info;
 
-        void start_thread();
-        void start_thread(const attributes& attr);
+    private:
+        bool start_thread_noexcept();
+        bool start_thread_noexcept(const attributes& attr);
+    public:
+        void start_thread()
+        {
+          if (!start_thread_noexcept())
+          {
+            pdalboost::throw_exception(thread_resource_error());
+          }
+        }
+        void start_thread(const attributes& attr)
+        {
+          if (!start_thread_noexcept(attr))
+          {
+            pdalboost::throw_exception(thread_resource_error());
+          }
+        }
 
         explicit thread(detail::thread_data_ptr data);
 
         detail::thread_data_ptr get_thread_info BOOST_PREVENT_MACRO_SUBSTITUTION () const;
 
-#ifndef BOOST_NO_RVALUE_REFERENCES
+#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
+#if defined(BOOST_THREAD_PROVIDES_VARIADIC_THREAD)
+        template<typename F, class ...ArgTypes>
+        static inline detail::thread_data_ptr make_thread_info(BOOST_THREAD_RV_REF(F) f, BOOST_THREAD_RV_REF(ArgTypes)... args)
+        {
+            return detail::thread_data_ptr(detail::heap_new<
+                  detail::thread_data<typename pdalboost::remove_reference<F>::type, ArgTypes...>
+                  >(
+                    pdalboost::forward<F>(f), pdalboost::forward<ArgTypes>(args)...
+                  )
+                );
+        }
+#else
         template<typename F>
         static inline detail::thread_data_ptr make_thread_info(BOOST_THREAD_RV_REF(F) f)
         {
             return detail::thread_data_ptr(detail::heap_new<detail::thread_data<typename pdalboost::remove_reference<F>::type> >(
                 pdalboost::forward<F>(f)));
         }
+#endif
         static inline detail::thread_data_ptr make_thread_info(void (*f)())
         {
             return detail::thread_data_ptr(detail::heap_new<detail::thread_data<void(*)()> >(
@@ -145,7 +221,12 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
         }
 #else
         template<typename F>
-        static inline detail::thread_data_ptr make_thread_info(F f)
+        static inline detail::thread_data_ptr make_thread_info(F f
+            , typename disable_if_c<
+                //pdalboost::thread_detail::is_convertible<F&,BOOST_THREAD_RV_REF(F)>::value ||
+                is_same<typename decay<F>::type, thread>::value,
+                dummy* >::type=0
+                )
         {
             return detail::thread_data_ptr(detail::heap_new<detail::thread_data<F> >(f));
         }
@@ -156,7 +237,6 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
         }
 
 #endif
-        struct dummy;
     public:
 #if 0 // This should not be needed anymore. Use instead BOOST_THREAD_MAKE_RV_REF.
 #if BOOST_WORKAROUND(__SUNPRO_CC, < 0x5100)
@@ -166,6 +246,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
         thread() BOOST_NOEXCEPT;
         ~thread()
         {
+
     #if defined BOOST_THREAD_PROVIDES_THREAD_DESTRUCTOR_CALLS_TERMINATE_IF_JOINABLE
           if (joinable()) {
             std::terminate();
@@ -174,12 +255,12 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
             detach();
     #endif
         }
-#ifndef BOOST_NO_RVALUE_REFERENCES
+#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
         template <
           class F
         >
         explicit thread(BOOST_THREAD_RV_REF(F) f
-        , typename disable_if<is_same<typename decay<F>::type, thread>, dummy* >::type=0
+        //, typename disable_if<is_same<typename decay<F>::type, thread>, dummy* >::type=0
         ):
           thread_info(make_thread_info(thread_detail::decay_copy(pdalboost::forward<F>(f))))
         {
@@ -188,7 +269,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
         template <
           class F
         >
-        thread(attributes& attrs, BOOST_THREAD_RV_REF(F) f):
+        thread(attributes const& attrs, BOOST_THREAD_RV_REF(F) f):
           thread_info(make_thread_info(thread_detail::decay_copy(pdalboost::forward<F>(f))))
         {
             start_thread(attrs);
@@ -203,7 +284,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
             start_thread();
         }
         template <class F>
-        thread(attributes& attrs, F f):
+        thread(attributes const& attrs, F f):
             thread_info(make_thread_info(f))
         {
             start_thread(attrs);
@@ -211,15 +292,19 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
 #else
         template <class F>
         explicit thread(F f
-            // todo Disable also if Or is_same<typename decay<F>::type, thread>
-        , typename disable_if<pdalboost::is_convertible<F&,BOOST_THREAD_RV_REF(F) >, dummy* >::type=0):
+        , typename disable_if_c<
+            pdalboost::thread_detail::is_convertible<F&,BOOST_THREAD_RV_REF(F)>::value
+            //|| is_same<typename decay<F>::type, thread>::value
+           , dummy* >::type=0
+        ):
             thread_info(make_thread_info(f))
         {
             start_thread();
         }
         template <class F>
-        thread(attributes& attrs, F f
-        , typename disable_if<pdalboost::is_convertible<F&,BOOST_THREAD_RV_REF(F) >, dummy* >::type=0):
+        thread(attributes const& attrs, F f
+        , typename disable_if<pdalboost::thread_detail::is_convertible<F&,BOOST_THREAD_RV_REF(F) >, dummy* >::type=0
+        ):
             thread_info(make_thread_info(f))
         {
             start_thread(attrs);
@@ -229,14 +314,22 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
         explicit thread(BOOST_THREAD_RV_REF(F) f
         , typename disable_if<is_same<typename decay<F>::type, thread>, dummy* >::type=0
         ):
-            thread_info(make_thread_info(f))
+#ifdef BOOST_THREAD_USES_MOVE
+        thread_info(make_thread_info(pdalboost::move<F>(f))) // todo : Add forward
+#else
+        thread_info(make_thread_info(f)) // todo : Add forward
+#endif
         {
             start_thread();
         }
 
         template <class F>
-        thread(attributes& attrs, BOOST_THREAD_RV_REF(F) f):
-            thread_info(make_thread_info(f))
+        thread(attributes const& attrs, BOOST_THREAD_RV_REF(F) f):
+#ifdef BOOST_THREAD_USES_MOVE
+            thread_info(make_thread_info(pdalboost::move<F>(f))) // todo : Add forward
+#else
+            thread_info(make_thread_info(f)) // todo : Add forward
+#endif
         {
             start_thread(attrs);
         }
@@ -267,8 +360,32 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
             return *this;
         }
 
+#if defined(BOOST_THREAD_PROVIDES_VARIADIC_THREAD)
+        template <class F, class Arg, class ...Args>
+        thread(F&& f, Arg&& arg, Args&&... args) :
+          thread_info(make_thread_info(
+              thread_detail::decay_copy(pdalboost::forward<F>(f)),
+              thread_detail::decay_copy(pdalboost::forward<Arg>(arg)),
+              thread_detail::decay_copy(pdalboost::forward<Args>(args))...)
+          )
+
+        {
+          start_thread();
+        }
+        template <class F, class Arg, class ...Args>
+        thread(attributes const& attrs, F&& f, Arg&& arg, Args&&... args) :
+          thread_info(make_thread_info(
+              thread_detail::decay_copy(pdalboost::forward<F>(f)),
+              thread_detail::decay_copy(pdalboost::forward<Arg>(arg)),
+              thread_detail::decay_copy(pdalboost::forward<Args>(args))...)
+          )
+
+        {
+          start_thread(attrs);
+        }
+#else
         template <class F,class A1>
-        thread(F f,A1 a1,typename disable_if<pdalboost::is_convertible<F&,thread_attributes >, dummy* >::type=0):
+        thread(F f,A1 a1,typename disable_if<pdalboost::thread_detail::is_convertible<F&,thread_attributes >, dummy* >::type=0):
             thread_info(make_thread_info(pdalboost::bind(pdalboost::type<void>(),f,a1)))
         {
             start_thread();
@@ -328,18 +445,26 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
         {
             start_thread();
         }
-
+#endif
         void swap(thread& x) BOOST_NOEXCEPT
         {
             thread_info.swap(x.thread_info);
         }
 
-        class BOOST_SYMBOL_VISIBLE id;
+        class id;
+#ifdef BOOST_THREAD_PLATFORM_PTHREAD
+        inline id get_id()  const BOOST_NOEXCEPT;
+#else
         id get_id() const BOOST_NOEXCEPT;
+#endif
 
 
         bool joinable() const BOOST_NOEXCEPT;
-        void join();
+    private:
+        bool join_noexcept();
+    public:
+        inline void join();
+
 #ifdef BOOST_THREAD_USES_CHRONO
         template <class Rep, class Period>
         bool try_join_for(const chrono::duration<Rep, Period>& rel_time)
@@ -363,44 +488,57 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
         }
 #endif
 #if defined(BOOST_THREAD_PLATFORM_WIN32)
+    private:
+        bool do_try_join_until_noexcept(uintmax_t milli, bool& res);
+        inline bool do_try_join_until(uintmax_t milli);
+    public:
         bool timed_join(const system_time& abs_time);
+        //{
+        //  return do_try_join_until(get_milliseconds_until(wait_until));
+        //}
 
 #ifdef BOOST_THREAD_USES_CHRONO
-        bool try_join_until(const chrono::time_point<chrono::system_clock, chrono::nanoseconds>& tp);
+        bool try_join_until(const chrono::time_point<chrono::system_clock, chrono::nanoseconds>& tp)
+        {
+          chrono::milliseconds rel_time= chrono::ceil<chrono::milliseconds>(tp-chrono::system_clock::now());
+          return do_try_join_until(rel_time.count());
+        }
 #endif
-    public:
+
 
 #else
+    private:
+        bool do_try_join_until_noexcept(struct timespec const &timeout, bool& res);
+        inline bool do_try_join_until(struct timespec const &timeout);
+    public:
+#if defined BOOST_THREAD_USES_DATETIME
         bool timed_join(const system_time& abs_time)
         {
-          struct timespec const ts=detail::get_timespec(abs_time);
+          struct timespec const ts=detail::to_timespec(abs_time);
           return do_try_join_until(ts);
         }
+#endif
 #ifdef BOOST_THREAD_USES_CHRONO
         bool try_join_until(const chrono::time_point<chrono::system_clock, chrono::nanoseconds>& tp)
         {
           using namespace chrono;
           nanoseconds d = tp.time_since_epoch();
-          timespec ts;
-          seconds s = duration_cast<seconds>(d);
-          ts.tv_sec = static_cast<long>(s.count());
-          ts.tv_nsec = static_cast<long>((d - s).count());
+          timespec ts = pdalboost::detail::to_timespec(d);
           return do_try_join_until(ts);
         }
 #endif
-      private:
-        bool do_try_join_until(struct timespec const &timeout);
-      public:
 
 #endif
+      public:
 
+#if defined BOOST_THREAD_USES_DATETIME
         template<typename TimeDuration>
         inline bool timed_join(TimeDuration const& rel_time)
         {
             return timed_join(get_system_time()+rel_time);
         }
-
-        void detach() BOOST_NOEXCEPT;
+#endif
+        void detach();
 
         static unsigned hardware_concurrency() BOOST_NOEXCEPT;
 
@@ -408,12 +546,13 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
         typedef detail::thread_data_base::native_handle_type native_handle_type;
         native_handle_type native_handle();
 
-#if defined BOOST_THREAD_PROVIDES_DEPRECATED_FEATURES_SINCE_V3_0_0
+#if defined BOOST_THREAD_PROVIDES_THREAD_EQ
         // Use thread::id when comparisions are needed
         // backwards compatibility
         bool operator==(const thread& other) const;
         bool operator!=(const thread& other) const;
 #endif
+#if defined BOOST_THREAD_USES_DATETIME
         static inline void yield() BOOST_NOEXCEPT
         {
             this_thread::yield();
@@ -423,10 +562,13 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
         {
             this_thread::sleep(xt);
         }
+#endif
 
+#if defined BOOST_THREAD_PROVIDES_INTERRUPTIONS
         // extensions
         void interrupt();
         bool interruption_requested() const BOOST_NOEXCEPT;
+#endif
     };
 
     inline void swap(thread& lhs,thread& rhs) BOOST_NOEXCEPT
@@ -434,7 +576,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
         return lhs.swap(rhs);
     }
 
-#ifndef BOOST_NO_RVALUE_REFERENCES
+#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
     inline thread&& move(thread& t) BOOST_NOEXCEPT
     {
         return static_cast<thread&&>(t);
@@ -445,16 +587,24 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
 
     namespace this_thread
     {
+#ifdef BOOST_THREAD_PLATFORM_PTHREAD
+        inline thread::id get_id() BOOST_NOEXCEPT;
+#else
         thread::id BOOST_THREAD_DECL get_id() BOOST_NOEXCEPT;
+#endif
 
+#if defined BOOST_THREAD_PROVIDES_INTERRUPTIONS
         void BOOST_THREAD_DECL interruption_point();
         bool BOOST_THREAD_DECL interruption_enabled() BOOST_NOEXCEPT;
         bool BOOST_THREAD_DECL interruption_requested() BOOST_NOEXCEPT;
+#endif
 
+#if defined BOOST_THREAD_USES_DATETIME
         inline BOOST_SYMBOL_VISIBLE void sleep(xtime const& abs_time)
         {
             sleep(system_time(abs_time));
         }
+#endif
     }
 
     class BOOST_SYMBOL_VISIBLE thread::id
@@ -490,11 +640,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
     public:
         id() BOOST_NOEXCEPT:
 #if defined BOOST_THREAD_PROVIDES_BASIC_THREAD_ID
-#if defined(BOOST_THREAD_PLATFORM_WIN32)
         thread_data(0)
-#else
-        thread_data(0)
-#endif
 #else
         thread_data()
 #endif
@@ -572,6 +718,61 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
 #endif
     };
 
+#ifdef BOOST_THREAD_PLATFORM_PTHREAD
+    thread::id thread::get_id() const BOOST_NOEXCEPT
+    {
+    #if defined BOOST_THREAD_PROVIDES_BASIC_THREAD_ID
+        return const_cast<thread*>(this)->native_handle();
+    #else
+        detail::thread_data_ptr const local_thread_info=(get_thread_info)();
+        return (local_thread_info? id(local_thread_info) : id());
+    #endif
+    }
+
+    namespace this_thread
+    {
+        inline thread::id get_id() BOOST_NOEXCEPT
+        {
+        #if defined BOOST_THREAD_PROVIDES_BASIC_THREAD_ID
+             return pthread_self();
+        #else
+            pdalboost::detail::thread_data_base* const thread_info=get_or_make_current_thread_data();
+            return (thread_info?thread::id(thread_info->shared_from_this()):thread::id());
+        #endif
+        }
+    }
+#endif
+    void thread::join() {
+        if (this_thread::get_id() == get_id())
+          pdalboost::throw_exception(thread_resource_error(system::errc::resource_deadlock_would_occur, "boost thread: trying joining itself"));
+
+        BOOST_THREAD_VERIFY_PRECONDITION( join_noexcept(),
+            thread_resource_error(system::errc::invalid_argument, "boost thread: thread not joinable")
+        );
+    }
+
+#ifdef BOOST_THREAD_PLATFORM_PTHREAD
+    bool thread::do_try_join_until(struct timespec const &timeout)
+#else
+    bool thread::do_try_join_until(uintmax_t timeout)
+#endif
+    {
+        if (this_thread::get_id() == get_id())
+          pdalboost::throw_exception(thread_resource_error(system::errc::resource_deadlock_would_occur, "boost thread: trying joining itself"));
+        bool res;
+        if (do_try_join_until_noexcept(timeout, res))
+        {
+          return res;
+        }
+        else
+        {
+          BOOST_THREAD_THROW_ELSE_RETURN(
+            (thread_resource_error(system::errc::invalid_argument, "boost thread: thread not joinable")),
+            false
+          );
+        }
+    }
+
 #if !defined(BOOST_NO_IOSTREAM) && defined(BOOST_NO_MEMBER_TEMPLATE_FRIENDS)
     template<class charT, class traits>
     BOOST_SYMBOL_VISIBLE
@@ -582,7 +783,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
     }
 #endif
 
-#if defined BOOST_THREAD_PROVIDES_DEPRECATED_FEATURES_SINCE_V3_0_0
+#if defined BOOST_THREAD_PROVIDES_THREAD_EQ
     inline bool thread::operator==(const thread& other) const
     {
         return get_id()==other.get_id();

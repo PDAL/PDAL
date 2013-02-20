@@ -5,6 +5,7 @@
  * Author: Jeff Garland 
  */
 
+#include <boost/config.hpp>
 #include "boost/date_time/posix_time/posix_time.hpp"
 #include <iostream>
 
@@ -19,7 +20,7 @@ main()
   ptime tu = second_clock::universal_time();
   std::cout << to_simple_string(tu) << std::endl;
 
-#if (defined(_POSIX_TIMERS))
+#if !defined(BOOST_WINDOWS) && defined(_POSIX_TIMERS)
   for (int i=0; i < 3; ++i) {
     ptime t2 = second_clock::local_time();
     std::cout << to_simple_string(t2) << std::endl;

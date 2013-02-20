@@ -28,7 +28,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
         return pdalboost::begin( r ) == pdalboost::end( r );
     }
 
-} // namepace 'boost'
+} // namespace 'boost'
 
 
 #endif

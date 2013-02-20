@@ -8,7 +8,7 @@
 #include <boost/fusion/tuple/tuple.hpp>
 #include <boost/fusion/adapted/mpl.hpp>
 
-#define TR1_TUPLE_TEST
+#define NO_CONSTRUCT_FROM_NIL
 #define FUSION_SEQUENCE tuple
 #define FUSION_AT get
 #include "construction.hpp"

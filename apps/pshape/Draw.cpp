@@ -21,17 +21,20 @@ namespace Pshape
 
 Draw::Draw(HexGrid *grid_p) : m_grid_p(grid_p)
 {
-    m_dpy_p = XOpenDisplay(NULL);
-    if (!m_dpy_p)
-    {
-        cerr << "Can't open display!\n";
-    }
-    m_window = XCreateSimpleWindow(m_dpy_p, RootWindow(m_dpy_p, 0), 0, 0,
-            750, 1000, 0, 0, BlackPixel(m_dpy_p, 0));
-    XSelectInput(m_dpy_p, m_window, StructureNotifyMask | ExposureMask);
-    XMapWindow(m_dpy_p, m_window);
-    m_surface_p = cairo_xlib_surface_create(m_dpy_p, m_window,
-            DefaultVisual(m_dpy_p, 0), 750, 1000);
+    // m_dpy_p = XOpenDisplay(NULL);
+    // if (!m_dpy_p)
+    // {
+    //     cerr << "Can't open display!\n";
+    // }
+    // m_window = XCreateSimpleWindow(m_dpy_p, RootWindow(m_dpy_p, 0), 0, 0,
+    //         750, 1000, 0, 0, BlackPixel(m_dpy_p, 0));
+            
+            
+    // XSelectInput(m_dpy_p, m_window, StructureNotifyMask | ExposureMask);
+    // XMapWindow(m_dpy_p, m_window);
+    // m_surface_p = cairo_xlib_surface_create(m_dpy_p, m_window,
+    //         DefaultVisual(m_dpy_p, 0), 750, 1000);
+    m_surface_p = cairo_svg_surface_create("svgfile.svg", 750, 1000);
     m_cairo_p = cairo_create(m_surface_p);
 
     // Move things to the center.
@@ -41,7 +44,8 @@ Draw::Draw(HexGrid *grid_p) : m_grid_p(grid_p)
 Draw::~Draw()
 {
     cairo_surface_destroy(m_surface_p);
-    XCloseDisplay(m_dpy_p);
+    cairo_destroy(m_cairo_p);
+    // XCloseDisplay(m_dpy_p);
 }
 
 void Draw::drawHexagon(Hexagon *hex_p, bool fill)
@@ -81,7 +85,7 @@ void Draw::drawHexagon(Hexagon *hex_p, bool fill)
     
     cairo_stroke(m_cairo_p);
     cairo_surface_flush(m_surface_p);
-    XFlush(m_dpy_p);
+    // XFlush(m_dpy_p);
 }
 
 void Draw::drawSegment(Segment s, Color c)
@@ -109,7 +113,7 @@ void Draw::drawSegment(Segment s, Color c)
     cairo_line_to(m_cairo_p, endpoint.m_x, endpoint.m_y);
     cairo_stroke(m_cairo_p);
     cairo_surface_flush(m_surface_p);
-    XFlush(m_dpy_p);
+    // XFlush(m_dpy_p);
 }
 
 void Draw::drawPoint(Point p)

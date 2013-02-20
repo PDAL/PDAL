@@ -44,7 +44,7 @@
 #@echo "see comments for instructions"
 #exit 1
 
-export BOOST_HOME=/home/hobu/release/boost_1_51_0/
+export BOOST_HOME=/home/hobu/release/boost_1_53_0/
 export TARGET=./boost
 export BOOST_HEADERS=`find src include test apps \( -name '*.[cChH]' -o -name '*.[cChH][pPxX][pPxX]' -o -name '*.[cChH][cChH]' \) -exec grep 'include.*boost' {} \; | grep '^#' | sed -e 's/.*boost/boost/' -e 's/>.*//' | sort -u`
 export BOOST_HEADERS="$BOOST_HEADERS boost/parameter/aux_/overloads.hpp"
@@ -55,7 +55,7 @@ echo $BOOST_HEADERS
 $BOOST_HOME/dist/bin/bcp --namespace=$NAMESPACE \
                          --namespace-alias \
                          $BOOST_HEADERS \
-                         filesystem iostreams fusion \
+                         filesystem iostreams fusion date_time unordered geometry multiprecision \
                          build \
                          boost \
                          --boost=$BOOST_HOME

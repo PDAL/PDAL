@@ -6,22 +6,30 @@
 // (C) Copyright 2007-8 Anthony Williams
 // (C) Copyright 2011-2012 Vicente J. Botet Escriba
 
-#include <boost/thread/mutex.hpp>
 #include <boost/thread/win32/thread_primitives.hpp>
-#include <limits.h>
-#include <boost/assert.hpp>
-#include <algorithm>
-#include <boost/thread/cv_status.hpp>
 #include <boost/thread/win32/thread_data.hpp>
-#include <boost/thread/thread_time.hpp>
+#include <boost/thread/win32/thread_data.hpp>
 #include <boost/thread/win32/interlocked_read.hpp>
+#include <boost/thread/cv_status.hpp>
+#if defined BOOST_THREAD_USES_DATETIME
 #include <boost/thread/xtime.hpp>
-#include <vector>
+#endif
+#include <boost/thread/mutex.hpp>
+#include <boost/thread/thread_time.hpp>
+#include <boost/thread/lock_guard.hpp>
+#include <boost/thread/lock_types.hpp>
+
+#include <boost/assert.hpp>
 #include <boost/intrusive_ptr.hpp>
+
 #ifdef BOOST_THREAD_USES_CHRONO
 #include <boost/chrono/system_clocks.hpp>
 #include <boost/chrono/ceil.hpp>
 #endif
+
+#include <limits.h>
+#include <algorithm>
+#include <vector>
 
 #include <boost/config/abi_prefix.hpp>
 
@@ -191,7 +199,10 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
 
                 ~entry_manager()
                 {
+                  //if(! entry->is_notified()) // several regression #7657
+                  {
                     entry->remove_waiter();
+                  }
                 }
 
                 list_entry* operator->()
@@ -314,6 +325,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
         }
 
 
+#if defined BOOST_THREAD_USES_DATETIME
         bool timed_wait(unique_lock<mutex>& m,pdalboost::system_time const& abs_time)
         {
             return do_wait(m,abs_time);
@@ -344,7 +356,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
         {
             return do_wait(m,wait_duration.total_milliseconds(),pred);
         }
-
+#endif
 #ifdef BOOST_THREAD_USES_CHRONO
 
         template <class Clock, class Duration>
@@ -393,7 +405,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
                 const chrono::duration<Rep, Period>& d,
                 Predicate pred)
         {
-            return wait_until(lock, chrono::steady_clock::now() + d, pred);
+            return wait_until(lock, chrono::steady_clock::now() + d, pdalboost::move(pred));
         }
 #endif
     };
@@ -421,6 +433,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
             while(!pred()) wait(m);
         }
 
+#if defined BOOST_THREAD_USES_DATETIME
         template<typename lock_type>
         bool timed_wait(lock_type& m,pdalboost::system_time const& abs_time)
         {
@@ -456,6 +469,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
         {
             return do_wait(m,wait_duration.total_milliseconds(),pred);
         }
+#endif
 #ifdef BOOST_THREAD_USES_CHRONO
 
         template <class lock_type, class Clock, class Duration>
@@ -505,11 +519,12 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
                 const chrono::duration<Rep, Period>& d,
                 Predicate pred)
         {
-            return wait_until(lock, chrono::steady_clock::now() + d, pred);
+            return wait_until(lock, chrono::steady_clock::now() + d, pdalboost::move(pred));
         }
 #endif
     };
 
+        BOOST_THREAD_DECL void notify_all_pdalboostat_thread_exit(condition_variable& cond, unique_lock<mutex> lk);
 }
 
 #include <boost/config/abi_suffix.hpp>

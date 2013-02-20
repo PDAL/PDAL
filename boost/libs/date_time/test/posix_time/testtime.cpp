@@ -302,6 +302,8 @@ main()
     ptime pt(pos_infin);
     tm pt_tm = to_tm(pt);
     check("Exception not thrown (special_value to_tm)", false);
+    //following code does nothing useful but stops compiler from complaining about unused pt_tm
+    std::cout << pt_tm.tm_sec << std::endl;
   }catch(std::out_of_range& e){
     check("Caught expected exception (special_value to_tm)", true);
   }catch(...){
@@ -314,6 +316,8 @@ main()
     pt += time_duration(pos_infin);
     tm pt_tm = to_tm(pt);
     check("Exception not thrown (special_value to_tm)", false);
+    //following code does nothing useful but stops compiler from complaining about unused pt_tm
+    std::cout << pt_tm.tm_sec << std::endl;
   }catch(std::out_of_range& e){
     check("Caught expected exception (special_value to_tm)", true);
   }catch(...){

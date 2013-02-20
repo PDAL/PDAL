@@ -49,6 +49,11 @@
 #include "cpl_conv.h"
 #include "cpl_string.h"
 
+#if ((GDAL_VERSION_MAJOR == 1 && GDAL_VERSION_MINOR < 10) || (GDAL_VERSION_MAJOR < 1))
+// #error "NITF support requires GDAL 1.10 or GDAL 2.0+"
+#endif
+
+
 
 namespace pdal
 {

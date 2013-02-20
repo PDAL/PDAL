@@ -115,7 +115,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
         {
             template<typename State, typename It0, typename F>
             static Result
-            call(State const& state,It0 const& it0, F)
+            call(State const& state,It0 const&, F)
             {
                 return static_cast<Result>(state);
             }

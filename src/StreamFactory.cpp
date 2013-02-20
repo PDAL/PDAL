@@ -35,6 +35,8 @@
 #include <pdal/StreamFactory.hpp>
 #include <pdal/FileUtils.hpp>
 
+#include <sstream>
+
 namespace pdal
 {
 
@@ -102,6 +104,13 @@ FilenameStreamFactory::~FilenameStreamFactory()
 std::istream& FilenameStreamFactory::allocate()
 {
     std::istream* s = FileUtils::openFile(m_filename, true);
+    if (s == NULL)
+    {
+        std::ostringstream oss;
+        oss << "Unable to open file '" << m_filename <<"'. Check access permissions and/or directory location";
+        throw pdal_error(oss.str());
+    }
+    
     m_streams.insert(s);
     return *s;
 }
@@ -245,6 +254,12 @@ void OutputStreamManager::open()
     if (m_isFileBased)
     {
         m_ostream = FileUtils::createFile(m_filename, true);
+        if (m_ostream == NULL)
+        {
+            std::ostringstream oss;
+            oss << "Unable to create file '" << m_filename <<"'. Check access permissions and/or directory location";
+            throw pdal_error(oss.str());
+        }
     }
     else
     {

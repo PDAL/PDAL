@@ -178,20 +178,10 @@ endif(APPLE)
 # settings for Boost dependencies
 #------------------------------------------------------------------------------
 
-<<<<<<< HEAD
-message("BOOST FUN")
-if (DEFINED PDAL_EMBED_BOOST)
-message("PDAL EMBED DEFINED")
-endif()
-=======
 find_package(Threads)
->>>>>>> fixme
 
 if (NOT PDAL_EMBED_BOOST)
-#  set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "/usr/local/boost_1_52_0/boost")
-#  find_package(Boost 1.48 COMPONENTS program_options thread iostreams filesystem system unit_test_framework random)
-message("Find BOOST")
-  find_package(Boost 1.48 )
+  find_package(Boost 1.48 COMPONENTS program_options thread iostreams filesystem system unit_test_framework random)
 endif()
 
 
@@ -228,7 +218,7 @@ else()
     set(Boost_LIBRARIES "${PDALBOOST_LIB_NAME}.lib")
     link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
   else()
-    # Some Cmake versions are broken here. See
+    # Some Cmake versions are borken here. See
     # http://www.cmake.org/Bug/view.php?id=12258#c26851
     # set(CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-isystem")
     # include_directories(BEFORE SYSTEM ${Boost_INCLUDE_DIRS}/)
@@ -561,8 +551,7 @@ install(FILES AUTHORS.txt LICENSE.txt
 
 configure_file(
   "${PROJECT_SOURCE_DIR}/pdal_defines.h.in"
-  "${PROJECT_BINARY_DIR}/pdal_defines.h")
-include_directories(${PROJECT_BINARY_DIR})
+  "${PDAL_INCLUDE_DIR}/pdal/pdal_defines.h")
 
 #------------------------------------------------------------------------------
 # subdirectory controls
