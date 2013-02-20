@@ -293,7 +293,11 @@ int PcEqual::execute()
         if (ids.size())
             random_iterator->seek(ids[0]);
         else
-            throw app_runtime_error("unable to find point for id" + i );
+		{
+			std::ostringstream oss;
+			oss << "unable to find point for id '"  << i <<"'";
+            throw app_runtime_error(oss.str() );
+		}
         
         random_iterator->read(candidates_data);
         boost::int32_t xi = candidates_data.getField<boost::int32_t>(dimX, 0);
