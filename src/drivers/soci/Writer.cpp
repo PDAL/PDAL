@@ -97,7 +97,9 @@ void Writer::initialize()
     if (m_type == DATABASE_UNKNOWN)
     {
         std::stringstream oss;
-        oss << "Database connection type '" << getOptions().getValueOrThrow<std::string>("type") << "' is unknown or not configured";
+        oss << "Database connection type '" 
+			<< getOptions().getValueOrThrow<std::string>("type") 
+			<< "' is unknown or not configured";
         throw soci_driver_error(oss.str());
     }
     try
