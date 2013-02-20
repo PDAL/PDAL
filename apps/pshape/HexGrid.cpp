@@ -23,26 +23,24 @@ void HexGrid::addPoint(Point p)
         if (dense(h))
         {
             h->setDense();
-            if (h->less(m_min))
-            {
-                m_min = h;
-            }
             m_miny = std::min(m_miny, h->y() - 1);
             if (h->possibleRoot())
             {
                 m_pos_roots.insert(h);
             }
-
-            // We only mark dense neighbors for hexes above and below
-            // (the ones on sides 0 and 3).
-            Coord c = h->neighborCoord(3);
-            Hexagon *neighbor = getHexagon(c);
-            neighbor->setDenseNeighbor(0);
-            if (neighbor->dense() && !neighbor->possibleRoot())
-            {
-                m_pos_roots.erase(neighbor);
-            }
+            markNeighborBelow(h);
         }
+    }
+}
+
+void HexGrid::markNeighborBelow(Hexagon *h)
+{
+    Coord c = h->neighborCoord(3);
+    Hexagon *neighbor = getHexagon(c);
+    neighbor->setDenseNeighbor(0);
+    if (neighbor->dense() && !neighbor->possibleRoot())
+    {
+        m_pos_roots.erase(neighbor);
     }
 }
 
@@ -92,7 +90,6 @@ Hexagon *HexGrid::findHexagon(Point p)
         // to the hexagon in the map.
         HexMap::value_type hexpair(Hexagon::key(0, 0), Hexagon(0, 0));
         HexMap::iterator it = m_hexes.insert(hexpair).first;
-        m_min = &it->second;
         return &it->second;
     }
 
@@ -209,26 +206,57 @@ void HexGrid::findShapes()
     while (m_pos_roots.size())
     {
         Hexagon *h = *m_pos_roots.begin();
-        Orientation orient = calcOrientation(h);
-        if (orient == CLOCKWISE)
+        findShape(h);
+    }
+}
+
+void HexGrid::findParentPaths()
+{
+    std::vector<Path *> roots;
+    for (size_t i = 0; i < m_paths.size(); ++i)
+    {
+        Path *p = m_paths[i];
+        findParentPath(p);
+        // Either add the path to the root list or the parent's list of
+        // children.
+        !p->parent() ?  roots.push_back(p) : p->parent()->addChild(p);
+    }
+    for (size_t i = 0; i < roots.size(); ++i)
+       roots[i]->finalize(CLOCKWISE);
+}
+
+void HexGrid::findParentPath(Path *p)
+{
+    Segment s = p->rootSegment();
+    Hexagon *h = s.hex();
+    int y = h->y();
+    while (y >= m_miny)
+    {
+        HexPathMap::iterator it = m_hex_paths.find(h);
+        if (it != m_hex_paths.end())
         {
-            findShape(h);
+            Path *parentPath = it->second;
+            if (parentPath == p->parent())
+            {
+               p->setParent(NULL);
+            }
+            else if (!p->parent() && parentPath != p)
+            {
+               p->setParent(parentPath);
+            }
         }
-        else
-        {
-            findHole(getHexagon(h->x(), h->y() - 1));
-        }
+        h = getHexagon(h->x(), --y);
     }
 }
 
 void HexGrid::findShape(Hexagon *hex)
 {
-    Path p;
+    Path *p = new Path(CLOCKWISE);
     Segment first(hex, 0);
     Segment cur(first);
     do {
-        cleanPossibleRoot(cur);
-        p.push_back(cur);
+        cleanPossibleRoot(cur, p);
+        p->push_back(cur);
         m_draw.drawSegment(cur);
         Segment next = cur.leftClockwise(this);
         if ( !next.hex()->dense() )
@@ -237,51 +265,21 @@ void HexGrid::findShape(Hexagon *hex)
         }
         cur = next;
     } while (cur != first);
+    m_paths.push_back(p);
 }
 
-void HexGrid::findHole(Hexagon *hex)
-{
-using namespace std;
-    Path p;
-    Segment first(hex, 3);
-    Segment cur(first);
-    do {
-        cleanPossibleRoot(cur);
-        p.push_back(cur);
-        m_draw.drawSegment(cur);
-        Segment next = cur.rightAntiClockwise(this);
-        if ( next.hex()->dense() )
-        {
-            next = cur.leftAntiClockwise(this); 
-        }
-        cur = next;
-    } while (cur != first);
-}
-
-void HexGrid::cleanPossibleRoot(Segment s)
+void HexGrid::cleanPossibleRoot(Segment s, Path *p)
 {
     if (s.possibleRoot(this))
     {
         m_pos_roots.erase(s.hex());
     }
-}
-
-// Determine if this root hexagon is part of a hole (anticlockwise) or
-// a regular polygon (clockwise)
-Orientation HexGrid::calcOrientation(Hexagon *h)
-{
-    int crossings = 0;
-
-    int y = h->y();
-    for (int y = h->y() - 1; y >= m_miny; y--)
+    if (s.horizontal())
     {
-        Hexagon *test = getHexagon(h->x(), y);
-        if (test->possibleRoot())
-        {
-            crossings++;
-        }
+        s.normalize(this);
+        HexPathMap::value_type hexpath(s.hex(), p);
+        m_hex_paths.insert(hexpath);
     }
-    return ((crossings % 2) ? ANTICLOCKWISE : CLOCKWISE);
 }
 
 void HexGrid::dumpInfo()

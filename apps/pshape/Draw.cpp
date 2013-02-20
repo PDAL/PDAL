@@ -53,7 +53,7 @@ void Draw::drawHexagon(Hexagon *hex_p, bool fill)
     Point pos;
     
     cairo_set_line_width(m_cairo_p, 1);
-    cairo_set_source_rgb(m_cairo_p, 1, 1, 0);
+    cairo_set_source_rgb(m_cairo_p, .5, .5, 0);
     pos.m_x = hex_p->x() * m_grid_p->width();
     pos.m_y = hex_p->y() * m_grid_p->height();
 

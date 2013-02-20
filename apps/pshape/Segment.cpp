@@ -68,6 +68,17 @@ Segment Segment::leftClockwise(HexGrid *grid)
     return next;
 }
 
+// Change the edge so that it has side 0-2 if necessary.
+void Segment::normalize(HexGrid *grid)
+{
+    if (m_side >= 3)
+    {
+        Coord coord = m_hex->neighborCoord(m_side);
+        m_side -= 3;
+        m_hex = grid->getHexagon(coord.m_x, coord.m_y);
+    }
+}
+
 bool operator == (const Segment& s1, const Segment &s2)
 {
     static int sharedside[] = { 3, 4, 5, 0, 1, 2 };

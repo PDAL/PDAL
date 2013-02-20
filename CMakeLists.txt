@@ -493,6 +493,9 @@ set (USE_PDAL_PLUGIN_OCI FALSE CACHE BOOL "Build the oci driver as a plugin rath
 set (USE_PDAL_PLUGIN_MRSID FALSE CACHE BOOL "Build the MrSID driver as a plugin rather than embedding")
 set (USE_PDAL_PLUGIN_CARIS FALSE CACHE BOOL "Build the Caris driver as a plugin rather than embedding")
 
+set (WITH_PSHAPE FALSE CACHE BOOL "Whether or not to build cairo pshape rendering")
+
+
 #------------------------------------------------------------------------------
 # installation path settings
 #------------------------------------------------------------------------------

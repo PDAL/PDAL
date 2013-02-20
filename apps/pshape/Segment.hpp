@@ -32,6 +32,10 @@ public:
     int side()
         { return m_side; }
 
+    bool horizontal()
+        { return (m_side == 0 || m_side == 3); }
+
+    void normalize(HexGrid *grid);
     bool possibleRoot(HexGrid *grid);
 
     Segment rightAntiClockwise(HexGrid *grid);
@@ -43,8 +47,6 @@ public:
     friend bool operator != (const Segment& s1, const Segment &s2);
     friend std::ostream& operator << (std::ostream& os, const Segment &s);
 };
-
-typedef std::vector<Segment> Path;
 
 } // namespace
 

@@ -114,7 +114,6 @@ bool readlas(double& x, double& y)
     }
     if (!iter->read(*buf))
     {
-        cerr << "Problem reading point number " << i << "!\n";
         delete reader;
         delete buf;
         //ABELL - Must be deleted elsewhere.
@@ -183,8 +182,8 @@ void process()
         grid.addPoint(Point(x, y));
     }
     grid.drawHexagons();
-//    grid.dumpInfo();
     grid.findShapes();
+    grid.findParentPaths();
 /**
     grid.extractShapes();
 **/
