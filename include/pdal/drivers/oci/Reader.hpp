@@ -96,7 +96,7 @@ public:
     {
         return m_querytype;
     }
-    Schema fetchSchema(Statement statement, sdo_pc* pc, boost::uint32_t& capacity) const;
+    Schema fetchSchema(Statement statement, sdo_pc* pc, boost::uint32_t& capacity, std::string ns_override="") const;
     pdal::SpatialReference fetchSpatialReference(Statement statement, sdo_pc* pc) const;
 
 
