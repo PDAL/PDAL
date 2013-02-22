@@ -22,7 +22,7 @@ cmake   -G "$CONFIG"  \
         -DPDAL_EMBED_BOOST=${EMBED} \
         -DWITH_GDAL=ON \
         -DWITH_ICONV=ON \
-        -DWITH_ORACLE=OFF \
+        -DWITH_ORACLE=ON \
         -DWITH_GEOTIFF=ON \
         -DWITH_LASZIP=ON \
         -DWITH_LIBXML2=ON \
@@ -40,8 +40,8 @@ cmake   -G "$CONFIG"  \
         -DLIBXML2_INCLUDE_DIR=${LIBXML2_HOME}/include/libxml2 \
         -DLIBXML2_LIBRARIES=${LIBXML2_HOME}/lib/libxml2.${SO_EXT} \
         -DTIFF_INCLUDE_DIR=/${TIFF_HOME}/include \
-        -DTIFF_LIBRARY=${TIFF_HOME}/lib/libtiff.${SO_EXT}
-
+        -DTIFF_LIBRARY=${TIFF_HOME}/lib/libtiff.${SO_EXT} \
+        -DORACLE_OCIEI_LIBRARY= \
 
     # -DUSE_PDAL_PLUGIN_SOCI=ON \
     # -DUSE_PDAL_PLUGIN_PCD=ON \
