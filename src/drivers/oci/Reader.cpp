@@ -469,9 +469,9 @@ pdal::Schema Reader::fetchSchema(Statement statement, sdo_pc* pc, boost::uint32_
     OCILobLocator* metadata = NULL;
     select_schema
             << "DECLARE" << std::endl
-            << "PC_TABLE VARCHAR2(32) := '" << m_initialQueryStatement->GetString(pc->base_table) << "';" << std::endl
-            << "PC_ID NUMBER := " << m_initialQueryStatement->GetInteger(&(pc->pc_id)) << ";" << std::endl
-            << "PC_COLUMN VARCHAR2(32) := '" << m_initialQueryStatement->GetString(pc->base_column) << "';" << std::endl
+            << "PC_TABLE VARCHAR2(32) := '" << statement->GetString(pc->base_table) << "';" << std::endl
+            << "PC_ID NUMBER := " << statement->GetInteger(&(pc->pc_id)) << ";" << std::endl
+            << "PC_COLUMN VARCHAR2(32) := '" << statement->GetString(pc->base_column) << "';" << std::endl
             << "BEGIN" << std::endl
             << std::endl
             << "EXECUTE IMMEDIATE" << std::endl
