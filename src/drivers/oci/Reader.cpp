@@ -710,7 +710,7 @@ void IteratorBase::fillUserBuffer(PointBuffer& user_buffer)
         Dimension const* point_source_field = &(user_buffer.getSchema().getDimensionOptional("PointSourceId").get());
         if (point_source_field)
         {  
-            for (boost::int32_t i = 0; i < numUserSpace; ++i)
+            for (boost::int32_t i = 0; i < (std::min)(numOraclePoints,numUserSpace); ++i)
             {  
                 if (i < 0)
                     throw pdal_error("point_source_field point index is less than 0!");
