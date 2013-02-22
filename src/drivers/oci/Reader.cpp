@@ -460,7 +460,7 @@ pdal::SpatialReference Reader::fetchSpatialReference(Statement statement, sdo_pc
         return pdal::SpatialReference();
 }
 
-pdal::Schema Reader::fetchSchema(Statement statement, sdo_pc* pc, boost::uint32_t& capacity) const
+pdal::Schema Reader::fetchSchema(Statement statement, sdo_pc* pc, boost::uint32_t& capacity, std::string ns_override) const
 {
     log()->get(logDEBUG) << "Fetching schema from SDO_PC object" << std::endl;
 
@@ -557,8 +557,15 @@ pdal::Schema Reader::fetchSchema(Statement statement, sdo_pc* pc, boost::uint32_
             if (iter->getUUID().is_nil())
             {
                 d.createUUID();
-            }            
-            d.setNamespace(getName());
+            }
+
+            if (ns_override.size() > 0)
+            {
+                d.setNamespace(ns_override);
+            } else
+            {
+                d.setNamespace(getName());
+            }
             schema.setDimension(d);        
         }
     }
@@ -740,7 +747,9 @@ void IteratorBase::copyOracleData(  PointBuffer& source,
     
     if (!source_dim)
     {
-        return;
+        source_dim = source.getSchema().getDimensionOptional(dest_dim.getName(), dest_dim.getNamespace()+".blocks");
+        if (!source_dim)
+            return;
     }
 
     for (boost::uint32_t i = 0; i < howMany; ++i)
@@ -838,7 +847,7 @@ BufferPtr IteratorBase::fetchPointBuffer(Statement statement, sdo_pc* pc)
     else
     {
         boost::uint32_t block_capacity(0);
-        Schema schema = m_reader.fetchSchema(statement, pc, block_capacity);
+        Schema schema = m_reader.fetchSchema(statement, pc, block_capacity, getReader().getName()+".blocks");
 
         // if (block_capacity > capacity)
         // {
