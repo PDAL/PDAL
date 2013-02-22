@@ -369,8 +369,8 @@ boost::uint32_t Crop::processBuffer(PointBuffer const& srcData, PointBuffer& dst
     Dimension const& dimZ = schema.getDimension(z_name);
     
     log()->get(logDEBUG2) << "x_dim '" << x_name <<"' fetched: " << dimX << std::endl;
-    log()->get(logDEBUG2) << "y_dim '" << x_name <<"' fetched: " << dimY << std::endl;
-    log()->get(logDEBUG2) << "z_dim '" << x_name <<"' fetched: " << dimZ << std::endl;
+    log()->get(logDEBUG2) << "y_dim '" << y_name <<"' fetched: " << dimY << std::endl;
+    log()->get(logDEBUG2) << "z_dim '" << z_name <<"' fetched: " << dimZ << std::endl;
     
     std::string wkt = getOptions().getValueOrDefault<std::string>("polygon", "");
     
