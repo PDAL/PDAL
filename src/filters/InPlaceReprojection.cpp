@@ -586,8 +586,6 @@ void IteratorBase::projectData(PointBuffer& buffer, boost::uint32_t numPoints)
         
     }
 
-    logOutput = m_reprojectionFilter.log()->getLevel() > logDEBUG3;
-
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
         double x = m_reprojectionFilter.getScaledValue(buffer, old_x, pointIndex);
