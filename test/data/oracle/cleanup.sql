@@ -6,8 +6,8 @@ declare
 begin
 
 name := '&1';
-clouds := name ||'_CLOUD_095';
-blks := name ||'_BLOCKS_095';
+clouds := name ||'_CLOUD';
+blks := name ||'_BLOCK';
 
 FOR i IN (SELECT table_name FROM user_tables WHERE table_name = clouds) LOOP
     EXECUTE IMMEDIATE 'DROP TABLE ' || clouds;
