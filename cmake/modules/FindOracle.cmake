@@ -41,6 +41,7 @@ if(DEFINED ENV{ORACLE_HOME})
   set(ORACLE_OCCI_NAMES libocci occi oraocci10 oraocci11)
 
   set(ORACLE_LIB_DIR 
+    ${ORACLE_HOME}/      
     ${ORACLE_HOME}/lib
     ${ORACLE_HOME}/sdk/lib       # Oracle SDK
     ${ORACLE_HOME}/sdk/lib/msvc
@@ -52,20 +53,20 @@ if(DEFINED ENV{ORACLE_HOME})
 
   set(ORACLE_LIBRARY ${ORACLE_OCI_LIBRARY} ${ORACLE_OCCI_LIBRARY} ${ORACLE_NNZ_LIBRARY})
 
-  if(APPLE)
-    set(ORACLE_OCIEI_NAMES libociei ociei)
-
-    find_library(ORACLE_OCIEI_LIBRARY
-      NAMES libociei ociei
-      PATHS ${ORACLE_LIB_DIR})
-
-    if(ORACLE_OCIEI_LIBRARY)
-      set(ORACLE_LIBRARY ${ORACLE_LIBRARY} ${ORACLE_OCIEI_LIBRARY})
-    else(ORACLE_OCIEI_LIBRARY)
-      message(STATUS
-        "libociei.dylib is not found. It may cause crash if you are building BUNDLE")
-    endif()
-  endif()
+  # if(APPLE)
+  #   set(ORACLE_OCIEI_NAMES libociei ociei)
+  # 
+  #   find_library(ORACLE_OCIEI_LIBRARY
+  #     NAMES libociei ociei
+  #     PATHS ${ORACLE_LIB_DIR})
+  # 
+  #   if(ORACLE_OCIEI_LIBRARY)
+  #     set(ORACLE_LIBRARY ${ORACLE_LIBRARY} ${ORACLE_OCIEI_LIBRARY})
+  #   else(ORACLE_OCIEI_LIBRARY)
+  #     message(STATUS
+  #       "libociei.dylib is not found. It may cause crash if you are building BUNDLE")
+  #   endif()
+  # endif()
 
   set(ORACLE_LIBRARIES ${ORACLE_LIBRARY})
 
