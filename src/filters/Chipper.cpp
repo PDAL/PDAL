@@ -133,7 +133,7 @@ Chipper::Chipper(Stage& prevStage, const Options& options)
     , m_yvec(chipper::DIR_Y)
     , m_spare(chipper::DIR_NONE)
 {
-    m_threshold = options.getValueOrThrow<boost::uint32_t>("capacity");
+    m_threshold = options.getValueOrDefault<boost::uint32_t>("capacity", 0u);
 
 }
 
@@ -145,7 +145,13 @@ void Chipper::initialize()
     checkImpedance();
     setPointCountType(PointCount_Fixed);
     setNumPoints(0);
-
+    
+    if (m_threshold == 0)
+    {
+        m_threshold = getPrevStage().getNumPoints();
+        if (m_threshold == 0)
+            throw pdal_error("chipper threshold cannot be 0!");
+    }
     return;
 }
 
