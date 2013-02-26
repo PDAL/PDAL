@@ -593,10 +593,18 @@ void IteratorBase::projectData(PointBuffer& buffer, boost::uint32_t numPoints)
         double z = m_reprojectionFilter.getScaledValue(buffer, old_z, pointIndex);
         
         if (logOutput)
-            m_reprojectionFilter.log()->get(logDEBUG5) << "input: " << x << " y: " << y << " z: " << z << std::endl;
+        {
+             m_reprojectionFilter.log()->floatPrecision(8);
+             m_reprojectionFilter.log()->get(logDEBUG5) << "input: " << x << " y: " << y << " z: " << z << std::endl;
+        }
+
         m_reprojectionFilter.transform(x,y,z);
+
         if (logOutput)
+        {
             m_reprojectionFilter.log()->get(logDEBUG5) << "output: " << x << " y: " << y << " z: " << z << std::endl;
+            
+        }
     
         m_reprojectionFilter.setScaledValue(buffer, x, new_x, pointIndex);
         m_reprojectionFilter.setScaledValue(buffer, y, new_y, pointIndex);
