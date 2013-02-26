@@ -10,6 +10,8 @@ EMBED=ON
 CC=/Users/hobu/bin/clang
 CXX=/Users/hobu/bin/clang++
 
+ORACLE_HOME=$HOME/oracle
+export ORACLE_HOME
 CONFIG="Unix Makefiles"
 
 if ! [ -z "$1" ]; then
@@ -17,7 +19,7 @@ if ! [ -z "$1" ]; then
 fi
 
 cmake   -G "$CONFIG"  \
-        -DCMAKE_BUILD_TYPE=Debug \
+        -DCMAKE_BUILD_TYPE=RelWithDebInfo \
         -DCMAKE_INSTALL_PREFIX=/Users/hobu \
         -DPDAL_EMBED_BOOST=${EMBED} \
         -DWITH_GDAL=ON \
@@ -40,8 +42,7 @@ cmake   -G "$CONFIG"  \
         -DLIBXML2_INCLUDE_DIR=${LIBXML2_HOME}/include/libxml2 \
         -DLIBXML2_LIBRARIES=${LIBXML2_HOME}/lib/libxml2.${SO_EXT} \
         -DTIFF_INCLUDE_DIR=/${TIFF_HOME}/include \
-        -DTIFF_LIBRARY=${TIFF_HOME}/lib/libtiff.${SO_EXT} \
-        -DORACLE_OCIEI_LIBRARY= \
+        -DTIFF_LIBRARY=${TIFF_HOME}/lib/libtiff.${SO_EXT} 
 
     # -DUSE_PDAL_PLUGIN_SOCI=ON \
     # -DUSE_PDAL_PLUGIN_PCD=ON \
