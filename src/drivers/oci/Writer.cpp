@@ -77,7 +77,7 @@ Writer::Writer(Stage& prevStage, const Options& options)
 
     m_connection = connect();
 
-    boost::uint32_t capacity = getOptions().getValueOrThrow<boost::uint32_t>("capacity");
+    boost::uint32_t capacity = getOptions().getValueOrDefault<boost::uint32_t>("capacity", 0);
     setChunkSize(capacity);
 
 
@@ -140,7 +140,7 @@ Options Writer::getDefaultOptions()
     Option srid("srid", 0, "The Oracle numerical SRID value to use \
                                              for PC_EXTENT, BLK_EXTENT, and indexing");
     Option capacity("capacity",
-                    10000,
+                    0,
                     "The block capacity or maximum number of \
                                      points a block can contain");
     Option stream_output_precision("stream_output_precision",
@@ -678,8 +678,14 @@ void Writer::CreatePCEntry(Schema const& buffer_schema)
 
     boost::uint32_t precision = getDefaultedOption<boost::uint32_t>("stream_output_precision");
     boost::uint32_t capacity = getDefaultedOption<boost::uint32_t>("capacity");
-
-
+    
+    if (capacity == 0)
+    {
+        capacity = getPrevStage().getNumPoints();
+        if (capacity == 0 )
+            throw pdal_error("blk_capacity for drivers.oci.writer cannot be 0!");
+    }
+    
 
 
     std::ostringstream oss;
