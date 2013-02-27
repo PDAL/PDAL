@@ -383,7 +383,10 @@ boost::uint32_t Crop::processBuffer(PointBuffer const& srcData, PointBuffer& dst
         double z = getScaledValue(srcData, dimZ, index);
 
         if (logOutput)
+        {
+            log()->floatPrecision(8);            
             log()->get(logDEBUG5) << "input: " << x << " y: " << y << " z: " << z << std::endl;
+        }
 
         if (wkt.empty())
         {
