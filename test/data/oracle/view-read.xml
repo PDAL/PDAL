@@ -7,18 +7,47 @@
         <Option name="compression">
             false
         </Option>
-        <Option name="chunk_size">
-            80000
-        </Option>
-                    
+        <Filter type="filters.selector">
+            <Option name="ignore_default">true</Option>
+            <Option name="keep">
+                <Options>
+                    <Option name="dimension">X</Option>
+                    <Option name="dimension">Y</Option>
+                    <Option name="dimension">Z</Option>
+                    <Option name="dimension">ReturnNumber</Option>
+                    <Option name="dimension">NumberOfReturns</Option>
+                    <Option name="dimension">ScanDirectionFlag</Option>
+                    <Option name="dimension">EdgeOfFlightLine</Option>
+                    <Option name="dimension">ScanAngleRank</Option>
+                    <Option name="dimension">UserData</Option>
+                    <Option name="dimension">PointSourceId</Option>
+                    <Option name="dimension">Time</Option>
+                    <Option name="dimension">Red</Option>
+                    <Option name="dimension">Green</Option>
+                    <Option name="dimension">Blue</Option>
+                    <Option name="dimension">Intensity</Option>
+                    <Option name="dimension">Classification</Option>
+                </Options>
+            </Option>
+            <Filter type="filters.inplacereprojection">
+                <Option name="out_srs">EPSG:26910</Option>
+                <Option name="scale_x">1e-02</Option>
+                <Option name="scale_z">1e-02</Option>
+                <Option name="scale_y">1e-02</Option>
+                <Filter type="filters.crop">
+                    <Option name="outside">false</Option>
+                    <Option name="y_dim">drivers.oci.reader.Y</Option>
+                    <Option name="z_dim">drivers.oci.reader.Z</Option>
+                    <Option name="polygon">POLYGON ((-117.25045912433896 49.363498220368406 422.7001953125,-117.250354838717698 49.363015851606754 422.4697265625,-117.250354838717698 49.363015851606754 422.4697265625,-117.249944310092033 49.363179659104745 422.5400390625,-117.249944310092033 49.363179659104745 422.5400390625,-117.249944310092033 49.363179659104745 422.5400390625,-117.249267132073385 49.363336566655938 424.150390625,-117.249267132073385 49.363336566655938 424.150390625,-117.248021694131495 49.362955485249948 438.7099609375,-117.247170953311993 49.362671823233526 425.9501953125,-117.247170953311993 49.362671823233526 425.9501953125,-117.244389715201308 49.362294540271016 425.8203125,-117.244389715201308 49.362294540271016 425.8203125,-117.242660823074814 49.359982173757416 435.6298828125,-117.241304573836388 49.355935148305193 420.509765625,-117.246145253552072 49.354272725227034 420.7998046875,-117.252725910517427 49.355838433248671 434.609375,-117.255514455016396 49.359399030387877 422.6396484375,-117.25045912433896 49.363498220368406 422.7001953125))</Option>
+                    <Option name="x_dim">drivers.oci.reader.X</Option>                    
                     <Reader type="drivers.oci.reader">
                         <Option name="query">
                             
 SELECT l."OBJ_ID", l."BLK_ID", l."BLK_EXTENT", l."BLK_DOMAIN",
        l."PCBLK_MIN_RES", l."PCBLK_MAX_RES", l."NUM_POINTS",
        l."NUM_UNSORTED_POINTS", l."PT_SORT_DIM", l."POINTS", b.cloud
-  FROM SIMPLE_BLOCKS l, SIMPLE_CLOUD b
- WHERE l.obj_id = b.id
+  FROM AUTZEN_BLOCKS l, AUTZEN_CLOUD b
+ WHERE l.obj_id = b.id and l.obj_id in (1,2)
 order by l.obj_id
                         </Option>
                         <Option name="connection">
@@ -31,6 +60,8 @@ order by l.obj_id
                             true
                         </Option>
                     </Reader>
-
+                </Filter>
+            </Filter>
+        </Filter>
     </Writer>
 </Pipeline>
