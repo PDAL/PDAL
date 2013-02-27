@@ -553,7 +553,7 @@ install(FILES AUTHORS.txt LICENSE.txt
 #------------------------------------------------------------------------------
 
 configure_file(
-  "${PROJECT_SOURCE_DIR}/pdal_defines.h.in"
+  "${PDAL_INCLUDE_DIR}/pdal/pdal_defines.h.in"
   "${PDAL_INCLUDE_DIR}/pdal/pdal_defines.h")
 
 #------------------------------------------------------------------------------
