@@ -225,7 +225,18 @@ bool Writer::CheckTableExists(std::string const& name)
 
 void Writer::CreatePCSchema(Schema const& buffer_schema, boost::uint32_t srid)
 {
-    pdal::Schema output_schema(buffer_schema);
+    bool pack = getOptions().getValueOrDefault<bool>("pack_ignored_fields", true);
+    pdal::Schema output_schema;
+    if (pack)
+    {
+        pdal::Schema schema(getPackedSchema(buffer_schema));
+        output_schema = schema;
+    } else
+    {
+        pdal::Schema schema(buffer_schema);
+        output_schema = schema;
+    }
+    
     bool bCreatePCPointSchema = true;
     long pcid;
     
@@ -586,7 +597,8 @@ Schema Writer::getPackedSchema( Schema const& schema) const
             position++;
         }
     }
-    return clean_schema;    
+    std::string xml = pdal::Schema::to_xml(clean_schema);
+    return clean_schema;
 }
 
 std::string Writer::loadGeometryWKT(std::string const& filename_or_wkt) const
