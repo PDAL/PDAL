@@ -280,6 +280,13 @@ void Writer::CreatePCSchema(Schema const& buffer_schema, boost::uint32_t srid)
         m_session->once << oss.str(), ::soci::use(xml), ::soci::into(pcid);
         oss.str("");
     }
+
+    // Set the typemod on the table
+    std::string block_table = getOptions().getValueOrThrow<std::string>("block_table");
+    std::stringstream update_typemod;
+    update_typemod << "ALTER TABLE " << block_table << " ALTER COLUMN pa SET DATA TYPE pcpatch(" << pcid << ")";
+    m_session->once << update_typemod.str();
+    update_typemod.str("");
     
     log()->get(logDEBUG) << "Point cloud id was " << pcid << std::endl;
     try
@@ -312,7 +319,7 @@ void Writer::CreateBlockTable(std::string const& name, boost::uint32_t srid)
     {
         if (m_use_PCPoint)
         {
-            oss << "CREATE TABLE " << boost::to_lower_copy(name) << " (pa PCPATCH)";
+            oss << "CREATE TABLE " << boost::to_lower_copy(name) << " (id SERIAL PRIMARY KEY, pa PCPATCH)";
             m_session->once << oss.str();
             oss.str("");
         } else
