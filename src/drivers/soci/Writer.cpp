@@ -906,8 +906,21 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
                 block_data.push_back(point_data[i]);
             }
             
-            // TODO: Read a flag from the pipeline and support compression
-            boost::uint32_t compression = 0;
+            std::string compression_str = getOptions().getValueOrDefault<std::string>("compression_type", "none");
+            boost::algorithm::to_lower(compression_str);
+            boost::uint32_t compression;
+            if (compression_str == "dimensional")
+            {
+                compression = 1;
+            } else if (compression_str == "ght")
+            {
+                compression = 2;
+            } else
+            {
+                compression = 0;
+            }
+            
+            
             
             std::stringstream options;
             #ifdef BOOST_LITTLE_ENDIAN

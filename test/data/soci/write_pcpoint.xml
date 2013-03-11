@@ -16,6 +16,9 @@
         <Option name="cloud_column">
             CLOUD_ID
         </Option>
+        <Option name="compression_type">
+            dimensional
+        </Option>
         <Option name="overwrite">
             false
         </Option>
@@ -35,7 +38,7 @@
             true
         </Option>
         <Option name="pack_ignored_fields">
-            false
+            true
         </Option>        
             <Filter type="filters.inplacereprojection">
                 <Option name="out_srs">
