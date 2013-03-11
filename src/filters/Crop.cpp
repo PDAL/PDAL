@@ -353,7 +353,8 @@ boost::uint32_t Crop::processBuffer(PointBuffer const& srcData, PointBuffer& dst
     boost::uint32_t count = srcData.getNumPoints();
 
     bool logOutput = log()->getLevel() > logDEBUG4;
-    log()->floatPrecision(8);
+    if (logOutput)
+        log()->floatPrecision(8);
     
     const std::string x_name = getOptions().getValueOrDefault<std::string>("x_dim", "X");
     const std::string y_name = getOptions().getValueOrDefault<std::string>("y_dim", "Y");
@@ -384,7 +385,7 @@ boost::uint32_t Crop::processBuffer(PointBuffer const& srcData, PointBuffer& dst
 
         if (logOutput)
         {
-            log()->floatPrecision(8);            
+            log()->floatPrecision(10);            
             log()->get(logDEBUG5) << "input: " << x << " y: " << y << " z: " << z << std::endl;
         }
 
