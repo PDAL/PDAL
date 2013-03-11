@@ -815,8 +815,8 @@ inline void PointBuffer::scaleData(PointBuffer& source,
 #  pragma warning(push)
 #  pragma warning(disable: 4127)  // conditional expression is constant
 #endif
-#pragma GCC diagnostic ignored "-Wfloat-equal"
-#pragma GCC diagnostic push
+// #pragma GCC diagnostic ignored "-Wfloat-equal"
+// #pragma GCC diagnostic push
 
 template <class T>
 inline void PointBuffer::scale(Dimension const& source_dimension,
@@ -856,7 +856,7 @@ inline void PointBuffer::scale(Dimension const& source_dimension,
 #ifdef PDAL_COMPILER_MSVC
 #  pragma warning(pop)
 #endif
-#pragma GCC diagnostic pop
+// #pragma GCC diagnostic pop
 
 PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const PointBuffer&);
 
