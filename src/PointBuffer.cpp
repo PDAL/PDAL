@@ -80,8 +80,8 @@ PointBuffer& PointBuffer::operator=(PointBuffer const& rhs)
         m_numPoints = rhs.getNumPoints();
         m_capacity = rhs.getCapacity();
         m_bounds = rhs.getSpatialBounds();
-        boost::scoped_array<boost::uint8_t> data(new boost::uint8_t[ m_schema.getByteSize()*m_capacity ]());
-        m_data.swap(data);
+        boost::uint8_t* new_array = new boost::uint8_t[ m_schema.getByteSize()*m_capacity ]();
+        m_data.reset(new_array);
         m_byteSize = rhs.m_byteSize;
         if (rhs.m_data.get())
             memcpy(m_data.get(), rhs.m_data.get(), m_byteSize*m_capacity);
@@ -98,8 +98,8 @@ void PointBuffer::reset(Schema const& new_schema)
     
     m_schema = new_schema;
     
-    boost::scoped_array<boost::uint8_t> data(new boost::uint8_t[ m_schema.getByteSize()*m_capacity ]());
-    m_data.swap(data);
+    boost::uint8_t* new_array = new boost::uint8_t[ m_schema.getByteSize()*m_capacity ]();
+    m_data.reset(new_array);
 
     m_numPoints = 0;
     m_byteSize = new_schema.getByteSize();    
@@ -110,8 +110,8 @@ void PointBuffer::resize(boost::uint32_t const& capacity)
     if (capacity != m_capacity)
     {
         m_capacity = capacity;
-        boost::scoped_array<boost::uint8_t> data(new boost::uint8_t[ m_schema.getByteSize()*m_capacity ]());
-        m_data.swap(data);        
+        boost::uint8_t* new_array = new boost::uint8_t[ m_schema.getByteSize()*m_capacity ]();
+        m_data.reset(new_array);
     }
 }
 
