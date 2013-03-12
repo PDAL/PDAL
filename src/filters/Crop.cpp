@@ -474,44 +474,35 @@ boost::uint32_t Crop::readBufferImpl(PointBuffer& data)
     boost::uint32_t originalCapacity = data.getCapacity();
     boost::int64_t numPointsNeeded = static_cast<boost::int64_t>(data.getCapacity());
 
-    if (numPointsNeeded <=0 )
-        throw pdal_error("numPointsNeeded is <=0!");
-        
-    // we've established numPointsNeeded is > 0
-    PointBuffer outputData(data.getSchema(), static_cast<boost::uint32_t>(numPointsNeeded));
+    PointBuffer outputData(data.getSchema(), originalCapacity);
     PointBuffer tmpData(outputData);
 
     m_cropFilter.log()->get(logDEBUG2) << "Fetching for block of size: " << numPointsNeeded << std::endl;
     
     while (numPointsNeeded > 0)
     {
+        // we got no data, and there is no more to get -- exit the loop
         if (getPrevIterator().atEnd()) 
         {
             m_cropFilter.log()->get(logDEBUG2) << "previous iterator is .atEnd, stopping"  
                                                << std::endl;
             break;
         }
-        
 
-        // read from prev stage
+
         if (numPointsNeeded <=0)
             throw pdal_error("unable resize PointBuffer to <=0 points in size!");
         data.resize(static_cast<boost::uint32_t>(numPointsNeeded));
+
+        // read from prev stage
         const boost::uint32_t numSrcPointsRead = getPrevIterator().read(data);
         m_cropFilter.log()->get(logDEBUG3) << "Fetched " 
                                            << numSrcPointsRead << " from previous iterator. "  
                                            << std::endl;
-
-        tmpData.resize(numSrcPointsRead);
-        
         assert(numSrcPointsRead <= numPointsNeeded);
 
 
-        // we got no data, and there is no more to get -- exit the loop
-
-
-        // copy points from src (prev stage) into dst (our stage),
-        // based on the CropFilter's rules (i.e. its bounds)
+        // copy points from src (prev stage) into dst (our stage)
         const boost::uint32_t numPointsProcessed = m_cropFilter.processBuffer(data, tmpData);
         m_cropFilter.log()->get(logDEBUG3) << "Processed " << numPointsProcessed << " in intersection filter" << std::endl;
 
@@ -524,14 +515,14 @@ boost::uint32_t Crop::readBufferImpl(PointBuffer& data)
             outputData.setNumPoints(outputData.getNumPoints() + tmpData.getNumPoints());
         }
 
-        numPointsNeeded -= outputData.getNumPoints() ;
+        numPointsNeeded -= tmpData.getNumPoints() ;
         m_cropFilter.log()->get(logDEBUG3) << numPointsNeeded << " left to read this block" << std::endl;
-        if ( numPointsNeeded <= 0)
-        {
-            m_cropFilter.log()->get(logDEBUG2) << "numPointsNeeded <=0, stopping"  
-                                               << std::endl;
-            break;
-        }        
+        // if ( numPointsNeeded <= 0)
+        // {
+        //     m_cropFilter.log()->get(logDEBUG2) << "numPointsNeeded <=0, stopping"  
+        //                                        << std::endl;
+        //     break;
+        // }        
     }
 
     const boost::uint32_t numPointsAchieved = outputData.getNumPoints();
