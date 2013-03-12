@@ -26,7 +26,6 @@
 if(DEFINED ENV{ORACLE_HOME})
 
   set(ORACLE_HOME $ENV{ORACLE_HOME})
-  message("ORACLE_HOME=${ORACLE_HOME}")
 
   find_path(ORACLE_INCLUDE_DIR
     NAMES oci.h
