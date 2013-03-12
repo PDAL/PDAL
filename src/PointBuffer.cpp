@@ -94,15 +94,19 @@ PointBuffer& PointBuffer::operator=(PointBuffer const& rhs)
 void PointBuffer::reset(Schema const& new_schema)
 {
     boost::uint32_t old_size = m_schema.getByteSize();
-    boost::uint32_t new_size = m_schema.getByteSize();
+    boost::uint32_t new_size = new_schema.getByteSize();
     
     m_schema = new_schema;
+    m_byteSize = new_size;
     
-    boost::uint8_t* new_array = new boost::uint8_t[ m_schema.getByteSize()*m_capacity ]();
-    m_data.reset(new_array);
+    if (m_byteSize != old_size )
+    {
+        boost::uint8_t* new_array = new boost::uint8_t[ new_size *m_capacity ]();
+        m_data.reset(new_array);
+    }
 
     m_numPoints = 0;
-    m_byteSize = new_schema.getByteSize();    
+
 }
 
 void PointBuffer::resize(boost::uint32_t const& capacity)
