@@ -208,7 +208,9 @@ public:
     {
         const boost::uint8_t* src = srcPointBuffer.getData(srcPointIndex);
         boost::uint8_t* dest = getData(destPointIndex);
-
+        
+        assert(srcPointBuffer.getSchema().getByteSize() == m_byteSize);
+        
         memcpy(dest, src, m_byteSize);
 
         assert(m_numPoints <= m_capacity);
@@ -239,10 +241,8 @@ public:
         const boost::uint8_t* src = srcPointBuffer.getData(srcPointIndex);
         boost::uint8_t* dest = getData(destPointIndex);
 
-        memcpy(dest, src, m_byteSize * numPoints);
-
         assert(m_numPoints <= m_capacity);
-
+        memcpy(dest, src, m_byteSize * numPoints);
         return;
     }
 
