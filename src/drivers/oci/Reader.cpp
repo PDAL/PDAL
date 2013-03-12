@@ -694,10 +694,25 @@ void IteratorBase::fillUserBuffer(PointBuffer& user_buffer)
     Schema const& user_schema = user_buffer.getSchema();
     schema::index_by_index const& idx = user_schema.getDimensions().get<schema::index>();
 
-    boost::int32_t numUserSpace = user_buffer.getCapacity() - user_buffer.getNumPoints();
-    if (numUserSpace <= 0)
-        return;
     boost::int32_t numOraclePoints = m_oracle_buffer->getNumPoints() - m_buffer_position;
+
+    boost::int32_t numUserSpace = user_buffer.getCapacity() - user_buffer.getNumPoints();
+    boost::int32_t howManyThisRead = (std::min)(numUserSpace, numOraclePoints);
+
+    if (numUserSpace < 0)
+    {
+        std::ostringstream oss;
+        oss << "numUserSpace < 0! : " << numUserSpace;
+        throw pdal_error(oss.str());
+    }
+
+    if (numOraclePoints < 0)
+    {
+        std::ostringstream oss;
+        oss << "numOraclePoints < 0! : " << numOraclePoints;
+        throw pdal_error(oss.str());
+    }
+
     
     schema::index_by_index::size_type i(0);
     for (i = 0; i < idx.size(); ++i)
@@ -707,7 +722,7 @@ void IteratorBase::fillUserBuffer(PointBuffer& user_buffer)
                             idx[i], 
                             m_buffer_position, 
                             user_buffer.getNumPoints(), 
-                            (std::min)(numOraclePoints,numUserSpace));
+                            howManyThisRead);
 
     }
 
@@ -717,11 +732,11 @@ void IteratorBase::fillUserBuffer(PointBuffer& user_buffer)
         Dimension const* point_source_field = &(user_buffer.getSchema().getDimensionOptional("PointSourceId").get());
         if (point_source_field)
         {  
-            for (boost::int32_t i = 0; i < (std::min)(numOraclePoints,numUserSpace); ++i)
+            for (boost::int32_t i = 0; i < howManyThisRead; ++i)
             {  
-                if (i < 0)
-                    throw pdal_error("point_source_field point index is less than 0!");
-                user_buffer.setField(*point_source_field, i, m_active_cloud_id);
+                user_buffer.setField(   *point_source_field, 
+                                        user_buffer.getNumPoints() + i, 
+                                        m_active_cloud_id);
             }
         }
     }
@@ -731,7 +746,6 @@ void IteratorBase::fillUserBuffer(PointBuffer& user_buffer)
     else if (numOraclePoints < numUserSpace)
         m_buffer_position = 0;
     
-    boost::uint32_t howManyThisRead = (std::min)(numUserSpace, numOraclePoints);
     user_buffer.setNumPoints(howManyThisRead + user_buffer.getNumPoints());
 }
 
