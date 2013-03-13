@@ -489,9 +489,6 @@ boost::uint32_t Crop::readBufferImpl(PointBuffer& data)
             break;
         }
 
-
-        if (numPointsNeeded <=0)
-            throw pdal_error("unable resize PointBuffer to <=0 points in size!");
         data.resize(static_cast<boost::uint32_t>(numPointsNeeded));
 
         // read from prev stage
@@ -517,12 +514,7 @@ boost::uint32_t Crop::readBufferImpl(PointBuffer& data)
 
         numPointsNeeded -= tmpData.getNumPoints() ;
         m_cropFilter.log()->get(logDEBUG3) << numPointsNeeded << " left to read this block" << std::endl;
-        // if ( numPointsNeeded <= 0)
-        // {
-        //     m_cropFilter.log()->get(logDEBUG2) << "numPointsNeeded <=0, stopping"  
-        //                                        << std::endl;
-        //     break;
-        // }        
+ 
     }
 
     const boost::uint32_t numPointsAchieved = outputData.getNumPoints();
