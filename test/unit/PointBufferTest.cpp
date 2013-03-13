@@ -279,7 +279,9 @@ BOOST_AUTO_TEST_CASE(PointBufferTest_large_buffer)
     data->setField<boost::int32_t>(x, 4294967293, x1);
     
     boost::int32_t x2 = data->getField<boost::int32_t>(x, 4294967293);
-    BOOST_CHECK_EQUAL(x1, x2);    
+    BOOST_CHECK_EQUAL(x1, x2);
+    
+    delete data;
 
     return;
 }
