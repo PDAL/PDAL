@@ -46,6 +46,8 @@
 #include <pdal/Schema.hpp>
 #include <pdal/Metadata.hpp>
 
+#include <vector>
+
 namespace pdal
 {
 
@@ -252,7 +254,7 @@ public:
     /// @param pointIndex position to start accessing
     inline boost::uint8_t* getData(boost::uint32_t pointIndex) const
     {
-        return m_data.get() + m_byteSize * pointIndex;
+        return (boost::uint8_t*)&(m_data.front()) + m_byteSize * pointIndex;
     }
 
     /// copies the raw data into your own byte array and sets the size
@@ -275,7 +277,7 @@ public:
     /// returns the raw array size of the current buffer. 
     inline boost::uint64_t getArraySize() const
     {
-        return m_arraySize;
+        return static_cast<boost::uint64_t>(m_data.size());
     }
     
     static void scaleData(PointBuffer& source_buffer,
@@ -332,7 +334,7 @@ public:
     */
 private:
     Schema m_schema;
-    boost::scoped_array<boost::uint8_t> m_data;
+    std::vector<boost::uint8_t> m_data;
     boost::uint32_t m_numPoints;
     boost::uint32_t m_capacity;
     boost::uint64_t m_arraySize;
@@ -363,7 +365,7 @@ inline void PointBuffer::setField(pdal::Dimension const& dim, boost::uint32_t po
     boost::uint64_t array_size = static_cast<boost::uint64_t>(m_capacity) * static_cast<boost::uint64_t>(m_byteSize); 
 
     assert(offset + sizeof(T) <= array_size);
-    boost::uint8_t* p = m_data.get() + offset;
+    boost::uint8_t* p = (boost::uint8_t*)&(m_data.front()) + offset;
 
     if (sizeof(T) == dim.getByteSize())
     {
@@ -407,7 +409,7 @@ inline  T const& PointBuffer::getField(pdal::Dimension const& dim, boost::uint32
     assert(offset + sizeof(T) <= array_size );
 #endif
 
-    boost::uint8_t const* p = m_data.get() + offset;
+    boost::uint8_t const* p = (boost::uint8_t*)&(m_data.front()) + offset;
     T const& output = *(T const*)(void const*)p;
     return output;
 }
