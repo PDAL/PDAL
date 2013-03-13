@@ -253,23 +253,32 @@ BOOST_AUTO_TEST_CASE(PointBufferTest_large_buffer)
     BOOST_CHECK_EQUAL(schema.getByteSize(), extras*8 + 8 + 4 + 1);
     boost::uint32_t capacity(4294967295);
     
-    PointBuffer data(schema, capacity);
-    boost::uint64_t total_size = static_cast<boost::uint64_t>(data.getSchema().getByteSize()) * static_cast<boost::uint64_t>(data.getCapacity());
-    BOOST_CHECK_EQUAL(data.getCapacity(), capacity);
-    BOOST_CHECK_EQUAL(data.getArraySize(), 261993004995u);
+    PointBuffer* data;
+    try
+    {
+        data = new PointBuffer(schema, capacity);
+        
+    } catch (std::bad_alloc&)
+    {
+        // We can't make one this big, test done.
+        return;
+    }
+    boost::uint64_t total_size = static_cast<boost::uint64_t>(data->getSchema().getByteSize()) * static_cast<boost::uint64_t>(data->getCapacity());
+    BOOST_CHECK_EQUAL(data->getCapacity(), capacity);
+    BOOST_CHECK_EQUAL(data->getArraySize(), 261993004995u);
 
-    Dimension const& cls = data.getSchema().getDimension("Classification");
+    Dimension const& cls = data->getSchema().getDimension("Classification");
     boost::uint8_t c1 = 1u;
-    data.setField<boost::uint8_t>(cls, 4294967294, c1);
+    data->setField<boost::uint8_t>(cls, 4294967294, c1);
     
-    boost::uint8_t c2 = data.getField<boost::uint8_t>(cls, 4294967294);
+    boost::uint8_t c2 = data->getField<boost::uint8_t>(cls, 4294967294);
     BOOST_CHECK_EQUAL(c2, c1);
 
-    Dimension const& x = data.getSchema().getDimension("Classification");
+    Dimension const& x = data->getSchema().getDimension("Classification");
     boost::int32_t x1 = 12673;
-    data.setField<boost::int32_t>(x, 4294967293, x1);
+    data->setField<boost::int32_t>(x, 4294967293, x1);
     
-    boost::int32_t x2 = data.getField<boost::int32_t>(x, 4294967293);
+    boost::int32_t x2 = data->getField<boost::int32_t>(x, 4294967293);
     BOOST_CHECK_EQUAL(x1, x2);    
 
     return;
