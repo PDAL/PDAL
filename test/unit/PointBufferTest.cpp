@@ -226,4 +226,38 @@ BOOST_AUTO_TEST_CASE(PointBufferTest_ptree)
     return;
 }
 
+
+BOOST_AUTO_TEST_CASE(PointBufferTest_large_buffer)
+{
+
+    Dimension d1("Classification", dimension::UnsignedInteger, 1);
+    Dimension d2("X", dimension::SignedInteger, 4);
+    Dimension d3("Y", dimension::Float, 8);
+    Schema schema;
+    schema.appendDimension(d1);
+    schema.appendDimension(d2);
+    schema.appendDimension(d3);
+    
+    boost::uint32_t capacity(4294967295);
+    PointBuffer data(schema, capacity);
+    boost::uint64_t total_size = static_cast<boost::uint64_t>(data.getSchema().getByteSize()) * static_cast<boost::uint64_t>(data.getCapacity());
+    BOOST_CHECK_EQUAL(data.getCapacity(), capacity);
+    BOOST_CHECK_EQUAL(total_size, 55834574835u);
+
+    Dimension const& cls = data.getSchema().getDimension("Classification");
+    boost::uint8_t c1 = 1u;
+    data.setField<boost::uint8_t>(cls, 55834574834, c1);
+    
+    boost::uint8_t c2 = data.getField<boost::uint8_t>(cls, 55834574834);
+    BOOST_CHECK_EQUAL(c2, c1);
+
+    Dimension const& x = data.getSchema().getDimension("Classification");
+    boost::int32_t x1 = 12673;
+    data.setField<boost::int32_t>(x, 55834574833, x1);
+    
+    boost::int32_t x2 = data.getField<boost::int32_t>(x, 55834574833);
+    BOOST_CHECK_EQUAL(x1, x2);    
+
+    return;
+}
 BOOST_AUTO_TEST_SUITE_END()

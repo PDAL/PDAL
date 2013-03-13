@@ -177,7 +177,7 @@ void Schema::appendDimension(const Dimension& dim)
 }
 
 
-const Dimension& Schema::getDimension(std::size_t t) const
+const Dimension& Schema::getDimension( schema::size_type t) const
 {
     schema::index_by_index const& idx = m_index.get<schema::index>();
 
@@ -187,7 +187,7 @@ const Dimension& Schema::getDimension(std::size_t t) const
     return idx.at(t);
 }
 
-boost::optional<Dimension const&> Schema::getDimensionOptional(std::size_t t) const
+boost::optional<Dimension const&> Schema::getDimensionOptional(schema::size_type t) const
 {
     try
     {

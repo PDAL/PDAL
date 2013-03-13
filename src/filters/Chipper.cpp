@@ -117,7 +117,7 @@ void Block::GetBuffer(boost::scoped_ptr<StageRandomIterator>& iterator, PointBuf
         one_point.setField(dimBlock, 0, block_id);
 
         // put single point onto our block
-        buffer.copyPointsFast(static_cast<std::size_t>(count), static_cast<std::size_t>(0), one_point, 1);
+        buffer.copyPointsFast(count, 0, one_point, 1);
         buffer.setNumPoints(count + 1);
 
         count++;
@@ -193,8 +193,8 @@ void Chipper::Load(RefList& xvec, RefList& yvec, RefList& spare)
     Dimension const& dimX = schema.getDimension("X");
     Dimension const& dimY = schema.getDimension("Y");
 
-    std::size_t num_points_loaded = 0;
-    std::size_t num_points_to_load = count32;
+    boost::uint32_t num_points_loaded = 0;
+    boost::uint32_t num_points_to_load = count32;
 
     PointBuffer buffer(schema, m_threshold);
 

@@ -167,7 +167,7 @@ public:
     /// @return a const& to Dimension with the given index. If the
     /// index is out of range, pdal::dimension_not_found is thrown.
     /// @param index position index to return.
-    const Dimension& getDimension(std::size_t index) const;
+    const Dimension& getDimension(schema::size_type index) const;
 
     /// @return a boost::optional-wrapped const& to a Dimension with the given name
     /// and namespace. If no matching dimension is found, the optional will be empty.
@@ -184,7 +184,7 @@ public:
     /// @return a boost::optional-wrapped const& to a Dimension with the given
     /// index. If the index is out of range, the optional will be empty.
     /// @param index position index to return.
-    boost::optional<Dimension const&> getDimensionOptional(std::size_t index) const;
+    boost::optional<Dimension const&> getDimensionOptional(schema::size_type index) const;
 
     /// @return the total cumulative byte size of all dimensions
     inline schema::size_type const& getByteSize() const
@@ -193,7 +193,7 @@ public:
     }
 
     /// @return the number of dimensions in this Schema instance
-    inline std::size_t size() const
+    inline schema::size_type size() const
     {
         return m_index.get<schema::name>().size();
     }

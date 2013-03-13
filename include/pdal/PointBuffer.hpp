@@ -186,7 +186,7 @@ public:
             will simply be saturated.
         \endverbatim
     */
-    template<class T> void setField(Dimension const& dim, std::size_t pointIndex, T value);
+    template<class T> void setField(Dimension const& dim, boost::uint32_t pointIndex, T value);
 
     /*! bulk copy all the fields from the given point into this object
         \param destPointIndex the destination point index to copy the data from
@@ -202,8 +202,8 @@ public:
             different compositions, congratulations :)
         \endverbatim
     */
-    inline void copyPointFast(std::size_t destPointIndex,
-                              std::size_t srcPointIndex,
+    inline void copyPointFast(boost::uint32_t destPointIndex,
+                              boost::uint32_t srcPointIndex,
                               const PointBuffer& srcPointBuffer)
     {
         const boost::uint8_t* src = srcPointBuffer.getData(srcPointIndex);
@@ -233,10 +233,10 @@ public:
             different compositions, congratulations :)
         \endverbatim
     */
-    inline void copyPointsFast(std::size_t destPointIndex,
-                               std::size_t srcPointIndex,
+    inline void copyPointsFast(boost::uint32_t destPointIndex,
+                               boost::uint32_t srcPointIndex,
                                const PointBuffer& srcPointBuffer,
-                               std::size_t numPoints)
+                               boost::uint32_t numPoints)
     {
         const boost::uint8_t* src = srcPointBuffer.getData(srcPointIndex);
         boost::uint8_t* dest = getData(destPointIndex);
@@ -250,7 +250,7 @@ public:
     */
     /// access to the raw byte data at specified pointIndex
     /// @param pointIndex position to start accessing
-    inline boost::uint8_t* getData(std::size_t pointIndex) const
+    inline boost::uint8_t* getData(boost::uint32_t pointIndex) const
     {
         return m_data.get() + m_byteSize * pointIndex;
     }
@@ -258,19 +258,19 @@ public:
     /// copies the raw data into your own byte array and sets the size
     /// @param data pointer to your byte array
     /// @param size size of the array in bytes
-    void getData(boost::uint8_t** data, std::size_t* size) const;
+    void getData(boost::uint8_t** data, boost::uint64_t* size) const;
 
     /// set the data for a single point at given pointIndex from a
     /// raw byte array
     /// @param data raw byte array
     /// @param pointIndex point position to set data.
-    void setData(boost::uint8_t* data, std::size_t pointIndex);
+    void setData(boost::uint8_t* data, boost::uint32_t pointIndex);
 
     /// overwrite raw data at a given pointIndex for a given number of byteCount
     /// @param data raw byte array
     /// @param pointIndex position to start writing
     /// @param byteCount number of bytes to overwrite at given position
-    void setDataStride(boost::uint8_t* data, std::size_t pointIndex, boost::uint32_t byteCount);
+    void setDataStride(boost::uint8_t* data, boost::uint32_t pointIndex, boost::uint32_t byteCount);
 
     static void scaleData(PointBuffer& source_buffer,
                           PointBuffer& destination_buffer,
@@ -343,7 +343,7 @@ private:
 };
 
 template <class T>
-inline void PointBuffer::setField(pdal::Dimension const& dim, std::size_t pointIndex, T value)
+inline void PointBuffer::setField(pdal::Dimension const& dim, boost::uint32_t pointIndex, T value)
 {
     if (dim.getPosition() == -1)
     {
@@ -351,8 +351,11 @@ inline void PointBuffer::setField(pdal::Dimension const& dim, std::size_t pointI
         throw buffer_error("This dimension has no identified position in a schema. Use the setRawField method to access an arbitrary byte position.");
     }
     
-    std::size_t offset = (pointIndex * m_byteSize) + dim.getByteOffset();
-    assert(offset + sizeof(T) <= m_byteSize * m_capacity);
+    boost::uint64_t point_start_byte_position = static_cast<boost::uint64_t>(pointIndex) * static_cast<boost::uint64_t>(m_byteSize); 
+    boost::uint64_t offset = point_start_byte_position + dim.getByteOffset();
+    boost::uint64_t array_size = static_cast<boost::uint64_t>(m_capacity) * static_cast<boost::uint64_t>(m_byteSize); 
+
+    assert(offset + sizeof(T) <= array_size);
     boost::uint8_t* p = m_data.get() + offset;
 
     if (sizeof(T) == dim.getByteSize())
@@ -379,20 +382,23 @@ inline  T const& PointBuffer::getField(pdal::Dimension const& dim, boost::uint32
         throw buffer_error("This dimension has no identified position in a schema.");
     }
 
-    std::size_t offset = (pointIndex * m_byteSize) + dim.getByteOffset();
+    boost::uint64_t point_start_byte_position = static_cast<boost::uint64_t>(pointIndex) * static_cast<boost::uint64_t>(m_byteSize); 
+    boost::uint64_t offset = point_start_byte_position + dim.getByteOffset();
 
 #ifdef DEBUG
     // This test ends up being somewhat expensive when run for every field 
     // for every point. 
-    if (offset + sizeof(T) > m_byteSize * m_capacity)
+    boost::uint64_t array_size = static_cast<boost::uint64_t>(m_capacity) * static_cast<boost::uint64_t>(m_byteSize); 
+    
+    if (offset + sizeof(T) > array_size)
     {
         std::ostringstream oss;
         oss << "Offset for given dimension is off the end of the buffer!";
         throw buffer_error(oss.str());
     }
-#endif
 
-    assert(offset + sizeof(T) <= m_byteSize * m_capacity);
+    assert(offset + sizeof(T) <= array_size );
+#endif
 
     boost::uint8_t const* p = m_data.get() + offset;
     T const& output = *(T const*)(void const*)p;
