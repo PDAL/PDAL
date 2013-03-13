@@ -272,6 +272,12 @@ public:
     /// @param byteCount number of bytes to overwrite at given position
     void setDataStride(boost::uint8_t* data, boost::uint32_t pointIndex, boost::uint32_t byteCount);
 
+    /// returns the raw array size of the current buffer. 
+    inline boost::uint64_t getArraySize() const
+    {
+        return m_arraySize;
+    }
+    
     static void scaleData(PointBuffer& source_buffer,
                           PointBuffer& destination_buffer,
                           Dimension const& source_dimension,
@@ -329,6 +335,7 @@ private:
     boost::scoped_array<boost::uint8_t> m_data;
     boost::uint32_t m_numPoints;
     boost::uint32_t m_capacity;
+    boost::uint64_t m_arraySize;
     Bounds<double> m_bounds;
 
     // We cache m_schema.getByteSize() here because it would end up

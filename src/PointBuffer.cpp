@@ -48,6 +48,7 @@ PointBuffer::PointBuffer(const Schema& schema, boost::uint32_t capacity)
     , m_data(new boost::uint8_t[static_cast<boost::uint64_t>(schema.getByteSize()) * static_cast<boost::uint64_t>(capacity)])
     , m_numPoints(0)
     , m_capacity(capacity)
+    , m_arraySize(static_cast<boost::uint64_t>(schema.getByteSize()) * static_cast<boost::uint64_t>(capacity))
     , m_bounds(Bounds<double>::getDefaultSpatialExtent())
     , m_byteSize(schema.getByteSize())
     , m_metadata("pointbuffer")
@@ -58,17 +59,17 @@ PointBuffer::PointBuffer(const Schema& schema, boost::uint32_t capacity)
 
 PointBuffer::PointBuffer(PointBuffer const& other)
     : m_schema(other.getSchema())
-    , m_data(new boost::uint8_t[static_cast<boost::uint64_t>(other.getSchema().getByteSize()) * static_cast<boost::uint64_t>(other.m_capacity)])
+    , m_data(new boost::uint8_t[other.m_arraySize])
     , m_numPoints(other.m_numPoints)
     , m_capacity(other.m_capacity)
+    , m_arraySize(other.m_arraySize)
     , m_bounds(other.m_bounds)
     , m_byteSize(other.m_byteSize)
     , m_metadata(other.m_metadata)
 {
     if (other.m_data)
     {
-        boost::uint64_t array_size = static_cast<boost::uint64_t>(other.getSchema().getByteSize()) * static_cast<boost::uint64_t>(other.m_capacity);
-        memcpy(m_data.get(), other.m_data.get(), array_size);
+        memcpy(m_data.get(), other.m_data.get(), other.m_arraySize);
     }
 
 }
@@ -82,6 +83,7 @@ PointBuffer& PointBuffer::operator=(PointBuffer const& rhs)
         m_capacity = rhs.getCapacity();
         m_bounds = rhs.getSpatialBounds();
         m_byteSize = rhs.m_byteSize;
+        m_arraySize = rhs.m_arraySize;
         boost::uint64_t array_size = static_cast<boost::uint64_t>(m_byteSize) * static_cast<boost::uint64_t>(m_capacity);
         boost::uint8_t* new_array = new boost::uint8_t[ array_size ]();
         m_data.reset(new_array);
@@ -103,9 +105,13 @@ void PointBuffer::reset(Schema const& new_schema)
     
     if (m_byteSize != old_size )
     {
-        boost::uint64_t array_size = static_cast<boost::uint64_t>(new_size) * static_cast<boost::uint64_t>(m_capacity); 
-        boost::uint8_t* new_array = new boost::uint8_t[ array_size ]();
-        m_data.reset(new_array);
+        boost::uint64_t new_array_size = static_cast<boost::uint64_t>(new_size) * static_cast<boost::uint64_t>(m_capacity); 
+        if (new_array_size > m_arraySize)
+        {
+            boost::uint8_t* new_array = new boost::uint8_t[ new_array_size ]();
+            m_data.reset(new_array);
+            m_arraySize = new_array_size;
+        }
     }
 
     m_numPoints = 0;
@@ -117,9 +123,14 @@ void PointBuffer::resize(boost::uint32_t const& capacity)
     if (capacity != m_capacity)
     {
         m_capacity = capacity;
-        boost::uint64_t array_size = static_cast<boost::uint64_t>(m_schema.getByteSize()) * static_cast<boost::uint64_t>(m_capacity); 
-        boost::uint8_t* new_array = new boost::uint8_t[ array_size ]();
-        m_data.reset(new_array);
+        boost::uint64_t new_array_size = static_cast<boost::uint64_t>(m_schema.getByteSize()) * static_cast<boost::uint64_t>(m_capacity); 
+        if (new_array_size > m_arraySize)
+        {
+            boost::uint8_t* new_array = new boost::uint8_t[ new_array_size ]();
+            m_data.reset(new_array);
+            m_arraySize = new_array_size;
+        }
+
     }
 }
 
