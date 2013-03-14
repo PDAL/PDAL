@@ -1068,6 +1068,7 @@ pdal::Bounds<double> Writer::CalculateBounds(PointBuffer const& buffer)
 
 
     bool first = true;
+    Vector<double> v(0.0, 0.0, 0.0);    
     for (boost::uint32_t pointIndex=0; pointIndex<buffer.getNumPoints(); pointIndex++)
     {
         const boost::int32_t xi = buffer.getField<boost::int32_t>(*dimX, pointIndex);
@@ -1078,7 +1079,9 @@ pdal::Bounds<double> Writer::CalculateBounds(PointBuffer const& buffer)
         const double yd = dimY->applyScaling(yi);
         const double zd = dimZ->applyScaling(zi);
 
-        Vector<double> v(xd, yd, zd);
+        v[0] = xd;
+        v[1] = yd;
+        v[2] = zd;
         if (first)
         {
             output = pdal::Bounds<double>(xd, yd, zd, xd, yd, zd);
