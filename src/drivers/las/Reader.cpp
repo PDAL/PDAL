@@ -188,8 +188,8 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data,
     const bool hasTime = Support::hasTime(pointFormat);
     const bool hasColor = Support::hasColor(pointFormat);
     const int pointByteCount = Support::getPointDataSize(pointFormat);
-
-    boost::uint8_t* buf = new boost::uint8_t[pointByteCount * numPoints];
+    
+    std::vector<boost::uint8_t> buf(pointByteCount * numPoints);
 
     if (!dimensions)
     {
@@ -207,7 +207,7 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data,
     if (zipPoint)
     {
 #ifdef PDAL_HAVE_LASZIP
-        boost::uint8_t* p = buf;
+        boost::uint8_t* p = &(buf.front());
 
         bool ok = false;
         for (boost::uint32_t i=0; i<numPoints; i++)
@@ -232,7 +232,7 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data,
     }
     else
     {
-        Utils::read_n(buf, stream, pointByteCount * numPoints);
+        Utils::read_n(buf.front(), stream, pointByteCount * numPoints);
     }
 	
 	pdal::Bounds<double> bounds;
@@ -240,7 +240,7 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data,
 	bool bFirstPoint(true);
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
-        boost::uint8_t* p = buf + pointByteCount * pointIndex;
+        boost::uint8_t* p = &(buf.front()) + pointByteCount * pointIndex;
 
         // always read the base fields
         {
@@ -335,8 +335,6 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data,
 
         data.setNumPoints(pointIndex+1);
     }
-    
-    delete[] buf;
 
     data.setSpatialBounds(bounds);
 
