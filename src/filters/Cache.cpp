@@ -185,6 +185,14 @@ Cache::Cache(const pdal::filters::Cache& filter, PointBuffer& buffer)
     : pdal::FilterSequentialIterator(filter, buffer)
     , m_filter(filter)
 {
+	// reset the cache to the point count if no block size 
+	// was specified. Yes we're doing dirt here, but nuking the cache at
+	// the creation of an iterator shouldn't be too catastrophic
+	if (filter.getCacheBlockSize() == 0)
+	{
+		filters::Cache* f = const_cast<filters::Cache*>(&filter);
+		f->resetCache(f->getMaxCacheBlocks(), f->getPrevStage().getNumPoints());
+	}
     return;
 }
 
@@ -264,6 +272,11 @@ Cache::Cache(const pdal::filters::Cache& filter, PointBuffer& buffer)
     : pdal::FilterRandomIterator(filter, buffer)
     , m_filter(filter)
 {
+    if (filter.getCacheBlockSize() == 0)
+    {
+        filters::Cache* f = const_cast<filters::Cache*>(&filter);
+        f->resetCache(f->getMaxCacheBlocks(), f->getPrevStage().getNumPoints());
+    }
 	return;
 }
 
@@ -308,10 +321,7 @@ boost::uint32_t Cache::readBufferImpl(PointBuffer& data)
     const PointBuffer* block = m_filter.lookupInCache(currentPointIndex);
     if (block != NULL)
     {
-        // A hit! A palpable hit!
-        data.copyPointFast(0,  currentPointIndex % cacheBlockSize, *block);
-
-        m_filter.updateStats(0, 1);
+        PointBuffer::copyLikeDimensions(*block, data, currentPointIndex % cacheBlockSize, currentPointIndex % cacheBlockSize, 1);
 
         return 1;
     }
