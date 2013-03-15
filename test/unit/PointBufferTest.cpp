@@ -357,12 +357,13 @@ BOOST_AUTO_TEST_CASE(PointBufferTest_copy_like_Dimensions)
     
     BOOST_CHECK_EQUAL(150, data_a.getField<boost::int32_t>(x, 150));
     
-    
-    PointBuffer::copyLikeDimensions(data_a, data_b, 0, 0, 175);
+    DimensionMap* dimensions = PointBuffer::mapDimensions(data_a, data_b);
+    PointBuffer::copyLikeDimensions(data_a, data_b, *dimensions, 0, 0, 175);
     
     Dimension const& x2 = data_b.getSchema().getDimension("X");
     BOOST_CHECK_EQUAL(150, data_b.getField<boost::int32_t>(x2, 150));
     
+    delete dimensions;
 
     return;
 }

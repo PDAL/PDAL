@@ -48,7 +48,7 @@
 
 namespace pdal
 {
-
+    typedef std::map<Dimension const*, Dimension const*> DimensionMap;
 
 /// A PointBuffer is the object that is passed through pdal::Stage instances
 /// to form a pipeline. A PointBuffer is composed of a pdal::Schema that determines
@@ -332,10 +332,12 @@ public:
     /// Copies dimensions from the given PointBuff
     static void copyLikeDimensions( PointBuffer const& source, 
                                     PointBuffer& destination, 
+                                    DimensionMap const& dimensions,
                                     boost::uint32_t source_starting_position, 
                                     boost::uint32_t destination_starting_position,
                                     boost::uint32_t howMany);
     
+    static DimensionMap* mapDimensions(PointBuffer const& source, PointBuffer const& destination);
     
     /** @name private attributes
     */

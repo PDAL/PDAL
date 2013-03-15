@@ -392,31 +392,54 @@ boost::property_tree::ptree PointBuffer::toPTree() const
     return tree;
 }
 
-void PointBuffer::copyLikeDimensions(   PointBuffer const& source, 
-                                        PointBuffer& destination, 
-                                        boost::uint32_t source_starting_position, 
-                                        boost::uint32_t destination_starting_position,
-                                        boost::uint32_t howMany)
+
+DimensionMap* PointBuffer::mapDimensions(PointBuffer const& source, PointBuffer const& destination)
 {
 
     schema::index_by_index const& dimensions = source.getSchema().getDimensions().get<schema::index>();
     schema::index_by_index::size_type d(0);
+
+    DimensionMap* dims = new DimensionMap;
     
-    assert(howMany <= destination.getCapacity() - destination_starting_position);
-    assert(howMany <= source.getCapacity() - source_starting_position);
-    
+    Schema const& dest_schema = destination.getSchema();
     for (d = 0; d < dimensions.size(); ++d)
     {
         Dimension const& source_dim = dimensions[d];
-        Schema const& dest_schema = destination.getSchema();
+            
         boost::optional<Dimension const&> dest_dim_ptr = dest_schema.getDimensionOptional(    source_dim.getName(), 
                                                                                                 source_dim.getNamespace());
         if (!dest_dim_ptr)
         {
             continue;
         }
-                
-        Dimension const& dest_dim = *dest_dim_ptr;
+            
+        Dimension const* s = &source_dim;
+        Dimension const* d = &(*dest_dim_ptr);
+        dims->insert(std::pair<Dimension const*, Dimension const*>(s, d));
+    }
+    
+    return dims;
+}
+
+void PointBuffer::copyLikeDimensions(   PointBuffer const& source, 
+                                        PointBuffer& destination,
+                                        DimensionMap const& dimensions,
+                                        boost::uint32_t source_starting_position, 
+                                        boost::uint32_t destination_starting_position,
+                                        boost::uint32_t howMany)
+{
+
+    
+    assert(howMany <= destination.getCapacity() - destination_starting_position);
+    assert(howMany <= source.getCapacity() - source_starting_position);
+
+    typedef DimensionMap::const_iterator Iterator;
+    
+    for (Iterator d = dimensions.begin(); d != dimensions.end(); ++d)
+    {
+        
+        Dimension const& source_dim = *d->first;
+        Dimension const& dest_dim = *d->second;
         
         for (boost::uint32_t i = 0; i < howMany; ++i)
         {

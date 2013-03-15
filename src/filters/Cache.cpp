@@ -271,6 +271,7 @@ namespace random
 Cache::Cache(const pdal::filters::Cache& filter, PointBuffer& buffer)
     : pdal::FilterRandomIterator(filter, buffer)
     , m_filter(filter)
+    , m_dimension_map(0)
 {
     if (filter.getCacheBlockSize() == 0)
     {
@@ -283,7 +284,14 @@ Cache::Cache(const pdal::filters::Cache& filter, PointBuffer& buffer)
 
 boost::uint64_t Cache::seekImpl(boost::uint64_t count)
 {
-    return getPrevIterator().seek(count);
+    const PointBuffer* block = m_filter.lookupInCache(count);
+    if (block != NULL)
+    {
+        return count;
+    } else 
+    {
+        return getPrevIterator().seek(count);
+    }
 }
 
 
@@ -321,7 +329,11 @@ boost::uint32_t Cache::readBufferImpl(PointBuffer& data)
     const PointBuffer* block = m_filter.lookupInCache(currentPointIndex);
     if (block != NULL)
     {
-        PointBuffer::copyLikeDimensions(*block, data, currentPointIndex, 0, 1);
+        if (!m_dimension_map)
+        {
+            m_dimension_map = PointBuffer::mapDimensions(*block, data);
+        }
+        PointBuffer::copyLikeDimensions(*block, data, *m_dimension_map, currentPointIndex, 0, 1);
 
         return 1;
     }

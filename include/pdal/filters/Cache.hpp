@@ -37,12 +37,13 @@
 
 #include <pdal/Filter.hpp>
 #include <pdal/FilterIterator.hpp>
+#include <pdal/PointBuffer.hpp>
 
 namespace pdal
 {
 
 class PointBufferCache;
-class PointBuffer;
+
 
 namespace filters
 {
@@ -159,6 +160,8 @@ private:
     boost::uint32_t readBufferImpl(PointBuffer&);
 
     const pdal::filters::Cache& m_filter;
+    
+    DimensionMap* m_dimension_map;
 };
 
 
