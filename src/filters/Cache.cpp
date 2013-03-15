@@ -321,7 +321,7 @@ boost::uint32_t Cache::readBufferImpl(PointBuffer& data)
     const PointBuffer* block = m_filter.lookupInCache(currentPointIndex);
     if (block != NULL)
     {
-        PointBuffer::copyLikeDimensions(*block, data, currentPointIndex % cacheBlockSize, currentPointIndex % cacheBlockSize, 1);
+        PointBuffer::copyLikeDimensions(*block, data, currentPointIndex, 0, 1);
 
         return 1;
     }
