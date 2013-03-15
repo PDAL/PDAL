@@ -399,11 +399,11 @@ void PointBuffer::copyLikeDimensions(   PointBuffer const& source,
                                         boost::uint32_t howMany)
 {
 
-    schema::index_by_index const& dimensions = destination.getSchema().getDimensions().get<schema::index>();
+    schema::index_by_index const& dimensions = source.getSchema().getDimensions().get<schema::index>();
     schema::index_by_index::size_type d(0);
     
-    assert(howMany < destination.getCapacity() - source_starting_position);
-    assert(howMany < source.getCapacity() - source_starting_position);
+    assert(howMany <= destination.getCapacity() - destination_starting_position);
+    assert(howMany <= source.getCapacity() - source_starting_position);
     
     for (d = 0; d < dimensions.size(); ++d)
     {
@@ -430,11 +430,10 @@ void PointBuffer::copyLikeDimensions(   PointBuffer const& source,
                 // FIXME: This test could produce false positives
                 boost::uint8_t* source_position = source.getData(source_starting_position+i) + source_dim.getByteOffset();
                 boost::uint8_t* destination_position = destination.getData(destination_starting_position + i) + dest_dim.getByteOffset();
-                memcpy(destination_position, source_position, source_dim.getByteSize());
+                memcpy(destination_position, source_position, dest_dim.getByteSize());
             }
             else
             {
-                throw pdal_error("Sclaing!");
                 PointBuffer::scaleData( source, 
                                         destination, 
                                         source_dim, 
