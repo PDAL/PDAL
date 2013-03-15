@@ -21,6 +21,8 @@ END LOOP;
 execute immediate 'CREATE TABLE '|| clouds ||'(id number, CLOUD SDO_PC, BOUNDARY SDO_GEOMETRY)';
 execute immediate 'delete from user_sdo_geom_metadata where table_name = '' || blks || ''';
 
+execute immediate 'purge recyclebin';
+
 end;
 /
 
