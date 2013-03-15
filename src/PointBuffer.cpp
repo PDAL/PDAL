@@ -415,7 +415,17 @@ DimensionMap* PointBuffer::mapDimensions(PointBuffer const& source, PointBuffer 
             
         Dimension const* s = &source_dim;
         Dimension const* d = &(*dest_dim_ptr);
-        dims->insert(std::pair<Dimension const*, Dimension const*>(s, d));
+
+        if (d->getInterpretation() == s->getInterpretation() &&
+            d->getByteSize() == s->getByteSize() && 
+            pdal::Utils::compare_distance(d->getNumericScale(), s->getNumericScale()) &&
+            pdal::Utils::compare_distance(d->getNumericOffset(), s->getNumericOffset()) &&
+            d->getEndianness() == s->getEndianness() 
+            )
+        {
+        
+            dims->insert(std::pair<Dimension const*, Dimension const*>(s, d));
+        }
     }
     
     return dims;
@@ -443,27 +453,9 @@ void PointBuffer::copyLikeDimensions(   PointBuffer const& source,
         
         for (boost::uint32_t i = 0; i < howMany; ++i)
         {
-            if (dest_dim.getInterpretation() == source_dim.getInterpretation() &&
-                dest_dim.getByteSize() == source_dim.getByteSize() && 
-                pdal::Utils::compare_distance(dest_dim.getNumericScale(), source_dim.getNumericScale()) &&
-                pdal::Utils::compare_distance(dest_dim.getNumericOffset(), source_dim.getNumericOffset()) &&
-                dest_dim.getEndianness() == source_dim.getEndianness() 
-                )
-            {
-                // FIXME: This test could produce false positives
-                boost::uint8_t* source_position = source.getData(source_starting_position+i) + source_dim.getByteOffset();
-                boost::uint8_t* destination_position = destination.getData(destination_starting_position + i) + dest_dim.getByteOffset();
-                memcpy(destination_position, source_position, dest_dim.getByteSize());
-            }
-            else
-            {
-                PointBuffer::scaleData( source, 
-                                        destination, 
-                                        source_dim, 
-                                        dest_dim, 
-                                        source_starting_position + i,
-                                        destination_starting_position + i);
-            }
+            boost::uint8_t* source_position = source.getData(source_starting_position+i) + source_dim.getByteOffset();
+            boost::uint8_t* destination_position = destination.getData(destination_starting_position + i) + dest_dim.getByteOffset();
+            memcpy(destination_position, source_position, dest_dim.getByteSize());
         }
     }
 
