@@ -392,6 +392,61 @@ boost::property_tree::ptree PointBuffer::toPTree() const
     return tree;
 }
 
+void PointBuffer::copyLikeDimensions(   PointBuffer const& source, 
+                                        PointBuffer& destination, 
+                                        boost::uint32_t source_starting_position, 
+                                        boost::uint32_t destination_starting_position,
+                                        boost::uint32_t howMany)
+{
+
+    schema::index_by_index const& dimensions = destination.getSchema().getDimensions().get<schema::index>();
+    schema::index_by_index::size_type d(0);
+    
+    assert(howMany < destination.getCapacity() - source_starting_position);
+    assert(howMany < source.getCapacity() - source_starting_position);
+    
+    for (d = 0; d < dimensions.size(); ++d)
+    {
+        Dimension const& source_dim = dimensions[d];
+        Schema const& dest_schema = destination.getSchema();
+        boost::optional<Dimension const&> dest_dim_ptr = dest_schema.getDimensionOptional(    source_dim.getName(), 
+                                                                                                source_dim.getNamespace());
+        if (!dest_dim_ptr)
+        {
+            continue;
+        }
+                
+        Dimension const& dest_dim = *dest_dim_ptr;
+        
+        for (boost::uint32_t i = 0; i < howMany; ++i)
+        {
+            if (dest_dim.getInterpretation() == source_dim.getInterpretation() &&
+                dest_dim.getByteSize() == source_dim.getByteSize() && 
+                pdal::Utils::compare_distance(dest_dim.getNumericScale(), source_dim.getNumericScale()) &&
+                pdal::Utils::compare_distance(dest_dim.getNumericOffset(), source_dim.getNumericOffset()) &&
+                dest_dim.getEndianness() == source_dim.getEndianness() 
+                )
+            {
+                // FIXME: This test could produce false positives
+                boost::uint8_t* source_position = source.getData(source_starting_position+i) + source_dim.getByteOffset();
+                boost::uint8_t* destination_position = destination.getData(destination_starting_position + i) + dest_dim.getByteOffset();
+                memcpy(destination_position, source_position, source_dim.getByteSize());
+            }
+            else
+            {
+                throw pdal_error("Sclaing!");
+                PointBuffer::scaleData( source, 
+                                        destination, 
+                                        source_dim, 
+                                        dest_dim, 
+                                        source_starting_position + i,
+                                        destination_starting_position + i);
+            }
+        }
+    }
+
+                        
+}
 
 std::ostream& operator<<(std::ostream& ostr, const PointBuffer& pointBuffer)
 {

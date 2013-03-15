@@ -278,7 +278,7 @@ public:
         return m_arraySize;
     }
     
-    static void scaleData(PointBuffer& source_buffer,
+    static void scaleData(PointBuffer const& source_buffer,
                           PointBuffer& destination_buffer,
                           Dimension const& source_dimension,
                           Dimension const& destination_dimension,
@@ -328,6 +328,15 @@ public:
     boost::property_tree::ptree toPTree() const;
 
     pdal::Bounds<double> calculateBounds(bool bis3d=true) const;
+
+    /// Copies dimensions from the given PointBuff
+    static void copyLikeDimensions( PointBuffer const& source, 
+                                    PointBuffer& destination, 
+                                    boost::uint32_t source_starting_position, 
+                                    boost::uint32_t destination_starting_position,
+                                    boost::uint32_t howMany);
+    
+    
     /** @name private attributes
     */
 private:
@@ -420,7 +429,7 @@ inline  T const& PointBuffer::getField(pdal::Dimension const& dim, boost::uint32
 #  pragma warning(disable: 4244)  // conversion from T1 to T2, possible loss of data
 #endif
 
-inline void PointBuffer::scaleData(PointBuffer& source,
+inline void PointBuffer::scaleData(PointBuffer const& source,
                             PointBuffer& destination,
                             Dimension const& source_dimension,
                             Dimension const& destination_dimension,
