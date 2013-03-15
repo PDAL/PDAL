@@ -175,7 +175,8 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data,
                                       boost::uint64_t numPointsLeft,
                                       LASunzipper* unzipper,
                                       ZipPoint* zipPoint,
-                                      PointDimensions* dimensions) const
+                                      PointDimensions* dimensions,
+                                      std::vector<boost::uint8_t>& read_buffer ) const
 {
     // we must not read more points than are left in the file
     const boost::uint64_t numPoints64 = std::min<boost::uint64_t>(data.getCapacity(), numPointsLeft);
@@ -189,8 +190,12 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data,
     const bool hasColor = Support::hasColor(pointFormat);
     const int pointByteCount = Support::getPointDataSize(pointFormat);
     
-    std::vector<boost::uint8_t> buf(pointByteCount * numPoints);
-
+    // std::vector<boost::uint8_t> buf(pointByteCount * numPoints);
+    if (read_buffer.size() < (pointByteCount * numPoints))
+    {
+        read_buffer.resize(pointByteCount * numPoints);
+    }
+    
     if (!dimensions)
     {
         throw pdal_error("No dimension positions are available!");
@@ -207,7 +212,7 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data,
     if (zipPoint)
     {
 #ifdef PDAL_HAVE_LASZIP
-        boost::uint8_t* p = &(buf.front());
+        boost::uint8_t* p = &(read_buffer.front());
 
         bool ok = false;
         for (boost::uint32_t i=0; i<numPoints; i++)
@@ -232,7 +237,7 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data,
     }
     else
     {
-        Utils::read_n(buf.front(), stream, pointByteCount * numPoints);
+        Utils::read_n(read_buffer.front(), stream, pointByteCount * numPoints);
     }
 	
 	pdal::Bounds<double> bounds;
@@ -240,7 +245,7 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data,
 	bool bFirstPoint(true);
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
-        boost::uint8_t* p = &(buf.front()) + pointByteCount * pointIndex;
+        boost::uint8_t* p = &(read_buffer.front()) + pointByteCount * pointIndex;
 
         // always read the base fields
         {
@@ -824,14 +829,16 @@ boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
                                   getStage().getNumPoints()-this->getIndex(),
                                   m_unzipper.get(),
                                   m_zipPoint.get(),
-                                  m_pointDimensions);
+                                  m_pointDimensions,
+                                  m_read_buffer);
 #else
     return m_reader.processBuffer(data,
                                   m_istream,
                                   getStage().getNumPoints()-this->getIndex(),
                                   NULL,
                                   NULL,
-                                  m_pointDimensions);
+                                  m_pointDimensions,
+                                  m_read_buffer);
 
 #endif
 }
@@ -897,14 +904,16 @@ boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
                                   getStage().getNumPoints()-this->getIndex(),
                                   m_unzipper.get(),
                                   m_zipPoint.get(),
-                                  m_pointDimensions);
+                                  m_pointDimensions,
+                                  m_read_buffer);
 #else
     return m_reader.processBuffer(data,
                                   m_istream,
                                   getStage().getNumPoints()-this->getIndex(),
                                   NULL,
                                   NULL,
-                                  m_pointDimensions);
+                                  m_pointDimensions,
+                                  m_read_buffer);
 
 #endif
 }

@@ -98,7 +98,8 @@ public:
                                   boost::uint64_t numPointsLeft,
                                   LASunzipper* unzipper,
                                   ZipPoint* zipPoint,
-                                  PointDimensions* dimensions) const;
+                                  PointDimensions* dimensions,
+                                  std::vector<boost::uint8_t>& read_buffer) const;
 
     // for dumping
     virtual boost::property_tree::ptree toPTree() const;
@@ -161,7 +162,8 @@ public:
     void* m_zipPoint;
     void* m_unzipper;
 #endif
-
+    
+    std::vector<boost::uint8_t> m_read_buffer;
     std::streampos m_zipReadStartPosition;
 
 private:
