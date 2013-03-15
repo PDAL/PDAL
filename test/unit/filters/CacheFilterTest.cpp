@@ -198,4 +198,51 @@ BOOST_AUTO_TEST_CASE(CacheFilterTest_test_use_counts)
     return;
 }
 
+
+
+BOOST_AUTO_TEST_CASE(CacheFilterTest_test_random)
+{
+    Bounds<double> srcBounds(0.0, 0.0, 0.0, 100.0, 100.0, 100.0);
+    
+    boost::uint32_t numPoints(10000);
+    pdal::drivers::faux::Reader reader(srcBounds, numPoints, pdal::drivers::faux::Reader::Constant);
+
+    // Option opt1("max_cache_blocks", 2);
+    // Option opt2("cache_block_size", 1024);
+    Options opts;
+    // opts.add(opt1);
+    // opts.add(opt2);
+    pdal::filters::Cache cache(reader, opts);
+    BOOST_CHECK_EQUAL(cache.getDescription(), "Cache Filter");
+    cache.initialize();
+
+    const Schema& schema = reader.getSchema();
+
+    PointBuffer dataBig(schema, reader.getNumPoints());
+    PointBuffer dataSmall(schema, 1);
+
+    StageSequentialIterator* sequential = cache.createSequentialIterator(dataBig);
+    StageRandomIterator* random = cache.createRandomIterator(dataSmall);
+
+    //BOOST_CHECK(cache.getIndex() == 0);
+    BOOST_CHECK_EQUAL(cache.getNumPointsRequested(), 0);
+    BOOST_CHECK_EQUAL(cache.getNumPointsRead(), 0);
+
+    sequential->read(dataBig);
+    BOOST_CHECK_EQUAL(dataBig.getField<boost::uint64_t>(dataBig.getSchema().getDimension("Time"), 0), 0);
+
+    BOOST_CHECK_EQUAL(cache.getNumPointsRequested(), numPoints);
+    BOOST_CHECK_EQUAL(cache.getNumPointsRead(), numPoints);
+    
+    random->seek(42);
+    random->read(dataSmall);
+    BOOST_CHECK_EQUAL(cache.getNumPointsRequested(), numPoints);
+    BOOST_CHECK_EQUAL(cache.getNumPointsRead(), numPoints);
+    
+    delete sequential;
+    delete random;
+
+    return;
+}
+
 BOOST_AUTO_TEST_SUITE_END()
