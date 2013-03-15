@@ -322,4 +322,50 @@ BOOST_AUTO_TEST_CASE(PointBufferTest_resetting)
     return;
 }
 
+
+BOOST_AUTO_TEST_CASE(PointBufferTest_copy_like_Dimensions)
+{
+
+    Dimension d1("Classification", dimension::UnsignedInteger, 1);
+    Dimension d2("X", dimension::SignedInteger, 4);
+    Dimension d3("Y", dimension::Float, 8);
+
+    Schema schema_a;
+    schema_a.appendDimension(d1);
+    schema_a.appendDimension(d2);
+    schema_a.appendDimension(d3);
+
+    Schema schema_b;
+    schema_b.appendDimension(d1);
+    schema_b.appendDimension(d2);
+    
+    
+    BOOST_CHECK_EQUAL(schema_a.getByteSize(), 8 + 4 + 1);
+    BOOST_CHECK_EQUAL(schema_b.getByteSize(), 4 + 1);
+
+    boost::uint32_t capacity(200);
+    PointBuffer data_a(schema_a, capacity);
+    PointBuffer data_b(schema_b, capacity);
+    
+    Dimension const& cls = data_a.getSchema().getDimension("Classification");
+    Dimension const& x = data_a.getSchema().getDimension("X");    
+    for (boost::uint32_t i = 0; i < capacity; ++i)
+    {
+        data_a.setField<boost::uint8_t>(cls, i, 3);
+        data_a.setField<boost::int32_t>(x, i, i);
+    }
+    
+    BOOST_CHECK_EQUAL(150, data_a.getField<boost::int32_t>(x, 150));
+    
+    
+    PointBuffer::copyLikeDimensions(data_a, data_b, 0, 0, 175);
+    
+    Dimension const& x2 = data_b.getSchema().getDimension("X");
+    BOOST_CHECK_EQUAL(150, data_b.getField<boost::int32_t>(x2, 150));
+    
+
+    return;
+}
+
+
 BOOST_AUTO_TEST_SUITE_END()
