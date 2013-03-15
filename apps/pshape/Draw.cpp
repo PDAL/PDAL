@@ -93,22 +93,8 @@ void Draw::drawSegment(Segment s, Color c)
     cairo_set_line_width(m_cairo_p, 2);
     cairo_set_source_rgb(m_cairo_p, c.m_red, c.m_blue, c.m_green);
 
-    Hexagon *hex_p = s.hex();
-    Point pos;
-    pos.m_x = hex_p->x() * m_grid_p->width();
-    pos.m_y = hex_p->y() * m_grid_p->height();
-    if ( hex_p->xodd())
-    {
-        pos.m_y += (m_grid_p->height() / 2);
-    }
-    int end = s.side();
-    int start = end - 1;
-    if (start < 0)
-    {
-        start = 5;
-    }
-    Point startpoint = pos + m_grid_p->offset(start);
-    Point endpoint = pos + m_grid_p->offset(end);
+    Point startpoint = s.startPos() - m_grid_p->origin();
+    Point endpoint = s.endPos() - m_grid_p->origin();
     cairo_move_to(m_cairo_p, startpoint.m_x, startpoint.m_y);
     cairo_line_to(m_cairo_p, endpoint.m_x, endpoint.m_y);
     cairo_stroke(m_cairo_p);
@@ -122,17 +108,5 @@ void Draw::drawPoint(Point p)
     cairo_arc(m_cairo_p, p.m_x, p.m_y, 1.0, 0.0, 2 * M_PI);
     cairo_stroke(m_cairo_p);
 }
-
-/**
-void Draw::flush()
-{
-    XEvent e;
-    while (XCheckWindowEvent(m_dpy_p, m_window,
-        MapNotify | Expose | ConfigureNotify, &e)
-    {
-        paint(m_window);
-    }
-}
-**/
 
 } //namespace

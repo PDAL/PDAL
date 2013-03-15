@@ -3,6 +3,7 @@
 
 #include <vector>
 
+#include "Mathpair.hpp"
 #include "Segment.hpp"
 
 namespace Pshape
@@ -14,11 +15,20 @@ enum Orientation
     ANTICLOCKWISE  // Hole
 };
 
+class HexGrid;
+
 class Path
 {
 public:
-    Path(Orientation orient) : m_parent(NULL), m_orientation(orient)
+    Path(HexGrid *m_grid, Orientation orient) :
+        m_parent(NULL), m_orientation(orient)
     {}
+
+    ~Path()
+    {
+        for (int i = 0; i < m_children.size(); ++i)
+            delete m_children[i];
+    }
 
     void push_back(const Segment& s)
         { m_segs.push_back(s); }
@@ -36,9 +46,18 @@ public:
         for (size_t i = 0; i < m_children.size(); ++i)
             m_children[i]->finalize(o == CLOCKWISE ? ANTICLOCKWISE : CLOCKWISE);
     }
-    void extract();
+    int pathLength()
+        { return m_segs.size(); }
+    Point getPoint(int pointnum);
+    Orientation orientation() const
+        { return m_orientation; }
+    std::vector<Point> points();
+    std::vector<Path *> subPaths()
+        { return m_children; }
 
 private:
+    /// Grid that owns the path.
+    HexGrid *m_grid;
     /// Parent path (NULL if root path)
     Path *m_parent;
     /// Children

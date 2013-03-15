@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <vector>
 
+#include "Mathpair.hpp"
+
 namespace Pshape
 {
 
@@ -13,12 +15,6 @@ class HexGrid;
 
 class Segment
 {
-private:
-    /// Hexagon who's side is the segment.
-    Hexagon *m_hex;
-    /// Which side of the hexagon.
-    int m_side;
-
 public:
     Segment() : m_hex(NULL), m_side(0)
         {}
@@ -42,10 +38,21 @@ public:
     Segment leftAntiClockwise(HexGrid *grid);
     Segment rightClockwise(HexGrid *grid);
     Segment leftClockwise(HexGrid *grid);
+    Point startPos(HexGrid *grid);
+    Point endPos(HexGrid *grid);
 
     friend bool operator == (const Segment& s1, const Segment &s2);
     friend bool operator != (const Segment& s1, const Segment &s2);
     friend std::ostream& operator << (std::ostream& os, const Segment &s);
+
+private:
+    Point pos(HexGrid *grid, const Point& offset);
+
+    /// Hexagon who's side is the segment.
+    Hexagon *m_hex;
+    /// Which side of the hexagon.
+    int m_side;
+
 };
 
 } // namespace

@@ -79,6 +79,30 @@ void Segment::normalize(HexGrid *grid)
     }
 }
 
+Point Segment::startPos(HexGrid *grid)
+{
+    int side = m_side - 1;
+    side = side < 0 ? 5 : side;
+    return pos(grid, grid->offset(side));
+}
+
+Point Segment::endPos(HexGrid *grid)
+{
+    return pos(grid, grid->offset(m_side));
+}
+
+Point Segment::pos(HexGrid *grid, const Point& offset)
+{
+    Point pos;
+    pos.m_x = m_hex->x() * grid->width();
+    pos.m_y = m_hex->y() * grid->height();
+    if (m_hex->xodd())
+    {
+        pos.m_y += (grid->height() / 2);
+    }
+    return pos + offset + grid->origin();
+}
+
 bool operator == (const Segment& s1, const Segment &s2)
 {
     static int sharedside[] = { 3, 4, 5, 0, 1, 2 };

@@ -33,6 +33,24 @@ void HexGrid::addPoint(Point p)
     }
 }
 
+// A debugging function that can be used to make a particular hexagon
+// dense.
+void HexGrid::addDenseHexagon(int x, int y)
+{
+    Hexagon *h = getHexagon(x, y);
+    if (!h->dense())
+    {
+        h->setCount(m_dense_limit);
+        h->setDense();
+        m_miny = std::min(m_miny, h->y() - 1);
+        if (h->possibleRoot())
+        {
+            m_pos_roots.insert(h);
+        }
+        markNeighborBelow(h);
+    }
+}
+
 void HexGrid::markNeighborBelow(Hexagon *h)
 {
     Coord c = h->neighborCoord(3);
@@ -175,16 +193,6 @@ Hexagon *HexGrid::getHexagon(int x, int y)
     return hex_p;
 }
 
-void HexGrid::drawHexagons()
-{
-    HexMap::iterator it;
-    for (it = m_hexes.begin(); it != m_hexes.end(); ++it)
-    {
-        Hexagon *hex_p = &(it->second);
-        m_draw.drawHexagon(hex_p);
-    }
-}
-
 // Walk the outside of the hexagons to make a path.  Hexagon sides are labeled:
 //
 //     __0_
@@ -223,6 +231,10 @@ void HexGrid::findParentPaths()
     }
     for (size_t i = 0; i < roots.size(); ++i)
        roots[i]->finalize(CLOCKWISE);
+
+    // In the end, the list of paths is just the root paths.  Children can
+    // be retrieved from their parents.
+    m_paths = roots;
 }
 
 void HexGrid::findParentPath(Path *p)
@@ -251,13 +263,12 @@ void HexGrid::findParentPath(Path *p)
 
 void HexGrid::findShape(Hexagon *hex)
 {
-    Path *p = new Path(CLOCKWISE);
+    Path *p = new Path(this, CLOCKWISE);
     Segment first(hex, 0);
     Segment cur(first);
     do {
         cleanPossibleRoot(cur, p);
         p->push_back(cur);
-        m_draw.drawSegment(cur);
         Segment next = cur.leftClockwise(this);
         if ( !next.hex()->dense() )
         {
