@@ -55,7 +55,9 @@ Cache::Cache(Stage& prevStage, const Options& options)
 
 
 // cache block size is measured in Points, not bytes
-Cache::Cache(Stage& prevStage, boost::uint32_t maxCacheBlocks, boost::uint32_t cacheBlockSize)
+Cache::Cache(   Stage& prevStage, 
+                boost::uint32_t maxCacheBlocks, 
+                boost::uint32_t cacheBlockSize)
     : Filter(prevStage, Options::none())
     , m_numPointsRequested(0)
     , m_numPointsRead(0)
@@ -153,7 +155,8 @@ boost::uint64_t Cache::getNumPointsRead() const
 }
 
 
-void Cache::updateStats(boost::uint64_t numRead, boost::uint64_t numRequested) const
+void Cache::updateStats(    boost::uint64_t numRead, 
+                            boost::uint64_t numRequested) const
 {
     m_numPointsRead += numRead;
     m_numPointsRequested += numRequested;
@@ -182,14 +185,6 @@ Cache::Cache(const pdal::filters::Cache& filter, PointBuffer& buffer)
     : pdal::FilterSequentialIterator(filter, buffer)
     , m_filter(filter)
 {
-	// reset the cache to the point count if no block size 
-	// was specified. Yes we're doing dirt here, but nuking the cache at
-	// the creation of an iterator shouldn't be too catastrophic
-	if (filter.getCacheBlockSize() == 0 && filter.getMaxCacheBlocks()==1)
-	{
-		filters::Cache* f = const_cast<filters::Cache*>(&filter);
-		f->resetCache(f->getMaxCacheBlocks(), f->getPrevStage().getNumPoints());
-	}
     return;
 }
 
@@ -269,11 +264,6 @@ Cache::Cache(const pdal::filters::Cache& filter, PointBuffer& buffer)
     : pdal::FilterRandomIterator(filter, buffer)
     , m_filter(filter)
 {
-	if (filter.getCacheBlockSize() == 0 && filter.getMaxCacheBlocks()==1)
-	{
-		filters::Cache* f = const_cast<filters::Cache*>(&filter);
-		f->resetCache(f->getMaxCacheBlocks(), f->getPrevStage().getNumPoints());
-	}
 	return;
 }
 
