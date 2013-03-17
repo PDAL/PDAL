@@ -61,29 +61,26 @@ BOOST_AUTO_TEST_CASE(test1)
     StageSequentialIterator* iter1 = cache.createSequentialIterator(dataBig);
 
     //BOOST_CHECK(cache.getIndex() == 0);
-    BOOST_CHECK(cache.getNumPointsRequested() == 0);
-    BOOST_CHECK(cache.getNumPointsRead() == 0);
+    BOOST_CHECK_EQUAL(cache.getNumPointsRequested(), 0);
+    BOOST_CHECK_EQUAL(cache.getNumPointsRead(), 0);
 
     iter1->read(dataBig);
-    BOOST_CHECK(dataBig.getField<boost::uint64_t>(dataBig.getSchema().getDimension("Time"), 0) == 0);
-    //BOOST_CHECK(cache.getIndex() == 1024);
-    BOOST_CHECK(cache.getNumPointsRequested() == 1024);
-    BOOST_CHECK(cache.getNumPointsRead() == 1024);
+    BOOST_CHECK_EQUAL(dataBig.getField<boost::uint64_t>(dataBig.getSchema().getDimension("Time"), 0), 0);
+    BOOST_CHECK_EQUAL(cache.getNumPointsRequested(), 1024);
+    BOOST_CHECK_EQUAL(cache.getNumPointsRead(), 1024);
 
     iter1->read(dataBig);
-    BOOST_CHECK(dataBig.getField<boost::uint64_t>(dataBig.getSchema().getDimension("Time"), 0) == 1024);
-    // BOOST_CHECK(cache.getIndex() == 2048);
-    BOOST_CHECK(cache.getNumPointsRequested() == 2048);
-    BOOST_CHECK(cache.getNumPointsRead() == 2048);
+    BOOST_CHECK_EQUAL(dataBig.getField<boost::uint64_t>(dataBig.getSchema().getDimension("Time"), 0), 1024);
+    BOOST_CHECK_EQUAL(cache.getNumPointsRequested(), 2048);
+    BOOST_CHECK_EQUAL(cache.getNumPointsRead(), 2048);
 
     StageSequentialIterator* iter2 = cache.createSequentialIterator(dataSmall);
 
     iter2->skip(42);
     iter2->read(dataSmall);
-    BOOST_CHECK(dataSmall.getField<boost::uint64_t>(dataSmall.getSchema().getDimension("Time"), 0) == 42);
-    //BOOST_CHECK(cache.getIndex() == 43);
-    BOOST_CHECK(cache.getNumPointsRequested() == 2048+1);
-    BOOST_CHECK(cache.getNumPointsRead() == 2048);
+    BOOST_CHECK_EQUAL(dataSmall.getField<boost::uint64_t>(dataSmall.getSchema().getDimension("Time"), 0), 42);
+    BOOST_CHECK_EQUAL(cache.getNumPointsRequested(), 2048+1);
+    BOOST_CHECK_EQUAL(cache.getNumPointsRead(), 2048+1);
 
     delete iter1;
     delete iter2;
@@ -114,29 +111,26 @@ BOOST_AUTO_TEST_CASE(CacheFilterTest_test_options)
     StageSequentialIterator* iter1 = cache.createSequentialIterator(dataBig);
 
     //BOOST_CHECK(cache.getIndex() == 0);
-    BOOST_CHECK(cache.getNumPointsRequested() == 0);
-    BOOST_CHECK(cache.getNumPointsRead() == 0);
+    BOOST_CHECK_EQUAL(cache.getNumPointsRequested(), 0);
+    BOOST_CHECK_EQUAL(cache.getNumPointsRead(), 0);
 
     iter1->read(dataBig);
-    BOOST_CHECK(dataBig.getField<boost::uint64_t>(dataBig.getSchema().getDimension("Time"), 0) == 0);
-    //BOOST_CHECK(cache.getIndex() == 1024);
-    BOOST_CHECK(cache.getNumPointsRequested() == 1024);
-    BOOST_CHECK(cache.getNumPointsRead() == 1024);
+    BOOST_CHECK_EQUAL(dataBig.getField<boost::uint64_t>(dataBig.getSchema().getDimension("Time"), 0), 0);
+    BOOST_CHECK_EQUAL(cache.getNumPointsRequested(), 1024);
+    BOOST_CHECK_EQUAL(cache.getNumPointsRead(), 1024);
 
     iter1->read(dataBig);
-    BOOST_CHECK(dataBig.getField<boost::uint64_t>(dataBig.getSchema().getDimension("Time"), 0) == 1024);
-    // BOOST_CHECK(cache.getIndex() == 2048);
-    BOOST_CHECK(cache.getNumPointsRequested() == 2048);
-    BOOST_CHECK(cache.getNumPointsRead() == 2048);
+    BOOST_CHECK_EQUAL(dataBig.getField<boost::uint64_t>(dataBig.getSchema().getDimension("Time"), 0), 1024);
+    BOOST_CHECK_EQUAL(cache.getNumPointsRequested(), 2048);
+    BOOST_CHECK_EQUAL(cache.getNumPointsRead(), 2048);
 
     StageSequentialIterator* iter2 = cache.createSequentialIterator(dataSmall);
 
     iter2->skip(42);
     iter2->read(dataSmall);
-    BOOST_CHECK(dataSmall.getField<boost::uint64_t>(dataBig.getSchema().getDimension("Time"), 0) == 42);
-    //BOOST_CHECK(cache.getIndex() == 43);
-    BOOST_CHECK(cache.getNumPointsRequested() == 2048+1);
-    BOOST_CHECK(cache.getNumPointsRead() == 2048);
+    BOOST_CHECK_EQUAL(dataSmall.getField<boost::uint64_t>(dataBig.getSchema().getDimension("Time"), 0), 42);
+    BOOST_CHECK_EQUAL(cache.getNumPointsRequested(), 2048+1);
+    BOOST_CHECK_EQUAL(cache.getNumPointsRead(), 2048+1);
 
     delete iter1;
     delete iter2;
