@@ -343,9 +343,6 @@ bool Support::compare_text_files(const std::string& file1, const std::string& fi
     return (numdiffs == 0);
 }
 
-
-#define Compare(x,y)    BOOST_CHECK(pdal::Utils::compare_approx((x),(y),0.001));
-
 void Support::check_pN(const pdal::PointBuffer& data,
                        std::size_t index,
                        double xref, double yref, double zref)
@@ -364,9 +361,9 @@ void Support::check_pN(const pdal::PointBuffer& data,
     double y0 = dimY.applyScaling<boost::int32_t>(y0raw);
     double z0 = dimZ.applyScaling<boost::int32_t>(z0raw);
 
-    Compare(x0, xref);
-    Compare(y0, yref);
-    Compare(z0, zref);
+    BOOST_CHECK_CLOSE(x0, xref, 0.001);
+    BOOST_CHECK_CLOSE(y0, yref, 0.001);
+    BOOST_CHECK_CLOSE(z0, zref, 0.001);
 }
 
 
