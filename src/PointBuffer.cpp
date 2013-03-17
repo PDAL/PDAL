@@ -118,13 +118,13 @@ void PointBuffer::reset(Schema const& new_schema)
 
 }
 
-void PointBuffer::resize(boost::uint32_t const& capacity)
+void PointBuffer::resize(boost::uint32_t const& capacity, bool bExact)
 {
     if (capacity != m_capacity)
     {
         m_capacity = capacity;
         boost::uint64_t new_array_size = static_cast<boost::uint64_t>(m_schema.getByteSize()) * static_cast<boost::uint64_t>(m_capacity); 
-        if (new_array_size > m_arraySize)
+        if (new_array_size > m_arraySize || bExact)
         {
             boost::uint8_t* new_array = new boost::uint8_t[ new_array_size ]();
             m_data.reset(new_array);

@@ -301,7 +301,7 @@ public:
         return m_metadata;
     }
     
-    void resize(boost::uint32_t const& capacity);
+    void resize(boost::uint32_t const& capacity, bool bExact=false);
     
     /** @name Serialization
     */
