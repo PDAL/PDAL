@@ -266,10 +266,10 @@ BOOST_AUTO_TEST_CASE(test_two_iters_with_cache)
 
     cache.initialize();
 
-    BOOST_CHECK(reader.getNumPoints() == 1065);
-    BOOST_CHECK(355 * 3 == 1065);
+    BOOST_CHECK_EQUAL(reader.getNumPoints(), 1065);
+    BOOST_CHECK_EQUAL(355 * 3, 1065);
 
-    BOOST_CHECK(cache.getNumPoints() == 1065);
+    BOOST_CHECK_EQUAL(cache.getNumPoints(), 1065);
 
     const Schema& schema = cache.getSchema();
 
@@ -279,23 +279,23 @@ BOOST_AUTO_TEST_CASE(test_two_iters_with_cache)
 
     {
         pdal::StageSequentialIterator* iter = cache.createSequentialIterator(data);
-        BOOST_CHECK(iter->getIndex() == 0);
+        BOOST_CHECK_EQUAL(iter->getIndex(), 0);
 
         numRead = iter->read(data);
-        BOOST_CHECK(numRead == 355);
-        BOOST_CHECK(iter->getIndex() == 355);
+        BOOST_CHECK_EQUAL(numRead, 355);
+        BOOST_CHECK_EQUAL(iter->getIndex(), 355);
 
         Support::check_p0_p1_p2(data);
 
         numRead = iter->read(data);
-        BOOST_CHECK(numRead == 355);
-        BOOST_CHECK(iter->getIndex() == 710);
+        BOOST_CHECK_EQUAL(numRead, 355);
+        BOOST_CHECK_EQUAL(iter->getIndex(), 710);
 
         Support::check_p355_p356_p357(data);
 
         numRead = iter->read(data);
-        BOOST_CHECK(numRead == 355);
-        BOOST_CHECK(iter->getIndex() == 1065);
+        BOOST_CHECK_EQUAL(numRead, 355);
+        BOOST_CHECK_EQUAL(iter->getIndex(), 1065);
 
         Support::check_p710_p711_p712(data);
 
@@ -304,41 +304,41 @@ BOOST_AUTO_TEST_CASE(test_two_iters_with_cache)
 
     {
         pdal::StageRandomIterator* iter = cache.createRandomIterator(data);
-        BOOST_CHECK(iter->getIndex() == 0);
+        BOOST_CHECK_EQUAL(iter->getIndex(), 0);
 
         // read the middle third
         iter->seek(355);
-        BOOST_CHECK(iter->getIndex() == 355);
+        BOOST_CHECK_EQUAL(iter->getIndex(), 355);
         numRead = iter->read(data);
-        BOOST_CHECK(numRead == 355);
-        BOOST_CHECK(iter->getIndex() == 710);
+        BOOST_CHECK_EQUAL(numRead, 355);
+        BOOST_CHECK_EQUAL(iter->getIndex(), 710);
 
         Support::check_p355_p356_p357(data);
 
         // read the first third
         iter->seek(0);
-        BOOST_CHECK(iter->getIndex() == 0);
+        BOOST_CHECK_EQUAL(iter->getIndex(), 0);
         numRead = iter->read(data);
-        BOOST_CHECK(numRead == 355);
-        BOOST_CHECK(iter->getIndex() == 355);
+        BOOST_CHECK_EQUAL(numRead, 355);
+        BOOST_CHECK_EQUAL(iter->getIndex(), 355);
 
         Support::check_p0_p1_p2(data);
 
         // read the first third again
         iter->seek(0);
-        BOOST_CHECK(iter->getIndex() == 0);
+        BOOST_CHECK_EQUAL(iter->getIndex(), 0);
         numRead = iter->read(data);
-        BOOST_CHECK(numRead == 355);
-        BOOST_CHECK(iter->getIndex() == 355);
+        BOOST_CHECK_EQUAL(numRead, 355);
+        BOOST_CHECK_EQUAL(iter->getIndex(), 355);
 
         Support::check_p0_p1_p2(data);
 
         // read the last third
         iter->seek(710);
-        BOOST_CHECK(iter->getIndex() == 710);
+        BOOST_CHECK_EQUAL(iter->getIndex(), 710);
         numRead = iter->read(data);
-        BOOST_CHECK(numRead == 355);
-        BOOST_CHECK(iter->getIndex() == 1065);
+        BOOST_CHECK_EQUAL(numRead, 355);
+        BOOST_CHECK_EQUAL(iter->getIndex(), 1065);
 
         Support::check_p710_p711_p712(data);
 
@@ -352,11 +352,11 @@ BOOST_AUTO_TEST_CASE(test_two_iters_with_cache)
 BOOST_AUTO_TEST_CASE(test_simultaneous_iters)
 {
     pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
-    BOOST_CHECK(reader.getDescription() == "Las Reader");
+    BOOST_CHECK_EQUAL(reader.getDescription(), "Las Reader");
     reader.initialize();
 
-    BOOST_CHECK(reader.getNumPoints() == 1065);
-    BOOST_CHECK(355 * 3 == 1065);
+    BOOST_CHECK_EQUAL(reader.getNumPoints(), 1065);
+    BOOST_CHECK_EQUAL(355 * 3, 1065);
 
     const Schema& schema = reader.getSchema();
 
@@ -365,21 +365,21 @@ BOOST_AUTO_TEST_CASE(test_simultaneous_iters)
     boost::uint32_t numRead;
 
     pdal::StageSequentialIterator* iterS1 = reader.createSequentialIterator(data);
-    BOOST_CHECK(iterS1->getIndex() == 0);
+    BOOST_CHECK_EQUAL(iterS1->getIndex(), 0);
 
     pdal::StageSequentialIterator* iterS2 = reader.createSequentialIterator(data);
-    BOOST_CHECK(iterS2->getIndex() == 0);
+    BOOST_CHECK_EQUAL(iterS2->getIndex(), 0);
 
     pdal::StageRandomIterator* iterR1 = reader.createRandomIterator(data);
-    BOOST_CHECK(iterR1->getIndex() == 0);
+    BOOST_CHECK_EQUAL(iterR1->getIndex(), 0);
 
     pdal::StageRandomIterator* iterR2 = reader.createRandomIterator(data);
-    BOOST_CHECK(iterR2->getIndex() == 0);
+    BOOST_CHECK_EQUAL(iterR2->getIndex(), 0);
 
     {
         numRead = iterS1->read(data);
-        BOOST_CHECK(numRead == 355);
-        BOOST_CHECK(iterS1->getIndex() == 355);
+        BOOST_CHECK_EQUAL(numRead, 355);
+        BOOST_CHECK_EQUAL(iterS1->getIndex(), 355);
 
         Support::check_p0_p1_p2(data);
     }
@@ -388,8 +388,8 @@ BOOST_AUTO_TEST_CASE(test_simultaneous_iters)
         iterS2->skip(355);
 
         numRead = iterS2->read(data);
-        BOOST_CHECK(numRead == 355);
-        BOOST_CHECK(iterS2->getIndex() == 710);
+        BOOST_CHECK_EQUAL(numRead, 355);
+        BOOST_CHECK_EQUAL(iterS2->getIndex(), 710);
 
         Support::check_p355_p356_p357(data);
     }
@@ -397,8 +397,8 @@ BOOST_AUTO_TEST_CASE(test_simultaneous_iters)
     {
         iterR1->seek(355);
         numRead = iterR1->read(data);
-        BOOST_CHECK(numRead == 355);
-        BOOST_CHECK(iterR1->getIndex() == 710);
+        BOOST_CHECK_EQUAL(numRead, 355);
+        BOOST_CHECK_EQUAL(iterR1->getIndex(), 710);
 
         Support::check_p355_p356_p357(data);
     }
@@ -406,8 +406,8 @@ BOOST_AUTO_TEST_CASE(test_simultaneous_iters)
     {
         iterR2->seek(0);
         numRead = iterR2->read(data);
-        BOOST_CHECK(numRead == 355);
-        BOOST_CHECK(iterR2->getIndex() == 355);
+        BOOST_CHECK_EQUAL(numRead, 355);
+        BOOST_CHECK_EQUAL(iterR2->getIndex(), 355);
 
         Support::check_p0_p1_p2(data);
     }
@@ -415,8 +415,8 @@ BOOST_AUTO_TEST_CASE(test_simultaneous_iters)
     {
         iterS1->skip(355);
         numRead = iterS1->read(data);
-        BOOST_CHECK(numRead == 355);
-        BOOST_CHECK(iterS1->getIndex() == 1065);
+        BOOST_CHECK_EQUAL(numRead, 355);
+        BOOST_CHECK_EQUAL(iterS1->getIndex(), 1065);
 
         Support::check_p710_p711_p712(data);
     }
@@ -425,8 +425,8 @@ BOOST_AUTO_TEST_CASE(test_simultaneous_iters)
         iterS2->skip(0);
 
         numRead = iterS2->read(data);
-        BOOST_CHECK(numRead == 355);
-        BOOST_CHECK(iterS2->getIndex() == 1065);
+        BOOST_CHECK_EQUAL(numRead, 355);
+        BOOST_CHECK_EQUAL(iterS2->getIndex(), 1065);
 
         Support::check_p710_p711_p712(data);
     }
@@ -434,8 +434,8 @@ BOOST_AUTO_TEST_CASE(test_simultaneous_iters)
     {
         iterR1->seek(355);
         numRead = iterR1->read(data);
-        BOOST_CHECK(numRead == 355);
-        BOOST_CHECK(iterR1->getIndex() == 710);
+        BOOST_CHECK_EQUAL(numRead, 355);
+        BOOST_CHECK_EQUAL(iterR1->getIndex(), 710);
 
         Support::check_p355_p356_p357(data);
     }
@@ -443,8 +443,8 @@ BOOST_AUTO_TEST_CASE(test_simultaneous_iters)
     {
         iterR2->seek(710);
         numRead = iterR2->read(data);
-        BOOST_CHECK(numRead == 355);
-        BOOST_CHECK(iterR2->getIndex() == 1065);
+        BOOST_CHECK_EQUAL(numRead, 355);
+        BOOST_CHECK_EQUAL(iterR2->getIndex(), 1065);
 
         Support::check_p710_p711_p712(data);
     }
@@ -452,8 +452,8 @@ BOOST_AUTO_TEST_CASE(test_simultaneous_iters)
     {
         iterR1->seek(0);
         numRead = iterR1->read(data);
-        BOOST_CHECK(numRead == 355);
-        BOOST_CHECK(iterR1->getIndex() == 355);
+        BOOST_CHECK_EQUAL(numRead, 355);
+        BOOST_CHECK_EQUAL(iterR1->getIndex(), 355);
 
         Support::check_p0_p1_p2(data);
     }
@@ -483,9 +483,9 @@ static void test_a_format(const std::string& file, boost::uint8_t majorVersion, 
     pdal::drivers::las::Reader reader(Support::datapath(file));
     reader.initialize();
 
-    BOOST_CHECK(reader.getLasHeader().getPointFormat() == pointFormat);
-    BOOST_CHECK(reader.getLasHeader().GetVersionMajor() == majorVersion);
-    BOOST_CHECK(reader.getLasHeader().GetVersionMinor() == minorVersion);
+    BOOST_CHECK_EQUAL(reader.getLasHeader().getPointFormat(), pointFormat);
+    BOOST_CHECK_EQUAL(reader.getLasHeader().GetVersionMajor(), majorVersion);
+    BOOST_CHECK_EQUAL(reader.getLasHeader().GetVersionMinor(), minorVersion);
 
     const Schema& schema = reader.getSchema();
 
@@ -495,7 +495,7 @@ static void test_a_format(const std::string& file, boost::uint8_t majorVersion, 
 
     {
         boost::uint32_t numRead = iter->read(data);
-        BOOST_CHECK(numRead == 1);
+        BOOST_CHECK_EQUAL(numRead, 1);
 
         Support::check_pN(data, 0, xref, yref, zref, tref, rref, gref, bref);
     }
@@ -525,7 +525,7 @@ BOOST_AUTO_TEST_CASE(test_vlr)
     pdal::drivers::las::Reader reader(Support::datapath("lots_of_vlr.las"));
     reader.initialize();
 
-    BOOST_CHECK(reader.getLasHeader().getVLRs().getAll().size() == 390);
+    BOOST_CHECK_EQUAL(reader.getLasHeader().getVLRs().getAll().size(), 390);
 
     return;
 }
