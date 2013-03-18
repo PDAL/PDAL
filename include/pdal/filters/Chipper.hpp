@@ -200,6 +200,11 @@ public:
         if (t == StageIterator_Sequential) return true;
         return false;
     }
+    
+    inline boost::uint32_t getThreshold() const
+    {
+        return m_threshold;
+    }
 
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
     pdal::StageRandomIterator* createRandomIterator(PointBuffer& buffer) const;
