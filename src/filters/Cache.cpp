@@ -246,12 +246,14 @@ boost::uint32_t IteratorBase::copyCachedBlocks(     std::vector<PointBuffer cons
     
         boost::int64_t blockHowMany = std::min(blockEndingPosition, readEndPosition) - currentPosition;
 
-        boost::int64_t blockBufferStartingPosition = std::max(0,blockStartingPosition - blockEndingPosition % currentPosition);
+        boost::int64_t blockBufferStartingPosition(0);
+        if (currentPosition > 0) 
+            blockBufferStartingPosition = std::max(0,blockStartingPosition - blockEndingPosition % currentPosition);
         if (blockBufferStartingPosition == m_cache_filter.getCacheBlockSize()) blockBufferStartingPosition = 0;
         
         if (blockBufferStartingPosition == 0 )
             if (blockNumber == startingBlockNumber)
-                blockBufferStartingPosition = blockStartingPosition + currentPosition;
+                blockBufferStartingPosition =  currentPosition - blockStartingPosition ;
 
         bool logOutput = m_cache_filter.log()->getLevel() > logDEBUG3;
         if (logOutput)
@@ -417,7 +419,12 @@ Cache::Cache(const pdal::filters::Cache& filter, PointBuffer& buffer)
 
 boost::uint64_t Cache::seekImpl(boost::uint64_t position)
 {
-    boost::uint32_t blockPosition = m_cache_filter.getCacheBlockSize() / position;
+    boost::uint32_t blockPosition(0);
+    if (position != 0)
+    {
+        blockPosition = m_cache_filter.getCacheBlockSize() / position;
+    }
+
     std::vector<PointBuffer const*> blocks = m_cache_filter.lookup(position, 1);
     if (blocks.size())
     {
@@ -436,7 +443,11 @@ boost::uint32_t Cache::readBufferImpl(PointBuffer& data)
 
     boost::uint64_t currentPointIndex = getIndex();
     
-    boost::uint32_t blockNumber = cacheBlockSize / currentPointIndex;
+    boost::uint32_t blockNumber(0);
+    if (currentPointIndex != 0)
+    {
+        blockNumber = cacheBlockSize / currentPointIndex;
+    }
 
     std::vector<PointBuffer const*> blocks = m_cache_filter.lookup(currentPointIndex, data.getCapacity()- data.getNumPoints());
     // We're cacheable if we're on the block boundary
