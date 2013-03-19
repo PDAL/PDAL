@@ -511,6 +511,7 @@ Chipper::Chipper(pdal::filters::Chipper const& filter, PointBuffer& buffer)
     , m_currentBlockId(0)
     , m_currentPointCount(0)
 {
+    buffer.resize(m_chipper.getThreshold(), true);
     const_cast<pdal::filters::Chipper&>(m_chipper).Chip();
     return;
 }
