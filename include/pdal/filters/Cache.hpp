@@ -74,8 +74,6 @@ public:
     // this is const only because the m_cache itself is mutable
     void addToCache(boost::uint64_t pointIndex, const PointBuffer& data) const;
 
-    bool isCached(boost::uint32_t blockPosition) const;
-    
     std::vector<PointBuffer const*> lookup(boost::uint64_t pointPosition, boost::uint32_t count) const;
 
     // clear cache (but leave cache params unchanged)

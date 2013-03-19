@@ -172,7 +172,7 @@ BOOST_AUTO_TEST_CASE(CacheFilterTest_test_use_counts)
     iter2->skip(skip_position);
     boost::uint32_t numRead = iter2->read(dataSmall);
     BOOST_CHECK_EQUAL(numRead, dataSmall.getCapacity());
-    BOOST_CHECK_EQUAL(dataSmall.getField<boost::uint64_t>(dataBig.getSchema().getDimension("Time"), 0), skip_position);
+    BOOST_CHECK_EQUAL(dataSmall.getField<boost::uint64_t>(dataSmall.getSchema().getDimension("Time"), 0), skip_position);
     BOOST_CHECK_EQUAL(cache.getNumPointsRequested(),buffer_size*2+dataSmall.getCapacity());
     BOOST_CHECK_EQUAL(cache.getNumPointsRead(), buffer_size*2);
 
@@ -191,12 +191,18 @@ BOOST_AUTO_TEST_CASE(CacheFilterTest_test_random)
     boost::uint32_t numPoints(10000);
     pdal::drivers::faux::Reader reader(srcBounds, numPoints, pdal::drivers::faux::Reader::Constant);
 
-    // Option opt1("max_cache_blocks", 2);
-    // Option opt2("cache_block_size", 1024);
-    Options opts;
-    // opts.add(opt1);
-    // opts.add(opt2);
-    pdal::filters::Cache cache(reader, opts);
+    pdal::Options options;
+    pdal::Option debug("debug", true, "");
+    pdal::Option verbose("verbose", 9, "");
+    // pdal::Option max_cache_blocks("max_cache_blocks", 1);
+    // pdal::Option cache_block_size("cache_block_size", cache_size);
+    // options.add(max_cache_blocks);
+    // options.add(cache_block_size);
+    // options.add(debug);
+    // options.add(verbose);
+
+    pdal::filters::Cache cache(reader, options);
+
     BOOST_CHECK_EQUAL(cache.getDescription(), "Cache Filter");
     cache.initialize();
 
@@ -218,9 +224,11 @@ BOOST_AUTO_TEST_CASE(CacheFilterTest_test_random)
     BOOST_CHECK_EQUAL(cache.getNumPointsRequested(), numPoints);
     BOOST_CHECK_EQUAL(cache.getNumPointsRead(), numPoints);
     
-    random->seek(42);
+    boost::uint32_t seek_position(42);
+    random->seek(seek_position);
     random->read(dataSmall);
-    BOOST_CHECK_EQUAL(cache.getNumPointsRequested(), numPoints);
+    BOOST_CHECK_EQUAL(dataSmall.getField<boost::uint64_t>(dataSmall.getSchema().getDimension("Time"), 0), seek_position);    
+    BOOST_CHECK_EQUAL(cache.getNumPointsRequested(), numPoints + dataSmall.getCapacity());
     BOOST_CHECK_EQUAL(cache.getNumPointsRead(), numPoints);
     
     delete sequential;
@@ -228,108 +236,108 @@ BOOST_AUTO_TEST_CASE(CacheFilterTest_test_random)
 
     return;
 }
-// 
-// 
-// BOOST_AUTO_TEST_CASE(test_two_iters_with_cache)
-// {
-//     pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
-//     BOOST_CHECK(reader.getDescription() == "Las Reader");
-// 
-//     pdal::Options options;
-//     pdal::Option debug("debug", true, "");
-//     pdal::Option verbose("verbose", 9, "");
-//     pdal::Option max_cache_blocks("max_cache_blocks", 1);
-//     pdal::Option cache_block_size("cache_block_size", 355);
-//     options.add(max_cache_blocks);
-//     options.add(cache_block_size);
-//     options.add(debug);
-//     options.add(verbose);
-// 
-// 
-//     pdal::filters::Cache cache(reader, options);
-// 
-//     cache.initialize();
-// 
-//     BOOST_CHECK_EQUAL(reader.getNumPoints(), 1065);
-//     BOOST_CHECK_EQUAL(355 * 3, 1065);
-// 
-//     BOOST_CHECK_EQUAL(cache.getNumPoints(), 1065);
-// 
-//     const Schema& schema = cache.getSchema();
-// 
-//     PointBuffer data(schema, 355);
-// 
-//     boost::uint32_t numRead;
-//     
-//     {
-//         pdal::StageSequentialIterator* iter = cache.createSequentialIterator(data);
-//         BOOST_CHECK_EQUAL(iter->getIndex(), 0);
-//     
-//         numRead = iter->read(data);
-//         BOOST_CHECK_EQUAL(numRead, 355);
-//         BOOST_CHECK_EQUAL(iter->getIndex(), 355);
-//     
-//         Support::check_p0_p1_p2(data);
-//     
-//         numRead = iter->read(data);
-//         BOOST_CHECK_EQUAL(numRead, 355);
-//         BOOST_CHECK_EQUAL(iter->getIndex(), 710);
-//     
-//         Support::check_p355_p356_p357(data);
-//     
-//         numRead = iter->read(data);
-//         BOOST_CHECK_EQUAL(numRead, 355);
-//         BOOST_CHECK_EQUAL(iter->getIndex(), 1065);
-//     
-//         Support::check_p710_p711_p712(data);
-//     
-//         delete iter;
-//     }
-// 
-//     {
-//         pdal::StageRandomIterator* iter = cache.createRandomIterator(data);
-//         BOOST_CHECK_EQUAL(iter->getIndex(), 0);
-// 
-//         // read the middle third
-//         iter->seek(355);
-//         BOOST_CHECK_EQUAL(iter->getIndex(), 355);
-//         numRead = iter->read(data);
-//         BOOST_CHECK_EQUAL(numRead, 355);
-//         BOOST_CHECK_EQUAL(iter->getIndex(), 710);
-// 
-//         Support::check_p355_p356_p357(data);
-//         
-//         // read the first third
-//         iter->seek(0);
-//         BOOST_CHECK_EQUAL(iter->getIndex(), 0);
-//         numRead = iter->read(data);
-//         BOOST_CHECK_EQUAL(numRead, 355);
-//         BOOST_CHECK_EQUAL(iter->getIndex(), 355);
-//         
-//         Support::check_p0_p1_p2(data);
-//         
-//         // read the first third again
-//         iter->seek(0);
-//         BOOST_CHECK_EQUAL(iter->getIndex(), 0);
-//         numRead = iter->read(data);
-//         BOOST_CHECK_EQUAL(numRead, 355);
-//         BOOST_CHECK_EQUAL(iter->getIndex(), 355);
-//         
-//         Support::check_p0_p1_p2(data);
-//         
-//         // // read the last third
-//         // iter->seek(710);
-//         // BOOST_CHECK_EQUAL(iter->getIndex(), 710);
-//         // numRead = iter->read(data);
-//         // BOOST_CHECK_EQUAL(numRead, 355);
-//         // BOOST_CHECK_EQUAL(iter->getIndex(), 1065);
-//         // 
-//         // Support::check_p710_p711_p712(data);
-// 
-//         delete iter;
-//     }
-// 
-//     return;
-// }
+
+
+BOOST_AUTO_TEST_CASE(test_two_iters_with_cache)
+{
+    pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
+    BOOST_CHECK(reader.getDescription() == "Las Reader");
+
+    pdal::Options options;
+    pdal::Option debug("debug", true, "");
+    pdal::Option verbose("verbose", 9, "");
+    pdal::Option max_cache_blocks("max_cache_blocks", 1);
+    pdal::Option cache_block_size("cache_block_size", 355);
+    options.add(max_cache_blocks);
+    options.add(cache_block_size);
+    options.add(debug);
+    options.add(verbose);
+
+
+    pdal::filters::Cache cache(reader, options);
+
+    cache.initialize();
+
+    BOOST_CHECK_EQUAL(reader.getNumPoints(), 1065);
+    BOOST_CHECK_EQUAL(355 * 3, 1065);
+
+    BOOST_CHECK_EQUAL(cache.getNumPoints(), 1065);
+
+    const Schema& schema = cache.getSchema();
+
+    PointBuffer data(schema, 355);
+
+    boost::uint32_t numRead;
+    
+    {
+        pdal::StageSequentialIterator* iter = cache.createSequentialIterator(data);
+        BOOST_CHECK_EQUAL(iter->getIndex(), 0);
+    
+        numRead = iter->read(data);
+        BOOST_CHECK_EQUAL(numRead, 355);
+        BOOST_CHECK_EQUAL(iter->getIndex(), 355);
+    
+        Support::check_p0_p1_p2(data);
+    
+        numRead = iter->read(data);
+        BOOST_CHECK_EQUAL(numRead, 355);
+        BOOST_CHECK_EQUAL(iter->getIndex(), 710);
+    
+        Support::check_p355_p356_p357(data);
+    
+        numRead = iter->read(data);
+        BOOST_CHECK_EQUAL(numRead, 355);
+        BOOST_CHECK_EQUAL(iter->getIndex(), 1065);
+    
+        Support::check_p710_p711_p712(data);
+    
+        delete iter;
+    }
+
+    {
+        pdal::StageRandomIterator* iter = cache.createRandomIterator(data);
+        BOOST_CHECK_EQUAL(iter->getIndex(), 0);
+
+        // read the middle third
+        iter->seek(355);
+        BOOST_CHECK_EQUAL(iter->getIndex(), 355);
+        numRead = iter->read(data);
+        BOOST_CHECK_EQUAL(numRead, 355);
+        BOOST_CHECK_EQUAL(iter->getIndex(), 710);
+
+        Support::check_p355_p356_p357(data);
+        
+        // read the first third
+        iter->seek(0);
+        BOOST_CHECK_EQUAL(iter->getIndex(), 0);
+        numRead = iter->read(data);
+        BOOST_CHECK_EQUAL(numRead, 355);
+        BOOST_CHECK_EQUAL(iter->getIndex(), 355);
+        
+        Support::check_p0_p1_p2(data);
+        
+        // read the first third again
+        iter->seek(0);
+        BOOST_CHECK_EQUAL(iter->getIndex(), 0);
+        numRead = iter->read(data);
+        BOOST_CHECK_EQUAL(numRead, 355);
+        BOOST_CHECK_EQUAL(iter->getIndex(), 355);
+        
+        Support::check_p0_p1_p2(data);
+        
+        // // read the last third
+        // iter->seek(710);
+        // BOOST_CHECK_EQUAL(iter->getIndex(), 710);
+        // numRead = iter->read(data);
+        // BOOST_CHECK_EQUAL(numRead, 355);
+        // BOOST_CHECK_EQUAL(iter->getIndex(), 1065);
+        // 
+        // Support::check_p710_p711_p712(data);
+
+        delete iter;
+    }
+
+    return;
+}
 
 BOOST_AUTO_TEST_SUITE_END()
