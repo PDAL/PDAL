@@ -74,7 +74,9 @@ public:
     // this is const only because the m_cache itself is mutable
     void addToCache(boost::uint64_t pointIndex, const PointBuffer& data) const;
 
-    const PointBuffer* lookupInCache(boost::uint64_t pointIndex) const;
+    bool isCached(boost::uint32_t blockPosition) const;
+    
+    std::vector<PointBuffer const*> lookup(boost::uint64_t pointPosition, boost::uint32_t count) const;
 
     // clear cache (but leave cache params unchanged)
     void resetCache();
@@ -83,10 +85,20 @@ public:
     void resetCache(boost::uint32_t numBlocks, boost::uint32_t blockSize);
 
     // number of points requested from this filter via read()
-    boost::uint64_t getNumPointsRequested() const;
+    inline boost::uint64_t getNumPointsRequested() const
+    {
+        return m_numPointsRequested;
+    }
 
     // num points this filter read from the previous stage
-    boost::uint64_t getNumPointsRead() const;
+    boost::uint64_t getNumPointsRead() const
+    {
+        return m_numPointsRead;
+    }
+    
+    // number of points requested from this filter via read()
+    boost::uint64_t getNumPointsCached() const;
+
 
     void updateStats(boost::uint64_t numRead, boost::uint64_t numRequested) const;
 
@@ -102,7 +114,10 @@ public:
 
         return false;
     }
-
+    
+    boost::uint32_t calculateNumberOfBlocks(boost::uint32_t CacheBlockSize, 
+                                            boost::uint64_t totalNumberOfPoints) const;
+    
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
     pdal::StageRandomIterator* createRandomIterator(PointBuffer& buffer) const;
 
@@ -139,6 +154,7 @@ private:
     bool atEndImpl() const;
 
     const pdal::filters::Cache& m_filter;
+    DimensionMap* m_dimension_map;    
 };
 
 }
