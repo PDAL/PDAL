@@ -212,14 +212,91 @@ pdal::StageRandomIterator* Cache::createRandomIterator(PointBuffer& buffer) cons
 
 namespace iterators
 {
+
+namespace cache {
+    
+IteratorBase::IteratorBase(pdal::filters::Cache const& filter, PointBuffer& buffer)
+: m_cache_filter(filter)
+, m_dimension_map(0) 
+{
+
+}
+
+boost::uint32_t IteratorBase::copyCachedBlocks(     std::vector<PointBuffer const*> const& blocks, 
+                                                    PointBuffer& data, 
+                                                    boost::uint32_t currentPointIndex) const
+{
+
+    if (!blocks.size()) return 0;
+
+    boost::uint32_t cacheBlockSize = m_cache_filter.getCacheBlockSize();
+    
+    boost::uint32_t blockNumber = currentPointIndex / cacheBlockSize;
+
+    typedef std::vector<PointBuffer const*>::const_iterator ConstIterator;
+    boost::int32_t readEndPosition(currentPointIndex + data.getCapacity());
+    boost::int32_t currentPosition(currentPointIndex);
+    boost::int32_t userBufferStartingPosition(0);
+    boost::uint32_t startingBlockNumber = currentPointIndex / m_cache_filter.getCacheBlockSize();
+    boost::uint32_t endingBlockNumber = (currentPointIndex + data.getCapacity()) / m_cache_filter.getCacheBlockSize();
+
+    boost::uint32_t numPointsCopied(0);
+    for (ConstIterator i = blocks.begin(); i != blocks.end(); ++i)
+    {
+        PointBuffer const* b = *i;
+        if (m_dimension_map)
+            delete m_dimension_map;               
+        m_dimension_map = PointBuffer::mapDimensions(*b, data);
+    
+        boost::int32_t blockStartingPosition = (blockNumber) * m_cache_filter.getCacheBlockSize();
+        boost::int32_t blockEndingPosition =   (blockNumber+1) * m_cache_filter.getCacheBlockSize();
+    
+        boost::int64_t blockHowMany = std::min(blockEndingPosition, readEndPosition) - currentPosition;
+    
+        boost::int64_t blockBufferStartingPosition = std::max(0,blockStartingPosition - blockEndingPosition % currentPosition);
+        if (blockBufferStartingPosition == m_cache_filter.getCacheBlockSize()) blockBufferStartingPosition = 0;
+
+        bool logOutput = m_cache_filter.log()->getLevel() > logDEBUG3;
+        if (logOutput)
+        {
+            m_cache_filter.log()->get(logDEBUG4) << "readEndPosition: " << readEndPosition << std::endl;
+            m_cache_filter.log()->get(logDEBUG4) << "blockStartingPosition: " << blockStartingPosition 
+                                           << " blockEndingPosition: " << blockEndingPosition << std::endl;
+            m_cache_filter.log()->get(logDEBUG4) << "blockBufferStartingPosition: " << blockBufferStartingPosition 
+                                           << " blockHowMany: " << blockHowMany << std::endl;
+            m_cache_filter.log()->get(logDEBUG4) << "currentPosition: " << currentPosition 
+                                           << " userBufferStartingPosition: " << userBufferStartingPosition << std::endl;                
+        }                
+
+        PointBuffer::copyLikeDimensions(*b, data, 
+                                        *m_dimension_map, 
+                                        blockBufferStartingPosition, 
+                                        userBufferStartingPosition, 
+                                        blockHowMany);
+
+        blockNumber++;
+        numPointsCopied = numPointsCopied + blockHowMany;
+        currentPosition = currentPosition + blockHowMany;
+        userBufferStartingPosition = userBufferStartingPosition + blockHowMany;         
+    }
+
+    m_cache_filter.updateStats( data.getNumPoints(), data.getCapacity());  
+
+    data.setNumPoints(numPointsCopied);
+
+
+    return data.getNumPoints();
+}
+
+} // namespace cache
+    
 namespace sequential
 {
 
 
 Cache::Cache(const pdal::filters::Cache& filter, PointBuffer& buffer)
     : pdal::FilterSequentialIterator(filter, buffer)
-    , m_filter(filter)
-    , m_dimension_map(0)        
+    , cache::IteratorBase(filter, buffer)     
 {
 	// reset the cache to the point count if no block size 
 	// was specified. Yes we're doing dirt here, but nuking the cache at
@@ -258,88 +335,35 @@ bool Cache::atEndImpl() const
 
 boost::uint32_t Cache::readBufferImpl(PointBuffer& data)
 {
-    boost::uint32_t cacheBlockSize = m_filter.getCacheBlockSize();
+    boost::uint32_t cacheBlockSize = m_cache_filter.getCacheBlockSize();
 
     boost::uint64_t currentPointIndex = getIndex();
     
     boost::uint32_t blockNumber = currentPointIndex / cacheBlockSize;
 
-    bool logOutput = m_filter.log()->getLevel() > logDEBUG3;
+    bool logOutput = m_cache_filter.log()->getLevel() > logDEBUG3;
     
 
 
-    bool bIsCached = m_filter.isCached(blockNumber);
+    bool bIsCached = m_cache_filter.isCached(blockNumber);
     if (bIsCached)
     {
-        m_filter.log()->get(logDEBUG3) << "sequential read had cache hit for block " 
+        m_cache_filter.log()->get(logDEBUG3) << "sequential read had cache hit for block " 
                                     << blockNumber << " with at point index " 
                                     << currentPointIndex << std::endl;
         
-        std::vector<PointBuffer const*> blocks = m_filter.lookup(currentPointIndex, data.getCapacity());
+        std::vector<PointBuffer const*> blocks = m_cache_filter.lookup(currentPointIndex, data.getCapacity());
         
         // lookup will only return a list of blocks if things are 
         // entirely contained in the cache.
         if (blocks.size())
         {
-            if (logOutput)
-                m_filter.log()->get(logDEBUG3) << "Requested read fits inside the cache of size for " 
-                                               << blocks.size() << " block(s)" << std::endl;
-            
-            typedef std::vector<PointBuffer const*>::const_iterator ConstIterator;
-            boost::int32_t readEndPosition(currentPointIndex + data.getCapacity());
-            boost::int32_t currentPosition(currentPointIndex);
-            boost::int32_t userBufferStartingPosition(0);
-            boost::uint32_t startingBlockNumber = currentPointIndex / m_filter.getCacheBlockSize();
-            boost::uint32_t endingBlockNumber = (currentPointIndex + data.getCapacity()) / m_filter.getCacheBlockSize();
-            
-            boost::uint32_t numPointsCopied(0);
-            for (ConstIterator i = blocks.begin(); i != blocks.end(); ++i)
+            boost::uint32_t copied = copyCachedBlocks(blocks, data, currentPointIndex);
+            if (copied != 0)
             {
-                PointBuffer const* b = *i;
-                if (m_dimension_map)
-                    delete m_dimension_map;               
-                m_dimension_map = PointBuffer::mapDimensions(*b, data);
-                
-                boost::int32_t blockStartingPosition = (blockNumber) * m_filter.getCacheBlockSize();
-                boost::int32_t blockEndingPosition =   (blockNumber+1) * m_filter.getCacheBlockSize();
-                
-                boost::int64_t blockHowMany = std::min(blockEndingPosition, readEndPosition) - currentPosition;
-                
-                boost::int64_t blockBufferStartingPosition = std::max(0,blockStartingPosition - blockEndingPosition % currentPosition);
-                if (blockBufferStartingPosition == m_filter.getCacheBlockSize()) blockBufferStartingPosition = 0;
-
-                if (logOutput)
-                {
-                    m_filter.log()->get(logDEBUG4) << "readEndPosition: " << readEndPosition << std::endl;
-                    m_filter.log()->get(logDEBUG4) << "blockStartingPosition: " << blockStartingPosition 
-                                                   << " blockEndingPosition: " << blockEndingPosition << std::endl;
-                    m_filter.log()->get(logDEBUG4) << "blockBufferStartingPosition: " << blockBufferStartingPosition 
-                                                   << " blockHowMany: " << blockHowMany << std::endl;
-                    m_filter.log()->get(logDEBUG4) << "currentPosition: " << currentPosition 
-                                                   << " userBufferStartingPosition: " << userBufferStartingPosition << std::endl;                
-                }                
-
-                PointBuffer::copyLikeDimensions(*b, data, 
-                                                *m_dimension_map, 
-                                                blockBufferStartingPosition, 
-                                                userBufferStartingPosition, 
-                                                blockHowMany);
-
-                blockNumber++;
-                numPointsCopied = numPointsCopied + blockHowMany;
-                currentPosition = currentPosition + blockHowMany;
-                userBufferStartingPosition = userBufferStartingPosition + blockHowMany;         
-            }
-            
-            m_filter.updateStats( data.getNumPoints(), data.getCapacity());  
-            
-            data.setNumPoints(numPointsCopied);
-            return data.getNumPoints();
-            
+                return data.getNumPoints();
+            }    
         }
-        
-
-        
     }
 
 
@@ -352,8 +376,8 @@ boost::uint32_t Cache::readBufferImpl(PointBuffer& data)
 
         const boost::uint32_t numRead = getPrevIterator().read(data);
         
-        m_filter.addToCache(blockNumber, data);
-        m_filter.updateStats(numRead, data.getCapacity());
+        m_cache_filter.addToCache(blockNumber, data);
+        m_cache_filter.updateStats(numRead, data.getCapacity());
 
         return numRead;
     }
@@ -362,7 +386,7 @@ boost::uint32_t Cache::readBufferImpl(PointBuffer& data)
 
     // Not in the cache, so do a normal read :-(
     const boost::uint32_t numRead = getPrevIterator().read(data);
-    m_filter.updateStats(numRead, numRead);
+    m_cache_filter.updateStats(numRead, numRead);
 
     return numRead;
 }
@@ -379,8 +403,7 @@ namespace random
 
 Cache::Cache(const pdal::filters::Cache& filter, PointBuffer& buffer)
     : pdal::FilterRandomIterator(filter, buffer)
-    , m_filter(filter)
-    , m_dimension_map(0)
+    , cache::IteratorBase(filter, buffer)    
 {
     // If we're set to defaults, just cache the whole thing.
     if (filter.getCacheBlockSize() == 0 && filter.getMaxCacheBlocks() == 1)
@@ -402,8 +425,8 @@ Cache::Cache(const pdal::filters::Cache& filter, PointBuffer& buffer)
 
 boost::uint64_t Cache::seekImpl(boost::uint64_t position)
 {
-    boost::uint32_t blockPosition = m_filter.getCacheBlockSize() / position;
-    bool bCached = m_filter.isCached(blockPosition);
+    boost::uint32_t blockPosition = m_cache_filter.getCacheBlockSize() / position;
+    bool bCached = m_cache_filter.isCached(blockPosition);
     if (bCached)
     {
         return position;
@@ -416,8 +439,8 @@ boost::uint64_t Cache::seekImpl(boost::uint64_t position)
 
 boost::uint32_t Cache::readBufferImpl(PointBuffer& data)
 {
-    boost::uint32_t cacheBlockSize = m_filter.getCacheBlockSize();
-    boost::uint32_t numBlocks = m_filter.getMaxCacheBlocks();
+    boost::uint32_t cacheBlockSize = m_cache_filter.getCacheBlockSize();
+    boost::uint32_t numBlocks = m_cache_filter.getMaxCacheBlocks();
 
     boost::uint64_t currentPointIndex = getIndex();
     
@@ -427,7 +450,7 @@ boost::uint32_t Cache::readBufferImpl(PointBuffer& data)
     const bool isCacheable = (data.getCapacity() == cacheBlockSize) &&
                              (data.getNumPoints() == 0) &&
                              (currentPointIndex % cacheBlockSize == 0) &&
-                             !m_filter.isCached(blockPosition);
+                             !m_cache_filter.isCached(blockPosition);
     
     if (isCacheable)
     {
@@ -438,8 +461,8 @@ boost::uint32_t Cache::readBufferImpl(PointBuffer& data)
             throw pdal_error("We did not read the same number of points as the cache size!");
         }
         boost::uint32_t cacheBlock = currentPointIndex/ cacheBlockSize * cacheBlockSize;
-        m_filter.addToCache(cacheBlock, data);
-        m_filter.updateStats(numRead, data.getCapacity());
+        m_cache_filter.addToCache(cacheBlock, data);
+        m_cache_filter.updateStats(numRead, data.getCapacity());
 
         return numRead;
     }
@@ -463,7 +486,7 @@ boost::uint32_t Cache::readBufferImpl(PointBuffer& data)
 
     // Not in the cache, so do a normal read :-(
     const boost::uint32_t numRead = getPrevIterator().read(data);
-    m_filter.updateStats(numRead, numRead);
+    m_cache_filter.updateStats(numRead, numRead);
 
     return numRead;
 }

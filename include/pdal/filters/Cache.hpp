@@ -118,6 +118,7 @@ public:
     boost::uint32_t calculateNumberOfBlocks(boost::uint32_t CacheBlockSize, 
                                             boost::uint64_t totalNumberOfPoints) const;
     
+
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
     pdal::StageRandomIterator* createRandomIterator(PointBuffer& buffer) const;
 
@@ -140,10 +141,30 @@ private:
 
 namespace iterators
 {
+
+namespace cache
+{
+class PDAL_DLL IteratorBase
+{
+
+public:
+    IteratorBase(pdal::filters::Cache const& filter, PointBuffer& buffer);
+
+protected:
+    const pdal::filters::Cache& m_cache_filter;
+    mutable DimensionMap* m_dimension_map;
+
+    boost::uint32_t copyCachedBlocks(   std::vector<PointBuffer const*> const& blocks, 
+                                        PointBuffer& data, 
+                                        boost::uint32_t pointPosition) const;
+    
+};    
+} // cache
+
 namespace sequential
 {
 
-class PDAL_DLL Cache : public pdal::FilterSequentialIterator
+class PDAL_DLL Cache : public pdal::FilterSequentialIterator, public cache::IteratorBase
 {
 public:
     Cache(const pdal::filters::Cache& filter, PointBuffer& buffer);
@@ -153,8 +174,6 @@ private:
     boost::uint32_t readBufferImpl(PointBuffer&);
     bool atEndImpl() const;
 
-    const pdal::filters::Cache& m_filter;
-    DimensionMap* m_dimension_map;    
 };
 
 }
@@ -166,7 +185,7 @@ namespace iterators
 namespace random
 {
 
-class PDAL_DLL Cache : public pdal::FilterRandomIterator
+class PDAL_DLL Cache : public pdal::FilterRandomIterator, public cache::IteratorBase
 {
 public:
     Cache(const pdal::filters::Cache& filter, PointBuffer& buffer);
@@ -175,9 +194,6 @@ private:
     boost::uint64_t seekImpl(boost::uint64_t);
     boost::uint32_t readBufferImpl(PointBuffer&);
 
-    const pdal::filters::Cache& m_filter;
-    
-    DimensionMap* m_dimension_map;
 };
 
 

@@ -46,141 +46,141 @@ using namespace pdal;
 
 BOOST_AUTO_TEST_SUITE(CacheFilterTest)
 
-// 
-// BOOST_AUTO_TEST_CASE(CacheFilterTest_test_options)
-// {
-//     Bounds<double> srcBounds(0.0, 0.0, 0.0, 100.0, 100.0, 100.0);
-//     pdal::drivers::faux::Reader reader(srcBounds, 10000, pdal::drivers::faux::Reader::Constant);
-//     
-//     boost::uint32_t cache_size(355);
-//     pdal::Options options;
-//     pdal::Option debug("debug", true, "");
-//     pdal::Option verbose("verbose", 9, "");
-//     pdal::Option max_cache_blocks("max_cache_blocks", 3);
-//     pdal::Option cache_block_size("cache_block_size", cache_size);
-//     options.add(max_cache_blocks);
-//     options.add(cache_block_size);
-//     // options.add(debug);
-//     // options.add(verbose);
-// 
-// 
-//     pdal::filters::Cache cache(reader, options);
-// 
-//     BOOST_CHECK(cache.getDescription() == "Cache Filter");
-//     cache.initialize();
-// 
-//     const Schema& schema = reader.getSchema();
-// 
-//     PointBuffer dataBig(schema, cache_size);
-//     PointBuffer dataSmall(schema, 293);
-// 
-//     StageSequentialIterator* iter1 = cache.createSequentialIterator(dataBig);
-// 
-//     BOOST_CHECK_EQUAL(cache.getNumPointsCached(), 0); // No data in there yet
-//     BOOST_CHECK_EQUAL(cache.getNumPointsRequested(), 0);
-//     BOOST_CHECK_EQUAL(cache.getNumPointsRead(), 0);
-// 
-//     iter1->read(dataBig);
-//     BOOST_CHECK_EQUAL(cache.getNumPointsCached(), cache_size);
-// 
-//     BOOST_CHECK_EQUAL(dataBig.getField<boost::uint64_t>(dataBig.getSchema().getDimension("Time"), 0), 0);
-//     BOOST_CHECK_EQUAL(cache.getNumPointsRequested(), cache_size);
-//     BOOST_CHECK_EQUAL(cache.getNumPointsRead(), cache_size);
-// 
-//     iter1->read(dataBig);
-//     BOOST_CHECK_EQUAL(cache.getNumPointsCached(), cache_size* 2); 
-//     BOOST_CHECK_EQUAL(dataBig.getField<boost::uint64_t>(dataBig.getSchema().getDimension("Time"), 0), cache_size * 1);
-//     BOOST_CHECK_EQUAL(cache.getNumPointsRequested(), cache_size * 2);
-//     BOOST_CHECK_EQUAL(cache.getNumPointsRead(), cache_size * 2);
-// 
-//     iter1->read(dataBig);
-//     BOOST_CHECK_EQUAL(cache.getNumPointsCached(), cache_size* 3); 
-// 
-//     BOOST_CHECK_EQUAL(dataBig.getField<boost::uint64_t>(dataBig.getSchema().getDimension("Time"), 0), cache_size*2);
-//     BOOST_CHECK_EQUAL(cache.getNumPointsRequested(), cache_size * 3);
-//     BOOST_CHECK_EQUAL(cache.getNumPointsRead(), cache_size * 3);
-//     
-// 
-//     StageSequentialIterator* iter2 = cache.createSequentialIterator(dataSmall);
-// 
-//     boost::uint32_t skip_position(648);
-//     iter2->skip(skip_position);
-//     iter2->read(dataSmall);
-//     BOOST_CHECK_EQUAL(dataSmall.getField<boost::uint64_t>(dataBig.getSchema().getDimension("Time"), 0), skip_position);
-// 
-//     BOOST_CHECK_EQUAL(cache.getNumPointsRequested(), cache_size*2+skip_position);
-//     BOOST_CHECK_EQUAL(cache.getNumPointsRead(), cache_size*3);
-// 
-//     delete iter1;
-//     delete iter2;
-// 
-//     return;
-// }
-// 
-// 
-// 
-// BOOST_AUTO_TEST_CASE(CacheFilterTest_test_use_counts)
-// {
-//     Bounds<double> srcBounds(0.0, 0.0, 0.0, 100.0, 100.0, 100.0);
-//     pdal::drivers::faux::Reader reader(srcBounds, 10000, pdal::drivers::faux::Reader::Constant);
-// 
-//     pdal::Options options;
-//     pdal::Option debug("debug", true, "");
-//     pdal::Option verbose("verbose", 9, "");
-//     // pdal::Option max_cache_blocks("max_cache_blocks", 1);
-//     // pdal::Option cache_block_size("cache_block_size", cache_size);
-//     // options.add(max_cache_blocks);
-//     // options.add(cache_block_size);
-//     // options.add(debug);
-//     // options.add(verbose);
-// 
-// 
-//     pdal::filters::Cache cache(reader, options);
-// 
-//     BOOST_CHECK_EQUAL(cache.getDescription(), "Cache Filter");
-//     cache.initialize();
-// 
-//     const Schema& schema = reader.getSchema();
-//     
-//     boost::uint32_t buffer_size(1024);
-//     PointBuffer dataBig(schema, buffer_size);
-//     PointBuffer dataSmall(schema, 293);
-// 
-//     StageSequentialIterator* iter1 = cache.createSequentialIterator(dataBig);
-// 
-//     BOOST_CHECK_EQUAL(cache.getNumPointsCached(), 0); // No data in there yet
-//     BOOST_CHECK_EQUAL(cache.getNumPointsRequested(), 0);
-//     BOOST_CHECK_EQUAL(cache.getNumPointsRead(), 0);
-// 
-//     iter1->read(dataBig);
-//     BOOST_CHECK_EQUAL(dataBig.getField<boost::uint64_t>(dataBig.getSchema().getDimension("Time"), 0), 0);
-//     BOOST_CHECK_EQUAL(cache.getNumPointsCached(), buffer_size);
-//     BOOST_CHECK_EQUAL(cache.getNumPointsRequested(), buffer_size);
-//     BOOST_CHECK_EQUAL(cache.getNumPointsRead(), buffer_size);
-// 
-//     iter1->read(dataBig);
-//     BOOST_CHECK_EQUAL(dataBig.getField<boost::uint64_t>(dataBig.getSchema().getDimension("Time"), 0), 1024);
-//     BOOST_CHECK_EQUAL(cache.getNumPointsCached(), buffer_size*2);
-//     BOOST_CHECK_EQUAL(cache.getNumPointsRequested(), buffer_size*2);
-//     BOOST_CHECK_EQUAL(cache.getNumPointsRead(), buffer_size*2);
-//     
-//     BOOST_CHECK_EQUAL(cache.getNumPointsCached(), buffer_size* 2);
-//     
-//     StageSequentialIterator* iter2 = cache.createSequentialIterator(dataSmall);
-// 
-//     boost::uint32_t skip_position(1045);
-//     iter2->skip(skip_position);
-//     boost::uint32_t numRead = iter2->read(dataSmall);
-//     BOOST_CHECK_EQUAL(numRead, dataSmall.getCapacity());
-//     BOOST_CHECK_EQUAL(dataSmall.getField<boost::uint64_t>(dataBig.getSchema().getDimension("Time"), 0), skip_position);
-//     BOOST_CHECK_EQUAL(cache.getNumPointsRequested(),buffer_size*2+dataSmall.getCapacity());
-//     BOOST_CHECK_EQUAL(cache.getNumPointsRead(), buffer_size*2);
-// 
-//     delete iter1;
-//     delete iter2;
-// 
-//     return;
-// }
+
+BOOST_AUTO_TEST_CASE(CacheFilterTest_test_options)
+{
+    Bounds<double> srcBounds(0.0, 0.0, 0.0, 100.0, 100.0, 100.0);
+    pdal::drivers::faux::Reader reader(srcBounds, 10000, pdal::drivers::faux::Reader::Constant);
+    
+    boost::uint32_t cache_size(355);
+    pdal::Options options;
+    pdal::Option debug("debug", true, "");
+    pdal::Option verbose("verbose", 9, "");
+    pdal::Option max_cache_blocks("max_cache_blocks", 3);
+    pdal::Option cache_block_size("cache_block_size", cache_size);
+    options.add(max_cache_blocks);
+    options.add(cache_block_size);
+    // options.add(debug);
+    // options.add(verbose);
+
+
+    pdal::filters::Cache cache(reader, options);
+
+    BOOST_CHECK(cache.getDescription() == "Cache Filter");
+    cache.initialize();
+
+    const Schema& schema = reader.getSchema();
+
+    PointBuffer dataBig(schema, cache_size);
+    PointBuffer dataSmall(schema, 293);
+
+    StageSequentialIterator* iter1 = cache.createSequentialIterator(dataBig);
+
+    BOOST_CHECK_EQUAL(cache.getNumPointsCached(), 0); // No data in there yet
+    BOOST_CHECK_EQUAL(cache.getNumPointsRequested(), 0);
+    BOOST_CHECK_EQUAL(cache.getNumPointsRead(), 0);
+
+    iter1->read(dataBig);
+    BOOST_CHECK_EQUAL(cache.getNumPointsCached(), cache_size);
+
+    BOOST_CHECK_EQUAL(dataBig.getField<boost::uint64_t>(dataBig.getSchema().getDimension("Time"), 0), 0);
+    BOOST_CHECK_EQUAL(cache.getNumPointsRequested(), cache_size);
+    BOOST_CHECK_EQUAL(cache.getNumPointsRead(), cache_size);
+
+    iter1->read(dataBig);
+    BOOST_CHECK_EQUAL(cache.getNumPointsCached(), cache_size* 2); 
+    BOOST_CHECK_EQUAL(dataBig.getField<boost::uint64_t>(dataBig.getSchema().getDimension("Time"), 0), cache_size * 1);
+    BOOST_CHECK_EQUAL(cache.getNumPointsRequested(), cache_size * 2);
+    BOOST_CHECK_EQUAL(cache.getNumPointsRead(), cache_size * 2);
+
+    iter1->read(dataBig);
+    BOOST_CHECK_EQUAL(cache.getNumPointsCached(), cache_size* 3); 
+
+    BOOST_CHECK_EQUAL(dataBig.getField<boost::uint64_t>(dataBig.getSchema().getDimension("Time"), 0), cache_size*2);
+    BOOST_CHECK_EQUAL(cache.getNumPointsRequested(), cache_size * 3);
+    BOOST_CHECK_EQUAL(cache.getNumPointsRead(), cache_size * 3);
+    
+
+    StageSequentialIterator* iter2 = cache.createSequentialIterator(dataSmall);
+
+    boost::uint32_t skip_position(648);
+    iter2->skip(skip_position);
+    iter2->read(dataSmall);
+    BOOST_CHECK_EQUAL(dataSmall.getField<boost::uint64_t>(dataBig.getSchema().getDimension("Time"), 0), skip_position);
+
+    BOOST_CHECK_EQUAL(cache.getNumPointsRequested(), cache_size*2+skip_position);
+    BOOST_CHECK_EQUAL(cache.getNumPointsRead(), cache_size*3);
+
+    delete iter1;
+    delete iter2;
+
+    return;
+}
+
+
+
+BOOST_AUTO_TEST_CASE(CacheFilterTest_test_use_counts)
+{
+    Bounds<double> srcBounds(0.0, 0.0, 0.0, 100.0, 100.0, 100.0);
+    pdal::drivers::faux::Reader reader(srcBounds, 10000, pdal::drivers::faux::Reader::Constant);
+
+    pdal::Options options;
+    pdal::Option debug("debug", true, "");
+    pdal::Option verbose("verbose", 9, "");
+    // pdal::Option max_cache_blocks("max_cache_blocks", 1);
+    // pdal::Option cache_block_size("cache_block_size", cache_size);
+    // options.add(max_cache_blocks);
+    // options.add(cache_block_size);
+    // options.add(debug);
+    // options.add(verbose);
+
+
+    pdal::filters::Cache cache(reader, options);
+
+    BOOST_CHECK_EQUAL(cache.getDescription(), "Cache Filter");
+    cache.initialize();
+
+    const Schema& schema = reader.getSchema();
+    
+    boost::uint32_t buffer_size(1024);
+    PointBuffer dataBig(schema, buffer_size);
+    PointBuffer dataSmall(schema, 293);
+
+    StageSequentialIterator* iter1 = cache.createSequentialIterator(dataBig);
+
+    BOOST_CHECK_EQUAL(cache.getNumPointsCached(), 0); // No data in there yet
+    BOOST_CHECK_EQUAL(cache.getNumPointsRequested(), 0);
+    BOOST_CHECK_EQUAL(cache.getNumPointsRead(), 0);
+
+    iter1->read(dataBig);
+    BOOST_CHECK_EQUAL(dataBig.getField<boost::uint64_t>(dataBig.getSchema().getDimension("Time"), 0), 0);
+    BOOST_CHECK_EQUAL(cache.getNumPointsCached(), buffer_size);
+    BOOST_CHECK_EQUAL(cache.getNumPointsRequested(), buffer_size);
+    BOOST_CHECK_EQUAL(cache.getNumPointsRead(), buffer_size);
+
+    iter1->read(dataBig);
+    BOOST_CHECK_EQUAL(dataBig.getField<boost::uint64_t>(dataBig.getSchema().getDimension("Time"), 0), 1024);
+    BOOST_CHECK_EQUAL(cache.getNumPointsCached(), buffer_size*2);
+    BOOST_CHECK_EQUAL(cache.getNumPointsRequested(), buffer_size*2);
+    BOOST_CHECK_EQUAL(cache.getNumPointsRead(), buffer_size*2);
+    
+    BOOST_CHECK_EQUAL(cache.getNumPointsCached(), buffer_size* 2);
+    
+    StageSequentialIterator* iter2 = cache.createSequentialIterator(dataSmall);
+
+    boost::uint32_t skip_position(1045);
+    iter2->skip(skip_position);
+    boost::uint32_t numRead = iter2->read(dataSmall);
+    BOOST_CHECK_EQUAL(numRead, dataSmall.getCapacity());
+    BOOST_CHECK_EQUAL(dataSmall.getField<boost::uint64_t>(dataBig.getSchema().getDimension("Time"), 0), skip_position);
+    BOOST_CHECK_EQUAL(cache.getNumPointsRequested(),buffer_size*2+dataSmall.getCapacity());
+    BOOST_CHECK_EQUAL(cache.getNumPointsRead(), buffer_size*2);
+
+    delete iter1;
+    delete iter2;
+
+    return;
+}
 
 
 
