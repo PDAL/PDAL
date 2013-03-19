@@ -109,27 +109,34 @@ std::vector<PointBuffer const*> Cache::lookup(boost::uint64_t pointPosition, boo
     std::vector<PointBuffer const*> output;
     
     boost::uint32_t startingBlockNumber = pointPosition / getCacheBlockSize();
-    boost::uint32_t endingBlockNumber = (pointPosition + count) / getCacheBlockSize();
-
-    log()->get(logDEBUG2) << "Checking for blocks from " << startingBlockNumber 
-                          << ".." << endingBlockNumber << std::endl;
+    boost::uint32_t endingBlockNumber = (pointPosition + count - 1) / getCacheBlockSize();
+    
+    bool logOutput = log()->getLevel() > logDEBUG3;
+    
+    if (logOutput)
+        log()->get(logDEBUG4) << "Checking for blocks from " << startingBlockNumber 
+                              << ".." << endingBlockNumber << std::endl;
     
     for (boost::uint32_t i(startingBlockNumber); i <= endingBlockNumber; ++i)
     {
-        log()->get(logDEBUG4) << "Searching for block " << i << std::endl;
+        if (logOutput)
+            log()->get(logDEBUG4) << "Searching for block " << i << std::endl;
         PointBuffer const* block = m_cache->lookup(i);
 
         
         // Every block must be in the cache, or we return nothing
         if (!block)
         {
-            log()->get(logDEBUG4) << "Did not find block " << i << std::endl;
+            if (logOutput)
+                log()->get(logDEBUG4) << "Did not find block " << i << std::endl;
             return empty;
             
         }
 
         output.push_back(block);
     }
+    
+    if (logOutput)
     log()->get(logDEBUG2) << "found " << output.size() 
                                 << " block(s) for position " 
                                 << pointPosition << " with size " 
@@ -215,6 +222,12 @@ IteratorBase::IteratorBase(pdal::filters::Cache const& filter, PointBuffer& buff
 
 }
 
+IteratorBase::~IteratorBase()
+{
+    if (m_dimension_map)
+        delete m_dimension_map;
+}
+
 boost::uint32_t IteratorBase::copyCachedBlocks(     std::vector<PointBuffer const*> const& blocks, 
                                                     PointBuffer& data, 
                                                     boost::uint32_t currentPointIndex) const
@@ -237,23 +250,16 @@ boost::uint32_t IteratorBase::copyCachedBlocks(     std::vector<PointBuffer cons
     for (ConstIterator i = blocks.begin(); i != blocks.end(); ++i)
     {
         PointBuffer const* b = *i;
-        if (m_dimension_map)
-            delete m_dimension_map;               
-        m_dimension_map = PointBuffer::mapDimensions(*b, data);
+        if (!m_dimension_map)
+            m_dimension_map = PointBuffer::mapDimensions(*b, data);
+            
     
         boost::int32_t blockStartingPosition = (blockNumber) * m_cache_filter.getCacheBlockSize();
         boost::int32_t blockEndingPosition =   (blockNumber+1) * m_cache_filter.getCacheBlockSize();
     
         boost::int64_t blockHowMany = std::min(blockEndingPosition, readEndPosition) - currentPosition;
 
-        boost::int64_t blockBufferStartingPosition(0);
-        if (currentPosition > 0) 
-            blockBufferStartingPosition = std::max(0,blockStartingPosition - blockEndingPosition % currentPosition);
-        if (blockBufferStartingPosition == m_cache_filter.getCacheBlockSize()) blockBufferStartingPosition = 0;
-        
-        if (blockBufferStartingPosition == 0 )
-            if (blockNumber == startingBlockNumber)
-                blockBufferStartingPosition =  currentPosition - blockStartingPosition ;
+        boost::int64_t blockBufferStartingPosition =  currentPosition - blockStartingPosition ;
 
         bool logOutput = m_cache_filter.log()->getLevel() > logDEBUG3;
         if (logOutput)
@@ -301,16 +307,26 @@ Cache::Cache(const pdal::filters::Cache& filter, PointBuffer& buffer)
 	// was specified. Yes we're doing dirt here, but nuking the cache at
 	// the creation of an iterator shouldn't be too catastrophic
     // If we're set to defaults, just cache the whole thing.
-    if (filter.getCacheBlockSize() == 0 && filter.getMaxCacheBlocks() == 1)
+    bool derive_blocks = filter.getOptions().getValueOrDefault<bool>("derive_blocks", false);
+    if (filter.getMaxCacheBlocks() == 1 && filter.getCacheBlockSize() == 0)
+        {
+            filters::Cache* f = const_cast<filters::Cache*>(&filter);
+        
+            boost::uint64_t total_count = f->getPrevStage().getNumPoints();
+            boost::uint32_t num_blocks = (total_count / filter.getMaxCacheBlocks()) + 1;
+        
+            f->resetCache(num_blocks, buffer.getCapacity());        
+        }
+    else if (filter.getMaxCacheBlocks() == 1 && derive_blocks)
     {
         filters::Cache* f = const_cast<filters::Cache*>(&filter);
         
         boost::uint64_t total_count = f->getPrevStage().getNumPoints();
-        boost::uint32_t num_blocks = f->calculateNumberOfBlocks(buffer.getCapacity(), total_count);
+        boost::uint32_t num_blocks = f->calculateNumberOfBlocks(filter.getCacheBlockSize(), total_count);
         
-        f->resetCache(num_blocks, buffer.getCapacity());
+        f->resetCache(num_blocks, filter.getCacheBlockSize());
     
-    }
+    } 
 
     filter.log()->get(logDEBUG) << "create sequential iterator: creating cache of " 
                                 << filter.getMaxCacheBlocks() << " blocks of capacity " 
@@ -343,7 +359,7 @@ boost::uint32_t Cache::readBufferImpl(PointBuffer& data)
     bool logOutput = m_cache_filter.log()->getLevel() > logDEBUG3;
     
 
-    std::vector<PointBuffer const*> blocks = m_cache_filter.lookup(currentPointIndex, data.getCapacity()-data.getNumPoints());
+    std::vector<PointBuffer const*> blocks = m_cache_filter.lookup(currentPointIndex, data.getCapacity());
 
     if (blocks.size())
     {
@@ -400,15 +416,36 @@ Cache::Cache(const pdal::filters::Cache& filter, PointBuffer& buffer)
     , cache::IteratorBase(filter, buffer)    
 {
     // If we're set to defaults, just cache the whole thing.
-    if (filter.getCacheBlockSize() == 0 && filter.getMaxCacheBlocks() == 1)
+    if (filter.getMaxCacheBlocks() == 1 && filter.getCacheBlockSize() == 0)
+        {
+            filters::Cache* f = const_cast<filters::Cache*>(&filter);
+        
+            boost::uint64_t total_count = f->getPrevStage().getNumPoints();
+            boost::uint32_t num_blocks = (total_count / filter.getMaxCacheBlocks()) + 1;
+        
+            f->resetCache(1, total_count);        
+        }
+    else if (filter.getMaxCacheBlocks() == 1 && filter.getCacheBlockSize() != 0)
     {
         filters::Cache* f = const_cast<filters::Cache*>(&filter);
         
         boost::uint64_t total_count = f->getPrevStage().getNumPoints();
-        boost::uint32_t num_blocks = f->calculateNumberOfBlocks(buffer.getCapacity(), total_count);
+        boost::uint32_t num_blocks = f->calculateNumberOfBlocks(filter.getCacheBlockSize(), total_count);
         
-        f->resetCache(num_blocks, buffer.getCapacity());
-    }
+        f->resetCache(num_blocks, filter.getCacheBlockSize());
+    
+    } else if (filter.getCacheBlockSize() != 0 && filter.getMaxCacheBlocks() == 1)
+    {
+        filters::Cache* f = const_cast<filters::Cache*>(&filter);
+        
+        boost::uint64_t total_count = f->getPrevStage().getNumPoints();
+        boost::uint32_t num_blocks = (total_count / filter.getMaxCacheBlocks()) + 1;
+        
+        f->resetCache(num_blocks, filter.getCacheBlockSize());
+    
+    } 
+
+
     filter.log()->get(logDEBUG) << "create random iterator: creating cache of " 
                                 << filter.getMaxCacheBlocks() << " blocks of capacity " 
                                 << filter.getCacheBlockSize() << std::endl;
@@ -428,6 +465,8 @@ boost::uint64_t Cache::seekImpl(boost::uint64_t position)
     std::vector<PointBuffer const*> blocks = m_cache_filter.lookup(position, 1);
     if (blocks.size())
     {
+        if (position > m_cache_filter.getNumPoints())
+            throw pdal_error("seeked past the end!");
         return position;
     } else 
     {
@@ -449,13 +488,27 @@ boost::uint32_t Cache::readBufferImpl(PointBuffer& data)
         blockNumber = cacheBlockSize / currentPointIndex;
     }
 
-    std::vector<PointBuffer const*> blocks = m_cache_filter.lookup(currentPointIndex, data.getCapacity()- data.getNumPoints());
+    std::vector<PointBuffer const*> blocks = m_cache_filter.lookup(currentPointIndex, data.getCapacity());
+
+    if (blocks.size())
+    {
+        m_cache_filter.log()->get(logDEBUG3) << "random read had cache hit for block " 
+                                    << blockNumber << " with at point index " 
+                                    << currentPointIndex << std::endl;
+        
+        // lookup will only return a list of blocks if things are 
+        // entirely contained in the cache.
+        boost::uint32_t copied(0);
+        copied  = copyCachedBlocks(blocks, data, currentPointIndex);
+        if (copied)
+            return data.getNumPoints();
+    }
+
     // We're cacheable if we're on the block boundary
     const bool isCacheable = (data.getCapacity() == cacheBlockSize) &&
                              (data.getNumPoints() == 0) &&
                              (currentPointIndex % cacheBlockSize == 0) &&
                              !blocks.size();
-    
     if (isCacheable)
     {
         const boost::uint32_t numRead = getPrevIterator().read(data);
@@ -469,21 +522,6 @@ boost::uint32_t Cache::readBufferImpl(PointBuffer& data)
         m_cache_filter.updateStats(numRead, data.getCapacity());
 
         return numRead;
-    }
-
-    if (blocks.size())
-    {
-        m_cache_filter.log()->get(logDEBUG3) << "random read had cache hit for block " 
-                                    << blockNumber << " with at point index " 
-                                    << currentPointIndex << std::endl;
-        
-        // lookup will only return a list of blocks if things are 
-        // entirely contained in the cache.
-        boost::uint32_t copied = copyCachedBlocks(blocks, data, currentPointIndex);
-        if (copied != 0)
-        {
-            return data.getNumPoints();
-        }    
     }
 
 

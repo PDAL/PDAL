@@ -147,6 +147,7 @@ class PDAL_DLL IteratorBase
 
 public:
     IteratorBase(pdal::filters::Cache const& filter, PointBuffer& buffer);
+    ~IteratorBase();
 
 protected:
     const pdal::filters::Cache& m_cache_filter;
