@@ -156,6 +156,8 @@ public:
         numCacheInsertMisses = m_numCacheInsertMisses;
         numCacheInsertHits = m_numCacheInsertHits;
     }
+    
+    size_t size() const { return _cache.size(); }
 
 private:
 
