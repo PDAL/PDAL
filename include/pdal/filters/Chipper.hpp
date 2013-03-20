@@ -161,7 +161,12 @@ public:
     {
         m_bounds = bounds;
     }
-    void GetBuffer(boost::scoped_ptr<StageRandomIterator>& iterator, PointBuffer& buffer, boost::uint32_t block_id, Dimension const& dimPoint, Dimension const& dimBlock) const;
+    void GetBuffer( StageRandomIterator* iterator, 
+                    PointBuffer& buffer, 
+                    PointBuffer& one_point, 
+                    boost::uint32_t block_id, 
+                    Dimension const& dimPoint, 
+                    Dimension const& dimBlock) const;
     // double GetXmin() const
     //     { return m_xmin; }
     // double GetYmin() const
@@ -255,7 +260,7 @@ private:
     std::size_t m_currentBlockId;
     boost::uint64_t m_currentPointCount;
 
-    boost::scoped_ptr<StageRandomIterator> m_random_iterator;
+    StageRandomIterator * m_random_iterator;
 
 
 };

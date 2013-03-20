@@ -92,6 +92,7 @@ BOOST_AUTO_TEST_CASE(test_construction)
         BOOST_CHECK(ids[14] == 1050);
 
         PointBuffer buffer(chipper.getSchema(), 15);
+        PointBuffer one_point(chipper.getSchema(), 1);
         pdal::Schema const& schema = buffer.getSchema();
         Dimension const& dimPoint = schema.getDimension("PointID");
         Dimension const& dimBlock = schema.getDimension("BlockID");
@@ -99,8 +100,8 @@ BOOST_AUTO_TEST_CASE(test_construction)
         Dimension const& dimY = schema.getDimension("Y");
         Dimension const& dimZ = schema.getDimension("Z");
 
-        boost::scoped_ptr<StageRandomIterator> iter(reader.createRandomIterator(buffer));
-        chipper.GetBlock(20).GetBuffer(iter, buffer, 20, dimPoint, dimBlock);
+        StageRandomIterator* iter = reader.createRandomIterator(buffer);
+        chipper.GetBlock(20).GetBuffer(iter, buffer, one_point, 20, dimPoint, dimBlock);
 
         //
         // std::cout << buffer.getField<boost::int32_t>(0, 0) << std::endl;

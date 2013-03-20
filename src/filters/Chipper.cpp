@@ -92,17 +92,20 @@ vector<boost::uint32_t> Block::GetIDs() const
     return ids;
 }
 
-void Block::GetBuffer(boost::scoped_ptr<StageRandomIterator>& iterator, PointBuffer& buffer,
-                      boost::uint32_t block_id, Dimension const& dimPoint, Dimension const& dimBlock) const
+void Block::GetBuffer(StageRandomIterator * iterator, 
+                      PointBuffer& destination,
+                      PointBuffer& one_point,
+                      boost::uint32_t block_id, 
+                      Dimension const& dimPoint, 
+                      Dimension const& dimBlock) const
 {
-    pdal::Schema const& schema = buffer.getSchema();
+    pdal::Schema const& schema = destination.getSchema();
 
     boost::int32_t size = m_right - m_left + 1;
     if (size < 0)
         throw pdal_error("m_right - m_left + 1 was less than 0 in Block::GetBuffer()!");
 
     std::vector<boost::uint32_t> ids = GetIDs();
-    pdal::PointBuffer one_point(schema, 1);
 
     std::vector<boost::uint32_t>::const_iterator it;
     boost::uint32_t count = 0;
@@ -117,8 +120,8 @@ void Block::GetBuffer(boost::scoped_ptr<StageRandomIterator>& iterator, PointBuf
         one_point.setField(dimBlock, 0, block_id);
 
         // put single point onto our block
-        buffer.copyPointsFast(count, 0, one_point, 1);
-        buffer.setNumPoints(count + 1);
+        destination.copyPointsFast(count, 0, one_point, 1);
+        destination.setNumPoints(count + 1);
 
         count++;
     }
@@ -510,8 +513,9 @@ Chipper::Chipper(pdal::filters::Chipper const& filter, PointBuffer& buffer)
     , m_chipper(filter)
     , m_currentBlockId(0)
     , m_currentPointCount(0)
+    , m_random_iterator(0)
 {
-    buffer.resize(m_chipper.getThreshold(), true);
+    // buffer.resize(m_chipper.getThreshold(), true);
     const_cast<pdal::filters::Chipper&>(m_chipper).Chip();
     return;
 }
@@ -546,17 +550,23 @@ boost::uint32_t Chipper::readBufferImpl(PointBuffer& buffer)
     Dimension const& blockID = schema.getDimension("BlockID");
 
     // Don't create this every GetBuffer call
-    boost::scoped_ptr<StageRandomIterator> iter(m_chipper.getPrevStage().createRandomIterator(buffer));
+    pdal::PointBuffer one_point(schema, 1);
+    if (m_random_iterator == 0)
+        m_random_iterator = m_chipper.getPrevStage().createRandomIterator(one_point);
     
-    if (!iter)
+    if (!m_random_iterator)
     {
         std::ostringstream oss;
         oss << "Unable to create random iterator from stage of type '" << m_chipper.getPrevStage().getName() << "'";
         throw pdal_error(oss.str());
     }
-    m_random_iterator.swap(iter);
 
-    block.GetBuffer(m_random_iterator, buffer, m_currentBlockId, pointID, blockID);
+    block.GetBuffer(m_random_iterator, 
+                    buffer, 
+                    one_point, 
+                    m_currentBlockId, 
+                    pointID, 
+                    blockID);
 
     buffer.setSpatialBounds(block.GetBounds());
     m_currentBlockId++;
