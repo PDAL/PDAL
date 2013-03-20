@@ -75,7 +75,7 @@ public:
     void addToCache(boost::uint64_t pointIndex, const PointBuffer& data) const;
 
     std::vector<PointBuffer const*> lookup(boost::uint64_t pointPosition, boost::uint32_t count) const;
-
+    bool isCached(boost::uint64_t pointPosition, boost::uint32_t count) const;
     // clear cache (but leave cache params unchanged)
     void resetCache();
 

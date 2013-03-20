@@ -101,6 +101,26 @@ void Cache::addToCache(boost::uint64_t blockPosition, const PointBuffer& data) c
     return;
 }
 
+bool Cache::isCached(boost::uint64_t pointPosition, boost::uint32_t count) const
+{
+    boost::uint32_t startingBlockNumber = pointPosition / getCacheBlockSize();
+    boost::uint32_t endingBlockNumber = (pointPosition + count - 1) / getCacheBlockSize();
+
+    for (boost::uint32_t i(startingBlockNumber); i <= endingBlockNumber; ++i)
+    {
+        PointBuffer const* block = m_cache->lookup(i);
+
+        
+        // Every block must be in the cache, or we return nothing
+        if (!block)
+        {
+            return false;
+            
+        }
+    }
+
+    return true;
+}
 
 std::vector<PointBuffer const*> Cache::lookup(boost::uint64_t pointPosition, boost::uint32_t count) const
 {
@@ -219,7 +239,7 @@ IteratorBase::IteratorBase(pdal::filters::Cache const& filter, PointBuffer& buff
 : m_cache_filter(filter)
 , m_mapped_buffer(&buffer)
 {
-
+    
 }
 
 IteratorBase::~IteratorBase()
@@ -269,7 +289,7 @@ boost::uint32_t IteratorBase::copyCachedBlocks(     std::vector<PointBuffer cons
             std::pair<PointBuffer const*, DimensionMap const*> p(b, d);
             m_dimension_maps.insert(p);
             dim_map = d;
-            // m_cache_filter.log()->get(logDEBUG2) << "Inserting dimension map entry for block" << std::endl;                
+            m_cache_filter.log()->get(logDEBUG2) << "Inserting dimension map entry for block" << std::endl;                
         } else
         {
             dim_map = it->second;
@@ -324,7 +344,7 @@ namespace sequential
 
 Cache::Cache(const pdal::filters::Cache& filter, PointBuffer& buffer)
     : pdal::FilterSequentialIterator(filter, buffer)
-    , cache::IteratorBase(filter, buffer)     
+    , cache::IteratorBase(filter, buffer)   
 {
 	// reset the cache to the point count if no block size 
 	// was specified. Yes we're doing dirt here, but nuking the cache at
@@ -479,17 +499,11 @@ Cache::Cache(const pdal::filters::Cache& filter, PointBuffer& buffer)
 
 boost::uint64_t Cache::seekImpl(boost::uint64_t position)
 {
-    boost::uint32_t blockPosition(0);
-    if (position != 0)
-    {
-        blockPosition = m_cache_filter.getCacheBlockSize() / position;
-    }
-
-    std::vector<PointBuffer const*> blocks = m_cache_filter.lookup(position, 1);
-    if (blocks.size())
+    bool bCached = m_cache_filter.isCached(position, 1);
+    if (bCached)
     {
         if (position > m_cache_filter.getNumPoints())
-            throw pdal_error("seeked past the end!");
+            throw invalid_seek_error("seeked past the end!");
         return position;
     } else 
     {
