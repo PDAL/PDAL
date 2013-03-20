@@ -552,7 +552,7 @@ boost::uint32_t Chipper::readBufferImpl(PointBuffer& buffer)
     // Don't create this every GetBuffer call
     pdal::PointBuffer one_point(schema, 1);
     if (m_random_iterator == 0)
-        m_random_iterator = m_chipper.getPrevStage().createRandomIterator(one_point);
+        m_random_iterator = m_chipper.getPrevStage().createRandomIterator(buffer);
     
     if (!m_random_iterator)
     {
