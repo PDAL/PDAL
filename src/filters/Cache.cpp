@@ -250,7 +250,7 @@ boost::uint32_t IteratorBase::copyCachedBlocks(     std::vector<PointBuffer cons
     for (ConstIterator i = blocks.begin(); i != blocks.end(); ++i)
     {
         PointBuffer const* b = *i;
-        if (!m_dimension_map)
+        // if (!m_dimension_map)
             m_dimension_map = PointBuffer::mapDimensions(*b, data);
             
     
