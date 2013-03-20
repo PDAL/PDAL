@@ -7,7 +7,7 @@ begin
 
 name := '&1';
 clouds := name ||'_CLOUD';
-blks := name ||'_BLOCK';
+blks := name ||'_BLOCKS';
 
 FOR i IN (SELECT table_name FROM user_tables WHERE table_name = clouds) LOOP
     EXECUTE IMMEDIATE 'DROP TABLE ' || clouds || ' PURGE';
