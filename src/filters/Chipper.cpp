@@ -513,7 +513,10 @@ Chipper::Chipper(pdal::filters::Chipper const& filter, PointBuffer& buffer)
     , m_chipper(filter)
     , m_currentBlockId(0)
     , m_currentPointCount(0)
+    , m_one_point(0)
+    , m_current_read_schema(0)
     , m_random_iterator(0)
+
 {
     // buffer.resize(m_chipper.getThreshold(), true);
     const_cast<pdal::filters::Chipper&>(m_chipper).Chip();
@@ -550,9 +553,23 @@ boost::uint32_t Chipper::readBufferImpl(PointBuffer& buffer)
     Dimension const& blockID = schema.getDimension("BlockID");
 
     // Don't create this every GetBuffer call
-    pdal::PointBuffer one_point(schema, 1);
-    // if (m_random_iterator == 0)
-        m_random_iterator = m_chipper.getPrevStage().createRandomIterator(buffer);
+    
+    if (!m_one_point)
+    {
+        m_one_point = new PointBuffer(schema, 1);
+        m_current_read_schema = &(m_one_point->getSchema());
+        m_random_iterator = m_chipper.getPrevStage().createRandomIterator(*m_one_point);        
+    }
+
+    if (m_current_read_schema != &(m_one_point->getSchema()))
+    {
+        if (m_random_iterator)
+            delete m_random_iterator;
+
+        m_random_iterator = m_chipper.getPrevStage().createRandomIterator(*m_one_point);
+        m_current_read_schema = &(m_one_point->getSchema());
+    }
+
     
     if (!m_random_iterator)
     {
@@ -563,7 +580,7 @@ boost::uint32_t Chipper::readBufferImpl(PointBuffer& buffer)
 
     block.GetBuffer(m_random_iterator, 
                     buffer, 
-                    one_point, 
+                    *m_one_point, 
                     m_currentBlockId, 
                     pointID, 
                     blockID);
