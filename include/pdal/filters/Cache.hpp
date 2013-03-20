@@ -151,7 +151,13 @@ public:
 
 protected:
     const pdal::filters::Cache& m_cache_filter;
-    mutable DimensionMap* m_dimension_map;
+    
+    // Each block in the cache has a mapping that 
+    // maps its dimensions to the dimensions that the 
+    // the user instantiated the IteratorBase with.
+    
+    mutable std::map<PointBuffer const*, DimensionMap const*> m_dimension_maps;
+    mutable PointBuffer const* m_mapped_buffer;
 
     boost::uint32_t copyCachedBlocks(   std::vector<PointBuffer const*> const& blocks, 
                                         PointBuffer& data, 

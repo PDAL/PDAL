@@ -217,15 +217,15 @@ namespace cache {
     
 IteratorBase::IteratorBase(pdal::filters::Cache const& filter, PointBuffer& buffer)
 : m_cache_filter(filter)
-, m_dimension_map(0) 
+, m_mapped_buffer(&buffer)
 {
 
 }
 
 IteratorBase::~IteratorBase()
 {
-    if (m_dimension_map)
-        delete m_dimension_map;
+    // if (m_dimension_maps)
+    //     delete m_dimension_maps;
 }
 
 boost::uint32_t IteratorBase::copyCachedBlocks(     std::vector<PointBuffer const*> const& blocks, 
@@ -247,11 +247,34 @@ boost::uint32_t IteratorBase::copyCachedBlocks(     std::vector<PointBuffer cons
     boost::uint32_t endingBlockNumber = (currentPointIndex + data.getCapacity()) / m_cache_filter.getCacheBlockSize();
 
     boost::uint32_t numPointsCopied(0);
+    
+    if (m_mapped_buffer != &data)
+    {
+        m_dimension_maps.clear();
+        m_mapped_buffer = &data;
+        m_cache_filter.log()->get(logDEBUG2) << "Wiping dimension map because mapped buffer != current buffer!" << std::endl;     
+    }
+    assert (m_mapped_buffer == &data);
+
     for (ConstIterator i = blocks.begin(); i != blocks.end(); ++i)
     {
         PointBuffer const* b = *i;
-        // if (!m_dimension_map)
-            m_dimension_map = PointBuffer::mapDimensions(*b, data);
+        DimensionMap const* dim_map(0);
+        
+        typedef std::map<PointBuffer const*, DimensionMap const*>::iterator MapIterator;
+        MapIterator it = m_dimension_maps.find(b);
+        if (it == m_dimension_maps.end())
+        {
+            DimensionMap* d = PointBuffer::mapDimensions(*b, *m_mapped_buffer);
+            std::pair<PointBuffer const*, DimensionMap const*> p(b, d);
+            m_dimension_maps.insert(p);
+            dim_map = d;
+            // m_cache_filter.log()->get(logDEBUG2) << "Inserting dimension map entry for block" << std::endl;                
+        } else
+        {
+            dim_map = it->second;
+        }
+
             
     
         boost::int32_t blockStartingPosition = (blockNumber) * m_cache_filter.getCacheBlockSize();
@@ -274,7 +297,7 @@ boost::uint32_t IteratorBase::copyCachedBlocks(     std::vector<PointBuffer cons
         }                
 
         PointBuffer::copyLikeDimensions(*b, data, 
-                                        *m_dimension_map, 
+                                        *dim_map, 
                                         blockBufferStartingPosition, 
                                         userBufferStartingPosition, 
                                         blockHowMany);
