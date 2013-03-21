@@ -190,7 +190,7 @@ public:
     static Options getDefaultOptions();
     static std::vector<Dimension> getDefaultDimensions();
 
-    void Chip();
+    void Chip(PointBuffer& buffer);
     std::vector<chipper::Block>::size_type GetBlockCount() const
     {
         return m_blocks.size();
@@ -215,7 +215,7 @@ public:
     pdal::StageRandomIterator* createRandomIterator(PointBuffer& buffer) const;
 
 private:
-    void Load(chipper::RefList& xvec, chipper::RefList& yvec, chipper::RefList& spare);
+    void Load(PointBuffer& buffer, chipper::RefList& xvec, chipper::RefList& yvec, chipper::RefList& spare);
     void Partition(boost::uint32_t size);
     void Split(chipper::RefList& xvec, chipper::RefList& yvec, chipper::RefList& spare);
     void DecideSplit(chipper::RefList& v1, chipper::RefList& v2, chipper::RefList& spare,

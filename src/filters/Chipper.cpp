@@ -168,14 +168,14 @@ Options Chipper::getDefaultOptions()
 }
 
 
-void Chipper::Chip()
+void Chipper::Chip(PointBuffer& buffer)
 {
-    Load(m_xvec, m_yvec, m_spare);
+    Load(buffer, m_xvec, m_yvec, m_spare);
     Partition(m_xvec.size());
     DecideSplit(m_xvec, m_yvec, m_spare, 0, m_partitions.size() - 1);
 }
 
-void Chipper::Load(RefList& xvec, RefList& yvec, RefList& spare)
+void Chipper::Load(PointBuffer& original_buffer, RefList& xvec, RefList& yvec, RefList& spare)
 {
     PtRef ref;
     boost::uint32_t idx;
@@ -196,31 +196,22 @@ void Chipper::Load(RefList& xvec, RefList& yvec, RefList& spare)
     Dimension const& dimX = schema.getDimension("X");
     Dimension const& dimY = schema.getDimension("Y");
 
-    boost::uint32_t num_points_loaded = 0;
+    boost::uint32_t num_points_loaded(0);
     boost::uint32_t num_points_to_load = count32;
 
-    PointBuffer buffer(schema, m_threshold);
+    boost::scoped_ptr<StageSequentialIterator> iter(getPrevStage().createSequentialIterator(original_buffer));
 
-    boost::scoped_ptr<StageSequentialIterator> iter(getPrevStage().createSequentialIterator(buffer));
-
-
-    boost::uint32_t counter = 0;
-    while (num_points_loaded < num_points_to_load)
+    boost::uint32_t counter(0);
+    while (!iter->atEnd())
     {
-        boost::uint64_t num_remaining = num_points_to_load - num_points_loaded;
-        boost::uint32_t num_to_read = static_cast<boost::uint32_t>(std::min<boost::uint64_t>(num_remaining, m_threshold));
+        boost::uint32_t numRead =  iter->read(original_buffer);
+        
 
-
-
-        boost::uint32_t num_read =  iter->read(buffer);
-
-        assert(num_read <= num_to_read);
-
-        for (boost::uint32_t j = 0; j < num_read; j++)
+        for (boost::uint32_t j = 0; j < numRead; j++)
         {
 
-            boost::int32_t xi = buffer.getField<boost::int32_t>(dimX, j);
-            boost::int32_t yi = buffer.getField<boost::int32_t>(dimY, j);
+            boost::int32_t xi = original_buffer.getField<boost::int32_t>(dimX, j);
+            boost::int32_t yi = original_buffer.getField<boost::int32_t>(dimY, j);
 
             double x = dimX.applyScaling(xi);
             double y = dimY.applyScaling(yi);
@@ -235,8 +226,7 @@ void Chipper::Load(RefList& xvec, RefList& yvec, RefList& spare)
 
         }
 
-        num_points_loaded += num_read;
-
+        num_points_loaded += numRead;
 
         if (iter->atEnd())
         {
@@ -436,7 +426,10 @@ void Chipper::Emit(RefList& wide, boost::uint32_t widemin, boost::uint32_t widem
     {
 
         // minx, miny, maxx, maxy
-        pdal::Bounds<double> bnd(wide[widemin].m_pos, narrow[narrowmin].m_pos, wide[widemax].m_pos,  narrow[narrowmax].m_pos);
+        pdal::Bounds<double> bnd(   wide[widemin].m_pos, 
+                                    narrow[narrowmin].m_pos, 
+                                    wide[widemax].m_pos,  
+                                    narrow[narrowmax].m_pos);
         b.SetBounds(bnd);
 
         // b.m_xmin = wide[widemin].m_pos;
@@ -446,7 +439,10 @@ void Chipper::Emit(RefList& wide, boost::uint32_t widemin, boost::uint32_t widem
     }
     else
     {
-        pdal::Bounds<double> bnd(narrow[narrowmin].m_pos, wide[widemin].m_pos, narrow[narrowmax].m_pos, wide[widemax].m_pos);
+        pdal::Bounds<double> bnd(   narrow[narrowmin].m_pos, 
+                                    wide[widemin].m_pos, 
+                                    narrow[narrowmax].m_pos, 
+                                    wide[widemax].m_pos);
         b.SetBounds(bnd);
 
         // b.m_xmin = narrow[narrowmin].m_pos;
@@ -462,7 +458,7 @@ void Chipper::Emit(RefList& wide, boost::uint32_t widemin, boost::uint32_t widem
 
 pdal::StageRandomIterator* Chipper::createRandomIterator(PointBuffer&) const
 {
-    return 0;
+    throw iterator_not_found("Chipper random iterator not implemented");
 }
 
 pdal::StageSequentialIterator* Chipper::createSequentialIterator(PointBuffer& buffer) const
@@ -518,8 +514,7 @@ Chipper::Chipper(pdal::filters::Chipper const& filter, PointBuffer& buffer)
     , m_random_iterator(0)
 
 {
-    // buffer.resize(m_chipper.getThreshold(), true);
-    const_cast<pdal::filters::Chipper&>(m_chipper).Chip();
+    const_cast<pdal::filters::Chipper&>(m_chipper).Chip(buffer);
     return;
 }
 

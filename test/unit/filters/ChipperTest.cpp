@@ -64,10 +64,10 @@ BOOST_AUTO_TEST_CASE(test_construction)
 
         pdal::filters::Chipper chipper(reader, options);
         chipper.initialize();
-
+        PointBuffer buffer(chipper.getSchema(), 15);
         const boost::uint64_t num_points = reader.getNumPoints();
 
-        chipper.Chip();
+        chipper.Chip(buffer);
         boost::uint32_t num_blocks = chipper.GetBlockCount();
         BOOST_CHECK(num_points == 1065);
         BOOST_CHECK(num_blocks==71);
@@ -91,7 +91,7 @@ BOOST_AUTO_TEST_CASE(test_construction)
         BOOST_CHECK(ids.size() == 15);
         BOOST_CHECK(ids[14] == 1050);
 
-        PointBuffer buffer(chipper.getSchema(), 15);
+
         PointBuffer one_point(chipper.getSchema(), 1);
         pdal::Schema const& schema = buffer.getSchema();
         Dimension const& dimPoint = schema.getDimension("PointID");
