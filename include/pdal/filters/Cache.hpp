@@ -74,7 +74,7 @@ public:
     // this is const only because the m_cache itself is mutable
     void addToCache(boost::uint64_t pointIndex, const PointBuffer& data) const;
 
-    std::vector<PointBuffer const*> lookup(boost::uint64_t pointPosition, boost::uint32_t count) const;
+    void lookup(boost::uint64_t pointPosition, boost::uint32_t count) const;
     bool isCached(boost::uint64_t pointPosition, boost::uint32_t count) const;
     // clear cache (but leave cache params unchanged)
     void resetCache();
@@ -116,6 +116,7 @@ public:
     boost::uint32_t calculateNumberOfBlocks(boost::uint32_t CacheBlockSize, 
                                             boost::uint64_t totalNumberOfPoints) const;
     
+    inline std::vector<PointBuffer const*> const& getCachedBlocks() const { return m_blocks; }
 
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
     pdal::StageRandomIterator* createRandomIterator(PointBuffer& buffer) const;
@@ -129,6 +130,7 @@ private:
     // these is mutable to allow const-ness for updating stats
     // BUG: need to make thread-safe
     mutable PointBufferCache* m_cache;
+    mutable std::vector<PointBuffer const*> m_blocks;
 
     boost::uint32_t m_maxCacheBlocks;
     boost::uint32_t m_cacheBlockSize;
