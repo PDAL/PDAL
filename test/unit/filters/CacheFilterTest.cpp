@@ -160,11 +160,10 @@ BOOST_AUTO_TEST_CASE(CacheFilterTest_test_use_counts)
 
     iter1->read(dataBig);
     BOOST_CHECK_EQUAL(dataBig.getField<boost::uint64_t>(dataBig.getSchema().getDimension("Time"), 0), 1024);
-    BOOST_CHECK_EQUAL(cache.getNumPointsCached(), buffer_size*2);
+    BOOST_CHECK_EQUAL(cache.getNumPointsCached(), buffer_size); // Our cache is only 1x1024 because that's what iterator was created with
     BOOST_CHECK_EQUAL(cache.getNumPointsRequested(), buffer_size*2);
     BOOST_CHECK_EQUAL(cache.getNumPointsRead(), buffer_size*2);
     
-    BOOST_CHECK_EQUAL(cache.getNumPointsCached(), buffer_size* 2);
     
     StageSequentialIterator* iter2 = cache.createSequentialIterator(dataSmall);
 
