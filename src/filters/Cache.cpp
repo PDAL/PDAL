@@ -475,7 +475,7 @@ boost::uint32_t Cache::readBufferImpl(PointBuffer& data)
 
     // Not in the cache, so do a normal read :-(
     const boost::uint32_t numRead = getPrevIterator().read(data);
-    m_cache_filter.updateStats(numRead, numRead);
+    m_cache_filter.updateStats(numRead, data.getCapacity());
 
     return numRead;
 }
