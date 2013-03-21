@@ -475,7 +475,8 @@ boost::uint32_t Crop::readBufferImpl(PointBuffer& data)
     boost::int64_t numPointsNeeded = static_cast<boost::int64_t>(data.getCapacity());
 
     PointBuffer outputData(data.getSchema(), originalCapacity);
-    PointBuffer tmpData(outputData);
+    PointBuffer tmpData(data.getSchema(), originalCapacity);
+    // PointBuffer tmpData(outputData);
 
     m_cropFilter.log()->get(logDEBUG2) << "Fetching for block of size: " << numPointsNeeded << std::endl;
     

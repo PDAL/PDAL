@@ -45,32 +45,29 @@ namespace pdal
 
 PointBuffer::PointBuffer(const Schema& schema, boost::uint32_t capacity)
     : m_schema(schema)
-    , m_data(new boost::uint8_t[static_cast<boost::uint64_t>(schema.getByteSize()) * static_cast<boost::uint64_t>(capacity)])
     , m_numPoints(0)
     , m_capacity(capacity)
-    , m_arraySize(static_cast<boost::uint64_t>(schema.getByteSize()) * static_cast<boost::uint64_t>(capacity))
     , m_bounds(Bounds<double>::getDefaultSpatialExtent())
     , m_byteSize(schema.getByteSize())
     , m_metadata("pointbuffer")
-{
 
+{
+    boost::uint64_t size = static_cast<boost::uint64_t>(schema.getByteSize()) * static_cast<boost::uint64_t>(capacity);
+    m_data.reserve(size);
+    m_data.resize(size);
     return;
 }
 
 PointBuffer::PointBuffer(PointBuffer const& other)
     : m_schema(other.getSchema())
-    , m_data(new boost::uint8_t[other.m_arraySize])
+    , m_data(other.m_data)
     , m_numPoints(other.m_numPoints)
     , m_capacity(other.m_capacity)
-    , m_arraySize(other.m_arraySize)
     , m_bounds(other.m_bounds)
     , m_byteSize(other.m_byteSize)
     , m_metadata(other.m_metadata)
 {
-    if (other.m_data)
-    {
-        memcpy(m_data.get(), other.m_data.get(), other.m_arraySize);
-    }
+
 
 }
 
@@ -83,13 +80,7 @@ PointBuffer& PointBuffer::operator=(PointBuffer const& rhs)
         m_capacity = rhs.getCapacity();
         m_bounds = rhs.getSpatialBounds();
         m_byteSize = rhs.m_byteSize;
-        m_arraySize = rhs.m_arraySize;
-        boost::uint64_t array_size = static_cast<boost::uint64_t>(m_byteSize) * static_cast<boost::uint64_t>(m_capacity);
-        boost::uint8_t* new_array = new boost::uint8_t[ array_size ]();
-        m_data.reset(new_array);
-        if (rhs.m_data.get())
-            memcpy(m_data.get(), rhs.m_data.get(), array_size);
-
+        m_data = rhs.m_data;
         m_metadata = rhs.m_metadata;
     }
     return *this;
@@ -106,11 +97,9 @@ void PointBuffer::reset(Schema const& new_schema)
     if (m_byteSize != old_size )
     {
         boost::uint64_t new_array_size = static_cast<boost::uint64_t>(new_size) * static_cast<boost::uint64_t>(m_capacity); 
-        if (new_array_size > m_arraySize)
+        if (new_array_size > m_data.size())
         {
-            boost::uint8_t* new_array = new boost::uint8_t[ new_array_size ]();
-            m_data.reset(new_array);
-            m_arraySize = new_array_size;
+            m_data.resize(new_array_size);
         }
     }
 
@@ -124,11 +113,9 @@ void PointBuffer::resize(boost::uint32_t const& capacity, bool bExact)
     {
         m_capacity = capacity;
         boost::uint64_t new_array_size = static_cast<boost::uint64_t>(m_schema.getByteSize()) * static_cast<boost::uint64_t>(m_capacity); 
-        if (new_array_size > m_arraySize || bExact)
+        if (new_array_size > m_data.size() || bExact)
         {
-            boost::uint8_t* new_array = new boost::uint8_t[ new_array_size ]();
-            m_data.reset(new_array);
-            m_arraySize = new_array_size;
+            m_data.resize(new_array_size);
         }
 
     }
@@ -149,7 +136,7 @@ void PointBuffer::setSpatialBounds(const Bounds<double>& bounds)
 void PointBuffer::setData(boost::uint8_t* data, boost::uint32_t pointIndex)
 {
     boost::uint64_t position = static_cast<boost::uint64_t>(m_byteSize) * static_cast<boost::uint64_t>(pointIndex);
-    memcpy(m_data.get() + position, data, m_byteSize);
+    memcpy(&(m_data.front()) + position, data, m_byteSize);
 }
 
 void PointBuffer::setDataStride(boost::uint8_t* data,
@@ -157,7 +144,7 @@ void PointBuffer::setDataStride(boost::uint8_t* data,
                                 boost::uint32_t byteCount)
 {
     boost::uint64_t position = static_cast<boost::uint64_t>(m_byteSize) * static_cast<boost::uint64_t>(pointIndex);
-    memcpy(m_data.get() + position, data, byteCount);
+    memcpy(&(m_data.front()) + position, data, byteCount);
 }
 
 
@@ -165,7 +152,7 @@ void PointBuffer::getData(boost::uint8_t** data, boost::uint64_t* array_size) co
 {
     *array_size = m_byteSize;
     *data = (boost::uint8_t*) malloc(*array_size);
-    memcpy(*data, m_data.get(), *array_size);
+    memcpy(*data, &(m_data.front()), *array_size);
 }
 
 
