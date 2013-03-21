@@ -19,7 +19,7 @@ if ! [ -z "$1" ]; then
 fi
 
 cmake   -G "$CONFIG"  \
-        -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+        -DCMAKE_BUILD_TYPE=Debug \
         -DCMAKE_INSTALL_PREFIX=/Users/hobu \
         -DPDAL_EMBED_BOOST=${EMBED} \
         -DWITH_GDAL=ON \
