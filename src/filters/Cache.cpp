@@ -194,6 +194,44 @@ void Cache::getCacheStats(boost::uint64_t& numCacheLookupMisses,
                            numCacheInsertHits);
 }
 
+Metadata Cache::toMetadata() const
+{
+    Metadata metadata;
+    
+
+    metadata.addMetadata<boost::uint32_t>("max_cache_blocks",
+                                getMaxCacheBlocks(),
+                                "Number of cache entries");
+    metadata.addMetadata<boost::uint32_t>("cache_block_size",
+                                getCacheBlockSize(),
+                                "Cache entry size");
+    
+    boost::uint64_t lookup_misses(0);
+    boost::uint64_t lookup_hits(0);
+    boost::uint64_t insert_misses(0);
+    boost::uint64_t insert_hits(0);
+                                
+    getCacheStats(lookup_misses, lookup_hits, insert_misses, insert_hits);
+    metadata.addMetadata<boost::uint64_t>("lookup_misses",
+                                lookup_misses,
+                                "Cache lookup misses");
+
+    metadata.addMetadata<boost::uint64_t>("lookup_hits",
+                                lookup_hits,
+                                "Cache lookup hits");
+
+    metadata.addMetadata<boost::uint64_t>("insert_misses",
+                                insert_misses,
+                                "Cache insert misses");
+
+    metadata.addMetadata<boost::uint64_t>("insert_hits",
+                                insert_hits,
+                                "Cache insert hits");
+                                
+    return metadata;
+}
+
+
 
 void Cache::resetCache(boost::uint32_t maxCacheBlocks, boost::uint32_t cacheBlockSize)
 {
@@ -425,6 +463,14 @@ bool Cache::atEndImpl() const
     return getPrevIterator().atEnd();
 }
 
+void Cache::readBufferEndImpl(PointBuffer& buffer)
+{
+    pdal::Metadata& metadata = buffer.getMetadataRef();
+    pdal::Metadata stats = m_cache_filter.toMetadata();
+    stats.setName(m_cache_filter.getName());
+    metadata.setMetadata(stats);
+    
+}
 
 boost::uint32_t Cache::readBufferImpl(PointBuffer& data)
 {

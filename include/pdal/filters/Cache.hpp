@@ -104,7 +104,7 @@ public:
                        boost::uint64_t& numCacheLookupHits,
                        boost::uint64_t& numCacheInsertMisses,
                        boost::uint64_t& numCacheInsertHits) const;
-
+    Metadata toMetadata() const;
     bool supportsIterator(StageIteratorType t) const
     {
         if (t == StageIterator_Sequential) return true;
@@ -175,7 +175,8 @@ class PDAL_DLL Cache : public pdal::FilterSequentialIterator, public cache::Iter
 {
 public:
     Cache(const pdal::filters::Cache& filter, PointBuffer& buffer);
-
+protected:
+    virtual void readBufferEndImpl(PointBuffer&);
 private:
     boost::uint64_t skipImpl(boost::uint64_t);
     boost::uint32_t readBufferImpl(PointBuffer&);
