@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Pipeline version="1.0">
+    <Writer type="drivers.text.writer">
+        <Option name="filename">
+            written-from-postgres_pcpatch.csv
+        </Option>
+    <!--<Writer type="drivers.las.writer">
+        <Option name="filename">
+            written-from-pg.las
+        </Option>-->
+        <Reader type="drivers.soci.reader">
+            <Option name="query">
+                select
+                    id as cloud_id,
+                    pointcloud_formats.schema::text,
+                    pointcloud_formats.srid
+                from sthelens_block, pointcloud_formats
+                where pointcloud_formats.pcid = 1
+            </Option>
+            <Option name="type">
+                postgresql
+            </Option>
+            <Option name="xml_schema_dump">
+                pcpatch-schema.xml
+            </Option>
+            <Option name="connection">
+                host='localhost' dbname='lidar' user='mweisman'
+            </Option>
+            <Option name="debug">
+                true
+            </Option>
+            <Option name="verbose">
+                3
+            </Option>
+            <Option name="block_table">
+                sthelens_block
+            </Option>
+            <Option name="pc_column">
+                pa
+            </Option>
+        </Reader>
+    </Writer>
+</Pipeline>

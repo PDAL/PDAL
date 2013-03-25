@@ -89,6 +89,7 @@ namespace soci
     enum QueryType
     {
         QUERY_CLOUD = 0,
+        QUERY_PC = 128,
         QUERY_BLOCKS_PLUS_CLOUD_VIEW,
         QUERY_UNKNOWN = 512
     };

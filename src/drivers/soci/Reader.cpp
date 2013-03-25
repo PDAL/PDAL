@@ -77,7 +77,7 @@ boost::uint64_t Reader::getNumPoints() const
 {
     if (m_cachedPointCount != 0) return m_cachedPointCount;
 
-    std::string const& query = getOptions().getValueOrThrow<std::string>("query");      
+    std::string const& query = getOptions().getValueOrThrow<std::string>("query");
     if (m_query_type == QUERY_CLOUD)
     {
         std::ostringstream block_query;
@@ -134,7 +134,25 @@ boost::uint64_t Reader::getNumPoints() const
         
         m_cachedPointCount = static_cast<boost::uint64_t>(count);     
         return m_cachedPointCount;
-    }    
+    }
+    else if (m_query_type == QUERY_PC)
+    {
+        std::ostringstream query_oss;
+        query_oss << "SELECT sum(pc_numpoints("
+        << getOptions().getValueOrDefault<std::string>("pc_column", "pa")
+        << ")) FROM " << getOptions().getValueOrThrow<std::string>("block_table");
+        
+        boost::int64_t count;
+        *m_session << query_oss.str(), ::soci::into(count);
+        
+        if (count < 0)
+        {
+            throw pdal_error("getNumPoints returned a count < 0!");
+        }
+        
+        m_cachedPointCount = static_cast<boost::uint64_t>(count);
+        return m_cachedPointCount;
+    }
     return m_cachedPointCount;
 }
 
@@ -208,11 +226,17 @@ Options Reader::getDefaultOptions()
                     "Block capacity");
 
     Option xml_schema_dump("xml_schema_dump", std::string(""), "Filename to dump the XML schema to.");
+    
+    Option block_table("block_table", std::string(""), "Database table to read from");
+    
+    Option pc_column("pc_column", std::string(""), "Column to read pointclouds from");
 
     options.add(connection);
     options.add(query);
     options.add(capacity);
     options.add(xml_schema_dump);
+    options.add(block_table);
+    options.add(pc_column);
 
     return options;
 }
@@ -228,6 +252,8 @@ QueryType Reader::describeQueryType(std::string const& query) const
     typedef std::pair<std::string, bool> SB;
     std::map<std::string, bool> block_fields;
     std::map<std::string, bool> cloud_fields;
+    std::map<std::string, bool> pc_fields;
+    
     // 
     // // We must have all of these field names present to be considered block
     // // data.
@@ -268,6 +294,12 @@ QueryType Reader::describeQueryType(std::string const& query) const
         cloud_fields.insert(SB("SRID", false));
     }
     
+    if (m_database_type == DATABASE_POSTGRESQL)
+    {
+        pc_fields.insert(SB("PA", false));
+        pc_fields.insert(SB("TABLE", false));
+    }
+    
     ::soci::row r;
     *m_session << query, ::soci::into(r);
     
@@ -286,7 +318,11 @@ QueryType Reader::describeQueryType(std::string const& query) const
         {
             c->second = true;
         }        
-        
+        std::map<std::string, bool>::iterator p = pc_fields.find(name);
+        if (p != pc_fields.end())
+        {
+            p->second = true;
+        }
     }
     
     bool bHasBlockFields(false);
@@ -311,6 +347,17 @@ QueryType Reader::describeQueryType(std::string const& query) const
         }
         bHasCloudFields = true;
     }
+    
+    bool bHasPCFields(false);
+    for (q = pc_fields.begin(); q != pc_fields.end(); ++q)
+    {
+        if (q->second == false)
+        {
+            bHasPCFields = false;
+            break;
+        }
+        bHasPCFields = true;
+    }
 
     if (bHasBlockFields && bHasCloudFields)
     {
@@ -323,8 +370,15 @@ QueryType Reader::describeQueryType(std::string const& query) const
         log()->get(logDEBUG) << "Query type is QUERY_CLOUD" << std::endl;
         return QUERY_CLOUD;
     }
+    
+    if (bHasPCFields)
+    {
+        log()->get(logDEBUG) << "Query type is PC_CLOUD" << std::endl;
+        return QUERY_PC;
+    }
 
-    return QUERY_UNKNOWN;
+//    return QUERY_UNKNOWN;
+    return QUERY_PC;
 
 }
 
@@ -434,16 +488,15 @@ IteratorBase::IteratorBase(const pdal::drivers::soci::Reader& reader)
 }
 
 ::soci::statement IteratorBase::getNextCloud(   std::string const& cloud_table_name, 
-                                                boost::int32_t& cloud_id, 
+                                                boost::int32_t& cloud_id,
                                                 ::soci::row& r)
 {
 
     std::ostringstream select_blocks;
 
     select_blocks
-            << "select T.cloud_id, T.block_id, T.extent::box3d::text, T.num_points, T.points from "
-            << cloud_table_name << " T WHERE T.cloud_id = "
-            << cloud_id;
+            << "select id, PC_Uncompress(pa)::text as points, PC_NumPoints(pa) as num_points from "
+            << "pcblocks " << "where id = " << cloud_id;
 
     ::soci::statement blocks = (m_session->prepare << select_blocks.str(), ::soci::into(r));
     blocks.execute();
@@ -470,7 +523,15 @@ void IteratorBase::readBlob(::soci::row& block,
     std::stringstream hex_data;
     hex_data << block.get<std::string>("points");
     
-    std::size_t trim = 2;
+    std::size_t trim;
+    if (getReader().getQueryType() == QUERY_PC)
+    {
+        trim = 26;
+    } else
+    {
+        trim = 2;
+    }
+    
     std::string trimmed = hex_data.str().substr(trim, hex_data.str().size()-trim);
     std::vector<boost::uint8_t> binary_data = Utils::hex_string_to_binary(trimmed);
     
@@ -488,9 +549,10 @@ void IteratorBase::readBlob(::soci::row& block,
         throw soci_driver_error(oss.str());
     }
     boost::uint32_t howMuchToRead = howMany * oracle_schema.getByteSize();
+//    boost::uint32_t howMuchToRead = block.get<int>("num_points") * oracle_schema.getByteSize();
     m_active_buffer->setDataStride(data, 0, howMuchToRead);
 
-    m_active_buffer->setNumPoints(howMany);    
+    m_active_buffer->setNumPoints(howMany);//block.get<int>("num_points"));
 }
 
 void IteratorBase::fillUserBuffer(PointBuffer& user_buffer)
@@ -503,6 +565,7 @@ void IteratorBase::fillUserBuffer(PointBuffer& user_buffer)
     if (numUserSpace < 0)
         throw pdal_error("We ran out of space!");
 
+    boost::int32_t num_points = m_active_buffer->getNumPoints();
     boost::int32_t numOraclePoints = m_active_buffer->getNumPoints() - m_buffer_position;
     
     schema::index_by_index::size_type i(0);
@@ -596,6 +659,10 @@ boost::uint32_t IteratorBase::myReadBuffer(PointBuffer& data)
 
         return myReadBlocks(data, blocks, block);
     }
+    if (getReader().getQueryType() == QUERY_PC)
+    {
+        return myPCClouds(data);
+    }
 
     return 0;
 }
@@ -643,6 +710,57 @@ boost::uint32_t IteratorBase::myReadClouds(PointBuffer& user_buffer)
 
     return numRead;
 }
+    
+boost::uint32_t IteratorBase::myPCClouds(PointBuffer& user_buffer)
+{
+    boost::uint32_t numRead(0);
+    
+    
+    ::soci::row cloud;
+    std::string query = getReader().getOptions().getValueOrThrow<std::string>("query");
+    ::soci::statement clouds = (m_session->prepare << query, ::soci::into(cloud));
+    clouds.execute();
+    bool bReadCloud = clouds.fetch();
+    
+    if (bReadCloud)
+        getReader().log()->get(logDEBUG2) << "Fetched buffer with cloud id: " << cloud.get<int>("cloud_id") << " for myReadClouds" << std::endl;
+    else
+        getReader().log()->get(logDEBUG) << "unable to fetch initial cloud!" << std::endl;
+    while (bReadCloud)
+    {
+        
+        // std::string blocks_query = fetchBlocks(cloud);
+        std::string blocks_query("SELECT SOMETHING");
+        std::string const& block_table = getReader().getOptions().getValueOrThrow<std::string>("block_table");
+        boost::int32_t cloud_id = cloud.get<int>("cloud_id");
+        std::string const& schema = cloud.get<std::string>("schema");
+        
+        m_active_buffer = fetchPointBuffer(cloud_id, schema);
+        
+        ::soci::row block;
+        ::soci::statement blocks = getNextCloud(block_table, cloud_id, block);
+
+        boost::uint32_t numReadThisCloud = myReadBlocks(user_buffer, blocks, block);
+        if (getReader().getQueryType() == QUERY_PC)
+        {
+            numRead = numRead + static_cast<boost::uint32_t>(block.get<int>("num_points"));
+        } else
+        {
+            numRead = numRead + numReadThisCloud;
+        }
+        
+        
+        getReader().log()->get(logDEBUG2) << "Read " << numReadThisCloud << " points from myReadBlocks" << std::endl;
+        
+        bReadCloud = clouds.fetch();
+        if (!bReadCloud && numReadThisCloud == 0)
+        {
+            m_at_end = true;
+            break;
+        }
+    }
+    return numRead;
+}
 
 BufferPtr IteratorBase::fetchPointBuffer(   boost::int32_t const& cloud_id,
                                             std::string const& schema_xml)
@@ -675,10 +793,10 @@ boost::uint32_t IteratorBase::myReadBlocks(PointBuffer& user_buffer, ::soci::sta
     
     // user_buffer.setNumPoints(0);
 
-    if (!m_active_buffer) 
+    if (!m_active_buffer)
     {
-        m_active_buffer = fetchPointBuffer(block.get<int>("cloud_id"), block.get<std::string>("schema"));
-        m_active_cloud_id = block.get<int>("cloud_id");
+        m_active_buffer = fetchPointBuffer(block.get<int>("id"), block.get<std::string>("schema"));
+        m_active_cloud_id = block.get<int>("id");
     }
     // 
     // This shouldn't ever happen
