@@ -180,6 +180,9 @@ Schema Scaling::alterSchema(Schema const& input_schema)
 
             log()->get(logDEBUG2)  << "Rescaling dimension " << from_dimension->getName()
                                                    << " [" << from_dimension->getInterpretation() << "/" << from_dimension->getByteSize() << "]"
+                                                   << " from scale: " << from_dimension->getNumericScale()
+                                                   << " offset: " << from_dimension->getNumericOffset()
+
                                                    << " to scale: " << to_dimension.getNumericScale()
                                                    << " offset: " << to_dimension.getNumericOffset()
                                                    << " datatype: " << to_dimension.getInterpretation() << "/" << to_dimension.getByteSize()
