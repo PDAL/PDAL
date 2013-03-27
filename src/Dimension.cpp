@@ -368,9 +368,9 @@ std::ostream& operator<<(std::ostream& os, pdal::Dimension const& d)
     os << quoted_name.str() << pad.str() <<" -- "<< " size: " << tree.get<boost::uint32_t>("bytesize");
 
     double scale = tree.get<double>("scale");
-    boost::uint32_t precision = Utils::getStreamPrecision(scale);
+    // boost::uint32_t precision = Utils::getStreamPrecision(scale);
     os.setf(std::ios_base::fixed, std::ios_base::floatfield);
-    os.precision(precision);
+    os.precision(14);
     os << " scale: " << scale;
 
     double offset = tree.get<double>("offset");
