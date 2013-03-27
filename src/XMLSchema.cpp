@@ -734,7 +734,7 @@ void Writer::writeSchema(TextWriterPtr writer)
         {
             std::ostringstream out;
             out.setf(std::ios_base::fixed, std::ios_base::floatfield);
-            out.precision(Utils::getStreamPrecision(scale));
+            out.precision(14);
             out << scale;
             xmlTextWriterWriteElementNS(w, BAD_CAST "pc", BAD_CAST "scale", NULL, BAD_CAST out.str().c_str());
 
