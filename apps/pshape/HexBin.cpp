@@ -173,7 +173,7 @@ void HexBin::readBufferEndImpl(PointBuffer&)
         m_grid->addPoint(m_samples[i]);
     }
 
-    m_grid->drawHexagons();
+//    m_grid->drawHexagons();
 //    grid.dumpInfo();
     m_grid->findShapes();
     

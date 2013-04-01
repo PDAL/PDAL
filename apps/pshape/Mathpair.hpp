@@ -30,6 +30,12 @@ public:
         return *this;
     }
 
+    friend Mathpair operator - (Mathpair p1, const Mathpair& p2)
+    {
+        p1 -= p2;
+        return p1;
+    }
+
     friend Mathpair operator + (Mathpair p1, const Mathpair& p2)
     {
         p1 += p2;

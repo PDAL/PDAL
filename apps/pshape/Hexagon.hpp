@@ -52,6 +52,9 @@ public:
     int count() const
         { return m_count; } 
 
+    void setCount(int count)
+        { m_count = count; }
+
     void setDenseNeighbor(int dir)
         { m_dense_neighbors |= (1 << dir); }
 
