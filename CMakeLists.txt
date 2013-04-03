@@ -553,6 +553,8 @@ configure_file(
   "${PROJECT_SOURCE_DIR}/pdal_defines.h.in"
   "${PDAL_INCLUDE_DIR}/pdal/pdal_defines.h")
 
+include_directories(${PROJECT_BINARY_DIR}/include)
+
 #------------------------------------------------------------------------------
 # subdirectory controls
 #------------------------------------------------------------------------------
