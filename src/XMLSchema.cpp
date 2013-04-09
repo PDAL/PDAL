@@ -32,6 +32,7 @@
 ****************************************************************************/
 
 #include <pdal/XMLSchema.hpp>
+#include <pdal/PipelineWriter.hpp>
 
 #include <sstream>
 #include <iostream>
@@ -54,7 +55,8 @@ struct XMLDocDeleter
     template <typename T>
     void operator()(T* ptr)
     {
-        ::xmlFreeDoc(ptr);
+        if (ptr)
+            ::xmlFreeDoc(ptr);
     }
 };
 
@@ -63,7 +65,8 @@ struct SchemaParserCtxDeleter
     template <typename T>
     void operator()(T* ptr)
     {
-        ::xmlSchemaFreeParserCtxt(ptr);
+        if (ptr)
+            ::xmlSchemaFreeParserCtxt(ptr);
     }
 };
 
@@ -72,7 +75,8 @@ struct SchemaDeleter
     template <typename T>
     void operator()(T* ptr)
     {
-        ::xmlSchemaFree(ptr);
+        if (ptr)
+            ::xmlSchemaFree(ptr);
     }
 };
 
@@ -81,7 +85,8 @@ struct SchemaValidCtxtDeleter
     template <typename T>
     void operator()(T* ptr)
     {
-        ::xmlSchemaFreeValidCtxt(ptr);
+        if (ptr)
+            ::xmlSchemaFreeValidCtxt(ptr);
     }
 };
 
@@ -90,7 +95,8 @@ struct WriterDeleter
     template <typename T>
     void operator()(T* ptr)
     {
-        ::xmlFreeTextWriter(ptr);
+        if (ptr)
+            ::xmlFreeTextWriter(ptr);
     }
 };
 
@@ -99,7 +105,8 @@ struct BufferDeleter
     template <typename T>
     void operator()(T* ptr)
     {
-        ::xmlBufferFree(ptr);
+        if (ptr)
+            ::xmlBufferFree(ptr);
     }
 };
 
@@ -108,7 +115,8 @@ struct xmlCharDeleter
     template <typename T>
     void operator()(T* ptr)
     {
-        ::xmlFree(ptr);
+        if (ptr)
+            ::xmlFree(ptr);
     }
 };
 
@@ -384,6 +392,63 @@ std::string Reader::remapOldNames(std::string const& input)
     return input;
 }
 
+pdal::Metadata Reader::LoadMetadata(xmlNode* startNode)
+{
+    
+    pdal::Metadata output;
+    
+    xmlNode* node = startNode;
+    
+    
+//     xmlChar* name = xmlGetProp(node, (const xmlChar*) "name");
+//     xmlChar* etype = xmlGetProp(node, (const xmlChar*) "type");
+// print_element_names(node);
+        // std::cout << "node name: " << (const char*)node->name << std::endl;   
+//         std::cout << "prop type: " << (const char*) etype << std::endl;   
+    
+    // pdal::Metadata m((const char*) node->name);
+    // if (boost::iequals((const char*)etype, "blank"))
+    // {
+    //     // blank denotes a new Metadata instance.
+    //     if (node->children)
+    //         output.addMetadata(LoadMetadata(node->children));
+    // }
+    
+        // 
+
+    while (node != NULL)
+    {
+
+        std::cout << "node name: " << (const char*)node->name << std::endl;   
+        
+        if (node->properties)
+        {
+            xmlChar* name = xmlGetProp(node, (const xmlChar *)"name");
+            xmlChar* etype = xmlGetProp(node, (const xmlChar *)"type");
+            std::cout << "property name: " << (const char*)name << std::endl;   
+            // std::cout << "proper type: " << (const char*)etype << std::endl;   
+
+        }
+        
+        // pdal::Metadata m((const char*) node->name);
+        // if (boost::iequals((const char*)etype.get(), "blank"))
+        // {
+        //     // blank denotes a new Metadata instance.
+        //     m.addMetadata(LoadMetadata(node));
+        // }
+            
+        
+        // output.addMetadata(m);
+
+        if (node->type == XML_ELEMENT_NODE)
+        {
+            node = node->children;
+        } else
+            node = node->next;
+    }
+    
+    return output;
+}
 
 void Reader::Load()
 {
@@ -398,16 +463,29 @@ void Reader::Load()
         throw schema_loading_error("First node of document was not named 'PointCloudSchema'");
 
     xmlNode* dimension = root->children;
-
+    
+    pdal::Metadata metadata;
 
     while (dimension != NULL)
     {
         // printf("node name: %s\n", (const char*)dimension->name);
+        // if (boost::equals((const char*)dimension->name, "metadata"))
+        // {
+        //     printf("metadata node name: %s\n", (const char*)dimension->name);
+        //     
+        //              
+        //     metadata.addMetadata(LoadMetadata(dimension));
+        //     dimension = dimension->next;
+        //     continue;
+        // }
+
         if (dimension->type != XML_ELEMENT_NODE || !boost::iequals((const char*)dimension->name, "dimension"))
         {
             dimension = dimension->next;
             continue;
         }
+
+
 
 
 
@@ -615,6 +693,7 @@ void Reader::Load()
 
 
 
+
 Writer::Writer(pdal::Schema const& schema)
     : m_schema(schema) {}
 
@@ -650,9 +729,11 @@ void Writer::write(TextWriterPtr writer)
     if (m_metadata.size())
     {
         xmlTextWriterStartElementNS(w, BAD_CAST "pc", BAD_CAST "metadata", NULL);
-                
+        
+        boost::property_tree::ptree output;
+        PipelineWriter::write_metadata_ptree(output, m_metadata);
         std::ostringstream oss;
-        boost::property_tree::xml_parser::write_xml(oss, m_metadata);
+        boost::property_tree::xml_parser::write_xml(oss, output);
         std::string xml = oss.str();
         
         // wipe off write_xml's xml declaration
