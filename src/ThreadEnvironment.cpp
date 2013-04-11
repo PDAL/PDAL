@@ -49,7 +49,9 @@ ThreadEnvironment::ThreadEnvironment(boost::thread::id id)
     boost::posix_time::ptime epoch(boost::gregorian::date(1970,1,1));
     boost::posix_time::ptime now = boost::posix_time::second_clock::local_time();
     boost::int64_t anumber = (now-epoch).ticks();
-    m_rng = new boost::random::mt19937(anumber);
+    
+    // The cast could nuke the RNG here if epoch > now
+    m_rng = new boost::random::mt19937(static_cast<boost::uint32_t>(anumber));
     
     return;
 }
