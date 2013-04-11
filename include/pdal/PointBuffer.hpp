@@ -373,9 +373,12 @@ inline void PointBuffer::setField(pdal::Dimension const& dim, boost::uint32_t po
     
     boost::uint64_t point_start_byte_position = static_cast<boost::uint64_t>(pointIndex) * static_cast<boost::uint64_t>(m_byteSize); 
     boost::uint64_t offset = point_start_byte_position + dim.getByteOffset();
-    boost::uint64_t array_size = static_cast<boost::uint64_t>(m_capacity) * static_cast<boost::uint64_t>(m_byteSize); 
 
+#ifdef DEBUG
+    boost::uint64_t array_size = static_cast<boost::uint64_t>(m_capacity) * static_cast<boost::uint64_t>(m_byteSize); 
     assert(offset + sizeof(T) <= array_size);
+#endif
+
     boost::uint8_t* p = (boost::uint8_t*)&(m_data.front()) + offset;
 
     if (sizeof(T) == dim.getByteSize())
