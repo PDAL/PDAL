@@ -51,6 +51,23 @@ namespace drivers
 namespace nitf
 {
 
+
+
+
+// this is a copy of the GDAL function, because the GDAL function isn't exported
+static char* myNITFGetField(char *pszTarget, const char *pszSource,
+                            int nStart, int nLength)
+{
+    memcpy(pszTarget, pszSource + nStart, nLength);
+    pszTarget[nLength] = '\0';
+
+    return pszTarget;
+}
+
+
+// --------------------------------------------------------------------------
+
+
 NitfFile::NitfFile(const std::string& filename)
     : m_filename(filename)
     , m_file(NULL)
@@ -276,7 +293,7 @@ void NitfFile::processTREs(int nTREBytes, const char *pszTREData, pdal::Metadata
 
     while (nTREBytes > 10)
     {
-        int nThisTRESize = atoi(NITFGetField(szTemp, pszTREData, 6, 5));
+        int nThisTRESize = atoi(myNITFGetField(szTemp, pszTREData, 6, 5));
         if (nThisTRESize < 0 || nThisTRESize > nTREBytes - 11)
         {
             break;
@@ -289,7 +306,14 @@ void NitfFile::processTREs(int nTREBytes, const char *pszTREData, pdal::Metadata
         const std::string value(pszTREData, nThisTRESize+1);
         Metadata m(parentkey+"."+key, value);
 
-        if (!boost::iequals(key, "DESDATA")) // LAS data stored in here
+        // const std::string value(pszTREData + 11);
+
+        //std::vector<boost::uint8_t> data(nThisTRESize);
+        //boost::uint8_t* p = (boost::uint8_t*)(pszTREData + 11);
+        //for (int i=0; i<nThisTRESize; i++) data[i] = p[i];
+        //ByteArray value(data);
+
+        if (!boost::iequals(key, "DESDATA"))
         {
             ms.addMetadata<std::string>(parentkey+"."+key, value);
         }

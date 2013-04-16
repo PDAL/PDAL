@@ -81,11 +81,11 @@ public:
 
     double minimum() const
     {
-        return boost::accumulators::min(m_summary);
+        return (boost::accumulators::min)(m_summary);
     }
     double maximum() const
     {
-        return boost::accumulators::max(m_summary);
+        return (boost::accumulators::max)(m_summary);
     }
     double average() const
     {

@@ -677,7 +677,7 @@ void Writer::CreatePCEntry(Schema const& buffer_schema)
 
 
     boost::uint32_t precision = getDefaultedOption<boost::uint32_t>("stream_output_precision");
-    boost::uint32_t capacity = getDefaultedOption<boost::uint32_t>("capacity");
+    boost::uint64_t capacity = getDefaultedOption<boost::uint64_t>("capacity");
     
     if (capacity == 0)
     {

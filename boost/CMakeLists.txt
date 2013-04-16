@@ -27,8 +27,6 @@ set(PDALBOOST_SOURCES
     ./libs/date_time/src/gregorian/gregorian_types.cpp
     ./libs/date_time/src/posix_time/posix_time_types.cpp
     ./libs/exception/src/clone_current_exception_non_intrusive.cpp
-    ./libs/filesystem
-    ./libs/filesystem/src/windows_file_codecvt.hpp
     ./libs/filesystem/src/path_traits.cpp
     ./libs/filesystem/src/unique_path.cpp
     ./libs/filesystem/src/codecvt_error_category.cpp
@@ -120,10 +118,11 @@ set(PDALBOOST_SOURCES
     ./libs/test/src/xml_report_formatter.cpp
 )
 if(WIN32)
-  list(APPEND 
+  list(APPEND PDALBOOST_SOURCES
        ./libs/thread/src/win32/thread.cpp
        ./libs/filesystem/src/windows_file_codecvt.hpp
        ./libs/filesystem/src/windows_file_codecvt.cpp
+       ./libs/filesystem/src/codecvt_error_category.cpp
        ./libs/thread/src/future.cpp
        ./libs/thread/src/win32/tss_dll.cpp
        ./libs/thread/src/win32/tss_pe.cpp)
