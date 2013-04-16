@@ -423,7 +423,7 @@ inline  T const& PointBuffer::getField(pdal::Dimension const& dim, boost::uint32
     assert(offset + sizeof(T) <= array_size );
 #endif
 
-    boost::uint8_t const* p = (boost::uint8_t*)&(m_data.front()) + offset;
+    boost::uint8_t const* p = (boost::uint8_t const*)&(m_data.front()) + offset;
     T const& output = *(T const*)(void const*)p;
     return output;
 }
