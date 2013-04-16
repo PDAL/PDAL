@@ -107,9 +107,8 @@ protected:
     Dimension const* m_dim_x;
     Dimension const* m_dim_y;
     
-    std::vector<Pshape::Point> m_samples;
-
 #ifdef PDAL_HAVE_HEXER
+    std::vector<Pshape::Point> m_samples;
     Pshape::HexGrid* m_grid;
 #endif
     
