@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <HexBin.hpp>
+#include <pdal/filters/HexBin.hpp>
 
 #include <boost/concept_check.hpp> // ignore_unused_variable_warning
 
@@ -72,33 +72,6 @@ void HexBin::initialize()
 Options HexBin::getDefaultOptions()
 {
     Options options;
-    // Option in_srs("in_srs", std::string(""),"Input SRS to use to override -- fetched from previous stage if not present");
-    // Option out_srs("out_srs", std::string(""), "Output SRS to reproject to");
-    // Option x("x_dim", std::string("X"), "Dimension name to use for 'X' data");
-    // Option y("y_dim", std::string("Y"), "Dimension name to use for 'Y' data");
-    // Option z("z_dim", std::string("Z"), "Dimension name to use for 'Z' data");
-    // Option x_scale("scale_x", 1.0f, "Scale for output X data in the case when 'X' dimension data are to be scaled.  Defaults to '1.0'.  If not set, the Dimensions's scale will be used");
-    // Option y_scale("scale_y", 1.0f, "Scale for output Y data in the case when 'Y' dimension data are to be scaled.  Defaults to '1.0'.  If not set, the Dimensions's scale will be used");
-    // Option z_scale("scale_z", 1.0f, "Scale for output Z data in the case when 'Z' dimension data are to be scaled.  Defaults to '1.0'.  If not set, the Dimensions's scale will be used");
-    // Option x_offset("offset_x", 0.0f, "Offset for output X data in the case when 'X' dimension data are to be scaled.  Defaults to '0.0'.  If not set, the Dimensions's scale will be used");
-    // Option y_offset("offset_y", 0.0f, "Offset for output Y data in the case when 'Y' dimension data are to be scaled.  Defaults to '0.0'.  If not set, the Dimensions's scale will be used");
-    // Option z_offset("offset_z", 0.0f, "Offset for output Z data in the case when 'Z' dimension data are to be scaled.  Defaults to '0.0'.  If not set, the Dimensions's scale will be used");
-    // Option ignore_old_dimensions("ignore_old_dimensions", true, "Mark old, unprojected dimensions as ignored");
-    // Option do_offset_z("do_offset_z", false, "Should we re-offset Z data");    
-    // options.add(in_srs);
-    // options.add(out_srs);
-    // options.add(x);
-    // options.add(y);
-    // options.add(z);
-    // options.add(x_scale);
-    // options.add(y_scale);
-    // options.add(z_scale);
-    // options.add(x_offset);
-    // options.add(y_offset);
-    // options.add(z_offset);
-    // options.add(ignore_old_dimensions);
-    // options.add(do_offset_z);
-
     return options;
 }
 
@@ -155,7 +128,10 @@ boost::uint32_t HexBin::readBufferImpl(PointBuffer& buffer)
         int32_t yi = buffer.getField<int32_t>(*m_dim_y, i);
         double x = m_dim_x->applyScaling<int32_t>(xi);
         double y = m_dim_y->applyScaling<int32_t>(yi);
+#ifdef PDAL_HAVE_HEXER
+
         m_samples.push_back(Pshape::Point(x,y));
+#endif
     }
         
     return numPoints;
@@ -167,16 +143,19 @@ void HexBin::readBufferEndImpl(PointBuffer&)
     // double hexsize = Pshape::computeHexSize(samples);
     double hexsize =5 ;
     int dense_limit = 10;
+
+#ifdef PDAL_HAVE_HEXER
+
     m_grid = new Pshape::HexGrid(hexsize, dense_limit);
     for (std::vector<Pshape::Point>::size_type i = 0; i < m_samples.size(); ++i)
     {
         m_grid->addPoint(m_samples[i]);
     }
 
-//    m_grid->drawHexagons();
-//    grid.dumpInfo();
+
     m_grid->findShapes();
-    
+#endif
+        
 }
     
 

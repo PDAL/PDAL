@@ -413,6 +413,7 @@ set(PDAL_FILTERS_HPP
   ${PDAL_FILTERS_HEADERS}/Colorization.hpp
   ${PDAL_FILTERS_HEADERS}/Crop.hpp
   ${PDAL_FILTERS_HEADERS}/Decimation.hpp
+  ${PDAL_FILTERS_HEADERS}/HexBin.hpp
   ${PDAL_FILTERS_HEADERS}/Index.hpp
   ${PDAL_FILTERS_HEADERS}/InPlaceReprojection.hpp
   ${PDAL_FILTERS_HEADERS}/Mosaic.hpp
@@ -433,6 +434,7 @@ set (PDAL_FILTERS_CPP
   ${PDAL_FILTERS_SRC}/Colorization.cpp
   ${PDAL_FILTERS_SRC}/Crop.cpp
   ${PDAL_FILTERS_SRC}/Decimation.cpp
+  ${PDAL_FILTERS_SRC}/HexBin.cpp
   ${PDAL_FILTERS_SRC}/Index.cpp
   ${PDAL_FILTERS_SRC}/InPlaceReprojection.cpp
   ${PDAL_FILTERS_SRC}/Mosaic.cpp
@@ -588,7 +590,8 @@ if (WIN32)
     ${PYTHON_LIBRARY}
     ${P2G_LIBRARY}
     ${GEOS_LIBRARY}
-    ${FLANN_LIBRARIES})
+    ${FLANN_LIBRARIES}
+    ${HEXER_LIBRARY})
 else()
   target_link_libraries(${APPS_CPP_DEPENDENCIES}
     ${PDAL_LIB_NAME}
@@ -603,7 +606,8 @@ else()
     ${PYTHON_LIBRARY}
     ${P2G_LIBRARY}
     ${GEOS_LIBRARY}
-    ${FLANN_LIBRARIES})
+    ${FLANN_LIBRARIES}
+    ${HEXER_LIBRARY})
 endif()
 
 message(STATUS "Using boost lib: ${Boost_LIBRARIES}")
