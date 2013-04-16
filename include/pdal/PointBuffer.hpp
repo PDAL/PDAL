@@ -254,7 +254,7 @@ public:
     /// @param pointIndex position to start accessing
     inline boost::uint8_t* getData(boost::uint32_t pointIndex) const
     {
-        return (boost::uint8_t*)&(m_data.front()) + m_byteSize * pointIndex;
+        return const_cast<boost::uint8_t*>(&(m_data.front())) + m_byteSize * pointIndex;
     }
 
     /// copies the raw data into your own byte array and sets the size
@@ -348,7 +348,6 @@ private:
     std::vector<boost::uint8_t> m_data;
     boost::uint32_t m_numPoints;
     boost::uint32_t m_capacity;
-    boost::uint64_t m_arraySize;
     Bounds<double> m_bounds;
 
     // We cache m_schema.getByteSize() here because it would end up
