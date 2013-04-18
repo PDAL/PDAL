@@ -130,7 +130,7 @@ boost::uint32_t HexBin::readBufferImpl(PointBuffer& buffer)
         double y = m_dim_y->applyScaling<int32_t>(yi);
 #ifdef PDAL_HAVE_HEXER
 
-        m_samples.push_back(Pshape::Point(x,y));
+        m_samples.push_back(hexer::Point(x,y));
 #endif
     }
         
@@ -140,14 +140,14 @@ boost::uint32_t HexBin::readBufferImpl(PointBuffer& buffer)
 void HexBin::readBufferEndImpl(PointBuffer&)
 {
 
-    // double hexsize = Pshape::computeHexSize(samples);
+    // double hexsize = hexer::computeHexSize(samples);
     double hexsize =5 ;
     int dense_limit = 10;
 
 #ifdef PDAL_HAVE_HEXER
 
-    m_grid = new Pshape::HexGrid(hexsize, dense_limit);
-    for (std::vector<Pshape::Point>::size_type i = 0; i < m_samples.size(); ++i)
+    m_grid = new hexer::HexGrid(hexsize, dense_limit);
+    for (std::vector<hexer::Point>::size_type i = 0; i < m_samples.size(); ++i)
     {
         m_grid->addPoint(m_samples[i]);
     }

@@ -34,7 +34,7 @@ cmake   -G "$CONFIG"  \
         -DWITH_P2G=ON \
         -DWITH_HEXER=ON \
         -DHEXER_INCLUDE_DIR=../hexer/include \
-        -DHEXER_LIBRARY=../hexer/bin/Debug/libhexer.dylib \
+        -DHEXER_LIBRARY=../hexer/bin/libhexer.dylib \
         -DGEOTIFF_INCLUDE_DIR=${GEOTIFF_HOME}/include/ \
         -DGEOTIFF_LIBRARY=${GEOTIFF_HOME}/lib/libgeotiff.${SO_EXT} \
         -DICONV_INCLUDE_DIR=/usr/include \
