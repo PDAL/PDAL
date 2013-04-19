@@ -156,6 +156,14 @@ public:
         return retval;
     }
 
+    static inline void binary_to_hex_stream(unsigned char* source, std::ostream& destination, int start, int end )
+    {
+        static char syms[] = "0123456789ABCDEF";
+        for (int i = start; i != end; i++)
+            destination << syms[((source[i] >> 4) & 0xf)] << syms[source[i] & 0xf];
+
+    }
+
     static inline std::string binary_to_hex_string(const std::vector<unsigned char>& source)
     {
         static char syms[] = "0123456789ABCDEF";
