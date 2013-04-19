@@ -230,7 +230,7 @@ std::streampos VSILFileBuffer::seek(boost::iostreams::stream_offset off, std::io
     {
         return -1;
     }
-    return VSIFTellL/*ftell*/(m_fp);
+    return static_cast<std::streamoff>(VSIFTellL/*ftell*/(m_fp));
 }
 #endif
 

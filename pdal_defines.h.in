@@ -27,6 +27,7 @@
 #cmakedefine PDAL_HAVE_CARIS
 #cmakedefine PDAL_HAVE_GEOS
 #cmakedefine PDAL_HAVE_GDAL
+#cmakedefine PDAL_HAVE_HEXER
 #cmakedefine PDAL_HAVE_FLANN
 #cmakedefine PDAL_HAVE_LASZIP
 #cmakedefine PDAL_HAVE_LIBXML2

@@ -171,7 +171,10 @@ boost::uint64_t Writer::write(  boost::uint64_t targetNumPointsToWrite,
         {
             capacity = (std::min)(static_cast<boost::uint64_t>(m_chunkSize), targetNumPointsToWrite) ;
         }
-        m_writer_buffer = new PointBuffer (schema, capacity);
+        
+        if (capacity > std::numeric_limits<boost::uint32_t>::max())
+            throw pdal_error("Buffer capacity is larger than 2^32 points!");
+        m_writer_buffer = new PointBuffer (schema, static_cast<boost::uint32_t>(capacity));
         
     }
     

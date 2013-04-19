@@ -37,6 +37,7 @@
 
 #include <pdal/pdal_internal.hpp>
 #include <pdal/Schema.hpp>
+#include <pdal/Metadata.hpp>
 
 #include <string>
 #include <stdarg.h>
@@ -148,7 +149,8 @@ private:
 
     Reader& operator=(const Reader&); // not implemented
     Reader(const Reader&); // not implemented;
-
+    pdal::Metadata LoadMetadata(xmlNode* node);
+    
 
     std::string remapOldNames(std::string const& input);
 

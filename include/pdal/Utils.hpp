@@ -148,9 +148,9 @@ public:
         for (std::string::const_iterator it = source.begin(); it < source.end(); it += 2) {
             unsigned char v = 0;
             if (::isxdigit(*it))
-                v = nibbles[::toupper(*it) - '0'] << 4;
+                v = (unsigned char)nibbles[::toupper(*it) - '0'] << 4;
             if (it + 1 < source.end() && ::isxdigit(*(it + 1)))
-                v += nibbles[::toupper(*(it + 1)) - '0'];
+                v += (unsigned char)nibbles[::toupper(*(it + 1)) - '0'];
             retval.push_back(v);
         }
         return retval;

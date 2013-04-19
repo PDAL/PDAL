@@ -470,10 +470,22 @@ if(WITH_FREEGLUT)
   endif()
 endif()
 
+set (WITH_HEXER FALSE CACHE BOOL "Whether or not hexbin filter is built")
+
+if(WITH_HEXER)
+  find_package(Hexer)
+  if(HEXER_FOUND)
+    include_directories(${HEXER_INCLUDE_DIR})
+    add_definitions(-DHAVE_HEXER=1)
+    set(PDAL_HAVE_HEXER 1)
+  endif()
+  
+endif()
 
 # default is false for now
 set(WITH_PYTHON FALSE CACHE BOOL "Choose if Python support (for PLang filters) should be built")
 if(WITH_PYTHON)
+  FIND_PACKAGE(PythonInterp)
   find_package(PythonLibs)
   if(PYTHONLIBS_FOUND)
     set(CMAKE_REQUIRED_LIBRARIES ${PYTHON_LIBRARY})
@@ -481,7 +493,7 @@ if(WITH_PYTHON)
     add_definitions(-DHAVE_PYTHON=1)    
     set(PDAL_HAVE_PYTHON 1)
     
-    find_package(NumPy 1.6)
+    find_package(NumPy 1.5)
     include_directories(${NUMPY_INCLUDE_DIR})
     message(STATUS "Found Python: ${PYTHON_LIBRARY}")
   endif()
@@ -493,7 +505,6 @@ set (USE_PDAL_PLUGIN_OCI FALSE CACHE BOOL "Build the oci driver as a plugin rath
 set (USE_PDAL_PLUGIN_MRSID FALSE CACHE BOOL "Build the MrSID driver as a plugin rather than embedding")
 set (USE_PDAL_PLUGIN_CARIS FALSE CACHE BOOL "Build the Caris driver as a plugin rather than embedding")
 
-set (WITH_PSHAPE FALSE CACHE BOOL "Whether or not to build cairo pshape rendering")
 
 
 #------------------------------------------------------------------------------
@@ -511,7 +522,7 @@ if(WIN32)
     set(DEFAULT_BIN_SUBDIR .)
   endif()
 else()
-  # Common locatoins for Unix and Mac OS X
+  # Common Locations for Unix and Mac OS X
   set(DEFAULT_BIN_SUBDIR bin)
   set(DEFAULT_LIB_SUBDIR lib)
   set(DEFAULT_DATA_SUBDIR share/pdal)

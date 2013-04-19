@@ -40,8 +40,12 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <Mathpair.hpp>
-#include <HexGrid.hpp>
+#ifdef PDAL_HAVE_HEXER
+
+#include <hexer/Mathpair.hpp>
+#include <hexer/HexGrid.hpp>
+
+#endif
 
 namespace pdal
 {
@@ -103,12 +107,14 @@ protected:
     Dimension const* m_dim_x;
     Dimension const* m_dim_y;
     
+#ifdef PDAL_HAVE_HEXER
     std::vector<Pshape::Point> m_samples;
     Pshape::HexGrid* m_grid;
+#endif
     
 };
 
-} // inplacereprojection
+} // hexer
     
 namespace sequential
 {

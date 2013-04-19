@@ -254,7 +254,7 @@ public:
     /// @param pointIndex position to start accessing
     inline boost::uint8_t* getData(boost::uint32_t pointIndex) const
     {
-        return (boost::uint8_t*)&(m_data.front()) + m_byteSize * pointIndex;
+        return const_cast<boost::uint8_t*>(&(m_data.front())) + m_byteSize * pointIndex;
     }
 
     /// copies the raw data into your own byte array and sets the size
@@ -348,7 +348,6 @@ private:
     std::vector<boost::uint8_t> m_data;
     boost::uint32_t m_numPoints;
     boost::uint32_t m_capacity;
-    boost::uint64_t m_arraySize;
     Bounds<double> m_bounds;
 
     // We cache m_schema.getByteSize() here because it would end up
@@ -373,9 +372,12 @@ inline void PointBuffer::setField(pdal::Dimension const& dim, boost::uint32_t po
     
     boost::uint64_t point_start_byte_position = static_cast<boost::uint64_t>(pointIndex) * static_cast<boost::uint64_t>(m_byteSize); 
     boost::uint64_t offset = point_start_byte_position + dim.getByteOffset();
-    boost::uint64_t array_size = static_cast<boost::uint64_t>(m_capacity) * static_cast<boost::uint64_t>(m_byteSize); 
 
+#ifdef DEBUG
+    boost::uint64_t array_size = static_cast<boost::uint64_t>(m_capacity) * static_cast<boost::uint64_t>(m_byteSize); 
     assert(offset + sizeof(T) <= array_size);
+#endif
+
     boost::uint8_t* p = (boost::uint8_t*)&(m_data.front()) + offset;
 
     if (sizeof(T) == dim.getByteSize())
@@ -420,7 +422,7 @@ inline  T const& PointBuffer::getField(pdal::Dimension const& dim, boost::uint32
     assert(offset + sizeof(T) <= array_size );
 #endif
 
-    boost::uint8_t const* p = (boost::uint8_t*)&(m_data.front()) + offset;
+    boost::uint8_t const* p = (boost::uint8_t const*)&(m_data.front()) + offset;
     T const& output = *(T const*)(void const*)p;
     return output;
 }

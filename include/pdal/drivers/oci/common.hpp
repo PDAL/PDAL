@@ -93,7 +93,7 @@ public:
 };
 
 
-class OracleDriver
+class PDAL_DLL OracleDriver
 {
 public:
     OracleDriver(const Options& options)
@@ -166,7 +166,7 @@ public:
     boost::int32_t           num_points;
     boost::int32_t           num_unsorted_points;
     boost::int32_t           pt_sort_dim;
-    boost::scoped_ptr<std::vector<uint8_t> > chunk;
+    boost::scoped_ptr<std::vector<boost::uint8_t> > chunk;
     OCILobLocator           *locator;
     Connection              m_connection;
     sdo_pc*                 pc;

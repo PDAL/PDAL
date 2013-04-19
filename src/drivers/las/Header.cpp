@@ -93,7 +93,7 @@ LasHeader::LasHeader(LasHeader const& other) :
     assert(p == m_systemId);
     p = std::memcpy(m_softwareId, other.m_softwareId, eSoftwareIdSize);
     assert(p == m_softwareId);
-    std::vector<uint32_t>(other.m_pointRecordsByReturn).swap(m_pointRecordsByReturn);
+    std::vector<boost::uint32_t>(other.m_pointRecordsByReturn).swap(m_pointRecordsByReturn);
     assert(ePointsByReturnSize >= m_pointRecordsByReturn.size());
     
     // std::vector<VariableRecord>(other.m_vlrs).swap(m_vlrs);
@@ -121,7 +121,7 @@ LasHeader& LasHeader::operator=(LasHeader const& rhs)
 	 m_dataOffset = rhs.m_dataOffset;
 	 m_pointRecordsCount = rhs.m_pointRecordsCount;
 	 
-	 std::vector<uint32_t>(rhs.m_pointRecordsByReturn).swap(m_pointRecordsByReturn);
+	 std::vector<boost::uint32_t>(rhs.m_pointRecordsByReturn).swap(m_pointRecordsByReturn);
 	 assert(ePointsByReturnSize >= m_pointRecordsByReturn.size());
 
 	 m_scales = rhs.m_scales;

@@ -39,6 +39,7 @@
 #include <boost/uuid/uuid_io.hpp>
 
 #include <pdal/XMLSchema.hpp>
+#include <pdal/Metadata.hpp>
 
 
 #include <pdal/drivers/faux/Reader.hpp>
@@ -105,9 +106,36 @@ BOOST_AUTO_TEST_CASE(test_schema_read)
 
     pdal::Schema schema = reader.getSchema();
 
-    pdal::schema::Writer writer(schema);
-    std::string xml_output = writer.getXML();
 
+    pdal::Metadata m1("m1");
+    pdal::Metadata m2("m2");
+    pdal::Metadata m1prime("m1");
+
+    m1.setValue<boost::uint32_t>(1u);
+    m2.setValue<boost::int32_t>(1);
+    m1prime.setValue<std::string>("Some other metadata");
+
+    pdal::Metadata b;
+
+    b.addMetadata(m1.getName(), m1);
+
+    pdal::Metadata m3(m1);
+    BOOST_CHECK_EQUAL(m3.getValue<boost::uint32_t>(), 1u);
+    m3.setValue<boost::int64_t>(64);
+    BOOST_CHECK_EQUAL(m3.getValue<boost::int64_t>(), 64);
+
+    
+    b.addMetadata("uuid", boost::uuids::nil_uuid());
+
+    
+    pdal::schema::Writer writer(schema);
+    writer.setMetadata(b.toPTree());
+
+    std::string xml_output = writer.getXML();
+    
+    std::ostream* output = FileUtils::createFile("example-metadata.xml");
+        *output << xml_output;
+    delete output;
     pdal::schema::Reader reader2(xml_output, xsd);
     pdal::Schema schema2 = reader2.getSchema();
 
