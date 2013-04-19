@@ -505,29 +505,55 @@ public:
     std::string toWKT(boost::uint32_t precision = 8, boost::uint32_t dimensions=0) const
     {
         std::stringstream oss;
+		
         oss.precision(precision);
+		oss.setf(std::ios_base::fixed, std::ios_base::floatfield);
         
         oss << "POLYGON ((";
         
-        if (m_ranges.size() == 2 || (dimensions != 0 && dimensions == 2))
-        {
-            oss << getMinimum(0) << " " << getMinimum(1) << ", ";
-            oss << getMinimum(0) << " " << getMaximum(1) << ", ";
-            oss << getMaximum(0) << " " << getMaximum(1) << ", ";
-            oss << getMaximum(0) << " " << getMinimum(1) << ", ";
-            oss << getMinimum(0) << " " << getMinimum(1);
-            
-        } else if (m_ranges.size() == 3 || (dimensions != 0 && dimensions == 3))
-        {
-            oss << getMinimum(0) << " " << getMinimum(1) << " " << getMaximum(2) <<", ";
-            oss << getMinimum(0) << " " << getMaximum(1) << " " << getMaximum(2) << ", ";
-            oss << getMaximum(0) << " " << getMaximum(1) << " " << getMaximum(2) << ", ";
-            oss << getMaximum(0) << " " << getMinimum(1) << " " << getMaximum(2) << ", ";
-            oss << getMinimum(0) << " " << getMinimum(1) << " " << getMaximum(2);
-        }
+        oss << getMinimum(0) << " " << getMinimum(1) << ", ";
+        oss << getMinimum(0) << " " << getMaximum(1) << ", ";
+        oss << getMaximum(0) << " " << getMaximum(1) << ", ";
+        oss << getMaximum(0) << " " << getMinimum(1) << ", ";
+        oss << getMinimum(0) << " " << getMinimum(1);
+        
+		// Nothing happens for 3D bounds.
+		// else if (m_ranges.size() == 3 || (dimensions != 0 && dimensions == 3))
+//         {
+//             oss << getMinimum(0) << " " << getMinimum(1) << " " << getMaximum(2) << ", ";
+//             oss << getMinimum(0) << " " << getMaximum(1) << " " << getMaximum(2) << ", ";
+//             oss << getMaximum(0) << " " << getMaximum(1) << " " << getMaximum(2) << ", ";
+//             oss << getMaximum(0) << " " << getMinimum(1) << " " << getMaximum(2) << ", ";
+//             oss << getMinimum(0) << " " << getMinimum(1) << " " << getMaximum(2);
+//         }
         oss << "))";
         return oss.str();
     }
+
+    std::string toBox(boost::uint32_t precision = 8, boost::uint32_t dimensions=2) const
+    {
+        std::stringstream oss;
+		
+        oss.precision(precision);
+		oss.setf(std::ios_base::fixed, std::ios_base::floatfield);
+        
+        
+		if (dimensions  == 2)
+		{
+	        oss << "BOX(";
+	        oss << getMinimum(0) << " " << getMinimum(1) << ", ";
+	        oss << getMaximum(0) << " " << getMaximum(1) << ")";
+		}
+        
+		else if (dimensions == 3)
+        {
+	        oss << "BOX3D(";
+            oss << getMinimum(0) << " " << getMinimum(1) << " " << getMinimum(2) << ", ";
+            oss << getMaximum(0) << " " << getMaximum(1) << " " << getMaximum(2) << ")";
+        }
+        return oss.str();
+    }
+	
 };
 
 
