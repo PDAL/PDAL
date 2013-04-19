@@ -315,7 +315,7 @@ BOOST_AUTO_TEST_CASE(test_lexicalcast_whitespace)
 BOOST_AUTO_TEST_CASE(test_wkt)
 {
     const Bounds<double> b(1.1,2.2,3.3,101.1,102.2,103.3);
-    BOOST_CHECK_EQUAL(b.toWKT(), "POLYGON ((1.1 2.2 103.3, 1.1 102.2 103.3, 101.1 102.2 103.3, 101.1 2.2 103.3, 1.1 2.2 103.3))");
+    BOOST_CHECK_EQUAL(b.toWKT(1), "POLYGON ((1.1 2.2, 1.1 102.2, 101.1 102.2, 101.1 2.2, 1.1 2.2))");
 
     return;
 }

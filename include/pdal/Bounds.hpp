@@ -502,7 +502,7 @@ public:
     /// describing the number of decimal places each point in the WKT will have
     /// @param dimensions override the dimensionality of the WKT. Defaults to 
     /// 0, and if not set, dimensionality of the WKT is determined by Bounds<T>::size()
-    std::string toWKT(boost::uint32_t precision = 8, boost::uint32_t dimensions=0) const
+    std::string toWKT(boost::uint32_t precision = 8) const
     {
         std::stringstream oss;
 		
