@@ -110,6 +110,8 @@ private:
     bool m_doCreateIndex;
     pdal::Bounds<double> m_bounds; // Bounds of the entire point cloud    
     bool m_sdo_pc_is_initialized;
+	std::ostringstream m_block_insert_query;
+	std::ostringstream m_block_bytes;
 };
 
 }

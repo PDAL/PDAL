@@ -42,6 +42,7 @@
 #include <boost-gregorian-date.h>
 #include <soci/soci.h>
 #include <soci/postgresql/soci-postgresql.h>
+#include <soci/error.h>
 #endif
 
 #include <pdal/pdal_error.hpp>

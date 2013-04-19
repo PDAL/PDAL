@@ -137,6 +137,10 @@ void Writer::writeBegin(boost::uint64_t /*targetNumPointsToWrite*/)
     std::string block_table = getOptions().getValueOrThrow<std::string>("block_table");
     std::string cloud_table = getOptions().getValueOrThrow<std::string>("cloud_table");
     std::string cloud_column = getOptions().getValueOrDefault<std::string>("cloud_column", "id");
+
+    m_block_insert_query << "INSERT INTO " << boost::to_lower_copy(block_table) 
+        << " ("<< boost::to_lower_copy(cloud_column) <<", block_id, num_points, points, extent, bbox) VALUES (" 
+        << " :obj_id, :block_id, :num_points, decode(:hex, 'hex'), ST_Force_2D(ST_GeometryFromText(:extent,:srid)), :bbox)";
     
     m_session->begin();
     
@@ -238,7 +242,8 @@ void Writer::CreateBlockTable(std::string const& name, boost::uint32_t srid)
             // << " obj_id INTEGER,"
             << " block_id INTEGER,"
             << " num_points INTEGER,"
-            << " points bytea"
+            << " points bytea,"
+		    << " bbox box3d"
             << ")";
 
         m_session->once << oss.str();
@@ -246,7 +251,7 @@ void Writer::CreateBlockTable(std::string const& name, boost::uint32_t srid)
         
         {
             bool is3d = getOptions().getValueOrDefault<bool>("is3d", false);
-            boost::uint32_t nDim = is3d ? 3 : 2;
+            boost::uint32_t nDim = 2;
 
             oss << "SELECT AddGeometryColumn('', '" << boost::to_lower_copy(name) 
                 << "'," << "'extent'" << "," 
@@ -335,7 +340,7 @@ void Writer::CreateCloudTable(std::string const& name, boost::uint32_t srid)
         oss.str("");
         {
             bool is3d = getOptions().getValueOrDefault<bool>("is3d", false);
-            boost::uint32_t nDim = is3d ? 3 : 2;
+            boost::uint32_t nDim = 2 ;// is3d ? 3 : 2;
             
             oss << "SELECT AddGeometryColumn('', '" << boost::to_lower_copy(name) 
                 << "'," << "'extent'" << "," 
@@ -746,7 +751,7 @@ void Writer::CreateCloud(Schema const& buffer_schema)
         {
             boost::uint32_t srid = getOptions().getValueOrDefault<boost::uint32_t>("srid", 4326);
             bool is3d = getOptions().getValueOrDefault<bool>("is3d", false);
-            std::string force = is3d ? "ST_Force_3D" : "ST_Force_2D";
+            std::string force =  "ST_Force_2D";
             
             oss << "UPDATE " 
 				<< boost::to_lower_copy(cloud_table) 
@@ -799,188 +804,48 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     {
         std::string cloud_column = getOptions().getValueOrDefault<std::string>("cloud_column", "id");
         bool is3d = getOptions().getValueOrDefault<bool>("is3d", false);
-        std::string force = is3d ? "ST_Force_3D" : "ST_Force_2D";
-        
-        std::stringstream oss;
-        oss << "INSERT INTO " << boost::to_lower_copy(block_table) 
-            << " ("<< boost::to_lower_copy(cloud_column) <<", block_id, num_points, points, extent) VALUES (" 
-            << " :obj_id, :block_id, :num_points, decode(:hex, 'hex'), " << force << "(ST_GeometryFromText(:extent,:srid)))";
-
+ 
         
         std::vector<boost::uint8_t> block_data;
         for (boost::uint32_t i = 0; i < point_data_length; ++i )
         {
             block_data.push_back(point_data[i]);
         }
-        std::string hex = Utils::binary_to_hex_string(block_data);
+        // std::string hex = Utils::binary_to_hex_string(block_data);
+		Utils::binary_to_hex_stream(point_data, m_block_bytes, 0, point_data_length);
+		
         //std::cout << "hex: " << hex.substr(0, 30) << std::endl;
         boost::uint32_t srid = getOptions().getValueOrDefault<boost::uint32_t>("srid", 4326);
-        
-        std::string extent = buffer.calculateBounds(is3d).toWKT();
-        //log()->get(logDEBUG) << "extent: " << extent << std::endl;
-        ::soci::statement st = (m_session->prepare << oss.str(), ::soci::use(obj_id, "obj_id"), ::soci::use(blk_id, "block_id"), ::soci::use(num_points, "num_points"), ::soci::use(hex,"hex"), ::soci::use(extent, "extent"), ::soci::use(srid, "srid"));
-        st.execute(true);
-        oss.str("");
-        
-        // ::soci::blob blob(*m_session);
-        // ::soci::indicator ind;
-        // oss << "SELECT POINTS from "<< boost::to_lower_copy(block_table) << " WHERE block_id =:blk_id and obj_id = :obj_id";
-        // m_session->once << oss.str(), ::soci::into(blob, ind), ::soci::use(blk_id), ::soci::use(obj_id);
-        // assert(blob.get_len() == 0);
-        // 
-        // blob.write(0, (const char*)point_data, point_data_length);
 
-        // m_session->commit();
+		boost::uint32_t precision(9);
+		pdal::Bounds<double> bounds = buffer.calculateBounds(3);
+        std::string extent = bounds.toWKT(precision); // polygons are only 2d, not cubes
+		std::string bbox = bounds.toBox(precision, 3);
+        log()->get(logDEBUG) << "extent: " << extent << std::endl;
+        log()->get(logDEBUG) << "bbox: " << bbox << std::endl;
+        ::soci::statement st = (m_session->prepare << 	m_block_insert_query.str(), \
+														::soci::use(obj_id, "obj_id"), \
+														::soci::use(blk_id, "block_id"), \
+														::soci::use(num_points, "num_points"), \
+														::soci::use(m_block_bytes.str(),"hex"), \
+														::soci::use(extent, "extent"), \
+														::soci::use(srid, "srid"), \
+														::soci::use(bbox, "bbox"));
+	    try
+	    {
+	        st.execute(true);
+	    }
+	    catch (std::exception const& e)
+	    {
+			std::ostringstream oss;
+			oss << "Insert query failed with error '" << e.what() << "'";
+			m_session->rollback();
+			throw pdal_error(oss.str());
+	    }
+		
+		m_block_bytes.str("");
+		
     }
-    // bool bUsePartition = m_block_table_partition_column.size() != 0;
-    // 
-    // // Pluck the block id out of the first point in the buffer
-    // pdal::Schema const& schema = buffer.getSchema();
-    // Dimension const& blockDim = schema.getDimension("BlockID");
-    // 
-    // boost::int32_t block_id  = buffer.getField<boost::int32_t>(blockDim, 0);
-    // 
-    // std::ostringstream oss;
-    // std::ostringstream partition;
-    // 
-    // if (bUsePartition)
-    // {
-    //     partition << "," << m_block_table_partition_column;
-    // }
-    // 
-    // oss << "INSERT INTO "<< m_block_table_name <<
-    //     "(OBJ_ID, BLK_ID, NUM_POINTS, POINTS,   "
-    //     "PCBLK_MIN_RES, BLK_EXTENT, PCBLK_MAX_RES, NUM_UNSORTED_POINTS, PT_SORT_DIM";
-    // if (bUsePartition)
-    //     oss << partition.str();
-    // oss << ") "
-    //     "VALUES ( :1, :2, :3, :4, 1, mdsys.sdo_geometry(:5, :6, null,:7, :8)"
-    //     ", 1, 0, 1";
-    // if (bUsePartition)
-    //     oss << ", :9";
-    // 
-    // oss <<")";
-    // 
-    // // TODO: If gotdata == false below, this memory probably leaks --mloskot
-    // OCILobLocator** locator =(OCILobLocator**) VSIMalloc(sizeof(OCILobLocator*) * 1);
-    // 
-    // Statement statement = Statement(m_connection->CreateStatement(oss.str().c_str()));
-    // 
-    // 
-    // long* p_pc_id = (long*) malloc(1 * sizeof(long));
-    // p_pc_id[0] = m_pc_id;
-    // 
-    // long* p_result_id = (long*) malloc(1 * sizeof(long));
-    // p_result_id[0] = (long)block_id;
-    // 
-    // long* p_num_points = (long*) malloc(1 * sizeof(long));
-    // p_num_points[0] = (long)buffer.getNumPoints();
-    // 
-    // // std::cout << "point count on write: " << buffer.getNumPoints() << std::endl;
-    // 
-    // 
-    // // :1
-    // statement->Bind(&m_pc_id);
-    // 
-    // // :2
-    // statement->Bind(p_result_id);
-    // 
-    // // :3
-    // statement->Bind(p_num_points);
-    // 
-    // // :4
-    // statement->Define(locator, 1);
-    // 
-    // 
-    // // std::vector<liblas::uint8_t> data;
-    // // bool gotdata = GetResultData(result, reader, data, 3);
-    // // if (! gotdata) throw std::runtime_error("unable to fetch point data byte array");
-    // // boost::uint8_t* point_data = buffer.getData(0);
-    // boost::uint8_t* point_data;
-    // boost::uint32_t point_data_length;
-    // boost::uint32_t schema_byte_size;
-    // 
-    // bool pack = getOptions().getValueOrDefault<bool>("pack_ignored_fields", true);
-    // if (pack)
-    //     PackPointData(buffer, &point_data, point_data_length, schema_byte_size);
-    // else
-    // {
-    //     point_data = buffer.getData(0);
-    //     point_data_length = buffer.getSchema().getByteSize() * buffer.getNumPoints();
-    // }
-    // 
-    // // statement->Bind((char*)point_data,(long)(buffer.getSchema().getByteSize()*buffer.getNumPoints()));
-    // statement->Bind((char*)point_data,(long)(point_data_length));
-    // 
-    // // :5
-    // long* p_gtype = (long*) malloc(1 * sizeof(long));
-    // p_gtype[0] = m_gtype;
-    // 
-    // statement->Bind(p_gtype);
-    // 
-    // // :6
-    // long* p_srid  = 0;
-    // 
-    // 
-    // if (m_srid != 0)
-    // {
-    //     p_srid = (long*) malloc(1 * sizeof(long));
-    //     p_srid[0] = m_srid;
-    // }
-    // statement->Bind(p_srid);
-    // 
-    // // :7
-    // OCIArray* sdo_elem_info=0;
-    // m_connection->CreateType(&sdo_elem_info, m_connection->GetElemInfoType());
-    // SetElements(statement, sdo_elem_info);
-    // statement->Bind(&sdo_elem_info, m_connection->GetElemInfoType());
-    // 
-    // // :8
-    // OCIArray* sdo_ordinates=0;
-    // m_connection->CreateType(&sdo_ordinates, m_connection->GetOrdinateType());
-    // 
-    // // x0, x1, y0, y1, z0, z1, bUse3d
-    // pdal::Bounds<double> bounds = CalculateBounds(buffer);
-    // SetOrdinates(statement, sdo_ordinates, bounds);
-    // statement->Bind(&sdo_ordinates, m_connection->GetOrdinateType());
-    // 
-    // // :9
-    // long* p_partition_d = 0;
-    // if (bUsePartition)
-    // {
-    //     p_partition_d = (long*) malloc(1 * sizeof(long));
-    //     p_partition_d[0] = m_block_table_partition_value;
-    //     statement->Bind(p_partition_d);
-    // }
-    // 
-    // try
-    // {
-    //     statement->Execute();
-    // }
-    // catch (std::runtime_error const& e)
-    // {
-    //     std::ostringstream oss;
-    //     oss << "Failed to insert block # into '" << m_block_table_name << "' table. Does the table exist? "  << std::endl << e.what() << std::endl;
-    //     throw std::runtime_error(oss.str());
-    // }
-    // 
-    // oss.str("");
-    // 
-    // 
-    // OWStatement::Free(locator, 1);
-    // 
-    // if (p_pc_id != 0) free(p_pc_id);
-    // if (p_result_id != 0) free(p_result_id);
-    // if (p_num_points != 0) free(p_num_points);
-    // if (p_gtype != 0) free(p_gtype);
-    // if (p_srid != 0) free(p_srid);
-    // if (p_partition_d != 0) free(p_partition_d);
-    // 
-    // m_connection->DestroyType(&sdo_elem_info);
-    // m_connection->DestroyType(&sdo_ordinates);
-
-
-
 
     return true;
 }
