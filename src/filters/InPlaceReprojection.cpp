@@ -545,14 +545,26 @@ void IteratorBase::updateBounds(PointBuffer& buffer)
         m_reprojectionFilter.transform(maxx, maxy, maxz);
 
     }
+
     catch (pdal::pdal_error&)
     {
         return;
     }
 
-    Bounds<double> newBounds(minx, miny, minz, maxx, maxy, maxz);
+	try
+	{
+	    Bounds<double> newBounds(minx, miny, minz, maxx, maxy, maxz);
 
-    buffer.setSpatialBounds(newBounds);
+	    buffer.setSpatialBounds(newBounds);
+		
+	}
+	catch (pdal::bounds_error&)
+	{
+	    Bounds<double> newBounds(minx, miny, oldBounds.getMinimum(2), maxx, maxy, oldBounds.getMaximum(2));
+
+	    buffer.setSpatialBounds(newBounds);
+		
+	}
 
     return;
 }
