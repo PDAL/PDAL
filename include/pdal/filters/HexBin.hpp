@@ -44,17 +44,9 @@
 
 #include <hexer/Mathpair.hpp>
 #include <hexer/HexGrid.hpp>
+#include <hexer/Processor.hpp>
 
 #endif
-
-namespace pdal
-{
-class PointBuffer;
-namespace gdal
-{
-class GlobalDebug;
-}
-}
 
 namespace pdal
 {
@@ -65,7 +57,7 @@ namespace filters
 class PDAL_DLL HexBin : public Filter
 {
 public:
-    SET_STAGE_NAME("filters.hexbin", "Hex bin implementation")
+    SET_STAGE_NAME("filters.hexbin", "Hexbin implementation")
 
     HexBin(Stage& prevStage, const Options&);
 
@@ -101,15 +93,19 @@ class PDAL_DLL IteratorBase
 {
 public:
     IteratorBase(pdal::filters::HexBin const& filter, PointBuffer& buffer);
-
+    ~IteratorBase();
 protected:
     pdal::filters::HexBin const& m_filter;
     Dimension const* m_dim_x;
     Dimension const* m_dim_y;
     
 #ifdef PDAL_HAVE_HEXER
-    std::vector<Pshape::Point> m_samples;
-    Pshape::HexGrid* m_grid;
+    std::vector<hexer::Point> m_samples;
+    hexer::HexGrid* m_grid;
+    boost::uint32_t m_sample_size;
+    boost::uint32_t m_sample_number;
+    boost::int32_t m_density;
+    double m_edge_size;
 #endif
     
 };
