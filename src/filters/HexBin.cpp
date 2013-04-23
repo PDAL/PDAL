@@ -93,7 +93,9 @@ namespace hexbin
 IteratorBase::IteratorBase( pdal::filters::HexBin const& filter, 
                             PointBuffer& buffer)
 : m_filter(filter)
+#ifdef PDAL_HAVE_HEXER
 , m_grid(0)
+#endif
 , m_sample_size(0)
 , m_sample_number(0)
 , m_density(10)

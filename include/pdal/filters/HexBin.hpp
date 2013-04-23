@@ -100,13 +100,13 @@ protected:
     Dimension const* m_dim_y;
     
 #ifdef PDAL_HAVE_HEXER
-    std::vector<hexer::Point> m_samples;
     hexer::HexGrid* m_grid;
+	std::vector<hexer::Point> m_samples;
+#endif
     boost::uint32_t m_sample_size;
     boost::uint32_t m_sample_number;
     boost::int32_t m_density;
     double m_edge_size;
-#endif
     
 };
 
