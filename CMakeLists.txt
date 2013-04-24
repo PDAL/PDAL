@@ -573,7 +573,9 @@ configure_file(
 
 add_subdirectory(src)
 
-add_subdirectory(apps)
+if(WITH_APPS)
+  add_subdirectory(apps)
+endif()
 
 if(WITH_TESTS)
   message(STATUS "Building with PDAL unit tests")
