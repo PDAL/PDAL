@@ -102,6 +102,7 @@ private:
     
 #ifdef PDAL_HAVE_SOCI
     ::soci::session* m_session;
+	::soci::statement* m_block_statement;
 #else
     void* m_session;
 #endif
@@ -112,6 +113,13 @@ private:
     bool m_sdo_pc_is_initialized;
 	std::ostringstream m_block_insert_query;
 	std::ostringstream m_block_bytes;
+	std::string m_block_data;
+	std::string m_extent;
+	std::string m_bbox;
+	boost::int32_t m_obj_id;
+	boost::int32_t m_block_id;
+	boost::uint32_t m_srid;
+	boost::int64_t m_num_points;
 };
 
 }

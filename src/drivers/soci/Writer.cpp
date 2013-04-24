@@ -66,6 +66,7 @@ namespace soci
 Writer::Writer(Stage& prevStage, const Options& options)
     : pdal::Writer(prevStage, options)
     , m_session(0)
+		, m_block_statement(0)
     , m_type(DATABASE_UNKNOWN)
     , m_doCreateIndex(false)
     , m_bounds(Bounds<double>())
@@ -243,7 +244,8 @@ void Writer::CreateBlockTable(std::string const& name, boost::uint32_t srid)
             << " block_id INTEGER,"
             << " num_points INTEGER,"
             << " points bytea,"
-		    << " bbox box3d"
+		    << " bbox box3d, "
+			<< " extent geometry"
             << ")";
 
         m_session->once << oss.str();
@@ -797,9 +799,9 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     pdal::Schema const& schema = buffer.getSchema();
     Dimension const& blockDim = schema.getDimension("BlockID");
     
-    boost::int32_t blk_id  = buffer.getField<boost::int32_t>(blockDim, 0);    
-    boost::int32_t obj_id = getOptions().getValueOrThrow<boost::int32_t>("pc_id");
-    boost::int64_t num_points = static_cast<boost::int64_t>(buffer.getNumPoints());
+    m_block_id  = buffer.getField<boost::int32_t>(blockDim, 0);    
+    m_obj_id = getOptions().getValueOrThrow<boost::int32_t>("pc_id");
+    m_num_points = static_cast<boost::int64_t>(buffer.getNumPoints());
     if (m_type == DATABASE_POSTGRESQL)
     {
         std::string cloud_column = getOptions().getValueOrDefault<std::string>("cloud_column", "id");
@@ -811,29 +813,56 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
         {
             block_data.push_back(point_data[i]);
         }
-        // std::string hex = Utils::binary_to_hex_string(block_data);
+        m_block_bytes.str("");
 		Utils::binary_to_hex_stream(point_data, m_block_bytes, 0, point_data_length);
-		
+		m_block_data = m_block_bytes.str();
         //std::cout << "hex: " << hex.substr(0, 30) << std::endl;
-        boost::uint32_t srid = getOptions().getValueOrDefault<boost::uint32_t>("srid", 4326);
+        m_srid = getOptions().getValueOrDefault<boost::uint32_t>("srid", 4326);
 
 		boost::uint32_t precision(9);
 		pdal::Bounds<double> bounds = buffer.calculateBounds(3);
-        std::string extent = bounds.toWKT(precision); // polygons are only 2d, not cubes
-		std::string bbox = bounds.toBox(precision, 3);
-        log()->get(logDEBUG) << "extent: " << extent << std::endl;
-        log()->get(logDEBUG) << "bbox: " << bbox << std::endl;
-        ::soci::statement st = (m_session->prepare << 	m_block_insert_query.str(), \
-														::soci::use(obj_id, "obj_id"), \
-														::soci::use(blk_id, "block_id"), \
-														::soci::use(num_points, "num_points"), \
-														::soci::use(m_block_bytes.str(),"hex"), \
-														::soci::use(extent, "extent"), \
-														::soci::use(srid, "srid"), \
-														::soci::use(bbox, "bbox"));
+		// m_extent.str("");
+        m_extent = bounds.toWKT(precision); // polygons are only 2d, not cubes
+		// m_bbox.str("");
+		m_bbox = bounds.toBox(precision, 3);
+        log()->get(logDEBUG) << "extent: " << m_extent << std::endl;
+        log()->get(logDEBUG) << "bbox: " << m_bbox << std::endl;
+		
+		if (!m_block_statement)
+		{
+        // m_block_statement = (m_session->prepare << 	m_block_insert_query.str(), \
+        // 														::soci::use(m_obj_id, "obj_id"), \
+        // 														::soci::use(m_block_id, "block_id"), \
+        // 														::soci::use(m_num_points, "num_points"), \
+        // 														::soci::use(m_block_bytes.str(),"hex"), \
+        // 														::soci::use(m_extent.str(), "extent"), \
+        // 														::soci::use(m_srid, "srid"), \
+        // 														::soci::use(m_bbox.str(), "bbox"));
+		m_block_statement = new ::soci::statement(*m_session);
+
+		m_block_statement->exchange( ::soci::use(m_obj_id, "obj_id"));
+		m_block_statement->exchange(::soci::use(m_block_id, "block_id"));
+		m_block_statement->exchange(::soci::use(m_num_points, "num_points"));
+		m_block_statement->exchange(::soci::use(m_block_data,"hex"));
+		m_block_statement->exchange(::soci::use(m_extent, "extent"));
+		m_block_statement->exchange(::soci::use(m_srid, "srid"));
+		m_block_statement->exchange(::soci::use(m_bbox, "bbox"));
+		m_block_statement->alloc();
+		m_block_statement->prepare(m_block_insert_query.str());
+		m_block_statement->define_and_bind();
+
+		}
+        // ::soci::statement st = (m_session->prepare << 	m_block_insert_query.str(), \
+        // 														::soci::use(m_obj_id, "obj_id"), \
+        // 														::soci::use(m_block_id, "block_id"), \
+        // 														::soci::use(m_num_points, "num_points"), \
+        // 														::soci::use(m_block_bytes.str(),"hex"), \
+        // 														::soci::use(m_extent.str(), "extent"), \
+        // 														::soci::use(m_srid, "srid"), \
+        // 														::soci::use(m_bbox.str(), "bbox"));
 	    try
 	    {
-	        st.execute(true);
+	        m_block_statement->execute(true);
 	    }
 	    catch (std::exception const& e)
 	    {
@@ -842,8 +871,6 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
 			m_session->rollback();
 			throw pdal_error(oss.str());
 	    }
-		
-		m_block_bytes.str("");
 		
     }
 
