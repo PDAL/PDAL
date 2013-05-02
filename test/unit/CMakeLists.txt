@@ -12,8 +12,6 @@ SET (PDAL_UNITTEST_XMLSCHEMA_TEST XMLSchemaTest.cpp)
 endif()
 
 SET(PDAL_UNITTEST_TEST_SRC
-    apps/pc2pcTest.cpp
-    apps/pcpipelineTest.cpp
     BoundsTest.cpp
     drivers/bpf/BPFTest.cpp
     filters/ByteSwapFilterTest.cpp
@@ -64,11 +62,18 @@ SET(PDAL_UNITTEST_TEST_SRC
     ${PDAL_UNITTEST_XMLSCHEMA_TEST}
     )
 
-if(LIBXML2_FOUND)
+if(WITH_APPS)
+  if(LIBXML2_FOUND)
     list(APPEND ${PDAL_UNITTEST_TEST_SRC} 
-        apps/pcinfoTest.cpp
-        )
-endif(LIBXML2_FOUND)
+      apps/pcinfoTest.cpp
+    )
+  endif(LIBXML2_FOUND)
+
+  list(APPEND ${PDAL_UNITTEST_TEST_SRC}
+    apps/pc2pcTest.cpp
+    apps/pcpipelineTest.cpp
+  )
+endif(WITH_APPS)
 
 set(PDAL_PLANG_TEST_SRC
     plang/PLangTest.cpp
