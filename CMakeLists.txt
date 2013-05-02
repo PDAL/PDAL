@@ -10,6 +10,7 @@ cmake_minimum_required(VERSION 2.6.0)
 endif()
 
 project(PDAL)
+string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
 
 #------------------------------------------------------------------------------
 # internal cmake settings
@@ -28,24 +29,41 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_PATH})
 # PDAL general settings
 #------------------------------------------------------------------------------
 
+include(${PDAL_SOURCE_DIR}/cmake/pdal_utils.cmake)
 
-
-# the next three lines are the ONLY place in the entire pdal system where
+# the next line is the ONLY place in the entire pdal system where
 # the version info is hard-coded
-SET(PDAL_VERSION_MAJOR "0")
-SET(PDAL_VERSION_MINOR "8")
-SET(PDAL_VERSION_PATCH "6")
+set(PDAL_VERSION_STRING 0.8.6 CACHE STRING "PDAL version")
 
-set(PDAL_VERSION_STRING "${PDAL_VERSION_MAJOR}.${PDAL_VERSION_MINOR}.${PDAL_VERSION_PATCH}")
+DISSECT_VERSION()
+GET_OS_INFO()
+SET_INSTALL_DIRS()
+
 SET(PDAL_LIB_SOVERSION ${PDAL_VERSION_MAJOR})
 SET(PDAL_C_LIB_SOVERSION ${PDAL_VERSION_MAJOR})
-
 
 # Name of C++ library
 set(PDAL_LIB_NAME pdal)
 
 set(CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE ON)
 
+set(PDAL_OUTPUT_LIB_DIR ${PDAL_BINARY_DIR}/${LIB_INSTALL_DIR})
+set(PDAL_OUTPUT_BIN_DIR ${PDAL_BINARY_DIR}/${BIN_INSTALL_DIR})
+make_directory(${PDAL_OUTPUT_LIB_DIR})
+make_directory(${PDAL_OUTPUT_BIN_DIR})
+if(WIN32)
+  foreach(config ${CMAKE_CONFIGURATION_TYPES})
+    string(TOUPPER ${config} CONFIG)
+    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${CONFIG} "${PDAL_OUTPUT_LIB_DIR}")
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${CONFIG} "${PDAL_OUTPUT_BIN_DIR}")
+    # ---[ Windows requires DLLs (shared libraries) to be installed in the same directory as executables
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_${CONFIG} "${PDAL_OUTPUT_BIN_DIR}")
+  endforeach(config)
+else(WIN32)
+  set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PDAL_OUTPUT_LIB_DIR}")
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PDAL_OUTPUT_BIN_DIR}")
+  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PDAL_OUTPUT_LIB_DIR}")
+endif(WIN32)
 
 
 #------------------------------------------------------------------------------
@@ -506,52 +524,6 @@ set (USE_PDAL_PLUGIN_MRSID FALSE CACHE BOOL "Build the MrSID driver as a plugin 
 set (USE_PDAL_PLUGIN_CARIS FALSE CACHE BOOL "Build the Caris driver as a plugin rather than embedding")
 
 
-
-#------------------------------------------------------------------------------
-# installation path settings
-#------------------------------------------------------------------------------
-
-if(WIN32)
-  set(DEFAULT_LIB_SUBDIR lib)
-  set(DEFAULT_DATA_SUBDIR .)
-  set(DEFAULT_INCLUDE_SUBDIR include)
-
-  if (MSVC)
-    set(DEFAULT_BIN_SUBDIR bin)
-  else()
-    set(DEFAULT_BIN_SUBDIR .)
-  endif()
-else()
-  # Common Locations for Unix and Mac OS X
-  set(DEFAULT_BIN_SUBDIR bin)
-  set(DEFAULT_LIB_SUBDIR lib)
-  set(DEFAULT_DATA_SUBDIR share/pdal)
-  set(DEFAULT_INCLUDE_SUBDIR include)
-endif()
-
-# Locations are changeable by user to customize layout of PDAL installation
-# (default values are platform-specific)
-set(PDAL_BIN_SUBDIR ${DEFAULT_BIN_SUBDIR} CACHE STRING
-  "Subdirectory where executables will be installed")
-set(PDAL_LIB_SUBDIR ${DEFAULT_LIB_SUBDIR} CACHE STRING
-  "Subdirectory where libraries will be installed")
-set(PDAL_INCLUDE_SUBDIR ${DEFAULT_INCLUDE_SUBDIR} CACHE STRING
-  "Subdirectory where header files will be installed")
-set(PDAL_DATA_SUBDIR ${DEFAULT_DATA_SUBDIR} CACHE STRING
-  "Subdirectory where data will be installed")
-
-# Mark *_SUBDIR variables as advanced and dedicated to use by power-users only.
-mark_as_advanced(PDAL_BIN_SUBDIR
-  PDAL_LIB_SUBDIR PDAL_INCLUDE_SUBDIR PDAL_DATA_SUBDIR)
-
-# Full paths for the installation
-set(PDAL_BIN_DIR ${PDAL_BIN_SUBDIR})
-set(PDAL_LIB_DIR ${PDAL_LIB_SUBDIR})
-set(PDAL_INCLUDE_DIR ${PDAL_INCLUDE_SUBDIR})
-set(PDAL_DATA_DIR ${PDAL_DATA_SUBDIR})
-
-
-
 #------------------------------------------------------------------------------
 # installation commands
 #------------------------------------------------------------------------------
@@ -560,12 +532,15 @@ install(FILES AUTHORS.txt LICENSE.txt
   DESTINATION ${PDAL_DATA_DIR}/doc)
 
 #------------------------------------------------------------------------------
-# generate the pdal_config.h header
+# generate the pdal_defines.h header
 #------------------------------------------------------------------------------
 
-configure_file(
-  "${PROJECT_SOURCE_DIR}/pdal_defines.h.in"
-  "${PDAL_INCLUDE_DIR}/pdal/pdal_defines.h")
+set(pdal_defines_h_in "${CMAKE_CURRENT_SOURCE_DIR}/pdal_defines.h.in")
+set(pdal_defines_h "${CMAKE_CURRENT_BINARY_DIR}/include/pdal/pdal_defines.h")
+configure_file(${pdal_defines_h_in} ${pdal_defines_h})
+PDAL_ADD_INCLUDES("" "" ${pdal_defines_h})
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
+
 
 #------------------------------------------------------------------------------
 # subdirectory controls
