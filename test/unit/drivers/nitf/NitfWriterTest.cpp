@@ -128,8 +128,13 @@ BOOST_AUTO_TEST_CASE(test1)
 
         Options writer_opts;
         Option writer_opt1("filename", nitf_output);
+        Option debug("debug", true);
+        Option verbose("verbose", 8);
+        
+        writer_opts.add(debug);
+        writer_opts.add(verbose);
         writer_opts.add(writer_opt1);
-
+        
         pdal::drivers::las::Reader reader(reader_opts);
 
         pdal::drivers::nitf::Writer writer(reader, writer_opts);
@@ -139,13 +144,14 @@ BOOST_AUTO_TEST_CASE(test1)
             writer.setPointFormat(::pdal::drivers::las::PointFormat3);
             writer.setSystemIdentifier("");
             writer.setGeneratingSoftware("PDAL-NITF");
+            writer.setChunkSize(100);
         }
         writer.initialize();
 
         writer.write(0);
     }
     
-    FileUtils::deleteFile(nitf_output);
+    // FileUtils::deleteFile(nitf_output);
     
 
     return;

@@ -184,7 +184,10 @@ if (NOT PDAL_EMBED_BOOST)
   find_package(Boost 1.48 COMPONENTS program_options thread iostreams filesystem system unit_test_framework random)
 endif()
 
-
+include_directories("/usr/local/nitro/include/")
+add_definitions("-D__POSIX" )
+add_definitions("-D_REENTRANT")
+set(NITRO_LIBRARY "/usr/local/nitro/lib/libsys-c++.a;/usr/local/nitro/lib/libmt-c++.a;/usr/local/nitro/lib/libstr-c++.a;/usr/local/nitro/lib/libio-c++.a;/usr/local/nitro/lib/libmt-c++.a;/usr/local/nitro/lib/libexcept-c++.a;/usr/local/nitro/lib/libnitf-c++.a;/usr/local/nitro/lib/libnrt-c.a;/usr/local/nitro/lib/libnitf-c.a")
 if(Boost_FOUND)
   include_directories(${Boost_INCLUDE_DIRS})
 
