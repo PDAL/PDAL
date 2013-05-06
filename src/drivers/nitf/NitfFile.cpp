@@ -255,6 +255,11 @@ int NitfFile::findIMSegment()
             if (iid1 == "INTENSITY " || iid1 == "ELEVATION " || iid1 == "None      ")
             {
                 return iSegment;
+            } else
+            {
+                std::ostringstream oss;
+                oss << "ID was not expected value '" << iid1 <<"'";
+                throw pdal_error(oss.str());
             }
         }
     }
