@@ -177,33 +177,69 @@ void Writer::writeEnd(boost::uint64_t actualNumPointsWritten)
     ::nitf::FileSecurity security =
         record.getHeader().getSecurityGroup();
     des.getSubheader().setSecurityGroup(security.clone());
-    const char lasdata[] = "123456dfdfadsfasdfasdfa789ABCDEF0\0";    
+
 
     ::nitf::TRE usrHdr("LIDARA DES", "raw_data");
     
     usrHdr.setField("raw_data", "not");
     ::nitf::Field fld = usrHdr.getField("raw_data");
     fld.setType(::nitf::Field::BINARY);
-    // fld.resize(strlen(lasdata));
-    // fld.setRawData((char*)&lasdata, strlen(lasdata));
-    
-                 
 
 
     std::streambuf *buf = m_oss.rdbuf();
     size_t size = m_oss.str().size();
-    // std::streamsize size = buf->pubseekpos(0,m_oss.end);
+
     buf->pubseekoff(0, m_oss.beg);
 
-    log()->get(logDEBUG) <<  " lasfile size: " << size <<  std::endl;   
         
     char* bytes = new char[size];
     buf->sgetn(bytes, size);
 
-    // fld.resize( size );
-    // fld.setRawData(bytes,  size );
     
     des.getSubheader().setSubheaderFields(usrHdr);
+
+    ::nitf::ImageSegment image = record.newImageSegment();
+    ::nitf::ImageSubheader subheader = image.getSubheader();
+    
+    ::nitf::BandInfo info;    
+    ::nitf::LookupTable lt(0,0);
+    info.init( "G",   /* The band representation, Nth band */
+               " ",      /* The band subcategory */
+               "N",      /* The band filter condition */
+               "   ",    /* The band standard image filter code */
+               0,        /* The number of look-up tables */
+               0,        /* The number of entries/LUT */
+               lt);     /* The look-up tables */
+    
+    std::vector< ::nitf::BandInfo> bands;
+    bands.push_back(info);
+    subheader.setPixelInformation( "INT",     /* Pixel value type */
+                                     8,         /* Number of bits/pixel */
+                                     8,         /* Actual number of bits/pixel */
+                                     "G",       /* Pixel justification */
+                                     "G",     /* Image representation */
+                                     "VIS",     /* Image category */
+                                     1,         /* Number of bands */
+                                     bands);
+    
+    subheader.setBlocking(  8, /*!< The number of rows */
+                            8,  /*!< The number of columns */
+                            8, /*!< The number of rows/block */
+                            8,  /*!< The number of columns/block */
+                            "P"                /*!< Image mode */
+                                         );
+    subheader.getImageId().set("None");
+    // 64 char string
+    char* buffer = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    
+    ::nitf::BandSource* band =
+        new ::nitf::MemorySource( buffer, 
+                                strlen(buffer) /* memory size */, 
+                                0 /* starting offset */, 
+                                1 /* bytes per pixel */, 
+                                0 /*skip*/);
+    ::nitf::ImageSource iSource;
+    iSource.addBand(*band);
     
     ::nitf::Writer writer;
     ::nitf::IOHandle output_io("written.ntf", NITF_ACCESS_WRITEONLY, NITF_CREATE);
@@ -211,11 +247,15 @@ void Writer::writeEnd(boost::uint64_t actualNumPointsWritten)
     
     ::nitf::SegmentWriter sWriter = writer.newDEWriter(0);
 
-    // ::nitf::SegmentMemorySource sSource(lasdata, strlen(lasdata), 0, 0, false);
     ::nitf::SegmentMemorySource sSource(bytes, size, 0, 0, false);
-    
     sWriter.attachSource(sSource);
+
+    ::nitf::ImageWriter iWriter = writer.newImageWriter(0);
+    iWriter.attachSource(iSource);
+
+
     writer.write();
+    output_io.close();
     }
 
     catch (except::Throwable & t)
