@@ -1,4 +1,12 @@
-/************
+/******************************************************************************
+* Copyright (c) 2013, Bradley J Chambers, brad.chambers@gmail.com
+*
+* All rights reserved.
+*
+* This is a modified version of the code provided in the Asymptote project.
+* See licensing terms below.
+*
+*******************************************************************************
 *
 *   This file is part of a tool for producing 3D content in the PRC format.
 *   Copyright (C) 2008  Orest Shardt <shardtor (at) gmail dot com>
@@ -16,7 +24,7 @@
 *   You should have received a copy of the GNU Lesser General Public License
 *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *
-*************/
+******************************************************************************/
 
 #ifndef __O_PRC_FILE_H
 #define __O_PRC_FILE_H
@@ -733,7 +741,7 @@ class oPRCFile
     uint32_t addTransform(const double* t);
     uint32_t addTransform(const double origin[3], const double x_axis[3], const double y_axis[3], double scale);
     void addPoint(const double P[3], const RGBAColour &c, double w=1.0);
-    void addPoints(uint32_t n, const double P[][3], const RGBAColour &c, double w=1.0);
+    void addPoints(uint32_t n, const double ** P, const RGBAColour &c, double w=1.0);
     void addLines(uint32_t nP, const double P[][3], uint32_t nI, const uint32_t PI[],
                       const RGBAColour& c, double w,
                       bool segment_color, uint32_t nC, const RGBAColour C[], uint32_t nCI, const uint32_t CI[]);

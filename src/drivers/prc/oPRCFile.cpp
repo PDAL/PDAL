@@ -1,4 +1,12 @@
-/************
+/******************************************************************************
+* Copyright (c) 2013, Bradley J Chambers, brad.chambers@gmail.com
+*
+* All rights reserved.
+*
+* This is a modified version of the code provided in the Asymptote project.
+* See licensing terms below.
+*
+*******************************************************************************
 *
 *   This file is part of a tool for producing 3D content in the PRC format.
 *   Copyright (C) 2008  Orest Shardt <shardtor (at) gmail dot com>
@@ -17,7 +25,7 @@
 *   You should have received a copy of the GNU Lesser General Public License
 *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *
-*************/
+******************************************************************************/
 
 #include <pdal/drivers/prc/oPRCFile.hpp>
 #include <time.h>
@@ -1492,7 +1500,7 @@ void oPRCFile::addPoint(const double P[3], const RGBAColour &c, double w)
   group.points[addColourWidth(c,w)].push_back(PRCVector3d(P[0],P[1],P[2]));
 }
 
-void oPRCFile::addPoints(uint32_t n, const double P[][3], const RGBAColour &c, double w)
+void oPRCFile::addPoints(uint32_t n, const double ** P, const RGBAColour &c, double w)
 {
   if(n==0 || P==NULL)
      return;

@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Howard Butler, hobu.inc@gmail.com
+* Copyright (c) 2013, Bradley J Chambers, brad.chambers@gmail.com
 *
 * All rights reserved.
 *
@@ -127,7 +127,12 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
     pdal::Dimension const& dimY = schema.getDimension("Y");
     pdal::Dimension const& dimZ = schema.getDimension("Z");
     
-    double points[data.getNumPoints()][3];
+    double **points;
+    points = (double**) malloc(data.getNumPoints()*sizeof(double*));
+    for (boost::uint32_t i = 0; i < data.getNumPoints(); ++i)
+    {
+        points[i] = (double*) malloc(3*sizeof(double));
+    }
 
     double xd(0.0);
     double yd(0.0);
@@ -139,19 +144,26 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
         boost::int32_t y = data.getField<boost::int32_t>(dimY, i);
         boost::int32_t z = data.getField<boost::int32_t>(dimZ, i);
 
+/*
         xd = dimX.applyScaling<boost::int32_t>(x);
         yd = dimY.applyScaling<boost::int32_t>(y);
         zd = dimZ.applyScaling<boost::int32_t>(z);
-
-        points[i][0] = xd;
-	points[i][1] = yd;
-	points[i][2] = zd;
-
-	numPoints++;
+*/
+        points[i][0] = x;
+        points[i][1] = y;
+        points[i][2] = z;
+        
+        numPoints++;
     }
 
-    m_prcFile.addPoints(numPoints, points, RGBAColour(1.0,0.0,0.0,1.0),10.0);
+    m_prcFile.addPoints(numPoints, const_cast<const double**>(points), RGBAColour(1.0,1.0,0.0,1.0),1.0);
     
+    for (boost::uint32_t i = 0; i < data.getNumPoints(); ++i)
+    {
+        free(points[i]);
+    }
+    free(points);
+
     return numPoints;
 }
 
