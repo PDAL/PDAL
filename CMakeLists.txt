@@ -340,6 +340,11 @@ endif()
 # settings for other 3rd party dependencies
 #------------------------------------------------------------------------------
 
+find_package(ZLIB REQUIRED)
+mark_as_advanced(CLEAR ZLIB_INCLUDE_DIR)
+mark_as_advanced(CLEAR ZLIB_LIBRARY)
+include_directories(${ZLIB_INCLUDE_DIR})
+
 # swig support
 if (WIN32)
     # keep C# bindings it off by default, even on windows, since not everyone wants it
