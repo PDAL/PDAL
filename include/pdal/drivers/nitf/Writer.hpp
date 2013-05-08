@@ -39,15 +39,10 @@
 #include <pdal/drivers/las/Writer.hpp>
 #include <pdal/StreamFactory.hpp>
 
-
 namespace pdal
 {
 class PointBuffer;
 
-namespace metadata
-{
-class Entry;
-}
 namespace drivers
 {
 namespace las
@@ -97,7 +92,8 @@ private:
     bool m_bCreatedFile;
     
     // From http://stackoverflow.com/questions/3175159/how-do-i-make-a-some-sort-of-istream-for-a-vector-of-unsigned-chars
-    std::ostringstream m_oss;
+    std::stringstream m_oss;
+    // std::ofstream m_oss;
     // std::vector<unsigned char> m_lasdata;
     // boost::iostreams::stream<container_device<std::vector<unsigned char> > > *m_io;
 };

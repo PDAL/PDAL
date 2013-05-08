@@ -66,12 +66,14 @@ namespace nitf
 {
 
 Writer::Writer(Stage& prevStage, const Options& options)
-    : pdal::drivers::las::Writer(prevStage, static_cast<std::ostream*>(&m_oss))
+    :  pdal::drivers::las::Writer(prevStage, static_cast<std::ostream*>(&m_oss))
 
 
 {
     Options&  opts = getOptions();
     opts = options;
+    
+    m_oss.str("");
     return;
 }
 
@@ -112,10 +114,6 @@ void Writer::writeBufferBegin(PointBuffer const& buffer)
 {
     // call super class
     pdal::drivers::las::Writer::writeBufferBegin(buffer);
-
-    size_t size = m_oss.str().size();
-    log()->get(logDEBUG) <<  " lasfile size: " << size <<  std::endl;                    
-    
 }
 
 
@@ -123,10 +121,6 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& buffer)
 {
     // call super class
     return pdal::drivers::las::Writer::writeBuffer(buffer);
-
-    size_t size = m_oss.str().size();
-    log()->get(logDEBUG) <<  " lasfile size: " << size <<  std::endl;                    
-    
 }
 
 
@@ -134,7 +128,6 @@ void Writer::writeBufferEnd(PointBuffer const& buffer)
 {
     // call super class
     pdal::drivers::las::Writer::writeBufferEnd(buffer);
- 
 }
 
 
@@ -146,25 +139,21 @@ void Writer::writeEnd(boost::uint64_t actualNumPointsWritten)
     m_oss.flush();
     try
     {
-        
-    //     ::nitf::IOHandle in("/Users/hobu//dev/git/nitro/c/nitf/tests/test_blank.ntf"); /* Input I/O handle */
-    // ::nitf::Reader reader;
-    // ::nitf::Record record = reader.read(in);
 
     ::nitf::Record record(NITF_VER_21);
     ::nitf::FileHeader header = record.getHeader();
     header.getFileHeader().set("NITF");
-    header.getComplianceLevel().set("03");
-    header.getSystemType().set("BF01");
-    header.getOriginStationID().set("PDAL");
-    header.getFileTitle().set("FTITLE");
-    header.getClassification().set("U");
+    header.getComplianceLevel().set(getOptions().getValueOrDefault<std::string>("CLEVEL","03"));
+    header.getSystemType().set(getOptions().getValueOrDefault<std::string>("STYPE","BF01"));
+    header.getOriginStationID().set(getOptions().getValueOrDefault<std::string>("OSTAID","PDAL"));
+    header.getFileTitle().set(getOptions().getValueOrDefault<std::string>("FTITLE","FTITLE"));
+    header.getClassification().set(getOptions().getValueOrDefault<std::string>("FSCLAS","U"));
     header.getMessageCopyNum().set("00000");
     header.getMessageNumCopies().set("00000");
     header.getEncrypted().set("0");
     header.getBackgroundColor().setRawData((char*)"000", 3);
-    header.getOriginatorName().set("");
-    header.getOriginatorPhone().set("");
+    header.getOriginatorName().set(getOptions().getValueOrDefault<std::string>("ONAME",""));
+    header.getOriginatorPhone().set(getOptions().getValueOrDefault<std::string>("OPHONE",""));
 
     ::nitf::DESegment des = record.newDataExtensionSegment();
 
@@ -172,7 +161,7 @@ void Writer::writeEnd(boost::uint64_t actualNumPointsWritten)
 
     des.getSubheader().getTypeID().set("LIDARA DES");
     des.getSubheader().getVersion().set("01");
-    des.getSubheader().getSecurityClass().set("U");
+    des.getSubheader().getSecurityClass().set(getOptions().getValueOrDefault<std::string>("FSCLAS","U"));
 
     ::nitf::FileSecurity security =
         record.getHeader().getSecurityGroup();
@@ -187,19 +176,24 @@ void Writer::writeEnd(boost::uint64_t actualNumPointsWritten)
 
 
     std::streambuf *buf = m_oss.rdbuf();
-    size_t size = m_oss.str().size();
 
+
+    long size = buf->pubseekoff(0, m_oss.end);
     buf->pubseekoff(0, m_oss.beg);
-
         
     char* bytes = new char[size];
     buf->sgetn(bytes, size);
 
-    
     des.getSubheader().setSubheaderFields(usrHdr);
 
     ::nitf::ImageSegment image = record.newImageSegment();
     ::nitf::ImageSubheader subheader = image.getSubheader();
+
+    subheader.getSecurityClass().set(getOptions().getValueOrDefault<std::string>("FSCLAS","U"));
+    
+    std::string fdate = getOptions().getValueOrDefault<std::string>("IDATIM", "");
+    if (fdate.size())
+        subheader.getImageDateAndTime().set(fdate);
     
     ::nitf::BandInfo info;    
     ::nitf::LookupTable lt(0,0);
@@ -230,7 +224,7 @@ void Writer::writeEnd(boost::uint64_t actualNumPointsWritten)
                                          );
     subheader.getImageId().set("None");
     // 64 char string
-    char* buffer = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    char* buffer = "0000000000000000000000000000000000000000000000000000000000000000";
     
     ::nitf::BandSource* band =
         new ::nitf::MemorySource( buffer, 
@@ -242,7 +236,7 @@ void Writer::writeEnd(boost::uint64_t actualNumPointsWritten)
     iSource.addBand(*band);
     
     ::nitf::Writer writer;
-    ::nitf::IOHandle output_io("written.ntf", NITF_ACCESS_WRITEONLY, NITF_CREATE);
+    ::nitf::IOHandle output_io(m_filename.c_str(), NITF_ACCESS_WRITEONLY, NITF_CREATE);
     writer.prepare(output_io, record);
     
     ::nitf::SegmentWriter sWriter = writer.newDEWriter(0);

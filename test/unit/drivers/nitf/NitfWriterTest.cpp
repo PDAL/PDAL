@@ -139,11 +139,11 @@ BOOST_AUTO_TEST_CASE(test1)
 
         pdal::drivers::nitf::Writer writer(reader, writer_opts);
         {
-            writer.setCompressed(false);
-            writer.setDate(0, 0);
-            writer.setPointFormat(::pdal::drivers::las::PointFormat3);
-            writer.setSystemIdentifier("");
-            writer.setGeneratingSoftware("PDAL-NITF");
+            // writer.setCompressed(false);
+            // // writer.setDate(0, 0);
+            // // writer.setPointFormat(::pdal::drivers::las::PointFormat3);
+            // // writer.setSystemIdentifier("");
+            // writer.setGeneratingSoftware("PDAL-NITF");
             writer.setChunkSize(100);
         }
         writer.initialize();
