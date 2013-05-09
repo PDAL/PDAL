@@ -54,7 +54,6 @@ namespace pgpointcloud
 {
 
 
-
 class PDAL_DLL Reader : public pdal::Reader
 {
 public:
@@ -73,141 +72,88 @@ public:
     }
     
     virtual boost::uint64_t getNumPoints() const;
+    boost::uint64_t getNumPatches() const;
+    boost::uint64_t getMaxPoints() const;
+    void getSession() const;
 
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
-
-    QueryType getQueryType() const
-    {
-        return m_query_type;
-    }
-    QueryType describeQueryType(std::string const& query) const;
-    
-    inline DatabaseType getDatabaseType() const { return m_database_type; }
-    pdal::Schema fetchSchema(std::string const& query) const;
-    pdal::SpatialReference fetchSpatialReference(std::string const& query) const;
 
 
 private:
 
     Reader& operator=(const Reader&); // not implemented
     Reader(const Reader&); // not implemented
-    //
 
-    DatabaseType m_database_type;
-    QueryType m_query_type;
-        
-    // Connection m_connection;
-    // Statement m_initialQueryStatement;
-    // QueryType m_querytype;
-    // 
-    // BlockPtr m_block;
-    // boost::uint32_t m_capacity;
-    // 
-    // // Fields in the form of NAME:TYPE
-    // std::map<std::string, int> m_fields;
-    // 
-    // boost::shared_ptr<pdal::gdal::Debug> m_gdal_debug;
-    mutable boost::uint64_t m_cachedPointCount;
+    pdal::Schema fetchSchema() const;
+    pdal::SpatialReference fetchSpatialReference() const;
+    boost::uint32_t fetchPcid() const;
 
+    ::soci::session* m_session;
+    std::string m_connection;
+    std::string m_table_name;
+    std::string m_schema_name;
+    std::string m_column_name;
+    std::string m_where;
+    boost::uint32_t m_pcid;
 
-    #ifdef PDAL_HAVE_SOCI
-        ::soci::session* m_session;
-    #else
-        void* m_session;
-    #endif
+    mutable boost::uint64_t m_cached_point_count;
+    mutable boost::uint64_t m_cached_patch_count;
+    mutable boost::uint64_t m_cached_max_points;
 
-};
+}; // pdal.drivers.pgpointcloud.Reader
+
 
 namespace iterators
 {
-
 namespace sequential
 {
 
+typedef boost::shared_ptr<PointBuffer> BufferPtr;
 
-    typedef boost::shared_ptr<PointBuffer> BufferPtr;
-    typedef std::map<int, BufferPtr> BufferMap;
 
-class IteratorBase
+class Iterator : public pdal::StageSequentialIterator
 {
 public:
-    IteratorBase(const pdal::drivers::pgpointcloud::Reader& reader);
-    ~IteratorBase();
+    Iterator(const pdal::drivers::pgpointcloud::Reader& reader, PointBuffer& buffer);
+    ~Iterator();
 
 protected:
+
+
+private:
+    //
+    // Methods
+    //
     const pdal::drivers::pgpointcloud::Reader& getReader() const;
 
-    boost::uint32_t myReadBuffer(PointBuffer& data);
-    // boost::uint32_t unpackOracleData(PointBuffer& data);
-    // 
-    boost::uint32_t myReadClouds(PointBuffer& data);
-    boost::uint32_t myReadBlocks(PointBuffer& data, ::soci::statement& statement, ::soci::row& row);
-    // 
-    BufferPtr fetchPointBuffer( boost::int32_t const& cloud_id,
-                                std::string const& schema_xml);
+    // Skip count points, return number of points skipped
+    boost::uint64_t skipImpl(boost::uint64_t count);
 
+    // Fill the provided pointbuffer, return the number of points written
+    boost::uint32_t readBufferImpl(PointBuffer& data);
+
+    // True when there are no more points to read
+    bool atEndImpl() const;
+
+    //
+    // Members
+    //
+    ::soci::session* m_session;
+    BufferPtr m_buffer;
     bool m_at_end;
-
-    DatabaseType m_database_type;
-    QueryType m_query_type;    
-
-    boost::int32_t m_active_cloud_id;
-    BufferPtr m_active_buffer;
-    BufferMap m_buffers;
-    boost::uint32_t m_buffer_position;
-
-
-
-private:
+    boost::uint64_t m_buffer_position;
     const pdal::drivers::pgpointcloud::Reader& m_reader;
 
-    #ifdef PDAL_HAVE_SOCI
-        ::soci::session* m_session;
-    #else
-        void* m_session;
-    #endif
-
-    
-    ::soci::statement getNextCloud(   std::string const& cloud_table_name, 
-                                      boost::int32_t& cloud_id,
-                                      ::soci::row& r);
-    void readBlob(::soci::row& block,
-                  boost::uint32_t howMany);
-    void fillUserBuffer(PointBuffer& user_buffer);
-    // 
-    void copyDatabaseData(PointBuffer& source, 
-                          PointBuffer& destination, 
-                          Dimension const& dest_dim, 
-                          boost::uint32_t source_starting_position, 
-                          boost::uint32_t destination_starting_position,
-                          boost::uint32_t howMany);
-    // pdal::Bounds<double> getBounds(Statement statement, BlockPtr block);
-    IteratorBase& operator=(const IteratorBase&); // not implemented
-    IteratorBase(const IteratorBase&); // not implemented;
-
-
-};
-
-
-class Reader : public IteratorBase, public pdal::StageSequentialIterator
-{
-public:
-    Reader(const pdal::drivers::pgpointcloud::Reader& reader, PointBuffer& buffer);
-    ~Reader();
-
-private:
-    boost::uint64_t skipImpl(boost::uint64_t count);
-    boost::uint32_t readBufferImpl(PointBuffer& data);
-    bool atEndImpl() const;
-};
+}; // pdal.drivers.pgpointcloud.sequential.iterators.Iterator
 
 
 } // sequential
-
 } // iterators
-}
-}
-} // namespace pdal::driver::oci
 
 
-#endif // INCLUDED_PDAL_DRIVER_OCI_READER_HPP
+} // pgpointcloud
+} // driver
+} // pdal
+
+
+#endif // INCLUDED_PDAL_DRIVER_PGPOINTCLOUD_READER_HPP

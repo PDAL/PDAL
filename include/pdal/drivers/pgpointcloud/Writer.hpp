@@ -119,8 +119,8 @@ private:
     bool m_sdo_pc_is_initialized;
 };
 
-}
-}
-} // namespaces
+} // pgpointcloud
+} // drivers
+} // pdal
 
-#endif
+#endif  // INCLUDED_DRIVERS_PGPOINTCLOUD_WRITER_HPP

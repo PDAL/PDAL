@@ -102,13 +102,32 @@ inline CompressionType getCompressionType(std::string const& compression_type)
         output = COMPRESSION_NONE;
     
     return output;
+}
+
+inline ::soci::session* connectToDataBase(std::string const& connection)
+{
+    ::soci::session* output(0);
     
+    if ( ! connection.size() )
+    {
+        throw soci_driver_error("unable to connect to database, no connection string was given!");
+    }
+
+    try
+    {
+        output = new ::soci::session(::soci::postgresql, connection);
+    } catch (::soci::soci_error const& e)
+    {
+        std::stringstream oss;
+        oss << "Unable to connect to database with error '" << e.what() << "'";
+        throw connection_failed(oss.str());
+    }
+    return output;
 }
 
+} // pgpointcloud
+} // drivers
+} // pdal
 
-}
-}
-} // namespace pdal::driver::pgpointcloud
 
-
-#endif
+#endif // INCLUDED_DRIVER_PGPOINTCLOUD_COMMON_HPP
