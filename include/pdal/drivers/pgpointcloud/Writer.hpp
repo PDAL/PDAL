@@ -52,7 +52,7 @@ namespace pgpointcloud
 class PDAL_DLL Writer : public pdal::Writer
 {
 public:
-    SET_STAGE_NAME("drivers.pgpointcloud.writer", "Database Writer")
+    SET_STAGE_NAME("drivers.pgpointcloud.writer", "PostgresSQL Pointcloud Database Writer")
 
     Writer(Stage& prevStage, const Options&);
     ~Writer();
@@ -60,12 +60,9 @@ public:
     virtual void initialize();
     static Options getDefaultOptions();
 
-
-
 protected:
     virtual void writeBegin(boost::uint64_t targetNumPointsToWrite);
     virtual void writeBufferBegin(PointBuffer const&);
-
     virtual boost::uint32_t writeBuffer(const PointBuffer&);
     virtual void writeEnd(boost::uint64_t actualNumPointsWritten);
 
@@ -74,53 +71,52 @@ private:
     Writer& operator=(const Writer&); // not implemented
     Writer(const Writer&); // not implemented
 
-    void CreateBlockTable(std::string const& name, boost::uint32_t srid);
-    void CreateCloudTable(std::string const& name, boost::uint32_t srid);    
     bool CheckTableExists(std::string const& name);
-    void DeleteBlockTable(std::string const& cloud_table_name,
-                          std::string const& cloud_column_name, 
-                          std::string const& block_table_name);
-    void DeleteCloudTable(std::string const& cloud_table_name,
-                          std::string const& cloud_column_name);                          
-    void CreateIndexes(std::string const& table_name, 
-                       std::string const& spatial_column_name, 
-                       bool is3d,
-                       bool isBlockTable=true);
-    void CreateSDOEntry(std::string const& block_table, 
-                        boost::uint32_t srid, 
-                        pdal::Bounds<double> bounds,
-                        bool is3d);
-    Schema getPackedSchema( Schema const& schema) const;
-    bool IsValidGeometryWKT(std::string const& wkt) const;
-    std::string loadGeometryWKT(std::string const& filename_or_wkt) const;
-    void CreateCloud(Schema const& buffer_schema);    
+    bool CheckPointCloudExists();
+    bool CheckPostGISExists();
+    Schema PackSchema(Schema const& schema) const;
+    boost::uint32_t SetupSchema(Schema const& buffer_schema, boost::uint32_t srid);
 
-    void PackPointData( PointBuffer const& buffer,
-                        boost::uint8_t** point_data,
-                        boost::uint32_t& point_data_len,
-                        boost::uint32_t& schema_byte_size);
+    void CreateTable(std::string const& schema_name, 
+                     std::string const& table_name,
+                     std::string const& column_name,
+                     boost::uint32_t pcid);
+
+    void DeleteTable(std::string const& schema_name,
+                     std::string const& table_name);
+
+    void CreateIndex(std::string const& schema_name, 
+                     std::string const& table_name, 
+                     std::string const& column_name);
+
+    void PackPointData(PointBuffer const& buffer,
+                       boost::uint8_t** point_data,
+                       boost::uint32_t& point_data_len,
+                       boost::uint32_t& schema_byte_size);
+
     bool WriteBlock(PointBuffer const& buffer);                        
     
 #ifdef PDAL_HAVE_SOCI
     ::soci::session* m_session;
-	::soci::statement* m_block_statement;
 #else
     void* m_session;
 #endif
 
-    DatabaseType m_type;
-    bool m_doCreateIndex;
-    pdal::Bounds<double> m_bounds; // Bounds of the entire point cloud    
+    const pdal::Schema &m_pdal_schema;
+    std::string m_schema_name;
+    std::string m_table_name;
+    std::string m_column_name;
+    CompressionType m_patch_compression_type;
+    boost::uint32_t m_patch_capacity;
+    boost::uint32_t m_srid;
+    boost::uint32_t m_pcid;
+    bool m_have_postgis;
+    bool m_create_index;
+    bool m_overwrite;
+
+
+    // lose this
     bool m_sdo_pc_is_initialized;
-	std::ostringstream m_block_insert_query;
-	std::ostringstream m_block_bytes;
-	std::string m_block_data;
-	std::string m_extent;
-	std::string m_bbox;
-	boost::int32_t m_obj_id;
-	boost::int32_t m_block_id;
-	boost::uint32_t m_srid;
-	boost::int64_t m_num_points;
 };
 
 }

@@ -57,85 +57,54 @@ namespace drivers
 namespace pgpointcloud
 {
 
-    class soci_driver_error : public pdal_error
-    {
-    public:
-        soci_driver_error(std::string const& msg)
-            : pdal_error(msg)
-        {}
-    };
-
-    class connection_failed : public soci_driver_error
-    {
-    public:
-        connection_failed(std::string const& msg)
-            : soci_driver_error(msg)
-        {}
-    };
-
-    class buffer_too_small : public soci_driver_error
-    {
-    public:
-        buffer_too_small(std::string const& msg)
-            : soci_driver_error(msg)
-        {}
-    };
-
-
-    enum DatabaseType
-    {
-        DATABASE_POSTGRESQL,
-        DATABASE_ORACLE,
-        DATABASE_UNKNOWN = 128
-    };
-
-    enum QueryType
-    {
-        QUERY_CLOUD = 0,
-        QUERY_BLOCKS_PLUS_CLOUD_VIEW,
-        QUERY_UNKNOWN = 512
-    };
-
-
-inline DatabaseType getDatabaseConnectionType(std::string const& connection_type)
+class soci_driver_error : public pdal_error
 {
-    DatabaseType output;
+public:
+    soci_driver_error(std::string const& msg)
+        : pdal_error(msg)
+    {}
+};
 
-    if (boost::iequals(connection_type, "oracle"))
-        output = DATABASE_ORACLE;
-    else if (boost::iequals(connection_type, "postgresql"))
-        output = DATABASE_POSTGRESQL;
+class connection_failed : public soci_driver_error
+{
+public:
+    connection_failed(std::string const& msg)
+        : soci_driver_error(msg)
+    {}
+};
+
+class buffer_too_small : public soci_driver_error
+{
+public:
+    buffer_too_small(std::string const& msg)
+        : soci_driver_error(msg)
+    {}
+};
+
+
+enum CompressionType
+{
+    COMPRESSION_NONE = 0,
+    COMPRESSION_GHT = 1,
+    COMPRESSION_DIMENSIONAL = 2
+};
+
+
+inline CompressionType getCompressionType(std::string const& compression_type)
+{
+    CompressionType output;
+
+    if (boost::iequals(compression_type, "dimensional"))
+        output = COMPRESSION_DIMENSIONAL;
+    else if (boost::iequals(compression_type, "ght"))
+        output = COMPRESSION_GHT;
     else
-        output = DATABASE_UNKNOWN;
+        output = COMPRESSION_NONE;
     
     return output;
     
 }
 
-inline ::soci::session* connectToDataBase(std::string const& connection, DatabaseType dtype)
-{
-    ::soci::session* output(0);
-    if (dtype == DATABASE_UNKNOWN)
-    {
-        std::stringstream oss;
-        oss << "Database connection type '" << dtype << "' is unknown or not configured";
-        throw soci_driver_error(oss.str());
-    }
-    
-    try
-    {
-        if (dtype == DATABASE_POSTGRESQL)
-            output = new ::soci::session(::soci::postgresql, connection);
-
-    } catch (::soci::soci_error const& e)
-    {
-        std::stringstream oss;
-        oss << "Unable to connect to database with error '" << e.what() << "'";
-        throw connection_failed(oss.str());
-    }
-    
-    return output;
-}
 
 }
 }

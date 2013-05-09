@@ -81,6 +81,8 @@
 #ifndef USE_PDAL_PLUGIN_SOCI
 #include <pdal/drivers/soci/Reader.hpp>
 #include <pdal/drivers/soci/Writer.hpp>
+/* #include <pdal/drivers/pgpointcloud/Reader.hpp> */
+#include <pdal/drivers/pgpointcloud/Writer.hpp>
 #endif
 #endif
 
@@ -197,6 +199,7 @@ MAKE_WRITER_CREATOR(P2GWriter, pdal::drivers::p2g::Writer)
 
 #ifdef PDAL_HAVE_SOCI
 #ifndef USE_PDAL_PLUGIN_SOCI
+MAKE_WRITER_CREATOR(PgPcWriter, pdal::drivers::pgpointcloud::Writer)
 MAKE_WRITER_CREATOR(SociWriter, pdal::drivers::soci::Writer)
 #endif
 #endif
@@ -482,6 +485,7 @@ void StageFactory::registerKnownWriters()
 #ifdef PDAL_HAVE_SOCI
 #ifndef USE_PDAL_PLUGIN_SOCI
     REGISTER_WRITER(SociWriter, pdal::drivers::soci::Writer);
+    REGISTER_WRITER(PgPcWriter, pdal::drivers::pgpointcloud::Writer);
 #endif
 #endif
 
