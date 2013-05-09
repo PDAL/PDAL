@@ -189,7 +189,7 @@ void Writer::writeEnd(boost::uint64_t actualNumPointsWritten)
     ::nitf::ImageSegment image = record.newImageSegment();
     ::nitf::ImageSubheader subheader = image.getSubheader();
 
-    subheader.getSecurityClass().set(getOptions().getValueOrDefault<std::string>("FSCLAS","U"));
+    subheader.getImageSecurityClass().set(getOptions().getValueOrDefault<std::string>("FSCLAS","U"));
     
     std::string fdate = getOptions().getValueOrDefault<std::string>("IDATIM", "");
     if (fdate.size())
