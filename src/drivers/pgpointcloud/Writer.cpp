@@ -117,31 +117,13 @@ void Writer::initialize()
     m_patch_compression_type = getCompressionType(compression_str);
 
     // Connection string needs to exist and actually work
-    std::string connection = getOptions().getValueOrDefault<std::string>("connection", "");
+    std::string connection = getOptions().getValueOrThrow<std::string>("connection");
     
-    // No string, nothing we can do
-    if ( ! connection.size() )
-    {
-        throw soci_driver_error("unable to connect to database, no connection string was given!");
-    }
-
     // Can we connect, using this string?
-    try
-    {
-        m_session = new ::soci::session(::soci::postgresql, connection);
-        log()->get(logDEBUG) << "Connected to database" << std::endl;
-    } 
-    catch (::soci::soci_error const &e)
-    {
-        std::stringstream oss;
-        oss << "Unable to connect '" << connection << "' with error '" << e.what() << "'";
-        throw pdal_error(oss.str());
-    }
+    m_session = connectToDataBase(connection);
 
     // Direct database log info to the logger
     m_session->set_log_stream(&(log()->get(logDEBUG2)));
-
-    // 
 
     // Read other preferences
     m_overwrite = getOptions().getValueOrDefault<bool>("overwrite", true);
