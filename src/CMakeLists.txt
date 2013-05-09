@@ -608,7 +608,7 @@ else()
     ${GEOS_LIBRARY}
     ${FLANN_LIBRARIES}
     ${HEXER_LIBRARY}
-    ${NITRO_LIBRARY})
+    ${NITRO_LIBRARIES})
 endif()
 
 message(STATUS "Using boost lib: ${Boost_LIBRARIES}")

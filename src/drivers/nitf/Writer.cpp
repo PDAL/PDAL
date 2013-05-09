@@ -49,9 +49,10 @@
 // #error "NITF support requires GDAL 1.10 or GDAL 2.0+"
 #endif
 
-#include <import/nitf.hpp>
-#include <except/Trace.h>
-
+#ifdef PDAL_HAVE_NITRO
+#include <nitro/c++/import/nitf.hpp>
+#include <nitro/c++/except/Trace.h>
+#endif
 // NOTES
 //
 // is it legal to write a LAZ file?
@@ -137,6 +138,9 @@ void Writer::writeEnd(boost::uint64_t actualNumPointsWritten)
     pdal::drivers::las::Writer::writeEnd(actualNumPointsWritten);
 
     m_oss.flush();
+
+#ifdef PDAL_HAVE_NITRO
+
     try
     {
 
@@ -258,7 +262,7 @@ void Writer::writeEnd(boost::uint64_t actualNumPointsWritten)
         // std::cout << t.getTrace();
         throw pdal_error( t.getMessage());
     }
-
+#endif
     return;
 }
 
