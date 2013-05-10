@@ -578,6 +578,12 @@ target_link_libraries(${APPS_CPP_DEPENDENCIES} ${ORACLE_LIBRARY})
 endif()
 endif()
 
+if (WITH_NITRO)
+if (NOT USE_PDAL_PLUGIN_NITRO)
+target_link_libraries(${APPS_CPP_DEPENDENCIES} ${NITRO_LIBRARIES})
+endif()
+endif()
+
 if (WIN32)
   target_link_libraries(${APPS_CPP_DEPENDENCIES} LINK_PUBLIC general
     ${PDAL_LIB_NAME}
@@ -607,8 +613,7 @@ else()
     ${P2G_LIBRARY}
     ${GEOS_LIBRARY}
     ${FLANN_LIBRARIES}
-    ${HEXER_LIBRARY}
-    ${NITRO_LIBRARIES})
+    ${HEXER_LIBRARY})
 endif()
 
 message(STATUS "Using boost lib: ${Boost_LIBRARIES}")
