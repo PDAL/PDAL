@@ -37,7 +37,7 @@
 
 #include <pdal/Reader.hpp>
 #include <pdal/ReaderIterator.hpp>
-
+#include <pdal/PointBuffer.hpp>
 
 #include <pdal/drivers/pgpointcloud/common.hpp>
 #include <boost/scoped_ptr.hpp>
@@ -74,6 +74,7 @@ public:
     virtual boost::uint64_t getNumPoints() const;
     boost::uint64_t getNumPatches() const;
     boost::uint64_t getMaxPoints() const;
+    std::string getDataQuery() const;
     void getSession() const;
 
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
@@ -84,9 +85,9 @@ private:
     Reader& operator=(const Reader&); // not implemented
     Reader(const Reader&); // not implemented
 
-    pdal::Schema fetchSchema() const;
     pdal::SpatialReference fetchSpatialReference() const;
     boost::uint32_t fetchPcid() const;
+    pdal::Schema fetchSchema() const;
 
     ::soci::session* m_session;
     std::string m_connection;
@@ -94,8 +95,7 @@ private:
     std::string m_schema_name;
     std::string m_column_name;
     std::string m_where;
-    boost::uint32_t m_pcid;
-
+    mutable boost::uint32_t m_pcid;
     mutable boost::uint64_t m_cached_point_count;
     mutable boost::uint64_t m_cached_patch_count;
     mutable boost::uint64_t m_cached_max_points;
@@ -126,6 +126,8 @@ private:
     //
     const pdal::drivers::pgpointcloud::Reader& getReader() const;
 
+    void setupDatabaseQuery();
+
     // Skip count points, return number of points skipped
     boost::uint64_t skipImpl(boost::uint64_t count);
 
@@ -138,11 +140,17 @@ private:
     //
     // Members
     //
-    ::soci::session* m_session;
-    BufferPtr m_buffer;
-    bool m_at_end;
-    boost::uint64_t m_buffer_position;
     const pdal::drivers::pgpointcloud::Reader& m_reader;
+    bool m_at_end;
+    pdal::PointBuffer* m_buffer;
+    boost::uint64_t m_buffer_position;
+
+    ::soci::statement* m_statement;
+    std::string m_patch_hex;
+    boost::uint32_t m_patch_npoints;
+    ::soci::session* m_session;
+    pdal::DimensionMap* m_dimension_map;
+
 
 }; // pdal.drivers.pgpointcloud.sequential.iterators.Iterator
 
