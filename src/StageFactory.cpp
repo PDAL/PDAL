@@ -75,7 +75,7 @@
 #ifndef USE_PDAL_PLUGIN_SOCI
 #include <pdal/drivers/soci/Reader.hpp>
 #include <pdal/drivers/soci/Writer.hpp>
-/* #include <pdal/drivers/pgpointcloud/Reader.hpp> */
+#include <pdal/drivers/pgpointcloud/Reader.hpp>
 #include <pdal/drivers/pgpointcloud/Writer.hpp>
 #endif
 #endif
@@ -135,6 +135,7 @@ MAKE_READER_CREATOR(NITFReader, pdal::drivers::nitf::Reader)
 #ifdef PDAL_HAVE_SOCI
 #ifndef USE_PDAL_PLUGIN_SOCI
 MAKE_READER_CREATOR(SociReader, pdal::drivers::soci::Reader)
+MAKE_READER_CREATOR(PgPcReader, pdal::drivers::pgpointcloud::Reader)
 #endif
 #endif
 
@@ -410,6 +411,7 @@ void StageFactory::registerKnownReaders()
 #ifdef PDAL_HAVE_SOCI
 #ifndef USE_PDAL_PLUGIN_SOCI
     REGISTER_READER(SociReader, pdal::drivers::soci::Reader);
+    REGISTER_READER(PgPcReader, pdal::drivers::pgpointcloud::Reader);
 #endif
 #endif
 
