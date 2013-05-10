@@ -65,7 +65,7 @@ namespace pgpointcloud
 
 Reader::Reader(const Options& options)
     : pdal::Reader(options)
-    , m_session(0)
+    , m_session(NULL)
     , m_connection("")
     , m_table_name("")
     , m_schema_name("")
@@ -102,6 +102,9 @@ Options Reader::getDefaultOptions()
 
 Reader::~Reader()
 {
+    if ( m_session )
+        delete m_session;
+
     return;
 }
 
@@ -158,7 +161,7 @@ boost::uint64_t Reader::getNumPoints() const
         oss << m_table_name;
         if ( m_where.size() )
         {
-            oss << " " << m_where;
+            oss << " WHERE " << m_where;
         }
 
         m_session->once << oss.str(), ::soci::into(m_cached_point_count), ::soci::into(m_cached_patch_count), ::soci::into(m_cached_max_points);
@@ -166,6 +169,25 @@ boost::uint64_t Reader::getNumPoints() const
     }
 
     return m_cached_point_count;
+}
+
+std::string Reader::getDataQuery() const
+{
+    std::ostringstream oss;
+    oss << "SELECT text(PC_Uncompress(" << m_column_name << ")) AS pa, ";
+    oss << "PC_NumPoints(" << m_column_name << ") AS npoints FROM ";
+    if ( m_schema_name.size() )
+    {
+        oss << m_schema_name << ".";
+    }
+    oss << m_table_name;
+    if ( m_where.size() )
+    {
+        oss << " WHERE " << m_where;
+    }
+
+    log()->get(logDEBUG) << "Constructed data query " << oss.str() << std::endl;
+    return oss.str();
 }
 
 boost::uint64_t Reader::getNumPatches() const
@@ -193,6 +215,8 @@ boost::uint32_t Reader::fetchPcid() const
 
     if ( m_pcid ) return m_pcid;
 
+    log()->get(logDEBUG) << "Fetching pcid ..." << std::endl;
+
     std::ostringstream oss;
     oss << "SELECT PC_Typmod_Pcid(a.atttypmod) AS pcid ";
     oss << "FROM pg_class c, pg_attribute a ";
@@ -204,7 +228,10 @@ boost::uint32_t Reader::fetchPcid() const
 
     if ( ! pcid )
         throw pdal_error("Unable to fetch pcid specified column and table");
+
+    log()->get(logDEBUG) << "     got pcid = " << pcid << std::endl;
     
+    m_pcid = pcid;
     return pcid;
 }
 
@@ -246,7 +273,7 @@ pdal::Schema Reader::fetchSchema() const
                 d.createUUID();
             }            
             d.setNamespace(getName());
-            schema.setDimension(d);        
+            schema.setDimension(d); 
         }
     }
 
@@ -256,7 +283,7 @@ pdal::Schema Reader::fetchSchema() const
 pdal::SpatialReference Reader::fetchSpatialReference() const
 {
     // Fetch the WKT for the SRID to set the coordinate system of this stage
-    log()->get(logDEBUG) << "Fetching spatial setSpatialReference object" << std::endl;
+    log()->get(logDEBUG) << "Fetching SRID ..." << std::endl;
 
     boost::uint32_t pcid = fetchPcid();
 
@@ -283,7 +310,7 @@ pdal::SpatialReference Reader::fetchSpatialReference() const
         return pdal::SpatialReference();
     }
 
-    log()->get(logDEBUG) << "query returned " << srid << std::endl;    
+    log()->get(logDEBUG) << "     got SRID = " << srid << std::endl;    
 
     oss << "EPSG:" << srid;
 
@@ -317,19 +344,36 @@ namespace sequential
 
 Iterator::Iterator(const pdal::drivers::pgpointcloud::Reader& reader, PointBuffer& buffer)
     : pdal::StageSequentialIterator(reader, buffer)
-    , m_at_end(false)
-    , m_buffer_position(0)
     , m_reader(reader)
+    , m_at_end(false)
+    , m_buffer(NULL)
+    , m_buffer_position(0)
+    , m_statement(NULL)
+    , m_patch_hex("")
+    , m_patch_npoints(0)
+    , m_session(NULL)
+    , m_dimension_map(NULL)
 {
     pdal::Options const& options = reader.getOptions();
     std::string const& connection = options.getValueOrThrow<std::string>("connection");
     m_session = connectToDataBase(connection);
-    
+
     return;
 }
 
 Iterator::~Iterator()
 {
+    if ( m_statement )
+        delete m_statement;
+
+    if ( m_session )
+        delete m_session;
+
+    if ( m_dimension_map )
+        delete m_dimension_map;
+
+    if ( m_buffer )
+        delete m_buffer;
 }
 
 const pdal::drivers::pgpointcloud::Reader& Iterator::getReader() const
@@ -340,6 +384,7 @@ const pdal::drivers::pgpointcloud::Reader& Iterator::getReader() const
 
 boost::uint64_t Iterator::skipImpl(boost::uint64_t count)
 {
+    getReader().log()->get(logDEBUG) << "skipImpl called" << std::endl;
 
     return naiveSkipImpl(count);
 }
@@ -347,22 +392,154 @@ boost::uint64_t Iterator::skipImpl(boost::uint64_t count)
 
 bool Iterator::atEndImpl() const
 {
-    return true;
-    // return m_at_end;
+    getReader().log()->get(logDEBUG) << "atEndImpl called" << std::endl;
+    // return true;
+    return m_at_end;
 }
 
 
-boost::uint32_t Iterator::readBufferImpl(PointBuffer& data)
+boost::uint32_t Iterator::readBufferImpl(PointBuffer& user_buffer)
 {
-    return data.getNumPoints();
-    // return myReadBuffer(data);
+    // do we already have a statement in place?
+    // no, set one up ('select from table where')
+    // yes,
+    //   do we already have a cached patch?
+    //   no, set one up
+    //   yes, 
+    //     is it all read?
+    //     yes, get a new one 
+    //        are there any more? no? set at_end to true, shut down statment
+    //        yes, copy it into the cached patch
+    //     no, read cached patch into user pointbuffer until it's empty
+    // 
+
+
+    getReader().log()->get(logDEBUG) << "readBufferImpl called with request for " << user_buffer.getNumPoints() << " points" << std::endl;
+
+    // First time through, create the SQL statement, allocate holding pens
+    // and fire it off!
+    if ( ! m_statement )
+    {
+        m_statement = new ::soci::statement(*m_session);
+        *m_statement = (m_session->prepare << getReader().getDataQuery(), ::soci::into(m_patch_hex), ::soci::into(m_patch_npoints));
+        m_statement->execute();
+        getReader().log()->get(logDEBUG) << "SQL statement prepared" << std::endl;
+    }
+
+    // Is the cache for patches ready?
+    if ( ! m_buffer )
+    {
+        uint32_t max_points = getReader().getMaxPoints();
+        m_buffer = new pdal::PointBuffer(getReader().getSchema(), max_points);
+        m_buffer->setNumPoints(0);
+        m_buffer_position = 0;
+        getReader().log()->get(logDEBUG) << "allocated a cached point buffer with capacity of " << max_points << std::endl;
+    }
+
+    // Create a dimension map if we don't already have one
+    if ( m_buffer && ! m_dimension_map )
+    {
+        m_dimension_map = pdal::PointBuffer::mapDimensions(*m_buffer, user_buffer);
+    }
+
+    boost::uint32_t num_loops = 0;
+    // Read from the SQL statement until we run out of blocks, or break the loop
+    // when we've filled up the user data buffer.
+    while ( true ) 
+    {
+        // User buffer is full? We need to get out of this loop and 
+        // let the writer decide what to do next.
+        if ( user_buffer.getNumPoints() == user_buffer.getCapacity() )
+        {
+            getReader().log()->get(logDEBUG) << "User buffer is full, returning control to pdal core" << std::endl;
+            break;
+        }
+
+        // If we've read all the contents of the cache buffer, get a fresh
+        // patch from the database
+        if ( m_buffer_position >= m_buffer->getNumPoints() )
+        {
+            // No more patches! We're done!
+            if ( ! m_statement->fetch() )
+            {
+                m_at_end = true;
+                break;
+            }
+            getReader().log()->get(logDEBUG) << "Fetched a patch from the database" << std::endl;
+
+            // Copy data from the hex WKB string obtained by the database
+            // into a pdal::PointBuffer for transfer to the user data buffer later
+            //
+            // Note: pointcloud hex WKB  has some header matter we need to trim off
+            // before we can copy the raw data into the pdal::PointBuffer
+            // endian (2) + pcid (8) + compression (8) + npoints (8) = 26 characters
+            boost::uint32_t trim = 26;
+            std::string hex_trimmed = m_patch_hex.substr(trim, m_patch_hex.size()-trim);
+            std::vector<boost::uint8_t> binary_data = Utils::hex_string_to_binary(hex_trimmed);
+            unsigned char* data = (unsigned char*) &(binary_data.front());
+            schema::size_type point_size = m_buffer->getSchema().getByteSize();
+            m_buffer->setDataStride(data, 0, m_patch_npoints * point_size);
+            m_buffer->setNumPoints(m_patch_npoints);
+            m_buffer_position = 0;
+            getReader().log()->get(logDEBUG) << "Copied patch into cache, npoints = " << m_patch_npoints << std::endl;
+        }
+
+        // Much many more points do we have to process in this cache?
+        boost::uint32_t points_in_cache = m_buffer->getNumPoints() - m_buffer_position;
+        // How much space is left in the user buffer?
+        boost::uint32_t space_in_user_buffer = user_buffer.getCapacity() - user_buffer.getNumPoints();
+        boost::uint32_t points_to_copy = 0;
+        // If there's space, put the whole cache into the user buffer,
+        if ( space_in_user_buffer > points_in_cache )
+        {
+            points_to_copy = points_in_cache;
+        }
+        // otherwise, just fill the buffer to full.
+        else
+        {
+            points_to_copy = space_in_user_buffer;
+        }
+
+        getReader().log()->get(logDEBUG) << "space_in_user_buffer = " << space_in_user_buffer << std::endl;
+        getReader().log()->get(logDEBUG) << "points_in_cache = " << points_in_cache << std::endl;
+        getReader().log()->get(logDEBUG) << "points_to_copy = " << points_to_copy << std::endl;
+        getReader().log()->get(logDEBUG) << "m_buffer_position = " << m_buffer_position << std::endl;
+        getReader().log()->get(logDEBUG) << "user_buffer.getNumPoints() = " << user_buffer.getNumPoints() << std::endl;
+
+        // Do the copying from cache to user buffer
+        // To do: this should be more tolerant of variations in source/dest schema
+        PointBuffer::copyLikeDimensions(*m_buffer, user_buffer, 
+                           *m_dimension_map,
+                           m_buffer_position, user_buffer.getNumPoints(), 
+                           points_to_copy);
+
+        // Update the buffers regarding how full/empty they are
+        m_buffer_position += points_to_copy;
+        user_buffer.setNumPoints(user_buffer.getNumPoints()+points_to_copy);
+
+        num_loops++;
+        getReader().log()->get(logDEBUG) << "User buffer filling loop, iteration " << num_loops << std::endl;
+    }
+ 
+    return user_buffer.getNumPoints();
 }
+
+// void Iterator::copyPointBufferData(PointBuffer& source, 
+//                               PointBuffer& destination,
+//                               boost::uint32_t source_position,
+//                               boost::uint32_t destination_position)
+// {
+//     Schema const& source_schema = source.getSchema();
+//     schema::index_by_index const& source_idx = source_schema.getDimensions().get<schema::index>();
+//     Schema const& destination_schema = destination.getSchema();
+//     schema::index_by_index const& destination_idx = destination_schema.getDimensions().get<schema::index>();
+// }
 
 
 
-}
-} // iterators::sequential::
 
-}
-}
-} // namespace pdal::driver::pgpointcloud
+}} // pdal.drivers.pgpointcloud.iterators.sequential.Iterator
+
+} // pgpointcloud
+} // drivers
+} // pdal
