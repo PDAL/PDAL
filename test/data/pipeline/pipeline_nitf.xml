@@ -7,6 +7,21 @@
         <Option name="compression">
             false
         </Option>
+        <Option name="FSCLASS">
+            U
+        </Option>        
+        <Option name="OPHONE">
+            5159664628
+        </Option>
+        <Option name="ONAME">
+            Howard Butler
+        </Option>
+        <Option name="IDATIM">
+            20110516183337
+        </Option>
+        <Option name="FTITLE">
+            This is the title
+        </Option>
         <Filter type="filters.crop">
             <Option name="bounds">
                 ([0,1000000],[0,1000000],[0,1000000])
