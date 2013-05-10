@@ -607,7 +607,8 @@ else()
     ${P2G_LIBRARY}
     ${GEOS_LIBRARY}
     ${FLANN_LIBRARIES}
-    ${HEXER_LIBRARY})
+    ${HEXER_LIBRARY}
+    ${NITRO_LIBRARIES})
 endif()
 
 message(STATUS "Using boost lib: ${Boost_LIBRARIES}")

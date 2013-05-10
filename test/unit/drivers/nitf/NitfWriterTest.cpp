@@ -128,24 +128,47 @@ BOOST_AUTO_TEST_CASE(test1)
 
         Options writer_opts;
         Option writer_opt1("filename", nitf_output);
-        writer_opts.add(writer_opt1);
+        Option debug("debug", true);
+        Option verbose("verbose", 8);
 
+        Option datetime("IDATIM", "20110516183337");
+        writer_opts.add(datetime);
+        
+        Option cls("FSCLAS", "S");
+        writer_opts.add(cls);
+        
+        Option phone("OPHONE", "5159664628");
+        writer_opts.add(phone);
+        
+        Option name("ONAME", "Howard Butler");
+        writer_opts.add(name);
+        
+        Option ftitle("FTITLE", "LiDAR from somewhere");
+        writer_opts.add(ftitle);
+        
+        
+        
+        writer_opts.add(debug);
+        writer_opts.add(verbose);
+        writer_opts.add(writer_opt1);
+        
         pdal::drivers::las::Reader reader(reader_opts);
 
         pdal::drivers::nitf::Writer writer(reader, writer_opts);
         {
-            writer.setCompressed(false);
-            writer.setDate(0, 0);
-            writer.setPointFormat(::pdal::drivers::las::PointFormat3);
-            writer.setSystemIdentifier("");
-            writer.setGeneratingSoftware("PDAL-NITF");
+            // writer.setCompressed(false);
+            // // writer.setDate(0, 0);
+            // // writer.setPointFormat(::pdal::drivers::las::PointFormat3);
+            // // writer.setSystemIdentifier("");
+            // writer.setGeneratingSoftware("PDAL-NITF");
+            writer.setChunkSize(100);
         }
         writer.initialize();
 
         writer.write(0);
     }
     
-    FileUtils::deleteFile(nitf_output);
+    // FileUtils::deleteFile(nitf_output);
     
 
     return;
