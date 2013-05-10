@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Pipeline version="1.0">
+    <Writer type="drivers.prc.writer">
+        <Option name="filename">
+            ../../temp/autzen-thin.prc
+        </Option>
+        <Reader type="drivers.las.reader">
+            <Option name="filename">
+                ../autzen-thin.las
+            </Option>
+        </Reader>
+    </Writer>
+</Pipeline>

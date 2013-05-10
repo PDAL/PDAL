@@ -55,6 +55,7 @@ SET(PDAL_UNITTEST_TEST_SRC
     SupportTest.cpp
     drivers/terrasolid/TerraSolidReaderTest.cpp
     drivers/text/TextWriterTest.cpp
+    drivers/prc/PRCWriterTest.cpp
 	ThreadTest.cpp
     UserCallbackTest.cpp
     UtilsTest.cpp

@@ -346,6 +346,33 @@ if (NOT USE_PDAL_PLUGIN_TEXT)
 endif()
 
 #
+# drivers/prc
+#
+set(PDAL_PRC_PATH drivers/prc)
+set(PDAL_PRC_HEADERS ${PDAL_HEADERS_DIR}/${PDAL_PRC_PATH})
+set(PDAL_PRC_SRC ${PROJECT_SOURCE_DIR}/src/${PDAL_PRC_PATH})
+
+set(PDAL_DRIVERS_PRC_HPP
+  ${PDAL_PRC_HEADERS}/PRC.hpp
+  ${PDAL_PRC_HEADERS}/PRCbitStream.hpp
+  ${PDAL_PRC_HEADERS}/PRCdouble.hpp
+  ${PDAL_PRC_HEADERS}/oPRCFile.hpp
+  ${PDAL_PRC_HEADERS}/writePRC.hpp
+  ${PDAL_PRC_HEADERS}/Writer.hpp
+)
+
+set(PDAL_DRIVERS_PRC_CPP
+  ${PDAL_PRC_SRC}/PRCbitStream.cpp
+  ${PDAL_PRC_SRC}/PRCdouble.cpp
+  ${PDAL_PRC_SRC}/oPRCFile.cpp
+  ${PDAL_PRC_SRC}/writePRC.cpp
+  ${PDAL_PRC_SRC}/Writer.cpp
+)
+
+list(APPEND PDAL_CPP ${PDAL_DRIVERS_PRC_CPP})
+list(APPEND PDAL_HPP ${PDAL_DRIVERS_PRC_HPP})
+
+#
 # drivers/nitf
 #
 set(PDAL_NITF_PATH drivers/nitf)
@@ -511,6 +538,7 @@ source_group("Header Files\\drivers\\las" FILES ${PDAL_DRIVERS_LAS_HPP})
 source_group("Header Files\\drivers\\nitf" FILES ${PDAL_DRIVERS_NITF_HPP})
 source_group("Header Files\\drivers\\oci" FILES ${PDAL_DRIVERS_OCI_HPP})
 source_group("Header Files\\drivers\\pipeline" FILES ${PDAL_DRIVERS_PIPELINE_HPP})
+source_group("Header Files\\drivers\\prc" FILES ${PDAL_DRIVERS_PRC_HPP})
 source_group("Header Files\\drivers\\qfit" FILES ${PDAL_DRIVERS_QFIT_HPP})
 source_group("Header Files\\drivers\\terrasolid" FILES ${PDAL_DRIVERS_TERRASOLID_HPP})
 source_group("Header Files\\drivers\\text" FILES ${PDAL_DRIVERS_TEXT_HPP})
@@ -525,6 +553,7 @@ source_group("Source Files\\drivers\\las" FILES ${PDAL_DRIVERS_LAS_CPP})
 source_group("Source Files\\drivers\\nitf" FILES ${PDAL_DRIVERS_NITF_CPP})
 source_group("Source Files\\drivers\\oci" FILES ${PDAL_DRIVERS_OCI_CPP})
 source_group("Source Files\\drivers\\pipeline" FILES ${PDAL_DRIVERS_PIPELINE_CPP})
+source_group("Source Files\\drivers\\prc" FILES ${PDAL_DRIVERS_PRC_CPP})
 source_group("Source Files\\drivers\\qfit" FILES ${PDAL_DRIVERS_QFIT_CPP})
 source_group("Source Files\\drivers\\terrasolid" FILES ${PDAL_DRIVERS_TERRASOLID_CPP})
 source_group("Source Files\\drivers\\text" FILES ${PDAL_DRIVERS_TEXT_CPP})
@@ -597,7 +626,8 @@ if (WIN32)
     ${P2G_LIBRARY}
     ${GEOS_LIBRARY}
     ${FLANN_LIBRARIES}
-    ${HEXER_LIBRARY})
+    ${HEXER_LIBRARY}
+    ${ZLIB_LIBRARY})
 else()
   target_link_libraries(${APPS_CPP_DEPENDENCIES}
     ${PDAL_LIB_NAME}
@@ -613,7 +643,8 @@ else()
     ${P2G_LIBRARY}
     ${GEOS_LIBRARY}
     ${FLANN_LIBRARIES}
-    ${HEXER_LIBRARY})
+    ${HEXER_LIBRARY}
+    ${ZLIB_LIBRARY})
 endif()
 
 message(STATUS "Using boost lib: ${Boost_LIBRARIES}")

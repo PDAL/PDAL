@@ -59,6 +59,7 @@
 #include <pdal/drivers/faux/Writer.hpp>
 #include <pdal/drivers/las/Writer.hpp>
 #include <pdal/drivers/text/Writer.hpp>
+#include <pdal/drivers/prc/Writer.hpp>
 
 #ifdef PDAL_HAVE_ORACLE
 #ifndef USE_PDAL_PLUGIN_OCI
@@ -180,6 +181,7 @@ MAKE_MULTIFILTER_CREATOR(Mosaic, pdal::filters::Mosaic)
 //
 MAKE_WRITER_CREATOR(FauxWriter, pdal::drivers::faux::Writer)
 MAKE_WRITER_CREATOR(LasWriter, pdal::drivers::las::Writer)
+MAKE_WRITER_CREATOR(PRCWriter, pdal::drivers::prc::Writer)
 
 #ifndef USE_PDAL_PLUGIN_TEXT
 MAKE_WRITER_CREATOR(TextWriter, pdal::drivers::text::Writer)
@@ -265,6 +267,7 @@ std::string StageFactory::inferWriterDriver(const std::string& filename, pdal::O
     drivers["las"] = "drivers.las.writer";
     drivers["laz"] = "drivers.las.writer";
     drivers["xyz"] = "drivers.text.writer";
+    drivers["prc"] = "drivers.prc.writer";
     drivers["txt"] = "drivers.text.writer";
     drivers["ntf"] = "drivers.nitf.writer";
     
@@ -464,6 +467,7 @@ void StageFactory::registerKnownWriters()
 {
     REGISTER_WRITER(FauxWriter, pdal::drivers::faux::Writer);
     REGISTER_WRITER(LasWriter, pdal::drivers::las::Writer);
+    REGISTER_WRITER(PRCWriter, pdal::drivers::prc::Writer);
 
 #ifndef USE_PDAL_PLUGIN_TEXT    
     REGISTER_WRITER(TextWriter, pdal::drivers::text::Writer);
