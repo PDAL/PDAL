@@ -149,7 +149,7 @@ boost::uint64_t Reader::getNumPoints() const
     {
         std::ostringstream oss;
         oss << "SELECT Sum(PC_NumPoints(" << m_column_name << ")) AS numpoints, ";
-        oss << "Count(*) AS numpatches ";
+        oss << "Count(*) AS numpatches, ";
         oss << "Max(PC_NumPoints(" << m_column_name << ")) AS maxpoints FROM ";
         if ( m_schema_name.size() )
         {
