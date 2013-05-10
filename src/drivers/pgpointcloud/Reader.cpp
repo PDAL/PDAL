@@ -62,6 +62,22 @@ namespace drivers
 namespace pgpointcloud
 {
 
+//*********************************************************************************
+//  pdal.drivers.pgpointcloud.Reader
+//  
+//  The iterator downbelow controls the actual reading, the Reader just does some
+//  basic setup and returning of metadata to the Writer at the other end of 
+//  the chain.
+//
+//  The core of PDAL only calls the following methods:
+//
+//  Options Reader::getDefaultOptions()
+//  void Reader::initialize()
+//  boost::uint64_t Reader::getNumPoints() const
+//  pdal::StageSequentialIterator* Reader::createSequentialIterator(PointBuffer& buffer) const
+//
+//*********************************************************************************
+
 
 Reader::Reader(const Options& options)
     : pdal::Reader(options)
@@ -75,8 +91,14 @@ Reader::Reader(const Options& options)
     , m_cached_point_count(0)
     , m_cached_patch_count(0)
     , m_cached_max_points(0)
-{
+{}
 
+Reader::~Reader()
+{
+    if ( m_session )
+        delete m_session;
+
+    return;
 }
 
 Options Reader::getDefaultOptions()
@@ -98,14 +120,6 @@ Options Reader::getDefaultOptions()
     options.add(spatialreference);
 
     return options;
-}
-
-Reader::~Reader()
-{
-    if ( m_session )
-        delete m_session;
-
-    return;
 }
 
 
@@ -400,20 +414,6 @@ bool Iterator::atEndImpl() const
 
 boost::uint32_t Iterator::readBufferImpl(PointBuffer& user_buffer)
 {
-    // do we already have a statement in place?
-    // no, set one up ('select from table where')
-    // yes,
-    //   do we already have a cached patch?
-    //   no, set one up
-    //   yes, 
-    //     is it all read?
-    //     yes, get a new one 
-    //        are there any more? no? set at_end to true, shut down statment
-    //        yes, copy it into the cached patch
-    //     no, read cached patch into user pointbuffer until it's empty
-    // 
-
-
     getReader().log()->get(logDEBUG) << "readBufferImpl called with request for " << user_buffer.getNumPoints() << " points" << std::endl;
 
     // First time through, create the SQL statement, allocate holding pens
@@ -523,18 +523,6 @@ boost::uint32_t Iterator::readBufferImpl(PointBuffer& user_buffer)
  
     return user_buffer.getNumPoints();
 }
-
-// void Iterator::copyPointBufferData(PointBuffer& source, 
-//                               PointBuffer& destination,
-//                               boost::uint32_t source_position,
-//                               boost::uint32_t destination_position)
-// {
-//     Schema const& source_schema = source.getSchema();
-//     schema::index_by_index const& source_idx = source_schema.getDimensions().get<schema::index>();
-//     Schema const& destination_schema = destination.getSchema();
-//     schema::index_by_index const& destination_idx = destination_schema.getDimensions().get<schema::index>();
-// }
-
 
 
 
