@@ -39,9 +39,6 @@
 #include <pdal/GlobalEnvironment.hpp>
 
 #ifdef PDAL_HAVE_GDAL
-#include "NitfFile.hpp"
-#include "nitflib.h"
-
 
 #include "gdal.h"
 #include "cpl_vsi.h"
@@ -52,7 +49,10 @@
 // #error "NITF support requires GDAL 1.10 or GDAL 2.0+"
 #endif
 
-
+#ifdef PDAL_HAVE_NITRO
+#include <nitro/c++/import/nitf.hpp>
+#include <nitro/c++/except/Trace.h>
+#endif
 // NOTES
 //
 // is it legal to write a LAZ file?
@@ -67,9 +67,14 @@ namespace nitf
 {
 
 Writer::Writer(Stage& prevStage, const Options& options)
-    : pdal::drivers::las::Writer(prevStage, options)
-    , m_bCreatedFile(false)
+    :  pdal::drivers::las::Writer(prevStage, static_cast<std::ostream*>(&m_oss))
+
+
 {
+    Options&  opts = getOptions();
+    opts = options;
+    
+    m_oss.str("");
     return;
 }
 
@@ -101,13 +106,6 @@ void Writer::writeBegin(boost::uint64_t targetNumPointsToWrite)
 {
     // call super class
     pdal::drivers::las::Writer::writeBegin(targetNumPointsToWrite);
-    
-    // char pszPVType[4] = "INT";
-    // pszPVType[3] = 0;
-    // char** options = NULL;
-    // NITFCreate(m_filename.c_str(), 1, 1, 1, 1, pszPVType, options);
-    
-    
 
     return;
 }
@@ -131,40 +129,6 @@ void Writer::writeBufferEnd(PointBuffer const& buffer)
 {
     // call super class
     pdal::drivers::las::Writer::writeBufferEnd(buffer);
-    
-    GlobalEnvironment::get().getGDALEnvironment();
-    GDALDriverH hDriver = GDALGetDriverByName( "NITF" );
-    if (hDriver == NULL)
-        throw pdal_error("NITF driver was null!");
-        
-    GDALDatasetH ds;   
-
-    char **papszMetadata = NULL;
-    papszMetadata = CSLAddNameValue( papszMetadata, "NITF_DESID", "LIDARA DES" );
-    papszMetadata = CSLAddNameValue( papszMetadata, "NITF_DESVER", "01" );
-    
-    char **papszOptions = NULL;
-
-    papszOptions = CSLSetNameValue( papszOptions, "CLEVEL", "05" );    
-
-    papszOptions = CSLSetNameValue( papszOptions, "FSCTLH", "FO" );    
-    papszOptions = CSLSetNameValue( papszOptions, "FDT", "20120323002946" );    
-    papszOptions = CSLSetNameValue( papszOptions, "OSTAID", "PDAL" );    
-    papszOptions = CSLSetNameValue( papszOptions, "FTITLE", "Some LiDAR data we're storing" );
-    papszOptions = CSLSetNameValue( papszOptions, "FSCLAS", "S" );
-    
-    
-
-    ds = GDALCreate( hDriver, m_filename.c_str(), 1, 1, 1, GDT_Byte, 
-                             papszOptions );
-
-    GDALRasterBandH band = GDALGetRasterBand(ds, 1);
-    GByte* buf  = (GByte*) CPLMalloc( 1 );
-    int eErr = GDALRasterIO(band,
-                  GF_Write,
-                  0, 0, 1,
-                  1, buf, 1, 1, GDT_Byte, 0, 0);    
-    GDALClose(ds);
 }
 
 
@@ -173,6 +137,132 @@ void Writer::writeEnd(boost::uint64_t actualNumPointsWritten)
     // call super class
     pdal::drivers::las::Writer::writeEnd(actualNumPointsWritten);
 
+    m_oss.flush();
+
+#ifdef PDAL_HAVE_NITRO
+
+    try
+    {
+
+    ::nitf::Record record(NITF_VER_21);
+    ::nitf::FileHeader header = record.getHeader();
+    header.getFileHeader().set("NITF");
+    header.getComplianceLevel().set(getOptions().getValueOrDefault<std::string>("CLEVEL","03"));
+    header.getSystemType().set(getOptions().getValueOrDefault<std::string>("STYPE","BF01"));
+    header.getOriginStationID().set(getOptions().getValueOrDefault<std::string>("OSTAID","PDAL"));
+    header.getFileTitle().set(getOptions().getValueOrDefault<std::string>("FTITLE","FTITLE"));
+    header.getClassification().set(getOptions().getValueOrDefault<std::string>("FSCLAS","U"));
+    header.getMessageCopyNum().set("00000");
+    header.getMessageNumCopies().set("00000");
+    header.getEncrypted().set("0");
+    header.getBackgroundColor().setRawData((char*)"000", 3);
+    header.getOriginatorName().set(getOptions().getValueOrDefault<std::string>("ONAME",""));
+    header.getOriginatorPhone().set(getOptions().getValueOrDefault<std::string>("OPHONE",""));
+
+    ::nitf::DESegment des = record.newDataExtensionSegment();
+
+    des.getSubheader().getFilePartType().set("DE");
+
+    des.getSubheader().getTypeID().set("LIDARA DES");
+    des.getSubheader().getVersion().set("01");
+    des.getSubheader().getSecurityClass().set(getOptions().getValueOrDefault<std::string>("FSCLAS","U"));
+
+    ::nitf::FileSecurity security =
+        record.getHeader().getSecurityGroup();
+    des.getSubheader().setSecurityGroup(security.clone());
+
+
+    ::nitf::TRE usrHdr("LIDARA DES", "raw_data");
+    
+    usrHdr.setField("raw_data", "not");
+    ::nitf::Field fld = usrHdr.getField("raw_data");
+    fld.setType(::nitf::Field::BINARY);
+
+
+    std::streambuf *buf = m_oss.rdbuf();
+
+
+    long size = buf->pubseekoff(0, m_oss.end);
+    buf->pubseekoff(0, m_oss.beg);
+        
+    char* bytes = new char[size];
+    buf->sgetn(bytes, size);
+
+    des.getSubheader().setSubheaderFields(usrHdr);
+
+    ::nitf::ImageSegment image = record.newImageSegment();
+    ::nitf::ImageSubheader subheader = image.getSubheader();
+
+    subheader.getImageSecurityClass().set(getOptions().getValueOrDefault<std::string>("FSCLAS","U"));
+    
+    std::string fdate = getOptions().getValueOrDefault<std::string>("IDATIM", "");
+    if (fdate.size())
+        subheader.getImageDateAndTime().set(fdate);
+    
+    ::nitf::BandInfo info;    
+    ::nitf::LookupTable lt(0,0);
+    info.init( "G",   /* The band representation, Nth band */
+               " ",      /* The band subcategory */
+               "N",      /* The band filter condition */
+               "   ",    /* The band standard image filter code */
+               0,        /* The number of look-up tables */
+               0,        /* The number of entries/LUT */
+               lt);     /* The look-up tables */
+    
+    std::vector< ::nitf::BandInfo> bands;
+    bands.push_back(info);
+    subheader.setPixelInformation( "INT",     /* Pixel value type */
+                                     8,         /* Number of bits/pixel */
+                                     8,         /* Actual number of bits/pixel */
+                                     "G",       /* Pixel justification */
+                                     "G",     /* Image representation */
+                                     "VIS",     /* Image category */
+                                     1,         /* Number of bands */
+                                     bands);
+    
+    subheader.setBlocking(  8, /*!< The number of rows */
+                            8,  /*!< The number of columns */
+                            8, /*!< The number of rows/block */
+                            8,  /*!< The number of columns/block */
+                            "P"                /*!< Image mode */
+                                         );
+    subheader.getImageId().set("None");
+    // 64 char string
+    char* buffer = "0000000000000000000000000000000000000000000000000000000000000000";
+    
+    ::nitf::BandSource* band =
+        new ::nitf::MemorySource( buffer, 
+                                strlen(buffer) /* memory size */, 
+                                0 /* starting offset */, 
+                                1 /* bytes per pixel */, 
+                                0 /*skip*/);
+    ::nitf::ImageSource iSource;
+    iSource.addBand(*band);
+    
+    ::nitf::Writer writer;
+    ::nitf::IOHandle output_io(m_filename.c_str(), NITF_ACCESS_WRITEONLY, NITF_CREATE);
+    writer.prepare(output_io, record);
+    
+    ::nitf::SegmentWriter sWriter = writer.newDEWriter(0);
+
+    ::nitf::SegmentMemorySource sSource(bytes, size, 0, 0, false);
+    sWriter.attachSource(sSource);
+
+    ::nitf::ImageWriter iWriter = writer.newImageWriter(0);
+    iWriter.attachSource(iSource);
+
+
+    writer.write();
+    output_io.close();
+    }
+
+    catch (except::Throwable & t)
+    {
+        std::ostringstream oss;
+        // std::cout << t.getTrace();
+        throw pdal_error( t.getMessage());
+    }
+#endif
     return;
 }
 

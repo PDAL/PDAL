@@ -66,6 +66,12 @@
 #endif
 #endif
 
+#ifdef PDAL_HAVE_NITRO
+#ifndef USE_PDAL_PLUGIN_NITF
+#include <pdal/drivers/nitf/Writer.hpp>
+#endif
+#endif
+
 #ifdef PDAL_HAVE_P2G
 #include <pdal/drivers/p2g/Writer.hpp>
 #endif
@@ -199,6 +205,11 @@ MAKE_WRITER_CREATOR(SociWriter, pdal::drivers::soci::Writer)
 #endif
 #endif
 
+#ifdef PDAL_HAVE_NITRO
+#ifndef USE_PDAL_PLUGIN_NITF
+MAKE_WRITER_CREATOR(NitfWriter, pdal::drivers::nitf::Writer)
+#endif
+#endif    
 
 StageFactory::StageFactory()
 {
@@ -259,7 +270,8 @@ std::string StageFactory::inferWriterDriver(const std::string& filename, pdal::O
     drivers["laz"] = "drivers.las.writer";
     drivers["xyz"] = "drivers.text.writer";
     drivers["txt"] = "drivers.text.writer";
-
+    drivers["ntf"] = "drivers.nitf.writer";
+    
     if (boost::algorithm::iequals(filename, "STDOUT"))
     {
         return drivers["txt"];
@@ -476,6 +488,12 @@ void StageFactory::registerKnownWriters()
 #ifndef USE_PDAL_PLUGIN_SOCI
     REGISTER_WRITER(SociWriter, pdal::drivers::soci::Writer);
     REGISTER_WRITER(PgPcWriter, pdal::drivers::pgpointcloud::Writer);
+#endif
+#endif
+
+#ifdef PDAL_HAVE_NITRO
+#ifndef USE_PDAL_PLUGIN_NITF
+    REGISTER_WRITER(NitfWriter, pdal::drivers::nitf::Writer);
 #endif
 #endif
 

@@ -33,6 +33,7 @@ cmake   -G "$CONFIG"  \
         -DWITH_SOCI=ON \
         -DWITH_P2G=ON \
         -DWITH_HEXER=ON \
+        -DWITH_NITRO=ON \
         -DHEXER_INCLUDE_DIR=../hexer/include \
         -DHEXER_LIBRARY=../hexer/bin/libhexer.dylib \
         -DGEOTIFF_INCLUDE_DIR=${GEOTIFF_HOME}/include/ \

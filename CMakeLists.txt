@@ -202,7 +202,6 @@ if (NOT PDAL_EMBED_BOOST)
   find_package(Boost 1.48 COMPONENTS program_options thread iostreams filesystem system unit_test_framework random)
 endif()
 
-
 if(Boost_FOUND)
   include_directories(${Boost_INCLUDE_DIRS})
 
@@ -335,6 +334,18 @@ if (SOCI_FOUND)
 endif()
 endif()
 
+
+set(WITH_NITRO FALSE CACHE BOOL "Choose if Nitro support (only install supported is from http://github.com/hobu/nitro)")
+
+if(WITH_NITRO)
+  find_package(Nitro 2.6)
+  set(PDAL_HAVE_NITRO 1)
+  include_directories(${NITRO_INCLUDE_DIR})
+  include_directories(${NITRO_INCLUDE_DIR}/nitro/c++)
+  include_directories(${NITRO_INCLUDE_DIR}/nitro/c)
+  add_definitions("-D__POSIX -D_REENTRANT")
+  message(STATUS "...building with Nitro")
+endif()
 
 #------------------------------------------------------------------------------
 # settings for other 3rd party dependencies
@@ -522,6 +533,7 @@ set (USE_PDAL_PLUGIN_SOCI FALSE CACHE BOOL "Build the soci driver as a plugin ra
 set (USE_PDAL_PLUGIN_OCI FALSE CACHE BOOL "Build the oci driver as a plugin rather than embedding")
 set (USE_PDAL_PLUGIN_MRSID FALSE CACHE BOOL "Build the MrSID driver as a plugin rather than embedding")
 set (USE_PDAL_PLUGIN_CARIS FALSE CACHE BOOL "Build the Caris driver as a plugin rather than embedding")
+set (USE_PDAL_PLUGIN_NITRO FALSE CACHE BOOL "Build the NITF writer as a plugin rather than embedding")
 
 
 #------------------------------------------------------------------------------
