@@ -27,7 +27,7 @@ cmake   -G "$CONFIG"  \
         -DWITH_ORACLE=ON \
         -DWITH_GEOTIFF=ON \
         -DWITH_LASZIP=ON \
-        -DWITH_LIBXML2=ON \
+        -DWITH_LIBXML2=OFF \
         -DWITH_PYTHON=ON \
         -DWITH_FLANN=ON \
         -DWITH_SOCI=ON \
