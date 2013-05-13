@@ -414,7 +414,7 @@ bool Iterator::atEndImpl() const
 
 boost::uint32_t Iterator::readBufferImpl(PointBuffer& user_buffer)
 {
-    getReader().log()->get(logDEBUG) << "readBufferImpl called with request for " << user_buffer.getNumPoints() << " points" << std::endl;
+    getReader().log()->get(logDEBUG) << "readBufferImpl called with PointBuffer filled to (" << user_buffer.getNumPoints() << "/" << user_buffer.getCapacity() << ") points" << std::endl;
 
     // First time through, create the SQL statement, allocate holding pens
     // and fire it off!
