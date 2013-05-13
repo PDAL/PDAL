@@ -47,11 +47,9 @@ link_directories(${Boost_LIBRARY_DIRS})
 
 # Build pcinfo
 if(PCINFO)
-    if(LIBXML2_FOUND)
-        list(APPEND PDAL_UTILITIES ${PCINFO})
-        add_executable(${PCINFO} pcinfo.cpp ${COMMON_APP_SOURCES})
-        target_link_libraries(${PCINFO} ${PDAL_LIB_NAME} ${Boost_LIBRARIES})
-    endif(LIBXML2_FOUND)
+    list(APPEND PDAL_UTILITIES ${PCINFO})
+    add_executable(${PCINFO} pcinfo.cpp ${COMMON_APP_SOURCES})
+    target_link_libraries(${PCINFO} ${PDAL_LIB_NAME} ${Boost_LIBRARIES})
 endif(PCINFO)
 
 if(PC2PC)

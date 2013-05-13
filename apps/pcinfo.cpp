@@ -42,7 +42,10 @@
 #include <pdal/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/filters/Stats.hpp>
+
+#ifdef PDAL_HAVE_LIBXML2
 #include <pdal/XMLSchema.hpp>
+#endif
 
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/json_parser.hpp>

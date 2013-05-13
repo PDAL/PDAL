@@ -49,6 +49,13 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include <stdio.h>
+#include <stdarg.h>
+#include <unistd.h>
+#include <xlocale.h>
+#include <strings.h>
+#include <sys/uio.h>
+#ifdef PDAL_HAVE_LIBXML2
 
 struct XMLDocDeleter
 {
@@ -120,6 +127,7 @@ struct xmlCharDeleter
     }
 };
 
+#endif
 
 static bool sort_dimensions(pdal::Dimension const& a, pdal::Dimension const& b)
 {
@@ -131,6 +139,7 @@ namespace pdal
 namespace schema
 {
 
+#ifdef PDAL_HAVE_LIBXML2
 
 void OCISchemaStructuredErrorHandler
 (void * userData, xmlErrorPtr error)
@@ -246,6 +255,7 @@ void OCISchemaGenericErrorHandler
     throw schema_generic_error(oss.str());
 
 }
+#endif
 
 
 
@@ -258,6 +268,8 @@ void Reader::Initialize()
     if (m_xml.size() == 0) throw schema_generic_error("Inputted XML has no size, is there data there?");
 
     // if (m_xsd.size() == 0) throw schema_generic_error("Inputted XSD has no size, is there data there?");
+
+#ifdef PDAL_HAVE_LIBXML2
 
 
     LIBXML_TEST_VERSION
@@ -305,7 +317,8 @@ void Reader::Initialize()
             throw schema_error("Document did not validate against schema!");
 
     }
-
+#endif
+    
 
 }
 
@@ -361,13 +374,17 @@ Reader::Reader(std::istream* xml, std::istream *xsd) : m_doc_options(XML_PARSE_N
 
 Reader::~Reader()
 {
-  xmlCleanupParser();    
+#ifdef PDAL_HAVE_LIBXML2
+    xmlCleanupParser();    
+#endif
 }
 
 
 static void
 print_element_names(xmlNode * a_node)
 {
+#ifdef PDAL_HAVE_LIBXML2
+    
     xmlNode *cur_node = NULL;
 
     for (cur_node = a_node; cur_node; cur_node = cur_node->next)
@@ -379,6 +396,7 @@ print_element_names(xmlNode * a_node)
 
         print_element_names(cur_node->children);
     }
+#endif
 }
 
 std::string Reader::remapOldNames(std::string const& input)
@@ -396,6 +414,8 @@ pdal::Metadata Reader::LoadMetadata(xmlNode* startNode)
 {
     
     pdal::Metadata output;
+
+#ifdef PDAL_HAVE_LIBXML2
     
     xmlNode* node = startNode;
     
@@ -446,13 +466,15 @@ pdal::Metadata Reader::LoadMetadata(xmlNode* startNode)
         } else
             node = node->next;
     }
-    
+#endif
     return output;
 }
 
 void Reader::Load()
 {
     std::vector<pdal::Dimension> layouts;
+
+#ifdef PDAL_HAVE_LIBXML2
 
     xmlDocPtr doc = static_cast<xmlDocPtr>(m_doc.get());
     xmlNode* root = xmlDocGetRootElement(doc);
@@ -688,6 +710,7 @@ void Reader::Load()
         const Dimension& dim = *i;
         m_schema.appendDimension(dim);
     }
+#endif
 
 }
 
@@ -699,6 +722,8 @@ Writer::Writer(pdal::Schema const& schema)
 
 std::string Writer::getXML()
 {
+#ifdef PDAL_HAVE_LIBXML2
+    
     BufferPtr buffer = BufferPtr(xmlBufferCreate(), BufferDeleter());
 
     xmlBufferPtr b = static_cast<xmlBuffer*>(buffer.get());
@@ -710,11 +735,15 @@ std::string Writer::getXML()
     xmlTextWriterFlush(w);
     // printf("xml: %s", (const char *) b->content);
     return std::string((const char *) b->content, b->size);
+#else
+    return std::string();
+#endif
 
 }
 
 void Writer::write(TextWriterPtr writer)
 {
+#ifdef PDAL_HAVE_LIBXML2
 
     xmlTextWriterPtr w = static_cast<xmlTextWriterPtr>(writer.get());
 
@@ -745,11 +774,13 @@ void Writer::write(TextWriterPtr writer)
 
     xmlTextWriterEndElement(w);
     xmlTextWriterEndDocument(w);
+#endif
 }
 
 
 void Writer::writeSchema(TextWriterPtr writer)
 {
+#ifdef PDAL_HAVE_LIBXML2
 
     xmlTextWriterPtr w = static_cast<xmlTextWriterPtr>(writer.get());
 
@@ -848,6 +879,7 @@ void Writer::writeSchema(TextWriterPtr writer)
 
         xmlTextWriterFlush(w);
     }
+#endif
 
 }
 

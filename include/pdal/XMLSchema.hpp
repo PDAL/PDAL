@@ -43,6 +43,7 @@
 #include <stdarg.h>
 #include <functional>
 
+#ifdef PDAL_HAVE_LIBXML2
 #include <libxml/parser.h>
 #include <libxml/xmlschemas.h>
 
@@ -52,6 +53,7 @@
 #include <libxml/xmlIO.h>
 #include <libxml/encoding.h>
 #include <libxml/xmlwriter.h>
+#endif
 
 #include <boost/shared_ptr.hpp>
 #include <boost/concept_check.hpp>
@@ -62,9 +64,11 @@ namespace pdal
 namespace schema
 {
 
+#ifdef PDAL_HAVE_LIBXML2
 
 void OCISchemaGenericErrorHandler(void * ctx, const char* message, ...);
 void OCISchemaStructuredErrorHandler(void * userData, xmlErrorPtr error);
+#endif
 
 class schema_error : public pdal_error
 {
@@ -154,6 +158,9 @@ private:
 
     std::string remapOldNames(std::string const& input);
 
+#ifdef PDAL_HAVE_LIBXML2
+
+
     DocPtr m_doc;
     DocPtr m_schema_doc;
 
@@ -162,9 +169,11 @@ private:
     SchemaValidCtxtPtr m_schema_valid_ctx;
 
     xmlParserOption m_doc_options;
-
+#endif
+    
 
     void* m_global_context;
+
     pdal::Schema m_schema;
 
     std::string m_xml;
