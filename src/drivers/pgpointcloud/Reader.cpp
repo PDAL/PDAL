@@ -90,7 +90,6 @@ Reader::Reader(const Options& options)
     , m_where("")
     , m_pcid(0)
     , m_cached_point_count(0)
-    , m_cached_patch_count(0)
     , m_cached_max_points(0)
 {}
 
@@ -167,7 +166,6 @@ boost::uint64_t Reader::getNumPoints() const
     {
         std::ostringstream oss;
         oss << "SELECT Sum(PC_NumPoints(" << m_column_name << ")) AS numpoints, ";
-        oss << "Count(*) AS numpatches, ";
         oss << "Max(PC_NumPoints(" << m_column_name << ")) AS maxpoints FROM ";
         if ( m_schema_name.size() )
         {
@@ -179,7 +177,7 @@ boost::uint64_t Reader::getNumPoints() const
             oss << " WHERE " << m_where;
         }
 
-        m_session->once << oss.str(), ::soci::into(m_cached_point_count), ::soci::into(m_cached_patch_count), ::soci::into(m_cached_max_points);
+        m_session->once << oss.str(), ::soci::into(m_cached_point_count), ::soci::into(m_cached_max_points);
         oss.str("");
     }
 
@@ -203,15 +201,6 @@ std::string Reader::getDataQuery() const
 
     log()->get(logDEBUG) << "Constructed data query " << oss.str() << std::endl;
     return oss.str();
-}
-
-boost::uint64_t Reader::getNumPatches() const
-{
-    if ( m_cached_point_count == 0 )
-    {
-        boost::uint64_t npoints = getNumPoints();
-    }
-    return m_cached_patch_count;
 }
 
 boost::uint64_t Reader::getMaxPoints() const

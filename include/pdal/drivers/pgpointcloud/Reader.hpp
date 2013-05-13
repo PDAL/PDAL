@@ -72,7 +72,6 @@ public:
     }
     
     virtual boost::uint64_t getNumPoints() const;
-    boost::uint64_t getNumPatches() const;
     boost::uint64_t getMaxPoints() const;
     std::string getDataQuery() const;
     void getSession() const;
@@ -97,7 +96,6 @@ private:
     std::string m_where;
     mutable boost::uint32_t m_pcid;
     mutable boost::uint64_t m_cached_point_count;
-    mutable boost::uint64_t m_cached_patch_count;
     mutable boost::uint64_t m_cached_max_points;
 
 }; // pdal.drivers.pgpointcloud.Reader
