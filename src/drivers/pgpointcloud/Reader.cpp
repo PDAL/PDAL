@@ -1,5 +1,6 @@
 /******************************************************************************
-* Copyright (c) 2011, Howard Butler, hobu.inc@gmail.com
+* Copyright (c) 2012, Howard Butler, hobu.inc@gmail.com
+* Copyright (c) 2013, Paul Ramsey, pramsey@cleverelephant.ca
 *
 * All rights reserved.
 *
