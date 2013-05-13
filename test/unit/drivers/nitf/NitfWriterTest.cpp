@@ -112,6 +112,8 @@ static void compare_contents(const std::string& las_file, const std::string& ntf
 
 BOOST_AUTO_TEST_CASE(test1)
 {
+
+#ifdef PDAL_HAVE_NITRO
     const std::string las_input(Support::datapath("1.2-with-color.las"));
     const std::string nitf_output(Support::temppath("temp_nitf.ntf"));
     const std::string reference_output(Support::datapath("nitf/write_test1.ntf"));
@@ -169,7 +171,8 @@ BOOST_AUTO_TEST_CASE(test1)
     }
     
     // FileUtils::deleteFile(nitf_output);
-    
+
+#endif
 
     return;
 
