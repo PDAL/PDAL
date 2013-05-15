@@ -244,8 +244,7 @@ void Writer::CreateBlockTable(std::string const& name, boost::uint32_t srid)
             << " block_id INTEGER,"
             << " num_points INTEGER,"
             << " points bytea,"
-		    << " bbox box3d, "
-			<< " extent geometry"
+		    << " bbox box3d "
             << ")";
 
         m_session->once << oss.str();
