@@ -147,26 +147,6 @@ void Reader::initialize()
         
     m_database_type = getDatabaseConnectionType(getOptions().getValueOrThrow<std::string>("type"));
     m_session = connectToDataBase(connection, m_database_type);
-    // if (m_database_type == DATABASE_UNKNOWN)
-    // {
-    //     std::stringstream oss;
-    //     oss << "Database connection type '" << getOptions().getValueOrThrow<std::string>("type") << "' is unknown or not configured";
-    //     throw soci_driver_error(oss.str());
-    // }
-    // 
-    // try
-    // {
-    //     if (m_database_type == DATABASE_POSTGRESQL)
-    //         m_session = new ::soci::session(::soci::postgresql, connection);
-    //     
-    //     log()->get(logDEBUG) << "Connected to database" << std::endl;
-    //     
-    // } catch (::soci::soci_error const& e)
-    // {
-    //     std::stringstream oss;
-    //     oss << "Unable to connect to database with error '" << e.what() << "'";
-    //     throw pdal_error(oss.str());
-    // }
 
     m_session->set_log_stream(&(log()->get(logDEBUG2)));    
     m_query_type = describeQueryType(query);
