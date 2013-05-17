@@ -80,8 +80,14 @@ boost::uint64_t Reader::getNumPoints() const
     std::string const& query = getOptions().getValueOrThrow<std::string>("query");     
     query_oss << "select sum(num_points) from (" << query << ") as summation";
 
+
+    ::soci::indicator ind = ::soci::i_null;
     boost::int64_t count;
-    *m_session << query_oss.str(), ::soci::into(count);
+    ::soci::statement q = (m_session->prepare << query_oss.str(), ::soci::into(count, ind));
+    q.execute();
+    
+    if (ind == ::soci::i_null)
+        return  0;
     
     if (count < 0)
     {
@@ -167,17 +173,21 @@ pdal::SpatialReference Reader::fetchSpatialReference(std::string const& query) c
     // query_oss << "SELECT ST_SRID(extent)::integer as code from cloud";
 
     ::soci::row r;
-    ::soci::indicator ind;
+    ::soci::indicator ind = ::soci::i_null;
     boost::int64_t srid;
     ::soci::statement clouds = (m_session->prepare << query, ::soci::into(r, ind));
     clouds.execute();
     
+    if (ind == ::soci::i_null)
+        return pdal::SpatialReference();
+
     bool bDidRead = clouds.fetch();
     
     srid = (boost::int64_t)r.get<boost::int32_t>("srid");
     
     if (!bDidRead)
-        throw pdal_error("Unable to fetch srid for query");
+        return pdal::SpatialReference();
+        // throw pdal_error("Unable to fetch srid for query");
 
     // if (ind == ::soci::i_null)
     // {
@@ -199,15 +209,21 @@ pdal::SpatialReference Reader::fetchSpatialReference(std::string const& query) c
 pdal::Schema Reader::fetchSchema(std::string const& query) const
 {
     log()->get(logDEBUG) << "Fetching schema object" << std::endl;
-    
+
+    ::soci::indicator ind = ::soci::i_null;
+
     std::ostringstream oss;
     oss << "SELECT SCHEMA FROM (" << query <<") as q LIMIT 1";
     std::string q(oss.str());
     ::soci::row r;
-    ::soci::statement clouds = (m_session->prepare << q, ::soci::into(r));
+    ::soci::statement clouds = (m_session->prepare << q, ::soci::into(r, ind));
     clouds.execute();
+    if (ind == ::soci::i_null)    
+        return pdal::Schema();
         
     bool bDidRead = clouds.fetch();
+    // if (!bDidRead)
+    //     return pdal::Schema();
     
     std::string xml = r.get<std::string>("schema");    
 
@@ -433,7 +449,7 @@ boost::uint32_t IteratorBase::myReadBlocks(PointBuffer& user_buffer)
     std::string const& query = getReader().getOptions().getValueOrThrow<std::string>("query");
 
     ::soci::row block;
-    ::soci::indicator ind;
+    ::soci::indicator ind = ::soci::i_null;
 
     
     ::soci::statement blocks = (m_session->prepare << query, ::soci::into(block, ind));
@@ -441,12 +457,12 @@ boost::uint32_t IteratorBase::myReadBlocks(PointBuffer& user_buffer)
 
     bool bDidRead = blocks.fetch();
 
-    // if (ind == ::soci::i_null)
-    // {
-    //     // We have no points to return
-    //     getReader().log()->get(logDEBUG) << "Query returned no points" << std::endl;
-    //     return 0;
-    // }
+    if (ind == ::soci::i_null)
+    {
+        // We have no points to return
+        getReader().log()->get(logDEBUG) << "Query returned no points" << std::endl;
+        return 0;
+    }
 
     // 
     // size_t size = block.size();
