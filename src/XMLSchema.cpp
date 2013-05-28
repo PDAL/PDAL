@@ -49,12 +49,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include <stdio.h>
-#include <stdarg.h>
-#include <unistd.h>
-#include <xlocale.h>
-#include <strings.h>
-#include <sys/uio.h>
 #ifdef PDAL_HAVE_LIBXML2
 
 struct XMLDocDeleter
