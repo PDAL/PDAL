@@ -32,6 +32,7 @@ set(PDAL_BASE_HPP
   ${PDAL_HEADERS_DIR}/FilterIterator.hpp
   ${PDAL_HEADERS_DIR}/GDALUtils.hpp
   ${PDAL_HEADERS_DIR}/GlobalEnvironment.hpp
+  ${PDAL_HEADERS_DIR}/gitsha.h
   ${PDAL_HEADERS_DIR}/Log.hpp
   ${PDAL_HEADERS_DIR}/Metadata.hpp
   ${PDAL_HEADERS_DIR}/MultiFilter.hpp
@@ -70,6 +71,7 @@ set(PDAL_BASE_CPP
   FileUtils.cpp
   Filter.cpp
   FilterIterator.cpp
+  gitsha.cpp
   GlobalEnvironment.cpp
   Log.cpp
   Metadata.cpp

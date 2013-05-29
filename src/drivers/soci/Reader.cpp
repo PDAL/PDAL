@@ -86,8 +86,8 @@ boost::uint64_t Reader::getNumPoints() const
     ::soci::statement q = (m_session->prepare << query_oss.str(), ::soci::into(count, ind));
     q.execute();
     
-    if (ind == ::soci::i_null)
-        return  0;
+    // if (ind == ::soci::i_null)
+    //     return  0;
     
     if (count < 0)
     {
@@ -218,8 +218,8 @@ pdal::Schema Reader::fetchSchema(std::string const& query) const
     ::soci::row r;
     ::soci::statement clouds = (m_session->prepare << q, ::soci::into(r, ind));
     clouds.execute();
-    if (ind == ::soci::i_null)    
-        return pdal::Schema();
+    // if (ind == ::soci::i_null)    
+    //     return pdal::Schema();
         
     bool bDidRead = clouds.fetch();
     // if (!bDidRead)
@@ -430,7 +430,7 @@ BufferPtr IteratorBase::fetchPointBuffer(   boost::int32_t const& cloud_id,
     else
     {
         std::stringstream query;
-
+        
         Schema schema = Schema::from_xml(schema_xml);
 
         BufferPtr output  = BufferPtr(new PointBuffer(schema, capacity));
@@ -457,12 +457,12 @@ boost::uint32_t IteratorBase::myReadBlocks(PointBuffer& user_buffer)
 
     bool bDidRead = blocks.fetch();
 
-    if (ind == ::soci::i_null)
-    {
-        // We have no points to return
-        getReader().log()->get(logDEBUG) << "Query returned no points" << std::endl;
-        return 0;
-    }
+    // if (ind == ::soci::i_null)
+    // {
+    //     // We have no points to return
+    //     getReader().log()->get(logDEBUG) << "Query returned no points" << std::endl;
+    //     return 0;
+    // }
 
     // 
     // size_t size = block.size();
@@ -472,7 +472,6 @@ boost::uint32_t IteratorBase::myReadBlocks(PointBuffer& user_buffer)
     // }
     if (!m_active_buffer) 
     {
-        // std::cout << "block: " << block << std::endl;
         m_active_buffer = fetchPointBuffer( block.get<int>("cloud_id"), 
                                             block.get<std::string>("schema"),
                                             user_buffer.getCapacity());
@@ -518,8 +517,7 @@ boost::uint32_t IteratorBase::myReadBlocks(PointBuffer& user_buffer)
             getReader().log()->get(logDEBUG3) << "IteratorBase::myReadBlocks: current_cloud_id: "
                                               << current_cloud_id << " m_active_cloud_id: "
                                               << m_active_cloud_id << std::endl;                
-            std::string schema;
-            m_active_buffer = fetchPointBuffer(current_cloud_id, schema, user_buffer.getCapacity());
+            m_active_buffer = fetchPointBuffer(current_cloud_id, block.get<std::string>("schema"), user_buffer.getCapacity());
         
             m_active_cloud_id = current_cloud_id;
             return user_buffer.getNumPoints();

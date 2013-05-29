@@ -547,6 +547,14 @@ install(FILES AUTHORS.txt LICENSE.txt
 # generate the pdal_defines.h header
 #------------------------------------------------------------------------------
 
+# from http://stackoverflow.com/questions/1435953/how-can-i-pass-git-sha1-to-compiler-as-definition-using-cmake
+include(GetGitRevisionDescription)
+get_git_head_revision(GIT_REFSPEC GIT_SHA1)
+
+configure_file(
+  "${PROJECT_SOURCE_DIR}/gitsha.cpp.in"
+  "${PROJECT_SOURCE_DIR}/src/gitsha.cpp")
+  
 set(pdal_defines_h_in "${CMAKE_CURRENT_SOURCE_DIR}/pdal_defines.h.in")
 set(pdal_defines_h "${CMAKE_CURRENT_BINARY_DIR}/include/pdal/pdal_defines.h")
 configure_file(${pdal_defines_h_in} ${pdal_defines_h})
