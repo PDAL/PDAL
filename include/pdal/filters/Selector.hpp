@@ -105,6 +105,9 @@ public:
 protected:
     void alterSchema(pdal::PointBuffer&);
     pdal::filters::Selector const& m_selectorFilter;
+
+private:
+    IteratorBase& operator=(IteratorBase const&);
 };
 } // selector
     

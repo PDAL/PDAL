@@ -433,13 +433,13 @@ pdal::Metadata Reader::LoadMetadata(xmlNode* startNode)
     while (node != NULL)
     {
 
-        std::cout << "node name: " << (const char*)node->name << std::endl;   
+   //     std::cout << "node name: " << (const char*)node->name << std::endl;   
         
         if (node->properties)
         {
-            xmlChar* name = xmlGetProp(node, (const xmlChar *)"name");
-            xmlChar* etype = xmlGetProp(node, (const xmlChar *)"type");
-            std::cout << "property name: " << (const char*)name << std::endl;   
+ //           xmlChar* name = xmlGetProp(node, (const xmlChar *)"name");
+ //           xmlChar* etype = xmlGetProp(node, (const xmlChar *)"type");
+//            std::cout << "property name: " << (const char*)name << std::endl;   
             // std::cout << "proper type: " << (const char*)etype << std::endl;   
 
         }

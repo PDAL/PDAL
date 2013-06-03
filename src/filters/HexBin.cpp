@@ -122,8 +122,8 @@ IteratorBase::IteratorBase( pdal::filters::HexBin const& filter,
 IteratorBase::~IteratorBase()
 {
 #ifdef PDAL_HAVE_HEXER
-    if (m_grid)
-        delete m_grid;
+    //if (m_grid)
+        //delete m_grid;
 #endif
 
 }

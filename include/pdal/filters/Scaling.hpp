@@ -143,6 +143,8 @@ protected:
 
     void scaleData(PointBuffer& buffer, boost::uint32_t numRead);
 
+private:
+    IteratorBase& operator=(IteratorBase const&);
 };
 
 } // scaling
