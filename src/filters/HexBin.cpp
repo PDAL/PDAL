@@ -163,7 +163,15 @@ boost::uint32_t HexBin::readBufferImpl(PointBuffer& buffer)
             if (bDoSample)
             {
                 if (getStage().getNumPoints() < m_sample_size)
-                    m_sample_size = getStage().getNumPoints();
+                {
+                    if (getStage().getNumPoints() >= std::numeric_limits<boost::uint32_t>::max())
+                    {
+                        throw pdal_error("point count >= size of 32bit integer, set a sample size");
+                    }
+                            
+                    m_sample_size = static_cast<boost::uint32_t>(getStage().getNumPoints());
+                }
+                        
                 if ( m_sample_number < m_sample_size )
                 {
                     m_samples.push_back(hexer::Point(x,y));
