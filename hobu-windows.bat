@@ -12,7 +12,7 @@ rem set GENERATOR="Visual Studio 10"
 
 :: Pick your build type
 set BUILD_TYPE=Release
-set BUILD_TYPE=Debug
+REM set BUILD_TYPE=Debug
 
 :: Where is your PDAL build tree?
 set PDAL_DIR=.
@@ -98,6 +98,8 @@ cmake -G %GENERATOR% ^
     -DWITH_ICONV=%ICONV_ENABLED% ^
 	-DWITH_PYTHON=%PYTHON_ENABLED% ^
 	-DPYTHON_EXECUTABLE=%OSGEO4W_DIR%\bin\python.exe ^
+	-DPYTHON_INCLUDE_DIR=%OSGEO4W_DIR%\apps\python27\include ^
+	-DPYTHON_LIBRARY=%OSGEO4W_DIR%\apps\python27\libs\python27.lib ^
 	-DNUMPY_INCLUDE_DIR=%OSGEO4W_DIR%\apps\python27\lib\site-packages\numpy\core\include ^
 	-DNUMPY_VERSION=1.5.1 ^
     -DCMAKE_BUILD_TYPE=%BUILD_TYPE% ^
