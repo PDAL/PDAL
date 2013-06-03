@@ -97,6 +97,24 @@ set(ENABLE_CTEST FALSE CACHE BOOL
 # General build settings
 #------------------------------------------------------------------------------
 
+if(WIN32)
+  if(MSVC)
+    option(PDAL_USE_STATIC_RUNTIME "Use the static runtime" OFF)
+
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MT")
+
+    # Note that the CMake cache will still show /MD
+    # http://www.cmake.org/Wiki/CMake_FAQ#Dynamic_Replace
+    foreach(flag_var
+      CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
+      CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
+      if(${flag_var} MATCHES "/MD")
+        string(REGEX REPLACE "/MD" "/MT" ${flag_var} "${${flag_var}}")
+      endif(${flag_var} MATCHES "/MD")
+    endforeach(flag_var)
+  endif(MSVC)
+endif(WIN32)
+
 # note we default to debug mode
 if(NOT MSVC_IDE)
   if(NOT CMAKE_BUILD_TYPE)
@@ -151,7 +169,19 @@ if(WIN32)
     else()
       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
     endif()
-  endif()
+
+    if(MSVC90 OR MSVC10 OR MSVC11)
+      if (NOT ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}.${CMAKE_PATCH_VERSION} LESS 2.8.6)
+        include(ProcessorCount)
+        ProcessorCount(N)
+        if(NOT N EQUAL 0)
+          set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   /MP${N}")
+  	      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP${N}")
+        endif()
+      endif()
+    endif()
+
+  endif(MSVC)
   
   set(CMAKE_INCLUDE_PATH c:/osgeo4w/include;$ENV{CMAKE_INCLUDE_PATH})
   set(CMAKE_LIBRARY_PATH c:/osgeo4w/lib;$ENV{CMAKE_LIBRARY_PATH})
@@ -198,6 +228,21 @@ endif(APPLE)
 
 find_package(Threads)
 
+# Default to using static, multithreaded libraries for 
+# linking under MSVC.  This is because we show users how to 
+# use boostpro.com installer and install those options when linking 
+# on windows in the compilation documentation.
+if(WIN32)
+  if (MSVC)
+    set(Boost_USE_STATIC_LIBS   ON)
+    set(Boost_USE_MULTITHREADED ON)
+
+    if (PDAL_USE_STATIC_RUNTIME)
+      set(Boost_USE_STATIC_RUNTIME ON)
+    endif(PDAL_USE_STATIC_RUNTIME)
+  endif(MSVC)
+endif(WIN32)
+
 if (NOT PDAL_EMBED_BOOST)
   find_package(Boost 1.48 COMPONENTS program_options thread iostreams filesystem system unit_test_framework random)
 endif()
@@ -209,18 +254,7 @@ if(Boost_FOUND)
   mark_as_advanced(CLEAR Boost_INCLUDE_DIR) 
   mark_as_advanced(CLEAR Boost_LIBRARY_DIRS) 
   link_directories(${Boost_LIBRARY_DIRS})
-
-  # Default to using static, multithreaded libraries for 
-  # linking under MSVC.  This is because we show users how to 
-  # use boostpro.com installer and install those options when linking 
-  # on windows in the compilation documentation.
-  if(WIN32)
-    if (MSVC)
-      set(Boost_USE_STATIC_LIBS   ON)
-      set(Boost_USE_MULTITHREADED ON)
-    endif(MSVC)
-  endif(WIN32)
-  
+ 
 else()
   set(BOOST_ROOT ${PROJECT_SOURCE_DIR}/boost)
 
@@ -547,6 +581,14 @@ install(FILES AUTHORS.txt LICENSE.txt
 # generate the pdal_defines.h header
 #------------------------------------------------------------------------------
 
+# from http://stackoverflow.com/questions/1435953/how-can-i-pass-git-sha1-to-compiler-as-definition-using-cmake
+include(GetGitRevisionDescription)
+get_git_head_revision(GIT_REFSPEC GIT_SHA1)
+
+configure_file(
+  "${PROJECT_SOURCE_DIR}/gitsha.cpp.in"
+  "${PROJECT_SOURCE_DIR}/src/gitsha.cpp")
+  
 set(pdal_defines_h_in "${CMAKE_CURRENT_SOURCE_DIR}/pdal_defines.h.in")
 set(pdal_defines_h "${CMAKE_CURRENT_BINARY_DIR}/include/pdal/pdal_defines.h")
 configure_file(${pdal_defines_h_in} ${pdal_defines_h})

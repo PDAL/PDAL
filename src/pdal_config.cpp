@@ -45,6 +45,7 @@
 
 #include <sstream>
 #include <pdal/pdal_defines.h>
+#include <pdal/gitsha.h>
 
 #ifdef PDAL_HAVE_LIBGEOTIFF
 #include <geotiff.h>
@@ -123,6 +124,8 @@ std::string GetFullVersionString()
 {
     std::ostringstream os;
 
+
+
 #ifdef PDAL_HAVE_LIBGEOTIFF
     os << " GeoTIFF "
        << (LIBGEOTIFF_VERSION / 1000) << '.'
@@ -144,6 +147,12 @@ std::string GetFullVersionString()
     std::string info(os.str());
     os.str("");
     os << "PDAL " << PDAL_VERSION_STRING;
+
+    std::ostringstream revs;
+    revs << g_GIT_SHA1;
+
+    os << " (" << revs.str().substr(0, 6) <<")"; 
+    
     if (!info.empty())
     {
         os << " with" << info;
