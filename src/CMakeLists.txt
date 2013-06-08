@@ -108,6 +108,24 @@ endif(GDAL_FOUND)
 list (APPEND PDAL_CPP ${PDAL_BASE_CPP} )
 list (APPEND PDAL_HPP ${PDAL_BASE_HPP} )
 
+
+#
+# drivers/buffer
+#
+set(PDAL_BUFFER_PATH drivers/buffer)
+set(PDAL_BUFFER_HEADERS ${PDAL_HEADERS_DIR}/${PDAL_BUFFER_PATH})
+set(PDAL_BUFFER_SRC ${PROJECT_SOURCE_DIR}/src/${PDAL_BUFFER_PATH})
+set(PDAL_DRIVERS_BUFFER_HPP 
+  ${PDAL_BUFFER_HEADERS}/Reader.hpp
+)
+
+set (PDAL_DRIVERS_BUFFER_CPP
+  ${PDAL_BUFFER_SRC}/Reader.cpp
+)
+list (APPEND PDAL_CPP ${PDAL_DRIVERS_BUFFER_CPP} )
+list (APPEND PDAL_HPP ${PDAL_DRIVERS_BUFFER_HPP} )
+
+
 #
 # drivers/faux
 #
@@ -546,6 +564,7 @@ source_group("CMake Files" FILES CMakeLists.txt)
 
 source_group("Header Files" FILES ${PDAL_BASE_HPP})
 source_group("Header Files\\config" FILES ${PDAL_CONFIG_HPP})
+source_group("Header Files\\drivers\\buffer" FILES ${PDAL_DRIVERS_BUFFER_HPP})
 source_group("Header Files\\drivers\\faux" FILES ${PDAL_DRIVERS_FAUX_HPP})
 source_group("Header Files\\drivers\\caris" FILES ${PDAL_DRIVERS_CARIS_HPP})
 source_group("Header Files\\drivers\\las" FILES ${PDAL_DRIVERS_LAS_HPP})
@@ -561,6 +580,7 @@ source_group("Header Files\\plang" FILES ${PDAL_PLANG_HPP})
 
 source_group("Source Files" FILES ${PDAL_BASE_CPP})
 source_group("Source Files\\config" FILES ${PDAL_CONFIG_CPP})
+source_group("Source Files\\drivers\\buffer" FILES ${PDAL_DRIVERS_BUFFER_CPP})
 source_group("Source Files\\drivers\\faux" FILES ${PDAL_DRIVERS_FAUX_CPP})
 source_group("Source Files\\drivers\\caris" FILES ${PDAL_DRIVERS_CARIS_CPP})
 source_group("Source Files\\drivers\\las" FILES ${PDAL_DRIVERS_LAS_CPP})
