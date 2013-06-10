@@ -408,7 +408,7 @@ if(WITH_LIBXML2)
 endif()
 
 if(NOT LIBXML2_FOUND)
-  message(STATUS "libxml2 not selected or not found, pcinfo will not be build")
+  message(STATUS "libxml2 not selected or not found, pcinfo will not be built")
 endif()
 
 # Oracle support - optional, default=OFF
