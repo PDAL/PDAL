@@ -1,3 +1,3 @@
 #include <pdal/gitsha.h>
-#define GIT_SHA1 "76c2da5f07d6138a0ce61def30b78e0e58859763"
+#define GIT_SHA1 "918693d1d8c83b9bb4c77ec9cadd68fc25a05196"
 const char g_GIT_SHA1[] = GIT_SHA1;
