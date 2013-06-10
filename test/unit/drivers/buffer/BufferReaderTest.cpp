@@ -306,6 +306,7 @@ BOOST_AUTO_TEST_CASE(test_iterator_write)
     boost::uint64_t numWritten = writer.write(100);
 
     BOOST_CHECK_EQUAL(numWritten, 100u);
+    FileUtils::deleteFile(Support::temppath(out_filename.getValue<std::string>()));    
 
     return;
 }
