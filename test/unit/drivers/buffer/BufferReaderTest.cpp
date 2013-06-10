@@ -117,8 +117,8 @@ BOOST_AUTO_TEST_CASE(test_sequential_iter)
     pdal::Option verbose("verbose", 5, "");
 
     pdal::Options reader_options;
-    reader_options.add(debug);
-    reader_options.add(verbose);
+    // reader_options.add(debug);
+    // reader_options.add(verbose);
 
     pdal::drivers::buffer::Reader reader(reader_options, *input);
     reader.initialize();
@@ -183,8 +183,8 @@ BOOST_AUTO_TEST_CASE(test_random_iter)
     pdal::Option verbose("verbose", 5, "");
 
     pdal::Options reader_options;
-    reader_options.add(debug);
-    reader_options.add(verbose);
+    // reader_options.add(debug);
+    // reader_options.add(verbose);
 
     pdal::drivers::buffer::Reader reader(reader_options, *input);
     reader.initialize();
@@ -285,8 +285,8 @@ BOOST_AUTO_TEST_CASE(test_iterator_write)
     pdal::Option verbose("verbose", 5, "");
 
     pdal::Options reader_options;
-    reader_options.add(debug);
-    reader_options.add(verbose);
+    // reader_options.add(debug);
+    // reader_options.add(verbose);
 
     pdal::drivers::buffer::Reader reader(reader_options, *input);
     //reader.initialize();
@@ -296,8 +296,8 @@ BOOST_AUTO_TEST_CASE(test_iterator_write)
     pdal::Option output_type("format", "geojson", "");
 
     pdal::Options writer_opts;
-    writer_opts.add(debug);
-    writer_opts.add(verbose);
+    // writer_opts.add(debug);
+    // writer_opts.add(verbose);
     writer_opts.add(out_filename);
     writer_opts.add(output_type);
 
