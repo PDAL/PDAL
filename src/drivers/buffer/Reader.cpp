@@ -96,30 +96,19 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, boost::uint64_t index) 
     boost::uint64_t numPointsAvailable = getNumPoints() - index;
     if (numPointsAvailable < numPointsWanted)
         numPointsWanted = numPointsAvailable;
+    
+    DimensionMap* d = PointBuffer::mapDimensions(m_buffer, data);
 
-    const Dimension& dimX = schema.getDimension("X");
-    const Dimension& dimY = schema.getDimension("Y");
-    const Dimension& dimZ = schema.getDimension("Z");
-
-    boost::uint32_t cnt = 0;
     data.setNumPoints(0);
 
-    for (boost::uint32_t pointIndex=0; pointIndex<numPointsWanted; pointIndex++)
-    {
-        float x = m_buffer.getField<float>(dimX, pointIndex);
-        float y = m_buffer.getField<float>(dimY, pointIndex);
-        float z = m_buffer.getField<float>(dimZ, pointIndex);
+    PointBuffer::copyLikeDimensions(m_buffer, data, 
+                                    *d, 
+                                    index, 
+                                    0, 
+                                    numPointsWanted);
 
-        data.setField<float>(dimX, pointIndex, x);
-        data.setField<float>(dimY, pointIndex, y);
-        data.setField<float>(dimZ, pointIndex, z);
-
-        ++cnt;
-        data.setNumPoints(cnt);
-        assert(cnt <= data.getCapacity());
-    }
-
-    return cnt;
+    data.setNumPoints(numPointsWanted);
+    return numPointsWanted;
 }
 
 
