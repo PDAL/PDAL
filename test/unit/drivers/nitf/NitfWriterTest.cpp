@@ -150,8 +150,8 @@ BOOST_AUTO_TEST_CASE(test1)
         
         
         
-        writer_opts.add(debug);
-        writer_opts.add(verbose);
+        // writer_opts.add(debug);
+        // writer_opts.add(verbose);
         writer_opts.add(writer_opt1);
         
         pdal::drivers::las::Reader reader(reader_opts);
