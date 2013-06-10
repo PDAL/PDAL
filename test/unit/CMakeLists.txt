@@ -14,6 +14,7 @@ endif()
 SET(PDAL_UNITTEST_TEST_SRC
     BoundsTest.cpp
     drivers/bpf/BPFTest.cpp
+    drivers/buffer/BufferReaderTest.cpp
     filters/ByteSwapFilterTest.cpp
     filters/CacheFilterTest.cpp
     drivers/caris/CarisReaderTest.cpp

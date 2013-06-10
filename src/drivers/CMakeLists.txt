@@ -6,7 +6,7 @@
 #
 ###############################################################################
 
-
+add_subdirectory(buffer)
 add_subdirectory(faux)
 add_subdirectory(las)
 add_subdirectory(liblas)
