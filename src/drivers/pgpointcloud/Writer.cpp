@@ -550,7 +550,7 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     boost::uint32_t compression = COMPRESSION_NONE;
     
     std::stringstream oss;
-    oss << "INSERT INTO " << m_table_name << " (pa) VALUES (:hex)";
+    oss << "INSERT INTO " << m_table_name << " (pa) VALUES ('";
     
     std::stringstream options;
     #ifdef BOOST_LITTLE_ENDIAN
@@ -568,9 +568,17 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
 
     std::stringstream hex;
     hex << options.str() << Utils::binary_to_hex_string(block_data);
-    ::soci::statement st = (m_session->prepare << oss.str(), ::soci::use(hex.str(),"hex"));
-    st.execute(true);
-    oss.str("");
+    oss << hex.str() << "')";
+    try
+    {
+        m_session->once << oss.str();
+        oss.str("");
+    }
+    catch (::soci::soci_error const &e)
+    {
+        throw pdal_error("uh oh");
+//        return false;
+    }
 
     return true;
 }
