@@ -133,9 +133,6 @@ BOOST_AUTO_TEST_CASE(test_schema_read)
 
     std::string xml_output = writer.getXML();
     
-    std::ostream* output = FileUtils::createFile("example-metadata.xml");
-        *output << xml_output;
-    delete output;
     pdal::schema::Reader reader2(xml_output, xsd);
     pdal::Schema schema2 = reader2.getSchema();
 
