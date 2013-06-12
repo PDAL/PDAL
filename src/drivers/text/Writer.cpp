@@ -165,7 +165,7 @@ std::vector<boost::tuple<std::string, std::string> >  Writer::getDimensionOrder(
         std::map<std::string, bool> all_names;
         schema::index_by_index const& dims = schema.getDimensions().get<schema::index>();
         schema::index_by_index::const_iterator iter = dims.begin();
-        schema::index_by_name const& name_index = schema.getDimensions().get<schema::name>();
+//        schema::index_by_name const& name_index = schema.getDimensions().get<schema::name>();
         while (iter != dims.end())
         {
             all_names.insert(std::pair<std::string, bool>(iter->getName(), true));
@@ -226,7 +226,7 @@ std::vector<boost::tuple<std::string, std::string> >  Writer::getDimensionOrder(
     
 }
 
-void Writer::WriteGeoJSONHeader(pdal::Schema const& schema)
+void Writer::WriteGeoJSONHeader(pdal::Schema const& )
 {
     std::string callback = getOptions().getValueOrDefault<std::string>("jscallback", "");
     
@@ -385,9 +385,9 @@ void Writer::WritePCDHeader(pdal::Schema const& schema)
 void Writer::WriteHeader(pdal::Schema const& schema)
 {
 
-    schema::index_by_index const& dims = schema.getDimensions().get<schema::index>();
+    //schema::index_by_index const& dims = schema.getDimensions().get<schema::index>();
 
-    bool isQuoted = getOptions().getValueOrDefault<bool>("quote_header", true);
+//    bool isQuoted = getOptions().getValueOrDefault<bool>("quote_header", true);
     bool bWriteHeader = getOptions().getValueOrDefault<bool>("write_header", true);
     std::string newline = getOptions().getValueOrDefault<std::string>("newline", "\n");
     std::string delimiter = getOptions().getValueOrDefault<std::string>("delimiter",",");
@@ -452,7 +452,7 @@ void Writer::putStringRepresentation(PointBuffer const& data,
     boost::uint32_t size = d.getByteSize();
     
     std::streamsize old_precision = output.precision();
-    std::ios_base::fmtflags  flags = output.flags();
+//    std::ios_base::fmtflags  flags = output.flags();
     
     bool bHaveScaling = !Utils::compare_distance(d.getNumericScale(), 1.0);
     
@@ -684,7 +684,7 @@ void Writer::WriteGeoJSONBuffer(const PointBuffer& data)
     std::vector<boost::tuple<std::string, std::string> >::const_iterator ord =  ordering.begin();
     
     std::vector<Dimension const*> dimensions;
-    bool bFirstProperty(true);
+//    bool bFirstProperty(true);
     while (ord != ordering.end())
     {
         Dimension const& d = schema.getDimension(ord->get<0>(), ord->get<1>());
