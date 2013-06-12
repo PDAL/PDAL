@@ -151,10 +151,12 @@ boost::uint32_t HexBin::readBufferImpl(PointBuffer& buffer)
     
     for (boost::uint32_t i = 0; i < buffer.getNumPoints(); ++i)
     {
-        int32_t xi = buffer.getField<int32_t>(*m_dim_x, i);
-        int32_t yi = buffer.getField<int32_t>(*m_dim_y, i);
-        double x = m_dim_x->applyScaling<int32_t>(xi);
-        double y = m_dim_y->applyScaling<int32_t>(yi);
+        boost::int32_t xi = buffer.getField<boost::int32_t>(*m_dim_x, i);
+        boost::int32_t yi = buffer.getField<boost::int32_t>(*m_dim_y, i);
+        double x(0.0);
+        x = m_dim_x->applyScaling<boost::int32_t>(xi);
+        double y(0.0);
+        y = m_dim_y->applyScaling<boost::int32_t>(yi);
 #ifdef PDAL_HAVE_HEXER
         
         if (!m_grid)
