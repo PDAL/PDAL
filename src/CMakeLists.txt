@@ -428,7 +428,7 @@ set (PDAL_DRIVERS_PGPOINTCLOUD_CPP
 )
 
 # no provision is made for building as a plugin
-if (SOCI_FOUND)
+if (POSTGRESQL_FOUND)
 #    if (NOT USE_PDAL_PLUGIN_SOCI)
         list (APPEND PDAL_CPP ${PDAL_DRIVERS_PGPOINTCLOUD_CPP} )
         list (APPEND PDAL_HPP ${PDAL_DRIVERS_PGPOINTCLOUD_HPP} )

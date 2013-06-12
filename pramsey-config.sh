@@ -21,7 +21,7 @@ if ! [ -z "$1" ]; then
 fi
 
 cmake   -G "$CONFIG"  \
-        -DCMAKE_BUILD_TYPE=Debug \
+        -DCMAKE_BUILD_TYPE=RelWithDebInfo \
         -DCMAKE_INSTALL_PREFIX=${HOME}/pdal \
         -DPDAL_EMBED_BOOST=${EMBED} \
         -DWITH_GDAL=ON \
