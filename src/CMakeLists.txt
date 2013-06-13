@@ -410,7 +410,7 @@ endif()
 
 #
 # drivers/pgpointcloud
-# for now, we depend on soci
+# we require PostgreSQL
 #
 set(PDAL_PGPOINTCLOUD_PATH drivers/pgpointcloud)
 set(PDAL_PGPOINTCLOUD_HEADERS ${PDAL_HEADERS_DIR}/${PDAL_PGPOINTCLOUD_PATH})
@@ -429,10 +429,12 @@ set (PDAL_DRIVERS_PGPOINTCLOUD_CPP
 
 # no provision is made for building as a plugin
 if (POSTGRESQL_FOUND)
-#    if (NOT USE_PDAL_PLUGIN_SOCI)
-        list (APPEND PDAL_CPP ${PDAL_DRIVERS_PGPOINTCLOUD_CPP} )
-        list (APPEND PDAL_HPP ${PDAL_DRIVERS_PGPOINTCLOUD_HPP} )
-#    endif()
+  if ( USE_PDAL_PLUGIN_PGPOINTCLOUD )
+    message(FATAL_ERROR, "PgPointCloud plugin support unimplemented")
+  else()
+    list (APPEND PDAL_CPP ${PDAL_DRIVERS_PGPOINTCLOUD_CPP} )
+    list (APPEND PDAL_HPP ${PDAL_DRIVERS_PGPOINTCLOUD_HPP} )
+  endif()
 endif()
 
 
@@ -610,6 +612,12 @@ set (SOCI_LIBRARIES ${SOCI_LIBRARY} ${SOCI_postgresql_PLUGIN})
 if (WITH_SOCI)
 if (NOT USE_PDAL_PLUGIN_SOCI)
 target_link_libraries(${APPS_CPP_DEPENDENCIES} ${SOCI_LIBRARIES})
+endif()
+endif()
+
+if (WITH_PGPOINTCLOUD)
+if (NOT USE_PDAL_PLUGIN_SOCI)
+target_link_libraries(${APPS_CPP_DEPENDENCIES} ${POSTGRESQL_LIBRARIES})
 endif()
 endif()
 

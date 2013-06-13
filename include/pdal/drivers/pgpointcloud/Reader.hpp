@@ -57,7 +57,7 @@ namespace pgpointcloud
 class PDAL_DLL Reader : public pdal::Reader
 {
 public:
-    SET_STAGE_NAME("drivers.pgpointcloud.reader", "PGPointcloud Reader")
+    SET_STAGE_NAME("drivers.pgpointcloud.reader", "PostgreSQL Pointcloud Database Reader")
 
     Reader(const Options&);
     ~Reader();
@@ -88,7 +88,7 @@ private:
     boost::uint32_t fetchPcid() const;
     pdal::Schema fetchSchema() const;
 
-    ::soci::session* m_session;
+    PGconn* m_session;
     std::string m_connection;
     std::string m_table_name;
     std::string m_schema_name;
@@ -124,8 +124,6 @@ private:
     //
     const pdal::drivers::pgpointcloud::Reader& getReader() const;
 
-    void setupDatabaseQuery();
-
     // Skip count points, return number of points skipped
     boost::uint64_t skipImpl(boost::uint64_t count);
 
@@ -135,6 +133,11 @@ private:
     // True when there are no more points to read
     bool atEndImpl() const;
 
+    // Internal functions for managing scroll cursor
+    bool CursorSetup();
+    bool CursorTeardown();
+    bool NextBuffer();
+
     //
     // Members
     //
@@ -143,12 +146,15 @@ private:
     pdal::PointBuffer* m_buffer;
     boost::uint64_t m_buffer_position;
 
-    ::soci::statement* m_statement;
+    bool m_cursor;
     std::string m_patch_hex;
     boost::uint32_t m_patch_npoints;
-    ::soci::session* m_session;
+    PGconn* m_session;
     pdal::DimensionMap* m_dimension_map;
 
+    boost::uint32_t m_cur_row;
+    boost::uint32_t m_cur_nrows;
+    PGresult* m_cur_result;
 
 }; // pdal.drivers.pgpointcloud.sequential.iterators.Iterator
 
