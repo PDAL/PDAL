@@ -326,7 +326,7 @@ boost::uint32_t Scaling::readBufferImpl(PointBuffer& buffer)
 namespace scaling
 {
     
-IteratorBase::IteratorBase(const pdal::filters::Scaling& filter, PointBuffer& buffer)
+IteratorBase::IteratorBase(const pdal::filters::Scaling& filter, PointBuffer& )
     : m_scalingFilter(filter)
 {
     return;

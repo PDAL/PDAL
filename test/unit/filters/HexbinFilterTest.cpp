@@ -58,8 +58,8 @@ BOOST_AUTO_TEST_CASE(HexbinFilterTest_test_1)
 
         pdal::Option debug("debug", true, "");
         pdal::Option verbose("verbose", 9, "");
-        options.add(debug);
-        options.add(verbose);
+        // options.add(debug);
+        // options.add(verbose);
         pdal::Option sample_size("sample_size",5000, "Number of samples to use when estimating hexagon edge size. Specify 0.0 for edge_size if you want to compute one.");
         pdal::Option threshold("threshold", 10, "Number of points necessary inside a hexagon to be considered full");
         pdal::Option edge_size("edge_size", 0.0, "The edge size of the hexagon to use in situations where you do not want to estimate based on a sample");

@@ -150,7 +150,10 @@ protected:
     pdal::filters::InPlaceReprojection const& m_reprojectionFilter;      
     void updateBounds(PointBuffer&);
 
-    void projectData(PointBuffer& buffer, boost::uint32_t numRead); 
+    void projectData(PointBuffer& buffer, boost::uint32_t numRead);
+
+private:
+    IteratorBase& operator=(IteratorBase const&);
 };
 
 } // inplacereprojection

@@ -205,7 +205,7 @@ namespace iterators
 namespace selector
 {
 
-IteratorBase::IteratorBase(pdal::filters::Selector const& filter, PointBuffer& buffer)
+IteratorBase::IteratorBase(pdal::filters::Selector const& filter, PointBuffer& )
 : m_selectorFilter(filter)
 {
     

@@ -206,7 +206,7 @@ void InPlaceReprojection::setDimension( std::string const& name,
 
 void InPlaceReprojection::reprojectOffsets( double& offset_x,
                                             double& offset_y,
-                                            double& offset_z)
+                                            double& )
 {
 
 #ifdef PDAL_HAVE_GDAL
@@ -521,7 +521,7 @@ namespace inplacereprojection
 {
     
 IteratorBase::IteratorBase( pdal::filters::InPlaceReprojection const& filter, 
-                            PointBuffer& buffer)
+                            PointBuffer& )
 : m_reprojectionFilter(filter)
 {
     

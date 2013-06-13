@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2013, Bradley J Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -32,121 +32,112 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_FILTERS_SELECTORFILTER_HPP
-#define INCLUDED_FILTERS_SELECTORFILTER_HPP
+#ifndef INCLUDED_DRIVERS_BUFFER_READER_HPP
+#define INCLUDED_DRIVERS_BUFFER_READER_HPP
 
-#include <boost/shared_ptr.hpp>
+#include <pdal/Reader.hpp>
+#include <pdal/ReaderIterator.hpp>
+#include <pdal/Bounds.hpp>
+#include <pdal/PointBuffer.hpp>
 
-#include <pdal/Filter.hpp>
-#include <pdal/FilterIterator.hpp>
-#include <pdal/Utils.hpp>
-
-#include <map>
 
 namespace pdal
 {
-class PointBuffer;
-}
-
-namespace pdal
+namespace drivers
 {
-namespace filters
+namespace buffer
 {
 
-class PDAL_DLL Selector: public Filter
+
+// The BufferReader doesn't read from disk, but instead just grabs data from an
+// existing PointBuffer.
+//
+// This reader knows about 3 fields (Dimensions):
+//    X,Y,Z - floats
+//
+class PDAL_DLL Reader : public pdal::Reader
 {
 public:
-    SET_STAGE_NAME("filters.selector", "Dimension Selection Filter")
+    SET_STAGE_NAME("drivers.buffer.reader", "Buffer Reader")
 
-    Selector(Stage& prevStage, const Options&);
+    Reader(const Options& options, const PointBuffer& buffer);
 
-    static Options getDefaultOptions();
     virtual void initialize();
+    static Options getDefaultOptions();
 
     bool supportsIterator(StageIteratorType t) const
     {
         if (t == StageIterator_Sequential) return true;
+        if (t == StageIterator_Random) return true;
 
         return false;
     }
 
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const;
-    
-    inline std::map<std::string, bool> const& getIgnoredMap() const { return m_ignoredMap; }
-    
-    inline bool doIgnoreUnspecifiedDimensions() const { return m_ignoreDefault; }
-    std::vector<Dimension> const& getCreatedDimensions() const { return m_createDimensions; }
-    
+    pdal::StageRandomIterator* createRandomIterator(PointBuffer& buffer) const;
+
+    // this is called by the stage's iterator
+    boost::uint32_t processBuffer(PointBuffer& data, boost::uint64_t index) const;
+
+    // for dumping
+    virtual boost::property_tree::ptree toPTree() const;
+
 private:
-    void checkImpedance();
+    PointBuffer m_buffer;
+    Bounds<double> m_bounds;
+    boost::uint64_t m_numPoints;
+    Schema m_schema;
 
+    Reader& operator=(const Reader&); // not implemented
+    Reader(const Reader&); // not implemented
 
-    Selector& operator=(const Selector&); // not implemented
-    Selector(const Selector&); // not implemented
-    
-    std::map<std::string, bool> m_ignoredMap;
-    bool m_ignoreDefault;
-    std::vector<Dimension> m_createDimensions;
 };
 
 
 namespace iterators
 {
-
-namespace selector
-{
-
-class PDAL_DLL IteratorBase
-{
-public:
-    IteratorBase(pdal::filters::Selector const& filter, PointBuffer& buffer);
-
-protected:
-    void alterSchema(pdal::PointBuffer&);
-    pdal::filters::Selector const& m_selectorFilter;
-
-private:
-    IteratorBase& operator=(IteratorBase const&);
-};
-} // selector
-    
 namespace sequential
 {
 
-class PDAL_DLL Selector : public pdal::FilterSequentialIterator, public selector::IteratorBase
+class PDAL_DLL Reader : public pdal::ReaderSequentialIterator
 {
 public:
-    Selector(const pdal::filters::Selector& filter, PointBuffer& buffer);
+    Reader(pdal::drivers::buffer::Reader const& reader, PointBuffer& buffer);
+
 private:
     boost::uint64_t skipImpl(boost::uint64_t);
     boost::uint32_t readBufferImpl(PointBuffer&);
     bool atEndImpl() const;
+
+    pdal::drivers::buffer::Reader const& m_reader;
 };
 
-} // sequential
+}
+} // iterators::sequential
 
+namespace iterators
+{
 namespace random
 {
-    
-class PDAL_DLL Selector : public pdal::FilterRandomIterator, public selector::IteratorBase
+
+class PDAL_DLL Reader : public pdal::ReaderRandomIterator
 {
 public:
-    Selector(const pdal::filters::Selector& filter, PointBuffer& buffer);
-    virtual ~Selector() {};
+    Reader(pdal::drivers::buffer::Reader const& reader, PointBuffer& buffer);
 
-protected:
-    virtual boost::uint32_t readBufferImpl(PointBuffer& buffer);
-    
-    virtual boost::uint64_t seekImpl(boost::uint64_t);
+private:
+    boost::uint64_t seekImpl(boost::uint64_t);
+    boost::uint32_t readBufferImpl(PointBuffer&);
 
+    pdal::drivers::buffer::Reader const& m_reader;
 };
 
-} // namespace random
+}
+} // iterators::random
 
-} // iterators
+}
+}
+} // namespaces
 
-} // filters
-} // pdal
 
 #endif

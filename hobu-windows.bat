@@ -12,7 +12,7 @@ rem set GENERATOR="Visual Studio 10"
 
 :: Pick your build type
 set BUILD_TYPE=Release
-set BUILD_TYPE=Debug
+REM set BUILD_TYPE=Debug
 
 :: Where is your PDAL build tree?
 set PDAL_DIR=.
@@ -21,7 +21,7 @@ set PDAL_DIR=.
 set OSGEO4W_DIR=C:\OSGeo4W
 
 :: Where is boost installed?
-set PDAL_EMBED_BOOST=ON
+REM set PDAL_EMBED_BOOST=ON
 rem set BOOST_DIR=c:\utils\boost_1_49_0
 REM set BOOST_DIR=%PDAL_DIR%\boost
 
@@ -97,12 +97,14 @@ cmake -G %GENERATOR% ^
     -DWITH_SWIG_CSHARP=%PDAL_SWIG_ENABLED% ^
     -DWITH_ICONV=%ICONV_ENABLED% ^
 	-DWITH_PYTHON=%PYTHON_ENABLED% ^
+	-DWITH_HEXER=ON ^
 	-DPYTHON_EXECUTABLE=%OSGEO4W_DIR%\bin\python.exe ^
+	-DPYTHON_INCLUDE_DIR=%OSGEO4W_DIR%\apps\python27\include ^
+	-DPYTHON_LIBRARY=%OSGEO4W_DIR%\apps\python27\libs\python27.lib ^
 	-DNUMPY_INCLUDE_DIR=%OSGEO4W_DIR%\apps\python27\lib\site-packages\numpy\core\include ^
 	-DNUMPY_VERSION=1.5.1 ^
     -DCMAKE_BUILD_TYPE=%BUILD_TYPE% ^
     -DCMAKE_VERBOSE_MAKEFILE=OFF ^
-    -DPDAL_EMBED_BOOST=ON ^
     %PDAL_DIR%
     
 rem    -DBOOST_INCLUDEDIR=%BOOST_DIR% ^

@@ -14,6 +14,7 @@ endif()
 SET(PDAL_UNITTEST_TEST_SRC
     BoundsTest.cpp
     drivers/bpf/BPFTest.cpp
+    drivers/buffer/BufferReaderTest.cpp
     filters/ByteSwapFilterTest.cpp
     filters/CacheFilterTest.cpp
     drivers/caris/CarisReaderTest.cpp
@@ -111,14 +112,22 @@ if (WITH_GDAL)
     set(PDAL_GDAL_TEST_CPP
         GDALUtilsTest.cpp
         drivers/nitf/NitfReaderTest.cpp
-        drivers/nitf/NitfWriterTest.cpp
         )
 
     FOREACH(file ${PDAL_GDAL_TEST_CPP})
             SET(PDAL_UNITTEST_TEST_SRC "${PDAL_UNITTEST_TEST_SRC};${file}" CACHE INTERNAL "source files for test")
     ENDFOREACH(file)
-    
 endif (WITH_GDAL)
+
+if (WITH_NITRO)
+    set(PDAL_NITRO_TEST_CPP
+        drivers/nitf/NitfWriterTest.cpp
+        )
+
+    FOREACH(file ${PDAL_NITRO_TEST_CPP})
+            SET(PDAL_UNITTEST_TEST_SRC "${PDAL_UNITTEST_TEST_SRC};${file}" CACHE INTERNAL "source files for test")
+    ENDFOREACH(file)
+endif (WITH_NITRO)
 
 set(PDAL_UNITTEST_SOURCES "")
 FOREACH(file ${PDAL_UNITTEST_TEST_SRC})
@@ -183,7 +192,7 @@ if(WIN32)
         ${TIFF_LIBRARY}
         ${GEOTIFF_LIBRARY}
         ${GDAL_LIBRARY}
-        ${SPATIALINDEX_LIBRARY} ${Boost_LIBRARIES})
+        ${SPATIALINDEX_LIBRARY} ${Boost_LIBRARIES} ${ORACLE_LIBRARY})
 else()
     TARGET_LINK_LIBRARIES(${PDAL_UNIT_TEST} 
         ${PDAL_LIB_NAME} ${APPS_CPP_DEPENDENCIES} ${ORACLE_LIBRARY})

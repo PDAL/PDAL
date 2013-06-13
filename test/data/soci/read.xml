@@ -16,7 +16,8 @@
                         blocks.block_id, 
                         blocks.num_points,
                         blocks.points,
-                        ST_AsText(cloud.extent) as extent 
+                        ST_AsText(cloud.extent) as extent,
+                        ST_SRID(cloud.extent) as srid
                 from 
                     cloud, blocks 
                 where 

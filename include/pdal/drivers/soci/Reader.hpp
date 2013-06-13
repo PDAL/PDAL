@@ -76,11 +76,6 @@ public:
 
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
 
-    QueryType getQueryType() const
-    {
-        return m_query_type;
-    }
-    QueryType describeQueryType(std::string const& query) const;
     
     inline DatabaseType getDatabaseType() const { return m_database_type; }
     pdal::Schema fetchSchema(std::string const& query) const;
@@ -91,22 +86,8 @@ private:
 
     Reader& operator=(const Reader&); // not implemented
     Reader(const Reader&); // not implemented
-    //
 
     DatabaseType m_database_type;
-    QueryType m_query_type;
-        
-    // Connection m_connection;
-    // Statement m_initialQueryStatement;
-    // QueryType m_querytype;
-    // 
-    // BlockPtr m_block;
-    // boost::uint32_t m_capacity;
-    // 
-    // // Fields in the form of NAME:TYPE
-    // std::map<std::string, int> m_fields;
-    // 
-    // boost::shared_ptr<pdal::gdal::Debug> m_gdal_debug;
     mutable boost::uint64_t m_cachedPointCount;
 
 
@@ -138,18 +119,16 @@ protected:
     const pdal::drivers::soci::Reader& getReader() const;
 
     boost::uint32_t myReadBuffer(PointBuffer& data);
-    // boost::uint32_t unpackOracleData(PointBuffer& data);
-    // 
-    boost::uint32_t myReadClouds(PointBuffer& data);
-    boost::uint32_t myReadBlocks(PointBuffer& data, ::soci::statement& statement, ::soci::row& row);
+
+    boost::uint32_t myReadBlocks(PointBuffer& data);
     // 
     BufferPtr fetchPointBuffer( boost::int32_t const& cloud_id,
-                                std::string const& schema_xml);
+                                std::string const& schema_xml,
+                                boost::uint32_t capacity);
 
     bool m_at_end;
 
     DatabaseType m_database_type;
-    QueryType m_query_type;    
 
     boost::int32_t m_active_cloud_id;
     BufferPtr m_active_buffer;

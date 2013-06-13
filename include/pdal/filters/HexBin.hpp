@@ -107,6 +107,10 @@ protected:
     boost::uint32_t m_sample_number;
     boost::int32_t m_density;
     double m_edge_size;
+
+private:
+    IteratorBase& operator=(IteratorBase const&);
+
     
 };
 
