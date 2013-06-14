@@ -101,7 +101,7 @@ inline void pg_execute(PGconn* session, std::string const& sql)
     PGresult *result = PQexec(session, sql.c_str());
     if ( (!result) || (PQresultStatus(result) != PGRES_COMMAND_OK) )
     {
-        throw pdal_error(PQresultErrorMessage(result));
+        throw pdal_error(PQerrorMessage(session));
     }
     PQclear(result);
 }
@@ -138,10 +138,12 @@ inline char* pg_query_once(PGconn* session, std::string const& sql)
 inline PGresult* pg_query_result(PGconn* session, std::string const& sql)
 {
     PGresult *result = PQexec(session, sql.c_str());
+    if ( ! result )
+        throw pdal_error(PQerrorMessage(session));
+        
     if ( PQresultStatus(result) != PGRES_TUPLES_OK )
-    {
         throw pdal_error(PQresultErrorMessage(result));
-    }
+
     return result;
 }
 
