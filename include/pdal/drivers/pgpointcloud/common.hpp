@@ -83,7 +83,7 @@ inline PGconn* pg_connect(std::string const& connection)
     PQconninfoOption *connOptions = PQconninfoParse(connection.c_str(), &errstr);
     if ( ! connOptions )
     {
-        throw pdal_error(errstr);        
+        throw pdal_error(errstr);      
     }
    
     /* connect to database */
@@ -101,7 +101,8 @@ inline void pg_execute(PGconn* session, std::string const& sql)
     PGresult *result = PQexec(session, sql.c_str());
     if ( (!result) || (PQresultStatus(result) != PGRES_COMMAND_OK) )
     {
-        throw pdal_error(PQerrorMessage(session));
+        std::string errmsg = std::string(PQerrorMessage(session));
+        throw pdal_error(errmsg);
     }
     PQclear(result);
 }
@@ -137,12 +138,20 @@ inline char* pg_query_once(PGconn* session, std::string const& sql)
 
 inline PGresult* pg_query_result(PGconn* session, std::string const& sql)
 {
+    std::string errmsg;
     PGresult *result = PQexec(session, sql.c_str());
     if ( ! result )
-        throw pdal_error(PQerrorMessage(session));
+    {
+        errmsg = std::string(PQerrorMessage(session));
+        throw pdal_error(errmsg);
+    }
         
     if ( PQresultStatus(result) != PGRES_TUPLES_OK )
-        throw pdal_error(PQresultErrorMessage(result));
+    {
+        errmsg = std::string(PQresultErrorMessage(result));
+        PQclear(result);
+        throw pdal_error(errmsg);
+    }
 
     return result;
 }
