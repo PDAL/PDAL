@@ -96,12 +96,7 @@ private:
 
     bool WriteBlock(PointBuffer const& buffer);                        
     
-#ifdef PDAL_HAVE_SOCI
-    ::soci::session* m_session;
-#else
-    void* m_session;
-#endif
-
+    PGconn* m_session;
     const pdal::Schema &m_pdal_schema;
     std::string m_schema_name;
     std::string m_table_name;

@@ -272,6 +272,12 @@ void LasHeaderReader::read(Reader& stage, Schema& schema)
             m_istream.seekg(current_pos + 2);
             m_header.SetDataOffset(m_header.GetDataOffset() + 2);
         }
+
+        if (m_istream.eof())
+        {
+            // If we eof'd here, we don't have any points in the file, just a header
+            return;
+        }
     }
 
     {

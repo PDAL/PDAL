@@ -36,17 +36,7 @@
 #ifndef INCLUDED_DRIVER_PGPOINTCLOUD_COMMON_HPP
 #define INCLUDED_DRIVER_PGPOINTCLOUD_COMMON_HPP
 
-#ifdef PDAL_HAVE_SOCI
-#include <boost-optional.h>
-#include <boost-tuple.h>
-#include <boost-fusion.h>
-#include <boost-gregorian-date.h>
-#include <soci/soci.h>
-#include <soci/postgresql/soci-postgresql.h>
-#include <soci/error.h>
-#include <soci/use.h>
-#endif
-
+#include "libpq-fe.h"
 #include <pdal/pdal_error.hpp>
 #include <pdal/Options.hpp>
 
@@ -56,30 +46,6 @@ namespace drivers
 {
 namespace pgpointcloud
 {
-
-class soci_driver_error : public pdal_error
-{
-public:
-    soci_driver_error(std::string const& msg)
-        : pdal_error(msg)
-    {}
-};
-
-class connection_failed : public soci_driver_error
-{
-public:
-    connection_failed(std::string const& msg)
-        : soci_driver_error(msg)
-    {}
-};
-
-class buffer_too_small : public soci_driver_error
-{
-public:
-    buffer_too_small(std::string const& msg)
-        : soci_driver_error(msg)
-    {}
-};
 
 
 enum CompressionType
@@ -104,26 +70,93 @@ inline CompressionType getCompressionType(std::string const& compression_type)
     return output;
 }
 
-inline ::soci::session* connectToDataBase(std::string const& connection)
+inline PGconn* pg_connect(std::string const& connection)
 {
-    ::soci::session* output(0);
-    
+    PGconn* conn;
     if ( ! connection.size() )
     {
-        throw soci_driver_error("unable to connect to database, no connection string was given!");
+        throw pdal_error("unable to connect to database, no connection string was given!");
     }
 
-    try
+    /* Validate the connection string and get verbose error (?) */
+    char *errstr;
+    PQconninfoOption *connOptions = PQconninfoParse(connection.c_str(), &errstr);
+    if ( ! connOptions )
     {
-        output = new ::soci::session(::soci::postgresql, connection);
-    } catch (::soci::soci_error const& e)
-    {
-        std::stringstream oss;
-        oss << "Unable to connect to database with error '" << e.what() << "'";
-        throw connection_failed(oss.str());
+        throw pdal_error(errstr);      
     }
-    return output;
+   
+    /* connect to database */
+    conn = PQconnectdb(connection.c_str());
+    if ( (!conn) || (PQstatus(conn) != CONNECTION_OK) )
+    {
+        throw pdal_error("unable to connect to database");        
+    }
+    
+    return conn;
 }
+
+inline void pg_execute(PGconn* session, std::string const& sql)
+{
+    PGresult *result = PQexec(session, sql.c_str());
+    if ( (!result) || (PQresultStatus(result) != PGRES_COMMAND_OK) )
+    {
+        std::string errmsg = std::string(PQerrorMessage(session));
+        throw pdal_error(errmsg);
+    }
+    PQclear(result);
+}
+
+inline void pg_begin(PGconn* session)
+{
+    std::string sql = "BEGIN";
+    pg_execute(session, sql);
+}
+
+inline void pg_commit(PGconn* session)
+{
+    std::string sql = "COMMIT";
+    pg_execute(session, sql);
+}
+
+inline char* pg_query_once(PGconn* session, std::string const& sql)
+{
+    PGresult *result = PQexec(session, sql.c_str());
+    
+    if ( (!result) ||
+         PQresultStatus(result) != PGRES_TUPLES_OK || 
+         PQntuples(result) == 0 )
+    {
+        PQclear(result);
+        return NULL;
+    }
+
+    char *str = strdup(PQgetvalue(result, 0, 0));
+    PQclear(result);
+    return str;
+}
+
+inline PGresult* pg_query_result(PGconn* session, std::string const& sql)
+{
+    std::string errmsg;
+    PGresult *result = PQexec(session, sql.c_str());
+    if ( ! result )
+    {
+        errmsg = std::string(PQerrorMessage(session));
+        throw pdal_error(errmsg);
+    }
+        
+    if ( PQresultStatus(result) != PGRES_TUPLES_OK )
+    {
+        errmsg = std::string(PQresultErrorMessage(result));
+        PQclear(result);
+        throw pdal_error(errmsg);
+    }
+
+    return result;
+}
+
+
 
 } // pgpointcloud
 } // drivers

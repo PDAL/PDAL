@@ -51,10 +51,13 @@ CREATE_WRITER_PLUGIN(pgpointcloud, pdal::drivers::pgpointcloud::Writer)
 #endif
 
 // TO DO: 
+// - change INSERT into COPY
+//
 // - PCID / Schema consistency. If a PCID is specified,
 // must it be consistent with the buffer schema? Or should
 // the writer shove the data into the database schema as best
 // it can?
+//
 // - Load information table. Should PDAL write into a metadata
 // table information about each load? If so, how to distinguish
 // between loads? Leave to pre/post SQL?
@@ -91,6 +94,9 @@ Writer::Writer(Stage& prevStage, const Options& options)
 
 Writer::~Writer()
 {
+    if ( m_session )
+        PQfinish(m_session);
+        
     return;
 }
 
@@ -120,10 +126,7 @@ void Writer::initialize()
     std::string connection = getOptions().getValueOrThrow<std::string>("connection");
     
     // Can we connect, using this string?
-    m_session = connectToDataBase(connection);
-
-    // Direct database log info to the logger
-    m_session->set_log_stream(&(log()->get(logDEBUG2)));
+    m_session = pg_connect(connection);
 
     // Read other preferences
     m_overwrite = getOptions().getValueOrDefault<bool>("overwrite", true);
@@ -177,7 +180,7 @@ void Writer::writeBegin(boost::uint64_t /*targetNumPointsToWrite*/)
 {
 
     // Start up the database connection
-    m_session->begin();
+    pg_begin(m_session);
 
     // Pre-SQL can be *either* a SQL file to execute, *or* a SQL statement
     // to execute. We find out which one here.
@@ -192,7 +195,7 @@ void Writer::writeBegin(boost::uint64_t /*targetNumPointsToWrite*/)
             // filename to open, we'll use that instead.
             sql = pre_sql;
         }
-        m_session->once << sql;
+        pg_execute(m_session, sql);
     }
 
     bool bHaveTable = CheckTableExists(m_table_name);
@@ -212,7 +215,7 @@ void Writer::writeBegin(boost::uint64_t /*targetNumPointsToWrite*/)
     {
         CreateTable(m_schema_name, m_table_name, m_column_name, m_pcid);
     }
-        
+
     return;
 }
 
@@ -236,10 +239,10 @@ void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
             // filename to open, we'll use that instead.
             sql = post_sql;
         }
-        m_session->once << sql;
+        pg_execute(m_session, sql);
     }
 
-    m_session->commit();
+    pg_commit(m_session);
     return;
 }
 
@@ -256,7 +259,9 @@ boost::uint32_t Writer::SetupSchema(Schema const& buffer_schema, boost::uint32_t
     if ( m_pcid )
     {
         oss << "SELECT Count(pcid) FROM pointcloud_formats WHERE pcid = " << m_pcid;
-        m_session->once << oss.str(), ::soci::into(schema_count);
+        char *count_str = pg_query_once(m_session, oss.str());
+        schema_count = atoi(count_str);
+        free(count_str);
         oss.str("");
         if ( schema_count == 0 )
         {
@@ -267,43 +272,47 @@ boost::uint32_t Writer::SetupSchema(Schema const& buffer_schema, boost::uint32_t
     }
 
     // Do we have any existing schemas in the POINTCLOUD_FORMATS table?
-    boost::uint32_t pcid;
+    boost::uint32_t pcid = 0;
     bool bCreatePCPointSchema = true;
     oss << "SELECT Count(pcid) FROM pointcloud_formats";
-    m_session->once << oss.str(), ::soci::into(schema_count);
+    char *schema_count_str = pg_query_once(m_session, oss.str());
+    schema_count = atoi(schema_count_str);
+    free(schema_count_str);
     oss.str("");
     
     // Do any of the existing schemas match the one we want to use?
     if (schema_count > 0)
     {
-        std::vector<std::string> pg_schemas(schema_count);
-        std::vector<long> pg_schema_ids(schema_count);
-        m_session->once << "SELECT pcid, schema FROM pointcloud_formats", ::soci::into(pg_schema_ids), ::soci::into(pg_schemas);
-        
-        for(int i=0; i<schema_count; ++i)
+        PGresult *result = pg_query_result(m_session, "SELECT pcid, schema FROM pointcloud_formats");
+        for(int i=0; i<PQntuples(result); ++i)
         {
-            if (pdal::Schema::from_xml(pg_schemas[i]) == output_schema)
+            char *pcid_str = PQgetvalue(result, i, 0);
+            char *schema_str = PQgetvalue(result, i, 1);
+            
+            if (pdal::Schema::from_xml(schema_str) == output_schema)
             {
                 bCreatePCPointSchema = false;
-                pcid = pg_schema_ids[i];
+                pcid = atoi(pcid_str);
                 break;
             }
         }
+        PQclear(result);
     }
     
     if (bCreatePCPointSchema)
     {
         std::string xml;
         std::string compression;
-
+        char *pcid_str;
+        
         if (schema_count == 0)
         {
             pcid = 1;
         } 
         else
         {
-            m_session->once << "SELECT Max(pcid)+1 AS pcid FROM pointcloud_formats", 
-                               ::soci::into(pcid);
+            char *pcid_str = pg_query_once(m_session, "SELECT Max(pcid)+1 AS pcid FROM pointcloud_formats");
+            pcid = atoi(pcid_str);
         }  
 
         /* If the writer specifies a compression, we should set that */
@@ -318,13 +327,19 @@ boost::uint32_t Writer::SetupSchema(Schema const& buffer_schema, boost::uint32_t
 
         Metadata metadata("compression", compression, "");
         xml = pdal::Schema::to_xml(output_schema, &(metadata.toPTree()));       
-        // xml = pdal::Schema::to_xml(output_schema);       
-        oss << "INSERT INTO pointcloud_formats (pcid, srid, schema) ";
-        oss << "VALUES (:pcid, :srid, :xml)";
 
-        m_session->once << oss.str(), ::soci::use(pcid, "pcid"), ::soci::use(srid, "srid"), ::soci::use(xml, "xml");
-        oss.str("");
+        const char** paramValues = (const char**)malloc(sizeof(char*));
+        paramValues[0] = xml.c_str();
+        
+        oss << "INSERT INTO pointcloud_formats (pcid, srid, schema) VALUES (" << pcid << "," << srid << ",$1)";
+        PGresult *result = PQexecParams(m_session, oss.str().c_str(), 1, NULL, paramValues, NULL, NULL, 0);
+        if ( PQresultStatus(result) != PGRES_COMMAND_OK )
+        {
+            throw pdal_error(PQresultErrorMessage(result));
+        }
+        PQclear(result);
     }
+    
     m_pcid = pcid;
     return m_pcid;   
 }
@@ -343,8 +358,7 @@ void Writer::DeleteTable(std::string const& schema_name,
     }
     oss << table_name;
 
-    m_session->once << oss.str();
-    oss.str("");
+    pg_execute(m_session, oss.str());
 }
 
 Schema Writer::PackSchema( Schema const& schema) const
@@ -377,72 +391,67 @@ Schema Writer::PackSchema( Schema const& schema) const
 
 bool Writer::CheckPointCloudExists()
 {
-    std::ostringstream oss;
-    oss << "SELECT PC_Version()";
-
     log()->get(logDEBUG) << "checking for pointcloud existence ... " << std::endl;
+
+    std::string q = "SELECT PC_Version()";
 
     try 
     {  
-        m_session->once << oss.str();
+        pg_execute(m_session, q);
     } 
-    catch (::soci::soci_error const &e)
+    catch (pdal_error const &e)
     {
-        oss.str("");
         return false;
     } 
 
-    oss.str("");
     return true;
 }
 
 bool Writer::CheckPostGISExists()
 {
-    std::ostringstream oss;
-    oss << "SELECT PostGIS_Version()";
+    std::string q = "SELECT PostGIS_Version()";
 
     log()->get(logDEBUG) << "checking for PostGIS existence ... " << std::endl;
 
     try 
     {  
-        m_session->once << oss.str();
+        pg_execute(m_session, q);
     } 
-    catch (::soci::soci_error const &e)
+    catch (pdal_error const &e)
     {
-        oss.str("");
         return false;
     } 
 
-    oss.str("");
     return true;
 }
 
 
 bool Writer::CheckTableExists(std::string const& name)
 {
-
     std::ostringstream oss;
-    oss << "SELECT tablename FROM pg_tables";
+    oss << "SELECT count(*) FROM pg_tables WHERE tablename ILIKE '" << name << "'";
 
-    log()->get(logDEBUG) << "checking for " << name << " existence ... " << std::endl;
+    log()->get(logDEBUG) << "checking for table '" << name << "' existence ... " << std::endl;
 
-    ::soci::rowset<std::string> rs = (m_session->prepare << oss.str());
-
-    std::ostringstream debug;
-    for (::soci::rowset<std::string>::const_iterator it = rs.begin(); it != rs.end(); ++it)
+    char *count_str = pg_query_once(m_session, oss.str());
+    int count = atoi(count_str);
+    free(count_str);
+    
+    if ( count == 1 )
     {
-        debug << ", " << *it;
-        if (boost::iequals(*it, name))
-        {
-            log()->get(logDEBUG) << "it exists!" << std::endl;
-            return true;
-        }
+        return true;
     }
-    log()->get(logDEBUG) << debug.str();
-    log()->get(logDEBUG) << " -- '" << name << "' not found." << std::endl;
-
-    return false;
+    else if ( count > 1 )
+    {
+        log()->get(logDEBUG) << "found more than 1 table named '" << name << "'" << std::endl;
+        return false;
+    }
+    else
+    {
+        return false;
+    }
 }
+
 
 void Writer::CreateTable(std::string const& schema_name, 
                          std::string const& table_name,
@@ -463,8 +472,7 @@ void Writer::CreateTable(std::string const& schema_name,
     }
     oss << ")";
 
-    m_session->once << oss.str();
-    oss.str("");
+    pg_execute(m_session, oss.str());
 }
 
 // Make sure you test for the presence of PostGIS before calling this
@@ -482,8 +490,7 @@ void Writer::CreateIndex(std::string const& schema_name,
     oss << table_name << "_pc_gix";
     oss << " USING GIST (Geometry(" << column_name << "))";
 
-    m_session->once << oss.str();
-    oss.str("");        
+    pg_execute(m_session, oss.str());
 }
 
 
@@ -566,19 +573,10 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     options << boost::format("%08x") % compression;
     options << boost::format("%08x") % num_points;
 
-    std::stringstream hex;
-    hex << options.str() << Utils::binary_to_hex_string(block_data);
-    oss << hex.str() << "')";
-    try
-    {
-        m_session->once << oss.str();
-        oss.str("");
-    }
-    catch (::soci::soci_error const &e)
-    {
-        throw pdal_error("uh oh");
-//        return false;
-    }
+    oss << options.str() << Utils::binary_to_hex_string(block_data);
+    oss << "')";
+
+    pg_execute(m_session, oss.str());
 
     return true;
 }

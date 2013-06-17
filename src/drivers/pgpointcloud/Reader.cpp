@@ -90,14 +90,13 @@ Reader::Reader(const Options& options)
     , m_where("")
     , m_pcid(0)
     , m_cached_point_count(0)
-    , m_cached_patch_count(0)
     , m_cached_max_points(0)
 {}
 
 Reader::~Reader()
 {
     if ( m_session )
-        delete m_session;
+        PQfinish(m_session);
 
     return;
 }
@@ -142,7 +141,7 @@ void Reader::initialize()
     m_where = getOptions().getValueOrDefault<std::string>("where", "");
 
     // Database connection
-    m_session = connectToDataBase(m_connection);
+    m_session = pg_connect(m_connection);
  
     // Read schema from pointcloud_formats if possible
     Schema& schema = getSchemaRef();
@@ -167,7 +166,6 @@ boost::uint64_t Reader::getNumPoints() const
     {
         std::ostringstream oss;
         oss << "SELECT Sum(PC_NumPoints(" << m_column_name << ")) AS numpoints, ";
-        oss << "Count(*) AS numpatches, ";
         oss << "Max(PC_NumPoints(" << m_column_name << ")) AS maxpoints FROM ";
         if ( m_schema_name.size() )
         {
@@ -179,8 +177,15 @@ boost::uint64_t Reader::getNumPoints() const
             oss << " WHERE " << m_where;
         }
 
-        m_session->once << oss.str(), ::soci::into(m_cached_point_count), ::soci::into(m_cached_patch_count), ::soci::into(m_cached_max_points);
-        oss.str("");
+        PGresult *result = pg_query_result(m_session, oss.str());
+        
+        if ( PQresultStatus(result) != PGRES_TUPLES_OK )
+        {
+            throw pdal_error("unable to get point count");
+        }
+        m_cached_point_count = atoi(PQgetvalue(result, 0, 0));
+        m_cached_max_points = atoi(PQgetvalue(result, 0, 1));        
+        PQclear(result);
     }
 
     return m_cached_point_count;
@@ -203,15 +208,6 @@ std::string Reader::getDataQuery() const
 
     log()->get(logDEBUG) << "Constructed data query " << oss.str() << std::endl;
     return oss.str();
-}
-
-boost::uint64_t Reader::getNumPatches() const
-{
-    if ( m_cached_point_count == 0 )
-    {
-        boost::uint64_t npoints = getNumPoints();
-    }
-    return m_cached_patch_count;
 }
 
 boost::uint64_t Reader::getMaxPoints() const
@@ -238,9 +234,10 @@ boost::uint32_t Reader::fetchPcid() const
     oss << "WHERE c.relname = '" << m_table_name << "' ";
     oss << "AND a.attname = '" << m_column_name << "' ";
 
-    m_session->once << oss.str(), ::soci::into(pcid);
-    oss.str("");
-
+    char *pcid_str = pg_query_once(m_session, oss.str());
+    pcid = atoi(pcid_str);
+    free(pcid_str);
+    
     if ( ! pcid )
         throw pdal_error("Unable to fetch pcid specified column and table");
 
@@ -259,14 +256,9 @@ pdal::Schema Reader::fetchSchema() const
     std::ostringstream oss;
     oss << "SELECT schema FROM pointcloud_formats WHERE pcid = " << pcid;
 
-    ::soci::row r;
-    ::soci::statement schemas = (m_session->prepare << oss.str(), ::soci::into(r));
-    schemas.execute();
-        
-    if ( ! schemas.fetch() )
-        throw pdal_error("Unable to retreive schema XML for specified column and table");
-
-    std::string xml = r.get<std::string>("schema");    
+    char *xml_str = pg_query_once(m_session, oss.str());
+    std::string xml = std::string(xml_str);
+    free(xml_str);
 
     Schema schema = Schema::from_xml(xml);
 
@@ -308,25 +300,15 @@ pdal::SpatialReference Reader::fetchSpatialReference() const
     std::ostringstream oss;
     oss << "SELECT srid FROM pointcloud_formats WHERE pcid = " << pcid;
 
-    ::soci::row r;
-    ::soci::indicator ind;
-    ::soci::statement srids = (m_session->prepare << oss.str(), ::soci::into(r, ind));
-    srids.execute();
-    oss.str("");
-    
-    if ( ! srids.fetch() )
+    char *srid_str = pg_query_once(m_session, oss.str());
+    if ( ! srid_str )
         throw pdal_error("Unable to fetch srid for this table and column");
     
-    boost::int32_t srid = r.get<boost::int32_t>("srid");
-
-    if (ind == ::soci::i_null)
-    {
-        log()->get(logDEBUG) << "No SRID was selected for query" << std::endl;
-        return pdal::SpatialReference();
-    }
+    boost::int32_t srid = atoi(srid_str);
 
     log()->get(logDEBUG) << "     got SRID = " << srid << std::endl;    
 
+    oss.str("");
     oss << "EPSG:" << srid;
 
     if ( srid >= 0 )
@@ -363,26 +345,34 @@ Iterator::Iterator(const pdal::drivers::pgpointcloud::Reader& reader, PointBuffe
     , m_at_end(false)
     , m_buffer(NULL)
     , m_buffer_position(0)
-    , m_statement(NULL)
+    , m_cursor(false)
     , m_patch_hex("")
     , m_patch_npoints(0)
     , m_session(NULL)
     , m_dimension_map(NULL)
+    , m_cur_row(0)
+    , m_cur_nrows(0)
+    , m_cur_result(NULL)
 {
     pdal::Options const& options = reader.getOptions();
     std::string const& connection = options.getValueOrThrow<std::string>("connection");
-    m_session = connectToDataBase(connection);
-
+    m_session = pg_connect(connection);
     return;
 }
 
 Iterator::~Iterator()
 {
-    if ( m_statement )
-        delete m_statement;
-
     if ( m_session )
-        delete m_session;
+    {
+        PQfinish(m_session);
+        m_session = NULL;
+    }
+    
+    if ( m_cur_result )
+    {
+        PQclear(m_cur_result);
+        m_cur_result = NULL;
+    }
 
     if ( m_dimension_map )
         delete m_dimension_map;
@@ -412,6 +402,56 @@ bool Iterator::atEndImpl() const
     return m_at_end;
 }
 
+bool Iterator::CursorSetup()
+{
+    std::ostringstream oss;
+    oss << "DECLARE cur CURSOR FOR " << getReader().getDataQuery();
+    pg_begin(m_session);
+    pg_execute(m_session, oss.str());
+    m_cursor = true;
+
+    getReader().log()->get(logDEBUG) << "SQL cursor prepared: " << oss.str() << std::endl;
+    return true;
+}
+
+bool Iterator::CursorTeardown()
+{
+    pg_execute(m_session, "CLOSE sur");
+    pg_commit(m_session);
+    m_cursor = false;
+    getReader().log()->get(logDEBUG) << "SQL cursor closed." << std::endl;
+    return true;
+}
+
+bool Iterator::NextBuffer()
+{
+    if ( ! m_cursor )
+        CursorSetup();
+    
+    if ( m_cur_row >= m_cur_nrows || ! m_cur_result )
+    {
+        static std::string fetch = "FETCH 2 FROM cur";
+        if ( m_cur_result ) PQclear(m_cur_result);
+        m_cur_result = pg_query_result(m_session, fetch);
+        getReader().log()->get(logDEBUG) << "SQL: " << fetch << std::endl;
+        if ( PQresultStatus(m_cur_result) != PGRES_TUPLES_OK || PQntuples(m_cur_result) == 0 )
+        {
+            PQclear(m_cur_result);
+            m_cur_result = NULL;
+            CursorTeardown();
+            return false;
+        }
+        
+        m_cur_row = 0;
+        m_cur_nrows = PQntuples(m_cur_result);
+    }
+    
+    m_patch_hex = std::string(PQgetvalue(m_cur_result, m_cur_row, 0));
+    m_patch_npoints = atoi(PQgetvalue(m_cur_result, m_cur_row, 1));
+
+    m_cur_row++;
+    return true;
+}
 
 boost::uint32_t Iterator::readBufferImpl(PointBuffer& user_buffer)
 {
@@ -419,12 +459,9 @@ boost::uint32_t Iterator::readBufferImpl(PointBuffer& user_buffer)
 
     // First time through, create the SQL statement, allocate holding pens
     // and fire it off!
-    if ( ! m_statement )
+    if ( ! m_cursor )
     {
-        m_statement = new ::soci::statement(*m_session);
-        *m_statement = (m_session->prepare << getReader().getDataQuery(), ::soci::into(m_patch_hex), ::soci::into(m_patch_npoints));
-        m_statement->execute();
-        getReader().log()->get(logDEBUG) << "SQL statement prepared" << std::endl;
+        CursorSetup();
     }
 
     // Is the cache for patches ready?
@@ -461,7 +498,7 @@ boost::uint32_t Iterator::readBufferImpl(PointBuffer& user_buffer)
         if ( m_buffer_position >= m_buffer->getNumPoints() )
         {
             // No more patches! We're done!
-            if ( ! m_statement->fetch() )
+            if ( ! NextBuffer() )
             {
                 m_at_end = true;
                 break;
