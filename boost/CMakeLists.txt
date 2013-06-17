@@ -11,7 +11,7 @@ if(WIN32)
     #add_definitions(-DBOOST_TEST_NO_MAIN)
 	
 	# disable compiler warnings
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w")
+#    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w")
 	
 else()
     
