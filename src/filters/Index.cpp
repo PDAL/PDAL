@@ -238,13 +238,14 @@ boost::uint32_t Index::readBufferImpl(PointBuffer& data)
 {
     const boost::uint32_t numRead = getPrevIterator().read(data);
 
-    bool logOutput = m_stage.log()->getLevel() > logDEBUG4;
+
     m_stage.log()->floatPrecision(8);
 
     m_stage.log()->get(logDEBUG2) << "inserting data into index data array of capacity: " << data.getCapacity() << std::endl;
     
 #ifdef PDAL_HAVE_FLANN        
-    
+
+    bool logOutput = m_stage.log()->getLevel() > logDEBUG4;    
     for (boost::uint32_t pointIndex=0; pointIndex<numRead; pointIndex++)
     {
         float x = static_cast<float>(getScaledValue(data, *m_xDim, pointIndex));
