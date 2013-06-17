@@ -40,6 +40,7 @@
 
 
 #ifdef PDAL_HAVE_NITRO
+#define IMPORT_NITRO_API 
 #include <nitro/c++/import/nitf.hpp>
 #include <nitro/c++/except/Trace.h>
 #endif
