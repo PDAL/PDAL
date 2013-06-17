@@ -33,7 +33,7 @@ include(${PDAL_SOURCE_DIR}/cmake/pdal_utils.cmake)
 
 # the next line is the ONLY place in the entire pdal system where
 # the version info is hard-coded
-set(PDAL_VERSION_STRING 0.8.6 CACHE STRING "PDAL version")
+set(PDAL_VERSION_STRING 0.9.8 CACHE STRING "PDAL version")
 
 DISSECT_VERSION()
 GET_OS_INFO()
@@ -391,7 +391,13 @@ if(WITH_NITRO)
   include_directories(${NITRO_INCLUDE_DIR})
   include_directories(${NITRO_INCLUDE_DIR}/nitro/c++)
   include_directories(${NITRO_INCLUDE_DIR}/nitro/c)
-  add_definitions("-D__POSIX -D_REENTRANT")
+  add_definitions("-D_REENTRANT")
+  if (WIN32)
+      add_definitions("-DSIZEOF_SIZE_T=4")
+      add_definitions("-DIMPORT_NITRO_API")
+  else()
+      add_definitions("-D__POSIX")
+  endif()
   message(STATUS "...building with Nitro")
 endif()
 
@@ -588,8 +594,8 @@ set (USE_PDAL_PLUGIN_NITRO FALSE CACHE BOOL "Build the NITF writer as a plugin r
 # installation commands
 #------------------------------------------------------------------------------
 
-install(FILES AUTHORS.txt LICENSE.txt
-  DESTINATION ${PDAL_DATA_DIR}/doc)
+#install(FILES AUTHORS.txt LICENSE.txt
+#  DESTINATION ${PDAL_DATA_DIR}/doc)
 
 #------------------------------------------------------------------------------
 # generate the pdal_defines.h header
