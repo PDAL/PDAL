@@ -100,6 +100,9 @@ protected:
     boost::int64_t m_startingIndex;
 
     boost::uint32_t decimateData(PointBuffer& buffer, StageSequentialIterator& iterator);        
+
+private:
+    IteratorBase& operator=(IteratorBase const&);
 };
 } // decimation
 namespace sequential
