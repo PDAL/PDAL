@@ -173,26 +173,8 @@ boost::uint32_t ByteSwap::readBufferImpl(PointBuffer& dstData)
     // We will read from our previous stage until we get that amount (or
     // until the previous stage runs out of points).
 
-    Stage const* prevStage = &(m_swapFilter.getPrevStage());
-
-    // std::cout << "Source: " << dstData.getSchema() << std::endl;
-    // std::cout << "prev stage: " << prevStage->getSchema() << std::endl;
-    Chipper const* chip = dynamic_cast<Chipper const*>(prevStage);
-
-    if (chip)
-    {
-        PointBuffer srcData(dstData.getSchema(), dstData.getCapacity());
-        const boost::uint32_t numSrcPointsRead = getPrevIterator().read(srcData);
-        const boost::uint32_t numPointsProcessed = m_swapFilter.processBuffer(dstData, srcData);
-
-        assert(numSrcPointsRead == numPointsProcessed);
-        // std::cout << "Prev stage was a chipper!" << std::endl;
-        return numPointsProcessed;
-    }
-
     boost::uint32_t numPointsNeeded = dstData.getCapacity();
     boost::uint32_t numPointsAchieved = 0;
-    // assert(dstData.getNumPoints() == 0);
 
     while (numPointsNeeded > 0)
     {
