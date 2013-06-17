@@ -668,7 +668,8 @@ if (WIN32)
     ${P2G_LIBRARY}
     ${GEOS_LIBRARY}
     ${FLANN_LIBRARIES}
-    ${HEXER_LIBRARY})
+    ${HEXER_LIBRARY}
+    ${ORACLE_LIBRARY})
 else()
   target_link_libraries(${APPS_CPP_DEPENDENCIES}
     ${PDAL_LIB_NAME}
