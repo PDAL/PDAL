@@ -41,7 +41,10 @@
 //
 #define MAKE_READER_CREATOR(T, FullT) \
     pdal::Reader* create_##T(const pdal::Options& options) \
-        { return new FullT(options); }
+        { \
+            return new FullT(options); \
+        } 
+            
 #define MAKE_FILTER_CREATOR(T, FullT) \
     pdal::Filter* create_##T(pdal::Stage& prevStage, const pdal::Options& options) \
         { return new FullT(prevStage, options); }
@@ -56,12 +59,16 @@
 // macros to register the stage creators
 //
 #define REGISTER_WRITER(T, FullT) \
+    addDriver(FullT::s_getName(), FullT::s_getDescription()); \
     registerWriter(FullT::s_getName(), create_##T)
 #define REGISTER_READER(T, FullT) \
+    addDriver(FullT::s_getName(), FullT::s_getDescription()); \
     registerReader(FullT::s_getName(), create_##T)
 #define REGISTER_FILTER(T, FullT) \
+    addDriver(FullT::s_getName(), FullT::s_getDescription()); \
     registerFilter(FullT::s_getName(), create_##T)
 #define REGISTER_MULTIFILTER(T, FullT) \
+    addDriver(FullT::s_getName(), FullT::s_getDescription()); \
     registerMultiFilter(FullT::s_getName(), create_##T)
 
 #define CREATE_READER_PLUGIN(DriverName, DriverFullType) \

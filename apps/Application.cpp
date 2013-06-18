@@ -38,6 +38,7 @@
 
 #include <pdal/pdal_config.hpp>
 #include <pdal/GlobalEnvironment.hpp>
+#include <pdal/StageFactory.hpp>
 
 #include "Application.hpp"
 #include <vector>
@@ -49,6 +50,7 @@ Application::Application(int argc, char* argv[], const std::string& appName)
     : m_isDebug(false)
     , m_verboseLevel(0)
     , m_showHelp(false)
+    , m_showDrivers(false)
     , m_showVersion(false)
     , m_showTime(false)
     , m_argc(argc)
@@ -229,7 +231,12 @@ int Application::innerRun()
         outputHelp();
         return 0;
     }
-
+    
+    if (m_showDrivers)
+    {
+        outputDrivers();
+        return 0;
+    }
     try
     {
         // do any user-level sanity checking
@@ -288,6 +295,17 @@ void Application::addPositionalSwitch(const char* name, int max_count)
     m_positionalOptions.add(name, max_count);
 }
 
+void Application::outputDrivers()
+{
+    pdal::StageFactory* factory = new pdal::StageFactory;
+    std::map<std::string, std::string> const& drivers = factory->getAvailableStages();
+    typedef std::map<std::string, std::string>::const_iterator Iterator;
+    
+    for (Iterator i = drivers.begin(); i != drivers.end(); ++i)
+    {
+        std::cout << " '" << i->first << "' -- '"<< i->second<<"'"<<std::endl;
+    }
+}
 
 void Application::outputHelp()
 {
@@ -325,7 +343,8 @@ void Application::addBasicSwitchSet()
     po::options_description* basic_options = new po::options_description("basic options");
 
     basic_options->add_options()
-        ("help,h", po::value<bool>(&m_showHelp)->zero_tokens()->implicit_value(true), "produce help message")
+        ("help,h", po::value<bool>(&m_showHelp)->zero_tokens()->implicit_value(true), "Print help message")
+        ("drivers,r", po::value<bool>(&m_showDrivers)->zero_tokens()->implicit_value(true), "Show currently registered drivers (including dynamic with PDAL_DRIVER_PATH)")
         ("debug,d", po::value<bool>(&m_isDebug)->zero_tokens()->implicit_value(true), "Enable debug mode")
         ("report-debug", po::value<bool>(&m_reportDebug)->zero_tokens()->implicit_value(true), "Report PDAL compilation DEBUG status")
         ("developer-debug", po::value<bool>(&m_hardCoreDebug)->zero_tokens()->implicit_value(true), "Enable developer debug mode (don't trap exceptions so segfaults are thrown)")

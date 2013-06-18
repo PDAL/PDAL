@@ -641,4 +641,13 @@ void StageFactory::registerPlugin(std::string const& filename)
     
 }
 
+void StageFactory::addDriver(std::string const& name, std::string const& description)
+{
+    m_drivers.insert(std::pair<std::string, std::string>(name, description));
+}
+
+std::map<std::string, std::string> const& StageFactory::getAvailableStages() const
+{
+    return m_drivers;
+}
 } // namespace pdal

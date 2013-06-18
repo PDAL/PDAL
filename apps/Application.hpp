@@ -110,6 +110,7 @@ protected:
 private:
     int innerRun();
     void parseSwitches();
+    void outputDrivers();
     void outputHelp();
     void outputVersion();
     void addBasicSwitchSet();
@@ -122,6 +123,7 @@ private:
     bool m_isDebug;
     boost::uint32_t m_verboseLevel;
     bool m_showHelp;
+    bool m_showDrivers;
     bool m_showVersion;
     bool m_showTime;
     const int m_argc;

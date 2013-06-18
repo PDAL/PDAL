@@ -110,6 +110,8 @@ public:
 
     void loadPlugins();
     void registerPlugin(std::string const& filename);
+    
+    std::map<std::string, std::string> const& getAvailableStages() const;
 
 private:
     // callers take ownership of returned stages
@@ -122,13 +124,16 @@ private:
     void registerKnownFilters();
     void registerKnownMultiFilters();
     void registerKnownWriters();
+    void addDriver(std::string const& name, std::string const& description);
 
     // these are the "registries" of the factory creator functions
     ReaderCreatorList m_readerCreators;
     FilterCreatorList m_filterCreators;
     MultiFilterCreatorList m_multifilterCreators;
     WriterCreatorList m_writerCreators;
-
+    
+    // driver name + driver description
+    std::map<std::string, std::string> m_drivers;
     StageFactory& operator=(const StageFactory&); // not implemented
     StageFactory(const StageFactory&); // not implemented
 };
