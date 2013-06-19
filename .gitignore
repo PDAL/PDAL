@@ -75,3 +75,4 @@ Makefile
 doc/build
 bin/
 test/unit/CMakeScripts/
+src/gitsha.cpp
