@@ -1,0 +1,11 @@
+.. _filters.chipper:
+
+Chipping Filter
+===============
+
+filters.chipper
+---------------
+
+
+
+
