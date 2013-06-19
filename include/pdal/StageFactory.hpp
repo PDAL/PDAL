@@ -112,6 +112,7 @@ public:
     void registerPlugin(std::string const& filename);
     
     std::map<std::string, std::string> const& getAvailableStages() const;
+    void addDriver(std::string const& name, std::string const& description);
 
 private:
     // callers take ownership of returned stages
@@ -124,7 +125,6 @@ private:
     void registerKnownFilters();
     void registerKnownMultiFilters();
     void registerKnownWriters();
-    void addDriver(std::string const& name, std::string const& description);
 
     // these are the "registries" of the factory creator functions
     ReaderCreatorList m_readerCreators;
