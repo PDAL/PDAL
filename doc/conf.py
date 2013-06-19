@@ -11,7 +11,7 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sys, os
+import sys, os, re
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -52,27 +52,15 @@ copyright = u'2012, Howard Butler, Michael Gerlek and others'
 def read_version(filename):
     # oh yes, this is brittle
     data = open(filename).readlines()
-    major = 'PDAL_VERSION_MAJOR'
-    minor = 'PDAL_VERSION_MINOR'
-    patch = 'PDAL_VERSION_PATCH'
+    full = 'PDAL_VERSION_STRING'
     
     for line in data:
-        if str(major) in line:
-            line = line.replace('SET('+major+' ', '')
-            line = line.replace(')','')
-            line = line.replace('"','')
-            maj = line.strip()
-        if str(minor) in line:
-            line = line.replace('SET('+minor+' ', '')
-            line = line.replace(')','')
-            line = line.replace('"','')
-            min = line.strip()
-        if str(patch) in line:
-            line = line.replace('SET('+patch+' ', '')
-            line = line.replace(')','')
-            line = line.replace('"','')
-            pat = line.strip()
-    return '%s.%s.%s'%(maj, min, pat)
+        if str(full) in line:
+            matchObj = re.search( r' (\d+\.\d+\.\d+) ', line, re.I )
+            if matchObj:
+                return matchObj.group(1)
+
+    return '0.0.0'
     
 version = read_version('../CMakeLists.txt')
 release = version
@@ -309,3 +297,4 @@ breathe_diagram = {
     'project' : 'api',
     'no-link' : False
 }
+
