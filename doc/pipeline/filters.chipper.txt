@@ -1,11 +1,9 @@
 .. _filters.chipper:
 
-Chipping Filter
+filters.chipper
 ===============
 
-filters.chipper
----------------
-
+This that other.
 
 
 
