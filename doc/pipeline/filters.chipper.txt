@@ -3,7 +3,7 @@
 filters.chipper
 ===============
 
-The chipper takes a single large point cloud and converts it into a set of smaller clouds, or chips. The chips are all spatially contiguous and non-overlapping, so the result is a an irregular tiling of the input data.
+The chipper filter takes a single large point cloud and converts it into a set of smaller clouds, or chips. The chips are all spatially contiguous and non-overlapping, so the result is a an irregular tiling of the input data.
 
 .. figure:: filters.chipper.img1.png
     :scale: 100 %
