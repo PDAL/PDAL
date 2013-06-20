@@ -17,7 +17,9 @@ Example
   <?xml version="1.0" encoding="utf-8"?>
   <Pipeline version="1.0">
     <Writer type="drivers.pgpointcloud.writer">
-      <Option name="connection">host='localhost' dbname='lidar' user='pramsey'</Option>
+      <Option name="connection">
+        host='localhost' dbname='lidar' user='pramsey'
+      </Option>
       <Option name="table">example</Option>
       <Option name="compression">dimensional</Option>
       <Option name="srid">26916</Option>
