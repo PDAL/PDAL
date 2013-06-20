@@ -136,7 +136,7 @@ Chipper::Chipper(Stage& prevStage, const Options& options)
     , m_yvec(chipper::DIR_Y)
     , m_spare(chipper::DIR_NONE)
 {
-    m_threshold = options.getValueOrDefault<boost::uint32_t>("capacity", 0u);
+    m_threshold = options.getValueOrDefault<boost::uint32_t>("capacity", 5000u);
 
 }
 
