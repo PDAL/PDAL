@@ -1,0 +1,64 @@
+.. _drivers.las.writer.txt:
+
+drivers.las.writer.txt
+======================
+
+The **LAS Writer** supports writing to `LAS format`_ files, the standard interchange file format for LIDAR data.
+
+Example
+-------
+
+.. code-block:: xml
+
+  <?xml version="1.0" encoding="utf-8"?>
+  <Pipeline version="1.0">
+    <Writer type="drivers.las.writer">
+      <Option name="filename">outputfile.las</Option>
+      
+      <Reader type="drivers.las.reader">
+        <Option name="filename">inputfile.las</Option>
+      </Reader>
+    </Writer>
+  </Pipeline>
+
+Options
+-------
+
+filename
+  LAS file to read [Required] 
+
+software_id
+  LasHeader::SoftwareIdentifier
+
+creation_doy
+  m_lasHeader.SetCreationDOY (0)
+  
+creation_year
+  m_lasHeader.SetCreationYear (0)
+  
+format
+  m_lasHeader.setPointFormat (3)
+  
+system_id
+  LasHeader::SystemIdentifier
+  
+header_padding
+  m_lasHeader.SetHeaderPadding (0)
+
+a_srs
+  setSpatialReference
+  
+compression
+  m_lasHeader.SetCompressed (true/false)
+  
+filesource_id
+  m_lasHeader.SetFileSourceId
+  
+datarecordlength
+  m_lasHeader.SetDataRecordLength
+  
+
+
+
+.. _LAS format: http://asprs.org/Committee-General/LASer-LAS-File-Format-Exchange-Activities.html
+  
