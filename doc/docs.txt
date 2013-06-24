@@ -20,6 +20,7 @@ Contents:
    api/index
    metadata
    pipeline
+   pipeline/index.txt
    copyright
   
 Indices and tables

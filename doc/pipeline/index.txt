@@ -1,0 +1,31 @@
+.. _pipeline_index:
+
+******************************************************************************
+Pipeline Reference
+******************************************************************************
+
+
+Readers & Writers
+=================
+
+.. toctree::
+   :maxdepth: 1
+
+   drivers.las.reader
+   drivers.las.writer
+   drivers.pgpointcloud.reader
+   drivers.pgpointcloud.writer
+
+
+Filters
+=======
+
+.. toctree::
+   :maxdepth: 1
+
+   filters.chipper
+   filters.crop
+   filters.decimation
+   filters.inplacereprojection
+
+
