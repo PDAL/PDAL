@@ -27,5 +27,7 @@ Filters
    filters.crop
    filters.decimation
    filters.inplacereprojection
+   filters.predicate
+   filters.programmable
 
 
