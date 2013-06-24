@@ -63,7 +63,7 @@ scale_x, scale_y, scale_z
   Output scales of the X, Y and Z dimensions respectively. When changing from projected to geographic, or vice versa, remember to set an output scale appropriate to the final coordinate magnitude. [Default: Scale of the input dimension]
 
 ignore_old_dimensions
-  TBD [Default: **true**]
+  Marking original dimensions as ignored will cause them to not be written out by the writer at the end of the chain. [Default: **true**]
   
 do_offset_z
   TDB [Default: **false**]

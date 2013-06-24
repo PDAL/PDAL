@@ -1,7 +1,7 @@
-.. _drivers.las.reader.txt:
+.. _drivers.las.reader:
 
-drivers.las.reader.txt
-======================
+drivers.las.reader
+==================
 
 The **LAS Reader** supports reading from `LAS format`_ files, the standard interchange format for LIDAR data.
 
