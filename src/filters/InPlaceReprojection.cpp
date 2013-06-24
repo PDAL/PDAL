@@ -206,17 +206,17 @@ void InPlaceReprojection::setDimension( std::string const& name,
 
 void InPlaceReprojection::reprojectOffsets( double& offset_x,
                                             double& offset_y,
-                                            double& )
+                                            double& offset_z)
 {
 
 #ifdef PDAL_HAVE_GDAL
     int ret = 0;
     
-    double dummy_x(0.0);
+    double dummy_z(0.0);
     bool doOffsetZ = getOptions().getValueOrDefault<bool>("do_offset_z", false);
     
-    double* x = doOffsetZ ? &offset_x : &dummy_x;
-    ret = OCTTransform(m_transform_ptr.get(), 1, &offset_x, &offset_y, x);
+    double* z = doOffsetZ ? &offset_z : &dummy_z;
+    ret = OCTTransform(m_transform_ptr.get(), 1, &offset_x, &offset_y, z);
     if (!ret)
     {
         std::ostringstream msg;
