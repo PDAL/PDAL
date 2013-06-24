@@ -28,36 +28,37 @@ filename
   LAS file to read [Required] 
 
 software_id
-  LasHeader::SoftwareIdentifier
+  String identifying the software that created this LAS file. [Default: "libLAS 1.2"]
 
 creation_doy
-  m_lasHeader.SetCreationDOY (0)
+  Number of the day of the year (January 1 == 0, Dec 31 == 365) this file is being created. [Default: 0]
   
 creation_year
-  m_lasHeader.SetCreationYear (0)
+  Year (Gregorian) this file is being created. [Default: 0]
   
 format
-  m_lasHeader.setPointFormat (3)
+  Controls whether information about color and time are stored with the point information in the LAS file. [Default: 3]
+  
+  * 0 == no color or time stored
+  * 1 == time is stored
+  * 2 == color is stored
+  * 3 == color and time are stored 
   
 system_id
-  LasHeader::SystemIdentifier
+  String identifying the system that created this LAS file. [Default: "libLAS"]
   
 header_padding
-  m_lasHeader.SetHeaderPadding (0)
+  The number of bytes between the variable-length header information and the point data itself. Extra header padding allows extra headers to be written later without re-writing the whole file [Default: 0]
 
 a_srs
-  setSpatialReference
+  The spatial reference system of the file to be written. Can be an EPSG string (eg "EPSG:268910") or a WKT string. [Default: Not set]
   
 compression
-  m_lasHeader.SetCompressed (true/false)
+  Apply compressed to the LAS file? [Default: false]
   
 filesource_id
-  m_lasHeader.SetFileSourceId
+  The file source id number to use for this file (a value between 1 and 65535) [Default: 0]
   
-datarecordlength
-  m_lasHeader.SetDataRecordLength
-  
-
 
 
 .. _LAS format: http://asprs.org/Committee-General/LASer-LAS-File-Format-Exchange-Activities.html
