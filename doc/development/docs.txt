@@ -63,7 +63,7 @@ If you have `pip installed <http://www.pip-installer.org/en/latest/installing.ht
 If you are installing these packages to a system-wide directory, you may need the **sudo** in front of the **pip**, though it might be better that instead you use `virtual environments`_ instead of installing the packages system-wide.
 
 The PDAL documentation also depends on `doxygen`_, which can be installed from source or from binaries from the `doxygen website <http://www.stack.nl/~dimitri/doxygen/download.html>`_.
-If you are on Max OS X and use `homebrew`, you can install doxygen with a simple ``brew install doxygen``.
+If you are on Max OS X and use `homebrew`_, you can install doxygen with a simple ``brew install doxygen``.
 
 Once you have installed all the doc dependencies, you can then build the documentation itself.
 The :file:`doc/` directory in the PDAL source tree contains a Makefile which can be used to build all documentation.
