@@ -1,7 +1,7 @@
-.. _drivers.las.writer.txt:
+.. _drivers.las.writer:
 
-drivers.las.writer.txt
-======================
+drivers.las.writer
+==================
 
 The **LAS Writer** supports writing to `LAS format`_ files, the standard interchange file format for LIDAR data.
 
