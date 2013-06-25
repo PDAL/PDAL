@@ -248,21 +248,29 @@ Schema InPlaceReprojection::alterSchema(Schema& schema)
     log()->get(logDEBUG3) << "Fetched x_name: " << dimX;
     log()->get(logDEBUG3) << "Fetched y_name: " << dimY;
     log()->get(logDEBUG3) << "Fetched z_name: " << dimZ;
+
+    /* Start with the incoming dimension offsets */
+    double offset_x = dimX.getNumericOffset();
+    double offset_y = dimY.getNumericOffset();
+    double offset_z = dimZ.getNumericOffset();
     
-    double offset_x = getOptions().getValueOrDefault<double>("offset_x", dimX.getNumericOffset());
-    double offset_y = getOptions().getValueOrDefault<double>("offset_y", dimY.getNumericOffset());
-    double offset_z = getOptions().getValueOrDefault<double>("offset_z", dimZ.getNumericOffset());
-
+    /* Reproject incoming offsets to new coordinate system */
     log()->floatPrecision(8);
-
     log()->get(logDEBUG2) << "original offset x,y: " << offset_x <<"," << offset_y << std::endl;
     reprojectOffsets(offset_x, offset_y, offset_z);
     log()->get(logDEBUG2) << "reprojected offset x,y: " << offset_x <<"," << offset_y << std::endl;
 
+    /* If user-specified offsets exist, use those instead of the reprojected offsets */
+    offset_x = getOptions().getValueOrDefault<double>("offset_x", offset_x);
+    offset_y = getOptions().getValueOrDefault<double>("offset_y", offset_y);
+    offset_z = getOptions().getValueOrDefault<double>("offset_z", offset_z);
+
+    /* Read any user-specified scales */
     double scale_x = getOptions().getValueOrDefault<double>("scale_x", dimX.getNumericScale());
     double scale_y = getOptions().getValueOrDefault<double>("scale_y", dimY.getNumericScale());
     double scale_z = getOptions().getValueOrDefault<double>("scale_z", dimZ.getNumericScale());
 
+    /* Apply scaling/offset to output schema */
     setDimension(x_name, m_old_x_id, m_new_x_id, schema, scale_x, offset_x);
     setDimension(y_name, m_old_y_id, m_new_y_id, schema, scale_y, offset_y);
     setDimension(z_name, m_old_z_id, m_new_z_id, schema, scale_z, offset_z);

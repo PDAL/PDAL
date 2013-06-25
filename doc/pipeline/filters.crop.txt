@@ -1,7 +1,7 @@
 .. _filters.crop:
 
 filters.crop
-==================
+============
 
 The cropping filter takes a stream of points and removes points that fall outside the cropping bounds, or an optional cropping polygon. The cropping filter requires a bounds or a polygon to crop with.
 
