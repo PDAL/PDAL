@@ -23,6 +23,7 @@ Filters
 .. toctree::
    :maxdepth: 1
 
+   filters.byteswap
    filters.chipper
    filters.crop
    filters.decimation
