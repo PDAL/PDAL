@@ -56,7 +56,7 @@ class ByteSwapFilterSequentialIterator;
 class PDAL_DLL ByteSwap : public Filter
 {
 public:
-    SET_STAGE_NAME("filters.byteswap", "Crop Filter")
+    SET_STAGE_NAME("filters.byteswap", "Byte-swap Filter")
 
     ByteSwap(Stage& prevStage, const Options&);
     ByteSwap(Stage& prevStage);
