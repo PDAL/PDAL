@@ -219,10 +219,10 @@ void Writer::writeEnd(boost::uint64_t actualNumPointsWritten)
                                          );
     subheader.getImageId().set("None");
     // 64 char string
-    char* buffer = "0000000000000000000000000000000000000000000000000000000000000000";
+    const char* buffer = "0000000000000000000000000000000000000000000000000000000000000000";
     
     ::nitf::BandSource* band =
-        new ::nitf::MemorySource( buffer, 
+        new ::nitf::MemorySource( (char*) buffer, 
                                 strlen(buffer) /* memory size */, 
                                 0 /* starting offset */, 
                                 1 /* bytes per pixel */, 
