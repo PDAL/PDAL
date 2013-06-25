@@ -23,11 +23,13 @@ Filters
 .. toctree::
    :maxdepth: 1
 
+   filters.byteswap
    filters.chipper
    filters.crop
    filters.decimation
    filters.inplacereprojection
    filters.predicate
    filters.programmable
+   filters.selector
 
 
