@@ -29,5 +29,6 @@ Filters
    filters.inplacereprojection
    filters.predicate
    filters.programmable
+   filters.selector
 
 
