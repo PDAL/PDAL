@@ -1,0 +1,22 @@
+# .travis.yml
+# Configure Travis CI service for http://github.com/PDAL
+language: cpp
+
+compiler:
+  - g++
+  - clang
+
+before_install:
+  - ./scripts/ci/before_install.sh
+
+script:
+  - ./scripts/ci/script.sh
+
+notifications:
+  email:
+    recipients:
+      - mateusz@loskot.net
+  on_success: change # [always|never|change] # default: change
+  on_failure: always # [always|never|change] # default: always
+  irc: "chat.freenode.net#pdal"
+
