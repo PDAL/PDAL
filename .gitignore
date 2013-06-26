@@ -70,6 +70,7 @@ test/data/local
 #
 .DS_Store
 
+_build
 build
 Makefile
 doc/build
