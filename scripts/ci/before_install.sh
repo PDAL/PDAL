@@ -8,3 +8,7 @@ sudo apt-get update -qq || exit 1
 sudo apt-get install cmake libgdal-dev libgeotiff-dev libproj-dev libtiff4-dev libxml2-dev || exit 1
 gcc --version || exit 1
 clang --version || exit 1
+
+# TEST
+grep VERSION /usr/include/tiff.h
+grep VERSION /usr/include/tiffvers.h
