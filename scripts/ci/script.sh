@@ -8,7 +8,7 @@ cd _build
 cmake \
     -DWITH_GDAL=ON \
     -DWITH_GEOTIFF=ON \
-    -DWITH_LIBXML2 \
+    -DWITH_LIBXML2=ON \
     ..
 #echo "$(tmstamp) *** script::cmake-config finished $(date) ***"
 
