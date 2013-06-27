@@ -5,7 +5,11 @@ mkdir -p _build
 cd _build
 
 #echo "$(tmstamp) *** script::cmake-config starting $(date) ***"
-cmake ..
+cmake \
+    -DWITH_GDAL=ON \
+    -DWITH_GEOTIFF=ON \
+    -DWITH_LIBXML2 \
+    ..
 #echo "$(tmstamp) *** script::cmake-config finished $(date) ***"
 
 #echo "$(tmstamp) *** script::cmake-build make -j ${NUMTHREADS} $(date) ***"
