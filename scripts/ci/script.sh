@@ -1,21 +1,16 @@
 #!/bin/bash
 # Builds and tests PDAL
 source ./scripts/ci/common.sh
-mkdir -p _build
-cd _build
+mkdir -p _build || return 1
+cd _build || return 1
 
-#echo "$(tmstamp) *** script::cmake-config starting $(date) ***"
 cmake \
     -DWITH_GDAL=ON \
     -DWITH_GEOTIFF=ON \
     -DWITH_LIBXML2=ON \
-    ..
-#echo "$(tmstamp) *** script::cmake-config finished $(date) ***"
+    .. \
+    || return 1
 
-#echo "$(tmstamp) *** script::cmake-build make -j ${NUMTHREADS} $(date) ***"
-make -j ${NUMTHREADS}
-#echo "$(tmstamp) *** script::cmake-build finished $(date) ***"
+    make -j ${NUMTHREADS} || return 1
 
-#echo "$(tmstamp) *** script::cmake-test starting $(date) ***"
-ctest -V --output-on-failure .
-#echo "$(tmstamp) *** script::cmake-test finished $(date) ***"
+ctest -V --output-on-failure . || return 1
