@@ -38,7 +38,7 @@ ENDIF()
      
 FIND_PATH(GEOTIFF_INCLUDE_DIR
   geotiff.h
-  PATH_PREFIXES geotiff
+  PATH_SUFFIXES geotiff
   PATHS
   ${OSGEO4W_ROOT_DIR}/include)
 
