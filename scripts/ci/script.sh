@@ -9,6 +9,7 @@ cmake \
     -DWITH_GDAL=ON \
     -DWITH_GEOTIFF=ON \
     -DWITH_LIBXML2=ON \
+    -DWITH_PGPOINTCLOUD=ON \
     .. \
     || exit 1
 

@@ -9,6 +9,7 @@ sudo apt-get install \
     cmake \
     libflann-dev \
     libgdal-dev \
+    libpq-dev \
     libproj-dev \
     libtiff4-dev \
     libxml2-dev \
