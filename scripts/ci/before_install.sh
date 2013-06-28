@@ -5,7 +5,14 @@ sudo apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 16126D3A3E5C1192 |
 sudo apt-get install python-software-properties -y || exit 1
 sudo add-apt-repository ppa:ubuntugis/ppa -y || exit 1
 sudo apt-get update -qq || exit 1
-sudo apt-get install cmake libgdal-dev libproj-dev libtiff4-dev libxml2-dev || exit 1
+sudo apt-get install \
+    cmake \
+    libflann-dev \
+    libgdal-dev \
+    libproj-dev \
+    libtiff4-dev \
+    libxml2-dev \
+    || exit 1
 
 # install libgeotiff from sources
 wget http://download.osgeo.org/geotiff/libgeotiff/libgeotiff-1.4.0.tar.gz || exit 1
