@@ -51,14 +51,14 @@ pdal::Stage* AppSupport::makeReader(pdal::Options& options)
         throw app_runtime_error("file not found: " + inputFile);
     }
 
-    pdal::StageFactory* factory = new pdal::StageFactory;
-    std::string driver = factory->inferReaderDriver(inputFile, options);
+    pdal::StageFactory factory;
+    std::string driver = factory.inferReaderDriver(inputFile, options);
     if (driver == "")
     {
         throw app_runtime_error("Cannot determine input file type of " + inputFile);
     }
 
-    pdal::Stage* stage = factory->createReader(driver, options);
+    pdal::Stage* stage = factory.createReader(driver, options);
     if (!stage)
     {
         throw app_runtime_error("reader creation failed");
@@ -72,14 +72,14 @@ pdal::Writer* AppSupport::makeWriter(pdal::Options& options, pdal::Stage& stage)
 {
     const std::string outputFile = options.getValueOrThrow<std::string>("filename");
 
-    pdal::StageFactory* factory = new pdal::StageFactory;
-    std::string driver = factory->inferWriterDriver(outputFile, options);
+    pdal::StageFactory factory;
+    std::string driver = factory.inferWriterDriver(outputFile, options);
     if (driver == "")
     {
         throw app_runtime_error("Cannot determine output file type of " + outputFile);
     }
         
-    pdal::Writer* writer = factory->createWriter(driver, stage, options);
+    pdal::Writer* writer = factory.createWriter(driver, stage, options);
     if (!writer)
     {
         throw app_runtime_error("writer creation failed");
