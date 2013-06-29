@@ -144,10 +144,6 @@ protected:
     const pdal::drivers::las::Reader& m_reader;
     std::istream& m_istream;
 
-    PointDimensions* m_pointDimensions;
-    Schema const* m_schema;
-
-    void setPointDimensions(PointBuffer& buffer);
     inline pdal::drivers::las::Reader const& getReader()
     {
         return m_reader;
