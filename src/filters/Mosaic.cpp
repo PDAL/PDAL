@@ -59,6 +59,7 @@ void Mosaic::initialize()
 
     const Stage& stage0 = *stages[0];
     const SpatialReference& srs0 = stage0.getSpatialReference();
+    const bool ignoreSrs = getOptions().getValueOrDefault<bool>("ignore_srs", false);
     const Schema& schema0 = stage0.getSchema();
     PointCountType pointCountType0 = stage0.getPointCountType();
     boost::uint64_t totalPoints = stage0.getNumPoints();
@@ -68,7 +69,7 @@ void Mosaic::initialize()
     for (boost::uint32_t i=1; i<stages.size(); i++)
     {
         Stage& stage = *(stages[i]);
-        if (stage.getSpatialReference() != srs0)
+        if (!ignoreSrs && stage.getSpatialReference() != srs0)
             throw impedance_invalid("mosaicked stages must have same srs");
         if (stage.getSchema() != schema0)
             throw impedance_invalid("mosaicked stages must have same schema");
