@@ -681,8 +681,6 @@ namespace iterators
 Base::Base(pdal::drivers::las::Reader const& reader)
     : m_reader(reader)
     , m_istream(m_reader.getStreamFactory().allocate())
-    , m_pointDimensions(NULL)
-    , m_schema(0)
     , m_zipPoint(NULL)
     , m_unzipper(NULL)
 {
@@ -707,9 +705,6 @@ Base::~Base()
     m_zipPoint.reset();
     m_unzipper.reset();
 #endif
-
-    if (m_pointDimensions)
-        delete m_pointDimensions;
 
     m_reader.getStreamFactory().deallocate(m_istream);
 }
@@ -755,16 +750,6 @@ void Base::read(PointBuffer&)
 
 }
 
-void Base::setPointDimensions(PointBuffer& buffer)
-{
-    // Cache dimension positions
-    Schema const& schema = buffer.getSchema();
-    if (m_pointDimensions)
-        delete m_pointDimensions;
-    m_pointDimensions = new PointDimensions(schema, m_reader.getName());
-
-}
-
 namespace sequential
 {
 
@@ -790,8 +775,6 @@ void Reader::readBeginImpl()
 
 void Reader::readBufferBeginImpl(PointBuffer& buffer)
 {
-    if (!m_pointDimensions)
-        setPointDimensions(buffer);
 }
 
 boost::uint64_t Reader::skipImpl(boost::uint64_t count)
@@ -823,13 +806,14 @@ bool Reader::atEndImpl() const
 
 boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
 {
+    PointDimensions cachedDimensions(data.getSchema(), m_reader.getName());
 #ifdef PDAL_HAVE_LASZIP
     return m_reader.processBuffer(data,
                                   m_istream,
                                   getStage().getNumPoints()-this->getIndex(),
                                   m_unzipper.get(),
                                   m_zipPoint.get(),
-                                  m_pointDimensions,
+                                  &cachedDimensions,
                                   m_read_buffer);
 #else
     return m_reader.processBuffer(data,
@@ -837,7 +821,7 @@ boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
                                   getStage().getNumPoints()-this->getIndex(),
                                   NULL,
                                   NULL,
-                                  m_pointDimensions,
+                                  &cachedDimensions,
                                   m_read_buffer);
 
 #endif
@@ -868,8 +852,6 @@ void Reader::readBufferBeginImpl(PointBuffer& /* buffer*/)
 }
 void Reader::readBeginImpl()
 {
-    if (!m_pointDimensions)
-        setPointDimensions(getBuffer());
 }
 
 boost::uint64_t Reader::seekImpl(boost::uint64_t count)
@@ -898,13 +880,14 @@ boost::uint64_t Reader::seekImpl(boost::uint64_t count)
 
 boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
 {
+    PointDimensions cachedDimensions(data.getSchema(), m_reader.getName());
 #ifdef PDAL_HAVE_LASZIP
     return m_reader.processBuffer(data,
                                   m_istream,
                                   getStage().getNumPoints()-this->getIndex(),
                                   m_unzipper.get(),
                                   m_zipPoint.get(),
-                                  m_pointDimensions,
+                                  &cachedDimensions,
                                   m_read_buffer);
 #else
     return m_reader.processBuffer(data,
@@ -912,7 +895,7 @@ boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
                                   getStage().getNumPoints()-this->getIndex(),
                                   NULL,
                                   NULL,
-                                  m_pointDimensions,
+                                  &cachedDimensions,
                                   m_read_buffer);
 
 #endif
