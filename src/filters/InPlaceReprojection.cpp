@@ -559,20 +559,24 @@ void IteratorBase::updateBounds(PointBuffer& buffer)
         return;
     }
 
-	try
-	{
-	    Bounds<double> newBounds(minx, miny, minz, maxx, maxy, maxz);
-
-	    buffer.setSpatialBounds(newBounds);
-		
-	}
-	catch (pdal::bounds_error&)
-	{
-	    Bounds<double> newBounds(minx, miny, oldBounds.getMinimum(2), maxx, maxy, oldBounds.getMaximum(2));
-
-	    buffer.setSpatialBounds(newBounds);
-		
-	}
+    try
+    {
+        Bounds<double> newBounds(minx, miny, minz, maxx, maxy, maxz);
+        buffer.setSpatialBounds(newBounds);
+    }
+    catch (pdal::bounds_error&)
+    {
+        try
+        {
+            Bounds<double> newBounds(minx, miny, oldBounds.getMinimum(2), maxx, maxy, oldBounds.getMaximum(2));
+            buffer.setSpatialBounds(newBounds);
+        }
+        catch (pdal::bounds_error&)
+        {
+            Bounds<double> newBounds = buffer.calculateBounds(true);
+            buffer.setSpatialBounds(newBounds);
+        }
+    }
 
     return;
 }
