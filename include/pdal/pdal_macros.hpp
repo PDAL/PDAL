@@ -59,16 +59,16 @@
 // macros to register the stage creators
 //
 #define REGISTER_WRITER(T, FullT) \
-    addDriver(FullT::s_getName(), FullT::s_getDescription()); \
+    registerDriverInfo<FullT>(); \
     registerWriter(FullT::s_getName(), create_##T)
 #define REGISTER_READER(T, FullT) \
-    addDriver(FullT::s_getName(), FullT::s_getDescription()); \
+    registerDriverInfo<FullT>(); \
     registerReader(FullT::s_getName(), create_##T)
 #define REGISTER_FILTER(T, FullT) \
-    addDriver(FullT::s_getName(), FullT::s_getDescription()); \
+    registerDriverInfo<FullT>(); \
     registerFilter(FullT::s_getName(), create_##T)
 #define REGISTER_MULTIFILTER(T, FullT) \
-    addDriver(FullT::s_getName(), FullT::s_getDescription()); \
+    registerDriverInfo<FullT>(); \
     registerMultiFilter(FullT::s_getName(), create_##T)
 
 #define CREATE_READER_PLUGIN(DriverName, DriverFullType) \

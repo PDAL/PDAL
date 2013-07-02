@@ -51,6 +51,7 @@ Application::Application(int argc, char* argv[], const std::string& appName)
     , m_verboseLevel(0)
     , m_showHelp(false)
     , m_showDrivers(false)
+    , m_showOptions("")
     , m_showVersion(false)
     , m_showTime(false)
     , m_argc(argc)
@@ -237,6 +238,11 @@ int Application::innerRun()
         outputDrivers();
         return 0;
     }
+    if (!m_showOptions.empty())
+    {
+        outputOptions(m_showOptions);
+        return 0;
+    }
     try
     {
         // do any user-level sanity checking
@@ -298,14 +304,59 @@ void Application::addPositionalSwitch(const char* name, int max_count)
 void Application::outputDrivers()
 {
     pdal::StageFactory* factory = new pdal::StageFactory;
-    std::map<std::string, std::string> const& drivers = factory->getAvailableStages();
-    typedef std::map<std::string, std::string>::const_iterator Iterator;
+    std::map<std::string, pdal::StageInfo> const& drivers = factory->getStageInfos();
+    typedef std::map<std::string, pdal::StageInfo>::const_iterator Iterator;
     
     for (Iterator i = drivers.begin(); i != drivers.end(); ++i)
     {
-        std::cout << " '" << i->first << "' -- '"<< i->second<<"'"<<std::endl;
+        std::cout << " '" << i->first << "' -- '"<< i->second.getDescription()<<"'"<<std::endl;
     }
 }
+
+void Application::outputOptions(std::string const& driver)
+{
+    pdal::StageFactory* factory = new pdal::StageFactory;
+    std::map<std::string, pdal::StageInfo> const& drivers = factory->getStageInfos();
+    typedef std::map<std::string, pdal::StageInfo>::const_iterator Iterator;
+    
+    Iterator i = drivers.find(driver);
+    if ( i != drivers.end())
+    {
+        std::cout << "Options for driver '" << i->first << "'" << std::endl;
+
+        std::vector<Option> options = i->second.getProvidedOptions();
+        for (std::vector<Option>::const_iterator it = options.begin();
+            it != options.end();
+            ++it)
+        {
+            pdal::Option const& opt = *it;
+            std::cout   << "   '" << opt.getName() << "' --- '" 
+                        << opt.getDescription() << "' " 
+                        << "default: '" << opt.getValue<std::string>() << "'"
+                        << std::endl;
+        }
+    }
+    else
+    {
+        for (Iterator i = drivers.begin(); i != drivers.end(); ++i)
+        {
+            std::cout << "Options for driver '" << " '" << i->first << "' -- '"<< i->second.getDescription()<<"'"<<std::endl;        
+            std::vector<Option> options = i->second.getProvidedOptions();
+            for (std::vector<Option>::const_iterator it = options.begin();
+                it != options.end();
+                ++it)
+            {
+                pdal::Option const& opt = *it;
+                std::cout   << "   '" << opt.getName() << "' --- '" 
+                            << opt.getDescription() << "' " 
+                            << "default: '" << opt.getValue<std::string>() << "'"
+                            << std::endl;
+            }
+        }
+        
+    }
+}
+
 
 void Application::outputHelp()
 {
@@ -345,6 +396,7 @@ void Application::addBasicSwitchSet()
     basic_options->add_options()
         ("help,h", po::value<bool>(&m_showHelp)->zero_tokens()->implicit_value(true), "Print help message")
         ("drivers", po::value<bool>(&m_showDrivers)->zero_tokens()->implicit_value(true), "Show currently registered drivers (including dynamic with PDAL_DRIVER_PATH)")
+        ("options", po::value<std::string>(&m_showOptions)->implicit_value("all"), "Show available options for a driver")
         ("debug,d", po::value<bool>(&m_isDebug)->zero_tokens()->implicit_value(true), "Enable debug mode")
         ("report-debug", po::value<bool>(&m_reportDebug)->zero_tokens()->implicit_value(true), "Report PDAL compilation DEBUG status")
         ("developer-debug", po::value<bool>(&m_hardCoreDebug)->zero_tokens()->implicit_value(true), "Enable developer debug mode (don't trap exceptions so segfaults are thrown)")

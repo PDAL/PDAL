@@ -39,6 +39,8 @@
 
 #include <pdal/pdal_internal.hpp>
 #include <pdal/Log.hpp>
+#include <pdal/Options.hpp>
+#include <pdal/Metadata.hpp>
 
 #include <string>
 #include <vector>

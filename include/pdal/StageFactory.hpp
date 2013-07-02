@@ -42,7 +42,7 @@
 #include <pdal/Filter.hpp>
 #include <pdal/MultiFilter.hpp>
 #include <pdal/Writer.hpp>
-
+#include <pdal/StageInfo.hpp>
 #include <boost/shared_ptr.hpp>
 
 #include <vector>
@@ -111,8 +111,8 @@ public:
     void loadPlugins();
     void registerPlugin(std::string const& filename);
     
-    std::map<std::string, std::string> const& getAvailableStages() const;
-    void addDriver(std::string const& name, std::string const& description);
+    std::map<std::string, pdal::StageInfo> const& getStageInfos() const;
+    template<class T> void registerDriverInfo();
 
 private:
     // callers take ownership of returned stages
@@ -133,11 +133,35 @@ private:
     WriterCreatorList m_writerCreators;
     
     // driver name + driver description
-    std::map<std::string, std::string> m_drivers;
+    std::map<std::string, pdal::StageInfo> m_driver_info;
     StageFactory& operator=(const StageFactory&); // not implemented
     StageFactory(const StageFactory&); // not implemented
 };
 
+template <class T>
+inline void StageFactory::registerDriverInfo()
+{
+    
+    pdal::StageInfo info(T::s_getName(), T::s_getDescription());
+    std::vector<Dimension> dimensions = T::getDefaultDimensions();
+    
+    for (std::vector<Dimension>::const_iterator i = dimensions.begin();
+         i != dimensions.end();
+         ++i)
+    {
+        info.addProvidedDimension(*i);
+    }
+    
+    std::vector<Option> options = T::getDefaultOptions().getOptions();
+    for (std::vector<Option>::const_iterator i = options.begin();
+        i != options.end();
+        ++i)
+    {
+        info.addProvidedOption(*i);
+    }
+    m_driver_info.insert(std::pair<std::string, pdal::StageInfo>(T::s_getName(), info));
+
+}
 
 } // namespace pdal
 

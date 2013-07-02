@@ -180,6 +180,12 @@ Options Reader::getDefaultOptions()
     return options;
 }
 
+std::vector<Dimension> Reader::getDefaultDimensions()
+{
+    std::vector<Dimension> output;
+    return output;
+}
+
 
 pdal::StageSequentialIterator* Reader::createSequentialIterator(PointBuffer& buffer) const
 {

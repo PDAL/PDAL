@@ -111,6 +111,7 @@ private:
     int innerRun();
     void parseSwitches();
     void outputDrivers();
+    void outputOptions(std::string const& driver);
     void outputHelp();
     void outputVersion();
     void addBasicSwitchSet();
@@ -124,6 +125,7 @@ private:
     boost::uint32_t m_verboseLevel;
     bool m_showHelp;
     bool m_showDrivers;
+    std::string m_showOptions;
     bool m_showVersion;
     bool m_showTime;
     const int m_argc;

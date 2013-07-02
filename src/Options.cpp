@@ -40,6 +40,7 @@
 #include <boost/concept_check.hpp> // ignore_unused_variable_warning
 #include <boost/optional.hpp>
 #include <boost/foreach.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include <iostream>
 #include <sstream>
@@ -208,11 +209,24 @@ std::vector<Option> Options::getOptions(std::string const& name) const
 {
     std::pair<std::multimap<std::string,Option>::const_iterator,std::multimap<std::string,Option>::const_iterator> ret;
     std::vector<Option> output;
-    ret = m_options.equal_range(name);
-    std::multimap<std::string, Option>::const_iterator it;
-    for (it = ret.first; it != ret.second; ++it)
+    
+    // If we have an empty name, return them all
+    if (boost::iequals(name, ""))
     {
-        output.push_back((*it).second);
+        std::multimap<std::string, Option>::const_iterator it;
+        for (it = m_options.begin(); it != m_options.end(); ++it)
+        {
+            output.push_back((*it).second);
+        }        
+    }
+    else
+    {
+        ret = m_options.equal_range(name);
+        std::multimap<std::string, Option>::const_iterator it;
+        for (it = ret.first; it != ret.second; ++it)
+        {
+            output.push_back((*it).second);
+        }
     }
     return output;
 

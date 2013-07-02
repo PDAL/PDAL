@@ -427,7 +427,7 @@ public:
 
     void dump() const;
 
-    std::vector<Option> getOptions(std::string const& name) const;
+    std::vector<Option> getOptions(std::string const& name="") const;
 
 
     template<typename T>
