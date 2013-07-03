@@ -239,11 +239,7 @@ std::string Dimension::getInterpretationName() const
 
     switch (t)
     {
-        case dimension::SignedByte:
-            if (bytesize == 1)
-                type << "int8_t";
-            break;
-        case dimension::UnsignedByte:
+        case dimension::RawByte:
             if (bytesize == 1)
                 type << "uint8_t";
             break;

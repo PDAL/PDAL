@@ -296,11 +296,7 @@ double Stats::getValue(PointBuffer& data, Dimension& d, boost::uint32_t pointInd
 
     switch (d.getInterpretation())
     {
-        case dimension::SignedByte:
-            i8 = data.getField<boost::int8_t>(d, pointIndex);
-            output = d.applyScaling<boost::int8_t>(i8);
-            break;
-        case dimension::UnsignedByte:
+        case dimension::RawByte:
             u8 = data.getField<boost::uint8_t>(d, pointIndex);
             output = d.applyScaling<boost::uint8_t>(u8);
             break;
