@@ -75,6 +75,7 @@
     PDAL_C_START PDAL_DLL void PDALRegister_reader_##DriverName(void* factory) \
     { \
         pdal::StageFactory& f = *(pdal::StageFactory*) factory; \
+        f.registerDriverInfo< DriverFullType>(); \
         f.registerReader(DriverFullType::s_getName(), create_##DriverName##Reader); \
     } \
     PDAL_C_END 
@@ -83,6 +84,7 @@
     PDAL_C_START PDAL_DLL void PDALRegister_filter_##DriverName(void* factory) \
     { \
         pdal::StageFactory& f = *(pdal::StageFactory*) factory; \
+        f.registerDriverInfo< DriverFullType>(); \
         f.registerFilter(DriverFullType::s_getName(), create_##DriverName##Filter); \
     } \
     PDAL_C_END 
@@ -91,6 +93,7 @@
     PDAL_C_START PDAL_DLL void PDALRegister_multifilter_##DriverName(void* factory) \
     { \
         pdal::StageFactory& f = *(pdal::StageFactory*) factory; \
+        f.registerDriverInfo< DriverFullType>(); \
         f.registerMultiFilter(DriverFullType::s_getName(), create_##DriverName##MultiFilter); \
     } \
     PDAL_C_END 
@@ -99,6 +102,7 @@
     PDAL_C_START PDAL_DLL void PDALRegister_writer_##DriverName(void* factory) \
     { \
         pdal::StageFactory& f = *(pdal::StageFactory*) factory; \
+        f.registerDriverInfo< DriverFullType>(); \
         f.registerWriter(DriverFullType::s_getName(), create_##DriverName##Writer); \
     } \
     PDAL_C_END 

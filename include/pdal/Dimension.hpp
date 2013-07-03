@@ -94,8 +94,7 @@ typedef boost::int32_t size_type;
 /// values `uint32_t` or `int64_t`).
 enum Interpretation
 {
-    SignedByte,
-    UnsignedByte,
+    RawByte,
     SignedInteger,
     UnsignedInteger,
     Pointer,
@@ -490,11 +489,7 @@ public:
 
         switch (this->getInterpretation())
         {
-            case dimension::SignedByte:
-                i8 = *(boost::int8_t*)(void*)data;
-                output = Utils::saturation_cast<T, boost::int8_t>(i8);
-                break;
-            case dimension::UnsignedByte:
+            case dimension::RawByte:
                 u8 = *(boost::uint8_t*)(void*)data;
                 output = Utils::saturation_cast<T, boost::uint8_t>(u8);
                 break;
