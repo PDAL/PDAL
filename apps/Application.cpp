@@ -303,8 +303,8 @@ void Application::addPositionalSwitch(const char* name, int max_count)
 
 void Application::outputDrivers()
 {
-    pdal::StageFactory* factory = new pdal::StageFactory;
-    std::map<std::string, pdal::StageInfo> const& drivers = factory->getStageInfos();
+    pdal::StageFactory factory;
+    std::map<std::string, pdal::StageInfo> const& drivers = factory.getStageInfos();
     typedef std::map<std::string, pdal::StageInfo>::const_iterator Iterator;
     
     for (Iterator i = drivers.begin(); i != drivers.end(); ++i)
