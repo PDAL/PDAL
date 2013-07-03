@@ -92,6 +92,14 @@ bool IsLasZipEnabled()
 #endif
 }
 
+bool IsEmbeddedBoost()
+{
+#ifdef PDAL_EMBED_BOOST
+    return true;
+#else
+    return false;
+#endif
+}
 
 int GetVersionMajor()
 {
@@ -143,7 +151,12 @@ std::string GetFullVersionString()
        << LASZIP_VERSION_MINOR << "."
        << LASZIP_VERSION_REVISION;
 #endif
-
+    
+    if (IsEmbeddedBoost())
+        os << " Embed ";
+    else
+        os << " System "; 
+    
     std::string info(os.str());
     os.str("");
     os << "PDAL " << PDAL_VERSION_STRING;
