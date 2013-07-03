@@ -106,7 +106,7 @@ boost::uint32_t Predicate::processBuffer(PointBuffer& data, pdal::plang::Buffere
     
     PointBuffer dstData(data.getSchema(), data.getCapacity());
     
-    python.extractResult("Mask", (boost::uint8_t*)mask, data.getNumPoints(), 1, pdal::dimension::UnsignedByte, 1);
+    python.extractResult("Mask", (boost::uint8_t*)mask, data.getNumPoints(), 1, pdal::dimension::RawByte, 1);
 
     boost::uint8_t* dst = dstData.getData(0);
     boost::uint8_t* src = data.getData(0);

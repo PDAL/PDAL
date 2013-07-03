@@ -477,7 +477,6 @@ void Writer::putStringRepresentation(PointBuffer const& data,
             break;
 
         case dimension::SignedInteger:
-        case dimension::SignedByte:
             if (size == 1)
             {
                 i8 = data.getField<boost::int8_t>(d, pointIndex);
@@ -513,7 +512,6 @@ void Writer::putStringRepresentation(PointBuffer const& data,
             break;
 
         case dimension::UnsignedInteger:
-        case dimension::UnsignedByte:
             if (size == 1)
             {
                 u8 = data.getField<boost::uint8_t>(d, pointIndex);
@@ -547,6 +545,13 @@ void Writer::putStringRepresentation(PointBuffer const& data,
                     output << u64;
             }
             break;
+
+        case dimension::RawByte:
+        {
+            unsigned char* raw  = data.getData(pointIndex) + d.getByteOffset();
+            Utils::binary_to_hex_stream(raw, output, 0, d.getByteSize());
+            break;
+        }
 
         case dimension::Pointer:    // stored as 64 bits, even on a 32-bit box
         case dimension::Undefined:

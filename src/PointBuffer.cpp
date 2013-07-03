@@ -245,7 +245,6 @@ boost::property_tree::ptree PointBuffer::toPTree() const
 #define STRINGIFY(T,x) boost::lexical_cast<std::string>(boost::numeric_cast<T>(x))
                     // note we convert 8-bit fields to ints, so they aren't treated as chars
                 case dimension::SignedInteger:
-                case dimension::SignedByte:
                     if (size == 1)
                     {
                         if (!applyScaling)
@@ -292,7 +291,6 @@ boost::property_tree::ptree PointBuffer::toPTree() const
                     }
                     break;
                 case dimension::UnsignedInteger:
-                case dimension::UnsignedByte:
                     if (size == 1)
                     {
                         if (!applyScaling)
@@ -368,7 +366,19 @@ boost::property_tree::ptree PointBuffer::toPTree() const
                         output += STRINGIFY(double, GETFIELDAS(double));
                     }
                     break;
-
+                    
+                case dimension::RawByte:
+                {
+                    const boost::uint8_t* data  = getData(pointIndex) + dimension.getByteOffset();
+                    std::vector<boost::uint8_t> bytes;
+                    for (int i=0; i < dimension.getByteSize(); ++i)
+                    {
+                        bytes.push_back(data[i]);
+                    }
+                    output += Utils::binary_to_hex_string(bytes);
+                    break;
+                }
+                    
                 default:
                     throw pdal_error("unknown dimension data type");
             }
@@ -475,7 +485,6 @@ std::ostream& operator<<(std::ostream& ostr, const PointBuffer& pointBuffer)
             switch (dimension.getInterpretation())
             {
                 case dimension::SignedInteger:
-                case dimension::SignedByte:
                     if (dimension.getByteSize() == 1)
                         ostr << (int)(pointBuffer.getField<boost::int8_t>(dimension, pointIndex));
                     if (dimension.getByteSize() == 2)
@@ -486,7 +495,7 @@ std::ostream& operator<<(std::ostream& ostr, const PointBuffer& pointBuffer)
                         ostr << pointBuffer.getField<boost::int64_t>(dimension, pointIndex);
                     break;
                 case dimension::UnsignedInteger:
-                case dimension::UnsignedByte:
+                case dimension::RawByte:
                     if (dimension.getByteSize() == 1)
                         ostr << (unsigned int)(pointBuffer.getField<boost::uint8_t>(dimension, pointIndex));
                     if (dimension.getByteSize() == 2)

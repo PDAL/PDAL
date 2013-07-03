@@ -310,7 +310,6 @@ double Index::getScaledValue(PointBuffer& data,
             break;
 
         case dimension::SignedInteger:
-        case dimension::SignedByte:
             if (size == 1)
             {
                 i8 = data.getField<boost::int8_t>(d, pointIndex);
@@ -334,7 +333,6 @@ double Index::getScaledValue(PointBuffer& data,
             break;
 
         case dimension::UnsignedInteger:
-        case dimension::UnsignedByte:
             if (size == 1)
             {
                 u8 = data.getField<boost::uint8_t>(d, pointIndex);
@@ -356,10 +354,11 @@ double Index::getScaledValue(PointBuffer& data,
                 output = d.applyScaling<boost::uint64_t>(u64);
             }
             break;
-
+        
+        case dimension::RawByte:
         case dimension::Pointer:    // stored as 64 bits, even on a 32-bit box
         case dimension::Undefined:
-            throw pdal_error("Dimension data type unable to be reprojected");
+            throw pdal_error("Dimension data type unable to be scaled in index filter");
     }
 
     return output;

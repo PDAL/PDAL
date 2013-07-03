@@ -238,11 +238,15 @@ dimension::Interpretation Scaling::getInterpretation(std::string const& t) const
     }
     if (boost::iequals(t, "SignedByte"))
     {
-        return dimension::SignedByte;
+        return dimension::RawByte;
     }
     if (boost::iequals(t, "UnsignedByte"))
     {
-        return dimension::UnsignedByte;
+        return dimension::RawByte;
+    }
+    if (boost::iequals(t, "RawByte"))
+    {
+        return dimension::RawByte;
     }
     if (boost::iequals(t, "Float"))
     {
