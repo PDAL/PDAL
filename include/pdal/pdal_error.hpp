@@ -299,6 +299,15 @@ public:
     {}
 };
 
+class plugin_error : public std::runtime_error
+{
+public:
+    plugin_error(std::string const& msg)
+        : std::runtime_error(msg)
+    {}
+};
+
+
 } // namespace pdal
 
 #endif // PDAL_EXCEPTION_HPP_INCLUDED

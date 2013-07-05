@@ -193,7 +193,10 @@ public:
 
     }
     
-    static void registerPlugin(void* stageFactoryPtr, std::string const& filename, std::string const& method);
+    static void* registerPlugin( void* stageFactoryPtr, 
+                                std::string const& filename, 
+                                std::string const& registerMethodName,
+                                std::string const& versionMethodName);
 
     static char* getenv(const char* env);
     static std::string getenv(std::string const& name);
