@@ -66,6 +66,7 @@ PDAL_DLL int GetVersionPatch();
 
 
 
+
 } // namespace pdal
 
 #endif

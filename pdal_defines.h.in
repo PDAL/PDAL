@@ -17,6 +17,8 @@
 
 #define PDAL_VERSION_STRING "@PDAL_VERSION_STRING@"
 
+#define PDAL_PLUGIN_VERSION 1
+
 /* (note this will look yucky until we get to major>=1) */
 #define PDAL_VERSION_INTEGER ((PDAL_VERSION_MAJOR*100*100)+(PDAL_VERSION_MINOR*100)+PDAL_VERSION_PATCH)
 

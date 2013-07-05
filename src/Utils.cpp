@@ -75,20 +75,38 @@ double Utils::random(double minimum, double maximum)
     return t;
 }
 
-void Utils::registerPlugin(void* stageFactoryPtr, std::string const& filename, std::string const& method)
+void* Utils::registerPlugin( void* stageFactoryPtr, 
+                            std::string const& filename, 
+                            std::string const& registerMethod,
+                            std::string const& versionMethod)
 {
     void* pRegister;
+    void* pVersion;
 
-    pRegister = Utils::getDLLSymbol(filename, method);
+    pVersion = Utils::getDLLSymbol(filename, versionMethod);
+    
+    int plugins_version =   ((int (*)()) pVersion)();
+    
+    if (plugins_version != PDAL_PLUGIN_VERSION)
+    {
+        std::ostringstream oss;
+        oss << "Unable to register shared library '" << filename << "' with method name '" << registerMethod << "' version of plugin, '" << plugins_version << "' did not match PDALs version '" << PDAL_PLUGIN_VERSION << "'";
+        throw pdal_error(oss.str());
+    }
+
+    
+    pRegister = Utils::getDLLSymbol(filename, registerMethod);
     if (pRegister != NULL)
     {
         ((void (*)(void*)) pRegister)(stageFactoryPtr);
     } else
     {
         std::ostringstream oss;
-        oss << "Unable to register shared library '" << filename << "' with method name '" << method << "'";
+        oss << "Unable to register shared library '" << filename << "' with method name '" << registerMethod << "'";
         throw pdal_error(oss.str());
     }
+    
+    return pRegister;
 }
 
 
