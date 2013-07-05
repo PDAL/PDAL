@@ -107,4 +107,13 @@
     } \
     PDAL_C_END 
 
+#define SET_PLUGIN_VERSION(DriverName) \
+    PDAL_C_START PDAL_DLL int PDALRegister_version_##DriverName() \
+    { \
+        return PDAL_PLUGIN_VERSION; \
+    } \
+    PDAL_C_END 
+
+
 #endif
+

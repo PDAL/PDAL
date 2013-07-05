@@ -527,7 +527,6 @@ void StageFactory::loadPlugins()
 {
     using namespace boost::filesystem;
 
-    typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
 
     std::string driver_path("PDAL_DRIVER_PATH");
     std::string pluginDir = Utils::getenv(driver_path);
@@ -636,8 +635,14 @@ void StageFactory::registerPlugin(std::string const& filename)
         }
     }    
     
-    std::string methodName = "PDALRegister_" + boost::algorithm::ireplace_first_copy(basename.string(), "libpdal_plugin_", "");
-    Utils::registerPlugin((void*)this, filename, methodName);
+    std::string base = basename.string();
+
+    std::string registerMethodName = "PDALRegister_" + \
+            boost::algorithm::ireplace_first_copy(base, "libpdal_plugin_", "");
+
+    std::string versionMethodName = "PDALRegister_version_" +  base.substr( base.find_last_of("_")+1, base.size());
+
+    Utils::registerPlugin((void*)this, filename, registerMethodName, versionMethodName);
     
 }
 
