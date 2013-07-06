@@ -106,14 +106,10 @@ Layout/Organization of Source Tree
   pdal headers may be further grouped by subdirectory, e.g. drivers/liblas,
   filters, etc.
 
-* First exception to the above: source files (.cpp) should #include their
+* Exception to the above: source files (.cpp) should #include their
   corresponding .hpp file first.  This assures that the header is including
   all the files it needs to.
   
-* Second exception to the above: header files (.hpp) should #include pdal.hpp
-  first.  This assures that we are consistent in including all "standard" stuff
-  we use everywhere.
-
 * Don't #include a file where a simple forward declaration will do.
   (Note: this only applies to pdal files; don't forward declare from system
   or 3rd party headers.)
