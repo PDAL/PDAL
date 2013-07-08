@@ -222,11 +222,13 @@ Dimension const* Schema::getDimensionPtr(std::string const& name, std::string co
     schema::index_by_name const& name_index = m_index.get<schema::name>();    
     schema::index_by_name::const_iterator it = name_index.find(name);
     
-    // Revert to the slow method if there's parent/child stuff 
+    // Revert to the slow method that checks parent/child relationships 
+    // if there's parent/child stuff 
     if (m_bHasParentDimensions)
     {
         return &getDimension(name, namespc);
     }
+    
     if (it != name_index.end())
     {
         return &(*it);
@@ -254,8 +256,6 @@ const Dimension& Schema::getDimension(std::string const& name, std::string const
 
     schema::index_by_name::size_type count = name_index.count(t);
 
-    std::ostringstream oss;
-    oss << "Dimension with name '" << t << "' not found, unable to Schema::getDimension";
 
 
     if (it != name_index.end())
@@ -360,6 +360,8 @@ const Dimension& Schema::getDimension(std::string const& name, std::string const
         }
         catch (std::runtime_error&)
         {
+            std::ostringstream oss;
+            oss << "Dimension with uuid '" << t << "' not found, unable to Schema::getDimension";
             // invalid string for uuid
             throw dimension_not_found(oss.str());
         }
@@ -386,7 +388,7 @@ const Dimension& Schema::getDimension(std::string const& name, std::string const
         }
         else
         {
-            oss.str("");
+            std::ostringstream oss;
             oss << "Dimension with name '" << t << "' not found, unable to Schema::getDimension";
             throw dimension_not_found(oss.str());
         }
