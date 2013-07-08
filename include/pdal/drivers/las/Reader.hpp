@@ -141,6 +141,9 @@ private:
     void initialize();
 
 protected:
+    
+    Schema const* m_describedSchema;
+    PointDimensions* m_pointDimensions;
     const pdal::drivers::las::Reader& m_reader;
     std::istream& m_istream;
 
