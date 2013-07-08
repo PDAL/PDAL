@@ -234,8 +234,12 @@ public:
 
 /// @name Private Attributes
 private:
-
+    
+    // memoize the total byte size of the schema
     schema::size_type m_byteSize;
+    
+    // memoize whether or not the schema has multiple, same-named dimensions
+    bool m_bHasParentDimensions;
 
     schema::Map m_index;
 

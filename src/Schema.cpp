@@ -62,12 +62,14 @@ namespace pdal
 
 Schema::Schema()
     : m_byteSize(0)
+    , m_bHasParentDimensions(false)
 {
     return;
 }
 
 Schema::Schema(std::vector<Dimension> const& dimensions)
     : m_byteSize(0)
+    , m_bHasParentDimensions(false)
 {
 
     for (std::vector<Dimension>::const_iterator i = dimensions.begin();
@@ -80,7 +82,9 @@ Schema::Schema(std::vector<Dimension> const& dimensions)
 /// copy constructor
 Schema::Schema(Schema const& other)
     : m_byteSize(other.m_byteSize)
+    , m_bHasParentDimensions(other.m_bHasParentDimensions)
     , m_index(other.m_index)
+    
 {
 
 }
@@ -93,6 +97,7 @@ Schema& Schema::operator=(Schema const& rhs)
     {
         m_byteSize = rhs.m_byteSize;
         m_index = rhs.m_index;
+        m_bHasParentDimensions = rhs.m_bHasParentDimensions;
     }
 
     return *this;
@@ -134,8 +139,20 @@ void Schema::appendDimension(const Dimension& dim)
     Dimension d(dim);
 
     schema::index_by_position& position_index = m_index.get<schema::position>();
-
     schema::index_by_position::const_reverse_iterator r = position_index.rbegin();
+    
+    if (!m_bHasParentDimensions)
+    {
+        // If we haven't memoized that this schema has parent/child
+        // relationships, check to see if we already have a dimension 
+        // with this name in it. If so, then we do have parent/child 
+        // relationships on this schema, and we need to do special 
+        // checks when querying.
+        schema::index_by_name const& name_index = m_index.get<schema::name>();    
+        schema::index_by_name::size_type count = name_index.count(dim.getName());
+        if (count)
+            m_bHasParentDimensions = true;
+    }
 
     // If we do not have anything in the index, set our current values.
     // Otherwise, use the values from the last entry in the index as our
@@ -204,7 +221,12 @@ Dimension const* Schema::getDimensionPtr(std::string const& name, std::string co
 {
     schema::index_by_name const& name_index = m_index.get<schema::name>();    
     schema::index_by_name::const_iterator it = name_index.find(name);
-
+    
+    // Revert to the slow method if there's parent/child stuff 
+    if (m_bHasParentDimensions)
+    {
+        return &getDimension(name, namespc);
+    }
     if (it != name_index.end())
     {
         return &(*it);

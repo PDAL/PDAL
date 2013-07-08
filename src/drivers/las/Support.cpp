@@ -163,8 +163,11 @@ PointDimensions::PointDimensions(const Schema& schema, std::string const& ns)
 {
 
     X = schema.getDimensionPtr("X", ns);
+    if (!X) throw pdal::dimension_not_found("X dimension not found");
     Y = schema.getDimensionPtr("Y", ns);
+    if (!Y) throw pdal::dimension_not_found("Y dimension not found");
     Z = schema.getDimensionPtr("Z", ns);
+    if (!Z) throw pdal::dimension_not_found("Z dimension not found");
 
     Intensity = schema.getDimensionPtr("Intensity", ns);
     if (Intensity)
