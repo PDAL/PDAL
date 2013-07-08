@@ -162,138 +162,62 @@ boost::uint16_t Support::getPointDataSize(PointFormat pointFormat)
 PointDimensions::PointDimensions(const Schema& schema, std::string const& ns)
 {
 
-    X = &schema.getDimension("X", ns);
-    Y = &schema.getDimension("Y", ns);
-    Z = &schema.getDimension("Z", ns);
+    X = schema.getDimensionPtr("X", ns);
+    Y = schema.getDimensionPtr("Y", ns);
+    Z = schema.getDimensionPtr("Z", ns);
 
-    try
-    {
-        Intensity = &schema.getDimension("Intensity", ns);
+    Intensity = schema.getDimensionPtr("Intensity", ns);
+    if (Intensity)
         if (Intensity->isIgnored()) Intensity = 0;
-    }
-    catch (pdal::dimension_not_found&)
-    {
-        Intensity = 0;
-    }
 
-    try
-    {
-        ReturnNumber = &schema.getDimension("ReturnNumber", ns);
+    ReturnNumber = schema.getDimensionPtr("ReturnNumber", ns);
+    if (ReturnNumber)
         if (ReturnNumber->isIgnored()) ReturnNumber = 0;
-    }
-    catch (pdal::dimension_not_found&)
-    {
-        ReturnNumber = 0;
-    }
 
-    try
-    {
-        NumberOfReturns = &schema.getDimension("NumberOfReturns", ns);
+    NumberOfReturns = schema.getDimensionPtr("NumberOfReturns", ns);
+    if (NumberOfReturns)
         if (NumberOfReturns->isIgnored()) NumberOfReturns = 0;
-    }
-    catch (pdal::dimension_not_found&)
-    {
-        NumberOfReturns = 0;
-    }
 
-    try
-    {
-        ScanDirectionFlag = &schema.getDimension("ScanDirectionFlag", ns);
+    ScanDirectionFlag = schema.getDimensionPtr("ScanDirectionFlag", ns);
+    if (ScanDirectionFlag)
         if (ScanDirectionFlag->isIgnored()) ScanDirectionFlag = 0;
-    }
-    catch (pdal::dimension_not_found&)
-    {
-        ScanDirectionFlag = 0;
-    }
 
-    try
-    {
-        EdgeOfFlightLine = &schema.getDimension("EdgeOfFlightLine", ns);
+    EdgeOfFlightLine = schema.getDimensionPtr("EdgeOfFlightLine", ns);
+    if (EdgeOfFlightLine)
         if (EdgeOfFlightLine->isIgnored()) EdgeOfFlightLine = 0;
-    }
-    catch (pdal::dimension_not_found&)
-    {
-        EdgeOfFlightLine = 0;
-    }
 
-    try
-    {
-        Classification = &schema.getDimension("Classification", ns);
+
+    Classification = schema.getDimensionPtr("Classification", ns);
+    if (Classification)
         if (Classification->isIgnored()) Classification = 0;
-    }
-    catch (pdal::dimension_not_found&)
-    {
-        Classification = 0;
-    }
 
-    try
-    {
-        ScanAngleRank = &schema.getDimension("ScanAngleRank", ns);
+    ScanAngleRank = schema.getDimensionPtr("ScanAngleRank", ns);
+    if (ScanAngleRank)
         if (ScanAngleRank->isIgnored()) ScanAngleRank = 0;
-    }
-    catch (pdal::dimension_not_found&)
-    {
-        ScanAngleRank = 0;
-    }
-
-    try
-    {
-        UserData = &schema.getDimension("UserData", ns);
+        
+    UserData = schema.getDimensionPtr("UserData", ns);
+    if (UserData)
         if (UserData->isIgnored()) UserData = 0;
-    }
-    catch (pdal::dimension_not_found&)
-    {
-        UserData = 0;
-    }
 
-    try
-    {
-        PointSourceId = &schema.getDimension("PointSourceId", ns);
+    PointSourceId = schema.getDimensionPtr("PointSourceId", ns);
+    if (PointSourceId)
         if (PointSourceId->isIgnored()) PointSourceId = 0;
-    }
-    catch (pdal::dimension_not_found&)
-    {
-        PointSourceId = 0;
-    }
 
-    try
-    {
-        Time = &schema.getDimension("Time", ns);
+    Time = schema.getDimensionPtr("Time", ns);
+    if (Time)
         if (Time->isIgnored()) Time = 0;
-    }
-    catch (pdal::dimension_not_found&)
-    {
-        Time = 0;
-    }
-    try
-    {
-        Red = &schema.getDimension("Red", ns);
+
+    Red = schema.getDimensionPtr("Red", ns);
+    if (Red)
         if (Red->isIgnored()) Red = 0;
-    }
-    catch (pdal::dimension_not_found&)
-    {
-        Red = 0;
-    }
 
-    try
-    {
-        Green = &schema.getDimension("Green", ns);
+    Green = schema.getDimensionPtr("Green", ns);
+    if (Green)
         if (Green->isIgnored()) Green = 0;
-    }
-    catch (pdal::dimension_not_found&)
-    {
-        Green = 0;
-    }
 
-    try
-    {
-        Blue = &schema.getDimension("Blue", ns);
+    Blue = schema.getDimensionPtr("Blue", ns);
+    if (Blue)
         if (Blue->isIgnored()) Blue = 0;
-    }
-    catch (pdal::dimension_not_found&)
-    {
-        Blue = 0;
-    }
 
 
     // WavePacketDescriptorIndex = (Support::hasWave(format) ? schema.getDimensionIndex(DimensionId::Las_WavePacketDescriptorIndex) : 0);

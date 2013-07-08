@@ -200,6 +200,19 @@ boost::optional<Dimension const&> Schema::getDimensionOptional(schema::size_type
     }
 }
 
+Dimension const* Schema::getDimensionPtr(std::string const& name, std::string const& namespc) const
+{
+    schema::index_by_name const& name_index = m_index.get<schema::name>();    
+    schema::index_by_name::const_iterator it = name_index.find(name);
+
+    if (it != name_index.end())
+    {
+        return &(*it);
+    }
+    
+    return 0;
+}
+
 const Dimension& Schema::getDimension(std::string const& name, std::string const& namespc) const
 {
     
