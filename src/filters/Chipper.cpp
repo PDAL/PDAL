@@ -600,4 +600,4 @@ bool Chipper::atEndImpl() const
 
 
 }
-} // namespace liblas::chipper
+} // namespace pdal::chipper
