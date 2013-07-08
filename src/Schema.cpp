@@ -401,17 +401,11 @@ const Dimension& Schema::getDimension(std::string const& name, std::string const
 
 boost::optional<Dimension const&> Schema::getDimensionOptional(std::string const& t, std::string const& ns) const
 {
-
-    try
-    {
-        Dimension const& dim = getDimension(t, ns);
-        return boost::optional<Dimension const&>(dim);
-    }
-    catch (pdal::dimension_not_found&)
-    {
+    Dimension const* dim = getDimensionPtr(t, ns);
+    if (!dim)
         return boost::optional<Dimension const&>();
-    }
-
+    else
+        return boost::optional<Dimension const&>(*dim);
 }
 
 bool Schema::setDimension(Dimension const& dim)
