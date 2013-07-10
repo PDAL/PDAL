@@ -42,6 +42,15 @@
 namespace pdal
 {
 
+PointBuffer::PointBuffer()
+    : m_numPoints(0)
+    , m_capacity(0)
+    , m_bounds(Bounds<double>::getDefaultSpatialExtent())
+    , m_byteSize(0)
+    , m_metadata("pointbuffer")
+
+{
+}
 
 PointBuffer::PointBuffer(const Schema& schema, boost::uint32_t capacity)
     : m_schema(schema)
@@ -88,6 +97,11 @@ PointBuffer& PointBuffer::operator=(PointBuffer const& rhs)
 
 void PointBuffer::reset(Schema const& new_schema)
 {
+    reset(new_schema, m_capacity);
+}
+
+void PointBuffer::reset(Schema const& new_schema, boost::uint32_t const& capacity)
+{
     boost::uint32_t old_size = m_schema.getByteSize();
     boost::uint32_t new_size = new_schema.getByteSize();
     
@@ -96,7 +110,7 @@ void PointBuffer::reset(Schema const& new_schema)
     
     if (m_byteSize != old_size )
     {
-        boost::uint64_t new_array_size = static_cast<boost::uint64_t>(new_size) * static_cast<boost::uint64_t>(m_capacity); 
+        boost::uint64_t new_array_size = static_cast<boost::uint64_t>(new_size) * static_cast<boost::uint64_t>(capacity); 
         if (new_array_size > m_data.size())
         {
             m_data.resize(static_cast<std::vector<boost::uint8_t>::size_type>(new_array_size));
@@ -106,6 +120,7 @@ void PointBuffer::reset(Schema const& new_schema)
     m_numPoints = 0;
 
 }
+
 
 void PointBuffer::resize(boost::uint32_t const& capacity, bool bExact)
 {

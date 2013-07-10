@@ -84,11 +84,14 @@ public:
 
     /// Assignment constructor.
     PointBuffer& operator=(const PointBuffer&);
-
+    
+    PointBuffer();
+    
     /// Destructor.
     ~PointBuffer() {};
     
     void reset(Schema const& new_schema);
+    void reset(Schema const& new_schema, boost::uint32_t const&  capacity);
 
     /** @name Attribute access
     */
