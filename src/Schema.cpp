@@ -219,10 +219,6 @@ const Dimension& Schema::getDimension(std::string const& name, std::string const
 
     schema::index_by_name::size_type count = name_index.count(t);
 
-    std::ostringstream oss;
-    oss << "Dimension with name '" << t << "' not found, unable to Schema::getDimension";
-
-
     if (it != name_index.end())
     {
 
@@ -326,6 +322,8 @@ const Dimension& Schema::getDimension(std::string const& name, std::string const
         catch (std::runtime_error&)
         {
             // invalid string for uuid
+            std::ostringstream oss;
+            oss << "Dimension with name '" << t << "' not found, unable to Schema::getDimension";
             throw dimension_not_found(oss.str());
         }
 
@@ -351,7 +349,7 @@ const Dimension& Schema::getDimension(std::string const& name, std::string const
         }
         else
         {
-            oss.str("");
+            std::ostringstream oss;
             oss << "Dimension with name '" << t << "' not found, unable to Schema::getDimension";
             throw dimension_not_found(oss.str());
         }
