@@ -169,58 +169,25 @@ PointDimensions::PointDimensions(const Schema& schema, std::string const& ns)
     Z = schema.getDimensionPtr("Z", ns);
     if (!Z) throw pdal::dimension_not_found("Z dimension not found");
 
-    Intensity = schema.getDimensionPtr("Intensity", ns);
-    if (Intensity)
-        if (Intensity->isIgnored()) Intensity = 0;
 
-    ReturnNumber = schema.getDimensionPtr("ReturnNumber", ns);
-    if (ReturnNumber)
-        if (ReturnNumber->isIgnored()) ReturnNumber = 0;
-
-    NumberOfReturns = schema.getDimensionPtr("NumberOfReturns", ns);
-    if (NumberOfReturns)
-        if (NumberOfReturns->isIgnored()) NumberOfReturns = 0;
-
-    ScanDirectionFlag = schema.getDimensionPtr("ScanDirectionFlag", ns);
-    if (ScanDirectionFlag)
-        if (ScanDirectionFlag->isIgnored()) ScanDirectionFlag = 0;
-
-    EdgeOfFlightLine = schema.getDimensionPtr("EdgeOfFlightLine", ns);
-    if (EdgeOfFlightLine)
-        if (EdgeOfFlightLine->isIgnored()) EdgeOfFlightLine = 0;
+#define CACHE_DIM(x) \
+    x = schema.getDimensionPtr(#x, ns); \
+    if (x && x->isIgnored()) x = 0;    
 
 
-    Classification = schema.getDimensionPtr("Classification", ns);
-    if (Classification)
-        if (Classification->isIgnored()) Classification = 0;
-
-    ScanAngleRank = schema.getDimensionPtr("ScanAngleRank", ns);
-    if (ScanAngleRank)
-        if (ScanAngleRank->isIgnored()) ScanAngleRank = 0;
-        
-    UserData = schema.getDimensionPtr("UserData", ns);
-    if (UserData)
-        if (UserData->isIgnored()) UserData = 0;
-
-    PointSourceId = schema.getDimensionPtr("PointSourceId", ns);
-    if (PointSourceId)
-        if (PointSourceId->isIgnored()) PointSourceId = 0;
-
-    Time = schema.getDimensionPtr("Time", ns);
-    if (Time)
-        if (Time->isIgnored()) Time = 0;
-
-    Red = schema.getDimensionPtr("Red", ns);
-    if (Red)
-        if (Red->isIgnored()) Red = 0;
-
-    Green = schema.getDimensionPtr("Green", ns);
-    if (Green)
-        if (Green->isIgnored()) Green = 0;
-
-    Blue = schema.getDimensionPtr("Blue", ns);
-    if (Blue)
-        if (Blue->isIgnored()) Blue = 0;
+    CACHE_DIM(Intensity)
+    CACHE_DIM(ReturnNumber)
+    CACHE_DIM(NumberOfReturns)
+    CACHE_DIM(ScanDirectionFlag)
+    CACHE_DIM(EdgeOfFlightLine)
+    CACHE_DIM(Classification)
+    CACHE_DIM(ScanAngleRank)
+    CACHE_DIM(UserData)
+    CACHE_DIM(PointSourceId)
+    CACHE_DIM(Time)
+    CACHE_DIM(Red)
+    CACHE_DIM(Green)
+    CACHE_DIM(Blue)
 
 
     // WavePacketDescriptorIndex = (Support::hasWave(format) ? schema.getDimensionIndex(DimensionId::Las_WavePacketDescriptorIndex) : 0);
