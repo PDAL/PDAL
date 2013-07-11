@@ -15,6 +15,8 @@
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <boost/test/test_tools.hpp>
 #include <stdexcept>
+#include <iostream>
+#include <iomanip>
 
 namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost{ namespace math{ namespace tools{
 

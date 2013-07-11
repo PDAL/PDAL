@@ -950,7 +950,7 @@ inline void eval_trunc(T& result, const T& a)
    int c = eval_fpclassify(a);
    if(c == FP_NAN || c == FP_INFINITE)
    {
-      result = pdalboost::math::policies::raise_rounding_error("pdalboost::multiprecision::trunc<%1%>(%1%)", 0, number<T>(a), 0, pdalboost::math::policies::policy<>()).backend();
+      result = pdalboost::math::policies::raise_rounding_error("pdalboost::multiprecision::trunc<%1%>(%1%)", 0, number<T>(a), number<T>(a), pdalboost::math::policies::policy<>()).backend();
       return;
    }
    if(eval_get_sign(a) < 0)
@@ -967,7 +967,7 @@ inline void eval_round(T& result, const T& a)
    int c = eval_fpclassify(a);
    if(c == FP_NAN || c == FP_INFINITE)
    {
-      result = pdalboost::math::policies::raise_rounding_error("pdalboost::multiprecision::round<%1%>(%1%)", 0, number<T>(a), 0, pdalboost::math::policies::policy<>()).backend();
+      result = pdalboost::math::policies::raise_rounding_error("pdalboost::multiprecision::round<%1%>(%1%)", 0, number<T>(a), number<T>(a), pdalboost::math::policies::policy<>()).backend();
       return;
    }
    if(eval_get_sign(a) < 0)
@@ -1250,7 +1250,7 @@ inline int itrunc(const detail::expression<tag, A1, A2, A3, A4>& v, const Policy
    typedef typename detail::expression<tag, A1, A2, A3, A4>::result_type number_type;
    number_type r = trunc(v, pol);
    if((r > (std::numeric_limits<int>::max)()) || r < (std::numeric_limits<int>::min)() || !pdalboost::math::isfinite(v))
-      return pdalboost::math::policies::raise_rounding_error("pdalboost::multiprecision::itrunc<%1%>(%1%)", 0, number_type(v), 0, pol).template convert_to<int>();
+      return pdalboost::math::policies::raise_rounding_error("pdalboost::multiprecision::itrunc<%1%>(%1%)", 0, number_type(v), 0, pol);
    return r.template convert_to<int>();
 }
 template <class tag, class A1, class A2, class A3, class A4>
@@ -1263,7 +1263,7 @@ inline int itrunc(const number<Backend, ExpressionTemplates>& v, const Policy& p
 {
    number<Backend, ExpressionTemplates> r = trunc(v, pol);
    if((r > (std::numeric_limits<int>::max)()) || r < (std::numeric_limits<int>::min)() || !pdalboost::math::isfinite(v))
-      return pdalboost::math::policies::raise_rounding_error("pdalboost::multiprecision::itrunc<%1%>(%1%)", 0, v, 0, pol).template convert_to<int>();
+      return pdalboost::math::policies::raise_rounding_error("pdalboost::multiprecision::itrunc<%1%>(%1%)", 0, v, 0, pol);
    return r.template convert_to<int>();
 }
 template <class Backend, expression_template_option ExpressionTemplates>
@@ -1277,7 +1277,7 @@ inline long ltrunc(const detail::expression<tag, A1, A2, A3, A4>& v, const Polic
    typedef typename detail::expression<tag, A1, A2, A3, A4>::result_type number_type;
    number_type r = trunc(v, pol);
    if((r > (std::numeric_limits<long>::max)()) || r < (std::numeric_limits<long>::min)() || !pdalboost::math::isfinite(v))
-      return pdalboost::math::policies::raise_rounding_error("pdalboost::multiprecision::ltrunc<%1%>(%1%)", 0, number_type(v), 0L, pol).template convert_to<long>();
+      return pdalboost::math::policies::raise_rounding_error("pdalboost::multiprecision::ltrunc<%1%>(%1%)", 0, number_type(v), 0L, pol);
    return r.template convert_to<long>();
 }
 template <class tag, class A1, class A2, class A3, class A4>
@@ -1290,7 +1290,7 @@ inline long ltrunc(const number<T, ExpressionTemplates>& v, const Policy& pol)
 {
    number<T, ExpressionTemplates> r = trunc(v, pol);
    if((r > (std::numeric_limits<long>::max)()) || r < (std::numeric_limits<long>::min)() || !pdalboost::math::isfinite(v))
-      return pdalboost::math::policies::raise_rounding_error("pdalboost::multiprecision::ltrunc<%1%>(%1%)", 0, v, 0L, pol).template convert_to<long>();
+      return pdalboost::math::policies::raise_rounding_error("pdalboost::multiprecision::ltrunc<%1%>(%1%)", 0, v, 0L, pol);
    return r.template convert_to<long>();
 }
 template <class T, expression_template_option ExpressionTemplates>
@@ -1305,7 +1305,7 @@ inline long long lltrunc(const detail::expression<tag, A1, A2, A3, A4>& v, const
    typedef typename detail::expression<tag, A1, A2, A3, A4>::result_type number_type;
    number_type r = trunc(v, pol);
    if((r > (std::numeric_limits<long long>::max)()) || r < (std::numeric_limits<long long>::min)() || !pdalboost::math::isfinite(v))
-      return pdalboost::math::policies::raise_rounding_error("pdalboost::multiprecision::lltrunc<%1%>(%1%)", 0, number_type(v), 0LL, pol).template convert_to<long long>();
+      return pdalboost::math::policies::raise_rounding_error("pdalboost::multiprecision::lltrunc<%1%>(%1%)", 0, number_type(v), 0LL, pol);
    return r.template convert_to<long long>();
 }
 template <class tag, class A1, class A2, class A3, class A4>
@@ -1318,7 +1318,7 @@ inline long long lltrunc(const number<T, ExpressionTemplates>& v, const Policy& 
 {
    number<T, ExpressionTemplates> r = trunc(v, pol);
    if((r > (std::numeric_limits<long long>::max)()) || r < (std::numeric_limits<long long>::min)() || !pdalboost::math::isfinite(v))
-      return pdalboost::math::policies::raise_rounding_error("pdalboost::multiprecision::lltrunc<%1%>(%1%)", 0, v, 0LL, pol).template convert_to<long long>();
+      return pdalboost::math::policies::raise_rounding_error("pdalboost::multiprecision::lltrunc<%1%>(%1%)", 0, v, 0LL, pol);
    return r.template convert_to<long long>();
 }
 template <class T, expression_template_option ExpressionTemplates>
@@ -1348,7 +1348,7 @@ inline int iround(const detail::expression<tag, A1, A2, A3, A4>& v, const Policy
    typedef typename detail::expression<tag, A1, A2, A3, A4>::result_type number_type;
    number_type r = round(v, pol);
    if((r > (std::numeric_limits<int>::max)()) || r < (std::numeric_limits<int>::min)() || !pdalboost::math::isfinite(v))
-      return pdalboost::math::policies::raise_rounding_error("pdalboost::multiprecision::iround<%1%>(%1%)", 0, number_type(v), 0, pol).template convert_to<int>();
+      return pdalboost::math::policies::raise_rounding_error("pdalboost::multiprecision::iround<%1%>(%1%)", 0, number_type(v), 0, pol);
    return r.template convert_to<int>();
 }
 template <class tag, class A1, class A2, class A3, class A4>
@@ -1361,7 +1361,7 @@ inline int iround(const number<T, ExpressionTemplates>& v, const Policy& pol)
 {
    number<T, ExpressionTemplates> r = round(v, pol);
    if((r > (std::numeric_limits<int>::max)()) || r < (std::numeric_limits<int>::min)() || !pdalboost::math::isfinite(v))
-      return pdalboost::math::policies::raise_rounding_error("pdalboost::multiprecision::iround<%1%>(%1%)", 0, v, 0, pol).template convert_to<int>();
+      return pdalboost::math::policies::raise_rounding_error("pdalboost::multiprecision::iround<%1%>(%1%)", 0, v, 0, pol);
    return r.template convert_to<int>();
 }
 template <class T, expression_template_option ExpressionTemplates>
@@ -1375,7 +1375,7 @@ inline long lround(const detail::expression<tag, A1, A2, A3, A4>& v, const Polic
    typedef typename detail::expression<tag, A1, A2, A3, A4>::result_type number_type;
    number_type r = round(v, pol);
    if((r > (std::numeric_limits<long>::max)()) || r < (std::numeric_limits<long>::min)() || !pdalboost::math::isfinite(v))
-      return pdalboost::math::policies::raise_rounding_error("pdalboost::multiprecision::lround<%1%>(%1%)", 0, number_type(v), 0L, pol).template convert_to<long>();
+      return pdalboost::math::policies::raise_rounding_error("pdalboost::multiprecision::lround<%1%>(%1%)", 0, number_type(v), 0L, pol);
    return r.template convert_to<long>();
 }
 template <class tag, class A1, class A2, class A3, class A4>
@@ -1388,7 +1388,7 @@ inline long lround(const number<T, ExpressionTemplates>& v, const Policy& pol)
 {
    number<T, ExpressionTemplates> r = round(v, pol);
    if((r > (std::numeric_limits<long>::max)()) || r < (std::numeric_limits<long>::min)() || !pdalboost::math::isfinite(v))
-      return pdalboost::math::policies::raise_rounding_error("pdalboost::multiprecision::lround<%1%>(%1%)", 0, v, 0L, pol).template convert_to<long>();
+      return pdalboost::math::policies::raise_rounding_error("pdalboost::multiprecision::lround<%1%>(%1%)", 0, v, 0L, pol);
    return r.template convert_to<long>();
 }
 template <class T, expression_template_option ExpressionTemplates>
@@ -1403,7 +1403,7 @@ inline long long llround(const detail::expression<tag, A1, A2, A3, A4>& v, const
    typedef typename detail::expression<tag, A1, A2, A3, A4>::result_type number_type;
    number_type r = round(v, pol);
    if((r > (std::numeric_limits<long long>::max)()) || r < (std::numeric_limits<long long>::min)() || !pdalboost::math::isfinite(v))
-      return pdalboost::math::policies::raise_rounding_error("pdalboost::multiprecision::iround<%1%>(%1%)", 0, number_type(v), 0LL, pol).template convert_to<long long>();
+      return pdalboost::math::policies::raise_rounding_error("pdalboost::multiprecision::iround<%1%>(%1%)", 0, number_type(v), 0LL, pol);
    return r.template convert_to<long long>();
 }
 template <class tag, class A1, class A2, class A3, class A4>
@@ -1416,7 +1416,7 @@ inline long long llround(const number<T, ExpressionTemplates>& v, const Policy& 
 {
    number<T, ExpressionTemplates> r = round(v, pol);
    if((r > (std::numeric_limits<long long>::max)()) || r < (std::numeric_limits<long long>::min)() || !pdalboost::math::isfinite(v))
-      return pdalboost::math::policies::raise_rounding_error("pdalboost::multiprecision::iround<%1%>(%1%)", 0, v, 0LL, pol).template convert_to<long long>();
+      return pdalboost::math::policies::raise_rounding_error("pdalboost::multiprecision::iround<%1%>(%1%)", 0, v, 0LL, pol);
    return r.template convert_to<long long>();
 }
 template <class T, expression_template_option ExpressionTemplates>

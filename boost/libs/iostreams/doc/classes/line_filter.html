@@ -59,7 +59,7 @@
 <SPAN CLASS='keyword'>public:</SPAN>
     <SPAN CLASS='keyword'>virtual</SPAN> ~basic_line_filter();
 <SPAN CLASS='keyword'>private:</SPAN>
-    <SPAN CLASS='keyword'>virtual</SPAN> string_type <A CLASS='documented' HREF='#do_filter'>do_filter</A>(<SPAN CLASS='keyword'>const</SPAN> string_type& line) <SPAN CLASS='numeric_literal'>= 0</SPAN>;
+    <SPAN CLASS='keyword'>virtual</SPAN> string_type <A CLASS='documented' HREF='#do_filter'>do_filter</A>(<SPAN CLASS='keyword'>const</SPAN> string_type&amp; line) <SPAN CLASS='numeric_literal'>= 0</SPAN>;
 };
 
 <SPAN CLASS='keyword'>typedef</SPAN> basic_line_filter&lt;<SPAN CLASS='keyword'>char</SPAN>&gt;     <SPAN CLASS='defined'>line_filter</SPAN>;
@@ -85,7 +85,7 @@
 <A NAME="do_filter"></A>
 <H4><CODE>line_filter::do_filter</CODE></H4>
 
-<PRE CLASS="broken_ie">    <SPAN CLASS='keyword'>virtual</SPAN> string_type do_filter(<SPAN CLASS='keyword'>const</SPAN> string_type& line) <SPAN CLASS='numeric_literal'>= 0</SPAN>;</PRE>
+<PRE CLASS="broken_ie">    <SPAN CLASS='keyword'>virtual</SPAN> string_type do_filter(<SPAN CLASS='keyword'>const</SPAN> string_type&amp; line) <SPAN CLASS='numeric_literal'>= 0</SPAN>;</PRE>
 
 <P>The argument <CODE>line</CODE> represents a single line of unfiltered text, not including any terminal newline character. Returns the result of filtering <CODE>line</CODE>.</P>
 
@@ -105,7 +105,7 @@
         { }
     <SPAN CLASS='keyword'>int</SPAN> count() <SPAN CLASS='keyword'>const</SPAN> { <SPAN CLASS='keyword'>return</SPAN> count_; }
 <SPAN CLASS='keyword'>private:</SPAN>
-    std::string do_filter(<SPAN CLASS='keyword'>const</SPAN> std::string& line)
+    std::string do_filter(<SPAN CLASS='keyword'>const</SPAN> std::string&amp; line)
     {
         <SPAN CLASS='keyword'>if</SPAN> (line.size() &gt; max_)
             ++count_;

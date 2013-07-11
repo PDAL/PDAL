@@ -49,19 +49,19 @@
         { }
 
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Source&gt;
-    <SPAN CLASS="keyword"><SPAN CLASS="keyword">int</SPAN></SPAN> get(Source& src)
+    <SPAN CLASS="keyword"><SPAN CLASS="keyword">int</SPAN></SPAN> get(Source&amp; src)
     {
         <SPAN CLASS='comment'>/* same as shell_comments_input_filter::get() */</SPAN>
     }
 
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Sink&gt;
-    <SPAN CLASS="keyword"><SPAN CLASS="keyword">bool</SPAN></SPAN> put(Sink& dest, <SPAN CLASS="keyword"><SPAN CLASS="keyword">int</SPAN></SPAN> c)
+    <SPAN CLASS="keyword"><SPAN CLASS="keyword">bool</SPAN></SPAN> put(Sink&amp; dest, <SPAN CLASS="keyword"><SPAN CLASS="keyword">int</SPAN></SPAN> c)
     {
         <SPAN CLASS='comment'>/* same as shell_comments_output_filter::put() */</SPAN>
     }
 
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Device&gt;
-    <SPAN CLASS="keyword">void</SPAN> close(Device&, std::ios_base::openmode) 
+    <SPAN CLASS="keyword">void</SPAN> close(Device&amp;, std::ios_base::openmode)
     { 
         skip_ = <SPAN CLASS="keyword">false</SPAN>; 
     }

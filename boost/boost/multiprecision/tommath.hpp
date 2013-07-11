@@ -7,7 +7,7 @@
 #define BOOST_MATH_MP_TOMMATH_BACKEND_HPP
 
 #include <boost/multiprecision/number.hpp>
-#include <boost/multiprecision/rational_adapter.hpp>
+#include <boost/multiprecision/rational_adaptor.hpp>
 #include <boost/multiprecision/detail/integer_ops.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <boost/cstdint.hpp>
@@ -639,7 +639,7 @@ template<>
 struct number_category<tommath_int> : public mpl::int_<number_kind_integer>{};
 
 typedef number<tommath_int >                     tom_int;
-typedef rational_adapter<tommath_int>               tommath_rational;
+typedef rational_adaptor<tommath_int>               tommath_rational;
 typedef number<tommath_rational>                 tom_rational;
 
 }}  // namespaces

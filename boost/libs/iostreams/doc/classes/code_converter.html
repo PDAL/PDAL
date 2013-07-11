@@ -76,8 +76,8 @@
                int buffer_size = <SPAN CLASS="omitted">default_value</SPAN> );
     <SPAN CLASS="keyword">bool</SPAN> <A CLASS="documented" HREF="#is_open">is_open</A>() <SPAN CLASS="keyword">const</SPAN>;
     <SPAN CLASS="keyword">void</SPAN> <A CLASS="documented" HREF="#close">close</A>();
-    std::locale <A CLASS="documented" HREF="#imbue">imbue</A>(<SPAN CLASS="keyword">const</SPAN> std::locale& loc); 
-    Device& <A CLASS="documented" HREF="#operator_star">operator*</A>();
+    std::locale <A CLASS="documented" HREF="#imbue">imbue</A>(<SPAN CLASS="keyword">const</SPAN> std::locale&amp; loc);
+    Device&amp; <A CLASS="documented" HREF="#operator_star">operator*</A>();
     Device* <A CLASS="documented" HREF="#operator_arrow">operator-&gt;</A>();
 };
 
@@ -130,7 +130,7 @@
 <A NAME="imbue"></A>
 <H4><CODE>code_converter::imbue</CODE></H4>
 
-<PRE CLASS="broken_ie">    std::locale imbue(<SPAN CLASS="keyword">const</SPAN> std::locale& loc);</PRE>
+<PRE CLASS="broken_ie">    std::locale imbue(<SPAN CLASS="keyword">const</SPAN> std::locale&amp; loc);</PRE>
 
 <P>
     Used to specify a locale from which a <CODE>std::codecvt</CODE> facet will be fetched to perform code conversion. The effect of invoking imbue while code conversion is in progress is undefined.
@@ -143,7 +143,7 @@
 <A NAME="open"></A>
 <H4><CODE>code_converter::open</CODE></H4>
 
-<PRE CLASS="broken_ie">     <SPAN CLASS="keyword">void</SPAN> open( <SPAN CLASS="keyword">const</SPAN> Device& dev, 
+<PRE CLASS="broken_ie">     <SPAN CLASS="keyword">void</SPAN> open( <SPAN CLASS="keyword">const</SPAN> Device&amp; dev,
                 std::streamsize buffer_size = <SPAN CLASS="omitted">default_value</SPAN> );
      <SPAN CLASS="keyword">void</SPAN> open( <SPAN CLASS="omitted">device-constructor-args</SPAN>,
                 std::streamsize buffer_size = <SPAN CLASS="omitted">default_value</SPAN> );<br></PRE>
@@ -174,7 +174,7 @@
 <A NAME="operator_star"></A>
 <H4><CODE>code_converter::operator*</CODE></H4>
 
-<PRE CLASS="broken_ie">    Device& operator*();</PRE>
+<PRE CLASS="broken_ie">    Device&amp; operator*();</PRE>
 
 <P>
      Returns a reference to the instance of Device associated with this instance of <CODE>code_converter</CODE>, which must be <A HREF="#is_open">open</A>.

@@ -58,14 +58,14 @@
     <SPAN CLASS='keyword'>typedef</SPAN> <SPAN CLASS='keyword'>typename</SPAN> <A CLASS='documented' HREF='../guide/traits.html#char_type'>char_type_of</A>&lt;Filter&gt;::type  char_type;
     <SPAN CLASS='keyword'>typedef</SPAN> <SPAN CLASS='omitted'>implementation-defined</SPAN>               mode;
 
-    <A CLASS='documented' HREF='#composite_ctor'>composite</A>(<SPAN CLASS='keyword'>const</SPAN> Filter& first, [<SPAN CLASS='keyword'>const</SPAN>] FilterOrDevice& second);
+    <A CLASS='documented' HREF='#composite_ctor'>composite</A>(<SPAN CLASS='keyword'>const</SPAN> Filter&amp; first, [<SPAN CLASS='keyword'>const</SPAN>] FilterOrDevice&amp; second);
 
     <SPAN CLASS='comment'>// Filter or Device member functions</SPAN>
 };
 
 <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> <A CLASS="documented" HREF="#compose_template_params">Filter</A>, <SPAN CLASS="keyword">typename</SPAN> <A CLASS="documented" HREF="#compose_template_params">FilterOrDevice</A>&gt;
 <A CLASS='documented' HREF='#composite'>composite</A>&lt;Filter, FilterOrDevice&gt; 
-<A CLASS='documented' HREF='#compose'>compose</A>(<SPAN CLASS='keyword'>const</SPAN> Filter& first, [<SPAN CLASS='keyword'>const</SPAN>] FilterOrDevice& second);
+<A CLASS='documented' HREF='#compose'>compose</A>(<SPAN CLASS='keyword'>const</SPAN> Filter&amp; first, [<SPAN CLASS='keyword'>const</SPAN>] FilterOrDevice&amp; second);
 
 } } // End namespace boost::io</PRE>
 
@@ -90,7 +90,7 @@
 <A NAME="composite_ctor"></A>
 <H4><CODE>composite::composite</CODE></H4>
 
-<PRE CLASS="broken_ie">    composite(<SPAN CLASS='keyword'>const</SPAN> Filter& first, [<SPAN CLASS='keyword'>const</SPAN>] FilterOrDevice& second);</PRE>
+<PRE CLASS="broken_ie">    composite(<SPAN CLASS='keyword'>const</SPAN> Filter&amp; first, [<SPAN CLASS='keyword'>const</SPAN>] FilterOrDevice&amp; second);</PRE>
 
 <P>
     Constructs an instance of <CODE>composite</CODE> based on the given components. If <CODE>FilterOrDevice</CODE> is a stream or stream buffer type, the second parameter is a non-<CODE>const</CODE> reference; otherwise it is a <CODE>const</CODE> reference.
@@ -99,7 +99,7 @@
 <A NAME="compose"></A>
 <H2>Function Template <CODE>compose</CODE></H2>
 
-<PRE CLASS="broken_ie">    composite(<SPAN CLASS='keyword'>const</SPAN> Filter& first, [<SPAN CLASS='keyword'>const</SPAN>] FilterOrDevice& second);</PRE>
+<PRE CLASS="broken_ie">    composite(<SPAN CLASS='keyword'>const</SPAN> Filter&amp; first, [<SPAN CLASS='keyword'>const</SPAN>] FilterOrDevice&amp; second);</PRE>
 
 <A NAME="compose_template_params"></A>
 <H4>Template parameters</H4>

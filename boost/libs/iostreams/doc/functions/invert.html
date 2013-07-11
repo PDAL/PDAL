@@ -68,13 +68,13 @@
     <SPAN CLASS='keyword'>typedef</SPAN> <SPAN CLASS='keyword'>typename</SPAN> <A CLASS='documented' HREF='../guide/traits.html#char_type_of_ref'>char_type_of</A>&lt;Filter&gt;::type  char_type;
     <SPAN CLASS='keyword'>typedef</SPAN> <SPAN CLASS='omitted'>see above</SPAN>                            mode;
 
-    <A CLASS='documented' HREF='#inverse_ctor'>inverse</A>(<SPAN CLASS='keyword'>const</SPAN> Filter& filter);
+    <A CLASS='documented' HREF='#inverse_ctor'>inverse</A>(<SPAN CLASS='keyword'>const</SPAN> Filter&amp; filter);
 
     <SPAN CLASS='comment'>// Filter member functions</SPAN>
 };
 
 <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> <A CLASS="documented" HREF="#invert_template_params">Filter</A>&gt;
-<A CLASS='documented' HREF='#inverse'>inverse</A>&lt;Filter&gt; <A CLASS='documented' HREF='#invert'>invert</A>(<SPAN CLASS='keyword'>const</SPAN> Filter& filter);
+<A CLASS='documented' HREF='#inverse'>inverse</A>&lt;Filter&gt; <A CLASS='documented' HREF='#invert'>invert</A>(<SPAN CLASS='keyword'>const</SPAN> Filter&amp; filter);
 
 } } // End namespace boost::io</PRE>
 
@@ -95,7 +95,7 @@
 <A NAME="inverse_ctor"></A>
 <H4><CODE>inverse::inverse</CODE></H4>
 
-<PRE CLASS="broken_ie">    inverse(<SPAN CLASS='keyword'>const</SPAN> Filter& filter);</PRE>
+<PRE CLASS="broken_ie">    inverse(<SPAN CLASS='keyword'>const</SPAN> Filter&amp; filter);</PRE>
 
 <P>
     Constructs an instance of <CODE>inverse</CODE> based on the given filter.
@@ -105,7 +105,7 @@
 <H2>Function Template <CODE>invert</CODE></H2>
 
 <PRE CLASS="broken_ie"><SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Filter&gt;
-inverse&lt;Filter&gt; invert(<SPAN CLASS='keyword'>const</SPAN> Filter& filter);</PRE>
+inverse&lt;Filter&gt; invert(<SPAN CLASS='keyword'>const</SPAN> Filter&amp; filter);</PRE>
 
 <A NAME="invert_template_params"></A>
 <H4>Template parameters</H4>

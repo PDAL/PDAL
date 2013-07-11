@@ -330,8 +330,8 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
     struct BidirectionalRangeConcept : ForwardRangeConcept<T>
     {
 #if BOOST_RANGE_ENABLE_CONCEPT_ASSERT
-        BOOST_RANGE_CONCEPT_ASSERT((BidirectionalIteratorConcept<BOOST_DEDUCED_TYPENAME BidirectionalRangeConcept::iterator>));
-        BOOST_RANGE_CONCEPT_ASSERT((BidirectionalIteratorConcept<BOOST_DEDUCED_TYPENAME BidirectionalRangeConcept::const_iterator>));
+        BOOST_RANGE_CONCEPT_ASSERT((range_detail::BidirectionalIteratorConcept<BOOST_DEDUCED_TYPENAME BidirectionalRangeConcept::iterator>));
+        BOOST_RANGE_CONCEPT_ASSERT((range_detail::BidirectionalIteratorConcept<BOOST_DEDUCED_TYPENAME BidirectionalRangeConcept::const_iterator>));
 #endif
     };
 
@@ -348,8 +348,8 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
     struct RandomAccessRangeConcept : BidirectionalRangeConcept<T>
     {
 #if BOOST_RANGE_ENABLE_CONCEPT_ASSERT
-        BOOST_RANGE_CONCEPT_ASSERT((RandomAccessIteratorConcept<BOOST_DEDUCED_TYPENAME RandomAccessRangeConcept::iterator>));
-        BOOST_RANGE_CONCEPT_ASSERT((RandomAccessIteratorConcept<BOOST_DEDUCED_TYPENAME RandomAccessRangeConcept::const_iterator>));
+        BOOST_RANGE_CONCEPT_ASSERT((range_detail::RandomAccessIteratorConcept<BOOST_DEDUCED_TYPENAME RandomAccessRangeConcept::iterator>));
+        BOOST_RANGE_CONCEPT_ASSERT((range_detail::RandomAccessIteratorConcept<BOOST_DEDUCED_TYPENAME RandomAccessRangeConcept::const_iterator>));
 #endif
     };
 

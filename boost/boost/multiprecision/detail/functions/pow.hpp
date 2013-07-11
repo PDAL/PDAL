@@ -25,6 +25,14 @@ inline void pow_imp(T& result, const T& t, const U& p, const mpl::false_&)
 
    typedef typename pdalboost::multiprecision::detail::canonical<U, T>::type int_type;
 
+   if(&result == &t)
+   {
+      T temp;
+      pow_imp(temp, t, p, mpl::false_());
+      result = temp;
+      return;
+   }
+
    // This will store the result.
    if(U(p % U(2)) != U(0))
    {
@@ -411,6 +419,7 @@ inline void eval_pow(T& result, const T& x, const T& a)
       T t;
       eval_pow(t, x, a);
       result = t;
+      return;
    }
 
    if(a.compare(si_type(1)) == 0)

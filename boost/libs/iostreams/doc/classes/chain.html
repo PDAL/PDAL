@@ -75,24 +75,24 @@
     <SPAN CLASS="keyword">typedef</SPAN> <SPAN CLASS="omitted">implementation-defined</SPAN>  size_type;
 
     <A CLASS="documented" HREF="#default_constructor">chain</A>();
-    <A CLASS="documented" HREF="#copy_constructor">chain</A>(<SPAN CLASS='keyword'>const</SPAN> chain&);
+    <A CLASS="documented" HREF="#copy_constructor">chain</A>(<SPAN CLASS='keyword'>const</SPAN> chain&amp;);
 
     std::streamsize <A CLASS='documented' HREF='#read'>read</A>(char_type* s, std::streamsize n);
     std::streamsize <A CLASS='documented' HREF='#write'>write</A>(<SPAN CLASS='keyword'>const</SPAN> char_type* s, std::streamsize n);
     <A CLASS='documented' HREF='../functions/positioning.html#synopsis'>stream_offset</A> <A CLASS='documented' HREF='#seek'>seek</A>(<A CLASS='documented' HREF='../functions/positioning.html#synopsis'>stream_offset</A> off, std::ios_base::seekdir way);
 
-    <SPAN CLASS='keyword'>const</SPAN> std::type_info& <A CLASS='documented' HREF='#component_type'>component_type</A>(<SPAN CLASS="keyword">int</SPAN> n) <SPAN CLASS='keyword'>const</SPAN>;
+    <SPAN CLASS='keyword'>const</SPAN> std::type_info&amp; <A CLASS='documented' HREF='#component_type'>component_type</A>(<SPAN CLASS="keyword">int</SPAN> n) <SPAN CLASS='keyword'>const</SPAN>;
 
     <SPAN CLASS='keyword'>template</SPAN>&lt;<SPAN CLASS='keyword'>typename</SPAN> T&gt;
     T* <A CLASS='documented' HREF='#component'>component</A>(<SPAN CLASS="keyword">int</SPAN> n) <SPAN CLASS='keyword'>const</SPAN>;
 
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> T&gt;
-    <SPAN CLASS="keyword">void</SPAN> <A CLASS="documented" HREF="#policy_push">push</A>( <SPAN CLASS="keyword">const</SPAN> T& t,
+    <SPAN CLASS="keyword">void</SPAN> <A CLASS="documented" HREF="#policy_push">push</A>( <SPAN CLASS="keyword">const</SPAN> T&amp; t,
                std::streamsize buffer_size = <SPAN CLASS="omitted">default value</SPAN>,
                std::streamsize pback_size = <SPAN CLASS="omitted">default value</SPAN> );
 
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> StreamOrStreambuf&gt;
-    <SPAN CLASS="keyword">void</SPAN> <A CLASS="documented" HREF="#stream_push">push</A>( StreamOrStreambuf& t,
+    <SPAN CLASS="keyword">void</SPAN> <A CLASS="documented" HREF="#stream_push">push</A>( StreamOrStreambuf&amp; t,
                std::streamsize buffer_size = <SPAN CLASS="omitted">default value</SPAN>,
                std::streamsize pback_size = <SPAN CLASS="omitted">default value</SPAN> );
 
@@ -109,7 +109,7 @@
         <SPAN CLASS='comment'>// Deprecated members</SPAN>
 
     <SPAN CLASS='keyword'>template</SPAN>&lt;<SPAN CLASS='keyword'>int</SPAN> N&gt;
-    <SPAN CLASS='keyword'>const</SPAN> std::type_info& <A CLASS='documented' HREF='#component_type'>component_type</A>() <SPAN CLASS='keyword'>const</SPAN>;
+    <SPAN CLASS='keyword'>const</SPAN> std::type_info&amp; <A CLASS='documented' HREF='#component_type'>component_type</A>() <SPAN CLASS='keyword'>const</SPAN>;
 
     <SPAN CLASS='keyword'>template</SPAN>&lt;<SPAN CLASS='keyword'>int</SPAN> N, <SPAN CLASS='keyword'>typename</SPAN> T&gt;
     T* <A CLASS='documented' HREF='#component'>component</A>() <SPAN CLASS='keyword'>const</SPAN>;
@@ -155,7 +155,7 @@
 <A NAME="copy_constructor"></A>
 <H4><CODE>chain::chain</CODE></H4>
 
-<PRE CLASS="broken_ie">    chain(<SPAN CLASS='keyword'>const</SPAN> chain& rhs);</PRE>
+<PRE CLASS="broken_ie">    chain(<SPAN CLASS='keyword'>const</SPAN> chain&amp; rhs);</PRE>
 
 <P>
     Constructs a <CODE>chain</CODE> representing the same sequence of Filters and Devices as the given chain.
@@ -192,7 +192,7 @@
 <A NAME="component_type"></A>
 <H4><CODE>chain::component_type</CODE></H4>
 
-<PRE CLASS="broken_ie">    <SPAN CLASS='keyword'>const</SPAN> std::type_info& component_type(<SPAN CLASS="keyword">int</SPAN> n) <SPAN CLASS='keyword'>const</SPAN>;
+<PRE CLASS="broken_ie">    <SPAN CLASS='keyword'>const</SPAN> std::type_info&amp; component_type(<SPAN CLASS="keyword">int</SPAN> n) <SPAN CLASS='keyword'>const</SPAN>;
 </PRE>
 
 <P>
@@ -201,7 +201,7 @@
 
 <PRE CLASS="broken_ie">    <SPAN CLASS='comment'>// Deprecated</SPAN>
     <SPAN CLASS='keyword'>template</SPAN>&lt;<SPAN CLASS='keyword'>int</SPAN> N&gt;
-    <SPAN CLASS='keyword'>const</SPAN> std::type_info& component_type() <SPAN CLASS='keyword'>const</SPAN>;
+    <SPAN CLASS='keyword'>const</SPAN> std::type_info&amp; component_type() <SPAN CLASS='keyword'>const</SPAN>;
 </PRE>
 
 <P>
@@ -241,7 +241,7 @@
 <A NAME="policy_push"></A>
 <H4><CODE>chain::push</CODE></H4>
 <PRE CLASS="broken_ie">    <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> T&gt;
-    void push( <SPAN CLASS="keyword">const</SPAN> T& t,
+    void push( <SPAN CLASS="keyword">const</SPAN> T&amp; t,
                std::streamsize buffer_size,
                std::streamsize pback_size );</PRE>
 <P>
@@ -281,7 +281,7 @@
 
 <A NAME="stream_push"></A>
 <PRE CLASS="broken_ie">    <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> StreamOrStreambuffer&gt;
-    void push( StreamOrStreambuffer& t,
+    void push( StreamOrStreambuffer&amp; t,
                std::streamsize buffer_size,
                std::streamsize pback_size );</PRE>
 

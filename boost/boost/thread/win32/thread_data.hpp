@@ -165,7 +165,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
 
         struct BOOST_SYMBOL_VISIBLE timeout
         {
-            unsigned long start;
+            win32::ticks_type start;
             uintmax_t milliseconds;
             bool relative;
             pdalboost::system_time abs_time;
@@ -173,14 +173,14 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
             static unsigned long const max_non_infinite_wait=0xfffffffe;
 
             timeout(uintmax_t milliseconds_):
-                start(win32::GetTickCount()),
+                start(win32::GetTickCount64()),
                 milliseconds(milliseconds_),
                 relative(true),
                 abs_time(pdalboost::get_system_time())
             {}
 
             timeout(pdalboost::system_time const& abs_time_):
-                start(win32::GetTickCount()),
+                start(win32::GetTickCount64()),
                 milliseconds(0),
                 relative(false),
                 abs_time(abs_time_)
@@ -205,8 +205,8 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
                 }
                 else if(relative)
                 {
-                    unsigned long const now=win32::GetTickCount();
-                    unsigned long const elapsed=now-start;
+                    win32::ticks_type const now=win32::GetTickCount64();
+                    win32::ticks_type const elapsed=now-start;
                     return remaining_time((elapsed<milliseconds)?(milliseconds-elapsed):0);
                 }
                 else

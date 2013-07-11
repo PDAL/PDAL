@@ -20,6 +20,7 @@
 #include <boost/geometry/algorithms/perimeter.hpp>
 
 #include <boost/geometry/multi/core/tags.hpp>
+#include <boost/geometry/multi/geometries/concepts/check.hpp>
 
 #include <boost/geometry/multi/algorithms/detail/multi_sum.hpp>
 #include <boost/geometry/multi/algorithms/num_points.hpp>

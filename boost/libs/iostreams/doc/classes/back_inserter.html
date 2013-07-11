@@ -56,12 +56,12 @@
 <SPAN CLASS="keyword">public</SPAN>:
     <SPAN CLASS="keyword">typedef</SPAN> <SPAN CLASS="keyword">typename</SPAN> Container::value_type  char_type;
     <SPAN CLASS="keyword">typedef</SPAN> sink_tag                        category;
-    <A HREF="#back_insert_device_constructor" CLASS="documented">back_insert_device</A>(Container& cnt);
+    <A HREF="#back_insert_device_constructor" CLASS="documented">back_insert_device</A>(Container&amp; cnt);
     <SPAN CLASS="omitted">...</SPAN> 
 };
 
 <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> <A HREF="#back_insert_device_template_params" CLASS="documented">Container</A>&gt;
-<A CLASS="documented" HREF="#back_insert_device_template_params">back_insert_device</A>&lt;Container&gt; <A CLASS="documented" HREF="#back_inserter">back_inserter</A>(Container& cnt);
+<A CLASS="documented" HREF="#back_insert_device_template_params">back_insert_device</A>&lt;Container&gt; <A CLASS="documented" HREF="#back_inserter">back_inserter</A>(Container&amp; cnt);
 
 } } <SPAN CLASS="comment">// End namespace boost::io</SPAN></PRE>
 
@@ -79,7 +79,7 @@
 <A NAME="back_insert_device_constructor"></A>
 <H4><CODE>back_insert_device::back_insert_device</CODE></H4>
 
-<PRE CLASS="broken_ie">    back_insert_device(Container& cnt);</PRE>
+<PRE CLASS="broken_ie">    back_insert_device(Container&amp; cnt);</PRE>
 
 <P>Constructs an instance of <CODE>back_insert_device</CODE> for appending to the given container. The given reference must remain valid for the lifetime of the instance of <CODE>back_insert_device</CODE>.</P>
 
@@ -87,7 +87,7 @@
 <H4><CODE>back_inserter</CODE></H4>
 
 <PRE CLASS="broken_ie"><SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Container&gt;
-back_insert_device&lt;Container&gt; back_inserter(Container& cnt);</PRE>
+back_insert_device&lt;Container&gt; back_inserter(Container&amp; cnt);</PRE>
 
 <P>Returns an instance of <CODE>back_insert_device</CODE> for appending to the given container.</P>
 

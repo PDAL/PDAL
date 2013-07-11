@@ -44,7 +44,7 @@
 <PRE CLASS="broken_ie"><SPAN CLASS="keyword">namespace</SPAN> boost { <SPAN CLASS="keyword">namespace</SPAN> iostreams {
               
 <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> <A CLASS="documented" HREF="#template_params">T</A>&gt;
-std::streamsize <A CLASS="documented" HREF="#optimal_buffer_size">optimal_buffer_size</A>(T& t);
+std::streamsize <A CLASS="documented" HREF="#optimal_buffer_size">optimal_buffer_size</A>(T&amp; t);
 
 } } <SPAN CLASS="comment">// End namespace boost::io</SPAN></PRE>
 
@@ -61,7 +61,7 @@ std::streamsize <A CLASS="documented" HREF="#optimal_buffer_size">optimal_buffer
 
 <A NAME="optimal_buffer_size"></A>
 <PRE CLASS="broken_ie"><SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> T&gt;
-std::streamsize optimal_buffer_size(T& t);</PRE>
+std::streamsize optimal_buffer_size(T&amp; t);</PRE>
 
 <P>The semantics of <CODE>optimal_buffer_size</CODE> depends on the <A HREF="../guide/traits.html#category">category</A> of <CODE>T</CODE> as follows:</P>
 

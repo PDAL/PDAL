@@ -72,20 +72,20 @@
 <SPAN CLASS="keyword">public:</SPAN>
     <SPAN CLASS="keyword">typedef</SPAN> <A CLASS="documented" HREF="../../../../doc/html/function.html" TARGET="_top">boost::function1&lt;</A>
                 std::basic_string&lt;Ch&gt;, 
-                <SPAN CLASS="keyword">const</SPAN> match_results&lt;const Ch*&gt;&
+                <SPAN CLASS="keyword">const</SPAN> match_results&lt;const Ch*&gt;&amp;
             &gt; 
             <A CLASS="documented" HREF="#formatter">formatter</A>;
-    <A CLASS="documented" HREF="#first_constructor">basic_regex_filter</A>( <SPAN CLASS="keyword">const</SPAN> basic_regex&lt;Ch, Tr, Alloc&gt;& pattern,
-                        <SPAN CLASS="keyword">const</SPAN> formatter& replace,
+    <A CLASS="documented" HREF="#first_constructor">basic_regex_filter</A>( <SPAN CLASS="keyword">const</SPAN> basic_regex&lt;Ch, Tr, Alloc&gt;&amp; pattern,
+                        <SPAN CLASS="keyword">const</SPAN> formatter&amp; replace,
                         regex_constants::match_flag_type flags = 
                             regex_constants::match_default );
-    <A CLASS="documented" HREF="#second_constructor">basic_regex_filter</A>( <SPAN CLASS="keyword">const</SPAN> basic_regex&lt;Ch, Tr, Alloc&gt;& pattern,
-                        <SPAN CLASS="keyword">const</SPAN> std::basic_string&lt;Ch&gt;& fmt,
+    <A CLASS="documented" HREF="#second_constructor">basic_regex_filter</A>( <SPAN CLASS="keyword">const</SPAN> basic_regex&lt;Ch, Tr, Alloc&gt;&amp; pattern,
+                        <SPAN CLASS="keyword">const</SPAN> std::basic_string&lt;Ch&gt;&amp; fmt,
                         regex_constants::match_flag_type flags = 
                             regex_constants::match_default,
                         regex_constants::match_flag_type fmt_flags = 
                             regex_constants::format_default );
-    <A CLASS="documented" HREF="#third_constructor">basic_regex_filter</A>( <SPAN CLASS="keyword">const</SPAN> basic_regex&lt;Ch, Tr, Alloc&gt;& pattern,
+    <A CLASS="documented" HREF="#third_constructor">basic_regex_filter</A>( <SPAN CLASS="keyword">const</SPAN> basic_regex&lt;Ch, Tr, Alloc&gt;&amp; pattern,
                         <SPAN CLASS="keyword">const</SPAN> Ch* fmt,
                         regex_constants::match_flag_type flags = 
                             regex_constants::match_default,
@@ -122,14 +122,14 @@
 
 <PRE CLASS="broken_ie">    <SPAN CLASS="keyword">typedef</SPAN> boost::function1&lt;
                 std::basic_string&lt;Ch&gt;, 
-                <SPAN CLASS="keyword">const</SPAN> match_results&lt;const Ch*&gt;&
+                <SPAN CLASS="keyword">const</SPAN> match_results&lt;const Ch*&gt;&amp;
             &gt; 
             <B>formatter</B>;</PRE>
     
 <P>
     The type of object which a <CODE>basic_regex_filter</CODE> uses to determine the replacement text for a given regular expression match. Each time a match is found, a corresponding <CODE>match_results</CODE> object is passed to a <CODE>formatter</CODE>, which returns the appropriate replacement text. Since <A HREF="http://www.boost.org/libs/function" TARGET="_top">Boost.Function</A> objects are implictly constructible from function objects with the correct signature, users of regular expression Filters may define their own function objects with the correct signature and pass them to the <CODE>basic_regex_filter</CODE> constructor which takes a <CODE>formatter</CODE>. E.g.,
 <PRE CLASS="broken_ie">    struct my_formatter {
-        std::string operator()(const match_results&lt;const char*&gt;& match)
+        std::string operator()(const match_results&lt;const char*&gt;&amp; match)
         {
             <SPAN CLASS="comment">// Examine match and return the appropriate replacement text</SPAN>
         }
@@ -145,8 +145,8 @@
 <H4><CODE>basic_regex_filter::basic_regex_filter</CODE></H4>
 
 <A NAME="first_constructor"></A>
-<PRE CLASS="broken_ie">    <B>basic_regex_filter</B>( <SPAN CLASS="keyword">const</SPAN> basic_regex&lt;Ch, Tr, Alloc&gt;& pattern,
-                        <SPAN CLASS="keyword">const</SPAN> formatter& replace,
+<PRE CLASS="broken_ie">    <B>basic_regex_filter</B>( <SPAN CLASS="keyword">const</SPAN> basic_regex&lt;Ch, Tr, Alloc&gt;&amp; pattern,
+                        <SPAN CLASS="keyword">const</SPAN> formatter&amp; replace,
                         regex_constants::match_flag_type flags = 
                             regex_constants::match_default );</PRE>
     
@@ -172,8 +172,8 @@
 
 <A NAME="second_constructor"></A>
 
-<PRE CLASS="broken_ie">    <B>basic_regex_filter</B>( <SPAN CLASS="keyword">const</SPAN> basic_regex&lt;Ch, Tr, Alloc&gt;& pattern,
-                        <SPAN CLASS="keyword">const</SPAN> std::basic_string&lt;Ch&gt;& fmt,
+<PRE CLASS="broken_ie">    <B>basic_regex_filter</B>( <SPAN CLASS="keyword">const</SPAN> basic_regex&lt;Ch, Tr, Alloc&gt;&amp; pattern,
+                        <SPAN CLASS="keyword">const</SPAN> std::basic_string&lt;Ch&gt;&amp; fmt,
                         regex_constants::match_flag_type flags = 
                             regex_constants::match_default,
                         regex_constants::match_flag_type fmt_flags = 
@@ -203,7 +203,7 @@
 
 <A NAME="third_constructor"></A>
 
-<PRE CLASS="broken_ie">    <B>basic_regex_filter</B>( <SPAN CLASS="keyword">const</SPAN> basic_regex&lt;Ch, Tr, Alloc&gt;& pattern,
+<PRE CLASS="broken_ie">    <B>basic_regex_filter</B>( <SPAN CLASS="keyword">const</SPAN> basic_regex&lt;Ch, Tr, Alloc&gt;&amp; pattern,
                         <SPAN CLASS="keyword">const</SPAN> Ch* fmt,
                         regex_constants::match_flag_type flags = 
                             regex_constants::match_default,

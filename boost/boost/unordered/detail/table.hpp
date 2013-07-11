@@ -159,6 +159,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
         typedef pdalboost::unordered::detail::functions<
             typename Types::hasher,
             typename Types::key_equal> functions;
+        typedef typename functions::set_hash_functions set_hash_functions;
 
         typedef typename Types::allocator allocator;
         typedef typename pdalboost::unordered::detail::
@@ -363,7 +364,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
         {}
 
         table(table& x, pdalboost::unordered::detail::move_tag m) :
-            functions(x),
+            functions(x, m),
             allocators_(x.allocators_, m),
             bucket_count_(x.bucket_count_),
             size_(x.size_),
@@ -377,8 +378,8 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
         }
 
         table(table& x, node_allocator const& a,
-                pdalboost::unordered::detail::move_tag) :
-            functions(x),
+                pdalboost::unordered::detail::move_tag m) :
+            functions(x, m),
             allocators_(a, a),
             bucket_count_(x.bucket_count_),
             size_(0),
@@ -469,10 +470,8 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
         // Only swaps the allocators if propagate_on_container_swap
         void swap(table& x)
         {
-            pdalboost::unordered::detail::set_hash_functions<hasher, key_equal>
-                op1(*this, x);
-            pdalboost::unordered::detail::set_hash_functions<hasher, key_equal>
-                op2(x, *this);
+            set_hash_functions op1(*this, x);
+            set_hash_functions op2(x, *this);
 
             // I think swap can throw if Propagate::value,
             // since the allocators' swap can throw. Not sure though.
@@ -637,8 +636,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
         void assign(table const& x, false_type)
         {
             // Strong exception safety.
-            pdalboost::unordered::detail::set_hash_functions<hasher, key_equal>
-                new_func_this(*this, x);
+            set_hash_functions new_func_this(*this, x);
             new_func_this.commit();
             mlf_ = x.mlf_;
             recalculate_max_load();
@@ -666,8 +664,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
                 assign(x, false_type());
             }
             else {
-                pdalboost::unordered::detail::set_hash_functions<hasher, key_equal>
-                    new_func_this(*this, x);
+                set_hash_functions new_func_this(*this, x);
 
                 // Delete everything with current allocators before assigning
                 // the new ones.
@@ -714,8 +711,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
                 move_assign_no_alloc(x);
             }
             else {
-                pdalboost::unordered::detail::set_hash_functions<hasher, key_equal>
-                    new_func_this(*this, x);
+                set_hash_functions new_func_this(*this, x);
                 new_func_this.commit();
                 mlf_ = x.mlf_;
                 recalculate_max_load();
@@ -740,8 +736,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
         
         void move_assign_no_alloc(table& x)
         {
-            pdalboost::unordered::detail::set_hash_functions<hasher, key_equal>
-                new_func_this(*this, x);
+            set_hash_functions new_func_this(*this, x);
             // No throw from here.
             mlf_ = x.mlf_;
             max_load_ = x.max_load_;

@@ -115,10 +115,10 @@
     }
 
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Source&gt;
-    <SPAN CLASS="keyword"><SPAN CLASS="keyword">int</SPAN></SPAN> get(Source& src);
+    <SPAN CLASS="keyword"><SPAN CLASS="keyword">int</SPAN></SPAN> get(Source&amp; src);
 
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Source&gt;
-    <SPAN CLASS="keyword">void</SPAN> close(Source&);
+    <SPAN CLASS="keyword">void</SPAN> close(Source&amp;);
 <SPAN CLASS="keyword">private</SPAN>:
     <SPAN CLASS="keyword"><SPAN CLASS="keyword">int</SPAN></SPAN> get_char(<SPAN CLASS="keyword"><SPAN CLASS="keyword">int</SPAN></SPAN> c);
     <SPAN CLASS="keyword"><SPAN CLASS="keyword">int</SPAN></SPAN>   tab_size_;
@@ -143,7 +143,7 @@
 <P>This function updates the column count based on the given character <CODE>c</CODE> and returns <CODE>c</CODE>. Using <CODE>get_char</CODE> you can implement <CODE>get</CODE> as follows:</P>
 
 <PRE class="broken_ie">    <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Source&gt;
-    <SPAN CLASS="keyword"><SPAN CLASS="keyword">int</SPAN></SPAN> get(Source& src)
+    <SPAN CLASS="keyword"><SPAN CLASS="keyword">int</SPAN></SPAN> get(Source&amp; src)
     {
         <SPAN CLASS="keyword">if</SPAN> (spaces_ &gt; 0) {
             --spaces_;
@@ -171,7 +171,7 @@
 
 <P>As usual, the function <CODE>close</CODE> resets the Filter's state:</P>
 
-<PRE class="broken_ie">    <SPAN CLASS="keyword">void</SPAN> close(Source&)
+<PRE class="broken_ie">    <SPAN CLASS="keyword">void</SPAN> close(Source&amp;)
     {
         col_no_ = 0;
         spaces_ = 0;
@@ -196,13 +196,13 @@
     }
 
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Sink&gt;
-    <SPAN CLASS="keyword"><SPAN CLASS="keyword">bool</SPAN></SPAN> put(Sink& dest, <SPAN CLASS="keyword"><SPAN CLASS="keyword">int</SPAN></SPAN> c);
+    <SPAN CLASS="keyword"><SPAN CLASS="keyword">bool</SPAN></SPAN> put(Sink&amp; dest, <SPAN CLASS="keyword"><SPAN CLASS="keyword">int</SPAN></SPAN> c);
 
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Sink&gt;
-    <SPAN CLASS="keyword">void</SPAN> close(Sink&);
+    <SPAN CLASS="keyword">void</SPAN> close(Sink&amp;);
 <SPAN CLASS="keyword">private</SPAN>:
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Sink&gt;
-    <SPAN CLASS="keyword"><SPAN CLASS="keyword">bool</SPAN></SPAN> put_char(Sink& dest, <SPAN CLASS="keyword"><SPAN CLASS="keyword">int</SPAN></SPAN> c);
+    <SPAN CLASS="keyword"><SPAN CLASS="keyword">bool</SPAN></SPAN> put_char(Sink&amp; dest, <SPAN CLASS="keyword"><SPAN CLASS="keyword">int</SPAN></SPAN> c);
     <SPAN CLASS="keyword"><SPAN CLASS="keyword">int</SPAN></SPAN>  tab_size_;
     <SPAN CLASS="keyword"><SPAN CLASS="keyword">int</SPAN></SPAN>  col_no_;
     <SPAN CLASS="keyword"><SPAN CLASS="keyword">int</SPAN></SPAN>  spaces_;
@@ -213,7 +213,7 @@
 <P>The implemenation helper function <CODE>put_char</CODE> is the same as that of <A HREF="line_wrapping_filters.html#line_wrapping_output_filter"><CODE>line_wrapping_output_filter::put_char</CODE></A>: it writes the given character to <CODE>std::cout</CODE> and increments the column number, unless the character is a newline, in which case the column number is reset.</P>
 
 <PRE class="broken_ie">    <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Sink&gt;
-    <SPAN CLASS="keyword"><SPAN CLASS="keyword">bool</SPAN></SPAN> put_char(Sink& dest, <SPAN CLASS="keyword"><SPAN CLASS="keyword">int</SPAN></SPAN> c)
+    <SPAN CLASS="keyword"><SPAN CLASS="keyword">bool</SPAN></SPAN> put_char(Sink&amp; dest, <SPAN CLASS="keyword"><SPAN CLASS="keyword">int</SPAN></SPAN> c)
     {
         <SPAN CLASS="keyword">if</SPAN> (!iostreams::put(dest, c))
             <SPAN CLASS="keyword">return</SPAN> <SPAN CLASS="keyword">false</SPAN>;
@@ -227,7 +227,7 @@
 <P>Using <CODE>put_char</CODE> you can implement <CODE>put</CODE> as follows:</P>
 
 <PRE class="broken_ie">    <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Sink&gt;
-    <SPAN CLASS="keyword"><SPAN CLASS="keyword">bool</SPAN></SPAN> put(Sink& dest, <SPAN CLASS="keyword"><SPAN CLASS="keyword">int</SPAN></SPAN> c) 
+    <SPAN CLASS="keyword"><SPAN CLASS="keyword">bool</SPAN></SPAN> put(Sink&amp; dest, <SPAN CLASS="keyword"><SPAN CLASS="keyword">int</SPAN></SPAN> c)
     {
         for (; spaces_ &gt; 0; --spaces_)
             <SPAN CLASS="keyword">if</SPAN> (!put_char(dest, ' '))
@@ -250,7 +250,7 @@
 
 <P>As usual, the function <CODE>close</CODE> resets the Filter's state:</P>
 
-<PRE class="broken_ie">    <SPAN CLASS="keyword">void</SPAN> close(Source&)
+<PRE class="broken_ie">    <SPAN CLASS="keyword">void</SPAN> close(Source&amp;)
     {
         col_no_ = 0;
         spaces_ = 0;

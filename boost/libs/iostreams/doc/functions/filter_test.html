@@ -58,13 +58,13 @@
 
 <SPAN CLASS='keyword'>template</SPAN>&lt;<SPAN CLASS='keyword'>typename</SPAN> InputFilter&gt;
 <SPAN CLASS='keyword'>bool</SPAN> test_input_filter( InputFilter filter, 
-                        <SPAN CLASS='keyword'>const</SPAN> std::string& input, 
-                        <SPAN CLASS='keyword'>const</SPAN> std::string& output );
+                        <SPAN CLASS='keyword'>const</SPAN> std::string&amp; input,
+                        <SPAN CLASS='keyword'>const</SPAN> std::string&amp; output );
 
 <SPAN CLASS='keyword'>template</SPAN>&lt;<SPAN CLASS='keyword'>typename</SPAN> InputFilter, <SPAN CLASS='keyword'>typename</SPAN> Source1, <SPAN CLASS='keyword'>typename</SPAN> Source2&gt;
 <SPAN CLASS='keyword'>bool</SPAN> test_input_filter( InputFilter filter, 
-                        <SPAN CLASS='keyword'>const</SPAN> Source1& input, 
-                        <SPAN CLASS='keyword'>const</SPAN> Source2& output );
+                        <SPAN CLASS='keyword'>const</SPAN> Source1&amp; input,
+                        <SPAN CLASS='keyword'>const</SPAN> Source2&amp; output );
 
 } } <SPAN CLASS='comment'>// End namespace boost::io</SPAN></PRE>
 
@@ -82,13 +82,13 @@
 
 <SPAN CLASS='keyword'>template</SPAN>&lt;<SPAN CLASS='keyword'>typename</SPAN> OutputFilter&gt;
 <SPAN CLASS='keyword'>bool</SPAN> test_output_filter( OutputFilter filter, 
-                         <SPAN CLASS='keyword'>const</SPAN> std::string& input, 
-                         <SPAN CLASS='keyword'>const</SPAN> std::string& output );
+                         <SPAN CLASS='keyword'>const</SPAN> std::string&amp; input,
+                         <SPAN CLASS='keyword'>const</SPAN> std::string&amp; output );
 
 <SPAN CLASS='keyword'>template</SPAN>&lt;<SPAN CLASS='keyword'>typename</SPAN> OutputFilter, <SPAN CLASS='keyword'>typename</SPAN> Source1, <SPAN CLASS='keyword'>typename</SPAN> Source2&gt;
 <SPAN CLASS='keyword'>bool</SPAN> test_output_filter( OutputFilter filter, 
-                         <SPAN CLASS='keyword'>const</SPAN> Source1& input, 
-                         <SPAN CLASS='keyword'>const</SPAN> Source2& output );
+                         <SPAN CLASS='keyword'>const</SPAN> Source1&amp; input,
+                         <SPAN CLASS='keyword'>const</SPAN> Source2&amp; output );
 
 } } <SPAN CLASS='comment'>// End namespace boost::io</SPAN></PRE>
 
@@ -106,12 +106,12 @@
 <SPAN CLASS='keyword'>template</SPAN>&lt;<SPAN CLASS='keyword'>typename</SPAN> OutputFilter, <SPAN CLASS='keyword'>typename</SPAN> InputFilter&gt;
 <SPAN CLASS='keyword'>bool</SPAN> test_filter_pair( OutputFilter first, 
                        InputFilter second,
-                       <SPAN CLASS='keyword'>const</SPAN> std::string& data );
+                       <SPAN CLASS='keyword'>const</SPAN> std::string&amp; data );
 
 <SPAN CLASS='keyword'>template</SPAN>&lt;<SPAN CLASS='keyword'>typename</SPAN> OutputFilter, <SPAN CLASS='keyword'>typename</SPAN> InputFilter, <SPAN CLASS='keyword'>typename</SPAN> Source&gt;
 <SPAN CLASS='keyword'>bool</SPAN> test_filter_pair( OutputFilter first, 
                        InputFilter second, 
-                       <SPAN CLASS='keyword'>const</SPAN> Source& data );
+                       <SPAN CLASS='keyword'>const</SPAN> Source&amp; data );
 
 } } <SPAN CLASS='comment'>// End namespace boost::io</SPAN></PRE>
 
