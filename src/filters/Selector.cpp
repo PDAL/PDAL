@@ -138,7 +138,6 @@ void Selector::checkImpedance()
                 double scale(0.0);
                 double minimum(0.0);
                 double maximum(0.0);
-                EndianType endianness = Endian_Little;
                 
                 name = o.getValue<std::string>();
                 scale = ops.getValueOrDefault<double>("scale", 1.0);
@@ -148,9 +147,12 @@ void Selector::checkImpedance()
                 description = ops.getValueOrDefault<std::string>("description", "");
                 interpretation = ops.getValueOrDefault<std::string>("interpretation", "int32_t");
 
+                /*
+                EndianType endianness = Endian_Little;
                 std::string endy = ops.getValueOrDefault<std::string>("endianness", "little");
                 if (boost::iequals(endy, "big"))
                     endianness = Endian_Big;
+                */
            
                 uuid = ops.getValueOrDefault<dimension::id>("uuid", boost::uuids::nil_uuid());
                 parent_uuid = ops.getValueOrDefault<dimension::id>("parent_uuid",  boost::uuids::nil_uuid());

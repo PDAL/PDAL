@@ -147,8 +147,7 @@ boost::uint32_t HexBin::readBufferImpl(PointBuffer& buffer)
     
     const boost::uint32_t numPoints = getPrevIterator().read(buffer);
     
-    
-    
+#ifdef PDAL_HAVE_HEXER
     for (boost::uint32_t i = 0; i < buffer.getNumPoints(); ++i)
     {
         boost::int32_t xi = buffer.getField<boost::int32_t>(*m_dim_x, i);
@@ -157,7 +156,6 @@ boost::uint32_t HexBin::readBufferImpl(PointBuffer& buffer)
         x = m_dim_x->applyScaling<boost::int32_t>(xi);
         double y(0.0);
         y = m_dim_y->applyScaling<boost::int32_t>(yi);
-#ifdef PDAL_HAVE_HEXER
         
         if (!m_grid)
         {
@@ -204,9 +202,8 @@ boost::uint32_t HexBin::readBufferImpl(PointBuffer& buffer)
         {
             m_grid->addPoint(hexer::Point(x,y));
         }
-
-#endif
     }
+#endif
         
     return numPoints;
 }
