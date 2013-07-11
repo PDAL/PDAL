@@ -81,7 +81,7 @@
 <SPAN CLASS='keyword'>public</SPAN>:
     <SPAN CLASS='keyword'>typedef</SPAN> <SPAN CLASS='keyword'>typename</SPAN> Container::value_type  char_type;
     <SPAN CLASS='keyword'>typedef</SPAN> source_tag                      category;
-    container_source(Container& container) 
+    container_source(Container&amp; container)
         : container_(container), pos_(<SPAN CLASS='numeric_literal'>0</SPAN>)
         { }
     std::streamsize read(char_type* s, std::streamsize n)
@@ -99,10 +99,10 @@
             <SPAN CLASS='keyword'>return</SPAN> <SPAN CLASS='numeric_literal'>-1</SPAN>; <SPAN CLASS='comment'>// EOF</SPAN>
         }
     }
-    Container& container() { <SPAN CLASS='keyword'>return</SPAN> container_; }
+    Container&amp; container() { <SPAN CLASS='keyword'>return</SPAN> container_; }
 <SPAN CLASS='keyword'>private</SPAN>:
     <SPAN CLASS='keyword'>typedef</SPAN> <SPAN CLASS='keyword'>typename</SPAN> Container::size_type   size_type;
-    Container&  container_;
+    Container&amp;  container_;
     size_type   pos_;
 };
 

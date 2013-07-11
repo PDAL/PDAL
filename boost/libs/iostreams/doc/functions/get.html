@@ -44,10 +44,10 @@
 
     <SPAN CLASS="keyword">struct</SPAN> tolower_filter : <SPAN CLASS="keyword">public</SPAN> input_filter {
         <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Source&gt;
-        <SPAN CLASS="keyword">int</SPAN> get(Source& src)
+        <SPAN CLASS="keyword">int</SPAN> get(Source&amp; src)
         {
             <SPAN CLASS="keyword">int</SPAN> c;
-            <SPAN CLASS="keyword">return</SPAN> (c == boost::iostreams::get(src)) != <SPAN CLASS='numeric_literal'>EOF</SPAN> &amp;&amp; 
+            <SPAN CLASS="keyword">return</SPAN> (c = boost::iostreams::get(src)) != <SPAN CLASS='numeric_literal'>EOF</SPAN> &amp;&amp;
                     c != WOULD_BLOCK 
                         ?
                 tolower((<SPAN CLASS="keyword">unsigned</SPAN> <SPAN CLASS="keyword">char</SPAN>) c) :
@@ -78,7 +78,7 @@
               
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> <A CLASS="documented" HREF="#template_params">Source</A>&gt;     
     <SPAN CLASS="keyword">typename</SPAN> <A CLASS='documented' HREF="../guide/traits.html#int_type_of_ref">int_type_of</A>&lt;Source&gt;::type
-    <A CLASS="documented" HREF="#semantics">get</A>(<A CLASS="documented" HREF="#template_params">Source</A>& <A CLASS="documented" HREF="#function_params">src</A>);
+    <A CLASS="documented" HREF="#semantics">get</A>(<A CLASS="documented" HREF="#template_params">Source</A>&amp; <A CLASS="documented" HREF="#function_params">src</A>);
 
 } } <SPAN CLASS="comment">// End namespace boost::io</SPAN></PRE>
 
@@ -109,7 +109,7 @@
 
 <PRE CLASS="broken_ie">    <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Source&gt;     
     <SPAN CLASS="keyword">typename</SPAN> int_type_of&lt;Source&gt;::type
-    get(Source& src);</PRE>
+    get(Source&amp; src);</PRE>
 
 <P>The semantics of <CODE>get</CODE> depends on the <A HREF="../guide/traits.html#category">category</A> of <CODE>Source</CODE> as follows:</P>
 

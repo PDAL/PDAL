@@ -58,7 +58,7 @@
     <SPAN CLASS='keyword'>typedef</SPAN> <SPAN CLASS='keyword'>typename</SPAN> <A CLASS='documented' HREF='../guide/traits.html#char_type_of_ref'>char_type_of</A>&lt;Component&gt;::type  char_type;
     <SPAN CLASS='keyword'>typedef</SPAN> <SPAN CLASS='omitted'>implementation-defined</SPAN>                  mode;
 
-    <A CLASS='documented' HREF='#restriction_ctor'>restriction</A>( [<SPAN CLASS='keyword'>const</SPAN>] Component& component,
+    <A CLASS='documented' HREF='#restriction_ctor'>restriction</A>( [<SPAN CLASS='keyword'>const</SPAN>] Component&amp; component,
                  <A CLASS='documented' HREF='positioning.html#synopsis'>stream_offset</A> off, 
                  <A CLASS='documented' HREF='positioning.html#synopsis'>stream_offset</A> len = <SPAN     CLASS='literal'>-1</SPAN> );
 
@@ -67,7 +67,7 @@
 
 <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> <A CLASS="documented" HREF="#restrict_template_params">Component</A>&gt;
 <A CLASS='documented' HREF='#restriction'>restriction</A>&lt;Component&gt; 
-<A CLASS='documented' HREF='#restrict'>restrict</A>( [<SPAN CLASS='keyword'>const</SPAN>] Component& component,
+<A CLASS='documented' HREF='#restrict'>restrict</A>( [<SPAN CLASS='keyword'>const</SPAN>] Component&amp; component,
           <A CLASS='documented' HREF='positioning.html#synopsis'>stream_offset</A> off, 
           <A CLASS='documented' HREF='positioning.html#synopsis'>stream_offset</A> len = <SPAN     CLASS='literal'>-1</SPAN> );
 
@@ -90,7 +90,7 @@
 <A NAME="restriction_ctor"></A>
 <H4><CODE>restriction::restriction</CODE></H4>
 
-<PRE CLASS="broken_ie">    restriction( [<SPAN CLASS='keyword'>const</SPAN>] Component& component,
+<PRE CLASS="broken_ie">    restriction( [<SPAN CLASS='keyword'>const</SPAN>] Component&amp; component,
                  <A CLASS='documented' HREF='positioning.html#synopsis'>stream_offset</A> off, 
                  <A CLASS='documented' HREF='positioning.html#synopsis'>stream_offset</A> len = <SPAN     CLASS='literal'>-1</SPAN> );</PRE>
 
@@ -119,7 +119,7 @@
 
 <PRE CLASS="broken_ie"><SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Component&gt;
 restriction&lt;Component&gt; 
-restrict( [<SPAN CLASS='keyword'>const</SPAN>] Component& component,
+restrict( [<SPAN CLASS='keyword'>const</SPAN>] Component&amp; component,
           <A CLASS='documented' HREF='positioning.html#synopsis'>stream_offset</A> off, 
           <A CLASS='documented' HREF='positioning.html#synopsis'>stream_offset</A> len = <SPAN     CLASS='literal'>-1</SPAN> );</PRE>
 

@@ -72,7 +72,7 @@
           <SPAN CLASS="keyword">typename</SPAN> <A HREF="#template_params" CLASS="documented">Alloc</A> = std::allocator&lt;Ch&gt; &gt;
 <SPAN CLASS="keyword">class</SPAN> <A HREF="#template_params" CLASS="documented">basic_grep_filter</A> {   
 <SPAN CLASS="keyword">public:</SPAN>
-    <A CLASS="documented" HREF="#constructor">basic_grep_filter</A>( <SPAN CLASS="keyword">const</SPAN> basic_regex&lt;Ch, Tr, Alloc&gt;& pattern,
+    <A CLASS="documented" HREF="#constructor">basic_grep_filter</A>( <SPAN CLASS="keyword">const</SPAN> basic_regex&lt;Ch, Tr, Alloc&gt;&amp; pattern,
                        regex_constants::match_flag_type flags = 
                            regex_constants::match_default,
                        <SPAN CLASS="keyword">int</SPAN> options = <SPAN CLASS="numeric_literal">0</SPAN> );
@@ -106,7 +106,7 @@
 <A NAME="constructor"></A>
 <H4><CODE>basic_grep_filter::basic_grep_filter</CODE></H4>
 
-<PRE CLASS="broken_ie">    <B>basic_grep_filter</B>( <SPAN CLASS="keyword">const</SPAN> basic_regex&lt;Ch, Tr, Alloc&gt;& pattern,
+<PRE CLASS="broken_ie">    <B>basic_grep_filter</B>( <SPAN CLASS="keyword">const</SPAN> basic_regex&lt;Ch, Tr, Alloc&gt;&amp; pattern,
                        regex_constants::match_flag_type flags = 
                            regex_constants::match_default,
                        <SPAN CLASS="keyword">int</SPAN> options = <SPAN CLASS="numeric_literal">0</SPAN> );</PRE>

@@ -216,7 +216,7 @@ Thanks to <A HREF="mailto:jloup@gailly.net">Jean-loup Gailly</A> and <A HREF="ma
     <SPAN CLASS="keyword">typedef</SPAN> <SPAN CLASS="keyword">char</SPAN>                    char_type;
     <SPAN CLASS="keyword">typedef</SPAN> <SPAN CLASS="omitted">implementation-defined</SPAN>  category;
 
-    <A CLASS="documented" HREF="#basic_gzip_compressor_ctors">basic_gzip_compressor</A>( <SPAN CLASS="keyword">const</SPAN> <A CLASS="documented" HREF="#gzip_params">gzip_params</A>& = <SPAN CLASS="omitted">zlib::default_compression</SPAN>, 
+    <A CLASS="documented" HREF="#basic_gzip_compressor_ctors">basic_gzip_compressor</A>( <SPAN CLASS="keyword">const</SPAN> <A CLASS="documented" HREF="#gzip_params">gzip_params</A>&amp; = <SPAN CLASS="omitted">zlib::default_compression</SPAN>,
                            std::streamsize buffer_size = <SPAN CLASS="omitted">default value</SPAN> );
 
     <SPAN CLASS="comment">// DualUseFilter members.</SPAN>
@@ -238,7 +238,7 @@ Thanks to <A HREF="mailto:jloup@gailly.net">Jean-loup Gailly</A> and <A HREF="ma
 <A NAME="basic_gzip_compressor_ctors"></A>
 <H4><CODE>basic_gzip_compressor::basic_gzip_compressor</CODE></H4>
 
-<PRE CLASS="broken_ie">    basic_gzip_compressor( <SPAN CLASS="keyword">const</SPAN> gzip_params& = <SPAN CLASS="omitted">zlib::default_compression</SPAN>, 
+<PRE CLASS="broken_ie">    basic_gzip_compressor( <SPAN CLASS="keyword">const</SPAN> gzip_params&amp; = <SPAN CLASS="omitted">zlib::default_compression</SPAN>,
                            std::streamsize buffer_size = <SPAN CLASS="omitted">default value</SPAN> );</PRE>
 
 <P>Constructs an instance of <CODE>basic_gzip_compressor</CODE> with the given parameters and buffer size. Since a <A CLASS="documented" HREF="#gzip_params"><CODE>gzip_params</CODE></A> object is implicitly constructible from an <CODE>int</CODE> representing a compression level, an <CODE>int</CODE> may be passed as the first constructor argument.</P>
@@ -298,7 +298,7 @@ Used by the gzip Filters to report errors.
 <PRE CLASS="broken_ie"><SPAN CLASS="keyword">class</SPAN> <SPAN CLASS="defined">gzip_error</SPAN> : <SPAN CLASS="keyword">public</SPAN> std::ios_base::failure {
 <SPAN CLASS="keyword">public:</SPAN>
     <A CLASS="documented" HREF="#gzip_error_constructor">gzip_error</A>(<SPAN CLASS="keyword">int</SPAN> error);
-    <A CLASS="documented" HREF="#gzip_error_constructor">gzip_error</A>(<SPAN CLASS="keyword">const</SPAN> <A CLASS="documented" HREF="zlib.html#zlib_error">zlib_error</A>& e);
+    <A CLASS="documented" HREF="#gzip_error_constructor">gzip_error</A>(<SPAN CLASS="keyword">const</SPAN> <A CLASS="documented" HREF="zlib.html#zlib_error">zlib_error</A>&amp; e);
     <SPAN CLASS="keyword">int</SPAN> <A CLASS="documented" HREF="#gzip_error_error">error</A>() <SPAN CLASS="keyword">const</SPAN>;
     <SPAN CLASS="keyword">int</SPAN> <A CLASS="documented" HREF="#gzip_error_zlib_error_code">zlib_error_code</A>() <SPAN CLASS="keyword">const</SPAN>;
 };</PRE>
@@ -307,7 +307,7 @@ Used by the gzip Filters to report errors.
 <H4><CODE>gzip_error::gzip_error</CODE></H4>
 
 <PRE CLASS="broken_ie">    gzip_error(<SPAN CLASS="keyword">int</SPAN> error);
-    gzip_error(<SPAN CLASS="keyword">const</SPAN> <A HREF="#zlib_error">zlib_error</A>& e);</PRE>
+    gzip_error(<SPAN CLASS="keyword">const</SPAN> <A HREF="#zlib_error">zlib_error</A>&amp; e);</PRE>
 
 <P>The first member constructs an instance of <CODE>gzip_error</CODE> with the given error code from the namespace <A HREF="#constants"><CODE>boost::iostreams::gzip</CODE></A>. The second constructs an instance of <CODE>gzip_error</CODE> based on an instance of <A HREF="zlib.html#zlib_error"><CODE>zlib_error</CODE></A>.</P>
 

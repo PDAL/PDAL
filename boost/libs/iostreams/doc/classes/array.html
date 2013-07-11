@@ -71,7 +71,7 @@
     <SPAN CLASS="keyword">typedef</SPAN> Ch          char_type;
     <SPAN CLASS="keyword">typedef</SPAN> source_tag  category;
 
-    <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">int</SPAN> N&gt; <A CLASS="documented" HREF="#array_source_constructors">basic_array_source</A>(char_type (&)[N]);
+    <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">int</SPAN> N&gt; <A CLASS="documented" HREF="#array_source_constructors">basic_array_source</A>(char_type (&amp;)[N]);
     <A CLASS="documented" HREF="#array_source_constructors">basic_array_source</A>(<SPAN CLASS="keyword">const</SPAN> char_type* begin, <SPAN CLASS="keyword">const</SPAN> char_type* end);
     <A CLASS="documented" HREF="#array_source_constructors">basic_array_source</A>(<SPAN CLASS="keyword">const</SPAN> char_type* begin, std::size_t length);
     <SPAN CLASS="omitted">...</SPAN>
@@ -95,7 +95,7 @@
 <A NAME="array_source_constructors"></A>
 <H4><CODE>basic_array_source::basic_array_source</CODE></H4>
 
-<PRE CLASS="broken_ie"><SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">int</SPAN> N&gt; basic_array_source(char_type (&)[N]);
+<PRE CLASS="broken_ie"><SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">int</SPAN> N&gt; basic_array_source(char_type (&amp;)[N]);
 basic_array_source(<SPAN CLASS="keyword">const</SPAN> char_type* begin, <SPAN CLASS="keyword">const</SPAN> char_type* end);
 basic_array_source(<SPAN CLASS="keyword">const</SPAN> char_type* begin, std::size_t length);</PRE>
     
@@ -118,7 +118,7 @@ basic_array_source(<SPAN CLASS="keyword">const</SPAN> char_type* begin, std::siz
     <SPAN CLASS="keyword">typedef</SPAN> Ch        char_type;
     <SPAN CLASS="keyword">typedef</SPAN> sink_tag  category;
 
-    <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">int</SPAN> N&gt; <A CLASS="documented" HREF="#array_sink_constructors">basic_array_sink</A>(char_type (&)[N]);
+    <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">int</SPAN> N&gt; <A CLASS="documented" HREF="#array_sink_constructors">basic_array_sink</A>(char_type (&amp;)[N]);
     <A CLASS="documented" HREF="#array_sink_constructors">basic_array_sink</A>(char_type* begin, char_type* end);
     <A CLASS="documented" HREF="#array_sink_constructors">basic_array_sink</A>(char_type* begin, std::size_t length);
 
@@ -143,7 +143,7 @@ basic_array_source(<SPAN CLASS="keyword">const</SPAN> char_type* begin, std::siz
 <A NAME="array_sink_constructors"></A>
 <H4><CODE>basic_array_sink::basic_array_sink</CODE></H4>
 
-<PRE CLASS="broken_ie"><SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">int</SPAN> N&gt; basic_array_sink(char_type (&)[N]);
+<PRE CLASS="broken_ie"><SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">int</SPAN> N&gt; basic_array_sink(char_type (&amp;)[N]);
 basic_array_sink(char_type* begin, char_type* end);
 basic_array_sink(char_type* begin, std::size_t length);</PRE>
     
@@ -166,7 +166,7 @@ basic_array_sink(char_type* begin, std::size_t length);</PRE>
     <SPAN CLASS="keyword">typedef</SPAN> Ch                   char_type;
     <SPAN CLASS="keyword">typedef</SPAN> seekable_device_tag  category;
 
-    <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">int</SPAN> N&gt; <A CLASS="documented" HREF="#array_constructor">basic_array</A>(char_type (&)[N]);
+    <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">int</SPAN> N&gt; <A CLASS="documented" HREF="#array_constructor">basic_array</A>(char_type (&amp;)[N]);
     <A CLASS="documented" HREF="#array_constructor">basic_array</A>(char_type* begin, char_type* end);
     <A CLASS="documented" HREF="#array_constructor">basic_array</A>(char_type* begin, std::size_t length);
 
@@ -191,7 +191,7 @@ basic_array_sink(char_type* begin, std::size_t length);</PRE>
 <A NAME="array_constructor"></A>
 <H4><CODE>array::array</CODE></H4>
 
-<PRE CLASS="broken_ie"><SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">int</SPAN> N&gt; basic_array(char_type (&)[N]);
+<PRE CLASS="broken_ie"><SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">int</SPAN> N&gt; basic_array(char_type (&amp;)[N]);
 basic_array(char_type* begin, char_type* end);
 basic_array(char_type* begin, std::size_t length);</PRE>
 

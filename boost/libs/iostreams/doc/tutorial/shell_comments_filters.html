@@ -93,7 +93,7 @@
     <SPAN CLASS='keyword'>typedef</SPAN> input_filter_tag  category;
 
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Source&gt;
-    <SPAN CLASS='keyword'>int</SPAN> get(Source& src)
+    <SPAN CLASS='keyword'>int</SPAN> get(Source&amp; src)
     {
         <SPAN CLASS='comment'>// Attempt to produce one character of filtered</SPAN>
         <SPAN CLASS='comment'>// data, reading from src as necessary. If successful,</SPAN>
@@ -113,7 +113,7 @@
 <SPAN CLASS='keyword'>class</SPAN> my_input_filter : <SPAN CLASS='keyword'>public</SPAN> input_filter {
 <SPAN CLASS='keyword'>public</SPAN>:
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Source&gt;
-    <SPAN CLASS='keyword'>int</SPAN> get(Source& src);
+    <SPAN CLASS='keyword'>int</SPAN> get(Source&amp; src);
 
     <SPAN CLASS='comment'>/* Other members */</SPAN>
 };</PRE>
@@ -135,7 +135,7 @@
         { }
 
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Source&gt;
-    <SPAN CLASS="keyword"><SPAN CLASS="keyword">int</SPAN></SPAN> get(Source& src)
+    <SPAN CLASS="keyword"><SPAN CLASS="keyword">int</SPAN></SPAN> get(Source&amp; src)
     {
         <SPAN CLASS="keyword"><SPAN CLASS="keyword">int</SPAN></SPAN> c;
         <SPAN CLASS="keyword">while</SPAN> (<SPAN CLASS="keyword">true</SPAN>) {
@@ -153,7 +153,7 @@
     }
 
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Source&gt;
-    <SPAN CLASS="keyword">void</SPAN> close(Source&) { skip_ = <SPAN CLASS="keyword">false</SPAN>; }
+    <SPAN CLASS="keyword">void</SPAN> close(Source&amp;) { skip_ = <SPAN CLASS="keyword">false</SPAN>; }
 <SPAN CLASS="keyword">private</SPAN>:
     <SPAN CLASS="keyword">char</SPAN> comment_char_;
     <SPAN CLASS="keyword"><SPAN CLASS="keyword">bool</SPAN></SPAN> skip_;
@@ -183,10 +183,10 @@
     shell_comments_input_filter();
 
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Source&gt;
-    <SPAN CLASS="keyword">int</SPAN> get(Source& src);
+    <SPAN CLASS="keyword">int</SPAN> get(Source&amp; src);
 
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Source&gt;
-    <SPAN CLASS="keyword">void</SPAN> close(Source&) { skip_ = <SPAN CLASS="keyword">false</SPAN>; }
+    <SPAN CLASS="keyword">void</SPAN> close(Source&amp;) { skip_ = <SPAN CLASS="keyword">false</SPAN>; }
 <SPAN CLASS="keyword">private</SPAN>:
     <SPAN CLASS="keyword">bool</SPAN> skip_;
 };
@@ -215,7 +215,7 @@
     <SPAN CLASS='keyword'>typedef</SPAN> output_filter_tag  category;
 
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Sink&gt;
-    <SPAN CLASS='keyword'>bool</SPAN> put(Sink& dest, <SPAN CLASS='keyword'>int</SPAN> c)
+    <SPAN CLASS='keyword'>bool</SPAN> put(Sink&amp; dest, <SPAN CLASS='keyword'>int</SPAN> c)
     {
         <SPAN CLASS='comment'>// Attempt to consume the given character of unfiltered</SPAN>
         <SPAN CLASS='comment'>// data, writing filtered data to dest as appropriate. </SPAN>
@@ -236,7 +236,7 @@
 <SPAN CLASS='keyword'>class</SPAN> my_output_filter : <SPAN CLASS='keyword'>public</SPAN> output_filter {
 <SPAN CLASS='keyword'>public</SPAN>:
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Sink&gt;
-    <SPAN CLASS='keyword'>bool</SPAN> put(Sink& dest, <SPAN CLASS='keyword'>int</SPAN> c);
+    <SPAN CLASS='keyword'>bool</SPAN> put(Sink&amp; dest, <SPAN CLASS='keyword'>int</SPAN> c);
 
     <SPAN CLASS='comment'>/* Other members */</SPAN>
 };</PRE>
@@ -257,7 +257,7 @@
         { }
 
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Sink&gt;
-    <SPAN CLASS="keyword"><SPAN CLASS="keyword">bool</SPAN></SPAN> put(Sink& dest, <SPAN CLASS="keyword"><SPAN CLASS="keyword">int</SPAN></SPAN> c)
+    <SPAN CLASS="keyword"><SPAN CLASS="keyword">bool</SPAN></SPAN> put(Sink&amp; dest, <SPAN CLASS="keyword"><SPAN CLASS="keyword">int</SPAN></SPAN> c)
     {
         skip_ = c == comment_char_ ?
             <SPAN CLASS="keyword">true</SPAN> :
@@ -272,7 +272,7 @@
     }
 
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Source&gt;
-    <SPAN CLASS="keyword">void</SPAN> close(Source&) { skip_ = <SPAN CLASS="keyword">false</SPAN>; }
+    <SPAN CLASS="keyword">void</SPAN> close(Source&amp;) { skip_ = <SPAN CLASS="keyword">false</SPAN>; }
 <SPAN CLASS="keyword">private</SPAN>:
     <SPAN CLASS="keyword">char</SPAN> comment_char_;
     <SPAN CLASS="keyword"><SPAN CLASS="keyword">bool</SPAN></SPAN> skip_;

@@ -16,11 +16,18 @@
 #ifndef BOOST_MP_CPP_DEC_FLOAT_BACKEND_HPP
 #define BOOST_MP_CPP_DEC_FLOAT_BACKEND_HPP
 
+#include <boost/config.hpp>
 #include <boost/cstdint.hpp>
+#include <limits>
+#ifndef BOOST_NO_CXX11_HDR_ARRAY
+#include <array>
+#else
 #include <boost/array.hpp>
+#endif
+#include <boost/cstdint.hpp>
 #include <boost/multiprecision/number.hpp>
 #include <boost/multiprecision/detail/big_lanczos.hpp>
-#include <vector>
+#include <boost/multiprecision/detail/dynamic_array.hpp>
 
 //
 // Headers required for Boost.Math integration:
@@ -41,32 +48,6 @@ struct number_category<backends::cpp_dec_float<Digits10, ExponentType, Allocator
 
 namespace backends{
 
-namespace detail{
-
-template <class T, class Allocator>
-struct rebind
-{
-   typedef typename Allocator::template rebind<T>::other type;
-};
-
-template <class T, unsigned S, class Allocator>
-struct dynamic_array : public std::vector<T, typename rebind<T, Allocator>::type>
-{
-   dynamic_array()
-      : std::vector<T, typename rebind<T, Allocator>::type>(static_cast<typename std::vector<T, typename rebind<T, Allocator>::type>::size_type>(S), static_cast<T>(0)) {}
-
-   T* data()
-   {
-      return &*this->begin();
-   }
-   const T* data()const
-   {
-      return &*this->begin();
-   }
-};
-
-}
-
 template <unsigned Digits10, class ExponentType, class Allocator>
 class cpp_dec_float
 {
@@ -74,8 +55,8 @@ private:
    static const pdalboost::int32_t cpp_dec_float_digits10_setting = Digits10;
 
    // We need at least 16-bits in the exponent type to do anything sensible:
-   BOOST_STATIC_ASSERT_MSG(sizeof(ExponentType) > 1, "ExponentType is too small.");
    BOOST_STATIC_ASSERT_MSG(pdalboost::is_signed<ExponentType>::value, "ExponentType must be a signed built in integer type.");
+   BOOST_STATIC_ASSERT_MSG(sizeof(ExponentType) > 1, "ExponentType is too small.");
 
 public:
    typedef mpl::list<long long>           signed_types;
@@ -124,10 +105,17 @@ private:
    }
    fpclass_type;
 
+#ifndef BOOST_NO_CXX11_HDR_ARRAY
+   typedef typename mpl::if_<is_void<Allocator>,
+      std::array<pdalboost::uint32_t, cpp_dec_float_elem_number>,
+      detail::dynamic_array<pdalboost::uint32_t, cpp_dec_float_elem_number, Allocator>
+      >::type array_type;
+#else
    typedef typename mpl::if_<is_void<Allocator>,
       pdalboost::array<pdalboost::uint32_t, cpp_dec_float_elem_number>,
       detail::dynamic_array<pdalboost::uint32_t, cpp_dec_float_elem_number, Allocator>
       >::type array_type;
+#endif
 
    array_type      data;
    ExponentType    exp;
@@ -1709,12 +1697,9 @@ cpp_dec_float<Digits10, ExponentType, Allocator> cpp_dec_float<Digits10, Exponen
       // Thus the integer part is zero.
       return zero();
    }
-   else if(exp >= static_cast<ExponentType>(Digits10 - 1))
-   {
-      // The number is too large to resolve the integer part.
-      // Thus it is already a pure integer part.
-      return *this;
-   }
+
+   // Truncate the digits from the decimal part, including guard digits
+   // that do not belong to the integer part.
 
    // Make a local copy.
    cpp_dec_float<Digits10, ExponentType, Allocator> x = *this;
@@ -2206,7 +2191,7 @@ cpp_dec_float<Digits10, ExponentType, Allocator>::cpp_dec_float(const double man
 }
 
 template <unsigned Digits10, class ExponentType, class Allocator>
-cpp_dec_float<Digits10, ExponentType, Allocator>& cpp_dec_float<Digits10, ExponentType, Allocator>::operator = (long double a)  
+cpp_dec_float<Digits10, ExponentType, Allocator>& cpp_dec_float<Digits10, ExponentType, Allocator>::operator= (long double a)
 {
    // Christopher Kormanyos's original code used a cast to long long here, but that fails
    // when long double has more digits than a long long.
@@ -2613,26 +2598,23 @@ cpp_dec_float<Digits10, ExponentType, Allocator> cpp_dec_float<Digits10, Exponen
        cpp_dec_float("1.701411834604692317316873037158841057280000000000000000000000000000000000000000000000000000000000000e38")
    }};
 
-   if((p > static_cast<ExponentType>(-128)) && (p < static_cast<ExponentType>(+128)))
+   if((p > static_cast<long long>(-128)) && (p < static_cast<long long>(+128)))
    {
       return p2_data[static_cast<std::size_t>(p + ((p2_data.size() - 1u) / 2u))];
    }
-
-   // Compute and return 2^p.
-   if(p < static_cast<ExponentType>(0))
-   {
-      return pow2(static_cast<ExponentType>(-p)).calculate_inv();
-   }
-   else if(p < static_cast<ExponentType>(std::numeric_limits<pdalboost::uint64_t>::digits))
-   {
-      const pdalboost::uint64_t p2 = static_cast<pdalboost::uint64_t>(static_cast<pdalboost::uint64_t>(1uLL) << p);
-      return cpp_dec_float(p2);
-   }
    else
    {
-      cpp_dec_float<Digits10, ExponentType, Allocator> t;
-      default_ops::detail::pow_imp(t, two(), p, mpl::true_());
-      return t;
+      // Compute and return 2^p.
+      if(p < static_cast<long long>(0))
+      {
+         return pow2(static_cast<long long>(-p)).calculate_inv();
+      }
+      else
+      {
+         cpp_dec_float<Digits10, ExponentType, Allocator> t;
+         default_ops::detail::pow_imp(t, two(), p, mpl::true_());
+         return t;
+      }
    }
 }
 
@@ -2805,7 +2787,7 @@ inline void eval_trunc(cpp_dec_float<Digits10, ExponentType, Allocator>& result,
 {
    if(!x.isfinite()) 
    { 
-      result = pdalboost::math::policies::raise_rounding_error("pdalboost::multiprecision::trunc<%1%>(%1%)", 0, number<cpp_dec_float<Digits10, ExponentType, Allocator> >(x), 0, pdalboost::math::policies::policy<>()).backend();
+      result = pdalboost::math::policies::raise_rounding_error("pdalboost::multiprecision::trunc<%1%>(%1%)", 0, number<cpp_dec_float<Digits10, ExponentType, Allocator> >(x), number<cpp_dec_float<Digits10, ExponentType, Allocator> >(x), pdalboost::math::policies::policy<>()).backend();
       return;
    }
    else if(x.isint())
@@ -2819,10 +2801,19 @@ inline void eval_trunc(cpp_dec_float<Digits10, ExponentType, Allocator>& result,
 template <unsigned Digits10, class ExponentType, class Allocator, class ArgType>
 inline void eval_ldexp(cpp_dec_float<Digits10, ExponentType, Allocator>& result, const cpp_dec_float<Digits10, ExponentType, Allocator>& x, ArgType e)  
 {
-   if((static_cast<long long>(e) > (std::numeric_limits<ExponentType>::max)()) || (static_cast<long long>(e) < (std::numeric_limits<ExponentType>::min)()))
+   const long long the_exp = static_cast<long long>(e);
+
+   if((the_exp > (std::numeric_limits<ExponentType>::max)()) || (the_exp < (std::numeric_limits<ExponentType>::min)()))
       BOOST_THROW_EXCEPTION(std::runtime_error(std::string("Exponent value is out of range.")));
+
    result = x;
-   result *= cpp_dec_float<Digits10, ExponentType, Allocator>::pow2(e);
+
+   if     ((the_exp > static_cast<long long>(-std::numeric_limits<long long>::digits)) && (the_exp < static_cast<long long>(0)))
+      result.div_unsigned_long_long(1ULL << static_cast<long long>(-the_exp));
+   else if((the_exp < static_cast<long long>( std::numeric_limits<long long>::digits)) && (the_exp > static_cast<long long>(0)))
+      result.mul_unsigned_long_long(1ULL << the_exp);
+   else if(the_exp != static_cast<long long>(0))
+      result *= cpp_dec_float<Digits10, ExponentType, Allocator>::pow2(e);
 }
 
 template <unsigned Digits10, class ExponentType, class Allocator>

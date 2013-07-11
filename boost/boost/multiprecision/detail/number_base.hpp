@@ -283,13 +283,12 @@ struct arg_type<expression<Tag, Arg1, Arg2, Arg3, Arg4> >
    typedef expression<Tag, Arg1, Arg2, Arg3, Arg4> type;
 };
 
-template <class T>
 struct unmentionable
 {
-   static void proc(){}
+   unmentionable* proc(){ return 0; }
 };
 
-typedef void (*unmentionable_type)();
+typedef unmentionable* (unmentionable::*unmentionable_type)();
 
 template <class T>
 struct expression_storage
@@ -320,6 +319,7 @@ struct expression<tag, Arg1, void, void, void>
 {
    typedef mpl::int_<1> arity;
    typedef typename arg_type<Arg1>::type left_type;
+   typedef typename left_type::result_type left_result_type;
    typedef typename left_type::result_type result_type;
    typedef tag tag_type;
 
@@ -330,12 +330,19 @@ struct expression<tag, Arg1, void, void, void>
    const Arg1& left_ref()const BOOST_NOEXCEPT { return arg; }
 
    static const unsigned depth = left_type::depth + 1;
-
+#ifndef BOOST_NO_CXX11_EXPLICIT_CONVERSION_OPERATORS
+   explicit operator bool()const
+   {
+      result_type r(*this);
+      return static_cast<bool>(r);
+   }
+#else
    operator unmentionable_type()const
    {
       result_type r(*this);
-      return r ? &unmentionable<void>::proc : 0;
+      return r ? &unmentionable::proc : 0;
    }
+#endif
 
 private:
    typename expression_storage<Arg1>::type arg;
@@ -355,10 +362,17 @@ struct expression<terminal, Arg1, void, void, void>
 
    static const unsigned depth = 0;
 
+#ifndef BOOST_NO_CXX11_EXPLICIT_CONVERSION_OPERATORS
+   explicit operator bool()const
+   {
+      return static_cast<bool>(arg);
+   }
+#else
    operator unmentionable_type()const
    {
-      return arg ? &unmentionable<void>::proc : 0;
+      return arg ? &unmentionable::proc : 0;
    }
+#endif
 
 private:
    typename expression_storage<Arg1>::type arg;
@@ -383,12 +397,19 @@ struct expression<tag, Arg1, Arg2, void, void>
    const Arg1& left_ref()const BOOST_NOEXCEPT { return arg1; }
    const Arg2& right_ref()const BOOST_NOEXCEPT { return arg2; }
 
+#ifndef BOOST_NO_CXX11_EXPLICIT_CONVERSION_OPERATORS
+   explicit operator bool()const
+   {
+      result_type r(*this);
+      return static_cast<bool>(r);
+   }
+#else
    operator unmentionable_type()const
    {
       result_type r(*this);
-      return r ? &unmentionable<void>::proc : 0;
+      return r ? &unmentionable::proc : 0;
    }
-
+#endif
    static const unsigned left_depth = left_type::depth + 1;
    static const unsigned right_depth = right_type::depth + 1;
    static const unsigned depth = left_depth > right_depth ? left_depth : right_depth;
@@ -423,12 +444,19 @@ struct expression<tag, Arg1, Arg2, Arg3, void>
    const Arg2& middle_ref()const BOOST_NOEXCEPT { return arg2; }
    const Arg3& right_ref()const BOOST_NOEXCEPT { return arg3; }
 
+#ifndef BOOST_NO_CXX11_EXPLICIT_CONVERSION_OPERATORS
+   explicit operator bool()const
+   {
+      result_type r(*this);
+      return static_cast<bool>(r);
+   }
+#else
    operator unmentionable_type()const
    {
       result_type r(*this);
-      return r ? &unmentionable<void>::proc : 0;
+      return r ? &unmentionable::proc : 0;
    }
-
+#endif
    static const unsigned left_depth = left_type::depth + 1;
    static const unsigned middle_depth = middle_type::depth + 1;
    static const unsigned right_depth = right_type::depth + 1;
@@ -472,12 +500,19 @@ struct expression
    const Arg3& right_middle_ref()const BOOST_NOEXCEPT { return arg3; }
    const Arg4& right_ref()const BOOST_NOEXCEPT { return arg4; }
 
+#ifndef BOOST_NO_CXX11_EXPLICIT_CONVERSION_OPERATORS
+   explicit operator bool()const
+   {
+      result_type r(*this);
+      return static_cast<bool>(r);
+   }
+#else
    operator unmentionable_type()const
    {
       result_type r(*this);
-      return r ? &unmentionable<void>::proc : 0;
+      return r ? &unmentionable::proc : 0;
    }
-
+#endif
    static const unsigned left_depth = left_type::depth + 1;
    static const unsigned left_middle_depth = left_middle_type::depth + 1;
    static const unsigned right_middle_depth = right_middle_type::depth + 1;
@@ -701,6 +736,10 @@ template <class Backend, expression_template_option ExpressionTemplates>
 struct is_unsigned_number<number<Backend, ExpressionTemplates> > : public is_unsigned_number<Backend> {};
 template <class T>
 struct is_signed_number : public mpl::bool_<!is_unsigned_number<T>::value> {};
+template <class T>
+struct is_interval_number : public mpl::false_ {};
+template <class Backend, expression_template_option ExpressionTemplates>
+struct is_interval_number<number<Backend, ExpressionTemplates> > : public is_interval_number<Backend>{};
 
 }} // namespaces
 

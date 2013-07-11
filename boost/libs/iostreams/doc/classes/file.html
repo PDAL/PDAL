@@ -67,7 +67,7 @@
 <SPAN CLASS="keyword">public</SPAN>:
     <SPAN CLASS="keyword">typedef</SPAN> Ch                      char_type;
     <SPAN CLASS="keyword">typedef</SPAN> <SPAN CLASS="omitted">implementation-defined</SPAN>  category;
-    <A CLASS="documented" HREF="#basic_file_source_constructor">basic_file_source</A>( <SPAN CLASS="keyword">const</SPAN> std::string& path,
+    <A CLASS="documented" HREF="#basic_file_source_constructor">basic_file_source</A>( <SPAN CLASS="keyword">const</SPAN> std::string&amp; path,
                        std::ios_base::openmode mode =
                            std::ios_base::in );
     <SPAN CLASS="keyword">bool</SPAN> <A CLASS="documented" HREF="#basic_file_source_is_open">is_open</A>() <SPAN CLASS="keyword">const</SPAN>;
@@ -92,13 +92,13 @@
 <A NAME="basic_file_source_constructor"></A>
 <H4><CODE>basic_file_source::basic_file_source</CODE></H4>
 
-<PRE CLASS="broken_ie">    basic_file_source( <SPAN CLASS="keyword">const</SPAN> std::string& path,
+<PRE CLASS="broken_ie">    basic_file_source( <SPAN CLASS="keyword">const</SPAN> std::string&amp; path,
                        std::ios_base::openmode mode );</PRE>
     
 <P>
     Constructs a <CODE>basic_file_source</CODE> which wraps a <CODE>std::basic_filebuf</CODE> <CODE>buf</CODE> opened as follows:
     <PRE CLASS="broken_ie">    mode |= std::ios_base::in;
-    mode &= ~std::ios_base::out;
+    mode &amp;= ~std::ios_base::out;
     buf.open(path.c_str(), mode);</PRE>
 </P>
 
@@ -128,7 +128,7 @@
 <SPAN CLASS="keyword">public</SPAN>:
     <SPAN CLASS="keyword">typedef</SPAN> Ch                      char_type;
     <SPAN CLASS="keyword">typedef</SPAN> <SPAN CLASS="omitted">implementation-defined</SPAN>  category;
-    <A CLASS="documented" HREF="#basic_file_sink_constructor">basic_file_sink</A>( <SPAN CLASS="keyword">const</SPAN> std::string& path,
+    <A CLASS="documented" HREF="#basic_file_sink_constructor">basic_file_sink</A>( <SPAN CLASS="keyword">const</SPAN> std::string&amp; path,
                      std::ios_base::openmode mode =
                          std::ios_base::out );
     <SPAN CLASS="keyword">bool</SPAN> <A CLASS="documented" HREF="#basic_file_sink_is_open">is_open</A>() <SPAN CLASS="keyword">const</SPAN>;
@@ -153,13 +153,13 @@
 <A NAME="basic_file_sink_constructor"></A>
 <H4><CODE>basic_file_sink::basic_file_sink</CODE></H4>
 
-<PRE CLASS="broken_ie">    basic_file_sink( <SPAN CLASS="keyword">const</SPAN> std::string& path,
+<PRE CLASS="broken_ie">    basic_file_sink( <SPAN CLASS="keyword">const</SPAN> std::string&amp; path,
                      std::ios_base::openmode mode );</PRE>
     
 <P>
     Constructs a <CODE>basic_file_sink</CODE> which wraps a <CODE>std::basic_filebuf</CODE> <CODE>buf</CODE> opened as follows:
     <PRE CLASS="broken_ie">    mode |= std::ios_base::out;
-    mode &= ~std::ios_base::in;
+    mode &amp;= ~std::ios_base::in;
     buf.open(path.c_str(), mode);</PRE>
 </P>
 
@@ -187,7 +187,7 @@
 <SPAN CLASS="keyword">public</SPAN>:
     <SPAN CLASS="keyword">typedef</SPAN> Ch                      char_type;
     <SPAN CLASS="keyword">typedef</SPAN> <SPAN CLASS="omitted">implementation-defined</SPAN>  category;
-    <A CLASS="documented" HREF="#basic_file_constructor">basic_file</A>( <SPAN CLASS="keyword">const</SPAN> std::string& path,
+    <A CLASS="documented" HREF="#basic_file_constructor">basic_file</A>( <SPAN CLASS="keyword">const</SPAN> std::string&amp; path,
                 std::ios_base::openmode mode =
                     std::ios_base::in | std::ios_base::out );
     <SPAN CLASS="keyword">bool</SPAN> <A CLASS="documented" HREF="#basic_file_is_open">is_open</A>() <SPAN CLASS="keyword">const</SPAN>;
@@ -212,7 +212,7 @@
 <A NAME="basic_file_constructor"></A>
 <H4><CODE>basic_file_::basic_file</CODE></H4>
 
-<PRE CLASS="broken_ie">    basic_file( <SPAN CLASS="keyword">const</SPAN> std::string& path,
+<PRE CLASS="broken_ie">    basic_file( <SPAN CLASS="keyword">const</SPAN> std::string&amp; path,
                 std::ios_base::openmode mode );</PRE>
     
 <P>

@@ -1038,7 +1038,8 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
       bool first_iteration = true;
       //we want to return from inside the loop when we hit end or new x
 #ifdef BOOST_POLYGON_MSVC
-#pragma warning( disable: 4127 )
+#pragma warning (push)
+#pragma warning (disable: 4127)
 #endif
       while(true) {
         if(begin == end || (!first_iteration && ((*begin).first.first.get(VERTICAL) != y ||
@@ -1146,7 +1147,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
         }
       }
 #ifdef BOOST_POLYGON_MSVC
-#pragma warning( default: 4127 )
+#pragma warning (pop)
 #endif
 
     }
@@ -2292,11 +2293,12 @@ pts.push_back(Point(12344171, 6695983 )); pts.push_back(Point(12287208, 6672388 
             stdcout << polys[j] << "\n";
             stdcout << polys90[j] << "\n";
 #ifdef BOOST_POLYGON_ICC
+#pragma warning (push)
 #pragma warning (disable:1572)
 #endif
             if(area(polys[j]) != area(polys90[j])) {
 #ifdef BOOST_POLYGON_ICC
-#pragma warning (default:1572)
+#pragma warning (pop)
 #endif
               stdcout << "merge failed with area mismatch\n";
               failed = true;
@@ -2539,6 +2541,7 @@ pts.push_back(Point(12344171, 6695983 )); pts.push_back(Point(12287208, 6672388 
         if(edge.second < edge.first) elem.second *= -1;
         if(scanline_base<Unit>::is_vertical(edge)) elem.second *= -1;
 #ifdef BOOST_POLYGON_MSVC
+#pragma warning (push)
 #pragma warning (disable: 4127)
 #endif
         if(op_type == 0) { //OR
@@ -2569,7 +2572,7 @@ pts.push_back(Point(12344171, 6695983 )); pts.push_back(Point(12287208, 6672388 
             }
           }
 #ifdef BOOST_POLYGON_MSVC
-#pragma warning (default: 4127)
+#pragma warning (pop)
 #endif
           if(right.size() == 1) {
             if((*(right.begin())) == 0) {

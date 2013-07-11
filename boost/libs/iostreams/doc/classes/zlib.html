@@ -251,7 +251,7 @@ Model of <A HREF="../concepts/dual_use_filter.html">DualUseFilter</A> which perf
     <SPAN CLASS="keyword">typedef</SPAN> <SPAN CLASS="keyword">char</SPAN>                    char_type;
     <SPAN CLASS="keyword">typedef</SPAN> <SPAN CLASS="omitted">implementation-defined</SPAN>  category;
 
-    <A CLASS="documented" HREF="#basic_zlib_compressor_constructors">basic_zlib_compressor</A>( <SPAN CLASS="keyword">const</SPAN> <A CLASS="documented" HREF="#zlib_params">zlib_params</A>& = <SPAN CLASS="omitted">zlib::default_compression</SPAN>, 
+    <A CLASS="documented" HREF="#basic_zlib_compressor_constructors">basic_zlib_compressor</A>( <SPAN CLASS="keyword">const</SPAN> <A CLASS="documented" HREF="#zlib_params">zlib_params</A>&amp; = <SPAN CLASS="omitted">zlib::default_compression</SPAN>,
                            std::streamsize buffer_size = <SPAN CLASS="omitted">default value</SPAN> );
 
     <SPAN CLASS="comment">// DualUseFilter members.</SPAN>
@@ -273,7 +273,7 @@ Model of <A HREF="../concepts/dual_use_filter.html">DualUseFilter</A> which perf
 <A NAME="basic_zlib_compressor_constructors"></A>
 <H4><CODE>basic_zlib_compressor::basic_zlib_compressor</CODE></H4>
 
-<PRE CLASS="broken_ie">    basic_zlib_compressor( <SPAN CLASS="keyword">const</SPAN> <A CLASS="documented" HREF="#zlib_params">zlib_params</A>& = <SPAN CLASS="omitted">zlib::default_compression</SPAN>, 
+<PRE CLASS="broken_ie">    basic_zlib_compressor( <SPAN CLASS="keyword">const</SPAN> <A CLASS="documented" HREF="#zlib_params">zlib_params</A>&amp; = <SPAN CLASS="omitted">zlib::default_compression</SPAN>,
                            std::streamsize buffer_size = <SPAN CLASS="omitted">default value</SPAN> );</PRE>
 
 <P>Constructs an instance of <CODE>basic_zlib_compressor</CODE> with the given parameters and buffer size. Since a <A CLASS="documented" HREF="#zlib_params"><CODE>zlib_params</CODE></A> object is implicitly constructible from an <CODE>int</CODE> representing a compression level, an <CODE>int</CODE> may be passed as the first constructor argument.</P>
@@ -295,7 +295,7 @@ Model of <A HREF="../concepts/dual_use_filter.html">DualUseFilter</A> which perf
     <A CLASS="documented" HREF="#basic_zlib_decompressor_constructors">basic_zlib_decompressor</A>( <SPAN CLASS="keyword">int</SPAN> window_bits = <SPAN CLASS="omitted">default value</SPAN>, 
                              std::streamsize buffer_size = 
                                  <SPAN CLASS="omitted">default value</SPAN> );
-    <A CLASS="documented" HREF="#basic_zlib_decompressor_constructors">basic_zlib_decompressor</A>( <SPAN CLASS="keyword">const</SPAN> <A CLASS="documented" HREF="#zlib_params">zlib_params</A>&, 
+    <A CLASS="documented" HREF="#basic_zlib_decompressor_constructors">basic_zlib_decompressor</A>( <SPAN CLASS="keyword">const</SPAN> <A CLASS="documented" HREF="#zlib_params">zlib_params</A>&amp;,
                              std::streamsize buffer_size = 
                                  <SPAN CLASS="omitted">default value</SPAN> );
 
@@ -321,7 +321,7 @@ Model of <A HREF="../concepts/dual_use_filter.html">DualUseFilter</A> which perf
 <PRE CLASS="broken_ie">    basic_zlib_decompressor( <SPAN CLASS="keyword">int</SPAN> window_bits = <SPAN CLASS="omitted">default value</SPAN>, 
                              std::streamsize buffer_size = 
                                  <SPAN CLASS="omitted">default value</SPAN> );
-    basic_zlib_decompressor( <SPAN CLASS="keyword">const</SPAN> <A CLASS="documented" HREF="#zlib_params">zlib_params</A>&, 
+    basic_zlib_decompressor( <SPAN CLASS="keyword">const</SPAN> <A CLASS="documented" HREF="#zlib_params">zlib_params</A>&amp;,
                              std::streamsize buffer_size = 
                                  <SPAN CLASS="omitted">default value</SPAN> );</PRE>
 

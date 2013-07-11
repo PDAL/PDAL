@@ -52,7 +52,7 @@
 <SPAN CLASS='keyword'>int</SPAN> main()
 {
     io::stream_buffer&lt;io::file_sink&gt; buf(<SPAN CLASS='literal'>"log.txt"</SPAN>);
-    std::ostream                     out(&buf);
+    std::ostream                     out(&amp;buf);
     <SPAN CLASS='comment'>// out writes to log.txt</SPAN>
 }</PRE>
 

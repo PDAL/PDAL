@@ -215,7 +215,7 @@ struct relate_cartesian_segments
                     return Policy::disjoint();
                 }
 
-                robustness_handle_meeting(a, b, sides, dx_a, dy_a, wx, wy, d, r);
+                //robustness_handle_meeting(a, b, sides, dx_a, dy_a, wx, wy, d, r);
 
                 if (robustness_verify_disjoint_at_one_collinear(a, b, sides))
                 {
@@ -295,7 +295,7 @@ private :
     }
 
     static inline void robustness_verify_collinear(
-                segment_type1 const& a, segment_type2 const& b,
+                segment_type1 const& , segment_type2 const& ,
                 bool a_is_point, bool b_is_point, 
                 side_info& sides,
                 bool& collinear)
@@ -413,7 +413,7 @@ private :
         return false;
     }
 
-
+/*
     // If r is one, or zero, segments should meet and their endpoints.
     // Robustness issue: check if this is really the case.
     // It turns out to be no problem, see buffer test #rt_s1 (and there are many cases generated)
@@ -447,7 +447,7 @@ private :
             }
         }
     }
-
+*/
     template <std::size_t Dimension>
     static inline bool verify_disjoint(segment_type1 const& a,
                     segment_type2 const& b)

@@ -48,7 +48,7 @@
 
     <SPAN CLASS="keyword">struct</SPAN> tolower_filter : <SPAN CLASS="keyword">public</SPAN> io::multichar_input_filter {
         <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Source&gt;
-        streamsize read(Source& src, <SPAN CLASS="keyword">char</SPAN>* s, streamsize n)
+        streamsize read(Source&amp; src, <SPAN CLASS="keyword">char</SPAN>* s, streamsize n)
         {
             streamsize result;
             <SPAN CLASS="keyword">if</SPAN> ((result = io::read(src, s, n)) == <SPAN CLASS='numeric_literal'>-1</SPAN>)
@@ -83,13 +83,13 @@
 <PRE CLASS="broken_ie"><SPAN CLASS="keyword">namespace</SPAN> boost { <SPAN CLASS="keyword">namespace</SPAN> iostreams {
               
 <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> <A CLASS="documented" HREF="#template_params">T</A>&gt;     
-std::streamsize <A CLASS="documented" HREF="#read_device">read</A>( T& <A CLASS="documented" HREF="#function_params">t</A>, 
+std::streamsize <A CLASS="documented" HREF="#read_device">read</A>( T&amp; <A CLASS="documented" HREF="#function_params">t</A>,
                       <SPAN CLASS="keyword">typename</SPAN> <A CLASS="documented" HREF="../guide/traits.html#char_type_of_ref">char_type_of</A>&lt;T&gt;::type* <A CLASS="documented" HREF="#function_params">s</A>, 
                       std::streamsize <A CLASS="documented" HREF="#function_params">n</A> );
 
 <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> <A CLASS="documented" HREF="#template_params">T</A>, <SPAN CLASS="keyword">typename</SPAN> <A CLASS="documented" HREF="#template_params">Source</A>&gt;
-std::streamsize <A CLASS="documented" HREF="#read_filter">read</A>( T& <A CLASS="documented" HREF="#function_params">t</A>, 
-                      Source& <A CLASS="documented" HREF="#function_params">src</A>, 
+std::streamsize <A CLASS="documented" HREF="#read_filter">read</A>( T&amp; <A CLASS="documented" HREF="#function_params">t</A>,
+                      Source&amp; <A CLASS="documented" HREF="#function_params">src</A>,
                       <SPAN CLASS="keyword">typename</SPAN> <A CLASS="documented" HREF="../guide/traits.html#char_type_of_ref">char_type_of</A>&lt;T&gt;::type* <A CLASS="documented" HREF="#function_params">s</A>, 
                       std::streamsize <A CLASS="documented" HREF="#function_params">n</A> );
 
@@ -137,7 +137,7 @@ std::streamsize <A CLASS="documented" HREF="#read_filter">read</A>( T& <A CLASS=
 <H4>Semantics &#8212; Device Types</H4>
 
 <PRE CLASS="broken_ie"><SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> T&gt;     
-std::streamsize read( T& t, 
+std::streamsize read( T&amp; t,
                       <SPAN CLASS="keyword">typename</SPAN> char_type_of&lt;T&gt;::type* s, 
                       std::streamsize n );</PRE>
 
@@ -167,8 +167,8 @@ std::streamsize read( T& t,
 <H4>Semantics &#8212; Filter Types</H4>
 
 <PRE CLASS="broken_ie"><SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> T&gt;
-std::streamsize read( T& t, 
-                      Source& src, 
+std::streamsize read( T&amp; t,
+                      Source&amp; src,
                       <SPAN CLASS="keyword">typename</SPAN> char_type_of&lt;T&gt;::type* s,
                       std::streamsize n );</PRE>
 

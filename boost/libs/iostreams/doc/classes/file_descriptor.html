@@ -109,7 +109,7 @@
     <SPAN CLASS='keyword'>typedef</SPAN> <SPAN CLASS='omitted'>[implementation-defined]</SPAN>  category;
     <A CLASS="documented" HREF="#file_descriptor_source_ctor">file_descriptor_source</A>();
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Path&gt;
-    <A CLASS="documented" HREF="#file_descriptor_source_ctor">file_descriptor_source</A>( <SPAN CLASS="keyword">const</SPAN> Path& pathname, 
+    <A CLASS="documented" HREF="#file_descriptor_source_ctor">file_descriptor_source</A>( <SPAN CLASS="keyword">const</SPAN> Path&amp; pathname,
                             std::ios_base::open_mode mode = 
                                 std::ios_base::in );
     <A CLASS="documented" HREF="#file_descriptor_source_ctor">file_descriptor_source</A>( <SPAN CLASS="keyword">int</SPAN> fd, <SPAN CLASS="keyword">file_descriptor_flags</SPAN> );
@@ -124,7 +124,7 @@
     <A CLASS="documented" HREF="#file_descriptor_source_ctor">file_descriptor_source</A>( HANDLE hFile, <SPAN CLASS="keyword">bool</SPAN> close_on_exit = <SPAN CLASS="keyword">false</SPAN> );
 
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Path&gt;
-    <SPAN CLASS="keyword">void</SPAN> <A CLASS="documented" HREF="#file_descriptor_source_open">open</A>( <SPAN CLASS="keyword">const</SPAN> Path& pathname, 
+    <SPAN CLASS="keyword">void</SPAN> <A CLASS="documented" HREF="#file_descriptor_source_open">open</A>( <SPAN CLASS="keyword">const</SPAN> Path&amp; pathname,
                      std::ios_base::open_mode mode = 
                          std::ios_base::in );
     <SPAN CLASS="keyword">void</SPAN> <A CLASS="documented" HREF="#file_descriptor_source_open">open</A>( <SPAN CLASS="keyword">int</SPAN> fd, <SPAN CLASS="keyword">file_descriptor_flags</SPAN> );   
@@ -150,7 +150,7 @@
 
 <PRE CLASS="broken_ie">    file_descriptor_source();
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Path&gt;
-    file_descriptor_source( <SPAN CLASS="keyword">const</SPAN> Path& pathname, 
+    file_descriptor_source( <SPAN CLASS="keyword">const</SPAN> Path&amp; pathname,
                             std::ios_base::open_mode mode = 
                                 std::ios_base::in );
     file_descriptor_source( <SPAN CLASS="keyword">int </SPAN>fd, <SPAN CLASS="keyword">file_descriptor_flags</SPAN> );
@@ -191,7 +191,7 @@
 <H4><CODE>file_descriptor_source::open</CODE></H4>
 
 <PRE CLASS="broken_ie">    <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Path&gt;
-    <SPAN CLASS="keyword">void</SPAN> open( <SPAN CLASS="keyword">const</SPAN> Path& pathname, 
+    <SPAN CLASS="keyword">void</SPAN> open( <SPAN CLASS="keyword">const</SPAN> Path&amp; pathname,
                      std::ios_base::open_mode mode = 
                          std::ios_base::in );
     <SPAN CLASS="keyword">void</SPAN> open( <SPAN CLASS="keyword">int</SPAN> fd, <SPAN CLASS="keyword">file_descriptor_flags</SPAN> );
@@ -248,7 +248,7 @@
     <SPAN CLASS='keyword'>typedef</SPAN> <SPAN CLASS='omitted'>[implementation-defined]</SPAN>  category;
     <A CLASS="documented" HREF="#file_descriptor_sink_ctor">file_descriptor_sink</A>();
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Path&gt;
-    <A CLASS="documented" HREF="#file_descriptor_sink_ctor">file_descriptor_sink</A>( <SPAN CLASS="keyword">const</SPAN> Path& pathname, 
+    <A CLASS="documented" HREF="#file_descriptor_sink_ctor">file_descriptor_sink</A>( <SPAN CLASS="keyword">const</SPAN> Path&amp; pathname,
                           std::ios_base::open_mode mode = 
                               std::ios_base::out );
     <A CLASS="documented" HREF="#file_descriptor_sink_ctor">file_descriptor_sink</A>( <SPAN CLASS="keyword">int</SPAN> fd, <SPAN CLASS="keyword">file_descriptor_flags</SPAN> );
@@ -263,7 +263,7 @@
     <A CLASS="documented" HREF="#file_descriptor_sink_ctor">file_descriptor_sink</A>( HANDLE hFile, <SPAN CLASS="keyword">bool</SPAN> close_on_exit = <SPAN CLASS="keyword">false</SPAN> );
 
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Path&gt;
-    <SPAN CLASS="keyword">void</SPAN> <A CLASS="documented" HREF="#file_descriptor_sink_open">open</A>( <SPAN CLASS="keyword">const</SPAN> Path& pathname, 
+    <SPAN CLASS="keyword">void</SPAN> <A CLASS="documented" HREF="#file_descriptor_sink_open">open</A>( <SPAN CLASS="keyword">const</SPAN> Path&amp; pathname,
                      std::ios_base::open_mode mode = 
                          std::ios_base::out );
     <SPAN CLASS="keyword">void</SPAN> <A CLASS="documented" HREF="#file_descriptor_sink_open">open</A>( <SPAN CLASS="keyword">int</SPAN> fd, <SPAN CLASS="keyword">file_descriptor_flags</SPAN> );   
@@ -289,7 +289,7 @@
 
 <PRE CLASS="broken_ie">    file_descriptor_sink();
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Path&gt;
-    file_descriptor_sink( <SPAN CLASS="keyword">const</SPAN> Path& pathname, 
+    file_descriptor_sink( <SPAN CLASS="keyword">const</SPAN> Path&amp; pathname,
                           std::ios_base::open_mode mode = 
                               std::ios_base::out );
     file_descriptor_sink( <SPAN CLASS="keyword">int</SPAN> fd, <SPAN CLASS="keyword">file_descriptor_flags</SPAN> );
@@ -331,7 +331,7 @@
 <H4><CODE>file_descriptor_sink::open</CODE></H4>
 
 <PRE CLASS="broken_ie">    <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Path&gt;
-    <SPAN CLASS="keyword">void</SPAN> open( <SPAN CLASS="keyword">const</SPAN> Path& pathname, 
+    <SPAN CLASS="keyword">void</SPAN> open( <SPAN CLASS="keyword">const</SPAN> Path&amp; pathname,
                      std::ios_base::open_mode mode = 
                          std::ios_base::out );
     <SPAN CLASS="keyword">void</SPAN> open( <SPAN CLASS="keyword">int</SPAN> fd, <SPAN CLASS="keyword">file_descriptor_flags</SPAN> );
@@ -388,7 +388,7 @@
     <SPAN CLASS='keyword'>typedef</SPAN> <SPAN CLASS='omitted'>[implementation-defined]</SPAN>  category;
     <A CLASS="documented" HREF="#file_descriptor_constructor">file_descriptor</A>();
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Path&gt;
-    <A CLASS="documented" HREF="#file_descriptor_constructor">file_descriptor</A>( <SPAN CLASS="keyword">const</SPAN> Path& pathname, 
+    <A CLASS="documented" HREF="#file_descriptor_constructor">file_descriptor</A>( <SPAN CLASS="keyword">const</SPAN> Path&amp; pathname,
                      std::ios_base::open_mode mode = 
                          std::ios_base::in | std::ios_base::out );
     <A CLASS="documented" HREF="#file_descriptor_constructor">file_descriptor</A>( <SPAN CLASS="keyword">int</SPAN> fd, <SPAN CLASS="keyword">file_descriptor_flags</SPAN> );
@@ -403,7 +403,7 @@
     <A CLASS="documented" HREF="#file_descriptor_constructor">file_descriptor</A>( HANDLE hFile, <SPAN CLASS="keyword">bool</SPAN> close_on_exit = <SPAN CLASS="keyword">false</SPAN> );
 
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Path&gt;
-    <SPAN CLASS="keyword">void</SPAN> <A CLASS="documented" HREF="#file_descriptor_open">open</A>( <SPAN CLASS="keyword">const</SPAN> Path& pathname, 
+    <SPAN CLASS="keyword">void</SPAN> <A CLASS="documented" HREF="#file_descriptor_open">open</A>( <SPAN CLASS="keyword">const</SPAN> Path&amp; pathname,
                      std::ios_base::open_mode mode = 
                          std::ios_base::in | std::ios_base::out );
     <SPAN CLASS="keyword">void</SPAN> <A CLASS="documented" HREF="#file_descriptor_open">open</A>( <SPAN CLASS="keyword">int</SPAN> fd, <SPAN CLASS="keyword">file_descriptor_flags</SPAN> );   
@@ -429,7 +429,7 @@
 
 <PRE CLASS="broken_ie">    file_descriptor();
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Path&gt;
-    file_descriptor( <SPAN CLASS="keyword">const</SPAN> Path& pathname, 
+    file_descriptor( <SPAN CLASS="keyword">const</SPAN> Path&amp; pathname,
                      std::ios_base::open_mode mode = 
                          std::ios_base::in | std::ios_base::out );
     file_descriptor( <SPAN CLASS="keyword">int</SPAN> fd, <SPAN CLASS="keyword">file_descriptor_flags</SPAN> );
@@ -471,7 +471,7 @@
 <H4><CODE>file_descriptor::open</CODE></H4>
 
 <PRE CLASS="broken_ie">    <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Path&gt;
-    <SPAN CLASS="keyword">void</SPAN> open( <SPAN CLASS="keyword">const</SPAN> Path& pathname, 
+    <SPAN CLASS="keyword">void</SPAN> open( <SPAN CLASS="keyword">const</SPAN> Path&amp; pathname,
                      std::ios_base::open_mode mode = 
                          std::ios_base::in | std::ios_base::out );
     <SPAN CLASS="keyword">void</SPAN> open( <SPAN CLASS="keyword">int</SPAN> fd, <SPAN CLASS="keyword">file_descriptor_flags</SPAN> );

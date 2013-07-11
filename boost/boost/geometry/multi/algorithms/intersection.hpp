@@ -14,6 +14,9 @@
 #include <boost/geometry/multi/core/geometry_id.hpp>
 #include <boost/geometry/multi/core/is_areal.hpp>
 #include <boost/geometry/multi/core/point_order.hpp>
+#include <boost/geometry/multi/core/tags.hpp>
+#include <boost/geometry/multi/geometries/concepts/check.hpp>
+
 #include <boost/geometry/multi/algorithms/covered_by.hpp>
 #include <boost/geometry/multi/algorithms/envelope.hpp>
 #include <boost/geometry/multi/algorithms/num_points.hpp>
