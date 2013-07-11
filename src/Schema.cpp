@@ -51,6 +51,7 @@
 #include <boost/concept_check.hpp> // ignore_unused_variable_warning
 #include <boost/algorithm/string.hpp>
 
+#include <string.h>
 
 #ifdef PDAL_HAVE_LIBXML2
 #include <pdal/XMLSchema.hpp>
@@ -200,58 +201,102 @@ boost::optional<Dimension const&> Schema::getDimensionOptional(schema::size_type
     }
 }
 
-const Dimension& Schema::getDimension(std::string const& name, std::string const& namespc) const
-{
-    
-    std::size_t dot_position = name.find_last_of(".");
 
-    std::string ns(namespc);
-    std::string t(name);
-    if (dot_position != std::string::npos && namespc.empty())
+const Dimension& Schema::getDimension(const char* name, const char* namespc) const
+{
+    std::string errorMsg;
+    const Dimension* dim = getDimensionPtr(name, namespc, &errorMsg);
+    if (!dim)
     {
-        // We were given a dotted name instead of a name + ns.  Let's split them up.
-        ns = name.substr(0,dot_position);
-        t = name.substr(dot_position+1 /*skip the '.'*/, name.size());
-    } 
+        throw dimension_not_found(errorMsg);
+    }
+    return *dim;
+}
+
+
+namespace {
+// Helpers for searching the dimension index using C strings
+
+// Hash for C strings, compatible with boost::hash<std::string>
+struct CStrHash
+{
+    std::size_t operator()(const char* str) const
+    {
+        return boost::hash_range(str, str + strlen(str));
+    }
+};
+
+// Compare std::string and C strings for equality
+struct StrCStrEqual
+{
+    bool operator()(const std::string& s1, const char* s2) const { return s1 == s2; }
+    bool operator()(const char* s1, const std::string& s2) const { return s1 == s2; }
+};
+
+} // namespace
+
+
+const Dimension* Schema::getDimensionPtr(const char* name, const char* namespc,
+                                          std::string* errorMsg) const
+{
+    // getDimensionPtr is implemented in terms of C strings so that we can
+    // guarentee not to allocate memory unless we really need to.  That makes
+    // the following code ugly but significantly faster when performing a lot
+    // of dimension lookup.  The various overloads could be removed if we had a
+    // recent boost with boost::string_ref 
+    const char* t = name;
+    const char* ns = namespc;
+    size_t nsLength = strlen(namespc);
+    if (nsLength == 0)
+    {
+        const char* dotPos = strrchr(name, '.');
+        if (dotPos)
+        {
+            // dimension is named as namespace.name (eg, drivers.las.reader.X)
+            // - split into name and namespace without allocating.
+            t = dotPos + 1;
+            nsLength = dotPos - name;
+            ns = name;
+        }
+    }
 
     schema::index_by_name const& name_index = m_index.get<schema::name>();
-    schema::index_by_name::const_iterator it = name_index.find(t);
+    std::pair<schema::index_by_name::const_iterator,
+              schema::index_by_name::const_iterator> nameRange =
+        name_index.equal_range(t, CStrHash(), StrCStrEqual());
 
-    schema::index_by_name::size_type count = name_index.count(t);
-
-    if (it != name_index.end())
+    if (nameRange.first != name_index.end())
     {
-
-        if (ns.size())
+        if (nsLength != 0)
         {
-            while (it != name_index.end())
+            for (schema::index_by_name::const_iterator it = nameRange.first;
+                 it != nameRange.second; ++it)
             {
-                if (boost::equals(ns, it->getNamespace()))
+                if (strncmp(ns, it->getNamespace().c_str(), nsLength) == 0)
                 {
-                    return *it;
+                    return &*it;
                 }
-                
-                ++it;
             }
-            std::ostringstream errmsg;
-            errmsg << "Unable to find dimension with name '" << t << "' and namespace  '" << ns << "' in schema";
-            throw dimension_not_found(errmsg.str());
-
+            // Name found, but requested namespace not found
+            if (errorMsg)
+            {
+                std::ostringstream oss;
+                oss << "Unable to find dimension with name '" << t
+                    << "' and namespace  '" << ns << "' in schema";
+                *errorMsg = oss.str();
+            }
+            return 0;
         }
 
-        if (count > 1)
+        // Determine whether we have more than one dimension of the same name
+        schema::index_by_name::const_iterator it = nameRange.first;
+        ++it;
+        if (it != nameRange.second)
         {
-
-            std::pair<schema::index_by_name::const_iterator, schema::index_by_name::const_iterator> ret = name_index.equal_range(t);
             boost::uint32_t num_parents(0);
-            boost::uint32_t num_children(0);
             std::map<dimension::id, dimension::id> relationships;
 
-            // Test to make sure that the number of parent dimensions all with
-            // the same name is equal to only 1. If there are multiple
-            // dimensions with the same name, but no relationships defined,
-            // we are in an error condition
-            for (schema::index_by_name::const_iterator  o = ret.first; o != ret.second; ++o)
+            for (schema::index_by_name::const_iterator  o = nameRange.first; o != nameRange.second; ++o)
             {
                 // Put a map together that maps parents to children that
                 // we are going to walk to find the very last child in the
@@ -266,22 +311,23 @@ const Dimension& Schema::getDimension(std::string const& name, std::string const
                 {
                     num_parents++;
                 }
-                else
-                {
-                    num_children++;
-                }
-
             }
 
+            // Test to make sure that the number of parent dimensions all with
+            // the same name is equal to only 1. If there are multiple
+            // dimensions with the same name, but no relationships defined,
+            // we are in an error condition
             if (num_parents != 1)
             {
-                std::ostringstream oss;
-
-                oss << "Schema has multiple dimensions with name '" << t << "', but "
-                    "their parent/child relationships are not coherent. Multiple "
-                    "parents are present.";
-
-                throw multiple_parent_dimensions(oss.str());
+                if (errorMsg)
+                {
+                    std::ostringstream oss;
+                    oss << "Schema has multiple dimensions with name '" << t << "', but "
+                        "their parent/child relationships are not coherent. Multiple "
+                        "parents are present.";
+                    *errorMsg = oss.str();
+                }
+                return 0;
             }
 
             dimension::id parent = boost::uuids::nil_uuid();
@@ -299,20 +345,26 @@ const Dimension& Schema::getDimension(std::string const& name, std::string const
             schema::index_by_uid::const_iterator pi = m_index.get<schema::uid>().find(child);
             if (pi != m_index.get<schema::uid>().end())
             {
-                return *pi;
+                return &*pi;
             }
             else
             {
-                std::ostringstream errmsg;
-                errmsg << "Unable to fetch subjugate dimension with id '" << child << "' in schema";
-                throw dimension_not_found(errmsg.str());
+                if (errorMsg)
+                {
+                    std::ostringstream oss;
+                    oss << "Unable to fetch subjugate dimension with id '" << child << "' in schema";
+                    *errorMsg = oss.str();
+                }
+                return 0;
             }
         }
         // we don't have a ns or we don't have multiples, return what we found
-        return *it;
+        return &*nameRange.first;
     }
     else
     {
+        // FIXME!!!  uuids::string_generator will generally throw - need our own parsing function.
+        return 0;
         boost::uuids::uuid ps1;
         try
         {
@@ -322,57 +374,48 @@ const Dimension& Schema::getDimension(std::string const& name, std::string const
         catch (std::runtime_error&)
         {
             // invalid string for uuid
-            std::ostringstream oss;
-            oss << "Dimension with name '" << t << "' not found, unable to Schema::getDimension";
-            throw dimension_not_found(oss.str());
+            if (errorMsg)
+            {
+                std::ostringstream oss;
+                oss << "Dimension with name '" << t << "' not found, unable to Schema::getDimension";
+                *errorMsg = oss.str();
+            }
+            return 0;
         }
 
         schema::index_by_uid::const_iterator i = m_index.get<schema::uid>().find(ps1);
 
         if (i != m_index.get<schema::uid>().end())
         {
-            if (ns.size())
+            if (nsLength != 0)
             {
                 while (i != m_index.get<schema::uid>().end())
                 {
-                    if (boost::equals(ns, i->getNamespace()))
+                    if (strncmp(ns, i->getNamespace().c_str(), nsLength) == 0)
                     {
-                        return *i;
+                        return &*i;
                     }
-
                     ++i;
                 }
-
             }
-
-            return *i;
+            return &*i;
         }
         else
         {
-            std::ostringstream oss;
-            oss << "Dimension with name '" << t << "' not found, unable to Schema::getDimension";
-            throw dimension_not_found(oss.str());
+            return 0;
         }
-
     }
-
+    return 0;
 }
 
 
-
-boost::optional<Dimension const&> Schema::getDimensionOptional(std::string const& t, std::string const& ns) const
+boost::optional<Dimension const&> Schema::getDimensionOptional(std::string const& name, std::string const& ns) const
 {
-
-    try
-    {
-        Dimension const& dim = getDimension(t, ns);
-        return boost::optional<Dimension const&>(dim);
-    }
-    catch (pdal::dimension_not_found&)
-    {
+    const Dimension* dim = getDimensionPtr(name.c_str(), ns.c_str());
+    if (dim)
+        return boost::optional<Dimension const&>(*dim);
+    else
         return boost::optional<Dimension const&>();
-    }
-
 }
 
 bool Schema::setDimension(Dimension const& dim)
