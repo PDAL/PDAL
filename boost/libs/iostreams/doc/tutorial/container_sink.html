@@ -79,15 +79,15 @@
 <SPAN CLASS='keyword'>public</SPAN>:
     <SPAN CLASS='keyword'>typedef</SPAN> <SPAN CLASS='keyword'>typename</SPAN> Container::value_type  char_type;
     <SPAN CLASS='keyword'>typedef</SPAN> sink_tag                        category;
-    container_sink(Container& container) : container_(container) { }
+    container_sink(Container&amp; container) : container_(container) { }
     std::streamsize write(const char_type* s, std::streamsize n)
     {
         container_.insert(container_.end(), s, s + n);
         <SPAN CLASS='keyword'>return</SPAN> n;
     }
-    Container& container() { return container_; }
+    Container&amp; container() { return container_; }
 <SPAN CLASS='keyword'>private</SPAN>:
-    Container& container_;
+    Container&amp; container_;
 };
 
 } } } <SPAN CLASS='comment'>// End namespace boost::iostreams:example</SPAN></PRE>

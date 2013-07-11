@@ -464,7 +464,12 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
 
     private:
         size_type size_;
+// MSVC does not like arrays of size 0 in base classes.  Hence, this conditionally changes the size to 1
+#ifdef _MSC_VER
+        BOOST_UBLAS_BOUNDED_ARRAY_ALIGN value_type data_ [(N>0)?N:1];
+#else
         BOOST_UBLAS_BOUNDED_ARRAY_ALIGN value_type data_ [N];
+#endif
     };
 
 

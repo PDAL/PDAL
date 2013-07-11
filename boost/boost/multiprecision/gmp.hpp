@@ -177,7 +177,7 @@ struct gmp_float_imp
 
       int e;
       long double f, term;
-      mpf_init_set_ui(m_data, 0u);
+      mpf_set_ui(m_data, 0u);
 
       f = frexp(a, &e);
 
@@ -1015,8 +1015,9 @@ struct gmp_int
    explicit gmp_int(const gmp_rational& o);
    gmp_int& operator = (const gmp_int& o)
    {
-      if(o.m_data[0]._mp_d)
-         mpz_set(m_data, o.m_data);
+      if(m_data[0]._mp_d == 0)
+         mpz_init(this->m_data);
+      mpz_set(m_data, o.m_data);
       return *this;
    }
 #ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
@@ -1224,27 +1225,27 @@ struct gmp_int
 
       return s;
    }
-   ~gmp_int()
+   ~gmp_int() BOOST_NOEXCEPT
    {
       if(m_data[0]._mp_d)
          mpz_clear(m_data);
    }
-   void negate()
+   void negate() BOOST_NOEXCEPT
    {
       BOOST_ASSERT(m_data[0]._mp_d);
       mpz_neg(m_data, m_data);
    }
-   int compare(const gmp_int& o)const
+   int compare(const gmp_int& o)const BOOST_NOEXCEPT
    {
       BOOST_ASSERT(m_data[0]._mp_d && o.m_data[0]._mp_d);
       return mpz_cmp(m_data, o.m_data);
    }
-   int compare(long i)const
+   int compare(long i)const BOOST_NOEXCEPT
    {
       BOOST_ASSERT(m_data[0]._mp_d);
       return mpz_cmp_si(m_data, i);
    }
-   int compare(unsigned long i)const
+   int compare(unsigned long i)const BOOST_NOEXCEPT
    {
       BOOST_ASSERT(m_data[0]._mp_d);
       return mpz_cmp_ui(m_data, i);
@@ -1256,12 +1257,12 @@ struct gmp_int
       d = v;
       return compare(d);
    }
-   mpz_t& data()
+   mpz_t& data() BOOST_NOEXCEPT
    {
       BOOST_ASSERT(m_data[0]._mp_d);
       return m_data;
    }
-   const mpz_t& data()const
+   const mpz_t& data()const BOOST_NOEXCEPT
    {
       BOOST_ASSERT(m_data[0]._mp_d);
       return m_data;
@@ -1728,8 +1729,9 @@ struct gmp_rational
    }
    gmp_rational& operator = (const gmp_rational& o)
    {
-      if(o.m_data[0]._mp_num._mp_d)
-         mpq_set(m_data, o.m_data);
+      if(m_data[0]._mp_den._mp_d == 0)
+         mpq_init(m_data);
+      mpq_set(m_data, o.m_data);
       return *this;
    }
 #ifndef BOOST_NO_CXX11_RVALUE_REFERENCES

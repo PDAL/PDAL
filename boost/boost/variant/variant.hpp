@@ -35,7 +35,6 @@
 #include "boost/variant/detail/hash_variant.hpp"
 
 #include "boost/variant/detail/generic_result_type.hpp"
-#include "boost/variant/detail/has_nothrow_move.hpp"
 #include "boost/variant/detail/move.hpp"
 
 #include "boost/detail/reference_content.hpp"
@@ -49,6 +48,7 @@
 #include "boost/type_traits/add_const.hpp"
 #include "boost/type_traits/has_nothrow_constructor.hpp"
 #include "boost/type_traits/has_nothrow_copy.hpp"
+#include "boost/type_traits/is_nothrow_move_constructible.hpp"
 #include "boost/type_traits/is_const.hpp"
 #include "boost/type_traits/is_same.hpp"
 #include "boost/type_traits/is_rvalue_reference.hpp"
@@ -759,7 +759,7 @@ private: // helpers, for visitor interface (below)
     template <typename LhsT>
     void backup_assign_impl(
           LhsT& lhs_content
-        , mpl::true_// has_nothrow_move
+        , mpl::true_ // is_nothrow_move_constructible
         )
     {
         // Move lhs content to backup...
@@ -794,7 +794,7 @@ private: // helpers, for visitor interface (below)
     template <typename LhsT>
     void backup_assign_impl(
           LhsT& lhs_content
-        , mpl::false_// has_nothrow_move
+        , mpl::false_ // is_nothrow_move_constructible
         )
     {
         // Backup lhs content...
@@ -834,7 +834,7 @@ public: // visitor interface
         BOOST_VARIANT_AUX_RETURN_VOID_TYPE
     internal_visit(LhsT& lhs_content, int)
     {
-        typedef typename has_nothrow_move_constructor<LhsT>::type
+        typedef typename is_nothrow_move_constructible<LhsT>::type
             nothrow_move;
 
         backup_assign_impl( lhs_content, nothrow_move() );
@@ -1811,9 +1811,9 @@ private: // helpers, for modifiers (below)
         template <typename RhsT, typename B1, typename B2>
         void assign_impl(
               const RhsT& rhs_content
-            , mpl::true_// has_nothrow_copy
-            , B1// has_nothrow_move_constructor
-            , B2// has_fallback_type
+            , mpl::true_ // has_nothrow_copy
+            , B1 // is_nothrow_move_constructible
+            , B2 // has_fallback_type
             )
         {
             // Destroy lhs's content...
@@ -1830,9 +1830,9 @@ private: // helpers, for modifiers (below)
         template <typename RhsT, typename B>
         void assign_impl(
               const RhsT& rhs_content
-            , mpl::false_// has_nothrow_copy
-            , mpl::true_// has_nothrow_move_constructor
-            , B// has_fallback_type
+            , mpl::false_ // has_nothrow_copy
+            , mpl::true_ // is_nothrow_move_constructible
+            , B // has_fallback_type
             )
         {
             // Attempt to make a temporary copy (so as to move it below)...
@@ -1852,9 +1852,9 @@ private: // helpers, for modifiers (below)
         template <typename RhsT>
         void assign_impl(
               const RhsT& rhs_content
-            , mpl::false_// has_nothrow_copy
-            , mpl::false_// has_nothrow_move_constructor
-            , mpl::true_// has_fallback_type
+            , mpl::false_ // has_nothrow_copy
+            , mpl::false_ // is_nothrow_move_constructible
+            , mpl::true_ // has_fallback_type
             )
         {
             // Destroy lhs's content...
@@ -1888,9 +1888,9 @@ private: // helpers, for modifiers (below)
         template <typename RhsT>
         void assign_impl(
               const RhsT& rhs_content
-            , mpl::false_// has_nothrow_copy
-            , mpl::false_// has_nothrow_move_constructor
-            , mpl::false_// has_fallback_type
+            , mpl::false_ // has_nothrow_copy
+            , mpl::false_ // is_nothrow_move_constructible
+            , mpl::false_ // has_fallback_type
             )
         {
             detail::variant::backup_assigner<wknd_self_t>
@@ -1908,7 +1908,7 @@ private: // helpers, for modifiers (below)
                 nothrow_copy;
             typedef typename mpl::or_< // reduces compile-time
                   nothrow_copy
-                , detail::variant::has_nothrow_move_constructor<RhsT>
+                , is_nothrow_move_constructible<RhsT>
                 >::type nothrow_move_constructor;
 
             assign_impl(
@@ -1958,9 +1958,9 @@ private: // helpers, for modifiers (below)
         template <typename RhsT, typename B1, typename B2>
         void assign_impl(
               RhsT& rhs_content
-            , mpl::true_// has_nothrow_copy
-            , mpl::false_// has_nothrow_move_constructor
-            , B2// has_fallback_type
+            , mpl::true_ // has_nothrow_copy
+            , mpl::false_ // is_nothrow_move_constructible
+            , B2 // has_fallback_type
             )
         {
             // Destroy lhs's content...
@@ -1977,9 +1977,9 @@ private: // helpers, for modifiers (below)
         template <typename RhsT, typename B>
         void assign_impl(
               RhsT& rhs_content
-            , mpl::true_// has_nothrow_copy
-            , mpl::true_// has_nothrow_move_constructor
-            , B// has_fallback_type
+            , mpl::true_ // has_nothrow_copy
+            , mpl::true_ // is_nothrow_move_constructible
+            , B // has_fallback_type
             )
         {
             // ...destroy lhs's content...
@@ -1996,9 +1996,9 @@ private: // helpers, for modifiers (below)
         template <typename RhsT>
         void assign_impl(
               RhsT& rhs_content
-            , mpl::false_// has_nothrow_copy
-            , mpl::false_// has_nothrow_move_constructor
-            , mpl::true_// has_fallback_type
+            , mpl::false_ // has_nothrow_copy
+            , mpl::false_ // is_nothrow_move_constructible
+            , mpl::true_ // has_fallback_type
             )
         {
             // Destroy lhs's content...
@@ -2032,9 +2032,9 @@ private: // helpers, for modifiers (below)
         template <typename RhsT>
         void assign_impl(
               const RhsT& rhs_content
-            , mpl::false_// has_nothrow_copy
-            , mpl::false_// has_nothrow_move_constructor
-            , mpl::false_// has_fallback_type
+            , mpl::false_ // has_nothrow_copy
+            , mpl::false_ // is_nothrow_move_constructible
+            , mpl::false_ // has_fallback_type
             )
         {
             detail::variant::backup_assigner<wknd_self_t>
@@ -2048,7 +2048,7 @@ private: // helpers, for modifiers (below)
             BOOST_VARIANT_AUX_RETURN_VOID_TYPE
         internal_visit(RhsT& rhs_content, int)
         {
-            typedef typename detail::variant::has_nothrow_move_constructor<RhsT>::type
+            typedef typename is_nothrow_move_constructible<RhsT>::type
                 nothrow_move_constructor;
             typedef typename mpl::or_< // reduces compile-time
                   nothrow_move_constructor

@@ -15,6 +15,7 @@
 #define BOOST_GEOMETRY_ALGORITHMS_DISTANCE_HPP
 
 
+#include <boost/concept_check.hpp>
 #include <boost/mpl/if.hpp>
 #include <boost/range.hpp>
 #include <boost/typeof/typeof.hpp>
@@ -55,6 +56,7 @@ struct point_to_point
     static inline typename return_type<Strategy>::type apply(P1 const& p1,
                 P2 const& p2, Strategy const& strategy)
     {
+        pdalboost::ignore_unused_variable_warning(strategy);
         return strategy.apply(p1, p2);
     }
 };

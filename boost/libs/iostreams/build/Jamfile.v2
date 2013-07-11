@@ -20,6 +20,7 @@ project /boost/iostreams : source-location ../src ;
 import modules ;
 import os ;
 import path ;
+import ac ;
 local debug = [ MATCH (--debug-configuration) : [ modules.peek : ARGV ] ] ;
 
 for local v in NO_COMPRESSION 
@@ -27,6 +28,18 @@ for local v in NO_COMPRESSION
                NO_BZIP2 BZIP2_SOURCE BZIP2_INCLUDE BZIP2_BINARY BZIP2_LIBPATH
 {
     $(v) = [ modules.peek : $(v) ] ;
+}
+
+if $(NO_COMPRESSION) != 1 && $(NO_ZLIB) != 1
+{
+    using zlib : : <build-name>boost_zlib <tag>@tag : : true ;
+}
+else
+{
+    if $(debug)
+    {
+        ECHO "notice: iostreams: not using zlib compression " ;
+    }
 }
 
 
@@ -133,16 +146,6 @@ rule create-library ( library-name : windows-name unix-name : sources + : requir
 
 
 local sources = file_descriptor.cpp mapped_file.cpp ;
-local z = [ create-library zlib : zll z : adler32 compress 
-     crc32 deflate gzclose gzio gzlib gzread gzwrite
-     infback inffast inflate inftrees trees uncompr zutil :
-     <link>shared:<define>ZLIB_DLL ] ;
-
-if $(z)
-{
-    sources += boost_zlib zlib.cpp gzip.cpp ;
-}
-
 local bz2 = [ create-library bzip2 : libbz2 bz2 : 
     blocksort bzlib compress crctable decompress huffman randtable :
     <link>shared:<def-file>$(BZIP2_SOURCE)/libbz2.def ] ;
@@ -156,6 +159,8 @@ lib pdalboost_iostreams
     : $(sources) 
     : <link>shared:<define>BOOST_IOSTREAMS_DYN_LINK=1 
       <define>BOOST_IOSTREAMS_USE_DEPRECATED
+      [ ac.check-library /zlib//zlib : <library>/zlib//zlib
+        <source>zlib.cpp <source>gzip.cpp ]
     :
     : <link>shared:<define>BOOST_IOSTREAMS_DYN_LINK=1
     ;

@@ -80,7 +80,7 @@
     {
         <SPAN CLASS="keyword"><SPAN CLASS="keyword">int</SPAN></SPAN> c;
         <SPAN CLASS="keyword">while</SPAN> ((c = std::cin.get()) != <SPAN CLASS='numeric_literal'>EOF</SPAN>) {
-            <SPAN CLASS="keyword">if</SPAN> (c != <SPAN CLASS="literal">'\n'</SPAN> && col_no_ &gt;= line_length_)
+            <SPAN CLASS="keyword">if</SPAN> (c != <SPAN CLASS="literal">'\n'</SPAN> &amp;&amp; col_no_ &gt;= line_length_)
                 put_char(<SPAN CLASS="literal">'\n'</SPAN>);
             put_char(c);
         }
@@ -112,10 +112,10 @@
         { }
 
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Source&gt;
-    <SPAN CLASS="keyword"><SPAN CLASS="keyword">int</SPAN></SPAN> get(Source& src);
+    <SPAN CLASS="keyword"><SPAN CLASS="keyword">int</SPAN></SPAN> get(Source&amp; src);
 
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Sink&gt;
-    <SPAN CLASS="keyword">void</SPAN> close(Sink&);
+    <SPAN CLASS="keyword">void</SPAN> close(Sink&amp;);
 <SPAN CLASS="keyword">private</SPAN>:
     <SPAN CLASS="keyword"><SPAN CLASS="keyword">int</SPAN></SPAN> get_char(<SPAN CLASS="keyword"><SPAN CLASS="keyword">int</SPAN></SPAN> c);
     <SPAN CLASS="keyword"><SPAN CLASS="keyword">int</SPAN></SPAN>  line_length_;
@@ -140,7 +140,7 @@
 <P>This function updates the column count based on the given character <CODE>c</CODE>, then returns <CODE>c</CODE>. Using <CODE>get_char</CODE>, you can implement <CODE>get</CODE> as follows:</P>
 
 <PRE class="broken_ie">    <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Source&gt;
-    <SPAN CLASS="keyword"><SPAN CLASS="keyword">int</SPAN></SPAN> get(Source& src) 
+    <SPAN CLASS="keyword"><SPAN CLASS="keyword">int</SPAN></SPAN> get(Source&amp; src)
     {
         <SPAN CLASS="keyword">if</SPAN> (has_next_) {
             has_next_ = <SPAN CLASS="keyword">false</SPAN>;
@@ -151,7 +151,7 @@
         <SPAN CLASS="keyword">if</SPAN> ((c = iostreams::get(src)) == <SPAN CLASS="numeric_literal">EOF</SPAN> || c == WOULD_BLOCK)
             <SPAN CLASS="keyword">return</SPAN> c;
 
-        <SPAN CLASS="keyword">if</SPAN> (c != <SPAN CLASS="literal">'\n'</SPAN> && col_no_ &gt;= line_length_) {
+        <SPAN CLASS="keyword">if</SPAN> (c != <SPAN CLASS="literal">'\n'</SPAN> &amp;&amp; col_no_ &gt;= line_length_) {
             next_ = c;
             has_next_ = <SPAN CLASS="keyword">true</SPAN>;
             <SPAN CLASS="keyword">return</SPAN> get_char(<SPAN CLASS="literal">'\n'</SPAN>);
@@ -171,7 +171,7 @@
 <P>Finally, the member function <CODE>close</CODE> resets the Filter's state:</P>
 
 <PRE class="broken_ie">    <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Sink&gt;
-    <SPAN CLASS="keyword">void</SPAN> close(Sink&) 
+    <SPAN CLASS="keyword">void</SPAN> close(Sink&amp;)
     { 
         col_no_ = 0; 
         has_next_ = <SPAN CLASS="keyword">false</SPAN>; 
@@ -194,13 +194,13 @@
         { }
 
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Sink&gt;
-    <SPAN CLASS="keyword"><SPAN CLASS="keyword">bool</SPAN></SPAN> put(Sink& dest, <SPAN CLASS="keyword"><SPAN CLASS="keyword">int</SPAN></SPAN> c);
+    <SPAN CLASS="keyword"><SPAN CLASS="keyword">bool</SPAN></SPAN> put(Sink&amp; dest, <SPAN CLASS="keyword"><SPAN CLASS="keyword">int</SPAN></SPAN> c);
 
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Sink&gt;
-    <SPAN CLASS="keyword">void</SPAN> close(Sink&);
+    <SPAN CLASS="keyword">void</SPAN> close(Sink&amp;);
 <SPAN CLASS="keyword">private</SPAN>:
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Sink&gt;
-    <SPAN CLASS="keyword"><SPAN CLASS="keyword">bool</SPAN></SPAN> put_char(Sink& dest, <SPAN CLASS="keyword"><SPAN CLASS="keyword">int</SPAN></SPAN> c);
+    <SPAN CLASS="keyword"><SPAN CLASS="keyword">bool</SPAN></SPAN> put_char(Sink&amp; dest, <SPAN CLASS="keyword"><SPAN CLASS="keyword">int</SPAN></SPAN> c);
     <SPAN CLASS="keyword"><SPAN CLASS="keyword">int</SPAN></SPAN>  line_length_;
     <SPAN CLASS="keyword"><SPAN CLASS="keyword">int</SPAN></SPAN>  col_no_;
 };
@@ -210,7 +210,7 @@
 <P>Let's look first at the helper function <CODE>put_char</CODE>:</P>
 
 <PRE class="broken_ie">    <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Sink&gt;
-    <SPAN CLASS="keyword"><SPAN CLASS="keyword">bool</SPAN></SPAN> put_char(Sink& dest, <SPAN CLASS="keyword"><SPAN CLASS="keyword">int</SPAN></SPAN> c)
+    <SPAN CLASS="keyword"><SPAN CLASS="keyword">bool</SPAN></SPAN> put_char(Sink&amp; dest, <SPAN CLASS="keyword"><SPAN CLASS="keyword">int</SPAN></SPAN> c)
     {
         <SPAN CLASS="keyword">if</SPAN> (!iostreams::put(dest, c))
             <SPAN CLASS="keyword">return</SPAN> <SPAN CLASS="keyword">false</SPAN>;
@@ -224,9 +224,9 @@
 <P>This function attempts to write the character <CODE>c</CODE> to the given <A HREF="../concepts/sink.html">Sink</A> and updates the column count if successful. Using <CODE>put_char</CODE>, you can implement <CODE>put</CODE> as follows:</P>
 
 <PRE class="broken_ie">    <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Sink&gt;
-    <SPAN CLASS="keyword"><SPAN CLASS="keyword">bool</SPAN></SPAN> put(Sink& dest, <SPAN CLASS="keyword"><SPAN CLASS="keyword">int</SPAN></SPAN> c)
+    <SPAN CLASS="keyword"><SPAN CLASS="keyword">bool</SPAN></SPAN> put(Sink&amp; dest, <SPAN CLASS="keyword"><SPAN CLASS="keyword">int</SPAN></SPAN> c)
     {
-        <SPAN CLASS="keyword">if</SPAN> (c != <SPAN CLASS="literal">'\n'</SPAN> && col_no_ &gt;= line_length_ && !put_char(dest, <SPAN CLASS="literal">'\n'</SPAN>))
+        <SPAN CLASS="keyword">if</SPAN> (c != <SPAN CLASS="literal">'\n'</SPAN> &amp;&amp; col_no_ &gt;= line_length_ &amp;&amp; !put_char(dest, <SPAN CLASS="literal">'\n'</SPAN>))
             <SPAN CLASS="keyword">return</SPAN> <SPAN CLASS="keyword">false</SPAN>;
         <SPAN CLASS="keyword">return</SPAN> put_char(dest, c);
     }</PRE>
@@ -238,7 +238,7 @@
 <P>Finally, the member function <CODE>close</CODE> resets the Filter's state:</P>
 
 <PRE class="broken_ie">    <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Sink&gt;
-    <SPAN CLASS="keyword">void</SPAN> close(Sink&) { col_no_ = 0; }</PRE>
+    <SPAN CLASS="keyword">void</SPAN> close(Sink&amp;) { col_no_ = 0; }</PRE>
 
 <!-- Begin Nav -->
 

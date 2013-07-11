@@ -12,9 +12,9 @@
 
 void path_test()
 {
-	pdalboost::filesystem::path orig("a/b");
-	pdalboost::iostreams::detail::path p(orig);
-	p = orig;
+    pdalboost::filesystem::path orig("a/b");
+    pdalboost::iostreams::detail::path p(orig);
+    p = orig;
 }
 
 pdalboost::unit_test::test_suite* init_unit_test_suite(int, char* []) 

@@ -65,7 +65,7 @@
         <SPAN CLASS="keyword">typedef</SPAN> input_filter_tag  category;
 
         <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Source&gt;
-        <SPAN CLASS="keyword">int</SPAN> get(Source& src)
+        <SPAN CLASS="keyword">int</SPAN> get(Source&amp; src)
         {
             <SPAN CLASS="keyword">int</SPAN> c;
             <SPAN CLASS="keyword">while</SPAN> ( (c = boost::iostreams::get(src)) != EOF &amp;&amp;
@@ -103,7 +103,7 @@
         <SPAN CLASS="keyword">typedef</SPAN> multichar_input_filter_tag  category;
 
         <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Source&gt;
-        streamsize read(Source& src, <SPAN CLASS="keyword">char</SPAN>* s, streamsize n)
+        streamsize read(Source&amp; src, <SPAN CLASS="keyword">char</SPAN>* s, streamsize n)
             {
                 <SPAN CLASS="keyword">int</SPAN>   c;
                 <SPAN CLASS="keyword">char</SPAN>* first = s;

@@ -22,7 +22,9 @@
 #include <boost/geometry/core/exterior_ring.hpp>
 #include <boost/geometry/algorithms/envelope.hpp>
 
+#include <boost/geometry/multi/core/tags.hpp>
 #include <boost/geometry/multi/core/point_type.hpp>
+#include <boost/geometry/multi/geometries/concepts/check.hpp>
 
 
 namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace geometry

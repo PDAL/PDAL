@@ -239,7 +239,7 @@ inline typename enable_if_c<number_category<Backend>::value == number_kind_integ
    return x;
 }
 
-namespace detail{
+namespace default_ops{
 
 //
 // Within powm, we need a type with twice as many digits as the argument type, define
@@ -264,7 +264,7 @@ void eval_powm(Backend& result, const Backend& a, const Backend& p, const Backen
    using default_ops::eval_right_shift;
 
    typedef typename double_precision_type<Backend>::type double_type;
-   typedef typename canonical<unsigned char, double_type>::type ui_type;
+   typedef typename pdalboost::multiprecision::detail::canonical<unsigned char, double_type>::type ui_type;
    
    double_type x, y(a), b(p), t;
    x = ui_type(1u);
@@ -288,9 +288,9 @@ template <class Backend, class Integer>
 void eval_powm(Backend& result, const Backend& a, const Backend& p, Integer c)
 {
    typedef typename double_precision_type<Backend>::type double_type;
-   typedef typename canonical<unsigned char, double_type>::type ui_type;
-   typedef typename canonical<Integer, double_type>::type i1_type;
-   typedef typename canonical<Integer, Backend>::type i2_type;
+   typedef typename pdalboost::multiprecision::detail::canonical<unsigned char, double_type>::type ui_type;
+   typedef typename pdalboost::multiprecision::detail::canonical<Integer, double_type>::type i1_type;
+   typedef typename pdalboost::multiprecision::detail::canonical<Integer, Backend>::type i2_type;
 
    using default_ops::eval_bit_test;
    using default_ops::eval_get_sign;
@@ -325,7 +325,7 @@ template <class Backend, class Integer>
 typename enable_if<is_unsigned<Integer> >::type eval_powm(Backend& result, const Backend& a, Integer b, const Backend& c)
 {
    typedef typename double_precision_type<Backend>::type double_type;
-   typedef typename canonical<unsigned char, double_type>::type ui_type;
+   typedef typename pdalboost::multiprecision::detail::canonical<unsigned char, double_type>::type ui_type;
 
    using default_ops::eval_bit_test;
    using default_ops::eval_get_sign;
@@ -365,9 +365,9 @@ template <class Backend, class Integer1, class Integer2>
 typename enable_if<is_unsigned<Integer1> >::type eval_powm(Backend& result, const Backend& a, Integer1 b, Integer2 c)
 {
    typedef typename double_precision_type<Backend>::type double_type;
-   typedef typename canonical<unsigned char, double_type>::type ui_type;
-   typedef typename canonical<Integer1, double_type>::type i1_type;
-   typedef typename canonical<Integer2, Backend>::type i2_type;
+   typedef typename pdalboost::multiprecision::detail::canonical<unsigned char, double_type>::type ui_type;
+   typedef typename pdalboost::multiprecision::detail::canonical<Integer1, double_type>::type i1_type;
+   typedef typename pdalboost::multiprecision::detail::canonical<Integer2, Backend>::type i2_type;
 
    using default_ops::eval_bit_test;
    using default_ops::eval_get_sign;
@@ -433,11 +433,11 @@ inline typename enable_if<
          is_integral<V>
       >
    >,
-   detail::expression<detail::function, detail::powm_func, T, U, V> >::type 
+   detail::expression<detail::function, default_ops::powm_func, T, U, V> >::type 
    powm(const T& b, const U& p, const V& mod)
 {
-   return detail::expression<detail::function, detail::powm_func, T, U, V>(
-      detail::powm_func(), b, p, mod);
+   return detail::expression<detail::function, default_ops::powm_func, T, U, V>(
+      default_ops::powm_func(), b, p, mod);
 }
 
 }} //namespaces

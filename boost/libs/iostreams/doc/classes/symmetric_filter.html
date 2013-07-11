@@ -57,18 +57,18 @@
     <SPAN CLASS="keyword">explicit</SPAN> symmetric_filter(<SPAN CLASS="keyword">int</SPAN> buffer_size);
 
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> T0&gt;
-    symmetric_filter(<SPAN CLASS="keyword">int</SPAN> buffer_size, <SPAN CLASS="keyword">const</SPAN> T0& t0);
+    symmetric_filter(<SPAN CLASS="keyword">int</SPAN> buffer_size, <SPAN CLASS="keyword">const</SPAN> T0&amp; t0);
 
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> T0, <SPAN CLASS="keyword">typename</SPAN> T1&gt;
-    symmetric_filter(<SPAN CLASS="keyword">int</SPAN> buffer_size, <SPAN CLASS="keyword">const</SPAN> T0& t0, <SPAN CLASS="keyword">const</SPAN> T1& t1);
+    symmetric_filter(<SPAN CLASS="keyword">int</SPAN> buffer_size, <SPAN CLASS="keyword">const</SPAN> T0&amp; t0, <SPAN CLASS="keyword">const</SPAN> T1&amp; t1);
 
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> T0, ..., <SPAN CLASS="keyword">typename</SPAN> TN&gt;
-    symmetric_filter( <SPAN CLASS="keyword">int</SPAN> buffer_size, const T0& t0,
-                      <SPAN CLASS="keyword">const</SPAN> T1& t1, ..., <SPAN CLASS="keyword">const</SPAN> TN& tN );
+    symmetric_filter( <SPAN CLASS="keyword">int</SPAN> buffer_size, const T0&amp; t0,
+                      <SPAN CLASS="keyword">const</SPAN> T1&amp; t1, ..., <SPAN CLASS="keyword">const</SPAN> TN&amp; tN );
 
     <SPAN CLASS="omitted">...</SPAN>
 <SPAN CLASS="keyword">protected</SPAN>:
-    SymmetricFilter& <A CLASS="documented" HREF="#filter">filter</A>();
+    SymmetricFilter&amp; <A CLASS="documented" HREF="#filter">filter</A>();
     std::basic_string&lt;char_type, Alloc&gt; <A CLASS="documented" HREF="#unconsumed_input">unconsumed_input</A>() <SPAN CLASS="keyword">const</SPAN>;
 };
 
@@ -100,21 +100,21 @@
 <H4><CODE>symmetric_filter::symmetric_filter</CODE></H4>
 
 <PRE CLASS="broken_ie">    <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> T0&gt;
-    symmetric_filter(<SPAN CLASS="keyword">int</SPAN> buffer_size, <SPAN CLASS="keyword">const</SPAN> T0& t0);
+    symmetric_filter(<SPAN CLASS="keyword">int</SPAN> buffer_size, <SPAN CLASS="keyword">const</SPAN> T0&amp; t0);
 
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> T0, <SPAN CLASS="keyword">typename</SPAN> T1&gt;
-    symmetric_filter(<SPAN CLASS="keyword">int</SPAN> buffer_size, <SPAN CLASS="keyword">const</SPAN> T0& t0, <SPAN CLASS="keyword">const</SPAN> T1& t1);
+    symmetric_filter(<SPAN CLASS="keyword">int</SPAN> buffer_size, <SPAN CLASS="keyword">const</SPAN> T0&amp; t0, <SPAN CLASS="keyword">const</SPAN> T1&amp; t1);
 
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> T0, ..., <SPAN CLASS="keyword">typename</SPAN> TN&gt;
-    symmetric_filter( <SPAN CLASS="keyword">int</SPAN> buffer_size, <SPAN CLASS="keyword">const</SPAN> T0& t0,
-                              <SPAN CLASS="keyword">const</SPAN> T1& t1, ..., <SPAN CLASS="keyword">const</SPAN> TN& tN );</PRE>
+    symmetric_filter( <SPAN CLASS="keyword">int</SPAN> buffer_size, <SPAN CLASS="keyword">const</SPAN> T0&amp; t0,
+                              <SPAN CLASS="keyword">const</SPAN> T1&amp; t1, ..., <SPAN CLASS="keyword">const</SPAN> TN&amp; tN );</PRE>
 
 <P>Each member constructs an instance of <CODE>symmetric_filter</CODE> based on an instance of the template parameter <A HREF="#template_params"><CODE>SymmetricFilter</CODE></A> constructed with the given sequence of arguments and having an internal buffer of size <CODE>buffer_size</CODE>.</P>
 
 <A NAME="filter"></A>
 <H4><CODE>symmetric_filter::filter</CODE></H4>
 
-<PRE CLASS="broken_ie">    SymmetricFilter& <A CLASS="documented" HREF="#filter">filter</A>();</PRE>
+<PRE CLASS="broken_ie">    SymmetricFilter&amp; <A CLASS="documented" HREF="#filter">filter</A>();</PRE>
 
 <P>Returns a reference to the underlying instance of <CODE>SymmetricFilter</CODE>.</P>
 

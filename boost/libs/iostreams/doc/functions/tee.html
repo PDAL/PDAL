@@ -30,7 +30,7 @@
 </P>
 
 <P>
-    The overloaded function template <A HREF='#tee'><CODE>tee</CODE></A> is an <A HREF='http://www.boost.org/more/generic_programming.html#object_generator' TARGET='_top'>object generator</A> which given a Device or a pair of Sinks returns an appropriate specialization of <CODE>tee_filter</CODE> or <CODE>tee_device</CODE>.
+    The overloaded function template <A HREF='#tee'><CODE>tee</CODE></A> is an <A HREF='http://www.boost.org/more/generic_programming.html#object_generator' TARGET='_top'>object generator</A> which given a Sink or a pair of Sinks returns an appropriate specialization of <CODE>tee_filter</CODE> or <CODE>tee_device</CODE>.
 </P>
 
 <A NAME="headers"></A>
@@ -54,7 +54,7 @@
     <SPAN CLASS='keyword'>typedef</SPAN> <SPAN CLASS='keyword'>typename</SPAN> char_type_of&lt;Sink&gt;::type  char_type;
     <SPAN CLASS='keyword'>typedef</SPAN> <SPAN CLASS='omitted'>[implementation-defined]</SPAN>           category;
 
-    <SPAN CLASS='keyword'>explicit</SPAN> <A CLASS='documented' HREF='#tee_filter_ctor'>tee_filter</A>([<SPAN CLASS='keyword'>const</SPAN>] Sink& snk);
+    <SPAN CLASS='keyword'>explicit</SPAN> <A CLASS='documented' HREF='#tee_filter_ctor'>tee_filter</A>([<SPAN CLASS='keyword'>const</SPAN>] Sink&amp; snk);
 
     <SPAN CLASS='comment'>// OutputFilter member functions</SPAN>
 };
@@ -65,16 +65,16 @@
     <SPAN CLASS='keyword'>typedef</SPAN> <SPAN CLASS='keyword'>typename</SPAN> char_type_of&lt;Sink1&gt;::type  char_type;
     <SPAN CLASS='keyword'>typedef</SPAN> <SPAN CLASS='omitted'>[implementation-defined]</SPAN>            category;
 
-    <A CLASS='documented' HREF='#tee_device_ctor'>tee_device</A>([<SPAN CLASS='keyword'>const</SPAN>] <SPAN CLASS='keyword'>const</SPAN>& sink1, [<SPAN CLASS='keyword'>const</SPAN>] Sink2& sink2);
+    <A CLASS='documented' HREF='#tee_device_ctor'>tee_device</A>([<SPAN CLASS='keyword'>const</SPAN>] <SPAN CLASS='keyword'>const</SPAN>&amp; sink1, [<SPAN CLASS='keyword'>const</SPAN>] Sink2&amp; sink2);
 
     <SPAN CLASS='comment'>// Sink member functions</SPAN>
 };
 
 <SPAN CLASS='keyword'>template</SPAN>&lt;<SPAN CLASS='keyword'>typename</SPAN> <A CLASS='documented' HREF='#tee_unary_template_params'>Sink</A>&gt;
-<A CLASS='documented' HREF='#tee_filter'>tee_filter</A>&lt;Sink&gt; <A CLASS='documented' HREF='#tee_unary'>tee</A>([<SPAN CLASS='keyword'>const</SPAN>] Sink& snk);
+<A CLASS='documented' HREF='#tee_filter'>tee_filter</A>&lt;Sink&gt; <A CLASS='documented' HREF='#tee_unary'>tee</A>([<SPAN CLASS='keyword'>const</SPAN>] Sink&amp; snk);
 
 <SPAN CLASS='keyword'>template</SPAN>&lt;<SPAN CLASS='keyword'>typename</SPAN> <A CLASS='documented' HREF='#tee_binary_template_params'>Sink1</A>, <SPAN CLASS='keyword'>typename</SPAN> <A CLASS='documented' HREF='#tee_binary_template_params'>Sink2</A>&gt;
-<A CLASS='documented' HREF='#tee_device'>tee_device</A>&lt;Sink1, Sink2&gt; <A CLASS='documented' HREF='#tee_binary'>tee</A>([<SPAN CLASS='keyword'>const</SPAN>] Sink1& sink1, [<SPAN CLASS='keyword'>const</SPAN>] Sink2& sink2);
+<A CLASS='documented' HREF='#tee_device'>tee_device</A>&lt;Sink1, Sink2&gt; <A CLASS='documented' HREF='#tee_binary'>tee</A>([<SPAN CLASS='keyword'>const</SPAN>] Sink1&amp; sink1, [<SPAN CLASS='keyword'>const</SPAN>] Sink2&amp; sink2);
 
 
 } } // End namespace boost::io</PRE>
@@ -100,7 +100,7 @@
 <A NAME="tee_filter_ctor"></A>
 <H4><CODE>tee_filter::tee_filter</CODE></H4>
 
-<PRE CLASS="broken_ie"><SPAN CLASS='keyword'>explicit</SPAN> tee_filter([<SPAN CLASS='keyword'>const</SPAN>] Sink& sink);</PRE>
+<PRE CLASS="broken_ie"><SPAN CLASS='keyword'>explicit</SPAN> tee_filter([<SPAN CLASS='keyword'>const</SPAN>] Sink&amp; sink);</PRE>
 
 <P>
     Constructs an instance of <CODE>tee_filter</CODE> based on the given Sink. The function parameter is a non-<CODE>const</CODE> reference if <CODE>Sink</CODE> is a stream or stream buffer type, and a <CODE>const</CODE> reference otherwise.
@@ -131,7 +131,7 @@
 <A NAME="tee_device_ctor"></A>
 <H4><CODE>tee_device::tee_device</CODE></H4>
 
-<PRE CLASS="broken_ie">tee_device([<SPAN CLASS='keyword'>const</SPAN>] <SPAN CLASS='keyword'>const</SPAN>& sink1, [<SPAN CLASS='keyword'>const</SPAN>] Sink2& sink2);</PRE>
+<PRE CLASS="broken_ie">tee_device([<SPAN CLASS='keyword'>const</SPAN>] <SPAN CLASS='keyword'>const</SPAN>&amp; sink1, [<SPAN CLASS='keyword'>const</SPAN>] Sink2&amp; sink2);</PRE>
 
 <P>
     Constructs an instance of <CODE>tee_device</CODE> based on the given pair of Sinks. Each function parameter is a non-<CODE>const</CODE> reference if the corresponding template argument is a stream or stream buffer type, and a <CODE>const</CODE> reference otherwise.
@@ -142,7 +142,7 @@
 <H2>Function Template <CODE>tee</CODE></H2>
 
 <PRE CLASS="broken_ie"><SPAN CLASS='keyword'>template</SPAN>&lt;<SPAN CLASS='keyword'>typename</SPAN> Sink&gt;
-tee_filter&lt;Sink&gt; tee([<SPAN CLASS='keyword'>const</SPAN>] Sink& snk);</PRE>
+tee_filter&lt;Sink&gt; tee([<SPAN CLASS='keyword'>const</SPAN>] Sink&amp; snk);</PRE>
 
 <A NAME="tee_unary_template_params"></A>
 <H4>Template parameters</H4>
@@ -160,7 +160,7 @@ tee_filter&lt;Sink&gt; tee([<SPAN CLASS='keyword'>const</SPAN>] Sink& snk);</PRE
 
 <A NAME="tee_binary"></A>
 <PRE CLASS="broken_ie"><SPAN CLASS='keyword'>template</SPAN>&lt;<SPAN CLASS='keyword'>typename</SPAN> Sink1, <SPAN CLASS='keyword'>typename</SPAN> Sink2&gt;
-tee_device&lt;Sink1, Sink2&gt; tee([<SPAN CLASS='keyword'>const</SPAN>] Sink1& sink1, [<SPAN CLASS='keyword'>const</SPAN>] Sink2& sink2);</PRE>
+tee_device&lt;Sink1, Sink2&gt; tee([<SPAN CLASS='keyword'>const</SPAN>] Sink1&amp; sink1, [<SPAN CLASS='keyword'>const</SPAN>] Sink2&amp; sink2);</PRE>
 
 <A NAME="tee_binary_template_params"></A>
 <H4>Template parameters</H4>

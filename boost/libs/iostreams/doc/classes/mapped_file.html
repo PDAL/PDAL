@@ -88,7 +88,7 @@ The memory-mapped file Devices are based on the work of Craig Henderson (<A CLAS
 
 <SPAN CLASS="keyword">struct</SPAN> <SPAN CLASS="defined">mapped_file_params</SPAN> {
     <SPAN CLASS='keyword'>explicit</SPAN> mapped_file_params();
-    <SPAN CLASS='keyword'>explicit</SPAN> mapped_file_params(<SPAN CLASS='keyword'>const</SPAN> std::string& path);
+    <SPAN CLASS='keyword'>explicit</SPAN> mapped_file_params(<SPAN CLASS='keyword'>const</SPAN> std::string&amp; path);
     std::string              <A CLASS='documented' HREF='#mapped_file_params_hint'>path</A>;
     mapped_file::mapmode     <A CLASS='documented' HREF='#mapped_file_params_flags'>flags</A>;
     std::ios_base::openmode  <A CLASS='documented' HREF='#mapped_file_params_mode'>mode</A>;  // Deprecated
@@ -166,11 +166,11 @@ The memory-mapped file Devices are based on the work of Craig Henderson (<A CLAS
     <SPAN CLASS='keyword'>typedef</SPAN> <SPAN CLASS='omitted'>[implementation-defined]</SPAN>  category;
     <A CLASS='documented' HREF='#mapped_file_source_default_ctor'>mapped_file_source</A>();
     <SPAN CLASS='keyword'>explicit</SPAN> <A CLASS='documented' HREF='#mapped_file_source_params_ctor'>mapped_file_source</A>(<A CLASS='documented' HREF='#mapped_file_params'>mapped_file_params</A> params);
-    <SPAN CLASS='keyword'>explicit</SPAN> <A CLASS='documented' HREF='#mapped_file_source_basic_ctor'>mapped_file_source</A>( <SPAN CLASS='keyword'>const</SPAN> std::string& path,
+    <SPAN CLASS='keyword'>explicit</SPAN> <A CLASS='documented' HREF='#mapped_file_source_basic_ctor'>mapped_file_source</A>( <SPAN CLASS='keyword'>const</SPAN> std::string&amp; path,
                                  size_type length = max_length,
                                  boost::intmax_t offset = <SPAN CLASS='numeric_literal'>0</SPAN> );
     void <A CLASS='documented' HREF='#mapped_file_source_params_open'>open</A>(<A CLASS='documented' HREF='#mapped_file_params'>mapped_file_params</A> params);
-    void <A CLASS='documented' HREF='#mapped_file_source_basic_open'>open</A>( <SPAN CLASS='keyword'>const</SPAN> std::string& path,
+    void <A CLASS='documented' HREF='#mapped_file_source_basic_open'>open</A>( <SPAN CLASS='keyword'>const</SPAN> std::string&amp; path,
                size_type length = max_length,
                boost::intmax_t offset = <SPAN CLASS='numeric_literal'>0</SPAN> );
     <SPAN CLASS='keyword'>bool</SPAN> <A CLASS='documented' HREF='#mapped_file_source_is_open'>is_open</A>() <SPAN CLASS='keyword'>const</SPAN>;
@@ -195,7 +195,7 @@ The memory-mapped file Devices are based on the work of Craig Henderson (<A CLAS
 <P>Constructs a <CODE>mapped_file_source</CODE> from the given parameters.</P>
 
 <A NAME="mapped_file_source_basic_ctor"></A>
-<PRE CLASS="broken_ie">    <SPAN CLASS='keyword'>explicit</SPAN> mapped_file_source( <SPAN CLASS='keyword'>const</SPAN> std::string& path,
+<PRE CLASS="broken_ie">    <SPAN CLASS='keyword'>explicit</SPAN> mapped_file_source( <SPAN CLASS='keyword'>const</SPAN> std::string&amp; path,
                                  size_type length = max_length,
                                  boost::intmax_t offset = <SPAN CLASS='numeric_literal'>0</SPAN> );</PRE>
     
@@ -225,7 +225,7 @@ The memory-mapped file Devices are based on the work of Craig Henderson (<A CLAS
 <P>Connects this <CODE>mapped_file_source</CODE> to a memory-mapped file obtained as described by the given parameters.</P>
 
 <A NAME="mapped_file_source_basic_open"></A>
-<PRE CLASS="broken_ie">        void open( <SPAN CLASS='keyword'>const</SPAN> std::string& path,
+<PRE CLASS="broken_ie">        void open( <SPAN CLASS='keyword'>const</SPAN> std::string&amp; path,
                    size_type length = max_length,
                    boost::intmax_t offset = <SPAN CLASS='numeric_literal'>0</SPAN> );</PRE>
     
@@ -300,12 +300,12 @@ The memory-mapped file Devices are based on the work of Craig Henderson (<A CLAS
     <SPAN CLASS='keyword'>enum</SPAN> mapmode { readwrite, priv };
     <A CLASS='documented' HREF='#mapped_file_sink_default_ctor'>mapped_file_sink</A>();
     <SPAN CLASS='keyword'>explicit</SPAN> <A CLASS='documented' HREF='#mapped_file_sink_params_ctor'>mapped_file_sink</A>(<A CLASS='documented' HREF='#mapped_file_params'>mapped_file_params</A> params);
-    <SPAN CLASS='keyword'>explicit</SPAN> <A CLASS='documented' HREF='#mapped_file_sink_basic_ctor'>mapped_file_sink</A>( <SPAN CLASS='keyword'>const</SPAN> std::string& path,
+    <SPAN CLASS='keyword'>explicit</SPAN> <A CLASS='documented' HREF='#mapped_file_sink_basic_ctor'>mapped_file_sink</A>( <SPAN CLASS='keyword'>const</SPAN> std::string&amp; path,
                                size_type length = max_length,
                                boost::intmax_t offset = <SPAN CLASS='numeric_literal'>0</SPAN>,
                                mapmode flags = readwrite );
     void <A CLASS='documented' HREF='#mapped_file_sink_params_open'>open</A>(<A CLASS='documented' HREF='#mapped_file_params'>mapped_file_params</A> params);
-    void <A CLASS='documented' HREF='#mapped_file_sink_basic_open'>open</A>( <SPAN CLASS='keyword'>const</SPAN> std::string& path,
+    void <A CLASS='documented' HREF='#mapped_file_sink_basic_open'>open</A>( <SPAN CLASS='keyword'>const</SPAN> std::string&amp; path,
                size_type length = max_length,
                boost::intmax_t offset = <SPAN CLASS='numeric_literal'>0</SPAN>,
                mapmode flags = readwrite );
@@ -332,7 +332,7 @@ The memory-mapped file Devices are based on the work of Craig Henderson (<A CLAS
 <P>Constructs a <CODE>mapped_file_sink</CODE> from the given parameters.</P>
 
 <A NAME="mapped_file_sink_basic_ctor"></A>
-<PRE CLASS="broken_ie">    <SPAN CLASS='keyword'>explicit</SPAN> mapped_file_sink( <SPAN CLASS='keyword'>const</SPAN> std::string& path,
+<PRE CLASS="broken_ie">    <SPAN CLASS='keyword'>explicit</SPAN> mapped_file_sink( <SPAN CLASS='keyword'>const</SPAN> std::string&amp; path,
                                size_type length = max_length,
                                boost::intmax_t offset = <SPAN CLASS='numeric_literal'>0</SPAN>,
                                mapmode flags );</PRE>
@@ -367,7 +367,7 @@ The memory-mapped file Devices are based on the work of Craig Henderson (<A CLAS
 <P>Connects this <CODE>mapped_file_sink</CODE> to a memory-mapped file obtained as described by the given parameters.</P>
 
 <A NAME="mapped_file_sink_basic_open"></A>
-<PRE CLASS="broken_ie">        void open( <SPAN CLASS='keyword'>const</SPAN> std::string& path,
+<PRE CLASS="broken_ie">        void open( <SPAN CLASS='keyword'>const</SPAN> std::string&amp; path,
                    size_type length = max_length,
                    boost::intmax_t offset = <SPAN CLASS='numeric_literal'>0</SPAN>
                    mapmode flags );</PRE>
@@ -454,22 +454,22 @@ The memory-mapped file Devices are based on the work of Craig Henderson (<A CLAS
     <SPAN CLASS='keyword'>enum</SPAN> mapmode { readonly, readwrite, priv };
     <A CLASS='documented' HREF='#mapped_file_default_ctor'>mapped_file</A>();
     <SPAN CLASS='keyword'>explicit</SPAN> <A CLASS='documented' HREF='#mapped_file_params_ctor'>mapped_file</A>(<A CLASS='documented' HREF='#mapped_file_params'>mapped_file_params</A> params);
-    <SPAN CLASS='keyword'>explicit</SPAN> <A CLASS='documented' HREF='#mapped_file_basic_ctor'>mapped_file</A>( <SPAN CLASS='keyword'>const</SPAN> std::string& path,
+    <SPAN CLASS='keyword'>explicit</SPAN> <A CLASS='documented' HREF='#mapped_file_basic_ctor'>mapped_file</A>( <SPAN CLASS='keyword'>const</SPAN> std::string&amp; path,
                           std::ios_base::openmode mode =
                               std::ios_base::in | std::ios_base::out,
                           size_type length = max_length,
                           boost::intmax_t offset = <SPAN CLASS='numeric_literal'>0</SPAN> );
-    <SPAN CLASS='keyword'>explicit</SPAN> <A CLASS='documented' HREF='#mapped_file_mapmode_ctor'>mapped_file</A>( <SPAN CLASS='keyword'>const</SPAN> std::string& path,
+    <SPAN CLASS='keyword'>explicit</SPAN> <A CLASS='documented' HREF='#mapped_file_mapmode_ctor'>mapped_file</A>( <SPAN CLASS='keyword'>const</SPAN> std::string&amp; path,
                           mapmode mode,
                           size_type length = max_length,
                           boost::intmax_t offset = <SPAN CLASS='numeric_literal'>0</SPAN> );
     <SPAN CLASS='keyword'>void</SPAN> <A CLASS='documented' HREF='#mapped_file_params_open'>open</A>(<A CLASS='documented' HREF='#mapped_file_params'>mapped_file_params</A> params);
-    <SPAN CLASS='keyword'>void</SPAN> <A CLASS='documented' HREF='#mapped_file_basic_open'>open</A>( <SPAN CLASS='keyword'>const</SPAN> std::string& path,
+    <SPAN CLASS='keyword'>void</SPAN> <A CLASS='documented' HREF='#mapped_file_basic_open'>open</A>( <SPAN CLASS='keyword'>const</SPAN> std::string&amp; path,
                std::ios_base::openmode mode = 
                    std::ios_base | std::ios_base,
                size_type length = max_length,
                boost::intmax_t offset = <SPAN CLASS='numeric_literal'>0</SPAN> );
-    <SPAN CLASS='keyword'>void</SPAN> <A CLASS='documented' HREF='#mapped_file_mapmode_open'>open</A>( <SPAN CLASS='keyword'>const</SPAN> std::string& path,
+    <SPAN CLASS='keyword'>void</SPAN> <A CLASS='documented' HREF='#mapped_file_mapmode_open'>open</A>( <SPAN CLASS='keyword'>const</SPAN> std::string&amp; path,
                mapmode mode,
                size_type length = max_length,
                boost::intmax_t offset = <SPAN CLASS='numeric_literal'>0</SPAN> );
@@ -497,7 +497,7 @@ The memory-mapped file Devices are based on the work of Craig Henderson (<A CLAS
 <P>Constructs a <CODE>mapped_file</CODE> from the given parameters.</P>
 
 <A NAME="mapped_file_basic_ctor"></A>
-<PRE CLASS="broken_ie">    <SPAN CLASS='keyword'>explicit</SPAN> mapped_file( <SPAN CLASS='keyword'>const</SPAN> std::string& path,
+<PRE CLASS="broken_ie">    <SPAN CLASS='keyword'>explicit</SPAN> mapped_file( <SPAN CLASS='keyword'>const</SPAN> std::string&amp; path,
                           std::ios_base::openmode mode = 
                               std::ios_base | std::ios_base,
                           size_type length = max_length,
@@ -526,7 +526,7 @@ The memory-mapped file Devices are based on the work of Craig Henderson (<A CLAS
 </TABLE>
 
 <A NAME="mapped_file_mapmode_ctor"></A>
-<PRE CLASS="broken_ie">    <SPAN CLASS='keyword'>explicit</SPAN> mapped_file( <SPAN CLASS='keyword'>const</SPAN> std::string& path,
+<PRE CLASS="broken_ie">    <SPAN CLASS='keyword'>explicit</SPAN> mapped_file( <SPAN CLASS='keyword'>const</SPAN> std::string&amp; path,
                           mapmode mode,
                           size_type length = max_length,
                           boost::intmax_t offset = <SPAN CLASS='numeric_literal'>0</SPAN> );</PRE>
@@ -561,7 +561,7 @@ The memory-mapped file Devices are based on the work of Craig Henderson (<A CLAS
 <P>Connects this <CODE>mapped_file</CODE> to a memory-mapped file obtained as described by the given parameters.</P>
 
 <A NAME="mapped_file_basic_open"></A>
-<PRE CLASS="broken_ie">        void open( <SPAN CLASS='keyword'>const</SPAN> std::string& path,
+<PRE CLASS="broken_ie">        void open( <SPAN CLASS='keyword'>const</SPAN> std::string&amp; path,
                    std::ios_base::openmode mode = 
                        std::ios_base | std::ios_base,
                    size_type length = max_length,
@@ -590,7 +590,7 @@ The memory-mapped file Devices are based on the work of Craig Henderson (<A CLAS
 </TABLE>
 
 <A NAME="mapped_file_mapmode_open"></A>
-<PRE CLASS="broken_ie">        void open( <SPAN CLASS='keyword'>const</SPAN> std::string& path,
+<PRE CLASS="broken_ie">        void open( <SPAN CLASS='keyword'>const</SPAN> std::string&amp; path,
                    mapmode mode,
                    size_type length = max_length,
                    boost::intmax_t offset = <SPAN CLASS='numeric_literal'>0</SPAN> );</PRE>

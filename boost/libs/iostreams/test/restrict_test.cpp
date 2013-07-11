@@ -492,7 +492,7 @@ void seek_direct_device()
             data_reps * data_length() + 2 * small_padding, '\n');
         stream_offset              off = small_padding,
                                    len = data_reps * data_length();
-        array                      ar(&src[0], &src[0] + src.size());
+        io::array                  ar(&src[0], &src[0] + src.size());
         filtering_stream<seekable> io(BOOST_RESTRICT(ar, off, len));
         BOOST_CHECK_MESSAGE(
             test_seekable_in_chars(io),
@@ -504,7 +504,7 @@ void seek_direct_device()
         vector<char>               src(
             data_reps * data_length() + small_padding, '\n');
         stream_offset              off = small_padding;
-        array                      ar(&src[0], &src[0] + src.size());
+        io::array                  ar(&src[0], &src[0] + src.size());
         filtering_stream<seekable> io(BOOST_RESTRICT(ar, off));
         BOOST_CHECK_MESSAGE(
             test_seekable_in_chars(io),
