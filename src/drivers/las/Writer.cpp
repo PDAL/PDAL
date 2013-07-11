@@ -573,15 +573,10 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& pointBuffer)
                 boost::uint16_t const& intensity = pointBuffer.getField<boost::uint16_t>(*dimensions.Intensity, pointIndex);
                 Utils::write_field<boost::uint16_t>(p, intensity);
             }
-            else
+            else if (dimensions.Intensity->getByteSize() == 1)
             {
-                if (dimensions.Intensity->getByteSize() == 1)
-                {
-
-                    boost::uint8_t const& intensity = pointBuffer.getField<boost::uint8_t>(*dimensions.Intensity, pointIndex);
-                    boost::uint16_t output = dimensions.Intensity->convert<boost::uint16_t>((void*) intensity);
-                    Utils::write_field<boost::uint16_t>(p, output);
-                }
+                boost::uint8_t intensity = pointBuffer.getField<boost::uint8_t>(*dimensions.Intensity, pointIndex);
+                Utils::write_field<boost::uint16_t>(p, intensity);
             }
         } 
         else 

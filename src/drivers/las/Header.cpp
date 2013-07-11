@@ -85,14 +85,9 @@ LasHeader::LasHeader(LasHeader const& other) :
     m_spatialReference(other.m_spatialReference),
     m_compressionInfo(other.m_compressionInfo)
 {
-    void* p = 0;
-
-    p = std::memcpy(m_signature, other.m_signature, eFileSignatureSize);
-    assert(p == m_signature);
-    p = std::memcpy(m_systemId, other.m_systemId, eSystemIdSize);
-    assert(p == m_systemId);
-    p = std::memcpy(m_softwareId, other.m_softwareId, eSoftwareIdSize);
-    assert(p == m_softwareId);
+    std::memcpy(m_signature, other.m_signature, eFileSignatureSize);
+    std::memcpy(m_systemId, other.m_systemId, eSystemIdSize);
+    std::memcpy(m_softwareId, other.m_softwareId, eSoftwareIdSize);
     std::vector<boost::uint32_t>(other.m_pointRecordsByReturn).swap(m_pointRecordsByReturn);
     assert(ePointsByReturnSize >= m_pointRecordsByReturn.size());
     
@@ -104,17 +99,13 @@ LasHeader& LasHeader::operator=(LasHeader const& rhs)
 {
  if (&rhs != this)
  {
-	 void* p = 0;
-	 p = std::memcpy(m_signature, rhs.m_signature, eFileSignatureSize);
-	 assert(p == m_signature);
+	 std::memcpy(m_signature, rhs.m_signature, eFileSignatureSize);
 	 m_sourceId = rhs.m_sourceId;
 	 m_reserved = rhs.m_reserved;
 	 m_versionMajor = rhs.m_versionMajor;
 	 m_versionMinor = rhs.m_versionMinor;
-	 p = std::memcpy(m_systemId, rhs.m_systemId, eSystemIdSize);
-	 assert(p == m_systemId);
-	 p = std::memcpy(m_softwareId, rhs.m_softwareId, eSoftwareIdSize);
-	 assert(p == m_softwareId);
+	 std::memcpy(m_systemId, rhs.m_systemId, eSystemIdSize);
+	 std::memcpy(m_softwareId, rhs.m_softwareId, eSoftwareIdSize);
 	 m_createDOY = rhs.m_createDOY;
 	 m_createYear = rhs.m_createYear;
 	 m_headerSize = rhs.m_headerSize;

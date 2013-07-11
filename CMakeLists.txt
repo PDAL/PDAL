@@ -251,7 +251,7 @@ if (NOT PDAL_EMBED_BOOST)
 endif()
 
 if(Boost_FOUND)
-  include_directories(${Boost_INCLUDE_DIRS})
+  include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 
   # make these available for the user to set.
   mark_as_advanced(CLEAR Boost_INCLUDE_DIR) 
@@ -282,7 +282,7 @@ else()
   # this prevents auto-linking pragmas from depending on wrong lib names
   add_definitions(-DBOOST_ALL_NO_LIB)
 
-  include_directories( ${Boost_INCLUDE_DIRS}/)
+  include_directories(SYSTEM ${Boost_INCLUDE_DIRS}/)
   set(PDAL_EMBED_BOOST TRUE CACHE BOOL "use embedded boost")
   add_subdirectory(boost)
   message(STATUS "Using embedded boost tree")
@@ -572,12 +572,12 @@ if(WITH_PYTHON)
   find_package(PythonLibs)
   if(PYTHONLIBS_FOUND)
     set(CMAKE_REQUIRED_LIBRARIES ${PYTHON_LIBRARY})
-    include_directories(${PYTHON_INCLUDE_DIR})
+    include_directories(SYSTEM ${PYTHON_INCLUDE_DIR})
     add_definitions(-DHAVE_PYTHON=1)    
     set(PDAL_HAVE_PYTHON 1)
     
     find_package(NumPy 1.5)
-    include_directories(${NUMPY_INCLUDE_DIR})
+    include_directories(SYSTEM ${NUMPY_INCLUDE_DIR})
     message(STATUS "Found Python: ${PYTHON_LIBRARY}")
   endif()
 endif()
