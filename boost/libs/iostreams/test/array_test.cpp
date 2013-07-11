@@ -74,7 +74,7 @@ void array_test()
 
     {
         vector<char> first(data_reps * data_length(), '?');
-        stream<array> io(&first[0], &first[0] + first.size());
+        stream<pdalboost::iostreams::array> io(&first[0], &first[0] + first.size());
         BOOST_CHECK_MESSAGE(
             test_seekable_in_chars(io),
             "failed seeking within stream<array>, in chars"
@@ -83,7 +83,7 @@ void array_test()
 
     {
         vector<char> first(data_reps * data_length(), '?');
-        stream<array> io(&first[0], &first[0] + first.size());
+        stream<pdalboost::iostreams::array> io(&first[0], &first[0] + first.size());
         BOOST_CHECK_MESSAGE(
             test_seekable_in_chars(io),
             "failed seeking within stream<array>, in chunks"

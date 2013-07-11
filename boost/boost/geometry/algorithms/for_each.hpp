@@ -67,17 +67,17 @@ struct fe_range_per_point
     template <typename Range, typename Functor>
     static inline void apply(Range& range, Functor& f)
     {
-		// The previous implementation called the std library:
+        // The previous implementation called the std library:
         // return (std::for_each(pdalboost::begin(range), pdalboost::end(range), f));
-		// But that is not accepted for capturing lambda's.
-		// It needs to do it like that to return the state of Functor f (f is passed by value in std::for_each).
+        // But that is not accepted for capturing lambda's.
+        // It needs to do it like that to return the state of Functor f (f is passed by value in std::for_each).
 
-		// So we now loop manually.
+        // So we now loop manually.
 
-		for (typename pdalboost::range_iterator<Range>::type it = pdalboost::begin(range); it != pdalboost::end(range); ++it)
-		{
-			f(*it);
-		}
+        for (typename pdalboost::range_iterator<Range>::type it = pdalboost::begin(range); it != pdalboost::end(range); ++it)
+        {
+            f(*it);
+        }
     }
 };
 
@@ -261,7 +261,7 @@ inline Functor for_each_segment(Geometry& geometry, Functor f)
     concept::check<Geometry>();
 
     dispatch::for_each_segment<Geometry>::apply(geometry, f);
-	return f;
+    return f;
 }
 
 

@@ -20,6 +20,7 @@
 #include <boost/range/metafunctions.hpp>
 #include <boost/variant/static_visitor.hpp>
 #include <boost/variant/apply_visitor.hpp>
+#include <boost/variant/variant_fwd.hpp>
 
 #include <boost/geometry/core/closure.hpp>
 #include <boost/geometry/core/exterior_ring.hpp>
@@ -28,7 +29,6 @@
 #include <boost/geometry/core/ring_type.hpp>
 
 #include <boost/geometry/geometries/concepts/check.hpp>
-#include <boost/geometry/geometries/variant.hpp>
 
 #include <boost/geometry/algorithms/detail/calculate_null.hpp>
 #include <boost/geometry/algorithms/detail/calculate_sum.hpp>
@@ -143,32 +143,6 @@ struct area : detail::calculate_null
 };
 
 
-template <BOOST_VARIANT_ENUM_PARAMS(typename T)>
-struct area<pdalboost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>, void>
-{
-    template <typename Strategy>
-    struct visitor: pdalboost::static_visitor<typename Strategy::return_type>
-    {
-        Strategy const& m_strategy;
-
-        visitor(Strategy const& strategy): m_strategy(strategy) {}
-
-        template <typename Geometry>
-        typename Strategy::return_type operator()(Geometry const& geometry) const
-        {
-            return dispatch::area<Geometry>::apply(geometry, m_strategy);
-        }
-    };
-
-    template <typename Variant, typename Strategy>
-    static inline typename Strategy::return_type
-    apply(Variant const& variant_geometry, Strategy const& strategy)
-    {
-        return pdalboost::apply_visitor(visitor<Strategy>(strategy), variant_geometry);
-    }
-};
-
-
 template <typename Geometry>
 struct area<Geometry, box_tag> : detail::area::box_area
 {};
@@ -198,6 +172,44 @@ struct area<Polygon, polygon_tag> : detail::calculate_polygon_sum
                     geometry::closure<Polygon>::value
                 >
             >(polygon, strategy);
+    }
+};
+
+
+template <typename Geometry>
+struct devarianted_area
+{
+    template <typename Strategy>
+    static inline typename Strategy::return_type apply(Geometry const& geometry,
+                                                       Strategy const& strategy)
+    {
+        return area<Geometry>::apply(geometry, strategy);
+    }
+};
+
+template <BOOST_VARIANT_ENUM_PARAMS(typename T)>
+struct devarianted_area<pdalboost::variant<BOOST_VARIANT_ENUM_PARAMS(T)> >
+{
+    template <typename Strategy>
+    struct visitor: pdalboost::static_visitor<typename Strategy::return_type>
+    {
+        Strategy const& m_strategy;
+
+        visitor(Strategy const& strategy): m_strategy(strategy) {}
+
+        template <typename Geometry>
+        typename Strategy::return_type operator()(Geometry const& geometry) const
+        {
+            return devarianted_area<Geometry>::apply(geometry, m_strategy);
+        }
+    };
+
+    template <typename Strategy>
+    static inline typename Strategy::return_type
+    apply(pdalboost::variant<BOOST_VARIANT_ENUM_PARAMS(T)> const& geometry,
+          Strategy const& strategy)
+    {
+        return pdalboost::apply_visitor(visitor<Strategy>(strategy), geometry);
     }
 };
 
@@ -242,7 +254,7 @@ inline typename default_area_result<Geometry>::type area(Geometry const& geometr
 
     // detail::throw_on_empty_input(geometry);
         
-    return dispatch::area<Geometry>::apply(geometry, strategy_type());
+    return dispatch::devarianted_area<Geometry>::apply(geometry, strategy_type());
 }
 
 /*!
@@ -277,7 +289,7 @@ inline typename Strategy::return_type area(
 
     // detail::throw_on_empty_input(geometry);
     
-    return dispatch::area<Geometry>::apply(geometry, strategy);
+    return dispatch::devarianted_area<Geometry>::apply(geometry, strategy);
 }
 
 

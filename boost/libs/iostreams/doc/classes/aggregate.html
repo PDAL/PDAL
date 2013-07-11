@@ -63,7 +63,7 @@
     <SPAN CLASS="keyword">virtual</SPAN> ~aggregate_filter();
     <SPAN CLASS="omitted">...</SPAN>
 <SPAN CLASS="keyword">private</SPAN>:
-    <SPAN CLASS="keyword">virtual</SPAN> <SPAN CLASS="keyword">void</SPAN> <A CLASS="documented" HREF="#do_filter">do_filter</A>(<SPAN CLASS="keyword">const</SPAN> vector_type& src, vector_type& dest) = 0;
+    <SPAN CLASS="keyword">virtual</SPAN> <SPAN CLASS="keyword">void</SPAN> <A CLASS="documented" HREF="#do_filter">do_filter</A>(<SPAN CLASS="keyword">const</SPAN> vector_type&amp; src, vector_type&amp; dest) = 0;
 };
 
 } } <SPAN CLASS="comment">// End namespace boost::io</SPAN></PRE>
@@ -90,7 +90,7 @@
 <A NAME="do_filter"></A>
 <H4><CODE>aggregate_filter::do_filter</CODE></H4>
 
-<PRE CLASS="broken_ie">    <SPAN CLASS="keyword">virtual</SPAN> <SPAN CLASS="keyword">void</SPAN> <B>do_filter</B>(<SPAN CLASS="keyword">const</SPAN> vector_type& src, vector_type& dest) = 0;</PRE>
+<PRE CLASS="broken_ie">    <SPAN CLASS="keyword">virtual</SPAN> <SPAN CLASS="keyword">void</SPAN> <B>do_filter</B>(<SPAN CLASS="keyword">const</SPAN> vector_type&amp; src, vector_type&amp; dest) = 0;</PRE>
 
 <P>Reads unflitered characters from <CODE>src</CODE> and appends filtered characters to <CODE>dest</CODE>, returning after all the characters in <CODE>src</CODE> have been consumed.</P>
 

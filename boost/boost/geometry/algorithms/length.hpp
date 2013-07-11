@@ -16,9 +16,17 @@
 
 #include <iterator>
 
+#include <boost/concept_check.hpp>
 #include <boost/range.hpp>
 
+#include <boost/mpl/fold.hpp>
+#include <boost/mpl/greater.hpp>
 #include <boost/mpl/if.hpp>
+#include <boost/mpl/insert.hpp>
+#include <boost/mpl/int.hpp>
+#include <boost/mpl/set.hpp>
+#include <boost/mpl/size.hpp>
+#include <boost/mpl/transform.hpp>
 #include <boost/type_traits.hpp>
 
 #include <boost/geometry/core/cs.hpp>
@@ -32,6 +40,10 @@
 #include <boost/geometry/views/closeable_view.hpp>
 #include <boost/geometry/strategies/distance.hpp>
 #include <boost/geometry/strategies/default_length_result.hpp>
+
+#include <boost/variant/apply_visitor.hpp>
+#include <boost/variant/static_visitor.hpp>
+#include <boost/variant/variant_fwd.hpp>
 
 
 namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace geometry
@@ -73,6 +85,7 @@ struct range_length
     static inline return_type apply(
             Range const& range, Strategy const& strategy)
     {
+        pdalboost::ignore_unused_variable_warning(strategy);
         typedef typename closeable_view<Range const, Closure>::type view_type;
         typedef typename pdalboost::range_iterator
             <
@@ -136,6 +149,69 @@ struct length<Geometry, segment_tag>
 {};
 
 
+template <typename Geometry>
+struct devarianted_length
+{
+    typedef typename default_length_result<Geometry>::type result_type;
+
+    template <typename Strategy>
+    static inline result_type apply(Geometry const& geometry,
+                                    Strategy const& strategy)
+    {
+        return length<Geometry>::apply(geometry, strategy);
+    }
+};
+
+template <BOOST_VARIANT_ENUM_PARAMS(typename T)>
+struct devarianted_length<variant<BOOST_VARIANT_ENUM_PARAMS(T)> >
+{
+    typedef typename mpl::fold<
+                typename mpl::transform<
+                    typename variant<BOOST_VARIANT_ENUM_PARAMS(T)>::types,
+                    default_length_result<mpl::_>
+                >::type,
+                mpl::set0<>,
+                mpl::insert<mpl::_1, mpl::_2>
+            >::type possible_result_types;
+
+    typedef typename mpl::if_<
+                mpl::greater<
+                    mpl::size<possible_result_types>,
+                    mpl::int_<1>
+                >,
+                typename make_variant_over<possible_result_types>::type,
+                typename mpl::front<possible_result_types>::type
+            >::type result_type;
+
+    template <typename Strategy>
+    struct visitor
+        : static_visitor<result_type>
+    {
+        Strategy const& m_strategy;
+
+        visitor(Strategy const& strategy)
+            : m_strategy(strategy)
+        {}
+
+        template <typename Geometry>
+        inline typename devarianted_length<Geometry>::result_type
+        operator()(Geometry const& geometry) const
+        {
+            return devarianted_length<Geometry>::apply(geometry, m_strategy);
+        }
+    };
+
+    template <typename Strategy>
+    static inline result_type apply(
+        variant<BOOST_VARIANT_ENUM_PARAMS(T)> const& geometry,
+        Strategy const& strategy
+    )
+    {
+        return apply_visitor(visitor<Strategy>(strategy), geometry);
+    }
+};
+
+
 } // namespace dispatch
 #endif // DOXYGEN_NO_DISPATCH
 
@@ -152,8 +228,8 @@ struct length<Geometry, segment_tag>
 \qbk{[length] [length_output]}
  */
 template<typename Geometry>
-inline typename default_length_result<Geometry>::type length(
-        Geometry const& geometry)
+inline typename dispatch::devarianted_length<Geometry>::result_type
+length(Geometry const& geometry)
 {
     concept::check<Geometry const>();
 
@@ -164,7 +240,7 @@ inline typename default_length_result<Geometry>::type length(
             point_tag, typename point_type<Geometry>::type
         >::type strategy_type;
 
-    return dispatch::length<Geometry>::apply(geometry, strategy_type());
+    return dispatch::devarianted_length<Geometry>::apply(geometry, strategy_type());
 }
 
 
@@ -183,14 +259,14 @@ inline typename default_length_result<Geometry>::type length(
 \qbk{[length_with_strategy] [length_with_strategy_output]}
  */
 template<typename Geometry, typename Strategy>
-inline typename default_length_result<Geometry>::type length(
-        Geometry const& geometry, Strategy const& strategy)
+inline typename dispatch::devarianted_length<Geometry>::result_type
+length(Geometry const& geometry, Strategy const& strategy)
 {
     concept::check<Geometry const>();
 
     // detail::throw_on_empty_input(geometry);
     
-    return dispatch::length<Geometry>::apply(geometry, strategy);
+    return dispatch::devarianted_length<Geometry>::apply(geometry, strategy);
 }
 
 

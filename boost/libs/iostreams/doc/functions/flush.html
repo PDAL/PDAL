@@ -55,10 +55,10 @@
 <PRE CLASS="broken_ie"><SPAN CLASS="keyword">namespace</SPAN> boost { <SPAN CLASS="keyword">namespace</SPAN> iostreams {
               
 <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> <A CLASS="documented" HREF="#template_params">T</A>&gt;
-<SPAN CLASS='keyword'>bool</SPAN> <A CLASS="documented" HREF="#flush_device">flush</A>(T& t);
+<SPAN CLASS='keyword'>bool</SPAN> <A CLASS="documented" HREF="#flush_device">flush</A>(T&amp; t);
 
 <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> <A CLASS="documented" HREF="#template_params">T</A>, <SPAN CLASS="keyword">typename</SPAN> <A CLASS="documented" HREF="#template_params">Sink</A>&gt;
-<SPAN CLASS='keyword'>bool</SPAN> <A CLASS="documented" HREF="#flush_filter">flush</A>(T& t, Sink& snk);
+<SPAN CLASS='keyword'>bool</SPAN> <A CLASS="documented" HREF="#flush_filter">flush</A>(T&amp; t, Sink&amp; snk);
 
 } } <SPAN CLASS="comment">// End namespace boost::io</SPAN></PRE>
 
@@ -81,7 +81,7 @@
 <H4>Semantics &#8212; Device Types</H4>
 
 <PRE CLASS="broken_ie"><SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> T&gt;
-<SPAN CLASS='keyword'>bool</SPAN> flush(T& t);</PRE>
+<SPAN CLASS='keyword'>bool</SPAN> flush(T&amp; t);</PRE>
 
 <P>The semantics of <CODE>flush</CODE> depends on the <A HREF="../guide/traits.html#category">category</A> of <CODE>T</CODE> as follows:</P>
 
@@ -109,7 +109,7 @@
 <H4>Semantics &#8212; Filter Types</H4>
 
 <PRE CLASS="broken_ie"><SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> T, <SPAN CLASS="keyword">typename</SPAN> Sink&gt;
-<SPAN CLASS='keyword'>bool</SPAN> flush(T& t, Sink& snk);</PRE>
+<SPAN CLASS='keyword'>bool</SPAN> flush(T&amp; t, Sink&amp; snk);</PRE>
 
 <P>The semantics of <CODE>flush</CODE> depends on the <A HREF="../guide/traits.html#category">category</A> of <CODE>T</CODE> as follows:</P>
 

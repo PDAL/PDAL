@@ -32,7 +32,7 @@
 <PRE CLASS="broken_ie"><SPAN CLASS="keyword">namespace</SPAN> boost { <SPAN CLASS="keyword">namespace</SPAN> iostreams {
               
 <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> <A CLASS="documented" HREF="#template_params">T</A>&gt;     
-<SPAN CLASS="keyword">void</SPAN> <A CLASS="documented" HREF="#close_device">close</A>(T& t);
+<SPAN CLASS="keyword">void</SPAN> <A CLASS="documented" HREF="#close_device">close</A>(T&amp; t);
 
 } } <SPAN CLASS="comment">// End namespace boost::io</SPAN></PRE>
 
@@ -105,13 +105,13 @@
 <PRE CLASS="broken_ie"><SPAN CLASS="keyword">namespace</SPAN> boost { <SPAN CLASS="keyword">namespace</SPAN> iostreams {
               
 <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> <A CLASS="documented" HREF="#template_params">T</A>&gt;     
-<SPAN CLASS="keyword">void</SPAN> <A CLASS="documented" HREF="#close_convenience">close</A>(T& t);
+<SPAN CLASS="keyword">void</SPAN> <A CLASS="documented" HREF="#close_convenience">close</A>(T&amp; t);
               
 <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> <A CLASS="documented" HREF="#template_params_devices">T</A>&gt;     
-<SPAN CLASS="keyword">void</SPAN> <A CLASS="documented" HREF="#close_device">close</A>(T& t, std::ios_base::openmode which);
+<SPAN CLASS="keyword">void</SPAN> <A CLASS="documented" HREF="#close_device">close</A>(T&amp; t, std::ios_base::openmode which);
 
 <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> <A CLASS="documented" HREF="#template_params_filters">T</A>, <SPAN CLASS="keyword">typename</SPAN> <A CLASS="documented" HREF="#template_params_filters">Device</A>&gt;
-<SPAN CLASS="keyword">void</SPAN> <A CLASS="documented" HREF="#close_filter">close</A>(T& t, Device& next, std::ios_base::openmode which);
+<SPAN CLASS="keyword">void</SPAN> <A CLASS="documented" HREF="#close_filter">close</A>(T&amp; t, Device&amp; next, std::ios_base::openmode which);
 
 } } <SPAN CLASS="comment">// End namespace boost::io</SPAN></PRE>
 
@@ -133,7 +133,7 @@
 <H4>Semantics</H4>
 
 <PRE CLASS="broken_ie"><SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> T&gt;     
-<SPAN CLASS="keyword">void</SPAN> <A CLASS="documented" HREF="#close_device">close</A>(T& t);</PRE>
+<SPAN CLASS="keyword">void</SPAN> <A CLASS="documented" HREF="#close_device">close</A>(T&amp; t);</PRE>
 
 <P>This overload of <CODE>close</CODE> calls <CODE>close(t, std::ios_base::in)</CODE> followed by <CODE>close(t, std::ios_base::out)</CODE>. It ensures that <CODE>t</CODE> is closed properly, regardless of the <A HREF="../guide/modes.html">mode</A> or <CODE>t</CODE>.
 
@@ -154,7 +154,7 @@
 <H4>Semantics</H4>
 
 <PRE CLASS="broken_ie"><SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> T&gt;     
-<SPAN CLASS="keyword">void</SPAN> <A CLASS="documented" HREF="#close_device">close</A>(T& t, std::ios_base::openmode which);</PRE>
+<SPAN CLASS="keyword">void</SPAN> <A CLASS="documented" HREF="#close_device">close</A>(T&amp; t, std::ios_base::openmode which);</PRE>
 
 <P>If <CODE>t</CODE> is a <A HREF="../guide/filtering_streams.html">filtering stream or stream buffer</A>, <CODE>close</CODE> calls <A HREF="../classes/filtering_stream.html#pop"><CODE>pop</CODE></A> if <CODE>t</CODE> is <A HREF="../classes/filtering_streambuf.html#is_complete">complete</A>. The semantics depends on its <A HREF="../guide/traits.html#category">category</A> as follows:</P>
 
@@ -228,7 +228,7 @@ instead of
 <H4>Semantics</H4>
 
 <PRE CLASS="broken_ie"><SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> T, <SPAN CLASS="keyword">typename</SPAN> Device&gt;
-<SPAN CLASS="keyword">void</SPAN> close(T& t, Device& next, std::ios_base::openmode which);</PRE>
+<SPAN CLASS="keyword">void</SPAN> close(T&amp; t, Device&amp; next, std::ios_base::openmode which);</PRE>
 
 <P>The semantics of <CODE>close</CODE> for a Filter type <CODE>T</CODE> depends on its <A HREF="../guide/traits.html#category">category</A> as follows:</P>
 

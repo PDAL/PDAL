@@ -184,7 +184,7 @@ Model of <A HREF="../concepts/dual_use_filter.html">DualUseFilter</A> which perf
     <SPAN CLASS="keyword">typedef</SPAN> <SPAN CLASS="keyword">char</SPAN>                    char_type;
     <SPAN CLASS="keyword">typedef</SPAN> <SPAN CLASS="omitted">implementation-defined</SPAN>  category;
 
-    <A CLASS="documented" HREF="#basic_bzip2_compressor_constructors">basic_bzip2_compressor</A>( <SPAN CLASS="keyword">const</SPAN> <A CLASS="documented" HREF="#bzip2_params">bzip2_params</A>& = <SPAN CLASS="omitted">bzip2::default_block_size</SPAN>, 
+    <A CLASS="documented" HREF="#basic_bzip2_compressor_constructors">basic_bzip2_compressor</A>( <SPAN CLASS="keyword">const</SPAN> <A CLASS="documented" HREF="#bzip2_params">bzip2_params</A>&amp; = <SPAN CLASS="omitted">bzip2::default_block_size</SPAN>,
                             std::streamsize buffer_size = <SPAN CLASS="omitted">default value</SPAN> );
     <SPAN CLASS="omitted">...</SPAN>
 };
@@ -205,7 +205,7 @@ Model of <A HREF="../concepts/dual_use_filter.html">DualUseFilter</A> which perf
 <A NAME="basic_bzip2_compressor_constructors"></A>
 <H4><CODE>basic_bzip2_compressor::basic_bzip2_compressor</CODE></H4>
 
-<PRE CLASS="broken_ie">    basic_bzip2_compressor(<SPAN CLASS="keyword">const</SPAN> <A CLASS="documented" HREF="#bzip2_params">bzip2_params</A>&, std::streamsize buffer_size);</PRE>
+<PRE CLASS="broken_ie">    basic_bzip2_compressor(<SPAN CLASS="keyword">const</SPAN> <A CLASS="documented" HREF="#bzip2_params">bzip2_params</A>&amp;, std::streamsize buffer_size);</PRE>
 
 <P>Constructs an instance of <CODE>basic_bzip2_compressor</CODE> with the given parameters and buffer size. Since a <A CLASS="documented" HREF="#bzip2_params"><CODE>bzip2_params</CODE></A> object is implicitly constructible from an <CODE>int</CODE> representing a block size, an <CODE>int</CODE> may be passed as the first constructor argument.</P>
 

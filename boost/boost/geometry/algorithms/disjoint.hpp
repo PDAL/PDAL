@@ -87,13 +87,13 @@ struct assign_disjoint_policy
 
     // We don't assign extra info:
     template 
-	<
-		typename Info,
-		typename Point1,
-		typename Point2,
-		typename IntersectionInfo,
-		typename DirInfo
-	>
+    <
+        typename Info,
+        typename Point1,
+        typename Point2,
+        typename IntersectionInfo,
+        typename DirInfo
+    >
     static inline void apply(Info& , Point1 const& , Point2 const&,
                 IntersectionInfo const&, DirInfo const&)
     {}

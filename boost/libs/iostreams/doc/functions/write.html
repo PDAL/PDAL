@@ -49,16 +49,16 @@
 
     <SPAN CLASS="keyword">struct</SPAN> reversing_filter : <SPAN CLASS="keyword">public</SPAN> multichar_output_filter {
         <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Sink&gt;
-        std::streamsize write(Sink& snk, <SPAN CLASS="keyword">const</SPAN> <SPAN CLASS="keyword">char</SPAN>* s, streamsize n)
+        std::streamsize write(Sink&amp; snk, <SPAN CLASS="keyword">const</SPAN> <SPAN CLASS="keyword">char</SPAN>* s, streamsize n)
         {
             data.insert(data.end(), s, s + n);
             <SPAN CLASS="keyword">return</SPAN> n;
         }
         <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Sink&gt;
-        <SPAN CLASS="keyword">void</SPAN> close(Sink& snk)
+        <SPAN CLASS="keyword">void</SPAN> close(Sink&amp; snk)
         {
             std::reverse(data.begin(), data.end());
-            boost::iostreams::write(&data[0], (streamsize) data.size());
+            boost::iostreams::write(&amp;data[0], (streamsize) data.size());
             data.clear();
         }
         std::vector&lt;<SPAN CLASS="keyword">char</SPAN>&gt; data;
@@ -87,14 +87,14 @@
               
 <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> <A CLASS="documented" HREF="#template_params">T</A>&gt;     
 std::streamsize 
-<A CLASS="documented" HREF="#write_device">write</A>( T& <A CLASS="documented" HREF="#function_params">t</A>, 
+<A CLASS="documented" HREF="#write_device">write</A>( T&amp; <A CLASS="documented" HREF="#function_params">t</A>,
        <SPAN CLASS="keyword">const</SPAN> <SPAN CLASS="keyword">typename</SPAN> <A CLASS="documented" HREF="../guide/traits.html#char_type_of_ref">char_type_of</A>&lt;T&gt;::type* <A CLASS="documented" HREF="#function_params">s</A>, 
        std::streamsize <A CLASS="documented" HREF="#function_params">n</A> );
 
 <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> <A CLASS="documented" HREF="#template_params">T</A>, <SPAN CLASS="keyword">typename</SPAN> <A CLASS="documented" HREF="#template_params">Sink</A>&gt;
 std::streamsize 
-<A CLASS="documented" HREF="#write_filter">write</A>( T& <A CLASS="documented" HREF="#function_params">t</A>,
-       Sink& <A CLASS="documented" HREF="#function_params">snk</A>, 
+<A CLASS="documented" HREF="#write_filter">write</A>( T&amp; <A CLASS="documented" HREF="#function_params">t</A>,
+       Sink&amp; <A CLASS="documented" HREF="#function_params">snk</A>,
        <SPAN CLASS="keyword">const</SPAN> <SPAN CLASS="keyword">typename</SPAN> <A CLASS="documented" HREF="../guide/traits.html#char_type_of_ref">char_type_of</A>&lt;T&gt;::type* <A CLASS="documented" HREF="#function_params">s</A>, 
        std::streamsize <A CLASS="documented" HREF="#function_params">n</A> );
 
@@ -143,7 +143,7 @@ std::streamsize
 
 <PRE CLASS="broken_ie"><SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> T&gt;     
 std::streamsize
-write( T& t, 
+write( T&amp; t,
        <SPAN CLASS="keyword">const</SPAN> <SPAN CLASS="keyword">typename</SPAN> char_type_of&lt;T&gt;::type* s,
        std::streamsize n );</PRE>
 
@@ -170,8 +170,8 @@ write( T& t,
 
 <PRE CLASS="broken_ie"><SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> T, <SPAN CLASS="keyword">typename</SPAN> Sink&gt;
 std::streamsize
-write( T& t, 
-       Sink& snk, 
+write( T&amp; t,
+       Sink&amp; snk,
        <SPAN CLASS="keyword">const</SPAN> <SPAN CLASS="keyword">typename</SPAN> char_type_of&lt;T&gt;::type* s,
        std::streamsize n );</PRE>
 

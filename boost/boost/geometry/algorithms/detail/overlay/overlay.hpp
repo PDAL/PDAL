@@ -110,6 +110,12 @@ inline OutputIterator return_if_one_input_is_empty(Geometry1 const& geometry1,
 
     typedef ring_properties<typename geometry::point_type<Geometry1>::type> properties;
 
+// Silence warning C4127: conditional expression is constant
+#if defined(_MSC_VER)
+#pragma warning(push)  
+#pragma warning(disable : 4127)  
+#endif
+
     // Union: return either of them
     // Intersection: return nothing
     // Difference: return first of them
@@ -119,6 +125,11 @@ inline OutputIterator return_if_one_input_is_empty(Geometry1 const& geometry1,
     {
         return out;
     }
+
+#if defined(_MSC_VER)
+#pragma warning(pop)  
+#endif
+
 
     std::map<ring_identifier, int> empty;
     std::map<ring_identifier, properties> all_of_one_of_them;

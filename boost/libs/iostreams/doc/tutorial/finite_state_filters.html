@@ -42,7 +42,7 @@
     A character class is a class type with a <CODE>static</CODE> member function <CODE>test</CODE> taking a character and a <CODE>std::locale</CODE> as arguments. <I>E.g.</I>,
 
 <PRE class="broken_ie">    <SPAN CLASS="keyword">struct</SPAN> is_any {
-        <SPAN CLASS="keyword">static</SPAN> <SPAN CLASS="keyword">bool</SPAN> test(<SPAN CLASS="keyword">char</SPAN>, <SPAN CLASS="keyword">const</SPAN> std::locale&);
+        <SPAN CLASS="keyword">static</SPAN> <SPAN CLASS="keyword">bool</SPAN> test(<SPAN CLASS="keyword">char</SPAN>, <SPAN CLASS="keyword">const</SPAN> std::locale&amp;);
     };</PRE>
 
 <P>
@@ -85,8 +85,8 @@
     BOOST_IOSTREAMS_FSM(dos2unix_fsm) <SPAN CLASS='comment'>// Define skip and push.</SPAN>
     <SPAN CLASS="keyword">typedef</SPAN> dos2unix_fsm self;
     <SPAN CLASS="keyword">typedef</SPAN> boost::mpl::vector&lt;
-                row&lt;initial_state, is&lt;<SPAN CLASS="literal">'\r'</SPAN>&gt;, initial_state, &self::skip&gt;,
-                row&lt;initial_state, is_any,   initial_state, &self::push&gt;
+                row&lt;initial_state, is&lt;<SPAN CLASS="literal">'\r'</SPAN>&gt;, initial_state, &amp;self::skip&gt;,
+                row&lt;initial_state, is_any,   initial_state, &amp;self::push&gt;
             &gt; transition_table;
 };</PRE>
 
@@ -111,8 +111,8 @@
     <SPAN CLASS="keyword">void</SPAN> on_lf(<SPAN CLASS="keyword">char</SPAN>) { push(<SPAN CLASS="literal">'\r'</SPAN>); push(<SPAN CLASS="literal">'\n'</SPAN>); }
 
     <SPAN CLASS="keyword">typedef</SPAN> boost::mpl::vector&lt;
-                row&lt;initial_state, is&lt;<SPAN CLASS="literal">'\n'</SPAN>&gt;, initial_state, &self::on_lf&gt;,
-                row&lt;initial_state, is_any,   initial_state, &self::push&gt;
+                row&lt;initial_state, is&lt;<SPAN CLASS="literal">'\n'</SPAN>&gt;, initial_state, &amp;self::on_lf&gt;,
+                row&lt;initial_state, is_any,   initial_state, &amp;self::push&gt;
             &gt; transition_table;
 };</PRE>
 
@@ -143,16 +143,16 @@
     <SPAN CLASS="keyword">void</SPAN> push_slash(<SPAN CLASS="keyword">char</SPAN> c) { push('/'); push(c); }
 
     <SPAN CLASS="keyword">typedef</SPAN> boost::mpl::vector&lt;
-                row&lt;no_comment,   is&lt;<SPAN CLASS='literal'>'/'</SPAN>&gt;, pre_comment,  &self::skip&gt;,
-                row&lt;no_comment,   is_any,  no_comment,   &self::push&gt;,
-                row&lt;pre_comment,  is&lt;<SPAN CLASS='literal'>'*'</SPAN>&gt;, comment,      &self::skip&gt;,
-                row&lt;pre_comment,  is&lt;<SPAN CLASS='literal'>'/'</SPAN>&gt;, pre_comment,  &self::push&gt;,
-                row&lt;pre_comment,  is_any,  no_comment,   &self::push_slash&gt;,
-                row&lt;comment,      is&lt;<SPAN CLASS='literal'>'*'</SPAN>&gt;, post_comment, &self::skip&gt;,
-                row&lt;comment,      is_any,  comment,      &self::skip&gt;,
-                row&lt;post_comment, is&lt;<SPAN CLASS='literal'>'/'</SPAN>&gt;, no_comment,   &self::skip&gt;,
-                row&lt;post_comment, is&lt;<SPAN CLASS='literal'>'*'</SPAN>&gt;, post_comment, &self::skip&gt;,
-                row&lt;post_comment, is_any,  comment,      &self::skip&gt;
+                row&lt;no_comment,   is&lt;<SPAN CLASS='literal'>'/'</SPAN>&gt;, pre_comment,  &amp;self::skip&gt;,
+                row&lt;no_comment,   is_any,  no_comment,   &amp;self::push&gt;,
+                row&lt;pre_comment,  is&lt;<SPAN CLASS='literal'>'*'</SPAN>&gt;, comment,      &amp;self::skip&gt;,
+                row&lt;pre_comment,  is&lt;<SPAN CLASS='literal'>'/'</SPAN>&gt;, pre_comment,  &amp;self::push&gt;,
+                row&lt;pre_comment,  is_any,  no_comment,   &amp;self::push_slash&gt;,
+                row&lt;comment,      is&lt;<SPAN CLASS='literal'>'*'</SPAN>&gt;, post_comment, &amp;self::skip&gt;,
+                row&lt;comment,      is_any,  comment,      &amp;self::skip&gt;,
+                row&lt;post_comment, is&lt;<SPAN CLASS='literal'>'/'</SPAN>&gt;, no_comment,   &amp;self::skip&gt;,
+                row&lt;post_comment, is&lt;<SPAN CLASS='literal'>'*'</SPAN>&gt;, post_comment, &amp;self::skip&gt;,
+                row&lt;post_comment, is_any,  comment,      &amp;self::skip&gt;
             &gt; transition_table;
 };</PRE>
 

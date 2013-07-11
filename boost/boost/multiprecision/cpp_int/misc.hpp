@@ -379,9 +379,16 @@ inline typename enable_if_c<!is_trivial_cpp_int<cpp_int_backend<MinBits1, MaxBit
    {
       /* Now u and v are both odd, so diff(u, v) is even.
       Let u = min(u, v), v = diff(u, v)/2. */
-      if(u.size() == 1)
+      if(u.size() <= 2)
       {
-         v = integer_gcd_reduce(*u.limbs(), v);
+         if(u.size() == 1)
+            v = integer_gcd_reduce(*u.limbs(), v);
+         else
+         {
+            double_limb_type i;
+            i = u.limbs()[0] | (static_cast<double_limb_type>(u.limbs()[1]) << sizeof(limb_type) * CHAR_BIT);
+            v = static_cast<limb_type>(integer_gcd_reduce(i, static_cast<double_limb_type>(v)));
+         }
          break;
       }
       eval_subtract(u, v);
@@ -431,6 +438,7 @@ inline typename enable_if_c<!is_trivial_cpp_int<cpp_int_backend<MinBits1, MaxBit
    if(b.size() == 1)
    {
       eval_gcd(result, a, *b.limbs());
+      return;
    }
 
    int shift;
@@ -579,7 +587,7 @@ inline typename enable_if_c<is_trivial_cpp_int<cpp_int_backend<MinBits1, MaxBits
    //
    // Find the index of the least significant bit within that limb:
    //
-   return find_lsb(*a.limbs(), mpl::int_<CHAR_BIT * sizeof(cpp_int_backend<MinBits1, MaxBits1, SignType1, Checked1, Allocator1>::local_limb_type)>());
+   return find_lsb(*a.limbs(), mpl::int_<CHAR_BIT * sizeof(typename cpp_int_backend<MinBits1, MaxBits1, SignType1, Checked1, Allocator1>::local_limb_type)>());
 }
 
 #ifdef BOOST_MSVC

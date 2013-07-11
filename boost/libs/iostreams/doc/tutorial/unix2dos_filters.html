@@ -76,7 +76,7 @@
     unix2dos_input_filter() : has_linefeed_(<SPAN CLASS='keyword'>false</SPAN>) { }
 
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Source&gt;
-    <SPAN CLASS="keyword">int</SPAN> get(Source& src)
+    <SPAN CLASS="keyword">int</SPAN> get(Source&amp; src)
     {
         <SPAN CLASS='comment'>// Handle unfinished business</SPAN>
         <SPAN CLASS="keyword">if</SPAN> (has_linefeed_) {
@@ -95,7 +95,7 @@
     }
 
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Source&gt;
-    <SPAN CLASS="keyword">void</SPAN> close(Source&);
+    <SPAN CLASS="keyword">void</SPAN> close(Source&amp;);
 <SPAN CLASS="keyword">private</SPAN>:
     <SPAN CLASS="keyword">bool</SPAN> has_linefeed_;
 };
@@ -107,7 +107,7 @@
 <P>As usual, the member function <CODE>close</CODE> reset's the Filter's state:</P>
 
 <PRE CLASS="broken_ie">    <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Source&gt;
-    <SPAN CLASS="keyword">void</SPAN> close(Source&) { skip_ = <SPAN CLASS="keyword">false</SPAN>; }</PRE>
+    <SPAN CLASS="keyword">void</SPAN> close(Source&amp;) { skip_ = <SPAN CLASS="keyword">false</SPAN>; }</PRE>
 
 <A NAME="unix2dos_output_filter"></A>
 <H4><CODE>unix2dos_output_filter</CODE></H4>
@@ -124,13 +124,13 @@
     unix2dos_output_filter() : has_linefeed_(<SPAN CLASS="keyword">false</SPAN>) { }
 
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Sink&gt;
-    <SPAN CLASS="keyword">bool</SPAN> put(Sink& dest, <SPAN CLASS="keyword">int</SPAN> c);
+    <SPAN CLASS="keyword">bool</SPAN> put(Sink&amp; dest, <SPAN CLASS="keyword">int</SPAN> c);
 
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Sink&gt;
-    <SPAN CLASS="keyword">void</SPAN> close(Sink&) { has_linefeed_ = <SPAN CLASS="keyword">false</SPAN>; }
+    <SPAN CLASS="keyword">void</SPAN> close(Sink&amp;) { has_linefeed_ = <SPAN CLASS="keyword">false</SPAN>; }
 <SPAN CLASS="keyword">private</SPAN>:
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Sink&gt;
-    <SPAN CLASS="keyword">bool</SPAN> put_char(Sink& dest, <SPAN CLASS="keyword">int</SPAN> c);
+    <SPAN CLASS="keyword">bool</SPAN> put_char(Sink&amp; dest, <SPAN CLASS="keyword">int</SPAN> c);
 
     <SPAN CLASS="keyword">bool</SPAN> has_linefeed_;
 };
@@ -144,7 +144,7 @@
 <P>Let's look first at the helper function <CODE>put_char</CODE>:</P>
 
 <PRE CLASS='broken_ie'>    <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Sink&gt;
-    <SPAN CLASS="keyword">bool</SPAN> put_char(Sink& dest, <SPAN CLASS="keyword">int</SPAN> c) 
+    <SPAN CLASS="keyword">bool</SPAN> put_char(Sink&amp; dest, <SPAN CLASS="keyword">int</SPAN> c)
     {
         <SPAN CLASS="keyword">bool</SPAN> result;
         <SPAN CLASS="keyword">if</SPAN> ((result = iostreams::put(dest, c)) == <SPAN CLASS="keyword">true</SPAN>) {
@@ -164,7 +164,7 @@
 
 <P>Using <CODE>put_char</CODE> you can implement <CODE>put</CODE> as follows:</P>
 
-<PRE CLASS='broken_ie'>    <SPAN CLASS="keyword">bool</SPAN> put(Sink& dest, <SPAN CLASS="keyword">int</SPAN> c) 
+<PRE CLASS='broken_ie'>    <SPAN CLASS="keyword">bool</SPAN> put(Sink&amp; dest, <SPAN CLASS="keyword">int</SPAN> c)
     {
         <SPAN CLASS="keyword">if</SPAN> (c == <SPAN CLASS="literal">'\n'</SPAN>) 
             <SPAN CLASS="keyword">return</SPAN> has_linefeed_ ?

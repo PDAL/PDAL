@@ -168,8 +168,8 @@ inline void convex_hull(Geometry const& geometry,
 \brief \brief_calc{convex hull}
 \ingroup convex_hull
 \details \details_calc{convex_hull,convex hull}.
-\tparam Geometry1 \tparam_geometry
-\tparam Geometry2 \tparam_geometry
+\tparam Geometry the input geometry type
+\tparam OutputGeometry the output geometry type
 \param geometry \param_geometry,  input geometry
 \param hull \param_geometry \param_set{convex hull}
 

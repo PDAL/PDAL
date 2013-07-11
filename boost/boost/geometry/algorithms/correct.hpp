@@ -40,6 +40,12 @@
 namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace geometry
 {
 
+// Silence warning C4127: conditional expression is constant
+#if defined(_MSC_VER)
+#pragma warning(push)  
+#pragma warning(disable : 4127)
+#endif
+
 #ifndef DOXYGEN_NO_DETAIL
 namespace detail { namespace correct
 {
@@ -137,7 +143,7 @@ struct correct_ring
             {
                 geometry::append(r, *pdalboost::begin(r));
             }
-            if (! disjoint && geometry::closure<Ring>::value != closed)
+            if (! disjoint && s != closed)
             {
                 // Open it by removing last point
                 geometry::traits::resize<Ring>::apply(r, pdalboost::size(r) - 1);
@@ -256,6 +262,9 @@ inline void correct(Geometry& geometry)
     dispatch::correct<Geometry>::apply(geometry);
 }
 
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif
 
 }} // namespace pdalboost::geometry
 
