@@ -196,7 +196,7 @@ private:
         {
             m_index += m_size;
         }
-		m_index = m_index % m_size;
+        m_index = m_index % m_size;
         this->m_iterator = pdalboost::begin(*m_range) + m_index;
     }
 

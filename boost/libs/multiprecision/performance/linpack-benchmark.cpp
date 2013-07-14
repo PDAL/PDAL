@@ -14,7 +14,6 @@ Source for libf2c is in /netlib/f2c/libf2c.zip, e.g.,
 
 http://www.netlib.org/f2c/libf2c.zip
 */
-#include <boost/lexical_cast.hpp>
 #include <iostream>
 #include <iomanip>
 #include <cmath>
@@ -34,9 +33,36 @@ typedef pdalboost::multiprecision::mpfr_float_50 real_type;
 #elif defined(TEST_MPF_50)
 #include <boost/multiprecision/gmp.hpp>
 typedef pdalboost::multiprecision::mpf_float_50 real_type;
+#elif defined(NATIVE_FLOAT128)
+#include <boost/multiprecision/float128.hpp>
+typedef __float128 real_type;
+
+std::ostream& operator<<(std::ostream& os, const __float128& f)
+{
+   return os << pdalboost::multiprecision::float128(f);
+}
+
+#include <boost/type_traits/has_left_shift.hpp>
+
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost{
+
+template<>
+struct has_left_shift<std::basic_ostream<char>, __float128> : public mpl::true_ {};
+
+template<>
+double lexical_cast<double, __float128>(const __float128& f)
+{ return f; }
+
+}
+
+#elif defined(TEST_FLOAT128)
+#include <boost/multiprecision/float128.hpp>
+typedef pdalboost::multiprecision::float128 real_type;
 #else
 typedef double real_type;
 #endif
+
+#include <boost/lexical_cast.hpp>
 
 #ifndef CAST_TO_RT
 #  define CAST_TO_RT(x) x
@@ -87,7 +113,6 @@ real_type ddot_(integer *, real_type *, integer *, real_type *, integer *);
 int daxpy_(integer *, real_type *, real_type *, integer *, real_type *, integer *);
 int dmxpy_(integer *, real_type *, integer *, integer *, real_type *, real_type *);
 
-
 extern "C" int MAIN__()
 {
 #ifdef TEST_MPF_50
@@ -102,6 +127,10 @@ extern "C" int MAIN__()
    mpfr_set_default_prec(((50 + 1) * 1000L) / 301L);
 #elif defined(TEST_CPP_DEC_FLOAT)
    std::cout << "Testing number<cpp_dec_float<50> >" << std::endl;
+#elif defined(NATIVE_FLOAT128)
+   std::cout << "Testing __float128" << std::endl;
+#elif defined(TEST_FLOAT128)
+   std::cout << "Testing number<float128_backend, et_off>" << std::endl;
 #else
    std::cout << "Testing double" << std::endl;
 #endif
@@ -911,6 +940,8 @@ real_type epslon_(real_type *x)
    return std::ldexp(1.0, 1 - ((100 + 1) * 1000L) / 301L);
 #elif defined(TEST_CPP_DEC_FLOAT_BN)
    return std::pow(10.0, 1-std::numeric_limits<efx::cpp_dec_float_50>::digits10);
+#elif defined(NATIVE_FLOAT128)
+   return FLT128_EPSILON;
 #else
    return CAST_TO_RT(std::numeric_limits<real_type>::epsilon());
 #endif

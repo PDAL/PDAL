@@ -49,7 +49,7 @@
         { };
 
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Source&gt;
-    std::streamsize read(Source& src, <SPAN CLASS='keyword'>char</SPAN>* s, std::streamsize n)
+    std::streamsize read(Source&amp; src, <SPAN CLASS='keyword'>char</SPAN>* s, std::streamsize n)
     {
         <SPAN CLASS='comment'>// Read up to n filtered characters into the buffer s,</SPAN>
         <SPAN CLASS='comment'>// returning the number of characters read or -1 for EOF.</SPAN>
@@ -108,7 +108,7 @@
         { }
 
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Source&gt;
-    std::streamsize read(Source& src, <SPAN CLASS="keyword">char</SPAN>* s, std::streamsize n)
+    std::streamsize read(Source&amp; src, <SPAN CLASS="keyword">char</SPAN>* s, std::streamsize n)
     {
         <SPAN CLASS="keyword">for</SPAN> (std::streamsize z = <SPAN CLASS='numeric_literal'>0</SPAN>; z &lt; n; ++z) {
             <SPAN CLASS="keyword">int</SPAN> c;
@@ -131,7 +131,7 @@
     }
 
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Source&gt;
-    <SPAN CLASS="keyword">void</SPAN> close(Source&) { skip_ = false; }
+    <SPAN CLASS="keyword">void</SPAN> close(Source&amp;) { skip_ = false; }
 <SPAN CLASS="keyword">private</SPAN>:
     <SPAN CLASS="keyword">char</SPAN> comment_char_;
     <SPAN CLASS="keyword">bool</SPAN> skip_;
@@ -160,7 +160,7 @@
         { };
 
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Sink&gt;
-    std::streamsize write(Sink& dest, <SPAN CLASS='keyword'>const</SPAN> <SPAN CLASS='keyword'>char</SPAN>* s, std::streamsize n)
+    std::streamsize write(Sink&amp; dest, <SPAN CLASS='keyword'>const</SPAN> <SPAN CLASS='keyword'>char</SPAN>* s, std::streamsize n)
     {
         <SPAN CLASS='comment'>// Consume up to n filtered characters from the buffer s,</SPAN>
         <SPAN CLASS='comment'>// writing filtered characters to dest. Return the number</SPAN>
@@ -194,7 +194,7 @@
 <SPAN CLASS='keyword'>class</SPAN> my_output_filter : <SPAN CLASS='keyword'>public</SPAN> multichar_output_filter {
 <SPAN CLASS='keyword'>public</SPAN>:
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Sink&gt;
-    std::streamsize write(Sink& dest, <SPAN CLASS='keyword'>const</SPAN> <SPAN CLASS='keyword'>char</SPAN>* s, std::streamsize n);
+    std::streamsize write(Sink&amp; dest, <SPAN CLASS='keyword'>const</SPAN> <SPAN CLASS='keyword'>char</SPAN>* s, std::streamsize n);
 
     <SPAN CLASS='comment'>/* Other members */</SPAN>
 };</PRE>
@@ -219,7 +219,7 @@
         { }
 
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Sink&gt;
-    std::streamsize write(Sink& dest, <SPAN CLASS="keyword">const</SPAN> char* s, std::streamsize n)
+    std::streamsize write(Sink&amp; dest, <SPAN CLASS="keyword">const</SPAN> char* s, std::streamsize n)
     {
         std::streamsize z;
         <SPAN CLASS="keyword">for</SPAN> (z = <SPAN CLASS='numeric_literal'>0</SPAN>; z &lt; n; ++z) {
@@ -238,7 +238,7 @@
     }
 
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Source&gt;
-    <SPAN CLASS="keyword">void</SPAN> close(Source&) { skip_ = <SPAN CLASS="keyword">false</SPAN>; }
+    <SPAN CLASS="keyword">void</SPAN> close(Source&amp;) { skip_ = <SPAN CLASS="keyword">false</SPAN>; }
 <SPAN CLASS="keyword">private</SPAN>:
     <SPAN CLASS="keyword">char</SPAN> comment_char_;
     <SPAN CLASS="keyword">bool</SPAN> skip_;

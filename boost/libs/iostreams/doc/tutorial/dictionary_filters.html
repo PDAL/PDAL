@@ -50,8 +50,8 @@
 
 <SPAN CLASS="keyword">class</SPAN> dictionary {
 <SPAN CLASS="keyword">public</SPAN>:
-    <SPAN CLASS="keyword">void</SPAN> add(std::string key, <SPAN CLASS="keyword">const</SPAN> std::string& value);
-    <SPAN CLASS="keyword">void</SPAN> replace(std::string& key);
+    <SPAN CLASS="keyword">void</SPAN> add(std::string key, <SPAN CLASS="keyword">const</SPAN> std::string&amp; value);
+    <SPAN CLASS="keyword">void</SPAN> replace(std::string&amp; key);
 
     <SPAN CLASS='comment'>/* ... */</SPAN>
 };
@@ -75,7 +75,7 @@
 
 <SPAN CLASS="keyword">class</SPAN> dictionary_stdio_filter : <SPAN CLASS="keyword"><SPAN CLASS="keyword"><SPAN CLASS="keyword">public</SPAN></SPAN></SPAN> stdio_filter {
 <SPAN CLASS="keyword">public</SPAN>:
-    dictionary_stdio_filter(dictionary& d) : dictionary_(d) { }
+    dictionary_stdio_filter(dictionary&amp; d) : dictionary_(d) { }
 <SPAN CLASS="keyword">private</SPAN>:
     <SPAN CLASS="keyword">void</SPAN> do_filter()
     {
@@ -95,7 +95,7 @@
             }
         }
     }
-    dictionary&  dictionary_;
+    dictionary&amp;  dictionary_;
     std::string  current_word_;
 };
 
@@ -118,17 +118,17 @@
 
 <SPAN CLASS="keyword">class</SPAN> dictionary_input_filter : <SPAN CLASS="keyword"><SPAN CLASS="keyword"><SPAN CLASS="keyword">public</SPAN></SPAN></SPAN> input_filter {
 <SPAN CLASS="keyword">public</SPAN>:
-    dictionary_input_filter(dictionary& d)
+    dictionary_input_filter(dictionary&amp; d)
         : dictionary_(d), off_(std::string::npos), eof_(<SPAN CLASS="keyword">false</SPAN>)
         { }
 
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Source&gt;
-    <SPAN CLASS="keyword"><SPAN CLASS="keyword">int</SPAN></SPAN> get(Source& src);
+    <SPAN CLASS="keyword"><SPAN CLASS="keyword">int</SPAN></SPAN> get(Source&amp; src);
 
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Source&gt;
-    <SPAN CLASS="keyword">void</SPAN> close(Source&);
+    <SPAN CLASS="keyword">void</SPAN> close(Source&amp;);
 <SPAN CLASS="keyword">private</SPAN>:
-    dictionary&             dictionary_;
+    dictionary&amp;             dictionary_;
     std::string             current_word_;
     std::string::size_type  off_;
     <SPAN CLASS="keyword"><SPAN CLASS="keyword">bool</SPAN></SPAN>                    eof_;
@@ -139,10 +139,10 @@
 <P>The function <CODE>get</CODE> is implemented as follows:</P>
 
 <PRE class="broken_ie">    <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Source&gt;
-    <SPAN CLASS="keyword"><SPAN CLASS="keyword">int</SPAN></SPAN> get(Source& src)
+    <SPAN CLASS="keyword"><SPAN CLASS="keyword">int</SPAN></SPAN> get(Source&amp; src)
     {
         <SPAN CLASS='comment'>// Handle unfinished business.</SPAN>
-        <SPAN CLASS="keyword">if</SPAN> (off_ != std::string::npos && off_ &lt; current_word_.size())
+        <SPAN CLASS="keyword">if</SPAN> (off_ != std::string::npos &amp;&amp; off_ &lt; current_word_.size())
             <SPAN CLASS="keyword">return</SPAN> current_word_[off_++];
         <SPAN CLASS="keyword">if</SPAN> (off_ == current_word_.size()) {
             current_word_.erase();
@@ -185,7 +185,7 @@
 <P>As usual, the function <CODE>close</CODE> resets the Filter's state:</P>
 
 <PRE class="broken_ie">    <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Source&gt;
-    <SPAN CLASS="keyword">void</SPAN> close(Source&)
+    <SPAN CLASS="keyword">void</SPAN> close(Source&amp;)
     {
         current_word_.erase();
         off_ = std::string::npos;
@@ -206,19 +206,19 @@
 <SPAN CLASS="keyword">class</SPAN> dictionary_output_filter : <SPAN CLASS="keyword"><SPAN CLASS="keyword"><SPAN CLASS="keyword">public</SPAN></SPAN></SPAN> output_filter {
 <SPAN CLASS="keyword">public</SPAN>:
     <SPAN CLASS="keyword">typedef</SPAN> std::map&lt;std::string, std::string&gt; map_type;
-    dictionary_output_filter(dictionary& d)
+    dictionary_output_filter(dictionary&amp; d)
         : dictionary_(d), off_(std::string::npos)
         { }
 
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Sink&gt;
-    <SPAN CLASS="keyword"><SPAN CLASS="keyword">bool</SPAN></SPAN> put(Sink& dest, <SPAN CLASS="keyword"><SPAN CLASS="keyword">int</SPAN></SPAN> c);
+    <SPAN CLASS="keyword"><SPAN CLASS="keyword">bool</SPAN></SPAN> put(Sink&amp; dest, <SPAN CLASS="keyword"><SPAN CLASS="keyword">int</SPAN></SPAN> c);
 
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Sink&gt;
-    <SPAN CLASS="keyword">void</SPAN> close(Sink& dest);
+    <SPAN CLASS="keyword">void</SPAN> close(Sink&amp; dest);
 <SPAN CLASS="keyword">private</SPAN>:
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Sink&gt;
-    <SPAN CLASS="keyword"><SPAN CLASS="keyword">bool</SPAN></SPAN> write_current_word(Sink& dest);
-    dictionary&             dictionary_;
+    <SPAN CLASS="keyword"><SPAN CLASS="keyword">bool</SPAN></SPAN> write_current_word(Sink&amp; dest);
+    dictionary&amp;             dictionary_;
     std::string             current_word_;
     std::string::size_type  off_;
 };
@@ -228,7 +228,7 @@
 <P>Let's look first at the helper function <CODE>write_current_word</CODE>:</P>
 
 <PRE class="broken_ie">    <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Sink&gt;
-    <SPAN CLASS="keyword"><SPAN CLASS="keyword">bool</SPAN></SPAN> write_current_word(Sink& dest)
+    <SPAN CLASS="keyword"><SPAN CLASS="keyword">bool</SPAN></SPAN> write_current_word(Sink&amp; dest)
     {
         <SPAN CLASS="keyword">using</SPAN> <SPAN CLASS="keyword">namespace</SPAN> std;
         streamsize amt = <SPAN CLASS="keyword">static_cast</SPAN>&lt;streamsize&gt;(current_word_.size() - off_);
@@ -251,9 +251,9 @@
 <P>Using <CODE>write_current_word</CODE> you can implement <CODE>put</CODE> as follows:</P>
 
 <PRE class="broken_ie">    <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Sink&gt;
-    <SPAN CLASS="keyword"><SPAN CLASS="keyword">bool</SPAN></SPAN> put(Sink& dest, <SPAN CLASS="keyword"><SPAN CLASS="keyword">int</SPAN></SPAN> c)
+    <SPAN CLASS="keyword"><SPAN CLASS="keyword">bool</SPAN></SPAN> put(Sink&amp; dest, <SPAN CLASS="keyword"><SPAN CLASS="keyword">int</SPAN></SPAN> c)
     {
-        <SPAN CLASS="keyword">if</SPAN> (off_ != std::string::npos && !write_current_word(dest))
+        <SPAN CLASS="keyword">if</SPAN> (off_ != std::string::npos &amp;&amp; !write_current_word(dest))
             <SPAN CLASS="keyword">return</SPAN> <SPAN CLASS="keyword">false</SPAN>;
         <SPAN CLASS="keyword">if</SPAN> (!std::isalpha((<SPAN CLASS="keyword">unsigned</SPAN> <SPAN CLASS="keyword">char</SPAN>) c)) {
             dictionary_.replace(current_word_);
@@ -271,7 +271,7 @@
 <P>The function <CODE>close</CODE> has more work to do in this case than simply reseting the Filter's state. Unless the last character of the unfiltered sequence happened to be a non-alphabetic character, the contents of current_word_ will not yet have been written:</P>
 
 <PRE class="broken_ie">    <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Sink&gt;
-    void close(Sink& dest)
+    void close(Sink&amp; dest)
     {
         <SPAN CLASS='comment'>// Reset current_word_ and off_, saving old values.</SPAN>
         std::string             current_word;

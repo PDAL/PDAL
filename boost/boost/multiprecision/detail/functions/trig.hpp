@@ -221,7 +221,7 @@ void eval_cos(T& result, const T& x)
    if(&result == &x)
    {
       T temp;
-      eval_sin(temp, x);
+      eval_cos(temp, x);
       result = temp;
       return;
    }
@@ -361,6 +361,13 @@ template <class T>
 void eval_tan(T& result, const T& x)
 {
    BOOST_STATIC_ASSERT_MSG(number_category<T>::value == number_kind_floating_point, "The tan function is only valid for floating point types.");
+   if(&result == &x)
+   {
+      T temp;
+      eval_tan(temp, x);
+      result = temp;
+      return;
+   }
    T t;
    eval_sin(result, x);
    eval_cos(t, x);

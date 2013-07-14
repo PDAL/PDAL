@@ -105,7 +105,7 @@
 <SPAN CLASS="keyword">public</SPAN>:
     <SPAN CLASS="keyword">typedef</SPAN> <SPAN CLASS="keyword">typename</SPAN> Container::value_type  char_type;
     <SPAN CLASS="keyword">typedef</SPAN> seekable_device_tag             category;
-    container_device(Container& container) 
+    container_device(Container&amp; container)
         : container_(container), pos_(<SPAN CLASS='numeric_literal'>0</SPAN>)
         { }
 
@@ -136,7 +136,7 @@
             pos_ += result;
         }
         <SPAN CLASS="keyword">if</SPAN> (result < n) {
-            container_.insert(container_.end(), s, s + n);
+            container_.insert(container_.end(), s + result, s + n);
             pos_ = container_.size();
         }
         <SPAN CLASS="keyword">return</SPAN> n;
@@ -147,11 +147,11 @@
 
         <SPAN CLASS='comment'>// Determine new value of pos_</SPAN>
         stream_offset next;
-        <SPAN CLASS="keyword">if</SPAN> (way == ios_bas::beg) {
+        <SPAN CLASS="keyword">if</SPAN> (way == ios_base::beg) {
             next = off;
-        } <SPAN CLASS="keyword">else</SPAN> <SPAN CLASS="keyword">if</SPAN> (way == ios_bas::cur) {
+        } <SPAN CLASS="keyword">else</SPAN> <SPAN CLASS="keyword">if</SPAN> (way == ios_base::cur) {
             next = pos_ + off;
-        } <SPAN CLASS="keyword">else</SPAN> <SPAN CLASS="keyword">if</SPAN> (way == ios_bas::end) {
+        } <SPAN CLASS="keyword">else</SPAN> <SPAN CLASS="keyword">if</SPAN> (way == ios_base::end) {
             next = container_.size() + off - <SPAN CLASS='numeric_literal'>1</SPAN>;
         } <SPAN CLASS="keyword">else</SPAN> {
             <SPAN CLASS="keyword">throw</SPAN> ios_base::failure(<SPAN CLASS='numeric_literal'>"bad seek direction"</SPAN>);
@@ -165,10 +165,10 @@
         <SPAN CLASS="keyword">return</SPAN> pos_;
     }
 
-    Container& container() { <SPAN CLASS="keyword">return</SPAN> container_; }
+    Container&amp; container() { <SPAN CLASS="keyword">return</SPAN> container_; }
 <SPAN CLASS="keyword">private</SPAN>:
     <SPAN CLASS="keyword">typedef</SPAN> <SPAN CLASS="keyword">typename</SPAN> Container::size_type   size_type;
-    Container&  container_;
+    Container&amp;  container_;
     size_type   pos_;
 };
 
@@ -176,15 +176,15 @@
 
 <P>Here, note that</P>
 <UL>
-<LI>The member type <CODE>char_type</CODE> is defined to be equal to the containers's <CODE>value_type</CODE>;
+<LI>The member type <CODE>char_type</CODE> is defined to be equal to the container's <CODE>value_type</CODE>;
 <LI>The member type <CODE>category</CODE> tells the Iostreams library that <CODE>container_device</CODE> is a model of <A HREF="../concepts/seekable_device.html">SeekableDevice</A>;
 <LI>A <CODE>container_device</CODE> can be constructed from a instance of <CODE>Container</CODE>, which is passed and stored by reference, and accessible <I>via</I> the member function <CODE>container()</CODE>;
 <LI>The implementation of <CODE>read</CODE> is identical to the implementation in <A HREF="container_source.html"><CODE>container_source</CODE></A>.
 </UL>
 
-<P>The implementation of <CODE>write</CODE> is a bit different from the implementation in <A HREF="container_sink.html"><CODE>container_sink</CODE></A>. Rather than simply appending characters to the container, you first check whether the current character position is somewhere in the middle of the container. If it is, you attempt to satisfy the write request by overwriting existing characters in the conatiner, starting at the current character position. If you reach the end of the container before the write request is satisfied, you insert the remaining characters at the end.</P>
+<P>The implementation of <CODE>write</CODE> is a bit different from the implementation in <A HREF="container_sink.html"><CODE>container_sink</CODE></A>. Rather than simply appending characters to the container, you first check whether the current character position is somewhere in the middle of the container. If it is, you attempt to satisfy the write request by overwriting existing characters in the container, starting at the current character position. If you reach the end of the container before the write request is satisfied, you insert the remaining characters at the end.</P>
 
-<P>The implementation of <CODE>seek</CODE> is striaghforward. First, you calculate the new character position based on <CODE>off</CODE> and <CODE>way</CODE>: if <CODE>way</CODE> is <CODE>ios_base::beg</CODE>, the new character position is simply <CODE>off</CODE>; if <CODE>way</CODE> is <CODE>ios_base::cur</CODE>, the new character position is <CODE>pos_ + off</CODE>; if <CODE>way</CODE> is <CODE>ios_base::end</CODE>, the new character position is <CODE>container_.size() + off - 1</CODE>. Next, you check whether the new character position is a valid offset, and throw an exception if it isn't. Instances of <CODE>std::basic_streambuf</CODE> are allowed to return <CODE>-1</CODE> to indicate failure, but the policy of the Boost Iostreams library is that errors should be indicated by throwing an exception (<I>see</I> <A HREF="../guide/exceptions.html">Exceptions</A>). Finally, you set the new position and return it.</P>
+<P>The implementation of <CODE>seek</CODE> is straightforward. First, you calculate the new character position based on <CODE>off</CODE> and <CODE>way</CODE>: if <CODE>way</CODE> is <CODE>ios_base::beg</CODE>, the new character position is simply <CODE>off</CODE>; if <CODE>way</CODE> is <CODE>ios_base::cur</CODE>, the new character position is <CODE>pos_ + off</CODE>; if <CODE>way</CODE> is <CODE>ios_base::end</CODE>, the new character position is <CODE>container_.size() + off - 1</CODE>. Next, you check whether the new character position is a valid offset, and throw an exception if it isn't. Instances of <CODE>std::basic_streambuf</CODE> are allowed to return <CODE>-1</CODE> to indicate failure, but the policy of the Boost Iostreams library is that errors should be indicated by throwing an exception (<I>see</I> <A HREF="../guide/exceptions.html">Exceptions</A>). Finally, you set the new position and return it.</P>
 
 <P>You can use a container_device as follows</P>
 

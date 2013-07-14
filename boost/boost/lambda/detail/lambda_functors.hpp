@@ -15,6 +15,7 @@
 
 #include <boost/config.hpp>
 #include <boost/detail/workaround.hpp>
+#include <boost/utility/result_of.hpp>
 
 #if BOOST_WORKAROUND(BOOST_MSVC, == 1310)
 
@@ -296,6 +297,38 @@ public:
 
 } // namespace lambda
 } // namespace pdalboost
+
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
+
+#if !defined(BOOST_RESULT_OF_USE_DECLTYPE) || defined(BOOST_NO_DECLTYPE)
+
+template<class T>
+struct result_of<pdalboost::lambda::lambda_functor<T>()>
+{
+    typedef typename pdalboost::lambda::lambda_functor<T>::nullary_return_type type;
+};
+
+template<class T>
+struct result_of<const pdalboost::lambda::lambda_functor<T>()>
+{
+    typedef typename pdalboost::lambda::lambda_functor<T>::nullary_return_type type;
+};
+
+#endif
+
+template<class T>
+struct tr1_result_of<pdalboost::lambda::lambda_functor<T>()>
+{
+    typedef typename pdalboost::lambda::lambda_functor<T>::nullary_return_type type;
+};
+
+template<class T>
+struct tr1_result_of<const pdalboost::lambda::lambda_functor<T>()>
+{
+    typedef typename pdalboost::lambda::lambda_functor<T>::nullary_return_type type;
+};
+
+}
 
 // is_placeholder
 

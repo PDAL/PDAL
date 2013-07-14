@@ -39,6 +39,9 @@
 
 #include <boost/geometry/algorithms/detail/equals/collect_vectors.hpp>
 
+#include <boost/variant/static_visitor.hpp>
+#include <boost/variant/apply_visitor.hpp>
+
 
 namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace geometry
 {
@@ -239,6 +242,110 @@ struct equals<Polygon, Box, polygon_tag, box_tag, 2, Reverse>
 {};
 
 
+template <typename Geometry1, typename Geometry2>
+struct devarianted_equals
+{
+    static inline bool apply(Geometry1 const& geometry1,
+                             Geometry2 const& geometry2)
+    {
+        concept::check_concepts_and_equal_dimensions
+        <
+            Geometry1 const,
+            Geometry2 const
+        >();
+        return equals<Geometry1, Geometry2>::apply(geometry1, geometry2);
+    }
+};
+
+template <BOOST_VARIANT_ENUM_PARAMS(typename T), typename Geometry2>
+struct devarianted_equals<pdalboost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>, Geometry2>
+{
+    struct visitor: static_visitor<bool>
+    {
+        Geometry2 const& m_geometry2;
+
+        visitor(Geometry2 const& geometry2)
+            : m_geometry2(geometry2)
+        {}
+
+        template <typename Geometry1>
+        inline bool operator()(Geometry1 const& geometry1) const
+        {
+            return devarianted_equals<Geometry1, Geometry2>
+                       ::apply(geometry1, m_geometry2);
+        }
+
+    };
+
+    static inline bool apply(
+        pdalboost::variant<BOOST_VARIANT_ENUM_PARAMS(T)> const& geometry1,
+        Geometry2 const& geometry2
+    )
+    {
+        return apply_visitor(visitor(geometry2), geometry1);
+    }
+};
+
+template <typename Geometry1, BOOST_VARIANT_ENUM_PARAMS(typename T)>
+struct devarianted_equals<Geometry1, pdalboost::variant<BOOST_VARIANT_ENUM_PARAMS(T)> >
+{
+    struct visitor: static_visitor<bool>
+    {
+        Geometry1 const& m_geometry1;
+
+        visitor(Geometry1 const& geometry1)
+            : m_geometry1(geometry1)
+        {}
+
+        template <typename Geometry2>
+        inline bool operator()(Geometry2 const& geometry2) const
+        {
+            return devarianted_equals<Geometry1, Geometry2>
+                       ::apply(m_geometry1, geometry2);
+        }
+
+    };
+
+    static inline bool apply(
+        Geometry1 const& geometry1,
+        pdalboost::variant<BOOST_VARIANT_ENUM_PARAMS(T)> const& geometry2
+    )
+    {
+        return apply_visitor(visitor(geometry1), geometry2);
+    }
+};
+
+template <
+    BOOST_VARIANT_ENUM_PARAMS(typename T1),
+    BOOST_VARIANT_ENUM_PARAMS(typename T2)
+>
+struct devarianted_equals<
+    pdalboost::variant<BOOST_VARIANT_ENUM_PARAMS(T1)>,
+    pdalboost::variant<BOOST_VARIANT_ENUM_PARAMS(T2)>
+>
+{
+    struct visitor: static_visitor<bool>
+    {
+        template <typename Geometry1, typename Geometry2>
+        inline bool operator()(Geometry1 const& geometry1,
+                               Geometry2 const& geometry2) const
+        {
+            return devarianted_equals<Geometry1, Geometry2>
+                ::apply(geometry1, geometry2);
+        }
+
+    };
+
+    static inline bool apply(
+        pdalboost::variant<BOOST_VARIANT_ENUM_PARAMS(T1)> const& geometry1,
+        pdalboost::variant<BOOST_VARIANT_ENUM_PARAMS(T2)> const& geometry2
+    )
+    {
+        return apply_visitor(visitor(), geometry1, geometry2);
+    }
+};
+
+
 } // namespace dispatch
 #endif // DOXYGEN_NO_DISPATCH
 
@@ -248,8 +355,8 @@ struct equals<Polygon, Box, polygon_tag, box_tag, 2, Reverse>
 \details \details_check12{equals, is spatially equal}. Spatially equal means 
     that the same point set is included. A box can therefore be spatially equal
     to a ring or a polygon, or a linestring can be spatially equal to a 
-    multi-linestring or a segment. This only theoretically, not all combinations
-    are implemented yet.
+    multi-linestring or a segment. This only works theoretically, not all
+    combinations are implemented yet.
 \ingroup equals
 \tparam Geometry1 \tparam_geometry
 \tparam Geometry2 \tparam_geometry
@@ -263,13 +370,8 @@ struct equals<Polygon, Box, polygon_tag, box_tag, 2, Reverse>
 template <typename Geometry1, typename Geometry2>
 inline bool equals(Geometry1 const& geometry1, Geometry2 const& geometry2)
 {
-    concept::check_concepts_and_equal_dimensions
-        <
-            Geometry1 const,
-            Geometry2 const
-        >();
-
-    return dispatch::equals<Geometry1, Geometry2>::apply(geometry1, geometry2);
+    return dispatch::devarianted_equals<Geometry1, Geometry2>
+               ::apply(geometry1, geometry2);
 }
 
 

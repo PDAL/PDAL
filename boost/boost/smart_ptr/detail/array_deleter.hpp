@@ -19,8 +19,8 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
         template<typename T>
         class array_deleter<T[]> {
         public:
-            array_deleter(std::size_t size)
-                : size(size),
+            array_deleter(std::size_t size_)
+                : size(size_),
                   object(0) {
             }
             ~array_deleter() {

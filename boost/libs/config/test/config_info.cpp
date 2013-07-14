@@ -11,7 +11,7 @@
 
 //  See http://www.boost.org/libs/config for most recent version.
 //
-//  Revision $Id: config_info.cpp 81827 2012-12-10 17:26:30Z johnmaddock $
+//  Revision $Id: config_info.cpp 84462 2013-05-24 17:07:06Z johnmaddock $
 //
 
 #include <boost/config.hpp>
@@ -563,6 +563,8 @@ void print_stdlib_macros()
    PRINT_MACRO(_HAS_EXCEPTIONS);
    PRINT_MACRO(_HAS_MEMBER_TEMPLATES_REBIND);
    PRINT_MACRO(_HAS_TEMPLATE_PARTIAL_ORDERING);
+   // Libc++:
+   PRINT_MACRO(_LIBCPP_VERSION);
    // STLPort and generic SGI STL options:
    PRINT_MACRO(__SGI_STL_NO_ARROW_OPERATOR);
    PRINT_MACRO(__SGI_STL_OWN_IOSTREAMS);
@@ -1037,6 +1039,7 @@ void print_boost_macros()
    PRINT_MACRO(BOOST_NO_CXX11_TEMPLATE_ALIASES);
    PRINT_MACRO(BOOST_NO_CXX11_UNICODE_LITERALS);
    PRINT_MACRO(BOOST_NO_CXX11_UNIFIED_INITIALIZATION_SYNTAX);
+   PRINT_MACRO(BOOST_NO_CXX11_USER_DEFINED_LITERALS);
    PRINT_MACRO(BOOST_NO_CXX11_VARIADIC_MACROS);
    PRINT_MACRO(BOOST_NO_CXX11_VARIADIC_TEMPLATES);
    PRINT_MACRO(BOOST_NO_DEPENDENT_NESTED_DERIVATIONS);
@@ -1100,25 +1103,6 @@ void print_boost_macros()
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
    // END GENERATED BLOCK
 
    PRINT_MACRO(BOOST_INTEL);
@@ -1130,6 +1114,7 @@ void print_boost_macros()
    PRINT_MACRO(BOOST_STATIC_CONSTEXPR);
    PRINT_MACRO(BOOST_NOEXCEPT);
    PRINT_MACRO(BOOST_FORCEINLINE);
+   PRINT_MACRO(BOOST_FALLTHROUGH);
 }
 
 void print_separator()

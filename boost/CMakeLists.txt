@@ -27,14 +27,20 @@ set(PDALBOOST_SOURCES
     ./libs/date_time/src/gregorian/gregorian_types.cpp
     ./libs/date_time/src/posix_time/posix_time_types.cpp
     ./libs/exception/src/clone_current_exception_non_intrusive.cpp
-    ./libs/filesystem/src/path_traits.cpp
-    ./libs/filesystem/src/unique_path.cpp
     ./libs/filesystem/src/codecvt_error_category.cpp
-    ./libs/filesystem/src/path.cpp
     ./libs/filesystem/src/operations.cpp
+    ./libs/filesystem/src/path.cpp
+    ./libs/filesystem/src/path_traits.cpp
+    ./libs/filesystem/src/portability.cpp
+    ./libs/filesystem/src/unique_path.cpp
     ./libs/filesystem/src/utf8_codecvt_facet.cpp
+    ./libs/fusion/preprocess/preprocess.cpp
     ./libs/iostreams/src/file_descriptor.cpp
     ./libs/iostreams/src/mapped_file.cpp
+    ./libs/iostreams/src/bzip2.cpp
+    ./libs/iostreams/src/file_descriptor.cpp
+    ./libs/iostreams/src/gzip.cpp
+    ./libs/iostreams/src/zlib.cpp
     ./libs/program_options/src/cmdline.cpp
     ./libs/program_options/src/config_file.cpp
     ./libs/program_options/src/convert.cpp
@@ -46,6 +52,7 @@ set(PDALBOOST_SOURCES
     ./libs/program_options/src/value_semantic.cpp
     ./libs/program_options/src/variables_map.cpp
     ./libs/program_options/src/winmain.cpp
+    ./libs/random/src/random_device.cpp
     ./libs/regex/src/c_regex_traits.cpp
     ./libs/regex/src/cpp_regex_traits.cpp
     ./libs/regex/src/cregex.cpp

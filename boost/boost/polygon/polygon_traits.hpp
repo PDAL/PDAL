@@ -985,11 +985,12 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
       area_type x1 = (area_type)x(previous);
       area_type x2 = (area_type)x(*begin_range);
 #ifdef BOOST_POLYGON_ICC
+#pragma warning (push)
 #pragma warning (disable:1572)
 #endif
       if(x1 != x2) {
 #ifdef BOOST_POLYGON_ICC
-#pragma warning (default:1572)
+#pragma warning (pop)
 #endif
         // do trapezoid area accumulation
         area += (x2 - x1) * (((area_type)y(*begin_range) - y_base) +

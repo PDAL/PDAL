@@ -44,7 +44,7 @@
 
     <SPAN CLASS="keyword">struct</SPAN> toupper_filter : <SPAN CLASS="keyword">public</SPAN> io::output_filter {
         <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Sink&gt;
-        <SPAN CLASS="keyword">bool</SPAN> put(Sink& snk, <SPAN CLASS="keyword">char</SPAN> c)
+        <SPAN CLASS="keyword">bool</SPAN> put(Sink&amp; snk, <SPAN CLASS="keyword">char</SPAN> c)
         {
             <SPAN CLASS="keyword">return</SPAN> io::put(snk, toupper((<SPAN CLASS="keyword">unsigned</SPAN> <SPAN CLASS="keyword">char</SPAN>) c));
         }
@@ -72,7 +72,7 @@
 <PRE CLASS="broken_ie"><SPAN CLASS="keyword">namespace</SPAN> boost { <SPAN CLASS="keyword">namespace</SPAN> iostreams {
               
     <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> <A CLASS="documented" HREF="#template_params">Sink</A>&gt;     
-    <SPAN CLASS="keyword">void</SPAN> put(Sink& <A CLASS="documented" HREF="#function_params">snk</A>, <SPAN CLASS="keyword">typename</SPAN> <A CLASS="documented" HREF="../guide/traits.html#char_type_of_ref">char_type_of</A>&lt;Sink&gt;::type c);
+    <SPAN CLASS="keyword">void</SPAN> put(Sink&amp; <A CLASS="documented" HREF="#function_params">snk</A>, <SPAN CLASS="keyword">typename</SPAN> <A CLASS="documented" HREF="../guide/traits.html#char_type_of_ref">char_type_of</A>&lt;Sink&gt;::type c);
 
 } } <SPAN CLASS="comment">// End namespace boost::io</SPAN></PRE>
 
@@ -102,7 +102,7 @@
 <H4>Semantics</H4>
 
 <PRE CLASS="broken_ie">    <SPAN CLASS="keyword">template</SPAN>&lt;<SPAN CLASS="keyword">typename</SPAN> Sink&gt;     
-    <SPAN CLASS="keyword">void</SPAN> put(Sink& snk, <SPAN CLASS="keyword">typename</SPAN> char_type_of&lt;Sink&gt;::type c);</PRE>
+    <SPAN CLASS="keyword">void</SPAN> put(Sink&amp; snk, <SPAN CLASS="keyword">typename</SPAN> char_type_of&lt;Sink&gt;::type c);</PRE>
 
 <P>The semantics of <CODE>put</CODE> depends on the <A HREF="../guide/traits.html#category">category</A> of <CODE>Sink</CODE> as follows:</P>
 
@@ -122,7 +122,7 @@
     </TR>
     <TR>
         <TD VALIGN="top">otherwise</TD>
-        <TD>invokes <CODE>snk.write(&c, 1)</CODE></TD>
+        <TD>invokes <CODE>snk.write(&amp;c, 1)</CODE></TD>
     </TR>
 </TABLE>
 

@@ -29,8 +29,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
         struct variant_hasher: public pdalboost::static_visitor<std::size_t> {
             template <class T>
             std::size_t operator()(T const& val) const {
-                using namespace pdalboost;
-                hash<T> hasher;
+                pdalboost::hash<T> hasher;
                 return hasher(val);
             }
         };

@@ -185,8 +185,18 @@ namespace detail
 
     inline void ignore_variable(void const *) {}
 
-  #define BOOST_ACCUMULATORS_IGNORE_GLOBAL(X)\
-    namespace detail { inline void BOOST_PP_CAT(ignore_, X)() { pdalboost::accumulators::detail::ignore_variable(&X); } }
+#define BOOST_ACCUMULATORS_IGNORE_GLOBAL(X)                             \
+    namespace detail                                                    \
+    {                                                                   \
+        struct BOOST_PP_CAT(ignore_, X)                                 \
+        {                                                               \
+            void ignore()                                               \
+            {                                                           \
+                pdalboost::accumulators::detail::ignore_variable(&X);       \
+            }                                                           \
+        };                                                              \
+    }                                                                   \
+    /**/
 }
 
 }} // namespace pdalboost::accumulators

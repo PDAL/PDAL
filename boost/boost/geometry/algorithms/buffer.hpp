@@ -145,11 +145,12 @@ inline void buffer(Input const& geometry_in, Output& geometry_out,
 \tparam Distance \tparam_numeric
 \param geometry \param_geometry
 \param distance The distance to be used for the buffer
-\param chord_length (optional) The length of the chord's in the generated arcs around points or bends
+\param chord_length (optional) The length of the chord's in the generated arcs
+    around points or bends
 \return \return_calc{buffer}
  */
-template <typename Output, typename Input, typename T>
-Output return_buffer(Input const& geometry, T const& distance, T const& chord_length = -1)
+template <typename Output, typename Input, typename Distance>
+Output return_buffer(Input const& geometry, Distance const& distance, Distance const& chord_length = -1)
 {
     concept::check<Input const>();
     concept::check<Output>();

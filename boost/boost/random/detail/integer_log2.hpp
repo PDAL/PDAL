@@ -7,7 +7,7 @@
  *
  * See http://www.boost.org for most recent version including documentation.
  *
- * $Id: integer_log2.hpp 82609 2013-01-25 17:06:07Z marshall $
+ * $Id: integer_log2.hpp 83381 2013-03-09 22:55:05Z eric_niebler $
  *
  */
 
