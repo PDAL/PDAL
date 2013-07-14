@@ -112,7 +112,6 @@ private:
 
     const pdal::filters::Programmable& m_programmableFilter;
 
-    pdal::plang::PythonEnvironment* m_pythonEnv;
     pdal::plang::BufferedInvocation* m_pythonMethod;
 };
 
