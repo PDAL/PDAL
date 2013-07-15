@@ -52,6 +52,7 @@
 #include <boost/cstdint.hpp>
 #include <boost/any.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/utility/string_ref.hpp>
 #include <boost/foreach.hpp>
 #include <boost/array.hpp>
 #include <boost/optional.hpp>
@@ -157,13 +158,7 @@ public:
     /// @param name name to use when searching
     /// @param ns namespace to use when searching. If none is given, the first
     /// matching Dimension instance with name \b name is returned.
-    const Dimension& getDimension(std::string const& name, std::string const& ns) const { return getDimension(name.c_str(), ns.c_str()); }
-    /// @overload getDimension(std::string const&, std::string const&)
-    const Dimension& getDimension(const char* name, std::string const& ns) const        { return getDimension(name, ns.c_str()); }
-    /// @overload getDimension(std::string const&, std::string const&)
-    const Dimension& getDimension(std::string const& name, const char* ns="") const     { return getDimension(name.c_str(), ns); }
-    /// @overload getDimension(std::string const&, std::string const&)
-    const Dimension& getDimension(const char* name, const char* ns="") const;
+    const Dimension& getDimension(boost::string_ref name, boost::string_ref ns = "") const;
 
     /// @return a const& to a Dimension with the given dimension::id. If
     /// no matching dimension is found, pdal::dimension_not_found is thrown.
@@ -174,9 +169,17 @@ public:
     /// index is out of range, pdal::dimension_not_found is thrown.
     /// @param index position index to return.
     const Dimension& getDimension(schema::size_type index) const;
-    /// @overload getDimension(schema::size_type index)
-    /// Required only to avoid ambiguity with const char* version
-    const Dimension& getDimension(int index) const { return getDimension(schema::size_type(index)); }
+
+    /// @return A pointer to a Dimension with the given name and namespace.  If
+    /// no matching dimension is found, the null pointer is returned.  The
+    /// optional errorMsg parameter will be filled with a descriptive error
+    /// message in the case that the dimension cannot found.
+    /// @param name name to use when searching
+    /// @param ns namespace to use when searching. If none is given, the first
+    /// matching Dimension instance with name \b name is returned.
+    /// @param errorMsg optional location for storing error messages
+    const Dimension* getDimensionPtr(boost::string_ref name, boost::string_ref ns = "",
+                                     std::string* errorMsg = 0) const;
 
     /// @return a boost::optional-wrapped const& to a Dimension with the given name
     /// and namespace. If no matching dimension is found, the optional will be empty.
@@ -240,8 +243,6 @@ public:
     static std::string to_xml(Schema const& schema, boost::property_tree::ptree const* metadata=0);
 
 /// @name Private Attributes
-    const Dimension* getDimensionPtr(const char* name, const char* ns,
-                                     std::string* errorMsg = 0) const;
 private:
 
     schema::size_type m_byteSize;

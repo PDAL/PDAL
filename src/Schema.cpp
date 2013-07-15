@@ -51,8 +51,6 @@
 #include <boost/concept_check.hpp> // ignore_unused_variable_warning
 #include <boost/algorithm/string.hpp>
 
-#include <string.h>
-
 #ifdef PDAL_HAVE_LIBXML2
 #include <pdal/XMLSchema.hpp>
 #endif
@@ -202,7 +200,7 @@ boost::optional<Dimension const&> Schema::getDimensionOptional(schema::size_type
 }
 
 
-const Dimension& Schema::getDimension(const char* name, const char* namespc) const
+const Dimension& Schema::getDimension(boost::string_ref name, boost::string_ref namespc) const
 {
     std::string errorMsg;
     const Dimension* dim = getDimensionPtr(name, namespc, &errorMsg);
@@ -215,64 +213,64 @@ const Dimension& Schema::getDimension(const char* name, const char* namespc) con
 
 
 namespace {
-// Helpers for searching the dimension index using C strings
+// Helpers for searching the dimension index without constructing a std::string
 
-// Hash for C strings, compatible with boost::hash<std::string>
-struct CStrHash
+// Hash for boost::string_ref
+struct string_ref_hash
 {
-    std::size_t operator()(const char* str) const
+    std::size_t operator()(boost::string_ref str) const
     {
-        return boost::hash_range(str, str + strlen(str));
+        return boost::hash_range(str.begin(), str.end());
     }
 };
 
-// Compare std::string and C strings for equality
-struct StrCStrEqual
+// Compare boost::string_ref and std::string
+struct string_ref_equal
 {
-    bool operator()(const std::string& s1, const char* s2) const { return s1 == s2; }
-    bool operator()(const char* s1, const std::string& s2) const { return s1 == s2; }
+    template<typename T1, typename T2>
+    bool operator()(const T1& s1, const T2& s2) const
+    {
+        return s1 == s2;
+    }
 };
 
 } // namespace
 
 
-const Dimension* Schema::getDimensionPtr(const char* name, const char* namespc,
-                                          std::string* errorMsg) const
+const Dimension* Schema::getDimensionPtr(boost::string_ref name, boost::string_ref namespc,
+                                         std::string* errorMsg) const
 {
-    // getDimensionPtr is implemented in terms of C strings so that we can
-    // guarentee not to allocate memory unless we really need to.  That makes
-    // the following code ugly but significantly faster when performing a lot
-    // of dimension lookup.  The various overloads could be removed if we had a
-    // recent boost with boost::string_ref 
-    const char* t = name;
-    const char* ns = namespc;
-    size_t nsLength = strlen(namespc);
-    if (nsLength == 0)
+    // getDimensionPtr is implemented in terms of boost::string_ref so that we
+    // can guarentee not to allocate memory unless we really need to.  That
+    // makes the following code ugly but significantly faster when performing a
+    // lot of dimension lookup.
+    boost::string_ref t = name;
+    boost::string_ref ns = namespc;
+    if (ns.empty())
     {
-        const char* dotPos = strrchr(name, '.');
-        if (dotPos)
+        size_t dotPos = name.rfind('.');
+        if (dotPos != boost::string_ref::npos)
         {
             // dimension is named as namespace.name (eg, drivers.las.reader.X)
-            // - split into name and namespace without allocating.
-            t = dotPos + 1;
-            nsLength = dotPos - name;
-            ns = name;
+            // - split into name and namespace
+            t = name.substr(dotPos + 1);
+            ns = name.substr(0, dotPos);
         }
     }
 
     schema::index_by_name const& name_index = m_index.get<schema::name>();
     std::pair<schema::index_by_name::const_iterator,
               schema::index_by_name::const_iterator> nameRange =
-        name_index.equal_range(t, CStrHash(), StrCStrEqual());
+        name_index.equal_range(t, string_ref_hash(), string_ref_equal());
 
     if (nameRange.first != name_index.end())
     {
-        if (nsLength != 0)
+        if (ns.empty())
         {
             for (schema::index_by_name::const_iterator it = nameRange.first;
                  it != nameRange.second; ++it)
             {
-                if (strncmp(ns, it->getNamespace().c_str(), nsLength) == 0)
+                if (ns == it->getNamespace())
                 {
                     return &*it;
                 }
@@ -364,12 +362,11 @@ const Dimension* Schema::getDimensionPtr(const char* name, const char* namespc,
     else
     {
         // FIXME!!!  uuids::string_generator will generally throw - need our own parsing function.
-        return 0;
         boost::uuids::uuid ps1;
         try
         {
             boost::uuids::string_generator gen;
-            ps1 = gen(t);
+            ps1 = gen(t.begin(), t.end());
         }
         catch (std::runtime_error&)
         {
@@ -387,11 +384,11 @@ const Dimension* Schema::getDimensionPtr(const char* name, const char* namespc,
 
         if (i != m_index.get<schema::uid>().end())
         {
-            if (nsLength != 0)
+            if (!ns.empty())
             {
                 while (i != m_index.get<schema::uid>().end())
                 {
-                    if (strncmp(ns, i->getNamespace().c_str(), nsLength) == 0)
+                    if (ns == i->getNamespace())
                     {
                         return &*i;
                     }
