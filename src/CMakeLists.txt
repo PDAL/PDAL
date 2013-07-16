@@ -782,23 +782,6 @@ if (USE_PDAL_PLUGIN_OCI)
       PROPERTIES
       INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib")
     endif()
-
-    set(PDAL_OCI_READER_LIB_NAME pdal_plugin_reader_oci)
-    add_library(${PDAL_OCI_READER_LIB_NAME} SHARED ${PDAL_ORACLE_SRC}/oci_wrapper.cpp
-                                                    ${PDAL_ORACLE_SRC}/common.cpp
-                                                    ${PDAL_ORACLE_SRC}/Reader.cpp)
-    target_link_libraries(${PDAL_OCI_READER_LIB_NAME}
-                          ${PDAL_LIB_NAME}
-                          ${ORACLE_LIBRARY})
-    set_target_properties(${PDAL_OCI_READER_LIB_NAME}
-    PROPERTIES SOVERSION "${PDAL_LIB_SOVERSION}" )
-    if (APPLE)
-    set_target_properties(
-      ${PDAL_OCI_READER_LIB_NAME}
-      PROPERTIES
-      INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib")
-    endif()
-    
 endif()
 endif()
 ###############################################################################
