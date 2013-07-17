@@ -37,7 +37,6 @@ set(PDALBOOST_SOURCES
     ./libs/fusion/preprocess/preprocess.cpp
     ./libs/iostreams/src/file_descriptor.cpp
     ./libs/iostreams/src/mapped_file.cpp
-    ./libs/iostreams/src/bzip2.cpp
     ./libs/iostreams/src/file_descriptor.cpp
     ./libs/iostreams/src/gzip.cpp
     ./libs/iostreams/src/zlib.cpp
