@@ -143,12 +143,12 @@ BOOST_AUTO_TEST_CASE(test_callbacks)
         pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Random);
         pdal::drivers::faux::Writer writer(reader, Options::none());
         writer.initialize();
-        writer.setChunkSize(100);
+        // writer.setChunkSize(100);
 
         MyUserCallback_0 cb;
         writer.setUserCallback(&cb);
 
-        writer.write(0);
+        writer.write(0, 0, 100);
 
         BOOST_CHECK_EQUAL(cb.getHeartbeats(), 12u);
         BOOST_CHECK_EQUAL(cb.getPercentComplete(), 100);
@@ -160,12 +160,12 @@ BOOST_AUTO_TEST_CASE(test_callbacks)
         pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Random);
         pdal::drivers::faux::Writer writer(reader, Options::none());
         writer.initialize();
-        writer.setChunkSize(100);
+        // writer.setChunkSize(100);
 
         MyUserCallback_0 cb;
         writer.setUserCallback(&cb);
 
-        writer.write(1000);
+        writer.write(1000, 0, 100);
 
         BOOST_CHECK_EQUAL(cb.getHeartbeats(), 12u);
         BOOST_CHECK_EQUAL(cb.getPercentComplete(), 100);
@@ -177,12 +177,12 @@ BOOST_AUTO_TEST_CASE(test_callbacks)
         pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Random);
         pdal::drivers::faux::Writer writer(reader, Options::none());
         writer.initialize();
-        writer.setChunkSize(100);
+        // writer.setChunkSize(100);
 
         MyUserCallback_1 cb;
         writer.setUserCallback(&cb);
 
-        BOOST_CHECK_THROW(writer.write(1000), pipeline_interrupt);
+        BOOST_CHECK_THROW(writer.write(1000, 0, 100), pipeline_interrupt);
 
         BOOST_CHECK_EQUAL(cb.getHeartbeats(), 7u);
         BOOST_CHECK_EQUAL(cb.getPercentComplete(), 60);
@@ -194,12 +194,12 @@ BOOST_AUTO_TEST_CASE(test_callbacks)
         pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Random);
         pdal::drivers::faux::Writer writer(reader, Options::none());
         writer.initialize();
-        writer.setChunkSize(100);
+        // writer.setChunkSize(100);
 
         MyUserCallback_2 cb;
         writer.setUserCallback(&cb);
 
-        BOOST_CHECK_THROW(writer.write(1000), pipeline_interrupt);
+        BOOST_CHECK_THROW(writer.write(1000, 0, 100), pipeline_interrupt);
 
         BOOST_CHECK_EQUAL(cb.getHeartbeats(), 7u);
         BOOST_CHECK_EQUAL(cb.getPercentComplete(), 60);
@@ -208,5 +208,15 @@ BOOST_AUTO_TEST_CASE(test_callbacks)
     return;
 }
 
+BOOST_AUTO_TEST_CASE(test_buffer_resize)
+{
+    Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
+    pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Random);
+    pdal::drivers::faux::Writer writer(reader, Options::none());
+    writer.initialize();
+    // writer.setChunkSize(101);
+
+    BOOST_CHECK_EQUAL(writer.write(750, 0, 101), 750);
+}
 
 BOOST_AUTO_TEST_SUITE_END()
