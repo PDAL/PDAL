@@ -265,7 +265,7 @@ const Dimension* Schema::getDimensionPtr(boost::string_ref name, boost::string_r
 
     if (nameRange.first != name_index.end())
     {
-        if (ns.empty())
+        if (!ns.empty())
         {
             for (schema::index_by_name::const_iterator it = nameRange.first;
                  it != nameRange.second; ++it)
