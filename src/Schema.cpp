@@ -263,146 +263,111 @@ const Dimension* Schema::getDimensionPtr(boost::string_ref name, boost::string_r
               schema::index_by_name::const_iterator> nameRange =
         name_index.equal_range(t, string_ref_hash(), string_ref_equal());
 
-    if (nameRange.first != name_index.end())
+    if (nameRange.first == name_index.end())
     {
-        if (!ns.empty())
+        if (errorMsg)
         {
-            for (schema::index_by_name::const_iterator it = nameRange.first;
-                 it != nameRange.second; ++it)
-            {
-                if (ns == it->getNamespace())
-                {
-                    return &*it;
-                }
-            }
-            // Name found, but requested namespace not found
-            if (errorMsg)
-            {
-                std::ostringstream oss;
-                oss << "Unable to find dimension with name '" << t
-                    << "' and namespace  '" << ns << "' in schema";
-                *errorMsg = oss.str();
-            }
-            return 0;
+            std::ostringstream oss;
+            oss << "Unable to find a dimension with name '" << name
+                << "' in schema";
+            *errorMsg = oss.str();
         }
-
-        // Determine whether we have more than one dimension of the same name
-        schema::index_by_name::const_iterator it = nameRange.first;
-        ++it;
-        if (it != nameRange.second)
-        {
-            boost::uint32_t num_parents(0);
-            std::map<dimension::id, dimension::id> relationships;
-
-            for (schema::index_by_name::const_iterator  o = nameRange.first; o != nameRange.second; ++o)
-            {
-                // Put a map together that maps parents to children that
-                // we are going to walk to find the very last child in the
-                // graph.
-                std::pair<dimension::id, dimension::id> p(o->getParent(), o->getUUID());
-                relationships.insert(p);
-
-                // The parent dimension should have a nil parent of its own.
-                // nil_uuid is the default parent of all dimensions as the y
-                // are created
-                if (o->getParent().is_nil())
-                {
-                    num_parents++;
-                }
-            }
-
-            // Test to make sure that the number of parent dimensions all with
-            // the same name is equal to only 1. If there are multiple
-            // dimensions with the same name, but no relationships defined,
-            // we are in an error condition
-            if (num_parents != 1)
-            {
-                if (errorMsg)
-                {
-                    std::ostringstream oss;
-                    oss << "Schema has multiple dimensions with name '" << t << "', but "
-                        "their parent/child relationships are not coherent. Multiple "
-                        "parents are present.";
-                    *errorMsg = oss.str();
-                }
-                return 0;
-            }
-
-            dimension::id parent = boost::uuids::nil_uuid();
-
-            // Starting at the parent (nil uuid), walk the child/parent graph down to the
-            // end.  When we're done finding dimensions, what's left is the child
-            // at the end of the graph.
-            std::map<dimension::id, dimension::id>::const_iterator p = relationships.find(parent);
-            dimension::id child;
-            while (p != relationships.end())
-            {
-                child = p->second;
-                p = relationships.find(p->second);
-            }
-            schema::index_by_uid::const_iterator pi = m_index.get<schema::uid>().find(child);
-            if (pi != m_index.get<schema::uid>().end())
-            {
-                return &*pi;
-            }
-            else
-            {
-                if (errorMsg)
-                {
-                    std::ostringstream oss;
-                    oss << "Unable to fetch subjugate dimension with id '" << child << "' in schema";
-                    *errorMsg = oss.str();
-                }
-                return 0;
-            }
-        }
-        // we don't have a ns or we don't have multiples, return what we found
-        return &*nameRange.first;
+        return 0;
     }
-    else
+
+    if (!ns.empty())
     {
-        // FIXME!!!  uuids::string_generator will generally throw - need our own parsing function.
-        boost::uuids::uuid ps1;
-        try
+        for (schema::index_by_name::const_iterator it = nameRange.first;
+                it != nameRange.second; ++it)
         {
-            boost::uuids::string_generator gen;
-            ps1 = gen(t.begin(), t.end());
+            if (ns == it->getNamespace())
+            {
+                return &*it;
+            }
         }
-        catch (std::runtime_error&)
+        // Name found, but requested namespace not found
+        if (errorMsg)
         {
-            // invalid string for uuid
+            std::ostringstream oss;
+            oss << "Unable to find dimension with name '" << t
+                << "' and namespace  '" << ns << "' in schema";
+            *errorMsg = oss.str();
+        }
+        return 0;
+    }
+
+    // Determine whether we have more than one dimension of the same name
+    schema::index_by_name::const_iterator nextByName = nameRange.first;
+    ++nextByName;
+    if (nextByName != nameRange.second)
+    {
+        boost::uint32_t num_parents(0);
+        std::map<dimension::id, dimension::id> relationships;
+
+        for (schema::index_by_name::const_iterator  o = nameRange.first; o != nameRange.second; ++o)
+        {
+            // Put a map together that maps parents to children that
+            // we are going to walk to find the very last child in the
+            // graph.
+            std::pair<dimension::id, dimension::id> p(o->getParent(), o->getUUID());
+            relationships.insert(p);
+
+            // The parent dimension should have a nil parent of its own.
+            // nil_uuid is the default parent of all dimensions as the y
+            // are created
+            if (o->getParent().is_nil())
+            {
+                num_parents++;
+            }
+        }
+
+        // Test to make sure that the number of parent dimensions all with
+        // the same name is equal to only 1. If there are multiple
+        // dimensions with the same name, but no relationships defined,
+        // we are in an error condition
+        if (num_parents != 1)
+        {
             if (errorMsg)
             {
                 std::ostringstream oss;
-                oss << "Dimension with name '" << t << "' not found, unable to Schema::getDimension";
+                oss << "Schema has multiple dimensions with name '" << t << "', but "
+                    "their parent/child relationships are not coherent. Multiple "
+                    "parents are present.";
                 *errorMsg = oss.str();
             }
             return 0;
         }
 
-        schema::index_by_uid::const_iterator i = m_index.get<schema::uid>().find(ps1);
+        dimension::id parent = boost::uuids::nil_uuid();
 
-        if (i != m_index.get<schema::uid>().end())
+        // Starting at the parent (nil uuid), walk the child/parent graph down to the
+        // end.  When we're done finding dimensions, what's left is the child
+        // at the end of the graph.
+        std::map<dimension::id, dimension::id>::const_iterator p = relationships.find(parent);
+        dimension::id child;
+        while (p != relationships.end())
         {
-            if (!ns.empty())
-            {
-                while (i != m_index.get<schema::uid>().end())
-                {
-                    if (ns == i->getNamespace())
-                    {
-                        return &*i;
-                    }
-                    ++i;
-                }
-            }
-            return &*i;
+            child = p->second;
+            p = relationships.find(p->second);
+        }
+        schema::index_by_uid::const_iterator pi = m_index.get<schema::uid>().find(child);
+        if (pi != m_index.get<schema::uid>().end())
+        {
+            return &*pi;
         }
         else
         {
+            if (errorMsg)
+            {
+                std::ostringstream oss;
+                oss << "Unable to fetch subjugate dimension with id '" << child << "' in schema";
+                *errorMsg = oss.str();
+            }
             return 0;
         }
     }
-    return 0;
+    // we don't have a ns and we don't have multiples, return what we found
+    return &*nameRange.first;
 }
 
 

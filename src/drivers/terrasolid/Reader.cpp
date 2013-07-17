@@ -237,7 +237,8 @@ void Reader::registerFields()
         // Fetch PointSource ID Uint8 dimension by UUID because dimensions
         // has two "PointSourceId" dimensions added.
 
-        schema.appendDimension(dimensions.getDimension("68c03b56-4248-4cca-ade5-33e90d5c5563"));
+        schema.appendDimension(dimensions.getDimension(
+                    boost::uuids::string_generator()("68c03b56-4248-4cca-ade5-33e90d5c5563")));
 
         schema.appendDimension(dimensions.getDimension("Intensity"));
 
@@ -254,12 +255,14 @@ void Reader::registerFields()
 
         schema.appendDimension(dimensions.getDimension("Classification"));
 
-        schema.appendDimension(dimensions.getDimension("465a9a7e-1e04-47b0-97b6-4f826411bc71"));
+        schema.appendDimension(dimensions.getDimension(
+                    boost::uuids::string_generator()("465a9a7e-1e04-47b0-97b6-4f826411bc71")));
 
         schema.appendDimension(dimensions.getDimension("Flag"));
         schema.appendDimension(dimensions.getDimension("Mark"));
 
-        schema.appendDimension(dimensions.getDimension("7193bb9f-3ca2-491f-ba18-594321493789"));
+        schema.appendDimension(dimensions.getDimension(
+                    boost::uuids::string_generator()("7193bb9f-3ca2-491f-ba18-594321493789")));
 
         schema.appendDimension(dimensions.getDimension("Intensity"));
     }
