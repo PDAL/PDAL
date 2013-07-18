@@ -209,4 +209,16 @@ BOOST_AUTO_TEST_CASE(test_callbacks)
 }
 
 
+BOOST_AUTO_TEST_CASE(test_buffer_resize)
+{
+    Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
+    pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Random);
+    pdal::drivers::faux::Writer writer(reader, Options::none());
+    writer.initialize();
+    writer.setChunkSize(101);
+
+    BOOST_CHECK_EQUAL(writer.write(750), 750);
+}
+
+
 BOOST_AUTO_TEST_SUITE_END()

@@ -216,7 +216,7 @@ boost::uint64_t Writer::write(  boost::uint64_t targetNumPointsToWrite,
             const boost::uint32_t numPointsToReadThisChunk = static_cast<boost::uint32_t>(numPointsToReadThisChunk64);
 
             // we are reusing the buffer, so we may need to adjust the capacity for the last (and likely undersized) chunk
-            if (m_writer_buffer->getCapacity() < numPointsToReadThisChunk)
+            if (m_writer_buffer->getCapacity() > numPointsToReadThisChunk)
             {
                 m_writer_buffer->resize(numPointsToReadThisChunk);
             }
