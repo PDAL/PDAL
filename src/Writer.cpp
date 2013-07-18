@@ -52,8 +52,7 @@ namespace pdal
 
 Writer::Writer(Stage& prevStage, const Options& options)
     : StageBase(StageBase::makeVector(prevStage), options)
-    // , m_chunkSize(options.getValueOrDefault("chunk_size", s_defaultChunkSize))
-    , m_userCallback(0)
+        , m_userCallback(0)
     , m_writer_buffer(0)
 {
     return;
@@ -72,19 +71,6 @@ Writer::~Writer()
     if (m_writer_buffer != 0)
         delete m_writer_buffer;
 }
-
-
-// void Writer::setChunkSize(boost::uint32_t chunkSize)
-// {
-//     m_chunkSize = chunkSize;
-// }
-// 
-// 
-// boost::uint32_t Writer::getChunkSize() const
-// {
-//     return m_chunkSize;
-// }
-
 
 const SpatialReference& Writer::getSpatialReference() const
 {

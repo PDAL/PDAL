@@ -151,25 +151,8 @@ int PcPipeline::execute()
     if (m_numPointsToWrite == 0)
         m_numPointsToWrite = numPointsToRead;
     
-    // boost::uint32_t chunkSize(0);
-    // try
-    // {
-    //     const pdal::Options& options = static_cast<pdal::Writer const*>(manager.getWriter())->getOptions();
-    //     chunkSize = options.getValueOrThrow<boost::uint32_t>("chunk_size");
-    //     
-    // } catch (pdal::option_not_found const&)
-    // {
-    //     chunkSize = m_chunkSize;
-    // }
-    // 
-    // if (chunkSize != 0)
-    //     manager.getWriter()->setChunkSize(chunkSize);
-    // else
-    // manager.getWriter()->setChunkSize(numPointsToRead);
-
     std::cerr << "Requested to read " << numPointsToRead << " points" << std::endl;
     std::cerr << "Requested to write " << m_numPointsToWrite << " points" << std::endl;
-    // std::cerr << "Buffer capacity is " << manager.getWriter()->getChunkSize() << std::endl;
     
     pdal::UserCallback* callback;
 

@@ -78,8 +78,6 @@ Writer::Writer(Stage& prevStage, const Options& options)
     m_connection = connect();
 
     boost::uint32_t capacity = getOptions().getValueOrDefault<boost::uint32_t>("capacity", 0);
-    // setChunkSize(capacity);
-
 
     m_block_table_name = boost::to_upper_copy(getOptions().getValueOrThrow<std::string>("block_table_name"));
     m_block_table_partition_column = boost::to_upper_copy(getDefaultedOption<std::string>("block_table_partition_column"));
