@@ -6,10 +6,6 @@ compiler:
   - g++
   - clang
 
-branches:
-  only:
-    - master
-
 before_install: ./scripts/ci/before_install.sh
 
 script: ./scripts/ci/script.sh
