@@ -437,25 +437,25 @@ public:
     {
         T output = static_cast<T>(Utils::sround((v - m_numericOffset)/ m_numericScale));
 
-        if (std::numeric_limits<T>::is_exact) //
-        {
-            if (output > (std::numeric_limits<T>::max)())
-            {
-                std::ostringstream oss;
-                oss << "Dimension::removeScaling: scale and/or offset combination causes "
-                    "re-scaled value to be greater than std::numeric_limits::max for dimension '" << getName() << "'. " <<
-                    "value is: " << output << " and max() is: " << (std::numeric_limits<T>::max)();
-            }
-            else if (output < (std::numeric_limits<T>::min)())
-            {
-                std::ostringstream oss;
-                oss << "Dimension::removeScaling: scale and/or offset combination causes "
-                    "re-scaled value to be less than std::numeric_limits::min for dimension '" << getName() << "'. " <<
-                    "value is: " << output << " and min() is: " << (std::numeric_limits<T>::min)();
-                throw std::out_of_range(oss.str());
-
-            }
-        }
+        // if (std::numeric_limits<T>::is_exact) //
+        // {
+        //     if (output > (std::numeric_limits<T>::max)())
+        //     {
+        //         std::ostringstream oss;
+        //         oss << "Dimension::removeScaling: scale and/or offset combination causes "
+        //             "re-scaled value to be greater than std::numeric_limits::max for dimension '" << getName() << "'. " <<
+        //             "value is: " << output << " and max() is: " << (std::numeric_limits<T>::max)();
+        //     }
+        //     else if (output < (std::numeric_limits<T>::min)())
+        //     {
+        //         std::ostringstream oss;
+        //         oss << "Dimension::removeScaling: scale and/or offset combination causes "
+        //             "re-scaled value to be less than std::numeric_limits::min for dimension '" << getName() << "'. " <<
+        //             "value is: " << output << " and min() is: " << (std::numeric_limits<T>::min)();
+        //         throw std::out_of_range(oss.str());
+        // 
+        //     }
+        // }
         return output;
     }
     
