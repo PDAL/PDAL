@@ -198,15 +198,12 @@ int PcQuery::execute()
 
     filter->initialize();
 
-    boost::uint32_t chunkSize(pdal::Writer::s_defaultChunkSize);
-    if (filter->getNumPoints() > 0 && m_chunkSize == 0)
+    boost::uint32_t chunkSize(131072);
+    if (filter->getNumPoints())
     {
         chunkSize = filter->getNumPoints();
-    } 
-    else if (m_chunkSize > 0)
-    {
-        chunkSize = m_chunkSize;
-    }    
+    }
+
     PointBuffer data(filter->getSchema(), chunkSize);
     StageSequentialIterator* iter = filter->createSequentialIterator(data);
 
