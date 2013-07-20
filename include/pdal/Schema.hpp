@@ -158,7 +158,8 @@ public:
     /// @param name name to use when searching
     /// @param ns namespace to use when searching. If none is given, the first
     /// matching Dimension instance with name \b name is returned.
-    const Dimension& getDimension(boost::string_ref name, boost::string_ref ns = "") const;
+    const Dimension& getDimension(boost::string_ref name,
+                                  boost::string_ref ns = boost::string_ref()) const;
 
     /// @return a const& to a Dimension with the given dimension::id. If
     /// no matching dimension is found, pdal::dimension_not_found is thrown.
@@ -178,7 +179,8 @@ public:
     /// @param ns namespace to use when searching. If none is given, the first
     /// matching Dimension instance with name \b name is returned.
     /// @param errorMsg optional location for storing error messages
-    const Dimension* getDimensionPtr(boost::string_ref name, boost::string_ref ns = "",
+    const Dimension* getDimensionPtr(boost::string_ref name,
+                                     boost::string_ref ns = boost::string_ref(),
                                      std::string* errorMsg = 0) const;
 
     /// @return a boost::optional-wrapped const& to a Dimension with the given name
@@ -186,7 +188,8 @@ public:
     /// @param name name to use when searching
     /// @param ns namespace to use when searching. If none is given, the first
     /// matching Dimension instance with name \b name is returned.
-    boost::optional<Dimension const&> getDimensionOptional(std::string const& name, std::string const& ns="") const;
+    boost::optional<Dimension const&> getDimensionOptional(boost::string_ref name,
+                                                           boost::string_ref ns=boost::string_ref()) const;
 
     /// @return a boost::optional-wrapped const& to a Dimension with the given dimension::id.
     /// If no matching dimension is found, the optional will be empty.

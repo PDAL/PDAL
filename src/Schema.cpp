@@ -371,9 +371,10 @@ const Dimension* Schema::getDimensionPtr(boost::string_ref name, boost::string_r
 }
 
 
-boost::optional<Dimension const&> Schema::getDimensionOptional(std::string const& name, std::string const& ns) const
+boost::optional<Dimension const&> Schema::getDimensionOptional(boost::string_ref name,
+                                                               boost::string_ref ns) const
 {
-    const Dimension* dim = getDimensionPtr(name.c_str(), ns.c_str());
+    const Dimension* dim = getDimensionPtr(name, ns);
     if (dim)
         return boost::optional<Dimension const&>(*dim);
     else
