@@ -237,31 +237,29 @@ struct string_ref_equal
 } // namespace
 
 
-const Dimension* Schema::getDimensionPtr(boost::string_ref name, boost::string_ref namespc,
+const Dimension* Schema::getDimensionPtr(boost::string_ref nameIn, boost::string_ref namespc,
                                          std::string* errorMsg) const
 {
     // getDimensionPtr is implemented in terms of boost::string_ref so that we
-    // can guarentee not to allocate memory unless we really need to.  That
-    // makes the following code ugly but significantly faster when performing a
-    // lot of dimension lookup.
-    boost::string_ref t = name;
+    // can guarentee not to allocate memory unless we really need to.
+    boost::string_ref name = nameIn;
     boost::string_ref ns = namespc;
     if (ns.empty())
     {
-        size_t dotPos = name.rfind('.');
+        size_t dotPos = nameIn.rfind('.');
         if (dotPos != boost::string_ref::npos)
         {
             // dimension is named as namespace.name (eg, drivers.las.reader.X)
             // - split into name and namespace
-            t = name.substr(dotPos + 1);
-            ns = name.substr(0, dotPos);
+            name = nameIn.substr(dotPos + 1);
+            ns = nameIn.substr(0, dotPos);
         }
     }
 
     schema::index_by_name const& name_index = m_index.get<schema::name>();
     std::pair<schema::index_by_name::const_iterator,
               schema::index_by_name::const_iterator> nameRange =
-        name_index.equal_range(t, string_ref_hash(), string_ref_equal());
+        name_index.equal_range(name, string_ref_hash(), string_ref_equal());
 
     if (nameRange.first == name_index.end())
     {
@@ -289,7 +287,7 @@ const Dimension* Schema::getDimensionPtr(boost::string_ref name, boost::string_r
         if (errorMsg)
         {
             std::ostringstream oss;
-            oss << "Unable to find dimension with name '" << t
+            oss << "Unable to find dimension with name '" << name
                 << "' and namespace  '" << ns << "' in schema";
             *errorMsg = oss.str();
         }
@@ -330,7 +328,7 @@ const Dimension* Schema::getDimensionPtr(boost::string_ref name, boost::string_r
             if (errorMsg)
             {
                 std::ostringstream oss;
-                oss << "Schema has multiple dimensions with name '" << t << "', but "
+                oss << "Schema has multiple dimensions with name '" << name << "', but "
                     "their parent/child relationships are not coherent. Multiple "
                     "parents are present.";
                 *errorMsg = oss.str();

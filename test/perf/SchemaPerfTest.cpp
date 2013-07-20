@@ -30,9 +30,9 @@ PDAL_NOINLINE const Dimension* lookup(Schema& schema, const char* name,
 
 
 // Lookup dimension, inefficiently swallowing exception if not found
-PDAL_NOINLINE const Dimension* lookup_ex(Schema& schema,
-                                         const char* name,
-                                         const char* namespc)
+PDAL_NOINLINE const Dimension* lookupEx(Schema& schema,
+                                        const char* name,
+                                        const char* namespc)
 {
     try
     {
@@ -48,8 +48,8 @@ PDAL_NOINLINE const Dimension* lookup_ex(Schema& schema,
 
 // Lookup dimensions, forcing the allocation of a pair of std::string instances
 // each time.
-PDAL_NOINLINE const Dimension* lookup_std_str(Schema& schema, const std::string& name,
-                                              const std::string& namespc)
+PDAL_NOINLINE const Dimension* lookupStdStr(Schema& schema, const std::string& name,
+                                            const std::string& namespc)
 {
     return schema.getDimensionPtr(name, namespc);
 }
@@ -134,7 +134,7 @@ int main(int argc, char* argv[])
         size_t niter = 100000;
         Timer timer;
         for (size_t i = 0; i < niter; ++i)
-            lookup_ex(schema, "Intensity_", "driver.las.reader");
+            lookupEx(schema, "Intensity_", "driver.las.reader");
         std::cout << "Time per THROWING lookup of missing \"Intensity_\" with namespace \"driver.las.reader\": "
                   << 1e9 * timer()/niter << " ns\n";
     }
@@ -144,13 +144,12 @@ int main(int argc, char* argv[])
         size_t niter = 10000000;
         Timer timer;
         for (size_t i = 0; i < niter; ++i)
-            lookup_std_str(schema, "Intensity", "driver.las.reader");
+            lookupStdStr(schema, "Intensity", "driver.las.reader");
         std::cout << "Time per lookup of \"Intensity\" with namespace \"driver.las.reader\" including std::string creation: "
                   << 1e9 * timer()/niter << " ns\n";
     }
 
     // TODO:
-    // * lookup by string uuid
     // * lookup of inheriting dimensions
 
     return 0;
