@@ -339,15 +339,9 @@ int Pc2Pc::execute()
     if (m_numPointsToWrite == 0)
         m_numPointsToWrite = numPointsToRead;
 
-    if (m_chunkSize != 0)
-        writer->setChunkSize(m_chunkSize);
-    else
-        writer->setChunkSize(numPointsToRead);
-        
-        
     std::cerr << "Requested to read " << numPointsToRead << " points" << std::endl;
     std::cerr << "Requested to write " << m_numPointsToWrite << " points" << std::endl;
-    std::cerr << "Buffer capacity is " << writer->getChunkSize() << std::endl;
+    // std::cerr << "Buffer capacity is " << writer->getChunkSize() << std::endl;
         
     pdal::UserCallback* callback;
     if (!getProgressShellCommand().size())

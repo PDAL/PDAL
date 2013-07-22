@@ -194,15 +194,11 @@ void PcInfo::dumpStats(pdal::filters::Stats& filter) const
 
     const Schema& schema = filter.getSchema();
     
-    boost::uint32_t chunkSize(pdal::Writer::s_defaultChunkSize);
-    if (filter.getNumPoints() > 0  && m_chunkSize == 0)
+    boost::uint32_t chunkSize(131072);
+    if (filter.getNumPoints() > 0 )
     {
         chunkSize = filter.getNumPoints();
     } 
-    else if (m_chunkSize > 0)
-    {
-        chunkSize = m_chunkSize;
-    }
 
     PointBuffer data(schema, chunkSize);
 

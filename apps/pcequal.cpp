@@ -121,8 +121,7 @@ PcEqual::PcEqual(int argc, char* argv[])
 
 void PcEqual::validateSwitches()
 {
-    if( m_chunkSize == 0)
-        m_chunkSize = 1048576;     
+    m_chunkSize = 1048576;     
 
     return;
 }

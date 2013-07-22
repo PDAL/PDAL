@@ -52,8 +52,7 @@ namespace pdal
 
 Writer::Writer(Stage& prevStage, const Options& options)
     : StageBase(StageBase::makeVector(prevStage), options)
-    , m_chunkSize(options.getValueOrDefault("chunk_size", s_defaultChunkSize))
-    , m_userCallback(0)
+        , m_userCallback(0)
     , m_writer_buffer(0)
 {
     return;
@@ -72,19 +71,6 @@ Writer::~Writer()
     if (m_writer_buffer != 0)
         delete m_writer_buffer;
 }
-
-
-void Writer::setChunkSize(boost::uint32_t chunkSize)
-{
-    m_chunkSize = chunkSize;
-}
-
-
-boost::uint32_t Writer::getChunkSize() const
-{
-    return m_chunkSize;
-}
-
 
 const SpatialReference& Writer::getSpatialReference() const
 {
@@ -147,7 +133,8 @@ static void do_callback(boost::uint64_t pointsWritten, boost::uint64_t pointsToW
 }
 
 boost::uint64_t Writer::write(  boost::uint64_t targetNumPointsToWrite,
-                                boost::uint64_t startingPosition)
+                                boost::uint64_t startingPosition,
+                                boost::uint64_t chunkSize)
 {
     if (!isInitialized())
     {
@@ -166,10 +153,16 @@ boost::uint64_t Writer::write(  boost::uint64_t targetNumPointsToWrite,
         boost::uint64_t capacity(targetNumPointsToWrite);
         if (capacity == 0)
         {
-            capacity = m_chunkSize;
+            if (chunkSize)
+                capacity = chunkSize;
+            else
+                capacity = 131072;
         } else
         {
-            capacity = (std::min)(static_cast<boost::uint64_t>(m_chunkSize), targetNumPointsToWrite) ;
+            if (chunkSize)
+                capacity = (std::min)(static_cast<boost::uint64_t>(chunkSize), targetNumPointsToWrite) ;
+            else
+                capacity = targetNumPointsToWrite;
         }
         
         if (capacity > std::numeric_limits<boost::uint32_t>::max())
@@ -209,14 +202,14 @@ boost::uint64_t Writer::write(  boost::uint64_t targetNumPointsToWrite,
         // rebuild our PointBuffer, if it needs to hold less than the default max chunk size
         if (targetNumPointsToWrite != 0)
         {
-            const boost::uint64_t numRemainingPointsToRead = targetNumPointsToWrite - actualNumPointsWritten;
+            const boost::int64_t numRemainingPointsToRead = targetNumPointsToWrite - actualNumPointsWritten;
 
-            const boost::uint64_t numPointsToReadThisChunk64 = std::min<boost::uint64_t>(numRemainingPointsToRead, m_chunkSize);
+            const boost::int64_t numPointsToReadThisChunk64 = std::min<boost::int64_t>(numRemainingPointsToRead, chunkSize == 0 ? numRemainingPointsToRead : chunkSize);
             // this case is safe because m_chunkSize is a uint32
             const boost::uint32_t numPointsToReadThisChunk = static_cast<boost::uint32_t>(numPointsToReadThisChunk64);
 
             // we are reusing the buffer, so we may need to adjust the capacity for the last (and likely undersized) chunk
-            if (m_writer_buffer->getCapacity() < numPointsToReadThisChunk)
+            if (m_writer_buffer->getCapacity() != numPointsToReadThisChunk)
             {
                 m_writer_buffer->resize(numPointsToReadThisChunk);
             }

@@ -163,7 +163,7 @@ BOOST_AUTO_TEST_CASE(test1)
             // // writer.setPointFormat(::pdal::drivers::las::PointFormat3);
             // // writer.setSystemIdentifier("");
             // writer.setGeneratingSoftware("PDAL-NITF");
-            writer.setChunkSize(100);
+            // writer.setChunkSize(100);
         }
         writer.initialize();
 
