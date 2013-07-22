@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Pipeline version="1.0">
+    <Writer type="drivers.faux.writer">
+        <Filter type="filters.chipper">
+            <Option name="capacity">
+                100
+            </Option>
+            <Reader type="drivers.las.reader">
+                <Option name="filename">
+                    ../data/autzen-thin.las
+                </Option>
+            </Reader>
+        </Filter>
+    </Writer>
+</Pipeline>
