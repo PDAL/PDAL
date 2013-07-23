@@ -162,138 +162,32 @@ boost::uint16_t Support::getPointDataSize(PointFormat pointFormat)
 PointDimensions::PointDimensions(const Schema& schema, std::string const& ns)
 {
 
-    X = &schema.getDimension("X", ns);
-    Y = &schema.getDimension("Y", ns);
-    Z = &schema.getDimension("Z", ns);
+    X = schema.getDimensionPtr("X", ns);
+    if (!X) throw pdal::dimension_not_found("X dimension not found");
+    Y = schema.getDimensionPtr("Y", ns);
+    if (!Y) throw pdal::dimension_not_found("Y dimension not found");
+    Z = schema.getDimensionPtr("Z", ns);
+    if (!Z) throw pdal::dimension_not_found("Z dimension not found");
 
-    try
-    {
-        Intensity = &schema.getDimension("Intensity", ns);
-        if (Intensity->isIgnored()) Intensity = 0;
-    }
-    catch (pdal::dimension_not_found&)
-    {
-        Intensity = 0;
-    }
 
-    try
-    {
-        ReturnNumber = &schema.getDimension("ReturnNumber", ns);
-        if (ReturnNumber->isIgnored()) ReturnNumber = 0;
-    }
-    catch (pdal::dimension_not_found&)
-    {
-        ReturnNumber = 0;
-    }
+#define CACHE_DIM(x) \
+    x = schema.getDimensionPtr(#x, ns); \
+    if (x && x->isIgnored()) x = 0;    
 
-    try
-    {
-        NumberOfReturns = &schema.getDimension("NumberOfReturns", ns);
-        if (NumberOfReturns->isIgnored()) NumberOfReturns = 0;
-    }
-    catch (pdal::dimension_not_found&)
-    {
-        NumberOfReturns = 0;
-    }
 
-    try
-    {
-        ScanDirectionFlag = &schema.getDimension("ScanDirectionFlag", ns);
-        if (ScanDirectionFlag->isIgnored()) ScanDirectionFlag = 0;
-    }
-    catch (pdal::dimension_not_found&)
-    {
-        ScanDirectionFlag = 0;
-    }
-
-    try
-    {
-        EdgeOfFlightLine = &schema.getDimension("EdgeOfFlightLine", ns);
-        if (EdgeOfFlightLine->isIgnored()) EdgeOfFlightLine = 0;
-    }
-    catch (pdal::dimension_not_found&)
-    {
-        EdgeOfFlightLine = 0;
-    }
-
-    try
-    {
-        Classification = &schema.getDimension("Classification", ns);
-        if (Classification->isIgnored()) Classification = 0;
-    }
-    catch (pdal::dimension_not_found&)
-    {
-        Classification = 0;
-    }
-
-    try
-    {
-        ScanAngleRank = &schema.getDimension("ScanAngleRank", ns);
-        if (ScanAngleRank->isIgnored()) ScanAngleRank = 0;
-    }
-    catch (pdal::dimension_not_found&)
-    {
-        ScanAngleRank = 0;
-    }
-
-    try
-    {
-        UserData = &schema.getDimension("UserData", ns);
-        if (UserData->isIgnored()) UserData = 0;
-    }
-    catch (pdal::dimension_not_found&)
-    {
-        UserData = 0;
-    }
-
-    try
-    {
-        PointSourceId = &schema.getDimension("PointSourceId", ns);
-        if (PointSourceId->isIgnored()) PointSourceId = 0;
-    }
-    catch (pdal::dimension_not_found&)
-    {
-        PointSourceId = 0;
-    }
-
-    try
-    {
-        Time = &schema.getDimension("Time", ns);
-        if (Time->isIgnored()) Time = 0;
-    }
-    catch (pdal::dimension_not_found&)
-    {
-        Time = 0;
-    }
-    try
-    {
-        Red = &schema.getDimension("Red", ns);
-        if (Red->isIgnored()) Red = 0;
-    }
-    catch (pdal::dimension_not_found&)
-    {
-        Red = 0;
-    }
-
-    try
-    {
-        Green = &schema.getDimension("Green", ns);
-        if (Green->isIgnored()) Green = 0;
-    }
-    catch (pdal::dimension_not_found&)
-    {
-        Green = 0;
-    }
-
-    try
-    {
-        Blue = &schema.getDimension("Blue", ns);
-        if (Blue->isIgnored()) Blue = 0;
-    }
-    catch (pdal::dimension_not_found&)
-    {
-        Blue = 0;
-    }
+    CACHE_DIM(Intensity)
+    CACHE_DIM(ReturnNumber)
+    CACHE_DIM(NumberOfReturns)
+    CACHE_DIM(ScanDirectionFlag)
+    CACHE_DIM(EdgeOfFlightLine)
+    CACHE_DIM(Classification)
+    CACHE_DIM(ScanAngleRank)
+    CACHE_DIM(UserData)
+    CACHE_DIM(PointSourceId)
+    CACHE_DIM(Time)
+    CACHE_DIM(Red)
+    CACHE_DIM(Green)
+    CACHE_DIM(Blue)
 
 
     // WavePacketDescriptorIndex = (Support::hasWave(format) ? schema.getDimensionIndex(DimensionId::Las_WavePacketDescriptorIndex) : 0);

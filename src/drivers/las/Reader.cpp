@@ -679,7 +679,9 @@ namespace iterators
 
 
 Base::Base(pdal::drivers::las::Reader const& reader)
-    : m_reader(reader)
+    : m_describedSchema(0)
+        , m_pointDimensions(0)
+    , m_reader(reader)
     , m_istream(m_reader.getStreamFactory().allocate())
     , m_zipPoint(NULL)
     , m_unzipper(NULL)
@@ -705,7 +707,9 @@ Base::~Base()
     m_zipPoint.reset();
     m_unzipper.reset();
 #endif
-
+    
+    if (m_pointDimensions)
+        delete m_pointDimensions;
     m_reader.getStreamFactory().deallocate(m_istream);
 }
 
@@ -806,14 +810,36 @@ bool Reader::atEndImpl() const
 
 boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
 {
-    PointDimensions cachedDimensions(data.getSchema(), m_reader.getName());
+    // There's still a scenario where this fails...
+    // If the PointBuffer's schema changed inbetween successive 
+    // readBufferImpl calls in such a way that altered the order, 
+    // we're still screwed.
+
+    Schema const* schema = &data.getSchema();        
+    if (!m_pointDimensions)
+    {
+        m_pointDimensions = new PointDimensions(*schema, m_reader.getName());
+    }
+   
+    if (!m_describedSchema)
+    {
+         m_describedSchema = schema;
+    } else 
+    {
+        if (m_describedSchema != schema)
+        {
+            delete m_pointDimensions;
+            m_pointDimensions = new PointDimensions(*schema, m_reader.getName());
+        }
+    }
+
 #ifdef PDAL_HAVE_LASZIP
     return m_reader.processBuffer(data,
                                   m_istream,
                                   getStage().getNumPoints()-this->getIndex(),
                                   m_unzipper.get(),
                                   m_zipPoint.get(),
-                                  &cachedDimensions,
+                                  m_pointDimensions,
                                   m_read_buffer);
 #else
     return m_reader.processBuffer(data,
@@ -821,7 +847,7 @@ boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
                                   getStage().getNumPoints()-this->getIndex(),
                                   NULL,
                                   NULL,
-                                  &cachedDimensions,
+                                  m_pointDimensions,
                                   m_read_buffer);
 
 #endif
@@ -880,14 +906,36 @@ boost::uint64_t Reader::seekImpl(boost::uint64_t count)
 
 boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
 {
-    PointDimensions cachedDimensions(data.getSchema(), m_reader.getName());
+    // There's still a scenario where this fails...
+    // If the PointBuffer's schema changed inbetween successive 
+    // readBufferImpl calls in such a way that altered the order, 
+    // we're still screwed.
+
+    Schema const* schema = &data.getSchema();        
+    if (!m_pointDimensions)
+    {
+        m_pointDimensions = new PointDimensions(*schema, m_reader.getName());
+    }
+   
+    if (!m_describedSchema)
+    {
+         m_describedSchema = schema;
+    } else 
+    {
+        if (m_describedSchema != schema)
+        {
+            delete m_pointDimensions;
+            m_pointDimensions = new PointDimensions(*schema, m_reader.getName());
+        }
+    }
+
 #ifdef PDAL_HAVE_LASZIP
     return m_reader.processBuffer(data,
                                   m_istream,
                                   getStage().getNumPoints()-this->getIndex(),
                                   m_unzipper.get(),
                                   m_zipPoint.get(),
-                                  &cachedDimensions,
+                                  m_pointDimensions,
                                   m_read_buffer);
 #else
     return m_reader.processBuffer(data,
@@ -895,7 +943,7 @@ boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
                                   getStage().getNumPoints()-this->getIndex(),
                                   NULL,
                                   NULL,
-                                  &cachedDimensions,
+                                  m_pointDimensions,
                                   m_read_buffer);
 
 #endif

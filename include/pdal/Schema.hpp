@@ -159,6 +159,8 @@ public:
     /// matching Dimension instance with name \b name is returned.
     const Dimension& getDimension(std::string const& name, std::string const& ns="") const;
 
+    Dimension const* getDimensionPtr(std::string const& name, std::string const& ns="") const;
+
     /// @return a const& to a Dimension with the given dimension::id. If
     /// no matching dimension is found, pdal::dimension_not_found is thrown.
     /// @param id id to use when searching
@@ -232,8 +234,12 @@ public:
 
 /// @name Private Attributes
 private:
-
+    
+    // memoize the total byte size of the schema
     schema::size_type m_byteSize;
+    
+    // memoize whether or not the schema has multiple, same-named dimensions
+    bool m_bHasParentDimensions;
 
     schema::Map m_index;
 
