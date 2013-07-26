@@ -166,7 +166,8 @@ pdal::Bounds<double> PointBuffer::calculateBounds(bool is3d) const
     Dimension const& dimY = schema.getDimension("Y");
     Dimension const& dimZ = schema.getDimension("Z");
 
-
+    Vector<double> v;
+    
     bool first = true;
     for (boost::uint32_t pointIndex=0; pointIndex<getNumPoints(); pointIndex++)
     {
@@ -180,21 +181,25 @@ pdal::Bounds<double> PointBuffer::calculateBounds(bool is3d) const
         if (is3d)
         {
             double zd = dimZ.applyScaling(zi);
-            Vector<double> v(xd, yd, zd);
             if (first)
             {
                 output = pdal::Bounds<double>(xd, yd, zd, xd, yd, zd);
                 first = false;
+                v.add(xd); v.add(yd); v.add(zd);
             }
+            v[0] = xd; v[1] = yd; v[2] = zd;
             output.grow(v);
+
         } else 
         {
-            Vector<double> v(xd, yd);
+
             if (first)
             {
                 output = pdal::Bounds<double>(xd, yd, xd, yd);
                 first = false;
+                v.add(xd); v.add(yd);
             }
+            v[0] = xd; v[1] = yd;
             output.grow(v);
         }
     }
