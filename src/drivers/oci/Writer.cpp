@@ -1290,7 +1290,7 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     m_connection->CreateType(&sdo_ordinates, m_connection->GetOrdinateType());
 
     // x0, x1, y0, y1, z0, z1, bUse3d
-    pdal::Bounds<double> bounds = CalculateBounds(buffer);
+    pdal::Bounds<double> bounds = buffer.calculateBounds(true);
     SetOrdinates(statement, sdo_ordinates, bounds);
     statement->Bind(&sdo_ordinates, m_connection->GetOrdinateType());
 
