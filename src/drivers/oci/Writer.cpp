@@ -1213,33 +1213,24 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
 
     // TODO: If gotdata == false below, this memory probably leaks --mloskot
     OCILobLocator** locator =(OCILobLocator**) VSIMalloc(sizeof(OCILobLocator*) * 1);
-
+    
     Statement statement = Statement(m_connection->CreateStatement(oss.str().c_str()));
 
-
-    long* p_pc_id = (long*) malloc(1 * sizeof(long));
-    p_pc_id[0] = m_pc_id;
-
-    long* p_result_id = (long*) malloc(1 * sizeof(long));
-    p_result_id[0] = (long)block_id;
-
-    long* p_num_points = (long*) malloc(1 * sizeof(long));
-    p_num_points[0] = (long)buffer.getNumPoints();
-
-    // std::cout << "point count on write: " << buffer.getNumPoints() << std::endl;
 
 
     // :1
     statement->Bind(&m_pc_id);
 
     // :2
-    statement->Bind(p_result_id);
+    long long_block_id =  static_cast<long>(block_id);
+    statement->Bind(&(long_block_id));
 
     // :3
-    statement->Bind(p_num_points);
+    long long_num_points = static_cast<long>(buffer.getNumPoints());
+    statement->Bind(&long_num_points);
 
     // :4
-    statement->Define(locator, 1);
+    // statement->Define(locator, 1);
 
 
     // std::vector<liblas::uint8_t> data;
@@ -1261,12 +1252,11 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
 
     // statement->Bind((char*)point_data,(long)(buffer.getSchema().getByteSize()*buffer.getNumPoints()));
     statement->Bind((char*)point_data,(long)(point_data_length));
-
+    // statement->EnableBuffering(locator);
+    
     // :5
-    long* p_gtype = (long*) malloc(1 * sizeof(long));
-    p_gtype[0] = m_gtype;
-
-    statement->Bind(p_gtype);
+    long long_gtype = static_cast<long>(m_gtype);
+    statement->Bind(&long_gtype);
 
     // :6
     long* p_srid  = 0;
@@ -1295,13 +1285,12 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     statement->Bind(&sdo_ordinates, m_connection->GetOrdinateType());
 
     // :9
-    long* p_partition_d = 0;
     if (bUsePartition)
     {
-        p_partition_d = (long*) malloc(1 * sizeof(long));
-        p_partition_d[0] = m_block_table_partition_value;
-        statement->Bind(p_partition_d);
+        long long_partition_id = static_cast<long>(m_block_table_partition_value);
+        statement->Bind(&long_partition_id);
     }
+    
 
     try
     {
@@ -1317,14 +1306,10 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     oss.str("");
 
 
-    OWStatement::Free(locator, 1);
+    // OWStatement::Free(locator, 1);
 
-    if (p_pc_id != 0) free(p_pc_id);
-    if (p_result_id != 0) free(p_result_id);
-    if (p_num_points != 0) free(p_num_points);
-    if (p_gtype != 0) free(p_gtype);
     if (p_srid != 0) free(p_srid);
-    if (p_partition_d != 0) free(p_partition_d);
+
 
     m_connection->DestroyType(&sdo_elem_info);
     m_connection->DestroyType(&sdo_ordinates);
