@@ -1708,16 +1708,32 @@ bool OWStatement::ReadBlob(OCILobLocator* phLocator,
                            unsigned int* nAmountRead)
 {
 
-    sword status = OCILobRead(
-                       poConnection->hSvcCtx,
-                       hError,
-                       phLocator,
-                       (ub4*) nAmountRead,
-                       (ub4) 1,
-                       (dvoid*) pBuffer,
-                       (ub4) nSize,
-                       (dvoid *) 0,
-                       (OCICallbackLobRead) 0,
+    // sword status = OCILobRead(
+    //                    poConnection->hSvcCtx,
+    //                    hError,
+    //                    phLocator,
+    //                    (ub4*) nAmountRead,
+    //                    (ub4) 1,
+    //                    (dvoid*) pBuffer,
+    //                    (ub4) nSize,
+    //                    (dvoid *) 0,
+    //                    (OCICallbackLobRead) 0,
+    //                    (ub2) 0,
+    //                    (ub1) SQLCS_IMPLICIT);
+    oraub8 char_amtp(0);
+    oraub8 offset(1);
+    sword status = OCILobRead2(
+                       poConnection->hSvcCtx, //svchp
+                       hError, //errhp
+                       phLocator, // locp
+                       (oraub8*) nAmountRead, //byte_amtp
+                       &char_amtp, // char_amtp
+                       offset, // offset
+                       (dvoid*) pBuffer, //buffer ptr
+                       (oraub8) nSize, // bufl
+                       (ub1) OCI_ONE_PIECE, // piece
+                       0, // ctx ptr 
+                       (OCICallbackLobRead2) 0,
                        (ub2) 0,
                        (ub1) SQLCS_IMPLICIT);
 
@@ -1733,18 +1749,80 @@ bool OWStatement::ReadBlob(OCILobLocator* phLocator,
 
 unsigned long OWStatement::GetBlobLength(OCILobLocator* phLocator)
 {
-    ub4 nLength      = (ub4) 0;
+    oraub8 nLength      = (oraub8) 0;
 
-    if (CheckError(OCILobGetLength(
+    if (CheckError(OCILobGetLength2(
                        poConnection->hSvcCtx,
                        hError,
                        phLocator,
-                       (ub4*) &nLength), hError))
+                       &nLength), hError))
     {
         return 0;
     }
 
     return nLength;
+}
+
+bool OWStatement::OpenBlob( OCILobLocator* phLocator,
+                                    bool bReadOnly)
+{
+    
+    ub1 mode(OCI_LOB_READONLY);
+    if (!bReadOnly)
+        mode = OCI_LOB_READWRITE;
+
+    if (CheckError(OCILobOpen(
+                       poConnection->hSvcCtx,
+                       hError,
+                       phLocator,
+                       mode), hError))
+    {
+        return false;
+    }
+
+    return true;
+}
+
+bool OWStatement::CloseBlob( OCILobLocator* phLocator)
+{
+    if (CheckError(OCILobClose(
+                       poConnection->hSvcCtx,
+                       hError,
+                       phLocator), hError))
+    {
+        return false;
+    }
+
+    return true;
+}
+bool OWStatement::EnableBuffering(OCILobLocator* phLocator)
+{
+
+
+    if (CheckError(OCILobEnableBuffering(
+                       poConnection->hSvcCtx,
+                       hError,
+                       phLocator), hError))
+    {
+        return false;
+    }
+
+    return true;
+}
+
+bool OWStatement::DisableBuffering(OCILobLocator* phLocator)
+{
+
+
+    if (CheckError(OCILobDisableBuffering(
+                       poConnection->hSvcCtx,
+                       hError,
+                       phLocator), hError))
+    {
+        return false;
+    }
+
+    return true;
 }
 
 bool OWStatement::WriteBlob(OCILobLocator* phLocator,
