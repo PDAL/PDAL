@@ -146,7 +146,6 @@ protected:
     boost::uint32_t myReadBuffer(PointBuffer& data);
     boost::uint32_t unpackOracleData(PointBuffer& data);
 
-    boost::uint32_t myReadClouds(PointBuffer& data);
     boost::uint32_t myReadBlocks(PointBuffer& data);
 
     BufferPtr fetchPointBuffer(Statement statment, sdo_pc* pc);

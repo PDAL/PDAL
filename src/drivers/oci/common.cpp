@@ -49,7 +49,6 @@ namespace oci
 
 Block::Block(Connection connection)
     : num_points(0)
-    , chunk(new std::vector<boost::uint8_t>)
     , m_connection(connection)
 {
     m_connection->CreateType(&blk_extent);
