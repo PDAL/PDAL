@@ -148,6 +148,7 @@ private:
     pdal::Bounds<double> m_bounds; // Bounds of the entire point cloud
     Connection m_connection;
     bool m_doCreateIndex;
+    bool m_bHaveOutputTable;
     Bounds<double> m_pcExtent;
     int m_pc_id;
     std::string m_block_table_name;

@@ -67,6 +67,7 @@ Writer::Writer(Stage& prevStage, const Options& options)
     : pdal::Writer(prevStage, options)
     , OracleDriver(getOptions())
     , m_doCreateIndex(false)
+    , m_bHaveOutputTable(false)
     , m_pc_id(0)
     , m_srid(0)
     , m_gtype(0)
@@ -956,6 +957,35 @@ void Writer::writeBufferBegin(PointBuffer const& data)
 {
     if (m_sdo_pc_is_initialized) return;
 
+    bool bTrace = getOptions().getValueOrDefault<bool>("do_trace", false);
+    if (bTrace)
+    {
+        log()->get(logDEBUG) << "Setting database trace..." << std::endl;
+        std::ostringstream oss;
+        // oss << "ALTER SESSION SET SQL_TRACE=TRUE";
+        oss << "BEGIN " << std::endl;
+        oss << "DBMS_SESSION.set_sql_trace(sql_trace => TRUE);" << std::endl;
+        oss << "DBMS_SESSION.SESSION_TRACE_ENABLE(waits => TRUE, binds => TRUE);" << std::endl;
+        oss << "END;" << std::endl; 
+        run(oss);
+        oss.str("");
+        
+        // oss << "alter session set events ‘10046 trace name context forever, level 12’" << std::endl;
+        // run(oss);
+        // oss.str("");
+        
+        oss << "SELECT VALUE FROM V$DIAG_INFO WHERE NAME = 'Default Trace File'";
+        Statement statement = Statement(m_connection->CreateStatement(oss.str().c_str()));
+        int trace_table_name_length = 1024;
+        char* trace_table_name = (char*) malloc(sizeof(char*) * trace_table_name_length);
+        trace_table_name[trace_table_name_length-1] = '\0'; //added trailing null to fix ORA-01480        
+        statement->Define(trace_table_name, trace_table_name_length);
+        statement->Execute();
+        // statement->Fetch();
+        log()->get(logDEBUG) << "Trace location name:  " << trace_table_name << std::endl;
+        
+
+    }
     CreatePCEntry(data.getSchema());
     m_trigger_name = ShutOff_SDO_PC_Trigger();
     
@@ -968,22 +998,25 @@ void Writer::writeBufferBegin(PointBuffer const& data)
 void Writer::writeBegin(boost::uint64_t)
 {
 
-    bool bHaveOutputTable = BlockTableExists();
+    m_bHaveOutputTable = BlockTableExists();
 
     if (getDefaultedOption<bool>("overwrite"))
     {
-        if (bHaveOutputTable)
+        if (m_bHaveOutputTable)
         {
             WipeBlockTable();
         }
     }
 
     RunFileSQL("pre_sql");
-    if (!bHaveOutputTable)
+    if (!m_bHaveOutputTable )
     {
-        m_doCreateIndex = true;
         CreateBlockTable();
     }
+
+    if (getOptions().getValueOrDefault<bool>("create_index", true))
+        m_doCreateIndex = true;
+    
     // 
     // CreatePCEntry();
     // m_trigger_name = ShutOff_SDO_PC_Trigger();
@@ -995,12 +1028,11 @@ void Writer::writeEnd(boost::uint64_t)
 {
     m_connection->Commit();
 
-    if (m_doCreateIndex)
+    if (m_doCreateIndex && !m_bHaveOutputTable)
     {
-        CreateSDOEntry();
         CreateBlockIndex();
     }
-
+    
 
     // Update extent of SDO_PC entry
     UpdatePCExtent();
@@ -1307,6 +1339,7 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
 
 
     // OWStatement::Free(locator, 1);
+
 
     if (p_srid != 0) free(p_srid);
 
