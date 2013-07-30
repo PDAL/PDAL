@@ -1915,7 +1915,8 @@ bool OWStatement::WriteBlob(OCILobLocator** pphLocator,
                hError);
 
    ub1 mode (OCI_LOB_READWRITE);
-
+    
+    cbctx ctx;
 
     CheckError(OCILobCreateTemporary(
                    poConnection->hSvcCtx,
@@ -1939,24 +1940,42 @@ bool OWStatement::WriteBlob(OCILobLocator** pphLocator,
     //                      hError,
     //                      *pphLocator), hError);
     
+    oraub8 nChunkSize (4096);
     oraub8 nAmont  = (oraub8) nSize;
     oraub8 charAmount(0);
 
-    CheckError(OCILobWrite2(
-                       poConnection->hSvcCtx,
-                       hError,
-                       (OCILobLocator*) *pphLocator,
-                       (oraub8*) &nAmont,
-                       (oraub8*) &charAmount,
-                       (oraub8) 1,
-                       (dvoid*) pBuffer,
-                       (oraub8) nSize,
-                       (ub1) OCI_ONE_PIECE,
-                       (dvoid*) NULL,
-                       NULL,
-                       (ub2) 0,
-                       (ub1) SQLCS_IMPLICIT),
-                   hError);
+    // CheckError(OCILobWrite2(
+    //                    poConnection->hSvcCtx,
+    //                    hError,
+    //                    (OCILobLocator*) *pphLocator,
+    //                    (oraub8*) &nChunkSize,
+    //                    (oraub8*) &charAmount,
+    //                    (oraub8) 1,
+    //                    (dvoid*) pBuffer,
+    //                    (oraub8) nSize,
+    //                    (ub1) OCI_FIRST_PIECE,
+    //                    (dvoid*) &ctx,
+    //                    (OCICallbackLobWrite2) callback,
+    //                    (ub2) 0,
+    //                    (ub1) SQLCS_IMPLICIT),
+    //                hError);
+
+                   CheckError(OCILobWrite2(
+                                      poConnection->hSvcCtx,
+                                      hError,
+                                      (OCILobLocator*) *pphLocator,
+                                      (oraub8*) &nAmont,
+                                      (oraub8*) &charAmount,
+                                      (oraub8) 1,
+                                      (dvoid*) pBuffer,
+                                      (oraub8) nSize,
+                                      (ub1) OCI_ONE_PIECE,
+                                      (dvoid*) &ctx,
+                                      NULL,
+                                      (ub2) 0,
+                                      (ub1) SQLCS_IMPLICIT),
+                                  hError);
+                   
     // CheckError(OCILobDisableBuffering(
     //                        poConnection->hSvcCtx,
     //                        hError,
