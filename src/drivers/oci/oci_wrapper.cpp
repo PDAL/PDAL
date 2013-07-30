@@ -1039,12 +1039,36 @@ void OWStatement::Bind(sdo_pc_blk** pphData)
 
 }
 
-void OWStatement::Bind(OCILobLocator** pphLocator)
+void OWStatement::BindBlob(OCILobLocator** pphLocator)
 {
     OCIBind* hBind = NULL;
 
     nNextBnd++;
 
+               
+    CheckError(OCIBindByPos(
+                   hStmt,
+                   &hBind,
+                   hError,
+                   (ub4) nNextBnd,
+                   (dvoid*) pphLocator,
+                   (sb4) -1,
+                   (ub2) SQLT_BLOB,
+                   (void*) NULL,
+                   (ub2*) NULL,
+                   (ub2*) NULL,
+                   (ub4) NULL,
+                   (ub4) NULL,
+                   (ub4) OCI_DEFAULT),
+               hError);
+}
+
+void OWStatement::BindClob(OCILobLocator** pphLocator)
+{
+    OCIBind* hBind = NULL;
+
+    nNextBnd++;
+               
     CheckError(OCIBindByPos(
                    hStmt,
                    &hBind,
@@ -1825,20 +1849,64 @@ bool OWStatement::DisableBuffering(OCILobLocator* phLocator)
     return true;
 }
 
-bool OWStatement::WriteBlob(OCILobLocator* phLocator,
+bool OWStatement::AllocBlob(OCILobLocator** pphLocator)
+{
+    CheckError(OCIDescriptorAlloc(
+                   poConnection->hEnv,
+                   (void**) pphLocator,
+                   OCI_DTYPE_LOB,
+                   0,
+                   0),
+               hError);
+   return true;
+}
+
+bool OWStatement::WriteBlob(OCILobLocator** pphLocator,
                             void* pBuffer,
                             int nSize)
 {
-    ub4 nAmont  = (ub4) nSize;
 
-    if (CheckError(OCILobWrite(
+
+    CheckError(OCIDescriptorAlloc(
+                   poConnection->hEnv,
+                   (void**) pphLocator,
+                   OCI_DTYPE_LOB,
+                   (size_t) 0,
+                   (dvoid **) 0),
+               hError);
+
+   ub1 mode (OCI_LOB_READWRITE);
+
+
+    CheckError(OCILobCreateTemporary(
+                   poConnection->hSvcCtx,
+                   poConnection->hError,
+                   (OCILobLocator*) *pphLocator,
+                   (ub4) OCI_DEFAULT,
+                   (ub1) OCI_DEFAULT,
+                   (ub1) OCI_TEMP_BLOB,
+                   TRUE,
+                   OCI_DURATION_SESSION),
+               hError);
+
+   CheckError(OCILobOpen(
+                      poConnection->hSvcCtx,
+                      hError,
+                      *pphLocator,
+                      mode), hError);
+    
+    oraub8 nAmont  = (oraub8) nSize;
+    oraub8 charAmount(0);
+
+    if (CheckError(OCILobWrite2(
                        poConnection->hSvcCtx,
                        hError,
-                       phLocator,
-                       (ub4*) &nAmont,
-                       (ub4) 1,
+                       (OCILobLocator*) *pphLocator,
+                       (oraub8*) &nAmont,
+                       (oraub8*) &charAmount,
+                       (oraub8) 1,
                        (dvoid*) pBuffer,
-                       (ub4) nSize,
+                       (oraub8) nSize,
                        (ub1) OCI_ONE_PIECE,
                        (dvoid*) NULL,
                        NULL,
@@ -1848,6 +1916,11 @@ bool OWStatement::WriteBlob(OCILobLocator* phLocator,
     {
         return false;
     }
+
+    CheckError(OCILobClose(
+                           poConnection->hSvcCtx,
+                           hError,
+                           *pphLocator), hError);
 
     return (nAmont == (ub4) nSize);
 }

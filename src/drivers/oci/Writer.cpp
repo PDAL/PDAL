@@ -866,7 +866,7 @@ void Writer::CreatePCEntry(Schema const& buffer_schema)
     strncpy(schema, schema_data.c_str(), schema_data.size());
     schema[schema_data.size()] = '\0';
     statement->WriteCLob(&schema_locator, schema);
-    statement->Bind(&schema_locator);
+    statement->BindClob(&schema_locator);
 
     std::ostringstream wkt_s;
 
@@ -904,7 +904,7 @@ void Writer::CreatePCEntry(Schema const& buffer_schema)
     if (!m_base_table_boundary_column.empty())
     {
         statement->WriteCLob(&boundary_locator, wkt);
-        statement->Bind(&boundary_locator);
+        statement->BindClob(&boundary_locator);
         statement->Bind((int*)&m_srid);
 
     }
@@ -1014,7 +1014,7 @@ void Writer::writeBegin(boost::uint64_t)
         CreateBlockTable();
     }
 
-    if (getOptions().getValueOrDefault<bool>("create_index", true))
+    if (getOptions().getValueOrDefault<bool>("create_index", true) && !m_bHaveOutputTable)
         m_doCreateIndex = true;
     
     // 
@@ -1028,8 +1028,9 @@ void Writer::writeEnd(boost::uint64_t)
 {
     m_connection->Commit();
 
-    if (m_doCreateIndex && !m_bHaveOutputTable)
+    if (m_doCreateIndex)
     {
+        CreateSDOEntry();
         CreateBlockIndex();
     }
     
@@ -1242,13 +1243,8 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
         oss << ", :9";
 
     oss <<")";
-
-    // TODO: If gotdata == false below, this memory probably leaks --mloskot
-    OCILobLocator** locator =(OCILobLocator**) VSIMalloc(sizeof(OCILobLocator*) * 1);
     
     Statement statement = Statement(m_connection->CreateStatement(oss.str().c_str()));
-
-
 
     // :1
     statement->Bind(&m_pc_id);
@@ -1263,6 +1259,7 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
 
     // :4
     // statement->Define(locator, 1);
+
 
 
     // std::vector<liblas::uint8_t> data;
@@ -1283,8 +1280,16 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     }
 
     // statement->Bind((char*)point_data,(long)(buffer.getSchema().getByteSize()*buffer.getNumPoints()));
-    statement->Bind((char*)point_data,(long)(point_data_length));
+    // statement->Bind((char*)point_data,(long)(point_data_length));
     // statement->EnableBuffering(locator);
+
+    // OCILobLocator** locator(0);
+    OCILobLocator* locator; // =(OCILobLocator**) VSIMalloc(sizeof(OCILobLocator*) * 1);
+
+    // statement->OpenBlob(*locator, false);
+    statement->WriteBlob(&locator, (void*) point_data, point_data_length);
+    // statement->CloseBlob(*locator);
+    statement->BindBlob(&locator);
     
     // :5
     long long_gtype = static_cast<long>(m_gtype);

@@ -425,7 +425,9 @@ public:
     void                BindClob( char* pData, long nData );    
     void                Bind( sdo_geometry** pphData );
     void                Bind( sdo_pc_blk** pphData );
-    void                Bind( OCILobLocator** pphLocator );
+    void                BindBlob( OCILobLocator** pphLocator );
+    bool                AllocBlob(OCILobLocator** phLocator);
+    void                BindClob( OCILobLocator** pphLocator );
     void                Bind( OCIArray** pphData, OCIType* type );
     void                Bind( char* pszData, int nSize = OWNAME );
     void                Define( int* pnData );
@@ -464,7 +466,7 @@ public:
     unsigned long       GetBlobLength(OCILobLocator* phLocator);
     signed long         GetArrayLength( OCIArray** ppoData);
     void                WriteCLob( OCILobLocator** pphLocator, char* pszData );
-    bool                WriteBlob( OCILobLocator* phLocator,
+    bool                WriteBlob( OCILobLocator** phLocator,
                             void* pBuffer, int nSize );
     int                 GetElement( OCIArray** ppoData,
                             int nIndex, int* pnResult );
