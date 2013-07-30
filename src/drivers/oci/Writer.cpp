@@ -1017,9 +1017,6 @@ void Writer::writeBegin(boost::uint64_t)
     if (getOptions().getValueOrDefault<bool>("create_index", true) && !m_bHaveOutputTable)
         m_doCreateIndex = true;
     
-    // 
-    // CreatePCEntry();
-    // m_trigger_name = ShutOff_SDO_PC_Trigger();
     return;
 }
 
