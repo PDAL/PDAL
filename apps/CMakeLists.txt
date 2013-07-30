@@ -76,6 +76,11 @@ if(PCEQUAL)
     target_link_libraries(${PCEQUAL} ${PDAL_LIB_NAME} ${Boost_LIBRARIES} )
 endif()
 
+if (WITH_ORACLE)
+    list(APPEND PDAL_UTILITIES oracle_array)
+    add_executable(oracle_array oracle_array.cpp ${COMMON_APP_SOURCES})
+    target_link_libraries(oracle_array ${PDAL_LIB_NAME} ${Boost_LIBRARIES} )
+endif()
 #------------------------------------------------------------------------------
 # Targets installation
 #------------------------------------------------------------------------------
