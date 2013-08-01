@@ -1902,7 +1902,8 @@ sb4 callback(void *ctxp, void *bufp, oraub8 *lenp,
  
 bool OWStatement::WriteBlob(OCILobLocator** pphLocator,
                             void* pBuffer,
-                            int nSize)
+                            int nSize,
+                            int numChunks)
 {
 
 
@@ -1935,10 +1936,7 @@ bool OWStatement::WriteBlob(OCILobLocator** pphLocator,
                       *pphLocator,
                       mode), hError);
 
-    // CheckError(OCILobEnableBuffering(
-    //                      poConnection->hSvcCtx,
-    //                      hError,
-    //                      *pphLocator), hError);
+
     
     ub4 nChunkSize (0);
     CheckError(OCILobGetChunkSize(  poConnection->hSvcCtx, 
@@ -1946,6 +1944,7 @@ bool OWStatement::WriteBlob(OCILobLocator** pphLocator,
                                     *pphLocator, 
                                     &nChunkSize),
                    hError);
+    nChunkSize = nChunkSize * numChunks;
     oraub8 nAmount  = (oraub8) nSize;
     oraub8 nAmountWritten(0);
     oraub8 charAmount(0);
@@ -1958,6 +1957,10 @@ bool OWStatement::WriteBlob(OCILobLocator** pphLocator,
     
     ub1* chunkBuffer = (ub1*) malloc (nChunkSize * sizeof(ub1) +1);
 
+    // CheckError(OCILobEnableBuffering(
+    //                      poConnection->hSvcCtx,
+    //                      hError,
+    //                      *pphLocator), hError);
     CheckError(OCILobWrite2(
                        poConnection->hSvcCtx,
                        hError,
@@ -1974,26 +1977,33 @@ bool OWStatement::WriteBlob(OCILobLocator** pphLocator,
                        (ub1) SQLCS_IMPLICIT),
                    hError);
 
-                   CheckError(OCILobWrite2(
-                                      poConnection->hSvcCtx,
-                                      hError,
-                                      (OCILobLocator*) *pphLocator,
-                                      (oraub8*) &nAmount,
-                                      (oraub8*) &charAmount,
-                                      (oraub8) 1,
-                                      (dvoid*) pBuffer,
-                                      (oraub8) nSize,
-                                      (ub1) OCI_ONE_PIECE,
-                                      (dvoid*) &ctx,
-                                      NULL,
-                                      (ub2) 0,
-                                      (ub1) SQLCS_IMPLICIT),
-                                  hError);
+                   // CheckError(OCILobWrite2(
+                   //                    poConnection->hSvcCtx,
+                   //                    hError,
+                   //                    (OCILobLocator*) *pphLocator,
+                   //                    (oraub8*) &nAmount,
+                   //                    (oraub8*) &charAmount,
+                   //                    (oraub8) 1,
+                   //                    (dvoid*) pBuffer,
+                   //                    (oraub8) nSize,
+                   //                    (ub1) OCI_ONE_PIECE,
+                   //                    (dvoid*) &ctx,
+                   //                    NULL,
+                   //                    (ub2) 0,
+                   //                    (ub1) SQLCS_IMPLICIT),
+                   //                hError);
                    
-    // CheckError(OCILobDisableBuffering(
-    //                        poConnection->hSvcCtx,
-    //                        hError,
-    //                        (OCILobLocator*) *pphLocator), hError);
+   // CheckError(OCILobFlushBuffer(
+   //                        poConnection->hSvcCtx,
+   //                        hError,
+   //                        (OCILobLocator*) *pphLocator, OCI_LOB_BUFFER_FREE), hError);
+   // 
+   //  CheckError(OCILobDisableBuffering(
+   //                         poConnection->hSvcCtx,
+   //                         hError,
+   //                         (OCILobLocator*) *pphLocator), hError);
+
+
 
     CheckError(OCILobClose(
                            poConnection->hSvcCtx,

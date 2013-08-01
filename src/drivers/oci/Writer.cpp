@@ -1284,7 +1284,7 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     OCILobLocator* locator; // =(OCILobLocator**) VSIMalloc(sizeof(OCILobLocator*) * 1);
 
     // statement->OpenBlob(*locator, false);
-    statement->WriteBlob(&locator, (void*) point_data, point_data_length);
+    statement->WriteBlob(&locator, (void*) point_data, point_data_length, 16);
     // statement->CloseBlob(*locator);
     statement->BindBlob(&locator);
     

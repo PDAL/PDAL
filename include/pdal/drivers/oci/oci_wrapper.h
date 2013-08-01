@@ -467,7 +467,7 @@ public:
     signed long         GetArrayLength( OCIArray** ppoData);
     void                WriteCLob( OCILobLocator** pphLocator, char* pszData );
     bool                WriteBlob( OCILobLocator** phLocator,
-                            void* pBuffer, int nSize );
+                            void* pBuffer, int nSize, int numChunks=8 );
     int                 GetElement( OCIArray** ppoData,
                             int nIndex, int* pnResult );
     double              GetElement( OCIArray** ppoData,
