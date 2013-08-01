@@ -1276,16 +1276,11 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
         point_data_length = buffer.getSchema().getByteSize() * buffer.getNumPoints();
     }
 
-    // statement->Bind((char*)point_data,(long)(buffer.getSchema().getByteSize()*buffer.getNumPoints()));
     // statement->Bind((char*)point_data,(long)(point_data_length));
-    // statement->EnableBuffering(locator);
 
-    // OCILobLocator** locator(0);
-    OCILobLocator* locator; // =(OCILobLocator**) VSIMalloc(sizeof(OCILobLocator*) * 1);
-
-    // statement->OpenBlob(*locator, false);
-    statement->WriteBlob(&locator, (void*) point_data, point_data_length, 16);
-    // statement->CloseBlob(*locator);
+    OCILobLocator* locator; 
+    boost::uint32_t blob_chunk_count = getOptions().getValueOrDefault<bool>("blob_chunk_count", 16);    
+    statement->WriteBlob(&locator, (void*) point_data, point_data_length, blob_chunk_count);
     statement->BindBlob(&locator);
     
     // :5
@@ -1325,7 +1320,6 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
         statement->Bind(&long_partition_id);
     }
     
-
     try
     {
         statement->Execute();
@@ -1340,7 +1334,7 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     oss.str("");
 
 
-    // OWStatement::Free(locator, 1);
+    OWStatement::Free(&locator, 1);
 
 
     if (p_srid != 0) free(p_srid);
