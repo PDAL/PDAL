@@ -629,7 +629,12 @@ if (NOT WITH_STATIC_LASZIP)
 endif()
 endif()
 
-add_library(${PDAL_LIB_NAME} SHARED ${PDAL_SOURCES})
+if (PDAL_BUILD_STATIC)
+  set(PDAL_LIB_TYPE STATIC)
+else()
+  set(PDAL_LIB_TYPE SHARED)
+endif()
+add_library(${PDAL_LIB_NAME} ${PDAL_LIB_TYPE} ${PDAL_SOURCES})
 
 set (SOCI_LIBRARIES ${SOCI_LIBRARY} ${SOCI_postgresql_PLUGIN})
 

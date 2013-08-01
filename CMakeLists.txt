@@ -97,6 +97,8 @@ set(ENABLE_CTEST FALSE CACHE BOOL
 # General build settings
 #------------------------------------------------------------------------------
 
+option(PDAL_BUILD_STATIC "Build PDAL as a static library" OFF)
+
 if(WIN32)
   if(MSVC)
     option(PDAL_USE_STATIC_RUNTIME "Use the static runtime" OFF)
@@ -196,7 +198,7 @@ else()
   # Recommended C++ compilation flags
   # -Weffc++
   set(PDAL_COMMON_CXX_FLAGS
-	  "-Wextra -Wall -Wno-unused-parameter -Wno-unused-variable -Wpointer-arith -Wcast-align -Wcast-qual -Wfloat-equal -Wredundant-decls -Wno-long-long -fPIC")
+      "-Wextra -Wall -Wno-unused-parameter -Wno-unused-variable -Wpointer-arith -Wcast-align -Wcast-qual -Wfloat-equal -Wredundant-decls -Wno-long-long")
 
   if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
 
@@ -589,6 +591,12 @@ set (USE_PDAL_PLUGIN_MRSID FALSE CACHE BOOL "Build the MrSID driver as a plugin 
 set (USE_PDAL_PLUGIN_CARIS FALSE CACHE BOOL "Build the Caris driver as a plugin rather than embedding")
 set (USE_PDAL_PLUGIN_NITRO FALSE CACHE BOOL "Build the NITF writer as a plugin rather than embedding")
 
+if (USE_PDAL_PLUGIN_TEXT OR USE_PDAL_PLUGIN_SOCI OR USE_PDAL_PLUGIN_OCI OR
+    USE_PDAL_PLUGIN_MRSID OR USE_PDAL_PLUGIN_CARIS OR USE_PDAL_PLUGIN_NITRO)
+  if (PDAL_BUILD_STATIC)
+    message(SEND_ERROR "Cannot build separate plugins with statically compiled PDAL")
+  endif()
+endif()
 
 #------------------------------------------------------------------------------
 # installation commands
