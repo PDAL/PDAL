@@ -38,8 +38,6 @@ set(PDALBOOST_SOURCES
     ./libs/iostreams/src/file_descriptor.cpp
     ./libs/iostreams/src/mapped_file.cpp
     ./libs/iostreams/src/file_descriptor.cpp
-    ./libs/iostreams/src/gzip.cpp
-    ./libs/iostreams/src/zlib.cpp
     ./libs/program_options/src/cmdline.cpp
     ./libs/program_options/src/config_file.cpp
     ./libs/program_options/src/convert.cpp
