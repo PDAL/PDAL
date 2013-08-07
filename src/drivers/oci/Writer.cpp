@@ -74,6 +74,8 @@ Writer::Writer(Stage& prevStage, const Options& options)
     , m_is3d(false)
     , m_issolid(false)
     , m_sdo_pc_is_initialized(false)
+    , m_chunkCount(16)
+    , m_streamChunks(false)
 {
 
     m_connection = connect();
@@ -94,7 +96,8 @@ Writer::Writer(Stage& prevStage, const Options& options)
 
     m_base_table_boundary_column = getDefaultedOption<std::string>("base_table_boundary_column");
     m_base_table_boundary_wkt = getDefaultedOption<std::string>("base_table_boundary_wkt");
-
+    m_chunkCount = getOptions().getValueOrDefault<boost::uint32_t>("blob_chunk_count", 16);    
+    m_streamChunks = getOptions().getValueOrDefault<bool>("stream_chunks", false);  
 
 }
 
@@ -230,7 +233,9 @@ Options Writer::getDefaultOptions()
     Option pc_id("pc_id", -1, "Point Cloud id");
     
     Option pack("pack_ignored_fields", true, "Pack ignored dimensions out of the data buffer that is written");
-
+    Option do_trace("do_trace", false, "turn on server-side binds/waits tracing -- needs ALTER SESSION privs");
+    Option stream_chunks("stream_chunks", false, "Stream block data chunk-wise by the DB's chunk size rather than as an entire blob");
+    Option blob_chunk_count("blob_chunk_count", 16, "When streaming, the number of chunks per write to use");
     options.add(is3d);
     options.add(solid);
     options.add(overwrite);
@@ -255,6 +260,10 @@ Options Writer::getDefaultOptions()
     options.add(base_table_bounds);
     options.add(pc_id);
     options.add(pack);
+    options.add(do_trace);
+    options.add(stream_chunks);
+    options.add(blob_chunk_count);
+    
     return options;
 }
 
@@ -1164,50 +1173,7 @@ void Writer::PackPointData(PointBuffer const& buffer,
             data = data + idx[d].getByteSize();
                 
         }
-    }
-
-    // Create a vector of two element vectors that states how long of a byte
-    // run to copy for the point based on whether or not the ignored/used 
-    // flag of the dimension switches. This is to a) eliminate panning through 
-    // the dimension multi_index repeatedly per point, and to b) eliminate 
-    // tons of small memcpy in exchange for larger ones.
-    // std::vector< std::vector< boost::uint32_t> > runs;
-    //  // bool switched = idx[0].isIgnored(); // start at with the first dimension
-    //  for (boost::uint32_t d = 0; d < idx.size(); ++d)
-    //  {
-    //      std::vector<boost::uint32_t> t;
-    //      if ( idx[d].isIgnored())
-    //      { 
-    //          t.push_back(0);
-    //          t.push_back(idx[d].getByteSize());
-    //      } 
-    //      else
-    //      {
-    //          t.push_back(1);
-    //          t.push_back(idx[d].getByteSize());
-    //      }
-    //      
-    //      runs.push_back(t);
-    //  }
-    //  
-    //  for (boost::uint32_t i = 0; i < buffer.getNumPoints(); ++i)
-    //  {
-    //      boost::uint8_t* data = buffer.getData(i);
-    //      for (std::vector< std::vector<boost::uint32_t> >::size_type d=0; d < runs.size(); d++)
-    //      // for (boost::uint32_t d = 0; d < idx.size(); ++d)
-    //      {
-    //          boost::uint32_t isUsed = runs[d][0];
-    //          boost::uint32_t byteSize = runs[d][1];
-    //          if (isUsed != 0)
-    //          {
-    //              memcpy(current_position, data, byteSize);
-    //              current_position = current_position+byteSize;
-    //          }
-    //          data = data + byteSize;
-    //              
-    //      }
-    //  }
-    
+    }    
 }
 
 bool Writer::WriteBlock(PointBuffer const& buffer)
@@ -1276,12 +1242,15 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
         point_data_length = buffer.getSchema().getByteSize() * buffer.getNumPoints();
     }
 
-    // statement->Bind((char*)point_data,(long)(point_data_length));
-
     OCILobLocator* locator; 
-    boost::uint32_t blob_chunk_count = getOptions().getValueOrDefault<bool>("blob_chunk_count", 16);    
-    statement->WriteBlob(&locator, (void*) point_data, point_data_length, blob_chunk_count);
-    statement->BindBlob(&locator);
+    if (m_streamChunks)
+    {
+        statement->WriteBlob(&locator, (void*) point_data, point_data_length, m_chunkCount);
+        statement->BindBlob(&locator);
+    } else
+    {
+        statement->Bind((char*)point_data,(long)(point_data_length));
+    }
     
     // :5
     long long_gtype = static_cast<long>(m_gtype);
@@ -1333,9 +1302,12 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
 
     oss.str("");
 
-
-    OWStatement::Free(&locator, 1);
-
+    
+    if (m_streamChunks)
+    {
+        // We don't use a locator unless we're stream-writing the data.    
+        OWStatement::Free(&locator, 1);
+    }
 
     if (p_srid != 0) free(p_srid);
 
