@@ -1285,8 +1285,6 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
         m_pcExtent = bounds;
     m_pcExtent.grow(bounds);
     
-    std::cout << bounds << std::endl;
-    
     SetOrdinates(statement, sdo_ordinates, bounds);
     statement->Bind(&sdo_ordinates, m_connection->GetOrdinateType());
 
