@@ -1279,6 +1279,14 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
 
     // x0, x1, y0, y1, z0, z1, bUse3d
     pdal::Bounds<double> bounds = buffer.calculateBounds(true);
+
+    // Cumulate a total bounds for the iterator
+    if (m_pcExtent.empty())
+        m_pcExtent = bounds;
+    m_pcExtent.grow(bounds);
+    
+    std::cout << bounds << std::endl;
+    
     SetOrdinates(statement, sdo_ordinates, bounds);
     statement->Bind(&sdo_ordinates, m_connection->GetOrdinateType());
 
