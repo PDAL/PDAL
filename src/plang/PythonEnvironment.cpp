@@ -108,7 +108,7 @@ void PythonEnvironment::gil_lock()
 
 void PythonEnvironment::gil_unlock()
 {
-    PyGILState_STATE gstate = (PyGILState_STATE)m_gilstate; 
+    PyGILState_STATE gstate = (PyGILState_STATE)m_gilstate;
     PyGILState_Release(gstate);
 }
 
@@ -136,8 +136,8 @@ std::string getPythonTraceback()
     {
         throw python_error("invalid traceback function while importing numpy inside PDAL");
     }
-    
-    
+
+
     // get exception info
     PyObject *type, *value, *traceback;
     PyErr_Fetch(&type, &value, &traceback);
@@ -182,7 +182,7 @@ std::string getPythonTraceback()
     return mssg.str();
 }
 
-    
+
 }
 } //namespaces
 

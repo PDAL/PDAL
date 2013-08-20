@@ -223,7 +223,7 @@ MAKE_WRITER_CREATOR(PgPcWriter, pdal::drivers::pgpointcloud::Writer)
 #ifndef USE_PDAL_PLUGIN_NITF
 MAKE_WRITER_CREATOR(NitfWriter, pdal::drivers::nitf::Writer)
 #endif
-#endif    
+#endif
 
 StageFactory::StageFactory()
 {
@@ -251,12 +251,12 @@ std::string StageFactory::inferReaderDriver(const std::string& filename, pdal::O
     drivers["xml"] = "drivers.pipeline.reader";
     drivers["nitf"] = "drivers.nitf.reader";
     drivers["ntf"] = "drivers.nitf.reader";
-    
+
     if (boost::algorithm::iequals(filename, "STDIN"))
     {
         return drivers["xml"];
     }
-    
+
     if (ext == "") return "";
     ext = ext.substr(1, ext.length()-1);
     if (ext == "") return "";
@@ -271,7 +271,7 @@ std::string StageFactory::inferWriterDriver(const std::string& filename, pdal::O
     std::string ext = boost::filesystem::extension(filename);
 
     boost::to_lower(ext);
-    
+
     if (boost::algorithm::iequals(ext,".laz"))
     {
         options.add("compression", true);
@@ -285,7 +285,7 @@ std::string StageFactory::inferWriterDriver(const std::string& filename, pdal::O
     drivers["xyz"] = "drivers.text.writer";
     drivers["txt"] = "drivers.text.writer";
     drivers["ntf"] = "drivers.nitf.writer";
-    
+
     if (boost::algorithm::iequals(filename, "STDOUT"))
     {
         return drivers["txt"];
@@ -489,7 +489,7 @@ void StageFactory::registerKnownWriters()
     REGISTER_WRITER(FauxWriter, pdal::drivers::faux::Writer);
     REGISTER_WRITER(LasWriter, pdal::drivers::las::Writer);
 
-#ifndef USE_PDAL_PLUGIN_TEXT    
+#ifndef USE_PDAL_PLUGIN_TEXT
     REGISTER_WRITER(TextWriter, pdal::drivers::text::Writer);
 #endif
 
@@ -613,7 +613,7 @@ void StageFactory::loadPlugins()
         // The last two tokens are the stage type and the stage name.
         path basename = t->first;
         path filename = t->second;
-        
+
         registerPlugin(filename.string());
         // std::string methodName = "PDALRegister_" + boost::algorithm::ireplace_first_copy(basename.string(), "libpdal_plugin_", "");
         // Utils::registerPlugin((void*)this, filename.string(), methodName);
@@ -633,17 +633,17 @@ void StageFactory::registerPlugin(std::string const& filename)
         {
             basename = t.stem().string();
         }
-    }    
-    
+    }
+
     std::string base = basename.string();
 
     std::string registerMethodName = "PDALRegister_" + \
-            boost::algorithm::ireplace_first_copy(base, "libpdal_plugin_", "");
+                                     boost::algorithm::ireplace_first_copy(base, "libpdal_plugin_", "");
 
-    std::string versionMethodName = "PDALRegister_version_" +  base.substr( base.find_last_of("_")+1, base.size());
+    std::string versionMethodName = "PDALRegister_version_" +  base.substr(base.find_last_of("_")+1, base.size());
 
     Utils::registerPlugin((void*)this, filename, registerMethodName, versionMethodName);
-    
+
 }
 
 

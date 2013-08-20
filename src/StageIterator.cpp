@@ -285,7 +285,7 @@ StageRandomIterator::~StageRandomIterator()
 boost::uint64_t StageRandomIterator::seek(boost::uint64_t position)
 {
     boost::uint64_t size = getStage().getNumPoints();
-    if (size != 0 && position >= size )
+    if (size != 0 && position >= size)
     {
         std::ostringstream oss;
         oss << "position '" << position << "' is out of bounds of size of stage '" << size << "'";

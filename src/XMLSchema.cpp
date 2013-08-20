@@ -312,7 +312,7 @@ void Reader::Initialize()
 
     }
 #endif
-    
+
 
 }
 
@@ -369,7 +369,7 @@ Reader::Reader(std::istream* xml, std::istream *xsd) : m_doc_options(XML_PARSE_N
 Reader::~Reader()
 {
 #ifdef PDAL_HAVE_LIBXML2
-    xmlCleanupParser();    
+    xmlCleanupParser();
 #endif
 }
 
@@ -378,7 +378,7 @@ static void
 print_element_names(xmlNode * a_node)
 {
 #ifdef PDAL_HAVE_LIBXML2
-    
+
     xmlNode *cur_node = NULL;
 
     for (cur_node = a_node; cur_node; cur_node = cur_node->next)
@@ -406,20 +406,20 @@ std::string Reader::remapOldNames(std::string const& input)
 
 pdal::Metadata Reader::LoadMetadata(xmlNode* startNode)
 {
-    
+
     pdal::Metadata output;
 
 #ifdef PDAL_HAVE_LIBXML2
-    
+
     xmlNode* node = startNode;
-    
-    
+
+
 //     xmlChar* name = xmlGetProp(node, (const xmlChar*) "name");
 //     xmlChar* etype = xmlGetProp(node, (const xmlChar*) "type");
 // print_element_names(node);
-        // std::cout << "node name: " << (const char*)node->name << std::endl;   
-//         std::cout << "prop type: " << (const char*) etype << std::endl;   
-    
+    // std::cout << "node name: " << (const char*)node->name << std::endl;
+//         std::cout << "prop type: " << (const char*) etype << std::endl;
+
     // pdal::Metadata m((const char*) node->name);
     // if (boost::iequals((const char*)etype, "blank"))
     // {
@@ -427,37 +427,38 @@ pdal::Metadata Reader::LoadMetadata(xmlNode* startNode)
     //     if (node->children)
     //         output.addMetadata(LoadMetadata(node->children));
     // }
-    
-        // 
+
+    //
 
     while (node != NULL)
     {
 
-   //     std::cout << "node name: " << (const char*)node->name << std::endl;   
-        
+        //     std::cout << "node name: " << (const char*)node->name << std::endl;
+
         if (node->properties)
         {
- //           xmlChar* name = xmlGetProp(node, (const xmlChar *)"name");
- //           xmlChar* etype = xmlGetProp(node, (const xmlChar *)"type");
-//            std::cout << "property name: " << (const char*)name << std::endl;   
-            // std::cout << "proper type: " << (const char*)etype << std::endl;   
+//           xmlChar* name = xmlGetProp(node, (const xmlChar *)"name");
+//           xmlChar* etype = xmlGetProp(node, (const xmlChar *)"type");
+//            std::cout << "property name: " << (const char*)name << std::endl;
+            // std::cout << "proper type: " << (const char*)etype << std::endl;
 
         }
-        
+
         // pdal::Metadata m((const char*) node->name);
         // if (boost::iequals((const char*)etype.get(), "blank"))
         // {
         //     // blank denotes a new Metadata instance.
         //     m.addMetadata(LoadMetadata(node));
         // }
-            
-        
+
+
         // output.addMetadata(m);
 
         if (node->type == XML_ELEMENT_NODE)
         {
             node = node->children;
-        } else
+        }
+        else
             node = node->next;
     }
 #endif
@@ -479,7 +480,7 @@ void Reader::Load()
         throw schema_loading_error("First node of document was not named 'PointCloudSchema'");
 
     xmlNode* dimension = root->children;
-    
+
     pdal::Metadata metadata;
 
     while (dimension != NULL)
@@ -488,8 +489,8 @@ void Reader::Load()
         // if (boost::equals((const char*)dimension->name, "metadata"))
         // {
         //     printf("metadata node name: %s\n", (const char*)dimension->name);
-        //     
-        //              
+        //
+        //
         //     metadata.addMetadata(LoadMetadata(dimension));
         //     dimension = dimension->next;
         //     continue;
@@ -639,7 +640,7 @@ void Reader::Load()
                 xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
                 if (!n) throw schema_loading_error("Unable to fetch uuid value!");
                 uuid = std::string((const char*)n);
-                
+
                 xmlFree(n);
             }
 
@@ -648,7 +649,7 @@ void Reader::Load()
                 xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
                 if (!n) throw schema_loading_error("Unable to fetch uuid value!");
                 parent_uuid = std::string((const char*)n);
-                
+
                 xmlFree(n);
             }
 
@@ -686,7 +687,7 @@ void Reader::Load()
         d.setEndianness(endianness);
 
         d.setPosition(position);
-        
+
         if (d.getUUID() == boost::uuids::nil_uuid())
         {
             d.createUUID();
@@ -717,7 +718,7 @@ Writer::Writer(pdal::Schema const& schema)
 std::string Writer::getXML()
 {
 #ifdef PDAL_HAVE_LIBXML2
-    
+
     BufferPtr buffer = BufferPtr(xmlBufferCreate(), BufferDeleter());
 
     xmlBufferPtr b = static_cast<xmlBuffer*>(buffer.get());
@@ -752,19 +753,19 @@ void Writer::write(TextWriterPtr writer)
     if (m_metadata.size())
     {
         xmlTextWriterStartElementNS(w, BAD_CAST "pc", BAD_CAST "metadata", NULL);
-        
+
         boost::property_tree::ptree output;
         PipelineWriter::write_metadata_ptree(output, m_metadata);
         std::ostringstream oss;
         boost::property_tree::xml_parser::write_xml(oss, output);
         std::string xml = oss.str();
-        
+
         // wipe off write_xml's xml declaration
         boost::algorithm::erase_all(xml, "<?xml version=\"1.0\" encoding=\"utf-8\"?>");
         xmlTextWriterWriteRawLen(w, BAD_CAST xml.c_str(), xml.size());
         xmlTextWriterEndElement(w);
     }
-    
+
 
     xmlTextWriterEndElement(w);
     xmlTextWriterEndDocument(w);

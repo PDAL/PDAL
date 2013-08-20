@@ -90,43 +90,43 @@ LasHeader::LasHeader(LasHeader const& other) :
     std::memcpy(m_softwareId, other.m_softwareId, eSoftwareIdSize);
     std::vector<boost::uint32_t>(other.m_pointRecordsByReturn).swap(m_pointRecordsByReturn);
     assert(ePointsByReturnSize >= m_pointRecordsByReturn.size());
-    
+
     // std::vector<VariableRecord>(other.m_vlrs).swap(m_vlrs);
 
 }
 
 LasHeader& LasHeader::operator=(LasHeader const& rhs)
 {
- if (&rhs != this)
- {
-	 std::memcpy(m_signature, rhs.m_signature, eFileSignatureSize);
-	 m_sourceId = rhs.m_sourceId;
-	 m_reserved = rhs.m_reserved;
-	 m_versionMajor = rhs.m_versionMajor;
-	 m_versionMinor = rhs.m_versionMinor;
-	 std::memcpy(m_systemId, rhs.m_systemId, eSystemIdSize);
-	 std::memcpy(m_softwareId, rhs.m_softwareId, eSoftwareIdSize);
-	 m_createDOY = rhs.m_createDOY;
-	 m_createYear = rhs.m_createYear;
-	 m_headerSize = rhs.m_headerSize;
-	 m_dataOffset = rhs.m_dataOffset;
-	 m_pointRecordsCount = rhs.m_pointRecordsCount;
-	 
-	 std::vector<boost::uint32_t>(rhs.m_pointRecordsByReturn).swap(m_pointRecordsByReturn);
-	 assert(ePointsByReturnSize >= m_pointRecordsByReturn.size());
+    if (&rhs != this)
+    {
+        std::memcpy(m_signature, rhs.m_signature, eFileSignatureSize);
+        m_sourceId = rhs.m_sourceId;
+        m_reserved = rhs.m_reserved;
+        m_versionMajor = rhs.m_versionMajor;
+        m_versionMinor = rhs.m_versionMinor;
+        std::memcpy(m_systemId, rhs.m_systemId, eSystemIdSize);
+        std::memcpy(m_softwareId, rhs.m_softwareId, eSoftwareIdSize);
+        m_createDOY = rhs.m_createDOY;
+        m_createYear = rhs.m_createYear;
+        m_headerSize = rhs.m_headerSize;
+        m_dataOffset = rhs.m_dataOffset;
+        m_pointRecordsCount = rhs.m_pointRecordsCount;
 
-	 m_scales = rhs.m_scales;
-	 m_offsets = rhs.m_offsets;
-	 m_bounds = rhs.m_bounds;
-	 m_spatialReference = rhs.m_spatialReference;
-	 m_isCompressed = rhs.m_isCompressed;
-	 m_headerPadding = rhs.m_headerPadding;
-     m_dataRecordLength = rhs.m_dataRecordLength; 
-     m_pointFormat = rhs.m_pointFormat;
-     m_compressionInfo = rhs.m_compressionInfo;
-     m_vlrList = rhs.m_vlrList;
- }
- return *this;
+        std::vector<boost::uint32_t>(rhs.m_pointRecordsByReturn).swap(m_pointRecordsByReturn);
+        assert(ePointsByReturnSize >= m_pointRecordsByReturn.size());
+
+        m_scales = rhs.m_scales;
+        m_offsets = rhs.m_offsets;
+        m_bounds = rhs.m_bounds;
+        m_spatialReference = rhs.m_spatialReference;
+        m_isCompressed = rhs.m_isCompressed;
+        m_headerPadding = rhs.m_headerPadding;
+        m_dataRecordLength = rhs.m_dataRecordLength;
+        m_pointFormat = rhs.m_pointFormat;
+        m_compressionInfo = rhs.m_compressionInfo;
+        m_vlrList = rhs.m_vlrList;
+    }
+    return *this;
 }
 
 
@@ -311,22 +311,22 @@ pdal::drivers::las::PointFormat LasHeader::getPointFormat() const
 
 void LasHeader::setPointFormat(pdal::drivers::las::PointFormat v)
 {
-	pdal::drivers::las::PointFormat old = m_pointFormat;
-	boost::uint16_t oldpad = m_dataRecordLength - Support::getPointDataSize(old);
+    pdal::drivers::las::PointFormat old = m_pointFormat;
+    boost::uint16_t oldpad = m_dataRecordLength - Support::getPointDataSize(old);
     m_pointFormat = v;
-	m_dataRecordLength = Support::getPointDataSize(v) + oldpad;
+    m_dataRecordLength = Support::getPointDataSize(v) + oldpad;
 }
 
 void LasHeader::SetDataRecordLength(boost::uint16_t v)
 {
-	boost::uint16_t requiredsize = Support::getPointDataSize(m_pointFormat);
-	if (requiredsize < v)
+    boost::uint16_t requiredsize = Support::getPointDataSize(m_pointFormat);
+    if (requiredsize < v)
         throw std::invalid_argument("record size too small to hold current point format required size");
-	m_dataRecordLength = v;
+    m_dataRecordLength = v;
 }
 boost::uint16_t LasHeader::GetDataRecordLength() const
 {
-	return m_dataRecordLength;
+    return m_dataRecordLength;
 }
 
 boost::uint32_t LasHeader::GetPointRecordsCount() const
@@ -378,7 +378,7 @@ void LasHeader::SetScale(double x, double y, double z)
 
     if (Utils::compare_distance(0.0, z))
         throw std::invalid_argument("Z scale of 0.0 is invalid!");
-    
+
     m_scales[0] = x;
     m_scales[1] = y;
     m_scales[2] = z;
@@ -470,7 +470,7 @@ void LasHeader::initialize()
     m_sourceId = m_reserved = boost::uint16_t();
     m_projectGuid = boost::uuids::nil_uuid();
 
-    m_dataOffset = eHeaderSize; 
+    m_dataOffset = eHeaderSize;
     m_pointRecordsCount = 0;
 
     std::memset(m_signature, 0, eFileSignatureSize);
@@ -489,7 +489,7 @@ void LasHeader::initialize()
     m_isCompressed = false;
     m_headerPadding = 0;
     m_compressionInfo = std::string("");
-	m_dataRecordLength = Support::getPointDataSize(m_pointFormat);
+    m_dataRecordLength = Support::getPointDataSize(m_pointFormat);
 }
 
 

@@ -190,14 +190,14 @@ std::size_t VariableLengthRecord::getTotalSize() const
     // Description 32 bytes
     // Data length -- size of the data's vector * the size of uint8_t
     // std::size_t sum = 2 + 16 + 2 + 2 + 32 + m_vlr_length * sizeof(boost::uint8_t);
-    std::size_t sum = sizeof(m_reserved) + 
-                            eUserIdSize + 
-                            sizeof(m_recordId) + 
-                            sizeof(m_vlr_length) + 
-                            eDescriptionSize + 
-                            m_vlr_length * sizeof(boost::uint8_t);
+    std::size_t sum = sizeof(m_reserved) +
+                      eUserIdSize +
+                      sizeof(m_recordId) +
+                      sizeof(m_vlr_length) +
+                      eDescriptionSize +
+                      m_vlr_length * sizeof(boost::uint8_t);
     return sum;
-    
+
 }
 
 

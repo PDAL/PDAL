@@ -97,14 +97,14 @@ boost::uint32_t Decimation::processBuffer(PointBuffer& dstData, const PointBuffe
 
     boost::uint32_t offset = getOptions().getValueOrDefault<boost::uint32_t>("offset", 0);
     boost::uint32_t srcIndex = 0;
-    
+
     if ((srcStartIndex+srcIndex) % (m_step) != 0)
     {
         srcIndex += m_step - ((srcStartIndex+srcIndex) % (m_step));
     }
-    
+
     srcIndex = srcIndex + offset;
-    
+
     while (srcIndex < numSrcPoints)
     {
 
@@ -134,14 +134,14 @@ pdal::StageRandomIterator* Decimation::createRandomIterator(PointBuffer& buffer)
 
 namespace iterators
 {
-    
+
 namespace decimation
 {
 IteratorBase::IteratorBase(pdal::filters::Decimation const& filter, PointBuffer& buffer)
-: m_decimationFilter(filter)
-, m_startingIndex(0)
+    : m_decimationFilter(filter)
+    , m_startingIndex(0)
 {
-    
+
 }
 
 
@@ -154,25 +154,25 @@ boost::uint32_t IteratorBase::decimateData(PointBuffer& data, StageSequentialIte
     boost::uint32_t originalCapacity = data.getCapacity();
     boost::int64_t numPointsNeeded = static_cast<boost::int64_t>(data.getCapacity());
 
-    if (numPointsNeeded <=0 )
+    if (numPointsNeeded <=0)
         throw pdal_error("numPointsNeeded is <=0!");
-        
+
     // we've established numPointsNeeded is > 0
     PointBuffer outputData(data.getSchema(), static_cast<boost::uint32_t>(numPointsNeeded));
     PointBuffer tmpData(data.getSchema(), static_cast<boost::uint32_t>(numPointsNeeded));
 
     m_decimationFilter.log()->get(logDEBUG2) << "Fetching for block of size: " << numPointsNeeded << std::endl;
-    
+
     m_startingIndex =  iterator.getIndex();
     bool logOutput = m_decimationFilter.log()->getLevel() > logDEBUG3;
-    
+
     while (numPointsNeeded > 0)
     {
-        if (iterator.atEnd()) 
+        if (iterator.atEnd())
         {
             if (logOutput)
-                m_decimationFilter.log()->get(logDEBUG4)  << "previous iterator is .atEnd, stopping"  
-                                                << std::endl;
+                m_decimationFilter.log()->get(logDEBUG4)  << "previous iterator is .atEnd, stopping"
+                        << std::endl;
             break;
         }
 
@@ -180,39 +180,39 @@ boost::uint32_t IteratorBase::decimateData(PointBuffer& data, StageSequentialIte
         {
             data.resize(static_cast<boost::uint32_t>(numPointsNeeded));
             if (logOutput)
-                m_decimationFilter.log()->get(logDEBUG4) << "Resizing original buffer to " 
-                                               << numPointsNeeded 
-                                               << std::endl;
-            
+                m_decimationFilter.log()->get(logDEBUG4) << "Resizing original buffer to "
+                        << numPointsNeeded
+                        << std::endl;
+
         }
 
         boost::uint32_t numRead = iterator.read(data);
         if (logOutput)
-            m_decimationFilter.log()->get(logDEBUG4) << "Fetched " 
-                                           << numRead << " from previous iterator. "  
-                                           << std::endl;
+            m_decimationFilter.log()->get(logDEBUG4) << "Fetched "
+                    << numRead << " from previous iterator. "
+                    << std::endl;
 
         if (tmpData.getCapacity() < numRead)
             tmpData.resize(numRead);
 
         boost::uint32_t numKept = m_decimationFilter.processBuffer(tmpData, data, m_startingIndex);
         if (logOutput)
-            m_decimationFilter.log()->get(logDEBUG4)  << "Kept " << numKept 
-                                            << " in decimation filter" << std::endl;
-        
+            m_decimationFilter.log()->get(logDEBUG4)  << "Kept " << numKept
+                    << " in decimation filter" << std::endl;
+
         data.resize(originalCapacity);
-        m_startingIndex = iterator.getIndex();      
-        
+        m_startingIndex = iterator.getIndex();
+
         if (logOutput)
         {
-            m_decimationFilter.log()->get(logDEBUG4)  << tmpData.getNumPoints() 
-                                            << " in temp buffer from filter" 
-                                            << std::endl;
-            m_decimationFilter.log()->get(logDEBUG4)  << "Starting index is now "<< m_startingIndex 
-                                            << std::endl;
-        
+            m_decimationFilter.log()->get(logDEBUG4)  << tmpData.getNumPoints()
+                    << " in temp buffer from filter"
+                    << std::endl;
+            m_decimationFilter.log()->get(logDEBUG4)  << "Starting index is now "<< m_startingIndex
+                    << std::endl;
+
         }
-                
+
         if (tmpData.getNumPoints() > 0)
         {
             outputData.copyPointsFast(outputData.getNumPoints(), 0, tmpData, tmpData.getNumPoints());
@@ -223,31 +223,31 @@ boost::uint32_t IteratorBase::decimateData(PointBuffer& data, StageSequentialIte
 
         numPointsNeeded -= numKept;
         if (logOutput)
-            m_decimationFilter.log()->get(logDEBUG4)  << numPointsNeeded 
-                                            << " left to fill this block" 
-                                            << std::endl;
-        if ( numPointsNeeded <= 0)
+            m_decimationFilter.log()->get(logDEBUG4)  << numPointsNeeded
+                    << " left to fill this block"
+                    << std::endl;
+        if (numPointsNeeded <= 0)
         {
-            if (logOutput)            
-                m_decimationFilter.log()->get(logDEBUG4) << "numPointsNeeded <=0, stopping"  
-                                               << std::endl;
+            if (logOutput)
+                m_decimationFilter.log()->get(logDEBUG4) << "numPointsNeeded <=0, stopping"
+                        << std::endl;
             break;
         }
 
     }
 
     const boost::uint32_t numPointsAchieved = outputData.getNumPoints();
-    
+
     if (numPointsAchieved)
     {
         data.resize(originalCapacity);
         data.setNumPoints(0);
         data.copyPointsFast(0, 0, outputData, outputData.getNumPoints());
         data.setNumPoints(outputData.getNumPoints());
-        if (logOutput)    
-            m_decimationFilter.log()->get(logDEBUG2)  << "Copying " << outputData.getNumPoints() 
-                                            << " at end of readBufferImpl" 
-                                            << std::endl;
+        if (logOutput)
+            m_decimationFilter.log()->get(logDEBUG2)  << "Copying " << outputData.getNumPoints()
+                    << " at end of readBufferImpl"
+                    << std::endl;
     }
 
     return numPointsAchieved;
@@ -300,7 +300,7 @@ Decimation::Decimation(const pdal::filters::Decimation& filter, PointBuffer& buf
 
 boost::uint64_t Decimation::seekImpl(boost::uint64_t count)
 {
-    boost::uint32_t offset = getStage().getOptions().getValueOrDefault<boost::uint32_t>("offset", 0);    
+    boost::uint32_t offset = getStage().getOptions().getValueOrDefault<boost::uint32_t>("offset", 0);
     m_startingIndex = count + offset;
     return getPrevIterator().seek(m_startingIndex);
 }
@@ -311,9 +311,9 @@ boost::uint32_t Decimation::readBufferImpl(PointBuffer& buffer)
 
     boost::scoped_ptr<StageSequentialIterator> iter(m_decimationFilter.getPrevStage().createSequentialIterator(buffer));
     iter->skip(m_startingIndex);
-    return decimateData(buffer, *iter);    
+    return decimateData(buffer, *iter);
 
-}    
+}
 
 } // random
 

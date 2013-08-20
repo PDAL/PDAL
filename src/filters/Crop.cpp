@@ -40,35 +40,35 @@
 
 namespace pdal
 {
-    
+
 #ifdef PDAL_HAVE_GEOS
-    namespace geos
-    {
-        static void _GEOSErrorHandler(const char *fmt, ...)
-        {
-            va_list args;
+namespace geos
+{
+static void _GEOSErrorHandler(const char *fmt, ...)
+{
+    va_list args;
 
-            va_start(args, fmt);
-            char buf[1024];  
+    va_start(args, fmt);
+    char buf[1024];
 
-            vsnprintf( buf, sizeof( buf), fmt, args);
-            std::cerr << "GEOS Error: " << buf << std::endl;
+    vsnprintf(buf, sizeof(buf), fmt, args);
+    std::cerr << "GEOS Error: " << buf << std::endl;
 
-            va_end(args);
-        }
+    va_end(args);
+}
 
-        static void _GEOSWarningHandler(const char *fmt, ...)
-        {
-            va_list args;
+static void _GEOSWarningHandler(const char *fmt, ...)
+{
+    va_list args;
 
-            char buf[1024];  
-            vsnprintf( buf, sizeof( buf), fmt, args);
-            std::cout << "GEOS warning: " << buf << std::endl;
+    char buf[1024];
+    vsnprintf(buf, sizeof(buf), fmt, args);
+    std::cout << "GEOS warning: " << buf << std::endl;
 
-            va_end(args);
-        }
+    va_end(args);
+}
 
-    } // geos
+} // geos
 #endif
 
 namespace filters
@@ -103,10 +103,10 @@ Crop::Crop(Stage& prevStage, Bounds<double> const& bounds)
 
 Crop::~Crop()
 {
-#ifdef PDAL_HAVE_GEOS    
+#ifdef PDAL_HAVE_GEOS
     if (m_geosPreparedGeometry)
         GEOSPreparedGeom_destroy_r(m_geosEnvironment, m_geosPreparedGeometry);
-    
+
     if (m_geosGeometry)
         GEOSGeom_destroy_r(m_geosEnvironment, m_geosGeometry);
 
@@ -119,7 +119,7 @@ Crop::~Crop()
 void Crop::initialize()
 {
     Filter::initialize();
-    
+
 #ifdef PDAL_HAVE_GEOS
     std::string wkt = getOptions().getValueOrDefault<std::string>("polygon", "");
     if (!wkt.empty())
@@ -129,17 +129,17 @@ void Crop::initialize()
         m_geosGeometry = GEOSGeomFromWKT_r(m_geosEnvironment, wkt.c_str());
         if (!m_geosGeometry)
             throw pdal_error("unable to import polygon WKT");
-        
+
         int gtype = GEOSGeomTypeId_r(m_geosEnvironment, m_geosGeometry);
         if (!(gtype == GEOS_POLYGON || gtype == GEOS_MULTIPOLYGON))
         {
             throw pdal_error("input WKT was not a POLYGON or MULTIPOLYGON");
         }
-        
+
         char* out_wkt = GEOSGeomToWKT_r(m_geosEnvironment, m_geosGeometry);
         log()->get(logDEBUG2) << "Ingested WKT for filters.crop: " << std::string(out_wkt) <<std::endl;
         GEOSFree_r(m_geosEnvironment, out_wkt);
-        
+
         bool bValid(false);
         bValid = static_cast<bool>(GEOSisValid_r(m_geosEnvironment, m_geosGeometry));
         if (!bValid)
@@ -150,22 +150,23 @@ void Crop::initialize()
             GEOSFree_r(m_geosEnvironment, reason);
             throw pdal_error(oss.str());
         }
-        
+
         m_geosPreparedGeometry = GEOSPrepare_r(m_geosEnvironment, m_geosGeometry);
         if (!m_geosPreparedGeometry)
             throw pdal_error("unable to prepare geometry for index-accellerated intersection");
-        
+
         m_bounds = computeBounds(m_geosGeometry);
         log()->get(logDEBUG) << "Computed bounds from given WKT: " << m_bounds <<std::endl;
-        
-    } else 
+
+    }
+    else
     {
         log()->get(logDEBUG) << "Using simple bounds for filters.crop: " << m_bounds <<std::endl;
-        
+
     }
 
-#endif    
-    
+#endif
+
     this->setBounds(m_bounds);
 
     this->setNumPoints(0);
@@ -180,9 +181,9 @@ Options Crop::getDefaultOptions()
     Options options;
     Option bounds("bounds",Bounds<double>(),"bounds to crop to");
     Option polygon("polygon", std::string(""), "WKT POLYGON() string to use to filter points");
-    
+
     Option inside("inside", true, "keep points that are inside or outside the given polygon");
-    
+
     options.add(inside);
     options.add(polygon);
     options.add(bounds);
@@ -203,14 +204,14 @@ Bounds<double> Crop::computeBounds(GEOSGeometry const* geometry)
     bool bFirst(true);
 
     GEOSGeometry const* ring = GEOSGetExteriorRing_r(m_geosEnvironment, geometry);
-    
+
     GEOSCoordSequence const* coords = GEOSGeom_getCoordSeq_r(m_geosEnvironment, ring);
-    
+
     boost::uint32_t count(0);
     int ret(0);
     ret = GEOSCoordSeq_getDimensions_r(m_geosEnvironment, coords, &m_dimensions);
     log()->get(logDEBUG) << "Inputted WKT had " << m_dimensions << " dimensions" <<std::endl;
-    
+
     ret = GEOSCoordSeq_getSize_r(m_geosEnvironment, coords, &count);
     pdal::Vector<double> p(0.0, 0.0, 0.0);
     for (unsigned i=0; i < count; ++i)
@@ -221,7 +222,7 @@ Bounds<double> Crop::computeBounds(GEOSGeometry const* geometry)
         ret = GEOSCoordSeq_getOrdinate_r(m_geosEnvironment, coords, i, 0, &x);
         ret = GEOSCoordSeq_getOrdinate_r(m_geosEnvironment, coords, i, 1, &y);
         if (m_dimensions > 2)
-            ret = GEOSCoordSeq_getOrdinate_r(m_geosEnvironment, coords, i, 2, &z);        
+            ret = GEOSCoordSeq_getOrdinate_r(m_geosEnvironment, coords, i, 2, &z);
         p.set(0, x);
         p.set(1, y);
         if (m_dimensions > 2)
@@ -232,7 +233,7 @@ Bounds<double> Crop::computeBounds(GEOSGeometry const* geometry)
             bFirst = false;
         }
         output.grow(p);
-        
+
     }
 #else
     boost::ignore_unused_variable_warning(geometry);
@@ -241,8 +242,8 @@ Bounds<double> Crop::computeBounds(GEOSGeometry const* geometry)
 }
 
 double Crop::getScaledValue(PointBuffer const& data,
-        Dimension const& d,
-        std::size_t pointIndex) const
+                            Dimension const& d,
+                            std::size_t pointIndex) const
 {
     double output(0.0);
 
@@ -332,14 +333,15 @@ boost::uint32_t Crop::processBuffer(PointBuffer const& srcData, PointBuffer& dst
 
     Bounds<double> const& filter_bounds = this->getBounds();
     Bounds<double> const& buffer_bounds = srcData.getSpatialBounds();
-    
+
     dstData.setNumPoints(0);
-    
+
     if (buffer_bounds.empty())
-        log()->get(logDEBUG2) << "Buffer bounds was empty, reader did not set!" << std::endl;\
-        
+        log()->get(logDEBUG2) << "Buffer bounds was empty, reader did not set!" << std::endl;
+    \
+
     // Not all readers set the buffer bounds, so we can't always believe them
-    // if (!buffer_bounds.empty() && 
+    // if (!buffer_bounds.empty() &&
     //     !buffer_bounds.overlaps(filter_bounds))
     // {
     //     // If the bounds doesn't overlap, we don't copy any points
@@ -348,13 +350,13 @@ boost::uint32_t Crop::processBuffer(PointBuffer const& srcData, PointBuffer& dst
     // }
 
     Schema const& schema = srcData.getSchema();
-    
+
     boost::uint32_t count = srcData.getNumPoints();
 
     bool logOutput = log()->getLevel() > logDEBUG4;
     if (logOutput)
         log()->floatPrecision(8);
-    
+
     const std::string x_name = getOptions().getValueOrDefault<std::string>("x_dim", "X");
     const std::string y_name = getOptions().getValueOrDefault<std::string>("y_dim", "Y");
     const std::string z_name = getOptions().getValueOrDefault<std::string>("z_dim", "Z");
@@ -367,13 +369,13 @@ boost::uint32_t Crop::processBuffer(PointBuffer const& srcData, PointBuffer& dst
     Dimension const& dimX = schema.getDimension(x_name);
     Dimension const& dimY = schema.getDimension(y_name);
     Dimension const& dimZ = schema.getDimension(z_name);
-    
+
     log()->get(logDEBUG2) << "x_dim '" << x_name <<"' fetched: " << dimX << std::endl;
     log()->get(logDEBUG2) << "y_dim '" << y_name <<"' fetched: " << dimY << std::endl;
     log()->get(logDEBUG2) << "z_dim '" << z_name <<"' fetched: " << dimZ << std::endl;
-    
+
     std::string wkt = getOptions().getValueOrDefault<std::string>("polygon", "");
-    
+
     boost::uint32_t copy_index(0);
     for (boost::uint32_t index=0; index<count; index++)
     {
@@ -384,13 +386,13 @@ boost::uint32_t Crop::processBuffer(PointBuffer const& srcData, PointBuffer& dst
 
         if (logOutput)
         {
-            log()->floatPrecision(10);            
+            log()->floatPrecision(10);
             log()->get(logDEBUG5) << "input: " << x << " y: " << y << " z: " << z << std::endl;
         }
 
         if (wkt.empty())
         {
-            // We don't have a polygon, just a bounds. Filter on that 
+            // We don't have a polygon, just a bounds. Filter on that
             // by itself.
             Vector<double> p(x,y,z);
 
@@ -400,8 +402,8 @@ boost::uint32_t Crop::processBuffer(PointBuffer const& srcData, PointBuffer& dst
                 dstData.setNumPoints(copy_index+1);
                 ++copy_index;
                 if (logOutput)
-                    log()->get(logDEBUG5) << "point is inside polygon!" << std::endl;                
-            }            
+                    log()->get(logDEBUG5) << "point is inside polygon!" << std::endl;
+            }
         }
 #ifdef PDAL_HAVE_GEOS
         else
@@ -420,20 +422,20 @@ boost::uint32_t Crop::processBuffer(PointBuffer const& srcData, PointBuffer& dst
 
             GEOSGeometry* p = GEOSGeom_createPoint_r(m_geosEnvironment, coords);
             if (!p) throw pdal_error("unable to allocate candidate test point");
-            
+
             if (static_cast<bool>(GEOSPreparedContains_r(m_geosEnvironment, m_geosPreparedGeometry, p)) == !bCropOutside)
             {
                 dstData.copyPointFast(copy_index, index, srcData);
                 dstData.setNumPoints(copy_index + 1);
                 ++copy_index;
                 if (logOutput)
-                    log()->get(logDEBUG5) << "point is inside polygon!" << std::endl;                
+                    log()->get(logDEBUG5) << "point is inside polygon!" << std::endl;
             }
             GEOSGeom_destroy_r(m_geosEnvironment, p);
         }
 #endif
     }
-    
+
     return srcData.getNumPoints();
 }
 
@@ -478,13 +480,13 @@ boost::uint32_t Crop::readBufferImpl(PointBuffer& data)
     // PointBuffer tmpData(outputData);
 
     m_cropFilter.log()->get(logDEBUG2) << "Fetching for block of size: " << numPointsNeeded << std::endl;
-    
+
     while (numPointsNeeded > 0)
     {
         // we got no data, and there is no more to get -- exit the loop
-        if (getPrevIterator().atEnd()) 
+        if (getPrevIterator().atEnd())
         {
-            m_cropFilter.log()->get(logDEBUG2) << "previous iterator is .atEnd, stopping"  
+            m_cropFilter.log()->get(logDEBUG2) << "previous iterator is .atEnd, stopping"
                                                << std::endl;
             break;
         }
@@ -493,8 +495,8 @@ boost::uint32_t Crop::readBufferImpl(PointBuffer& data)
 
         // read from prev stage
         const boost::uint32_t numSrcPointsRead = getPrevIterator().read(data);
-        m_cropFilter.log()->get(logDEBUG3) << "Fetched " 
-                                           << numSrcPointsRead << " from previous iterator. "  
+        m_cropFilter.log()->get(logDEBUG3) << "Fetched "
+                                           << numSrcPointsRead << " from previous iterator. "
                                            << std::endl;
         assert(numSrcPointsRead <= numPointsNeeded);
 
@@ -505,7 +507,7 @@ boost::uint32_t Crop::readBufferImpl(PointBuffer& data)
 
 
         m_cropFilter.log()->get(logDEBUG3) << tmpData.getNumPoints() << " passed intersection filter" << std::endl;
-        
+
         if (tmpData.getNumPoints() > 0)
         {
             outputData.copyPointsFast(outputData.getNumPoints(), 0, tmpData, tmpData.getNumPoints());
@@ -514,11 +516,11 @@ boost::uint32_t Crop::readBufferImpl(PointBuffer& data)
 
         numPointsNeeded -= tmpData.getNumPoints() ;
         m_cropFilter.log()->get(logDEBUG3) << numPointsNeeded << " left to read this block" << std::endl;
- 
+
     }
 
     const boost::uint32_t numPointsAchieved = outputData.getNumPoints();
-    
+
     data.resize(originalCapacity);
     data.setNumPoints(0);
     data.copyPointsFast(0, 0, outputData, outputData.getNumPoints());

@@ -91,14 +91,14 @@ void GlobalEnvironment::init()
 }
 
 
-// 
+//
 // regular member functions
 //
 
 GlobalEnvironment::GlobalEnvironment()
-: m_pythonEnvironment(0)
-, m_bIsGDALInitialized(false)
-, m_gdal_debug(0)
+    : m_pythonEnvironment(0)
+    , m_bIsGDALInitialized(false)
+    , m_gdal_debug(0)
 {
     // this should be the not-a-thread thread environment
     (void) createThreadEnvironment(boost::thread::id());
@@ -114,9 +114,9 @@ void GlobalEnvironment::getGDALEnvironment()
     if (!m_bIsGDALInitialized)
     {
         (void) GDALAllRegister();
-        m_bIsGDALInitialized = true;        
+        m_bIsGDALInitialized = true;
     }
-#endif    
+#endif
 }
 
 GlobalEnvironment::~GlobalEnvironment()
@@ -140,7 +140,7 @@ GlobalEnvironment::~GlobalEnvironment()
     {
         if (m_gdal_debug)
             delete m_gdal_debug;
-            
+
         (void) GDALDestroyDriverManager();
         m_bIsGDALInitialized = false;
     }
@@ -159,13 +159,13 @@ void GlobalEnvironment::createPythonEnvironment()
 void GlobalEnvironment::createThreadEnvironment(boost::thread::id id)
 {
     ThreadEnvironment* threadEnv = new ThreadEnvironment(id);
-    
+
     if (m_threadMap.find(id) != m_threadMap.end())
     {
         throw pdal_error("thread already registered");
     }
 
-    m_threadMap.insert( std::make_pair(id, threadEnv ) );
+    m_threadMap.insert(std::make_pair(id, threadEnv));
 }
 
 
@@ -197,10 +197,10 @@ plang::PythonEnvironment& GlobalEnvironment::getPythonEnvironment()
 pdal::gdal::GlobalDebug* GlobalEnvironment::getGDALDebug()
 {
     getGDALEnvironment();
-#ifdef PDAL_HAVE_GDAL 
+#ifdef PDAL_HAVE_GDAL
     if (m_gdal_debug == 0)
         m_gdal_debug = new pdal::gdal::GlobalDebug();
-    
+
 #endif
     return m_gdal_debug;
 }
@@ -210,7 +210,7 @@ boost::random::mt19937* GlobalEnvironment::getRNG()
     boost::random::mt19937* rng = getThreadEnvironment().getRNG();
     if (!rng)
         throw pdal_error("ThreadEnvironment RNG was null!");
-        
+
     return rng;
 }
 
