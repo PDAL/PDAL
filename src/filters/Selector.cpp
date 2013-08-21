@@ -71,16 +71,16 @@ void Selector::initialize()
 void Selector::checkImpedance()
 {
     Options& options = getOptions();
-    
+
     m_ignoreDefault = options.getValueOrDefault<bool>("ignore_default", true);
     std::vector<Option>::const_iterator i;
-    
+
     try
     {
         Option ignored = options.getOption("ignore");
         boost::optional<Options const&> ignored_options = ignored.getOptions();
-    
-        
+
+
         if (ignored_options)
         {
             std::vector<Option> ignored_dimensions = ignored_options->getOptions("dimension");
@@ -98,7 +98,7 @@ void Selector::checkImpedance()
     {
         Option keep = options.getOption("keep");
         boost::optional<Options const&> keep_options = keep.getOptions();
-    
+
         if (keep_options)
         {
             std::vector<Option> keep_dimensions = keep_options->getOptions("dimension");
@@ -116,7 +116,7 @@ void Selector::checkImpedance()
     {
         Option create = options.getOption("create");
         boost::optional<Options const&> create_options = create.getOptions();
-    
+
         if (create_options)
         {
             std::vector<Option> create_dimensions = create_options->getOptions("dimension");
@@ -124,7 +124,7 @@ void Selector::checkImpedance()
             {
                 Option const& o = *i;
                 boost::optional<Options const&> dim_opts = o.getOptions();
-                
+
                 if (!dim_opts)
                     throw pdal_error("create dimension option has no sub options!");
                 Options const& ops = *dim_opts;
@@ -138,12 +138,12 @@ void Selector::checkImpedance()
                 double scale(0.0);
                 double minimum(0.0);
                 double maximum(0.0);
-                
+
                 name = o.getValue<std::string>();
                 scale = ops.getValueOrDefault<double>("scale", 1.0);
                 offset = ops.getValueOrDefault<double>("offset", 0.0);
                 size = ops.getValueOrDefault<boost::uint32_t>("size", 1);
-                
+
                 description = ops.getValueOrDefault<std::string>("description", "");
                 interpretation = ops.getValueOrDefault<std::string>("interpretation", "int32_t");
 
@@ -153,18 +153,18 @@ void Selector::checkImpedance()
                 if (boost::iequals(endy, "big"))
                     endianness = Endian_Big;
                 */
-           
+
                 uuid = ops.getValueOrDefault<dimension::id>("uuid", boost::uuids::nil_uuid());
                 parent_uuid = ops.getValueOrDefault<dimension::id>("parent_uuid",  boost::uuids::nil_uuid());
 
                 minimum = ops.getValueOrDefault<double>("minimum", 0.0);
                 maximum = ops.getValueOrDefault<double>("maximum", 0.0);
-                
+
                 dimension::Interpretation interp = Dimension::getInterpretation(interpretation);
 
                 Dimension d(name, interp, size, description);
                 d.setUUID(uuid);
-                
+
                 if (d.getUUID().is_nil())
                     d.createUUID();
                 d.setParent(parent_uuid);
@@ -203,21 +203,21 @@ Options Selector::getDefaultOptions()
 
 namespace iterators
 {
-    
+
 namespace selector
 {
 
-IteratorBase::IteratorBase(pdal::filters::Selector const& filter, PointBuffer& )
-: m_selectorFilter(filter)
+IteratorBase::IteratorBase(pdal::filters::Selector const& filter, PointBuffer&)
+    : m_selectorFilter(filter)
 {
-    
+
 }
 
 void IteratorBase::alterSchema(PointBuffer& buffer)
 {
     Schema original_schema = buffer.getSchema();
 
-    // Add new dimensions to the schema first in case we wanted to ignore them 
+    // Add new dimensions to the schema first in case we wanted to ignore them
     // or something silly like that.
     Schema new_schema = buffer.getSchema();
     std::vector<Dimension> const& new_dimensions = m_selectorFilter.getCreatedDimensions();
@@ -232,10 +232,11 @@ void IteratorBase::alterSchema(PointBuffer& buffer)
             if (old_dim)
                 bFoundDimension = true;
 
-            if (!bFoundDimension )
+            if (!bFoundDimension)
             {
                 new_schema.appendDimension(*i);
-            } else if (bOverwriteExistingDimensions)
+            }
+            else if (bOverwriteExistingDimensions)
             {
                 Dimension new_dim(*i);
                 new_dim.setParent(old_dim->getUUID());
@@ -247,9 +248,9 @@ void IteratorBase::alterSchema(PointBuffer& buffer)
     std::map<std::string, bool> const& ignoredMap = m_selectorFilter.getIgnoredMap();
     schema::Map dimensions = original_schema.getDimensions();
     schema::index_by_index const& dims = dimensions.get<schema::index>();
-    for (schema::index_by_index::const_iterator t = dims.begin(); 
-         t != dims.end(); 
-         ++t)
+    for (schema::index_by_index::const_iterator t = dims.begin();
+            t != dims.end();
+            ++t)
     {
 
         std::map<std::string, bool>::const_iterator ignored = ignoredMap.find(t->getName());
@@ -263,7 +264,9 @@ void IteratorBase::alterSchema(PointBuffer& buffer)
                 d2.setFlags(flags | dimension::IsIgnored);
                 new_schema.setDimension(d2);
             }
-        } else { // didn't find it in our map of specified dimensions
+        }
+        else     // didn't find it in our map of specified dimensions
+        {
 
             if (m_selectorFilter.doIgnoreUnspecifiedDimensions())
             {
@@ -279,7 +282,7 @@ void IteratorBase::alterSchema(PointBuffer& buffer)
 
     buffer.reset(new_schema);
 }
-    
+
 } // selector
 
 namespace sequential
@@ -339,7 +342,7 @@ boost::uint32_t Selector::readBufferImpl(PointBuffer& buffer)
     const boost::uint32_t numRead = getPrevIterator().read(buffer);
 
     return numRead;
-}    
+}
 
 } // random
 

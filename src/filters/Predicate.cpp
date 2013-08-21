@@ -103,9 +103,9 @@ boost::uint32_t Predicate::processBuffer(PointBuffer& data, pdal::plang::Buffere
     }
 
     boost::uint8_t* mask = new boost::uint8_t[data.getNumPoints()];
-    
+
     PointBuffer dstData(data.getSchema(), data.getCapacity());
-    
+
     python.extractResult("Mask", (boost::uint8_t*)mask, data.getNumPoints(), 1, pdal::dimension::RawByte, 1);
 
     boost::uint8_t* dst = dstData.getData(0);
@@ -129,7 +129,7 @@ boost::uint32_t Predicate::processBuffer(PointBuffer& data, pdal::plang::Buffere
         src += numBytes;
     }
 
-    
+
     data.copyPointsFast(0, 0, dstData, count);
     data.setNumPoints(count);
 
@@ -191,7 +191,7 @@ void Predicate::readBeginImpl()
 
     m_numPointsProcessed = m_numPointsPassed = 0;
 
-    pdal::GlobalEnvironment::get().getPythonEnvironment().set_stdout( m_predicateFilter.log()->getLogStream() );
+    pdal::GlobalEnvironment::get().getPythonEnvironment().set_stdout(m_predicateFilter.log()->getLogStream());
 
     return;
 }
@@ -199,7 +199,7 @@ void Predicate::readBeginImpl()
 
 void Predicate::readEndImpl()
 {
-    pdal::GlobalEnvironment::get().getPythonEnvironment().reset_stdout( );
+    pdal::GlobalEnvironment::get().getPythonEnvironment().reset_stdout();
 
     return;
 }

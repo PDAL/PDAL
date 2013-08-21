@@ -238,7 +238,7 @@ void Reader::registerFields()
         // has two "PointSourceId" dimensions added.
 
         schema.appendDimension(dimensions.getDimension(
-                    boost::uuids::string_generator()("68c03b56-4248-4cca-ade5-33e90d5c5563")));
+                                   boost::uuids::string_generator()("68c03b56-4248-4cca-ade5-33e90d5c5563")));
 
         schema.appendDimension(dimensions.getDimension("Intensity"));
 
@@ -256,13 +256,13 @@ void Reader::registerFields()
         schema.appendDimension(dimensions.getDimension("Classification"));
 
         schema.appendDimension(dimensions.getDimension(
-                    boost::uuids::string_generator()("465a9a7e-1e04-47b0-97b6-4f826411bc71")));
+                                   boost::uuids::string_generator()("465a9a7e-1e04-47b0-97b6-4f826411bc71")));
 
         schema.appendDimension(dimensions.getDimension("Flag"));
         schema.appendDimension(dimensions.getDimension("Mark"));
 
         schema.appendDimension(dimensions.getDimension(
-                    boost::uuids::string_generator()("7193bb9f-3ca2-491f-ba18-594321493789")));
+                                   boost::uuids::string_generator()("7193bb9f-3ca2-491f-ba18-594321493789")));
 
         schema.appendDimension(dimensions.getDimension("Intensity"));
     }
@@ -324,7 +324,7 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
                 data.setField<boost::uint16_t>(*dimensions.ReturnNumber, pointIndex, echo_int);
 
             boost::int32_t x = Utils::read_field<boost::int32_t>(p);
-            
+
             if (dimensions.X)
                 data.setField<boost::int32_t>(*dimensions.X, pointIndex, x);
 
@@ -335,7 +335,7 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
             boost::int32_t z = Utils::read_field<boost::int32_t>(p);
             if (dimensions.Z)
                 data.setField<boost::int32_t>(*dimensions.Z, pointIndex, z);
-            
+
             boost::uint32_t time = Utils::read_field<boost::uint32_t>(p);
             if (dimensions.Time)
                 data.setField<boost::uint32_t>(*dimensions.Time, pointIndex, time);
@@ -343,11 +343,11 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
             boost::uint8_t red = Utils::read_field<boost::uint8_t>(p);
             if (dimensions.Red)
                 data.setField<boost::uint8_t>(*dimensions.Red, pointIndex, red);
-            
+
             boost::uint8_t green = Utils::read_field<boost::uint8_t>(p);
             if (dimensions.Green)
                 data.setField<boost::uint8_t>(*dimensions.Green, pointIndex, green);
-            
+
             boost::uint8_t blue = Utils::read_field<boost::uint8_t>(p);
             if (dimensions.Blue)
                 data.setField<boost::uint8_t>(*dimensions.Blue, pointIndex,  blue);
@@ -449,7 +449,7 @@ boost::property_tree::ptree Reader::toPTree() const
 std::vector<Dimension> Reader::getDefaultDimensions()
 {
     std::vector<Dimension> output;
-    
+
     Dimension alpha("Alpha", dimension::UnsignedInteger, 1,
                     "The alpha image channel value associated with this point");
     alpha.setUUID("f3806ee6-e82e-45af-89bd-59b20cda8ffa");

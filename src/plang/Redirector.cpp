@@ -21,7 +21,7 @@ namespace pdal
 {
 namespace plang
 {
- 
+
 struct Stdout
 {
     PyObject_HEAD

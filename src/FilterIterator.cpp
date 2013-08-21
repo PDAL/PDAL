@@ -76,7 +76,7 @@ const StageSequentialIterator& FilterSequentialIterator::getPrevIterator() const
         std::ostringstream oss;
         oss << "Const sequential iterator for stage of type '" <<  m_filter.getPrevStage().getName() << "' is not available";
         throw iterator_not_found(oss.str());
-    }    
+    }
     return *m_prevIterator;
 }
 
@@ -107,7 +107,7 @@ StageRandomIterator& FilterRandomIterator::getPrevIterator()
         std::ostringstream oss;
         oss << "Non-const random iterator for stage of type '" <<  m_filter.getPrevStage().getName() << "' is not available";
         throw iterator_not_found(oss.str());
-    }    
+    }
     return *m_prevIterator;
 }
 
@@ -119,7 +119,7 @@ const StageRandomIterator& FilterRandomIterator::getPrevIterator() const
         std::ostringstream oss;
         oss << "Const random terator for stage of type '" <<  m_filter.getPrevStage().getName() << "' is not available";
         throw iterator_not_found(oss.str());
-    }    
+    }
     return *m_prevIterator;
 }
 

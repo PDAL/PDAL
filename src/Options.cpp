@@ -209,7 +209,7 @@ std::vector<Option> Options::getOptions(std::string const& name) const
 {
     std::pair<std::multimap<std::string,Option>::const_iterator,std::multimap<std::string,Option>::const_iterator> ret;
     std::vector<Option> output;
-    
+
     // If we have an empty name, return them all
     if (boost::iequals(name, ""))
     {
@@ -217,7 +217,7 @@ std::vector<Option> Options::getOptions(std::string const& name) const
         for (it = m_options.begin(); it != m_options.end(); ++it)
         {
             output.push_back((*it).second);
-        }        
+        }
     }
     else
     {

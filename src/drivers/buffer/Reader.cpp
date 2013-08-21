@@ -96,15 +96,15 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, boost::uint64_t index) 
     boost::uint64_t numPointsAvailable = getNumPoints() - index;
     if (numPointsAvailable < numPointsWanted)
         numPointsWanted = numPointsAvailable;
-    
+
     DimensionMap* d = PointBuffer::mapDimensions(m_buffer, data);
 
     data.setNumPoints(0);
 
-    PointBuffer::copyLikeDimensions(m_buffer, data, 
-                                    *d, 
-                                    index, 
-                                    0, 
+    PointBuffer::copyLikeDimensions(m_buffer, data,
+                                    *d,
+                                    index,
+                                    0,
                                     numPointsWanted);
 
     data.setNumPoints(numPointsWanted);

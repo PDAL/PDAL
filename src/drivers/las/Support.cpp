@@ -51,7 +51,7 @@ void Support::registerFields(Reader& stage, Schema& schema, PointFormat format)
     std::vector<pdal::Dimension> const& d = stage.getDefaultDimensions();
 
     Schema dimensions(d);
-    
+
     schema.appendDimension(dimensions.getDimension("X", stage.getName()));
     schema.appendDimension(dimensions.getDimension("Y", stage.getName()));
     schema.appendDimension(dimensions.getDimension("Z", stage.getName()));

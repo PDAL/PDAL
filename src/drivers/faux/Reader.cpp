@@ -63,7 +63,7 @@ Reader::Reader(const Options& options)
     , m_mode(string2mode(options.getValueOrThrow<std::string>("mode")))
 {
     Schema& schema = getSchemaRef();
-    schema = Schema(getDefaultDimensions());    
+    schema = Schema(getDefaultDimensions());
     return;
 }
 
@@ -76,7 +76,7 @@ Reader::Reader(const Bounds<double>& bounds, boost::uint64_t numPoints, Mode mod
 {
     Schema& schema = getSchemaRef();
     schema = Schema(getDefaultDimensions());
-        
+
     return;
 }
 
@@ -88,7 +88,7 @@ Reader::Reader(const Bounds<double>& bounds, boost::uint64_t numPoints, Mode mod
 {
     Schema& schema = getSchemaRef();
     schema = Schema(dimensions);
-    
+
     return;
 }
 
@@ -99,7 +99,7 @@ std::vector<Dimension> Reader::getDefaultDimensions()
     x.setUUID("c74a80bd-8eca-4ab6-9e90-972738e122f0");
     x.setNamespace(s_getName());
     output.push_back(x);
-    
+
     Dimension y("Y", dimension::Float, 8);
     y.setUUID("1b102a72-daa5-4a81-8a23-8aa907350473");
     y.setNamespace(s_getName());

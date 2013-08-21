@@ -157,7 +157,7 @@ void Schema::appendDimension(const Dimension& dim)
 
     schema::index_by_uid const& id_index = m_index.get<schema::uid>();
     schema::index_by_uid::size_type id_count = id_index.count(d.getUUID());
-    
+
     if (id_count >0)
     {
         std::ostringstream oss;
@@ -176,7 +176,7 @@ void Schema::appendDimension(const Dimension& dim)
 }
 
 
-const Dimension& Schema::getDimension( schema::size_type t) const
+const Dimension& Schema::getDimension(schema::size_type t) const
 {
     schema::index_by_index const& idx = m_index.get<schema::index>();
 
@@ -212,7 +212,8 @@ const Dimension& Schema::getDimension(boost::string_ref name, boost::string_ref 
 }
 
 
-namespace {
+namespace
+{
 // Helpers for searching the dimension index without constructing a std::string
 
 // Hash for boost::string_ref
@@ -238,7 +239,7 @@ struct string_ref_equal
 
 
 const Dimension* Schema::getDimensionPtr(boost::string_ref nameIn, boost::string_ref namespc,
-                                         std::string* errorMsg) const
+        std::string* errorMsg) const
 {
     // getDimensionPtr is implemented in terms of boost::string_ref so that we
     // can guarentee not to allocate memory unless we really need to.
@@ -258,8 +259,8 @@ const Dimension* Schema::getDimensionPtr(boost::string_ref nameIn, boost::string
 
     schema::index_by_name const& name_index = m_index.get<schema::name>();
     std::pair<schema::index_by_name::const_iterator,
-              schema::index_by_name::const_iterator> nameRange =
-        name_index.equal_range(name, string_ref_hash(), string_ref_equal());
+        schema::index_by_name::const_iterator> nameRange =
+            name_index.equal_range(name, string_ref_hash(), string_ref_equal());
 
     if (nameRange.first == name_index.end())
     {
@@ -370,7 +371,7 @@ const Dimension* Schema::getDimensionPtr(boost::string_ref nameIn, boost::string
 
 
 boost::optional<Dimension const&> Schema::getDimensionOptional(boost::string_ref name,
-                                                               boost::string_ref ns) const
+        boost::string_ref ns) const
 {
     const Dimension* dim = getDimensionPtr(name, ns);
     if (dim)
@@ -421,9 +422,9 @@ bool Schema::setDimension(Dimension const& dim)
 
 const Dimension& Schema::getDimension(dimension::id const& t) const
 {
-    /// getDimension for a dimension::id will not respect the isIgnored setting 
-    /// of the dimension.  Stages that wish to operate with dimensions with exacting 
-    /// specificity should take care to use uuids as their keys rather than 
+    /// getDimension for a dimension::id will not respect the isIgnored setting
+    /// of the dimension.  Stages that wish to operate with dimensions with exacting
+    /// specificity should take care to use uuids as their keys rather than
     /// names.
     schema::index_by_uid::const_iterator it = m_index.get<schema::uid>().find(t);
 
@@ -491,7 +492,7 @@ std::string Schema::to_xml(Schema const& schema, boost::property_tree::ptree con
 #ifdef PDAL_HAVE_LIBXML2
 
     pdal::schema::Writer writer(schema);
-    
+
     if (metadata)
         writer.setMetadata(*metadata);
 
