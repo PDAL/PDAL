@@ -72,7 +72,7 @@ std::vector<Dimension> Color::getDefaultDimensions()
     blue.setUUID("7cdd9ec4-a209-4f14-ad55-1eda94aec750");
     blue.setNamespace(s_getName());
     output.push_back(blue);
-    
+
     return output;
 
 }

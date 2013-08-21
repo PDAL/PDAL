@@ -225,7 +225,7 @@ void Dimension::createUUID()
     // Stack-allocated, uninitialized RNG
     // boost::mt19937 ran;
     // boost::uuids::basic_random_generator<boost::mt19937> gen(&ran);
-    // m_uuid = gen();                
+    // m_uuid = gen();
 
     // Single call, uninitialized RNG
     // m_uuid = boost::uuids::random_generator()();
@@ -355,7 +355,7 @@ std::ostream& operator<<(std::ostream& os, pdal::Dimension const& d)
     std::string::size_type size = cur.size();
     std::string::size_type buffer(24);
     std::string::size_type pad_size = buffer - size;
-    if (size > buffer) 
+    if (size > buffer)
         pad_size = 4;
     for (std::string::size_type i=0; i != pad_size; i++)
     {
@@ -371,7 +371,7 @@ std::ostream& operator<<(std::ostream& os, pdal::Dimension const& d)
 
     double offset = tree.get<double>("offset");
     os << " offset: " << offset;
-    
+
     os << " ignored: " << tree.get<bool>("isIgnored");
 
     os << " uid: " << tree.get<std::string>("uuid");

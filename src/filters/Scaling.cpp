@@ -62,7 +62,7 @@ void Scaling::initialize()
 
     checkImpedance();
 
-    
+
     Schema& s = getSchemaRef();
     s = alterSchema(s);
 
@@ -112,7 +112,7 @@ pdal::StageRandomIterator* Scaling::createRandomIterator(PointBuffer& buffer) co
 Options Scaling::getDefaultOptions()
 {
     Options options;
-    Option ignore_old_dimensions("ignore_old_dimensions", true, "Mark old, unscaled dimensions as ignored");    
+    Option ignore_old_dimensions("ignore_old_dimensions", true, "Mark old, unscaled dimensions as ignored");
     return options;
 }
 
@@ -128,9 +128,9 @@ Schema Scaling::alterSchema(Schema const& input_schema)
 
     // Only certain scaling conversions are allowed. If we're not one of the
     // defined conversions, we're going to complain.
-    
+
     Schema schema(input_schema);
-    
+
     std::multimap<dimension::Interpretation, dimension::Interpretation> allowed_conversions;
     allowed_conversions.insert(std::make_pair(dimension::Float, dimension::Float));
     allowed_conversions.insert(std::make_pair(dimension::Float, dimension::SignedInteger));
@@ -179,18 +179,18 @@ Schema Scaling::alterSchema(Schema const& input_schema)
                 throw pdal_error("Scaling between types is not supported");
 
             log()->get(logDEBUG2)  << "Rescaling dimension " << from_dimension->getName()
-                                                   << " [" << from_dimension->getInterpretation() << "/" << from_dimension->getByteSize() << "]"
-                                                   << " from scale: " << from_dimension->getNumericScale()
-                                                   << " offset: " << from_dimension->getNumericOffset()
+                                   << " [" << from_dimension->getInterpretation() << "/" << from_dimension->getByteSize() << "]"
+                                   << " from scale: " << from_dimension->getNumericScale()
+                                   << " offset: " << from_dimension->getNumericOffset()
 
-                                                   << " to scale: " << to_dimension.getNumericScale()
-                                                   << " offset: " << to_dimension.getNumericOffset()
-                                                   << " datatype: " << to_dimension.getInterpretation() << "/" << to_dimension.getByteSize()
-                                                   << std::endl;
+                                   << " to scale: " << to_dimension.getNumericScale()
+                                   << " offset: " << to_dimension.getNumericOffset()
+                                   << " datatype: " << to_dimension.getInterpretation() << "/" << to_dimension.getByteSize()
+                                   << std::endl;
             std::pair<dimension::id, dimension::id> p(from_dimension->getUUID(), to_dimension.getUUID());
-            
+
             m_scale_map.insert(p);
-            log()->get(logDEBUG2) << "scaling dimension with id '" << from_dimension->getUUID() 
+            log()->get(logDEBUG2) << "scaling dimension with id '" << from_dimension->getUUID()
                                   << "' to dimension with id: '" << to_dimension.getUUID() <<"'" << std::endl;
             schema.appendDimension(to_dimension);
         }
@@ -202,7 +202,7 @@ Schema Scaling::alterSchema(Schema const& input_schema)
     {
         Dimension const& from_dimension = schema.getDimension(d->first);
         Dimension const& to_dimension = schema.getDimension(d->second);
-        
+
         if (markIgnored)
         {
             log()->get(logDEBUG2) << "marking " << from_dimension.getName() << " as ignored with uuid "  <<  from_dimension.getUUID() << std::endl;
@@ -215,11 +215,11 @@ Schema Scaling::alterSchema(Schema const& input_schema)
 
 
         log()->get(logDEBUG2) << "Map wants to do: " << from_dimension.getName()
-                                              << " [" << from_dimension.getInterpretation() << "/" << from_dimension.getByteSize() << "]"
-                                              << " to scale: " << to_dimension.getNumericScale()
-                                              << " offset: " << to_dimension.getNumericOffset()
-                                              << " datatype: " << to_dimension.getInterpretation() << "/" << to_dimension.getByteSize()
-                                              << std::endl;
+                              << " [" << from_dimension.getInterpretation() << "/" << from_dimension.getByteSize() << "]"
+                              << " to scale: " << to_dimension.getNumericScale()
+                              << " offset: " << to_dimension.getNumericOffset()
+                              << " datatype: " << to_dimension.getInterpretation() << "/" << to_dimension.getByteSize()
+                              << std::endl;
     }
 
     return schema;
@@ -290,7 +290,7 @@ bool Scaling::atEndImpl() const
 boost::uint32_t Scaling::readBufferImpl(PointBuffer& buffer)
 {
     const boost::uint32_t numRead = getPrevIterator().read(buffer);
-    
+
     IteratorBase::scaleData(buffer, numRead);
 
     return numRead;
@@ -311,7 +311,7 @@ Scaling::Scaling(const pdal::filters::Scaling& filter, PointBuffer& buffer)
 
 boost::uint64_t Scaling::seekImpl(boost::uint64_t count)
 {
-    
+
     return getPrevIterator().seek(count);
 }
 
@@ -329,8 +329,8 @@ boost::uint32_t Scaling::readBufferImpl(PointBuffer& buffer)
 
 namespace scaling
 {
-    
-IteratorBase::IteratorBase(const pdal::filters::Scaling& filter, PointBuffer& )
+
+IteratorBase::IteratorBase(const pdal::filters::Scaling& filter, PointBuffer&)
     : m_scalingFilter(filter)
 {
     return;
@@ -345,10 +345,10 @@ void IteratorBase::readBufferBeginImpl(PointBuffer& buffer)
     {
         boost::optional<pdal::Dimension const&> fr = schema.getDimensionOptional(d->first);
         boost::optional<pdal::Dimension const&> to = schema.getDimensionOptional(d->second);
-        
+
         if (!fr) throw pdal_error("from dimension is not found on schema!");
         if (!to) throw pdal_error("to dimension is not found on schema!");
-        
+
         std::pair<boost::optional<pdal::Dimension const&>, boost::optional<pdal::Dimension const&> > g(fr, to);
         m_dimension_map.insert(g);
 
@@ -360,7 +360,7 @@ void IteratorBase::scaleData(PointBuffer& buffer, boost::uint32_t numRead)
     for (boost::uint32_t pointIndex=0; pointIndex<numRead; pointIndex++)
     {
         std::map<boost::optional<pdal::Dimension const&>, boost::optional<pdal::Dimension const&> >::const_iterator d;
-        
+
         for (d = m_dimension_map.begin(); d != m_dimension_map.end(); ++d)
         {
             boost::optional<pdal::Dimension const&> f = d->first;
@@ -382,9 +382,9 @@ void IteratorBase::scaleData(PointBuffer& buffer, boost::uint32_t numRead)
 #endif
 
 void IteratorBase::writeScaledData(PointBuffer& buffer,
-                              Dimension const& from_dimension,
-                              Dimension const& to_dimension,
-                              boost::uint32_t pointIndex)
+                                   Dimension const& from_dimension,
+                                   Dimension const& to_dimension,
+                                   boost::uint32_t pointIndex)
 {
     if (from_dimension.getInterpretation() == dimension::Float)
     {

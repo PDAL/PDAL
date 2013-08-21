@@ -92,11 +92,11 @@ vector<boost::uint32_t> Block::GetIDs() const
     return ids;
 }
 
-void Block::GetBuffer(StageRandomIterator * iterator, 
+void Block::GetBuffer(StageRandomIterator * iterator,
                       PointBuffer& destination,
                       PointBuffer& one_point,
-                      boost::uint32_t block_id, 
-                      Dimension const& dimPoint, 
+                      boost::uint32_t block_id,
+                      Dimension const& dimPoint,
                       Dimension const& dimBlock) const
 {
     pdal::Schema const& schema = destination.getSchema();
@@ -148,7 +148,7 @@ void Chipper::initialize()
     checkImpedance();
     setPointCountType(PointCount_Fixed);
     setNumPoints(0);
-    
+
     if (m_threshold == 0)
     {
         m_threshold = getPrevStage().getNumPoints();
@@ -205,7 +205,7 @@ void Chipper::Load(PointBuffer& original_buffer, RefList& xvec, RefList& yvec, R
     while (!iter->atEnd())
     {
         boost::uint32_t numRead =  iter->read(original_buffer);
-        
+
 
         for (boost::uint32_t j = 0; j < numRead; j++)
         {
@@ -426,10 +426,10 @@ void Chipper::Emit(RefList& wide, boost::uint32_t widemin, boost::uint32_t widem
     {
 
         // minx, miny, maxx, maxy
-        pdal::Bounds<double> bnd(   wide[widemin].m_pos, 
-                                    narrow[narrowmin].m_pos, 
-                                    wide[widemax].m_pos,  
-                                    narrow[narrowmax].m_pos);
+        pdal::Bounds<double> bnd(wide[widemin].m_pos,
+                                 narrow[narrowmin].m_pos,
+                                 wide[widemax].m_pos,
+                                 narrow[narrowmax].m_pos);
         b.SetBounds(bnd);
 
         // b.m_xmin = wide[widemin].m_pos;
@@ -439,10 +439,10 @@ void Chipper::Emit(RefList& wide, boost::uint32_t widemin, boost::uint32_t widem
     }
     else
     {
-        pdal::Bounds<double> bnd(   narrow[narrowmin].m_pos, 
-                                    wide[widemin].m_pos, 
-                                    narrow[narrowmax].m_pos, 
-                                    wide[widemax].m_pos);
+        pdal::Bounds<double> bnd(narrow[narrowmin].m_pos,
+                                 wide[widemin].m_pos,
+                                 narrow[narrowmax].m_pos,
+                                 wide[widemax].m_pos);
         b.SetBounds(bnd);
 
         // b.m_xmin = narrow[narrowmin].m_pos;
@@ -493,7 +493,7 @@ std::vector<Dimension> Chipper::getDefaultDimensions()
     bid.setUUID("289657d3-3193-42da-b9a8-2c6dba73facf");
     bid.setNamespace(s_getName());
     output.push_back(bid);
-    
+
     return output;
 }
 
@@ -548,12 +548,12 @@ boost::uint32_t Chipper::readBufferImpl(PointBuffer& buffer)
     Dimension const& blockID = schema.getDimension("BlockID");
 
     // Don't create this every GetBuffer call
-    
+
     if (!m_one_point)
     {
         m_one_point = new PointBuffer(schema, 1);
         m_current_read_schema = &(m_one_point->getSchema());
-        m_random_iterator = m_chipper.getPrevStage().createRandomIterator(*m_one_point);        
+        m_random_iterator = m_chipper.getPrevStage().createRandomIterator(*m_one_point);
     }
 
     if (m_current_read_schema != &(m_one_point->getSchema()))
@@ -565,7 +565,7 @@ boost::uint32_t Chipper::readBufferImpl(PointBuffer& buffer)
         m_current_read_schema = &(m_one_point->getSchema());
     }
 
-    
+
     if (!m_random_iterator)
     {
         std::ostringstream oss;
@@ -573,11 +573,11 @@ boost::uint32_t Chipper::readBufferImpl(PointBuffer& buffer)
         throw pdal_error(oss.str());
     }
 
-    block.GetBuffer(m_random_iterator, 
-                    buffer, 
-                    *m_one_point, 
-                    m_currentBlockId, 
-                    pointID, 
+    block.GetBuffer(m_random_iterator,
+                    buffer,
+                    *m_one_point,
+                    m_currentBlockId,
+                    pointID,
                     blockID);
 
     buffer.setSpatialBounds(block.GetBounds());

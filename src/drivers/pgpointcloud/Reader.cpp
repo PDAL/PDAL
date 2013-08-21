@@ -65,9 +65,9 @@ namespace pgpointcloud
 
 //*********************************************************************************
 //  pdal.drivers.pgpointcloud.Reader
-//  
+//
 //  The iterator downbelow controls the actual reading, the Reader just does some
-//  basic setup and returning of metadata to the Writer at the other end of 
+//  basic setup and returning of metadata to the Writer at the other end of
 //  the chain.
 //
 //  The core of PDAL only calls the following methods:
@@ -95,7 +95,7 @@ Reader::Reader(const Options& options)
 
 Reader::~Reader()
 {
-    if ( m_session )
+    if (m_session)
         PQfinish(m_session);
 
     return;
@@ -142,7 +142,7 @@ void Reader::initialize()
 
     // Database connection
     m_session = pg_connect(m_connection);
- 
+
     // Read schema from pointcloud_formats if possible
     Schema& schema = getSchemaRef();
     schema = fetchSchema();
@@ -162,29 +162,29 @@ void Reader::initialize()
 
 boost::uint64_t Reader::getNumPoints() const
 {
-    if ( m_cached_point_count == 0 )
+    if (m_cached_point_count == 0)
     {
         std::ostringstream oss;
         oss << "SELECT Sum(PC_NumPoints(" << m_column_name << ")) AS numpoints, ";
         oss << "Max(PC_NumPoints(" << m_column_name << ")) AS maxpoints FROM ";
-        if ( m_schema_name.size() )
+        if (m_schema_name.size())
         {
             oss << m_schema_name << ".";
         }
         oss << m_table_name;
-        if ( m_where.size() )
+        if (m_where.size())
         {
             oss << " WHERE " << m_where;
         }
 
         PGresult *result = pg_query_result(m_session, oss.str());
-        
-        if ( PQresultStatus(result) != PGRES_TUPLES_OK )
+
+        if (PQresultStatus(result) != PGRES_TUPLES_OK)
         {
             throw pdal_error("unable to get point count");
         }
         m_cached_point_count = atoi(PQgetvalue(result, 0, 0));
-        m_cached_max_points = atoi(PQgetvalue(result, 0, 1));        
+        m_cached_max_points = atoi(PQgetvalue(result, 0, 1));
         PQclear(result);
     }
 
@@ -196,12 +196,12 @@ std::string Reader::getDataQuery() const
     std::ostringstream oss;
     oss << "SELECT text(PC_Uncompress(" << m_column_name << ")) AS pa, ";
     oss << "PC_NumPoints(" << m_column_name << ") AS npoints FROM ";
-    if ( m_schema_name.size() )
+    if (m_schema_name.size())
     {
         oss << m_schema_name << ".";
     }
     oss << m_table_name;
-    if ( m_where.size() )
+    if (m_where.size())
     {
         oss << " WHERE " << m_where;
     }
@@ -212,7 +212,7 @@ std::string Reader::getDataQuery() const
 
 boost::uint64_t Reader::getMaxPoints() const
 {
-    if ( m_cached_point_count == 0 )
+    if (m_cached_point_count == 0)
     {
         boost::uint64_t npoints = getNumPoints();
     }
@@ -224,7 +224,7 @@ boost::uint32_t Reader::fetchPcid() const
 {
     boost::uint32_t pcid = 0;
 
-    if ( m_pcid ) return m_pcid;
+    if (m_pcid) return m_pcid;
 
     log()->get(logDEBUG) << "Fetching pcid ..." << std::endl;
 
@@ -237,12 +237,12 @@ boost::uint32_t Reader::fetchPcid() const
     char *pcid_str = pg_query_once(m_session, oss.str());
     pcid = atoi(pcid_str);
     free(pcid_str);
-    
-    if ( ! pcid )
+
+    if (! pcid)
         throw pdal_error("Unable to fetch pcid specified column and table");
 
     log()->get(logDEBUG) << "     got pcid = " << pcid << std::endl;
-    
+
     m_pcid = pcid;
     return pcid;
 }
@@ -266,21 +266,21 @@ pdal::Schema Reader::fetchSchema() const
 
     for (schema::index_by_index::const_iterator iter = dims.begin(); iter != dims.end(); ++iter)
     {
-        // For dimensions that do not have namespaces, we'll set the namespace 
+        // For dimensions that do not have namespaces, we'll set the namespace
         // to the namespace of the current stage
-        
+
         if (iter->getNamespace().size() == 0)
         {
             log()->get(logDEBUG4) << "setting namespace for dimension " << iter->getName() << " to "  << getName() << std::endl;
-            
+
 
             Dimension d(*iter);
             if (iter->getUUID().is_nil())
             {
                 d.createUUID();
-            }            
+            }
             d.setNamespace(getName());
-            schema.setDimension(d); 
+            schema.setDimension(d);
         }
     }
 
@@ -301,17 +301,17 @@ pdal::SpatialReference Reader::fetchSpatialReference() const
     oss << "SELECT srid FROM pointcloud_formats WHERE pcid = " << pcid;
 
     char *srid_str = pg_query_once(m_session, oss.str());
-    if ( ! srid_str )
+    if (! srid_str)
         throw pdal_error("Unable to fetch srid for this table and column");
-    
+
     boost::int32_t srid = atoi(srid_str);
 
-    log()->get(logDEBUG) << "     got SRID = " << srid << std::endl;    
+    log()->get(logDEBUG) << "     got SRID = " << srid << std::endl;
 
     oss.str("");
     oss << "EPSG:" << srid;
 
-    if ( srid >= 0 )
+    if (srid >= 0)
         return pdal::SpatialReference(oss.str());
     else
         return pdal::SpatialReference();
@@ -325,8 +325,8 @@ pdal::StageSequentialIterator* Reader::createSequentialIterator(PointBuffer& buf
 
 //*********************************************************************************
 //  pdal.drivers.pgpointcloud.iterators.sequential.Iterator
-//  
-//  The iterator controls the actual reading of features, via calls to 
+//
+//  The iterator controls the actual reading of features, via calls to
 //
 //  boost::uint64_t skipImpl(boost::uint64_t count)
 //  bool            atEndImpl() const
@@ -362,22 +362,22 @@ Iterator::Iterator(const pdal::drivers::pgpointcloud::Reader& reader, PointBuffe
 
 Iterator::~Iterator()
 {
-    if ( m_session )
+    if (m_session)
     {
         PQfinish(m_session);
         m_session = NULL;
     }
-    
-    if ( m_cur_result )
+
+    if (m_cur_result)
     {
         PQclear(m_cur_result);
         m_cur_result = NULL;
     }
 
-    if ( m_dimension_map )
+    if (m_dimension_map)
         delete m_dimension_map;
 
-    if ( m_buffer )
+    if (m_buffer)
         delete m_buffer;
 }
 
@@ -425,27 +425,27 @@ bool Iterator::CursorTeardown()
 
 bool Iterator::NextBuffer()
 {
-    if ( ! m_cursor )
+    if (! m_cursor)
         CursorSetup();
-    
-    if ( m_cur_row >= m_cur_nrows || ! m_cur_result )
+
+    if (m_cur_row >= m_cur_nrows || ! m_cur_result)
     {
         static std::string fetch = "FETCH 2 FROM cur";
-        if ( m_cur_result ) PQclear(m_cur_result);
+        if (m_cur_result) PQclear(m_cur_result);
         m_cur_result = pg_query_result(m_session, fetch);
         getReader().log()->get(logDEBUG) << "SQL: " << fetch << std::endl;
-        if ( PQresultStatus(m_cur_result) != PGRES_TUPLES_OK || PQntuples(m_cur_result) == 0 )
+        if (PQresultStatus(m_cur_result) != PGRES_TUPLES_OK || PQntuples(m_cur_result) == 0)
         {
             PQclear(m_cur_result);
             m_cur_result = NULL;
             CursorTeardown();
             return false;
         }
-        
+
         m_cur_row = 0;
         m_cur_nrows = PQntuples(m_cur_result);
     }
-    
+
     m_patch_hex = std::string(PQgetvalue(m_cur_result, m_cur_row, 0));
     m_patch_npoints = atoi(PQgetvalue(m_cur_result, m_cur_row, 1));
 
@@ -459,13 +459,13 @@ boost::uint32_t Iterator::readBufferImpl(PointBuffer& user_buffer)
 
     // First time through, create the SQL statement, allocate holding pens
     // and fire it off!
-    if ( ! m_cursor )
+    if (! m_cursor)
     {
         CursorSetup();
     }
 
     // Is the cache for patches ready?
-    if ( ! m_buffer )
+    if (! m_buffer)
     {
         uint32_t max_points = getReader().getMaxPoints();
         m_buffer = new pdal::PointBuffer(getReader().getSchema(), max_points);
@@ -475,7 +475,7 @@ boost::uint32_t Iterator::readBufferImpl(PointBuffer& user_buffer)
     }
 
     // Create a dimension map if we don't already have one
-    if ( m_buffer && ! m_dimension_map )
+    if (m_buffer && ! m_dimension_map)
     {
         m_dimension_map = pdal::PointBuffer::mapDimensions(*m_buffer, user_buffer);
     }
@@ -483,11 +483,11 @@ boost::uint32_t Iterator::readBufferImpl(PointBuffer& user_buffer)
     boost::uint32_t num_loops = 0;
     // Read from the SQL statement until we run out of blocks, or break the loop
     // when we've filled up the user data buffer.
-    while ( true ) 
+    while (true)
     {
-        // User buffer is full? We need to get out of this loop and 
+        // User buffer is full? We need to get out of this loop and
         // let the writer decide what to do next.
-        if ( user_buffer.getNumPoints() == user_buffer.getCapacity() )
+        if (user_buffer.getNumPoints() == user_buffer.getCapacity())
         {
             getReader().log()->get(logDEBUG) << "User buffer is full, returning control to pdal core" << std::endl;
             break;
@@ -495,10 +495,10 @@ boost::uint32_t Iterator::readBufferImpl(PointBuffer& user_buffer)
 
         // If we've read all the contents of the cache buffer, get a fresh
         // patch from the database
-        if ( m_buffer_position >= m_buffer->getNumPoints() )
+        if (m_buffer_position >= m_buffer->getNumPoints())
         {
             // No more patches! We're done!
-            if ( ! NextBuffer() )
+            if (! NextBuffer())
             {
                 m_at_end = true;
                 break;
@@ -528,7 +528,7 @@ boost::uint32_t Iterator::readBufferImpl(PointBuffer& user_buffer)
         boost::uint32_t space_in_user_buffer = user_buffer.getCapacity() - user_buffer.getNumPoints();
         boost::uint32_t points_to_copy = 0;
         // If there's space, put the whole cache into the user buffer,
-        if ( space_in_user_buffer > points_in_cache )
+        if (space_in_user_buffer > points_in_cache)
         {
             points_to_copy = points_in_cache;
         }
@@ -546,10 +546,10 @@ boost::uint32_t Iterator::readBufferImpl(PointBuffer& user_buffer)
 
         // Do the copying from cache to user buffer
         // To do: this should be more tolerant of variations in source/dest schema
-        PointBuffer::copyLikeDimensions(*m_buffer, user_buffer, 
-                           *m_dimension_map,
-                           m_buffer_position, user_buffer.getNumPoints(), 
-                           points_to_copy);
+        PointBuffer::copyLikeDimensions(*m_buffer, user_buffer,
+                                        *m_dimension_map,
+                                        m_buffer_position, user_buffer.getNumPoints(),
+                                        points_to_copy);
 
         // Update the buffers regarding how full/empty they are
         m_buffer_position += points_to_copy;
@@ -558,13 +558,14 @@ boost::uint32_t Iterator::readBufferImpl(PointBuffer& user_buffer)
         num_loops++;
         getReader().log()->get(logDEBUG) << "User buffer filling loop, iteration " << num_loops << std::endl;
     }
- 
+
     return user_buffer.getNumPoints();
 }
 
 
 
-}} // pdal.drivers.pgpointcloud.iterators.sequential.Iterator
+}
+} // pdal.drivers.pgpointcloud.iterators.sequential.Iterator
 
 } // pgpointcloud
 } // drivers

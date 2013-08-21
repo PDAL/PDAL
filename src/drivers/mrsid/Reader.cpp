@@ -329,7 +329,7 @@ boost::property_tree::ptree Reader::toPTree() const
 std::vector<Dimension> Reader::getDefaultDimensions()
 {
     std::vector<Dimension> output;
-        
+
     Dimension x("X", dimension::Float, 8);
     x.setUUID("8c54ff0c-234f-43a2-8959-d9681ad1dea3");
     x.setNamespace(getName());
@@ -389,7 +389,7 @@ std::vector<Dimension> Reader::getDefaultDimensions()
     return_no.setUUID("e38cc121-8d26-482a-8920-c5599b2cdd19");
     return_no.setNamespace(getName());
     output.push_back(return_no);
-    
+
     Dimension scan_angle("ScanAngleRank", dimension::UnsignedInteger, 1);
     scan_angle.setUUID("5d816875-10a5-4048-ad9d-fd3b8d065a6a");
     scan_angle.setNamespace(getName());
@@ -404,12 +404,12 @@ std::vector<Dimension> Reader::getDefaultDimensions()
     ptsource.setUUID("be6e71af-b2f7-4107-a902-96e2fb71343f");
     ptsource.setNamespace(getName());
     output.push_back(ptsource);
-    
+
     Dimension userdata("UserData", dimension::UnsignedInteger, 1);
     userdata.setUUID("551ca4be-cb6e-47a4-93a9-e403e9a06a8a");
     userdata.setNamespace(getName());
     output.push_back(userdata);
-    
+
     return output;
 }
 

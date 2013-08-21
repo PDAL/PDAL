@@ -42,13 +42,13 @@ namespace pdal
 std::ostream& operator<<(std::ostream& ostr, const StageInfo& info)
 {
     // boost::property_tree::ptree tree = stage.toPTree();
-    // 
+    //
     // boost::property_tree::write_json(ostr, tree);
 
     return ostr;
 }
 
-StageInfo::StageInfo(std::string const& name, std::string const& description) 
+StageInfo::StageInfo(std::string const& name, std::string const& description)
     : m_name(name), m_description(description) {}
 
 /// copy constructor

@@ -110,7 +110,7 @@ std::istream& FilenameStreamFactory::allocate()
         oss << "Unable to open file '" << m_filename <<"'. Check access permissions and/or directory location";
         throw pdal_error(oss.str());
     }
-    
+
     m_streams.insert(s);
     return *s;
 }

@@ -75,8 +75,8 @@ double Utils::random(double minimum, double maximum)
     return t;
 }
 
-void* Utils::registerPlugin( void* stageFactoryPtr, 
-                            std::string const& filename, 
+void* Utils::registerPlugin(void* stageFactoryPtr,
+                            std::string const& filename,
                             std::string const& registerMethod,
                             std::string const& versionMethod)
 {
@@ -84,9 +84,9 @@ void* Utils::registerPlugin( void* stageFactoryPtr,
     void* pVersion;
 
     pVersion = Utils::getDLLSymbol(filename, versionMethod);
-    
-    int plugins_version =   ((int (*)()) pVersion)();
-    
+
+    int plugins_version = ((int (*)()) pVersion)();
+
     if (plugins_version != PDAL_PLUGIN_VERSION)
     {
         std::ostringstream oss;
@@ -94,18 +94,19 @@ void* Utils::registerPlugin( void* stageFactoryPtr,
         throw pdal_error(oss.str());
     }
 
-    
+
     pRegister = Utils::getDLLSymbol(filename, registerMethod);
     if (pRegister != NULL)
     {
         ((void (*)(void*)) pRegister)(stageFactoryPtr);
-    } else
+    }
+    else
     {
         std::ostringstream oss;
         oss << "Unable to register shared library '" << filename << "' with method name '" << registerMethod << "'";
         throw pdal_error(oss.str());
     }
-    
+
     return pRegister;
 }
 
@@ -351,7 +352,7 @@ std::string Utils::base64_encode(std::vector<boost::uint8_t> const& bytes)
         René Nyffenegger rene.nyffenegger@adp-gmbh.ch
 
     */
-        
+
     if (!bytes.size())
     {
         return std::string("");
@@ -519,9 +520,9 @@ int Utils::portable_pclose(FILE* fp)
 // This problem shows up on mpg's Ubuntu 11.4 machine (gcc 4.5.2, boost 1.47.0)
 // as well as on Hobu's machine.
 
-// Boost's unit test system has a flag on the execution monitor that catches 
-// all signals --  p_catch_system_errors, and throws unittest errors when it sees 
-// them. We can use --catch_system_errors=no as part of the invocation, or manually 
+// Boost's unit test system has a flag on the execution monitor that catches
+// all signals --  p_catch_system_errors, and throws unittest errors when it sees
+// them. We can use --catch_system_errors=no as part of the invocation, or manually
 // turn them off in the execution monitor. -- hobu 7/12/2012
 //  boost::unit_test::unit_test_monitor.p_catch_system_errors.set (false);
 // #include <boost/test/unit_test_monitor.hpp>

@@ -96,8 +96,8 @@ Writer::Writer(Stage& prevStage, const Options& options)
 
     m_base_table_boundary_column = getDefaultedOption<std::string>("base_table_boundary_column");
     m_base_table_boundary_wkt = getDefaultedOption<std::string>("base_table_boundary_wkt");
-    m_chunkCount = getOptions().getValueOrDefault<boost::uint32_t>("blob_chunk_count", 16);    
-    m_streamChunks = getOptions().getValueOrDefault<bool>("stream_chunks", false);  
+    m_chunkCount = getOptions().getValueOrDefault<boost::uint32_t>("blob_chunk_count", 16);
+    m_streamChunks = getOptions().getValueOrDefault<bool>("stream_chunks", false);
 
 }
 
@@ -231,7 +231,7 @@ Options Writer::getDefaultOptions()
                                                     the cumulated bounds of all of the block data are used.");
 
     Option pc_id("pc_id", -1, "Point Cloud id");
-    
+
     Option pack("pack_ignored_fields", true, "Pack ignored dimensions out of the data buffer that is written");
     Option do_trace("do_trace", false, "turn on server-side binds/waits tracing -- needs ALTER SESSION privs");
     Option stream_chunks("stream_chunks", false, "Stream block data chunk-wise by the DB's chunk size rather than as an entire blob");
@@ -263,7 +263,7 @@ Options Writer::getDefaultOptions()
     options.add(do_trace);
     options.add(stream_chunks);
     options.add(blob_chunk_count);
-    
+
     return options;
 }
 
@@ -376,7 +376,7 @@ void Writer::CreateBlockIndex()
     index_name.str("");
     index_name <<  block_table_name <<"_objectid_idx";
     name = index_name.str().substr(0,29);
-    oss << "ALTER TABLE "<< block_table_name <<  " ADD CONSTRAINT "<< name <<  
+    oss << "ALTER TABLE "<< block_table_name <<  " ADD CONSTRAINT "<< name <<
         "  PRIMARY KEY (OBJ_ID, BLK_ID) ENABLE VALIDATE";
     // oss << "CREATE INDEX " << name <<" on "
     //     << block_table_name << "(OBJ_ID,BLK_ID) COMPRESS 2" ;
@@ -686,14 +686,14 @@ void Writer::CreatePCEntry(Schema const& buffer_schema)
 
     boost::uint32_t precision = getDefaultedOption<boost::uint32_t>("stream_output_precision");
     boost::uint64_t capacity = getDefaultedOption<boost::uint64_t>("capacity");
-    
+
     if (capacity == 0)
     {
         capacity = getPrevStage().getNumPoints();
-        if (capacity == 0 )
+        if (capacity == 0)
             throw pdal_error("blk_capacity for drivers.oci.writer cannot be 0!");
     }
-    
+
 
 
     std::ostringstream oss;
@@ -845,18 +845,18 @@ void Writer::CreatePCEntry(Schema const& buffer_schema)
         log()->get(logDEBUG3) << "Packing ignored dimension from PointBuffer " << std::endl;
 
         boost::uint32_t position(0);
-        
+
         pdal::Schema clean_schema;
         schema::index_by_index::size_type i(0);
         for (i = 0; i < idx.size(); ++i)
         {
             if (! idx[i].isIgnored())
             {
-                
+
                 Dimension d(idx[i]);
                 d.setPosition(position);
-                
-                // Wipe off parent/child relationships if we're ignoring 
+
+                // Wipe off parent/child relationships if we're ignoring
                 // same-named dimensions
                 d.setParent(boost::uuids::nil_uuid());
                 clean_schema.appendDimension(d);
@@ -864,11 +864,12 @@ void Writer::CreatePCEntry(Schema const& buffer_schema)
             }
         }
         schema_data = pdal::Schema::to_xml(clean_schema);
-            
-    } else
+
+    }
+    else
     {
         schema_data = pdal::Schema::to_xml(buffer_schema);
-        
+
     }
 
     char* schema = (char*) malloc(schema_data.size() * sizeof(char) + 1);
@@ -975,29 +976,29 @@ void Writer::writeBufferBegin(PointBuffer const& data)
         oss << "BEGIN " << std::endl;
         oss << "DBMS_SESSION.set_sql_trace(sql_trace => TRUE);" << std::endl;
         oss << "DBMS_SESSION.SESSION_TRACE_ENABLE(waits => TRUE, binds => TRUE);" << std::endl;
-        oss << "END;" << std::endl; 
+        oss << "END;" << std::endl;
         run(oss);
         oss.str("");
-        
+
         // oss << "alter session set events ‘10046 trace name context forever, level 12’" << std::endl;
         // run(oss);
         // oss.str("");
-        
+
         oss << "SELECT VALUE FROM V$DIAG_INFO WHERE NAME = 'Default Trace File'";
         Statement statement = Statement(m_connection->CreateStatement(oss.str().c_str()));
         int trace_table_name_length = 1024;
         char* trace_table_name = (char*) malloc(sizeof(char*) * trace_table_name_length);
-        trace_table_name[trace_table_name_length-1] = '\0'; //added trailing null to fix ORA-01480        
+        trace_table_name[trace_table_name_length-1] = '\0'; //added trailing null to fix ORA-01480
         statement->Define(trace_table_name, trace_table_name_length);
         statement->Execute();
         // statement->Fetch();
         log()->get(logDEBUG) << "Trace location name:  " << trace_table_name << std::endl;
-        
+
 
     }
     CreatePCEntry(data.getSchema());
     m_trigger_name = ShutOff_SDO_PC_Trigger();
-    
+
     m_sdo_pc_is_initialized = true;
 
     return;
@@ -1018,14 +1019,14 @@ void Writer::writeBegin(boost::uint64_t)
     }
 
     RunFileSQL("pre_sql");
-    if (!m_bHaveOutputTable )
+    if (!m_bHaveOutputTable)
     {
         CreateBlockTable();
     }
 
     if (getOptions().getValueOrDefault<bool>("create_index", true) && !m_bHaveOutputTable)
         m_doCreateIndex = true;
-    
+
     return;
 }
 
@@ -1039,7 +1040,7 @@ void Writer::writeEnd(boost::uint64_t)
         CreateSDOEntry();
         CreateBlockIndex();
     }
-    
+
 
     // Update extent of SDO_PC entry
     UpdatePCExtent();
@@ -1105,7 +1106,7 @@ pdal::Bounds<double> Writer::CalculateBounds(PointBuffer const& buffer)
 
 
     bool first = true;
-    Vector<double> v(0.0, 0.0, 0.0);    
+    Vector<double> v(0.0, 0.0, 0.0);
     for (boost::uint32_t pointIndex=0; pointIndex<buffer.getNumPoints(); pointIndex++)
     {
         const boost::int32_t xi = buffer.getField<boost::int32_t>(*dimX, pointIndex);
@@ -1140,9 +1141,9 @@ void Writer::PackPointData(PointBuffer const& buffer,
                            boost::uint32_t& schema_byte_size)
 
 {
-    // Creates a new buffer that has the ignored dimensions removed from 
+    // Creates a new buffer that has the ignored dimensions removed from
     // it.
-    
+
     schema::index_by_index const& idx = buffer.getSchema().getDimensions().get<schema::index>();
 
     schema_byte_size = 0;
@@ -1152,14 +1153,14 @@ void Writer::PackPointData(PointBuffer const& buffer,
         if (! idx[i].isIgnored())
             schema_byte_size = schema_byte_size+idx[i].getByteSize();
     }
-    
+
     log()->get(logDEBUG) << "Packed schema byte size " << schema_byte_size;
 
     point_data_len = buffer.getNumPoints() * schema_byte_size;
     *point_data = new boost::uint8_t[point_data_len];
-    
+
     boost::uint8_t* current_position = *point_data;
-    
+
     for (boost::uint32_t i = 0; i < buffer.getNumPoints(); ++i)
     {
         boost::uint8_t* data = buffer.getData(i);
@@ -1171,9 +1172,9 @@ void Writer::PackPointData(PointBuffer const& buffer,
                 current_position = current_position+idx[d].getByteSize();
             }
             data = data + idx[d].getByteSize();
-                
+
         }
-    }    
+    }
 }
 
 bool Writer::WriteBlock(PointBuffer const& buffer)
@@ -1206,7 +1207,7 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
         oss << ", :9";
 
     oss <<")";
-    
+
     Statement statement = Statement(m_connection->CreateStatement(oss.str().c_str()));
 
     // :1
@@ -1232,7 +1233,7 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     boost::uint8_t* point_data;
     boost::uint32_t point_data_length;
     boost::uint32_t schema_byte_size;
-    
+
     bool pack = getOptions().getValueOrDefault<bool>("pack_ignored_fields", true);
     if (pack)
         PackPointData(buffer, &point_data, point_data_length, schema_byte_size);
@@ -1242,16 +1243,17 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
         point_data_length = buffer.getSchema().getByteSize() * buffer.getNumPoints();
     }
 
-    OCILobLocator* locator; 
+    OCILobLocator* locator;
     if (m_streamChunks)
     {
         statement->WriteBlob(&locator, (void*) point_data, point_data_length, m_chunkCount);
         statement->BindBlob(&locator);
-    } else
+    }
+    else
     {
         statement->Bind((char*)point_data,(long)(point_data_length));
     }
-    
+
     // :5
     long long_gtype = static_cast<long>(m_gtype);
     statement->Bind(&long_gtype);
@@ -1284,7 +1286,7 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     if (m_pcExtent.empty())
         m_pcExtent = bounds;
     m_pcExtent.grow(bounds);
-    
+
     SetOrdinates(statement, sdo_ordinates, bounds);
     statement->Bind(&sdo_ordinates, m_connection->GetOrdinateType());
 
@@ -1294,7 +1296,7 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
         long long_partition_id = static_cast<long>(m_block_table_partition_value);
         statement->Bind(&long_partition_id);
     }
-    
+
     try
     {
         statement->Execute();
@@ -1308,10 +1310,10 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
 
     oss.str("");
 
-    
+
     if (m_streamChunks)
     {
-        // We don't use a locator unless we're stream-writing the data.    
+        // We don't use a locator unless we're stream-writing the data.
         OWStatement::Free(&locator, 1);
     }
 

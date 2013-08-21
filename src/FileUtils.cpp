@@ -51,7 +51,7 @@ std::istream* FileUtils::openFile(std::string const& filename, bool asBinary)
 {
     if (boost::algorithm::ifind_first(filename, "STDIN"))
         return &std::cin;
-        
+
     if (!FileUtils::fileExists(filename))
         throw pdal_error("File not found: " + filename);
 

@@ -66,7 +66,7 @@ Debug::Debug(bool isDebug, pdal::LogPtr log)
     }
 
 
-#if ((GDAL_VERSION_MAJOR == 1 && GDAL_VERSION_MINOR >= 9) || (GDAL_VERSION_MAJOR > 1)) 
+#if ((GDAL_VERSION_MAJOR == 1 && GDAL_VERSION_MINOR >= 9) || (GDAL_VERSION_MAJOR > 1))
     CPLPushErrorHandlerEx(&Debug::trampoline, this);
 #else
     CPLPushErrorHandler(&Debug::trampoline);
@@ -125,7 +125,7 @@ GlobalDebug::GlobalDebug()
     m_gdal_callback = boost::bind(&GlobalDebug::log, this, _1, _2, _3);
 
 
-#if ((GDAL_VERSION_MAJOR == 1 && GDAL_VERSION_MINOR >= 9) || (GDAL_VERSION_MAJOR > 1)) 
+#if ((GDAL_VERSION_MAJOR == 1 && GDAL_VERSION_MINOR >= 9) || (GDAL_VERSION_MAJOR > 1))
     CPLPushErrorHandlerEx(&GlobalDebug::trampoline, this);
 #else
     CPLPushErrorHandler(&GlobalDebug::trampoline);
@@ -146,19 +146,19 @@ void GlobalDebug::log(::CPLErr code, int num, char const* msg)
     {
         oss << "Global GDAL debug: " << msg;
         std::vector<LogPtr>::const_iterator i;
-        
+
         std::map<std::ostream*, LogPtr> streams;
         for (i = m_logs.begin(); i != m_logs.end(); ++i)
         {
             streams.insert(std::pair<std::ostream*, LogPtr>((*i)->getLogStream(), *i));
         }
-        
+
         std::map<std::ostream*, LogPtr>::const_iterator t;
         for (t = streams.begin(); t != streams.end(); t++)
         {
             LogPtr l = t->second;
             if (l->getLevel() > logDEBUG)
-                l->get(logDEBUG) << oss.str() << std::endl;            
+                l->get(logDEBUG) << oss.str() << std::endl;
         }
 
         return;
