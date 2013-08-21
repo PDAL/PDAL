@@ -249,7 +249,7 @@ endif(WIN32)
 
 set(PDAL_EMBED_BOOST TRUE CACHE BOOL "use embedded rather than system boost")
 if (NOT PDAL_EMBED_BOOST)
-  find_package(Boost 1.48 COMPONENTS program_options thread iostreams filesystem system unit_test_framework random)
+  find_package(Boost 1.53 COMPONENTS program_options thread iostreams filesystem system unit_test_framework random)
 endif()
 
 if(Boost_FOUND)
