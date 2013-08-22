@@ -151,12 +151,12 @@ std::string GetFullVersionString()
        << LASZIP_VERSION_MINOR << "."
        << LASZIP_VERSION_REVISION;
 #endif
-    
+
     if (IsEmbeddedBoost())
         os << " Embed ";
     else
-        os << " System "; 
-    
+        os << " System ";
+
     std::string info(os.str());
     os.str("");
     os << "PDAL " << PDAL_VERSION_STRING;
@@ -164,8 +164,8 @@ std::string GetFullVersionString()
     std::ostringstream revs;
     revs << g_GIT_SHA1;
 
-    os << " (" << revs.str().substr(0, 6) <<")"; 
-    
+    os << " (" << revs.str().substr(0, 6) <<")";
+
     if (!info.empty())
     {
         os << " with" << info;

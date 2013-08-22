@@ -68,29 +68,30 @@ Writer::Writer(Stage& prevStage, const Options& options)
     return;
 }
 
-void Writer::setOptions() 
+void Writer::setOptions()
 {
     setGeneratingSoftware(getOptions().getValueOrDefault<std::string>("software_id",
-                LasHeader::SoftwareIdentifier));
+                          LasHeader::SoftwareIdentifier));
 
     m_lasHeader.SetCreationDOY((boost::uint16_t)getOptions().getValueOrDefault<boost::uint32_t>("creation_doy", 0));
     m_lasHeader.SetCreationYear((boost::uint16_t)getOptions().getValueOrDefault<boost::uint32_t>("creation_year", 0));
-    m_lasHeader.setPointFormat(static_cast<PointFormat>(getOptions().getValueOrDefault<boost::uint32_t>("format", 3)));        
+    m_lasHeader.setPointFormat(static_cast<PointFormat>(getOptions().getValueOrDefault<boost::uint32_t>("format", 3)));
     m_lasHeader.SetSystemId(getOptions().getValueOrDefault<std::string>("system_id",
-                LasHeader::SystemIdentifier));
+                            LasHeader::SystemIdentifier));
 
     m_lasHeader.SetHeaderPadding(getOptions().getValueOrDefault<boost::uint32_t>("header_padding", 0));
     if (getOptions().hasOption("a_srs"))
     {
         setSpatialReference(getOptions().getValueOrDefault<std::string>("a_srs",""));
-    } 
+    }
     m_lasHeader.SetCompressed(getOptions().getValueOrDefault("compression", false));
-    m_lasHeader.SetFileSourceId(getOptions().getValueOrDefault<boost::uint16_t>("filesource_id", 0));   
+    m_lasHeader.SetFileSourceId(getOptions().getValueOrDefault<boost::uint16_t>("filesource_id", 0));
     try
     {
         boost::uint16_t record_length = getOptions().getValueOrThrow<boost::uint16_t>("datarecordlength");
         m_lasHeader.SetDataRecordLength(record_length);
-    } catch (pdal::option_not_found&) {};
+    }
+    catch (pdal::option_not_found&) {};
 }
 
 Writer::Writer(Stage& prevStage, std::ostream* ostream)
@@ -203,7 +204,7 @@ void Writer::writeBegin(boost::uint64_t /*targetNumPointsToWrite*/)
 
 void Writer::setVLRsFromMetadata(LasHeader& header, Metadata const& metadata, Options const& opts)
 {
-    
+
 
     std::vector<pdal::Option> options = opts.getOptions("vlr");
     std::vector<pdal::Option>::const_iterator o;
@@ -212,11 +213,11 @@ void Writer::setVLRsFromMetadata(LasHeader& header, Metadata const& metadata, Op
     for (o = options.begin(); o != options.end(); ++o)
     {
         if (!boost::algorithm::istarts_with(o->getName(), "vlr"))
-        // if (!boost::algorithm::iequals(o->getName(), "VLR"))
+            // if (!boost::algorithm::iequals(o->getName(), "VLR"))
             continue;
-        
+
         boost::optional<pdal::Options const&> vo = o->getOptions();
-        if (!vo) 
+        if (!vo)
             throw pdal_error("VLR option given, but no sub options available to specify which VLRs to copy!");
 
         if (boost::algorithm::iequals(o->getValue<std::string>(), "FORWARD"))
@@ -231,46 +232,46 @@ void Writer::setVLRsFromMetadata(LasHeader& header, Metadata const& metadata, Op
                     boost::uint16_t metadata_record_id = m->second.get<boost::uint16_t>("metadata.record_id.value");
                     std::string option_user_id = vo->getOption("user_id").getValue<std::string>();
                     std::string metadata_user_id = m->second.get<std::string>("metadata.user_id.value");
-                    
+
                     if (option_record_id == metadata_record_id &&
-                        option_user_id == metadata_user_id)
+                            option_user_id == metadata_user_id)
                     {
                         std::string vlr_data = m->second.get<std::string>("value");
                         std::vector<boost::uint8_t> data = Utils::base64_decode(vlr_data);
                         std::string description = m->second.get<std::string>("metadata.description.value");
-                        
+
                         // In case the VLR is 0 in size
                         boost::uint8_t* bytes = 0;
                         if (data.size() > 0)
                             bytes = &data[0];
 
-                        pdal::drivers::las::VariableLengthRecord vlr(   0xAABB, 
-                                                                        metadata_user_id, 
-                                                                        metadata_record_id, 
-                                                                        description, 
-                                                                        bytes, 
-                                                                        static_cast<boost::uint16_t>(data.size()));
+                        pdal::drivers::las::VariableLengthRecord vlr(0xAABB,
+                                metadata_user_id,
+                                metadata_record_id,
+                                description,
+                                bytes,
+                                static_cast<boost::uint16_t>(data.size()));
                         header.getVLRs().add(vlr);
-                        log()->get(logDEBUG) << "Forwarding VLR from metadata with user_id='" << option_user_id 
-                                             << "' and record_id='" << option_record_id << "'"<< " with size: " << data.size()<< std::endl;                    
+                        log()->get(logDEBUG) << "Forwarding VLR from metadata with user_id='" << option_user_id
+                                             << "' and record_id='" << option_record_id << "'"<< " with size: " << data.size()<< std::endl;
                     }
                 }
             }
         }
-        else 
+        else
         {
             boost::uint16_t record_id = vo->getValueOrDefault<boost::uint16_t>("record_id", 4321);
             std::string user_id = vo->getValueOrDefault<std::string>("user_id", "PDALUSERID");
             std::string description = vo->getValueOrDefault<std::string>("description", "PDAL default VLR description");
             std::vector<boost::uint8_t> data = Utils::base64_decode(o->getValue<std::string>());
-            pdal::drivers::las::VariableLengthRecord vlr(   0xAABB, 
-                                                            user_id, 
-                                                            record_id, 
-                                                            description, 
-                                                            &data[0], 
-                                                            static_cast<boost::uint16_t>(data.size()));
-            header.getVLRs().add(vlr);            
-            log()->get(logDEBUG) << "Setting VLR from metadata with user_id='" << user_id 
+            pdal::drivers::las::VariableLengthRecord vlr(0xAABB,
+                    user_id,
+                    record_id,
+                    description,
+                    &data[0],
+                    static_cast<boost::uint16_t>(data.size()));
+            header.getVLRs().add(vlr);
+            log()->get(logDEBUG) << "Setting VLR from metadata with user_id='" << user_id
                                  << "' and record_id='" << record_id << "'"<< " with size: " << data.size() << std::endl;
         }
     }
@@ -313,10 +314,14 @@ bool Writer::doForwardThisMetadata(std::string const& name) const
     Option const* doMetadata(0);
     try
     {
-        
+
         doMetadata = &options.getOption("metadata");
-    } catch (pdal::option_not_found&) { return false; }
-    
+    }
+    catch (pdal::option_not_found&)
+    {
+        return false;
+    }
+
     boost::optional<Options const&> meta = doMetadata->getOptions();
     try
     {
@@ -325,15 +330,23 @@ bool Writer::doForwardThisMetadata(std::string const& name) const
             try
             {
                 meta->getOption(name);
-            } catch (pdal::option_not_found&) { return false;}
-            
+            }
+            catch (pdal::option_not_found&)
+            {
+                return false;
+            }
+
             std::string value = meta->getOption(name).getValue<std::string>();
             if (boost::algorithm::iequals(value,"FORWARD"))
                 return true;
             return false;
         }
-    } catch (pdal::option_not_found&) { return false; }
-    
+    }
+    catch (pdal::option_not_found&)
+    {
+        return false;
+    }
+
     return false;
 }
 
@@ -349,53 +362,55 @@ void Writer::writeBufferBegin(PointBuffer const& data)
     const Dimension& dimY = schema.getDimension("Y");
     const Dimension& dimZ = schema.getDimension("Z");
 
-    m_lasHeader.SetScale(   dimX.getNumericScale(), 
-                            dimY.getNumericScale(), 
-                            dimZ.getNumericScale());
-    m_lasHeader.SetOffset(  dimX.getNumericOffset(), 
-                            dimY.getNumericOffset(), 
-                            dimZ.getNumericOffset());
+    m_lasHeader.SetScale(dimX.getNumericScale(),
+                         dimY.getNumericScale(),
+                         dimZ.getNumericScale());
+    m_lasHeader.SetOffset(dimX.getNumericOffset(),
+                          dimY.getNumericOffset(),
+                          dimZ.getNumericOffset());
 
     m_lasHeader.setSpatialReference(getSpatialReference());
-    
+
     bool useMetadata;
     try
     {
         getOptions().getOption("metadata");
         useMetadata = true;
-    } catch (pdal::option_not_found&)
+    }
+    catch (pdal::option_not_found&)
     {
         useMetadata = false;
     }
-    
+
     if (useMetadata)
     {
         pdal::Metadata m;
-        
+
         try
         {
             m = getPrevStage().collectMetadata().getMetadata("drivers.las.reader");
-        } catch (pdal::metadata_not_found const&)
+        }
+        catch (pdal::metadata_not_found const&)
         {
-            // If there's nothing already prepopulated with the las.reader's metadata, we're 
+            // If there's nothing already prepopulated with the las.reader's metadata, we're
             // just going to take what ever was set in the options (if there was any)
         }
-        
-        // Default to PointFormat 3 if not forwarded from a previous metadata 
+
+        // Default to PointFormat 3 if not forwarded from a previous metadata
         // or given in a metadata option
         boost::uint32_t v = getMetadataOption<boost::uint32_t>(getOptions(), m, "dataformat_id", 3);
         setPointFormat(static_cast<PointFormat>(v));
-        log()->get(logDEBUG) << "Setting point format to " 
-                             << v 
+        log()->get(logDEBUG) << "Setting point format to "
+                             << v
                              << " from metadata " << std::endl;
-                         
+
 
         boost::uint32_t minor = getMetadataOption<boost::uint32_t>(getOptions(), m, "minor_version", 2);
 
         setFormatVersion(1, static_cast<boost::uint8_t>(minor));
-        log()->get(logDEBUG) << "Setting version to " 
-            << "1." << minor
-            << " from metadata " << std::endl;
+        log()->get(logDEBUG) << "Setting version to "
+                             << "1." << minor
+                             << " from metadata " << std::endl;
 
 
         std::time_t now;
@@ -413,54 +428,54 @@ void Writer::writeBufferBegin(PointBuffer const& data)
         day = getMetadataOption<boost::uint32_t>(getOptions(), m, "creation_doy", day);
 
         setDate(static_cast<boost::uint16_t>(day), static_cast<boost::uint16_t>(year));
-        log()->get(logDEBUG) << "Setting date to format " 
-                           << day << "/"
-                           << year 
-                           << " from metadata " << std::endl;
+        log()->get(logDEBUG) << "Setting date to format "
+                             << day << "/"
+                             << year
+                             << " from metadata " << std::endl;
 
-        std::string software_id = getMetadataOption<std::string>(   getOptions(), 
-                                                                    m, 
-                                                                    "software_id", 
-                                                                    pdal::drivers::las::LasHeader::SoftwareIdentifier);
+        std::string software_id = getMetadataOption<std::string>(getOptions(),
+                                  m,
+                                  "software_id",
+                                  pdal::drivers::las::LasHeader::SoftwareIdentifier);
         setGeneratingSoftware(software_id);
-        log()->get(logDEBUG) << "Setting generating software to '" 
-                               << software_id
-                               << "' from metadata " << std::endl;
+        log()->get(logDEBUG) << "Setting generating software to '"
+                             << software_id
+                             << "' from metadata " << std::endl;
 
-        std::string system_id = getMetadataOption<std::string>( getOptions(), 
-                                                                m, 
-                                                                "system_id", 
-                                                                pdal::drivers::las::LasHeader::SystemIdentifier);
+        std::string system_id = getMetadataOption<std::string>(getOptions(),
+                                m,
+                                "system_id",
+                                pdal::drivers::las::LasHeader::SystemIdentifier);
         setSystemIdentifier(system_id);
-        log()->get(logDEBUG) << "Setting system identifier to " 
-                           << system_id
-                           << " from metadata " << std::endl;
+        log()->get(logDEBUG) << "Setting system identifier to "
+                             << system_id
+                             << " from metadata " << std::endl;
 
-        boost::uuids::uuid project_id = getMetadataOption<boost::uuids::uuid>( getOptions(), 
-                                                                m, 
-                                                                "project_id", 
-                                                                boost::uuids::nil_uuid());
+        boost::uuids::uuid project_id = getMetadataOption<boost::uuids::uuid>(getOptions(),
+                                        m,
+                                        "project_id",
+                                        boost::uuids::nil_uuid());
         m_lasHeader.SetProjectId(project_id);
-        log()->get(logDEBUG) << "Setting project_id to " 
-                           << project_id
-                           << " from metadata " << std::endl;
+        log()->get(logDEBUG) << "Setting project_id to "
+                             << project_id
+                             << " from metadata " << std::endl;
 
-        boost::uint16_t reserved = getMetadataOption<boost::uint16_t>( getOptions(), 
-                                                                m, 
-                                                                "global_encoding", 
-                                                                0);
+        boost::uint16_t reserved = getMetadataOption<boost::uint16_t>(getOptions(),
+                                   m,
+                                   "global_encoding",
+                                   0);
         m_lasHeader.SetReserved(reserved);
-        log()->get(logDEBUG) << "Setting reserved to " 
+        log()->get(logDEBUG) << "Setting reserved to "
                              << reserved
                              << " from metadata " << std::endl;
 
 
-        boost::uint16_t filesource_id = getMetadataOption<boost::uint16_t>( getOptions(), 
-                                                                m, 
-                                                                "filesource_id", 
-                                                                0);
+        boost::uint16_t filesource_id = getMetadataOption<boost::uint16_t>(getOptions(),
+                                        m,
+                                        "filesource_id",
+                                        0);
         m_lasHeader.SetFileSourceId(filesource_id);
-        log()->get(logDEBUG) << "Setting file source id to " 
+        log()->get(logDEBUG) << "Setting file source id to "
                              << filesource_id
                              << " from metadata " << std::endl;
 
@@ -468,16 +483,17 @@ void Writer::writeBufferBegin(PointBuffer const& data)
         {
 
             boost::optional<pdal::Options const&> opts = \
-                            getOptions().getOption("metadata").getOptions();
+                    getOptions().getOption("metadata").getOptions();
             if (opts)
                 setVLRsFromMetadata(m_lasHeader, m, *opts);
-        } catch (pdal::option_not_found&) {  }
+        }
+        catch (pdal::option_not_found&) {  }
 
 
     } // useMetadata
 
-    LasHeaderWriter lasHeaderWriter(m_lasHeader, 
-                                    m_streamManager.ostream(), 
+    LasHeaderWriter lasHeaderWriter(m_lasHeader,
+                                    m_streamManager.ostream(),
                                     m_streamOffset);
 
     lasHeaderWriter.write();
@@ -549,11 +565,11 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& pointBuffer)
     boost::uint32_t numValidPoints = 0;
 
     boost::uint8_t buf[64]; // BUG: fixed size
-    
+
     bool hasColor = Support::hasColor(pointFormat);
     bool hasTime = Support::hasTime(pointFormat);
     boost::uint16_t record_length = m_lasHeader.GetDataRecordLength();
-    
+
     for (boost::uint32_t pointIndex=0; pointIndex<pointBuffer.getNumPoints(); pointIndex++)
     {
         boost::uint8_t* p = buf;
@@ -578,12 +594,12 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& pointBuffer)
                 boost::uint8_t intensity = pointBuffer.getField<boost::uint8_t>(*dimensions.Intensity, pointIndex);
                 Utils::write_field<boost::uint16_t>(p, intensity);
             }
-        } 
-        else 
-        {
-            Utils::write_field<boost::uint16_t>(p, 0);            
         }
-        
+        else
+        {
+            Utils::write_field<boost::uint16_t>(p, 0);
+        }
+
         boost::uint8_t returnNumber(0);
         if (dimensions.ReturnNumber)
             returnNumber = pointBuffer.getField<boost::uint8_t>(*dimensions.ReturnNumber, pointIndex);
@@ -607,40 +623,40 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& pointBuffer)
         {
             boost::uint8_t const& classification = pointBuffer.getField<boost::uint8_t>(*dimensions.Classification, pointIndex);
             Utils::write_field<boost::uint8_t>(p, classification);
-        } 
-        else 
+        }
+        else
         {
-            Utils::write_field<boost::uint8_t>(p, 0);            
+            Utils::write_field<boost::uint8_t>(p, 0);
         }
 
         if (dimensions.ScanAngleRank)
         {
             boost::int8_t const& scanAngleRank = pointBuffer.getField<boost::int8_t>(*dimensions.ScanAngleRank, pointIndex);
             Utils::write_field<boost::int8_t>(p, scanAngleRank);
-        } 
-        else 
+        }
+        else
         {
-            Utils::write_field<boost::int8_t>(p, 0);            
+            Utils::write_field<boost::int8_t>(p, 0);
         }
 
         if (dimensions.UserData)
         {
             boost::uint8_t const& userData = pointBuffer.getField<boost::uint8_t>(*dimensions.UserData, pointIndex);
             Utils::write_field<boost::uint8_t>(p, userData);
-        } 
-        else 
+        }
+        else
         {
-            Utils::write_field<boost::uint8_t>(p, 0);            
+            Utils::write_field<boost::uint8_t>(p, 0);
         }
 
         if (dimensions.PointSourceId)
         {
             boost::uint16_t const& pointSourceId = pointBuffer.getField<boost::uint16_t>(*dimensions.PointSourceId, pointIndex);
             Utils::write_field<boost::uint16_t>(p, pointSourceId);
-        } 
-        else 
+        }
+        else
         {
-            Utils::write_field<boost::uint16_t>(p, 0);            
+            Utils::write_field<boost::uint16_t>(p, 0);
         }
 
         if (hasTime)
@@ -649,10 +665,10 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& pointBuffer)
             {
                 double const& t = pointBuffer.getField<double>(*dimensions.Time, pointIndex);
                 Utils::write_field<double>(p, t);
-            } 
-            else 
+            }
+            else
             {
-                Utils::write_field<double>(p, 0.0);            
+                Utils::write_field<double>(p, 0.0);
             }
         }
 
@@ -663,30 +679,30 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& pointBuffer)
             {
                 boost::uint16_t const& red = pointBuffer.getField<boost::uint16_t>(*dimensions.Red, pointIndex);
                 Utils::write_field<boost::uint16_t>(p, red);
-            } 
-            else 
+            }
+            else
             {
-                Utils::write_field<boost::uint16_t>(p, 0);            
+                Utils::write_field<boost::uint16_t>(p, 0);
             }
 
             if (dimensions.Green)
             {
                 boost::uint16_t const& green = pointBuffer.getField<boost::uint16_t>(*dimensions.Green, pointIndex);
                 Utils::write_field<boost::uint16_t>(p, green);
-            } 
-            else 
+            }
+            else
             {
-                Utils::write_field<boost::uint16_t>(p, 0);            
+                Utils::write_field<boost::uint16_t>(p, 0);
             }
 
             if (dimensions.Blue)
             {
                 boost::uint16_t const& blue = pointBuffer.getField<boost::uint16_t>(*dimensions.Blue, pointIndex);
                 Utils::write_field<boost::uint16_t>(p, blue);
-            } 
-            else 
+            }
+            else
             {
-                Utils::write_field<boost::uint16_t>(p, 0);            
+                Utils::write_field<boost::uint16_t>(p, 0);
             }
         }
 

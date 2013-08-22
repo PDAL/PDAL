@@ -277,17 +277,17 @@ bool SpatialReference::isGeographic() const
 #ifdef PDAL_SRS_ENABLED
 
     OGRSpatialReferenceH current = OSRNewSpatialReference(getWKT(eCompoundOK, false).c_str());
-    
+
     int isGeog = OSRIsGeographic(current);
     bool output(false);
-    
+
     if (isGeog == 0)
         output = false;
     else
         output = true;
-    
+
     OSRDestroySpatialReference(current);
-    
+
     return output;
 #else
     throw std::runtime_error("GDAL is not available, SpatialReference could not determine if isGeographic");

@@ -81,9 +81,9 @@ void Colorization::initialize()
     collectOptions();
 
 #ifdef PDAL_HAVE_GDAL
-    
+
     pdal::GlobalEnvironment::get().getGDALEnvironment();
-    
+
     pdal::GlobalEnvironment::get().getGDALDebug()->addLog(log());
 
 #endif
@@ -212,7 +212,7 @@ Colorization::Colorization(const pdal::filters::Colorization& filter, PointBuffe
     m_ds = GDALOpen(filename.c_str(), GA_ReadOnly);
     if (m_ds == NULL)
         throw pdal_error("Unable to open GDAL datasource!");
-    
+
     if (GDALGetGeoTransform(m_ds, &(m_forward_transform.front())) != CE_None)
     {
         throw pdal_error("unable to fetch forward geotransform for raster!");
@@ -220,7 +220,7 @@ Colorization::Colorization(const pdal::filters::Colorization& filter, PointBuffe
 
     GDALInvGeoTransform(&(m_forward_transform.front()), &(m_inverse_transform.front()));
 
-#endif 
+#endif
 
     return;
 }
@@ -234,7 +234,7 @@ Colorization::~Colorization()
         m_ds = 0;
     }
 #endif
-    
+
 }
 
 void Colorization::readBufferBeginImpl(PointBuffer& buffer)
@@ -247,11 +247,11 @@ void Colorization::readBufferBeginImpl(PointBuffer& buffer)
 
     std::map<std::string, boost::uint32_t> band_map = m_stage.getBandMap();
     std::map<std::string, double> scale_map = m_stage.getScaleMap();
-    
+
     m_dimensions.clear();
     m_bands.clear();
     m_scales.clear();
-    
+
     for (std::map<std::string, boost::uint32_t>::const_iterator i = band_map.begin();
             i != band_map.end();
             ++i)
@@ -287,19 +287,19 @@ bool Colorization::getPixelAndLinePosition(double x,
                inverse[3]
                + inverse[4] * x
                + inverse[5] * y);
-    
+
     int xs = GDALGetRasterXSize(ds);
     int ys = GDALGetRasterYSize(ds);
-    
+
     if (!xs || !ys)
     {
         throw pdal_error("Unable to get X or Y size from raster!");
     }
 
-    if (pixel < 0 || 
-        line < 0 || 
-        pixel >= xs || 
-        line  >= ys
+    if (pixel < 0 ||
+            line < 0 ||
+            pixel >= xs ||
+            line  >= ys
        )
     {
         // The x, y is not coincident with this raster
@@ -450,7 +450,7 @@ double Colorization::getScaledValue(PointBuffer& data,
                 output = d.applyScaling<boost::uint64_t>(u64);
             }
             break;
-        
+
         case dimension::RawByte:
         case dimension::Pointer:    // stored as 64 bits, even on a 32-bit box
         case dimension::Undefined:

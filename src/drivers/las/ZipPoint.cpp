@@ -67,9 +67,9 @@ static boost::uint16_t laszip_recordid = 22204;
 static const char* laszip_description = "http://laszip.org";
 
 
-ZipPoint::ZipPoint( PointFormat format, 
-                    const std::vector<VariableLengthRecord>& vlrs, 
-                    bool isReadMode)
+ZipPoint::ZipPoint(PointFormat format,
+                   const std::vector<VariableLengthRecord>& vlrs,
+                   bool isReadMode)
     : m_readMode(isReadMode)
     , his_vlr_num(0)
     , his_vlr_data(0)
@@ -90,7 +90,7 @@ ZipPoint::ZipPoint( PointFormat format,
             break;
         }
     }
-    
+
     if (vlr)
     {
         bool ok(false);
@@ -177,12 +177,12 @@ VariableLengthRecord ZipPoint::ConstructVLR() const
             << std::numeric_limits<boost::uint16_t>::max() << " bytes.";
         throw std::runtime_error(oss.str());
     }
-    
-    VariableLengthRecord vlr(0xAABB, 
-                             laszip_userid, 
-                             laszip_recordid, 
-                             laszip_description, 
-                             data, 
+
+    VariableLengthRecord vlr(0xAABB,
+                             laszip_userid,
+                             laszip_recordid,
+                             laszip_description,
+                             data,
                              (boost::uint16_t)num);
 
     return vlr;
@@ -191,8 +191,8 @@ VariableLengthRecord ZipPoint::ConstructVLR() const
 
 bool ZipPoint::IsZipVLR(const VariableLengthRecord& vlr) const
 {
-    if (laszip_userid == vlr.getUserId() && 
-        laszip_recordid == vlr.getRecordId())
+    if (laszip_userid == vlr.getUserId() &&
+            laszip_recordid == vlr.getRecordId())
     {
         return true;
     }

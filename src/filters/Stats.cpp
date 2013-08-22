@@ -66,7 +66,7 @@ pdal::Metadata Summary::toMetadata() const
     {
         sample << m_sample[i] << " ";
     };
-    
+
     output.addMetadata("sample", sample.str(), "sample");
 
     if (m_doExact == true)
@@ -76,7 +76,7 @@ pdal::Metadata Summary::toMetadata() const
         counts.setName("counts");
 
         for (std::map<boost::int32_t, boost::uint32_t>::const_iterator i = m_counts.begin();
-             i != m_counts.end(); ++i)
+                i != m_counts.end(); ++i)
         {
             Metadata bin;
             std::ostringstream binname;
@@ -124,14 +124,14 @@ boost::property_tree::ptree Summary::toPTree() const
     };
 
     tree.add("sample", sample.str());
-    
-    
+
+
     if (m_doExact == true)
     {
-        
+
         boost::property_tree::ptree counts;
         for (std::map<boost::int32_t, boost::uint32_t>::const_iterator i = m_counts.begin();
-             i != m_counts.end(); ++i)
+                i != m_counts.end(); ++i)
         {
             boost::property_tree::ptree bin;
             bin.add("value", i->first);
@@ -139,7 +139,7 @@ boost::property_tree::ptree Summary::toPTree() const
             std::ostringstream binname;
             binname << "count-" <<i->first;
             counts.add_child(binname.str(), bin);
-            
+
         }
         tree.add_child("counts", counts);
     }
@@ -172,13 +172,13 @@ void Stats::addMetadata()
 {
     Metadata& metadata = getMetadataRef();
     metadata.addMetadata<boost::uint32_t>("sample_size",
-                                       getOptions().getValueOrDefault<boost::uint32_t>("sample_size", 1000));
+                                          getOptions().getValueOrDefault<boost::uint32_t>("sample_size", 1000));
     metadata.addMetadata<boost::uint32_t>("seed",
-                                       getOptions().getValueOrDefault<boost::uint32_t>("seed", 0));
+                                          getOptions().getValueOrDefault<boost::uint32_t>("seed", 0));
     metadata.addMetadata<boost::uint32_t>("num_bins",
-                                       getOptions().getValueOrDefault<boost::uint32_t>("num_bins", 20));
+                                          getOptions().getValueOrDefault<boost::uint32_t>("num_bins", 20));
     metadata.addMetadata<boost::uint32_t>("stats_cache_size",
-                                       getOptions().getValueOrDefault<boost::uint32_t>("num_bins", 20));    
+                                          getOptions().getValueOrDefault<boost::uint32_t>("num_bins", 20));
 }
 
 Stats::~Stats()
@@ -193,7 +193,7 @@ void Stats::initialize()
     std::string names = getOptions().getValueOrDefault<std::string>("dimensions", "");
     if (names.size())
     {
-        log()->get(logDEBUG) << "Using explicit list of dimension names'" << names << "'"<<std::endl;        
+        log()->get(logDEBUG) << "Using explicit list of dimension names'" << names << "'"<<std::endl;
         boost::char_separator<char> seps(" ,");
 
 
@@ -208,7 +208,7 @@ void Stats::initialize()
     std::string exact = getOptions().getValueOrDefault<std::string>("exact_dimensions", "");
     if (exact.size())
     {
-        log()->get(logDEBUG) << "Calculating histogram statistics for exact names '" << names << "'"<<std::endl;        
+        log()->get(logDEBUG) << "Calculating histogram statistics for exact names '" << names << "'"<<std::endl;
         boost::char_separator<char> seps(" ,");
 
 
@@ -407,7 +407,7 @@ void Stats::readBufferEndImpl(PointBuffer& buffer)
     pdal::Metadata stats = toMetadata();
     stats.setName(getStage().getName());
     metadata.setMetadata(stats);
-    
+
 }
 
 void Stats::readBufferBeginImpl(PointBuffer& buffer)
@@ -419,16 +419,16 @@ void Stats::readBufferBeginImpl(PointBuffer& buffer)
         Options const& options = getStage().getOptions();
 
         std::vector<std::string> dimension_names = m_statsFilter.getExactDimensionNames();
-        
+
         std::map<std::string, bool> exact_dimensions;
         for (std::vector<std::string>::const_iterator i = dimension_names.begin();
-        i != dimension_names.end(); ++i)
+                i != dimension_names.end(); ++i)
         {
             getStage().log()->get(logDEBUG2) << "Using exact histogram counts for '" << *i << "'" << std::endl;
             std::pair<std::string,bool> p(*i, true);
             exact_dimensions.insert(p);
         }
-        
+
         Schema const& schema = buffer.getSchema();
 
         boost::uint64_t numPoints = getStage().getPrevStage().getNumPoints();
@@ -463,18 +463,18 @@ void Stats::readBufferBeginImpl(PointBuffer& buffer)
 
 
         boost::uint32_t bin_count = options.getValueOrDefault<boost::uint32_t>("num_bins", 20);
-        
+
         std::vector<std::string> const& specified_names = m_statsFilter.getDimensionNames();
-        
+
         if (specified_names.size())
         {
 
-            for(std::vector<std::string>::const_iterator  i = specified_names.begin(); i != specified_names.end(); i++)
+            for (std::vector<std::string>::const_iterator  i = specified_names.begin(); i != specified_names.end(); i++)
             {
                 std::string const& name = *i;
-                getStage().log()->get(logDEBUG2) << "Requested to cumulate stats for dimension with name '" << name <<"'"<< std::endl;                
+                getStage().log()->get(logDEBUG2) << "Requested to cumulate stats for dimension with name '" << name <<"'"<< std::endl;
                 Dimension const& dim = schema.getDimension(name);
-                getStage().log()->get(logDEBUG2) << "Found dimension with name '" << dim.getName() <<"' and namespace '" << dim.getNamespace() << "'"<< std::endl;                
+                getStage().log()->get(logDEBUG2) << "Found dimension with name '" << dim.getName() <<"' and namespace '" << dim.getNamespace() << "'"<< std::endl;
 
                 DimensionPtr d = boost::shared_ptr<Dimension>(new Dimension(dim));
                 getStage().log()->get(logDEBUG2) << "Cumulating stats for dimension " << d->getName() << " with namespace: " << d->getNamespace() << std::endl;
@@ -490,7 +490,7 @@ void Stats::readBufferBeginImpl(PointBuffer& buffer)
 
                 std::pair<DimensionPtr, stats::SummaryPtr> p(d,c);
                 m_dimensions.push_back(d);
-                m_stats.insert(p);                
+                m_stats.insert(p);
             }
         }
         else
@@ -609,7 +609,7 @@ Stats::~Stats()
 
 boost::uint64_t Stats::seekImpl(boost::uint64_t count)
 {
-    
+
     return getPrevIterator().seek(count);
 }
 

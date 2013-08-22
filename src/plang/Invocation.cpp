@@ -97,9 +97,9 @@ void Invocation::compile()
 {
     m_bytecode = Py_CompileString(m_script.source(), m_script.module(), Py_file_input);
     if (!m_bytecode) throw python_error(getPythonTraceback());
-    
+
     Py_INCREF(m_bytecode);
-    
+
     m_module = PyImport_ExecCodeModule(const_cast<char*>(m_script.module()), m_bytecode);
     if (!m_module) throw python_error(getPythonTraceback());
 
@@ -127,7 +127,7 @@ void Invocation::cleanup()
     Py_XDECREF(m_scriptResult);
 
     Py_XDECREF(m_scriptArgs); // also decrements script and vars
-    
+
     for (unsigned int i=0; i<m_pyInputArrays.size(); i++)
     {
         PyObject* obj = m_pyInputArrays[i];
@@ -389,7 +389,7 @@ bool Invocation::execute()
     {
         throw python_error("no code has been compiled");
     }
-    
+
     m_environment.gil_lock();
 
     Py_INCREF(m_varsIn);

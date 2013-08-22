@@ -528,7 +528,7 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
             boost::int32_t time = Utils::read_field<boost::int32_t>(p);
             if (!m_littleEndian)
                 QFIT_SWAP_BE_TO_LE(time);
-            
+
             if (dimensions.Time)
                 data.setField<boost::int32_t>(*dimensions.Time, pointIndex, time);
 
@@ -700,7 +700,7 @@ boost::property_tree::ptree Reader::toPTree() const
 std::vector<Dimension> Reader::getDefaultDimensions()
 {
     std::vector<Dimension> output;
-    
+
     Dimension time("Time", dimension::SignedInteger, 4,
                    "Relative Time (msec from start of data file)");
     time.setUUID("adfc310a-111d-437b-b76b-5a1805eab8ad");
@@ -806,7 +806,7 @@ std::vector<Dimension> Reader::getDefaultDimensions()
     passive_z.setUUID("0d3dec08-188d-4c2e-84d2-bb6881d40c7e");
     passive_z.setNamespace(s_getName());
     output.push_back(passive_z);
-    
+
     return output;
 }
 

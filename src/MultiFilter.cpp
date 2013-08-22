@@ -50,7 +50,7 @@ void MultiFilter::initialize()
 {
     Metadata& m = getMetadataRef();
     m.setName(getName());
-    
+
     Stage::initialize();
 
     return;

@@ -52,7 +52,7 @@ namespace pdal
 
 Writer::Writer(Stage& prevStage, const Options& options)
     : StageBase(StageBase::makeVector(prevStage), options)
-        , m_userCallback(0)
+    , m_userCallback(0)
     , m_writer_buffer(0)
 {
     return;
@@ -132,9 +132,9 @@ static void do_callback(boost::uint64_t pointsWritten, boost::uint64_t pointsToW
     return;
 }
 
-boost::uint64_t Writer::write(  boost::uint64_t targetNumPointsToWrite,
-                                boost::uint64_t startingPosition,
-                                boost::uint64_t chunkSize)
+boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite,
+                              boost::uint64_t startingPosition,
+                              boost::uint64_t chunkSize)
 {
     if (!isInitialized())
     {
@@ -147,7 +147,7 @@ boost::uint64_t Writer::write(  boost::uint64_t targetNumPointsToWrite,
     do_callback(0.0, callback);
 
     const Schema& schema = getPrevStage().getSchema();
-    
+
     if (m_writer_buffer == 0)
     {
         boost::uint64_t capacity(targetNumPointsToWrite);
@@ -157,25 +157,26 @@ boost::uint64_t Writer::write(  boost::uint64_t targetNumPointsToWrite,
                 capacity = chunkSize;
             else
                 capacity = 131072;
-        } else
+        }
+        else
         {
             if (chunkSize)
                 capacity = (std::min)(static_cast<boost::uint64_t>(chunkSize), targetNumPointsToWrite) ;
             else
                 capacity = targetNumPointsToWrite;
         }
-        
+
         if (capacity > std::numeric_limits<boost::uint32_t>::max())
             throw pdal_error("Buffer capacity is larger than 2^32 points!");
-        m_writer_buffer = new PointBuffer (schema, static_cast<boost::uint32_t>(capacity));
-        
+        m_writer_buffer = new PointBuffer(schema, static_cast<boost::uint32_t>(capacity));
+
     }
-    
+
     boost::scoped_ptr<StageSequentialIterator> iter(getPrevStage().createSequentialIterator(*m_writer_buffer));
-    
+
     if (startingPosition)
         iter->skip(startingPosition);
-        
+
     if (!iter) throw pdal_error("Unable to obtain iterator from previous stage!");
 
     // if we don't have an SRS, try to forward the one from the prev stage
@@ -222,15 +223,15 @@ boost::uint64_t Writer::write(  boost::uint64_t targetNumPointsToWrite,
 
         assert(numPointsReadThisChunk == m_writer_buffer->getNumPoints());
         assert(numPointsReadThisChunk <= m_writer_buffer->getCapacity());
-        
-        // Some drivers may do header setups and such, even for situations 
-        // where there's no points, so we should a buffer begin. 
+
+        // Some drivers may do header setups and such, even for situations
+        // where there's no points, so we should a buffer begin.
         writeBufferBegin(*m_writer_buffer);
-        
+
         // were there no points left to write this chunk?
-        if (numPointsReadThisChunk == 0) 
+        if (numPointsReadThisChunk == 0)
         {
-            // Match the above writeBufferBegin now that 
+            // Match the above writeBufferBegin now that
             // we're breaking the loop
             writeBufferEnd(*m_writer_buffer);
             break;
@@ -257,14 +258,14 @@ boost::uint64_t Writer::write(  boost::uint64_t targetNumPointsToWrite,
     }
 
     iter->readEnd();
-    
+
     writeEnd(actualNumPointsWritten);
 
     assert((targetNumPointsToWrite == 0) || (actualNumPointsWritten <= targetNumPointsToWrite));
 
     do_callback(100.0, callback);
 
-    
+
     return actualNumPointsWritten;
 }
 
