@@ -264,24 +264,11 @@ HexBin::~HexBin()
         throw pdal_error("Hexgrid was not created!");
     }
 #endif
-<<<<<<< HEAD
-=======
 
 }
 
 
-boost::uint64_t HexBin::skipImpl(boost::uint64_t count)
-{
-    getPrevIterator().skip(count);
-    return count;
-}
 
-
-bool HexBin::atEndImpl() const
-{
-    return getPrevIterator().atEnd();
-
-}
 } // sequential
 
 // namespace random
