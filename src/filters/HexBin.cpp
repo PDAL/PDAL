@@ -122,8 +122,9 @@ IteratorBase::IteratorBase( pdal::filters::HexBin const& filter,
 IteratorBase::~IteratorBase()
 {
 #ifdef PDAL_HAVE_HEXER
-    //if (m_grid)
-        //delete m_grid;
+
+
+
 #endif
 
 }
@@ -207,9 +208,23 @@ boost::uint32_t HexBin::readBufferImpl(PointBuffer& buffer)
         
     return numPoints;
 }
+    
 
-void HexBin::readBufferEndImpl(PointBuffer& buffer)
+boost::uint64_t HexBin::skipImpl(boost::uint64_t count)
 {
+    getPrevIterator().skip(count);
+    return count;
+}
+
+
+bool HexBin::atEndImpl() const
+{
+    return getPrevIterator().atEnd();
+}
+
+HexBin::~HexBin()
+{
+
 
 #ifdef PDAL_HAVE_HEXER
     if (m_grid)
@@ -217,7 +232,7 @@ void HexBin::readBufferEndImpl(PointBuffer& buffer)
         m_grid->findShapes();
         m_grid->findParentPaths();
 
-        pdal::Metadata& metadata = buffer.getMetadataRef();
+        pdal::Metadata& metadata = getBuffer().getMetadataRef();
 
         
         pdal::Metadata m;
@@ -246,22 +261,7 @@ void HexBin::readBufferEndImpl(PointBuffer& buffer)
         throw pdal_error("Hexgrid was not created!");
     }
 #endif
-        
 }
-    
-
-boost::uint64_t HexBin::skipImpl(boost::uint64_t count)
-{
-    getPrevIterator().skip(count);
-    return count;
-}
-
-
-bool HexBin::atEndImpl() const
-{
-    return getPrevIterator().atEnd();
-}
-
 } // sequential
 
 // namespace random
