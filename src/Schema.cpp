@@ -200,7 +200,7 @@ boost::optional<Dimension const&> Schema::getDimensionOptional(schema::size_type
 }
 
 
-const Dimension& Schema::getDimension(boost::string_ref name, boost::string_ref namespc) const
+const Dimension& Schema::getDimension(string_ref name, string_ref namespc) const
 {
     std::string errorMsg;
     const Dimension* dim = getDimensionPtr(name, namespc, &errorMsg);
@@ -216,16 +216,16 @@ namespace
 {
 // Helpers for searching the dimension index without constructing a std::string
 
-// Hash for boost::string_ref
+// Hash for string_ref
 struct string_ref_hash
 {
-    std::size_t operator()(boost::string_ref str) const
+    std::size_t operator()(string_ref str) const
     {
         return boost::hash_range(str.begin(), str.end());
     }
 };
 
-// Compare boost::string_ref and std::string
+// Compare string_ref and std::string
 struct string_ref_equal
 {
     template<typename T1, typename T2>
@@ -238,17 +238,17 @@ struct string_ref_equal
 } // namespace
 
 
-const Dimension* Schema::getDimensionPtr(boost::string_ref nameIn, boost::string_ref namespc,
+const Dimension* Schema::getDimensionPtr(string_ref nameIn, string_ref namespc,
         std::string* errorMsg) const
 {
-    // getDimensionPtr is implemented in terms of boost::string_ref so that we
+    // getDimensionPtr is implemented in terms of string_ref so that we
     // can guarentee not to allocate memory unless we really need to.
-    boost::string_ref name = nameIn;
-    boost::string_ref ns = namespc;
+    string_ref name = nameIn;
+    string_ref ns = namespc;
     if (ns.empty())
     {
         size_t dotPos = nameIn.rfind('.');
-        if (dotPos != boost::string_ref::npos)
+        if (dotPos != string_ref::npos)
         {
             // dimension is named as namespace.name (eg, drivers.las.reader.X)
             // - split into name and namespace
@@ -370,8 +370,8 @@ const Dimension* Schema::getDimensionPtr(boost::string_ref nameIn, boost::string
 }
 
 
-boost::optional<Dimension const&> Schema::getDimensionOptional(boost::string_ref name,
-        boost::string_ref ns) const
+boost::optional<Dimension const&> Schema::getDimensionOptional(string_ref name,
+        string_ref ns) const
 {
     const Dimension* dim = getDimensionPtr(name, ns);
     if (dim)
