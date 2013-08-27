@@ -150,7 +150,8 @@ Options Writer::getDefaultOptions()
     Option radius("radius", default_radius);
 
     Option fill_window_size("fill_window_size", 3);
-
+    Option dim_z("Z", "Z", "Name of Z dimension to interpolate");
+    options.add(dim_z);
     options.add(grid_x);
     options.add(grid_y);
     options.add(radius);
@@ -225,10 +226,11 @@ void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
 boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
 {
     const Schema& schema = data.getSchema();
-
+    
+    std::string z_name = getOptions().getValueOrDefault<std::string>("Z", "Z");
     pdal::Dimension const& dimX = schema.getDimension("X");
     pdal::Dimension const& dimY = schema.getDimension("Y");
-    pdal::Dimension const& dimZ = schema.getDimension("Z");
+    pdal::Dimension const& dimZ = schema.getDimension(z_name);
 
 
     boost::uint32_t numPoints = 0;
