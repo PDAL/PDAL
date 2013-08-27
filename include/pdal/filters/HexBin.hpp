@@ -124,12 +124,13 @@ class PDAL_DLL HexBin : public pdal::FilterSequentialIterator, public hexbin::It
 {
 public:
     HexBin(const pdal::filters::HexBin& filter, PointBuffer& buffer);
-    ~HexBin(){};
+    ~HexBin();
 
 protected:
     // virtual void readBufferBeginImpl(PointBuffer&);
-    virtual void readBufferEndImpl(PointBuffer&);
-    
+    // virtual void readBufferEndImpl(PointBuffer&);
+    // virtual void readEndImpl();    
+
 private:
     boost::uint64_t skipImpl(boost::uint64_t);
     boost::uint32_t readBufferImpl(PointBuffer&);

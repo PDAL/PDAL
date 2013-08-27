@@ -51,7 +51,7 @@ void Filter::initialize()
 {
     Metadata& m = getMetadataRef();
     m.setName(getName());
-    
+
     Stage::initialize();
 
     // by default, we set our core properties to be the same as those

@@ -18,10 +18,11 @@ FOR i IN (SELECT table_name FROM user_tables WHERE table_name = blks) LOOP
     EXECUTE IMMEDIATE 'DROP TABLE ' || blks || ' PURGE';
 END LOOP;
 
-execute immediate 'CREATE TABLE '|| clouds ||'(id number, CLOUD SDO_PC, BOUNDARY SDO_GEOMETRY)';
-execute immediate q'[delete from user_sdo_geom_metadata where table_name = ' || blks || ']';
 
 execute immediate 'purge recyclebin';
+execute immediate 'purge tablespace GRID';
+execute immediate 'CREATE TABLE '|| clouds ||'(id number, CLOUD SDO_PC, BOUNDARY SDO_GEOMETRY)';
+execute immediate q'[delete from user_sdo_geom_metadata where table_name = ' || blks || ']';
 
 commit;
 

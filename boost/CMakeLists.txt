@@ -38,8 +38,6 @@ set(PDALBOOST_SOURCES
     ./libs/iostreams/src/file_descriptor.cpp
     ./libs/iostreams/src/mapped_file.cpp
     ./libs/iostreams/src/file_descriptor.cpp
-    ./libs/iostreams/src/gzip.cpp
-    ./libs/iostreams/src/zlib.cpp
     ./libs/program_options/src/cmdline.cpp
     ./libs/program_options/src/config_file.cpp
     ./libs/program_options/src/convert.cpp
@@ -141,3 +139,7 @@ endif(WIN32)
 
 add_library(${PDALBOOST_LIB_NAME} STATIC ${PDALBOOST_SOURCES})
 
+if (UNIX AND NOT PDAL_BUILD_STATIC)
+     # Must use position independent code to link static libs into dynamic ones
+     set_target_properties(${PDALBOOST_LIB_NAME} PROPERTIES COMPILE_FLAGS "-fPIC")
+endif()

@@ -1,7 +1,7 @@
 /************************************************************************
  * Copyright (c) 2012, CARIS
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *   * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *   * Neither the name of CARIS nor the names of its contributors may be
  *     used to endorse or promote products derived from this software without
  *     specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
  * IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
  * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
@@ -34,23 +34,25 @@
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/detail/utf8_codecvt_facet.hpp>
 
-namespace csar {
-namespace utils {
+namespace csar
+{
+namespace utils
+{
 
 //************************************************************************
 //! convert a caris_type to a pdal::dimension::Interpretation
 /*!
 \param in_type
     \li caris_type to convert
-\return 
+\return
     \li pdal::dimension::Interpretation of \e in_type
 */
 //************************************************************************
 pdal::dimension::Interpretation carisTypeToInterpretation(caris_type in_type)
 {
     using namespace pdal::dimension;
-    
-    switch(in_type)
+
+    switch (in_type)
     {
         case CARIS_TYPE_FLOAT32:
         case CARIS_TYPE_FLOAT64:
@@ -78,15 +80,15 @@ pdal::dimension::Interpretation carisTypeToInterpretation(caris_type in_type)
 /*!
 \param in_type
     \li caris_type to convert
-\return 
+\return
     \li number of bytes of an element of type \e in_type
 */
 //************************************************************************
 pdal::dimension::size_type carisTypeToSize(caris_type in_type)
 {
     using namespace pdal::dimension;
-    
-    switch(in_type)
+
+    switch (in_type)
     {
         case CARIS_TYPE_INT8:
         case CARIS_TYPE_UINT8:
@@ -113,7 +115,7 @@ pdal::dimension::size_type carisTypeToSize(caris_type in_type)
 /*!
 \param in_path
     \li filesystem path
-\return 
+\return
     \li Absolute URI to \e in_path in utf-8
 */
 //************************************************************************
@@ -121,51 +123,53 @@ std::string systemPathToURI(std::string const& in_path)
 {
     boost::filesystem::path fsPath = boost::filesystem::absolute(in_path);
     std::string path = fsPath.string(boost::filesystem::detail::utf8_codecvt_facet());
-    
+
 #ifdef WIN32
     // convert /'s and add inital /
     path = "/" + path;
     boost::replace_all(path, "\\", "/");
 #endif
-    
-    const char validChars[] = 
+
+    const char validChars[] =
         "abcdefghijklmnopqrstuvwxyz"
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         "0123456789"
         "-._~"
         "!$&'()*+,;=:@/";
-    
+
     std::string uri = "file://";
-    
+
     BOOST_FOREACH(char c, path)
     {
-        if(boost::range::count(validChars, c))
+        if (boost::range::count(validChars, c))
         {
             uri += c;
         }
         else
         {
             // percent encode
-            struct {
+            struct
+            {
                 char operator()(uint8_t in_v)
                 {
                     return (in_v < 10)
-                        ? (in_v + '0')
-                        : (in_v - 10 + 'A');
+                           ? (in_v + '0')
+                           : (in_v - 10 + 'A');
                 }
             } toHexChar;
-        
-            char hexStr[4] = {
-                '%', 
-                toHexChar((c & 0xf0) >> 4), 
-                toHexChar( c & 0x0f), 
+
+            char hexStr[4] =
+            {
+                '%',
+                toHexChar((c & 0xf0) >> 4),
+                toHexChar(c & 0x0f),
                 '\0'
             };
-            
+
             uri += hexStr;
         }
     }
-    
+
     return uri;
 }
 

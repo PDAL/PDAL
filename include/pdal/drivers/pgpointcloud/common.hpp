@@ -79,12 +79,14 @@ inline PGconn* pg_connect(std::string const& connection)
     }
 
     /* Validate the connection string and get verbose error (?) */
+#ifdef PQconninfoParse
     char *errstr;
     PQconninfoOption *connOptions = PQconninfoParse(connection.c_str(), &errstr);
     if ( ! connOptions )
     {
         throw pdal_error(errstr);      
     }
+#endif
    
     /* connect to database */
     conn = PQconnectdb(connection.c_str());

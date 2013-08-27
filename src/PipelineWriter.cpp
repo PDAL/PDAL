@@ -127,7 +127,7 @@ boost::property_tree::ptree PipelineWriter::get_metadata_entry(boost::property_t
     using namespace boost;
 
     property_tree::ptree entry;
-    
+
     // std::ostream* ofile = FileUtils::createFile("metadata.xml");
     // boost::property_tree::write_xml(*ofile, input);
     // FileUtils::closeFile(ofile);
@@ -148,14 +148,14 @@ boost::property_tree::ptree PipelineWriter::get_metadata_entry(boost::property_t
 
             property_tree::ptree e = get_metadata_entry(iter->second);
             entry.add_child("Metadata", e);
-            
+
             ++iter;
         }
 
     }
     return entry;
-         
-    
+
+
 }
 
 void PipelineWriter::write_metadata_ptree(boost::property_tree::ptree& tree, const Metadata& m)
@@ -177,11 +177,11 @@ void PipelineWriter::writePipeline(const std::string& filename) const
     const StageBase* stage = m_manager.isWriterPipeline() ? (StageBase*)m_manager.getWriter() : (StageBase*)m_manager.getStage();
 
     boost::property_tree::ptree tree = generateTreeFromStageBase(*stage);
-    
+
     if (m_buffer)
     {
         boost::property_tree::ptree metadata_tree;
-        
+
         write_metadata_ptree(metadata_tree, m_buffer->getMetadata());
         boost::property_tree::ptree & child = tree.get_child("Pipeline");
         child.add_child("PointBuffer", metadata_tree);

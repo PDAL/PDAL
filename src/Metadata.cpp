@@ -51,7 +51,7 @@ namespace pdal
 {
 
 Metadata::Metadata()
-    
+
 {
     setName("root");
     setType("blank");
@@ -60,7 +60,7 @@ Metadata::Metadata()
 }
 
 Metadata::Metadata(Metadata const& other)
-: m_tree(other.m_tree)
+    : m_tree(other.m_tree)
 {}
 
 Metadata::Metadata(std::string const& name)
@@ -71,7 +71,7 @@ Metadata::Metadata(std::string const& name)
 }
 
 Metadata::Metadata(boost::property_tree::ptree const& tree)
-: m_tree(tree)
+    : m_tree(tree)
 {}
 
 Metadata Metadata::operator+(const Metadata& rhs) const
@@ -79,7 +79,7 @@ Metadata Metadata::operator+(const Metadata& rhs) const
     boost::property_tree::ptree tree = this->toPTree();
     tree.add_child(rhs.getName(), rhs.toPTree());
     return Metadata(tree);
-    
+
 }
 
 
@@ -100,11 +100,11 @@ std::ostream& operator<<(std::ostream& ostr, const pdal::ByteArray& data)
 
 std::istream& operator>>(std::istream& istr, pdal::ByteArray& output)
 {
-    
+
     std::string data;
     istr >> data;
     std::vector<boost::uint8_t> d = pdal::Utils::base64_decode(data);
-    
+
     output.set(d);
     return istr;
 }
@@ -113,7 +113,7 @@ std::istream& operator>>(std::istream& istr, pdal::ByteArray& output)
 std::ostream& operator<<(std::ostream& ostr, const pdal::Metadata& metadata)
 {
     boost::property_tree::ptree tree = metadata.toPTree();
-    
+
     boost::property_tree::write_json(ostr, tree);
     return ostr;
 }

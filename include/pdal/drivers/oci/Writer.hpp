@@ -148,6 +148,7 @@ private:
     pdal::Bounds<double> m_bounds; // Bounds of the entire point cloud
     Connection m_connection;
     bool m_doCreateIndex;
+    bool m_bHaveOutputTable;
     Bounds<double> m_pcExtent;
     int m_pc_id;
     std::string m_block_table_name;
@@ -168,6 +169,8 @@ private:
     boost::shared_ptr<pdal::gdal::Debug> m_gdal_debug;
     std::string m_trigger_name;
     bool m_sdo_pc_is_initialized;
+    boost::uint32_t m_chunkCount;
+    bool m_streamChunks;
 
 };
 

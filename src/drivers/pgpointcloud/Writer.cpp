@@ -50,7 +50,7 @@ MAKE_WRITER_CREATOR(pgpointcloudWriter, pdal::drivers::pgpointcloud::Writer)
 CREATE_WRITER_PLUGIN(pgpointcloud, pdal::drivers::pgpointcloud::Writer)
 #endif
 
-// TO DO: 
+// TO DO:
 // - change INSERT into COPY
 //
 // - PCID / Schema consistency. If a PCID is specified,
@@ -94,9 +94,9 @@ Writer::Writer(Stage& prevStage, const Options& options)
 
 Writer::~Writer()
 {
-    if ( m_session )
+    if (m_session)
         PQfinish(m_session);
-        
+
     return;
 }
 
@@ -104,27 +104,27 @@ Writer::~Writer()
 //
 // Called from PDAL core during start-up. Do everything
 // here that you are going to absolutely require later.
-// Optional things you can defer or attempt to initialize 
+// Optional things you can defer or attempt to initialize
 // here.
 //
 void Writer::initialize()
 {
     pdal::Writer::initialize();
-    
+
     // If we don't know the table name, we're SOL
     m_table_name = getOptions().getValueOrThrow<std::string>("table");
 
     // Schema and column name can be defaulted safely
     m_column_name = getOptions().getValueOrDefault<std::string>("column", "pa");
     m_schema_name = getOptions().getValueOrDefault<std::string>("schema", "");
-    
+
     // Read compression type and turn into an integer
     std::string compression_str = getOptions().getValueOrDefault<std::string>("compression", "dimensional");
     m_patch_compression_type = getCompressionType(compression_str);
 
     // Connection string needs to exist and actually work
     std::string connection = getOptions().getValueOrThrow<std::string>("connection");
-    
+
     // Can we connect, using this string?
     m_session = pg_connect(connection);
 
@@ -171,7 +171,7 @@ Options Writer::getDefaultOptions()
 }
 
 //
-// Called by PDAL core before the start of the writing process, but 
+// Called by PDAL core before the start of the writing process, but
 // after the initialization. At this point, the machinery is all set
 // up and we can apply actions to the target database, like pre-SQL and
 // preparing new tables and/or deleting old ones.
@@ -190,8 +190,8 @@ void Writer::writeBegin(boost::uint64_t /*targetNumPointsToWrite*/)
         std::string sql = FileUtils::readFileAsString(pre_sql);
         if (!sql.size())
         {
-            // if there was no file to read because the data in pre_sql was 
-            // actually the sql code the user wanted to run instead of the 
+            // if there was no file to read because the data in pre_sql was
+            // actually the sql code the user wanted to run instead of the
             // filename to open, we'll use that instead.
             sql = pre_sql;
         }
@@ -199,9 +199,9 @@ void Writer::writeBegin(boost::uint64_t /*targetNumPointsToWrite*/)
     }
 
     bool bHaveTable = CheckTableExists(m_table_name);
-    
+
     // Apply the over-write preference if it is set
-    if ( m_overwrite && bHaveTable )
+    if (m_overwrite && bHaveTable)
     {
         DeleteTable(m_schema_name, m_table_name);
         bHaveTable = false;
@@ -210,8 +210,8 @@ void Writer::writeBegin(boost::uint64_t /*targetNumPointsToWrite*/)
     // Read or create a PCID for our new table
     m_pcid = SetupSchema(m_pdal_schema, m_srid);
 
-    // Create the table! 
-    if ( ! bHaveTable )
+    // Create the table!
+    if (! bHaveTable)
     {
         CreateTable(m_schema_name, m_table_name, m_column_name, m_pcid);
     }
@@ -221,7 +221,7 @@ void Writer::writeBegin(boost::uint64_t /*targetNumPointsToWrite*/)
 
 void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
 {
-    if ( m_create_index && m_have_postgis )
+    if (m_create_index && m_have_postgis)
     {
         CreateIndex(m_schema_name, m_table_name, m_column_name);
     }
@@ -234,8 +234,8 @@ void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
         std::string sql = FileUtils::readFileAsString(post_sql);
         if (!sql.size())
         {
-            // if there was no file to read because the data in post_sql was 
-            // actually the sql code the user wanted to run instead of the 
+            // if there was no file to read because the data in post_sql was
+            // actually the sql code the user wanted to run instead of the
             // filename to open, we'll use that instead.
             sql = post_sql;
         }
@@ -251,19 +251,19 @@ boost::uint32_t Writer::SetupSchema(Schema const& buffer_schema, boost::uint32_t
 {
     // We strip any ignored dimensions from the schema before creating the table
     pdal::Schema output_schema(PackSchema(buffer_schema));
-        
+
     // If the user has specified a PCID they want to use,
     // does it exist in the database?
-    std::ostringstream oss;    
+    std::ostringstream oss;
     long schema_count;
-    if ( m_pcid )
+    if (m_pcid)
     {
         oss << "SELECT Count(pcid) FROM pointcloud_formats WHERE pcid = " << m_pcid;
         char *count_str = pg_query_once(m_session, oss.str());
         schema_count = atoi(count_str);
         free(count_str);
         oss.str("");
-        if ( schema_count == 0 )
+        if (schema_count == 0)
         {
             oss << "requested PCID '" << m_pcid << "' does not exist in POINTCLOUD_FORMATS";
             throw pdal_error(oss.str());
@@ -279,16 +279,16 @@ boost::uint32_t Writer::SetupSchema(Schema const& buffer_schema, boost::uint32_t
     schema_count = atoi(schema_count_str);
     free(schema_count_str);
     oss.str("");
-    
+
     // Do any of the existing schemas match the one we want to use?
     if (schema_count > 0)
     {
         PGresult *result = pg_query_result(m_session, "SELECT pcid, schema FROM pointcloud_formats");
-        for(int i=0; i<PQntuples(result); ++i)
+        for (int i=0; i<PQntuples(result); ++i)
         {
             char *pcid_str = PQgetvalue(result, i, 0);
             char *schema_str = PQgetvalue(result, i, 1);
-            
+
             if (pdal::Schema::from_xml(schema_str) == output_schema)
             {
                 bCreatePCPointSchema = false;
@@ -298,50 +298,50 @@ boost::uint32_t Writer::SetupSchema(Schema const& buffer_schema, boost::uint32_t
         }
         PQclear(result);
     }
-    
+
     if (bCreatePCPointSchema)
     {
         std::string xml;
         std::string compression;
         char *pcid_str;
-        
+
         if (schema_count == 0)
         {
             pcid = 1;
-        } 
+        }
         else
         {
             char *pcid_str = pg_query_once(m_session, "SELECT Max(pcid)+1 AS pcid FROM pointcloud_formats");
             pcid = atoi(pcid_str);
-        }  
+        }
 
         /* If the writer specifies a compression, we should set that */
-        if ( m_patch_compression_type == COMPRESSION_DIMENSIONAL )
+        if (m_patch_compression_type == COMPRESSION_DIMENSIONAL)
         {
             compression = "dimensional";
         }
-        else if ( m_patch_compression_type == COMPRESSION_GHT )
+        else if (m_patch_compression_type == COMPRESSION_GHT)
         {
             compression = "ght";
         }
 
         Metadata metadata("compression", compression, "");
-        xml = pdal::Schema::to_xml(output_schema, &(metadata.toPTree()));       
+        xml = pdal::Schema::to_xml(output_schema, &(metadata.toPTree()));
 
         const char** paramValues = (const char**)malloc(sizeof(char*));
         paramValues[0] = xml.c_str();
-        
+
         oss << "INSERT INTO pointcloud_formats (pcid, srid, schema) VALUES (" << pcid << "," << srid << ",$1)";
         PGresult *result = PQexecParams(m_session, oss.str().c_str(), 1, NULL, paramValues, NULL, NULL, 0);
-        if ( PQresultStatus(result) != PGRES_COMMAND_OK )
+        if (PQresultStatus(result) != PGRES_COMMAND_OK)
         {
             throw pdal_error(PQresultErrorMessage(result));
         }
         PQclear(result);
     }
-    
+
     m_pcid = pcid;
-    return m_pcid;   
+    return m_pcid;
 }
 
 
@@ -352,7 +352,7 @@ void Writer::DeleteTable(std::string const& schema_name,
 
     oss << "DROP TABLE IF EXISTS ";
 
-    if ( schema_name.size() )
+    if (schema_name.size())
     {
         oss << schema_name << ".";
     }
@@ -361,24 +361,24 @@ void Writer::DeleteTable(std::string const& schema_name,
     pg_execute(m_session, oss.str());
 }
 
-Schema Writer::PackSchema( Schema const& schema) const
+Schema Writer::PackSchema(Schema const& schema) const
 {
     schema::index_by_index const& idx = schema.getDimensions().get<schema::index>();
     log()->get(logDEBUG3) << "Packing ignored dimension from PointBuffer " << std::endl;
 
     boost::uint32_t position(0);
-    
+
     pdal::Schema clean_schema;
     schema::index_by_index::size_type i(0);
     for (i = 0; i < idx.size(); ++i)
     {
         if (! idx[i].isIgnored())
         {
-            
+
             Dimension d(idx[i]);
             d.setPosition(position);
-            
-            // Wipe off parent/child relationships if we're ignoring 
+
+            // Wipe off parent/child relationships if we're ignoring
             // same-named dimensions
             d.setParent(boost::uuids::nil_uuid());
             clean_schema.appendDimension(d);
@@ -395,14 +395,14 @@ bool Writer::CheckPointCloudExists()
 
     std::string q = "SELECT PC_Version()";
 
-    try 
-    {  
+    try
+    {
         pg_execute(m_session, q);
-    } 
+    }
     catch (pdal_error const &e)
     {
         return false;
-    } 
+    }
 
     return true;
 }
@@ -413,14 +413,14 @@ bool Writer::CheckPostGISExists()
 
     log()->get(logDEBUG) << "checking for PostGIS existence ... " << std::endl;
 
-    try 
-    {  
+    try
+    {
         pg_execute(m_session, q);
-    } 
+    }
     catch (pdal_error const &e)
     {
         return false;
-    } 
+    }
 
     return true;
 }
@@ -436,12 +436,12 @@ bool Writer::CheckTableExists(std::string const& name)
     char *count_str = pg_query_once(m_session, oss.str());
     int count = atoi(count_str);
     free(count_str);
-    
-    if ( count == 1 )
+
+    if (count == 1)
     {
         return true;
     }
-    else if ( count > 1 )
+    else if (count > 1)
     {
         log()->get(logDEBUG) << "found more than 1 table named '" << name << "'" << std::endl;
         return false;
@@ -453,20 +453,20 @@ bool Writer::CheckTableExists(std::string const& name)
 }
 
 
-void Writer::CreateTable(std::string const& schema_name, 
+void Writer::CreateTable(std::string const& schema_name,
                          std::string const& table_name,
                          std::string const& column_name,
                          boost::uint32_t pcid)
 {
     std::ostringstream oss;
     oss << "CREATE TABLE ";
-    if ( schema_name.size() )
+    if (schema_name.size())
     {
         oss << schema_name << ".";
     }
     oss << table_name;
     oss << " (id SERIAL PRIMARY KEY, " << column_name << " PcPatch";
-    if ( pcid )
+    if (pcid)
     {
         oss << "(" << pcid << ")";
     }
@@ -476,14 +476,14 @@ void Writer::CreateTable(std::string const& schema_name,
 }
 
 // Make sure you test for the presence of PostGIS before calling this
-void Writer::CreateIndex(std::string const& schema_name, 
-                         std::string const& table_name, 
+void Writer::CreateIndex(std::string const& schema_name,
+                         std::string const& table_name,
                          std::string const& column_name)
 {
     std::ostringstream oss;
 
     oss << "CREATE INDEX ";
-    if ( schema_name.size() )
+    if (schema_name.size())
     {
         oss << schema_name << "_";
     }
@@ -497,12 +497,12 @@ void Writer::CreateIndex(std::string const& schema_name,
 //
 // Called by PDAL core before *each buffer* is written.
 // So it gets called a lot. The hack below does something
-// the first time it is called only. Hopefully we do 
+// the first time it is called only. Hopefully we do
 // not need that hack anymore.
 //
 void Writer::writeBufferBegin(PointBuffer const& data)
 {
-    if ( ! m_sdo_pc_is_initialized) 
+    if (! m_sdo_pc_is_initialized)
     {
         // Currently Unused
         // Do somethine only once, after PointBuffer is sent in
@@ -530,17 +530,17 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     boost::uint8_t* point_data;
     boost::uint32_t point_data_length;
     boost::uint32_t schema_byte_size;
-    
+
     PackPointData(buffer, &point_data, point_data_length, schema_byte_size);
-    
+
     // Pluck the block id out of the first point in the buffer
     pdal::Schema const& schema = buffer.getSchema();
     Dimension const& blockDim = schema.getDimension("BlockID");
-    
+
 //    boost::int32_t blk_id  = buffer.getField<boost::int32_t>(blockDim, 0);
     boost::uint32_t num_points = static_cast<boost::uint32_t>(buffer.getNumPoints());
-    
-    if ( num_points > m_patch_capacity )
+
+    if (num_points > m_patch_capacity)
     {
         // error here
     }
@@ -550,25 +550,25 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     {
         block_data.push_back(point_data[i]);
     }
-    
+
     /* We are always getting uncompressed bytes off the block_data */
     /* so we always used compression type 0 (uncompressed) in writing our WKB */
     boost::int32_t pcid = m_pcid;
     boost::uint32_t compression = COMPRESSION_NONE;
-    
+
     std::stringstream oss;
     oss << "INSERT INTO " << m_table_name << " (pa) VALUES ('";
-    
+
     std::stringstream options;
-    #ifdef BOOST_LITTLE_ENDIAN
-        options << boost::format("%02x") % 1;
-        SWAP_ENDIANNESS(pcid);
-        SWAP_ENDIANNESS(compression);
-        SWAP_ENDIANNESS(num_points);
-    #elif BOOST_BIG_ENDIAN
-        options << boost::format("%02x") % 0;
-    #endif
-    
+#ifdef BOOST_LITTLE_ENDIAN
+    options << boost::format("%02x") % 1;
+    SWAP_ENDIANNESS(pcid);
+    SWAP_ENDIANNESS(compression);
+    SWAP_ENDIANNESS(num_points);
+#elif BOOST_BIG_ENDIAN
+    options << boost::format("%02x") % 0;
+#endif
+
     options << boost::format("%08x") % pcid;
     options << boost::format("%08x") % compression;
     options << boost::format("%08x") % num_points;
@@ -588,9 +588,9 @@ void Writer::PackPointData(PointBuffer const& buffer,
                            boost::uint32_t& schema_byte_size)
 
 {
-    // Creates a new buffer that has the ignored dimensions removed from 
+    // Creates a new buffer that has the ignored dimensions removed from
     // it.
-    
+
     schema::index_by_index const& idx = buffer.getSchema().getDimensions().get<schema::index>();
 
     schema_byte_size = 0;
@@ -600,14 +600,14 @@ void Writer::PackPointData(PointBuffer const& buffer,
         if (! idx[i].isIgnored())
             schema_byte_size = schema_byte_size+idx[i].getByteSize();
     }
-    
+
     log()->get(logDEBUG) << "Packed schema byte size " << schema_byte_size << std::endl;;
 
     point_data_len = buffer.getNumPoints() * schema_byte_size;
     *point_data = new boost::uint8_t[point_data_len];
-    
+
     boost::uint8_t* current_position = *point_data;
-    
+
     for (boost::uint32_t i = 0; i < buffer.getNumPoints(); ++i)
     {
         boost::uint8_t* data = buffer.getData(i);
@@ -619,11 +619,11 @@ void Writer::PackPointData(PointBuffer const& buffer,
                 current_position = current_position+idx[d].getByteSize();
             }
             data = data + idx[d].getByteSize();
-                
+
         }
     }
 
-    
+
 }
 
 }

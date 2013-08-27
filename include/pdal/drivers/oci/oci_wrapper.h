@@ -425,7 +425,9 @@ public:
     void                BindClob( char* pData, long nData );    
     void                Bind( sdo_geometry** pphData );
     void                Bind( sdo_pc_blk** pphData );
-    void                Bind( OCILobLocator** pphLocator );
+    void                BindBlob( OCILobLocator** pphLocator );
+    bool                AllocBlob(OCILobLocator** phLocator);
+    void                BindClob( OCILobLocator** pphLocator );
     void                Bind( OCIArray** pphData, OCIType* type );
     void                Bind( char* pszData, int nSize = OWNAME );
     void                Define( int* pnData );
@@ -451,6 +453,11 @@ public:
     void                BindArray( void* pData, long nSize = 1);
     static void         Free( OCILobLocator** ppphLocator,
                             int nCount );
+    bool                OpenBlob(OCILobLocator* phLocator, bool bReadOnly=true);
+    bool                CloseBlob(OCILobLocator* phLocator);
+    bool                EnableBuffering(OCILobLocator* phLocator);
+    bool                DisableBuffering(OCILobLocator* phLocator);
+
     unsigned long       ReadBlob( OCILobLocator* phLocator,
                             void* pBuffer, int nSize );
     bool                ReadBlob( OCILobLocator* phLocator,
@@ -459,8 +466,8 @@ public:
     unsigned long       GetBlobLength(OCILobLocator* phLocator);
     signed long         GetArrayLength( OCIArray** ppoData);
     void                WriteCLob( OCILobLocator** pphLocator, char* pszData );
-    bool                WriteBlob( OCILobLocator* phLocator,
-                            void* pBuffer, int nSize );
+    bool                WriteBlob( OCILobLocator** phLocator,
+                            void* pBuffer, int nSize, int numChunks=8 );
     int                 GetElement( OCIArray** ppoData,
                             int nIndex, int* pnResult );
     double              GetElement( OCIArray** ppoData,

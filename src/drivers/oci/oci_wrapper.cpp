@@ -1039,7 +1039,31 @@ void OWStatement::Bind(sdo_pc_blk** pphData)
 
 }
 
-void OWStatement::Bind(OCILobLocator** pphLocator)
+void OWStatement::BindBlob(OCILobLocator** pphLocator)
+{
+    OCIBind* hBind = NULL;
+
+    nNextBnd++;
+
+
+    CheckError(OCIBindByPos(
+                   hStmt,
+                   &hBind,
+                   hError,
+                   (ub4) nNextBnd,
+                   (dvoid*) pphLocator,
+                   (sb4) -1,
+                   (ub2) SQLT_BLOB,
+                   (void*) NULL,
+                   (ub2*) NULL,
+                   (ub2*) NULL,
+                   (ub4) NULL,
+                   (ub4) NULL,
+                   (ub4) OCI_DEFAULT),
+               hError);
+}
+
+void OWStatement::BindClob(OCILobLocator** pphLocator)
 {
     OCIBind* hBind = NULL;
 
@@ -1708,16 +1732,33 @@ bool OWStatement::ReadBlob(OCILobLocator* phLocator,
                            unsigned int* nAmountRead)
 {
 
-    sword status = OCILobRead(
-                       poConnection->hSvcCtx,
-                       hError,
-                       phLocator,
-                       (ub4*) nAmountRead,
-                       (ub4) 1,
-                       (dvoid*) pBuffer,
-                       (ub4) nSize,
-                       (dvoid *) 0,
-                       (OCICallbackLobRead) 0,
+    // sword status = OCILobRead(
+    //                    poConnection->hSvcCtx,
+    //                    hError,
+    //                    phLocator,
+    //                    (ub4*) nAmountRead,
+    //                    (ub4) 1,
+    //                    (dvoid*) pBuffer,
+    //                    (ub4) nSize,
+    //                    (dvoid *) 0,
+    //                    (OCICallbackLobRead) 0,
+    //                    (ub2) 0,
+    //                    (ub1) SQLCS_IMPLICIT);
+    oraub8 char_amtp(0);
+    oraub8 offset(1);
+    oraub8 amountRead8(0);
+    sword status = OCILobRead2(
+                       poConnection->hSvcCtx, //svchp
+                       hError, //errhp
+                       phLocator, // locp
+                       &amountRead8, //byte_amtp
+                       &char_amtp, // char_amtp
+                       offset, // offset
+                       (dvoid*) pBuffer, //buffer ptr
+                       (oraub8) nSize, // bufl
+                       (ub1) OCI_ONE_PIECE, // piece
+                       0, // ctx ptr
+                       (OCICallbackLobRead2) 0,
                        (ub2) 0,
                        (ub1) SQLCS_IMPLICIT);
 
@@ -1726,6 +1767,8 @@ bool OWStatement::ReadBlob(OCILobLocator* phLocator,
         return false;
     }
 
+    *nAmountRead = static_cast<unsigned int>(amountRead8);
+
     if (CheckError(status, hError)) return true;
 
     return true;
@@ -1733,13 +1776,13 @@ bool OWStatement::ReadBlob(OCILobLocator* phLocator,
 
 unsigned long OWStatement::GetBlobLength(OCILobLocator* phLocator)
 {
-    ub4 nLength      = (ub4) 0;
+    oraub8 nLength      = (oraub8) 0;
 
-    if (CheckError(OCILobGetLength(
+    if (CheckError(OCILobGetLength2(
                        poConnection->hSvcCtx,
                        hError,
                        phLocator,
-                       (ub4*) &nLength), hError))
+                       &nLength), hError))
     {
         return 0;
     }
@@ -1747,31 +1790,228 @@ unsigned long OWStatement::GetBlobLength(OCILobLocator* phLocator)
     return nLength;
 }
 
-bool OWStatement::WriteBlob(OCILobLocator* phLocator,
-                            void* pBuffer,
-                            int nSize)
+bool OWStatement::OpenBlob(OCILobLocator* phLocator,
+                           bool bReadOnly)
 {
-    ub4 nAmont  = (ub4) nSize;
 
-    if (CheckError(OCILobWrite(
+    ub1 mode(OCI_LOB_READONLY);
+    if (!bReadOnly)
+        mode = OCI_LOB_READWRITE;
+
+    if (CheckError(OCILobOpen(
                        poConnection->hSvcCtx,
                        hError,
                        phLocator,
-                       (ub4*) &nAmont,
-                       (ub4) 1,
-                       (dvoid*) pBuffer,
-                       (ub4) nSize,
-                       (ub1) OCI_ONE_PIECE,
-                       (dvoid*) NULL,
-                       NULL,
-                       (ub2) 0,
-                       (ub1) SQLCS_IMPLICIT),
-                   hError))
+                       mode), hError))
     {
         return false;
     }
 
-    return (nAmont == (ub4) nSize);
+    return true;
+}
+
+bool OWStatement::CloseBlob(OCILobLocator* phLocator)
+{
+    if (CheckError(OCILobClose(
+                       poConnection->hSvcCtx,
+                       hError,
+                       phLocator), hError))
+    {
+        return false;
+    }
+
+    return true;
+}
+bool OWStatement::EnableBuffering(OCILobLocator* phLocator)
+{
+
+
+    if (CheckError(OCILobEnableBuffering(
+                       poConnection->hSvcCtx,
+                       hError,
+                       phLocator), hError))
+    {
+        return false;
+    }
+
+    return true;
+}
+
+bool OWStatement::DisableBuffering(OCILobLocator* phLocator)
+{
+
+
+    if (CheckError(OCILobDisableBuffering(
+                       poConnection->hSvcCtx,
+                       hError,
+                       phLocator), hError))
+    {
+        return false;
+    }
+
+    return true;
+}
+
+bool OWStatement::AllocBlob(OCILobLocator** pphLocator)
+{
+    CheckError(OCIDescriptorAlloc(
+                   poConnection->hEnv,
+                   (void**) pphLocator,
+                   OCI_DTYPE_LOB,
+                   0,
+                   0),
+               hError);
+    return true;
+}
+
+typedef struct cbctx
+{
+    ub1 *buffer;
+    ub4 buffer_len;
+    oraub8 position;
+    oraub8 length;
+} cbctx;
+
+sb4 callback(void *ctxp, void *bufp, oraub8 *lenp,
+             ub1 *piece, void **changed_bufpp,
+             oraub8 *changed_lenp)
+{
+    ub4 nbytes(0);
+    cbctx * ctx = (cbctx *) ctxp;
+    oraub8 amt = (*lenp > ctx->buffer_len) ? ctx->buffer_len : *lenp;
+    oraub8 rem = ctx->length - (ctx->position - 1);
+    *piece = OCI_NEXT_PIECE;
+
+    if (rem > amt)
+    {
+        nbytes = amt;
+    }
+    else
+    {
+        nbytes = rem;
+        *piece = OCI_LAST_PIECE;
+    }
+
+    memcpy(bufp, ctx->buffer, nbytes);
+    *lenp = nbytes;
+
+    ctx->position += nbytes;
+    *changed_bufpp = NULL;
+    // *changed_lenp = 0;
+    return OCI_CONTINUE;
+}
+
+bool OWStatement::WriteBlob(OCILobLocator** pphLocator,
+                            void* pBuffer,
+                            int nSize,
+                            int numChunks)
+{
+
+
+
+    CheckError(OCIDescriptorAlloc(
+                   poConnection->hEnv,
+                   (void**) pphLocator,
+                   OCI_DTYPE_LOB,
+                   (size_t) 0,
+                   (dvoid **) 0),
+               hError);
+
+    ub1 mode(OCI_LOB_READWRITE);
+
+
+    CheckError(OCILobCreateTemporary(
+                   poConnection->hSvcCtx,
+                   poConnection->hError,
+                   (OCILobLocator*) *pphLocator,
+                   (ub4) OCI_DEFAULT,
+                   (ub1) OCI_DEFAULT,
+                   (ub1) OCI_TEMP_BLOB,
+                   TRUE,
+                   OCI_DURATION_SESSION),
+               hError);
+
+    CheckError(OCILobOpen(
+                   poConnection->hSvcCtx,
+                   hError,
+                   *pphLocator,
+                   mode), hError);
+
+
+
+    ub4 nChunkSize(0);
+    CheckError(OCILobGetChunkSize(poConnection->hSvcCtx,
+                                  hError,
+                                  *pphLocator,
+                                  &nChunkSize),
+               hError);
+    nChunkSize = nChunkSize * numChunks;
+    oraub8 nAmount  = (oraub8) nSize;
+    oraub8 nAmountWritten(0);
+    oraub8 charAmount(0);
+
+    cbctx ctx;
+    ctx.buffer = (ub1*) pBuffer;
+    ctx.buffer_len = nChunkSize;
+    ctx.position = 1;
+    ctx.length = nAmount;
+
+    ub1* chunkBuffer = (ub1*) malloc(nChunkSize * sizeof(ub1) +1);
+
+    // CheckError(OCILobEnableBuffering(
+    //                      poConnection->hSvcCtx,
+    //                      hError,
+    //                      *pphLocator), hError);
+    CheckError(OCILobWrite2(
+                   poConnection->hSvcCtx,
+                   hError,
+                   (OCILobLocator*) *pphLocator,
+                   (oraub8*) &nAmountWritten,
+                   (oraub8*) &charAmount,
+                   (oraub8) 1,
+                   (dvoid*) chunkBuffer,
+                   (oraub8) nChunkSize,
+                   (ub1) OCI_FIRST_PIECE,
+                   (dvoid*) &ctx,
+                   (OCICallbackLobWrite2) callback,
+                   (ub2) 0,
+                   (ub1) SQLCS_IMPLICIT),
+               hError);
+
+    // CheckError(OCILobWrite2(
+    //                    poConnection->hSvcCtx,
+    //                    hError,
+    //                    (OCILobLocator*) *pphLocator,
+    //                    (oraub8*) &nAmount,
+    //                    (oraub8*) &charAmount,
+    //                    (oraub8) 1,
+    //                    (dvoid*) pBuffer,
+    //                    (oraub8) nSize,
+    //                    (ub1) OCI_ONE_PIECE,
+    //                    (dvoid*) &ctx,
+    //                    NULL,
+    //                    (ub2) 0,
+    //                    (ub1) SQLCS_IMPLICIT),
+    //                hError);
+
+    // CheckError(OCILobFlushBuffer(
+    //                        poConnection->hSvcCtx,
+    //                        hError,
+    //                        (OCILobLocator*) *pphLocator, OCI_LOB_BUFFER_FREE), hError);
+    //
+    //  CheckError(OCILobDisableBuffering(
+    //                         poConnection->hSvcCtx,
+    //                         hError,
+    //                         (OCILobLocator*) *pphLocator), hError);
+
+
+
+    CheckError(OCILobClose(
+                   poConnection->hSvcCtx,
+                   hError,
+                   *pphLocator), hError);
+    free(chunkBuffer);
+    return (nAmount == (ub4) nSize);
 }
 
 char* OWStatement::ReadCLob(OCILobLocator* phLocator)

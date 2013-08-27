@@ -90,13 +90,13 @@ void PointBuffer::reset(Schema const& new_schema)
 {
     boost::uint32_t old_size = m_schema.getByteSize();
     boost::uint32_t new_size = new_schema.getByteSize();
-    
+
     m_schema = new_schema;
     m_byteSize = new_size;
-    
-    if (m_byteSize != old_size )
+
+    if (m_byteSize != old_size)
     {
-        boost::uint64_t new_array_size = static_cast<boost::uint64_t>(new_size) * static_cast<boost::uint64_t>(m_capacity); 
+        boost::uint64_t new_array_size = static_cast<boost::uint64_t>(new_size) * static_cast<boost::uint64_t>(m_capacity);
         if (new_array_size > m_data.size())
         {
             m_data.resize(static_cast<std::vector<boost::uint8_t>::size_type>(new_array_size));
@@ -112,7 +112,7 @@ void PointBuffer::resize(boost::uint32_t const& capacity, bool bExact)
     if (capacity != m_capacity)
     {
         m_capacity = capacity;
-        boost::uint64_t new_array_size = static_cast<boost::uint64_t>(m_schema.getByteSize()) * static_cast<boost::uint64_t>(m_capacity); 
+        boost::uint64_t new_array_size = static_cast<boost::uint64_t>(m_schema.getByteSize()) * static_cast<boost::uint64_t>(m_capacity);
         if (new_array_size > m_data.size() || bExact)
         {
             m_data.resize(static_cast<std::vector<boost::uint8_t>::size_type>(new_array_size));
@@ -166,6 +166,7 @@ pdal::Bounds<double> PointBuffer::calculateBounds(bool is3d) const
     Dimension const& dimY = schema.getDimension("Y");
     Dimension const& dimZ = schema.getDimension("Z");
 
+    Vector<double> v;
 
     bool first = true;
     for (boost::uint32_t pointIndex=0; pointIndex<getNumPoints(); pointIndex++)
@@ -176,25 +177,36 @@ pdal::Bounds<double> PointBuffer::calculateBounds(bool is3d) const
 
         double xd = dimX.applyScaling(xi);
         double yd = dimY.applyScaling(yi);
-        
+
         if (is3d)
         {
             double zd = dimZ.applyScaling(zi);
-            Vector<double> v(xd, yd, zd);
             if (first)
             {
                 output = pdal::Bounds<double>(xd, yd, zd, xd, yd, zd);
                 first = false;
+                v.add(xd);
+                v.add(yd);
+                v.add(zd);
             }
+            v[0] = xd;
+            v[1] = yd;
+            v[2] = zd;
             output.grow(v);
-        } else 
+
+        }
+        else
         {
-            Vector<double> v(xd, yd);
+
             if (first)
             {
                 output = pdal::Bounds<double>(xd, yd, xd, yd);
                 first = false;
+                v.add(xd);
+                v.add(yd);
             }
+            v[0] = xd;
+            v[1] = yd;
             output.grow(v);
         }
     }
@@ -366,19 +378,19 @@ boost::property_tree::ptree PointBuffer::toPTree() const
                         output += STRINGIFY(double, GETFIELDAS(double));
                     }
                     break;
-                    
+
                 case dimension::RawByte:
-                {
-                    const boost::uint8_t* data  = getData(pointIndex) + dimension.getByteOffset();
-                    std::vector<boost::uint8_t> bytes;
-                    for (int i=0; i < dimension.getByteSize(); ++i)
                     {
-                        bytes.push_back(data[i]);
+                        const boost::uint8_t* data  = getData(pointIndex) + dimension.getByteOffset();
+                        std::vector<boost::uint8_t> bytes;
+                        for (int i=0; i < dimension.getByteSize(); ++i)
+                        {
+                            bytes.push_back(data[i]);
+                        }
+                        output += Utils::binary_to_hex_string(bytes);
+                        break;
                     }
-                    output += Utils::binary_to_hex_string(bytes);
-                    break;
-                }
-                    
+
                 default:
                     throw pdal_error("unknown dimension data type");
             }
@@ -397,57 +409,57 @@ DimensionMap* PointBuffer::mapDimensions(PointBuffer const& source, PointBuffer 
     schema::index_by_index::size_type d(0);
 
     DimensionMap* dims = new DimensionMap;
-    
+
     Schema const& dest_schema = destination.getSchema();
     for (d = 0; d < dimensions.size(); ++d)
     {
         Dimension const& source_dim = dimensions[d];
-            
-        boost::optional<Dimension const&> dest_dim_ptr = dest_schema.getDimensionOptional(    source_dim.getName(), 
-                                                                                                source_dim.getNamespace());
+
+        boost::optional<Dimension const&> dest_dim_ptr = dest_schema.getDimensionOptional(source_dim.getName(),
+                source_dim.getNamespace());
         if (!dest_dim_ptr)
         {
             continue;
         }
-            
+
         Dimension const* s = &source_dim;
         Dimension const* d = &(*dest_dim_ptr);
 
         if (d->getInterpretation() == s->getInterpretation() &&
-            d->getByteSize() == s->getByteSize() && 
-            pdal::Utils::compare_distance(d->getNumericScale(), s->getNumericScale()) &&
-            pdal::Utils::compare_distance(d->getNumericOffset(), s->getNumericOffset()) &&
-            d->getEndianness() == s->getEndianness() 
-            )
+                d->getByteSize() == s->getByteSize() &&
+                pdal::Utils::compare_distance(d->getNumericScale(), s->getNumericScale()) &&
+                pdal::Utils::compare_distance(d->getNumericOffset(), s->getNumericOffset()) &&
+                d->getEndianness() == s->getEndianness()
+           )
         {
-        
+
             dims->insert(std::pair<Dimension const*, Dimension const*>(s, d));
         }
     }
-    
+
     return dims;
 }
 
-void PointBuffer::copyLikeDimensions(   PointBuffer const& source, 
-                                        PointBuffer& destination,
-                                        DimensionMap const& dimensions,
-                                        boost::uint32_t source_starting_position, 
-                                        boost::uint32_t destination_starting_position,
-                                        boost::uint32_t howMany)
+void PointBuffer::copyLikeDimensions(PointBuffer const& source,
+                                     PointBuffer& destination,
+                                     DimensionMap const& dimensions,
+                                     boost::uint32_t source_starting_position,
+                                     boost::uint32_t destination_starting_position,
+                                     boost::uint32_t howMany)
 {
 
-    
+
     assert(howMany <= destination.getCapacity() - destination_starting_position);
     assert(howMany <= source.getCapacity() - source_starting_position);
 
     typedef DimensionMap::const_iterator Iterator;
-    
+
     for (Iterator d = dimensions.begin(); d != dimensions.end(); ++d)
     {
-        
+
         Dimension const& source_dim = *d->first;
         Dimension const& dest_dim = *d->second;
-        
+
         for (boost::uint32_t i = 0; i < howMany; ++i)
         {
             boost::uint8_t* source_position = source.getData(source_starting_position+i) + source_dim.getByteOffset();
@@ -456,7 +468,7 @@ void PointBuffer::copyLikeDimensions(   PointBuffer const& source,
         }
     }
 
-                        
+
 }
 
 std::ostream& operator<<(std::ostream& ostr, const PointBuffer& pointBuffer)
