@@ -85,6 +85,7 @@ private:
     boost::uint32_t m_seed;
     boost::uint32_t m_sample_size;
     bool m_useXML;
+    std::string m_Dimensions;
 };
 
 
@@ -140,6 +141,7 @@ void PcInfo::addSwitches()
     processing_options->add_options()
         ("point,p", po::value<boost::uint64_t>(&m_pointNumber)->implicit_value(0), "point to dump")
         ("stats,a", po::value<bool>(&m_showStats)->zero_tokens()->implicit_value(true), "dump stats on all points (reads entire dataset)")
+        ("dimensions", po::value<std::string >(&m_Dimensions), "dump stats on all points (reads entire dataset)")
         ("schema,s", po::value<bool>(&m_showSchema)->zero_tokens()->implicit_value(true), "dump the schema")
         ("metadata,m", po::value<bool>(&m_showMetadata)->zero_tokens()->implicit_value(true), "dump the metadata")
         ("sdo_pc", po::value<bool>(&m_showSDOPCMetadata)->zero_tokens()->implicit_value(true), "dump the SDO_PC Oracle Metadata")
@@ -320,10 +322,16 @@ int PcInfo::execute()
     m_options.add(cls);
     m_options.add(rn);
     m_options.add(nr);
+    if (m_Dimensions.size())
+    {
+        Option dimensions("dimensions", m_Dimensions, "Use explicit list of dimensions");
+        m_options.add(dimensions);
+    }
     
     pdal::Options options = m_options + readerOptions;
     
     pdal::filters::Stats* filter = new pdal::filters::Stats(*reader, options);
+    
 
     filter->initialize();
 
