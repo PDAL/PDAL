@@ -326,6 +326,8 @@ int PcInfo::execute()
     {
         Option dimensions("dimensions", m_Dimensions, "Use explicit list of dimensions");
         m_options.add(dimensions);
+        Option do_sample("do_sample", false, "Dont do sampling");
+        m_options.add(do_sample);
     }
     
     pdal::Options options = m_options + readerOptions;
