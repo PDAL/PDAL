@@ -284,7 +284,7 @@ else()
   # this prevents auto-linking pragmas from depending on wrong lib names
   add_definitions(-DBOOST_ALL_NO_LIB)
 
-  include_directories(SYSTEM ${Boost_INCLUDE_DIRS}/)
+  include_directories(${Boost_INCLUDE_DIRS}/)
   set(PDAL_EMBED_BOOST TRUE CACHE BOOL "use embedded boost")
   add_subdirectory(boost)
   message(STATUS "Using embedded boost tree")
