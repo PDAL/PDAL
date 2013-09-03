@@ -487,7 +487,7 @@ void Stats::readBufferBeginImpl(PointBuffer& buffer)
                     doExact = true;
                 }
                 
-                bool doSample = options.getValueOrDefault<bool>("do_sample", true);
+                bool doSample = options.getValueOrDefault<bool>("do_sample", false);
                 stats::SummaryPtr c = boost::shared_ptr<stats::Summary>(new stats::Summary(bin_count, sample_size, stats_cache_size, seed, doExact, doSample));
 
                 std::pair<DimensionPtr, stats::SummaryPtr> p(d,c);
