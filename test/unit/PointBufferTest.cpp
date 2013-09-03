@@ -368,5 +368,20 @@ BOOST_AUTO_TEST_CASE(PointBufferTest_copy_like_Dimensions)
     return;
 }
 
+BOOST_AUTO_TEST_CASE(test_indexed)
+{
+    Dimension d1("Y", dimension::SignedInteger, 4);
+    Dimension d2("X", dimension::SignedInteger, 4);
+    Schema schema;
+    schema.appendDimension(d1);
+    schema.appendDimension(d2);
+
+    IndexedPointBuffer data(schema, 10);
+
+    BOOST_CHECK(data.getCapacity() == 10);
+    BOOST_CHECK(data.getSchema() == schema);
+
+    return;
+}
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -440,6 +440,91 @@ DimensionMap* PointBuffer::mapDimensions(PointBuffer const& source, PointBuffer 
     return dims;
 }
 
+double PointBuffer::applyScaling(Dimension const& d,
+                                 std::size_t pointIndex) const
+{
+    double output(0.0);
+
+    float flt(0.0);
+    boost::int8_t i8(0);
+    boost::uint8_t u8(0);
+    boost::int16_t i16(0);
+    boost::uint16_t u16(0);
+    boost::int32_t i32(0);
+    boost::uint32_t u32(0);
+    boost::int64_t i64(0);
+    boost::uint64_t u64(0);
+
+    boost::uint32_t size = d.getByteSize();
+    switch (d.getInterpretation())
+    {
+        case dimension::Float:
+            if (size == 4)
+            {
+                flt = getField<float>(d, pointIndex);
+                output = static_cast<double>(flt);
+            }
+            if (size == 8)
+            {
+                output = getField<double>(d, pointIndex);
+            }
+            break;
+
+        case dimension::SignedInteger:
+            if (size == 1)
+            {
+                i8 = getField<boost::int8_t>(d, pointIndex);
+                output = d.applyScaling<boost::int8_t>(i8);
+            }
+            if (size == 2)
+            {
+                i16 = getField<boost::int16_t>(d, pointIndex);
+                output = d.applyScaling<boost::int16_t>(i16);
+            }
+            if (size == 4)
+            {
+                i32 = getField<boost::int32_t>(d, pointIndex);
+                output = d.applyScaling<boost::int32_t>(i32);
+            }
+            if (size == 8)
+            {
+                i64 = getField<boost::int64_t>(d, pointIndex);
+                output = d.applyScaling<boost::int64_t>(i64);
+            }
+            break;
+
+        case dimension::UnsignedInteger:
+            if (size == 1)
+            {
+                u8 = getField<boost::uint8_t>(d, pointIndex);
+                output = d.applyScaling<boost::uint8_t>(u8);
+            }
+            if (size == 2)
+            {
+                u16 = getField<boost::uint16_t>(d, pointIndex);
+                output = d.applyScaling<boost::uint16_t>(u16);
+            }
+            if (size == 4)
+            {
+                u32 = getField<boost::uint32_t>(d, pointIndex);
+                output = d.applyScaling<boost::uint32_t>(u32);
+            }
+            if (size == 8)
+            {
+                u64 = getField<boost::uint64_t>(d, pointIndex);
+                output = d.applyScaling<boost::uint64_t>(u64);
+            }
+            break;
+
+        case dimension::RawByte:
+        case dimension::Pointer:    // stored as 64 bits, even on a 32-bit box
+        case dimension::Undefined:
+            throw pdal_error("Dimension data type unable to be scaled in index filter");
+    }
+
+    return output;
+}
+
 void PointBuffer::copyLikeDimensions(PointBuffer const& source,
                                      PointBuffer& destination,
                                      DimensionMap const& dimensions,
@@ -539,5 +624,18 @@ std::ostream& operator<<(std::ostream& ostr, const PointBuffer& pointBuffer)
     return ostr;
 }
 
+IndexedPointBuffer::IndexedPointBuffer( const Schema& schema, 
+                                        boost::uint32_t capacity)
+    : PointBuffer(schema, capacity)
+{
+
+}
+
+void IndexedPointBuffer::build()
+{
+    Dimension const* x = &m_schema.getDimension("X");
+    Dimension const* y = &m_schema.getDimension("Y");
+    Dimension const* z = &m_schema.getDimension("Z"); 
+}
 
 } // namespace pdal

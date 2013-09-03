@@ -46,6 +46,10 @@
 #include <pdal/Schema.hpp>
 #include <pdal/Metadata.hpp>
 
+#ifdef PDAL_HAVE_FLANN
+#include <flann/flann.hpp>
+#endif
+
 #include <vector>
 
 namespace pdal
@@ -280,6 +284,8 @@ public:
         return static_cast<boost::uint64_t>(m_data.size());
     }
     
+    double applyScaling(Dimension const& d,
+                        std::size_t pointIndex) const;
     static void scaleData(PointBuffer const& source_buffer,
                           PointBuffer& destination_buffer,
                           Dimension const& source_dimension,
@@ -343,7 +349,7 @@ public:
     
     /** @name private attributes
     */
-private:
+protected:
     Schema m_schema;
     std::vector<boost::uint8_t> m_data;
     boost::uint32_t m_numPoints;
@@ -881,6 +887,26 @@ inline void PointBuffer::scale(Dimension const& source_dimension,
     return;
 }
 
+
+class IndexedPointBuffer : public PointBuffer
+{
+public:
+    IndexedPointBuffer(const Schema& schema, boost::uint32_t capacity=65536);
+
+    // /// Copy constructor. The data array is simply memcpy'd.
+    // IndexedPointBuffer(const IndexedPointBuffer&) : PointBuffer(buffer) {}
+    // 
+    // /// Assignment constructor.
+    // PointBuffer& operator=(const PointBuffer&) { return IndexedPointBuffer};
+    void build();
+
+private:
+#ifdef PDAL_HAVE_FLANN
+    flann::KDTreeSingleIndex<flann::L2_Simple<float> >* m_index;
+    flann::Matrix<float>* m_dataset;    
+#endif      
+        
+};
 #ifdef PDAL_COMPILER_MSVC
 #  pragma warning(pop)
 #endif

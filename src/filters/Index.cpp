@@ -249,9 +249,9 @@ boost::uint32_t Index::readBufferImpl(PointBuffer& data)
     bool logOutput = m_stage.log()->getLevel() > logDEBUG4;
     for (boost::uint32_t pointIndex=0; pointIndex<numRead; pointIndex++)
     {
-        float x = static_cast<float>(getScaledValue(data, *m_xDim, pointIndex));
-        float y = static_cast<float>(getScaledValue(data, *m_yDim, pointIndex));
-        float z = static_cast<float>(getScaledValue(data, *m_zDim, pointIndex));
+        float x = static_cast<float>(data.applyScaling(*m_xDim, pointIndex));
+        float y = static_cast<float>(data.applyScaling(*m_yDim, pointIndex));
+        float z = static_cast<float>(data.applyScaling(*m_zDim, pointIndex));
 
         m_data.push_back(x);
         m_data.push_back(y);
