@@ -253,7 +253,7 @@ if (NOT PDAL_EMBED_BOOST)
 endif()
 
 if(Boost_FOUND)
-  include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
+  include_directories(${Boost_INCLUDE_DIRS})
 
   # make these available for the user to set.
   mark_as_advanced(CLEAR Boost_INCLUDE_DIR) 
