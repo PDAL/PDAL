@@ -83,11 +83,6 @@ public:
     boost::uint32_t processBuffer(PointBuffer const& srcData, PointBuffer& dstData) const;
 
     const Bounds<double>& getBounds() const;
-
-    double getScaledValue(PointBuffer const& data,
-                          Dimension const& d,
-                          std::size_t pointIndex) const;
-
     inline boost::uint32_t getDimensions() const { return m_dimensions; }
     inline void setDimensions(boost::uint32_t const& dimensions) { m_dimensions = dimensions; }
 

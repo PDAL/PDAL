@@ -134,9 +134,6 @@ private:
     boost::uint64_t skipImpl(boost::uint64_t);
     boost::uint32_t readBufferImpl(PointBuffer&);
     bool atEndImpl() const;
-    double getScaledValue(PointBuffer& data,
-                          Dimension const& d,
-                          std::size_t pointIndex) const;
     void setScaledValue(PointBuffer& data,
                         double value,
                         Dimension const& d,
