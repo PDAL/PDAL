@@ -423,8 +423,8 @@ BOOST_AUTO_TEST_CASE(test_indexed)
     BOOST_CHECK_EQUAL(nids[3], 42u);
     BOOST_CHECK_EQUAL(nids[4], 40u);    
 
-    std::vector<boost::uint32_t> rids = idata.radius(636199, 849238, 428.05, 5000.0);
-    BOOST_CHECK_EQUAL(rids.size(), 40u);    
+    std::vector<boost::uint32_t> rids = idata.radius(637012.24, 849028.31, 431.66, 100000);
+    BOOST_CHECK_EQUAL(rids.size(), 11u);    
 
     return;
 }

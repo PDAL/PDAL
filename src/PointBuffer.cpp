@@ -698,21 +698,28 @@ std::vector<boost::uint32_t> IndexedPointBuffer::radius(double const& x, double 
     if (num_dimensions > 2)
         query_vec[2] = z;
 
-
     flann::Matrix<double> query_mat(&query_vec[0], 1, num_dimensions);
 
+    int checks(flann::FLANN_CHECKS_UNLIMITED);
+    flann::SearchParams parameters(checks, 0 /*eps*/, false /*sorted*/);
+    
+    // FLANN is more efficient using an internal heap 
+    // search structure for large numbers of points. For radiusSearch, 
+    // we're just guessing how many neighbors are going to 
+    // come back, however.
+    if (getNumPoints() > 16777216) // 2^24
+    {
+        parameters.use_heap = flann::FLANN_True;
+    }
     m_index->radiusSearch(query_mat,
                        indices_vec,
                        distances_vec,
                        r,
-                       flann::SearchParams(128));
-   std::clog << "indices_vec.size(): " << indices_vec.size() << std::endl;
-   std::clog << "indices_vec[0].size(): " << indices_vec[0].size() << std::endl;
-   std::clog << "indices_vec[0][0].size(): " << indices_vec[0][0] << std::endl;
+                       parameters);
 
-    for (unsigned i=0; i < indices_vec.size() ; ++i)
+    for (unsigned i=0; i < indices_vec[0].size() ; ++i)
     {
-        // output.push_back(indices_vec[i]);
+        output.push_back(indices_vec[0][i]);
     }
 #else
     boost::ignore_unused_variable_warning(x);
