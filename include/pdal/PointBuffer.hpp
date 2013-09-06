@@ -892,7 +892,13 @@ class IndexedPointBuffer : public PointBuffer
 {
 public:
     IndexedPointBuffer(const Schema& schema, boost::uint32_t capacity=65536);
-
+    IndexedPointBuffer(IndexedPointBuffer const& buffer); 
+    IndexedPointBuffer(PointBuffer const& buffer); 
+    ~IndexedPointBuffer();
+    
+    std::vector<boost::uint32_t> neighbors(double const& x, double const& y, double const& z, double distance, boost::uint32_t count=1);
+    std::vector<boost::uint32_t> radius(double const& x, double const& y, double const& z, double const& r);
+    
     // /// Copy constructor. The data array is simply memcpy'd.
     // IndexedPointBuffer(const IndexedPointBuffer&) : PointBuffer(buffer) {}
     // 
@@ -901,9 +907,10 @@ public:
     void build();
 
 private:
+    std::vector<double> m_coordinates;
 #ifdef PDAL_HAVE_FLANN
-    flann::KDTreeSingleIndex<flann::L2_Simple<float> >* m_index;
-    flann::Matrix<float>* m_dataset;    
+    flann::KDTreeSingleIndex<flann::L2_Simple<double> >* m_index;
+    flann::Matrix<double>* m_dataset;    
 #endif      
         
 };
