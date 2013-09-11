@@ -105,7 +105,7 @@ bool Schema::operator==(const Schema& other) const
     if (m_index.size() != other.m_index.size()) return false;
 
     schema::index_by_index const& idx = m_index.get<schema::index>();
-    schema::index_by_index const& idx2 = m_index.get<schema::index>();
+    schema::index_by_index const& idx2 = other.m_index.get<schema::index>();
 
     schema::index_by_index::size_type i(0);
     for (i = 0; i < idx.size(); ++i)
