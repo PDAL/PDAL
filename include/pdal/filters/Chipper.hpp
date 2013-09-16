@@ -250,6 +250,7 @@ class PDAL_DLL Chipper : public pdal::FilterSequentialIterator
 {
 public:
     Chipper(pdal::filters::Chipper const& filter, PointBuffer& buffer);
+    ~Chipper();
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t);

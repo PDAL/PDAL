@@ -594,6 +594,14 @@ bool Chipper::atEndImpl() const
     return iter.atEnd();
 }
 
+Chipper::~Chipper()
+{
+    if (m_random_iterator) 
+        delete m_random_iterator; 
+    
+    if (m_one_point)
+        delete m_one_point;
+}
 }
 } // iterators::sequential
 
