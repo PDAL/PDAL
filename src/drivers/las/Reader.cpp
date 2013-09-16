@@ -178,28 +178,36 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data,
                                       PointDimensions* dimensions,
                                       std::vector<boost::uint8_t>& read_buffer) const
 {
-    // we must not read more points than are left in the file
-    const boost::uint64_t numPoints64 = std::min<boost::uint64_t>(data.getCapacity(), numPointsLeft);
-    const boost::uint32_t numPoints = (boost::uint32_t)std::min<boost::uint64_t>(numPoints64, std::numeric_limits<boost::uint32_t>::max());
-
-    const LasHeader& lasHeader = getLasHeader();
-    const PointFormat pointFormat = lasHeader.getPointFormat();
-
-
-    const bool hasTime = Support::hasTime(pointFormat);
-    const bool hasColor = Support::hasColor(pointFormat);
-    const int pointByteCount = Support::getPointDataSize(pointFormat);
-
-    // std::vector<boost::uint8_t> buf(pointByteCount * numPoints);
-    if (read_buffer.size() < (pointByteCount * numPoints))
-    {
-        read_buffer.resize(pointByteCount * numPoints);
-    }
-
+ 
     if (!dimensions)
     {
         throw pdal_error("No dimension positions are available!");
+    } 
+ 
+    // we must not read more points than are left in the file
+    const boost::uint64_t numPoints64 = std::min<boost::uint64_t>(data.getCapacity(), numPointsLeft);
+    const boost::uint64_t numPoints = std::min<boost::uint64_t>(numPoints64, std::numeric_limits<boost::uint32_t>::max());
+    
+    if (numPoints64 >= std::numeric_limits<boost::uint32_t>::max())
+    {
+        throw pdal_error("Unable to read more than 2**32 points at a time");
     }
+    
+    const LasHeader& lasHeader = getLasHeader();
+    const PointFormat pointFormat = lasHeader.getPointFormat();
+
+    const bool hasTime = Support::hasTime(pointFormat);
+    const bool hasColor = Support::hasColor(pointFormat);
+    boost::uint16_t pointByteCount = Support::getPointDataSize(pointFormat);
+
+
+    if (read_buffer.size() < (pointByteCount * numPoints))
+    {
+        boost::int64_t size = pointByteCount * numPoints64;
+        read_buffer.resize(size);
+    }
+
+
 
     if (!dimensions->X)
         throw pdal_error("No X dimension position available!");
