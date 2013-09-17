@@ -54,7 +54,6 @@ SET(PDAL_UNITTEST_TEST_SRC
     filters/StatsFilterTest.cpp
     StreamFactoryTest.cpp
     SupportTest.cpp
-    drivers/soci/Writer.cpp    
     drivers/terrasolid/TerraSolidReaderTest.cpp
     drivers/text/TextWriterTest.cpp
 	ThreadTest.cpp
@@ -108,6 +107,17 @@ if (NOT USE_PDAL_PLUGIN_OCI)
 endif()
 
 endif (WITH_ORACLE)
+
+if (WITH_SOCI)
+if (NOT USE_PDAL_PLUGIN_SOCI)
+    set(PDAL_SOCI_TEST_CPP drivers/soci/Writer.cpp)
+
+    FOREACH(file ${PDAL_SOCI_TEST_CPP})
+            SET(PDAL_UNITTEST_TEST_SRC "${PDAL_UNITTEST_TEST_SRC};${file}" CACHE INTERNAL "source files for test")
+    ENDFOREACH(file)
+endif()
+
+endif (WITH_SOCI)
 
 if (WITH_GDAL)
     set(PDAL_GDAL_TEST_CPP
