@@ -639,11 +639,11 @@ else()
 endif()
 add_library(${PDAL_LIB_NAME} ${PDAL_LIB_TYPE} ${PDAL_SOURCES})
 
-set (SOCI_LIBRARIES ${SOCI_LIBRARY} ${SOCI_postgresql_PLUGIN})
+set (SOCI_LIBRARIES ${SOCI_LIBRARY} ${SOCI_postgresql_PLUGIN} ${SOCI_sqlite3_PLUGIN} ${SQLITE3_LIBRARY})
 
 if (WITH_SOCI)
 if (NOT USE_PDAL_PLUGIN_SOCI)
-target_link_libraries(${APPS_CPP_DEPENDENCIES} ${SOCI_LIBRARIES})
+target_link_libraries(${APPS_CPP_DEPENDENCIES} ${SOCI_LIBRARIES} )
 endif()
 endif()
 

@@ -107,7 +107,9 @@ void Writer::initialize()
     {
         if (m_type == DATABASE_POSTGRESQL)
             m_session = new ::soci::session(::soci::postgresql, connection);
-
+        if (m_type == DATABASE_SQLITE)
+            m_session = new ::soci::session(::soci::sqlite3, connection);
+        
         log()->get(logDEBUG) << "Connected to database" << std::endl;
 
     }
@@ -200,6 +202,8 @@ bool Writer::CheckTableExists(std::string const& name)
         oss << "select table_name from user_tables";
     else if (m_type == DATABASE_POSTGRESQL)
         oss << "SELECT tablename FROM pg_tables";
+    else if (m_type == DATABASE_SQLITE)
+        oss << "SELECT name FROM sqlite_master WHERE type = \"table\"";
 
     log()->get(logDEBUG) << "checking for " << name << " existence ... " << std::endl;
 
@@ -262,6 +266,32 @@ void Writer::CreateBlockTable(std::string const& name, boost::uint32_t srid)
             oss.str("");
         }
     }
+    else if (m_type == DATABASE_SQLITE)
+    {
+        std::string cloud_column = getOptions().getValueOrDefault<std::string>("cloud_column", "id");
+        std::string cloud_table = getOptions().getValueOrThrow<std::string>("cloud_table");
+
+        oss << "CREATE TABLE " << boost::to_lower_copy(name)
+            << "(" << boost::to_lower_copy(cloud_column)  << " INTEGER REFERENCES " << boost::to_lower_copy(cloud_table)  <<","
+            // << " obj_id INTEGER,"
+            << " block_id INTEGER,"
+            << " num_points INTEGER,"
+            << " points bytea,"
+            << " bbox box3d "
+            << ")";
+
+        m_session->once << oss.str();
+        oss.str("");
+
+        {
+            oss << "SELECT AddGeometryColumn('" << boost::to_lower_copy(name)
+                << "'," << "'extent'" << ","
+                << srid << ", 'POLYGON', 'XY')";
+            m_session->once << oss.str();
+            oss.str("");
+        }
+    }
+    
 }
 
 void Writer::DeleteBlockTable(std::string const& cloud_table_name,
@@ -316,6 +346,17 @@ void Writer::DeleteBlockTable(std::string const& cloud_table_name,
         m_session->once << oss.str();
         oss.str("");
     }
+    else if (m_type == DATABASE_SQLITE)
+    {
+        // We need to clean up the geometry column before dropping the table
+        oss << "SELECT DropGeometryColumn('" << boost::to_lower_copy(block_table_name) << "', 'extent')";
+        m_session->once << oss.str();
+        oss.str("");
+
+        oss << "DROP TABLE " << boost::to_lower_copy(block_table_name);
+        m_session->once << oss.str();
+        oss.str("");
+    }    
 
 }
 
@@ -352,6 +393,44 @@ void Writer::CreateCloudTable(std::string const& name, boost::uint32_t srid)
             oss.str("");
         }
     }
+    if (m_type == DATABASE_SQLITE)
+    {
+        ::soci::sqlite3_session_backend* backend = static_cast< ::soci::sqlite3_session_backend*>( m_session->get_backend());
+        int did_enable = sqlite3_enable_load_extension(static_cast<sqlite_api::sqlite3*>(backend->conn_), 1);
+        
+        if (did_enable == SQLITE_ERROR)
+            throw soci_driver_error("Unable to enable extensions on sqlite backend -- can't enable spatialite");
+        log()->get(logDEBUG3) << "Packing ignored dimension from PointBuffer " << std::endl;
+
+        oss << "SELECT load_extension('libspatialite.dylib')";
+        m_session->once << oss.str();
+        oss.str("");
+
+        oss << "SELECT InitSpatialMetadata()";
+        m_session->once << oss.str();
+        oss.str("");
+
+
+        std::string cloud_column = getOptions().getValueOrDefault<std::string>("cloud_column", "id");
+        oss << "CREATE TABLE " << boost::to_lower_copy(name)
+            << " (" << boost::to_lower_copy(cloud_column) << " INTEGER PRIMARY KEY AUTOINCREMENT,"
+            << " schema TEXT,"
+            << " block_table varchar(64)"
+            << ")";
+
+        m_session->once << oss.str();
+        oss.str("");
+        {
+            bool is3d = getOptions().getValueOrDefault<bool>("is3d", false);
+            boost::uint32_t nDim = 2 ;// is3d ? 3 : 2;
+
+            oss << "SELECT AddGeometryColumn('" << boost::to_lower_copy(name)
+                << "'," << "'extent'" << ","
+                << srid << ", 'POLYGON', 'XY')";
+            m_session->once << oss.str();
+            oss.str("");
+        }
+    }    
 }
 
 void Writer::DeleteCloudTable(std::string const& cloud_table_name,
@@ -397,7 +476,7 @@ void Writer::DeleteCloudTable(std::string const& cloud_table_name,
         oss.str("");
 
     }
-    else if (m_type == DATABASE_POSTGRESQL)
+    else if (m_type == DATABASE_POSTGRESQL || m_type == DATABASE_SQLITE)
     {
         // We need to clean up the geometry column before dropping the table
 
@@ -473,24 +552,35 @@ void Writer::CreateIndexes(std::string const& table_name,
         oss.str("");
     }
 
+    else if (m_type == DATABASE_SQLITE)
+    {
+        oss << "SELECT CreateSpatialIndex('"<< boost::to_lower_copy(table_name) << "', 'extent')";
+        m_session->once << oss.str();
+        oss.str("");
+    }    
+
     // Primary key
 
     if (isBlockTable)
     {
-        index_name_ss.str("");
-        index_name_ss <<  table_name <<"_objectid_idx";
-        index_name = index_name_ss.str().substr(0,29);
-
-        std::string cloud_column = getOptions().getValueOrDefault<std::string>("cloud_column", "id");
-
-        oss << "ALTER TABLE "<< table_name <<  " ADD CONSTRAINT "<< index_name <<
-            "  PRIMARY KEY ("<<boost::to_lower_copy(cloud_column) <<", block_id)";
-        if (m_type == DATABASE_ORACLE)
+        
+        if (m_type == DATABASE_POSTGRESQL)
         {
-            oss <<" ENABLE VALIDATE";
-        }
+            index_name_ss.str("");
+            index_name_ss <<  table_name <<"_objectid_idx";
+            index_name = index_name_ss.str().substr(0,29);
 
-        m_session->once << oss.str();
+            std::string cloud_column = getOptions().getValueOrDefault<std::string>("cloud_column", "id");
+
+            oss << "ALTER TABLE "<< table_name <<  " ADD CONSTRAINT "<< index_name <<
+                "  PRIMARY KEY ("<<boost::to_lower_copy(cloud_column) <<", block_id)";
+            if (m_type == DATABASE_ORACLE)
+            {
+                oss <<" ENABLE VALIDATE";
+            }
+
+            m_session->once << oss.str();
+        }
 
     }
     else
@@ -737,6 +827,57 @@ void Writer::CreateCloud(Schema const& buffer_schema)
             << "',:xml) RETURNING " << boost::to_lower_copy(cloud_column);
         std::string xml = pdal::Schema::to_xml(output_schema);
         m_session->once << oss.str(), ::soci::use(xml), ::soci::into(id);
+        oss.str("");
+
+        //
+        // int id;
+        // oss << "SELECT CURRVAL('"<< boost::to_lower_copy(cloud_table)  <<"_id_seq')";
+        // (m_session->once << oss.str(), ::soci::into(id));
+        // oss.str("");
+
+        log()->get(logDEBUG) << "Point cloud id was " << id << std::endl;
+        try
+        {
+            Option& pc_id = getOptions().getOptionByRef("pc_id");
+            pc_id.setValue(id);
+        }
+        catch (pdal::option_not_found&)
+        {
+            Option pc_id("pc_id", id, "Point Cloud Id");
+            getOptions().add(pc_id);
+        }
+
+        if (bounds.size())
+        {
+            boost::uint32_t srid = getOptions().getValueOrDefault<boost::uint32_t>("srid", 4326);
+            bool is3d = getOptions().getValueOrDefault<bool>("is3d", false);
+            std::string force =  "ST_Force_2D";
+
+            oss << "UPDATE "
+                << boost::to_lower_copy(cloud_table)
+                << " SET extent="<< force
+                << "(ST_GeometryFromText(:wkt,:srid)) where "
+                << boost::to_lower_copy(cloud_column) <<"=:id";
+
+            m_session->once << oss.str(), ::soci::use(bounds, "wkt"), ::soci::use(srid,"srid"), ::soci::use(id, "id");
+
+        }
+    } else if (m_type == DATABASE_SQLITE)
+    {
+        std::string cloud_column = getOptions().getValueOrDefault<std::string>("cloud_column", "id");
+        oss << "INSERT INTO " << boost::to_lower_copy(cloud_table)
+            << "(" 
+            << " block_table, schema) VALUES ('"
+            << boost::to_lower_copy(block_table)
+            << "',:xml) ";
+        std::string xml = pdal::Schema::to_xml(output_schema);
+        m_session->once << oss.str(), ::soci::use(xml);
+        oss.str("");
+
+
+        long id;
+        oss << "select last_insert_rowid()";
+        m_session->once << oss.str(), ::soci::into(id);
         oss.str("");
 
         //

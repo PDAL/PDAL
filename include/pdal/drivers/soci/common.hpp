@@ -42,6 +42,7 @@
 #include <boost-gregorian-date.h>
 #include <soci/soci.h>
 #include <soci/postgresql/soci-postgresql.h>
+#include <soci/sqlite3/soci-sqlite3.h>
 #include <soci/error.h>
 #include <soci/use.h>
 #endif
@@ -85,6 +86,7 @@ namespace soci
     {
         DATABASE_POSTGRESQL,
         DATABASE_ORACLE,
+        DATABASE_SQLITE,
         DATABASE_UNKNOWN = 128
     };
 
@@ -104,6 +106,8 @@ inline DatabaseType getDatabaseConnectionType(std::string const& connection_type
         output = DATABASE_ORACLE;
     else if (boost::iequals(connection_type, "postgresql"))
         output = DATABASE_POSTGRESQL;
+    else if (boost::iequals(connection_type, "sqlite"))
+        output = DATABASE_SQLITE;
     else
         output = DATABASE_UNKNOWN;
     
