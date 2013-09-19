@@ -37,6 +37,8 @@
 #include <boost/property_tree/xml_parser.hpp>
 
 #include <pdal/PointBuffer.hpp>
+#include <pdal/drivers/las/Reader.hpp>
+#include "Support.hpp"
 
 using namespace pdal;
 
@@ -300,7 +302,7 @@ BOOST_AUTO_TEST_CASE(PointBufferTest_resetting)
     schema.appendDimension(d3);
 
     
-    BOOST_CHECK_EQUAL(schema.getByteSize(), 8 + 4 + 1);
+    BOOST_CHECK_EQUAL(schema.getByteSize(), 8u + 4u + 1u);
     boost::uint32_t capacity(300);
     
     PointBuffer data(schema, capacity);
@@ -340,8 +342,8 @@ BOOST_AUTO_TEST_CASE(PointBufferTest_copy_like_Dimensions)
     schema_b.appendDimension(d2);
     
     
-    BOOST_CHECK_EQUAL(schema_a.getByteSize(), 8 + 4 + 1);
-    BOOST_CHECK_EQUAL(schema_b.getByteSize(), 4 + 1);
+    BOOST_CHECK_EQUAL(schema_a.getByteSize(), 8u + 4u + 1u);
+    BOOST_CHECK_EQUAL(schema_b.getByteSize(), 4u + 1u);
 
     boost::uint32_t capacity(200);
     PointBuffer data_a(schema_a, capacity);
@@ -368,5 +370,63 @@ BOOST_AUTO_TEST_CASE(PointBufferTest_copy_like_Dimensions)
     return;
 }
 
+BOOST_AUTO_TEST_CASE(test_indexed)
+{
+    pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
+    BOOST_CHECK(reader.getDescription() == "Las Reader");
+    reader.initialize();
+
+    const Schema& schema = reader.getSchema();
+    boost::uint32_t capacity(1000);
+    PointBuffer data(schema, capacity);
+
+    pdal::StageSequentialIterator* iter = reader.createSequentialIterator(data);
+
+    {
+        boost::uint32_t numRead = iter->read(data);
+        BOOST_CHECK_EQUAL(numRead, capacity);
+    }
+
+    BOOST_CHECK_EQUAL(data.getCapacity(), capacity);
+    BOOST_CHECK_EQUAL(data.getSchema(), schema);
+
+    
+    IndexedPointBuffer idata(data);
+    BOOST_CHECK_EQUAL(idata.getCapacity(), capacity);
+    BOOST_CHECK_EQUAL(idata.getSchema(), schema);
+
+    idata.build();
+    
+    unsigned k = 8;
+    
+    // If the query distance is 0, just return the k nearest neighbors
+    std::vector<boost::uint32_t> ids = idata.neighbors(636199, 849238, 428.05, 0.0, k);
+    
+    BOOST_CHECK_EQUAL(ids.size(), k);
+    BOOST_CHECK_EQUAL(ids[0], 8u);
+    BOOST_CHECK_EQUAL(ids[1], 7u);
+    BOOST_CHECK_EQUAL(ids[2], 9u);
+    BOOST_CHECK_EQUAL(ids[3], 42u);
+    BOOST_CHECK_EQUAL(ids[4], 40u);    
+
+    std::vector<boost::uint32_t> dist_ids = idata.neighbors(636199, 849238, 428.05, 100.0, k);
+
+    BOOST_CHECK_EQUAL(dist_ids.size(), 3u);
+    BOOST_CHECK_EQUAL(dist_ids[0], 8u);        
+
+    std::vector<boost::uint32_t> nids = idata.neighbors(636199, 849238, 428.05, 0.0, k);
+    
+    BOOST_CHECK_EQUAL(nids.size(), k);
+    BOOST_CHECK_EQUAL(nids[0], 8u);
+    BOOST_CHECK_EQUAL(nids[1], 7u);
+    BOOST_CHECK_EQUAL(nids[2], 9u);
+    BOOST_CHECK_EQUAL(nids[3], 42u);
+    BOOST_CHECK_EQUAL(nids[4], 40u);    
+
+    std::vector<boost::uint32_t> rids = idata.radius(636199, 849238, 428.05, 5000.0);
+    BOOST_CHECK_EQUAL(rids.size(), 40u);    
+
+    return;
+}
 
 BOOST_AUTO_TEST_SUITE_END()
