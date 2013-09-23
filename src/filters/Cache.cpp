@@ -315,8 +315,14 @@ IteratorBase::IteratorBase(pdal::filters::Cache const& filter, PointBuffer& buff
 
 IteratorBase::~IteratorBase()
 {
-    // if (m_dimension_maps)
-    //     delete m_dimension_maps;
+    if (m_dimension_maps.size())
+    {
+        typedef std::map<PointBuffer const*, DimensionMap const*>::iterator MapIterator;
+        for (MapIterator i = m_dimension_maps.begin(); i != m_dimension_maps.end(); ++i)
+        {
+            delete i->second;
+        }
+    }
 }
 
 boost::uint32_t IteratorBase::copyCachedBlocks(std::vector<PointBuffer const*> const& blocks,
