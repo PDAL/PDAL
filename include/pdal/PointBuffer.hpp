@@ -152,7 +152,7 @@ public:
     /// Equivalent to getNumPoints() * getSchema() * getByteSize().
     inline BufferByteSize getBufferByteLength() const
     {
-        return m_byteSize * m_numPoints;
+        return m_data.size();
     }
 
     /// returns the size of the theoretically filled raw byte array.
@@ -279,12 +279,6 @@ public:
     /// @param byteCount number of bytes to overwrite at given position
     void setDataStride(boost::uint8_t* data, boost::uint32_t pointIndex, boost::uint32_t byteCount);
 
-    /// returns the raw array size of the current buffer. 
-    inline BufferByteSize getArraySize() const
-    {
-        return static_cast<boost::uint64_t>(m_data.size());
-    }
-    
     double applyScaling(Dimension const& d,
                         std::size_t pointIndex) const;
     static void scaleData(PointBuffer const& source_buffer,
@@ -381,7 +375,7 @@ inline void PointBuffer::setField(pdal::Dimension const& dim, boost::uint32_t po
     BufferByteSize  offset = point_start_byte_position + dim.getByteOffset();
 
 #ifdef DEBUG
-    assert(offset + sizeof(T) <= getBufferByteLength());
+    assert(offset + sizeof(T) <= getBufferByteSize());
 #endif
 
     boost::uint8_t* p = (boost::uint8_t*)&(m_data.front()) + offset;
@@ -417,14 +411,14 @@ inline  T const& PointBuffer::getField(pdal::Dimension const& dim, boost::uint32
     // This test ends up being somewhat expensive when run for every field 
     // for every point. 
     
-    if (offset + sizeof(T) > getBufferByteLength())
+    if (offset + sizeof(T) > getBufferByteSize())
     {
         std::ostringstream oss;
         oss << "Offset for given dimension is off the end of the buffer!";
         throw buffer_error(oss.str());
     }
 
-    assert(offset + sizeof(T) <= getBufferByteLength() );
+    assert(offset + sizeof(T) <= getBufferByteSize() );
 #endif
 
     boost::uint8_t const* p = (boost::uint8_t const*)&(m_data.front()) + offset;
