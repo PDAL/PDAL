@@ -52,7 +52,8 @@ PointBuffer::PointBuffer(const Schema& schema, boost::uint32_t capacity)
     , m_metadata("pointbuffer")
 
 {
-    BufferByteSize size = getBufferByteCapacity();
+    BufferByteSize size = static_cast<BufferByteSize>(schema.getByteSize()) * static_cast<BufferByteSize>(capacity);
+
     m_data.reserve(size);
     m_data.resize(size);
     return;

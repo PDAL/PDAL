@@ -159,7 +159,7 @@ public:
     /// Equivalent to getCapacity() * getSchema() * getByteSize().
     inline BufferByteSize getBufferByteCapacity() const
     {
-        return m_byteSize * m_capacity;
+        return static_cast<BufferByteSize>(m_byteSize) * static_cast<BufferByteSize>(m_capacity);
     }
 
     /** @name Point data access

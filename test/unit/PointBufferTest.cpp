@@ -228,7 +228,7 @@ BOOST_AUTO_TEST_CASE(PointBufferTest_ptree)
     return;
 }
 
-// 
+
 // BOOST_AUTO_TEST_CASE(PointBufferTest_large_buffer)
 // {
 // 
@@ -268,6 +268,7 @@ BOOST_AUTO_TEST_CASE(PointBufferTest_ptree)
 //     }
 //     boost::uint64_t total_size = static_cast<boost::uint64_t>(data->getSchema().getByteSize()) * static_cast<boost::uint64_t>(data->getCapacity());
 //     BOOST_CHECK_EQUAL(data->getCapacity(), capacity);
+//     BOOST_CHECK_EQUAL(data->getBufferByteLength(), 38654705655u);
 //     BOOST_CHECK_EQUAL(data->getBufferByteCapacity(), 38654705655u);
 // 
 //     Dimension const& cls = data->getSchema().getDimension("Classification");
