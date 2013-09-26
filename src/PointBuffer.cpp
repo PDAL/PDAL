@@ -52,9 +52,10 @@ PointBuffer::PointBuffer(const Schema& schema, boost::uint32_t capacity)
     , m_metadata("pointbuffer")
 
 {
-    boost::uint64_t size = static_cast<boost::uint64_t>(schema.getByteSize()) * static_cast<boost::uint64_t>(capacity);
-    m_data.reserve(static_cast<std::vector<boost::uint8_t>::size_type>(size));
-    m_data.resize(static_cast<std::vector<boost::uint8_t>::size_type>(size));
+    BufferByteSize size = static_cast<BufferByteSize>(schema.getByteSize()) * static_cast<BufferByteSize>(capacity);
+
+    m_data.reserve(size);
+    m_data.resize(size);
     return;
 }
 
@@ -96,10 +97,10 @@ void PointBuffer::reset(Schema const& new_schema)
 
     if (m_byteSize != old_size)
     {
-        boost::uint64_t new_array_size = static_cast<boost::uint64_t>(new_size) * static_cast<boost::uint64_t>(m_capacity);
+        BufferByteSize new_array_size = static_cast<BufferByteSize>(new_size) * static_cast<BufferByteSize>(m_capacity);
         if (new_array_size > m_data.size())
         {
-            m_data.resize(static_cast<std::vector<boost::uint8_t>::size_type>(new_array_size));
+            m_data.resize(new_array_size);
         }
     }
 
@@ -112,10 +113,10 @@ void PointBuffer::resize(boost::uint32_t const& capacity, bool bExact)
     if (capacity != m_capacity)
     {
         m_capacity = capacity;
-        boost::uint64_t new_array_size = static_cast<boost::uint64_t>(m_schema.getByteSize()) * static_cast<boost::uint64_t>(m_capacity);
+        BufferByteSize new_array_size = static_cast<BufferByteSize>(m_schema.getByteSize()) * static_cast<BufferByteSize>(m_capacity);
         if (new_array_size > m_data.size() || bExact)
         {
-            m_data.resize(static_cast<std::vector<boost::uint8_t>::size_type>(new_array_size));
+            m_data.resize(new_array_size);
         }
 
     }
@@ -440,6 +441,91 @@ DimensionMap* PointBuffer::mapDimensions(PointBuffer const& source, PointBuffer 
     return dims;
 }
 
+double PointBuffer::applyScaling(Dimension const& d,
+                                 std::size_t pointIndex) const
+{
+    double output(0.0);
+
+    float flt(0.0);
+    boost::int8_t i8(0);
+    boost::uint8_t u8(0);
+    boost::int16_t i16(0);
+    boost::uint16_t u16(0);
+    boost::int32_t i32(0);
+    boost::uint32_t u32(0);
+    boost::int64_t i64(0);
+    boost::uint64_t u64(0);
+
+    boost::uint32_t size = d.getByteSize();
+    switch (d.getInterpretation())
+    {
+        case dimension::Float:
+            if (size == 4)
+            {
+                flt = getField<float>(d, pointIndex);
+                output = static_cast<double>(flt);
+            }
+            if (size == 8)
+            {
+                output = getField<double>(d, pointIndex);
+            }
+            break;
+
+        case dimension::SignedInteger:
+            if (size == 1)
+            {
+                i8 = getField<boost::int8_t>(d, pointIndex);
+                output = d.applyScaling<boost::int8_t>(i8);
+            }
+            if (size == 2)
+            {
+                i16 = getField<boost::int16_t>(d, pointIndex);
+                output = d.applyScaling<boost::int16_t>(i16);
+            }
+            if (size == 4)
+            {
+                i32 = getField<boost::int32_t>(d, pointIndex);
+                output = d.applyScaling<boost::int32_t>(i32);
+            }
+            if (size == 8)
+            {
+                i64 = getField<boost::int64_t>(d, pointIndex);
+                output = d.applyScaling<boost::int64_t>(i64);
+            }
+            break;
+
+        case dimension::UnsignedInteger:
+            if (size == 1)
+            {
+                u8 = getField<boost::uint8_t>(d, pointIndex);
+                output = d.applyScaling<boost::uint8_t>(u8);
+            }
+            if (size == 2)
+            {
+                u16 = getField<boost::uint16_t>(d, pointIndex);
+                output = d.applyScaling<boost::uint16_t>(u16);
+            }
+            if (size == 4)
+            {
+                u32 = getField<boost::uint32_t>(d, pointIndex);
+                output = d.applyScaling<boost::uint32_t>(u32);
+            }
+            if (size == 8)
+            {
+                u64 = getField<boost::uint64_t>(d, pointIndex);
+                output = d.applyScaling<boost::uint64_t>(u64);
+            }
+            break;
+
+        case dimension::RawByte:
+        case dimension::Pointer:    // stored as 64 bits, even on a 32-bit box
+        case dimension::Undefined:
+            throw pdal_error("Dimension data type unable to be scaled in index filter");
+    }
+
+    return output;
+}
+
 void PointBuffer::copyLikeDimensions(PointBuffer const& source,
                                      PointBuffer& destination,
                                      DimensionMap const& dimensions,
@@ -539,5 +625,182 @@ std::ostream& operator<<(std::ostream& ostr, const PointBuffer& pointBuffer)
     return ostr;
 }
 
+IndexedPointBuffer::IndexedPointBuffer( const Schema& schema, 
+                                        boost::uint32_t capacity)
+    : PointBuffer(schema, capacity)
+{
 
+}
+
+IndexedPointBuffer::IndexedPointBuffer(PointBuffer const& other) 
+    : PointBuffer(other)
+{
+
+}
+IndexedPointBuffer::IndexedPointBuffer(IndexedPointBuffer const& other) 
+    : PointBuffer(other)
+    , m_coordinates(other.m_coordinates)
+    , m_index(other.m_index)
+    , m_dataset(other.m_dataset)
+{
+
+}
+
+void IndexedPointBuffer::build()
+{
+    Dimension const& dx = m_schema.getDimension("X");
+    Dimension const& dy = m_schema.getDimension("Y");
+    Dimension const* dz = m_schema.getDimensionPtr("Z");
+
+    for (boost::uint32_t pointIndex=0; pointIndex<getNumPoints(); pointIndex++)
+    {
+        double x = applyScaling(dx, pointIndex);
+        double y = applyScaling(dy, pointIndex);
+        double z = applyScaling(*dz, pointIndex);
+        m_coordinates.push_back(x);
+        m_coordinates.push_back(y);
+        if (dz)
+        {
+            m_coordinates.push_back(z);
+        }
+    }    
+
+    boost::uint32_t num_dims = dz ? 3 : 2;
+    m_dataset = new flann::Matrix<double>(&m_coordinates[0], getNumPoints(), num_dims);
+
+
+    m_index = new flann::KDTreeSingleIndex<flann::L2_Simple<double> >(*m_dataset, flann::KDTreeIndexParams(4));
+
+    m_index->buildIndex();
+
+    
+}
+
+std::vector<boost::uint32_t> IndexedPointBuffer::radius(double const& x, double const& y, double const& z, double const& r)
+{
+    std::vector<boost::uint32_t> output;
+
+#ifdef PDAL_HAVE_FLANN
+
+    if (!m_index)
+    {
+        throw pdal_error("Index is not initialized! Unable to query!");
+    }
+    Dimension const* dz = m_schema.getDimensionPtr("Z");
+    boost::uint32_t num_dimensions = dz ? 3 : 2;    
+
+    std::vector< std::vector<double> > distances_vec;
+
+    std::vector< std::vector<size_t> > indices_vec;
+
+    std::vector<double> query_vec(num_dimensions);
+    query_vec[0] = x;
+    query_vec[1] = y;
+    if (num_dimensions > 2)
+        query_vec[2] = z;
+
+
+    flann::Matrix<double> query_mat(&query_vec[0], 1, num_dimensions);
+
+    // m_index->radiusSearch(query_mat,
+    //                    indices_vec,
+    //                    distances_vec,
+    //                    r,
+    //                    flann::SearchParams(128));
+   std::clog << "indices_vec.size(): " << indices_vec.size() << std::endl;
+   std::clog << "indices_vec[0].size(): " << indices_vec[0].size() << std::endl;
+   std::clog << "indices_vec[0][0].size(): " << indices_vec[0][0] << std::endl;
+
+    for (unsigned i=0; i < indices_vec.size() ; ++i)
+    {
+        // output.push_back(indices_vec[i]);
+    }
+#else
+    boost::ignore_unused_variable_warning(x);
+    boost::ignore_unused_variable_warning(y);
+    boost::ignore_unused_variable_warning(z);
+    boost::ignore_unused_variable_warning(distance);
+    boost::ignore_unused_variable_warning(k);
+#endif
+
+    return output;
+}
+
+std::vector<boost::uint32_t> IndexedPointBuffer::neighbors(double const& x, double const& y, double const& z, double distance, boost::uint32_t k)
+{
+    std::vector<boost::uint32_t> output;
+
+#ifdef PDAL_HAVE_FLANN
+
+    if (!m_index)
+    {
+        throw pdal_error("Index is not initialized! Unable to query!");
+    }
+    Dimension const* dz = m_schema.getDimensionPtr("Z");
+    boost::uint32_t num_dimensions = dz ? 3 : 2;    
+
+    std::vector<double> distances_vec;
+    distances_vec.resize(k);
+
+    std::vector<boost::int32_t> indices_vec;
+    indices_vec.resize(k);
+    indices_vec.assign(indices_vec.size(), -1);
+
+    std::vector<double> query_vec(num_dimensions);
+    query_vec[0] = x;
+    query_vec[1] = y;
+    if (num_dimensions > 2)
+        query_vec[2] = z;
+
+
+    flann::Matrix<int> indices_mat(&indices_vec[0], 1, k);
+    flann::Matrix<double> distances_mat(&distances_vec[0], 1, k);
+    flann::Matrix<double> query_mat(&query_vec[0], 1, num_dimensions);
+
+    m_index->knnSearch(query_mat,
+                       indices_mat,
+                       distances_mat,
+                       k,
+                       flann::SearchParams(128));
+    for (unsigned i=0; i < k; ++i)
+    {
+        // if distance is 0, just return the nearest one, otherwise filter by distance
+        if (Utils::compare_distance<double>(distance, 0))
+        {
+            if (indices_vec[i] != -1)
+                output.push_back(indices_vec[i]);
+
+        }
+        else
+        {
+            if (::sqrt(distances_vec[i]) < distance)
+            {
+                if (indices_vec[i] != -1)
+                    output.push_back(indices_vec[i]);
+            }
+
+        }
+    }
+#else
+    boost::ignore_unused_variable_warning(x);
+    boost::ignore_unused_variable_warning(y);
+    boost::ignore_unused_variable_warning(z);
+    boost::ignore_unused_variable_warning(distance);
+    boost::ignore_unused_variable_warning(k);
+#endif
+
+    return output;
+}
+
+
+IndexedPointBuffer::~IndexedPointBuffer()
+{
+#ifdef PDAL_HAVE_FLANN
+    if (m_index)
+        delete m_index;
+
+    if (m_dataset)
+        delete m_dataset;
+#endif
+}
 } // namespace pdal

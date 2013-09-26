@@ -205,7 +205,7 @@ inline void scaling::IteratorBase::scale(Dimension const& from_dimension,
 
     double v = static_cast<double>(value);
     double out = (v*from_dimension.getNumericScale() + from_dimension.getNumericOffset() - to_dimension.getNumericOffset())/to_dimension.getNumericScale();
-
+    // FIXME: This only downscales, not upscales. If from_dimension.getNumericScale is > to_dimension.getNumericScale ==> BOOM
     T output = static_cast<T>(out);
 
     if (std::numeric_limits<T>::is_exact) //

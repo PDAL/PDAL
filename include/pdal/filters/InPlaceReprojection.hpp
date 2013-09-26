@@ -82,9 +82,6 @@ public:
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
     pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const;
 
-    double getScaledValue(PointBuffer& data,
-                          Dimension const& d,
-                          std::size_t pointIndex) const;
     void setScaledValue(PointBuffer& data,
                         double value,
                         Dimension const& d,

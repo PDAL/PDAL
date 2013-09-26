@@ -336,91 +336,7 @@ void InPlaceReprojection::transform(double& x, double& y, double& z) const
     return;
 }
 
-double InPlaceReprojection::getScaledValue(PointBuffer& data,
-        Dimension const& d,
-        std::size_t pointIndex) const
-{
-    double output(0.0);
 
-    float flt(0.0);
-    boost::int8_t i8(0);
-    boost::uint8_t u8(0);
-    boost::int16_t i16(0);
-    boost::uint16_t u16(0);
-    boost::int32_t i32(0);
-    boost::uint32_t u32(0);
-    boost::int64_t i64(0);
-    boost::uint64_t u64(0);
-
-    boost::uint32_t size = d.getByteSize();
-    switch (d.getInterpretation())
-    {
-        case dimension::Float:
-            if (size == 4)
-            {
-                flt = data.getField<float>(d, pointIndex);
-                output = static_cast<double>(flt);
-            }
-            if (size == 8)
-            {
-                output = data.getField<double>(d, pointIndex);
-            }
-            break;
-
-        case dimension::SignedInteger:
-            if (size == 1)
-            {
-                i8 = data.getField<boost::int8_t>(d, pointIndex);
-                output = d.applyScaling<boost::int8_t>(i8);
-            }
-            if (size == 2)
-            {
-                i16 = data.getField<boost::int16_t>(d, pointIndex);
-                output = d.applyScaling<boost::int16_t>(i16);
-            }
-            if (size == 4)
-            {
-                i32 = data.getField<boost::int32_t>(d, pointIndex);
-                output = d.applyScaling<boost::int32_t>(i32);
-            }
-            if (size == 8)
-            {
-                i64 = data.getField<boost::int64_t>(d, pointIndex);
-                output = d.applyScaling<boost::int64_t>(i64);
-            }
-            break;
-
-        case dimension::UnsignedInteger:
-            if (size == 1)
-            {
-                u8 = data.getField<boost::uint8_t>(d, pointIndex);
-                output = d.applyScaling<boost::uint8_t>(u8);
-            }
-            if (size == 2)
-            {
-                u16 = data.getField<boost::uint16_t>(d, pointIndex);
-                output = d.applyScaling<boost::uint16_t>(u16);
-            }
-            if (size == 4)
-            {
-                u32 = data.getField<boost::uint32_t>(d, pointIndex);
-                output = d.applyScaling<boost::uint32_t>(u32);
-            }
-            if (size == 8)
-            {
-                u64 = data.getField<boost::uint64_t>(d, pointIndex);
-                output = d.applyScaling<boost::uint64_t>(u64);
-            }
-            break;
-
-        case dimension::RawByte:
-        case dimension::Pointer:    // stored as 64 bits, even on a 32-bit box
-        case dimension::Undefined:
-            throw pdal_error("Dimension data type unable to be reprojected inplacereproj");
-    }
-
-    return output;
-}
 void InPlaceReprojection::setScaledValue(PointBuffer& data,
         double value,
         Dimension const& d,
@@ -610,9 +526,9 @@ void IteratorBase::projectData(PointBuffer& buffer, boost::uint32_t numPoints)
 
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
-        double x = m_reprojectionFilter.getScaledValue(buffer, old_x, pointIndex);
-        double y = m_reprojectionFilter.getScaledValue(buffer, old_y, pointIndex);
-        double z = m_reprojectionFilter.getScaledValue(buffer, old_z, pointIndex);
+        double x = buffer.applyScaling( old_x, pointIndex);
+        double y = buffer.applyScaling( old_y, pointIndex);
+        double z = buffer.applyScaling( old_z, pointIndex);
 
         if (logOutput)
         {
@@ -634,9 +550,9 @@ void IteratorBase::projectData(PointBuffer& buffer, boost::uint32_t numPoints)
 
         if (logOutput)
         {
-            m_reprojectionFilter.log()->get(logDEBUG5) << "scaled: " << m_reprojectionFilter.getScaledValue(buffer, new_x, pointIndex)
-                    << " y: " << m_reprojectionFilter.getScaledValue(buffer, new_y, pointIndex)
-                    << " z: " << m_reprojectionFilter.getScaledValue(buffer, new_z, pointIndex) << std::endl;
+            m_reprojectionFilter.log()->get(logDEBUG5) << "scaled: " << buffer.applyScaling(new_x, pointIndex)
+                    << " y: " << buffer.applyScaling( new_y, pointIndex)
+                    << " z: " << buffer.applyScaling(new_z, pointIndex) << std::endl;
         }
 
         buffer.setNumPoints(pointIndex+1);

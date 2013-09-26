@@ -46,12 +46,17 @@
 #include <pdal/Schema.hpp>
 #include <pdal/Metadata.hpp>
 
+#ifdef PDAL_HAVE_FLANN
+#include <flann/flann.hpp>
+#endif
+
 #include <vector>
 
 namespace pdal
 {
     typedef std::map<Dimension const*, Dimension const*> DimensionMap;
-
+    typedef std::vector<boost::uint8_t>::size_type BufferByteSize;
+    
 /// A PointBuffer is the object that is passed through pdal::Stage instances
 /// to form a pipeline. A PointBuffer is composed of a pdal::Schema that determines
 /// the layout of the data contained within, along with a dictionary of pdal::Metadata
@@ -145,16 +150,16 @@ public:
 
     /// returns the size of the currently filled raw byte array
     /// Equivalent to getNumPoints() * getSchema() * getByteSize().
-    inline boost::uint64_t getBufferByteLength() const
+    inline BufferByteSize getBufferByteLength() const
     {
-        return m_byteSize * m_numPoints;
+        return m_data.size();
     }
 
     /// returns the size of the theoretically filled raw byte array.
     /// Equivalent to getCapacity() * getSchema() * getByteSize().
-    inline boost::uint64_t getBufferByteCapacity() const
+    inline BufferByteSize getBufferByteCapacity() const
     {
-        return m_byteSize * m_capacity;
+        return static_cast<BufferByteSize>(m_byteSize) * static_cast<BufferByteSize>(m_capacity);
     }
 
     /** @name Point data access
@@ -274,12 +279,8 @@ public:
     /// @param byteCount number of bytes to overwrite at given position
     void setDataStride(boost::uint8_t* data, boost::uint32_t pointIndex, boost::uint32_t byteCount);
 
-    /// returns the raw array size of the current buffer. 
-    inline boost::uint64_t getArraySize() const
-    {
-        return static_cast<boost::uint64_t>(m_data.size());
-    }
-    
+    double applyScaling(Dimension const& d,
+                        std::size_t pointIndex) const;
     static void scaleData(PointBuffer const& source_buffer,
                           PointBuffer& destination_buffer,
                           Dimension const& source_dimension,
@@ -343,7 +344,7 @@ public:
     
     /** @name private attributes
     */
-private:
+protected:
     Schema m_schema;
     std::vector<boost::uint8_t> m_data;
     boost::uint32_t m_numPoints;
@@ -370,12 +371,11 @@ inline void PointBuffer::setField(pdal::Dimension const& dim, boost::uint32_t po
         throw buffer_error("This dimension has no identified position in a schema. Use the setRawField method to access an arbitrary byte position.");
     }
     
-    boost::uint64_t point_start_byte_position = static_cast<boost::uint64_t>(pointIndex) * static_cast<boost::uint64_t>(m_byteSize); 
-    boost::uint64_t offset = point_start_byte_position + dim.getByteOffset();
+    BufferByteSize point_start_byte_position = pointIndex * m_byteSize; 
+    BufferByteSize  offset = point_start_byte_position + dim.getByteOffset();
 
 #ifdef DEBUG
-    boost::uint64_t array_size = static_cast<boost::uint64_t>(m_capacity) * static_cast<boost::uint64_t>(m_byteSize); 
-    assert(offset + sizeof(T) <= array_size);
+    assert(offset + sizeof(T) <= getBufferByteSize());
 #endif
 
     boost::uint8_t* p = (boost::uint8_t*)&(m_data.front()) + offset;
@@ -404,22 +404,21 @@ inline  T const& PointBuffer::getField(pdal::Dimension const& dim, boost::uint32
         throw buffer_error("This dimension has no identified position in a schema.");
     }
 
-    boost::uint64_t point_start_byte_position = static_cast<boost::uint64_t>(pointIndex) * static_cast<boost::uint64_t>(m_byteSize); 
+    BufferByteSize point_start_byte_position = pointIndex * m_byteSize; 
     boost::uint64_t offset = point_start_byte_position + dim.getByteOffset();
 
 #ifdef DEBUG
     // This test ends up being somewhat expensive when run for every field 
     // for every point. 
-    boost::uint64_t array_size = static_cast<boost::uint64_t>(m_capacity) * static_cast<boost::uint64_t>(m_byteSize); 
     
-    if (offset + sizeof(T) > array_size)
+    if (offset + sizeof(T) > getBufferByteSize())
     {
         std::ostringstream oss;
         oss << "Offset for given dimension is off the end of the buffer!";
         throw buffer_error(oss.str());
     }
 
-    assert(offset + sizeof(T) <= array_size );
+    assert(offset + sizeof(T) <= getBufferByteSize() );
 #endif
 
     boost::uint8_t const* p = (boost::uint8_t const*)&(m_data.front()) + offset;
@@ -881,6 +880,33 @@ inline void PointBuffer::scale(Dimension const& source_dimension,
     return;
 }
 
+
+class IndexedPointBuffer : public PointBuffer
+{
+public:
+    IndexedPointBuffer(const Schema& schema, boost::uint32_t capacity=65536);
+    IndexedPointBuffer(IndexedPointBuffer const& buffer); 
+    IndexedPointBuffer(PointBuffer const& buffer); 
+    ~IndexedPointBuffer();
+    
+    std::vector<boost::uint32_t> neighbors(double const& x, double const& y, double const& z, double distance, boost::uint32_t count=1);
+    std::vector<boost::uint32_t> radius(double const& x, double const& y, double const& z, double const& r);
+    
+    // /// Copy constructor. The data array is simply memcpy'd.
+    // IndexedPointBuffer(const IndexedPointBuffer&) : PointBuffer(buffer) {}
+    // 
+    // /// Assignment constructor.
+    // PointBuffer& operator=(const PointBuffer&) { return IndexedPointBuffer};
+    void build();
+
+private:
+    std::vector<double> m_coordinates;
+#ifdef PDAL_HAVE_FLANN
+    flann::KDTreeSingleIndex<flann::L2_Simple<double> >* m_index;
+    flann::Matrix<double>* m_dataset;    
+#endif      
+        
+};
 #ifdef PDAL_COMPILER_MSVC
 #  pragma warning(pop)
 #endif

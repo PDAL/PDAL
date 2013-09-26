@@ -344,4 +344,65 @@ BOOST_AUTO_TEST_CASE(test_two_iters_with_cache)
     return;
 }
 
+BOOST_AUTO_TEST_CASE(CacheFilterTest_test_large)
+{
+    Bounds<double> srcBounds(0.0, 0.0, 0.0, 10000000.0, 10000000.0, 100.0);
+    
+    // boost::uint32_t numPoints(144970056); // good
+    // boost::uint32_t numPoints(165680064); // good    
+    // boost::uint32_t numPoints(274407606); // good
+    // boost::uint32_t numPoints(474407606); // good
+    boost::uint32_t numPoints(300); // good
+    pdal::drivers::faux::Reader reader(srcBounds, numPoints, pdal::drivers::faux::Reader::Constant);
+
+    pdal::Options options;
+    pdal::Option debug("debug", true, "");
+    pdal::Option verbose("verbose", 9, "");
+    pdal::Option max_cache_blocks("max_cache_blocks", 1);
+    // pdal::Option cache_block_size("cache_block_size", cache_size);
+    options.add(max_cache_blocks);
+    // options.add(cache_block_size);
+    // options.add(debug);
+    // options.add(verbose);
+
+    pdal::filters::Cache cache(reader, options);
+
+    BOOST_CHECK_EQUAL(cache.getDescription(), "Cache Filter");
+    cache.initialize();
+
+    const Schema& schema = cache.getSchema();
+    BOOST_CHECK_EQUAL(schema.getByteSize(), 32);
+    
+    PointBuffer dataBig(schema, cache.getNumPoints());
+    BOOST_CHECK_EQUAL(dataBig.getBufferByteLength(), 
+                      static_cast<boost::uint64_t>(numPoints)*static_cast<boost::uint64_t>(schema.getByteSize()));    
+    PointBuffer dataSmall(schema, 1);
+
+    StageSequentialIterator* sequential = cache.createSequentialIterator(dataBig);
+    StageRandomIterator* random = cache.createRandomIterator(dataSmall);
+
+    //BOOST_CHECK(cache.getIndex() == 0);
+    BOOST_CHECK_EQUAL(cache.getNumPointsRequested(), 0);
+    BOOST_CHECK_EQUAL(cache.getNumPointsRead(), 0);
+
+    sequential->read(dataBig);
+    BOOST_CHECK_EQUAL(dataBig.getField<boost::uint64_t>(dataBig.getSchema().getDimension("Time"), numPoints-1), numPoints-1);
+
+    BOOST_CHECK_EQUAL(cache.getNumPointsRequested(), numPoints);
+    BOOST_CHECK_EQUAL(cache.getNumPointsRead(), numPoints);
+    
+    boost::uint32_t seek_position(42);
+    random->seek(seek_position);
+    random->read(dataSmall);
+    BOOST_CHECK_EQUAL(dataSmall.getField<boost::uint64_t>(dataSmall.getSchema().getDimension("Time"), 0), seek_position);    
+    BOOST_CHECK_EQUAL(cache.getNumPointsRequested(), numPoints + dataSmall.getCapacity());
+    BOOST_CHECK_EQUAL(cache.getNumPointsRead(), numPoints);
+    
+    delete sequential;
+    delete random;
+
+    return;
+}
+
+
 BOOST_AUTO_TEST_SUITE_END()
