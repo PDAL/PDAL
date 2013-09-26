@@ -702,11 +702,11 @@ std::vector<boost::uint32_t> IndexedPointBuffer::radius(double const& x, double 
 
     flann::Matrix<double> query_mat(&query_vec[0], 1, num_dimensions);
 
-    m_index->radiusSearch(query_mat,
-                       indices_vec,
-                       distances_vec,
-                       r,
-                       flann::SearchParams(128));
+    // m_index->radiusSearch(query_mat,
+    //                    indices_vec,
+    //                    distances_vec,
+    //                    r,
+    //                    flann::SearchParams(128));
    std::clog << "indices_vec.size(): " << indices_vec.size() << std::endl;
    std::clog << "indices_vec[0].size(): " << indices_vec[0].size() << std::endl;
    std::clog << "indices_vec[0][0].size(): " << indices_vec[0][0] << std::endl;
