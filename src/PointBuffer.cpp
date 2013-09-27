@@ -50,12 +50,16 @@ PointBuffer::PointBuffer(const Schema& schema, boost::uint32_t capacity)
     , m_bounds(Bounds<double>::getDefaultSpatialExtent())
     , m_byteSize(schema.getByteSize())
     , m_metadata("pointbuffer")
+    , m_segment(0)
 
 {
     BufferByteSize size = static_cast<BufferByteSize>(schema.getByteSize()) * static_cast<BufferByteSize>(capacity);
 
     m_data.reserve(size);
     m_data.resize(size);
+    
+    // boost::interprocess::shared_memory_object::remove("mySegmentObjectVector");
+    // m_segment = new boost::interprocess::managed_shared_memory(boost::interprocess::create_only, "mySegmentObjectVector", size);    
     return;
 }
 
@@ -795,6 +799,9 @@ std::vector<boost::uint32_t> IndexedPointBuffer::neighbors(double const& x, doub
 
 IndexedPointBuffer::~IndexedPointBuffer()
 {
+    if (m_segment)
+        delete m_segment;
+    
 #ifdef PDAL_HAVE_FLANN
     if (m_index)
         delete m_index;

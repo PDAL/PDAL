@@ -40,6 +40,7 @@
 #include <boost/scoped_array.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/interprocess/managed_shared_memory.hpp>
 
 #include <pdal/pdal_internal.hpp>
 #include <pdal/Bounds.hpp>
@@ -52,10 +53,14 @@
 
 #include <vector>
 
+
+
 namespace pdal
 {
     typedef std::map<Dimension const*, Dimension const*> DimensionMap;
     typedef std::vector<boost::uint8_t>::size_type BufferByteSize;
+    typedef boost::interprocess::allocator<boost::uint8_t, boost::interprocess::managed_shared_memory::segment_manager>     ShmemAllocator; 
+    typedef boost::container::vector<boost::uint8_t, ShmemAllocator> PointBufferVector;
     
 /// A PointBuffer is the object that is passed through pdal::Stage instances
 /// to form a pipeline. A PointBuffer is composed of a pdal::Schema that determines
@@ -356,6 +361,7 @@ protected:
     schema::size_type m_byteSize;
 
     Metadata m_metadata;
+    boost::interprocess::managed_shared_memory *m_segment;
 
     template<class T> static void scale(Dimension const& source_dimension,
                                  Dimension const& destination_dimension,
