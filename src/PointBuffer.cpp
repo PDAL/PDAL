@@ -719,8 +719,7 @@ std::vector<boost::uint32_t> IndexedPointBuffer::radius(double const& x, double 
     boost::ignore_unused_variable_warning(x);
     boost::ignore_unused_variable_warning(y);
     boost::ignore_unused_variable_warning(z);
-    boost::ignore_unused_variable_warning(distance);
-    boost::ignore_unused_variable_warning(k);
+    boost::ignore_unused_variable_warning(r);
 #endif
 
     return output;
