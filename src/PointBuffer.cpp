@@ -53,7 +53,7 @@ PointBuffer::PointBuffer(const Schema& schema, boost::uint32_t capacity)
     , m_segment(0)
 
 {
-    BufferByteSize size = static_cast<BufferByteSize>(schema.getByteSize()) * static_cast<BufferByteSize>(capacity);
+    PointBufferByteSize size = static_cast<PointBufferByteSize>(schema.getByteSize()) * static_cast<PointBufferByteSize>(capacity);
 
     m_data.reserve(size);
     m_data.resize(size);
@@ -101,7 +101,7 @@ void PointBuffer::reset(Schema const& new_schema)
 
     if (m_byteSize != old_size)
     {
-        BufferByteSize new_array_size = static_cast<BufferByteSize>(new_size) * static_cast<BufferByteSize>(m_capacity);
+        PointBufferByteSize new_array_size = static_cast<PointBufferByteSize>(new_size) * static_cast<PointBufferByteSize>(m_capacity);
         if (new_array_size > m_data.size())
         {
             m_data.resize(new_array_size);
@@ -117,7 +117,7 @@ void PointBuffer::resize(boost::uint32_t const& capacity, bool bExact)
     if (capacity != m_capacity)
     {
         m_capacity = capacity;
-        BufferByteSize new_array_size = static_cast<BufferByteSize>(m_schema.getByteSize()) * static_cast<BufferByteSize>(m_capacity);
+        PointBufferByteSize new_array_size = static_cast<PointBufferByteSize>(m_schema.getByteSize()) * static_cast<PointBufferByteSize>(m_capacity);
         if (new_array_size > m_data.size() || bExact)
         {
             m_data.resize(new_array_size);
@@ -723,8 +723,7 @@ std::vector<boost::uint32_t> IndexedPointBuffer::radius(double const& x, double 
     boost::ignore_unused_variable_warning(x);
     boost::ignore_unused_variable_warning(y);
     boost::ignore_unused_variable_warning(z);
-    boost::ignore_unused_variable_warning(distance);
-    boost::ignore_unused_variable_warning(k);
+    boost::ignore_unused_variable_warning(r);
 #endif
 
     return output;
