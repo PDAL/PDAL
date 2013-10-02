@@ -36,10 +36,13 @@
 #define PDAL_GLOBAL_ENVIRONMENT_H
 
 #include <pdal/pdal_internal.hpp>
+#include <pdal/PointBuffer.hpp>
+
 #include <pdal/ThreadEnvironment.hpp>
 #include <pdal/plang/PythonEnvironment.hpp>
 
 #include <boost/thread/once.hpp>
+#include <boost/interprocess/managed_shared_memory.hpp>
 
 #include <map>
 #include <sstream>
@@ -50,6 +53,7 @@ namespace gdal
 {
 class GlobalDebug;
 }
+
 }
 
 namespace pdal
@@ -59,6 +63,8 @@ namespace pdal
 class PDAL_DLL GlobalEnvironment
 {
 public:
+    typedef std::map<pdal::pointbuffer::id, boost::interprocess::managed_shared_memory*> segments_map;
+
     static GlobalEnvironment& get();
     static void startup();
     static void shutdown();
@@ -80,6 +86,8 @@ public:
     void getGDALEnvironment();
     
     pdal::gdal::GlobalDebug* getGDALDebug();
+    
+    segments_map const& getSegments() const { return m_segmentsMap; }
 
 private:
     GlobalEnvironment();
@@ -88,8 +96,9 @@ private:
     static void init();
 
     typedef std::map<boost::thread::id, ThreadEnvironment*> thread_map;
-
+    
     thread_map m_threadMap;
+    segments_map m_segmentsMap;
     plang::PythonEnvironment* m_pythonEnvironment;
     bool m_bIsGDALInitialized;
     pdal::gdal::GlobalDebug* m_gdal_debug;
