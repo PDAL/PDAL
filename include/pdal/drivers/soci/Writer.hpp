@@ -52,7 +52,7 @@ namespace soci
 class PDAL_DLL Writer : public pdal::Writer
 {
 public:
-    SET_STAGE_NAME("drivers.soci.writer", "Database Writer")
+    SET_STAGE_NAME("drivers.soci.writer", "SOCI Writer")
 
     Writer(Stage& prevStage, const Options&);
     ~Writer();
