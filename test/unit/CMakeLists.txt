@@ -108,6 +108,17 @@ endif()
 
 endif (WITH_ORACLE)
 
+if (WITH_SOCI)
+if (NOT USE_PDAL_PLUGIN_SOCI)
+    set(PDAL_SOCI_TEST_CPP drivers/soci/Writer.cpp)
+
+    FOREACH(file ${PDAL_SOCI_TEST_CPP})
+            SET(PDAL_UNITTEST_TEST_SRC "${PDAL_UNITTEST_TEST_SRC};${file}" CACHE INTERNAL "source files for test")
+    ENDFOREACH(file)
+endif()
+
+endif (WITH_SOCI)
+
 if (WITH_GDAL)
     set(PDAL_GDAL_TEST_CPP
         GDALUtilsTest.cpp
@@ -182,17 +193,17 @@ endif()
 
 if(WIN32)
     TARGET_LINK_LIBRARIES(${PDAL_UNIT_TEST} 
-        ${PDAL_LIB_NAME}
-        ${LIBLAS_LIBRARY}
-        ${ZLIB_LIBRARIES}
-        ${TIFF_LIBRARY}
-        ${GEOTIFF_LIBRARY}
-        ${GDAL_LIBRARY}
-        ${SPATIALINDEX_LIBRARY} ${Boost_LIBRARIES} ${ORACLE_LIBRARY})
+        "${PDAL_LIB_NAME}"
+        "${LIBLAS_LIBRARY}"
+        "${ZLIB_LIBRARIES}"
+        "${TIFF_LIBRARY}"
+        "${GEOTIFF_LIBRARY}"
+        "${GDAL_LIBRARY}"
+        "${SPATIALINDEX_LIBRARY}" "${Boost_LIBRARIES}" "${ORACLE_LIBRARY}")
 else()
     TARGET_LINK_LIBRARIES(${PDAL_UNIT_TEST} 
         ${PDAL_LIB_NAME} ${APPS_CPP_DEPENDENCIES} ${ORACLE_LIBRARY})
 endif() 
 
 
-ADD_TEST(pdal_test ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/pdal_test ${PROJECT_SOURCE_DIR}/test/data --catch_system_errors=no)
+ADD_TEST(pdal_test "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/pdal_test" "${PROJECT_SOURCE_DIR}/test/data" --catch_system_errors=no)

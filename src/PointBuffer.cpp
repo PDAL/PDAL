@@ -33,11 +33,12 @@
 ****************************************************************************/
 
 #include <pdal/PointBuffer.hpp>
+#include <pdal/GlobalEnvironment.hpp>
 
 #include <boost/lexical_cast.hpp>
 
 #include <boost/uuid/uuid_io.hpp>
-
+#include <boost/uuid/random_generator.hpp>
 
 namespace pdal
 {
@@ -50,11 +51,20 @@ PointBuffer::PointBuffer(const Schema& schema, boost::uint32_t capacity)
     , m_bounds(Bounds<double>::getDefaultSpatialExtent())
     , m_byteSize(schema.getByteSize())
     , m_metadata("pointbuffer")
+    , m_segment(0)
 
 {
-    boost::uint64_t size = static_cast<boost::uint64_t>(schema.getByteSize()) * static_cast<boost::uint64_t>(capacity);
-    m_data.reserve(static_cast<std::vector<boost::uint8_t>::size_type>(size));
-    m_data.resize(static_cast<std::vector<boost::uint8_t>::size_type>(size));
+    pointbuffer::PointBufferByteSize size = static_cast<pointbuffer::PointBufferByteSize>(schema.getByteSize()) * static_cast<pointbuffer::PointBufferByteSize>(capacity);
+
+    m_data.reserve(size);
+    m_data.resize(size);
+
+    GlobalEnvironment& env = pdal::GlobalEnvironment::get();
+    boost::uuids::basic_random_generator<boost::mt19937> gen(env.getRNG());
+    m_uuid = gen();
+    
+    // boost::interprocess::shared_memory_object::remove("mySegmentObjectVector");
+    // m_segment = new boost::interprocess::managed_shared_memory(boost::interprocess::create_only, "mySegmentObjectVector", size);    
     return;
 }
 
@@ -71,6 +81,11 @@ PointBuffer::PointBuffer(PointBuffer const& other)
 
 }
 
+PointBuffer::~PointBuffer()
+{
+    // delete m_segment;
+    
+}
 PointBuffer& PointBuffer::operator=(PointBuffer const& rhs)
 {
     if (&rhs != this)
@@ -96,10 +111,10 @@ void PointBuffer::reset(Schema const& new_schema)
 
     if (m_byteSize != old_size)
     {
-        boost::uint64_t new_array_size = static_cast<boost::uint64_t>(new_size) * static_cast<boost::uint64_t>(m_capacity);
+        pointbuffer::PointBufferByteSize new_array_size = static_cast<pointbuffer::PointBufferByteSize>(new_size) * static_cast<pointbuffer::PointBufferByteSize>(m_capacity);
         if (new_array_size > m_data.size())
         {
-            m_data.resize(static_cast<std::vector<boost::uint8_t>::size_type>(new_array_size));
+            m_data.resize(new_array_size);
         }
     }
 
@@ -112,10 +127,10 @@ void PointBuffer::resize(boost::uint32_t const& capacity, bool bExact)
     if (capacity != m_capacity)
     {
         m_capacity = capacity;
-        boost::uint64_t new_array_size = static_cast<boost::uint64_t>(m_schema.getByteSize()) * static_cast<boost::uint64_t>(m_capacity);
+        pointbuffer::PointBufferByteSize new_array_size = static_cast<pointbuffer::PointBufferByteSize>(m_schema.getByteSize()) * static_cast<pointbuffer::PointBufferByteSize>(m_capacity);
         if (new_array_size > m_data.size() || bExact)
         {
-            m_data.resize(static_cast<std::vector<boost::uint8_t>::size_type>(new_array_size));
+            m_data.resize(new_array_size);
         }
 
     }
@@ -402,13 +417,13 @@ boost::property_tree::ptree PointBuffer::toPTree() const
 }
 
 
-DimensionMap* PointBuffer::mapDimensions(PointBuffer const& source, PointBuffer const& destination)
+pointbuffer::DimensionMap* PointBuffer::mapDimensions(PointBuffer const& source, PointBuffer const& destination)
 {
 
     schema::index_by_index const& dimensions = source.getSchema().getDimensions().get<schema::index>();
     schema::index_by_index::size_type d(0);
 
-    DimensionMap* dims = new DimensionMap;
+    pointbuffer::DimensionMap* dims = new pointbuffer::DimensionMap;
 
     Schema const& dest_schema = destination.getSchema();
     for (d = 0; d < dimensions.size(); ++d)
@@ -527,7 +542,7 @@ double PointBuffer::applyScaling(Dimension const& d,
 
 void PointBuffer::copyLikeDimensions(PointBuffer const& source,
                                      PointBuffer& destination,
-                                     DimensionMap const& dimensions,
+                                     pointbuffer::DimensionMap const& dimensions,
                                      boost::uint32_t source_starting_position,
                                      boost::uint32_t destination_starting_position,
                                      boost::uint32_t howMany)
@@ -537,7 +552,7 @@ void PointBuffer::copyLikeDimensions(PointBuffer const& source,
     assert(howMany <= destination.getCapacity() - destination_starting_position);
     assert(howMany <= source.getCapacity() - source_starting_position);
 
-    typedef DimensionMap::const_iterator Iterator;
+    typedef pointbuffer::DimensionMap::const_iterator Iterator;
 
     for (Iterator d = dimensions.begin(); d != dimensions.end(); ++d)
     {
@@ -725,8 +740,7 @@ std::vector<boost::uint32_t> IndexedPointBuffer::radius(double const& x, double 
     boost::ignore_unused_variable_warning(x);
     boost::ignore_unused_variable_warning(y);
     boost::ignore_unused_variable_warning(z);
-    boost::ignore_unused_variable_warning(distance);
-    boost::ignore_unused_variable_warning(k);
+    boost::ignore_unused_variable_warning(r);
 #endif
 
     return output;

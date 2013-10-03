@@ -228,7 +228,7 @@ BOOST_AUTO_TEST_CASE(PointBufferTest_ptree)
     return;
 }
 
-// 
+
 // BOOST_AUTO_TEST_CASE(PointBufferTest_large_buffer)
 // {
 // 
@@ -263,11 +263,13 @@ BOOST_AUTO_TEST_CASE(PointBufferTest_ptree)
 //     } catch (std::bad_alloc&)
 //     {
 //         // We can't make one this big, test done.
+//         BOOST_CHECK_EQUAL(1, 2);
 //         return;
 //     }
 //     boost::uint64_t total_size = static_cast<boost::uint64_t>(data->getSchema().getByteSize()) * static_cast<boost::uint64_t>(data->getCapacity());
 //     BOOST_CHECK_EQUAL(data->getCapacity(), capacity);
-//     BOOST_CHECK_EQUAL(data->getArraySize(), 38654705655u);
+//     BOOST_CHECK_EQUAL(data->getBufferByteLength(), 38654705655u);
+//     BOOST_CHECK_EQUAL(data->getBufferByteCapacity(), 38654705655u);
 // 
 //     Dimension const& cls = data->getSchema().getDimension("Classification");
 //     boost::uint8_t c1 = 1u;
@@ -308,16 +310,18 @@ BOOST_AUTO_TEST_CASE(PointBufferTest_resetting)
     PointBuffer data(schema, capacity);
     boost::uint64_t total_size = static_cast<boost::uint64_t>(data.getSchema().getByteSize()) * static_cast<boost::uint64_t>(data.getCapacity());
     BOOST_CHECK_EQUAL(data.getCapacity(), capacity);
-    BOOST_CHECK_EQUAL(data.getArraySize(), 3900u);
+    BOOST_CHECK_EQUAL(data.getBufferByteCapacity(), 3900u);
     
     // resizing to something smaller isn't going to reallocate 
     // the array.
     data.resize(100);
-    BOOST_CHECK_EQUAL(data.getArraySize(), 3900u);
+    BOOST_CHECK_EQUAL(data.getBufferByteCapacity(), 1300u);
+    BOOST_CHECK_EQUAL(data.getBufferByteLength(), 3900u);
     BOOST_CHECK_EQUAL(data.getCapacity(), 100u);
 
     data.resize(400);
-    BOOST_CHECK_EQUAL(data.getArraySize(), 5200u);
+    BOOST_CHECK_EQUAL(data.getBufferByteCapacity(), 5200u);
+    BOOST_CHECK_EQUAL(data.getBufferByteLength(), 5200u);
     BOOST_CHECK_EQUAL(data.getCapacity(), 400u);
     
 
@@ -359,7 +363,7 @@ BOOST_AUTO_TEST_CASE(PointBufferTest_copy_like_Dimensions)
     
     BOOST_CHECK_EQUAL(150, data_a.getField<boost::int32_t>(x, 150));
     
-    DimensionMap* dimensions = PointBuffer::mapDimensions(data_a, data_b);
+    pointbuffer::DimensionMap* dimensions = PointBuffer::mapDimensions(data_a, data_b);
     PointBuffer::copyLikeDimensions(data_a, data_b, *dimensions, 0, 0, 175);
     
     Dimension const& x2 = data_b.getSchema().getDimension("X");
@@ -428,5 +432,4 @@ BOOST_AUTO_TEST_CASE(test_indexed)
 
     return;
 }
-
 BOOST_AUTO_TEST_SUITE_END()

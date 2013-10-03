@@ -85,8 +85,8 @@ void SummaryData::reset()
 
 void SummaryData::addPoint(double x, double y, double z, int returnNumber)
 {
-    if (returnNumber < 0 || returnNumber > s_maxNumReturns)
-        throw invalid_point_data("point returnNumber is out of range", 0);
+    // if (returnNumber < 0 || returnNumber > s_maxNumReturns)
+    //     throw invalid_point_data("point returnNumber is out of range", 0);
 
     if (m_isFirst)
     {
@@ -135,8 +135,8 @@ void SummaryData::getBounds(double& minX, double& minY, double& minZ, double& ma
 
 boost::uint32_t SummaryData::getReturnCount(int returnNumber) const
 {
-    if (returnNumber < 0 || returnNumber > s_maxNumReturns)
-        throw invalid_point_data("point returnNumber is out of range", 0);
+    // if (returnNumber < 0 || returnNumber > s_maxNumReturns)
+    //     throw invalid_point_data("point returnNumber is out of range", 0);
 
     return m_returnCounts[returnNumber-1];
 }

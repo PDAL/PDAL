@@ -315,8 +315,14 @@ IteratorBase::IteratorBase(pdal::filters::Cache const& filter, PointBuffer& buff
 
 IteratorBase::~IteratorBase()
 {
-    // if (m_dimension_maps)
-    //     delete m_dimension_maps;
+    if (m_dimension_maps.size())
+    {
+        typedef std::map<PointBuffer const*, pointbuffer::DimensionMap const*>::iterator MapIterator;
+        for (MapIterator i = m_dimension_maps.begin(); i != m_dimension_maps.end(); ++i)
+        {
+            delete i->second;
+        }
+    }
 }
 
 boost::uint32_t IteratorBase::copyCachedBlocks(std::vector<PointBuffer const*> const& blocks,
@@ -358,14 +364,14 @@ boost::uint32_t IteratorBase::copyCachedBlocks(std::vector<PointBuffer const*> c
     for (ConstIterator i = blocks.begin(); i != blocks.end(); ++i)
     {
         PointBuffer const* b = *i;
-        DimensionMap const* dim_map(0);
+        pointbuffer::DimensionMap const* dim_map(0);
 
-        typedef std::map<PointBuffer const*, DimensionMap const*>::iterator MapIterator;
+        typedef std::map<PointBuffer const*, pointbuffer::DimensionMap const*>::iterator MapIterator;
         MapIterator it = m_dimension_maps.find(b);
         if (it == m_dimension_maps.end())
         {
-            DimensionMap* d = PointBuffer::mapDimensions(*b, *m_mapped_buffer);
-            std::pair<PointBuffer const*, DimensionMap const*> p(b, d);
+            pointbuffer::DimensionMap* d = PointBuffer::mapDimensions(*b, *m_mapped_buffer);
+            std::pair<PointBuffer const*, pointbuffer::DimensionMap const*> p(b, d);
             m_dimension_maps.insert(p);
             dim_map = d;
 #ifdef DEBUG
@@ -603,11 +609,6 @@ boost::uint32_t Cache::readBufferImpl(PointBuffer& data)
 
     boost::uint64_t currentPointIndex = getIndex();
 
-    boost::uint32_t blockNumber(0);
-    if (currentPointIndex != 0)
-    {
-        blockNumber = cacheBlockSize / currentPointIndex;
-    }
 
 #ifdef DEBUG
     bool logOutput = m_cache_filter.log()->getLevel() > logDEBUG3;
@@ -619,8 +620,8 @@ boost::uint32_t Cache::readBufferImpl(PointBuffer& data)
     {
 #ifdef DEBUG
         if (logOutput)
-            m_cache_filter.log()->get(logDEBUG3) << "random read had cache hit for block "
-                                                 << blockNumber << " with at point index "
+
+            m_cache_filter.log()->get(logDEBUG3) << "random read had cache hit for block with at point index "
                                                  << currentPointIndex << std::endl;
 #endif
         // lookup will only return a list of blocks if things are
@@ -631,30 +632,9 @@ boost::uint32_t Cache::readBufferImpl(PointBuffer& data)
             return data.getNumPoints();
     }
 
-    // We're cacheable if we're on the block boundary
-    const bool isCacheable = (data.getCapacity() == cacheBlockSize) &&
-                             (data.getNumPoints() == 0) &&
-                             (currentPointIndex % cacheBlockSize == 0) &&
-                             !blocks.size();
-    if (isCacheable)
-    {
-        const boost::uint32_t numRead = getPrevIterator().read(data);
-
-        if (numRead != cacheBlockSize)
-        {
-            throw pdal_error("We did not read the same number of points as the cache size!");
-        }
-
-        m_cache_filter.addToCache(blockNumber, data);
-        m_cache_filter.updateStats(numRead, data.getCapacity());
-
-        return numRead;
-    }
-
-
     // Not in the cache, so do a normal read :-(
     const boost::uint32_t numRead = getPrevIterator().read(data);
-    m_cache_filter.updateStats(numRead, numRead);
+
 
     return numRead;
 }

@@ -223,15 +223,15 @@ boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite,
 
         assert(numPointsReadThisChunk == m_writer_buffer->getNumPoints());
         assert(numPointsReadThisChunk <= m_writer_buffer->getCapacity());
-
-        // Some drivers may do header setups and such, even for situations
-        // where there's no points, so we should a buffer begin.
+        
+        // Some drivers may do header setups and such, even for situations 
+        // where there's no points, so we should a buffer begin. 
         writeBufferBegin(*m_writer_buffer);
-
+        
         // were there no points left to write this chunk?
-        if (numPointsReadThisChunk == 0)
+        if (numPointsReadThisChunk == 0) 
         {
-            // Match the above writeBufferBegin now that
+            // Match the above writeBufferBegin now that 
             // we're breaking the loop
             writeBufferEnd(*m_writer_buffer);
             break;
