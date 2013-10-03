@@ -22,14 +22,14 @@ set(CMAKE_COLOR_MAKEFILE ON)
 mark_as_advanced(CMAKE_VERBOSE_MAKEFILE)
 
 # Path to additional CMake modules
-set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_PATH})
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/modules" ${CMAKE_MODULE_PATH})
 
 
 #------------------------------------------------------------------------------
 # PDAL general settings
 #------------------------------------------------------------------------------
 
-include(${PDAL_SOURCE_DIR}/cmake/pdal_utils.cmake)
+include("${PDAL_SOURCE_DIR}/cmake/pdal_utils.cmake")
 
 # the next line is the ONLY place in the entire pdal system where
 # the version info is hard-coded
@@ -47,10 +47,10 @@ set(PDAL_LIB_NAME pdal)
 
 set(CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE ON)
 
-set(PDAL_OUTPUT_LIB_DIR ${PDAL_BINARY_DIR}/${LIB_INSTALL_DIR})
-set(PDAL_OUTPUT_BIN_DIR ${PDAL_BINARY_DIR}/${BIN_INSTALL_DIR})
-file(MAKE_DIRECTORY ${PDAL_OUTPUT_LIB_DIR})
-file(MAKE_DIRECTORY ${PDAL_OUTPUT_BIN_DIR})
+set(PDAL_OUTPUT_LIB_DIR "${PDAL_BINARY_DIR}/${LIB_INSTALL_DIR}")
+set(PDAL_OUTPUT_BIN_DIR "${PDAL_BINARY_DIR}/${BIN_INSTALL_DIR}")
+file(MAKE_DIRECTORY "${PDAL_OUTPUT_LIB_DIR}")
+file(MAKE_DIRECTORY "${PDAL_OUTPUT_BIN_DIR}")
 if(WIN32)
   foreach(config ${CMAKE_CONFIGURATION_TYPES})
     string(TOUPPER ${config} CONFIG)
@@ -131,16 +131,16 @@ endif()
 set(PDAL_BUILD_TYPE ${CMAKE_BUILD_TYPE})
 
 # TODO: Still testing the output paths --mloskot
-set(PDAL_BUILD_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
+set(PDAL_BUILD_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin")
 
 # Output directory in which to build RUNTIME target files.
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PDAL_BUILD_OUTPUT_DIRECTORY})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PDAL_BUILD_OUTPUT_DIRECTORY}")
 
 # Output directory in which to build LIBRARY target files
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PDAL_BUILD_OUTPUT_DIRECTORY})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PDAL_BUILD_OUTPUT_DIRECTORY}")
 
 # Output directory in which to build ARCHIVE target files.
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PDAL_BUILD_OUTPUT_DIRECTORY}) 
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PDAL_BUILD_OUTPUT_DIRECTORY}") 
 
 
 #------------------------------------------------------------------------------
@@ -187,8 +187,8 @@ if(WIN32)
 
   endif(MSVC)
   
-  set(CMAKE_INCLUDE_PATH c:/osgeo4w/include;$ENV{CMAKE_INCLUDE_PATH})
-  set(CMAKE_LIBRARY_PATH c:/osgeo4w/lib;$ENV{CMAKE_LIBRARY_PATH})
+  set(CMAKE_INCLUDE_PATH "c:/osgeo4w/include;$ENV{CMAKE_INCLUDE_PATH}")
+  set(CMAKE_LIBRARY_PATH "c:/osgeo4w/lib;$ENV{CMAKE_LIBRARY_PATH}")
 
   set(PDAL_PLATFORM_WIN32 1)
 
@@ -261,18 +261,18 @@ if(Boost_FOUND)
   link_directories(${Boost_LIBRARY_DIRS})
  
 else()
-  set(BOOST_ROOT ${PROJECT_SOURCE_DIR}/boost)
+  set(BOOST_ROOT "${PROJECT_SOURCE_DIR}/boost")
 
   # find_package would normally set the following variables
   set(Boost_FOUND TRUE)
-  set(Boost_INCLUDE_DIRS ${BOOST_ROOT})
+  set(Boost_INCLUDE_DIRS "${BOOST_ROOT}")
 
   set(PDALBOOST_LIB_NAME "pdalboost" CACHE STRING "use embedded boost")
   mark_as_advanced(FORCE PDALBOOST_LIB_NAME)
 
   if (WIN32)
     set(Boost_LIBRARIES "${PDALBOOST_LIB_NAME}.lib")
-    link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
+    link_directories("${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
   else()
     # Some Cmake versions are borken here. See
     # http://www.cmake.org/Bug/view.php?id=12258#c26851
@@ -284,7 +284,7 @@ else()
   # this prevents auto-linking pragmas from depending on wrong lib names
   add_definitions(-DBOOST_ALL_NO_LIB)
 
-  include_directories(${Boost_INCLUDE_DIRS}/)
+  include_directories("${Boost_INCLUDE_DIRS}/")
   set(PDAL_EMBED_BOOST TRUE CACHE BOOL "use embedded boost")
   add_subdirectory(boost)
   message(STATUS "Using embedded boost tree")
@@ -300,7 +300,7 @@ set(WITH_GDAL FALSE CACHE BOOL "Choose if GDAL support should be built")
 if(WITH_GDAL)
   find_package(GDAL 1.9.0)
   set(PDAL_HAVE_GDAL 1)
-  include_directories(${GDAL_INCLUDE_DIR})
+  include_directories("${GDAL_INCLUDE_DIR}")
   mark_as_advanced(CLEAR GDAL_INCLUDE_DIR) 
   mark_as_advanced(CLEAR GDAL_LIBRARY)
   message(STATUS "...building with GDAL")
@@ -308,7 +308,7 @@ if(WITH_GDAL)
   find_package(GEOS 3.3)
   if (GEOS_FOUND)
     set(PDAL_HAVE_GEOS 1)
-    include_directories(${GEOS_INCLUDE_DIR})
+    include_directories("${GEOS_INCLUDE_DIR}")
     message(STATUS "...GEOS found and used in addition to GDAL")
   else()
     set(GEOS_LIBRARY "") 
@@ -325,8 +325,8 @@ if(WITH_GEOTIFF)
   find_package(GeoTIFF 1.2.5)
   if(GEOTIFF_FOUND)
     include(CheckFunctionExists) 
-    set(CMAKE_REQUIRED_LIBRARIES ${GEOTIFF_LIBRARY})
-    include_directories(${GEOTIFF_INCLUDE_DIR})
+    set(CMAKE_REQUIRED_LIBRARIES "${GEOTIFF_LIBRARY}")
+    include_directories("${GEOTIFF_INCLUDE_DIR}")
     set(PDAL_HAVE_LIBGEOTIFF 1)
   endif()
 
@@ -339,7 +339,7 @@ if(WITH_GEOTIFF)
     endif(WIN32)
     find_package(TIFF) 
     if (TIFF_FOUND)
-      include_directories(${TIFF_INCLUDE_DIR})
+      include_directories("${TIFF_INCLUDE_DIR}")
     endif()
   endif()
 endif()
@@ -394,8 +394,8 @@ if(WITH_NITRO)
   find_package(Nitro 2.6)
   set(PDAL_HAVE_NITRO 1)
   include_directories(${NITRO_INCLUDE_DIR})
-  include_directories(${NITRO_INCLUDE_DIR}/nitro/c++)
-  include_directories(${NITRO_INCLUDE_DIR}/nitro/c)
+  include_directories("${NITRO_INCLUDE_DIR}/nitro/c++")
+  include_directories("${NITRO_INCLUDE_DIR}/nitro/c")
   add_definitions("-D_REENTRANT")
   if (WIN32)
       add_definitions("-DSIZEOF_SIZE_T=4")
@@ -424,7 +424,7 @@ set(WITH_SWIG_PYTHON FALSE CACHE BOOL "Choose if you want to make Python binding
 if(WITH_SWIG_CSHARP OR WITH_SWIG_PYTHON)
     find_package(swig 2.0.1 REQUIRED)
     if (SWIG_FOUND)
-        include(${SWIG_USE_FILE})
+        include("${SWIG_USE_FILE}")
         message(STATUS "Found Swig version ${SWIG_VERSION}")
         if(WITH_SWIG_CSHARP)
             add_subdirectory(csharp)
@@ -491,7 +491,7 @@ mark_as_advanced(WITH_STATIC_LASZIP)
 if(WITH_LASZIP)
     find_package(LASzip 1.0.1)
     if(LASZIP_FOUND)    
-        set(CMAKE_REQUIRED_LIBRARIES ${LASZIP_LIBRARY})
+        set(CMAKE_REQUIRED_LIBRARIES "${LASZIP_LIBRARY}")
         include_directories(${LASZIP_INCLUDE_DIR})
         mark_as_advanced(CLEAR LASZIP_INCLUDE_DIR) 
         mark_as_advanced(CLEAR LASZIP_LIBRARY) 
@@ -510,7 +510,7 @@ if(WITH_MRSID)
 
     find_package(MrSID)
     if(MRSID_FOUND)
-        set(CMAKE_REQUIRED_LIBRARIES ${MRSID_LIBRARY})
+        set(CMAKE_REQUIRED_LIBRARIES "${MRSID_LIBRARY}")
         include_directories(${MRSID_INCLUDE_DIR})
         add_definitions(-DHAVE_MRSID=1)
         set(PDAL_HAVE_MRSID 1)
@@ -540,7 +540,7 @@ set(WITH_P2G FALSE CACHE BOOL "Choose if Points2Grid support should be built")
 if(WITH_P2G)
     find_package(Points2Grid)
     if(P2G_FOUND)
-        set(CMAKE_REQUIRED_LIBRARIES ${P2G_LIBRARY})
+        set(CMAKE_REQUIRED_LIBRARIES "${P2G_LIBRARY}")
         include_directories(${P2G_INCLUDE_DIR})
         add_definitions(-DHAVE_P2G=1)
         set(PDAL_HAVE_P2G 1)
@@ -576,7 +576,7 @@ if(WITH_PYTHON)
   FIND_PACKAGE(PythonInterp)
   find_package(PythonLibs)
   if(PYTHONLIBS_FOUND)
-    set(CMAKE_REQUIRED_LIBRARIES ${PYTHON_LIBRARY})
+    set(CMAKE_REQUIRED_LIBRARIES "${PYTHON_LIBRARY}")
     include_directories(SYSTEM ${PYTHON_INCLUDE_DIR})
     add_definitions(-DHAVE_PYTHON=1)    
     set(PDAL_HAVE_PYTHON 1)
@@ -624,7 +624,7 @@ set(pdal_defines_h_in "${CMAKE_CURRENT_SOURCE_DIR}/pdal_defines.h.in")
 set(pdal_defines_h "${CMAKE_CURRENT_BINARY_DIR}/include/pdal/pdal_defines.h")
 configure_file(${pdal_defines_h_in} ${pdal_defines_h})
 PDAL_ADD_INCLUDES("" "" ${pdal_defines_h})
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
+include_directories("${CMAKE_CURRENT_BINARY_DIR}/include")
 
 
 #------------------------------------------------------------------------------

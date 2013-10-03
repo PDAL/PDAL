@@ -40,6 +40,7 @@
 #include <boost/scoped_array.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/interprocess/managed_shared_memory.hpp>
 
 #include <pdal/pdal_internal.hpp>
 #include <pdal/Bounds.hpp>
@@ -52,10 +53,21 @@
 
 #include <vector>
 
+
+
 namespace pdal
 {
-    typedef std::map<Dimension const*, Dimension const*> DimensionMap;
-    typedef std::vector<boost::uint8_t>::size_type BufferByteSize;
+    namespace pointbuffer
+    {
+        typedef boost::uuids::uuid id;
+        typedef std::vector<boost::uint8_t>::size_type PointBufferByteSize;
+
+        typedef std::map<Dimension const*, Dimension const*> DimensionMap;
+
+        typedef boost::interprocess::allocator<boost::uint8_t, boost::interprocess::managed_shared_memory::segment_manager>     ShmemAllocator; 
+        typedef boost::container::vector<boost::uint8_t, ShmemAllocator> PointBufferVector;
+    } // pointbuffer
+
     
 /// A PointBuffer is the object that is passed through pdal::Stage instances
 /// to form a pipeline. A PointBuffer is composed of a pdal::Schema that determines
@@ -150,16 +162,16 @@ public:
 
     /// returns the size of the currently filled raw byte array
     /// Equivalent to getNumPoints() * getSchema() * getByteSize().
-    inline BufferByteSize getBufferByteLength() const
+    inline pointbuffer::PointBufferByteSize getBufferByteLength() const
     {
         return m_data.size();
     }
 
     /// returns the size of the theoretically filled raw byte array.
     /// Equivalent to getCapacity() * getSchema() * getByteSize().
-    inline BufferByteSize getBufferByteCapacity() const
+    inline pointbuffer::PointBufferByteSize getBufferByteCapacity() const
     {
-        return static_cast<BufferByteSize>(m_byteSize) * static_cast<BufferByteSize>(m_capacity);
+        return static_cast<pointbuffer::PointBufferByteSize>(m_byteSize) * static_cast<pointbuffer::PointBufferByteSize>(m_capacity);
     }
 
     /** @name Point data access
@@ -335,12 +347,12 @@ public:
     /// Copies dimensions from the given PointBuff
     static void copyLikeDimensions( PointBuffer const& source, 
                                     PointBuffer& destination, 
-                                    DimensionMap const& dimensions,
+                                    pointbuffer::DimensionMap const& dimensions,
                                     boost::uint32_t source_starting_position, 
                                     boost::uint32_t destination_starting_position,
                                     boost::uint32_t howMany);
     
-    static DimensionMap* mapDimensions(PointBuffer const& source, PointBuffer const& destination);
+    static pointbuffer::DimensionMap* mapDimensions(PointBuffer const& source, PointBuffer const& destination);
     
     /** @name private attributes
     */
@@ -356,6 +368,9 @@ protected:
     schema::size_type m_byteSize;
 
     Metadata m_metadata;
+    boost::interprocess::managed_shared_memory *m_segment;
+    pointbuffer::id m_uuid;
+    
 
     template<class T> static void scale(Dimension const& source_dimension,
                                  Dimension const& destination_dimension,
@@ -371,8 +386,8 @@ inline void PointBuffer::setField(pdal::Dimension const& dim, boost::uint32_t po
         throw buffer_error("This dimension has no identified position in a schema. Use the setRawField method to access an arbitrary byte position.");
     }
     
-    BufferByteSize point_start_byte_position = pointIndex * m_byteSize; 
-    BufferByteSize  offset = point_start_byte_position + dim.getByteOffset();
+    pointbuffer::PointBufferByteSize point_start_byte_position = static_cast<pointbuffer::PointBufferByteSize>(pointIndex) * static_cast<pointbuffer::PointBufferByteSize>(m_byteSize); 
+    pointbuffer::PointBufferByteSize offset = point_start_byte_position + static_cast<pointbuffer::PointBufferByteSize>(dim.getByteOffset());
 
 #ifdef DEBUG
     assert(offset + sizeof(T) <= getBufferByteSize());
@@ -404,8 +419,8 @@ inline  T const& PointBuffer::getField(pdal::Dimension const& dim, boost::uint32
         throw buffer_error("This dimension has no identified position in a schema.");
     }
 
-    BufferByteSize point_start_byte_position = pointIndex * m_byteSize; 
-    boost::uint64_t offset = point_start_byte_position + dim.getByteOffset();
+    pointbuffer::PointBufferByteSize point_start_byte_position = static_cast<pointbuffer::PointBufferByteSize>(pointIndex) * static_cast<pointbuffer::PointBufferByteSize>(m_byteSize); 
+    boost::uint64_t offset = point_start_byte_position + static_cast<pointbuffer::PointBufferByteSize>(dim.getByteOffset());
 
 #ifdef DEBUG
     // This test ends up being somewhat expensive when run for every field 

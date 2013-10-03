@@ -198,12 +198,12 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data,
 
     const bool hasTime = Support::hasTime(pointFormat);
     const bool hasColor = Support::hasColor(pointFormat);
-    boost::uint16_t pointByteCount = Support::getPointDataSize(pointFormat);
+    pointbuffer::PointBufferByteSize pointByteCount = Support::getPointDataSize(pointFormat);
 
 
     if (read_buffer.size() < (pointByteCount * numPoints))
     {
-        boost::int64_t size = pointByteCount * numPoints64;
+        pointbuffer::PointBufferByteSize size = pointByteCount * numPoints64;
         read_buffer.resize(size);
     }
 
@@ -253,7 +253,7 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data,
     bool bFirstPoint(true);
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
-        boost::uint8_t* p = &(read_buffer.front()) + pointByteCount * pointIndex;
+        boost::uint8_t* p = &(read_buffer.front()) + static_cast<pointbuffer::PointBufferByteSize>(pointByteCount) * static_cast<pointbuffer::PointBufferByteSize>(pointIndex);
 
         // always read the base fields
         {
@@ -795,11 +795,11 @@ boost::uint64_t Reader::skipImpl(boost::uint64_t count)
     }
     else
     {
-        boost::uint64_t delta = Support::getPointDataSize(m_reader.getLasHeader().getPointFormat());
+        pointbuffer::PointBufferByteSize delta = Support::getPointDataSize(m_reader.getLasHeader().getPointFormat());
         m_istream.seekg(delta * count, std::ios::cur);
     }
 #else
-    boost::uint64_t delta = Support::getPointDataSize(m_reader.getLasHeader().getPointFormat());
+    pointbuffer::PointBufferByteSize delta = Support::getPointDataSize(m_reader.getLasHeader().getPointFormat());
     m_istream.seekg(delta * count, std::ios::cur);
 #endif
     return count;
@@ -872,12 +872,12 @@ boost::uint64_t Reader::seekImpl(boost::uint64_t count)
     }
     else
     {
-        boost::uint64_t delta = Support::getPointDataSize(m_reader.getLasHeader().getPointFormat());
+        pointbuffer::PointBufferByteSize delta = Support::getPointDataSize(m_reader.getLasHeader().getPointFormat());
         m_istream.seekg(m_reader.getLasHeader().GetDataOffset() + delta * count);
     }
 #else
 
-    boost::uint64_t delta = Support::getPointDataSize(m_reader.getLasHeader().getPointFormat());
+    pointbuffer::PointBufferByteSize delta = Support::getPointDataSize(m_reader.getLasHeader().getPointFormat());
     m_istream.seekg(m_reader.getLasHeader().GetDataOffset() + delta * count);
 
 #endif

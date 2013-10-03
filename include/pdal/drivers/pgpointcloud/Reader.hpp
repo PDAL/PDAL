@@ -150,7 +150,7 @@ private:
     std::string m_patch_hex;
     boost::uint32_t m_patch_npoints;
     PGconn* m_session;
-    pdal::DimensionMap* m_dimension_map;
+    pdal::pointbuffer::DimensionMap* m_dimension_map;
 
     boost::uint32_t m_cur_row;
     boost::uint32_t m_cur_nrows;
