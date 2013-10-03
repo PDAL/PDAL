@@ -55,7 +55,7 @@ using namespace pdal;
 
 static unsigned chunk_size = 15;
 
-Options getOptions()
+Options getSOCIOptions()
 {
     Options options;
 
@@ -139,11 +139,11 @@ BOOST_AUTO_TEST_CASE(SociWriterTest_test_simple_las)
 
     {
 
-        pdal::drivers::las::Reader writer_reader(getOptions());
-        pdal::filters::Cache writer_cache(writer_reader, getOptions());
-        pdal::filters::Chipper writer_chipper(writer_cache, getOptions());
-        pdal::filters::InPlaceReprojection writer_reproj(writer_chipper, getOptions());
-        pdal::drivers::soci::Writer writer_writer(writer_reproj, getOptions());
+        pdal::drivers::las::Reader writer_reader(getSOCIOptions());
+        pdal::filters::Cache writer_cache(writer_reader, getSOCIOptions());
+        pdal::filters::Chipper writer_chipper(writer_cache, getSOCIOptions());
+        pdal::filters::InPlaceReprojection writer_reproj(writer_chipper, getSOCIOptions());
+        pdal::drivers::soci::Writer writer_writer(writer_reproj, getSOCIOptions());
 
         writer_writer.initialize();
         boost::uint64_t numPointsToRead = writer_reader.getNumPoints();

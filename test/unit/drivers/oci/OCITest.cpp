@@ -67,7 +67,7 @@ bool ShouldRunTest()
     return TestConfig::g_oracle_connection.size() > 0;
 }
 
-Options getOptions()
+Options getOCIOptions()
 {
     Options options;
 
@@ -148,7 +148,7 @@ Options getOptions()
 struct OracleTestFixture
 {
     OracleTestFixture() :
-        m_options(getOptions())
+        m_options(getOCIOptions())
         , m_connection(pdal::drivers::oci::Connection())
         , m_driver(m_options)
     {
@@ -209,11 +209,11 @@ BOOST_FIXTURE_TEST_SUITE(OCITest, OracleTestFixture)
 
 bool WriteDefaultData()
 {
-    pdal::drivers::las::Reader writer_reader(getOptions());
-    pdal::filters::Cache writer_cache(writer_reader, getOptions());
-    pdal::filters::Chipper writer_chipper(writer_cache, getOptions());
-    pdal::filters::InPlaceReprojection writer_reproj(writer_chipper, getOptions());
-    pdal::drivers::oci::Writer writer_writer(writer_reproj, getOptions());
+    pdal::drivers::las::Reader writer_reader(getOCIOptions());
+    pdal::filters::Cache writer_cache(writer_reader, getOCIOptions());
+    pdal::filters::Chipper writer_chipper(writer_cache, getOCIOptions());
+    pdal::filters::InPlaceReprojection writer_reproj(writer_chipper, getOCIOptions());
+    pdal::drivers::oci::Writer writer_writer(writer_reproj, getOCIOptions());
 
     writer_writer.initialize();
     boost::uint64_t numPointsToRead = writer_reader.getNumPoints();
@@ -240,7 +240,7 @@ bool WriteDefaultData()
 //         "FROM PDAL_TEST_BLOCKS l, PDAL_TEST_BASE b "
 //         "WHERE b.id=1 and l.obj_id = b.id "
 //         "ORDER BY l.obj_id ";
-//     Options options = getOptions();
+//     Options options = getOCIOptions();
 //     Option& query = options.getOptionByRef("query");
 //     query.setValue<std::string>(oss.str());
 //     pdal::drivers::oci::Reader reader_reader(options);
@@ -265,7 +265,7 @@ bool WriteDefaultData()
 // 
 //     WriteDefaultData();
 // 
-//     Options options = getOptions();
+//     Options options = getOCIOptions();
 //     Option& query = options.getOptionByRef("query");
 // 
 //     query.setValue<std::string>("SELECT CLOUD FROM PDAL_TEST_BASE where ID=1");
@@ -308,7 +308,7 @@ bool WriteDefaultData()
 // 
 //     WriteDefaultData();
 // 
-//     Options options = getOptions();
+//     Options options = getOCIOptions();
 //     Option& query = options.getOptionByRef("query");
 //     query.setValue<std::string>("SELECT CLOUD FROM PDAL_TEST_BASE where ID=1");
 //     pdal::drivers::oci::Reader reader_reader(options);
@@ -357,7 +357,7 @@ BOOST_AUTO_TEST_CASE(read_view_reproj)
            "FROM PDAL_TEST_BLOCKS l, PDAL_TEST_BASE b "
         "WHERE b.id=1 and l.obj_id = b.id "
         "ORDER BY l.obj_id ";
-    Options options = getOptions();
+    Options options = getOCIOptions();
     Option& query = options.getOptionByRef("query");
     query.setValue<std::string>(oss.str());
 
@@ -423,7 +423,7 @@ BOOST_AUTO_TEST_CASE(read_view_reproj)
 //     std::ostringstream oss;
 // 
 //     oss << "SELECT CLOUD FROM PDAL_TEST_BASE";
-//     Options options = getOptions();
+//     Options options = getOCIOptions();
 //     Option& query = options.getOptionByRef("query");
 //     query.setValue<std::string>(oss.str());
 //     pdal::drivers::oci::Reader reader_reader(options);
@@ -473,7 +473,7 @@ BOOST_AUTO_TEST_CASE(read_view_reproj)
 //            "FROM PDAL_TEST_BLOCKS l, PDAL_TEST_BASE b "
 //         "WHERE b.id=1 and l.obj_id = b.id "
 //         "ORDER BY l.obj_id ";
-//     Options options = getOptions();
+//     Options options = getOCIOptions();
 //     Option& query = options.getOptionByRef("query");
 //     query.setValue<std::string>(oss.str());
 //     pdal::drivers::oci::Reader reader_reader(options);

@@ -5,6 +5,7 @@ LASZIP_HOME=$USR_LOCAL
 LIBXML2_HOME=$USR
 GEOTIFF_HOME=$USR_LOCAL
 P2G_HOME=$USR_LOCAL
+SQLITE_HOME="/usr/local/opt/sqlite"
 SO_EXT=dylib
 EMBED=ON
 CC=/Users/hobu/bin/clang
@@ -48,7 +49,9 @@ cmake   -G "$CONFIG"  \
         -DLIBXML2_INCLUDE_DIR=${LIBXML2_HOME}/include/libxml2 \
         -DLIBXML2_LIBRARIES=${LIBXML2_HOME}/lib/libxml2.${SO_EXT} \
         -DTIFF_INCLUDE_DIR=/${TIFF_HOME}/include \
-        -DTIFF_LIBRARY=${TIFF_HOME}/lib/libtiff.${SO_EXT} 
+        -DTIFF_LIBRARY=${TIFF_HOME}/lib/libtiff.${SO_EXT} \
+        -DSQLITE3_INCLUDE_DIR=${SQLITE_HOME}/include \
+        -DSQLITE3_LIBRARY=${SQLITE_HOME}/lib/libsqlite3.${SO_EXT} 
 
     # -DUSE_PDAL_PLUGIN_SOCI=ON \
     # -DUSE_PDAL_PLUGIN_PCD=ON \
