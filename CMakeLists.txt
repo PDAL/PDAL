@@ -581,7 +581,7 @@ if(WITH_PYTHON)
     add_definitions(-DHAVE_PYTHON=1)    
     set(PDAL_HAVE_PYTHON 1)
     
-    find_package(NumPy 1.5)
+    find_package(NumPy 1.5 REQUIRED)
     include_directories(SYSTEM ${NUMPY_INCLUDE_DIR})
     message(STATUS "Found Python: ${PYTHON_LIBRARY}")
   endif()
