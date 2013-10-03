@@ -158,7 +158,7 @@ protected:
     // maps its dimensions to the dimensions that the 
     // the user instantiated the IteratorBase with.
     
-    mutable std::map<PointBuffer const*, DimensionMap const*> m_dimension_maps;
+    mutable std::map<PointBuffer const*, pointbuffer::DimensionMap const*> m_dimension_maps;
     mutable PointBuffer const* m_mapped_buffer;
 
     boost::uint32_t copyCachedBlocks(   std::vector<PointBuffer const*> const& blocks, 
