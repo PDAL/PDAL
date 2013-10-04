@@ -661,7 +661,6 @@ IndexedPointBuffer::IndexedPointBuffer(IndexedPointBuffer const& other)
 {
 
 }
-
 void IndexedPointBuffer::build()
 {
     Dimension const& dx = m_schema.getDimension("X");
@@ -682,14 +681,13 @@ void IndexedPointBuffer::build()
     }    
 
     boost::uint32_t num_dims = dz ? 3 : 2;
-#ifdef PDAL_HAVE_FLANN
     m_dataset = new flann::Matrix<double>(&m_coordinates[0], getNumPoints(), num_dims);
 
 
     m_index = new flann::KDTreeSingleIndex<flann::L2_Simple<double> >(*m_dataset, flann::KDTreeIndexParams(4));
 
     m_index->buildIndex();
-#endif
+
     
 }
 
@@ -716,21 +714,28 @@ std::vector<boost::uint32_t> IndexedPointBuffer::radius(double const& x, double 
     if (num_dimensions > 2)
         query_vec[2] = z;
 
-
     flann::Matrix<double> query_mat(&query_vec[0], 1, num_dimensions);
 
-    // m_index->radiusSearch(query_mat,
-    //                    indices_vec,
-    //                    distances_vec,
-    //                    r,
-    //                    flann::SearchParams(128));
-   std::clog << "indices_vec.size(): " << indices_vec.size() << std::endl;
-   std::clog << "indices_vec[0].size(): " << indices_vec[0].size() << std::endl;
-   std::clog << "indices_vec[0][0].size(): " << indices_vec[0][0] << std::endl;
-
-    for (unsigned i=0; i < indices_vec.size() ; ++i)
+    int checks(flann::FLANN_CHECKS_UNLIMITED);
+    flann::SearchParams parameters(checks, 0 /*eps*/, false /*sorted*/);
+    
+    // FLANN is more efficient using an internal heap 
+    // search structure for large numbers of points. For radiusSearch, 
+    // we're just guessing how many neighbors are going to 
+    // come back, however.
+    if (getNumPoints() > 16777216) // 2^24
     {
-        // output.push_back(indices_vec[i]);
+        parameters.use_heap = flann::FLANN_True;
+    }
+    m_index->radiusSearch(query_mat,
+                       indices_vec,
+                       distances_vec,
+                       r,
+                       parameters);
+
+    for (unsigned i=0; i < indices_vec[0].size() ; ++i)
+    {
+        output.push_back(indices_vec[0][i]);
     }
 #else
     boost::ignore_unused_variable_warning(x);
@@ -809,10 +814,9 @@ std::vector<boost::uint32_t> IndexedPointBuffer::neighbors(double const& x, doub
 }
 
 
+
 IndexedPointBuffer::~IndexedPointBuffer()
 {
-    if (m_segment)
-        delete m_segment;
     
 #ifdef PDAL_HAVE_FLANN
     if (m_index)
