@@ -103,7 +103,7 @@ public:
     PointBuffer& operator=(const PointBuffer&);
 
     /// Destructor.
-    ~PointBuffer() {};
+    ~PointBuffer();
     
     void reset(Schema const& new_schema);
 
@@ -917,8 +917,8 @@ public:
 private:
     std::vector<double> m_coordinates;
 #ifdef PDAL_HAVE_FLANN
-    flann::KDTreeSingleIndex<flann::L2_Simple<double> >* m_index;
     flann::Matrix<double>* m_dataset;    
+    flann::KDTreeSingleIndex<flann::L2_Simple<double> >* m_index;
 #endif      
         
 };

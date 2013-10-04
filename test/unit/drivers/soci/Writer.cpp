@@ -129,6 +129,7 @@ BOOST_AUTO_TEST_SUITE(SociWriterTest)
 
 BOOST_AUTO_TEST_CASE(SociWriterTest_test_simple_las)
 {
+#ifdef PDAL_HAVE_SOCI
     // remove file from earlier run, if needed
     std::string temp_filename("temp-SociWriterTest_test_simple_las.sqlite");
     FileUtils::deleteFile(temp_filename);
@@ -159,6 +160,7 @@ BOOST_AUTO_TEST_CASE(SociWriterTest_test_simple_las)
     // FileUtils::deleteFile(Support::temppath(temp_filename));
 
     return;
+#endif
 }
 
 
