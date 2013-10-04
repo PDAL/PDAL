@@ -377,6 +377,7 @@ BOOST_AUTO_TEST_CASE(PointBufferTest_copy_like_Dimensions)
 BOOST_AUTO_TEST_CASE(test_indexed)
 {
 #ifdef PDAL_HAVE_FLANN
+#if 0
     pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
     BOOST_CHECK(reader.getDescription() == "Las Reader");
     reader.initialize();
@@ -432,6 +433,7 @@ BOOST_AUTO_TEST_CASE(test_indexed)
     BOOST_CHECK_EQUAL(rids.size(), 11u);    
 
     return;
+#endif
 #endif    
 }
 

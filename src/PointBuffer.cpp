@@ -727,6 +727,8 @@ std::vector<boost::uint32_t> IndexedPointBuffer::radius(double const& x, double 
     {
         parameters.use_heap = flann::FLANN_True;
     }
+
+#if 0    
     m_index->radiusSearch(query_mat,
                        indices_vec,
                        distances_vec,
@@ -737,6 +739,7 @@ std::vector<boost::uint32_t> IndexedPointBuffer::radius(double const& x, double 
     {
         output.push_back(indices_vec[0][i]);
     }
+#endif
 #else
     boost::ignore_unused_variable_warning(x);
     boost::ignore_unused_variable_warning(y);
