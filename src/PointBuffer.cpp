@@ -681,13 +681,15 @@ void IndexedPointBuffer::build()
     }    
 
     boost::uint32_t num_dims = dz ? 3 : 2;
+
+#ifdef PDAL_HAVE_FLANN
     m_dataset = new flann::Matrix<double>(&m_coordinates[0], getNumPoints(), num_dims);
 
 
     m_index = new flann::KDTreeSingleIndex<flann::L2_Simple<double> >(*m_dataset, flann::KDTreeIndexParams(4));
 
     m_index->buildIndex();
-
+#endif
     
 }
 
