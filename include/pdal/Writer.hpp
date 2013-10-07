@@ -73,7 +73,7 @@ public:
     /// @param startingPosition The starting position to start reading from 
     /// This position is arrived at by the prevStage's seekImpl.
     /// @param chunkSize The chunk size, or size of the internal Writer's buffer, to use. 
-    /// If no chunkSize is specified, a chunkSize that defaults to the prevStage->getNumPoints() 
+    /// If no chunkSize is specified, a chunkSize that defaults to the Stage::getNumPoints() 
     /// is used.
     /// @return The number of points that were written.
     virtual boost::uint64_t write(  boost::uint64_t targetNumPointsToWrite = 0, 
