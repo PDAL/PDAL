@@ -86,6 +86,7 @@ PointBuffer::~PointBuffer()
     // delete m_segment;
     
 }
+
 PointBuffer& PointBuffer::operator=(PointBuffer const& rhs)
 {
     if (&rhs != this)
@@ -654,12 +655,13 @@ IndexedPointBuffer::IndexedPointBuffer(PointBuffer const& other)
 IndexedPointBuffer::IndexedPointBuffer(IndexedPointBuffer const& other) 
     : PointBuffer(other)
     , m_coordinates(other.m_coordinates)
-    , m_index(other.m_index)
+#ifdef PDAL_HAVE_FLANN
     , m_dataset(other.m_dataset)
+    , m_index(other.m_index)
+#endif
 {
 
 }
-
 void IndexedPointBuffer::build()
 {
     Dimension const& dx = m_schema.getDimension("X");
@@ -680,13 +682,15 @@ void IndexedPointBuffer::build()
     }    
 
     boost::uint32_t num_dims = dz ? 3 : 2;
+
+#ifdef PDAL_HAVE_FLANN
     m_dataset = new flann::Matrix<double>(&m_coordinates[0], getNumPoints(), num_dims);
 
 
     m_index = new flann::KDTreeSingleIndex<flann::L2_Simple<double> >(*m_dataset, flann::KDTreeIndexParams(4));
 
     m_index->buildIndex();
-
+#endif
     
 }
 
@@ -726,6 +730,8 @@ std::vector<boost::uint32_t> IndexedPointBuffer::radius(double const& x, double 
     {
         parameters.use_heap = flann::FLANN_True;
     }
+
+#if 0    
     m_index->radiusSearch(query_mat,
                        indices_vec,
                        distances_vec,
@@ -736,6 +742,7 @@ std::vector<boost::uint32_t> IndexedPointBuffer::radius(double const& x, double 
     {
         output.push_back(indices_vec[0][i]);
     }
+#endif
 #else
     boost::ignore_unused_variable_warning(x);
     boost::ignore_unused_variable_warning(y);
@@ -811,6 +818,7 @@ std::vector<boost::uint32_t> IndexedPointBuffer::neighbors(double const& x, doub
 
     return output;
 }
+
 
 
 IndexedPointBuffer::~IndexedPointBuffer()
