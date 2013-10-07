@@ -159,8 +159,6 @@ private:
     std::string remapOldNames(std::string const& input);
 
 #ifdef PDAL_HAVE_LIBXML2
-
-
     DocPtr m_doc;
     DocPtr m_schema_doc;
 
@@ -170,7 +168,6 @@ private:
 
     xmlParserOption m_doc_options;
 #endif
-    
 
     void* m_global_context;
 
@@ -180,9 +177,6 @@ private:
     std::string m_xsd;
 
     boost::uint32_t m_field_position;
-
-
-
 };
 
 
@@ -194,20 +188,11 @@ public:
     
     void setMetadata(boost::property_tree::ptree const& tree) { m_metadata = tree; }
     std::string getXML();
-
-
 protected:
-
-
-
 private:
 
     Writer& operator=(const Writer&); // not implemented
     Writer(const Writer&); // not implemented;
-
-
-
-
     void write(TextWriterPtr w);
     void writeSchema(TextWriterPtr w);
     void* m_global_context;
