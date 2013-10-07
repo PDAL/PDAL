@@ -96,9 +96,13 @@ public:
     /// Set this SpatialReference to assign the output 
     /// SpatialReference of the written data.
     void setSpatialReference(SpatialReference const&);
-
+    
+    /// Sets the UserCallback to manage progress/cancel operations
     void setUserCallback(UserCallback* userCallback);
 
+    /// @return the UserCallback that manages progress/cancel operations
+    UserCallback* getUserCallback() const;
+    
 protected:
     // this is called once before the loop with all the writeBuffer calls
     virtual void writeBegin(boost::uint64_t targetNumPointsToWrite) = 0;
@@ -114,8 +118,6 @@ protected:
 
     // called once, after all the the writeBuffer calls
     virtual void writeEnd(boost::uint64_t actualNumPointsWritten) = 0;
-
-    UserCallback* getUserCallback() const;
 
 private:
     SpatialReference m_spatialReference;

@@ -1,20 +1,11 @@
-.. _cppapi:
+.. _cpp-pdal-writer:
 
 ******************************************************************************
-C++ API
+pdal::Writer
 ******************************************************************************
 
 
-.. toctree::
-   :maxdepth: 2
-   
-   dimension
-   drivers
-   bounds
-   log
-   metadata
-   option
-   options
-   pointbuffer
-   schema
-   writer
+.. doxygenclass:: pdal::Writer
+   :members:
+
+
