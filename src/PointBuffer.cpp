@@ -643,12 +643,21 @@ std::ostream& operator<<(std::ostream& ostr, const PointBuffer& pointBuffer)
 IndexedPointBuffer::IndexedPointBuffer( const Schema& schema, 
                                         boost::uint32_t capacity)
     : PointBuffer(schema, capacity)
+#ifdef PDAL_HAVE_FLANN
+    , m_dataset(0)
+    , m_index(0)
+#endif
 {
 
 }
 
 IndexedPointBuffer::IndexedPointBuffer(PointBuffer const& other) 
     : PointBuffer(other)
+#ifdef PDAL_HAVE_FLANN
+    , m_dataset(0)
+    , m_index(0)
+#endif
+        
 {
 
 }
