@@ -138,7 +138,7 @@ public:
     Reader(std::istream* xml, std::istream* schema);
     ~Reader();
 
-    inline pdal::Schema getSchema()
+    inline pdal::Schema const& getSchema()
     {
         return m_schema;
     }
