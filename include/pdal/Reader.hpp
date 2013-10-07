@@ -56,7 +56,7 @@ class ReaderBlockIterator;
 class PDAL_DLL Reader : public Stage
 {
 public:
-    Reader(const Options& options);
+    Reader(Options const& options);
     virtual ~Reader();
 
     virtual void initialize();
