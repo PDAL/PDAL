@@ -94,9 +94,8 @@ private:
     void addSwitches(); // overrride
     void validateSwitches(); // overrride
     
-    void readPoints(std::vector<Point>* points,
-                                StageSequentialIterator* iter,
-                                PointBuffer& data);    
+    void readPoints(    StageSequentialIterator* iter,
+                        PointBuffer& data);    
     std::string m_sourceFile;
     std::string m_candidateFile;
     std::string m_wkt;
@@ -159,38 +158,12 @@ void PcEqual::addSwitches()
 
 
 
-void PcEqual::readPoints(   std::vector<Point>* points,
-                            StageSequentialIterator* iter,
+void PcEqual::readPoints(   StageSequentialIterator* iter,
                             PointBuffer& data)
 {
-    const Schema& schema = data.getSchema();
-    
-    Dimension const& dimX = schema.getDimension("X");
-    Dimension const& dimY = schema.getDimension("Y");
-    Dimension const& dimZ = schema.getDimension("Z");
-
-    boost::uint64_t id = 0;
     while (!iter->atEnd())
     {
         const boost::uint32_t numRead = iter->read(data);
-        
-        for (boost::uint32_t i = 0; i < data.getNumPoints(); ++i)
-        {
-            boost::int32_t xi = data.getField<boost::int32_t>(dimX, i);
-            boost::int32_t yi = data.getField<boost::int32_t>(dimY, i);
-            boost::int32_t zi = data.getField<boost::int32_t>(dimZ, i);
-            
-            Point p;
-            p.x = dimX.applyScaling<boost::int32_t>(xi);
-            p.y = dimY.applyScaling<boost::int32_t>(yi);
-            p.z = dimZ.applyScaling<boost::int32_t>(zi);
-            p.id = id;
-            id += 1;
-            
-            points->push_back(p);
-            
-        }
-        
     }
 
 }
@@ -205,30 +178,24 @@ std::ostream& writeHeader(std::ostream& strm)
 int PcEqual::execute()
 {
 
-    std::vector<Point>* source_points = new std::vector<Point>();
-    std::vector<Point>* candidate_points = new std::vector<Point>();
-    
+    Options sourceOptions;
     {
-        Options sourceOptions;
-        {
-            sourceOptions.add<std::string>("filename", m_sourceFile);
-            sourceOptions.add<bool>("debug", isDebug());
-            sourceOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
-        }
-        Stage* source = AppSupport::makeReader(sourceOptions);
-        source->initialize();
+        sourceOptions.add<std::string>("filename", m_sourceFile);
+        sourceOptions.add<bool>("debug", isDebug());
+        sourceOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
+    }
+    Stage* source = AppSupport::makeReader(sourceOptions);
+    source->initialize();
 
-        source_points->reserve(source->getNumPoints());
+    PointBuffer source_data(source->getSchema(), m_chunkSize);
+    StageSequentialIterator* source_iter = source->createSequentialIterator(source_data);
 
-        PointBuffer source_data(source->getSchema(), m_chunkSize);
-        StageSequentialIterator* reader_iter = source->createSequentialIterator(source_data);
+    readPoints(source_iter, source_data);
 
-        readPoints(source_points, reader_iter, source_data);
+    delete source_iter;
+    delete source;
 
-        delete reader_iter;
-        delete source;
-        
-    }    
+
 
     Options candidateOptions;
     {
@@ -238,41 +205,32 @@ int PcEqual::execute()
     }
 
     Stage* candidate = AppSupport::makeReader(candidateOptions);
-    pdal::filters::Index* index_filter = new pdal::filters::Index(*candidate, candidateOptions);
-    index_filter->initialize();    
+    // pdal::filters::Index* index_filter = new pdal::filters::Index(*candidate, candidateOptions);
+    candidate->initialize();    
 
 
-    candidate_points->reserve(candidate->getNumPoints());
-
-    PointBuffer candidate_data(candidate->getSchema(), m_chunkSize);
-    StageSequentialIterator* index_iter = index_filter->createSequentialIterator(candidate_data);
-    readPoints(candidate_points, index_iter, candidate_data);
-
+    IndexedPointBuffer candidate_data(candidate->getSchema(), m_chunkSize);
+    StageSequentialIterator* candidate_iter = candidate->createSequentialIterator(candidate_data);
+    readPoints(candidate_iter, candidate_data);
+    delete candidate_iter;    
 
 
-    if (candidate_points->size() != source_points->size())
+    if (source_data.getNumPoints() != candidate_data.getNumPoints())
     {
         std::cerr << "Source and candidate files do not have the same point count, testing each source point only!";
     }
     
-    pdal::filters::iterators::sequential::Index* idx = dynamic_cast<pdal::filters::iterators::sequential::Index*>(index_iter);
-    if (!idx)
-    {
-        throw app_runtime_error("unable to cast iterator to Index iterator!");
-    }
-    
 
-    Stage* candidates = AppSupport::makeReader(candidateOptions);
-    candidates->initialize();    
+    
+    Schema const& candidate_schema = candidate_data.getSchema();
+    Dimension const& cDimX = candidate_schema.getDimension("X");
+    Dimension const& cDimY = candidate_schema.getDimension("Y");
+    Dimension const& cDimZ = candidate_schema.getDimension("Z");
 
-    PointBuffer candidates_data(candidates->getSchema(), 1);
-    StageRandomIterator* random_iterator = candidates->createRandomIterator(candidates_data);
-    
-    
-    Schema const& schema = candidates_data.getSchema();
-    Dimension const& dimX = schema.getDimension("X");
-    Dimension const& dimY = schema.getDimension("Y");
-    Dimension const& dimZ = schema.getDimension("Z");
+    Schema const& source_schema = source_data.getSchema();
+    Dimension const& sDimX = source_schema.getDimension("X");
+    Dimension const& sDimY = source_schema.getDimension("Y");
+    Dimension const& sDimZ = source_schema.getDimension("Z");
     
     bool bWroteHeader(false);
     
@@ -282,35 +240,30 @@ int PcEqual::execute()
     }
     std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
     
-    idx->build();
-    for (std::size_t i = 0; i <  source_points->size(); ++i)
+    candidate_data.build();
+    for (boost::uint32_t i = 0; i < source_data.getNumPoints(); ++i)
     {
-        Point& source = (*source_points)[i];
+        double sx = source_data.applyScaling(sDimX, i);
+        double sy = source_data.applyScaling(sDimY, i);
+        double sz = source_data.applyScaling(sDimZ, i);                
         
-        std::vector<boost::uint32_t> ids = idx->query(source.x, source.y, source.z, 0.0, 1);
+        std::vector<boost::uint32_t> ids = candidate_data.neighbors(sx, sy, sz, 1);
 
-        if (ids.size())
-            random_iterator->seek(ids[0]);
-        else
-		{
+        if (!ids.size())
+        {
 			std::ostringstream oss;
 			oss << "unable to find point for id '"  << i <<"'";
             throw app_runtime_error(oss.str() );
 		}
         
-        random_iterator->read(candidates_data);
-        boost::int32_t xi = candidates_data.getField<boost::int32_t>(dimX, 0);
-        boost::int32_t yi = candidates_data.getField<boost::int32_t>(dimY, 0);
-        boost::int32_t zi = candidates_data.getField<boost::int32_t>(dimZ, 0);
-        
-        Point p;
-        p.x = dimX.applyScaling<boost::int32_t>(xi);
-        p.y = dimY.applyScaling<boost::int32_t>(yi);
-        p.z = dimZ.applyScaling<boost::int32_t>(zi);
-        
-        double xd = source.x - p.x;
-        double yd = source.y - p.y;
-        double zd = source.z - p.z;
+        boost::uint32_t id = ids[0];
+        double cx = candidate_data.applyScaling(cDimX, id);
+        double cy = candidate_data.applyScaling(cDimY, id);
+        double cz = candidate_data.applyScaling(cDimZ, id);
+
+        double xd = sx - cx;
+        double yd = sy - cy;
+        double zd = sz - cz;
         
         if (!bWroteHeader)
         {
@@ -318,16 +271,16 @@ int PcEqual::execute()
             bWroteHeader = true;
         }
         ostr << i << ",";
-        boost::uint32_t precision = Utils::getStreamPrecision(dimX.getNumericScale());
+        boost::uint32_t precision = Utils::getStreamPrecision(cDimX.getNumericScale());
         ostr.setf(std::ios_base::fixed, std::ios_base::floatfield);
         ostr.precision(precision);
         ostr << xd << ",";
 
-        precision = Utils::getStreamPrecision(dimY.getNumericScale());
+        precision = Utils::getStreamPrecision(cDimY.getNumericScale());
         ostr.precision(precision);
         ostr << yd << ",";
 
-        precision = Utils::getStreamPrecision(dimZ.getNumericScale());
+        precision = Utils::getStreamPrecision(cDimZ.getNumericScale());
         ostr.precision(precision);
         ostr << zd;
         
@@ -335,10 +288,7 @@ int PcEqual::execute()
 
     }
 
-    delete index_iter;
-    delete index_filter;    
-    delete candidate_points;
-    delete source_points;
+
 
     if (m_outputStream)
     {
