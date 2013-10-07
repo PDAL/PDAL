@@ -100,9 +100,6 @@ public:
         return m_averageZ;
     }
 
-    // for dumping
-    virtual boost::property_tree::ptree toPTree() const;
-
 private:
     double m_minimumX;
     double m_minimumY;

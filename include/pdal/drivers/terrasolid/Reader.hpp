@@ -172,9 +172,6 @@ public:
     // this is called by the stage's iterator
     boost::uint32_t processBuffer(PointBuffer& PointBuffer, std::istream& stream, boost::uint64_t numPointsLeft) const;
 
-    // for dumping
-    virtual boost::property_tree::ptree toPTree() const;
-
 protected:
     inline TERRASOLID_Format_Type getFormat() const
     {

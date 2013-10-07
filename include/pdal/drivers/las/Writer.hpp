@@ -89,9 +89,6 @@ public:
     // default false
     void setCompressed(bool);
 
-    // for dumping
-    virtual boost::property_tree::ptree toPTree() const;
-
 protected:
     virtual void writeBegin(boost::uint64_t targetNumPointsToWrite);
     virtual void writeBufferBegin(PointBuffer const&);

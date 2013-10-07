@@ -86,9 +86,6 @@ public:
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
     pdal::StageRandomIterator* createRandomIterator(PointBuffer& buffer) const;
 
-    // for dumping
-    virtual boost::property_tree::ptree toPTree() const;
-
 private:
     std::string m_filename;
     StreamFactory* m_streamFactory;

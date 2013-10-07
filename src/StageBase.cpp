@@ -240,31 +240,12 @@ std::vector<Stage*> StageBase::getPrevStages() const
 }
 
 
-boost::property_tree::ptree StageBase::toPTree() const
-{
-    boost::property_tree::ptree tree;
-
-    tree.add("name", getName());
-    tree.add("id", getId());
-    tree.add("description", getDescription());
-    tree.add_child("options", getOptions().toPTree());
-
-    return tree;
-}
-
-
-void StageBase::dump() const
-{
-    m_log->get(logDEBUG) << *this;
-}
-
-
 std::ostream& operator<<(std::ostream& ostr, const StageBase& stage)
 {
-    boost::property_tree::ptree tree = stage.toPTree();
-
-    boost::property_tree::write_json(ostr, tree);
-
+    // boost::property_tree::ptree tree = stage.toPTree();
+    // 
+    // boost::property_tree::write_json(ostr, tree);
+    // 
     return ostr;
 }
 

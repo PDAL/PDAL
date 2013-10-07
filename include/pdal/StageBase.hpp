@@ -76,25 +76,23 @@ public:
     virtual ~StageBase();
 
     /// Initializes this object.
-    ///
-    /// This function is for derived stages to perform "static" validation, e.g. bad Option arguments.
     /// It will recursively call initialize() on all previous stages.
-    /// Users must call this after the last stage in the pipeline has been consturcted.
+    /// Users must call this after the last stage in the pipeline 
+    ///  has been constructed.
     /// It is illegal to call this twice for a stage.
-    /// Derived stages should feel free to provide their own implementations.  Remember to call initialize() on
-    ///   the parent class before your own class-specific code.
-    /// This function will throw when errors are found.
+    /// Derived stages should feel free to provide their own implementations.  
+    /// Remember to call initialize() on the parent class before 
+    /// your own class-specific code. This function will throw when errors are found.
     virtual void initialize();
 
     /// Query if this object is initialized.
-    ///
     /// @return true if initialized, false if not.
     bool isInitialized() const;
 
     /// Gets the Options set for the stage.
     ///
     /// @return The options.
-    const Options& getOptions() const;
+    Options const& getOptions() const;
 
 
     /// Returns the serialized pipeline.
@@ -105,10 +103,7 @@ public:
     /// @return the ptree for the stage
     virtual boost::property_tree::ptree serializePipeline() const = 0;
 
-    /// Put data to the log
-    /// @param input a string to put into the Stage's log
-    // virtual void log(std::ostringstream& input, boost::uint32_t nVerbosity = 1) const;
-
+    /// @return the pdal::LogPtr for this pdal::Stage.
     virtual LogPtr log(void) const
     {
         return m_log;
@@ -193,14 +188,6 @@ public:
     std::string getName() const { return name; }  \
     static std::string s_getDescription() { return description; }  \
     std::string getDescription() const { return description; }
-
-    /// Converts this object to a ptree.
-    ///
-    /// @return This object as a boost::property_tree::ptree.
-    virtual boost::property_tree::ptree toPTree() const;
-
-    /// Dumps this object.
-    virtual void dump() const;
 
     /// Gets the stage's id.
     ///

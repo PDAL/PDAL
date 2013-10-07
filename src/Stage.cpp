@@ -90,13 +90,6 @@ void Stage::setBounds(const Bounds<double>& bounds)
     m_bounds = bounds;
 }
 
-
-const Schema& Stage::getSchema() const
-{
-    return m_schema;
-}
-
-
 Schema& Stage::getSchemaRef()
 {
     return m_schema;
@@ -189,19 +182,6 @@ void Stage::setCoreProperties(const Stage& stage)
 
     return;
 }
-
-boost::property_tree::ptree Stage::toPTree() const
-{
-    boost::property_tree::ptree tree = StageBase::toPTree();
-
-    tree.add("NumPoints", getNumPoints());
-    tree.add("PointCountType", getPointCountType());
-    tree.add("Bounds", getBounds());
-    tree.add("SRS", getSpatialReference());
-
-    return tree;
-}
-
 
 std::ostream& operator<<(std::ostream& ostr, const Stage& stage)
 {

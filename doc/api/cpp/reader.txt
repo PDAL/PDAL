@@ -10,6 +10,7 @@ format that is described via the :cpp:class:`pdal::Schema`.
 
 .. doxygenclass:: pdal::Reader
    :members:
+   :sections: public*
 
 
 `ASPRS LAS`_ Reader

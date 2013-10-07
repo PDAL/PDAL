@@ -83,14 +83,4 @@ boost::property_tree::ptree Filter::serializePipeline() const
 }
 
 
-boost::property_tree::ptree Filter::toPTree() const
-{
-    boost::property_tree::ptree tree = Stage::toPTree();
-
-    // (nothing to add for a Filter)
-
-    return tree;
-}
-
-
 } // namespace pdal

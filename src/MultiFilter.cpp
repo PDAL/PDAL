@@ -80,14 +80,4 @@ boost::property_tree::ptree MultiFilter::serializePipeline() const
 }
 
 
-boost::property_tree::ptree MultiFilter::toPTree() const
-{
-    boost::property_tree::ptree tree = Stage::toPTree();
-
-    tree.add("NumPrevStages", getPrevStages().size());
-
-    return tree;
-}
-
-
 } // namespace pdal

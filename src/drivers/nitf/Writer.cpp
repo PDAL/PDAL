@@ -258,15 +258,6 @@ void Writer::writeEnd(boost::uint64_t actualNumPointsWritten)
 }
 
 
-boost::property_tree::ptree Writer::toPTree() const
-{
-    boost::property_tree::ptree tree = pdal::Writer::toPTree();
-
-    // add stuff here specific to this stage type
-
-    return tree;
-}
-
 }
 }
 } // namespaces

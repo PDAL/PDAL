@@ -237,15 +237,6 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, boost::uint64_t index) 
 }
 
 
-boost::property_tree::ptree Reader::toPTree() const
-{
-    boost::property_tree::ptree tree = pdal::Reader::toPTree();
-
-    // add stuff here specific to this stage type
-
-    return tree;
-}
-
 namespace iterators
 {
 namespace sequential

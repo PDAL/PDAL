@@ -264,16 +264,17 @@ void PcInfo::dumpSDO_PCMetadata(const Stage& stage) const
 
 void PcInfo::dumpStage(const Stage& stage) const
 {
-    boost::property_tree::ptree tree = stage.toPTree();
-
-    std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
-
-    boost::property_tree::ptree output;
-    output.add_child("stage", tree);
-    if (m_useXML)
-        write_xml(ostr, output);
-    else
-        write_json(ostr, tree);
+    // FIXME: change this to dumpPipeline now that we've removed toPTree stuff for Stage::
+    // boost::property_tree::ptree tree = stage.toPTree();
+    // 
+    // std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
+    // 
+    // boost::property_tree::ptree output;
+    // output.add_child("stage", tree);
+    // if (m_useXML)
+    //     write_xml(ostr, output);
+    // else
+    //     write_json(ostr, tree);
 
     return;
 }

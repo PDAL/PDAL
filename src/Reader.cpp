@@ -78,14 +78,4 @@ boost::property_tree::ptree Reader::serializePipeline() const
     return root;
 }
 
-
-boost::property_tree::ptree Reader::toPTree() const
-{
-    boost::property_tree::ptree tree = Stage::toPTree();
-
-    // (nothing to add for a Reader)
-
-    return tree;
-}
-
 } // namespace pdal

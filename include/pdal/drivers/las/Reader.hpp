@@ -101,9 +101,6 @@ public:
                                   PointDimensions* dimensions,
                                   std::vector<boost::uint8_t>& read_buffer) const;
 
-    // for dumping
-    virtual boost::property_tree::ptree toPTree() const;
-
     const LasHeader& getLasHeader() const
     {
         return m_lasHeader;

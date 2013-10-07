@@ -121,15 +121,6 @@ boost::property_tree::ptree Reader::serializePipeline() const
     return m_stage->serializePipeline();
 }
 
-boost::property_tree::ptree Reader::toPTree() const
-{
-    boost::property_tree::ptree tree = pdal::Reader::toPTree();
-
-    tree.add("filename", m_filename);
-
-    return tree;
-}
-
 }
 }
 } // namespaces

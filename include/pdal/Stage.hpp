@@ -65,8 +65,10 @@ public:
 
     virtual void initialize();
 
-    // core properties of all stages
-    const Schema& getSchema() const;
+    inline Schema const& getSchema() const
+    {
+        return m_schema;
+    }
     
     virtual boost::uint64_t getNumPoints() const;
     PointCountType getPointCountType() const;
@@ -83,10 +85,6 @@ public:
     {
         return NULL;
     }
-
-    // for dumping
-    virtual boost::property_tree::ptree toPTree() const;
-
 
 protected:
     // setters for the core properties

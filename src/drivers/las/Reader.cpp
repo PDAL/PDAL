@@ -670,21 +670,8 @@ std::vector<Dimension> Reader::getDefaultDimensions()
     return output;
 }
 
-boost::property_tree::ptree Reader::toPTree() const
-{
-    boost::property_tree::ptree tree = pdal::Reader::toPTree();
-
-    tree.add("Compression", this->getLasHeader().Compressed());
-    // add more stuff here specific to this stage type
-
-    return tree;
-}
-
-
-
 namespace iterators
 {
-
 
 Base::Base(pdal::drivers::las::Reader const& reader)
     : m_reader(reader)

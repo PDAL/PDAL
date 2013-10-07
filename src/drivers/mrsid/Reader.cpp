@@ -317,15 +317,6 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, boost::uint64_t index) 
     return cnt;
 }
 
-boost::property_tree::ptree Reader::toPTree() const
-{
-    boost::property_tree::ptree tree = pdal::Reader::toPTree();
-
-    // add stuff here specific to this stage type
-
-    return tree;
-}
-
 std::vector<Dimension> Reader::getDefaultDimensions()
 {
     std::vector<Dimension> output;

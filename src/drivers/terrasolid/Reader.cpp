@@ -436,16 +436,6 @@ pdal::StageRandomIterator* Reader::createRandomIterator(PointBuffer& buffer) con
     return new pdal::drivers::terrasolid::iterators::random::Reader(*this, buffer);
 }
 
-
-boost::property_tree::ptree Reader::toPTree() const
-{
-    boost::property_tree::ptree tree = pdal::Reader::toPTree();
-
-    // add stuff here specific to this stage type
-
-    return tree;
-}
-
 std::vector<Dimension> Reader::getDefaultDimensions()
 {
     std::vector<Dimension> output;

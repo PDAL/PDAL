@@ -71,9 +71,6 @@ public:
     // this is called by the stage's iterator
     boost::uint32_t processBuffer(PointBuffer& data, boost::uint64_t index) const;
 
-    // for dumping
-    virtual boost::property_tree::ptree toPTree() const;
-
     PipelineManager const& getManager()
     {
         return *m_manager.get();
