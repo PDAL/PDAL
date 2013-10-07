@@ -912,7 +912,7 @@ public:
     // 
     // /// Assignment constructor.
     // PointBuffer& operator=(const PointBuffer&) { return IndexedPointBuffer};
-    void build();
+    void build(bool b3D=true);
 
 private:
     std::vector<double> m_coordinates;

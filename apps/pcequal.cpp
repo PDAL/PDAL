@@ -103,7 +103,7 @@ private:
     std::ostream* m_outputStream;
     std::string m_outputFileName;
 	
-    pdal::Options m_options;
+    bool m_3d;
 };
 
 
@@ -113,6 +113,7 @@ PcEqual::PcEqual(int argc, char* argv[])
     , m_candidateFile("")
     , m_outputStream(0)
     , m_outputFileName("")
+    , m_3d(true)
 {
     return;
 }
@@ -137,6 +138,7 @@ void PcEqual::addSwitches()
         ("source", po::value<std::string>(&m_sourceFile), "source file name")
         ("candidate", po::value<std::string>(&m_candidateFile), "candidate file name")
         ("output", po::value<std::string>(&m_outputFileName), "output file name")
+        ("2d", po::value<bool>(&m_3d)->zero_tokens()->implicit_value(false), "only 2D comparisons/indexing")
         ;
 
     addSwitchSet(file_options);
@@ -168,9 +170,12 @@ void PcEqual::readPoints(   StageSequentialIterator* iter,
 
 }
 
-std::ostream& writeHeader(std::ostream& strm)
+std::ostream& writeHeader(std::ostream& strm, bool b3D)
 {
-    strm << "\"ID\",\"DeltaX\",\"DeltaY\",\"DeltaZ\"" << std::endl;
+    strm << "\"ID\",\"DeltaX\",\"DeltaY\"";
+    if (b3D)
+        strm << ",\"DeltaZ\"";
+    strm << std::endl;
     return strm;
     
 }
@@ -240,7 +245,7 @@ int PcEqual::execute()
     }
     std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
     
-    candidate_data.build();
+    candidate_data.build(m_3d);
     for (boost::uint32_t i = 0; i < source_data.getNumPoints(); ++i)
     {
         double sx = source_data.applyScaling(sDimX, i);
@@ -267,7 +272,7 @@ int PcEqual::execute()
         
         if (!bWroteHeader)
         {
-            writeHeader(ostr);
+            writeHeader(ostr, m_3d);
             bWroteHeader = true;
         }
         ostr << i << ",";
@@ -278,11 +283,15 @@ int PcEqual::execute()
 
         precision = Utils::getStreamPrecision(cDimY.getNumericScale());
         ostr.precision(precision);
-        ostr << yd << ",";
-
-        precision = Utils::getStreamPrecision(cDimZ.getNumericScale());
-        ostr.precision(precision);
-        ostr << zd;
+        ostr << yd;
+        
+        if (m_3d)
+        {
+            ostr << ",";
+            precision = Utils::getStreamPrecision(cDimZ.getNumericScale());
+            ostr.precision(precision);
+            ostr << zd;
+        }
         
         ostr << std::endl;
 

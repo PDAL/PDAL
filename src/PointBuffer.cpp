@@ -671,10 +671,11 @@ IndexedPointBuffer::IndexedPointBuffer(IndexedPointBuffer const& other)
 {
 
 }
-void IndexedPointBuffer::build()
+void IndexedPointBuffer::build(bool b3D)
 {
     Dimension const& dx = m_schema.getDimension("X");
     Dimension const& dy = m_schema.getDimension("Y");
+    
     Dimension const* dz = m_schema.getDimensionPtr("Z");
 
     for (boost::uint32_t pointIndex=0; pointIndex<getNumPoints(); pointIndex++)
@@ -684,14 +685,17 @@ void IndexedPointBuffer::build()
         double z = applyScaling(*dz, pointIndex);
         m_coordinates.push_back(x);
         m_coordinates.push_back(y);
-        if (dz)
+        if (dz && b3D)
         {
             m_coordinates.push_back(z);
         }
     }    
 
-    boost::uint32_t num_dims = dz ? 3 : 2;
-
+    boost::uint32_t num_dims = dz && b3D ? 3 : 2;
+    
+    delete m_dataset;
+    delete m_index;
+    
 #ifdef PDAL_HAVE_FLANN
     m_dataset = new flann::Matrix<double>(&m_coordinates[0], getNumPoints(), num_dims);
 
@@ -714,7 +718,8 @@ std::vector<boost::uint32_t> IndexedPointBuffer::radius(double const& x, double 
         throw pdal_error("Index is not initialized! Unable to query!");
     }
     Dimension const* dz = m_schema.getDimensionPtr("Z");
-    boost::uint32_t num_dimensions = dz ? 3 : 2;    
+    
+    boost::uint32_t num_dimensions = dz && m_dataset->cols == 3 ? 3 : 2;    
 
     std::vector< std::vector<double> > distances_vec;
 
@@ -773,7 +778,7 @@ std::vector<boost::uint32_t> IndexedPointBuffer::neighbors(double const& x, doub
         throw pdal_error("Index is not initialized! Unable to query!");
     }
     Dimension const* dz = m_schema.getDimensionPtr("Z");
-    boost::uint32_t num_dimensions = dz ? 3 : 2;    
+    boost::uint32_t num_dimensions = dz && m_dataset->cols == 3 ? 3 : 2;    
 
     std::vector<double> distances_vec;
     distances_vec.resize(k);
