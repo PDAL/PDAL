@@ -66,6 +66,14 @@ namespace pdal
 
         typedef boost::interprocess::allocator<boost::uint8_t, boost::interprocess::managed_shared_memory::segment_manager>     ShmemAllocator; 
         typedef boost::container::vector<boost::uint8_t, ShmemAllocator> PointBufferVector;
+
+        enum Orientation
+        {
+            POINT_INTERLEAVED = 1,
+            DIMENSION_INTERLEAVED = 2,
+            UNKNOWN_INTERLEAVED = 256
+        };    
+
     } // pointbuffer
 
     
@@ -77,7 +85,18 @@ namespace pdal
 /// std::numeric_limits<boost::uint32_t>::max().  Underneath the covers, a PointBuffer
 /// is simply the composed array of bytes described in the pdal::Schema. You can
 /// operate on the raw bytes if you need to, but PointBuffer provides a number of
-/// convienence methods to make things easier.
+/// convienence methods to make things easier. 
+/*! 
+    \verbatim embed:rst
+    .. note::
+
+        The arrangement of PointBuffer's bytes might either be point-interleaved or
+        dimension-interleaved, with point-interleave being the default organization.
+        If you are directly modifying a PointBuffer's bytes, you must respect the 
+        :cpp:class:`pdal::pointbuffer::Orientation`. 
+        
+    \endverbatim
+*/    
 class PDAL_DLL PointBuffer
 {
 public:
@@ -87,12 +106,6 @@ public:
     /*! Base constructor for pdal::PointBuffer.
         \param schema pdal::Schema instance to use to describe the layout. It is copied.
         \param capacity size of the pdal::PointBuffer in number of points.
-        \verbatim embed:rst
-        .. note::
-
-            All fields are initialized to inactive regardless of what the
-            passed-in pdal::Schema says.
-        \endverbatim
     */
     PointBuffer(const Schema& schema, boost::uint32_t capacity=65536);
 
@@ -105,11 +118,9 @@ public:
     /// Destructor.
     ~PointBuffer();
     
-    void reset(Schema const& new_schema);
-
     /** @name Attribute access
     */
-    /*! returns the pdal::Bounds instance associated with this pdal::PointBuffer.
+    /*! @return the pdal::Bounds instance associated with this pdal::PointBuffer.
         \verbatim embed:rst
         .. note::
 
@@ -123,7 +134,7 @@ public:
     /// @param bounds bounds instance to set.
     void setSpatialBounds(const Bounds<double>& bounds);
 
-    /// returns the number of points that are set for the PointBuffer. It is
+    /// @return the number of points that are set for the PointBuffer. It is
     /// an arbitrary number that must be <= getCapacity() is the number of
     /// active points for the PointBuffer
     inline boost::uint32_t getNumPoints() const
@@ -139,16 +150,17 @@ public:
         m_numPoints = v;
     }
 
-    /*! returns the maximum number of points the PointBuffer can hold.
+    /*! @return the maximum number of points the PointBuffer can hold.
         \verbatim embed:rst
         .. note::
 
             This value is given at construction time, and it in conjunction
-            with the given pdal::Schema determine the size of the raw byte
-            buffer that contains the point data. It cannot be changed.
+            with the given :cpp:class:`pdal::Schema` determine the size of the raw byte
+            buffer that contains the point data. It can be changed by 
+            a call to :cpp:func:`pdal::PointBuffer::resize`.
         \endverbatim
     */
-    inline boost::uint32_t getCapacity() const
+    inline boost::uint32_t const& getCapacity() const
     {
         return m_capacity;
     }
@@ -160,15 +172,14 @@ public:
         return m_schema;
     }
 
-    /// returns the size of the currently filled raw byte array
-    /// Equivalent to getNumPoints() * getSchema() * getByteSize().
+    /// @return the size of the currently allocated raw byte array
     inline pointbuffer::PointBufferByteSize getBufferByteLength() const
     {
         return m_data.size();
     }
 
-    /// returns the size of the theoretically filled raw byte array.
-    /// Equivalent to getCapacity() * getSchema() * getByteSize().
+    /// @return the size of the theoretically filled raw byte array.
+    /// Should be equivalent to PointBuffer::getCapacity() * PointBuffer::getSchema()::getByteSize().
     inline pointbuffer::PointBufferByteSize getBufferByteCapacity() const
     {
         return static_cast<pointbuffer::PointBufferByteSize>(m_byteSize) * static_cast<pointbuffer::PointBufferByteSize>(m_capacity);
@@ -176,13 +187,13 @@ public:
 
     /** @name Point data access
     */
-    /*! fetch the value T for a given pdal::Dimension dim at pointIndex i.
-        \param dim pdal::Dimension instance describing the dimension to select
+    /*! fetch the value T for a given :cpp:class:`pdal::Dimension` dim at pointIndex `i`.
+        \param dim  a pdal::Dimension instance describing the dimension to select
         \param pointIndex the point index of the PointBuffer to select.
         \verbatim embed:rst
         .. warning::
 
-            If the data type of T is not the same as described in pdal::Dimension,
+            If the data type of T is not the same as described in :cpp:class:`pdal::Dimension`,
             the data value will be casted into the appropriate type. In some
             situations this may not be what you want. In situations where the T
             is smaller than the datatype given by `dim`, the return value T
@@ -191,14 +202,14 @@ public:
     */
     template<class T> T const& getField(Dimension const& dim, boost::uint32_t pointIndex) const;
 
-    /*! set the value T for a given pdal::Dimension dim at pointIndex i.
-        \param dim pdal::Dimension instance describing the dimension to select
+    /*! set the value T for a given  :cpp:class:`pdal::Dimension` dim at pointIndex i.
+        \param dim a pdal::Dimension instance describing the dimension to select
         \param pointIndex the point index of the PointBuffer to select.
         \param value the T value to set
         \verbatim embed:rst
         .. warning::
 
-            If the data type of T is not the same as described in pdal::Dimension,
+            If the data type of T is not the same as described in  :cpp:class:`pdal::Dimension`,
             the data value will be casted into the appropriate type. In some
             situations this may not be what you want. In situations where the T
             is smaller than the datatype given by `dim`, the return value T
@@ -291,20 +302,9 @@ public:
     /// @param byteCount number of bytes to overwrite at given position
     void setDataStride(boost::uint8_t* data, boost::uint32_t pointIndex, boost::uint32_t byteCount);
 
-    double applyScaling(Dimension const& d,
-                        std::size_t pointIndex) const;
-    static void scaleData(PointBuffer const& source_buffer,
-                          PointBuffer& destination_buffer,
-                          Dimension const& source_dimension,
-                          Dimension const& destination_dimension,
-                          boost::uint32_t source_index,
-                          boost::uint32_t destination_index);
-
-
     /** @name Metadata
     */
-
-    /// return  Metadatas const& for the PointBuffer
+    /// return  Metadata const& for the PointBuffer
     inline Metadata const& getMetadata() const
     {
         return m_metadata;
@@ -315,7 +315,19 @@ public:
     {
         return m_metadata;
     }
+
+    /** @name Memory Operations
+    */
+    /// Reallocates a new data buffer with the given schema
+    /// @param new_schema The new schema to use.
+    void reset(Schema const& new_schema);
     
+    /// Resizes the PointBuffer to the given capacity. If the 
+    /// PointBuffer is already big enough to hold all of the bytes, 
+    /// it is not reallocated unless bExact is true
+    /// @param capacity The new number of points to use for the instance
+    /// @param bExact Whether or not to exactly resize the PointBuffer instance 
+    /// with the given point size and force a new reallocation of the data buffer. 
     void resize(boost::uint32_t const& capacity, bool bExact=false);
     
     /** @name Serialization
@@ -342,9 +354,22 @@ public:
     */
     boost::property_tree::ptree toPTree() const;
 
+    /*! @return a cumulated bounds of all points in the PointBuffer.
+        \verbatim embed:rst
+        .. note::
+
+            This method requires that an `X`, `Y`, and `Z` dimension be 
+            available, and that it can be casted into a *double* data 
+            type using the :cpp:func:`pdal::Dimension::applyScaling` 
+            method. Otherwise, an exception will be thrown.
+        \endverbatim
+    */    
     pdal::Bounds<double> calculateBounds(bool bis3d=true) const;
 
-    /// Copies dimensions from the given PointBuff
+    /// Copies dimensions from the given PointBuffer that have both 
+    /// similar names and data types. Create a pointbuffer::DimensionMap 
+    /// and adjust as necessary before utilizing this method to copy 
+    /// dimensions from one PointBuffer instance to another.
     static void copyLikeDimensions( PointBuffer const& source, 
                                     PointBuffer& destination, 
                                     pointbuffer::DimensionMap const& dimensions,
@@ -352,8 +377,19 @@ public:
                                     boost::uint32_t destination_starting_position,
                                     boost::uint32_t howMany);
     
-    static pointbuffer::DimensionMap* mapDimensions(PointBuffer const& source, PointBuffer const& destination);
-    
+    /// @return a pointbuffer::DimensionMap instance that maps dimension names
+    static pointbuffer::DimensionMap* mapDimensions(PointBuffer const& source, 
+                                                    PointBuffer const& destination);
+    static void scaleData(PointBuffer const& source_buffer,
+                          PointBuffer& destination_buffer,
+                          Dimension const& source_dimension,
+                          Dimension const& destination_dimension,
+                          boost::uint32_t source_index,
+                          boost::uint32_t destination_index);
+
+    double applyScaling(Dimension const& d,
+                        std::size_t pointIndex) const;
+                            
     /** @name private attributes
     */
 protected:
