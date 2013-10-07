@@ -68,8 +68,7 @@ void Writer::initialize()
 
 Writer::~Writer()
 {
-    if (m_writer_buffer)
-        delete m_writer_buffer;
+    delete m_writer_buffer;
 }
 
 const SpatialReference& Writer::getSpatialReference() const

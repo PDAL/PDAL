@@ -59,12 +59,7 @@ ThreadEnvironment::ThreadEnvironment(boost::thread::id id)
 
 ThreadEnvironment::~ThreadEnvironment()
 {
-    if (m_rng != 0)
-    {
-        delete m_rng;
-        m_rng = 0;
-    }
-
+    delete m_rng;
     return;
 }
 

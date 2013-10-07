@@ -824,11 +824,8 @@ std::vector<boost::uint32_t> IndexedPointBuffer::neighbors(double const& x, doub
 IndexedPointBuffer::~IndexedPointBuffer()
 {
 #ifdef PDAL_HAVE_FLANN
-    if (m_index)
-        delete m_index;
-
-    if (m_dataset)
-        delete m_dataset;
+    delete m_index;
+    delete m_dataset;
 #endif
 }
 } // namespace pdal
