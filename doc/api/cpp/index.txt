@@ -9,12 +9,13 @@ C++ API
    :maxdepth: 2
    
    dimension
-   drivers
    bounds
    log
    metadata
    option
    options
    pointbuffer
+   reader
    schema
+   stage
    writer
