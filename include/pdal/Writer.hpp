@@ -48,37 +48,56 @@ class Stage;
 class PointBuffer;
 class UserCallback;
 
+/// End-stage consumer of PDAL pipeline
 class PDAL_DLL Writer : public StageBase
 {
 public:
-    Writer(Stage& prevStage, const Options& options);
+    
+    /// Constructs an end-stage consumer of a pipeline of data -- a writer
+    /// @param prevStage The non-Writer stage in the pipeline
+    /// @param options options to be passed into the writer.
+    Writer(Stage& prevStage, Options const& options);
+    
+    /// Virtual destructor for Writer
     virtual ~Writer();
 
+    /// "Wakes up" the Writer and starts the process of walking down the 
+    /// pipeline to wake up all subsequent stages of the pipeline.
     virtual void initialize();
 
-    // // size of the PointBuffer buffer to use
-    // void setChunkSize(boost::uint32_t);
-    // boost::uint32_t getChunkSize() const;
+    /// Read the given number of points (or less, if the reader runs out first),
+    /// and then write them out to wherever.  Returns total number of points
+    /// actually written.
+    /// @param targetNumPointsToWrite The number of points to write. If given number of points is 0, 
+    /// do as many points as the reader supplies to us.
+    /// @param startingPosition The starting position to start reading from 
+    /// This position is arrived at by the prevStage's seekImpl.
+    /// @param chunkSize The chunk size, or size of the internal Writer's buffer, to use. 
+    /// If no chunkSize is specified, a chunkSize that defaults to the prevStage->getNumPoints() 
+    /// is used.
+    /// @return The number of points that were written.
+    virtual boost::uint64_t write(  boost::uint64_t targetNumPointsToWrite = 0, 
+                                    boost::uint64_t startingPosition = 0,
+                                    boost::uint64_t chunkSize = 0);
 
-    // Read the given number of points (or less, if the reader runs out first),
-    // and then write them out to wherever.  Returns total number of points
-    // actually written.
-    // If given number of points is 0, do as many points as the reader supplies to us.
-    virtual boost::uint64_t write(  boost::uint64_t targetNumPointsToWrite=0, 
-                                    boost::uint64_t startingPosition=0,
-                                    boost::uint64_t chunkSize=0);
-
-    // for xml serializion of pipelines
+    /// Serialize the pipeline to a boost::property_tree::ptree
+    /// @return boost::property_tree::ptree with xml attributes
     virtual boost::property_tree::ptree serializePipeline() const;
+    
+    /// @return the internal working PointBuffer of the Writer
+    virtual PointBuffer const* getPointBuffer() const 
+    { 
+        return m_writer_buffer; 
+    }
 
-    const SpatialReference& getSpatialReference() const;
-    void setSpatialReference(const SpatialReference&);
+    /// @return the SpatialReference for the pdal::Writer. 
+    SpatialReference const& getSpatialReference() const;
+    
+    /// Set this SpatialReference to assign the output 
+    /// SpatialReference of the written data.
+    void setSpatialReference(SpatialReference const&);
 
     void setUserCallback(UserCallback* userCallback);
-
-    // for dumping
-    virtual boost::property_tree::ptree toPTree() const;
-    virtual PointBuffer const* getPointBuffer() const { return m_writer_buffer; }
 
 protected:
     // this is called once before the loop with all the writeBuffer calls
@@ -99,8 +118,6 @@ protected:
     UserCallback* getUserCallback() const;
 
 private:
-    boost::uint32_t m_chunkSize;
-
     SpatialReference m_spatialReference;
     UserCallback* m_userCallback;
     PointBuffer* m_writer_buffer;

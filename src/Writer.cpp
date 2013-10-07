@@ -68,7 +68,7 @@ void Writer::initialize()
 
 Writer::~Writer()
 {
-    if (m_writer_buffer != 0)
+    if (m_writer_buffer)
         delete m_writer_buffer;
 }
 
@@ -206,7 +206,6 @@ boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite,
             const boost::int64_t numRemainingPointsToRead = targetNumPointsToWrite - actualNumPointsWritten;
 
             const boost::int64_t numPointsToReadThisChunk64 = std::min<boost::int64_t>(numRemainingPointsToRead, chunkSize == 0 ? numRemainingPointsToRead : chunkSize);
-            // this case is safe because m_chunkSize is a uint32
             const boost::uint32_t numPointsToReadThisChunk = static_cast<boost::uint32_t>(numPointsToReadThisChunk64);
 
             // we are reusing the buffer, so we may need to adjust the capacity for the last (and likely undersized) chunk
@@ -290,14 +289,14 @@ boost::property_tree::ptree Writer::serializePipeline() const
 }
 
 
-boost::property_tree::ptree Writer::toPTree() const
-{
-    boost::property_tree::ptree tree = StageBase::toPTree();
-
-    // (nothing to add for a Writer)
-
-    return tree;
-}
+// boost::property_tree::ptree Writer::toPTree() const
+// {
+//     boost::property_tree::ptree tree = StageBase::toPTree();
+// 
+//     // (nothing to add for a Writer)
+// 
+//     return tree;
+// }
 
 
 } // namespace pdal
