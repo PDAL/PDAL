@@ -118,7 +118,7 @@ private:
 
 
 
-/// metadata::Metadata is a container for metadata entries that pdal::Stage and
+/// pdal::Metadata is a container for metadata entries that pdal::Stage and
 /// pdal::PointBuffer carry around as part of their internal operations. Bits of
 /// information might come from a pdal::Reader that opens a file, or a
 /// pdal::Filter that processes as an intermediate stage, and
