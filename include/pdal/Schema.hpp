@@ -99,6 +99,8 @@ typedef Map::index<uid>::type index_by_uid;
 
 typedef boost::uint32_t size_type;
 
+typedef std::map<Dimension const*, Dimension const*> DimensionMap;
+
 }
 
 /// A pdal::Schema is a composition of pdal::Dimension instances that form
@@ -229,6 +231,10 @@ public:
         \endverbatim
     */
     boost::property_tree::ptree toPTree() const;
+
+    /// @return a schema::DimensionMap instance that maps dimension names
+    schema::DimensionMap* mapDimensions(Schema const& destination) const;
+
 
     /// dumps a string representation of the Schema instance to std::cout
     void dump() const;

@@ -62,8 +62,6 @@ namespace pdal
         typedef boost::uuids::uuid id;
         typedef std::vector<boost::uint8_t>::size_type PointBufferByteSize;
 
-        typedef std::map<Dimension const*, Dimension const*> DimensionMap;
-
         typedef boost::interprocess::allocator<boost::uint8_t, boost::interprocess::managed_shared_memory::segment_manager>     ShmemAllocator; 
         typedef boost::container::vector<boost::uint8_t, ShmemAllocator> PointBufferVector;
 
@@ -367,19 +365,16 @@ public:
     pdal::Bounds<double> calculateBounds(bool bis3d=true) const;
 
     /// Copies dimensions from the given PointBuffer that have both 
-    /// similar names and data types. Create a pointbuffer::DimensionMap 
+    /// similar names and data types. Create a schema::DimensionMap 
     /// and adjust as necessary before utilizing this method to copy 
     /// dimensions from one PointBuffer instance to another.
     static void copyLikeDimensions( PointBuffer const& source, 
                                     PointBuffer& destination, 
-                                    pointbuffer::DimensionMap const& dimensions,
+                                    schema::DimensionMap const& dimensions,
                                     boost::uint32_t source_starting_position, 
                                     boost::uint32_t destination_starting_position,
                                     boost::uint32_t howMany);
     
-    /// @return a pointbuffer::DimensionMap instance that maps dimension names
-    static pointbuffer::DimensionMap* mapDimensions(PointBuffer const& source, 
-                                                    PointBuffer const& destination);
     static void scaleData(PointBuffer const& source_buffer,
                           PointBuffer& destination_buffer,
                           Dimension const& source_dimension,

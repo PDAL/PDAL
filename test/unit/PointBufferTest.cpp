@@ -363,7 +363,7 @@ BOOST_AUTO_TEST_CASE(PointBufferTest_copy_like_Dimensions)
     
     BOOST_CHECK_EQUAL(150, data_a.getField<boost::int32_t>(x, 150));
     
-    pointbuffer::DimensionMap* dimensions = PointBuffer::mapDimensions(data_a, data_b);
+    schema::DimensionMap* dimensions = data_a.getSchema().mapDimensions(data_b.getSchema());
     PointBuffer::copyLikeDimensions(data_a, data_b, *dimensions, 0, 0, 175);
     
     Dimension const& x2 = data_b.getSchema().getDimension("X");
