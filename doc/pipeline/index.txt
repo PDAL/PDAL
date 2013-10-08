@@ -25,6 +25,7 @@ Filters
 
    filters.byteswap
    filters.cache
+   filters.color
    filters.chipper
    filters.crop
    filters.decimation
