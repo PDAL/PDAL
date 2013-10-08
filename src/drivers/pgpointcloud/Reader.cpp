@@ -477,7 +477,7 @@ boost::uint32_t Iterator::readBufferImpl(PointBuffer& user_buffer)
     // Create a dimension map if we don't already have one
     if (m_buffer && ! m_dimension_map)
     {
-        m_dimension_map = pdal::PointBuffer::mapDimensions(*m_buffer, user_buffer);
+        m_dimension_map = m_buffer->getSchema().mapDimensions(user_buffer.getSchema());
     }
 
     boost::uint32_t num_loops = 0;
