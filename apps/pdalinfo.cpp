@@ -49,9 +49,13 @@
 
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/json_parser.hpp>
+#include <boost/tokenizer.hpp>
 
 #include "AppSupport.hpp"
 #include "Application.hpp"
+
+#define SEPARATORS ",| "
+typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
 
 using namespace pdal;
 
@@ -70,6 +74,7 @@ private:
     void dumpStats(pdal::filters::Stats& filter) const;
     void dumpSchema(const Stage&) const;
     void dumpStage(const Stage&) const;
+    void dumpQuery(Stage const&, IndexedPointBuffer&) const;
     void dumpMetadata(const Stage&) const;
     void dumpSDO_PCMetadata(Stage const&) const;
 
@@ -86,6 +91,9 @@ private:
     boost::uint32_t m_sample_size;
     bool m_useXML;
     std::string m_Dimensions;
+    std::string m_QueryPoint;
+    double m_QueryDistance;
+    boost::uint64_t m_numPointsToWrite;
 };
 
 
@@ -100,6 +108,8 @@ PcInfo::PcInfo(int argc, char* argv[])
     , m_pointNumber((std::numeric_limits<boost::uint64_t>::max)())
     , m_outputStream(0)
     , m_useXML(false)
+    , m_QueryDistance(0.0)
+    , m_numPointsToWrite(0)
 {
     return;
 }
@@ -114,7 +124,8 @@ void PcInfo::validateSwitches()
         m_showSchema ||
         m_showMetadata ||
         m_showSDOPCMetadata ||
-        m_showStage;
+        m_showStage || 
+        m_QueryPoint.size() > 0;
     if (!got_something)
     {
         throw app_usage_error("no action option specified");
@@ -140,7 +151,10 @@ void PcInfo::addSwitches()
     
     processing_options->add_options()
         ("point,p", po::value<boost::uint64_t>(&m_pointNumber)->implicit_value(0), "point to dump")
+        ("query", po::value< std::string>(&m_QueryPoint), "A 2d or 3d point query point")
+        ("distance", po::value< double>(&m_QueryDistance), "A query distance")
         ("stats,a", po::value<bool>(&m_showStats)->zero_tokens()->implicit_value(true), "dump stats on all points (reads entire dataset)")
+        ("count", po::value<boost::uint64_t>(&m_numPointsToWrite)->default_value(0), "How many points should we write?")
         ("dimensions", po::value<std::string >(&m_Dimensions), "dump stats on all points (reads entire dataset)")
         ("schema,s", po::value<bool>(&m_showSchema)->zero_tokens()->implicit_value(true), "dump the schema")
         ("metadata,m", po::value<bool>(&m_showMetadata)->zero_tokens()->implicit_value(true), "dump the metadata")
@@ -242,6 +256,72 @@ void PcInfo::dumpSchema(const Stage& stage) const
     
     if (m_useXML)
         write_xml(ostr, tree);
+    else
+        write_json(ostr, tree);
+    
+    return;
+}
+
+void PcInfo::dumpQuery(Stage const& stage, IndexedPointBuffer& data) const
+{
+
+    boost::char_separator<char> sep(SEPARATORS);
+    tokenizer tokens(m_QueryPoint, sep);
+    std::vector<double> values;
+    for (tokenizer::iterator t = tokens.begin(); t != tokens.end(); ++t) {
+        values.push_back(boost::lexical_cast<double>(*t));
+    }
+    
+    if (values.size() < 2)
+        throw app_runtime_error("--points must be two or three values");
+
+    boost::scoped_ptr<StageSequentialIterator> iter(stage.createSequentialIterator(data));
+
+    const boost::uint32_t numRead = iter->read(data);
+    
+    bool is3D(true);
+    if (values.size() < 3) 
+        is3D = false;
+
+    data.build(is3D);
+
+    Schema const& schema = data.getSchema();
+    Dimension const& dimX = schema.getDimension("X");
+    Dimension const& dimY = schema.getDimension("Y");
+    Dimension const& dimZ = schema.getDimension("Z");
+
+    double x = values[0];
+    double y = values[1];
+    
+    double z(0.0);
+    if (is3D)
+        z = values[2];                
+    
+    boost::uint32_t count(m_numPointsToWrite);
+    if (!m_numPointsToWrite)
+        count = 1;
+    
+    double d(0.0);
+    std::vector<boost::uint32_t> ids = data.neighbors(x, y, z, d, count);
+    
+    PointBuffer response(data.getSchema(), count);
+    typedef std::vector<boost::uint32_t>::const_iterator Iterator;
+    std::vector<boost::uint32_t>::size_type pos(0);
+    for (Iterator i = ids.begin(); i != ids.end(); ++i)
+    {
+        response.copyPointFast(pos, *i, data);
+        response.setNumPoints(response.getNumPoints() + 1);
+        pos++;
+    }
+
+    boost::property_tree::ptree tree = response.toPTree();
+   
+    std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
+
+    boost::property_tree::ptree output;
+    output.add_child("point", tree);
+    if (m_useXML)
+        write_xml(ostr, output);
     else
         write_json(ostr, tree);
     
@@ -365,6 +445,12 @@ int PcInfo::execute()
     if (m_showSDOPCMetadata)
     {
         dumpSDO_PCMetadata(*reader);
+    }
+    
+    if (m_QueryPoint.size())
+    {
+        IndexedPointBuffer buffer(reader->getSchema(), reader->getNumPoints());
+        dumpQuery(*reader, buffer);
     }
     
     std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
