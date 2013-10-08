@@ -371,7 +371,6 @@ boost::uint32_t IteratorBase::copyCachedBlocks(std::vector<PointBuffer const*> c
         if (it == m_dimension_maps.end())
         {
             schema::DimensionMap* d = b->getSchema().mapDimensions(m_mapped_buffer->getSchema());
-            // schema::DimensionMap* d = PointBuffer::mapDimensions(*b, *m_mapped_buffer);
             std::pair<PointBuffer const*, schema::DimensionMap const*> p(b, d);
             m_dimension_maps.insert(p);
             dim_map = d;
