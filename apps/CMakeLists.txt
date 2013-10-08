@@ -26,7 +26,6 @@ include_directories(
 set(PC2PC pc2pc)
 set(PDALINFO pdalinfo)
 set(PCPIPELINE pcpipeline)
-set(PCQUERY pcquery)
 set(PCEQUAL pcequal)
 
 set(COMMON_APP_SOURCES Application.cpp Application.hpp AppSupport.cpp AppSupport.hpp)
@@ -60,12 +59,6 @@ if(PCPIPELINE)
     list(APPEND PDAL_UTILITIES ${PCPIPELINE})
     add_executable(${PCPIPELINE} pcpipeline.cpp ${COMMON_APP_SOURCES})
     target_link_libraries(${PCPIPELINE} ${PDAL_LIB_NAME} ${Boost_LIBRARIES} )
-endif()
-
-if(PCQUERY)
-    list(APPEND PDAL_UTILITIES ${PCQUERY})
-    add_executable(${PCQUERY} pcquery.cpp ${COMMON_APP_SOURCES})
-    target_link_libraries(${PCQUERY} ${PDAL_LIB_NAME} ${Boost_LIBRARIES} )
 endif()
 
 if(PCEQUAL)
