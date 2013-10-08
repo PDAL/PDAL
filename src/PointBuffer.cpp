@@ -693,10 +693,11 @@ void IndexedPointBuffer::build(bool b3D)
 
     boost::uint32_t num_dims = dz && b3D ? 3 : 2;
     
-    delete m_dataset;
-    delete m_index;
     
 #ifdef PDAL_HAVE_FLANN
+    delete m_dataset;
+    delete m_index;
+
     m_dataset = new flann::Matrix<double>(&m_coordinates[0], getNumPoints(), num_dims);
 
 
