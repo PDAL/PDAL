@@ -505,6 +505,43 @@ std::string Schema::to_xml(Schema const& schema, boost::property_tree::ptree con
 }
 
 
+schema::DimensionMap* Schema::mapDimensions(Schema const& destination) const
+{
+
+    schema::index_by_index const& dimensions = getDimensions().get<schema::index>();
+    schema::index_by_index::size_type d(0);
+
+    schema::DimensionMap* dims = new schema::DimensionMap;
+
+    for (d = 0; d < dimensions.size(); ++d)
+    {
+        Dimension const& source_dim = dimensions[d];
+
+        boost::optional<Dimension const&> dest_dim_ptr = destination.getDimensionOptional(source_dim.getName(),
+                source_dim.getNamespace());
+        if (!dest_dim_ptr)
+        {
+            continue;
+        }
+
+        Dimension const* s = &source_dim;
+        Dimension const* d = &(*dest_dim_ptr);
+
+        if (d->getInterpretation() == s->getInterpretation() &&
+                d->getByteSize() == s->getByteSize() &&
+                pdal::Utils::compare_distance(d->getNumericScale(), s->getNumericScale()) &&
+                pdal::Utils::compare_distance(d->getNumericOffset(), s->getNumericOffset()) &&
+                d->getEndianness() == s->getEndianness()
+           )
+        {
+
+            dims->insert(std::pair<Dimension const*, Dimension const*>(s, d));
+        }
+    }
+
+    return dims;
+}
+
 boost::property_tree::ptree Schema::toPTree() const
 {
     boost::property_tree::ptree tree;

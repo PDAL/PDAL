@@ -418,43 +418,6 @@ boost::property_tree::ptree PointBuffer::toPTree() const
 }
 
 
-pointbuffer::DimensionMap* PointBuffer::mapDimensions(PointBuffer const& source, PointBuffer const& destination)
-{
-
-    schema::index_by_index const& dimensions = source.getSchema().getDimensions().get<schema::index>();
-    schema::index_by_index::size_type d(0);
-
-    pointbuffer::DimensionMap* dims = new pointbuffer::DimensionMap;
-
-    Schema const& dest_schema = destination.getSchema();
-    for (d = 0; d < dimensions.size(); ++d)
-    {
-        Dimension const& source_dim = dimensions[d];
-
-        boost::optional<Dimension const&> dest_dim_ptr = dest_schema.getDimensionOptional(source_dim.getName(),
-                source_dim.getNamespace());
-        if (!dest_dim_ptr)
-        {
-            continue;
-        }
-
-        Dimension const* s = &source_dim;
-        Dimension const* d = &(*dest_dim_ptr);
-
-        if (d->getInterpretation() == s->getInterpretation() &&
-                d->getByteSize() == s->getByteSize() &&
-                pdal::Utils::compare_distance(d->getNumericScale(), s->getNumericScale()) &&
-                pdal::Utils::compare_distance(d->getNumericOffset(), s->getNumericOffset()) &&
-                d->getEndianness() == s->getEndianness()
-           )
-        {
-
-            dims->insert(std::pair<Dimension const*, Dimension const*>(s, d));
-        }
-    }
-
-    return dims;
-}
 
 double PointBuffer::applyScaling(Dimension const& d,
                                  std::size_t pointIndex) const
@@ -543,7 +506,7 @@ double PointBuffer::applyScaling(Dimension const& d,
 
 void PointBuffer::copyLikeDimensions(PointBuffer const& source,
                                      PointBuffer& destination,
-                                     pointbuffer::DimensionMap const& dimensions,
+                                     schema::DimensionMap const& dimensions,
                                      boost::uint32_t source_starting_position,
                                      boost::uint32_t destination_starting_position,
                                      boost::uint32_t howMany)
@@ -553,7 +516,7 @@ void PointBuffer::copyLikeDimensions(PointBuffer const& source,
     assert(howMany <= destination.getCapacity() - destination_starting_position);
     assert(howMany <= source.getCapacity() - source_starting_position);
 
-    typedef pointbuffer::DimensionMap::const_iterator Iterator;
+    typedef schema::DimensionMap::const_iterator Iterator;
 
     for (Iterator d = dimensions.begin(); d != dimensions.end(); ++d)
     {

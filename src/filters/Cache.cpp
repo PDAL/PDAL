@@ -317,7 +317,7 @@ IteratorBase::~IteratorBase()
 {
     if (m_dimension_maps.size())
     {
-        typedef std::map<PointBuffer const*, pointbuffer::DimensionMap const*>::iterator MapIterator;
+        typedef std::map<PointBuffer const*, schema::DimensionMap const*>::iterator MapIterator;
         for (MapIterator i = m_dimension_maps.begin(); i != m_dimension_maps.end(); ++i)
         {
             delete i->second;
@@ -364,14 +364,15 @@ boost::uint32_t IteratorBase::copyCachedBlocks(std::vector<PointBuffer const*> c
     for (ConstIterator i = blocks.begin(); i != blocks.end(); ++i)
     {
         PointBuffer const* b = *i;
-        pointbuffer::DimensionMap const* dim_map(0);
+        schema::DimensionMap const* dim_map(0);
 
-        typedef std::map<PointBuffer const*, pointbuffer::DimensionMap const*>::iterator MapIterator;
+        typedef std::map<PointBuffer const*, schema::DimensionMap const*>::iterator MapIterator;
         MapIterator it = m_dimension_maps.find(b);
         if (it == m_dimension_maps.end())
         {
-            pointbuffer::DimensionMap* d = PointBuffer::mapDimensions(*b, *m_mapped_buffer);
-            std::pair<PointBuffer const*, pointbuffer::DimensionMap const*> p(b, d);
+            schema::DimensionMap* d = b->getSchema().mapDimensions(m_mapped_buffer->getSchema());
+            // schema::DimensionMap* d = PointBuffer::mapDimensions(*b, *m_mapped_buffer);
+            std::pair<PointBuffer const*, schema::DimensionMap const*> p(b, d);
             m_dimension_maps.insert(p);
             dim_map = d;
 #ifdef DEBUG
