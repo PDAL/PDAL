@@ -24,16 +24,14 @@ include_directories(
 #------------------------------------------------------------------------------
 
 set(PC2PC pc2pc)
-set(PCINFO pcinfo)
+set(PDALINFO pdalinfo)
 set(PCPIPELINE pcpipeline)
 set(PCQUERY pcquery)
 set(PCEQUAL pcequal)
 
 set(COMMON_APP_SOURCES Application.cpp Application.hpp AppSupport.cpp AppSupport.hpp)
 
-set(PDAL_UTILITIES ${PCINFO} )
-#    ${PCPIPELINE} ${PCINFO} ${PC2PC} ${PCVIEW})
-
+set(PDAL_UTILITIES )
 
 #------------------------------------------------------------------------------
 # Configure build targets
@@ -45,12 +43,12 @@ endif()
 
 link_directories(${Boost_LIBRARY_DIRS})
 
-# Build pcinfo
-if(PCINFO)
-    list(APPEND PDAL_UTILITIES ${PCINFO})
-    add_executable(${PCINFO} pcinfo.cpp ${COMMON_APP_SOURCES})
-    target_link_libraries(${PCINFO} ${PDAL_LIB_NAME} ${Boost_LIBRARIES})
-endif(PCINFO)
+# Build pdalinfo
+if(PDALINFO)
+    list(APPEND PDAL_UTILITIES ${PDALINFO})
+    add_executable(${PDALINFO} pdalinfo.cpp ${COMMON_APP_SOURCES})
+    target_link_libraries(${PDALINFO} ${PDAL_LIB_NAME} ${Boost_LIBRARIES})
+endif(PDALINFO)
 
 if(PC2PC)
     list(APPEND PDAL_UTILITIES ${PC2PC})
