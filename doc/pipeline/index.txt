@@ -30,6 +30,7 @@ Filters
    filters.chipper
    filters.crop
    filters.decimation
+   filters.hexbin
    filters.inplacereprojection
    filters.index
    filters.predicate
