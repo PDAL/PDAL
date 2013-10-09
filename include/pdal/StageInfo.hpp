@@ -101,12 +101,23 @@ public:
     {
         return m_description;
     }
+    
+    inline void setInfoLink(std::string const& link)
+    {
+        m_link = link;
+    }
+    
+    inline std::string const& getInfoLink() const
+    {
+        return m_link;
+    }
 
 private:
     std::string m_name;
     std::string m_description;
     std::vector<Dimension> m_dimensions;
     std::vector<Option> m_options;
+    std::string m_link;
 
 
 };
