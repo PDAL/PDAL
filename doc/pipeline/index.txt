@@ -19,6 +19,8 @@ Readers & Writers
    drivers.faux.writer
    drivers.csardb.reader
    drivers.csar.reader
+   drivers.nitf.reader
+   drivers.nitf.writer
 
 
 Filters
