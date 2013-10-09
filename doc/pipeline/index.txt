@@ -15,6 +15,10 @@ Readers & Writers
    drivers.las.writer
    drivers.pgpointcloud.reader
    drivers.pgpointcloud.writer
+   drivers.faux.reader
+   drivers.faux.writer
+   drivers.csardb.reader
+   drivers.csar.reader
 
 
 Filters
@@ -24,12 +28,18 @@ Filters
    :maxdepth: 1
 
    filters.byteswap
+   filters.cache
+   filters.color
+   filters.colorization
    filters.chipper
    filters.crop
    filters.decimation
+   filters.hexbin
    filters.inplacereprojection
+   filters.index
    filters.predicate
    filters.programmable
    filters.selector
+   filters.scaling
 
 

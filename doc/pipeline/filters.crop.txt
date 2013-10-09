@@ -46,7 +46,7 @@ y_dim
   The name of the dimension to use as the Y coordinate in the cropping process. [Default: **Y**]
 
 z_dim
-  The name of the dimension to use as the X coordinate in the cropping process. [Default: **Z**]
+  The name of the dimension to use as the Z coordinate in the cropping process. [Default: **Z**]
 
 outside
   Invert the cropping logic and only take points **outside** the cropping bounds or polygon. [Default: **false**]

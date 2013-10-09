@@ -135,5 +135,7 @@ create
     offset
       The offset to apply to the dimension values. [Default: 0.0]
     
-    
-    
+overwite_existing_dimensions
+  A boolean options. When creating new dimensions allow the new dimensions to overwrite existing dimensions with the same name? [Default: **false**]
+ 
+ 

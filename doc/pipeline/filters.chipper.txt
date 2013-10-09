@@ -18,7 +18,7 @@ The chipper filter takes a single large point cloud and converts it into a set o
 
     After chipping, the points are tiled into smaller contiguous chips.
    
-Chipping is usually applied to data read from files (which produce one large stream of points) before the points are written to a database (which prefer data segmented into smaller blocks).
+Chipping is usually applied to data read from files (which produce one large stream of points) before the points are written to a database (which prefer data segmented into smaller blocks). The chipper filter is often used in conjunction with :ref:`filters.cache` to improve chipping performance when there is sufficient memory available.
 
 Example
 -------
