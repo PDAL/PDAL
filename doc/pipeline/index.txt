@@ -31,8 +31,10 @@ Filters
    filters.crop
    filters.decimation
    filters.inplacereprojection
+   filters.index
    filters.predicate
    filters.programmable
    filters.selector
+   filters.scaling
 
 
