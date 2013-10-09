@@ -7,7 +7,7 @@ filters.inplacereprojection
 
 When reprojecting, coordinate values are scaled and offset into their true values in double precision floating point format. The coordinate reference system transformation is applied. Then the values are un-offset and un-scaled into their new dimensions.
 
-Many LIDAR formats store coordinate information in 32-bit address spaces, and use scaling and offsetting to ensure that accuracy is not lost while fitting the information into a limited address space. When changing projections, the coordinate values will change, which may chagne the optimal scale and offset for storing the data.
+Many LIDAR formats store coordinate information in 32-bit address spaces, and use scaling and offsetting to ensure that accuracy is not lost while fitting the information into a limited address space. When changing projections, the coordinate values will change, which may change the optimal scale and offset for storing the data.
 
 For example, data in UTM might have a scaling of 0.01 (for centimeter accuracy) and offsets of 200000 in X and 4000000 in Y. When converted to a geographic coordinate reference, a scaling of 0.0000001 is required to maintain centimeter accuracy, and the offsets should be close to the lower left of the data extent to help ensure small positive values.
 
@@ -42,7 +42,7 @@ Options
 -------
 
 in_srs
-  Spatial reference system of the input data. Express as an EPSG string (eg "EPSG:4326" for WGS86 geographic) or a well-known text string. [Required]
+  Spatial reference system of the input data. Express as an EPSG string (eg "EPSG:4326" for WGS86 geographic) or a well-known text string. [Required if input reader does not supply SRS information]
 
 out_srs
   Spatial reference system of the output data. Express as an EPSG string (eg "EPSG:4326" for WGS86 geographic) or a well-known text string. [Required]
