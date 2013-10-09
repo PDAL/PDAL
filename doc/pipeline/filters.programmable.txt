@@ -47,6 +47,7 @@ Example
     </Writer>
   </Pipeline>
 
+The XML pipeline file referenced the external `multiply_z.pl` `Python`_ script, which scales up the Z coordinate by a factor of 10 (you could also do this with :ref:`filters.scaling`).
 
 .. code-block:: python
 
@@ -72,5 +73,5 @@ function
   The function to call.
 
 
-.. _Python: http://python.org
+.. _Python: http://python.org/
 .. _NumPy: http://www.numpy.org/
