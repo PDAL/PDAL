@@ -24,6 +24,8 @@ Filters
    :maxdepth: 1
 
    filters.byteswap
+   filters.cache
+   filters.color
    filters.chipper
    filters.crop
    filters.decimation
