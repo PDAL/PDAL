@@ -14,26 +14,26 @@ Example
 
 .. code-block:: xml
 
-<?xml version="1.0" encoding="utf-8"?>
-<Pipeline version="1.0">
-  <Writer type="drivers.pgpointcloud.writer">
-    <Option name="connection">
-      host='localhost' dbname='lidar' user='lidaruser'
-    </Option>
-    <Option name="table">example</Option>
-    <Filter type="filters.chipper">
-      <Option name="capacity">400</Option>
-      <Filter type="filters.cache">
-        <Option name="max_cache_blocks">1</Option>
-        <Option name="cache_block_size">1028000000</Option>
-	      <Reader type="drivers.las.reader">
-	        <Option name="filename">example.las</Option>
-	        <Option name="spatialreference">EPSG:26916</Option>
-	      </Reader>
-	    </Filter>
-    </Filter>
-  </Writer>
-</Pipeline>
+  <?xml version="1.0" encoding="utf-8"?>
+  <Pipeline version="1.0">
+    <Writer type="drivers.pgpointcloud.writer">
+      <Option name="connection">
+        host='localhost' dbname='lidar' user='lidaruser'
+      </Option>
+      <Option name="table">example</Option>
+      <Filter type="filters.chipper">
+        <Option name="capacity">400</Option>
+        <Filter type="filters.cache">
+          <Option name="max_cache_blocks">1</Option>
+          <Option name="cache_block_size">1028000000</Option>
+  	      <Reader type="drivers.las.reader">
+  	        <Option name="filename">example.las</Option>
+  	        <Option name="spatialreference">EPSG:26916</Option>
+  	      </Reader>
+  	    </Filter>
+      </Filter>
+    </Writer>
+  </Pipeline>
 
 
 Options
