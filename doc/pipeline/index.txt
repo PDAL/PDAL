@@ -21,6 +21,7 @@ Readers & Writers
    drivers.csar.reader
    drivers.nitf.reader
    drivers.nitf.writer
+   drivers.oci.reader
 
 
 Filters
