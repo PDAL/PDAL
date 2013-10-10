@@ -46,6 +46,8 @@
 using namespace pdal;
 namespace po = boost::program_options;
 
+std::string headline("------------------------------------------------------------------------------------------");
+
 
 Application::Application(int argc, char* argv[], const std::string& appName)
     : m_isDebug(false)
@@ -302,19 +304,54 @@ void Application::addPositionalSwitch(const char* name, int max_count)
     m_positionalOptions.add(name, max_count);
 }
 
+std::ostream& displayDriver(    std::ostream& strm,
+                                pdal::StageInfo const& info )
+{
+    std::string link(info.getInfoLink());
+    bool bDoLink = link.size() > 0;
+    
+    // strm << headline << std::endl;
+    if (bDoLink)
+        strm << "`";
+    strm << info.getName();
+    if (bDoLink)
+        strm << "`_ ";
+    strm << std::endl;
+
+    strm << headline << std::endl;
+    
+    strm << std::endl;
+    strm << info.getDescription() << std::endl;
+
+    if (bDoLink)
+    {
+        strm << std::endl;
+        strm << ".. _`" << info.getName() << "`: " << info.getInfoLink() << std::endl;
+    }
+    return strm;    
+}
+
+
 void Application::outputDrivers()
 {
     pdal::StageFactory factory;
     std::map<std::string, pdal::StageInfo> const& drivers = factory.getStageInfos();
     typedef std::map<std::string, pdal::StageInfo>::const_iterator Iterator;
+
+    std::cout << headline << std::endl;
+    std::cout << "PDAL Drivers" << " (" << pdal::GetFullVersionString() << ")" <<std::endl;
+    std::cout << headline << std::endl << std::endl;
     
     for (Iterator i = drivers.begin(); i != drivers.end(); ++i)
     {
-        std::cout << " '" << i->first << "' -- '"<< i->second.getDescription()<<"'"<<std::endl;
+        displayDriver(std::cout, i->second);
+        std::cout << std::endl;
     }
 }
 
-void WordWrap(const std::string& inputString, std::vector<std::string>& outputString, unsigned int lineLength)
+void WordWrap(std::string const& inputString, 
+              std::vector<std::string>& outputString, 
+              unsigned int lineLength)
 {
     // stolen from http://stackoverflow.com/questions/5815227/fix-improve-word-wrap-function
     std::istringstream iss(inputString);
@@ -339,42 +376,16 @@ void WordWrap(const std::string& inputString, std::vector<std::string>& outputSt
     }
 }
 
+
 std::ostream& displayDriverOptions( std::ostream& strm, 
-                                    std::string const& driverName, 
                                     pdal::StageInfo const& info)
 {
     std::vector<Option> options = info.getProvidedOptions();
-    
 
-    std::string headline("------------------------------------------------------------------------------------------");
-
-   
-    std::string link(info.getInfoLink());
-    bool bDoLink = link.size() > 0;
-    
-    strm << headline << std::endl;
-    if (bDoLink)
-        strm << "`";
-    strm << driverName;
-    if (bDoLink)
-        strm << "`_ ";
-    strm << std::endl;
-
-    strm << headline << std::endl;
-    
-    strm << std::endl;
-    strm << info.getDescription() << std::endl;
-
-    if (bDoLink)
-    {
-        strm << std::endl;
-        strm << ".. _`" << driverName << "`: " << info.getInfoLink() << std::endl;
-    }
-    
-
+    displayDriver(strm, info);
     if (!options.size())
     {
-        strm << "None" << std::endl << std::endl;
+        strm << "No options documented" << std::endl << std::endl;
         return strm;
     } 
  
@@ -443,23 +454,21 @@ void Application::outputOptions(std::string const& driverName)
     
     Iterator i = drivers.find(driverName);
     
-    std::string headline("------------------------------------------------------------------------------");
     std::cout << headline << std::endl;
-    std::cout << "PDAL Driver Options" << std::endl;
+    std::cout << "PDAL Options" << " (" << pdal::GetFullVersionString() << ")" <<std::endl;
     std::cout << headline << std::endl << std::endl;
     
     // If we were given an explicit driver name, only display that.
     // Otherwise, display output for all of the registered drivers.
     if ( i != drivers.end())
     {
-
-        displayDriverOptions(std::cout, i->first, i->second);
+        displayDriverOptions(std::cout, i->second);
     }
     else
     {
         for (i = drivers.begin(); i != drivers.end(); ++i)
         {
-            displayDriverOptions(std::cout, i->first, i->second);
+            displayDriverOptions(std::cout, i->second);
         }
         
     }
@@ -481,7 +490,7 @@ void Application::outputHelp()
     std::cout <<"\nFor more information, see the full documentation for PDAL at:\n";
     
     std::cout << "  http://pointcloud.org/\n";
-    std::cout << "--------------------------------------------------------------------\n";
+    std::cout << headline << std::endl;
     std::cout << std::endl;
 
     return;
@@ -490,9 +499,9 @@ void Application::outputHelp()
 
 void Application::outputVersion()
 {
-    std::cout << "--------------------------------------------------------------------\n";
+    std::cout << headline << std::endl;
     std::cout << m_appName << " (" << pdal::GetFullVersionString() << ")\n";
-    std::cout << "--------------------------------------------------------------------\n";
+    std::cout << headline << std::endl;
     std::cout << std::endl;
 }
 

@@ -57,12 +57,26 @@
 typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
 
 using namespace pdal;
+namespace po = boost::program_options;
 
-
-class Pc2Pc : public Application
+class Action
 {
 public:
-    Pc2Pc(int argc, char* argv[]);
+    Action(std::string const& n) 
+        : name(n)
+    {
+        
+    }
+    
+    
+    std::string name;
+    po::options_description options;
+};
+
+class PDAL : public Application
+{
+public:
+    PDAL(int argc, char* argv[]);
     int execute();
 
 private:
@@ -86,7 +100,7 @@ private:
 };
 
 
-Pc2Pc::Pc2Pc(int argc, char* argv[])
+PDAL::PDAL(int argc, char* argv[])
     : Application(argc, argv, "pc2pc")
     , m_inputFile("")
     , m_outputFile("")
@@ -104,7 +118,7 @@ Pc2Pc::Pc2Pc(int argc, char* argv[])
 }
 
 
-void Pc2Pc::validateSwitches()
+void PDAL::validateSwitches()
 {
     if (m_inputFile == "")
     {
@@ -120,9 +134,9 @@ void Pc2Pc::validateSwitches()
 }
 
 
-void Pc2Pc::addSwitches()
+void PDAL::addSwitches()
 {
-    namespace po = boost::program_options;
+
     
     po::options_description* file_options = new po::options_description("file options");
 
@@ -147,7 +161,7 @@ void Pc2Pc::addSwitches()
     addPositionalSwitch("output", 1);    
 }
 
-Stage* Pc2Pc::makeReader(Options readerOptions)
+Stage* PDAL::makeReader(Options readerOptions)
 {
 
     if (isDebug())
@@ -270,7 +284,7 @@ Stage* Pc2Pc::makeReader(Options readerOptions)
 
 }
 
-void Pc2Pc::forwardMetadata(Options& options, Metadata metadata)
+void PDAL::forwardMetadata(Options& options, Metadata metadata)
 {
     // boost::property_tree::ptree::const_iterator m;
     // Metadata mdata = metadata.getMetadata("drivers.las.reader");
@@ -286,7 +300,7 @@ void Pc2Pc::forwardMetadata(Options& options, Metadata metadata)
 }
 
 
-int Pc2Pc::execute()
+int PDAL::execute()
 {
     Options readerOptions;
     {
@@ -366,6 +380,6 @@ int Pc2Pc::execute()
 
 int main(int argc, char* argv[])
 {
-    Pc2Pc app(argc, argv);
+    PDAL app(argc, argv);
     return app.run();
 }
