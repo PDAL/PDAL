@@ -259,10 +259,7 @@ HexBin::~HexBin()
         metadata.setMetadata(m);
 
     }
-    else
-    {
-        throw pdal_error("Hexgrid was not created!");
-    }
+
 #endif
 
 }
