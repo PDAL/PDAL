@@ -143,6 +143,7 @@ inline void StageFactory::registerDriverInfo()
 {
     
     pdal::StageInfo info(T::s_getName(), T::s_getDescription());
+    info.setInfoLink(T::s_getInfoLink());
     std::vector<Dimension> dimensions = T::getDefaultDimensions();
     
     for (std::vector<Dimension>::const_iterator i = dimensions.begin();

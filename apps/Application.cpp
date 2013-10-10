@@ -35,6 +35,7 @@
 #include <iostream>
 
 #include <boost/timer.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include <pdal/pdal_config.hpp>
 #include <pdal/GlobalEnvironment.hpp>
@@ -44,6 +45,8 @@
 #include <vector>
 using namespace pdal;
 namespace po = boost::program_options;
+
+std::string headline("------------------------------------------------------------------------------------------");
 
 
 Application::Application(int argc, char* argv[], const std::string& appName)
@@ -301,57 +304,171 @@ void Application::addPositionalSwitch(const char* name, int max_count)
     m_positionalOptions.add(name, max_count);
 }
 
+std::ostream& displayDriver(    std::ostream& strm,
+                                pdal::StageInfo const& info )
+{
+    std::string link(info.getInfoLink());
+    bool bDoLink = link.size() > 0;
+    
+    // strm << headline << std::endl;
+    if (bDoLink)
+        strm << "`";
+    strm << info.getName();
+    if (bDoLink)
+        strm << "`_ ";
+    strm << std::endl;
+
+    strm << headline << std::endl;
+    
+    strm << std::endl;
+    strm << info.getDescription() << std::endl;
+
+    if (bDoLink)
+    {
+        strm << std::endl;
+        strm << ".. _`" << info.getName() << "`: " << info.getInfoLink() << std::endl;
+    }
+    return strm;    
+}
+
+
 void Application::outputDrivers()
 {
     pdal::StageFactory factory;
     std::map<std::string, pdal::StageInfo> const& drivers = factory.getStageInfos();
     typedef std::map<std::string, pdal::StageInfo>::const_iterator Iterator;
+
+    std::cout << headline << std::endl;
+    std::cout << "PDAL Drivers" << " (" << pdal::GetFullVersionString() << ")" <<std::endl;
+    std::cout << headline << std::endl << std::endl;
     
     for (Iterator i = drivers.begin(); i != drivers.end(); ++i)
     {
-        std::cout << " '" << i->first << "' -- '"<< i->second.getDescription()<<"'"<<std::endl;
+        displayDriver(std::cout, i->second);
+        std::cout << std::endl;
     }
 }
 
-void Application::outputOptions(std::string const& driver)
+void WordWrap(std::string const& inputString, 
+              std::vector<std::string>& outputString, 
+              unsigned int lineLength)
+{
+    // stolen from http://stackoverflow.com/questions/5815227/fix-improve-word-wrap-function
+    std::istringstream iss(inputString);
+    std::string line;
+    do
+    {
+        std::string word;
+        iss >> word;
+
+        if (line.length() + word.length() > lineLength)
+        {
+            outputString.push_back(line);
+            line.clear();
+        }
+        line += word + " ";
+
+    } while (iss);
+
+    if (!line.empty())
+    {
+        outputString.push_back(line);
+    }
+}
+
+
+std::ostream& displayDriverOptions( std::ostream& strm, 
+                                    pdal::StageInfo const& info)
+{
+    std::vector<Option> options = info.getProvidedOptions();
+
+    displayDriver(strm, info);
+    if (!options.size())
+    {
+        strm << "No options documented" << std::endl << std::endl;
+        return strm;
+    } 
+ 
+    std::string tablehead("================================ =============== =========================================");
+    std::string headings ("Name                              Default          Description");
+    
+    strm << std::endl;
+    strm << tablehead << std::endl;
+    strm << headings << std::endl;
+    strm << tablehead << std::endl;
+    
+    boost::uint32_t default_column(15);
+    boost::uint32_t name_column(32);
+    boost::uint32_t description_column(40);
+    for (std::vector<Option>::const_iterator it = options.begin();
+        it != options.end();
+        ++it)
+    {
+        pdal::Option const& opt = *it;
+        std::string default_value(opt.getValue<std::string>() );
+        default_value = boost::algorithm::erase_all_copy(default_value, "\n");
+        if (default_value.size() > default_column -1 )
+        {
+            default_value = default_value.substr(0, default_column-3);
+            default_value = default_value + "...";
+        }
+        
+        std::vector<std::string> lines;
+        std::string description(opt.getDescription());
+        description = boost::algorithm::erase_all_copy(description, "\n");
+        
+        WordWrap(description, lines, description_column-1);
+        if (lines.size() == 1)
+        {
+            
+            strm   << std::setw(name_column) << opt.getName() << " " 
+                   << std::setw(default_column) << default_value << " " 
+                   << std::left << std::setw(description_column) << description << std::endl;
+        } else
+            strm   << std::setw(name_column) << opt.getName() << " " 
+                   << std::setw(default_column) << default_value << " " 
+                   << lines[0] << std::endl;
+        
+        std::stringstream blank;
+        size_t blanks(49);
+        for (size_t i = 0; i < blanks; ++i)
+            blank << " ";
+        for (size_t i = 1; i < lines.size(); ++i)
+        {
+            strm << blank.str() <<lines[i] << std::endl;
+        }
+
+    }
+
+    strm << tablehead << std::endl;
+    strm << std::endl;
+    return strm;
+    
+}
+
+void Application::outputOptions(std::string const& driverName)
 {
     pdal::StageFactory* factory = new pdal::StageFactory;
     std::map<std::string, pdal::StageInfo> const& drivers = factory->getStageInfos();
     typedef std::map<std::string, pdal::StageInfo>::const_iterator Iterator;
     
-    Iterator i = drivers.find(driver);
+    Iterator i = drivers.find(driverName);
+    
+    std::cout << headline << std::endl;
+    std::cout << "PDAL Options" << " (" << pdal::GetFullVersionString() << ")" <<std::endl;
+    std::cout << headline << std::endl << std::endl;
+    
+    // If we were given an explicit driver name, only display that.
+    // Otherwise, display output for all of the registered drivers.
     if ( i != drivers.end())
     {
-        std::cout << "Options for driver '" << i->first << "'" << std::endl;
-
-        std::vector<Option> options = i->second.getProvidedOptions();
-        for (std::vector<Option>::const_iterator it = options.begin();
-            it != options.end();
-            ++it)
-        {
-            pdal::Option const& opt = *it;
-            std::cout   << "   '" << opt.getName() << "' --- '" 
-                        << opt.getDescription() << "' " 
-                        << "default: '" << opt.getValue<std::string>() << "'"
-                        << std::endl;
-        }
+        displayDriverOptions(std::cout, i->second);
     }
     else
     {
-        for (Iterator i = drivers.begin(); i != drivers.end(); ++i)
+        for (i = drivers.begin(); i != drivers.end(); ++i)
         {
-            std::cout << "Options for driver '" << " '" << i->first << "' -- '"<< i->second.getDescription()<<"'"<<std::endl;        
-            std::vector<Option> options = i->second.getProvidedOptions();
-            for (std::vector<Option>::const_iterator it = options.begin();
-                it != options.end();
-                ++it)
-            {
-                pdal::Option const& opt = *it;
-                std::cout   << "   '" << opt.getName() << "' --- '" 
-                            << opt.getDescription() << "' " 
-                            << "default: '" << opt.getValue<std::string>() << "'"
-                            << std::endl;
-            }
+            displayDriverOptions(std::cout, i->second);
         }
         
     }
@@ -373,7 +490,7 @@ void Application::outputHelp()
     std::cout <<"\nFor more information, see the full documentation for PDAL at:\n";
     
     std::cout << "  http://pointcloud.org/\n";
-    std::cout << "--------------------------------------------------------------------\n";
+    std::cout << headline << std::endl;
     std::cout << std::endl;
 
     return;
@@ -382,9 +499,9 @@ void Application::outputHelp()
 
 void Application::outputVersion()
 {
-    std::cout << "--------------------------------------------------------------------\n";
+    std::cout << headline << std::endl;
     std::cout << m_appName << " (" << pdal::GetFullVersionString() << ")\n";
-    std::cout << "--------------------------------------------------------------------\n";
+    std::cout << headline << std::endl;
     std::cout << std::endl;
 }
 

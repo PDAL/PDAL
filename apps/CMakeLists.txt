@@ -23,7 +23,7 @@ include_directories(
 # Collect programs to build
 #------------------------------------------------------------------------------
 
-set(PC2PC pc2pc)
+set(PDAL_UTILITY pdal)
 set(PDALINFO pdalinfo)
 set(PCPIPELINE pcpipeline)
 set(PCEQUAL pcequal)
@@ -49,10 +49,10 @@ if(PDALINFO)
     target_link_libraries(${PDALINFO} ${PDAL_LIB_NAME} ${Boost_LIBRARIES})
 endif(PDALINFO)
 
-if(PC2PC)
-    list(APPEND PDAL_UTILITIES ${PC2PC})
-    add_executable(${PC2PC} pc2pc.cpp ${COMMON_APP_SOURCES})
-    target_link_libraries(${PC2PC} ${PDAL_LIB_NAME} ${Boost_LIBRARIES} )
+if(PDAL_UTILITY)
+    list(APPEND PDAL_UTILITIES ${PDAL_UTILITY})
+    add_executable(${PDAL_UTILITY} pdal.cpp ${COMMON_APP_SOURCES})
+    target_link_libraries(${PDAL_UTILITY} ${PDAL_LIB_NAME} ${Boost_LIBRARIES} )
 endif()
 
 if(PCPIPELINE)
