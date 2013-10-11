@@ -606,193 +606,105 @@ std::ostream& operator<<(std::ostream& ostr, const PointBuffer& pointBuffer)
 IndexedPointBuffer::IndexedPointBuffer( const Schema& schema, 
                                         boost::uint32_t capacity)
     : PointBuffer(schema, capacity)
-#ifdef PDAL_HAVE_FLANN
-    , m_dataset(0)
+    , m_dimX(0)
+    , m_dimY(0)
+    , m_dimZ(0)
+    , m_is3D(true)
     , m_index(0)
-#endif
 {
-
+    setCoordinateDimensions();
 }
 
 IndexedPointBuffer::IndexedPointBuffer(PointBuffer const& other) 
     : PointBuffer(other)
-#ifdef PDAL_HAVE_FLANN
-    , m_dataset(0)
+    , m_dimX(0)
+    , m_dimY(0)
+    , m_dimZ(0)
+    , m_is3D(true)
     , m_index(0)
-#endif
-        
 {
-
+    setCoordinateDimensions();
 }
 IndexedPointBuffer::IndexedPointBuffer(IndexedPointBuffer const& other) 
     : PointBuffer(other)
-    , m_coordinates(other.m_coordinates)
-#ifdef PDAL_HAVE_FLANN
-    , m_dataset(other.m_dataset)
-    , m_index(other.m_index)
-#endif
+    , m_dimX(other.m_dimX)
+    , m_dimY(other.m_dimY)
+    , m_dimZ(other.m_dimZ)
+    , m_is3D(other.m_is3D)
+    , m_index(0)
 {
-
+    setCoordinateDimensions();
+    build(m_is3D);
 }
+
+void IndexedPointBuffer::setCoordinateDimensions()
+{
+    m_dimX = m_schema.getDimensionPtr("X");
+    m_dimY = m_schema.getDimensionPtr("Y");
+    m_dimZ = m_schema.getDimensionPtr("Z");
+    if (!m_dimZ)
+        m_is3D = false;
+}
+
 void IndexedPointBuffer::build(bool b3D)
 {
-    Dimension const& dx = m_schema.getDimension("X");
-    Dimension const& dy = m_schema.getDimension("Y");
+    m_is3D = b3D;
+    size_t nDims = m_is3D && m_dimZ ? 3 : 2;
+    m_index =  new my_kd_tree_t(nDims, *this, nanoflann::KDTreeSingleIndexAdaptorParams(10, nDims ) );
     
-    Dimension const* dz = m_schema.getDimensionPtr("Z");
-
-    for (boost::uint32_t pointIndex=0; pointIndex<getNumPoints(); pointIndex++)
+    if (!m_dimX)
     {
-        double x = applyScaling(dx, pointIndex);
-        double y = applyScaling(dy, pointIndex);
-        double z = applyScaling(*dz, pointIndex);
-        m_coordinates.push_back(x);
-        m_coordinates.push_back(y);
-        if (dz && b3D)
-        {
-            m_coordinates.push_back(z);
-        }
-    }    
-
-    boost::uint32_t num_dims = dz && b3D ? 3 : 2;
-    
-    
-#ifdef PDAL_HAVE_FLANN
-    delete m_dataset;
-    delete m_index;
-
-    m_dataset = new flann::Matrix<double>(&m_coordinates[0], getNumPoints(), num_dims);
-
-
-    m_index = new flann::KDTreeSingleIndex<flann::L2_Simple<double> >(*m_dataset, flann::KDTreeIndexParams(4));
+        throw pdal_error("No 'X' dimension exists to build index with!");
+    }
+    if (!m_dimY)
+    {
+        throw pdal_error("No 'Y' dimension exists to build index with!");
+    }
 
     m_index->buildIndex();
-#endif
-    
 }
 
-std::vector<boost::uint32_t> IndexedPointBuffer::radius(double const& x, double const& y, double const& z, double const& r)
+std::vector<size_t> IndexedPointBuffer::radius( double const& x, 
+                                                double const& y, 
+                                                double const& z, 
+                                                double const& r)
 {
-    std::vector<boost::uint32_t> output;
-
-#ifdef PDAL_HAVE_FLANN
-
-    if (!m_index)
-    {
-        throw pdal_error("Index is not initialized! Unable to query!");
-    }
-    Dimension const* dz = m_schema.getDimensionPtr("Z");
+    std::vector<size_t>   output;
+    std::vector<std::pair<size_t,double> >   ret_matches;
+    nanoflann::SearchParams params;
+    //params.sorted = false;
     
-    boost::uint32_t num_dimensions = dz && m_dataset->cols == 3 ? 3 : 2;    
-
-    std::vector< std::vector<double> > distances_vec;
-
-    std::vector< std::vector<size_t> > indices_vec;
-
-    std::vector<double> query_vec(num_dimensions);
-    query_vec[0] = x;
-    query_vec[1] = y;
-    if (num_dimensions > 2)
-        query_vec[2] = z;
-
-    flann::Matrix<double> query_mat(&query_vec[0], 1, num_dimensions);
-
-    int checks(flann::FLANN_CHECKS_UNLIMITED);
-    flann::SearchParams parameters(checks, 0 /*eps*/, false /*sorted*/);
+    std::vector<double> pt;
+    pt.push_back(x); pt.push_back(y);
+    if (m_is3D) pt.push_back(z);
+    const size_t count = m_index->radiusSearch(&pt[0], r, ret_matches, params);
     
-    // FLANN is more efficient using an internal heap 
-    // search structure for large numbers of points. For radiusSearch, 
-    // we're just guessing how many neighbors are going to 
-    // come back, however.
-    if (getNumPoints() > 16777216) // 2^24
+    for (size_t i = 0; i < count; ++i)
     {
-        parameters.use_heap = flann::FLANN_True;
+        output.push_back(ret_matches[i].first);
     }
-
-#if 0    
-    m_index->radiusSearch(query_mat,
-                       indices_vec,
-                       distances_vec,
-                       r,
-                       parameters);
-
-    for (unsigned i=0; i < indices_vec[0].size() ; ++i)
-    {
-        output.push_back(indices_vec[0][i]);
-    }
-#endif
-#else
-    boost::ignore_unused_variable_warning(x);
-    boost::ignore_unused_variable_warning(y);
-    boost::ignore_unused_variable_warning(z);
-    boost::ignore_unused_variable_warning(r);
-#endif
-
     return output;
 }
 
-std::vector<boost::uint32_t> IndexedPointBuffer::neighbors(double const& x, double const& y, double const& z, double distance, boost::uint32_t k)
+std::vector<size_t> IndexedPointBuffer::neighbors(  double const& x,
+                                                    double const& y, 
+                                                    double const& z, 
+                                                    double distance, 
+                                                    boost::uint32_t k)
 {
-    std::vector<boost::uint32_t> output;
-
-#ifdef PDAL_HAVE_FLANN
-
-    if (!m_index)
-    {
-        throw pdal_error("Index is not initialized! Unable to query!");
-    }
-    Dimension const* dz = m_schema.getDimensionPtr("Z");
-    boost::uint32_t num_dimensions = dz && m_dataset->cols == 3 ? 3 : 2;    
-
-    std::vector<double> distances_vec;
-    distances_vec.resize(k);
-
-    std::vector<boost::int32_t> indices_vec;
-    indices_vec.resize(k);
-    indices_vec.assign(indices_vec.size(), -1);
-
-    std::vector<double> query_vec(num_dimensions);
-    query_vec[0] = x;
-    query_vec[1] = y;
-    if (num_dimensions > 2)
-        query_vec[2] = z;
 
 
-    flann::Matrix<int> indices_mat(&indices_vec[0], 1, k);
-    flann::Matrix<double> distances_mat(&distances_vec[0], 1, k);
-    flann::Matrix<double> query_mat(&query_vec[0], 1, num_dimensions);
+    std::vector<size_t> output(k);
+    std::vector<double> out_dist_sqr(k);
+    nanoflann::KNNResultSet<double> resultSet(k);
+    
+    resultSet.init(&output[0], &out_dist_sqr[0] );
+    
+    std::vector<double> pt;
+    pt.push_back(x); pt.push_back(y);
+    if (m_is3D) pt.push_back(z);
+    m_index->findNeighbors(resultSet, &pt[0], nanoflann::SearchParams(10));
 
-    m_index->knnSearch(query_mat,
-                       indices_mat,
-                       distances_mat,
-                       k,
-                       flann::SearchParams(128));
-    for (unsigned i=0; i < k; ++i)
-    {
-        // if distance is 0, just return the nearest one, otherwise filter by distance
-        if (Utils::compare_distance<double>(distance, 0))
-        {
-            if (indices_vec[i] != -1)
-                output.push_back(indices_vec[i]);
-
-        }
-        else
-        {
-            if (::sqrt(distances_vec[i]) < distance)
-            {
-                if (indices_vec[i] != -1)
-                    output.push_back(indices_vec[i]);
-            }
-
-        }
-    }
-#else
-    boost::ignore_unused_variable_warning(x);
-    boost::ignore_unused_variable_warning(y);
-    boost::ignore_unused_variable_warning(z);
-    boost::ignore_unused_variable_warning(distance);
-    boost::ignore_unused_variable_warning(k);
-#endif
 
     return output;
 }
@@ -801,9 +713,6 @@ std::vector<boost::uint32_t> IndexedPointBuffer::neighbors(double const& x, doub
 
 IndexedPointBuffer::~IndexedPointBuffer()
 {
-#ifdef PDAL_HAVE_FLANN
     delete m_index;
-    delete m_dataset;
-#endif
 }
 } // namespace pdal

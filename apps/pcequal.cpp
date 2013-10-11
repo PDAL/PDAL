@@ -252,7 +252,7 @@ int PcEqual::execute()
         double sy = source_data.applyScaling(sDimY, i);
         double sz = source_data.applyScaling(sDimZ, i);                
         
-        std::vector<boost::uint32_t> ids = candidate_data.neighbors(sx, sy, sz, 1);
+        std::vector<std::size_t> ids = candidate_data.neighbors(sx, sy, sz, 1);
 
         if (!ids.size())
         {
@@ -261,7 +261,7 @@ int PcEqual::execute()
             throw app_runtime_error(oss.str() );
 		}
         
-        boost::uint32_t id = ids[0];
+        std::size_t id = ids[0];
         double cx = candidate_data.applyScaling(cDimX, id);
         double cy = candidate_data.applyScaling(cDimY, id);
         double cz = candidate_data.applyScaling(cDimZ, id);

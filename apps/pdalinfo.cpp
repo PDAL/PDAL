@@ -302,11 +302,11 @@ void PcInfo::dumpQuery(Stage const& stage, IndexedPointBuffer& data) const
         count = 1;
     
     double d(0.0);
-    std::vector<boost::uint32_t> ids = data.neighbors(x, y, z, d, count);
+    std::vector<std::size_t> ids = data.neighbors(x, y, z, d, count);
     
     PointBuffer response(data.getSchema(), count);
-    typedef std::vector<boost::uint32_t>::const_iterator Iterator;
-    std::vector<boost::uint32_t>::size_type pos(0);
+    typedef std::vector<std::size_t>::const_iterator Iterator;
+    std::vector<std::size_t>::size_type pos(0);
     for (Iterator i = ids.begin(); i != ids.end(); ++i)
     {
         response.copyPointFast(pos, *i, data);

@@ -376,9 +376,7 @@ BOOST_AUTO_TEST_CASE(PointBufferTest_copy_like_Dimensions)
 
 BOOST_AUTO_TEST_CASE(test_indexed)
 {
-#ifdef PDAL_HAVE_FLANN
 
-#if 0
     pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
     BOOST_CHECK(reader.getDescription() == "Las Reader");
     reader.initialize();
@@ -408,21 +406,20 @@ BOOST_AUTO_TEST_CASE(test_indexed)
     unsigned k = 8;
     
     // If the query distance is 0, just return the k nearest neighbors
-    std::vector<boost::uint32_t> ids = idata.neighbors(636199, 849238, 428.05, 0.0, k);
-    
+    std::vector<size_t> ids = idata.neighbors(636199, 849238, 428.05, 0.0, k);
     BOOST_CHECK_EQUAL(ids.size(), k);
     BOOST_CHECK_EQUAL(ids[0], 8u);
     BOOST_CHECK_EQUAL(ids[1], 7u);
     BOOST_CHECK_EQUAL(ids[2], 9u);
     BOOST_CHECK_EQUAL(ids[3], 42u);
     BOOST_CHECK_EQUAL(ids[4], 40u);    
-
-    std::vector<boost::uint32_t> dist_ids = idata.neighbors(636199, 849238, 428.05, 100.0, k);
-
+    
+    std::vector<size_t> dist_ids = idata.neighbors(636199, 849238, 428.05, 100.0, 3);
+    
     BOOST_CHECK_EQUAL(dist_ids.size(), 3u);
     BOOST_CHECK_EQUAL(dist_ids[0], 8u);        
-
-    std::vector<boost::uint32_t> nids = idata.neighbors(636199, 849238, 428.05, 0.0, k);
+    
+    std::vector<size_t> nids = idata.neighbors(636199, 849238, 428.05, 0.0, k);
     
     BOOST_CHECK_EQUAL(nids.size(), k);
     BOOST_CHECK_EQUAL(nids[0], 8u);
@@ -430,12 +427,11 @@ BOOST_AUTO_TEST_CASE(test_indexed)
     BOOST_CHECK_EQUAL(nids[2], 9u);
     BOOST_CHECK_EQUAL(nids[3], 42u);
     BOOST_CHECK_EQUAL(nids[4], 40u);    
-
-    std::vector<boost::uint32_t> rids = idata.radius(637012.24, 849028.31, 431.66, 100000);
+    
+    std::vector<size_t> rids = idata.radius(637012.24, 849028.31, 431.66, 100000);
     BOOST_CHECK_EQUAL(rids.size(), 11u);    
 
     return;
-#endif
-#endif
+
 }
 BOOST_AUTO_TEST_SUITE_END()

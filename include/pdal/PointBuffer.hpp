@@ -51,6 +51,8 @@
 #include <flann/flann.hpp>
 #endif
 
+#include <pdal/third/nanoflann.hpp>
+
 #include <vector>
 
 
@@ -935,8 +937,42 @@ public:
     IndexedPointBuffer(PointBuffer const& buffer); 
     ~IndexedPointBuffer();
     
-    std::vector<boost::uint32_t> neighbors(double const& x, double const& y, double const& z, double distance, boost::uint32_t count=1);
-    std::vector<boost::uint32_t> radius(double const& x, double const& y, double const& z, double const& r);
+    // Satisfy nanoflann::DatasetAdapter
+    inline size_t kdtree_get_point_count() const 
+    { 
+        return PointBuffer::getNumPoints();
+    }
+
+    inline double kdtree_get_pt(const size_t idx, int dim) const
+    {
+        if (dim == 0)
+            return applyScaling(*m_dimX, idx);
+        if (dim == 1)
+            return applyScaling(*m_dimY, idx);
+        if (dim == 2)
+            return applyScaling(*m_dimZ, idx);
+        
+        std::stringstream oss;
+        oss << "dimension '" << dim << "' is out of range 0-2";
+        throw std::runtime_error(oss.str());
+    }
+
+    inline double kdtree_distance(const double *p1, const size_t idx_p2,size_t size) const
+    {
+        const double d0 = applyScaling(*m_dimX, idx_p2) - applyScaling(*m_dimX, size-1);
+        const double d1 = applyScaling(*m_dimY, idx_p2) - applyScaling(*m_dimY, size-1);
+        const double d2 = applyScaling(*m_dimZ, idx_p2) - applyScaling(*m_dimZ, size-1);
+    // const T d0=p1[0]-pts[idx_p2].x;
+    // const T d1=p1[1]-pts[idx_p2].y;
+    // const T d2=p1[2]-pts[idx_p2].z;
+    return d0*d0+d1*d1+d2*d2;
+    }
+    
+    template <class BBOX> bool kdtree_get_bbox(BBOX &bb) const ;
+
+ 
+    std::vector<size_t> neighbors(double const& x, double const& y, double const& z, double distance, boost::uint32_t count=1);
+    std::vector<size_t> radius(double const& x, double const& y, double const& z, double const& r);
     
     // /// Copy constructor. The data array is simply memcpy'd.
     // IndexedPointBuffer(const IndexedPointBuffer&) : PointBuffer(buffer) {}
@@ -946,13 +982,35 @@ public:
     void build(bool b3D=true);
 
 private:
-    std::vector<double> m_coordinates;
-#ifdef PDAL_HAVE_FLANN
-    flann::Matrix<double>* m_dataset;    
-    flann::KDTreeSingleIndex<flann::L2_Simple<double> >* m_index;
-#endif      
-        
+    pdal::Dimension const* m_dimX;
+    pdal::Dimension const* m_dimY;
+    pdal::Dimension const* m_dimZ;
+    bool m_is3D;
+    void setCoordinateDimensions();
+
+    typedef nanoflann::KDTreeSingleIndexAdaptor<
+                    nanoflann::L2_Adaptor<double, IndexedPointBuffer> ,
+                    IndexedPointBuffer,
+                    3 /* dim */
+                    > my_kd_tree_t;
+
+    my_kd_tree_t* m_index;
 };
+
+template <class BBOX> bool IndexedPointBuffer::kdtree_get_bbox(BBOX &bb) const 
+{
+    pdal::Bounds<double> const& bounds = getSpatialBounds();
+    if (bounds.empty())
+        return false;
+    
+    for (unsigned i=0; i < 3; ++i)
+    {
+        bb[i].low = bounds.getMinimum(i);
+        bb[i].high = bounds.getMaximum(i);
+    }
+    return true;
+    
+}   
 #ifdef PDAL_COMPILER_MSVC
 #  pragma warning(pop)
 #endif
