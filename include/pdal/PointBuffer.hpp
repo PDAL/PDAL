@@ -46,16 +46,9 @@
 #include <pdal/Bounds.hpp>
 #include <pdal/Schema.hpp>
 #include <pdal/Metadata.hpp>
-
-#ifdef PDAL_HAVE_FLANN
-#include <flann/flann.hpp>
-#endif
-
 #include <pdal/third/nanoflann.hpp>
 
 #include <vector>
-
-
 
 namespace pdal
 {

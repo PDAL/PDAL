@@ -30,7 +30,6 @@
 #cmakedefine PDAL_HAVE_GEOS
 #cmakedefine PDAL_HAVE_GDAL
 #cmakedefine PDAL_HAVE_HEXER
-#cmakedefine PDAL_HAVE_FLANN
 #cmakedefine PDAL_HAVE_LASZIP
 #cmakedefine PDAL_HAVE_LIBXML2
 #cmakedefine PDAL_HAVE_LIBGEOTIFF

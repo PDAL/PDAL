@@ -99,7 +99,6 @@
 #include <pdal/filters/Crop.hpp>
 #include <pdal/filters/Decimation.hpp>
 #include <pdal/filters/HexBin.hpp>
-#include <pdal/filters/Index.hpp>
 #include <pdal/filters/InPlaceReprojection.hpp>
 #include <pdal/filters/Reprojection.hpp>
 
@@ -169,7 +168,6 @@ MAKE_FILTER_CREATOR(Colorization, pdal::filters::Colorization)
 MAKE_FILTER_CREATOR(Crop, pdal::filters::Crop)
 MAKE_FILTER_CREATOR(Decimation, pdal::filters::Decimation)
 MAKE_FILTER_CREATOR(HexBin, pdal::filters::HexBin)
-MAKE_FILTER_CREATOR(Index, pdal::filters::Index)
 MAKE_FILTER_CREATOR(InPlaceReprojection, pdal::filters::InPlaceReprojection)
 
 #ifdef PDAL_HAVE_PYTHON
@@ -463,7 +461,6 @@ void StageFactory::registerKnownFilters()
     REGISTER_FILTER(Decimation, pdal::filters::Decimation);
     REGISTER_FILTER(Reprojection, pdal::filters::Reprojection);
     REGISTER_FILTER(HexBin, pdal::filters::HexBin);
-    REGISTER_FILTER(Index, pdal::filters::Index);
     REGISTER_FILTER(InPlaceReprojection, pdal::filters::InPlaceReprojection);
 
 #ifdef PDAL_HAVE_PYTHON

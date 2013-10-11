@@ -99,11 +99,6 @@ private:
                         boost::uint8_t** point_data,
                         boost::uint32_t& point_data_len,
                         boost::uint32_t& schema_byte_size);
-    bool kdtreeify(     PointBuffer const& buffer,
-                        boost::uint8_t** point_data,
-                        boost::uint32_t& point_data_len,
-                        boost::uint32_t& schema_byte_size);
-
     bool WriteBlock(PointBuffer const& buffer);                        
     
 #ifdef PDAL_HAVE_SOCI

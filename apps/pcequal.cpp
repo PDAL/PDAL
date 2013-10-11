@@ -41,7 +41,6 @@
 #include <pdal/StageIterator.hpp>
 #include <pdal/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
-#include <pdal/filters/Index.hpp>
 
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/json_parser.hpp>
