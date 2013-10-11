@@ -672,11 +672,10 @@ std::vector<size_t> IndexedPointBuffer::radius( double const& x,
     std::vector<size_t>   output;
     std::vector<std::pair<size_t,double> >   ret_matches;
     nanoflann::SearchParams params;
-    //params.sorted = false;
+    params.sorted = true;
     
     std::vector<double> pt;
-    pt.push_back(x); pt.push_back(y);
-    if (m_is3D) pt.push_back(z);
+    pt.push_back(x); pt.push_back(y); pt.push_back(z);
     const size_t count = m_index->radiusSearch(&pt[0], r, ret_matches, params);
     
     for (size_t i = 0; i < count; ++i)
@@ -704,8 +703,6 @@ std::vector<size_t> IndexedPointBuffer::neighbors(  double const& x,
     pt.push_back(x); pt.push_back(y);
     if (m_is3D) pt.push_back(z);
     m_index->findNeighbors(resultSet, &pt[0], nanoflann::SearchParams(10));
-
-
     return output;
 }
 

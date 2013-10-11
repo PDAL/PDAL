@@ -957,15 +957,21 @@ public:
         throw std::runtime_error(oss.str());
     }
 
-    inline double kdtree_distance(const double *p1, const size_t idx_p2,size_t size) const
+    double kdtree_distance(const double *p1, const size_t idx_p2,size_t size) const
     {
         const double d0 = applyScaling(*m_dimX, idx_p2) - applyScaling(*m_dimX, size-1);
         const double d1 = applyScaling(*m_dimY, idx_p2) - applyScaling(*m_dimY, size-1);
-        const double d2 = applyScaling(*m_dimZ, idx_p2) - applyScaling(*m_dimZ, size-1);
+
     // const T d0=p1[0]-pts[idx_p2].x;
     // const T d1=p1[1]-pts[idx_p2].y;
     // const T d2=p1[2]-pts[idx_p2].z;
-    return d0*d0+d1*d1+d2*d2;
+        double output(d0*d0+d1*d1);
+        if (m_is3D)
+        {
+            const double d2 = applyScaling(*m_dimZ, idx_p2) - applyScaling(*m_dimZ, size-1);
+            output += d2*d2;
+        }
+    return output;
     }
     
     template <class BBOX> bool kdtree_get_bbox(BBOX &bb) const ;
@@ -991,7 +997,7 @@ private:
     typedef nanoflann::KDTreeSingleIndexAdaptor<
                     nanoflann::L2_Adaptor<double, IndexedPointBuffer> ,
                     IndexedPointBuffer,
-                    3 /* dim */
+                    -1 /* dim */
                     > my_kd_tree_t;
 
     my_kd_tree_t* m_index;
@@ -1003,7 +1009,8 @@ template <class BBOX> bool IndexedPointBuffer::kdtree_get_bbox(BBOX &bb) const
     if (bounds.empty())
         return false;
     
-    for (unsigned i=0; i < 3; ++i)
+    size_t nDims = m_is3D && m_dimZ ? 3 : 2;
+    for (size_t i=0; i < nDims; ++i)
     {
         bb[i].low = bounds.getMinimum(i);
         bb[i].high = bounds.getMaximum(i);
