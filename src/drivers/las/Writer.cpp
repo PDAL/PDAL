@@ -354,8 +354,6 @@ void Writer::writeBufferBegin(PointBuffer const& data)
 {
     if (m_headerInitialized) return;
 
-    m_lasHeader.setBounds(getPrevStage().getBounds());
-
     const Schema& schema = data.getSchema();
 
     const Dimension& dimX = schema.getDimension("X");
@@ -551,6 +549,8 @@ void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
 
 void Writer::writeBufferEnd(PointBuffer const& /*data*/)
 {
+    m_lasHeader.setBounds(getPrevStage().getBounds());
+
     return;
 }
 
