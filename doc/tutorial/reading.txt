@@ -40,7 +40,7 @@ Our first example to demonstrate PDAL's utility will be to simply query an
 
 ::
 
-    $ pcinfo interesting.las -p 0 
+    $ pdal info interesting.las -p 0 
 
 .. code-block:: javascript
 
@@ -74,7 +74,7 @@ switch:
 
 ::
 
-    $ pcinfo interesting.las -p 0 --xml
+    $ pdal info interesting.las -p 0 --xml
 
 .. code-block:: xml
 
@@ -145,11 +145,11 @@ your conversion to make it useful down the road.
 
 PDAL transmits this other information in the form of :ref:`metadata` that is
 carried per-stage throughout the PDAL :ref:`processing pipeline <pipeline>`.
-We can capture this metadata using the :ref:`pcinfo` utility.
+We can capture this metadata using the :ref:`info` utility.
 
 ::
 
-    $ pcinfo --metadata --xml interesting.las
+    $ pdal info --metadata --xml interesting.las
 
 This produces metadata that looks like :ref:`this <metadataxml>`. You can use
 your favorite `XML`_ or `JSON`_ manipulation tools to extract this information
@@ -164,7 +164,7 @@ A :ref:`pipeline` example
 ------------------------------------------------------------------------------
 
 The full power of PDAL comes in the form of :ref:`pipeline` invocations. 
-While :ref:`pc2pc` provides some utility as far as simple conversion of 
+While :ref:`translate` provides some utility as far as simple conversion of 
 one format to another, it does not provide much power to a user to be able 
 to filter or alter data as they are converted.  Pipelines are the way to take 
 advantage of PDAL's ability to manipulate data as they are converted. This 
@@ -177,7 +177,7 @@ topic.
     The :ref:`pipeline` document contains detailed examples and background
     information.
 
-The :ref:`pcpipeline` PDAL utility is one that takes in a ``.xml`` file 
+The :ref:`pipeline` PDAL utility is one that takes in a ``.xml`` file 
 containing :ref:`pipeline <pipeline>` description that defines a PDAL 
 processing pipeline. Options can be given at each :cpp:class:`pdal::Stage` of 
 the pipeline to affect different aspects of the processing pipeline, and 

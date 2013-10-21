@@ -49,8 +49,7 @@ BOOST_AUTO_TEST_SUITE(pc2pcTest)
 
 static std::string appName()
 {
-    const std::string app = Support::binpath(Support::exename("pc2pc"));
-    BOOST_CHECK(pdal::FileUtils::fileExists(app));
+    const std::string app = Support::binpath(Support::exename("pdal translate"));
     return app;
 }
 

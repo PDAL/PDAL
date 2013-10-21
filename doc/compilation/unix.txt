@@ -91,7 +91,7 @@ Run ``make install`` and test your installation with a :ref:`pdal_test` command
 
 ``make install`` will install the :ref:`utilities <apps>` in the location
 that was specified for 'CMAKE_INSTALL_PREFIX'.  Once installed, ensure that 
-you can run pcinfo.
+you can run `pdal info`.
 
 
 .. _configure_optional_libraries:

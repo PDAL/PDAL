@@ -126,7 +126,7 @@ Options getOCIOptions()
     Option cache_block_size("cache_block_size", capacity.getValue<boost::uint32_t>(), "");
     options.add(cache_block_size);
 
-    Option filename("filename", "./1.2-with-color.las", "");
+    Option filename("filename", Support::datapath("1.2-with-color.las"), "");
     options.add(filename);
 
     Option query("query", "SELECT CLOUD FROM PDAL_TEST_BASE where ID=1", "");

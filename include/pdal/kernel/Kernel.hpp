@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2013, Howard Butler (hobu.inc@gmail.com)
 *
 * All rights reserved.
 *
@@ -32,55 +32,16 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <boost/test/unit_test.hpp>
-#include <pdal/FileUtils.hpp>
+#ifndef INCLUDED_PDAL_KERNEL_HPP
+#define INCLUDED_PDAL_KERNEL_HPP
+
+
+#include "Application.hpp"
 #include "Support.hpp"
 
-#include <iostream>
-#include <sstream>
-#include <string>
+#include "Info.hpp"
+#include "Pipeline.hpp"
+#include "Query.hpp"
+#include "Translate.hpp"
 
-
-BOOST_AUTO_TEST_SUITE(pcpipelineTest)
-
-
-static std::string appName()
-{
-    const std::string app = Support::binpath(Support::exename("pdal pipeline"));
-    return app;
-}
-
-
-#ifdef PDAL_COMPILER_MSVC
-BOOST_AUTO_TEST_CASE(pcpipelineTest_no_input)
-{
-    const std::string cmd = appName();
-
-    std::string output;
-    int stat = pdal::Utils::run_shell_command(cmd, output);
-    BOOST_CHECK_EQUAL(stat, 1);
-
-    const std::string expected = "Usage error: input file name required";
-    BOOST_CHECK_EQUAL(output.substr(0, expected.length()), expected);
-
-    return;
-}
 #endif
-
-
-BOOST_AUTO_TEST_CASE(pcpipelineTest_test_common_opts)
-{
-    const std::string cmd = appName();
-
-    std::string output;
-    int stat = pdal::Utils::run_shell_command(cmd + " -h", output);
-    BOOST_CHECK_EQUAL(stat, 0);
-
-    stat = pdal::Utils::run_shell_command(cmd + " --version", output);
-    BOOST_CHECK_EQUAL(stat, 0);
-
-    return;
-}
-
-
-BOOST_AUTO_TEST_SUITE_END()

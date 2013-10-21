@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2013, Howard Butler (hobu.inc@gmail.com)
 *
 * All rights reserved.
 *
@@ -32,55 +32,64 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <boost/test/unit_test.hpp>
+#ifndef INCLUDED_PDAL_KERNEL_INFO_HPP
+#define INCLUDED_PDAL_KERNEL_INFO_HPP
+
+#include <pdal/Stage.hpp>
+#include <pdal/StageIterator.hpp>
 #include <pdal/FileUtils.hpp>
+#include <pdal/PointBuffer.hpp>
+#include <pdal/filters/Stats.hpp>
+#include <pdal/XMLSchema.hpp>
+
+#include <boost/property_tree/xml_parser.hpp>
+#include <boost/property_tree/json_parser.hpp>
+#include <boost/tokenizer.hpp>
+
 #include "Support.hpp"
+#include "Application.hpp"
 
-#include <iostream>
-#include <sstream>
-#include <string>
-
-
-BOOST_AUTO_TEST_SUITE(pcpipelineTest)
+#define SEPARATORS ",| "
+typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
 
 
-static std::string appName()
+namespace pdal { namespace kernel {
+
+class PDAL_DLL Info : public Application
 {
-    const std::string app = Support::binpath(Support::exename("pdal pipeline"));
-    return app;
-}
+public:
+    Info(int argc, const char* argv[]);
+    int execute(); // overrride
 
+private:
+    void addSwitches(); // overrride
+    void validateSwitches(); // overrride
 
-#ifdef PDAL_COMPILER_MSVC
-BOOST_AUTO_TEST_CASE(pcpipelineTest_no_input)
-{
-    const std::string cmd = appName();
+    void dumpOnePoint(const Stage&) const;
+    void dumpStats(pdal::filters::Stats& filter) const;
+    void dumpSchema(const Stage&) const;
+    void dumpStage(const Stage&) const;
+    void dumpQuery(Stage const&, IndexedPointBuffer&) const;
+    void dumpMetadata(const Stage&) const;
+    void dumpSDO_PCMetadata(Stage const&) const;
 
-    std::string output;
-    int stat = pdal::Utils::run_shell_command(cmd, output);
-    BOOST_CHECK_EQUAL(stat, 1);
+    std::string m_inputFile;
+    bool m_showStats;
+    bool m_showSchema;
+    bool m_showStage;
+    bool m_showMetadata;
+    bool m_showSDOPCMetadata;
+    pdal::Options m_options;
+    boost::uint64_t m_pointNumber;
+    std::ostream* m_outputStream;
+    boost::uint32_t m_seed;
+    boost::uint32_t m_sample_size;
+    bool m_useXML;
+    std::string m_Dimensions;
+    std::string m_QueryPoint;
+    double m_QueryDistance;
+    boost::uint64_t m_numPointsToWrite;
+};
 
-    const std::string expected = "Usage error: input file name required";
-    BOOST_CHECK_EQUAL(output.substr(0, expected.length()), expected);
-
-    return;
-}
+}} // pdal::kernel
 #endif
-
-
-BOOST_AUTO_TEST_CASE(pcpipelineTest_test_common_opts)
-{
-    const std::string cmd = appName();
-
-    std::string output;
-    int stat = pdal::Utils::run_shell_command(cmd + " -h", output);
-    BOOST_CHECK_EQUAL(stat, 0);
-
-    stat = pdal::Utils::run_shell_command(cmd + " --version", output);
-    BOOST_CHECK_EQUAL(stat, 0);
-
-    return;
-}
-
-
-BOOST_AUTO_TEST_SUITE_END()

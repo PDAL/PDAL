@@ -1,5 +1,6 @@
-/******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+
+#ifndef INCLUDED_PDAL_KERNEL_PIPELINE_HPP/******************************************************************************
+* Copyright (c) 2013, Howard Butler (hobu.inc@gmail.com)
 *
 * All rights reserved.
 *
@@ -32,55 +33,38 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <boost/test/unit_test.hpp>
+#define INCLUDED_PDAL_KERNEL_PIPELINE_HPP
+
+
+
+#include <pdal/PipelineReader.hpp>
+#include <pdal/PipelineManager.hpp>
+#include <pdal/PipelineWriter.hpp>
 #include <pdal/FileUtils.hpp>
-#include "Support.hpp"
+#include <pdal/PointBuffer.hpp>
+#include <pdal/StageIterator.hpp>
 
-#include <iostream>
-#include <sstream>
-#include <string>
+#include "Application.hpp"
 
-
-BOOST_AUTO_TEST_SUITE(pcpipelineTest)
-
-
-static std::string appName()
+namespace pdal { namespace kernel {
+    
+class PDAL_DLL Pipeline : public Application
 {
-    const std::string app = Support::binpath(Support::exename("pdal pipeline"));
-    return app;
-}
+public:
+    Pipeline(int argc, const char* argv[]);
+    int execute();
 
+private:
+    void addSwitches();
+    void validateSwitches();
+    pdal::PointBuffer* dummyWrite(pdal::PipelineManager& manager);
+    
+    std::string m_inputFile;
+    std::string m_pipelineFile;
+    bool m_validate;
+    boost::uint64_t m_numPointsToWrite;
+    boost::uint64_t m_numSkipPoints;
+};
 
-#ifdef PDAL_COMPILER_MSVC
-BOOST_AUTO_TEST_CASE(pcpipelineTest_no_input)
-{
-    const std::string cmd = appName();
-
-    std::string output;
-    int stat = pdal::Utils::run_shell_command(cmd, output);
-    BOOST_CHECK_EQUAL(stat, 1);
-
-    const std::string expected = "Usage error: input file name required";
-    BOOST_CHECK_EQUAL(output.substr(0, expected.length()), expected);
-
-    return;
-}
+}} // pdal::kernel
 #endif
-
-
-BOOST_AUTO_TEST_CASE(pcpipelineTest_test_common_opts)
-{
-    const std::string cmd = appName();
-
-    std::string output;
-    int stat = pdal::Utils::run_shell_command(cmd + " -h", output);
-    BOOST_CHECK_EQUAL(stat, 0);
-
-    stat = pdal::Utils::run_shell_command(cmd + " --version", output);
-    BOOST_CHECK_EQUAL(stat, 0);
-
-    return;
-}
-
-
-BOOST_AUTO_TEST_SUITE_END()

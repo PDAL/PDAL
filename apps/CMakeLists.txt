@@ -23,14 +23,8 @@ include_directories(
 # Collect programs to build
 #------------------------------------------------------------------------------
 
-set(PC2PC pc2pc)
-set(PDALINFO pdalinfo)
-set(PCPIPELINE pcpipeline)
-set(PCEQUAL pcequal)
+set(PDAL_UTILITY pdal)
 
-set(COMMON_APP_SOURCES Application.cpp Application.hpp AppSupport.cpp AppSupport.hpp)
-
-set(PDAL_UTILITIES )
 
 #------------------------------------------------------------------------------
 # Configure build targets
@@ -42,29 +36,10 @@ endif()
 
 link_directories(${Boost_LIBRARY_DIRS})
 
-# Build pdalinfo
-if(PDALINFO)
-    list(APPEND PDAL_UTILITIES ${PDALINFO})
-    add_executable(${PDALINFO} pdalinfo.cpp ${COMMON_APP_SOURCES})
-    target_link_libraries(${PDALINFO} ${PDAL_LIB_NAME} ${Boost_LIBRARIES})
-endif(PDALINFO)
-
-if(PC2PC)
-    list(APPEND PDAL_UTILITIES ${PC2PC})
-    add_executable(${PC2PC} pc2pc.cpp ${COMMON_APP_SOURCES})
-    target_link_libraries(${PC2PC} ${PDAL_LIB_NAME} ${Boost_LIBRARIES} )
-endif()
-
-if(PCPIPELINE)
-    list(APPEND PDAL_UTILITIES ${PCPIPELINE})
-    add_executable(${PCPIPELINE} pcpipeline.cpp ${COMMON_APP_SOURCES})
-    target_link_libraries(${PCPIPELINE} ${PDAL_LIB_NAME} ${Boost_LIBRARIES} )
-endif()
-
-if(PCEQUAL)
-    list(APPEND PDAL_UTILITIES ${PCEQUAL})
-    add_executable(${PCEQUAL} pcequal.cpp ${COMMON_APP_SOURCES})
-    target_link_libraries(${PCEQUAL} ${PDAL_LIB_NAME} ${Boost_LIBRARIES} )
+if(PDAL_UTILITY)
+    list(APPEND PDAL_UTILITIES ${PDAL_UTILITY})
+    add_executable(${PDAL_UTILITY} pdal.cpp)
+    target_link_libraries(${PDAL_UTILITY} ${PDAL_LIB_NAME})
 endif()
 
 #------------------------------------------------------------------------------
@@ -93,12 +68,6 @@ if(UNIX)
     if(GEOTIFF_FOUND)
       set(PKGCFG_REQUIRES "${PKGCFG_REQUIRES} geotiff")
     endif()
-    #  if(WITH_GDAL)
-    #    set(PKGCFG_INC_DIR "${PKGCFG_INC_DIR} ${GDAL_INCLUDE_DIR}")
-    #  endif()
-    # install(FILES ${CMAKE_CURRENT_BINARY_DIR}/pdal.pc
-    #   DESTINATION ${PDAL_LIB_DIR}/pkgconfig
-    #   PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
     
   else()
 

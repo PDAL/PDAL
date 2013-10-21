@@ -43,7 +43,7 @@ SET(PDAL_LIB_SOVERSION ${PDAL_VERSION_MAJOR})
 SET(PDAL_C_LIB_SOVERSION ${PDAL_VERSION_MAJOR})
 
 # Name of C++ library
-set(PDAL_LIB_NAME pdal)
+set(PDAL_LIB_NAME pdalcpp)
 
 set(CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE ON)
 
@@ -360,7 +360,7 @@ if (WITH_SOCI)
     mark_as_advanced(CLEAR SOCI_LIBRARY) 
     include_directories(${SOCI_INCLUDE_DIRS})
     set(PDAL_HAVE_SOCI 1)
-    find_package(sqlite3)
+    find_package(SQLite3)
     include_directories(${SQLITE3_INCLUDE_DIR})
   endif()
 endif()

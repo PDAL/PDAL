@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "AppSupport.hpp"
+#include <pdal/kernel/Support.hpp>
 
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp>
@@ -42,6 +42,8 @@
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineReader.hpp>
 
+namespace pdal { namespace kernel {
+    
 pdal::Stage* AppSupport::makeReader(pdal::Options& options)
 {
     const std::string inputFile = options.getValueOrThrow<std::string>("filename");
@@ -191,3 +193,5 @@ void HeartbeatCallback::callback()
 
     return;
 }
+
+}} // pdal::kernel

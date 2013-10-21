@@ -32,62 +32,13 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/FileUtils.hpp>
-
-#include <pdal/drivers/las/Reader.hpp>
-#include <pdal/drivers/las/Writer.hpp>
-
-#include <pdal/filters/Cache.hpp>
-#include <pdal/filters/Chipper.hpp>
-#include <pdal/filters/Crop.hpp>
-#include <pdal/filters/InPlaceReprojection.hpp>
-#include <pdal/filters/Scaling.hpp>
-#include <pdal/SpatialReference.hpp>
-#include <pdal/Bounds.hpp>
-
-#include <boost/property_tree/xml_parser.hpp>
-#include <boost/tokenizer.hpp>
-
-#include "AppSupport.hpp"
-
-#include "Application.hpp"
-
-#define SEPARATORS ",| "
-
-typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-
-using namespace pdal;
+#include <pdal/kernel/Translate.hpp>
 
 
-class Pc2Pc : public Application
-{
-public:
-    Pc2Pc(int argc, char* argv[]);
-    int execute();
+namespace pdal { namespace kernel {
 
-private:
-    void addSwitches();
-    void validateSwitches();
-    Stage* makeReader(Options readerOptions);
-    void forwardMetadata(Options & options, Metadata metadata);
-
-    std::string m_inputFile;
-    std::string m_outputFile;
-    bool m_bCompress;
-    boost::uint64_t m_numPointsToWrite; 
-    boost::uint64_t m_numSkipPoints;
-    pdal::SpatialReference m_input_srs;
-    pdal::SpatialReference m_output_srs;
-    pdal::Bounds<double> m_bounds;
-    std::string m_wkt;
-    std::string m_scales;
-    std::string m_offsets;
-    bool m_bForwardMetadata;
-};
-
-
-Pc2Pc::Pc2Pc(int argc, char* argv[])
-    : Application(argc, argv, "pc2pc")
+Translate::Translate(int argc, const char* argv[])
+    : Application(argc, argv, "translate")
     , m_inputFile("")
     , m_outputFile("")
     , m_bCompress(false)
@@ -104,7 +55,7 @@ Pc2Pc::Pc2Pc(int argc, char* argv[])
 }
 
 
-void Pc2Pc::validateSwitches()
+void Translate::validateSwitches()
 {
     if (m_inputFile == "")
     {
@@ -120,9 +71,10 @@ void Pc2Pc::validateSwitches()
 }
 
 
-void Pc2Pc::addSwitches()
+void Translate::addSwitches()
 {
-    namespace po = boost::program_options;
+    
+    // Action translate("translate");
     
     po::options_description* file_options = new po::options_description("file options");
 
@@ -147,7 +99,7 @@ void Pc2Pc::addSwitches()
     addPositionalSwitch("output", 1);    
 }
 
-Stage* Pc2Pc::makeReader(Options readerOptions)
+Stage* Translate::makeReader(Options readerOptions)
 {
 
     if (isDebug())
@@ -270,7 +222,7 @@ Stage* Pc2Pc::makeReader(Options readerOptions)
 
 }
 
-void Pc2Pc::forwardMetadata(Options& options, Metadata metadata)
+void Translate::forwardMetadata(Options& options, Metadata metadata)
 {
     // boost::property_tree::ptree::const_iterator m;
     // Metadata mdata = metadata.getMetadata("drivers.las.reader");
@@ -286,7 +238,7 @@ void Pc2Pc::forwardMetadata(Options& options, Metadata metadata)
 }
 
 
-int Pc2Pc::execute()
+int Translate::execute()
 {
     Options readerOptions;
     {
@@ -363,9 +315,4 @@ int Pc2Pc::execute()
     return 0;
 }
 
-
-int main(int argc, char* argv[])
-{
-    Pc2Pc app(argc, argv);
-    return app.run();
-}
+}} // pdal::kernel

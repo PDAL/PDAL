@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2013, Howard Butler (hobu.inc@gmail.com)
 *
 * All rights reserved.
 *
@@ -32,55 +32,69 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <boost/test/unit_test.hpp>
+#ifndef INCLUDED_PDAL_KERNEL_QUERY_HPP
+#define INCLUDED_PDAL_KERNEL_QUERY_HPP
+
+#include <pdal/Stage.hpp>
+#include <pdal/StageIterator.hpp>
 #include <pdal/FileUtils.hpp>
-#include "Support.hpp"
+#include <pdal/PointBuffer.hpp>
 
-#include <iostream>
-#include <sstream>
-#include <string>
+#include <boost/property_tree/xml_parser.hpp>
+#include <boost/property_tree/json_parser.hpp>
 
+#include "Application.hpp"
 
-BOOST_AUTO_TEST_SUITE(pcpipelineTest)
-
-
-static std::string appName()
+namespace pdal { namespace kernel {
+    
+class PDAL_DLL Point
 {
-    const std::string app = Support::binpath(Support::exename("pdal pipeline"));
-    return app;
-}
+public:
+    double x;
+    double y;
+    double z;
+    boost::uint64_t id;
+    
+    bool equal(Point const& other)
+    {
+        return (Utils::compare_distance(x, other.x) && 
+                Utils::compare_distance(y, other.y) && 
+                Utils::compare_distance(z, other.z));
+        
+    }
+    bool operator==(Point const& other)
+    {
+        return equal(other);
+    }
+    bool operator!=(Point const& other)
+    {
+        return !equal(other);
+    }    
+};
 
-
-#ifdef PDAL_COMPILER_MSVC
-BOOST_AUTO_TEST_CASE(pcpipelineTest_no_input)
+class Query : public Application
 {
-    const std::string cmd = appName();
+public:
+    Query(int argc, const char* argv[]);
+    int execute(); // overrride
+    
+    
+private:
+    void addSwitches(); // overrride
+    void validateSwitches(); // overrride
+    
+    void readPoints(    StageSequentialIterator* iter,
+                        PointBuffer& data);    
+    std::string m_sourceFile;
+    std::string m_candidateFile;
+    std::string m_wkt;
 
-    std::string output;
-    int stat = pdal::Utils::run_shell_command(cmd, output);
-    BOOST_CHECK_EQUAL(stat, 1);
+    std::ostream* m_outputStream;
+    std::string m_outputFileName;
+	
+    bool m_3d;
+};
 
-    const std::string expected = "Usage error: input file name required";
-    BOOST_CHECK_EQUAL(output.substr(0, expected.length()), expected);
+}} // pdal::kernel
 
-    return;
-}
 #endif
-
-
-BOOST_AUTO_TEST_CASE(pcpipelineTest_test_common_opts)
-{
-    const std::string cmd = appName();
-
-    std::string output;
-    int stat = pdal::Utils::run_shell_command(cmd + " -h", output);
-    BOOST_CHECK_EQUAL(stat, 0);
-
-    stat = pdal::Utils::run_shell_command(cmd + " --version", output);
-    BOOST_CHECK_EQUAL(stat, 0);
-
-    return;
-}
-
-
-BOOST_AUTO_TEST_SUITE_END()

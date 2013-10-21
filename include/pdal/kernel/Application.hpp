@@ -32,11 +32,14 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_APPLICATION_HPP
-#define INCLUDED_APPLICATION_HPP
+#ifndef INCLUDED_PDAL_KERNEL_APPLICATION_HPP
+#define INCLUDED_PDAL_KERNEL_APPLICATION_HPP
 
 #include <pdal/pdal_error.hpp>
 #include <boost/cstdint.hpp>
+#include <cstdarg>
+
+#include "Support.hpp"
 
 
 
@@ -49,23 +52,9 @@
 #  pragma warning(pop)
 #endif
 
+namespace po = boost::program_options;
+namespace pdal { namespace kernel {
 
-class app_usage_error : public pdal::pdal_error
-{
-public:
-    app_usage_error(std::string const& msg)
-        : pdal_error(msg)
-    {}
-};
-
-
-class app_runtime_error : public pdal::pdal_error
-{
-public:
-    app_runtime_error(std::string const& msg)
-        : pdal_error(msg)
-    {}
-};
 
 
 //
@@ -75,7 +64,7 @@ public:
 //    --version
 //    --timer
 //
-class Application
+class PDAL_DLL Application
 {
 public:
     // call this, to start the machine
@@ -87,7 +76,7 @@ public:
 
 protected:
     // this is protected; your derived class ctor will be the public entry point
-    Application(int argc, char* argv[], const std::string& appName);
+    Application(int argc, const char* argv[], const std::string& appName);
     ~Application();
 
     // implement this, with calls to addOptionSet()
@@ -129,7 +118,7 @@ private:
     bool m_showVersion;
     bool m_showTime;
     const int m_argc;
-    char** m_argv;
+    const char** m_argv;
     const std::string m_appName;
     bool m_hardCoreDebug;
     std::vector<std::string> m_heartbeat_shell_command;
@@ -148,4 +137,5 @@ protected:
     
 };
 
+}} // pdal::kernel
 #endif

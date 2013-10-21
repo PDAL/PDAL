@@ -560,6 +560,31 @@ list (APPEND PDAL_CPP ${PDAL_CONFIG_CPP} )
 list (APPEND PDAL_HPP ${PDAL_CONFIG_HPP} )
 
 
+set(PDAL_KERNEL_PATH kernel)
+set(PDAL_KERNEL_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_KERNEL_PATH}")
+set(PDAL_KERNEL_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_KERNEL_PATH}")
+
+set(PDAL_KERNEL_HPP
+    ${PDAL_KERNEL_HEADERS}/Application.hpp 
+    ${PDAL_KERNEL_HEADERS}/Support.hpp
+    ${PDAL_KERNEL_HEADERS}/Info.hpp
+    ${PDAL_KERNEL_HEADERS}/Kernel.hpp
+    ${PDAL_KERNEL_HEADERS}/Pipeline.hpp
+    ${PDAL_KERNEL_HEADERS}/Query.hpp
+    ${PDAL_KERNEL_HEADERS}/Translate.hpp
+)
+
+set(PDAL_KERNEL_CPP
+    ${PDAL_KERNEL_SRC}/Application.cpp
+    ${PDAL_KERNEL_SRC}/Support.cpp
+    ${PDAL_KERNEL_SRC}/Info.cpp
+    ${PDAL_KERNEL_SRC}/Pipeline.cpp
+    ${PDAL_KERNEL_SRC}/Query.cpp
+    ${PDAL_KERNEL_SRC}/Translate.cpp
+)
+
+list (APPEND PDAL_CPP ${PDAL_KERNEL_CPP} )
+list (APPEND PDAL_HPP ${PDAL_KERNEL_HPP} )
 #
 # Group source files for IDE source explorers (e.g. Visual Studio)
 #
@@ -686,11 +711,14 @@ else()
     "${GEOTIFF_LIBRARY}"
     "${GDAL_LIBRARY}"
     "${LASZIP_LIBRARY}"
-    "${LIBXML2_LIBRARIES}"
+    ${LIBXML2_LIBRARIES}
     "${PYTHON_LIBRARY}"
     "${P2G_LIBRARY}"
     "${GEOS_LIBRARY}"
-    "${HEXER_LIBRARY}")
+    "${HEXER_LIBRARY}"
+    "${ORACLE_LIBRARY}"
+    ${NITRO_LIBRARIES}
+    ${SOCI_LIBRARIES})
 endif()
 
 message(STATUS "Using boost lib: ${Boost_LIBRARIES}")
@@ -698,14 +726,14 @@ message(STATUS "Using boost lib: ${Boost_LIBRARIES}")
 if (WIN32)
 	if (CMAKE_VERSION VERSION_GREATER 2.8.6)
 		target_link_libraries(${APPS_CPP_DEPENDENCIES}
-                       LINK_PRIVATE general "${Boost_LIBRARIES}" "${Boost_FILESYSTEM_LIBRARY}")
+                       LINK_PRIVATE general ${Boost_LIBRARIES} "${Boost_FILESYSTEM_LIBRARY}")
 	else()
 		target_link_libraries(${APPS_CPP_DEPENDENCIES}
-                        "${Boost_LIBRARIES}" "${Boost_FILESYSTEM_LIBRARY}")
+                        ${Boost_LIBRARIES} "${Boost_FILESYSTEM_LIBRARY}")
 	endif()
 else()
 	target_link_libraries(${APPS_CPP_DEPENDENCIES}
-                      "${Boost_LIBRARIES}" )
+                      ${Boost_LIBRARIES} )
 
 endif(WIN32)
 

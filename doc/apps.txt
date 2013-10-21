@@ -1,45 +1,82 @@
 .. _apps:
 
 ******************************************************************************
-Apps
+PDAL Applications
 ******************************************************************************
 
-PDAL will contain a number of command line applications that are built on
-top of the PDAL libraries.  This Note lists those apps.
+:Author: Howard Butler
+:Contact: hobu.inc at gmail dot com
+:Date: 10/21/2013
 
-This should be fleshed out to list the (major) options for each of the apps.
+PDAL contains a single `git`_-style application, called *pdal*. The `pdal` 
+application currently contains four commands:
+
+* :ref:`translate <translate_command>`
+* :ref:`info <info_command>`
+* :ref:`pipeline <pipeline_command>`
+* :ref:`query <query_command>`
+
+Applications are run by invoking the *pdal* application along with the 
+command name:
+
+::
+
+    $ pdal info myfile.las
+    $ pdal translate input.las output.las
+    $ pdal pipeline --stdin < myxml.xml
+    
+
+Help about each command can be retrieved via the ``--help`` switch, 
+and the ``--drivers`` and ``--options`` switches can tell you more about 
+particular drivers and their options
+
+::
+
+    $ pdal info --help
+    $ pdal translate --drivers
+    $ pdal pipeline --options drivers.las.writer
+
+.. _`git`: http://git-scm.com/
 
 
-App Commonality
+.. _translate_command:
+
+``translate`` command 
 ------------------------------------------------------------------------------
 
-The following notes apply to all apps:
+The *translate* command is used for simple conversion of files based on their 
+file extensions. Use the :ref:`pipeline_command` for more significant 
+translation operations.
 
-* The apps should have a common support/utilities library for processing
-  command line arguments, showing version information, etc. -- describe
-  boost program_options, and Application/AppSupport classes
-  
-* Input format detection should reside in the app, not in the library.
-  There will be no equivalent meta GDALOpen-like function to do this work
-  for you, as it is too expensive and too easy to screw up.
+::
 
-* describe common switches: --version, --help, --verbose
+    -i [ --input ] arg           input file name
+    -o [ --output ] arg          output file name
+    --a_srs arg                  Assign input coordinate system (if supported by
+                               output format)
+    --t_srs arg                  Transform to output coordinate system (if
+                               supported by output format)
+    -z [ --compress ]            Compress output data (if supported by output
+                               format)
+    --count arg (=0)             How many points should we write?
+    --skip arg (=0)              How many points should we skip?
+    --bounds arg                 Extent (in XYZ to clip output to)
+    --polygon arg                POLYGON WKT to use for precise crop of data (2d
+                               or 3d)
+    --scale arg                  A comma-separated or quoted, space-separated
+                               list of scales to set on the output file:
+                               --scale 0.1,0.1,0.00001
+                               --scale "0.1 0.1 0.00001"
+    --offset arg                 A comma-separated or quoted, space-separated
+                               list of offsets to set on the output file:
+                               --offset 0,0,0
+                               --offset "1234 5678 91011"
+    -m [ --metadata ] [=arg(=1)] Forward metadata (VLRs, header entries, etc)
+                               from previous stages
+                           
+.. _info_command:
 
-pc2pc
-------------------------------------------------------------------------------
-
-Converts from one file format to another, optionally with some (relatively
-simple) filtering or processing.
-
-
-.. _pdal_test:
-
-pdal_test
-------------------------------------------------------------------------------
-
-some text
-
-pcinfo
+``info`` command
 ------------------------------------------------------------------------------
 
 Dumps information about a point cloud file, such as:
@@ -55,25 +92,73 @@ Dumps information about a point cloud file, such as:
 * the plain text format should be reStructured text if possible to allow 
   a user to retransform the output into whatever they want with ease
 
-* the xml format needs an XSD or XMLSchema for validation.
+::
 
-The dump should go the stdout, but options should be provided to dump to
-XML or similar, where it makes sense to do so.
+    $ pdal info  test/data/1.2-with-color.las --count 3 --query "636601.87, 849018.59, 425.10"
+:: 
 
+    -p [ --point ] [=arg(=0)] point to dump
+    --query arg               A 2d or 3d point query point
+    --distance arg            A query distance
+    -a [ --stats ]            dump stats on all points (reads entire dataset)
+    --count arg (=0)          How many points should we write?
+    --dimensions arg          dump stats on all points (reads entire dataset)
+    -s [ --schema ]           dump the schema
+    -m [ --metadata ]         dump the metadata
+    --sdo_pc                  dump the SDO_PC Oracle Metadata
+    -r [ --stage ]            dump the stage info
+    --xml                     dump XML instead of JSON
+    --seed arg (=0)           Seed value for random sample
+    --sample_size arg (=1000) Sample size for random sample
 
-pcpipeline
+.. _pipeline_command:
+
+``pipeline`` command
 ------------------------------------------------------------------------------
 
-[tbd]
+The pipeline command is used to execute :ref:`pipeline` XML. See :ref:`reading` 
+or :ref:`pipeline` for more information.
 
+::
 
-pcview
-======
+    -i [ --input ] arg           input file name
+    --pipeline-serialization arg
+    --validate                   Validate the pipeline (including serialization),
+                               but do not execute writing of points
+    --count arg (=0)             How many points should we write?
+    --skip arg (=0)              How many points should we skip?
 
-A simple 3D viewer for point clouds, largely for development and testing
-as opposed to something for "rea" use.  Uses OpenGL; works under Windows,
-should work under Unix too.
+.. _query_command:
 
+``query`` command
+------------------------------------------------------------------------------
+
+The *query* command is used to select a nearest point from a candidate file
+for each point in the source file. If the ``--2d`` option is used, the
+query only happens in XY coordinate space.
+
+::
+
+    $ pdal query test/data/1.2-with-color.las test/data/1.2-with-color.las > deltas
+
+A simple CSV-style text is output with delta information:
+
+::
+
+    "ID","DeltaX","DeltaY","DeltaZ"
+    0,0.00,0.00,0.00
+    1,0.00,0.00,0.00
+    2,0.00,0.00,0.00
+    3,0.00,0.00,0.00
+    4,0.00,0.00,0.00
+    5,0.00,0.00,0.00
+
+::
+
+      --source arg          source file name
+      --candidate arg       candidate file name
+      --output arg          output file name
+      --2d                  only 2D comparisons/indexing
 
 
 

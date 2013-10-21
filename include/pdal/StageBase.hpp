@@ -179,6 +179,17 @@ public:
     /// @return The description.
     virtual std::string getDescription() const = 0;
 
+    
+    /// @return the HTML link to info about the stage
+    static std::string getInfoLink()
+    {
+        return std::string("");
+    }
+    
+    static std::string s_getInfoLink() 
+    { 
+        return std::string(""); 
+    } 
     /// For getName() and getDescription(), each stage provides a static and
     /// a dynamic version of the function.  Each (concrete) stage should call
     /// the following macro to create the functions for you.
@@ -188,6 +199,10 @@ public:
     std::string getName() const { return name; }  \
     static std::string s_getDescription() { return description; }  \
     std::string getDescription() const { return description; }
+
+#define SET_STAGE_LINK(infolink) \
+    static std::string s_getInfoLink() { return infolink; }  \
+    std::string getInfoLink() const { return infolink; }
 
     /// Gets the stage's id.
     ///

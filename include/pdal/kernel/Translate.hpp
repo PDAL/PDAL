@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2013, Howard Butler (hobu.inc@gmail.com)
 *
 * All rights reserved.
 *
@@ -32,63 +32,60 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_APPSUPPORT_HPP
-#define INCLUDED_APPSUPPORT_HPP
+#ifndef INCLUDED_PDAL_KERNEL_TRANSLATE_HPP
+#define INCLUDED_PDAL_KERNEL_TRANSLATE_HPP
 
-#include <string>
+#include <pdal/FileUtils.hpp>
 
-#include <pdal/Options.hpp>
-#include <pdal/Stage.hpp>
-#include <pdal/Writer.hpp>
-#include <pdal/UserCallback.hpp>
+#include <pdal/drivers/las/Reader.hpp>
+#include <pdal/drivers/las/Writer.hpp>
+
+#include <pdal/filters/Cache.hpp>
+#include <pdal/filters/Chipper.hpp>
+#include <pdal/filters/Crop.hpp>
+#include <pdal/filters/InPlaceReprojection.hpp>
+#include <pdal/filters/Scaling.hpp>
+#include <pdal/SpatialReference.hpp>
+#include <pdal/Bounds.hpp>
 
 #include "Application.hpp"
 
+#define SEPARATORS ",| "
 
-// this is a static class with some helper functions the cmd line apps need
-class AppSupport
+#include <boost/tokenizer.hpp>
+typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
+
+
+namespace pdal { namespace kernel {
+
+class PDAL_DLL Translate : public Application
 {
 public:
-    // makes a reader/stage, from just the filename and some other options
-    static pdal::Stage* makeReader(pdal::Options& options);
-
-    // makes a writer, from just the filename and some other options (and the input stage)
-    static pdal::Writer* makeWriter(pdal::Options& options, pdal::Stage& stage);
+    Translate(int argc, const char* argv[]);
+    int execute();
 
 private:
+    void addSwitches();
+    void validateSwitches();
 
-    AppSupport& operator=(const AppSupport&); // not implemented
-    AppSupport(const AppSupport&); // not implemented
+    
+    Stage* makeReader(Options readerOptions);
+    void forwardMetadata(Options & options, Metadata metadata);
+
+    std::string m_inputFile;
+    std::string m_outputFile;
+    bool m_bCompress;
+    boost::uint64_t m_numPointsToWrite; 
+    boost::uint64_t m_numSkipPoints;
+    pdal::SpatialReference m_input_srs;
+    pdal::SpatialReference m_output_srs;
+    pdal::Bounds<double> m_bounds;
+    std::string m_wkt;
+    std::string m_scales;
+    std::string m_offsets;
+    bool m_bForwardMetadata;
 };
 
-
-class PercentageCallback : public pdal::UserCallback
-{
-public:
-    PercentageCallback(double major=10.0, double minor=2.0);
-    virtual void callback();
-protected:
-    double m_lastMajorPerc;
-    double m_lastMinorPerc;
-    bool m_done;
-};
-
-
-class HeartbeatCallback : public pdal::UserCallback
-{
-public:
-    HeartbeatCallback();
-    virtual void callback();
-private:
-};
-
-class ShellScriptCallback : public PercentageCallback
-{
-public:
-    ShellScriptCallback(std::vector<std::string> const& command);
-    virtual void callback();
-private:
-    std::string m_command;
-};
+}} // pdal::kernel
 
 #endif

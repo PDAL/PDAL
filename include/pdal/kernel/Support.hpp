@@ -32,55 +32,82 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <boost/test/unit_test.hpp>
-#include <pdal/FileUtils.hpp>
-#include "Support.hpp"
+#ifndef INCLUDED_PDAL_KERNEL_SUPPORT_HPP
+#define INCLUDED_PDAL_KERNEL_SUPPORT_HPP
 
-#include <iostream>
-#include <sstream>
 #include <string>
 
+#include <pdal/Options.hpp>
+#include <pdal/Stage.hpp>
+#include <pdal/Writer.hpp>
+#include <pdal/UserCallback.hpp>
 
-BOOST_AUTO_TEST_SUITE(pcpipelineTest)
 
-
-static std::string appName()
+namespace pdal { namespace kernel {
+    
+class app_usage_error : public pdal::pdal_error
 {
-    const std::string app = Support::binpath(Support::exename("pdal pipeline"));
-    return app;
-}
+public:
+    app_usage_error(std::string const& msg)
+        : pdal_error(msg)
+    {}
+};
 
 
-#ifdef PDAL_COMPILER_MSVC
-BOOST_AUTO_TEST_CASE(pcpipelineTest_no_input)
+class app_runtime_error : public pdal::pdal_error
 {
-    const std::string cmd = appName();
+public:
+    app_runtime_error(std::string const& msg)
+        : pdal_error(msg)
+    {}
+};
 
-    std::string output;
-    int stat = pdal::Utils::run_shell_command(cmd, output);
-    BOOST_CHECK_EQUAL(stat, 1);
+    
+// this is a static class with some helper functions the cmd line apps need
+class AppSupport
+{
+public:
+    // makes a reader/stage, from just the filename and some other options
+    static pdal::Stage* makeReader(pdal::Options& options);
 
-    const std::string expected = "Usage error: input file name required";
-    BOOST_CHECK_EQUAL(output.substr(0, expected.length()), expected);
+    // makes a writer, from just the filename and some other options (and the input stage)
+    static pdal::Writer* makeWriter(pdal::Options& options, pdal::Stage& stage);
 
-    return;
-}
+private:
+
+    AppSupport& operator=(const AppSupport&); // not implemented
+    AppSupport(const AppSupport&); // not implemented
+};
+
+
+class PercentageCallback : public pdal::UserCallback
+{
+public:
+    PercentageCallback(double major=10.0, double minor=2.0);
+    virtual void callback();
+protected:
+    double m_lastMajorPerc;
+    double m_lastMinorPerc;
+    bool m_done;
+};
+
+
+class HeartbeatCallback : public pdal::UserCallback
+{
+public:
+    HeartbeatCallback();
+    virtual void callback();
+private:
+};
+
+class ShellScriptCallback : public PercentageCallback
+{
+public:
+    ShellScriptCallback(std::vector<std::string> const& command);
+    virtual void callback();
+private:
+    std::string m_command;
+};
+
+}} // pdal::kernel
 #endif
-
-
-BOOST_AUTO_TEST_CASE(pcpipelineTest_test_common_opts)
-{
-    const std::string cmd = appName();
-
-    std::string output;
-    int stat = pdal::Utils::run_shell_command(cmd + " -h", output);
-    BOOST_CHECK_EQUAL(stat, 0);
-
-    stat = pdal::Utils::run_shell_command(cmd + " --version", output);
-    BOOST_CHECK_EQUAL(stat, 0);
-
-    return;
-}
-
-
-BOOST_AUTO_TEST_SUITE_END()

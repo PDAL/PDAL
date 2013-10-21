@@ -64,12 +64,12 @@ SET(PDAL_UNITTEST_TEST_SRC
 
 if(WITH_APPS)
   if(LIBXML2_FOUND)
-    list(APPEND ${PDAL_UNITTEST_TEST_SRC} 
+    list(APPEND PDAL_UNITTEST_TEST_SRC 
       apps/pcinfoTest.cpp
     )
   endif(LIBXML2_FOUND)
 
-  list(APPEND ${PDAL_UNITTEST_TEST_SRC}
+  list(APPEND PDAL_UNITTEST_TEST_SRC
     apps/pc2pcTest.cpp
     apps/pcpipelineTest.cpp
   )
