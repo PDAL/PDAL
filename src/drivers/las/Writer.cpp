@@ -71,7 +71,7 @@ Writer::Writer(Stage& prevStage, const Options& options)
 void Writer::setOptions()
 {
     setGeneratingSoftware(getOptions().getValueOrDefault<std::string>("software_id",
-                          LasHeader::SoftwareIdentifier));
+                          pdal::drivers::las::GetDefaultSoftwareId()));
 
     m_lasHeader.SetCreationDOY((boost::uint16_t)getOptions().getValueOrDefault<boost::uint32_t>("creation_doy", 0));
     m_lasHeader.SetCreationYear((boost::uint16_t)getOptions().getValueOrDefault<boost::uint32_t>("creation_year", 0));
@@ -136,7 +136,7 @@ Options Writer::getDefaultOptions()
     Option day_of_year("creation_doy", 0, "Day of Year for file");
     Option year("creation_year", 2011, "4-digit year value for file");
     Option system_id("system_id", LasHeader::SystemIdentifier, "System ID for this file");
-    Option software_id("software_id", LasHeader::SoftwareIdentifier, "Software ID for this file");
+    Option software_id("software_id", pdal::drivers::las::GetDefaultSoftwareId(), "Software ID for this file");
     Option filesourceid("filesource_id", 0, "File Source ID for this file");
     Option header_padding("header_padding", 0, "Header padding (space between end of VLRs and beginning of point data)");
     Option set_metadata("forward_metadata", false, "forward metadata into the file as necessary");
@@ -436,7 +436,7 @@ void Writer::writeBufferBegin(PointBuffer const& data)
         std::string software_id = getMetadataOption<std::string>(getOptions(),
                                   m,
                                   "software_id",
-                                  pdal::drivers::las::LasHeader::SoftwareIdentifier);
+                                  pdal::drivers::las::GetDefaultSoftwareId());
         setGeneratingSoftware(software_id);
         log()->get(logDEBUG) << "Setting generating software to '"
                              << software_id
