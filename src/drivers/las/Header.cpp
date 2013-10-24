@@ -52,11 +52,21 @@ namespace drivers
 namespace las
 {
 
+std::string GetDefaultSoftwareId()
+{
+    std::string ver(PDAL_VERSION_STRING);
+    std::stringstream oss;
+    std::ostringstream revs;
+    revs << g_GIT_SHA1;
+
+
+    oss << "PDAL " << ver << " (" << revs.str().substr(0, 6) <<")";
+    return oss.str();
+}
 
 // BUG: should be std::string
 char const* const LasHeader::FileSignature = "LASF";
 char const* const LasHeader::SystemIdentifier = "PDAL";
-char const* const LasHeader::SoftwareIdentifier = "PDAL 0.1.0";
 
 LasHeader::LasHeader()
 {
@@ -480,7 +490,7 @@ void LasHeader::initialize()
     std::strncpy(m_systemId, SystemIdentifier, eSystemIdSize);
 
     std::memset(m_softwareId, 0, eSoftwareIdSize);
-    std::strncpy(m_softwareId, SoftwareIdentifier, eSoftwareIdSize);
+    std::strncpy(m_softwareId, pdal::drivers::las::GetDefaultSoftwareId().c_str(), eSoftwareIdSize);
 
     m_pointRecordsByReturn.resize(ePointsByReturnSize);
 

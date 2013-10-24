@@ -52,6 +52,8 @@
 #include <pdal/Schema.hpp>
 #include <pdal/Bounds.hpp>
 #include <pdal/SpatialReference.hpp>
+#include <pdal/pdal_config.hpp>
+#include <pdal/gitsha.h>
 #include <pdal/drivers/las/Support.hpp>
 #include <pdal/drivers/las/VariableLengthRecord.hpp>
 
@@ -62,6 +64,7 @@ namespace drivers
 namespace las
 {
 
+std::string GetDefaultSoftwareId();
 
 class PDAL_DLL LasHeader
 {

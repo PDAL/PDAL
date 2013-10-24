@@ -33,7 +33,7 @@ include("${PDAL_SOURCE_DIR}/cmake/pdal_utils.cmake")
 
 # the next line is the ONLY place in the entire pdal system where
 # the version info is hard-coded
-set(PDAL_VERSION_STRING 0.9.8 CACHE STRING "PDAL version")
+set(PDAL_VERSION_STRING 0.9.9 CACHE STRING "PDAL version")
 
 DISSECT_VERSION()
 GET_OS_INFO()
