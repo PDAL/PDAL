@@ -13,8 +13,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.network :forwarded_port, guest: 80, host: 8080
 
   config.vm.provider :virtualbox do |vb|
-     vb.customize ["modifyvm", :id, "--memory", "1024"]
-     vb.customize ["modifyvm", :id, "--cpus", "2"]   
+     vb.customize ["modifyvm", :id, "--memory", "512"]
+     vb.customize ["modifyvm", :id, "--cpus", "1"]   
      vb.customize ["modifyvm", :id, "--ioapic", "on"]
    end  
 
@@ -40,7 +40,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     "libbz2-dev",
     "libsqlite0-dev",
     "cmake-curses-gui",
-    "screen"
+    "screen",
+    "postgis".
+    "libcunit1-dev",
+    "postgresql-server-dev-9.1",
+    "postgresql-9.1-postgis"
   ];
 
   if Dir.glob("#{File.dirname(__FILE__)}/.vagrant/machines/default/*/id").empty?
@@ -57,6 +61,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 	  pkg_cmd << "apt-get install -q -y " + packageList.join(" ") << " ; "
 	  config.vm.provision :shell, :inline => pkg_cmd
     scripts = [
+      "startup.sh",
   	  "libgeotiff.sh",
       "nitro.sh",
       "hexer.sh",
