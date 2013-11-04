@@ -41,7 +41,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     "libsqlite0-dev",
     "cmake-curses-gui",
     "screen",
-    "postgis".
+    "postgis",
     "libcunit1-dev",
     "postgresql-server-dev-9.1",
     "postgresql-9.1-postgis"
