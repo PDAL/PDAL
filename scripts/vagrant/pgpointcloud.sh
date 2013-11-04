@@ -16,4 +16,4 @@ wget http://liblas.org/samples/st-helens-small.las
 wget https://raw.github.com/PDAL/PDAL/master/scripts/vagrant/loadpgpointcloud.xml
 wget https://raw.github.com/PDAL/PDAL/master/scripts/vagrant/readpgpointcloud.xml
 pdal pipeline --input loadpgpointcloud.xml
-pdal info --input readpgpointcloud.xml
+pdal info --input readpgpointcloud.xml -p 0
