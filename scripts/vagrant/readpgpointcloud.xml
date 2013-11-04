@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Pipeline version="1.0">
+    <Writer type="drivers.las.writer">
+        <Option name="filename">st-helens-small-out.las</Option>
+        <Option name="spatialreference">EPSG:26910</Option>
+        <Reader type="drivers.pgpointcloud.reader">
+            <Option name="connection">dbname='points'</Option>
+            <Option name="table">sthsm</Option>
+            <Option name="column">pa</Option>
+            <Option name="srid">26910</Option>
+            <Option name="where">PC_Intersects(pa, ST_MakeEnvelope(560037.36, 5114846.45, 562667.31, 5118943.24, 26910))</Option>
+        </Reader>
+    </Writer>
+</Pipeline>
