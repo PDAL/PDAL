@@ -32,7 +32,7 @@ Installation
 
     This document assumes you are starting with a basic Macintosh system 
     because this is the only system the author assumes people could 
-    ever want to run. This document has not been tested on any other 
+    ever want to run :). This document has not been tested on any other 
     platforms, but it is expected that things should work if you're 
     starting from Windows or some Linux.
 
@@ -127,7 +127,8 @@ file into `pgpointcloud`_.
 .. _`Points2Grid`: https://github.com/CRREL/points2grid
 .. _`Oracle Point Cloud`: http://docs.oracle.com/cd/B28359_01/appdev.111/b28400/sdo_pc_pkg_ref.htm
 .. _`pgpointcloud`: https://github.com/pramsey/pointcloud
-.. _`Vagrant`: www.vagrantup.com
+.. _`Vagrant`: http://www.vagrantup.com
+.. _`LASzip`: http://laszip.org
 .. _`VirtualBox`: https://www.virtualbox.org/
 .. _`GDAL`: http://gdal.org
 .. _`MapServer`: http://mapserver.org
