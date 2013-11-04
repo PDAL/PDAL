@@ -68,7 +68,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       "p2g.sh",
       "soci.sh",
       "laszip.sh",
-      "pdal.sh"
+      "pdal.sh",
+      "pgpointcloud.sh"
     ];
     scripts.each { |script| config.vm.provision :shell, :path => "scripts/vagrant/" << script }
   end
