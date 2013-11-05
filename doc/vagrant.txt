@@ -4,6 +4,7 @@
 Getting Started with PDAL using `Vagrant`_ and `VirtualBox`_
 ******************************************************************************
 
+
 :Author: Howard Butler
 :Contact: hobu.inc at gmail dot com
 :Date: 11/04/2013
@@ -127,7 +128,7 @@ file into `pgpointcloud`_.
 .. _`Points2Grid`: https://github.com/CRREL/points2grid
 .. _`Oracle Point Cloud`: http://docs.oracle.com/cd/B28359_01/appdev.111/b28400/sdo_pc_pkg_ref.htm
 .. _`pgpointcloud`: https://github.com/pramsey/pointcloud
-.. _`Vagrant`: http://www.vagrantup.com
+
 .. _`LASzip`: http://laszip.org
 .. _`VirtualBox`: https://www.virtualbox.org/
 .. _`GDAL`: http://gdal.org

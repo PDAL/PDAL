@@ -43,7 +43,6 @@ Filters
    filters.decimation
    filters.hexbin
    filters.inplacereprojection
-   filters.index
    filters.predicate
    filters.programmable
    filters.selector
