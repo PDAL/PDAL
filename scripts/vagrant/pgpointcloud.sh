@@ -9,9 +9,9 @@ sudo make install
 sudo service postgresql start
 sudo -u postgres createuser -s vagrant
 sudo -u postgres createdb points
-echo "CREATE EXTENSION postgis;" | psql -d points -U vagrant
-echo "CREATE EXTENSION pointcloud;" | psql -d points -U vagrant
-echo "CREATE EXTENSION pointcloud_postgis;" | psql -d points -U vagrant
+echo "CREATE EXTENSION postgis;" | sudo -u vagrant psql -d points -U vagrant
+echo "CREATE EXTENSION pointcloud;" | sudo -u vagrant psql -d points -U vagrant
+echo "CREATE EXTENSION pointcloud_postgis;" | sudo -u vagrant psql -d points -U vagrant
 wget http://liblas.org/samples/st-helens-small.las
 wget https://raw.github.com/PDAL/PDAL/master/scripts/vagrant/loadpgpointcloud.xml
 wget https://raw.github.com/PDAL/PDAL/master/scripts/vagrant/readpgpointcloud.xml
