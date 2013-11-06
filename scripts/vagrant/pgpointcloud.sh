@@ -8,7 +8,7 @@ make
 sudo make install
 sudo service postgresql start
 sudo -u postgres createuser -s vagrant
-createdb points
+sudo -u postgres createdb points
 echo "CREATE EXTENSION postgis;" | psql -d points -U vagrant
 echo "CREATE EXTENSION pointcloud;" | psql -d points -U vagrant
 echo "CREATE EXTENSION pointcloud_postgis;" | psql -d points -U vagrant

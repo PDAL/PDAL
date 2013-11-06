@@ -8,7 +8,7 @@
             <Option name="capacity">600</Option>
             <Filter type="filters.cache">
                 <Reader type="drivers.las.reader">
-                    <Option name="filename">/home/vagrant/st-helens-small.las</Option>
+                    <Option name="filename">/home/vagrant/pointcloud/st-helens-small.las</Option>
                     <Option name="spatialreference">EPSG:26910</Option>
                 </Reader>
             </Filter>
