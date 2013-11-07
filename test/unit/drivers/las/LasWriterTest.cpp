@@ -372,4 +372,15 @@ BOOST_AUTO_TEST_CASE(test_different_formats)
 }
 
 
+BOOST_AUTO_TEST_CASE(test_summary_data_add_point)
+{
+    pdal::drivers::las::SummaryData summaryData;
+    double minX, minY, minZ, maxX, maxY, maxZ;
+
+    summaryData.addPoint(-95.329381929535259, 29.71948951835612, -17.515486778166398, 0);
+    summaryData.getBounds(minX, minY, minZ, maxX, maxY, maxZ);
+    BOOST_CHECK_EQUAL(minZ, maxZ);
+}
+
+
 BOOST_AUTO_TEST_SUITE_END()
