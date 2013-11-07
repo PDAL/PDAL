@@ -153,12 +153,13 @@ private:
 
     Reader& operator=(const Reader&); // not implemented
     Reader(const Reader&); // not implemented;
+
+#ifdef PDAL_HAVE_LIBXML2
     pdal::Metadata LoadMetadata(xmlNode* node);
     
 
     std::string remapOldNames(std::string const& input);
 
-#ifdef PDAL_HAVE_LIBXML2
     DocPtr m_doc;
     DocPtr m_schema_doc;
 

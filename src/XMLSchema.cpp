@@ -404,12 +404,12 @@ std::string Reader::remapOldNames(std::string const& input)
     return input;
 }
 
+#ifdef PDAL_HAVE_LIBXML2
 pdal::Metadata Reader::LoadMetadata(xmlNode* startNode)
 {
 
     pdal::Metadata output;
 
-#ifdef PDAL_HAVE_LIBXML2
 
     xmlNode* node = startNode;
 
@@ -461,9 +461,9 @@ pdal::Metadata Reader::LoadMetadata(xmlNode* startNode)
         else
             node = node->next;
     }
-#endif
     return output;
 }
+#endif
 
 void Reader::Load()
 {
