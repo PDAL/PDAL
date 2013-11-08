@@ -69,20 +69,16 @@ int main(int argc, char* argv[])
         ("version", po::value<bool>()->zero_tokens()->implicit_value(true), "Show version info")
         ("help,h", po::value<bool>()->zero_tokens()->implicit_value(true), "Print help message")
             ;
-    std::vector<std::string> action_args;
     
     if (argc < 2)
     {
         std::cerr << "Action not specified!" << std::endl << std::endl;
         outputVersion(); return 1;
     }
-    
-    action_args.push_back(argv[0]);
-    action_args.push_back(argv[1]);
 
     try
     {
-        po::store(po::command_line_parser(2, (char**)&action_args[0]).
+        po::store(po::command_line_parser(2, argv).
             options(options).positional(positional).run(), 
             variables);
     }
