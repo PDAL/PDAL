@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/drivers/soci/Reader.hpp>
+#include <pdal/drivers/sqlite/Reader.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/FileUtils.hpp>
 #include <pdal/Utils.hpp>
@@ -50,8 +50,8 @@
 
 
 #ifdef USE_PDAL_PLUGIN_SOCI
-MAKE_READER_CREATOR(sociReader, pdal::drivers::soci::Reader)
-CREATE_READER_PLUGIN(soci, pdal::drivers::soci::Reader)
+MAKE_READER_CREATOR(sqliteReader, pdal::drivers::sqlite::Reader)
+CREATE_READER_PLUGIN(sqlite, pdal::drivers::sqlite::Reader)
 #endif
 
 
@@ -59,13 +59,12 @@ namespace pdal
 {
 namespace drivers
 {
-namespace soci
+namespace sqlite
 {
 
 
 Reader::Reader(const Options& options)
     : pdal::Reader(options)
-    , m_database_type(DATABASE_UNKNOWN)
     , m_cachedPointCount(0)
 {
 
@@ -105,8 +104,6 @@ void Reader::initialize()
     std::string const& query = getOptions().getValueOrThrow<std::string>("query");
     std::string const& connection = getOptions().getValueOrThrow<std::string>("connection");
 
-    m_database_type = getDatabaseConnectionType(getOptions().getValueOrThrow<std::string>("type"));
-    m_session = connectToDataBase(connection, m_database_type);
 
     m_session->set_log_stream(&(log()->get(logDEBUG2)));
 
@@ -256,7 +253,7 @@ pdal::Schema Reader::fetchSchema(std::string const& query) const
 
 pdal::StageSequentialIterator* Reader::createSequentialIterator(PointBuffer& buffer) const
 {
-    return new pdal::drivers::soci::iterators::sequential::Reader(*this, buffer);
+    return new pdal::drivers::sqlite::iterators::sequential::Reader(*this, buffer);
 }
 
 namespace iterators
@@ -265,7 +262,7 @@ namespace sequential
 {
 
 
-IteratorBase::IteratorBase(const pdal::drivers::soci::Reader& reader)
+IteratorBase::IteratorBase(const pdal::drivers::sqlite::Reader& reader)
     : m_at_end(false)
     , m_active_buffer(BufferPtr())
     , m_buffer_position(0)
@@ -275,8 +272,6 @@ IteratorBase::IteratorBase(const pdal::drivers::soci::Reader& reader)
     std::string const& connection = options.getValueOrThrow<std::string>("connection");
     std::string const& query = options.getValueOrThrow<std::string>("query");
 
-    m_database_type = getReader().getDatabaseType();
-    m_session = connectToDataBase(connection, m_database_type);
 
     return;
 }
@@ -288,7 +283,7 @@ IteratorBase::~IteratorBase()
 
 
 
-const pdal::drivers::soci::Reader& IteratorBase::getReader() const
+const pdal::drivers::sqlite::Reader& IteratorBase::getReader() const
 {
     return m_reader;
 }
@@ -316,7 +311,7 @@ void IteratorBase::readBlob(::soci::row& block,
     {
         std::stringstream oss;
         oss << "Did not read the amount of binary data as expected -- read: " << howMuchWeRead << " should read: " << howMuchTheBlobShouldBe;
-        throw soci_driver_error(oss.str());
+        throw sqlite_driver_error(oss.str());
     }
     boost::uint32_t howMuchToRead = howMany * oracle_schema.getByteSize();
     m_active_buffer->setDataStride(data, 0, howMuchToRead);
@@ -357,7 +352,7 @@ void IteratorBase::fillUserBuffer(PointBuffer& user_buffer)
             for (boost::int32_t i = 0; i < numUserSpace; ++i)
             {
                 if (i < 0)
-                    throw soci_driver_error("point_source_field point index is less than 0!");
+                    throw sqlite_driver_error("point_source_field point index is less than 0!");
                 user_buffer.setField(*point_source_field, i, m_active_cloud_id);
             }
         }
@@ -536,7 +531,7 @@ boost::uint32_t IteratorBase::myReadBlocks(PointBuffer& user_buffer)
 //
 //---------------------------------------------------------------------------
 
-Reader::Reader(const pdal::drivers::soci::Reader& reader, PointBuffer& buffer)
+Reader::Reader(const pdal::drivers::sqlite::Reader& reader, PointBuffer& buffer)
     : IteratorBase(reader)
     , pdal::StageSequentialIterator(reader, buffer)
 {
@@ -577,4 +572,4 @@ boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
 
 }
 }
-} // namespace pdal::driver::soci
+} // namespace pdal::driver::sqlite
