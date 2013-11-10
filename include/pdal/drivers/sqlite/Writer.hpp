@@ -32,12 +32,12 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_DRIVERS_SOCI_WRITER_HPP
-#define INCLUDED_DRIVERS_SOCI_WRITER_HPP
+#ifndef INCLUDED_DRIVERS_SQLITE_WRITER_HPP
+#define INCLUDED_DRIVERS_SQLITE_WRITER_HPP
 
 
 #include <pdal/Writer.hpp>
-#include <pdal/drivers/soci/common.hpp>
+#include <pdal/drivers/sqlite/common.hpp>
 #include <pdal/third/nanoflann.hpp>
 
 
@@ -45,14 +45,14 @@ namespace pdal
 {
 namespace drivers
 {
-namespace soci
+namespace sqlite
 {
 
 
 class PDAL_DLL Writer : public pdal::Writer
 {
 public:
-    SET_STAGE_NAME("drivers.soci.writer", "SOCI Writer")
+    SET_STAGE_NAME("drivers.sqlite.writer", "SQLite Writer")
 
     Writer(Stage& prevStage, const Options&);
     ~Writer();
@@ -101,14 +101,9 @@ private:
                         boost::uint32_t& schema_byte_size);
     bool WriteBlock(PointBuffer const& buffer);                        
     
-#ifdef PDAL_HAVE_SOCI
     ::soci::session* m_session;
 	::soci::statement* m_block_statement;
-#else
-    void* m_session;
-#endif
 
-    DatabaseType m_type;
     bool m_doCreateIndex;
     pdal::Bounds<double> m_bounds; // Bounds of the entire point cloud    
     bool m_sdo_pc_is_initialized;

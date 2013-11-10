@@ -77,10 +77,10 @@
 #endif
 
 
-#ifdef PDAL_HAVE_SOCI
-#ifndef USE_PDAL_PLUGIN_SOCI
-#include <pdal/drivers/soci/Reader.hpp>
-#include <pdal/drivers/soci/Writer.hpp>
+#ifdef PDAL_HAVE_SQLITE
+#ifndef USE_PDAL_PLUGIN_SQLITE
+#include <pdal/drivers/sqlite/Reader.hpp>
+#include <pdal/drivers/sqlite/Writer.hpp>
 #endif
 #endif
 
@@ -141,9 +141,9 @@ MAKE_READER_CREATOR(OciReader, pdal::drivers::oci::Reader)
 MAKE_READER_CREATOR(NITFReader, pdal::drivers::nitf::Reader)
 #endif
 
-#ifdef PDAL_HAVE_SOCI
-#ifndef USE_PDAL_PLUGIN_SOCI
-MAKE_READER_CREATOR(SociReader, pdal::drivers::soci::Reader)
+#ifdef PDAL_HAVE_SQLITE
+#ifndef USE_PDAL_PLUGIN_SQLITE
+MAKE_READER_CREATOR(SqliteReader, pdal::drivers::sqlite::Reader)
 #endif
 #endif
 
@@ -205,9 +205,9 @@ MAKE_WRITER_CREATOR(OciWriter, pdal::drivers::oci::Writer)
 MAKE_WRITER_CREATOR(P2GWriter, pdal::drivers::p2g::Writer)
 #endif
 
-#ifdef PDAL_HAVE_SOCI
-#ifndef USE_PDAL_PLUGIN_SOCI
-MAKE_WRITER_CREATOR(SociWriter, pdal::drivers::soci::Writer)
+#ifdef PDAL_HAVE_SQLITE
+#ifndef USE_PDAL_PLUGIN_SQLITE
+MAKE_WRITER_CREATOR(SqliteWriter, pdal::drivers::sqlite::Writer)
 #endif
 #endif
 
@@ -432,9 +432,9 @@ void StageFactory::registerKnownReaders()
     REGISTER_READER(NITFReader, pdal::drivers::nitf::Reader);
 #endif
 
-#ifdef PDAL_HAVE_SOCI
-#ifndef USE_PDAL_PLUGIN_SOCI
-    REGISTER_READER(SociReader, pdal::drivers::soci::Reader);
+#ifdef PDAL_HAVE_SQLITE
+#ifndef USE_PDAL_PLUGIN_SQLITE
+    REGISTER_READER(SqliteReader, pdal::drivers::sqlite::Reader);
 #endif
 #endif
 
@@ -500,9 +500,9 @@ void StageFactory::registerKnownWriters()
     REGISTER_WRITER(P2GWriter, pdal::drivers::p2g::Writer);
 #endif
 
-#ifdef PDAL_HAVE_SOCI
-#ifndef USE_PDAL_PLUGIN_SOCI
-    REGISTER_WRITER(SociWriter, pdal::drivers::soci::Writer);
+#ifdef PDAL_HAVE_SQLITE
+#ifndef USE_PDAL_PLUGIN_SQLITE
+    REGISTER_WRITER(SqliteWriter, pdal::drivers::sqlite::Writer);
 #endif
 #endif
 

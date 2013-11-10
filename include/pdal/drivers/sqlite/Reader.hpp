@@ -32,14 +32,14 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_PDAL_DRIVER_SOCI_READER_HPP
-#define INCLUDED_PDAL_DRIVER_SOCI_READER_HPP
+#ifndef INCLUDED_PDAL_DRIVER_SQLITE_READER_HPP
+#define INCLUDED_PDAL_DRIVER_SQLITE_READER_HPP
 
 #include <pdal/Reader.hpp>
 #include <pdal/ReaderIterator.hpp>
 
 
-#include <pdal/drivers/soci/common.hpp>
+#include <pdal/drivers/sqlite/common.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/scoped_array.hpp>
 
@@ -50,7 +50,7 @@ namespace pdal
 {
 namespace drivers
 {
-namespace soci
+namespace sqlite
 {
 
 
@@ -58,7 +58,7 @@ namespace soci
 class PDAL_DLL Reader : public pdal::Reader
 {
 public:
-    SET_STAGE_NAME("drivers.soci.reader", "SOCI Reader")
+    SET_STAGE_NAME("drivers.sqlite.reader", "SOCI Reader")
 
     Reader(const Options&);
     ~Reader();
@@ -77,7 +77,6 @@ public:
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
 
     
-    inline DatabaseType getDatabaseType() const { return m_database_type; }
     pdal::Schema fetchSchema(std::string const& query) const;
     pdal::SpatialReference fetchSpatialReference(std::string const& query) const;
 
@@ -87,15 +86,10 @@ private:
     Reader& operator=(const Reader&); // not implemented
     Reader(const Reader&); // not implemented
 
-    DatabaseType m_database_type;
     mutable boost::uint64_t m_cachedPointCount;
 
 
-    #ifdef PDAL_HAVE_SOCI
-        ::soci::session* m_session;
-    #else
-        void* m_session;
-    #endif
+    ::soci::session* m_session;
 
 };
 
@@ -112,11 +106,11 @@ namespace sequential
 class IteratorBase
 {
 public:
-    IteratorBase(const pdal::drivers::soci::Reader& reader);
+    IteratorBase(const pdal::drivers::sqlite::Reader& reader);
     ~IteratorBase();
 
 protected:
-    const pdal::drivers::soci::Reader& getReader() const;
+    const pdal::drivers::sqlite::Reader& getReader() const;
 
     boost::uint32_t myReadBuffer(PointBuffer& data);
 
@@ -128,7 +122,6 @@ protected:
 
     bool m_at_end;
 
-    DatabaseType m_database_type;
 
     boost::int32_t m_active_cloud_id;
     BufferPtr m_active_buffer;
@@ -138,13 +131,9 @@ protected:
 
 
 private:
-    const pdal::drivers::soci::Reader& m_reader;
+    const pdal::drivers::sqlite::Reader& m_reader;
 
-    #ifdef PDAL_HAVE_SOCI
-        ::soci::session* m_session;
-    #else
-        void* m_session;
-    #endif
+    ::soci::session* m_session;
 
     
     ::soci::statement getNextCloud(   std::string const& cloud_table_name, 
@@ -171,7 +160,7 @@ private:
 class Reader : public IteratorBase, public pdal::StageSequentialIterator
 {
 public:
-    Reader(const pdal::drivers::soci::Reader& reader, PointBuffer& buffer);
+    Reader(const pdal::drivers::sqlite::Reader& reader, PointBuffer& buffer);
     ~Reader();
 
 private:
