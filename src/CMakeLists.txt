@@ -60,6 +60,7 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/Writer.hpp"
   "${PDAL_HEADERS_DIR}/XMLSchema.hpp"
   "${PDAL_HEADERS_DIR}/third/nanoflann.hpp"
+  "${PDAL_HEADERS_DIR}/third/md5-pdal.h"
   "${PDAL_HEADERS_DIR}/third/string_ref.hpp"
   "${PDAL_HEADERS_DIR}/third/string_ref_fwd.hpp"
 )
@@ -102,6 +103,7 @@ set(PDAL_BASE_CPP
   Utils.cpp
   Vector.cpp  
   Writer.cpp
+  third/md5-pdal.c
   ${PDAL_XML_SRC}
 )
 
@@ -407,27 +409,27 @@ endif()
 
 
 #
-# drivers/soci
+# drivers/sqlite
 #
-set(PDAL_SOCI_PATH drivers/soci)
-set(PDAL_SOCI_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_SOCI_PATH}")
-set(PDAL_SOCI_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_SOCI_PATH}")
+set(PDAL_SQLITE_PATH drivers/sqlite)
+set(PDAL_SQLITE_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_SQLITE_PATH}")
+set(PDAL_SQLITE_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_SQLITE_PATH}")
 
-set(PDAL_DRIVERS_SOCI_HPP
-  "${PDAL_SOCI_HEADERS}/common.hpp"
-  "${PDAL_SOCI_HEADERS}/Reader.hpp"
-  "${PDAL_SOCI_HEADERS}/Writer.hpp"
+set(PDAL_DRIVERS_SQLITE_HPP
+  "${PDAL_SQLITE_HEADERS}/common.hpp"
+  "${PDAL_SQLITE_HEADERS}/Reader.hpp"
+  "${PDAL_SQLITE_HEADERS}/Writer.hpp"
 )
 
-set (PDAL_DRIVERS_SOCI_CPP 
-  "${PDAL_SOCI_SRC}/Reader.cpp"
-  "${PDAL_SOCI_SRC}/Writer.cpp"
+set (PDAL_DRIVERS_SQLITE_CPP 
+  "${PDAL_SQLITE_SRC}/Reader.cpp"
+  "${PDAL_SQLITE_SRC}/Writer.cpp"
 )
 
-if (SOCI_FOUND)
-    if (NOT USE_PDAL_PLUGIN_SOCI)
-        list (APPEND PDAL_CPP ${PDAL_DRIVERS_SOCI_CPP} )
-        list (APPEND PDAL_HPP ${PDAL_DRIVERS_SOCI_HPP} )
+if (WITH_SQLITE)
+    if (NOT USE_PDAL_PLUGIN_SQLITE)
+        list (APPEND PDAL_CPP ${PDAL_DRIVERS_SQLITE_CPP} )
+        list (APPEND PDAL_HPP ${PDAL_DRIVERS_SQLITE_HPP} )
     endif()
 endif()
 
@@ -661,16 +663,16 @@ else()
 endif()
 add_library(${PDAL_LIB_NAME} ${PDAL_LIB_TYPE} ${PDAL_SOURCES})
 
-set (SOCI_LIBRARIES ${SOCI_LIBRARY} ${SOCI_postgresql_PLUGIN} ${SOCI_sqlite3_PLUGIN} ${SQLITE3_LIBRARY})
+set (SQLITE_LIBRARIES ${SOCI_LIBRARY} ${SOCI_sqlite3_PLUGIN} ${SQLITE3_LIBRARY})
 
-if (WITH_SOCI)
-if (NOT USE_PDAL_PLUGIN_SOCI)
-target_link_libraries(${APPS_CPP_DEPENDENCIES} "${SOCI_LIBRARIES}")
+if (WITH_SQLITE)
+if (NOT USE_PDAL_PLUGIN_SQLITE)
+target_link_libraries(${APPS_CPP_DEPENDENCIES} "${SQLITE_LIBRARIES}")
 endif()
 endif()
 
 if (WITH_PGPOINTCLOUD)
-if (NOT USE_PDAL_PLUGIN_SOCI)
+if (NOT USE_PDAL_PLUGIN_PGPOINTCLOUD)
 target_link_libraries(${APPS_CPP_DEPENDENCIES} "${POSTGRESQL_LIBRARIES}")
 endif()
 endif()
@@ -695,12 +697,15 @@ if (WIN32)
     "${GEOTIFF_LIBRARY}"
     "${GDAL_LIBRARY}"
     "${LASZIP_LIBRARY}"
-    "${LIBXML2_LIBRARIES}"
+    ${LIBXML2_LIBRARIES}
     "${PYTHON_LIBRARY}"
     "${P2G_LIBRARY}"
     "${GEOS_LIBRARY}"
     "${HEXER_LIBRARY}"
-    "${ORACLE_LIBRARY}")
+    "${ORACLE_LIBRARY}"
+    ${SQLITE_LIBRARIES}
+    ${NITRO_LIBRARIES}
+)
 else()
   target_link_libraries(${APPS_CPP_DEPENDENCIES}
     "${PDAL_LIB_NAME}"
@@ -718,7 +723,7 @@ else()
     "${HEXER_LIBRARY}"
     "${ORACLE_LIBRARY}"
     ${NITRO_LIBRARIES}
-    ${SOCI_LIBRARIES})
+    ${SQLITE_LIBRARIES})
 endif()
 
 message(STATUS "Using boost lib: ${Boost_LIBRARIES}")
@@ -763,28 +768,28 @@ if (USE_PDAL_PLUGIN_TEXT)
     endif()
 endif()
 
-if (WITH_SOCI)
-if (USE_PDAL_PLUGIN_SOCI)
-    set(PDAL_SOCI_WRITER_LIB_NAME pdal_plugin_writer_soci)
-    add_library(${PDAL_SOCI_WRITER_LIB_NAME} SHARED "${PDAL_SOCI_SRC}/Writer.cpp")
-    target_link_libraries(${PDAL_SOCI_WRITER_LIB_NAME}
+if (WITH_SQLITE)
+if (USE_PDAL_PLUGIN_SQLITE)
+    set(PDAL_SOCI_WRITER_LIB_NAME pdal_plugin_writer_sqlite)
+    add_library(${PDAL_SQLITE_WRITER_LIB_NAME} SHARED "${PDAL_SQLITE_SRC}/Writer.cpp")
+    target_link_libraries(${PDAL_SQLITE_WRITER_LIB_NAME}
                           "${PDAL_LIB_NAME}"
-                          "${SOCI_LIBRARIES}")
-    set_target_properties(${PDAL_SOCI_WRITER_LIB_NAME}
+                          "${SQLITE_LIBRARIES}")
+    set_target_properties(${PDAL_SQLITE_WRITER_LIB_NAME}
     PROPERTIES SOVERSION "${PDAL_LIB_SOVERSION}" )
     if (APPLE)
     set_target_properties(
-      "${PDAL_SOCI_WRITER_LIB_NAME}"
+      "${PDAL_SQLITE_WRITER_LIB_NAME}"
       PROPERTIES
       INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib")
     endif()
 
-    set(PDAL_SOCI_READER_LIB_NAME pdal_plugin_reader_soci)
-    add_library(${PDAL_SOCI_READER_LIB_NAME} SHARED ${PDAL_SOCI_SRC}/Reader.cpp)
+    set(PDAL_SOCI_READER_LIB_NAME pdal_plugin_reader_sqlite)
+    add_library(${PDAL_SQLITE_READER_LIB_NAME} SHARED ${PDAL_SQLITE_SRC}/Reader.cpp)
     target_link_libraries(${PDAL_SOCI_READER_LIB_NAME}
                           "${PDAL_LIB_NAME}"
-                          "${SOCI_LIBRARIES}")
-    set_target_properties(${PDAL_SOCI_READER_LIB_NAME}
+                          "${SQLITE_LIBRARIES}")
+    set_target_properties(${PDAL_SQLITE_READER_LIB_NAME}
     PROPERTIES SOVERSION "${PDAL_LIB_SOVERSION}" )
     if (APPLE)
     set_target_properties(

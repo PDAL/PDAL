@@ -36,6 +36,7 @@
 #define INCLUDED_DRIVERS_LAS_SUMMARYDATA_HPP
 
 #include <pdal/pdal_internal.hpp>
+#include <pdal/Bounds.hpp>
 
 #include <ostream>
 
@@ -59,14 +60,12 @@ public:
 
     boost::uint32_t getTotalNumPoints() const;
 
-    void getBounds(double& minX, double& minY, double& minZ, double& maxX, double& maxY, double& maxZ) const;
+    pdal::Bounds<double> getBounds() const;
 
     // note that returnNumber is in the range [0..4]
     boost::uint32_t getReturnCount(int returnNumber) const;
 
     void dump(std::ostream&) const;
-
-    static const int s_maxNumReturns = 5;
 
 private:
     bool m_isFirst;
@@ -76,7 +75,7 @@ private:
     double m_maxX;
     double m_maxY;
     double m_maxZ;
-    boost::uint32_t m_returnCounts[s_maxNumReturns];
+    std::vector<boost::uint32_t> m_returnCounts;
     boost::uint32_t m_totalNumPoints;
 
     SummaryData& operator=(const SummaryData&); // not implemented

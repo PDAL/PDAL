@@ -40,7 +40,7 @@
 
 #include <pdal/FileUtils.hpp>
 #include <pdal/drivers/faux/Reader.hpp>
-#include <pdal/drivers/soci/Writer.hpp>
+#include <pdal/drivers/sqlite/Writer.hpp>
 #include <pdal/drivers/las/Reader.hpp>
 #include <pdal/filters/Cache.hpp>
 #include <pdal/filters/Chipper.hpp>
@@ -55,7 +55,7 @@ using namespace pdal;
 
 static unsigned chunk_size = 15;
 
-Options getSOCIOptions()
+Options getSQLITEOptions()
 {
     Options options;
 
@@ -66,7 +66,7 @@ Options getSOCIOptions()
     Option overwrite("overwrite", false,"overwrite");
     options.add(overwrite);
     
-    std::string temp_filename("temp-SociWriterTest_test_simple_las.sqlite");
+    std::string temp_filename("temp-SqliteWriterTest_test_simple_las.sqlite");
     Option connection("connection",temp_filename, "connection");
     options.add(connection);
 
@@ -125,13 +125,13 @@ Options getSOCIOptions()
 }
 
 
-BOOST_AUTO_TEST_SUITE(SociWriterTest)
+BOOST_AUTO_TEST_SUITE(SqliteWriterTest)
 
-BOOST_AUTO_TEST_CASE(SociWriterTest_test_simple_las)
+BOOST_AUTO_TEST_CASE(SqliteWriterTest_test_simple_las)
 {
-#ifdef PDAL_HAVE_SOCI
+#ifdef PDAL_HAVE_SQLITE
     // remove file from earlier run, if needed
-    std::string temp_filename("temp-SociWriterTest_test_simple_las.sqlite");
+    std::string temp_filename("temp-SqliteWriterTest_test_simple_las.sqlite");
     FileUtils::deleteFile(temp_filename);
 
     pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
@@ -140,11 +140,11 @@ BOOST_AUTO_TEST_CASE(SociWriterTest_test_simple_las)
 
     {
 
-        pdal::drivers::las::Reader writer_reader(getSOCIOptions());
-        pdal::filters::Cache writer_cache(writer_reader, getSOCIOptions());
-        pdal::filters::Chipper writer_chipper(writer_cache, getSOCIOptions());
-        pdal::filters::InPlaceReprojection writer_reproj(writer_chipper, getSOCIOptions());
-        pdal::drivers::soci::Writer writer_writer(writer_reproj, getSOCIOptions());
+        pdal::drivers::las::Reader writer_reader(getSQLITEOptions());
+        pdal::filters::Cache writer_cache(writer_reader, getSQLITEOptions());
+        pdal::filters::Chipper writer_chipper(writer_cache, getSQLITEOptions());
+        pdal::filters::InPlaceReprojection writer_reproj(writer_chipper, getSQLITEOptions());
+        pdal::drivers::sqlite::Writer writer_writer(writer_reproj, getSQLITEOptions());
 
         writer_writer.initialize();
         boost::uint64_t numPointsToRead = writer_reader.getNumPoints();

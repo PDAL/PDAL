@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Pipeline version="1.0">
+    <Writer type="drivers.pgpointcloud.writer">
+        <Option name="connection">dbname='points'</Option>
+        <Option name="table">sthsm</Option>
+        <Option name="srid">26910</Option>
+        <Filter type="filters.chipper">
+            <Option name="capacity">600</Option>
+            <Filter type="filters.cache">
+                <Reader type="drivers.las.reader">
+                    <Option name="filename">/home/vagrant/pointcloud/st-helens-small.las</Option>
+                    <Option name="spatialreference">EPSG:26910</Option>
+                </Reader>
+            </Filter>
+        </Filter>
+    </Writer>
+</Pipeline>

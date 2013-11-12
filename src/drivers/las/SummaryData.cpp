@@ -73,9 +73,8 @@ void SummaryData::reset()
     m_maxX = 0.0;
     m_maxY = 0.0;
     m_maxZ = 0.0;
-
-    for (int i=0; i<s_maxNumReturns; i++)
-        m_returnCounts[i] = 0;
+    
+    m_returnCounts.assign(7,0);
 
     m_totalNumPoints = 0;
 
@@ -85,8 +84,8 @@ void SummaryData::reset()
 
 void SummaryData::addPoint(double x, double y, double z, int returnNumber)
 {
-    // if (returnNumber < 0 || returnNumber > s_maxNumReturns)
-    //     throw invalid_point_data("point returnNumber is out of range", 0);
+    if (returnNumber < 0 || returnNumber > m_returnCounts.size()-1)
+        throw invalid_point_data("addPoint: point returnNumber is out of range", 0);
 
     if (m_isFirst)
     {
@@ -108,7 +107,7 @@ void SummaryData::addPoint(double x, double y, double z, int returnNumber)
         m_maxZ = std::max(m_maxZ, z);
     }
 
-    ++m_returnCounts[returnNumber-1];
+    m_returnCounts[returnNumber] = m_returnCounts[returnNumber] + 1;
 
     ++m_totalNumPoints;
 
@@ -122,23 +121,26 @@ boost::uint32_t SummaryData::getTotalNumPoints() const
 }
 
 
-void SummaryData::getBounds(double& minX, double& minY, double& minZ, double& maxX, double& maxY, double& maxZ) const
+pdal::Bounds<double> SummaryData::getBounds() const
 {
-    minX = m_minX;
-    minY = m_minY;
-    minZ = m_minZ;
-    maxX = m_maxX;
-    maxY = m_maxY;
-    maxZ = m_maxZ;
+    pdal::Bounds<double> output;
+    output.setMinimum(0, m_minX);
+    output.setMinimum(1, m_minY);
+    output.setMinimum(2, m_minZ);
+    
+    output.setMaximum(0, m_maxX);
+    output.setMaximum(1, m_maxY);
+    output.setMaximum(2, m_maxZ);
+    return output;
 }
 
 
 boost::uint32_t SummaryData::getReturnCount(int returnNumber) const
 {
-    // if (returnNumber < 0 || returnNumber > s_maxNumReturns)
-    //     throw invalid_point_data("point returnNumber is out of range", 0);
-
-    return m_returnCounts[returnNumber-1];
+    if (returnNumber < 0 || returnNumber > m_returnCounts.size()-1)
+        throw invalid_point_data("getReturnCount: point returnNumber is out of range", 0);
+    
+    return m_returnCounts[returnNumber];
 }
 
 
@@ -152,7 +154,7 @@ void SummaryData::dump(std::ostream& str) const
     str << "MaxZ: " << m_maxZ << "\n";
 
     str << "Number of returns:";
-    for (int i=0; i<s_maxNumReturns; i++)
+    for (std::vector<boost::uint32_t>::size_type i=0; i<m_returnCounts.size(); i++)
     {
         str << " " << m_returnCounts[i];
     }

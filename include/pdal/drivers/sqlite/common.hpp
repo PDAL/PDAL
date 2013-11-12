@@ -41,7 +41,6 @@
 #include <boost-fusion.h>
 #include <boost-gregorian-date.h>
 #include <soci/soci.h>
-#include <soci/postgresql/soci-postgresql.h>
 #include <soci/sqlite3/soci-sqlite3.h>
 #include <soci/error.h>
 #include <soci/use.h>
@@ -54,41 +53,34 @@ namespace pdal
 {
 namespace drivers
 {
-namespace soci
+namespace sqlite
 {
 
-    class soci_driver_error : public pdal_error
+    class sqlite_driver_error : public pdal_error
     {
     public:
-        soci_driver_error(std::string const& msg)
+        sqlite_driver_error(std::string const& msg)
             : pdal_error(msg)
         {}
     };
 
-    class connection_failed : public soci_driver_error
+    class connection_failed : public sqlite_driver_error
     {
     public:
         connection_failed(std::string const& msg)
-            : soci_driver_error(msg)
+            : sqlite_driver_error(msg)
         {}
     };
 
-    class buffer_too_small : public soci_driver_error
+    class buffer_too_small : public sqlite_driver_error
     {
     public:
         buffer_too_small(std::string const& msg)
-            : soci_driver_error(msg)
+            : sqlite_driver_error(msg)
         {}
     };
 
 
-    enum DatabaseType
-    {
-        DATABASE_POSTGRESQL,
-        DATABASE_ORACLE,
-        DATABASE_SQLITE,
-        DATABASE_UNKNOWN = 128
-    };
 
     enum QueryType
     {
@@ -98,47 +90,8 @@ namespace soci
     };
 
 
-inline DatabaseType getDatabaseConnectionType(std::string const& connection_type)
-{
-    DatabaseType output;
 
-    if (boost::iequals(connection_type, "oracle"))
-        output = DATABASE_ORACLE;
-    else if (boost::iequals(connection_type, "postgresql"))
-        output = DATABASE_POSTGRESQL;
-    else if (boost::iequals(connection_type, "sqlite"))
-        output = DATABASE_SQLITE;
-    else
-        output = DATABASE_UNKNOWN;
-    
-    return output;
-    
-}
 
-inline ::soci::session* connectToDataBase(std::string const& connection, DatabaseType dtype)
-{
-    ::soci::session* output(0);
-    if (dtype == DATABASE_UNKNOWN)
-    {
-        std::stringstream oss;
-        oss << "Database connection type '" << dtype << "' is unknown or not configured";
-        throw soci_driver_error(oss.str());
-    }
-    
-    try
-    {
-        if (dtype == DATABASE_POSTGRESQL)
-            output = new ::soci::session(::soci::postgresql, connection);
-
-    } catch (::soci::soci_error const& e)
-    {
-        std::stringstream oss;
-        oss << "Unable to connect to database with error '" << e.what() << "'";
-        throw connection_failed(oss.str());
-    }
-    
-    return output;
-}
 
 }
 }
