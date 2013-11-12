@@ -60,6 +60,7 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/Writer.hpp"
   "${PDAL_HEADERS_DIR}/XMLSchema.hpp"
   "${PDAL_HEADERS_DIR}/third/nanoflann.hpp"
+  "${PDAL_HEADERS_DIR}/third/md5-pdal.h"
   "${PDAL_HEADERS_DIR}/third/string_ref.hpp"
   "${PDAL_HEADERS_DIR}/third/string_ref_fwd.hpp"
 )
@@ -102,6 +103,7 @@ set(PDAL_BASE_CPP
   Utils.cpp
   Vector.cpp  
   Writer.cpp
+  third/md5-pdal.c
   ${PDAL_XML_SRC}
 )
 
