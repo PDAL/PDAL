@@ -41,7 +41,7 @@
 #include <pdal/Stage.hpp>
 #include <pdal/Writer.hpp>
 #include <pdal/UserCallback.hpp>
-
+#include <pdal/PipelineManager.hpp>
 
 namespace pdal { namespace kernel {
     
@@ -72,6 +72,8 @@ public:
 
     // makes a writer, from just the filename and some other options (and the input stage)
     static pdal::Writer* makeWriter(pdal::Options& options, pdal::Stage& stage);
+    
+    static pdal::PipelineManager* makePipeline(pdal::Options& options);
 
 private:
 

@@ -1,5 +1,4 @@
-
-#ifndef INCLUDED_PDAL_KERNEL_PIPELINE_HPP/******************************************************************************
+/******************************************************************************
 * Copyright (c) 2013, Howard Butler (hobu.inc@gmail.com)
 *
 * All rights reserved.
@@ -33,6 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#ifndef INCLUDED_PDAL_KERNEL_PIPELINE_HPP
 #define INCLUDED_PDAL_KERNEL_PIPELINE_HPP
 
 

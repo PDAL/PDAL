@@ -33,6 +33,7 @@
 ****************************************************************************/
 
 #include <pdal/kernel/Info.hpp>
+#include <pdal/PipelineWriter.hpp>
 
 
 namespace pdal { namespace kernel {
@@ -103,6 +104,8 @@ void Info::addSwitches()
         ("xml", po::value<bool>(&m_useXML)->zero_tokens()->implicit_value(true), "dump XML instead of JSON")
         ("seed", po::value<boost::uint32_t>(&m_seed)->default_value(0), "Seed value for random sample")
         ("sample_size", po::value<boost::uint32_t>(&m_sample_size)->default_value(1000), "Sample size for random sample")
+        ("pipeline-serialization", po::value<std::string>(&m_pipelineFile)->default_value(""), "")
+
         ;
     
     addSwitchSet(processing_options);
@@ -145,7 +148,7 @@ void Info::dumpOnePoint(const Stage& stage) const
 }
 
 
-void Info::dumpStats(pdal::filters::Stats& filter) const
+void Info::dumpStats(pdal::filters::Stats& filter, pdal::PipelineManager* manager) const
 {
 
     const Schema& schema = filter.getSchema();
@@ -155,10 +158,18 @@ void Info::dumpStats(pdal::filters::Stats& filter) const
     {
         chunkSize = filter.getNumPoints();
     } 
-
+    
+    pdal::PipelineWriter* writer(0);
+    
     PointBuffer data(schema, chunkSize);
 
-    boost::scoped_ptr<StageSequentialIterator> iter(filter.createSequentialIterator(data));
+    if (m_pipelineFile.size() > 0)
+    {
+         writer = new pdal::PipelineWriter(*manager);
+         writer->setPointBuffer(&data);
+    }
+
+    StageSequentialIterator* iter = filter.createSequentialIterator(data);
 
     boost::uint64_t totRead = 0;
     while (!iter->atEnd())
@@ -167,9 +178,9 @@ void Info::dumpStats(pdal::filters::Stats& filter) const
         const boost::uint32_t numRead = iter->read(data);
         totRead += numRead;
     }
-
-    pdal::Metadata output = static_cast<pdal::filters::iterators::sequential::Stats*>(iter.get())->toMetadata();
     
+    pdal::Metadata output = static_cast<pdal::filters::iterators::sequential::Stats*>(iter)->toMetadata();
+    delete iter;
     boost::property_tree::ptree tree;
     tree.add_child("stats", output.toPTree());
     std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
@@ -178,6 +189,13 @@ void Info::dumpStats(pdal::filters::Stats& filter) const
         write_xml(ostr, tree);
     else
         write_json(ostr, tree);
+
+    if (m_pipelineFile.size() > 0)
+    {
+        writer->writePipeline(m_pipelineFile);
+        delete writer;
+    }
+
     
     return;
 }
@@ -326,7 +344,9 @@ int Info::execute()
         readerOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
     }
 
-    Stage* reader = AppSupport::makeReader(readerOptions);
+    PipelineManager* manager = AppSupport::makePipeline(readerOptions);
+    
+    // Stage* reader = AppSupport::makeReader(readerOptions);
 
     if (m_seed != 0)
     {
@@ -353,8 +373,11 @@ int Info::execute()
     
     pdal::Options options = m_options + readerOptions;
     
-    pdal::filters::Stats* filter = new pdal::filters::Stats(*reader, options);
+    Stage* reader = manager->getStage();
+    manager->addFilter("filters.stats", *reader, options);
+    // pdal::filters::Stats* filter = new pdal::filters::Stats(*reader, options);
     
+    Stage* filter = manager->getStage();
 
     filter->initialize();
 
@@ -365,39 +388,38 @@ int Info::execute()
 
     if (m_showStats)
     {
-        dumpStats(*filter);
+        dumpStats(*dynamic_cast<pdal::filters::Stats*>(filter), manager);
     }
 
     if (m_showSchema)
     {
-        dumpSchema(*reader);
+        dumpSchema(*filter);
     }
     
     if (m_showMetadata)
     {
-        dumpMetadata(*reader);
+        dumpMetadata(*filter);
     }
     if (m_showStage)
     {
-        dumpStage(*reader);
+        dumpStage(*filter);
     }
     
     if (m_showSDOPCMetadata)
     {
-        dumpSDO_PCMetadata(*reader);
+        dumpSDO_PCMetadata(*filter);
     }
     
     if (m_QueryPoint.size())
     {
-        IndexedPointBuffer buffer(reader->getSchema(), reader->getNumPoints());
-        dumpQuery(*reader, buffer);
+        IndexedPointBuffer buffer(filter->getSchema(), filter->getNumPoints());
+        dumpQuery(*filter, buffer);
     }
     
     std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
     ostr << std::endl;
     
-    delete filter;
-    delete reader;
+    delete manager;
 
     if (m_outputStream)
     {
