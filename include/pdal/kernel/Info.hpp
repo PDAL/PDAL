@@ -66,7 +66,7 @@ private:
     void validateSwitches(); // overrride
 
     void dumpOnePoint(const Stage&) const;
-    void dumpStats(pdal::filters::Stats& filter) const;
+    void dumpStats(pdal::filters::Stats& filter, PipelineManager* manager) const;
     void dumpSchema(const Stage&) const;
     void dumpStage(const Stage&) const;
     void dumpQuery(Stage const&, IndexedPointBuffer&) const;
@@ -89,6 +89,7 @@ private:
     std::string m_QueryPoint;
     double m_QueryDistance;
     boost::uint64_t m_numPointsToWrite;
+    std::string m_pipelineFile;    
 };
 
 }} // pdal::kernel
