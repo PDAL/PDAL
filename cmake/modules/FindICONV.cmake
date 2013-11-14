@@ -29,7 +29,7 @@
 #  
 
 set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS true)
-
+include(CheckFunctionExists)
 if (ICONV_INCLUDE_DIR)
   # Already in cache, be silent
   set(ICONV_FIND_QUIETLY TRUE)
