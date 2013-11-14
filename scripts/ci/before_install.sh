@@ -12,7 +12,8 @@ sudo apt-get install \
     libpq-dev \
     libproj-dev \
     libtiff4-dev \
-    libxml2-dev
+    libxml2-dev \
+    python-numpy
 
 # install libgeotiff from sources
 wget http://download.osgeo.org/geotiff/libgeotiff/libgeotiff-1.4.0.tar.gz
