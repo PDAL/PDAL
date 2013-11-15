@@ -204,6 +204,7 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_metadata)
     pdal::Option polygon("vlr", "forward");
     pdal::Option record_id("record_id", 1234);
     pdal::Option user_id("user_id", "hobu");
+    pdal::Option global_encoding("global_encoding", "AQA=");
     
     pdal::Options vlr_opts;
     vlr_opts.add(record_id);
@@ -220,6 +221,7 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_metadata)
     moptions.add(creation_doy);
     moptions.add(creation_year);
     moptions.add(polygon);
+    moptions.add(global_encoding);
     metadata_option.setOptions(moptions);
 
     options.add(metadata_option);

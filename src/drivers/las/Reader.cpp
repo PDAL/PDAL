@@ -377,10 +377,23 @@ void Reader::readMetadata()
                                           static_cast<boost::uint32_t>(header.GetFileSourceId()),
                                           "File Source ID (Flight Line Number if this file was derived from an original flight line): This field should be set to a value between 1 and 65,535, inclusive. A value of zero (0) is interpreted to mean that an ID has not been assigned. In this case, processing software is free to assign any valid number. Note that this scheme allows a LIDAR project to contain up to 65,535 unique sources. A source can be considered an original flight line or it can be the result of merge and/or extract operations."
                                          );
-    metadata.addMetadata<boost::uint32_t>("global_encoding",
-                                          static_cast<boost::uint32_t>(header.GetReserved()),
-                                          "Global Encoding: This is a bit field used to indicate certain global properties about the file. In LAS 1.2 (the version in which this field was introduced), only the low bit is defined (this is the bit, that if set, would have the unsigned integer yield a value of 1)."
-                                         );
+    std::vector<boost::uint8_t> raw_bytes;
+    boost::uint16_t reserved = header.GetReserved();
+    boost::uint8_t* start = (boost::uint8_t*)&reserved;
+    for (std::size_t i = 0 ; i < sizeof(boost::uint16_t); ++i)
+    {
+      raw_bytes.push_back(start[i]);
+    }
+    pdal::ByteArray bytearray(raw_bytes);
+
+    pdal::Metadata entry("global_encoding", bytearray);
+
+    entry.setDescription("Global Encoding: This is a bit field used to indicate certain global properties about the file. In LAS 1.2 (the version in which this field was introduced), only the low bit is defined (this is the bit, that if set, would have the unsigned integer yield a value of 1).");
+    metadata.addMetadata(entry);                                       
+    // metadata.addMetadata<boost::uint32_t>("global_encoding",
+    //                                       static_cast<boost::uint32_t>(header.GetReserved()),
+    //                                       "Global Encoding: This is a bit field used to indicate certain global properties about the file. In LAS 1.2 (the version in which this field was introduced), only the low bit is defined (this is the bit, that if set, would have the unsigned integer yield a value of 1)."
+    //                                      );
     metadata.addMetadata<boost::uuids::uuid>("project_id",
             header.GetProjectId(),
             "Project ID (GUID data): The four fields that comprise a complete Globally Unique Identifier (GUID) are now reserved for use as a Project Identifier (Project ID). The field remains optional. The time of assignment of the Project ID is at the discretion of processing software. The Project ID should be the same for all files that are associated with a unique project. By assigning a Project ID and using a File Source ID (defined above) every file within a project and every point within a file can be uniquely identified, globally."

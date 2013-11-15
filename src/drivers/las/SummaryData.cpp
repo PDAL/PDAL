@@ -84,7 +84,7 @@ void SummaryData::reset()
 
 void SummaryData::addPoint(double x, double y, double z, int returnNumber)
 {
-    if (returnNumber < 0 || returnNumber > m_returnCounts.size()-1)
+    if (returnNumber < 0 || returnNumber > static_cast<int>(m_returnCounts.size())-1)
         throw invalid_point_data("addPoint: point returnNumber is out of range", 0);
 
     if (m_isFirst)
@@ -137,7 +137,7 @@ pdal::Bounds<double> SummaryData::getBounds() const
 
 boost::uint32_t SummaryData::getReturnCount(int returnNumber) const
 {
-    if (returnNumber < 0 || returnNumber > m_returnCounts.size()-1)
+    if (returnNumber < 0 || returnNumber > static_cast<int>(m_returnCounts.size())-1)
         throw invalid_point_data("getReturnCount: point returnNumber is out of range", 0);
     
     return m_returnCounts[returnNumber];

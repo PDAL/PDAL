@@ -459,11 +459,33 @@ void Writer::writeBufferBegin(PointBuffer const& data)
         log()->get(logDEBUG) << "Setting project_id to "
                              << project_id
                              << " from metadata " << std::endl;
+        
+        std::string global_encoding_data = getMetadataOption<std::string>(getOptions(), m, "global_encoding", "");
+        std::vector<boost::uint8_t> data = Utils::base64_decode(global_encoding_data);
 
-        boost::uint16_t reserved = getMetadataOption<boost::uint16_t>(getOptions(),
-                                   m,
-                                   "global_encoding",
-                                   0);
+        // In case the VLR is 0 in size
+        boost::uint8_t* bytes = 0;
+        if (data.size() > 0)
+            bytes = &data[0];
+        
+        boost::uint16_t reserved(0);
+        if (global_encoding_data.size())
+        {
+            if (data.size() != sizeof(boost::uint16_t) )
+            {
+                std::ostringstream oss;
+                oss << "size of global_encoding bytes should == 2, not " << data.size();
+                throw pdal_error(oss.str());
+            }
+            boost::uint8_t* ptr = (boost::uint8_t*)&reserved;
+            ptr[0] = data[0];
+            ptr[1] = data[1];
+        }
+
+        // boost::uint16_t reserved = getMetadataOption<boost::uint16_t>(getOptions(),
+        //                            m,
+        //                            "global_encoding",
+        //                            0);
         m_lasHeader.SetReserved(reserved);
         log()->get(logDEBUG) << "Setting reserved to "
                              << reserved
