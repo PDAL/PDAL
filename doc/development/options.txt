@@ -1,8 +1,0 @@
-.. _development_options:
-
-==================
-The Options System
-==================
-
-
-[tbd]

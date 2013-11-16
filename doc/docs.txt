@@ -11,17 +11,17 @@ Contents:
    :maxdepth: 2
    
    download
-   vagrant
    compilation/index
    tutorial/index
    apps
+   stages/index.txt
+   pipeline
+   vagrant
    community
    faq
    development/index
    api/index
    metadata
-   pipeline
-   pipeline/index.txt
    copyright
   
 Indices and tables

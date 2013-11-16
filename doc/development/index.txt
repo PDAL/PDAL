@@ -20,19 +20,10 @@ Contents:
 .. toctree::
    :maxdepth: 2
    
-   bindings
    conventions
-   coreclasses
    docs
    errorhandling
    goals
-   future
-   io
-   options
-   pipeline
-   projectmanagement
-   source
-   stages
    testing
    usecases
   

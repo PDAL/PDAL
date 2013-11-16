@@ -5,8 +5,8 @@ Unix Compilation
 ******************************************************************************
 
 :Author: Howard Butler
-:Contact: hobu.inc at gmail dot com
-:Date: 3/19/2012
+:Contact: howard@hobu.co
+:Date: 11/16/2013
 
 `CMake`_ 2.8.6+ is the prescribed tool for building from source as well as
 running unit tests. `CMake`_ is a cross-platform build system that provides a
@@ -75,8 +75,17 @@ Configure the basic core library for the "Unix Makefiles" target:
     -- Enable PDAL utilities to build - done
     -- Configuring done
     -- Generating done
-    -- Build files have been written to: /Users/hobu/hg/PDAL-cmake/makefiles
+    -- Build files have been written to: /Users/hobu/dev/git/PDAL-cmake/makefiles
 
+
+.. note::
+
+    The ``hobu-config.sh`` shell script contains a number of common 
+    settings that I use to configure my `Homebrew`-based Macintosh 
+    system.
+
+.. _`Homebrew`: http://brew.sh/
+ 
 Issue the `make` command
 ------------------------------------------------------------------------------
 
