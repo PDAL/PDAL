@@ -16,6 +16,10 @@
 #define BOOST_TEST_UNIT_TEST_HPP_071894GER
 
 // Boost.Test
+#pragma GCC diagnostic ignored "-Wfloat-equal"
+#pragma GCC diagnostic ignored "-Wunneeded-internal-declaration"
+#pragma GCC diagnostic ignored "-Wsign-compare"
+
 #include <boost/test/test_tools.hpp>
 #include <boost/test/unit_test_suite.hpp>
 

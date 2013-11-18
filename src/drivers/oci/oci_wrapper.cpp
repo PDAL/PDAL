@@ -874,7 +874,7 @@ void OWStatement::Bind(int* pnData)
                    (ub2*) NULL,
                    (ub2*) NULL,
                    (ub4) NULL,
-                   (ub4) NULL,
+                   (ub4*) NULL,
                    (ub4) OCI_DEFAULT),
                hError);
 }
@@ -897,7 +897,7 @@ void OWStatement::Bind(long* pnData)
                    (ub2*) NULL,
                    (ub2*) NULL,
                    (ub4) NULL,
-                   (ub4) NULL,
+                   (ub4*) NULL,
                    (ub4) OCI_DEFAULT),
                hError);
 }
@@ -920,7 +920,7 @@ void OWStatement::Bind(double* pnData)
                    (ub2*) NULL,
                    (ub2*) NULL,
                    (ub4) NULL,
-                   (ub4) NULL,
+                   (ub4*) NULL,
                    (ub4) OCI_DEFAULT),
                hError);
 }
@@ -943,7 +943,7 @@ void OWStatement::Bind(char* pData, long nData)
                    (ub2*) NULL,
                    (ub2*) NULL,
                    (ub4) NULL,
-                   (ub4) NULL,
+                   (ub4*) NULL,
                    (ub4) OCI_DEFAULT),
                hError);
 }
@@ -966,7 +966,7 @@ void OWStatement::BindClob(char* pData, long nData)
                    (ub2*) NULL,
                    (ub2*) NULL,
                    (ub4) NULL,
-                   (ub4) NULL,
+                   (ub4*) NULL,
                    (ub4) OCI_DEFAULT),
                hError);
 }
@@ -989,7 +989,7 @@ void OWStatement::Bind(sdo_geometry** pphData)
                    (ub2*) NULL,
                    (ub2*) NULL,
                    (ub4) 0,
-                   (ub4) 0,
+                   (ub4*) NULL,
                    (ub4) OCI_DEFAULT),
                hError);
 
@@ -1023,7 +1023,7 @@ void OWStatement::Bind(sdo_pc_blk** pphData)
                    (ub2*) NULL,
                    (ub2*) NULL,
                    (ub4) 0,
-                   (ub4) 0,
+                   (ub4*) NULL,
                    (ub4) OCI_DEFAULT),
                hError);
 
@@ -1058,7 +1058,7 @@ void OWStatement::BindBlob(OCILobLocator** pphLocator)
                    (ub2*) NULL,
                    (ub2*) NULL,
                    (ub4) NULL,
-                   (ub4) NULL,
+                   (ub4*) NULL,
                    (ub4) OCI_DEFAULT),
                hError);
 }
@@ -1081,7 +1081,7 @@ void OWStatement::BindClob(OCILobLocator** pphLocator)
                    (ub2*) NULL,
                    (ub2*) NULL,
                    (ub4) NULL,
-                   (ub4) NULL,
+                   (ub4*) NULL,
                    (ub4) OCI_DEFAULT),
                hError);
 }
@@ -1104,7 +1104,7 @@ void OWStatement::Bind(OCIArray** pphData, OCIType* type)
                    (ub2*) NULL,
                    (ub2*) NULL,
                    (ub4) NULL,
-                   (ub4) NULL,
+                   (ub4*) NULL,
                    (ub4) OCI_DEFAULT),
                hError);
 
@@ -1138,7 +1138,7 @@ void OWStatement::Bind(char* pszData, int nSize)
                    (ub2*) NULL,
                    (ub2*) NULL,
                    (ub4) NULL,
-                   (ub4) NULL,
+                   (ub4*) NULL,
                    (ub4) OCI_DEFAULT),
                hError);
 }
@@ -2177,7 +2177,7 @@ void OWStatement::BindArray(void* pData, long nSize)
                    (ub2*) NULL,
                    (ub2*) NULL,
                    (ub4) NULL,
-                   (ub4) NULL,
+                   (ub4*) NULL,
                    (ub4) OCI_DEFAULT), hError);
 
     CheckError(OCIBindArrayOfStruct(

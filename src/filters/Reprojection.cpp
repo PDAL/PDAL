@@ -40,6 +40,7 @@
 
 
 #ifdef PDAL_HAVE_GDAL
+#pragma GCC diagnostic ignored "-Wfloat-equal"
 #include <gdal.h>
 #include <ogr_spatialref.h>
 #include <pdal/GDALUtils.hpp>

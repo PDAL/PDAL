@@ -10,6 +10,9 @@
 #ifndef BOOST_PROPERTY_TREE_DETAIL_JSON_PARSER_WRITE_HPP_INCLUDED
 #define BOOST_PROPERTY_TREE_DETAIL_JSON_PARSER_WRITE_HPP_INCLUDED
 
+#pragma GCC diagnostic ignored "-Wfloat-equal"
+#pragma GCC diagnostic ignored "-Wtautological-constant-out-of-range-compare"
+
 #include <boost/property_tree/ptree.hpp>
 #include <boost/next_prior.hpp>
 #include <boost/type_traits/make_unsigned.hpp>

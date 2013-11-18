@@ -43,6 +43,8 @@
 #include <pdal/XMLSchema.hpp>
 
 #include <boost/property_tree/xml_parser.hpp>
+
+#pragma GCC diagnostic ignored "-Wtautological-constant-out-of-range-compare"
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/tokenizer.hpp>
 
