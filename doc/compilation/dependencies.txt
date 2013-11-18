@@ -164,7 +164,7 @@ It is used by :ref:`drivers.p2g.writer` to output point cloud interpolation.
 Hexer
 ------------------------------------------------------------------------------
 
-`Hexer`_ is a library with a simle `CMake`-based build system that 
+`Hexer`_ is a library with a simple `CMake`-based build system that 
 provides simple hexagon gridding of large point sets for density surface 
 generation and boundary approximation. It can be obtained via github.com at 
 https://github.com/hobu/hexer It is used by :ref:`filters.hexbin` to output 
@@ -183,6 +183,17 @@ of the mainline tree for two reasons:
 It is expected that the fork will go away once these items are incorporated into 
 the main source tree.
 
+
+LASzip
+------------------------------------------------------------------------------
+
+`LASzip`_ is a library with a simple `CMake`-based build system that 
+provides periodic compression of `ASPRS LAS`_ data. It is used by the 
+:ref:`drivers.las.writer` and :ref:`drivers.las.reader` to provide 
+compressed LAS support.
+
+.. _`ASPRS LAS`: http://www.asprs.org/Committee-General/LASer-LAS-File-Format-Exchange-Activities.html
+.. _`LASzip`: http://laszip.org
 .. _`NITF`: http://en.wikipedia.org/wiki/National_Imagery_Transmission_Format
 .. _`Nitro`: http://nitro-nitf.sourceforge.net/wikka.php?wakka=HomePage
 
