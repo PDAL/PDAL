@@ -17,7 +17,9 @@
 
 // Boost.Test
 #pragma GCC diagnostic ignored "-Wfloat-equal"
+#ifdef __clang__
 #pragma GCC diagnostic ignored "-Wunneeded-internal-declaration"
+#endif
 #pragma GCC diagnostic ignored "-Wsign-compare"
 
 #include <boost/test/test_tools.hpp>
