@@ -497,6 +497,7 @@ void Stats::readBufferBeginImpl(PointBuffer& buffer)
         }
         else
         {
+            bool doSample = options.getValueOrDefault<bool>("do_sample", true);
             schema::index_by_index const& dims = schema.getDimensions().get<schema::index>();
             for (schema::index_by_index::const_iterator iter = dims.begin(); iter != dims.end(); ++iter)
             {
@@ -510,7 +511,7 @@ void Stats::readBufferBeginImpl(PointBuffer& buffer)
                     getStage().log()->get(logDEBUG2) << "Cumulating exact stats for dimension " << d->getName() << std::endl;
                     doExact = true;
                 }
-                stats::SummaryPtr c = boost::shared_ptr<stats::Summary>(new stats::Summary(bin_count, sample_size, stats_cache_size, seed, doExact));
+                stats::SummaryPtr c = boost::shared_ptr<stats::Summary>(new stats::Summary(bin_count, sample_size, stats_cache_size, seed, doExact, doSample));
 
                 std::pair<DimensionPtr, stats::SummaryPtr> p(d,c);
                 m_dimensions.push_back(d);
