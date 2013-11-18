@@ -44,7 +44,10 @@
 
 #include <boost/property_tree/xml_parser.hpp>
 
+#ifdef __clang__
 #pragma GCC diagnostic ignored "-Wtautological-constant-out-of-range-compare"
+#endif
+
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/tokenizer.hpp>
 
