@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<xs:schema xmlns:pc="http://pointcloud.org/schemas/PC/1.1" xmlns:xs="http://www.w3.org/2001/XMLSchema" attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://pointcloud.org/schemas/PC/1.1" version="1.1">
+<xs:schema xmlns:pc="http://pointcloud.org/schemas/PC/" xmlns:xs="http://www.w3.org/2001/XMLSchema" attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://pointcloud.org/schemas/PC/" version="1.2">
 
     <xs:simpleType name="interpretationType">
         <xs:annotation>
@@ -51,7 +51,7 @@
                 <xs:annotation>
                     <xs:documentation>
                         The dimension's position in the block of point data
-                        (counting from 0)
+                        (counting from 1)
                     </xs:documentation>
                 </xs:annotation>                
             </xs:element>
@@ -153,11 +153,25 @@
 
         </xs:all>
     </xs:complexType>
+
+    <xs:simpleType name="orientationType">
+        <xs:annotation>
+      <xs:documentation>
+            Used to describe the storage orientation of the word. The orientation of a dimension might be 'point' oriented or 'dimension' oriented. A 'point' oriented dimension, the default orientation, has its dimensions composed as XYZXYZXYZ. A 'dimension' oriented one has data composed as XXXYYYZZZ.
+        </xs:documentation>
+    </xs:annotation>   
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="point"/>
+            <xs:enumeration value="dimension"/>
+            <xs:enumeration value="unknown"/>
+        </xs:restriction>
+    </xs:simpleType>
     
     <xs:element name="PointCloudSchema">
         <xs:complexType>
             <xs:sequence>
                 <xs:element maxOccurs="unbounded" minOccurs="1" name="dimension" type="pc:dimensionType"/>
+                <xs:element name="orientation" minOccurs="0" maxOccurs="1" type="pc:orientationType"/>
                 <xs:element name="metadata" minOccurs="0" maxOccurs="1" type="xs:anyType"/>
             </xs:sequence>
         </xs:complexType>
