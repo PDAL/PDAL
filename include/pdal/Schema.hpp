@@ -101,6 +101,13 @@ typedef boost::uint32_t size_type;
 
 typedef std::map<Dimension const*, Dimension const*> DimensionMap;
 
+enum Orientation
+{
+    POINT_INTERLEAVED = 1,
+    DIMENSION_INTERLEAVED = 2,
+    UNKNOWN_INTERLEAVED = 256
+};    
+
 }
 
 /// A pdal::Schema is a composition of pdal::Dimension instances that form
@@ -216,6 +223,11 @@ public:
         return m_index.get<schema::name>().size();
     }
 
+    inline schema::Orientation getOrientation() const
+    {
+        return m_orientation;
+    }
+    
 /// @name Summary and serialization
     /// @return  a boost::property_tree representing the Schema
     /*!
@@ -256,7 +268,7 @@ public:
 private:
 
     schema::size_type m_byteSize;
-
+    schema::Orientation m_orientation;
     schema::Map m_index;
 
 };
