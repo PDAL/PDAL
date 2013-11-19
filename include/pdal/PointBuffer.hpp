@@ -60,13 +60,6 @@ namespace pdal
         typedef boost::interprocess::allocator<boost::uint8_t, boost::interprocess::managed_shared_memory::segment_manager>     ShmemAllocator; 
         typedef boost::container::vector<boost::uint8_t, ShmemAllocator> PointBufferVector;
 
-        enum Orientation
-        {
-            POINT_INTERLEAVED = 1,
-            DIMENSION_INTERLEAVED = 2,
-            UNKNOWN_INTERLEAVED = 256
-        };    
-
     } // pointbuffer
 
     
