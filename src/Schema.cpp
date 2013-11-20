@@ -577,7 +577,7 @@ Schema Schema::pack() const
 
     boost::uint32_t position(0);
 
-    pdal::Schema clean_schema;
+    pdal::Schema output;
     schema::index_by_index::size_type i(0);
     for (i = 0; i < idx.size(); ++i)
     {
@@ -590,11 +590,11 @@ Schema Schema::pack() const
             // Wipe off parent/child relationships if we're ignoring
             // same-named dimensions
             d.setParent(boost::uuids::nil_uuid());
-            clean_schema.appendDimension(d);
+            output.appendDimension(d);
             position++;
         }
     }
-    return clean_schema;
+    return output;
 }
 
 std::ostream& operator<<(std::ostream& os, pdal::Schema const& schema)
