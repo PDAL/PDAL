@@ -228,6 +228,9 @@ public:
         return m_orientation;
     }
     
+    /// @return a new schema with all ignored fields removed.
+    Schema pack() const;
+    
 /// @name Summary and serialization
     /// @return  a boost::property_tree representing the Schema
     /*!
@@ -268,8 +271,8 @@ public:
 private:
 
     schema::size_type m_byteSize;
-    schema::Orientation m_orientation;
     schema::Map m_index;
+    schema::Orientation m_orientation;
 
 };
 

@@ -570,6 +570,32 @@ void Schema::dump() const
     std::cout << *this;
 }
 
+Schema Schema::pack() const
+{
+
+    schema::index_by_index const& idx = getDimensions().get<schema::index>();
+
+    boost::uint32_t position(0);
+
+    pdal::Schema clean_schema;
+    schema::index_by_index::size_type i(0);
+    for (i = 0; i < idx.size(); ++i)
+    {
+        if (! idx[i].isIgnored())
+        {
+
+            Dimension d(idx[i]);
+            d.setPosition(position);
+
+            // Wipe off parent/child relationships if we're ignoring
+            // same-named dimensions
+            d.setParent(boost::uuids::nil_uuid());
+            clean_schema.appendDimension(d);
+            position++;
+        }
+    }
+    return clean_schema;
+}
 
 std::ostream& operator<<(std::ostream& os, pdal::Schema const& schema)
 {
