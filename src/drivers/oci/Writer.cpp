@@ -841,28 +841,9 @@ void Writer::CreatePCEntry(Schema const& buffer_schema)
     bool pack = getOptions().getValueOrDefault<bool>("pack_ignored_fields", true);
     if (pack)
     {
-        schema::index_by_index const& idx = buffer_schema.getDimensions().get<schema::index>();
         log()->get(logDEBUG3) << "Packing ignored dimension from PointBuffer " << std::endl;
-
-        boost::uint32_t position(0);
-
-        pdal::Schema clean_schema;
-        schema::index_by_index::size_type i(0);
-        for (i = 0; i < idx.size(); ++i)
-        {
-            if (! idx[i].isIgnored())
-            {
-
-                Dimension d(idx[i]);
-                d.setPosition(position);
-
-                // Wipe off parent/child relationships if we're ignoring
-                // same-named dimensions
-                d.setParent(boost::uuids::nil_uuid());
-                clean_schema.appendDimension(d);
-                position++;
-            }
-        }
+        
+        pdal::Schema clean_schema = buffer_schema.pack();
         schema_data = pdal::Schema::to_xml(clean_schema);
 
     }
