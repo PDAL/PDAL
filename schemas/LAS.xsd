@@ -171,8 +171,8 @@
         <xs:complexType>
             <xs:sequence>
                 <xs:element maxOccurs="unbounded" minOccurs="1" name="dimension" type="pc:dimensionType"/>
-                <xs:element name="orientation" minOccurs="0" maxOccurs="1" type="pc:orientationType"/>
                 <xs:element name="metadata" minOccurs="0" maxOccurs="1" type="xs:anyType"/>
+                <xs:element name="orientation" minOccurs="0" maxOccurs="1" type="pc:orientationType"/>
             </xs:sequence>
         </xs:complexType>
     </xs:element>
