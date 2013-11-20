@@ -171,6 +171,38 @@ void PointBuffer::getData(boost::uint8_t** data, boost::uint64_t* array_size) co
     memcpy(*data, &(m_data.front()), static_cast<size_t>(*array_size));
 }
 
+PointBuffer PointBuffer::pack() const
+{
+
+    // Creates a new buffer that has the ignored dimensions removed from
+    // it.
+
+    schema::index_by_index const& idx = getSchema().getDimensions().get<schema::index>();
+
+    pdal::PointBuffer output(getSchema().pack(), getNumPoints());
+
+    boost::uint8_t* src = getData(0);
+    
+    boost::uint8_t* current_position = output.getData(0);
+
+    for (boost::uint32_t i = 0; i < getNumPoints(); ++i)
+    {
+        boost::uint8_t* data = getData(i);
+        for (boost::uint32_t d = 0; d < idx.size(); ++d)
+        {
+            if (! idx[d].isIgnored())
+            {
+                memcpy(current_position, data, idx[d].getByteSize());
+                current_position = current_position+idx[d].getByteSize();
+            }
+            data = data + idx[d].getByteSize();
+
+        }
+    }
+    
+    return output;
+    
+}
 
 pdal::Bounds<double> PointBuffer::calculateBounds(bool is3d) const
 {

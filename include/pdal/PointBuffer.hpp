@@ -316,6 +316,9 @@ public:
     /// with the given point size and force a new reallocation of the data buffer. 
     void resize(boost::uint32_t const& capacity, bool bExact=false);
     
+    /// @return a new PointBuffer with all ignored dimensions removed
+    PointBuffer pack() const;
+    
     /** @name Serialization
     */
     /*! returns a boost::property_tree containing the point records, which is
