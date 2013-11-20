@@ -765,7 +765,14 @@ void Writer::write(TextWriterPtr writer)
         xmlTextWriterWriteRawLen(w, BAD_CAST xml.c_str(), xml.size());
         xmlTextWriterEndElement(w);
     }
-
+    
+    std::ostringstream orientation;
+    if (m_schema.getOrientation() == schema::POINT_INTERLEAVED)
+        orientation << "point";
+    if (m_schema.getOrientation() == schema::DIMENSION_INTERLEAVED)
+        orientation << "dimension";
+    xmlTextWriterWriteElementNS(w, BAD_CAST "pc", BAD_CAST "orientation", NULL, BAD_CAST orientation.str().c_str());
+    
 
     xmlTextWriterEndElement(w);
     xmlTextWriterEndDocument(w);
