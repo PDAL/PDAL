@@ -594,6 +594,7 @@ Schema Schema::pack() const
             position++;
         }
     }
+    output.setOrientation(getOrientation());
     return output;
 }
 
