@@ -227,6 +227,11 @@ public:
     {
         return m_orientation;
     }
+
+    inline void setOrientation(schema::Orientation v)
+    {
+        m_orientation = v;
+    }
     
     /// @return a new schema with all ignored fields removed.
     Schema pack() const;
