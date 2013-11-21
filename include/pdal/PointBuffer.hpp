@@ -268,7 +268,22 @@ public:
     /// @param pointIndex position to start accessing
     inline boost::uint8_t* getData(boost::uint32_t pointIndex) const
     {
-        return const_cast<boost::uint8_t*>(&(m_data.front())) + m_byteSize * pointIndex;
+#if DEBUG
+#endif
+        pointbuffer::PointBufferByteSize position(0);
+        if (m_orientation == schema::POINT_INTERLEAVED)
+        {
+            position = static_cast<pointbuffer::PointBufferByteSize>(m_byteSize) * static_cast<pointbuffer::PointBufferByteSize>(pointIndex);
+            
+        }
+        else if (m_orientation == schema::DIMENSION_INTERLEAVED)
+        {
+            pointbuffer::PointBufferByteSize offset(0);
+            offset = m_schema.getDimension(pointIndex).getByteOffset();
+            position = static_cast<pointbuffer::PointBufferByteSize>(m_numPoints) * offset;
+        }
+        return const_cast<boost::uint8_t*>(&(m_data.front())) + position;
+
     }
 
     /// copies the raw data into your own byte array and sets the size
@@ -388,6 +403,10 @@ protected:
     // We cache m_schema.getByteSize() here because it would end up
     // being dereferenced for every point read otherwise.
     schema::size_type m_byteSize;
+    
+    // We cache m_schema.getOrientation() here because it would end 
+    // up being dereferenced for every point read
+    schema::Orientation m_orientation;
 
     Metadata m_metadata;
     boost::interprocess::managed_shared_memory *m_segment;
@@ -404,12 +423,30 @@ inline void PointBuffer::setField(pdal::Dimension const& dim, boost::uint32_t po
 {
     if (dim.getPosition() == -1)
     {
-        // this is a little harsh, but we'll keep it for now as we shake things out
         throw buffer_error("This dimension has no identified position in a schema. Use the setRawField method to access an arbitrary byte position.");
     }
     
-    pointbuffer::PointBufferByteSize point_start_byte_position = static_cast<pointbuffer::PointBufferByteSize>(pointIndex) * static_cast<pointbuffer::PointBufferByteSize>(m_byteSize); 
-    pointbuffer::PointBufferByteSize offset = point_start_byte_position + static_cast<pointbuffer::PointBufferByteSize>(dim.getByteOffset());
+    pointbuffer::PointBufferByteSize point_start_byte_position(0); 
+    pointbuffer::PointBufferByteSize offset(0);
+    
+    if (m_orientation == schema::POINT_INTERLEAVED)
+    {
+        point_start_byte_position = static_cast<pointbuffer::PointBufferByteSize>(pointIndex) * \
+                                    static_cast<pointbuffer::PointBufferByteSize>(m_byteSize); 
+        offset = point_start_byte_position + \
+                 static_cast<pointbuffer::PointBufferByteSize>(dim.getByteOffset());
+    } else if (m_orientation == schema::DIMENSION_INTERLEAVED)
+    {
+        point_start_byte_position = static_cast<pointbuffer::PointBufferByteSize>(m_numPoints) * \
+                                    static_cast<pointbuffer::PointBufferByteSize>(dim.getPosition()+1) * \
+                                    static_cast<pointbuffer::PointBufferByteSize>(dim.getByteSize());
+        offset = point_start_byte_position + \
+                 static_cast<pointbuffer::PointBufferByteSize>(dim.getByteSize()) * \
+                 static_cast<pointbuffer::PointBufferByteSize>(pointIndex);
+    } else
+    {
+        throw buffer_error("unknown pdal::Schema::m_orientation provided!");
+    }
 
 #ifdef DEBUG
     assert(offset + sizeof(T) <= getBufferByteSize());
@@ -441,8 +478,30 @@ inline  T const& PointBuffer::getField(pdal::Dimension const& dim, boost::uint32
         throw buffer_error("This dimension has no identified position in a schema.");
     }
 
-    pointbuffer::PointBufferByteSize point_start_byte_position = static_cast<pointbuffer::PointBufferByteSize>(pointIndex) * static_cast<pointbuffer::PointBufferByteSize>(m_byteSize); 
-    boost::uint64_t offset = point_start_byte_position + static_cast<pointbuffer::PointBufferByteSize>(dim.getByteOffset());
+    // pointbuffer::PointBufferByteSize point_start_byte_position = static_cast<pointbuffer::PointBufferByteSize>(pointIndex) * static_cast<pointbuffer::PointBufferByteSize>(m_byteSize); 
+    // boost::uint64_t offset = point_start_byte_position + static_cast<pointbuffer::PointBufferByteSize>(dim.getByteOffset());
+
+    pointbuffer::PointBufferByteSize point_start_byte_position(0); 
+    pointbuffer::PointBufferByteSize offset(0);
+    
+    if (m_orientation == schema::POINT_INTERLEAVED)
+    {
+        point_start_byte_position = static_cast<pointbuffer::PointBufferByteSize>(pointIndex) * \
+                                    static_cast<pointbuffer::PointBufferByteSize>(m_byteSize); 
+        offset = point_start_byte_position + \
+                 static_cast<pointbuffer::PointBufferByteSize>(dim.getByteOffset());
+    } else if (m_orientation == schema::DIMENSION_INTERLEAVED)
+    {
+        point_start_byte_position = static_cast<pointbuffer::PointBufferByteSize>(m_numPoints) * \
+                                    static_cast<pointbuffer::PointBufferByteSize>(dim.getPosition()+1) * \
+                                    static_cast<pointbuffer::PointBufferByteSize>(dim.getByteSize());
+        offset = point_start_byte_position + \
+                 static_cast<pointbuffer::PointBufferByteSize>(dim.getByteSize()) * \
+                 static_cast<pointbuffer::PointBufferByteSize>(pointIndex);
+    } else
+    {
+        throw buffer_error("unknown pdal::Schema::m_orientation provided!");
+    }
 
 #ifdef DEBUG
     // This test ends up being somewhat expensive when run for every field 

@@ -487,4 +487,53 @@ BOOST_AUTO_TEST_CASE(test_packing)
     return;
 
 }
+
+
+BOOST_AUTO_TEST_CASE(test_orientation)
+{
+
+
+    Dimension cls("Classification", dimension::UnsignedInteger, 1);
+    Dimension x("X", dimension::SignedInteger, 4);
+    Dimension y("Y", dimension::Float, 8);
+    
+    Schema schema;
+    schema.appendDimension(x);
+    schema.appendDimension(y);
+    schema.appendDimension(cls);
+    schema.setOrientation(schema::DIMENSION_INTERLEAVED);
+    
+    BOOST_CHECK_EQUAL(schema.getOrientation(), schema::DIMENSION_INTERLEAVED);
+    
+    PointBuffer buffer(schema, 10);
+    Dimension const& dimX = buffer.getSchema().getDimension("X");
+    Dimension const& dimY = buffer.getSchema().getDimension("Y");
+    Dimension const& dimCls = buffer.getSchema().getDimension("Classification");
+    
+    buffer.setNumPoints(10);
+    for(int i = 0; i < buffer.getNumPoints(); ++i)
+    {
+        buffer.setField<boost::int32_t>(dimX, i, i);
+        double yd = i + 100;
+        buffer.setField<double>(dimY, i, yd);
+        buffer.setField<boost::uint8_t>(dimCls, i, 7);
+    }
+    BOOST_CHECK_EQUAL(buffer.getNumPoints(), 10);
+
+
+    for(int i = 0; i < buffer.getNumPoints(); ++i)
+    {
+        boost::int32_t x = buffer.getField<boost::int32_t>(dimX, i);
+        double y = buffer.getField<double>(dimY, i);
+        boost::uint8_t c = buffer.getField<boost::uint8_t>(dimCls, i);
+        BOOST_CHECK_EQUAL(x, i);
+        BOOST_CHECK_CLOSE(y, i + 100, 0.000001);
+        BOOST_CHECK_EQUAL(c, 7u);
+    }
+    
+ 
+
+    return;
+
+}
 BOOST_AUTO_TEST_SUITE_END()

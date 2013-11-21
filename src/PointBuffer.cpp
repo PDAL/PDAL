@@ -50,6 +50,7 @@ PointBuffer::PointBuffer(const Schema& schema, boost::uint32_t capacity)
     , m_capacity(capacity)
     , m_bounds(Bounds<double>::getDefaultSpatialExtent())
     , m_byteSize(schema.getByteSize())
+    , m_orientation(schema.getOrientation())
     , m_metadata("pointbuffer")
     , m_segment(0)
 
@@ -75,6 +76,7 @@ PointBuffer::PointBuffer(PointBuffer const& other)
     , m_capacity(other.m_capacity)
     , m_bounds(other.m_bounds)
     , m_byteSize(other.m_byteSize)
+    , m_orientation(other.m_orientation)
     , m_metadata(other.m_metadata)
 {
 
@@ -96,6 +98,7 @@ PointBuffer& PointBuffer::operator=(PointBuffer const& rhs)
         m_capacity = rhs.getCapacity();
         m_bounds = rhs.getSpatialBounds();
         m_byteSize = rhs.m_byteSize;
+        m_orientation = rhs.m_orientation;
         m_data = rhs.m_data;
         m_metadata = rhs.m_metadata;
     }
@@ -109,6 +112,7 @@ void PointBuffer::reset(Schema const& new_schema)
 
     m_schema = new_schema;
     m_byteSize = new_size;
+    m_orientation = new_schema.getOrientation();
 
     if (m_byteSize != old_size)
     {
@@ -151,7 +155,7 @@ void PointBuffer::setSpatialBounds(const Bounds<double>& bounds)
 
 void PointBuffer::setData(boost::uint8_t* data, boost::uint32_t pointIndex)
 {
-    boost::uint64_t position = static_cast<boost::uint64_t>(m_byteSize) * static_cast<boost::uint64_t>(pointIndex);
+    boost::uint64_t position = static_cast<pointbuffer::PointBufferByteSize>(m_byteSize) * static_cast<pointbuffer::PointBufferByteSize>(pointIndex);
     memcpy(&(m_data.front()) + position, data, m_byteSize);
 }
 
@@ -159,7 +163,7 @@ void PointBuffer::setDataStride(boost::uint8_t* data,
                                 boost::uint32_t pointIndex,
                                 boost::uint32_t byteCount)
 {
-    boost::uint64_t position = static_cast<boost::uint64_t>(m_byteSize) * static_cast<boost::uint64_t>(pointIndex);
+    boost::uint64_t position = static_cast<pointbuffer::PointBufferByteSize>(m_byteSize) * static_cast<pointbuffer::PointBufferByteSize>(pointIndex);
     memcpy(&(m_data.front()) + position, data, byteCount);
 }
 
@@ -184,20 +188,39 @@ PointBuffer PointBuffer::pack() const
     boost::uint8_t* src = getData(0);
     
     boost::uint8_t* current_position = output.getData(0);
-
-    for (boost::uint32_t i = 0; i < getNumPoints(); ++i)
+    
+    schema::Orientation orientation = getSchema().getOrientation();
+    if (orientation == schema::POINT_INTERLEAVED)
     {
-        boost::uint8_t* data = getData(i);
-        for (boost::uint32_t d = 0; d < idx.size(); ++d)
+        for (boost::uint32_t i = 0; i < getNumPoints(); ++i)
         {
-            if (! idx[d].isIgnored())
+            boost::uint8_t* data = getData(i);
+            for (boost::uint32_t d = 0; d < idx.size(); ++d)
             {
-                memcpy(current_position, data, idx[d].getByteSize());
-                current_position = current_position+idx[d].getByteSize();
+                if (! idx[d].isIgnored())
+                {
+                    memcpy(current_position, data, idx[d].getByteSize());
+                    current_position = current_position+idx[d].getByteSize();
+                }
+                data = data + idx[d].getByteSize();
             }
-            data = data + idx[d].getByteSize();
-
         }
+    }
+    else if (orientation == schema::DIMENSION_INTERLEAVED)
+    {
+        for (boost::uint32_t i = 0; i < getSchema().size(); ++i)
+        {
+            // For each dimension, copy the data if it isn't ignored
+            boost::uint8_t* data = getData(i);
+            boost::uint64_t dimension_length = static_cast<boost::uint64_t>(idx[i].getByteSize()) * static_cast<boost::uint64_t>(getNumPoints());
+            if (! idx[i].isIgnored())
+            {
+
+                memcpy(current_position, data, dimension_length);
+                current_position = current_position+dimension_length;
+            }
+            data = data + dimension_length;
+        }        
     }
     
     return output;
