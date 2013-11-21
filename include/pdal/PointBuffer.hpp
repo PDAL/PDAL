@@ -273,7 +273,8 @@ public:
         pointbuffer::PointBufferByteSize position(0);
         if (m_orientation == schema::POINT_INTERLEAVED)
         {
-            position = static_cast<pointbuffer::PointBufferByteSize>(m_byteSize) * static_cast<pointbuffer::PointBufferByteSize>(pointIndex);
+            position =  static_cast<pointbuffer::PointBufferByteSize>(m_byteSize) * \
+                        static_cast<pointbuffer::PointBufferByteSize>(pointIndex);
             
         }
         else if (m_orientation == schema::DIMENSION_INTERLEAVED)
