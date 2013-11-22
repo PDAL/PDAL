@@ -213,7 +213,7 @@ PointBuffer PointBuffer::pack() const
         {
             // For each dimension, copy the data if it isn't ignored
             boost::uint8_t* data = getData(i);
-            boost::uint64_t dimension_length = static_cast<boost::uint64_t>(idx[i].getByteSize()) * static_cast<boost::uint64_t>(getNumPoints());
+            boost::uint64_t dimension_length = static_cast<boost::uint64_t>(idx[i].getByteSize()) * static_cast<boost::uint64_t>(getCapacity());
             if (! idx[i].isIgnored())
             {
 
@@ -602,18 +602,15 @@ void PointBuffer::copyLikeDimensions(PointBuffer const& source,
         {
             pointbuffer::PointBufferByteSize source_point_start_byte_position(0); 
             pointbuffer::PointBufferByteSize source_offset(0);
-            source_point_start_byte_position = static_cast<pointbuffer::PointBufferByteSize>(source.getNumPoints()) * \
-                                        static_cast<pointbuffer::PointBufferByteSize>(source_dim.getPosition()+1) * \
-                                        static_cast<pointbuffer::PointBufferByteSize>(source_dim.getByteSize());
-            source_offset = source_point_start_byte_position + \
+            source_point_start_byte_position = static_cast<pointbuffer::PointBufferByteSize>(source.getCapacity()) * \
+                                               static_cast<pointbuffer::PointBufferByteSize>(source_dim.getByteOffset());            source_offset = source_point_start_byte_position + \
                      static_cast<pointbuffer::PointBufferByteSize>(source_dim.getByteSize()) * \
                      static_cast<pointbuffer::PointBufferByteSize>(source_starting_position);
 
             pointbuffer::PointBufferByteSize destination_point_start_byte_position(0); 
             pointbuffer::PointBufferByteSize destination_offset(0);
-            destination_point_start_byte_position = static_cast<pointbuffer::PointBufferByteSize>(destination.getNumPoints()) * \
-                                        static_cast<pointbuffer::PointBufferByteSize>(dest_dim.getPosition()+1) * \
-                                        static_cast<pointbuffer::PointBufferByteSize>(dest_dim.getByteSize());
+            destination_point_start_byte_position = static_cast<pointbuffer::PointBufferByteSize>(destination.getCapacity()) * \
+                                        static_cast<pointbuffer::PointBufferByteSize>(dest_dim.getByteOffset());
             destination_offset = destination_point_start_byte_position + \
                      static_cast<pointbuffer::PointBufferByteSize>(dest_dim.getByteSize()) * \
                      static_cast<pointbuffer::PointBufferByteSize>(destination_starting_position);

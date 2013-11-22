@@ -439,9 +439,8 @@ inline void PointBuffer::setField(pdal::Dimension const& dim, boost::uint32_t po
     } 
     else if (m_orientation == schema::DIMENSION_INTERLEAVED)
     {
-        point_start_byte_position = static_cast<pointbuffer::PointBufferByteSize>(m_numPoints) * \
-                                    static_cast<pointbuffer::PointBufferByteSize>(dim.getPosition()+1) * \
-                                    static_cast<pointbuffer::PointBufferByteSize>(dim.getByteSize());
+        point_start_byte_position = static_cast<pointbuffer::PointBufferByteSize>(m_capacity) * \
+                                    static_cast<pointbuffer::PointBufferByteSize>(dim.getByteOffset());
         offset = point_start_byte_position + \
                  static_cast<pointbuffer::PointBufferByteSize>(dim.getByteSize()) * \
                  static_cast<pointbuffer::PointBufferByteSize>(pointIndex);
@@ -494,9 +493,8 @@ inline  T const& PointBuffer::getField(pdal::Dimension const& dim, boost::uint32
                  static_cast<pointbuffer::PointBufferByteSize>(dim.getByteOffset());
     } else if (m_orientation == schema::DIMENSION_INTERLEAVED)
     {
-        point_start_byte_position = static_cast<pointbuffer::PointBufferByteSize>(m_numPoints) * \
-                                    static_cast<pointbuffer::PointBufferByteSize>(dim.getPosition()+1) * \
-                                    static_cast<pointbuffer::PointBufferByteSize>(dim.getByteSize());
+        point_start_byte_position = static_cast<pointbuffer::PointBufferByteSize>(m_capacity) * \
+                                    static_cast<pointbuffer::PointBufferByteSize>(dim.getByteOffset());
         offset = point_start_byte_position + \
                  static_cast<pointbuffer::PointBufferByteSize>(dim.getByteSize()) * \
                  static_cast<pointbuffer::PointBufferByteSize>(pointIndex);
