@@ -554,8 +554,9 @@ BOOST_AUTO_TEST_CASE(test_orientation_packing)
     for(int i = 0; i < buffer.getNumPoints(); ++i)
     {
         buffer.setField<boost::int32_t>(dimX, i, i);
-        buffer.setField<boost::int32_t>(dimY, i, i + 100);
-        buffer.setField<boost::int32_t>(dimCls, i, 7);
+        double yd = i + 100;
+        buffer.setField<double>(dimY, i, yd);
+        buffer.setField<boost::uint8_t>(dimCls, i, 7);
     }
     BOOST_CHECK_EQUAL(buffer.getNumPoints(), 10);
     
@@ -572,7 +573,7 @@ BOOST_AUTO_TEST_CASE(test_orientation_packing)
     Dimension const& kls = packed.getSchema().getDimension("Classification");    
     Dimension const& x2 = packed.getSchema().getDimension("X");    
     BOOST_CHECK_EQUAL(packed.getField<boost::uint8_t>(kls,0),7);
-    BOOST_CHECK_EQUAL(packed.getField<boost::uint8_t>(x2,8),8);
+    BOOST_CHECK_EQUAL(packed.getField<boost::int32_t>(x2,8),8);
 
     delete dims;
 

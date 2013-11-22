@@ -436,7 +436,8 @@ inline void PointBuffer::setField(pdal::Dimension const& dim, boost::uint32_t po
                                     static_cast<pointbuffer::PointBufferByteSize>(m_byteSize); 
         offset = point_start_byte_position + \
                  static_cast<pointbuffer::PointBufferByteSize>(dim.getByteOffset());
-    } else if (m_orientation == schema::DIMENSION_INTERLEAVED)
+    } 
+    else if (m_orientation == schema::DIMENSION_INTERLEAVED)
     {
         point_start_byte_position = static_cast<pointbuffer::PointBufferByteSize>(m_numPoints) * \
                                     static_cast<pointbuffer::PointBufferByteSize>(dim.getPosition()+1) * \
