@@ -94,7 +94,8 @@ private:
     std::string m_QueryPoint;
     double m_QueryDistance;
     boost::uint64_t m_numPointsToWrite;
-    std::string m_pipelineFile;    
+    std::string m_pipelineFile;
+    bool m_showSample;
 };
 
 }} // pdal::kernel
