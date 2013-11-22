@@ -563,15 +563,14 @@ BOOST_AUTO_TEST_CASE(test_orientation_packing)
     PointBuffer packed = buffer.pack();
     pdal::schema::DimensionMap* dims = schema.mapDimensions(packed.getSchema()); 
     PointBuffer::copyLikeDimensions(buffer, packed, *dims, 0, 0, buffer.getNumPoints());
-    
-    packed.setNumPoints(10);
-    
+        
     BOOST_CHECK_EQUAL(packed.getSchema().getByteSize(), 5);
     BOOST_CHECK_EQUAL(packed.getNumPoints(), 10);
     BOOST_CHECK_EQUAL(packed.getBufferByteLength(), 10*5);
     
     Dimension const& kls = packed.getSchema().getDimension("Classification");    
     Dimension const& x2 = packed.getSchema().getDimension("X");    
+
     BOOST_CHECK_EQUAL(packed.getField<boost::uint8_t>(kls,0),7);
     BOOST_CHECK_EQUAL(packed.getField<boost::int32_t>(x2,8),8);
 
