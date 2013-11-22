@@ -365,9 +365,12 @@ void IteratorBase::scaleData(PointBuffer& buffer, boost::uint32_t numRead)
         {
             boost::optional<pdal::Dimension const&> f = d->first;
             boost::optional<pdal::Dimension const&> t = d->second;
-            Dimension const& from_dimension = *f;
-            Dimension const& to_dimension = *t;
-            writeScaledData(buffer, from_dimension, to_dimension, pointIndex);
+            if (f && t)
+            {
+                Dimension const& from_dimension = *f;
+                Dimension const& to_dimension = *t;
+                writeScaledData(buffer, from_dimension, to_dimension, pointIndex);
+            }
         }
     }
 }

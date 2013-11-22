@@ -146,7 +146,7 @@ void Writer::writeEnd(boost::uint64_t actualNumPointsWritten)
         header.getMessageCopyNum().set("00000");
         header.getMessageNumCopies().set("00000");
         header.getEncrypted().set("0");
-        header.getBackgroundColor().setRawData((char*)"000", 3);
+        header.getBackgroundColor().setRawData(const_cast<char*>("000"), 3);
         header.getOriginatorName().set(getOptions().getValueOrDefault<std::string>("ONAME",""));
         header.getOriginatorPhone().set(getOptions().getValueOrDefault<std::string>("OPHONE",""));
 
@@ -222,7 +222,7 @@ void Writer::writeEnd(boost::uint64_t actualNumPointsWritten)
         const char* buffer = "0000000000000000000000000000000000000000000000000000000000000000";
 
         ::nitf::BandSource* band =
-            new ::nitf::MemorySource((char*) buffer,
+            new ::nitf::MemorySource(const_cast<char*>(buffer),
                                      strlen(buffer) /* memory size */,
                                      0 /* starting offset */,
                                      1 /* bytes per pixel */,
