@@ -745,7 +745,7 @@ void Writer::write(TextWriterPtr writer)
     xmlTextWriterSetIndent(w, 1);
     xmlTextWriterStartDocument(w, NULL, "utf-8", NULL);
     xmlTextWriterStartElementNS(w, BAD_CAST "pc", BAD_CAST "PointCloudSchema", NULL);
-    xmlTextWriterWriteAttributeNS(w, BAD_CAST "xmlns", BAD_CAST "pc", NULL, BAD_CAST "http://pointcloud.org/schemas/PC/1.1");
+    xmlTextWriterWriteAttributeNS(w, BAD_CAST "xmlns", BAD_CAST "pc", NULL, BAD_CAST "http://pointcloud.org/schemas/PC/");
     xmlTextWriterWriteAttributeNS(w, BAD_CAST "xmlns", BAD_CAST "xsi", NULL, BAD_CAST "http://www.w3.org/2001/XMLSchema-instance");
 
     writeSchema(writer);
@@ -765,7 +765,14 @@ void Writer::write(TextWriterPtr writer)
         xmlTextWriterWriteRawLen(w, BAD_CAST xml.c_str(), xml.size());
         xmlTextWriterEndElement(w);
     }
-
+    
+    std::ostringstream orientation;
+    if (m_schema.getOrientation() == schema::POINT_INTERLEAVED)
+        orientation << "point";
+    if (m_schema.getOrientation() == schema::DIMENSION_INTERLEAVED)
+        orientation << "dimension";
+    xmlTextWriterWriteElementNS(w, BAD_CAST "pc", BAD_CAST "orientation", NULL, BAD_CAST orientation.str().c_str());
+    
 
     xmlTextWriterEndElement(w);
     xmlTextWriterEndDocument(w);
