@@ -77,7 +77,7 @@ Writer::Writer(Stage& prevStage, const Options& options)
     , m_schema_name("")
     , m_table_name("")
     , m_column_name("")
-    , m_patch_compression_type(COMPRESSION_NONE)
+    , m_patch_compression_type(schema::COMPRESSION_NONE)
     , m_patch_capacity(400)
     , m_srid(0)
     , m_pcid(0)
@@ -316,11 +316,11 @@ boost::uint32_t Writer::SetupSchema(Schema const& buffer_schema, boost::uint32_t
         }
 
         /* If the writer specifies a compression, we should set that */
-        if (m_patch_compression_type == COMPRESSION_DIMENSIONAL)
+        if (m_patch_compression_type == schema::COMPRESSION_DIMENSIONAL)
         {
             compression = "dimensional";
         }
-        else if (m_patch_compression_type == COMPRESSION_GHT)
+        else if (m_patch_compression_type == schema::COMPRESSION_GHT)
         {
             compression = "ght";
         }
@@ -554,8 +554,9 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     /* We are always getting uncompressed bytes off the block_data */
     /* so we always used compression type 0 (uncompressed) in writing our WKB */
     boost::int32_t pcid = m_pcid;
-    boost::uint32_t compression = COMPRESSION_NONE;
-
+    schema::CompressionType compression_v = schema::COMPRESSION_NONE;
+    boost::uint32_t compression = static_cast<boost::uint32_t>(compression_v);
+    
     std::stringstream oss;
     oss << "INSERT INTO " << m_table_name << " (pa) VALUES ('";
 

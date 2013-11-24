@@ -108,6 +108,17 @@ enum Orientation
     UNKNOWN_INTERLEAVED = 256
 };    
 
+enum CompressionType
+{
+    COMPRESSION_NONE = 0,
+    COMPRESSION_GHT = 1,
+    COMPRESSION_DIMENSIONAL = 2,
+    COMPRESSION_POINT = 4,
+    COMPRESSION_LASZIP = 8,
+    COMPRESSION_UNKNOWN = 256
+};
+
+
 }
 
 /// A pdal::Schema is a composition of pdal::Dimension instances that form

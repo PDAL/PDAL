@@ -101,7 +101,7 @@ private:
     std::string m_schema_name;
     std::string m_table_name;
     std::string m_column_name;
-    CompressionType m_patch_compression_type;
+    schema::CompressionType m_patch_compression_type;
     boost::uint32_t m_patch_capacity;
     boost::uint32_t m_srid;
     boost::uint32_t m_pcid;
