@@ -1701,31 +1701,6 @@ void OWStatement::AddElement(OCIArray* poData,
                              (OCIColl*) poData), hError);
 }
 
-unsigned long OWStatement::ReadBlob(OCILobLocator* phLocator,
-                                    void* pBuffer,
-                                    int nSize)
-{
-    ub4 nAmont      = (ub4) 0;
-
-    if (CheckError(OCILobRead(
-                       poConnection->hSvcCtx,
-                       hError,
-                       phLocator,
-                       (ub4*) &nAmont,
-                       (ub4) 1,
-                       (dvoid*) pBuffer,
-                       (ub4) nSize,
-                       (dvoid *) 0,
-                       (OCICallbackLobRead) 0,
-                       (ub2) 0,
-                       (ub1) SQLCS_IMPLICIT), hError))
-    {
-        return 0;
-    }
-
-    return nAmont;
-}
-
 bool OWStatement::ReadBlob(OCILobLocator* phLocator,
                            void* pBuffer,
                            int nSize,
@@ -1744,9 +1719,10 @@ bool OWStatement::ReadBlob(OCILobLocator* phLocator,
     //                    (OCICallbackLobRead) 0,
     //                    (ub2) 0,
     //                    (ub1) SQLCS_IMPLICIT);
-    oraub8 char_amtp(0);
-    oraub8 offset(1);
-    oraub8 amountRead8(0);
+    oraub8 char_amtp = 0;
+    oraub8 offset = 1;
+    oraub8 amountRead8 = static_cast<oraub8>(nSize);
+    oraub8 bufl = static_cast<oraub8>(nSize);
     sword status = OCILobRead2(
                        poConnection->hSvcCtx, //svchp
                        hError, //errhp
@@ -1755,12 +1731,12 @@ bool OWStatement::ReadBlob(OCILobLocator* phLocator,
                        &char_amtp, // char_amtp
                        offset, // offset
                        (dvoid*) pBuffer, //buffer ptr
-                       (oraub8) nSize, // bufl
+                       (oraub8) bufl, // bufl
                        (ub1) OCI_ONE_PIECE, // piece
-                       0, // ctx ptr
-                       (OCICallbackLobRead2) 0,
-                       (ub2) 0,
-                       (ub1) SQLCS_IMPLICIT);
+                       (void*) NULL, // ctx ptr
+                       (OCICallbackLobRead2) NULL, //cbfp
+                       (ub2) 0, // csid
+                       (ub1) SQLCS_IMPLICIT); //csfrm
 
     if (status == OCI_NEED_DATA)
     {

@@ -458,8 +458,6 @@ public:
     bool                EnableBuffering(OCILobLocator* phLocator);
     bool                DisableBuffering(OCILobLocator* phLocator);
 
-    unsigned long       ReadBlob( OCILobLocator* phLocator,
-                            void* pBuffer, int nSize );
     bool                ReadBlob( OCILobLocator* phLocator,
                             void* pBuffer, int nSize, unsigned int* nAmountRead );
     char*               ReadCLob( OCILobLocator* phLocator );
