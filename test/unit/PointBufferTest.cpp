@@ -457,7 +457,7 @@ BOOST_AUTO_TEST_CASE(test_packing)
     Dimension const& dimCls = buffer.getSchema().getDimension("Classification");
     
     buffer.setNumPoints(10);
-    for(int i = 0; i < buffer.getNumPoints(); ++i)
+    for(unsigned int i = 0; i < buffer.getNumPoints(); ++i)
     {
         buffer.setField<boost::int32_t>(dimX, i, i);
         buffer.setField<boost::int32_t>(dimY, i, i + 100);
@@ -508,7 +508,7 @@ BOOST_AUTO_TEST_CASE(test_orientation)
     Dimension const& dimCls = buffer.getSchema().getDimension("Classification");
     
     buffer.setNumPoints(10);
-    for(int i = 0; i < buffer.getNumPoints(); ++i)
+    for(unsigned int i = 0; i < buffer.getNumPoints(); ++i)
     {
         buffer.setField<boost::int32_t>(dimX, i, i);
         double yd = i + 100;
@@ -518,7 +518,7 @@ BOOST_AUTO_TEST_CASE(test_orientation)
     BOOST_CHECK_EQUAL(buffer.getNumPoints(), 10);
 
 
-    for(int i = 0; i < buffer.getNumPoints(); ++i)
+    for(unsigned int i = 0; i < buffer.getNumPoints(); ++i)
     {
         boost::int32_t x = buffer.getField<boost::int32_t>(dimX, i);
         double y = buffer.getField<double>(dimY, i);
@@ -551,7 +551,7 @@ BOOST_AUTO_TEST_CASE(test_orientation_packing)
     Dimension const& dimCls = buffer.getSchema().getDimension("Classification");
     
     buffer.setNumPoints(10);
-    for(int i = 0; i < buffer.getNumPoints(); ++i)
+    for(unsigned int i = 0; i < buffer.getNumPoints(); ++i)
     {
         buffer.setField<boost::int32_t>(dimX, i, i);
         double yd = i + 100;
