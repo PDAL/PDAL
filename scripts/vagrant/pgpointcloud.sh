@@ -13,8 +13,8 @@ echo "CREATE EXTENSION postgis;" | sudo -u vagrant psql -d points -U vagrant
 echo "CREATE EXTENSION pointcloud;" | sudo -u vagrant psql -d points -U vagrant
 echo "CREATE EXTENSION pointcloud_postgis;" | sudo -u vagrant psql -d points -U vagrant
 sudo wget http://liblas.org/samples/st-helens-small.las
-sudo https://raw.github.com/PDAL/PDAL/master/scripts/vagrant/loadpgpointcloud.xml
-sudo https://raw.github.com/PDAL/PDAL/master/scripts/vagrant/readpgpointcloud.xml
+sudo wget https://raw.github.com/PDAL/PDAL/master/scripts/vagrant/loadpgpointcloud.xml
+sudo wget https://raw.github.com/PDAL/PDAL/master/scripts/vagrant/readpgpointcloud.xml
 chmod 777 st-helens-small.las
 chmod 777 readpgpointcloud.xml
 chmod 777 loadpgpointcloud.xml
