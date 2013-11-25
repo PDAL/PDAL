@@ -20,7 +20,7 @@ cmake   -G "Unix Makefiles"  \
         -DWITH_LASZIP=ON \
         -DWITH_LIBXML2=ON \
         -DWITH_PYTHON=ON \
-        -DWITH_SOCI=ON \
+        -DWITH_SQLITE=ON \
         -DWITH_P2G=ON \
         -DWITH_HEXER=ON \
         -DWITH_NITRO=ON \
