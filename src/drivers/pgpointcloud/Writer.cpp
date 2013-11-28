@@ -250,7 +250,7 @@ void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
 boost::uint32_t Writer::SetupSchema(Schema const& buffer_schema, boost::uint32_t srid)
 {
     // We strip any ignored dimensions from the schema before creating the table
-    pdal::Schema output_schema(PackSchema(buffer_schema));
+    pdal::Schema output_schema = buffer_schema.pack();
 
     // If the user has specified a PCID they want to use,
     // does it exist in the database?
@@ -359,34 +359,6 @@ void Writer::DeleteTable(std::string const& schema_name,
     oss << table_name;
 
     pg_execute(m_session, oss.str());
-}
-
-Schema Writer::PackSchema(Schema const& schema) const
-{
-    schema::index_by_index const& idx = schema.getDimensions().get<schema::index>();
-    log()->get(logDEBUG3) << "Packing ignored dimension from PointBuffer " << std::endl;
-
-    boost::uint32_t position(0);
-
-    pdal::Schema clean_schema;
-    schema::index_by_index::size_type i(0);
-    for (i = 0; i < idx.size(); ++i)
-    {
-        if (! idx[i].isIgnored())
-        {
-
-            Dimension d(idx[i]);
-            d.setPosition(position);
-
-            // Wipe off parent/child relationships if we're ignoring
-            // same-named dimensions
-            d.setParent(boost::uuids::nil_uuid());
-            clean_schema.appendDimension(d);
-            position++;
-        }
-    }
-    std::string xml = pdal::Schema::to_xml(clean_schema);
-    return clean_schema;
 }
 
 bool Writer::CheckPointCloudExists()

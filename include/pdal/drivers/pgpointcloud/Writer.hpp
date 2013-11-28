@@ -74,7 +74,6 @@ private:
     bool CheckTableExists(std::string const& name);
     bool CheckPointCloudExists();
     bool CheckPostGISExists();
-    Schema PackSchema(Schema const& schema) const;
     boost::uint32_t SetupSchema(Schema const& buffer_schema, boost::uint32_t srid);
 
     void CreateTable(std::string const& schema_name, 
