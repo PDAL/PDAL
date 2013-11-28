@@ -62,7 +62,6 @@ public:
 
 protected:
     virtual void writeBegin(boost::uint64_t targetNumPointsToWrite);
-    virtual void writeBufferBegin(PointBuffer const&);
     virtual boost::uint32_t writeBuffer(const PointBuffer&);
     virtual void writeEnd(boost::uint64_t actualNumPointsWritten);
 

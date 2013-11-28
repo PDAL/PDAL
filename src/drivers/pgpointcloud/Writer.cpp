@@ -466,28 +466,6 @@ void Writer::CreateIndex(std::string const& schema_name,
 }
 
 
-//
-// Called by PDAL core before *each buffer* is written.
-// So it gets called a lot. The hack below does something
-// the first time it is called only. Hopefully we do
-// not need that hack anymore.
-//
-void Writer::writeBufferBegin(PointBuffer const& data)
-{
-    if (! m_sdo_pc_is_initialized)
-    {
-        // Currently Unused
-        // Do somethine only once, after PointBuffer is sent in
-        // like setting up tables, for example, in case the
-        // schema we get from the parent is not valid?
-        m_sdo_pc_is_initialized = true;
-    }
-
-    return;
-}
-
-
-
 boost::uint32_t Writer::writeBuffer(const PointBuffer& buffer)
 {
     boost::uint32_t numPoints = buffer.getNumPoints();
