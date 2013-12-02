@@ -486,43 +486,20 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& buffer)
 
 bool Writer::WriteBlock(PointBuffer const& buffer)
 {
-    boost::uint8_t* point_data;
-
-    boost::uint32_t schema_byte_size;
-
-    // PackPointData(buffer, &point_data, point_data_length, schema_byte_size);
-    
     PointBuffer output = buffer.pack();
     pointbuffer::PointBufferByteSize  point_data_length = output.getBufferByteLength();
-    point_data = output.getData(0);
-    // 
-    // 
-    // 
-    // log()->get(logDEBUG) << "point_data_length " <<  output.getSchema().getByteSize() * output.getNumPoints() << std::endl;;
-    // log()->get(logDEBUG) << "output.getSchema().getByteSize() " << output.getSchema().getByteSize() << std::endl;;
-    // log()->get(logDEBUG) << "output.getNumPoints() " << output.getNumPoints() << std::endl;;
-    // log()->get(logDEBUG) << "buffer.getNumPoints() " << buffer.getNumPoints() << std::endl;;
-    // 
-    // log()->get(logDEBUG) << "buffer.getBufferByteCapacity() " << buffer.getBufferByteCapacity() << std::endl;;
-    // log()->get(logDEBUG) << "output.getBufferByteCapacity() " << output.getBufferByteCapacity() << std::endl;;
-    // log()->get(logDEBUG) << "buffer.getBufferByteLength() " << buffer.getBufferByteLength() << std::endl;;
-    // log()->get(logDEBUG) << "output.getBufferByteLength() " << output.getBufferByteLength() << std::endl;;
-
+    boost::uint8_t* point_data = output.getData(0);
 
     boost::uint32_t num_points = static_cast<boost::uint32_t>(output.getNumPoints());
 
     if (num_points > m_patch_capacity)
     {
-        // error here
+        throw pdal_error("drivers.pgpointcloud.writer num_points > m_patch_capacity!");
     }
 
     std::vector<boost::uint8_t> block_data;
     block_data.resize(point_data_length);
     std::copy(point_data, point_data+point_data_length, block_data.begin());
-    // for (boost::uint32_t i = 0; i < point_data_length; ++i)
-    // {
-    //     block_data.push_back(point_data[i]);
-    // }
 
     /* We are always getting uncompressed bytes off the block_data */
     /* so we always used compression type 0 (uncompressed) in writing our WKB */
