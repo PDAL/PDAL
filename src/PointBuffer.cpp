@@ -213,10 +213,10 @@ PointBuffer PointBuffer::pack() const
         {
             // For each dimension, copy the data if it isn't ignored
             boost::uint8_t* data = getData(i);
-            boost::uint64_t dimension_length = static_cast<boost::uint64_t>(idx[i].getByteSize()) * static_cast<boost::uint64_t>(getCapacity());
+            boost::uint64_t dimension_length = static_cast<boost::uint64_t>(idx[i].getByteSize()) * static_cast<boost::uint64_t>(getNumPoints());
             if (! idx[i].isIgnored())
             {
-
+   
                 memcpy(current_position, data, dimension_length);
                 current_position = current_position+dimension_length;
             }
@@ -224,6 +224,7 @@ PointBuffer PointBuffer::pack() const
         }        
     }
     
+    output.setNumPoints(getNumPoints());
     return output;
     
 }
