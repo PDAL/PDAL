@@ -439,7 +439,9 @@ BOOST_AUTO_TEST_CASE(test_indexed)
 BOOST_AUTO_TEST_CASE(test_packing)
 {
 
-
+    boost::uint32_t capacity(100);
+    boost::uint32_t cnt(10);
+    
     Dimension cls("Classification", dimension::UnsignedInteger, 1);
     Dimension x("X", dimension::SignedInteger, 4);
     Dimension y("Y", dimension::Float, 8);
@@ -451,36 +453,41 @@ BOOST_AUTO_TEST_CASE(test_packing)
     schema.appendDimension(y);
     schema.appendDimension(cls);
     
-    PointBuffer buffer(schema, 10);
+    PointBuffer buffer(schema, capacity);
     Dimension const& dimX = buffer.getSchema().getDimension("X");
     Dimension const& dimY = buffer.getSchema().getDimension("Y");
     Dimension const& dimCls = buffer.getSchema().getDimension("Classification");
     
-    buffer.setNumPoints(10);
+    buffer.setNumPoints(cnt);
     for(unsigned int i = 0; i < buffer.getNumPoints(); ++i)
     {
         buffer.setField<boost::int32_t>(dimX, i, i);
-        buffer.setField<boost::int32_t>(dimY, i, i + 100);
-        buffer.setField<boost::int32_t>(dimCls, i, 7);
+        buffer.setField<double>(dimY, i, i + 100);
+        buffer.setField<boost::uint8_t>(dimCls, i, 7);
     }
-    BOOST_CHECK_EQUAL(buffer.getNumPoints(), 10);
+    BOOST_CHECK_EQUAL(buffer.getNumPoints(), cnt);
+    BOOST_CHECK_EQUAL(buffer.getCapacity(), capacity);
     
     PointBuffer packed = buffer.pack();
     pdal::schema::DimensionMap* dims = schema.mapDimensions(packed.getSchema()); 
-    PointBuffer::copyLikeDimensions(buffer, packed, *dims, 0, 0, buffer.getNumPoints());
+    // PointBuffer::copyLikeDimensions(buffer, packed, *dims, 0, 0, buffer.getNumPoints());
     
-    packed.setNumPoints(10);
     
     BOOST_CHECK_EQUAL(packed.getSchema().getByteSize(), 5);
-    BOOST_CHECK_EQUAL(packed.getNumPoints(), 10);
-    BOOST_CHECK_EQUAL(packed.getBufferByteLength(), 10*5);
+    BOOST_CHECK_EQUAL(packed.getNumPoints(), cnt);
+    
+    // ::pack() only packs down to the point count
+    BOOST_CHECK_EQUAL(packed.getBufferByteLength(), cnt*packed.getSchema().getByteSize());
     
     Dimension const& kls = packed.getSchema().getDimension("Classification");    
     Dimension const& x2 = packed.getSchema().getDimension("X");    
+    // Dimension const& y2 = packed.getSchema().getDimension("Y");
+    
     BOOST_CHECK_EQUAL(packed.getField<boost::uint8_t>(kls,0),7);
-    BOOST_CHECK_EQUAL(packed.getField<boost::uint8_t>(x2,8),8);
+    BOOST_CHECK_EQUAL(packed.getField<boost::int32_t>(x2,8),8);
+    BOOST_CHECK_EQUAL(packed.getField<boost::int32_t>(x2,7),7);
+    // BOOST_CHECK_CLOSE(packed.getField<double>(y2,7), 7 + 100, 0.000001);    
 
-    delete dims;
     return;
 
 }
