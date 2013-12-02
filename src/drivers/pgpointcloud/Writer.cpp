@@ -73,7 +73,6 @@ namespace pgpointcloud
 Writer::Writer(Stage& prevStage, const Options& options)
     : pdal::Writer(prevStage, options)
     , m_session(0)
-    , m_pdal_schema(prevStage.getSchema())
     , m_schema_name("")
     , m_table_name("")
     , m_column_name("")
@@ -84,7 +83,7 @@ Writer::Writer(Stage& prevStage, const Options& options)
     , m_have_postgis(false)
     , m_create_index(true)
     , m_overwrite(true)
-    , m_sdo_pc_is_initialized(false)
+    , m_schema_is_initialized(false)
 {
 
 
@@ -170,14 +169,18 @@ Options Writer::getDefaultOptions()
     return options;
 }
 
+void Writer::writeBegin(boost::uint64_t /*targetNumPointsToWrite*/)
+{}
 //
 // Called by PDAL core before the start of the writing process, but
 // after the initialization. At this point, the machinery is all set
 // up and we can apply actions to the target database, like pre-SQL and
 // preparing new tables and/or deleting old ones.
 //
-void Writer::writeBegin(boost::uint64_t /*targetNumPointsToWrite*/)
+
+void Writer::writeBufferBegin(PointBuffer const& data)
 {
+    if (m_schema_is_initialized) return;
 
     // Start up the database connection
     pg_begin(m_session);
@@ -208,7 +211,7 @@ void Writer::writeBegin(boost::uint64_t /*targetNumPointsToWrite*/)
     }
 
     // Read or create a PCID for our new table
-    m_pcid = SetupSchema(m_pdal_schema, m_srid);
+    m_pcid = SetupSchema(data.getSchema(), m_srid);
 
     // Create the table!
     if (! bHaveTable)
@@ -216,7 +219,11 @@ void Writer::writeBegin(boost::uint64_t /*targetNumPointsToWrite*/)
         CreateTable(m_schema_name, m_table_name, m_column_name, m_pcid);
     }
 
+
+    m_schema_is_initialized = true;
+
     return;
+
 }
 
 void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
@@ -326,6 +333,8 @@ boost::uint32_t Writer::SetupSchema(Schema const& buffer_schema, boost::uint32_t
         }
 
         Metadata metadata("compression", compression, "");
+        
+        log()->get(logDEBUG) << "output_schema: " << output_schema.getByteSize() << std::endl;
         xml = pdal::Schema::to_xml(output_schema, &(metadata.toPTree()));
 
         const char** paramValues = (const char**)malloc(sizeof(char*));
@@ -478,17 +487,29 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& buffer)
 bool Writer::WriteBlock(PointBuffer const& buffer)
 {
     boost::uint8_t* point_data;
-    boost::uint32_t point_data_length;
+
     boost::uint32_t schema_byte_size;
 
-    PackPointData(buffer, &point_data, point_data_length, schema_byte_size);
+    // PackPointData(buffer, &point_data, point_data_length, schema_byte_size);
+    
+    PointBuffer output = buffer.pack();
+    pointbuffer::PointBufferByteSize  point_data_length = output.getBufferByteLength();
+    point_data = output.getData(0);
+    // 
+    // 
+    // 
+    // log()->get(logDEBUG) << "point_data_length " <<  output.getSchema().getByteSize() * output.getNumPoints() << std::endl;;
+    // log()->get(logDEBUG) << "output.getSchema().getByteSize() " << output.getSchema().getByteSize() << std::endl;;
+    // log()->get(logDEBUG) << "output.getNumPoints() " << output.getNumPoints() << std::endl;;
+    // log()->get(logDEBUG) << "buffer.getNumPoints() " << buffer.getNumPoints() << std::endl;;
+    // 
+    // log()->get(logDEBUG) << "buffer.getBufferByteCapacity() " << buffer.getBufferByteCapacity() << std::endl;;
+    // log()->get(logDEBUG) << "output.getBufferByteCapacity() " << output.getBufferByteCapacity() << std::endl;;
+    // log()->get(logDEBUG) << "buffer.getBufferByteLength() " << buffer.getBufferByteLength() << std::endl;;
+    // log()->get(logDEBUG) << "output.getBufferByteLength() " << output.getBufferByteLength() << std::endl;;
 
-    // Pluck the block id out of the first point in the buffer
-    pdal::Schema const& schema = buffer.getSchema();
-    Dimension const& blockDim = schema.getDimension("BlockID");
 
-//    boost::int32_t blk_id  = buffer.getField<boost::int32_t>(blockDim, 0);
-    boost::uint32_t num_points = static_cast<boost::uint32_t>(buffer.getNumPoints());
+    boost::uint32_t num_points = static_cast<boost::uint32_t>(output.getNumPoints());
 
     if (num_points > m_patch_capacity)
     {
@@ -496,10 +517,12 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     }
 
     std::vector<boost::uint8_t> block_data;
-    for (boost::uint32_t i = 0; i < point_data_length; ++i)
-    {
-        block_data.push_back(point_data[i]);
-    }
+    block_data.resize(point_data_length);
+    std::copy(point_data, point_data+point_data_length, block_data.begin());
+    // for (boost::uint32_t i = 0; i < point_data_length; ++i)
+    // {
+    //     block_data.push_back(point_data[i]);
+    // }
 
     /* We are always getting uncompressed bytes off the block_data */
     /* so we always used compression type 0 (uncompressed) in writing our WKB */
@@ -533,49 +556,6 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
 }
 
 
-void Writer::PackPointData(PointBuffer const& buffer,
-                           boost::uint8_t** point_data,
-                           boost::uint32_t& point_data_len,
-                           boost::uint32_t& schema_byte_size)
-
-{
-    // Creates a new buffer that has the ignored dimensions removed from
-    // it.
-
-    schema::index_by_index const& idx = buffer.getSchema().getDimensions().get<schema::index>();
-
-    schema_byte_size = 0;
-    schema::index_by_index::size_type i(0);
-    for (i = 0; i < idx.size(); ++i)
-    {
-        if (! idx[i].isIgnored())
-            schema_byte_size = schema_byte_size+idx[i].getByteSize();
-    }
-
-    log()->get(logDEBUG) << "Packed schema byte size " << schema_byte_size << std::endl;;
-
-    point_data_len = buffer.getNumPoints() * schema_byte_size;
-    *point_data = new boost::uint8_t[point_data_len];
-
-    boost::uint8_t* current_position = *point_data;
-
-    for (boost::uint32_t i = 0; i < buffer.getNumPoints(); ++i)
-    {
-        boost::uint8_t* data = buffer.getData(i);
-        for (boost::uint32_t d = 0; d < idx.size(); ++d)
-        {
-            if (! idx[d].isIgnored())
-            {
-                memcpy(current_position, data, idx[d].getByteSize());
-                current_position = current_position+idx[d].getByteSize();
-            }
-            data = data + idx[d].getByteSize();
-
-        }
-    }
-
-
-}
 
 }
 }

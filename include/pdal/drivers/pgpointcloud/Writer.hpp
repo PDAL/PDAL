@@ -62,6 +62,7 @@ public:
 
 protected:
     virtual void writeBegin(boost::uint64_t targetNumPointsToWrite);
+    virtual void writeBufferBegin(PointBuffer const& data);
     virtual boost::uint32_t writeBuffer(const PointBuffer&);
     virtual void writeEnd(boost::uint64_t actualNumPointsWritten);
 
@@ -87,15 +88,9 @@ private:
                      std::string const& table_name, 
                      std::string const& column_name);
 
-    void PackPointData(PointBuffer const& buffer,
-                       boost::uint8_t** point_data,
-                       boost::uint32_t& point_data_len,
-                       boost::uint32_t& schema_byte_size);
-
     bool WriteBlock(PointBuffer const& buffer);                        
     
     PGconn* m_session;
-    const pdal::Schema &m_pdal_schema;
     std::string m_schema_name;
     std::string m_table_name;
     std::string m_column_name;
@@ -109,7 +104,7 @@ private:
 
 
     // lose this
-    bool m_sdo_pc_is_initialized;
+    bool m_schema_is_initialized;
 };
 
 } // pgpointcloud
