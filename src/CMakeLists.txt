@@ -667,13 +667,13 @@ set (SQLITE_LIBRARIES ${SOCI_LIBRARY} ${SOCI_sqlite3_PLUGIN} ${SQLITE3_LIBRARY})
 
 if (WITH_SQLITE)
 if (NOT USE_PDAL_PLUGIN_SQLITE)
-target_link_libraries(${APPS_CPP_DEPENDENCIES} "${SQLITE_LIBRARIES}")
+target_link_libraries(${APPS_CPP_DEPENDENCIES} ${SQLITE_LIBRARIES})
 endif()
 endif()
 
 if (WITH_PGPOINTCLOUD)
 if (NOT USE_PDAL_PLUGIN_PGPOINTCLOUD)
-target_link_libraries(${APPS_CPP_DEPENDENCIES} "${POSTGRESQL_LIBRARIES}")
+target_link_libraries(${APPS_CPP_DEPENDENCIES} ${POSTGRESQL_LIBRARIES})
 endif()
 endif()
 
@@ -685,7 +685,7 @@ endif()
 
 if (WITH_NITRO)
 if (NOT USE_PDAL_PLUGIN_NITRO)
-target_link_libraries(${APPS_CPP_DEPENDENCIES} "${NITRO_LIBRARIES}")
+target_link_libraries(${APPS_CPP_DEPENDENCIES} ${NITRO_LIBRARIES})
 endif()
 endif()
 
@@ -703,8 +703,6 @@ if (WIN32)
     "${GEOS_LIBRARY}"
     "${HEXER_LIBRARY}"
     "${ORACLE_LIBRARY}"
-    ${SQLITE_LIBRARIES}
-    ${NITRO_LIBRARIES}
 )
 else()
   target_link_libraries(${APPS_CPP_DEPENDENCIES}
@@ -722,8 +720,7 @@ else()
     "${GEOS_LIBRARY}"
     "${HEXER_LIBRARY}"
     "${ORACLE_LIBRARY}"
-    ${NITRO_LIBRARIES}
-    ${SQLITE_LIBRARIES})
+)
 endif()
 
 message(STATUS "Using boost lib: ${Boost_LIBRARIES}")
