@@ -557,7 +557,6 @@ boost::uint32_t Iterator::readBufferImpl(PointBuffer& user_buffer)
 
         // Do the copying from cache to user buffer
         // To do: this should be more tolerant of variations in source/dest schema
-        // copyLikeDimensions updates user_buffer.getNumPoints()
         PointBuffer::copyLikeDimensions(*m_buffer, user_buffer,
                                         *m_dimension_map,
                                         m_buffer_position, user_buffer.getNumPoints(),
@@ -565,6 +564,7 @@ boost::uint32_t Iterator::readBufferImpl(PointBuffer& user_buffer)
 
         // Update the buffers regarding how full/empty they are                                        
         m_buffer_position += points_to_copy;
+        user_buffer.setNumPoints(user_buffer.getNumPoints()+points_to_copy);
 
         num_loops++;
         getReader().log()->get(logDEBUG2) << "User buffer filling loop, iteration " << num_loops << std::endl;

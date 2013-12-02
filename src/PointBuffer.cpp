@@ -625,7 +625,6 @@ void PointBuffer::copyLikeDimensions(PointBuffer const& source,
         }
         
     }
-    destination.setNumPoints(howMany);
 
 }
 
