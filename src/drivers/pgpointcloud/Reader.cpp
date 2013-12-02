@@ -416,7 +416,7 @@ bool Iterator::CursorSetup()
 
 bool Iterator::CursorTeardown()
 {
-    pg_execute(m_session, "CLOSE sur");
+    pg_execute(m_session, "CLOSE cur");
     pg_commit(m_session);
     m_cursor = false;
     getReader().log()->get(logDEBUG) << "SQL cursor closed." << std::endl;
