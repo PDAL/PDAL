@@ -799,7 +799,26 @@ void Writer::CreatePCEntry(Schema const& buffer_schema)
 
     s_geom << "))";
 
-    boost::uint32_t dimensions = 8;
+    boost::uint32_t dimensions(8);
+    std::string schema_data;
+
+    bool pack = getOptions().getValueOrDefault<bool>("pack_ignored_fields", true);
+    if (pack)
+    {
+        log()->get(logDEBUG3) << "Packing ignored dimension from PointBuffer " << std::endl;
+        
+        pdal::Schema clean_schema = buffer_schema.pack();
+        schema_data = pdal::Schema::to_xml(clean_schema);
+        dimensions = clean_schema.size();
+
+    }
+    else
+    {
+        schema_data = pdal::Schema::to_xml(buffer_schema);
+        dimensions  = buffer_schema.size();
+
+    }
+
 
     oss << "declare\n"
         "  pc_id NUMBER := :"<<nPCPos<<";\n"
@@ -835,23 +854,6 @@ void Writer::CreatePCEntry(Schema const& buffer_schema)
 
     OCILobLocator* schema_locator ;
     OCILobLocator* boundary_locator ;
-
-    std::string schema_data;
-
-    bool pack = getOptions().getValueOrDefault<bool>("pack_ignored_fields", true);
-    if (pack)
-    {
-        log()->get(logDEBUG3) << "Packing ignored dimension from PointBuffer " << std::endl;
-        
-        pdal::Schema clean_schema = buffer_schema.pack();
-        schema_data = pdal::Schema::to_xml(clean_schema);
-
-    }
-    else
-    {
-        schema_data = pdal::Schema::to_xml(buffer_schema);
-
-    }
 
     char* schema = (char*) malloc(schema_data.size() * sizeof(char) + 1);
     strncpy(schema, schema_data.c_str(), schema_data.size());
