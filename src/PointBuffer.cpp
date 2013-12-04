@@ -175,7 +175,7 @@ void PointBuffer::getData(boost::uint8_t** data, boost::uint64_t* array_size) co
     memcpy(*data, &(m_data.front()), static_cast<size_t>(*array_size));
 }
 
-PointBuffer PointBuffer::pack() const
+PointBuffer* PointBuffer::pack() const
 {
 
     // Creates a new buffer that has the ignored dimensions removed from
@@ -184,11 +184,11 @@ PointBuffer PointBuffer::pack() const
     pdal::Schema const& schema = getSchema();
     schema::index_by_index const& idx = schema.getDimensions().get<schema::index>();
     pdal::Schema output_schema = schema.pack();
-    pdal::PointBuffer output(output_schema, getNumPoints());
+    pdal::PointBuffer* output = new PointBuffer(output_schema, getNumPoints());
 
     boost::uint8_t* src = getData(0);
     
-    boost::uint8_t* current_position = output.getData(0);
+    boost::uint8_t* current_position = output->getData(0);
     
     schema::Orientation orientation = getSchema().getOrientation();
     if (orientation == schema::POINT_INTERLEAVED)
@@ -224,7 +224,7 @@ PointBuffer PointBuffer::pack() const
         }        
     }
     
-    output.setNumPoints(getNumPoints());
+    output->setNumPoints(getNumPoints());
     return output;
     
 }

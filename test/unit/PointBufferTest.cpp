@@ -468,24 +468,23 @@ BOOST_AUTO_TEST_CASE(test_packing)
     BOOST_CHECK_EQUAL(buffer.getNumPoints(), cnt);
     BOOST_CHECK_EQUAL(buffer.getCapacity(), capacity);
     
-    PointBuffer packed = buffer.pack();
-    pdal::schema::DimensionMap* dims = schema.mapDimensions(packed.getSchema()); 
-    // PointBuffer::copyLikeDimensions(buffer, packed, *dims, 0, 0, buffer.getNumPoints());
+    PointBuffer* packed = buffer.pack();
+    pdal::schema::DimensionMap* dims = schema.mapDimensions(packed->getSchema()); 
     
     
-    BOOST_CHECK_EQUAL(packed.getSchema().getByteSize(), 5);
-    BOOST_CHECK_EQUAL(packed.getNumPoints(), cnt);
+    BOOST_CHECK_EQUAL(packed->getSchema().getByteSize(), 5);
+    BOOST_CHECK_EQUAL(packed->getNumPoints(), cnt);
     
     // ::pack() only packs down to the point count
-    BOOST_CHECK_EQUAL(packed.getBufferByteLength(), cnt*packed.getSchema().getByteSize());
+    BOOST_CHECK_EQUAL(packed->getBufferByteLength(), cnt*packed->getSchema().getByteSize());
     
-    Dimension const& kls = packed.getSchema().getDimension("Classification");    
-    Dimension const& x2 = packed.getSchema().getDimension("X");    
+    Dimension const& kls = packed->getSchema().getDimension("Classification");    
+    Dimension const& x2 = packed->getSchema().getDimension("X");    
     // Dimension const& y2 = packed.getSchema().getDimension("Y");
     
-    BOOST_CHECK_EQUAL(packed.getField<boost::uint8_t>(kls,0),7);
-    BOOST_CHECK_EQUAL(packed.getField<boost::int32_t>(x2,8),8);
-    BOOST_CHECK_EQUAL(packed.getField<boost::int32_t>(x2,7),7);
+    BOOST_CHECK_EQUAL(packed->getField<boost::uint8_t>(kls,0),7);
+    BOOST_CHECK_EQUAL(packed->getField<boost::int32_t>(x2,8),8);
+    BOOST_CHECK_EQUAL(packed->getField<boost::int32_t>(x2,7),7);
     // BOOST_CHECK_CLOSE(packed.getField<double>(y2,7), 7 + 100, 0.000001);    
 
     return;
@@ -567,21 +566,22 @@ BOOST_AUTO_TEST_CASE(test_orientation_packing)
     }
     BOOST_CHECK_EQUAL(buffer.getNumPoints(), 10);
     
-    PointBuffer packed = buffer.pack();
-    pdal::schema::DimensionMap* dims = schema.mapDimensions(packed.getSchema()); 
-    PointBuffer::copyLikeDimensions(buffer, packed, *dims, 0, 0, buffer.getNumPoints());
+    PointBuffer* packed = buffer.pack();
+    pdal::schema::DimensionMap* dims = schema.mapDimensions(packed->getSchema()); 
+    PointBuffer::copyLikeDimensions(buffer, *packed, *dims, 0, 0, buffer.getNumPoints());
         
-    BOOST_CHECK_EQUAL(packed.getSchema().getByteSize(), 5);
-    BOOST_CHECK_EQUAL(packed.getNumPoints(), 10);
-    BOOST_CHECK_EQUAL(packed.getBufferByteLength(), 10*5);
+    BOOST_CHECK_EQUAL(packed->getSchema().getByteSize(), 5);
+    BOOST_CHECK_EQUAL(packed->getNumPoints(), 10);
+    BOOST_CHECK_EQUAL(packed->getBufferByteLength(), 10*5);
     
-    Dimension const& kls = packed.getSchema().getDimension("Classification");    
-    Dimension const& x2 = packed.getSchema().getDimension("X");    
+    Dimension const& kls = packed->getSchema().getDimension("Classification");    
+    Dimension const& x2 = packed->getSchema().getDimension("X");    
 
-    BOOST_CHECK_EQUAL(packed.getField<boost::uint8_t>(kls,0),7);
-    BOOST_CHECK_EQUAL(packed.getField<boost::int32_t>(x2,8),8);
+    BOOST_CHECK_EQUAL(packed->getField<boost::uint8_t>(kls,0),7);
+    BOOST_CHECK_EQUAL(packed->getField<boost::int32_t>(x2,8),8);
 
     delete dims;
+    delete packed;
 
 
 

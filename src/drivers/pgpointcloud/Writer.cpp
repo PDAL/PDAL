@@ -42,6 +42,7 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
+#include <boost/scoped_ptr.hpp>
 
 #include <sstream>
 
@@ -486,11 +487,11 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& buffer)
 
 bool Writer::WriteBlock(PointBuffer const& buffer)
 {
-    PointBuffer output = buffer.pack();
-    pointbuffer::PointBufferByteSize  point_data_length = output.getBufferByteLength();
-    boost::uint8_t* point_data = output.getData(0);
+    boost::scoped_ptr<PointBuffer> output(buffer.pack());
+    pointbuffer::PointBufferByteSize  point_data_length = output->getBufferByteLength();
+    boost::uint8_t* point_data = output->getData(0);
 
-    boost::uint32_t num_points = static_cast<boost::uint32_t>(output.getNumPoints());
+    boost::uint32_t num_points = static_cast<boost::uint32_t>(output->getNumPoints());
 
     if (num_points > m_patch_capacity)
     {
