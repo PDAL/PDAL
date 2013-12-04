@@ -1118,48 +1118,6 @@ pdal::Bounds<double> Writer::CalculateBounds(PointBuffer const& buffer)
 
 }
 
-void Writer::PackPointData(PointBuffer const& buffer,
-                           boost::uint8_t** point_data,
-                           boost::uint32_t& point_data_len,
-                           boost::uint32_t& schema_byte_size)
-
-{
-    // Creates a new buffer that has the ignored dimensions removed from
-    // it.
-
-    schema::index_by_index const& idx = buffer.getSchema().getDimensions().get<schema::index>();
-
-    schema_byte_size = 0;
-    schema::index_by_index::size_type i(0);
-    for (i = 0; i < idx.size(); ++i)
-    {
-        if (! idx[i].isIgnored())
-            schema_byte_size = schema_byte_size+idx[i].getByteSize();
-    }
-
-    log()->get(logDEBUG) << "Packed schema byte size " << schema_byte_size;
-
-    point_data_len = buffer.getNumPoints() * schema_byte_size;
-    *point_data = new boost::uint8_t[point_data_len];
-
-    boost::uint8_t* current_position = *point_data;
-
-    for (boost::uint32_t i = 0; i < buffer.getNumPoints(); ++i)
-    {
-        boost::uint8_t* data = buffer.getData(i);
-        for (boost::uint32_t d = 0; d < idx.size(); ++d)
-        {
-            if (! idx[d].isIgnored())
-            {
-                memcpy(current_position, data, idx[d].getByteSize());
-                current_position = current_position+idx[d].getByteSize();
-            }
-            data = data + idx[d].getByteSize();
-
-        }
-    }
-}
-
 bool Writer::WriteBlock(PointBuffer const& buffer)
 {
     bool bUsePartition = m_block_table_partition_column.size() != 0;
@@ -1216,10 +1174,15 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     boost::uint8_t* point_data;
     boost::uint32_t point_data_length;
     boost::uint32_t schema_byte_size;
-
+    PointBuffer* output_buffer(0);
+    
     bool pack = getOptions().getValueOrDefault<bool>("pack_ignored_fields", true);
     if (pack)
-        PackPointData(buffer, &point_data, point_data_length, schema_byte_size);
+    {
+        output_buffer = buffer.pack();
+        point_data = output_buffer->getData(0);
+        point_data_length = output_buffer->getSchema().getByteSize() * output_buffer->getNumPoints();
+    }
     else
     {
         point_data = buffer.getData(0);
