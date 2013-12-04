@@ -333,7 +333,7 @@ public:
     void resize(boost::uint32_t const& capacity, bool bExact=false);
     
     /// @return a new PointBuffer with all ignored dimensions removed
-    PointBuffer pack() const;
+    PointBuffer* pack() const;
     
     /** @name Serialization
     */
