@@ -281,7 +281,7 @@ public:
         {
             pointbuffer::PointBufferByteSize offset(0);
             offset = m_schema.getDimension(pointIndex).getByteOffset();
-            position = static_cast<pointbuffer::PointBufferByteSize>(m_numPoints) * offset;
+            position = static_cast<pointbuffer::PointBufferByteSize>(m_capacity) * offset;
         }
         return const_cast<boost::uint8_t*>(&(m_data.front())) + position;
 
@@ -334,6 +334,9 @@ public:
     
     /// @return a new PointBuffer with all ignored dimensions removed
     PointBuffer* pack() const;
+    
+    /// @return a new PointBuffer with the opposite orientation
+    PointBuffer* flipOrientation() const;
     
     /** @name Serialization
     */

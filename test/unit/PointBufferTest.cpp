@@ -577,6 +577,7 @@ BOOST_AUTO_TEST_CASE(test_orientation_packing)
     Dimension const& kls = packed->getSchema().getDimension("Classification");    
     Dimension const& x2 = packed->getSchema().getDimension("X");    
 
+    
     BOOST_CHECK_EQUAL(packed->getField<boost::uint8_t>(kls,0),7);
     BOOST_CHECK_EQUAL(packed->getField<boost::int32_t>(x2,8),8);
 
@@ -589,4 +590,106 @@ BOOST_AUTO_TEST_CASE(test_orientation_packing)
 
 }
 
+
+BOOST_AUTO_TEST_CASE(test_orientation_point_interleaved_flipping)
+{
+    boost::uint32_t capacity(100);
+    boost::uint32_t cnt(10);
+
+    Dimension cls("Classification", dimension::UnsignedInteger, 1);
+    Dimension x("X", dimension::SignedInteger, 4);
+    Dimension y("Y", dimension::Float, 8);
+    
+    Schema schema;
+    schema.appendDimension(x);
+    schema.appendDimension(y);
+    schema.appendDimension(cls);
+    
+    PointBuffer buffer(schema, cnt);
+    Dimension const& dimX = buffer.getSchema().getDimension("X");
+    Dimension const& dimY = buffer.getSchema().getDimension("Y");
+    Dimension const& dimCls = buffer.getSchema().getDimension("Classification");
+    
+    buffer.setNumPoints(cnt);
+    for(unsigned int i = 0; i < buffer.getNumPoints(); ++i)
+    {
+        buffer.setField<boost::int32_t>(dimX, i, i);
+        double yd = i + capacity;
+        buffer.setField<double>(dimY, i, yd);
+        buffer.setField<boost::uint8_t>(dimCls, i, 7);
+    }
+    BOOST_CHECK_EQUAL(buffer.getNumPoints(), cnt);
+    
+    PointBuffer* flipped = buffer.flipOrientation();
+        
+    BOOST_CHECK_EQUAL(flipped->getSchema().getByteSize(), 13);
+    BOOST_CHECK_EQUAL(flipped->getNumPoints(), cnt);
+    BOOST_CHECK_EQUAL(flipped->getBufferByteLength(), cnt*13);
+    
+    Dimension const& kls = flipped->getSchema().getDimension("Classification");    
+    Dimension const& x2 = flipped->getSchema().getDimension("X");    
+    Dimension const& y2 = flipped->getSchema().getDimension("Y");
+    
+    BOOST_CHECK_EQUAL(flipped->getField<boost::uint8_t>(kls,0),7);
+    BOOST_CHECK_EQUAL(flipped->getField<boost::int32_t>(x2,8),8);
+    BOOST_CHECK_CLOSE(flipped->getField<double>(y2,7), 7 + 100, 0.000001);
+    delete flipped;
+
+
+
+    return;
+
+}
+
+
+BOOST_AUTO_TEST_CASE(test_orientation_dimension_interleaved_flipping)
+{
+    boost::uint32_t capacity(100);
+    boost::uint32_t cnt(10);
+
+    Dimension cls("Classification", dimension::UnsignedInteger, 1);
+    Dimension x("X", dimension::SignedInteger, 4);
+    Dimension y("Y", dimension::Float, 8);
+    
+    Schema schema;
+    schema.appendDimension(x);
+    schema.appendDimension(y);
+    schema.appendDimension(cls);
+    schema.setOrientation(schema::DIMENSION_INTERLEAVED);
+        
+    PointBuffer buffer(schema, cnt);
+    Dimension const& dimX = buffer.getSchema().getDimension("X");
+    Dimension const& dimY = buffer.getSchema().getDimension("Y");
+    Dimension const& dimCls = buffer.getSchema().getDimension("Classification");
+    
+    buffer.setNumPoints(cnt);
+    for(unsigned int i = 0; i < buffer.getNumPoints(); ++i)
+    {
+        buffer.setField<boost::int32_t>(dimX, i, i);
+        double yd = i + capacity;
+        buffer.setField<double>(dimY, i, yd);
+        buffer.setField<boost::uint8_t>(dimCls, i, 7);
+    }
+    BOOST_CHECK_EQUAL(buffer.getNumPoints(), cnt);
+    
+    PointBuffer* flipped = buffer.flipOrientation();
+        
+    BOOST_CHECK_EQUAL(flipped->getSchema().getByteSize(), 13);
+    BOOST_CHECK_EQUAL(flipped->getNumPoints(), cnt);
+    BOOST_CHECK_EQUAL(flipped->getBufferByteLength(), cnt*13);
+    
+    Dimension const& kls = flipped->getSchema().getDimension("Classification");    
+    Dimension const& x2 = flipped->getSchema().getDimension("X");    
+    Dimension const& y2 = flipped->getSchema().getDimension("Y");
+    
+    BOOST_CHECK_EQUAL(flipped->getField<boost::uint8_t>(kls,0),7);
+    BOOST_CHECK_EQUAL(flipped->getField<boost::int32_t>(x2,8),8);
+    BOOST_CHECK_CLOSE(flipped->getField<double>(y2,7), 7 + 100, 0.000001);
+    delete flipped;
+
+
+
+    return;
+
+}
 BOOST_AUTO_TEST_SUITE_END()

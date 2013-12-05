@@ -229,6 +229,69 @@ PointBuffer* PointBuffer::pack() const
     
 }
 
+
+PointBuffer* PointBuffer::flipOrientation() const
+{
+
+    // Creates a new buffer that has the ignored dimensions removed from
+    // it.
+
+    pdal::Schema schema = getSchema();
+    schema::Orientation orientation = getSchema().getOrientation();
+    if (orientation == schema::POINT_INTERLEAVED)
+        schema.setOrientation(schema::DIMENSION_INTERLEAVED);
+    else if (orientation == schema::DIMENSION_INTERLEAVED)
+        schema.setOrientation(schema::POINT_INTERLEAVED);
+    else
+        throw pdal_error("schema orientation is not recognized for PointBuffer::flipOrientation!");
+    
+    schema::index_by_index const& idx = schema.getDimensions().get<schema::index>();
+
+    pdal::PointBuffer* output = new PointBuffer(schema, getCapacity());
+
+    if (orientation == schema::POINT_INTERLEAVED)
+    {
+        for (boost::uint32_t d = 0; d < idx.size(); ++d)
+        {
+            boost::uint8_t* write_position = output->getData(d);
+            schema::size_type dimSize(idx[d].getByteSize());
+            std::size_t offset(idx[d].getByteOffset());
+            
+            for (boost::uint32_t i = 0; i < getNumPoints(); ++i)
+            {
+                boost::uint8_t* point_start = getData(i);
+                boost::uint8_t* read_position = point_start + offset;
+                std::copy(read_position, read_position + dimSize, write_position);
+
+                // memcpy(write_position, read_position, dimSize);
+                write_position = write_position + dimSize;
+            }
+        }
+    }
+    else if (orientation == schema::DIMENSION_INTERLEAVED)
+    {
+        for (boost::uint32_t d = 0; d < idx.size(); ++d)
+        {
+            
+            schema::size_type dimSize(idx[d].getByteSize());
+            std::size_t offset(idx[d].getByteOffset());
+
+            boost::uint8_t* read_start = getData(d);
+                        
+            for (boost::uint32_t i = 0; i < getNumPoints(); ++i)
+            {
+                boost::uint8_t* write_position = output->getData(i)+offset;
+                boost::uint8_t* read_position = read_start + i*dimSize;
+                std::copy(read_position, read_position + dimSize, write_position);
+            }
+        }   
+    }
+    
+    output->setNumPoints(getNumPoints());
+    return output;
+    
+}
+
 pdal::Bounds<double> PointBuffer::calculateBounds(bool is3d) const
 {
     pdal::Schema const& schema = getSchema();
