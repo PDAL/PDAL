@@ -485,6 +485,23 @@ void Reader::Load()
 
     while (dimension != NULL)
     {
+        // Read off orientation setting
+        if (boost::equals((const char*)dimension->name, "orientation"))
+        {
+            xmlChar* n = xmlNodeListGetString(doc, dimension->children, 1);
+            if (!n) throw schema_loading_error("Unable to fetch orientation!");
+            std::string orientation = std::string((const char*)n);
+            xmlFree(n);
+            
+            if (boost::iequals(orientation, "dimension"))
+                m_schema.setOrientation(schema::DIMENSION_INTERLEAVED);
+            else
+                m_schema.setOrientation(schema::POINT_INTERLEAVED);
+            
+            dimension = dimension->next;
+            continue;
+        }
+                
         // printf("node name: %s\n", (const char*)dimension->name);
         // if (boost::equals((const char*)dimension->name, "metadata"))
         // {
