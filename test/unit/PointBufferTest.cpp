@@ -692,4 +692,74 @@ BOOST_AUTO_TEST_CASE(test_orientation_dimension_interleaved_flipping)
     return;
 
 }
+
+
+BOOST_AUTO_TEST_CASE(test_copyLikeDimensions)
+{
+
+
+    Dimension cls("Classification", dimension::UnsignedInteger, 1);
+    Dimension x("X", dimension::SignedInteger, 4);
+    Dimension y("Y", dimension::Float, 8);
+    boost::uint32_t flags = y.getFlags();
+    y.setFlags(flags | dimension::IsIgnored);
+    
+    Schema schema;
+    schema.appendDimension(x);
+    schema.appendDimension(y);
+    schema.appendDimension(cls);
+    schema.setOrientation(schema::DIMENSION_INTERLEAVED);
+    
+    PointBuffer buffer(schema, 10);
+    Dimension const& dimX = buffer.getSchema().getDimension("X");
+    Dimension const& dimY = buffer.getSchema().getDimension("Y");
+    Dimension const& dimCls = buffer.getSchema().getDimension("Classification");
+    
+    buffer.setNumPoints(10);
+    for(unsigned int i = 0; i < buffer.getNumPoints(); ++i)
+    {
+        buffer.setField<boost::int32_t>(dimX, i, i);
+        double yd = i + 100;
+        buffer.setField<double>(dimY, i, yd);
+        buffer.setField<boost::uint8_t>(dimCls, i, 7);
+    }
+    BOOST_CHECK_EQUAL(buffer.getNumPoints(), 10);
+    
+    Schema flipped_schema(buffer.getSchema());
+    flipped_schema.setOrientation(schema::POINT_INTERLEAVED);
+    PointBuffer flipped(flipped_schema, buffer.getCapacity());
+    pdal::schema::DimensionMap* dims = schema.mapDimensions(flipped.getSchema()); 
+    BOOST_CHECK_EQUAL(dims->size(), 3);
+    PointBuffer::copyLikeDimensions(buffer, flipped, *dims, 0, 0, buffer.getNumPoints());
+    flipped.setNumPoints(buffer.getNumPoints());
+    BOOST_CHECK_EQUAL(flipped.getSchema().getByteSize(), 13);
+    BOOST_CHECK_EQUAL(flipped.getNumPoints(), 10);
+    BOOST_CHECK_EQUAL(flipped.getBufferByteLength(), 10*13);
+    
+    Dimension const& kls = flipped.getSchema().getDimension("Classification");    
+    Dimension const& x2 = flipped.getSchema().getDimension("X");    
+    Dimension const& y2 = flipped.getSchema().getDimension("Y");
+    
+    // BOOST_CHECK_EQUAL(flipped.getField<boost::uint8_t>(kls,0),7);
+    // BOOST_CHECK_EQUAL(flipped.getField<boost::int32_t>(x2,8),8);
+    // BOOST_CHECK_CLOSE(flipped.getField<double>(y2,7), 7 + 100, 0.000001);
+
+    for(unsigned int i = 0; i < flipped.getNumPoints(); ++i)
+    {
+        boost::int32_t x = flipped.getField<boost::int32_t>(x2, i);
+        double y = flipped.getField<double>(y2, i);
+        boost::uint8_t c = flipped.getField<boost::uint8_t>(kls, i);
+        BOOST_CHECK_EQUAL(x, i);
+        BOOST_CHECK_CLOSE(y, i + 100, 0.000001);
+        BOOST_CHECK_EQUAL(c, 7u);
+    }
+    
+    delete dims;
+
+
+
+    return;
+
+}
+
 BOOST_AUTO_TEST_SUITE_END()
