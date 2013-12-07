@@ -264,7 +264,7 @@ public:
     boost::property_tree::ptree toPTree() const;
 
     /// @return a schema::DimensionMap instance that maps dimension names
-    schema::DimensionMap* mapDimensions(Schema const& destination) const;
+    schema::DimensionMap* mapDimensions(Schema const& destination, bool bIgnoreNamespace=false) const;
 
 
     /// dumps a string representation of the Schema instance to std::cout
