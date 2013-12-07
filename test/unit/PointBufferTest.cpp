@@ -673,7 +673,8 @@ BOOST_AUTO_TEST_CASE(test_orientation_dimension_interleaved_flipping)
     BOOST_CHECK_EQUAL(buffer.getNumPoints(), cnt);
     
     PointBuffer* flipped = buffer.flipOrientation();
-        
+    
+    BOOST_CHECK_EQUAL(flipped->getSchema().getOrientation(), schema::POINT_INTERLEAVED);
     BOOST_CHECK_EQUAL(flipped->getSchema().getByteSize(), 13);
     BOOST_CHECK_EQUAL(flipped->getNumPoints(), cnt);
     BOOST_CHECK_EQUAL(flipped->getBufferByteLength(), cnt*13);
@@ -682,9 +683,15 @@ BOOST_AUTO_TEST_CASE(test_orientation_dimension_interleaved_flipping)
     Dimension const& x2 = flipped->getSchema().getDimension("X");    
     Dimension const& y2 = flipped->getSchema().getDimension("Y");
     
-    BOOST_CHECK_EQUAL(flipped->getField<boost::uint8_t>(kls,0),7);
-    BOOST_CHECK_EQUAL(flipped->getField<boost::int32_t>(x2,8),8);
-    BOOST_CHECK_CLOSE(flipped->getField<double>(y2,7), 7 + 100, 0.000001);
+    for(unsigned int i = 0; i < flipped->getNumPoints(); ++i)
+    {
+        boost::int32_t x = flipped->getField<boost::int32_t>(x2, i);
+        double y = flipped->getField<double>(y2, i);
+        boost::uint8_t c = flipped->getField<boost::uint8_t>(kls, i);
+        BOOST_CHECK_EQUAL(x, i);
+        BOOST_CHECK_CLOSE(y, i + 100, 0.000001);
+        BOOST_CHECK_EQUAL(c, 7u);
+    }
     delete flipped;
 
 
