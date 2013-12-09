@@ -614,7 +614,7 @@ void IteratorBase::readBlob(Statement statement,
         throw pdal_error(oss.str());
     }
 
-    m_oracle_buffer->setDataStride(&(block->chunk)[0], 0, howMuchToRead);
+    m_oracle_buffer->setDataStride(&(block->chunk)[0], 0, nAmountRead);
 
     m_oracle_buffer->setNumPoints(howMany);
 }
