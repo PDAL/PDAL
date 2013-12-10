@@ -3,10 +3,10 @@
 INSTALL_PREFIX=${HOME}/pdal
 
 # Where are our dependencies installed?
-TIFF_HOME=/usr/local
+TIFF_HOME=/opt/local
 LASZIP_HOME=/usr/local
 LIBXML2_HOME=/opt/local
-GEOTIFF_HOME=/usr/local
+GEOTIFF_HOME=/opt/local
 P2G_HOME=/usr/local
 PGSQL_HOME=/usr/pgsql-9.2
 
