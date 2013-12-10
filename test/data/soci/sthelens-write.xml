@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Pipeline version="1.0">
+    <Writer type="drivers.soci.writer">
+        <Option name="connection">
+            host='localhost' dbname='lidar' user='hobu'
+        </Option>
+        <Option name="type">
+            postgresql
+        </Option>        
+        <Option name="cloud_table">
+            STHELENS_CLOUD
+        </Option>
+        <Option name="block_table">
+            STHELENS_BLOCK
+        </Option>
+        <Option name="kdtreeify">
+            true
+        </Option>        
+        <Option name="cloud_column">
+            CLOUD_ID
+        </Option>
+        <Option name="overwrite">
+            false
+        </Option>
+        <Option name="srid">
+            26910
+        </Option>
+        <Option name="capacity">
+            131072
+        </Option>
+        <Option name="is3d">
+            true
+        </Option>        
+                <Filter type="filters.chipper">
+                    <Option name="capacity">
+                        131072
+                    </Option>
+                    <Filter type="filters.cache">
+                        <Option name="max_cache_blocks">
+                            1
+                        </Option>
+                        <Reader type="drivers.las.reader">
+                                <Option name="filename">
+                                    /Users/hobu/dev/git/pdal/test/data/local/mtsthelens/st-helens.las
+                                </Option>
+                                <!-- <Option name="spatialreference">
+                                    EPSG:26910
+                                </Option> -->
+                                <!-- <Option name="log">
+                                    oracle-pipeline-write.log
+                                </Option>     -->
+                        </Reader>
+                </Filter>
+            </Filter>
+    </Writer>
+</Pipeline>

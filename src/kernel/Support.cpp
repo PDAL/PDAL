@@ -39,10 +39,36 @@
 
 #include <pdal/FileUtils.hpp>
 #include <pdal/Utils.hpp>
-#include <pdal/PipelineManager.hpp>
-#include <pdal/PipelineReader.hpp>
+
 
 namespace pdal { namespace kernel {
+    
+
+pdal::PipelineManager* AppSupport::makePipeline(pdal::Options& options)
+{
+    const std::string inputFile = options.getValueOrThrow<std::string>("filename");
+
+    if (!pdal::FileUtils::fileExists(inputFile))
+    {
+        throw app_runtime_error("file not found: " + inputFile);
+    }
+    
+    pdal::PipelineManager* output = new PipelineManager;
+    pdal::StageFactory factory;
+    std::string driver = factory.inferReaderDriver(inputFile, options);
+    if (driver == "")
+    {
+        throw app_runtime_error("Cannot determine input file type of " + inputFile);
+    }
+
+    pdal::Stage* stage = output->addReader(driver, options);
+    if (!stage)
+    {
+        throw app_runtime_error("reader creation failed");
+    }
+
+    return output;
+}
     
 pdal::Stage* AppSupport::makeReader(pdal::Options& options)
 {

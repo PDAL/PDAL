@@ -50,6 +50,7 @@ PointBuffer::PointBuffer(const Schema& schema, boost::uint32_t capacity)
     , m_capacity(capacity)
     , m_bounds(Bounds<double>::getDefaultSpatialExtent())
     , m_byteSize(schema.getByteSize())
+    , m_orientation(schema.getOrientation())
     , m_metadata("pointbuffer")
     , m_segment(0)
 
@@ -75,6 +76,7 @@ PointBuffer::PointBuffer(PointBuffer const& other)
     , m_capacity(other.m_capacity)
     , m_bounds(other.m_bounds)
     , m_byteSize(other.m_byteSize)
+    , m_orientation(other.m_orientation)
     , m_metadata(other.m_metadata)
 {
 
@@ -96,6 +98,7 @@ PointBuffer& PointBuffer::operator=(PointBuffer const& rhs)
         m_capacity = rhs.getCapacity();
         m_bounds = rhs.getSpatialBounds();
         m_byteSize = rhs.m_byteSize;
+        m_orientation = rhs.m_orientation;
         m_data = rhs.m_data;
         m_metadata = rhs.m_metadata;
     }
@@ -109,6 +112,7 @@ void PointBuffer::reset(Schema const& new_schema)
 
     m_schema = new_schema;
     m_byteSize = new_size;
+    m_orientation = new_schema.getOrientation();
 
     if (m_byteSize != old_size)
     {
@@ -151,7 +155,7 @@ void PointBuffer::setSpatialBounds(const Bounds<double>& bounds)
 
 void PointBuffer::setData(boost::uint8_t* data, boost::uint32_t pointIndex)
 {
-    boost::uint64_t position = static_cast<boost::uint64_t>(m_byteSize) * static_cast<boost::uint64_t>(pointIndex);
+    boost::uint64_t position = static_cast<pointbuffer::PointBufferByteSize>(m_byteSize) * static_cast<pointbuffer::PointBufferByteSize>(pointIndex);
     memcpy(&(m_data.front()) + position, data, m_byteSize);
 }
 
@@ -159,7 +163,7 @@ void PointBuffer::setDataStride(boost::uint8_t* data,
                                 boost::uint32_t pointIndex,
                                 boost::uint32_t byteCount)
 {
-    boost::uint64_t position = static_cast<boost::uint64_t>(m_byteSize) * static_cast<boost::uint64_t>(pointIndex);
+    boost::uint64_t position = static_cast<pointbuffer::PointBufferByteSize>(m_byteSize) * static_cast<pointbuffer::PointBufferByteSize>(pointIndex);
     memcpy(&(m_data.front()) + position, data, byteCount);
 }
 
@@ -171,6 +175,59 @@ void PointBuffer::getData(boost::uint8_t** data, boost::uint64_t* array_size) co
     memcpy(*data, &(m_data.front()), static_cast<size_t>(*array_size));
 }
 
+PointBuffer* PointBuffer::pack() const
+{
+
+    // Creates a new buffer that has the ignored dimensions removed from
+    // it.
+
+    pdal::Schema const& schema = getSchema();
+    schema::index_by_index const& idx = schema.getDimensions().get<schema::index>();
+    pdal::Schema output_schema = schema.pack();
+    pdal::PointBuffer* output = new PointBuffer(output_schema, getNumPoints());
+
+    boost::uint8_t* src = getData(0);
+    
+    boost::uint8_t* current_position = output->getData(0);
+    
+    schema::Orientation orientation = getSchema().getOrientation();
+    if (orientation == schema::POINT_INTERLEAVED)
+    {
+        for (boost::uint32_t i = 0; i < getNumPoints(); ++i)
+        {
+            boost::uint8_t* data = getData(i);
+            for (boost::uint32_t d = 0; d < idx.size(); ++d)
+            {
+                if (! idx[d].isIgnored())
+                {
+                    memcpy(current_position, data, idx[d].getByteSize());
+                    current_position = current_position+idx[d].getByteSize();
+                }
+                data = data + idx[d].getByteSize();
+            }
+        }
+    }
+    else if (orientation == schema::DIMENSION_INTERLEAVED)
+    {
+        for (boost::uint32_t i = 0; i < getSchema().size(); ++i)
+        {
+            // For each dimension, copy the data if it isn't ignored
+            boost::uint8_t* data = getData(i);
+            boost::uint64_t dimension_length = static_cast<boost::uint64_t>(idx[i].getByteSize()) * static_cast<boost::uint64_t>(getNumPoints());
+            if (! idx[i].isIgnored())
+            {
+   
+                memcpy(current_position, data, dimension_length);
+                current_position = current_position+dimension_length;
+            }
+            data = data + dimension_length;
+        }        
+    }
+    
+    output->setNumPoints(getNumPoints());
+    return output;
+    
+}
 
 pdal::Bounds<double> PointBuffer::calculateBounds(bool is3d) const
 {
@@ -517,21 +574,57 @@ void PointBuffer::copyLikeDimensions(PointBuffer const& source,
     assert(howMany <= source.getCapacity() - source_starting_position);
 
     typedef schema::DimensionMap::const_iterator Iterator;
-
+    
+    if (source.getSchema().getOrientation() != destination.getSchema().getOrientation())
+        throw buffer_error("Point Buffers do not have same orientation");
+    
+    unsigned counter(0);
     for (Iterator d = dimensions.begin(); d != dimensions.end(); ++d)
     {
 
         Dimension const& source_dim = *d->first;
         Dimension const& dest_dim = *d->second;
-
-        for (boost::uint32_t i = 0; i < howMany; ++i)
+        if (source_dim.getByteSize() != dest_dim.getByteSize())
         {
-            boost::uint8_t* source_position = source.getData(source_starting_position+i) + source_dim.getByteOffset();
-            boost::uint8_t* destination_position = destination.getData(destination_starting_position + i) + dest_dim.getByteOffset();
-            memcpy(destination_position, source_position, dest_dim.getByteSize());
+            std::ostringstream oss;
+            oss << "Dimension '" << dest_dim.getName() << "' are not the same byte size and cannot be copied";
+            throw buffer_error(oss.str());
         }
-    }
+        
+        if (source.getSchema().getOrientation() == schema::POINT_INTERLEAVED)
+        {
+            for (boost::uint32_t i = 0; i < howMany; ++i)
+            {
+                boost::uint8_t* source_position = source.getData(source_starting_position+i) + source_dim.getByteOffset();
+                boost::uint8_t* destination_position = destination.getData(destination_starting_position + i) + dest_dim.getByteOffset();
+                memcpy(destination_position, source_position, dest_dim.getByteSize());
+            }
+        } else if (source.getSchema().getOrientation() == schema::DIMENSION_INTERLEAVED)
+        {
+            pointbuffer::PointBufferByteSize source_point_start_byte_position(0); 
+            pointbuffer::PointBufferByteSize source_offset(0);
+            source_point_start_byte_position = static_cast<pointbuffer::PointBufferByteSize>(source.getCapacity()) * \
+                                               static_cast<pointbuffer::PointBufferByteSize>(source_dim.getByteOffset());            source_offset = source_point_start_byte_position + \
+                     static_cast<pointbuffer::PointBufferByteSize>(source_dim.getByteSize()) * \
+                     static_cast<pointbuffer::PointBufferByteSize>(source_starting_position);
 
+            pointbuffer::PointBufferByteSize destination_point_start_byte_position(0); 
+            pointbuffer::PointBufferByteSize destination_offset(0);
+            destination_point_start_byte_position = static_cast<pointbuffer::PointBufferByteSize>(destination.getCapacity()) * \
+                                        static_cast<pointbuffer::PointBufferByteSize>(dest_dim.getByteOffset());
+            destination_offset = destination_point_start_byte_position + \
+                     static_cast<pointbuffer::PointBufferByteSize>(dest_dim.getByteSize()) * \
+                     static_cast<pointbuffer::PointBufferByteSize>(destination_starting_position);
+            
+            boost::uint8_t* source_start = source.getData(0);
+            boost::uint8_t* destination_start = destination.getData(0);
+            pointbuffer::PointBufferByteSize dimension_size(0);
+            dimension_size = static_cast<pointbuffer::PointBufferByteSize>(source_dim.getByteSize()) * \
+                             static_cast<pointbuffer::PointBufferByteSize>(howMany);
+            memcpy(destination_start + destination_offset, source_start+source_offset, dimension_size);
+        }
+        
+    }
 
 }
 

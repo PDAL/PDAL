@@ -11,6 +11,19 @@ Michael P. Gerlek
   Flaxen Geo Consulting
   mpg at flaxen.com
 
+Paul Ramsey
+  Boundless
+  pramsey at cleverelephant.ca
+  
+Bradley Chambers
+  brad dot chambers at gmail.com
+
+Mateusz Loskot
+  mateusz at loskot.net
+  
+Chris Foster
+  https://github.com/c42f
+    
 Pete Gadomski
   USACE
   pete dot gadomski at gmail.com

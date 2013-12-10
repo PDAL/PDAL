@@ -588,13 +588,15 @@ void IteratorBase::readBlob(Statement statement,
 
     getReader().log()->get(logDEBUG4) << "IteratorBase::readBlob expected nBlobLength: " << nBlobLength << std::endl;
 
-    statement->OpenBlob(block->locator);
+    // statement->OpenBlob(block->locator);
     bool read_all_data = statement->ReadBlob(block->locator,
                          (void*)(&(block->chunk)[0]),
                          block->chunk.size() ,
                          &nAmountRead);
 
-    statement->CloseBlob(block->locator);
+    // statement->CloseBlob(block->locator);
+
+    getReader().log()->get(logDEBUG4) << "IteratorBase::readBlob read nAmountRead: " << nAmountRead << std::endl;
     if (!read_all_data) throw pdal_error("Did not read all blob data!");
 
     getReader().log()->get(logDEBUG4) << "IteratorBase::readBlob actual nAmountRead: " << nAmountRead  << std::endl;

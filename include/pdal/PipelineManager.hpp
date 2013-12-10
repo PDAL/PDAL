@@ -77,7 +77,6 @@ public:
     // the user doesn't even need to know anything about the Writer class
     boost::uint64_t execute();
     
-    void registerPluginIfExists( const Options& options );
 
 private:
     StageFactory m_factory;
@@ -97,6 +96,9 @@ private:
 
     PipelineManager& operator=(const PipelineManager&); // not implemented
     PipelineManager(const PipelineManager&); // not implemented
+
+    void registerPluginIfExists( const Options& options );
+    
 };
 
 

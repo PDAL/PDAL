@@ -5,37 +5,43 @@ Dependencies
 ==============================================================================
 
 :Author: Howard Butler
-:Contact: hobu.inc at gmail.com
-:Date: 3/19/2012
+:Contact: howard@hobu.co
+:Date: 11/15/2013
 
 PDAL explicitly stands on the shoulders of giants that have come before it. 
 Specifically, PDAL depends on a number of libraries to do its work including: 
 
-* Boost_
-* GDAL_
-* Proj.4_
-* GeoTIFF_
-* libxml2_
-* Oracle Call Interface (OCI_)
-
+.. contents:: 
+    :depth: 1
+    :local:
+    
+.. note::
+    
+    :ref:`stage_index` contains explicit usages of the various 
+    stage types available to PDAL. 
+    
 Boost
 ------------------------------------------------------------------------------
 
-PDAL attempts to constrain its code-love for Boost and not always try to 
-use the latest and the greatest, but the instinct is hard to control. Specifically, 
-PDAL takes advantage of a number of late-version features in boost::accumulators 
-for statistics filtering, and as of this writing, it should be assumed that the 
-minimum version required for Boost is 1.48.  Other versions less than that 
-may work with some minor modifications or ``#ifdef``'ing, but the PDAL 
-developers currently track rather late versions of Boost.
+PDAL attempts to constrain its code-love for Boost and not always try to use the
+latest and the greatest, but the instinct is hard to control. Specifically, PDAL
+takes advantage of a number of late-version features in boost::accumulators for
+statistics filtering, and as of this writing, it should be assumed that the
+minimum version required for Boost is 1.48. Other versions less than that may
+work with some minor modifications or ``#ifdef``'ing, but the PDAL developers
+currently track rather late versions of Boost.
+
 
 To that end, PDAL embeds a custom version of Boost_ in the ./boost directory 
-of the source tree.  It can be activated with the ``-DPDAL_BOOST_EMBED=ON`` 
+of the source tree.  It is activated by the default ``-DPDAL_BOOST_EMBED=ON`` 
 CMake_ environment variable. Expect that the embedded Boost_ version is the 
 active version used by the developers, and in nearly all situations you can 
 just use the embedded Boost solution for your own builds.
 
-* Boost 1.48+ is required.
+.. note::
+
+    If you are not using the embedded Boost library that PDAL provides, 
+    a Boost version of 1.48+ is required.
 
 .. note::
     
@@ -68,8 +74,8 @@ An unexhaustive list includes:
 GDAL
 ------------------------------------------------------------------------------
 
-PDAL uses GDAL for spatial reference system description manipulation and image 
-reading and writing supporting for the NITF driver. In conjunction with GeoTIFF_, 
+PDAL uses GDAL for spatial reference system description manipulation, and image 
+reading supporting for the NITF driver, and :ref:`drivers.oci.writer` support. In conjunction with GeoTIFF_, 
 GDAL is used to convert GeoTIFF keys and OGC WKT SRS description strings into 
 formats required by specific drivers. While PDAL can be built without GDAL 
 support, if you want SRS manipulation and description ability, you must have 
@@ -107,16 +113,20 @@ LAS driver.  Obtain `GeoTIFF`_ from the same place you got `GDAL`_.
 Proj.4
 ------------------------------------------------------------------------------
 
-Proj.4_ is the projection engine that PDAL uses for the :cpp::class:`pdal::filters::InPlaceReprojection`.
+Proj.4_ is the projection engine that PDAL uses for the :cpp:class:`pdal::filters::InPlaceReprojection` and :ref:`filters.inplacereprojection`.
 
-* Proj.4 4.9.0+ is required.
+.. note::
+    
+    Proj.4 4.9.0+ is required.
 
 libxml2
 ------------------------------------------------------------------------------
 
-libxml2_ is used to serialize PDAL :cpp:class:`pdal::Schema` to- and fro- to raw XML.
+libxml2_ is used to serialize PDAL :cpp:class:`pdal::Schema` to and from to raw XML.
 
-* libxml 2.7.0+ is required. Older versions may also work but are untested.
+.. note::
+
+    libxml 2.7.0+ is required. Older versions may also work but are untested.
 
 `OCI`_
 ------------------------------------------------------------------------------
@@ -124,7 +134,9 @@ libxml2_ is used to serialize PDAL :cpp:class:`pdal::Schema` to- and fro- to raw
 Obtain the `Oracle Instant Client`_ and install in a location on your system.
 Be sure to install both the "Basic" and the "SDK" modules. Set your
 ``ORACLE_HOME`` environment variable system- or user-wide to point to this
-location so the CMake configuration can find your install.
+location so the CMake configuration can find your install. OCI is used by 
+both :ref:`drivers.oci.writer` and :ref:`drivers.oci.reader` for Oracle 
+Point Cloud read/write support.
 
 .. warning::
     `OCI`_'s libraries are inconsistently named.  You may need to create 
@@ -141,6 +153,50 @@ location so the CMake configuration can find your install.
 .. note::
     MSVC should only require the oci.lib and oci.dll library and dlls.
 
+Points2Grid
+------------------------------------------------------------------------------
+
+`Points2Grid`_ is a library with a simple `CMake`-based build system that 
+provides simple, out-of-process interpolation of large point sets using 
+Boost_. It can be obtained via github.com at https://github.com/CRREL/points2grid
+It is used by :ref:`drivers.p2g.writer` to output point cloud interpolation.
+
+Hexer
+------------------------------------------------------------------------------
+
+`Hexer`_ is a library with a simple `CMake`-based build system that 
+provides simple hexagon gridding of large point sets for density surface 
+generation and boundary approximation. It can be obtained via github.com at 
+https://github.com/hobu/hexer It is used by :ref:`filters.hexbin` to output 
+density surfaces and boundary approximations.
+
+Nitro
+------------------------------------------------------------------------------
+
+Nitro is a library that provides `NITF`_ support for PDAL to write LAS-in-NITF 
+files for :ref:`drivers.nitf.writer`. PDAL can only use a fork of Nitro located at http://github.com/hobu/nitro instead 
+of the mainline tree for two reasons:
+
+1) The fork contains a simple `CMake`-based build system
+2) The fork properly dynamically links on Windows to maintain LGPL compliance.
+
+It is expected that the fork will go away once these items are incorporated into 
+the main source tree.
+
+
+LASzip
+------------------------------------------------------------------------------
+
+`LASzip`_ is a library with a simple `CMake`-based build system that 
+provides periodic compression of `ASPRS LAS`_ data. It is used by the 
+:ref:`drivers.las.writer` and :ref:`drivers.las.reader` to provide 
+compressed LAS support.
+
+.. _`ASPRS LAS`: http://www.asprs.org/Committee-General/LASer-LAS-File-Format-Exchange-Activities.html
+.. _`LASzip`: http://laszip.org
+.. _`NITF`: http://en.wikipedia.org/wiki/National_Imagery_Transmission_Format
+.. _`Nitro`: http://nitro-nitf.sourceforge.net/wikka.php?wakka=HomePage
+
 .. _`Oracle Instant Client`: http://www.oracle.com/technology/tech/oci/instantclient/index.html
 .. _`OCI`: http://www.oracle.com/technology/tech/oci/index.html
 .. _`Oracle Point Cloud`: http://download.oracle.com/docs/cd/B28359_01/appdev.111/b28400/sdo_pc_pkg_ref.htm
@@ -155,4 +211,6 @@ location so the CMake configuration can find your install.
 .. _GeoTIFF: http://trac.osgeo.org/geotiff
 .. _libxml2: http://xmlsoft.org
 .. _CMake: http://www.cmake.org
+.. _`libpq`: http://www.postgresql.org/docs/9.3/static/libpq.html
 
+.. _`Points2Grid`: https://github.com/CRREL/points2grid

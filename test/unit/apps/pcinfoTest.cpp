@@ -152,7 +152,7 @@ BOOST_AUTO_TEST_CASE(pdalinfo_test_dumps)
     command.str("");
 
     std::string stats_test = Support::temppath("pdalinfo_stats.txt");
-    command << cmd + " --stats " + inputLas + " --seed 1234" +" > " + stats_test; 
+    command << cmd + " --stats " + inputLas + " --seed 1234 --sample" +" > " + stats_test; 
     stat = pdal::Utils::run_shell_command(command.str(), output);
     BOOST_CHECK_EQUAL(stat, 0);
 #if defined(PDAL_PLATFORM_WIN32)

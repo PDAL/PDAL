@@ -37,6 +37,11 @@
 
 #include <pdal/pdal_internal.hpp>
 
+// See http://lists.osgeo.org/pipermail/gdal-dev/2013-November/037429.html
+#define CPL_SERV_H_INCLUDED
+
+#pragma GCC diagnostic ignored "-Wfloat-equal"
+
 #ifdef PDAL_HAVE_LIBGEOTIFF
 #include <geo_simpletags.h>
 #include <cpl_conv.h>

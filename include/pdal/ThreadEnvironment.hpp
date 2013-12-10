@@ -38,6 +38,8 @@
 #include <pdal/pdal_internal.hpp>
 
 #include <boost/random/mersenne_twister.hpp>
+
+#pragma GCC diagnostic ignored "-Wredundant-decls"
 #include <boost/thread.hpp>
 
 namespace pdal

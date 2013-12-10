@@ -75,16 +75,3 @@ A Support function is provided for referencing this directory as well.
 Unit tests should always clean up and remove any files that they create
 (except perhaps in case of a failed test, in which case leaving the output
 around might be helpful for debugging).
-
-
-
-Other Tests
-===========
-
-We should also eventually have:
-
-* Large-file testing, to make sure we don't break when over the 2GB or 
-  4GB limit.
-  
-* Performance testing.  (mpg would like to see us put together a set of 
-  benchmark files, too.)
