@@ -727,7 +727,7 @@ BOOST_AUTO_TEST_CASE(test_orientation_dimension_interleaved_flipping)
 BOOST_AUTO_TEST_CASE(test_copyLikeDimensions)
 {
 
-
+    boost::uint32_t capacity(100);
     Dimension cls("Classification", dimension::UnsignedInteger, 1);
     Dimension x("X", dimension::SignedInteger, 4);
     Dimension y("Y", dimension::Float, 8);
@@ -740,20 +740,20 @@ BOOST_AUTO_TEST_CASE(test_copyLikeDimensions)
     schema.appendDimension(cls);
     schema.setOrientation(schema::DIMENSION_INTERLEAVED);
     
-    PointBuffer buffer(schema, 10);
+    PointBuffer buffer(schema, capacity);
     Dimension const& dimX = buffer.getSchema().getDimension("X");
     Dimension const& dimY = buffer.getSchema().getDimension("Y");
     Dimension const& dimCls = buffer.getSchema().getDimension("Classification");
     
-    buffer.setNumPoints(10);
+    buffer.setNumPoints(capacity);
     for(unsigned int i = 0; i < buffer.getNumPoints(); ++i)
     {
         buffer.setField<boost::int32_t>(dimX, i, i);
-        double yd = i + 100;
+        double yd = i + capacity;
         buffer.setField<double>(dimY, i, yd);
         buffer.setField<boost::uint8_t>(dimCls, i, 7);
     }
-    BOOST_CHECK_EQUAL(buffer.getNumPoints(), 10);
+    BOOST_CHECK_EQUAL(buffer.getNumPoints(), capacity);
     
     Schema flipped_schema(buffer.getSchema());
     flipped_schema.setOrientation(schema::POINT_INTERLEAVED);
@@ -763,8 +763,8 @@ BOOST_AUTO_TEST_CASE(test_copyLikeDimensions)
     PointBuffer::copyLikeDimensions(buffer, flipped, *dims, 0, 0, buffer.getNumPoints());
     flipped.setNumPoints(buffer.getNumPoints());
     BOOST_CHECK_EQUAL(flipped.getSchema().getByteSize(), 13);
-    BOOST_CHECK_EQUAL(flipped.getNumPoints(), 10);
-    BOOST_CHECK_EQUAL(flipped.getBufferByteLength(), 10*13);
+    BOOST_CHECK_EQUAL(flipped.getNumPoints(), capacity);
+    BOOST_CHECK_EQUAL(flipped.getBufferByteLength(), capacity*13);
     
     Dimension const& kls = flipped.getSchema().getDimension("Classification");    
     Dimension const& x2 = flipped.getSchema().getDimension("X");    
@@ -780,12 +780,34 @@ BOOST_AUTO_TEST_CASE(test_copyLikeDimensions)
         double y = flipped.getField<double>(y2, i);
         boost::uint8_t c = flipped.getField<boost::uint8_t>(kls, i);
         BOOST_CHECK_EQUAL(x, i);
-        BOOST_CHECK_CLOSE(y, i + 100, 0.000001);
+        BOOST_CHECK_CLOSE(y, i + capacity, 0.000001);
         BOOST_CHECK_EQUAL(c, 7u);
     }
     
     delete dims;
 
+
+    PointBuffer offset(buffer.getSchema(), capacity);
+    pdal::schema::DimensionMap* dims_offset = flipped_schema.mapDimensions(flipped.getSchema()); 
+    BOOST_CHECK_EQUAL(dims_offset->size(), 3);
+    PointBuffer::copyLikeDimensions(buffer, offset, *dims_offset, 7, 0, buffer.getNumPoints()-7);
+    offset.setNumPoints(buffer.getNumPoints());
+    BOOST_CHECK_EQUAL(offset.getSchema().getByteSize(), 13);
+    BOOST_CHECK_EQUAL(offset.getNumPoints(), capacity);
+    BOOST_CHECK_EQUAL(offset.getBufferByteLength(), capacity*13);
+
+    Dimension const& okls = offset.getSchema().getDimension("Classification");    
+    Dimension const& ox2 = offset.getSchema().getDimension("X");    
+    Dimension const& oy2 = offset.getSchema().getDimension("Y");
+    for(unsigned int i = 7; i < 17; ++i)
+    {
+        boost::int32_t x = offset.getField<boost::int32_t>(ox2, i);
+        double y = offset.getField<double>(oy2, i);
+        boost::uint8_t c = offset.getField<boost::uint8_t>(okls, i);
+        BOOST_CHECK_EQUAL(x, i);
+        BOOST_CHECK_CLOSE(y, i + capacity, 0.000001);
+        BOOST_CHECK_EQUAL(c, 7u);
+    }  
 
 
     return;
