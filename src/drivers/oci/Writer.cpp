@@ -1133,9 +1133,12 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
 
     // Pluck the block id out of the first point in the buffer
     pdal::Schema const& schema = buffer.getSchema();
-    Dimension const& blockDim = schema.getDimension("BlockID");
-
-    boost::int32_t block_id  = buffer.getField<boost::int32_t>(blockDim, 0);
+    Dimension const* blockDim(0);
+    blockDim = schema.getDimensionPtr("BlockID");
+    
+    boost::int32_t block_id(1);
+    if (blockDim)
+        block_id  = buffer.getField<boost::int32_t>(*blockDim, 0);
 
     std::ostringstream oss;
     std::ostringstream partition;
@@ -1190,7 +1193,7 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     if (pack)
     {
         output_buffer = buffer.pack();
-        
+        assert (output_buffer->getCapacity() == buffer.getNumPoints());
         if (m_orientation != output_buffer->getSchema().getOrientation())
         {
             PointBuffer* flipped = output_buffer->flipOrientation();
@@ -1198,7 +1201,11 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
             output_buffer = flipped;
         }
         point_data = output_buffer->getData(0);
-        point_data_length = output_buffer->getSchema().getByteSize() * output_buffer->getNumPoints();
+        
+        if (m_orientation == schema::DIMENSION_INTERLEAVED)
+            point_data_length = output_buffer->getSchema().getByteSize() * output_buffer->getCapacity();
+        else
+            point_data_length = output_buffer->getSchema().getByteSize() * output_buffer->getNumPoints();
     }
     else
     {
@@ -1206,12 +1213,19 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
         {
             output_buffer = buffer.flipOrientation();
             point_data = output_buffer->getData(0);
-            point_data_length = output_buffer->getSchema().getByteSize() * output_buffer->getNumPoints();
+            
+            if (m_orientation == schema::DIMENSION_INTERLEAVED)
+                point_data_length = output_buffer->getSchema().getByteSize() * output_buffer->getCapacity();
+            else
+                point_data_length = output_buffer->getSchema().getByteSize() * output_buffer->getNumPoints();
         }
         else
         {
             point_data = buffer.getData(0);
-            point_data_length = buffer.getSchema().getByteSize() * buffer.getNumPoints();
+            if (m_orientation == schema::DIMENSION_INTERLEAVED)
+                point_data_length = output_buffer->getSchema().getByteSize() * output_buffer->getCapacity();
+            else
+                point_data_length = output_buffer->getSchema().getByteSize() * output_buffer->getNumPoints();
             
         }
     }
