@@ -222,6 +222,8 @@ public:
                               boost::uint32_t srcPointIndex,
                               const PointBuffer& srcPointBuffer)
     {
+        assert (srcPointBuffer.getSchema().getOrientation() == getSchema().getOrientation());
+
         const boost::uint8_t* src = srcPointBuffer.getData(srcPointIndex);
         boost::uint8_t* dest = getData(destPointIndex);
         
@@ -254,6 +256,7 @@ public:
                                const PointBuffer& srcPointBuffer,
                                boost::uint32_t numPoints)
     {
+        assert (srcPointBuffer.getSchema().getOrientation() == getSchema().getOrientation());
         const boost::uint8_t* src = srcPointBuffer.getData(srcPointIndex);
         boost::uint8_t* dest = getData(destPointIndex);
 
