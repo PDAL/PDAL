@@ -116,8 +116,8 @@ void Block::GetBuffer(StageRandomIterator * iterator,
         iterator->seek(id);
         iterator->read(one_point);
 
-        one_point.setField(dimPoint, 0, id);
-        one_point.setField(dimBlock, 0, block_id);
+        one_point.setField<boost::uint32_t>(dimPoint, 0, id);
+        one_point.setField<boost::uint32_t>(dimBlock, 0, block_id);
 
         // put single point onto our block
         destination.copyPointsFast(count, 0, one_point, 1);
@@ -145,7 +145,9 @@ void Chipper::initialize()
 {
     Filter::initialize();
 
-    checkImpedance();
+    Schema& s = getSchemaRef();
+    s = alterSchema(s);
+
     setPointCountType(PointCount_Fixed);
     setNumPoints(0);
 
@@ -181,8 +183,6 @@ void Chipper::Load(PointBuffer& original_buffer, RefList& xvec, RefList& yvec, R
     boost::uint32_t idx;
     vector<PtRef>::iterator it;
 
-    pdal::Schema const& schema = getPrevStage().getSchema();
-
     boost::uint64_t count = getPrevStage().getNumPoints();
     if (count > std::numeric_limits<boost::uint32_t>::max())
         throw pdal_error("numPoints too large for Chipper");
@@ -192,12 +192,9 @@ void Chipper::Load(PointBuffer& original_buffer, RefList& xvec, RefList& yvec, R
     yvec.reserve(count32);
     spare.resize(count32);
 
-
+    Schema const& schema = original_buffer.getSchema();
     Dimension const& dimX = schema.getDimension("X");
     Dimension const& dimY = schema.getDimension("Y");
-
-    boost::uint32_t num_points_loaded(0);
-    boost::uint32_t num_points_to_load = count32;
 
     boost::scoped_ptr<StageSequentialIterator> iter(getPrevStage().createSequentialIterator(original_buffer));
 
@@ -206,15 +203,12 @@ void Chipper::Load(PointBuffer& original_buffer, RefList& xvec, RefList& yvec, R
     {
         boost::uint32_t numRead =  iter->read(original_buffer);
 
-
+        double x(0.0); double y(0.0);
         for (boost::uint32_t j = 0; j < numRead; j++)
         {
-
-            boost::int32_t xi = original_buffer.getField<boost::int32_t>(dimX, j);
-            boost::int32_t yi = original_buffer.getField<boost::int32_t>(dimY, j);
-
-            double x = dimX.applyScaling(xi);
-            double y = dimY.applyScaling(yi);
+            
+            x = original_buffer.applyScaling(dimX, j);
+            y = original_buffer.applyScaling(dimY, j);
 
             ref.m_pos = x;
             ref.m_ptindex = counter;
@@ -223,10 +217,7 @@ void Chipper::Load(PointBuffer& original_buffer, RefList& xvec, RefList& yvec, R
             ref.m_pos = y;
             yvec.push_back(ref);
             counter++;
-
         }
-
-        num_points_loaded += numRead;
 
         if (iter->atEnd())
         {
@@ -466,16 +457,16 @@ pdal::StageSequentialIterator* Chipper::createSequentialIterator(PointBuffer& bu
     return new pdal::filters::iterators::sequential::Chipper(*this, buffer);
 }
 
-void Chipper::checkImpedance()
+Schema Chipper::alterSchema(Schema const& input)
 {
-    Schema& schema = getSchemaRef();
-
-    Schema dimensions(getDefaultDimensions());
-
-    schema.appendDimension(dimensions.getDimension("PointID"));
-    schema.appendDimension(dimensions.getDimension("BlockID"));
-
-    return;
+    Schema output(input);
+    typedef std::vector<Dimension>::const_iterator Iterator;
+    std::vector<Dimension> dimensions = getDefaultDimensions();
+    for (Iterator i = dimensions.begin(); i != dimensions.end(); ++i)
+    {
+        output.appendDimension(*i);
+    }
+    return output;
 }
 
 std::vector<Dimension> Chipper::getDefaultDimensions()
@@ -534,7 +525,8 @@ boost::uint32_t Chipper::readBufferImpl(PointBuffer& buffer)
     buffer.setNumPoints(0);
 
     filters::chipper::Block const& block = m_chipper.GetBlock(m_currentBlockId);
-    std::size_t numPointsThisBlock = block.GetIDs().size();
+    // std::size_t numPointsThisBlock = block.GetIDs().size();
+    std::size_t numPointsThisBlock = block.m_right - block.m_left + 1;
     m_currentPointCount = m_currentPointCount + numPointsThisBlock;
 
     if (buffer.getCapacity() < numPointsThisBlock)

@@ -61,6 +61,7 @@ namespace filters
 {
 
 
+namespace iterators { namespace sequential { class Chipper; }}
 
 class PDAL_DLL Chipper;
 
@@ -139,6 +140,7 @@ public:
 class PDAL_DLL Block
 {
     friend class pdal::filters::Chipper;
+    friend class pdal::filters::iterators::sequential::Chipper;
 
 private:
     RefList *m_list_p;
@@ -227,8 +229,7 @@ private:
     void Emit(chipper::RefList& wide, boost::uint32_t widemin, boost::uint32_t widemax,
               chipper::RefList& narrow, boost::uint32_t narrowmin, boost::uint32_t narrowmax);
 
-    void checkImpedance();
-
+    Schema alterSchema(Schema const& schema);
 
     boost::uint32_t m_threshold;
     std::vector<chipper::Block> m_blocks;
