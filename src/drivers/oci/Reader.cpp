@@ -239,15 +239,11 @@ Options Reader::getDefaultOptions()
                  "SELECT statement that returns an SDO_PC object \
                  as its first and only queried item.");
 
-    Option capacity("capacity",
-                    0,
-                    "Block capacity");
 
     Option xml_schema_dump("xml_schema_dump", std::string(""), "Filename to dump the XML schema to.");
 
     options.add(connection);
     options.add(query);
-    options.add(capacity);
     options.add(xml_schema_dump);
 
     return options;
@@ -603,14 +599,10 @@ void IteratorBase::readBlob(Statement statement,
 
     getReader().log()->get(logDEBUG4) << "IteratorBase::readBlob actual nAmountRead: " << nAmountRead  << std::endl;
 
-    Schema const& oracle_schema = m_oracle_buffer->getSchema();
-
-    boost::uint32_t howMuchToRead = howMany * oracle_schema.getByteSize();
-
-    if (howMany > m_oracle_buffer->getCapacity())
+    if (nBlobLength > m_oracle_buffer->getBufferByteLength())
     {
         std::ostringstream oss;
-        oss << "blob size is larger than oracle buffer size! howMany: " << howMany << " m_oracle_buffer->getCapacity(): " << m_oracle_buffer->getCapacity();
+        oss << "blob size is larger than oracle buffer size! nBlobLength: " << nBlobLength << " m_oracle_buffer->getBufferByteLength(): " << m_oracle_buffer->getBufferByteLength() << " block->chunk.size(): " << block->chunk.size();
         throw pdal_error(oss.str());
     }
 
@@ -643,8 +635,7 @@ void IteratorBase::fillUserBuffer(PointBuffer& user_buffer)
         oss << "numOraclePoints < 0! : " << numOraclePoints;
         throw pdal_error(oss.str());
     }
-
-    
+ 
     PointBuffer::copyLikeDimensions(*m_oracle_buffer, user_buffer,
                                     *m_dimension_map,
                                     m_buffer_position, user_buffer.getNumPoints(),
@@ -665,10 +656,14 @@ void IteratorBase::fillUserBuffer(PointBuffer& user_buffer)
         }
     }
 
+    getReader().log()->get(logDEBUG2) << "IteratorBase::fillUserBuffer m_buffer_position:   " << m_buffer_position << std::endl;
+
     if (numOraclePoints > numUserSpace)
         m_buffer_position = m_buffer_position + numUserSpace;
     else if (numOraclePoints < numUserSpace)
         m_buffer_position = 0;
+
+    getReader().log()->get(logDEBUG2) << "IteratorBase::fillUserBuffer m_buffer_position:   " << m_buffer_position << std::endl;
 
     user_buffer.setNumPoints(howManyThisRead + user_buffer.getNumPoints());
 }
@@ -677,7 +672,6 @@ boost::uint32_t IteratorBase::myReadBuffer(PointBuffer& data)
 {
     return myReadBlocks(data);
 }
-
 
 BufferPtr IteratorBase::fetchPointBuffer(Statement statement, sdo_pc* pc)
 {
@@ -694,6 +688,7 @@ BufferPtr IteratorBase::fetchPointBuffer(Statement statement, sdo_pc* pc)
         boost::uint32_t block_capacity(0);
         Schema schema = m_reader.fetchSchema(statement, pc, block_capacity, getReader().getName()+".blocks");
         m_orientation = schema.getOrientation();
+        getReader().log()->get(logDEBUG2) << "Incoming schema orientation is " << m_orientation << std::endl;
 
         // if (block_capacity > capacity)
         // {
@@ -734,11 +729,9 @@ boost::uint32_t IteratorBase::myReadBlocks(PointBuffer& user_buffer)
     // This shouldn't ever happen
     if (m_block->num_points > static_cast<boost::int32_t>(m_oracle_buffer->getCapacity()))
     {
-        std::ostringstream oss;
-        oss << "Block size, " << m_block->num_points <<", is too large to fit in "
-            << "buffer of size " << user_buffer.getCapacity() <<". Increase buffer capacity with writer's \"chunk_size\" option "
-            << "or increase the read buffer size";
-        throw buffer_too_small(oss.str());
+        // This can happen if the block capacity of the SDO_PC 
+        // is mis-specified. We'll just resize in this case
+        m_oracle_buffer->resize(m_block->num_points);
     }
 
     if (!m_block->num_points)
