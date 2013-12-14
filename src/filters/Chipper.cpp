@@ -45,7 +45,6 @@
 #include <iostream>
 #include <limits>
 
-using namespace std;
 using namespace pdal::filters::chipper;
 
 /**
@@ -83,9 +82,9 @@ namespace pdal
 namespace filters
 {
 
-vector<boost::uint32_t> Block::GetIDs() const
+std::vector<boost::uint32_t> Block::GetIDs() const
 {
-    vector<boost::uint32_t> ids;
+    std::vector<boost::uint32_t> ids;
 
     for (boost::uint32_t i = m_left; i <= m_right; ++i)
         ids.push_back((*m_list_p)[i].m_ptindex);
@@ -99,35 +98,29 @@ void Block::GetBuffer(StageRandomIterator * iterator,
                       Dimension const& dimPoint,
                       Dimension const& dimBlock) const
 {
-    pdal::Schema const& schema = destination.getSchema();
 
     boost::int32_t size = m_right - m_left + 1;
     if (size < 0)
         throw pdal_error("m_right - m_left + 1 was less than 0 in Block::GetBuffer()!");
 
-    std::vector<boost::uint32_t> ids = GetIDs();
-
-    std::vector<boost::uint32_t>::const_iterator it;
-    boost::uint32_t count = 0;
-
-    for (it = ids.begin(); it != ids.end(); it++)
+    boost::uint32_t count(0);
+    for (boost::uint32_t i = m_left; i <= m_right; ++i)
     {
-        boost::uint32_t id = *it;
-        iterator->seek(id);
+        
+        boost::uint32_t id = (*m_list_p)[i].m_ptindex;
+        boost::uint64_t position(iterator->seek(id));
+        
         iterator->read(one_point);
 
         one_point.setField<boost::uint32_t>(dimPoint, 0, id);
         one_point.setField<boost::uint32_t>(dimBlock, 0, block_id);
 
         // put single point onto our block
-        destination.copyPointsFast(count, 0, one_point, 1);
-        destination.setNumPoints(count + 1);
-
+        destination.copyPointFast(count, 0, one_point);
         count++;
     }
 
 }
-
 
 
 Chipper::Chipper(Stage& prevStage, const Options& options)
@@ -137,7 +130,6 @@ Chipper::Chipper(Stage& prevStage, const Options& options)
     , m_spare(chipper::DIR_NONE)
 {
     m_threshold = options.getValueOrDefault<boost::uint32_t>("capacity", 5000u);
-
 }
 
 
@@ -164,7 +156,7 @@ void Chipper::initialize()
 Options Chipper::getDefaultOptions()
 {
     Options options;
-    Option capacity("capacity", 5000, "Tile capacity");
+    Option capacity("capacity", 5000u, "Tile capacity");
     options.add(capacity);
     return options;
 }
@@ -177,11 +169,14 @@ void Chipper::Chip(PointBuffer& buffer)
     DecideSplit(m_xvec, m_yvec, m_spare, 0, m_partitions.size() - 1);
 }
 
-void Chipper::Load(PointBuffer& original_buffer, RefList& xvec, RefList& yvec, RefList& spare)
+void Chipper::Load( PointBuffer& buffer, 
+                    RefList& xvec, 
+                    RefList& yvec, 
+                    RefList& spare)
 {
     PtRef ref;
     boost::uint32_t idx;
-    vector<PtRef>::iterator it;
+    std::vector<PtRef>::iterator it;
 
     boost::uint64_t count = getPrevStage().getNumPoints();
     if (count > std::numeric_limits<boost::uint32_t>::max())
@@ -192,23 +187,26 @@ void Chipper::Load(PointBuffer& original_buffer, RefList& xvec, RefList& yvec, R
     yvec.reserve(count32);
     spare.resize(count32);
 
-    Schema const& schema = original_buffer.getSchema();
+    Schema const& schema = buffer.getSchema();
     Dimension const& dimX = schema.getDimension("X");
     Dimension const& dimY = schema.getDimension("Y");
-
-    boost::scoped_ptr<StageSequentialIterator> iter(getPrevStage().createSequentialIterator(original_buffer));
+    
+    // we want to use the incoming buffer because we probably 
+    // have a cache filter on here, so we want to only read 
+    // all the data one time.
+    
+    boost::scoped_ptr<StageSequentialIterator> iter(getPrevStage().createSequentialIterator(buffer));
 
     boost::uint32_t counter(0);
     while (!iter->atEnd())
     {
-        boost::uint32_t numRead =  iter->read(original_buffer);
+        boost::uint32_t numRead =  iter->read(buffer);
 
         double x(0.0); double y(0.0);
         for (boost::uint32_t j = 0; j < numRead; j++)
         {
-            
-            x = original_buffer.applyScaling(dimX, j);
-            y = original_buffer.applyScaling(dimY, j);
+            x = buffer.applyScaling(dimX, j);
+            y = buffer.applyScaling(dimY, j);
 
             ref.m_pos = x;
             ref.m_ptindex = counter;
@@ -227,7 +225,7 @@ void Chipper::Load(PointBuffer& original_buffer, RefList& xvec, RefList& yvec, R
 
 
     // Sort xvec and assign other index in yvec to sorted indices in xvec.
-    sort(xvec.begin(), xvec.end());
+    std::sort(xvec.begin(), xvec.end());
     for (boost::uint32_t i = 0; i < xvec.size(); ++i)
     {
         idx = xvec[i].m_ptindex;
@@ -235,7 +233,7 @@ void Chipper::Load(PointBuffer& original_buffer, RefList& xvec, RefList& yvec, R
     }
 
     // Sort yvec.
-    sort(yvec.begin(), yvec.end());
+    std::sort(yvec.begin(), yvec.end());
 
     //Iterate through the yvector, setting the xvector appropriately.
     for (boost::uint32_t i = 0; i < yvec.size(); ++i)
@@ -249,7 +247,7 @@ void Chipper::Partition(boost::uint32_t size)
     num_partitions = size / m_threshold;
     if (size % m_threshold)
         num_partitions++;
-    double total = 0;
+    double total(0.0);
     double partition_size = static_cast<double>(size) / num_partitions;
     m_partitions.push_back(0);
     for (boost::uint32_t i = 0; i < num_partitions; ++i)
@@ -260,8 +258,11 @@ void Chipper::Partition(boost::uint32_t size)
     }
 }
 
-void Chipper::DecideSplit(RefList& v1, RefList& v2, RefList& spare,
-                          boost::uint32_t pleft, boost::uint32_t pright)
+void Chipper::DecideSplit(  RefList& v1,
+                            RefList& v2, 
+                            RefList& spare,
+                            boost::uint32_t pleft, 
+                            boost::uint32_t pright)
 {
     double v1range;
     double v2range;
@@ -278,8 +279,11 @@ void Chipper::DecideSplit(RefList& v1, RefList& v2, RefList& spare,
         Split(v2, v1, spare, pleft, pright);
 }
 
-void Chipper::Split(RefList& wide, RefList& narrow, RefList& spare,
-                    boost::uint32_t pleft, boost::uint32_t pright)
+void Chipper::Split(RefList& wide, 
+                    RefList& narrow, 
+                    RefList& spare,
+                    boost::uint32_t pleft, 
+                    boost::uint32_t pright)
 {
     boost::uint32_t lstart;
     boost::uint32_t rstart;
@@ -339,8 +343,10 @@ void Chipper::Split(RefList& wide, RefList& narrow, RefList& spare,
 // In this case the wide array is like we want it.  The narrow array is
 // ordered, but not for our split, so we have to find the max/min entries
 // for each partition in the final split.
-void Chipper::FinalSplit(RefList& wide, RefList& narrow,
-                         boost::uint32_t pleft, boost::uint32_t pright)
+void Chipper::FinalSplit(   RefList& wide, 
+                            RefList& narrow,
+                            boost::uint32_t pleft, 
+                            boost::uint32_t pright)
 {
 
     boost::int64_t left1 = -1;
@@ -407,8 +413,12 @@ void Chipper::FinalSplit(RefList& wide, RefList& narrow,
          static_cast<boost::uint32_t>(right2));
 }
 
-void Chipper::Emit(RefList& wide, boost::uint32_t widemin, boost::uint32_t widemax,
-                   RefList& narrow, boost::uint32_t narrowmin, boost::uint32_t narrowmax)
+void Chipper::Emit( RefList& wide, 
+                    boost::uint32_t widemin, 
+                    boost::uint32_t widemax,
+                    RefList& narrow, 
+                    boost::uint32_t narrowmin, 
+                    boost::uint32_t narrowmax)
 {
     Block b;
 
@@ -521,11 +531,8 @@ boost::uint32_t Chipper::readBufferImpl(PointBuffer& buffer)
     if (m_currentBlockId == m_chipper.GetBlockCount())
         return 0; // we're done.
 
-
-    buffer.setNumPoints(0);
-
     filters::chipper::Block const& block = m_chipper.GetBlock(m_currentBlockId);
-    // std::size_t numPointsThisBlock = block.GetIDs().size();
+
     std::size_t numPointsThisBlock = block.m_right - block.m_left + 1;
     m_currentPointCount = m_currentPointCount + numPointsThisBlock;
 
@@ -573,6 +580,7 @@ boost::uint32_t Chipper::readBufferImpl(PointBuffer& buffer)
                     blockID);
 
     buffer.setSpatialBounds(block.GetBounds());
+    buffer.setNumPoints(numPointsThisBlock);
     m_currentBlockId++;
     return numPointsThisBlock;
 
@@ -582,8 +590,13 @@ bool Chipper::atEndImpl() const
 {
     // we don't have a fixed point point --
     // we are at the end only when our source is at the end
-    const StageSequentialIterator& iter = getPrevIterator();
-    return iter.atEnd();
+    // const StageSequentialIterator& iter = getPrevIterator();
+    // return iter.atEnd();
+
+    if (m_currentBlockId == m_chipper.GetBlockCount())
+        return true;
+    else
+        return false;
 }
 
 Chipper::~Chipper()
