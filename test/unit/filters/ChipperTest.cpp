@@ -101,7 +101,9 @@ BOOST_AUTO_TEST_CASE(test_construction)
         Dimension const& dimZ = schema.getDimension("Z");
 
         StageRandomIterator* iter = reader.createRandomIterator(buffer);
-        chipper.GetBlock(20).GetBuffer(iter, buffer, one_point, 20, dimPoint, dimBlock);
+        schema::DimensionMap* dim_map = one_point.getSchema().mapDimensions(buffer.getSchema());
+
+        chipper.GetBlock(20).GetBuffer(iter, buffer, one_point, 20, dimPoint, dimBlock, dim_map);
 
         //
         // std::cout << buffer.getField<boost::int32_t>(0, 0) << std::endl;
