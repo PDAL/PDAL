@@ -168,7 +168,8 @@ public:
                     PointBuffer& one_point, 
                     boost::uint32_t block_id, 
                     Dimension const& dimPoint, 
-                    Dimension const& dimBlock) const;
+                    Dimension const& dimBlock,
+                    schema::DimensionMap* dimension_map) const;
     // double GetXmin() const
     //     { return m_xmin; }
     // double GetYmin() const
@@ -264,6 +265,7 @@ private:
     PointBuffer* m_one_point;
     Schema const* m_current_read_schema;
     StageRandomIterator * m_random_iterator;
+    schema::DimensionMap* m_dimension_map;
 
 
 };

@@ -96,7 +96,8 @@ void Block::GetBuffer(StageRandomIterator * iterator,
                       PointBuffer& one_point,
                       boost::uint32_t block_id,
                       Dimension const& dimPoint,
-                      Dimension const& dimBlock) const
+                      Dimension const& dimBlock,
+                      schema::DimensionMap* dimension_map) const
 {
 
     boost::int32_t size = m_right - m_left + 1;
@@ -114,6 +115,11 @@ void Block::GetBuffer(StageRandomIterator * iterator,
 
         one_point.setField<boost::uint32_t>(dimPoint, 0, id);
         one_point.setField<boost::uint32_t>(dimBlock, 0, block_id);
+
+        PointBuffer::copyLikeDimensions(one_point, destination,
+                                        *dimension_map,
+                                        0, count,
+                                        1);
 
         // put single point onto our block
         destination.copyPointFast(count, 0, one_point);
@@ -513,6 +519,7 @@ Chipper::Chipper(pdal::filters::Chipper const& filter, PointBuffer& buffer)
     , m_one_point(0)
     , m_current_read_schema(0)
     , m_random_iterator(0)
+    , m_dimension_map(0)
 
 {
     const_cast<pdal::filters::Chipper&>(m_chipper).Chip(buffer);
@@ -523,7 +530,6 @@ boost::uint64_t Chipper::skipImpl(boost::uint64_t count)
 {
     return naiveSkipImpl(count);
 }
-
 
 boost::uint32_t Chipper::readBufferImpl(PointBuffer& buffer)
 {
@@ -552,16 +558,21 @@ boost::uint32_t Chipper::readBufferImpl(PointBuffer& buffer)
     {
         m_one_point = new PointBuffer(schema, 1);
         m_current_read_schema = &(m_one_point->getSchema());
+        m_dimension_map = m_one_point->getSchema().mapDimensions(buffer.getSchema());
         m_random_iterator = m_chipper.getPrevStage().createRandomIterator(*m_one_point);
     }
 
     if (m_current_read_schema != &(m_one_point->getSchema()))
     {
         if (m_random_iterator)
+        {
             delete m_random_iterator;
+            delete m_dimension_map;
+        }
 
         m_random_iterator = m_chipper.getPrevStage().createRandomIterator(*m_one_point);
-        m_current_read_schema = &(m_one_point->getSchema());
+        m_dimension_map = m_one_point->getSchema().mapDimensions(buffer.getSchema());
+
     }
 
 
@@ -577,7 +588,8 @@ boost::uint32_t Chipper::readBufferImpl(PointBuffer& buffer)
                     *m_one_point,
                     m_currentBlockId,
                     pointID,
-                    blockID);
+                    blockID,
+                    m_dimension_map);
 
     buffer.setSpatialBounds(block.GetBounds());
     buffer.setNumPoints(numPointsThisBlock);
