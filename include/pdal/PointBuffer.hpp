@@ -336,7 +336,7 @@ public:
     void resize(boost::uint32_t const& capacity, bool bExact=false);
     
     /// @return a new PointBuffer with all ignored dimensions removed
-    PointBuffer* pack() const;
+    PointBuffer* pack(bool bRemoveIgnoredDimensions = true) const;
     
     /// @return a new PointBuffer with the opposite orientation
     PointBuffer* flipOrientation() const;

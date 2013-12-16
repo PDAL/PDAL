@@ -181,7 +181,7 @@ void PointBuffer::getData(boost::uint8_t** data, boost::uint64_t* array_size) co
     memcpy(*data, &(m_data.front()), static_cast<size_t>(*array_size));
 }
 
-PointBuffer* PointBuffer::pack() const
+PointBuffer* PointBuffer::pack(bool bRemoveIgnoredDimensions) const
 {
 
     // Creates a new buffer that has the ignored dimensions removed from
@@ -204,7 +204,7 @@ PointBuffer* PointBuffer::pack() const
             boost::uint8_t* data = getData(i);
             for (boost::uint32_t d = 0; d < idx.size(); ++d)
             {
-                if (! idx[d].isIgnored())
+                if (! idx[d].isIgnored() || !bRemoveIgnoredDimensions)
                 {
                     memcpy(current_position, data, idx[d].getByteSize());
                     current_position = current_position+idx[d].getByteSize();
@@ -220,7 +220,7 @@ PointBuffer* PointBuffer::pack() const
             // For each dimension, copy the data if it isn't ignored
             boost::uint8_t* data = getData(i);
             boost::uint64_t dimension_length = static_cast<boost::uint64_t>(idx[i].getByteSize()) * static_cast<boost::uint64_t>(getNumPoints());
-            if (! idx[i].isIgnored())
+            if (! idx[i].isIgnored() || !bRemoveIgnoredDimensions)
             {
    
                 memcpy(current_position, data, dimension_length);
