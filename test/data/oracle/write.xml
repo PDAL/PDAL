@@ -1,14 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Pipeline version="1.0">
     <Writer type="drivers.oci.writer">
-        <Option name="debug">
-            true
-        </Option>
-        <Option name="verbose">
-            1
-        </Option>
         <Option name="connection">
-            grid/grid@localhost/orcl
+            grid/grid@localhost/vm
         </Option>
         <Option name="base_table_name">
             SIMPLE_CLOUD
@@ -16,6 +10,8 @@
         <Option name="block_table_name">
             SIMPLE_BLOCKS
         </Option>
+        <Option name="store_dimensional_orientation">true</Option>
+        
         <Option name="cloud_column_name">
             CLOUD
         </Option>
@@ -49,10 +45,13 @@
         <Option name="post_block_sql">
         </Option>
         <Option name="capacity">
-            50
+            1065
         </Option>
         <Option name="stream_output_precision">
             8
+        </Option>
+        <Option name="pack_ignored_fields">
+            true
         </Option>
             <Filter type="filters.inplacereprojection">
                 <Option name="out_srs">
@@ -71,9 +70,6 @@
                     <Filter type="filters.cache">
                         <Option name="max_cache_blocks">
                             1
-                        </Option>
-                        <Option name="cache_block_size">
-                            50
                         </Option>
                         <Reader type="drivers.las.reader">
                                 <Option name="filename">
