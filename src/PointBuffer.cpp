@@ -189,7 +189,9 @@ PointBuffer* PointBuffer::pack(bool bRemoveIgnoredDimensions) const
 
     pdal::Schema const& schema = getSchema();
     schema::index_by_index const& idx = schema.getDimensions().get<schema::index>();
-    pdal::Schema output_schema = schema.pack();
+    pdal::Schema output_schema(schema);
+    if (bRemoveIgnoredDimensions)
+        output_schema = schema.pack();
     pdal::PointBuffer* output = new PointBuffer(output_schema, getNumPoints());
 
     boost::uint8_t* src = getData(0);
@@ -204,25 +206,45 @@ PointBuffer* PointBuffer::pack(bool bRemoveIgnoredDimensions) const
             boost::uint8_t* data = getData(i);
             for (boost::uint32_t d = 0; d < idx.size(); ++d)
             {
-                if (! idx[d].isIgnored() || !bRemoveIgnoredDimensions)
+                if (bRemoveIgnoredDimensions) 
+                {
+                    if (! idx[d].isIgnored())
+                    {
+                        memcpy(current_position, data, idx[d].getByteSize());
+                        current_position = current_position+idx[d].getByteSize();                        
+                    }
+                } 
+                else 
                 {
                     memcpy(current_position, data, idx[d].getByteSize());
-                    current_position = current_position+idx[d].getByteSize();
+                    current_position = current_position+idx[d].getByteSize();                    
                 }
+                // if (! idx[d].isIgnored())
+                // {
+                //     memcpy(current_position, data, idx[d].getByteSize());
+                //     current_position = current_position+idx[d].getByteSize();
+                // }
                 data = data + idx[d].getByteSize();
             }
         }
     }
     else if (orientation == schema::DIMENSION_INTERLEAVED)
     {
-        for (boost::uint32_t i = 0; i < getSchema().size(); ++i)
+        for (boost::uint32_t d = 0; d < getSchema().size(); ++d)
         {
             // For each dimension, copy the data if it isn't ignored
-            boost::uint8_t* data = getData(i);
-            boost::uint64_t dimension_length = static_cast<boost::uint64_t>(idx[i].getByteSize()) * static_cast<boost::uint64_t>(getNumPoints());
-            if (! idx[i].isIgnored() || !bRemoveIgnoredDimensions)
+            boost::uint8_t* data = getData(d);
+            boost::uint64_t dimension_length = static_cast<boost::uint64_t>(idx[d].getByteSize()) * static_cast<boost::uint64_t>(getNumPoints());
+            if (bRemoveIgnoredDimensions) 
             {
-   
+                if (! idx[d].isIgnored())
+                {
+                    memcpy(current_position, data, dimension_length);
+                    current_position = current_position+dimension_length;
+                }
+            } 
+            else 
+            {
                 memcpy(current_position, data, dimension_length);
                 current_position = current_position+dimension_length;
             }
