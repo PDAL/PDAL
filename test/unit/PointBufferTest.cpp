@@ -700,9 +700,9 @@ BOOST_AUTO_TEST_CASE(test_orientation_dimension_interleaved_flipping)
     BOOST_CHECK_EQUAL(again->getNumPoints(), cnt);
     BOOST_CHECK_EQUAL(again->getBufferByteLength(), cnt*13);
     
-    Dimension const& akls = flipped->getSchema().getDimension("Classification");    
-    Dimension const& ax2 = flipped->getSchema().getDimension("X");    
-    Dimension const& ay2 = flipped->getSchema().getDimension("Y");
+    Dimension const& akls = again->getSchema().getDimension("Classification");    
+    Dimension const& ax2 = again->getSchema().getDimension("X");    
+    Dimension const& ay2 = again->getSchema().getDimension("Y");
     
     for(unsigned int i = 0; i < again->getNumPoints(); ++i)
     {
