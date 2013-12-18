@@ -584,6 +584,7 @@ void IteratorBase::readBlob(Statement statement,
         block->chunk.resize(nBlobLength);
     }
 
+    getReader().log()->get(logDEBUG4) << "IteratorBase::readBlob expected point count: " << howMany << std::endl;
     getReader().log()->get(logDEBUG4) << "IteratorBase::readBlob expected nBlobLength: " << nBlobLength << std::endl;
 
     // statement->OpenBlob(block->locator);
@@ -601,14 +602,24 @@ void IteratorBase::readBlob(Statement statement,
 
     if (nBlobLength > m_oracle_buffer->getBufferByteLength())
     {
-        std::ostringstream oss;
-        oss << "blob size is larger than oracle buffer size! nBlobLength: " << nBlobLength << " m_oracle_buffer->getBufferByteLength(): " << m_oracle_buffer->getBufferByteLength() << " block->chunk.size(): " << block->chunk.size();
-        throw pdal_error(oss.str());
+        // resize and check again. If the schema doesn't match 
+        // what the blob actually had, this won't divide correctly and 
+        // we're screwed.
+        boost::uint32_t capacity = nBlobLength/m_oracle_buffer->getSchema().getByteSize();
+        assert(nBlobLength % m_oracle_buffer->getSchema().getByteSize() == 0);
+        m_oracle_buffer->resize(capacity, true);
+    }
+
+    if (m_oracle_buffer->getSchema().getOrientation() == schema::DIMENSION_INTERLEAVED)
+    {
+        boost::uint32_t capacity = nBlobLength/m_oracle_buffer->getSchema().getByteSize();
+        assert(nBlobLength % m_oracle_buffer->getSchema().getByteSize() == 0);
+        m_oracle_buffer->resize(capacity, true);
     }
 
     m_oracle_buffer->setDataStride(&(block->chunk)[0], 0, nAmountRead);
+    m_oracle_buffer->setNumPoints(m_block->num_points);
 
-    m_oracle_buffer->setNumPoints(howMany);
 }
 
 void IteratorBase::fillUserBuffer(PointBuffer& user_buffer)
@@ -729,8 +740,6 @@ boost::uint32_t IteratorBase::myReadBlocks(PointBuffer& user_buffer)
     // This shouldn't ever happen
     if (m_block->num_points > static_cast<boost::int32_t>(m_oracle_buffer->getCapacity()))
     {
-        // This can happen if the block capacity of the SDO_PC 
-        // is mis-specified. We'll just resize in this case
         m_oracle_buffer->resize(m_block->num_points);
     }
 
