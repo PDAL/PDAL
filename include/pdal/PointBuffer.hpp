@@ -289,6 +289,8 @@ public:
         return const_cast<boost::uint8_t*>(&(m_data.front())) + position;
 
     }
+    
+    inline boost::uint8_t* getDataStart() { return &(m_data.front()); }
 
     /// copies the raw data into your own byte array and sets the size
     /// @param data pointer to your byte array
