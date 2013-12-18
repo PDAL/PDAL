@@ -23,6 +23,10 @@
             <Option name="connection">
                 grid/grid@localhost/vm
             </Option>
+            
+            <Option name="populate_pointsourceid">
+                true
+            </Option>            
         </Reader>
     </Writer>
 </Pipeline>
