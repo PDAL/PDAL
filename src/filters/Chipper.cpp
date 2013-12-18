@@ -91,44 +91,6 @@ std::vector<boost::uint32_t> Block::GetIDs() const
     return ids;
 }
 
-void Block::GetBuffer(StageRandomIterator * iterator,
-                      PointBuffer& destination,
-                      PointBuffer& one_point,
-                      boost::uint32_t block_id,
-                      Dimension const& dimPoint,
-                      Dimension const& dimBlock,
-                      schema::DimensionMap* dimension_map) const
-{
-
-    boost::int32_t size = m_right - m_left + 1;
-    if (size < 0)
-        throw pdal_error("m_right - m_left + 1 was less than 0 in Block::GetBuffer()!");
-
-    boost::uint32_t count(0);
-    for (boost::uint32_t i = m_left; i <= m_right; ++i)
-    {
-        
-        boost::uint32_t id = (*m_list_p)[i].m_ptindex;
-        boost::uint64_t position(iterator->seek(id));
-        
-        iterator->read(one_point);
-
-        one_point.setField<boost::uint32_t>(dimPoint, 0, id);
-        one_point.setField<boost::uint32_t>(dimBlock, 0, block_id);
-
-        PointBuffer::copyLikeDimensions(one_point, destination,
-                                        *dimension_map,
-                                        0, count,
-                                        1);
-
-        // put single point onto our block
-        destination.copyPointFast(count, 0, one_point);
-        count++;
-    }
-
-}
-
-
 Chipper::Chipper(Stage& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
     , m_xvec(chipper::DIR_X)
@@ -519,7 +481,9 @@ Chipper::Chipper(pdal::filters::Chipper const& filter, PointBuffer& buffer)
     , m_one_point(0)
     , m_current_read_schema(0)
     , m_random_iterator(0)
-    , m_dimension_map(0)
+    , m_one_point_dimension_map(0)
+    , m_dimPoint(0)
+    , m_dimBlock(0)
 
 {
     const_cast<pdal::filters::Chipper&>(m_chipper).Chip(buffer);
@@ -531,34 +495,59 @@ boost::uint64_t Chipper::skipImpl(boost::uint64_t count)
     return naiveSkipImpl(count);
 }
 
+
+boost::uint32_t Chipper::fillUserBuffer( PointBuffer& buffer,
+                                         filters::chipper::Block const& block)                              
+{
+    boost::uint32_t s = block.GetSize();
+    boost::uint32_t count(0);
+    boost::uint32_t numToRead(buffer.getCapacity());
+    
+    for (boost::uint32_t i = block.left(); i <= block.right(); ++i)
+    {
+        boost::uint32_t id = block.GetID(i); 
+        boost::uint64_t position(m_random_iterator->seek(id));
+        
+        m_random_iterator->read(*m_one_point);
+        
+        if (m_dimPoint)
+            m_one_point->setField<boost::uint32_t>(*m_dimPoint, 0, id);
+        if (m_dimBlock)
+            m_one_point->setField<boost::uint32_t>(*m_dimBlock, 0, m_currentBlockId);
+
+        PointBuffer::copyLikeDimensions(*m_one_point, buffer,
+                                        *m_one_point_dimension_map,
+                                        0, count,
+                                        1);
+        
+        count++;
+        numToRead--;
+        if (numToRead == 0)
+            break;
+    }
+    
+    return count;
+}
+
+void Chipper::readBufferBeginImpl(PointBuffer& buffer)
+{
+    Schema const& schema = buffer.getSchema();
+    m_dimPoint = schema.getDimensionPtr("PointID");
+    m_dimBlock = schema.getDimensionPtr("BlockID");    
+}
+
 boost::uint32_t Chipper::readBufferImpl(PointBuffer& buffer)
 {
 
     if (m_currentBlockId == m_chipper.GetBlockCount())
         return 0; // we're done.
 
-    filters::chipper::Block const& block = m_chipper.GetBlock(m_currentBlockId);
-
-    std::size_t numPointsThisBlock = block.m_right - block.m_left + 1;
-    m_currentPointCount = m_currentPointCount + numPointsThisBlock;
-
-    if (buffer.getCapacity() < numPointsThisBlock)
-    {
-        // FIXME: Expand the buffer?
-        throw pdal_error("Buffer not large enough to hold block!");
-    }
-
-    Schema const& schema = buffer.getSchema();
-    Dimension const& pointID = schema.getDimension("PointID");
-    Dimension const& blockID = schema.getDimension("BlockID");
-
-    // Don't create this every GetBuffer call
-
     if (!m_one_point)
     {
+        Schema const& schema = buffer.getSchema();
         m_one_point = new PointBuffer(schema, 1);
         m_current_read_schema = &(m_one_point->getSchema());
-        m_dimension_map = m_one_point->getSchema().mapDimensions(buffer.getSchema());
+        m_one_point_dimension_map = m_one_point->getSchema().mapDimensions(buffer.getSchema());
         m_random_iterator = m_chipper.getPrevStage().createRandomIterator(*m_one_point);
     }
 
@@ -567,11 +556,11 @@ boost::uint32_t Chipper::readBufferImpl(PointBuffer& buffer)
         if (m_random_iterator)
         {
             delete m_random_iterator;
-            delete m_dimension_map;
+            delete m_one_point_dimension_map;
         }
 
         m_random_iterator = m_chipper.getPrevStage().createRandomIterator(*m_one_point);
-        m_dimension_map = m_one_point->getSchema().mapDimensions(buffer.getSchema());
+        m_one_point_dimension_map = m_one_point->getSchema().mapDimensions(buffer.getSchema());
 
     }
 
@@ -583,18 +572,15 @@ boost::uint32_t Chipper::readBufferImpl(PointBuffer& buffer)
         throw pdal_error(oss.str());
     }
 
-    block.GetBuffer(m_random_iterator,
-                    buffer,
-                    *m_one_point,
-                    m_currentBlockId,
-                    pointID,
-                    blockID,
-                    m_dimension_map);
+    filters::chipper::Block const& block = m_chipper.GetBlock(m_currentBlockId);
+    std::size_t numPointsThisBlock = block.GetSize();
+    
+    boost::uint32_t numRead = fillUserBuffer(buffer, block);
+    m_currentPointCount = m_currentPointCount + numRead;
 
     buffer.setSpatialBounds(block.GetBounds());
-    buffer.setNumPoints(numPointsThisBlock);
     m_currentBlockId++;
-    return numPointsThisBlock;
+    return numRead;
 
 }
 
