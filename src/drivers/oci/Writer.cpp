@@ -1189,11 +1189,14 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     PointBuffer* output_buffer(0);
     
     bool pack = getOptions().getValueOrDefault<bool>("pack_ignored_fields", true);
-    
     if (pack)
     {
+        log()->get(logDEBUG4) << "packing out ignored fields" << std::endl;
         output_buffer = buffer.pack();
         assert (output_buffer->getCapacity() == buffer.getNumPoints());
+
+        // The requested orientation is m_orientation, and it does not match 
+        // the orientation of the output_buffer. Flip it.
         if (m_orientation != output_buffer->getSchema().getOrientation())
         {
             PointBuffer* flipped = output_buffer->flipOrientation();
@@ -1213,7 +1216,6 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
         {
             output_buffer = buffer.flipOrientation();
             point_data = output_buffer->getData(0);
-            
             if (m_orientation == schema::DIMENSION_INTERLEAVED)
                 point_data_length = output_buffer->getSchema().getByteSize() * output_buffer->getCapacity();
             else
@@ -1223,13 +1225,13 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
         {
             point_data = buffer.getData(0);
             if (m_orientation == schema::DIMENSION_INTERLEAVED)
-                point_data_length = output_buffer->getSchema().getByteSize() * output_buffer->getCapacity();
+                point_data_length = buffer.getSchema().getByteSize() * buffer.getCapacity();
             else
-                point_data_length = output_buffer->getSchema().getByteSize() * output_buffer->getNumPoints();
-            
+                point_data_length = buffer.getSchema().getByteSize() * buffer.getNumPoints();
         }
     }
-
+    
+    log()->get(logDEBUG4) << "Writing blob of size" << point_data_length << std::endl;
     OCILobLocator* locator;
     if (m_streamChunks)
     {
