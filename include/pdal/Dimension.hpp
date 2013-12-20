@@ -482,9 +482,15 @@ public:
             
             oss.precision(12);
             oss.setf(std::ios::fixed);
-            oss << "Dimension::removeScaling: scale: '" << m_numericScale <<"' and/or offset: '" << m_numericOffset <<"' combination causes "
-                "de-scaled value to be greater than std::numeric_limits::max for dimension '" << getFQName() << "'. " <<
-                "(v - offset)/ scale) is: (" << out << " - " << m_numericOffset << ")/" << m_numericScale <<") == '" << out << "' but max() for the datatype is: " << (std::numeric_limits<T>::max)();
+            oss << "Dimension::removeScaling: scale: '" << m_numericScale 
+                << "' and/or offset: " << m_numericOffset <<"' combination causes "
+                "de-scaled value to be greater than std::numeric_limits::max for dimension '" 
+                << getFQName() << "'. " <<
+                "(v - offset)/ scale) is: (" 
+                << out << " - " << m_numericOffset << ")/" 
+                << m_numericScale <<") == '" << out 
+                << "' but max() for the datatype is: " 
+                << (std::numeric_limits<T>::max)();
             throw std::out_of_range(oss.str());
         }
         else if (bLess)
@@ -497,9 +503,15 @@ public:
                 out = static_cast<boost::int64_t>(u64);
             oss.precision(12);
             oss.setf(std::ios::fixed);
-            oss << "Dimension::removeScaling: scale: '" << m_numericScale <<"' and/or offset: " << m_numericOffset <<"' combination causes "
-                "de-scaled value to be less than std::numeric_limits::min for dimension '" << getFQName() << "'. " <<
-                "(v - offset)/ scale) is: (" << out << " - " << m_numericOffset << ")/" << m_numericScale <<") == '" << out << "' but min() for the datatype is: " << (std::numeric_limits<T>::min)();
+            oss << "Dimension::removeScaling: scale: '" << m_numericScale 
+                << "' and/or offset: " << m_numericOffset <<"' combination causes "
+                "de-scaled value to be less than std::numeric_limits::min for dimension '" 
+                << getFQName() << "'. " <<
+                "(v - offset)/ scale) is: (" 
+                << out << " - " << m_numericOffset << ")/" 
+                << m_numericScale <<") == '" << out 
+                << "' but min() for the datatype is: " 
+                << (std::numeric_limits<T>::min)();
 
             throw std::out_of_range(oss.str());
         }
