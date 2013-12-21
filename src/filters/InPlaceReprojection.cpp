@@ -76,23 +76,11 @@ struct OSRTransformDeleter
 
 InPlaceReprojection::InPlaceReprojection(Stage& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
-    , m_outSRS(options.getValueOrThrow<pdal::SpatialReference>("out_srs"))
-    , m_inferInputSRS(false)
-    , m_new_x_id(boost::uuids::nil_uuid())
-    , m_new_y_id(boost::uuids::nil_uuid())
-    , m_new_z_id(boost::uuids::nil_uuid())
-    , m_old_x_id(boost::uuids::nil_uuid())
-    , m_old_y_id(boost::uuids::nil_uuid())
-    , m_old_z_id(boost::uuids::nil_uuid())
+
 {
     if (options.hasOption("in_srs"))
     {
         m_inSRS = options.getValueOrThrow<pdal::SpatialReference>("in_srs");
-        m_inferInputSRS = false;
-    }
-    else
-    {
-        m_inferInputSRS = true;
     }
 
     return;
@@ -106,200 +94,26 @@ void InPlaceReprojection::initialize()
 {
     Filter::initialize();
 
-    if (m_inferInputSRS)
+    if (!getOptions().hasOption("in_srs"))
     {
         m_inSRS = getPrevStage().getSpatialReference();
-    }
-
-#ifdef PDAL_HAVE_GDAL
-
-    pdal::GlobalEnvironment::get().getGDALDebug()->addLog(log());
-
-    m_in_ref_ptr = ReferencePtr(OSRNewSpatialReference(0), OGRSpatialReferenceDeleter());
-    m_out_ref_ptr = ReferencePtr(OSRNewSpatialReference(0), OGRSpatialReferenceDeleter());
-
-    int result = OSRSetFromUserInput(m_in_ref_ptr.get(), m_inSRS.getWKT(pdal::SpatialReference::eCompoundOK).c_str());
-    if (result != OGRERR_NONE)
+    } else
     {
-        std::ostringstream msg;
-        msg << "Could not import input spatial reference for InPlaceReprojection:: "
-            << CPLGetLastErrorMsg() << " code: " << result
-            << " wkt: '" << m_inSRS.getWKT() << "'";
-        throw std::runtime_error(msg.str());
+        m_inSRS = getOptions().getValueOrThrow<pdal::SpatialReference>("in_srs");
     }
 
-    result = OSRSetFromUserInput(m_out_ref_ptr.get(), m_outSRS.getWKT(pdal::SpatialReference::eCompoundOK).c_str());
-    if (result != OGRERR_NONE)
-    {
-        std::ostringstream msg;
-        msg << "Could not import output spatial reference for InPlaceReprojection:: "
-            << CPLGetLastErrorMsg() << " code: " << result
-            << " wkt: '" << m_outSRS.getWKT() << "'";
-        std::string message(msg.str());
-        throw std::runtime_error(message);
-    }
-    m_transform_ptr = TransformPtr(OCTNewCoordinateTransformation(m_in_ref_ptr.get(), m_out_ref_ptr.get()), OSRTransformDeleter());
 
-    if (!m_transform_ptr.get())
-    {
-        std::ostringstream msg;
-        msg << "Could not construct CoordinateTransformation in InPlaceReprojection:: ";
-        std::string message(msg.str());
-        throw std::runtime_error(message);
-    }
-
-#endif
-
+    m_outSRS = getOptions().getValueOrThrow<pdal::SpatialReference>("out_srs");
     setSpatialReference(m_outSRS);
-
-    Schema& s = getSchemaRef();
-    s = alterSchema(s);
-
 
     return;
 }
 
 
-void InPlaceReprojection::setDimension(std::string const& name,
-                                       dimension::id& old_id,
-                                       dimension::id& new_id,
-                                       Schema& schema,
-                                       double scale,
-                                       double offset)
-{
-
-
-    Dimension const& old_dim = schema.getDimension(name);
-
-    log()->get(logDEBUG2) << "found '" << name <<"' dimension " << old_dim << std::endl;
-
-    Dimension derived(old_dim.getName(), old_dim.getInterpretation(), old_dim.getByteSize(), old_dim.getDescription());
-    derived.setNumericScale(scale);
-    derived.setNumericOffset(offset);
-    derived.createUUID();
-    derived.setNamespace(getName());
-    derived.setParent(old_dim.getUUID());
-    schema.appendDimension(derived);
-
-    old_id = old_dim.getUUID();
-    new_id = derived.getUUID();
-
-    log()->get(logDEBUG2) << "source    dimension: " << old_dim << std::endl;
-    log()->get(logDEBUG2) << "derived dimension: " << derived << std::endl;
-
-    log()->get(logDEBUG2) << "source  id: " << old_id << std::endl;
-    log()->get(logDEBUG2) << "derived id: " << new_id << std::endl;
-
-    bool markIgnored = getOptions().getValueOrDefault<bool>("ignore_old_dimensions", true);
-    if (markIgnored)
-    {
-        Dimension const& dim = schema.getDimension(old_id);
-        log()->get(logDEBUG2) << "marking " << name << " as ignored with uuid "  << old_id << std::endl;
-
-        Dimension d(dim);
-        boost::uint32_t flags = d.getFlags();
-        d.setFlags(flags | dimension::IsIgnored);
-        schema.setDimension(d);
-    }
-
-}
-
-void InPlaceReprojection::reprojectOffsets(double& offset_x,
-        double& offset_y,
-        double& offset_z)
-{
-
-#ifdef PDAL_HAVE_GDAL
-    int ret = 0;
-
-    double dummy_z(0.0);
-    bool doOffsetZ = getOptions().getValueOrDefault<bool>("do_offset_z", false);
-
-    double* z = doOffsetZ ? &offset_z : &dummy_z;
-    ret = OCTTransform(m_transform_ptr.get(), 1, &offset_x, &offset_y, z);
-    if (!ret)
-    {
-        std::ostringstream msg;
-        msg << "Could not project offset for InPlaceReprojection::" << CPLGetLastErrorMsg() << ret;
-        throw pdal_error(msg.str());
-    }
-#else
-
-#endif
-
-}
-
-Schema InPlaceReprojection::alterSchema(Schema& schema)
-{
-
-
-    const std::string x_name = getOptions().getValueOrDefault<std::string>("x_dim", "X");
-    const std::string y_name = getOptions().getValueOrDefault<std::string>("y_dim", "Y");
-    const std::string z_name = getOptions().getValueOrDefault<std::string>("z_dim", "Z");
-
-    log()->get(logDEBUG2) << "x_dim '" << x_name <<"' requested" << std::endl;
-    log()->get(logDEBUG2) << "y_dim '" << y_name <<"' requested" << std::endl;
-    log()->get(logDEBUG2) << "z_dim '" << z_name <<"' requested" << std::endl;
-
-    Dimension const& dimX = schema.getDimension(x_name);
-    Dimension const& dimY = schema.getDimension(y_name);
-    Dimension const& dimZ = schema.getDimension(z_name);
-
-    log()->get(logDEBUG3) << "Fetched x_name: " << dimX;
-    log()->get(logDEBUG3) << "Fetched y_name: " << dimY;
-    log()->get(logDEBUG3) << "Fetched z_name: " << dimZ;
-
-    /* Start with the incoming dimension offsets */
-    double offset_x = dimX.getNumericOffset();
-    double offset_y = dimY.getNumericOffset();
-    double offset_z = dimZ.getNumericOffset();
-    
-    offset_x = getOptions().getValueOrDefault<double>("offset_x", offset_x);
-    offset_y = getOptions().getValueOrDefault<double>("offset_y", offset_y);
-    offset_z = getOptions().getValueOrDefault<double>("offset_z", offset_z);    
-    
-    /* Reproject incoming offsets to new coordinate system */
-    log()->floatPrecision(8);
-    log()->get(logDEBUG2) << "original offset x,y: " << offset_x <<"," << offset_y << std::endl;
-
-    try
-    {
-        double x(offset_x);
-        double y(offset_y);
-        double z(offset_z);
-        reprojectOffsets(x, y, z);        
-        log()->get(logDEBUG2) << "reprojected offset x,y: " 
-                              << x <<"," 
-                              << y << std::endl;
-        offset_x = x;
-        offset_y = y;
-        offset_z = z;
-    } catch (pdal::pdal_error&)
-    {
-        // If we failed to reproject the offsets, we're going to just use
-        // what we have
-        /* If user-specified offsets exist, use those instead of the reprojected offsets */
-        log()->get(logDEBUG2) << "Default offset used due to inability to reproject original offset x,y: " 
-                              << offset_x <<"," 
-                              << offset_y << std::endl;
-    }
 
 
 
 
-    /* Read any user-specified scales */
-    double scale_x = getOptions().getValueOrDefault<double>("scale_x", dimX.getNumericScale());
-    double scale_y = getOptions().getValueOrDefault<double>("scale_y", dimY.getNumericScale());
-    double scale_z = getOptions().getValueOrDefault<double>("scale_z", dimZ.getNumericScale());
-
-    /* Apply scaling/offset to output schema */
-    setDimension(x_name, m_old_x_id, m_new_x_id, schema, scale_x, offset_x);
-    setDimension(y_name, m_old_y_id, m_new_y_id, schema, scale_y, offset_y);
-    setDimension(z_name, m_old_z_id, m_new_z_id, schema, scale_z, offset_z);
-
-    return schema;
-
-}
 
 Options InPlaceReprojection::getDefaultOptions()
 {
@@ -336,27 +150,6 @@ Options InPlaceReprojection::getDefaultOptions()
 
 
 
-void InPlaceReprojection::transform(double& x, double& y, double& z) const
-{
-
-#ifdef PDAL_HAVE_GDAL
-    int ret = 0;
-
-    ret = OCTTransform(m_transform_ptr.get(), 1, &x, &y, &z);
-    if (!ret)
-    {
-        std::ostringstream msg;
-        msg << "Could not project point for InPlaceReprojection::" << CPLGetLastErrorMsg() << ret;
-        throw pdal_error(msg.str());
-    }
-#else
-    boost::ignore_unused_variable_warning(x);
-    boost::ignore_unused_variable_warning(y);
-    boost::ignore_unused_variable_warning(z);
-#endif
-
-    return;
-}
 
 
 void InPlaceReprojection::setScaledValue(PointBuffer& data,
@@ -465,9 +258,83 @@ namespace inplacereprojection
 {
 
 IteratorBase::IteratorBase(pdal::filters::InPlaceReprojection const& filter,
-                           PointBuffer&)
+                           PointBuffer& buffer)
     : m_reprojectionFilter(filter)
+    , m_new_x_id(boost::uuids::nil_uuid())
+    , m_new_y_id(boost::uuids::nil_uuid())
+    , m_new_z_id(boost::uuids::nil_uuid())
+    , m_old_x_id(boost::uuids::nil_uuid())
+    , m_old_y_id(boost::uuids::nil_uuid())
+    , m_old_z_id(boost::uuids::nil_uuid())                               
 {
+
+
+#ifdef PDAL_HAVE_GDAL
+
+    pdal::GlobalEnvironment::get().getGDALDebug()->addLog(m_reprojectionFilter.log());
+
+    m_in_ref_ptr = ReferencePtr(OSRNewSpatialReference(0), OGRSpatialReferenceDeleter());
+    m_out_ref_ptr = ReferencePtr(OSRNewSpatialReference(0), OGRSpatialReferenceDeleter());
+
+    int result = OSRSetFromUserInput(m_in_ref_ptr.get(), m_reprojectionFilter.getInSRS().getWKT(pdal::SpatialReference::eCompoundOK).c_str());
+    if (result != OGRERR_NONE)
+    {
+        std::ostringstream msg;
+        msg << "Could not import input spatial reference for InPlaceReprojection:: "
+            << CPLGetLastErrorMsg() << " code: " << result
+            << " wkt: '" << m_reprojectionFilter.getInSRS().getWKT() << "'";
+        throw std::runtime_error(msg.str());
+    }
+
+    result = OSRSetFromUserInput(m_out_ref_ptr.get(), m_reprojectionFilter.getOutSRS().getWKT(pdal::SpatialReference::eCompoundOK).c_str());
+    if (result != OGRERR_NONE)
+    {
+        std::ostringstream msg;
+        msg << "Could not import output spatial reference for InPlaceReprojection:: "
+            << CPLGetLastErrorMsg() << " code: " << result
+            << " wkt: '" << m_reprojectionFilter.getOutSRS().getWKT() << "'";
+        std::string message(msg.str());
+        throw std::runtime_error(message);
+    }
+    m_transform_ptr = TransformPtr(OCTNewCoordinateTransformation(m_in_ref_ptr.get(), m_out_ref_ptr.get()), OSRTransformDeleter());
+
+    if (!m_transform_ptr.get())
+    {
+        std::ostringstream msg;
+        msg << "Could not construct CoordinateTransformation in InPlaceReprojection:: ";
+        std::string message(msg.str());
+        throw std::runtime_error(message);
+    }
+
+#endif
+    
+    Schema new_schema = alterSchema(buffer.getSchema());
+    buffer.reset(new_schema);
+    m_reprojectionFilter.log()->get(logDEBUG4) << "inplacereprojection iterator has modified schema" << std::endl;
+}
+
+void IteratorBase::reprojectOffsets(double& offset_x,
+        double& offset_y,
+        double& offset_z)
+{
+
+#ifdef PDAL_HAVE_GDAL
+    int ret = 0;
+
+    double dummy_z(0.0);
+    bool doOffsetZ = m_reprojectionFilter.getOptions().getValueOrDefault<bool>("do_offset_z", false);
+
+    double* z = doOffsetZ ? &offset_z : &dummy_z;
+    ret = OCTTransform(m_transform_ptr.get(), 1, &offset_x, &offset_y, z);
+    if (!ret)
+    {
+        std::ostringstream msg;
+        msg << "Could not project offset for InPlaceReprojection::" << CPLGetLastErrorMsg() << ret;
+        throw pdal_error(msg.str());
+    }
+#else
+
+#endif
 
 }
 
@@ -485,8 +352,8 @@ void IteratorBase::updateBounds(PointBuffer& buffer)
     try
     {
 
-        m_reprojectionFilter.transform(minx, miny, minz);
-        m_reprojectionFilter.transform(maxx, maxy, maxz);
+        transform(minx, miny, minz);
+        transform(maxx, maxy, maxz);
 
     }
 
@@ -522,13 +389,13 @@ void IteratorBase::projectData(PointBuffer& buffer, boost::uint32_t numPoints)
 
     const Schema& schema = buffer.getSchema();
 
-    Dimension const& old_x = schema.getDimension(m_reprojectionFilter.getOldXId());
-    Dimension const& old_y = schema.getDimension(m_reprojectionFilter.getOldYId());
-    Dimension const& old_z = schema.getDimension(m_reprojectionFilter.getOldZId());
+    Dimension const& old_x = schema.getDimension(getOldXId());
+    Dimension const& old_y = schema.getDimension(getOldYId());
+    Dimension const& old_z = schema.getDimension(getOldZId());
 
-    Dimension const& new_x = schema.getDimension(m_reprojectionFilter.getNewXId());
-    Dimension const& new_y = schema.getDimension(m_reprojectionFilter.getNewYId());
-    Dimension const& new_z = schema.getDimension(m_reprojectionFilter.getNewZId());
+    Dimension const& new_x = schema.getDimension(getNewXId());
+    Dimension const& new_y = schema.getDimension(getNewYId());
+    Dimension const& new_z = schema.getDimension(getNewZId());
 
     bool logOutput = m_reprojectionFilter.log()->getLevel() > logDEBUG3;
 
@@ -545,7 +412,8 @@ void IteratorBase::projectData(PointBuffer& buffer, boost::uint32_t numPoints)
         m_reprojectionFilter.log()->get(logDEBUG3) << "new_z: " << new_z;
 
     }
-
+    
+    std::cout << buffer.getSchema() << std::endl;
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
         double x = buffer.applyScaling( old_x, pointIndex);
@@ -558,7 +426,7 @@ void IteratorBase::projectData(PointBuffer& buffer, boost::uint32_t numPoints)
             m_reprojectionFilter.log()->get(logDEBUG5) << "input: " << x << " y: " << y << " z: " << z << std::endl;
         }
 
-        m_reprojectionFilter.transform(x,y,z);
+        transform(x,y,z);
 
         if (logOutput)
         {
@@ -585,6 +453,144 @@ void IteratorBase::projectData(PointBuffer& buffer, boost::uint32_t numPoints)
     updateBounds(buffer);
 }
 
+
+Schema IteratorBase::alterSchema(Schema const& schema)
+{
+    Schema output(schema);
+    const std::string x_name = m_reprojectionFilter.getOptions().getValueOrDefault<std::string>("x_dim", "X");
+    const std::string y_name = m_reprojectionFilter.getOptions().getValueOrDefault<std::string>("y_dim", "Y");
+    const std::string z_name = m_reprojectionFilter.getOptions().getValueOrDefault<std::string>("z_dim", "Z");
+
+    m_reprojectionFilter.log()->get(logDEBUG2) << "x_dim '" << x_name <<"' requested" << std::endl;
+    m_reprojectionFilter.log()->get(logDEBUG2) << "y_dim '" << y_name <<"' requested" << std::endl;
+    m_reprojectionFilter.log()->get(logDEBUG2) << "z_dim '" << z_name <<"' requested" << std::endl;
+
+    Dimension const& dimX = output.getDimension(x_name);
+    Dimension const& dimY = output.getDimension(y_name);
+    Dimension const& dimZ = output.getDimension(z_name);
+
+    m_reprojectionFilter.log()->get(logDEBUG3) << "Fetched x_name: " << dimX;
+    m_reprojectionFilter.log()->get(logDEBUG3) << "Fetched y_name: " << dimY;
+    m_reprojectionFilter.log()->get(logDEBUG3) << "Fetched z_name: " << dimZ;
+
+    /* Start with the incoming dimension offsets */
+    double offset_x = dimX.getNumericOffset();
+    double offset_y = dimY.getNumericOffset();
+    double offset_z = dimZ.getNumericOffset();
+    
+    offset_x = m_reprojectionFilter.getOptions().getValueOrDefault<double>("offset_x", offset_x);
+    offset_y = m_reprojectionFilter.getOptions().getValueOrDefault<double>("offset_y", offset_y);
+    offset_z = m_reprojectionFilter.getOptions().getValueOrDefault<double>("offset_z", offset_z);    
+    
+    /* Reproject incoming offsets to new coordinate system */
+    m_reprojectionFilter.log()->floatPrecision(8);
+    m_reprojectionFilter.log()->get(logDEBUG2) << "original offset x,y: " << offset_x <<"," << offset_y << std::endl;
+
+    try
+    {
+        double x(offset_x);
+        double y(offset_y);
+        double z(offset_z);
+        reprojectOffsets(x, y, z);        
+        m_reprojectionFilter.log()->get(logDEBUG2) << "reprojected offset x,y: " 
+                              << x <<"," 
+                              << y << std::endl;
+        offset_x = x;
+        offset_y = y;
+        offset_z = z;
+    } catch (pdal::pdal_error&)
+    {
+        // If we failed to reproject the offsets, we're going to just use
+        // what we have
+        /* If user-specified offsets exist, use those instead of the reprojected offsets */
+        m_reprojectionFilter.log()->get(logDEBUG2) << "Default offset used due to inability to reproject original offset x,y: " 
+                              << offset_x <<"," 
+                              << offset_y << std::endl;
+    }
+
+
+
+
+    /* Read any user-specified scales */
+    double scale_x = m_reprojectionFilter.getOptions().getValueOrDefault<double>("scale_x", dimX.getNumericScale());
+    double scale_y = m_reprojectionFilter.getOptions().getValueOrDefault<double>("scale_y", dimY.getNumericScale());
+    double scale_z = m_reprojectionFilter.getOptions().getValueOrDefault<double>("scale_z", dimZ.getNumericScale());
+
+    /* Apply scaling/offset to output schema */
+    setDimension(x_name, m_old_x_id, m_new_x_id, output, scale_x, offset_x);
+    setDimension(y_name, m_old_y_id, m_new_y_id, output, scale_y, offset_y);
+    setDimension(z_name, m_old_z_id, m_new_z_id, output, scale_z, offset_z);
+
+    return output;
+
+}
+
+void IteratorBase::setDimension(std::string const& name,
+                                       dimension::id& old_id,
+                                       dimension::id& new_id,
+                                       Schema& schema,
+                                       double scale,
+                                       double offset)
+{
+
+
+    Dimension const& old_dim = schema.getDimension(name);
+
+    m_reprojectionFilter.log()->get(logDEBUG2) << "found '" << name <<"' dimension " << old_dim << std::endl;
+
+    Dimension derived(old_dim.getName(), old_dim.getInterpretation(), old_dim.getByteSize(), old_dim.getDescription());
+    derived.setNumericScale(scale);
+    derived.setNumericOffset(offset);
+    derived.createUUID();
+    derived.setNamespace(m_reprojectionFilter.getName());
+    derived.setParent(old_dim.getUUID());
+    schema.appendDimension(derived);
+
+    old_id = old_dim.getUUID();
+    new_id = derived.getUUID();
+
+    m_reprojectionFilter.log()->get(logDEBUG2) << "source  dimension: " << old_dim << std::endl;
+    m_reprojectionFilter.log()->get(logDEBUG2) << "derived dimension: " << derived << std::endl;
+
+    m_reprojectionFilter.log()->get(logDEBUG2) << "source  id: " << old_id << std::endl;
+    m_reprojectionFilter.log()->get(logDEBUG2) << "derived id: " << new_id << std::endl;
+
+    bool markIgnored = m_reprojectionFilter.getOptions().getValueOrDefault<bool>("ignore_old_dimensions", true);
+    if (markIgnored)
+    {
+        Dimension const& dim = schema.getDimension(old_id);
+        m_reprojectionFilter.log()->get(logDEBUG2) << "marking " << name << " as ignored with uuid "  << old_id << std::endl;
+
+        Dimension d(dim);
+        boost::uint32_t flags = d.getFlags();
+        d.setFlags(flags | dimension::IsIgnored);
+        schema.setDimension(d);
+    }
+
+}
+
+
+void IteratorBase::transform(double& x, double& y, double& z) const
+{
+
+#ifdef PDAL_HAVE_GDAL
+    int ret = 0;
+
+    ret = OCTTransform(m_transform_ptr.get(), 1, &x, &y, &z);
+    if (!ret)
+    {
+        std::ostringstream msg;
+        msg << "Could not project point for InPlaceReprojection::" << CPLGetLastErrorMsg() << ret;
+        throw pdal_error(msg.str());
+    }
+#else
+    boost::ignore_unused_variable_warning(x);
+    boost::ignore_unused_variable_warning(y);
+    boost::ignore_unused_variable_warning(z);
+#endif
+
+    return;
+}
 } // inplacereprojection
 
 namespace sequential
@@ -620,6 +626,8 @@ bool InPlaceReprojection::atEndImpl() const
 {
     return getPrevIterator().atEnd();
 }
+
+
 
 } // sequential
 
