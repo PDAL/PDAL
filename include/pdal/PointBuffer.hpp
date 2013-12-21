@@ -457,9 +457,7 @@ inline void PointBuffer::setField(pdal::Dimension const& dim, boost::uint32_t po
         throw buffer_error("unknown pdal::Schema::m_orientation provided!");
     }
 
-#ifdef DEBUG
-    assert(offset + sizeof(T) <= getBufferByteSize());
-#endif
+    assert(offset + sizeof(T) <= getBufferByteLength());
 
     boost::uint8_t* p = (boost::uint8_t*)&(m_data.front()) + offset;
 
@@ -511,19 +509,7 @@ inline  T const& PointBuffer::getField(pdal::Dimension const& dim, boost::uint32
         throw buffer_error("unknown pdal::Schema::m_orientation provided!");
     }
 
-#ifdef DEBUG
-    // This test ends up being somewhat expensive when run for every field 
-    // for every point. 
-    
-    if (offset + sizeof(T) > getBufferByteSize())
-    {
-        std::ostringstream oss;
-        oss << "Offset for given dimension is off the end of the buffer!";
-        throw buffer_error(oss.str());
-    }
-
-    assert(offset + sizeof(T) <= getBufferByteSize() );
-#endif
+    assert(offset + sizeof(T) <= getBufferByteLength());
 
     boost::uint8_t const* p = (boost::uint8_t const*)&(m_data.front()) + offset;
     T const& output = *(T const*)(void const*)p;
