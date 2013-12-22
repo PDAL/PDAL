@@ -413,7 +413,6 @@ void IteratorBase::projectData(PointBuffer& buffer, boost::uint32_t numPoints)
 
     }
     
-    std::cout << buffer.getSchema() << std::endl;
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
         double x = buffer.applyScaling( old_x, pointIndex);
