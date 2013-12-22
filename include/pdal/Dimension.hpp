@@ -49,6 +49,7 @@
 
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
+#include <boost/type_traits.hpp>
 
 #include <limits>
 
@@ -443,13 +444,13 @@ public:
         T output(0);
         boost::int64_t i64(0);
         boost::uint64_t u64(0);
-        if (std::is_floating_point<T>::value)
+        if (boost::is_floating_point<T>::value)
         {   
             output = static_cast<T>(descaled);
             return output;
         }
         
-        bool bSigned(std::is_signed<T>::value);
+        bool bSigned(boost::is_signed<T>::value);
         bool bGreater(false);
         bool bLess(false);
         if (bSigned)
