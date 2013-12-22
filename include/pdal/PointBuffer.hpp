@@ -222,6 +222,8 @@ public:
                               boost::uint32_t srcPointIndex,
                               const PointBuffer& srcPointBuffer)
     {
+        assert (srcPointBuffer.getSchema().getOrientation() == getSchema().getOrientation());
+
         const boost::uint8_t* src = srcPointBuffer.getData(srcPointIndex);
         boost::uint8_t* dest = getData(destPointIndex);
         
@@ -254,6 +256,7 @@ public:
                                const PointBuffer& srcPointBuffer,
                                boost::uint32_t numPoints)
     {
+        assert (srcPointBuffer.getSchema().getOrientation() == getSchema().getOrientation());
         const boost::uint8_t* src = srcPointBuffer.getData(srcPointIndex);
         boost::uint8_t* dest = getData(destPointIndex);
 
@@ -281,11 +284,13 @@ public:
         {
             pointbuffer::PointBufferByteSize offset(0);
             offset = m_schema.getDimension(pointIndex).getByteOffset();
-            position = static_cast<pointbuffer::PointBufferByteSize>(m_numPoints) * offset;
+            position = static_cast<pointbuffer::PointBufferByteSize>(m_capacity) * offset;
         }
         return const_cast<boost::uint8_t*>(&(m_data.front())) + position;
 
     }
+    
+    inline boost::uint8_t* getDataStart() { return &(m_data.front()); }
 
     /// copies the raw data into your own byte array and sets the size
     /// @param data pointer to your byte array
@@ -333,7 +338,10 @@ public:
     void resize(boost::uint32_t const& capacity, bool bExact=false);
     
     /// @return a new PointBuffer with all ignored dimensions removed
-    PointBuffer* pack() const;
+    PointBuffer* pack(bool bRemoveIgnoredDimensions = true) const;
+    
+    /// @return a new PointBuffer with the opposite orientation
+    PointBuffer* flipOrientation() const;
     
     /** @name Serialization
     */
@@ -449,9 +457,7 @@ inline void PointBuffer::setField(pdal::Dimension const& dim, boost::uint32_t po
         throw buffer_error("unknown pdal::Schema::m_orientation provided!");
     }
 
-#ifdef DEBUG
-    assert(offset + sizeof(T) <= getBufferByteSize());
-#endif
+    assert(offset + sizeof(T) <= getBufferByteLength());
 
     boost::uint8_t* p = (boost::uint8_t*)&(m_data.front()) + offset;
 
@@ -503,19 +509,7 @@ inline  T const& PointBuffer::getField(pdal::Dimension const& dim, boost::uint32
         throw buffer_error("unknown pdal::Schema::m_orientation provided!");
     }
 
-#ifdef DEBUG
-    // This test ends up being somewhat expensive when run for every field 
-    // for every point. 
-    
-    if (offset + sizeof(T) > getBufferByteSize())
-    {
-        std::ostringstream oss;
-        oss << "Offset for given dimension is off the end of the buffer!";
-        throw buffer_error(oss.str());
-    }
-
-    assert(offset + sizeof(T) <= getBufferByteSize() );
-#endif
+    assert(offset + sizeof(T) <= getBufferByteLength());
 
     boost::uint8_t const* p = (boost::uint8_t const*)&(m_data.front()) + offset;
     T const& output = *(T const*)(void const*)p;
