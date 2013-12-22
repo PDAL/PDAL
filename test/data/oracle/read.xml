@@ -7,6 +7,39 @@
         <Option name="compression">
             false
         </Option>
+        <Filter type="filters.selector">
+          <Option name="ignore">
+            <Options>
+              <Option name="dimension">ReturnNumber</Option>
+              <Option name="dimension">NumberOfReturns</Option>
+              <Option name="dimension">ScanDirectionFlag</Option>
+              <Option name="dimension">EdgeOfFlightLine</Option>
+              <Option name="dimension">ScanAngleRank</Option>
+              <Option name="dimension">UserData</Option>
+              <Option name="dimension">PointSourceId</Option>
+            </Options>
+          </Option>
+          <Option name="overwrite_existing_dimensions">true</Option>
+          <Option name="ignore_default">true</Option>
+          <Option name="keep">
+            <Options>
+              <Option name="dimension">X</Option>
+              <Option name="dimension">Y</Option>
+              <Option name="dimension">Z</Option>
+              <Option name="dimension">Intensity</Option>
+              <Option name="dimension">Classification</Option>
+            </Options>
+          </Option>     
+        <!-- <Filter type="filters.inplacereprojection">
+            <Option name="out_srs">
+                EPSG:4326
+            </Option>
+            <Option name="scale_x">
+                0.0000001
+            </Option>
+            <Option name="scale_y">
+                0.0000001
+            </Option> -->
         <Reader type="drivers.oci.reader">
             <Option name="query">
                             
@@ -24,9 +57,11 @@
                 grid/grid@localhost/vm
             </Option>
             
-            <Option name="populate_pointsourceid">
+            <!-- <Option name="populate_pointsourceid">
                 true
-            </Option>            
+            </Option>       -->      
         </Reader>
+    </Filter>
+    </Filter>
     </Writer>
 </Pipeline>
