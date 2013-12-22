@@ -697,7 +697,7 @@ BufferPtr IteratorBase::fetchPointBuffer(Statement statement, sdo_pc* pc)
     else
     {
         boost::uint32_t block_capacity(0);
-        Schema schema = m_reader.fetchSchema(statement, pc, block_capacity, getReader().getName()+".blocks");
+        Schema schema = m_reader.fetchSchema(statement, pc, block_capacity, getReader().getName());
         m_orientation = schema.getOrientation();
         getReader().log()->get(logDEBUG2) << "Incoming schema orientation is " << m_orientation << std::endl;
 
@@ -838,7 +838,7 @@ DimensionMapPtr IteratorBase::fetchDimensionMap(Statement statement, sdo_pc* pc,
     else
     {
         schema::DimensionMap* m = oracle_buffer.getSchema().mapDimensions(user_buffer.getSchema());
-        DimensionMapPtr output  = DimensionMapPtr(oracle_buffer.getSchema().mapDimensions(user_buffer.getSchema(), true /*ignore namespaces*/));
+        DimensionMapPtr output  = DimensionMapPtr(oracle_buffer.getSchema().mapDimensions(user_buffer.getSchema(), false /*ignore namespaces*/));
         getReader().log()->get(logDEBUG2) << "DimensionMapPtr->size():  " << output->size() << std::endl;
         if (!output->size()) throw pdal_error("fetchDimensionMap map was unable to map any dimensions!");
         
