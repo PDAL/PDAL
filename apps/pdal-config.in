@@ -7,7 +7,7 @@ libdir=@libdir@
 usage()
 {
 	cat <<EOF
-Usage: liblas-config [OPTIONS]
+Usage: pdal-config [OPTIONS]
 Options:
 	[--libs]
 	[--cflags]
