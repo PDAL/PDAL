@@ -163,4 +163,56 @@ BOOST_AUTO_TEST_CASE(test_schema_read)
 }
 
 
+BOOST_AUTO_TEST_CASE(test_schema_orientation)
+{
+
+  
+    Dimension cls("Classification", dimension::UnsignedInteger, 1);
+    Dimension x("X", dimension::SignedInteger, 4);
+    Dimension y("Y", dimension::Float, 8);
+    
+    Schema schema;
+    schema.appendDimension(x);
+    schema.appendDimension(y);
+    schema.appendDimension(cls);
+    schema.setOrientation(schema::DIMENSION_INTERLEAVED);
+  
+    
+    pdal::schema::Writer writer(schema);
+
+    std::string xml_output = writer.getXML();
+std::ostream* out = FileUtils::createFile("orientation-schema.xml");
+out->write(xml_output.c_str(), strlen(xml_output.c_str()));
+FileUtils::closeFile(out);
+    
+    pdal::schema::Reader reader2(xml_output, std::string(""));
+    pdal::Schema schema2 = reader2.getSchema();
+    
+    BOOST_CHECK_EQUAL(schema2.getOrientation(), schema.getOrientation());
+
+    schema::index_by_index const& dims1 = schema.getDimensions().get<schema::index>();
+    schema::index_by_index const& dims2 = schema2.getDimensions().get<schema::index>();
+
+    // const std::vector<pdal::Dimension>& dims1 = schema.getDimensions();
+    // const std::vector<pdal::Dimension>& dims2 = schema2.getDimensions();
+
+    BOOST_CHECK_EQUAL(dims1.size(), dims2.size());
+
+    for (boost::uint32_t i = 0; i < dims2.size(); ++i)
+    {
+        pdal::Dimension const& dim1 = dims1[i];
+        pdal::Dimension const& dim2 = dims2[i];
+
+        BOOST_CHECK_EQUAL(dim1.getName(), dim2.getName());
+        BOOST_CHECK_EQUAL(dim1.getInterpretation(), dim2.getInterpretation());
+        BOOST_CHECK_EQUAL(dim1.getByteSize(), dim2.getByteSize());
+
+        BOOST_CHECK_EQUAL(dim1.getDescription(), dim2.getDescription());
+
+    }
+
+}
+
+
+
 BOOST_AUTO_TEST_SUITE_END()

@@ -131,6 +131,8 @@ namespace sequential
 {
 
 
+typedef schema::DimensionMap* DimensionMapPtr;
+typedef std::map<int, DimensionMapPtr> DimensionMaps;
 typedef boost::shared_ptr<PointBuffer> BufferPtr;
 typedef std::map<int, BufferPtr> BufferMap;
 
@@ -149,6 +151,7 @@ protected:
     boost::uint32_t myReadBlocks(PointBuffer& data);
 
     BufferPtr fetchPointBuffer(Statement statment, sdo_pc* pc);
+    DimensionMapPtr fetchDimensionMap(Statement statement, sdo_pc* pc, PointBuffer const& oracle_buffer, PointBuffer const& user_buffer);
 
     Statement m_block_statement;
     Statement m_initialQueryStatement;
@@ -162,8 +165,10 @@ protected:
     BufferPtr m_oracle_buffer;
     BufferMap m_buffers;
     boost::uint32_t m_buffer_position;
-
-
+    DimensionMapPtr m_dimension_map;
+    schema::Orientation m_orientation;
+    DimensionMaps m_dimensions;
+    
 private:
     const pdal::drivers::oci::Reader& m_reader;
 

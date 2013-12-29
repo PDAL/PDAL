@@ -7,22 +7,61 @@
         <Option name="compression">
             false
         </Option>
+        <Filter type="filters.selector">
+          <Option name="ignore">
+            <Options>
+              <Option name="dimension">ReturnNumber</Option>
+              <Option name="dimension">NumberOfReturns</Option>
+              <Option name="dimension">ScanDirectionFlag</Option>
+              <Option name="dimension">EdgeOfFlightLine</Option>
+              <Option name="dimension">ScanAngleRank</Option>
+              <Option name="dimension">UserData</Option>
+              <Option name="dimension">PointSourceId</Option>
+            </Options>
+          </Option>
+          <Option name="overwrite_existing_dimensions">true</Option>
+          <Option name="ignore_default">true</Option>
+          <Option name="keep">
+            <Options>
+              <Option name="dimension">X</Option>
+              <Option name="dimension">Y</Option>
+              <Option name="dimension">Z</Option>
+              <Option name="dimension">Intensity</Option>
+              <Option name="dimension">Classification</Option>
+            </Options>
+          </Option>     
+        <!-- <Filter type="filters.inplacereprojection">
+            <Option name="out_srs">
+                EPSG:4326
+            </Option>
+            <Option name="scale_x">
+                0.0000001
+            </Option>
+            <Option name="scale_y">
+                0.0000001
+            </Option> -->
         <Reader type="drivers.oci.reader">
             <Option name="query">
-                SELECT CLOUD FROM SIMPLE_CLOUD where id in (1,2)
+                            
+                SELECT l."OBJ_ID", l."BLK_ID", l."BLK_EXTENT", l."BLK_DOMAIN",
+                       l."PCBLK_MIN_RES", l."PCBLK_MAX_RES", l."NUM_POINTS",
+                       l."NUM_UNSORTED_POINTS", l."PT_SORT_DIM", l."POINTS", b.cloud
+                  FROM SIMPLE_BLOCKS l, SIMPLE_CLOUD b
+                 WHERE l.obj_id = b.id and l.obj_id in (1)
+                order by l.obj_id
             </Option>
             <Option name="xml_schema_dump">
-                oracle-schema.xml
+                flipped-dimensions.xml
             </Option>
             <Option name="connection">
-                grid/grid@localhost/orcl
+                grid/grid@localhost/vm
             </Option>
-            <Option name="debug">
+            
+            <!-- <Option name="populate_pointsourceid">
                 true
-            </Option>
-            <Option name="verbose">
-                3
-            </Option>
+            </Option>       -->      
         </Reader>
+    </Filter>
+    </Filter>
     </Writer>
 </Pipeline>

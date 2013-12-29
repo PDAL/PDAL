@@ -61,6 +61,7 @@ namespace filters
 {
 
 
+namespace iterators { namespace sequential { class Chipper; }}
 
 class PDAL_DLL Chipper;
 
@@ -138,7 +139,24 @@ public:
 
 class PDAL_DLL Block
 {
+public:
     friend class pdal::filters::Chipper;
+
+    inline boost::uint32_t GetID(boost::uint32_t const& index) const
+    {
+        return (*m_list_p)[index].m_ptindex;
+    }
+    
+    inline boost::uint32_t GetSize() const
+    {
+        boost::int32_t size = m_right - m_left + 1;
+        if (size < 0)
+            throw pdal_error("m_right - m_left + 1 was less than 0 in Block::size()!");
+        return boost::uint32_t(size);
+    }
+    
+    inline boost::uint32_t left() const { return m_left; }
+    inline boost::uint32_t right() const { return m_right; }
 
 private:
     RefList *m_list_p;
@@ -161,20 +179,6 @@ public:
     {
         m_bounds = bounds;
     }
-    void GetBuffer( StageRandomIterator* iterator, 
-                    PointBuffer& buffer, 
-                    PointBuffer& one_point, 
-                    boost::uint32_t block_id, 
-                    Dimension const& dimPoint, 
-                    Dimension const& dimBlock) const;
-    // double GetXmin() const
-    //     { return m_xmin; }
-    // double GetYmin() const
-    //     { return m_ymin; }
-    // double GetXmax() const
-    //     { return m_xmax; }
-    // double GetYmax() const
-    //     { return m_ymax; }
 };
 
 } // namespace chipper
@@ -227,8 +231,7 @@ private:
     void Emit(chipper::RefList& wide, boost::uint32_t widemin, boost::uint32_t widemax,
               chipper::RefList& narrow, boost::uint32_t narrowmin, boost::uint32_t narrowmax);
 
-    void checkImpedance();
-
+    Schema alterSchema(Schema const& schema);
 
     boost::uint32_t m_threshold;
     std::vector<chipper::Block> m_blocks;
@@ -252,10 +255,15 @@ public:
     Chipper(pdal::filters::Chipper const& filter, PointBuffer& buffer);
     ~Chipper();
 
+protected:
+    virtual void readBufferBeginImpl(PointBuffer& buffer);
+    virtual boost::uint32_t readBufferImpl(PointBuffer&);
+
 private:
     boost::uint64_t skipImpl(boost::uint64_t);
-    boost::uint32_t readBufferImpl(PointBuffer&);
     bool atEndImpl() const;
+    boost::uint32_t fillUserBuffer( PointBuffer& buffer,
+                                    filters::chipper::Block const& block);
 
     pdal::filters::Chipper const& m_chipper;
     std::size_t m_currentBlockId;
@@ -263,7 +271,9 @@ private:
     PointBuffer* m_one_point;
     Schema const* m_current_read_schema;
     StageRandomIterator * m_random_iterator;
-
+    schema::DimensionMap* m_one_point_dimension_map;
+    pdal::Dimension const* m_dimPoint;
+    pdal::Dimension const* m_dimBlock;
 
 };
 
