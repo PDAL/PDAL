@@ -76,6 +76,7 @@ Writer::Writer(Stage& prevStage, const Options& options)
     , m_sdo_pc_is_initialized(false)
     , m_chunkCount(16)
     , m_streamChunks(false)
+    , m_orientation(schema::POINT_INTERLEAVED)
 {
 
     m_connection = connect();
@@ -99,6 +100,10 @@ Writer::Writer(Stage& prevStage, const Options& options)
     m_chunkCount = getOptions().getValueOrDefault<boost::uint32_t>("blob_chunk_count", 16);
     m_streamChunks = getOptions().getValueOrDefault<bool>("stream_chunks", false);
 
+    bool bFlipDimensional = getOptions().getValueOrDefault<bool>("store_dimensional_orientation", false);
+    if (bFlipDimensional)
+        m_orientation = schema::DIMENSION_INTERLEAVED;
+    
 }
 
 Writer::~Writer()
@@ -236,6 +241,7 @@ Options Writer::getDefaultOptions()
     Option do_trace("do_trace", false, "turn on server-side binds/waits tracing -- needs ALTER SESSION privs");
     Option stream_chunks("stream_chunks", false, "Stream block data chunk-wise by the DB's chunk size rather than as an entire blob");
     Option blob_chunk_count("blob_chunk_count", 16, "When streaming, the number of chunks per write to use");
+    Option store_dimensional_orientation("store_dimensional_orientation", false, "Store the points oriented in DIMENSION_INTERLEAVED instead of POINT_INTERLEAVED orientation");
     options.add(is3d);
     options.add(solid);
     options.add(overwrite);
@@ -263,6 +269,7 @@ Options Writer::getDefaultOptions()
     options.add(do_trace);
     options.add(stream_chunks);
     options.add(blob_chunk_count);
+    options.add(store_dimensional_orientation);
 
     return options;
 }
@@ -799,7 +806,28 @@ void Writer::CreatePCEntry(Schema const& buffer_schema)
 
     s_geom << "))";
 
-    boost::uint32_t dimensions = 8;
+    boost::uint32_t dimensions(8);
+    std::string schema_data;
+
+    bool pack = getOptions().getValueOrDefault<bool>("pack_ignored_fields", true);
+    if (pack)
+    {
+        log()->get(logDEBUG3) << "Packing ignored dimension from PointBuffer " << std::endl;
+        
+        pdal::Schema clean_schema = buffer_schema.pack();
+        clean_schema.setOrientation(m_orientation);
+        schema_data = pdal::Schema::to_xml(clean_schema);
+        dimensions = clean_schema.size();
+
+    }
+    else
+    {
+        pdal::Schema oriented_schema(buffer_schema);
+        oriented_schema.setOrientation(m_orientation);
+        schema_data = pdal::Schema::to_xml(oriented_schema);
+        dimensions  = buffer_schema.size();
+    }
+
 
     oss << "declare\n"
         "  pc_id NUMBER := :"<<nPCPos<<";\n"
@@ -835,42 +863,6 @@ void Writer::CreatePCEntry(Schema const& buffer_schema)
 
     OCILobLocator* schema_locator ;
     OCILobLocator* boundary_locator ;
-
-    std::string schema_data;
-
-    bool pack = getOptions().getValueOrDefault<bool>("pack_ignored_fields", true);
-    if (pack)
-    {
-        schema::index_by_index const& idx = buffer_schema.getDimensions().get<schema::index>();
-        log()->get(logDEBUG3) << "Packing ignored dimension from PointBuffer " << std::endl;
-
-        boost::uint32_t position(0);
-
-        pdal::Schema clean_schema;
-        schema::index_by_index::size_type i(0);
-        for (i = 0; i < idx.size(); ++i)
-        {
-            if (! idx[i].isIgnored())
-            {
-
-                Dimension d(idx[i]);
-                d.setPosition(position);
-
-                // Wipe off parent/child relationships if we're ignoring
-                // same-named dimensions
-                d.setParent(boost::uuids::nil_uuid());
-                clean_schema.appendDimension(d);
-                position++;
-            }
-        }
-        schema_data = pdal::Schema::to_xml(clean_schema);
-
-    }
-    else
-    {
-        schema_data = pdal::Schema::to_xml(buffer_schema);
-
-    }
 
     char* schema = (char*) malloc(schema_data.size() * sizeof(char) + 1);
     strncpy(schema, schema_data.c_str(), schema_data.size());
@@ -1135,57 +1127,18 @@ pdal::Bounds<double> Writer::CalculateBounds(PointBuffer const& buffer)
 
 }
 
-void Writer::PackPointData(PointBuffer const& buffer,
-                           boost::uint8_t** point_data,
-                           boost::uint32_t& point_data_len,
-                           boost::uint32_t& schema_byte_size)
-
-{
-    // Creates a new buffer that has the ignored dimensions removed from
-    // it.
-
-    schema::index_by_index const& idx = buffer.getSchema().getDimensions().get<schema::index>();
-
-    schema_byte_size = 0;
-    schema::index_by_index::size_type i(0);
-    for (i = 0; i < idx.size(); ++i)
-    {
-        if (! idx[i].isIgnored())
-            schema_byte_size = schema_byte_size+idx[i].getByteSize();
-    }
-
-    log()->get(logDEBUG) << "Packed schema byte size " << schema_byte_size;
-
-    point_data_len = buffer.getNumPoints() * schema_byte_size;
-    *point_data = new boost::uint8_t[point_data_len];
-
-    boost::uint8_t* current_position = *point_data;
-
-    for (boost::uint32_t i = 0; i < buffer.getNumPoints(); ++i)
-    {
-        boost::uint8_t* data = buffer.getData(i);
-        for (boost::uint32_t d = 0; d < idx.size(); ++d)
-        {
-            if (! idx[d].isIgnored())
-            {
-                memcpy(current_position, data, idx[d].getByteSize());
-                current_position = current_position+idx[d].getByteSize();
-            }
-            data = data + idx[d].getByteSize();
-
-        }
-    }
-}
-
 bool Writer::WriteBlock(PointBuffer const& buffer)
 {
     bool bUsePartition = m_block_table_partition_column.size() != 0;
 
     // Pluck the block id out of the first point in the buffer
     pdal::Schema const& schema = buffer.getSchema();
-    Dimension const& blockDim = schema.getDimension("BlockID");
-
-    boost::int32_t block_id  = buffer.getField<boost::int32_t>(blockDim, 0);
+    Dimension const* blockDim(0);
+    blockDim = schema.getDimensionPtr("BlockID");
+    
+    boost::int32_t block_id(1);
+    if (blockDim)
+        block_id  = buffer.getField<boost::int32_t>(*blockDim, 0);
 
     std::ostringstream oss;
     std::ostringstream partition;
@@ -1233,16 +1186,52 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     boost::uint8_t* point_data;
     boost::uint32_t point_data_length;
     boost::uint32_t schema_byte_size;
-
+    PointBuffer* output_buffer(0);
+    
     bool pack = getOptions().getValueOrDefault<bool>("pack_ignored_fields", true);
     if (pack)
-        PackPointData(buffer, &point_data, point_data_length, schema_byte_size);
+    {
+        log()->get(logDEBUG4) << "packing out ignored fields" << std::endl;
+        output_buffer = buffer.pack();
+        assert (output_buffer->getCapacity() == buffer.getNumPoints());
+
+        // The requested orientation is m_orientation, and it does not match 
+        // the orientation of the output_buffer. Flip it.
+        if (m_orientation != output_buffer->getSchema().getOrientation())
+        {
+            PointBuffer* flipped = output_buffer->flipOrientation();
+            delete output_buffer;
+            output_buffer = flipped;
+        }
+        point_data = output_buffer->getData(0);
+        
+        if (m_orientation == schema::DIMENSION_INTERLEAVED)
+            point_data_length = output_buffer->getSchema().getByteSize() * output_buffer->getCapacity();
+        else
+            point_data_length = output_buffer->getSchema().getByteSize() * output_buffer->getNumPoints();
+    }
     else
     {
-        point_data = buffer.getData(0);
-        point_data_length = buffer.getSchema().getByteSize() * buffer.getNumPoints();
+        if (m_orientation != buffer.getSchema().getOrientation())
+        {
+            output_buffer = buffer.flipOrientation();
+            point_data = output_buffer->getData(0);
+            if (m_orientation == schema::DIMENSION_INTERLEAVED)
+                point_data_length = output_buffer->getSchema().getByteSize() * output_buffer->getCapacity();
+            else
+                point_data_length = output_buffer->getSchema().getByteSize() * output_buffer->getNumPoints();
+        }
+        else
+        {
+            point_data = buffer.getData(0);
+            if (m_orientation == schema::DIMENSION_INTERLEAVED)
+                point_data_length = buffer.getSchema().getByteSize() * buffer.getCapacity();
+            else
+                point_data_length = buffer.getSchema().getByteSize() * buffer.getNumPoints();
+        }
     }
-
+    
+    log()->get(logDEBUG4) << "Writing blob of size" << point_data_length << std::endl;
     OCILobLocator* locator;
     if (m_streamChunks)
     {
@@ -1323,7 +1312,8 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     m_connection->DestroyType(&sdo_elem_info);
     m_connection->DestroyType(&sdo_ordinates);
 
-
+    if (output_buffer)
+        delete output_buffer;
 
 
     return true;

@@ -43,6 +43,11 @@
 #include <pdal/XMLSchema.hpp>
 
 #include <boost/property_tree/xml_parser.hpp>
+
+#ifdef __clang__
+#pragma GCC diagnostic ignored "-Wtautological-constant-out-of-range-compare"
+#endif
+
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/tokenizer.hpp>
 
@@ -89,7 +94,8 @@ private:
     std::string m_QueryPoint;
     double m_QueryDistance;
     boost::uint64_t m_numPointsToWrite;
-    std::string m_pipelineFile;    
+    std::string m_pipelineFile;
+    bool m_showSample;
 };
 
 }} // pdal::kernel

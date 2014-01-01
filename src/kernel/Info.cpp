@@ -51,6 +51,7 @@ Info::Info(int argc, const char* argv[])
     , m_useXML(false)
     , m_QueryDistance(0.0)
     , m_numPointsToWrite(0)
+    , m_showSample(false)
 {
     return;
 }
@@ -101,10 +102,11 @@ void Info::addSwitches()
         ("metadata,m", po::value<bool>(&m_showMetadata)->zero_tokens()->implicit_value(true), "dump the metadata")
         ("sdo_pc", po::value<bool>(&m_showSDOPCMetadata)->zero_tokens()->implicit_value(true), "dump the SDO_PC Oracle Metadata")
         ("stage,r", po::value<bool>(&m_showStage)->zero_tokens()->implicit_value(true), "dump the stage info")
+        ("pipeline-serialization", po::value<std::string>(&m_pipelineFile)->default_value(""), "")
         ("xml", po::value<bool>(&m_useXML)->zero_tokens()->implicit_value(true), "dump XML instead of JSON")
+        ("sample", po::value<bool>(&m_showSample)->zero_tokens()->implicit_value(true), "randomly sample dimension for stats")
         ("seed", po::value<boost::uint32_t>(&m_seed)->default_value(0), "Seed value for random sample")
         ("sample_size", po::value<boost::uint32_t>(&m_sample_size)->default_value(1000), "Sample size for random sample")
-        ("pipeline-serialization", po::value<std::string>(&m_pipelineFile)->default_value(""), "")
 
         ;
     
@@ -363,12 +365,12 @@ int Info::execute()
     m_options.add(cls);
     m_options.add(rn);
     m_options.add(nr);
+    Option do_sample("do_sample", m_showSample, "Dont do sampling");
+    m_options.add(do_sample);
     if (m_Dimensions.size())
     {
         Option dimensions("dimensions", m_Dimensions, "Use explicit list of dimensions");
         m_options.add(dimensions);
-        Option do_sample("do_sample", false, "Dont do sampling");
-        m_options.add(do_sample);
     }
     
     pdal::Options options = m_options + readerOptions;

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<pc:PointCloudSchema xmlns:pc="http://pointcloud.org/schemas/PC/1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<pc:PointCloudSchema xmlns:pc="http://pointcloud.org/schemas/PC/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <pc:dimension>
     <pc:position>1</pc:position>
     <pc:size>4</pc:size>
@@ -249,4 +249,5 @@
       <Metadata name="a_binary" type="base64Binary">true</Metadata>AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygpKissLS4vMDEyMzQ1Njc4OTo7PD0+P0BBQkNERUZHSElKS0xNTk9QUVJTVFVWV1hZWltcXV5fYGFiYw==</Metadata>
     </Reader>
   </pc:metadata>
+  <pc:orientation>point</pc:orientation>
 </pc:PointCloudSchema>

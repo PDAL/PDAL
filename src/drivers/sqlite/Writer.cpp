@@ -267,15 +267,21 @@ void Writer::CreateCloudTable(std::string const& name, boost::uint32_t srid)
 
 
         ::soci::sqlite3_session_backend* backend = static_cast< ::soci::sqlite3_session_backend*>( m_session->get_backend());
-        int did_enable = sqlite3_enable_load_extension(static_cast<sqlite_api::sqlite3*>(backend->conn_), 1);
         
-        if (did_enable == SQLITE_ERROR)
-            throw sqlite_driver_error("Unable to enable extensions on sqlite backend -- can't enable spatialite");
-        log()->get(logDEBUG3) << "Packing ignored dimension from PointBuffer " << std::endl;
+        try
+        {
+            int did_enable = sqlite3_enable_load_extension(static_cast<sqlite_api::sqlite3*>(backend->conn_), 1);
+        
+            if (did_enable == SQLITE_ERROR)
+                throw sqlite_driver_error("Unable to enable extensions on sqlite backend -- can't enable spatialite");
 
-        oss << "SELECT load_extension('libspatialite.dylib')";
-        m_session->once << oss.str();
-        oss.str("");
+            oss << "SELECT load_extension('libspatialite.dylib')";
+            m_session->once << oss.str();
+            oss.str("");
+        } catch (std::runtime_error&)
+        {
+            throw;
+        }
 
         oss << "SELECT InitSpatialMetadata()";
         m_session->once << oss.str();

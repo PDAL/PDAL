@@ -416,7 +416,7 @@ bool Iterator::CursorSetup()
 
 bool Iterator::CursorTeardown()
 {
-    pg_execute(m_session, "CLOSE sur");
+    pg_execute(m_session, "CLOSE cur");
     pg_commit(m_session);
     m_cursor = false;
     getReader().log()->get(logDEBUG) << "SQL cursor closed." << std::endl;
@@ -433,7 +433,9 @@ bool Iterator::NextBuffer()
         static std::string fetch = "FETCH 2 FROM cur";
         if (m_cur_result) PQclear(m_cur_result);
         m_cur_result = pg_query_result(m_session, fetch);
-        getReader().log()->get(logDEBUG) << "SQL: " << fetch << std::endl;
+        bool logOutput = getReader().log()->getLevel() > logDEBUG3;
+        if (logOutput)
+            getReader().log()->get(logDEBUG3) << "SQL: " << fetch << std::endl;
         if (PQresultStatus(m_cur_result) != PGRES_TUPLES_OK || PQntuples(m_cur_result) == 0)
         {
             PQclear(m_cur_result);
@@ -471,7 +473,7 @@ boost::uint32_t Iterator::readBufferImpl(PointBuffer& user_buffer)
         m_buffer = new pdal::PointBuffer(getReader().getSchema(), max_points);
         m_buffer->setNumPoints(0);
         m_buffer_position = 0;
-        getReader().log()->get(logDEBUG) << "allocated a cached point buffer with capacity of " << max_points << std::endl;
+        getReader().log()->get(logDEBUG2) << "allocated a cached point buffer with capacity of " << max_points << std::endl;
     }
 
     // Create a dimension map if we don't already have one
@@ -489,7 +491,7 @@ boost::uint32_t Iterator::readBufferImpl(PointBuffer& user_buffer)
         // let the writer decide what to do next.
         if (user_buffer.getNumPoints() == user_buffer.getCapacity())
         {
-            getReader().log()->get(logDEBUG) << "User buffer is full, returning control to pdal core" << std::endl;
+            getReader().log()->get(logDEBUG2) << "User buffer is full, returning control to pdal core" << std::endl;
             break;
         }
 
@@ -503,7 +505,9 @@ boost::uint32_t Iterator::readBufferImpl(PointBuffer& user_buffer)
                 m_at_end = true;
                 break;
             }
-            getReader().log()->get(logDEBUG) << "Fetched a patch from the database" << std::endl;
+            bool logOutput = getReader().log()->getLevel() > logDEBUG3;
+            if (logOutput)
+                getReader().log()->get(logDEBUG3) << "Fetched a patch from the database" << std::endl;
 
             // Copy data from the hex WKB string obtained by the database
             // into a pdal::PointBuffer for transfer to the user data buffer later
@@ -519,7 +523,9 @@ boost::uint32_t Iterator::readBufferImpl(PointBuffer& user_buffer)
             m_buffer->setDataStride(data, 0, m_patch_npoints * point_size);
             m_buffer->setNumPoints(m_patch_npoints);
             m_buffer_position = 0;
-            getReader().log()->get(logDEBUG) << "Copied patch into cache, npoints = " << m_patch_npoints << std::endl;
+            
+            if (logOutput)
+                getReader().log()->get(logDEBUG3) << "Copied patch into cache, npoints = " << m_patch_npoints << std::endl;
         }
 
         // Much many more points do we have to process in this cache?
@@ -538,11 +544,16 @@ boost::uint32_t Iterator::readBufferImpl(PointBuffer& user_buffer)
             points_to_copy = space_in_user_buffer;
         }
 
-        getReader().log()->get(logDEBUG) << "space_in_user_buffer = " << space_in_user_buffer << std::endl;
-        getReader().log()->get(logDEBUG) << "points_in_cache = " << points_in_cache << std::endl;
-        getReader().log()->get(logDEBUG) << "points_to_copy = " << points_to_copy << std::endl;
-        getReader().log()->get(logDEBUG) << "m_buffer_position = " << m_buffer_position << std::endl;
-        getReader().log()->get(logDEBUG) << "user_buffer.getNumPoints() = " << user_buffer.getNumPoints() << std::endl;
+        bool logOutput = getReader().log()->getLevel() > logDEBUG3;
+        
+        if (logOutput)
+        {
+            getReader().log()->get(logDEBUG3) << "space_in_user_buffer = " << space_in_user_buffer << std::endl;
+            getReader().log()->get(logDEBUG3) << "points_in_cache = " << points_in_cache << std::endl;
+            getReader().log()->get(logDEBUG3) << "points_to_copy = " << points_to_copy << std::endl;
+            getReader().log()->get(logDEBUG3) << "m_buffer_position = " << m_buffer_position << std::endl;
+            getReader().log()->get(logDEBUG3) << "user_buffer.getNumPoints() = " << user_buffer.getNumPoints() << std::endl;
+        }
 
         // Do the copying from cache to user buffer
         // To do: this should be more tolerant of variations in source/dest schema
@@ -551,12 +562,12 @@ boost::uint32_t Iterator::readBufferImpl(PointBuffer& user_buffer)
                                         m_buffer_position, user_buffer.getNumPoints(),
                                         points_to_copy);
 
-        // Update the buffers regarding how full/empty they are
+        // Update the buffers regarding how full/empty they are                                        
         m_buffer_position += points_to_copy;
         user_buffer.setNumPoints(user_buffer.getNumPoints()+points_to_copy);
 
         num_loops++;
-        getReader().log()->get(logDEBUG) << "User buffer filling loop, iteration " << num_loops << std::endl;
+        getReader().log()->get(logDEBUG2) << "User buffer filling loop, iteration " << num_loops << std::endl;
     }
 
     return user_buffer.getNumPoints();

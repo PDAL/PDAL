@@ -144,5 +144,42 @@ BOOST_AUTO_TEST_CASE(test_find)
 }
 
 
+BOOST_AUTO_TEST_CASE(SchemaTest_orientation)
+{
+
+    Dimension x("X", dimension::SignedInteger, 4);
+    Dimension y("Y", dimension::SignedInteger, 4);
+    Schema s;
+    s.appendDimension(x);
+    s.appendDimension(y);
+    
+    BOOST_CHECK_EQUAL(s.getOrientation(), pdal::schema::POINT_INTERLEAVED);
+
+
+    return;
+}
+
+
+BOOST_AUTO_TEST_CASE(SchemaTest_pack)
+{
+
+    Dimension x("X", dimension::SignedInteger, 4);
+    Dimension y("Y", dimension::SignedInteger, 4);
+    boost::uint32_t flags = y.getFlags();
+    y.setFlags(flags | dimension::IsIgnored);
+    Schema s;
+    s.appendDimension(x);
+    s.appendDimension(y);
+    
+    Schema p = s.pack();
+    
+    BOOST_CHECK_EQUAL(p.size(), 1);
+    BOOST_CHECK_EQUAL(s.size(), 2);
+
+    
+
+
+    return;
+}
 
 BOOST_AUTO_TEST_SUITE_END()

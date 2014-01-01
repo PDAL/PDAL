@@ -61,12 +61,14 @@ namespace pdal
 
 Schema::Schema()
     : m_byteSize(0)
+    , m_orientation(schema::POINT_INTERLEAVED)
 {
     return;
 }
 
 Schema::Schema(std::vector<Dimension> const& dimensions)
     : m_byteSize(0)
+    , m_orientation(schema::POINT_INTERLEAVED)
 {
 
     for (std::vector<Dimension>::const_iterator i = dimensions.begin();
@@ -80,6 +82,8 @@ Schema::Schema(std::vector<Dimension> const& dimensions)
 Schema::Schema(Schema const& other)
     : m_byteSize(other.m_byteSize)
     , m_index(other.m_index)
+    , m_orientation(other.m_orientation)
+        
 {
 
 }
@@ -92,6 +96,7 @@ Schema& Schema::operator=(Schema const& rhs)
     {
         m_byteSize = rhs.m_byteSize;
         m_index = rhs.m_index;
+        m_orientation = rhs.m_orientation;
     }
 
     return *this;
@@ -103,6 +108,8 @@ bool Schema::operator==(const Schema& other) const
     if (m_byteSize != other.m_byteSize) return false;
 
     if (m_index.size() != other.m_index.size()) return false;
+    
+    if (m_orientation != other.m_orientation) return false;
 
     schema::index_by_index const& idx = m_index.get<schema::index>();
     schema::index_by_index const& idx2 = other.m_index.get<schema::index>();
@@ -242,7 +249,7 @@ const Dimension* Schema::getDimensionPtr(string_ref nameIn, string_ref namespc,
         std::string* errorMsg) const
 {
     // getDimensionPtr is implemented in terms of string_ref so that we
-    // can guarentee not to allocate memory unless we really need to.
+    // can guarantee not to allocate memory unless we really need to.
     string_ref name = nameIn;
     string_ref ns = namespc;
     if (ns.empty())
@@ -505,7 +512,7 @@ std::string Schema::to_xml(Schema const& schema, boost::property_tree::ptree con
 }
 
 
-schema::DimensionMap* Schema::mapDimensions(Schema const& destination) const
+schema::DimensionMap* Schema::mapDimensions(Schema const& destination, bool bIgnoreNamespace) const
 {
 
     schema::index_by_index const& dimensions = getDimensions().get<schema::index>();
@@ -516,9 +523,10 @@ schema::DimensionMap* Schema::mapDimensions(Schema const& destination) const
     for (d = 0; d < dimensions.size(); ++d)
     {
         Dimension const& source_dim = dimensions[d];
-
+        std::string ns = source_dim.getNamespace();
+        if (bIgnoreNamespace) ns = std::string("");
         boost::optional<Dimension const&> dest_dim_ptr = destination.getDimensionOptional(source_dim.getName(),
-                source_dim.getNamespace());
+                ns);
         if (!dest_dim_ptr)
         {
             continue;
@@ -563,6 +571,33 @@ void Schema::dump() const
     std::cout << *this;
 }
 
+Schema Schema::pack() const
+{
+
+    schema::index_by_index const& idx = getDimensions().get<schema::index>();
+
+    boost::uint32_t position(0);
+
+    pdal::Schema output;
+    schema::index_by_index::size_type i(0);
+    for (i = 0; i < idx.size(); ++i)
+    {
+        if (! idx[i].isIgnored())
+        {
+
+            Dimension d(idx[i]);
+            d.setPosition(position);
+
+            // Wipe off parent/child relationships if we're ignoring
+            // same-named dimensions
+            d.setParent(boost::uuids::nil_uuid());
+            output.appendDimension(d);
+            position++;
+        }
+    }
+    output.setOrientation(getOrientation());
+    return output;
+}
 
 std::ostream& operator<<(std::ostream& os, pdal::Schema const& schema)
 {

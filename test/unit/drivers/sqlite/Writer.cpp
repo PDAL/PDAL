@@ -66,7 +66,7 @@ Options getSQLITEOptions()
     Option overwrite("overwrite", false,"overwrite");
     options.add(overwrite);
     
-    std::string temp_filename("temp-SqliteWriterTest_test_simple_las.sqlite");
+    std::string temp_filename(Support::temppath("temp-SqliteWriterTest_test_simple_las.sqlite"));
     Option connection("connection",temp_filename, "connection");
     options.add(connection);
 
@@ -125,13 +125,32 @@ Options getSQLITEOptions()
 }
 
 
-BOOST_AUTO_TEST_SUITE(SqliteWriterTest)
+struct SQLiteTestFixture
+{
+    SQLiteTestFixture() :
+        m_options(getSQLITEOptions())
+    {
+
+    }
+
+    ~SQLiteTestFixture()
+    {
+        std::string temp_filename = m_options.getValueOrThrow<std::string>("connection");
+        FileUtils::deleteFile(temp_filename);
+    }
+
+    pdal::Options m_options;    
+};
+
+
+
+BOOST_FIXTURE_TEST_SUITE(SqliteWriterTest, SQLiteTestFixture)
 
 BOOST_AUTO_TEST_CASE(SqliteWriterTest_test_simple_las)
 {
 #ifdef PDAL_HAVE_SQLITE
     // remove file from earlier run, if needed
-    std::string temp_filename("temp-SqliteWriterTest_test_simple_las.sqlite");
+    std::string temp_filename = getSQLITEOptions().getValueOrThrow<std::string>("connection");
     FileUtils::deleteFile(temp_filename);
 
     pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
@@ -145,19 +164,30 @@ BOOST_AUTO_TEST_CASE(SqliteWriterTest_test_simple_las)
         pdal::filters::Chipper writer_chipper(writer_cache, getSQLITEOptions());
         pdal::filters::InPlaceReprojection writer_reproj(writer_chipper, getSQLITEOptions());
         pdal::drivers::sqlite::Writer writer_writer(writer_reproj, getSQLITEOptions());
+        
+        try
+        {
+            writer_writer.initialize();
+            boost::uint64_t numPointsToRead = writer_reader.getNumPoints();
 
-        writer_writer.initialize();
-        boost::uint64_t numPointsToRead = writer_reader.getNumPoints();
+            BOOST_CHECK_EQUAL(numPointsToRead, 1065u);
 
-        BOOST_CHECK_EQUAL(numPointsToRead, 1065u);
+            writer_writer.write(numPointsToRead);
+            
+        } catch (std::runtime_error &)
+        {
+            FileUtils::closeFile(ofs);
 
-        writer_writer.write(numPointsToRead);
+            FileUtils::deleteFile(temp_filename);
+            return;
+        }
+
 
     }
 
     FileUtils::closeFile(ofs);
 
-    // FileUtils::deleteFile(Support::temppath(temp_filename));
+    FileUtils::deleteFile(temp_filename);
 
     return;
 #endif

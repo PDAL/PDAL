@@ -42,6 +42,7 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
+#include <boost/scoped_ptr.hpp>
 
 #include <sstream>
 
@@ -73,18 +74,17 @@ namespace pgpointcloud
 Writer::Writer(Stage& prevStage, const Options& options)
     : pdal::Writer(prevStage, options)
     , m_session(0)
-    , m_pdal_schema(prevStage.getSchema())
     , m_schema_name("")
     , m_table_name("")
     , m_column_name("")
-    , m_patch_compression_type(COMPRESSION_NONE)
+    , m_patch_compression_type(schema::COMPRESSION_NONE)
     , m_patch_capacity(400)
     , m_srid(0)
     , m_pcid(0)
     , m_have_postgis(false)
     , m_create_index(true)
     , m_overwrite(true)
-    , m_sdo_pc_is_initialized(false)
+    , m_schema_is_initialized(false)
 {
 
 
@@ -170,14 +170,18 @@ Options Writer::getDefaultOptions()
     return options;
 }
 
+void Writer::writeBegin(boost::uint64_t /*targetNumPointsToWrite*/)
+{}
 //
 // Called by PDAL core before the start of the writing process, but
 // after the initialization. At this point, the machinery is all set
 // up and we can apply actions to the target database, like pre-SQL and
 // preparing new tables and/or deleting old ones.
 //
-void Writer::writeBegin(boost::uint64_t /*targetNumPointsToWrite*/)
+
+void Writer::writeBufferBegin(PointBuffer const& data)
 {
+    if (m_schema_is_initialized) return;
 
     // Start up the database connection
     pg_begin(m_session);
@@ -208,7 +212,7 @@ void Writer::writeBegin(boost::uint64_t /*targetNumPointsToWrite*/)
     }
 
     // Read or create a PCID for our new table
-    m_pcid = SetupSchema(m_pdal_schema, m_srid);
+    m_pcid = SetupSchema(data.getSchema(), m_srid);
 
     // Create the table!
     if (! bHaveTable)
@@ -216,7 +220,11 @@ void Writer::writeBegin(boost::uint64_t /*targetNumPointsToWrite*/)
         CreateTable(m_schema_name, m_table_name, m_column_name, m_pcid);
     }
 
+
+    m_schema_is_initialized = true;
+
     return;
+
 }
 
 void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
@@ -250,7 +258,7 @@ void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
 boost::uint32_t Writer::SetupSchema(Schema const& buffer_schema, boost::uint32_t srid)
 {
     // We strip any ignored dimensions from the schema before creating the table
-    pdal::Schema output_schema(PackSchema(buffer_schema));
+    pdal::Schema output_schema = buffer_schema.pack();
 
     // If the user has specified a PCID they want to use,
     // does it exist in the database?
@@ -316,16 +324,18 @@ boost::uint32_t Writer::SetupSchema(Schema const& buffer_schema, boost::uint32_t
         }
 
         /* If the writer specifies a compression, we should set that */
-        if (m_patch_compression_type == COMPRESSION_DIMENSIONAL)
+        if (m_patch_compression_type == schema::COMPRESSION_DIMENSIONAL)
         {
             compression = "dimensional";
         }
-        else if (m_patch_compression_type == COMPRESSION_GHT)
+        else if (m_patch_compression_type == schema::COMPRESSION_GHT)
         {
             compression = "ght";
         }
 
         Metadata metadata("compression", compression, "");
+        
+        log()->get(logDEBUG) << "output_schema: " << output_schema.getByteSize() << std::endl;
         xml = pdal::Schema::to_xml(output_schema, &(metadata.toPTree()));
 
         const char** paramValues = (const char**)malloc(sizeof(char*));
@@ -359,34 +369,6 @@ void Writer::DeleteTable(std::string const& schema_name,
     oss << table_name;
 
     pg_execute(m_session, oss.str());
-}
-
-Schema Writer::PackSchema(Schema const& schema) const
-{
-    schema::index_by_index const& idx = schema.getDimensions().get<schema::index>();
-    log()->get(logDEBUG3) << "Packing ignored dimension from PointBuffer " << std::endl;
-
-    boost::uint32_t position(0);
-
-    pdal::Schema clean_schema;
-    schema::index_by_index::size_type i(0);
-    for (i = 0; i < idx.size(); ++i)
-    {
-        if (! idx[i].isIgnored())
-        {
-
-            Dimension d(idx[i]);
-            d.setPosition(position);
-
-            // Wipe off parent/child relationships if we're ignoring
-            // same-named dimensions
-            d.setParent(boost::uuids::nil_uuid());
-            clean_schema.appendDimension(d);
-            position++;
-        }
-    }
-    std::string xml = pdal::Schema::to_xml(clean_schema);
-    return clean_schema;
 }
 
 bool Writer::CheckPointCloudExists()
@@ -494,28 +476,6 @@ void Writer::CreateIndex(std::string const& schema_name,
 }
 
 
-//
-// Called by PDAL core before *each buffer* is written.
-// So it gets called a lot. The hack below does something
-// the first time it is called only. Hopefully we do
-// not need that hack anymore.
-//
-void Writer::writeBufferBegin(PointBuffer const& data)
-{
-    if (! m_sdo_pc_is_initialized)
-    {
-        // Currently Unused
-        // Do somethine only once, after PointBuffer is sent in
-        // like setting up tables, for example, in case the
-        // schema we get from the parent is not valid?
-        m_sdo_pc_is_initialized = true;
-    }
-
-    return;
-}
-
-
-
 boost::uint32_t Writer::writeBuffer(const PointBuffer& buffer)
 {
     boost::uint32_t numPoints = buffer.getNumPoints();
@@ -527,35 +487,27 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& buffer)
 
 bool Writer::WriteBlock(PointBuffer const& buffer)
 {
-    boost::uint8_t* point_data;
-    boost::uint32_t point_data_length;
-    boost::uint32_t schema_byte_size;
+    boost::scoped_ptr<PointBuffer> output(buffer.pack());
+    pointbuffer::PointBufferByteSize  point_data_length = output->getBufferByteLength();
+    boost::uint8_t* point_data = output->getData(0);
 
-    PackPointData(buffer, &point_data, point_data_length, schema_byte_size);
-
-    // Pluck the block id out of the first point in the buffer
-    pdal::Schema const& schema = buffer.getSchema();
-    Dimension const& blockDim = schema.getDimension("BlockID");
-
-//    boost::int32_t blk_id  = buffer.getField<boost::int32_t>(blockDim, 0);
-    boost::uint32_t num_points = static_cast<boost::uint32_t>(buffer.getNumPoints());
+    boost::uint32_t num_points = static_cast<boost::uint32_t>(output->getNumPoints());
 
     if (num_points > m_patch_capacity)
     {
-        // error here
+        throw pdal_error("drivers.pgpointcloud.writer num_points > m_patch_capacity!");
     }
 
     std::vector<boost::uint8_t> block_data;
-    for (boost::uint32_t i = 0; i < point_data_length; ++i)
-    {
-        block_data.push_back(point_data[i]);
-    }
+    block_data.resize(point_data_length);
+    std::copy(point_data, point_data+point_data_length, block_data.begin());
 
     /* We are always getting uncompressed bytes off the block_data */
     /* so we always used compression type 0 (uncompressed) in writing our WKB */
     boost::int32_t pcid = m_pcid;
-    boost::uint32_t compression = COMPRESSION_NONE;
-
+    schema::CompressionType compression_v = schema::COMPRESSION_NONE;
+    boost::uint32_t compression = static_cast<boost::uint32_t>(compression_v);
+    
     std::stringstream oss;
     oss << "INSERT INTO " << m_table_name << " (pa) VALUES ('";
 
@@ -582,49 +534,6 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
 }
 
 
-void Writer::PackPointData(PointBuffer const& buffer,
-                           boost::uint8_t** point_data,
-                           boost::uint32_t& point_data_len,
-                           boost::uint32_t& schema_byte_size)
-
-{
-    // Creates a new buffer that has the ignored dimensions removed from
-    // it.
-
-    schema::index_by_index const& idx = buffer.getSchema().getDimensions().get<schema::index>();
-
-    schema_byte_size = 0;
-    schema::index_by_index::size_type i(0);
-    for (i = 0; i < idx.size(); ++i)
-    {
-        if (! idx[i].isIgnored())
-            schema_byte_size = schema_byte_size+idx[i].getByteSize();
-    }
-
-    log()->get(logDEBUG) << "Packed schema byte size " << schema_byte_size << std::endl;;
-
-    point_data_len = buffer.getNumPoints() * schema_byte_size;
-    *point_data = new boost::uint8_t[point_data_len];
-
-    boost::uint8_t* current_position = *point_data;
-
-    for (boost::uint32_t i = 0; i < buffer.getNumPoints(); ++i)
-    {
-        boost::uint8_t* data = buffer.getData(i);
-        for (boost::uint32_t d = 0; d < idx.size(); ++d)
-        {
-            if (! idx[d].isIgnored())
-            {
-                memcpy(current_position, data, idx[d].getByteSize());
-                current_position = current_position+idx[d].getByteSize();
-            }
-            data = data + idx[d].getByteSize();
-
-        }
-    }
-
-
-}
 
 }
 }

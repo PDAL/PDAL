@@ -462,11 +462,6 @@ void Writer::writeBufferBegin(PointBuffer const& data)
         
         std::string global_encoding_data = getMetadataOption<std::string>(getOptions(), m, "global_encoding", "");
         std::vector<boost::uint8_t> data = Utils::base64_decode(global_encoding_data);
-
-        // In case the VLR is 0 in size
-        boost::uint8_t* bytes = 0;
-        if (data.size() > 0)
-            bytes = &data[0];
         
         boost::uint16_t reserved(0);
         if (global_encoding_data.size())

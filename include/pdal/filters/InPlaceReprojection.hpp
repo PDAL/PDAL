@@ -87,49 +87,22 @@ public:
                         Dimension const& d,
                         std::size_t pointIndex) const;
 
-    void transform(double& x, double& y, double& z) const;
+
+
     
-    dimension::id const& getOldXId() const { return m_old_x_id; }
-    dimension::id const& getOldYId() const { return m_old_y_id; }
-    dimension::id const& getOldZId() const { return m_old_z_id; }
-
-    dimension::id const& getNewXId() const { return m_new_x_id; }
-    dimension::id const& getNewYId() const { return m_new_y_id; }
-    dimension::id const& getNewZId() const { return m_new_z_id; }
-
-
+    SpatialReference const& getOutSRS() const { return m_outSRS; }
+    SpatialReference const& getInSRS() const { return m_inSRS; }
 private:
     
-    Schema alterSchema(Schema & s);
-    void setDimension( std::string const& name, 
-                       dimension::id& old_id,
-                       dimension::id& new_id,
-                       Schema& schema,
-                       double scale,
-                       double offset);
-                       
+
     SpatialReference m_inSRS;
     SpatialReference m_outSRS;
-    bool m_inferInputSRS;
 
-    typedef boost::shared_ptr<void> ReferencePtr;
-    typedef boost::shared_ptr<void> TransformPtr;
-    ReferencePtr m_in_ref_ptr;
-    ReferencePtr m_out_ref_ptr;
-    TransformPtr m_transform_ptr;
-
-    dimension::id m_new_x_id;
-    dimension::id m_new_y_id;
-    dimension::id m_new_z_id;
-
-    dimension::id m_old_x_id;
-    dimension::id m_old_y_id;
-    dimension::id m_old_z_id;
     
     InPlaceReprojection& operator=(const InPlaceReprojection&); // not implemented
     InPlaceReprojection(const InPlaceReprojection&); // not implemented
     
-    void reprojectOffsets( double& offset_x, double& offset_y, double& offset_z);
+
 };
 
 namespace iterators
@@ -146,11 +119,43 @@ public:
 protected:
     pdal::filters::InPlaceReprojection const& m_reprojectionFilter;      
     void updateBounds(PointBuffer&);
+    Schema alterSchema(Schema const& s);
 
     void projectData(PointBuffer& buffer, boost::uint32_t numRead);
+    
+    dimension::id const& getOldXId() const { return m_old_x_id; }
+    dimension::id const& getOldYId() const { return m_old_y_id; }
+    dimension::id const& getOldZId() const { return m_old_z_id; }
+
+    dimension::id const& getNewXId() const { return m_new_x_id; }
+    dimension::id const& getNewYId() const { return m_new_y_id; }
+    dimension::id const& getNewZId() const { return m_new_z_id; }
+
 
 private:
     IteratorBase& operator=(IteratorBase const&);
+    void setDimension( std::string const& name, 
+                       dimension::id& old_id,
+                       dimension::id& new_id,
+                       Schema& schema,
+                       double scale,
+                       double offset);
+    void reprojectOffsets( double& offset_x, double& offset_y, double& offset_z);
+    void transform(double& x, double& y, double& z) const;    
+    typedef boost::shared_ptr<void> ReferencePtr;
+    typedef boost::shared_ptr<void> TransformPtr;
+    ReferencePtr m_in_ref_ptr;
+    ReferencePtr m_out_ref_ptr;
+    TransformPtr m_transform_ptr;
+
+    dimension::id m_new_x_id;
+    dimension::id m_new_y_id;
+    dimension::id m_new_z_id;
+
+    dimension::id m_old_x_id;
+    dimension::id m_old_y_id;
+    dimension::id m_old_z_id;
+                           
 };
 
 } // inplacereprojection

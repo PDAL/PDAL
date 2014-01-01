@@ -33,7 +33,6 @@
 ****************************************************************************/
 
 #include <pdal/filters/ByteSwap.hpp>
-#include <pdal/filters/Chipper.hpp>
 
 #include <pdal/Schema.hpp>
 #include <pdal/PointBuffer.hpp>
@@ -43,8 +42,6 @@
 #ifdef PDAL_COMPILER_MSVC
 #  pragma warning(disable: 4127)  // conditional expression is constant
 #endif
-
-using namespace pdal::filters::chipper;
 
 namespace pdal
 {

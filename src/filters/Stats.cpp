@@ -190,35 +190,7 @@ void Stats::initialize()
 {
     Filter::initialize();
 
-    std::string names = getOptions().getValueOrDefault<std::string>("dimensions", "");
-    if (names.size())
-    {
-        log()->get(logDEBUG) << "Using explicit list of dimension names'" << names << "'"<<std::endl;
-        boost::char_separator<char> seps(" ,");
 
-
-        tokenizer parameters(names, seps);
-        for (tokenizer::iterator t = parameters.begin(); t != parameters.end(); ++t)
-        {
-            log()->get(logDEBUG) << "adding '" << *t << "' as dimension name to cumulate stats for" << std::endl;
-            m_dimension_names.push_back(*t);
-        }
-    }
-
-    std::string exact = getOptions().getValueOrDefault<std::string>("exact_dimensions", "");
-    if (exact.size())
-    {
-        log()->get(logDEBUG) << "Calculating histogram statistics for exact names '" << names << "'"<<std::endl;
-        boost::char_separator<char> seps(" ,");
-
-
-        tokenizer parameters(exact, seps);
-        for (tokenizer::iterator t = parameters.begin(); t != parameters.end(); ++t)
-        {
-            log()->get(logDEBUG) << "adding '" << *t << "' as exact dimension name to cumulate stats for" << std::endl;
-            m_exact_dimension_names.push_back(*t);
-        }
-    }
 
 
     return;
@@ -252,7 +224,6 @@ namespace sequential
 
 Stats::Stats(const pdal::filters::Stats& filter, PointBuffer& buffer)
     : pdal::FilterSequentialIterator(filter, buffer)
-    , m_statsFilter(filter)
 {
     return;
 }
@@ -418,11 +389,40 @@ void Stats::readBufferBeginImpl(PointBuffer& buffer)
     {
         Options const& options = getStage().getOptions();
 
-        std::vector<std::string> dimension_names = m_statsFilter.getExactDimensionNames();
+        std::string names = options.getValueOrDefault<std::string>("dimensions", "");
+        if (names.size())
+        {
+            getStage().log()->get(logDEBUG) << "Using explicit list of dimension names'" << names << "'"<<std::endl;
+            boost::char_separator<char> seps(" ,");
+
+
+            tokenizer parameters(names, seps);
+            for (tokenizer::iterator t = parameters.begin(); t != parameters.end(); ++t)
+            {
+                getStage().log()->get(logDEBUG) << "adding '" << *t << "' as dimension name to cumulate stats for" << std::endl;
+                m_dimension_names.push_back(*t);
+            }
+        }
+
+        std::string exact = options.getValueOrDefault<std::string>("exact_dimensions", "");
+        if (exact.size())
+        {
+            getStage().log()->get(logDEBUG) << "Calculating histogram statistics for exact names '" << names << "'"<<std::endl;
+            boost::char_separator<char> seps(" ,");
+
+
+            tokenizer parameters(exact, seps);
+            for (tokenizer::iterator t = parameters.begin(); t != parameters.end(); ++t)
+            {
+                getStage().log()->get(logDEBUG) << "adding '" << *t << "' as exact dimension name to cumulate stats for" << std::endl;
+                m_exact_dimension_names.push_back(*t);
+            }
+        }
+
 
         std::map<std::string, bool> exact_dimensions;
-        for (std::vector<std::string>::const_iterator i = dimension_names.begin();
-                i != dimension_names.end(); ++i)
+        for (std::vector<std::string>::const_iterator i = m_dimension_names.begin();
+                i != m_dimension_names.end(); ++i)
         {
             getStage().log()->get(logDEBUG2) << "Using exact histogram counts for '" << *i << "'" << std::endl;
             std::pair<std::string,bool> p(*i, true);
@@ -464,12 +464,11 @@ void Stats::readBufferBeginImpl(PointBuffer& buffer)
 
         boost::uint32_t bin_count = options.getValueOrDefault<boost::uint32_t>("num_bins", 20);
 
-        std::vector<std::string> const& specified_names = m_statsFilter.getDimensionNames();
 
-        if (specified_names.size())
+        if (m_exact_dimension_names.size())
         {
 
-            for (std::vector<std::string>::const_iterator  i = specified_names.begin(); i != specified_names.end(); i++)
+            for (std::vector<std::string>::const_iterator  i = m_exact_dimension_names.begin(); i != m_exact_dimension_names.end(); i++)
             {
                 std::string const& name = *i;
                 getStage().log()->get(logDEBUG2) << "Requested to cumulate stats for dimension with name '" << name <<"'"<< std::endl;
@@ -497,6 +496,7 @@ void Stats::readBufferBeginImpl(PointBuffer& buffer)
         }
         else
         {
+            bool doSample = options.getValueOrDefault<bool>("do_sample", true);
             schema::index_by_index const& dims = schema.getDimensions().get<schema::index>();
             for (schema::index_by_index::const_iterator iter = dims.begin(); iter != dims.end(); ++iter)
             {
@@ -510,7 +510,7 @@ void Stats::readBufferBeginImpl(PointBuffer& buffer)
                     getStage().log()->get(logDEBUG2) << "Cumulating exact stats for dimension " << d->getName() << std::endl;
                     doExact = true;
                 }
-                stats::SummaryPtr c = boost::shared_ptr<stats::Summary>(new stats::Summary(bin_count, sample_size, stats_cache_size, seed, doExact));
+                stats::SummaryPtr c = boost::shared_ptr<stats::Summary>(new stats::Summary(bin_count, sample_size, stats_cache_size, seed, doExact, doSample));
 
                 std::pair<DimensionPtr, stats::SummaryPtr> p(d,c);
                 m_dimensions.push_back(d);

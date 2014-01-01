@@ -208,21 +208,21 @@ Bounds<double> Crop::computeBounds(GEOSGeometry const* geometry)
     GEOSCoordSequence const* coords = GEOSGeom_getCoordSeq_r(m_geosEnvironment, ring);
 
     boost::uint32_t count(0);
-    int ret(0);
-    ret = GEOSCoordSeq_getDimensions_r(m_geosEnvironment, coords, &m_dimensions);
+    GEOSCoordSeq_getDimensions_r(m_geosEnvironment, coords, &m_dimensions);
     log()->get(logDEBUG) << "Inputted WKT had " << m_dimensions << " dimensions" <<std::endl;
 
-    ret = GEOSCoordSeq_getSize_r(m_geosEnvironment, coords, &count);
+    GEOSCoordSeq_getSize_r(m_geosEnvironment, coords, &count);
     pdal::Vector<double> p(0.0, 0.0, 0.0);
+    double x(0.0);
+    double y(0.0);
+    double z(0.0);
+
     for (unsigned i=0; i < count; ++i)
     {
-        double x;
-        double y;
-        double z;
-        ret = GEOSCoordSeq_getOrdinate_r(m_geosEnvironment, coords, i, 0, &x);
-        ret = GEOSCoordSeq_getOrdinate_r(m_geosEnvironment, coords, i, 1, &y);
+        GEOSCoordSeq_getOrdinate_r(m_geosEnvironment, coords, i, 0, &x);
+        GEOSCoordSeq_getOrdinate_r(m_geosEnvironment, coords, i, 1, &y);
         if (m_dimensions > 2)
-            ret = GEOSCoordSeq_getOrdinate_r(m_geosEnvironment, coords, i, 2, &z);
+            GEOSCoordSeq_getOrdinate_r(m_geosEnvironment, coords, i, 2, &z);
         p.set(0, x);
         p.set(1, y);
         if (m_dimensions > 2)

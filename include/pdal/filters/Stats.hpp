@@ -214,13 +214,11 @@ public:
 
     void processBuffer(PointBuffer& data) const;
     
-    std::vector<std::string> const& getDimensionNames() const { return m_dimension_names; }
-    std::vector<std::string> const& getExactDimensionNames() const { return m_exact_dimension_names; }
+
 
 private:
     
-    std::vector<std::string> m_dimension_names;
-    std::vector<std::string> m_exact_dimension_names;
+
     
     Stats& operator=(const Stats&); // not implemented
     Stats(const Stats&); // not implemented
@@ -249,14 +247,17 @@ public:
 protected:
     virtual void readBufferBeginImpl(PointBuffer&);
     virtual void readBufferEndImpl(PointBuffer&);
+    std::vector<std::string> const& getDimensionNames() const { return m_dimension_names; }
+    std::vector<std::string> const& getExactDimensionNames() const { return m_exact_dimension_names; }    
 private:
     boost::uint64_t skipImpl(boost::uint64_t);
     boost::uint32_t readBufferImpl(PointBuffer&);
     bool atEndImpl() const;
 
-    const pdal::filters::Stats& m_statsFilter;
 
     std::vector<DimensionPtr> m_dimensions;
+    std::vector<std::string> m_dimension_names;
+    std::vector<std::string> m_exact_dimension_names;
 
     double getValue(PointBuffer& data, Dimension& dim, boost::uint32_t pointIndex);
 

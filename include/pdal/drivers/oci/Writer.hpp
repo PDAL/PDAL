@@ -126,13 +126,6 @@ private:
         return getOptions().getValueOrDefault<T>(option_name, default_value);
     }
 
-    void PackPointData( PointBuffer const& buffer,
-                        boost::uint8_t** point_data,
-                        boost::uint32_t& point_data_len,
-                        boost::uint32_t& schema_byte_size);
-
-
-
     bool is3d() const;
     bool isSolid() const;
     boost::int32_t getPCID() const;
@@ -168,6 +161,8 @@ private:
     bool m_sdo_pc_is_initialized;
     boost::uint32_t m_chunkCount;
     bool m_streamChunks;
+    schema::Orientation m_orientation;
+
 
 };
 

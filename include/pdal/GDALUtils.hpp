@@ -45,6 +45,7 @@
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
 
+#pragma GCC diagnostic ignored "-Wfloat-equal"
 #include <cpl_port.h>
 #include "gdal.h"
 #include <cpl_vsi.h>

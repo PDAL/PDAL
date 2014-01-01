@@ -667,13 +667,13 @@ set (SQLITE_LIBRARIES ${SOCI_LIBRARY} ${SOCI_sqlite3_PLUGIN} ${SQLITE3_LIBRARY})
 
 if (WITH_SQLITE)
 if (NOT USE_PDAL_PLUGIN_SQLITE)
-target_link_libraries(${APPS_CPP_DEPENDENCIES} "${SQLITE_LIBRARIES}")
+target_link_libraries(${APPS_CPP_DEPENDENCIES} ${SQLITE_LIBRARIES})
 endif()
 endif()
 
 if (WITH_PGPOINTCLOUD)
 if (NOT USE_PDAL_PLUGIN_PGPOINTCLOUD)
-target_link_libraries(${APPS_CPP_DEPENDENCIES} "${POSTGRESQL_LIBRARIES}")
+target_link_libraries(${APPS_CPP_DEPENDENCIES} ${POSTGRESQL_LIBRARIES})
 endif()
 endif()
 
@@ -685,7 +685,7 @@ endif()
 
 if (WITH_NITRO)
 if (NOT USE_PDAL_PLUGIN_NITRO)
-target_link_libraries(${APPS_CPP_DEPENDENCIES} "${NITRO_LIBRARIES}")
+target_link_libraries(${APPS_CPP_DEPENDENCIES} ${NITRO_LIBRARIES})
 endif()
 endif()
 
@@ -703,8 +703,6 @@ if (WIN32)
     "${GEOS_LIBRARY}"
     "${HEXER_LIBRARY}"
     "${ORACLE_LIBRARY}"
-    ${SQLITE_LIBRARIES}
-    ${NITRO_LIBRARIES}
 )
 else()
   target_link_libraries(${APPS_CPP_DEPENDENCIES}
@@ -722,8 +720,7 @@ else()
     "${GEOS_LIBRARY}"
     "${HEXER_LIBRARY}"
     "${ORACLE_LIBRARY}"
-    ${NITRO_LIBRARIES}
-    ${SQLITE_LIBRARIES})
+)
 endif()
 
 message(STATUS "Using boost lib: ${Boost_LIBRARIES}")
@@ -774,7 +771,7 @@ if (USE_PDAL_PLUGIN_SQLITE)
     add_library(${PDAL_SQLITE_WRITER_LIB_NAME} SHARED "${PDAL_SQLITE_SRC}/Writer.cpp")
     target_link_libraries(${PDAL_SQLITE_WRITER_LIB_NAME}
                           "${PDAL_LIB_NAME}"
-                          "${SQLITE_LIBRARIES}")
+                          ${SQLITE_LIBRARIES})
     set_target_properties(${PDAL_SQLITE_WRITER_LIB_NAME}
     PROPERTIES SOVERSION "${PDAL_LIB_SOVERSION}" )
     if (APPLE)
@@ -788,7 +785,7 @@ if (USE_PDAL_PLUGIN_SQLITE)
     add_library(${PDAL_SQLITE_READER_LIB_NAME} SHARED ${PDAL_SQLITE_SRC}/Reader.cpp)
     target_link_libraries(${PDAL_SOCI_READER_LIB_NAME}
                           "${PDAL_LIB_NAME}"
-                          "${SQLITE_LIBRARIES}")
+                          ${SQLITE_LIBRARIES})
     set_target_properties(${PDAL_SQLITE_READER_LIB_NAME}
     PROPERTIES SOVERSION "${PDAL_LIB_SOVERSION}" )
     if (APPLE)
