@@ -466,15 +466,41 @@ void Writer::writeBufferBegin(PointBuffer const& data)
         boost::uint16_t reserved(0);
         if (global_encoding_data.size())
         {
-            if (data.size() != sizeof(boost::uint16_t) )
+            boost::uint8_t* ptr = (boost::uint8_t*)&reserved;
+            boost::uint8_t u8(0);
+            boost::uint32_t u32(0);
+            boost::uint64_t u64(0);
+
+            if (data.size() == 1 )
+            {
+                boost::uint8_t* p = (boost::uint8_t*)&u8;
+                p[0] = data[0];
+                reserved = static_cast<boost::uint16_t>(u8);
+            } else if (data.size() == 2 )
+            {
+                boost::uint8_t* p = (boost::uint8_t*)&reserved;
+                for (int i = 0; i < 2; ++i)
+                    p[i] = data[i];
+            } else if (data.size() == 4 )
+            {
+                boost::uint8_t* p = (boost::uint8_t*)&u32;
+                for (int i = 0; i < 4; ++i)
+                    p[i] = data[i];
+                reserved = static_cast<boost::uint16_t>(u32);
+            } else if (data.size() == 8 )
+            {
+                boost::uint8_t* p = (boost::uint8_t*)&u64;
+                for (int i = 0; i < 8; ++i)
+                    p[i] = data[i];
+                reserved = static_cast<boost::uint16_t>(u64);
+            } else 
             {
                 std::ostringstream oss;
                 oss << "size of global_encoding bytes should == 2, not " << data.size();
-                throw pdal_error(oss.str());
+                throw pdal_error(oss.str());                
             }
-            boost::uint8_t* ptr = (boost::uint8_t*)&reserved;
-            ptr[0] = data[0];
-            ptr[1] = data[1];
+            
+            
         }
 
         // boost::uint16_t reserved = getMetadataOption<boost::uint16_t>(getOptions(),
