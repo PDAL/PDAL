@@ -36,6 +36,8 @@
 #include <pdal/PipelineWriter.hpp>
 
 
+#include <boost/algorithm/string/find.hpp>
+
 namespace pdal { namespace kernel {
 
 Info::Info(int argc, const char* argv[])
@@ -46,9 +48,10 @@ Info::Info(int argc, const char* argv[])
     , m_showStage(false)
     , m_showMetadata(false)
     , m_showSDOPCMetadata(false)
-    , m_pointNumber((std::numeric_limits<boost::uint64_t>::max)())
     , m_outputStream(0)
     , m_useXML(false)
+    , m_useJSON(false)
+    , m_useREST(true)
     , m_QueryDistance(0.0)
     , m_numPointsToWrite(0)
     , m_showSample(false)
@@ -61,13 +64,13 @@ void Info::validateSwitches()
 {
 
     const bool got_something =
-        (m_pointNumber != (std::numeric_limits<boost::uint64_t>::max)()) ||
         m_showStats ||
         m_showSchema ||
         m_showMetadata ||
         m_showSDOPCMetadata ||
         m_showStage || 
-        m_QueryPoint.size() > 0;
+        m_QueryPoint.size() > 0 ||
+        m_pointIndexes.size() > 0;
     if (!got_something)
     {
         throw app_usage_error("no action option specified");
@@ -92,7 +95,7 @@ void Info::addSwitches()
     po::options_description* processing_options = new po::options_description("processing options");
     
     processing_options->add_options()
-        ("point,p", po::value<boost::uint64_t>(&m_pointNumber)->implicit_value(0), "point to dump")
+        ("point,p", po::value<std::string >(&m_pointIndexes), "point to dump")
         ("query", po::value< std::string>(&m_QueryPoint), "A 2d or 3d point query point")
         ("distance", po::value< double>(&m_QueryDistance), "A query distance")
         ("stats,a", po::value<bool>(&m_showStats)->zero_tokens()->implicit_value(true), "dump stats on all points (reads entire dataset)")
@@ -103,7 +106,8 @@ void Info::addSwitches()
         ("sdo_pc", po::value<bool>(&m_showSDOPCMetadata)->zero_tokens()->implicit_value(true), "dump the SDO_PC Oracle Metadata")
         ("stage,r", po::value<bool>(&m_showStage)->zero_tokens()->implicit_value(true), "dump the stage info")
         ("pipeline-serialization", po::value<std::string>(&m_pipelineFile)->default_value(""), "")
-        ("xml", po::value<bool>(&m_useXML)->zero_tokens()->implicit_value(true), "dump XML instead of JSON")
+        ("xml", po::value<bool>(&m_useXML)->zero_tokens()->implicit_value(true), "dump XML")
+        ("json", po::value<bool>(&m_useJSON)->zero_tokens()->implicit_value(true), "dump JSON")
         ("sample", po::value<bool>(&m_showSample)->zero_tokens()->implicit_value(true), "randomly sample dimension for stats")
         ("seed", po::value<boost::uint32_t>(&m_seed)->default_value(0), "Seed value for random sample")
         ("sample_size", po::value<boost::uint32_t>(&m_sample_size)->default_value(1000), "Sample size for random sample")
@@ -117,35 +121,130 @@ void Info::addSwitches()
     return;
 }
 
-
-void Info::dumpOnePoint(const Stage& stage) const
+std::vector<boost::uint32_t>  getListOfPoints(std::string const& p)
 {
-    const Schema& schema = stage.getSchema();
-
-    PointBuffer data(schema, 1);
     
-    boost::scoped_ptr<StageSequentialIterator> iter(stage.createSequentialIterator(data));
-    iter->skip(m_pointNumber);
+    typedef const boost::iterator_range<std::string::const_iterator> StringRange;
+    
+    std::vector<boost::uint32_t> output;
+    
+    std::string comma(",");
+    std::string dash("-");
 
-    const boost::uint32_t numRead = iter->read(data);
-    if (numRead != 1)
+    boost::char_separator<char> sep_comma(",");
+
+    StringRange iDash = boost::algorithm::ifind_first(  StringRange(p.begin(), p.end()),
+                                                        StringRange(dash.begin(), dash.end()));
+    bool bHaveDash = !iDash.empty();
+
+    StringRange iComma = boost::algorithm::ifind_first(  StringRange(p.begin(), p.end()),
+                                                        StringRange(comma.begin(), comma.end()));
+    bool bHaveComma = !iComma.empty();
+    
+    if (bHaveComma && bHaveDash)
     {
         std::ostringstream oss;
-        oss << "problem reading point number " << m_pointNumber;
+        oss << "list of points cannot contain both a dash for ranges and comma for explicit points";
         throw app_runtime_error(oss.str());
     }
 
-    boost::property_tree::ptree tree = data.toPTree();
+    if (bHaveDash)
+    {
+        typedef boost::tokenizer<boost::char_separator<char>  > tokenizer;
+        boost::char_separator<char> sep_dash("-");        
+        tokenizer beg_end(p, sep_dash);
+        unsigned i(0);
+        std::vector<boost::uint32_t> rng;
+        for (tokenizer::iterator t = beg_end.begin(); t != beg_end.end(); ++t)
+        {
+            boost::uint32_t v = boost::lexical_cast<boost::uint32_t>(*t);
+            rng.push_back(v);
+            i++;
+        }
+
+        if (rng.size() != 2)
+        {
+            std::ostringstream oss;
+            oss << "multiple ranges cannot be specified";
+            throw app_runtime_error(oss.str());            
+        }
+        
+        for (unsigned i = rng[0]; i != rng[1]; ++i)
+        {
+            output.push_back(i);
+        }
+
+    }
+
+    if (bHaveComma)
+    {
+        typedef boost::tokenizer<boost::char_separator<char>  > tokenizer;
+        boost::char_separator<char> sep_comma(",");        
+        tokenizer indexes(p, sep_comma);
+        for (tokenizer::iterator t = indexes.begin(); t != indexes.end(); ++t)
+        {
+            boost::uint32_t v = boost::lexical_cast<boost::uint32_t>(*t);
+            output.push_back(v);
+        }
+    }
+    
+    // Put our string on as an integer and hope for the best
+    output.push_back(boost::lexical_cast<boost::uint32_t>(p));
+
+    return output;
+}
+
+void Info::dumpPoints(const Stage& stage, std::string const& points_string) const
+{
+    const Schema& schema = stage.getSchema();
+
+    std::vector<boost::uint32_t> points = getListOfPoints(points_string);
+    
+    PointBuffer output_data(schema, points.size());
+    PointBuffer read_data(schema, 1);
+        
+    StageRandomIterator* iter = stage.createRandomIterator(read_data);
+    
+    if (!iter)
+        throw app_runtime_error("Unable to create random iterator for stage!");
+    
+    for (size_t i = 0; i < points.size(); ++i )
+    {
+        boost::uint64_t s = iter->seek(points[i]);
+        if (s != points[i])
+        {
+            std::ostringstream oss;
+            oss << "Unable to seek to " << points[i] << "due to size of file being " << stage.getNumPoints();
+            throw app_runtime_error(oss.str());
+        }
+        const boost::uint32_t numRead = iter->read(read_data);
+        if (numRead != 1)
+        {
+            std::ostringstream oss;
+            oss << "problem reading point number " << points[i];
+            throw app_runtime_error(oss.str());
+        }
+        
+        output_data.copyPointFast(i, 0, read_data);
+    }
+    output_data.setNumPoints(points.size());
+
+
+
+    boost::property_tree::ptree tree = output_data.toPTree();
    
     std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
 
     boost::property_tree::ptree output;
     output.add_child("point", tree.get_child("0"));
     if (m_useXML)
-        write_xml(ostr, output);
-    else
-        write_json(ostr, tree.get_child("0"));
-        
+        write_xml(ostr, tree);
+    else if (m_useJSON)
+        write_json(ostr, tree);
+    else if (m_useREST)
+        output_data.toRST(ostr) << std::endl;
+    
+    delete iter;
     return;
 }
 
@@ -383,16 +482,16 @@ int Info::execute()
 
     filter->initialize();
 
-    if (m_pointNumber != (std::numeric_limits<boost::uint64_t>::max)())
+    if (m_pointIndexes.size())
     {
-        dumpOnePoint(*filter);
+        dumpPoints(*filter, m_pointIndexes);
     }
 
     if (m_showStats)
     {
         dumpStats(*dynamic_cast<pdal::filters::Stats*>(filter), manager);
     }
-
+    
     if (m_showSchema)
     {
         dumpSchema(*filter);
