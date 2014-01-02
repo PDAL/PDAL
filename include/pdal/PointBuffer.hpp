@@ -222,7 +222,7 @@ public:
                               boost::uint32_t srcPointIndex,
                               const PointBuffer& srcPointBuffer)
     {
-        assert (srcPointBuffer.getSchema().getOrientation() == getSchema().getOrientation());
+        assert (srcPointBuffer.getSchema().getOrientation() == getSchema().getOrientation() && getSchema().getOrientation() != schema::DIMENSION_INTERLEAVED);
 
         const boost::uint8_t* src = srcPointBuffer.getData(srcPointIndex);
         boost::uint8_t* dest = getData(destPointIndex);
@@ -256,7 +256,7 @@ public:
                                const PointBuffer& srcPointBuffer,
                                boost::uint32_t numPoints)
     {
-        assert (srcPointBuffer.getSchema().getOrientation() == getSchema().getOrientation());
+        assert (srcPointBuffer.getSchema().getOrientation() == getSchema().getOrientation() && getSchema().getOrientation() != schema::DIMENSION_INTERLEAVED);
         const boost::uint8_t* src = srcPointBuffer.getData(srcPointIndex);
         boost::uint8_t* dest = getData(destPointIndex);
 
@@ -366,6 +366,7 @@ public:
         \endverbatim
     */
     boost::property_tree::ptree toPTree() const;
+    std::ostream& toRST(std::ostream& os) const;
 
     /*! @return a cumulated bounds of all points in the PointBuffer.
         \verbatim embed:rst
@@ -425,6 +426,7 @@ protected:
     template<class T> static void scale(Dimension const& source_dimension,
                                  Dimension const& destination_dimension,
                                  T& value);
+    std::string printDimension(Dimension const& dimension, boost::uint32_t index) const;
 };
 
 template <class T>
