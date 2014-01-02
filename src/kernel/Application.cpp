@@ -351,32 +351,6 @@ void Application::outputDrivers()
     }
 }
 
-void WordWrap(std::string const& inputString, 
-              std::vector<std::string>& outputString, 
-              unsigned int lineLength)
-{
-    // stolen from http://stackoverflow.com/questions/5815227/fix-improve-word-wrap-function
-    std::istringstream iss(inputString);
-    std::string line;
-    do
-    {
-        std::string word;
-        iss >> word;
-
-        if (line.length() + word.length() > lineLength)
-        {
-            outputString.push_back(line);
-            line.clear();
-        }
-        line += word + " ";
-
-    } while (iss);
-
-    if (!line.empty())
-    {
-        outputString.push_back(line);
-    }
-}
 
 
 std::ostream& displayDriverOptions( std::ostream& strm, 
@@ -419,7 +393,7 @@ std::ostream& displayDriverOptions( std::ostream& strm,
         std::string description(opt.getDescription());
         description = boost::algorithm::erase_all_copy(description, "\n");
         
-        WordWrap(description, lines, description_column-1);
+        Utils::wordWrap(description, lines, description_column-1);
         if (lines.size() == 1)
         {
             

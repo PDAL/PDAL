@@ -228,7 +228,9 @@ public:
     static std::string replaceAll(std::string result, 
                                   const std::string& replaceWhat, 
                                   const std::string& replaceWithWhat);
-
+    static void wordWrap(std::string const& inputString, 
+                         std::vector<std::string>& outputString, 
+                         unsigned int lineLength);
  
 private:
     template<typename T>
