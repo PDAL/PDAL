@@ -207,9 +207,9 @@ public:
     }
 
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const
+    pdal::StageRandomIterator* createRandomIterator(PointBuffer& buffer) const
     {
-        return 0;    // BUG: add this
+        return getPrevStage().createRandomIterator(buffer);
     }
 
     void processBuffer(PointBuffer& data) const;
