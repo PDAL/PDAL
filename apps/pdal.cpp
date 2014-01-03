@@ -51,6 +51,8 @@ void outputVersion()
     std::cout << "     - pipeline" << std::endl;
     std::cout << "     - query" << std::endl;
     std::cout << "     - translate" << std::endl;
+    std::cout << std::endl;
+    std::cout << "See http://pdal.io/apps.html for more detail";
     
     std::cout << std::endl;
 }
@@ -68,8 +70,6 @@ int main(int argc, char* argv[])
         ("action", po::value<std::string>(), "action name")
         ("version", po::value<bool>()->zero_tokens()->implicit_value(true), "Show version info")
         ("help,h", po::value<bool>()->zero_tokens()->implicit_value(true), "Print help message")
-        ("drivers", po::value<bool>()->zero_tokens()->implicit_value(true), "Show currently registered drivers (including dynamic with PDAL_DRIVER_PATH)")
-        ("options", po::value<std::string>()->implicit_value("all"), "Show available options for a driver")
             ;
         
     if (argc < 2)
@@ -97,11 +97,6 @@ int main(int argc, char* argv[])
 
     }
 
-    if (variables.count("drivers"))
-    {
-        
-    }
-    
     int count(argc - 1); // remove the 1st argument
     const char** args = const_cast<const char**>(&argv[1]);
     
