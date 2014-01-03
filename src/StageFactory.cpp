@@ -668,17 +668,16 @@ std::string StageFactory::toRST(std::string driverName) const
     // Otherwise, display output for all of the registered drivers.
     if ( i != drivers.end())
     {
-        std::cout << i->second.optionsToRST() << std::endl;
+        os << i->second.optionsToRST() << std::endl;
     }
     else
     {
         for (i = drivers.begin(); i != drivers.end(); ++i)
         {
-            std::cout << i->second.optionsToRST() << std::endl;
+            os << i->second.optionsToRST() << std::endl;
         }
-        
     }
-    
+    return os.str();
 }
 
 } // namespace pdal
