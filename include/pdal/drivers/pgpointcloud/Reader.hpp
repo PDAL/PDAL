@@ -58,7 +58,8 @@ class PDAL_DLL Reader : public pdal::Reader
 {
 public:
     SET_STAGE_NAME("drivers.pgpointcloud.reader", "PostgreSQL Pointcloud Database Reader")
-
+    SET_STAGE_LINK("http://pdal.io/stages/drivers.pgpointcloud.reader.html")
+    
     Reader(const Options&);
     ~Reader();
 

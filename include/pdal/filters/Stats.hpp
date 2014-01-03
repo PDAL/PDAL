@@ -190,7 +190,8 @@ class PDAL_DLL Stats : public Filter
 {
 public:
     SET_STAGE_NAME("filters.stats", "Statistics Filter")
-
+    SET_STAGE_LINK("http://pdal.io/stages/filters.stats.html")  
+    
     Stats(Stage& prevStage, const Options&);
     Stats(Stage& prevStage);
     ~Stats();
