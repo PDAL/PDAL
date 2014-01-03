@@ -49,7 +49,7 @@
 #endif
 
 #ifdef PDAL_HAVE_GEOS
-#include <geos.h>
+#include <geos/version.h>
 #endif
 
 #ifdef PDAL_HAVE_LASZIP
