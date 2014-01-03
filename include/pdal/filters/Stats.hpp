@@ -258,9 +258,7 @@ private:
     std::vector<DimensionPtr> m_dimensions;
     std::vector<std::string> m_dimension_names;
     std::vector<std::string> m_exact_dimension_names;
-
-    double getValue(PointBuffer& data, Dimension& dim, boost::uint32_t pointIndex);
-
+    
     std::multimap<DimensionPtr,stats::SummaryPtr> m_stats; // one Stats item per field in the schema
 };
 

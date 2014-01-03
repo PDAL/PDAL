@@ -244,122 +244,13 @@ boost::uint32_t Stats::readBufferImpl(PointBuffer& data)
             DimensionPtr d = p->first;
             stats::SummaryPtr c = p->second;
 
-            double output = getValue(data, *d, pointIndex);
+            double output = data.applyScaling(*d, pointIndex);
             c->insert(output);
         }
     }
     return numRead;
 }
 
-double Stats::getValue(PointBuffer& data, Dimension& d, boost::uint32_t pointIndex)
-{
-    double output(0.0);
-
-    float flt(0.0);
-    boost::int8_t i8(0);
-    boost::uint8_t u8(0);
-    boost::int16_t i16(0);
-    boost::uint16_t u16(0);
-    boost::int32_t i32(0);
-    boost::uint32_t u32(0);
-    boost::int64_t i64(0);
-    boost::uint64_t u64(0);
-
-    switch (d.getInterpretation())
-    {
-        case dimension::RawByte:
-            u8 = data.getField<boost::uint8_t>(d, pointIndex);
-            output = d.applyScaling<boost::uint8_t>(u8);
-            break;
-        case dimension::Float:
-            if (d.getByteSize() == 4)
-            {
-                flt = data.getField<float>(d, pointIndex);
-                output = static_cast<double>(flt);
-                break;
-            }
-            else if (d.getByteSize() == 8)
-            {
-                output = data.getField<double>(d, pointIndex);
-                break;
-            }
-            else
-            {
-                std::ostringstream oss;
-                oss << "Unable to interpret Float of size '" << d.getByteSize() <<"'";
-                throw pdal_error(oss.str());
-            }
-
-        case dimension::SignedInteger:
-            if (d.getByteSize() == 1)
-            {
-                i8 = data.getField<boost::int8_t>(d, pointIndex);
-                output = d.applyScaling<boost::int8_t>(i8);
-                break;
-            }
-            else if (d.getByteSize() == 2)
-            {
-                i16 = data.getField<boost::int16_t>(d, pointIndex);
-                output = d.applyScaling<boost::int16_t>(i16);
-                break;
-            }
-            else if (d.getByteSize() == 4)
-            {
-                i32 = data.getField<boost::int32_t>(d, pointIndex);
-                output = d.applyScaling<boost::int32_t>(i32);
-                break;
-            }
-            else if (d.getByteSize() == 8)
-            {
-                i64 = data.getField<boost::int64_t>(d, pointIndex);
-                output = d.applyScaling<boost::int64_t>(i64);
-                break;
-            }
-            else
-            {
-                std::ostringstream oss;
-                oss << "Unable to interpret SignedInteger of size '" << d.getByteSize() <<"'";
-                throw pdal_error(oss.str());
-            }
-        case dimension::UnsignedInteger:
-            if (d.getByteSize() == 1)
-            {
-                u8 = data.getField<boost::uint8_t>(d, pointIndex);
-                output = d.applyScaling<boost::uint8_t>(u8);
-                break;
-            }
-            else if (d.getByteSize() == 2)
-            {
-                u16 = data.getField<boost::uint16_t>(d, pointIndex);
-                output = d.applyScaling<boost::uint16_t>(u16);
-                break;
-            }
-            else if (d.getByteSize() == 4)
-            {
-                u32 = data.getField<boost::uint32_t>(d, pointIndex);
-                output = d.applyScaling<boost::uint32_t>(u32);
-                break;
-            }
-            else if (d.getByteSize() == 8)
-            {
-                u64 = data.getField<boost::uint64_t>(d, pointIndex);
-                output = d.applyScaling<boost::uint64_t>(u64);
-                break;
-            }
-            else
-            {
-                std::ostringstream oss;
-                oss << "Unable to interpret UnsignedInteger of size '" << d.getByteSize() <<"'";
-                throw pdal_error(oss.str());
-            }
-
-        case dimension::Pointer:    // stored as 64 bits, even on a 32-bit box
-        case dimension::Undefined:
-            throw pdal_error("Dimension data type unable to be summarized");
-    }
-
-    return output;
-}
 boost::uint64_t Stats::skipImpl(boost::uint64_t count)
 {
     getPrevIterator().skip(count);
