@@ -34,6 +34,7 @@
 
 #include <pdal/StageInfo.hpp>
 
+#include <iomanip>
 
 namespace pdal
 {
@@ -75,6 +76,76 @@ StageInfo& StageInfo::operator=(StageInfo const& rhs)
     }
 
     return *this;
+}
+
+std::string StageInfo::optionsToRST() const
+{
+    std::ostringstream strm;
+
+    std::vector<Option> options = getProvidedOptions();
+
+    strm << toRST() << std::endl;
+
+    if (!options.size())
+    {
+        strm << "No options documented" << std::endl << std::endl;
+        return strm.str();
+    } 
+ 
+    std::string tablehead("================================ =============== =========================================");
+    std::string headings ("Name                              Default          Description");
+    
+    strm << std::endl;
+    strm << tablehead << std::endl;
+    strm << headings << std::endl;
+    strm << tablehead << std::endl;
+    
+    boost::uint32_t default_column(15);
+    boost::uint32_t name_column(32);
+    boost::uint32_t description_column(40);
+    for (std::vector<Option>::const_iterator it = options.begin();
+        it != options.end();
+        ++it)
+    {
+        pdal::Option const& opt = *it;
+        std::string default_value(opt.getValue<std::string>() );
+        default_value = boost::algorithm::erase_all_copy(default_value, "\n");
+        if (default_value.size() > default_column -1 )
+        {
+            default_value = default_value.substr(0, default_column-3);
+            default_value = default_value + "...";
+        }
+        
+        std::vector<std::string> lines;
+        std::string description(opt.getDescription());
+        description = boost::algorithm::erase_all_copy(description, "\n");
+        
+        Utils::wordWrap(description, lines, description_column-1);
+        if (lines.size() == 1)
+        {
+            
+            strm   << std::setw(name_column) << opt.getName() << " " 
+                   << std::setw(default_column) << default_value << " " 
+                   << std::left << std::setw(description_column) << description << std::endl;
+        } else
+            strm   << std::setw(name_column) << opt.getName() << " " 
+                   << std::setw(default_column) << default_value << " " 
+                   << lines[0] << std::endl;
+        
+        std::stringstream blank;
+        size_t blanks(49);
+        for (size_t i = 0; i < blanks; ++i)
+            blank << " ";
+        for (size_t i = 1; i < lines.size(); ++i)
+        {
+            strm << blank.str() <<lines[i] << std::endl;
+        }
+
+    }
+
+    strm << tablehead << std::endl;
+    strm << std::endl;
+    return strm.str();    
 }
 
 

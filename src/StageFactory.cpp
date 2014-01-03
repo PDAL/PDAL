@@ -649,4 +649,36 @@ std::map<std::string, pdal::StageInfo> const& StageFactory::getStageInfos() cons
 {
     return m_driver_info;
 }
+
+std::string StageFactory::toRST(std::string driverName) const
+{
+    std::ostringstream os;
+    
+    std::map<std::string, pdal::StageInfo> const& drivers = getStageInfos();
+    typedef std::map<std::string, pdal::StageInfo>::const_iterator Iterator;
+    
+    Iterator i = drivers.find(driverName);
+    std::string headline("------------------------------------------------------------------------------------------");
+    
+    os << headline << std::endl;
+    os << "PDAL Options" << " (" << pdal::GetFullVersionString() << ")" <<std::endl;
+    os << headline << std::endl << std::endl;
+    
+    // If we were given an explicit driver name, only display that.
+    // Otherwise, display output for all of the registered drivers.
+    if ( i != drivers.end())
+    {
+        std::cout << i->second.optionsToRST() << std::endl;
+    }
+    else
+    {
+        for (i = drivers.begin(); i != drivers.end(); ++i)
+        {
+            std::cout << i->second.optionsToRST() << std::endl;
+        }
+        
+    }
+    
+}
+
 } // namespace pdal

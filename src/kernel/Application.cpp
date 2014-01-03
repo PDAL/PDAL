@@ -42,31 +42,10 @@
 #include <pdal/StageFactory.hpp>
 
 #include <pdal/kernel/Application.hpp>
+#include <pdal/pdal_config.hpp>
 #include <vector>
 
-#ifdef PDAL_HAVE_GDAL
-#include <gdal.h>
-#endif
 
-#ifdef PDAL_HAVE_GEOS
-#include <geos/version.h>
-#endif
-
-#ifdef PDAL_HAVE_LASZIP
-#include <laszip/laszip.hpp>
-#endif
-
-#ifdef PDAL_HAVE_HEXER
-#include <hexer/hexer.hpp>
-#endif
-
-#ifdef PDAL_HAVE_LIBXML2
-#include <libxml/xmlversion.h>
-#endif
-
-#ifdef PDAL_HAVE_LIBGEOTIFF
-#include <geotiff.h>
-#endif
 
 namespace po = boost::program_options;
 
@@ -160,154 +139,7 @@ int Application::do_execution()
     
     if (m_reportDebug)
     {
-        std::string headline("------------------------------------------------------------------------------------------");
-        
-        std::cout << headline << std::endl;
-        std::cout << "PDAL debug information" << std::endl ;
-        std::cout << headline << std::endl << std::endl;
-        
-        std::cout << "Version information" << std::endl;
-        std::cout << headline << std::endl;
-        std::cout << "(" << pdal::GetFullVersionString() << ")" << std::endl;
-        std::cout << std::endl;
-        
-        std::cout << "Debug build status" << std::endl;
-        std::cout << headline << std::endl << std::endl;
-        std::cout << PDAL_BUILD_TYPE << std::endl<< std::endl;
-        
-        std::cout << "Enabled libraries" << std::endl;
-        std::cout << headline << std::endl << std::endl;
-
-        boost::uint32_t special_column(32);    
-        boost::uint32_t name_column(20);
-        boost::uint32_t url_column(40);
-
-        std::ostringstream thdr;
-        for (unsigned i = 0; i < name_column-1; ++i)
-            thdr << "=";
-        thdr << " ";
-        for (unsigned i = 0; i < url_column-1; ++i)
-            thdr << "=";        
-        thdr << " ";
-        for (unsigned i = 0; i < special_column-1; ++i)
-            thdr << "=";    
-        thdr << " ";
-
-        name_column--; 
-
-        unsigned step_back(3);
-
-        std::cout << thdr.str() << std::endl;
-        std::cout << std::setw(name_column-step_back) << "Name" << std::setw(url_column-step_back) << "URL"  << std::setw(special_column-step_back) << "Version" << std::endl;
-        std::cout << thdr.str() << std::endl ;        
-        
-#ifdef PDAL_HAVE_CARIS
-        std::cout << std::left 
-                  << std::setw(name_column) << "CARIS" << std::right 
-                  << std::setw(url_column) << "http://www.caris.com/" 
-                  << std::setw(special_column) << ""  << std::endl;
-#endif
-#ifdef PDAL_HAVE_GEOS
-        std::cout << std::left 
-                  << std::setw(name_column) << "GEOS" << std::right 
-                  << std::setw(url_column) << "http://trac.osgeo.org/geos" 
-                  << std::setw(special_column) << GEOS_VERSION  << std::endl;
-#endif
-#ifdef PDAL_HAVE_GDAL
-        std::cout << std::left 
-                  << std::setw(name_column) << "GDAL" << std::right 
-                  << std::setw(url_column) << "http://www.gdal.org" 
-                  << std::setw(special_column) << GDALVersionInfo("RELEASE_NAME")  << std::endl;
-#endif
-#ifdef PDAL_HAVE_HEXER
-        std::ostringstream hexerver;
-        hexerver << HEXER_VERSION_MAJOR << "."
-            << HEXER_VERSION_MINOR << "."
-            << HEXER_VERSION_REVISION;
-        std::cout << std::left 
-                  << std::setw(name_column) << "Hexer" << std::right 
-                  << std::setw(url_column) << "http://github.com/hobu/hexer/" 
-                  << std::setw(special_column) << hexerver.str()  << std::endl;
-#endif
-#ifdef PDAL_HAVE_LASZIP
-        
-        std::ostringstream laszipver;
-        laszipver << LASZIP_VERSION_MAJOR << "."
-            << LASZIP_VERSION_MINOR << "."
-            << LASZIP_VERSION_REVISION;
-        std::cout << std::left 
-                  << std::setw(name_column) << "LASzip" << std::right 
-                  << std::setw(url_column) << "http://laszip.org" 
-                  << std::setw(special_column) << laszipver.str() << std::endl;
-        
-#endif
-#ifdef PDAL_HAVE_LIBXML2
-        std::cout << std::left 
-                  << std::setw(name_column) << "libxml" << std::right 
-                  << std::setw(url_column) << "http://www.xmlsoft.org/" 
-                  << std::setw(special_column) << LIBXML_DOTTED_VERSION  << std::endl;
-#endif
-#ifdef PDAL_HAVE_LIBGEOTIFF
-        std::cout << std::left 
-                  << std::setw(name_column) << "libgeotiff" << std::right 
-                  << std::setw(url_column) << "http://trac.osgeo.org/geotiff/" 
-                  << std::setw(special_column) << LIBGEOTIFF_VERSION  << std::endl;
-#endif
-#ifdef PDAL_HAVE_MRSID
-        std::cout << std::left 
-                  << std::setw(name_column) << "MrSID" << std::right 
-                  << std::setw(url_column) << "http://www.lizardtech.com" 
-                  << std::setw(special_column) << ""  << std::endl;
-#endif
-#ifdef PDAL_HAVE_MSGPACK
-        std::cout << std::left 
-                  << std::setw(name_column) << "MessagePack" << std::right 
-                  << std::setw(url_column) << "http://msgpack.org/" 
-                  << std::setw(special_column) << ""  << std::endl;
-#endif
-#ifdef PDAL_HAVE_NITRO
-        std::cout << std::left 
-                  << std::setw(name_column) << "Nitro" << std::right 
-                  << std::setw(url_column) << "http://github.com/hobu/nitro/" 
-                  << std::setw(special_column) << ""  << std::endl;
-#endif
-#ifdef PDAL_HAVE_ORACLE
-        std::cout << std::left 
-                  << std::setw(name_column) << "Oracle" << std::right 
-                  << std::setw(url_column) << "http://www.oracle.com/" 
-                  << std::setw(special_column) << ""  << std::endl;
-#endif
-#ifdef PDAL_HAVE_P2G
-        std::cout << std::left 
-                  << std::setw(name_column) << "Points2grid" << std::right 
-                  << std::setw(url_column) << "http://github.com/CRREL/points2grid/" 
-                  << std::setw(special_column) << ""  << std::endl;
-#endif        
-#ifdef PDAL_HAVE_PYTHON
-        std::cout << std::left 
-                  << std::setw(name_column) << "Python" << std::right 
-                  << std::setw(url_column) << "http://www.python.org" 
-                  << std::setw(special_column) << ""  << std::endl;
-#endif        
-#ifdef PDAL_HAVE_SOCI
-        std::cout << std::left 
-                  << std::setw(name_column) << "SOCI" << std::right 
-                  << std::setw(url_column) << "http://soci.sourceforge.net/" 
-                  << std::setw(special_column) << ""  << std::endl;
-#endif        
-#ifdef PDAL_HAVE_SQLITE
-        std::cout << std::left 
-                  << std::setw(name_column) << "SQLite" << std::right 
-                  << std::setw(url_column) << "http://www.sqlite.org/" 
-                  << std::setw(special_column) << ""  << std::endl;
-#endif        
-#ifdef PDAL_HAVE_POSTGRESQL
-        std::cout << std::left 
-                  << std::setw(name_column) << "PostgreSQL" << std::right 
-                  << std::setw(url_column) << "http://github.com/pramsey/pointcloud/" 
-                  << std::setw(special_column) << ""  << std::endl;
-#endif
-        std::cout << thdr.str() << std::endl;
+        std::cout << getPDALDebugInformation() << std::endl;
         return 0;
     }
     
@@ -414,7 +246,8 @@ int Application::innerRun()
     }
     if (!m_showOptions.empty())
     {
-        outputOptions(m_showOptions);
+        pdal::StageFactory factory;
+        std::cout << factory.toRST(m_showOptions) << std::endl;
         return 0;
     }
     try
@@ -475,35 +308,6 @@ void Application::addPositionalSwitch(const char* name, int max_count)
     m_positionalOptions.add(name, max_count);
 }
 
-std::ostream& displayDriver(    std::ostream& strm,
-                                pdal::StageInfo const& info )
-{
-    std::string link(info.getInfoLink());
-    bool bDoLink = link.size() > 0;
-    
-    // strm << headline << std::endl;
-    if (bDoLink)
-        strm << "`";
-    strm << info.getName();
-    if (bDoLink)
-        strm << "`_ ";
-    strm << std::endl;
-    std::string headline("------------------------------------------------------------------------------------------");
-
-    strm << headline << std::endl;
-    
-    strm << std::endl;
-    strm << info.getDescription() << std::endl;
-
-    if (bDoLink)
-    {
-        strm << std::endl;
-        strm << ".. _`" << info.getName() << "`: " << info.getInfoLink() << std::endl;
-    }
-    return strm;    
-}
-
-
 void Application::outputDrivers()
 {
     pdal::StageFactory factory;
@@ -517,111 +321,9 @@ void Application::outputDrivers()
     
     for (Iterator i = drivers.begin(); i != drivers.end(); ++i)
     {
-        displayDriver(std::cout, i->second);
-        std::cout << std::endl;
+        std::cout << i->second.toRST() << std::endl;
     }
 }
-
-
-
-std::ostream& displayDriverOptions( std::ostream& strm, 
-                                    pdal::StageInfo const& info)
-{
-    std::vector<Option> options = info.getProvidedOptions();
-
-    displayDriver(strm, info);
-    if (!options.size())
-    {
-        strm << "No options documented" << std::endl << std::endl;
-        return strm;
-    } 
- 
-    std::string tablehead("================================ =============== =========================================");
-    std::string headings ("Name                              Default          Description");
-    
-    strm << std::endl;
-    strm << tablehead << std::endl;
-    strm << headings << std::endl;
-    strm << tablehead << std::endl;
-    
-    boost::uint32_t default_column(15);
-    boost::uint32_t name_column(32);
-    boost::uint32_t description_column(40);
-    for (std::vector<Option>::const_iterator it = options.begin();
-        it != options.end();
-        ++it)
-    {
-        pdal::Option const& opt = *it;
-        std::string default_value(opt.getValue<std::string>() );
-        default_value = boost::algorithm::erase_all_copy(default_value, "\n");
-        if (default_value.size() > default_column -1 )
-        {
-            default_value = default_value.substr(0, default_column-3);
-            default_value = default_value + "...";
-        }
-        
-        std::vector<std::string> lines;
-        std::string description(opt.getDescription());
-        description = boost::algorithm::erase_all_copy(description, "\n");
-        
-        Utils::wordWrap(description, lines, description_column-1);
-        if (lines.size() == 1)
-        {
-            
-            strm   << std::setw(name_column) << opt.getName() << " " 
-                   << std::setw(default_column) << default_value << " " 
-                   << std::left << std::setw(description_column) << description << std::endl;
-        } else
-            strm   << std::setw(name_column) << opt.getName() << " " 
-                   << std::setw(default_column) << default_value << " " 
-                   << lines[0] << std::endl;
-        
-        std::stringstream blank;
-        size_t blanks(49);
-        for (size_t i = 0; i < blanks; ++i)
-            blank << " ";
-        for (size_t i = 1; i < lines.size(); ++i)
-        {
-            strm << blank.str() <<lines[i] << std::endl;
-        }
-
-    }
-
-    strm << tablehead << std::endl;
-    strm << std::endl;
-    return strm;
-    
-}
-
-void Application::outputOptions(std::string const& driverName)
-{
-    pdal::StageFactory* factory = new pdal::StageFactory;
-    std::map<std::string, pdal::StageInfo> const& drivers = factory->getStageInfos();
-    typedef std::map<std::string, pdal::StageInfo>::const_iterator Iterator;
-    
-    Iterator i = drivers.find(driverName);
-    std::string headline("------------------------------------------------------------------------------------------");
-    
-    std::cout << headline << std::endl;
-    std::cout << "PDAL Options" << " (" << pdal::GetFullVersionString() << ")" <<std::endl;
-    std::cout << headline << std::endl << std::endl;
-    
-    // If we were given an explicit driver name, only display that.
-    // Otherwise, display output for all of the registered drivers.
-    if ( i != drivers.end())
-    {
-        displayDriverOptions(std::cout, i->second);
-    }
-    else
-    {
-        for (i = drivers.begin(); i != drivers.end(); ++i)
-        {
-            displayDriverOptions(std::cout, i->second);
-        }
-        
-    }
-}
-
 
 void Application::outputHelp()
 {
@@ -639,7 +341,7 @@ void Application::outputHelp()
 
     std::cout <<"\nFor more information, see the full documentation for PDAL at:\n";
     
-    std::cout << "  http://pointcloud.org/\n";
+    std::cout << "  http://pdal.io/\n";
     std::cout << headline << std::endl;
     std::cout << std::endl;
 

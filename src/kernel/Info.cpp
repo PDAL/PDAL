@@ -174,9 +174,7 @@ std::vector<boost::uint32_t>  getListOfPoints(std::string const& p)
             output.push_back(i);
         }
 
-    }
-
-    if (bHaveComma)
+    } else if (bHaveComma)
     {
         typedef boost::tokenizer<boost::char_separator<char>  > tokenizer;
         boost::char_separator<char> sep_comma(",");        
@@ -186,10 +184,12 @@ std::vector<boost::uint32_t>  getListOfPoints(std::string const& p)
             boost::uint32_t v = boost::lexical_cast<boost::uint32_t>(*t);
             output.push_back(v);
         }
+    } else
+    {
+        // Put our string on as an integer and hope for the best
+        output.push_back(boost::lexical_cast<boost::uint32_t>(p));
     }
     
-    // Put our string on as an integer and hope for the best
-    output.push_back(boost::lexical_cast<boost::uint32_t>(p));
 
     return output;
 }

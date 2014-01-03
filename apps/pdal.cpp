@@ -68,8 +68,10 @@ int main(int argc, char* argv[])
         ("action", po::value<std::string>(), "action name")
         ("version", po::value<bool>()->zero_tokens()->implicit_value(true), "Show version info")
         ("help,h", po::value<bool>()->zero_tokens()->implicit_value(true), "Print help message")
+        ("drivers", po::value<bool>()->zero_tokens()->implicit_value(true), "Show currently registered drivers (including dynamic with PDAL_DRIVER_PATH)")
+        ("options", po::value<std::string>()->implicit_value("all"), "Show available options for a driver")
             ;
-    
+        
     if (argc < 2)
     {
         std::cerr << "Action not specified!" << std::endl << std::endl;
@@ -85,12 +87,20 @@ int main(int argc, char* argv[])
     catch (boost::program_options::unknown_option& e)
     {
 #if BOOST_VERSION >= 104200
-        throw pdal::kernel::app_usage_error("unknown option: " + e.get_option_name());
+
+        std::cerr << "Unknown option '" << e.get_option_name() <<"' not recognized" << std::endl << std::endl;
 #else
-        throw pdal::kernel::app_usage_error("unknown option: " + std::string(e.what()));
+        std::cerr << "Unknown option '" << std::string(e.what()) <<"' not recognized" << std::endl << std::endl;
 #endif
+        outputVersion();
+        return 1;
+
     }
 
+    if (variables.count("drivers"))
+    {
+        
+    }
     
     int count(argc - 1); // remove the 1st argument
     const char** args = const_cast<const char**>(&argv[1]);
