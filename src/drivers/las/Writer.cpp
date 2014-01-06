@@ -470,8 +470,13 @@ void Writer::writeBufferBegin(PointBuffer const& data)
             boost::uint8_t u8(0);
             boost::uint32_t u32(0);
             boost::uint64_t u64(0);
-
-            if (data.size() == 1 )
+            
+            if (data.size() == 0)
+            {
+                // stay 0's
+                reserved = 0;
+            }
+            else if (data.size() == 1 )
             {
                 boost::uint8_t* p = (boost::uint8_t*)&u8;
                 p[0] = data[0];
