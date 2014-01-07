@@ -7,6 +7,10 @@
         <Option name="compression">
             true
         </Option>
+        <Filter type="filters.stats">
+            <Option name="exact_dimensions">Classification</Option>
+            <Option name="dimensions">drivers.las.reader.X, drivers.las.reader.Y, drivers.las.reader.Z, Classification</Option>
+                   
         <Filter type="filters.crop">
             <Option name="bounds">
                 ([0,1000000],[0,1000000],[0,1000000])
@@ -17,5 +21,6 @@
                 </Option>
             </Reader>
         </Filter>
+    </Filter>
     </Writer>
 </Pipeline>
