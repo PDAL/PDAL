@@ -233,14 +233,11 @@ boost::uint32_t Stats::readBufferImpl(PointBuffer& data)
 {
     const boost::uint32_t numRead = getPrevIterator().read(data);
 
-    const boost::uint32_t numPoints = data.getNumPoints();
-
-    for (boost::uint32_t pointIndex=0; pointIndex < numPoints; pointIndex++)
+    for (boost::uint32_t pointIndex=0; pointIndex < numRead; pointIndex++)
     {
         std::multimap<DimensionPtr, stats::SummaryPtr>::const_iterator p;
         for (p = m_stats.begin(); p != m_stats.end(); ++p)
         {
-
             DimensionPtr d = p->first;
             stats::SummaryPtr c = p->second;
 
