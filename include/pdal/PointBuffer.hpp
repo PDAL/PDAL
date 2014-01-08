@@ -467,16 +467,18 @@ inline void PointBuffer::setField(pdal::Dimension const& dim, boost::uint32_t po
         // do anything magical. It's up to you to get the interpretation right.
         *(T*)(void*)p = value;
         return;
+    } else 
+    {
+        std::ostringstream oss;
+        oss << "Size of type T " << sizeof(T) << " does not match the size of dimension '" 
+            << dim.getFQName() << "' which is " << dim.getByteSize();
+        throw pdal_error(oss.str());
     }
     
-    std::ostringstream oss;
-    oss << "Size of type T " << sizeof(T) << " does not match the size of dimension '" 
-        << dim.getFQName() << "' which is " << dim.getByteSize();
-    throw pdal_error(oss.str());
     
-    T output(0);
-    output = boost::lexical_cast<T>(value);
-    *(T*)(void*)p = output;
+    // T output(0);
+    // output = boost::lexical_cast<T>(value);
+    // *(T*)(void*)p = output;
 
 
 }
