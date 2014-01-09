@@ -563,12 +563,6 @@ Statement IteratorBase::getNextCloud(BlockPtr block, boost::int32_t& cloud_id)
 
 IteratorBase::~IteratorBase()
 {
-    for(DimensionMaps::const_iterator i = m_dimensions.begin(); 
-        i != m_dimensions.end(); 
-        ++i)
-    {
-        delete i->second;
-    }
 }
 
 
@@ -863,7 +857,6 @@ DimensionMapPtr IteratorBase::fetchDimensionMap(Statement statement, sdo_pc* pc,
     }
     else
     {
-        schema::DimensionMap* m = oracle_buffer.getSchema().mapDimensions(user_buffer.getSchema());
         DimensionMapPtr output  = DimensionMapPtr(oracle_buffer.getSchema().mapDimensions(user_buffer.getSchema(), false /*ignore namespaces*/));
         getReader().log()->get(logDEBUG2) << "DimensionMapPtr->size():  " << output->size() << std::endl;
         if (!output->size()) throw pdal_error("fetchDimensionMap map was unable to map any dimensions!");
