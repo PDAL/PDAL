@@ -57,8 +57,8 @@ namespace pdal
         typedef boost::uuids::uuid id;
         typedef std::vector<boost::uint8_t>::size_type PointBufferByteSize;
 
-        typedef boost::interprocess::allocator<boost::uint8_t, boost::interprocess::managed_shared_memory::segment_manager>     ShmemAllocator; 
-        typedef boost::container::vector<boost::uint8_t, ShmemAllocator> PointBufferVector;
+        // typedef boost::interprocess::allocator<boost::uint8_t, boost::interprocess::managed_shared_memory::segment_manager>     ShmemAllocator; 
+        // typedef boost::container::vector<boost::uint8_t, ShmemAllocator> PointBufferVector;
 
     } // pointbuffer
 
@@ -418,7 +418,7 @@ protected:
     schema::Orientation m_orientation;
 
     Metadata m_metadata;
-    boost::interprocess::managed_shared_memory *m_segment;
+    // boost::interprocess::managed_shared_memory *m_segment;
     pointbuffer::id m_uuid;
     
 

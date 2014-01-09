@@ -80,7 +80,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
 
 namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost 
 {
-#if !defined(BOOST_RESULT_OF_USE_DECLTYPE) || defined(BOOST_NO_DECLTYPE)
+#if !defined(BOOST_RESULT_OF_USE_DECLTYPE) || defined(BOOST_NO_CXX11_DECLTYPE)
     template<class F, class Seq>
     struct result_of< pdalboost::fusion::unfused_typed<F,Seq> const () >
         : pdalboost::fusion::unfused_typed<F,Seq>::template result< 

@@ -18,6 +18,10 @@
 
 #include <boost/geometry/geometries/box.hpp>
 
+#ifdef BOOST_GEOMETRY_TIME_OVERLAY
+#  include <boost/timer.hpp>
+#endif
+
 
 namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace geometry
 {

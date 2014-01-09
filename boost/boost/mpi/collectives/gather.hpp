@@ -131,7 +131,12 @@ void
 gather(const communicator& comm, const T* in_values, int n, 
        std::vector<T>& out_values, int root)
 {
-  ::pdalboost::mpi::gather(comm, in_values, n, &out_values[0], root);
+  if (comm.rank() == root) {
+    out_values.resize(comm.size() * n);
+    ::pdalboost::mpi::gather(comm, in_values, n, &out_values[0], root);
+  } 
+  else
+    ::pdalboost::mpi::gather(comm, in_values, n, root);
 }
 
 template<typename T>

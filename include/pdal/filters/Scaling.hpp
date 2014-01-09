@@ -224,8 +224,10 @@ inline void scaling::IteratorBase::scale(Dimension const& from_dimension,
     if (bSigned)
     {
         i64 = static_cast<boost::int64_t>(scaled);
-        bGreater = (i64 > (std::numeric_limits<T>::max)());
-        bLess = (i64 < (std::numeric_limits<T>::min)());
+        boost::int64_t mn = static_cast<boost::int64_t>((std::numeric_limits<T>::min)());            
+        boost::int64_t mx = static_cast<boost::int64_t>((std::numeric_limits<T>::max)());            
+        bGreater = (i64 > mx);
+        bLess = (i64 < mn);
         output = static_cast<T>(i64);              
         if (!bGreater && !bLess)
         {
@@ -237,8 +239,10 @@ inline void scaling::IteratorBase::scale(Dimension const& from_dimension,
     else
     {
         u64 = static_cast<boost::uint64_t>(scaled);
-        bGreater = (u64 > (std::numeric_limits<T>::max)());
-        bLess = (u64 < (std::numeric_limits<T>::min)());
+        boost::uint64_t mn = static_cast<boost::uint64_t>((std::numeric_limits<T>::min)());
+        boost::uint64_t mx = static_cast<boost::uint64_t>((std::numeric_limits<T>::max)());
+        bGreater = (u64 > mx);
+        bLess = (u64 < mn);
         output = static_cast<T>(u64);
         if (!bGreater && !bLess)
         {

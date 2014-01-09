@@ -206,7 +206,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
          T non_central_t_cdf(T v, T delta, T t, bool invert, const Policy& pol)
          {
             BOOST_MATH_STD_USING
-            if (pdalboost::math::isinf(v))
+            if ((pdalboost::math::isinf)(v))
             { // Infinite degrees of freedom, so use normal distribution located at delta.
                normal_distribution<T, Policy> n(delta, 1); 
                return cdf(n, t);
@@ -320,7 +320,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
 
 
             value_type guess = 0;
-            if ( (pdalboost::math::isinf(v)) || (v > 1 / pdalboost::math::tools::epsilon<T>()) )
+            if ( ((pdalboost::math::isinf)(v)) || (v > 1 / pdalboost::math::tools::epsilon<T>()) )
             { // Infinite or very large degrees of freedom, so use normal distribution located at delta.
                normal_distribution<T, Policy> n(delta, 1);
                if (p < q)
@@ -447,10 +447,10 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
          T non_central_t_pdf(T n, T delta, T t, const Policy& pol)
          {
             BOOST_MATH_STD_USING
-            if (pdalboost::math::isinf(n))
+            if ((pdalboost::math::isinf)(n))
             { // Infinite degrees of freedom, so use normal distribution located at delta.
-               normal_distribution<T, Policy> n(delta, 1); 
-               return pdf(n, t);
+               normal_distribution<T, Policy> norm(delta, 1); 
+               return pdf(norm, t);
             }
             //
             // Otherwise, for t < 0 we have to use the reflection formula:
@@ -515,7 +515,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
          template <class T, class Policy>
          T mean(T v, T delta, const Policy& pol)
          {
-            if (pdalboost::math::isinf(v))
+            if ((pdalboost::math::isinf)(v))
             {
                return delta;
             }
@@ -536,7 +536,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
          template <class T, class Policy>
          T variance(T v, T delta, const Policy& pol)
          {
-            if (pdalboost::math::isinf(v))
+            if ((pdalboost::math::isinf)(v))
             {
                return 1;
             }
@@ -554,7 +554,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
          T skewness(T v, T delta, const Policy& pol)
          {
             BOOST_MATH_STD_USING
-            if (pdalboost::math::isinf(v))
+            if ((pdalboost::math::isinf)(v))
             {
                return 0;
             }
@@ -576,7 +576,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
          T kurtosis_excess(T v, T delta, const Policy& pol)
          {
             BOOST_MATH_STD_USING
-            if (pdalboost::math::isinf(v))
+            if ((pdalboost::math::isinf)(v))
             {
                return 3;
             }
@@ -1097,7 +1097,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
             &r,
             Policy()))
                return (RealType)r;
-          if (pdalboost::math::isinf(v))
+          if ((pdalboost::math::isinf)(v))
           { // Infinite degrees of freedom, so use normal distribution located at delta.
              normal_distribution<RealType, Policy> n(l, 1); 
              cdf(n, x);
@@ -1152,7 +1152,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
             Policy()))
                return (RealType)r;
 
-         if (pdalboost::math::isinf(v))
+         if ((pdalboost::math::isinf)(v))
          { // Infinite degrees of freedom, so use normal distribution located at delta.
              normal_distribution<RealType, Policy> n(l, 1); 
              return cdf(complement(n, x));

@@ -190,19 +190,18 @@ else()
     endif()
 endif()
 
-if(WIN32)
-    TARGET_LINK_LIBRARIES(${PDAL_UNIT_TEST} 
-        "${PDAL_LIB_NAME}"
-        "${LIBLAS_LIBRARY}"
-        "${ZLIB_LIBRARIES}"
-        "${TIFF_LIBRARY}"
-        "${GEOTIFF_LIBRARY}"
-        "${GDAL_LIBRARY}"
-        "${SPATIALINDEX_LIBRARY}" "${Boost_LIBRARIES}" "${ORACLE_LIBRARY}")
+if (CMAKE_VERSION VERSION_GREATER 2.8.10)
+    set(PDAL_LINKAGE "PUBLIC;general")
+    set(BOOST_LINKAGE "PRIVATE;general")
 else()
-    TARGET_LINK_LIBRARIES(${PDAL_UNIT_TEST} 
-        ${PDAL_LIB_NAME} ${APPS_CPP_DEPENDENCIES} ${ORACLE_LIBRARY})
-endif() 
+    set(PDAL_LINKAGE "")
+    set(BOOST_LINKAGE "")
+endif()
 
+TARGET_LINK_LIBRARIES(  ${PDAL_UNIT_TEST} ${PDAL_LINKAGE}
+                        ${PDAL_LIB_NAME} )
+
+TARGET_LINK_LIBRARIES(  ${PDAL_UNIT_TEST} ${BOOST_LINKAGE}
+                        ${Boost_LIBRARIES} )
 
 ADD_TEST(pdal_test "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/pdal_test" "${PROJECT_SOURCE_DIR}/test/data" --catch_system_errors=no)

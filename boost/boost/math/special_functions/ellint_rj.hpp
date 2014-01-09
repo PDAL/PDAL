@@ -91,7 +91,7 @@ T ellint_rj_imp(T x, T y, T z, T p, const Policy& pol)
 
        BOOST_ASSERT(pmy >= 0);
 
-       T p = pmy + y;
+       p = pmy + y;
        value = pdalboost::math::ellint_rj(x, y, z, p, pol);
        value *= pmy;
        value -= 3 * pdalboost::math::ellint_rf(x, y, z, pol);

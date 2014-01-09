@@ -7,6 +7,8 @@
 
 // boostinspect:nounnamed
 
+#pragma GCC diagnostic ignored "-Wunused-function"
+
 #include <boost/assert.hpp>
 
 namespace {

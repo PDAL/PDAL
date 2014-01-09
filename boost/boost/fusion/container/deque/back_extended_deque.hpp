@@ -31,7 +31,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
           : base(val, deque)
         {}
 
-#if defined(BOOST_NO_RVALUE_REFERENCES)
+#if defined(BOOST_NO_CXX11_RVALUE_REFERENCES)
         template <typename Arg>
         back_extended_deque(Deque const& deque, Arg& val)
           : base(val, deque)

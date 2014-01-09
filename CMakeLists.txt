@@ -3,11 +3,7 @@
 #
 # (based originally on the libLAS files copyright Mateusz Loskot)
 
-if(WIN32)
-cmake_minimum_required(VERSION 2.8.7)
-else()
-cmake_minimum_required(VERSION 2.6.0)
-endif()
+cmake_minimum_required(VERSION 2.8.6)
 
 project(PDAL)
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)

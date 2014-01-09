@@ -81,6 +81,6 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
     template <>
     struct list_to_cons<void_ , void_ , void_ , void_ , void_ , void_ , void_ , void_ , void_ , void_>
     {
-        typedef nil type;
+        typedef nil_ type;
     };
 }}}
