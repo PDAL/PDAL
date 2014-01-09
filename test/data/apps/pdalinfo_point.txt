@@ -1,19 +1,28 @@
-{
-    "X": "636896.32999999996",
-    "Y": "849087.70000000007",
-    "Z": "446.38999999999999",
-    "Intensity": "18",
-    "ReturnNumber": "1",
-    "NumberOfReturns": "2",
-    "ScanDirectionFlag": "1",
-    "EdgeOfFlightLine": "0",
-    "Classification": "1",
-    "ScanAngleRank": "-11",
-    "UserData": "128",
-    "PointSourceId": "7326",
-    "Time": "245381.45279923646",
-    "Red": "54",
-    "Green": "66",
-    "Blue": "68"
-}
+Point 0
+--------------------------------------------------------------------------------
+
+=================== ======================================= =================== 
+            Name                                Value        Namespace
+=================== ======================================= =================== 
+X                                        636896.32999999996  drivers.las.reader
+Y                                        849087.70000000007  drivers.las.reader
+Z                                        446.38999999999999  drivers.las.reader
+Intensity                                                18  drivers.las.reader
+ReturnNumber                                              1  drivers.las.reader
+NumberOfReturns                                           2  drivers.las.reader
+ScanDirectionFlag                                         1  drivers.las.reader
+EdgeOfFlightLine                                          0  drivers.las.reader
+Classification                                            1  drivers.las.reader
+ScanAngleRank                                           -11  drivers.las.reader
+UserData                                                128  drivers.las.reader
+PointSourceId                                          7326  drivers.las.reader
+Time                                     245381.45279923646  drivers.las.reader
+Red                                                      54  drivers.las.reader
+Green                                                    66  drivers.las.reader
+Blue                                                     68  drivers.las.reader
+=================== ======================================= =================== 
+
+
+
+
 

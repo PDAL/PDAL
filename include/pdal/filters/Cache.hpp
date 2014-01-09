@@ -60,7 +60,7 @@ class PDAL_DLL Cache : public Filter
 {
 public:
     SET_STAGE_NAME("filters.cache", "Cache Filter")
-
+    SET_STAGE_LINK("http://pdal.io/stages/filters.cache.html")
     Cache(Stage& prevStage, const Options&);
     Cache(Stage& prevStage, boost::uint32_t numBlocks, boost::uint32_t blockSize);
     ~Cache();

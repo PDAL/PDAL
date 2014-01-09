@@ -100,7 +100,6 @@ private:
     int innerRun();
     void parseSwitches();
     void outputDrivers();
-    void outputOptions(std::string const& driver);
     void outputHelp();
     void outputVersion();
     void addBasicSwitchSet();

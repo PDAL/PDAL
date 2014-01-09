@@ -63,6 +63,7 @@ PDAL_DLL int GetVersionInteger();
 PDAL_DLL int GetVersionMajor();
 PDAL_DLL int GetVersionMinor();
 PDAL_DLL int GetVersionPatch();
+PDAL_DLL std::string getPDALDebugInformation();
 
 
 

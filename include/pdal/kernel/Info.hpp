@@ -70,7 +70,7 @@ private:
     void addSwitches(); // overrride
     void validateSwitches(); // overrride
 
-    void dumpOnePoint(const Stage&) const;
+    void dumpPoints(const Stage& stage, std::string const& points) const;
     void dumpStats(pdal::filters::Stats& filter, PipelineManager* manager) const;
     void dumpSchema(const Stage&) const;
     void dumpStage(const Stage&) const;
@@ -85,11 +85,13 @@ private:
     bool m_showMetadata;
     bool m_showSDOPCMetadata;
     pdal::Options m_options;
-    boost::uint64_t m_pointNumber;
+    std::string m_pointIndexes;
     std::ostream* m_outputStream;
     boost::uint32_t m_seed;
     boost::uint32_t m_sample_size;
     bool m_useXML;
+    bool m_useJSON;
+    bool m_useREST;
     std::string m_Dimensions;
     std::string m_QueryPoint;
     double m_QueryDistance;

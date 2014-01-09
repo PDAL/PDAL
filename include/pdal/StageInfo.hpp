@@ -111,6 +111,35 @@ public:
     {
         return m_link;
     }
+    std::string optionsToRST() const;
+    
+    inline std::string toRST() const
+    {
+        std::ostringstream strm;
+        std::string link(getInfoLink());
+        bool bDoLink = link.size() > 0;
+    
+        // strm << headline << std::endl;
+        if (bDoLink)
+            strm << "`";
+        strm << getName();
+        if (bDoLink)
+            strm << "`_ ";
+        strm << std::endl;
+        std::string headline("------------------------------------------------------------------------------------------");
+
+        strm << headline << std::endl;
+    
+        strm << std::endl;
+        strm << getDescription() << std::endl;
+
+        if (bDoLink)
+        {
+            strm << std::endl;
+            strm << ".. _`" << getName() << "`: " << getInfoLink() << std::endl;
+        }
+        return strm.str();    
+    }
 
 private:
     std::string m_name;
@@ -118,6 +147,7 @@ private:
     std::vector<Dimension> m_dimensions;
     std::vector<Option> m_options;
     std::string m_link;
+
 
 
 };

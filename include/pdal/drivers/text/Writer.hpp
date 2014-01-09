@@ -80,6 +80,7 @@ class PDAL_DLL Writer : public pdal::Writer
 {
 public:
     SET_STAGE_NAME("drivers.text.writer", "Text Writer")
+    SET_STAGE_LINK("http://pdal.io/stages/drivers.text.writer.html")
 
     Writer(Stage& prevStage, const Options&);
     ~Writer();

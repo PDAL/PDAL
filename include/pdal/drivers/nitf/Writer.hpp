@@ -66,7 +66,8 @@ class PDAL_DLL Writer : public pdal::drivers::las::Writer
 {
 public:
     SET_STAGE_NAME("drivers.nitf.writer", "NITF Writer")
-
+    SET_STAGE_LINK("http://pdal.io/stages/drivers.nitf.writer.html")
+    
     Writer(Stage& prevStage, const Options&);
     ~Writer();
 

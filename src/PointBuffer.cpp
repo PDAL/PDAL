@@ -39,6 +39,7 @@
 
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/uuid/random_generator.hpp>
+#include <algorithm>
 
 namespace pdal
 {
@@ -400,172 +401,248 @@ boost::property_tree::ptree PointBuffer::toPTree() const
 
             const std::string key = pointstring + dimension.getName();
 
-            std::string output = "";
-
-            double scale = dimension.getNumericScale();
-            double offset = dimension.getNumericOffset();
-
-            bool applyScaling(false);
-            if (!Utils::compare_distance(scale, 0.0) ||
-                    !Utils::compare_distance(offset, 0.0)
-               )
-            {
-                applyScaling = true;
-            }
-
-
-            switch (dimension.getInterpretation())
-            {
-
-#define GETFIELDAS(T) getField<T>(dimension, pointIndex)
-#define STRINGIFY(T,x) boost::lexical_cast<std::string>(boost::numeric_cast<T>(x))
-                    // note we convert 8-bit fields to ints, so they aren't treated as chars
-                case dimension::SignedInteger:
-                    if (size == 1)
-                    {
-                        if (!applyScaling)
-                            output += STRINGIFY(boost::int32_t, GETFIELDAS(boost::int8_t));
-                        else
-                        {
-                            boost::int8_t v = GETFIELDAS(boost::int8_t);
-                            double d = dimension.applyScaling<boost::int8_t>(v);
-                            output += STRINGIFY(double, d);
-                        }
-                    }
-                    if (size == 2)
-                    {
-                        if (!applyScaling)
-                            output += STRINGIFY(boost::int16_t, GETFIELDAS(boost::int16_t));
-                        else
-                        {
-                            boost::int16_t v = GETFIELDAS(boost::int16_t);
-                            double d = dimension.applyScaling<boost::int16_t>(v);
-                            output += STRINGIFY(double, d);
-                        }
-                    }
-                    if (size == 4)
-                    {
-                        if (!applyScaling)
-                            output += STRINGIFY(boost::int32_t, GETFIELDAS(boost::int32_t));
-                        else
-                        {
-                            boost::int32_t v = GETFIELDAS(boost::int32_t);
-                            double d = dimension.applyScaling<boost::int32_t>(v);
-                            output += STRINGIFY(double, d);
-                        }
-                    }
-                    if (size == 8)
-                    {
-                        if (!applyScaling)
-                            output += STRINGIFY(boost::int64_t, GETFIELDAS(boost::int64_t));
-                        else
-                        {
-                            boost::int64_t v = GETFIELDAS(boost::int64_t);
-                            double d = dimension.applyScaling<boost::int64_t>(v);
-                            output += STRINGIFY(double, d);
-                        }
-                    }
-                    break;
-                case dimension::UnsignedInteger:
-                    if (size == 1)
-                    {
-                        if (!applyScaling)
-                            output += STRINGIFY(boost::uint32_t, GETFIELDAS(boost::uint8_t));
-                        else
-                        {
-                            boost::uint8_t v = GETFIELDAS(boost::uint8_t);
-                            double d = dimension.applyScaling<boost::uint8_t>(v);
-                            output += STRINGIFY(double, d);
-                        }
-                    }
-                    if (size == 2)
-                    {
-                        if (!applyScaling)
-                            output += STRINGIFY(boost::uint16_t, GETFIELDAS(boost::uint16_t));
-                        else
-                        {
-                            boost::uint16_t v = GETFIELDAS(boost::uint16_t);
-                            double d = dimension.applyScaling<boost::uint16_t>(v);
-                            output += STRINGIFY(double, d);
-                        }
-                    }
-                    if (size == 4)
-                    {
-                        if (!applyScaling)
-                            output += STRINGIFY(boost::uint32_t, GETFIELDAS(boost::uint32_t));
-                        else
-                        {
-                            boost::uint32_t v = GETFIELDAS(boost::uint32_t);
-                            double d = dimension.applyScaling<boost::uint32_t>(v);
-                            output += STRINGIFY(double, d);
-                        }
-                    }
-                    if (size == 8)
-                    {
-                        if (!applyScaling)
-                            output += STRINGIFY(double, GETFIELDAS(boost::uint64_t));
-                        else
-                        {
-                            boost::uint64_t v = GETFIELDAS(boost::uint64_t);
-                            double d = dimension.applyScaling<boost::uint64_t>(v);
-                            output += STRINGIFY(double, d);
-                        }
-                    }
-                    break;
-
-
-                case dimension::Float:
-                    if (size == 4)
-                    {
-                        if (!applyScaling)
-                            output += STRINGIFY(float, GETFIELDAS(float));
-                        else
-                        {
-                            float v = GETFIELDAS(float);
-                            double d = dimension.applyScaling<float>(v);
-                            output += STRINGIFY(float, d);
-                        }
-                    }
-                    else if (size == 8)
-                    {
-                        if (!applyScaling)
-                            output += STRINGIFY(double, GETFIELDAS(double));
-                        else
-                        {
-                            double v = GETFIELDAS(double);
-                            double d = dimension.applyScaling<double>(v);
-                            output += STRINGIFY(double, d);
-                        }
-                    }
-                    else
-                    {
-                        output += STRINGIFY(double, GETFIELDAS(double));
-                    }
-                    break;
-
-                case dimension::RawByte:
-                    {
-                        const boost::uint8_t* data  = getData(pointIndex) + dimension.getByteOffset();
-                        std::vector<boost::uint8_t> bytes;
-                        for (int i=0; i < dimension.getByteSize(); ++i)
-                        {
-                            bytes.push_back(data[i]);
-                        }
-                        output += Utils::binary_to_hex_string(bytes);
-                        break;
-                    }
-
-                default:
-                    throw pdal_error("unknown dimension data type");
-            }
-
+            std::string output = printDimension(dimension, pointIndex);
+            
             tree.add(key, output);
         }
     }
     return tree;
 }
 
+std::string PointBuffer::printDimension(Dimension const& dimension, boost::uint32_t index) const
+{
 
+    boost::uint32_t const& size = dimension.getByteSize();
+
+
+    std::string output;
+
+    double scale = dimension.getNumericScale();
+    double offset = dimension.getNumericOffset();
+
+    bool applyScaling(false);
+    if (!Utils::compare_distance(scale, 1.0) ||
+            !Utils::compare_distance(offset, 0.0)
+       )
+    {
+        applyScaling = true;
+    }
+
+
+    switch (dimension.getInterpretation())
+    {
+
+#define GETFIELDAS(T) getField<T>(dimension, index)
+#define STRINGIFY(T,x) boost::lexical_cast<std::string>(boost::numeric_cast<T>(x))
+            // note we convert 8-bit fields to ints, so they aren't treated as chars
+        case dimension::SignedInteger:
+            if (size == 1)
+            {
+                if (!applyScaling)
+                    output += STRINGIFY(boost::int32_t, GETFIELDAS(boost::int8_t));
+                else
+                {
+                    boost::int8_t v = GETFIELDAS(boost::int8_t);
+                    double d = dimension.applyScaling<boost::int8_t>(v);
+                    output += STRINGIFY(double, d);
+                }
+            }
+            if (size == 2)
+            {
+                if (!applyScaling)
+                    output += STRINGIFY(boost::int16_t, GETFIELDAS(boost::int16_t));
+                else
+                {
+                    boost::int16_t v = GETFIELDAS(boost::int16_t);
+                    double d = dimension.applyScaling<boost::int16_t>(v);
+                    output += STRINGIFY(double, d);
+                }
+            }
+            if (size == 4)
+            {
+                if (!applyScaling)
+                    output += STRINGIFY(boost::int32_t, GETFIELDAS(boost::int32_t));
+                else
+                {
+                    boost::int32_t v = GETFIELDAS(boost::int32_t);
+                    double d = dimension.applyScaling<boost::int32_t>(v);
+                    output += STRINGIFY(double, d);
+                }
+            }
+            if (size == 8)
+            {
+                if (!applyScaling)
+                    output += STRINGIFY(boost::int64_t, GETFIELDAS(boost::int64_t));
+                else
+                {
+                    boost::int64_t v = GETFIELDAS(boost::int64_t);
+                    double d = dimension.applyScaling<boost::int64_t>(v);
+                    output += STRINGIFY(double, d);
+                }
+            }
+            break;
+        case dimension::UnsignedInteger:
+            if (size == 1)
+            {
+                if (!applyScaling)
+                    output += STRINGIFY(boost::uint32_t, GETFIELDAS(boost::uint8_t));
+                else
+                {
+                    boost::uint8_t v = GETFIELDAS(boost::uint8_t);
+                    double d = dimension.applyScaling<boost::uint8_t>(v);
+                    output += STRINGIFY(double, d);
+                }
+            }
+            if (size == 2)
+            {
+                if (!applyScaling)
+                    output += STRINGIFY(boost::uint16_t, GETFIELDAS(boost::uint16_t));
+                else
+                {
+                    boost::uint16_t v = GETFIELDAS(boost::uint16_t);
+                    double d = dimension.applyScaling<boost::uint16_t>(v);
+                    output += STRINGIFY(double, d);
+                }
+            }
+            if (size == 4)
+            {
+                if (!applyScaling)
+                    output += STRINGIFY(boost::uint32_t, GETFIELDAS(boost::uint32_t));
+                else
+                {
+                    boost::uint32_t v = GETFIELDAS(boost::uint32_t);
+                    double d = dimension.applyScaling<boost::uint32_t>(v);
+                    output += STRINGIFY(double, d);
+                }
+            }
+            if (size == 8)
+            {
+                if (!applyScaling)
+                    output += STRINGIFY(double, GETFIELDAS(boost::uint64_t));
+                else
+                {
+                    boost::uint64_t v = GETFIELDAS(boost::uint64_t);
+                    double d = dimension.applyScaling<boost::uint64_t>(v);
+                    output += STRINGIFY(double, d);
+                }
+            }
+            break;
+
+
+        case dimension::Float:
+            if (size == 4)
+            {
+                if (!applyScaling)
+                    output += STRINGIFY(float, GETFIELDAS(float));
+                else
+                {
+                    float v = GETFIELDAS(float);
+                    double d = dimension.applyScaling<float>(v);
+                    output += STRINGIFY(float, d);
+                }
+            }
+            else if (size == 8)
+            {
+                if (!applyScaling)
+                    output += STRINGIFY(double, GETFIELDAS(double));
+                else
+                {
+                    double v = GETFIELDAS(double);
+                    double d = dimension.applyScaling<double>(v);
+                    output += STRINGIFY(double, d);
+                }
+            }
+            else
+            {
+                output += STRINGIFY(double, GETFIELDAS(double));
+            }
+            break;
+
+        case dimension::RawByte:
+            {
+                const boost::uint8_t* data  = getData(index) + dimension.getByteOffset();
+                std::vector<boost::uint8_t> bytes;
+                for (int i=0; i < dimension.getByteSize(); ++i)
+                {
+                    bytes.push_back(data[i]);
+                }
+                output += Utils::binary_to_hex_string(bytes);
+                break;
+            }
+
+        default:
+            output = std::string("unknown dimension data type");
+    }
+    return output;
+    
+}
+
+
+std::ostream& PointBuffer::toRST(std::ostream& os) const
+{
+    boost::property_tree::ptree tree;
+
+    const Schema& schema = getSchema();
+    schema::index_by_index const& dimensions = schema.getDimensions().get<schema::index>();
+
+
+    boost::uint32_t ns_column(32);    
+    boost::uint32_t name_column(20);
+    boost::uint32_t value_column(40);
+    
+    std::string output;
+    
+    std::ostringstream hdr;
+    for (int i = 0; i < 80; ++i)
+        hdr << "-";
+
+
+    
+
+    for (std::size_t i=0; i< dimensions.size(); i++)
+    {
+        name_column = std::max(static_cast<std::size_t>(name_column), dimensions[i].getName().size());
+        ns_column = std::max(static_cast<std::size_t>(name_column), dimensions[i].getNamespace().size());
+    }
+    
+    
+    std::ostringstream thdr;
+    for (unsigned i = 0; i < name_column-1; ++i)
+        thdr << "=";
+    thdr << " ";
+    for (unsigned i = 0; i < value_column-1; ++i)
+        thdr << "=";        
+    thdr << " ";
+    for (unsigned i = 0; i < ns_column-1; ++i)
+        thdr << "=";    
+    thdr << " ";
+
+    name_column--;
+
+    
+    unsigned step_back(3);
+
+    for (boost::uint32_t pointIndex=0; pointIndex<getNumPoints(); pointIndex++)
+    {
+        os << "Point " << pointIndex << std::endl;
+        os << hdr.str() << std::endl << std::endl;
+        os << thdr.str() << std::endl;
+        os << std::setw(name_column-step_back) << "Name" << std::setw(value_column-step_back) << "Value"  << std::setw(ns_column-step_back) << "Namespace" << std::endl;
+        os << thdr.str() << std::endl;        
+        for (unsigned i=0; i< dimensions.size(); i++)
+        {
+            const Dimension& dimension = dimensions[i];
+            std::string value = printDimension(dimension, pointIndex);
+            std::string name = dimension.getName();
+            std::string ns = dimension.getNamespace();
+            os   << std::left << std::setw(name_column) << name << std::right << std::setw(value_column) << value << std::setw(ns_column) << ns  << std::endl;
+        }
+        os << thdr.str() << std::endl << std::endl;
+    }
+    os << std::endl << std::endl;;
+        
+    return os;
+}
 
 double PointBuffer::applyScaling(Dimension const& d,
                                  std::size_t pointIndex) const

@@ -190,7 +190,8 @@ class PDAL_DLL Stats : public Filter
 {
 public:
     SET_STAGE_NAME("filters.stats", "Statistics Filter")
-
+    SET_STAGE_LINK("http://pdal.io/stages/filters.stats.html")  
+    
     Stats(Stage& prevStage, const Options&);
     Stats(Stage& prevStage);
     ~Stats();
@@ -207,9 +208,9 @@ public:
     }
 
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const
+    pdal::StageRandomIterator* createRandomIterator(PointBuffer& buffer) const
     {
-        return 0;    // BUG: add this
+        return getPrevStage().createRandomIterator(buffer);
     }
 
     void processBuffer(PointBuffer& data) const;
@@ -258,9 +259,7 @@ private:
     std::vector<DimensionPtr> m_dimensions;
     std::vector<std::string> m_dimension_names;
     std::vector<std::string> m_exact_dimension_names;
-
-    double getValue(PointBuffer& data, Dimension& dim, boost::uint32_t pointIndex);
-
+    
     std::multimap<DimensionPtr,stats::SummaryPtr> m_stats; // one Stats item per field in the schema
 };
 

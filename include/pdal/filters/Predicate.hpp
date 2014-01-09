@@ -53,7 +53,8 @@ class PDAL_DLL Predicate : public Filter
 {
 public:
     SET_STAGE_NAME("filters.predicate", "Predicate Filter")
-
+    SET_STAGE_LINK("http://pdal.io/stages/filters.predicate.html")  
+    
     Predicate(Stage& prevStage, const Options&);
     ~Predicate();
 
