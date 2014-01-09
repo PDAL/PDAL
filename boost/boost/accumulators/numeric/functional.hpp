@@ -245,14 +245,14 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
         };
 
         template<typename Left, typename Right, typename EnableIf>
-        struct average_base
+        struct fdiv_base
           : functional::divides<Left, Right>
         {};
 
         // partial specialization that promotes the arguments to double for
         // integral division.
         template<typename Left, typename Right>
-        struct average_base<Left, Right, typename enable_if<are_integral<Left, Right> >::type>
+        struct fdiv_base<Left, Right, typename enable_if<are_integral<Left, Right> >::type>
           : functional::divides<double const, double const>
         {};
 
@@ -348,8 +348,15 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
         {};
 
         template<typename Left, typename Right, typename LeftTag, typename RightTag>
+        struct fdiv
+          : fdiv_base<Left, Right, void>
+        {};
+
+        /// INTERNAL ONLY 
+        /// For back-compat only. Use fdiv.
+        template<typename Left, typename Right, typename LeftTag, typename RightTag>
         struct average
-          : average_base<Left, Right, void>
+          : fdiv<Left, Right, LeftTag, RightTag>
         {};
 
         template<typename Arg, typename Tag>
@@ -388,8 +395,13 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
           : pdalboost::detail::function2<functional::max_assign<_1, _2, functional::tag<_1>, functional::tag<_2> > >
         {};
 
+        struct fdiv
+          : pdalboost::detail::function2<functional::fdiv<_1, _2, functional::tag<_1>, functional::tag<_2> > >
+        {};
+
+        /// INTERNAL ONLY
         struct average
-          : pdalboost::detail::function2<functional::average<_1, _2, functional::tag<_1>, functional::tag<_2> > >
+          : pdalboost::detail::function2<functional::fdiv<_1, _2, functional::tag<_1>, functional::tag<_2> > >
         {};
 
         struct as_min
@@ -413,7 +425,8 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
     {
         op::min_assign const &min_assign = pdalboost::detail::pod_singleton<op::min_assign>::instance;
         op::max_assign const &max_assign = pdalboost::detail::pod_singleton<op::max_assign>::instance;
-        op::average const &average = pdalboost::detail::pod_singleton<op::average>::instance;
+        op::fdiv const &fdiv = pdalboost::detail::pod_singleton<op::fdiv>::instance;
+        op::fdiv const &average = pdalboost::detail::pod_singleton<op::fdiv>::instance; ///< INTERNAL ONLY
         op::as_min const &as_min = pdalboost::detail::pod_singleton<op::as_min>::instance;
         op::as_max const &as_max = pdalboost::detail::pod_singleton<op::as_max>::instance;
         op::as_zero const &as_zero = pdalboost::detail::pod_singleton<op::as_zero>::instance;
@@ -421,6 +434,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
 
         BOOST_ACCUMULATORS_IGNORE_GLOBAL(min_assign)
         BOOST_ACCUMULATORS_IGNORE_GLOBAL(max_assign)
+        BOOST_ACCUMULATORS_IGNORE_GLOBAL(fdiv)
         BOOST_ACCUMULATORS_IGNORE_GLOBAL(average)
         BOOST_ACCUMULATORS_IGNORE_GLOBAL(as_min)
         BOOST_ACCUMULATORS_IGNORE_GLOBAL(as_max)

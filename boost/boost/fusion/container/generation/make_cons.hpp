@@ -13,11 +13,11 @@
 
 namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion
 {
-    struct nil;
+    struct nil_;
 
     namespace result_of
     {
-        template <typename Car, typename Cdr = nil>
+        template <typename Car, typename Cdr = nil_>
         struct make_cons
         {
             typedef cons<typename detail::as_fusion_element<Car>::type, Cdr> type;

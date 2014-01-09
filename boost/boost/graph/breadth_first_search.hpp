@@ -64,7 +64,6 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
     BOOST_CONCEPT_ASSERT(( IncidenceGraphConcept<IncidenceGraph> ));
     typedef graph_traits<IncidenceGraph> GTraits;
     typedef typename GTraits::vertex_descriptor Vertex;
-    typedef typename GTraits::edge_descriptor Edge;
     BOOST_CONCEPT_ASSERT(( BFSVisitorConcept<BFSVisitor, IncidenceGraph> ));
     BOOST_CONCEPT_ASSERT(( ReadWritePropertyMapConcept<ColorMap, Vertex> ));
     typedef typename property_traits<ColorMap>::value_type ColorValue;
@@ -248,8 +247,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
        ColorMap color,
        BFSVisitor vis,
        const bgl_named_params<P, T, R>& params,
-       BOOST_GRAPH_ENABLE_IF_MODELS(VertexListGraph, vertex_list_graph_tag,
-                                    void)* = 0)
+       pdalboost::mpl::false_)
     {
       typedef graph_traits<VertexListGraph> Traits;
       // Buffer default
@@ -271,8 +269,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
        ColorMap color,
        BFSVisitor vis,
        const bgl_named_params<P, T, R>& params,
-       BOOST_GRAPH_ENABLE_IF_MODELS(DistributedGraph, distributed_graph_tag,
-                                    void)* = 0);
+       pdalboost::mpl::true_);
 #endif // BOOST_GRAPH_USE_MPI
 
     //-------------------------------------------------------------------------
@@ -293,7 +290,11 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
           (g, s, color,
            choose_param(get_param(params, graph_visitor),
                         make_bfs_visitor(null_visitor())),
-           params);
+           params,
+           pdalboost::mpl::bool_<
+             pdalboost::is_base_and_derived<
+               distributed_graph_tag,
+               typename graph_traits<VertexListGraph>::traversal_category>::value>());
       }
     };
 
@@ -316,7 +317,11 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost {
                               g, vertex_index)),
            choose_param(get_param(params, graph_visitor),
                         make_bfs_visitor(null_vis)),
-           params);
+           params,
+           pdalboost::mpl::bool_<
+             pdalboost::is_base_and_derived<
+               distributed_graph_tag,
+               typename graph_traits<VertexListGraph>::traversal_category>::value>());
       }
     };
 

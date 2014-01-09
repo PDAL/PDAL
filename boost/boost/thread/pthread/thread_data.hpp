@@ -82,7 +82,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
 
     namespace detail
     {
-        struct future_object_base;
+        struct shared_state_base;
         struct tss_cleanup_function;
         struct thread_exit_callback_node;
         struct tss_data_node
@@ -121,7 +121,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
             > notify_list_t;
             notify_list_t notify;
 
-            typedef std::vector<shared_ptr<future_object_base> > async_states_t;
+            typedef std::vector<shared_ptr<shared_state_base> > async_states_t;
             async_states_t async_states_;
 
 //#if defined BOOST_THREAD_PROVIDES_INTERRUPTIONS
@@ -154,7 +154,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
               notify.push_back(std::pair<condition_variable*, mutex*>(cv, m));
             }
 
-            void make_ready_pdalboostat_thread_exit(shared_ptr<future_object_base> as)
+            void make_ready_pdalboostat_thread_exit(shared_ptr<shared_state_base> as)
             {
               async_states_.push_back(as);
             }

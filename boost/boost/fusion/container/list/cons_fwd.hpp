@@ -10,9 +10,12 @@
 
 namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion
 {
-    struct nil;
+    struct nil_;
+    #ifndef nil
+    typedef nil_ nil;
+    #endif
 
-    template <typename Car, typename Cdr = nil>
+    template <typename Car, typename Cdr = nil_>
     struct cons;
 }}
 

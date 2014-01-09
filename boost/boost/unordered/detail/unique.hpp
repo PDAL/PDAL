@@ -334,8 +334,6 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
 
         value_type& operator[](key_type const& k)
         {
-            typedef typename value_type::second_type mapped_type;
-    
             std::size_t key_hash = this->hash(k);
             iterator pos = this->find_node(key_hash, k);
     
