@@ -63,7 +63,8 @@ class PDAL_DLL Writer : public pdal::Writer, pdal::drivers::oci::OracleDriver
 {
 public:
     SET_STAGE_NAME("drivers.oci.writer", "OCI Writer")
-
+    SET_STAGE_LINK("http://pdal.io/stages/drivers.oci.writer.html")
+    
     Writer(Stage& prevStage, const Options&);
     ~Writer();
 

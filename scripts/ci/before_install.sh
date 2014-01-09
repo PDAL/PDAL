@@ -11,6 +11,8 @@ sudo apt-get install \
     cmake \
     libflann-dev \
     libgdal-dev \
+    libgeos-dev \
+    libgeos++-dev \
     libpq-dev \
     libproj-dev \
     libtiff4-dev \

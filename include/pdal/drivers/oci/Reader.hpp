@@ -59,7 +59,8 @@ class PDAL_DLL Reader : public pdal::Reader, pdal::drivers::oci::OracleDriver
 {
 public:
     SET_STAGE_NAME("drivers.oci.reader", "OCI Reader")
-    SET_STAGE_LINK("http://www.pointcloud.org/api/cpp/reader.html#oci-reader")
+    SET_STAGE_LINK("http://pdal.io/stages/drivers.oci.reader.html")
+    
     Reader(const Options&);
     ~Reader();
 

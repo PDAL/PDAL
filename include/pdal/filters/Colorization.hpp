@@ -77,7 +77,8 @@ class PDAL_DLL Colorization : public Filter
 {
 public:
     SET_STAGE_NAME("filters.colorization", "Fetch color information from a GDAL datasource")
-
+    SET_STAGE_LINK("http://pdal.io/stages/filters.colorization.html")
+    
     Colorization(Stage& prevStage, const Options&);
     ~Colorization();
 

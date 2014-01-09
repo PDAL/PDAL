@@ -54,7 +54,8 @@ class PDAL_DLL Color : public Filter
 {
 public:
     SET_STAGE_NAME("filters.color", "Color Filter")
-
+    SET_STAGE_LINK("http://pdal.io/stages/filters.color.html")
+    
     Color(Stage& prevStage, const Options&);
     Color(Stage& prevStage);
 

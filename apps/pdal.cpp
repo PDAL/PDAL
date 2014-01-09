@@ -51,6 +51,8 @@ void outputVersion()
     std::cout << "     - pipeline" << std::endl;
     std::cout << "     - query" << std::endl;
     std::cout << "     - translate" << std::endl;
+    std::cout << std::endl;
+    std::cout << "See http://pdal.io/apps.html for more detail";
     
     std::cout << std::endl;
 }
@@ -69,7 +71,7 @@ int main(int argc, char* argv[])
         ("version", po::value<bool>()->zero_tokens()->implicit_value(true), "Show version info")
         ("help,h", po::value<bool>()->zero_tokens()->implicit_value(true), "Print help message")
             ;
-    
+        
     if (argc < 2)
     {
         std::cerr << "Action not specified!" << std::endl << std::endl;
@@ -85,13 +87,16 @@ int main(int argc, char* argv[])
     catch (boost::program_options::unknown_option& e)
     {
 #if BOOST_VERSION >= 104200
-        throw pdal::kernel::app_usage_error("unknown option: " + e.get_option_name());
+
+        std::cerr << "Unknown option '" << e.get_option_name() <<"' not recognized" << std::endl << std::endl;
 #else
-        throw pdal::kernel::app_usage_error("unknown option: " + std::string(e.what()));
+        std::cerr << "Unknown option '" << std::string(e.what()) <<"' not recognized" << std::endl << std::endl;
 #endif
+        outputVersion();
+        return 1;
+
     }
 
-    
     int count(argc - 1); // remove the 1st argument
     const char** args = const_cast<const char**>(&argv[1]);
     

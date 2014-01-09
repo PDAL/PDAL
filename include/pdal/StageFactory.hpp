@@ -113,6 +113,8 @@ public:
     
     std::map<std::string, pdal::StageInfo> const& getStageInfos() const;
     template<class T> void registerDriverInfo();
+    
+    std::string toRST(std::string driverName="") const;
 
 private:
     // callers take ownership of returned stages

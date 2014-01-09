@@ -54,7 +54,8 @@ class PDAL_DLL Programmable : public Filter
 {
 public:
     SET_STAGE_NAME("filters.programmable", "Programmable Filter")
-
+    SET_STAGE_LINK("http://pdal.io/stages/filters.programmable.html")  
+    
     Programmable(Stage& prevStage, const Options&);
     ~Programmable();
 

@@ -67,6 +67,7 @@ class PDAL_DLL Reader : public pdal::Reader
 {
 public:
     SET_STAGE_NAME("drivers.nitf.reader", "NITF Reader")
+    SET_STAGE_LINK("http://pdal.io/stages/drivers.nitf.reader.html")
 
     Reader(const Options& options);
     ~Reader();
