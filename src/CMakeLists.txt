@@ -629,8 +629,6 @@ source_group("Source Files\\plang" FILES ${PDAL_PLANG_CPP})
 # Standard include directory of PDAL library
 include_directories(../include)
 
-set (APPS_CPP_DEPENDENCIES "${PDAL_LIB_NAME}" CACHE INTERNAL "libraries to link")
-
 ###############################################################################
 # Targets settings
 
@@ -667,45 +665,29 @@ set (SQLITE_LIBRARIES ${SOCI_LIBRARY} ${SOCI_sqlite3_PLUGIN} ${SQLITE3_LIBRARY})
 
 if (WITH_SQLITE)
 if (NOT USE_PDAL_PLUGIN_SQLITE)
-target_link_libraries(${APPS_CPP_DEPENDENCIES} ${SQLITE_LIBRARIES})
+target_link_libraries(${PDAL_LIB_NAME} PUBLIC general ${SQLITE_LIBRARIES} )
 endif()
 endif()
 
 if (WITH_PGPOINTCLOUD)
 if (NOT USE_PDAL_PLUGIN_PGPOINTCLOUD)
-target_link_libraries(${APPS_CPP_DEPENDENCIES} ${POSTGRESQL_LIBRARIES})
+target_link_libraries(${PDAL_LIB_NAME} PUBLIC general ${POSTGRESQL_LIBRARIES})
 endif()
 endif()
 
 if (WITH_ORACLE)
 if (NOT USE_PDAL_PLUGIN_OCI)
-target_link_libraries(${APPS_CPP_DEPENDENCIES} "${ORACLE_LIBRARY}")
+target_link_libraries(${PDAL_LIB_NAME}  PUBLIC general "${ORACLE_LIBRARY}")
 endif()
 endif()
 
 if (WITH_NITRO)
 if (NOT USE_PDAL_PLUGIN_NITRO)
-target_link_libraries(${APPS_CPP_DEPENDENCIES} ${NITRO_LIBRARIES})
+target_link_libraries(${PDAL_LIB_NAME}  PUBLIC general ${NITRO_LIBRARIES} )
 endif()
 endif()
 
-if (WIN32)
-  target_link_libraries(${APPS_CPP_DEPENDENCIES} LINK_PUBLIC general
-    "${PDAL_LIB_NAME}"
-    "${TIFF_LIBRARY}"
-    "${MRSID_LIBRARY}"
-    "${GEOTIFF_LIBRARY}"
-    "${GDAL_LIBRARY}"
-    "${LASZIP_LIBRARY}"
-    ${LIBXML2_LIBRARIES}
-    "${PYTHON_LIBRARY}"
-    "${P2G_LIBRARY}"
-    "${GEOS_LIBRARY}"
-    "${HEXER_LIBRARY}"
-    "${ORACLE_LIBRARY}"
-)
-else()
-  target_link_libraries(${APPS_CPP_DEPENDENCIES}
+  target_link_libraries(${PDAL_LIB_NAME} PUBLIC general
     "${PDAL_LIB_NAME}"
     "${CMAKE_THREAD_LIBS_INIT}"
     "${CMAKE_DL_LIBS}"
@@ -721,23 +703,12 @@ else()
     "${HEXER_LIBRARY}"
     "${ORACLE_LIBRARY}"
 )
-endif()
 
 message(STATUS "Using boost lib: ${Boost_LIBRARIES}")
 
-if (WIN32)
-	if (CMAKE_VERSION VERSION_GREATER 2.8.6)
-		target_link_libraries(${APPS_CPP_DEPENDENCIES}
-                       LINK_PRIVATE general ${Boost_LIBRARIES} "${Boost_FILESYSTEM_LIBRARY}")
-	else()
-		target_link_libraries(${APPS_CPP_DEPENDENCIES}
-                        ${Boost_LIBRARIES} "${Boost_FILESYSTEM_LIBRARY}")
-	endif()
-else()
-	target_link_libraries(${APPS_CPP_DEPENDENCIES}
-                      ${Boost_LIBRARIES} )
+target_link_libraries(${PDAL_LIB_NAME}
+                       LINK_PRIVATE general ${Boost_LIBRARIES})
 
-endif(WIN32)
 
 set_target_properties(${PDAL_LIB_NAME}
   PROPERTIES SOVERSION "${PDAL_LIB_SOVERSION}" )
@@ -753,8 +724,8 @@ endif()
 if (USE_PDAL_PLUGIN_TEXT)
     set(PDAL_TEXT_WRITER_LIB_NAME pdal_plugin_writer_text)
     add_library(${PDAL_TEXT_WRITER_LIB_NAME} SHARED "${PDAL_DRIVERS_TEXT_CPP}" "${PDAL_DRIVERS_TEXT_HPP}")
-    target_link_libraries(${PDAL_TEXT_WRITER_LIB_NAME}
-                          "${PDAL_LIB_NAME}")
+    target_link_libraries(${PDAL_TEXT_WRITER_LIB_NAME} INTERFACE general
+                          ${PDAL_LIB_NAME})
     set_target_properties("${PDAL_TEXT_WRITER_LIB_NAME}"
     PROPERTIES SOVERSION "${PDAL_LIB_SOVERSION}" )
     if (APPLE)
@@ -769,7 +740,7 @@ if (WITH_SQLITE)
 if (USE_PDAL_PLUGIN_SQLITE)
     set(PDAL_SOCI_WRITER_LIB_NAME pdal_plugin_writer_sqlite)
     add_library(${PDAL_SQLITE_WRITER_LIB_NAME} SHARED "${PDAL_SQLITE_SRC}/Writer.cpp")
-    target_link_libraries(${PDAL_SQLITE_WRITER_LIB_NAME}
+    target_link_libraries(${PDAL_SQLITE_WRITER_LIB_NAME} INTERFACE general
                           "${PDAL_LIB_NAME}"
                           ${SQLITE_LIBRARIES})
     set_target_properties(${PDAL_SQLITE_WRITER_LIB_NAME}
@@ -783,7 +754,7 @@ if (USE_PDAL_PLUGIN_SQLITE)
 
     set(PDAL_SOCI_READER_LIB_NAME pdal_plugin_reader_sqlite)
     add_library(${PDAL_SQLITE_READER_LIB_NAME} SHARED ${PDAL_SQLITE_SRC}/Reader.cpp)
-    target_link_libraries(${PDAL_SOCI_READER_LIB_NAME}
+    target_link_libraries(${PDAL_SOCI_READER_LIB_NAME} INTERFACE general
                           "${PDAL_LIB_NAME}"
                           ${SQLITE_LIBRARIES})
     set_target_properties(${PDAL_SQLITE_READER_LIB_NAME}
@@ -804,7 +775,7 @@ if (USE_PDAL_PLUGIN_OCI)
     add_library(${PDAL_OCI_WRITER_LIB_NAME} SHARED "${PDAL_ORACLE_SRC}/oci_wrapper.cpp"
                                                     "${PDAL_ORACLE_SRC}/common.cpp"
                                                     "${PDAL_ORACLE_SRC}/Writer.cpp")
-    target_link_libraries(${PDAL_OCI_WRITER_LIB_NAME}
+    target_link_libraries(${PDAL_OCI_WRITER_LIB_NAME} INTERFACE general
                           "${PDAL_LIB_NAME}"
                           "${ORACLE_LIBRARY}")
     set_target_properties(${PDAL_OCI_WRITER_LIB_NAME}

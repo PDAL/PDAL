@@ -140,5 +140,5 @@ add_library(${PDALBOOST_LIB_NAME} STATIC ${PDALBOOST_SOURCES})
 
 if (UNIX AND NOT PDAL_BUILD_STATIC)
      # Must use position independent code to link static libs into dynamic ones
-     set_target_properties(${PDALBOOST_LIB_NAME} PROPERTIES COMPILE_FLAGS "-fPIC")
+     # set_target_properties(${PDALBOOST_LIB_NAME} PROPERTIES COMPILE_FLAGS "-fPIC")
 endif()
