@@ -156,10 +156,6 @@
 #  define BOOST_NO_CXX11_USER_DEFINED_LITERALS
 #endif
 
-#if !(__has_feature(cxx_alignas) || __has_extension(cxx_alignas))
-#  define BOOST_NO_CXX11_ALIGNAS
-#endif
-
 #if !__has_feature(cxx_trailing_return)
 #  define BOOST_NO_CXX11_TRAILING_RESULT_TYPES
 #endif
