@@ -363,7 +363,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
         }
     }
 #else
-#ifndef BOOST_MSVC
+#if ! defined(BOOST_MSVC) && ! defined(BOOST_INTEL)
     template<typename Function>
     void call_once(once_flag& flag,Function f)
     {

@@ -45,7 +45,7 @@
         <Option name="post_block_sql">
         </Option>
         <Option name="capacity">
-            1065
+            50
         </Option>
         <Option name="stream_output_precision">
             8
@@ -69,7 +69,7 @@
             <Options>
               <Option name="dimension">X</Option>
               <Option name="dimension">Y</Option>
-              <Option name="dimension">filters.inplacereprojection.Z</Option>
+              <Option name="dimension">Z</Option>
               <Option name="dimension">Intensity</Option>
               <Option name="dimension">Classification</Option>
               <Option name="dimension">PointSourceId</Option>
@@ -78,19 +78,19 @@
         <Filter type="filters.stats">
            <Option name="exact_dimensions">Classification</Option>
            <Option name="dimensions">drivers.las.reader.X, drivers.las.reader.Y, drivers.las.reader.Z, Classification</Option>        
-            <Filter type="filters.inplacereprojection">
+            <!-- <Filter type="filters.inplacereprojection">
                 <Option name="out_srs">
-                    EPSG:2926
+                    EPSG:26910
                 </Option>
-                <!-- <Option name="scale_x">
+               <Option name="scale_x">
                     0.01
                 </Option>
                 <Option name="scale_y">
                     0.01
-                </Option> -->
-                <Filter type="filters.scaling">
+                </Option>  -->
+                <!-- <Filter type="filters.scaling">
                   <Option name="dimension">X<Options><Option name="scale">1e-1</Option></Options></Option>
-                  <Option name="dimension">Y<Options><Option name="scale">1e-1</Option></Options></Option>                
+                  <Option name="dimension">Y<Options><Option name="scale">1e-1</Option></Options></Option>     -->            
                 <Filter type="filters.chipper">
                     <Option name="capacity">
                         50
@@ -101,7 +101,7 @@
                         </Option>
                         <Reader type="drivers.las.reader">
                                 <Option name="filename">
-                                    ../autzen-dd.las
+                                    ../autzen-dd-pf0.las
                                 </Option>
                                 <Option name="spatialreference">
                                     EPSG:4326
@@ -111,9 +111,9 @@
                                 </Option>     -->
                         </Reader>
                 </Filter>
+            <!-- </Filter> -->
             </Filter>
-            </Filter>
-            </Filter>
+            <!-- </Filter> -->
             </Filter>            
         </Filter>
     </Writer>

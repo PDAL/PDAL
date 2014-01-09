@@ -57,7 +57,9 @@ inline BOOST_CONSTEXPR const char* make_big_value(long double, const char* s, mp
 // For constants too huge for any conceivable long double (and which generate compiler errors if we try and declare them as such):
 //
 #define BOOST_MATH_HUGE_CONSTANT(T, D, x)\
-   pdalboost::math::tools::make_big_value<T>(0.0L, BOOST_STRINGIZE(x), mpl::bool_<is_floating_point<T>::value || (std::numeric_limits<T>::is_specialized && std::numeric_limits<T>::max_exponent <= std::numeric_limits<long double>::max_exponent)>(), pdalboost::is_convertible<const char*, T>())
+   pdalboost::math::tools::make_big_value<T>(0.0L, BOOST_STRINGIZE(x), \
+   mpl::bool_<is_floating_point<T>::value || (std::numeric_limits<T>::is_specialized && std::numeric_limits<T>::max_exponent <= std::numeric_limits<long double>::max_exponent && std::numeric_limits<T>::digits <= std::numeric_limits<long double>::digits)>(), \
+   pdalboost::is_convertible<const char*, T>())
 
 }}} // namespaces
 

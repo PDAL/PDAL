@@ -85,6 +85,8 @@
 #include <boost/config.hpp>
 #include <boost/detail/workaround.hpp>
 
+#pragma GCC diagnostic ignored "-Woverloaded-virtual"
+
 #if defined(BOOST_NO_STDC_NAMESPACE)
 namespace std {
     using ::mbstate_t;

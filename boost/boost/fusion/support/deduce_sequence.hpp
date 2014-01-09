@@ -32,7 +32,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
             { };
 
             // never called, but needed for decltype-based result_of (C++0x)
-#ifndef BOOST_NO_RVALUE_REFERENCES
+#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
             template <typename T>
             typename result< deducer(T) >::type
             operator()(T&&) const;

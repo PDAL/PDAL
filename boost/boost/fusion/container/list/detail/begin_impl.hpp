@@ -13,7 +13,7 @@
 
 namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace fusion
 {
-    struct nil;
+    struct nil_;
 
     struct cons_tag;
 

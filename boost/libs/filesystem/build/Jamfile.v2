@@ -25,7 +25,7 @@ SOURCES =
 	;
 
 lib pdalboost_filesystem
-    : $(SOURCES).cpp ../../system/build//boost_system
+    : $(SOURCES).cpp ../../system/build//pdalboost_system
     : <link>shared:<define>BOOST_FILESYSTEM_DYN_LINK=1
       <link>static:<define>BOOST_FILESYSTEM_STATIC_LINK=1
     :
@@ -35,7 +35,7 @@ lib pdalboost_filesystem
       # means those clients have to be directly linked to Boost.System. For static
       # linking this happens anyway, but for shared we need to make it happen. Since
       # doing so is harmless even when not needed, we do it for all platforms.
-      <link>shared:<library>../../system/build//boost_system
+      <link>shared:<library>../../system/build//pdalboost_system
     ;
 
 boost-install pdalboost_filesystem ;

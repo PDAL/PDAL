@@ -13,7 +13,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
 {
     struct cons_tag;
 
-    struct nil;
+    struct nil_;
 
     template <typename Car, typename Cdr>
     struct cons;
@@ -28,7 +28,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
         {
             template <typename Sequence>
             struct apply
-                : pdalboost::is_convertible<Sequence, nil>
+                : pdalboost::is_convertible<Sequence, nil_>
             {};
         };
     }

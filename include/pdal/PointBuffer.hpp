@@ -57,8 +57,8 @@ namespace pdal
         typedef boost::uuids::uuid id;
         typedef std::vector<boost::uint8_t>::size_type PointBufferByteSize;
 
-        typedef boost::interprocess::allocator<boost::uint8_t, boost::interprocess::managed_shared_memory::segment_manager>     ShmemAllocator; 
-        typedef boost::container::vector<boost::uint8_t, ShmemAllocator> PointBufferVector;
+        // typedef boost::interprocess::allocator<boost::uint8_t, boost::interprocess::managed_shared_memory::segment_manager>     ShmemAllocator; 
+        // typedef boost::container::vector<boost::uint8_t, ShmemAllocator> PointBufferVector;
 
     } // pointbuffer
 
@@ -419,7 +419,7 @@ protected:
     schema::Orientation m_orientation;
 
     Metadata m_metadata;
-    boost::interprocess::managed_shared_memory *m_segment;
+    // boost::interprocess::managed_shared_memory *m_segment;
     pointbuffer::id m_uuid;
     
 
@@ -469,11 +469,18 @@ inline void PointBuffer::setField(pdal::Dimension const& dim, boost::uint32_t po
         // do anything magical. It's up to you to get the interpretation right.
         *(T*)(void*)p = value;
         return;
+    } else 
+    {
+        std::ostringstream oss;
+        oss << "Size of type T " << sizeof(T) << " does not match the size of dimension '" 
+            << dim.getFQName() << "' which is " << dim.getByteSize();
+        throw pdal_error(oss.str());
     }
-
-    T output(0);
-    output = boost::lexical_cast<T>(value);
-    *(T*)(void*)p = output;
+    
+    
+    // T output(0);
+    // output = boost::lexical_cast<T>(value);
+    // *(T*)(void*)p = output;
 
 
 }

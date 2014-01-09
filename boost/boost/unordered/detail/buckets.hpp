@@ -32,6 +32,10 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
 
 }}}
 
+// The 'iterator_detail' namespace was a misguided attempt at avoiding ADL
+// in the detail namespace. It didn't work because the template parameters
+// were in detail. I'm not changing it at the moment to be safe. I might
+// do in the future if I change the iterator types.
 namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace unordered { namespace iterator_detail {
 
     ////////////////////////////////////////////////////////////////////////////
@@ -73,9 +77,9 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
 
         typedef typename Node::value_type value_type;
 
-        l_iterator() : ptr_() {}
+        l_iterator() BOOST_NOEXCEPT : ptr_() {}
 
-        l_iterator(iterator x, std::size_t b, std::size_t c)
+        l_iterator(iterator x, std::size_t b, std::size_t c) BOOST_NOEXCEPT
             : ptr_(x.node_), bucket_(b), bucket_count_(c) {}
 
         value_type& operator*() const {
@@ -100,11 +104,11 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
             return tmp;
         }
 
-        bool operator==(l_iterator x) const {
+        bool operator==(l_iterator x) const BOOST_NOEXCEPT {
             return ptr_ == x.ptr_;
         }
 
-        bool operator!=(l_iterator x) const {
+        bool operator!=(l_iterator x) const BOOST_NOEXCEPT {
             return ptr_ != x.ptr_;
         }
     };
@@ -132,13 +136,13 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
 
         typedef typename Node::value_type value_type;
 
-        cl_iterator() : ptr_() {}
+        cl_iterator() BOOST_NOEXCEPT : ptr_() {}
 
-        cl_iterator(iterator x, std::size_t b, std::size_t c) :
+        cl_iterator(iterator x, std::size_t b, std::size_t c) BOOST_NOEXCEPT :
             ptr_(x.node_), bucket_(b), bucket_count_(c) {}
 
         cl_iterator(pdalboost::unordered::iterator_detail::l_iterator<
-                Node, Policy> const& x) :
+                Node, Policy> const& x) BOOST_NOEXCEPT :
             ptr_(x.ptr_), bucket_(x.bucket_), bucket_count_(x.bucket_count_)
         {}
 
@@ -164,11 +168,15 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
             return tmp;
         }
 
-        friend bool operator==(cl_iterator const& x, cl_iterator const& y) {
+        friend bool operator==(cl_iterator const& x, cl_iterator const& y)
+            BOOST_NOEXCEPT
+        {
             return x.ptr_ == y.ptr_;
         }
 
-        friend bool operator!=(cl_iterator const& x, cl_iterator const& y) {
+        friend bool operator!=(cl_iterator const& x, cl_iterator const& y)
+            BOOST_NOEXCEPT
+        {
             return x.ptr_ != y.ptr_;
         }
     };
@@ -204,9 +212,9 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
 
         typedef typename Node::value_type value_type;
 
-        iterator() : node_() {}
+        iterator() BOOST_NOEXCEPT : node_() {}
 
-        explicit iterator(typename Node::link_pointer x) :
+        explicit iterator(typename Node::link_pointer x) BOOST_NOEXCEPT :
             node_(static_cast<node_pointer>(x)) {}
 
         value_type& operator*() const {
@@ -228,11 +236,11 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
             return tmp;
         }
 
-        bool operator==(iterator const& x) const {
+        bool operator==(iterator const& x) const BOOST_NOEXCEPT {
             return node_ == x.node_;
         }
 
-        bool operator!=(iterator const& x) const {
+        bool operator!=(iterator const& x) const BOOST_NOEXCEPT {
             return node_ != x.node_;
         }
     };
@@ -266,12 +274,12 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
 
         typedef typename Node::value_type value_type;
 
-        c_iterator() : node_() {}
+        c_iterator() BOOST_NOEXCEPT : node_() {}
 
-        explicit c_iterator(typename Node::link_pointer x) :
+        explicit c_iterator(typename Node::link_pointer x) BOOST_NOEXCEPT :
             node_(static_cast<node_pointer>(x)) {}
 
-        c_iterator(iterator const& x) : node_(x.node_) {}
+        c_iterator(iterator const& x) BOOST_NOEXCEPT : node_(x.node_) {}
 
         value_type const& operator*() const {
             return node_->value();
@@ -292,11 +300,15 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
             return tmp;
         }
 
-        friend bool operator==(c_iterator const& x, c_iterator const& y) {
+        friend bool operator==(c_iterator const& x, c_iterator const& y)
+            BOOST_NOEXCEPT
+        {
             return x.node_ == y.node_;
         }
 
-        friend bool operator!=(c_iterator const& x, c_iterator const& y) {
+        friend bool operator!=(c_iterator const& x, c_iterator const& y)
+            BOOST_NOEXCEPT
+        {
             return x.node_ != y.node_;
         }
     };
@@ -345,7 +357,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
         void construct_with_value(BOOST_UNORDERED_EMPLACE_ARGS)
         {
             construct();
-            pdalboost::unordered::detail::construct_value_impl(
+            pdalboost::unordered::detail::func::construct_value_impl(
                 alloc_, node_->value_ptr(), BOOST_UNORDERED_EMPLACE_FORWARD);
             value_constructed_ = true;
         }
@@ -354,7 +366,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
         void construct_with_value2(BOOST_FWD_REF(A0) a0)
         {
             construct();
-            pdalboost::unordered::detail::construct_value_impl(
+            pdalboost::unordered::detail::func::construct_value_impl(
                 alloc_, node_->value_ptr(),
                 BOOST_UNORDERED_EMPLACE_ARGS1(pdalboost::forward<A0>(a0)));
             value_constructed_ = true;
@@ -384,7 +396,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
     {
         if (node_) {
             if (value_constructed_) {
-                pdalboost::unordered::detail::destroy_value_impl(alloc_,
+                pdalboost::unordered::detail::func::destroy_value_impl(alloc_,
                     node_->value_ptr());
             }
 
@@ -416,7 +428,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
 
             if (value_constructed_)
             {
-                pdalboost::unordered::detail::destroy_value_impl(alloc_,
+                pdalboost::unordered::detail::func::destroy_value_impl(alloc_,
                     node_->value_ptr());
                 value_constructed_ = false;
             }
@@ -533,7 +545,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
             node_pointer p = nodes_;
             nodes_ = static_cast<node_pointer>(p->next_);
 
-            pdalboost::unordered::detail::destroy_value_impl(this->alloc_,
+            pdalboost::unordered::detail::func::destroy_value_impl(this->alloc_,
                 p->value_ptr());
             node_allocator_traits::destroy(this->alloc_, pdalboost::addressof(*p));
             node_allocator_traits::deallocate(this->alloc_, p, 1);
@@ -715,20 +727,23 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
             new((void*) &funcs_[which]) function_pair(hf, eq);
         }
 
-        void construct(bool which, function_pair const& f)
+        void construct(bool which, function_pair const& f,
+                pdalboost::unordered::detail::false_type =
+                    pdalboost::unordered::detail::false_type())
         {
             new((void*) &funcs_[which]) function_pair(f);
         }
         
         void construct(bool which, function_pair& f,
-                pdalboost::unordered::detail::move_tag m)
+                pdalboost::unordered::detail::true_type)
         {
-            new((void*) &funcs_[which]) function_pair(f, m);
+            new((void*) &funcs_[which]) function_pair(f,
+                pdalboost::unordered::detail::move_tag());
         }
 
         void destroy(bool which)
         {
-            pdalboost::unordered::detail::destroy((function_pair*)(&funcs_[which]));
+            pdalboost::unordered::detail::func::destroy((function_pair*)(&funcs_[which]));
         }
         
     public:
@@ -748,15 +763,12 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
             construct(current_, bf.current());
         }
 
-        functions(functions& bf, pdalboost::unordered::detail::move_tag m)
+        functions(functions& bf, pdalboost::unordered::detail::move_tag)
             : current_(false)
         {
-            if (nothrow_move_constructible) {
-                construct(current_, bf.current(), m);
-            }
-            else {
-                construct(current_, bf.current());
-            }
+            construct(current_, bf.current(),
+                pdalboost::unordered::detail::integral_constant<bool,
+                    nothrow_move_constructible>());
         }
 
         ~functions() {

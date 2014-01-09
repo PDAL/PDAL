@@ -25,8 +25,7 @@ Developers and Sponsorship
 PDAL is developed by `Howard Butler`_ and `Michael Gerlek`_.
 
 PDAL is currently sponsored by the `U.S. Army Cold Regions Research and
-Engineering Laboratory`_.  Thanks to `Aerial Services, Inc`_ for the
-http://pointcloud.org domain.
+Engineering Laboratory`_.  
 
 .. _`Aerial Services, Inc`: http://www.asi-gis.com/
 .. _`Point Cloud Library (PCL)`: http://pointclouds.org
@@ -35,7 +34,7 @@ http://pointcloud.org domain.
 .. _`point cloud data`: http://en.wikipedia.org/wiki/Point_cloud
 .. _`LIDAR`: http://en.wikipedia.org/wiki/LIDAR
 .. _`U.S. Army Cold Regions Research and Engineering Laboratory` : http://www.crrel.usace.army.mil/
-.. _`Howard Butler`: http://hobu.biz
+.. _`Howard Butler`: http://hobu.co
 .. _`Michael Gerlek`: http://www.flaxen.com
 
 

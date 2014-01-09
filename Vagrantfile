@@ -60,7 +60,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     "postgis",
     "libcunit1-dev",
     "postgresql-server-dev-9.1",
-    "postgresql-9.1-postgis"
+    "postgresql-9.1-postgis",
+    "libmsgpack-dev"
   ];
 
   if Dir.glob("#{File.dirname(__FILE__)}/.vagrant/machines/default/*/id").empty?

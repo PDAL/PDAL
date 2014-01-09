@@ -56,7 +56,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
             };
 
             // never called, but needed for decltype-based result_of (C++0x)
-#ifndef BOOST_NO_RVALUE_REFERENCES
+#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
             template<typename StrictestSoFar, typename Next>
             typename result<strictest_traversal_impl(StrictestSoFar, Next)>::type
             operator()(StrictestSoFar&&, Next&&) const;

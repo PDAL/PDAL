@@ -29,6 +29,8 @@
 #include <boost/type_traits/has_trivial_copy.hpp>
 #include <boost/type_traits/has_trivial_constructor.hpp>
 #include <boost/type_traits/has_trivial_destructor.hpp>
+#include <boost/type_traits/has_trivial_move_constructor.hpp>
+#include <boost/type_traits/has_trivial_move_assign.hpp>
 //#include <boost/type_traits/has_nothrow_constructor.hpp>
 //#include <boost/type_traits/has_nothrow_copy.hpp>
 //#include <boost/type_traits/has_nothrow_assign.hpp>
@@ -409,12 +411,12 @@ struct has_nothrow_move : public
 template <typename I, typename O>
 inline
 O uninitialized_move_if_noexcept_dispatch(I first, I last, O dst, pdalboost::mpl::bool_<true> const& /*use_move*/)
-{ return uninitialized_move(first, last, dst); }
+{ return varray_detail::uninitialized_move(first, last, dst); }
 
 template <typename I, typename O>
 inline
 O uninitialized_move_if_noexcept_dispatch(I first, I last, O dst, pdalboost::mpl::bool_<false> const& /*use_move*/)
-{ return uninitialized_copy(first, last, dst); }
+{ return varray_detail::uninitialized_copy(first, last, dst); }
 
 template <typename I, typename O>
 inline
@@ -532,16 +534,16 @@ void construct(DisableTrivialInit const&, I pos)
 
 template <typename I, typename V>
 inline
-void construct_dispatch(I pos, V const& v,
-                        pdalboost::mpl::bool_<true> const& /*use_memcpy*/)
+void construct_copy_dispatch(I pos, V const& v,
+                             pdalboost::mpl::bool_<true> const& /*use_memcpy*/)
 {
     ::memcpy(pdalboost::addressof(*pos), pdalboost::addressof(v), sizeof(V));
 }
 
 template <typename I, typename P>
 inline
-void construct_dispatch(I pos, P const& p,
-                        pdalboost::mpl::bool_<false> const& /*use_memcpy*/)
+void construct_copy_dispatch(I pos, P const& p,
+                             pdalboost::mpl::bool_<false> const& /*use_memcpy*/)
 {
     typedef typename pdalboost::iterator_value<I>::type V;
     new (static_cast<void*>(pdalboost::addressof(*pos))) V(p);                      // may throw
@@ -559,10 +561,27 @@ void construct(DisableTrivialInit const&,
     >::type
     use_memcpy;
 
-    construct_dispatch(pos, p, use_memcpy());                                   // may throw
+    construct_copy_dispatch(pos, p, use_memcpy());                              // may throw
 }
 
 // Needed by push_back(V &&)
+
+template <typename I, typename V>
+inline
+void construct_move_dispatch(I pos, V const& v,
+                             pdalboost::mpl::bool_<true> const& /*use_memcpy*/)
+{
+    ::memcpy(pdalboost::addressof(*pos), pdalboost::addressof(v), sizeof(V));
+}
+
+template <typename I, typename P>
+inline
+void construct_move_dispatch(I pos, BOOST_RV_REF(P) p,
+                             pdalboost::mpl::bool_<false> const& /*use_memcpy*/)
+{
+    typedef typename pdalboost::iterator_value<I>::type V;
+    new (static_cast<void*>(pdalboost::addressof(*pos))) V(::pdalboost::move(p));       // may throw
+}
 
 template <typename DisableTrivialInit, typename I, typename P>
 inline
@@ -571,12 +590,11 @@ void construct(DisableTrivialInit const&, I pos, BOOST_RV_REF(P) p)
     typedef typename
     ::pdalboost::mpl::and_<
         is_corresponding_value<I, P>,
-        ::pdalboost::has_trivial_copy<P>
+        ::pdalboost::has_trivial_move_constructor<P>
     >::type
     use_memcpy;
 
-    typedef typename pdalboost::iterator_value<I>::type V;
-    new (static_cast<void*>(pdalboost::addressof(*pos))) V(::pdalboost::move(p));       // may throw
+    construct_move_dispatch(pos, ::pdalboost::move(p), use_memcpy());               // may throw
 }
 
 // Needed by emplace_back() and emplace()
@@ -624,16 +642,17 @@ void construct(DisableTrivialInit const&,                                       
 
 template <typename I, typename V>
 inline
-void assign_dispatch(I pos, V const& v,
-                     pdalboost::mpl::bool_<true> const& /*use_memcpy*/)
+void assign_copy_dispatch(I pos, V const& v,
+                          pdalboost::mpl::bool_<true> const& /*use_memcpy*/)
 {
+// TODO - use memmove here?
     ::memcpy(pdalboost::addressof(*pos), pdalboost::addressof(v), sizeof(V));
 }
 
 template <typename I, typename V>
 inline
-void assign_dispatch(I pos, V const& v,
-                     pdalboost::mpl::bool_<false> const& /*use_memcpy*/)
+void assign_copy_dispatch(I pos, V const& v,
+                          pdalboost::mpl::bool_<false> const& /*use_memcpy*/)
 {
     *pos = v;                                                                   // may throw
 }
@@ -649,16 +668,39 @@ void assign(I pos, V const& v)
     >::type
     use_memcpy;
 
-    assign_dispatch(pos, v, use_memcpy());                                        // may throw
+    assign_copy_dispatch(pos, v, use_memcpy());                                   // may throw
+}
+
+template <typename I, typename V>
+inline
+void assign_move_dispatch(I pos, V const& v,
+                          pdalboost::mpl::bool_<true> const& /*use_memcpy*/)
+{
+// TODO - use memmove here?
+    ::memcpy(pdalboost::addressof(*pos), pdalboost::addressof(v), sizeof(V));
+}
+
+template <typename I, typename V>
+inline
+void assign_move_dispatch(I pos, BOOST_RV_REF(V) v,
+                          pdalboost::mpl::bool_<false> const& /*use_memcpy*/)
+{
+    *pos = pdalboost::move(v);                                                        // may throw
 }
 
 template <typename I, typename V>
 inline
 void assign(I pos, BOOST_RV_REF(V) v)
 {
-    *pos = pdalboost::move(v);                                                        // may throw
-}
+    typedef typename
+    ::pdalboost::mpl::and_<
+        is_corresponding_value<I, V>,
+        ::pdalboost::has_trivial_move_assign<V>
+    >::type
+    use_memcpy;
 
+    assign_move_dispatch(pos, ::pdalboost::move(v), use_memcpy());
+}
 
 // uninitialized_copy_s
 

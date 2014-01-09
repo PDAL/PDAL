@@ -646,26 +646,20 @@ void IteratorBase::fillUserBuffer(PointBuffer& user_buffer)
         oss << "numOraclePoints < 0! : " << numOraclePoints;
         throw pdal_error(oss.str());
     }
+
+    if (user_buffer.getNumPoints() + howManyThisRead > user_buffer.getCapacity())
+    {
+        std::ostringstream oss;
+        oss << "user_buffer.getNumPoints() + howManyThisRead == " << user_buffer.getNumPoints() + howManyThisRead 
+            << " but user_buffer.getCapacity() == " << user_buffer.getCapacity();
+        throw pdal_error(oss.str());
+    }
+
  
     PointBuffer::copyLikeDimensions(*m_oracle_buffer, user_buffer,
                                     *m_dimension_map,
                                     m_buffer_position, user_buffer.getNumPoints(),
                                     howManyThisRead);
-
-    bool bSetPointSourceId = getReader().getOptions().getValueOrDefault<bool>("populate_pointsourceid", false);
-    if (bSetPointSourceId)
-    {
-        Dimension const* point_source_field = user_buffer.getSchema().getDimensionPtr("PointSourceId");
-        if (point_source_field)
-        {
-            for (boost::int32_t i = 0; i < howManyThisRead; ++i)
-            {
-                user_buffer.setField(*point_source_field,
-                                     user_buffer.getNumPoints() + i,
-                                     m_active_cloud_id);
-            }
-        }
-    }
 
     getReader().log()->get(logDEBUG2) << "IteratorBase::fillUserBuffer m_buffer_position:   " << m_buffer_position << std::endl;
 
@@ -675,6 +669,32 @@ void IteratorBase::fillUserBuffer(PointBuffer& user_buffer)
         m_buffer_position = 0;
 
     getReader().log()->get(logDEBUG2) << "IteratorBase::fillUserBuffer m_buffer_position:   " << m_buffer_position << std::endl;
+
+
+
+    bool bSetPointSourceId = getReader().getOptions().getValueOrDefault<bool>("populate_pointsourceid", false);
+    if (bSetPointSourceId)
+    {
+        Dimension const* point_source_field = user_buffer.getSchema().getDimensionPtr("PointSourceId");
+        if (point_source_field)
+        {
+            for (boost::int32_t i = 0; i < howManyThisRead; ++i)
+            {
+                assert(user_buffer.getNumPoints() + i < user_buffer.getCapacity());
+                if (point_source_field->getByteSize() == 2)
+                    user_buffer.setField(*point_source_field,
+                                         user_buffer.getNumPoints() + i,
+                                         static_cast<boost::uint16_t>(m_active_cloud_id));
+                else if (point_source_field->getByteSize() == 4)
+                {
+                    user_buffer.setField(*point_source_field,
+                                         user_buffer.getNumPoints() + i,
+                                         m_active_cloud_id);
+                }
+            }
+        }
+    }
+
 
     user_buffer.setNumPoints(howManyThisRead + user_buffer.getNumPoints());
 }

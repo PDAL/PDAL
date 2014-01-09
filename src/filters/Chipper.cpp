@@ -579,6 +579,7 @@ boost::uint32_t Chipper::readBufferImpl(PointBuffer& buffer)
     m_currentPointCount = m_currentPointCount + numRead;
 
     buffer.setSpatialBounds(block.GetBounds());
+    buffer.setNumPoints(numRead);
     m_currentBlockId++;
     return numRead;
 

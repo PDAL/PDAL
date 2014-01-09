@@ -28,6 +28,11 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
     struct move_tag {};
     struct empty_emplace {};
 
+    namespace func {
+        template <class T>
+        inline void ignore_unused_variable_warning(T const&) {}
+    }
+
     ////////////////////////////////////////////////////////////////////////////
     // iterator SFINAE
 

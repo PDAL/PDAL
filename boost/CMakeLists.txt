@@ -34,7 +34,6 @@ set(PDALBOOST_SOURCES
     ./libs/filesystem/src/portability.cpp
     ./libs/filesystem/src/unique_path.cpp
     ./libs/filesystem/src/utf8_codecvt_facet.cpp
-    ./libs/fusion/preprocess/preprocess.cpp
     ./libs/iostreams/src/file_descriptor.cpp
     ./libs/iostreams/src/mapped_file.cpp
     ./libs/iostreams/src/file_descriptor.cpp

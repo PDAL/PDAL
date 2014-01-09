@@ -1231,7 +1231,7 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
         }
     }
     
-    log()->get(logDEBUG4) << "Writing blob of size" << point_data_length << std::endl;
+    log()->get(logDEBUG4) << "Writing blob of size " << point_data_length << std::endl;
     OCILobLocator* locator;
     if (m_streamChunks)
     {
