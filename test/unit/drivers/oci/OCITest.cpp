@@ -380,7 +380,7 @@ BOOST_AUTO_TEST_CASE(read_view_reproj)
     reproj.initialize();
 
     pdal::PointBuffer data3(reproj.getSchema(), chunk_size+30);
-    boost::scoped_ptr<pdal::StageSequentialIterator> iter(reproj.createSequentialIterator(data3));
+    pdal::StageSequentialIterator* iter = reproj.createSequentialIterator(data3);
 
 
     //boost::uint32_t numTotal(0);
@@ -409,6 +409,7 @@ BOOST_AUTO_TEST_CASE(read_view_reproj)
     BOOST_CHECK_EQUAL(z, 12931);
     BOOST_CHECK_EQUAL(intensity, 67);
     BOOST_CHECK_EQUAL(red, 113);
+    delete iter;
 
 }
 
