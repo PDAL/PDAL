@@ -16,6 +16,8 @@
 #ifndef BOOST_TEST_BASIC_CSTRING_HPP_071894GER
 #define BOOST_TEST_BASIC_CSTRING_HPP_071894GER
 
+#pragma GCC diagnostic ignored "-Wsign-compare"
+
 // Boost.Test
 #include <boost/test/utils/basic_cstring/basic_cstring_fwd.hpp>
 #include <boost/test/utils/basic_cstring/bcs_char_traits.hpp>
