@@ -42,6 +42,7 @@
 #include <boost/detail/lcast_precision.hpp>
 #include <boost/detail/workaround.hpp>
 
+#pragma GCC diagnostic ignored "-Wsign-compare"
 
 #ifndef BOOST_NO_STD_LOCALE
 #   include <locale>
