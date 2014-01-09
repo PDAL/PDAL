@@ -46,12 +46,12 @@
 SELECT l."OBJ_ID", l."BLK_ID", l."BLK_EXTENT", l."BLK_DOMAIN",
        l."PCBLK_MIN_RES", l."PCBLK_MAX_RES", l."NUM_POINTS",
        l."NUM_UNSORTED_POINTS", l."PT_SORT_DIM", l."POINTS", b.cloud
-  FROM AUTZEN_BLOCKS l, AUTZEN_CLOUD b
+  FROM SIMPLE_BLOCKS l, SIMPLE_CLOUD b
  WHERE l.obj_id = b.id and l.obj_id in (1,2)
 order by l.obj_id
                         </Option>
                         <Option name="connection">
-                            grid/grid@localhost/orcl
+                            grid/grid@localhost/vm
                         </Option>
                         <Option name="debug">
                             true
