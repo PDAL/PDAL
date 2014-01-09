@@ -15,6 +15,14 @@
 #ifndef BOOST_TEST_TEST_TOOLS_HPP_012705GER
 #define BOOST_TEST_TEST_TOOLS_HPP_012705GER
 
+#ifdef __clang__
+#pragma GCC diagnostic ignored "-Wunknown-pragmas"
+#else
+#pragma GCC diagnostic ignored "-Wpragmas"
+#endif
+
+#pragma GCC diagnostic ignored "-Wunneeded-internal-declaration"
+
 // Boost.Test
 #include <boost/test/predicate_result.hpp>
 #include <boost/test/unit_test_log.hpp>

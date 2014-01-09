@@ -15,6 +15,9 @@
 #ifndef BOOST_TEST_UNIT_TEST_HPP_071894GER
 #define BOOST_TEST_UNIT_TEST_HPP_071894GER
 
+#pragma GCC diagnostic ignored "-Wfloat-equal"
+#pragma GCC diagnostic ignored "-Wsign-compare"
+     
 // Boost.Test
 #include <boost/test/test_tools.hpp>
 #include <boost/test/unit_test_suite.hpp>

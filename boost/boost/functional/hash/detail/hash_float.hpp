@@ -68,7 +68,8 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost
             std::size_t seed = 0;
 
             if (length >= sizeof(std::size_t)) {
-                seed = *(std::size_t*) ptr;
+                // seed = *(std::size_t*) ptr;
+                seed = *reinterpret_cast<std::size_t*>(ptr);
                 length -= sizeof(std::size_t);
                 ptr += sizeof(std::size_t);
 
