@@ -563,6 +563,7 @@ Statement IteratorBase::getNextCloud(BlockPtr block, boost::int32_t& cloud_id)
 
 IteratorBase::~IteratorBase()
 {
+    delete m_dimension_map;
 }
 
 

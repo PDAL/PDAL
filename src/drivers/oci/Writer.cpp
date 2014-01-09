@@ -923,6 +923,7 @@ void Writer::CreatePCEntry(Schema const& buffer_schema)
     }
 
     free(wkt);
+    free(schema);
 
     try
     {
@@ -985,6 +986,7 @@ void Writer::writeBufferBegin(PointBuffer const& data)
         statement->Execute();
         // statement->Fetch();
         log()->get(logDEBUG) << "Trace location name:  " << trace_table_name << std::endl;
+        free(trace_table_name);
 
 
     }
