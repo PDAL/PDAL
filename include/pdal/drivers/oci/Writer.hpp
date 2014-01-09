@@ -157,7 +157,7 @@ private:
 
     std::string m_base_table_boundary_column;
     std::string m_base_table_boundary_wkt;
-    boost::shared_ptr<pdal::gdal::Debug> m_gdal_debug;
+
     std::string m_trigger_name;
     bool m_sdo_pc_is_initialized;
     boost::uint32_t m_chunkCount;

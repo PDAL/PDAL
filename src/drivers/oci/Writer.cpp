@@ -38,6 +38,7 @@
 #include <pdal/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/StageFactory.hpp>
+#include <pdal/GlobalEnvironment.hpp>
 
 #include <pdal/drivers/oci/Writer.hpp>
 
@@ -126,8 +127,7 @@ Writer::~Writer()
 void Writer::initialize()
 {
     pdal::Writer::initialize();
-    m_gdal_debug = boost::shared_ptr<pdal::gdal::Debug>(new pdal::gdal::Debug(isDebug(), log()));
-
+    pdal::GlobalEnvironment::get().getGDALDebug()->addLog(log());    
 }
 
 Options Writer::getDefaultOptions()
