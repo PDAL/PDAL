@@ -190,10 +190,18 @@ else()
     endif()
 endif()
 
-TARGET_LINK_LIBRARIES(  ${PDAL_UNIT_TEST} PUBLIC general
+if (CMAKE_VERSION VERSION_GREATER 2.8.10)
+    set(PDAL_LINKAGE "PUBLIC general")
+    set(BOOST_LINKAGE "PRIVATE general")
+else()
+    set(PDAL_LINKAGE "")
+    set(BOOST_LINKAGE "")
+endif()
+
+TARGET_LINK_LIBRARIES(  ${PDAL_UNIT_TEST} ${PDAL_LINKAGE}
                         ${PDAL_LIB_NAME} )
 
-TARGET_LINK_LIBRARIES(  ${PDAL_UNIT_TEST} PRIVATE general
+TARGET_LINK_LIBRARIES(  ${PDAL_UNIT_TEST} ${BOOST_LINKAGE}
                         ${Boost_LIBRARIES} )
 
 ADD_TEST(pdal_test "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/pdal_test" "${PROJECT_SOURCE_DIR}/test/data" --catch_system_errors=no)

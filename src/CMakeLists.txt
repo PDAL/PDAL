@@ -659,35 +659,44 @@ if (PDAL_BUILD_STATIC)
 else()
   set(PDAL_LIB_TYPE SHARED)
 endif()
+
+
 add_library(${PDAL_LIB_NAME} ${PDAL_LIB_TYPE} ${PDAL_SOURCES})
+if (CMAKE_VERSION VERSION_GREATER 2.8.10)
+    set(PDAL_LINKAGE "PUBLIC general")
+    set(BOOST_LINKAGE "LINK_PRIVATE general")
+else()
+    set(PDAL_LINKAGE "")
+    set(BOOST_LINKAGE "")
+endif()
 
 set (SQLITE_LIBRARIES ${SOCI_LIBRARY} ${SOCI_sqlite3_PLUGIN} ${SQLITE3_LIBRARY})
 
 if (WITH_SQLITE)
 if (NOT USE_PDAL_PLUGIN_SQLITE)
-target_link_libraries(${PDAL_LIB_NAME} PUBLIC general ${SQLITE_LIBRARIES} )
+target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE} ${SQLITE_LIBRARIES} )
 endif()
 endif()
 
 if (WITH_PGPOINTCLOUD)
 if (NOT USE_PDAL_PLUGIN_PGPOINTCLOUD)
-target_link_libraries(${PDAL_LIB_NAME} PUBLIC general ${POSTGRESQL_LIBRARIES})
+target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE} ${POSTGRESQL_LIBRARIES})
 endif()
 endif()
 
 if (WITH_ORACLE)
 if (NOT USE_PDAL_PLUGIN_OCI)
-target_link_libraries(${PDAL_LIB_NAME}  PUBLIC general "${ORACLE_LIBRARY}")
+target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE} "${ORACLE_LIBRARY}")
 endif()
 endif()
 
 if (WITH_NITRO)
 if (NOT USE_PDAL_PLUGIN_NITRO)
-target_link_libraries(${PDAL_LIB_NAME}  PUBLIC general ${NITRO_LIBRARIES} )
+target_link_libraries(${PDAL_LIB_NAME}  ${PDAL_LINKAGE} ${NITRO_LIBRARIES} )
 endif()
 endif()
 
-  target_link_libraries(${PDAL_LIB_NAME} PUBLIC general
+  target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE}
     "${PDAL_LIB_NAME}"
     "${CMAKE_THREAD_LIBS_INIT}"
     "${CMAKE_DL_LIBS}"
@@ -707,7 +716,7 @@ endif()
 message(STATUS "Using boost lib: ${Boost_LIBRARIES}")
 
 target_link_libraries(${PDAL_LIB_NAME}
-                       LINK_PRIVATE general ${Boost_LIBRARIES})
+                       ${BOOST_LINKAGE} ${Boost_LIBRARIES})
 
 
 set_target_properties(${PDAL_LIB_NAME}
