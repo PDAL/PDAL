@@ -204,30 +204,96 @@ inline void scaling::IteratorBase::scale(Dimension const& from_dimension,
 {
 
     double v = static_cast<double>(value);
-    double out = (v*from_dimension.getNumericScale() + from_dimension.getNumericOffset() - to_dimension.getNumericOffset())/to_dimension.getNumericScale();
+    double scaled = (v*from_dimension.getNumericScale() + from_dimension.getNumericOffset() - to_dimension.getNumericOffset())/to_dimension.getNumericScale();
     // FIXME: This only downscales, not upscales. If from_dimension.getNumericScale is > to_dimension.getNumericScale ==> BOOM
-    T output = static_cast<T>(out);
 
-    if (std::numeric_limits<T>::is_exact) //
+    T output(0);
+    boost::int64_t i64(0);
+    boost::uint64_t u64(0);
+    if (boost::is_floating_point<T>::value)
+    {   
+        // Since we're a float already, just 
+        // cast it and be done with it.
+        value = static_cast<T>(scaled);
+        return;
+    }
+
+    bool bSigned(boost::is_signed<T>::value);
+    bool bGreater(false);
+    bool bLess(false);
+    if (bSigned)
     {
-        if (Utils::compare_distance<T>(output, (std::numeric_limits<T>::max)()))
+        i64 = static_cast<boost::int64_t>(scaled);
+        bGreater = (i64 > (std::numeric_limits<T>::max)());
+        bLess = (i64 < (std::numeric_limits<T>::min)());
+        output = static_cast<T>(i64);              
+        if (!bGreater && !bLess)
         {
-            std::ostringstream oss;
-            oss << "filter.Scaling: scale and/or offset combination causes "
-                "re-scaled value to be greater than std::numeric_limits::max for dimension '" << to_dimension.getName() << "'. " <<
-                "value is: " << output << " and max() is: " << (std::numeric_limits<T>::max)();
-        }
-        else if (Utils::compare_distance<T>(output, (std::numeric_limits<T>::min)()))
-        {
-            std::ostringstream oss;
-            oss << "filter.Scaling: scale and/or offset combination causes "
-                "re-scaled value to be less than std::numeric_limits::min for dimension '" << to_dimension.getName() << "'. " <<
-                "value is: " << output << " and min() is: " << (std::numeric_limits<T>::min)();
-            throw std::out_of_range(oss.str());
-
+            // We didn't overflow, we're done
+            value = output;
+            return;
         }
     }
-    value = output;
+    else
+    {
+        u64 = static_cast<boost::uint64_t>(scaled);
+        bGreater = (u64 > (std::numeric_limits<T>::max)());
+        bLess = (u64 < (std::numeric_limits<T>::min)());
+        output = static_cast<T>(u64);
+        if (!bGreater && !bLess)
+        {
+            // We didn't overflow, we're done
+            value = output;
+            return;
+        }
+    }
+
+
+    if (bGreater)
+    {
+        std::ostringstream oss;
+        boost::int64_t out(0);
+        if (bSigned)
+            out = static_cast<boost::int64_t>(i64);
+        else
+            out = static_cast<boost::int64_t>(u64);
+        
+        oss.precision(12);
+        oss.setf(std::ios::fixed);
+        oss << "scaling::IteratorBase::scale: '" << to_dimension.getNumericScale() 
+            << "' and/or offset: " << to_dimension.getNumericOffset() <<"' combination causes "
+            "de-scaled value to be greater than std::numeric_limits::max for dimension '" 
+            << to_dimension.getFQName() << "'. " <<
+            "(v - offset)/ scale) is: (" 
+            << out << " - " << to_dimension.getNumericOffset()  << ")/" 
+            << to_dimension.getNumericScale() <<") == '" << out 
+            << "' but max() for the datatype is: " 
+            << (std::numeric_limits<T>::max)();
+        throw std::out_of_range(oss.str());
+    }
+    else if (bLess)
+    {
+        std::ostringstream oss;
+        boost::int64_t out(0);
+        if (bSigned)
+            out = static_cast<boost::int64_t>(i64);
+        else
+            out = static_cast<boost::int64_t>(u64);
+        oss.precision(12);
+        oss.setf(std::ios::fixed);
+        oss << "scaling::IteratorBase::scale: '" << to_dimension.getNumericScale() 
+            << "' and/or offset: " << to_dimension.getNumericOffset() <<"' combination causes "
+            "de-scaled value to be less than std::numeric_limits::mine for dimension '" 
+            << to_dimension.getFQName() << "'. " <<
+            "(v - offset)/ scale) is: (" 
+            << out << " - " << to_dimension.getNumericOffset()  << ")/" 
+            << to_dimension.getNumericScale() <<") == '" << out 
+            << "' but min() for the datatype is: " 
+            << (std::numeric_limits<T>::min)();
+
+        throw std::out_of_range(oss.str());
+    }
+
 
     return;
 }
