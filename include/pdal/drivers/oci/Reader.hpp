@@ -132,7 +132,7 @@ namespace sequential
 {
 
 
-typedef schema::DimensionMap* DimensionMapPtr;
+typedef boost::shared_ptr<schema::DimensionMap> DimensionMapPtr;
 typedef std::map<int, DimensionMapPtr> DimensionMaps;
 typedef boost::shared_ptr<PointBuffer> BufferPtr;
 typedef std::map<int, BufferPtr> BufferMap;
