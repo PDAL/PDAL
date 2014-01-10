@@ -472,7 +472,7 @@ inline void PointBuffer::setField(pdal::Dimension const& dim, boost::uint32_t po
     } else 
     {
         std::ostringstream oss;
-        oss << "Size of type T " << sizeof(T) << " does not match the size of dimension '" 
+        oss << "setField size of type T " << sizeof(T) << " does not match the size of dimension '" 
             << dim.getFQName() << "' which is " << dim.getByteSize();
         throw pdal_error(oss.str());
     }
@@ -493,9 +493,6 @@ inline  T const& PointBuffer::getField(pdal::Dimension const& dim, boost::uint32
         // this is a little harsh, but we'll keep it for now as we shake things out
         throw buffer_error("This dimension has no identified position in a schema.");
     }
-
-    // pointbuffer::PointBufferByteSize point_start_byte_position = static_cast<pointbuffer::PointBufferByteSize>(pointIndex) * static_cast<pointbuffer::PointBufferByteSize>(m_byteSize); 
-    // boost::uint64_t offset = point_start_byte_position + static_cast<pointbuffer::PointBufferByteSize>(dim.getByteOffset());
 
     pointbuffer::PointBufferByteSize point_start_byte_position(0); 
     pointbuffer::PointBufferByteSize offset(0);
@@ -521,8 +518,18 @@ inline  T const& PointBuffer::getField(pdal::Dimension const& dim, boost::uint32
     assert(offset + sizeof(T) <= getBufferByteLength());
 
     boost::uint8_t const* p = (boost::uint8_t const*)&(m_data.front()) + offset;
-    T const& output = *(T const*)(void const*)p;
-    return output;
+    
+    if (sizeof(T) <= dim.getByteSize())
+    {
+        T const& output = *(T const*)(void const*)p;
+        return output;
+    } else
+    {
+        std::ostringstream oss;
+        oss << "getField size of type T " << sizeof(T) << " is greater than the size of dimension '" 
+            << dim.getFQName() << "' which is " << dim.getByteSize();
+        throw pdal_error(oss.str());
+    }
 }
 
 
