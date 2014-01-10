@@ -908,7 +908,7 @@ namespace filesystem
       // which may throw, is called only if path_locale and condecvt_facet will actually
       // be used. Thus misconfigured environmental variables will only cause an
       // exception if a valid std::locale("") is actually needed.
-      static std::locale posix_lazy_initialization(path::imbue(std::locale("")));
+      // static std::locale posix_lazy_initialization(path::imbue(std::locale("")));
 #   endif
     return *codecvt_facet_ptr;
   }
