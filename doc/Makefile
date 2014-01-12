@@ -6,8 +6,7 @@ SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
 PAPER         =
 BUILDDIR      = build
-OUTPUTDIR=/../../pdal.github.io
-OUTPUTDIR=/tmp/pdal.github.io
+OUTPUTDIR=/tmp/pdal-docs
 DATE=$(shell date +'%y.%m.%d %H:%M:%S')
 
 # Internal variables.
@@ -144,9 +143,11 @@ doxygen:
 
 clone: html
 	-rm -rf $(OUTPUTDIR)
-	git clone git@github.com:PDAL/pdal.github.io.git $(OUTPUTDIR)
+	git clone git@github.com:PDAL/PDAL.git $(OUTPUTDIR)
+	
 	
 publish: clone
+	cd $(OUTPUTDIR);git checkout gh-pages
 	cp -r build/html/* $(OUTPUTDIR)/
-	cd $(OUTPUTDIR) ; git add  "*" ; git commit -m "update for $(DATE)" . ; git push origin master
-	
+	cd $(OUTPUTDIR) ; git add  "*" ; git commit -m "update for $(DATE)" . ; git push origin gh-pages
+
