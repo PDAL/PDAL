@@ -37,10 +37,62 @@ A basic inquiry example
 Our first example to demonstrate PDAL's utility will be to simply query an
 `ASPRS LAS`_ file to determine the data that are in it in the very first point.
 
+.. note::
+
+    The `interesting.las`_ file in these examples can be found on github.
+
+`reStructuredText`_ output
+................................................................................
+
+By default, PDAL outputs `reStructuredText`_. This makes it convenient for 
+transforming the output into more pleasing formats like PDF (using `rst2pdf`_) 
+or HTML (using `rst2html`_) as part of a processing pipeline.
+
+.. _`rst2pdf`: https://code.google.com/p/rst2pdf/
+.. _`rst2html`: http://docutils.sourceforge.net/docs/user/tools.html#rst2html-py
+
+.. _`reStructuredText`: http://docutils.sourceforge.net/rst.html
 
 ::
 
     $ pdal info interesting.las -p 0 
+
+::
+
+    Point 0
+    --------------------------------------------------------------------------------
+
+    =================== ======================================= ===================
+                Name                                Value        Namespace
+    =================== ======================================= ===================
+    X                                        637012.23999999999  drivers.las.reader
+    Y                                        849028.31000000006  drivers.las.reader
+    Z                                        431.66000000000003  drivers.las.reader
+    Intensity                                               143  drivers.las.reader
+    ReturnNumber                                              1  drivers.las.reader
+    NumberOfReturns                                           1  drivers.las.reader
+    ScanDirectionFlag                                         1  drivers.las.reader
+    EdgeOfFlightLine                                          0  drivers.las.reader
+    Classification                                            1  drivers.las.reader
+    ScanAngleRank                                            -9  drivers.las.reader
+    UserData                                                132  drivers.las.reader
+    PointSourceId                                          7326  drivers.las.reader
+    Time                                     245380.78254962614  drivers.las.reader
+    Red                                                      68  drivers.las.reader
+    Green                                                    77  drivers.las.reader
+    Blue                                                     88  drivers.las.reader
+    =================== ======================================= ===================
+
+JavaScript output
+................................................................................
+
+JavaScript `JSON`_ can also be output.
+
+.. _`JSON`: http://www.json.org/
+
+::
+
+    $ pdal info interesting.las -p 0 --json
 
 .. code-block:: javascript
 
@@ -63,8 +115,7 @@ Our first example to demonstrate PDAL's utility will be to simply query an
         "Blue": "88"
     }
 
-.. note::
-    `interesting.las`_ can be found on github.
+
 
 XML output
 ................................................................................
@@ -121,7 +172,7 @@ terms of width or interpretation.
 
 ::
     
-    $ pc2pc interesting.las output.txt
+    $ pdal translate interesting.las output.txt
 
 ::
 
@@ -145,7 +196,7 @@ your conversion to make it useful down the road.
 
 PDAL transmits this other information in the form of :ref:`metadata` that is
 carried per-stage throughout the PDAL :ref:`processing pipeline <pipeline>`.
-We can capture this metadata using the :ref:`info` utility.
+We can capture this metadata using the :ref:`info_command` utility.
 
 ::
 
@@ -160,25 +211,25 @@ alongside the ``.txt`` file as auxiliary information.
 .. seealso::
     :ref:`metadata` contains much more detail of metadata workflow in PDAL.
 
-A :ref:`pipeline` example
+A :ref:`pipeline_command` example
 ------------------------------------------------------------------------------
 
-The full power of PDAL comes in the form of :ref:`pipeline` invocations. 
-While :ref:`translate` provides some utility as far as simple conversion of 
+The full power of PDAL comes in the form of :ref:`pipeline_command` invocations. 
+While :ref:`translate_command` provides some utility as far as simple conversion of 
 one format to another, it does not provide much power to a user to be able 
 to filter or alter data as they are converted.  Pipelines are the way to take 
 advantage of PDAL's ability to manipulate data as they are converted. This 
-section will provide a basic example and demonstration of :ref:`pcpipeline`, 
+section will provide a basic example and demonstration of :ref:`pipeline`, 
 but the :ref:`pipeline` document contains more detailed exposition of the 
 topic.
 
 .. note::
 
-    The :ref:`pipeline` document contains detailed examples and background
+    The :ref:`pipeline_command` document contains detailed examples and background
     information.
 
-The :ref:`pipeline` PDAL utility is one that takes in a ``.xml`` file 
-containing :ref:`pipeline <pipeline>` description that defines a PDAL 
+The :ref:`pipeline_command` PDAL utility is one that takes in a ``.xml`` file 
+containing :ref:`pipeline <pipeline_command>` description that defines a PDAL 
 processing pipeline. Options can be given at each :cpp:class:`pdal::Stage` of 
 the pipeline to affect different aspects of the processing pipeline, and 
 stages may be chained together into multiple combinations to have varying 

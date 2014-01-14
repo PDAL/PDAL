@@ -39,8 +39,10 @@ help:
 clean:
 	-rm -rf $(BUILDDIR)/*
 	-rm -rf $(OUTPUTDIR)/
+	-rm -rf doxygen/xml*;
+	-rm -rf doxygen/html*;
 
-html: doxygen
+html: 
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
