@@ -140,6 +140,38 @@ void Reader::initialize()
 
         schema = fetchSchema(m_initialQueryStatement, m_block->pc, m_capacity);
         schema.setOrientation(schema::POINT_INTERLEAVED);
+
+        bool bNormalizeXYZ = getOptions().getValueOrDefault<bool>("do_normalize_xyz", true);
+        if (bNormalizeXYZ)
+        {
+            Dimension x = schema.getDimension("drivers.oci.reader.X");
+            double scale_x = getOptions().getValueOrDefault<double>("scale_x", x.getNumericScale());
+            x.setNumericScale(scale_x);
+            
+            double offset_x = getOptions().getValueOrDefault<double>("offset_x", x.getNumericOffset());
+            x.setNumericOffset(offset_x);
+            
+            schema.setDimension(x);
+            
+            Dimension y = schema.getDimension("drivers.oci.reader.Y");
+            double scale_y = getOptions().getValueOrDefault<double>("scale_y", y.getNumericScale());
+            y.setNumericScale(scale_y);
+            
+            double offset_y = getOptions().getValueOrDefault<double>("offset_y", y.getNumericOffset());
+            y.setNumericOffset(offset_y);
+            
+            schema.setDimension(y);
+
+            Dimension z = schema.getDimension("drivers.oci.reader.Z");
+            double scale_z = getOptions().getValueOrDefault<double>("scale_z", z.getNumericScale());
+            z.setNumericScale(scale_z);
+        
+            double offset_z = getOptions().getValueOrDefault<double>("offset_z", z.getNumericOffset());
+            z.setNumericOffset(offset_z);
+        
+            schema.setDimension(z);
+        }
+
     }
 
     else
@@ -242,9 +274,12 @@ Options Reader::getDefaultOptions()
 
     Option xml_schema_dump("xml_schema_dump", std::string(""), "Filename to dump the XML schema to.");
 
+    Option do_normalize_xyz("do_normalize_xyz", true, "Normalize XYZ dimensions from selections that have varying scale/offsets");
+
     options.add(connection);
     options.add(query);
     options.add(xml_schema_dump);
+    options.add(do_normalize_xyz);
 
     return options;
 }
@@ -661,14 +696,54 @@ void IteratorBase::fillUserBuffer(PointBuffer& user_buffer)
                                     m_buffer_position, user_buffer.getNumPoints(),
                                     howManyThisRead);
 
-    getReader().log()->get(logDEBUG2) << "IteratorBase::fillUserBuffer m_buffer_position:   " << m_buffer_position << std::endl;
+
+    Schema const& src = m_oracle_buffer->getSchema();
+    Dimension const& src_x = src.getDimension("drivers.oci.reader.X");
+    Dimension const& src_y = src.getDimension("drivers.oci.reader.Y");
+    Dimension const& src_z = src.getDimension("drivers.oci.reader.Z");
+
+    Schema const& dst = user_buffer.getSchema();
+    Dimension const& dst_x = dst.getDimension("drivers.oci.reader.X");
+    Dimension const& dst_y = dst.getDimension("drivers.oci.reader.Y");
+    Dimension const& dst_z = dst.getDimension("drivers.oci.reader.Z");
+    
+    bool bDifferentScales = (!pdal::Utils::compare_distance(dst_x.getNumericScale(), src_x.getNumericScale()) ||
+                             !pdal::Utils::compare_distance(dst_y.getNumericScale(), src_y.getNumericScale()) ||
+                             !pdal::Utils::compare_distance(dst_z.getNumericScale(), src_z.getNumericScale()));
+
+    bool bDifferentOffsets = (!pdal::Utils::compare_distance(dst_x.getNumericOffset(), src_x.getNumericOffset()) ||
+                              !pdal::Utils::compare_distance(dst_y.getNumericOffset(), src_y.getNumericOffset()) ||
+                              !pdal::Utils::compare_distance(dst_z.getNumericOffset(), src_z.getNumericOffset()));
+    
+    bool bNormalizeXYZ = getReader().getOptions().getValueOrDefault<bool>("do_normalize_xyz", true);
+    if ((bDifferentScales || bDifferentOffsets) && bNormalizeXYZ)
+    {
+        for (unsigned i =  m_buffer_position; i < howManyThisRead; ++i)
+        {
+            double x = m_oracle_buffer->applyScaling(src_x, i);
+            boost::int32_t xi = dst_x.removeScaling<boost::int32_t>(x);
+            user_buffer.setField<boost::int32_t>(dst_x, user_buffer.getNumPoints()+i, xi);
+
+            double y = m_oracle_buffer->applyScaling(src_y, i);
+            boost::int32_t yi = dst_y.removeScaling<boost::int32_t>(y);
+            user_buffer.setField<boost::int32_t>(dst_y, user_buffer.getNumPoints()+i, yi);
+ 
+            double z = m_oracle_buffer->applyScaling(src_z, i);
+            boost::int32_t zi = dst_z.removeScaling<boost::int32_t>(z);
+            user_buffer.setField<boost::int32_t>(dst_z, user_buffer.getNumPoints()+i, zi);
+        }
+    }
+
+    getReader().log()->get(logDEBUG2)   << "IteratorBase::fillUserBuffer m_buffer_position:   " 
+                                        << m_buffer_position << std::endl;
 
     if (numOraclePoints > numUserSpace)
         m_buffer_position = m_buffer_position + numUserSpace;
     else if (numOraclePoints < numUserSpace)
         m_buffer_position = 0;
 
-    getReader().log()->get(logDEBUG2) << "IteratorBase::fillUserBuffer m_buffer_position:   " << m_buffer_position << std::endl;
+    getReader().log()->get(logDEBUG2) << "IteratorBase::fillUserBuffer m_buffer_position:   " 
+                                      << m_buffer_position << std::endl;
 
 
 
@@ -678,7 +753,7 @@ void IteratorBase::fillUserBuffer(PointBuffer& user_buffer)
         Dimension const* point_source_field = user_buffer.getSchema().getDimensionPtr("PointSourceId");
         if (point_source_field)
         {
-            for (boost::int32_t i = 0; i < howManyThisRead; ++i)
+            for (boost::int32_t i = m_buffer_position; i < howManyThisRead; ++i)
             {
                 assert(user_buffer.getNumPoints() + i < user_buffer.getCapacity());
                 if (point_source_field->getByteSize() == 2)
@@ -721,14 +796,7 @@ BufferPtr IteratorBase::fetchPointBuffer(Statement statement, sdo_pc* pc)
         m_orientation = schema.getOrientation();
         getReader().log()->get(logDEBUG2) << "Incoming schema orientation is " << m_orientation << std::endl;
 
-        // if (block_capacity > capacity)
-        // {
-        //     std::ostringstream oss;
-        //     oss << "Block capacity, " << block_capacity <<", is too large to fit in "
-        //         << "buffer of size " << capacity<<". Increase buffer capacity with writer's \"chunk_size\" option "
-        //         << "or increase the read buffer size";
-        //     throw buffer_too_small(oss.str());
-        // }
+  
 
         BufferPtr output  = BufferPtr(new PointBuffer(schema, block_capacity));
         std::pair<int, BufferPtr> p(id, output);
@@ -857,10 +925,15 @@ DimensionMapPtr IteratorBase::fetchDimensionMap(Statement statement, sdo_pc* pc,
     }
     else
     {
-        DimensionMapPtr output  = DimensionMapPtr(oracle_buffer.getSchema().mapDimensions(user_buffer.getSchema(), false /*ignore namespaces*/));
+        DimensionMapPtr output  = DimensionMapPtr(m_oracle_buffer->getSchema().mapDimensions(  user_buffer.getSchema(), 
+                                                                                            false /*ignore namespaces*/));
         getReader().log()->get(logDEBUG2) << "DimensionMapPtr->size():  " << output->size() << std::endl;
         if (!output->size()) throw pdal_error("fetchDimensionMap map was unable to map any dimensions!");
         
+        for (schema::DimensionMap::const_iterator i = output->begin(); i != output->end(); ++i)
+        {
+            getReader().log()->get(logDEBUG2) << "mapping " << i->first->getFQName() << " to " << i->second->getFQName() << std::endl;
+        }
         std::pair<int, DimensionMapPtr> p(id, output);
         m_dimensions.insert(p);
         getReader().log()->get(logDEBUG2) << "IteratorBase::fetchDimensionMap: creating new DimensionMap with id " << id << std::endl;
