@@ -664,7 +664,9 @@ std::ostream& Schema::toRST(std::ostream& os) const
     for (schema::index_by_index::size_type i=0; i<dimensions.size(); i++)
     {
         Dimension const& d = dimensions[i];
-        
+        std::ostringstream hdr;
+        for (int i = 0; i < 80; ++i)
+            hdr << ".";
         os << d.getFQName() << std::endl;
         os << hdr.str() << std::endl << std::endl;
 
@@ -734,7 +736,7 @@ std::ostream& Schema::toRST(std::ostream& os) const
         {
             
             os   << std::left << std::setw(key_column) << "Description" << " " 
-                   << std::right << std::setw(value_column) << description << std::endl;
+                   << std::right << std::setw(value_column-1) << description << std::endl;
         } else
         {
             os   << std::left  << std::setw(key_column) << "Description" << " " 
