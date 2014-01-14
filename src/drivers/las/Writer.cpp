@@ -711,7 +711,15 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& pointBuffer)
         {
             if (dimensions.Time)
             {
-                double const& t = pointBuffer.getField<double>(*dimensions.Time, pointIndex);
+                Dimension const& tm = *dimensions.Time;
+                double t(0.0);
+                if (tm.getByteSize() == 2)
+                    t = static_cast<double>(pointBuffer.getField<boost::int16_t>(tm, pointIndex));
+                else if (tm.getByteSize() == 4)
+                    t = static_cast<double>(pointBuffer.getField<boost::int32_t>(tm, pointIndex));
+                else if (tm.getByteSize() == 8)
+                    t = pointBuffer.getField<double>(tm, pointIndex);
+                
                 Utils::write_field<double>(p, t);
             }
             else
