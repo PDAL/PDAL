@@ -433,8 +433,10 @@ public:
             a std::out_of_range exception will be thrown.
         \endverbatim
     */
+#if (__GNUC__ == 4 && __GNUC_MINOR__ >= 6 && !defined(_MSC_VER))    
 # pragma GCC diagnostic push
-# pragma GCC diagnostic ignored "-Wsign-compare"  
+# pragma GCC diagnostic ignored "-Wsign-compare"
+#endif
 
     template<class T>
     inline T removeScaling(double const& v) const
@@ -522,7 +524,9 @@ public:
         }
         return output;
     }
+#if (__GNUC__ == 4 && __GNUC_MINOR__ >= 6 && !defined(_MSC_VER))
 # pragma GCC diagnostic pop
+#endif
     
     /// Return the dimension::Interpretation for a given stdint.h-style type name 
     /// such as `int32_t` or `uint8_t`.
