@@ -172,6 +172,7 @@ void Selector::checkImpedance()
                 d.setNumericOffset(offset);
                 d.setMinimum(minimum);
                 d.setMaximum(maximum);
+                d.setNamespace(getName());
                 m_createDimensions.push_back(d);
             }
         }
