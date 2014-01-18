@@ -163,7 +163,7 @@ BOOST_AUTO_TEST_CASE(DimensionTest_Interpretation)
     Dimension x("X", dimension::SignedInteger, 4);
     
     BOOST_CHECK_EQUAL(x.getInterpretationName(), "int32_t");
-    dimension::Interpretation interp = Dimension::getInterpretation(interpretation);
+    dimension::Interpretation interp = Dimension::getInterpretation(x.getInterpretationName());
     
     BOOST_CHECK_EQUAL(interp, pdal::dimension::SignedInteger);
     return;
