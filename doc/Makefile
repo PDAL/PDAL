@@ -149,7 +149,7 @@ clone: html
 	
 	
 publish: clone
-	cd $(OUTPUTDIR);git checkout --orphan gh-pages
+	cd $(OUTPUTDIR);git checkout gh-pages
 	cp -r build/html/* $(OUTPUTDIR)/
 	cd $(OUTPUTDIR) ; git add  "*" ; git commit -m "update for $(DATE)" . ; git push origin gh-pages
 
