@@ -146,10 +146,17 @@ doxygen:
 clone: html
 	-rm -rf $(OUTPUTDIR)
 	git clone git@github.com:PDAL/PDAL.git $(OUTPUTDIR)
-	
+	cd $(OUTPUTDIR);
+	git push origin :gh-pages
+	git checkout  --orphan gh-pages
+	rm -rf *
+	wget https://raw.github.com/PDAL/PDAL/gh-pages/CNAME
+	wget https://raw.github.com/PDAL/PDAL/gh-pages/.nojekyll
+	git add .nojekyll
+
 	
 publish: clone
-	cd $(OUTPUTDIR);git checkout gh-pages
+	cd $(OUTPUTDIR)
 	cp -r build/html/* $(OUTPUTDIR)/
 	cd $(OUTPUTDIR) ; git add  "*" ; git commit -m "update for $(DATE)" . ; git push origin gh-pages
 
