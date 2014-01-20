@@ -149,5 +149,5 @@ clone: html
 	
 publish: clone
 	cp -r build/html/* $(OUTPUTDIR)/
-	cd $(OUTPUTDIR) ; git add  "*" ; git commit -m "update for $(DATE)" . ; git push origin master
+	cd $(OUTPUTDIR) ; git checkout origin/gh-pages; git add  "*" ; git commit -m "update for $(DATE)" . ; git push origin gh-pages
 
