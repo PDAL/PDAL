@@ -34,7 +34,7 @@ issue a compilation command something like the following:
 Includes
 -------------------------------------------------------------------------------
 
-As of PDAL 1.0.0, there isn't a single 
+As of PDAL 1.0.0, there isn't a single header file for PDAL.
 
 
 

@@ -249,6 +249,17 @@ boost::uint32_t Reader::fetchPcid() const
     pcid = atoi(pcid_str);
     free(pcid_str);
 
+    if (! pcid)
+    {
+        // Are pcid == 0 valid?
+        std::ostringstream oss;
+        oss << "Unable to fetch pcid with column '" 
+            << m_column_name <<"' and  table '" 
+            << m_table_name <<"'";
+        throw pdal_error(oss.str());
+    }
+
+
     log()->get(logDEBUG) << "     got pcid = " << pcid << std::endl;
 
     m_pcid = pcid;

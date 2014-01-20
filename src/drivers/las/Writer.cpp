@@ -733,8 +733,18 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& pointBuffer)
 
             if (dimensions.Red)
             {
-                boost::uint16_t const& red = pointBuffer.getField<boost::uint16_t>(*dimensions.Red, pointIndex);
-                Utils::write_field<boost::uint16_t>(p, red);
+                Dimension const& dim = *dimensions.Red;
+                boost::uint16_t v(0);
+                if (dim.getByteSize() == 1)
+                    v = static_cast<boost::uint16_t>(pointBuffer.getField<boost::uint8_t>(dim, pointIndex));
+                else if (dim.getByteSize() == 2)
+                    v = static_cast<boost::uint16_t>(pointBuffer.getField<boost::uint16_t>(dim, pointIndex));
+                else if (dim.getByteSize() == 4)
+                    v = static_cast<boost::uint16_t>(pointBuffer.getField<boost::uint32_t>(dim, pointIndex));
+                else if (dim.getByteSize() == 8)
+                    v = static_cast<boost::uint16_t>(pointBuffer.getField<boost::uint32_t>(dim, pointIndex));
+                
+                Utils::write_field<boost::uint16_t>(p, v);
             }
             else
             {
@@ -743,8 +753,18 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& pointBuffer)
 
             if (dimensions.Green)
             {
-                boost::uint16_t const& green = pointBuffer.getField<boost::uint16_t>(*dimensions.Green, pointIndex);
-                Utils::write_field<boost::uint16_t>(p, green);
+                Dimension const& dim = *dimensions.Green;
+                boost::uint16_t v(0);
+                if (dim.getByteSize() == 1)
+                    v = static_cast<boost::uint16_t>(pointBuffer.getField<boost::uint8_t>(dim, pointIndex));
+                else if (dim.getByteSize() == 2)
+                    v = static_cast<boost::uint16_t>(pointBuffer.getField<boost::uint16_t>(dim, pointIndex));
+                else if (dim.getByteSize() == 4)
+                    v = static_cast<boost::uint16_t>(pointBuffer.getField<boost::uint32_t>(dim, pointIndex));
+                else if (dim.getByteSize() == 8)
+                    v = static_cast<boost::uint16_t>(pointBuffer.getField<boost::uint32_t>(dim, pointIndex));
+                
+                Utils::write_field<boost::uint16_t>(p, v);
             }
             else
             {
@@ -753,8 +773,18 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& pointBuffer)
 
             if (dimensions.Blue)
             {
-                boost::uint16_t const& blue = pointBuffer.getField<boost::uint16_t>(*dimensions.Blue, pointIndex);
-                Utils::write_field<boost::uint16_t>(p, blue);
+                Dimension const& dim = *dimensions.Blue;
+                boost::uint16_t v(0);
+                if (dim.getByteSize() == 1)
+                    v = static_cast<boost::uint16_t>(pointBuffer.getField<boost::uint8_t>(dim, pointIndex));
+                else if (dim.getByteSize() == 2)
+                    v = static_cast<boost::uint16_t>(pointBuffer.getField<boost::uint16_t>(dim, pointIndex));
+                else if (dim.getByteSize() == 4)
+                    v = static_cast<boost::uint16_t>(pointBuffer.getField<boost::uint32_t>(dim, pointIndex));
+                else if (dim.getByteSize() == 8)
+                    v = static_cast<boost::uint16_t>(pointBuffer.getField<boost::uint32_t>(dim, pointIndex));
+                
+                Utils::write_field<boost::uint16_t>(p, v);
             }
             else
             {
