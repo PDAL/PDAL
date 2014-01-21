@@ -44,7 +44,7 @@
 #include <boost/format.hpp>
 #include <boost/scoped_ptr.hpp>
 
-#include <sstream>
+
 
 #ifdef USE_PDAL_PLUGIN_PGPOINTCLOUD
 MAKE_WRITER_CREATOR(pgpointcloudWriter, pdal::drivers::pgpointcloud::Writer)
@@ -498,20 +498,30 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
         throw pdal_error("drivers.pgpointcloud.writer num_points > m_patch_capacity!");
     }
 
-    std::vector<boost::uint8_t> block_data;
-    block_data.resize(point_data_length);
-    std::copy(point_data, point_data+point_data_length, block_data.begin());
-
     /* We are always getting uncompressed bytes off the block_data */
     /* so we always used compression type 0 (uncompressed) in writing our WKB */
     boost::int32_t pcid = m_pcid;
     schema::CompressionType compression_v = schema::COMPRESSION_NONE;
     boost::uint32_t compression = static_cast<boost::uint32_t>(compression_v);
-    
-    std::stringstream oss;
-    oss << "INSERT INTO " << m_table_name << " (pa) VALUES ('";
 
-    std::stringstream options;
+    static char syms[] = "0123456789ABCDEF";
+    std::string hex;
+    hex.resize(point_data_length*2);
+    for (int i = 0; i != point_data_length; i++)
+    {
+        hex[i] = syms[((point_data[i] >> 4) & 0xf)];
+        hex[i] = syms[point_data[i] & 0xf];
+    }
+    
+    std::string insert;    
+    insert.reserve(hex.size() + 3000);
+    
+    insert.append("INSERT INTO ");
+    insert.append(m_table_name);
+    insert.append(" (pa) VALUES ('");
+
+    std::ostringstream options;
+
 #ifdef BOOST_LITTLE_ENDIAN
     options << boost::format("%02x") % 1;
     SWAP_ENDIANNESS(pcid);
@@ -525,11 +535,12 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     options << boost::format("%08x") % compression;
     options << boost::format("%08x") % num_points;
 
-    oss << options.str() << Utils::binary_to_hex_string(block_data);
-    oss << "')";
+    insert.append(options.str());
+    insert.append(hex);
+    insert.append("')");
 
-    pg_execute(m_session, oss.str());
-
+    pg_execute(m_session, insert);
+    insert.clear();
     return true;
 }
 
