@@ -509,19 +509,27 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     hex.resize(point_data_length*2);
     for (int i = 0; i != point_data_length; i++)
     {
-        hex[i] = syms[((point_data[i] >> 4) & 0xf)];
-        hex[i] = syms[point_data[i] & 0xf];
+        hex[i*2] = syms[((point_data[i] >> 4) & 0xf)];
+        hex[i*2+1] = syms[point_data[i] & 0xf];
     }
     
-    std::string insert;    
-    insert.reserve(hex.size() + 3000);
+    m_insert.clear();
+  
+    m_insert.resize(hex.size() + 3000);
     
-    insert.append("INSERT INTO ");
-    insert.append(m_table_name);
-    insert.append(" (pa) VALUES ('");
+    std::string insert_into("INSERT INTO ");
+    std::string values(" (pa) VALUES ('");
+    
+    std::string::size_type position(0);
+    m_insert.insert(position, insert_into);
+    position += insert_into.size();
+    m_insert.insert(position, m_table_name);
+    position += m_table_name.size();
+
+    m_insert.insert(position, values);
+    position += values.size();
 
     std::ostringstream options;
-
 #ifdef BOOST_LITTLE_ENDIAN
     options << boost::format("%02x") % 1;
     SWAP_ENDIANNESS(pcid);
@@ -534,13 +542,18 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     options << boost::format("%08x") % pcid;
     options << boost::format("%08x") % compression;
     options << boost::format("%08x") % num_points;
+    
+    m_insert.insert(position, options.str());
+    position += options.str().size();
+    
+    m_insert.insert(position, hex);
+    position += hex.size();
+    
+    std::string tail("')");
+    m_insert.insert(position, tail);
 
-    insert.append(options.str());
-    insert.append(hex);
-    insert.append("')");
 
-    pg_execute(m_session, insert);
-    insert.clear();
+    pg_execute(m_session, m_insert);
     return true;
 }
 

@@ -102,7 +102,7 @@ private:
     bool m_have_postgis;
     bool m_create_index;
     bool m_overwrite;
-
+    std::string m_insert;
 
     // lose this
     bool m_schema_is_initialized;
