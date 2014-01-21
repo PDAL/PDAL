@@ -295,7 +295,7 @@ boost::uint32_t Crop::processBuffer(PointBuffer const& srcData, PointBuffer& dst
     {
         // need to scale the values
         double x = srcData.applyScaling(dimX, index);
-        double y = srcData.applyScaling( dimY, index);
+        double y = srcData.applyScaling(dimY, index);
         double z = srcData.applyScaling(dimZ, index);
 
         if (logOutput)

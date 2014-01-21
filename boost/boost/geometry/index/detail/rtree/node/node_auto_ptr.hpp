@@ -17,6 +17,8 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
 
 namespace detail { namespace rtree {
 
+// TODO - change the name to node_scoped_ptr
+
 template <typename Value, typename Options, typename Translator, typename Box, typename Allocators>
 class node_auto_ptr
 {

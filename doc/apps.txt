@@ -95,6 +95,19 @@ Dumps information about a point cloud file, such as:
 ::
 
     $ pdal info  test/data/1.2-with-color.las --count 3 --query "636601.87, 849018.59, 425.10"
+
+Print the first 10 points of the file as `reStructuredText`_
+
+::
+    $ pdal info test/data/1.2-with-color.las -p 0-10
+
+Print three selected points of the file as `reStructuredText`_
+
+::
+    $ pdal info test/data/1.2-with-color.las -p 4, 16, 28
+
+
+.. _`reStructuredText`: http://docutils.sourceforge.net/docs/user/rst/quickref.html
 :: 
 
     -p [ --point ] [=arg(=0)] point to dump

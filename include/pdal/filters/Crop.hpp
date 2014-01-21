@@ -57,7 +57,8 @@ class PDAL_DLL Crop : public Filter
 {
 public:
     SET_STAGE_NAME("filters.crop", "Crop Filter")
-
+    SET_STAGE_LINK("http://pdal.io/stages/filters.crop.html")
+    
     Crop(Stage& prevStage, const Options&);
     Crop(Stage& prevStage, Bounds<double> const& bounds);
     ~Crop();

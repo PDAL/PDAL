@@ -3,11 +3,7 @@
 #
 # (based originally on the libLAS files copyright Mateusz Loskot)
 
-if(WIN32)
-cmake_minimum_required(VERSION 2.8.7)
-else()
-cmake_minimum_required(VERSION 2.6.0)
-endif()
+cmake_minimum_required(VERSION 2.8.6)
 
 project(PDAL)
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
@@ -407,6 +403,18 @@ if(WITH_NITRO)
     endif()
 endif()
 
+set(WITH_MSGPACK TRUE CACHE BOOL "Choose if MessagePack support should be built")
+if(WITH_MSGPACK)
+    find_package(MsgPack)
+    if (MSGPACK_FOUND)
+        set(PDAL_HAVE_MSGPACK 1)
+        include_directories("${MsgPack_INCLUDE_DIRS}")
+        message(STATUS "...building with MessagePack")
+    else()
+        set(WITH_MSGPACK FALSE)
+        set(MsgPack_LIBRARIES "")
+    endif()
+endif()
 #------------------------------------------------------------------------------
 # settings for other 3rd party dependencies
 #------------------------------------------------------------------------------

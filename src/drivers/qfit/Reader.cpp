@@ -273,14 +273,14 @@ Reader::Reader(const Options& options)
     , m_format(QFIT_Format_Unknown)
     , m_size(0)
     , m_flip_x(true)
-    , m_scale_z(1.0)
+    , m_scale_z(0.001)
     , m_littleEndian(false)
 {
 
     std::string filename= getFileName();
 
     m_flip_x = getOptions().getValueOrDefault("flip_coordinates", true);
-    m_scale_z = getOptions().getValueOrDefault("scale_z", 1.0);
+    m_scale_z = getOptions().getValueOrDefault("scale_z", 0.001);
 
     std::istream* str = FileUtils::openFile(filename);
 
@@ -416,7 +416,7 @@ Options Reader::getDefaultOptions()
     Options options;
     Option filename("filename", "", "file to read from");
     Option flip_coordinates("flip_coordinates", true, "Flip coordinates from 0-360 to -180-180");
-    Option convert_z_units("scale_z", 1.0f, "Z scale. Use 0.001 to go from mm to m");
+    Option convert_z_units("scale_z", 0.001f, "Z scale. Use 0.001 to go from mm to m");
     Option little_endian("little_endian", false, "Are data in little endian format?");
     options.add(filename);
     options.add(flip_coordinates);
@@ -559,7 +559,11 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
             if (!m_littleEndian)
                 QFIT_SWAP_BE_TO_LE(z);
             if (dimensions.Z)
+            {
+                double zd = dimensions.Z->applyScaling(z);
+                z = dimensions.Z->removeScaling<boost::int32_t>(static_cast<double>(zd));
                 data.setField<boost::int32_t>(*dimensions.Z, pointIndex, z);
+            }
 
             boost::int32_t start_pulse = Utils::read_field<boost::int32_t>(p);
             if (!m_littleEndian)
@@ -717,6 +721,7 @@ std::vector<Dimension> Reader::getDefaultDimensions()
                 "Elevation (millimeters)");
     z.setUUID("cadb2807-c14f-4ce3-8b7a-b393a91a9f10");
     z.setNamespace(s_getName());
+    z.setNumericScale(1/1000.00);
     output.push_back(z);
 
     Dimension start_pulse("StartPulse", dimension::SignedInteger, 4,

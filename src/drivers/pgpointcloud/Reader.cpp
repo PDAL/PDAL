@@ -234,12 +234,31 @@ boost::uint32_t Reader::fetchPcid() const
     oss << "WHERE c.relname = '" << m_table_name << "' ";
     oss << "AND a.attname = '" << m_column_name << "' ";
 
-    char *pcid_str = pg_query_once(m_session, oss.str());
+    char *pcid_str(0);
+    pcid_str = pg_query_once(m_session, oss.str());
+
+    if (! pcid_str)
+    {
+        std::ostringstream oss;
+        oss << "Unable to fetch pcid with column '" 
+            << m_column_name <<"' and  table '" 
+            << m_table_name <<"'";
+        throw pdal_error(oss.str());
+    }
+
     pcid = atoi(pcid_str);
     free(pcid_str);
 
     if (! pcid)
-        throw pdal_error("Unable to fetch pcid specified column and table");
+    {
+        // Are pcid == 0 valid?
+        std::ostringstream oss;
+        oss << "Unable to fetch pcid with column '" 
+            << m_column_name <<"' and  table '" 
+            << m_table_name <<"'";
+        throw pdal_error(oss.str());
+    }
+
 
     log()->get(logDEBUG) << "     got pcid = " << pcid << std::endl;
 

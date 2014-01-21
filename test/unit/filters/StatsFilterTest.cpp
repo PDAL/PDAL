@@ -269,9 +269,9 @@ BOOST_AUTO_TEST_CASE(test_specified_stats)
 
     pdal::filters::iterators::sequential::Stats* iterator = static_cast<pdal::filters::iterators::sequential::Stats*>(iter.get());
 
-    const pdal::filters::stats::Summary& statsX = iterator->getStats(schema.getDimension("filters.inplacereprojection.X"));
-    const pdal::filters::stats::Summary& statsY = iterator->getStats(schema.getDimension("drivers.las.reader.Y"));
-    const pdal::filters::stats::Summary& statsZ = iterator->getStats(schema.getDimension("Z"));
+    const pdal::filters::stats::Summary& statsX = iterator->getStats(data.getSchema().getDimension("filters.inplacereprojection.X"));
+    const pdal::filters::stats::Summary& statsY = iterator->getStats(data.getSchema().getDimension("drivers.las.reader.Y"));
+    const pdal::filters::stats::Summary& statsZ = iterator->getStats(data.getSchema().getDimension("Z"));
 
     BOOST_CHECK_EQUAL(statsX.count(), 1000u);
     BOOST_CHECK_EQUAL(statsY.count(), 1000u);

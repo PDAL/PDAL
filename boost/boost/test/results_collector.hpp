@@ -17,6 +17,9 @@
 #define BOOST_TEST_RESULTS_COLLECTOR_HPP_071894GER
 
 // Boost.Test
+
+#pragma GCC diagnostic ignored "-Wunused-function"
+
 #include <boost/test/test_observer.hpp>
 
 #include <boost/test/detail/global_typedef.hpp>

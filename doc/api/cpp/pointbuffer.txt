@@ -7,5 +7,5 @@ pdal::PointBuffer
 .. doxygenclass:: pdal::PointBuffer
    :members:
 
-.. doxygenenum:: pdal::pointbuffer::Orientation
+
 

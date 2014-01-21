@@ -1,14 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Pipeline version="1.0">
     <Writer type="drivers.oci.writer">
-        <Option name="debug">
-            true
-        </Option>
-        <Option name="verbose">
-            1
-        </Option>
         <Option name="connection">
-            grid/grid@localhost/orcl
+            grid/grid@localhost/vm
         </Option>
         <Option name="base_table_name">
             SIMPLE_CLOUD
@@ -16,6 +10,8 @@
         <Option name="block_table_name">
             SIMPLE_BLOCKS
         </Option>
+        <Option name="store_dimensional_orientation">true</Option>
+        
         <Option name="cloud_column_name">
             CLOUD
         </Option>
@@ -54,16 +50,47 @@
         <Option name="stream_output_precision">
             8
         </Option>
-            <Filter type="filters.inplacereprojection">
+        <Option name="pack_ignored_fields">
+            true
+        </Option>
+        <Filter type="filters.selector">
+          <Option name="ignore">
+            <Options>
+              <Option name="dimension">ReturnNumber</Option>
+              <Option name="dimension">NumberOfReturns</Option>
+              <Option name="dimension">ScanDirectionFlag</Option>
+              <Option name="dimension">EdgeOfFlightLine</Option>
+              <Option name="dimension">ScanAngleRank</Option>
+              <Option name="dimension">UserData</Option>
+            </Options>
+          </Option>
+          <Option name="ignore_default">true</Option>
+          <Option name="keep">
+            <Options>
+              <Option name="dimension">X</Option>
+              <Option name="dimension">Y</Option>
+              <Option name="dimension">Z</Option>
+              <Option name="dimension">Intensity</Option>
+              <Option name="dimension">Classification</Option>
+              <Option name="dimension">PointSourceId</Option>
+            </Options>
+          </Option>        
+        <Filter type="filters.stats">
+           <Option name="exact_dimensions">Classification</Option>
+           <Option name="dimensions">drivers.las.reader.X, drivers.las.reader.Y, drivers.las.reader.Z, Classification</Option>        
+            <!-- <Filter type="filters.inplacereprojection">
                 <Option name="out_srs">
-                    EPSG:4326
+                    EPSG:26910
                 </Option>
-                <Option name="scale_x">
-                    0.0000001
+               <Option name="scale_x">
+                    0.01
                 </Option>
                 <Option name="scale_y">
-                    0.0000001
-                </Option>
+                    0.01
+                </Option>  -->
+                <!-- <Filter type="filters.scaling">
+                  <Option name="dimension">X<Options><Option name="scale">1e-1</Option></Options></Option>
+                  <Option name="dimension">Y<Options><Option name="scale">1e-1</Option></Options></Option>     -->            
                 <Filter type="filters.chipper">
                     <Option name="capacity">
                         50
@@ -72,22 +99,22 @@
                         <Option name="max_cache_blocks">
                             1
                         </Option>
-                        <Option name="cache_block_size">
-                            50
-                        </Option>
                         <Reader type="drivers.las.reader">
                                 <Option name="filename">
-                                    ../1.2-with-color.las
+                                    ../autzen-dd-pf0.las
                                 </Option>
                                 <Option name="spatialreference">
-                                    EPSG:2926
+                                    EPSG:4326
                                 </Option>
                                 <!-- <Option name="log">
                                     oracle-pipeline-write.log
                                 </Option>     -->
                         </Reader>
                 </Filter>
+            <!-- </Filter> -->
             </Filter>
+            <!-- </Filter> -->
+            </Filter>            
         </Filter>
     </Writer>
 </Pipeline>

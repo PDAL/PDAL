@@ -7,7 +7,7 @@
 project 
     : requirements
       <library>/boost/filesystem//pdalboost_filesystem
-      <library>/boost/system//boost_system
+      <library>/boost/system//pdalboost_system
       <library>/boost/test//pdalboost_prg_exec_monitor
       <toolset>msvc:<asynch-exceptions>on
     ;

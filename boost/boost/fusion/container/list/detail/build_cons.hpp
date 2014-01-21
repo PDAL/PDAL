@@ -24,12 +24,12 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
     template <typename First, typename Last>
     struct build_cons<First, Last, true>
     {
-        typedef nil type;
+        typedef nil_ type;
         
-        static nil
+        static nil_
         call(First const&, Last const&)
         {
-            return nil();
+            return nil_();
         }
     };
 

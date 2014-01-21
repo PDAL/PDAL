@@ -1,22 +1,38 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+require 'socket'
+
 # Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
 VAGRANTFILE_API_VERSION = "2"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.box = "precise64"
 
-  config.vm.hostname = "pdal-development"
+  config.vm.hostname = "pdal-vagrant"
   config.vm.box_url = "http://files.vagrantup.com/precise64.box"
-
+  config.vm.host_name = "pdal-vagrant"
+  
   config.vm.network :forwarded_port, guest: 80, host: 8080
 
   config.vm.provider :virtualbox do |vb|
-     vb.customize ["modifyvm", :id, "--memory", "512"]
-     vb.customize ["modifyvm", :id, "--cpus", "1"]   
+     vb.customize ["modifyvm", :id, "--memory", "1024"]
+     vb.customize ["modifyvm", :id, "--cpus", "2"]   
      vb.customize ["modifyvm", :id, "--ioapic", "on"]
+     vb.name = "pdal-vagrant"
    end  
+
+
+  if RUBY_PLATFORM.include? "darwin"
+    config.vm.network "private_network", ip: "192.168.50.4"
+    config.vm.synced_folder ".", "/vagrant", nfs: true
+    
+    if Socket.gethostname.include? "pyro" # Howard's machine
+     config.vm.synced_folder "/Users/hobu/dev/git/pointcloud", "/pointcloud", nfs: true
+    end
+  end
+  
+  
 
   ppaRepos = [
 	  "ppa:ubuntugis/ppa",
@@ -44,7 +60,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     "postgis",
     "libcunit1-dev",
     "postgresql-server-dev-9.1",
-    "postgresql-9.1-postgis"
+    "postgresql-9.1-postgis",
+    "libmsgpack-dev",
+    "libgeos++-dev"
   ];
 
   if Dir.glob("#{File.dirname(__FILE__)}/.vagrant/machines/default/*/id").empty?

@@ -6,6 +6,8 @@ SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
 PAPER         =
 BUILDDIR      = build
+OUTPUTDIR=/tmp/pdal-docs
+DATE=$(shell date +'%y.%m.%d %H:%M:%S')
 
 # Internal variables.
 PAPEROPT_a4     = -D latex_paper_size=a4
@@ -36,8 +38,11 @@ help:
 
 clean:
 	-rm -rf $(BUILDDIR)/*
+	-rm -rf $(OUTPUTDIR)/
+	-rm -rf doxygen/xml*;
+	-rm -rf doxygen/html*;
 
-html:
+html: 
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
@@ -137,3 +142,12 @@ doctest:
 
 doxygen:
 	cd ../ ; doxygen doc/doxygen/doxygen.conf; cd doc
+
+clone: html
+	-rm -rf $(OUTPUTDIR)
+	git clone git@github.com:PDAL/pdal.github.io.git $(OUTPUTDIR)
+	
+publish: clone
+	cp -r build/html/* $(OUTPUTDIR)/
+	cd $(OUTPUTDIR) ; git checkout origin/gh-pages; git add  "*" ; git commit -m "update for $(DATE)" . ; git push origin gh-pages
+

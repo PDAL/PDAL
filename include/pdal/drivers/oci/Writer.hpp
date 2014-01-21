@@ -63,7 +63,8 @@ class PDAL_DLL Writer : public pdal::Writer, pdal::drivers::oci::OracleDriver
 {
 public:
     SET_STAGE_NAME("drivers.oci.writer", "OCI Writer")
-
+    SET_STAGE_LINK("http://pdal.io/stages/drivers.oci.writer.html")
+    
     Writer(Stage& prevStage, const Options&);
     ~Writer();
 
@@ -156,11 +157,13 @@ private:
 
     std::string m_base_table_boundary_column;
     std::string m_base_table_boundary_wkt;
-    boost::shared_ptr<pdal::gdal::Debug> m_gdal_debug;
+
     std::string m_trigger_name;
     bool m_sdo_pc_is_initialized;
     boost::uint32_t m_chunkCount;
     bool m_streamChunks;
+    schema::Orientation m_orientation;
+
 
 };
 

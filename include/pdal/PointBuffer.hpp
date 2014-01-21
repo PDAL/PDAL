@@ -57,8 +57,8 @@ namespace pdal
         typedef boost::uuids::uuid id;
         typedef std::vector<boost::uint8_t>::size_type PointBufferByteSize;
 
-        typedef boost::interprocess::allocator<boost::uint8_t, boost::interprocess::managed_shared_memory::segment_manager>     ShmemAllocator; 
-        typedef boost::container::vector<boost::uint8_t, ShmemAllocator> PointBufferVector;
+        // typedef boost::interprocess::allocator<boost::uint8_t, boost::interprocess::managed_shared_memory::segment_manager>     ShmemAllocator; 
+        // typedef boost::container::vector<boost::uint8_t, ShmemAllocator> PointBufferVector;
 
     } // pointbuffer
 
@@ -222,6 +222,8 @@ public:
                               boost::uint32_t srcPointIndex,
                               const PointBuffer& srcPointBuffer)
     {
+        assert (srcPointBuffer.getSchema().getOrientation() == getSchema().getOrientation() && getSchema().getOrientation() != schema::DIMENSION_INTERLEAVED);
+
         const boost::uint8_t* src = srcPointBuffer.getData(srcPointIndex);
         boost::uint8_t* dest = getData(destPointIndex);
         
@@ -254,6 +256,7 @@ public:
                                const PointBuffer& srcPointBuffer,
                                boost::uint32_t numPoints)
     {
+        assert (srcPointBuffer.getSchema().getOrientation() == getSchema().getOrientation() && getSchema().getOrientation() != schema::DIMENSION_INTERLEAVED);
         const boost::uint8_t* src = srcPointBuffer.getData(srcPointIndex);
         boost::uint8_t* dest = getData(destPointIndex);
 
@@ -281,11 +284,13 @@ public:
         {
             pointbuffer::PointBufferByteSize offset(0);
             offset = m_schema.getDimension(pointIndex).getByteOffset();
-            position = static_cast<pointbuffer::PointBufferByteSize>(m_numPoints) * offset;
+            position = static_cast<pointbuffer::PointBufferByteSize>(m_capacity) * offset;
         }
         return const_cast<boost::uint8_t*>(&(m_data.front())) + position;
 
     }
+    
+    inline boost::uint8_t* getDataStart() { return &(m_data.front()); }
 
     /// copies the raw data into your own byte array and sets the size
     /// @param data pointer to your byte array
@@ -333,7 +338,10 @@ public:
     void resize(boost::uint32_t const& capacity, bool bExact=false);
     
     /// @return a new PointBuffer with all ignored dimensions removed
-    PointBuffer* pack() const;
+    PointBuffer* pack(bool bRemoveIgnoredDimensions = true) const;
+    
+    /// @return a new PointBuffer with the opposite orientation
+    PointBuffer* flipOrientation() const;
     
     /** @name Serialization
     */
@@ -358,6 +366,7 @@ public:
         \endverbatim
     */
     boost::property_tree::ptree toPTree() const;
+    std::ostream& toRST(std::ostream& os) const;
 
     /*! @return a cumulated bounds of all points in the PointBuffer.
         \verbatim embed:rst
@@ -410,13 +419,14 @@ protected:
     schema::Orientation m_orientation;
 
     Metadata m_metadata;
-    boost::interprocess::managed_shared_memory *m_segment;
+    // boost::interprocess::managed_shared_memory *m_segment;
     pointbuffer::id m_uuid;
     
 
     template<class T> static void scale(Dimension const& source_dimension,
                                  Dimension const& destination_dimension,
                                  T& value);
+    std::string printDimension(Dimension const& dimension, boost::uint32_t index) const;
 };
 
 template <class T>
@@ -449,9 +459,7 @@ inline void PointBuffer::setField(pdal::Dimension const& dim, boost::uint32_t po
         throw buffer_error("unknown pdal::Schema::m_orientation provided!");
     }
 
-#ifdef DEBUG
-    assert(offset + sizeof(T) <= getBufferByteSize());
-#endif
+    assert(offset + sizeof(T) <= getBufferByteLength());
 
     boost::uint8_t* p = (boost::uint8_t*)&(m_data.front()) + offset;
 
@@ -461,11 +469,18 @@ inline void PointBuffer::setField(pdal::Dimension const& dim, boost::uint32_t po
         // do anything magical. It's up to you to get the interpretation right.
         *(T*)(void*)p = value;
         return;
+    } else 
+    {
+        std::ostringstream oss;
+        oss << "setField size of type T " << sizeof(T) << " does not match the size of dimension '" 
+            << dim.getFQName() << "' which is " << dim.getByteSize();
+        throw pdal_error(oss.str());
     }
-
-    T output(0);
-    output = boost::lexical_cast<T>(value);
-    *(T*)(void*)p = output;
+    
+    
+    // T output(0);
+    // output = boost::lexical_cast<T>(value);
+    // *(T*)(void*)p = output;
 
 
 }
@@ -478,9 +493,6 @@ inline  T const& PointBuffer::getField(pdal::Dimension const& dim, boost::uint32
         // this is a little harsh, but we'll keep it for now as we shake things out
         throw buffer_error("This dimension has no identified position in a schema.");
     }
-
-    // pointbuffer::PointBufferByteSize point_start_byte_position = static_cast<pointbuffer::PointBufferByteSize>(pointIndex) * static_cast<pointbuffer::PointBufferByteSize>(m_byteSize); 
-    // boost::uint64_t offset = point_start_byte_position + static_cast<pointbuffer::PointBufferByteSize>(dim.getByteOffset());
 
     pointbuffer::PointBufferByteSize point_start_byte_position(0); 
     pointbuffer::PointBufferByteSize offset(0);
@@ -503,23 +515,21 @@ inline  T const& PointBuffer::getField(pdal::Dimension const& dim, boost::uint32
         throw buffer_error("unknown pdal::Schema::m_orientation provided!");
     }
 
-#ifdef DEBUG
-    // This test ends up being somewhat expensive when run for every field 
-    // for every point. 
-    
-    if (offset + sizeof(T) > getBufferByteSize())
-    {
-        std::ostringstream oss;
-        oss << "Offset for given dimension is off the end of the buffer!";
-        throw buffer_error(oss.str());
-    }
-
-    assert(offset + sizeof(T) <= getBufferByteSize() );
-#endif
+    assert(offset + sizeof(T) <= getBufferByteLength());
 
     boost::uint8_t const* p = (boost::uint8_t const*)&(m_data.front()) + offset;
-    T const& output = *(T const*)(void const*)p;
-    return output;
+    
+    if (sizeof(T) <= dim.getByteSize())
+    {
+        T const& output = *(T const*)(void const*)p;
+        return output;
+    } else
+    {
+        std::ostringstream oss;
+        oss << "getField size of type T " << sizeof(T) << " is greater than the size of dimension '" 
+            << dim.getFQName() << "' which is " << dim.getByteSize();
+        throw pdal_error(oss.str());
+    }
 }
 
 

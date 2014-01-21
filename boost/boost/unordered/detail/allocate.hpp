@@ -234,9 +234,11 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
 #pragma warning(disable:4100) // unreferenced formal parameter
 #endif
 
-    template <class T>
-    inline void destroy(T* x) {
-        x->~T();
+    namespace func {
+        template <class T>
+        inline void destroy(T* x) {
+            x->~T();
+        }
     }
 
 #if defined(BOOST_MSVC)
@@ -257,13 +259,12 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
 
     template <typename T, unsigned int> struct expr_test;
     template <typename T> struct expr_test<T, sizeof(char)> : T {};
-    template <typename U> static char for_expr_test(U const&);
 
 #   define BOOST_UNORDERED_CHECK_EXPRESSION(count, result, expression)      \
         template <typename U>                                               \
         static typename pdalboost::unordered::detail::expr_test<                \
             BOOST_PP_CAT(choice, result),                                   \
-            sizeof(pdalboost::unordered::detail::for_expr_test((                \
+            sizeof(for_expr_test((                                          \
                 (expression),                                               \
             0)))>::type test(                                               \
             BOOST_PP_CAT(choice, count))
@@ -276,6 +277,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
 #   define BOOST_UNORDERED_HAS_FUNCTION(name, thing, args, _)               \
     struct BOOST_PP_CAT(has_, name)                                         \
     {                                                                       \
+        template <typename U> static char for_expr_test(U const&);          \
         BOOST_UNORDERED_CHECK_EXPRESSION(1, 1,                              \
             pdalboost::unordered::detail::make< thing >().name args);           \
         BOOST_UNORDERED_DEFAULT_EXPRESSION(2, 2);                           \
@@ -473,6 +475,9 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
 
 #   endif
 
+    namespace func
+    {
+
     template <typename Alloc>
     inline Alloc call_select_on_container_copy_construction(const Alloc& rhs,
         typename pdalboost::enable_if_c<
@@ -509,6 +514,8 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
     {
         return (std::numeric_limits<SizeType>::max)();
     }
+
+    } // namespace func.
 
     template <typename Alloc>
     struct allocator_traits
@@ -589,7 +596,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
                 pdalboost::unordered::detail::has_destroy<Alloc, T>::value>::type
             destroy(Alloc&, T* p)
         {
-            pdalboost::unordered::detail::destroy(p);
+            pdalboost::unordered::detail::func::destroy(p);
         }
 
 #   elif !defined(BOOST_NO_SFINAE_EXPR)
@@ -623,7 +630,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
                 pdalboost::unordered::detail::has_destroy<Alloc, T>::value>::type
             destroy(Alloc&, T* p)
         {
-            pdalboost::unordered::detail::destroy(p);
+            pdalboost::unordered::detail::func::destroy(p);
         }
 
 #   else
@@ -669,21 +676,22 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
                 pdalboost::is_same<T, value_type>::value,
                 void*>::type = 0)
         {
-            pdalboost::unordered::detail::destroy(p);
+            pdalboost::unordered::detail::func::destroy(p);
         }
 
 #   endif
 
         static size_type max_size(const Alloc& a)
         {
-            return pdalboost::unordered::detail::call_max_size<size_type>(a);
+            return pdalboost::unordered::detail::func::
+                call_max_size<size_type>(a);
         }
 
         // Allocator propagation on construction
 
         static Alloc select_on_container_copy_construction(Alloc const& rhs)
         {
-            return pdalboost::unordered::detail::
+            return pdalboost::unordered::detail::func::
                 call_select_on_container_copy_construction(rhs);
         }
 
@@ -758,7 +766,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
 #endif
 
 
-namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace unordered { namespace detail {
+namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace unordered { namespace detail { namespace func {
 
     ////////////////////////////////////////////////////////////////////////////
     // call_construct
@@ -792,7 +800,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
 
     template <typename Alloc, typename T>
     inline void destroy_value_impl(Alloc&, T* x) {
-        pdalboost::unordered::detail::destroy(x);
+        pdalboost::unordered::detail::func::destroy(x);
     }
 
 
@@ -802,7 +810,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
 
     template <typename Alloc, typename T>
     inline void destroy_value_impl(Alloc&, T* x) {
-        pdalboost::unordered::detail::destroy(x);
+        pdalboost::unordered::detail::func::destroy(x);
     }
 
 #endif
@@ -818,7 +826,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
     template<typename Alloc, typename T>                                    \
     void construct_from_tuple(Alloc& alloc, T* ptr, namespace_ tuple<>)     \
     {                                                                       \
-        pdalboost::unordered::detail::call_construct(alloc, ptr);               \
+        pdalboost::unordered::detail::func::call_construct(alloc, ptr);         \
     }                                                                       \
                                                                             \
     BOOST_PP_REPEAT_FROM_TO(1, n,                                           \
@@ -830,7 +838,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
     void construct_from_tuple(Alloc& alloc, T* ptr,                         \
             namespace_ tuple<BOOST_PP_ENUM_PARAMS_Z(z, n, A)> const& x)     \
     {                                                                       \
-        pdalboost::unordered::detail::call_construct(alloc, ptr,                \
+        pdalboost::unordered::detail::func::call_construct(alloc, ptr,          \
             BOOST_PP_ENUM_##z(n, BOOST_UNORDERED_GET_TUPLE_ARG, namespace_) \
         );                                                                  \
     }
@@ -945,7 +953,7 @@ BOOST_UNORDERED_CONSTRUCT_FROM_TUPLE(10, pdalboost::)
     inline void construct_value_impl(Alloc& alloc, T* address,
         BOOST_FWD_REF(Args)... args)
     {
-        pdalboost::unordered::detail::call_construct(alloc,
+        pdalboost::unordered::detail::func::call_construct(alloc,
             address, pdalboost::forward<Args>(args)...);
     }
 
@@ -960,9 +968,9 @@ BOOST_UNORDERED_CONSTRUCT_FROM_TUPLE(10, pdalboost::)
         construct_value_impl(Alloc& alloc, std::pair<A, B>* address,
             BOOST_FWD_REF(A0), BOOST_FWD_REF(A1) a1, BOOST_FWD_REF(A2) a2)
     {
-        pdalboost::unordered::detail::construct_from_tuple(alloc,
+        pdalboost::unordered::detail::func::construct_from_tuple(alloc,
             pdalboost::addressof(address->first), pdalboost::forward<A1>(a1));
-        pdalboost::unordered::detail::construct_from_tuple(alloc,
+        pdalboost::unordered::detail::func::construct_from_tuple(alloc,
             pdalboost::addressof(address->second), pdalboost::forward<A2>(a2));
     }
 
@@ -1032,19 +1040,15 @@ BOOST_UNORDERED_CONSTRUCT_FROM_TUPLE(10, pdalboost::)
             pdalboost::unordered::detail::emplace_args3<A0, A1, A2> const& args,
             typename enable_if<use_piecewise<A0>, void*>::type = 0)
     {
-        pdalboost::unordered::detail::construct_from_tuple(alloc,
+        pdalboost::unordered::detail::func::construct_from_tuple(alloc,
             pdalboost::addressof(address->first), args.a1);
-        pdalboost::unordered::detail::construct_from_tuple(alloc,
+        pdalboost::unordered::detail::func::construct_from_tuple(alloc,
             pdalboost::addressof(address->second), args.a2);
     }
 
 #endif // BOOST_NO_CXX11_VARIADIC_TEMPLATES
 
-}}}
-
-////////////////////////////////////////////////////////////////////////////////
-//
-// Some helper functions for allocating & constructing
+}}}}
 
 namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namespace unordered { namespace detail {
 

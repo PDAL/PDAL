@@ -118,17 +118,17 @@ BOOST_AUTO_TEST_CASE(test_one)
 
     for (boost::uint32_t i=0; i<las_numRead; i++)
     {
-        const double nitf_x = nitf_data.getField<double>(nitf_dimX, i);
-        const double nitf_y = nitf_data.getField<double>(nitf_dimY, i);
-        const double nitf_z = nitf_data.getField<double>(nitf_dimZ, i);
+        const boost::int32_t nitf_x = nitf_data.getField<boost::int32_t>(nitf_dimX, i);
+        const boost::int32_t nitf_y = nitf_data.getField<boost::int32_t>(nitf_dimY, i);
+        const boost::int32_t nitf_z = nitf_data.getField<boost::int32_t>(nitf_dimZ, i);
 
-        const double las_x = las_data.getField<double>(las_dimX, i);
-        const double las_y = las_data.getField<double>(las_dimY, i);
-        const double las_z = las_data.getField<double>(las_dimZ, i);
+        const boost::int32_t las_x = las_data.getField<boost::int32_t>(las_dimX, i);
+        const boost::int32_t las_y = las_data.getField<boost::int32_t>(las_dimY, i);
+        const boost::int32_t las_z = las_data.getField<boost::int32_t>(las_dimZ, i);
 
-        BOOST_CHECK_CLOSE(nitf_x, las_x, 0.00001);
-        BOOST_CHECK_CLOSE(nitf_y, las_y, 0.00001);
-        BOOST_CHECK_CLOSE(nitf_z, las_z, 0.00001);
+        BOOST_CHECK_EQUAL(nitf_x, las_x);
+        BOOST_CHECK_EQUAL(nitf_y, las_y);
+        BOOST_CHECK_EQUAL(nitf_z, las_z);
     }
 
     delete nitf_iter;

@@ -173,7 +173,7 @@ BOOST_AUTO_TEST_CASE(ScalingFilterFloat_test)
         boost::int32_t x = data.getField<boost::int32_t>(dimX, i);
         boost::int32_t y = data.getField<boost::int32_t>(dimY, i);
         double z = data.getField<double>(dimZ, i);
-        boost::uint64_t t = data.getField<boost::uint64_t>(dimTime, i);
+        boost::int32_t t = data.getField<boost::int32_t>(dimTime, i);
 
         BOOST_CHECK_EQUAL(x, -1234400030);
         BOOST_CHECK_EQUAL(y, -12342999);

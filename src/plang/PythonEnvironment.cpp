@@ -60,7 +60,7 @@ namespace plang
 PythonEnvironment::PythonEnvironment()
     : m_redirector(new Redirector())
 {
-    PyImport_AppendInittab("redirector", redirector_init);
+    PyImport_AppendInittab(const_cast<char*>("redirector"), redirector_init);
 
     Py_Initialize();
 

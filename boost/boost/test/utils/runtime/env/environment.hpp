@@ -15,6 +15,8 @@
 #ifndef BOOST_RT_ENV_ENVIRONMENT_HPP_062604GER
 #define BOOST_RT_ENV_ENVIRONMENT_HPP_062604GER
 
+#pragma GCC diagnostic ignored "-Wredundant-decls"
+
 #ifdef UNDER_CE
 #error Windows CE does not support environment variables.
 #endif

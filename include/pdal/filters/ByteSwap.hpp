@@ -57,7 +57,8 @@ class PDAL_DLL ByteSwap : public Filter
 {
 public:
     SET_STAGE_NAME("filters.byteswap", "Byte-swap Filter")
-
+    SET_STAGE_LINK("http://pdal.io/stages/filters.byteswap.html")
+    
     ByteSwap(Stage& prevStage, const Options&);
     ByteSwap(Stage& prevStage);
 

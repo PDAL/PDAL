@@ -84,10 +84,10 @@ Options getOCIOptions()
     Option connection("connection",std::string(TestConfig::g_oracle_connection), "connection");
     options.add(connection);
 
-    Option debug("debug", true, "debug");
+    Option debug("debug", "false", "debug");
     options.add(debug);
 
-    Option verbose("verbose", 7, "verbose");
+    Option verbose("verbose", 1, "verbose");
     options.add(verbose);
 
     Option block_table_name("block_table_name", "PDAL_TEST_BLOCKS", "block_table_name");
@@ -105,16 +105,25 @@ Options getOCIOptions()
     Option solid("solid", false,"");
     options.add(solid);
 
-    Option srid("srid",4326,"");
+    Option srid("srid",26910,"");
     options.add(srid);
 
-    Option out_srs("out_srs", "EPSG:4269","");
+    Option out_srs("out_srs", "EPSG:26910","");
     options.add(out_srs);
 
-    Option scale_x("scale_x", 0.0000001f, "");
+    Option scale_x("scale_x", 0.01, "");
     options.add(scale_x);
+    
 
-    Option scale_y("scale_y", 0.0000001f, "");
+
+    Option offset_x("offset_x", 493994.875f, "");
+    options.add(offset_x);
+    
+    Option offset_y("offset_y", 4877429.62f, "");
+    options.add(offset_y);
+
+
+    Option scale_y("scale_y", 0.01, "");
     options.add(scale_y);
 
     Option disable_cloud_trigger("disable_cloud_trigger", true, "");
@@ -126,20 +135,17 @@ Options getOCIOptions()
     Option cache_block_size("cache_block_size", capacity.getValue<boost::uint32_t>(), "");
     options.add(cache_block_size);
 
-    Option filename("filename", Support::datapath("1.2-with-color.las"), "");
+    Option filename("filename", Support::datapath("autzen-dd.las"), "");
     options.add(filename);
 
     Option query("query", "SELECT CLOUD FROM PDAL_TEST_BASE where ID=1", "");
     options.add(query);
-
-    Option a_srs("spatialreference", "EPSG:2926", "");
-    options.add(a_srs);
     
     Option pack("pack_ignored_fields", true, "");
     options.add(pack);
     
     Option xml_schema_dump("xml_schema_dump", "oracle-xml-schema-dump.xml", "");
-    options.add(xml_schema_dump);
+    // options.add(xml_schema_dump);
 
     
     return options;
@@ -342,6 +348,35 @@ bool WriteDefaultData()
 //     BOOST_CHECK_EQUAL(red2, 78);
 // }
 
+void checkPoints(PointBuffer const& data)
+{
+    pdal::Schema const& schema = data.getSchema();
+    
+    pdal::Dimension const& dimX = schema.getDimension("X");
+    pdal::Dimension const& dimY = schema.getDimension("Y");
+    pdal::Dimension const& dimZ = schema.getDimension("Z");
+    pdal::Dimension const& dimIntensity = schema.getDimension("Intensity");
+    pdal::Dimension const& dimRed = schema.getDimension("Red");
+    pdal::Dimension const& dimGreen = schema.getDimension("Green");
+    pdal::Dimension const& dimBlue = schema.getDimension("Blue");
+
+    boost::int32_t x = data.getField<boost::int32_t>(dimX, 0);
+    boost::int32_t y = data.getField<boost::int32_t>(dimY, 0);
+    boost::int32_t z = data.getField<boost::int32_t>(dimZ, 0);
+    boost::uint16_t intensity = data.getField<boost::uint16_t>(dimIntensity, 0);
+    boost::uint16_t red = data.getField<boost::uint16_t>(dimRed, 0);
+    boost::uint16_t green = data.getField<boost::uint16_t>(dimGreen, 0);
+    boost::uint16_t blue = data.getField<boost::uint16_t>(dimBlue, 0);
+
+    BOOST_CHECK_EQUAL(x, 44194425);
+    BOOST_CHECK_EQUAL(y, 440496109);
+    BOOST_CHECK_EQUAL(z, 12931);
+    BOOST_CHECK_EQUAL(intensity,35u);
+    BOOST_CHECK_EQUAL(red, 160u);
+    BOOST_CHECK_EQUAL(green, 125u);
+    BOOST_CHECK_EQUAL(blue, 148u);
+    
+}
 
 BOOST_AUTO_TEST_CASE(read_view_reproj)
 {
@@ -362,53 +397,51 @@ BOOST_AUTO_TEST_CASE(read_view_reproj)
     query.setValue<std::string>(oss.str());
 
     Option& out_srs = options.getOptionByRef("out_srs"); 
-    out_srs.setValue<std::string>("EPSG:26910");
+    out_srs.setValue<std::string>("EPSG:4326");
 
     Option& x_scale = options.getOptionByRef("scale_x");
-    x_scale.setValue<float>(0.01f);
+    x_scale.setValue<float>(0.0000001);
 
     Option& y_scale = options.getOptionByRef("scale_y");
-    y_scale.setValue<float>(0.01f);
+    y_scale.setValue<float>(0.0000001);
 
-    Option& srs = options.getOptionByRef("spatialreference"); 
-    srs.setValue<std::string>("EPSG:4326");
+    Option& offset_x = options.getOptionByRef("offset_x");
+    offset_x.setValue<float>( -123.0749695f);
 
+    Option& offset_y = options.getOptionByRef("offset_y");
+    offset_y.setValue<float>( 44.0500086f);
 
+    pdal::Option x_dim("x_dim", std::string("drivers.oci.reader.X"), "Dimension name to use for 'X' data");
+    pdal::Option y_dim("y_dim", std::string("drivers.oci.reader.Y"), "Dimension name to use for 'Y' data");
+    pdal::Option z_dim("z_dim", std::string("drivers.oci.reader.Z"), "Dimension name to use for 'Z' data");    
+
+    options.add(x_dim);
+    options.add(y_dim);
+    options.add(z_dim);
+
+    Option& debug = options.getOptionByRef("debug");
+    debug.setValue<std::string>( "false");
+
+    Option& verbose = options.getOptionByRef("verbose");
+    verbose.setValue<std::string>( "1");
     
     pdal::drivers::oci::Reader reader_reader(options);
     pdal::filters::InPlaceReprojection reproj(reader_reader, options);
     reproj.initialize();
 
-    pdal::PointBuffer data3(reproj.getSchema(), chunk_size+30);
-    boost::scoped_ptr<pdal::StageSequentialIterator> iter(reproj.createSequentialIterator(data3));
+    pdal::PointBuffer data(reproj.getSchema(), chunk_size+30);
+    pdal::StageSequentialIterator* iter = reproj.createSequentialIterator(data);
 
-
-    //boost::uint32_t numTotal(0);
     boost::uint32_t numRead(0);
 
-    numRead = iter->read(data3);
+    numRead = iter->read(data);
 
-    BOOST_CHECK_EQUAL(numRead, 10u);
+    BOOST_CHECK_EQUAL(numRead, chunk_size+30u);
+    BOOST_CHECK_EQUAL(data.getNumPoints(), chunk_size+30u);
     
-    pdal::Schema const& schema = data3.getSchema();
-    
-    pdal::Dimension const& dimX = schema.getDimension("X");
-    pdal::Dimension const& dimY = schema.getDimension("Y");
-    pdal::Dimension const& dimZ = schema.getDimension("Z");
-    pdal::Dimension const& dimIntensity = schema.getDimension("Intensity");
-    pdal::Dimension const& dimRed = schema.getDimension("Red");
+    checkPoints(data);
 
-    boost::int32_t x = data3.getField<boost::int32_t>(dimX, 0);
-    boost::int32_t y = data3.getField<boost::int32_t>(dimY, 0);
-    boost::int32_t z = data3.getField<boost::int32_t>(dimZ, 0);
-    boost::uint16_t intensity = data3.getField<boost::uint16_t>(dimIntensity, 6);
-    boost::uint16_t red = data3.getField<boost::uint16_t>(dimRed, 6);
-
-    BOOST_CHECK_EQUAL(x, -1250367506);
-    BOOST_CHECK_EQUAL(y, 492519663);
-    BOOST_CHECK_EQUAL(z, 12931);
-    BOOST_CHECK_EQUAL(intensity, 67);
-    BOOST_CHECK_EQUAL(red, 113);
+    delete iter;
 
 }
 

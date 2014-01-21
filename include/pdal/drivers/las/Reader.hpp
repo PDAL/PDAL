@@ -69,6 +69,7 @@ class PDAL_DLL Reader : public ReaderBase
 {
 public:
     SET_STAGE_NAME("drivers.las.reader", "Las Reader")
+    SET_STAGE_LINK("http://pdal.io/stages/drivers.las.reader.html")
 
     Reader(const Options&);
     Reader(const std::string&);

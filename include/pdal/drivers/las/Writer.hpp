@@ -64,6 +64,7 @@ class PDAL_DLL Writer : public pdal::Writer
 {
 public:
     SET_STAGE_NAME("drivers.las.writer", "Las Writer")
+    SET_STAGE_LINK("http://pdal.io/stages/drivers.las.writer.html")
 
     Writer(Stage& prevStage, const Options&);
     Writer(Stage& prevStage, std::ostream*);

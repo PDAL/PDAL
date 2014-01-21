@@ -101,7 +101,7 @@ public :
 
         // Make bad output clean
         rings.resize(size_at_start);
-        ring.clear();
+        geometry::traits::clear<typename pdalboost::range_value<Rings>::type>::apply(ring);
 
         // Reject this as a starting point
         operation.visited.set_rejected();

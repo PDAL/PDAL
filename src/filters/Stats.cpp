@@ -190,35 +190,7 @@ void Stats::initialize()
 {
     Filter::initialize();
 
-    std::string names = getOptions().getValueOrDefault<std::string>("dimensions", "");
-    if (names.size())
-    {
-        log()->get(logDEBUG) << "Using explicit list of dimension names'" << names << "'"<<std::endl;
-        boost::char_separator<char> seps(" ,");
 
-
-        tokenizer parameters(names, seps);
-        for (tokenizer::iterator t = parameters.begin(); t != parameters.end(); ++t)
-        {
-            log()->get(logDEBUG) << "adding '" << *t << "' as dimension name to cumulate stats for" << std::endl;
-            m_dimension_names.push_back(*t);
-        }
-    }
-
-    std::string exact = getOptions().getValueOrDefault<std::string>("exact_dimensions", "");
-    if (exact.size())
-    {
-        log()->get(logDEBUG) << "Calculating histogram statistics for exact names '" << names << "'"<<std::endl;
-        boost::char_separator<char> seps(" ,");
-
-
-        tokenizer parameters(exact, seps);
-        for (tokenizer::iterator t = parameters.begin(); t != parameters.end(); ++t)
-        {
-            log()->get(logDEBUG) << "adding '" << *t << "' as exact dimension name to cumulate stats for" << std::endl;
-            m_exact_dimension_names.push_back(*t);
-        }
-    }
 
 
     return;
@@ -252,7 +224,6 @@ namespace sequential
 
 Stats::Stats(const pdal::filters::Stats& filter, PointBuffer& buffer)
     : pdal::FilterSequentialIterator(filter, buffer)
-    , m_statsFilter(filter)
 {
     return;
 }
@@ -262,133 +233,21 @@ boost::uint32_t Stats::readBufferImpl(PointBuffer& data)
 {
     const boost::uint32_t numRead = getPrevIterator().read(data);
 
-    const boost::uint32_t numPoints = data.getNumPoints();
-
-    for (boost::uint32_t pointIndex=0; pointIndex < numPoints; pointIndex++)
+    for (boost::uint32_t pointIndex=0; pointIndex < numRead; pointIndex++)
     {
         std::multimap<DimensionPtr, stats::SummaryPtr>::const_iterator p;
         for (p = m_stats.begin(); p != m_stats.end(); ++p)
         {
-
             DimensionPtr d = p->first;
             stats::SummaryPtr c = p->second;
 
-            double output = getValue(data, *d, pointIndex);
+            double output = data.applyScaling(*d, pointIndex);
             c->insert(output);
         }
     }
     return numRead;
 }
 
-double Stats::getValue(PointBuffer& data, Dimension& d, boost::uint32_t pointIndex)
-{
-    double output(0.0);
-
-    float flt(0.0);
-    boost::int8_t i8(0);
-    boost::uint8_t u8(0);
-    boost::int16_t i16(0);
-    boost::uint16_t u16(0);
-    boost::int32_t i32(0);
-    boost::uint32_t u32(0);
-    boost::int64_t i64(0);
-    boost::uint64_t u64(0);
-
-    switch (d.getInterpretation())
-    {
-        case dimension::RawByte:
-            u8 = data.getField<boost::uint8_t>(d, pointIndex);
-            output = d.applyScaling<boost::uint8_t>(u8);
-            break;
-        case dimension::Float:
-            if (d.getByteSize() == 4)
-            {
-                flt = data.getField<float>(d, pointIndex);
-                output = static_cast<double>(flt);
-                break;
-            }
-            else if (d.getByteSize() == 8)
-            {
-                output = data.getField<double>(d, pointIndex);
-                break;
-            }
-            else
-            {
-                std::ostringstream oss;
-                oss << "Unable to interpret Float of size '" << d.getByteSize() <<"'";
-                throw pdal_error(oss.str());
-            }
-
-        case dimension::SignedInteger:
-            if (d.getByteSize() == 1)
-            {
-                i8 = data.getField<boost::int8_t>(d, pointIndex);
-                output = d.applyScaling<boost::int8_t>(i8);
-                break;
-            }
-            else if (d.getByteSize() == 2)
-            {
-                i16 = data.getField<boost::int16_t>(d, pointIndex);
-                output = d.applyScaling<boost::int16_t>(i16);
-                break;
-            }
-            else if (d.getByteSize() == 4)
-            {
-                i32 = data.getField<boost::int32_t>(d, pointIndex);
-                output = d.applyScaling<boost::int32_t>(i32);
-                break;
-            }
-            else if (d.getByteSize() == 8)
-            {
-                i64 = data.getField<boost::int64_t>(d, pointIndex);
-                output = d.applyScaling<boost::int64_t>(i64);
-                break;
-            }
-            else
-            {
-                std::ostringstream oss;
-                oss << "Unable to interpret SignedInteger of size '" << d.getByteSize() <<"'";
-                throw pdal_error(oss.str());
-            }
-        case dimension::UnsignedInteger:
-            if (d.getByteSize() == 1)
-            {
-                u8 = data.getField<boost::uint8_t>(d, pointIndex);
-                output = d.applyScaling<boost::uint8_t>(u8);
-                break;
-            }
-            else if (d.getByteSize() == 2)
-            {
-                u16 = data.getField<boost::uint16_t>(d, pointIndex);
-                output = d.applyScaling<boost::uint16_t>(u16);
-                break;
-            }
-            else if (d.getByteSize() == 4)
-            {
-                u32 = data.getField<boost::uint32_t>(d, pointIndex);
-                output = d.applyScaling<boost::uint32_t>(u32);
-                break;
-            }
-            else if (d.getByteSize() == 8)
-            {
-                u64 = data.getField<boost::uint64_t>(d, pointIndex);
-                output = d.applyScaling<boost::uint64_t>(u64);
-                break;
-            }
-            else
-            {
-                std::ostringstream oss;
-                oss << "Unable to interpret UnsignedInteger of size '" << d.getByteSize() <<"'";
-                throw pdal_error(oss.str());
-            }
-
-        case dimension::Pointer:    // stored as 64 bits, even on a 32-bit box
-        case dimension::Undefined:
-            throw pdal_error("Dimension data type unable to be summarized");
-    }
-
-    return output;
-}
 boost::uint64_t Stats::skipImpl(boost::uint64_t count)
 {
     getPrevIterator().skip(count);
@@ -418,16 +277,52 @@ void Stats::readBufferBeginImpl(PointBuffer& buffer)
     {
         Options const& options = getStage().getOptions();
 
-        std::vector<std::string> dimension_names = m_statsFilter.getExactDimensionNames();
+        std::string exact = options.getValueOrDefault<std::string>("exact_dimensions", "");
+        if (exact.size())
+        {
+            getStage().log()->get(logDEBUG) << "Calculating histogram statistics for exact names '" << exact << "'"<<std::endl;
+            boost::char_separator<char> seps(" ,");
+
+
+            tokenizer parameters(exact, seps);
+            for (tokenizer::iterator t = parameters.begin(); t != parameters.end(); ++t)
+            {
+                getStage().log()->get(logDEBUG) << "adding '" << *t << "' as exact dimension name to cumulate stats for" << std::endl;
+                m_exact_dimension_names.push_back(*t);
+                m_dimension_names.push_back(*t);
+
+            }
+        }
+
 
         std::map<std::string, bool> exact_dimensions;
-        for (std::vector<std::string>::const_iterator i = dimension_names.begin();
-                i != dimension_names.end(); ++i)
+        for (std::vector<std::string>::const_iterator i = m_exact_dimension_names.begin();
+                i != m_exact_dimension_names.end(); ++i)
         {
             getStage().log()->get(logDEBUG2) << "Using exact histogram counts for '" << *i << "'" << std::endl;
             std::pair<std::string,bool> p(*i, true);
             exact_dimensions.insert(p);
         }
+
+        std::string names = options.getValueOrDefault<std::string>("dimensions", "");
+        if (names.size())
+        {
+            getStage().log()->get(logDEBUG) << "Using explicit list of dimension names'" << names << "'"<<std::endl;
+            boost::char_separator<char> seps(" ,");
+
+
+            tokenizer parameters(names, seps);
+            for (tokenizer::iterator t = parameters.begin(); t != parameters.end(); ++t)
+            {
+                getStage().log()->get(logDEBUG) << "adding '" << *t << "' as dimension name to cumulate stats for" << std::endl;
+                // Add to explicit dim list if not already there
+                if (exact_dimensions.find(*t) == exact_dimensions.end())
+                    m_dimension_names.push_back(*t);
+            
+            }
+        }
+
+
 
         Schema const& schema = buffer.getSchema();
 
@@ -464,12 +359,13 @@ void Stats::readBufferBeginImpl(PointBuffer& buffer)
 
         boost::uint32_t bin_count = options.getValueOrDefault<boost::uint32_t>("num_bins", 20);
 
-        std::vector<std::string> const& specified_names = m_statsFilter.getDimensionNames();
 
-        if (specified_names.size())
+        
+        if (m_dimension_names.size())
         {
-
-            for (std::vector<std::string>::const_iterator  i = specified_names.begin(); i != specified_names.end(); i++)
+            getStage().log()->get(logDEBUG2) << "Explicit dimension size:" << m_dimension_names.size() << std::endl;
+            
+            for (std::vector<std::string>::const_iterator  i = m_dimension_names.begin(); i != m_dimension_names.end(); i++)
             {
                 std::string const& name = *i;
                 getStage().log()->get(logDEBUG2) << "Requested to cumulate stats for dimension with name '" << name <<"'"<< std::endl;
@@ -486,7 +382,7 @@ void Stats::readBufferBeginImpl(PointBuffer& buffer)
                     getStage().log()->get(logDEBUG2) << "Cumulating exact stats for dimension " << d->getName() << std::endl;
                     doExact = true;
                 }
-                
+            
                 bool doSample = options.getValueOrDefault<bool>("do_sample", false);
                 stats::SummaryPtr c = boost::shared_ptr<stats::Summary>(new stats::Summary(bin_count, sample_size, stats_cache_size, seed, doExact, doSample));
 
@@ -494,9 +390,7 @@ void Stats::readBufferBeginImpl(PointBuffer& buffer)
                 m_dimensions.push_back(d);
                 m_stats.insert(p);
             }
-        }
-        else
-        {
+        } else {
             bool doSample = options.getValueOrDefault<bool>("do_sample", true);
             schema::index_by_index const& dims = schema.getDimensions().get<schema::index>();
             for (schema::index_by_index::const_iterator iter = dims.begin(); iter != dims.end(); ++iter)

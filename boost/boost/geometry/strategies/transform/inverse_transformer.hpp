@@ -31,22 +31,23 @@ namespace strategy { namespace transform
 {
 
 /*!
-\brief Transformation strategy to do an inverse ransformation in Cartesian system
+\brief Transformation strategy to do an inverse transformation in a Cartesian coordinate system
 \ingroup strategies
-\tparam P1 first point type
-\tparam P2 second point type
  */
-template <typename P1, typename P2>
+template
+<
+    typename CalculationType,
+    std::size_t Dimension1,
+    std::size_t Dimension2
+>
 class inverse_transformer
-    : public ublas_transformer<P1, P2, dimension<P1>::type::value, dimension<P2>::type::value>
+    : public ublas_transformer<CalculationType, Dimension1, Dimension2>
 {
-    typedef typename select_coordinate_type<P1, P2>::type T;
-
 public :
     template <typename Transformer>
     inline inverse_transformer(Transformer const& input)
     {
-        typedef pdalboost::numeric::ublas::matrix<T> matrix_type;
+        typedef pdalboost::numeric::ublas::matrix<CalculationType> matrix_type;
 
         // create a working copy of the input
         matrix_type copy(input.matrix());
@@ -60,7 +61,7 @@ public :
         if( res == 0 )
         {
             // create identity matrix
-            this->m_matrix.assign(pdalboost::numeric::ublas::identity_matrix<T>(copy.size1()));
+            this->m_matrix.assign(pdalboost::numeric::ublas::identity_matrix<CalculationType>(copy.size1()));
 
             // backsubstitute to get the inverse
             pdalboost::numeric::ublas::lu_substitute(copy, pm, this->m_matrix);

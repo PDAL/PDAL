@@ -83,7 +83,7 @@ namespace pdalboost {} namespace boost = pdalboost; namespace pdalboost { namesp
         //auto segmented_next_impl_recurse3(stack)
         //{
         //  if (size(stack) == 1)
-        //    return cons(iterator_range(end(car(stack)), end(car(stack))), nil);
+        //    return cons(iterator_range(end(car(stack)), end(car(stack))), nil_);
         //  else
         //    return segmented_next_impl_recurse(stack.cdr);
         //}

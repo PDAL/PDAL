@@ -59,7 +59,8 @@ class PDAL_DLL Reader : public pdal::Reader, pdal::drivers::oci::OracleDriver
 {
 public:
     SET_STAGE_NAME("drivers.oci.reader", "OCI Reader")
-    SET_STAGE_LINK("http://www.pointcloud.org/api/cpp/reader.html#oci-reader")
+    SET_STAGE_LINK("http://pdal.io/stages/drivers.oci.reader.html")
+    
     Reader(const Options&);
     ~Reader();
 
@@ -131,6 +132,8 @@ namespace sequential
 {
 
 
+typedef boost::shared_ptr<schema::DimensionMap> DimensionMapPtr;
+typedef std::map<int, DimensionMapPtr> DimensionMaps;
 typedef boost::shared_ptr<PointBuffer> BufferPtr;
 typedef std::map<int, BufferPtr> BufferMap;
 
@@ -149,6 +152,7 @@ protected:
     boost::uint32_t myReadBlocks(PointBuffer& data);
 
     BufferPtr fetchPointBuffer(Statement statment, sdo_pc* pc);
+    DimensionMapPtr fetchDimensionMap(Statement statement, sdo_pc* pc, PointBuffer const& oracle_buffer, PointBuffer const& user_buffer);
 
     Statement m_block_statement;
     Statement m_initialQueryStatement;
@@ -162,8 +166,10 @@ protected:
     BufferPtr m_oracle_buffer;
     BufferMap m_buffers;
     boost::uint32_t m_buffer_position;
-
-
+    DimensionMapPtr m_dimension_map;
+    schema::Orientation m_orientation;
+    DimensionMaps m_dimensions;
+    
 private:
     const pdal::drivers::oci::Reader& m_reader;
 

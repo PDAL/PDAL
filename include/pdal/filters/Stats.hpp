@@ -190,7 +190,8 @@ class PDAL_DLL Stats : public Filter
 {
 public:
     SET_STAGE_NAME("filters.stats", "Statistics Filter")
-
+    SET_STAGE_LINK("http://pdal.io/stages/filters.stats.html")  
+    
     Stats(Stage& prevStage, const Options&);
     Stats(Stage& prevStage);
     ~Stats();
@@ -207,20 +208,18 @@ public:
     }
 
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const
+    pdal::StageRandomIterator* createRandomIterator(PointBuffer& buffer) const
     {
-        return 0;    // BUG: add this
+        return getPrevStage().createRandomIterator(buffer);
     }
 
     void processBuffer(PointBuffer& data) const;
     
-    std::vector<std::string> const& getDimensionNames() const { return m_dimension_names; }
-    std::vector<std::string> const& getExactDimensionNames() const { return m_exact_dimension_names; }
+
 
 private:
     
-    std::vector<std::string> m_dimension_names;
-    std::vector<std::string> m_exact_dimension_names;
+
     
     Stats& operator=(const Stats&); // not implemented
     Stats(const Stats&); // not implemented
@@ -249,17 +248,18 @@ public:
 protected:
     virtual void readBufferBeginImpl(PointBuffer&);
     virtual void readBufferEndImpl(PointBuffer&);
+    std::vector<std::string> const& getDimensionNames() const { return m_dimension_names; }
+    std::vector<std::string> const& getExactDimensionNames() const { return m_exact_dimension_names; }    
 private:
     boost::uint64_t skipImpl(boost::uint64_t);
     boost::uint32_t readBufferImpl(PointBuffer&);
     bool atEndImpl() const;
 
-    const pdal::filters::Stats& m_statsFilter;
 
     std::vector<DimensionPtr> m_dimensions;
-
-    double getValue(PointBuffer& data, Dimension& dim, boost::uint32_t pointIndex);
-
+    std::vector<std::string> m_dimension_names;
+    std::vector<std::string> m_exact_dimension_names;
+    
     std::multimap<DimensionPtr,stats::SummaryPtr> m_stats; // one Stats item per field in the schema
 };
 
