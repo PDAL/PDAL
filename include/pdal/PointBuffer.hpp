@@ -400,7 +400,13 @@ public:
 
     double applyScaling(Dimension const& d,
                         std::size_t pointIndex) const;
-                            
+
+    /// @return a new PointBuffer with all ignored dimensions removed
+    static void pack(PointBuffer const* input, 
+                     PointBuffer* output, 
+                     bool bRemoveIgnoredDimensions = true,
+                     bool bResetOutputSchema = false);
+    
     /** @name private attributes
     */
 protected:

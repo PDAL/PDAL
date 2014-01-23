@@ -53,7 +53,7 @@ PointBuffer::PointBuffer(const Schema& schema, boost::uint32_t capacity)
     , m_byteSize(schema.getByteSize())
     , m_orientation(schema.getOrientation())
     , m_metadata("pointbuffer")
-        // , m_segment(0)
+
 
 {
     pointbuffer::PointBufferByteSize size = static_cast<pointbuffer::PointBufferByteSize>(schema.getByteSize()) * static_cast<pointbuffer::PointBufferByteSize>(capacity);
@@ -64,10 +64,6 @@ PointBuffer::PointBuffer(const Schema& schema, boost::uint32_t capacity)
     GlobalEnvironment& env = pdal::GlobalEnvironment::get();
     boost::uuids::basic_random_generator<boost::mt19937> gen(env.getRNG());
     m_uuid = gen();
-    
-    // boost::interprocess::shared_memory_object::remove("mySegmentObjectVector");
-    // m_segment = new boost::interprocess::managed_shared_memory(boost::interprocess::create_only, "mySegmentObjectVector", size);    
-    return;
 }
 
 PointBuffer::PointBuffer(PointBuffer const& other)
@@ -194,17 +190,41 @@ PointBuffer* PointBuffer::pack(bool bRemoveIgnoredDimensions) const
     if (bRemoveIgnoredDimensions)
         output_schema = schema.pack();
     pdal::PointBuffer* output = new PointBuffer(output_schema, getNumPoints());
+    
+    PointBuffer::pack(this, output, true /* we need to pack out ignored dims*/, false /*no need to reset schema, already done */);
+    return output;
+}
 
-    boost::uint8_t* src = getData(0);
+
+void PointBuffer::pack( PointBuffer const* input, 
+                        PointBuffer* output, 
+                        bool bRemoveIgnoredDimensions,
+                        bool bResetOutputSchema)
+{
+
+    // Creates a new buffer that has the ignored dimensions removed from
+    // it.
+
+    schema::index_by_index const& idx = input->getSchema().getDimensions().get<schema::index>();
+    
+    if (bResetOutputSchema)
+    {
+        pdal::Schema output_schema(input->getSchema());
+        output_schema = input->getSchema().pack();
+        output->reset(output_schema);
+    }
+    output->resize(input->getNumPoints(), true);
+
+    boost::uint8_t* src = input->getData(0);
     
     boost::uint8_t* current_position = output->getData(0);
     
-    schema::Orientation orientation = getSchema().getOrientation();
+    schema::Orientation orientation = input->getSchema().getOrientation();
     if (orientation == schema::POINT_INTERLEAVED)
     {
-        for (boost::uint32_t i = 0; i < getNumPoints(); ++i)
+        for (boost::uint32_t i = 0; i < input->getNumPoints(); ++i)
         {
-            boost::uint8_t* data = getData(i);
+            boost::uint8_t* data = input->getData(i);
             for (boost::uint32_t d = 0; d < idx.size(); ++d)
             {
                 if (bRemoveIgnoredDimensions) 
@@ -231,11 +251,11 @@ PointBuffer* PointBuffer::pack(bool bRemoveIgnoredDimensions) const
     }
     else if (orientation == schema::DIMENSION_INTERLEAVED)
     {
-        for (boost::uint32_t d = 0; d < getSchema().size(); ++d)
+        for (boost::uint32_t d = 0; d < input->getSchema().size(); ++d)
         {
             // For each dimension, copy the data if it isn't ignored
-            boost::uint8_t* data = getData(d);
-            boost::uint64_t dimension_length = static_cast<boost::uint64_t>(idx[d].getByteSize()) * static_cast<boost::uint64_t>(getNumPoints());
+            boost::uint8_t* data = input->getData(d);
+            boost::uint64_t dimension_length = static_cast<boost::uint64_t>(idx[d].getByteSize()) * static_cast<boost::uint64_t>(input->getNumPoints());
             if (bRemoveIgnoredDimensions) 
             {
                 if (! idx[d].isIgnored())
@@ -253,11 +273,8 @@ PointBuffer* PointBuffer::pack(bool bRemoveIgnoredDimensions) const
         }        
     }
     
-    output->setNumPoints(getNumPoints());
-    return output;
-    
+    output->setNumPoints(input->getNumPoints());
 }
-
 
 PointBuffer* PointBuffer::flipOrientation() const
 {
