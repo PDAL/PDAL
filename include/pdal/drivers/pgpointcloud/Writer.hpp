@@ -103,6 +103,8 @@ private:
     bool m_create_index;
     bool m_overwrite;
     std::string m_insert;
+    std::string m_hex;
+    PointBuffer* m_output_buffer;
 
     // lose this
     bool m_schema_is_initialized;

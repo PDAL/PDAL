@@ -84,6 +84,7 @@ Writer::Writer(Stage& prevStage, const Options& options)
     , m_have_postgis(false)
     , m_create_index(true)
     , m_overwrite(true)
+    , m_output_buffer(0)
     , m_schema_is_initialized(false)
 {
 
@@ -487,11 +488,19 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& buffer)
 
 bool Writer::WriteBlock(PointBuffer const& buffer)
 {
-    boost::scoped_ptr<PointBuffer> output(buffer.pack());
-    pointbuffer::PointBufferByteSize  point_data_length = output->getBufferByteLength();
-    boost::uint8_t* point_data = output->getData(0);
 
-    boost::uint32_t num_points = static_cast<boost::uint32_t>(output->getNumPoints());
+    if (!m_output_buffer)
+    {
+        m_output_buffer = buffer.pack();
+    } else
+    {
+        PointBuffer::pack(&buffer, m_output_buffer, true, false);
+    }
+    
+    pointbuffer::PointBufferByteSize  point_data_length = m_output_buffer->getBufferByteLength();
+    boost::uint8_t* point_data = m_output_buffer->getData(0);
+
+    boost::uint32_t num_points = static_cast<boost::uint32_t>(m_output_buffer->getNumPoints());
 
     if (num_points > m_patch_capacity)
     {
@@ -506,16 +515,16 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
 
     static char syms[] = "0123456789ABCDEF";
     std::string hex;
-    hex.resize(point_data_length*2);
+    m_hex.resize(point_data_length*2);
     for (int i = 0; i != point_data_length; i++)
     {
-        hex[i*2] = syms[((point_data[i] >> 4) & 0xf)];
-        hex[i*2+1] = syms[point_data[i] & 0xf];
+        m_hex[i*2] = syms[((point_data[i] >> 4) & 0xf)];
+        m_hex[i*2+1] = syms[point_data[i] & 0xf];
     }
     
     m_insert.clear();
   
-    m_insert.resize(hex.size() + 3000);
+    m_insert.resize(m_hex.size() + 3000);
     
     std::string insert_into("INSERT INTO ");
     std::string values(" (pa) VALUES ('");
@@ -546,8 +555,8 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     m_insert.insert(position, options.str());
     position += options.str().size();
     
-    m_insert.insert(position, hex);
-    position += hex.size();
+    m_insert.insert(position, m_hex);
+    position += m_hex.size();
     
     std::string tail("')");
     m_insert.insert(position, tail);
