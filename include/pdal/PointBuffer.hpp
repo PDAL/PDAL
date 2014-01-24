@@ -996,7 +996,7 @@ inline void PointBuffer::scale(Dimension const& source_dimension,
 }
 
 
-class IndexedPointBuffer : public PointBuffer
+class PDAL_DLL IndexedPointBuffer : public PointBuffer
 {
 public:
     IndexedPointBuffer(const Schema& schema, boost::uint32_t capacity=65536);
