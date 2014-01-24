@@ -72,7 +72,7 @@ public:
     }    
 };
 
-class Query : public Application
+class PDAL_DLL Query : public Application
 {
 public:
     Query(int argc, const char* argv[]);
