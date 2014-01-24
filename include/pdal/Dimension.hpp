@@ -494,7 +494,7 @@ public:
                 "de-scaled value to be greater than std::numeric_limits::max for dimension '" 
                 << getFQName() << "'. " <<
                 "(v - offset)/ scale) is: (" 
-                << out << " - " << m_numericOffset << ")/" 
+                << v << " - " << m_numericOffset << ")/" 
                 << m_numericScale <<") == '" << out 
                 << "' but max() for the datatype is: " 
                 << (std::numeric_limits<T>::max)();
@@ -515,7 +515,7 @@ public:
                 "de-scaled value to be less than std::numeric_limits::min for dimension '" 
                 << getFQName() << "'. " <<
                 "(v - offset)/ scale) is: (" 
-                << out << " - " << m_numericOffset << ")/" 
+                << v << " - " << m_numericOffset << ")/" 
                 << m_numericScale <<") == '" << out 
                 << "' but min() for the datatype is: " 
                 << (std::numeric_limits<T>::min)();

@@ -269,7 +269,7 @@ inline void scaling::IteratorBase::scale(Dimension const& from_dimension,
             "de-scaled value to be greater than std::numeric_limits::max for dimension '" 
             << to_dimension.getFQName() << "'. " <<
             "(v - offset)/ scale) is: (" 
-            << out << " - " << to_dimension.getNumericOffset()  << ")/" 
+            << v << " - " << to_dimension.getNumericOffset()  << ")/" 
             << to_dimension.getNumericScale() <<") == '" << out 
             << "' but max() for the datatype is: " 
             << (std::numeric_limits<T>::max)();
@@ -290,7 +290,7 @@ inline void scaling::IteratorBase::scale(Dimension const& from_dimension,
             "de-scaled value to be less than std::numeric_limits::mine for dimension '" 
             << to_dimension.getFQName() << "'. " <<
             "(v - offset)/ scale) is: (" 
-            << out << " - " << to_dimension.getNumericOffset()  << ")/" 
+            << v << " - " << to_dimension.getNumericOffset()  << ")/" 
             << to_dimension.getNumericScale() <<") == '" << out 
             << "' but min() for the datatype is: " 
             << (std::numeric_limits<T>::min)();
