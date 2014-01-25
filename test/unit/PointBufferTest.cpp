@@ -799,13 +799,13 @@ BOOST_AUTO_TEST_CASE(test_copyLikeDimensions)
     Dimension const& okls = offset.getSchema().getDimension("Classification");    
     Dimension const& ox2 = offset.getSchema().getDimension("X");    
     Dimension const& oy2 = offset.getSchema().getDimension("Y");
-    for(unsigned int i = 7; i < 17; ++i)
+    for(unsigned int i = 0; i < 10; ++i)
     {
         boost::int32_t x = offset.getField<boost::int32_t>(ox2, i);
         double y = offset.getField<double>(oy2, i);
         boost::uint8_t c = offset.getField<boost::uint8_t>(okls, i);
-        BOOST_CHECK_EQUAL(x, i);
-        BOOST_CHECK_CLOSE(y, i + capacity, 0.000001);
+        BOOST_CHECK_EQUAL(x, 7 + i);
+        BOOST_CHECK_CLOSE(y, 7 + i + capacity, 0.000001);
         BOOST_CHECK_EQUAL(c, 7u);
     }  
 
@@ -814,7 +814,90 @@ BOOST_AUTO_TEST_CASE(test_copyLikeDimensions)
 
 }
 
+BOOST_AUTO_TEST_CASE(test_copyLikeDimensions_All)
+{
 
+    boost::uint32_t capacity(100);
+    Dimension cls("Classification", dimension::UnsignedInteger, 1);
+    Dimension x("X", dimension::SignedInteger, 4);
+    Dimension y("Y", dimension::Float, 8);
+    boost::uint32_t flags = y.getFlags();
+    y.setFlags(flags | dimension::IsIgnored);
+    
+    Schema schema;
+    schema.appendDimension(x);
+    schema.appendDimension(y);
+    schema.appendDimension(cls);
+
+    int offsets[] = { 0, 10, 50, 80, 90, 99 };
+    int num_offsets = sizeof(offsets) / sizeof(offsets[0]);
+    schema::Orientation orients[] = { schema::DIMENSION_INTERLEAVED, schema::POINT_INTERLEAVED };
+
+    for (int i = 0 ; i < num_offsets ; i ++) {
+        for (int j = 0 ; j < num_offsets ; j ++) {
+            for (int os = 0 ; os < sizeof(orients) / sizeof(orients[0]) ; os ++) {
+                for (int od = 0 ; od < sizeof(orients) / sizeof(orients[0]) ; od ++) {
+                    Schema source(schema);
+                    source.setOrientation(orients[os]);
+
+                    Schema dest(schema);
+                    dest.setOrientation(orients[od]);
+
+                    PointBuffer source_buffer(source, capacity);
+                    PointBuffer dest_buffer(dest, capacity);
+
+                    // fill up source with something
+                    //
+                    {
+                        Dimension const& dimX = source_buffer.getSchema().getDimension("X");
+                        Dimension const& dimY = source_buffer.getSchema().getDimension("Y");
+                        Dimension const& dimCls = source_buffer.getSchema().getDimension("Classification");
+
+                        for (boost::uint32_t s = 0 ; s < capacity ; ++ s) {
+                            source_buffer.setField<boost::uint32_t>(dimX, s, s);
+                            source_buffer.setField<double>(dimY, s, s + capacity);
+                            source_buffer.setField<boost::uint8_t>(dimCls, s, 7u);
+                        }
+                    }
+
+                    pdal::schema::DimensionMap* dims = source.mapDimensions(dest_buffer.getSchema()); 
+                    boost::uint32_t points_to_copy = std::min(capacity - offsets[i], capacity - offsets[j]);
+
+                    PointBuffer::copyLikeDimensions(source_buffer, dest_buffer, *dims,
+                            offsets[i], offsets[j], points_to_copy);
+
+#if 0
+                    // enable this to see pretty printing of what's going on here
+                    //
+                    std::cout << "**************************" << std::endl << std::endl;
+                    std::cout << "points_to_copy: " << points_to_copy << ", source:" << offsets[i] <<
+                        ", dest: " << offsets[j] <<
+                        ", s: " << (orients[os] == schema::POINT_INTERLEAVED ? "POINT" : "DIMENSION") <<
+                        ", d:" << (orients[od] == schema::POINT_INTERLEAVED ? "POINT" : "DIMENSION") << std::endl << std::endl;
+                    std::cout << "**************************" << std::endl << std::endl;
+#endif
+
+                    // Now make sure the destination buffer behaves
+                    {
+                        Dimension const& dimX = dest_buffer.getSchema().getDimension("X");
+                        Dimension const& dimY = dest_buffer.getSchema().getDimension("Y");
+                        Dimension const& dimCls = dest_buffer.getSchema().getDimension("Classification");
+
+                        for (boost::uint32_t s = 0 ; s < points_to_copy ; ++ s) {
+                            boost::uint32_t x = dest_buffer.getField<boost::uint32_t>(dimX, offsets[j] + s);
+                            double y = dest_buffer.getField<double>(dimY, offsets[j] + s);
+                            boost::uint8_t c = dest_buffer.getField<boost::uint8_t>(dimCls, offsets[j] + s);
+
+                            BOOST_CHECK_EQUAL(x, offsets[i] + s);
+                            BOOST_CHECK_CLOSE(y, offsets[i] + s + capacity, 0.00001);
+                            BOOST_CHECK_EQUAL(c, 7u);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 
 
 BOOST_AUTO_TEST_CASE(PointBufferTest_dataStriding)
