@@ -753,13 +753,15 @@ double PointBuffer::applyScaling(Dimension const& d,
 }
 
 
-static std::vector<uint64_t> buildCopyMap(schema::DimensionMap const& dimensions)
+static size_t buildCopyMap(schema::DimensionMap const& dimensions, uint64_t *mapEntries,
+        size_t mapEntriesSize)
 {
+    assert(dimensions.size() <= mapEntriesSize);
+
     typedef schema::DimensionMap::const_iterator Iterator;
 
-    std::vector<uint64_t> copyMap;
-
-    for (Iterator d = dimensions.begin(); d != dimensions.end(); ++d)
+    size_t entIndex = 0;
+    for (Iterator d = dimensions.begin(); d != dimensions.end(); ++d, ++entIndex)
     {
         Dimension const& source_dim = *d->first;
         Dimension const& dest_dim = *d->second;
@@ -779,10 +781,10 @@ static std::vector<uint64_t> buildCopyMap(schema::DimensionMap const& dimensions
             ((destination_byteoffset & 0xFFFF) << 16) |
             (source_dim.getByteSize() & 0xFFFF);
 
-        copyMap.push_back(encoded);
+        mapEntries[entIndex] = encoded;
     }
 
-    return copyMap;
+    return entIndex;
 }
 
 
@@ -837,7 +839,8 @@ void PointBuffer::copyLikeDimensions(PointBuffer const& source,
     pointbuffer::PointBufferByteSize source_capacity = static_cast<pointbuffer::PointBufferByteSize>(source.getCapacity());
     pointbuffer::PointBufferByteSize destination_capacity = static_cast<pointbuffer::PointBufferByteSize>(destination.getCapacity());
 
-    std::vector<uint64_t> copyMap = buildCopyMap(dimensions);
+    uint64_t copyMap[4096];
+    uint64_t numCopyMapEntries = buildCopyMap(dimensions, copyMap, sizeof(copyMap) / sizeof(copyMap[0]));
 
     pointbuffer::PointBufferByteSize source_point_size = static_cast<pointbuffer::PointBufferByteSize>(source.getSchema().getByteSize());
     pointbuffer::PointBufferByteSize dest_point_size = static_cast<pointbuffer::PointBufferByteSize>(destination.getSchema().getByteSize());
@@ -857,10 +860,8 @@ void PointBuffer::copyLikeDimensions(PointBuffer const& source,
         //
         for (boost::uint32_t i = 0; i < howMany ; ++i)
         {
-            for (std::vector<uint64_t>::const_iterator iter = copyMap.begin() ;
-                    iter != copyMap.end() ; ++ iter)
-            {
-                uint64_t encoded = *(iter);
+            for(size_t iE = 0 ; iE < numCopyMapEntries ; ++iE) {
+                uint64_t& encoded = copyMap[iE];
 
                 uint64_t source_byteoffset = (encoded >> 32);
                 uint64_t dest_byteoffset = (encoded >> 16) & 0xFFFF;
@@ -881,10 +882,8 @@ void PointBuffer::copyLikeDimensions(PointBuffer const& source,
 
         // copy dimension by dimension
         // 
-        for (std::vector<uint64_t>::const_iterator iter = copyMap.begin() ;
-                iter != copyMap.end() ; ++ iter)
-        {
-            uint64_t encoded = *(iter);
+        for(size_t iE = 0 ; iE < numCopyMapEntries ; ++iE) {
+            uint64_t& encoded = copyMap[iE];
 
             uint64_t source_byteoffset = (encoded >> 32);
             uint64_t dest_byteoffset = (encoded >> 16) & 0xFFFF;
@@ -908,9 +907,8 @@ void PointBuffer::copyLikeDimensions(PointBuffer const& source,
         boost::uint8_t *dst_ptr = destination.getData(0);
 
 
-        std::vector<uint64_t>::const_iterator iter, iterEnd = copyMap.end();
-        for (iter = copyMap.begin() ; iter != iterEnd ; ++ iter) {
-            uint64_t encoded = *(iter);
+        for(size_t iE = 0 ; iE < numCopyMapEntries ; ++iE) {
+            uint64_t& encoded = copyMap[iE];
 
             uint64_t source_byteoffset = (encoded >> 32);
             uint64_t dest_byteoffset = (encoded >> 16) & 0xFFFF;
@@ -934,9 +932,8 @@ void PointBuffer::copyLikeDimensions(PointBuffer const& source,
         boost::uint8_t *dst_ptr = destination.getData(destination_starting_position);
 
 
-        std::vector<uint64_t>::const_iterator iter, iterEnd = copyMap.end();
-        for (iter = copyMap.begin() ; iter != iterEnd ; ++ iter) {
-            uint64_t encoded = *(iter);
+        for(size_t iE = 0 ; iE < numCopyMapEntries ; ++iE) {
+            uint64_t& encoded = copyMap[iE];
 
             uint64_t source_byteoffset = (encoded >> 32);
             uint64_t dest_byteoffset = (encoded >> 16) & 0xFFFF;
