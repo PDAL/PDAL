@@ -759,7 +759,7 @@ BOOST_AUTO_TEST_CASE(test_copyLikeDimensions)
     flipped_schema.setOrientation(schema::POINT_INTERLEAVED);
     PointBuffer flipped(flipped_schema, buffer.getCapacity());
     pdal::schema::DimensionMap* dims = schema.mapDimensions(flipped.getSchema()); 
-    BOOST_CHECK_EQUAL(dims->size(), 3);
+    BOOST_CHECK_EQUAL(dims->m.size(), 3);
     PointBuffer::copyLikeDimensions(buffer, flipped, *dims, 0, 0, buffer.getNumPoints());
     flipped.setNumPoints(buffer.getNumPoints());
     BOOST_CHECK_EQUAL(flipped.getSchema().getByteSize(), 13);
@@ -789,7 +789,7 @@ BOOST_AUTO_TEST_CASE(test_copyLikeDimensions)
 
     PointBuffer offset(buffer.getSchema(), capacity);
     pdal::schema::DimensionMap* dims_offset = flipped_schema.mapDimensions(flipped.getSchema()); 
-    BOOST_CHECK_EQUAL(dims_offset->size(), 3);
+    BOOST_CHECK_EQUAL(dims_offset->m.size(), 3);
     PointBuffer::copyLikeDimensions(buffer, offset, *dims_offset, 7, 0, buffer.getNumPoints()-7);
     offset.setNumPoints(buffer.getNumPoints());
     BOOST_CHECK_EQUAL(offset.getSchema().getByteSize(), 13);

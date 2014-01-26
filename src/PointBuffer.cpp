@@ -753,44 +753,10 @@ double PointBuffer::applyScaling(Dimension const& d,
 }
 
 
-static size_t buildCopyMap(schema::DimensionMap const& dimensions, uint64_t *mapEntries,
-        size_t mapEntriesSize)
-{
-    assert(dimensions.size() <= mapEntriesSize);
-
-    typedef schema::DimensionMap::const_iterator Iterator;
-
-    size_t entIndex = 0;
-    for (Iterator d = dimensions.begin(); d != dimensions.end(); ++d, ++entIndex)
-    {
-        Dimension const& source_dim = *d->first;
-        Dimension const& dest_dim = *d->second;
-
-        pointbuffer::PointBufferByteSize source_byteoffset = static_cast<pointbuffer::PointBufferByteSize>(source_dim.getByteOffset());
-        pointbuffer::PointBufferByteSize destination_byteoffset = static_cast<pointbuffer::PointBufferByteSize>(dest_dim.getByteOffset());
-
-        if (source_dim.getByteSize() != dest_dim.getByteSize())
-        {
-            std::ostringstream oss;
-            oss << "Dimension '" << dest_dim.getName() << "' are not the same byte size and cannot be copied";
-            throw buffer_error(oss.str());
-        }
-
-        uint64_t encoded =
-            ((source_byteoffset & 0xFFFF) << 32)  |
-            ((destination_byteoffset & 0xFFFF) << 16) |
-            (source_dim.getByteSize() & 0xFFFF);
-
-        mapEntries[entIndex] = encoded;
-    }
-
-    return entIndex;
-}
-
 
 inline void copyOver(boost::uint8_t *destination_position,
-        const boost::uint8_t *source_position,
-        boost::uint32_t source_bytesize) {
+                     const boost::uint8_t *source_position,
+                     boost::uint32_t source_bytesize) {
     if (source_bytesize == 1)
     {
         destination_position[0] = source_position[0];
@@ -831,17 +797,14 @@ void PointBuffer::copyLikeDimensions(PointBuffer const& source,
     assert(howMany <= destination.getCapacity() - destination_starting_position);
     assert(howMany <= source.getCapacity() - source_starting_position);
 
-    typedef schema::DimensionMap::const_iterator Iterator;
-    
     pdal::schema::Orientation source_orientation = source.getSchema().getOrientation();
     pdal::schema::Orientation destination_orientation = destination.getSchema().getOrientation();
 
     pointbuffer::PointBufferByteSize source_capacity = static_cast<pointbuffer::PointBufferByteSize>(source.getCapacity());
     pointbuffer::PointBufferByteSize destination_capacity = static_cast<pointbuffer::PointBufferByteSize>(destination.getCapacity());
 
-    uint64_t copyMap[4096];
-    uint64_t numCopyMapEntries = buildCopyMap(dimensions, copyMap, sizeof(copyMap) / sizeof(copyMap[0]));
-
+    pointbuffer::PointBufferByteSize numCopyMapEntries = static_cast<pointbuffer::PointBufferByteSize>(dimensions.m.size());
+    
     pointbuffer::PointBufferByteSize source_point_size = static_cast<pointbuffer::PointBufferByteSize>(source.getSchema().getByteSize());
     pointbuffer::PointBufferByteSize dest_point_size = static_cast<pointbuffer::PointBufferByteSize>(destination.getSchema().getByteSize());
 
@@ -860,12 +823,12 @@ void PointBuffer::copyLikeDimensions(PointBuffer const& source,
         //
         for (boost::uint32_t i = 0; i < howMany ; ++i)
         {
-            for(size_t iE = 0 ; iE < numCopyMapEntries ; ++iE) {
-                uint64_t& encoded = copyMap[iE];
+            for(pointbuffer::PointBufferByteSize iE = 0 ; iE < numCopyMapEntries ; ++iE) {
+                boost::uint64_t const& encoded = dimensions.offsets[iE];
 
-                uint64_t source_byteoffset = (encoded >> 32);
-                uint64_t dest_byteoffset = (encoded >> 16) & 0xFFFF;
-                uint64_t source_bytesize = (encoded & 0xFFFF);
+                boost::uint64_t source_byteoffset = (encoded >> 32);
+                boost::uint64_t dest_byteoffset = (encoded >> 16) & 0xFFFF;
+                boost::uint64_t source_bytesize = (encoded & 0xFFFF);
 
                 copyOver(dst_ptr + dest_byteoffset,
                         source_ptr + source_byteoffset, source_bytesize);
@@ -882,12 +845,12 @@ void PointBuffer::copyLikeDimensions(PointBuffer const& source,
 
         // copy dimension by dimension
         // 
-        for(size_t iE = 0 ; iE < numCopyMapEntries ; ++iE) {
-            uint64_t& encoded = copyMap[iE];
+        for(pointbuffer::PointBufferByteSize iE = 0 ; iE < numCopyMapEntries ; ++iE) {
+            boost::uint64_t const& encoded = dimensions.offsets[iE];
 
-            uint64_t source_byteoffset = (encoded >> 32);
-            uint64_t dest_byteoffset = (encoded >> 16) & 0xFFFF;
-            uint64_t source_bytesize = (encoded & 0xFFFF);
+            boost::uint64_t source_byteoffset = (encoded >> 32);
+            boost::uint64_t dest_byteoffset = (encoded >> 16) & 0xFFFF;
+            boost::uint64_t source_bytesize = (encoded & 0xFFFF);
 
             boost::uint8_t* source_position = source_ptr +  source_capacity * source_byteoffset + 
                 source_starting_position * source_bytesize;
@@ -907,12 +870,12 @@ void PointBuffer::copyLikeDimensions(PointBuffer const& source,
         boost::uint8_t *dst_ptr = destination.getData(0);
 
 
-        for(size_t iE = 0 ; iE < numCopyMapEntries ; ++iE) {
-            uint64_t& encoded = copyMap[iE];
+        for(pointbuffer::PointBufferByteSize iE = 0 ; iE < numCopyMapEntries ; ++iE) {
+            boost::uint64_t const& encoded = dimensions.offsets[iE];
 
-            uint64_t source_byteoffset = (encoded >> 32);
-            uint64_t dest_byteoffset = (encoded >> 16) & 0xFFFF;
-            uint64_t source_bytesize = (encoded & 0xFFFF);
+            boost::uint64_t source_byteoffset = (encoded >> 32);
+            boost::uint64_t dest_byteoffset = (encoded >> 16) & 0xFFFF;
+            boost::uint64_t source_bytesize = (encoded & 0xFFFF);
 
             boost::uint8_t *this_src_ptr = src_ptr + source_byteoffset;
             boost::uint8_t *this_dst_ptr = dst_ptr + destination_capacity * dest_byteoffset +
@@ -932,12 +895,12 @@ void PointBuffer::copyLikeDimensions(PointBuffer const& source,
         boost::uint8_t *dst_ptr = destination.getData(destination_starting_position);
 
 
-        for(size_t iE = 0 ; iE < numCopyMapEntries ; ++iE) {
-            uint64_t& encoded = copyMap[iE];
+        for(pointbuffer::PointBufferByteSize iE = 0 ; iE < numCopyMapEntries ; ++iE) {
+            boost::uint64_t const& encoded = dimensions.offsets[iE];
 
-            uint64_t source_byteoffset = (encoded >> 32);
-            uint64_t dest_byteoffset = (encoded >> 16) & 0xFFFF;
-            uint64_t source_bytesize = (encoded & 0xFFFF);
+            boost::uint64_t source_byteoffset = (encoded >> 32);
+            boost::uint64_t dest_byteoffset = (encoded >> 16) & 0xFFFF;
+            boost::uint64_t source_bytesize = (encoded & 0xFFFF);
 
             boost::uint8_t *this_src_ptr = src_ptr + source_capacity * source_byteoffset + source_starting_position * source_bytesize;
             boost::uint8_t *this_dst_ptr = dst_ptr + dest_byteoffset;

@@ -927,10 +927,10 @@ DimensionMapPtr IteratorBase::fetchDimensionMap(Statement statement, sdo_pc* pc,
     {
         DimensionMapPtr output  = DimensionMapPtr(m_oracle_buffer->getSchema().mapDimensions(  user_buffer.getSchema(), 
                                                                                             false /*ignore namespaces*/));
-        getReader().log()->get(logDEBUG2) << "DimensionMapPtr->size():  " << output->size() << std::endl;
-        if (!output->size()) throw pdal_error("fetchDimensionMap map was unable to map any dimensions!");
-        
-        for (schema::DimensionMap::const_iterator i = output->begin(); i != output->end(); ++i)
+        getReader().log()->get(logDEBUG2) << "DimensionMapPtr->size():  " << output->m.size() << std::endl;
+        if (!output->m.size()) throw pdal_error("fetchDimensionMap map was unable to map any dimensions!");
+        typedef std::map<Dimension const*, Dimension const*>::const_iterator Iterator;
+        for (Iterator i = output->m.begin(); i != output->m.end(); ++i)
         {
             getReader().log()->get(logDEBUG2) << "mapping " << i->first->getFQName() << " to " << i->second->getFQName() << std::endl;
         }
