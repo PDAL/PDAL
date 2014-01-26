@@ -44,7 +44,7 @@
 #include <boost/format.hpp>
 #include <boost/scoped_ptr.hpp>
 
-#include <sstream>
+
 
 #ifdef USE_PDAL_PLUGIN_PGPOINTCLOUD
 MAKE_WRITER_CREATOR(pgpointcloudWriter, pdal::drivers::pgpointcloud::Writer)
@@ -84,6 +84,7 @@ Writer::Writer(Stage& prevStage, const Options& options)
     , m_have_postgis(false)
     , m_create_index(true)
     , m_overwrite(true)
+    , m_output_buffer(0)
     , m_schema_is_initialized(false)
 {
 
@@ -487,31 +488,57 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& buffer)
 
 bool Writer::WriteBlock(PointBuffer const& buffer)
 {
-    boost::scoped_ptr<PointBuffer> output(buffer.pack());
-    pointbuffer::PointBufferByteSize  point_data_length = output->getBufferByteLength();
-    boost::uint8_t* point_data = output->getData(0);
 
-    boost::uint32_t num_points = static_cast<boost::uint32_t>(output->getNumPoints());
+    if (!m_output_buffer)
+    {
+        m_output_buffer = buffer.pack();
+    } else
+    {
+        PointBuffer::pack(&buffer, m_output_buffer, true, false);
+    }
+    
+    pointbuffer::PointBufferByteSize  point_data_length = m_output_buffer->getBufferByteLength();
+    boost::uint8_t* point_data = m_output_buffer->getData(0);
+
+    boost::uint32_t num_points = static_cast<boost::uint32_t>(m_output_buffer->getNumPoints());
 
     if (num_points > m_patch_capacity)
     {
         throw pdal_error("drivers.pgpointcloud.writer num_points > m_patch_capacity!");
     }
 
-    std::vector<boost::uint8_t> block_data;
-    block_data.resize(point_data_length);
-    std::copy(point_data, point_data+point_data_length, block_data.begin());
-
     /* We are always getting uncompressed bytes off the block_data */
     /* so we always used compression type 0 (uncompressed) in writing our WKB */
     boost::int32_t pcid = m_pcid;
     schema::CompressionType compression_v = schema::COMPRESSION_NONE;
     boost::uint32_t compression = static_cast<boost::uint32_t>(compression_v);
-    
-    std::stringstream oss;
-    oss << "INSERT INTO " << m_table_name << " (pa) VALUES ('";
 
-    std::stringstream options;
+    static char syms[] = "0123456789ABCDEF";
+    std::string hex;
+    m_hex.resize(point_data_length*2);
+    for (int i = 0; i != point_data_length; i++)
+    {
+        m_hex[i*2] = syms[((point_data[i] >> 4) & 0xf)];
+        m_hex[i*2+1] = syms[point_data[i] & 0xf];
+    }
+    
+    m_insert.clear();
+  
+    m_insert.resize(m_hex.size() + 3000);
+    
+    std::string insert_into("INSERT INTO ");
+    std::string values(" (pa) VALUES ('");
+    
+    std::string::size_type position(0);
+    m_insert.insert(position, insert_into);
+    position += insert_into.size();
+    m_insert.insert(position, m_table_name);
+    position += m_table_name.size();
+
+    m_insert.insert(position, values);
+    position += values.size();
+
+    std::ostringstream options;
 #ifdef BOOST_LITTLE_ENDIAN
     options << boost::format("%02x") % 1;
     SWAP_ENDIANNESS(pcid);
@@ -524,12 +551,18 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     options << boost::format("%08x") % pcid;
     options << boost::format("%08x") % compression;
     options << boost::format("%08x") % num_points;
+    
+    m_insert.insert(position, options.str());
+    position += options.str().size();
+    
+    m_insert.insert(position, m_hex);
+    position += m_hex.size();
+    
+    std::string tail("')");
+    m_insert.insert(position, tail);
 
-    oss << options.str() << Utils::binary_to_hex_string(block_data);
-    oss << "')";
 
-    pg_execute(m_session, oss.str());
-
+    pg_execute(m_session, m_insert);
     return true;
 }
 

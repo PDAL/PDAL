@@ -71,15 +71,15 @@ endmacro(GET_OS_INFO)
 
 ###############################################################################
 # Set the destination directories for installing stuff.
-# Sets LIB_INSTALL_DIR. Install libraries here.
-# Sets BIN_INSTALL_DIR. Install binaries here.
-# Sets INCLUDE_INSTALL_DIR. Install include files here, preferably in a
+# Sets PDAL_LIB_DIR. Install libraries here.
+# Sets PDAL_BIN_DIR. Install binaries here.
+# Sets PDAL_INCLUDE_DIR. Install include files here, preferably in a
 # subdirectory named after the library in question (e.g.
 # "registration/blorgle.h")
 macro(SET_INSTALL_DIRS)
-  if (NOT DEFINED LIB_INSTALL_DIR)
+  if (NOT DEFINED PDAL_LIB_DIR)
     set(PDAL_LIB_DIR "lib")
-  endif (NOT DEFINED LIB_INSTALL_DIR)
+  endif (NOT DEFINED PDAL_LIB_DIR)
     set(PDAL_INCLUDE_ROOT
         "include/")
     set(PDAL_INCLUDE_DIR "${PDAL_INCLUDE_ROOT}/${PROJECT_NAME_LOWER}/")

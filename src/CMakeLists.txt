@@ -699,6 +699,14 @@ target_link_libraries(${PDAL_LIB_NAME}  ${PDAL_LINKAGE} ${NITRO_LIBRARIES} )
 endif()
 endif()
 
+if (WITH_LASZIP)
+target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE} "${LASZIP_LIBRARY}")
+endif()
+
+if (WITH_PYTHON)
+target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE} "${PYTHON_LIBRARY}")
+endif()
+
   target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE}
     "${PDAL_LIB_NAME}"
     "${CMAKE_THREAD_LIBS_INIT}"
@@ -707,9 +715,7 @@ endif()
     "${MRSID_LIBRARY}"
     "${GEOTIFF_LIBRARY}"
     "${GDAL_LIBRARY}"
-    "${LASZIP_LIBRARY}"
     ${LIBXML2_LIBRARIES}
-    "${PYTHON_LIBRARY}"
     "${P2G_LIBRARY}"
     "${GEOS_LIBRARY}"
     "${HEXER_LIBRARY}"

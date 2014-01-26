@@ -40,6 +40,7 @@
  ****************************************************************************/
 
 #include <pdal/Schema.hpp>
+#include <pdal/PointBuffer.hpp>
 
 #include <iostream>
 #include <map>
@@ -597,6 +598,40 @@ Schema Schema::pack() const
     }
     output.setOrientation(getOrientation());
     return output;
+}
+
+std:: size_t pdal::schema::DimensionMap::update()
+{
+    typedef std::map<Dimension const*, Dimension const*>::const_iterator Iterator;
+    
+    assert(m.size() <= MAX_OFFSETS_LENGTH);
+    
+    std::size_t entIndex = 0;
+    for (Iterator d = m.begin(); d != m.end(); ++d, ++entIndex)
+    {
+        Dimension const& source_dim = *d->first;
+        Dimension const& dest_dim = *d->second;
+
+        pointbuffer::PointBufferByteSize source_byteoffset = static_cast<pointbuffer::PointBufferByteSize>(source_dim.getByteOffset());
+        pointbuffer::PointBufferByteSize destination_byteoffset = static_cast<pointbuffer::PointBufferByteSize>(dest_dim.getByteOffset());
+
+        if (source_dim.getByteSize() != dest_dim.getByteSize())
+        {
+            std::ostringstream oss;
+            oss << "Dimension '" << dest_dim.getName() << "' are not the same byte size and cannot be copied";
+            throw buffer_error(oss.str());
+        }
+
+        uint64_t encoded =
+            ((source_byteoffset & 0xFFFF) << 32)  |
+            ((destination_byteoffset & 0xFFFF) << 16) |
+            (source_dim.getByteSize() & 0xFFFF);
+
+        offsets[entIndex] = encoded;
+    }
+
+    return entIndex;
+    
 }
 
 std::ostream& operator<<(std::ostream& os, pdal::Schema const& schema)

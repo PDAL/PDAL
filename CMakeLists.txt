@@ -43,8 +43,8 @@ set(PDAL_LIB_NAME pdalcpp)
 
 set(CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE ON)
 
-set(PDAL_OUTPUT_LIB_DIR "${PDAL_BINARY_DIR}/${LIB_INSTALL_DIR}")
-set(PDAL_OUTPUT_BIN_DIR "${PDAL_BINARY_DIR}/${BIN_INSTALL_DIR}")
+set(PDAL_OUTPUT_LIB_DIR "${PDAL_BINARY_DIR}/${PDAL_LIB_DIR}")
+set(PDAL_OUTPUT_BIN_DIR "${PDAL_BINARY_DIR}/${PDAL_BIN_DIR}")
 file(MAKE_DIRECTORY "${PDAL_OUTPUT_LIB_DIR}")
 file(MAKE_DIRECTORY "${PDAL_OUTPUT_BIN_DIR}")
 if(WIN32)
@@ -127,7 +127,7 @@ endif()
 set(PDAL_BUILD_TYPE ${CMAKE_BUILD_TYPE})
 
 # TODO: Still testing the output paths --mloskot
-set(PDAL_BUILD_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin")
+set(PDAL_BUILD_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/${PDAL_BIN_DIR}")
 
 # Output directory in which to build RUNTIME target files.
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PDAL_BUILD_OUTPUT_DIRECTORY}")
@@ -137,6 +137,8 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PDAL_BUILD_OUTPUT_DIRECTORY}")
 
 # Output directory in which to build ARCHIVE target files.
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PDAL_BUILD_OUTPUT_DIRECTORY}") 
+
+link_directories(${PDAL_BINARY_DIR}/${PDAL_LIB_DIR})
 
 
 #------------------------------------------------------------------------------
@@ -183,8 +185,8 @@ if(WIN32)
 
   endif(MSVC)
   
-  set(CMAKE_INCLUDE_PATH "c:/osgeo4w/include;$ENV{CMAKE_INCLUDE_PATH}")
-  set(CMAKE_LIBRARY_PATH "c:/osgeo4w/lib;$ENV{CMAKE_LIBRARY_PATH}")
+  set(CMAKE_INCLUDE_PATH "c:/osgeo4w/include;c:/OSGeo4W64/include;$ENV{CMAKE_INCLUDE_PATH}")
+  set(CMAKE_LIBRARY_PATH "c:/osgeo4w/lib;c:/OSGeo4W64/lib;$ENV{CMAKE_LIBRARY_PATH}")
 
   set(PDAL_PLATFORM_WIN32 1)
 
