@@ -39,8 +39,5 @@
 #include <pdal/PointBuffer.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/StageIterator.hpp>
-#include <pdal/Filters.hpp>
-#include <pdal/Drivers.hpp>
-#include <pdal/Kernel.hpp>
 
 #endif

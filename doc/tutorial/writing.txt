@@ -34,16 +34,29 @@ issue a compilation command something like the following:
 Includes
 -------------------------------------------------------------------------------
 
-As of PDAL 1.0.0, there isn't a single header file for PDAL.
+As of PDAL 1.0.0, there's a couple of include files available for use.  The 
+main one, `<pdal/pdal.hpp>`, brings in most of the utility and basic classes 
+used throughout the PDAL system. Additionally, the following includes are 
+available subject to having the required include directories pathed:
 
+* `#include <pdal/Drivers.hpp>`
+* `#include <pdal/Filters.hpp>`
+* `#include <pdal/Kernel.hpp>`
+
+
+.. note::
+
+    Drivers, Filters, and Kernel bring in *all* of the respective sub includes 
+    for those sections of the source tree. You are not required to include 
+    everything if you don't need it, however, and it is still possible to 
+    selectively include the classes you need as shown in the example below.
 
 
 
 .. code-block:: cpp
 
 
-    #include <pdal/Options.hpp>
-    #include <pdal/PointBuffer.hpp>
+    #include <pdal/pdal.hpp>
     #include <pdal/drivers/buffer/Reader.hpp>
     #include <pdal/filters/Scaling.hpp>
     #include <pdal/drivers/las/Writer.hpp>
