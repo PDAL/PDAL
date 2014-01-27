@@ -25,6 +25,8 @@ set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/modules" ${CMAKE_MODULE_PATH}
 # PDAL general settings
 #------------------------------------------------------------------------------
 
+include("${PDAL_SOURCE_DIR}/cmake/pdal_options.cmake")
+include("${PDAL_SOURCE_DIR}/cmake/pdal_targets.cmake")
 include("${PDAL_SOURCE_DIR}/cmake/pdal_utils.cmake")
 
 # the next line is the ONLY place in the entire pdal system where
@@ -43,8 +45,8 @@ set(PDAL_LIB_NAME pdalcpp)
 
 set(CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE ON)
 
-set(PDAL_OUTPUT_LIB_DIR "${PDAL_BINARY_DIR}/${LIB_INSTALL_DIR}")
-set(PDAL_OUTPUT_BIN_DIR "${PDAL_BINARY_DIR}/${BIN_INSTALL_DIR}")
+set(PDAL_OUTPUT_LIB_DIR "${PDAL_BINARY_DIR}/${PDAL_LIB_DIR}")
+set(PDAL_OUTPUT_BIN_DIR "${PDAL_BINARY_DIR}/${PDAL_BIN_DIR}")
 file(MAKE_DIRECTORY "${PDAL_OUTPUT_LIB_DIR}")
 file(MAKE_DIRECTORY "${PDAL_OUTPUT_BIN_DIR}")
 if(WIN32)
@@ -93,8 +95,6 @@ set(ENABLE_CTEST FALSE CACHE BOOL
 # General build settings
 #------------------------------------------------------------------------------
 
-option(PDAL_BUILD_STATIC "Build PDAL as a static library" OFF)
-
 if(WIN32)
   if(MSVC)
     option(PDAL_USE_STATIC_RUNTIME "Use the static runtime" OFF)
@@ -125,18 +125,6 @@ if(NOT MSVC_IDE)
 endif()
 
 set(PDAL_BUILD_TYPE ${CMAKE_BUILD_TYPE})
-
-# TODO: Still testing the output paths --mloskot
-set(PDAL_BUILD_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin")
-
-# Output directory in which to build RUNTIME target files.
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PDAL_BUILD_OUTPUT_DIRECTORY}")
-
-# Output directory in which to build LIBRARY target files
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PDAL_BUILD_OUTPUT_DIRECTORY}")
-
-# Output directory in which to build ARCHIVE target files.
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PDAL_BUILD_OUTPUT_DIRECTORY}") 
 
 
 #------------------------------------------------------------------------------
@@ -183,8 +171,8 @@ if(WIN32)
 
   endif(MSVC)
   
-  set(CMAKE_INCLUDE_PATH "c:/osgeo4w/include;$ENV{CMAKE_INCLUDE_PATH}")
-  set(CMAKE_LIBRARY_PATH "c:/osgeo4w/lib;$ENV{CMAKE_LIBRARY_PATH}")
+  set(CMAKE_INCLUDE_PATH "c:/osgeo4w/include;c:/OSGeo4W64/include;$ENV{CMAKE_INCLUDE_PATH}")
+  set(CMAKE_LIBRARY_PATH "c:/osgeo4w/lib;c:/OSGeo4W64/lib;$ENV{CMAKE_LIBRARY_PATH}")
 
   set(PDAL_PLATFORM_WIN32 1)
 
@@ -267,8 +255,7 @@ else()
   mark_as_advanced(FORCE PDALBOOST_LIB_NAME)
 
   if (WIN32)
-    set(Boost_LIBRARIES "${PDALBOOST_LIB_NAME}.lib")
-    link_directories("${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
+    set(Boost_LIBRARIES ${PDALBOOST_LIB_NAME})
   else()
     # Some Cmake versions are borken here. See
     # http://www.cmake.org/Bug/view.php?id=12258#c26851

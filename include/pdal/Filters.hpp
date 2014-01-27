@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2013, Howard Butler (hobu.inc@gmail.com)
+* Copyright (c) 2014, Howard Butler, hobu.inc@gmail.com
 *
 * All rights reserved.
 *
@@ -32,69 +32,24 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_PDAL_KERNEL_QUERY_HPP
-#define INCLUDED_PDAL_KERNEL_QUERY_HPP
+#ifndef INCLUDED_PDAL_FILTERS_HPP
+#define INCLUDED_PDAL_FILTERS_HPP
 
-#include <pdal/Stage.hpp>
-#include <pdal/StageIterator.hpp>
-#include <pdal/FileUtils.hpp>
-#include <pdal/PointBuffer.hpp>
-
-#include <boost/property_tree/xml_parser.hpp>
-#include <boost/property_tree/json_parser.hpp>
-
-#include "Application.hpp"
-
-namespace pdal { namespace kernel {
-    
-class PDAL_DLL Point
-{
-public:
-    double x;
-    double y;
-    double z;
-    boost::uint64_t id;
-    
-    bool equal(Point const& other)
-    {
-        return (Utils::compare_distance(x, other.x) && 
-                Utils::compare_distance(y, other.y) && 
-                Utils::compare_distance(z, other.z));
-        
-    }
-    bool operator==(Point const& other)
-    {
-        return equal(other);
-    }
-    bool operator!=(Point const& other)
-    {
-        return !equal(other);
-    }    
-};
-
-class PDAL_DLL Query : public Application
-{
-public:
-    Query(int argc, const char* argv[]);
-    int execute(); // overrride
-    
-    
-private:
-    void addSwitches(); // overrride
-    void validateSwitches(); // overrride
-    
-    void readPoints(    StageSequentialIterator* iter,
-                        PointBuffer& data);    
-    std::string m_sourceFile;
-    std::string m_candidateFile;
-    std::string m_wkt;
-
-    std::ostream* m_outputStream;
-    std::string m_outputFileName;
-	
-    bool m_3d;
-};
-
-}} // pdal::kernel
+#include <pdal/filters/ByteSwap.hpp>
+#include <pdal/filters/Cache.hpp>
+#include <pdal/filters/Chipper.hpp>
+#include <pdal/filters/Color.hpp>
+#include <pdal/filters/Colorization.hpp>
+#include <pdal/filters/Crop.hpp>
+#include <pdal/filters/Decimation.hpp>
+#include <pdal/filters/HexBin.hpp>
+#include <pdal/filters/InPlaceReprojection.hpp>
+#include <pdal/filters/Mosaic.hpp>
+#include <pdal/filters/Predicate.hpp>
+#include <pdal/filters/Programmable.hpp>
+#include <pdal/filters/Reprojection.hpp>
+#include <pdal/filters/Scaling.hpp>
+#include <pdal/filters/Selector.hpp>
+#include <pdal/filters/Stats.hpp>
 
 #endif

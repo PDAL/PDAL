@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2013, Howard Butler (hobu.inc@gmail.com)
+* Copyright (c) 2014, Howard Butler, hobu.inc@gmail.com
 *
 * All rights reserved.
 *
@@ -32,69 +32,78 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_PDAL_KERNEL_QUERY_HPP
-#define INCLUDED_PDAL_KERNEL_QUERY_HPP
+#ifndef INCLUDED_PDAL_DRIVERS_HPP
+#define INCLUDED_PDAL_DRIVERS_HPP
 
-#include <pdal/Stage.hpp>
-#include <pdal/StageIterator.hpp>
-#include <pdal/FileUtils.hpp>
-#include <pdal/PointBuffer.hpp>
+#include <pdal/pdal_config.hpp>
 
-#include <boost/property_tree/xml_parser.hpp>
-#include <boost/property_tree/json_parser.hpp>
+#include <pdal/drivers/faux/Reader.hpp>
+#include <pdal/drivers/faux/Writer.hpp>
 
-#include "Application.hpp"
+#include <pdal/drivers/las/Reader.hpp>
+#include <pdal/drivers/las/Writer.hpp>
 
-namespace pdal { namespace kernel {
-    
-class PDAL_DLL Point
-{
-public:
-    double x;
-    double y;
-    double z;
-    boost::uint64_t id;
-    
-    bool equal(Point const& other)
-    {
-        return (Utils::compare_distance(x, other.x) && 
-                Utils::compare_distance(y, other.y) && 
-                Utils::compare_distance(z, other.z));
-        
-    }
-    bool operator==(Point const& other)
-    {
-        return equal(other);
-    }
-    bool operator!=(Point const& other)
-    {
-        return !equal(other);
-    }    
-};
 
-class PDAL_DLL Query : public Application
-{
-public:
-    Query(int argc, const char* argv[]);
-    int execute(); // overrride
-    
-    
-private:
-    void addSwitches(); // overrride
-    void validateSwitches(); // overrride
-    
-    void readPoints(    StageSequentialIterator* iter,
-                        PointBuffer& data);    
-    std::string m_sourceFile;
-    std::string m_candidateFile;
-    std::string m_wkt;
+#ifdef PDAL_HAVE_ORACLE
+#ifndef USE_PDAL_PLUGIN_OCI
+#include <pdal/drivers/oci/Reader.hpp>
+#endif
+#endif
 
-    std::ostream* m_outputStream;
-    std::string m_outputFileName;
-	
-    bool m_3d;
-};
 
-}} // pdal::kernel
+#include <pdal/drivers/buffer/Reader.hpp>
+
+#ifdef PDAL_HAVE_CARIS
+#ifndef USE_PDAL_PLUGIN_CARIS
+#include <pdal/drivers/caris/Reader.hpp>
+#endif
+#endif
+
+#ifdef PDAL_HAVE_MRSID
+#ifndef USE_PDAL_PLUGIN_MRSID
+#include <pdal/drivers/mrsid/Reader.hpp>
+#endif
+#endif
+
+
+#include <pdal/drivers/pipeline/Reader.hpp>
+#include <pdal/drivers/qfit/Reader.hpp>
+#include <pdal/drivers/terrasolid/Reader.hpp>
+
+#include <pdal/drivers/text/Writer.hpp>
+
+#ifdef PDAL_HAVE_ORACLE
+#ifndef USE_PDAL_PLUGIN_OCI
+#include <pdal/drivers/oci/Writer.hpp>
+#endif
+#endif
+
+#ifdef PDAL_HAVE_NITRO
+#ifndef USE_PDAL_PLUGIN_NITF
+#include <pdal/drivers/nitf/Writer.hpp>
+#endif
+#endif
+
+#ifdef PDAL_HAVE_GDAL
+#include <pdal/drivers/nitf/Reader.hpp>
+#endif
+
+#ifdef PDAL_HAVE_P2G
+#include <pdal/drivers/p2g/Writer.hpp>
+#endif
+
+#ifdef PDAL_HAVE_SQLITE
+#ifndef USE_PDAL_PLUGIN_SQLITE
+#include <pdal/drivers/sqlite/Reader.hpp>
+#include <pdal/drivers/sqlite/Writer.hpp>
+#endif
+#endif
+
+#ifdef PDAL_HAVE_POSTGRESQL
+#ifndef USE_PDAL_PLUGIN_PGPOINTCLOUD
+#include <pdal/drivers/pgpointcloud/Reader.hpp>
+#include <pdal/drivers/pgpointcloud/Writer.hpp>
+#endif
+#endif
 
 #endif

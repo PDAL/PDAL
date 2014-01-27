@@ -99,7 +99,21 @@ typedef Map::index<uid>::type index_by_uid;
 
 typedef boost::uint32_t size_type;
 
-typedef std::map<Dimension const*, Dimension const*> DimensionMap;
+class PDAL_DLL DimensionMap
+{
+public:
+    inline void insert(std::pair<Dimension const*, Dimension const*> p) { m.insert(p); update();}
+    
+    std::map<Dimension const*, Dimension const*> m;
+    
+    static const int MAX_OFFSETS_LENGTH = 256;
+    boost::uint64_t offsets[MAX_OFFSETS_LENGTH];
+
+private:
+    std::size_t update();
+    
+};
+
 
 enum Orientation
 {
@@ -294,7 +308,10 @@ private:
 };
 
 
+
 PDAL_DLL std::ostream& operator<<(std::ostream& os, pdal::Schema const& d);
+
+
 
 } // namespace liblas
 

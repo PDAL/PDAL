@@ -36,10 +36,6 @@
 #define INCLUDED_DRIVER_SOCI_COMMON_HPP
 
 #ifdef PDAL_HAVE_SOCI
-#include <boost-optional.h>
-#include <boost-tuple.h>
-#include <boost-fusion.h>
-#include <boost-gregorian-date.h>
 #include <soci/soci.h>
 #include <soci/sqlite3/soci-sqlite3.h>
 #include <soci/error.h>

@@ -47,7 +47,7 @@ Example
     </Writer>
   </Pipeline>
 
-The XML pipeline file referenced the external `multiply_z.pl` `Python`_ script, which scales up the Z coordinate by a factor of 10 (you could also do this with :ref:`filters.scaling`).
+The XML pipeline file referenced the external `multiply_z.py` `Python`_ script, which scales up the Z coordinate by a factor of 10 (you could also do this with :ref:`filters.scaling`).
 
 .. code-block:: python
 

@@ -38,6 +38,7 @@
 
 #include <boost/cstdint.hpp>
 #include <boost/scoped_array.hpp>
+#include <boost/shared_array.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/interprocess/managed_shared_memory.hpp>
@@ -55,8 +56,9 @@ namespace pdal
     namespace pointbuffer
     {
         typedef boost::uuids::uuid id;
-        typedef std::vector<boost::uint8_t>::size_type PointBufferByteSize;
-
+        // typedef std::vector<boost::uint8_t>::size_type PointBufferByteSize;
+        typedef boost::int64_t PointBufferByteSize;
+        
         // typedef boost::interprocess::allocator<boost::uint8_t, boost::interprocess::managed_shared_memory::segment_manager>     ShmemAllocator; 
         // typedef boost::container::vector<boost::uint8_t, ShmemAllocator> PointBufferVector;
 
@@ -161,7 +163,7 @@ public:
     /// @return the size of the currently allocated raw byte array
     inline pointbuffer::PointBufferByteSize getBufferByteLength() const
     {
-        return m_data.size();
+        return m_data_size;
     }
 
     /// @return the size of the theoretically filled raw byte array.
@@ -286,11 +288,11 @@ public:
             offset = m_schema.getDimension(pointIndex).getByteOffset();
             position = static_cast<pointbuffer::PointBufferByteSize>(m_capacity) * offset;
         }
-        return const_cast<boost::uint8_t*>(&(m_data.front())) + position;
+        return const_cast<boost::uint8_t*>(m_data.get()) + position;
 
     }
     
-    inline boost::uint8_t* getDataStart() { return &(m_data.front()); }
+    inline boost::uint8_t* getDataStart() { return m_data.get(); }
 
     /// copies the raw data into your own byte array and sets the size
     /// @param data pointer to your byte array
@@ -400,12 +402,19 @@ public:
 
     double applyScaling(Dimension const& d,
                         std::size_t pointIndex) const;
-                            
+
+    /// @return a new PointBuffer with all ignored dimensions removed
+    static void pack(PointBuffer const* input, 
+                     PointBuffer* output, 
+                     bool bRemoveIgnoredDimensions = true,
+                     bool bResetOutputSchema = false);
+    
     /** @name private attributes
     */
 protected:
     Schema m_schema;
-    std::vector<boost::uint8_t> m_data;
+    pointbuffer::PointBufferByteSize m_data_size;
+    boost::shared_array<boost::uint8_t> m_data;
     boost::uint32_t m_numPoints;
     boost::uint32_t m_capacity;
     Bounds<double> m_bounds;
@@ -461,7 +470,7 @@ inline void PointBuffer::setField(pdal::Dimension const& dim, boost::uint32_t po
 
     assert(offset + sizeof(T) <= getBufferByteLength());
 
-    boost::uint8_t* p = (boost::uint8_t*)&(m_data.front()) + offset;
+    boost::uint8_t* p = (boost::uint8_t*)m_data.get() + offset;
 
     if (sizeof(T) == dim.getByteSize())
     {
@@ -517,7 +526,7 @@ inline  T const& PointBuffer::getField(pdal::Dimension const& dim, boost::uint32
 
     assert(offset + sizeof(T) <= getBufferByteLength());
 
-    boost::uint8_t const* p = (boost::uint8_t const*)&(m_data.front()) + offset;
+    boost::uint8_t const* p = (boost::uint8_t const*)m_data.get() + offset;
     
     if (sizeof(T) <= dim.getByteSize())
     {
@@ -987,7 +996,7 @@ inline void PointBuffer::scale(Dimension const& source_dimension,
 }
 
 
-class IndexedPointBuffer : public PointBuffer
+class PDAL_DLL IndexedPointBuffer : public PointBuffer
 {
 public:
     IndexedPointBuffer(const Schema& schema, boost::uint32_t capacity=65536);

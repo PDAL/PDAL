@@ -27,12 +27,15 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/pdal_types.hpp"
   "${PDAL_HEADERS_DIR}/Bounds.hpp"
   "${PDAL_HEADERS_DIR}/Dimension.hpp"
+  "${PDAL_HEADERS_DIR}/Drivers.hpp"
   "${PDAL_HEADERS_DIR}/FileUtils.hpp"
   "${PDAL_HEADERS_DIR}/Filter.hpp"
+  "${PDAL_HEADERS_DIR}/Filters.hpp"
   "${PDAL_HEADERS_DIR}/FilterIterator.hpp"
   "${PDAL_HEADERS_DIR}/GDALUtils.hpp"
   "${PDAL_HEADERS_DIR}/GlobalEnvironment.hpp"
   "${PDAL_HEADERS_DIR}/gitsha.h"
+  "${PDAL_HEADERS_DIR}/Kernel.hpp"
   "${PDAL_HEADERS_DIR}/Log.hpp"
   "${PDAL_HEADERS_DIR}/Metadata.hpp"
   "${PDAL_HEADERS_DIR}/MultiFilter.hpp"
@@ -649,26 +652,12 @@ set(PDAL_SOURCES
 
 if(WIN32)
     add_definitions("-DPDAL_DLL_EXPORT=1")
-if (NOT WITH_STATIC_LASZIP)
-    add_definitions("-DLASZIP_DLL_IMPORT=1")
-endif()
-endif()
-
-if (PDAL_BUILD_STATIC)
-  set(PDAL_LIB_TYPE STATIC)
-else()
-  set(PDAL_LIB_TYPE SHARED)
+    if (NOT WITH_STATIC_LASZIP)
+        add_definitions("-DLASZIP_DLL_IMPORT=1")
+    endif()
 endif()
 
-
-add_library(${PDAL_LIB_NAME} ${PDAL_LIB_TYPE} ${PDAL_SOURCES})
-if (CMAKE_VERSION VERSION_GREATER 2.8.10)
-    set(PDAL_LINKAGE "PUBLIC;general")
-    set(BOOST_LINKAGE "LINK_PRIVATE;general")
-else()
-    set(PDAL_LINKAGE "")
-    set(BOOST_LINKAGE "")
-endif()
+PDAL_ADD_LIBRARY(${PDAL_LIB_NAME} ${PDAL_SOURCES})
 
 set (SQLITE_LIBRARIES ${SOCI_LIBRARY} ${SOCI_sqlite3_PLUGIN} ${SQLITE3_LIBRARY})
 
@@ -696,6 +685,14 @@ target_link_libraries(${PDAL_LIB_NAME}  ${PDAL_LINKAGE} ${NITRO_LIBRARIES} )
 endif()
 endif()
 
+if (WITH_LASZIP)
+    target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE} "${LASZIP_LIBRARY}")
+endif()
+
+if (WITH_PYTHON)
+    target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE} "${PYTHON_LIBRARY}")
+endif()
+
   target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE}
     "${PDAL_LIB_NAME}"
     "${CMAKE_THREAD_LIBS_INIT}"
@@ -704,9 +701,7 @@ endif()
     "${MRSID_LIBRARY}"
     "${GEOTIFF_LIBRARY}"
     "${GDAL_LIBRARY}"
-    "${LASZIP_LIBRARY}"
     ${LIBXML2_LIBRARIES}
-    "${PYTHON_LIBRARY}"
     "${P2G_LIBRARY}"
     "${GEOS_LIBRARY}"
     "${HEXER_LIBRARY}"
@@ -799,11 +794,6 @@ endif()
 endif()
 ###############################################################################
 # Targets installation
-
-install(TARGETS ${PDAL_LIB_NAME} ${PDAL_C_LIB_NAME}
-  RUNTIME DESTINATION ${PDAL_BIN_DIR}
-  LIBRARY DESTINATION ${PDAL_LIB_DIR}
-  ARCHIVE DESTINATION ${PDAL_LIB_DIR})
 
 install(DIRECTORY "${PDAL_HEADERS_DIR}/"
   DESTINATION "${PDAL_INCLUDE_DIR}"
