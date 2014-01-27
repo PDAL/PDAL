@@ -148,7 +148,7 @@ private:
     boost::uint64_t m_buffer_position;
 
     bool m_cursor;
-    std::string m_patch_hex;
+    char* m_patch_hex;
     boost::uint32_t m_patch_npoints;
     PGconn* m_session;
     pdal::schema::DimensionMap* m_dimension_map;

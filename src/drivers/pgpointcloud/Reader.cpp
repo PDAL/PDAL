@@ -365,7 +365,7 @@ Iterator::Iterator(const pdal::drivers::pgpointcloud::Reader& reader, PointBuffe
     , m_buffer(NULL)
     , m_buffer_position(0)
     , m_cursor(false)
-    , m_patch_hex("")
+    , m_patch_hex(0)
     , m_patch_npoints(0)
     , m_session(NULL)
     , m_dimension_map(NULL)
@@ -467,29 +467,32 @@ bool Iterator::NextBuffer()
         m_cur_nrows = PQntuples(m_cur_result);
     }
 
-    m_patch_hex = std::string(PQgetvalue(m_cur_result, m_cur_row, 0));
+    m_patch_hex = PQgetvalue(m_cur_result, m_cur_row, 0);
     m_patch_npoints = atoi(PQgetvalue(m_cur_result, m_cur_row, 1));
 
     m_cur_row++;
     return true;
 }
 
-static inline void hex_string_to_binary(std::string const& source, std::vector<boost::uint8_t>& output, std::string::size_type offset)
+static inline void hex_string_to_binary(char const* source, 
+                                        std::vector<boost::uint8_t>& output, 
+                                        std::string::size_type offset)
 {
     // Stolen from http://stackoverflow.com/questions/7363774/c-converting-binary-data-to-a-hex-string-and-back
     static int nibbles[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0, 0, 10, 11, 12, 13, 14, 15 };
     std::vector<unsigned char> retval;
     
-    for (std::string::const_iterator it = source.begin()+offset; it < source.end(); it += 2) {
+    std::size_t len = std::strlen(source);
+    for (std::size_t i = offset; i < len; i+=2) {
+    // for (std::string::const_iterator it = source.begin()+offset; it < source.end(); it += 2) {
         unsigned char v = 0;
-        if (::isxdigit(*it))
-            v = (unsigned char)nibbles[*it - '0'] << 4;
-        if (it + 1 < source.end() && ::isxdigit(*(it + 1)))
-            v += (unsigned char)nibbles[*(it + 1) - '0'];
+        if (::isxdigit(source[i]))
+            v = (unsigned char)nibbles[source[i] - '0'] << 4;
+        if (i + 1 < len && ::isxdigit(source[i+1]))
+            v += (unsigned char)nibbles[source[i+1] - '0'];
         output.push_back(v);
     }
 }
-
 
 boost::uint32_t Iterator::readBufferImpl(PointBuffer& user_buffer)
 {
@@ -555,10 +558,11 @@ boost::uint32_t Iterator::readBufferImpl(PointBuffer& user_buffer)
             // before we can copy the raw data into the pdal::PointBuffer
             // endian (2) + pcid (8) + compression (8) + npoints (8) = 26 characters
             const boost::uint32_t trim = 26;
-            // std::string hex_trimmed = m_patch_hex.substr(trim, m_patch_hex.size()-trim);
             schema::size_type point_size = m_buffer->getSchema().getByteSize();
-
-            binary_data.resize(m_patch_npoints * point_size);
+            
+            // resize our vector to 0, but we've reserved max_points * getByteSize 
+            // for the vector so the next push_back won't have allocation costs.
+            binary_data.resize(0);
             hex_string_to_binary(m_patch_hex, binary_data, trim);
             unsigned char* data = (unsigned char*) &(binary_data.front());
 

@@ -41,58 +41,45 @@
 
 
 ###############################################################################
-# Pull the component parts out of the version number.
-macro(DISSECT_VERSION)
-    # Find version components
-    string(REGEX REPLACE "^([0-9]+).*" "\\1"
-        PDAL_VERSION_MAJOR "${PDAL_VERSION_STRING}")
-    string(REGEX REPLACE "^[0-9]+\\.([0-9]+).*" "\\1"
-        PDAL_VERSION_MINOR "${PDAL_VERSION_STRING}")
-    string(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.([0-9]+)" "\\1"
-        PDAL_VERSION_PATCH "${PDAL_VERSION_STRING}")
-    string(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.[0-9]+(.*)" "\\1"
-        PDAL_CANDIDATE_VERSION "${PDAL_VERSION_STRING}")
-endmacro(DISSECT_VERSION)
+# Add a set of include files to install.
+# _component The part of PDAL that the install files belong to.
+# _subdir The sub-directory for these include files.
+# ARGN The include files.
+macro(PDAL_ADD_INCLUDES _subdir)
+    install(FILES ${ARGN} DESTINATION ${PDAL_INCLUDE_DIR}/${_subdir})
+endmacro(PDAL_ADD_INCLUDES)
 
 
 ###############################################################################
-# Get the operating system information. Generally, CMake does a good job of
-# this. Sometimes, though, it doesn't give enough information. This macro will
-# distinguish between the UNIX variants. Otherwise, use the CMake variables
-# such as WIN32 and APPLE and CYGWIN.
-# Sets OS_IS_64BIT if the operating system is 64-bit.
-# Sets LINUX if the operating system is Linux.
-macro(GET_OS_INFO)
-    string(REGEX MATCH "Linux" OS_IS_LINUX ${CMAKE_SYSTEM_NAME})
-    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-        set(OS_IS_64BIT TRUE)
-    else(CMAKE_SIZEOF_VOID_P EQUAL 8)
-        set(OS_IS_64BIT FALSE)
-    endif(CMAKE_SIZEOF_VOID_P EQUAL 8)
-endmacro(GET_OS_INFO)
+# Add a library target.
+# _name The library name.
+# _component The part of PDAL that this library belongs to.
+# ARGN The source files for the library.
+macro(PDAL_ADD_LIBRARY _name)
+    add_library(${_name} ${PDAL_LIB_TYPE} ${ARGN})
+    
+    # must link explicitly against boost.
+    target_link_libraries(${_name} ${BOOST_LINKAGE} ${Boost_LIBRARIES})
+
+    install(TARGETS ${_name}
+        RUNTIME DESTINATION ${PDAL_BIN_DIR}
+        LIBRARY DESTINATION ${PDAL_LIB_DIR}
+        ARCHIVE DESTINATION ${PDAL_LIB_DIR})
+endmacro(PDAL_ADD_LIBRARY)
 
 
 ###############################################################################
-# Set the destination directories for installing stuff.
-# Sets PDAL_LIB_DIR. Install libraries here.
-# Sets PDAL_BIN_DIR. Install binaries here.
-# Sets PDAL_INCLUDE_DIR. Install include files here, preferably in a
-# subdirectory named after the library in question (e.g.
-# "registration/blorgle.h")
-macro(SET_INSTALL_DIRS)
-  if (NOT DEFINED PDAL_LIB_DIR)
-    set(PDAL_LIB_DIR "lib")
-  endif (NOT DEFINED PDAL_LIB_DIR)
-    set(PDAL_INCLUDE_ROOT
-        "include/")
-    set(PDAL_INCLUDE_DIR "${PDAL_INCLUDE_ROOT}/${PROJECT_NAME_LOWER}/")
-    set(PDAL_DOC_DIR "share/doc/${PROJECT_NAME_LOWER}-${PDAL_VERSION_MAJOR}.${PDAL_VERSION_MINOR}")
-    set(PDAL_BIN_DIR "bin")
-    set(PDAL_PKGCFG_DIR "${PDAL_LIB_DIR}/pkgconfig")
-    if(WIN32)
-        set(PDALCONFIG_INSTALL_DIR "cmake")
-    else(WIN32)
-        set(PDALCONFIG_INSTALL_DIR "share/${PROJECT_NAME_LOWER}-${PDAL_VERSION_MAJOR}.${PDAL_VERSION_MINOR}")
-    endif(WIN32)
-endmacro(SET_INSTALL_DIRS)
+# Add an executable target.
+# _name The executable name.
+# _component The part of PDAL that this library belongs to.
+# ARGN the source files for the library.
+macro(PDAL_ADD_EXECUTABLE _name)
+    add_executable(${_name} ${ARGN})
+
+    # must link explicitly against boost.
+    target_link_libraries(${_name} ${BOOST_LINKAGE} ${Boost_LIBRARIES})
+    
+    set(PDAL_EXECUTABLES ${PDAL_EXECUTABLES} ${_name})
+    install(TARGETS ${_name} RUNTIME DESTINATION ${PDAL_BIN_DIR})
+endmacro(PDAL_ADD_EXECUTABLE)
 
