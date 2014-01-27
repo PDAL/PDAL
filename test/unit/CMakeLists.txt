@@ -168,7 +168,7 @@ INCLUDE_DIRECTORIES(
     ${GEOTIFF_INCLUDE_DIR}
     ${ORACLE_INCLUDE_DIR})
 
-ADD_EXECUTABLE(${PDAL_UNIT_TEST} ${PDAL_UNITTEST_SOURCES})
+PDAL_ADD_EXECUTABLE(${PDAL_UNIT_TEST} ${PDAL_UNITTEST_SOURCES})
 
 set_target_properties(${PDAL_UNIT_TEST} PROPERTIES COMPILE_DEFINITIONS PDAL_DLL_IMPORT)
 
@@ -188,14 +188,6 @@ else()
         message(STATUS "No non-embed static boost library found, setting BOOST_TEST_DYN_LINK")
         add_definitions("-DBOOST_TEST_DYN_LINK")
     endif()
-endif()
-
-if (CMAKE_VERSION VERSION_GREATER 2.8.10)
-    set(PDAL_LINKAGE "PUBLIC;general")
-    set(BOOST_LINKAGE "PRIVATE;general")
-else()
-    set(PDAL_LINKAGE "")
-    set(BOOST_LINKAGE "")
 endif()
 
 TARGET_LINK_LIBRARIES(  ${PDAL_UNIT_TEST} ${PDAL_LINKAGE}
