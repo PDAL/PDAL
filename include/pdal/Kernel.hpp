@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2012, Howard Butler, hobu.inc@gmail.com
+* Copyright (c) 2014, Howard Butler, hobu.inc@gmail.com
 *
 * All rights reserved.
 *
@@ -32,66 +32,15 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_DRIVER_SOCI_COMMON_HPP
-#define INCLUDED_DRIVER_SOCI_COMMON_HPP
+#ifndef INCLUDED_PDAL_KERNEL_HPP
+#define INCLUDED_PDAL_KERNEL_HPP
 
-#ifdef PDAL_HAVE_SOCI
-#include <soci/soci.h>
-#include <soci/sqlite3/soci-sqlite3.h>
-#include <soci/error.h>
-#include <soci/use.h>
-#endif
-
-#include <pdal/pdal_error.hpp>
-#include <pdal/Options.hpp>
-
-namespace pdal
-{
-namespace drivers
-{
-namespace sqlite
-{
-
-    class sqlite_driver_error : public pdal_error
-    {
-    public:
-        sqlite_driver_error(std::string const& msg)
-            : pdal_error(msg)
-        {}
-    };
-
-    class connection_failed : public sqlite_driver_error
-    {
-    public:
-        connection_failed(std::string const& msg)
-            : sqlite_driver_error(msg)
-        {}
-    };
-
-    class buffer_too_small : public sqlite_driver_error
-    {
-    public:
-        buffer_too_small(std::string const& msg)
-            : sqlite_driver_error(msg)
-        {}
-    };
-
-
-
-    enum QueryType
-    {
-        QUERY_CLOUD = 0,
-        QUERY_BLOCKS_PLUS_CLOUD_VIEW,
-        QUERY_UNKNOWN = 512
-    };
-
-
-
-
-
-}
-}
-} // namespace pdal::driver::soci
-
+#include <pdal/kernel/Application.hpp>
+#include <pdal/kernel/Info.hpp>
+#include <pdal/kernel/Kernel.hpp>
+#include <pdal/kernel/Pipeline.hpp>
+#include <pdal/kernel/Query.hpp>
+#include <pdal/kernel/Support.hpp>
+#include <pdal/kernel/Translate.hpp>
 
 #endif

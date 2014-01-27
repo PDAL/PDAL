@@ -39,79 +39,9 @@
 #include <pdal/Reader.hpp>
 #include <pdal/Writer.hpp>
 
-#include <pdal/drivers/faux/Reader.hpp>
-#include <pdal/drivers/las/Reader.hpp>
 
-#ifdef PDAL_HAVE_ORACLE
-#ifndef USE_PDAL_PLUGIN_OCI
-#include <pdal/drivers/oci/Reader.hpp>
-#endif
-#endif
-
-#ifdef PDAL_HAVE_GDAL
-#include <pdal/drivers/nitf/Reader.hpp>
-#endif
-
-#include <pdal/drivers/pipeline/Reader.hpp>
-#include <pdal/drivers/qfit/Reader.hpp>
-#include <pdal/drivers/terrasolid/Reader.hpp>
-
-#include <pdal/drivers/faux/Writer.hpp>
-#include <pdal/drivers/las/Writer.hpp>
-#include <pdal/drivers/text/Writer.hpp>
-
-#ifdef PDAL_HAVE_ORACLE
-#ifndef USE_PDAL_PLUGIN_OCI
-#include <pdal/drivers/oci/Writer.hpp>
-#endif
-#endif
-
-#ifdef PDAL_HAVE_NITRO
-#ifndef USE_PDAL_PLUGIN_NITF
-#include <pdal/drivers/nitf/Writer.hpp>
-#endif
-#endif
-
-#ifdef PDAL_HAVE_P2G
-#include <pdal/drivers/p2g/Writer.hpp>
-#endif
-
-
-#ifdef PDAL_HAVE_SQLITE
-#ifndef USE_PDAL_PLUGIN_SQLITE
-#include <pdal/drivers/sqlite/Reader.hpp>
-#include <pdal/drivers/sqlite/Writer.hpp>
-#endif
-#endif
-
-#ifdef PDAL_HAVE_POSTGRESQL
-#ifndef USE_PDAL_PLUGIN_PGPOINTCLOUD
-#include <pdal/drivers/pgpointcloud/Reader.hpp>
-#include <pdal/drivers/pgpointcloud/Writer.hpp>
-#endif
-#endif
-
-#include <pdal/filters/ByteSwap.hpp>
-#include <pdal/filters/Cache.hpp>
-#include <pdal/filters/Chipper.hpp>
-#include <pdal/filters/Color.hpp>
-#include <pdal/filters/Colorization.hpp>
-#include <pdal/filters/Crop.hpp>
-#include <pdal/filters/Decimation.hpp>
-#include <pdal/filters/HexBin.hpp>
-#include <pdal/filters/InPlaceReprojection.hpp>
-#include <pdal/filters/Reprojection.hpp>
-
-#ifdef PDAL_HAVE_PYTHON
-#include <pdal/filters/Predicate.hpp>
-#include <pdal/filters/Programmable.hpp>
-#endif
-
-#include <pdal/filters/Scaling.hpp>
-#include <pdal/filters/Selector.hpp>
-#include <pdal/filters/Stats.hpp>
-
-#include <pdal/filters/Mosaic.hpp>
+#include <pdal/Drivers.hpp>
+#include <pdal/Filters.hpp>
 
 #include <pdal/Utils.hpp>
 
