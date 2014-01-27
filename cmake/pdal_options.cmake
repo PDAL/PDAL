@@ -61,7 +61,7 @@ mark_as_advanced(PDAL_BUILD_STATIC)
 
 if (CMAKE_VERSION VERSION_GREATER 2.8.10)
     set(PDAL_LINKAGE "PUBLIC;general")
-    set(BOOST_LINKAGE "PRIVATE;general")
+    set(BOOST_LINKAGE "LINK_PRIVATE;general")
 else()
     set(PDAL_LINKAGE "")
     set(BOOST_LINKAGE "")
