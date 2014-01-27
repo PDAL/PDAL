@@ -555,10 +555,11 @@ boost::uint32_t Iterator::readBufferImpl(PointBuffer& user_buffer)
             // before we can copy the raw data into the pdal::PointBuffer
             // endian (2) + pcid (8) + compression (8) + npoints (8) = 26 characters
             const boost::uint32_t trim = 26;
-            // std::string hex_trimmed = m_patch_hex.substr(trim, m_patch_hex.size()-trim);
             schema::size_type point_size = m_buffer->getSchema().getByteSize();
-
-            binary_data.resize(m_patch_npoints * point_size);
+            
+            // resize our vector to 0, but we've reserved max_points * getByteSize 
+            // for the vector so the next push_back won't have allocation costs.
+            binary_data.resize(0);
             hex_string_to_binary(m_patch_hex, binary_data, trim);
             unsigned char* data = (unsigned char*) &(binary_data.front());
 
