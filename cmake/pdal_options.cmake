@@ -39,60 +39,31 @@
 # POSSIBILITY OF SUCH DAMAGE.                                            #
 ##########################################################################
 
+# Options for building PDAL.
 
-###############################################################################
-# Pull the component parts out of the version number.
-macro(DISSECT_VERSION)
-    # Find version components
-    string(REGEX REPLACE "^([0-9]+).*" "\\1"
-        PDAL_VERSION_MAJOR "${PDAL_VERSION_STRING}")
-    string(REGEX REPLACE "^[0-9]+\\.([0-9]+).*" "\\1"
-        PDAL_VERSION_MINOR "${PDAL_VERSION_STRING}")
-    string(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.([0-9]+)" "\\1"
-        PDAL_VERSION_PATCH "${PDAL_VERSION_STRING}")
-    string(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.[0-9]+(.*)" "\\1"
-        PDAL_CANDIDATE_VERSION "${PDAL_VERSION_STRING}")
-endmacro(DISSECT_VERSION)
+# Build shared libraries by default.
+option(PDAL_BUILD_STATIC "Build PDAL as a static library" OFF)
+if(PDAL_BUILD_STATIC)
+  set(PDAL_LIB_PREFIX ${CMAKE_STATIC_LIBRARY_PREFIX})
+  set(PDAL_LIB_SUFFIX ${CMAKE_STATIC_LIBRARY_SUFFIX})
+  set(PDAL_LIB_TYPE "STATIC")
+  set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_STATIC_LIBRARY_SUFFIX})
+else(PDAL_BUILD_STATIC)
+  set(PDAL_LIB_PREFIX ${CMAKE_SHARED_LIBRARY_PREFIX})
+  set(PDAL_LIB_SUFFIX ${CMAKE_SHARED_LIBRARY_SUFFIX})
+  set(PDAL_LIB_TYPE "SHARED")
+#  set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_SHARED_LIBRARY_SUFFIX})
+  if(WIN32)
+    set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_IMPORT_LIBRARY_SUFFIX})
+  endif(WIN32)
+endif(PDAL_BUILD_STATIC)
+mark_as_advanced(PDAL_BUILD_STATIC)
 
-
-###############################################################################
-# Get the operating system information. Generally, CMake does a good job of
-# this. Sometimes, though, it doesn't give enough information. This macro will
-# distinguish between the UNIX variants. Otherwise, use the CMake variables
-# such as WIN32 and APPLE and CYGWIN.
-# Sets OS_IS_64BIT if the operating system is 64-bit.
-# Sets LINUX if the operating system is Linux.
-macro(GET_OS_INFO)
-    string(REGEX MATCH "Linux" OS_IS_LINUX ${CMAKE_SYSTEM_NAME})
-    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-        set(OS_IS_64BIT TRUE)
-    else(CMAKE_SIZEOF_VOID_P EQUAL 8)
-        set(OS_IS_64BIT FALSE)
-    endif(CMAKE_SIZEOF_VOID_P EQUAL 8)
-endmacro(GET_OS_INFO)
-
-
-###############################################################################
-# Set the destination directories for installing stuff.
-# Sets PDAL_LIB_DIR. Install libraries here.
-# Sets PDAL_BIN_DIR. Install binaries here.
-# Sets PDAL_INCLUDE_DIR. Install include files here, preferably in a
-# subdirectory named after the library in question (e.g.
-# "registration/blorgle.h")
-macro(SET_INSTALL_DIRS)
-  if (NOT DEFINED PDAL_LIB_DIR)
-    set(PDAL_LIB_DIR "lib")
-  endif (NOT DEFINED PDAL_LIB_DIR)
-    set(PDAL_INCLUDE_ROOT
-        "include/")
-    set(PDAL_INCLUDE_DIR "${PDAL_INCLUDE_ROOT}/${PROJECT_NAME_LOWER}/")
-    set(PDAL_DOC_DIR "share/doc/${PROJECT_NAME_LOWER}-${PDAL_VERSION_MAJOR}.${PDAL_VERSION_MINOR}")
-    set(PDAL_BIN_DIR "bin")
-    set(PDAL_PKGCFG_DIR "${PDAL_LIB_DIR}/pkgconfig")
-    if(WIN32)
-        set(PDALCONFIG_INSTALL_DIR "cmake")
-    else(WIN32)
-        set(PDALCONFIG_INSTALL_DIR "share/${PROJECT_NAME_LOWER}-${PDAL_VERSION_MAJOR}.${PDAL_VERSION_MINOR}")
-    endif(WIN32)
-endmacro(SET_INSTALL_DIRS)
+if (CMAKE_VERSION VERSION_GREATER 2.8.10)
+    set(PDAL_LINKAGE "PUBLIC;general")
+    set(BOOST_LINKAGE "LINK_PRIVATE;general")
+else()
+    set(PDAL_LINKAGE "")
+    set(BOOST_LINKAGE "")
+endif()
 

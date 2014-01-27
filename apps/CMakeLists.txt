@@ -39,7 +39,7 @@ link_directories(${Boost_LIBRARY_DIRS})
 if(PDAL_UTILITY)
     list(APPEND PDAL_UTILITIES ${PDAL_UTILITY})
     add_executable(${PDAL_UTILITY} pdal.cpp)
-    target_link_libraries(${PDAL_UTILITY} ${PDAL_LIB_NAME})
+    target_link_libraries(${PDAL_UTILITY} ${PDAL_LINKAGE} ${PDAL_LIB_NAME})
 endif()
 
 #------------------------------------------------------------------------------
