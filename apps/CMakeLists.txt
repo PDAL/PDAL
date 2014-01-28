@@ -53,45 +53,76 @@ install(TARGETS ${PDAL_UTILITIES}
 
 if(UNIX)
 
-  if(WITH_PKGCONFIG)
-    
-    set(PKGCFG_PREFIX "${CMAKE_INSTALL_PREFIX}")
-    set(PKGCFG_INC_DIR "${PDAL_INCLUDE_SUBDIR}")
-    set(PKGCFG_LIB_DIR "${PDAL_LIB_SUBDIR}")
-    set(PKGCFG_REQUIRES  "")
-    set(PKGCFG_VERSION ${VERSION})
-    set(PKGCFG_LINK_FLAGS "-lpdal")
-    set(PKGCFG_COMPILE_FLAGS "")
-    if(LIBXML2_FOUND)
-      set(PKGCFG_REQUIRES "${PKGCFG_REQUIRES} libxml-2.0")
-    endif()
-    if(GEOTIFF_FOUND)
-      set(PKGCFG_REQUIRES "${PKGCFG_REQUIRES} geotiff")
-    endif()
-    
-  else()
-
-    # Autoconf compatibility variables to use the same script source.
-    set(prefix ${CMAKE_INSTALL_PREFIX})
-    set(exec_prefix ${CMAKE_INSTALL_PREFIX}/bin)
-    set(libdir ${CMAKE_INSTALL_PREFIX}/lib)
-
-    get_directory_property(PDAL_DEFINITIONS DIRECTORY ${PDAL_SOURCE_DIR}/ COMPILE_DEFINITIONS)   
+    get_directory_property(PDAL_DEFINITIONS DIRECTORY ${PDAL_SOURCE_DIR}/../src COMPILE_DEFINITIONS)   
 
     set(PDAL_CONFIG_DEFINITIONS "")
     foreach(definition ${PDAL_DEFINITIONS})
         set(PDAL_CONFIG_DEFINITIONS "${PDAL_CONFIG_DEFINITIONS} -D${definition}")
     endforeach()
 
+
+    set(PKGCFG_PREFIX "${CMAKE_INSTALL_PREFIX}")
+    set(PKGCFG_EXEC_PREFIX "${CMAKE_INSTALL_PREFIX}/${PDAL_BIN_DIR}")
+    set(PKGCFG_INC_DIR "${CMAKE_INSTALL_PREFIX}/${PDAL_INCLUDE_DIR}")
+    set(PKGCFG_LIB_DIR "${CMAKE_INSTALL_PREFIX}/${PDAL_LIB_DIR}")
+    set(PKGCFG_REQUIRES  "")
+    set(PKGCFG_VERSION ${PDAL_VERSION_STRING})
+    set(PKGCFG_LINK_FLAGS "-lpdalcpp")
+    set(PKGCFG_COMPILE_FLAGS "")
+    if(LIBXML2_FOUND)
+      set(PKGCFG_REQUIRES "${PKGCFG_REQUIRES} libxml2-dev")
+    endif()
+    if(GEOTIFF_FOUND)
+      set(PKGCFG_REQUIRES "${PKGCFG_REQUIRES} libgeotiff-dev")
+    endif()
+    if (GDAL_FOUND)
+        set(PKGCFG_REQUIRES "${PKGCFG_REQUIRES} libgdal-dev")
+    endif()
+    if (LASZIP_FOUND)
+        set(PKGCFG_REQUIRES "${PKGCFG_REQUIRES} laszip")
+    endif()
+    if (P2G_FOUND)
+        set(PKGCFG_REQUIRES "${PKGCFG_REQUIRES} points2grid")
+    endif()
+    if (NITRO_FOUND)
+        set(PKGCFG_REQUIRES "${PKGCFG_REQUIRES} nitro-cpp")
+    endif()
+    if (POSTGRESQL_FOUND)
+        set(PKGCFG_REQUIRES "${PKGCFG_REQUIRES} libpq-dev")
+    endif()
+    if (MSGPACK_FOUND)
+        set(PKGCFG_REQUIRES "${PKGCFG_REQUIRES} libmsgpack-dev")
+    endif()
+    if (SOCI_FOUND)
+        set(PKGCFG_REQUIRES "${PKGCFG_REQUIRES} libmsgpack-dev")
+    endif()
+
+    if (NOT PDAL_EMBED_BOOST)
+        set(PKGCFG_REQUIRES "${PKGCFG_REQUIRES} libboost-dev")
+    endif()
+
+
+
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/pdal.pc.in
+      ${CMAKE_CURRENT_BINARY_DIR}/pdal.pc @ONLY)
+
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/pdal.pc
+        DESTINATION ${PDAL_PKGCFG_DIR}
+        PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
+    
+    # Autoconf compatibility variables to use the same script source.
+    set(prefix ${CMAKE_INSTALL_PREFIX})
+    set(exec_prefix ${CMAKE_INSTALL_PREFIX}/bin)
+    set(libdir ${CMAKE_INSTALL_PREFIX}/lib)
+
+
      
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/pdal-config.in
       ${CMAKE_CURRENT_BINARY_DIR}/pdal-config @ONLY)
       
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/pdal-config
-      DESTINATION bin/
+      DESTINATION "${CMAKE_INSTALL_PREFIX}/${PDAL_BIN_DIR}"
       PERMISSIONS
       OWNER_READ OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
-
-  endif()
 
 endif()
