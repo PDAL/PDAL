@@ -1,4 +1,4 @@
-`/***********************************************************************
+/***********************************************************************
  * Software License Agreement (BSD License)
  *
  * Copyright 2008-2009  Marius Muja (mariusm@cs.ubc.ca). All rights reserved.
@@ -1454,4 +1454,3 @@ namespace nanoflann
 
 
 #endif /* NANOFLANN_HPP_ */
-`
