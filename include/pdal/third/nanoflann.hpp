@@ -1,4 +1,4 @@
-/***********************************************************************
+`/***********************************************************************
  * Software License Agreement (BSD License)
  *
  * Copyright 2008-2009  Marius Muja (mariusm@cs.ubc.ca). All rights reserved.
@@ -524,11 +524,11 @@ namespace nanoflann
 				wastedMemory += remaining;
 
 				/* Allocate new storage. */
-				const size_t bsize = (size + sizeof(void*) + (WORDSIZE-1) > blocksize) ?
-							size + sizeof(void*) + (WORDSIZE-1) : blocksize;
+				const size_t blocksize = (size + sizeof(void*) + (WORDSIZE-1) > BLOCKSIZE) ?
+							size + sizeof(void*) + (WORDSIZE-1) : BLOCKSIZE;
 
 				// use the standard C malloc to allocate memory
-				void* m = ::malloc(bsize);
+				void* m = ::malloc(blocksize);
 				if (!m) {
 					fprintf(stderr,"Failed to allocate memory.\n");
 					return NULL;
@@ -541,7 +541,7 @@ namespace nanoflann
 				size_t shift = 0;
 				//int size_t = (WORDSIZE - ( (((size_t)m) + sizeof(void*)) & (WORDSIZE-1))) & (WORDSIZE-1);
 
-				remaining = bsize - sizeof(void*) - shift;
+				remaining = blocksize - sizeof(void*) - shift;
 				loc = ((char*)m + sizeof(void*) + shift);
 			}
 			void* rloc = loc;
@@ -732,6 +732,9 @@ namespace nanoflann
 	template <typename Distance, class DatasetAdaptor,int DIM = -1, typename IndexType = size_t>
 	class KDTreeSingleIndexAdaptor
 	{
+	private:
+		/** Hidden copy constructor, to disallow copying indices (Not implemented) */
+		KDTreeSingleIndexAdaptor(const KDTreeSingleIndexAdaptor<Distance,DatasetAdaptor,DIM,IndexType>&);
 	public:
 		typedef typename Distance::ElementType  ElementType;
 		typedef typename Distance::DistanceType DistanceType;
@@ -1379,6 +1382,10 @@ namespace nanoflann
 			index = new index_t( dims, *this /* adaptor */, nanoflann::KDTreeSingleIndexAdaptorParams(leaf_max_size, dims ) );
 			index->buildIndex();
 		}
+	private:
+		/** Hidden copy constructor, to disallow copying this class (Not implemented) */
+		KDTreeEigenMatrixAdaptor(const self_t&);
+	public:
 
 		~KDTreeEigenMatrixAdaptor() {
 			delete index;
@@ -1447,3 +1454,4 @@ namespace nanoflann
 
 
 #endif /* NANOFLANN_HPP_ */
+`
