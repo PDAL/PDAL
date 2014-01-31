@@ -1161,7 +1161,7 @@ namespace nanoflann
 
 		void middleSplit_(IndexType* ind, IndexType count, IndexType& index, int& cutfeat, DistanceType& cutval, const BoundingBox& bbox)
 		{
-			const DistanceType EPS=static_cast<DistanceType>(0.00001);
+			const DistanceType EPSs=static_cast<DistanceType>(0.00001);
 			ElementType max_span = bbox[0].high-bbox[0].low;
 			for (int i=1; i<(DIM>0 ? DIM : dim); ++i) {
 				ElementType span = bbox[i].high-bbox[i].low;
@@ -1173,7 +1173,7 @@ namespace nanoflann
 			cutfeat = 0;
 			for (int i=0; i<(DIM>0 ? DIM : dim); ++i) {
 				ElementType span = bbox[i].high-bbox[i].low;
-				if (span>(1-EPS)*max_span) {
+				if (span>(1-EPSs)*max_span) {
 					ElementType min_elem, max_elem;
 					computeMinMax(ind, count, cutfeat, min_elem, max_elem);
 					ElementType spread = max_elem-min_elem;;
