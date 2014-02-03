@@ -524,11 +524,11 @@ namespace nanoflann
 				wastedMemory += remaining;
 
 				/* Allocate new storage. */
-				const size_t blocksize = (size + sizeof(void*) + (WORDSIZE-1) > BLOCKSIZE) ?
-							size + sizeof(void*) + (WORDSIZE-1) : BLOCKSIZE;
+				const size_t bsize = (size + sizeof(void*) + (WORDSIZE-1) > blocksize) ?
+							size + sizeof(void*) + (WORDSIZE-1) : blocksize;
 
 				// use the standard C malloc to allocate memory
-				void* m = ::malloc(blocksize);
+				void* m = ::malloc(bsize);
 				if (!m) {
 					fprintf(stderr,"Failed to allocate memory.\n");
 					return NULL;
@@ -541,7 +541,7 @@ namespace nanoflann
 				size_t shift = 0;
 				//int size_t = (WORDSIZE - ( (((size_t)m) + sizeof(void*)) & (WORDSIZE-1))) & (WORDSIZE-1);
 
-				remaining = blocksize - sizeof(void*) - shift;
+				remaining = bsize - sizeof(void*) - shift;
 				loc = ((char*)m + sizeof(void*) + shift);
 			}
 			void* rloc = loc;
