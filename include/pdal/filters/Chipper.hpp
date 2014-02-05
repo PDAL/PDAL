@@ -195,6 +195,10 @@ public:
     static Options getDefaultOptions();
     static std::vector<Dimension> getDefaultDimensions();
 
+    inline virtual boost::uint64_t getNumPoints() const
+    {
+        return getPrevStage().getNumPoints();
+    }
     void Chip(PointBuffer& buffer);
     std::vector<chipper::Block>::size_type GetBlockCount() const
     {
