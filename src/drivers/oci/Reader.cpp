@@ -666,7 +666,10 @@ void IteratorBase::fillUserBuffer(PointBuffer& user_buffer)
     boost::int32_t numOraclePoints = m_oracle_buffer->getNumPoints() - m_buffer_position;
 
     boost::int32_t numUserSpace = user_buffer.getCapacity() - user_buffer.getNumPoints();
-    boost::int32_t howManyThisRead = (std::min)(numUserSpace, numOraclePoints);
+    
+    // We will check that both numUserSpace and numOraclePoints
+    // are not less than 0 before using this.
+    boost::uint64_t howManyThisRead = static_cast<boost::uint64_t>((std::min)(numUserSpace, numOraclePoints));
 
     if (numUserSpace < 0)
     {
@@ -753,7 +756,7 @@ void IteratorBase::fillUserBuffer(PointBuffer& user_buffer)
         Dimension const* point_source_field = user_buffer.getSchema().getDimensionPtr("PointSourceId");
         if (point_source_field)
         {
-            for (boost::int32_t i = m_buffer_position; i < howManyThisRead; ++i)
+            for (unsigned i = m_buffer_position; i < howManyThisRead; ++i)
             {
                 assert(user_buffer.getNumPoints() + i < user_buffer.getCapacity());
                 if (point_source_field->getByteSize() == 2)

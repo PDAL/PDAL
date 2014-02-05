@@ -835,8 +835,8 @@ BOOST_AUTO_TEST_CASE(test_copyLikeDimensions_All)
 
     for (int i = 0 ; i < num_offsets ; i ++) {
         for (int j = 0 ; j < num_offsets ; j ++) {
-            for (int os = 0 ; os < sizeof(orients) / sizeof(orients[0]) ; os ++) {
-                for (int od = 0 ; od < sizeof(orients) / sizeof(orients[0]) ; od ++) {
+            for (unsigned os = 0 ; os < sizeof(orients) / sizeof(orients[0]) ; os ++) {
+                for (unsigned od = 0 ; od < sizeof(orients) / sizeof(orients[0]) ; od ++) {
                     Schema source(schema);
                     source.setOrientation(orients[os]);
 

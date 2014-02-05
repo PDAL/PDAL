@@ -516,7 +516,7 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     static char syms[] = "0123456789ABCDEF";
     std::string hex;
     m_hex.resize(point_data_length*2);
-    for (int i = 0; i != point_data_length; i++)
+    for (unsigned i = 0; i != point_data_length; i++)
     {
         m_hex[i*2] = syms[((point_data[i] >> 4) & 0xf)];
         m_hex[i*2+1] = syms[point_data[i] & 0xf];
