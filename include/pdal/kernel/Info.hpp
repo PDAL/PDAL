@@ -72,7 +72,7 @@ private:
 
     void dumpPoints(const Stage& stage, std::string const& points) const;
     void dumpStats(pdal::filters::Stats& filter, PipelineManager* manager) const;
-    void dumpSchema(const Stage&) const;
+    void dumpSchema(const Stage&, pdal::PipelineManager* manager) const;
     void dumpStage(const Stage&) const;
     void dumpQuery(Stage const&, IndexedPointBuffer&) const;
     void dumpMetadata(const Stage&) const;

@@ -280,7 +280,8 @@ public:
     /// @return a schema::DimensionMap instance that maps dimension names
     schema::DimensionMap* mapDimensions(Schema const& destination, bool bIgnoreNamespace=false) const;
 
-
+    std::ostream& toRST(std::ostream& os) const;
+    
     /// dumps a string representation of the Schema instance to std::cout
     void dump() const;
 
@@ -296,7 +297,7 @@ public:
 
     /// @return serialized Schema instance as xml
     static std::string to_xml(Schema const& schema, boost::property_tree::ptree const* metadata=0);
-
+    
 /// @name Private Attributes
 private:
 

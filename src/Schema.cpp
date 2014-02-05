@@ -566,6 +566,200 @@ boost::property_tree::ptree Schema::toPTree() const
     return tree;
 }
 
+std::ostream& Schema::toRST(std::ostream& os) const
+{
+
+    schema::index_by_index const& dimensions = getDimensions().get<schema::index>();
+
+    boost::uint32_t gap(1);
+    boost::uint32_t name_column(20+gap);
+    boost::uint32_t scale_column(10+gap);
+    boost::uint32_t offset_column(10+gap);
+    boost::uint32_t type_column(9+gap);
+    boost::uint32_t size_column(9+gap);    
+
+
+    for (schema::index_by_index::size_type i=0; i< dimensions.size(); i++)
+    {
+        name_column = std::max( static_cast<std::size_t>(name_column), 
+                                dimensions[i].getFQName().size()+2*gap);
+        scale_column = std::max(static_cast<std::size_t>(scale_column), 
+                                boost::lexical_cast<std::string>(dimensions[i].getNumericScale()).size()+2*gap);
+        offset_column = std::max(static_cast<std::size_t>(offset_column), 
+                                 boost::lexical_cast<std::string>(dimensions[i].getNumericOffset()).size()+2*gap);
+        type_column = std::max(static_cast<std::size_t>(type_column), 
+                               dimensions[i].getInterpretationName().size()+2*gap);
+        size_column = std::max(static_cast<std::size_t>(size_column), 
+                               boost::lexical_cast<std::string>(dimensions[i].getByteSize()).size()+2*gap);
+        
+    }
+
+    std::ostringstream hdr;
+    for (int i = 0; i < 80; ++i)
+        hdr << "-";
+    
+    os << std::endl;
+    os << "Schema" << std::endl;
+    os << hdr.str() << std::endl << std::endl;
+    
+    std::string orientation("point");
+    std::string size = boost::lexical_cast<std::string>(dimensions.size());
+    
+    if (getOrientation() == schema::DIMENSION_INTERLEAVED)
+        orientation = "dimension";
+    
+    os << orientation << "-oriented schema has " << size 
+       << " dimensions and a total size of " << getByteSize() << " bytes. " << std::endl << std::endl;
+    
+    std::ostringstream thdr;
+    for (unsigned i = 0; i < name_column-gap; ++i)
+        thdr << "=";
+    thdr << " ";
+    for (unsigned i = 0; i < scale_column-gap; ++i)
+        thdr << "=";        
+    thdr << " ";
+    
+    for (unsigned i = 0; i < offset_column-gap; ++i)
+        thdr << "=";    
+    thdr << " ";
+    
+    for (unsigned i = 0; i < type_column-gap; ++i)
+        thdr << "=";    
+    thdr << " ";
+
+    for (unsigned i = 0; i < size_column-gap; ++i)
+        thdr << "=";    
+    thdr << " ";    
+    
+    name_column--;
+    unsigned step_back(3);
+
+    os << thdr.str() << std::endl;
+    os << std::setw(name_column-step_back) << "Name" 
+       << std::setw(scale_column) << "Scale"  
+       << std::setw(offset_column) << "Offset" 
+       << std::setw(type_column) << "Type" 
+       << std::setw(size_column) << "Size" 
+       << std::endl;
+    os << thdr.str() << std::endl; 
+    for (schema::index_by_index::size_type i=0; i<dimensions.size(); i++)
+    {
+        Dimension const& d = dimensions[i];
+        std::string name(d.getFQName());
+        std::string scale(boost::lexical_cast<std::string>(d.getNumericScale()));
+        std::string offset(boost::lexical_cast<std::string>(d.getNumericOffset()));
+        std::string t(d.getInterpretationName());
+        std::string size(boost::lexical_cast<std::string>(d.getByteSize()));
+
+        os   << std::left << std::setw(name_column) << name 
+             << std::right << std::setw(scale_column) << scale 
+             << std::setw(offset_column) << offset 
+             << std::setw(type_column) << t 
+             << std::setw(size_column) << size << std::endl;
+
+ 
+    }
+    os << thdr.str() << std::endl << std::endl;
+    
+
+    for (schema::index_by_index::size_type i=0; i<dimensions.size(); i++)
+    {
+        Dimension const& d = dimensions[i];
+        std::ostringstream hdr;
+        for (int i = 0; i < 80; ++i)
+            hdr << ".";
+        os << d.getFQName() << std::endl;
+        os << hdr.str() << std::endl << std::endl;
+
+        boost::uint32_t gap(1);
+        boost::uint32_t key_column(32+gap);        
+        boost::uint32_t value_column(40+gap);        
+
+        std::ostringstream thdr;
+        for (unsigned i = 0; i < key_column-gap; ++i)
+            thdr << "=";
+        thdr << " ";
+
+        for (unsigned i = 0; i < value_column-gap; ++i)
+            thdr << "=";
+        thdr << " ";
+
+        os << thdr.str() << std::endl;
+        os << std::left << std::setw(key_column-step_back) << "Name" 
+           << std::right << std::setw(value_column-step_back) << "Value"  
+           << std::endl;
+        os << thdr.str() << std::endl;         
+        key_column = key_column - gap;
+        os   << std::left << std::setw(key_column) << "Name" 
+             << std::right << std::setw(value_column) << d.getName() << std::endl;        
+        
+        os   << std::left << std::setw(key_column) << "Namespace" 
+             << std::right << std::setw(value_column) << d.getNamespace() << std::endl;        
+
+        os   << std::left << std::setw(key_column) << "Position" 
+             << std::right << std::setw(value_column) << d.getPosition() << std::endl;        
+
+        os   << std::left << std::setw(key_column) << "ByteSize" 
+             << std::right << std::setw(value_column) << d.getByteSize() << std::endl;        
+
+        os   << std::left << std::setw(key_column) << "Ignored?" 
+             << std::right << std::setw(value_column) << d.isIgnored() << std::endl;        
+
+        os   << std::left << std::setw(key_column) << "UUID" 
+             << std::right << std::setw(value_column) << d.getUUID() << std::endl;        
+        
+        std::string parent("None");
+        if (!d.getParent().is_nil())
+            parent = getDimension(d.getParent()).getFQName();
+        os   << std::left << std::setw(key_column) << "Parent" 
+             << std::right << std::setw(value_column) << parent << std::endl;        
+
+        os   << std::left << std::setw(key_column) << "Offset" 
+             << std::right << std::setw(value_column) << d.getByteOffset() << std::endl;        
+
+        os   << std::left << std::setw(key_column) << "Maximum" 
+             << std::right << std::setw(value_column) << d.getMaximum() << std::endl;        
+
+        os   << std::left << std::setw(key_column) << "Minimum" 
+             << std::right << std::setw(value_column) << d.getMinimum() << std::endl;        
+
+        os   << std::left << std::setw(key_column) << "Scale" 
+             << std::right << std::setw(value_column) << d.getNumericScale() << std::endl;        
+
+        os   << std::left << std::setw(key_column) << "Offset" 
+             << std::right << std::setw(value_column) << d.getNumericOffset() << std::endl;        
+
+        std::vector<std::string> lines;
+        std::string description = boost::algorithm::erase_all_copy(d.getDescription(), "\n");
+        
+        Utils::wordWrap(description, lines, value_column-gap);
+        if (lines.size() == 1)
+        {
+            
+            os   << std::left << std::setw(key_column) << "Description" << " " 
+                   << std::right << std::setw(value_column-1) << description << std::endl;
+        } else
+        {
+            os   << std::left  << std::setw(key_column) << "Description" << " " 
+                 << std::setw(value_column) << lines[0] << std::endl;
+        
+            std::stringstream blank;
+            size_t blanks(key_column+gap);
+            for (size_t i = 0; i < blanks; ++i)
+                blank << " ";
+            for (size_t i = 1; i < lines.size(); ++i)
+            {
+                os  << std::left  << std::setw(blanks) << blank.str() 
+                    << std::setw(value_column) << lines[i] 
+                    << std::endl;
+            }
+
+        }
+        os << thdr.str()<< std::endl << std::endl;
+    }    
+            
+    return os;
+}
 
 void Schema::dump() const
 {

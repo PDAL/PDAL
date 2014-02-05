@@ -603,31 +603,22 @@ std::string PointBuffer::printDimension(Dimension const& dimension, boost::uint3
 
 std::ostream& PointBuffer::toRST(std::ostream& os) const
 {
-    boost::property_tree::ptree tree;
-
     const Schema& schema = getSchema();
     schema::index_by_index const& dimensions = schema.getDimensions().get<schema::index>();
-
 
     boost::uint32_t ns_column(32);    
     boost::uint32_t name_column(20);
     boost::uint32_t value_column(40);
     
-    std::string output;
-    
     std::ostringstream hdr;
     for (int i = 0; i < 80; ++i)
         hdr << "-";
-
-
-    
 
     for (std::size_t i=0; i< dimensions.size(); i++)
     {
         name_column = std::max(static_cast<std::size_t>(name_column), dimensions[i].getName().size());
         ns_column = std::max(static_cast<std::size_t>(name_column), dimensions[i].getNamespace().size());
     }
-    
     
     std::ostringstream thdr;
     for (unsigned i = 0; i < name_column-1; ++i)
@@ -641,8 +632,6 @@ std::ostream& PointBuffer::toRST(std::ostream& os) const
     thdr << " ";
 
     name_column--;
-
-    
     unsigned step_back(3);
 
     for (boost::uint32_t pointIndex=0; pointIndex<getNumPoints(); pointIndex++)
