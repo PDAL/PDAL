@@ -23,7 +23,6 @@ fi
 cmake   -G "$CONFIG"  \
         -DCMAKE_BUILD_TYPE=Debug \
         -DCMAKE_INSTALL_PREFIX=/Users/hobu \
-        -DPDAL_EMBED_BOOST=${EMBED} \
         -DWITH_ORACLE=ON \
         -DWITH_GEOTIFF=ON \
         -DWITH_SQLITE=ON \
