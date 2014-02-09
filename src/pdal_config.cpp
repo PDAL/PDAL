@@ -256,7 +256,7 @@ std::string getPDALDebugInformation()
     std::ostringstream hexerver;
     hexerver << HEXER_VERSION_MAJOR << "."
         << HEXER_VERSION_MINOR << "."
-        << HEXER_VERSION_REVISION;
+        << HEXER_VERSION_PATCH;
     os << std::left 
               << std::setw(name_column) << "Hexer" << std::right 
               << std::setw(url_column) << "http://github.com/hobu/hexer/" 
