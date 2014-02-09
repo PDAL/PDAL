@@ -208,7 +208,9 @@ void Invocation::extractResult(const std::string& name,
         double* src = (double*)PyArray_GetPtr(arr, &one);
         for (unsigned int i=0; i<data_len; i++)
         {
-            *(double*)p = src[i];
+            double* d = reinterpret_cast<double*>(p);
+            *d = src[i];
+            // *(double*)p = src[i];
             p += data_stride;
         }
     }
@@ -217,7 +219,9 @@ void Invocation::extractResult(const std::string& name,
         float* src = (float*)PyArray_GetPtr(arr, &one);
         for (unsigned int i=0; i<data_len; i++)
         {
-            *(float*)p = src[i];
+            float* f = reinterpret_cast<float*>(p);
+            *f = src[i];
+            // *(float*)p = src[i];
             p += data_stride;
         }
     }
@@ -226,7 +230,9 @@ void Invocation::extractResult(const std::string& name,
         boost::int8_t* src = (boost::int8_t*)PyArray_GetPtr(arr, &one);
         for (unsigned int i=0; i<data_len; i++)
         {
-            *(boost::int8_t*)p = src[i];
+            boost::int8_t* t = reinterpret_cast<boost::int8_t*>(p);
+            *t = src[i];
+            // *(boost::int8_t*)p = src[i];
             p += data_stride;
         }
     }
@@ -235,7 +241,9 @@ void Invocation::extractResult(const std::string& name,
         boost::uint8_t* src = (boost::uint8_t*)PyArray_GetPtr(arr, &one);
         for (unsigned int i=0; i<data_len; i++)
         {
-            *(boost::uint8_t*)p = src[i];
+            boost::uint8_t* t = reinterpret_cast<boost::uint8_t*>(p);
+            *t = src[i];
+            // *(boost::uint8_t*)p = src[i];
             p += data_stride;
         }
     }
@@ -244,7 +252,9 @@ void Invocation::extractResult(const std::string& name,
         boost::int16_t* src = (boost::int16_t*)PyArray_GetPtr(arr, &one);
         for (unsigned int i=0; i<data_len; i++)
         {
-            *(boost::int16_t*)p = src[i];
+            boost::int16_t* t = reinterpret_cast<boost::int16_t*>(p);
+            *t = src[i];
+            // *(boost::int16_t*)p = src[i];
             p += data_stride;
         }
     }
@@ -253,7 +263,9 @@ void Invocation::extractResult(const std::string& name,
         boost::uint16_t* src = (boost::uint16_t*)PyArray_GetPtr(arr, &one);
         for (unsigned int i=0; i<data_len; i++)
         {
-            *(boost::uint16_t*)p = src[i];
+            boost::uint16_t* t = reinterpret_cast<boost::uint16_t*>(p);
+            *t = src[i];
+            // *(boost::uint16_t*)p = src[i];
             p += data_stride;
         }
     }
@@ -262,7 +274,9 @@ void Invocation::extractResult(const std::string& name,
         boost::int32_t* src = (boost::int32_t*)PyArray_GetPtr(arr, &one);
         for (unsigned int i=0; i<data_len; i++)
         {
-            *(boost::int32_t*)p = src[i];
+            boost::int32_t* t = reinterpret_cast<boost::int32_t*>(p);
+            *t = src[i];
+            // *(boost::int32_t*)p = src[i];
             p += data_stride;
         }
     }
@@ -271,7 +285,9 @@ void Invocation::extractResult(const std::string& name,
         boost::uint32_t* src = (boost::uint32_t*)PyArray_GetPtr(arr, &one);
         for (unsigned int i=0; i<data_len; i++)
         {
-            *(boost::uint32_t*)p = src[i];
+            boost::uint32_t* t = reinterpret_cast<boost::uint32_t*>(p);
+            *t = src[i];
+            // *(boost::uint32_t*)p = src[i];
             p += data_stride;
         }
     }
@@ -280,7 +296,9 @@ void Invocation::extractResult(const std::string& name,
         boost::int64_t* src = (boost::int64_t*)PyArray_GetPtr(arr, &one);
         for (unsigned int i=0; i<data_len; i++)
         {
-            *(boost::int64_t*)p = src[i];
+            boost::int64_t* t = reinterpret_cast<boost::int64_t*>(p);
+            *t = src[i];
+            // *(boost::int64_t*)p = src[i];
             p += data_stride;
         }
     }
@@ -289,7 +307,9 @@ void Invocation::extractResult(const std::string& name,
         boost::uint64_t* src = (boost::uint64_t*)PyArray_GetPtr(arr, &one);
         for (unsigned int i=0; i<data_len; i++)
         {
-            *(boost::uint64_t*)p = src[i];
+            boost::uint64_t* t = reinterpret_cast<boost::uint64_t*>(p);
+            *t = src[i];
+            // *(boost::uint64_t*)p = src[i];
             p += data_stride;
         }
     }
