@@ -57,7 +57,7 @@ namespace pdal
     {
         typedef boost::uuids::uuid id;
         // typedef std::vector<boost::uint8_t>::size_type PointBufferByteSize;
-        typedef boost::int64_t PointBufferByteSize;
+        typedef boost::uint64_t PointBufferByteSize;
         
         // typedef boost::interprocess::allocator<boost::uint8_t, boost::interprocess::managed_shared_memory::segment_manager>     ShmemAllocator; 
         // typedef boost::container::vector<boost::uint8_t, ShmemAllocator> PointBufferVector;
@@ -528,7 +528,7 @@ inline  T const& PointBuffer::getField(pdal::Dimension const& dim, boost::uint32
 
     boost::uint8_t const* p = (boost::uint8_t const*)m_data.get() + offset;
     
-    if (sizeof(T) <= dim.getByteSize())
+    if (static_cast<dimension::size_type>(sizeof(T)) <= dim.getByteSize())
     {
         T const& output = *(T const*)(void const*)p;
         return output;

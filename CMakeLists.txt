@@ -25,6 +25,8 @@ set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/modules" ${CMAKE_MODULE_PATH}
 # PDAL general settings
 #------------------------------------------------------------------------------
 
+set(PDAL_EMBED_BOOST FALSE CACHE BOOL "use embedded rather than system boost")
+
 include("${PDAL_SOURCE_DIR}/cmake/pdal_options.cmake")
 include("${PDAL_SOURCE_DIR}/cmake/pdal_targets.cmake")
 include("${PDAL_SOURCE_DIR}/cmake/pdal_utils.cmake")
@@ -73,7 +75,7 @@ set(WITH_APPS TRUE CACHE BOOL "Choose if PDAL utilities should be built")
 set(WITH_TESTS TRUE CACHE BOOL "Choose if PDAL unit tests should be built")
 
 # Choose to use pkg-config or not
-set(WITH_PKGCONFIG FALSE CACHE BOOL
+set(WITH_PKGCONFIG TRUE CACHE BOOL
   "Choose whether a pkgconfig file (PDAL.pc) should be installed")
 
 
@@ -231,7 +233,6 @@ if(WIN32)
   endif(MSVC)
 endif(WIN32)
 
-set(PDAL_EMBED_BOOST TRUE CACHE BOOL "use embedded rather than system boost")
 if (NOT PDAL_EMBED_BOOST)
   find_package(Boost 1.53 COMPONENTS program_options thread iostreams filesystem system unit_test_framework random)
 endif()
@@ -268,9 +269,9 @@ else()
   add_definitions(-DBOOST_ALL_NO_LIB)
 
   include_directories("${Boost_INCLUDE_DIRS}/")
-  set(PDAL_EMBED_BOOST TRUE CACHE BOOL "use embedded boost")
+  set(PDAL_EMBED_BOOST TRUE )
   add_subdirectory(boost)
-  message(STATUS "Using embedded boost tree")
+  message(STATUS "External boost not found, using embedded boost tree")
 endif(Boost_FOUND)
 
 #------------------------------------------------------------------------------

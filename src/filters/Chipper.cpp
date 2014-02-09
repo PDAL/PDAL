@@ -193,7 +193,7 @@ void Chipper::Load( PointBuffer& buffer,
 
 
     // Sort xvec and assign other index in yvec to sorted indices in xvec.
-    std::sort(xvec.begin(), xvec.end());
+    std::stable_sort(xvec.begin(), xvec.end());
     for (boost::uint32_t i = 0; i < xvec.size(); ++i)
     {
         idx = xvec[i].m_ptindex;
@@ -201,7 +201,7 @@ void Chipper::Load( PointBuffer& buffer,
     }
 
     // Sort yvec.
-    std::sort(yvec.begin(), yvec.end());
+    std::stable_sort(yvec.begin(), yvec.end());
 
     //Iterate through the yvector, setting the xvector appropriately.
     for (boost::uint32_t i = 0; i < yvec.size(); ++i)

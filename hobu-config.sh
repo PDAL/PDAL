@@ -23,13 +23,15 @@ fi
 cmake   -G "$CONFIG"  \
         -DCMAKE_BUILD_TYPE=Debug \
         -DCMAKE_INSTALL_PREFIX=/Users/hobu \
-        -DPDAL_EMBED_BOOST=${EMBED} \
         -DWITH_ORACLE=ON \
         -DWITH_GEOTIFF=ON \
         -DWITH_SQLITE=ON \
         -DWITH_P2G=ON \
         -DWITH_HEXER=ON \
         -DWITH_NITRO=ON \
+        -DWITH_MRSID=ON \
+        -DMRSID_INCLUDE_DIR=/Users/hobu/dev/release/mrsid/Lidar_DSDK/include \
+        -DMRSID_LIBRRARY=/Users/hobu/dev/release/mrsid/Lidar_DSDK/lib/liblti_lidar_dsdk.dylib \
         -DHEXER_INCLUDE_DIR=${HEXER_HOME}/include \
         -DHEXER_LIBRARY=${HEXER_HOME}/bin/libhexer.${SO_EXT} \
         -DGEOTIFF_INCLUDE_DIR=${GEOTIFF_HOME}/include/ \

@@ -61,7 +61,8 @@ using namespace pdal;
 
 // using namespace pdal::drivers::oci;
 
-static unsigned chunk_size = 1000;
+static unsigned chunk_size = 25;
+
 bool ShouldRunTest()
 {
     return TestConfig::g_oracle_connection.size() > 0;
@@ -75,19 +76,16 @@ Options getOCIOptions()
     Option capacity("capacity", chunk_size,"capacity");
     options.add(capacity);
 
-    Option chunk("chunk_size", capacity.getValue<boost::uint32_t>() +30,"chunk_size");
-    options.add(chunk);
-
     Option overwrite("overwrite", false,"overwrite");
     options.add(overwrite);
 
     Option connection("connection",std::string(TestConfig::g_oracle_connection), "connection");
     options.add(connection);
 
-    Option debug("debug", "false", "debug");
+    Option debug("debug", "true", "debug");
     options.add(debug);
 
-    Option verbose("verbose", 1, "verbose");
+    Option verbose("verbose", 7, "verbose");
     options.add(verbose);
 
     Option block_table_name("block_table_name", "PDAL_TEST_BLOCKS", "block_table_name");
@@ -99,32 +97,26 @@ Options getOCIOptions()
     Option cloud_column_name("cloud_column_name", "CLOUD" , "");
     options.add(cloud_column_name);
 
-    Option is3d("is3d", false,"");
-    options.add(is3d);
-
-    Option solid("solid", false,"");
-    options.add(solid);
-
     Option srid("srid",26910,"");
     options.add(srid);
-
-    Option out_srs("out_srs", "EPSG:26910","");
-    options.add(out_srs);
-
-    Option scale_x("scale_x", 0.01, "");
-    options.add(scale_x);
+    // 
+    // Option out_srs("out_srs", "EPSG:4326","");
+    // options.add(out_srs);
+    // 
+    // Option scale_x("scale_x", 0.0000001, "");
+    // options.add(scale_x);
     
 
 
-    Option offset_x("offset_x", 493994.875f, "");
-    options.add(offset_x);
-    
-    Option offset_y("offset_y", 4877429.62f, "");
-    options.add(offset_y);
+    // Option offset_x("offset_x", 493994.875f, "");
+    // options.add(offset_x);
+    // 
+    // Option offset_y("offset_y", 4877429.62f, "");
+    // options.add(offset_y);
 
 
-    Option scale_y("scale_y", 0.01, "");
-    options.add(scale_y);
+
+
 
     Option disable_cloud_trigger("disable_cloud_trigger", true, "");
     options.add(disable_cloud_trigger);
@@ -132,10 +124,10 @@ Options getOCIOptions()
     Option max_cache_blocks("max_cache_blocks", 1, "");
     options.add(max_cache_blocks);
 
-    Option cache_block_size("cache_block_size", capacity.getValue<boost::uint32_t>(), "");
-    options.add(cache_block_size);
+    // Option cache_block_size("cache_block_size", capacity.getValue<boost::uint32_t>(), "");
+    // options.add(cache_block_size);
 
-    Option filename("filename", Support::datapath("autzen-dd.las"), "");
+    Option filename("filename", Support::datapath("autzen-utm.las"), "");
     options.add(filename);
 
     Option query("query", "SELECT CLOUD FROM PDAL_TEST_BASE where ID=1", "");
@@ -213,21 +205,60 @@ struct OracleTestFixture
 BOOST_FIXTURE_TEST_SUITE(OCITest, OracleTestFixture)
 
 
-bool WriteDefaultData()
+bool WriteUnprojectedData()
 {
-    pdal::drivers::las::Reader writer_reader(getOCIOptions());
-    pdal::filters::Cache writer_cache(writer_reader, getOCIOptions());
-    pdal::filters::Chipper writer_chipper(writer_cache, getOCIOptions());
-    pdal::filters::InPlaceReprojection writer_reproj(writer_chipper, getOCIOptions());
-    pdal::drivers::oci::Writer writer_writer(writer_reproj, getOCIOptions());
+    Options options;
 
-    writer_writer.initialize();
-    boost::uint64_t numPointsToRead = writer_reader.getNumPoints();
+    // Note that this corresponds to the autzen-utm-chipped-25.las 
+    // file in test/data/
+    Option capacity("capacity", 25,"capacity");
+    options.add(capacity);
 
-    BOOST_CHECK_EQUAL(numPointsToRead, 1065u);
+    Option connection("connection",std::string(TestConfig::g_oracle_connection), "connection");
+    options.add(connection);
 
-    writer_writer.write(0);
+    Option debug("debug", "true", "debug");
+    options.add(debug);
 
+    Option verbose("verbose", 7, "verbose");
+    options.add(verbose);
+
+    Option block_table_name("block_table_name", "PDAL_TEST_BLOCKS", "block_table_name");
+    options.add(block_table_name);
+
+    Option base_table_name("base_table_name", "PDAL_TEST_BASE" , "");
+    options.add(base_table_name);
+
+    Option cloud_column_name("cloud_column_name", "CLOUD" , "");
+    options.add(cloud_column_name);
+
+    Option srid("srid", 26910,"");
+    options.add(srid);
+
+    Option disable_cloud_trigger("disable_cloud_trigger", true, "");
+    options.add(disable_cloud_trigger);
+
+    Option max_cache_blocks("max_cache_blocks", 1, "");
+    options.add(max_cache_blocks);
+
+    Option filename("filename", Support::datapath("autzen-utm.las"), "");
+    options.add(filename);
+    
+    pdal::drivers::las::Reader reader(options);
+    pdal::filters::Cache cache(reader, options);
+    pdal::filters::Chipper chipper(cache, options);
+    // pdal::filters::InPlaceReprojection reproj(writer_chipper, getOCIOptions());
+    pdal::drivers::oci::Writer writer(chipper, options);
+
+    writer.initialize();
+    boost::uint64_t numPointsToRead = chipper.getNumPoints();
+    
+    boost::uint32_t count(1065);
+    BOOST_CHECK_EQUAL(numPointsToRead, count);
+
+    boost::uint64_t numPointsWritten = writer.write(0);
+    BOOST_CHECK_EQUAL(numPointsWritten, count);
+    
     return true;
 }
 
@@ -348,7 +379,7 @@ bool WriteDefaultData()
 //     BOOST_CHECK_EQUAL(red2, 78);
 // }
 
-void checkPoints(PointBuffer const& data)
+void checkUnProjectedPoints(PointBuffer const& data)
 {
     pdal::Schema const& schema = data.getSchema();
     
@@ -360,29 +391,120 @@ void checkPoints(PointBuffer const& data)
     pdal::Dimension const& dimGreen = schema.getDimension("Green");
     pdal::Dimension const& dimBlue = schema.getDimension("Blue");
 
-    boost::int32_t x = data.getField<boost::int32_t>(dimX, 0);
-    boost::int32_t y = data.getField<boost::int32_t>(dimY, 0);
-    boost::int32_t z = data.getField<boost::int32_t>(dimZ, 0);
-    boost::uint16_t intensity = data.getField<boost::uint16_t>(dimIntensity, 0);
-    boost::uint16_t red = data.getField<boost::uint16_t>(dimRed, 0);
-    boost::uint16_t green = data.getField<boost::uint16_t>(dimGreen, 0);
-    boost::uint16_t blue = data.getField<boost::uint16_t>(dimBlue, 0);
+    int X[] = { 49405730, 49413382, 49402110, 49419289, 49418622, 49403411 };
+    int Y[] = { 487743335, 487743982, 487743983, 487744219, 487744254, 487745019 };
+    int Z[] = { 13063, 13044, 13046, 13050, 13049, 13066 };
+    int I[] = { 134, 75, 153, 93, 67, 167 };
+    int R[] = { 142, 152, 146, 104, 113, 163 };
+    int G[] = { 102, 108, 104, 93, 97, 118 };
+    int B[] = { 137, 134, 140, 120, 123, 150 };
+        
+    for (unsigned i = 0; i < 6; ++i)
+    {
+        boost::int32_t x = data.getField<boost::int32_t>(dimX, i);
+        boost::int32_t y = data.getField<boost::int32_t>(dimY, i);
+        boost::int32_t z = data.getField<boost::int32_t>(dimZ, i);
+        boost::uint16_t intensity = data.getField<boost::uint16_t>(dimIntensity, i);
+        boost::uint16_t red = data.getField<boost::uint16_t>(dimRed, i);
+        boost::uint16_t green = data.getField<boost::uint16_t>(dimGreen, i);
+        boost::uint16_t blue = data.getField<boost::uint16_t>(dimBlue, i);
 
-    BOOST_CHECK_EQUAL(x, 44194425);
-    BOOST_CHECK_EQUAL(y, 440496109);
-    BOOST_CHECK_EQUAL(z, 12931);
-    BOOST_CHECK_EQUAL(intensity,35u);
-    BOOST_CHECK_EQUAL(red, 160u);
-    BOOST_CHECK_EQUAL(green, 125u);
-    BOOST_CHECK_EQUAL(blue, 148u);
+        BOOST_CHECK_EQUAL(x, X[i]);
+        BOOST_CHECK_EQUAL(y, Y[i]);
+        BOOST_CHECK_EQUAL(z, Z[i]);
+        BOOST_CHECK_EQUAL(intensity, I[i]);
+        BOOST_CHECK_EQUAL(red, R[i]);
+        BOOST_CHECK_EQUAL(green, G[i]);
+        BOOST_CHECK_EQUAL(blue, B[i]);
+    }
     
 }
 
-BOOST_AUTO_TEST_CASE(read_view_reproj)
+
+void compareAgainstSourceBuffer(PointBuffer const& candidate, std::string filename)
+{
+
+    pdal::Options options;
+    pdal::Option f("filename", filename);
+    options.add(f);
+    
+    pdal::drivers::las::Reader reader(options);
+    reader.initialize();
+    
+    BOOST_CHECK_EQUAL(candidate.getNumPoints(), reader.getNumPoints());
+    
+    pdal::PointBuffer source(reader.getSchema(), reader.getNumPoints());
+    
+    pdal::StageSequentialIterator* iter = reader.createSequentialIterator(source);
+    boost::uint64_t numRead = iter->read(source);
+    BOOST_CHECK_EQUAL(numRead, reader.getNumPoints());
+    
+    
+    
+    pdal::Schema const& cs = candidate.getSchema();
+    pdal::Schema const& ss = source.getSchema();
+    
+    pdal::Dimension const& sdimX = ss.getDimension("X");
+    pdal::Dimension const& sdimY = ss.getDimension("Y");
+    pdal::Dimension const& sdimZ = ss.getDimension("Z");
+    pdal::Dimension const& sdimIntensity = ss.getDimension("Intensity");
+    pdal::Dimension const& sdimRed = ss.getDimension("Red");
+    pdal::Dimension const& sdimGreen = ss.getDimension("Green");
+    pdal::Dimension const& sdimBlue = ss.getDimension("Blue");
+
+    pdal::Dimension const& cdimX = cs.getDimension("X");
+    pdal::Dimension const& cdimY = cs.getDimension("Y");
+    pdal::Dimension const& cdimZ = cs.getDimension("Z");
+    pdal::Dimension const& cdimIntensity = cs.getDimension("Intensity");
+    pdal::Dimension const& cdimRed = cs.getDimension("Red");
+    pdal::Dimension const& cdimGreen = cs.getDimension("Green");
+    pdal::Dimension const& cdimBlue = cs.getDimension("Blue");
+    // 
+    // int X[] = { 49405730, 49413382, 49402110, 494192890, 49418622, 49403411 };
+    // int Y[] = { 487743335, 487743982, 487743983, 487744219, 487744254, 487745019 };
+    // int Z[] = { 13063, 13044, 13046, 13050, 13049, 13066 };
+    // int I[] = { 134, 75, 153, 93, 67, 167 };
+    // int R[] = { 142, 152, 146, 104, 113, 163 };
+    // int G[] = { 102, 108, 104, 96, 97, 118 };
+    // int B[] = { 137, 134, 140, 120, 123, 150 };
+    //     
+    for (unsigned i = 0; i < 6; ++i)
+    {
+        boost::int32_t sx = source.getField<boost::int32_t>(sdimX, i);
+        boost::int32_t sy = source.getField<boost::int32_t>(sdimY, i);
+        boost::int32_t sz = source.getField<boost::int32_t>(sdimZ, i);
+        boost::uint16_t sintensity = source.getField<boost::uint16_t>(sdimIntensity, i);
+        boost::uint16_t sred = source.getField<boost::uint16_t>(sdimRed, i);
+        boost::uint16_t sgreen = source.getField<boost::uint16_t>(sdimGreen, i);
+        boost::uint16_t sblue = source.getField<boost::uint16_t>(sdimBlue, i);
+
+        boost::int32_t cx = candidate.getField<boost::int32_t>(cdimX, i);
+        boost::int32_t cy = candidate.getField<boost::int32_t>(cdimY, i);
+        boost::int32_t cz = candidate.getField<boost::int32_t>(cdimZ, i);
+        boost::uint16_t cintensity = candidate.getField<boost::uint16_t>(cdimIntensity, i);
+        boost::uint16_t cred = candidate.getField<boost::uint16_t>(cdimRed, i);
+        boost::uint16_t cgreen = candidate.getField<boost::uint16_t>(cdimGreen, i);
+        boost::uint16_t cblue = candidate.getField<boost::uint16_t>(cdimBlue, i);
+
+
+        BOOST_CHECK_EQUAL(sx, cx);
+        BOOST_CHECK_EQUAL(sy, cy);
+        BOOST_CHECK_EQUAL(sz, cz);
+        BOOST_CHECK_EQUAL(sintensity, cintensity);
+        BOOST_CHECK_EQUAL(sred, cred);
+        BOOST_CHECK_EQUAL(sgreen, cgreen);
+        BOOST_CHECK_EQUAL(sblue, cblue);
+    }
+    delete iter;
+    
+}
+
+
+BOOST_AUTO_TEST_CASE(read_unprojected_data)
 {
     if (!ShouldRunTest()) return;
 
-    WriteDefaultData();
+    WriteUnprojectedData();
 
     std::ostringstream oss;
 
@@ -390,60 +512,111 @@ BOOST_AUTO_TEST_CASE(read_view_reproj)
            "        l.\"PCBLK_MIN_RES\", l.\"PCBLK_MAX_RES\", l.\"NUM_POINTS\","
            "        l.\"NUM_UNSORTED_POINTS\", l.\"PT_SORT_DIM\", l.\"POINTS\", b.cloud "
            "FROM PDAL_TEST_BLOCKS l, PDAL_TEST_BASE b "
-        "WHERE b.id=1 and l.obj_id = b.id "
+        "WHERE b.id=1 and l.obj_id = b.id and l.obj_id in (1) "
         "ORDER BY l.obj_id ";
     Options options = getOCIOptions();
     Option& query = options.getOptionByRef("query");
     query.setValue<std::string>(oss.str());
 
-    Option& out_srs = options.getOptionByRef("out_srs"); 
-    out_srs.setValue<std::string>("EPSG:4326");
-
-    Option& x_scale = options.getOptionByRef("scale_x");
-    x_scale.setValue<float>(0.0000001);
-
-    Option& y_scale = options.getOptionByRef("scale_y");
-    y_scale.setValue<float>(0.0000001);
-
-    Option& offset_x = options.getOptionByRef("offset_x");
-    offset_x.setValue<float>( -123.0749695f);
-
-    Option& offset_y = options.getOptionByRef("offset_y");
-    offset_y.setValue<float>( 44.0500086f);
-
-    pdal::Option x_dim("x_dim", std::string("drivers.oci.reader.X"), "Dimension name to use for 'X' data");
-    pdal::Option y_dim("y_dim", std::string("drivers.oci.reader.Y"), "Dimension name to use for 'Y' data");
-    pdal::Option z_dim("z_dim", std::string("drivers.oci.reader.Z"), "Dimension name to use for 'Z' data");    
-
-    options.add(x_dim);
-    options.add(y_dim);
-    options.add(z_dim);
-
     Option& debug = options.getOptionByRef("debug");
-    debug.setValue<std::string>( "false");
+    debug.setValue<std::string>( "true");
 
     Option& verbose = options.getOptionByRef("verbose");
-    verbose.setValue<std::string>( "1");
+    verbose.setValue<std::string>( "7");
     
-    pdal::drivers::oci::Reader reader_reader(options);
-    pdal::filters::InPlaceReprojection reproj(reader_reader, options);
-    reproj.initialize();
-
-    pdal::PointBuffer data(reproj.getSchema(), chunk_size+30);
-    pdal::StageSequentialIterator* iter = reproj.createSequentialIterator(data);
-
+    pdal::drivers::oci::Reader reader(options);
+    reader.initialize();
+    
+    pdal::PointBuffer data(reader.getSchema(), reader.getNumPoints());
+    pdal::StageSequentialIterator* iter = reader.createSequentialIterator(data);
+    
     boost::uint32_t numRead(0);
-
-    numRead = iter->read(data);
-
-    BOOST_CHECK_EQUAL(numRead, chunk_size+30u);
-    BOOST_CHECK_EQUAL(data.getNumPoints(), chunk_size+30u);
     
-    checkPoints(data);
+    numRead = iter->read(data);
+    
+    BOOST_CHECK_EQUAL(numRead, 1065u);
+    BOOST_CHECK_EQUAL(data.getNumPoints(), 1065u);
+    
+    checkUnProjectedPoints(data);
+    
+    // compareAgainstSourceBuffer(data,  Support::datapath("autzen-utm-chipped-25.las"));
 
     delete iter;
 
 }
+
+
+// 
+// 
+// BOOST_AUTO_TEST_CASE(read_view_reproj)
+// {
+//     if (!ShouldRunTest()) return;
+// 
+//     WriteDefaultData();
+// 
+//     std::ostringstream oss;
+// 
+//     oss << "SELECT  l.\"OBJ_ID\", l.\"BLK_ID\", l.\"BLK_EXTENT\", l.\"BLK_DOMAIN\","
+//            "        l.\"PCBLK_MIN_RES\", l.\"PCBLK_MAX_RES\", l.\"NUM_POINTS\","
+//            "        l.\"NUM_UNSORTED_POINTS\", l.\"PT_SORT_DIM\", l.\"POINTS\", b.cloud "
+//            "FROM PDAL_TEST_BLOCKS l, PDAL_TEST_BASE b "
+//         "WHERE b.id=1 and l.obj_id = b.id "
+//         "ORDER BY l.obj_id ";
+//     Options options = getOCIOptions();
+//     Option& query = options.getOptionByRef("query");
+//     query.setValue<std::string>(oss.str());
+// 
+//     Option& out_srs = options.getOptionByRef("out_srs"); 
+//     out_srs.setValue<std::string>("EPSG:26910");
+// 
+//     Option& x_scale = options.getOptionByRef("scale_x");
+//     x_scale.setValue<float>(0.01);
+// 
+//     Option& y_scale = options.getOptionByRef("scale_y");
+//     y_scale.setValue<float>(0.01);
+// 
+//     // Option& offset_x = options.getOptionByRef("offset_x");
+//     // offset_x.setValue<float>( -123.0749695f);
+//     // offset_x.setValue<float>( 0.0f);
+// 
+//     // Option& offset_y = options.getOptionByRef("offset_y");
+//     // offset_y.setValue<float>( 44.0500086f);
+//     // offset_y.setValue<float>( 0.0f);
+// 
+// 
+//     pdal::Option x_dim("x_dim", std::string("drivers.oci.reader.X"), "Dimension name to use for 'X' data");
+//     pdal::Option y_dim("y_dim", std::string("drivers.oci.reader.Y"), "Dimension name to use for 'Y' data");
+//     pdal::Option z_dim("z_dim", std::string("drivers.oci.reader.Z"), "Dimension name to use for 'Z' data");    
+// 
+//     options.add(x_dim);
+//     options.add(y_dim);
+//     options.add(z_dim);
+// 
+//     Option& debug = options.getOptionByRef("debug");
+//     debug.setValue<std::string>( "true");
+// 
+//     Option& verbose = options.getOptionByRef("verbose");
+//     verbose.setValue<std::string>( "7");
+//     
+//     pdal::drivers::oci::Reader reader_reader(options);
+//     // pdal::filters::InPlaceReprojection reproj(reader_reader, options);
+//     reader_reader.initialize();
+// 
+//     pdal::PointBuffer data(reader_reader.getSchema(), chunk_size+30);
+//     pdal::StageSequentialIterator* iter = reader_reader.createSequentialIterator(data);
+// 
+//     boost::uint32_t numRead(0);
+// 
+//     numRead = iter->read(data);
+// 
+//     BOOST_CHECK_EQUAL(numRead, chunk_size+30u);
+//     BOOST_CHECK_EQUAL(data.getNumPoints(), chunk_size+30u);
+//     
+//     checkPoints(data);
+// 
+//     delete iter;
+// 
+// }
 
 //
 // BOOST_AUTO_TEST_CASE(read_all)
