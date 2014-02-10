@@ -602,6 +602,7 @@ Chipper::~Chipper()
 {
     delete m_random_iterator; 
     delete m_one_point;
+    delete m_one_point_dimension_map;
 }
 }
 } // iterators::sequential

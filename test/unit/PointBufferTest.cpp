@@ -430,7 +430,8 @@ BOOST_AUTO_TEST_CASE(test_indexed)
     
     std::vector<size_t> rids = idata.radius(637012.24, 849028.31, 431.66, 100000);
     BOOST_CHECK_EQUAL(rids.size(), 11u);    
-
+    
+    delete iter;
     return;
 
 }
@@ -486,7 +487,8 @@ BOOST_AUTO_TEST_CASE(test_packing)
     BOOST_CHECK_EQUAL(packed->getField<boost::int32_t>(x2,8),8);
     BOOST_CHECK_EQUAL(packed->getField<boost::int32_t>(x2,7),7);
     // BOOST_CHECK_CLOSE(packed.getField<double>(y2,7), 7 + 100, 0.000001);    
-
+    
+    delete packed;
     return;
 
 }
@@ -809,7 +811,7 @@ BOOST_AUTO_TEST_CASE(test_copyLikeDimensions)
         BOOST_CHECK_EQUAL(c, 7u);
     }  
 
-
+    delete dims_offset;
     return;
 
 }
@@ -893,6 +895,7 @@ BOOST_AUTO_TEST_CASE(test_copyLikeDimensions_All)
                             BOOST_CHECK_EQUAL(c, 7u);
                         }
                     }
+                    delete dims;
                 }
             }
         }

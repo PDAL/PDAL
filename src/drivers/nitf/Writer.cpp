@@ -245,6 +245,8 @@ void Writer::writeEnd(boost::uint64_t actualNumPointsWritten)
 
         writer.write();
         output_io.close();
+        delete bytes;
+        delete band;
     }
 
     catch (except::Throwable & t)

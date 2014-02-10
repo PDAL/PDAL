@@ -108,6 +108,7 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, boost::uint64_t index) 
                                     numPointsWanted);
 
     data.setNumPoints(numPointsWanted);
+    delete d;
     return numPointsWanted;
 }
 

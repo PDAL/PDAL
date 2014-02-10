@@ -794,11 +794,12 @@ Schema Schema::pack() const
     return output;
 }
 
-std:: size_t pdal::schema::DimensionMap::update()
+std::size_t pdal::schema::DimensionMap::update()
 {
     typedef std::map<Dimension const*, Dimension const*>::const_iterator Iterator;
     
-    assert(m.size() <= MAX_OFFSETS_LENGTH);
+    std::map<Dimension const*, Dimension const*>::size_type l = static_cast<std::map<Dimension const*, Dimension const*>::size_type >(MAX_OFFSETS_LENGTH);
+    assert(m.size() <= l);
     
     std::size_t entIndex = 0;
     for (Iterator d = m.begin(); d != m.end(); ++d, ++entIndex)

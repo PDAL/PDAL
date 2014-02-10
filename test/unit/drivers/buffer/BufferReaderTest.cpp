@@ -151,6 +151,7 @@ BOOST_AUTO_TEST_CASE(test_sequential_iter)
     }
 
     delete iter;
+    delete input;
 
     return;
 }
@@ -171,7 +172,8 @@ BOOST_AUTO_TEST_CASE(test_iterator_checks)
 
     BOOST_CHECK_EQUAL(reader.supportsIterator(StageIterator_Sequential), true);
     BOOST_CHECK_EQUAL(reader.supportsIterator(StageIterator_Random) , true);
-
+    
+    delete input;
     return;
 }
 
@@ -272,6 +274,7 @@ BOOST_AUTO_TEST_CASE(test_random_iter)
     }
 
     delete iter;
+    delete input;
 
     return;
 }
@@ -307,7 +310,8 @@ BOOST_AUTO_TEST_CASE(test_iterator_write)
 
     BOOST_CHECK_EQUAL(numWritten, 100u);
     FileUtils::deleteFile(out_filename.getValue<std::string>());
-
+    
+    delete input;
     return;
 }
 
