@@ -99,6 +99,7 @@ MAKE_FILTER_CREATOR(Crop, pdal::filters::Crop)
 MAKE_FILTER_CREATOR(Decimation, pdal::filters::Decimation)
 MAKE_FILTER_CREATOR(HexBin, pdal::filters::HexBin)
 MAKE_FILTER_CREATOR(InPlaceReprojection, pdal::filters::InPlaceReprojection)
+MAKE_FILTER_CREATOR(PCLBlock, pdal::filters::PCLBlock)
 
 #ifdef PDAL_HAVE_PYTHON
 MAKE_FILTER_CREATOR(Predicate, pdal::filters::Predicate)
@@ -392,6 +393,7 @@ void StageFactory::registerKnownFilters()
     REGISTER_FILTER(Reprojection, pdal::filters::Reprojection);
     REGISTER_FILTER(HexBin, pdal::filters::HexBin);
     REGISTER_FILTER(InPlaceReprojection, pdal::filters::InPlaceReprojection);
+    REGISTER_FILTER(PCLBlock, pdal::filters::PCLBlock);
 
 #ifdef PDAL_HAVE_PYTHON
     REGISTER_FILTER(Predicate, pdal::filters::Predicate);

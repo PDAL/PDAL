@@ -43,6 +43,7 @@ Filters
    filters.decimation
    filters.hexbin
    filters.inplacereprojection
+   filters.pclblock
    filters.predicate
    filters.programmable
    filters.selector

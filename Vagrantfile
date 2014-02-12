@@ -16,8 +16,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.network :forwarded_port, guest: 80, host: 8080
 
   config.vm.provider :virtualbox do |vb|
-     vb.customize ["modifyvm", :id, "--memory", "1024"]
-     vb.customize ["modifyvm", :id, "--cpus", "2"]   
+     vb.customize ["modifyvm", :id, "--memory", "8192"]
+     vb.customize ["modifyvm", :id, "--cpus", "4"]
      vb.customize ["modifyvm", :id, "--ioapic", "on"]
      vb.name = "pdal-vagrant"
    end  
@@ -35,23 +35,23 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   
 
   ppaRepos = [
-	  "ppa:ubuntugis/ppa",
+    "ppa:ubuntugis/ppa",
     "ppa:apokluda/boost1.53"
   ]
 
   packageList = [
-	  "git",
-	  "build-essential",
-	  "pkg-config",
-	  "cmake",
+    "git",
+    "build-essential",
+    "pkg-config",
+    "cmake",
     "libgeos-dev",
-	  "libgdal-dev",
-	  "libpq-dev",
+    "libgdal-dev",
+    "libpq-dev",
     "python-all-dev",
     "python-numpy",
-	  "libproj-dev",
-	  "libtiff4-dev",
-	  "libxml2-dev",
+    "libproj-dev",
+    "libtiff4-dev",
+    "libxml2-dev",
     "libboost1.53-all-dev",
     "libbz2-dev",
     "libsqlite0-dev",
@@ -62,7 +62,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     "postgresql-server-dev-9.1",
     "postgresql-9.1-postgis",
     "libmsgpack-dev",
-    "libgeos++-dev"
+    "libgeos++-dev",
+    "vim",
+    "libeigen3-dev",
+    "libvtk5-dev",
+    "libflann-dev"
   ];
 
   if Dir.glob("#{File.dirname(__FILE__)}/.vagrant/machines/default/*/id").empty?
@@ -80,12 +84,13 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 	  config.vm.provision :shell, :inline => pkg_cmd
     scripts = [
       "startup.sh",
-  	  "libgeotiff.sh",
+      "libgeotiff.sh",
       "nitro.sh",
       "hexer.sh",
       "p2g.sh",
       "soci.sh",
       "laszip.sh",
+      "pcl.sh",
       "pdal.sh",
       "pgpointcloud.sh"
     ];

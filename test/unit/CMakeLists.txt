@@ -37,6 +37,7 @@ SET(PDAL_UNITTEST_TEST_SRC
     MetadataTest.cpp
     filters/MosaicFilterTest.cpp
     OptionsTest.cpp
+    filters/PCLBlockFilterTest.cpp
     PipelineManagerTest.cpp
     drivers/pipeline/PipelineReaderTest.cpp
     drivers/pipeline/PipelineWriterTest.cpp

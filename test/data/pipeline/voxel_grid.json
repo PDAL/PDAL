@@ -1,0 +1,15 @@
+{
+  "pipeline": {
+    "name": "VoxelGridExample",
+    "filters": [
+      { "name": "VoxelGrid",
+        "setLeafSize": {
+          "x": 0.1,
+          "y": 0.1,
+          "z": 0.1
+        }
+      }
+    ]
+  }
+}
+

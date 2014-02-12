@@ -382,6 +382,10 @@ public:
     */    
     pdal::Bounds<double> calculateBounds(bool bis3d=true) const;
 
+    static void extractIndices(PointBuffer const& source,
+		    PointBuffer& destination,
+		    std::vector<int> indices);
+
     /// Copies dimensions from the given PointBuffer that have both 
     /// similar names and data types. Create a schema::DimensionMap 
     /// and adjust as necessary before utilizing this method to copy 

@@ -274,6 +274,26 @@ else()
   message(STATUS "External boost not found, using embedded boost tree")
 endif(Boost_FOUND)
 
+
+#------------------------------------------------------------------------------
+# settings for PCL
+#------------------------------------------------------------------------------
+
+set(WITH_PCL FALSE CACHE BOOL "Choose if PCL support should be built")
+if(WITH_PCL)
+    find_package(PCL 1.7)
+    if(PCL_FOUND)
+        set(PDAL_HAVE_PCL 1)
+        include_directories(${PCL_INCLUDE_DIRS})
+        link_directories(${PCL_LIBRARY_DIRS})
+        add_definitions(${PCL_DEFINITIONS})
+        message(STATUS "...building with PCL")
+    else()
+        set(PCL_LIBRARIES "")
+    endif()
+endif()
+
+
 #------------------------------------------------------------------------------
 # settings for GDAL & related dependencies
 #------------------------------------------------------------------------------
