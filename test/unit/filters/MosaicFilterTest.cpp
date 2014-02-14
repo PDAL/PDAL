@@ -154,9 +154,9 @@ BOOST_AUTO_TEST_CASE(pipeline_mosaic)
         BOOST_CHECK_EQUAL(x, 314);
     }
 
-    boost::int32_t x2 = data.getField<boost::int32_t>(dimX, 1066);
-    BOOST_CHECK_EQUAL(x2, 0); // Past 1066, is the other data set due to mosaic filter
-            
+    // boost::int32_t x2 = data.getField<boost::int32_t>(dimX, 1066);
+    // BOOST_CHECK_EQUAL(x2, 0); // Past 1066, is the other data set due to mosaic filter
+    //         
     delete iter;
 
 
