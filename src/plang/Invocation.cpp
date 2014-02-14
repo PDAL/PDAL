@@ -200,7 +200,41 @@ void Invocation::extractResult(const std::string& name,
 
     npy_intp one=0;
     const int pyDataType = getPythonDataType(dataType, numBytes);
+    
+    PyArray_Descr *dtype = PyArray_DESCR(arr);
+    
+    if (static_cast<boost::uint32_t>(dtype->elsize) != numBytes)
+    {
+        std::ostringstream oss;
+        oss << "dtype of array has size " << dtype->elsize 
+            << " but PDAL dimension '" << name << "' has byte size of "
+            << numBytes << " bytes";
+        throw python_error(oss.str());
+    }
+    
+    if (dtype->kind == 'i' && dataType != dimension::SignedInteger)
+    {
+        std::ostringstream oss;
+        oss << "dtype of array has a signed integer type but the "
+            << "dimension data type of '" << name << "' is not pdal::SignedInteger"; 
+        throw python_error(oss.str());
+    }
 
+    if (dtype->kind == 'u' && dataType != dimension::UnsignedInteger)
+    {
+        std::ostringstream oss;
+        oss << "dtype of array has a unsigned integer type but the "
+            << "dimension data type of '" << name << "' is not pdal::UnsignedInteger"; 
+        throw python_error(oss.str());
+    }
+
+    if (dtype->kind == 'f' && dataType != dimension::Float)
+    {
+        std::ostringstream oss;
+        oss << "dtype of array has a float type but the "
+            << "dimension data type of '" << name << "' is not pdal::Float"; 
+        throw python_error(oss.str());
+    }    
     boost::uint8_t* p = dst;
 
     if (pyDataType == PyArray_DOUBLE)
