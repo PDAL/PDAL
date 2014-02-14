@@ -71,7 +71,7 @@ public:
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
     pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const
     {
-        return NULL;
+        throw iterator_not_found("filters.predicate random iterator not implemented");
     }
 
     boost::uint32_t processBuffer(PointBuffer& data, pdal::plang::BufferedInvocation&) const;
