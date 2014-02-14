@@ -92,14 +92,14 @@ BOOST_AUTO_TEST_CASE(ProgrammableFilterTest_test1)
     const double minZ = writer.getMinZ();
     const double maxZ = writer.getMaxZ();
 
-    BOOST_CHECK(Utils::compare_approx<double>(minX, 10.0, 0.001));
-    BOOST_CHECK(Utils::compare_approx<double>(maxX, 11.0, 0.001));
+    BOOST_CHECK_CLOSE(minX, 10.0, 0.001);
+    BOOST_CHECK_CLOSE(maxX, 11.0, 0.001);
 
-    BOOST_CHECK(Utils::compare_approx<double>(minY, 0.0, 0.001));
-    BOOST_CHECK(Utils::compare_approx<double>(maxY, 1.0, 0.001));
+    BOOST_CHECK_CLOSE(minY, 0.0, 0.001);
+    BOOST_CHECK_CLOSE(maxY, 1.0, 0.001);
 
-    BOOST_CHECK(Utils::compare_approx<double>(minZ, 3.14, 0.001));
-    BOOST_CHECK(Utils::compare_approx<double>(maxZ, 3.14, 0.001));
+    BOOST_CHECK_CLOSE(minZ, 3.14, 0.001);
+    BOOST_CHECK_CLOSE(maxZ, 3.14, 0.001);
 
     return;
 }
