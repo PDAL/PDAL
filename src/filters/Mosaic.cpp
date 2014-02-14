@@ -59,7 +59,7 @@ void Mosaic::initialize()
 
     const Stage& stage0 = *stages[0];
     const SpatialReference& srs0 = stage0.getSpatialReference();
-    const bool ignoreSrs = getOptions().getValueOrDefault<bool>("ignore_srs", false);
+    bool respectSrs = getOptions().getValueOrDefault<bool>("require_matching_srs", false);
     const Schema& schema0 = stage0.getSchema();
     PointCountType pointCountType0 = stage0.getPointCountType();
     boost::uint64_t totalPoints = stage0.getNumPoints();
@@ -69,7 +69,7 @@ void Mosaic::initialize()
     for (boost::uint32_t i=1; i<stages.size(); i++)
     {
         Stage& stage = *(stages[i]);
-        if (!ignoreSrs && stage.getSpatialReference() != srs0)
+        if (respectSrs && stage.getSpatialReference() != srs0)
             throw impedance_invalid("mosaicked stages must have same srs");
         if (stage.getSchema() != schema0)
             throw impedance_invalid("mosaicked stages must have same schema");
@@ -95,6 +95,11 @@ void Mosaic::initialize()
 Options Mosaic::getDefaultOptions()
 {
     Options options;
+    Option require_matching_srs("require_matching_srs",false,"Throw an exception when SRSs do not match");
+    Option ignore_namespaces("ignore_namespaces",false,"Ignore namespaces and copy first matching dimension");
+    
+    options.add(require_matching_srs);
+    options.add(ignore_namespaces);
     return options;
 }
 
@@ -161,27 +166,88 @@ bool Mosaic::atEndImpl() const
 }
 
 
-boost::uint32_t Mosaic::readBufferImpl(PointBuffer& destData)
+DimensionMapPtr Mosaic::fetchDimensionMap(PointBuffer const& user_buffer, BufferPtr stage_buffer)
 {
-    boost::uint32_t totalNumPointsToRead = destData.getCapacity();
+    DimensionMaps::const_iterator i = m_dimensions.find(m_iteratorIndex);
+
+    if (i != m_dimensions.end())
+    {
+        getStage().log()->get(logDEBUG2) 
+            << "Mosaic::fetchDimensionMap: found existing DimensionMap with id " 
+            << m_iteratorIndex << std::endl;
+        return i->second;
+    }
+    else
+    {
+        bool ignore_namespaces = getStage().getOptions().getValueOrDefault<bool>("ignore_namespaces", false);
+        DimensionMapPtr output  = DimensionMapPtr(stage_buffer->getSchema().mapDimensions(  user_buffer.getSchema(), 
+                                                                                               ignore_namespaces /*ignore namespaces*/));
+        getStage().log()->get(logDEBUG2) << "DimensionMapPtr->size():  " << output->m.size() << std::endl;
+        if (!output->m.size()) throw pdal_error("fetchDimensionMap map was unable to map any dimensions!");
+        typedef std::map<Dimension const*, Dimension const*>::const_iterator Iterator;
+        for (Iterator i = output->m.begin(); i != output->m.end(); ++i)
+        {
+            getStage().log()->get(logDEBUG2) << "mapping " << i->first->getFQName() << " to " << i->second->getFQName() << std::endl;
+        }
+        std::pair<int, DimensionMapPtr> p(m_iteratorIndex, output);
+        m_dimensions.insert(p);
+        getStage().log()->get(logDEBUG2) << "IteratorBase::fetchDimensionMap: creating new DimensionMap with id " << m_iteratorIndex << std::endl;
+
+        return p.second;
+    }
+}
+
+
+
+BufferPtr Mosaic::fetchPointBuffer(PointBuffer const& user_buffer)
+{
+    BufferMap::const_iterator i = m_buffers.find(m_iteratorIndex);
+
+    if (i != m_buffers.end())
+    {
+        getStage().log()->get(logDEBUG2) << "Mosaic::fetchPointBuffer: found existing PointBuffer with id " << m_iteratorIndex << std::endl;
+        return i->second;
+    }
+    else
+    {
+
+        BufferPtr output  = BufferPtr(new PointBuffer(user_buffer.getSchema(), user_buffer.getCapacity()));
+        std::pair<int, BufferPtr> p(m_iteratorIndex, output);
+        m_buffers.insert(p);
+        getStage().log()->get(logDEBUG2) << "Mosaic::fetchPointBuffer: creating new PointBuffer with id " << m_iteratorIndex << std::endl;
+
+        return p.second;
+    }
+}
+
+boost::uint32_t Mosaic::readBufferImpl(PointBuffer& user_buffer)
+{
+    boost::uint32_t totalNumPointsToRead = user_buffer.getCapacity();
     boost::uint32_t totalNumPointsRead = 0;
     boost::uint32_t destPointIndex = 0;
 
     // for each stage, we read as many points as we can
+    
     while (totalNumPointsRead < totalNumPointsToRead)
     {
         assert(m_iteratorIndex < m_prevIterators.size());
         m_prevIterator = m_prevIterators[m_iteratorIndex];
 
-        // read as much as we can into temp buffer
-        PointBuffer tmp(destData.getSchema(), totalNumPointsToRead-totalNumPointsRead);
-        boost::uint32_t numRead = m_prevIterator->read(tmp);
+        BufferPtr tmp = fetchPointBuffer(user_buffer);
+        
+        boost::uint32_t howMany(totalNumPointsToRead-totalNumPointsRead);
+        
+        tmp->resize(howMany);
+        boost::uint32_t numRead = m_prevIterator->read(*tmp);
         totalNumPointsRead += numRead;
 
-        // concat the temp buffer on to end of real dest buffer
-        destData.copyPointsFast(destPointIndex, 0, tmp, numRead);
-        destPointIndex += numRead;
-        destData.setNumPoints(destData.getNumPoints() + numRead);
+        DimensionMapPtr d = fetchDimensionMap(user_buffer, tmp);
+
+        PointBuffer::copyLikeDimensions(*tmp, user_buffer,
+                                        *d,
+                                        0, user_buffer.getNumPoints(),
+                                        howMany);
+        user_buffer.setNumPoints(totalNumPointsRead);    
 
         if (m_prevIterator->atEnd())
         {
@@ -192,7 +258,6 @@ boost::uint32_t Mosaic::readBufferImpl(PointBuffer& destData)
             break;
         }
     }
-
     return totalNumPointsRead;
 }
 

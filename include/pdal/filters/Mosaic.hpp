@@ -36,6 +36,7 @@
 #define INCLUDED_FILTERS_MOSAICFILTER_HPP
 
 #include <vector>
+#include <map>
 
 #include <pdal/MultiFilter.hpp>
 #include <pdal/MultiFilterIterator.hpp>
@@ -85,6 +86,11 @@ private:
 
 namespace iterators
 {
+    typedef boost::shared_ptr<schema::DimensionMap> DimensionMapPtr;
+    typedef boost::shared_ptr<PointBuffer> BufferPtr;
+    typedef std::map<int, DimensionMapPtr> DimensionMaps;
+    typedef std::map<int, BufferPtr> BufferMap;
+    
 namespace sequential
 {
 
@@ -98,6 +104,14 @@ private:
     boost::uint64_t skipImpl(boost::uint64_t);
     boost::uint32_t readBufferImpl(PointBuffer&);
     bool atEndImpl() const;
+    DimensionMapPtr fetchDimensionMap(PointBuffer const& user_buffer, BufferPtr stage_buffer);
+    BufferPtr fetchPointBuffer(PointBuffer const& user_buffer);
+    DimensionMapPtr m_active_dimension;
+    DimensionMaps m_dimensions;
+
+    BufferMap m_buffers;
+
+    
 };
 
 

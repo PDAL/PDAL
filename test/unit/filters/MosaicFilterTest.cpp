@@ -35,21 +35,21 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 
+#include "Support.hpp"
 #include <pdal/StageIterator.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/drivers/faux/Reader.hpp>
 #include <pdal/filters/Mosaic.hpp>
 
+#include <pdal/PipelineReader.hpp>
+#include <pdal/PipelineManager.hpp>
+
 using namespace pdal;
 
 BOOST_AUTO_TEST_SUITE(MosaicFilterTest)
 
-BOOST_AUTO_TEST_CASE(test1)
+BOOST_AUTO_TEST_CASE(basic_test)
 {
-#ifndef PDAL_SRS_ENABLED
-    // because mosaicking needs to compare SRSs
-    return;
-#endif
 
     Bounds<double> bounds1(0.0, 0.0, 0.0, 100.0, 100.0, 100.0);
     pdal::drivers::faux::Reader reader1(bounds1, 100, pdal::drivers::faux::Reader::Constant);
@@ -65,7 +65,14 @@ BOOST_AUTO_TEST_CASE(test1)
     vec.push_back(&reader2);
     vec.push_back(&reader3);
 
-    pdal::filters::Mosaic mosaic(vec, Options::none());
+    Options options;
+    // Option debug("debug", "true", "debug");
+    // options.add(debug);
+    // 
+    // Option verbose("verbose", 7, "verbose");
+    // options.add(verbose);
+
+    pdal::filters::Mosaic mosaic(vec, options);
     BOOST_CHECK(mosaic.getDescription() == "Mosaic Filter");
     mosaic.initialize();
 
@@ -85,7 +92,7 @@ BOOST_AUTO_TEST_CASE(test1)
     Dimension const& dimZ = buffer_schema.getDimension("Z");
     Dimension const& dimTime = buffer_schema.getDimension("Time");
 
-    for (boost::uint32_t i=0; i<300; i++)
+    for (boost::uint32_t i=0; i<10; i++)
     {
         double x = data.getField<double>(dimX, i);
         double y = data.getField<double>(dimY, i);
@@ -94,23 +101,24 @@ BOOST_AUTO_TEST_CASE(test1)
 
         if (i<100)
         {
-            BOOST_CHECK(Utils::compare_approx(x, 0.0, (std::numeric_limits<double>::min)()) == true);
-            BOOST_CHECK(Utils::compare_approx(y, 0.0, (std::numeric_limits<double>::min)()) == true);
-            BOOST_CHECK(Utils::compare_approx(z, 0.0, (std::numeric_limits<double>::min)()) == true);
+            BOOST_CHECK_CLOSE(x, 0.0, 0.001);
+            BOOST_CHECK_CLOSE(y, 0.0, 0.001);
+            BOOST_CHECK_CLOSE(z, 0.0, 0.001);
         }
         else if (i<200)
         {
-            BOOST_CHECK(Utils::compare_approx(x, 100.0, (std::numeric_limits<double>::min)()) == true);
-            BOOST_CHECK(Utils::compare_approx(y, 100.0, (std::numeric_limits<double>::min)()) == true);
-            BOOST_CHECK(Utils::compare_approx(z, 100.0, (std::numeric_limits<double>::min)()) == true);
+            BOOST_CHECK_CLOSE(x, 100.0, 0.001);
+            BOOST_CHECK_CLOSE(y, 100.0, 0.001);
+            BOOST_CHECK_CLOSE(z, 100.0, 0.001);
         }
         else
         {
-            BOOST_CHECK(Utils::compare_approx(x, 200.0, (std::numeric_limits<double>::min)()) == true);
-            BOOST_CHECK(Utils::compare_approx(y, 200.0, (std::numeric_limits<double>::min)()) == true);
-            BOOST_CHECK(Utils::compare_approx(z, 200.0, (std::numeric_limits<double>::min)()) == true);
+            BOOST_CHECK_CLOSE(x, 200.0, 0.001);
+            BOOST_CHECK_CLOSE(y, 200.0, 0.001);
+            BOOST_CHECK_CLOSE(z, 200.0, 0.001);
+
         }
-        BOOST_CHECK(t == i % 100);
+        BOOST_CHECK_EQUAL(t, i % 100);
     }
 
     delete iter;
@@ -118,5 +126,41 @@ BOOST_AUTO_TEST_CASE(test1)
     return;
 }
 
+
+
+BOOST_AUTO_TEST_CASE(pipeline_mosaic)
+{
+
+    pdal::PipelineManager manager;
+    PipelineReader reader(manager);
+
+    reader.readPipeline(Support::datapath("pipeline/mosaic.xml"));
+    Stage* stage = manager.getStage();
+    BOOST_CHECK(stage != NULL);
+    stage->initialize();
+
+    const Schema& schema = stage->getSchema();
+    PointBuffer data(schema, 2*1065);
+    StageSequentialIterator* iter = stage->createSequentialIterator(data);
+    boost::uint32_t np = iter->read(data);
+    BOOST_CHECK_EQUAL(np, 2*1065u);
+
+
+    Dimension const& dimX = data.getSchema().getDimension("X1");
+    // std::cout << data.getSchema() << std::endl;
+    for (boost::uint32_t i=0; i<1065; i++)
+    {
+        boost::int32_t x = data.getField<boost::int32_t>(dimX, i);
+        BOOST_CHECK_EQUAL(x, 314);
+    }
+
+    boost::int32_t x2 = data.getField<boost::int32_t>(dimX, 1066);
+    BOOST_CHECK_EQUAL(x2, 0); // Past 1066, is the other data set due to mosaic filter
+            
+    delete iter;
+
+
+    return;
+}
 
 BOOST_AUTO_TEST_SUITE_END()
