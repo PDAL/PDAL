@@ -427,6 +427,12 @@ void Writer::WriteHeader(pdal::Schema const& schema)
         return;
     }
 
+    bool bPCD = boost::iequals(outputType, "PCD");
+    if (bPCD)
+    {
+        WritePCDHeader(schema);
+        return;
+    }
 
 
     return;
