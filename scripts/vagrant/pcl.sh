@@ -7,15 +7,15 @@ fi
 export NUMTHREADS
 
 
-git clone https://github.com/PDAL/PDAL.git pdal
-cd pdal
+git clone https://github.com/chambbj/pcl.git pcl
+cd pcl
 mkdir build
 cd build
-git checkout feature/pcl-block
+git checkout develop
 cmake   -G "Unix Makefiles"  \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=/usr \
-        -DWITH_PCL=ON \
+        -DBUILD_global_tests=ON \
         ..
 
 make -j $NUMTHREADS

@@ -43,6 +43,7 @@
 #include <pdal/drivers/las/Reader.hpp>
 #include <pdal/drivers/las/Writer.hpp>
 
+#include <pdal/drivers/pipeline/Reader.hpp>
 
 #ifdef PDAL_HAVE_ORACLE
 #ifndef USE_PDAL_PLUGIN_OCI

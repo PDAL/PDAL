@@ -486,6 +486,7 @@ set(PDAL_FILTERS_HPP
   "${PDAL_FILTERS_HEADERS}/HexBin.hpp"
   "${PDAL_FILTERS_HEADERS}/InPlaceReprojection.hpp"
   "${PDAL_FILTERS_HEADERS}/Mosaic.hpp"
+  "${PDAL_FILTERS_HEADERS}/PCLBlock.hpp"
   "${PDAL_FILTERS_HEADERS}/PointBufferCache.hpp"
   "${PDAL_FILTERS_HEADERS}/Predicate.hpp"
   "${PDAL_FILTERS_HEADERS}/Programmable.hpp"
@@ -506,6 +507,7 @@ set (PDAL_FILTERS_CPP
   "${PDAL_FILTERS_SRC}/HexBin.cpp"
   "${PDAL_FILTERS_SRC}/InPlaceReprojection.cpp"
   "${PDAL_FILTERS_SRC}/Mosaic.cpp"
+  "${PDAL_FILTERS_SRC}/PCLBlock.cpp"
   "${PDAL_FILTERS_SRC}/PointBufferCache.cpp"
   "${PDAL_FILTERS_SRC}/Predicate.cpp"
   "${PDAL_FILTERS_SRC}/Programmable.cpp"  
@@ -691,6 +693,10 @@ endif()
 
 if (WITH_PYTHON)
     target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE} "${PYTHON_LIBRARY}")
+endif()
+
+if (WITH_PCL)
+    target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE} ${PCL_LIBRARIES})
 endif()
 
   target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE}

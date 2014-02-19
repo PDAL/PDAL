@@ -1,0 +1,74 @@
+.. _filters.pclblock:
+
+filters.pclblock
+================
+
+The PCL Block filter allows users to specify a block of Point Cloud Library (PCL) operations on a PDAL PointBuffer, applying the necessary conversions between PDAL and PCL point cloud representations.
+
+This filter is under active development. The current implementation serves as a proof of concept for linking PCL into PDAL and converting data. Rather than providing access to the full suite of PCL filters, the prototype code simply calls PCL's PassThrough filter, removing points whose Z dimension values fall outside predefined bounds [400,500].
+
+Example
+-------
+
+.. code-block:: xml
+
+  <?xml version="1.0" encoding="utf-8"?>
+  <Pipeline version="1.0">
+    <Writer type="drivers.las.writer">
+      <Option name="filename">
+        filtered_cloud.las
+      </Option>
+      <Filter type="filters.pclblock">
+        <Option name="filename">
+          block.json
+        </Option>
+        <Reader type="drivers.las.reader">
+          <Option name="filename">
+            input_cloud.las
+          </Option>
+        </Reader>
+      </Filter>
+    </Writer>
+  </Pipeline>
+
+Future PCL Block Definition
+---------------------------
+
+In the future, the PCL block will likely take a single option, a filename specifying an XML or JSON description of the PCL operations to be applied within the PCL block. The PCL Block filter will then always call a to be developed PCL "Pipeline" that in turn interprets the PCL block or pipeline of operations.
+
+For example, the PCL tutorial for extracting indices from a point cloud found at http://pointclouds.org/documentation/tutorials/extract_indices.php#extract-indices may be implemented within a PDAL pipeline as follows...
+
+.. code-block:: json
+
+  { "name", "ExtractIndicesExample",
+    "filter": {
+      "name": "VoxelGrid",
+      "options": {
+        "setLeafSizeX": 0.01,
+        "setLeafSizeY": 0.01,
+        "setLeafSizeZ": 0.01
+      }
+    },
+    "filter": {
+      "name": "SACSegmentation",
+      "options": {
+        "setOptimizeCoefficients": true,
+        "setModelType": SACMODEL_PLANE,
+        "setMethodType": SAC_RANSAC,
+        "setMaxIterations": 1000,
+        "setDistanceThreshold": 0.01
+      }
+    },
+    "filter": {
+      "name": "ExtractIndices",
+      "options": {
+        "setNegative": false
+      }
+    }
+  }
+
+Options
+-------
+
+The PCL Block filter currently takes no options.
+

@@ -776,6 +776,21 @@ inline void copyOver(boost::uint8_t *destination_position,
 }
 
 
+void PointBuffer::extractIndices(PointBuffer const& source,
+		PointBuffer& destination,
+		std::vector<int> indices)
+{
+	destination.setNumPoints(indices.size());
+
+	size_t j = 0;
+
+	for (size_t i = 0; i < indices.size(); ++i)
+		destination.copyPointFast(j++, indices[i], source);
+
+	return;
+}
+
+
 void PointBuffer::copyLikeDimensions(PointBuffer const& source,
                                      PointBuffer& destination,
                                      schema::DimensionMap const& dimensions,
