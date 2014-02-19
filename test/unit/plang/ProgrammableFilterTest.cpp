@@ -35,6 +35,7 @@
 #include <pdal/pdal_internal.hpp>
 #ifdef PDAL_HAVE_PYTHON
 
+#include "Support.hpp"
 #include <boost/test/unit_test.hpp>
 
 #include <pdal/filters/Programmable.hpp>
@@ -42,6 +43,10 @@
 #include <pdal/drivers/faux/Reader.hpp>
 #include <pdal/drivers/faux/Writer.hpp>
 #include <pdal/drivers/pipeline/Reader.hpp>
+
+
+#include <pdal/PipelineReader.hpp>
+#include <pdal/PipelineManager.hpp>
 
 BOOST_AUTO_TEST_SUITE(ProgrammableFilterTest)
 
@@ -92,14 +97,45 @@ BOOST_AUTO_TEST_CASE(ProgrammableFilterTest_test1)
     const double minZ = writer.getMinZ();
     const double maxZ = writer.getMaxZ();
 
-    BOOST_CHECK(Utils::compare_approx<double>(minX, 10.0, 0.001));
-    BOOST_CHECK(Utils::compare_approx<double>(maxX, 11.0, 0.001));
+    BOOST_CHECK_CLOSE(minX, 10.0, 0.001);
+    BOOST_CHECK_CLOSE(maxX, 11.0, 0.001);
 
-    BOOST_CHECK(Utils::compare_approx<double>(minY, 0.0, 0.001));
-    BOOST_CHECK(Utils::compare_approx<double>(maxY, 1.0, 0.001));
+    BOOST_CHECK_CLOSE(minY, 0.0, 0.001);
+    BOOST_CHECK_CLOSE(maxY, 1.0, 0.001);
 
-    BOOST_CHECK(Utils::compare_approx<double>(minZ, 3.14, 0.001));
-    BOOST_CHECK(Utils::compare_approx<double>(maxZ, 3.14, 0.001));
+    BOOST_CHECK_CLOSE(minZ, 3.14, 0.001);
+    BOOST_CHECK_CLOSE(maxZ, 3.14, 0.001);
+
+    return;
+}
+
+BOOST_AUTO_TEST_CASE(pipeline)
+{
+
+    pdal::PipelineManager manager;
+    PipelineReader reader(manager);
+
+    reader.readPipeline(Support::datapath("pipeline/create-dimension.xml"));
+    Stage* stage = manager.getStage();
+    BOOST_CHECK(stage != NULL);
+    stage->initialize();
+
+    const Schema& schema = stage->getSchema();
+    PointBuffer data(schema, 2*1065);
+    StageSequentialIterator* iter = stage->createSequentialIterator(data);
+    boost::uint32_t np = iter->read(data);
+    BOOST_CHECK_EQUAL(np, 1065u);
+
+
+    Dimension const& dimX = data.getSchema().getDimension("Y");
+    // std::cout << data.getSchema() << std::endl;
+    for (boost::uint32_t i=0; i<10; i++)
+    {
+        boost::int32_t x = data.getField<boost::int32_t>(dimX, i);
+        BOOST_CHECK_EQUAL(x, 314);
+    }
+            
+    delete iter;
 
     return;
 }

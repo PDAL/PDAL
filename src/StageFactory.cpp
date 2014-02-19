@@ -206,11 +206,17 @@ std::string StageFactory::inferWriterDriver(const std::string& filename, pdal::O
         options.add("compression", true);
     }
 
+    if (boost::algorithm::iequals(ext,".pcd"))
+    {
+        options.add("format","PCD");
+    }
+
     options.add<std::string>("filename", filename);
 
     std::map<std::string, std::string> drivers;
     drivers["las"] = "drivers.las.writer";
     drivers["laz"] = "drivers.las.writer";
+    drivers["pcd"] = "drivers.text.writer";
     drivers["xyz"] = "drivers.text.writer";
     drivers["txt"] = "drivers.text.writer";
     drivers["ntf"] = "drivers.nitf.writer";
