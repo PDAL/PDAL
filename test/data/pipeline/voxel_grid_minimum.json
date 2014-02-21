@@ -1,0 +1,15 @@
+{
+  "pipeline": {
+    "name": "GridMinimumExample",
+    "filters": [
+      { "name": "GridMinimum",
+        "setLeafSize": {
+          "x": 500.0,
+          "y": 500.0,
+          "z": 99999.0
+        }
+      }
+    ]
+  }
+}
+
