@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_passthrough)
 
         pdal::drivers::las::Reader reader(options);
 
-        pdal::Option fname("filename", Support::datapath("pipeline/passthrough.json"));
+        pdal::Option fname("filename", Support::datapath("filters/pcl/passthrough.json"));
 
         pdal::Options filter_options;
 
@@ -100,7 +100,7 @@ BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_outlier_removal)
 
         pdal::drivers::las::Reader reader(options);
 
-        pdal::Option fname("filename", Support::datapath("pipeline/outlier_removal.json"));
+        pdal::Option fname("filename", Support::datapath("filters/pcl/outlier_removal.json"));
 
         pdal::Options filter_options;
 

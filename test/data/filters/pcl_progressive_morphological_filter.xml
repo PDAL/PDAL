@@ -6,7 +6,7 @@
         </Option>
 	<Filter type="filters.pclblock">
 	    <Option name="filename">
-                voxel_grid_minimum.json
+                pcl/progressive_morphological_filter.json
             </Option>
             <Reader type="drivers.las.reader">
                 <Option name="filename">

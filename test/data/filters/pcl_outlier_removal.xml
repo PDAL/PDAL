@@ -6,7 +6,7 @@
         </Option>
 	<Filter type="filters.pclblock">
 	    <Option name="filename">
-                outlier_removal.json
+                pcl/outlier_removal.json
             </Option>
             <Reader type="drivers.las.reader">
                 <Option name="filename">
