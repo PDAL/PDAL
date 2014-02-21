@@ -1,74 +1,103 @@
 .. _filters.pclblock:
 
+===============================================================================
 filters.pclblock
-================
+===============================================================================
 
-The PCL Block filter allows users to specify a block of Point Cloud Library (PCL) operations on a PDAL PointBuffer, applying the necessary conversions between PDAL and PCL point cloud representations.
+The PCL Block filter allows users to specify a block of Point Cloud Library
+(PCL) operations on a PDAL PointBuffer, applying the necessary conversions
+between PDAL and PCL point cloud representations.
 
-This filter is under active development. The current implementation serves as a proof of concept for linking PCL into PDAL and converting data. Rather than providing access to the full suite of PCL filters, the prototype code simply calls PCL's PassThrough filter, removing points whose Z dimension values fall outside predefined bounds [400,500].
+This filter is under active development. The current implementation serves as a
+proof of concept for linking PCL into PDAL and converting data. The PCL Block
+creates a PCL Pipeline object (only available in development branch) and passes
+a single argument, the JSON file containing the PCL block definition. After
+filtering, the resulting indices can be retrieved and used to create a new PDAL
+PointBuffer containing only those points that passed the filtering stages.
 
-Example
--------
+At this stage in its development, the PCL Pipeline does not allow complex
+operations that may change the point type (e.g., PointXYZ to PointNormal) or
+alter points.  We will continue to look into use cases that are of value and
+feasible, but for now are limited primarily to PCL functions that filter or
+segment the point cloud, returning a list of indices of the filtered points
+(e.g., ground or object, noise or signal). The main reason for this design
+decision is that we want to avoid converting all PointBuffer dimensions to the
+PCL PointCloud. In the case of an LAS reader, we may very well not want to
+operate on fields such as return number, but we do not want to lose this
+information post PCL filtering. The easy solution is to simply retain the index
+between the PointBuffer and PointCloud objects and update as necessary.
 
-.. code-block:: xml
+.. seealso::
 
-  <?xml version="1.0" encoding="utf-8"?>
-  <Pipeline version="1.0">
-    <Writer type="drivers.las.writer">
-      <Option name="filename">
-        filtered_cloud.las
-      </Option>
-      <Filter type="filters.pclblock">
-        <Option name="filename">
-          block.json
-        </Option>
-        <Reader type="drivers.las.reader">
-          <Option name="filename">
-            input_cloud.las
-          </Option>
-        </Reader>
-      </Filter>
-    </Writer>
-  </Pipeline>
+    See :ref:`pcl_block_tutorial` for more on using the PCL Block including
+    examples.
 
-Future PCL Block Definition
----------------------------
+Options
+-------------------------------------------------------------------------------
 
-In the future, the PCL block will likely take a single option, a filename specifying an XML or JSON description of the PCL operations to be applied within the PCL block. The PCL Block filter will then always call a to be developed PCL "Pipeline" that in turn interprets the PCL block or pipeline of operations.
+filename
+  JSON file to read [Required]
 
-For example, the PCL tutorial for extracting indices from a point cloud found at http://pointclouds.org/documentation/tutorials/extract_indices.php#extract-indices may be implemented within a PDAL pipeline as follows...
+PCL Block Schema
+-------------------------------------------------------------------------------
 
 .. code-block:: json
 
-  { "name", "ExtractIndicesExample",
-    "filter": {
-      "name": "VoxelGrid",
-      "options": {
-        "setLeafSizeX": 0.01,
-        "setLeafSizeY": 0.01,
-        "setLeafSizeZ": 0.01
-      }
-    },
-    "filter": {
-      "name": "SACSegmentation",
-      "options": {
-        "setOptimizeCoefficients": true,
-        "setModelType": SACMODEL_PLANE,
-        "setMethodType": SAC_RANSAC,
-        "setMaxIterations": 1000,
-        "setDistanceThreshold": 0.01
-      }
-    },
-    "filter": {
-      "name": "ExtractIndices",
-      "options": {
-        "setNegative": false
+    {
+      "pipeline": {
+        "name": "PCL-Block-Name",
+        "filters": [{
+            "name": "FilterName",
+            "setParameter": "value"
+          }, {
+            "name": "AnotherFilterName",
+            "setParameter": "value"
+        }]
       }
     }
-  }
 
-Options
--------
+Implemented Filters
+-------------------------------------------------------------------------------
 
-The PCL Block filter currently takes no options.
+The list of PCL filters that are accessible through the PCL Block depends on
+PCL itself. PDAL is rather dumb in this respect, merely converting the PDAL
+PointBuffer to a PCL PointCloud object and passing the JSON filename. The
+parsing of the JSON file and implementation of the PCL filters is entirely
+embedded within the PCL Pipeline. The list of filters and their paremeters as
+of this writing includes:
 
+PassThrough
+...............................................................................
+
+setFilterFieldName
+  TBD
+
+setFilterLimits (min, max)
+  TBD - default = +/- FLT_MAX
+
+StatisticalOutlierRemoval
+...............................................................................
+
+setMeanK
+  default = 2
+
+setStddevMulThresh
+  default = 0.0
+
+RadiusOutlierRemoval
+...............................................................................
+
+setMinNeighborsInRadius
+  default = 2
+
+setRadiusSearch
+  default = 1.0
+
+GridMinimum
+...............................................................................
+
+setLeafSize (x, y, z)
+  default = 1.0
+
+ProgressiveMorphologicalFilter
+...............................................................................

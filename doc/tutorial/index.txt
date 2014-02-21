@@ -13,4 +13,5 @@ Contents:
    
    reading
    writing
+   pcl_block_tutorial
  
