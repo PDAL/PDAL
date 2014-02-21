@@ -16,8 +16,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.network :forwarded_port, guest: 80, host: 8080
 
   config.vm.provider :virtualbox do |vb|
-     vb.customize ["modifyvm", :id, "--memory", "8192"]
-     vb.customize ["modifyvm", :id, "--cpus", "4"]
+     vb.customize ["modifyvm", :id, "--memory", "4096"]
+     vb.customize ["modifyvm", :id, "--cpus", "2"]
      vb.customize ["modifyvm", :id, "--ioapic", "on"]
      vb.name = "pdal-vagrant"
    end  
