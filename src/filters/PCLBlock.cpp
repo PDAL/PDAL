@@ -45,7 +45,6 @@
 #ifdef PDAL_HAVE_PCL
 #include <pcl/console/print.h>
 #include <pcl/point_types.h>
-//#include <pcl/filters/passthrough.h>
 #include <pcl/pipeline/pipeline.h>
 #include <pcl/io/pcd_io.h>
 #endif
@@ -74,15 +73,14 @@ PCLBlock::processBuffer(PointBuffer& srcData, std::string& filename, PointBuffer
 
     log()->get(logDEBUG2) << "Process PCLBlock..." << std::endl;
 
-    // convert PointBuffer to PointXYZ
-    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
-    pdal::PDALtoPCD(srcData, *cloud);
+    // convert PointBuffer to PointNormal
+    pcl::PointCloud<pcl::PointNormal>::Ptr cloud(new pcl::PointCloud<pcl::PointNormal>);
+    pdal::PDALtoPCD (srcData, *cloud);
 
     log()->get(logDEBUG2) << cloud->points[0].x << ", " << cloud->points[0].y << ", " << cloud->points[0].z << std::endl;
 
-    // create PointCloud and vector for results
-    //pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered(new pcl::PointCloud<pcl::PointXYZ>);
-    std::vector<int> indices;
+    // create PointCloud for results
+    pcl::PointCloud<pcl::PointNormal>::Ptr cloud_f(new pcl::PointCloud<pcl::PointNormal>);
 
     int level = log()->getLevel();
     switch (level)
@@ -112,17 +110,14 @@ PCLBlock::processBuffer(PointBuffer& srcData, std::string& filename, PointBuffer
 	    break;
     }
 
-    pcl::Pipeline<pcl::PointXYZ> pipeline;
-    pipeline.setInputCloud( cloud );
-    pipeline.setJSON( filename );
-    pipeline.filter( indices );
+    pcl::Pipeline<pcl::PointNormal> pipeline;
+    pipeline.setInputCloud(cloud);
+    pipeline.setJSON(filename);
+    pipeline.filter(*cloud_f);
 
-    PointBuffer::extractIndices(srcData, dstData, indices);
+    pdal::PCDtoPDAL(*cloud_f, dstData);
 
-    log()->get(logDEBUG2) << cloud->points.size() << " before, " << indices.size() << " after" << std::endl;
-
-    // copy PointXYZ back to PointBuffer
-    //pdal::PCDtoPDAL(*cloud_filtered, dstData);
+    log()->get(logDEBUG2) << cloud->points.size() << " before, " << cloud_f->points.size() << " after" << std::endl;
 
     log()->get(logDEBUG2) << dstData.getNumPoints() << std::endl;
 
