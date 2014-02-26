@@ -70,7 +70,7 @@ And is run from the command line thusly.
 
 ::
 
-    $ pdal pipeline -i /path/to/xml -v 4
+    $ pdal pipeline -i /path/to/xml
 
 Simple point cloud cropping
 ..............................................................................
@@ -145,9 +145,9 @@ PDAL source code, just do the following:
     $ vagrant up
     $ vagrant ssh
 
-The `vagrant up` command will take a considerable amount of time, but once its
-completed you have a fully functional VM with both PCL and PDAL installed. Try
-entering
+The ```vagrant up``` command will take a considerable amount of time, but once
+its completed you have a fully functional VM with both PCL and PDAL installed.
+Try entering
 
 ::
 
@@ -168,7 +168,7 @@ example above by typing
 
 ::
 
-    $ pdal pipeline -i pdal/test/data/pipeline/pipeline_pclblock_passthrough.xml -v4
+    $ pdal pipeline -i pdal/test/data/filters/pcl_passthrough.xml -v4
 
 which should produce
 
@@ -177,7 +177,7 @@ which should produce
     Requested to read 106 points
     Requested to write 106 points
     0
-    Processing /home/vagrant/pdal/test/data/pipeline/passthrough.json
+    Processing /home/vagrant/pdal/test/data/filters/pcl/passthrough.json
 
     --------------------------------------------------------------------------------
     NAME:   PassThroughExample ()
