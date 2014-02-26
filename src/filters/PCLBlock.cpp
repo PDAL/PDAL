@@ -58,6 +58,8 @@ namespace filters
 boost::uint32_t
 PCLBlock::processBuffer(PointBuffer& srcData, std::string& filename, PointBuffer& dstData) const
 {
+    boost::uint32_t numPointsAfterFiltering = srcData.getNumPoints();
+
 #ifdef PDAL_HAVE_PCL
     bool logOutput = log()->getLevel() > logDEBUG1;
     if (logOutput)
@@ -113,18 +115,28 @@ PCLBlock::processBuffer(PointBuffer& srcData, std::string& filename, PointBuffer
     pcl::Pipeline<pcl::PointNormal> pipeline;
     pipeline.setInputCloud(cloud);
     pipeline.setJSON(filename);
+    pipeline.setOffsets(dX.getNumericOffset(), dY.getNumericOffset(), dZ.getNumericOffset());
     pipeline.filter(*cloud_f);
 
-    pdal::PCDtoPDAL(*cloud_f, dstData);
+    if (cloud_f->points.size() > 0)
+    {
+      pdal::PCDtoPDAL(*cloud_f, dstData);
 
-    log()->get(logDEBUG2) << cloud->points.size() << " before, " << cloud_f->points.size() << " after" << std::endl;
+      log()->get(logDEBUG2) << cloud->points.size() << " before, " << cloud_f->points.size() << " after" << std::endl;
 
-    log()->get(logDEBUG2) << dstData.getNumPoints() << std::endl;
+      log()->get(logDEBUG2) << dstData.getNumPoints() << std::endl;
 
-    log()->get(logDEBUG2) << dstData.applyScaling(dX, 0) << ", " << dstData.applyScaling(dY, 0) << ", " << dstData.applyScaling(dZ, 0) << std::endl;
+      log()->get(logDEBUG2) << dstData.applyScaling(dX, 0) << ", " << dstData.applyScaling(dY, 0) << ", " << dstData.applyScaling(dZ, 0) << std::endl;
+    }
+    else
+    {
+      log()->get(logDEBUG2) << "Filtered cloud has no points!" << std::endl;
+    }
+
+    numPointsAfterFiltering = cloud_f->points.size();
 #endif
 
-    return srcData.getNumPoints();
+    return numPointsAfterFiltering;
 }
 
 PCLBlock::PCLBlock(Stage& prevStage, const Options& options)
