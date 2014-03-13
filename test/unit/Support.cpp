@@ -54,11 +54,11 @@
 //#pragma GCC diagnostic ignored "-Wsign-compare"
 #endif
 
+using namespace std;
 
-std::string Support::datapath()
+string Support::datapath()
 {
-    const std::string s = TestConfig::g_data_path;
-    return s;
+    return TestConfig::g_data_path;
 }
 
 bool Support::compare_stage_data(pdal::Stage const& a, pdal::Stage const& b)
@@ -71,11 +71,11 @@ bool Support::compare_stage_data(pdal::Stage const& a, pdal::Stage const& b)
     boost::uint64_t b_num_points64 = b.getNumPoints();
     if (a_num_points64 > std::numeric_limits<boost::uint32_t>::max() ||
             b_num_points64 > std::numeric_limits<boost::uint32_t>::max())
-        throw pdal::pdal_error("unable to do compare_stage_data for > 2^32 points");
+        throw pdal::pdal_error("unable to do compare_stage_data for "
+            "> 2^32 points");
     boost::uint32_t a_num_points = static_cast<boost::uint32_t>(a_num_points64);
     boost::uint32_t b_num_points = static_cast<boost::uint32_t>(b_num_points64);
     if (a_num_points != b_num_points) return false;
-
 
     // if we don't have any sizes here, we'll just use a small default
     if (a_num_points == 0) a_num_points = 1024;
@@ -87,10 +87,12 @@ bool Support::compare_stage_data(pdal::Stage const& a, pdal::Stage const& b)
     pdal::StageSequentialIterator* a_itr = a.createSequentialIterator(a_data);
     pdal::StageSequentialIterator* b_itr = b.createSequentialIterator(b_data);
 
-    if (!a_itr) throw pdal::pdal_error("unable to create sequential iterator for compare_stage_data for stage a");
-    if (!b_itr) throw pdal::pdal_error("unable to create sequential iterator for compare_stage_data for stage b");
-
-
+    if (!a_itr)
+        throw pdal::pdal_error("unable to create sequential iterator for "
+            "compare_stage_data for stage a");
+    if (!b_itr)
+        throw pdal::pdal_error("unable to create sequential iterator for "
+            "compare_stage_data for stage b");
 
     {
         boost::uint32_t a_numRead = a_itr->read(a_data);
@@ -112,48 +114,36 @@ bool Support::compare_stage_data(pdal::Stage const& a, pdal::Stage const& b)
             ++a_bytes;
             ++b_bytes;
         }
-
     }
-
     return true;
-
 }
 
 std::string Support::datapath(const std::string& file)
 {
-    const std::string s = datapath() + file;
-    return s;
+    return datapath() + file;
 }
-
 
 std::string Support::temppath()
 {
-    const std::string s = TestConfig::g_data_path + "../temp/";
-    return s;
+    return TestConfig::g_data_path + "../temp/";
 }
-
 
 std::string Support::temppath(const std::string& file)
 {
-    const std::string s = temppath() + file;
-    return s;
+    return temppath() + file;
 }
-
 
 std::string Support::binpath()
 {
-    std::string argv0 = boost::unit_test::framework::master_test_suite().argv[0];
-    std::string path = pdal::FileUtils::toAbsolutePath(argv0);
+    string argv0 = boost::unit_test::framework::master_test_suite().argv[0];
+    string path = pdal::FileUtils::toAbsolutePath(argv0);
     return pdal::FileUtils::getDirectory(path);
 }
 
-
 std::string Support::binpath(const std::string& file)
 {
-    const std::string s = binpath() + file;
-    return s;
+    return binpath() + file;
 }
-
 
 std::string Support::exename(const std::string& name)
 {
@@ -236,8 +226,9 @@ boost::uint32_t Support::diff_text_files(const std::string& file1, const std::st
 }
 
 
-boost::uint32_t Support::diff_files(const std::string& file1, const std::string& file2,
-                                    boost::uint32_t ignorable_start, boost::uint32_t ignorable_length)
+boost::uint32_t Support::diff_files(const std::string& file1,
+    const std::string& file2, boost::uint32_t ignorable_start,
+    boost::uint32_t ignorable_length)
 {
     boost::uint32_t start[] = { ignorable_start };
     boost::uint32_t len[] = { ignorable_length };
@@ -246,8 +237,9 @@ boost::uint32_t Support::diff_files(const std::string& file1, const std::string&
 
 
 // do a byte-wise comparison of two (binary) files
-boost::uint32_t Support::diff_files(const std::string& file1, const std::string& file2,
-                                    boost::uint32_t* ignorable_start, boost::uint32_t* ignorable_length, boost::uint32_t num_ignorables)
+boost::uint32_t Support::diff_files(const std::string& file1,
+    const std::string& file2, boost::uint32_t* ignorable_start,
+    boost::uint32_t* ignorable_length, boost::uint32_t num_ignorables)
 {
     if (!pdal::FileUtils::fileExists(file1) ||
             !pdal::FileUtils::fileExists(file2))
@@ -288,12 +280,13 @@ boost::uint32_t Support::diff_files(const std::string& file1, const std::string&
             }
             else
             {
-                // only count the difference if we are NOT in an ignorable region
+                // only count the difference if we are NOT in an ignorable
+                // region
                 bool is_ignorable = false;
                 for (boost::uint32_t region=0; region<num_ignorables; region++)
                 {
-                    const boost::uint32_t start = ignorable_start[region];
-                    const boost::uint32_t end = start + ignorable_length[region];
+                    boost::uint32_t start = ignorable_start[region];
+                    boost::uint32_t end = start + ignorable_length[region];
                     if (i >= start && i < end)
                     {
                         // we are in an ignorable region!
@@ -324,7 +317,8 @@ boost::uint32_t Support::diff_files(const std::string& file1, const std::string&
 }
 
 
-boost::uint32_t Support::diff_files(const std::string& file1, const std::string& file2)
+boost::uint32_t Support::diff_files(const std::string& file1,
+    const std::string& file2)
 {
     return diff_files(file1, file2, NULL, NULL, 0);
 }

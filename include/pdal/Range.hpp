@@ -72,16 +72,6 @@ public:
     {
     }
 
-    Range& operator=(Range<T> const& rhs)
-    {
-        if (&rhs != this)
-        {
-            m_minimum = rhs.m_minimum;
-            m_maximum = rhs.m_maximum;
-        }
-        return *this;
-    }
-
     bool operator==(Range<T> const& rhs) const
     {
         return equal(rhs);

@@ -56,33 +56,28 @@ namespace pdal
     namespace pointbuffer
     {
         typedef boost::uuids::uuid id;
-        // typedef std::vector<boost::uint8_t>::size_type PointBufferByteSize;
         typedef boost::uint64_t PointBufferByteSize;
-        
-        // typedef boost::interprocess::allocator<boost::uint8_t, boost::interprocess::managed_shared_memory::segment_manager>     ShmemAllocator; 
-        // typedef boost::container::vector<boost::uint8_t, ShmemAllocator> PointBufferVector;
-
     } // pointbuffer
 
     
 /// A PointBuffer is the object that is passed through pdal::Stage instances
-/// to form a pipeline. A PointBuffer is composed of a pdal::Schema that determines
-/// the layout of the data contained within, along with a dictionary of pdal::Metadata
-/// entries. The capacity of a PointBuffer is determined by the number of points
-/// it contains, and the number of points possible in a PointBuffer is limited to
-/// std::numeric_limits<boost::uint32_t>::max().  Underneath the covers, a PointBuffer
-/// is simply the composed array of bytes described in the pdal::Schema. You can
-/// operate on the raw bytes if you need to, but PointBuffer provides a number of
-/// convienence methods to make things easier. 
+/// to form a pipeline. A PointBuffer is composed of a pdal::Schema that
+/// determines the layout of the data contained within, along with a dictionary
+/// of pdal::Metadata entries. The capacity of a PointBuffer is determined by
+/// the number of points it contains, and the number of points possible in a
+/// PointBuffer is limited to std::numeric_limits<boost::uint32_t>::max().
+/// Underneath the covers, a PointBuffer is simply the composed array of bytes
+/// described in the pdal::Schema. You can operate on the raw bytes if you need
+/// to, but PointBuffer provides a number of convienence methods to make things
+/// easier. 
 /*! 
     \verbatim embed:rst
     .. note::
 
-        The arrangement of PointBuffer's bytes might either be point-interleaved or
-        dimension-interleaved, with point-interleave being the default organization.
-        If you are directly modifying a PointBuffer's bytes, you must respect the 
-        :cpp:class:`pdal::pointbuffer::Orientation`. 
-        
+        The arrangement of PointBuffer's bytes might either be
+        point-interleaved or dimension-interleaved, with point-interleave being
+        the default organization.  If you are directly modifying a PointBuffer's
+        bytes, you must respect the :cpp:class:`pdal::pointbuffer::Orientation`. 
     \endverbatim
 */    
 class PDAL_DLL PointBuffer
@@ -92,7 +87,8 @@ public:
     /** @name Constructors
     */
     /*! Base constructor for pdal::PointBuffer.
-        \param schema pdal::Schema instance to use to describe the layout. It is copied.
+        \param schema pdal::Schema instance to use to describe the layout.
+            It is copied.
         \param capacity size of the pdal::PointBuffer in number of points.
     */
     PointBuffer(const Schema& schema, boost::uint32_t capacity=65536);
@@ -234,8 +230,6 @@ public:
         memcpy(dest, src, m_byteSize);
 
         assert(m_numPoints <= m_capacity);
-
-        return;
     }
 
     /*! bulk copy all the fields from the given point into this object
@@ -278,7 +272,7 @@ public:
         pointbuffer::PointBufferByteSize position(0);
         if (m_orientation == schema::POINT_INTERLEAVED)
         {
-            position =  static_cast<pointbuffer::PointBufferByteSize>(m_byteSize) * \
+            position = static_cast<pointbuffer::PointBufferByteSize>(m_byteSize) * \
                         static_cast<pointbuffer::PointBufferByteSize>(pointIndex);
             
         }
@@ -966,23 +960,26 @@ inline void PointBuffer::scaleData(PointBuffer const& source,
 
 template <class T>
 inline void PointBuffer::scale(Dimension const& source_dimension,
-                           Dimension const& destination_dimension,
-                           T& value)
+    Dimension const& destination_dimension, T& value)
 {
-
     double v = static_cast<double>(value);
-    double out = (v*source_dimension.getNumericScale() + source_dimension.getNumericOffset() - destination_dimension.getNumericOffset())/destination_dimension.getNumericScale();
+    double out = (v*source_dimension.getNumericScale() +
+        source_dimension.getNumericOffset() -
+        destination_dimension.getNumericOffset()) /
+            destination_dimension.getNumericScale();
 
     T output = static_cast<T>(out);
 
-    if (std::numeric_limits<T>::is_exact) //
+    if (std::numeric_limits<T>::is_exact)
     {
         if (Utils::compare_distance<T>(output, (std::numeric_limits<T>::max)()))
         {
             std::ostringstream oss;
             oss << "PointBuffer::scale: scale and/or offset combination causes "
-                "re-scaled value to be greater than std::numeric_limits::max for dimension '" << destination_dimension.getName() << "'. " <<
-                "value is: " << output << " and max() is: " << (std::numeric_limits<T>::max)();
+                "re-scaled value to be greater than std::numeric_limits::max "
+                "for dimension '" << destination_dimension.getName() <<
+                "'. " << "value is: " << output << " and max() is: " <<
+                (std::numeric_limits<T>::max)();
         }
         else if (Utils::compare_distance<T>(output, (std::numeric_limits<T>::min)()))
         {
@@ -1028,28 +1025,32 @@ public:
         throw std::runtime_error(oss.str());
     }
 
-    double kdtree_distance(const double *p1, const size_t idx_p2,size_t size) const
+    double kdtree_distance(const double *p1, const size_t idx_p2,
+        size_t size) const
     {
-        const double d0 = applyScaling(*m_dimX, idx_p2) - applyScaling(*m_dimX, size-1);
-        const double d1 = applyScaling(*m_dimY, idx_p2) - applyScaling(*m_dimY, size-1);
+        double d0 = applyScaling(*m_dimX, idx_p2) -
+            applyScaling(*m_dimX, size-1);
+        double d1 = applyScaling(*m_dimY, idx_p2) -
+            applyScaling(*m_dimY, size-1);
 
-    // const T d0=p1[0]-pts[idx_p2].x;
-    // const T d1=p1[1]-pts[idx_p2].y;
-    // const T d2=p1[2]-pts[idx_p2].z;
         double output(d0*d0+d1*d1);
         if (m_is3D)
         {
-            const double d2 = applyScaling(*m_dimZ, idx_p2) - applyScaling(*m_dimZ, size-1);
+            const double d2 = applyScaling(*m_dimZ, idx_p2) -
+                 applyScaling(*m_dimZ, size-1);
             output += d2*d2;
         }
-    return output;
+        return output;
     }
     
     template <class BBOX> bool kdtree_get_bbox(BBOX &bb) const ;
 
  
-    std::vector<size_t> neighbors(double const& x, double const& y, double const& z, double distance, boost::uint32_t count=1);
-    std::vector<size_t> radius(double const& x, double const& y, double const& z, double const& r);
+    std::vector<size_t>
+    neighbors(double const& x, double const& y, double const& z,
+        double distance, boost::uint32_t count=1);
+    std::vector<size_t> radius(double const& x, double const& y,
+        double const& z, double const& r);
     
     // /// Copy constructor. The data array is simply memcpy'd.
     // IndexedPointBuffer(const IndexedPointBuffer&) : PointBuffer(buffer) {}

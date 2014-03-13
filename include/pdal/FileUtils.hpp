@@ -52,10 +52,12 @@ class PDAL_DLL FileUtils
 {
 public:
     // open existing file for reading
-    static std::istream* openFile(std::string const& filename, bool asBinary=true);
+    static std::istream* openFile(std::string const& filename,
+        bool asBinary=true);
 
     // open new file for writing
-    static std::ostream* createFile(std::string const& filename, bool asBinary=true);
+    static std::ostream* createFile(std::string const& filename,
+        bool asBinary=true);
 
     static void closeFile(std::ostream* ofs);
     static void closeFile(std::istream* ifs);
@@ -72,7 +74,8 @@ public:
     // the result will always have a trailing '/'
     static std::string getcwd();
 
-    // return the directory component of the given path, e.g. "d:/foo/bar/a.c" -> "d:/foo/bar"
+    // return the directory component of the given path,
+    // e.g. "d:/foo/bar/a.c" -> "d:/foo/bar"
     // the result will always have a trailing '/'
     static std::string getDirectory(const std::string& path);
 
@@ -80,14 +83,17 @@ public:
     static bool isAbsolutePath(const std::string& path);
 
     // if the filename is an absolute path, just return it
-    // otherwise, make it absolute (relative to current working dir) and return that
+    // otherwise, make it absolute (relative to current working dir)
+    // and return that
     static std::string toAbsolutePath(const std::string& filename);
 
     // if the filename is an absolute path, just return it
     // otherwise, make it absolute (relative to base dir) and return that
     //
-    // note: if base dir is not absolute, first make it absolute via toAbsolutePath(base)
-    static std::string toAbsolutePath(const std::string& filename, const std::string base);
+    // note: if base dir is not absolute, first make it absolute via
+    // toAbsolutePath(base)
+    static std::string toAbsolutePath(const std::string& filename,
+        const std::string base);
     
     static std::string readFileAsString(std::string const& filename);
 
@@ -97,7 +103,6 @@ private:
     FileUtils& operator=(const FileUtils&); // not implemented
     FileUtils(const FileUtils&); // not implemented;
 };
-
 
 } // namespace pdal
 

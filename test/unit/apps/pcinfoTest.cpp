@@ -43,7 +43,6 @@
 
 BOOST_AUTO_TEST_SUITE(pdalinfoTest)
 
-
 static std::string appName()
 {
     const std::string app = Support::binpath(Support::exename("pdal info"));
@@ -60,8 +59,6 @@ BOOST_AUTO_TEST_CASE(pdalinfoTest_no_input)
 
     const std::string expected = "Usage error: no action option specified";
     BOOST_CHECK_EQUAL(output.substr(0, expected.length()), expected);
-
-    return;
 }
 
 

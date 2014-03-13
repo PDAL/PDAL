@@ -48,8 +48,6 @@
 #include <sstream>
 #include <vector>
 
-#include <boost/filesystem.hpp>
-#include <boost/algorithm/string/erase.hpp>
 #include <boost/numeric/conversion/cast.hpp>
 
 namespace pdal
@@ -72,26 +70,22 @@ public:
     // compares two values to within a given tolerance
     // the value |tolerance| is compared to |actual - expected|
     template<class T>
-    static bool compare_approx(const T& actual, const T& expected, const T& tolerance)
+    static bool compare_approx(const T& actual, const T& expected,
+        const T& tolerance)
     {
-        const double diff = std::abs((double)actual - (double)expected);
-        const double delta = std::abs((double)tolerance);
-
-        if (diff > delta)
-        {
-            return false;
-        }
-        return true;
+        double diff = std::abs((double)actual - (double)expected);
+        return diff <= std::abs((double) tolerance);
     }
 
+    // Copy v into *t and increment dest by the sizeof v
     template<class T>
     static inline void write_field(boost::uint8_t*& dest, T v)
     {
         *(T*)(void*)dest = v;
         dest += sizeof(T);
-        return;
     }
 
+    // Return a 'T' from a stream and increment src by the sizeof 'T'
     template<class T>
     static inline T read_field(boost::uint8_t*& src)
     {
@@ -100,19 +94,24 @@ public:
         return tmp;
     }
 
+    // Copy data from dest to src and increment dest by the copied size.
     template<class T>
-    static inline void read_array_field(boost::uint8_t*& src, T* dest, std::size_t count)
+    static inline void read_array_field(boost::uint8_t*& src, T* dest,
+        std::size_t count)
     {
-        memcpy((boost::uint8_t*)dest, (boost::uint8_t*)(T*)src, sizeof(T)*count);
+        memcpy((boost::uint8_t*)dest, (boost::uint8_t*)(T*)src,
+            sizeof(T)*count);
         src += sizeof(T) * count;
-        return;
     }
 
+    // Read 'num' items from the source stream to the dest location
     template <typename T>
-    static inline void read_n(T& dest, std::istream& src, std::streamsize const& num)
+    static inline void read_n(T& dest, std::istream& src,
+        std::streamsize const& num)
     {
         if (!src.good())
-            throw std::runtime_error("pdal::Utils::read_n<T> input stream is not readable");
+            throw std::runtime_error("pdal::Utils::read_n<T> input stream is "
+                "not readable");
 
         char* p = as_buffer(dest);
         src.read(p, num);
@@ -121,10 +120,12 @@ public:
     }
 
     template <typename T>
-    static inline void write_n(std::ostream& dest, T const& src, std::streamsize const& num)
+    static inline void write_n(std::ostream& dest, T const& src,
+        std::streamsize const& num)
     {
         if (!dest.good())
-            throw std::runtime_error("pdal::Utils::write_n<T>: output stream is not writable");
+            throw std::runtime_error("pdal::Utils::write_n<T>: output stream "
+                "is not writable");
 
         T& tmp = const_cast<T&>(src);
 
@@ -140,7 +141,7 @@ public:
         return (r > 0.0) ? floor(r + 0.5) : ceil(r - 0.5);
     }
     
-    static inline std::vector<boost::uint8_t> hex_string_to_binary(std::string const& source)
+    static inline std::vector<boost::uint8_t>hex_string_to_binary(std::string const& source)
     {
         // Stolen from http://stackoverflow.com/questions/7363774/c-converting-binary-data-to-a-hex-string-and-back
         static int nibbles[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0, 0, 10, 11, 12, 13, 14, 15 };
@@ -156,19 +157,22 @@ public:
         return retval;
     }
 
-    static inline void binary_to_hex_stream(unsigned char* source, std::ostream& destination, int start, int end )
+    static inline void binary_to_hex_stream(unsigned char* source,
+        std::ostream& destination, int start, int end )
     {
         static char syms[] = "0123456789ABCDEF";
         for (int i = start; i != end; i++)
-            destination << syms[((source[i] >> 4) & 0xf)] << syms[source[i] & 0xf];
-
+            destination << syms[((source[i] >> 4) & 0xf)] <<
+                           syms[source[i] & 0xf];
     }
 
-    static inline std::string binary_to_hex_string(const std::vector<unsigned char>& source)
+    static inline std::string binary_to_hex_string(
+        const std::vector<unsigned char>& source)
     {
         static char syms[] = "0123456789ABCDEF";
         std::stringstream ss;
-        for (std::vector<unsigned char>::const_iterator it = source.begin(); it != source.end(); it++)
+        for (std::vector<unsigned char>::const_iterator it = source.begin();
+                it != source.end(); it++)
             ss << syms[((*it >> 4) & 0xf)] << syms[*it & 0xf];
 
         return ss.str();
@@ -177,7 +181,6 @@ public:
     template<typename Target, typename Source>
     static inline Target saturation_cast(Source const& src)
     {
-
         try
         {
             return boost::numeric_cast<Target>(src);
@@ -190,7 +193,6 @@ public:
         {
             return std::numeric_limits<Target>::max();
         }
-
     }
     
     static void* registerPlugin( void* stageFactoryPtr, 
@@ -206,7 +208,8 @@ public:
     static void eatwhitespace(std::istream& s);
 
     // aid to operator>> parsers
-    // if char found, eats it and returns true; otherwise, don't eat it and then return false
+    // if char found, eats it and returns true; otherwise, don't eat it and
+    // then return false
     static bool eatcharacter(std::istream& s, char x);
 
     static boost::uint32_t getStreamPrecision(double scale);
@@ -217,11 +220,13 @@ public:
     static std::string generate_filename();
     static std::string generate_tempfile();
 
-    static void* getDLLSymbol(std::string const& library, std::string const& name);
+    static void* getDLLSymbol(std::string const& library,
+       std::string const& name);
     static std::string base64_encode(std::vector<boost::uint8_t> const& bytes);
     static std::vector<boost::uint8_t> base64_decode(std::string const& input);
     
-    static FILE* portable_popen(const std::string& command, const std::string& mode);
+    static FILE* portable_popen(const std::string& command,
+        const std::string& mode);
     static int portable_pclose(FILE* fp);
     static int run_shell_command(const std::string& cmd, std::string& output);
    
@@ -257,7 +262,6 @@ private:
         return static_cast<char const*>(static_cast<void const*>(data));
     }
 
-
     template <typename C, typename T>
     static inline bool check_stream_state(std::basic_ios<C, T>& srtm)
     {
@@ -271,9 +275,7 @@ private:
         return true;
     }
 
-
 };
-
 
 } // namespace pdal
 

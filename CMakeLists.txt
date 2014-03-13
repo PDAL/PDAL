@@ -91,8 +91,6 @@ set(PDAL_UNIT_TEST pdal_test)
 set(ENABLE_CTEST FALSE CACHE BOOL
   "Enable CTest to support submissions of results to CDash at http://cdash.org")
 
-
-
 #------------------------------------------------------------------------------
 # General build settings
 #------------------------------------------------------------------------------
@@ -127,7 +125,6 @@ if(NOT MSVC_IDE)
 endif()
 
 set(PDAL_BUILD_TYPE ${CMAKE_BUILD_TYPE})
-
 
 #------------------------------------------------------------------------------
 # Platform and compiler specific settings
@@ -177,7 +174,6 @@ if(WIN32)
   set(CMAKE_LIBRARY_PATH "c:/osgeo4w/lib;c:/OSGeo4W64/lib;$ENV{CMAKE_LIBRARY_PATH}")
 
   set(PDAL_PLATFORM_WIN32 1)
-
 else()
   # not WIN32
 
@@ -186,28 +182,27 @@ else()
   set(PDAL_COMMON_CXX_FLAGS
       "-Wextra -Wall -Wno-unused-parameter -Wno-unused-variable -Wpointer-arith -Wcast-align -Wcast-qual -Wfloat-equal -Wredundant-decls -Wno-long-long")
 
-  if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
-
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PDAL_COMMON_CXX_FLAGS}")
-    if (CMAKE_COMPILER_IS_GNUCXX)
-      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++98")
+    if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PDAL_COMMON_CXX_FLAGS}")
+        if (CMAKE_COMPILER_IS_GNUCXX)
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++98")
+        endif()
+        set(PDAL_COMPILER_GCC 1)
+    elseif("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" OR
+            "${CMAKE_CXX_COMPILER}" MATCHES "clang")
+         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PDAL_COMMON_CXX_FLAGS}")
+         set(PDAL_COMPILER_CLANG 1)
+#        set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
     endif()
-    
-    set(PDAL_COMPILER_GCC 1)
-    
-  elseif("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" OR "${CMAKE_CXX_COMPILER}" MATCHES "clang")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PDAL_COMMON_CXX_FLAGS}")
-    set(PDAL_COMPILER_CLANG 1)
-  endif()
 endif(WIN32)
 
 if (APPLE)
-  set(SO_EXT dylib)
-  set(CMAKE_FIND_FRAMEWORK "LAST")
+    set(SO_EXT dylib)
+    set(CMAKE_FIND_FRAMEWORK "LAST")
 elseif(WIN32)
-  set(SO_EXT dll)
+    set(SO_EXT dll)
 else()
-  set(SO_EXT so)
+    set(SO_EXT so)
 endif(APPLE)
 
 

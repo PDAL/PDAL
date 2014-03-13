@@ -48,7 +48,8 @@ class PDAL_DLL StageIterator
 {
 public:
     StageIterator(const Stage& stage, PointBuffer& buffer);
-    virtual ~StageIterator();
+    virtual ~StageIterator()
+        {}
 
     const Stage& getStage() const;
 
@@ -64,13 +65,13 @@ public:
     // (This function really just performs the readBegin..readEnd sequence)
     boost::uint32_t read(PointBuffer& buffer);
 
-    // These functions just call into the corresponding 'Impls that the derived stage
-    // provides, plus some of them do a little internal bookkeeping we don't want to have
-    // to make the derived stages keep track of.
+    // These functions just call into the corresponding 'Impls that the derived
+    // stage provides, plus some of them do a little internal bookkeeping we
+    // don't want to have to make the derived stages keep track of.
     //
-    // Mortal users are not intended to use these functions.  For read workflows, just
-    // call the above read() method.  For write workflows, Writer::write() will take
-    // care of calling these guys for you.
+    // Mortal users are not intended to use these functions.  For read
+    // workflows, just call the above read() method.  For write workflows,
+    // Writer::write() will take care of calling these guys for you.
     //
     // Sequence:
     //    - readBegin
@@ -125,7 +126,6 @@ private:
     bool m_readBeginPerformed;
     bool m_readBufferBeginPerformed;
 
-
     StageIterator& operator=(const StageIterator&); // not implemented
     StageIterator(const StageIterator&); // not implemented
 };
@@ -139,12 +139,13 @@ public:
 
     // advance N points ahead in the file
     //
-    // In some cases, this might be a very slow, painful function to call because
-    // it might entail physically reading the N points (and dropping the data on the
-    // floor)
+    // In some cases, this might be a very slow, painful function to call
+    // because it might entail physically reading the N points (and dropping
+    // the data on the floor)
     //
-    // Returns the number actually skipped (which might be less than count, if the
-    // end of the stage was reached first).
+    // Returns the number actually skipped (which might be less than count,
+    // if the end of the stage was reached first).
+    //
     boost::uint64_t skip(boost::uint64_t count);
 
     // returns true after we've read all the points available to this stage
@@ -153,10 +154,8 @@ public:
 protected:
     // from Iterator
     virtual boost::uint32_t readBufferImpl(PointBuffer&) = 0;
-
     virtual boost::uint64_t skipImpl(boost::uint64_t pointNum) = 0;
     virtual bool atEndImpl() const = 0;
-
 };
 
 
@@ -168,19 +167,18 @@ public:
 
     // seek to point N (an absolute value)
     //
-    // In some cases, this might be a very slow, painful function to call because
-    // it might entail physically reading the N points (and dropping the data on the
-    // floor)
+    // In some cases, this might be a very slow, painful function to call
+    // because it might entail physically reading the N points (and dropping
+    // the data on the floor)
     //
-    // Returns the number actually seeked to (which might be less than asked for, if the
-    // end of the stage was reached first).
+    // Returns the number actually seeked to (which might be less than asked
+    // for, if the end of the stage was reached first).
     boost::uint64_t seek(boost::uint64_t position);
 
 protected:
     // from Iterator
     virtual boost::uint64_t seekImpl(boost::uint64_t position) = 0;
 };
-
 
 } // namespace pdal
 

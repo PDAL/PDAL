@@ -37,8 +37,8 @@
 #include "Support.hpp"
 #include <pdal/FileUtils.hpp>
 
-
 using namespace pdal;
+using namespace std;
 
 BOOST_AUTO_TEST_SUITE(SupportTest)
 
@@ -46,23 +46,23 @@ BOOST_AUTO_TEST_SUITE(SupportTest)
 BOOST_AUTO_TEST_CASE(test_paths)
 {
     // does the data path work?
-    const std::string data_file = Support::datapath("simple.las");
+    string data_file = Support::datapath("simple.las");
     BOOST_CHECK(FileUtils::fileExists(data_file));
 
     // make sure we have read access
-    std::istream* istr = FileUtils::openFile(data_file);
-    std::string yow;
+    istream* istr = FileUtils::openFile(data_file);
+    string yow;
     *istr >> yow;
     FileUtils::closeFile(istr);
 
     // does the temp path work?
-    const std::string temp_file_ok = Support::temppath("README.txt");
+    string temp_file_ok = Support::temppath("README.txt");
     BOOST_CHECK(FileUtils::fileExists(temp_file_ok));
-    const std::string temp_file = Support::temppath("my_temp_file.dat");
+    string temp_file = Support::temppath("my_temp_file.dat");
     BOOST_CHECK(!FileUtils::fileExists(temp_file));
 
     // make sure we have write access to the temp dir
-    std::ostream* ostr = FileUtils::createFile(temp_file);
+    ostream* ostr = FileUtils::createFile(temp_file);
     *ostr << "yow";
     FileUtils::closeFile(ostr);
     BOOST_CHECK(FileUtils::fileExists(temp_file));
@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE(test_paths)
     BOOST_CHECK(!FileUtils::fileExists(temp_file));
 
     // does binpath (and exename) work?
-    std::string this_bin = Support::exename("pdal_test");
+    string this_bin = Support::exename("pdal_test");
 #ifdef PDAL_PLATFORM_WIN32
     BOOST_CHECK_EQUAL(this_bin, "pdal_test.exe");
 #else
@@ -78,8 +78,6 @@ BOOST_AUTO_TEST_CASE(test_paths)
 #endif
     this_bin = Support::binpath(this_bin);
     BOOST_CHECK(FileUtils::fileExists(this_bin));
-
-    return;
 }
 
 
@@ -221,9 +219,9 @@ BOOST_AUTO_TEST_CASE(test_diff_text_file)
 BOOST_AUTO_TEST_CASE(test_run_command)
 {
     // amazingly, this command works under both dos *and* unix shells
-    const std::string cmd = "echo foo";
+    string cmd = "echo foo";
 
-    std::string output;
+    string output;
     const int stat = pdal::Utils::run_shell_command(cmd, output);
 
     BOOST_CHECK_EQUAL(output.substr(0, 3), "foo");
