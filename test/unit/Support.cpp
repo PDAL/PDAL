@@ -142,9 +142,9 @@ std::string Support::temppath(const std::string& file)
 
 std::string Support::binpath()
 {
-    const std::string argv0 = boost::unit_test::framework::master_test_suite().argv[0];
-    const std::string s = pdal::FileUtils::getDirectory(argv0);
-    return s;
+    std::string argv0 = boost::unit_test::framework::master_test_suite().argv[0];
+    std::string path = pdal::FileUtils::toAbsolutePath(argv0);
+    return pdal::FileUtils::getDirectory(path);
 }
 
 
