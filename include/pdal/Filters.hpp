@@ -51,6 +51,7 @@
 #include <pdal/filters/Reprojection.hpp>
 #include <pdal/filters/Scaling.hpp>
 #include <pdal/filters/Selector.hpp>
+#include <pdal/filters/Splitter.hpp>
 #include <pdal/filters/Stats.hpp>
 
 #endif
