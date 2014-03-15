@@ -439,7 +439,7 @@ endif()
 set(WITH_SWIG_PYTHON FALSE CACHE BOOL "Choose if you want to make Python bindings via Swig")
 
 if(WITH_SWIG_CSHARP OR WITH_SWIG_PYTHON)
-    find_package(swig 2.0.1 REQUIRED)
+    find_package(SWIG 2.0.1 REQUIRED)
     if (SWIG_FOUND)
         include("${SWIG_USE_FILE}")
         message(STATUS "Found Swig version ${SWIG_VERSION}")
