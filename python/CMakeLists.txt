@@ -1,5 +1,5 @@
 if (SWIG_FOUND)
-    find_package(PythonLibs)
+    find_package(PythonLibs 2.4)
     include_directories(${PYTHON_INCLUDE_PATH})
     include_directories("${PDAL_SOURCE_DIR}/include")
     set_source_files_properties(pdal.i PROPERTIES CPLUSPLUS ON)
