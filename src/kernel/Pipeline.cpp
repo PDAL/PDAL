@@ -134,7 +134,7 @@ int Pipeline::execute()
     
     PointBuffer* dummy(0);
     if (!m_validate) 
-        manager.getWriter()->write(m_numPointsToWrite, m_numSkipPoints);
+        manager.getWriter()->write(m_numPointsToWrite, m_numSkipPoints, m_chunkSize);
     else
     {
         // If we chose to validate, we'll do a dummy read of all of the data
