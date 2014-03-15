@@ -305,7 +305,7 @@ int Translate::execute()
         callback = static_cast<pdal::UserCallback*>(new ShellScriptCallback(getProgressShellCommand()));
     writer->setUserCallback(callback);
 
-    const boost::uint64_t numPointsRead = writer->write(m_numPointsToWrite, m_numSkipPoints);
+    const boost::uint64_t numPointsRead = writer->write(m_numPointsToWrite, m_numSkipPoints, m_chunkSize);
 
     std::cerr << "Wrote " << numPointsRead << " points\n";
 
