@@ -41,20 +41,15 @@
 namespace pdal
 {
 
-
 Stage::Stage(const std::vector<StageBase*>& prevs, const Options& options)
     : StageBase(prevs, options)
     , m_numPoints(0)
     , m_pointCountType(PointCount_Fixed)
-{
-    return;
-}
+{}
 
 
 Stage::~Stage()
-{
-    return;
-}
+{}
 
 
 void Stage::initialize()
@@ -66,16 +61,14 @@ void Stage::initialize()
     // If the user gave us an SRS via options, take that.
     try
     {
-        m_spatialReference = getOptions().getValueOrThrow<pdal::SpatialReference>("spatialreference");
-
+        m_spatialReference = getOptions().
+            getValueOrThrow<pdal::SpatialReference>("spatialreference");
     }
     catch (pdal_error const&)
     {
         // If one wasn't set on the options, we'll ignore at this
         // point.  Maybe another stage might forward/set it later.
     }
-
-    return;
 }
 
 
@@ -119,13 +112,9 @@ boost::uint64_t Stage::getNumPoints() const
         try
         {
             m_numPoints = getPrevStage().getNumPoints();
-            return m_numPoints;
         }
         catch (pdal::internal_error const&)
-        {
-            return m_numPoints;
-        }
-
+        {}
     }
     return m_numPoints;
 }
@@ -160,16 +149,15 @@ void Stage::setSpatialReference(const SpatialReference& spatialReference)
     m_spatialReference = spatialReference;
 
 
-    boost::optional<SpatialReference> ref = m_metadata.getValueOptional<SpatialReference>("spatialreference");
+    boost::optional<SpatialReference> ref =
+        m_metadata.getValueOptional<SpatialReference>("spatialreference");
     if (!ref)
     {
         m_metadata.deleteMetadata("spatialreference");
         m_metadata.addMetadata<pdal::SpatialReference>("spatialreference",
                 spatialReference,
                 "SRS of this stage");
-
     }
-
 }
 
 void Stage::setCoreProperties(const Stage& stage)
@@ -179,8 +167,6 @@ void Stage::setCoreProperties(const Stage& stage)
     this->setPointCountType(stage.getPointCountType());
     this->setBounds(stage.getBounds());
     this->setSpatialReference(stage.getSpatialReference());
-
-    return;
 }
 
 std::ostream& operator<<(std::ostream& ostr, const Stage& stage)
@@ -192,14 +178,13 @@ std::ostream& operator<<(std::ostream& ostr, const Stage& stage)
     ostr << "    " << stage.getBounds() << std::endl;
 
     ostr << "  Schema: " << std::endl;
-    ostr << "    Num dims: " << stage.getSchema().getDimensions().size() << std::endl;
-//    ostr << "    Size in bytes: " << header.getSchema().getByteSize() << std::endl;
+    ostr << "    Num dims: " << stage.getSchema().getDimensions().size() <<
+        std::endl;
 
     ostr << "  Spatial Reference:" << std::endl;
     ostr << "    WKT: " << stage.getSpatialReference().getWKT() << std::endl;
 
     return ostr;
 }
-
 
 } // namespace pdal

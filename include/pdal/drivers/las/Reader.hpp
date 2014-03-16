@@ -95,12 +95,9 @@ public:
 
     // this is called by the stage's iterator
     boost::uint32_t processBuffer(PointBuffer& PointBuffer,
-                                  std::istream& stream,
-                                  boost::uint64_t numPointsLeft,
-                                  LASunzipper* unzipper,
-                                  ZipPoint* zipPoint,
-                                  PointDimensions* dimensions,
-                                  std::vector<boost::uint8_t>& read_buffer) const;
+        std::istream& stream, boost::uint64_t numPointsLeft,
+        LASunzipper* unzipper, ZipPoint* zipPoint, PointDimensions* dimensions,
+        std::vector<boost::uint8_t>& read_buffer) const;
 
     const LasHeader& getLasHeader() const
     {
@@ -116,9 +113,9 @@ protected:
 private:
     StreamFactory* m_streamFactory;
     bool m_ownsStreamFactory;
-
     LasHeader m_lasHeader;
-	void readMetadata();
+
+    void readMetadata();
 
     Reader& operator=(const Reader&); // not implemented
     Reader(const Reader&); // not implemented
@@ -163,8 +160,6 @@ public:
 private:
     Base& operator=(Base const&); // not implemented
     Base(Base const&); // not implemented
-
-
 };
 
 namespace sequential
@@ -184,9 +179,7 @@ private:
     boost::uint64_t skipImpl(boost::uint64_t);
     boost::uint32_t readBufferImpl(PointBuffer&);
     bool atEndImpl() const;
-
 };
-
 
 } // sequential
 
@@ -206,12 +199,9 @@ protected:
 private:
     boost::uint64_t seekImpl(boost::uint64_t);
     boost::uint32_t readBufferImpl(PointBuffer&);
-
 };
 
-
 } // random
-
 
 } // iterators
 

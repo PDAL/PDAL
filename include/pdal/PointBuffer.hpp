@@ -385,21 +385,16 @@ public:
     /// and adjust as necessary before utilizing this method to copy 
     /// dimensions from one PointBuffer instance to another.
     static void copyLikeDimensions( PointBuffer const& source, 
-                                    PointBuffer& destination, 
-                                    schema::DimensionMap const& dimensions,
-                                    boost::uint32_t source_starting_position, 
-                                    boost::uint32_t destination_starting_position,
-                                    boost::uint32_t howMany);
+        PointBuffer& destination, schema::DimensionMap const& dimensions,
+        boost::uint32_t source_starting_position, 
+        boost::uint32_t destination_starting_position, boost::uint32_t howMany);
     
     static void scaleData(PointBuffer const& source_buffer,
-                          PointBuffer& destination_buffer,
-                          Dimension const& source_dimension,
-                          Dimension const& destination_dimension,
-                          boost::uint32_t source_index,
-                          boost::uint32_t destination_index);
+        PointBuffer& destination_buffer, Dimension const& source_dimension,
+        Dimension const& destination_dimension, boost::uint32_t source_index,
+        boost::uint32_t destination_index);
 
-    double applyScaling(Dimension const& d,
-                        std::size_t pointIndex) const;
+    double applyScaling(Dimension const& d, std::size_t pointIndex) const;
 
     /// @return a new PointBuffer with all ignored dimensions removed
     static void pack(PointBuffer const* input, 
@@ -426,7 +421,6 @@ protected:
     schema::Orientation m_orientation;
 
     Metadata m_metadata;
-    // boost::interprocess::managed_shared_memory *m_segment;
     pointbuffer::id m_uuid;
     
 

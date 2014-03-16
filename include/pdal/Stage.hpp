@@ -77,7 +77,8 @@ public:
 
     virtual bool supportsIterator(StageIteratorType) const = 0;
 
-    virtual StageSequentialIterator* createSequentialIterator(PointBuffer&) const
+    virtual StageSequentialIterator*
+        createSequentialIterator(PointBuffer&) const
     {
         return NULL;
     }

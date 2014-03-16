@@ -46,15 +46,15 @@ namespace las
 {
 
 
-// this class gives the interfaces for the LAS-specific header data access functions -- we use
-// this to make sure that the native las and liblas readers both have the same API
+// this class gives the interfaces for the LAS-specific header data access
+// functions -- we use this to make sure that the native las and liblas
+// readers both have the same API
 class PDAL_DLL ReaderBase: public pdal::Reader
 {
 public:
     ReaderBase(const Options& options) : Reader(options) {}
     virtual ~ReaderBase() {}
 };
-
 
 }
 }

@@ -47,18 +47,22 @@ namespace pdal
 
 PointBuffer::PointBuffer(const Schema& schema, boost::uint32_t capacity)
     : m_schema(schema)
-    , m_data_size(static_cast<pointbuffer::PointBufferByteSize>(schema.getByteSize()) * static_cast<pointbuffer::PointBufferByteSize>(capacity))
-    , m_data(new boost::uint8_t[static_cast<pointbuffer::PointBufferByteSize>(schema.getByteSize()) * static_cast<pointbuffer::PointBufferByteSize>(capacity)])
+    , m_data_size(static_cast<pointbuffer::PointBufferByteSize>(
+        schema.getByteSize()) *
+        static_cast<pointbuffer::PointBufferByteSize>(capacity))
+    , m_data(new boost::uint8_t[static_cast<pointbuffer::PointBufferByteSize>(
+        schema.getByteSize()) *
+        static_cast<pointbuffer::PointBufferByteSize>(capacity)])
     , m_numPoints(0)
     , m_capacity(capacity)
     , m_bounds(Bounds<double>::getDefaultSpatialExtent())
     , m_byteSize(schema.getByteSize())
     , m_orientation(schema.getOrientation())
     , m_metadata("pointbuffer")
-
-
 {
-    pointbuffer::PointBufferByteSize size = static_cast<pointbuffer::PointBufferByteSize>(schema.getByteSize()) * static_cast<pointbuffer::PointBufferByteSize>(capacity);
+    pointbuffer::PointBufferByteSize size =
+        static_cast<pointbuffer::PointBufferByteSize>(schema.getByteSize()) *
+        static_cast<pointbuffer::PointBufferByteSize>(capacity);
 
     GlobalEnvironment& env = pdal::GlobalEnvironment::get();
     boost::uuids::basic_random_generator<boost::mt19937> gen(env.getRNG());
@@ -76,15 +80,13 @@ PointBuffer::PointBuffer(PointBuffer const& other)
     , m_orientation(other.m_orientation)
     , m_metadata(other.m_metadata)
 {
-    
-    std::copy(other.m_data.get(), other.m_data.get() + other.m_data_size, m_data.get());
-
+    std::copy(other.m_data.get(), other.m_data.get() + other.m_data_size,
+        m_data.get());
 }
 
 PointBuffer::~PointBuffer()
 {
     // delete m_segment;
-    
 }
 
 PointBuffer& PointBuffer::operator=(PointBuffer const& rhs)
@@ -132,15 +134,17 @@ void PointBuffer::resize(boost::uint32_t const& capacity, bool bExact)
     if (capacity != m_capacity)
     {
         m_capacity = capacity;
-        pointbuffer::PointBufferByteSize new_array_size = static_cast<pointbuffer::PointBufferByteSize>(m_schema.getByteSize()) * static_cast<pointbuffer::PointBufferByteSize>(m_capacity);
+        pointbuffer::PointBufferByteSize new_array_size =
+            static_cast<pointbuffer::PointBufferByteSize>
+                (m_schema.getByteSize()) *
+            static_cast<pointbuffer::PointBufferByteSize>(m_capacity);
         if (new_array_size > m_data_size || bExact)
         {
-            boost::shared_array<boost::uint8_t> f(new boost::uint8_t[new_array_size]);
+            boost::shared_array<boost::uint8_t> f(
+                new boost::uint8_t[new_array_size]);
             m_data.swap(f);
             m_data_size = new_array_size;
-            
         }
-
     }
 }
 
@@ -246,11 +250,6 @@ void PointBuffer::pack( PointBuffer const* input,
                     memcpy(current_position, data, idx[d].getByteSize());
                     current_position = current_position+idx[d].getByteSize();                    
                 }
-                // if (! idx[d].isIgnored())
-                // {
-                //     memcpy(current_position, data, idx[d].getByteSize());
-                //     current_position = current_position+idx[d].getByteSize();
-                // }
                 data = data + idx[d].getByteSize();
             }
         }
@@ -261,7 +260,9 @@ void PointBuffer::pack( PointBuffer const* input,
         {
             // For each dimension, copy the data if it isn't ignored
             boost::uint8_t* data = input->getData(d);
-            boost::uint64_t dimension_length = static_cast<boost::uint64_t>(idx[d].getByteSize()) * static_cast<boost::uint64_t>(input->getNumPoints());
+            boost::uint64_t dimension_length =
+                static_cast<boost::uint64_t>(idx[d].getByteSize()) *
+                    static_cast<boost::uint64_t>(input->getNumPoints());
             if (bRemoveIgnoredDimensions) 
             {
                 if (! idx[d].isIgnored())
@@ -278,7 +279,6 @@ void PointBuffer::pack( PointBuffer const* input,
             data = data + dimension_length;
         }        
     }
-    
     output->setNumPoints(input->getNumPoints());
 }
 
@@ -295,9 +295,11 @@ PointBuffer* PointBuffer::flipOrientation() const
     else if (orientation == schema::DIMENSION_INTERLEAVED)
         schema.setOrientation(schema::POINT_INTERLEAVED);
     else
-        throw pdal_error("schema orientation is not recognized for PointBuffer::flipOrientation!");
+        throw pdal_error("schema orientation is not recognized for "
+            "PointBuffer::flipOrientation!");
     
-    schema::index_by_index const& idx = schema.getDimensions().get<schema::index>();
+    schema::index_by_index const& idx =
+        schema.getDimensions().get<schema::index>();
 
     pdal::PointBuffer* output = new PointBuffer(schema, getCapacity());
 
@@ -313,7 +315,8 @@ PointBuffer* PointBuffer::flipOrientation() const
             {
                 boost::uint8_t* point_start = getData(i);
                 boost::uint8_t* read_position = point_start + offset;
-                std::copy(read_position, read_position + dimSize, write_position);
+                std::copy(read_position, read_position + dimSize,
+                    write_position);
 
                 // memcpy(write_position, read_position, dimSize);
                 write_position = write_position + dimSize;
@@ -324,7 +327,6 @@ PointBuffer* PointBuffer::flipOrientation() const
     {
         for (boost::uint32_t d = 0; d < idx.size(); ++d)
         {
-            
             schema::size_type dimSize(idx[d].getByteSize());
             std::size_t offset(idx[d].getByteOffset());
 
@@ -334,14 +336,14 @@ PointBuffer* PointBuffer::flipOrientation() const
             {
                 boost::uint8_t* write_position = output->getData(i)+offset;
                 boost::uint8_t* read_position = read_start + i*dimSize;
-                std::copy(read_position, read_position + dimSize, write_position);
+                std::copy(read_position, read_position + dimSize,
+                    write_position);
             }
         }   
     }
     
     output->setNumPoints(getNumPoints());
     return output;
-    
 }
 
 pdal::Bounds<double> PointBuffer::calculateBounds(bool is3d) const
@@ -381,11 +383,9 @@ pdal::Bounds<double> PointBuffer::calculateBounds(bool is3d) const
             v[1] = yd;
             v[2] = zd;
             output.grow(v);
-
         }
         else
         {
-
             if (first)
             {
                 output = pdal::Bounds<double>(xd, yd, xd, yd);
@@ -398,9 +398,7 @@ pdal::Bounds<double> PointBuffer::calculateBounds(bool is3d) const
             output.grow(v);
         }
     }
-
     return output;
-
 }
 
 boost::property_tree::ptree PointBuffer::toPTree() const
@@ -408,13 +406,15 @@ boost::property_tree::ptree PointBuffer::toPTree() const
     boost::property_tree::ptree tree;
 
     const Schema& schema = getSchema();
-    schema::index_by_index const& dimensions = schema.getDimensions().get<schema::index>();
+    schema::index_by_index const& dimensions =
+        schema.getDimensions().get<schema::index>();
 
     const boost::uint32_t numPoints = getNumPoints();
 
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
-        const std::string pointstring = boost::lexical_cast<std::string>(pointIndex) + ".";
+        const std::string pointstring =
+            boost::lexical_cast<std::string>(pointIndex) + ".";
 
         boost::uint32_t i = 0;
         for (i=0; i<dimensions.size(); i++)
@@ -432,37 +432,33 @@ boost::property_tree::ptree PointBuffer::toPTree() const
     return tree;
 }
 
-std::string PointBuffer::printDimension(Dimension const& dimension, boost::uint32_t index) const
+std::string PointBuffer::printDimension(Dimension const& dimension,
+    boost::uint32_t index) const
 {
 
     boost::uint32_t const& size = dimension.getByteSize();
-
 
     std::string output;
 
     double scale = dimension.getNumericScale();
     double offset = dimension.getNumericOffset();
 
-    bool applyScaling(false);
-    if (!Utils::compare_distance(scale, 1.0) ||
-            !Utils::compare_distance(offset, 0.0)
-       )
-    {
-        applyScaling = true;
-    }
-
+    bool applyScaling = !Utils::compare_distance(scale, 1.0) ||
+        !Utils::compare_distance(offset, 0.0);
 
     switch (dimension.getInterpretation())
     {
 
 #define GETFIELDAS(T) getField<T>(dimension, index)
 #define STRINGIFY(T,x) boost::lexical_cast<std::string>(boost::numeric_cast<T>(x))
-            // note we convert 8-bit fields to ints, so they aren't treated as chars
+        // note we convert 8-bit fields to ints, so they aren't treated as
+        // chars
         case dimension::SignedInteger:
             if (size == 1)
             {
                 if (!applyScaling)
-                    output += STRINGIFY(boost::int32_t, GETFIELDAS(boost::int8_t));
+                    output += STRINGIFY(boost::int32_t,
+                        GETFIELDAS(boost::int8_t));
                 else
                 {
                     boost::int8_t v = GETFIELDAS(boost::int8_t);
@@ -473,7 +469,8 @@ std::string PointBuffer::printDimension(Dimension const& dimension, boost::uint3
             if (size == 2)
             {
                 if (!applyScaling)
-                    output += STRINGIFY(boost::int16_t, GETFIELDAS(boost::int16_t));
+                    output += STRINGIFY(boost::int16_t,
+                        GETFIELDAS(boost::int16_t));
                 else
                 {
                     boost::int16_t v = GETFIELDAS(boost::int16_t);
@@ -484,7 +481,8 @@ std::string PointBuffer::printDimension(Dimension const& dimension, boost::uint3
             if (size == 4)
             {
                 if (!applyScaling)
-                    output += STRINGIFY(boost::int32_t, GETFIELDAS(boost::int32_t));
+                    output += STRINGIFY(boost::int32_t,
+                        GETFIELDAS(boost::int32_t));
                 else
                 {
                     boost::int32_t v = GETFIELDAS(boost::int32_t);
@@ -495,7 +493,8 @@ std::string PointBuffer::printDimension(Dimension const& dimension, boost::uint3
             if (size == 8)
             {
                 if (!applyScaling)
-                    output += STRINGIFY(boost::int64_t, GETFIELDAS(boost::int64_t));
+                    output += STRINGIFY(boost::int64_t,
+                        GETFIELDAS(boost::int64_t));
                 else
                 {
                     boost::int64_t v = GETFIELDAS(boost::int64_t);
@@ -508,7 +507,8 @@ std::string PointBuffer::printDimension(Dimension const& dimension, boost::uint3
             if (size == 1)
             {
                 if (!applyScaling)
-                    output += STRINGIFY(boost::uint32_t, GETFIELDAS(boost::uint8_t));
+                    output += STRINGIFY(boost::uint32_t,
+                        GETFIELDAS(boost::uint8_t));
                 else
                 {
                     boost::uint8_t v = GETFIELDAS(boost::uint8_t);
@@ -519,7 +519,8 @@ std::string PointBuffer::printDimension(Dimension const& dimension, boost::uint3
             if (size == 2)
             {
                 if (!applyScaling)
-                    output += STRINGIFY(boost::uint16_t, GETFIELDAS(boost::uint16_t));
+                    output += STRINGIFY(boost::uint16_t,
+                        GETFIELDAS(boost::uint16_t));
                 else
                 {
                     boost::uint16_t v = GETFIELDAS(boost::uint16_t);
@@ -530,7 +531,8 @@ std::string PointBuffer::printDimension(Dimension const& dimension, boost::uint3
             if (size == 4)
             {
                 if (!applyScaling)
-                    output += STRINGIFY(boost::uint32_t, GETFIELDAS(boost::uint32_t));
+                    output += STRINGIFY(boost::uint32_t,
+                        GETFIELDAS(boost::uint32_t));
                 else
                 {
                     boost::uint32_t v = GETFIELDAS(boost::uint32_t);
@@ -583,7 +585,8 @@ std::string PointBuffer::printDimension(Dimension const& dimension, boost::uint3
 
         case dimension::RawByte:
             {
-                const boost::uint8_t* data  = getData(index) + dimension.getByteOffset();
+                const boost::uint8_t* data  = getData(index) +
+                    dimension.getByteOffset();
                 std::vector<boost::uint8_t> bytes;
                 for (int i=0; i < dimension.getByteSize(); ++i)
                 {
@@ -597,14 +600,14 @@ std::string PointBuffer::printDimension(Dimension const& dimension, boost::uint3
             output = std::string("unknown dimension data type");
     }
     return output;
-    
 }
 
 
 std::ostream& PointBuffer::toRST(std::ostream& os) const
 {
     const Schema& schema = getSchema();
-    schema::index_by_index const& dimensions = schema.getDimensions().get<schema::index>();
+    schema::index_by_index const& dimensions =
+        schema.getDimensions().get<schema::index>();
 
     boost::uint32_t ns_column(32);    
     boost::uint32_t name_column(20);
@@ -616,8 +619,10 @@ std::ostream& PointBuffer::toRST(std::ostream& os) const
 
     for (std::size_t i=0; i< dimensions.size(); i++)
     {
-        name_column = std::max(static_cast<std::size_t>(name_column), dimensions[i].getName().size());
-        ns_column = std::max(static_cast<std::size_t>(name_column), dimensions[i].getNamespace().size());
+        name_column = std::max(static_cast<std::size_t>(name_column),
+            dimensions[i].getName().size());
+        ns_column = std::max(static_cast<std::size_t>(name_column),
+            dimensions[i].getNamespace().size());
     }
     
     std::ostringstream thdr;
@@ -639,7 +644,9 @@ std::ostream& PointBuffer::toRST(std::ostream& os) const
         os << "Point " << pointIndex << std::endl;
         os << hdr.str() << std::endl << std::endl;
         os << thdr.str() << std::endl;
-        os << std::setw(name_column-step_back) << "Name" << std::setw(value_column-step_back) << "Value"  << std::setw(ns_column-step_back) << "Namespace" << std::endl;
+        os << std::setw(name_column-step_back) << "Name" <<
+            std::setw(value_column-step_back) << "Value"  <<
+            std::setw(ns_column-step_back) << "Namespace" << std::endl;
         os << thdr.str() << std::endl;        
         for (unsigned i=0; i< dimensions.size(); i++)
         {
@@ -647,7 +654,9 @@ std::ostream& PointBuffer::toRST(std::ostream& os) const
             std::string value = printDimension(dimension, pointIndex);
             std::string name = dimension.getName();
             std::string ns = dimension.getNamespace();
-            os   << std::left << std::setw(name_column) << name << std::right << std::setw(value_column) << value << std::setw(ns_column) << ns  << std::endl;
+            os << std::left << std::setw(name_column) << name <<
+                std::right << std::setw(value_column) << value <<
+                std::setw(ns_column) << ns  << std::endl;
         }
         os << thdr.str() << std::endl << std::endl;
     }
@@ -657,7 +666,7 @@ std::ostream& PointBuffer::toRST(std::ostream& os) const
 }
 
 double PointBuffer::applyScaling(Dimension const& d,
-                                 std::size_t pointIndex) const
+    std::size_t pointIndex) const
 {
     double output(0.0);
 
@@ -735,17 +744,17 @@ double PointBuffer::applyScaling(Dimension const& d,
         case dimension::RawByte:
         case dimension::Pointer:    // stored as 64 bits, even on a 32-bit box
         case dimension::Undefined:
-            throw pdal_error("Dimension data type unable to be scaled in index filter");
+            throw pdal_error("Dimension data type unable to be scaled in "
+                "index filter");
     }
 
     return output;
 }
 
 
-
 inline void copyOver(boost::uint8_t *destination_position,
-                     const boost::uint8_t *source_position,
-                     boost::uint32_t source_bytesize) {
+    const boost::uint8_t *source_position, boost::uint32_t source_bytesize)
+{
     if (source_bytesize == 1)
     {
         destination_position[0] = source_position[0];
@@ -771,54 +780,60 @@ inline void copyOver(boost::uint8_t *destination_position,
         destination_position[7] = source_position[7];
     } else
     {
-        std::copy(source_position, source_position + source_bytesize, destination_position);
+        std::copy(source_position, source_position + source_bytesize,
+            destination_position);
     }
 }
 
 
 void PointBuffer::extractIndices(PointBuffer const& source,
-		PointBuffer& destination,
-		std::vector<int> indices)
+    PointBuffer& destination, std::vector<int> indices)
 {
-	destination.setNumPoints(indices.size());
+    destination.setNumPoints(indices.size());
 
-	size_t j = 0;
-
-	for (size_t i = 0; i < indices.size(); ++i)
-		destination.copyPointFast(j++, indices[i], source);
-
-	return;
+    size_t j = 0;
+    for (size_t i = 0; i < indices.size(); ++i)
+        destination.copyPointFast(j++, indices[i], source);
 }
 
 
 void PointBuffer::copyLikeDimensions(PointBuffer const& source,
-                                     PointBuffer& destination,
-                                     schema::DimensionMap const& dimensions,
-                                     boost::uint32_t source_starting_position,
-                                     boost::uint32_t destination_starting_position,
-                                     boost::uint32_t howMany)
+    PointBuffer& destination, schema::DimensionMap const& dimensions,
+    boost::uint32_t source_starting_position,
+    boost::uint32_t destination_starting_position,
+    boost::uint32_t howMany)
 {
-    assert(howMany <= destination.getCapacity() - destination_starting_position);
+    assert(howMany <=
+        destination.getCapacity() - destination_starting_position);
     assert(howMany <= source.getCapacity() - source_starting_position);
 
-    pdal::schema::Orientation source_orientation = source.getSchema().getOrientation();
-    pdal::schema::Orientation destination_orientation = destination.getSchema().getOrientation();
+    pdal::schema::Orientation source_orientation =
+        source.getSchema().getOrientation();
+    pdal::schema::Orientation destination_orientation =
+        destination.getSchema().getOrientation();
 
-    pointbuffer::PointBufferByteSize source_capacity = static_cast<pointbuffer::PointBufferByteSize>(source.getCapacity());
-    pointbuffer::PointBufferByteSize destination_capacity = static_cast<pointbuffer::PointBufferByteSize>(destination.getCapacity());
+    pointbuffer::PointBufferByteSize source_capacity =
+        static_cast<pointbuffer::PointBufferByteSize>(source.getCapacity());
+    pointbuffer::PointBufferByteSize destination_capacity =
+       static_cast<pointbuffer::PointBufferByteSize>(destination.getCapacity());
 
-    pointbuffer::PointBufferByteSize numCopyMapEntries = static_cast<pointbuffer::PointBufferByteSize>(dimensions.m.size());
+    pointbuffer::PointBufferByteSize numCopyMapEntries =
+        static_cast<pointbuffer::PointBufferByteSize>(dimensions.m.size());
     
-    pointbuffer::PointBufferByteSize source_point_size = static_cast<pointbuffer::PointBufferByteSize>(source.getSchema().getByteSize());
-    pointbuffer::PointBufferByteSize dest_point_size = static_cast<pointbuffer::PointBufferByteSize>(destination.getSchema().getByteSize());
+    pointbuffer::PointBufferByteSize source_point_size =
+        static_cast<pointbuffer::PointBufferByteSize>(
+            source.getSchema().getByteSize());
+    pointbuffer::PointBufferByteSize dest_point_size =
+        static_cast<pointbuffer::PointBufferByteSize>(
+            destination.getSchema().getByteSize());
 
     // setup fast paths
     if (source_orientation == schema::POINT_INTERLEAVED &&
-            destination_orientation == schema::POINT_INTERLEAVED) {
-
-        boost::uint8_t *source_ptr = source.getData(source_starting_position);
-        boost::uint8_t *dst_ptr = destination.getData(destination_starting_position);
-
+        destination_orientation == schema::POINT_INTERLEAVED) {
+        boost::uint8_t *source_ptr =
+            source.getData(source_starting_position);
+        boost::uint8_t *dst_ptr =
+            destination.getData(destination_starting_position);
 
         boost::uint8_t* source_position = source_ptr;
         boost::uint8_t* destination_position = dst_ptr;
@@ -827,7 +842,9 @@ void PointBuffer::copyLikeDimensions(PointBuffer const& source,
         //
         for (boost::uint32_t i = 0; i < howMany ; ++i)
         {
-            for(pointbuffer::PointBufferByteSize iE = 0 ; iE < numCopyMapEntries ; ++iE) {
+            for (pointbuffer::PointBufferByteSize iE = 0;
+                iE < numCopyMapEntries; ++iE)
+            {
                 boost::uint64_t const& encoded = dimensions.offsets[iE];
 
                 boost::uint64_t source_byteoffset = (encoded >> 32);
@@ -843,38 +860,45 @@ void PointBuffer::copyLikeDimensions(PointBuffer const& source,
         }
     }
     else if (source_orientation == schema::DIMENSION_INTERLEAVED &&
-            destination_orientation == schema::DIMENSION_INTERLEAVED) {
+        destination_orientation == schema::DIMENSION_INTERLEAVED)
+    {
         boost::uint8_t *source_ptr = source.getData(0);
         boost::uint8_t *dst_ptr = destination.getData(0);
 
         // copy dimension by dimension
         // 
-        for(pointbuffer::PointBufferByteSize iE = 0 ; iE < numCopyMapEntries ; ++iE) {
+        for (pointbuffer::PointBufferByteSize iE = 0;
+            iE < numCopyMapEntries; ++iE)
+        {
             boost::uint64_t const& encoded = dimensions.offsets[iE];
 
             boost::uint64_t source_byteoffset = (encoded >> 32);
             boost::uint64_t dest_byteoffset = (encoded >> 16) & 0xFFFF;
             boost::uint64_t source_bytesize = (encoded & 0xFFFF);
 
-            boost::uint8_t* source_position = source_ptr +  source_capacity * source_byteoffset + 
+            boost::uint8_t* source_position = source_ptr +
+                source_capacity * source_byteoffset + 
                 source_starting_position * source_bytesize;
-            boost::uint8_t* destination_position = dst_ptr + destination_capacity * dest_byteoffset +
+            boost::uint8_t* destination_position = dst_ptr +
+                destination_capacity * dest_byteoffset +
                 destination_starting_position * source_bytesize;
 
-            memcpy(destination_position, source_position, howMany * source_bytesize);
-
-            //std::copy(destination_position, destination_position + howMany * source_bytesize, source_position);
+            // was std::copy
+            memcpy(destination_position, source_position,
+                howMany * source_bytesize);
         }
     }
     else if (source_orientation == schema::POINT_INTERLEAVED &&
-            destination_orientation == schema::DIMENSION_INTERLEAVED) {
-        // slowt case #1 when one of the dimensions doesn't match the other
+        destination_orientation == schema::DIMENSION_INTERLEAVED)
+    {
+        // slow case #1 when one of the dimensions doesn't match the other
         //
         boost::uint8_t *src_ptr = source.getData(source_starting_position);
         boost::uint8_t *dst_ptr = destination.getData(0);
 
-
-        for(pointbuffer::PointBufferByteSize iE = 0 ; iE < numCopyMapEntries ; ++iE) {
+        for (pointbuffer::PointBufferByteSize iE = 0;
+            iE < numCopyMapEntries ; ++iE)
+        {
             boost::uint64_t const& encoded = dimensions.offsets[iE];
 
             boost::uint64_t source_byteoffset = (encoded >> 32);
@@ -882,10 +906,12 @@ void PointBuffer::copyLikeDimensions(PointBuffer const& source,
             boost::uint64_t source_bytesize = (encoded & 0xFFFF);
 
             boost::uint8_t *this_src_ptr = src_ptr + source_byteoffset;
-            boost::uint8_t *this_dst_ptr = dst_ptr + destination_capacity * dest_byteoffset +
+            boost::uint8_t *this_dst_ptr = dst_ptr +
+                destination_capacity * dest_byteoffset +
                 destination_starting_position * source_bytesize;
 
-            for (boost::uint32_t i = 0; i < howMany; ++i) {
+            for (boost::uint32_t i = 0; i < howMany; ++i)
+            {
                 copyOver(this_dst_ptr, this_src_ptr, source_bytesize);
 
                 this_src_ptr += source_point_size;
@@ -894,22 +920,28 @@ void PointBuffer::copyLikeDimensions(PointBuffer const& source,
         }
     }
     else if (source_orientation == schema::DIMENSION_INTERLEAVED &&
-            destination_orientation == schema::POINT_INTERLEAVED) {
+        destination_orientation == schema::POINT_INTERLEAVED)
+    {
         boost::uint8_t *src_ptr = source.getData(0);
-        boost::uint8_t *dst_ptr = destination.getData(destination_starting_position);
+        boost::uint8_t *dst_ptr =
+            destination.getData(destination_starting_position);
 
-
-        for(pointbuffer::PointBufferByteSize iE = 0 ; iE < numCopyMapEntries ; ++iE) {
+        for (pointbuffer::PointBufferByteSize iE = 0;
+            iE < numCopyMapEntries; ++iE)
+        {
             boost::uint64_t const& encoded = dimensions.offsets[iE];
 
             boost::uint64_t source_byteoffset = (encoded >> 32);
             boost::uint64_t dest_byteoffset = (encoded >> 16) & 0xFFFF;
             boost::uint64_t source_bytesize = (encoded & 0xFFFF);
 
-            boost::uint8_t *this_src_ptr = src_ptr + source_capacity * source_byteoffset + source_starting_position * source_bytesize;
+            boost::uint8_t *this_src_ptr = src_ptr +
+                source_capacity * source_byteoffset +
+                source_starting_position * source_bytesize;
             boost::uint8_t *this_dst_ptr = dst_ptr + dest_byteoffset;
 
-            for (boost::uint32_t i = 0; i < howMany; ++i) {
+            for (boost::uint32_t i = 0; i < howMany; ++i)
+            {
                 copyOver(this_dst_ptr, this_src_ptr, source_bytesize);
 
                 this_src_ptr += source_bytesize;
@@ -924,7 +956,8 @@ std::ostream& operator<<(std::ostream& ostr, const PointBuffer& pointBuffer)
     using std::endl;
 
     const Schema& schema = pointBuffer.getSchema();
-    schema::index_by_index const& dimensions = schema.getDimensions().get<schema::index>();
+    schema::index_by_index const& dimensions =
+        schema.getDimensions().get<schema::index>();
 
     const boost::uint32_t numPoints = pointBuffer.getNumPoints();
 
@@ -940,38 +973,49 @@ std::ostream& operator<<(std::ostream& ostr, const PointBuffer& pointBuffer)
         {
             const Dimension& dimension = dimensions[i];
 
-            ostr << dimension.getName() << " (" << dimension.getInterpretationName() << ") : ";
+            ostr << dimension.getName() << " (" <<
+                dimension.getInterpretationName() << ") : ";
 
             switch (dimension.getInterpretation())
             {
                 case dimension::SignedInteger:
                     if (dimension.getByteSize() == 1)
-                        ostr << (int)(pointBuffer.getField<boost::int8_t>(dimension, pointIndex));
+                        ostr << (int)(pointBuffer.getField<boost::int8_t>(
+                            dimension, pointIndex));
                     if (dimension.getByteSize() == 2)
-                        ostr << pointBuffer.getField<boost::int16_t>(dimension, pointIndex);
+                        ostr << pointBuffer.getField<boost::int16_t>(
+                            dimension, pointIndex);
                     if (dimension.getByteSize() == 4)
-                        ostr << pointBuffer.getField<boost::int32_t>(dimension, pointIndex);
+                        ostr << pointBuffer.getField<boost::int32_t>(
+                            dimension, pointIndex);
                     if (dimension.getByteSize() == 8)
-                        ostr << pointBuffer.getField<boost::int64_t>(dimension, pointIndex);
+                        ostr << pointBuffer.getField<boost::int64_t>(
+                            dimension, pointIndex);
                     break;
                 case dimension::UnsignedInteger:
                 case dimension::RawByte:
                     if (dimension.getByteSize() == 1)
-                        ostr << (unsigned int)(pointBuffer.getField<boost::uint8_t>(dimension, pointIndex));
+                        ostr << (unsigned int)
+                            (pointBuffer.getField<boost::uint8_t>(dimension,
+                                pointIndex));
                     if (dimension.getByteSize() == 2)
-                        ostr << pointBuffer.getField<boost::uint16_t>(dimension, pointIndex);
+                        ostr << pointBuffer.getField<boost::uint16_t>(
+                            dimension, pointIndex);
                     if (dimension.getByteSize() == 4)
-                        ostr << pointBuffer.getField<boost::uint32_t>(dimension, pointIndex);
+                        ostr << pointBuffer.getField<boost::uint32_t>(
+                            dimension, pointIndex);
                     if (dimension.getByteSize() == 8)
-                        ostr << pointBuffer.getField<boost::uint64_t>(dimension, pointIndex);
+                        ostr << pointBuffer.getField<boost::uint64_t>(
+                            dimension, pointIndex);
                     break;
-
 
                 case dimension::Float:
                     if (dimension.getByteSize() == 4)
-                        ostr << pointBuffer.getField<float>(dimension, pointIndex);
+                        ostr << pointBuffer.getField<float>(
+                            dimension, pointIndex);
                     if (dimension.getByteSize() == 8)
-                        ostr << pointBuffer.getField<double>(dimension, pointIndex);
+                        ostr << pointBuffer.getField<double>(
+                            dimension, pointIndex);
                     break;
                 case dimension::Pointer:
                     ostr << "pointer";
@@ -983,12 +1027,11 @@ std::ostream& operator<<(std::ostream& ostr, const PointBuffer& pointBuffer)
             ostr << endl;
         }
     }
-
     return ostr;
 }
 
 IndexedPointBuffer::IndexedPointBuffer( const Schema& schema, 
-                                        boost::uint32_t capacity)
+    boost::uint32_t capacity)
     : PointBuffer(schema, capacity)
     , m_dimX(0)
     , m_dimY(0)
@@ -1034,7 +1077,8 @@ void IndexedPointBuffer::build(bool b3D)
 {
     m_is3D = b3D;
     size_t nDims = m_is3D && m_dimZ ? 3 : 2;
-    m_index =  new my_kd_tree_t(nDims, *this, nanoflann::KDTreeSingleIndexAdaptorParams(10, nDims ) );
+    m_index =  new my_kd_tree_t(nDims, *this,
+        nanoflann::KDTreeSingleIndexAdaptorParams(10, nDims ) );
     
     if (!m_dimX)
     {
@@ -1075,8 +1119,6 @@ std::vector<size_t> IndexedPointBuffer::neighbors(  double const& x,
                                                     double distance, 
                                                     boost::uint32_t k)
 {
-
-
     std::vector<size_t> output(k);
     std::vector<double> out_dist_sqr(k);
     nanoflann::KNNResultSet<double> resultSet(k);
@@ -1084,16 +1126,18 @@ std::vector<size_t> IndexedPointBuffer::neighbors(  double const& x,
     resultSet.init(&output[0], &out_dist_sqr[0] );
     
     std::vector<double> pt;
-    pt.push_back(x); pt.push_back(y);
-    if (m_is3D) pt.push_back(z);
+    pt.push_back(x);
+    pt.push_back(y);
+    if (m_is3D)
+        pt.push_back(z);
     m_index->findNeighbors(resultSet, &pt[0], nanoflann::SearchParams(10));
     return output;
 }
-
 
 
 IndexedPointBuffer::~IndexedPointBuffer()
 {
     delete m_index;
 }
+
 } // namespace pdal

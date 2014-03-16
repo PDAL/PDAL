@@ -145,8 +145,9 @@ public:
     /// An empty constructor with no Dimension instances
     Schema();
 
-    /// construct an instanct given the order and dimensions in the dimensions vector
-    /// @param dimensions the list of dimensions (and their order) to use to construct the Schema
+    /// construct an instance given the order and dimensions in the dimensions
+    /// vector @param dimensions the list of dimensions (and their order) to
+    /// use to construct the Schema
     Schema(std::vector<Dimension> const& dimensions);
 
     /// Copy constructor
@@ -218,23 +219,27 @@ public:
                                      string_ref ns = string_ref(),
                                      std::string* errorMsg = 0) const;
 
-    /// @return a boost::optional-wrapped const& to a Dimension with the given name
-    /// and namespace. If no matching dimension is found, the optional will be empty.
+    /// @return a boost::optional-wrapped const& to a Dimension with the
+    /// given name and namespace. If no matching dimension is found, the
+    /// optional will be empty.
     /// @param name name to use when searching
     /// @param ns namespace to use when searching. If none is given, the first
     /// matching Dimension instance with name \b name is returned.
     boost::optional<Dimension const&> getDimensionOptional(string_ref name,
-                                                           string_ref ns=string_ref()) const;
+        string_ref ns=string_ref()) const;
 
-    /// @return a boost::optional-wrapped const& to a Dimension with the given dimension::id.
-    /// If no matching dimension is found, the optional will be empty.
+    /// @return a boost::optional-wrapped const& to a Dimension with the
+    /// given dimension::id.  If no matching dimension is found, the optional
+    /// will be empty.
     /// @param id id to use when searching
-    boost::optional<Dimension const&> getDimensionOptional(dimension::id const& id) const;
+    boost::optional<Dimension const&>
+    getDimensionOptional(dimension::id const& id) const;
 
     /// @return a boost::optional-wrapped const& to a Dimension with the given
     /// index. If the index is out of range, the optional will be empty.
     /// @param index position index to return.
-    boost::optional<Dimension const&> getDimensionOptional(schema::size_type index) const;
+    boost::optional<Dimension const&>
+    getDimensionOptional(schema::size_type index) const;
 
     /// @return the total cumulative byte size of all dimensions
     inline schema::size_type const& getByteSize() const
@@ -278,15 +283,16 @@ public:
     boost::property_tree::ptree toPTree() const;
 
     /// @return a schema::DimensionMap instance that maps dimension names
-    schema::DimensionMap* mapDimensions(Schema const& destination, bool bIgnoreNamespace=false) const;
+    schema::DimensionMap* mapDimensions(Schema const& destination,
+        bool bIgnoreNamespace=false) const;
 
     std::ostream& toRST(std::ostream& os) const;
     
     /// dumps a string representation of the Schema instance to std::cout
     void dump() const;
 
-    /// Deserialize a Schema instance from the given xml and validate against the
-    /// given xsd
+    /// Deserialize a Schema instance from the given xml and validate
+    /// against the given xsd
     /// @param xml xml data to ingest
     /// @param xsd xsd document to use for validation
     static Schema from_xml(std::string const& xml, std::string const& xsd);
@@ -296,7 +302,8 @@ public:
     static Schema from_xml(std::string const& xml);
 
     /// @return serialized Schema instance as xml
-    static std::string to_xml(Schema const& schema, boost::property_tree::ptree const* metadata=0);
+    static std::string to_xml(Schema const& schema,
+        boost::property_tree::ptree const* metadata=0);
     
 /// @name Private Attributes
 private:
@@ -304,15 +311,10 @@ private:
     schema::size_type m_byteSize;
     schema::Map m_index;
     schema::Orientation m_orientation;
-
 };
-
-
 
 PDAL_DLL std::ostream& operator<<(std::ostream& os, pdal::Schema const& d);
 
-
-
-} // namespace liblas
+} // namespace pdal
 
 #endif // PDAL_SCHEMA_HPP_INCLUDED

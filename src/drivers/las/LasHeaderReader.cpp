@@ -83,7 +83,8 @@ void LasHeaderReader::read(Reader& stage, Schema& schema)
     double y2 = 0;
     double z2 = 0;
 
-    // BUG: these two were std::string, but the read_n() failed until I made them char[]
+    // BUG: these two were std::string, but the read_n() failed until I made
+    // them char[]
     char buff[32] =  {'\0'};
     char fsig[4] =  {'\0'};
 
@@ -178,7 +179,9 @@ void LasHeaderReader::read(Reader& stage, Schema& schema)
     }
     else if (compression_bit_7 && compression_bit_6)
     {
-        throw std::domain_error("This file was compressed with an earlier, experimental version of laszip; please contact 'martin.isenburg@gmail.com' for assistance.");
+        throw std::domain_error("This file was compressed with an earlier, "
+            "experimental version of laszip; please contact "
+            "'martin.isenburg@gmail.com' for assistance.");
     }
     else
     {
@@ -190,7 +193,8 @@ void LasHeaderReader::read(Reader& stage, Schema& schema)
     n1 &= 0x3f;
     if (n1 <= 5)
     {
-        const pdal::drivers::las::PointFormat format = (pdal::drivers::las::PointFormat)n1;
+        const pdal::drivers::las::PointFormat format =
+            (pdal::drivers::las::PointFormat)n1;
         m_header.setPointFormat(format);
         pdal::drivers::las::Support::registerFields(stage, schema, format);
     }
@@ -204,7 +208,8 @@ void LasHeaderReader::read(Reader& stage, Schema& schema)
     // FIXME: We currently only use the DataFormatId, this needs to
     // adjust the schema based on the difference between the DataRecordLength
     // and the base size of the pointformat.  If we have an XML schema in the
-    // form of a VLR in the file, we'll use that to apportion the liblas::Schema.
+    // form of a VLR in the file, we'll use that to apportion the
+    // liblas::Schema.
     // Otherwise, all bytes after the liblas::Schema::GetBaseByteSize will be
     // a simple uninterpreted byte field.
     // SetDataRecordLength(n2);
@@ -239,7 +244,8 @@ void LasHeaderReader::read(Reader& stage, Schema& schema)
     Utils::read_n(zOffset, m_istream, sizeof(zOffset));
     m_header.SetOffset(xOffset, yOffset, zOffset);
 
-    Support::setScaling(schema, xScale, yScale, zScale, xOffset, yOffset, zOffset);
+    Support::setScaling(schema, xScale, yScale, zScale,
+        xOffset, yOffset, zOffset);
 
     // 27-28. Max/Min X
     Utils::read_n(x1, m_istream, sizeof(x1));
@@ -255,15 +261,13 @@ void LasHeaderReader::read(Reader& stage, Schema& schema)
 
     pdal::Bounds<double> b = pdal::Bounds<double>(x2, y2, z2, x1, y1, z1);
     m_header.setBounds(b);
-    // m_header.SetMax(x1, y1, z1);
-    // m_header.SetMin(x2, y2, z2);
 
     {
         // We're going to check the two bytes off the end of the header to
-        // see if they're pad bytes anyway.  Some softwares, notably older QTModeler,
-        // write 1.0-style pad bytes off the end of their header but state that the
-        // offset is actually 2 bytes back.  We need to set the dataoffset
-        // appropriately in those cases anyway.
+        // see if they're pad bytes anyway.  Some softwares, notably older
+        // QTModeler, write 1.0-style pad bytes off the end of their header
+        // but state that the offset is actually 2 bytes back.  We need to
+        // set the dataoffset appropriately in those cases anyway.
         m_istream.seekg(m_header.GetDataOffset());
 
         if (hasLAS10PadSignature())
@@ -275,7 +279,8 @@ void LasHeaderReader::read(Reader& stage, Schema& schema)
 
         if (m_istream.eof())
         {
-            // If we eof'd here, we don't have any points in the file, just a header
+            // If we eof'd here, we don't have any points in the file, just
+            // a header
             return;
         }
     }
@@ -289,7 +294,8 @@ void LasHeaderReader::read(Reader& stage, Schema& schema)
 
     if (m_header.Compressed())
     {
-        ZipPoint zp(m_header.getPointFormat(), m_header.getVLRs().getAll(), true);
+        ZipPoint zp(m_header.getPointFormat(), m_header.getVLRs().getAll(),
+            true);
         LASzip* laszip = zp.GetZipper();
         std::ostringstream zip_version;
         zip_version <<"LASzip Version "
@@ -302,8 +308,8 @@ void LasHeaderReader::read(Reader& stage, Schema& schema)
         else
             zip_version << ":";
         for (int i = 0; i < (int)laszip->num_items; i++)
-            zip_version <<" "<< laszip->items[i].get_name()<<" "<< (int)laszip->items[i].version;
-
+            zip_version << " " << laszip->items[i].get_name() << " " <<
+                (int)laszip->items[i].version;
         m_header.setCompressionInfo(zip_version.str());
     }
 #endif
@@ -316,8 +322,6 @@ void LasHeaderReader::read(Reader& stage, Schema& schema)
 
     // Seek to the data offset so we can start reading points
     m_istream.seekg(m_header.GetDataOffset());
-
-    return;
 }
 
 
@@ -381,23 +385,30 @@ void LasHeaderReader::readOneVLR()
 
     {
         // BUG: this should be a scoped ptr
-        boost::uint8_t* buf1 = new boost::uint8_t[pdal::drivers::las::VariableLengthRecord::s_headerLength];
-        Utils::read_n(buf1, m_istream, pdal::drivers::las::VariableLengthRecord::s_headerLength);
+        boost::uint8_t* buf1 =
+            new boost::uint8_t[
+                pdal::drivers::las::VariableLengthRecord::s_headerLength];
+        Utils::read_n(buf1, m_istream,
+            pdal::drivers::las::VariableLengthRecord::s_headerLength);
         boost::uint8_t* p1 = buf1;
 
         reserved = Utils::read_field<boost::uint16_t>(p1);
         boost::ignore_unused_variable_warning(reserved);
 
         boost::uint8_t userId_data[VariableLengthRecord::eUserIdSize];
-        Utils::read_array_field(p1, userId_data, VariableLengthRecord::eUserIdSize);
-        userId = VariableLengthRecord::bytes2string(userId_data, VariableLengthRecord::eUserIdSize);
+        Utils::read_array_field(p1, userId_data,
+            VariableLengthRecord::eUserIdSize);
+        userId = VariableLengthRecord::bytes2string(userId_data,
+            VariableLengthRecord::eUserIdSize);
 
         recordId = Utils::read_field<boost::uint16_t>(p1);
         recordLenAfterHeader = Utils::read_field<boost::uint16_t>(p1);
 
         boost::uint8_t description_data[VariableLengthRecord::eDescriptionSize];
-        Utils::read_array_field(p1, description_data, VariableLengthRecord::eDescriptionSize);
-        description = VariableLengthRecord::bytes2string(description_data, VariableLengthRecord::eDescriptionSize);
+        Utils::read_array_field(p1, description_data,
+            VariableLengthRecord::eDescriptionSize);
+        description = VariableLengthRecord::bytes2string(description_data,
+            VariableLengthRecord::eDescriptionSize);
 
         delete[] buf1;
     }
@@ -407,13 +418,11 @@ void LasHeaderReader::readOneVLR()
         Utils::read_n(data, m_istream, recordLenAfterHeader);
     }
 
-    VariableLengthRecord vlr(reserved, userId, recordId, description, data, recordLenAfterHeader);
+    VariableLengthRecord vlr(reserved, userId, recordId, description,
+        data, recordLenAfterHeader);
 
     m_header.getVLRs().add(vlr);
-
     delete[] data;
-
-    return;
 }
 
 
@@ -453,8 +462,6 @@ void LasHeaderReader::readAllVLRs()
     //////    SetSchema(schema);
     //////    boost::ignore_unused_variable_warning(e);
     //////}
-
-    return;
 }
 
 
@@ -492,10 +499,9 @@ void LasHeaderReader::validate()
         std::ios::off_type count = point_bytes / length;
         std::ios::off_type remainder = point_bytes % length;
 
-
-        if (m_header.GetPointRecordsCount() != static_cast<boost::uint32_t>(count))
+        if (m_header.GetPointRecordsCount() !=
+            static_cast<boost::uint32_t>(count))
         {
-
             std::ostringstream msg;
             msg <<  "The number of points in the header that was set "
                 "by the software '" << m_header.GetSoftwareId() <<
@@ -511,11 +517,9 @@ void LasHeaderReader::validate()
                 << m_header.GetPointRecordsCount() <<
                 " Point data remainder: " << remainder;
             throw std::runtime_error(msg.str());
-
         }
     }
 }
-
 
 
 }
