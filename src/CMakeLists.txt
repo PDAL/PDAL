@@ -574,6 +574,7 @@ set(PDAL_KERNEL_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_KERNEL_PATH}")
 set(PDAL_KERNEL_HPP
     ${PDAL_KERNEL_HEADERS}/Application.hpp 
     ${PDAL_KERNEL_HEADERS}/Support.hpp
+    ${PDAL_KERNEL_HEADERS}/Diff.hpp
     ${PDAL_KERNEL_HEADERS}/Info.hpp
     ${PDAL_KERNEL_HEADERS}/Kernel.hpp
     ${PDAL_KERNEL_HEADERS}/Pipeline.hpp
@@ -584,6 +585,7 @@ set(PDAL_KERNEL_HPP
 set(PDAL_KERNEL_CPP
     ${PDAL_KERNEL_SRC}/Application.cpp
     ${PDAL_KERNEL_SRC}/Support.cpp
+    ${PDAL_KERNEL_SRC}/Diff.cpp
     ${PDAL_KERNEL_SRC}/Info.cpp
     ${PDAL_KERNEL_SRC}/Pipeline.cpp
     ${PDAL_KERNEL_SRC}/Query.cpp

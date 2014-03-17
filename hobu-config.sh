@@ -15,6 +15,7 @@ CXX=/Users/hobu/bin/clang++
 ORACLE_HOME=$HOME/oracle
 export ORACLE_HOME
 CONFIG="Unix Makefiles"
+CONFIG="Ninja"
 
 if ! [ -z "$1" ]; then
     CONFIG="$1"
