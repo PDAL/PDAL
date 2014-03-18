@@ -82,6 +82,22 @@ Metadata Metadata::operator+(const Metadata& rhs) const
 
 }
 
+bool Metadata::equal(Metadata const& rhs) const
+{
+    return m_tree == rhs.m_tree;
+}
+
+
+bool Metadata::operator==(Metadata const& rhs) const
+{
+    return equal(rhs);
+}
+
+bool Metadata::operator!=(Metadata const& rhs) const
+{
+    return !(equal(rhs));
+}
+
 
 } // namespace pdal
 
