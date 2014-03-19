@@ -112,6 +112,14 @@ public:
     {}
 };
 
+class invalid_stream : public pdal_error
+{
+public:
+
+    invalid_stream(std::string const& msg)
+        : pdal_error(msg)
+    {}
+};
 
 // for when a stage doesn't get the schema it expects
 class impedance_invalid : public pdal_error
