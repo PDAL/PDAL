@@ -142,7 +142,11 @@ boost::uint32_t StageIterator::readBuffer(PointBuffer& buffer)
     }
 
     boost::uint32_t numRead = readBufferImpl(buffer);
-    m_index += numRead;
+    
+    if (numRead == 0)
+        m_index = m_stage.getNumPoints();
+    else
+        m_index += numRead;
     return numRead;
 }
 
