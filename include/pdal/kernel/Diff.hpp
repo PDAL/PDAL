@@ -40,8 +40,8 @@
 #include <pdal/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
 
-#include <boost/property_tree/xml_parser.hpp>
-#include <boost/property_tree/json_parser.hpp>
+#include <boost/property_tree/ptree.hpp>
+
 
 #include "Application.hpp"
 
@@ -59,8 +59,11 @@ private:
     void addSwitches(); // overrride
     void validateSwitches(); // overrride
     
-    void readPoints(    StageSequentialIterator* iter,
-                        PointBuffer& data);    
+    void checkPoints(  StageSequentialIterator* source_iter,
+                       PointBuffer& source_data,
+                       StageSequentialIterator* candidate_iter,
+                       PointBuffer& candidate_data,
+                       boost::property_tree::ptree& errors);
     std::string m_sourceFile;
     std::string m_candidateFile;
     bool m_useXML;

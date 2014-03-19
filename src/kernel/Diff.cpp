@@ -53,7 +53,12 @@ Diff::Diff(int argc, const char* argv[])
 void Diff::validateSwitches()
 {
   
-
+    
+    if (!m_sourceFile.size())
+        throw app_runtime_error("No source file given!");
+    if (!m_candidateFile.size())
+        throw app_runtime_error("No candidate file given!");
+        
     return;
 }
 
@@ -91,12 +96,69 @@ void Diff::addSwitches()
 
 
 
-void Diff::readPoints(  StageSequentialIterator* iter,
-                        PointBuffer& data)
+void Diff::checkPoints(  StageSequentialIterator* source_iter,
+                         PointBuffer& source_data,
+                         StageSequentialIterator* candidate_iter,
+                         PointBuffer& candidate_data,
+                         ptree& errors)
 {
-    while (!iter->atEnd())
+
+    boost::uint32_t i(0);
+    boost::uint32_t chunk(0);    
+    boost::uint32_t MAX_BADBYTES(20);
+    boost::uint32_t badbytes(0);
+    while (!source_iter->atEnd())
     {
-        const boost::uint32_t numRead = iter->read(data);
+        const boost::uint32_t numSrcRead = source_iter->read(source_data);
+        const boost::uint32_t numCandidateRead = candidate_iter->read(candidate_data);
+        if (numSrcRead != numCandidateRead)
+        {
+            std::ostringstream oss;
+        
+            oss << "Unable to read same number of points for chunk number";
+            errors.put<std::string>("points.error", oss.str());
+            errors.put<boost::uint32_t>("points.candidate" , numCandidateRead);
+            errors.put<boost::uint32_t>("points.source" , numSrcRead);         
+        }
+        
+        chunk++;
+        
+        pdal::pointbuffer::PointBufferByteSize source_byte_length(0);
+        pdal::pointbuffer::PointBufferByteSize candidate_byte_length(0);
+        source_byte_length =  static_cast<pdal::pointbuffer::PointBufferByteSize>(source_data.getSchema().getByteSize()) * 
+                              static_cast<pdal::pointbuffer::PointBufferByteSize>(source_data.getNumPoints());
+
+        candidate_byte_length =  static_cast<pdal::pointbuffer::PointBufferByteSize>(candidate_data.getSchema().getByteSize()) * 
+                                 static_cast<pdal::pointbuffer::PointBufferByteSize>(candidate_data.getNumPoints());
+        
+        if (source_byte_length != candidate_byte_length)
+        {
+            std::ostringstream oss;
+        
+            oss << "Source byte length != candidate byte length";
+            errors.put<std::string>("buffer.error", oss.str());
+            errors.put<boost::uint32_t>("buffer.candidate" , candidate_byte_length);
+            errors.put<boost::uint32_t>("buffer.source" , source_byte_length);            
+        }
+        boost::uint8_t* s = source_data.getData(0);
+        boost::uint8_t* c = candidate_data.getData(0);
+
+        for (boost::uint32_t p = 0; p < std::min(source_byte_length, candidate_byte_length); ++p)
+        {
+            if (s[p] != c[p])
+            {
+                std::ostringstream oss;
+        
+                oss << "Byte number " << p << " is not equal for source and candidate";
+                errors.put<std::string>("data.error", oss.str());
+                badbytes++;                        
+            }
+            
+        }
+        
+        if (badbytes > MAX_BADBYTES )
+            break;
+        
     }
 
 }
@@ -113,8 +175,11 @@ int Diff::execute()
     }
     Stage* source = AppSupport::makeReader(sourceOptions);
     source->initialize();
-
-    PointBuffer source_data(source->getSchema(), m_chunkSize);
+    
+    boost::uint32_t chunkSize(source->getNumPoints());
+    if (m_chunkSize)
+        chunkSize = m_chunkSize;
+    PointBuffer source_data(source->getSchema(), chunkSize);
     StageSequentialIterator* source_iter = source->createSequentialIterator(source_data);
     
     ptree errors;
@@ -130,11 +195,10 @@ int Diff::execute()
     }
 
     Stage* candidate = AppSupport::makeReader(candidateOptions);
-    // pdal::filters::Index* index_filter = new pdal::filters::Index(*candidate, candidateOptions);
     candidate->initialize();    
 
 
-    PointBuffer candidate_data(candidate->getSchema(), m_chunkSize);
+    PointBuffer candidate_data(candidate->getSchema(), chunkSize);
     StageSequentialIterator* candidate_iter = candidate->createSequentialIterator(candidate_data);
     // readPoints(candidate_iter, candidate_data);
 
@@ -150,6 +214,18 @@ int Diff::execute()
         
     }
     
+    pdal::Metadata source_metadata = source->collectMetadata();
+    pdal::Metadata candidate_metadata = candidate->collectMetadata();
+    
+    if (source_metadata != candidate_metadata)
+    {
+        std::ostringstream oss;
+        
+        oss << "Source and candidate files do not have the same metadata count";
+        errors.put<std::string>("metadata.error", oss.str());
+        errors.put_child("metadata.source", source_metadata.toPTree());
+        errors.put_child("metadata.candidate", candidate_metadata.toPTree());
+    }
 
     
     Schema const& candidate_schema = candidate_data.getSchema();
@@ -167,8 +243,35 @@ int Diff::execute()
         errors.put_child("schema.candidate", candidate_schema.toPTree());
 
     }
+
     
-    write_json(std::cout, errors);
+
+    // readPoints(candidate_iter, candidate_data);
+
+
+    if (errors.size())
+    {
+        write_json(std::cout, errors);
+        return 1;
+    } else
+    {
+        checkPoints(source_iter, 
+                    source_data, 
+                    candidate_iter, 
+                    candidate_data, 
+                    errors);
+        if (errors.size())
+        {
+            write_json(std::cout, errors);
+            delete candidate_iter;    
+            delete candidate;
+
+    
+            delete source_iter;
+            delete source;            
+            return 1;
+        }
+    }
 
     delete candidate_iter;    
     delete candidate;
