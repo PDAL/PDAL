@@ -234,7 +234,7 @@ boost::uint32_t PCLBlock::readBufferImpl(PointBuffer& buffer)
             outputData.setNumPoints(outputData.getNumPoints() + tmpData.getNumPoints());
         }
 
-        numPointsNeeded -= tmpData.getNumPoints();
+        numPointsNeeded -= numSrcPointsRead;
         m_pclblockFilter.log()->get(logDEBUG3) << numPointsNeeded << " left to read this block" << std::endl;
 
     }
