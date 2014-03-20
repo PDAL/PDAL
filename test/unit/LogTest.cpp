@@ -322,7 +322,7 @@ BOOST_AUTO_TEST_CASE(test_three)
             "import numpy as np\n"
             "def xfunc(ins,outs):\n"
             "  X = ins['X']\n"
-            "  print \"Hi!\"\n"
+            "  print (\"Hi!\")\n"
             "  X = X + 1.0\n"
             "  outs['X'] = X\n"
             "  return True\n"

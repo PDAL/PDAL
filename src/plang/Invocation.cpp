@@ -365,8 +365,15 @@ void Invocation::getOutputNames(std::vector<std::string>& names)
 
     while (PyDict_Next(m_varsOut, &pos, &key, &value))
     {
-        char* p = PyString_AsString(key);
-        names.push_back(p);
+        const char* p(0);
+#if PY_MAJOR_VERSION >= 3
+        PyObject* u = PyUnicode_AsUTF8String(key);
+        p = PyBytes_AsString(u);
+#else
+        p = PyString_AsString(key);
+#endif
+        if (p)
+            names.push_back(p);
     }
 
     return;

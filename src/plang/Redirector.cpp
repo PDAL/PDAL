@@ -130,23 +130,39 @@ Redirector::~Redirector()
 
 PyMODINIT_FUNC redirector_init(void)
 {
-    Redirector::init();
+    return Redirector::init();
 }
 
+#if PY_MAJOR_VERSION >= 3
+    static struct PyModuleDef redirectordef = {
+        PyModuleDef_HEAD_INIT,
+        "redirector",     /* m_name */
+        "redirector.Stdout objects",  /* m_doc */
+        -1,                  /* m_size */
+        Stdout_methods,    /* m_methods */
+        NULL,                /* m_reload */
+        NULL,                /* m_traverse */
+        NULL,                /* m_clear */
+        NULL,                /* m_free */
+    };
+#endif
 
-void Redirector::init()
+PyObject* Redirector::init()
 {
     StdoutType.tp_new = PyType_GenericNew;
     if (PyType_Ready(&StdoutType) < 0)
-        return;
-
-    PyObject* m = Py_InitModule3("redirector", 0, 0);
+        return NULL;
+#if PY_MAJOR_VERSION >= 3
+    PyObject* m = PyModule_Create(&redirectordef);
+#else
+    PyObject* m = Py_InitModule("redirector", 0, 0);    
+#endif
     if (m)
     {
         Py_INCREF(&StdoutType);
         PyModule_AddObject(m, "Stdout", reinterpret_cast<PyObject*>(&StdoutType));
     }
-    return;
+    return m;
 }
 
 

@@ -160,8 +160,20 @@ std::string getPythonTraceback()
 
         // print error message
         int i, n = PyList_Size(output);
-        for (i=0; i<n; i++) mssg << PyString_AsString(PyList_GetItem(output, i));
 
+#if PY_MAJOR_VERSION >= 3
+        for (i=0; i<n; i++) 
+        {
+            PyObject* u = PyUnicode_AsUTF8String(PyList_GetItem(output, i));
+            const char* p = PyBytes_AsString(u);
+            
+            mssg << p;
+        }
+        
+#else
+        for (i=0; i<n; i++) mssg << PyString_AsString(PyList_GetItem(output, i));
+#endif
+        
         // clean up
         Py_XDECREF(args);
         Py_XDECREF(output);
@@ -169,7 +181,13 @@ std::string getPythonTraceback()
     else if (value != NULL)
     {
         PyObject *s = PyObject_Str(value);
+#if PY_MAJOR_VERSION >= 3
+        // const char* text = PyUnicode_AS_DATA(s);
+        PyObject* u = PyUnicode_AsUTF8String(s);
+        const char* text = PyBytes_AsString(u);        
+#else
         const char* text = PyString_AS_STRING(s);
+#endif
         Py_DECREF(s);
         mssg << text;
     }
