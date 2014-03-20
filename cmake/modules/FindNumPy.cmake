@@ -15,6 +15,7 @@ endif (NUMPY_INCLUDE_DIR)
 
 # To set the variables PYTHON_EXECUTABLE
 FIND_PACKAGE(PythonInterp REQUIRED)
+FIND_PACKAGE(PythonLibs REQUIRED)
 
 # Look for the include path
 # WARNING: The variable PYTHON_EXECUTABLE is defined by the script FindPythonInterp.cmake
