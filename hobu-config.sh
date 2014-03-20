@@ -30,6 +30,7 @@ cmake   -G "$CONFIG"  \
         -DWITH_HEXER=ON \
         -DWITH_NITRO=ON \
         -DWITH_MRSID=ON \
+        -DPYTHON_EXECUTABLE=/usr/local/bin/python3 \
         -DMRSID_INCLUDE_DIR=/Users/hobu/dev/release/mrsid/Lidar_DSDK/include \
         -DMRSID_LIBRRARY=/Users/hobu/dev/release/mrsid/Lidar_DSDK/lib/liblti_lidar_dsdk.dylib \
         -DHEXER_INCLUDE_DIR=${HEXER_HOME}/include \
