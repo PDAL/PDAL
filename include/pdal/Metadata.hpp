@@ -172,7 +172,7 @@ public:
         setDescription(description);
         setValue<T>(value);
     }
-
+    
 
     /// @name Adding Metadata members
     /// Convenience addition
@@ -200,6 +200,11 @@ public:
     /// respective paths as defined by their dotted Metadata::getName() values
     Metadata operator+(const Metadata& rhs) const;
     
+    bool operator==(Metadata const& rhs) const;
+    bool operator!=(Metadata const& rhs) const;
+    bool equal(Metadata const& rhs) const;
+
+
     /** @name entry type
     */
     /// @return the type for the metadata entry as a string.  These 

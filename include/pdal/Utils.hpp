@@ -110,7 +110,7 @@ public:
         std::streamsize const& num)
     {
         if (!src.good())
-            throw std::runtime_error("pdal::Utils::read_n<T> input stream is "
+            throw pdal::invalid_stream("pdal::Utils::read_n<T> input stream is "
                 "not readable");
 
         char* p = as_buffer(dest);

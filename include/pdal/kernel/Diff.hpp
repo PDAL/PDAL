@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2013, Howard Butler (hobu.inc@gmail.com)
+* Copyright (c) 2014, Howard Butler (howard@hobu.co)
 *
 * All rights reserved.
 *
@@ -32,17 +32,44 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_PDAL_KERNEL_HPP
-#define INCLUDED_PDAL_KERNEL_HPP
+#ifndef INCLUDED_PDAL_KERNEL_DIFF_HPP
+#define INCLUDED_PDAL_KERNEL_DIFF_HPP
+
+#include <pdal/Stage.hpp>
+#include <pdal/StageIterator.hpp>
+#include <pdal/FileUtils.hpp>
+#include <pdal/PointBuffer.hpp>
+
+#include <boost/property_tree/ptree.hpp>
 
 
 #include "Application.hpp"
-#include "Support.hpp"
 
-#include "Info.hpp"
-#include "Pipeline.hpp"
-#include "Query.hpp"
-#include "Translate.hpp"
-#include "Diff.hpp"
+namespace pdal { namespace kernel {
+    
+
+class PDAL_DLL Diff : public Application
+{
+public:
+    Diff(int argc, const char* argv[]);
+    int execute(); // overrride
+    
+    
+private:
+    void addSwitches(); // overrride
+    void validateSwitches(); // overrride
+    
+    void checkPoints(  StageSequentialIterator* source_iter,
+                       PointBuffer& source_data,
+                       StageSequentialIterator* candidate_iter,
+                       PointBuffer& candidate_data,
+                       boost::property_tree::ptree& errors);
+    std::string m_sourceFile;
+    std::string m_candidateFile;
+    bool m_useXML;
+    bool m_useJSON;
+};
+
+}} // pdal::kernel
 
 #endif

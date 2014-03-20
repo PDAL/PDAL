@@ -15,6 +15,7 @@ application currently contains four commands:
 * :ref:`info <info_command>`
 * :ref:`pipeline <pipeline_command>`
 * :ref:`query <query_command>`
+* :ref:`query <diff_command>`
 
 Applications are run by invoking the *pdal* application along with the 
 command name:
@@ -174,4 +175,24 @@ A simple CSV-style text is output with delta information:
       --2d                  only 2D comparisons/indexing
 
 
+.. _diff_command:
 
+``diff`` command 
+------------------------------------------------------------------------------
+
+The *diff* command is used for executing a simple contextual difference 
+between two sources. 
+
+::
+
+    $ pdal diff test/data/1.2-with-color.las test/data/1.2-with-color-clipped.las
+    
+It will output JSON if there are any differences. It will output nothing 
+and return 0 if there are no differences. At this time it supports 
+checking the following:
+
+* Different schema
+* Expected count
+* Metadata
+* Actual point count
+* Byte-by-byte point data

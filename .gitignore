@@ -19,6 +19,7 @@ cmake_install.cmake
 CTestTestfile.cmake
 Testing/
 apps/pdal-config
+apps/pdal.pc
 src/CMakeScripts/
 apps/CMakeScripts/
 CMakeScripts/

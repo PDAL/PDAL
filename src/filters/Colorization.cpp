@@ -221,7 +221,7 @@ Colorization::Colorization(const pdal::filters::Colorization& filter, PointBuffe
         throw pdal_error("unable to fetch forward geotransform for raster!");
     }
 
-    if (!GDALInvGeoTransform(&(m_forward_transform.front()), &(m_inverse_transform.front())) != CE_None)
+    if (!GDALInvGeoTransform(&(m_forward_transform.front()), &(m_inverse_transform.front())))
     {
         throw pdal_error("unable to fetch inverse geotransform for raster!");
     }

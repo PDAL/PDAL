@@ -48,6 +48,7 @@
 #include <pdal/PointBuffer.hpp>
 #include <pdal/Metadata.hpp>
 #include "ZipPoint.hpp"
+#include <stdexcept>
 
 #ifdef PDAL_HAVE_GDAL
 #include "gdal.h"
@@ -190,11 +191,11 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream,
     const bool hasColor = Support::hasColor(pointFormat);
     pointbuffer::PointBufferByteSize pointByteCount =
         Support::getPointDataSize(pointFormat);
-
-    if (read_buffer.size() < (pointByteCount * numPoints))
+    
+    pointbuffer::PointBufferByteSize numBytesToRead = pointByteCount * numPoints;
+    if (read_buffer.size() < numBytesToRead)
     {
-        pointbuffer::PointBufferByteSize size = pointByteCount * numPoints64;
-        read_buffer.resize(size);
+        read_buffer.resize(numBytesToRead);
     }
 
     if (!dimensions->X)
@@ -235,7 +236,28 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream,
     }
     else
     {
-        Utils::read_n(read_buffer.front(), stream, pointByteCount * numPoints);
+        try
+        {
+            Utils::read_n(read_buffer.front(), stream, numBytesToRead);
+        } catch (std::out_of_range&)
+        {
+            if (stream.gcount())
+            {
+                // We weren't able to read as many bytes as asked 
+                // The header must have lied or something, but we 
+                // do have some data here. Figure out how many 
+                // points we read and set things to that
+                numPoints = stream.gcount()/pointByteCount;
+
+            } else
+            {
+                throw;
+            }
+        } catch (pdal::invalid_stream&)
+        {
+            numPoints = 0;
+        }
+        
     }
 
     pdal::Bounds<double> bounds;
