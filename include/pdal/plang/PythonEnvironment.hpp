@@ -37,13 +37,6 @@
 
 #include <pdal/pdal_internal.hpp>
 
-#include <pdal/pdal_internal.hpp>
-//#include <pdal/PointBuffer.hpp>
-
-//#include <boost/cstdint.hpp>
-//#include <boost/variant.hpp>
-
-//#include <vector>
 #include <iostream>
 
 // forward declare PyObject so we don't need the python headers everywhere
