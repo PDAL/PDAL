@@ -52,3 +52,7 @@ cmake   -G "$CONFIG"  \
     # -DUSE_PDAL_PLUGIN_PCD=ON \
     # -DUSE_PDAL_PLUGIN_OCI=ON \
     # -DUSE_PDAL_PLUGIN_TEXT=ON \
+
+        # -DPYTHON_EXECUTABLE=/usr/local/bin/python3 \
+        # -DPYTHON_LIBRARY=/usr/local/Cellar/python3/3.3.3/Frameworks/Python.framework/Versions/3.3/lib/libpython3.3.dylib \
+        # -DPYTHON_INCLUDE_DIR=/usr/local/Cellar/python3/3.3.3/Frameworks/Python.framework/Versions/3.3/include/python3.3m/ \

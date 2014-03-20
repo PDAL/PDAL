@@ -35,7 +35,7 @@ public:
     Redirector();
     ~Redirector();
 
-    static void init();
+    static PyObject* init();
     void set_stdout(std::ostream* ostr);
     void reset_stdout();
 
