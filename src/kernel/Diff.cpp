@@ -37,6 +37,8 @@
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
+#include <boost/scoped_ptr.hpp>
+
 using boost::property_tree::ptree;
 
 namespace pdal { namespace kernel {
@@ -173,14 +175,14 @@ int Diff::execute()
         sourceOptions.add<bool>("debug", isDebug());
         sourceOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
     }
-    Stage* source = AppSupport::makeReader(sourceOptions);
+    boost::scoped_ptr<Stage> source(AppSupport::makeReader(sourceOptions));
     source->initialize();
     
     boost::uint32_t chunkSize(source->getNumPoints());
     if (m_chunkSize)
         chunkSize = m_chunkSize;
     PointBuffer source_data(source->getSchema(), chunkSize);
-    StageSequentialIterator* source_iter = source->createSequentialIterator(source_data);
+    boost::scoped_ptr<StageSequentialIterator> source_iter(source->createSequentialIterator(source_data));
     
     ptree errors;
 
@@ -194,14 +196,12 @@ int Diff::execute()
         candidateOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
     }
 
-    Stage* candidate = AppSupport::makeReader(candidateOptions);
+    boost::scoped_ptr<Stage> candidate(AppSupport::makeReader(candidateOptions));
     candidate->initialize();    
 
 
     PointBuffer candidate_data(candidate->getSchema(), chunkSize);
-    StageSequentialIterator* candidate_iter = candidate->createSequentialIterator(candidate_data);
-    // readPoints(candidate_iter, candidate_data);
-
+    boost::scoped_ptr<StageSequentialIterator> candidate_iter(candidate->createSequentialIterator(candidate_data));
 
     if (candidate->getNumPoints() != source->getNumPoints())
     {
@@ -246,98 +246,28 @@ int Diff::execute()
 
     
 
-    // readPoints(candidate_iter, candidate_data);
-
-
     if (errors.size())
     {
         write_json(std::cout, errors);
         return 1;
     } else
     {
-        checkPoints(source_iter, 
+        // If we made it this far with no errors, now we'll 
+        // check the points.
+        checkPoints(source_iter.get(), 
                     source_data, 
-                    candidate_iter, 
+                    candidate_iter.get(), 
                     candidate_data, 
                     errors);
         if (errors.size())
         {
             write_json(std::cout, errors);
-            delete candidate_iter;    
-            delete candidate;
-
-    
-            delete source_iter;
-            delete source;            
             return 1;
         }
     }
 
-    delete candidate_iter;    
-    delete candidate;
-
-    
-    delete source_iter;
-    delete source;
-    
     return 0;
 
-    
-
-         //    for (boost::uint32_t i = 0; i < source_data.getNumPoints(); ++i)
-        //     {
-        //         double sx = source_data.applyScaling(sDimX, i);
-        //         double sy = source_data.applyScaling(sDimY, i);
-        //         double sz = source_data.applyScaling(sDimZ, i);                
-        //         
-        //         std::vector<std::size_t> ids = candidate_data.neighbors(sx, sy, sz, 1);
-        // 
-        //         if (!ids.size())
-        //         {
-        //     std::ostringstream oss;
-        //     oss << "unable to find point for id '"  << i <<"'";
-        //             throw app_runtime_error(oss.str() );
-        // }
-        //         
-        //         std::size_t id = ids[0];
-        //         double cx = candidate_data.applyScaling(cDimX, id);
-        //         double cy = candidate_data.applyScaling(cDimY, id);
-        //         double cz = candidate_data.applyScaling(cDimZ, id);
-        // 
-        //         double xd = sx - cx;
-        //         double yd = sy - cy;
-        //         double zd = sz - cz;
-        //         
-        //         if (!bWroteHeader)
-        //         {
-        //             writeHeader(ostr, m_3d);
-        //             bWroteHeader = true;
-        //         }
-        //         ostr << i << ",";
-        //         boost::uint32_t precision = Utils::getStreamPrecision(cDimX.getNumericScale());
-        //         ostr.setf(std::ios_base::fixed, std::ios_base::floatfield);
-        //         ostr.precision(precision);
-        //         ostr << xd << ",";
-        // 
-        //         precision = Utils::getStreamPrecision(cDimY.getNumericScale());
-        //         ostr.precision(precision);
-        //         ostr << yd;
-        //         
-        //         if (m_3d)
-        //         {
-        //             ostr << ",";
-        //             precision = Utils::getStreamPrecision(cDimZ.getNumericScale());
-        //             ostr.precision(precision);
-        //             ostr << zd;
-        //         }
-        //         
-        //         ostr << std::endl;
-        // 
-        //     }
-
-
-    
-    return 0;
 }
 
 }} // pdal::kernel
