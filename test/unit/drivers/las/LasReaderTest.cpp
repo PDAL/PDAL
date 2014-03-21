@@ -440,4 +440,48 @@ BOOST_AUTO_TEST_CASE(test_vlr)
 }
 
 
+BOOST_AUTO_TEST_CASE(test_no_xyz)
+{
+    // Wipe off the XYZ dimensions and see if we can 
+    // still read LAS data #123
+    pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
+    BOOST_CHECK(reader.getDescription() == "Las Reader");
+    reader.initialize();
+
+    Schema schema = reader.getSchema();
+    
+    Dimension x = schema.getDimension("X");
+    boost::uint32_t flags = x.getFlags();
+    x.setFlags(flags | dimension::IsIgnored);
+    schema.setDimension(x);
+
+    Dimension y = schema.getDimension("Y");
+    flags = y.getFlags();
+    y.setFlags(flags | dimension::IsIgnored);
+    schema.setDimension(y);
+
+    Dimension z = schema.getDimension("Z");
+    flags = z.getFlags();
+    z.setFlags(flags | dimension::IsIgnored);
+    schema.setDimension(z);
+        
+    schema = schema.pack(); // wipe out ignored dims.
+
+    PointBuffer data(schema, 3);
+
+    pdal::StageSequentialIterator* iter = reader.createSequentialIterator(data);
+
+    {
+        boost::uint32_t numRead = iter->read(data);
+        BOOST_CHECK(numRead == 3);
+
+    }
+
+
+    delete iter;
+
+    return;
+}
+
+
 BOOST_AUTO_TEST_SUITE_END()

@@ -198,12 +198,6 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream,
         read_buffer.resize(numBytesToRead);
     }
 
-    if (!dimensions->X)
-        throw pdal_error("No X dimension position available!");
-    if (!dimensions->Y)
-        throw pdal_error("No Y dimension position available!");
-    if (!dimensions->Z)
-        throw pdal_error("No Z dimension position available!");
 
     if (zipPoint)
     {
@@ -269,26 +263,29 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream,
             static_cast<pointbuffer::PointBufferByteSize>(pointByteCount) *
             static_cast<pointbuffer::PointBufferByteSize>(pointIndex);
 
-        // always read the base fields
         {
             const boost::int32_t x = Utils::read_field<boost::int32_t>(p);
             const boost::int32_t y = Utils::read_field<boost::int32_t>(p);
             const boost::int32_t z = Utils::read_field<boost::int32_t>(p);
-
-            double X = dimensions->X->applyScaling(x);
-            double Y = dimensions->Y->applyScaling(y);
-            double Z = dimensions->Z->applyScaling(z);
-
-            if (bFirstPoint)
+            
+            if (dimensions->X && dimensions->Y && dimensions->Z)
             {
-                bounds = pdal::Bounds<double>(X, Y, Z, X, Y, Z);
-                bFirstPoint = false;
+                double X = dimensions->X->applyScaling(x);
+                double Y = dimensions->Y->applyScaling(y);
+                double Z = dimensions->Z->applyScaling(z);
+
+                if (bFirstPoint)
+                {
+                    bounds = pdal::Bounds<double>(X, Y, Z, X, Y, Z);
+                    bFirstPoint = false;
+                }
+
+                point.set(0, X);
+                point.set(1, Y);
+                point.set(2, Z);
+                bounds.grow(point);
             }
 
-            point.set(0, X);
-            point.set(1, Y);
-            point.set(2, Z);
-            bounds.grow(point);
 
             boost::uint16_t intensity = Utils::read_field<boost::uint16_t>(p);
             boost::uint8_t flags = Utils::read_field<boost::uint8_t>(p);
@@ -303,10 +300,15 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream,
             boost::uint8_t numReturns = (flags >> 3) & 0x07;
             boost::uint8_t scanDirFlag = (flags >> 6) & 0x01;
             boost::uint8_t flight = (flags >> 7) & 0x01;
-
-            data.setField<boost::int32_t>(*dimensions->X, pointIndex, x);
-            data.setField<boost::int32_t>(*dimensions->Y, pointIndex, y);
-            data.setField<boost::int32_t>(*dimensions->Z, pointIndex, z);
+            
+            if (dimensions->X)
+                data.setField<boost::int32_t>(*dimensions->X, pointIndex, x);
+            
+            if (dimensions->Y)
+                data.setField<boost::int32_t>(*dimensions->Y, pointIndex, y);
+            
+            if (dimensions->Z)
+                data.setField<boost::int32_t>(*dimensions->Z, pointIndex, z);
 
             if (dimensions->Intensity)
                 data.setField<boost::uint16_t>(*dimensions->Intensity,
