@@ -161,14 +161,17 @@ boost::uint16_t Support::getPointDataSize(PointFormat pointFormat)
 
 PointDimensions::PointDimensions(const Schema& schema, std::string const& ns)
 {
-    X = &schema.getDimension("X", ns);
-    Y = &schema.getDimension("Y", ns);
-    Z = &schema.getDimension("Z", ns);
+
 
 #   define CACHE_DIM(x) \
     x = schema.getDimensionPtr(#x, ns.c_str()); \
     if (x && x->isIgnored()) x = 0;
-
+    
+    // don't ever wipe off ignored XYZ dims.
+    X = schema.getDimensionPtr("X", ns);
+    Y = schema.getDimensionPtr("Y", ns);
+    Z = schema.getDimensionPtr("Z", ns);
+    
     CACHE_DIM(Intensity)
     CACHE_DIM(ReturnNumber)
     CACHE_DIM(NumberOfReturns)
