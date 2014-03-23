@@ -140,7 +140,8 @@ int main(int argc, char* argv[])
         return app.run();
     }
     
-    std::cerr << "Action '" << action <<"' not recognized" << std::endl << std::endl;
+    std::cerr << "Action '" << action << "' not recognized" <<
+        std::endl << std::endl;
     outputVersion();
     return 1;
 }

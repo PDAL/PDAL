@@ -115,7 +115,7 @@ void Reader::initialize()
     std::istream& stream = m_streamFactory->allocate();
 
     LasHeaderReader lasHeaderReader(m_lasHeader, stream);
-    lasHeaderReader.read(*this, getSchemaRef());
+    lasHeaderReader.read(*this, m_schema);
 
     this->setBounds(m_lasHeader.getBounds());
     this->setNumPoints(m_lasHeader.GetPointRecordsCount());

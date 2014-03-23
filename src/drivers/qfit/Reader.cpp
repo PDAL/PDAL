@@ -433,47 +433,42 @@ std::string Reader::getFileName() const
 
 void Reader::registerFields()
 {
-    Schema& schema = getSchemaRef();
-
     Schema dimensions(getDefaultDimensions());
 
-    schema.appendDimension(dimensions.getDimension("Time"));
-    schema.appendDimension(dimensions.getDimension("Y"));
-    schema.appendDimension(dimensions.getDimension("X"));
+    m_schema.appendDimension(dimensions.getDimension("Time"));
+    m_schema.appendDimension(dimensions.getDimension("Y"));
+    m_schema.appendDimension(dimensions.getDimension("X"));
 
     Dimension z = dimensions.getDimension("Z");
     z.setNumericScale(m_scale_z);
-    schema.appendDimension(z);
+    m_schema.appendDimension(z);
 
-    schema.appendDimension(dimensions.getDimension("StartPulse"));
-    schema.appendDimension(dimensions.getDimension("ReflectedPulse"));
-    schema.appendDimension(dimensions.getDimension("ScanAngleRank"));
-    schema.appendDimension(dimensions.getDimension("Pitch"));
-    schema.appendDimension(dimensions.getDimension("Roll"));
+    m_schema.appendDimension(dimensions.getDimension("StartPulse"));
+    m_schema.appendDimension(dimensions.getDimension("ReflectedPulse"));
+    m_schema.appendDimension(dimensions.getDimension("ScanAngleRank"));
+    m_schema.appendDimension(dimensions.getDimension("Pitch"));
+    m_schema.appendDimension(dimensions.getDimension("Roll"));
 
     if (m_format == QFIT_Format_12)
     {
-        schema.appendDimension(dimensions.getDimension("PDOP"));
-        schema.appendDimension(dimensions.getDimension("PulseWidth"));
-        schema.appendDimension(dimensions.getDimension("GPSTime"));
-
+        m_schema.appendDimension(dimensions.getDimension("PDOP"));
+        m_schema.appendDimension(dimensions.getDimension("PulseWidth"));
+        m_schema.appendDimension(dimensions.getDimension("GPSTime"));
     }
     else if (m_format == QFIT_Format_14)
     {
-        schema.appendDimension(dimensions.getDimension("PassiveSignal"));
-        schema.appendDimension(dimensions.getDimension("PassiveY"));
-        schema.appendDimension(dimensions.getDimension("PassiveX"));
+        m_schema.appendDimension(dimensions.getDimension("PassiveSignal"));
+        m_schema.appendDimension(dimensions.getDimension("PassiveY"));
+        m_schema.appendDimension(dimensions.getDimension("PassiveX"));
         Dimension z = dimensions.getDimension("PassiveZ");
         z.setNumericScale(m_scale_z);
-        schema.appendDimension(z);
-        schema.appendDimension(dimensions.getDimension("GPSTime"));
+        m_schema.appendDimension(z);
+        m_schema.appendDimension(dimensions.getDimension("GPSTime"));
     }
     else
     {
-        schema.appendDimension(dimensions.getDimension("GPSTime"));
+        m_schema.appendDimension(dimensions.getDimension("GPSTime"));
     }
-
-    return;
 }
 
 
