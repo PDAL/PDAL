@@ -64,20 +64,16 @@ public:
     static Options getDefaultOptions();
     virtual void initialize();
 
-    bool supportsIterator(StageIteratorType t) const
-    {
-        if (t == StageIterator_Sequential) return true;
-
-        return false;
-    }
-
-    pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
+    pdal::StageSequentialIterator*
+        createSequentialIterator(PointBuffer& buffer) const;
     pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const;
     
-    inline std::map<std::string, bool> const& getIgnoredMap() const { return m_ignoredMap; }
-    
-    inline bool doIgnoreUnspecifiedDimensions() const { return m_ignoreDefault; }
-    std::vector<Dimension> const& getCreatedDimensions() const { return m_createDimensions; }
+    inline std::map<std::string, bool> const& getIgnoredMap() const
+        { return m_ignoredMap; }
+    inline bool doIgnoreUnspecifiedDimensions() const
+        { return m_ignoreDefault; }
+    std::vector<Dimension> const& getCreatedDimensions() const
+        { return m_createDimensions; }
     
 private:
     void checkImpedance();

@@ -79,23 +79,15 @@ public:
     static Options getDefaultOptions();
     virtual void initialize();
 
-    bool supportsIterator(StageIteratorType t) const
-    {
-        if (t == StageIterator_Sequential) return true;
-        if (t == StageIterator_Random) return true;
-
-        return false;
-    }
-
-    pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
+    pdal::StageSequentialIterator*
+        createSequentialIterator(PointBuffer& buffer) const;
     pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const;
     
     std::vector<scaling::Scaler> const& getScalers() const
-    {
-        return m_scalers;
-    }
+        { return m_scalers; }
     
-    std::map<dimension::id, dimension::id> const& getScaleMap() const { return m_scale_map; }
+    std::map<dimension::id, dimension::id> const& getScaleMap() const
+        { return m_scale_map; }
     dimension::Interpretation getInterpretation(std::string const& t) const;
     
 private:

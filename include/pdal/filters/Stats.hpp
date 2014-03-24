@@ -199,28 +199,13 @@ public:
     virtual void initialize();
     static Options getDefaultOptions();
 
-    bool supportsIterator(StageIteratorType t) const
-    {
-        if (t == StageIterator_Sequential) return true;
-        if (t == StageIterator_Random) return true;
-        if (t == StageIterator_Block) return true;
-        return false;
-    }
-
-    pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
+    pdal::StageSequentialIterator*
+        createSequentialIterator(PointBuffer& buffer) const;
     pdal::StageRandomIterator* createRandomIterator(PointBuffer& buffer) const
-    {
-        return getPrevStage().createRandomIterator(buffer);
-    }
-
+        { return getPrevStage().createRandomIterator(buffer); }
     void processBuffer(PointBuffer& data) const;
-    
-
 
 private:
-    
-
-    
     Stats& operator=(const Stats&); // not implemented
     Stats(const Stats&); // not implemented
     

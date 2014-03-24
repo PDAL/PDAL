@@ -62,20 +62,16 @@ public:
     virtual void initialize();
     static Options getDefaultOptions();
 
-    bool supportsIterator(StageIteratorType t) const
-    {
-        if (t == StageIterator_Sequential) return true;
-
-        return false;
-    }
-
-    pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
+    pdal::StageSequentialIterator*
+        createSequentialIterator(PointBuffer& buffer) const;
     pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const
     {
-        throw iterator_not_found("filters.programmable random iterator not implemented");
+        throw iterator_not_found(
+            "filters.programmable random iterator not implemented");
     }
 
-    void processBuffer(PointBuffer& data, pdal::plang::BufferedInvocation& python) const;
+    void processBuffer(PointBuffer& data,
+        pdal::plang::BufferedInvocation& python) const;
 
     const pdal::plang::Script& getScript() const
     {

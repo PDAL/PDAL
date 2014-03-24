@@ -156,27 +156,6 @@ BOOST_AUTO_TEST_CASE(test_sequential_iter)
     return;
 }
 
-BOOST_AUTO_TEST_CASE(test_iterator_checks)
-{
-    PointBuffer *input = makeBuffer();
-
-    pdal::Option debug("debug", true, "");
-    pdal::Option verbose("verbose", 5, "");
-
-    pdal::Options reader_options;
-    reader_options.add(debug);
-    reader_options.add(verbose);
-
-    pdal::drivers::buffer::Reader reader(reader_options, *input);
-    reader.initialize();
-
-    BOOST_CHECK_EQUAL(reader.supportsIterator(StageIterator_Sequential), true);
-    BOOST_CHECK_EQUAL(reader.supportsIterator(StageIterator_Random) , true);
-    
-    delete input;
-    return;
-}
-
 BOOST_AUTO_TEST_CASE(test_random_iter)
 {
     PointBuffer *input = makeBuffer();

@@ -209,12 +209,6 @@ public:
         return m_blocks[i];
     }
 
-    bool supportsIterator(StageIteratorType t) const
-    {
-        if (t == StageIterator_Sequential) return true;
-        return false;
-    }
-    
     inline boost::uint32_t getThreshold() const
     {
         return m_threshold;

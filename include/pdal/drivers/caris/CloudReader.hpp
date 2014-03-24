@@ -57,10 +57,8 @@ public:
     
     
     virtual void initialize();
-    
-    virtual bool supportsIterator(pdal::StageIteratorType in_type) const;
-
-    virtual pdal::StageSequentialIterator* createSequentialIterator(pdal::PointBuffer& in_buffer) const;
+    virtual pdal::StageSequentialIterator*
+        createSequentialIterator(pdal::PointBuffer& in_buffer) const;
     
     //! Info for mapping between pdal and caris dimensions
     struct DimInfo
@@ -68,8 +66,10 @@ public:
         DimInfo()
             : dimIndex(), tupleIndex(), dimension()
         {}
-        DimInfo(int in_dimIndex, int in_tupleIndex, caris_dimension const* in_dimension)
-            : dimIndex(in_dimIndex), tupleIndex(in_tupleIndex), dimension(in_dimension)
+        DimInfo(int in_dimIndex, int in_tupleIndex,
+                caris_dimension const* in_dimension) :
+            dimIndex(in_dimIndex), tupleIndex(in_tupleIndex),
+            dimension(in_dimension)
         {}
         
         //! index of the dimension in the related caris_cloud

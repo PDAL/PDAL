@@ -66,19 +66,15 @@ public:
     virtual void initialize();
     static Options getDefaultOptions();
 
-    bool supportsIterator(StageIteratorType t) const
+    pdal::StageSequentialIterator*
+        createSequentialIterator(PointBuffer& buffer) const;
+    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const
     {
-        if (t == StageIterator_Sequential) return true;
-        // if (t == StageIterator_Random) return true;
-        return false;
+        throw pdal::not_yet_implemented(
+            "HexBin random iterator not implemented");
     }
 
-    pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const { throw pdal::not_yet_implemented("HexBin random iterator not implemented"); }
-
 private:
-    
-
     HexBin& operator=(const HexBin&); // not implemented
     HexBin(const HexBin&); // not implemented
     

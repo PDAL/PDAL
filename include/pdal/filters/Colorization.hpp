@@ -84,19 +84,10 @@ public:
 
     virtual void initialize();
     static Options getDefaultOptions();
-
-    bool supportsIterator(StageIteratorType t) const
-    {
-        if (t == StageIterator_Sequential) return true;
-
-        return false;
-    }
-
-    pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
+    pdal::StageSequentialIterator*
+        createSequentialIterator(PointBuffer& buffer) const;
     pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const
-    {
-        return NULL;
-    }
+        { return NULL; }
 
     std::map<std::string, boost::uint32_t> getBandMap() const
     {

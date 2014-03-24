@@ -105,20 +105,14 @@ public:
                        boost::uint64_t& numCacheInsertMisses,
                        boost::uint64_t& numCacheInsertHits) const;
     Metadata toMetadata() const;
-    bool supportsIterator(StageIteratorType t) const
-    {
-        if (t == StageIterator_Sequential) return true;
-        if (t == StageIterator_Random) return true;
-
-        return false;
-    }
-    
     boost::uint32_t calculateNumberOfBlocks(boost::uint32_t CacheBlockSize, 
-                                            boost::uint64_t totalNumberOfPoints) const;
+        boost::uint64_t totalNumberOfPoints) const;
     
-    inline std::vector<PointBuffer const*> const& getCachedBlocks() const { return m_blocks; }
+    inline std::vector<PointBuffer const*> const& getCachedBlocks() const
+        { return m_blocks; }
 
-    pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
+    pdal::StageSequentialIterator*
+        createSequentialIterator(PointBuffer& buffer) const;
     pdal::StageRandomIterator* createRandomIterator(PointBuffer& buffer) const;
 
 private:

@@ -199,12 +199,6 @@ void CloudReader::initialize()
 }
 
 
-//! \copydoc pdal::Reader::supportsIterator
-bool CloudReader::supportsIterator(pdal::StageIteratorType in_type) const
-{
-    return in_type == pdal::StageIterator_Sequential;
-}
-
 //! \copydoc pdal::Reader::createSequentialIterator
 pdal::StageSequentialIterator* CloudReader::createSequentialIterator(
     pdal::PointBuffer& in_buffer) const

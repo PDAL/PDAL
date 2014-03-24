@@ -94,11 +94,6 @@ Options Reader::getDefaultOptions()
     return options;
 }
 
-bool Reader::supportsIterator(StageIteratorType t) const
-{
-    return m_stage->supportsIterator(t);
-}
-
 
 pdal::StageSequentialIterator* Reader::createSequentialIterator(PointBuffer& buffer) const
 {
