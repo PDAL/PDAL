@@ -89,19 +89,13 @@ public:
 
     Mode getMode() const;
 
-    bool supportsIterator(StageIteratorType t) const
-    {
-        if (t == StageIterator_Sequential) return true;
-        if (t == StageIterator_Random) return true;
-
-        return false;
-    }
-
-    pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
+    pdal::StageSequentialIterator*
+        createSequentialIterator(PointBuffer& buffer) const;
     pdal::StageRandomIterator* createRandomIterator(PointBuffer& buffer) const;
 
     // this is called by the stage's iterator
-    boost::uint32_t processBuffer(PointBuffer& data, boost::uint64_t index) const;
+    boost::uint32_t processBuffer(PointBuffer& data,
+        boost::uint64_t index) const;
 
 private:
     Bounds<double> m_bounds;
@@ -111,7 +105,6 @@ private:
 
     Reader& operator=(const Reader&); // not implemented
     Reader(const Reader&); // not implemented
-
 };
 
 

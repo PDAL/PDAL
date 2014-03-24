@@ -375,17 +375,6 @@ BOOST_AUTO_TEST_CASE(test_simultaneous_iters)
     return;
 }
 
-BOOST_AUTO_TEST_CASE(test_iterator_checks)
-{
-    pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
-    reader.initialize();
-
-    BOOST_CHECK_EQUAL(reader.supportsIterator(StageIterator_Sequential), true);
-    BOOST_CHECK_EQUAL(reader.supportsIterator(StageIterator_Random) , true);
-
-    return;
-}
-
 static void test_a_format(const std::string& file, boost::uint8_t majorVersion, boost::uint8_t minorVersion, int pointFormat,
                           double xref, double yref, double zref, double tref, boost::uint16_t rref,  boost::uint16_t gref,  boost::uint16_t bref)
 {

@@ -72,38 +72,22 @@ public:
     ~InPlaceReprojection();
     virtual void initialize();
     static Options getDefaultOptions();
-
-    bool supportsIterator(StageIteratorType t) const
-    {
-        if (t == StageIterator_Sequential) return true;
-        if (t == StageIterator_Random) return true;
-        return false;
-    }
-
-    pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
+    pdal::StageSequentialIterator*
+        createSequentialIterator(PointBuffer& buffer) const;
     pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const;
 
-    void setScaledValue(PointBuffer& data,
-                        double value,
-                        Dimension const& d,
-                        std::size_t pointIndex) const;
+    void setScaledValue(PointBuffer& data, double value, Dimension const& d,
+        std::size_t pointIndex) const;
 
-
-
-    
     SpatialReference const& getOutSRS() const { return m_outSRS; }
     SpatialReference const& getInSRS() const { return m_inSRS; }
-private:
-    
 
+private:
     SpatialReference m_inSRS;
     SpatialReference m_outSRS;
 
-    
     InPlaceReprojection& operator=(const InPlaceReprojection&); // not implemented
     InPlaceReprojection(const InPlaceReprojection&); // not implemented
-    
-
 };
 
 namespace iterators

@@ -63,19 +63,10 @@ public:
     virtual void initialize();
     static Options getDefaultOptions();
 
-    bool supportsIterator(StageIteratorType t) const
-    {
-        if (t == StageIterator_Sequential) return true;
-        if (t == StageIterator_Random) return false; // BUG: could be true
-
-        return false;
-    }
-
-    pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
+    pdal::StageSequentialIterator*
+        createSequentialIterator(PointBuffer& buffer) const;
     pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const
-    {
-        return NULL;
-    }
+        { return NULL; }
 
 private:
     Mosaic& operator=(const Mosaic&); // not implemented

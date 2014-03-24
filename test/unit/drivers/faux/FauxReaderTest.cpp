@@ -412,28 +412,7 @@ BOOST_AUTO_TEST_CASE(test_custom_fields)
 
     const Schema& schema = reader.getSchema();
     BOOST_CHECK_EQUAL(schema.getDimensions().size(), 2u);
-    // BOOST_CHECK_EQUAL(schema.getDimensions()[0].getId(), DimensionId::Red_u8);
-    // BOOST_CHECK_EQUAL(schema.getDimensions()[1].getId(), DimensionId::Blue_u8);
-
-    return;
 }
 
-
-
-BOOST_AUTO_TEST_CASE(test_iterator_checks)
-{
-    Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 152.0, 203.0);
-    pdal::drivers::faux::Reader reader(bounds, 750, pdal::drivers::faux::Reader::Ramp);
-    reader.initialize();
-
-    const Schema& schema = reader.getSchema();
-
-    PointBuffer data(schema, 750);
-
-    BOOST_CHECK_EQUAL(reader.supportsIterator(StageIterator_Sequential), true);
-    BOOST_CHECK_EQUAL(reader.supportsIterator(StageIterator_Random) , true);
-
-    return;
-}
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -64,20 +64,16 @@ public:
     virtual void initialize();
     static Options getDefaultOptions();
 
-    bool supportsIterator(StageIteratorType t) const
-    {
-        if (t == StageIterator_Sequential) return true;
-
-        return false;
-    }
-
-    pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
+    pdal::StageSequentialIterator*
+        createSequentialIterator(PointBuffer& buffer) const;
     pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const
     {
-        throw pdal::not_yet_implemented("PCLBlock random iterator not implemented");
+        throw pdal::not_yet_implemented(
+            "PCLBlock random iterator not implemented");
     }
 
-    boost::uint32_t processBuffer(PointBuffer& srcData, std::string& filename, PointBuffer& dstData) const;
+    boost::uint32_t processBuffer(PointBuffer& srcData, std::string& filename,
+        PointBuffer& dstData) const;
 
 private:
 

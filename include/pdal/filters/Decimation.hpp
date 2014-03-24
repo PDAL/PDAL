@@ -62,19 +62,14 @@ public:
     virtual void initialize();
     static Options getDefaultOptions();
 
-    bool supportsIterator(StageIteratorType t) const
-    {
-        if (t == StageIterator_Sequential) return true;
-
-        return false;
-    }
-
-    pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
+    pdal::StageSequentialIterator*
+        createSequentialIterator(PointBuffer& buffer) const;
     pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const;
 
     boost::uint32_t getStep() const;
 
-    boost::uint32_t processBuffer(PointBuffer& dstData, const PointBuffer& srcData, boost::uint64_t srcStartIndex) const;
+    boost::uint32_t processBuffer(PointBuffer& dstData,
+        const PointBuffer& srcData, boost::uint64_t srcStartIndex) const;
 
 private:
     boost::uint32_t m_step;

@@ -66,16 +66,9 @@ public:
 
     virtual void initialize();
     static Options getDefaultOptions();
-
-    bool supportsIterator(StageIteratorType t) const
-    {
-        if (t == StageIterator_Sequential) return true;
-        return false;
-    }
-    
     virtual boost::uint64_t getNumPoints() const;
-
-    pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
+    pdal::StageSequentialIterator*
+        createSequentialIterator(PointBuffer& buffer) const;
 
     Connection getConnection() const
     {

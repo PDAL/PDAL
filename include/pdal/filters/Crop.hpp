@@ -66,22 +66,16 @@ public:
     virtual void initialize();
     static Options getDefaultOptions();
 
-    bool supportsIterator(StageIteratorType t) const
-    {
-        if (t == StageIterator_Sequential) return true;
-
-        return false;
-    }
-
-    pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
+    pdal::StageSequentialIterator*
+        createSequentialIterator(PointBuffer& buffer) const;
     pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const
-    {
-        return NULL;
-    }
+        { return NULL; }
 
-    // returns number of points accepted into the data buffer (which may be less than data.getNumPoints(),
-    // if we're calling this routine multiple times with the same buffer
-    boost::uint32_t processBuffer(PointBuffer const& srcData, PointBuffer& dstData) const;
+    // returns number of points accepted into the data buffer (which may
+    // be less than data.getNumPoints(), if we're calling this routine
+    // multiple times with the same buffer
+    boost::uint32_t processBuffer(PointBuffer const& srcData,
+        PointBuffer& dstData) const;
 
     const Bounds<double>& getBounds() const;
     inline boost::uint32_t getDimensions() const { return m_dimensions; }

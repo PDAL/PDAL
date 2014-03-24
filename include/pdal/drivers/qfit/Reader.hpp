@@ -142,25 +142,14 @@ public:
 
     std::string getFileName() const;
 
-    bool supportsIterator(StageIteratorType t) const
-    {
-        if (t == StageIterator_Sequential) return true;
-        if (t == StageIterator_Random) return true;
-
-        return false;
-    }
-
-    pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
+    pdal::StageSequentialIterator*
+        createSequentialIterator(PointBuffer& buffer) const;
     pdal::StageRandomIterator* createRandomIterator(PointBuffer& buffer) const;
 
     std::size_t getPointDataOffset() const
-    {
-        return m_offset;
-    }
+        { return m_offset; }
     boost::uint32_t getPointDataSize() const
-    {
-        return m_size;
-    }
+        { return m_size; }
 
     // this is called by the stage's iterator
     boost::uint32_t processBuffer(PointBuffer& PointBuffer, std::istream& stream, boost::uint64_t numPointsLeft) const;
