@@ -50,6 +50,7 @@ SET(PDAL_UNITTEST_TEST_SRC
     SchemaLayoutTest.cpp
     SchemaTest.cpp
     SpatialReferenceTest.cpp
+    filters/SplitterTest.cpp
     StageFactoryTest.cpp
     filters/StatsFilterTest.cpp
     StreamFactoryTest.cpp

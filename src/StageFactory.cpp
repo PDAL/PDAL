@@ -109,6 +109,7 @@ MAKE_FILTER_CREATOR(Programmable, pdal::filters::Programmable)
 MAKE_FILTER_CREATOR(Reprojection, pdal::filters::Reprojection)
 MAKE_FILTER_CREATOR(Scaling, pdal::filters::Scaling)
 MAKE_FILTER_CREATOR(Selector, pdal::filters::Selector)
+MAKE_FILTER_CREATOR(Splitter, pdal::filters::Splitter)
 MAKE_FILTER_CREATOR(Stats, pdal::filters::Stats)
 
 //
@@ -409,6 +410,7 @@ void StageFactory::registerKnownFilters()
     REGISTER_FILTER(Reprojection, pdal::filters::Reprojection);
     REGISTER_FILTER(Scaling, pdal::filters::Scaling);
     REGISTER_FILTER(Selector, pdal::filters::Selector);
+    REGISTER_FILTER(Splitter, pdal::filters::Splitter);
     REGISTER_FILTER(Stats, pdal::filters::Stats);
 }
 
