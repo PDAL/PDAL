@@ -25,7 +25,7 @@ set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/modules" ${CMAKE_MODULE_PATH}
 # PDAL general settings
 #------------------------------------------------------------------------------
 
-set(PDAL_EMBED_BOOST FALSE CACHE BOOL "use embedded rather than system boost")
+option(PDAL_EMBED_BOOST "use embedded rather than system boost" FALSE)
 
 include("${PDAL_SOURCE_DIR}/cmake/pdal_options.cmake")
 include("${PDAL_SOURCE_DIR}/cmake/pdal_targets.cmake")
@@ -71,12 +71,11 @@ endif(WIN32)
 #------------------------------------------------------------------------------
 
 # Choose package components
-set(WITH_APPS TRUE CACHE BOOL "Choose if PDAL utilities should be built")
-set(WITH_TESTS TRUE CACHE BOOL "Choose if PDAL unit tests should be built")
+option(WITH_APPS "Choose if PDAL utilities should be built" TRUE)
+option(WITH_TESTS "Choose if PDAL unit tests should be built" TRUE)
 
 # Choose to use pkg-config or not
-set(WITH_PKGCONFIG TRUE CACHE BOOL
-  "Choose whether a pkgconfig file (PDAL.pc) should be installed")
+option(WITH_PKGCONFIG "Choose whether a pkgconfig file (PDAL.pc) should be installed" TRUE)
 
 
 #------------------------------------------------------------------------------
@@ -88,8 +87,7 @@ set(PDAL_UNIT_TEST pdal_test)
 
 # Enable CTest and submissions to PDAL dashboard at CDash
 # http://my.cdash.org/index.php?project=PDAL
-set(ENABLE_CTEST FALSE CACHE BOOL
-  "Enable CTest to support submissions of results to CDash at http://cdash.org")
+option(ENABLE_CTEST "Enable CTest to support submissions of results to CDash at http://cdash.org" FALSE)
 
 #------------------------------------------------------------------------------
 # General build settings
@@ -97,7 +95,7 @@ set(ENABLE_CTEST FALSE CACHE BOOL
 
 if(WIN32)
   if(MSVC)
-    option(PDAL_USE_STATIC_RUNTIME "Use the static runtime" OFF)
+    option(PDAL_USE_STATIC_RUNTIME "Use the static runtime" FALSE)
 
     if(PDAL_USE_STATIC_RUNTIME)
       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MT")
@@ -274,7 +272,7 @@ endif(Boost_FOUND)
 # settings for PCL
 #------------------------------------------------------------------------------
 
-set(WITH_PCL FALSE CACHE BOOL "Choose if PCL support should be built")
+option(WITH_PCL "Choose if PCL support should be built" FALSE)
 if(WITH_PCL)
     find_package(PCL 1.7)
     if(PCL_FOUND)
@@ -294,7 +292,7 @@ endif()
 #------------------------------------------------------------------------------
    
 # GDAL/OGR support - optional, default=ON
-set(WITH_GDAL TRUE CACHE BOOL "Choose if GDAL support should be built")
+option(WITH_GDAL "Choose if GDAL support should be built" TRUE)
 if(WITH_GDAL)
     find_package(GDAL 1.9.0)
     if (GDAL_FOUND)
@@ -320,7 +318,7 @@ if(WITH_GDAL)
 endif()
 
 # GeoTIFF support - optional, default=ON
-set(WITH_GEOTIFF TRUE CACHE BOOL "Choose if GeoTIFF support should be built")
+option(WITH_GEOTIFF "Choose if GeoTIFF support should be built" TRUE)
 if(WITH_GEOTIFF)
     find_package(GeoTIFF 1.2.5)
     if(GEOTIFF_FOUND)
@@ -348,7 +346,7 @@ if(WITH_GDAL)
   endif()
 endif()
 
-set(WITH_SQLITE FALSE CACHE BOOL "Choose if sqlite database support should be built")
+option(WITH_SQLITE "Choose if sqlite database support should be built" FALSE)
 if (WITH_SQLITE)
     find_package(Soci 3.1.0 )
     if (NOT SOCI_sqlite3_FOUND)
@@ -369,7 +367,7 @@ if (WITH_SQLITE)
     set(PDAL_HAVE_SQLITE 1)
 endif()
 
-set(WITH_PGPOINTCLOUD TRUE CACHE BOOL "Choose if PostgreSQL PointCloud support should be built")
+option(WITH_PGPOINTCLOUD "Choose if PostgreSQL PointCloud support should be built" TRUE)
 if (WITH_PGPOINTCLOUD)
     find_package(PostgreSQL)
     if (POSTGRESQL_FOUND)
@@ -384,7 +382,7 @@ if (WITH_PGPOINTCLOUD)
     endif()
 endif()
 
-set(WITH_NITRO TRUE CACHE BOOL "Choose if Nitro support (only install supported is from http://github.com/hobu/nitro)")
+option(WITH_NITRO "Choose if Nitro support (only install supported is from http://github.com/hobu/nitro)" TRUE)
 if(WITH_NITRO)
     find_package(Nitro 2.6)
     IF (NITRO_FOUND)
@@ -406,7 +404,7 @@ if(WITH_NITRO)
     endif()
 endif()
 
-set(WITH_MSGPACK TRUE CACHE BOOL "Choose if MessagePack support should be built")
+option(WITH_MSGPACK "Choose if MessagePack support should be built" TRUE)
 if(WITH_MSGPACK)
     find_package(MsgPack)
     if (MSGPACK_FOUND)
@@ -425,13 +423,13 @@ endif()
 # swig support
 if (WIN32)
     # keep C# bindings it off by default, even on windows, since not everyone wants it
-    set(WITH_SWIG_CSHARP FALSE CACHE BOOL "Choose if you want to make C# bindings via Swig")
+    option(WITH_SWIG_CSHARP "Choose if you want to make C# bindings via Swig" FALSE)
 else()
     # swig/C# not likely to be supported anytime soon
-    set(WITH_SWIG_CSHARP FALSE CACHE BOOL "Choose if you want to make C# bindings via Swig")
+    option(WITH_SWIG_CSHARP "Choose if you want to make C# bindings via Swig" FALSE)
 endif()
 
-set(WITH_SWIG_PYTHON FALSE CACHE BOOL "Choose if you want to make Python bindings via Swig")
+option(WITH_SWIG_PYTHON "Choose if you want to make Python bindings via Swig" FALSE)
 
 if(WITH_SWIG_CSHARP OR WITH_SWIG_PYTHON)
     find_package(SWIG 2.0.1 REQUIRED)
@@ -453,7 +451,7 @@ endif()
 
 # iconv support - optional, default=ON
 # GDAL and libxml2 require iconv.  The library is supplied by OSGeo4W.
-set(WITH_ICONV TRUE CACHE BOOL "Choose if IConv support should be built")
+option(WITH_ICONV "Choose if IConv support should be built" TRUE)
 if(WITH_ICONV)
     find_package(ICONV)
     if (ICONV_FOUND)
@@ -466,7 +464,7 @@ endif()
 
 
 # libxml2 support - optional, default=ON
-set(WITH_LIBXML2 TRUE CACHE BOOL "Choose if libxml2 support should be built ")
+option(WITH_LIBXML2 "Choose if libxml2 support should be built " TRUE)
 if(WITH_LIBXML2)
     find_package(LibXml2)
     if(LIBXML2_FOUND)
@@ -481,7 +479,7 @@ if(WITH_LIBXML2)
 endif()
 
 # Oracle support - optional, default=ON
-set(WITH_ORACLE TRUE CACHE BOOL "Choose if Oracle support should be built")
+option(WITH_ORACLE "Choose if Oracle support should be built" TRUE)
 if(WITH_ORACLE)
     find_package(Oracle)
     if(ORACLE_FOUND)
@@ -495,8 +493,8 @@ if(WITH_ORACLE)
 endif()
 
 # LASZIP support - optional, default=OFF
-set(WITH_LASZIP TRUE CACHE BOOL "Choose if LASzip support should be built")
-set(WITH_STATIC_LASZIP FALSE CACHE BOOL "Choose if LASzip should be statically linked")
+option(WITH_LASZIP "Choose if LASzip support should be built" TRUE)
+option(WITH_STATIC_LASZIP "Choose if LASzip should be statically linked" FALSE)
 mark_as_advanced(WITH_STATIC_LASZIP)
 
 if(WITH_LASZIP)
@@ -516,7 +514,7 @@ endif()
 
 
 # MrSID/LiDAR support - optiona, default=OFF
-set(WITH_MRSID FALSE CACHE BOOL "Choose if MrSID/LiDAR support should be built")
+option(WITH_MRSID "Choose if MrSID/LiDAR support should be built" FALSE)
 
 if(WITH_MRSID)
 
@@ -533,7 +531,7 @@ endif()
 
 
 # CARIS/BDB support - optional, default=OFF
-set(WITH_CARIS FALSE CACHE BOOL "Choose if CARIS/BDB support should be built")
+option(WITH_CARIS "Choose if CARIS/BDB support should be built" FALSE)
 if(WITH_CARIS)
     set(CARIS_FOUND 1)
     set(PDAL_HAVE_CARIS 1)
@@ -542,7 +540,7 @@ endif()
 
 # Points2Grid
 # Points2Grid support - optional, default=OFF
-set(WITH_P2G FALSE CACHE BOOL "Choose if Points2Grid support should be built")
+option(WITH_P2G "Choose if Points2Grid support should be built" FALSE)
 if(WITH_P2G)
     find_package(Points2Grid)
     if(P2G_FOUND)
@@ -564,7 +562,7 @@ if(WITH_FREEGLUT)
   endif()
 endif()
 
-set (WITH_HEXER FALSE CACHE BOOL "Whether or not hexbin filter is built")
+option(WITH_HEXER "Whether or not hexbin filter is built" FALSE)
 if(WITH_HEXER)
     find_package(Hexer)
     if(HEXER_FOUND)
@@ -575,7 +573,7 @@ if(WITH_HEXER)
 endif()
 
 # default is false for now
-set(WITH_PYTHON TRUE CACHE BOOL "Choose if Python support (for PLang filters) should be built")
+option(WITH_PYTHON "Choose if Python support (for PLang filters) should be built" TRUE)
 if(WITH_PYTHON)
     FIND_PACKAGE(PythonInterp)
     find_package(PythonLibs 2.4)
@@ -594,12 +592,12 @@ if(WITH_PYTHON)
     endif()
 endif()
 
-set (USE_PDAL_PLUGIN_TEXT FALSE CACHE BOOL "Build the text driver as a plugin rather than embedding")
-set (USE_PDAL_PLUGIN_SOCI FALSE CACHE BOOL "Build the soci driver as a plugin rather than embedding")
-set (USE_PDAL_PLUGIN_OCI FALSE CACHE BOOL "Build the oci driver as a plugin rather than embedding")
-set (USE_PDAL_PLUGIN_MRSID FALSE CACHE BOOL "Build the MrSID driver as a plugin rather than embedding")
-set (USE_PDAL_PLUGIN_CARIS FALSE CACHE BOOL "Build the Caris driver as a plugin rather than embedding")
-set (USE_PDAL_PLUGIN_NITRO FALSE CACHE BOOL "Build the NITF writer as a plugin rather than embedding")
+option(USE_PDAL_PLUGIN_TEXT "Build the text driver as a plugin rather than embedding" FALSE)
+option(USE_PDAL_PLUGIN_SOCI "Build the soci driver as a plugin rather than embedding" FALSE)
+option(USE_PDAL_PLUGIN_OCI "Build the oci driver as a plugin rather than embedding" FALSE)
+option(USE_PDAL_PLUGIN_MRSID "Build the MrSID driver as a plugin rather than embedding" FALSE)
+option(USE_PDAL_PLUGIN_CARIS "Build the Caris driver as a plugin rather than embedding" FALSE)
+option(USE_PDAL_PLUGIN_NITRO "Build the NITF writer as a plugin rather than embedding" FALSE)
 
 if (USE_PDAL_PLUGIN_TEXT OR USE_PDAL_PLUGIN_SOCI OR USE_PDAL_PLUGIN_OCI OR
     USE_PDAL_PLUGIN_MRSID OR USE_PDAL_PLUGIN_CARIS OR USE_PDAL_PLUGIN_NITRO)
