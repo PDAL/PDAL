@@ -65,7 +65,7 @@ public:
     static Options getDefaultOptions();
 
     pdal::StageSequentialIterator*
-        createSequentialIterator(PointBuffer& buffer) const;
+    createSequentialIterator(PointBuffer& buffer) const;
     pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const
     {
         throw pdal::not_yet_implemented(
@@ -73,7 +73,7 @@ public:
     }
 
     boost::uint32_t processBuffer(PointBuffer& srcData, std::string& filename,
-        PointBuffer& dstData) const;
+                                  PointBuffer& dstData) const;
 
 private:
 

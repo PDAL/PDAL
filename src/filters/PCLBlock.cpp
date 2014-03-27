@@ -77,7 +77,7 @@ PCLBlock::processBuffer(PointBuffer& srcData, std::string& filename, PointBuffer
 
     // convert PointBuffer to PointNormal
     pcl::PointCloud<pcl::PointNormal>::Ptr cloud(new pcl::PointCloud<pcl::PointNormal>);
-    pdal::PDALtoPCD (srcData, *cloud);
+    pdal::PDALtoPCD(srcData, *cloud);
 
     log()->get(logDEBUG2) << cloud->points[0].x << ", " << cloud->points[0].y << ", " << cloud->points[0].z << std::endl;
 
@@ -87,29 +87,29 @@ PCLBlock::processBuffer(PointBuffer& srcData, std::string& filename, PointBuffer
     int level = log()->getLevel();
     switch (level)
     {
-	case 0:
-	    pcl::console::setVerbosityLevel(pcl::console::L_ALWAYS);
-	    break;
+        case 0:
+            pcl::console::setVerbosityLevel(pcl::console::L_ALWAYS);
+            break;
 
-	case 1:
-	    pcl::console::setVerbosityLevel(pcl::console::L_ERROR);
-	    break;
+        case 1:
+            pcl::console::setVerbosityLevel(pcl::console::L_ERROR);
+            break;
 
-	case 2:
-	    pcl::console::setVerbosityLevel(pcl::console::L_WARN);
-	    break;
+        case 2:
+            pcl::console::setVerbosityLevel(pcl::console::L_WARN);
+            break;
 
-	case 3:
-	    pcl::console::setVerbosityLevel(pcl::console::L_INFO);
-	    break;
+        case 3:
+            pcl::console::setVerbosityLevel(pcl::console::L_INFO);
+            break;
 
-	case 4:
-	    pcl::console::setVerbosityLevel(pcl::console::L_DEBUG);
-	    break;
+        case 4:
+            pcl::console::setVerbosityLevel(pcl::console::L_DEBUG);
+            break;
 
-	default:
-	    pcl::console::setVerbosityLevel(pcl::console::L_VERBOSE);
-	    break;
+        default:
+            pcl::console::setVerbosityLevel(pcl::console::L_VERBOSE);
+            break;
     }
 
     pcl::Pipeline<pcl::PointNormal> pipeline;
@@ -120,17 +120,17 @@ PCLBlock::processBuffer(PointBuffer& srcData, std::string& filename, PointBuffer
 
     if (cloud_f->points.size() > 0)
     {
-      pdal::PCDtoPDAL(*cloud_f, dstData);
+        pdal::PCDtoPDAL(*cloud_f, dstData);
 
-      log()->get(logDEBUG2) << cloud->points.size() << " before, " << cloud_f->points.size() << " after" << std::endl;
+        log()->get(logDEBUG2) << cloud->points.size() << " before, " << cloud_f->points.size() << " after" << std::endl;
 
-      log()->get(logDEBUG2) << dstData.getNumPoints() << std::endl;
+        log()->get(logDEBUG2) << dstData.getNumPoints() << std::endl;
 
-      log()->get(logDEBUG2) << dstData.applyScaling(dX, 0) << ", " << dstData.applyScaling(dY, 0) << ", " << dstData.applyScaling(dZ, 0) << std::endl;
+        log()->get(logDEBUG2) << dstData.applyScaling(dX, 0) << ", " << dstData.applyScaling(dY, 0) << ", " << dstData.applyScaling(dZ, 0) << std::endl;
     }
     else
     {
-      log()->get(logDEBUG2) << "Filtered cloud has no points!" << std::endl;
+        log()->get(logDEBUG2) << "Filtered cloud has no points!" << std::endl;
     }
 
     numPointsAfterFiltering = cloud_f->points.size();
