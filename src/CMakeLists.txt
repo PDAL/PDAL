@@ -703,6 +703,10 @@ if (WITH_PCL)
     target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE} ${PCL_LIBRARIES})
 endif()
 
+if (WITH_LIBXML2)
+    target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE} ${LIBXML2_LIBRARIES})
+endif()
+
   target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE}
     "${PDAL_LIB_NAME}"
     "${CMAKE_THREAD_LIBS_INIT}"
@@ -711,7 +715,6 @@ endif()
     "${MRSID_LIBRARY}"
     "${GEOTIFF_LIBRARY}"
     "${GDAL_LIBRARY}"
-    ${LIBXML2_LIBRARIES}
     "${P2G_LIBRARY}"
     "${GEOS_LIBRARY}"
     "${HEXER_LIBRARY}"
