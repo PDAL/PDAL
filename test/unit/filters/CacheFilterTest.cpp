@@ -253,14 +253,9 @@ BOOST_AUTO_TEST_CASE(test_two_iters_with_cache)
     pdal::Option cache_block_size("cache_block_size", block_size);
     options.add(max_cache_blocks);
     options.add(cache_block_size);
-    // options.add(debug);
-    // options.add(verbose);
-
 
     pdal::filters::Cache cache(reader, options);
-
     cache.initialize();
-    
 
     BOOST_CHECK_EQUAL(reader.getNumPoints(), num_points);
     BOOST_CHECK_EQUAL(block_size * num_blocks, num_points);
@@ -328,7 +323,6 @@ BOOST_AUTO_TEST_CASE(test_two_iters_with_cache)
         BOOST_CHECK_EQUAL(iter->getIndex(), 355);
         
         Support::check_p0_p1_p2(data);
-        
         // read the last third
         iter->seek(710);
         BOOST_CHECK_EQUAL(iter->getIndex(), 710);

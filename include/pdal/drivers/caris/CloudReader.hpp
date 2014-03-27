@@ -58,7 +58,7 @@ public:
     
     virtual void initialize();
     virtual pdal::StageSequentialIterator*
-        createSequentialIterator(pdal::PointBuffer& in_buffer) const;
+    createSequentialIterator(pdal::PointBuffer& in_buffer) const;
     
     //! Info for mapping between pdal and caris dimensions
     struct DimInfo

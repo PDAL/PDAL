@@ -40,7 +40,7 @@ namespace pdal
 
 
 MultiFilterSequentialIterator::MultiFilterSequentialIterator(const MultiFilter& filter, PointBuffer& buffer)
-    : StageSequentialIterator(filter, buffer)
+    : StageSequentialIterator(buffer)
     , m_filter(filter)
     , m_prevIterator(NULL)
     , m_iteratorIndex(0)

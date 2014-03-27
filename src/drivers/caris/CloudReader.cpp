@@ -204,8 +204,7 @@ pdal::StageSequentialIterator* CloudReader::createSequentialIterator(
     pdal::PointBuffer& in_buffer) const
 {
     assert(m_cloud);
-
-    return new CloudIterator(*this, in_buffer);
+    return new CloudIterator(in_buffer, getCarisCloud());
 }
 
 } // namespace

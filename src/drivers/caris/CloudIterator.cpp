@@ -111,16 +111,13 @@ void copyToPointBuffer(
     \li ?
 */
 //************************************************************************
-CloudIterator::CloudIterator(
-    CloudReader const& in_reader,
-    pdal::PointBuffer & in_buffer)
-    : ReaderSequentialIterator(in_reader, in_buffer)
+CloudIterator::CloudIterator(pdal::PointBuffer & in_buffer, caris_cloud *cloud)
+    : ReaderSequentialIterator(in_buffer)
     , m_itr(NULL)
     , m_dimInfo(in_reader.getDimInfo())
     , m_currentOffset(0)
 {
-    m_itr = caris_cloud_create_itr(in_reader.getCarisCloud());
-
+    m_itr = caris_cloud_create_itr(cloud)
     throwIfItrError();
 }
 

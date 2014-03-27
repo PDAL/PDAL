@@ -100,7 +100,7 @@ public:
     PointBuffer& operator=(const PointBuffer&);
 
     /// Destructor.
-    ~PointBuffer();
+    virtual ~PointBuffer();
     
     /** @name Attribute access
     */
@@ -112,23 +112,21 @@ public:
             up-to-date when operating on the PointBuffer.
         \endverbatim
     */
-    const Bounds<double>& getSpatialBounds() const;
+    virtual const Bounds<double>& getSpatialBounds() const;
 
     /// sets the pdal::Bounds instance for this pdal::PointBuffer
     /// @param bounds bounds instance to set.
-    void setSpatialBounds(const Bounds<double>& bounds);
+    virtual void setSpatialBounds(const Bounds<double>& bounds);
 
     /// @return the number of points that are set for the PointBuffer. It is
     /// an arbitrary number that must be <= getCapacity() is the number of
     /// active points for the PointBuffer
-    inline boost::uint32_t getNumPoints() const
-    {
-        return m_numPoints;
-    }
+    virtual boost::uint32_t getNumPoints() const
+        { return m_numPoints; }
 
     /// sets the number of active points for the PointBuffer.
     /// @param v number of points to set.
-    inline void setNumPoints(boost::uint32_t v)
+    virtual void setNumPoints(boost::uint32_t v)
     {
         assert(v <= m_capacity);
         m_numPoints = v;
@@ -139,68 +137,68 @@ public:
         .. note::
 
             This value is given at construction time, and it in conjunction
-            with the given :cpp:class:`pdal::Schema` determine the size of the raw byte
-            buffer that contains the point data. It can be changed by 
-            a call to :cpp:func:`pdal::PointBuffer::resize`.
+            with the given :cpp:class:`pdal::Schema` determine the size of
+            the raw byte buffer that contains the point data. It can be
+            changed by a call to :cpp:func:`pdal::PointBuffer::resize`.
         \endverbatim
     */
-    inline boost::uint32_t const& getCapacity() const
-    {
-        return m_capacity;
-    }
+    virtual boost::uint32_t getCapacity() const
+        { return m_capacity; }
 
     /// A const reference to the internally copied pdal::Schema instance that
     /// was given at construction time.
     const Schema& getSchema() const
-    {
-        return m_schema;
-    }
+        { return m_schema; }
 
     /// @return the size of the currently allocated raw byte array
-    inline pointbuffer::PointBufferByteSize getBufferByteLength() const
-    {
-        return m_data_size;
-    }
+    pointbuffer::PointBufferByteSize getBufferByteLength() const
+        { return m_data_size; }
 
     /// @return the size of the theoretically filled raw byte array.
-    /// Should be equivalent to PointBuffer::getCapacity() * PointBuffer::getSchema()::getByteSize().
-    inline pointbuffer::PointBufferByteSize getBufferByteCapacity() const
+    virtual pointbuffer::PointBufferByteSize getBufferByteCapacity() const
     {
-        return static_cast<pointbuffer::PointBufferByteSize>(m_byteSize) * static_cast<pointbuffer::PointBufferByteSize>(m_capacity);
+        return static_cast<pointbuffer::PointBufferByteSize>(m_byteSize) * 
+            static_cast<pointbuffer::PointBufferByteSize>(m_capacity);
     }
 
     /** @name Point data access
     */
-    /*! fetch the value T for a given :cpp:class:`pdal::Dimension` dim at pointIndex `i`.
-        \param dim  a pdal::Dimension instance describing the dimension to select
+    /*! fetch the value T for a given :cpp:class:`pdal::Dimension` dim at
+        pointIndex `i`.
+        \param dim  The dimension to select
         \param pointIndex the point index of the PointBuffer to select.
         \verbatim embed:rst
         .. warning::
 
-            If the data type of T is not the same as described in :cpp:class:`pdal::Dimension`,
-            the data value will be casted into the appropriate type. In some
-            situations this may not be what you want. In situations where the T
-            is smaller than the datatype given by `dim`, the return value T
-            will simply be saturated.
+            If the data type of T is not the same as described in
+            :cpp:class:`pdal::Dimension`, the data value will be cast into
+            the appropriate type. In some situations this may not be what
+            you want. In situations where the T is smaller than the
+            datatype given by `dim`, the return value T will simply be
+            saturated.
         \endverbatim
     */
-    template<class T> T const& getField(Dimension const& dim, boost::uint32_t pointIndex) const;
+    template<class T>
+    T const& getField(Dimension const& dim, boost::uint32_t pointIndex) const;
 
-    /*! set the value T for a given  :cpp:class:`pdal::Dimension` dim at pointIndex i.
-        \param dim a pdal::Dimension instance describing the dimension to select
+    /*! set the value T for a given  :cpp:class:`pdal::Dimension` dim
+        at pointIndex i.
+        \param dim  The dimension to select.
         \param pointIndex the point index of the PointBuffer to select.
         \param value the T value to set
         \verbatim embed:rst
         .. warning::
 
-            If the data type of T is not the same as described in  :cpp:class:`pdal::Dimension`,
-            the data value will be casted into the appropriate type. In some
-            situations this may not be what you want. In situations where the T
-            is smaller than the datatype given by `dim`, the return value T
-            will simply be saturated.
+            If the data type of T is not the same as described in
+            :cpp:class:`pdal::Dimension`, the data value will be cast 
+            into the appropriate type. In some situations this may not
+            be what you want. In situations where the T is smaller than
+            the datatype given by `dim`, the return value T will simply be
+            saturated.
         \endverbatim
     */
-    template<class T> void setField(Dimension const& dim, boost::uint32_t pointIndex, T value);
+    template<class T>
+    void setField(Dimension const& dim, boost::uint32_t pointIndex, T value);
 
     /*! bulk copy all the fields from the given point into this object
         \param destPointIndex the destination point index to copy the data from
@@ -212,15 +210,20 @@ public:
 
             This is only legal if the source and destination schemas are
             exactly the same. It is up the caller to ensure this is the case.
-            Additionally, if the schemas are the same :cpp:func:`pdal::Schema::getByteSize()` but of
-            different compositions, congratulations :)
+            Additionally, if the schemas are the same
+            :cpp:func:`pdal::Schema::getByteSize()` but of different
+            compositions, congratulations :)
         \endverbatim
     */
-    inline void copyPointFast(boost::uint32_t destPointIndex,
-                              boost::uint32_t srcPointIndex,
-                              const PointBuffer& srcPointBuffer)
+    void copyPointFast(boost::uint32_t destPointIndex,
+        boost::uint32_t srcPointIndex, const PointBuffer& srcPointBuffer)
     {
-        assert (srcPointBuffer.getSchema().getOrientation() == getSchema().getOrientation() && getSchema().getOrientation() != schema::DIMENSION_INTERLEAVED);
+        if (!getBufferByteLength() || !srcPointBuffer.getBufferByteLength())
+            return;
+
+        assert (srcPointBuffer.getSchema().getOrientation() ==
+            getSchema().getOrientation() &&
+            getSchema().getOrientation() != schema::DIMENSION_INTERLEAVED);
 
         const boost::uint8_t* src = srcPointBuffer.getData(srcPointIndex);
         boost::uint8_t* dest = getData(destPointIndex);
@@ -243,8 +246,9 @@ public:
 
             This is only legal if the source and destination schemas are
             exactly the same. It is up the caller to ensure this is the case.
-            Additionally, if the schemas are the same :cpp:func:`pdal::Schema::getByteSize()` but of
-            different compositions, congratulations :)
+            Additionally, if the schemas are the same
+            :cpp:func:`pdal::Schema::getByteSize()` but of different
+            compositions, congratulations :)
         \endverbatim
     */
     inline void copyPointsFast(boost::uint32_t destPointIndex,
@@ -252,58 +256,65 @@ public:
                                const PointBuffer& srcPointBuffer,
                                boost::uint32_t numPoints)
     {
-        assert (srcPointBuffer.getSchema().getOrientation() == getSchema().getOrientation() && getSchema().getOrientation() != schema::DIMENSION_INTERLEAVED);
+        assert (srcPointBuffer.getSchema().getOrientation() ==
+            getSchema().getOrientation() &&
+            getSchema().getOrientation() != schema::DIMENSION_INTERLEAVED);
         const boost::uint8_t* src = srcPointBuffer.getData(srcPointIndex);
         boost::uint8_t* dest = getData(destPointIndex);
 
+        if (!src || !dest)
+            return;
         assert(m_numPoints <= m_capacity);
         memcpy(dest, src, m_byteSize * numPoints);
-        return;
     }
 
     /** @name Raw Data Access
     */
     /// access to the raw byte data at specified pointIndex
     /// @param pointIndex position to start accessing
-    inline boost::uint8_t* getData(boost::uint32_t pointIndex) const
+    boost::uint8_t* getData(boost::uint32_t pointIndex) const
     {
-#if DEBUG
-#endif
+        if (!getBufferByteLength())
+            return NULL;
+
         pointbuffer::PointBufferByteSize position(0);
         if (m_orientation == schema::POINT_INTERLEAVED)
         {
-            position = static_cast<pointbuffer::PointBufferByteSize>(m_byteSize) * \
-                        static_cast<pointbuffer::PointBufferByteSize>(pointIndex);
-            
+            position =
+                static_cast<pointbuffer::PointBufferByteSize>(m_byteSize) *
+                static_cast<pointbuffer::PointBufferByteSize>(pointIndex);
         }
         else if (m_orientation == schema::DIMENSION_INTERLEAVED)
         {
             pointbuffer::PointBufferByteSize offset(0);
             offset = m_schema.getDimension(pointIndex).getByteOffset();
-            position = static_cast<pointbuffer::PointBufferByteSize>(m_capacity) * offset;
+            position =
+                static_cast<pointbuffer::PointBufferByteSize>(m_capacity) *
+                offset;
         }
         return const_cast<boost::uint8_t*>(m_data.get()) + position;
-
     }
     
-    inline boost::uint8_t* getDataStart() { return m_data.get(); }
+    boost::uint8_t* getDataStart()
+        { return getBufferByteLength() ? m_data.get() : NULL; }
 
     /// copies the raw data into your own byte array and sets the size
     /// @param data pointer to your byte array
     /// @param size size of the array in bytes
-    void getData(boost::uint8_t** data, boost::uint64_t* size) const;
+    virtual void getData(boost::uint8_t** data, boost::uint64_t* size) const;
 
     /// set the data for a single point at given pointIndex from a
     /// raw byte array
     /// @param data raw byte array
     /// @param pointIndex point position to set data.
-    void setData(boost::uint8_t* data, boost::uint32_t pointIndex);
+    virtual void setData(boost::uint8_t* data, boost::uint32_t pointIndex);
 
     /// overwrite raw data at a given pointIndex for a given number of byteCount
     /// @param data raw byte array
     /// @param pointIndex position to start writing
     /// @param byteCount number of bytes to overwrite at given position
-    void setDataStride(boost::uint8_t* data, boost::uint32_t pointIndex, boost::uint32_t byteCount);
+    virtual void setDataStride(boost::uint8_t* data,
+        boost::uint32_t pointIndex, boost::uint32_t byteCount);
 
     /** @name Metadata
     */
@@ -323,21 +334,22 @@ public:
     */
     /// Reallocates a new data buffer with the given schema
     /// @param new_schema The new schema to use.
-    void reset(Schema const& new_schema);
+    virtual void reset(Schema const& new_schema);
     
     /// Resizes the PointBuffer to the given capacity. If the 
     /// PointBuffer is already big enough to hold all of the bytes, 
     /// it is not reallocated unless bExact is true
     /// @param capacity The new number of points to use for the instance
     /// @param bExact Whether or not to exactly resize the PointBuffer instance 
-    /// with the given point size and force a new reallocation of the data buffer. 
-    void resize(boost::uint32_t const& capacity, bool bExact=false);
+    /// with the given point size and force a new reallocation of the data
+    /// buffer. 
+    virtual void resize(boost::uint32_t const& capacity, bool bExact=false);
     
     /// @return a new PointBuffer with all ignored dimensions removed
-    PointBuffer* pack(bool bRemoveIgnoredDimensions = true) const;
+    virtual PointBuffer* pack(bool bRemoveIgnoredDimensions = true) const;
     
     /// @return a new PointBuffer with the opposite orientation
-    PointBuffer* flipOrientation() const;
+    virtual PointBuffer* flipOrientation() const;
     
     /** @name Serialization
     */
@@ -358,11 +370,12 @@ public:
         .. note::
 
             If you want to print out details about the fields, e.g. the byte
-            offset or the datatype, use the :cpp:func:`pdal::Schema::getPtree()` dumper.
+            offset or the datatype, use the :cpp:func:`pdal::Schema::getPtree()`
+            dumper.
         \endverbatim
     */
-    boost::property_tree::ptree toPTree() const;
-    std::ostream& toRST(std::ostream& os) const;
+    virtual boost::property_tree::ptree toPTree() const;
+    virtual std::ostream& toRST(std::ostream& os) const;
 
     /*! @return a cumulated bounds of all points in the PointBuffer.
         \verbatim embed:rst
@@ -374,11 +387,10 @@ public:
             method. Otherwise, an exception will be thrown.
         \endverbatim
     */    
-    pdal::Bounds<double> calculateBounds(bool bis3d=true) const;
+    virtual pdal::Bounds<double> calculateBounds(bool bis3d=true) const;
 
     static void extractIndices(PointBuffer const& source,
-		    PointBuffer& destination,
-		    std::vector<int> indices);
+		PointBuffer& destination, std::vector<int> indices);
 
     /// Copies dimensions from the given PointBuffer that have both 
     /// similar names and data types. Create a schema::DimensionMap 
@@ -394,7 +406,8 @@ public:
         Dimension const& destination_dimension, boost::uint32_t source_index,
         boost::uint32_t destination_index);
 
-    double applyScaling(Dimension const& d, std::size_t pointIndex) const;
+    virtual double applyScaling(Dimension const& d,
+        std::size_t pointIndex) const;
 
     /// @return a new PointBuffer with all ignored dimensions removed
     static void pack(PointBuffer const* input, 
@@ -427,15 +440,22 @@ protected:
     template<class T> static void scale(Dimension const& source_dimension,
                                  Dimension const& destination_dimension,
                                  T& value);
-    std::string printDimension(Dimension const& dimension, boost::uint32_t index) const;
+    virtual std::string printDimension(Dimension const& dimension,
+        boost::uint32_t index) const;
 };
 
 template <class T>
-inline void PointBuffer::setField(pdal::Dimension const& dim, boost::uint32_t pointIndex, T value)
+inline void PointBuffer::setField(pdal::Dimension const& dim,
+    boost::uint32_t pointIndex, T value)
 {
+    if (!getBufferByteLength())
+        return;
+
     if (dim.getPosition() == -1)
     {
-        throw buffer_error("This dimension has no identified position in a schema. Use the setRawField method to access an arbitrary byte position.");
+        throw buffer_error("This dimension has no identified position "
+            "in a schema. Use the setRawField method to access an "
+            "arbitrary byte position.");
     }
     
     pointbuffer::PointBufferByteSize point_start_byte_position(0); 
@@ -443,19 +463,22 @@ inline void PointBuffer::setField(pdal::Dimension const& dim, boost::uint32_t po
     
     if (m_orientation == schema::POINT_INTERLEAVED)
     {
-        point_start_byte_position = static_cast<pointbuffer::PointBufferByteSize>(pointIndex) * \
-                                    static_cast<pointbuffer::PointBufferByteSize>(m_byteSize); 
+        point_start_byte_position =
+            static_cast<pointbuffer::PointBufferByteSize>(pointIndex) * \
+            static_cast<pointbuffer::PointBufferByteSize>(m_byteSize); 
         offset = point_start_byte_position + \
-                 static_cast<pointbuffer::PointBufferByteSize>(dim.getByteOffset());
+            static_cast<pointbuffer::PointBufferByteSize>(dim.getByteOffset());
     } 
     else if (m_orientation == schema::DIMENSION_INTERLEAVED)
     {
-        point_start_byte_position = static_cast<pointbuffer::PointBufferByteSize>(m_capacity) * \
-                                    static_cast<pointbuffer::PointBufferByteSize>(dim.getByteOffset());
-        offset = point_start_byte_position + \
-                 static_cast<pointbuffer::PointBufferByteSize>(dim.getByteSize()) * \
-                 static_cast<pointbuffer::PointBufferByteSize>(pointIndex);
-    } else
+        point_start_byte_position =
+            static_cast<pointbuffer::PointBufferByteSize>(m_capacity) *
+            static_cast<pointbuffer::PointBufferByteSize>(dim.getByteOffset());
+        offset = point_start_byte_position +
+            static_cast<pointbuffer::PointBufferByteSize>(dim.getByteSize()) *
+            static_cast<pointbuffer::PointBufferByteSize>(pointIndex);
+    }
+    else
     {
         throw buffer_error("unknown pdal::Schema::m_orientation provided!");
     }
@@ -469,30 +492,31 @@ inline void PointBuffer::setField(pdal::Dimension const& dim, boost::uint32_t po
         // Winner, winner, chicken dinner. We're not going to try to
         // do anything magical. It's up to you to get the interpretation right.
         *(T*)(void*)p = value;
-        return;
-    } else 
+    }
+    else 
     {
         std::ostringstream oss;
-        oss << "setField size of type T " << sizeof(T) << " does not match the size of dimension '" 
+        oss << "setField size of type T " << sizeof(T) <<
+            " does not match the size of dimension '" 
             << dim.getFQName() << "' which is " << dim.getByteSize();
         throw pdal_error(oss.str());
     }
-    
-    
-    // T output(0);
-    // output = boost::lexical_cast<T>(value);
-    // *(T*)(void*)p = output;
-
-
 }
 
 template <class T>
-inline  T const& PointBuffer::getField(pdal::Dimension const& dim, boost::uint32_t pointIndex) const
+inline T const& PointBuffer::getField(pdal::Dimension const& dim,
+    boost::uint32_t pointIndex) const
 {
+    static char buf[1000] = {0};
+    if (!getBufferByteLength())
+        return *(T const *)(void const *)buf;
+
     if (dim.getPosition() == -1)
     {
-        // this is a little harsh, but we'll keep it for now as we shake things out
-        throw buffer_error("This dimension has no identified position in a schema.");
+        // this is a little harsh, but we'll keep it for now as we
+        // shake things out
+        throw buffer_error("This dimension has no identified position "
+            "in a schema.");
     }
 
     pointbuffer::PointBufferByteSize point_start_byte_position(0); 
@@ -500,18 +524,22 @@ inline  T const& PointBuffer::getField(pdal::Dimension const& dim, boost::uint32
     
     if (m_orientation == schema::POINT_INTERLEAVED)
     {
-        point_start_byte_position = static_cast<pointbuffer::PointBufferByteSize>(pointIndex) * \
-                                    static_cast<pointbuffer::PointBufferByteSize>(m_byteSize); 
-        offset = point_start_byte_position + \
-                 static_cast<pointbuffer::PointBufferByteSize>(dim.getByteOffset());
-    } else if (m_orientation == schema::DIMENSION_INTERLEAVED)
+        point_start_byte_position =
+            static_cast<pointbuffer::PointBufferByteSize>(pointIndex) *
+            static_cast<pointbuffer::PointBufferByteSize>(m_byteSize); 
+        offset = point_start_byte_position +
+            static_cast<pointbuffer::PointBufferByteSize>(dim.getByteOffset());
+    }
+    else if (m_orientation == schema::DIMENSION_INTERLEAVED)
     {
-        point_start_byte_position = static_cast<pointbuffer::PointBufferByteSize>(m_capacity) * \
-                                    static_cast<pointbuffer::PointBufferByteSize>(dim.getByteOffset());
-        offset = point_start_byte_position + \
-                 static_cast<pointbuffer::PointBufferByteSize>(dim.getByteSize()) * \
-                 static_cast<pointbuffer::PointBufferByteSize>(pointIndex);
-    } else
+        point_start_byte_position =
+            static_cast<pointbuffer::PointBufferByteSize>(m_capacity) *
+            static_cast<pointbuffer::PointBufferByteSize>(dim.getByteOffset());
+        offset = point_start_byte_position +
+            static_cast<pointbuffer::PointBufferByteSize>(dim.getByteSize()) *
+            static_cast<pointbuffer::PointBufferByteSize>(pointIndex);
+    }
+    else
     {
         throw buffer_error("unknown pdal::Schema::m_orientation provided!");
     }
@@ -524,10 +552,12 @@ inline  T const& PointBuffer::getField(pdal::Dimension const& dim, boost::uint32
     {
         T const& output = *(T const*)(void const*)p;
         return output;
-    } else
+    }
+    else
     {
         std::ostringstream oss;
-        oss << "getField size of type T " << sizeof(T) << " is greater than the size of dimension '" 
+        oss << "getField size of type T " << sizeof(T) <<
+            " is greater than the size of dimension '" 
             << dim.getFQName() << "' which is " << dim.getByteSize();
         throw pdal_error(oss.str());
     }
@@ -548,6 +578,9 @@ inline void PointBuffer::scaleData(PointBuffer const& source,
                             boost::uint32_t source_index,
                             boost::uint32_t destination_index)
 {
+    if (!source.getBufferByteLength() || !destination.getBufferByteLength())
+        return;
+
     if (source_dimension.getInterpretation() == dimension::Float)
     {
         if (source_dimension.getByteSize() == 4)
@@ -952,6 +985,8 @@ inline void PointBuffer::scaleData(PointBuffer const& source,
 // #pragma GCC diagnostic ignored "-Wfloat-equal"
 // #pragma GCC diagnostic push
 
+//ABELL - Why is this here?  It seems to have nothing to do with a
+//  PointBuffer.
 template <class T>
 inline void PointBuffer::scale(Dimension const& source_dimension,
     Dimension const& destination_dimension, T& value)

@@ -115,7 +115,6 @@ private:
     boost::uint64_t skipImpl(boost::uint64_t);
     boost::uint32_t readBufferImpl(PointBuffer&);
     bool atEndImpl() const;
-
 };
 
 
@@ -127,7 +126,8 @@ namespace random
 class PDAL_DLL Decimation : public pdal::FilterRandomIterator, public decimation::IteratorBase
 {
 public:
-    Decimation(const pdal::filters::Decimation& filter, PointBuffer& buffer);
+    Decimation(const pdal::filters::Decimation& filter, PointBuffer& buffer,
+        boost::uint32_t offset);
     virtual ~Decimation() {};
 
 protected:
@@ -135,6 +135,7 @@ protected:
     
     virtual boost::uint64_t seekImpl(boost::uint64_t);
 
+    boost::uint32_t m_offset;
 };    
 } // random
 

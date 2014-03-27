@@ -425,15 +425,18 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
     return numPoints;
 }
 
-pdal::StageSequentialIterator* Reader::createSequentialIterator(PointBuffer& buffer) const
+pdal::StageSequentialIterator*
+Reader::createSequentialIterator(PointBuffer& buffer) const
 {
-    return new pdal::drivers::terrasolid::iterators::sequential::Reader(*this, buffer);
+    return new pdal::drivers::terrasolid::iterators::sequential::Reader(
+        *this, buffer, getNumPoints());
 }
 
 
 pdal::StageRandomIterator* Reader::createRandomIterator(PointBuffer& buffer) const
 {
-    return new pdal::drivers::terrasolid::iterators::random::Reader(*this, buffer);
+    return new pdal::drivers::terrasolid::iterators::random::Reader(
+        *this, buffer, getNumPoints());
 }
 
 std::vector<Dimension> Reader::getDefaultDimensions()
@@ -550,14 +553,13 @@ namespace sequential
 {
 
 
-Reader::Reader(const terrasolid::Reader& reader, PointBuffer& buffer)
-    : pdal::ReaderSequentialIterator(reader, buffer)
-    , m_reader(reader)
-    , m_istream(NULL)
+Reader::Reader(const terrasolid::Reader& reader, PointBuffer& buffer,
+        uint32_t numPoints)
+    : pdal::ReaderSequentialIterator(buffer)
+    , m_reader(reader), m_numPoints(numPoints)
 {
     m_istream = FileUtils::openFile(m_reader.getFileName());
     m_istream->seekg(m_reader.getPointDataOffset());
-    return;
 }
 
 
@@ -577,13 +579,14 @@ boost::uint64_t Reader::skipImpl(boost::uint64_t count)
 
 bool Reader::atEndImpl() const
 {
-    return getIndex() >= getStage().getNumPoints();
+    return getIndex() >= m_numPoints;
 }
 
 
 boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
 {
-    return m_reader.processBuffer(data, *m_istream, getStage().getNumPoints()-this->getIndex());
+    uint32_t numToRead = m_numPoints - getIndex();
+    return m_reader.processBuffer(data, *m_istream, numToRead);
 }
 
 
@@ -594,14 +597,13 @@ namespace random
 
 
 
-Reader::Reader(const terrasolid::Reader& reader, PointBuffer& buffer)
-    : pdal::ReaderRandomIterator(reader, buffer)
-    , m_reader(reader)
-    , m_istream(NULL)
+Reader::Reader(const terrasolid::Reader& reader, PointBuffer& buffer,
+        uint32_t numPoints)
+    : pdal::ReaderRandomIterator(buffer)
+    , m_reader(reader), m_numPoints(numPoints)
 {
     m_istream = FileUtils::openFile(m_reader.getFileName());
     m_istream->seekg(m_reader.getPointDataOffset());
-    return;
 }
 
 
@@ -623,7 +625,8 @@ boost::uint64_t Reader::seekImpl(boost::uint64_t count)
 
 boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
 {
-    return m_reader.processBuffer(data, *m_istream, getStage().getNumPoints()-this->getIndex());
+    boost::uint32_t numToRead = m_numPoints - getIndex();
+    return m_reader.processBuffer(data, *m_istream, numToRead);
 }
 
 } // random

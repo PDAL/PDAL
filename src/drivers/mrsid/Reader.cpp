@@ -411,7 +411,7 @@ namespace sequential
 
 
 Reader::Reader(const pdal::drivers::mrsid::Reader& reader, PointBuffer& buffer)
-    : pdal::ReaderSequentialIterator(reader, buffer)
+    : pdal::ReaderSequentialIterator(buffer)
     , m_reader(reader)
 {
     return;

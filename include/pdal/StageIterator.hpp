@@ -47,11 +47,9 @@ class PointBuffer;
 class PDAL_DLL StageIterator
 {
 public:
-    StageIterator(const Stage& stage, PointBuffer& buffer);
+    StageIterator(PointBuffer& buffer);
     virtual ~StageIterator()
         {}
-
-    const Stage& getStage() const;
 
     // This reads a set of points at the current position in the file.
     //
@@ -119,7 +117,6 @@ protected:
     boost::uint64_t m_index;
 
 private:
-    const Stage& m_stage;
     PointBuffer& m_buffer;
     boost::uint32_t m_chunkSize;
 
@@ -134,7 +131,7 @@ private:
 class PDAL_DLL StageSequentialIterator : public StageIterator
 {
 public:
-    StageSequentialIterator(const Stage& stage, PointBuffer& buffer);
+    StageSequentialIterator(PointBuffer& buffer);
     virtual ~StageSequentialIterator();
 
     // advance N points ahead in the file
@@ -162,7 +159,7 @@ protected:
 class PDAL_DLL StageRandomIterator : public StageIterator
 {
 public:
-    StageRandomIterator(const Stage& stage, PointBuffer& buffer);
+    StageRandomIterator(PointBuffer& buffer);
     virtual ~StageRandomIterator();
 
     // seek to point N (an absolute value)

@@ -186,7 +186,8 @@ namespace sequential
 class Reader : public pdal::ReaderSequentialIterator
 {
 public:
-    Reader(const pdal::drivers::qfit::Reader& reader, PointBuffer& buffer);
+    Reader(const pdal::drivers::qfit::Reader& reader, PointBuffer& buffer,
+        boost::uint32_t numPoints);
     ~Reader();
 
 private:
@@ -196,8 +197,8 @@ private:
 
     const pdal::drivers::qfit::Reader& m_reader;
     std::istream* m_istream;
+    boost::uint32_t m_numPoints;
 };
-
 
 } // sequential
 
@@ -207,7 +208,8 @@ namespace random
 class Reader : public pdal::ReaderRandomIterator
 {
 public:
-    Reader(const pdal::drivers::qfit::Reader& reader, PointBuffer& buffer);
+    Reader(const pdal::drivers::qfit::Reader& reader, PointBuffer& buffer,
+        boost::uint32_t numPoints);
     ~Reader();
 
 private:
@@ -216,6 +218,7 @@ private:
 
     const pdal::drivers::qfit::Reader& m_reader;
     std::istream* m_istream;
+    boost::uint32_t m_numPoints;
 };
 
 } // random

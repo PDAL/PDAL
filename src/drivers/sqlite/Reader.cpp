@@ -533,10 +533,8 @@ boost::uint32_t IteratorBase::myReadBlocks(PointBuffer& user_buffer)
 
 Reader::Reader(const pdal::drivers::sqlite::Reader& reader, PointBuffer& buffer)
     : IteratorBase(reader)
-    , pdal::StageSequentialIterator(reader, buffer)
-{
-    return;
-}
+    , pdal::StageSequentialIterator(buffer)
+{}
 
 
 Reader::~Reader()

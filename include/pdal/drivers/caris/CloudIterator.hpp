@@ -49,9 +49,7 @@ namespace csar {
 class CloudIterator : public pdal::ReaderSequentialIterator
 {
 public:
-    CloudIterator(
-        CloudReader const& in_reader, 
-        pdal::PointBuffer & in_buffer);
+    CloudIterator(pdal::PointBuffer & in_buffer, caris_cloud *cloud);
     virtual ~CloudIterator();
 
 protected:
