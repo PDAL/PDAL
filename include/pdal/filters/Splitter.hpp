@@ -51,13 +51,13 @@ class Stage;
 namespace filters
 {
 
-namespace iterators
-{
-namespace sequential
-{
-class Splitter;
-}
-}
+// namespace iterators
+// {
+// namespace sequential
+// {
+// class Splitter;
+// }
+// }
 
 class PDAL_DLL Splitter;
 
@@ -100,7 +100,6 @@ public:
     SET_STAGE_LINK("http://pdal.io/stages/filters.splitter.html")
 
     Splitter(Stage& prevStage, const Options&);
-    Splitter(Stage& prevStage);
 
     virtual void initialize();
     static Options getDefaultOptions();

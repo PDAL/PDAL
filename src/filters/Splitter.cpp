@@ -44,7 +44,7 @@ namespace pdal
 namespace filters
 {
 
-Splitter::Splitter(Stage& prevStage, const Options& options)
+Splitter::Splitter(Stage& prevStage, Options const& options)
     : pdal::Filter(prevStage, options)
     , m_leaf_size(0)
     , m_inverse_leaf_size(0)
@@ -58,12 +58,6 @@ Splitter::Splitter(Stage& prevStage, const Options& options)
     , m_divb_mul_y(0)
 {
     m_length = options.getValueOrDefault<boost::uint32_t>("length", 1000);
-}
-
-Splitter::Splitter(Stage& prevStage)
-    : pdal::Filter(prevStage, Options::none())
-{
-    return;
 }
 
 void Splitter::initialize()
@@ -94,7 +88,10 @@ struct tile_point_idx
     boost::uint32_t tile_idx;
     boost::uint32_t point_idx;
 
-    tile_point_idx(boost::uint32_t tile_idx_, boost::uint32_t point_idx_) : tile_idx(tile_idx_), point_idx(point_idx_) {}
+    tile_point_idx( boost::uint32_t tile_idx_, 
+                    boost::uint32_t point_idx_) 
+        : tile_idx(tile_idx_)
+        , point_idx(point_idx_) {};
     bool operator < (const tile_point_idx &p) const
     {
         return (tile_idx < p.tile_idx);
