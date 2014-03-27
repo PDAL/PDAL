@@ -1,5 +1,6 @@
 /******************************************************************************
-* Copyright (c) 2013, Bradley J Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2013, Howard Butler (hobu.inc@gmail.com)
+* Copyright (c) 2014, Brad Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -32,41 +33,45 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+#ifndef INCLUDED_PDAL_KERNEL_GROUND_HPP
+#define INCLUDED_PDAL_KERNEL_GROUND_HPP
 
-#include <pdal/Filter.hpp>
+#include <pdal/FileUtils.hpp>
+
+#include "Application.hpp"
+
 
 namespace pdal
 {
-namespace filters
+namespace kernel
 {
 
-class PDAL_DLL PCLBlock : public Filter
+class PDAL_DLL Ground : public Application
 {
 public:
-    SET_STAGE_NAME("filters.pclblock", "PCL Block implementation")
-    SET_STAGE_LINK("http://www.pdal.io/stages/filters.pclblock.html")  
-#ifdef PDAL_HAVE_PCL
-    SET_STAGE_ENABLED(true)
-#else
-    SET_STAGE_ENABLED(false)
-#endif
-        
-    PCLBlock(const Options& options) : Filter(options)
-        {}
+    Ground(int argc, const char* argv[]);
+    int execute();
 
 private:
-    std::string m_filename;
-    std::string m_json;
+    void addSwitches();
+    void validateSwitches();
 
-    virtual void processOptions(const Options& options);
-    virtual void ready(PointContext ctx);
-    virtual PointBufferSet run(PointBufferPtr buf);
+    
+    std::unique_ptr<Stage> makeReader(Options readerOptions);
 
-    PCLBlock& operator=(const PCLBlock&); // not implemented
-    PCLBlock(const PCLBlock&); // not implemented
+    std::string m_inputFile;
+    std::string m_outputFile;
+    double m_maxWindowSize;
+    double m_slope;
+    double m_maxDistance;
+    double m_initialDistance;
+    double m_cellSize;
+    double m_base;
+    bool m_exponential;
+    bool m_bCompress;
 };
 
-} // namespace filters
-} // namespace pdal
+} // kernel
+} // pdal
 
+#endif

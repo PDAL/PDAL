@@ -36,6 +36,7 @@
 #define INCLUDED_PDAL_KERNEL_HPP
 
 #include <pdal/kernel/Application.hpp>
+#include <pdal/kernel/Ground.hpp>
 #include <pdal/kernel/Info.hpp>
 #include <pdal/kernel/Kernel.hpp>
 #include <pdal/kernel/Pipeline.hpp>
