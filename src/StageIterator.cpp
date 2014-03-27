@@ -36,8 +36,8 @@
 
 #include <algorithm> // for std::min/max
 
+#include <pdal/NullPointBuffer.hpp>
 #include <pdal/Stage.hpp>
-#include <pdal/PointBuffer.hpp>
 
 namespace pdal
 {
@@ -51,21 +51,13 @@ static boost::uint32_t s_defaultChunkSize = 65536;
 //
 //---------------------------------------------------------------------------
 
-StageIterator::StageIterator(const Stage& stage, PointBuffer& buffer)
+StageIterator::StageIterator(PointBuffer& buffer)
     : m_index(0)
-    , m_stage(stage)
     , m_buffer(buffer)
     , m_chunkSize(s_defaultChunkSize)
     , m_readBeginPerformed(false)
     , m_readBufferBeginPerformed(false)
 {}
-
-/**
-const Stage& StageIterator::getStage() const
-{
-    return m_stage;
-}
-**/
 
 boost::uint64_t StageIterator::getIndex() const
 {
@@ -99,11 +91,6 @@ boost::uint32_t StageIterator::read(PointBuffer& buffer)
 
 void StageIterator::readBegin()
 {
-    if (!m_stage.isInitialized())
-    {
-        throw pdal_error("stage not initialized: " + m_stage.getName());
-    }
-
     if (m_readBeginPerformed)
     {
         throw pdal_error("readBegin called without corresponding readEnd");
@@ -143,11 +130,7 @@ boost::uint32_t StageIterator::readBuffer(PointBuffer& buffer)
     }
 
     boost::uint32_t numRead = readBufferImpl(buffer);
-    
-    if (numRead == 0)
-        m_index = m_stage.getNumPoints();
-    else
-        m_index += numRead;
+    m_index += numRead;
     return numRead;
 }
 
@@ -195,8 +178,7 @@ boost::uint64_t StageIterator::naiveSkipImpl(boost::uint64_t count)
         boost::uint32_t thisCount =
             static_cast<boost::uint32_t>(thisCount64);
 
-//        PointBuffer junk(getStage().getSchema(), thisCount);
-        PointBuffer junk(Schema(), thisCount);
+        NullPointBuffer junk;
         boost::uint32_t numRead = read(junk);
         if (numRead == 0)
             break; // end of file or something
@@ -215,9 +197,8 @@ boost::uint64_t StageIterator::naiveSkipImpl(boost::uint64_t count)
 //
 //---------------------------------------------------------------------------
 
-StageSequentialIterator::StageSequentialIterator(const Stage& stage,
-        PointBuffer& buffer)
-    : StageIterator(stage, buffer)
+StageSequentialIterator::StageSequentialIterator(PointBuffer& buffer)
+    : StageIterator(buffer)
 {}
 
 
@@ -244,9 +225,8 @@ bool StageSequentialIterator::atEnd() const
 //
 //---------------------------------------------------------------------------
 
-StageRandomIterator::StageRandomIterator(const Stage& stage,
-        PointBuffer& buffer)
-    : StageIterator(stage, buffer)
+StageRandomIterator::StageRandomIterator(PointBuffer& buffer)
+    : StageIterator(buffer)
 {}
 
 

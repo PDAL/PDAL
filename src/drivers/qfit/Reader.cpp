@@ -819,8 +819,8 @@ namespace sequential
 
 Reader::Reader(const pdal::drivers::qfit::Reader& reader, PointBuffer& buffer,
         boost::uint32_t numPoints)
-    : pdal::ReaderSequentialIterator(reader, buffer)
-    , m_reader(reader) , m_istream(NULL), m_numPoints(numPoints)
+    : pdal::ReaderSequentialIterator(buffer)
+    , m_reader(reader), m_numPoints(numPoints)
 {
     m_istream = FileUtils::openFile(m_reader.getFileName());
     m_istream->seekg(m_reader.getPointDataOffset());
@@ -860,8 +860,8 @@ namespace random
 
 Reader::Reader(const pdal::drivers::qfit::Reader& reader, PointBuffer& buffer,
         boost::uint32_t numPoints)
-    : pdal::ReaderRandomIterator(reader, buffer),
-    m_reader(reader) , m_istream(NULL), m_numPoints(numPoints)
+    : pdal::ReaderRandomIterator(buffer),
+    m_reader(reader), m_numPoints(numPoints)
 {
     m_istream = FileUtils::openFile(m_reader.getFileName());
     m_istream->seekg(m_reader.getPointDataOffset());

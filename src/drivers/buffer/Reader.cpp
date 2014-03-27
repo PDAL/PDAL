@@ -123,8 +123,8 @@ namespace sequential
 
 Reader::Reader(const pdal::drivers::buffer::Reader& reader, PointBuffer& buffer,
         boost::uint32_t numPoints, LogPtr log)
-    : pdal::ReaderSequentialIterator(reader, buffer)
-    , m_reader(reader), m_numPoints(numPoints), m_log(log)
+    : pdal::ReaderSequentialIterator(buffer),
+    m_reader(reader), m_numPoints(numPoints), m_log(log)
 {}
 
 
@@ -157,8 +157,7 @@ namespace random
 {
 
 Reader::Reader(const pdal::drivers::buffer::Reader& reader, PointBuffer& buffer)
-    : pdal::ReaderRandomIterator(reader, buffer)
-    , m_reader(reader)
+    : pdal::ReaderRandomIterator(buffer), m_reader(reader)
 {}
 
 

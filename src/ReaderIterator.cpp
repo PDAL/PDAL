@@ -45,17 +45,13 @@ namespace pdal
 //
 //---------------------------------------------------------------------------
 
-ReaderSequentialIterator::ReaderSequentialIterator(const Reader& reader, PointBuffer& buffer)
-    : StageSequentialIterator(reader, buffer)
-{
-    return;
-}
+ReaderSequentialIterator::ReaderSequentialIterator(PointBuffer& buffer)
+    : StageSequentialIterator(buffer)
+{}
 
 
 ReaderSequentialIterator::~ReaderSequentialIterator()
-{
-    return;
-}
+{}
 
 
 //---------------------------------------------------------------------------
@@ -64,19 +60,13 @@ ReaderSequentialIterator::~ReaderSequentialIterator()
 //
 //---------------------------------------------------------------------------
 
-ReaderRandomIterator::ReaderRandomIterator(const Reader& reader, PointBuffer& buffer)
-    : StageRandomIterator(reader, buffer)
-{
-    return;
-}
+ReaderRandomIterator::ReaderRandomIterator(PointBuffer& buffer)
+    : StageRandomIterator(buffer)
+{}
 
 
 ReaderRandomIterator::~ReaderRandomIterator()
-{
-    return;
-}
-
-
+{}
 
 
 } // namespace pdal
