@@ -124,9 +124,6 @@ BOOST_AUTO_TEST_CASE(test_two_a)
         xfilter_opts.add(source);
         xfilter_opts.add(module);
         xfilter_opts.add(function);
-    
-        //Option optlog("log", Support::temppath("logtest_2.txt"));
-        //xfilter_opts.add(optlog);
     }
 
     Options yfilter_opts;
@@ -145,9 +142,6 @@ BOOST_AUTO_TEST_CASE(test_two_a)
         yfilter_opts.add(source);
         yfilter_opts.add(module);
         yfilter_opts.add(function);
-    
-        //Option optlog("log", Support::temppath("logtest_3.txt"));
-        //yfilter_opts.add(optlog);
     }
 
     {

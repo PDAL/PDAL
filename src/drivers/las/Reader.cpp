@@ -148,11 +148,11 @@ StreamFactory& Reader::getStreamFactory() const
 }
 
 
-
 pdal::StageSequentialIterator*
 Reader::createSequentialIterator(PointBuffer& buffer) const
 {
-    return new pdal::drivers::las::iterators::sequential::Reader(*this, buffer);
+    return new pdal::drivers::las::iterators::sequential::Reader(*this,
+        buffer, getNumPoints());
 }
 
 
@@ -845,8 +845,10 @@ namespace sequential
 {
 
 
-Reader::Reader(pdal::drivers::las::Reader const& reader, PointBuffer& buffer)
-    : Base(reader), pdal::ReaderSequentialIterator(reader, buffer)
+Reader::Reader(pdal::drivers::las::Reader const& reader, PointBuffer& buffer,
+        boost::uint32_t numPoints)
+    : Base(reader), pdal::ReaderSequentialIterator(reader, buffer),
+    m_numPoints(numPoints)
 {}
 
 
@@ -886,20 +888,21 @@ boost::uint64_t Reader::skipImpl(boost::uint64_t count)
 
 bool Reader::atEndImpl() const
 {
-    return getIndex() >= getStage().getNumPoints();
+    return getIndex() >= m_numPoints;
 }
 
 
 boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
 {
     PointDimensions cachedDimensions(data.getSchema(), m_reader.getName());
+
+    //ABELL
+    boost::uint32_t numToRead = 1000000 - getIndex();
 #ifdef PDAL_HAVE_LASZIP
-    return m_reader.processBuffer(data, m_istream,
-        getStage().getNumPoints()-this->getIndex(), m_unzipper.get(),
+    return m_reader.processBuffer(data, m_istream, numToRead, m_unzipper.get(),
         m_zipPoint.get(), &cachedDimensions, m_read_buffer);
 #else
-    return m_reader.processBuffer(data, m_istream,
-        getStage().getNumPoints()-this->getIndex(), NULL, NULL,
+    return m_reader.processBuffer(data, m_istream, numToRead, NULL, NULL,
         &cachedDimensions, m_read_buffer);
 #endif
 }
@@ -953,13 +956,14 @@ boost::uint64_t Reader::seekImpl(boost::uint64_t count)
 boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
 {
     PointDimensions cachedDimensions(data.getSchema(), m_reader.getName());
+
+//ABELL
+    boost::uint32_t numToRead = 1000000 - getIndex();
 #ifdef PDAL_HAVE_LASZIP
-    return m_reader.processBuffer(data, m_istream,
-        getStage().getNumPoints()-this->getIndex(), m_unzipper.get(),
+    return m_reader.processBuffer(data, m_istream, numToRead, m_unzipper.get(),
         m_zipPoint.get(), &cachedDimensions, m_read_buffer);
 #else
-    return m_reader.processBuffer(data, m_istream,
-         getStage().getNumPoints()-this->getIndex(), NULL, NULL,
+    return m_reader.processBuffer(data, m_istream, numToRead, NULL, NULL,
          &cachedDimensions, m_read_buffer);
 #endif
 }

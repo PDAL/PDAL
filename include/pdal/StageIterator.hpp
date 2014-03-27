@@ -51,8 +51,6 @@ public:
     virtual ~StageIterator()
         {}
 
-    const Stage& getStage() const;
-
     // This reads a set of points at the current position in the file.
     //
     // The schema of the PointBuffer buffer we are given here might

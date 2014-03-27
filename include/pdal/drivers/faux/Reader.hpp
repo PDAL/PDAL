@@ -61,10 +61,14 @@ namespace faux
 //    Time  - uint64
 //
 // It supports a few modes:
-//   - "random" generates points that are randomly distributed within the given bounding box
-//   - "constant" generates its points to always be at the minimum of the bounding box
-//   - "ramp" generates its points as a linear ramp from the minimum of the bbox to the maximum
-// In all these modes, however, the Time field is always set to the point number.
+//   - "random" generates points that are randomly distributed within the
+//     given bounding box
+//   - "constant" generates its points to always be at the minimum of the
+//      bounding box
+//   - "ramp" generates its points as a linear ramp from the minimum of the
+//     bbox to the maximum
+// In all these modes, however, the Time field is always set to the point
+// number.
 //
 class PDAL_DLL Reader : public pdal::Reader
 {
@@ -81,7 +85,8 @@ public:
 
     Reader(const Options& options);
     Reader(const Bounds<double>&, boost::uint64_t numPoints, Mode mode);
-    Reader(const Bounds<double>&, boost::uint64_t numPoints, Mode mode, const std::vector<Dimension>& dimensions);
+    Reader(const Bounds<double>&, boost::uint64_t numPoints, Mode mode,
+        const std::vector<Dimension>& dimensions);
 
     virtual void initialize();
     static Options getDefaultOptions();
@@ -116,7 +121,8 @@ namespace sequential
 class PDAL_DLL Reader : public pdal::ReaderSequentialIterator
 {
 public:
-    Reader(pdal::drivers::faux::Reader const& reader, PointBuffer& buffer);
+    Reader(pdal::drivers::faux::Reader const& reader, PointBuffer& buffer,
+        boost::uint32_t numPoints, LogPtr log);
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t);
@@ -124,6 +130,8 @@ private:
     bool atEndImpl() const;
 
     pdal::drivers::faux::Reader const& m_reader;
+    boost::uint32_t m_numPoints;
+    LogPtr m_log;
 };
 
 }

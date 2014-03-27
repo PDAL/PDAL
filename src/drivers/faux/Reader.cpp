@@ -142,13 +142,16 @@ Reader::Mode Reader::getMode() const
 }
 
 
-pdal::StageSequentialIterator* Reader::createSequentialIterator(PointBuffer& buffer) const
+pdal::StageSequentialIterator*
+Reader::createSequentialIterator(PointBuffer& buffer) const
 {
-    return new pdal::drivers::faux::iterators::sequential::Reader(*this, buffer);
+    return new pdal::drivers::faux::iterators::sequential::Reader(*this,
+        buffer, getNumPoints(), log());
 }
 
 
-pdal::StageRandomIterator* Reader::createRandomIterator(PointBuffer& buffer) const
+pdal::StageRandomIterator*
+Reader::createRandomIterator(PointBuffer& buffer) const
 {
     return new pdal::drivers::faux::iterators::random::Reader(*this, buffer);
 }
@@ -243,13 +246,11 @@ namespace sequential
 {
 
 
-
-Reader::Reader(const pdal::drivers::faux::Reader& reader, PointBuffer& buffer)
-    : pdal::ReaderSequentialIterator(reader, buffer)
-    , m_reader(reader)
-{
-    return;
-}
+Reader::Reader(const pdal::drivers::faux::Reader& reader, PointBuffer& buffer,
+        boost::uint32_t numPoints, LogPtr log)
+    : pdal::ReaderSequentialIterator(reader, buffer),
+    m_reader(reader), m_numPoints(numPoints), m_log(log)
+{}
 
 
 boost::uint64_t Reader::skipImpl(boost::uint64_t count)
@@ -260,19 +261,16 @@ boost::uint64_t Reader::skipImpl(boost::uint64_t count)
 
 bool Reader::atEndImpl() const
 {
-    const boost::uint64_t numPoints = getStage().getNumPoints();
-    const boost::uint64_t currPoint = getIndex();
-
-    return currPoint >= numPoints;
+    return getIndex() >= m_numPoints;
 }
 
 
 boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
 {
-    m_reader.log()->get(logDEBUG5) << "Reading a point buffer of " << data.getCapacity() << " points." << std::endl;
+    m_log->get(logDEBUG5) << "Reading a point buffer of " <<
+        data.getCapacity() << " points." << std::endl;
     return m_reader.processBuffer(data, getIndex());
 }
-
 
 }
 } // iterators::sequential

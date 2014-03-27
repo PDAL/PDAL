@@ -224,7 +224,9 @@ typedef boost::shared_ptr<Dimension> DimensionPtr;
 class PDAL_DLL Stats : public pdal::FilterSequentialIterator
 {
 public:
-    Stats(const pdal::filters::Stats& filter, PointBuffer& buffer);
+    Stats(const pdal::filters::Stats& filter, PointBuffer& buffer,
+        LogPtr log, boost::uint64_t numPoints, const std::string& name,
+        const Options& options);
     boost::property_tree::ptree toPTree() const;
     pdal::Metadata toMetadata() const;
     stats::Summary const& getStats(Dimension const& dim) const;
@@ -246,6 +248,10 @@ private:
     std::vector<std::string> m_exact_dimension_names;
     
     std::multimap<DimensionPtr,stats::SummaryPtr> m_stats; // one Stats item per field in the schema
+    LogPtr m_log;
+    boost::uint64_t m_numPoints;
+    std::string m_name;
+    Options m_options;
 };
 
 

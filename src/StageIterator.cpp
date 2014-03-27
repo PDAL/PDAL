@@ -60,11 +60,12 @@ StageIterator::StageIterator(const Stage& stage, PointBuffer& buffer)
     , m_readBufferBeginPerformed(false)
 {}
 
+/**
 const Stage& StageIterator::getStage() const
 {
     return m_stage;
 }
-
+**/
 
 boost::uint64_t StageIterator::getIndex() const
 {
@@ -194,7 +195,8 @@ boost::uint64_t StageIterator::naiveSkipImpl(boost::uint64_t count)
         boost::uint32_t thisCount =
             static_cast<boost::uint32_t>(thisCount64);
 
-        PointBuffer junk(getStage().getSchema(), thisCount);
+//        PointBuffer junk(getStage().getSchema(), thisCount);
+        PointBuffer junk(Schema(), thisCount);
         boost::uint32_t numRead = read(junk);
         if (numRead == 0)
             break; // end of file or something
@@ -254,17 +256,8 @@ StageRandomIterator::~StageRandomIterator()
 
 boost::uint64_t StageRandomIterator::seek(boost::uint64_t position)
 {
-    boost::uint64_t size = getStage().getNumPoints();
-    if (size != 0 && position >= size)
-    {
-        std::ostringstream oss;
-        oss << "position '" << position <<
-            "' is out of bounds of size of stage '" << size << "'";
-        throw invalid_seek_error(oss.str());
-    }
-    boost::uint64_t newPos = seekImpl(position);
-    m_index = newPos;
-    return newPos;
+    m_index = seekImpl(position);
+    return m_index;
 }
 
 } // namespace pdal

@@ -127,9 +127,11 @@ pdal::StageSequentialIterator* Decimation::createSequentialIterator(PointBuffer&
 
 pdal::StageRandomIterator* Decimation::createRandomIterator(PointBuffer& buffer) const
 {
-    return new pdal::filters::iterators::random::Decimation(*this, buffer);
+    boost::uint32_t offset =
+        getOptions().getValueOrDefault<boost::uint32_t>("offset", 0);
+    return new pdal::filters::iterators::random::Decimation(*this, buffer,
+        offset);
 }
-
 
 
 namespace iterators
@@ -260,12 +262,11 @@ namespace sequential
 {
 
 
-Decimation::Decimation(const pdal::filters::Decimation& filter, PointBuffer& buffer)
-    : pdal::FilterSequentialIterator(filter, buffer)
-    , decimation::IteratorBase(filter, buffer)
-{
-    return;
-}
+Decimation::Decimation(const pdal::filters::Decimation& filter,
+        PointBuffer& buffer) :
+    pdal::FilterSequentialIterator(filter, buffer),
+    decimation::IteratorBase(filter, buffer)
+{}
 
 
 boost::uint64_t Decimation::skipImpl(boost::uint64_t count)
@@ -291,17 +292,16 @@ boost::uint32_t Decimation::readBufferImpl(PointBuffer& data)
 
 namespace random
 {
-Decimation::Decimation(const pdal::filters::Decimation& filter, PointBuffer& buffer)
+Decimation::Decimation(const pdal::filters::Decimation& filter,
+        PointBuffer& buffer, boost::uint32_t offset)
     : pdal::FilterRandomIterator(filter, buffer)
-    , decimation::IteratorBase(filter, buffer)
+    , decimation::IteratorBase(filter, buffer), m_offset(offset)
 {
-    return;
 }
 
 boost::uint64_t Decimation::seekImpl(boost::uint64_t count)
 {
-    boost::uint32_t offset = getStage().getOptions().getValueOrDefault<boost::uint32_t>("offset", 0);
-    m_startingIndex = count + offset;
+    m_startingIndex = count + m_offset;
     return getPrevIterator().seek(m_startingIndex);
 }
 
