@@ -114,7 +114,7 @@ PCLBlock::processBuffer(PointBuffer& srcData, std::string& filename, PointBuffer
 
     pcl::Pipeline<pcl::PointNormal> pipeline;
     pipeline.setInputCloud(cloud);
-    pipeline.setJSON(filename);
+    pipeline.setFilename(filename);
     pipeline.setOffsets(dX.getNumericOffset(), dY.getNumericOffset(), dZ.getNumericOffset());
     pipeline.filter(*cloud_f);
 
