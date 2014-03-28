@@ -24,6 +24,8 @@ apps/CMakeScripts/
 CMakeScripts/
 _CPack_Packages/
 install_manifest.txt
+build
+makefiles
 
 #
 # visual studio cruft
@@ -78,3 +80,9 @@ bin/
 test/unit/CMakeScripts/
 src/gitsha.cpp
 .vagrant/
+
+#
+# Vim
+#
+
+.*.sw*

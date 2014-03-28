@@ -32,17 +32,22 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <stdint.h>
+#include <string>
+#include <vector>
+
 #pragma once
 
 namespace pdal
 {
 
+class ILeStream;
+
 struct BpfMuellerMatrix
 {
     float m_vals[16];
-
-    bool read(ILeStream& stream);
 };
+ILeStream& operator >> (ILeStream& stream, BpfMuellerMatrix& m);
 
 struct BpfHeader
 {
@@ -61,7 +66,7 @@ struct BpfHeader
     double m_dim_offset;
 
     bool read(ILeStream& stream);
-}
+};
 
 struct BpfDimension
 {
@@ -70,7 +75,7 @@ struct BpfDimension
     std::string m_label;
 
     bool read(ILeStream& stream);
-}
+};
 
 struct BpfUlemHeader
 {
@@ -142,7 +147,7 @@ public:
     float m_stokes_param[4];
     float m_stokes_out_param[4];
     BpfMuellerMatrix m_xform;
-    int16 m_truncation;
+    int16_t m_truncation;
 
     bool read(ILeStream& stream);
 };

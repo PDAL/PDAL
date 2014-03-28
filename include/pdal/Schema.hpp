@@ -164,8 +164,8 @@ public:
 
 /// @name Dimension manipulation
     /// adds (copies) a Dimension instance to the Schema
-    /// @param dim a Dimension that is copied and added to the end of the Schema
-    void appendDimension(Dimension const& dim);
+    /// @param dim a Dimension added to the end of the Schema
+    void appendDimension(Dimension dim);
 
     /*! overwrites an existing Dimension with the same name as dim
         \param dim the Dimension instance that contains the name and namespace
@@ -187,6 +187,10 @@ public:
     {
         return m_index;
     }
+
+    /// @return  Number of dimensions in the schema.
+    size_t numDimensions() const
+        { return getDimensions().size(); }
 
 /// @name Dimension access
     /// @return a const& to a Dimension with the given name and namespace. If

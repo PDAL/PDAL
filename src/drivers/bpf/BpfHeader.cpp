@@ -32,7 +32,19 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <pdal/BoStream.hpp>
+
 #include "BpfHeader.hpp"
+
+namespace pdal
+{
+
+ILeStream& operator >> (ILeStream& stream, BpfMuellerMatrix& m)
+{
+    for (size_t i = 0; i < (sizeof(m.m_vals) / sizeof(m.m_vals[0])); ++i)
+        stream >> m.m_vals[i]; 
+    return stream;
+}
 
 bool BpfHeader::read(ILeStream& stream)
 {
@@ -42,91 +54,95 @@ bool BpfHeader::read(ILeStream& stream)
     stream.get(magic, 4);
     if (magic != "BPF!")
         return false;
-    stream.get(m_ver, 4)
-    stream >> m_len > m_num_dim >> m_interleave >> m_compression >>
+    stream.get(m_ver, 4);
+    stream >> m_len >> m_num_dim >> m_interleave >> m_compression >>
         dummy_char >> m_num_pts >> m_coord_type >> m_coord_id >> m_spacing >>
         m_xform >> m_start_time >> m_end_time >> m_dim_offset;
-    return stream.good();
+    return (bool)stream;
 }
 
 bool BpfDimension::read(ILeStream& stream)
 {
     stream >> m_min >> m_max;
     stream.get(m_label, 32);
-    return stream.good();
+    return (bool)stream;
 }
 
 bool BpfUlemHeader::read(ILeStream& stream)
 {
-    string magic;
-    StreamMarker mark(stream);
+    std::string magic;
+    IStreamMarker mark(stream);
 
-    m_stream.get(magic, 4);
+    stream.get(magic, 4);
     if (magic != "ULEM")
     {
         mark.rewind();
         return false;
     }
-    m_stream >> m_num_frames >> m_year >> m_month >> m_day >> m_lidar_mode >>
+    stream >> m_num_frames >> m_year >> m_month >> m_day >> m_lidar_mode >>
         m_wavelen >> m_pulse_freq >> m_focal_width >> m_focal_height >>
-        m_pixel_pitch_width >> m_pixed_pitch_height;
-    m_stream.get(m_class_code, 32);    
-    return stream.good();
+        m_pixel_pitch_width >> m_pixel_pitch_height;
+    stream.get(m_class_code, 32);    
+    return (bool)stream;
 }
 
 bool BpfUlemFrame::read(ILeStream& stream)
 {
     stream >> m_num >> m_roll >> m_pitch >> m_heading >> m_xform >>
         m_short_encoder >> m_long_encoder;
-    return stream.good();
+    return (bool)stream;
 }
 
 bool BpfUlemFile::read(ILeStream& stream)
 {
-    StreamMarker mark(stream);
+    IStreamMarker mark(stream);
+    std::string magic;
 
-    m_stream.get(magic, 4);
+    stream.get(magic, 4);
     if (magic != "FILE")
     {
         mark.rewind();
         return false;
     }
     stream >> m_len;
-    stream.get(filename, 32);
-    stream.skip(len);
-    return m_stream.good();
+    stream.get(m_filename, 32);
+    stream.skip(m_len);
+    return (bool)stream;
 }
 
 bool BpfPolarStokesParam::read(ILeStream& stream)
 {
     stream >> m_x >> m_y >> m_z >> m_a;
-    return stream.good();
+    return (bool)stream;
 }
 
 bool BpfPolarHeader::read(ILeStream& stream)
 {
-    StreamMarker mark(stream);
+    IStreamMarker mark(stream);
 
+    std::string magic;
     stream.get(magic, 4);
     if (magic != "POL$")
     {
         mark.rewind();
         return false;
     }
+
+    int16_t size;
     stream >> size >> m_num_frames >> m_fpa_id >> m_num_xmit >> m_num_rcv;
-    for (int i = 0; i < m_num_xmit; ++i)
+    for (decltype(m_num_xmit) i = 0; i < m_num_xmit; ++i)
     {
         BpfPolarStokesParam vec;
         vec.read(stream);
         m_xmit_states.push_back(vec);
     }
-    for (int i = 0; i < m_num_rcv; ++i)
+    for (decltype(m_num_rcv) i = 0; i < m_num_rcv; ++i)
     {
         BpfMuellerMatrix mat;
-        mat.read(stream);
+        stream >> mat;
         m_psa_settings.push_back(mat);
     }
-    return stream.good();
+    return (bool)stream;
 }
 
 bool BpfPolarFrame::read(ILeStream& stream)
@@ -136,7 +152,8 @@ bool BpfPolarFrame::read(ILeStream& stream)
         stream >> m_stokes_param[i];
     for (int i = 0; i < 4; ++i)
         stream >> m_stokes_out_param[i];
-    m_xform.read(stream);
-    stream >> m_truncation;
-    return stream.good();
+    stream >> m_xform >> m_truncation;
+    return (bool)stream;
 }
+
+} // namespace pdal
