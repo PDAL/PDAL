@@ -78,7 +78,7 @@ void BpfReader::initialize()
 StageSequentialIterator *
 BpfReader::createSequentialIterator(PointBuffer& pb) const
 {
-    return new BpfSeqIterator(*this, pb, m_header.m_num_pts,
+    return new BpfSeqIterator(pb, m_header.m_num_pts,
         const_cast<ILeStream&>(m_stream));
 }
 

@@ -83,11 +83,6 @@ void Stage::setBounds(const Bounds<double>& bounds)
     m_bounds = bounds;
 }
 
-Schema& Stage::getSchemaRef()
-{
-    return m_schema;
-}
-
 
 void Stage::setSchema(const Schema& schema)
 {

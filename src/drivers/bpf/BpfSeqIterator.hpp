@@ -49,8 +49,8 @@ class PointBuffer;
 class BpfSeqIterator : public ReaderSequentialIterator
 {
 public:
-    BpfSeqIterator(const BpfReader& reader, PointBuffer& buffer,
-        boost::uint32_t numPoints, ILeStream& stream);
+    BpfSeqIterator(PointBuffer& buffer, boost::uint32_t numPoints,
+        ILeStream& stream);
 
 protected:
     boost::uint32_t readBufferImpl(PointBuffer&);

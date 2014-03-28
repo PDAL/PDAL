@@ -207,8 +207,8 @@ set(PDAL_BPF_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_BPF_PATH}")
 set(PDAL_BPF_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_BPF_PATH}")
 
 set(PDAL_DRIVERS_BPF_HPP
-    "${PDAL_BPF_HEADERS}/BpfReader.hpp"
-    "${PDAL_BPF_HEADERS}/BpfSeqIterator.hpp"
+    "${PDAL_BPF_SRC}/BpfReader.hpp"
+    "${PDAL_BPF_SRC}/BpfSeqIterator.hpp"
     "${PDAL_BPF_SRC}/BpfHeader.hpp"
 )
 

@@ -105,9 +105,7 @@ void Chipper::initialize()
 {
     Filter::initialize();
 
-    Schema& s = getSchemaRef();
-    s = alterSchema(s);
-
+    m_schema = alterSchema(m_schema);
     setPointCountType(PointCount_Fixed);
     setNumPoints(0);
 
@@ -117,7 +115,6 @@ void Chipper::initialize()
         if (m_threshold == 0)
             throw pdal_error("chipper threshold cannot be 0!");
     }
-    return;
 }
 
 
