@@ -45,8 +45,8 @@ namespace pdal
 
 BpfSeqIterator::BpfSeqIterator(PointBuffer& data, boost::uint32_t numPoints,
         ILeStream& stream) :
-    ReaderSequentialIterator(data), m_numPoints(numPoints),
-    m_stream(stream), m_index(0)
+    ReaderSequentialIterator(data), m_numPoints(numPoints), m_stream(stream),
+    m_index(0)
 {}
 
 boost::uint32_t BpfSeqIterator::readBufferImpl(PointBuffer& data)
