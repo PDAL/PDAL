@@ -213,8 +213,6 @@ std::string Reader::getFileName() const
 
 void Reader::registerFields()
 {
-    Schema& schema = getSchemaRef();
-
     Schema dimensions(getDefaultDimensions());
 
     double xyz_scale = 1/static_cast<double>(m_header->Units);
@@ -232,52 +230,52 @@ void Reader::registerFields()
 
     if (m_format == TERRASOLID_Format_1)
     {
-        schema.appendDimension(dimensions.getDimension("Classification"));
+        m_schema.appendDimension(dimensions.getDimension("Classification"));
 
         // Fetch PointSource ID Uint8 dimension by UUID because dimensions
         // has two "PointSourceId" dimensions added.
 
-        schema.appendDimension(dimensions.getDimension(
+        m_schema.appendDimension(dimensions.getDimension(
                                    boost::uuids::string_generator()("68c03b56-4248-4cca-ade5-33e90d5c5563")));
 
-        schema.appendDimension(dimensions.getDimension("Intensity"));
+        m_schema.appendDimension(dimensions.getDimension("Intensity"));
 
-        schema.appendDimension(x);
-        schema.appendDimension(y);
-        schema.appendDimension(z);
+        m_schema.appendDimension(x);
+        m_schema.appendDimension(y);
+        m_schema.appendDimension(z);
     }
 
     if (m_format == TERRASOLID_Format_2)
     {
-        schema.appendDimension(x);
-        schema.appendDimension(y);
-        schema.appendDimension(z);
+        m_schema.appendDimension(x);
+        m_schema.appendDimension(y);
+        m_schema.appendDimension(z);
 
-        schema.appendDimension(dimensions.getDimension("Classification"));
+        m_schema.appendDimension(dimensions.getDimension("Classification"));
 
-        schema.appendDimension(dimensions.getDimension(
+        m_schema.appendDimension(dimensions.getDimension(
                                    boost::uuids::string_generator()("465a9a7e-1e04-47b0-97b6-4f826411bc71")));
 
-        schema.appendDimension(dimensions.getDimension("Flag"));
-        schema.appendDimension(dimensions.getDimension("Mark"));
+        m_schema.appendDimension(dimensions.getDimension("Flag"));
+        m_schema.appendDimension(dimensions.getDimension("Mark"));
 
-        schema.appendDimension(dimensions.getDimension(
+        m_schema.appendDimension(dimensions.getDimension(
                                    boost::uuids::string_generator()("7193bb9f-3ca2-491f-ba18-594321493789")));
 
-        schema.appendDimension(dimensions.getDimension("Intensity"));
+        m_schema.appendDimension(dimensions.getDimension("Intensity"));
     }
 
     if (m_haveTime)
     {
-        schema.appendDimension(dimensions.getDimension("Time"));
+        m_schema.appendDimension(dimensions.getDimension("Time"));
     }
 
     if (m_haveColor)
     {
-        schema.appendDimension(dimensions.getDimension("Red"));
-        schema.appendDimension(dimensions.getDimension("Green"));
-        schema.appendDimension(dimensions.getDimension("Blue"));
-        schema.appendDimension(dimensions.getDimension("Alpha"));
+        m_schema.appendDimension(dimensions.getDimension("Red"));
+        m_schema.appendDimension(dimensions.getDimension("Green"));
+        m_schema.appendDimension(dimensions.getDimension("Blue"));
+        m_schema.appendDimension(dimensions.getDimension("Alpha"));
     }
 
     return;
