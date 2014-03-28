@@ -24,7 +24,7 @@ When reading files that are not formatted correctly:
 
 * PDAL may try to compensate for the error.  This is typically done when as 
   a practical matter the market needs support for well-known or pervasive,
-  but nonetheless "broken", upstream implementations.
+  but nonetheless "broken," upstream implementations.
 
 * PDAL may explicitly reject such files.  This is typically done where we do 
   not wish to continue to promote or support mistakes that should be fixed 

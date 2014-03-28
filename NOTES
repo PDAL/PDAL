@@ -1,0 +1,4 @@
+A PointBuffer is created as part of the initialization process for an Info
+or Query.  For a pipeline, it's created by the writer, or by the Pipeline
+if the pipeline specification has no writer.
+
