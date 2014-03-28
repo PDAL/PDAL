@@ -5,8 +5,8 @@ Project Goals
 =============
 
 1. PDAL is a library which provides APIs for reading, writing, and 
-   processing geospatial point cloud data of various formats.  Additionally, some 
-   command line tools are provided.  As GDAL is to 2D pixels, PDAL is to 
+   processing geospatial point cloud data of various formats.  Additionally,
+   some command line tools are provided.  As GDAL is to 2D pixels, PDAL is to 
    multidimensional points.
     
 2. From a market perspective, PDAL is "version 2" of libLAS.  The actual 

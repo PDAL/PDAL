@@ -25,6 +25,7 @@ set(PDAL_CPP "")
 set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/pdal_error.hpp"
   "${PDAL_HEADERS_DIR}/pdal_types.hpp"
+  "${PDAL_HEADERS_DIR}/BoStream.hpp"
   "${PDAL_HEADERS_DIR}/Bounds.hpp"
   "${PDAL_HEADERS_DIR}/Dimension.hpp"
   "${PDAL_HEADERS_DIR}/Drivers.hpp"
@@ -197,6 +198,27 @@ set (PDAL_DRIVERS_LAS_CPP
 )
 list (APPEND PDAL_CPP ${PDAL_DRIVERS_LAS_CPP} )
 list (APPEND PDAL_HPP ${PDAL_DRIVERS_LAS_HPP} )
+
+#
+# drivers/bpf
+#
+set(PDAL_BPF_PATH drivers/bpf)
+set(PDAL_BPF_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_BPF_PATH}")
+set(PDAL_BPF_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_BPF_PATH}")
+
+set(PDAL_DRIVERS_BPF_HPP
+    "${PDAL_BPF_HEADERS}/BpfReader.hpp"
+    "${PDAL_BPF_HEADERS}/BpfSeqIterator.hpp"
+    "${PDAL_BPF_SRC}/BpfHeader.hpp"
+)
+
+set(PDAL_DRIVERS_BPF_CPP
+    "${PDAL_BPF_SRC}/BpfHeader.cpp"
+    "${PDAL_BPF_SRC}/BpfReader.cpp"
+    "${PDAL_BPF_SRC}/BpfSeqIterator.cpp"
+)
+list (APPEND PDAL_CPP ${PDAL_DRIVERS_BPF_CPP} )
+list (APPEND PDAL_HPP ${PDAL_DRIVERS_BPF_HPP} )
 
 #
 # drivers/mrsid
