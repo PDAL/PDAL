@@ -90,7 +90,7 @@ bool BpfUlemFrame::read(ILeStream& stream)
 {
     stream >> m_num >> m_roll >> m_pitch >> m_heading >> m_xform >>
         m_short_encoder >> m_long_encoder;
-    return stream.good();
+    return (bool)stream;
 }
 
 bool BpfUlemFile::read(ILeStream& stream)
