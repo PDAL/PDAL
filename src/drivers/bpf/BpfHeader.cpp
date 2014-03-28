@@ -89,7 +89,7 @@ bool BpfUlemHeader::read(ILeStream& stream)
 bool BpfUlemFrame::read(ILeStream& stream)
 {
     stream >> m_num >> m_roll >> m_pitch >> m_heading >> m_xform >>
-        m_short_encoder >> m_long_encoder;
+        m_shortEncoder >> m_longEncoder;
     return (bool)stream;
 }
 
@@ -134,24 +134,24 @@ bool BpfPolarHeader::read(ILeStream& stream)
     {
         BpfPolarStokesParam vec;
         vec.read(stream);
-        m_xmit_states.push_back(vec);
+        m_xmitStates.push_back(vec);
     }
     for (decltype(m_numRcv) i = 0; i < m_numRcv; ++i)
     {
         BpfMuellerMatrix mat;
         stream >> mat;
-        m_psa_settings.push_back(mat);
+        m_psaSettings.push_back(mat);
     }
     return (bool)stream;
 }
 
 bool BpfPolarFrame::read(ILeStream& stream)
 {
-    stream >> m_num >> m_stokes_idx;
+    stream >> m_num >> m_stokesIdx;
     for (int i = 0; i < 4; ++i)
-        stream >> m_stokes_param[i];
+        stream >> m_stokesParam[i];
     for (int i = 0; i < 4; ++i)
-        stream >> m_stokes_out_param[i];
+        stream >> m_stokesOutParam[i];
     stream >> m_xform >> m_truncation;
     return (bool)stream;
 }

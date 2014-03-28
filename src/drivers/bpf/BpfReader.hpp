@@ -54,15 +54,6 @@ public:
 
     virtual void initialize();
 
-//ABELL - Remove
-    bool supportsIterator(StageIteratorType t) const
-    {
-        if (t == StageIterator_Sequential) return true;
-        if (t == StageIterator_Random) return true;
-
-        return false;
-    }
-
     StageSequentialIterator*
         createSequentialIterator(PointBuffer& buffer) const;
     StageRandomIterator* createRandomIterator(PointBuffer& buffer) const;
@@ -71,6 +62,13 @@ private:
     ILeStream m_stream;
     BpfHeader m_header;
     std::vector<BpfDimension> m_dims;
+    BpfUlemHeader m_ulemHeader;
+    std::vector<BpfUlemFrame> m_ulemFrames;
+    BpfPolarHeader m_polarHeader;
+    std::vector<BpfPolarFrame> m_polarFrames;
+
+    bool readUlemData();
+    bool readPolarData();
 };
 
 } // namespace

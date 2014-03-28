@@ -58,12 +58,10 @@ void BpfReader::initialize()
 {
     // In order to know the dimensions we must read the file header.
     if (!m_header.read(m_stream))
-    {
         return;
-    }
 
     // Read the dimensions and stick them in the schema.
-    for (int d = 0; d < m_header.m_num_dim; d++)
+    for (int d = 0; d < m_header.m_numDim; d++)
     {
         BpfDimension dim;
         if (dim.read(m_stream))
@@ -73,12 +71,50 @@ void BpfReader::initialize()
         pd.setNamespace("bpf");
         m_schema.appendDimension(pd);
     }
+    readUlemData();
+    if (!m_stream)
+        return;
+    readPolarData();
+}
+
+bool BpfReader::readUlemData()
+{
+    if (!m_ulemHeader.read(m_stream));
+        return false;
+
+    for (int i = 0; i < m_ulemHeader.m_numFrames; i++)
+    {
+        BpfUlemFrame frame;
+        if (!frame.read(m_stream))
+            return false;
+        m_ulemFrames.push_back(frame);
+    }
+
+    BpfUlemFile file;
+    while (file.read(m_stream))
+        ;
+
+    return (bool)m_stream;
+}
+
+bool BpfReader::readPolarData()
+{
+    if (!m_polarHeader.read(m_stream))
+        return false;
+    for (size_t i = 0; i < m_polarHeader.m_numFrames; ++i)
+    {
+        BpfPolarFrame frame;
+        if (!frame.read(m_stream))
+            return false;
+        m_polarFrames.push_back(frame);
+    }
+    return (bool)m_stream;
 }
 
 StageSequentialIterator *
 BpfReader::createSequentialIterator(PointBuffer& pb) const
 {
-    return new BpfSeqIterator(pb, m_header.m_num_pts,
+    return new BpfSeqIterator(pb, m_header.m_numPts,
         const_cast<ILeStream&>(m_stream));
 }
 

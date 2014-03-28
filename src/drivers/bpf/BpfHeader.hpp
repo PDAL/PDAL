@@ -53,17 +53,17 @@ struct BpfHeader
 {
     std::string m_ver;
     int32_t m_len;
-    uint8_t m_num_dim;
+    uint8_t m_numDim;
     uint8_t m_interleave;
     uint8_t m_compression;
-    int32_t m_num_pts;
-    int32_t m_coord_type;
-    int32_t m_coord_id;
+    int32_t m_numPts;
+    int32_t m_coordType;
+    int32_t m_coordId;
     float m_spacing;
     BpfMuellerMatrix m_xform;
-    double m_start_time;
-    double m_end_time;
-    double m_dim_offset;
+    double m_startTime;
+    double m_endTime;
+    double m_dimOffset;
 
     bool read(ILeStream& stream);
 };
@@ -79,18 +79,18 @@ struct BpfDimension
 
 struct BpfUlemHeader
 {
-    uint32_t m_num_frames;
+    uint32_t m_numFrames;
     uint16_t m_year;
     uint8_t m_month;
     uint8_t m_day;
-    uint16_t m_lidar_mode;
+    uint16_t m_lidarMode;
     uint16_t m_wavelen;  // In nm.
-    uint16_t m_pulse_freq;  // In Hz.
-    uint16_t m_focal_width;
-    uint16_t m_focal_height;
-    float m_pixel_pitch_width;
-    float m_pixel_pitch_height;
-    std::string m_class_code;
+    uint16_t m_pulseFreq;  // In Hz.
+    uint16_t m_focalWidth;
+    uint16_t m_focalHeight;
+    float m_pixelPitchWidth;
+    float m_pixelPitchHeight;
+    std::string m_classCode;
 
     bool read(ILeStream& stream);
 };
@@ -102,8 +102,8 @@ struct BpfUlemFrame
     double m_pitch; //y
     double m_heading; //z
     BpfMuellerMatrix m_xform;
-    int16_t m_short_encoder;
-    int16_t m_long_encoder;
+    int16_t m_shortEncoder;
+    int16_t m_longEncoder;
 
     bool read(ILeStream& stream);
 };
@@ -129,12 +129,12 @@ struct BpfPolarStokesParam
 
 struct BpfPolarHeader
 {
-    uint32_t m_num_frames;
-    uint16_t m_fpa_id;
-    uint32_t m_num_xmit;
-    uint32_t m_num_rcv;
-    std::vector<BpfPolarStokesParam> m_xmit_states;
-    std::vector<BpfMuellerMatrix> m_psa_settings;
+    uint32_t m_numFrames;
+    uint16_t m_fpaId;
+    uint32_t m_numXmit;
+    uint32_t m_numRcv;
+    std::vector<BpfPolarStokesParam> m_xmitStates;
+    std::vector<BpfMuellerMatrix> m_psaSettings;
 
     bool read(ILeStream& stream);
 };
@@ -143,9 +143,9 @@ struct BpfPolarFrame
 {
 public:
     uint32_t m_num;
-    int16_t m_stokes_idx;
-    float m_stokes_param[4];
-    float m_stokes_out_param[4];
+    int16_t m_stokesIdx;
+    float m_stokesParam[4];
+    float m_stokesOutParam[4];
     BpfMuellerMatrix m_xform;
     int16_t m_truncation;
 
