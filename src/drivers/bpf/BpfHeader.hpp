@@ -49,12 +49,23 @@ struct BpfMuellerMatrix
 };
 ILeStream& operator >> (ILeStream& stream, BpfMuellerMatrix& m);
 
+//ABELL - Replace with strongly-typed enum C++11
+namespace BpfFormat
+{
+enum Enum
+{
+    PointMajor,
+    DimMajor,
+    ByteMajor
+};
+}
+
 struct BpfHeader
 {
     std::string m_ver;
     int32_t m_len;
     uint8_t m_numDim;
-    uint8_t m_interleave;
+    BpfFormat::Enum m_pointFormat;
     uint8_t m_compression;
     int32_t m_numPts;
     int32_t m_coordType;
@@ -63,18 +74,19 @@ struct BpfHeader
     BpfMuellerMatrix m_xform;
     double m_startTime;
     double m_endTime;
-    double m_dimOffset;
 
     bool read(ILeStream& stream);
+    void dump();
 };
 
 struct BpfDimension
 {
+    double m_offset;
     double m_min;
     double m_max;
     std::string m_label;
 
-    bool read(ILeStream& stream);
+    static bool read(ILeStream& stream, std::vector<BpfDimension>& dims);
 };
 
 struct BpfUlemHeader

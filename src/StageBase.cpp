@@ -96,7 +96,6 @@ StageBase::~StageBase()
 
 void StageBase::initialize()
 {
-    std::cerr << "Initializing " << getName() << "!\n";
     // first, initialize any previous stages
     BOOST_FOREACH(StageBase* prev, getInputs())
     {
@@ -115,8 +114,6 @@ void StageBase::initialize()
         m_verbose = 1;
 
     std::vector<StageBase*> const& inputs = getInputs();
-    std::cerr << "Stage name = " << getName() << "!\n";
-    std::cerr << "Inputs size = " << inputs.size() << "!\n";
     if (inputs.size() == 0)
     {
         std::string logname =
@@ -132,13 +129,8 @@ void StageBase::initialize()
         }
         else
         {
-            std::cerr << "Prev stage = " << getPrevStage().getName() << "\n";
             LogPtr l = getPrevStage().log();
-            std::cerr << "Got log!\n";
-            if (!l)
-                std::cerr << "No log!\n";
             std::ostream* v = getPrevStage().log()->getLogStream();
-            std::cerr << "Get log stream!\n";
             m_log = boost::shared_ptr<pdal::Log>(new Log(getName(), v));
         }
     }

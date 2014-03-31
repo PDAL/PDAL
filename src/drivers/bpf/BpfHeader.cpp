@@ -32,6 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <iostream>
+
 #include <pdal/BoStream.hpp>
 
 #include "BpfHeader.hpp"
@@ -49,22 +51,56 @@ ILeStream& operator >> (ILeStream& stream, BpfMuellerMatrix& m)
 bool BpfHeader::read(ILeStream& stream)
 {
     uint8_t dummyChar;
+    uint8_t interleave;
     std::string magic;
 
     stream.get(magic, 4);
     if (magic != "BPF!")
         return false;
     stream.get(m_ver, 4);
-    stream >> m_len >> m_numDim >> m_interleave >> m_compression >>
+    stream >> m_len >> m_numDim >> interleave >> m_compression >>
         dummyChar >> m_numPts >> m_coordType >> m_coordId >> m_spacing >>
-        m_xform >> m_startTime >> m_endTime >> m_dimOffset;
+        m_xform >> m_startTime >> m_endTime;
+    m_pointFormat = (BpfFormat::Enum)interleave;
+    dump();
     return (bool)stream;
 }
 
-bool BpfDimension::read(ILeStream& stream)
+void BpfHeader::dump()
 {
-    stream >> m_min >> m_max;
-    stream.get(m_label, 32);
+    using namespace std;
+
+    cerr << "Length: " << m_len << "!\n";
+    cerr << "Diemsions: " << (int)m_numDim << "!\n";
+    cerr << "Interleave: " << (int)m_pointFormat << "!\n";
+    cerr << "Compression: " << (int)m_compression << "!\n";
+    cerr << "Point count: " << m_numPts << "!\n";
+    cerr << "Coordinate type: " << m_coordType << "!\n";
+    cerr << "Coordinate ID: " << m_coordId << "!\n";
+    cerr << "Spacing: " << m_spacing << "!\n";
+    cerr << "Start time: " << m_startTime << "!\n";
+    cerr << "End time: " << m_endTime << "!\n";
+}
+
+bool BpfDimension::read(ILeStream& stream, std::vector<BpfDimension>& dims)
+{
+    for (size_t d = 0; d < dims.size(); ++d)
+    {
+        stream >> dims[d].m_offset;
+    }
+    for (size_t d = 0; d < dims.size(); ++d)
+    {
+        stream >> dims[d].m_min;
+    }
+    for (size_t d = 0; d < dims.size(); ++d)
+    {
+        stream >> dims[d].m_max;
+    }
+    for (size_t d = 0; d < dims.size(); ++d)
+    {
+        stream.get(dims[d].m_label, 32);
+        std::cerr << "Label = " << dims[d].m_label << "!\n";
+    }
     return (bool)stream;
 }
 

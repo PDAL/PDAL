@@ -66,9 +66,12 @@ public:
 
     void get(std::string& s, size_t size)
     {
-        s.reserve(size);
-        m_stream->width(size);
-        *m_stream >> s;
+        // Could do this by appending to a string with a stream, but this
+        // is probably fast enough for now (there's only a simple increment
+        // to advance an istream iterator, which you'd have to call in a loop).
+        char buf[size + 1];
+        m_stream->get(buf, size + 1);
+        s = buf;
     }
 
     ILeStream& operator >> (uint8_t& v)

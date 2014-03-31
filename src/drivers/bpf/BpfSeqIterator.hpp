@@ -36,6 +36,7 @@
 
 #include <pdal/BoStream.hpp>
 #include <pdal/ReaderIterator.hpp>
+#include "BpfHeader.hpp"
 
 #include <vector>
 
@@ -50,7 +51,7 @@ class BpfSeqIterator : public ReaderSequentialIterator
 {
 public:
     BpfSeqIterator(PointBuffer& buffer, boost::uint32_t numPoints,
-        ILeStream& stream);
+        BpfFormat::Enum pointFormat, bool compression, ILeStream& stream);
 
 protected:
     boost::uint32_t readBufferImpl(PointBuffer&);
@@ -69,6 +70,8 @@ private:
     void skipByteMajor(size_t dimIdx, uint32_t ptIdx);
 
     boost::uint32_t m_numPoints;
+    BpfFormat::Enum m_pointFormat;
+    bool m_compression;
     ILeStream& m_stream;
     boost::uint32_t m_index;
 };

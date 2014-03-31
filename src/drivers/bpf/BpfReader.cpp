@@ -62,13 +62,13 @@ void BpfReader::initialize()
     if (!m_header.read(m_stream))
         return;
 
-    // Read the dimensions and stick them in the schema.
-    for (int d = 0; d < m_header.m_numDim; d++)
-    {
-        BpfDimension dim;
-        if (dim.read(m_stream))
-           m_dims.push_back(dim);
+    m_dims.insert(m_dims.end(), m_header.m_numDim, BpfDimension());
+    if (!BpfDimension::read(m_stream, m_dims))
+        return;
 
+    for (size_t i = 0; i < m_dims.size(); ++i)
+    {
+        BpfDimension& dim = m_dims[i];
         Dimension pd(dim.m_label, dimension::Float, sizeof(float));
         pd.setNamespace("bpf");
         m_schema.appendDimension(pd);
@@ -116,8 +116,8 @@ bool BpfReader::readPolarData()
 StageSequentialIterator *
 BpfReader::createSequentialIterator(PointBuffer& pb) const
 {
-    return new BpfSeqIterator(pb, m_header.m_numPts,
-        const_cast<ILeStream&>(m_stream));
+    return new BpfSeqIterator(pb, m_header.m_numPts, m_header.m_pointFormat, 
+        m_header.m_compression, const_cast<ILeStream&>(m_stream));
 }
 
 StageRandomIterator *
