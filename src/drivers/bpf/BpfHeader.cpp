@@ -48,16 +48,16 @@ ILeStream& operator >> (ILeStream& stream, BpfMuellerMatrix& m)
 
 bool BpfHeader::read(ILeStream& stream)
 {
-    uint8_t dummy_char;
+    uint8_t dummyChar;
     std::string magic;
 
     stream.get(magic, 4);
     if (magic != "BPF!")
         return false;
     stream.get(m_ver, 4);
-    stream >> m_len >> m_num_dim >> m_interleave >> m_compression >>
-        dummy_char >> m_num_pts >> m_coord_type >> m_coord_id >> m_spacing >>
-        m_xform >> m_start_time >> m_end_time >> m_dim_offset;
+    stream >> m_len >> m_numDim >> m_interleave >> m_compression >>
+        dummyChar >> m_numPts >> m_coordType >> m_coordId >> m_spacing >>
+        m_xform >> m_startTime >> m_endTime >> m_dimOffset;
     return (bool)stream;
 }
 
@@ -79,10 +79,10 @@ bool BpfUlemHeader::read(ILeStream& stream)
         mark.rewind();
         return false;
     }
-    stream >> m_num_frames >> m_year >> m_month >> m_day >> m_lidar_mode >>
-        m_wavelen >> m_pulse_freq >> m_focal_width >> m_focal_height >>
-        m_pixel_pitch_width >> m_pixel_pitch_height;
-    stream.get(m_class_code, 32);    
+    stream >> m_numFrames >> m_year >> m_month >> m_day >> m_lidarMode >>
+        m_wavelen >> m_pulseFreq >> m_focalWidth >> m_focalHeight >>
+        m_pixelPitchWidth >> m_pixelPitchHeight;
+    stream.get(m_classCode, 32);    
     return (bool)stream;
 }
 
@@ -90,7 +90,7 @@ bool BpfUlemFrame::read(ILeStream& stream)
 {
     stream >> m_num >> m_roll >> m_pitch >> m_heading >> m_xform >>
         m_short_encoder >> m_long_encoder;
-    return (bool)stream;
+    return stream.good();
 }
 
 bool BpfUlemFile::read(ILeStream& stream)
@@ -129,14 +129,14 @@ bool BpfPolarHeader::read(ILeStream& stream)
     }
 
     int16_t size;
-    stream >> size >> m_num_frames >> m_fpa_id >> m_num_xmit >> m_num_rcv;
-    for (decltype(m_num_xmit) i = 0; i < m_num_xmit; ++i)
+    stream >> size >> m_numFrames >> m_fpaId >> m_numXmit >> m_numRcv;
+    for (decltype(m_numXmit) i = 0; i < m_numXmit; ++i)
     {
         BpfPolarStokesParam vec;
         vec.read(stream);
         m_xmit_states.push_back(vec);
     }
-    for (decltype(m_num_rcv) i = 0; i < m_num_rcv; ++i)
+    for (decltype(m_numRcv) i = 0; i < m_numRcv; ++i)
     {
         BpfMuellerMatrix mat;
         stream >> mat;
@@ -157,3 +157,4 @@ bool BpfPolarFrame::read(ILeStream& stream)
 }
 
 } // namespace pdal
+
