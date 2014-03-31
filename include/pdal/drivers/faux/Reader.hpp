@@ -47,7 +47,9 @@ enum Mode
 {
     Constant,
     Random,
-    Ramp
+    Ramp,
+    Uniform,
+    Normal
 };
 
 
@@ -68,6 +70,10 @@ enum Mode
 //      bounding box
 //   - "ramp" generates its points as a linear ramp from the minimum of the
 //     bbox to the maximum
+//   - "uniform" generates points that are uniformly distributed within the
+//     given bounding box
+//   - "normal" generates points that are normally distributed with a given
+//     mean and standard deviation in each of the XYZ dimensions
 // In all these modes, however, the Time field is always set to the point
 // number.
 //
@@ -77,7 +83,6 @@ enum Mode
 //
 class PDAL_DLL Reader : public pdal::Reader
 {
-
 public:
     SET_STAGE_NAME("drivers.faux.reader", "Faux Reader")
     SET_STAGE_ENABLED(true)
@@ -94,6 +99,12 @@ private:
     double m_maxY;
     double m_minZ;
     double m_maxZ;
+    double m_mean_x;
+    double m_mean_y;
+    double m_mean_z;
+    double m_stdev_x;
+    double m_stdev_y;
+    double m_stdev_z;
     uint64_t m_time;
     int m_numReturns;
     int m_returnNum;

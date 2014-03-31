@@ -34,6 +34,8 @@
 
 #include <pdal/drivers/faux/Reader.hpp>
 
+#include <ctime>
+
 #include <pdal/PointBuffer.hpp>
 
 #include <boost/algorithm/string.hpp>
@@ -50,6 +52,8 @@ static Mode string2mode(const std::string& str)
     if (boost::iequals(str, "constant")) return Constant;
     if (boost::iequals(str, "random")) return Random;
     if (boost::iequals(str, "ramp")) return Ramp;
+    if (boost::iequals(str, "uniform")) return Uniform;
+    if (boost::iequals(str, "normal")) return Normal;
     throw pdal_error("invalid Mode option: " + str);
 }
 
@@ -63,7 +67,7 @@ Reader::Reader(const Options& options)
 
 void Reader::processOptions(const Options& options)
 {
-    Bounds<double> bounds = options.getValueOrThrow<Bounds<double>>("bounds");
+    Bounds<double> bounds = options.getValueOrDefault<Bounds<double>>("bounds",Bounds<double>(0,0,0,1,1,1));
     const std::vector<Range<double>>& ranges = bounds.dimensions();
     m_minX = ranges[0].getMinimum();
     m_maxX = ranges[0].getMaximum();
@@ -75,6 +79,13 @@ void Reader::processOptions(const Options& options)
     // For backward compatibility.
     if (m_count == 0)
         m_count = options.getValueOrThrow<point_count_t>("num_points");
+    
+    m_mean_x = options.getValueOrDefault<double>("mean_x",0.0);
+    m_mean_y = options.getValueOrDefault<double>("mean_y",0.0);
+    m_mean_z = options.getValueOrDefault<double>("mean_z",0.0);
+    m_stdev_x = options.getValueOrDefault<double>("stdev_x",1.0);
+    m_stdev_y = options.getValueOrDefault<double>("stdev_y",1.0);
+    m_stdev_z = options.getValueOrDefault<double>("stdev_z",1.0);
     m_mode = string2mode(options.getValueOrThrow<std::string>("mode"));
     m_numReturns = options.getValueOrDefault("number_of_returns", 0);
     if (m_numReturns > 10)
@@ -115,6 +126,10 @@ point_count_t Reader::read(PointBuffer& buf, point_count_t count)
     log()->get(LogLevel::Debug5) << "Reading a point buffer of " <<
         count << " points." << std::endl;
 
+    boost::uint64_t time = count;
+
+    boost::uint32_t seed = static_cast<boost::uint32_t>(std::time(NULL));
+
     for (PointId idx = 0; idx < count; ++idx)
     {
         double x;
@@ -136,6 +151,19 @@ point_count_t Reader::read(PointBuffer& buf, point_count_t count)
                 x = m_minX + delX * idx;
                 y = m_minY + delY * idx;
                 z = m_minZ + delZ * idx;
+                break;
+            case Uniform:
+                x = Utils::uniform(m_minX, m_maxX, seed++);
+                y = Utils::uniform(m_minY, m_maxY, seed++);
+                z = Utils::uniform(m_minZ, m_maxZ, seed++);
+                break;
+            case Normal:
+                x = Utils::normal(m_mean_x, m_stdev_x, seed++);
+                y = Utils::normal(m_mean_y, m_stdev_y, seed++);
+                z = Utils::normal(m_mean_z, m_stdev_z, seed++);
+                break;
+            default:
+                throw pdal_error("invalid mode in FauxReader");
                 break;
         }
 

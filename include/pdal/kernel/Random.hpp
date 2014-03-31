@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2013, Howard Butler (hobu.inc@gmail.com)
+* Copyright (c) 2014, Brad Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -32,21 +32,51 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_PDAL_KERNEL_HPP
-#define INCLUDED_PDAL_KERNEL_HPP
+#ifndef INCLUDED_PDAL_KERNEL_RANDOM_HPP
+#define INCLUDED_PDAL_KERNEL_RANDOM_HPP
 
+#include <pdal/FileUtils.hpp>
+
+#include <pdal/drivers/faux/Reader.hpp>
+#include <pdal/drivers/las/Writer.hpp>
+
+#include <pdal/Bounds.hpp>
 
 #include "Application.hpp"
-#include "Support.hpp"
 
-#include "Info.hpp"
-#ifdef PDAL_HAVE_PCL
-#include "PCL.hpp"
-#endif
-#include "Pipeline.hpp"
-#include "Delta.hpp"
-#include "Random.hpp"
-#include "Translate.hpp"
-#include "Diff.hpp"
+#define SEPARATORS ",| "
+
+#include <boost/tokenizer.hpp>
+typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
+
+namespace pdal
+{
+namespace kernel
+{
+
+class PDAL_DLL Random : public Application
+{
+public:
+    Random(int argc, const char* argv[]);
+    int execute();
+
+private:
+    void addSwitches();
+    void validateSwitches();
+
+    Stage* makeReader(Options readerOptions);
+
+    std::string m_outputFile;
+    bool m_bCompress;
+    boost::uint64_t m_numPointsToWrite;
+    pdal::Bounds<double> m_bounds;
+    std::string m_distribution;
+    std::string m_means;
+    std::string m_stdevs;
+};
+
+} // kernel
+} // pdal
 
 #endif
+
