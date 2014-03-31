@@ -86,20 +86,17 @@ StageBase::StageBase(const std::vector<StageBase*>& inputs, const Options& optio
         input->m_outputs.push_back(this);
     }
 
-    if (m_debug)
-        if (m_verbose == 0) m_verbose = 1;
-
-    return;
+    if (m_debug && m_verbose == 0)
+        m_verbose = 1;
 }
 
 
 StageBase::~StageBase()
-{
-
-}
+{}
 
 void StageBase::initialize()
 {
+    std::cerr << "Initializing " << getName() << "!\n";
     // first, initialize any previous stages
     BOOST_FOREACH(StageBase* prev, getInputs())
     {
@@ -114,14 +111,16 @@ void StageBase::initialize()
 
     m_debug = m_options.getValueOrDefault<bool>("debug", false);
     m_verbose = m_options.getValueOrDefault<boost::uint32_t>("verbose", 0);
-    if (m_debug)
-        if (m_verbose == 0) m_verbose = 1;
+    if (m_debug && m_verbose == 0)
+        m_verbose = 1;
 
-
-    std::vector<StageBase*> const&  inputs = getInputs();
+    std::vector<StageBase*> const& inputs = getInputs();
+    std::cerr << "Stage name = " << getName() << "!\n";
+    std::cerr << "Inputs size = " << inputs.size() << "!\n";
     if (inputs.size() == 0)
     {
-        std::string logname = m_options.getValueOrDefault<std::string>("log", "stdlog");
+        std::string logname =
+           m_options.getValueOrDefault<std::string>("log", "stdlog");
         m_log = boost::shared_ptr<pdal::Log>(new Log(getName(), logname));
     }
     else
@@ -133,7 +132,13 @@ void StageBase::initialize()
         }
         else
         {
+            std::cerr << "Prev stage = " << getPrevStage().getName() << "\n";
+            LogPtr l = getPrevStage().log();
+            std::cerr << "Got log!\n";
+            if (!l)
+                std::cerr << "No log!\n";
             std::ostream* v = getPrevStage().log()->getLogStream();
+            std::cerr << "Get log stream!\n";
             m_log = boost::shared_ptr<pdal::Log>(new Log(getName(), v));
         }
     }
@@ -218,7 +223,8 @@ const std::vector<StageBase*>& StageBase::getOutputs() const
 Stage& StageBase::getPrevStage() const
 {
     // BUG: should probably do this once and cache it
-    if (getInputs().size()==0) throw internal_error("StageBase does not have any previous stages");
+    if (getInputs().size()==0)
+        throw internal_error("StageBase does not have any previous stages");
     StageBase* sb = getInputs()[0];
     Stage* s = dynamic_cast<Stage*>(sb);
     if (!s) throw internal_error("previous StageBase is not a Stage");

@@ -38,7 +38,7 @@
 #include <pdal/MultiFilter.hpp>
 #include <pdal/Reader.hpp>
 #include <pdal/Writer.hpp>
-
+#include "./drivers/bpf/BpfReader.hpp"
 
 #include <pdal/Drivers.hpp>
 #include <pdal/Filters.hpp>
@@ -62,6 +62,7 @@ namespace pdal
 //
 MAKE_READER_CREATOR(FauxReader, pdal::drivers::faux::Reader)
 MAKE_READER_CREATOR(LasReader, pdal::drivers::las::Reader)
+MAKE_READER_CREATOR(BpfReader, pdal::BpfReader)
 #ifdef PDAL_HAVE_ORACLE
 #ifndef USE_PDAL_PLUGIN_OCI
 MAKE_READER_CREATOR(OciReader, pdal::drivers::oci::Reader)
@@ -166,7 +167,8 @@ StageFactory::StageFactory()
     return;
 }
 
-std::string StageFactory::inferReaderDriver(const std::string& filename, pdal::Options& options)
+std::string StageFactory::inferReaderDriver(const std::string& filename,
+    pdal::Options& options)
 {
     std::string ext = boost::filesystem::extension(filename);
 
@@ -181,22 +183,25 @@ std::string StageFactory::inferReaderDriver(const std::string& filename, pdal::O
     drivers["xml"] = "drivers.pipeline.reader";
     drivers["nitf"] = "drivers.nitf.reader";
     drivers["ntf"] = "drivers.nitf.reader";
+    drivers["bpf"] = "drivers.bpf.reader";
 
     if (boost::algorithm::iequals(filename, "STDIN"))
     {
         return drivers["xml"];
     }
 
-    if (ext == "") return "";
-    ext = ext.substr(1, ext.length()-1);
-    if (ext == "") return "";
+    if (ext == "") 
+         return "";
+    ext = ext.substr(1, ext.length() - 1);
+    if (ext == "")
+        return "";
 
     boost::to_lower(ext);
-    std::string driver = drivers[ext];
-    return driver; // will be "" if not found
+    return drivers[ext];
 }
 
-std::string StageFactory::inferWriterDriver(const std::string& filename, pdal::Options& options)
+std::string StageFactory::inferWriterDriver(const std::string& filename,
+    pdal::Options& options)
 {
     std::string ext = boost::filesystem::extension(filename);
 
@@ -227,22 +232,26 @@ std::string StageFactory::inferWriterDriver(const std::string& filename, pdal::O
         return drivers["txt"];
     }
 
-    if (ext == "") return drivers["txt"];
-    ext = ext.substr(1, ext.length()-1);
-    if (ext == "") return drivers["txt"];
+    if (ext == "")
+        return drivers["txt"];
+    ext = ext.substr(1, ext.length() - 1);
+    if (ext == "")
+        return drivers["txt"];
 
     boost::to_lower(ext);
     std::string driver = drivers[ext];
     return driver; // will be "" if not found
 }
 
-Reader* StageFactory::createReader(const std::string& type, const Options& options)
+Reader* StageFactory::createReader(const std::string& type,
+    const Options& options)
 {
     ReaderCreator* f = getReaderCreator(type);
     if (!f)
     {
         std::ostringstream oss;
-        oss << "Unable to create reader for type '" << type << "'. Does a driver with this type name exist?";
+        oss << "Unable to create reader for type '" << type <<
+            "'. Does a driver with this type name exist?";
         throw pdal_error(oss.str());
     }
     Reader* stage = f(options);
@@ -256,7 +265,8 @@ Filter* StageFactory::createFilter(const std::string& type, Stage& prevStage, co
     if (!f)
     {
         std::ostringstream oss;
-        oss << "Unable to create filter for type '" << type << "'. Does a driver with this type name exist?";
+        oss << "Unable to create filter for type '" << type <<
+            "'. Does a driver with this type name exist?";
         throw pdal_error(oss.str());
     }
 
@@ -305,25 +315,29 @@ static T* findFirst(const std::string& type, std::map<std::string, T*> list)
 }
 
 
-StageFactory::ReaderCreator* StageFactory::getReaderCreator(const std::string& type) const
+StageFactory::ReaderCreator*
+StageFactory::getReaderCreator(const std::string& type) const
 {
     return findFirst<ReaderCreator>(type, m_readerCreators);
 }
 
 
-StageFactory::FilterCreator* StageFactory::getFilterCreator(const std::string& type) const
+StageFactory::FilterCreator*
+StageFactory::getFilterCreator(const std::string& type) const
 {
     return findFirst<FilterCreator>(type, m_filterCreators);
 }
 
 
-StageFactory::MultiFilterCreator* StageFactory::getMultiFilterCreator(const std::string& type) const
+StageFactory::MultiFilterCreator*
+StageFactory::getMultiFilterCreator(const std::string& type) const
 {
     return findFirst<MultiFilterCreator>(type, m_multifilterCreators);
 }
 
 
-StageFactory::WriterCreator* StageFactory::getWriterCreator(const std::string& type) const
+StageFactory::WriterCreator*
+StageFactory::getWriterCreator(const std::string& type) const
 {
     return findFirst<WriterCreator>(type, m_writerCreators);
 }
@@ -385,6 +399,7 @@ void StageFactory::registerKnownReaders()
     REGISTER_READER(PipelineReader, pdal::drivers::pipeline::Reader);
     REGISTER_READER(QfitReader, pdal::drivers::qfit::Reader);
     REGISTER_READER(TerrasolidReader, pdal::drivers::terrasolid::Reader);
+    REGISTER_READER(BpfReader, pdal::BpfReader);
 }
 
 

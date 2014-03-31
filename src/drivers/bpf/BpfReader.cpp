@@ -56,6 +56,8 @@ BpfReader::BpfReader(const std::string& filename) : Reader(Options::none()),
 // the dimensions in the PointBuffer.
 void BpfReader::initialize()
 {
+    Reader::initialize();
+
     // In order to know the dimensions we must read the file header.
     if (!m_header.read(m_stream))
         return;
@@ -79,10 +81,10 @@ void BpfReader::initialize()
 
 bool BpfReader::readUlemData()
 {
-    if (!m_ulemHeader.read(m_stream));
+    if (!m_ulemHeader.read(m_stream))
         return false;
 
-    for (int i = 0; i < m_ulemHeader.m_numFrames; i++)
+    for (size_t i = 0; i < m_ulemHeader.m_numFrames; i++)
     {
         BpfUlemFrame frame;
         if (!frame.read(m_stream))
