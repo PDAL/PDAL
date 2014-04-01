@@ -61,7 +61,20 @@ bool BpfHeader::read(ILeStream& stream)
     stream >> m_len >> m_numDim >> interleave >> m_compression >>
         dummyChar >> m_numPts >> m_coordType >> m_coordId >> m_spacing >>
         m_xform >> m_startTime >> m_endTime;
-    m_pointFormat = (BpfFormat::Enum)interleave;
+    switch (interleave)
+    {
+    case 0:
+        m_pointFormat = BpfFormat::DimMajor;
+        break;
+    case 1:
+        m_pointFormat = BpfFormat::PointMajor;
+        break;
+    case 2:
+        m_pointFormat = BpfFormat::ByteMajor;
+        break;
+    default:
+        throw "Invalid BPF file: unknown interleave type.";
+    }
     dump();
     return (bool)stream;
 }

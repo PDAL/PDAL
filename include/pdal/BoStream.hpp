@@ -45,24 +45,35 @@ namespace pdal
 
 class IStreamMarker;
 
-class ILeStream
+class IStream
 {
     friend class IStreamMarker;
-private:
-    std::istream *m_stream;
 
 public:
-    ILeStream(const std::string& filename)
+    IStream(const std::string& filename)
         { m_stream = new std::ifstream(filename); }
-
-    ~ILeStream()
+    ~IStream()
         { delete m_stream; }
 
     operator bool ()
         { return (bool)(*m_stream); }
-
+    void seek(std::streampos pos)
+        { m_stream->seekg(pos, std::istream::beg); }
     void skip(std::streamoff offset)
         { m_stream->seekg(offset, std::istream::cur); }
+    std::streampos position() const
+        { return m_stream->tellg(); }
+
+protected:
+    std::istream *m_stream;
+};
+
+class ILeStream : public IStream
+{
+public:
+    ILeStream(const std::string& filename) : IStream(filename)
+    {}
+
 
     void get(std::string& s, size_t size)
     {

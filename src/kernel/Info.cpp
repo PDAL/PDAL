@@ -75,8 +75,6 @@ void Info::validateSwitches()
     {
         throw app_usage_error("no action option specified");
     }
-
-    return;
 }
 
 
@@ -84,47 +82,70 @@ void Info::addSwitches()
 {
     namespace po = boost::program_options;
 
-    po::options_description* file_options = new po::options_description("file options");
+    po::options_description* file_options =
+        new po::options_description("file options");
 
     file_options->add_options()
-        ("input,i", po::value<std::string>(&m_inputFile)->default_value(""), "input file name")
+        ("input,i", po::value<std::string>(&m_inputFile)->default_value(""),
+            "input file name")
         ;
 
     addSwitchSet(file_options);
 
-    po::options_description* processing_options = new po::options_description("processing options");
+    po::options_description* processing_options =
+        new po::options_description("processing options");
     
     processing_options->add_options()
         ("point,p", po::value<std::string >(&m_pointIndexes), "point to dump")
-        ("query", po::value< std::string>(&m_QueryPoint), "A 2d or 3d point query point")
+        ("query", po::value< std::string>(&m_QueryPoint),
+            "A 2d or 3d point query point")
         ("distance", po::value< double>(&m_QueryDistance), "A query distance")
-        ("stats,a", po::value<bool>(&m_showStats)->zero_tokens()->implicit_value(true), "dump stats on all points (reads entire dataset)")
-        ("count", po::value<boost::uint64_t>(&m_numPointsToWrite)->default_value(0), "How many points should we write?")
-        ("dimensions", po::value<std::string >(&m_Dimensions), "dump stats on all points (reads entire dataset)")
-        ("schema,s", po::value<bool>(&m_showSchema)->zero_tokens()->implicit_value(true), "dump the schema")
-        ("metadata,m", po::value<bool>(&m_showMetadata)->zero_tokens()->implicit_value(true), "dump the metadata")
-        ("sdo_pc", po::value<bool>(&m_showSDOPCMetadata)->zero_tokens()->implicit_value(true), "dump the SDO_PC Oracle Metadata")
-        ("stage,r", po::value<bool>(&m_showStage)->zero_tokens()->implicit_value(true), "dump the stage info")
-        ("pipeline-serialization", po::value<std::string>(&m_pipelineFile)->default_value(""), "")
-        ("xml", po::value<bool>(&m_useXML)->zero_tokens()->implicit_value(true), "dump XML")
-        ("json", po::value<bool>(&m_useJSON)->zero_tokens()->implicit_value(true), "dump JSON")
-        ("sample", po::value<bool>(&m_showSample)->zero_tokens()->implicit_value(true), "randomly sample dimension for stats")
-        ("seed", po::value<boost::uint32_t>(&m_seed)->default_value(0), "Seed value for random sample")
-        ("sample_size", po::value<boost::uint32_t>(&m_sample_size)->default_value(1000), "Sample size for random sample")
-
+        ("stats,a",
+            po::value<bool>(&m_showStats)->zero_tokens()->implicit_value(true),
+            "dump stats on all points (reads entire dataset)")
+        ("count",
+            po::value<boost::uint64_t>(&m_numPointsToWrite)->default_value(0),
+            "How many points should we write?")
+        ("dimensions", po::value<std::string >(&m_Dimensions),
+            "dump stats on all points (reads entire dataset)")
+        ("schema,s",
+            po::value<bool>(&m_showSchema)->zero_tokens()->implicit_value(true),
+            "dump the schema")
+        ("metadata,m",
+            po::value<bool>(&m_showMetadata)->
+            zero_tokens()->implicit_value(true), "dump the metadata")
+        ("sdo_pc",
+            po::value<bool>(&m_showSDOPCMetadata)->
+            zero_tokens()->implicit_value(true),
+            "dump the SDO_PC Oracle Metadata")
+        ("stage,r", po::value<bool>(&m_showStage)->
+            zero_tokens()->implicit_value(true), "dump the stage info")
+        ("pipeline-serialization",
+            po::value<std::string>(&m_pipelineFile)->default_value(""), "")
+        ("xml", po::value<bool>(&m_useXML)->zero_tokens()->implicit_value(true),
+            "dump XML")
+        ("json",
+            po::value<bool>(&m_useJSON)->zero_tokens()->implicit_value(true),
+            "dump JSON")
+        ("sample",
+            po::value<bool>(&m_showSample)->zero_tokens()->implicit_value(true),
+            "randomly sample dimension for stats")
+        ("seed", po::value<boost::uint32_t>(&m_seed)->default_value(0),
+            "Seed value for random sample")
+        ("sample_size",
+            po::value<boost::uint32_t>(&m_sample_size)->default_value(1000),
+            "Sample size for random sample")
         ;
     
     addSwitchSet(processing_options);
-
     addPositionalSwitch("input", 1);
-
-    return;
 }
 
-std::vector<boost::uint32_t>  getListOfPoints(std::string const& p)
+std::vector<boost::uint32_t> getListOfPoints(std::string const& p)
 {
     
-    typedef const boost::iterator_range<std::string::const_iterator> StringRange;
+    typedef const boost::iterator_range<std::string::const_iterator>
+        StringRange;
     
     std::vector<boost::uint32_t> output;
     
@@ -194,7 +215,8 @@ std::vector<boost::uint32_t>  getListOfPoints(std::string const& p)
     return output;
 }
 
-void Info::dumpPoints(const Stage& stage, std::string const& points_string) const
+void Info::dumpPoints(const Stage& stage,
+    std::string const& points_string) const
 {
     const Schema& schema = stage.getSchema();
 
@@ -214,7 +236,8 @@ void Info::dumpPoints(const Stage& stage, std::string const& points_string) cons
         if (s != points[i])
         {
             std::ostringstream oss;
-            oss << "Unable to seek to " << points[i] << "due to size of file being " << stage.getNumPoints();
+            oss << "Unable to seek to " << points[i] <<
+                "due to size of file being " << stage.getNumPoints();
             throw app_runtime_error(oss.str());
         }
         const boost::uint32_t numRead = iter->read(read_data);
@@ -245,11 +268,11 @@ void Info::dumpPoints(const Stage& stage, std::string const& points_string) cons
         output_data.toRST(ostr) << std::endl;
     
     delete iter;
-    return;
 }
 
 
-void Info::dumpStats(pdal::filters::Stats& filter, pdal::PipelineManager* manager) const
+void Info::dumpStats(pdal::filters::Stats& filter,
+    pdal::PipelineManager* manager) const
 {
 
     const Schema& schema = filter.getSchema();

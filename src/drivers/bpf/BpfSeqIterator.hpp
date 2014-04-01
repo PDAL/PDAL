@@ -58,22 +58,31 @@ protected:
     boost::uint64_t skipImpl(boost::uint64_t);
     bool atEndImpl() const;
 
-    boost::uint32_t readPointMajor(PointBuffer& data,
-        const std::vector<Dimension>& dims);
-    boost::uint32_t readDimMajor(PointBuffer& data,
-        const std::vector<Dimension>& dims);
-    boost::uint32_t readByteMajor(PointBuffer& data,
-        const std::vector<Dimension>& dims);
+    boost::uint32_t read(PointBuffer& data);
+    boost::uint32_t readPointMajor(PointBuffer& data);
+    boost::uint32_t readDimMajor(PointBuffer& data);
+    boost::uint32_t readByteMajor(PointBuffer& data);
 
 private:
-    void skipDimMajor(size_t dimIdx, uint32_t ptIdx);
-    void skipByteMajor(size_t dimIdx, uint32_t ptIdx);
+    void seekPointMajor(uint32_t ptIdx);
+    void seekDimMajor(size_t dimIdx, uint32_t ptIdx);
+    void seekByteMajor(uint32_t ptIdx);
 
+    /// Dimensions
+    std::vector<Dimension> m_dims;
+    /// Total number of points in the file.
     boost::uint32_t m_numPoints;
+    /// Bpf point format being read.
     BpfFormat::Enum m_pointFormat;
+    /// Whether compression is enabled.
     bool m_compression;
+    /// Input stream
     ILeStream& m_stream;
+    /// Index of the next point to read.
     boost::uint32_t m_index;
+    /// Stream position when the iterator is created (should always be
+    /// the start of point data).
+    std::streampos m_start;
 };
 
 } // namespace pdal

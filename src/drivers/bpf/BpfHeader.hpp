@@ -54,8 +54,8 @@ namespace BpfFormat
 {
 enum Enum
 {
-    PointMajor,
     DimMajor,
+    PointMajor,
     ByteMajor
 };
 }
