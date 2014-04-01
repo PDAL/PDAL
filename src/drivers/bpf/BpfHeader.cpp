@@ -75,7 +75,6 @@ bool BpfHeader::read(ILeStream& stream)
     default:
         throw "Invalid BPF file: unknown interleave type.";
     }
-    dump();
     return (bool)stream;
 }
 
@@ -112,7 +111,6 @@ bool BpfDimension::read(ILeStream& stream, std::vector<BpfDimension>& dims)
     for (size_t d = 0; d < dims.size(); ++d)
     {
         stream.get(dims[d].m_label, 32);
-        std::cerr << "Label = " << dims[d].m_label << "!\n";
     }
     return (bool)stream;
 }

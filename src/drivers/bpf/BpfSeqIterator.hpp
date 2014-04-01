@@ -66,7 +66,7 @@ protected:
 private:
     void seekPointMajor(uint32_t ptIdx);
     void seekDimMajor(size_t dimIdx, uint32_t ptIdx);
-    void seekByteMajor(uint32_t ptIdx);
+    void seekByteMajor(size_t dimIdx, size_t byteIdx, uint32_t ptIdx);
 
     /// Dimensions
     std::vector<Dimension> m_dims;

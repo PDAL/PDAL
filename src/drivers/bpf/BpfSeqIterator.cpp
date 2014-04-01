@@ -32,9 +32,6 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <iostream>
-using namespace std;
-
 #include <vector>
 #include <algorithm>
 
@@ -68,7 +65,6 @@ boost::uint32_t BpfSeqIterator::readBufferImpl(PointBuffer& data)
         if (d.getNamespace() == "bpf")
             m_dims.push_back(d);
     }
-cerr << "Dimension size = " << dims.size() << "!\n";
 
     boost::uint32_t numRead = 0;
     if (m_compression)
@@ -83,23 +79,18 @@ cerr << "Dimension size = " << dims.size() << "!\n";
     }
     else
         numRead = read(data);
-    cerr << "Returning " << numRead << " from readBufferImpl()!\n";
     return numRead;
 }
 
 boost::uint32_t BpfSeqIterator::read(PointBuffer& data)
 {
-cerr << "Reading points!\n";
     switch (m_pointFormat)
     {
     case BpfFormat::PointMajor:
-cerr << "Reading point major!\n";
         return readPointMajor(data);
     case BpfFormat::DimMajor:
-cerr << "Reading dim major!\n";
         return readDimMajor(data);
     case BpfFormat::ByteMajor:
-cerr << "Reading byte major!\n";
         return readByteMajor(data);
     default:
         break;
@@ -136,14 +127,15 @@ boost::uint32_t BpfSeqIterator::readPointMajor(PointBuffer& data)
         }
         idx++;
     }
+    uint32_t numRead = idx - m_index;
     m_index = idx;
-    return idx - data.getNumPoints();
+    data.setNumPoints(m_index);
+    return numRead;
 }
 
 boost::uint32_t BpfSeqIterator::readDimMajor(PointBuffer& data)
 {
     uint32_t capacity = data.getCapacity();
-
     uint32_t idx;
     for (size_t d = 0; d < m_dims.size(); ++d)
     {
@@ -157,8 +149,10 @@ boost::uint32_t BpfSeqIterator::readDimMajor(PointBuffer& data)
            data.setField<float>(m_dims[d], idx, f);
         }
     }
+    uint32_t numRead = idx - m_index;
     m_index = idx;
-    return m_index - data.getNumPoints();
+    data.setNumPoints(m_index);
+    return numRead;
 }
 
 boost::uint32_t BpfSeqIterator::readByteMajor(PointBuffer& data)
@@ -171,7 +165,7 @@ boost::uint32_t BpfSeqIterator::readByteMajor(PointBuffer& data)
         for (size_t b = 0; b < sizeof(float); ++b)
         {
             idx = m_index;
-            seekByteMajor(idx);
+            seekByteMajor(d, b, idx);
             for (;idx < capacity && idx < m_numPoints; idx++)
             {
                 union 
@@ -188,31 +182,37 @@ boost::uint32_t BpfSeqIterator::readByteMajor(PointBuffer& data)
                 }
                 uint8_t u8;
                 m_stream >> u8;
-                u.u32 |= ((uint32_t)u8 << b);
+                u.u32 |= ((uint32_t)u8 << (b * CHAR_BIT));
                 data.setField<float>(m_dims[d], idx, u.f);
             }
         }
     }
+    uint32_t numRead = idx - m_index;
     m_index = idx;
-    return idx - data.getNumPoints();
+    data.setNumPoints(m_index);
+    return numRead;
 }
 
 void BpfSeqIterator::seekPointMajor(uint32_t ptIdx)
 {
-    m_stream.seek(m_start + std::streamoff(ptIdx * sizeof(float) * m_dims.size()));
+    std::streamoff offset = ptIdx * sizeof(float) * m_dims.size();
+    m_stream.seek(m_start + offset);
 }
 
 void BpfSeqIterator::seekDimMajor(size_t dimIdx, uint32_t ptIdx)
 {
-    std::streampos pos = m_start +
-        std::streamoff((sizeof(float) * dimIdx * m_numPoints) +
-                       (sizeof(float) * ptIdx));
-    m_stream.seek(pos);
+    std::streamoff offset = ((sizeof(float) * dimIdx * m_numPoints) +
+        (sizeof(float) * ptIdx));
+    m_stream.seek(m_start + offset);
 }
 
-void BpfSeqIterator::seekByteMajor(uint32_t ptIdx)
+void BpfSeqIterator::seekByteMajor(size_t dimIdx, size_t byteIdx, uint32_t ptIdx)
 {
-    m_stream.seek(m_start + std::streamoff(ptIdx));
+    std::streamoff offset =
+        (dimIdx * m_numPoints * sizeof(float)) +
+        (byteIdx * m_numPoints) +
+        ptIdx;
+    m_stream.seek(m_start + offset);
 }
 
 } //namespace

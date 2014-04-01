@@ -45,7 +45,7 @@ class ILeStream;
 
 struct BpfMuellerMatrix
 {
-    float m_vals[16];
+    double m_vals[16];
 };
 ILeStream& operator >> (ILeStream& stream, BpfMuellerMatrix& m);
 

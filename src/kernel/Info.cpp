@@ -298,12 +298,12 @@ void Info::dumpStats(pdal::filters::Stats& filter,
     boost::uint64_t totRead = 0;
     while (!iter->atEnd())
     {
-
         const boost::uint32_t numRead = iter->read(data);
         totRead += numRead;
     }
     
-    pdal::Metadata output = static_cast<pdal::filters::iterators::sequential::Stats*>(iter)->toMetadata();
+    pdal::Metadata output =
+        static_cast<pdal::filters::iterators::sequential::Stats*>(iter)->toMetadata();
     delete iter;
     boost::property_tree::ptree tree;
     tree.add_child("stats", output.toPTree());
@@ -319,9 +319,6 @@ void Info::dumpStats(pdal::filters::Stats& filter,
         writer->writePipeline(m_pipelineFile);
         delete writer;
     }
-
-    
-    return;
 }
 
 
