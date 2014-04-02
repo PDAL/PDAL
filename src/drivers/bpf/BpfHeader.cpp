@@ -34,7 +34,7 @@
 
 #include <iostream>
 
-#include <pdal/BoStream.hpp>
+#include <pdal/IStream.hpp>
 
 #include "BpfHeader.hpp"
 

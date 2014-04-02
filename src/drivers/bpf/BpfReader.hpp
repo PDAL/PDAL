@@ -34,7 +34,7 @@
 
 #pragma once
 
-#include <pdal/BoStream.hpp>
+#include <pdal/IStream.hpp>
 #include <pdal/Reader.hpp>
 #include <pdal/ReaderIterator.hpp>
 

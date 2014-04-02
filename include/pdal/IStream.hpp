@@ -45,6 +45,7 @@ namespace pdal
 
 class IStreamMarker;
 
+/// Stream wrapper for input of binary data.
 class IStream
 {
     friend class IStreamMarker;
@@ -68,12 +69,13 @@ protected:
     std::istream *m_stream;
 };
 
+/// Stream wrapper for input of binary data that converts from little-endian
+/// to host ordering.
 class ILeStream : public IStream
 {
 public:
     ILeStream(const std::string& filename) : IStream(filename)
     {}
-
 
     void get(std::string& s, size_t size)
     {
@@ -156,10 +158,11 @@ public:
     }
 };
 
+/// Stream position marker with rewinding support.
 class IStreamMarker
 {
 public:
-    IStreamMarker(ILeStream& stream) : m_stream(stream)
+    IStreamMarker(IStream& stream) : m_stream(stream)
     {
         m_pos = m_stream.m_stream->tellg();
     }
@@ -171,91 +174,7 @@ public:
 
 private:
     std::streampos m_pos;
-    ILeStream& m_stream;
-};
-
-class OLeStream
-{
-private:
-    std::ostream *m_stream;
-
-public:
-    OLeStream(const std::string& s)
-       { m_stream = new std::ofstream(s); }
-
-    ~OLeStream()
-        { delete m_stream; }
-
-    operator bool ()
-        { return (bool)(*m_stream); }
-
-    OLeStream& operator << (uint8_t v)
-    {
-        m_stream->put((char)v);
-        return *this;
-    }
-
-    OLeStream& operator << (int8_t v)
-    {
-        m_stream->put((char)v);
-        return *this;
-    }
-
-    OLeStream& operator << (uint16_t v)
-    {
-        v = htole16(v);
-        m_stream->write((char *)&v, sizeof(v));
-        return *this;
-    }
-
-    OLeStream& operator << (int16_t v)
-    { 
-        v = (int16_t)htole16((uint16_t)v);
-        m_stream->write((char *)&v, sizeof(v));
-        return *this;
-    }
-
-    OLeStream& operator << (uint32_t v)
-    {
-        v = htole32(v);
-        m_stream->write((char *)&v, sizeof(v));
-        return *this;
-    }
-
-    OLeStream& operator << (int32_t v)
-    {
-        v = (int32_t)htole32((uint32_t)v);
-        m_stream->write((char *)&v, sizeof(v));
-        return *this;
-    }
-
-    OLeStream& operator << (uint64_t v)
-    {
-        v = htole64(v);
-        m_stream->write((char *)&v, sizeof(v));
-        return *this;
-    }
-
-    OLeStream& operator << (int64_t v)
-    {
-        v = (int64_t)htole64((uint64_t)v);
-        m_stream->write((char *)&v, sizeof(v));
-        return *this;
-    }
-
-    OLeStream& operator << (float v)
-    {
-        uint32_t tmp = le32toh(*(uint32_t *)(&v));
-        m_stream->write((char *)&tmp, sizeof(tmp));
-        return *this;
-    }
-
-    OLeStream& operator << (double v)
-    {
-        uint64_t tmp = le64toh(*(uint64_t *)(&v));
-        m_stream->write((char *)&tmp, sizeof(tmp));
-        return *this;
-    }
+    IStream& m_stream;
 };
 
 } // namespace pdal
