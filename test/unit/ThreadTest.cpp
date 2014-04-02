@@ -86,7 +86,7 @@ Options makeFilterOptions(int threadNum, int filterNum, bool log)
         if (log)
         {
             ostringstream log_id;
-            log_id << "log_" << id << ".txt";
+            log_id << "log_" << id.str() << ".txt";
             Option optlog("log", Support::temppath(log_id.str()));
             opts.add(optlog);
         }
