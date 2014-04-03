@@ -32,12 +32,12 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/kernel/Query.hpp>
+#include <pdal/kernel/Delta.hpp>
 
 namespace pdal { namespace kernel {
     
-Query::Query(int argc, const char* argv[])
-    : Application(argc, argv, "query")
+Delta::Delta(int argc, const char* argv[])
+    : Application(argc, argv, "delta")
     , m_sourceFile("")
     , m_candidateFile("")
     , m_outputStream(0)
@@ -48,7 +48,7 @@ Query::Query(int argc, const char* argv[])
 }
 
 
-void Query::validateSwitches()
+void Delta::validateSwitches()
 {
     m_chunkSize = 1048576;     
 
@@ -56,7 +56,7 @@ void Query::validateSwitches()
 }
 
 
-void Query::addSwitches()
+void Delta::addSwitches()
 {
     namespace po = boost::program_options;
 
@@ -99,7 +99,7 @@ std::ostream& writeHeader(std::ostream& strm, bool b3D)
     
 }
 
-int Query::execute()
+int Delta::execute()
 {
 
     Options sourceOptions;

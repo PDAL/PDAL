@@ -32,8 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_PDAL_KERNEL_QUERY_HPP
-#define INCLUDED_PDAL_KERNEL_QUERY_HPP
+#ifndef INCLUDED_PDAL_KERNEL_DELTA_HPP
+#define INCLUDED_PDAL_KERNEL_DELTA_HPP
 
 #include <pdal/Stage.hpp>
 #include <pdal/StageIterator.hpp>
@@ -72,10 +72,10 @@ public:
     }    
 };
 
-class PDAL_DLL Query : public Application
+class PDAL_DLL Delta : public Application
 {
 public:
-    Query(int argc, const char* argv[]);
+    Delta(int argc, const char* argv[]);
     int execute(); // overrride
     
     

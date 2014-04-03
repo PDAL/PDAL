@@ -128,9 +128,9 @@ int main(int argc, char* argv[])
         return app.run();
     }
 
-    if (boost::iequals(action, "query"))
+    if (boost::iequals(action, "delta"))
     {
-        pdal::kernel::Query app(count, args);
+        pdal::kernel::Delta app(count, args);
         return app.run();
     }
     
