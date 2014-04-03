@@ -33,6 +33,8 @@
 ****************************************************************************/
 
 #include <pdal/kernel/Delta.hpp>
+#include <boost/format.hpp>
+
 
 namespace pdal { namespace kernel {
     
@@ -43,6 +45,7 @@ Delta::Delta(int argc, const char* argv[])
     , m_outputStream(0)
     , m_outputFileName("")
     , m_3d(true)
+    , m_OutputDetail(false)
 {
     return;
 }
@@ -68,6 +71,8 @@ void Delta::addSwitches()
         ("candidate", po::value<std::string>(&m_candidateFile), "candidate file name")
         ("output", po::value<std::string>(&m_outputFileName), "output file name")
         ("2d", po::value<bool>(&m_3d)->zero_tokens()->implicit_value(false), "only 2D comparisons/indexing")
+        ("detail", po::value<bool>(&m_OutputDetail)->zero_tokens()->implicit_value(true), "Output deltas per-point")
+        ("output", po::value<std::string>(&m_outputFileName), "output file name")
         ;
 
     addSwitchSet(file_options);
@@ -99,6 +104,138 @@ std::ostream& writeHeader(std::ostream& strm, bool b3D)
     
 }
 
+std::map<Point, Point>* cumulatePoints(PointBuffer& source_data,
+                  IndexedPointBuffer& candidate_data)
+{
+    std::map<Point, Point> *output = new std::map<Point, Point>;
+    boost::uint32_t count(std::min(source_data.getNumPoints(), candidate_data.getNumPoints()));
+    
+
+    Schema const& candidate_schema = candidate_data.getSchema();
+    Dimension const& cDimX = candidate_schema.getDimension("X");
+    Dimension const& cDimY = candidate_schema.getDimension("Y");
+    Dimension const& cDimZ = candidate_schema.getDimension("Z");
+
+    Schema const& source_schema = source_data.getSchema();
+    Dimension const& sDimX = source_schema.getDimension("X");
+    Dimension const& sDimY = source_schema.getDimension("Y");
+    Dimension const& sDimZ = source_schema.getDimension("Z");    
+    for (boost::uint32_t i = 0; i < count; ++i)
+    {
+        double sx = source_data.applyScaling(sDimX, i);
+        double sy = source_data.applyScaling(sDimY, i);
+        double sz = source_data.applyScaling(sDimZ, i);                
+        
+        std::vector<std::size_t> ids = candidate_data.neighbors(sx, sy, sz, 1);
+        
+        if (!ids.size())
+        {
+			std::ostringstream oss;
+			oss << "unable to find point for id '"  << i <<"'";
+            throw app_runtime_error(oss.str() );
+		}
+        
+        std::size_t id = ids[0];
+        double cx = candidate_data.applyScaling(cDimX, id);
+        double cy = candidate_data.applyScaling(cDimY, id);
+        double cz = candidate_data.applyScaling(cDimZ, id);
+        
+        Point s(sx, sy, sz, i);
+        Point c(cx, cy, cz, id);
+        output->insert(std::pair<Point, Point>(s, c));
+
+        double xd = sx - cx;
+        double yd = sy - cy;
+        double zd = sz - cz;
+    }
+  
+    return output;
+}
+
+void Delta::outputDetail(PointBuffer& source_data,
+                         IndexedPointBuffer& candidate_data,
+                         std::map<Point, Point> *points) const
+{
+    Schema const& candidate_schema = candidate_data.getSchema();
+    Dimension const& cDimX = candidate_schema.getDimension("X");
+    Dimension const& cDimY = candidate_schema.getDimension("Y");
+    Dimension const& cDimZ = candidate_schema.getDimension("Z");
+
+    Schema const& source_schema = source_data.getSchema();
+    Dimension const& sDimX = source_schema.getDimension("X");
+    Dimension const& sDimY = source_schema.getDimension("Y");
+    Dimension const& sDimZ = source_schema.getDimension("Z");
+    
+    bool bWroteHeader(false);
+    
+    std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
+    
+    candidate_data.build(m_3d);
+    boost::uint32_t count(std::min(source_data.getNumPoints(), candidate_data.getNumPoints()));
+    
+
+    for (boost::uint32_t i = 0; i < count; ++i)
+    {
+        double sx = source_data.applyScaling(sDimX, i);
+        double sy = source_data.applyScaling(sDimY, i);
+        double sz = source_data.applyScaling(sDimZ, i);                
+        
+        std::vector<std::size_t> ids = candidate_data.neighbors(sx, sy, sz, 1);
+        
+        if (!ids.size())
+        {
+			std::ostringstream oss;
+			oss << "unable to find point for id '"  << i <<"'";
+            throw app_runtime_error(oss.str() );
+		}
+        
+        std::size_t id = ids[0];
+        double cx = candidate_data.applyScaling(cDimX, id);
+        double cy = candidate_data.applyScaling(cDimY, id);
+        double cz = candidate_data.applyScaling(cDimZ, id);
+        
+        Point s(sx, sy, sz, id);
+        Point c(cx, cy, cz, id);
+        
+        double xd = sx - cx;
+        double yd = sy - cy;
+        double zd = sz - cz;
+
+        
+        if (!bWroteHeader)
+        {
+            writeHeader(ostr, m_3d);
+            bWroteHeader = true;
+        }
+        ostr << i << ",";
+        boost::uint32_t precision = Utils::getStreamPrecision(cDimX.getNumericScale());
+        ostr.setf(std::ios_base::fixed, std::ios_base::floatfield);
+        ostr.precision(precision);
+        ostr << xd << ",";
+
+        precision = Utils::getStreamPrecision(cDimY.getNumericScale());
+        ostr.precision(precision);
+        ostr << yd;
+        
+        if (m_3d)
+        {
+            ostr << ",";
+            precision = Utils::getStreamPrecision(cDimZ.getNumericScale());
+            ostr.precision(precision);
+            ostr << zd;
+        }
+        
+        ostr << std::endl;
+
+    }
+
+
+
+    if (m_outputStream)
+    {
+        FileUtils::closeFile(m_outputStream);
+    }    
+}
 int Delta::execute()
 {
 
@@ -147,88 +284,74 @@ int Delta::execute()
 
     if (source_data.getNumPoints() != candidate_data.getNumPoints())
     {
-        std::cerr << "Source and candidate files do not have the same point count, testing each source point only!";
+        std::cerr << "Source and candidate files do not have the same point count, testing each source point only!" << std::endl;
     }
     
 
-    
-    Schema const& candidate_schema = candidate_data.getSchema();
-    Dimension const& cDimX = candidate_schema.getDimension("X");
-    Dimension const& cDimY = candidate_schema.getDimension("Y");
-    Dimension const& cDimZ = candidate_schema.getDimension("Z");
+    // m_summary_x(xd);
+    // m_summary_y(yd);
+    // m_summary_z(zd);
 
-    Schema const& source_schema = source_data.getSchema();
-    Dimension const& sDimX = source_schema.getDimension("X");
-    Dimension const& sDimY = source_schema.getDimension("Y");
-    Dimension const& sDimZ = source_schema.getDimension("Z");
-    
-    bool bWroteHeader(false);
-    
     if (m_outputFileName.size())
     {
         m_outputStream = FileUtils::createFile(m_outputFileName);
     }
-    std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
-    
+
     candidate_data.build(m_3d);
-    for (boost::uint32_t i = 0; i < std::min(source_data.getNumPoints(), candidate_data.getNumPoints()); ++i)
+    boost::uint32_t count(std::min(source_data.getNumPoints(), candidate_data.getNumPoints()));
+    
+
+
+    std::map<Point, Point> *points = cumulatePoints(source_data, candidate_data);
+    if (m_OutputDetail)
     {
-        double sx = source_data.applyScaling(sDimX, i);
-        double sy = source_data.applyScaling(sDimY, i);
-        double sz = source_data.applyScaling(sDimZ, i);                
-        
-        std::vector<std::size_t> ids = candidate_data.neighbors(sx, sy, sz, 1);
-
-        if (!ids.size())
-        {
-			std::ostringstream oss;
-			oss << "unable to find point for id '"  << i <<"'";
-            throw app_runtime_error(oss.str() );
-		}
-        
-        std::size_t id = ids[0];
-        double cx = candidate_data.applyScaling(cDimX, id);
-        double cy = candidate_data.applyScaling(cDimY, id);
-        double cz = candidate_data.applyScaling(cDimZ, id);
-
-        double xd = sx - cx;
-        double yd = sy - cy;
-        double zd = sz - cz;
-        
-        if (!bWroteHeader)
-        {
-            writeHeader(ostr, m_3d);
-            bWroteHeader = true;
-        }
-        ostr << i << ",";
-        boost::uint32_t precision = Utils::getStreamPrecision(cDimX.getNumericScale());
-        ostr.setf(std::ios_base::fixed, std::ios_base::floatfield);
-        ostr.precision(precision);
-        ostr << xd << ",";
-
-        precision = Utils::getStreamPrecision(cDimY.getNumericScale());
-        ostr.precision(precision);
-        ostr << yd;
-        
-        if (m_3d)
-        {
-            ostr << ",";
-            precision = Utils::getStreamPrecision(cDimZ.getNumericScale());
-            ostr.precision(precision);
-            ostr << zd;
-        }
-        
-        ostr << std::endl;
-
-    }
-
-
-
-    if (m_outputStream)
-    {
-        FileUtils::closeFile(m_outputStream);
+        outputDetail(source_data, candidate_data, points);
     }
     
+    std::map<Point, Point>::const_iterator i;
+    for(i = points->begin(); i != points->end(); ++i)
+    {
+        Point const& s = i->first;
+        Point const& c = i->second;
+
+        double xd = s.x - c.x;
+        double yd = s.y - c.y;
+        double zd = s.z - c.z;        
+        m_summary_x(xd);
+        m_summary_y(yd);
+        m_summary_z(zd);        
+    }
+    
+    std::string headline("------------------------------------------------------------------------------------------");
+    std::cout << headline << std::endl;
+    std::cout << " Delta summary for source '" << m_sourceFile << "' and candidate '" << m_candidateFile <<"'" << std::endl;
+    std::cout << headline << std::endl;
+    std::cout << std::endl;
+    
+    std::string thead("----------- --------------- --------------- --------------");
+    std::cout << thead << std::endl;
+    std::cout << " Dimension       X             Y                  Z    " << std::endl;
+    std::cout << thead << std::endl;
+    
+    boost::format fmt("%.4f");
+    double sminx  = (boost::accumulators::min)(m_summary_x);
+    double sminy  = (boost::accumulators::min)(m_summary_y);
+    double sminz  = (boost::accumulators::min)(m_summary_z);
+    double smaxx  = (boost::accumulators::max)(m_summary_x);
+    double smaxy  = (boost::accumulators::max)(m_summary_y);
+    double smaxz  = (boost::accumulators::max)(m_summary_z);
+    
+    double smeanx  = (boost::accumulators::mean)(m_summary_x);
+    double smeany  = (boost::accumulators::mean)(m_summary_y);
+    double smeanz  = (boost::accumulators::mean)(m_summary_z);
+    
+    std::cout << " Min          " << fmt % sminx << "            " << fmt % sminy << "            " << fmt % sminz<<std::endl;
+    std::cout << " Min          " << fmt % smaxx << "            " << fmt % smaxy << "            " << fmt % smaxz<<std::endl;
+    std::cout << " Mean         " << fmt % smeanx << "            " << fmt % smeany << "            " << fmt % smeanz<<std::endl;
+    std::cout << thead << std::endl;
+    
+    // return (boost::accumulators::min)(m_summary);
+    delete points;
     return 0;
 }
 
