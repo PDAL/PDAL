@@ -89,16 +89,6 @@ void Query::addSwitches()
 
 
 
-void Query::readPoints(   StageSequentialIterator* iter,
-                            PointBuffer& data)
-{
-    while (!iter->atEnd())
-    {
-        const boost::uint32_t numRead = iter->read(data);
-    }
-
-}
-
 std::ostream& writeHeader(std::ostream& strm, bool b3D)
 {
     strm << "\"ID\",\"DeltaX\",\"DeltaY\"";
@@ -120,11 +110,14 @@ int Query::execute()
     }
     Stage* source = AppSupport::makeReader(sourceOptions);
     source->initialize();
-
-    PointBuffer source_data(source->getSchema(), m_chunkSize);
+    
+    boost::uint32_t totalPointCount(source->getNumPoints());
+    
+    PointBuffer source_data(source->getSchema(), totalPointCount);
     StageSequentialIterator* source_iter = source->createSequentialIterator(source_data);
 
-    readPoints(source_iter, source_data);
+    boost::uint32_t  numRead = source_iter->read(source_data);
+    assert(numRead == source_data.getNumPoints());
 
     delete source_iter;
     delete source;
@@ -139,13 +132,16 @@ int Query::execute()
     }
 
     Stage* candidate = AppSupport::makeReader(candidateOptions);
-    // pdal::filters::Index* index_filter = new pdal::filters::Index(*candidate, candidateOptions);
+
     candidate->initialize();    
 
 
-    IndexedPointBuffer candidate_data(candidate->getSchema(), m_chunkSize);
+    IndexedPointBuffer candidate_data(candidate->getSchema(), totalPointCount);
     StageSequentialIterator* candidate_iter = candidate->createSequentialIterator(candidate_data);
-    readPoints(candidate_iter, candidate_data);
+
+    numRead = candidate_iter->read(candidate_data);
+    assert(numRead == candidate_data.getNumPoints());
+        
     delete candidate_iter;    
 
 
@@ -175,7 +171,7 @@ int Query::execute()
     std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
     
     candidate_data.build(m_3d);
-    for (boost::uint32_t i = 0; i < source_data.getNumPoints(); ++i)
+    for (boost::uint32_t i = 0; i < std::min(source_data.getNumPoints(), candidate_data.getNumPoints()); ++i)
     {
         double sx = source_data.applyScaling(sDimX, i);
         double sy = source_data.applyScaling(sDimY, i);

@@ -83,8 +83,6 @@ private:
     void addSwitches(); // overrride
     void validateSwitches(); // overrride
     
-    void readPoints(    StageSequentialIterator* iter,
-                        PointBuffer& data);    
     std::string m_sourceFile;
     std::string m_candidateFile;
     std::string m_wkt;
