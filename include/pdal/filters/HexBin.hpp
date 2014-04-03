@@ -89,12 +89,21 @@ namespace hexbin
 class PDAL_DLL IteratorBase
 {
 public:
-    IteratorBase(pdal::filters::HexBin const& filter, PointBuffer& buffer);
+    IteratorBase(pdal::filters::HexBin const& filter, 
+                 PointBuffer& buffer,
+                 boost::uint32_t numPoints,
+                 std::string const& name,
+                 LogPtr log,
+                 Options const& options);
     ~IteratorBase();
 protected:
     pdal::filters::HexBin const& m_filter;
     Dimension const* m_dim_x;
     Dimension const* m_dim_y;
+    boost::uint32_t m_numPoints;
+    std::string m_name;
+    LogPtr m_log;
+    Options m_options;
     
 #ifdef PDAL_HAVE_HEXER
     hexer::HexGrid* m_grid;
@@ -120,7 +129,12 @@ namespace sequential
 class PDAL_DLL HexBin : public pdal::FilterSequentialIterator, public hexbin::IteratorBase
 {
 public:
-    HexBin(const pdal::filters::HexBin& filter, PointBuffer& buffer);
+    HexBin(pdal::filters::HexBin const& filter, 
+                 PointBuffer& buffer,
+                 boost::uint32_t numPoints,
+                 std::string const& name,
+                 LogPtr log,
+                 Options options);
     ~HexBin();
 
 protected:
