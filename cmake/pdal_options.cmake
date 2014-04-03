@@ -60,7 +60,11 @@ endif(PDAL_BUILD_STATIC)
 mark_as_advanced(PDAL_BUILD_STATIC)
 
 if (CMAKE_VERSION VERSION_GREATER 2.8.10)
-    set(PDAL_LINKAGE "PUBLIC;general")
+    if (CMAKE_VERSION VERSION_GREATER 2.8.12)
+        set(PDAL_LINKAGE "PUBLIC;general")
+    else()
+        set(PDAL_LINKAGE "LINK_PUBLIC;general")
+    endif()
     
     if (PDAL_EMBED_BOOST)
         set(BOOST_LINKAGE "LINK_PRIVATE;general")
