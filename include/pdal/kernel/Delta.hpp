@@ -32,8 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_PDAL_KERNEL_QUERY_HPP
-#define INCLUDED_PDAL_KERNEL_QUERY_HPP
+#ifndef INCLUDED_PDAL_KERNEL_DELTA_HPP
+#define INCLUDED_PDAL_KERNEL_DELTA_HPP
 
 #include <pdal/Stage.hpp>
 #include <pdal/StageIterator.hpp>
@@ -42,11 +42,25 @@
 
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/json_parser.hpp>
+#include <boost/accumulators/accumulators.hpp>
+#include <boost/accumulators/statistics/stats.hpp>
+#include <boost/accumulators/statistics/mean.hpp>
+#include <boost/accumulators/statistics/moment.hpp>
+#include <boost/accumulators/statistics/max.hpp>
+#include <boost/accumulators/statistics/min.hpp>
+#include <boost/accumulators/statistics/count.hpp>
+#include <boost/accumulators/statistics/density.hpp>
 
 #include "Application.hpp"
 
 namespace pdal { namespace kernel {
     
+
+typedef boost::accumulators::accumulator_set<double, boost::accumulators::features<     boost::accumulators::droppable<boost::accumulators::tag::mean>,
+        boost::accumulators::droppable<boost::accumulators::tag::max>,
+        boost::accumulators::droppable<boost::accumulators::tag::min>,
+        boost::accumulators::droppable<boost::accumulators::tag::count> > > summary_accumulator;
+
 class PDAL_DLL Point
 {
 public:
@@ -55,27 +69,35 @@ public:
     double z;
     boost::uint64_t id;
     
-    bool equal(Point const& other)
+    Point(double x, double y, double z, uint64_t id=0)
+        : x(x), y(y),z(z), id(id) {};
+    Point(Point const& other) : x(other.x), y(other.y), z(other.z), id(other.id) {};
+    Point() : x(0.0), y(0.0), z(0.0), id(0) {};
+    bool equal(Point const& other) const
     {
         return (Utils::compare_distance(x, other.x) && 
                 Utils::compare_distance(y, other.y) && 
                 Utils::compare_distance(z, other.z));
         
     }
-    bool operator==(Point const& other)
+    bool operator==(Point const& other) const
     {
         return equal(other);
     }
-    bool operator!=(Point const& other)
+    bool operator!=(Point const& other) const
     {
         return !equal(other);
-    }    
+    }
+    bool operator<(Point const& other) const
+    {
+        return id < other.id;
+    }       
 };
 
-class PDAL_DLL Query : public Application
+class PDAL_DLL Delta : public Application
 {
 public:
-    Query(int argc, const char* argv[]);
+    Delta(int argc, const char* argv[]);
     int execute(); // overrride
     
     
@@ -83,16 +105,24 @@ private:
     void addSwitches(); // overrride
     void validateSwitches(); // overrride
     
-    void readPoints(    StageSequentialIterator* iter,
-                        PointBuffer& data);    
     std::string m_sourceFile;
     std::string m_candidateFile;
     std::string m_wkt;
 
     std::ostream* m_outputStream;
     std::string m_outputFileName;
+    
+    summary_accumulator m_summary_x;
+    summary_accumulator m_summary_y;
+    summary_accumulator m_summary_z;
 	
     bool m_3d;
+    bool m_OutputDetail;
+
+    void outputDetail(PointBuffer& source_data,
+                         IndexedPointBuffer& candidate_data,
+                         std::map<Point, Point> *points) const;
+
 };
 
 }} // pdal::kernel

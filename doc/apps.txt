@@ -14,8 +14,8 @@ application currently contains four commands:
 * :ref:`translate <translate_command>`
 * :ref:`info <info_command>`
 * :ref:`pipeline <pipeline_command>`
-* :ref:`query <query_command>`
-* :ref:`query <diff_command>`
+* :ref:`delta <delta_command>`
+* :ref:`diff <diff_command>`
 
 Applications are run by invoking the *pdal* application along with the 
 command name:
@@ -142,18 +142,18 @@ or :ref:`pipeline` for more information.
     --count arg (=0)             How many points should we write?
     --skip arg (=0)              How many points should we skip?
 
-.. _query_command:
+.. _delta_command:
 
-``query`` command
+``delta`` command
 ------------------------------------------------------------------------------
 
-The *query* command is used to select a nearest point from a candidate file
+The *delta* command is used to select a nearest point from a candidate file
 for each point in the source file. If the ``--2d`` option is used, the
 query only happens in XY coordinate space.
 
 ::
 
-    $ pdal query test/data/1.2-with-color.las test/data/1.2-with-color.las > deltas
+    $ pdal delta test/data/1.2-with-color.las test/data/1.2-with-color.las > deltas
 
 A simple CSV-style text is output with delta information:
 
