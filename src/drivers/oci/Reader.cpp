@@ -533,7 +533,7 @@ pdal::Schema Reader::fetchSchema(Statement statement, sdo_pc* pc, boost::uint32_
 
 pdal::StageSequentialIterator* Reader::createSequentialIterator(PointBuffer& buffer) const
 {
-    return new pdal::drivers::oci::iterators::sequential::Reader(*this, buffer);
+    return new pdal::drivers::oci::iterators::sequential::Reader(*this, buffer, getNumPoints(), log());
 }
 
 namespace iterators
@@ -980,9 +980,11 @@ pdal::Bounds<double> IteratorBase::getBounds(Statement statement, BlockPtr block
 //
 //---------------------------------------------------------------------------
 
-Reader::Reader(const pdal::drivers::oci::Reader& reader, PointBuffer& buffer)
+Reader::Reader(const pdal::drivers::oci::Reader& reader, PointBuffer& buffer, boost::uint32_t numPoints, LogPtr log)
     : IteratorBase(reader)
-    , pdal::StageSequentialIterator(reader, buffer)
+    , pdal::StageSequentialIterator(buffer)
+    , m_numPoints(numPoints)
+    , m_log(log)
 {
     return;
 }
