@@ -70,25 +70,33 @@ Writer::Writer(Stage& prevStage, const Options& options)
 
 void Writer::setOptions()
 {
-    setGeneratingSoftware(getOptions().getValueOrDefault<std::string>("software_id",
-                          pdal::drivers::las::GetDefaultSoftwareId()));
+    setGeneratingSoftware(getOptions().getValueOrDefault<std::string>(
+        "software_id", pdal::drivers::las::GetDefaultSoftwareId()));
 
-    m_lasHeader.SetCreationDOY((boost::uint16_t)getOptions().getValueOrDefault<boost::uint32_t>("creation_doy", 0));
-    m_lasHeader.SetCreationYear((boost::uint16_t)getOptions().getValueOrDefault<boost::uint32_t>("creation_year", 0));
-    m_lasHeader.setPointFormat(static_cast<PointFormat>(getOptions().getValueOrDefault<boost::uint32_t>("format", 3)));
-    m_lasHeader.SetSystemId(getOptions().getValueOrDefault<std::string>("system_id",
-                            LasHeader::SystemIdentifier));
+    m_lasHeader.SetCreationDOY((boost::uint16_t)getOptions().
+        getValueOrDefault<boost::uint32_t>("creation_doy", 0));
+    m_lasHeader.SetCreationYear((boost::uint16_t)getOptions().
+        getValueOrDefault<boost::uint32_t>("creation_year", 0));
+    m_lasHeader.setPointFormat(static_cast<PointFormat>(getOptions().
+        getValueOrDefault<boost::uint32_t>("format", 3)));
+    m_lasHeader.SetSystemId(getOptions().getValueOrDefault<std::string>(
+        "system_id", LasHeader::SystemIdentifier));
 
-    m_lasHeader.SetHeaderPadding(getOptions().getValueOrDefault<boost::uint32_t>("header_padding", 0));
+    m_lasHeader.SetHeaderPadding(getOptions().
+        getValueOrDefault<boost::uint32_t>("header_padding", 0));
     if (getOptions().hasOption("a_srs"))
     {
-        setSpatialReference(getOptions().getValueOrDefault<std::string>("a_srs",""));
+        setSpatialReference(getOptions().getValueOrDefault<std::string>(
+            "a_srs",""));
     }
-    m_lasHeader.SetCompressed(getOptions().getValueOrDefault("compression", false));
-    m_lasHeader.SetFileSourceId(getOptions().getValueOrDefault<boost::uint16_t>("filesource_id", 0));
+    m_lasHeader.SetCompressed(getOptions().getValueOrDefault(
+        "compression", false));
+    m_lasHeader.SetFileSourceId(getOptions().getValueOrDefault<boost::uint16_t>(
+        "filesource_id", 0));
     try
     {
-        boost::uint16_t record_length = getOptions().getValueOrThrow<boost::uint16_t>("datarecordlength");
+        boost::uint16_t record_length =
+            getOptions().getValueOrThrow<boost::uint16_t>("datarecordlength");
         m_lasHeader.SetDataRecordLength(record_length);
     }
     catch (pdal::option_not_found&) {};
@@ -102,7 +110,6 @@ Writer::Writer(Stage& prevStage, std::ostream* ostream)
     , m_streamOffset(0)
 {
     setOptions();
-    return;
 }
 
 Writer::~Writer()
@@ -112,16 +119,12 @@ Writer::~Writer()
     m_zipPoint.reset();
 #endif
     m_streamManager.close();
-    return;
 }
 
 void Writer::initialize()
 {
     pdal::Writer::initialize();
-
     m_streamManager.open();
-
-    return;
 }
 
 Options Writer::getDefaultOptions()
@@ -135,11 +138,15 @@ Options Writer::getDefaultOptions()
     Option minor_version("minor_version", 2, "LAS Minor version");
     Option day_of_year("creation_doy", 0, "Day of Year for file");
     Option year("creation_year", 2011, "4-digit year value for file");
-    Option system_id("system_id", LasHeader::SystemIdentifier, "System ID for this file");
-    Option software_id("software_id", pdal::drivers::las::GetDefaultSoftwareId(), "Software ID for this file");
+    Option system_id("system_id", LasHeader::SystemIdentifier,
+        "System ID for this file");
+    Option software_id("software_id", GetDefaultSoftwareId(),
+        "Software ID for this file");
     Option filesourceid("filesource_id", 0, "File Source ID for this file");
-    Option header_padding("header_padding", 0, "Header padding (space between end of VLRs and beginning of point data)");
-    Option set_metadata("forward_metadata", false, "forward metadata into the file as necessary");
+    Option header_padding("header_padding", 0, "Header padding (space between "
+        "end of VLRs and beginning of point data)");
+    Option set_metadata("forward_metadata", false, "forward metadata into "
+        "the file as necessary");
 
     options.add(major_version);
     options.add(minor_version);
@@ -159,7 +166,8 @@ void Writer::setCompressed(bool v)
     m_lasHeader.SetCompressed(v);
 }
 
-void Writer::setFormatVersion(boost::uint8_t majorVersion, boost::uint8_t minorVersion)
+void Writer::setFormatVersion(boost::uint8_t majorVersion,
+    boost::uint8_t minorVersion)
 {
     m_lasHeader.SetVersionMajor(majorVersion);
     m_lasHeader.SetVersionMinor(minorVersion);
@@ -199,17 +207,16 @@ void Writer::setHeaderPadding(boost::uint32_t const& v)
 void Writer::writeBegin(boost::uint64_t /*targetNumPointsToWrite*/)
 {
     m_streamOffset = m_streamManager.ostream().tellp();
-    return;
 }
 
-void Writer::setVLRsFromMetadata(LasHeader& header, Metadata const& metadata, Options const& opts)
+void Writer::setVLRsFromMetadata(LasHeader& header, Metadata const& metadata,
+    Options const& opts)
 {
-
+    using namespace boost::property_tree;
 
     std::vector<pdal::Option> options = opts.getOptions("vlr");
     std::vector<pdal::Option>::const_iterator o;
 
-    // boost::property_tree::write_xml(std::cout, metadata.toPTree());
     for (o = options.begin(); o != options.end(); ++o)
     {
         if (!boost::algorithm::istarts_with(o->getName(), "vlr"))
@@ -218,27 +225,36 @@ void Writer::setVLRsFromMetadata(LasHeader& header, Metadata const& metadata, Op
 
         boost::optional<pdal::Options const&> vo = o->getOptions();
         if (!vo)
-            throw pdal_error("VLR option given, but no sub options available to specify which VLRs to copy!");
+            throw pdal_error("VLR option given, but no sub options "
+                "available to specify which VLRs to copy!");
 
         if (boost::algorithm::iequals(o->getValue<std::string>(), "FORWARD"))
         {
-            boost::property_tree::ptree::const_iterator m;
-            boost::property_tree::ptree const& entries = metadata.toPTree().get_child("metadata");
-            for (m = entries.begin(); m != entries.end(); ++m)
+            ptree const& entries = metadata.toPTree().get_child("metadata");
+            for (auto m = entries.begin(); m != entries.end(); ++m)
             {
                 if (boost::algorithm::istarts_with(m->first, "vlr"))
                 {
-                    boost::uint16_t option_record_id = vo->getOption("record_id").getValue<boost::uint16_t>();
-                    boost::uint16_t metadata_record_id = m->second.get<boost::uint16_t>("metadata.record_id.value");
-                    std::string option_user_id = vo->getOption("user_id").getValue<std::string>();
-                    std::string metadata_user_id = m->second.get<std::string>("metadata.user_id.value");
+                    boost::uint16_t option_record_id =
+                        vo->getOption("record_id").getValue<boost::uint16_t>();
+                    boost::uint16_t metadata_record_id =
+                        m->second.get<boost::uint16_t>(
+                            "metadata.record_id.value");
+                    std::string option_user_id =
+                        vo->getOption("user_id").getValue<std::string>();
+                    std::string metadata_user_id =
+                        m->second.get<std::string>("metadata.user_id.value");
 
                     if (option_record_id == metadata_record_id &&
-                            option_user_id == metadata_user_id)
+                        option_user_id == metadata_user_id)
                     {
-                        std::string vlr_data = m->second.get<std::string>("value");
-                        std::vector<boost::uint8_t> data = Utils::base64_decode(vlr_data);
-                        std::string description = m->second.get<std::string>("metadata.description.value");
+                        std::string vlr_data =
+                            m->second.get<std::string>("value");
+                        std::vector<boost::uint8_t> data =
+                            Utils::base64_decode(vlr_data);
+                        std::string description =
+                            m->second.get<std::string>(
+                            "metadata.description.value");
 
                         // In case the VLR is 0 in size
                         boost::uint8_t* bytes = 0;
@@ -252,18 +268,24 @@ void Writer::setVLRsFromMetadata(LasHeader& header, Metadata const& metadata, Op
                                 bytes,
                                 static_cast<boost::uint16_t>(data.size()));
                         header.getVLRs().add(vlr);
-                        log()->get(logDEBUG) << "Forwarding VLR from metadata with user_id='" << option_user_id
-                                             << "' and record_id='" << option_record_id << "'"<< " with size: " << data.size()<< std::endl;
+                        log()->get(logDEBUG) << "Forwarding VLR from metadata "
+                            "with user_id='" << option_user_id <<
+                            "' and record_id='" << option_record_id << "'"<<
+                            " with size: " << data.size()<< std::endl;
                     }
                 }
             }
         }
         else
         {
-            boost::uint16_t record_id = vo->getValueOrDefault<boost::uint16_t>("record_id", 4321);
-            std::string user_id = vo->getValueOrDefault<std::string>("user_id", "PDALUSERID");
-            std::string description = vo->getValueOrDefault<std::string>("description", "PDAL default VLR description");
-            std::vector<boost::uint8_t> data = Utils::base64_decode(o->getValue<std::string>());
+            boost::uint16_t record_id =
+                vo->getValueOrDefault<boost::uint16_t>("record_id", 4321);
+            std::string user_id = vo->getValueOrDefault<std::string>("user_id",
+                "PDALUSERID");
+            std::string description = vo->getValueOrDefault<std::string>(
+                "description", "PDAL default VLR description");
+            std::vector<boost::uint8_t> data = Utils::base64_decode(
+                o->getValue<std::string>());
             pdal::drivers::las::VariableLengthRecord vlr(0xAABB,
                     user_id,
                     record_id,
@@ -271,8 +293,9 @@ void Writer::setVLRsFromMetadata(LasHeader& header, Metadata const& metadata, Op
                     &data[0],
                     static_cast<boost::uint16_t>(data.size()));
             header.getVLRs().add(vlr);
-            log()->get(logDEBUG) << "Setting VLR from metadata with user_id='" << user_id
-                                 << "' and record_id='" << record_id << "'"<< " with size: " << data.size() << std::endl;
+            log()->get(logDEBUG) << "Setting VLR from metadata with "
+                "user_id='" << user_id << "' and record_id='" << record_id <<
+                "'"<< " with size: " << data.size() << std::endl;
         }
     }
 }
@@ -314,7 +337,6 @@ bool Writer::doForwardThisMetadata(std::string const& name) const
     Option const* doMetadata(0);
     try
     {
-
         doMetadata = &options.getOption("metadata");
     }
     catch (pdal::option_not_found&)
@@ -339,13 +361,10 @@ bool Writer::doForwardThisMetadata(std::string const& name) const
             std::string value = meta->getOption(name).getValue<std::string>();
             if (boost::algorithm::iequals(value,"FORWARD"))
                 return true;
-            return false;
         }
     }
     catch (pdal::option_not_found&)
-    {
-        return false;
-    }
+    {}
 
     return false;
 }
@@ -388,30 +407,32 @@ void Writer::writeBufferBegin(PointBuffer const& data)
 
         try
         {
-            m = getPrevStage().collectMetadata().getMetadata("drivers.las.reader");
+            m = getPrevStage().collectMetadata().getMetadata(
+                "drivers.las.reader");
         }
         catch (pdal::metadata_not_found const&)
         {
-            // If there's nothing already prepopulated with the las.reader's metadata, we're
-            // just going to take what ever was set in the options (if there was any)
+            // If there's nothing already prepopulated with the las.reader's
+            // metadata, we're just going to take what ever was set in the
+            // options (if there was any)
         }
 
         // Default to PointFormat 3 if not forwarded from a previous metadata
         // or given in a metadata option
-        boost::uint32_t v = getMetadataOption<boost::uint32_t>(getOptions(), m, "dataformat_id", 3);
+        boost::uint32_t v = getMetadataOption<boost::uint32_t>(getOptions(),
+            m, "dataformat_id", 3);
         setPointFormat(static_cast<PointFormat>(v));
         log()->get(logDEBUG) << "Setting point format to "
                              << v
                              << " from metadata " << std::endl;
 
-
-        boost::uint32_t minor = getMetadataOption<boost::uint32_t>(getOptions(), m, "minor_version", 2);
+        boost::uint32_t minor = getMetadataOption<boost::uint32_t>(getOptions(),
+            m, "minor_version", 2);
 
         setFormatVersion(1, static_cast<boost::uint8_t>(minor));
         log()->get(logDEBUG) << "Setting version to "
                              << "1." << minor
                              << " from metadata " << std::endl;
-
 
         std::time_t now;
         std::time(&now);
@@ -424,10 +445,13 @@ void Writer::writeBufferBegin(PointBuffer const& data)
             year = static_cast<boost::uint16_t>(ptm->tm_year + 1900);
         }
 
-        year = getMetadataOption<boost::uint32_t>(getOptions(), m, "creation_year", year);
-        day = getMetadataOption<boost::uint32_t>(getOptions(), m, "creation_doy", day);
+        year = getMetadataOption<boost::uint32_t>(getOptions(), m,
+            "creation_year", year);
+        day = getMetadataOption<boost::uint32_t>(getOptions(), m,
+            "creation_doy", day);
 
-        setDate(static_cast<boost::uint16_t>(day), static_cast<boost::uint16_t>(year));
+        setDate(static_cast<boost::uint16_t>(day),
+            static_cast<boost::uint16_t>(year));
         log()->get(logDEBUG) << "Setting date to format "
                              << day << "/"
                              << year
@@ -451,17 +475,18 @@ void Writer::writeBufferBegin(PointBuffer const& data)
                              << system_id
                              << " from metadata " << std::endl;
 
-        boost::uuids::uuid project_id = getMetadataOption<boost::uuids::uuid>(getOptions(),
-                                        m,
-                                        "project_id",
-                                        boost::uuids::nil_uuid());
+        boost::uuids::uuid project_id =
+            getMetadataOption<boost::uuids::uuid>(getOptions(),
+            m, "project_id", boost::uuids::nil_uuid());
         m_lasHeader.SetProjectId(project_id);
         log()->get(logDEBUG) << "Setting project_id to "
                              << project_id
                              << " from metadata " << std::endl;
         
-        std::string global_encoding_data = getMetadataOption<std::string>(getOptions(), m, "global_encoding", "");
-        std::vector<boost::uint8_t> data = Utils::base64_decode(global_encoding_data);
+        std::string global_encoding_data = getMetadataOption<std::string>(
+            getOptions(), m, "global_encoding", "");
+        std::vector<boost::uint8_t> data =
+            Utils::base64_decode(global_encoding_data);
         
         boost::uint16_t reserved(0);
         if (global_encoding_data.size())
@@ -501,27 +526,21 @@ void Writer::writeBufferBegin(PointBuffer const& data)
             } else 
             {
                 std::ostringstream oss;
-                oss << "size of global_encoding bytes should == 2, not " << data.size();
+                oss << "size of global_encoding bytes should == 2, not " <<
+                    data.size();
                 throw pdal_error(oss.str());                
             }
-            
-            
         }
 
-        // boost::uint16_t reserved = getMetadataOption<boost::uint16_t>(getOptions(),
-        //                            m,
-        //                            "global_encoding",
-        //                            0);
         m_lasHeader.SetReserved(reserved);
         log()->get(logDEBUG) << "Setting reserved to "
                              << reserved
                              << " from metadata " << std::endl;
 
 
-        boost::uint16_t filesource_id = getMetadataOption<boost::uint16_t>(getOptions(),
-                                        m,
-                                        "filesource_id",
-                                        0);
+        boost::uint16_t filesource_id =
+            getMetadataOption<boost::uint16_t>(getOptions(),
+            m, "filesource_id", 0);
         m_lasHeader.SetFileSourceId(filesource_id);
         log()->get(logDEBUG) << "Setting file source id to "
                              << filesource_id
@@ -530,19 +549,19 @@ void Writer::writeBufferBegin(PointBuffer const& data)
         try
         {
 
-            boost::optional<pdal::Options const&> opts = \
-                    getOptions().getOption("metadata").getOptions();
+            boost::optional<pdal::Options const&> opts =
+                getOptions().getOption("metadata").getOptions();
             if (opts)
                 setVLRsFromMetadata(m_lasHeader, m, *opts);
         }
-        catch (pdal::option_not_found&) {  }
+        catch (pdal::option_not_found&)
+        {}
 
 
     } // useMetadata
 
     LasHeaderWriter lasHeaderWriter(m_lasHeader,
-                                    m_streamManager.ostream(),
-                                    m_streamOffset);
+        m_streamManager.ostream(), m_streamOffset);
 
     lasHeaderWriter.write();
 
@@ -564,7 +583,8 @@ void Writer::writeBufferBegin(PointBuffer const& data)
             m_zipper.swap(z);
 
             bool stat(false);
-            stat = m_zipper->open(m_streamManager.ostream(), m_zipPoint->GetZipper());
+            stat = m_zipper->open(m_streamManager.ostream(),
+                m_zipPoint->GetZipper());
             if (!stat)
             {
                 std::ostringstream oss;
@@ -580,9 +600,6 @@ void Writer::writeBufferBegin(PointBuffer const& data)
     }
 
     m_headerInitialized = true;
-
-    return;
-
 }
 
 void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
@@ -593,13 +610,10 @@ void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
 
     m_streamManager.ostream().seekp(m_streamOffset);
     Support::rewriteHeader(m_streamManager.ostream(), m_summaryData);
-
-    return;
 }
 
 void Writer::writeBufferEnd(PointBuffer const& /*data*/)
 {
-    return;
 }
 
 boost::uint32_t Writer::writeBuffer(const PointBuffer& pointBuffer)
@@ -618,12 +632,14 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& pointBuffer)
     bool hasTime = Support::hasTime(pointFormat);
     boost::uint16_t record_length = m_lasHeader.GetDataRecordLength();
 
-    for (boost::uint32_t pointIndex=0; pointIndex<pointBuffer.getNumPoints(); pointIndex++)
+    for (boost::uint32_t pointIndex=0; pointIndex<pointBuffer.getNumPoints();
+        pointIndex++)
     {
         boost::uint8_t* p = buf;
 
         // we always write the base fields
-        boost::int32_t const& x = pointBuffer.getField<boost::int32_t>(*dimensions.X, pointIndex);
+        boost::int32_t const& x =
+            pointBuffer.getField<boost::int32_t>(*dimensions.X, pointIndex);
         boost::int32_t const& y = pointBuffer.getField<boost::int32_t>(*dimensions.Y, pointIndex);
         boost::int32_t const& z = pointBuffer.getField<boost::int32_t>(*dimensions.Z, pointIndex);
 
@@ -634,12 +650,16 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& pointBuffer)
         {
             if (dimensions.Intensity->getByteSize() == 2)
             {
-                boost::uint16_t const& intensity = pointBuffer.getField<boost::uint16_t>(*dimensions.Intensity, pointIndex);
+                boost::uint16_t const& intensity =
+                    pointBuffer.getField<boost::uint16_t>(
+                        *dimensions.Intensity, pointIndex);
                 Utils::write_field<boost::uint16_t>(p, intensity);
             }
             else if (dimensions.Intensity->getByteSize() == 1)
             {
-                boost::uint8_t intensity = pointBuffer.getField<boost::uint8_t>(*dimensions.Intensity, pointIndex);
+                boost::uint8_t intensity =
+                    pointBuffer.getField<boost::uint8_t>(*dimensions.Intensity,
+                     pointIndex);
                 Utils::write_field<boost::uint16_t>(p, intensity);
             }
         }
@@ -650,26 +670,33 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& pointBuffer)
 
         boost::uint8_t returnNumber(0);
         if (dimensions.ReturnNumber)
-            returnNumber = pointBuffer.getField<boost::uint8_t>(*dimensions.ReturnNumber, pointIndex);
+            returnNumber = pointBuffer.getField<boost::uint8_t>(
+                *dimensions.ReturnNumber, pointIndex);
 
         boost::uint8_t numberOfReturns(0);
         if (dimensions.NumberOfReturns)
-            numberOfReturns = pointBuffer.getField<boost::uint8_t>(*dimensions.NumberOfReturns, pointIndex);
+            numberOfReturns = pointBuffer.getField<boost::uint8_t>(
+                *dimensions.NumberOfReturns, pointIndex);
 
         boost::uint8_t scanDirectionFlag(0);
         if (dimensions.ScanDirectionFlag)
-            scanDirectionFlag = pointBuffer.getField<boost::uint8_t>(*dimensions.ScanDirectionFlag, pointIndex);
+            scanDirectionFlag = pointBuffer.getField<boost::uint8_t>(
+                *dimensions.ScanDirectionFlag, pointIndex);
 
         boost::uint8_t edgeOfFlightLine(0);
         if (dimensions.EdgeOfFlightLine)
-            edgeOfFlightLine = pointBuffer.getField<boost::uint8_t>(*dimensions.EdgeOfFlightLine, pointIndex);
+            edgeOfFlightLine = pointBuffer.getField<boost::uint8_t>(
+                *dimensions.EdgeOfFlightLine, pointIndex);
 
-        boost::uint8_t bits = returnNumber | (numberOfReturns<<3) | (scanDirectionFlag << 6) | (edgeOfFlightLine << 7);
+        boost::uint8_t bits = returnNumber | (numberOfReturns<<3) |
+            (scanDirectionFlag << 6) | (edgeOfFlightLine << 7);
         Utils::write_field<boost::uint8_t>(p, bits);
 
         if (dimensions.Classification)
         {
-            boost::uint8_t const& classification = pointBuffer.getField<boost::uint8_t>(*dimensions.Classification, pointIndex);
+            boost::uint8_t const& classification =
+                pointBuffer.getField<boost::uint8_t>(*dimensions.Classification,
+                pointIndex);
             Utils::write_field<boost::uint8_t>(p, classification);
         }
         else
@@ -679,7 +706,9 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& pointBuffer)
 
         if (dimensions.ScanAngleRank)
         {
-            boost::int8_t const& scanAngleRank = pointBuffer.getField<boost::int8_t>(*dimensions.ScanAngleRank, pointIndex);
+            boost::int8_t const& scanAngleRank =
+                pointBuffer.getField<boost::int8_t>(*dimensions.ScanAngleRank,
+                pointIndex);
             Utils::write_field<boost::int8_t>(p, scanAngleRank);
         }
         else
@@ -689,7 +718,9 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& pointBuffer)
 
         if (dimensions.UserData)
         {
-            boost::uint8_t const& userData = pointBuffer.getField<boost::uint8_t>(*dimensions.UserData, pointIndex);
+            boost::uint8_t const& userData =
+                pointBuffer.getField<boost::uint8_t>(*dimensions.UserData,
+                pointIndex);
             Utils::write_field<boost::uint8_t>(p, userData);
         }
         else
@@ -699,7 +730,9 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& pointBuffer)
 
         if (dimensions.PointSourceId)
         {
-            boost::uint16_t const& pointSourceId = pointBuffer.getField<boost::uint16_t>(*dimensions.PointSourceId, pointIndex);
+            boost::uint16_t const& pointSourceId =
+                pointBuffer.getField<boost::uint16_t>(*dimensions.PointSourceId,
+                pointIndex);
             Utils::write_field<boost::uint16_t>(p, pointSourceId);
         }
         else
@@ -714,9 +747,11 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& pointBuffer)
                 Dimension const& tm = *dimensions.Time;
                 double t(0.0);
                 if (tm.getByteSize() == 2)
-                    t = static_cast<double>(pointBuffer.getField<boost::int16_t>(tm, pointIndex));
+                    t = static_cast<double>(
+                        pointBuffer.getField<boost::int16_t>(tm, pointIndex));
                 else if (tm.getByteSize() == 4)
-                    t = static_cast<double>(pointBuffer.getField<boost::int32_t>(tm, pointIndex));
+                    t = static_cast<double>(
+                        pointBuffer.getField<boost::int32_t>(tm, pointIndex));
                 else if (tm.getByteSize() == 8)
                     t = pointBuffer.getField<double>(tm, pointIndex);
                 
@@ -736,14 +771,17 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& pointBuffer)
                 Dimension const& dim = *dimensions.Red;
                 boost::uint16_t v(0);
                 if (dim.getByteSize() == 1)
-                    v = static_cast<boost::uint16_t>(pointBuffer.getField<boost::uint8_t>(dim, pointIndex));
+                    v = static_cast<boost::uint16_t>(
+                    pointBuffer.getField<boost::uint8_t>(dim, pointIndex));
                 else if (dim.getByteSize() == 2)
-                    v = static_cast<boost::uint16_t>(pointBuffer.getField<boost::uint16_t>(dim, pointIndex));
+                    v = static_cast<boost::uint16_t>(
+                    pointBuffer.getField<boost::uint16_t>(dim, pointIndex));
                 else if (dim.getByteSize() == 4)
-                    v = static_cast<boost::uint16_t>(pointBuffer.getField<boost::uint32_t>(dim, pointIndex));
+                    v = static_cast<boost::uint16_t>(
+                    pointBuffer.getField<boost::uint32_t>(dim, pointIndex));
                 else if (dim.getByteSize() == 8)
-                    v = static_cast<boost::uint16_t>(pointBuffer.getField<boost::uint32_t>(dim, pointIndex));
-                
+                    v = static_cast<boost::uint16_t>(
+                    pointBuffer.getField<boost::uint32_t>(dim, pointIndex));
                 Utils::write_field<boost::uint16_t>(p, v);
             }
             else
@@ -756,14 +794,17 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& pointBuffer)
                 Dimension const& dim = *dimensions.Green;
                 boost::uint16_t v(0);
                 if (dim.getByteSize() == 1)
-                    v = static_cast<boost::uint16_t>(pointBuffer.getField<boost::uint8_t>(dim, pointIndex));
+                    v = static_cast<boost::uint16_t>(
+                    pointBuffer.getField<boost::uint8_t>(dim, pointIndex));
                 else if (dim.getByteSize() == 2)
-                    v = static_cast<boost::uint16_t>(pointBuffer.getField<boost::uint16_t>(dim, pointIndex));
+                    v = static_cast<boost::uint16_t>(
+                    pointBuffer.getField<boost::uint16_t>(dim, pointIndex));
                 else if (dim.getByteSize() == 4)
-                    v = static_cast<boost::uint16_t>(pointBuffer.getField<boost::uint32_t>(dim, pointIndex));
+                    v = static_cast<boost::uint16_t>(
+                    pointBuffer.getField<boost::uint32_t>(dim, pointIndex));
                 else if (dim.getByteSize() == 8)
-                    v = static_cast<boost::uint16_t>(pointBuffer.getField<boost::uint32_t>(dim, pointIndex));
-                
+                    v = static_cast<boost::uint16_t>(
+                    pointBuffer.getField<boost::uint32_t>(dim, pointIndex));
                 Utils::write_field<boost::uint16_t>(p, v);
             }
             else
@@ -776,14 +817,17 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& pointBuffer)
                 Dimension const& dim = *dimensions.Blue;
                 boost::uint16_t v(0);
                 if (dim.getByteSize() == 1)
-                    v = static_cast<boost::uint16_t>(pointBuffer.getField<boost::uint8_t>(dim, pointIndex));
+                    v = static_cast<boost::uint16_t>(
+                    pointBuffer.getField<boost::uint8_t>(dim, pointIndex));
                 else if (dim.getByteSize() == 2)
-                    v = static_cast<boost::uint16_t>(pointBuffer.getField<boost::uint16_t>(dim, pointIndex));
+                    v = static_cast<boost::uint16_t>(
+                    pointBuffer.getField<boost::uint16_t>(dim, pointIndex));
                 else if (dim.getByteSize() == 4)
-                    v = static_cast<boost::uint16_t>(pointBuffer.getField<boost::uint32_t>(dim, pointIndex));
+                    v = static_cast<boost::uint16_t>(
+                    pointBuffer.getField<boost::uint32_t>(dim, pointIndex));
                 else if (dim.getByteSize() == 8)
-                    v = static_cast<boost::uint16_t>(pointBuffer.getField<boost::uint32_t>(dim, pointIndex));
-                
+                    v = static_cast<boost::uint16_t>(
+                    pointBuffer.getField<boost::uint32_t>(dim, pointIndex));
                 Utils::write_field<boost::uint16_t>(p, v);
             }
             else
@@ -805,7 +849,8 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& pointBuffer)
             {
                 std::ostringstream oss;
                 const char* err = m_zipper->get_error();
-                if (err==NULL) err="(unknown error)";
+                if (err == NULL)
+                    err = "(unknown error)";
                 oss << "Error writing point: " << std::string(err);
                 throw pdal_error(oss.str());
             }
@@ -816,7 +861,6 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& pointBuffer)
         }
 #else
         Utils::write_n(m_streamManager.ostream(), buf, record_length);
-
 #endif
         ++numValidPoints;
 
