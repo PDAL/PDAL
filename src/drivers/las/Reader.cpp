@@ -159,7 +159,8 @@ Reader::createSequentialIterator(PointBuffer& buffer) const
 pdal::StageRandomIterator*
 Reader::createRandomIterator(PointBuffer& buffer) const
 {
-    return new pdal::drivers::las::iterators::random::Reader(*this, buffer);
+    return new pdal::drivers::las::iterators::random::Reader(*this, buffer,
+        getNumPoints());
 }
 
 
@@ -896,8 +897,7 @@ boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
 {
     PointDimensions cachedDimensions(data.getSchema(), m_reader.getName());
 
-    //ABELL
-    boost::uint32_t numToRead = 1000000 - getIndex();
+    boost::uint32_t numToRead = m_numPoints - getIndex();
 #ifdef PDAL_HAVE_LASZIP
     return m_reader.processBuffer(data, m_istream, numToRead, m_unzipper.get(),
         m_zipPoint.get(), &cachedDimensions, m_read_buffer);
@@ -912,8 +912,9 @@ boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
 namespace random
 {
 
-Reader::Reader(const pdal::drivers::las::Reader& reader, PointBuffer& buffer)
-    : Base(reader), pdal::ReaderRandomIterator(buffer)
+Reader::Reader(const pdal::drivers::las::Reader& reader, PointBuffer& buffer,
+        boost::uint32_t numPoints)
+    : Base(reader), pdal::ReaderRandomIterator(buffer), m_numPoints(numPoints)
 {}
 
 
@@ -957,8 +958,7 @@ boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
 {
     PointDimensions cachedDimensions(data.getSchema(), m_reader.getName());
 
-//ABELL
-    boost::uint32_t numToRead = 1000000 - getIndex();
+    boost::uint32_t numToRead = m_numPoints - getIndex();
 #ifdef PDAL_HAVE_LASZIP
     return m_reader.processBuffer(data, m_istream, numToRead, m_unzipper.get(),
         m_zipPoint.get(), &cachedDimensions, m_read_buffer);
