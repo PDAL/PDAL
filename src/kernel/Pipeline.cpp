@@ -107,10 +107,10 @@ int Pipeline::execute()
         throw app_runtime_error("pipeline file is not a Writer");
 
     if (!manager.isWriterPipeline())
-        throw pdal_error("This pipeline does not have a writer, unable to execute");
+        throw pdal_error("This pipeline does not have a writer, "
+            "unable to execute");
         
     manager.getWriter()->initialize();
-
 
     const boost::uint64_t numPointsToRead = manager.getStage()->getNumPoints();
     
@@ -151,9 +151,7 @@ int Pipeline::execute()
         writer.writePipeline(m_pipelineFile);
     }
     
-    if (dummy)
-        delete dummy;
-        
+    delete dummy;
     delete callback;
     return 0;
 }
