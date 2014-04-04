@@ -115,6 +115,12 @@ BOOST_AUTO_TEST_CASE(pdalinfo_test_switches)
     BOOST_CHECK_EQUAL(output.substr(0, expected.length()), expected);
 #endif
 
+    // does -s work?
+    stat = pdal::Utils::run_shell_command(cmd + " -s", output);
+    BOOST_CHECK_EQUAL(stat, 1);
+    expected = "Usage error: no action option specified";
+    BOOST_CHECK_EQUAL(output.substr(0, expected.length()), expected);
+
     return;
 }
 
