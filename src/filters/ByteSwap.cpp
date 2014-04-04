@@ -71,12 +71,12 @@ void ByteSwap::initialize()
     this->setNumPoints(stage.getNumPoints());
     this->setPointCountType(stage.getPointCountType());
 
-    Schema& schema = this->getSchemaRef();
-
-    schema::index_by_index const& dimensions = schema.getDimensions().get<schema::index>();
+    schema::index_by_index const& dimensions =
+        m_schema.getDimensions().get<schema::index>();
 
     std::vector<Dimension> new_dimensions;
-    for (schema::index_by_index::const_iterator i = dimensions.begin(); i != dimensions.end(); ++i)
+    for (schema::index_by_index::const_iterator i = dimensions.begin();
+        i != dimensions.end(); ++i)
     {
         pdal::Dimension d(*i);
         pdal::EndianType t = i->getEndianness();
@@ -90,13 +90,12 @@ void ByteSwap::initialize()
         }
         else
         {
-            throw pdal_error("ByteSwapFilter can only swap big/little endian dimensions");
+            throw pdal_error("ByteSwapFilter can only swap big/little "
+                "endian dimensions");
         }
         new_dimensions.push_back(d);
     }
-
-    schema = Schema(new_dimensions);
-    return;
+    m_schema = Schema(new_dimensions);
 }
 
 

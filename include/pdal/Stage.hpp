@@ -82,8 +82,7 @@ public:
         { return NULL; }
 
 protected:
-    // setters for the core properties
-    Schema& getSchemaRef();
+    Schema m_schema;
 
     void setSchema(Schema const&);
     void setNumPoints(boost::uint64_t);
@@ -96,7 +95,6 @@ protected:
     void setCoreProperties(const Stage&);
 
 private:
-    Schema m_schema;
     mutable boost::uint64_t m_numPoints;
     PointCountType m_pointCountType;
     Bounds<double> m_bounds;

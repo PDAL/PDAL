@@ -134,15 +134,12 @@ bool Schema::operator!=(const Schema& other) const
 }
 
 
-void Schema::appendDimension(const Dimension& dim)
+void Schema::appendDimension(Dimension d)
 {
-    // Copy the Dimension because we're going to overwrite/set some of
-    // its attributes
-    Dimension d(dim);
-
-    schema::index_by_position& position_index = m_index.get<schema::position>();
-
-    schema::index_by_position::const_reverse_iterator r = position_index.rbegin();
+    schema::index_by_position& position_index =
+        m_index.get<schema::position>();
+    schema::index_by_position::const_reverse_iterator r =
+        position_index.rbegin();
 
     // If we do not have anything in the index, set our current values.
     // Otherwise, use the values from the last entry in the index as our
@@ -150,9 +147,7 @@ void Schema::appendDimension(const Dimension& dim)
     if (r != position_index.rend())
     {
         Dimension const& t = *r;
-
         m_byteSize = m_byteSize + d.getByteSize();
-
         d.setByteOffset(t.getByteOffset() + t.getByteSize());
     }
     else
@@ -165,22 +160,23 @@ void Schema::appendDimension(const Dimension& dim)
 
     schema::index_by_uid const& id_index = m_index.get<schema::uid>();
     schema::index_by_uid::size_type id_count = id_index.count(d.getUUID());
-
     if (id_count >0)
     {
         std::ostringstream oss;
-        oss << "Dimension with uuid '" << d.getUUID() << "' already exists with name '" << d.getName() << "' and namespace '" << d.getNamespace() << "'";
+        oss << "Dimension with uuid '" << d.getUUID() <<
+            "' already exists with name '" << d.getName() <<
+            "' and namespace '" << d.getNamespace() << "'";
         throw duplicate_dimension_id(oss.str());
     }
-    std::pair<schema::index_by_position::iterator, bool> q = position_index.insert(d);
+    std::pair<schema::index_by_position::iterator, bool> q =
+        position_index.insert(d);
     if (!q.second)
     {
         std::ostringstream oss;
-        oss << "Could not insert into schema index because of " << q.first->getName();
+        oss << "Could not insert into schema index because of " <<
+            q.first->getName();
         throw schema_error(oss.str());
     }
-
-    return;
 }
 
 

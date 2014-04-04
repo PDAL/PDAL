@@ -144,8 +144,7 @@ void Reader::initialize()
     m_session = pg_connect(m_connection);
 
     // Read schema from pointcloud_formats if possible
-    Schema& schema = getSchemaRef();
-    schema = fetchSchema();
+    m_schema = fetchSchema();
 
     // Allow spatialreference override if desired
     try

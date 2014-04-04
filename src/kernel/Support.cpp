@@ -46,7 +46,8 @@ namespace pdal { namespace kernel {
 
 pdal::PipelineManager* AppSupport::makePipeline(pdal::Options& options)
 {
-    const std::string inputFile = options.getValueOrThrow<std::string>("filename");
+    const std::string inputFile =
+        options.getValueOrThrow<std::string>("filename");
 
     if (!pdal::FileUtils::fileExists(inputFile))
     {
@@ -58,7 +59,8 @@ pdal::PipelineManager* AppSupport::makePipeline(pdal::Options& options)
     std::string driver = factory.inferReaderDriver(inputFile, options);
     if (driver == "")
     {
-        throw app_runtime_error("Cannot determine input file type of " + inputFile);
+        throw app_runtime_error("Cannot determine input file type of " +
+            inputFile);
     }
 
     pdal::Stage* stage = output->addReader(driver, options);
@@ -72,7 +74,8 @@ pdal::PipelineManager* AppSupport::makePipeline(pdal::Options& options)
     
 pdal::Stage* AppSupport::makeReader(pdal::Options& options)
 {
-    const std::string inputFile = options.getValueOrThrow<std::string>("filename");
+    const std::string inputFile =
+        options.getValueOrThrow<std::string>("filename");
 
     if (!pdal::FileUtils::fileExists(inputFile))
     {
@@ -83,7 +86,8 @@ pdal::Stage* AppSupport::makeReader(pdal::Options& options)
     std::string driver = factory.inferReaderDriver(inputFile, options);
     if (driver == "")
     {
-        throw app_runtime_error("Cannot determine input file type of " + inputFile);
+        throw app_runtime_error("Cannot determine input file type of " +
+            inputFile);
     }
 
     pdal::Stage* stage = factory.createReader(driver, options);
@@ -91,7 +95,6 @@ pdal::Stage* AppSupport::makeReader(pdal::Options& options)
     {
         throw app_runtime_error("reader creation failed");
     }
-
     return stage;
 }
 
