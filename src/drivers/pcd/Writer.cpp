@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Howard Butler, hobu.inc@gmail.com
+* Copyright (c) 2011, Brad Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -32,77 +32,64 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+#include <pdal/drivers/pcd/Writer.hpp>
 
-#include <pdal/Writer.hpp>
-#include <pdal/FileUtils.hpp>
-#include <pdal/StageFactory.hpp>
+#include <algorithm>
+#include <iostream>
+#include <map>
 
-#include <vector>
-#include <string>
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/erase.hpp>
+
+#include <pcl/io/pcd_io.h>
+#include <pcl/io/impl/pcd_io.hpp>
+
+#include <pdal/PCLConversions.hpp>
+#include <pdal/PointBuffer.hpp>
+#include <pdal/pdal_macros.hpp>
+#include <pdal/drivers/pcd/point_types.hpp>
 
 namespace pdal
 {
 namespace drivers
 {
-namespace text
+namespace pcd
 {
 
-#ifdef USE_PDAL_PLUGIN_TEXT
-PDAL_C_START
 
-PDAL_DLL void PDALRegister_writer_text(void* factory);
-
-PDAL_C_END
-#endif
-
-typedef std::shared_ptr<std::ostream> FileStreamPtr;
-
-class PDAL_DLL Writer : public pdal::Writer
+void PcdWriter::processOptions(const Options& ops)
 {
-public:
-    SET_STAGE_NAME("drivers.text.writer", "Text Writer")
-    SET_STAGE_LINK("http://pdal.io/stages/drivers.text.writer.html")
-    SET_STAGE_ENABLED(true)
+    m_filename = ops.getValueOrThrow<std::string>("filename");
+    m_compressed = ops.getValueOrDefault("compression", false);
+}
 
-    Writer(const Options& options) : pdal::Writer(options)
-    {}
 
-    static Options getDefaultOptions();
+Options PcdWriter::getDefaultOptions()
+{
+    Options options;
 
-private:
-    virtual void processOptions(const Options&);
-    virtual void ready(PointContext ctx);
-    virtual void write(const PointBuffer& buf);
-    virtual void done(PointContext ctx);
+    options.add("filename", "", "Filename to write PCD file to");
+    options.add("compression", false, "Write binary compressed data?");
 
-    void writeHeader(PointContext ctx);
-    void writeFooter();
-    void writeGeoJSONHeader();
-    void writeCSVHeader(PointContext ctx);
+    return options;
+}
 
-    void writeGeoJSONBuffer(const PointBuffer& data);
-    void writeCSVBuffer(const PointBuffer& data);
-    
-    std::string m_filename;
-    std::string m_outputType;
-    std::string m_callback;
-    bool m_writeAllDims;
-    std::string m_dimOrder;
-    bool m_writeHeader;
-    std::string m_newline;
-    std::string m_delimiter;
-    bool m_quoteHeader;
-    bool m_packRgb;
 
-    FileStreamPtr m_stream;
-    Dimension::IdList m_dims;
+void PcdWriter::write(const PointBuffer& data)
+{
+    pcl::PointCloud<XYZIRGBA>::Ptr cloud(new pcl::PointCloud<XYZIRGBA>);
+    Bounds<double> const& buffer_bounds = data.calculateBounds();
+    pdal::PDALtoPCD(const_cast<PointBuffer&>(data), *cloud, buffer_bounds);
 
-    Writer& operator=(const Writer&); // not implemented
-    Writer(const Writer&); // not implemented
-};
+    pcl::PCDWriter w;
 
-} // namespace text
-} // namespace drivers
-} // namespace pdal
+    if (m_compressed)
+        w.writeBinaryCompressed<XYZIRGBA>(m_filename, *cloud);
+    else
+        w.writeASCII<XYZIRGBA>(m_filename, *cloud);
+}
 
+
+}
+}
+} // namespaces
