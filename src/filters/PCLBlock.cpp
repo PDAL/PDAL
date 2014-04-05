@@ -35,12 +35,10 @@
 #include <pdal/PCLConversions.hpp>
 #include <pdal/filters/PCLBlock.hpp>
 
-#ifdef PDAL_HAVE_PCL
 #include <pcl/console/print.h>
 #include <pcl/point_types.h>
 #include <pcl/pipeline/pipeline.h>
 #include <pcl/io/pcd_io.h>
-#endif
 
 namespace pdal
 {
@@ -67,7 +65,6 @@ PointBufferSet PCLBlock::run(PointBufferPtr input)
     PointBufferSet pbSet;
     pbSet.insert(output);
 
-#ifdef PDAL_HAVE_PCL
     bool logOutput = log()->getLevel() > LogLevel::Debug1;
     if (logOutput)
         log()->floatPrecision(8);
@@ -136,7 +133,6 @@ PointBufferSet PCLBlock::run(PointBufferPtr input)
     log()->get(LogLevel::Debug2) << output->getFieldAs<double>(Dimension::Id::X, 0) << ", " <<
         output->getFieldAs<double>(Dimension::Id::Y, 0) << ", " << 
         output->getFieldAs<double>(Dimension::Id::Z, 0) << std::endl;
-#endif
     return pbSet;
 }
 

@@ -83,6 +83,10 @@ MAKE_READER_CREATOR(SqliteReader, pdal::drivers::sqlite::SQLiteReader)
 #endif
 #endif
 
+#ifdef PDAL_HAVE_PCL
+MAKE_READER_CREATOR(PcdReader, pdal::drivers::pcd::PcdReader);
+#endif
+
 #ifdef PDAL_HAVE_POSTGRESQL
 #ifndef USE_PDAL_PLUGIN_PGPOINTCLOUD
 MAKE_READER_CREATOR(PgPcReader, pdal::drivers::pgpointcloud::PgReader)
@@ -151,6 +155,10 @@ MAKE_WRITER_CREATOR(OciWriter, pdal::drivers::oci::Writer)
 MAKE_WRITER_CREATOR(P2GWriter, pdal::drivers::p2g::P2gWriter)
 #endif
 
+#ifdef PDAL_HAVE_PCL
+MAKE_WRITER_CREATOR(PcdWriter, pdal::drivers::pcd::PcdWriter);
+#endif
+
 #ifdef PDAL_HAVE_SQLITE
 #ifndef USE_PDAL_PLUGIN_SQLITE
 MAKE_WRITER_CREATOR(SqliteWriter, pdal::drivers::sqlite::SQLiteWriter)
@@ -196,6 +204,10 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
     drivers["icebridge"] = "drivers.icebridge.reader";
     drivers["sqlite"] = "drivers.sqlite.reader";
     
+#ifdef PDAL_HAVE_PCL
+    drivers["pcd"] = "drivers.pcd.reader";
+#endif
+
     if (ext == "") return "";
     ext = ext.substr(1, ext.length()-1);
     if (ext == "") return "";
@@ -215,7 +227,11 @@ std::string StageFactory::inferWriterDriver(const std::string& filename)
     std::map<std::string, std::string> drivers;
     drivers["las"] = "drivers.las.writer";
     drivers["laz"] = "drivers.las.writer";
-    drivers["pcd"] = "drivers.text.writer";
+#ifdef PDAL_HAVE_PCL
+    drivers["pcd"] = "drivers.pcd.writer";
+#endif
+    drivers["csv"] = "drivers.text.writer";
+    drivers["json"] = "drivers.text.writer";
     drivers["xyz"] = "drivers.text.writer";
     drivers["txt"] = "drivers.text.writer";
     drivers["ntf"] = "drivers.nitf.writer";
@@ -369,6 +385,10 @@ void StageFactory::registerKnownReaders()
 #endif
 #endif
 
+#ifdef PDAL_HAVE_PCL
+    REGISTER_READER(PcdReader, pdal::drivers::pcd::PcdReader);
+#endif
+
 #ifdef PDAL_HAVE_POSTGRESQL
 #ifndef USE_PDAL_PLUGIN_PGPOINTCLOUD
     REGISTER_READER(PgPcReader, pdal::drivers::pgpointcloud::PgReader);
@@ -438,6 +458,10 @@ void StageFactory::registerKnownWriters()
 
 #ifdef PDAL_HAVE_P2G
     REGISTER_WRITER(P2GWriter, pdal::drivers::p2g::P2gWriter);
+#endif
+
+#ifdef PDAL_HAVE_PCL
+    REGISTER_WRITER(PcdWriter, pdal::drivers::pcd::PcdWriter);
 #endif
 
 #ifdef PDAL_HAVE_SQLITE

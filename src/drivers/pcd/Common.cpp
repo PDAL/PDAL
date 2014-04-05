@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Howard Butler, hobu.inc@gmail.com
+* Copyright (c) 2014, Brad Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -32,77 +32,32 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
-
-#include <pdal/Writer.hpp>
-#include <pdal/FileUtils.hpp>
-#include <pdal/StageFactory.hpp>
-
-#include <vector>
-#include <string>
+#include <pdal/drivers/pcd/Common.hpp>
 
 namespace pdal
 {
 namespace drivers
 {
-namespace text
+namespace pcd
 {
 
-#ifdef USE_PDAL_PLUGIN_TEXT
-PDAL_C_START
-
-PDAL_DLL void PDALRegister_writer_text(void* factory);
-
-PDAL_C_END
-#endif
-
-typedef std::shared_ptr<std::ostream> FileStreamPtr;
-
-class PDAL_DLL Writer : public pdal::Writer
+Dimension::IdList fileDimensions()
 {
-public:
-    SET_STAGE_NAME("drivers.text.writer", "Text Writer")
-    SET_STAGE_LINK("http://pdal.io/stages/drivers.text.writer.html")
-    SET_STAGE_ENABLED(true)
+    Dimension::IdList ids;
 
-    Writer(const Options& options) : pdal::Writer(options)
-    {}
+    using namespace Dimension;
+    ids.push_back(Id::X);
+    ids.push_back(Id::Y);
+    ids.push_back(Id::Z);
+    ids.push_back(Id::Intensity);
+    ids.push_back(Id::Red);
+    ids.push_back(Id::Green);
+    ids.push_back(Id::Blue);
 
-    static Options getDefaultOptions();
+    return ids;
+}
 
-private:
-    virtual void processOptions(const Options&);
-    virtual void ready(PointContext ctx);
-    virtual void write(const PointBuffer& buf);
-    virtual void done(PointContext ctx);
-
-    void writeHeader(PointContext ctx);
-    void writeFooter();
-    void writeGeoJSONHeader();
-    void writeCSVHeader(PointContext ctx);
-
-    void writeGeoJSONBuffer(const PointBuffer& data);
-    void writeCSVBuffer(const PointBuffer& data);
-    
-    std::string m_filename;
-    std::string m_outputType;
-    std::string m_callback;
-    bool m_writeAllDims;
-    std::string m_dimOrder;
-    bool m_writeHeader;
-    std::string m_newline;
-    std::string m_delimiter;
-    bool m_quoteHeader;
-    bool m_packRgb;
-
-    FileStreamPtr m_stream;
-    Dimension::IdList m_dims;
-
-    Writer& operator=(const Writer&); // not implemented
-    Writer(const Writer&); // not implemented
-};
-
-} // namespace text
+} // namespace pcd
 } // namespace drivers
 } // namespace pdal
 
