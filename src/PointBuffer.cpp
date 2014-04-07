@@ -211,6 +211,8 @@ void PointBuffer::pack( PointBuffer const* input,
                         bool bRemoveIgnoredDimensions,
                         bool bResetOutputSchema)
 {
+    if (!input->getBufferByteLength() || !output->getBufferByteLength())
+        return;
 
     // Creates a new buffer that has the ignored dimensions removed from
     // it.
@@ -789,8 +791,10 @@ inline void copyOver(boost::uint8_t *destination_position,
 void PointBuffer::extractIndices(PointBuffer const& source,
     PointBuffer& destination, std::vector<int> indices)
 {
-    destination.setNumPoints(indices.size());
+    if (!destination.getBufferByteLength())
+        return;
 
+    destination.setNumPoints(indices.size());
     size_t j = 0;
     for (size_t i = 0; i < indices.size(); ++i)
         destination.copyPointFast(j++, indices[i], source);
@@ -803,6 +807,9 @@ void PointBuffer::copyLikeDimensions(PointBuffer const& source,
     boost::uint32_t destination_starting_position,
     boost::uint32_t howMany)
 {
+    if (!source.getBufferByteLength() || !destination.getBufferByteLength())
+        return;
+
     assert(howMany <=
         destination.getCapacity() - destination_starting_position);
     assert(howMany <= source.getCapacity() - source_starting_position);

@@ -93,46 +93,16 @@ public:
 
     /// Empty constructor
     Option()
-        : m_name("")
-        , m_value("")
-        , m_description("")
-    {
-        return;
-    }
+    {}
 
     /// Primary constructor
     template <typename T>
-    Option(std::string const& name, const T& value, std::string const& description="")
-        : m_name(name)
-        , m_value("")
-        , m_description(description)
+    Option(std::string const& name, const T& value,
+            std::string const& description = "") :
+        m_name(name), m_description(description)
     {
         // FIXME: This shouldn't be able to throw -- hobu
         setValue<T>(value);
-        return;
-    }
-
-    /// Copy constructor
-    Option(const Option& rhs)
-        : m_name(rhs.m_name)
-        , m_value(rhs.m_value)
-        , m_description(rhs.m_description)
-        , m_options(rhs.m_options)
-    {
-        return;
-    }
-
-    /// Assignment constructor
-    Option& operator=(const Option& rhs)
-    {
-        if (&rhs != this)
-        {
-            m_name = rhs.m_name;
-            m_value = rhs.m_value;
-            m_description = rhs.m_description;
-            m_options = rhs.m_options;
-        }
-        return *this;
     }
 
     /// Construct from an existing boost::property_tree
@@ -142,13 +112,10 @@ public:
     /// Equality
     bool equals(const Option& rhs) const
     {
-        if (m_name == rhs.getName() &&
-                m_value == rhs.getValue<std::string>() &&
-                m_description == rhs.getDescription() && m_options == rhs.m_options)
-        {
-            return true;
-        }
-        return false;
+        return (m_name == rhs.getName() &&
+            m_value == rhs.getValue<std::string>() &&
+            m_description == rhs.getDescription() &&
+            m_options == rhs.m_options);
     }
 
     /// Equality operator
@@ -197,7 +164,8 @@ public:
         return boost::lexical_cast<T>(m_value);
     }
 
-    /// sets the value of the Option to T after boost::lexical_cast'ing it to a std::string
+    /// sets the value of the Option to T after boost::lexical_cast'ing
+    /// it to a std::string
     template<typename T> void setValue(const T& value)
     {
         m_value = boost::lexical_cast<std::string>(value);
@@ -229,12 +197,15 @@ public:
     /// the string value of the Option is "true" or "false"
     template<> bool getValue() const
     {
-        if (m_value=="true") return true;
-        if (m_value=="false") return false;
+        if (m_value == "true")
+            return true;
+        if (m_value=="false")
+            return false;
         return boost::lexical_cast<bool>(m_value);
     }
 
-    /// explicit specialization to return a (const ref) string so we don't need lexical_cast
+    /// explicit specialization to return a (const ref) string so we
+    /// don't need lexical_cast
     template<> const std::string& getValue() const
     {
         return m_value;
@@ -318,27 +289,16 @@ public:
     Options(const Options&);
 
     // assignment operator
-    Options& operator=(const Options& rhs)
-    {
-        if (&rhs != this)
-        {
-            m_options = rhs.m_options;
-        }
-        return *this;
-    }
-
-    // assignment operator
     Options& operator+=(const Options& rhs)
     {
-
         if (&rhs != this)
         {
             options::map_t::const_iterator i;
             for (i = rhs.m_options.begin(); i != rhs.m_options.end(); ++i)
             {
-                m_options.insert(std::pair<std::string, Option>(i->first, i->second));
+                m_options.insert(std::pair<std::string, Option>(
+                    i->first, i->second));
             }
-
         }
         return *this;
     }
@@ -350,11 +310,7 @@ public:
 
     bool equals(const Options& rhs) const
     {
-        if (m_options== rhs.m_options)
-        {
-            return true;
-        }
-        return false;
+        return m_options == rhs.m_options;
     }
 
     bool operator==(const Options& rhs) const
@@ -378,7 +334,8 @@ public:
     void remove(const std::string& name);
 
     // add an option (shortcut version, bypass need for an Option object)
-    template<typename T> void add(const std::string& name, T value, const std::string& description="")
+    template<typename T> void add(const std::string& name, T value,
+        const std::string& description="")
     {
         Option opt(name, value, description);
         add(opt);
@@ -397,7 +354,8 @@ public:
     }
 
     // get value of an option, or use given default if option not present
-    template<typename T> T getValueOrDefault(std::string const& name, T defaultValue) const
+    template<typename T> T getValueOrDefault(std::string const& name,
+        T defaultValue) const
     {
         T result;
 
@@ -422,7 +380,8 @@ public:
     boost::property_tree::ptree toPTree() const;
 
     // the empty options list
-    // BUG: this should be a member variable, not a function, but doing so causes vs2010 to fail to link
+    // BUG: this should be a member variable, not a function, but doing so
+    // causes vs2010 to fail to link
     static const Options& none();
 
     void dump() const;
@@ -476,14 +435,16 @@ public:
             try
             {
                 meta->getOption(name);
-                } catch (pdal::option_not_found&) { return boost::optional<T>(); }
+            }
+            catch (pdal::option_not_found&)
+            {
+                return boost::optional<T>();
+            }
 
             return boost::optional<T>(meta->getOption(name).getValue<T>());
         }
-
         return boost::optional<T>();
     }
-
 
 private:
     options::map_t m_options;

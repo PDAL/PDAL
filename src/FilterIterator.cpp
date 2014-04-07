@@ -41,7 +41,7 @@ namespace pdal
 
 FilterSequentialIterator::FilterSequentialIterator(const Filter& filter,
         PointBuffer& buffer) :
-    StageSequentialIterator(filter, buffer), m_filter(filter)
+    StageSequentialIterator(buffer), m_filter(filter)
 {
     m_prevIterator = m_filter.getPrevStage().createSequentialIterator(buffer);
 }
@@ -83,7 +83,7 @@ const StageSequentialIterator& FilterSequentialIterator::getPrevIterator() const
 
 FilterRandomIterator::FilterRandomIterator(const Filter& filter,
         PointBuffer& buffer) :
-    StageRandomIterator(filter, buffer) , m_filter(filter)
+    StageRandomIterator(buffer) , m_filter(filter)
 {
     m_prevIterator = m_filter.getPrevStage().createRandomIterator(buffer);
 }

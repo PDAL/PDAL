@@ -472,7 +472,7 @@ vector<boost::uint8_t> Utils::base64_decode(string const& encoded_string)
 FILE* Utils::portable_popen(const string& command, const string& mode)
 {
 #ifdef PDAL_PLATFORM_WIN32
-    const :string dos_command = Utils::replaceAll(command, "/", "\\");
+    const string dos_command = Utils::replaceAll(command, "/", "\\");
     return _popen(dos_command.c_str(), mode.c_str());
 #else
     return popen(command.c_str(), mode.c_str());

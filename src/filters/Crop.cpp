@@ -448,7 +448,7 @@ boost::uint32_t Crop::readBufferImpl(PointBuffer& data)
 
 bool Crop::atEndImpl() const
 {
-    // we don't have a fixed point point --
+    // we don't have a fixed point count --
     // we are at the end only when our source is at the end
     const StageSequentialIterator& iter = getPrevIterator();
     return iter.atEnd();

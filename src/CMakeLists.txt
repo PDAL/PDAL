@@ -40,6 +40,7 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/Metadata.hpp"
   "${PDAL_HEADERS_DIR}/MultiFilter.hpp"
   "${PDAL_HEADERS_DIR}/MultiFilterIterator.hpp"
+  "${PDAL_HEADERS_DIR}/NullPointBuffer.hpp"
   "${PDAL_HEADERS_DIR}/Options.hpp"
   "${PDAL_HEADERS_DIR}/PipelineManager.hpp"
   "${PDAL_HEADERS_DIR}/PipelineReader.hpp"
@@ -84,7 +85,7 @@ set(PDAL_BASE_CPP
   Metadata.cpp
   MultiFilter.cpp
   MultiFilterIterator.cpp
-#  Object.cpp
+  NullPointBuffer.cpp
   Options.cpp
   PipelineManager.cpp
   PipelineReader.cpp
@@ -703,6 +704,10 @@ if (WITH_PCL)
     target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE} ${PCL_LIBRARIES})
 endif()
 
+if (WITH_LIBXML2)
+    target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE} ${LIBXML2_LIBRARIES})
+endif()
+
   target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE}
     "${PDAL_LIB_NAME}"
     "${CMAKE_THREAD_LIBS_INIT}"
@@ -711,7 +716,6 @@ endif()
     "${MRSID_LIBRARY}"
     "${GEOTIFF_LIBRARY}"
     "${GDAL_LIBRARY}"
-    ${LIBXML2_LIBRARIES}
     "${P2G_LIBRARY}"
     "${GEOS_LIBRARY}"
     "${HEXER_LIBRARY}"

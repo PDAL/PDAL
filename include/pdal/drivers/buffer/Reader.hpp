@@ -91,7 +91,8 @@ namespace sequential
 class PDAL_DLL Reader : public pdal::ReaderSequentialIterator
 {
 public:
-    Reader(pdal::drivers::buffer::Reader const& reader, PointBuffer& buffer);
+    Reader(pdal::drivers::buffer::Reader const& reader, PointBuffer& buffer,
+        boost::uint32_t numPoints, LogPtr log);
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t);
@@ -99,6 +100,8 @@ private:
     bool atEndImpl() const;
 
     pdal::drivers::buffer::Reader const& m_reader;
+    boost::uint32_t m_numPoints;
+    LogPtr m_log;
 };
 
 }

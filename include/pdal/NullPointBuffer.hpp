@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2014, Andrew Bell
 *
 * All rights reserved.
 *
@@ -31,42 +31,48 @@
 * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 * OF SUCH DAMAGE.
 ****************************************************************************/
+#pragma once
 
-#include <pdal/Reader.hpp>
-#include <pdal/ReaderIterator.hpp>
-
+#include <pdal/PointBuffer.hpp>
 
 namespace pdal
 {
 
-//---------------------------------------------------------------------------
-//
-// ReaderSequentialIterator
-//
-//---------------------------------------------------------------------------
+class PDAL_DLL NullPointBuffer : public PointBuffer
+{
+public:
+    NullPointBuffer();
+    
+    virtual const Bounds<double>& getSpatialBounds() const;
+    virtual void setSpatialBounds(const Bounds<double>& bounds);
+    virtual boost::uint32_t getNumPoints() const
+        { return 0; }
+    virtual void setNumPoints(boost::uint32_t v)
+        { (void)v; }
+    virtual boost::uint32_t getCapacity() const
+        { return std::numeric_limits<boost::uint32_t>::max(); }
+    virtual pointbuffer::PointBufferByteSize getBufferByteCapacity() const
+    {
+        return std::numeric_limits<pointbuffer::PointBufferByteSize>::max();
+    }
+    virtual void getData(boost::uint8_t** data, boost::uint64_t* size) const;
+    virtual void setData(boost::uint8_t* data, boost::uint32_t pointIndex);
+    virtual void setDataStride(boost::uint8_t* data, boost::uint32_t pointIndex,
+        boost::uint32_t byteCount);
+    virtual void reset(Schema const& new_schema);
+    virtual void resize(boost::uint32_t const& capacity, bool bExact=false);
+    virtual PointBuffer* pack(bool bRemoveIgnoredDimensions = true) const;
+    virtual PointBuffer* flipOrientation() const;
+    virtual boost::property_tree::ptree toPTree() const;
+    virtual std::ostream& toRST(std::ostream& os) const;
+    virtual pdal::Bounds<double> calculateBounds(bool bis3d=true) const;
+    virtual double applyScaling(Dimension const& d,
+        std::size_t pointIndex) const;
 
-ReaderSequentialIterator::ReaderSequentialIterator(PointBuffer& buffer)
-    : StageSequentialIterator(buffer)
-{}
-
-
-ReaderSequentialIterator::~ReaderSequentialIterator()
-{}
-
-
-//---------------------------------------------------------------------------
-//
-// RandomIterator
-//
-//---------------------------------------------------------------------------
-
-ReaderRandomIterator::ReaderRandomIterator(PointBuffer& buffer)
-    : StageRandomIterator(buffer)
-{}
-
-
-ReaderRandomIterator::~ReaderRandomIterator()
-{}
-
+protected:
+    virtual std::string printDimension(Dimension const& dimension,
+        boost::uint32_t index) const;
+};
 
 } // namespace pdal
+

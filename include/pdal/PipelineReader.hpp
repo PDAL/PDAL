@@ -54,8 +54,8 @@ private:
     class StageParserContext;
 
 public:
-    PipelineReader(PipelineManager&, bool debug=false, boost::uint32_t verbose=0);
-    ~PipelineReader();
+    PipelineReader(PipelineManager&, bool debug=false,
+        boost::uint32_t verbose = 0);
 
     // Use this to fill in a pipeline manager with an XML file that
     // contains a <Writer> as the last pipeline stage.
@@ -69,16 +69,18 @@ private:
     typedef std::map<std::string, std::string> map_t;
 
     bool parseElement_Pipeline(const boost::property_tree::ptree&);
-    Stage* parseElement_anystage(const std::string& name, const boost::property_tree::ptree& subtree);
+    Stage* parseElement_anystage(const std::string& name,
+        const boost::property_tree::ptree& subtree);
     Reader* parseElement_Reader(const boost::property_tree::ptree& tree);
     Filter* parseElement_Filter(const boost::property_tree::ptree& tree);
-    MultiFilter* parseElement_MultiFilter(const boost::property_tree::ptree& tree);
+    MultiFilter* parseElement_MultiFilter(
+        const boost::property_tree::ptree& tree);
     Writer* parseElement_Writer(const boost::property_tree::ptree& tree);
-
     Option parseElement_Option(const boost::property_tree::ptree& tree);
-
-    void collect_attributes(map_t& attrs, const boost::property_tree::ptree& tree);
-    void parse_attributes(map_t& attrs, const boost::property_tree::ptree& tree);
+    void collect_attributes(map_t& attrs,
+        const boost::property_tree::ptree& tree);
+    void parse_attributes(map_t& attrs,
+        const boost::property_tree::ptree& tree);
 
 private:
     PipelineManager& m_manager;

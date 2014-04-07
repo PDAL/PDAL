@@ -99,12 +99,13 @@ namespace sequential
 class Reader : public pdal::ReaderSequentialIterator
 {
 public:
-    Reader(const pdal::drivers::mrsid::Reader& reader, PointBuffer& buffer);
+    Reader(const pdal::drivers::mrsid::Reader& reader, PointBuffer& buffer, boost::uint32_t numPoints);
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t);
     boost::uint32_t readBufferImpl(PointBuffer&);
     bool atEndImpl() const;
+    boost::uint32_t m_numPoints;
 
     const pdal::drivers::mrsid::Reader& m_reader;
 };
@@ -117,13 +118,16 @@ namespace random
 class Reader : public pdal::ReaderRandomIterator
 {
 public:
-    Reader(const pdal::drivers::mrsid::Reader& reader, PointBuffer& buffer);
+    Reader(const pdal::drivers::mrsid::Reader& reader, 
+           PointBuffer& buffer, boost::uint32_t numPoints);
 
 private:
     boost::uint64_t seekImpl(boost::uint64_t);
     boost::uint32_t readBufferImpl(PointBuffer&);
 
     const pdal::drivers::mrsid::Reader& m_reader;
+    boost::uint32_t m_numPoints;
+    
 };
 
 

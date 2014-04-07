@@ -104,9 +104,11 @@ Options Mosaic::getDefaultOptions()
 }
 
 
-pdal::StageSequentialIterator* Mosaic::createSequentialIterator(PointBuffer& buffer) const
+pdal::StageSequentialIterator*
+Mosaic::createSequentialIterator(PointBuffer& buffer) const
 {
-    return new pdal::filters::iterators::sequential::Mosaic(*this, buffer);
+    return new pdal::filters::iterators::sequential::Mosaic(*this, buffer,
+        log(), getOptions());
 }
 
 
@@ -116,11 +118,11 @@ namespace sequential
 {
 
 
-Mosaic::Mosaic(const pdal::filters::Mosaic& filter, PointBuffer& buffer)
-    : MultiFilterSequentialIterator(filter, buffer)
-{
-    return;
-}
+Mosaic::Mosaic(const pdal::filters::Mosaic& filter, PointBuffer& buffer,
+        LogPtr log, const Options& options)
+    : MultiFilterSequentialIterator(filter, buffer), m_log(log),
+    m_options(options)
+{}
 
 
 Mosaic::~Mosaic()
@@ -172,27 +174,34 @@ DimensionMapPtr Mosaic::fetchDimensionMap(PointBuffer const& user_buffer, Buffer
 
     if (i != m_dimensions.end())
     {
-        getStage().log()->get(logDEBUG2) 
-            << "Mosaic::fetchDimensionMap: found existing DimensionMap with id " 
-            << m_iteratorIndex << std::endl;
+        m_log->get(logDEBUG2) << "Mosaic::fetchDimensionMap: found existing "
+            "DimensionMap with id " << m_iteratorIndex << std::endl;
         return i->second;
     }
     else
     {
-        bool ignore_namespaces = getStage().getOptions().getValueOrDefault<bool>("ignore_namespaces", false);
-        DimensionMapPtr output  = DimensionMapPtr(stage_buffer->getSchema().mapDimensions(  user_buffer.getSchema(), 
-                                                                                               ignore_namespaces /*ignore namespaces*/));
-        getStage().log()->get(logDEBUG2) << "DimensionMapPtr->size():  " << output->m.size() << std::endl;
-        if (!output->m.size()) throw pdal_error("fetchDimensionMap map was unable to map any dimensions!");
-        typedef std::map<Dimension const*, Dimension const*>::const_iterator Iterator;
+        bool ignore_namespaces =
+            m_options.getValueOrDefault<bool>("ignore_namespaces", false);
+        DimensionMapPtr output  =
+            DimensionMapPtr(stage_buffer->getSchema().
+                mapDimensions(user_buffer.getSchema(), ignore_namespaces));
+        m_log->get(logDEBUG2) << "DimensionMapPtr->size():  " <<
+            output->m.size() << std::endl;
+        if (!output->m.size())
+            throw pdal_error("fetchDimensionMap map was unable to map "
+                "any dimensions!");
+        typedef std::map<Dimension const*,
+            Dimension const*>::const_iterator Iterator;
         for (Iterator i = output->m.begin(); i != output->m.end(); ++i)
         {
-            getStage().log()->get(logDEBUG2) << "mapping " << i->first->getFQName() << " to " << i->second->getFQName() << std::endl;
+            m_log->get(logDEBUG2) << "mapping " << i->first->getFQName() <<
+                " to " << i->second->getFQName() << std::endl;
         }
         std::pair<int, DimensionMapPtr> p(m_iteratorIndex, output);
         m_dimensions.insert(p);
-        getStage().log()->get(logDEBUG2) << "IteratorBase::fetchDimensionMap: creating new DimensionMap with id " << m_iteratorIndex << std::endl;
-
+        m_log->get(logDEBUG2) << "IteratorBase::fetchDimensionMap: "
+            "creating new DimensionMap with id " << m_iteratorIndex <<
+            std::endl;
         return p.second;
     }
 }
@@ -205,17 +214,18 @@ BufferPtr Mosaic::fetchPointBuffer(PointBuffer const& user_buffer)
 
     if (i != m_buffers.end())
     {
-        getStage().log()->get(logDEBUG2) << "Mosaic::fetchPointBuffer: found existing PointBuffer with id " << m_iteratorIndex << std::endl;
+        m_log->get(logDEBUG2) << "Mosaic::fetchPointBuffer: found existing "
+            "PointBuffer with id " << m_iteratorIndex << std::endl;
         return i->second;
     }
     else
     {
-
-        BufferPtr output  = BufferPtr(new PointBuffer(user_buffer.getSchema(), user_buffer.getCapacity()));
+        BufferPtr output  = BufferPtr(new PointBuffer(user_buffer.getSchema(),
+            user_buffer.getCapacity()));
         std::pair<int, BufferPtr> p(m_iteratorIndex, output);
         m_buffers.insert(p);
-        getStage().log()->get(logDEBUG2) << "Mosaic::fetchPointBuffer: creating new PointBuffer with id " << m_iteratorIndex << std::endl;
-
+        m_log->get(logDEBUG2)  << "Mosaic::fetchPointBuffer: creating "
+            "new PointBuffer with id " << m_iteratorIndex << std::endl;
         return p.second;
     }
 }

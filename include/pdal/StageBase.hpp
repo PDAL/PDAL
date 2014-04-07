@@ -104,10 +104,8 @@ public:
     virtual boost::property_tree::ptree serializePipeline() const = 0;
 
     /// @return the pdal::LogPtr for this pdal::Stage.
-    virtual LogPtr log(void) const
-    {
-        return m_log;
-    }
+    virtual LogPtr log() const
+        { return m_log; }
 
 
     /// Put data to the log

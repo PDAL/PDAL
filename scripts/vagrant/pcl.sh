@@ -11,7 +11,7 @@ git clone https://github.com/chambbj/pcl.git pcl
 cd pcl
 mkdir build
 cd build
-git checkout develop
+git checkout pipeline
 cmake   -G "Unix Makefiles"  \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=/usr \

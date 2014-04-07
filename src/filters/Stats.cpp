@@ -214,7 +214,8 @@ Options Stats::getDefaultOptions()
 
 pdal::StageSequentialIterator* Stats::createSequentialIterator(PointBuffer& buffer) const
 {
-    return new pdal::filters::iterators::sequential::Stats(*this, buffer);
+    return new pdal::filters::iterators::sequential::Stats(*this, buffer,
+        log(), getPrevStage().getNumPoints(), getName(), getOptions());
 }
 
 namespace iterators
@@ -222,11 +223,12 @@ namespace iterators
 namespace sequential
 {
 
-Stats::Stats(const pdal::filters::Stats& filter, PointBuffer& buffer)
-    : pdal::FilterSequentialIterator(filter, buffer)
-{
-    return;
-}
+Stats::Stats(const pdal::filters::Stats& filter, PointBuffer& buffer,
+        LogPtr log, boost::uint64_t numPoints, const std::string& name,
+        const Options& options)
+    : pdal::FilterSequentialIterator(filter, buffer), m_log(log),
+    m_numPoints(numPoints), m_name(name), m_options(options)
+{}
 
 
 boost::uint32_t Stats::readBufferImpl(PointBuffer& data)
@@ -264,9 +266,8 @@ void Stats::readBufferEndImpl(PointBuffer& buffer)
 {
     pdal::Metadata& metadata = buffer.getMetadataRef();
     pdal::Metadata stats = toMetadata();
-    stats.setName(getStage().getName());
+    stats.setName(m_name);
     metadata.setMetadata(stats);
-
 }
 
 void Stats::readBufferBeginImpl(PointBuffer& buffer)
@@ -275,19 +276,20 @@ void Stats::readBufferBeginImpl(PointBuffer& buffer)
 
     if (m_stats.size() == 0)
     {
-        Options const& options = getStage().getOptions();
-
-        std::string exact = options.getValueOrDefault<std::string>("exact_dimensions", "");
+        std::string exact =
+            m_options.getValueOrDefault<std::string>("exact_dimensions", "");
         if (exact.size())
         {
-            getStage().log()->get(logDEBUG) << "Calculating histogram statistics for exact names '" << exact << "'"<<std::endl;
+            m_log->get(logDEBUG) << "Calculating histogram statistics for "
+                "exact names '" << exact << "'"<<std::endl;
             boost::char_separator<char> seps(" ,");
 
 
             tokenizer parameters(exact, seps);
             for (tokenizer::iterator t = parameters.begin(); t != parameters.end(); ++t)
             {
-                getStage().log()->get(logDEBUG) << "adding '" << *t << "' as exact dimension name to cumulate stats for" << std::endl;
+                m_log->get(logDEBUG) << "adding '" << *t << "' as exact "
+                    "dimension name to cumulate stats for" << std::endl;
                 m_exact_dimension_names.push_back(*t);
                 m_dimension_names.push_back(*t);
 
@@ -299,22 +301,25 @@ void Stats::readBufferBeginImpl(PointBuffer& buffer)
         for (std::vector<std::string>::const_iterator i = m_exact_dimension_names.begin();
                 i != m_exact_dimension_names.end(); ++i)
         {
-            getStage().log()->get(logDEBUG2) << "Using exact histogram counts for '" << *i << "'" << std::endl;
+            m_log->get(logDEBUG2) << "Using exact histogram counts for '" <<
+                *i << "'" << std::endl;
             std::pair<std::string,bool> p(*i, true);
             exact_dimensions.insert(p);
         }
 
-        std::string names = options.getValueOrDefault<std::string>("dimensions", "");
+        std::string names =
+            m_options.getValueOrDefault<std::string>("dimensions", "");
         if (names.size())
         {
-            getStage().log()->get(logDEBUG) << "Using explicit list of dimension names'" << names << "'"<<std::endl;
+            m_log->get(logDEBUG) << "Using explicit list of dimension names'" <<
+                 names << "'"<< std::endl;
             boost::char_separator<char> seps(" ,");
-
 
             tokenizer parameters(names, seps);
             for (tokenizer::iterator t = parameters.begin(); t != parameters.end(); ++t)
             {
-                getStage().log()->get(logDEBUG) << "adding '" << *t << "' as dimension name to cumulate stats for" << std::endl;
+                m_log->get(logDEBUG) << "adding '" << *t <<
+                    "' as dimension name to cumulate stats for" << std::endl;
                 // Add to explicit dim list if not already there
                 if (exact_dimensions.find(*t) == exact_dimensions.end())
                     m_dimension_names.push_back(*t);
@@ -322,18 +327,17 @@ void Stats::readBufferBeginImpl(PointBuffer& buffer)
             }
         }
 
-
-
         Schema const& schema = buffer.getSchema();
 
-        boost::uint64_t numPoints = getStage().getPrevStage().getNumPoints();
+        boost::uint64_t numPoints = m_numPoints;
         boost::uint32_t stats_cache_size(1000);
-
 
         try
         {
-            stats_cache_size = options.getValueOrThrow<boost::uint32_t>("stats_cache_size");
-            getStage().log()->get(logDEBUG2) << "Using " << stats_cache_size << "for histogram cache size set from option" << std::endl;
+            stats_cache_size =
+                m_options.getValueOrThrow<boost::uint32_t>("stats_cache_size");
+            m_log->get(logDEBUG2) << "Using " << stats_cache_size <<
+                "for histogram cache size set from option" << std::endl;
 
         }
         catch (pdal::option_not_found const&)
@@ -345,45 +349,58 @@ void Stats::readBufferBeginImpl(PointBuffer& buffer)
                     throw std::out_of_range("too many points for the histogram cache");
                 }
                 stats_cache_size = static_cast<boost::uint32_t>(numPoints);
-                getStage().log()->get(logDEBUG2) << "Using point count, " << numPoints << ", for histogram cache size" << std::endl;
+                m_log->get(logDEBUG2) << "Using point count, " << numPoints <<
+                    ", for histogram cache size" << std::endl;
 
             }
         }
 
-        boost::uint32_t sample_size = options.getValueOrDefault<boost::uint32_t>("sample_size", 100000);
-        boost::uint32_t seed = options.getValueOrDefault<boost::uint32_t>("seed", 0);
+        boost::uint32_t sample_size =
+            m_options.getValueOrDefault<boost::uint32_t>("sample_size", 100000);
+        boost::uint32_t seed =
+            m_options.getValueOrDefault<boost::uint32_t>("seed", 0);
 
-        getStage().log()->get(logDEBUG2) << "Using " << sample_size << " for sample size" << std::endl;
-        getStage().log()->get(logDEBUG2) << "Using " << seed << " for sample seed" << std::endl;
+        m_log->get(logDEBUG2) << "Using " << sample_size <<
+            " for sample size" << std::endl;
+        m_log->get(logDEBUG2) << "Using " << seed << " for sample seed" <<
+            std::endl;
 
-
-        boost::uint32_t bin_count = options.getValueOrDefault<boost::uint32_t>("num_bins", 20);
-
-
+        boost::uint32_t bin_count =
+            m_options.getValueOrDefault<boost::uint32_t>("num_bins", 20);
         
         if (m_dimension_names.size())
         {
-            getStage().log()->get(logDEBUG2) << "Explicit dimension size:" << m_dimension_names.size() << std::endl;
+            m_log->get(logDEBUG2) << "Explicit dimension size:" <<
+                m_dimension_names.size() << std::endl;
             
             for (std::vector<std::string>::const_iterator  i = m_dimension_names.begin(); i != m_dimension_names.end(); i++)
             {
                 std::string const& name = *i;
-                getStage().log()->get(logDEBUG2) << "Requested to cumulate stats for dimension with name '" << name <<"'"<< std::endl;
+                m_log->get(logDEBUG2) << "Requested to cumulate stats for "
+                    "dimension with name '" << name <<"'"<< std::endl;
                 Dimension const& dim = schema.getDimension(name);
-                getStage().log()->get(logDEBUG2) << "Found dimension with name '" << dim.getName() <<"' and namespace '" << dim.getNamespace() << "'"<< std::endl;
+                m_log->get(logDEBUG2) << "Found dimension with name '" <<
+                    dim.getName() << "' and namespace '" <<
+                    dim.getNamespace() << "'"<< std::endl;
 
-                DimensionPtr d = boost::shared_ptr<Dimension>(new Dimension(dim));
-                getStage().log()->get(logDEBUG2) << "Cumulating stats for dimension " << d->getName() << " with namespace: " << d->getNamespace() << std::endl;
+                DimensionPtr d =
+                    boost::shared_ptr<Dimension>(new Dimension(dim));
+                m_log->get(logDEBUG2) << "Cumulating stats for dimension " <<
+                    d->getName() << " with namespace: " <<
+                    d->getNamespace() << std::endl;
 
-                std::map<std::string, bool>::const_iterator exact = exact_dimensions.find(d->getName());
+                std::map<std::string, bool>::const_iterator exact =
+                    exact_dimensions.find(d->getName());
                 bool doExact(false);
                 if (exact != exact_dimensions.end())
                 {
-                    getStage().log()->get(logDEBUG2) << "Cumulating exact stats for dimension " << d->getName() << std::endl;
+                    m_log->get(logDEBUG2) << "Cumulating exact stats for "
+                        "dimension " << d->getName() << std::endl;
                     doExact = true;
                 }
             
-                bool doSample = options.getValueOrDefault<bool>("do_sample", false);
+                bool doSample =
+                    m_options.getValueOrDefault<bool>("do_sample", false);
                 stats::SummaryPtr c = boost::shared_ptr<stats::Summary>(new stats::Summary(bin_count, sample_size, stats_cache_size, seed, doExact, doSample));
 
                 std::pair<DimensionPtr, stats::SummaryPtr> p(d,c);
@@ -391,18 +408,23 @@ void Stats::readBufferBeginImpl(PointBuffer& buffer)
                 m_stats.insert(p);
             }
         } else {
-            bool doSample = options.getValueOrDefault<bool>("do_sample", true);
+            bool doSample =
+                m_options.getValueOrDefault<bool>("do_sample", true);
             schema::index_by_index const& dims = schema.getDimensions().get<schema::index>();
             for (schema::index_by_index::const_iterator iter = dims.begin(); iter != dims.end(); ++iter)
             {
                 DimensionPtr d = boost::shared_ptr<Dimension>(new Dimension(*iter));
-                getStage().log()->get(logDEBUG2) << "Cumulating stats for dimension " << d->getName() << " with namespace: " << d->getNamespace() << std::endl;
+                m_log->get(logDEBUG2) << "Cumulating stats for dimension " <<
+                    d->getName() << " with namespace: " << d->getNamespace() <<
+                    std::endl;
 
-                std::map<std::string, bool>::const_iterator exact = exact_dimensions.find(d->getName());
+                std::map<std::string, bool>::const_iterator exact =
+                    exact_dimensions.find(d->getName());
                 bool doExact(false);
                 if (exact != exact_dimensions.end())
                 {
-                    getStage().log()->get(logDEBUG2) << "Cumulating exact stats for dimension " << d->getName() << std::endl;
+                    m_log->get(logDEBUG2) << "Cumulating exact stats for "
+                        "dimension " << d->getName() << std::endl;
                     doExact = true;
                 }
                 stats::SummaryPtr c = boost::shared_ptr<stats::Summary>(new stats::Summary(bin_count, sample_size, stats_cache_size, seed, doExact, doSample));

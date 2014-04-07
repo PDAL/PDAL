@@ -88,21 +88,23 @@ namespace sequential
 class PDAL_DLL Mosaic : public pdal::MultiFilterSequentialIterator
 {
 public:
-    Mosaic(const pdal::filters::Mosaic& filter, PointBuffer& buffer);
+    Mosaic(const pdal::filters::Mosaic& filter, PointBuffer& buffer,
+        LogPtr log, const Options& options);
     ~Mosaic();
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t);
     boost::uint32_t readBufferImpl(PointBuffer&);
     bool atEndImpl() const;
-    DimensionMapPtr fetchDimensionMap(PointBuffer const& user_buffer, BufferPtr stage_buffer);
+    DimensionMapPtr fetchDimensionMap(PointBuffer const& user_buffer,
+        BufferPtr stage_buffer);
     BufferPtr fetchPointBuffer(PointBuffer const& user_buffer);
     DimensionMapPtr m_active_dimension;
     DimensionMaps m_dimensions;
 
     BufferMap m_buffers;
-
-    
+    LogPtr m_log;
+    Options m_options;
 };
 
 

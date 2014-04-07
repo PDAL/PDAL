@@ -359,7 +359,7 @@ namespace sequential
 {
 
 Iterator::Iterator(const pdal::drivers::pgpointcloud::Reader& reader, PointBuffer& buffer)
-    : pdal::StageSequentialIterator(reader, buffer)
+    : pdal::StageSequentialIterator(buffer)
     , m_reader(reader)
     , m_at_end(false)
     , m_buffer(NULL)

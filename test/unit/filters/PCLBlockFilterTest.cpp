@@ -49,78 +49,78 @@ BOOST_AUTO_TEST_SUITE(PCLBlockFilterTest)
 
 BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_passthrough)
 {
-        pdal::Options options;
-        
-        pdal::Option filename("filename", Support::datapath("autzen-point-format-3.las"));
-        pdal::Option debug("debug", true, "");
-        pdal::Option verbose("verbose", 9, "");
+    pdal::Options options;
 
-        options.add(filename);
-        options.add(debug);
-        options.add(verbose);
+    pdal::Option filename("filename", Support::datapath("autzen-point-format-3.las"));
+    pdal::Option debug("debug", true, "");
+    pdal::Option verbose("verbose", 9, "");
 
-        pdal::drivers::las::Reader reader(options);
+    options.add(filename);
+    options.add(debug);
+    options.add(verbose);
 
-        pdal::Option fname("filename", Support::datapath("filters/pcl/passthrough.json"));
+    pdal::drivers::las::Reader reader(options);
 
-        pdal::Options filter_options;
+    pdal::Option fname("filename", Support::datapath("filters/pcl/passthrough.json"));
 
-        filter_options.add(fname);
+    pdal::Options filter_options;
 
-        pdal::filters::PCLBlock pcl_block(reader, filter_options);
-        
-        pcl_block.initialize();
+    filter_options.add(fname);
 
-        const pdal::Schema& schema = reader.getSchema();
-        pdal::PointBuffer data(schema, reader.getNumPoints());
-        
-        pdal::StageSequentialIterator* iter = pcl_block.createSequentialIterator(data);
+    pdal::filters::PCLBlock pcl_block(reader, filter_options);
 
-        boost::uint32_t numRead = iter->read(data);
-        BOOST_CHECK_EQUAL(numRead, 81u);
+    pcl_block.initialize();
 
-        pdal::filters::iterators::sequential::PCLBlock* b = static_cast<pdal::filters::iterators::sequential::PCLBlock*>(iter);
+    const pdal::Schema& schema = reader.getSchema();
+    pdal::PointBuffer data(schema, reader.getNumPoints());
 
-        delete iter;
+    pdal::StageSequentialIterator* iter = pcl_block.createSequentialIterator(data);
+
+    boost::uint32_t numRead = iter->read(data);
+    BOOST_CHECK_EQUAL(numRead, 81u);
+
+    pdal::filters::iterators::sequential::PCLBlock* b = static_cast<pdal::filters::iterators::sequential::PCLBlock*>(iter);
+
+    delete iter;
 
     return;
 }
 
 BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_outlier_removal)
 {
-        pdal::Options options;
-        
-        pdal::Option filename("filename", Support::datapath("autzen-point-format-3.las"));
-        pdal::Option debug("debug", true, "");
-        pdal::Option verbose("verbose", 9, "");
+    pdal::Options options;
 
-        options.add(filename);
-        options.add(debug);
-        options.add(verbose);
+    pdal::Option filename("filename", Support::datapath("autzen-point-format-3.las"));
+    pdal::Option debug("debug", true, "");
+    pdal::Option verbose("verbose", 9, "");
 
-        pdal::drivers::las::Reader reader(options);
+    options.add(filename);
+    options.add(debug);
+    options.add(verbose);
 
-        pdal::Option fname("filename", Support::datapath("filters/pcl/outlier_removal.json"));
+    pdal::drivers::las::Reader reader(options);
 
-        pdal::Options filter_options;
+    pdal::Option fname("filename", Support::datapath("filters/pcl/outlier_removal.json"));
 
-        filter_options.add(fname);
+    pdal::Options filter_options;
 
-        pdal::filters::PCLBlock pcl_block(reader, filter_options);
-        
-        pcl_block.initialize();
+    filter_options.add(fname);
 
-        const pdal::Schema& schema = reader.getSchema();
-        pdal::PointBuffer data(schema, reader.getNumPoints());
-        
-        pdal::StageSequentialIterator* iter = pcl_block.createSequentialIterator(data);
+    pdal::filters::PCLBlock pcl_block(reader, filter_options);
 
-        boost::uint32_t numRead = iter->read(data);
-        BOOST_CHECK_EQUAL(numRead, 100u);
+    pcl_block.initialize();
 
-        pdal::filters::iterators::sequential::PCLBlock* b = static_cast<pdal::filters::iterators::sequential::PCLBlock*>(iter);
+    const pdal::Schema& schema = reader.getSchema();
+    pdal::PointBuffer data(schema, reader.getNumPoints());
 
-        delete iter;
+    pdal::StageSequentialIterator* iter = pcl_block.createSequentialIterator(data);
+
+    boost::uint32_t numRead = iter->read(data);
+    BOOST_CHECK_EQUAL(numRead, 100u);
+
+    pdal::filters::iterators::sequential::PCLBlock* b = static_cast<pdal::filters::iterators::sequential::PCLBlock*>(iter);
+
+    delete iter;
 
     return;
 }

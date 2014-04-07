@@ -88,8 +88,8 @@ struct tile_point_idx
     boost::uint32_t tile_idx;
     boost::uint32_t point_idx;
 
-    tile_point_idx( boost::uint32_t tile_idx_, 
-                    boost::uint32_t point_idx_) 
+    tile_point_idx(boost::uint32_t tile_idx_,
+                   boost::uint32_t point_idx_)
         : tile_idx(tile_idx_)
         , point_idx(point_idx_) {};
     bool operator < (const tile_point_idx &p) const

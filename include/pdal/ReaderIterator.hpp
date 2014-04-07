@@ -47,7 +47,7 @@ class PointBuffer;
 class PDAL_DLL ReaderSequentialIterator : public StageSequentialIterator
 {
 public:
-    ReaderSequentialIterator(const Reader& reader, PointBuffer& buffer);
+    ReaderSequentialIterator(PointBuffer& buffer);
     virtual ~ReaderSequentialIterator();
 };
 
@@ -55,7 +55,7 @@ public:
 class PDAL_DLL ReaderRandomIterator : public StageRandomIterator
 {
 public:
-    ReaderRandomIterator(const Reader& reader, PointBuffer& buffer);
+    ReaderRandomIterator(PointBuffer& buffer);
     virtual ~ReaderRandomIterator();
 };
 
