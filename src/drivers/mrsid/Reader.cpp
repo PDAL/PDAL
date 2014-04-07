@@ -91,7 +91,6 @@ void Reader::initialize()
 {
     pdal::Reader::initialize();
 
-    Schema& schema = getSchemaRef();
     const LizardTech::PointInfo& pointinfo = m_PS->getPointInfo();
 
     Schema const& dimensions(getDefaultDimensions());
@@ -99,7 +98,7 @@ void Reader::initialize()
     {
         const LizardTech::ChannelInfo &channel = pointinfo.getChannel(i);
         Dimension dim = LTChannelToPDalDimension(channel, dimensions);
-        schema.appendDimension(dim);
+        m_schema.appendDimension(dim);
     }
 
     setNumPoints(m_PS->getNumPoints());

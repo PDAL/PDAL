@@ -107,8 +107,7 @@ void Reader::initialize()
 
     m_session->set_log_stream(&(log()->get(logDEBUG2)));
 
-    Schema& schema = getSchemaRef();
-    schema = fetchSchema(query);
+    m_schema = fetchSchema(query);
 
     try
     {
