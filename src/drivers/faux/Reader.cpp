@@ -62,9 +62,7 @@ Reader::Reader(const Options& options)
     , m_numPoints(options.getValueOrThrow<boost::uint64_t>("num_points"))
     , m_mode(string2mode(options.getValueOrThrow<std::string>("mode")))
 {
-    Schema& schema = getSchemaRef();
-    schema = Schema(getDefaultDimensions());
-    return;
+    m_schema = Schema(getDefaultDimensions());
 }
 
 
@@ -74,10 +72,7 @@ Reader::Reader(const Bounds<double>& bounds, boost::uint64_t numPoints, Mode mod
     , m_numPoints(numPoints)
     , m_mode(mode)
 {
-    Schema& schema = getSchemaRef();
-    schema = Schema(getDefaultDimensions());
-
-    return;
+    m_schema = Schema(getDefaultDimensions());
 }
 
 Reader::Reader(const Bounds<double>& bounds, boost::uint64_t numPoints, Mode mode, const std::vector<Dimension>& dimensions)
@@ -86,10 +81,7 @@ Reader::Reader(const Bounds<double>& bounds, boost::uint64_t numPoints, Mode mod
     , m_numPoints(numPoints)
     , m_mode(mode)
 {
-    Schema& schema = getSchemaRef();
-    schema = Schema(dimensions);
-
-    return;
+    m_schema = Schema(dimensions);
 }
 
 std::vector<Dimension> Reader::getDefaultDimensions()

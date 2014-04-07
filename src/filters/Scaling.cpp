@@ -62,11 +62,7 @@ void Scaling::initialize()
 
     checkImpedance();
 
-
-    Schema& s = getSchemaRef();
-    s = alterSchema(s);
-
-    return;
+    m_schema = alterSchema(m_schema);
 }
 
 
