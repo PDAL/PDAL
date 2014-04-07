@@ -6,6 +6,7 @@ sudo apt-get update -y
 sudo apt-get install software-properties-common -y
 sudo apt-get install python-software-properties -y
 sudo add-apt-repository ppa:ubuntugis/ppa -y
+sudo add-apt-repository ppa:boost-latest/ppa -y
 sudo apt-get update -qq
 sudo apt-get install \
     cmake \
@@ -17,7 +18,8 @@ sudo apt-get install \
     libproj-dev \
     libtiff4-dev \
     libxml2-dev \
-    python-numpy
+    python-numpy \
+    boost1.55
 
 # install libgeotiff from sources
 wget http://download.osgeo.org/geotiff/libgeotiff/libgeotiff-1.4.0.tar.gz
