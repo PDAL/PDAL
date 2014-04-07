@@ -302,10 +302,11 @@ int Delta::execute()
     
 
 
-    std::map<Point, Point> *points = cumulatePoints(source_data, candidate_data);
+    boost::scoped_ptr<std::map<Point, Point> > points(cumulatePoints(source_data, candidate_data));
     if (m_OutputDetail)
     {
-        outputDetail(source_data, candidate_data, points);
+        outputDetail(source_data, candidate_data, points.get());
+        return 0;
     }
     
     std::map<Point, Point>::const_iterator i;
@@ -345,13 +346,11 @@ int Delta::execute()
     double smeany  = (boost::accumulators::mean)(m_summary_y);
     double smeanz  = (boost::accumulators::mean)(m_summary_z);
     
-    std::cout << " Min          " << fmt % sminx << "            " << fmt % sminy << "            " << fmt % sminz<<std::endl;
-    std::cout << " Min          " << fmt % smaxx << "            " << fmt % smaxy << "            " << fmt % smaxz<<std::endl;
-    std::cout << " Mean         " << fmt % smeanx << "            " << fmt % smeany << "            " << fmt % smeanz<<std::endl;
+    std::cout << " Min        " << fmt % sminx << "            " << fmt % sminy << "            " << fmt % sminz<<std::endl;
+    std::cout << " Min        " << fmt % smaxx << "            " << fmt % smaxy << "            " << fmt % smaxz<<std::endl;
+    std::cout << " Mean       " << fmt % smeanx << "            " << fmt % smeany << "            " << fmt % smeanz<<std::endl;
     std::cout << thead << std::endl;
     
-    // return (boost::accumulators::min)(m_summary);
-    delete points;
     return 0;
 }
 
