@@ -37,7 +37,6 @@ SET(PDAL_UNITTEST_TEST_SRC
     MetadataTest.cpp
     filters/MosaicFilterTest.cpp
     OptionsTest.cpp
-    filters/PCLBlockFilterTest.cpp
     PipelineManagerTest.cpp
     drivers/pipeline/PipelineReaderTest.cpp
     drivers/pipeline/PipelineWriterTest.cpp
@@ -142,6 +141,17 @@ if (WITH_NITRO)
             CACHE INTERNAL "source files for test")
     ENDFOREACH(file)
 endif (WITH_NITRO)
+
+if (WITH_PCL)
+    set(PDAL_PCL_TEST_CPP
+        filters/PCLBlockFilterTest.cpp
+        )
+
+    FOREACH(file ${PDAL_PCL_TEST_CPP})
+        SET(PDAL_UNITTEST_TEST_SRC "${PDAL_UNITTEST_TEST_SRC};${file}"
+            CACHE INTERNAL "source files for test")
+    ENDFOREACH(file)
+endif (WITH_PCL)
 
 set(PDAL_UNITTEST_SOURCES "")
 FOREACH(file ${PDAL_UNITTEST_TEST_SRC})
