@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Howard Butler, hobu.inc@gmail.com
+* Copyright (c) 2014, Andrew Bell
 *
 * All rights reserved.
 *
@@ -32,81 +32,46 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_PDAL_DRIVERS_HPP
-#define INCLUDED_PDAL_DRIVERS_HPP
+#pragma once
 
-#include <pdal/pdal_config.hpp>
+#include <pdal/IStream.hpp>
+#include <pdal/Reader.hpp>
+#include <pdal/ReaderIterator.hpp>
 
-#include <pdal/drivers/faux/Reader.hpp>
-#include <pdal/drivers/faux/Writer.hpp>
+#include "BpfHeader.hpp"
 
-#include <pdal/drivers/las/Reader.hpp>
-#include <pdal/drivers/las/Writer.hpp>
+namespace pdal
+{
 
-#include <pdal/drivers/bpf/BpfReader.hpp>
+class PDAL_DLL BpfReader : public Reader
+{
+public:
+    SET_STAGE_NAME("drivers.bpf.reader", "Bpf Reader")
+    SET_STAGE_LINK("http://pdal.io/stages/drivers.bpf.reader.html")
 
-#include <pdal/drivers/pipeline/Reader.hpp>
+    BpfReader(const Options&);
+    BpfReader(const std::string&);
 
-#ifdef PDAL_HAVE_ORACLE
-#ifndef USE_PDAL_PLUGIN_OCI
-#include <pdal/drivers/oci/Reader.hpp>
-#endif
-#endif
+    virtual void initialize();
+    virtual boost::uint64_t getNumPoints() const
+        {  return m_header.m_numPts; }
 
+    StageSequentialIterator*
+        createSequentialIterator(PointBuffer& buffer) const;
+    StageRandomIterator* createRandomIterator(PointBuffer& buffer) const;
 
-#include <pdal/drivers/buffer/Reader.hpp>
+private:
+    ILeStream m_stream;
+    BpfHeader m_header;
+    std::vector<BpfDimension> m_dims;
+    BpfUlemHeader m_ulemHeader;
+    std::vector<BpfUlemFrame> m_ulemFrames;
+    BpfPolarHeader m_polarHeader;
+    std::vector<BpfPolarFrame> m_polarFrames;
 
-#ifdef PDAL_HAVE_CARIS
-#ifndef USE_PDAL_PLUGIN_CARIS
-#include <pdal/drivers/caris/Reader.hpp>
-#endif
-#endif
+    bool readUlemData();
+    bool readPolarData();
+};
 
-#ifdef PDAL_HAVE_MRSID
-#ifndef USE_PDAL_PLUGIN_MRSID
-#include <pdal/drivers/mrsid/Reader.hpp>
-#endif
-#endif
+} // namespace
 
-
-#include <pdal/drivers/pipeline/Reader.hpp>
-#include <pdal/drivers/qfit/Reader.hpp>
-#include <pdal/drivers/terrasolid/Reader.hpp>
-
-#include <pdal/drivers/text/Writer.hpp>
-
-#ifdef PDAL_HAVE_ORACLE
-#ifndef USE_PDAL_PLUGIN_OCI
-#include <pdal/drivers/oci/Writer.hpp>
-#endif
-#endif
-
-#ifdef PDAL_HAVE_NITRO
-#ifndef USE_PDAL_PLUGIN_NITF
-#include <pdal/drivers/nitf/Writer.hpp>
-#endif
-#endif
-
-#ifdef PDAL_HAVE_GDAL
-#include <pdal/drivers/nitf/Reader.hpp>
-#endif
-
-#ifdef PDAL_HAVE_P2G
-#include <pdal/drivers/p2g/Writer.hpp>
-#endif
-
-#ifdef PDAL_HAVE_SQLITE
-#ifndef USE_PDAL_PLUGIN_SQLITE
-#include <pdal/drivers/sqlite/Reader.hpp>
-#include <pdal/drivers/sqlite/Writer.hpp>
-#endif
-#endif
-
-#ifdef PDAL_HAVE_POSTGRESQL
-#ifndef USE_PDAL_PLUGIN_PGPOINTCLOUD
-#include <pdal/drivers/pgpointcloud/Reader.hpp>
-#include <pdal/drivers/pgpointcloud/Writer.hpp>
-#endif
-#endif
-
-#endif

@@ -62,6 +62,7 @@ namespace pdal
 //
 MAKE_READER_CREATOR(FauxReader, pdal::drivers::faux::Reader)
 MAKE_READER_CREATOR(LasReader, pdal::drivers::las::Reader)
+MAKE_READER_CREATOR(BpfReader, pdal::BpfReader)
 #ifdef PDAL_HAVE_ORACLE
 #ifndef USE_PDAL_PLUGIN_OCI
 MAKE_READER_CREATOR(OciReader, pdal::drivers::oci::Reader)
@@ -181,6 +182,7 @@ std::string StageFactory::inferReaderDriver(const std::string& filename, pdal::O
     drivers["xml"] = "drivers.pipeline.reader";
     drivers["nitf"] = "drivers.nitf.reader";
     drivers["ntf"] = "drivers.nitf.reader";
+    drivers["bpf"] = "drivers.bpf.reader";
 
     if (boost::algorithm::iequals(filename, "STDIN"))
     {
@@ -385,6 +387,7 @@ void StageFactory::registerKnownReaders()
     REGISTER_READER(PipelineReader, pdal::drivers::pipeline::Reader);
     REGISTER_READER(QfitReader, pdal::drivers::qfit::Reader);
     REGISTER_READER(TerrasolidReader, pdal::drivers::terrasolid::Reader);
+    REGISTER_READER(BpfReader, pdal::BpfReader);
 }
 
 

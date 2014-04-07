@@ -188,6 +188,10 @@ public:
         return m_index;
     }
 
+    /// @return  Number of dimensions in the schema.
+    size_t numDimensions() const
+        { return getDimensions().size(); }
+
 /// @name Dimension access
     /// @return a const& to a Dimension with the given name and namespace. If
     /// no matching dimension is found, pdal::dimension_not_found is thrown.
