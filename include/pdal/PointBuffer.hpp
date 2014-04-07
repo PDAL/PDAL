@@ -179,7 +179,7 @@ public:
         \endverbatim
     */
     template<class T>
-    T const& getField(Dimension const& dim, boost::uint32_t pointIndex) const;
+    T getField(Dimension const& dim, boost::uint32_t pointIndex) const;
 
     /*! set the value T for a given  :cpp:class:`pdal::Dimension` dim
         at pointIndex i.
@@ -504,12 +504,11 @@ inline void PointBuffer::setField(pdal::Dimension const& dim,
 }
 
 template <class T>
-inline T const& PointBuffer::getField(pdal::Dimension const& dim,
+inline T PointBuffer::getField(pdal::Dimension const& dim,
     boost::uint32_t pointIndex) const
 {
-    static char buf[1000] = {0};
     if (!getBufferByteLength())
-        return *(T const *)(void const *)buf;
+        return (T)0;
 
     if (dim.getPosition() == -1)
     {
@@ -550,8 +549,7 @@ inline T const& PointBuffer::getField(pdal::Dimension const& dim,
     
     if (static_cast<dimension::size_type>(sizeof(T)) <= dim.getByteSize())
     {
-        T const& output = *(T const*)(void const*)p;
-        return output;
+        return *(T *)(void *)p;
     }
     else
     {

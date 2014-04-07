@@ -581,7 +581,7 @@ set(PDAL_KERNEL_HPP
     ${PDAL_KERNEL_HEADERS}/Info.hpp
     ${PDAL_KERNEL_HEADERS}/Kernel.hpp
     ${PDAL_KERNEL_HEADERS}/Pipeline.hpp
-    ${PDAL_KERNEL_HEADERS}/Query.hpp
+    ${PDAL_KERNEL_HEADERS}/Delta.hpp
     ${PDAL_KERNEL_HEADERS}/Translate.hpp
 )
 
@@ -591,7 +591,7 @@ set(PDAL_KERNEL_CPP
     ${PDAL_KERNEL_SRC}/Diff.cpp
     ${PDAL_KERNEL_SRC}/Info.cpp
     ${PDAL_KERNEL_SRC}/Pipeline.cpp
-    ${PDAL_KERNEL_SRC}/Query.cpp
+    ${PDAL_KERNEL_SRC}/Delta.cpp
     ${PDAL_KERNEL_SRC}/Translate.cpp
 )
 

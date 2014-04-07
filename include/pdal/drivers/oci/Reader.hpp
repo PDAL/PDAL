@@ -189,13 +189,18 @@ private:
 class Reader : public IteratorBase, public pdal::StageSequentialIterator
 {
 public:
-    Reader(const pdal::drivers::oci::Reader& reader, PointBuffer& buffer);
+    Reader(const pdal::drivers::oci::Reader& reader, 
+           PointBuffer& buffer,
+           uint32_t numPoints,
+           LogPtr log);
     ~Reader();
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t count);
     boost::uint32_t readBufferImpl(PointBuffer& data);
     bool atEndImpl() const;
+    boost::uint32_t m_numPoints;
+    LogPtr m_log;
 };
 
 

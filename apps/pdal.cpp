@@ -47,10 +47,10 @@ void outputVersion()
     std::cout << "pdal " << "(" << pdal::GetFullVersionString() << ")" << std::endl;
     std::cout << headline << std::endl;
     std::cout << "  available actions: " << std::endl;
+    std::cout << "     - delta" << std::endl;
     std::cout << "     - diff" << std::endl;
     std::cout << "     - info" << std::endl;
     std::cout << "     - pipeline" << std::endl;
-    std::cout << "     - query" << std::endl;
     std::cout << "     - translate" << std::endl;
     std::cout << std::endl;
     std::cout << "See http://pdal.io/apps.html for more detail";
@@ -128,9 +128,9 @@ int main(int argc, char* argv[])
         return app.run();
     }
 
-    if (boost::iequals(action, "query"))
+    if (boost::iequals(action, "delta"))
     {
-        pdal::kernel::Query app(count, args);
+        pdal::kernel::Delta app(count, args);
         return app.run();
     }
     

@@ -127,7 +127,8 @@ BOOST_AUTO_TEST_CASE(basic_test)
 }
 
 
-
+// pipeline/mosaic.xml uses filters.programmable, which depends on Python
+#ifdef PDAL_HAVE_PYTHON
 BOOST_AUTO_TEST_CASE(pipeline_mosaic)
 {
 
@@ -162,5 +163,6 @@ BOOST_AUTO_TEST_CASE(pipeline_mosaic)
 
     return;
 }
+#endif
 
 BOOST_AUTO_TEST_SUITE_END()

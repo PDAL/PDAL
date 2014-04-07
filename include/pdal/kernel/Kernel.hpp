@@ -41,7 +41,7 @@
 
 #include "Info.hpp"
 #include "Pipeline.hpp"
-#include "Query.hpp"
+#include "Delta.hpp"
 #include "Translate.hpp"
 #include "Diff.hpp"
 
