@@ -36,7 +36,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   ppaRepos = [
     "ppa:ubuntugis/ppa",
-    "ppa:apokluda/boost1.53"
+    "ppa:boost-latest/ppa"
   ]
 
   packageList = [
@@ -52,7 +52,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     "libproj-dev",
     "libtiff4-dev",
     "libxml2-dev",
-    "libboost1.53-all-dev",
+    "boost1.55",
     "libbz2-dev",
     "libsqlite0-dev",
     "cmake-curses-gui",
