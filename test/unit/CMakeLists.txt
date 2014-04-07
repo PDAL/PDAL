@@ -44,6 +44,7 @@ SET(PDAL_UNITTEST_TEST_SRC
     PointBufferTest.cpp
     drivers/qfit/QFITReaderTest.cpp
     RangeTest.cpp
+    drivers/sbet/SbetReaderTest.cpp
     filters/ScalingFilterTest.cpp
     filters/SelectorFilterTest.cpp
     SchemaLayoutTest.cpp

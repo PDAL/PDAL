@@ -45,6 +45,8 @@
 
 #include <pdal/drivers/bpf/BpfReader.hpp>
 
+#include <pdal/drivers/sbet/Reader.hpp>
+
 #include <pdal/drivers/pipeline/Reader.hpp>
 
 #ifdef PDAL_HAVE_ORACLE
