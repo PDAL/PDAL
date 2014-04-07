@@ -105,8 +105,7 @@ void Chipper::initialize()
 {
     Filter::initialize();
 
-    Schema& s = getSchemaRef();
-    s = alterSchema(s);
+    m_schema = alterSchema(m_schema);
 
     setPointCountType(PointCount_Fixed);
     setNumPoints(0);
