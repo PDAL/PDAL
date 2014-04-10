@@ -40,6 +40,7 @@
 #include "Support.hpp"
 
 #include "Info.hpp"
+#include "PCL.hpp"
 #include "Pipeline.hpp"
 #include "Delta.hpp"
 #include "Translate.hpp"
