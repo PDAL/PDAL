@@ -492,6 +492,25 @@ endif()
 
 
 #
+# drivers/sbet
+#
+set(PDAL_SBET_PATH drivers/sbet)
+set(PDAL_SBET_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_SBET_PATH}")
+set(PDAL_SBET_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_SBET_PATH}")
+
+set(PDAL_DRIVERS_SBET_HPP
+    "${PDAL_SBET_HEADERS}/Reader.hpp"
+)
+
+set (PDAL_DRIVERS_SBET_CPP 
+    "${PDAL_SBET_SRC}/Reader.cpp"
+)
+
+list (APPEND PDAL_CPP ${PDAL_DRIVERS_SBET_CPP} )
+list (APPEND PDAL_HPP ${PDAL_DRIVERS_SBET_HPP} )
+
+
+#
 # filters
 #
 
@@ -636,6 +655,7 @@ source_group("Header Files\\drivers\\nitf" FILES ${PDAL_DRIVERS_NITF_HPP})
 source_group("Header Files\\drivers\\oci" FILES ${PDAL_DRIVERS_OCI_HPP})
 source_group("Header Files\\drivers\\pipeline" FILES ${PDAL_DRIVERS_PIPELINE_HPP})
 source_group("Header Files\\drivers\\qfit" FILES ${PDAL_DRIVERS_QFIT_HPP})
+source_group("Header Files\\drivers\\sbet" FILES ${PDAL_DRIVERS_SBET_HPP})
 source_group("Header Files\\drivers\\terrasolid" FILES ${PDAL_DRIVERS_TERRASOLID_HPP})
 source_group("Header Files\\drivers\\text" FILES ${PDAL_DRIVERS_TEXT_HPP})
 source_group("Header Files\\drivers\\pgpointcloud" FILES ${PDAL_DRIVERS_PGPOINTCLOUD_HPP})
@@ -652,6 +672,7 @@ source_group("Source Files\\drivers\\nitf" FILES ${PDAL_DRIVERS_NITF_CPP})
 source_group("Source Files\\drivers\\oci" FILES ${PDAL_DRIVERS_OCI_CPP})
 source_group("Source Files\\drivers\\pipeline" FILES ${PDAL_DRIVERS_PIPELINE_CPP})
 source_group("Source Files\\drivers\\qfit" FILES ${PDAL_DRIVERS_QFIT_CPP})
+source_group("Source Files\\drivers\\sbet" FILES ${PDAL_DRIVERS_SBET_CPP})
 source_group("Source Files\\drivers\\terrasolid" FILES ${PDAL_DRIVERS_TERRASOLID_CPP})
 source_group("Source Files\\drivers\\text" FILES ${PDAL_DRIVERS_TEXT_CPP})
 source_group("Source Files\\drivers\\pgpointcloud" FILES ${PDAL_DRIVERS_PGPOINTCLOUD_CPP})

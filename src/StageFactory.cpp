@@ -88,6 +88,8 @@ MAKE_READER_CREATOR(PipelineReader, pdal::drivers::pipeline::Reader)
 MAKE_READER_CREATOR(QfitReader, pdal::drivers::qfit::Reader)
 MAKE_READER_CREATOR(TerrasolidReader, pdal::drivers::terrasolid::Reader)
 
+MAKE_READER_CREATOR(SbetReader, pdal::drivers::sbet::Reader)
+
 //
 // define the functions to create the filters
 //
@@ -183,6 +185,7 @@ std::string StageFactory::inferReaderDriver(const std::string& filename, pdal::O
     drivers["nitf"] = "drivers.nitf.reader";
     drivers["ntf"] = "drivers.nitf.reader";
     drivers["bpf"] = "drivers.bpf.reader";
+    drivers["sbet"] = "drivers.sbet.reader";
 
     if (boost::algorithm::iequals(filename, "STDIN"))
     {
@@ -388,6 +391,8 @@ void StageFactory::registerKnownReaders()
     REGISTER_READER(QfitReader, pdal::drivers::qfit::Reader);
     REGISTER_READER(TerrasolidReader, pdal::drivers::terrasolid::Reader);
     REGISTER_READER(BpfReader, pdal::BpfReader);
+
+    REGISTER_READER(SbetReader, pdal::drivers::sbet::Reader);
 }
 
 
