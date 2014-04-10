@@ -97,75 +97,27 @@ Dimension::Dimension(std::string const& name,
 
 }
 
-/// copy constructor
-Dimension::Dimension(Dimension const& other)
-    : m_name(other.m_name)
-    , m_flags(other.m_flags)
-    , m_endian(other.m_endian)
-    , m_byteSize(other.m_byteSize)
-    , m_description(other.m_description)
-    , m_min(other.m_min)
-    , m_max(other.m_max)
-    , m_numericScale(other.m_numericScale)
-    , m_numericOffset(other.m_numericOffset)
-    , m_byteOffset(other.m_byteOffset)
-    , m_position(other.m_position)
-    , m_interpretation(other.m_interpretation)
-    , m_uuid(other.m_uuid)
-    , m_namespace(other.m_namespace)
-    , m_parentDimensionID(other.m_parentDimensionID)
-{
-    return;
-}
-
-/// assignment operator
-Dimension& Dimension::operator=(Dimension const& rhs)
-{
-    if (&rhs != this)
-    {
-        m_name = rhs.m_name;
-        m_flags = rhs.m_flags;
-        m_endian = rhs.m_endian;
-        m_byteSize = rhs.m_byteSize;
-        m_description = rhs.m_description;
-        m_min = rhs.m_min;
-        m_max = rhs.m_max;
-        m_numericScale = rhs.m_numericScale;
-        m_numericOffset = rhs.m_numericOffset;
-        m_byteOffset = rhs.m_byteOffset;
-        m_position = rhs.m_position;
-        m_interpretation = rhs.m_interpretation;
-        m_uuid = rhs.m_uuid;
-        m_namespace = rhs.m_namespace;
-        m_parentDimensionID = rhs.m_parentDimensionID;
-    }
-
-    return *this;
-}
-
 
 bool Dimension::operator==(const Dimension& other) const
 {
-    if (boost::iequals(m_name, other.m_name) &&
-            m_flags == other.m_flags &&
-            m_endian == other.m_endian &&
-            m_byteSize == other.m_byteSize &&
-            boost::iequals(m_description, other.m_description) &&
-            Utils::compare_approx(m_min, other.m_min, (std::numeric_limits<double>::min)()) &&
-            Utils::compare_approx(m_max, other.m_max, (std::numeric_limits<double>::min)()) &&
-            Utils::compare_approx(m_numericScale, other.m_numericScale, (std::numeric_limits<double>::min)()) &&
-            Utils::compare_approx(m_numericOffset, other.m_numericOffset, (std::numeric_limits<double>::min)()) &&
-            m_byteOffset == other.m_byteOffset &&
-            m_position == other.m_position &&
-            m_interpretation == other.m_interpretation &&
-            m_uuid == other.m_uuid &&
-            m_parentDimensionID == other.m_parentDimensionID
-       )
-    {
-        return true;
-    }
-
-    return false;
+    return (boost::iequals(m_name, other.m_name) &&
+        m_flags == other.m_flags &&
+        m_endian == other.m_endian &&
+        m_byteSize == other.m_byteSize &&
+        boost::iequals(m_description, other.m_description) &&
+        Utils::compare_approx(m_min, other.m_min,
+            std::numeric_limits<double>::min()) &&
+        Utils::compare_approx(m_max, other.m_max,
+            std::numeric_limits<double>::min()) &&
+        Utils::compare_approx(m_numericScale, other.m_numericScale,
+            std::numeric_limits<double>::min()) &&
+        Utils::compare_approx(m_numericOffset, other.m_numericOffset,
+            std::numeric_limits<double>::min()) &&
+        m_byteOffset == other.m_byteOffset &&
+        m_position == other.m_position &&
+        m_interpretation == other.m_interpretation &&
+        m_uuid == other.m_uuid &&
+        m_parentDimensionID == other.m_parentDimensionID);
 }
 
 
@@ -244,7 +196,6 @@ std::string Dimension::getInterpretationName() const
                 type << "uint8_t";
             break;
 
-
         case dimension::SignedInteger:
             if (bytesize == 1)
                 type << "int8_t";
@@ -291,7 +242,8 @@ std::string Dimension::getInterpretationName() const
 }
 
 
-dimension::Interpretation Dimension::getInterpretation(std::string const& interpretation)
+dimension::Interpretation
+Dimension::getInterpretation(std::string const& interpretation)
 {
 
     if (boost::iequals(interpretation, "int8_t") ||
@@ -333,7 +285,6 @@ dimension::Interpretation Dimension::getInterpretation(std::string const& interp
     if (boost::iequals(interpretation, "double"))
         return dimension::Float;
 
-
     return dimension::Undefined;
 }
 
@@ -354,29 +305,20 @@ std::ostream& operator<<(std::ostream& os, pdal::Dimension const& d)
     std::string const& cur = quoted_name.str();
     std::string::size_type size = cur.size();
     std::string::size_type buffer(24);
-    std::string::size_type pad_size = buffer - size;
-    if (size > buffer)
-        pad_size = 4;
-    for (std::string::size_type i=0; i != pad_size; i++)
-    {
-        pad << " ";
-    }
-    os << quoted_name.str() << pad.str() <<" -- "<< " size: " << tree.get<boost::uint32_t>("bytesize");
+    std::string::size_type pad_size = size > buffer ? 4 : buffer - size;
+    os << quoted_name.str() << std::string(pad_size, ' ') << " -- "<<
+        " size: " << tree.get<boost::uint32_t>("bytesize");
 
     double scale = tree.get<double>("scale");
-    // boost::uint32_t precision = Utils::getStreamPrecision(scale);
     os.setf(std::ios_base::fixed, std::ios_base::floatfield);
     os.precision(14);
     os << " scale: " << scale;
 
     double offset = tree.get<double>("offset");
     os << " offset: " << offset;
-
     os << " ignored: " << tree.get<bool>("isIgnored");
-
     os << " uid: " << tree.get<std::string>("uuid");
     os << " parent: " << tree.get<std::string>("parent");
-
     os << std::endl;
 
     return os;
