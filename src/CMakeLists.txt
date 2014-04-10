@@ -743,6 +743,7 @@ endif()
     "${GEOS_LIBRARY}"
     "${HEXER_LIBRARY}"
     "${ORACLE_LIBRARY}"
+    "z"
 )
 
 message(STATUS "Using boost lib: ${Boost_LIBRARIES}")

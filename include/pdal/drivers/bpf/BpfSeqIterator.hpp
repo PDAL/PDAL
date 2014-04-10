@@ -59,11 +59,14 @@ protected:
     bool atEndImpl() const;
 
     boost::uint32_t read(PointBuffer& data);
+    boost::uint32_t readCompressed(PointBuffer& data);
     boost::uint32_t readPointMajor(PointBuffer& data);
     boost::uint32_t readDimMajor(PointBuffer& data);
     boost::uint32_t readByteMajor(PointBuffer& data);
 
 private:
+    size_t readBlock(std::vector<char>& outBuf, size_t index);
+    int inflate(char *inbuf, size_t insize, char *outbuf, size_t outsize);
     void seekPointMajor(uint32_t ptIdx);
     void seekDimMajor(size_t dimIdx, uint32_t ptIdx);
     void seekByteMajor(size_t dimIdx, size_t byteIdx, uint32_t ptIdx);

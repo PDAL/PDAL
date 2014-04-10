@@ -32,6 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <zlib.h>
+
 #include <vector>
 #include <algorithm>
 
@@ -65,22 +67,58 @@ boost::uint32_t BpfSeqIterator::readBufferImpl(PointBuffer& data)
             m_dims.push_back(d);
     }
 
-    boost::uint32_t numRead = 0;
+    uint32_t numRead = 0;
     if (m_compression)
-    {
-        throw "Compressed BPF 3 files not currently supported.";
-        /**
-        while(decompressBlock(compressionBlock))
-        {
-            numRead += read(data, dims);
-        }
-        **/
-    }
+        numRead = readCompressed(data);
     else
         numRead = read(data);
     return numRead;
 }
 
+uint32_t BpfSeqIterator::readCompressed(PointBuffer& data)
+{
+    std::vector<char> outBuf(m_numPoints * m_dims.size() * sizeof(float));
+    size_t index = 0;
+    size_t bytesRead = 0;
+    do
+    {
+        bytesRead = readBlock(outBuf, index);
+        index += bytesRead;
+    } while (bytesRead > 0 && index < outBuf.size());
+
+    class charbuf : public std::streambuf
+    {
+    public:
+        charbuf(std::vector<char>& v)
+            { setg(v.data(), v.data(), v.data() + v.size()); }
+    };
+
+    charbuf buf(outBuf);
+    std::unique_ptr<std::istream> stream(new std::istream(&buf));
+
+    m_stream.pushStream(stream.get());
+    uint32_t numRead = read(data);
+    m_stream.popStream();
+    return numRead;
+}
+
+size_t BpfSeqIterator::readBlock(std::vector<char>& outBuf, size_t index)
+{
+    boost::uint32_t finalBytes;
+    boost::uint32_t compressBytes;
+
+    m_stream >> finalBytes;
+    m_stream >> compressBytes;
+
+    std::vector<char> in(compressBytes);
+
+    // Fill the input bytes from the stream.
+    m_stream.get(in);
+    int ret = inflate(in.data(), compressBytes,
+        outBuf.data() + index, finalBytes);
+    return (ret ? 0 : finalBytes);
+}
+    
 boost::uint32_t BpfSeqIterator::read(PointBuffer& data)
 {
     switch (m_pointFormat)
@@ -212,6 +250,34 @@ void BpfSeqIterator::seekByteMajor(size_t dimIdx, size_t byteIdx, uint32_t ptIdx
         (byteIdx * m_numPoints) +
         ptIdx;
     m_stream.seek(m_start + offset);
+}
+
+int BpfSeqIterator::inflate(char *buf, size_t insize, char *outbuf,
+    size_t outsize)
+{
+   if (insize == 0)
+        return 0;
+
+    int ret;
+    z_stream strm;
+
+    /* allocate inflate state */
+    strm.zalloc = Z_NULL;
+    strm.zfree = Z_NULL;
+    strm.opaque = Z_NULL;
+    strm.avail_in = 0;
+    strm.next_in = Z_NULL;
+    if (inflateInit(&strm) != Z_OK)
+        return -2;
+
+    strm.avail_in = insize;
+    strm.next_in = (unsigned char *)buf;
+    strm.avail_out = outsize;
+    strm.next_out = (unsigned char *)outbuf;
+
+    ret = ::inflate(&strm, Z_NO_FLUSH);
+    (void)inflateEnd(&strm);
+    return ret == Z_STREAM_END ? 0 : -1;
 }
 
 } //namespace

@@ -37,6 +37,8 @@
 #include <stdint.h>
 
 #include <fstream>
+#include <stack>
+#include <vector>
 
 #include <pdal/portable_endian.hpp>
 
@@ -64,9 +66,24 @@ public:
         { m_stream->seekg(offset, std::istream::cur); }
     std::streampos position() const
         { return m_stream->tellg(); }
+    void pushStream(std::istream *strm)
+    {
+        m_streams.push(m_stream);
+        m_stream = strm;
+    }
+    std::istream *popStream()
+    {
+        std::istream *strm = m_stream;
+        m_stream = m_streams.top();
+        m_streams.pop();
+        return strm;
+    }
 
 protected:
     std::istream *m_stream;
+
+private:
+    std::stack<std::istream *> m_streams;
 };
 
 /// Stream wrapper for input of binary data that converts from little-endian
@@ -85,6 +102,11 @@ public:
         char buf[size + 1];
         m_stream->get(buf, size + 1);
         s = buf;
+    }
+
+    void get(std::vector<char>& buf)
+    {
+        m_stream->read(&buf[0], buf.size());
     }
 
     ILeStream& operator >> (uint8_t& v)
