@@ -194,44 +194,89 @@ std::vector<boost::uint32_t>  getListOfPoints(std::string const& p)
     return output;
 }
 
-void Info::dumpPoints(const Stage& stage, std::string const& points_string) const
+void Info::dumpPoints(const Stage& stage,
+    std::string const& pointsString) const
 {
-    const Schema& schema = stage.getSchema();
-
-    std::vector<boost::uint32_t> points = getListOfPoints(points_string);
-    
-    PointBuffer output_data(schema, points.size());
-    PointBuffer read_data(schema, 1);
+    PointBuffer readData(stage.getSchema(), 1);
+    std::vector<boost::uint32_t> points = getListOfPoints(pointsString);
         
-    StageRandomIterator* iter = stage.createRandomIterator(read_data);
-    
-    if (!iter)
-        throw app_runtime_error("Unable to create random iterator for stage!");
-    
+    std::unique_ptr<pdal::StageRandomIterator> random(
+        stage.createRandomIterator(readData));
+    if (!random)
+    {
+        std::unique_ptr<pdal::StageSequentialIterator> seq(
+            stage.createSequentialIterator(readData));
+        if (!seq)
+            throw app_runtime_error("Unable to iterator retrieve points");
+        dumpPointsSequential(points, seq.get());
+    }
+    else
+        dumpPointsRandom(points, random.get());
+}
+
+
+void Info::dumpPointsRandom(const std::vector<uint32_t>& points,
+    StageRandomIterator *iter) const
+{ 
+    PointBuffer& readData = iter->getBuffer();
+    PointBuffer outputData(readData.getSchema(), points.size());
     for (size_t i = 0; i < points.size(); ++i )
     {
         boost::uint64_t s = iter->seek(points[i]);
         if (s != points[i])
         {
             std::ostringstream oss;
-            oss << "Unable to seek to " << points[i] << "due to size of file being " << stage.getNumPoints();
+            oss << "Unable to seek to " << points[i] <<
+                " file too large?";
             throw app_runtime_error(oss.str());
         }
-        const boost::uint32_t numRead = iter->read(read_data);
+        const boost::uint32_t numRead = iter->read(readData);
         if (numRead != 1)
         {
             std::ostringstream oss;
             oss << "problem reading point number " << points[i];
             throw app_runtime_error(oss.str());
         }
-        
-        output_data.copyPointFast(i, 0, read_data);
+        outputData.copyPointFast(i, 0, readData);
     }
-    output_data.setNumPoints(points.size());
+    outputData.setNumPoints(points.size());
+    dumpPointData(outputData);
+}
 
 
+void Info::dumpPointsSequential(const std::vector<uint32_t>& points,
+    StageSequentialIterator *iter) const
+{
+    PointBuffer& readData = iter->getBuffer();
+    PointBuffer outputData(readData.getSchema(), points.size());
 
-    boost::property_tree::ptree tree = output_data.toPTree();
+    int64_t lastPt = -1;
+    uint32_t writePos = 0;
+    for (uint32_t pt : points)
+    {
+        if (pt < lastPt)
+            throw app_runtime_error("Unable to read points of this type "
+                "out of order (must be monotonically increasing)");
+        uint64_t numSkipped = iter->skip(pt - lastPt - 1);
+        assert((int)numSkipped == (int)(pt - lastPt - 1));
+        uint32_t numRead = iter->read(readData);
+        if (numRead != 1)
+        {
+            std::ostringstream oss;
+            oss << "problem reading point number " << pt;
+            throw app_runtime_error(oss.str());
+        }
+        outputData.copyPointFast(writePos++, 0, readData);
+        lastPt = pt;
+    }
+    outputData.setNumPoints(points.size());
+    dumpPointData(outputData);
+}
+
+
+void Info::dumpPointData(PointBuffer& outputData) const
+{
+    boost::property_tree::ptree tree = outputData.toPTree();
    
     std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
 
@@ -242,10 +287,7 @@ void Info::dumpPoints(const Stage& stage, std::string const& points_string) cons
     else if (m_useJSON)
         write_json(ostr, tree);
     else if (m_useREST)
-        output_data.toRST(ostr) << std::endl;
-    
-    delete iter;
-    return;
+        outputData.toRST(ostr) << std::endl;
 }
 
 

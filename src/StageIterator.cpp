@@ -164,6 +164,15 @@ void StageIterator::readEnd()
 }
 
 
+boost::uint64_t StageIterator::skip(boost::uint64_t count)
+{
+    uint32_t pos = m_index;
+    boost::uint64_t numSkipped = skipImpl(count);
+    m_index = pos + numSkipped;
+    return numSkipped;
+}
+
+
 boost::uint64_t StageIterator::naiveSkipImpl(boost::uint64_t count)
 {
     boost::uint64_t totalNumRead = 0;
@@ -206,14 +215,6 @@ StageSequentialIterator::~StageSequentialIterator()
 {}
 
 
-boost::uint64_t StageSequentialIterator::skip(boost::uint64_t count)
-{
-    boost::uint64_t numSkipped = skipImpl(count);
-    m_index += numSkipped;
-    return numSkipped;
-}
-
-
 bool StageSequentialIterator::atEnd() const
 {
     return atEndImpl();
@@ -238,6 +239,14 @@ boost::uint64_t StageRandomIterator::seek(boost::uint64_t position)
 {
     m_index = seekImpl(position);
     return m_index;
+}
+
+
+boost::uint64_t StageRandomIterator::skipImpl(boost::uint64_t numPts)
+{
+    uint64_t pos = m_index;
+    pos = seekImpl(pos + numPts);
+    return (pos - numPts);
 }
 
 } // namespace pdal
