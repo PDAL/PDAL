@@ -84,6 +84,17 @@ public:
     void readBufferEnd(PointBuffer&);
     void readEnd();
 
+    // advance N points ahead in the file
+    //
+    // In some cases, this might be a very slow, painful function to call
+    // because it might entail physically reading the N points (and dropping
+    // the data on the floor)
+    //
+    // Returns the number actually skipped (which might be less than count,
+    // if the end of the stage was reached first).
+    //
+    virtual boost::uint64_t skip(boost::uint64_t count);
+
     // Returns the current point number.  The first point is 0.
     // If this number if > getNumPoints(), then no more points
     // may be read (and atEnd() should be true).
@@ -108,6 +119,7 @@ protected:
     virtual boost::uint32_t readBufferImpl(PointBuffer&) = 0;
     virtual void readBufferEndImpl(PointBuffer&) {}
     virtual void readEndImpl() {}
+    virtual boost::uint64_t skipImpl(boost::uint64_t pointNum) = 0;
 
     // This is provided as a sample implementation that some stages could use
     // to implement their own skip or seek functions. It uses the read() call
@@ -134,24 +146,12 @@ public:
     StageSequentialIterator(PointBuffer& buffer);
     virtual ~StageSequentialIterator();
 
-    // advance N points ahead in the file
-    //
-    // In some cases, this might be a very slow, painful function to call
-    // because it might entail physically reading the N points (and dropping
-    // the data on the floor)
-    //
-    // Returns the number actually skipped (which might be less than count,
-    // if the end of the stage was reached first).
-    //
-    boost::uint64_t skip(boost::uint64_t count);
-
     // returns true after we've read all the points available to this stage
     bool atEnd() const;
 
 protected:
     // from Iterator
     virtual boost::uint32_t readBufferImpl(PointBuffer&) = 0;
-    virtual boost::uint64_t skipImpl(boost::uint64_t pointNum) = 0;
     virtual bool atEndImpl() const = 0;
 };
 
@@ -175,6 +175,7 @@ public:
 protected:
     // from Iterator
     virtual boost::uint64_t seekImpl(boost::uint64_t position) = 0;
+    virtual boost::uint64_t skipImpl(boost::uint64_t position);
 };
 
 } // namespace pdal

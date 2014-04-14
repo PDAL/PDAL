@@ -71,7 +71,13 @@ private:
     void validateSwitches(); // overrride
 
     void dumpPoints(const Stage& stage, std::string const& points) const;
-    void dumpStats(pdal::filters::Stats& filter, PipelineManager* manager) const;
+    void dumpPointsRandom(const std::vector<uint32_t>& points,
+        StageRandomIterator *iter) const;
+    void dumpPointsSequential(const std::vector<uint32_t>& points,
+        StageSequentialIterator *iter) const;
+    void dumpPointData(PointBuffer& outputData) const;
+    void dumpStats(pdal::filters::Stats& filter,
+    PipelineManager* manager) const;
     void dumpSchema(const Stage&, pdal::PipelineManager* manager) const;
     void dumpStage(const Stage&) const;
     void dumpQuery(Stage const&, IndexedPointBuffer&) const;
