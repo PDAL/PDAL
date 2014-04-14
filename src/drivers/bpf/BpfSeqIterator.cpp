@@ -53,12 +53,14 @@ BpfSeqIterator::BpfSeqIterator(PointBuffer& data, boost::uint32_t numPoints,
     m_index(0)
 {
     m_start = m_stream.position();
+
 }
 
 boost::uint32_t BpfSeqIterator::readBufferImpl(PointBuffer& data)
 {
     std::vector<Dimension> dims;
 
+    m_dims.clear();
     const Schema& schema = data.getSchema();
     for (size_t i = 0; i < schema.numDimensions(); ++i)
     {
@@ -152,21 +154,24 @@ boost::uint32_t BpfSeqIterator::readPointMajor(PointBuffer& data)
 {
     uint32_t capacity = data.getCapacity();
     uint32_t idx = m_index;
+    uint32_t numRead = 0;
     seekPointMajor(idx);
-    while (idx < capacity && idx < m_numPoints)
+    while (numRead < capacity && idx < m_numPoints)
     {
         for (size_t d = 0; d < m_dims.size(); ++d)
         {
             float f;
 
             m_stream >> f;
-            data.setField<float>(m_dims[d], idx, f);
+            //NOTE - Each time this function is called, we start writing at
+            //  point position 0 in the buffer.
+            data.setField<float>(m_dims[d], numRead, f);
         }
         idx++;
+        numRead++;
     }
-    uint32_t numRead = idx - m_index;
     m_index = idx;
-    data.setNumPoints(m_index);
+    data.setNumPoints(numRead);
     return numRead;
 }
 
@@ -174,27 +179,31 @@ boost::uint32_t BpfSeqIterator::readDimMajor(PointBuffer& data)
 {
     uint32_t capacity = data.getCapacity();
     uint32_t idx;
+    uint32_t numRead = 0;
     for (size_t d = 0; d < m_dims.size(); ++d)
     {
-       idx = m_index;
-       seekDimMajor(d, idx);
-       for (; idx < capacity && idx < m_numPoints; idx++)
-       {
-           float f;
+        idx = m_index;
+        numRead = 0;
+        seekDimMajor(d, idx);
+        for (; numRead < capacity && idx < m_numPoints; idx++, numRead++)
+        {
+            float f;
 
-           m_stream >> f;
-           data.setField<float>(m_dims[d], idx, f);
+            m_stream >> f;
+            //NOTE - Each time this function is called, we start writing at
+            //  point position 0 in the buffer.
+            data.setField<float>(m_dims[d], numRead, f);
         }
     }
-    uint32_t numRead = idx - m_index;
     m_index = idx;
-    data.setNumPoints(m_index);
+    data.setNumPoints(numRead);
     return numRead;
 }
 
 boost::uint32_t BpfSeqIterator::readByteMajor(PointBuffer& data)
 {
     uint32_t idx;
+    uint32_t numRead = 0;
     uint32_t capacity = data.getCapacity();
 
     for (size_t d = 0; d < m_dims.size(); ++d)
@@ -202,8 +211,9 @@ boost::uint32_t BpfSeqIterator::readByteMajor(PointBuffer& data)
         for (size_t b = 0; b < sizeof(float); ++b)
         {
             idx = m_index;
+            numRead = 0;
             seekByteMajor(d, b, idx);
-            for (;idx < capacity && idx < m_numPoints; idx++)
+            for (;numRead < capacity && idx < m_numPoints; idx++, numRead++)
             {
                 union 
                 {
@@ -213,20 +223,21 @@ boost::uint32_t BpfSeqIterator::readByteMajor(PointBuffer& data)
 
                 u.u32 = 0;
 
+                //NOTE - Each time this function is called, we start writing at
+                //  point position 0 in the buffer.
                 if (b)
                 {
-                    u.f = data.getField<float>(m_dims[d], idx);
+                    u.f = data.getField<float>(m_dims[d], numRead);
                 }
                 uint8_t u8;
                 m_stream >> u8;
                 u.u32 |= ((uint32_t)u8 << (b * CHAR_BIT));
-                data.setField<float>(m_dims[d], idx, u.f);
+                data.setField<float>(m_dims[d], numRead, u.f);
             }
         }
     }
-    uint32_t numRead = idx - m_index;
     m_index = idx;
-    data.setNumPoints(m_index);
+    data.setNumPoints(numRead);
     return numRead;
 }
 
