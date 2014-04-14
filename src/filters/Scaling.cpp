@@ -46,20 +46,14 @@ namespace pdal
 namespace filters
 {
 
-
-// ------------------------------------------------------------------------
-
 Scaling::Scaling(Stage& prevStage, const Options& options)
     : Filter(prevStage, options)
-{
-    return;
-}
+{}
 
 
 void Scaling::initialize()
 {
     Filter::initialize();
-
     checkImpedance();
 
     m_schema = alterSchema(m_schema);
@@ -72,50 +66,54 @@ void Scaling::checkImpedance()
 
     std::vector<Option> dimensions = options.getOptions("dimension");
 
-    std::vector<Option>::const_iterator i;
-    for (i = dimensions.begin(); i != dimensions.end(); ++i)
+    for (Option& option : dimensions)
     {
-        boost::optional<Options const&> dimensionOptions = i->getOptions();
+        boost::optional<Options const&> dimOps = option.getOptions();
 
         scaling::Scaler scaler;
-        scaler.name = i->getValue<std::string>();
-        if (dimensionOptions)
+        scaler.name = option.getValue<std::string>();
+        if (dimOps)
         {
             Dimension const& dim = getSchema().getDimension(scaler.name);
-            scaler.scale = dimensionOptions->getValueOrDefault<double>("scale", dim.getNumericScale());
-            scaler.offset = dimensionOptions->getValueOrDefault<double>("offset", dim.getNumericOffset());
-            scaler.type = dimensionOptions->getValueOrDefault<std::string>("type", "SignedInteger");
-            scaler.size = dimensionOptions->getValueOrDefault<boost::uint32_t>("size", 4);
+            scaler.scale = dimOps->getValueOrDefault<double>("scale",
+                dim.getNumericScale());
+            scaler.offset = dimOps->getValueOrDefault<double>("offset",
+                dim.getNumericOffset());
+            scaler.type = dimOps->getValueOrDefault<std::string>( "type",
+                "SignedInteger");
+            scaler.size = dimOps->getValueOrDefault<boost::uint32_t>("size", 4);
         }
-
         m_scalers.push_back(scaler);
-
     }
-    return;
 }
 
 
-pdal::StageSequentialIterator* Scaling::createSequentialIterator(PointBuffer& buffer) const
+pdal::StageSequentialIterator*
+Scaling::createSequentialIterator(PointBuffer& buffer) const
 {
-    return new pdal::filters::iterators::sequential::Scaling(*this, buffer);
+    return new iterators::sequential::Scaling(*this, buffer);
 }
 
-pdal::StageRandomIterator* Scaling::createRandomIterator(PointBuffer& buffer) const
+pdal::StageRandomIterator*
+Scaling::createRandomIterator(PointBuffer& buffer) const
 {
-    return new pdal::filters::iterators::random::Scaling(*this, buffer);
+    return new iterators::random::Scaling(*this, buffer);
 }
 
 Options Scaling::getDefaultOptions()
 {
+//ABELL - This looks like a NOOP.  Can it go away?
     Options options;
-    Option ignore_old_dimensions("ignore_old_dimensions", true, "Mark old, unscaled dimensions as ignored");
+    Option ignore_old_dimensions("ignore_old_dimensions", true,
+        "Mark old, unscaled dimensions as ignored");
     return options;
 }
 
 
 Schema Scaling::alterSchema(Schema const& input_schema)
 {
-    typedef std::multimap<dimension::Interpretation, dimension::Interpretation>::const_iterator MapIterator;
+    typedef std::multimap<dimension::Interpretation,
+        dimension::Interpretation>::const_iterator MapIterator;
 
     typedef std::pair<MapIterator, MapIterator> MapPair;
     std::vector<scaling::Scaler> const& scalers = getScalers();
@@ -127,81 +125,81 @@ Schema Scaling::alterSchema(Schema const& input_schema)
 
     Schema schema(input_schema);
 
-    std::multimap<dimension::Interpretation, dimension::Interpretation> allowed_conversions;
-    allowed_conversions.insert(std::make_pair(dimension::Float, dimension::Float));
-    allowed_conversions.insert(std::make_pair(dimension::Float, dimension::SignedInteger));
-    allowed_conversions.insert(std::make_pair(dimension::UnsignedInteger, dimension::Float));
-    allowed_conversions.insert(std::make_pair(dimension::UnsignedInteger, dimension::UnsignedInteger));
-    allowed_conversions.insert(std::make_pair(dimension::SignedInteger, dimension::Float));
-    allowed_conversions.insert(std::make_pair(dimension::SignedInteger, dimension::SignedInteger));
+    std::vector<std::pair<dimension::Interpretation, dimension::Interpretation>>
+        conversions;
 
+    conversions.push_back(
+        std::make_pair(dimension::Float, dimension::Float));
+    conversions.push_back(
+        std::make_pair(dimension::Float, dimension::SignedInteger));
+    conversions.push_back(
+        std::make_pair(dimension::UnsignedInteger, dimension::Float));
+    conversions.push_back(std::make_pair(
+        dimension::UnsignedInteger, dimension::UnsignedInteger));
+    conversions.push_back(
+        std::make_pair(dimension::SignedInteger, dimension::Float));
+    conversions.push_back(
+        std::make_pair(dimension::SignedInteger, dimension::SignedInteger));
 
     // Loop through the options that the filter.Scaler collected. For each
     // dimension described, create a new dimension with the given parameters.
     // Create a map with the uuid of the new dimension that maps to the old
     // dimension to be scaled
 
-    for (i = scalers.begin(); i != scalers.end(); ++i)
+    for (scaling::Scaler s : scalers)
     {
-        boost::optional<Dimension const&> from_dimension = schema.getDimensionOptional(i->name);
+        boost::optional<Dimension const&> from_dimension =
+            schema.getDimensionOptional(s.name);
         if (from_dimension)
         {
-            dimension::Interpretation interp = getInterpretation(i->type);
-
-            Dimension to_dimension(i->name, interp, i->size, from_dimension->getDescription());
-            to_dimension.setNumericScale(i->scale);
-            to_dimension.setNumericOffset(i->offset);
+            Dimension to_dimension(s.name, getInterpretation(s.type), s.size,
+                from_dimension->getDescription());
+            to_dimension.setNumericScale(s.scale);
+            to_dimension.setNumericOffset(s.offset);
             to_dimension.createUUID();
             to_dimension.setNamespace(getName());
             to_dimension.setParent(from_dimension->getUUID());
 
-            MapPair f = allowed_conversions.equal_range(from_dimension->getInterpretation());
-            if (f.first == allowed_conversions.end())
+            auto target = std::make_pair(from_dimension->getInterpretation(),
+                to_dimension.getInterpretation());
+            if (std::find(conversions.begin(), conversions.end(), 
+                target) == conversions.end())
             {
                 throw pdal_error("Scaling between types not supported");
             }
 
-            bool found(false);
-            for (MapIterator  o = f.first; o != f.second; ++o)
-            {
-                if (to_dimension.getInterpretation() == o->second)
-                {
-                    found = true;
-                    break;
-                }
-            }
+            log()->get(logDEBUG2)  <<
+                "Rescaling dimension " << from_dimension->getName() << " [" <<
+                from_dimension->getInterpretation() << "/" <<
+                from_dimension->getByteSize() << "]" << " from scale: " <<
+                from_dimension->getNumericScale() << " offset: " <<
+                from_dimension->getNumericOffset() << " to scale: " <<
+                to_dimension.getNumericScale() << " offset: " <<
+                to_dimension.getNumericOffset() << " datatype: " <<
+                to_dimension.getInterpretation() << "/" <<
+                to_dimension.getByteSize() << std::endl;
 
-            if (!found)
-                throw pdal_error("Scaling between types is not supported");
-
-            log()->get(logDEBUG2)  << "Rescaling dimension " << from_dimension->getName()
-                                   << " [" << from_dimension->getInterpretation() << "/" << from_dimension->getByteSize() << "]"
-                                   << " from scale: " << from_dimension->getNumericScale()
-                                   << " offset: " << from_dimension->getNumericOffset()
-
-                                   << " to scale: " << to_dimension.getNumericScale()
-                                   << " offset: " << to_dimension.getNumericOffset()
-                                   << " datatype: " << to_dimension.getInterpretation() << "/" << to_dimension.getByteSize()
-                                   << std::endl;
-            std::pair<dimension::id, dimension::id> p(from_dimension->getUUID(), to_dimension.getUUID());
-
-            m_scale_map.insert(p);
-            log()->get(logDEBUG2) << "scaling dimension with id '" << from_dimension->getUUID()
-                                  << "' to dimension with id: '" << to_dimension.getUUID() <<"'" << std::endl;
+            m_scale_map.insert(std::make_pair(from_dimension->getUUID(),
+                to_dimension.getUUID()));
+            log()->get(logDEBUG2) << "scaling dimension with id '" <<
+                from_dimension->getUUID() << "' to dimension with id: '" <<
+                to_dimension.getUUID() <<"'" << std::endl;
             schema.appendDimension(to_dimension);
         }
     }
 
-    bool markIgnored = getOptions().getValueOrDefault<bool>("ignore_old_dimensions", true);
-    std::map<dimension::id, dimension::id>::const_iterator d;
-    for (d = m_scale_map.begin(); d != m_scale_map.end(); ++d)
+    bool markIgnored =
+        getOptions().getValueOrDefault<bool>("ignore_old_dimensions", true);
+    for (auto it = m_scale_map.begin(); it != m_scale_map.end(); ++it)
     {
-        Dimension const& from_dimension = schema.getDimension(d->first);
-        Dimension const& to_dimension = schema.getDimension(d->second);
+        Dimension const& from_dimension = schema.getDimension(it->first);
+        Dimension const& to_dimension = schema.getDimension(it->second);
 
         if (markIgnored)
         {
-            log()->get(logDEBUG2) << "marking " << from_dimension.getName() << " as ignored with uuid "  <<  from_dimension.getUUID() << std::endl;
+            log()->get(logDEBUG2) << "marking " << from_dimension.getName() <<
+                " as ignored with uuid "  <<  from_dimension.getUUID() <<
+                std::endl;
 
             Dimension d(from_dimension);
             boost::uint32_t flags = d.getFlags();
@@ -209,52 +207,37 @@ Schema Scaling::alterSchema(Schema const& input_schema)
             schema.setDimension(d);
         }
 
-
-        log()->get(logDEBUG2) << "Map wants to do: " << from_dimension.getName()
-                              << " [" << from_dimension.getInterpretation() << "/" << from_dimension.getByteSize() << "]"
-                              << " to scale: " << to_dimension.getNumericScale()
-                              << " offset: " << to_dimension.getNumericOffset()
-                              << " datatype: " << to_dimension.getInterpretation() << "/" << to_dimension.getByteSize()
-                              << std::endl;
+        log()->get(logDEBUG2) << "Map wants to do: " <<
+            from_dimension.getName() << " [" <<
+            from_dimension.getInterpretation() << "/" <<
+            from_dimension.getByteSize() << "]" << " to scale: " <<
+            to_dimension.getNumericScale() << " offset: " <<
+            to_dimension.getNumericOffset() << " datatype: " <<
+            to_dimension.getInterpretation() << "/" <<
+            to_dimension.getByteSize() << std::endl;
     }
-
     return schema;
-
 }
 
-dimension::Interpretation Scaling::getInterpretation(std::string const& t) const
+dimension::Interpretation Scaling::getInterpretation(std::string t) const
 {
-    if (boost::iequals(t, "SignedInteger"))
-    {
+    std::transform(t.begin(), t.end(), t.begin(), ::tolower);
+
+    if (t == "signedinteger")
         return dimension::SignedInteger;
-    }
-    if (boost::iequals(t, "UnsignedInteger"))
-    {
+    if (t == "unsignedinteger")
         return dimension::UnsignedInteger;
-    }
-    if (boost::iequals(t, "SignedByte"))
-    {
+    if (t == "signedbyte")
         return dimension::RawByte;
-    }
-    if (boost::iequals(t, "UnsignedByte"))
-    {
+    if (t == "unsignedbyte")
         return dimension::RawByte;
-    }
-    if (boost::iequals(t, "RawByte"))
-    {
+    if (t == "rawbyte")
         return dimension::RawByte;
-    }
-    if (boost::iequals(t, "Float"))
-    {
+    if (t == "float")
         return dimension::Float;
-    }
-    if (boost::iequals(t, "Pointer"))
-    {
+    if (t == "pointer")
         return dimension::Pointer;
-    }
-
     return dimension::Undefined;
-
 }
 
 namespace iterators
@@ -267,9 +250,8 @@ namespace sequential
 Scaling::Scaling(const pdal::filters::Scaling& filter, PointBuffer& buffer)
     : pdal::FilterSequentialIterator(filter, buffer)
     , scaling::IteratorBase(filter, buffer)
-{
-    return;
-}
+{} 
+
 
 boost::uint64_t Scaling::skipImpl(boost::uint64_t count)
 {
@@ -286,9 +268,7 @@ bool Scaling::atEndImpl() const
 boost::uint32_t Scaling::readBufferImpl(PointBuffer& buffer)
 {
     const boost::uint32_t numRead = getPrevIterator().read(buffer);
-
     IteratorBase::scaleData(buffer, numRead);
-
     return numRead;
 }
 
@@ -301,9 +281,7 @@ namespace random
 Scaling::Scaling(const pdal::filters::Scaling& filter, PointBuffer& buffer)
     : pdal::FilterRandomIterator(filter, buffer)
     , scaling::IteratorBase(filter, buffer)
-{
-    return;
-}
+{}
 
 boost::uint64_t Scaling::seekImpl(boost::uint64_t count)
 {
@@ -314,9 +292,7 @@ boost::uint64_t Scaling::seekImpl(boost::uint64_t count)
 boost::uint32_t Scaling::readBufferImpl(PointBuffer& buffer)
 {
     const boost::uint32_t numRead = getPrevIterator().read(buffer);
-
     IteratorBase::scaleData(buffer, numRead);
-
     return numRead;
 }
 
@@ -336,41 +312,47 @@ void IteratorBase::readBufferBeginImpl(PointBuffer& buffer)
 {
     pdal::Schema const& schema = buffer.getSchema();
     std::map<dimension::id, dimension::id>::const_iterator d;
-    std::map<dimension::id, dimension::id> const& scale_map = m_scalingFilter.getScaleMap();
+    std::map<dimension::id, dimension::id> const& scale_map =
+        m_scalingFilter.getScaleMap();
     for (d = scale_map.begin(); d != scale_map.end(); ++d)
     {
-        boost::optional<pdal::Dimension const&> fr = schema.getDimensionOptional(d->first);
-        boost::optional<pdal::Dimension const&> to = schema.getDimensionOptional(d->second);
+        boost::optional<pdal::Dimension const&> fr =
+            schema.getDimensionOptional(d->first);
+        boost::optional<pdal::Dimension const&> to =
+            schema.getDimensionOptional(d->second);
 
-        if (!fr) throw pdal_error("from dimension is not found on schema!");
-        if (!to) throw pdal_error("to dimension is not found on schema!");
+        if (!fr)
+            throw pdal_error("from dimension is not found on schema!");
+        if (!to)
+            throw pdal_error("to dimension is not found on schema!");
 
-        std::pair<boost::optional<pdal::Dimension const&>, boost::optional<pdal::Dimension const&> > g(fr, to);
+        //ABELL - We've checked they exist, seems we could dispense with the
+        //  optional bit.
+        std::pair<boost::optional<pdal::Dimension const&>,
+            boost::optional<pdal::Dimension const&>> g(fr, to);
         m_dimension_map.insert(g);
-
     }
 }
 
 void IteratorBase::scaleData(PointBuffer& buffer, boost::uint32_t numRead)
 {
-    for (boost::uint32_t pointIndex=0; pointIndex<numRead; pointIndex++)
+    for (boost::uint32_t pointIndex = 0; pointIndex < numRead; pointIndex++)
     {
-        std::map<boost::optional<pdal::Dimension const&>, boost::optional<pdal::Dimension const&> >::const_iterator d;
-
-        for (d = m_dimension_map.begin(); d != m_dimension_map.end(); ++d)
+        for (auto i = m_dimension_map.begin(); i != m_dimension_map.end(); ++i)
         {
-            boost::optional<pdal::Dimension const&> f = d->first;
-            boost::optional<pdal::Dimension const&> t = d->second;
+            boost::optional<pdal::Dimension const&> f = i->first;
+            boost::optional<pdal::Dimension const&> t = i->second;
+            //ABELL - Didn't we already check this?
             if (f && t)
             {
                 Dimension const& from_dimension = *f;
                 Dimension const& to_dimension = *t;
-                writeScaledData(buffer, from_dimension, to_dimension, pointIndex);
+                writeScaledData(buffer, from_dimension, to_dimension,
+                    pointIndex);
             }
         }
     }
 }
-
 
 
 #ifdef PDAL_COMPILER_MSVC
@@ -381,399 +363,419 @@ void IteratorBase::scaleData(PointBuffer& buffer, boost::uint32_t numRead)
 #endif
 
 void IteratorBase::writeScaledData(PointBuffer& buffer,
-                                   Dimension const& from_dimension,
-                                   Dimension const& to_dimension,
-                                   boost::uint32_t pointIndex)
+    Dimension const& from, Dimension const& to, boost::uint32_t pointIndex)
 {
-    if (from_dimension.getInterpretation() == dimension::Float)
+    if (from.getInterpretation() == dimension::Float)
     {
-        if (from_dimension.getByteSize() == 4)
+        if (from.getByteSize() == 4)
         {
-            float v = buffer.getField<float>(from_dimension, pointIndex);
-            scale(from_dimension,
-                  to_dimension,
-                  v);
-            if (to_dimension.getInterpretation() == dimension::SignedInteger)
+            float v = buffer.getField<float>(from, pointIndex);
+            scale(from, to, v);
+            if (to.getInterpretation() == dimension::SignedInteger)
             {
-                if (to_dimension.getByteSize() == 1)
-                    buffer.setField<boost::int8_t>(to_dimension, pointIndex, v);
-                else if (to_dimension.getByteSize() == 2)
-                    buffer.setField<boost::int16_t>(to_dimension, pointIndex, v);
-                else if (to_dimension.getByteSize() == 4)
-                    buffer.setField<boost::int32_t>(to_dimension, pointIndex, v);
-                else if (to_dimension.getByteSize() == 8)
-                    buffer.setField<boost::int64_t>(to_dimension, pointIndex, v);
+                if (to.getByteSize() == 1)
+                    buffer.setField<boost::int8_t>(to, pointIndex, v);
+                else if (to.getByteSize() == 2)
+                    buffer.setField<boost::int16_t>(to, pointIndex, v);
+                else if (to.getByteSize() == 4)
+                    buffer.setField<boost::int32_t>(to, pointIndex, v);
+                else if (to.getByteSize() == 8)
+                    buffer.setField<boost::int64_t>(to, pointIndex, v);
                 else
-                    throw pdal_error("Unable to convert dimension::Float to dimension::SignedInteger of size >8");
+                    throw pdal_error("Unable to convert dimension::Float to "
+                        "dimension::SignedInteger of size >8");
                 return;
             }
         }
-        else if (from_dimension.getByteSize() == 8)
+        else if (from.getByteSize() == 8)
         {
-            double v = buffer.getField<double>(from_dimension, pointIndex);
-            scale(from_dimension,
-                  to_dimension,
-                  v);
-            if (to_dimension.getInterpretation() == dimension::SignedInteger)
+            double v = buffer.getField<double>(from, pointIndex);
+            scale(from, to, v);
+            if (to.getInterpretation() == dimension::SignedInteger)
             {
-                if (to_dimension.getByteSize() == 1)
-                    buffer.setField<boost::int8_t>(to_dimension, pointIndex, v);
-                else if (to_dimension.getByteSize() == 2)
-                    buffer.setField<boost::int16_t>(to_dimension, pointIndex, v);
-                else if (to_dimension.getByteSize() == 4)
-                    buffer.setField<boost::int32_t>(to_dimension, pointIndex, v);
-                else if (to_dimension.getByteSize() == 8)
-                    buffer.setField<boost::int64_t>(to_dimension, pointIndex, v);
+                if (to.getByteSize() == 1)
+                    buffer.setField<boost::int8_t>(to, pointIndex, v);
+                else if (to.getByteSize() == 2)
+                    buffer.setField<boost::int16_t>(to, pointIndex, v);
+                else if (to.getByteSize() == 4)
+                    buffer.setField<boost::int32_t>(to, pointIndex, v);
+                else if (to.getByteSize() == 8)
+                    buffer.setField<boost::int64_t>(to, pointIndex, v);
                 else
-                    throw pdal_error("Unable to convert dimension::Float to dimension::SignedInteger of size >8");
+                    throw pdal_error("Unable to convert dimension::Float to "
+                        "dimension::SignedInteger of size >8");
                 return;
             }
         }
         else
         {
             std::ostringstream oss;
-            oss << "Unable to interpret Float of size '" << from_dimension.getByteSize() <<"'";
+            oss << "Unable to interpret Float of size '" <<
+                from.getByteSize() <<"'";
             throw pdal_error(oss.str());
         }
     }
 
-    if (from_dimension.getInterpretation() == dimension::SignedInteger)
+    if (from.getInterpretation() == dimension::SignedInteger)
     {
-
-        if (to_dimension.getInterpretation() == dimension::SignedInteger)
+        if (to.getInterpretation() == dimension::SignedInteger)
         {
-            if (from_dimension.getByteSize() == 1)
+            if (from.getByteSize() == 1)
             {
-                boost::int8_t v = buffer.getField<boost::int8_t>(from_dimension, pointIndex);
-                scale(from_dimension,
-                      to_dimension,
-                      v);
-                if (to_dimension.getByteSize() == 1)
-                    buffer.setField<boost::int8_t>(to_dimension, pointIndex, v);
-                else if (to_dimension.getByteSize() == 2)
-                    buffer.setField<boost::int16_t>(to_dimension, pointIndex, v);
-                else if (to_dimension.getByteSize() == 4)
-                    buffer.setField<boost::int32_t>(to_dimension, pointIndex, v);
-                else if (to_dimension.getByteSize() == 8)
-                    buffer.setField<boost::int64_t>(to_dimension, pointIndex, v);
+                boost::int8_t v = buffer.getField<boost::int8_t>(from,
+                    pointIndex);
+                scale(from, to, v);
+                if (to.getByteSize() == 1)
+                    buffer.setField<boost::int8_t>(to, pointIndex, v);
+                else if (to.getByteSize() == 2)
+                    buffer.setField<boost::int16_t>(to, pointIndex, v);
+                else if (to.getByteSize() == 4)
+                    buffer.setField<boost::int32_t>(to, pointIndex, v);
+                else if (to.getByteSize() == 8)
+                    buffer.setField<boost::int64_t>(to, pointIndex, v);
                 else
-                    throw pdal_error("Unable to convert dimension from SignedInteger 1 to SignedInteger of size > 8");
+                    throw pdal_error("Unable to convert dimension from "
+                        "SignedInteger 1 to SignedInteger of size > 8");
                 return;
             }
-            else if (from_dimension.getByteSize() == 2)
+            else if (from.getByteSize() == 2)
             {
-                boost::int16_t v = buffer.getField<boost::int16_t>(from_dimension, pointIndex);
-                scale(from_dimension,
-                      to_dimension,
-                      v);
-                if (to_dimension.getByteSize() == 1)
-                    buffer.setField<boost::int8_t>(to_dimension, pointIndex, v);
-                else if (to_dimension.getByteSize() == 2)
-                    buffer.setField<boost::int16_t>(to_dimension, pointIndex, v);
-                else if (to_dimension.getByteSize() == 4)
-                    buffer.setField<boost::int32_t>(to_dimension, pointIndex, v);
-                else if (to_dimension.getByteSize() == 8)
-                    buffer.setField<boost::int64_t>(to_dimension, pointIndex, v);
+                boost::int16_t v = buffer.getField<boost::int16_t>(from,
+                    pointIndex);
+                scale(from, to, v);
+                if (to.getByteSize() == 1)
+                    buffer.setField<boost::int8_t>(to, pointIndex, v);
+                else if (to.getByteSize() == 2)
+                    buffer.setField<boost::int16_t>(to, pointIndex, v);
+                else if (to.getByteSize() == 4)
+                    buffer.setField<boost::int32_t>(to, pointIndex, v);
+                else if (to.getByteSize() == 8)
+                    buffer.setField<boost::int64_t>(to, pointIndex, v);
                 else
-                    throw pdal_error("Unable to convert dimension from SignedInteger 2 to SignedInteger of size > 8");
+                    throw pdal_error("Unable to convert dimension from "
+                        "SignedInteger 2 to SignedInteger of size > 8");
                 return;
             }
-            else if (from_dimension.getByteSize() == 4)
+            else if (from.getByteSize() == 4)
             {
-                boost::int32_t v = buffer.getField<boost::int32_t>(from_dimension, pointIndex);
-                scale(from_dimension,
-                      to_dimension,
-                      v);
-                if (to_dimension.getByteSize() == 1)
-                    buffer.setField<boost::int8_t>(to_dimension, pointIndex, v);
-                else if (to_dimension.getByteSize() == 2)
-                    buffer.setField<boost::int16_t>(to_dimension, pointIndex, v);
-                else if (to_dimension.getByteSize() == 4)
-                    buffer.setField<boost::int32_t>(to_dimension, pointIndex, v);
-                else if (to_dimension.getByteSize() == 8)
-                    buffer.setField<boost::int64_t>(to_dimension, pointIndex, v);
+                boost::int32_t v = buffer.getField<boost::int32_t>(from,
+                    pointIndex);
+                scale(from, to, v);
+                if (to.getByteSize() == 1)
+                    buffer.setField<boost::int8_t>(to, pointIndex, v);
+                else if (to.getByteSize() == 2)
+                    buffer.setField<boost::int16_t>(to, pointIndex, v);
+                else if (to.getByteSize() == 4)
+                    buffer.setField<boost::int32_t>(to, pointIndex, v);
+                else if (to.getByteSize() == 8)
+                    buffer.setField<boost::int64_t>(to, pointIndex, v);
                 else
-                    throw pdal_error("Unable to convert dimension from SignedInteger 4 to SignedInteger of size > 8");
+                    throw pdal_error("Unable to convert dimension from "
+                        "SignedInteger 4 to SignedInteger of size > 8");
                 return;
             }
-            else if (from_dimension.getByteSize() == 8)
+            else if (from.getByteSize() == 8)
             {
-                boost::int64_t v = buffer.getField<boost::int64_t>(from_dimension, pointIndex);
-                scale(from_dimension,
-                      to_dimension,
-                      v);
-                if (to_dimension.getByteSize() == 1)
-                    buffer.setField<boost::int8_t>(to_dimension, pointIndex, v);
-                else if (to_dimension.getByteSize() == 2)
-                    buffer.setField<boost::int16_t>(to_dimension, pointIndex, v);
-                else if (to_dimension.getByteSize() == 4)
-                    buffer.setField<boost::int32_t>(to_dimension, pointIndex, v);
-                else if (to_dimension.getByteSize() == 8)
-                    buffer.setField<boost::int64_t>(to_dimension, pointIndex, v);
+                boost::int64_t v = buffer.getField<boost::int64_t>(from,
+                    pointIndex);
+                scale(from, to, v);
+                if (to.getByteSize() == 1)
+                    buffer.setField<boost::int8_t>(to, pointIndex, v);
+                else if (to.getByteSize() == 2)
+                    buffer.setField<boost::int16_t>(to, pointIndex, v);
+                else if (to.getByteSize() == 4)
+                    buffer.setField<boost::int32_t>(to, pointIndex, v);
+                else if (to.getByteSize() == 8)
+                    buffer.setField<boost::int64_t>(to, pointIndex, v);
                 else
-                    throw pdal_error("Unable to convert dimension from SignedInteger 8 to SignedInteger of size > 8");
+                    throw pdal_error("Unable to convert dimension from "
+                        "SignedInteger 8 to SignedInteger of size > 8");
                 return;
             }
             else
             {
-                throw pdal_error("Unable to convert dimension::SignedInteger >8 to dimension::SignedInteger of size >8");
+                throw pdal_error("Unable to convert dimension::SignedInteger "
+                    ">8 to dimension::SignedInteger of size >8");
             }
 
         }
-        else if (to_dimension.getInterpretation() == dimension::Float)
+        else if (to.getInterpretation() == dimension::Float)
         {
-
-            if (from_dimension.getByteSize() == 1)
+            if (from.getByteSize() == 1)
             {
-                boost::int8_t v = buffer.getField<boost::int8_t>(from_dimension, pointIndex);
-                double d = from_dimension.applyScaling<double>(v);
-                d = to_dimension.removeScaling<double>(d);
-                if (to_dimension.getByteSize() == 4)
-                    buffer.setField<float>(to_dimension, pointIndex, (float)d);
-                else if (to_dimension.getByteSize() == 8)
-                    buffer.setField<double>(to_dimension, pointIndex, d);
+                boost::int8_t v = buffer.getField<boost::int8_t>(from,
+                    pointIndex);
+                double d = from.applyScaling<double>(v);
+                d = to.removeScaling<double>(d);
+                if (to.getByteSize() == 4)
+                    buffer.setField<float>(to, pointIndex, (float)d);
+                else if (to.getByteSize() == 8)
+                    buffer.setField<double>(to, pointIndex, d);
                 else
-                    throw pdal_error("Unable to convert dimension from SignedInteger 1 to Float of size > 8");
+                    throw pdal_error("Unable to convert dimension from "
+                        "SignedInteger 1 to Float of size > 8");
                 return;
             }
-            else if (from_dimension.getByteSize() == 2)
+            else if (from.getByteSize() == 2)
             {
-                boost::int16_t v = buffer.getField<boost::int16_t>(from_dimension, pointIndex);
-                double d = from_dimension.applyScaling<double>(v);
-                d = to_dimension.removeScaling<double>(d);
-                if (to_dimension.getByteSize() == 4)
-                    buffer.setField<float>(to_dimension, pointIndex, (float)d);
-                else if (to_dimension.getByteSize() == 8)
-                    buffer.setField<double>(to_dimension, pointIndex, d);
+                boost::int16_t v = buffer.getField<boost::int16_t>(from,
+                    pointIndex);
+                double d = from.applyScaling<double>(v);
+                d = to.removeScaling<double>(d);
+                if (to.getByteSize() == 4)
+                    buffer.setField<float>(to, pointIndex, (float)d);
+                else if (to.getByteSize() == 8)
+                    buffer.setField<double>(to, pointIndex, d);
                 else
-                    throw pdal_error("Unable to convert dimension from SignedInteger 2 to Float of size > 8");
+                    throw pdal_error("Unable to convert dimension from "
+                        "SignedInteger 2 to Float of size > 8");
                 return;
             }
-            else if (from_dimension.getByteSize() == 4)
+            else if (from.getByteSize() == 4)
             {
-                boost::int32_t v = buffer.getField<boost::int32_t>(from_dimension, pointIndex);
-                double d = from_dimension.applyScaling<double>(v);
-                d = to_dimension.removeScaling<double>(d);
-                if (to_dimension.getByteSize() == 4)
-                    buffer.setField<float>(to_dimension, pointIndex, (float)d);
-                else if (to_dimension.getByteSize() == 8)
-                    buffer.setField<double>(to_dimension, pointIndex, d);
+                boost::int32_t v = buffer.getField<boost::int32_t>(from,
+                    pointIndex);
+                double d = from.applyScaling<double>(v);
+                d = to.removeScaling<double>(d);
+                if (to.getByteSize() == 4)
+                    buffer.setField<float>(to, pointIndex, (float)d);
+                else if (to.getByteSize() == 8)
+                    buffer.setField<double>(to, pointIndex, d);
                 else
-                    throw pdal_error("Unable to convert dimension from SignedInteger 4 to Float of size > 8");
+                    throw pdal_error("Unable to convert dimension from "
+                        "SignedInteger 4 to Float of size > 8");
                 return;
             }
-            else if (from_dimension.getByteSize() == 8)
+            else if (from.getByteSize() == 8)
             {
-                boost::int64_t v = buffer.getField<boost::int64_t>(from_dimension, pointIndex);
-                double d = from_dimension.applyScaling<double>(v);
-                d = to_dimension.removeScaling<double>(d);
-                if (to_dimension.getByteSize() == 4)
-                    buffer.setField<float>(to_dimension, pointIndex, (float)d);
-                else if (to_dimension.getByteSize() == 8)
-                    buffer.setField<double>(to_dimension, pointIndex, d);
+                boost::int64_t v = buffer.getField<boost::int64_t>(from,
+                    pointIndex);
+                double d = from.applyScaling<double>(v);
+                d = to.removeScaling<double>(d);
+                if (to.getByteSize() == 4)
+                    buffer.setField<float>(to, pointIndex, (float)d);
+                else if (to.getByteSize() == 8)
+                    buffer.setField<double>(to, pointIndex, d);
                 else
-                    throw pdal_error("Unable to convert dimension from SignedInteger 8 to Float of size > 8");
+                    throw pdal_error("Unable to convert dimension from "
+                        "SignedInteger 8 to Float of size > 8");
                 return;
             }
             else
             {
-                throw pdal_error("Unable to convert dimension::SignedInteger >8 to dimension::Float of size >8");
+                throw pdal_error("Unable to convert dimension::SignedInteger "
+                    ">8 to dimension::Float of size >8");
+            }
+        }
+    }
+
+    if (from.getInterpretation() == dimension::UnsignedInteger)
+    {
+
+        if (to.getInterpretation() == dimension::UnsignedInteger)
+        {
+            if (from.getByteSize() == 1)
+            {
+                boost::uint8_t v = buffer.getField<boost::uint8_t>(from,
+                    pointIndex);
+                double d = from.applyScaling<double>(v);
+
+                if (to.getByteSize() == 1)
+                {
+                    boost::uint8_t i = to.removeScaling<boost::uint8_t>(d);
+                    buffer.setField<boost::uint8_t>(to, pointIndex, i);
+                }
+                else if (to.getByteSize() == 2)
+                {
+                    boost::uint16_t i = to.removeScaling<boost::uint16_t>(d);
+                    buffer.setField<boost::uint16_t>(to, pointIndex, i);
+                }
+                else if (to.getByteSize() == 4)
+                {
+                    boost::uint32_t i = to.removeScaling<boost::uint32_t>(d);
+                    buffer.setField<boost::uint32_t>(to, pointIndex, i);
+                }
+                else if (to.getByteSize() == 8)
+                {
+                    boost::uint64_t i = to.removeScaling<boost::uint64_t>(d);
+                    buffer.setField<boost::uint64_t>(to, pointIndex, i);
+                }
+                else
+                    throw pdal_error("Unable to convert dimension from "
+                        "UnsignedInteger 8 to UnsignedInteger of size > 8");
+                return;
+            }
+            else if (from.getByteSize() == 2)
+            {
+                boost::uint16_t v = buffer.getField<boost::uint16_t>(from,
+                    pointIndex);
+                double d = from.applyScaling<double>(v);
+
+                if (to.getByteSize() == 1)
+                {
+                    boost::uint8_t i = to.removeScaling<boost::uint8_t>(d);
+                    buffer.setField<boost::uint8_t>(to, pointIndex, i);
+                }
+                else if (to.getByteSize() == 2)
+                {
+                    boost::uint16_t i = to.removeScaling<boost::uint16_t>(d);
+                    buffer.setField<boost::uint16_t>(to, pointIndex, i);
+                }
+                else if (to.getByteSize() == 4)
+                {
+                    boost::uint32_t i = to.removeScaling<boost::uint32_t>(d);
+                    buffer.setField<boost::uint32_t>(to, pointIndex, i);
+                }
+                else if (to.getByteSize() == 8)
+                {
+                    boost::uint64_t i = to.removeScaling<boost::uint64_t>(d);
+                    buffer.setField<boost::uint64_t>(to, pointIndex, i);
+                }
+                else
+                    throw pdal_error("Unable to convert dimension from "
+                        "UnsignedInteger 2 to UnsignedInteger of size > 8");
+                return;
+            }
+            else if (from.getByteSize() == 4)
+            {
+                boost::uint32_t v = buffer.getField<boost::uint32_t>(from,
+                    pointIndex);
+                double d = from.applyScaling<double>(v);
+
+                if (to.getByteSize() == 1)
+                {
+                    boost::uint8_t i = to.removeScaling<boost::uint8_t>(d);
+                    buffer.setField<boost::uint8_t>(to, pointIndex, i);
+                }
+                else if (to.getByteSize() == 2)
+                {
+                    boost::uint16_t i = to.removeScaling<boost::uint16_t>(d);
+                    buffer.setField<boost::uint16_t>(to, pointIndex, i);
+                }
+                else if (to.getByteSize() == 4)
+                {
+                    boost::uint32_t i = to.removeScaling<boost::uint32_t>(d);
+                    buffer.setField<boost::uint32_t>(to, pointIndex, i);
+                }
+                else if (to.getByteSize() == 8)
+                {
+                    boost::uint64_t i = to.removeScaling<boost::uint64_t>(d);
+                    buffer.setField<boost::uint64_t>(to, pointIndex, i);
+                }
+                else
+                    throw pdal_error("Unable to convert dimension from "
+                        "UnsignedInteger 4 to UnsignedInteger of size > 8");
+                return;
+            }
+            else if (from.getByteSize() == 8)
+            {
+                boost::uint64_t v = buffer.getField<boost::uint64_t>(from,
+                    pointIndex);
+                double d = from.applyScaling<double>(v);
+
+                if (to.getByteSize() == 1)
+                {
+                    boost::uint8_t i = to.removeScaling<boost::uint8_t>(d);
+                    buffer.setField<boost::uint8_t>(to, pointIndex, i);
+                }
+                else if (to.getByteSize() == 2)
+                {
+                    boost::uint16_t i = to.removeScaling<boost::uint16_t>(d);
+                    buffer.setField<boost::uint16_t>(to, pointIndex, i);
+                }
+                else if (to.getByteSize() == 4)
+                {
+                    boost::uint32_t i = to.removeScaling<boost::uint32_t>(d);
+                    buffer.setField<boost::uint32_t>(to, pointIndex, i);
+                }
+                else if (to.getByteSize() == 8)
+                {
+                    boost::uint64_t i = to.removeScaling<boost::uint64_t>(d);
+                    buffer.setField<boost::uint64_t>(to, pointIndex, i);
+                }
+                else
+                    throw pdal_error("Unable to convert dimension from "
+                        "UnsignedInteger 8 to UnsignedInteger of size > 8");
+                return;
+            }
+            else
+            {
+                throw pdal_error("Unable to convert dimension::UnsignedInteger "
+                    ">8 to dimension::UnsignedInteger of size >8");
+            }
+        }
+        else if (to.getInterpretation() == dimension::Float)
+        {
+            if (from.getByteSize() == 1)
+            {
+                boost::uint8_t v = buffer.getField<boost::uint8_t>(from,
+                    pointIndex);
+                double d = from.applyScaling<double>(v);
+                d = to.removeScaling<double>(d);
+                if (to.getByteSize() == 4)
+                    buffer.setField<float>(to, pointIndex, (float)d);
+                else if (to.getByteSize() == 8)
+                    buffer.setField<double>(to, pointIndex, d);
+                else
+                    throw pdal_error("Unable to convert dimension from "
+                        "UnsignedInteger 1 to Float of size > 8");
+                return;
+            }
+            else if (from.getByteSize() == 2)
+            {
+                boost::uint16_t v = buffer.getField<boost::uint16_t>(from,
+                    pointIndex);
+                double d = from.applyScaling<double>(v);
+                d = to.removeScaling<double>(d);
+                if (to.getByteSize() == 4)
+                    buffer.setField<float>(to, pointIndex, (float)d);
+                else if (to.getByteSize() == 8)
+                    buffer.setField<double>(to, pointIndex, d);
+                else
+                    throw pdal_error("Unable to convert dimension from "
+                        "UnsignedInteger 2 to Float of size > 8");
+                return;
+            }
+            else if (from.getByteSize() == 4)
+            {
+                boost::uint32_t v = buffer.getField<boost::uint32_t>(from,
+                    pointIndex);
+                double d = from.applyScaling<double>(v);
+                d = to.removeScaling<double>(d);
+                if (to.getByteSize() == 4)
+                    buffer.setField<float>(to, pointIndex, (float)d);
+                else if (to.getByteSize() == 8)
+                    buffer.setField<double>(to, pointIndex, d);
+                else
+                    throw pdal_error("Unable to convert dimension from "
+                        "UnsignedInteger 4 to Float of size > 8");
+                return;
+            }
+            else if (from.getByteSize() == 8)
+            {
+                boost::uint64_t v = buffer.getField<boost::uint64_t>(from,
+                    pointIndex);
+                double d = from.applyScaling<double>(v);
+                d = to.removeScaling<double>(d);
+                if (to.getByteSize() == 4)
+                    buffer.setField<float>(to, pointIndex, (float)d);
+                else if (to.getByteSize() == 8)
+                    buffer.setField<double>(to, pointIndex, d);
+                else
+                    throw pdal_error("Unable to convert dimension from "
+                        "UnsignedInteger 8 to Float of size > 8");
+                return;
+            }
+            else
+            {
+                throw pdal_error("Unable to convert dimension::UnsignedInteger "
+                    ">8 to dimension::Float of size >8");
             }
 
         }
     }
-
-    if (from_dimension.getInterpretation() == dimension::UnsignedInteger)
-    {
-
-        if (to_dimension.getInterpretation() == dimension::UnsignedInteger)
-        {
-            if (from_dimension.getByteSize() == 1)
-            {
-                boost::uint8_t v = buffer.getField<boost::uint8_t>(from_dimension, pointIndex);
-                double d = from_dimension.applyScaling<double>(v);
-
-                if (to_dimension.getByteSize() == 1)
-                {
-                    boost::uint8_t i = to_dimension.removeScaling<boost::uint8_t>(d);
-                    buffer.setField<boost::uint8_t>(to_dimension, pointIndex, i);
-                }
-                else if (to_dimension.getByteSize() == 2)
-                {
-                    boost::uint16_t i = to_dimension.removeScaling<boost::uint16_t>(d);
-                    buffer.setField<boost::uint16_t>(to_dimension, pointIndex, i);
-                }
-                else if (to_dimension.getByteSize() == 4)
-                {
-                    boost::uint32_t i = to_dimension.removeScaling<boost::uint32_t>(d);
-                    buffer.setField<boost::uint32_t>(to_dimension, pointIndex, i);
-                }
-                else if (to_dimension.getByteSize() == 8)
-                {
-                    boost::uint64_t i = to_dimension.removeScaling<boost::uint64_t>(d);
-                    buffer.setField<boost::uint64_t>(to_dimension, pointIndex, i);
-                }
-                else
-                    throw pdal_error("Unable to convert dimension from UnsignedInteger 8 to UnsignedInteger of size > 8");
-                return;
-            }
-            else if (from_dimension.getByteSize() == 2)
-            {
-                boost::uint16_t v = buffer.getField<boost::uint16_t>(from_dimension, pointIndex);
-                double d = from_dimension.applyScaling<double>(v);
-
-                if (to_dimension.getByteSize() == 1)
-                {
-                    boost::uint8_t i = to_dimension.removeScaling<boost::uint8_t>(d);
-                    buffer.setField<boost::uint8_t>(to_dimension, pointIndex, i);
-                }
-                else if (to_dimension.getByteSize() == 2)
-                {
-                    boost::uint16_t i = to_dimension.removeScaling<boost::uint16_t>(d);
-                    buffer.setField<boost::uint16_t>(to_dimension, pointIndex, i);
-                }
-                else if (to_dimension.getByteSize() == 4)
-                {
-                    boost::uint32_t i = to_dimension.removeScaling<boost::uint32_t>(d);
-                    buffer.setField<boost::uint32_t>(to_dimension, pointIndex, i);
-                }
-                else if (to_dimension.getByteSize() == 8)
-                {
-                    boost::uint64_t i = to_dimension.removeScaling<boost::uint64_t>(d);
-                    buffer.setField<boost::uint64_t>(to_dimension, pointIndex, i);
-                }
-                else
-                    throw pdal_error("Unable to convert dimension from UnsignedInteger 2 to UnsignedInteger of size > 8");
-                return;
-            }
-            else if (from_dimension.getByteSize() == 4)
-            {
-                boost::uint32_t v = buffer.getField<boost::uint32_t>(from_dimension, pointIndex);
-                double d = from_dimension.applyScaling<double>(v);
-
-                if (to_dimension.getByteSize() == 1)
-                {
-                    boost::uint8_t i = to_dimension.removeScaling<boost::uint8_t>(d);
-                    buffer.setField<boost::uint8_t>(to_dimension, pointIndex, i);
-                }
-                else if (to_dimension.getByteSize() == 2)
-                {
-                    boost::uint16_t i = to_dimension.removeScaling<boost::uint16_t>(d);
-                    buffer.setField<boost::uint16_t>(to_dimension, pointIndex, i);
-                }
-                else if (to_dimension.getByteSize() == 4)
-                {
-                    boost::uint32_t i = to_dimension.removeScaling<boost::uint32_t>(d);
-                    buffer.setField<boost::uint32_t>(to_dimension, pointIndex, i);
-                }
-                else if (to_dimension.getByteSize() == 8)
-                {
-                    boost::uint64_t i = to_dimension.removeScaling<boost::uint64_t>(d);
-                    buffer.setField<boost::uint64_t>(to_dimension, pointIndex, i);
-                }
-                else
-                    throw pdal_error("Unable to convert dimension from UnsignedInteger 4 to UnsignedInteger of size > 8");
-                return;
-            }
-            else if (from_dimension.getByteSize() == 8)
-            {
-                boost::uint64_t v = buffer.getField<boost::uint64_t>(from_dimension, pointIndex);
-                double d = from_dimension.applyScaling<double>(v);
-
-                if (to_dimension.getByteSize() == 1)
-                {
-                    boost::uint8_t i = to_dimension.removeScaling<boost::uint8_t>(d);
-                    buffer.setField<boost::uint8_t>(to_dimension, pointIndex, i);
-                }
-                else if (to_dimension.getByteSize() == 2)
-                {
-                    boost::uint16_t i = to_dimension.removeScaling<boost::uint16_t>(d);
-                    buffer.setField<boost::uint16_t>(to_dimension, pointIndex, i);
-                }
-                else if (to_dimension.getByteSize() == 4)
-                {
-                    boost::uint32_t i = to_dimension.removeScaling<boost::uint32_t>(d);
-                    buffer.setField<boost::uint32_t>(to_dimension, pointIndex, i);
-                }
-                else if (to_dimension.getByteSize() == 8)
-                {
-                    boost::uint64_t i = to_dimension.removeScaling<boost::uint64_t>(d);
-                    buffer.setField<boost::uint64_t>(to_dimension, pointIndex, i);
-                }
-                else
-                    throw pdal_error("Unable to convert dimension from UnsignedInteger 8 to UnsignedInteger of size > 8");
-                return;
-            }
-            else
-            {
-                throw pdal_error("Unable to convert dimension::UnsignedInteger >8 to dimension::UnsignedInteger of size >8");
-            }
-
-        }
-        else if (to_dimension.getInterpretation() == dimension::Float)
-        {
-
-            if (from_dimension.getByteSize() == 1)
-            {
-                boost::uint8_t v = buffer.getField<boost::uint8_t>(from_dimension, pointIndex);
-                double d = from_dimension.applyScaling<double>(v);
-                d = to_dimension.removeScaling<double>(d);
-                if (to_dimension.getByteSize() == 4)
-                    buffer.setField<float>(to_dimension, pointIndex, (float)d);
-                else if (to_dimension.getByteSize() == 8)
-                    buffer.setField<double>(to_dimension, pointIndex, d);
-                else
-                    throw pdal_error("Unable to convert dimension from UnsignedInteger 1 to Float of size > 8");
-                return;
-            }
-            else if (from_dimension.getByteSize() == 2)
-            {
-                boost::uint16_t v = buffer.getField<boost::uint16_t>(from_dimension, pointIndex);
-                double d = from_dimension.applyScaling<double>(v);
-                d = to_dimension.removeScaling<double>(d);
-                if (to_dimension.getByteSize() == 4)
-                    buffer.setField<float>(to_dimension, pointIndex, (float)d);
-                else if (to_dimension.getByteSize() == 8)
-                    buffer.setField<double>(to_dimension, pointIndex, d);
-                else
-                    throw pdal_error("Unable to convert dimension from UnsignedInteger 2 to Float of size > 8");
-                return;
-            }
-            else if (from_dimension.getByteSize() == 4)
-            {
-                boost::uint32_t v = buffer.getField<boost::uint32_t>(from_dimension, pointIndex);
-                double d = from_dimension.applyScaling<double>(v);
-                d = to_dimension.removeScaling<double>(d);
-                if (to_dimension.getByteSize() == 4)
-                    buffer.setField<float>(to_dimension, pointIndex, (float)d);
-                else if (to_dimension.getByteSize() == 8)
-                    buffer.setField<double>(to_dimension, pointIndex, d);
-                else
-                    throw pdal_error("Unable to convert dimension from UnsignedInteger 4 to Float of size > 8");
-                return;
-            }
-            else if (from_dimension.getByteSize() == 8)
-            {
-                boost::uint64_t v = buffer.getField<boost::uint64_t>(from_dimension, pointIndex);
-                double d = from_dimension.applyScaling<double>(v);
-                d = to_dimension.removeScaling<double>(d);
-                if (to_dimension.getByteSize() == 4)
-                    buffer.setField<float>(to_dimension, pointIndex, (float)d);
-                else if (to_dimension.getByteSize() == 8)
-                    buffer.setField<double>(to_dimension, pointIndex, d);
-                else
-                    throw pdal_error("Unable to convert dimension from UnsignedInteger 8 to Float of size > 8");
-                return;
-            }
-            else
-            {
-                throw pdal_error("Unable to convert dimension::UnsignedInteger >8 to dimension::Float of size >8");
-            }
-
-        }
-    }
-
-    throw pdal_error("Dimension data type unable to be scaled because it is Undefined");
+    throw pdal_error("Dimension data type unable to be scaled because it "
+        "is Undefined");
 }
 
 #ifdef PDAL_COMPILER_MSVC
