@@ -33,18 +33,72 @@
 ****************************************************************************/
 #include <boost/test/unit_test.hpp>
 
-
 #include <pdal/PipelineReader.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/Utils.hpp>
 #include <pdal/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/StageIterator.hpp>
+#include <pdal/drivers/bpf/BpfReader.hpp>
 
 #include "Support.hpp"
 
 BOOST_AUTO_TEST_SUITE(BPFTest)
 
+namespace
+{
+}
+
+BOOST_AUTO_TEST_CASE(test_point_major)
+{
+    using namespace pdal;
+
+    pdal::BpfReader reader(
+        Support::datapath("bpf/autzen-utm-chipped-25-v3-interleaved.bpf"));
+
+    reader.initialize();
+    const Schema& schema = reader.getSchema();
+    
+    PointBuffer data(schema, 3);
+    StageSequentialIterator *it = reader.createSequentialIterator(data);
+    boost::uint32_t numRead = it->read(data);
+    BOOST_CHECK(numRead = 3);
+    Dimension dimX = schema.getDimension("X");
+    Dimension dimY = schema.getDimension("Y");
+    Dimension dimZ = schema.getDimension("Z");
+    try
+    {
+        Dimension dimQ = schema.getDimension("Q");
+        BOOST_ERROR("Found unexpected dimension");
+    }
+    catch (std::runtime_error err)
+    {
+    }
+
+    struct PtData
+    {
+        float x;
+        float y;
+        float z;
+    };
+
+    PtData pts[3] = { {494057.312, 4877433.5, 130.630005},
+                      {494133.812, 4877440, 130.440002},
+                      {494021.094, 4877440, 130.460007} };
+
+    for (int i = 0; i < 3; ++i)
+    {
+        float x = data.getFieldAs<float>(dimX, i);
+        float y = data.getFieldAs<float>(dimY, i);
+        float z = data.getFieldAs<float>(dimZ, i);
+        
+        BOOST_CHECK_CLOSE(x, pts[i].x, 0.001);
+        BOOST_CHECK_CLOSE(y, pts[i].y, 0.001);
+        BOOST_CHECK_CLOSE(z, pts[i].z, 0.001);
+    }
+    delete it;
+}
+/**
 BOOST_AUTO_TEST_CASE(BPFTest_test)
 {
 
@@ -91,6 +145,7 @@ BOOST_AUTO_TEST_CASE(BPFTest_test)
 
     return;
 }
+**/
 
 
 BOOST_AUTO_TEST_SUITE_END()
