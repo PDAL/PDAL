@@ -134,6 +134,87 @@ BOOST_AUTO_TEST_CASE(test_get_set)
     delete data;
 }
 
+BOOST_AUTO_TEST_CASE(test_getFieldAs_uint8)
+{
+    PointBuffer* data = makeTestBuffer();
+
+    Dimension const& dimC = data->getSchema().getDimension("Classification");
+    Dimension const& dimX = data->getSchema().getDimension("X");
+    Dimension const& dimY = data->getSchema().getDimension("Y");
+
+    // read the data back out
+    for (int i=0; i<3; i++)
+    {
+        uint8_t x = data->getFieldAs<uint8_t>(dimC, i);
+        uint8_t y = data->getFieldAs<uint8_t>(dimX, i);
+        uint8_t z = data->getFieldAs<uint8_t>(dimY, i);
+        
+        BOOST_CHECK(x == i+1);
+        BOOST_CHECK(y == i*10);
+        BOOST_CHECK(z == i*100);
+    }
+
+    // read the data back out
+    for (int i=3; i<17; i++)
+    {
+        uint8_t x = data->getFieldAs<uint8_t>(dimC, i);
+        uint8_t y = data->getFieldAs<uint8_t>(dimX, i);
+        BOOST_CHECK_THROW(data->getFieldAs<uint8_t>(dimY, i), pdal_error);
+        
+        BOOST_CHECK(x == i+1);
+        BOOST_CHECK(y == i*10);
+    }
+
+    delete data;
+}
+
+BOOST_AUTO_TEST_CASE(test_getFieldAs_int32)
+{
+    PointBuffer* data = makeTestBuffer();
+
+    Dimension const& dimC = data->getSchema().getDimension("Classification");
+    Dimension const& dimX = data->getSchema().getDimension("X");
+    Dimension const& dimY = data->getSchema().getDimension("Y");
+
+    // read the data back out
+    for (int i=0; i<17; i++)
+    {
+        int32_t x = data->getFieldAs<int32_t>(dimC, i);
+        int32_t y = data->getFieldAs<int32_t>(dimX, i);
+        int32_t z = data->getFieldAs<int32_t>(dimY, i);
+        
+        BOOST_CHECK(x == i+1);
+        BOOST_CHECK(y == i*10);
+        BOOST_CHECK(z == i*100);
+    }
+
+    delete data;
+}
+
+
+BOOST_AUTO_TEST_CASE(test_getFieldAs_float)
+{
+    PointBuffer* data = makeTestBuffer();
+
+    Dimension const& dimC = data->getSchema().getDimension("Classification");
+    Dimension const& dimX = data->getSchema().getDimension("X");
+    Dimension const& dimY = data->getSchema().getDimension("Y");
+
+    // read the data back out
+    for (int i=0; i<17; i++)
+    {
+        float x = data->getFieldAs<float>(dimC, i);
+        float y = data->getFieldAs<float>(dimX, i);
+        float z = data->getFieldAs<float>(dimY, i);
+        
+        BOOST_CHECK_CLOSE(x, i+1.0f, std::numeric_limits<float>::min());
+        BOOST_CHECK_CLOSE(y, i*10.0f, std::numeric_limits<float>::min());
+        BOOST_CHECK_CLOSE(z, i*100.0f, std::numeric_limits<float>::min());
+    }
+
+    delete data;
+}
+
 
 BOOST_AUTO_TEST_CASE(test_copy)
 {

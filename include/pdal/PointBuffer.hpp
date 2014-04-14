@@ -181,6 +181,23 @@ public:
     template<class T>
     T getField(Dimension const& dim, boost::uint32_t pointIndex) const;
 
+    /*! fetch the value T for a given :cpp:class:`pdal::Dimension` dim at
+        pointIndex `i`.
+        \param dim the dimension to select.
+        \param pointIndex the point index of the PointBuffer to select.
+        \param applyScaling whether or not to apply the dimension's scale and
+               offset prior to returning the value.
+        \verbatim embed:rst
+        .. note::
+
+            The method will attempt to cast :cpp:class:`pdal::Dimension` to
+            the requested data type T. If a bad cast is detected, pdal_error
+            is thrown.
+        \endverbatim
+    */
+    template<class T>
+    T getFieldAs(Dimension const& dim, boost::uint32_t pointIndex, bool applyScaling=true) const;
+
     /*! set the value T for a given  :cpp:class:`pdal::Dimension` dim
         at pointIndex i.
         \param dim  The dimension to select.
@@ -559,6 +576,89 @@ inline T PointBuffer::getField(pdal::Dimension const& dim,
             << dim.getFQName() << "' which is " << dim.getByteSize();
         throw pdal_error(oss.str());
     }
+}
+
+
+template <class T>
+inline T PointBuffer::getFieldAs(pdal::Dimension const& dim,
+    boost::uint32_t pointIndex, bool applyScaling) const
+{
+    T retval;
+    boost::uint32_t size = dim.getByteSize();
+    double val;
+
+    switch (dim.getInterpretation())
+    {
+        case dimension::Float:
+            switch (size)
+            {
+                case 4:
+                    val = getField<float>(dim, pointIndex);
+                    break;
+                case 8:
+                    val = getField<double>(dim, pointIndex);
+                    break;
+            }
+            break;
+
+        case dimension::SignedInteger:
+            switch (size)
+            {
+              case 1:
+                  val = getField<boost::int8_t>(dim, pointIndex);
+                  break;
+              case 2:
+                  val = getField<boost::int16_t>(dim, pointIndex);
+                  break;
+              case 4:
+                  val = getField<boost::int32_t>(dim, pointIndex);
+                  break;
+              case 8:
+                  val = getField<boost::int64_t>(dim, pointIndex);
+                  break;
+            }
+            break;
+
+        case dimension::UnsignedInteger:
+            switch (size)
+            {
+                case 1:
+                    val = getField<boost::uint8_t>(dim, pointIndex);
+                    break;
+                case 2:
+                    val = getField<boost::uint16_t>(dim, pointIndex);
+                    break;
+                case 4:
+                    val = getField<boost::uint32_t>(dim, pointIndex);
+                    break;
+                case 8:
+                    val = getField<boost::uint64_t>(dim, pointIndex);
+                    break;
+            }
+            break;
+
+        case dimension::RawByte:
+        case dimension::Pointer:
+        case dimension::Undefined:
+            throw pdal_error("Dimension data type unable to be retrieved in getFieldAs");
+    }
+
+    if (applyScaling)
+        val = dim.applyScaling(val);
+
+    try
+    {
+        if (std::is_integral<T>::value)
+            retval = boost::numeric_cast<T>(lround(val));
+        else
+            retval = boost::numeric_cast<T>(val);
+    }
+    catch (boost::numeric::bad_numeric_cast& e)
+    {
+      throw pdal_error("Unable to fetch data and convert as requested");
+    }
+
+    return retval;
 }
 
 
