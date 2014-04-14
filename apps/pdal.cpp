@@ -50,6 +50,7 @@ void outputVersion()
     std::cout << "     - delta" << std::endl;
     std::cout << "     - diff" << std::endl;
     std::cout << "     - info" << std::endl;
+    std::cout << "     - pcl" << std::endl;
     std::cout << "     - pipeline" << std::endl;
     std::cout << "     - translate" << std::endl;
     std::cout << std::endl;
@@ -119,6 +120,12 @@ int main(int argc, char* argv[])
     if (boost::iequals(action, "info"))
     {
         pdal::kernel::Info app(count, args);
+        return app.run();
+    }
+
+    if (boost::iequals(action, "pcl"))
+    {
+        pdal::kernel::PCL app(count, args);
         return app.run();
     }
 
