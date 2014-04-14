@@ -82,9 +82,30 @@ BOOST_AUTO_TEST_CASE(test_point_major)
         float z;
     };
 
-    PtData pts[3] = { {494057.312, 4877433.5, 130.630005},
-                      {494133.812, 4877440, 130.440002},
-                      {494021.094, 4877440, 130.460007} };
+    PtData pts2[3] = { {494057.312, 4877433.5, 130.630005},
+                       {494133.812, 4877440, 130.440002},
+                       {494021.094, 4877440, 130.460007} };
+
+    for (int i = 0; i < 3; ++i)
+    {
+        float x = data.getFieldAs<float>(dimX, i);
+        float y = data.getFieldAs<float>(dimY, i);
+        float z = data.getFieldAs<float>(dimZ, i);
+        
+        BOOST_CHECK_CLOSE(x, pts2[i].x, 0.001);
+        BOOST_CHECK_CLOSE(y, pts2[i].y, 0.001);
+        BOOST_CHECK_CLOSE(z, pts2[i].z, 0.001);
+    }
+
+    // Should be positioned at point 3.
+    // Skip by 500, which should put us at 503.
+
+    it->skip(500);
+    numRead = it->read(data);
+    BOOST_CHECK(numRead = 3);
+    PtData pts[3] = { {494915.25, 4878096.5, 128.220001},
+                      {494917.062, 4878124.5, 128.539993},
+                      {494920.781, 4877914.5, 127.43} };
 
     for (int i = 0; i < 3; ++i)
     {
@@ -96,56 +117,14 @@ BOOST_AUTO_TEST_CASE(test_point_major)
         BOOST_CHECK_CLOSE(y, pts[i].y, 0.001);
         BOOST_CHECK_CLOSE(z, pts[i].z, 0.001);
     }
+
+    // We should now be at 506.  Skip too far.  Check that we've skipped
+    // to the end.
+    uint32_t numSkipped = it->skip(2000);
+    BOOST_CHECK(numSkipped == 559);
+
     delete it;
 }
-/**
-BOOST_AUTO_TEST_CASE(BPFTest_test)
-{
-
-
-    std::string p = Support::binpath("/../../bpf/test/pipeline_bpf.xml");
-
-    // BPF driver is a (closed source) plugin. If the pipeline file for its
-    // example data isn't alongside the PDAL source tree, we skip the test.
-    if (!pdal::FileUtils::fileExists(p))
-        return;
-    // BPF driver is a (closed source) plugin. If we don't have PDAL_DRIVER_PATH
-    // set, we aren't going to bother trying to run the test.
-    std::string drivers;
-    std::string driver_path("PDAL_DRIVER_PATH");
-    drivers = pdal::Utils::getenv(driver_path);
-    if (drivers.size() == 0)
-        return;
-
-    pdal::PipelineManager manager;
-
-
-    pdal::Option option("filename", p);
-
-    pdal::PipelineReader reader(manager, false, 0);
-    reader.readPipeline(option.getValue<std::string>());
-
-    pdal::Stage* stage = manager.getStage();
-    BOOST_CHECK(stage != NULL);
-    stage->initialize();
-    BOOST_CHECK_EQUAL(stage->getNumPoints(), 1838289u);
-
-    {
-        const pdal::Schema& schema = stage->getSchema();
-        // std::cout << schema << std::endl;
-        pdal::PointBuffer data(schema, 2048);
-        pdal::StageSequentialIterator* iter = stage->createSequentialIterator(data);
-        boost::uint32_t np = iter->read(data);
-        BOOST_CHECK_EQUAL(np, 2048u);
-
-        delete iter;
-    }
-
-    // BOOST_CHECK_EQUAL(np, 106u);
-
-    return;
-}
-**/
 
 
 BOOST_AUTO_TEST_SUITE_END()
