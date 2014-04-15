@@ -12,6 +12,25 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.hostname = "pdal-vagrant"
   config.vm.box_url = "http://files.vagrantup.com/precise64.box"
   config.vm.host_name = "pdal-vagrant"
+
+  # Set the bash environment variable PDAL_VAGRANT_SSH_FORWARD_AGENT to any
+  # value to turn on ssh forwarding. This allows you to use your host machine's
+  # ssh credentials inside your guest box, for example when interacting with
+  # private github repositories.
+  #
+  # To confirm that ssh fowarding is working, run the following from inside the
+  # guest machine:
+  #
+  #   ssh -T git@github.com
+  #
+  # You should see something like "Hi <your name here>! You've successfully
+  # authenticated, but GitHub does not provide shell access."
+  #
+  # You may need to run `ssh-add` on your host machine to add your private key
+  # identities to the authentication agent.
+  if ENV['PDAL_VAGRANT_SSH_FORWARD_AGENT']
+    config.ssh.forward_agent = true
+  end
   
   config.vm.network :forwarded_port, guest: 80, host: 8080
 
