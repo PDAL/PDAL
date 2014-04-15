@@ -120,8 +120,6 @@ BOOST_AUTO_TEST_CASE(testRead)
     BOOST_CHECK_EQUAL(numRead, 2);
     BOOST_CHECK(iter->atEnd());
 
-    BOOST_CHECK_THROW(iter->read(data), pdal::pdal_error);
-
     delete iter;
 
     checkPoint(data, 0, 1.516310028360710e+05, 5.680211852972264e-01,
@@ -197,6 +195,38 @@ BOOST_AUTO_TEST_CASE(testPipeline)
     const boost::uint64_t numPoints = manager.execute();
     BOOST_CHECK_EQUAL(numPoints, 2);
     pdal::FileUtils::deleteFile(Support::datapath("sbet/outfile.txt"));
+
+    return;
+}
+
+
+BOOST_AUTO_TEST_CASE(testRandomIterator)
+{
+    pdal::Option filename("filename", Support::datapath("sbet/2-points.sbet"), "");
+    pdal::Options options(filename);
+    pdal::drivers::sbet::Reader reader(options);
+    reader.initialize();
+
+    pdal::PointBuffer data(reader.getSchema(), 1);
+
+    pdal::StageRandomIterator* iter = reader.createRandomIterator(data);
+    boost::uint64_t numSeek = iter->seek(1);
+    BOOST_CHECK_EQUAL(numSeek, 1);
+
+    boost::uint32_t numRead = iter->read(data);
+
+    delete iter;
+
+    BOOST_CHECK_EQUAL(numRead, 1);
+    checkPoint(data, 0, 1.516310078318641e+05, 5.680211834722869e-01,
+               -2.041654392034053e+00, 1.077151424357507e+02,
+               -2.336228229691271e+00, -3.324663118952635e-01,
+               -3.022948961008987e-02, -2.813856631423094e-02,
+               -2.425215669392169e-02, 3.047131105236811e+00,
+               -2.198416007932108e-02, 8.397590491636475e-01,
+               3.252165276637165e-01, -1.558883225990844e-01,
+               8.379685112283802e-04, 7.372886784718076e-03,
+               7.179027672314571e-02);
 
     return;
 }

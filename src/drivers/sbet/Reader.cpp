@@ -183,8 +183,63 @@ Reader::createSequentialIterator(PointBuffer& buffer) const
 }
 
 
+pdal::StageRandomIterator*
+Reader::createRandomIterator(PointBuffer& buffer) const
+{
+    return new pdal::drivers::sbet::iterators::random::Iterator(*this, buffer);
+}
+
+
 namespace iterators
 {
+
+
+IteratorBase::IteratorBase(const pdal::drivers::sbet::Reader& reader,
+                           PointBuffer& buffer)
+    : m_numPoints(reader.getNumPoints())
+    , m_schema(reader.getSchema())
+    , m_readBuffer(pdal::PointBuffer(m_schema, m_numPoints))
+{
+    m_istream = FileUtils::openFile(reader.getFileName());
+}
+
+
+IteratorBase::~IteratorBase()
+{
+    FileUtils::closeFile(m_istream);
+}
+
+
+boost::uint32_t IteratorBase::readSbetIntoBuffer(PointBuffer& data, const boost::uint64_t numPoints64)
+{
+    if (!m_istream->good())
+    {
+        throw pdal_error("sbet stream is no good");
+    }
+
+    const boost::uint32_t numPoints = (boost::uint32_t)std::min<boost::uint64_t>(numPoints64,
+                                      std::numeric_limits<boost::uint32_t>::max());
+
+    m_readBuffer.setNumPoints(0);
+    schema::DimensionMap* dimensionMap = m_readBuffer.getSchema().mapDimensions(data.getSchema());
+
+    boost::uint8_t* bufferData = m_readBuffer.getDataStart();
+    if (!bufferData)
+    {
+        throw pdal_error("unable to access point buffer's data");
+    }
+
+    Utils::read_n(bufferData, *m_istream, numPoints * m_schema.getByteSize());
+    m_readBuffer.setNumPoints(numPoints);
+
+    PointBuffer::copyLikeDimensions(m_readBuffer, data, *dimensionMap, 0,
+                                    data.getNumPoints(), numPoints);
+    data.setNumPoints(data.getNumPoints() + numPoints);
+
+    return numPoints;
+}
+
+
 namespace sequential
 {
 
@@ -192,17 +247,15 @@ namespace sequential
 Iterator::Iterator(const pdal::drivers::sbet::Reader& reader,
                    PointBuffer& buffer)
     : pdal::ReaderSequentialIterator(buffer)
-    , m_numPoints(reader.getNumPoints())
-    , m_schema(reader.getSchema())
-    , m_buffer(pdal::PointBuffer(m_schema, m_numPoints))
+    , IteratorBase(reader, buffer)
 {
-    m_istream = FileUtils::openFile(reader.getFileName());
+    return;
 }
 
 
 Iterator::~Iterator()
 {
-    FileUtils::closeFile(m_istream);
+    return;
 }
 
 
@@ -221,42 +274,52 @@ bool Iterator::atEndImpl() const
 
 boost::uint32_t Iterator::readBufferImpl(PointBuffer& data)
 {
-    if (!m_istream->good())
-    {
-        throw pdal_error("sbet stream is no good");
-    }
-    if (m_istream->eof() || m_numPoints == getIndex())
-    {
-        throw pdal_error("sbet stream is eof");
-    }
-
     const boost::uint64_t numPoints64 = std::min<boost::uint64_t>(data.getCapacity(),
                                         m_numPoints - getIndex());
-    const boost::uint32_t numPoints = (boost::uint32_t)std::min<boost::uint64_t>(numPoints64,
-                                      std::numeric_limits<boost::uint32_t>::max());
-
-    m_buffer.setNumPoints(0);
-    schema::DimensionMap* dimensionMap = m_buffer.getSchema().mapDimensions(data.getSchema());
-
-    boost::uint8_t* bufferData = m_buffer.getDataStart();
-    if (!bufferData)
-    {
-        throw pdal_error("unable to access point buffer's data");
-    }
-
-    Utils::read_n(bufferData, *m_istream, numPoints * m_schema.getByteSize());
-    m_buffer.setNumPoints(numPoints);
-
-    PointBuffer::copyLikeDimensions(m_buffer, data, *dimensionMap, 0,
-                                    data.getNumPoints(), numPoints);
-    data.setNumPoints(data.getNumPoints() + numPoints);
-
-    return numPoints;
+    return readSbetIntoBuffer(data, numPoints64);
 }
 
 
+} // namespace sequential
+
+
+namespace random
+{
+
+
+Iterator::Iterator(const pdal::drivers::sbet::Reader& reader,
+                   PointBuffer& buffer)
+    : pdal::ReaderRandomIterator(buffer)
+    , IteratorBase(reader, buffer)
+{
+    return;
 }
-} // namespace iterators::sequential
+
+
+Iterator::~Iterator()
+{
+    return;
+}
+
+
+boost::uint32_t Iterator::readBufferImpl(PointBuffer& data)
+{
+    const boost::uint64_t numPoints64 = std::min<boost::uint64_t>(data.getCapacity(),
+                                        m_numPoints - getIndex());
+    return readSbetIntoBuffer(data, numPoints64);
+}
+
+
+boost::uint64_t Iterator::seekImpl(boost::uint64_t numSeek)
+{
+    m_istream->seekg(m_schema.getByteSize() * numSeek);
+    assert(m_istream->tellg() % m_schema.getByteSize() == 0);
+    return m_istream->tellg() / m_schema.getByteSize();
+}
+
+
+} // namespace random
+} // namespace iterators
 
 
 }

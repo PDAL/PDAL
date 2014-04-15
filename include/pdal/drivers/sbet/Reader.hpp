@@ -86,17 +86,39 @@ public:
     std::string getFileName() const;
 
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer&) const;
+    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const;
 
 }; // class Reader
 
 
 namespace iterators
 {
+
+
+class PDAL_DLL IteratorBase
+{
+public:
+   IteratorBase(const pdal::drivers::sbet::Reader&, PointBuffer&); 
+   ~IteratorBase();
+
+protected:
+    boost::uint32_t readSbetIntoBuffer(PointBuffer&, const boost::uint64_t);
+    std::istream* m_istream;
+    const boost::uint64_t m_numPoints;
+    const Schema m_schema;
+    PointBuffer m_readBuffer;
+
+private:
+    IteratorBase& operator=(const IteratorBase&); // not implemented
+    IteratorBase(const IteratorBase&); // not implemented
+}; // class Iterator Base
+
+
 namespace sequential
 {
 
 
-class PDAL_DLL Iterator : public pdal::ReaderSequentialIterator
+class PDAL_DLL Iterator : public pdal::ReaderSequentialIterator, public IteratorBase
 {
 public:
     Iterator(const pdal::drivers::sbet::Reader&, PointBuffer&);
@@ -106,15 +128,30 @@ private:
     boost::uint64_t skipImpl(boost::uint64_t);
     boost::uint32_t readBufferImpl(PointBuffer&);
     bool atEndImpl() const;
-
-    std::istream* m_istream;
-    const boost::uint64_t m_numPoints;
-    const Schema m_schema;
-    PointBuffer m_buffer;
 };
 
-}
-} // namespace iterators::sequential
+
+} // namespace sequential
+
+
+namespace random
+{
+
+
+class PDAL_DLL Iterator : public pdal::ReaderRandomIterator, public IteratorBase
+{
+public:
+    Iterator(const pdal::drivers::sbet::Reader&, PointBuffer&);
+    ~Iterator();
+
+private:
+    boost::uint64_t seekImpl(boost::uint64_t);
+    boost::uint32_t readBufferImpl(PointBuffer&);
+};
+
+
+} // namespace random
+} // namespace iterators
 
 }
 }
