@@ -31,6 +31,8 @@ cmake   -G "$CONFIG"  \
         -DWITH_HEXER=ON \
         -DWITH_NITRO=ON \
         -DWITH_MRSID=ON \
+        -DWITH_PCL=ON \
+        -DPCL_DIR=/Users/hobu/dev/git/pcl/include \
         -DMRSID_INCLUDE_DIR=/Users/hobu/dev/release/mrsid/Lidar_DSDK/include \
         -DMRSID_LIBRRARY=/Users/hobu/dev/release/mrsid/Lidar_DSDK/lib/liblti_lidar_dsdk.dylib \
         -DHEXER_INCLUDE_DIR=${HEXER_HOME}/include \
