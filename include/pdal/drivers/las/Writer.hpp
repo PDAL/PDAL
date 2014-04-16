@@ -127,7 +127,7 @@ private:
         boost::optional<std::string> candidate = options.getMetadataOption<std::string>(name);
         if (!candidate)
         {
-            return default_value;
+            return options.getValueOrDefault<T>(name, default_value);
         }
             
         if (boost::algorithm::iequals(*candidate, "FORWARD"))

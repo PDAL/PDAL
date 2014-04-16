@@ -421,11 +421,16 @@ void Writer::writeBufferBegin(PointBuffer const& data)
         // or given in a metadata option
         boost::uint32_t v = getMetadataOption<boost::uint32_t>(getOptions(),
             m, "dataformat_id", 3);
+        boost::uint32_t v2 = getMetadataOption<boost::uint32_t>(getOptions(),
+            m, "format", 3);
+            
+        // Use the 'format' option specified by the options instead of the metadata one that was set passively
+        if (v2 != v) v = v2; 
         setPointFormat(static_cast<PointFormat>(v));
         log()->get(logDEBUG) << "Setting point format to "
                              << v
                              << " from metadata " << std::endl;
-
+        
         boost::uint32_t minor = getMetadataOption<boost::uint32_t>(getOptions(),
             m, "minor_version", 2);
 
