@@ -2,9 +2,24 @@
 # vi: set ft=ruby :
 
 require 'socket'
+require 'ipaddr'
 
 # Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
 VAGRANTFILE_API_VERSION = "2"
+
+
+# Evaluate a block passing one argument, an integer plucked from an environment
+# variable. If that integer is zero, or the environment variable evaluates to
+# zero with String#to_i, then don't evaluate the block.
+def with_nonzero_integer_envvar(envvar, default = 0)
+  integer = ENV[envvar] ? ENV[envvar].to_i : default
+  if integer == 0
+    # noop
+  else
+    yield integer
+  end
+end
+
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.box = "precise64"
@@ -32,22 +47,55 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.ssh.forward_agent = true
   end
   
-  config.vm.network :forwarded_port, guest: 80, host: 8080
+  # Set PDAL_VAGRANT_PORT_80_FORWARD to customize the target port
+  # for the guest port 80. To disable guest port 80 forwarding, set
+  # PDAL_VAGRANT_PORT_80_FORWARD to any value that cannot be parsed to
+  # an integer with ruby's String#to_i method (e.g. 'false').
+  with_nonzero_integer_envvar('PDAL_VAGRANT_PORT_80_FORWARD', 8080) do |host_port|
+    config.vm.network :forwarded_port, guest: 80, host: host_port
+  end
 
   config.vm.provider :virtualbox do |vb|
-     vb.customize ["modifyvm", :id, "--memory", "4096"]
-     vb.customize ["modifyvm", :id, "--cpus", "2"]
-     vb.customize ["modifyvm", :id, "--ioapic", "on"]
-     vb.name = "pdal-vagrant"
-   end  
+    # Set PDAL_VAGRANT_VIRTUALBOX_MEMORY to customize the virtualbox vm memory
+    with_nonzero_integer_envvar('PDAL_VAGRANT_VIRTUALBOX_MEMORY', 4096) do |memory|
+      vb.customize ["modifyvm", :id, "--memory", memory]
+    end
+    # Set PDAL_VAGRANT_VIRTUALBOX_CPUS to customize the virtualbox vm cpus
+    with_nonzero_integer_envvar('PDAL_VAGRANT_VIRTUALBOX_CPUS', 2) do |cpus|
+      vb.customize ["modifyvm", :id, "--cpus", cpus]
+    end
+    # Set PDAL_VAGRANT_VIRTUALBOX_IOAPIC to customize the virtualbox vm ioapic
+    vb.customize ["modifyvm", :id, "--ioapic", ENV['PDAL_VAGRANT_VIRTUALBOX_IOAPIC'] || "on"]
+    vb.name = "pdal-vagrant"
+
+    # Set PDAL_VAGRANT_VIRTUALBOX_ENABLE_GUI to turn on the gui
+    if ENV['PDAL_VAGRANT_VIRTUALBOX_ENABLE_GUI']
+      vb.gui = true
+    end
+  end
 
 
   if RUBY_PLATFORM.include? "darwin"
-    config.vm.network "private_network", ip: "192.168.50.4"
-    config.vm.synced_folder ".", "/vagrant", nfs: true
-    
+    # If on a Mac, set PDAL_VAGRANT_PRIVATE_NETWORK_IP to customize
+    # the private network's IP. Set to a non-IP value to disable private networking.
+    if ENV['PDAL_VAGRANT_PRIVATE_NETWORK_IP']
+      begin
+        ipaddr = IPAddr.new ENV['PDAL_VAGRANT_PRIVATE_NETWORK_IP']
+      rescue ArgumentError
+        # noop
+      else
+        config.vm.network "private_network", ip: ipaddr
+      end
+    else
+      config.vm.network "private_network", ip: "192.168.50.4"
+    end
+
+    # If on a Mac, set PDAL_VAGRANT_DISABLE_NFS to false to disable nfs mounting
+    use_nfs = !ENV['PDAL_VAGRANT_DISABLE_NFS']
+    config.vm.synced_folder ".", "/vagrant", nfs: use_nfs
+
     if Socket.gethostname.include? "pyro" # Howard's machine
-     config.vm.synced_folder "/Users/hobu/dev/git/pointcloud", "/pointcloud", nfs: true
+      config.vm.synced_folder "/Users/hobu/dev/git/pointcloud", "/pointcloud", nfs: use_nfs
     end
   end
   
