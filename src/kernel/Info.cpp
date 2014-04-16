@@ -32,11 +32,10 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <algorithm>
+
 #include <pdal/kernel/Info.hpp>
 #include <pdal/PipelineWriter.hpp>
-
-
-#include <boost/algorithm/string/find.hpp>
 
 namespace pdal { namespace kernel {
 
@@ -121,78 +120,82 @@ void Info::addSwitches()
     return;
 }
 
-std::vector<boost::uint32_t>  getListOfPoints(std::string const& p)
+// Support for parsing point numbers.  Points can be specified singly or as
+// dash-separated ranges.  i.e. 6-7,8,19-20
+namespace {
+
+using namespace std;
+
+vector<string> tokenize(const string s, char c)
 {
-    
-    typedef const boost::iterator_range<std::string::const_iterator> StringRange;
-    
-    std::vector<boost::uint32_t> output;
-    
-    std::string comma(",");
-    std::string dash("-");
-
-    boost::char_separator<char> sep_comma(",");
-
-    StringRange iDash = boost::algorithm::ifind_first(  StringRange(p.begin(), p.end()),
-                                                        StringRange(dash.begin(), dash.end()));
-    bool bHaveDash = !iDash.empty();
-
-    StringRange iComma = boost::algorithm::ifind_first(  StringRange(p.begin(), p.end()),
-                                                        StringRange(comma.begin(), comma.end()));
-    bool bHaveComma = !iComma.empty();
-    
-    if (bHaveComma && bHaveDash)
+    string::const_iterator begin;
+    string::const_iterator end;
+    vector<string> strings;
+    begin = s.begin();
+    while (true)
     {
-        std::ostringstream oss;
-        oss << "list of points cannot contain both a dash for ranges and comma for explicit points";
-        throw app_runtime_error(oss.str());
+        end = find(begin, s.end(), c);
+        strings.push_back(string(begin, end));
+        if (end == s.end())
+            break;
+        begin = end + 1;
     }
+    return strings;
+}
 
-    if (bHaveDash)
+uint32_t parseInt(const string& s)
+{
+    try
     {
-        typedef boost::tokenizer<boost::char_separator<char>  > tokenizer;
-        boost::char_separator<char> sep_dash("-");        
-        tokenizer beg_end(p, sep_dash);
-        unsigned i(0);
-        std::vector<boost::uint32_t> rng;
-        for (tokenizer::iterator t = beg_end.begin(); t != beg_end.end(); ++t)
-        {
-            boost::uint32_t v = boost::lexical_cast<boost::uint32_t>(*t);
-            rng.push_back(v);
-            i++;
-        }
-
-        if (rng.size() != 2)
-        {
-            std::ostringstream oss;
-            oss << "multiple ranges cannot be specified";
-            throw app_runtime_error(oss.str());            
-        }
-        
-        for (unsigned i = rng[0]; i != rng[1]; ++i)
-        {
-            output.push_back(i);
-        }
-
-    } else if (bHaveComma)
-    {
-        typedef boost::tokenizer<boost::char_separator<char>  > tokenizer;
-        boost::char_separator<char> sep_comma(",");        
-        tokenizer indexes(p, sep_comma);
-        for (tokenizer::iterator t = indexes.begin(); t != indexes.end(); ++t)
-        {
-            boost::uint32_t v = boost::lexical_cast<boost::uint32_t>(*t);
-            output.push_back(v);
-        }
-    } else
-    {
-        // Put our string on as an integer and hope for the best
-        output.push_back(boost::lexical_cast<boost::uint32_t>(p));
+        return boost::lexical_cast<uint32_t>(s);
     }
-    
+    catch (boost::bad_lexical_cast)
+    {
+        throw app_runtime_error(string("Invalid integer: ") + s);
+    }
+}
 
+
+void addSingle(const string& s, vector<uint32_t>& points)
+{
+    points.push_back(parseInt(s));
+}
+
+
+void addRange(const string& begin, const string& end,
+    vector<uint32_t>& points)
+{
+    uint32_t low = parseInt(begin);
+    uint32_t high = parseInt(end);
+    if (low > high)
+        throw app_runtime_error(string("Range invalid: ") + begin + "-" + end);
+    while (low <= high)
+        points.push_back(low++);
+}
+
+
+vector<boost::uint32_t> getListOfPoints(std::string p)
+{
+    vector<boost::uint32_t> output;
+
+    //Remove whitespace from string with awful remove/erase idiom.
+    p.erase(remove_if(p.begin(), p.end(), ::isspace), p.end());
+
+    vector<string> ranges = tokenize(p, ',');
+    for (string s : ranges)
+    {
+        vector<string> limits = tokenize(s, '-');
+        if (limits.size() == 1)
+            addSingle(limits[0], output);
+        else if (limits.size() == 2)
+            addRange(limits[0], limits[1], output);
+        else
+            throw app_runtime_error(string("Invalid point range: ") + s);
+    }
     return output;
 }
+
+} //namespace
 
 void Info::dumpPoints(const Stage& stage,
     std::string const& pointsString) const
