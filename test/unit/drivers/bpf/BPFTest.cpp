@@ -47,14 +47,12 @@ BOOST_AUTO_TEST_SUITE(BPFTest)
 
 namespace
 {
-}
 
-BOOST_AUTO_TEST_CASE(test_point_major)
+void test_file_type(const std::string& filename)
 {
     using namespace pdal;
 
-    pdal::BpfReader reader(
-        Support::datapath("bpf/autzen-utm-chipped-25-v3-interleaved.bpf"));
+    pdal::BpfReader reader(Support::datapath(filename));
 
     reader.initialize();
     const Schema& schema = reader.getSchema();
@@ -124,6 +122,38 @@ BOOST_AUTO_TEST_CASE(test_point_major)
     BOOST_CHECK(numSkipped == 559);
 
     delete it;
+}
+
+} //namespace
+
+BOOST_AUTO_TEST_CASE(test_point_major)
+{
+    test_file_type("bpf/autzen-utm-chipped-25-v3-interleaved.bpf");
+}
+
+BOOST_AUTO_TEST_CASE(test_dim_major)
+{
+    test_file_type("bpf/autzen-utm-chipped-25-v3.bpf");
+}
+
+BOOST_AUTO_TEST_CASE(test_byte_major)
+{
+    test_file_type("bpf/autzen-utm-chipped-25-v3-segregated.bpf");
+}
+
+BOOST_AUTO_TEST_CASE(test_point_major_zlib)
+{
+    test_file_type("bpf/autzen-utm-chipped-25-v3-deflate-interleaved.bpf");
+}
+
+BOOST_AUTO_TEST_CASE(test_dim_major_zlib)
+{
+    test_file_type("bpf/autzen-utm-chipped-25-v3-deflate.bpf");
+}
+
+BOOST_AUTO_TEST_CASE(test_byte_major_zlib)
+{
+    test_file_type("bpf/autzen-utm-chipped-25-v3-deflate-segregated.bpf");
 }
 
 

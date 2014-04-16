@@ -73,6 +73,9 @@ public:
     }
     std::istream *popStream()
     {
+        // Can't pop the last stream for now.
+        if (m_streams.empty())
+            return nullptr;
         std::istream *strm = m_stream;
         m_stream = m_streams.top();
         m_streams.pop();

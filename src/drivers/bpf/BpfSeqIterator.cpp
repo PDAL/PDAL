@@ -46,21 +46,56 @@
 namespace pdal
 {
 
+void BpfSeqIterator::Charbuf::initialize(std::vector<char>& v,
+    pos_type bufOffset)
+{
+    m_bufOffset = bufOffset;
+    setg(v.data(), v.data(), v.data() + v.size());
+}
+
+
+BpfSeqIterator::Charbuf::pos_type
+BpfSeqIterator::Charbuf::seekpos(pos_type pos, std::ios_base::openmode which)
+{
+    pos -= m_bufOffset;
+    if (pos >= egptr() - eback())
+        return -1;
+    char *cpos = eback() + pos;
+    setg(eback(), cpos, egptr());
+    return pos;
+}
+
+
+BpfSeqIterator::Charbuf::pos_type
+BpfSeqIterator::Charbuf::seekoff(off_type off, std::ios_base::seekdir dir,
+    std::ios_base::openmode which)
+{
+    char *cpos = nullptr;
+    switch (dir)
+    {
+        case std::ios::beg:
+            cpos = eback() + off - m_bufOffset;
+            break;
+        case std::ios::cur:
+            cpos = gptr() + off;
+            break;
+        case std::ios::end:
+            cpos = egptr() - off;
+            break;
+    }
+    if (cpos < eback() || cpos > egptr())
+        return -1;
+    setg(eback(), cpos, egptr());
+    return eback() - cpos;
+}
+
+
 BpfSeqIterator::BpfSeqIterator(PointBuffer& data, boost::uint32_t numPoints,
         BpfFormat::Enum pointFormat, bool compression, ILeStream& stream) :
     ReaderSequentialIterator(data), m_numPoints(numPoints),
-    m_pointFormat(pointFormat), m_compression(compression), m_stream(stream), 
-    m_index(0)
+    m_pointFormat(pointFormat), m_stream(stream), 
+    m_index(0), m_start(m_stream.position())
 {
-    m_start = m_stream.position();
-
-}
-
-boost::uint32_t BpfSeqIterator::readBufferImpl(PointBuffer& data)
-{
-    std::vector<Dimension> dims;
-
-    m_dims.clear();
     const Schema& schema = data.getSchema();
     for (size_t i = 0; i < schema.numDimensions(); ++i)
     {
@@ -69,39 +104,29 @@ boost::uint32_t BpfSeqIterator::readBufferImpl(PointBuffer& data)
             m_dims.push_back(d);
     }
 
-    uint32_t numRead = 0;
-    if (m_compression)
-        numRead = readCompressed(data);
-    else
-        numRead = read(data);
-    return numRead;
+    if (compression)
+    {
+        m_deflateBuf.resize(m_numPoints * m_dims.size() * sizeof(float));
+        size_t index = 0;
+        size_t bytesRead = 0;
+        do
+        {
+            bytesRead = readBlock(m_deflateBuf, index);
+            index += bytesRead;
+        } while (bytesRead > 0 && index < m_deflateBuf.size());
+        m_charbuf.initialize(m_deflateBuf, m_start);
+        m_stream.pushStream(new std::istream(&m_charbuf));
+    }
 }
 
-uint32_t BpfSeqIterator::readCompressed(PointBuffer& data)
+BpfSeqIterator::~BpfSeqIterator()
 {
-    std::vector<char> outBuf(m_numPoints * m_dims.size() * sizeof(float));
-    size_t index = 0;
-    size_t bytesRead = 0;
-    do
-    {
-        bytesRead = readBlock(outBuf, index);
-        index += bytesRead;
-    } while (bytesRead > 0 && index < outBuf.size());
+     delete m_stream.popStream();
+}
 
-    class charbuf : public std::streambuf
-    {
-    public:
-        charbuf(std::vector<char>& v)
-            { setg(v.data(), v.data(), v.data() + v.size()); }
-    };
-
-    charbuf buf(outBuf);
-    std::unique_ptr<std::istream> stream(new std::istream(&buf));
-
-    m_stream.pushStream(stream.get());
-    uint32_t numRead = read(data);
-    m_stream.popStream();
-    return numRead;
+boost::uint32_t BpfSeqIterator::readBufferImpl(PointBuffer& data)
+{
+    return read(data);
 }
 
 size_t BpfSeqIterator::readBlock(std::vector<char>& outBuf, size_t index)

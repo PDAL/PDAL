@@ -49,9 +49,26 @@ class PointBuffer;
 
 class BpfSeqIterator : public ReaderSequentialIterator
 {
+    class Charbuf : public std::streambuf
+    {
+    public:
+        Charbuf() : m_bufOffset(0)
+            {}
+        void initialize(std::vector<char>& v, pos_type bufOffset);
+    protected:
+        pos_type seekpos(pos_type pos, std::ios_base::openmode which =
+            std::ios_base::in | std::ios_base::out);
+        pos_type seekoff(off_type off, std::ios_base::seekdir dir,
+            std::ios_base::openmode which =
+                std::ios_base::in | std::ios_base::out);
+    private:
+        pos_type m_bufOffset;
+    };
+
 public:
     BpfSeqIterator(PointBuffer& buffer, boost::uint32_t numPoints,
         BpfFormat::Enum pointFormat, bool compression, ILeStream& stream);
+    ~BpfSeqIterator();
 
 protected:
     boost::uint32_t readBufferImpl(PointBuffer&);
@@ -59,7 +76,6 @@ protected:
     bool atEndImpl() const;
 
     boost::uint32_t read(PointBuffer& data);
-    boost::uint32_t readCompressed(PointBuffer& data);
     boost::uint32_t readPointMajor(PointBuffer& data);
     boost::uint32_t readDimMajor(PointBuffer& data);
     boost::uint32_t readByteMajor(PointBuffer& data);
@@ -77,8 +93,6 @@ private:
     boost::uint32_t m_numPoints;
     /// Bpf point format being read.
     BpfFormat::Enum m_pointFormat;
-    /// Whether compression is enabled.
-    bool m_compression;
     /// Input stream
     ILeStream& m_stream;
     /// Index of the next point to read.
@@ -86,6 +100,10 @@ private:
     /// Stream position when the iterator is created (should always be
     /// the start of point data).
     std::streampos m_start;
+    /// Buffer for deflated data.
+    std::vector<char> m_deflateBuf;
+    /// Streambuf for deflated data.
+    Charbuf m_charbuf;
 };
 
 } // namespace pdal
