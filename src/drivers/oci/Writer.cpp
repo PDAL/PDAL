@@ -1101,15 +1101,11 @@ pdal::Bounds<double> Writer::CalculateBounds(PointBuffer const& buffer)
 
     bool first = true;
     Vector<double> v(0.0, 0.0, 0.0);
-    for (boost::uint32_t pointIndex=0; pointIndex<buffer.getNumPoints(); pointIndex++)
+    for (uint32_t idx = 0; idx < buffer.getNumPoints(); idx++)
     {
-        const boost::int32_t xi = buffer.getField<boost::int32_t>(*dimX, pointIndex);
-        const boost::int32_t yi = buffer.getField<boost::int32_t>(*dimY, pointIndex);
-        const boost::int32_t zi = buffer.getField<boost::int32_t>(*dimZ, pointIndex);
-
-        const double xd = dimX->applyScaling(xi);
-        const double yd = dimY->applyScaling(yi);
-        const double zd = dimZ->applyScaling(zi);
+        int32_t xd = buffer.getFieldAs<double>(*dimX, idx);
+        int32_t yd = buffer.getFieldAs<double>(*dimY, idx);
+        int32_t zd = buffer.getFieldAs<double>(*dimZ, idx);
 
         v[0] = xd;
         v[1] = yd;
@@ -1123,10 +1119,8 @@ pdal::Bounds<double> Writer::CalculateBounds(PointBuffer const& buffer)
         }
         output.grow(v);
     }
-
     m_pcExtent.grow(output);
     return output;
-
 }
 
 bool Writer::WriteBlock(PointBuffer const& buffer)
@@ -1140,7 +1134,7 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     
     boost::int32_t block_id(1);
     if (blockDim)
-        block_id  = buffer.getField<boost::int32_t>(*blockDim, 0);
+        block_id  = buffer.getFieldAs<int32_t>(*blockDim, 0, false);
 
     std::ostringstream oss;
     std::ostringstream partition;

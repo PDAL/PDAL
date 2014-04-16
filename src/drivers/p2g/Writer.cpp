@@ -234,31 +234,19 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
 
 
     boost::uint32_t numPoints = 0;
-
-
-    double xd(0.0);
-    double yd(0.0);
-    double zd(0.0);
-
-    for (boost::uint32_t pointIndex=0; pointIndex < data.getNumPoints(); pointIndex++)
+    for (uint32_t idx = 0; idx < data.getNumPoints(); idx++)
     {
-        boost::int32_t x = data.getField<boost::int32_t>(dimX, pointIndex);
-        boost::int32_t y = data.getField<boost::int32_t>(dimY, pointIndex);
-        boost::int32_t z = data.getField<boost::int32_t>(dimZ, pointIndex);
+        double x = data.getFieldAs<double>(dimX, idx);
+        double y = data.getFieldAs<double>(dimY, idx);
+        double z = data.getFieldAs<double>(dimZ, idx);
 
-        xd = dimX.applyScaling<boost::int32_t>(x);
-        yd = dimY.applyScaling<boost::int32_t>(y);
-        zd = dimZ.applyScaling<boost::int32_t>(z);
-
-        m_bounds.setMinimum(0, (std::min)(xd, m_bounds.getMinimum(0)));
-        m_bounds.setMinimum(1, (std::min)(yd, m_bounds.getMinimum(1)));
-        m_bounds.setMaximum(0, (std::max)(xd, m_bounds.getMaximum(0)));
-        m_bounds.setMaximum(1, (std::max)(yd, m_bounds.getMaximum(1)));
-
-        m_coordinates.push_back(boost::tuple<double, double, double>(xd, yd, zd));
+        m_bounds.setMinimum(0, (std::min)(x, m_bounds.getMinimum(0)));
+        m_bounds.setMinimum(1, (std::min)(y, m_bounds.getMinimum(1)));
+        m_bounds.setMaximum(0, (std::max)(x, m_bounds.getMaximum(0)));
+        m_bounds.setMaximum(1, (std::max)(y, m_bounds.getMaximum(1)));
+        m_coordinates.push_back(boost::tuple<double, double, double>(x, y, z));
         numPoints++;
     }
-
     return numPoints;
 }
 

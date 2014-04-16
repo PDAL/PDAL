@@ -196,7 +196,8 @@ public:
         \endverbatim
     */
     template<class T>
-    T getFieldAs(Dimension const& dim, boost::uint32_t pointIndex, bool applyScaling=true) const;
+    T getFieldAs(Dimension const& dim, boost::uint32_t pointIndex,
+        bool applyScaling = true) const;
 
     /*! set the value T for a given  :cpp:class:`pdal::Dimension` dim
         at pointIndex i.
@@ -640,7 +641,8 @@ inline T PointBuffer::getFieldAs(pdal::Dimension const& dim,
         case dimension::RawByte:
         case dimension::Pointer:
         case dimension::Undefined:
-            throw pdal_error("Dimension data type unable to be retrieved in getFieldAs");
+            throw pdal_error("Dimension data type unable to be retrieved "
+                "in getFieldAs");
     }
 
     if (applyScaling)
@@ -655,9 +657,12 @@ inline T PointBuffer::getFieldAs(pdal::Dimension const& dim,
     }
     catch (boost::numeric::bad_numeric_cast& e)
     {
-      throw pdal_error("Unable to fetch data and convert as requested");
+        std::ostringstream oss;
+        oss << "Unable to fetch data and convert as requested: ";
+        oss << dim.getName() << ":" << dim.getInterpretationName() <<
+            "(" << val << ") -> " << Utils::typeidName<T>();
+        throw pdal_error(oss.str());
     }
-
     return retval;
 }
 

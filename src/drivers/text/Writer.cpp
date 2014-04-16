@@ -443,22 +443,7 @@ void Writer::putStringRepresentation(PointBuffer const& data,
                                      std::size_t pointIndex,
                                      std::ostream& output)
 {
-
-
-    float flt(0.0);
-    boost::int8_t i8(0);
-    boost::uint8_t u8(0);
-    boost::int16_t i16(0);
-    boost::uint16_t u16(0);
-    boost::int32_t i32(0);
-    boost::uint32_t u32(0);
-    boost::int64_t i64(0);
-    boost::uint64_t u64(0);
-
-    boost::uint32_t size = d.getByteSize();
-
     std::streamsize old_precision = output.precision();
-//    std::ios_base::fmtflags  flags = output.flags();
 
     bool bHaveScaling = !Utils::compare_distance(d.getNumericScale(), 1.0);
 
@@ -471,99 +456,21 @@ void Writer::putStringRepresentation(PointBuffer const& data,
     switch (d.getInterpretation())
     {
         case dimension::Float:
-            if (size == 4)
-            {
-                flt = data.getField<float>(d, pointIndex);
-                output << static_cast<double>(flt);
-            }
-            if (size == 8)
-            {
-                output << data.getField<double>(d, pointIndex);
-            }
-            break;
-
         case dimension::SignedInteger:
-            if (size == 1)
-            {
-                i8 = data.getField<boost::int8_t>(d, pointIndex);
-                if (bHaveScaling)
-                    output << d.applyScaling<boost::int8_t>(i8);
-                else
-                    output << boost::lexical_cast<std::string>(static_cast<boost::int32_t>(i8));
-            }
-            if (size == 2)
-            {
-                i16 = data.getField<boost::int16_t>(d, pointIndex);
-                if (bHaveScaling)
-                    output << d.applyScaling<boost::int16_t>(i16);
-                else
-                    output << i16;
-            }
-            if (size == 4)
-            {
-                i32 = data.getField<boost::int32_t>(d, pointIndex);
-                if (bHaveScaling)
-                    output << d.applyScaling<boost::int32_t>(i32);
-                else
-                    output << i32;
-            }
-            if (size == 8)
-            {
-                i64 = data.getField<boost::int64_t>(d, pointIndex);
-                if (bHaveScaling)
-                    output << d.applyScaling<boost::int64_t>(i64);
-                else
-                    output << i64;
-            }
-            break;
-
         case dimension::UnsignedInteger:
-            if (size == 1)
-            {
-                u8 = data.getField<boost::uint8_t>(d, pointIndex);
-                if (bHaveScaling)
-                    output << d.applyScaling<boost::uint8_t>(u8);
-                else
-                    output << boost::lexical_cast<std::string>(static_cast<boost::uint32_t>(u8));
-            }
-            if (size == 2)
-            {
-                u16 = data.getField<boost::uint16_t>(d, pointIndex);
-                if (bHaveScaling)
-                    output << d.applyScaling<boost::uint16_t>(u16);
-                else
-                    output << u16;
-            }
-            if (size == 4)
-            {
-                u32 = data.getField<boost::uint32_t>(d, pointIndex);
-                if (bHaveScaling)
-                    output << d.applyScaling<boost::uint32_t>(u32);
-                else
-                    output << u32;
-            }
-            if (size == 8)
-            {
-                u64 = data.getField<boost::uint64_t>(d, pointIndex);
-                if (bHaveScaling)
-                    output << d.applyScaling<boost::uint64_t>(u64);
-                else
-                    output << u64;
-            }
+            output << data.getFieldAs<double>(d, pointIndex);
             break;
-
         case dimension::RawByte:
             {
-                unsigned char* raw  = data.getData(pointIndex) + d.getByteOffset();
+                unsigned char* raw  = data.getData(pointIndex) +
+                    d.getByteOffset();
                 Utils::binary_to_hex_stream(raw, output, 0, d.getByteSize());
                 break;
             }
-
         case dimension::Pointer:    // stored as 64 bits, even on a 32-bit box
         case dimension::Undefined:
             break;
     }
-
 
     if (bHaveScaling)
     {
@@ -571,7 +478,6 @@ void Writer::putStringRepresentation(PointBuffer const& data,
         output.unsetf(std::ios::fixed);
         output.unsetf(std::ios::floatfield);
     }
-
 }
 
 
@@ -637,21 +543,20 @@ void Writer::WritePCDBuffer(const PointBuffer& data)
     boost::optional<Dimension const&> dimGreen = schema.getDimensionOptional("Green");
     boost::optional<Dimension const&> dimBlue = schema.getDimensionOptional("Blue");
 
-    boost::uint32_t pointIndex(0);
-
     bool bHaveColor(false);
     if (dimRed && dimGreen && dimBlue)
         bHaveColor = true;
 
     bool bRGBPacked = getOptions().getValueOrDefault<bool>("pack_rgb", true);
 
-    while (pointIndex != data.getNumPoints())
+    boost::uint32_t idx(0);
+    while (idx != data.getNumPoints())
     {
-        putStringRepresentation(data, x, pointIndex, *m_stream);
+        putStringRepresentation(data, x, idx, *m_stream);
         *m_stream << " ";
-        putStringRepresentation(data, y, pointIndex, *m_stream);
+        putStringRepresentation(data, y, idx, *m_stream);
         *m_stream << " ";
-        putStringRepresentation(data, z, pointIndex, *m_stream);
+        putStringRepresentation(data, z, idx, *m_stream);
         *m_stream << " ";
 
         std::string color;
@@ -659,32 +564,29 @@ void Writer::WritePCDBuffer(const PointBuffer& data)
         {
             if (bRGBPacked)
             {
-                boost::uint16_t r = data.getField<boost::uint16_t>(*dimRed, pointIndex);
-                boost::uint16_t g = data.getField<boost::uint16_t>(*dimGreen, pointIndex);
-                boost::uint16_t b = data.getField<boost::uint16_t>(*dimBlue, pointIndex);
+                uint16_t r = data.getFieldAs<uint16_t>(*dimRed, idx, false);
+                uint16_t g = data.getFieldAs<uint16_t>(*dimGreen, idx, false);
+                uint16_t b = data.getFieldAs<uint16_t>(*dimBlue, idx, false);
                 int rgb = ((int)r) << 16 | ((int)g) << 8 | ((int)b);
                 m_stream->precision(8);
                 *m_stream << static_cast<float>(rgb);
             }
             else
             {
-                putStringRepresentation(data, *dimRed, pointIndex, *m_stream);
+                putStringRepresentation(data, *dimRed, idx, *m_stream);
                 *m_stream << " ";
 
-                putStringRepresentation(data, *dimGreen, pointIndex, *m_stream);
+                putStringRepresentation(data, *dimGreen, idx, *m_stream);
                 *m_stream << " ";
 
-                putStringRepresentation(data, *dimBlue, pointIndex, *m_stream);
+                putStringRepresentation(data, *dimBlue, idx, *m_stream);
                 *m_stream << " ";
             }
         }
 
         *m_stream << "\n";
-
-        pointIndex++;
-
+        idx++;
     }
-
 }
 
 void Writer::WriteGeoJSONBuffer(const PointBuffer& data)

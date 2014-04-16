@@ -669,7 +669,7 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     pdal::Schema const& schema = buffer.getSchema();
     Dimension const& blockDim = schema.getDimension("BlockID");
 
-    m_block_id  = buffer.getField<boost::int32_t>(blockDim, 0);
+    m_block_id  = buffer.getFieldAs<boost::int32_t>(blockDim, 0, false);
     m_obj_id = getOptions().getValueOrThrow<boost::int32_t>("pc_id");
     m_num_points = static_cast<boost::int64_t>(buffer.getNumPoints());
     // if (m_type == DATABASE_POSTGRESQL)

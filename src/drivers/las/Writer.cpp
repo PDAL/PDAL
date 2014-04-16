@@ -632,220 +632,112 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& pointBuffer)
     bool hasTime = Support::hasTime(pointFormat);
     boost::uint16_t record_length = m_lasHeader.GetDataRecordLength();
 
-    for (boost::uint32_t pointIndex=0; pointIndex<pointBuffer.getNumPoints();
-        pointIndex++)
+    for (uint32_t idx = 0; idx < pointBuffer.getNumPoints(); idx++)
     {
         boost::uint8_t* p = buf;
 
         // we always write the base fields
-        boost::int32_t const& x =
-            pointBuffer.getField<boost::int32_t>(*dimensions.X, pointIndex);
-        boost::int32_t const& y = pointBuffer.getField<boost::int32_t>(*dimensions.Y, pointIndex);
-        boost::int32_t const& z = pointBuffer.getField<boost::int32_t>(*dimensions.Z, pointIndex);
+        int32_t x = pointBuffer.getFieldAs<int32_t>(*dimensions.X, idx, false);
+        int32_t y = pointBuffer.getFieldAs<int32_t>(*dimensions.Y, idx, false);
+        int32_t z = pointBuffer.getFieldAs<int32_t>(*dimensions.Z, idx, false);
 
-        Utils::write_field<boost::int32_t>(p, x);
-        Utils::write_field<boost::int32_t>(p, y);
-        Utils::write_field<boost::int32_t>(p, z);
+        Utils::write_field(p, x);
+        Utils::write_field(p, y);
+        Utils::write_field(p, z);
+
+        uint16_t intensity = 0;
         if (dimensions.Intensity)
-        {
-            if (dimensions.Intensity->getByteSize() == 2)
-            {
-                boost::uint16_t const& intensity =
-                    pointBuffer.getField<boost::uint16_t>(
-                        *dimensions.Intensity, pointIndex);
-                Utils::write_field<boost::uint16_t>(p, intensity);
-            }
-            else if (dimensions.Intensity->getByteSize() == 1)
-            {
-                boost::uint8_t intensity =
-                    pointBuffer.getField<boost::uint8_t>(*dimensions.Intensity,
-                     pointIndex);
-                Utils::write_field<boost::uint16_t>(p, intensity);
-            }
-        }
-        else
-        {
-            Utils::write_field<boost::uint16_t>(p, 0);
-        }
+            intensity = pointBuffer.getFieldAs<uint16_t>(*dimensions.Intensity,
+                idx, false);
+        Utils::write_field(p, intensity);
+
 
         boost::uint8_t returnNumber(0);
         if (dimensions.ReturnNumber)
-            returnNumber = pointBuffer.getField<boost::uint8_t>(
-                *dimensions.ReturnNumber, pointIndex);
+            returnNumber = pointBuffer.getFieldAs<uint8_t>(
+                *dimensions.ReturnNumber, idx, false);
 
         boost::uint8_t numberOfReturns(0);
         if (dimensions.NumberOfReturns)
-            numberOfReturns = pointBuffer.getField<boost::uint8_t>(
-                *dimensions.NumberOfReturns, pointIndex);
+            numberOfReturns = pointBuffer.getFieldAs<uint8_t>(
+                *dimensions.NumberOfReturns, idx, false);
 
         boost::uint8_t scanDirectionFlag(0);
         if (dimensions.ScanDirectionFlag)
-            scanDirectionFlag = pointBuffer.getField<boost::uint8_t>(
-                *dimensions.ScanDirectionFlag, pointIndex);
+            scanDirectionFlag = pointBuffer.getFieldAs<boost::uint8_t>(
+                *dimensions.ScanDirectionFlag, idx, false);
 
         boost::uint8_t edgeOfFlightLine(0);
         if (dimensions.EdgeOfFlightLine)
-            edgeOfFlightLine = pointBuffer.getField<boost::uint8_t>(
-                *dimensions.EdgeOfFlightLine, pointIndex);
+            edgeOfFlightLine = pointBuffer.getFieldAs<boost::uint8_t>(
+                *dimensions.EdgeOfFlightLine, idx, false);
 
         boost::uint8_t bits = returnNumber | (numberOfReturns<<3) |
             (scanDirectionFlag << 6) | (edgeOfFlightLine << 7);
-        Utils::write_field<boost::uint8_t>(p, bits);
+        Utils::write_field(p, bits);
 
+        uint8_t classification = 0;
         if (dimensions.Classification)
-        {
-            boost::uint8_t const& classification =
-                pointBuffer.getField<boost::uint8_t>(*dimensions.Classification,
-                pointIndex);
-            Utils::write_field<boost::uint8_t>(p, classification);
-        }
-        else
-        {
-            Utils::write_field<boost::uint8_t>(p, 0);
-        }
+            classification = pointBuffer.getFieldAs<uint8_t>(
+                *dimensions.Classification, idx, false);
+        Utils::write_field(p, classification);
 
+        int8_t scanAngleRank = 0;
         if (dimensions.ScanAngleRank)
-        {
-            boost::int8_t const& scanAngleRank =
-                pointBuffer.getField<boost::int8_t>(*dimensions.ScanAngleRank,
-                pointIndex);
-            Utils::write_field<boost::int8_t>(p, scanAngleRank);
-        }
-        else
-        {
-            Utils::write_field<boost::int8_t>(p, 0);
-        }
+            scanAngleRank = pointBuffer.getFieldAs<int8_t>(
+                *dimensions.ScanAngleRank, idx, false);
+        Utils::write_field(p, scanAngleRank);
 
+        uint8_t userData = 0;
         if (dimensions.UserData)
-        {
-            boost::uint8_t const& userData =
-                pointBuffer.getField<boost::uint8_t>(*dimensions.UserData,
-                pointIndex);
-            Utils::write_field<boost::uint8_t>(p, userData);
-        }
-        else
-        {
-            Utils::write_field<boost::uint8_t>(p, 0);
-        }
+            userData = pointBuffer.getFieldAs<uint8_t>(
+                *dimensions.UserData, idx, false);
+        Utils::write_field(p, userData);
 
+        uint16_t pointSourceId = 0;
         if (dimensions.PointSourceId)
-        {
-            boost::uint16_t const& pointSourceId =
-                pointBuffer.getField<boost::uint16_t>(*dimensions.PointSourceId,
-                pointIndex);
-            Utils::write_field<boost::uint16_t>(p, pointSourceId);
-        }
-        else
-        {
-            Utils::write_field<boost::uint16_t>(p, 0);
-        }
+            pointSourceId = pointBuffer.getFieldAs<uint16_t>(
+                *dimensions.PointSourceId, idx, false);
+        Utils::write_field(p, pointSourceId);
 
         if (hasTime)
         {
+            double t = 0.0;
             if (dimensions.Time)
-            {
-                Dimension const& tm = *dimensions.Time;
-                double t(0.0);
-                if (tm.getByteSize() == 2)
-                    t = static_cast<double>(
-                        pointBuffer.getField<boost::int16_t>(tm, pointIndex));
-                else if (tm.getByteSize() == 4)
-                    t = static_cast<double>(
-                        pointBuffer.getField<boost::int32_t>(tm, pointIndex));
-                else if (tm.getByteSize() == 8)
-                    t = pointBuffer.getField<double>(tm, pointIndex);
-                
-                Utils::write_field<double>(p, t);
-            }
-            else
-            {
-                Utils::write_field<double>(p, 0.0);
-            }
+                t = pointBuffer.getFieldAs<double>(
+                    *dimensions.Time, idx, false);
+            Utils::write_field(p, t);
         }
 
         if (hasColor)
         {
-
+            uint16_t red = 0;
+            uint16_t green = 0;
+            uint16_t blue = 0;
             if (dimensions.Red)
-            {
-                Dimension const& dim = *dimensions.Red;
-                boost::uint16_t v(0);
-                if (dim.getByteSize() == 1)
-                    v = static_cast<boost::uint16_t>(
-                    pointBuffer.getField<boost::uint8_t>(dim, pointIndex));
-                else if (dim.getByteSize() == 2)
-                    v = static_cast<boost::uint16_t>(
-                    pointBuffer.getField<boost::uint16_t>(dim, pointIndex));
-                else if (dim.getByteSize() == 4)
-                    v = static_cast<boost::uint16_t>(
-                    pointBuffer.getField<boost::uint32_t>(dim, pointIndex));
-                else if (dim.getByteSize() == 8)
-                    v = static_cast<boost::uint16_t>(
-                    pointBuffer.getField<boost::uint32_t>(dim, pointIndex));
-                Utils::write_field<boost::uint16_t>(p, v);
-            }
-            else
-            {
-                Utils::write_field<boost::uint16_t>(p, 0);
-            }
-
+                red = pointBuffer.getFieldAs<uint16_t>(
+                    *dimensions.Red, idx, false);
             if (dimensions.Green)
-            {
-                Dimension const& dim = *dimensions.Green;
-                boost::uint16_t v(0);
-                if (dim.getByteSize() == 1)
-                    v = static_cast<boost::uint16_t>(
-                    pointBuffer.getField<boost::uint8_t>(dim, pointIndex));
-                else if (dim.getByteSize() == 2)
-                    v = static_cast<boost::uint16_t>(
-                    pointBuffer.getField<boost::uint16_t>(dim, pointIndex));
-                else if (dim.getByteSize() == 4)
-                    v = static_cast<boost::uint16_t>(
-                    pointBuffer.getField<boost::uint32_t>(dim, pointIndex));
-                else if (dim.getByteSize() == 8)
-                    v = static_cast<boost::uint16_t>(
-                    pointBuffer.getField<boost::uint32_t>(dim, pointIndex));
-                Utils::write_field<boost::uint16_t>(p, v);
-            }
-            else
-            {
-                Utils::write_field<boost::uint16_t>(p, 0);
-            }
-
+                green = pointBuffer.getFieldAs<uint16_t>(
+                    *dimensions.Green, idx, false);
             if (dimensions.Blue)
-            {
-                Dimension const& dim = *dimensions.Blue;
-                boost::uint16_t v(0);
-                if (dim.getByteSize() == 1)
-                    v = static_cast<boost::uint16_t>(
-                    pointBuffer.getField<boost::uint8_t>(dim, pointIndex));
-                else if (dim.getByteSize() == 2)
-                    v = static_cast<boost::uint16_t>(
-                    pointBuffer.getField<boost::uint16_t>(dim, pointIndex));
-                else if (dim.getByteSize() == 4)
-                    v = static_cast<boost::uint16_t>(
-                    pointBuffer.getField<boost::uint32_t>(dim, pointIndex));
-                else if (dim.getByteSize() == 8)
-                    v = static_cast<boost::uint16_t>(
-                    pointBuffer.getField<boost::uint32_t>(dim, pointIndex));
-                Utils::write_field<boost::uint16_t>(p, v);
-            }
-            else
-            {
-                Utils::write_field<boost::uint16_t>(p, 0);
-            }
+                blue = pointBuffer.getFieldAs<uint16_t>(
+                    *dimensions.Blue, idx, false);
+
+            Utils::write_field(p, red);
+            Utils::write_field(p, green);
+            Utils::write_field(p, blue);
         }
 
+        //Buffer is complete.
+
+        // If we're going to compress, do it.
 #ifdef PDAL_HAVE_LASZIP
         if (m_zipPoint)
         {
-            for (unsigned int i=0; i<m_zipPoint->m_lz_point_size; i++)
-            {
+            for (unsigned i = 0; i < m_zipPoint->m_lz_point_size; i++)
                 m_zipPoint->m_lz_point_data[i] = buf[i];
-                // printf("%d %d\n", buf[i], i);
-            }
-            bool ok = m_zipper->write(m_zipPoint->m_lz_point);
-            if (!ok)
+            if (!m_zipper->write(m_zipPoint->m_lz_point))
             {
                 std::ostringstream oss;
                 const char* err = m_zipper->get_error();
@@ -864,13 +756,13 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& pointBuffer)
 #endif
         ++numValidPoints;
 
-        const double xValue = (*dimensions.X).applyScaling<boost::int32_t>(x);
-        const double yValue = (*dimensions.Y).applyScaling<boost::int32_t>(y);
-        const double zValue = (*dimensions.Z).applyScaling<boost::int32_t>(z);
+        double xValue = pointBuffer.getFieldAs<double>(*dimensions.X, idx);
+        double yValue = pointBuffer.getFieldAs<double>(*dimensions.Y, idx);
+        double zValue = pointBuffer.getFieldAs<double>(*dimensions.Z, idx);
         m_summaryData.addPoint(xValue, yValue, zValue, returnNumber);
     }
 
-    m_numPointsWritten = m_numPointsWritten+numValidPoints;
+    m_numPointsWritten = m_numPointsWritten + numValidPoints;
     return numValidPoints;
 }
 

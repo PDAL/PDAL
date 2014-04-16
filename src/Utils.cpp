@@ -41,6 +41,8 @@
 #include <cstdlib>
 #include <cctype>
 
+#include <cxxabi.h>
+
 #ifdef PDAL_COMPILER_MSVC
 #  pragma warning(disable: 4127)  // conditional expression is constant
 #endif
@@ -556,6 +558,11 @@ string Utils::replaceAll(string result, const string& replaceWhat,
     return result;
 }
 
+/// Break a string into a list of strings, none of which exceeds a specified
+/// length.
+/// \param[in] inputString  String to split
+/// \param[out] outputString  Vector of strings split from inputString
+/// \param[in] lineLength  Maximum length of any of the output strings
 void Utils::wordWrap(string const& inputString, vector<string>& outputString, 
     unsigned int lineLength)
 {
@@ -580,6 +587,18 @@ void Utils::wordWrap(string const& inputString, vector<string>& outputString,
     {
         outputString.push_back(line);
     }
+}
+
+
+/// Demangle strings using the compiler-provided demangle function.
+/// \param[in] s  String to be demangled.
+/// \return  Demangled string
+std::string Utils::demangle(const std::string& s)
+{
+    int status;
+    std::unique_ptr<char[], void (*)(void*)> result(
+            abi::__cxa_demangle(s.c_str(), 0, 0, &status), std::free);
+    return std::string(result.get());
 }
 
 //#endif
