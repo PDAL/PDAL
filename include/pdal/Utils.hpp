@@ -236,6 +236,12 @@ public:
     static void wordWrap(std::string const& inputString, 
                          std::vector<std::string>& outputString, 
                          unsigned int lineLength);
+
+    static std::string demangle(const std::string& s);
+
+    template<typename T>
+    static std::string typeidName()
+        { return Utils::demangle(typeid(T).name()); }
  
 private:
     template<typename T>
@@ -274,7 +280,6 @@ private:
             throw std::runtime_error("fatal I/O error occured");
         return true;
     }
-
 };
 
 } // namespace pdal

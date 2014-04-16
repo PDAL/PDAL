@@ -108,12 +108,11 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& PointBuffer)
     Dimension const& dimY = schema.getDimension("Y");
     Dimension const& dimZ = schema.getDimension("Z");
 
-    for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
+    for (uint32_t idx = 0; idx < numPoints; idx++)
     {
-
-        double x = PointBuffer.getField<double>(dimX, pointIndex);
-        double y = PointBuffer.getField<double>(dimY, pointIndex);
-        double z = PointBuffer.getField<double>(dimZ, pointIndex);
+        double x = PointBuffer.getFieldAs<double>(dimX, idx, false);
+        double y = PointBuffer.getFieldAs<double>(dimY, idx, false);
+        double z = PointBuffer.getFieldAs<double>(dimZ, idx, false);
 
         m_minimumX = std::min(m_minimumX, x);
         m_minimumY = std::min(m_minimumY, y);
