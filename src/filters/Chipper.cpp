@@ -476,7 +476,7 @@ Chipper::Chipper(pdal::filters::Chipper const& filter, PointBuffer& buffer)
     : pdal::FilterSequentialIterator(filter, buffer)
     , m_chipper(filter)
     , m_currentBlockId(0)
-    , m_currentPointCount(0)
+    , m_blockOffset(0)
     , m_one_point(0)
     , m_current_read_schema(0)
     , m_random_iterator(0)
@@ -491,9 +491,11 @@ Chipper::Chipper(pdal::filters::Chipper const& filter, PointBuffer& buffer)
 
 boost::uint64_t Chipper::skipImpl(boost::uint64_t count)
 {
-    return naiveSkipImpl(count);
+    // With the way that points are read from the chipper (in blocks),
+    // skipping doesn't make much sense.
+    assert(true);
+    return count;
 }
-
 
 boost::uint32_t Chipper::fillUserBuffer( PointBuffer& buffer,
                                          filters::chipper::Block const& block)                              
@@ -575,8 +577,6 @@ boost::uint32_t Chipper::readBufferImpl(PointBuffer& buffer)
     std::size_t numPointsThisBlock = block.GetSize();
     
     boost::uint32_t numRead = fillUserBuffer(buffer, block);
-    m_currentPointCount = m_currentPointCount + numRead;
-
     buffer.setSpatialBounds(block.GetBounds());
     buffer.setNumPoints(numRead);
     m_currentBlockId++;

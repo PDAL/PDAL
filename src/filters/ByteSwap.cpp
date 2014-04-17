@@ -158,7 +158,7 @@ ByteSwap::ByteSwap(const pdal::filters::ByteSwap& filter, PointBuffer& buffer)
 
 boost::uint64_t ByteSwap::skipImpl(boost::uint64_t count)
 {
-    return naiveSkipImpl(count);
+    return getPrevIterator().skip(count);
 }
 
 
