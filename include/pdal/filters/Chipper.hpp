@@ -266,7 +266,6 @@ private:
 
     pdal::filters::Chipper const& m_chipper;
     std::size_t m_currentBlockId;
-    boost::uint64_t m_currentPointCount;
     PointBuffer* m_one_point;
     Schema const* m_current_read_schema;
     StageRandomIterator * m_random_iterator;

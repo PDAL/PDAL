@@ -982,7 +982,6 @@ pdal::Bounds<double> IteratorBase::getBounds(Statement statement, BlockPtr block
 Reader::Reader(const pdal::drivers::oci::Reader& reader, PointBuffer& buffer, boost::uint32_t numPoints, LogPtr log)
     : IteratorBase(reader)
     , pdal::StageSequentialIterator(buffer)
-    , m_numPoints(numPoints)
     , m_log(log)
 {
     return;
@@ -997,8 +996,27 @@ Reader::~Reader()
 
 boost::uint64_t Reader::skipImpl(boost::uint64_t count)
 {
+    boost::uint64_t totalNumRead = 0;
 
-    return naiveSkipImpl(count);
+    // read (and discard) all the next 'count' points
+    // in case count is really big, we do this in blocks of size 'chunk'
+    while (count > 0)
+    {
+        boost::uint64_t thisCount64 =
+            std::min<boost::uint64_t>(getChunkSize(), count);
+        // getChunkSize is a uint32, so this cast is safe
+        boost::uint32_t thisCount =
+            static_cast<boost::uint32_t>(thisCount64);
+
+        PointBuffer junk(m_reader.getSchema(), thisCount);
+        boost::uint32_t numRead = read(junk);
+        if (numRead == 0)
+            break; // end of file or something
+
+        count -= numRead;
+        totalNumRead += numRead;
+    }
+    return totalNumRead;
 }
 
 
