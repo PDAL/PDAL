@@ -376,7 +376,7 @@ Crop::Crop(const pdal::filters::Crop& filter, PointBuffer& buffer)
 
 boost::uint64_t Crop::skipImpl(boost::uint64_t count)
 {
-    return naiveSkipImpl(count);
+    return getPrevIterator().skip(count);
 }
 
 
