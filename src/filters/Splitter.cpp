@@ -267,7 +267,10 @@ Splitter::Splitter(pdal::filters::Splitter const& filter, PointBuffer& buffer)
 
 boost::uint64_t Splitter::skipImpl(boost::uint64_t count)
 {
-    return naiveSkipImpl(count);
+    // Skipping points doesn't make much sense when the splitter works in
+    // terms of tiles.
+    assert(true);
+    return count;
 }
 
 boost::uint32_t Splitter::fillUserBuffer(PointBuffer& buffer,
