@@ -55,12 +55,9 @@ public:
     SET_STAGE_NAME("drivers.sqlite.writer", "SQLite Writer")
 
     Writer(Stage& prevStage, const Options&);
-    ~Writer();
 
     virtual void initialize();
     static Options getDefaultOptions();
-
-
 
 protected:
     virtual void writeBegin(boost::uint64_t targetNumPointsToWrite);

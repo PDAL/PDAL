@@ -47,8 +47,6 @@
 #include <iostream>
 #include <map>
 
-
-
 #ifdef USE_PDAL_PLUGIN_SOCI
 MAKE_READER_CREATOR(sqliteReader, pdal::drivers::sqlite::Reader)
 CREATE_READER_PLUGIN(sqlite, pdal::drivers::sqlite::Reader)
@@ -66,9 +64,7 @@ namespace sqlite
 Reader::Reader(const Options& options)
     : pdal::Reader(options)
     , m_cachedPointCount(0)
-{
-
-}
+{}
 
 
 boost::uint64_t Reader::getNumPoints() const
@@ -76,73 +72,63 @@ boost::uint64_t Reader::getNumPoints() const
     if (m_cachedPointCount != 0) return m_cachedPointCount;
 
     std::ostringstream query_oss;
-    std::string const& query = getOptions().getValueOrThrow<std::string>("query");
+    std::string const& query =
+        getOptions().getValueOrThrow<std::string>("query");
     query_oss << "select sum(num_points) from (" << query << ") as summation";
 
 
     ::soci::indicator ind = ::soci::i_null;
     boost::int64_t count;
-    ::soci::statement q = (m_session->prepare << query_oss.str(), ::soci::into(count, ind));
+    ::soci::statement q =
+        (m_session->prepare << query_oss.str(), ::soci::into(count, ind));
     q.execute();
 
-    // if (ind == ::soci::i_null)
-    //     return  0;
-
     if (count < 0)
-    {
         throw pdal_error("getNumPoints returned a count < 0!");
-    }
 
     m_cachedPointCount = static_cast<boost::uint64_t>(count);
     return m_cachedPointCount;
 }
 
+
 void Reader::initialize()
 {
+    using namespace std;
+
     pdal::Reader::initialize();
 
-    std::string const& query = getOptions().getValueOrThrow<std::string>("query");
-    std::string const& connection = getOptions().getValueOrThrow<std::string>("connection");
+    Options& ops = getOptions();
 
+    string const& query = ops.getValueOrThrow<string>("query");
+    string const& connection = ops.getValueOrThrow<string>("connection");
 
     m_session->set_log_stream(&(log()->get(logDEBUG2)));
-
     m_schema = fetchSchema(query);
-
     try
     {
-        setSpatialReference(getOptions().getValueOrThrow<pdal::SpatialReference>("spatialreference"));
-
+        setSpatialReference(
+            ops.getValueOrThrow<pdal::SpatialReference>("spatialreference"));
     }
     catch (pdal::option_not_found const&)
     {
         // If one wasn't set on the options, we'll ignore at this
         setSpatialReference(fetchSpatialReference(query));
-
     }
-
 }
-
-
 
 
 Options Reader::getDefaultOptions()
 {
     Options options;
 
-    Option connection("connection",
-                      "",
-                      "Connection string to connect to database");
+    Option connection("connection", "",
+        "Connection string to connect to database");
+    Option query("query", "",
+        "SELECT statement that returns point cloud");
+    Option capacity("capacity", 0, "Block capacity");
 
-    Option query("query",
-                 "",
-                 "SELECT statement that returns point cloud");
-
-    Option capacity("capacity",
-                    0,
-                    "Block capacity");
-
-    Option xml_schema_dump("xml_schema_dump", std::string(""), "Filename to dump the XML schema to.");
+    Option xml_schema_dump("xml_schema_dump", "",
+        "Filename to dump the XML schema to.");
 
     options.add(connection);
     options.add(query);
@@ -152,26 +138,18 @@ Options Reader::getDefaultOptions()
     return options;
 }
 
-Reader::~Reader()
-{
-    return;
-}
 
-
-
-
-pdal::SpatialReference Reader::fetchSpatialReference(std::string const& query) const
+pdal::SpatialReference
+Reader::fetchSpatialReference(std::string const& query) const
 {
     // Fetch the WKT for the SRID to set the coordinate system of this stage
     log()->get(logDEBUG) << "Fetching schema object" << std::endl;
 
-    // query_oss << "select ST_SRID(query.extent)::integer as code from (" << query << ") as query";
-    // query_oss << "SELECT ST_SRID(extent)::integer as code from cloud";
-
     ::soci::row r;
     ::soci::indicator ind = ::soci::i_null;
     boost::int64_t srid;
-    ::soci::statement clouds = (m_session->prepare << query, ::soci::into(r, ind));
+    ::soci::statement clouds =
+        (m_session->prepare << query, ::soci::into(r, ind));
     clouds.execute();
 
     if (ind == ::soci::i_null)
@@ -183,14 +161,6 @@ pdal::SpatialReference Reader::fetchSpatialReference(std::string const& query) c
 
     if (!bDidRead)
         return pdal::SpatialReference();
-    // throw pdal_error("Unable to fetch srid for query");
-
-    // if (ind == ::soci::i_null)
-    // {
-    //     log()->get(logDEBUG) << "No SRID was selected for query" << std::endl;
-    //     return pdal::SpatialReference();
-    //
-    // }
 
     log()->get(logDEBUG) << "query returned " << srid << std::endl;
     std::ostringstream oss;
@@ -201,6 +171,7 @@ pdal::SpatialReference Reader::fetchSpatialReference(std::string const& query) c
     else
         return pdal::SpatialReference();
 }
+
 
 pdal::Schema Reader::fetchSchema(std::string const& query) const
 {
@@ -214,46 +185,41 @@ pdal::Schema Reader::fetchSchema(std::string const& query) const
     ::soci::row r;
     ::soci::statement clouds = (m_session->prepare << q, ::soci::into(r, ind));
     clouds.execute();
-    // if (ind == ::soci::i_null)
-    //     return pdal::Schema();
 
     bool bDidRead = clouds.fetch();
-    // if (!bDidRead)
-    //     return pdal::Schema();
-
     std::string xml = r.get<std::string>("schema");
-
     Schema schema = Schema::from_xml(xml);
+    schema::index_by_index const& dims =
+        schema.getDimensions().get<schema::index>();
 
-    schema::index_by_index const& dims = schema.getDimensions().get<schema::index>();
-
-    for (schema::index_by_index::const_iterator iter = dims.begin(); iter != dims.end(); ++iter)
+    for (auto iter = dims.begin(); iter != dims.end(); ++iter)
     {
         // For dimensions that do not have namespaces, we'll set the namespace
         // to the namespace of the current stage
 
         if (iter->getNamespace().size() == 0)
         {
-            log()->get(logDEBUG4) << "setting namespace for dimension " << iter->getName() << " to "  << getName() << std::endl;
-
+            log()->get(logDEBUG4) << "setting namespace for dimension " <<
+                iter->getName() << " to "  << getName() << std::endl;
 
             Dimension d(*iter);
             if (iter->getUUID().is_nil())
-            {
                 d.createUUID();
-            }
             d.setNamespace(getName());
             schema.setDimension(d);
         }
     }
-
     return schema;
 }
 
-pdal::StageSequentialIterator* Reader::createSequentialIterator(PointBuffer& buffer) const
+
+pdal::StageSequentialIterator*
+Reader::createSequentialIterator(PointBuffer& buffer) const
 {
-    return new pdal::drivers::sqlite::iterators::sequential::Reader(*this, buffer);
+    return new iterators::sequential::Reader(*this, buffer);
 }
+
+
 
 namespace iterators
 {
@@ -268,18 +234,10 @@ IteratorBase::IteratorBase(const pdal::drivers::sqlite::Reader& reader)
     , m_reader(reader)
 {
     pdal::Options const& options = reader.getOptions();
-    std::string const& connection = options.getValueOrThrow<std::string>("connection");
+    std::string const& connection =
+        options.getValueOrThrow<std::string>("connection");
     std::string const& query = options.getValueOrThrow<std::string>("query");
-
-
-    return;
 }
-
-
-IteratorBase::~IteratorBase()
-{
-}
-
 
 
 const pdal::drivers::sqlite::Reader& IteratorBase::getReader() const
@@ -287,8 +245,7 @@ const pdal::drivers::sqlite::Reader& IteratorBase::getReader() const
     return m_reader;
 }
 
-void IteratorBase::readBlob(::soci::row& block,
-                            boost::uint32_t howMany)
+void IteratorBase::readBlob(::soci::row& block, boost::uint32_t howMany)
 {
     boost::uint32_t nAmountRead = 0;
 
@@ -305,34 +262,38 @@ void IteratorBase::readBlob(::soci::row& block,
     Schema const& oracle_schema = m_active_buffer->getSchema();
 
     boost::uint32_t howMuchWeRead = binary_data.size();
-    boost::uint32_t howMuchTheBlobShouldBe = block.get<int>("num_points") * oracle_schema.getByteSize();
+    boost::uint32_t howMuchTheBlobShouldBe =
+        block.get<int>("num_points") * oracle_schema.getByteSize();
     if (howMuchWeRead != howMuchTheBlobShouldBe)
     {
         std::stringstream oss;
-        oss << "Did not read the amount of binary data as expected -- read: " << howMuchWeRead << " should read: " << howMuchTheBlobShouldBe;
+        oss << "Did not read the amount of binary data as expected "
+            "-- read: " << howMuchWeRead << " should read: " <<
+            howMuchTheBlobShouldBe;
         throw sqlite_driver_error(oss.str());
     }
     boost::uint32_t howMuchToRead = howMany * oracle_schema.getByteSize();
     m_active_buffer->setDataStride(data, 0, howMuchToRead);
-
     m_active_buffer->setNumPoints(howMany);
 }
 
+
 void IteratorBase::fillUserBuffer(PointBuffer& user_buffer)
 {
-
     Schema const& user_schema = user_buffer.getSchema();
-    schema::index_by_index const& idx = user_schema.getDimensions().get<schema::index>();
+    schema::index_by_index const& idx =
+        user_schema.getDimensions().get<schema::index>();
 
-    boost::int32_t numUserSpace = user_buffer.getCapacity() - user_buffer.getNumPoints();
+    boost::int32_t numUserSpace =
+        user_buffer.getCapacity() - user_buffer.getNumPoints();
     if (numUserSpace < 0)
         throw pdal_error("We ran out of space!");
 
-    boost::int32_t numOraclePoints = m_active_buffer->getNumPoints() - m_buffer_position;
+    boost::int32_t numOraclePoints =
+        m_active_buffer->getNumPoints() - m_buffer_position;
 
-    schema::index_by_index::size_type i(0);
+    schema::index_by_index::size_type i;
     for (i = 0; i < idx.size(); ++i)
-    {
         copyDatabaseData(*m_active_buffer,
                          user_buffer,
                          idx[i],
@@ -340,18 +301,20 @@ void IteratorBase::fillUserBuffer(PointBuffer& user_buffer)
                          user_buffer.getNumPoints(),
                          (std::min)(numOraclePoints,numUserSpace));
 
-    }
-
-    bool bSetPointSourceId = getReader().getOptions().getValueOrDefault<bool>("populate_pointsourceid", false);
+    bool bSetPointSourceId =
+        getReader().getOptions().getValueOrDefault<bool>(
+            "populate_pointsourceid", false);
     if (bSetPointSourceId)
     {
-        Dimension const* point_source_field = &(user_buffer.getSchema().getDimensionOptional("PointSourceId").get());
+        Dimension const* point_source_field =
+            &(user_schema.getDimensionOptional("PointSourceId").get());
         if (point_source_field)
         {
             for (boost::int32_t i = 0; i < numUserSpace; ++i)
             {
                 if (i < 0)
-                    throw sqlite_driver_error("point_source_field point index is less than 0!");
+                    throw sqlite_driver_error("point_source_field point "
+                        "index is less than 0!");
                 user_buffer.setField(*point_source_field, i, m_active_cloud_id);
             }
         }
@@ -366,59 +329,59 @@ void IteratorBase::fillUserBuffer(PointBuffer& user_buffer)
     user_buffer.setNumPoints(howManyThisRead + user_buffer.getNumPoints());
 }
 
+
 void IteratorBase::copyDatabaseData(PointBuffer& source,
-                                    PointBuffer& destination,
-                                    Dimension const& dest_dim,
-                                    boost::uint32_t source_starting_position,
-                                    boost::uint32_t destination_starting_position,
-                                    boost::uint32_t howMany)
+    PointBuffer& destination, Dimension const& dest_dim,
+    uint32_t source_starting_position, uint32_t destination_starting_position,
+    uint32_t howMany)
 {
 
-    boost::optional<Dimension const&> source_dim = source.getSchema().getDimensionOptional(dest_dim.getName());
+    boost::optional<Dimension const&> source_dim =
+        source.getSchema().getDimensionOptional(dest_dim.getName());
 
     if (!source_dim)
-    {
         return;
-    }
 
-    for (boost::uint32_t i = 0; i < howMany; ++i)
+    for (uint32_t i = 0; i < howMany; ++i)
     {
         if (dest_dim.getInterpretation() == source_dim->getInterpretation() &&
-                dest_dim.getByteSize() == source_dim->getByteSize() &&
-                pdal::Utils::compare_distance(dest_dim.getNumericScale(), source_dim->getNumericScale()) &&
-                pdal::Utils::compare_distance(dest_dim.getNumericOffset(), source_dim->getNumericOffset()) &&
-                dest_dim.getEndianness() == source_dim->getEndianness()
-           )
+            dest_dim.getByteSize() == source_dim->getByteSize() &&
+            pdal::Utils::compare_distance(dest_dim.getNumericScale(),
+                source_dim->getNumericScale()) &&
+            pdal::Utils::compare_distance(dest_dim.getNumericOffset(),
+                source_dim->getNumericOffset()) &&
+            dest_dim.getEndianness() == source_dim->getEndianness())
         {
             // FIXME: This test could produce false positives
-            boost::uint8_t* source_position = source.getData(source_starting_position+i) + source_dim->getByteOffset();
-            boost::uint8_t* destination_position = destination.getData(destination_starting_position + i) + dest_dim.getByteOffset();
-            memcpy(destination_position, source_position, source_dim->getByteSize());
+            uint8_t *source_position =
+                source.getData(source_starting_position+i) +
+                source_dim->getByteOffset();
+            uint8_t *destination_position =
+                destination.getData(destination_starting_position + i) +
+                dest_dim.getByteOffset();
+            memcpy(destination_position, source_position,
+                source_dim->getByteSize());
         }
         else
         {
-            PointBuffer::scaleData(source,
-                                   destination,
-                                   *source_dim,
-                                   dest_dim,
-                                   source_starting_position + i,
-                                   destination_starting_position + i);
+            PointBuffer::scaleData(source, destination, *source_dim, dest_dim,
+                source_starting_position + i,
+                destination_starting_position + i);
         }
     }
-
 }
 
 
 
-BufferPtr IteratorBase::fetchPointBuffer(boost::int32_t const& cloud_id,
-        std::string const& schema_xml,
-        boost::uint32_t capacity)
+BufferPtr IteratorBase::fetchPointBuffer(int32_t const& cloud_id,
+    std::string const& schema_xml, uint32_t capacity)
 {
     BufferMap::const_iterator i = m_buffers.find(cloud_id);
-
     if (i != m_buffers.end())
     {
-        getReader().log()->get(logDEBUG2) << "IteratorBase::fetchPointBuffer: found existing PointBuffer with id " << cloud_id << std::endl;
+        getReader().log()->get(logDEBUG2) <<
+            "IteratorBase::fetchPointBuffer: found existing PointBuffer "
+            "with id " << cloud_id << std::endl;
         return i->second;
     }
     else
@@ -426,100 +389,80 @@ BufferPtr IteratorBase::fetchPointBuffer(boost::int32_t const& cloud_id,
         std::stringstream query;
 
         Schema schema = Schema::from_xml(schema_xml);
-
         BufferPtr output  = BufferPtr(new PointBuffer(schema, capacity));
         std::pair<int, BufferPtr> p(cloud_id, output);
         m_buffers.insert(p);
-        getReader().log()->get(logDEBUG2) << "IteratorBase::fetchPointBuffer: creating new PointBuffer with id " << cloud_id << std::endl;
-
+        getReader().log()->get(logDEBUG2) <<
+            "IteratorBase::fetchPointBuffer: creating new PointBuffer "
+            "with id " << cloud_id << std::endl;
         return p.second;
     }
 }
 
-boost::uint32_t IteratorBase::myReadBlocks(PointBuffer& user_buffer)
-{
-    boost::uint32_t numPointsRead = 0;
 
-    std::string const& query = getReader().getOptions().getValueOrThrow<std::string>("query");
+uint32_t IteratorBase::myReadBlocks(PointBuffer& user_buffer)
+{
+    uint32_t numPointsRead = 0;
+
+    std::string const& query =
+        getReader().getOptions().getValueOrThrow<std::string>("query");
 
     ::soci::row block;
     ::soci::indicator ind = ::soci::i_null;
-
-
-    ::soci::statement blocks = (m_session->prepare << query, ::soci::into(block, ind));
+    ::soci::statement blocks =
+        (m_session->prepare << query, ::soci::into(block, ind));
     blocks.execute();
 
     bool bDidRead = blocks.fetch();
-
-    // if (ind == ::soci::i_null)
-    // {
-    //     // We have no points to return
-    //     getReader().log()->get(logDEBUG) << "Query returned no points" << std::endl;
-    //     return 0;
-    // }
-
-    //
-    // size_t size = block.size();
-    // for (size_t i = 0; i < size; ++i)
-    // {
-    //     getReader().log()->get(logDEBUG3) << "column: " << block.get_properties(i).get_name() << std::endl;
-    // }
     if (!m_active_buffer)
     {
         m_active_buffer = fetchPointBuffer(block.get<int>("cloud_id"),
-                                           block.get<std::string>("schema"),
-                                           user_buffer.getCapacity());
+            block.get<std::string>("schema"), user_buffer.getCapacity());
         m_active_cloud_id = block.get<int>("cloud_id");
     }
-    //
+
     // This shouldn't ever happen
     int num_points = block.get<int>("num_points");
-    if (num_points > static_cast<boost::int32_t>(m_active_buffer->getCapacity()))
+    if (num_points > static_cast<int32_t>(m_active_buffer->getCapacity()))
     {
         std::ostringstream oss;
-        oss << "Block size, " << num_points <<", is too large to fit in "
-            << "buffer of size " << user_buffer.getCapacity() <<". Increase buffer capacity with writer's \"chunk_size\" option "
-            << "or increase the read buffer size";
+        oss << "Block size, " << num_points << ", is too large to fit in " <<
+            "buffer of size " << user_buffer.getCapacity() <<
+            ". Increase buffer capacity with writer's \"chunk_size\" option " <<
+            "or increase the read buffer size";
         throw buffer_too_small(oss.str());
     }
 
-
     while (bDidRead)
     {
-        boost::uint32_t numReadThisBlock = static_cast<boost::uint32_t>(block.get<int>("num_points"));
-        boost::uint32_t numSpaceLeftThisBuffer = user_buffer.getCapacity() - user_buffer.getNumPoints();
+        uint32_t numReadThisBlock =
+            static_cast<uint32_t>(block.get<int>("num_points"));
+        uint32_t numSpaceLeftThisBuffer =
+            user_buffer.getCapacity() - user_buffer.getNumPoints();
 
-        getReader().log()->get(logDEBUG4) << "IteratorBase::myReadBlocks:" "numReadThisBlock: "
-                                          << numReadThisBlock << " numSpaceLeftThisBlock: "
-                                          << numSpaceLeftThisBuffer << " total numPointsRead: "
-                                          << numPointsRead << std::endl;
+        getReader().log()->get(logDEBUG4) << "IteratorBase::myReadBlocks:"
+            "numReadThisBlock: " << numReadThisBlock <<
+            " numSpaceLeftThisBlock: " << numSpaceLeftThisBuffer <<
+            " total numPointsRead: " << numPointsRead << std::endl;
 
         numPointsRead = numPointsRead + numReadThisBlock;
-
-        readBlob(block, (std::min)(numReadThisBlock, numSpaceLeftThisBuffer));
+        readBlob(block, std::min(numReadThisBlock, numSpaceLeftThisBuffer));
         fillUserBuffer(user_buffer);
-
         bDidRead = blocks.fetch();
-        // if (!bDidRead)
-        //     return user_buffer.getNumPoints();
 
-        boost::int32_t const& current_cloud_id = block.get<int>("cloud_id");
+        int32_t const& current_cloud_id = block.get<int>("cloud_id");
         if (current_cloud_id != m_active_cloud_id)
         {
-
-
-            getReader().log()->get(logDEBUG3) << "IteratorBase::myReadBlocks: current_cloud_id: "
-                                              << current_cloud_id << " m_active_cloud_id: "
-                                              << m_active_cloud_id << std::endl;
-            m_active_buffer = fetchPointBuffer(current_cloud_id, block.get<std::string>("schema"), user_buffer.getCapacity());
-
+            getReader().log()->get(logDEBUG3) <<
+                "IteratorBase::myReadBlocks: current_cloud_id: " <<
+                current_cloud_id << " m_active_cloud_id: " <<
+                m_active_cloud_id << std::endl;
+            m_active_buffer = fetchPointBuffer(current_cloud_id,
+                block.get<std::string>("schema"), user_buffer.getCapacity());
             m_active_cloud_id = current_cloud_id;
             return user_buffer.getNumPoints();
         }
-
     }
-
-
     return numPointsRead;
 }
 
@@ -536,29 +479,20 @@ Reader::Reader(const pdal::drivers::sqlite::Reader& reader, PointBuffer& buffer)
 {}
 
 
-Reader::~Reader()
+uint64_t Reader::skipImpl(uint64_t count)
 {
-    return;
-}
-
-
-boost::uint64_t Reader::skipImpl(boost::uint64_t count)
-{
-
     return naiveSkipImpl(count);
 }
 
 
 bool Reader::atEndImpl() const
 {
-    // return true;
     return m_at_end;
 }
 
 
-boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
+uint32_t Reader::readBufferImpl(PointBuffer& data)
 {
-    // return data.getNumPoints();
     return myReadBlocks(data);
 }
 

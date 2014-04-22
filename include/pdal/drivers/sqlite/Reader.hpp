@@ -61,7 +61,6 @@ public:
     SET_STAGE_NAME("drivers.sqlite.reader", "SOCI Reader")
 
     Reader(const Options&);
-    ~Reader();
 
     virtual void initialize();
     static Options getDefaultOptions();
@@ -89,16 +88,13 @@ namespace iterators
 
 namespace sequential
 {
-
-
-    typedef boost::shared_ptr<PointBuffer> BufferPtr;
-    typedef std::map<int, BufferPtr> BufferMap;
+typedef boost::shared_ptr<PointBuffer> BufferPtr;
+typedef std::map<int, BufferPtr> BufferMap;
 
 class IteratorBase
 {
 public:
     IteratorBase(const pdal::drivers::sqlite::Reader& reader);
-    ~IteratorBase();
 
 protected:
     const pdal::drivers::sqlite::Reader& getReader() const;
@@ -112,26 +108,18 @@ protected:
                                 boost::uint32_t capacity);
 
     bool m_at_end;
-
-
     boost::int32_t m_active_cloud_id;
     BufferPtr m_active_buffer;
     BufferMap m_buffers;
     boost::uint32_t m_buffer_position;
 
-
-
 private:
     const pdal::drivers::sqlite::Reader& m_reader;
-
     ::soci::session* m_session;
-
     
-    ::soci::statement getNextCloud(   std::string const& cloud_table_name, 
-                                      boost::int32_t& cloud_id,
-                                      ::soci::row& r);
-    void readBlob(::soci::row& block,
-                  boost::uint32_t howMany);
+    ::soci::statement getNextCloud(std::string const& cloud_table_name, 
+        boost::int32_t& cloud_id, ::soci::row& r);
+    void readBlob(::soci::row& block, boost::uint32_t howMany);
     void fillUserBuffer(PointBuffer& user_buffer);
     // 
     void copyDatabaseData(PointBuffer& source, 
@@ -143,8 +131,6 @@ private:
     // pdal::Bounds<double> getBounds(Statement statement, BlockPtr block);
     IteratorBase& operator=(const IteratorBase&); // not implemented
     IteratorBase(const IteratorBase&); // not implemented;
-
-
 };
 
 
@@ -152,7 +138,6 @@ class Reader : public IteratorBase, public pdal::StageSequentialIterator
 {
 public:
     Reader(const pdal::drivers::sqlite::Reader& reader, PointBuffer& buffer);
-    ~Reader();
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t count);
