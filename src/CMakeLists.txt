@@ -41,7 +41,6 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/Metadata.hpp"
   "${PDAL_HEADERS_DIR}/MultiFilter.hpp"
   "${PDAL_HEADERS_DIR}/MultiFilterIterator.hpp"
-  "${PDAL_HEADERS_DIR}/NullPointBuffer.hpp"
   "${PDAL_HEADERS_DIR}/Options.hpp"
   "${PDAL_HEADERS_DIR}/OStream.hpp"
   "${PDAL_HEADERS_DIR}/PipelineManager.hpp"
@@ -87,7 +86,6 @@ set(PDAL_BASE_CPP
   Metadata.cpp
   MultiFilter.cpp
   MultiFilterIterator.cpp
-  NullPointBuffer.cpp
   Options.cpp
   PipelineManager.cpp
   PipelineReader.cpp

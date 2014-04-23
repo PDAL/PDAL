@@ -162,10 +162,9 @@ protected:
     DimensionMapPtr m_dimension_map;
     schema::Orientation m_orientation;
     DimensionMaps m_dimensions;
+    const pdal::drivers::oci::Reader& m_reader;
     
 private:
-    const pdal::drivers::oci::Reader& m_reader;
-
     Statement getNextCloud(BlockPtr block, boost::int32_t& cloud_id);
     void readBlob(Statement statement,
                   BlockPtr block,
@@ -199,7 +198,6 @@ private:
     boost::uint64_t skipImpl(boost::uint64_t count);
     boost::uint32_t readBufferImpl(PointBuffer& data);
     bool atEndImpl() const;
-    boost::uint32_t m_numPoints;
     LogPtr m_log;
 };
 
