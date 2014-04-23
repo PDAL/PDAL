@@ -32,12 +32,11 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_DRIVERS_SBET_READER_HPP
-#define INCLUDED_DRIVERS_SBET_READER_HPP
+#ifndef INCLUDED_DRIVERS_SBET_WRITER_HPP
+#define INCLUDED_DRIVERS_SBET_WRITER_HPP
 
-#include <pdal/PointBuffer.hpp>
-#include <pdal/Reader.hpp>
-#include <pdal/ReaderIterator.hpp>
+
+#include <pdal/Writer.hpp>
 
 
 namespace pdal
@@ -48,92 +47,32 @@ namespace sbet
 {
 
 
-class PDAL_DLL Reader : public pdal::Reader
+class PDAL_DLL Writer : public pdal::Writer
 {
 public:
-    SET_STAGE_NAME("drivers.sbet.reader", "SBET Reader")
-    SET_STAGE_LINK("http://pdal.io/stages/drivers.sbet.reader.html")
+    SET_STAGE_NAME("drivers.sbet.writer", "SBET Writer")
+    SET_STAGE_LINK("http://pdal.io/stages/drivers.sbet.writer.html")
 
-    Reader(const Options&);
-    ~Reader();
+    Writer(Stage& prevStage, const Options&);
+    virtual ~Writer();
 
     virtual void initialize();
     static Options getDefaultOptions();
-    static std::vector<Dimension> getDefaultDimensions();
-
-    std::string getFileName() const;
-
-    pdal::StageSequentialIterator* createSequentialIterator(PointBuffer&) const;
-    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const;
-
-}; // class Reader
-
-
-namespace iterators
-{
-
-
-class PDAL_DLL IteratorBase
-{
-public:
-    IteratorBase(const pdal::drivers::sbet::Reader&, PointBuffer&);
-    ~IteratorBase();
 
 protected:
-    boost::uint32_t readSbetIntoBuffer(PointBuffer&, const boost::uint64_t);
-    std::istream* m_istream;
-    const boost::uint64_t m_numPoints;
-    const Schema m_schema;
-    PointBuffer m_readBuffer;
+    virtual void writeBegin(boost::uint64_t);
+    virtual boost::uint32_t writeBuffer(const PointBuffer&);
+    virtual void writeEnd(boost::uint64_t);
 
 private:
-    IteratorBase& operator=(const IteratorBase&); // not implemented
-    IteratorBase(const IteratorBase&); // not implemented
-}; // class Iterator Base
+    std::ostream* m_ostream;
 
+}; // class Writer
 
-namespace sequential
-{
-
-
-class PDAL_DLL Iterator : public pdal::ReaderSequentialIterator, public IteratorBase
-{
-public:
-    Iterator(const pdal::drivers::sbet::Reader&, PointBuffer&);
-    ~Iterator();
-
-private:
-    boost::uint64_t skipImpl(boost::uint64_t);
-    boost::uint32_t readBufferImpl(PointBuffer&);
-    bool atEndImpl() const;
-};
-
-
-} // namespace sequential
-
-
-namespace random
-{
-
-
-class PDAL_DLL Iterator : public pdal::ReaderRandomIterator, public IteratorBase
-{
-public:
-    Iterator(const pdal::drivers::sbet::Reader&, PointBuffer&);
-    ~Iterator();
-
-private:
-    boost::uint64_t seekImpl(boost::uint64_t);
-    boost::uint32_t readBufferImpl(PointBuffer&);
-};
-
-
-} // namespace random
-} // namespace iterators
 
 }
 }
 } // namespace pdal::drivers::sbet
 
 
-#endif // INCLUDED_DRIVERS_SBET_READER_HPP
+#endif // INCLUDED_DRIVERS_SBET_WRITER_HPP

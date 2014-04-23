@@ -498,10 +498,12 @@ set(PDAL_SBET_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_SBET_PATH}")
 
 set(PDAL_DRIVERS_SBET_HPP
     "${PDAL_SBET_HEADERS}/Reader.hpp"
+    "${PDAL_SBET_HEADERS}/Writer.hpp"
 )
 
 set (PDAL_DRIVERS_SBET_CPP 
     "${PDAL_SBET_SRC}/Reader.cpp"
+    "${PDAL_SBET_SRC}/Writer.cpp"
 )
 
 list (APPEND PDAL_CPP ${PDAL_DRIVERS_SBET_CPP} )
