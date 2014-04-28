@@ -76,6 +76,7 @@ build
 Makefile
 doc/build
 bin/
+lib/
 test/unit/CMakeScripts/
 src/gitsha.cpp
 .vagrant/
