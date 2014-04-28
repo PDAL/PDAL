@@ -56,7 +56,13 @@ class PDAL_DLL PCLBlock : public Filter
 {
 public:
     SET_STAGE_NAME("filters.pclblock", "PCL Block implementation")
-
+    SET_STAGE_LINK("http://www.pdal.io/stages/filters.pclblock.html")  
+#ifdef PDAL_HAVE_PCL
+    SET_STAGE_ENABLED(true)
+#else
+    SET_STAGE_ENABLED(false)
+#endif
+        
     PCLBlock(Stage& prevStage, const Options&);
     PCLBlock(Stage& prevStage);
     ~PCLBlock();

@@ -31,7 +31,7 @@ cmake   -G "$CONFIG"  \
         -DWITH_HEXER=ON \
         -DWITH_NITRO=ON \
         -DWITH_MRSID=ON \
-        -DWITH_PCL=ON \
+        -DWITH_PCL=OFF \
         -DPCL_DIR=/Users/hobu/dev/git/pcl/installed/share/pcl-1.7/ \
         -DMRSID_INCLUDE_DIR=/Users/hobu/dev/release/mrsid/Lidar_DSDK/include \
         -DMRSID_LIBRRARY=/Users/hobu/dev/release/mrsid/Lidar_DSDK/lib/liblti_lidar_dsdk.dylib \

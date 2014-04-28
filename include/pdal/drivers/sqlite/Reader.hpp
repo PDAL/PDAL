@@ -59,6 +59,11 @@ class PDAL_DLL Reader : public pdal::Reader
 {
 public:
     SET_STAGE_NAME("drivers.sqlite.reader", "SOCI Reader")
+#ifdef PDAL_HAVE_SQLITE
+    SET_STAGE_ENABLED(true)
+#else
+    SET_STAGE_ENABLED(false)
+#endif
 
     Reader(const Options&);
 

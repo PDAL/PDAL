@@ -54,6 +54,11 @@ class PDAL_DLL Predicate : public Filter
 public:
     SET_STAGE_NAME("filters.predicate", "Predicate Filter")
     SET_STAGE_LINK("http://pdal.io/stages/filters.predicate.html")  
+#ifdef PDAL_HAVE_PYTHON
+    SET_STAGE_ENABLED(true)
+#else
+    SET_STAGE_ENABLED(false)
+#endif
     
     Predicate(Stage& prevStage, const Options&);
     ~Predicate();

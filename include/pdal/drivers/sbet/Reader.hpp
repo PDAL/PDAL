@@ -75,6 +75,7 @@ class PDAL_DLL Reader : public pdal::Reader
 public:
     SET_STAGE_NAME("drivers.sbet.reader", "SBET Reader")
     SET_STAGE_LINK("http://pdal.io/stages/drivers.sbet.reader.html")
+    SET_STAGE_ENABLED(true)
 
     Reader(const Options&);
     ~Reader();

@@ -54,7 +54,8 @@ class PDAL_DLL Mosaic : public MultiFilter
 {
 public:
     SET_STAGE_NAME("filters.mosaic", "Mosaic Filter")
-    SET_STAGE_LINK("http://pdal.io/stages/filters.mosaic.html")  
+    SET_STAGE_LINK("http://pdal.io/stages/filters.mosaic.html")
+    SET_STAGE_ENABLED(true)
     
     // entries may not be null
     // vector.size() must be > 0
