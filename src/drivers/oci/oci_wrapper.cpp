@@ -151,7 +151,7 @@ OWConnection::OWConnection(const char* pszUserIn,
     }
 
     if (CheckError(OCIAttrSet((dvoid *) hSession, (ub4) OCI_HTYPE_SESSION,
-                              (dvoid *) pszUserId, (ub4) strlen(pszUserId),
+                              (dvoid*)const_cast<char *>( pszUserId), (ub4) strlen(pszUserId),
                               (ub4) OCI_ATTR_USERNAME, hError), hError))
     {
         return;
@@ -271,7 +271,7 @@ OCIType* OWConnection::DescribeType(const char *pszTypeName)
     CheckError(OCIDescribeAny(
                    hSvcCtx,
                    hError,
-                   (text*) pszTypeName,
+                   (dvoid*)const_cast<char *>( pszTypeName),
                    (ub4) strlen(pszTypeName),
                    (ub1) OCI_OTYPE_NAME,
                    (ub1) OCI_DEFAULT,
@@ -613,7 +613,7 @@ OWStatement::OWStatement(OWConnection* pConnect, const char* pszStatement)
 
     CheckError(OCIStmtPrepare(hStmt,
                               hError,
-                              (text*) pszStatement,
+                              (const text*) pszStatement,
                               (ub4) strlen(pszStatement),
                               (ub4) OCI_NTV_SYNTAX,
                               (ub4) OCI_DEFAULT), hError);
@@ -2047,7 +2047,7 @@ void OWStatement::BindName(const char* pszName, int* pnData)
                    (OCIStmt*) hStmt,
                    (OCIBind**) &hBind,
                    (OCIError*) hError,
-                   (text*) pszName,
+                   (const text*) pszName,
                    (sb4) -1,
                    (dvoid*) pnData,
                    (sb4) sizeof(int),
@@ -2069,7 +2069,7 @@ void OWStatement::BindName(const char* pszName, double* pnData)
                    (OCIStmt*) hStmt,
                    (OCIBind**) &hBind,
                    (OCIError*) hError,
-                   (text*) pszName,
+                   (const text*) pszName,
                    (sb4) -1,
                    (dvoid*) pnData,
                    (sb4) sizeof(double),
@@ -2091,7 +2091,7 @@ void OWStatement::BindName(const char* pszName, char* pszData, int nSize)
                    (OCIStmt*) hStmt,
                    (OCIBind**) &hBind,
                    (OCIError*) hError,
-                   (text*) pszName,
+                   (const text*) pszName,
                    (sb4) -1,
                    (dvoid*) pszData,
                    (sb4) nSize,
@@ -2121,7 +2121,7 @@ void OWStatement::BindName(const char* pszName, OCILobLocator** pphLocator)
                    (OCIStmt*) hStmt,
                    (OCIBind**) &hBind,
                    (OCIError*) hError,
-                   (text*) pszName,
+                   (const text*) pszName,
                    (sb4) -1,
                    (dvoid*) pphLocator,
                    (sb4) -1,

@@ -349,7 +349,6 @@ MultiFilter* PipelineReader::parseElement_MultiFilter(const ptree& tree)
     map_t attrs;
     collect_attributes(attrs, tree);
 
-    auto iter = tree.begin();
     for (auto iter = tree.begin(); iter != tree.end(); ++iter)
     {
         const std::string& name = iter->first;
