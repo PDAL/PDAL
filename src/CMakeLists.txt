@@ -753,7 +753,6 @@ if (WITH_LIBXML2)
 endif()
 
   target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE}
-    "${PDAL_LIB_NAME}"
     "${CMAKE_THREAD_LIBS_INIT}"
     "${CMAKE_DL_LIBS}"
     "${TIFF_LIBRARY}"
