@@ -187,7 +187,8 @@ public:
     static std::string s_getInfoLink() 
     { 
         return std::string(""); 
-    } 
+    }
+    
     /// For getName() and getDescription(), each stage provides a static and
     /// a dynamic version of the function.  Each (concrete) stage should call
     /// the following macro to create the functions for you.
@@ -202,6 +203,10 @@ public:
     static std::string s_getInfoLink() { return infolink; }  \
     std::string getInfoLink() const { return infolink; }
 
+#define SET_STAGE_ENABLED(YES_OR_NO) \
+    static bool s_isEnabled() { return YES_OR_NO; } \
+    bool isEnabled() const { return YES_OR_NO; }
+    
     /// Gets the stage's id.
     ///
     /// @return The id.

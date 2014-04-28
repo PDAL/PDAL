@@ -188,6 +188,7 @@ class PDAL_DLL Chipper : public pdal::Filter
 public:
     SET_STAGE_NAME("filters.chipper", "Chipper")
     SET_STAGE_LINK("http://pdal.io/stages/filters.chipper.html")
+    SET_STAGE_ENABLED(true)
 
     Chipper(Stage& prevStage, const Options&);
 

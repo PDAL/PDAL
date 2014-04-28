@@ -76,6 +76,8 @@ class PDAL_DLL Scaling: public Filter
 public:
     SET_STAGE_NAME("filters.scaling", "Scaling Filter")
     SET_STAGE_LINK("http://pdal.io/stages/filters.scaling.html")  
+    SET_STAGE_ENABLED(true)
+
 
     Scaling(Stage& prevStage, const Options&);
     Scaling& operator=(const Scaling&) = delete;

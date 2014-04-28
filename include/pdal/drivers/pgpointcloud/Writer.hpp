@@ -54,6 +54,11 @@ class PDAL_DLL Writer : public pdal::Writer
 public:
     SET_STAGE_NAME("drivers.pgpointcloud.writer", "PostgresSQL Pointcloud Database Writer")
     SET_STAGE_LINK("http://pdal.io/stages/drivers.pgpointcloud.writer.html")
+#ifdef PDAL_HAVE_POSTGRESQL
+    SET_STAGE_ENABLED(true)
+#else
+    SET_STAGE_ENABLED(false)
+#endif
 
     Writer(Stage& prevStage, const Options&);
     ~Writer();

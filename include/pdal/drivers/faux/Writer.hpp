@@ -56,6 +56,7 @@ class PDAL_DLL Writer : public pdal::Writer
 {
 public:
     SET_STAGE_NAME("drivers.faux.writer", "Faux Writer")
+    SET_STAGE_ENABLED(true)
 
     Writer(Stage& prevStage, const Options&);
 

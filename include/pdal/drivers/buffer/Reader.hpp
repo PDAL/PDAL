@@ -59,6 +59,8 @@ class PDAL_DLL Reader : public pdal::Reader
 {
 public:
     SET_STAGE_NAME("drivers.buffer.reader", "Buffer Reader")
+    SET_STAGE_ENABLED(true)
+
 
     Reader(const Options& options, const PointBuffer& buffer);
 

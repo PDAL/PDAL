@@ -55,6 +55,7 @@ class PDAL_DLL Decimation : public Filter
 public:
     SET_STAGE_NAME("filters.decimation", "Decimation Filter")
     SET_STAGE_LINK("http://pdal.io/stages/filters.decimation.html")        
+    SET_STAGE_ENABLED(true)
 
     Decimation(Stage& prevStage, const Options&);
     Decimation(Stage& prevStage, boost::uint32_t step);

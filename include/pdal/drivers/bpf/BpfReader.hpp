@@ -48,6 +48,7 @@ class PDAL_DLL BpfReader : public Reader
 public:
     SET_STAGE_NAME("drivers.bpf.reader", "Bpf Reader")
     SET_STAGE_LINK("http://pdal.io/stages/drivers.bpf.reader.html")
+    SET_STAGE_ENABLED(true)
 
     BpfReader(const Options&);
     BpfReader(const std::string&);

@@ -82,6 +82,7 @@ public:
 
 public:
     SET_STAGE_NAME("drivers.faux.reader", "Faux Reader")
+    SET_STAGE_ENABLED(true)
 
     Reader(const Options& options);
     Reader(const Bounds<double>&, boost::uint64_t numPoints, Mode mode);

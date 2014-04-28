@@ -98,6 +98,7 @@ class PDAL_DLL Splitter : public pdal::Filter
 public:
     SET_STAGE_NAME("filters.splitter", "Splitter")
     SET_STAGE_LINK("http://pdal.io/stages/filters.splitter.html")
+    SET_STAGE_ENABLED(true)
 
     Splitter(Stage& prevStage, const Options&);
 

@@ -59,6 +59,11 @@ class PDAL_DLL HexBin : public Filter
 public:
     SET_STAGE_NAME("filters.hexbin", "Hexbin implementation")
     SET_STAGE_LINK("http://pdal.io/stages/filters.hexbin.html")       
+#ifdef PDAL_HAVE_HEXER
+    SET_STAGE_ENABLED(true)
+#else
+    SET_STAGE_ENABLED(false)
+#endif
 
     HexBin(Stage& prevStage, const Options&);
 
