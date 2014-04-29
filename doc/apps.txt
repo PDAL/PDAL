@@ -109,6 +109,7 @@ Print three selected points of the file as `reStructuredText`_
 
 
 .. _`reStructuredText`: http://docutils.sourceforge.net/docs/user/rst/quickref.html
+
 :: 
 
     -p [ --point ] [=arg(=0)] point to dump
