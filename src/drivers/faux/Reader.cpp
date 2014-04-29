@@ -115,7 +115,6 @@ void Reader::initialize()
     pdal::Reader::initialize();
 
     setNumPoints(m_numPoints);
-    setPointCountType(PointCount_Fixed);
 
     setBounds(m_bounds);
 }

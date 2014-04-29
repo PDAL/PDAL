@@ -102,7 +102,6 @@ void Reader::initialize()
     }
 
     setNumPoints(m_PS->getNumPoints());
-    setPointCountType(PointCount_Fixed);
     pdal::Bounds<double> b(m_PS->getBounds().x.min, m_PS->getBounds().x.max, m_PS->getBounds().y.min, m_PS->getBounds().y.max, m_PS->getBounds().z.min,m_PS->getBounds().z.max);
     setBounds(b);
     m_iter = m_PS->createIterator(m_PS->getBounds(), 1.0, m_PS->getPointInfo(), NULL);

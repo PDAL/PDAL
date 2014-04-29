@@ -69,7 +69,6 @@ void ByteSwap::initialize()
 
     const Stage& stage = getPrevStage();
     this->setNumPoints(stage.getNumPoints());
-    this->setPointCountType(stage.getPointCountType());
 
     schema::index_by_index const& dimensions =
         m_schema.getDimensions().get<schema::index>();

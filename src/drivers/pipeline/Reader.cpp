@@ -80,7 +80,6 @@ void Reader::initialize()
     setSchema(m_stage->getSchema());
 
     setNumPoints(m_stage->getNumPoints());
-    setPointCountType(m_stage->getPointCountType());
     setBounds(m_stage->getBounds());
     setSpatialReference(m_stage->getSpatialReference());
 

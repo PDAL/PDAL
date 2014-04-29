@@ -169,7 +169,6 @@ void Crop::initialize()
 
     setBounds(m_bounds);
     setNumPoints(0);
-    setPointCountType(PointCount_Unknown);
 }
 
 
