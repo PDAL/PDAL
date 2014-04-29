@@ -107,7 +107,6 @@ void Chipper::initialize()
 
     m_schema = alterSchema(m_schema);
 
-    setPointCountType(PointCount_Fixed);
     setNumPoints(0);
 
     if (m_threshold == 0)

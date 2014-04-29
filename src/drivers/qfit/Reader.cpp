@@ -388,7 +388,6 @@ Reader::Reader(const Options& options)
         throw qfit_error(msg.str());
 
     }
-    setPointCountType(PointCount_Fixed);
     setNumPoints(count);
 
     if (str != 0)

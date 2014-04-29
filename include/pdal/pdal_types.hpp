@@ -47,11 +47,6 @@ enum EndianType
     Endian_Unknown = 128
 };
 
-enum PointCountType
-{
-    PointCount_Fixed,       // getNumPoints will return value (which might be zero, though)
-    PointCount_Unknown      // the stage has an unknown count, and getNumPoints will return 0
-};
 
 enum StageIteratorType
 {
