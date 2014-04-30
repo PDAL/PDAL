@@ -87,7 +87,7 @@ public:
     Reader(const Options& options);
     Reader(const Bounds<double>&, boost::uint64_t numPoints, Mode mode);
     Reader(const Bounds<double>&, boost::uint64_t numPoints, Mode mode,
-        const std::vector<Dimension>& dimensions);
+        const std::vector<Dimension>& dimensions, bool forceZeroNumPoints = false);
 
     virtual void initialize();
     static Options getDefaultOptions();
