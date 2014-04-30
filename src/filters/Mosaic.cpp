@@ -61,7 +61,6 @@ void Mosaic::initialize()
     const SpatialReference& srs0 = stage0.getSpatialReference();
     bool respectSrs = getOptions().getValueOrDefault<bool>("require_matching_srs", false);
     const Schema& schema0 = stage0.getSchema();
-    PointCountType pointCountType0 = stage0.getPointCountType();
     boost::uint64_t totalPoints = stage0.getNumPoints();
     Bounds<double> bigbox(stage0.getBounds());
 
@@ -73,19 +72,13 @@ void Mosaic::initialize()
             throw impedance_invalid("mosaicked stages must have same srs");
         if (stage.getSchema() != schema0)
             throw impedance_invalid("mosaicked stages must have same schema");
-        if (stage.getPointCountType() == PointCount_Unknown)
-            pointCountType0 = PointCount_Unknown;
 
         totalPoints += stage.getNumPoints();
 
         bigbox.grow(stage.getBounds());
     }
 
-    if (pointCountType0 == PointCount_Unknown)
-        totalPoints = 0;
-
     setCoreProperties(stage0);
-    setPointCountType(pointCountType0);
     setNumPoints(totalPoints);
 
     return;

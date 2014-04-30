@@ -97,7 +97,6 @@ BOOST_AUTO_TEST_CASE(testConstructor)
 
     reader.initialize();
 
-    BOOST_CHECK_EQUAL(reader.getPointCountType(), pdal::PointCount_Fixed);
     BOOST_CHECK_EQUAL(reader.getNumPoints(), 2);
 
 }

@@ -44,7 +44,6 @@ namespace pdal
 Stage::Stage(const std::vector<StageBase*>& prevs, const Options& options)
     : StageBase(prevs, options)
     , m_numPoints(0)
-    , m_pointCountType(PointCount_Fixed)
 {}
 
 
@@ -121,18 +120,6 @@ void Stage::setNumPoints(boost::uint64_t numPoints)
 }
 
 
-PointCountType Stage::getPointCountType() const
-{
-    return m_pointCountType;
-}
-
-
-void Stage::setPointCountType(PointCountType pointCountType)
-{
-    m_pointCountType = pointCountType;
-}
-
-
 const SpatialReference& Stage::getSpatialReference() const
 {
     return m_spatialReference;
@@ -159,7 +146,6 @@ void Stage::setCoreProperties(const Stage& stage)
 {
     this->setSchema(stage.getSchema());
     this->setNumPoints(stage.getNumPoints());
-    this->setPointCountType(stage.getPointCountType());
     this->setBounds(stage.getBounds());
     this->setSpatialReference(stage.getSpatialReference());
 }

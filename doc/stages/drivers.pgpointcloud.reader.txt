@@ -47,3 +47,5 @@ column
 spatialreference
   The spatial reference to use for the points. Over-rides the value read from the database.
 
+
+.. _PostgreSQL Pointcloud: https://github.com/pramsey/pointcloud

@@ -71,7 +71,6 @@ public:
     }
     
     virtual boost::uint64_t getNumPoints() const;
-    PointCountType getPointCountType() const;
     const Bounds<double>& getBounds() const;
     const SpatialReference& getSpatialReference() const;
 
@@ -86,7 +85,6 @@ protected:
 
     void setSchema(Schema const&);
     void setNumPoints(boost::uint64_t);
-    void setPointCountType(PointCountType);
     void setBounds(Bounds<double> const&);
     void setSpatialReference(SpatialReference const&);
 
@@ -96,7 +94,6 @@ protected:
 
 private:
     mutable boost::uint64_t m_numPoints;
-    PointCountType m_pointCountType;
     Bounds<double> m_bounds;
     SpatialReference m_spatialReference;
 

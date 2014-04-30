@@ -21,7 +21,6 @@
         }
     },
     "NumPoints": "1065",
-    "PointCountType": "0",
     "Bounds": "([635620, 638983], [848900, 853535], [406.59, 586.38])",
     "SRS": "SpatialReference data is not available without GDAL+libgeotiff support",
     "Compression": "false"
