@@ -199,13 +199,6 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
 }
 
 
-std::string StageFactory::inferReaderDriver(const std::string& filename, pdal::Options& options)
-{
-    pdal::Option& fn = options.getOptionByRef("filename");
-    fn.setValue<std::string>(filename);
-    return StageFactory::inferReaderDriver(filename);
-}
-
 std::string StageFactory::inferWriterDriver(const std::string& filename, pdal::Options& options)
 {
     std::string ext = boost::filesystem::extension(filename);
