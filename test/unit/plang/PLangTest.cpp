@@ -55,8 +55,6 @@ BOOST_AUTO_TEST_CASE(PLangTest_basic)
     pdal::plang::Invocation meth(script);
     meth.compile();
     meth.execute();
-
-    return;
 }
 
 
@@ -78,8 +76,6 @@ BOOST_AUTO_TEST_CASE(PLangTest_compile_error)
     pdal::plang::Invocation meth(script);
 
     BOOST_REQUIRE_THROW(meth.compile(), pdal::python_error);
-
-    return;
 }
 
 
@@ -97,8 +93,6 @@ BOOST_AUTO_TEST_CASE(PLangTest_runtime_error)
     meth.compile();
 
     BOOST_REQUIRE_THROW(meth.execute(), pdal::python_error);
-
-    return;
 }
 
 
@@ -116,8 +110,6 @@ BOOST_AUTO_TEST_CASE(PLangTest_toofewinputs)
     meth.compile();
 
     BOOST_REQUIRE_THROW(meth.execute(), pdal::python_error);
-
-    return;
 }
 
 
@@ -135,8 +127,6 @@ BOOST_AUTO_TEST_CASE(PLangTest_toomanyinputs)
     meth.compile();
 
     BOOST_REQUIRE_THROW(meth.execute(), pdal::python_error);
-
-    return;
 }
 
 
@@ -154,8 +144,6 @@ BOOST_AUTO_TEST_CASE(PLangTest_returnvoid)
     meth.compile();
 
     BOOST_REQUIRE_THROW(meth.execute(), pdal::python_error);
-
-    return;
 }
 
 
@@ -173,8 +161,6 @@ BOOST_AUTO_TEST_CASE(PLangTest_returnint)
     meth.compile();
 
     BOOST_REQUIRE_THROW(meth.execute(), pdal::python_error);
-
-    return;
 }
 
 
@@ -205,8 +191,6 @@ BOOST_AUTO_TEST_CASE(PLangTest_ins)
     meth.insertArgument("X", (boost::uint8_t*)data, 5, 8, pdal::dimension::Float, 8);
 
     meth.execute();
-
-    return;
 }
 
 
@@ -239,8 +223,6 @@ BOOST_AUTO_TEST_CASE(PLangTest_outs)
     BOOST_CHECK_CLOSE(data[2], 1.0, 0.00001);
     BOOST_CHECK_CLOSE(data[3], 1.0, 0.00001);
     BOOST_CHECK_CLOSE(data[4], 1.0, 0.00001);
-
-    return;
 }
 
 
@@ -314,8 +296,6 @@ BOOST_AUTO_TEST_CASE(PLangTest_aliases)
         BOOST_CHECK(names[0] == "Y");
         BOOST_CHECK(names[1] == "prefix.Y");
     }
-
-    return;
 }
 
 
@@ -333,8 +313,6 @@ BOOST_AUTO_TEST_CASE(PLangTest_returntrue)
 
     bool sts = meth.execute();
     BOOST_CHECK(sts);
-
-    return;
 }
 
 
@@ -352,8 +330,6 @@ BOOST_AUTO_TEST_CASE(PLangTest_returnfalse)
 
     bool sts = meth.execute();
     BOOST_CHECK(!sts);
-
-    return;
 }
 
 
@@ -411,8 +387,6 @@ BOOST_AUTO_TEST_CASE(PLangTest_reentry)
         BOOST_CHECK_CLOSE(outdata2[3], 41.0, 0.00001);
         BOOST_CHECK_CLOSE(outdata2[4], 51.0, 0.00001);
     }
-
-    return;
 }
 
 

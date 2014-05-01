@@ -91,8 +91,6 @@ BOOST_AUTO_TEST_CASE(ScalingFilterTest_test_1)
 
     BOOST_CHECK_EQUAL(x, 63701224);
     BOOST_CHECK_EQUAL(y, 84902831);
-
-    return;
 }
 
 
@@ -182,8 +180,6 @@ BOOST_AUTO_TEST_CASE(ScalingFilterFloat_test)
     }
 
     delete iter;
-
-    return;
 }
 
 
@@ -231,8 +227,6 @@ BOOST_AUTO_TEST_CASE(ScalingFilterTest_test_2)
 
     BOOST_CHECK_EQUAL(x, 63603753);
     BOOST_CHECK_EQUAL(y, 84933845);
-
-    return;
 }
 
 

@@ -120,8 +120,6 @@ BOOST_AUTO_TEST_CASE(test_diff_file)
     same = Support::compare_files(Support::datapath("misc/data3.dat"), Support::datapath("misc/data1.dat"));
     BOOST_CHECK(diffs == 2);
     BOOST_CHECK(same == false);
-
-    return;
 }
 
 
@@ -167,8 +165,6 @@ BOOST_AUTO_TEST_CASE(test_diff_file_ignorable)
         diffs = Support::diff_files(Support::datapath("misc/data4a.dat"), Support::datapath("misc/data4b.dat"), start, len, 2);
         BOOST_CHECK(diffs == 1);
     }
-
-    return;
 }
 
 
@@ -211,8 +207,6 @@ BOOST_AUTO_TEST_CASE(test_diff_text_file)
     same = Support::compare_text_files(Support::datapath("misc/data3.txt"), Support::datapath("misc/data1.txt"));
     BOOST_CHECK(diffs == 2);
     BOOST_CHECK(same == false);
-
-    return;
 }
 
 
@@ -226,8 +220,6 @@ BOOST_AUTO_TEST_CASE(test_run_command)
 
     BOOST_CHECK_EQUAL(output.substr(0, 3), "foo");
     BOOST_CHECK_EQUAL(stat, 0);
-
-    return;
 }
 
 

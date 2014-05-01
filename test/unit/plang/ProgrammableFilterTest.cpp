@@ -105,8 +105,6 @@ BOOST_AUTO_TEST_CASE(ProgrammableFilterTest_test1)
 
     BOOST_CHECK_CLOSE(minZ, 3.14, 0.001);
     BOOST_CHECK_CLOSE(maxZ, 3.14, 0.001);
-
-    return;
 }
 
 BOOST_AUTO_TEST_CASE(pipeline)
@@ -136,8 +134,6 @@ BOOST_AUTO_TEST_CASE(pipeline)
     }
             
     delete iter;
-
-    return;
 }
 
 BOOST_AUTO_TEST_SUITE_END()

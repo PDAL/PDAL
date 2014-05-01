@@ -72,8 +72,6 @@ BOOST_AUTO_TEST_CASE(pdalinfo_test_common_opts)
 
     stat = pdal::Utils::run_shell_command(cmd + " --version", output);
     BOOST_CHECK_EQUAL(stat, 0);
-
-    return;
 }
 
 
@@ -120,8 +118,6 @@ BOOST_AUTO_TEST_CASE(pdalinfo_test_switches)
     BOOST_CHECK_EQUAL(stat, 1);
     expected = "Usage error: no action option specified";
     BOOST_CHECK_EQUAL(output.substr(0, expected.length()), expected);
-
-    return;
 }
 
 
@@ -202,8 +198,6 @@ BOOST_AUTO_TEST_CASE(pdalinfo_test_dumps)
 //         pdal::FileUtils::deleteFile(stage_test);
 //     else
 //         std::cout << command.str() << std::endl;
-
-    return;
 }
 
 

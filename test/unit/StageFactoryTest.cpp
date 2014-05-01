@@ -90,8 +90,6 @@ BOOST_AUTO_TEST_CASE(StageFactoryTest_test1)
     delete reader;
 
     FileUtils::deleteFile("temp.las");
-
-    return;
 }
 
 
@@ -190,8 +188,6 @@ BOOST_AUTO_TEST_CASE(StageFactoryTest_test2)
     delete reader;
 
     FileUtils::deleteFile("temp.las");
-
-    return;
 }
 
 

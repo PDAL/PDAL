@@ -89,8 +89,6 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_las)
     {
         FileUtils::deleteFile(Support::temppath(temp_filename));
     }
-
-    return;
 }
 
 #ifdef PDAL_HAVE_LASZIP
@@ -137,8 +135,6 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_laz)
     {
         FileUtils::deleteFile(Support::temppath("LasWriterTest_test_simple_laz.laz"));
     }
-
-    return;
 }
 #endif
 
@@ -183,8 +179,6 @@ static void test_a_format(const std::string& refFile, boost::uint8_t majorVersio
     {
         FileUtils::deleteFile(Support::temppath("temp.las"));
     }
-
-    return;
 }
 
 BOOST_AUTO_TEST_CASE(LasWriterTest_test_metadata)
@@ -260,8 +254,6 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_metadata)
     BOOST_CHECK_EQUAL(r.getLength(), 70);    
     
     FileUtils::deleteFile(temp_filename);
-
-    return;
 }
 
 BOOST_AUTO_TEST_CASE(LasWriterTest_test_ignored_dimensions)
@@ -353,8 +345,6 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_ignored_dimensions)
     }
 
     FileUtils::deleteFile(temp_filename);
-
-    return;
 }
 
 BOOST_AUTO_TEST_CASE(test_different_formats)
@@ -369,8 +359,6 @@ BOOST_AUTO_TEST_CASE(test_different_formats)
     test_a_format("1.2_1.las", 1, 2, 1);
     test_a_format("1.2_2.las", 1, 2, 2);
     test_a_format("1.2_3.las", 1, 2, 3);
-
-    return;
 }
 
 

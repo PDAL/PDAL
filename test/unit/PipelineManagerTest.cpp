@@ -70,8 +70,6 @@ BOOST_AUTO_TEST_CASE(PipelineManagerTest_test1)
     }
 
     FileUtils::deleteFile("temp.las");
-
-    return;
 }
 
 
@@ -150,8 +148,6 @@ BOOST_AUTO_TEST_CASE(PipelineManagerTest_test2)
     }
 
     FileUtils::deleteFile("temp.las");
-
-    return;
 }
 
 BOOST_AUTO_TEST_SUITE_END()
