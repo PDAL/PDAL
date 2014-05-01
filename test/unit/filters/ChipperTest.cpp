@@ -122,8 +122,6 @@ BOOST_AUTO_TEST_CASE(test_construction)
         // BOOST_CHECK_EQUAL(buffer.getField<boost::int32_t>(dimZ, 2), 42651);
 
     }
-
-    return;
 }
 
 

@@ -81,8 +81,6 @@ BOOST_AUTO_TEST_CASE(test1)
 
     // We created Greenish
     BOOST_CHECK_EQUAL(new_schema.getDimension("Greenish").isIgnored(), false);
-
-    return;
 }
 
 

@@ -151,9 +151,6 @@ BOOST_AUTO_TEST_CASE(DimensionTest_ptree)
     BOOST_CHECK_EQUAL(tree.get<std::string>("namespace"), "");
 
     BOOST_CHECK_EQUAL(tree.get<std::string>("uuid"), "9bf8d966-0c0d-4c94-a14e-bce97e860bde");
-
-
-    return;
 }
 
 
@@ -166,7 +163,6 @@ BOOST_AUTO_TEST_CASE(DimensionTest_Interpretation)
     dimension::Interpretation interp = Dimension::getInterpretation(x.getInterpretationName());
     
     BOOST_CHECK_EQUAL(interp, pdal::dimension::SignedInteger);
-    return;
 }
 
 

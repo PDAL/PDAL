@@ -118,8 +118,6 @@ Options makeReaderOptions()
 
 BOOST_AUTO_TEST_CASE(test_parallel)
 {
-    //return;
-
 #define TEN 10
     Options opts[TEN][TEN];
     Stage* stages[TEN][TEN];
@@ -180,8 +178,6 @@ BOOST_AUTO_TEST_CASE(test_parallel)
     FileUtils::deleteFile(Support::temppath("logtest_1.txt"));
     FileUtils::deleteFile(Support::temppath("logtest_2.txt"));
     FileUtils::deleteFile(Support::temppath("logtest_3.txt"));
-    
-    return;
 }
 
 

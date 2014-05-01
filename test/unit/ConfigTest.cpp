@@ -65,8 +65,6 @@ BOOST_AUTO_TEST_CASE(test_3rdparty_libs)
 #else
     BOOST_CHECK(!laszip);
 #endif
-
-    return;
 }
 
 BOOST_AUTO_TEST_CASE(test_version)
@@ -87,8 +85,6 @@ BOOST_AUTO_TEST_CASE(test_version)
 
     int bignum = GetVersionInteger();
     BOOST_CHECK(bignum > 0);
-
-    return;
 }
 
 BOOST_AUTO_TEST_SUITE_END()

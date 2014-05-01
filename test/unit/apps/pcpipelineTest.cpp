@@ -62,8 +62,6 @@ BOOST_AUTO_TEST_CASE(pcpipelineTest_no_input)
 
     const std::string expected = "Usage error: input file name required";
     BOOST_CHECK_EQUAL(output.substr(0, expected.length()), expected);
-
-    return;
 }
 #endif
 
@@ -78,8 +76,6 @@ BOOST_AUTO_TEST_CASE(pcpipelineTest_test_common_opts)
 
     stat = pdal::Utils::run_shell_command(cmd + " --version", output);
     BOOST_CHECK_EQUAL(stat, 0);
-
-    return;
 }
 
 

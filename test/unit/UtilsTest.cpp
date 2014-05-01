@@ -129,8 +129,6 @@ BOOST_AUTO_TEST_CASE(test_buffer_read_write)
     boost::uint8_t tmp[30];
     Utils::read_n(tmp, istr, 15);
     BOOST_CHECK(memcmp(buf, tmp, 15) == 0);
-
-    return;
 }
 
 
@@ -152,8 +150,6 @@ BOOST_AUTO_TEST_CASE(test_field_read_write)
 
     BOOST_CHECK(x==one);
     BOOST_CHECK(Utils::compare_approx(y, two, std::numeric_limits<double>::min()) == true);
-
-    return;
 }
 
 
@@ -179,9 +175,6 @@ BOOST_AUTO_TEST_CASE(test_base64)
 
     BOOST_CHECK_EQUAL(decoded.size(), data.size());
     BOOST_CHECK_EQUAL(size, begin_size);
-
-
-    return;
 }
 
 

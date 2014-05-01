@@ -94,8 +94,6 @@ BOOST_AUTO_TEST_CASE(test_wrapped_vsifile_read)
     VSIFCloseL/*fclose*/(fp);
 
     pdal::FileUtils::deleteFile(tempfile);
-
-    return;
 }
 
 
@@ -146,8 +144,6 @@ BOOST_AUTO_TEST_CASE(GDALUtilsTest_test_vsifile_write)
 
     pdal::FileUtils::deleteFile(tempfile_a);
     pdal::FileUtils::deleteFile(tempfile_b);
-
-    return;
 }
 
 
@@ -208,8 +204,6 @@ BOOST_AUTO_TEST_CASE(test_wrapped_vsifile_subsequence)
     VSIFCloseL/*fclose*/(vsi_file);
 
     pdal::FileUtils::deleteFile(tempfile);
-
-    return;
 }
 
 
