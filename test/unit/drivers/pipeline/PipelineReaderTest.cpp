@@ -270,4 +270,12 @@ BOOST_AUTO_TEST_CASE(PipelineReaderTest_MultiOptions)
 }
 
 
+BOOST_AUTO_TEST_CASE(testNoType)
+{
+    PipelineManager manager;
+    PipelineReader reader(manager);
+    reader.readPipeline(Support::datapath("pipeline/pipeline_read_notype.xml"));
+}
+
+
 BOOST_AUTO_TEST_SUITE_END()
