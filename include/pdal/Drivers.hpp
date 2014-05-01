@@ -47,6 +47,8 @@
 
 #include <pdal/drivers/sbet/Reader.hpp>
 
+#include <pdal/drivers/icebridge/Reader.hpp>
+
 #include <pdal/drivers/pipeline/Reader.hpp>
 
 #ifdef PDAL_HAVE_ORACLE
@@ -95,6 +97,10 @@
 
 #ifdef PDAL_HAVE_P2G
 #include <pdal/drivers/p2g/Writer.hpp>
+#endif
+
+#ifdef PDAL_HAVE_HDF5
+#include <pdal/drivers/icebridge/Reader.hpp>
 #endif
 
 #ifdef PDAL_HAVE_SQLITE

@@ -221,6 +221,7 @@ boost::uint32_t IteratorBase::readSbetIntoBuffer(PointBuffer& data, const boost:
                                       std::numeric_limits<boost::uint32_t>::max());
 
     m_readBuffer.setNumPoints(0);
+
     schema::DimensionMap* dimensionMap = m_readBuffer.getSchema().mapDimensions(data.getSchema());
 
     boost::uint8_t* bufferData = m_readBuffer.getDataStart();
