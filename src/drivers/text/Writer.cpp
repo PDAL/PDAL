@@ -69,15 +69,11 @@ struct FileStreamDeleter
     }
 };
 
-Writer::Writer(Stage& prevStage, const Options& options)
-    : pdal::Writer(prevStage, options)
+Writer::Writer(const Options& options)
+    : pdal::Writer(options)
     , bWroteHeader(false)
     , bWroteFirstPoint(false)
-
-{
-
-    return;
-}
+{}
 
 
 Writer::~Writer()

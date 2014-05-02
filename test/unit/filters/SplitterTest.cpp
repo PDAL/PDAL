@@ -65,7 +65,8 @@ BOOST_AUTO_TEST_CASE(test_tile_filter)
         o.add(length);
 
         // create the tile filter and initialize
-        pdal::filters::Splitter s(r, o);
+        pdal::filters::Splitter s(o);
+        s.setInput(&r);
         s.initialize();
 
         // get the bounds of the entire dataset

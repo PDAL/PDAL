@@ -52,9 +52,8 @@ namespace pdal
 class PDAL_DLL MultiFilter : public Stage
 {
 public:
-    // entries may not be null
-    // vector.size() must be > 0
-    MultiFilter(const std::vector<Stage*>& prevStages, const Options& options);
+    MultiFilter(const Options& options) : Stage(options)
+    {}
 
     virtual void initialize();
 

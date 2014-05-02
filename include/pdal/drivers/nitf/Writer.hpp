@@ -74,7 +74,8 @@ public:
     SET_STAGE_ENABLED(false)
 #endif
     
-    Writer(Stage& prevStage, const Options&);
+    Writer(const Options& options) : las::Writer(options, &m_oss)
+        {}
     ~Writer();
 
     virtual void initialize();

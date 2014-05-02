@@ -245,10 +245,12 @@ bool WriteUnprojectedData()
     options.add(filename);
     
     pdal::drivers::las::Reader reader(options);
-    pdal::filters::Cache cache(reader, options);
-    pdal::filters::Chipper chipper(cache, options);
-    // pdal::filters::InPlaceReprojection reproj(writer_chipper, getOCIOptions());
-    pdal::drivers::oci::Writer writer(chipper, options);
+    pdal::filters::Cache cache(options);
+    cache.setInput(&reader);
+    pdal::filters::Chipper chipper(options);
+    chipper.setInput(&cache);
+    pdal::drivers::oci::Writer writer(options);
+    writer.setInput(&chipper);
 
     writer.initialize();
     boost::uint64_t numPointsToRead = chipper.getNumPoints();

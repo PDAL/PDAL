@@ -46,9 +46,6 @@
 #include <vector>
 #include <string>
 
-// pdal::Writer* createTextWriter(pdal::Stage& prevStage, const pdal::Options& options);
-
-
 namespace pdal
 {
 namespace drivers
@@ -83,7 +80,7 @@ public:
     SET_STAGE_LINK("http://pdal.io/stages/drivers.text.writer.html")
     SET_STAGE_ENABLED(true)
 
-    Writer(Stage& prevStage, const Options&);
+    Writer(const Options&);
     ~Writer();
 
     virtual void initialize();

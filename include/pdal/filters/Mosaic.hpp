@@ -57,9 +57,8 @@ public:
     SET_STAGE_LINK("http://pdal.io/stages/filters.mosaic.html")
     SET_STAGE_ENABLED(true)
     
-    // entries may not be null
-    // vector.size() must be > 0
-    Mosaic(const std::vector<Stage*>& prevStages, const Options&);
+    Mosaic(const Options& options) : MultiFilter(options)
+        {}
 
     virtual void initialize();
     static Options getDefaultOptions();

@@ -41,20 +41,38 @@
 namespace pdal
 {
 
-Stage::Stage(const std::vector<Stage*>& inputs, const Options& options) :
-    m_options(options), m_initialized(false), m_inputs(inputs),
-    m_dimensionsType(StageOperation_All), m_log(LogPtr()), m_numPoints(0)
+Stage::Stage(PointContext context, const Options& options) :
+    Stage{context}
 {
-    m_debug = options.getValueOrDefault<bool>("debug", false);
-    m_verbose = options.getValueOrDefault<boost::uint32_t>("verbose", 0);
-    m_id = options.getValueOrDefault<boost::uint32_t>("id", 0);
+    m_options = options;
+    m_debug = m_options.getValueOrDefault<bool>("debug", false);
+    m_verbose = m_options.getValueOrDefault<boost::uint32_t>("verbose", 0);
+    m_id = m_options.getValueOrDefault<boost::uint32_t>("id", 0);
+    if (m_debug && !m_verbose)
+        m_verbose = 1;
+}
+
+
+Stage::Stage(PointContext context) :
+    m_context(context), m_initialized(false), m_debug(false), m_verbose(0),
+    m_id(0), m_dimensionsType(StageOperation_All),
+    m_log(LogPtr()), m_numPoints(0)
+{}
+
+void Stage::setInput(const std::vector<Stage *>& inputs)
+{
+    m_inputs = inputs;
     for (size_t i = 0; i < m_inputs.size(); ++i)
     {
         Stage *input = m_inputs[i];
         input->m_outputs.push_back(this);
     }
-    if (m_debug && !m_verbose)
-        m_verbose = 1;
+}
+
+void Stage::setInput(Stage *input)
+{
+    m_inputs.push_back(input);
+    input->m_outputs.push_back(this);
 }
 
 

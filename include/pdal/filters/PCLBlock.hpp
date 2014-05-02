@@ -63,9 +63,10 @@ public:
     SET_STAGE_ENABLED(false)
 #endif
         
-    PCLBlock(Stage& prevStage, const Options&);
-    PCLBlock(Stage& prevStage);
-    ~PCLBlock();
+    PCLBlock(const Options& options) : Filter(options)
+        {}
+    ~PCLBlock()
+        {}
 
     virtual void initialize();
     static Options getDefaultOptions();

@@ -38,7 +38,7 @@
 namespace pdal
 {
 
-Reader::Reader(const Options& options) : Stage(makeVector(), options)
+Reader::Reader(const Options& options) : Stage(options)
 {}
 
 

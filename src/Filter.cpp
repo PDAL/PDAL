@@ -39,11 +39,6 @@ namespace pdal
 {
 
 
-Filter::Filter(Stage& prevStage, const Options& options)
-    : Stage(makeVector(prevStage), options)
-{}
-
-
 void Filter::initialize()
 {
     Metadata& m = getMetadataRef();

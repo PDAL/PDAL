@@ -84,9 +84,8 @@ public:
     SET_STAGE_ENABLED(false)
 #endif
 
-
-    Colorization(Stage& prevStage, const Options&);
-    ~Colorization();
+    Colorization(const Options& options) : Filter(options)
+        {}
 
     virtual void initialize();
     static Options getDefaultOptions();

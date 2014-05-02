@@ -65,7 +65,8 @@ BOOST_AUTO_TEST_SUITE(SbetWriterTest)
 BOOST_AUTO_TEST_CASE(testConstructor)
 {
     pdal::drivers::sbet::Reader reader(makeReaderOptions());
-    pdal::drivers::sbet::Writer writer(reader, makeWriterOptions());
+    pdal::drivers::sbet::Writer writer(makeWriterOptions());
+    writer.setInput(&reader);
 
     BOOST_CHECK(writer.getDescription() == "SBET Writer");
     BOOST_CHECK_EQUAL(writer.getName(), "drivers.sbet.writer");
@@ -78,7 +79,8 @@ BOOST_AUTO_TEST_CASE(testWrite)
 {
     {
         pdal::drivers::sbet::Reader reader(makeReaderOptions());
-        pdal::drivers::sbet::Writer writer(reader, makeWriterOptions());
+        pdal::drivers::sbet::Writer writer(makeWriterOptions());
+        writer.setInput(&reader);
         writer.initialize();
 
         writer.write(2);

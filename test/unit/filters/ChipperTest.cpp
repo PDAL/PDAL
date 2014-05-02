@@ -63,7 +63,8 @@ BOOST_AUTO_TEST_CASE(test_construction)
         pdal::Option capacity("capacity", 15, "capacity");
         options.add(capacity);
 
-        pdal::filters::Chipper chipper(reader, options);
+        pdal::filters::Chipper chipper(options);
+        chipper.setInput(&reader);
         chipper.initialize();
         PointBuffer buffer(chipper.getSchema(), 15);
         const boost::uint64_t num_points = reader.getNumPoints();
@@ -139,8 +140,10 @@ BOOST_AUTO_TEST_CASE(test_ordering)
     options.add(capacity);
     
     pdal::drivers::las::Reader candidate_reader(options);
-    pdal::filters::Cache cache(candidate_reader, options);
-    pdal::filters::Chipper chipper(cache, options);
+    pdal::filters::Cache cache(options);
+    cache.setInput(&candidate_reader);
+    pdal::filters::Chipper chipper(options);
+    chipper.setInput(&cache);
     chipper.initialize();
     
     Option& query = options.getOptionByRef("filename");

@@ -60,7 +60,8 @@ BOOST_AUTO_TEST_CASE(test_swapping)
     boost::uint32_t buffer_size = 20;
     pdal::drivers::faux::Reader reader(srcBounds, buffer_size, pdal::drivers::faux::Reader::Ramp);
 
-    pdal::filters::ByteSwap filter(reader);
+    pdal::filters::ByteSwap filter;
+    filter.setInput(&reader);
     BOOST_CHECK_EQUAL(filter.getName(), "filters.byteswap");
 
     filter.initialize();

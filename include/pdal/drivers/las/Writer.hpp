@@ -68,8 +68,8 @@ public:
     SET_STAGE_ENABLED(true)
 
 
-    Writer(Stage& prevStage, const Options&);
-    Writer(Stage& prevStage, std::ostream*);
+    Writer(const Options&);
+    Writer(std::ostream*);
     virtual ~Writer();
 
     virtual void initialize();

@@ -73,17 +73,14 @@ struct OSRTransformDeleter
 #endif
 
 
-
-InPlaceReprojection::InPlaceReprojection(Stage& prevStage, const Options& options)
-    : pdal::Filter(prevStage, options)
+InPlaceReprojection::InPlaceReprojection(const Options& options)
+    : pdal::Filter(options)
 
 {
     if (options.hasOption("in_srs"))
     {
         m_inSRS = options.getValueOrThrow<pdal::SpatialReference>("in_srs");
     }
-
-    return;
 }
 
 InPlaceReprojection::~InPlaceReprojection()

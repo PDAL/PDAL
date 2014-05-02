@@ -55,7 +55,8 @@ static std::string xml_str_ref = "<Name>my_string</Name><Value>Yow.</Value><Desc
 BOOST_AUTO_TEST_CASE(test_static_options)
 {
     pdal::drivers::faux::Reader reader(pdal::Bounds<double>(), 1, pdal::drivers::faux::Reader::Constant);
-    pdal::filters::Crop crop(reader, pdal::Bounds<double>());
+    pdal::filters::Crop crop;
+    crop.setInput(&reader);
     const pdal::Options& opts = crop.getDefaultOptions();
 
     BOOST_CHECK(opts.hasOption("bounds"));

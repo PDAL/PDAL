@@ -60,7 +60,8 @@ public:
     SET_STAGE_ENABLED(false)
 #endif
     
-    Predicate(Stage& prevStage, const Options&);
+    Predicate(const Options& options) : Filter(options), m_script(NULL)
+        {}
     ~Predicate();
 
     virtual void initialize();

@@ -35,10 +35,16 @@
 #ifndef INCLUDED_TYPES_HPP
 #define INCLUDED_TYPES_HPP
 
+#include <stdint.h>
+
 #include <pdal/pdal_internal.hpp>
+
 
 namespace pdal
 {
+
+typedef uint32_t point_count_t;
+typedef uint32_t PointId;
 
 enum EndianType
 {

@@ -1,4 +1,4 @@
-/******************************************************************************
+/****************************************************************************
 * Copyright (c) 2012, Michael P. Gerlek (mpg@flaxen.com)
 *
 * All rights reserved.
@@ -57,21 +57,14 @@ namespace drivers
 namespace nitf
 {
 
-Writer::Writer(Stage& prevStage, const Options& options)
-    :  pdal::drivers::las::Writer(prevStage, static_cast<std::ostream*>(&m_oss))
-
-
+Writer::Writer(const Options& options)
+    :  pdal::drivers::las::Writer(static_cast<std::ostream*>(&m_oss))
 {
     m_options = options;
-
-    m_oss.str("");
-    return;
 }
 
 Writer::~Writer()
-{
-    return;
-}
+{}
 
 
 void Writer::initialize()

@@ -153,21 +153,6 @@ boost::property_tree::ptree Summary::toPTree() const
 //---------------------------------------------------------------------------
 
 
-Stats::Stats(Stage& prevStage, const Options& options)
-    : pdal::Filter(prevStage, options)
-{
-    addMetadata();
-    return;
-}
-
-
-Stats::Stats(Stage& prevStage)
-    : Filter(prevStage, Options::none())
-{
-    addMetadata();
-    return;
-}
-
 void Stats::addMetadata()
 {
     Metadata& metadata = getMetadataRef();

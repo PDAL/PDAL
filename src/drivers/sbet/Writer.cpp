@@ -47,17 +47,9 @@ namespace sbet
 {
 
 
-Writer::Writer(Stage& prevStage, const Options& options)
-    : pdal::Writer(prevStage, options)
-{
-    return;
-}
-
-
 Writer::~Writer()
 {
     FileUtils::closeFile(m_ostream);
-    return;
 }
 
 

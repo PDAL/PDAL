@@ -60,7 +60,8 @@ public:
     SET_STAGE_LINK("http://pdal.io/stages/filters.selector.html")  
     SET_STAGE_ENABLED(true)
     
-    Selector(Stage& prevStage, const Options&);
+    Selector(const Options& options) : Filter(options), m_ignoreDefault(true)
+        {}
 
     static Options getDefaultOptions();
     virtual void initialize();

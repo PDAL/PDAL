@@ -32,7 +32,6 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-//
 #include <boost/scoped_ptr.hpp>
 
 #include <pdal/Writer.hpp>
@@ -50,9 +49,13 @@
 namespace pdal
 {
 
-Writer::Writer(Stage& prevStage, const Options& options)
-    : Stage(makeVector(prevStage), options), m_userCallback(0),
+
+Writer::Writer(const Options& options) : Stage(options), m_userCallback(0),
     m_writer_buffer(0)
+{}
+
+
+Writer::Writer() : m_userCallback(0), m_writer_buffer(0)
 {}
 
 

@@ -60,8 +60,10 @@ public:
     SET_STAGE_LINK("http://pdal.io/stages/filters.byteswap.html")
     SET_STAGE_ENABLED(true)
     
-    ByteSwap(Stage& prevStage, const Options&);
-    ByteSwap(Stage& prevStage);
+    ByteSwap(const Options& options) : Filter(options)
+        {}
+    ByteSwap()
+        {}
 
     virtual void initialize();
     static Options getDefaultOptions();

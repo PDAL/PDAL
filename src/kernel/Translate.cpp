@@ -184,14 +184,17 @@ Stage* Translate::makeReader(Options readerOptions)
                     readerOptions.add<double >("offset_z", offsets[2]);
                 }
             }
-            reprojection_stage = new pdal::filters::InPlaceReprojection(*next_stage, readerOptions);
+            reprojection_stage =
+                new pdal::filters::InPlaceReprojection(readerOptions);
+            reprojection_stage->setInput(next_stage);
             next_stage = reprojection_stage;
         }
         
         if (!m_bounds.empty() && m_wkt.empty())
         {
             readerOptions.add<pdal::Bounds<double> >("bounds", m_bounds);
-            crop_stage = new pdal::filters::Crop(*next_stage, readerOptions);
+            crop_stage = new pdal::filters::Crop(readerOptions);
+            crop_stage->setInput(next_stage);
             next_stage = crop_stage;
         } 
         else if (m_bounds.empty() && !m_wkt.empty())
@@ -212,7 +215,8 @@ Stage* Translate::makeReader(Options readerOptions)
                 // was likely actually wkt, leave it alone
             }
             readerOptions.add<std::string >("polygon", m_wkt);
-            crop_stage = new pdal::filters::Crop(*next_stage, readerOptions);
+            crop_stage = new pdal::filters::Crop(readerOptions);
+            crop_stage->setInput(next_stage);
             next_stage = crop_stage;
         }
         
@@ -230,7 +234,8 @@ Stage* Translate::makeReader(Options readerOptions)
         decimationOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
         decimationOptions.add<boost::uint32_t>("step", m_decimation_step);
         decimationOptions.add<boost::uint32_t>("offset", m_decimation_offset);
-        decimation_stage = new pdal::filters::Decimation(*final_stage, decimationOptions);
+        decimation_stage = new pdal::filters::Decimation(decimationOptions);
+        decimation_stage->setInput(final_stage);
     }
     if (decimation_stage != 0)
         final_stage = decimation_stage;

@@ -49,20 +49,6 @@ namespace filters
 {
 
 
-ByteSwap::ByteSwap(Stage& prevStage, const Options& options)
-    : pdal::Filter(prevStage, options)
-{
-    return;
-}
-
-
-ByteSwap::ByteSwap(Stage& prevStage)
-    : Filter(prevStage, Options::none())
-{
-    return;
-}
-
-
 void ByteSwap::initialize()
 {
     Filter::initialize();

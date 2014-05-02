@@ -64,7 +64,8 @@ BOOST_AUTO_TEST_CASE(CacheFilterTest_test_options)
     // options.add(verbose);
 
 
-    pdal::filters::Cache cache(reader, options);
+    pdal::filters::Cache cache(options);
+    cache.setInput(&reader);
 
     BOOST_CHECK(cache.getDescription() == "Cache Filter");
     cache.initialize();
@@ -133,7 +134,8 @@ BOOST_AUTO_TEST_CASE(CacheFilterTest_test_use_counts)
     // options.add(verbose);
 
 
-    pdal::filters::Cache cache(reader, options);
+    pdal::filters::Cache cache(options);
+    cache.setInput(&reader);
 
     BOOST_CHECK_EQUAL(cache.getDescription(), "Cache Filter");
     cache.initialize();
@@ -196,7 +198,8 @@ BOOST_AUTO_TEST_CASE(CacheFilterTest_test_random)
     // options.add(debug);
     // options.add(verbose);
 
-    pdal::filters::Cache cache(reader, options);
+    pdal::filters::Cache cache(options);
+    cache.setInput(&reader);
 
     BOOST_CHECK_EQUAL(cache.getDescription(), "Cache Filter");
     cache.initialize();
@@ -248,7 +251,8 @@ BOOST_AUTO_TEST_CASE(test_two_iters_with_cache)
     options.add(max_cache_blocks);
     options.add(cache_block_size);
 
-    pdal::filters::Cache cache(reader, options);
+    pdal::filters::Cache cache(options);
+    cache.setInput(&reader);
     cache.initialize();
 
     BOOST_CHECK_EQUAL(reader.getNumPoints(), num_points);
@@ -351,7 +355,8 @@ BOOST_AUTO_TEST_CASE(CacheFilterTest_test_large)
     // options.add(debug);
     // options.add(verbose);
 
-    pdal::filters::Cache cache(reader, options);
+    pdal::filters::Cache cache(options);
+    cache.setInput(&reader);
 
     BOOST_CHECK_EQUAL(cache.getDescription(), "Cache Filter");
     cache.initialize();
