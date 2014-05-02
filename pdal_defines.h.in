@@ -84,6 +84,8 @@
  */
 #cmakedefine PDAL_EMBED_BOOST
 
+#cmakedefine PDAL_COMPILER_VC12
+#cmakedefine PDAL_COMPILER_VC11
 #cmakedefine PDAL_COMPILER_VC10
 #cmakedefine PDAL_COMPILER_VC9
 #cmakedefine PDAL_COMPILER_VC8
