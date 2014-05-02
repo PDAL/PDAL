@@ -38,6 +38,7 @@
 #include <pdal/pdal_internal.hpp>
 
 #include <pdal/Bounds.hpp>
+#include <pdal/GlobalEnvironment.hpp>
 #include <pdal/Log.hpp>
 #include <pdal/Metadata.hpp>
 #include <pdal/Options.hpp>
@@ -62,9 +63,18 @@ class PointBuffer;
 class PDAL_DLL Stage
 {
 public:
-    Stage(const std::vector<Stage*>& prevs, const Options& options);
+    Stage(PointContext ctx);
+    Stage(PointContext ctx, const Options& options);
+    Stage(const Options& options) :
+            Stage{GlobalEnvironment::get().context(), options}
+        {}
+    Stage() : Stage{GlobalEnvironment::get().context()}
+        {}
     virtual ~Stage()
         {}
+
+    void setInput(const std::vector<Stage *>& inputs);
+    void setInput(Stage *input);
 
     virtual void initialize();
     bool isInitialized() const
@@ -128,6 +138,7 @@ public:
         { return NULL; }
 
 protected:
+    PointContext m_context;
     Schema m_schema;
     Options m_options;
 

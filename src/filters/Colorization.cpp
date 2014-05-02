@@ -64,14 +64,6 @@ struct GDALSourceDeleter
 };
 #endif
 
-Colorization::Colorization(Stage& prevStage, const Options& options)
-    : pdal::Filter(prevStage, options)
-{}
-
-
-Colorization::~Colorization()
-{}
-
 
 void Colorization::initialize()
 {

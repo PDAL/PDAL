@@ -58,9 +58,11 @@ BOOST_AUTO_TEST_CASE(test_crop)
 
     pdal::drivers::faux::Reader reader(srcBounds, 1000, pdal::drivers::faux::Reader::Ramp);
 
-    pdal::filters::Crop filter(reader, dstBounds);
+    pdal::filters::Crop filter(dstBounds);
+    filter.setInput(&reader);
     BOOST_CHECK(filter.getDescription() == "Crop Filter");
-    pdal::drivers::faux::Writer writer(filter, Options::none());
+    pdal::drivers::faux::Writer writer(Options::none());
+    writer.setInput(&filter);
     writer.initialize();
 
     boost::uint64_t numWritten = writer.write(1000);
@@ -120,7 +122,8 @@ BOOST_AUTO_TEST_CASE(test_crop_polygon)
     options.add(polygon);
 
 
-    pdal::filters::Crop crop(reader, options);
+    pdal::filters::Crop crop(options);
+    crop.setInput(&reader);
     crop.initialize();
 
     pdal::PointBuffer data(crop.getSchema(), 1000);
@@ -182,8 +185,10 @@ BOOST_AUTO_TEST_CASE(test_crop_polygon_reprojection)
 
 
     pdal::drivers::las::Reader reader(options);
-    pdal::filters::InPlaceReprojection reprojection(reader, options);
-    pdal::filters::Crop crop(reprojection, options);
+    pdal::filters::InPlaceReprojection reprojection(options);
+    reprojection.setInput(&reader);
+    pdal::filters::Crop crop(options);
+    crop.setInput(&reprojection);
     crop.initialize();
 
     pdal::PointBuffer data(crop.getSchema(), 1000);

@@ -64,8 +64,8 @@ namespace oci
 {
 
 
-Writer::Writer(Stage& prevStage, const Options& options)
-    : pdal::Writer(prevStage, options)
+Writer::Writer(const Options& options)
+    : pdal::Writer(options)
     , OracleDriver(getOptions())
     , m_doCreateIndex(false)
     , m_bHaveOutputTable(false)
@@ -79,7 +79,6 @@ Writer::Writer(Stage& prevStage, const Options& options)
     , m_streamChunks(false)
     , m_orientation(schema::POINT_INTERLEAVED)
 {
-
     m_connection = connect();
 
     boost::uint32_t capacity = getOptions().getValueOrDefault<boost::uint32_t>("capacity", 0);

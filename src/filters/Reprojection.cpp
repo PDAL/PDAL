@@ -84,8 +84,8 @@ struct GDALSourceDeleter
 
 
 
-Reprojection::Reprojection(Stage& prevStage, const Options& options)
-    : pdal::Filter(prevStage, options)
+Reprojection::Reprojection(const Options& options)
+    : pdal::Filter(options)
     , m_outSRS(options.getValueOrThrow<pdal::SpatialReference>("out_srs"))
     , m_inferInputSRS(false)
 {
@@ -98,31 +98,21 @@ Reprojection::Reprojection(Stage& prevStage, const Options& options)
     {
         m_inferInputSRS = true;
     }
-
-    return;
 }
 
 
-Reprojection::Reprojection(Stage& prevStage,
-                           const SpatialReference& outSRS)
-    : Filter(prevStage, Options::none())
-    , m_outSRS(outSRS)
+Reprojection::Reprojection(const SpatialReference& outSRS)
+    : m_outSRS(outSRS)
     , m_inferInputSRS(true)
-{
-    return;
-}
+{}
 
 
-Reprojection::Reprojection(Stage& prevStage,
-                           const SpatialReference& inSRS,
+Reprojection::Reprojection(const SpatialReference& inSRS,
                            const SpatialReference& outSRS)
-    : Filter(prevStage, Options::none())
-    , m_inSRS(inSRS)
+    : m_inSRS(inSRS)
     , m_outSRS(outSRS)
     , m_inferInputSRS(false)
-{
-    return;
-}
+{}
 
 
 void Reprojection::initialize()

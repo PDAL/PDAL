@@ -57,15 +57,14 @@ namespace las
 {
 
 
-Writer::Writer(Stage& prevStage, const Options& options)
-    : pdal::Writer(prevStage, options)
+Writer::Writer(const Options& options)
+    : pdal::Writer(options)
     , m_streamManager(options.getOption("filename").getValue<std::string>())
     , m_numPointsWritten(0)
     , m_headerInitialized(false)
     , m_streamOffset(0)
 {
     setOptions();
-    return;
 }
 
 void Writer::setOptions()
@@ -102,9 +101,8 @@ void Writer::setOptions()
     catch (pdal::option_not_found&) {};
 }
 
-Writer::Writer(Stage& prevStage, std::ostream* ostream)
-    : pdal::Writer(prevStage, Options::none())
-    , m_streamManager(ostream)
+Writer::Writer(std::ostream* ostream) :
+    m_streamManager(ostream)
     , m_numPointsWritten(0)
     , m_headerInitialized(false)
     , m_streamOffset(0)

@@ -52,7 +52,8 @@ BOOST_AUTO_TEST_CASE(DecimationFilterTest_test1)
 
     pdal::drivers::faux::Reader reader(srcBounds, 1000, pdal::drivers::faux::Reader::Random);
 
-    pdal::filters::Decimation filter(reader, 10);
+    pdal::filters::Decimation filter(10);
+    filter.setInput(&reader);
     BOOST_CHECK(filter.getDescription() == "Decimation Filter");
     filter.initialize();
 
@@ -86,7 +87,8 @@ BOOST_AUTO_TEST_CASE(DecimationFilterTest_test_options)
 
     pdal::Option opt("step", "10");
     pdal::Options opts(opt);
-    pdal::filters::Decimation filter(reader, opts);
+    pdal::filters::Decimation filter(opts);
+    filter.setInput(&reader);
     BOOST_CHECK(filter.getDescription() == "Decimation Filter");
     filter.initialize();
 
@@ -131,7 +133,8 @@ BOOST_AUTO_TEST_CASE(DecimationFilterTest_test_random)
     pdal::Option verbose("verbose", 9, "");
     // opts.add(debug);
     // opts.add(verbose);
-    pdal::filters::Decimation filter(reader, opts);
+    pdal::filters::Decimation filter(opts);
+    filter.setInput(&reader);
     BOOST_CHECK(filter.getDescription() == "Decimation Filter");
     filter.initialize();
 

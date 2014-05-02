@@ -133,7 +133,8 @@ BOOST_AUTO_TEST_CASE(test_parallel)
         {
             opts[threadId][stageId] = makeFilterOptions(threadId, stageId, true);
 
-            stages[threadId][stageId] = new filters::Programmable(*stages[threadId][stageId-1], opts[threadId][stageId]);
+            stages[threadId][stageId] = new filters::Programmable(opts[threadId][stageId]);
+            stages[threadId][stageId]->setInput(stages[threadId][stageId - 1]);
         }
     }
 

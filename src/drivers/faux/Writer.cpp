@@ -45,13 +45,6 @@ namespace faux
 {
 
 
-Writer::Writer(Stage& prevStage, const Options& options)
-    : pdal::Writer(prevStage, options)
-{
-    return;
-}
-
-
 void Writer::initialize()
 {
     pdal::Writer::initialize();

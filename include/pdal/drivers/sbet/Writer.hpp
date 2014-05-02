@@ -53,7 +53,8 @@ public:
     SET_STAGE_NAME("drivers.sbet.writer", "SBET Writer")
     SET_STAGE_LINK("http://pdal.io/stages/drivers.sbet.writer.html")
 
-    Writer(Stage& prevStage, const Options&);
+    Writer(const Options& options) : pdal::Writer(options)
+        {}
     virtual ~Writer();
 
     virtual void initialize();

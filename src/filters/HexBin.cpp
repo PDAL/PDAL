@@ -47,26 +47,6 @@ namespace filters
 {
 
 
-HexBin::HexBin(Stage& prevStage, const Options& options)
-    : pdal::Filter(prevStage, options)
-{
-
-    return;
-}
-
-HexBin::~HexBin()
-{
-
-}
-void HexBin::initialize()
-{
-    Filter::initialize();
-    return;
-}
-
-
-
-
 Options HexBin::getDefaultOptions()
 {
     Options options;

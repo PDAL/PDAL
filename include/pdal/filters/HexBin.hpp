@@ -65,10 +65,9 @@ public:
     SET_STAGE_ENABLED(false)
 #endif
 
-    HexBin(Stage& prevStage, const Options&);
+    HexBin(const Options& options) : Filter(options)
+        {}
 
-    ~HexBin();
-    virtual void initialize();
     static Options getDefaultOptions();
 
     pdal::StageSequentialIterator*

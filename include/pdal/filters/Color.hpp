@@ -57,8 +57,10 @@ public:
     SET_STAGE_LINK("http://pdal.io/stages/filters.color.html")
     SET_STAGE_ENABLED(true)
     
-    Color(Stage& prevStage, const Options&);
-    Color(Stage& prevStage);
+    Color(const Options& options) : Filter(options)
+        {}
+    Color()
+        {}
 
     virtual void initialize();
     static Options getDefaultOptions();

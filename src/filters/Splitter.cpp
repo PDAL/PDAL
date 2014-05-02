@@ -44,8 +44,8 @@ namespace pdal
 namespace filters
 {
 
-Splitter::Splitter(Stage& prevStage, Options const& options)
-    : pdal::Filter(prevStage, options)
+Splitter::Splitter(Options const& options)
+    : pdal::Filter(options)
     , m_leaf_size(0)
     , m_inverse_leaf_size(0)
     , m_min_b_x(0)

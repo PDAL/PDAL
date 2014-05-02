@@ -53,9 +53,11 @@ class PDAL_DLL Writer : public Stage
 public:
     
     /// Constructs an end-stage consumer of a pipeline of data -- a writer
-    /// @param prevStage The non-Writer stage in the pipeline
     /// @param options options to be passed into the writer.
-    Writer(Stage& prevStage, Options const& options);
+    Writer(Options const& options);
+    //
+    /// Constructs an end-stage consumer of a pipeline of data -- a writer
+    Writer();
     
     /// Virtual destructor for Writer
     virtual ~Writer();

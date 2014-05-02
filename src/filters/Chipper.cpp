@@ -91,8 +91,8 @@ std::vector<boost::uint32_t> Block::GetIDs() const
     return ids;
 }
 
-Chipper::Chipper(Stage& prevStage, const Options& options)
-    : pdal::Filter(prevStage, options)
+Chipper::Chipper(const Options& options)
+    : pdal::Filter(options)
     , m_xvec(chipper::DIR_X)
     , m_yvec(chipper::DIR_Y)
     , m_spare(chipper::DIR_NONE)

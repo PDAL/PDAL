@@ -116,7 +116,8 @@ BOOST_AUTO_TEST_CASE(TextWriterTest_geojson)
 
 
     pdal::drivers::las::Reader reader(options);
-    pdal::filters::Selector filter(reader, options);
+    pdal::filters::Selector filter(options);
+    filter.setInput(&reader);
     
     std::string output("TextWriterTest-geojson.json");
     pdal::Options writer_options;
@@ -124,7 +125,8 @@ BOOST_AUTO_TEST_CASE(TextWriterTest_geojson)
     writer_options.add(out_filename);
     writer_options.add(output_type);
     
-    pdal::drivers::text::Writer writer(filter, writer_options);
+    pdal::drivers::text::Writer writer(writer_options);
+    writer.setInput(&filter);
 
     BOOST_CHECK_EQUAL(writer.getDescription(), "Text Writer");
     writer.initialize();

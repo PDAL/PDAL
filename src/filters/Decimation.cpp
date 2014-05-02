@@ -43,20 +43,10 @@ namespace filters
 {
 
 
-Decimation::Decimation(Stage& prevStage, const Options& options)
-    : pdal::Filter(prevStage, options)
-    , m_step(options.getValueOrDefault<boost::uint32_t>("step", 1))
-{
-    return;
-}
-
-
-Decimation::Decimation(Stage& prevStage, boost::uint32_t step)
-    : Filter(prevStage, Options::none())
-    , m_step(step)
-{
-    return;
-}
+Decimation::Decimation(const Options& options)
+    : pdal::Filter(options),
+    m_step(options.getValueOrDefault<boost::uint32_t>("step", 1))
+{}
 
 
 void Decimation::initialize()

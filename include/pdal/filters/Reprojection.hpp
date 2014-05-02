@@ -67,12 +67,9 @@ public:
 #endif
 
 
-    Reprojection(Stage& prevStage, const Options&);
-    Reprojection(Stage& prevStage,
-                 const SpatialReference& outSRS);
-    Reprojection(Stage& prevStage,
-                 const SpatialReference& inSRS,
-                 const SpatialReference& outSRS);
+    Reprojection(const Options&);
+    Reprojection(const SpatialReference& outSRS);
+    Reprojection(const SpatialReference& inSRS, const SpatialReference& outSRS);
 
     virtual void initialize();
     static Options getDefaultOptions();

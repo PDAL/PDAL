@@ -125,7 +125,8 @@ BOOST_AUTO_TEST_CASE(InPlaceReprojectionFilterTest_test_1)
         // options.add(y_offset);
         // options.add(z_offset);
 
-        pdal::filters::InPlaceReprojection reprojectionFilter(reader, options);
+        pdal::filters::InPlaceReprojection reprojectionFilter(options);
+        reprojectionFilter.setInput(&reader);
 
         reprojectionFilter.initialize();
 
@@ -199,7 +200,8 @@ BOOST_AUTO_TEST_CASE(InPlaceReprojectionFilterTest_test_2)
         options.add(filename);
 
         pdal::drivers::las::Reader reader(options);
-        pdal::filters::InPlaceReprojection reprojectionFilter(reader, options);
+        pdal::filters::InPlaceReprojection reprojectionFilter(options);
+        reprojectionFilter.setInput(&reader);
         reprojectionFilter.initialize();
 
         const pdal::Schema& schema = reprojectionFilter.getSchema();

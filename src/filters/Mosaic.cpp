@@ -43,14 +43,6 @@ namespace filters
 {
 
 
-
-Mosaic::Mosaic(const std::vector<Stage*>& prevStages, const Options& options)
-    : MultiFilter(prevStages, options)
-{
-    return;
-}
-
-
 void Mosaic::initialize()
 {
     MultiFilter::initialize();

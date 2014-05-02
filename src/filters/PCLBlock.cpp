@@ -139,21 +139,6 @@ PCLBlock::processBuffer(PointBuffer& srcData, std::string& filename, PointBuffer
     return numPointsAfterFiltering;
 }
 
-PCLBlock::PCLBlock(Stage& prevStage, const Options& options)
-    : pdal::Filter(prevStage, options)
-{
-    return;
-}
-
-PCLBlock::PCLBlock(Stage& prevStage)
-    : pdal::Filter(prevStage, Options::none())
-{
-    return;
-}
-
-PCLBlock::~PCLBlock()
-{
-}
 
 void PCLBlock::initialize()
 {

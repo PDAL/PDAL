@@ -65,7 +65,8 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_las)
 
     {
         // need to scope the writer, so that's it dtor can use the stream
-        pdal::drivers::las::Writer writer(reader, ofs);
+        pdal::drivers::las::Writer writer(ofs);
+        writer.setInput(&reader);
         BOOST_CHECK_EQUAL(writer.getDescription(), "Las Writer");
         writer.initialize();
 
@@ -105,7 +106,8 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_laz)
         const boost::uint64_t numPoints = reader.getNumPoints();
 
         // need to scope the writer, so that's it dtor can use the stream
-        pdal::drivers::las::Writer writer(reader, ofs);
+        pdal::drivers::las::Writer writer(ofs);
+        writer.setInput(&reader);
 
         writer.setCompressed(true);
         writer.setDate(0, 0);
@@ -151,7 +153,8 @@ static void test_a_format(const std::string& refFile, boost::uint8_t majorVersio
         const boost::uint64_t numPoints = reader.getNumPoints();
 
         // need to scope the writer, so that's it dtor can use the stream
-        pdal::drivers::las::Writer writer(reader, ofs);
+        pdal::drivers::las::Writer writer(ofs);
+        writer.setInput(&reader);
         BOOST_CHECK_EQUAL(writer.getDescription(), "Las Writer");
 
         writer.setCompressed(false);
@@ -226,7 +229,8 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_metadata)
     pdal::drivers::las::Reader reader(Support::datapath("interesting.las"));
 
     {
-        pdal::drivers::las::Writer writer(reader, options);
+        pdal::drivers::las::Writer writer(options);
+        writer.setInput(&reader);
         writer.initialize();
 
         const boost::uint64_t numPoints = reader.getNumPoints();
@@ -291,8 +295,10 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_ignored_dimensions)
     pdal::drivers::las::Reader reader(Support::datapath("interesting.las"));
 
     {
-        pdal::filters::Selector selector(reader, options);
-        pdal::drivers::las::Writer writer(selector, options);
+        pdal::filters::Selector selector(options);
+        selector.setInput(&reader);
+        pdal::drivers::las::Writer writer(options);
+        writer.setInput(&selector);
         writer.initialize();
 
         const boost::uint64_t numPoints = reader.getNumPoints();

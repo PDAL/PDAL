@@ -79,7 +79,8 @@ public:
     SET_STAGE_ENABLED(true)
 
 
-    Scaling(Stage& prevStage, const Options&);
+    Scaling(const Options& options) : Filter(options)
+        {}
     Scaling& operator=(const Scaling&) = delete;
     Scaling(const Scaling&) = delete;
 

@@ -91,10 +91,9 @@ BOOST_AUTO_TEST_CASE(ColorizationFilterTest_test_1)
         reader_options.add(green);
         reader_options.add(blue);
         reader_options.add(datasource);
-        // reader_options.add(debug);
-        // reader_options.add(verbose);
 
-        pdal::filters::Colorization filter(reader, reader_options);
+        pdal::filters::Colorization filter(reader_options);
+        filter.setInput(&reader);
 
         filter.initialize();
 

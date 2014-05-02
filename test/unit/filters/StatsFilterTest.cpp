@@ -58,7 +58,8 @@ BOOST_AUTO_TEST_CASE(StatsFilterTest_test1)
     Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
     pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Constant);
 
-    pdal::filters::Stats filter(reader, Options::none());
+    pdal::filters::Stats filter(Options::none());
+    filter.setInput(&reader);
     BOOST_CHECK_EQUAL(filter.getName(), "filters.stats");
     BOOST_CHECK_EQUAL(filter.getDescription(), "Statistics Filter");
     filter.initialize();
@@ -104,7 +105,8 @@ BOOST_AUTO_TEST_CASE(test_random_iterator)
     pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
     BOOST_CHECK(reader.getDescription() == "Las Reader");
 
-    pdal::filters::Stats filter(reader, Options::none());    
+    pdal::filters::Stats filter;
+    filter.setInput(&reader);
     filter.initialize();
 
     const Schema& schema = reader.getSchema();
@@ -177,10 +179,11 @@ BOOST_AUTO_TEST_CASE(test_multiple_dims_same_name)
     options.add(ignore);
 
     pdal::drivers::las::Reader reader(options);
-    pdal::filters::InPlaceReprojection reprojectionFilter(reader, options);
-    pdal::filters::Stats filter(reprojectionFilter,options);    
+    pdal::filters::InPlaceReprojection reprojectionFilter(options);
+    reprojectionFilter.setInput(&reader);
+    pdal::filters::Stats filter(options);    
+    filter.setInput(&reprojectionFilter);
     filter.initialize();
-
 
     const pdal::Schema& schema = filter.getSchema();
     pdal::PointBuffer data(schema, 1000u);
@@ -245,10 +248,11 @@ BOOST_AUTO_TEST_CASE(test_specified_stats)
 
     pdal::drivers::las::Reader reader(options);
 
-    pdal::filters::InPlaceReprojection reprojectionFilter(reader, options);
-    pdal::filters::Stats filter(reprojectionFilter,options);
+    pdal::filters::InPlaceReprojection reprojectionFilter(options);
+    reprojectionFilter.setInput(&reader);
+    pdal::filters::Stats filter(options);
+    filter.setInput(&reprojectionFilter);
     filter.initialize();
-
 
     const pdal::Schema& schema = filter.getSchema();
     pdal::PointBuffer data(schema, 1000u);
@@ -314,10 +318,11 @@ BOOST_AUTO_TEST_CASE(test_pointbuffer_stats)
 
     pdal::drivers::las::Reader reader(options);
 
-    pdal::filters::InPlaceReprojection reprojectionFilter(reader, options);
-    pdal::filters::Stats filter(reprojectionFilter,options);
+    pdal::filters::InPlaceReprojection reprojectionFilter(options);
+    reprojectionFilter.setInput(&reader);
+    pdal::filters::Stats filter(options);
+    filter.setInput(&reprojectionFilter);
     filter.initialize();
-
 
     const pdal::Schema& schema = filter.getSchema();
     pdal::PointBuffer data(schema, 1000u);

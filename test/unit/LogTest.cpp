@@ -143,8 +143,10 @@ BOOST_AUTO_TEST_CASE(test_two_a)
 
     {
         drivers::faux::Reader reader(reader_opts);
-        filters::Programmable xfilter(reader, xfilter_opts);
-        filters::Programmable yfilter(xfilter, yfilter_opts);
+        filters::Programmable xfilter(xfilter_opts);
+        xfilter.setInput(&reader);
+        filters::Programmable yfilter(yfilter_opts);
+        yfilter.setInput(&xfilter);
 
         yfilter.initialize();
 
@@ -240,8 +242,10 @@ BOOST_AUTO_TEST_CASE(test_two_b)
 
     {
         drivers::faux::Reader reader(reader_opts);
-        filters::Programmable xfilter(reader, xfilter_opts);
-        filters::Programmable yfilter(xfilter, yfilter_opts);
+        filters::Programmable xfilter(xfilter_opts);
+        xfilter.setInput(&reader);
+        filters::Programmable yfilter(yfilter_opts);
+        yfilter.setInput(&xfilter);
 
         yfilter.initialize();
 
@@ -323,7 +327,8 @@ BOOST_AUTO_TEST_CASE(test_three)
 
     {
         drivers::faux::Reader reader(reader_opts);
-        filters::Programmable xfilter(reader, xfilter_opts);
+        filters::Programmable xfilter(xfilter_opts);
+        xfilter.setInput(&reader);
 
         xfilter.initialize();
 

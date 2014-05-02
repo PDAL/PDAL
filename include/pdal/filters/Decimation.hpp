@@ -57,8 +57,9 @@ public:
     SET_STAGE_LINK("http://pdal.io/stages/filters.decimation.html")        
     SET_STAGE_ENABLED(true)
 
-    Decimation(Stage& prevStage, const Options&);
-    Decimation(Stage& prevStage, boost::uint32_t step);
+    Decimation(const Options&);
+    Decimation(boost::uint32_t step) : m_step(step)
+        {}
 
     virtual void initialize();
     static Options getDefaultOptions();

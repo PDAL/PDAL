@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2014, Hobu Inc.
 *
 * All rights reserved.
 *
@@ -32,41 +32,33 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_FILTER_HPP
-#define INCLUDED_FILTER_HPP
+#pragma once
 
-#include <pdal/pdal_internal.hpp>
-
-#include <pdal/Stage.hpp>
+#include "pdal/Schema.hpp"
+#include "pdal/RawPtBuf.hpp"
 
 namespace pdal
 {
 
-//
-// supported options:
-//   <uint32>id
-//   <bool>debug
-//   <uint32>verbose
-//
-
-class PDAL_DLL Filter : public Stage
+// This provides a context for processing a set of points and allows the library
+// to be used to process multiple point sets simultaneously.
+class PointContext
 {
-public:
-    Filter(const Options& options) : Stage{options}
-        {}
-    Filter()
-        {}
-
-    virtual void initialize();
-
-    // for xml serializion of pipelines
-    virtual boost::property_tree::ptree serializePipeline() const;
-
 private:
-    Filter& operator=(const Filter&); // not implemented
-    Filter(const Filter&); // not implemented
+    // Provides information on the dimensions/layout inforamtion for the points.
+    Schema *m_schema;
+    // Provides storage for the point data.
+    RawPtBuf *m_ptBuf;
+
+public:
+    PointContext() : m_schema(new Schema), m_ptBuf(new RawPtBuf(m_schema))
+    {}
+
+    Schema *getSchema()
+        { return m_schema; }
+    RawPtBuf *getRawPtBuf()
+        { return m_ptBuf; }
 };
 
-}  // namespace pdal
+} //namespace
 
-#endif

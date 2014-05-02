@@ -75,9 +75,8 @@ namespace filters
 {
 
 
-Crop::Crop(Stage& prevStage, const Options& options)
-    : pdal::Filter(prevStage, options)
-    , bCropOutside(false)
+Crop::Crop(const Options& options) : 
+    pdal::Filter(options)
     , m_geosEnvironment(0)
     , m_geosGeometry(0)
     , m_geosPreparedGeometry(0)
@@ -89,10 +88,13 @@ Crop::Crop(Stage& prevStage, const Options& options)
 }
 
 
-Crop::Crop(Stage& prevStage, Bounds<double> const& bounds)
-    : Filter(prevStage, Options::none())
-    , m_bounds(bounds)
-    , bCropOutside(false)
+Crop::Crop(Bounds<double> const& bounds) : Crop{}
+{
+    m_bounds = bounds;
+}
+
+Crop::Crop() :
+    bCropOutside(false)
     , m_geosEnvironment(0)
     , m_geosGeometry(0)
     , m_geosPreparedGeometry(0)

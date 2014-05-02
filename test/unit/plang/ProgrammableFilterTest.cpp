@@ -81,9 +81,11 @@ BOOST_AUTO_TEST_CASE(ProgrammableFilterTest_test1)
     opts.add(module);
     opts.add(function);
 
-    pdal::filters::Programmable filter(reader, opts);
+    pdal::filters::Programmable filter(opts);
+    filter.setInput(&reader);
     BOOST_CHECK(filter.getDescription() == "Programmable Filter");
-    pdal::drivers::faux::Writer writer(filter, Options::none());
+    pdal::drivers::faux::Writer writer;
+    writer.setInput(&filter);
     writer.initialize();
 
     boost::uint64_t numWritten = writer.write(10);

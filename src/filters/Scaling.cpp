@@ -46,10 +46,6 @@ namespace pdal
 namespace filters
 {
 
-Scaling::Scaling(Stage& prevStage, const Options& options)
-    : Filter(prevStage, options)
-{}
-
 
 void Scaling::initialize()
 {

@@ -190,7 +190,7 @@ public:
     SET_STAGE_LINK("http://pdal.io/stages/filters.chipper.html")
     SET_STAGE_ENABLED(true)
 
-    Chipper(Stage& prevStage, const Options&);
+    Chipper(const Options&);
 
     virtual void initialize();
     static Options getDefaultOptions();
