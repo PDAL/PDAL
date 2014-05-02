@@ -114,17 +114,17 @@ BOOST_AUTO_TEST_CASE(PipelineManagerTest_test2)
         const boost::uint64_t np = writer->write(0);
         BOOST_CHECK(np == 1065 * 2);
 
-        std::vector<StageBase*> reader1_inputs = reader1->getInputs();
-        std::vector<StageBase*> reader2_inputs = reader2->getInputs();
-        std::vector<StageBase*> multifilter_inputs = multifilter->getInputs();
-        std::vector<StageBase*> filter_inputs = filter->getInputs();
-        std::vector<StageBase*> writer_inputs = writer->getInputs();
+        std::vector<Stage *> reader1_inputs = reader1->getInputs();
+        std::vector<Stage *> reader2_inputs = reader2->getInputs();
+        std::vector<Stage *> multifilter_inputs = multifilter->getInputs();
+        std::vector<Stage *> filter_inputs = filter->getInputs();
+        std::vector<Stage *> writer_inputs = writer->getInputs();
 
-        std::vector<StageBase*> reader1_outputs = reader1->getOutputs();
-        std::vector<StageBase*> reader2_outputs = reader2->getOutputs();
-        std::vector<StageBase*> multifilter_outputs = multifilter->getOutputs();
-        std::vector<StageBase*> filter_outputs = filter->getOutputs();
-        std::vector<StageBase*> writer_outputs = writer->getOutputs();
+        std::vector<Stage *> reader1_outputs = reader1->getOutputs();
+        std::vector<Stage *> reader2_outputs = reader2->getOutputs();
+        std::vector<Stage *> multifilter_outputs = multifilter->getOutputs();
+        std::vector<Stage *> filter_outputs = filter->getOutputs();
+        std::vector<Stage *> writer_outputs = writer->getOutputs();
 
         BOOST_CHECK(reader1_inputs.size() == 0);
         BOOST_CHECK(reader2_inputs.size() == 0);

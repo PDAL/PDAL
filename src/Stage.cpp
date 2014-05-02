@@ -41,21 +41,62 @@
 namespace pdal
 {
 
-Stage::Stage(const std::vector<StageBase*>& prevs, const Options& options)
-    : StageBase(prevs, options)
-    , m_numPoints(0)
-{}
-
-
-Stage::~Stage()
-{}
+Stage::Stage(const std::vector<Stage*>& inputs, const Options& options) :
+    m_options(options), m_initialized(false), m_inputs(inputs),
+    m_dimensionsType(StageOperation_All), m_log(LogPtr()), m_numPoints(0)
+{
+    m_debug = options.getValueOrDefault<bool>("debug", false);
+    m_verbose = options.getValueOrDefault<boost::uint32_t>("verbose", 0);
+    m_id = options.getValueOrDefault<boost::uint32_t>("id", 0);
+    for (size_t i = 0; i < m_inputs.size(); ++i)
+    {
+        Stage *input = m_inputs[i];
+        input->m_outputs.push_back(this);
+    }
+    if (m_debug && !m_verbose)
+        m_verbose = 1;
+}
 
 
 void Stage::initialize()
 {
-    StageBase::initialize();
 
-    // Try to fetch overridden options here
+    for (size_t i = 0; i < m_inputs.size(); ++i)
+    {
+        Stage *prev = m_inputs[i];
+        prev->initialize();
+    }
+
+    // it is illegal to call initialize() twice
+    if (m_initialized)
+        throw pdal_error("Class already initialized: " + this->getName());
+
+    m_debug = m_options.getValueOrDefault<bool>("debug", false);
+    m_verbose = m_options.getValueOrDefault<boost::uint32_t>("verbose", 0);
+    if (m_debug && !m_verbose)
+        m_verbose = 1;
+
+    if (m_inputs.empty())
+    {
+        std::string logname =
+            m_options.getValueOrDefault<std::string>("log", "stdlog");
+        m_log = boost::shared_ptr<pdal::Log>(new Log(getName(), logname));
+    }
+    else
+    {
+        if (m_options.hasOption("log"))
+        {
+            std::string logname = m_options.getValueOrThrow<std::string>("log");
+            m_log = boost::shared_ptr<pdal::Log>(new Log(getName(), logname));
+        }
+        else
+        {
+            std::ostream* v = getPrevStage().log()->getLogStream();
+            m_log = boost::shared_ptr<pdal::Log>(new Log(getName(), v));
+        }
+    }
+    m_log->setLevel((LogLevel)m_verbose);
+    m_initialized = true;
 
     // If the user gave us an SRS via options, take that.
     try
@@ -68,6 +109,37 @@ void Stage::initialize()
         // If one wasn't set on the options, we'll ignore at this
         // point.  Maybe another stage might forward/set it later.
     }
+}
+
+
+Metadata Stage::collectMetadata() const
+{
+    Metadata output(m_metadata);
+    output = output + m_metadata;
+
+    try
+    {
+        Metadata const& m = getPrevStage().getMetadata();
+        output = output + m;
+    }
+    catch (pdal::internal_error const&)
+    {
+    }
+    return output;
+}
+
+
+Stage& Stage::getPrevStage() const
+{
+    if (m_inputs.empty())
+        throw internal_error("Stage does not have any previous stages");
+    return *m_inputs[0];
+}
+
+
+std::vector<Stage*> Stage::getPrevStages() const
+{
+    return m_inputs;
 }
 
 
@@ -148,6 +220,18 @@ void Stage::setCoreProperties(const Stage& stage)
     this->setNumPoints(stage.getNumPoints());
     this->setBounds(stage.getBounds());
     this->setSpatialReference(stage.getSpatialReference());
+}
+
+std::vector<Stage *> Stage::makeVector(Stage& sref)
+{
+    std::vector<Stage *> v;
+    v.push_back(&sref);
+    return v;
+}
+
+std::vector<Stage*> Stage::makeVector(const std::vector<Stage*>& stages)
+{
+    return stages;
 }
 
 std::ostream& operator<<(std::ostream& ostr, const Stage& stage)

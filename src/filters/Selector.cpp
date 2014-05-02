@@ -70,20 +70,19 @@ void Selector::initialize()
 
 void Selector::checkImpedance()
 {
-    Options& options = getOptions();
-
-    m_ignoreDefault = options.getValueOrDefault<bool>("ignore_default", true);
+    m_ignoreDefault = m_options.getValueOrDefault<bool>("ignore_default", true);
     std::vector<Option>::const_iterator i;
 
     try
     {
-        Option ignored = options.getOption("ignore");
+        Option ignored = m_options.getOption("ignore");
         boost::optional<Options const&> ignored_options = ignored.getOptions();
 
 
         if (ignored_options)
         {
-            std::vector<Option> ignored_dimensions = ignored_options->getOptions("dimension");
+            std::vector<Option> ignored_dimensions =
+                ignored_options->getOptions("dimension");
             for (i = ignored_dimensions.begin(); i != ignored_dimensions.end(); ++i)
             {
                 m_ignoredMap.insert(std::pair<std::string, bool>(i->getValue<std::string>(), true));
@@ -96,7 +95,7 @@ void Selector::checkImpedance()
 
     try
     {
-        Option keep = options.getOption("keep");
+        Option keep = m_options.getOption("keep");
         boost::optional<Options const&> keep_options = keep.getOptions();
 
         if (keep_options)
@@ -114,7 +113,7 @@ void Selector::checkImpedance()
 
     try
     {
-        Option create = options.getOption("create");
+        Option create = m_options.getOption("create");
         boost::optional<Options const&> create_options = create.getOptions();
 
         if (create_options)

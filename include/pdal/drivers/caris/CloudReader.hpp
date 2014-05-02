@@ -37,7 +37,6 @@
 #   pragma warning(disable : DISABLED_3RDPARTY_WARNINGS)
 #endif 
 
-#include <pdal/StageBase.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/Reader.hpp>
 
