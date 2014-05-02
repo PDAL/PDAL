@@ -50,6 +50,8 @@ Translate::Translate(int argc, const char* argv[])
     , m_scales("")
     , m_offsets("")
     , m_bForwardMetadata(false)
+    , m_decimation_step(1)
+    , m_decimation_offset(0)
 {
     return;
 }
@@ -91,6 +93,8 @@ void Translate::addSwitches()
         ("scale", po::value< std::string >(&m_scales), "A comma-separated or quoted, space-separated list of scales to set on the output file: \n--scale 0.1,0.1,0.00001\n--scale \"0.1 0.1 0.00001\"")
         ("offset", po::value< std::string >(&m_offsets), "A comma-separated or quoted, space-separated list of offsets to set on the output file: \n--offset 0,0,0\n--offset \"1234 5678 91011\"")
         ("metadata,m", po::value< bool >(&m_bForwardMetadata)->implicit_value(true), "Forward metadata (VLRs, header entries, etc) from previous stages")
+        ("d_step", po::value<boost::uint32_t>(&m_decimation_step)->default_value(1), "Decimation filter step")
+        ("d_offset", po::value<boost::uint32_t>(&m_decimation_offset)->default_value(0), "Decimation filter offset")
         ;
 
     addSwitchSet(file_options);
@@ -217,7 +221,20 @@ Stage* Translate::makeReader(Options readerOptions)
 
     if (final_stage == 0) 
         final_stage = reader_stage;
-    
+ 
+    Stage* decimation_stage(0);
+    if (m_decimation_step > 1)
+    {
+        Options decimationOptions;
+        decimationOptions.add<bool>("debug", isDebug());
+        decimationOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
+        decimationOptions.add<boost::uint32_t>("step", m_decimation_step);
+        decimationOptions.add<boost::uint32_t>("offset", m_decimation_offset);
+        decimation_stage = new pdal::filters::Decimation(*final_stage, decimationOptions);
+    }
+    if (decimation_stage != 0)
+        final_stage = decimation_stage;
+   
     return final_stage;    
 
 }
@@ -275,7 +292,7 @@ int Translate::execute()
     }
 
     
-    Stage* final_stage = makeReader(readerOptions);    
+    Stage* final_stage = makeReader(readerOptions);
     
     Writer* writer = AppSupport::makeWriter(writerOptions, *final_stage);
 
