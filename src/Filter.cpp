@@ -40,11 +40,8 @@ namespace pdal
 
 
 Filter::Filter(Stage& prevStage, const Options& options)
-    : Stage(StageBase::makeVector(prevStage), options)
-{
-
-    return;
-}
+    : Stage(makeVector(prevStage), options)
+{}
 
 
 void Filter::initialize()

@@ -47,7 +47,6 @@
 namespace pdal
 {
 
-class StageBase;
 class Stage;
 class Dimension;
 
