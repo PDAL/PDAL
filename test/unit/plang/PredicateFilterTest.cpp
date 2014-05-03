@@ -72,9 +72,11 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test1)
     opts.add(module);
     opts.add(function);
 
-    pdal::filters::Predicate filter(reader, opts);
+    pdal::filters::Predicate filter(opts);
+    filter.setInput(&reader);
     BOOST_CHECK(filter.getDescription() == "Predicate Filter");
-    pdal::drivers::faux::Writer writer(filter, Options::none());
+    pdal::drivers::faux::Writer writer;
+    writer.setInput(&filter);
     writer.initialize();
 
     boost::uint64_t numWritten = writer.write(1000);
@@ -121,9 +123,11 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test2)
     opts.add(module);
     opts.add(function);
 
-    pdal::filters::Predicate filter(reader, opts);
+    pdal::filters::Predicate filter(opts);
+    filter.setInput(&reader);
     BOOST_CHECK(filter.getDescription() == "Predicate Filter");
-    pdal::drivers::faux::Writer writer(filter, Options::none());
+    pdal::drivers::faux::Writer writer;
+    writer.setInput(&filter);
     writer.initialize();
 
     boost::uint64_t numWritten = writer.write(1000);
@@ -172,7 +176,8 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test3)
     opts1.add(module1);
     opts1.add(function1);
 
-    pdal::filters::Predicate filter1(reader, opts1);
+    pdal::filters::Predicate filter1(opts1);
+    filter1.setInput(&reader);
 
     // keep all points where y greater than 0.5
     const pdal::Option source2("source",
@@ -193,9 +198,11 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test3)
     opts2.add(module2);
     opts2.add(function2);
 
-    pdal::filters::Predicate filter2(filter1, opts2);
+    pdal::filters::Predicate filter2(opts2);
+    filter2.setInput(&filter1);
 
-    pdal::drivers::faux::Writer writer(filter2, Options::none());
+    pdal::drivers::faux::Writer writer;
+    writer.setInput(&filter2);
     writer.initialize();
 
     boost::uint64_t numWritten = writer.write(1000);
@@ -242,7 +249,8 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test4)
     opts.add(module);
     opts.add(function);
 
-    pdal::filters::Predicate filter(reader, opts);
+    pdal::filters::Predicate filter(opts);
+    filter.setInput(&reader);
 
     filter.initialize();
 
@@ -288,7 +296,8 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test5)
     opts.add(module);
     opts.add(function);
 
-    pdal::filters::Predicate filter(reader, opts);
+    pdal::filters::Predicate filter(opts);
+    filter.setInput(&reader);
 
     filter.initialize();
 

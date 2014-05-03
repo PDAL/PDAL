@@ -279,7 +279,8 @@ BOOST_AUTO_TEST_CASE(test_iterator_write)
     writer_opts.add(out_filename);
     writer_opts.add(output_type);
 
-    pdal::drivers::text::Writer writer(reader, writer_opts);
+    pdal::drivers::text::Writer writer(writer_opts);
+    writer.setInput(&reader);
     writer.initialize();
     boost::uint64_t numWritten = writer.write(100);
 

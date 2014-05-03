@@ -193,8 +193,10 @@ public:
     SET_STAGE_LINK("http://pdal.io/stages/filters.stats.html")  
     SET_STAGE_ENABLED(true)
     
-    Stats(Stage& prevStage, const Options&);
-    Stats(Stage& prevStage);
+    Stats(const Options& options) : Filter(options)
+        { addMetadata(); }
+    Stats()
+        { addMetadata(); }
     ~Stats();
 
     virtual void initialize();

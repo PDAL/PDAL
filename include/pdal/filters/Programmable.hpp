@@ -61,7 +61,8 @@ public:
     SET_STAGE_ENABLED(false)
 #endif
     
-    Programmable(Stage& prevStage, const Options&);
+    Programmable(const Options& options) : Filter(options), m_script(NULL)
+        {}
     ~Programmable();
 
     virtual void initialize();

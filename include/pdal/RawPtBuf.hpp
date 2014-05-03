@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2014, Hobu Inc.
 *
 * All rights reserved.
 *
@@ -31,42 +31,71 @@
 * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 * OF SUCH DAMAGE.
 ****************************************************************************/
+#pragma once
 
-#ifndef INCLUDED_FILTER_HPP
-#define INCLUDED_FILTER_HPP
+#include <memory>
+#include <vector>
 
-#include <pdal/pdal_internal.hpp>
-
-#include <pdal/Stage.hpp>
+#include "pdal/Dimension.hpp"
+#include "pdal/Schema.hpp"
 
 namespace pdal
 {
 
-//
-// supported options:
-//   <uint32>id
-//   <bool>debug
-//   <uint32>verbose
-//
-
-class PDAL_DLL Filter : public Stage
+/// This class provides a place to store the point data.
+class RawPtBuf
 {
 public:
-    Filter(const Options& options) : Stage{options}
-        {}
-    Filter()
-        {}
+    RawPtBuf(const Schema *schema) : m_numPts{0}, m_allocPts{0},
+        m_schema{schema}
+    {}
 
-    virtual void initialize();
+    PointId addPoint()
+    {
+        if (m_numPts >= m_allocPts)
+        {
+            m_allocPts += 10000;
+            m_buf.resize(pointsToBytes(m_allocPts));
+        }
+        return m_numPts++;
+    }
 
-    // for xml serializion of pipelines
-    virtual boost::property_tree::ptree serializePipeline() const;
+    template <typename T>
+    void setField(const Dimension& dim, PointId idx, T value); 
+    template <typename T>
+    T getField(const Dimension& dim, PointId idx);
 
 private:
-    Filter& operator=(const Filter&); // not implemented
-    Filter(const Filter&); // not implemented
+    std::vector<char> m_buf;
+    point_count_t m_numPts;
+    point_count_t m_allocPts;
+    const Schema *m_schema;
+    
+    size_t pointsToBytes(point_count_t numPts)
+        { return m_schema->getByteSize() * numPts; }
+
 };
+typedef std::shared_ptr<RawPtBuf> RawPtBufPtr;
 
-}  // namespace pdal
 
-#endif
+template <typename T>
+void RawPtBuf::setField(const Dimension& dim, PointId idx, T value)
+{
+    size_t offset = pointsToBytes(idx) + dim.getByteOffset();
+    memcpy(m_buf.data() + offset, &value, sizeof(T));
+}
+
+
+template <typename T>
+T RawPtBuf::getField(const Dimension& dim, PointId idx)
+{
+    T t;
+
+    size_t offset = pointsToBytes(idx) + dim.getByteOffset();
+    memcpy(&t, m_buf.data() + offset, sizeof(T));
+    return t;
+}
+
+
+} // namespace pdal
+

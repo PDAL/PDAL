@@ -46,14 +46,6 @@ namespace filters
 {
 
 
-Programmable::Programmable(Stage& prevStage, const Options& options)
-    : pdal::Filter(prevStage, options)
-    , m_script(NULL)
-{
-    return;
-}
-
-
 Programmable::~Programmable()
 {
     delete m_script;

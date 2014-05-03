@@ -72,7 +72,8 @@ BOOST_AUTO_TEST_CASE(basic_test)
     // Option verbose("verbose", 7, "verbose");
     // options.add(verbose);
 
-    pdal::filters::Mosaic mosaic(vec, options);
+    pdal::filters::Mosaic mosaic(options);
+    mosaic.setInput(vec);
     BOOST_CHECK(mosaic.getDescription() == "Mosaic Filter");
     mosaic.initialize();
 

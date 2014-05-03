@@ -148,7 +148,8 @@ BOOST_AUTO_TEST_CASE(ScalingFilterFloat_test)
     opts.add(tdim);
 
     pdal::drivers::faux::Reader reader(opts);
-    pdal::filters::Scaling scaling(reader, opts);
+    pdal::filters::Scaling scaling(opts);
+    scaling.setInput(&reader);
     scaling.initialize();
 
     const Schema& schema = scaling.getSchema();

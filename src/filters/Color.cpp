@@ -42,15 +42,6 @@ namespace filters
 {
 
 
-Color::Color(Stage& prevStage, const Options& options)
-    : pdal::Filter(prevStage, options)
-{}
-
-
-Color::Color(Stage& prevStage)
-    : Filter(prevStage, Options::none())
-{}
-
 std::vector<Dimension> Color::getDefaultDimensions()
 {
     std::vector<Dimension> output;

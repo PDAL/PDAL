@@ -67,13 +67,7 @@ public:
     SET_STAGE_ENABLED(false)
 #endif
     
-    InPlaceReprojection(Stage& prevStage, const Options&);
-    InPlaceReprojection(Stage& prevStage,
-                        const SpatialReference& outSRS);
-    InPlaceReprojection(Stage& prevStage,
-                        const SpatialReference& inSRS,
-                        const SpatialReference& outSRS);
-
+    InPlaceReprojection(const Options&);
     ~InPlaceReprojection();
     virtual void initialize();
     static Options getDefaultOptions();

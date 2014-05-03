@@ -46,14 +46,6 @@ namespace filters
 {
 
 
-Predicate::Predicate(Stage& prevStage, const Options& options)
-    : pdal::Filter(prevStage, options)
-    , m_script(NULL)
-{
-    return;
-}
-
-
 Predicate::~Predicate()
 {
     delete m_script;

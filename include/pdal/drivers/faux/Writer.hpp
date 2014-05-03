@@ -58,7 +58,10 @@ public:
     SET_STAGE_NAME("drivers.faux.writer", "Faux Writer")
     SET_STAGE_ENABLED(true)
 
-    Writer(Stage& prevStage, const Options&);
+    Writer(const Options& options) : pdal::Writer(options)
+        {}
+    Writer() : pdal::Writer()
+        {}
 
     virtual void initialize();
     static Options getDefaultOptions();;

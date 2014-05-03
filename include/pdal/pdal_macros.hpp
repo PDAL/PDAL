@@ -47,13 +47,13 @@
             
 #define MAKE_FILTER_CREATOR(T, FullT) \
     pdal::Filter* create_##T(pdal::Stage& prevStage, const pdal::Options& options) \
-        { return new FullT(prevStage, options); }
+        { pdal::Filter *f = new FullT(options); f->setInput(&prevStage); return f; }
 #define MAKE_MULTIFILTER_CREATOR(T, FullT) \
     pdal::MultiFilter* create_##T(const std::vector<pdal::Stage*>& prevStages, const pdal::Options& options) \
-        { return new FullT(prevStages, options); }
+        { pdal::MultiFilter *mf = new FullT(options); mf->setInput(prevStages); return mf; }
 #define MAKE_WRITER_CREATOR(T, FullT) \
     pdal::Writer* create_##T(pdal::Stage& prevStage, const pdal::Options& options) \
-        { return new FullT(prevStage, options); }
+        { pdal::Writer *w = new FullT(options); w->setInput(&prevStage); return w; }
 
 //
 // macros to register the stage creators

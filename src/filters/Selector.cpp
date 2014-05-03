@@ -48,16 +48,6 @@ namespace filters
 {
 
 
-// ------------------------------------------------------------------------
-
-Selector::Selector(Stage& prevStage, const Options& options)
-    : Filter(prevStage, options)
-    , m_ignoreDefault(true)
-{
-    return;
-}
-
-
 void Selector::initialize()
 {
     Filter::initialize();

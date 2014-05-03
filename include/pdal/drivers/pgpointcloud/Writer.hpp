@@ -60,7 +60,7 @@ public:
     SET_STAGE_ENABLED(false)
 #endif
 
-    Writer(Stage& prevStage, const Options&);
+    Writer(const Options&);
     ~Writer();
 
     virtual void initialize();
