@@ -122,8 +122,6 @@ BOOST_AUTO_TEST_CASE(basic_test)
     }
 
     delete iter;
-
-    return;
 }
 
 
@@ -159,9 +157,6 @@ BOOST_AUTO_TEST_CASE(pipeline_mosaic)
     // BOOST_CHECK_EQUAL(x2, 0); // Past 1066, is the other data set due to mosaic filter
     //         
     delete iter;
-
-
-    return;
 }
 #endif
 

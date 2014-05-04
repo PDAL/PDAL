@@ -44,12 +44,11 @@
 namespace pdal
 {
 
-class Stage;
 class PointBuffer;
 class UserCallback;
 
 /// End-stage consumer of PDAL pipeline
-class PDAL_DLL Writer : public StageBase
+class PDAL_DLL Writer : public Stage
 {
 public:
     

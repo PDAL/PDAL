@@ -67,6 +67,11 @@ class PDAL_DLL Reader : public pdal::Reader
 public:
     SET_STAGE_NAME("drivers.mrsid.reader", "MrSID Reader")
     SET_STAGE_LINK("http://www.pdal.io/stages/drivers.mrsid.reader.html")
+#ifdef PDAL_HAVE_MRSID
+    SET_STAGE_ENABLED(true)
+#else
+    SET_STAGE_ENABLED(false)
+#endif
     
     virtual ~Reader();
     Reader(const Options& options);

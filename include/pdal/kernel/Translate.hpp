@@ -43,6 +43,7 @@
 #include <pdal/filters/Cache.hpp>
 #include <pdal/filters/Chipper.hpp>
 #include <pdal/filters/Crop.hpp>
+#include <pdal/filters/Decimation.hpp>
 #include <pdal/filters/InPlaceReprojection.hpp>
 #include <pdal/filters/Scaling.hpp>
 #include <pdal/SpatialReference.hpp>
@@ -84,6 +85,8 @@ private:
     std::string m_scales;
     std::string m_offsets;
     bool m_bForwardMetadata;
+    boost::uint32_t m_decimation_step;
+    boost::uint32_t m_decimation_offset;
 };
 
 }} // pdal::kernel

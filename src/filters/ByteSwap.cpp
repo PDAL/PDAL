@@ -69,7 +69,6 @@ void ByteSwap::initialize()
 
     const Stage& stage = getPrevStage();
     this->setNumPoints(stage.getNumPoints());
-    this->setPointCountType(stage.getPointCountType());
 
     schema::index_by_index const& dimensions =
         m_schema.getDimensions().get<schema::index>();
@@ -158,7 +157,7 @@ ByteSwap::ByteSwap(const pdal::filters::ByteSwap& filter, PointBuffer& buffer)
 
 boost::uint64_t ByteSwap::skipImpl(boost::uint64_t count)
 {
-    return naiveSkipImpl(count);
+    return getPrevIterator().skip(count);
 }
 
 

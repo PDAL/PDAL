@@ -56,7 +56,6 @@ BOOST_AUTO_TEST_CASE(test_env_vars)
     BOOST_CHECK(pdal::FileUtils::fileExists(gdal_data));
     BOOST_CHECK(pdal::FileUtils::fileExists(proj_lib));
 #endif
-    return;
 }
 
 
@@ -67,8 +66,6 @@ BOOST_AUTO_TEST_CASE(test_ctor)
     BOOST_CHECK(srs.getProj4() == "");
     BOOST_CHECK(srs.getWKT() == "");
     BOOST_CHECK(srs.empty());
-
-    return;
 }
 
 
@@ -102,8 +99,6 @@ BOOST_AUTO_TEST_CASE(test_proj4_roundtrip)
         const std::string ret = ref.getProj4();
         BOOST_CHECK(ret == proj4_out);
     }
-
-    return;
 }
 
 
@@ -123,8 +118,6 @@ BOOST_AUTO_TEST_CASE(test_userstring_roundtrip)
 
     BOOST_CHECK(ret_proj == proj4);
     BOOST_CHECK(ret_wkt == wkt);
-
-    return;
 }
 
 
@@ -146,8 +139,6 @@ BOOST_AUTO_TEST_CASE(test_read_srs)
 
     const std::string proj4 = "+proj=utm +zone=17 +datum=WGS84 +units=m +no_defs";
     BOOST_CHECK(ret_proj4 == proj4);
-
-    return;
 }
 
 
@@ -163,8 +154,6 @@ BOOST_AUTO_TEST_CASE(test_vlr_sizes)
 
     BOOST_CHECK(vlrs.size() == boost::uint32_t(4));
     BOOST_CHECK(vlrs[0].getLength() == boost::uint32_t(64));
-
-    return;
 }
 
 
@@ -203,8 +192,6 @@ BOOST_AUTO_TEST_CASE(test_vertical_datum)
         // const std::string wkt2_ret = ref2.getWKT(pdal::SpatialReference::eCompoundOK);
         // BOOST_CHECK_EQUAL(wkt2_ret,wkt3);
     }
-
-    return;
 }
 
 
@@ -231,8 +218,6 @@ BOOST_AUTO_TEST_CASE(test_vertical_datum_notcompound)
     //BOOST_CHECK(vlrs_horizonly[1].getLength() == 16);
     //BOOST_CHECK(vlrs_horizonly[2].getLength() == 7);
     //BOOST_CHECK(vlrs_horizonly[3].getLength() == 511);
-
-    return;
 }
 
 // Try writing a compound coordinate system to file and ensure we get back
@@ -283,8 +268,6 @@ BOOST_AUTO_TEST_CASE(test_vertical_datums)
 
     // Cleanup
     pdal::FileUtils::deleteFile(tmpfile);
-
-    return;
 }
 
 
@@ -365,8 +348,6 @@ BOOST_AUTO_TEST_CASE(test_writing_vlr)
 
     // Cleanup
     pdal::FileUtils::deleteFile(tmpfile);
-
-    return;
 }
 
 
@@ -386,9 +367,6 @@ BOOST_AUTO_TEST_CASE(test_io)
     ss >> ref2;
 
     BOOST_CHECK(ref == ref2);
-
-
-    return;
 }
 
 #endif

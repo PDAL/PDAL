@@ -90,8 +90,6 @@ BOOST_AUTO_TEST_CASE(test_readFileIntoString)
     const std::string ref = "Redistribution and use in source and binary forms, with or without modification...";
 
     BOOST_CHECK(source == ref);
-
-    return;
 }
 
 
@@ -102,8 +100,6 @@ BOOST_AUTO_TEST_CASE(test_getcwd)
     const std::string cwd = FileUtils::getcwd();
     BOOST_CHECK(cwd == "D:/dev/pdal/test/unit/");
 #endif
-
-    return;
 }
 
 
@@ -149,8 +145,6 @@ BOOST_AUTO_TEST_CASE(test_toAbsolutePath)
     // check 1-arg version: make absolute when file is already absolute
     const string e = FileUtils::toAbsolutePath(drive+"/baz/foo.txt", drive+"/a/b/c/d");
     compare_paths(e, drive + "/baz/foo.txt");
-
-    return;
 }
 
 
@@ -163,8 +157,6 @@ BOOST_AUTO_TEST_CASE(test_getDirectory)
     // test relative case
     const std::string b = FileUtils::getDirectory("a/b/foo.txt");
     compare_paths(b, "a/b/");
-
-    return;
 }
 
 
@@ -177,8 +169,6 @@ BOOST_AUTO_TEST_CASE(test_isAbsolute)
     // test relative case
     const bool b = FileUtils::isAbsolutePath("a/b/foo.txt");
     BOOST_CHECK(!b);
-
-    return;
 }
 
 

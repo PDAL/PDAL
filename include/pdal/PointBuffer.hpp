@@ -588,7 +588,7 @@ inline T PointBuffer::getField(pdal::Dimension const& dim,
     
     if (static_cast<dimension::size_type>(sizeof(T)) <= dim.getByteSize())
     {
-        return *(T *)(void *)p;
+        return *(const T *)(const void *)p;
     }
     else
     {

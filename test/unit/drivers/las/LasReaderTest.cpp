@@ -83,8 +83,6 @@ BOOST_AUTO_TEST_CASE(test_base_options)
         BOOST_CHECK(reader.getVerboseLevel() == 99);
         BOOST_CHECK(reader.isDebug() == true);
     }
-
-    return;
 }
 
 
@@ -118,8 +116,6 @@ BOOST_AUTO_TEST_CASE(test_sequential)
     }
 
     delete iter;
-
-    return;
 }
 
 
@@ -163,8 +159,6 @@ BOOST_AUTO_TEST_CASE(test_random)
     }
 
     delete iter;
-
-    return;
 }
 
 
@@ -209,8 +203,6 @@ BOOST_AUTO_TEST_CASE(test_random_laz)
     }
 
     delete iter;
-
-    return;
 }
 #endif
 
@@ -251,8 +243,6 @@ BOOST_AUTO_TEST_CASE(test_two_iters)
 
         delete iter;
     }
-
-    return;
 }
 
 
@@ -371,8 +361,6 @@ BOOST_AUTO_TEST_CASE(test_simultaneous_iters)
     delete iterS2;
     delete iterR1;
     delete iterR2;
-
-    return;
 }
 
 static void test_a_format(const std::string& file, boost::uint8_t majorVersion, boost::uint8_t minorVersion, int pointFormat,
@@ -413,8 +401,6 @@ BOOST_AUTO_TEST_CASE(test_different_formats)
     test_a_format("1.2_1.las", 1, 2, 1, 470692.440000, 4602888.900000, 16.000000, 1205902800.000000, 0, 0, 0);
     test_a_format("1.2_2.las", 1, 2, 2, 470692.440000, 4602888.900000, 16.000000, 0, 255, 12, 234);
     test_a_format("1.2_3.las", 1, 2, 3, 470692.440000, 4602888.900000, 16.000000, 1205902800.000000, 255, 12, 234);
-
-    return;
 }
 
 
@@ -424,8 +410,6 @@ BOOST_AUTO_TEST_CASE(test_vlr)
     reader.initialize();
 
     BOOST_CHECK_EQUAL(reader.getLasHeader().getVLRs().getAll().size(), 390);
-
-    return;
 }
 
 
@@ -468,8 +452,6 @@ BOOST_AUTO_TEST_CASE(test_no_xyz)
 
 
     delete iter;
-
-    return;
 }
 
 

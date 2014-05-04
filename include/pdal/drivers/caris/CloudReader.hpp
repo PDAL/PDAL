@@ -37,7 +37,6 @@
 #   pragma warning(disable : DISABLED_3RDPARTY_WARNINGS)
 #endif 
 
-#include <pdal/StageBase.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/Reader.hpp>
 
@@ -51,6 +50,13 @@ namespace csar {
 class CloudReader : public pdal::Reader
 {
 public:
+
+#ifdef PDAL_HAVE_CARIS
+    SET_STAGE_ENABLED(true)
+#else
+    SET_STAGE_ENABLED(false)
+#endif
+
     
     explicit CloudReader(const pdal::Options& options);
     virtual ~CloudReader();

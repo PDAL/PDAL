@@ -47,7 +47,6 @@
 namespace pdal
 {
 
-class StageBase;
 class Stage;
 class Dimension;
 
@@ -111,6 +110,17 @@ public:
     {
         return m_link;
     }
+
+    inline void setIsEnabled(bool isEnabled)
+    {
+        m_isEnabled = isEnabled;
+    }
+    
+    inline bool getIsEnabled() const
+    {
+        return m_isEnabled;
+    }
+        
     std::string optionsToRST() const;
     
     inline std::string toRST() const
@@ -131,8 +141,15 @@ public:
         strm << headline << std::endl;
     
         strm << std::endl;
+        std::string enabled("ENABLED");
+        if (!getIsEnabled())
+        {
+            enabled = std::string ("NOT ENABLED");
+        }
+        
+        strm << "Status: " << enabled << std::endl << std::endl;
         strm << getDescription() << std::endl;
-
+        
         if (bDoLink)
         {
             strm << std::endl;
@@ -147,6 +164,7 @@ private:
     std::vector<Dimension> m_dimensions;
     std::vector<Option> m_options;
     std::string m_link;
+    bool m_isEnabled;
 
 
 

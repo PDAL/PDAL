@@ -481,7 +481,27 @@ Reader::Reader(const pdal::drivers::sqlite::Reader& reader, PointBuffer& buffer)
 
 uint64_t Reader::skipImpl(uint64_t count)
 {
-    return naiveSkipImpl(count);
+    uint64_t totalNumRead = 0;
+
+    // read (and discard) all the next 'count' points
+    // in case count is really big, we do this in blocks of size 'chunk'
+    while (count > 0)
+    {
+        boost::uint64_t thisCount64 =
+            std::min<boost::uint64_t>(getChunkSize(), count);
+        // getChunkSize is a uint32, so this cast is safe
+        boost::uint32_t thisCount =
+            static_cast<boost::uint32_t>(thisCount64);
+
+        PointBuffer junk(getReader().getSchema(), thisCount);
+        boost::uint32_t numRead = read(junk);
+        if (numRead == 0)
+            break; // end of file or something
+
+        count -= numRead;
+        totalNumRead += numRead;
+    }
+    return totalNumRead;
 }
 
 

@@ -927,15 +927,14 @@ void Writer::CreatePCEntry(Schema const& buffer_schema)
 
     try
     {
-        Option& pc_id = getOptions().getOptionByRef("pc_id");
+        Option& pc_id = m_options.getOptionByRef("pc_id");
         pc_id.setValue(m_pc_id);
     }
     catch (pdal::option_not_found&)
     {
         Option pc_id("pc_id", m_pc_id, "Point Cloud Id");
-        getOptions().add(pc_id);
+        m_options.add(pc_id);
     }
-
 }
 
 bool Writer::IsValidWKT(std::string const& input)

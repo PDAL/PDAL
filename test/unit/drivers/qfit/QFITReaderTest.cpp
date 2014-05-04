@@ -121,8 +121,6 @@ BOOST_AUTO_TEST_CASE(test_10_word)
     Check_Point(data, 0, 221.826822, 59.205160, 32.0900, 0);
     Check_Point(data, 1, 221.826740, 59.205161, 32.0190, 0);
     Check_Point(data, 2, 221.826658, 59.205164, 32.0000, 0);
-
-    return;
 }
 
 BOOST_AUTO_TEST_CASE(test_14_word)

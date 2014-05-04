@@ -88,8 +88,6 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_sequential_iter)
     }
 
     delete iter;
-
-    return;
 }
 
 
@@ -140,8 +138,6 @@ BOOST_AUTO_TEST_CASE(FauxReaderTest_test_options)
     }
 
     delete iter;
-
-    return;
 }
 
 
@@ -247,8 +243,6 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_random_iter)
     }
 
     delete iter;
-
-    return;
 }
 
 
@@ -298,8 +292,6 @@ BOOST_AUTO_TEST_CASE(test_random_mode)
     }
 
     delete iter;
-
-    return;
 }
 
 BOOST_AUTO_TEST_CASE(test_ramp_mode_1)
@@ -345,8 +337,6 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode_1)
 
 
     delete iter;
-
-    return;
 }
 
 
@@ -390,8 +380,6 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode_2)
     }
 
     delete iter;
-
-    return;
 }
 
 
@@ -412,6 +400,24 @@ BOOST_AUTO_TEST_CASE(test_custom_fields)
 
     const Schema& schema = reader.getSchema();
     BOOST_CHECK_EQUAL(schema.getDimensions().size(), 2u);
+}
+
+
+BOOST_AUTO_TEST_CASE(testUnknownPointCountType)
+{
+    Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
+    std::vector<Dimension> dims = pdal::drivers::faux::Reader::getDefaultDimensions();
+    pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Constant,
+                                       dims, true);
+    reader.initialize();
+    BOOST_CHECK_EQUAL(reader.getNumPoints(), 0);
+
+    PointBuffer data(reader.getSchema(), 1250);
+    StageSequentialIterator* iter = reader.createSequentialIterator(data);
+    boost::uint32_t numRead = iter->read(data);
+    BOOST_CHECK_EQUAL(numRead, 1000);
+
+    delete iter;
 }
 
 

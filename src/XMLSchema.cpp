@@ -761,15 +761,15 @@ void Writer::write(TextWriterPtr writer)
 
     xmlTextWriterSetIndent(w, 1);
     xmlTextWriterStartDocument(w, NULL, "utf-8", NULL);
-    xmlTextWriterStartElementNS(w, BAD_CAST "pc", BAD_CAST "PointCloudSchema", NULL);
-    xmlTextWriterWriteAttributeNS(w, BAD_CAST "xmlns", BAD_CAST "pc", NULL, BAD_CAST "http://pointcloud.org/schemas/PC/");
-    xmlTextWriterWriteAttributeNS(w, BAD_CAST "xmlns", BAD_CAST "xsi", NULL, BAD_CAST "http://www.w3.org/2001/XMLSchema-instance");
+    xmlTextWriterStartElementNS(w, (const xmlChar*) "pc", (const xmlChar*) "PointCloudSchema", NULL);
+    xmlTextWriterWriteAttributeNS(w, (const xmlChar*) "xmlns", (const xmlChar*) "pc", NULL, (const xmlChar*) "http://pointcloud.org/schemas/PC/");
+    xmlTextWriterWriteAttributeNS(w, (const xmlChar*) "xmlns", (const xmlChar*) "xsi", NULL, (const xmlChar*) "http://www.w3.org/2001/XMLSchema-instance");
 
     writeSchema(writer);
 
     if (m_metadata.size())
     {
-        xmlTextWriterStartElementNS(w, BAD_CAST "pc", BAD_CAST "metadata", NULL);
+        xmlTextWriterStartElementNS(w, (const xmlChar*) "pc", (const xmlChar*) "metadata", NULL);
 
         boost::property_tree::ptree output;
         PipelineWriter::write_metadata_ptree(output, m_metadata);
@@ -779,7 +779,7 @@ void Writer::write(TextWriterPtr writer)
 
         // wipe off write_xml's xml declaration
         boost::algorithm::erase_all(xml, "<?xml version=\"1.0\" encoding=\"utf-8\"?>");
-        xmlTextWriterWriteRawLen(w, BAD_CAST xml.c_str(), xml.size());
+        xmlTextWriterWriteRawLen(w, (const xmlChar*) xml.c_str(), xml.size());
         xmlTextWriterEndElement(w);
     }
     
@@ -788,7 +788,7 @@ void Writer::write(TextWriterPtr writer)
         orientation << "point";
     if (m_schema.getOrientation() == schema::DIMENSION_INTERLEAVED)
         orientation << "dimension";
-    xmlTextWriterWriteElementNS(w, BAD_CAST "pc", BAD_CAST "orientation", NULL, BAD_CAST orientation.str().c_str());
+    xmlTextWriterWriteElementNS(w, (const xmlChar*) "pc", (const xmlChar*) "orientation", NULL, (const xmlChar*) orientation.str().c_str());
     
 
     xmlTextWriterEndElement(w);
@@ -808,27 +808,27 @@ void Writer::writeSchema(TextWriterPtr writer)
     for (boost::uint32_t i = 0; i < dims.size(); i++)
     {
         Dimension const& dim = dims[i];
-        xmlTextWriterStartElementNS(w, BAD_CAST "pc", BAD_CAST "dimension", NULL);
+        xmlTextWriterStartElementNS(w, (const xmlChar*) "pc", (const xmlChar*) "dimension", NULL);
 
         std::ostringstream position;
         position << i+1;
-        xmlTextWriterWriteElementNS(w, BAD_CAST "pc", BAD_CAST "position", NULL, BAD_CAST position.str().c_str());
+        xmlTextWriterWriteElementNS(w, (const xmlChar*) "pc", (const xmlChar*) "position", NULL, (const xmlChar*) position.str().c_str());
 
         std::ostringstream size;
         size << dim.getByteSize();
-        xmlTextWriterWriteElementNS(w, BAD_CAST "pc", BAD_CAST "size", NULL, BAD_CAST size.str().c_str());
+        xmlTextWriterWriteElementNS(w, (const xmlChar*) "pc", (const xmlChar*) "size", NULL, (const xmlChar*) size.str().c_str());
 
         std::ostringstream description;
         description << dim.getDescription();
         if (description.str().size())
-            xmlTextWriterWriteElementNS(w, BAD_CAST "pc", BAD_CAST "description", NULL, BAD_CAST description.str().c_str());
+            xmlTextWriterWriteElementNS(w, (const xmlChar*) "pc", (const xmlChar*) "description", NULL, (const xmlChar*) description.str().c_str());
 
         std::ostringstream name;
         name << dim.getName();
         if (name.str().size())
-            xmlTextWriterWriteElementNS(w, BAD_CAST "pc", BAD_CAST "name", NULL, BAD_CAST name.str().c_str());
+            xmlTextWriterWriteElementNS(w, (const xmlChar*) "pc", (const xmlChar*) "name", NULL, (const xmlChar*) name.str().c_str());
 
-        xmlTextWriterWriteElementNS(w, BAD_CAST "pc", BAD_CAST "interpretation", NULL, BAD_CAST dim.getInterpretationName().c_str());
+        xmlTextWriterWriteElementNS(w, (const xmlChar*) "pc", (const xmlChar*) "interpretation", NULL, (const xmlChar*) dim.getInterpretationName().c_str());
 
         double minimum = dim.getMinimum();
         if (!Utils::compare_distance<double>(minimum, 0.0))
@@ -837,10 +837,10 @@ void Writer::writeSchema(TextWriterPtr writer)
             mn.setf(std::ios_base::fixed, std::ios_base::floatfield);
             mn.precision(12);
             mn << minimum;
-            xmlTextWriterStartElementNS(w, BAD_CAST "pc", BAD_CAST "minimum", NULL);
+            xmlTextWriterStartElementNS(w, (const xmlChar*) "pc", (const xmlChar*) "minimum", NULL);
 
-            xmlTextWriterWriteAttributeNS(w, BAD_CAST "pc", BAD_CAST "units", NULL, BAD_CAST "double");
-            xmlTextWriterWriteAttributeNS(w, BAD_CAST "pc", BAD_CAST "value", NULL, BAD_CAST mn.str().c_str());
+            xmlTextWriterWriteAttributeNS(w, (const xmlChar*) "pc", (const xmlChar*) "units", NULL, (const xmlChar*) "double");
+            xmlTextWriterWriteAttributeNS(w, (const xmlChar*) "pc", (const xmlChar*) "value", NULL, (const xmlChar*) mn.str().c_str());
             xmlTextWriterEndElement(w);
         }
 
@@ -852,10 +852,10 @@ void Writer::writeSchema(TextWriterPtr writer)
             mn.setf(std::ios_base::fixed, std::ios_base::floatfield);
             mn.precision(12);
             mn << maximum;
-            xmlTextWriterStartElementNS(w, BAD_CAST "pc", BAD_CAST "maximum", NULL);
+            xmlTextWriterStartElementNS(w, (const xmlChar*) "pc", (const xmlChar*) "maximum", NULL);
 
-            xmlTextWriterWriteAttributeNS(w, BAD_CAST "pc", BAD_CAST "units", NULL, BAD_CAST "double");
-            xmlTextWriterWriteAttributeNS(w, BAD_CAST "pc", BAD_CAST "value", NULL, BAD_CAST mn.str().c_str());
+            xmlTextWriterWriteAttributeNS(w, (const xmlChar*) "pc", (const xmlChar*) "units", NULL, (const xmlChar*) "double");
+            xmlTextWriterWriteAttributeNS(w, (const xmlChar*) "pc", (const xmlChar*) "value", NULL, (const xmlChar*) mn.str().c_str());
             xmlTextWriterEndElement(w);
 
         }
@@ -867,7 +867,7 @@ void Writer::writeSchema(TextWriterPtr writer)
             out.setf(std::ios_base::fixed, std::ios_base::floatfield);
             out.precision(14);
             out << scale;
-            xmlTextWriterWriteElementNS(w, BAD_CAST "pc", BAD_CAST "scale", NULL, BAD_CAST out.str().c_str());
+            xmlTextWriterWriteElementNS(w, (const xmlChar*) "pc", (const xmlChar*) "scale", NULL, (const xmlChar*) out.str().c_str());
 
         }
 
@@ -878,21 +878,21 @@ void Writer::writeSchema(TextWriterPtr writer)
             out.setf(std::ios_base::fixed, std::ios_base::floatfield);
             out.precision(12);
             out << offset;
-            xmlTextWriterWriteElementNS(w, BAD_CAST "pc", BAD_CAST "offset", NULL, BAD_CAST out.str().c_str());
+            xmlTextWriterWriteElementNS(w, (const xmlChar*) "pc", (const xmlChar*) "offset", NULL, (const xmlChar*) out.str().c_str());
 
         }
 
-        xmlTextWriterWriteElementNS(w, BAD_CAST "pc", BAD_CAST "active", NULL, BAD_CAST "true");
+        xmlTextWriterWriteElementNS(w, (const xmlChar*) "pc", (const xmlChar*) "active", NULL, (const xmlChar*) "true");
 
         std::ostringstream uuid;
         uuid << dim.getUUID();
         if (uuid.str().size())
-            xmlTextWriterWriteElementNS(w, BAD_CAST "pc", BAD_CAST "uuid", NULL, BAD_CAST uuid.str().c_str());
+            xmlTextWriterWriteElementNS(w, (const xmlChar*) "pc", (const xmlChar*) "uuid", NULL, (const xmlChar*) uuid.str().c_str());
 
         std::ostringstream parent;
         parent << dim.getParent();
         if (parent.str().size())
-            xmlTextWriterWriteElementNS(w, BAD_CAST "pc", BAD_CAST "parent_uuid", NULL, BAD_CAST parent.str().c_str());
+            xmlTextWriterWriteElementNS(w, (const xmlChar*) "pc", (const xmlChar*) "parent_uuid", NULL, (const xmlChar*) parent.str().c_str());
 
         xmlTextWriterEndElement(w);
 

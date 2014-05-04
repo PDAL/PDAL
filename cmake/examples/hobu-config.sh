@@ -9,8 +9,8 @@ HEXER_HOME="/Users/hobu/dev/git/hexer"
 SQLITE_HOME="/usr/local/opt/sqlite"
 SO_EXT=dylib
 EMBED=ON
-CC=/Users/hobu/bin/clang
-CXX=/Users/hobu/bin/clang++
+# CC=/usr/local/bin/gcc-4.8
+# CXX=/usr/local/bin/g++-4.8
 
 ORACLE_HOME=$HOME/oracle
 export ORACLE_HOME
@@ -21,7 +21,7 @@ if ! [ -z "$1" ]; then
     CONFIG="$1"
 fi
 
-cmake   -G "$CONFIG"  \
+CC=$CC CXX=$CXX cmake   -G "$CONFIG"  \
         -DCMAKE_BUILD_TYPE=Debug \
         -DCMAKE_INSTALL_PREFIX=/Users/hobu \
         -DWITH_ORACLE=ON \
@@ -32,9 +32,9 @@ cmake   -G "$CONFIG"  \
         -DWITH_NITRO=ON \
         -DWITH_MRSID=ON \
         -DWITH_PCL=ON \
-        -DPCL_DIR=/Users/hobu/dev/git/pcl/include \
+        -DPCL_DIR=/Users/hobu/dev/git/pcl/installed/share/pcl-1.7/ \
         -DMRSID_INCLUDE_DIR=/Users/hobu/dev/release/mrsid/Lidar_DSDK/include \
-        -DMRSID_LIBRRARY=/Users/hobu/dev/release/mrsid/Lidar_DSDK/lib/liblti_lidar_dsdk.dylib \
+        -DMRSID_LIBRARY=/Users/hobu/dev/release/mrsid/Lidar_DSDK/lib/liblti_lidar_dsdk.dylib \
         -DHEXER_INCLUDE_DIR=${HEXER_HOME}/include \
         -DHEXER_LIBRARY=${HEXER_HOME}/bin/libhexer.${SO_EXT} \
         -DGEOTIFF_INCLUDE_DIR=${GEOTIFF_HOME}/include/ \

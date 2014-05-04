@@ -84,8 +84,6 @@ BOOST_AUTO_TEST_CASE(test1)
         FileUtils::closeFile(ostreamname);
         FileUtils::deleteFile(wfilename);
     }
-
-    return;
 }
 
 
@@ -138,8 +136,6 @@ static void check_contents(std::istream& s)
     BOOST_CHECK(s.get() == -1);
 
     BOOST_CHECK(s.eof());
-
-    return;
 }
 
 
@@ -194,8 +190,6 @@ BOOST_AUTO_TEST_CASE(test2)
         f.deallocate(s3);
         // f.deallocate(s2);   // let the dtor do it for us
     }
-
-    return;
 }
 
 BOOST_AUTO_TEST_SUITE_END()

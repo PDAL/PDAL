@@ -52,7 +52,6 @@ Reader::Reader(const Options& options, const PointBuffer& buffer)
     setNumPoints(buffer.getNumPoints());
     setBounds(buffer.getSpatialBounds());
     setSchema(buffer.getSchema());
-    setPointCountType(PointCount_Fixed);
 
     return;
 }

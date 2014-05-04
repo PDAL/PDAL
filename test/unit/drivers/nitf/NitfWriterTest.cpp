@@ -105,8 +105,6 @@ static void compare_contents(const std::string& las_file, const std::string& ntf
 
     delete ntf_iter;
     delete las_iter;
-
-    return;
 }
 #endif
 
@@ -174,8 +172,6 @@ BOOST_AUTO_TEST_CASE(test1)
 
 #endif
 
-    return;
-
 #if 0
     //
     // check the generated NITF
@@ -196,8 +192,6 @@ BOOST_AUTO_TEST_CASE(test1)
         FileUtils::deleteFile(Support::temppath(nitf_output));
     }
 #endif
-
-    return;
 }
 
 

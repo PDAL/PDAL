@@ -394,8 +394,6 @@ void Support::check_pN(const pdal::PointBuffer& data,
         BOOST_CHECK_EQUAL(g0, gref);
         BOOST_CHECK_EQUAL(b0, bref);
     }
-
-    return;
 }
 
 

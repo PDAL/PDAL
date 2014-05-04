@@ -60,6 +60,11 @@ class PDAL_DLL Reader : public pdal::Reader, pdal::drivers::oci::OracleDriver
 public:
     SET_STAGE_NAME("drivers.oci.reader", "OCI Reader")
     SET_STAGE_LINK("http://pdal.io/stages/drivers.oci.reader.html")
+#ifdef PDAL_HAVE_ORACLE
+    SET_STAGE_ENABLED(true)
+#else
+    SET_STAGE_ENABLED(false)
+#endif
     
     Reader(const Options&);
     ~Reader();
@@ -162,10 +167,9 @@ protected:
     DimensionMapPtr m_dimension_map;
     schema::Orientation m_orientation;
     DimensionMaps m_dimensions;
+    const pdal::drivers::oci::Reader& m_reader;
     
 private:
-    const pdal::drivers::oci::Reader& m_reader;
-
     Statement getNextCloud(BlockPtr block, boost::int32_t& cloud_id);
     void readBlob(Statement statement,
                   BlockPtr block,
@@ -199,7 +203,6 @@ private:
     boost::uint64_t skipImpl(boost::uint64_t count);
     boost::uint32_t readBufferImpl(PointBuffer& data);
     bool atEndImpl() const;
-    boost::uint32_t m_numPoints;
     LogPtr m_log;
 };
 

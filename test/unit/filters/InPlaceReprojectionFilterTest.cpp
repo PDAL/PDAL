@@ -152,9 +152,6 @@ BOOST_AUTO_TEST_CASE(InPlaceReprojectionFilterTest_test_1)
         delete iter;
 
     }
-
-
-    return;
 }
 
 
@@ -225,9 +222,6 @@ BOOST_AUTO_TEST_CASE(InPlaceReprojectionFilterTest_test_2)
         delete iter;
 
     }
-
-
-    return;
 }
 #endif
 

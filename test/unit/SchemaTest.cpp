@@ -96,8 +96,6 @@ BOOST_AUTO_TEST_CASE(SchemaTest_ptree)
 
     boost::algorithm::erase_all(ref, "\n");
     BOOST_CHECK_EQUAL(ref, out1);
-
-    return;
 }
 
 
@@ -154,9 +152,6 @@ BOOST_AUTO_TEST_CASE(SchemaTest_orientation)
     s.appendDimension(y);
     
     BOOST_CHECK_EQUAL(s.getOrientation(), pdal::schema::POINT_INTERLEAVED);
-
-
-    return;
 }
 
 
@@ -175,11 +170,6 @@ BOOST_AUTO_TEST_CASE(SchemaTest_pack)
     
     BOOST_CHECK_EQUAL(p.size(), 1);
     BOOST_CHECK_EQUAL(s.size(), 2);
-
-    
-
-
-    return;
 }
 
 BOOST_AUTO_TEST_SUITE_END()

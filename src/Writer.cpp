@@ -51,19 +51,14 @@ namespace pdal
 {
 
 Writer::Writer(Stage& prevStage, const Options& options)
-    : StageBase(StageBase::makeVector(prevStage), options)
-    , m_userCallback(0)
-    , m_writer_buffer(0)
-{
-    return;
-}
+    : Stage(makeVector(prevStage), options), m_userCallback(0),
+    m_writer_buffer(0)
+{}
 
 
 void Writer::initialize()
 {
-    StageBase::initialize();
-
-    return;
+    Stage::initialize();
 }
 
 Writer::~Writer()
@@ -286,16 +281,6 @@ boost::property_tree::ptree Writer::serializePipeline() const
 
     return root;
 }
-
-
-// boost::property_tree::ptree Writer::toPTree() const
-// {
-//     boost::property_tree::ptree tree = StageBase::toPTree();
-// 
-//     // (nothing to add for a Writer)
-// 
-//     return tree;
-// }
 
 
 } // namespace pdal

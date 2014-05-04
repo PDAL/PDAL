@@ -54,8 +54,6 @@ BOOST_AUTO_TEST_CASE(EnvironmentTest_1)
 
     (void)python_env;
 #endif
-
-    return;
 }
 
 boost::test_tools::predicate_result
@@ -127,8 +125,6 @@ BOOST_AUTO_TEST_CASE(EnvironmentTest_rng)
     // }
     // 
     // BOOST_CHECK(compare_uuids(e, f));    
-    
-    return;
 }
 
 

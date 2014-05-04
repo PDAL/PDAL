@@ -142,8 +142,6 @@ BOOST_AUTO_TEST_CASE(test_swapping)
         SWAP_ENDIANNESS(reflipped_t);
         BOOST_CHECK_EQUAL(unflipped_t, reflipped_t);
     }
-
-    return;
 }
 
 BOOST_AUTO_TEST_SUITE_END()

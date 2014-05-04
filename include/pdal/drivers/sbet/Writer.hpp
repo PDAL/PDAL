@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Andrew Bell
+* Copyright (c) 2014, Peter J. Gadomski (pete.gadomski@gmail.com)
 *
 * All rights reserved.
 *
@@ -32,47 +32,47 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+#ifndef INCLUDED_DRIVERS_SBET_WRITER_HPP
+#define INCLUDED_DRIVERS_SBET_WRITER_HPP
 
-#include <pdal/IStream.hpp>
-#include <pdal/Reader.hpp>
-#include <pdal/ReaderIterator.hpp>
 
-#include "BpfHeader.hpp"
+#include <pdal/Writer.hpp>
+
 
 namespace pdal
 {
+namespace drivers
+{
+namespace sbet
+{
 
-class PDAL_DLL BpfReader : public Reader
+
+class PDAL_DLL Writer : public pdal::Writer
 {
 public:
-    SET_STAGE_NAME("drivers.bpf.reader", "Bpf Reader")
-    SET_STAGE_LINK("http://pdal.io/stages/drivers.bpf.reader.html")
-    SET_STAGE_ENABLED(true)
+    SET_STAGE_NAME("drivers.sbet.writer", "SBET Writer")
+    SET_STAGE_LINK("http://pdal.io/stages/drivers.sbet.writer.html")
 
-    BpfReader(const Options&);
-    BpfReader(const std::string&);
+    Writer(Stage& prevStage, const Options&);
+    virtual ~Writer();
 
     virtual void initialize();
-    virtual boost::uint64_t getNumPoints() const
-        {  return m_header.m_numPts; }
+    static Options getDefaultOptions();
 
-    StageSequentialIterator*
-        createSequentialIterator(PointBuffer& buffer) const;
-    StageRandomIterator* createRandomIterator(PointBuffer& buffer) const;
+protected:
+    virtual void writeBegin(boost::uint64_t);
+    virtual boost::uint32_t writeBuffer(const PointBuffer&);
+    virtual void writeEnd(boost::uint64_t);
 
 private:
-    ILeStream m_stream;
-    BpfHeader m_header;
-    std::vector<BpfDimension> m_dims;
-    BpfUlemHeader m_ulemHeader;
-    std::vector<BpfUlemFrame> m_ulemFrames;
-    BpfPolarHeader m_polarHeader;
-    std::vector<BpfPolarFrame> m_polarFrames;
+    std::ostream* m_ostream;
 
-    bool readUlemData();
-    bool readPolarData();
-};
+}; // class Writer
 
-} // namespace
 
+}
+}
+} // namespace pdal::drivers::sbet
+
+
+#endif // INCLUDED_DRIVERS_SBET_WRITER_HPP

@@ -73,6 +73,11 @@ class PDAL_DLL Writer : public pdal::Writer
 public:
     SET_STAGE_NAME("drivers.p2g.writer", "Points2Grid Writer")
     SET_STAGE_LINK("http://pdal.io/stages/drivers.p2g.writer.html")
+#ifdef PDAL_HAVE_P2G
+    SET_STAGE_ENABLED(true)
+#else
+    SET_STAGE_ENABLED(false)
+#endif
     
     Writer(Stage& prevStage, const Options&);
     ~Writer();

@@ -59,6 +59,13 @@ class PDAL_DLL Reprojection : public Filter
 {
 public:
     SET_STAGE_NAME("filters.reprojection", "Reprojection Filter")
+    SET_STAGE_LINK("http://www.pdal.io/stages/filters.inplacereprojection.html")     
+#ifdef PDAL_HAVE_GDAL
+    SET_STAGE_ENABLED(true)
+#else
+    SET_STAGE_ENABLED(false)
+#endif
+
 
     Reprojection(Stage& prevStage, const Options&);
     Reprojection(Stage& prevStage,

@@ -41,7 +41,6 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/Metadata.hpp"
   "${PDAL_HEADERS_DIR}/MultiFilter.hpp"
   "${PDAL_HEADERS_DIR}/MultiFilterIterator.hpp"
-  "${PDAL_HEADERS_DIR}/NullPointBuffer.hpp"
   "${PDAL_HEADERS_DIR}/Options.hpp"
   "${PDAL_HEADERS_DIR}/OStream.hpp"
   "${PDAL_HEADERS_DIR}/PipelineManager.hpp"
@@ -54,7 +53,6 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/Schema.hpp"
   "${PDAL_HEADERS_DIR}/SpatialReference.hpp"
   "${PDAL_HEADERS_DIR}/Stage.hpp"
-  "${PDAL_HEADERS_DIR}/StageBase.hpp"
   "${PDAL_HEADERS_DIR}/StageFactory.hpp"
   "${PDAL_HEADERS_DIR}/StageInfo.hpp"
   "${PDAL_HEADERS_DIR}/StageIterator.hpp"
@@ -87,7 +85,6 @@ set(PDAL_BASE_CPP
   Metadata.cpp
   MultiFilter.cpp
   MultiFilterIterator.cpp
-  NullPointBuffer.cpp
   Options.cpp
   PipelineManager.cpp
   PipelineReader.cpp
@@ -99,7 +96,6 @@ set(PDAL_BASE_CPP
   Schema.cpp
   SpatialReference.cpp
   Stage.cpp
-  StageBase.cpp
   StageFactory.cpp
   StageInfo.cpp
   StageIterator.cpp
@@ -500,10 +496,12 @@ set(PDAL_SBET_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_SBET_PATH}")
 
 set(PDAL_DRIVERS_SBET_HPP
     "${PDAL_SBET_HEADERS}/Reader.hpp"
+    "${PDAL_SBET_HEADERS}/Writer.hpp"
 )
 
 set (PDAL_DRIVERS_SBET_CPP 
     "${PDAL_SBET_SRC}/Reader.cpp"
+    "${PDAL_SBET_SRC}/Writer.cpp"
 )
 
 list (APPEND PDAL_CPP ${PDAL_DRIVERS_SBET_CPP} )
@@ -796,7 +794,6 @@ if (WITH_HDF5)
 endif()
 
   target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE}
-    "${PDAL_LIB_NAME}"
     "${CMAKE_THREAD_LIBS_INIT}"
     "${CMAKE_DL_LIBS}"
     "${TIFF_LIBRARY}"

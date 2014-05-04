@@ -65,8 +65,6 @@ BOOST_AUTO_TEST_CASE(pc2pcTest_test_no_input)
 
     const std::string expected = "Usage error: --input";
     BOOST_CHECK_EQUAL(output.substr(0, expected.length()), expected);
-
-    return;
 }
 #endif
 
@@ -81,8 +79,6 @@ BOOST_AUTO_TEST_CASE(pc2pcTest_test_common_opts)
 
     stat = pdal::Utils::run_shell_command(cmd + " --version", output);
     BOOST_CHECK_EQUAL(stat, 0);
-
-    return;
 }
 
 
@@ -180,8 +176,6 @@ BOOST_AUTO_TEST_CASE(pc2pc_test_switches)
 
     pdal::FileUtils::deleteFile(outputLas);
     pdal::FileUtils::deleteFile(outputLaz);
-
-    return;
 }
 
 

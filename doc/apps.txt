@@ -109,6 +109,7 @@ Print three selected points of the file as `reStructuredText`_
 
 
 .. _`reStructuredText`: http://docutils.sourceforge.net/docs/user/rst/quickref.html
+
 :: 
 
     -p [ --point ] [=arg(=0)] point to dump
@@ -171,6 +172,10 @@ A simple CSV-style text is output with delta information:
      Min        0.0000            0.0000            0.0000
      Mean       0.0000            0.0000            0.0000
     ----------- --------------- --------------- --------------
+
+::
+
+        [hobu@pyro pdal (master)]$ ./bin/pdal delta test/data/1.2-with-color.las test/data/1.2-with-color.las --detail
 
 ::
 

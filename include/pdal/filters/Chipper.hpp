@@ -188,6 +188,7 @@ class PDAL_DLL Chipper : public pdal::Filter
 public:
     SET_STAGE_NAME("filters.chipper", "Chipper")
     SET_STAGE_LINK("http://pdal.io/stages/filters.chipper.html")
+    SET_STAGE_ENABLED(true)
 
     Chipper(Stage& prevStage, const Options&);
 
@@ -266,7 +267,6 @@ private:
 
     pdal::filters::Chipper const& m_chipper;
     std::size_t m_currentBlockId;
-    boost::uint64_t m_currentPointCount;
     PointBuffer* m_one_point;
     Schema const* m_current_read_schema;
     StageRandomIterator * m_random_iterator;

@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Andrew Bell
+* Copyright (c) 2014, Peter J. Gadomski (pete.gadomski@gmail.com)
 *
 * All rights reserved.
 *
@@ -32,47 +32,65 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+#include <boost/test/unit_test.hpp>
 
-#include <pdal/IStream.hpp>
-#include <pdal/Reader.hpp>
-#include <pdal/ReaderIterator.hpp>
+#include <pdal/drivers/sbet/Reader.hpp>
+#include <pdal/drivers/sbet/Writer.hpp>
 
-#include "BpfHeader.hpp"
+#include "Support.hpp"
 
-namespace pdal
+
+pdal::Options makeReaderOptions()
 {
+    pdal::Options options;
+    pdal::Option filename("filename", Support::datapath("sbet/2-points.sbet"), "");
+    options.add(filename);
+    return options;
+}
 
-class PDAL_DLL BpfReader : public Reader
+
+pdal::Options makeWriterOptions()
 {
-public:
-    SET_STAGE_NAME("drivers.bpf.reader", "Bpf Reader")
-    SET_STAGE_LINK("http://pdal.io/stages/drivers.bpf.reader.html")
-    SET_STAGE_ENABLED(true)
+    pdal::Options options;
+    pdal::Option filename("filename",
+                          Support::temppath("SbetWriterTest.sbet"), "");
+    options.add(filename);
+    return options;
+}
 
-    BpfReader(const Options&);
-    BpfReader(const std::string&);
 
-    virtual void initialize();
-    virtual boost::uint64_t getNumPoints() const
-        {  return m_header.m_numPts; }
+BOOST_AUTO_TEST_SUITE(SbetWriterTest)
 
-    StageSequentialIterator*
-        createSequentialIterator(PointBuffer& buffer) const;
-    StageRandomIterator* createRandomIterator(PointBuffer& buffer) const;
 
-private:
-    ILeStream m_stream;
-    BpfHeader m_header;
-    std::vector<BpfDimension> m_dims;
-    BpfUlemHeader m_ulemHeader;
-    std::vector<BpfUlemFrame> m_ulemFrames;
-    BpfPolarHeader m_polarHeader;
-    std::vector<BpfPolarFrame> m_polarFrames;
+BOOST_AUTO_TEST_CASE(testConstructor)
+{
+    pdal::drivers::sbet::Reader reader(makeReaderOptions());
+    pdal::drivers::sbet::Writer writer(reader, makeWriterOptions());
 
-    bool readUlemData();
-    bool readPolarData();
-};
+    BOOST_CHECK(writer.getDescription() == "SBET Writer");
+    BOOST_CHECK_EQUAL(writer.getName(), "drivers.sbet.writer");
 
-} // namespace
+    writer.initialize();
+}
 
+
+BOOST_AUTO_TEST_CASE(testWrite)
+{
+    {
+        pdal::drivers::sbet::Reader reader(makeReaderOptions());
+        pdal::drivers::sbet::Writer writer(reader, makeWriterOptions());
+        writer.initialize();
+
+        writer.write(2);
+    }
+
+    BOOST_CHECK(Support::compare_files(
+                    Support::temppath("SbetWriterTest.sbet"),
+                    Support::datapath("sbet/2-points.sbet")));
+
+    pdal::FileUtils::deleteFile(
+        Support::temppath("SbetWriterTest.sbet"));
+}
+
+
+BOOST_AUTO_TEST_SUITE_END()
