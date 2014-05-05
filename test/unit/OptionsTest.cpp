@@ -62,8 +62,6 @@ BOOST_AUTO_TEST_CASE(test_static_options)
     BOOST_CHECK(!opts.hasOption("metes"));
     const boost::property_tree::ptree& pt = opts.toPTree();
     BOOST_CHECK(pt.size() == 3);
-
-    return;
 }
 
 
@@ -95,8 +93,6 @@ BOOST_AUTO_TEST_CASE(test_option_writing)
     boost::property_tree::xml_parser::write_xml(ostr_s, tree_s);
     const std::string str_s = ostr_s.str();
     BOOST_CHECK(str_s == ref_s);
-
-    return;
 }
 
 
@@ -121,8 +117,6 @@ BOOST_AUTO_TEST_CASE(test_option_reading)
     BOOST_CHECK(opt_from_ptree.getDescription() == "This is my integral option.");
     BOOST_CHECK(opt_from_ptree.getValue<std::string>() == "17");
     BOOST_CHECK(opt_from_ptree.getValue<int>() == 17);
-
-    return;
 }
 
 
@@ -141,8 +135,6 @@ BOOST_AUTO_TEST_CASE(test_options_copy_ctor)
 
     BOOST_CHECK(copy.hasOption("my_int"));
     BOOST_CHECK(copy.hasOption("my_string"));
-
-    return;
 }
 
 BOOST_AUTO_TEST_CASE(test_options_multi)
@@ -164,8 +156,6 @@ BOOST_AUTO_TEST_CASE(test_options_multi)
 
     pdal::Option const& s = o->getOption("b");
     BOOST_CHECK_EQUAL(s.getValue<std::string>(), "2");
-
-    return;
 }
 
 BOOST_AUTO_TEST_CASE(test_options_writing)
@@ -193,8 +183,6 @@ BOOST_AUTO_TEST_CASE(test_options_writing)
     BOOST_CHECK(val_s == "Yow.");
     BOOST_CHECK(desc_i == "This is my integral option.");
     BOOST_CHECK(desc_s == "This is my stringy option.");
-
-    return;
 }
 
 
@@ -211,8 +199,6 @@ BOOST_AUTO_TEST_CASE(test_options_reading)
 
     BOOST_CHECK(opt.getValue<std::string>() == "17");
     BOOST_CHECK(opt.getValue<int>() == 17);
-
-    return;
 }
 
 
@@ -261,8 +247,6 @@ BOOST_AUTO_TEST_CASE(test_valid_options)
 
         BOOST_CHECK(options[1].getValue<std::string>() == "nineteen");
     }
-
-    return;
 }
 
 
@@ -298,8 +282,6 @@ BOOST_AUTO_TEST_CASE(Options_test_bool)
     BOOST_CHECK_EQUAL(bv, false);
     BOOST_CHECK_EQUAL(cv, true);
     BOOST_CHECK_EQUAL(dv, false);
-
-    return;
 }
 
 

@@ -84,8 +84,6 @@ BOOST_AUTO_TEST_CASE(PipelineWriterTest_test1)
     }
 
     FileUtils::deleteFile(Support::datapath("pipeline/out.las"));
-
-    return;
 }
 
 
@@ -115,8 +113,6 @@ BOOST_AUTO_TEST_CASE(PipelineWriterTest_attr_test)
         BOOST_CHECK_EQUAL(tree.get<std::string>("x.<xmlattr>.b"), "bbb");
         BOOST_CHECK_EQUAL(tree.get<std::string>("child2"), "two");
     }
-
-    return;
 }
 
 
@@ -152,7 +148,6 @@ BOOST_AUTO_TEST_CASE(PipelineWriterTest_multioptions)
     }
 
     FileUtils::deleteFile(Support::temppath("test-multi.xml"));
-    return;
 }
 
 BOOST_AUTO_TEST_SUITE_END()

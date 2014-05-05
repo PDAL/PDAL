@@ -38,18 +38,12 @@
 namespace pdal
 {
 
-Reader::Reader(const Options& options)
-    : Stage(StageBase::makeVector(), options)
-
-{
-
-}
+Reader::Reader(const Options& options) : Stage(makeVector(), options)
+{}
 
 
 Reader::~Reader()
-{
-    return;
-}
+{}
 
 
 void Reader::initialize()

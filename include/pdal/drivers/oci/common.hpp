@@ -97,7 +97,7 @@ class PDAL_DLL OracleDriver
 {
 public:
     OracleDriver(const Options& options)
-        : m_options(options)
+        : m_stageOptions(options)
     {
 
 
@@ -105,7 +105,7 @@ public:
 
     pdal::drivers::oci::Connection connect()
     {
-        std::string connection  = m_options.getValueOrThrow<std::string>("connection");
+        std::string connection  = m_stageOptions.getValueOrThrow<std::string>("connection");
 
         if (connection.empty())
             throw pdal_error("Oracle connection string empty! Unable to connect");
@@ -129,7 +129,7 @@ public:
     }
 
 private:
-    Options const& m_options;
+    Options const& m_stageOptions;
 
     OracleDriver& operator=(const OracleDriver&); // not implemented
     OracleDriver(const OracleDriver&); // not implemented

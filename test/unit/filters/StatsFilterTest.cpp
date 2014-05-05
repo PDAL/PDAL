@@ -94,8 +94,6 @@ BOOST_AUTO_TEST_CASE(StatsFilterTest_test1)
     BOOST_CHECK_CLOSE(statsX.average(), 1.0, 0.0001);
     BOOST_CHECK_CLOSE(statsY.average(), 2.0, 0.0001);
     BOOST_CHECK_CLOSE(statsZ.average(), 3.0, 0.0001);
-
-    return;
 }
 
 
@@ -143,8 +141,6 @@ BOOST_AUTO_TEST_CASE(test_random_iterator)
     }
 
     delete iter;
-
-    return;
 }
 
 
@@ -208,8 +204,6 @@ BOOST_AUTO_TEST_CASE(test_multiple_dims_same_name)
     BOOST_CHECK_EQUAL(statsZ.count(), 1000u);
     
     pdal::Metadata m = iterator->toMetadata();
-
-    return;
 }
 
 
@@ -279,9 +273,6 @@ BOOST_AUTO_TEST_CASE(test_specified_stats)
     
     BOOST_CHECK_CLOSE(statsX.minimum(), -117.2686466233, 0.0001);
     BOOST_CHECK_CLOSE(statsY.minimum(), 848899.700, 0.0001);    
-
-
-    return;
 }
 
 BOOST_AUTO_TEST_CASE(test_pointbuffer_stats)
@@ -342,9 +333,6 @@ BOOST_AUTO_TEST_CASE(test_pointbuffer_stats)
     pdal::Metadata m = data.getMetadata();
     
     BOOST_CHECK_EQUAL(m.toPTree().get<int>("metadata.filters_stats.metadata.Classification.metadata.counts.metadata.count-1.metadata.count.value"), 737);
-
-
-    return;
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -111,8 +111,6 @@ BOOST_AUTO_TEST_CASE(SchemaLayoutTest_ptree)
     boost::algorithm::erase_all(out1, "\n");
     boost::algorithm::erase_all(ref, "\n");
     BOOST_CHECK_EQUAL(ref, out1);
-
-    return;
 }
 #endif
 

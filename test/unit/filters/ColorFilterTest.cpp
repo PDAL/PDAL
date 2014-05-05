@@ -46,8 +46,6 @@ BOOST_AUTO_TEST_SUITE(ColorFilterTest)
 BOOST_AUTO_TEST_CASE(test1)
 {
     // BUG: tbd
-
-    return;
 }
 
 BOOST_AUTO_TEST_SUITE_END()

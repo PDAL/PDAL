@@ -37,9 +37,11 @@
 
 #include <pdal/pdal_internal.hpp>
 
-#include <pdal/StageBase.hpp>
-#include <pdal/Schema.hpp>
 #include <pdal/Bounds.hpp>
+#include <pdal/Log.hpp>
+#include <pdal/Metadata.hpp>
+#include <pdal/Options.hpp>
+#include <pdal/Schema.hpp>
 #include <pdal/SpatialReference.hpp>
 
 namespace pdal
@@ -57,22 +59,67 @@ class PointBuffer;
 //   <uint32>verbose
 //
 
-class PDAL_DLL Stage : public StageBase
+class PDAL_DLL Stage
 {
 public:
-    Stage(const std::vector<StageBase*>& prevs, const Options& options);
-    virtual ~Stage();
+    Stage(const std::vector<Stage*>& prevs, const Options& options);
+    virtual ~Stage()
+        {}
 
     virtual void initialize();
+    bool isInitialized() const
+        { return m_initialized; }
 
     inline Schema const& getSchema() const
-    {
-        return m_schema;
-    }
+        { return m_schema; }
     
     virtual boost::uint64_t getNumPoints() const;
     const Bounds<double>& getBounds() const;
     const SpatialReference& getSpatialReference() const;
+    const Options& getOptions() const
+        { return m_options; }
+    virtual boost::property_tree::ptree serializePipeline() const = 0;
+    virtual LogPtr log() const
+        { return m_log; }
+    bool isDebug() const
+        { return m_debug; }
+    bool isVerbose() const
+        { return (bool)m_verbose; }
+    boost::uint32_t getVerboseLevel() const
+        { return m_verbose; }
+    virtual std::string getName() const = 0;
+    virtual std::string getDescription() const = 0;
+    boost::uint32_t getId() const
+        { return m_id; }
+    const std::vector<Stage *>& getInputs() const
+        { return m_inputs; }
+    const std::vector<Stage *>& getOutputs() const
+        { return m_outputs; }
+    Stage& getPrevStage() const;
+    std::vector<Stage *> getPrevStages() const;
+    virtual Metadata getMetadata() const
+        { return m_metadata; }
+    virtual Metadata collectMetadata() const;
+    static Options getDefaultOptions()
+        { return Options(); }
+    static std::vector<Dimension> getDefaultDimensions()
+        { return std::vector<Dimension>(); }
+    static std::string s_getInfoLink()
+        { return std::string(); }
+
+#define SET_STAGE_NAME(name, description)  \
+    static std::string s_getName() { return name; }  \
+    std::string getName() const { return name; }  \
+    static std::string s_getDescription() { return description; }  \
+    std::string getDescription() const { return description; }
+
+#define SET_STAGE_LINK(infolink) \
+    static std::string s_getInfoLink() { return infolink; }  \
+    std::string getInfoLink() const { return infolink; }
+
+#define SET_STAGE_ENABLED(YES_OR_NO) \
+    static bool s_isEnabled() { return YES_OR_NO; } \
+    bool isEnabled() const { return YES_OR_NO; }
 
     virtual StageSequentialIterator*
             createSequentialIterator(PointBuffer&) const
@@ -82,17 +129,36 @@ public:
 
 protected:
     Schema m_schema;
+    Options m_options;
 
+    StageOperationType getDimensionOperationType() const
+        { return m_dimensionsType; }
     void setSchema(Schema const&);
     void setNumPoints(boost::uint64_t);
     void setBounds(Bounds<double> const&);
     void setSpatialReference(SpatialReference const&);
+    Metadata& getMetadataRef()
+        { return m_metadata; }
 
     // convenience function, for doing a "copy ctor" on all the core props
     // (used by the Filter stage, for example)
     void setCoreProperties(const Stage&);
 
+    static std::vector<Stage *> makeVector()
+        { return std::vector<Stage *>(); }
+    static std::vector<Stage *> makeVector(Stage& src);
+    static std::vector<Stage *> makeVector(const std::vector<Stage *>& src);
+
 private:
+    bool m_initialized;
+    bool m_debug;
+    boost::uint32_t m_verbose;
+    boost::uint32_t m_id;
+    std::vector<Stage *> m_inputs;
+    std::vector<Stage *> m_outputs;
+    StageOperationType m_dimensionsType;
+    LogPtr m_log;
+    Metadata m_metadata;
     mutable boost::uint64_t m_numPoints;
     Bounds<double> m_bounds;
     SpatialReference m_spatialReference;
