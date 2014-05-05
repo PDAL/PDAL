@@ -42,7 +42,7 @@
 
 #include <pdal/pdal_error.hpp>
 
-#include <vector> // TODO Forward declare?
+#include <vector>
 #include <string>
 #include <map>
 
