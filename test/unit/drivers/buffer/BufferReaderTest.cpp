@@ -152,8 +152,6 @@ BOOST_AUTO_TEST_CASE(test_sequential_iter)
 
     delete iter;
     delete input;
-
-    return;
 }
 
 BOOST_AUTO_TEST_CASE(test_random_iter)
@@ -254,8 +252,6 @@ BOOST_AUTO_TEST_CASE(test_random_iter)
 
     delete iter;
     delete input;
-
-    return;
 }
 
 
@@ -291,7 +287,6 @@ BOOST_AUTO_TEST_CASE(test_iterator_write)
     FileUtils::deleteFile(out_filename.getValue<std::string>());
     
     delete input;
-    return;
 }
 
 

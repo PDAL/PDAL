@@ -94,10 +94,6 @@ BOOST_AUTO_TEST_CASE(HexbinFilterTest_test_1)
 
 
         delete iter;
-
-
-
-    return;
 }
 
 

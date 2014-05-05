@@ -88,8 +88,6 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_sequential_iter)
     }
 
     delete iter;
-
-    return;
 }
 
 
@@ -140,8 +138,6 @@ BOOST_AUTO_TEST_CASE(FauxReaderTest_test_options)
     }
 
     delete iter;
-
-    return;
 }
 
 
@@ -247,8 +243,6 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_random_iter)
     }
 
     delete iter;
-
-    return;
 }
 
 
@@ -298,8 +292,6 @@ BOOST_AUTO_TEST_CASE(test_random_mode)
     }
 
     delete iter;
-
-    return;
 }
 
 BOOST_AUTO_TEST_CASE(test_ramp_mode_1)
@@ -345,8 +337,6 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode_1)
 
 
     delete iter;
-
-    return;
 }
 
 
@@ -390,8 +380,6 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode_2)
     }
 
     delete iter;
-
-    return;
 }
 
 
@@ -430,8 +418,6 @@ BOOST_AUTO_TEST_CASE(testUnknownPointCountType)
     BOOST_CHECK_EQUAL(numRead, 1000);
 
     delete iter;
-
-    return;
 }
 
 

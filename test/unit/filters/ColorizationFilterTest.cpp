@@ -135,9 +135,6 @@ BOOST_AUTO_TEST_CASE(ColorizationFilterTest_test_1)
 // #endif
 
     }
-
-
-    return;
 }
 
 #endif

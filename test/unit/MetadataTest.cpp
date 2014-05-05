@@ -136,8 +136,6 @@ BOOST_AUTO_TEST_CASE(test_construction)
     m.setValue<boost::uint64_t>(u64);
     BOOST_CHECK_EQUAL(m.getValue<boost::uint64_t>(), 64u);
     BOOST_CHECK_EQUAL(m.getType(), "nonNegativeInteger");
-
-    return;
 }
 
 BOOST_AUTO_TEST_CASE(test_metadata_copy)
@@ -170,8 +168,6 @@ BOOST_AUTO_TEST_CASE(test_metadata_copy)
     // pdal::Metadata m22 = b2.getEntry("m2");
     // BOOST_CHECK_EQUAL(m22.getValue<boost::uint32_t>(), 1u);
     //BOOST_CHECK_THROW(m22.getValue<boost::uint32_t>(), boost::bad_get);
-
-    return;
 }
 
 BOOST_AUTO_TEST_CASE(test_metadata_set)
@@ -195,8 +191,6 @@ BOOST_AUTO_TEST_CASE(test_metadata_set)
 
     
     b.addMetadata("uuid", boost::uuids::nil_uuid());
-    
-    return;
 }
 
 BOOST_AUTO_TEST_CASE(test_metadata_stage)
@@ -222,8 +216,6 @@ BOOST_AUTO_TEST_CASE(test_metadata_stage)
     // boost::property_tree::write_xml(std::cout, pipeline_metadata.toPTree());
 
     BOOST_CHECK_EQUAL(pipeline_metadata.toPTree().get_child("metadata").size(), 32u);
-
-    return;
 }
 
 BOOST_AUTO_TEST_CASE(test_metadata_constructor_no_throw)
@@ -231,8 +223,6 @@ BOOST_AUTO_TEST_CASE(test_metadata_constructor_no_throw)
 
     pdal::Bounds<double> b;
     pdal::Metadata entry("name", b);
-
-    return;
 }
 
 

@@ -113,8 +113,6 @@ BOOST_AUTO_TEST_CASE(CacheFilterTest_test_options)
 
     delete iter1;
     delete iter2;
-
-    return;
 }
 
 
@@ -177,8 +175,6 @@ BOOST_AUTO_TEST_CASE(CacheFilterTest_test_use_counts)
 
     delete iter1;
     delete iter2;
-
-    return;
 }
 
 
@@ -232,8 +228,6 @@ BOOST_AUTO_TEST_CASE(CacheFilterTest_test_random)
     
     delete sequential;
     delete random;
-
-    return;
 }
 
 
@@ -334,8 +328,6 @@ BOOST_AUTO_TEST_CASE(test_two_iters_with_cache)
    
         delete iter;
     }
-
-    return;
 }
 
 BOOST_AUTO_TEST_CASE(CacheFilterTest_test_large)
@@ -394,8 +386,6 @@ BOOST_AUTO_TEST_CASE(CacheFilterTest_test_large)
     
     delete sequential;
     delete random;
-
-    return;
 }
 
 

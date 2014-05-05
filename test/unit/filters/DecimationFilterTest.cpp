@@ -76,8 +76,6 @@ BOOST_AUTO_TEST_CASE(DecimationFilterTest_test1)
     BOOST_CHECK_EQUAL(t2, 20);
 
     delete iter;
-
-    return;
 }
 
 BOOST_AUTO_TEST_CASE(DecimationFilterTest_test_options)
@@ -113,8 +111,6 @@ BOOST_AUTO_TEST_CASE(DecimationFilterTest_test_options)
     BOOST_CHECK_EQUAL(t2, 20);
 
     delete iter;
-
-    return;
 }
 
 
@@ -160,8 +156,6 @@ BOOST_AUTO_TEST_CASE(DecimationFilterTest_test_random)
     // BOOST_CHECK_EQUAL(t2, 28);
 
     delete iter;
-
-    return;
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -89,8 +89,6 @@ BOOST_AUTO_TEST_CASE(test1)
     BOOST_CHECK(lookupHits == 5);
     BOOST_CHECK(insertMisses == 4);
     BOOST_CHECK(insertHits == 0);
-
-    return;
 }
 
 

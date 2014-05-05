@@ -83,9 +83,6 @@ BOOST_AUTO_TEST_CASE(TextWriterTest_test_1)
         pdal::FileUtils::deleteFile(output_file);
     else
         std::cout << "comparison of " << Support::datapath("autzen-point-format-3.txt") << " and " << output_file << " failed.";
-
-
-    return;
 }
 
 
@@ -141,8 +138,6 @@ BOOST_AUTO_TEST_CASE(TextWriterTest_geojson)
     {
         FileUtils::deleteFile(Support::temppath(output));
     }    
-
-    return;
 }
 #endif
 

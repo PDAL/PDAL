@@ -96,10 +96,12 @@ public:
 
     // infer the driver to use based on filename extension
     // returns "" if no driver found
-    // 
-    // this may also add on an option to pass to the driver, such as the filename
-    // (or something inferred from the extension, such as .laz means we need to use compress=true)
-    static std::string inferWriterDriver(const std::string& filename, pdal::Options& options);
+    static std::string inferWriterDriver(const std::string& filename);
+
+    // modify options based upon expectations implicit in a given filename
+    // e.g. output files ending in .laz should be compressed
+    static void inferWriterOptionsChanges(const std::string& filename,
+                                          pdal::Options& options);
 
     Reader* createReader(const std::string& type, const Options& options);
     Filter* createFilter(const std::string& type, Stage& prevStage, const Options& options);

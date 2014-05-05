@@ -133,8 +133,6 @@ BOOST_AUTO_TEST_CASE(test_one)
 
     delete nitf_iter;
     delete las_iter;
-
-    return;
 }
 
 
@@ -165,8 +163,6 @@ BOOST_AUTO_TEST_CASE(test_chipper)
     BOOST_CHECK_EQUAL(num_blocks, 8u);
  
     delete iter;
-
-    return;
 }
 
 

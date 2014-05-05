@@ -61,8 +61,6 @@ BOOST_AUTO_TEST_SUITE(CarisReaderTest)
 
 BOOST_AUTO_TEST_CASE(test_one)
 {
-
-    return;
 }
 
 

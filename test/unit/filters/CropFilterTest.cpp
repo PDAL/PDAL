@@ -92,8 +92,6 @@ BOOST_AUTO_TEST_CASE(test_crop)
     BOOST_CHECK_CLOSE(avgX, 5.00000, delX);
     BOOST_CHECK_CLOSE(avgY, 50.00000, delY);
     BOOST_CHECK_CLOSE(avgZ, 500.00000, delZ);
-
-    return;
 }
 
 
@@ -136,7 +134,6 @@ BOOST_AUTO_TEST_CASE(test_crop_polygon)
     FileUtils::closeFile(wkt_stream);
     
 #endif
-    return;
 }
 
 BOOST_AUTO_TEST_CASE(test_crop_polygon_reprojection)
@@ -201,7 +198,6 @@ BOOST_AUTO_TEST_CASE(test_crop_polygon_reprojection)
     FileUtils::closeFile(wkt_stream);
     
 #endif
-    return;
 }
 
 BOOST_AUTO_TEST_SUITE_END()
