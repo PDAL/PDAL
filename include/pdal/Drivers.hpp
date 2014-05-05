@@ -47,7 +47,9 @@
 
 #include <pdal/drivers/sbet/Reader.hpp>
 
+#ifdef PDAL_HAVE_HDF5
 #include <pdal/drivers/icebridge/Reader.hpp>
+#endif
 
 #include <pdal/drivers/pipeline/Reader.hpp>
 
