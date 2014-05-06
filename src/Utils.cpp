@@ -530,6 +530,12 @@ int Utils::run_shell_command(const string& cmd, string& output)
 
     output = "";
 
+    const char* gdal_debug = ::pdal::Utils::getenv("CPL_DEBUG");
+    if (gdal_debug == 0)
+    {
+        pdal::Utils::putenv("CPL_DEBUG=OFF");
+    }
+
     FILE* fp = portable_popen(cmd.c_str(), "r");
 
     while (!feof(fp))
