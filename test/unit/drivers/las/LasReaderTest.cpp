@@ -455,4 +455,29 @@ BOOST_AUTO_TEST_CASE(test_no_xyz)
 }
 
 
+BOOST_AUTO_TEST_CASE(testFilenameConstructorSetOption)
+{
+    pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
+    BOOST_CHECK_EQUAL(reader.getOptions().getValueOrDefault<std::string>("filename", ""),
+            Support::datapath("1.2-with-color.las"));
+}
+
+
+BOOST_AUTO_TEST_CASE(testInvalidFileSignature)
+{
+    pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las.wkt"));
+    try
+    {
+        reader.initialize();
+    }
+    catch (const std::invalid_argument& e)
+    {
+        std::string msg(e.what());
+        BOOST_CHECK(msg.find("1.2-with-color.las.wkt") != std::string::npos);
+        return;
+    }
+    BOOST_FAIL("reader.initialize() did not throw std::invalid_argument");
+}
+
+
 BOOST_AUTO_TEST_SUITE_END()

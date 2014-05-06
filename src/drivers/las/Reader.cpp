@@ -86,7 +86,7 @@ Reader::Reader(const Options& options)
 
 
 Reader::Reader(const std::string& filename)
-    : ReaderBase(Options::none())
+    : ReaderBase(Option("filename", filename))
     , m_streamFactory(new FilenameStreamFactory(filename))
     , m_ownsStreamFactory(true)
 {}
@@ -115,7 +115,23 @@ void Reader::initialize()
     std::istream& stream = m_streamFactory->allocate();
 
     LasHeaderReader lasHeaderReader(m_lasHeader, stream);
-    lasHeaderReader.read(*this, m_schema);
+    try
+    {
+        lasHeaderReader.read(*this, m_schema);
+    }
+    catch (const std::invalid_argument& e)
+    {
+        // Improve the error message. #277
+        std::stringstream msg;
+        std::string filename(getOptions().getValueOrDefault<std::string>("filename", ""));
+        if (filename.empty())
+        {
+            throw e;
+        }
+        msg << "Unable to read file " << filename
+            << ". It does not have a las file signature.";
+        throw std::invalid_argument(msg.str());
+    }
 
     this->setBounds(m_lasHeader.getBounds());
     this->setNumPoints(m_lasHeader.GetPointRecordsCount());
