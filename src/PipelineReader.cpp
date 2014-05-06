@@ -76,6 +76,11 @@ public:
         ++m_numTypes;
     }
 
+    int getNumTypes()
+    {
+        return m_numTypes;
+    }
+
     void addStage()
     {
         ++m_numStages;
@@ -278,6 +283,23 @@ Reader* PipelineReader::parseElement_Reader(const ptree& tree)
     {
         type = attrs["type"];
         context.addType();
+    }
+
+    // If we aren't provided a type, try to infer the type from the filename
+    // #278
+    if (context.getNumTypes() == 0)
+    {
+        try
+        {
+            const std::string filename = options.getValueOrThrow<std::string>("filename");
+            type = StageFactory::inferReaderDriver(filename);
+            if (!type.empty())
+            {
+                context.addType();
+            }
+        }
+        catch (option_not_found)
+        {} // noop
     }
 
     context.validate();
