@@ -62,8 +62,7 @@ Writer::Writer(Stage& prevStage, const Options& options)
 
 
 {
-    Options&  opts = getOptions();
-    opts = options;
+    m_options = options;
 
     m_oss.str("");
     return;
