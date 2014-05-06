@@ -277,7 +277,7 @@ Reader::Reader(const Options& options)
     , m_littleEndian(false)
 {
 
-    std::string filename= getFileName();
+    std::string filename = getFileName();
 
     m_flip_x = getOptions().getValueOrDefault("flip_coordinates", true);
     m_scale_z = getOptions().getValueOrDefault("scale_z", 0.001);
@@ -732,7 +732,7 @@ std::vector<Dimension> Reader::getDefaultDimensions()
     output.push_back(start_pulse);
 
     Dimension reflected_pulse("ReflectedPulse", dimension::SignedInteger, 4,
-                              "Start Pulse Signal Strength (relative)");
+                              "Reflected Pulse Signal Strength (relative)");
     reflected_pulse.setUUID("8526cc21-3fe6-4876-84c7-3303384f56b1");
     reflected_pulse.setNamespace(s_getName());
     output.push_back(reflected_pulse);

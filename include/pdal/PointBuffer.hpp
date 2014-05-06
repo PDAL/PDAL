@@ -218,6 +218,28 @@ public:
     template<class T>
     void setField(Dimension const& dim, boost::uint32_t pointIndex, T value);
 
+    /*! set the value for a given  :cpp:class:`pdal::Dimension` dim
+        at the given point index, inferring the size of the value from
+        the byteSize of the dimension.
+        \param dim The dimension to select.
+        \param pointIndex The point index of the PointBuffer to select.
+        \param value The value to set, which must have a width of at least
+        dim.byteSize().
+        \verbatim embed:rst
+        .. warning::
+
+            This operation performs a memcpy from input parameter 'value'
+            of length dim.getByteSize(), so 'value' must be guaranteed by
+            the caller to be at least as long as the dimension's byte size.
+            This operation will hammer the contents of the pdal::Dimension
+            with the contents of parameter 'value', so their underlying
+            types should be ensured to match via an accurate schema.
+        \endverbatim
+    */
+    void setRawField(Dimension const& dim,
+            boost::uint32_t pointIndex,
+            const void* value);
+
     /*! bulk copy all the fields from the given point into this object
         \param destPointIndex the destination point index to copy the data from
                 srcPointBuffer at srcPointIndex.
@@ -471,9 +493,8 @@ inline void PointBuffer::setField(pdal::Dimension const& dim,
 
     if (dim.getPosition() == -1)
     {
-        throw buffer_error("This dimension has no identified position "
-            "in a schema. Use the setRawField method to access an "
-            "arbitrary byte position.");
+        throw buffer_error(
+            "This dimension has no identified position in a schema.");
     }
     
     pointbuffer::PointBufferByteSize point_start_byte_position(0); 

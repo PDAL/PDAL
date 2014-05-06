@@ -90,6 +90,10 @@ MAKE_READER_CREATOR(TerrasolidReader, pdal::drivers::terrasolid::Reader)
 
 MAKE_READER_CREATOR(SbetReader, pdal::drivers::sbet::Reader)
 
+#ifdef PDAL_HAVE_HDF5
+MAKE_READER_CREATOR(IcebridgeReader, pdal::drivers::icebridge::Reader)
+#endif
+
 //
 // define the functions to create the filters
 //
@@ -183,6 +187,7 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
     drivers["ntf"] = "drivers.nitf.reader";
     drivers["bpf"] = "drivers.bpf.reader";
     drivers["sbet"] = "drivers.sbet.reader";
+    drivers["icebridge"] = "drivers.icebridge.reader";
 
     if (boost::algorithm::iequals(filename, "STDIN"))
     {
@@ -407,6 +412,10 @@ void StageFactory::registerKnownReaders()
     REGISTER_READER(BpfReader, pdal::BpfReader);
 
     REGISTER_READER(SbetReader, pdal::drivers::sbet::Reader);
+
+#ifdef PDAL_HAVE_HDF5
+    REGISTER_READER(IcebridgeReader, pdal::drivers::icebridge::Reader);
+#endif
 }
 
 

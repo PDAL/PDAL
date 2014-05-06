@@ -544,7 +544,6 @@ if(WITH_CARIS)
 endif()
 
 
-# Points2Grid
 # Points2Grid support - optional, default=OFF
 option(WITH_P2G "Choose if Points2Grid support should be built" FALSE)
 if(WITH_P2G)
@@ -554,6 +553,23 @@ if(WITH_P2G)
         include_directories(${P2G_INCLUDE_DIR})
         add_definitions(-DHAVE_P2G=1)
         set(PDAL_HAVE_P2G 1)
+    endif()
+endif()
+
+# HDF5 support - optional, default=OFF
+option(WITH_HDF5 "Choose if HDF5 support should be built" FALSE)
+if(WITH_HDF5)
+    set (HDF5_FIND_COMPONENTS "CXX")
+    find_package(HDF5 COMPONENTS CXX)
+    if(HDF5_FOUND)
+        include_directories(${HDF5_INCLUDE_DIR})
+        add_definitions(-DHAVE_HDF5=1)
+        set(PDAL_HAVE_HDF5 1)
+        message(STATUS "Found HDF5")
+    else()
+        set(WITH_HDF5 FALSE)
+        set(PDAL_HAVE_HDF5 0)
+        message(STATUS "HDF5 not found")
     endif()
 endif()
 
