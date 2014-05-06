@@ -546,13 +546,13 @@ void Writer::CreateCloud(Schema const& buffer_schema)
     log()->get(logDEBUG) << "Point cloud id was " << id << std::endl;
     try
     {
-        Option& pc_id = getOptions().getOptionByRef("pc_id");
+        Option& pc_id = m_options.getOptionByRef("pc_id");
         pc_id.setValue(id);
     }
     catch (pdal::option_not_found&)
     {
         Option pc_id("pc_id", id, "Point Cloud Id");
-        getOptions().add(pc_id);
+        m_options.add(pc_id);
     }
 
     if (bounds.size())

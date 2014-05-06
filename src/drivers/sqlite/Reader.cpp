@@ -46,6 +46,7 @@
 
 #include <iostream>
 #include <map>
+#include <string>
 
 #ifdef USE_PDAL_PLUGIN_SOCI
 MAKE_READER_CREATOR(sqliteReader, pdal::drivers::sqlite::Reader)
@@ -97,7 +98,7 @@ void Reader::initialize()
 
     pdal::Reader::initialize();
 
-    Options& ops = getOptions();
+    Options const& ops = getOptions();
 
     string const& query = ops.getValueOrThrow<string>("query");
     string const& connection = ops.getValueOrThrow<string>("connection");
