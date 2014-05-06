@@ -169,13 +169,10 @@ StageFactory::StageFactory()
     return;
 }
 
-std::string StageFactory::inferReaderDriver(const std::string& filename, pdal::Options& options)
+
+std::string StageFactory::inferReaderDriver(const std::string& filename)
 {
     std::string ext = boost::filesystem::extension(filename);
-
-    pdal::Option& fn = options.getOptionByRef("filename");
-    fn.setValue<std::string>(filename);
-
     std::map<std::string, std::string> drivers;
     drivers["las"] = "drivers.las.reader";
     drivers["laz"] = "drivers.las.reader";
@@ -199,6 +196,14 @@ std::string StageFactory::inferReaderDriver(const std::string& filename, pdal::O
     boost::to_lower(ext);
     std::string driver = drivers[ext];
     return driver; // will be "" if not found
+}
+
+
+std::string StageFactory::inferReaderDriver(const std::string& filename, pdal::Options& options)
+{
+    pdal::Option& fn = options.getOptionByRef("filename");
+    fn.setValue<std::string>(filename);
+    return StageFactory::inferReaderDriver(filename);
 }
 
 
