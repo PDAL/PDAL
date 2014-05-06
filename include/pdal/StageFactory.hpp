@@ -89,11 +89,6 @@ public:
     // returns "" if no driver found
     static std::string inferReaderDriver(const std::string& filename);
 
-    // the same as inferReaderDriver(const std::string&), but
-    // this may also add on an option to pass to the driver, such as the
-    // filename
-    static std::string inferReaderDriver(const std::string& filename, pdal::Options& options);
-
     // infer the driver to use based on filename extension
     // returns "" if no driver found
     static std::string inferWriterDriver(const std::string& filename);
