@@ -38,10 +38,10 @@
 #include <pdal/pdal_internal.hpp>
 
 #include <pdal/Bounds.hpp>
-#include <pdal/GlobalEnvironment.hpp>
 #include <pdal/Log.hpp>
 #include <pdal/Metadata.hpp>
 #include <pdal/Options.hpp>
+#include <pdal/PointContext.hpp>
 #include <pdal/Schema.hpp>
 #include <pdal/SpatialReference.hpp>
 
@@ -65,11 +65,8 @@ class PDAL_DLL Stage
 public:
     Stage(PointContext ctx);
     Stage(PointContext ctx, const Options& options);
-    Stage(const Options& options) :
-            Stage{GlobalEnvironment::get().context(), options}
-        {}
-    Stage() : Stage{GlobalEnvironment::get().context()}
-        {}
+    Stage(const Options& options);
+    Stage();
     virtual ~Stage()
         {}
 
@@ -176,6 +173,7 @@ private:
 
     Stage& operator=(const Stage&); // not implemented
     Stage(const Stage&); // not implemented
+    void Init();
 };
 
 PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const Stage&);

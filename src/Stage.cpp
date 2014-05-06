@@ -32,6 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <pdal/GlobalEnvironment.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/SpatialReference.hpp>
 
@@ -41,9 +42,27 @@
 namespace pdal
 {
 
-Stage::Stage(PointContext context, const Options& options) :
-    Stage{context}
+Stage::Stage()
 {
+    m_context = GlobalEnvironment::get().context();
+    Init();
+}
+
+Stage::Stage(PointContext context, const Options& options) : m_context(context)
+{
+    Init();
+    m_options = options;
+    m_debug = m_options.getValueOrDefault<bool>("debug", false);
+    m_verbose = m_options.getValueOrDefault<boost::uint32_t>("verbose", 0);
+    m_id = m_options.getValueOrDefault<boost::uint32_t>("id", 0);
+    if (m_debug && !m_verbose)
+        m_verbose = 1;
+}
+
+Stage::Stage(const Options& options)
+{
+    Init();
+    m_context = GlobalEnvironment::get().context();
     m_options = options;
     m_debug = m_options.getValueOrDefault<bool>("debug", false);
     m_verbose = m_options.getValueOrDefault<boost::uint32_t>("verbose", 0);
@@ -54,10 +73,21 @@ Stage::Stage(PointContext context, const Options& options) :
 
 
 Stage::Stage(PointContext context) :
-    m_context(context), m_initialized(false), m_debug(false), m_verbose(0),
-    m_id(0), m_dimensionsType(StageOperation_All),
-    m_log(LogPtr()), m_numPoints(0)
-{}
+    m_context(context)
+{
+    Init();
+}
+
+
+void Stage::Init()
+{
+    m_initialized = false;
+    m_debug = false;
+    m_verbose = 0;
+    m_id = 0;
+    m_dimensionsType = StageOperation_All;
+    m_numPoints = 0;
+}
 
 void Stage::setInput(const std::vector<Stage *>& inputs)
 {

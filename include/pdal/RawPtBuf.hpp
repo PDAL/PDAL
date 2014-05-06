@@ -54,7 +54,7 @@ public:
     {
         if (m_numPts >= m_allocPts)
         {
-            m_allocPts += 10000;
+            m_allocPts += 100000;
             m_buf.resize(pointsToBytes(m_allocPts));
         }
         return m_numPts++;
