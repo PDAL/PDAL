@@ -69,6 +69,10 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/third/string_ref_fwd.hpp"
 )
 
+if (PDAL_HAVE_PCL)
+  list(APPEND PDAL_BASE_HPP "${PDAL_HEADERS_DIR}/PCLConversions.hpp")
+endif()
+
 if (PDAL_HAVE_LIBXML2)
   SET (PDAL_XML_SRC XMLSchema.cpp)
 endif()
