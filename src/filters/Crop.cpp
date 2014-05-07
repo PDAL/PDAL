@@ -88,18 +88,27 @@ Crop::Crop(const Options& options) :
 }
 
 
-Crop::Crop(Bounds<double> const& bounds) : Crop{}
+Crop::Crop(Bounds<double> const& bounds)
 {
     m_bounds = bounds;
+    Init();
 }
 
-Crop::Crop() :
-    bCropOutside(false)
-    , m_geosEnvironment(0)
-    , m_geosGeometry(0)
-    , m_geosPreparedGeometry(0)
-    , m_dimensions(3)
-{}
+
+Crop::Crop()
+{
+    Init();
+}
+
+
+void Crop::Init()
+{
+    bCropOutside = false;
+    m_geosEnvironment = 0;
+    m_geosGeometry = 0;
+    m_geosPreparedGeometry = 0;
+    m_dimensions = 3;
+}
 
 Crop::~Crop()
 {
