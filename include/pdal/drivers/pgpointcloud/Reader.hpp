@@ -68,7 +68,6 @@ public:
     Reader(const Options&);
     ~Reader();
 
-    virtual void initialize();
     static Options getDefaultOptions();
     virtual boost::uint64_t getNumPoints() const;
     boost::uint64_t getMaxPoints() const;
@@ -82,6 +81,8 @@ private:
     Reader& operator=(const Reader&); // not implemented
     Reader(const Reader&); // not implemented
 
+    virtual void initialize();
+    virtual void processOptions(const Options&);
     pdal::SpatialReference fetchSpatialReference() const;
     boost::uint32_t fetchPcid() const;
     pdal::Schema fetchSchema() const;

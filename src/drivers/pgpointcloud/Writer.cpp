@@ -87,9 +87,6 @@ Writer::Writer(const Options& options)
     , m_output_buffer(0)
     , m_schema_is_initialized(false)
 {
-
-
-    return;
 }
 
 
@@ -97,10 +94,33 @@ Writer::~Writer()
 {
     if (m_session)
         PQfinish(m_session);
-
-    return;
 }
 
+
+void Writer::processOptions(const Options& options)
+{
+    // If we don't know the table name, we're SOL
+    m_table_name = options.getValueOrThrow<std::string>("table");
+
+    // Schema and column name can be defaulted safely
+    m_column_name = options.getValueOrDefault<std::string>("column", "pa");
+    m_schema_name = options.getValueOrDefault<std::string>("schema", "");
+    //
+    // Read compression type and turn into an integer
+    std::string compression_str =
+        options.getValueOrDefault<std::string>("compression", "dimensional");
+    m_patch_compression_type = getCompressionType(compression_str);
+
+    // Connection string needs to exist and actually work
+    m_connection = options.getValueOrThrow<std::string>("connection");
+
+    // Read other preferences
+    m_overwrite = options.getValueOrDefault<bool>("overwrite", true);
+    m_patch_capacity =
+        options.getValueOrDefault<boost::uint32_t>("capacity", 400);
+    m_srid = options.getValueOrDefault<boost::uint32_t>("srid", 4326);
+    m_pcid = options.getValueOrDefault<boost::uint32_t>("pcid", 0);
+}
 
 //
 // Called from PDAL core during start-up. Do everything
@@ -110,32 +130,7 @@ Writer::~Writer()
 //
 void Writer::initialize()
 {
-    pdal::Writer::initialize();
-
-    // If we don't know the table name, we're SOL
-    m_table_name = getOptions().getValueOrThrow<std::string>("table");
-
-    // Schema and column name can be defaulted safely
-    m_column_name = getOptions().getValueOrDefault<std::string>("column", "pa");
-    m_schema_name = getOptions().getValueOrDefault<std::string>("schema", "");
-
-    // Read compression type and turn into an integer
-    std::string compression_str = getOptions().getValueOrDefault<std::string>("compression", "dimensional");
-    m_patch_compression_type = getCompressionType(compression_str);
-
-    // Connection string needs to exist and actually work
-    std::string connection = getOptions().getValueOrThrow<std::string>("connection");
-
-    // Can we connect, using this string?
-    m_session = pg_connect(connection);
-
-    // Read other preferences
-    m_overwrite = getOptions().getValueOrDefault<bool>("overwrite", true);
-    m_patch_capacity = getOptions().getValueOrDefault<boost::uint32_t>("capacity", 400);
-    m_srid = getOptions().getValueOrDefault<boost::uint32_t>("srid", 4326);
-    m_pcid = getOptions().getValueOrDefault<boost::uint32_t>("pcid", 0);
-
-    return;
+    m_session = pg_connect(m_connection);
 }
 
 //

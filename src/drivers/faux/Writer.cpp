@@ -45,27 +45,11 @@ namespace faux
 {
 
 
-void Writer::initialize()
-{
-    pdal::Writer::initialize();
-}
-
-
-Options Writer::getDefaultOptions()
-{
-    Options options;
-    return options;
-}
-
-
-
 void Writer::writeBegin(boost::uint64_t /*targetNumPointsToWrite*/)
 {
     m_minimumX = m_minimumY = m_minimumZ = std::numeric_limits<double>::max();
     m_maximumX = m_maximumY = m_maximumZ = std::numeric_limits<double>::min();
     m_averageX = m_averageY = m_averageZ = 0;
-
-    return;
 }
 
 

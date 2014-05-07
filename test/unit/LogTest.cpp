@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(test_one)
 
     {
         pdal::drivers::faux::Reader reader(opts);
-        reader.initialize();
+        reader.prepare();
 
         BOOST_CHECK_EQUAL(reader.log()->getLevel(), logERROR);
         reader.log()->setLevel(logDEBUG5);
@@ -148,7 +148,7 @@ BOOST_AUTO_TEST_CASE(test_two_a)
         filters::Programmable yfilter(yfilter_opts);
         yfilter.setInput(&xfilter);
 
-        yfilter.initialize();
+        yfilter.prepare();
 
         reader.log()->setLevel(logDEBUG5);
         xfilter.log()->setLevel(logDEBUG5);
@@ -247,7 +247,7 @@ BOOST_AUTO_TEST_CASE(test_two_b)
         filters::Programmable yfilter(yfilter_opts);
         yfilter.setInput(&xfilter);
 
-        yfilter.initialize();
+        yfilter.prepare();
 
         reader.log()->setLevel(logDEBUG5);
         xfilter.log()->setLevel(logDEBUG5);
@@ -330,7 +330,7 @@ BOOST_AUTO_TEST_CASE(test_three)
         filters::Programmable xfilter(xfilter_opts);
         xfilter.setInput(&reader);
 
-        xfilter.initialize();
+        xfilter.prepare();
 
         const Schema& schema = xfilter.getSchema();
         PointBuffer data(schema, 750);

@@ -192,7 +192,6 @@ public:
 
     Chipper(const Options&);
 
-    virtual void initialize();
     static Options getDefaultOptions();
     static std::vector<Dimension> getDefaultDimensions();
 
@@ -242,6 +241,7 @@ private:
 
     Chipper& operator=(const Chipper&); // not implemented
     Chipper(const Chipper&); // not implemented
+    virtual void initialize();
 };
 
 namespace iterators

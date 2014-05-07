@@ -61,9 +61,6 @@ public:
     Decimation(boost::uint32_t step) : m_step(step)
         {}
 
-    virtual void initialize();
-    static Options getDefaultOptions();
-
     pdal::StageSequentialIterator*
         createSequentialIterator(PointBuffer& buffer) const;
     pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const;
@@ -78,6 +75,7 @@ private:
 
     Decimation& operator=(const Decimation&); // not implemented
     Decimation(const Decimation&); // not implemented
+    virtual void initialize();
 };
 
 

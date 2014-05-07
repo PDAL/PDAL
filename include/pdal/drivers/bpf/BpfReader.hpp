@@ -53,10 +53,8 @@ public:
     BpfReader(const Options&);
     BpfReader(const std::string&);
 
-    virtual void initialize();
     virtual boost::uint64_t getNumPoints() const
         {  return m_header.m_numPts; }
-
     StageSequentialIterator*
         createSequentialIterator(PointBuffer& buffer) const;
     StageRandomIterator* createRandomIterator(PointBuffer& buffer) const;
@@ -70,6 +68,7 @@ private:
     BpfPolarHeader m_polarHeader;
     std::vector<BpfPolarFrame> m_polarFrames;
 
+    virtual void initialize();
     bool readUlemData();
     bool readPolarData();
 };

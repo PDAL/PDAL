@@ -65,7 +65,6 @@ public:
     Crop();
     ~Crop();
     
-    virtual void initialize();
     static Options getDefaultOptions();
 
     pdal::StageSequentialIterator*
@@ -101,6 +100,7 @@ private:
     boost::uint32_t m_dimensions;
 
     Bounds <double> computeBounds(GEOSGeometry const* geometry);
+    virtual void initialize();
     
     Crop& operator=(const Crop&); // not implemented
     Crop(const Crop&); // not implemented

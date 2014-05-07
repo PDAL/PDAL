@@ -39,17 +39,6 @@ namespace pdal
 {
 
 
-void MultiFilter::initialize()
-{
-    Metadata& m = getMetadataRef();
-    m.setName(getName());
-
-    Stage::initialize();
-
-    return;
-}
-
-
 boost::property_tree::ptree MultiFilter::serializePipeline() const
 {
     boost::property_tree::ptree tree;

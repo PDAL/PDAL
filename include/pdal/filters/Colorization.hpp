@@ -87,7 +87,6 @@ public:
     Colorization(const Options& options) : Filter(options)
         {}
 
-    virtual void initialize();
     static Options getDefaultOptions();
     pdal::StageSequentialIterator*
         createSequentialIterator(PointBuffer& buffer) const;
@@ -104,7 +103,8 @@ public:
     }
 
 private:
-    void collectOptions();
+    virtual void initialize();
+    virtual void processOptions(const Options&);
 
     std::map<std::string, boost::uint32_t> m_band_map;
     std::map<std::string, double> m_scale_map;

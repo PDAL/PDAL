@@ -65,7 +65,6 @@ public:
         {}
     ~Programmable();
 
-    virtual void initialize();
     static Options getDefaultOptions();
 
     pdal::StageSequentialIterator*
@@ -89,6 +88,7 @@ private:
 
     Programmable& operator=(const Programmable&); // not implemented
     Programmable(const Programmable&); // not implemented
+    virtual void initialize();
 };
 
 

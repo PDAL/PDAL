@@ -63,8 +63,7 @@ BOOST_AUTO_TEST_CASE(test_swapping)
     pdal::filters::ByteSwap filter;
     filter.setInput(&reader);
     BOOST_CHECK_EQUAL(filter.getName(), "filters.byteswap");
-
-    filter.initialize();
+    filter.prepare();
 
     Schema const& readerSchema = reader.getSchema();
     boost::optional<Dimension const&> readerdimX = readerSchema.getDimension("X");

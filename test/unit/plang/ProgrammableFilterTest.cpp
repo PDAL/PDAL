@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE(ProgrammableFilterTest_test1)
     BOOST_CHECK(filter.getDescription() == "Programmable Filter");
     pdal::drivers::faux::Writer writer;
     writer.setInput(&filter);
-    writer.initialize();
+    writer.prepare();
 
     boost::uint64_t numWritten = writer.write(10);
 
@@ -118,7 +118,7 @@ BOOST_AUTO_TEST_CASE(pipeline)
     reader.readPipeline(Support::datapath("pipeline/create-dimension.xml"));
     Stage* stage = manager.getStage();
     BOOST_CHECK(stage != NULL);
-    stage->initialize();
+    stage->prepare();
 
     const Schema& schema = stage->getSchema();
     PointBuffer data(schema, 2*1065);

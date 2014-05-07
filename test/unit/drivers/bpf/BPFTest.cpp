@@ -54,7 +54,7 @@ void test_file_type(const std::string& filename)
 
     pdal::BpfReader reader(Support::datapath(filename));
 
-    reader.initialize();
+    reader.prepare();
     const Schema& schema = reader.getSchema();
     
     PointBuffer data(schema, 3);

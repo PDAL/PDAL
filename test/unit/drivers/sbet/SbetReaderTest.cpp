@@ -95,7 +95,7 @@ BOOST_AUTO_TEST_CASE(testConstructor)
     BOOST_CHECK(reader.getDescription() == "SBET Reader");
     BOOST_CHECK_EQUAL(reader.getName(), "drivers.sbet.reader");
 
-    reader.initialize();
+    reader.prepare();
 
     BOOST_CHECK_EQUAL(reader.getNumPoints(), 2);
 
@@ -107,7 +107,7 @@ BOOST_AUTO_TEST_CASE(testRead)
     pdal::Option filename("filename", Support::datapath("sbet/2-points.sbet"), "");
     pdal::Options options(filename);
     pdal::drivers::sbet::Reader reader(options);
-    reader.initialize();
+    reader.prepare();
 
     const pdal::Schema& schema = reader.getSchema();
     pdal::PointBuffer data(schema, 2);
@@ -147,7 +147,7 @@ BOOST_AUTO_TEST_CASE(testSkip)
     pdal::Option filename("filename", Support::datapath("sbet/2-points.sbet"), "");
     pdal::Options options(filename);
     pdal::drivers::sbet::Reader reader(options);
-    reader.initialize();
+    reader.prepare();
 
     const pdal::Schema& schema = reader.getSchema();
     pdal::PointBuffer data(schema, 1);
@@ -175,7 +175,7 @@ BOOST_AUTO_TEST_CASE(testBadFile)
     pdal::Option filename("filename", Support::datapath("sbet/badfile.sbet"), "");
     pdal::Options options(filename);
     pdal::drivers::sbet::Reader reader(options);
-    BOOST_CHECK_THROW(reader.initialize(), pdal::pdal_error);
+    BOOST_CHECK_THROW(reader.prepare(), pdal::pdal_error);
 }
 
 
@@ -198,7 +198,7 @@ BOOST_AUTO_TEST_CASE(testRandomIterator)
     pdal::Option filename("filename", Support::datapath("sbet/2-points.sbet"), "");
     pdal::Options options(filename);
     pdal::drivers::sbet::Reader reader(options);
-    reader.initialize();
+    reader.prepare();
 
     pdal::PointBuffer data(reader.getSchema(), 1);
 

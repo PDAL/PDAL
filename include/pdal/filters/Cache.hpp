@@ -67,7 +67,6 @@ public:
     Cache(boost::uint32_t numBlocks, boost::uint32_t blockSize);
     ~Cache();
 
-    virtual void initialize();
     static Options getDefaultOptions();
 
     inline boost::uint32_t getCacheBlockSize() const { return m_cacheBlockSize; }
@@ -133,6 +132,7 @@ private:
 
     Cache& operator=(const Cache&); // not implemented
     Cache(const Cache&); // not implemented
+    virtual void initialize();
 };
 
 namespace iterators

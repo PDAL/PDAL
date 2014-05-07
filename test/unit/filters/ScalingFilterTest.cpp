@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(ScalingFilterTest_test_1)
     pdal::Options options(option);
 
     pdal::drivers::pipeline::Reader reader(options);
-    reader.initialize();
+    reader.prepare();
 
     pdal::filters::Scaling const* filter = static_cast<pdal::filters::Scaling const*>(reader.getManager().getStage());
     pdal::Options opt = filter->getOptions();
@@ -150,7 +150,7 @@ BOOST_AUTO_TEST_CASE(ScalingFilterFloat_test)
     pdal::drivers::faux::Reader reader(opts);
     pdal::filters::Scaling scaling(opts);
     scaling.setInput(&reader);
-    scaling.initialize();
+    scaling.prepare();
 
     const Schema& schema = scaling.getSchema();
 
@@ -190,7 +190,7 @@ BOOST_AUTO_TEST_CASE(ScalingFilterTest_test_2)
     pdal::Options options(option);
 
     pdal::drivers::pipeline::Reader reader(options);
-    reader.initialize();
+    reader.prepare();
 
     pdal::filters::Scaling const* filter = static_cast<pdal::filters::Scaling const*>(reader.getManager().getStage());
     pdal::Options opt = filter->getOptions();

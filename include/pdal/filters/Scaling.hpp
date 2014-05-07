@@ -85,7 +85,6 @@ public:
     Scaling(const Scaling&) = delete;
 
     static Options getDefaultOptions();
-    virtual void initialize();
 
     pdal::StageSequentialIterator*
         createSequentialIterator(PointBuffer& buffer) const;
@@ -101,6 +100,7 @@ public:
 private:
     void checkImpedance();
     Schema alterSchema(Schema const& schema);
+    virtual void initialize();
 
     std::vector<scaling::Scaler> m_scalers;
     std::map<dimension::id, dimension::id> m_scale_map;

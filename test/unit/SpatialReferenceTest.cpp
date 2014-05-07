@@ -125,7 +125,7 @@ BOOST_AUTO_TEST_CASE(test_userstring_roundtrip)
 BOOST_AUTO_TEST_CASE(test_read_srs)
 {
     pdal::drivers::las::Reader reader(Support::datapath("utm17.las"));
-    reader.initialize();
+    reader.prepare();
 
     const pdal::SpatialReference& ref = reader.getSpatialReference();
 
@@ -247,7 +247,7 @@ BOOST_AUTO_TEST_CASE(test_vertical_datums)
             // need to scope the writer, so that's it dtor can use the stream
             pdal::drivers::las::Writer writer(ofs);
             writer.setInput(&reader);
-            writer.initialize();
+            writer.prepare();
 
             writer.setSpatialReference(ref);
 
@@ -259,7 +259,7 @@ BOOST_AUTO_TEST_CASE(test_vertical_datums)
     // Reopen and check contents.
     {
         pdal::drivers::las::Reader reader(tmpfile);
-        reader.initialize();
+        reader.prepare();
 
         const pdal::SpatialReference ref2 = reader.getSpatialReference();
         const std::string wkt2 = ref2.getWKT(pdal::SpatialReference::eCompoundOK);
@@ -318,7 +318,7 @@ BOOST_AUTO_TEST_CASE(test_writing_vlr)
             // need to scope the writer, so that's it dtor can use the stream
             pdal::drivers::las::Writer writer(ofs);
             writer.setInput(&readerx);
-            writer.initialize();
+            writer.prepare();
 
             writer.setSpatialReference(ref);
 
@@ -330,7 +330,7 @@ BOOST_AUTO_TEST_CASE(test_writing_vlr)
     // Reopen and check contents.
     {
         pdal::drivers::las::Reader reader(tmpfile);
-        reader.initialize();
+        reader.prepare();
 
         pdal::SpatialReference result_ref = reader.getSpatialReference();
 

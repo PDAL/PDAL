@@ -58,7 +58,6 @@ public:
     Reader(const Options& options);
     ~Reader();
 
-    virtual void initialize();
     static Options getDefaultOptions();
 
     virtual Metadata getMetadata() const;
@@ -88,6 +87,7 @@ private:
 
     Reader& operator=(const Reader&); // not implemented
     Reader(const Reader&); // not implemented
+    virtual void initialize();
 };
 
 

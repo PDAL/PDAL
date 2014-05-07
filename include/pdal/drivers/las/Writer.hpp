@@ -72,7 +72,6 @@ public:
     Writer(std::ostream*);
     virtual ~Writer();
 
-    virtual void initialize();
     static Options getDefaultOptions();
 
     void setFormatVersion(boost::uint8_t majorVersion, boost::uint8_t minorVersion);
@@ -102,6 +101,8 @@ protected:
     OutputStreamManager m_streamManager;
 
 private:
+    virtual void initialize();
+
     LasHeader m_lasHeader;
     boost::uint32_t m_numPointsWritten;
     SummaryData m_summaryData;

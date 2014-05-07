@@ -107,7 +107,7 @@ BOOST_AUTO_TEST_CASE(test_tsolid)
     // options.add(verbose);
     options.add(fname);
     pdal::drivers::terrasolid::Reader reader(options);
-    reader.initialize();
+    reader.prepare();
 
     BOOST_CHECK(reader.getDescription() == "TerraSolid Reader");
     BOOST_CHECK_EQUAL(reader.getName(), "drivers.terrasolid.reader");

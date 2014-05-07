@@ -69,7 +69,6 @@ public:
     
     InPlaceReprojection(const Options&);
     ~InPlaceReprojection();
-    virtual void initialize();
     static Options getDefaultOptions();
     pdal::StageSequentialIterator*
         createSequentialIterator(PointBuffer& buffer) const;
@@ -87,6 +86,7 @@ private:
 
     InPlaceReprojection& operator=(const InPlaceReprojection&); // not implemented
     InPlaceReprojection(const InPlaceReprojection&); // not implemented
+    virtual void initialize();
 };
 
 namespace iterators

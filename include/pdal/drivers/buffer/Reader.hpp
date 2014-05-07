@@ -64,7 +64,6 @@ public:
 
     Reader(const Options& options, const PointBuffer& buffer);
 
-    virtual void initialize();
     static Options getDefaultOptions();
 
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;

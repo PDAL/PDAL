@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE(test_construction)
 
         pdal::filters::Chipper chipper(options);
         chipper.setInput(&reader);
-        chipper.initialize();
+        chipper.prepare();
         PointBuffer buffer(chipper.getSchema(), 15);
         const boost::uint64_t num_points = reader.getNumPoints();
 
@@ -144,13 +144,13 @@ BOOST_AUTO_TEST_CASE(test_ordering)
     cache.setInput(&candidate_reader);
     pdal::filters::Chipper chipper(options);
     chipper.setInput(&cache);
-    chipper.initialize();
+    chipper.prepare();
     
     Option& query = options.getOptionByRef("filename");
     query.setValue<std::string>(source_filename);
 
     pdal::drivers::las::Reader source_reader(options);
-    source_reader.initialize();
+    source_reader.prepare();
     
     BOOST_CHECK_EQUAL(chipper.getNumPoints(), source_reader.getNumPoints());
     

@@ -133,7 +133,7 @@ BOOST_AUTO_TEST_CASE(PipelineWriterTest_multioptions)
         PipelineReader reader(manager);
 
         reader.readPipeline(Support::temppath("test-multi.xml"));
-        manager.getStage()->initialize();
+        manager.getStage()->prepare();
 
         Stage const& stage = manager.getStage()->getPrevStage();
         Options opt = stage.getOptions();

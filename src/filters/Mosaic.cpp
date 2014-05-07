@@ -45,8 +45,6 @@ namespace filters
 
 void Mosaic::initialize()
 {
-    MultiFilter::initialize();
-
     const std::vector<Stage*>& stages = getPrevStages();
 
     const Stage& stage0 = *stages[0];
@@ -56,7 +54,8 @@ void Mosaic::initialize()
     boost::uint64_t totalPoints = stage0.getNumPoints();
     Bounds<double> bigbox(stage0.getBounds());
 
-    // we will only mosaic if all the stages have the same core properties: SRS, schema, etc
+    // we will only mosaic if all the stages have the same core
+    // properties: SRS, schema, etc
     for (boost::uint32_t i=1; i<stages.size(); i++)
     {
         Stage& stage = *(stages[i]);
@@ -69,11 +68,7 @@ void Mosaic::initialize()
 
         bigbox.grow(stage.getBounds());
     }
-
-    setCoreProperties(stage0);
     setNumPoints(totalPoints);
-
-    return;
 }
 
 

@@ -103,19 +103,14 @@ Chipper::Chipper(const Options& options)
 
 void Chipper::initialize()
 {
-    Filter::initialize();
-
     m_schema = alterSchema(m_schema);
-
     setNumPoints(0);
-
     if (m_threshold == 0)
     {
         m_threshold = getPrevStage().getNumPoints();
         if (m_threshold == 0)
             throw pdal_error("chipper threshold cannot be 0!");
     }
-    return;
 }
 
 

@@ -102,7 +102,6 @@ public:
 
     Splitter(const Options&);
 
-    virtual void initialize();
     static Options getDefaultOptions();
 
     inline void setLeafSize(const float &leaf_size)
@@ -171,6 +170,7 @@ private:
 
     Splitter& operator=(const Splitter&); // not implemented
     Splitter(const Splitter&); // not implemented
+    virtual void initialize();
 };
 
 namespace iterators

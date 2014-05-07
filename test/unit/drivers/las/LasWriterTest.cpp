@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_las)
         pdal::drivers::las::Writer writer(ofs);
         writer.setInput(&reader);
         BOOST_CHECK_EQUAL(writer.getDescription(), "Las Writer");
-        writer.initialize();
+        writer.prepare();
 
         const boost::uint64_t numPoints = reader.getNumPoints();
 
@@ -116,7 +116,7 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_laz)
         writer.setGeneratingSoftware("TerraScan");
         writer.setHeaderPadding(2);
 
-        writer.initialize();
+        writer.prepare();
         writer.write(numPoints);
     }
 
@@ -166,7 +166,7 @@ static void test_a_format(const std::string& refFile, boost::uint8_t majorVersio
 
         boost::uuids::uuid u = boost::lexical_cast<boost::uuids::uuid>("8388f1b8-aa1b-4108-bca3-6bc68e7b062e");
         writer.setProjectId(u);
-        writer.initialize();
+        writer.prepare();
 
         writer.write(numPoints);
     }
@@ -231,7 +231,7 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_metadata)
     {
         pdal::drivers::las::Writer writer(options);
         writer.setInput(&reader);
-        writer.initialize();
+        writer.prepare();
 
         const boost::uint64_t numPoints = reader.getNumPoints();
 
@@ -240,7 +240,7 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_metadata)
 
 
     pdal::drivers::las::Reader reader2(options);
-    reader2.initialize();
+    reader2.prepare();
     
     pdal::drivers::las::LasHeader const& h = reader2.getLasHeader();
     
@@ -299,7 +299,7 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_ignored_dimensions)
         selector.setInput(&reader);
         pdal::drivers::las::Writer writer(options);
         writer.setInput(&selector);
-        writer.initialize();
+        writer.prepare();
 
         const boost::uint64_t numPoints = reader.getNumPoints();
 
@@ -309,7 +309,7 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_ignored_dimensions)
 
     {
         pdal::drivers::las::Reader reader2(options);
-        reader2.initialize();
+        reader2.prepare();
 
         const Schema& schema2 = reader2.getSchema();
 
@@ -333,7 +333,7 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_ignored_dimensions)
     {
         
         pdal::drivers::las::Reader reader3(Support::datapath("interesting.las"));
-        reader3.initialize();
+        reader3.prepare();
         const Schema& schema1 = reader3.getSchema();
         PointBuffer original(schema1, 1);
         pdal::StageSequentialIterator* iter2 = reader.createSequentialIterator(original);

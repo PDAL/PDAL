@@ -93,7 +93,7 @@ static bool fileIsOkay(const std::string& name)
 static bool fileIsCompressed(const std::string& name)
 {
     pdal::drivers::las::Reader reader(name);
-    reader.initialize();
+    reader.prepare();
     return reader.getLasHeader().Compressed();
 }
 
@@ -101,7 +101,7 @@ static bool fileIsCompressed(const std::string& name)
 static bool fileHasSrs(const std::string& name)
 {
     pdal::drivers::las::Reader reader(name);
-    reader.initialize();
+    reader.prepare();
     return !reader.getSpatialReference().empty();
 }
 

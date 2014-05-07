@@ -530,7 +530,7 @@ int Info::execute()
     
     Stage* filter = manager->getStage();
 
-    filter->initialize();
+    filter->prepare();
 
     if (m_pointIndexes.size())
     {

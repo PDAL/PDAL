@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(PipelineReaderTest_test1)
     reader.readPipeline(Support::datapath("pipeline/pipeline_read.xml"));
     Stage* stage = manager.getStage();
     BOOST_CHECK(stage != NULL);
-    stage->initialize();
+    stage->prepare();
 
     {
         const Schema& schema = stage->getSchema();
@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE(PipelineReaderTest_test2)
 
         reader.readPipeline(Support::datapath("pipeline/pipeline_write.xml"));
         Writer* writerStage = manager.getWriter();
-        writerStage->initialize();
+        writerStage->prepare();
 
         const boost::uint64_t np = writerStage->write();
         BOOST_CHECK_EQUAL(np, 1065u);
@@ -182,7 +182,7 @@ BOOST_AUTO_TEST_CASE(PipelineReaderTest_test4)
 
         reader.readPipeline(Support::datapath("pipeline/pipeline_write2.xml"));
         Writer* writerStage = manager.getWriter();
-        writerStage->initialize();
+        writerStage->prepare();
 
         const boost::uint64_t np = writerStage->write();
         BOOST_CHECK(np == 1);
@@ -196,14 +196,14 @@ BOOST_AUTO_TEST_CASE(PipelineReaderTest_test4)
     const double postZ = 16.000000;
     {
         pdal::drivers::las::Reader reader(Support::datapath("utm15.las"));
-        reader.initialize();
+        reader.prepare();
         const pdal::Bounds<double>& bounds = reader.getBounds();
         const pdal::Bounds<double> ref(preX, preY, preZ, preX, preY, preZ);
         Support::compareBounds(bounds, ref);
     }
     {
         pdal::drivers::las::Reader reader(Support::datapath("pipeline/out2.las"));
-        reader.initialize();
+        reader.prepare();
         const pdal::Bounds<double>& bounds = reader.getBounds();
         const pdal::Bounds<double> ref(postX, postY, postZ, postX, postY, postZ);
         Support::compareBounds(bounds, ref);
@@ -220,7 +220,7 @@ BOOST_AUTO_TEST_CASE(PipelineReaderTest_Reader)
 
     pdal::drivers::pipeline::Reader reader(options);
 
-    reader.initialize();
+    reader.prepare();
 
     {
         const Schema& schema = reader.getSchema();
@@ -240,7 +240,7 @@ BOOST_AUTO_TEST_CASE(PipelineReaderTest_MultiOptions)
 
     pdal::drivers::pipeline::Reader reader(options);
 
-    reader.initialize();
+    reader.prepare();
 
     // .getStage gets us the filter stage.  .getPrevStage gets us the reader
     // we wrote our extra options on the reader stage.

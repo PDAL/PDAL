@@ -123,23 +123,25 @@ Options Reader::getDefaultOptions()
 }
 
 
-void Reader::initialize()
+void Reader::processOptions(const Options& options)
 {
-    pdal::Reader::initialize();
-
     // If we don't know the table name, we're SOL
-    m_table_name = getOptions().getValueOrThrow<std::string>("table");
+    m_table_name = options.getValueOrThrow<std::string>("table");
 
     // Connection string needs to exist and actually work
-    m_connection = getOptions().getValueOrThrow<std::string>("connection");
+    m_connection = options.getValueOrThrow<std::string>("connection");
 
     // Schema and column name can be defaulted safely
-    m_column_name = getOptions().getValueOrDefault<std::string>("column", "pa");
-    m_schema_name = getOptions().getValueOrDefault<std::string>("schema", "");
+    m_column_name = options.getValueOrDefault<std::string>("column", "pa");
+    m_schema_name = options.getValueOrDefault<std::string>("schema", "");
 
     // Read other preferences
-    m_where = getOptions().getValueOrDefault<std::string>("where", "");
+    m_where = options.getValueOrDefault<std::string>("where", "");
+}
 
+
+void Reader::initialize()
+{
     // Database connection
     m_session = pg_connect(m_connection);
 
@@ -147,6 +149,7 @@ void Reader::initialize()
     m_schema = fetchSchema();
 
     // Allow spatialreference override if desired
+//ABELL - Move to processOptions()
     try
     {
         setSpatialReference(getOptions().getValueOrThrow<pdal::SpatialReference>("spatialreference"));
@@ -156,7 +159,6 @@ void Reader::initialize()
         // Read from pointcloud_formats otherwise
         setSpatialReference(fetchSpatialReference());
     }
-
 }
 
 boost::uint64_t Reader::getNumPoints() const

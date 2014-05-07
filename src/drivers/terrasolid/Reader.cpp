@@ -180,10 +180,9 @@ Reader::Reader(const Options& options)
 }
 
 
+/**
 void Reader::initialize()
 {
-    pdal::Reader::initialize();
-
     log()->get(logDEBUG) << "TerraSolid Reader::initialize format: " << m_format << std::endl;
     log()->get(logDEBUG) << "OrgX: " << m_header->OrgX << std::endl;
     log()->get(logDEBUG) << "OrgY: " << m_header->OrgY << std::endl;
@@ -193,9 +192,8 @@ void Reader::initialize()
     log()->get(logDEBUG) << "Color: " << m_header->Color << std::endl;
     log()->get(logDEBUG) << "Count: " << m_header->PntCnt << std::endl;
     log()->get(logDEBUG) << "RecogVal: " << m_header->RecogVal << std::endl;
-
-
 }
+**/
 
 
 Options Reader::getDefaultOptions()

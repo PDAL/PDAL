@@ -63,7 +63,6 @@ public:
     Writer(const Options&);
     ~Writer();
 
-    virtual void initialize();
     static Options getDefaultOptions();
 
 protected:
@@ -73,10 +72,11 @@ protected:
     virtual void writeEnd(boost::uint64_t actualNumPointsWritten);
 
 private:
-
     Writer& operator=(const Writer&); // not implemented
     Writer(const Writer&); // not implemented
 
+    virtual void processOptions(const Options& options);
+    virtual void initialize();
     bool CheckTableExists(std::string const& name);
     bool CheckPointCloudExists();
     bool CheckPostGISExists();
@@ -100,6 +100,7 @@ private:
     std::string m_schema_name;
     std::string m_table_name;
     std::string m_column_name;
+    std::string m_connection;
     schema::CompressionType m_patch_compression_type;
     boost::uint32_t m_patch_capacity;
     boost::uint32_t m_srid;

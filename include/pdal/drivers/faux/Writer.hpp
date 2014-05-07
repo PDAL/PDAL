@@ -63,9 +63,6 @@ public:
     Writer() : pdal::Writer()
         {}
 
-    virtual void initialize();
-    static Options getDefaultOptions();;
-
     // retrieve the summary info
     double getMinX() const
     {

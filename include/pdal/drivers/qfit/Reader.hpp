@@ -138,7 +138,6 @@ public:
     Reader(const Options& options);
     ~Reader();
 
-    virtual void initialize();
     static Options getDefaultOptions();
     static std::vector<Dimension> getDefaultDimensions();
 

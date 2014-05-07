@@ -197,9 +197,7 @@ public:
         { addMetadata(); }
     Stats()
         { addMetadata(); }
-    ~Stats();
 
-    virtual void initialize();
     static Options getDefaultOptions();
 
     pdal::StageSequentialIterator*

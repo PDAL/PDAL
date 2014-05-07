@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(CacheFilterTest_test_options)
     cache.setInput(&reader);
 
     BOOST_CHECK(cache.getDescription() == "Cache Filter");
-    cache.initialize();
+    cache.prepare();
 
     const Schema& schema = reader.getSchema();
 
@@ -138,7 +138,7 @@ BOOST_AUTO_TEST_CASE(CacheFilterTest_test_use_counts)
     cache.setInput(&reader);
 
     BOOST_CHECK_EQUAL(cache.getDescription(), "Cache Filter");
-    cache.initialize();
+    cache.prepare();
 
     const Schema& schema = reader.getSchema();
     
@@ -202,7 +202,7 @@ BOOST_AUTO_TEST_CASE(CacheFilterTest_test_random)
     cache.setInput(&reader);
 
     BOOST_CHECK_EQUAL(cache.getDescription(), "Cache Filter");
-    cache.initialize();
+    cache.prepare();
 
     const Schema& schema = reader.getSchema();
 
@@ -253,7 +253,7 @@ BOOST_AUTO_TEST_CASE(test_two_iters_with_cache)
 
     pdal::filters::Cache cache(options);
     cache.setInput(&reader);
-    cache.initialize();
+    cache.prepare();
 
     BOOST_CHECK_EQUAL(reader.getNumPoints(), num_points);
     BOOST_CHECK_EQUAL(block_size * num_blocks, num_points);
@@ -359,7 +359,7 @@ BOOST_AUTO_TEST_CASE(CacheFilterTest_test_large)
     cache.setInput(&reader);
 
     BOOST_CHECK_EQUAL(cache.getDescription(), "Cache Filter");
-    cache.initialize();
+    cache.prepare();
 
     const Schema& schema = cache.getSchema();
     BOOST_CHECK_EQUAL(schema.getByteSize(), 32);

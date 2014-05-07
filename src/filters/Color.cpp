@@ -64,19 +64,6 @@ std::vector<Dimension> Color::getDefaultDimensions()
 }
 
 
-void Color::initialize()
-{
-    Filter::initialize();
-}
-
-
-Options Color::getDefaultOptions()
-{
-    Options options;
-    return options;
-}
-
-
 void Color::processBuffer(PointBuffer& data) const
 {
     const boost::uint32_t numPoints = data.getNumPoints();

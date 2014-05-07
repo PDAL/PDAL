@@ -197,7 +197,7 @@ BOOST_AUTO_TEST_CASE(test_metadata_stage)
 {
     pdal::drivers::las::Reader reader(Support::datapath("interesting.las"));
     BOOST_CHECK(reader.getDescription() == "Las Reader");
-    reader.initialize();
+    reader.prepare();
 
     pdal::Metadata file_metadata = reader.getMetadata();
 
@@ -207,14 +207,9 @@ BOOST_AUTO_TEST_CASE(test_metadata_stage)
     pdal::Options options(option);
 
     pdal::drivers::pipeline::Reader pipeline(options);
-    pipeline.initialize();
+    pipeline.prepare();
 
     pdal::Metadata pipeline_metadata = pipeline.getMetadata();
-    
-    // pdal::Metadata m3 = pipeline_metadata.toPTree().get_child("root");
-    
-    // boost::property_tree::write_xml(std::cout, pipeline_metadata.toPTree());
-
     BOOST_CHECK_EQUAL(pipeline_metadata.toPTree().get_child("metadata").size(), 32u);
 }
 

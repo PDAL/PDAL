@@ -121,7 +121,7 @@ BOOST_AUTO_TEST_CASE(test_sequential_iter)
     // reader_options.add(verbose);
 
     pdal::drivers::buffer::Reader reader(reader_options, *input);
-    reader.initialize();
+    reader.prepare();
 
     BOOST_CHECK_EQUAL(reader.getDescription(), "Buffer Reader");
 
@@ -166,7 +166,7 @@ BOOST_AUTO_TEST_CASE(test_random_iter)
     // reader_options.add(verbose);
 
     pdal::drivers::buffer::Reader reader(reader_options, *input);
-    reader.initialize();
+    reader.prepare();
 
     BOOST_CHECK_EQUAL(reader.getDescription(), "Buffer Reader");
 
@@ -267,7 +267,7 @@ BOOST_AUTO_TEST_CASE(test_iterator_write)
     // reader_options.add(verbose);
 
     pdal::drivers::buffer::Reader reader(reader_options, *input);
-    //reader.initialize();
+    //reader.prepare();
 
     std::string output("BufferReaderTest-geojson.json");
     pdal::Option out_filename("filename", Support::temppath(output));
@@ -281,7 +281,7 @@ BOOST_AUTO_TEST_CASE(test_iterator_write)
 
     pdal::drivers::text::Writer writer(writer_opts);
     writer.setInput(&reader);
-    writer.initialize();
+    writer.prepare();
     boost::uint64_t numWritten = writer.write(100);
 
     BOOST_CHECK_EQUAL(numWritten, 100u);

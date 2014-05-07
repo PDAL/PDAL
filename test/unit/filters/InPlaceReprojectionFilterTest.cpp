@@ -128,7 +128,7 @@ BOOST_AUTO_TEST_CASE(InPlaceReprojectionFilterTest_test_1)
         pdal::filters::InPlaceReprojection reprojectionFilter(options);
         reprojectionFilter.setInput(&reader);
 
-        reprojectionFilter.initialize();
+        reprojectionFilter.prepare();
 
         const pdal::Schema& schema = reprojectionFilter.getSchema();
         pdal::PointBuffer data(schema, 1);
@@ -202,7 +202,7 @@ BOOST_AUTO_TEST_CASE(InPlaceReprojectionFilterTest_test_2)
         pdal::drivers::las::Reader reader(options);
         pdal::filters::InPlaceReprojection reprojectionFilter(options);
         reprojectionFilter.setInput(&reader);
-        reprojectionFilter.initialize();
+        reprojectionFilter.prepare();
 
         const pdal::Schema& schema = reprojectionFilter.getSchema();
         pdal::PointBuffer data(schema, 1);

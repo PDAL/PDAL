@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_sequential_iter)
 {
     Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
     pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Constant);
-    reader.initialize();
+    reader.prepare();
 
     BOOST_CHECK_EQUAL(reader.getDescription(), "Faux Reader");
 
@@ -104,7 +104,7 @@ BOOST_AUTO_TEST_CASE(FauxReaderTest_test_options)
     opts.add(opt3);
     opts.add(opt4);
     pdal::drivers::faux::Reader reader(opts);
-    reader.initialize();
+    reader.prepare();
 
     BOOST_CHECK_EQUAL(reader.getDescription(), "Faux Reader");
     BOOST_CHECK_EQUAL(reader.getId(), 90210u);
@@ -145,7 +145,7 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_random_iter)
 {
     Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
     pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Constant);
-    reader.initialize();
+    reader.prepare();
 
     BOOST_CHECK_EQUAL(reader.getDescription(), "Faux Reader");
 
@@ -250,7 +250,7 @@ BOOST_AUTO_TEST_CASE(test_random_mode)
 {
     Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
     pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Random);
-    reader.initialize();
+    reader.prepare();
 
     const Schema& schema = reader.getSchema();
 
@@ -298,7 +298,7 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode_1)
 {
     Bounds<double> bounds(0,0,0,4,4,4);
     pdal::drivers::faux::Reader reader(bounds, 2, pdal::drivers::faux::Reader::Ramp);
-    reader.initialize();
+    reader.prepare();
 
     const Schema& schema = reader.getSchema();
 
@@ -344,7 +344,7 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode_2)
 {
     Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 152.0, 203.0);
     pdal::drivers::faux::Reader reader(bounds, 750, pdal::drivers::faux::Reader::Ramp);
-    reader.initialize();
+    reader.prepare();
 
     const Schema& schema = reader.getSchema();
 
@@ -396,7 +396,7 @@ BOOST_AUTO_TEST_CASE(test_custom_fields)
     dims.push_back(dimX);
 
     pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Random, dims);
-    reader.initialize();
+    reader.prepare();
 
     const Schema& schema = reader.getSchema();
     BOOST_CHECK_EQUAL(schema.getDimensions().size(), 2u);
@@ -409,7 +409,7 @@ BOOST_AUTO_TEST_CASE(testUnknownPointCountType)
     std::vector<Dimension> dims = pdal::drivers::faux::Reader::getDefaultDimensions();
     pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Constant,
                                        dims, true);
-    reader.initialize();
+    reader.prepare();
     BOOST_CHECK_EQUAL(reader.getNumPoints(), 0);
 
     PointBuffer data(reader.getSchema(), 1250);

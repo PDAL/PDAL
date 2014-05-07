@@ -110,8 +110,6 @@ Reader::~Reader()
 
 void Reader::initialize()
 {
-    pdal::Reader::initialize();
-
     std::istream& stream = m_streamFactory->allocate();
 
     LasHeaderReader lasHeaderReader(m_lasHeader, stream);
@@ -123,7 +121,8 @@ void Reader::initialize()
     {
         // Improve the error message. #277
         std::stringstream msg;
-        std::string filename(getOptions().getValueOrDefault<std::string>("filename", ""));
+        std::string filename(
+            getOptions().getValueOrDefault<std::string>("filename", ""));
         if (filename.empty())
         {
             throw e;
@@ -133,8 +132,8 @@ void Reader::initialize()
         throw std::invalid_argument(msg.str());
     }
 
-    this->setBounds(m_lasHeader.getBounds());
-    this->setNumPoints(m_lasHeader.GetPointRecordsCount());
+    setBounds(m_lasHeader.getBounds());
+    setNumPoints(m_lasHeader.GetPointRecordsCount());
 
     // If the user is already overriding this by setting it on the stage, we'll
     // take their overridden value

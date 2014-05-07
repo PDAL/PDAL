@@ -62,17 +62,13 @@ Splitter::Splitter(Options const& options)
 
 void Splitter::initialize()
 {
-    Filter::initialize();
-
     if (m_length == 0)
     {
         throw pdal_error("splitter length cannot be 0!");
     }
-
     setLeafSize(m_length);
-
-    return;
 }
+
 
 Options Splitter::getDefaultOptions()
 {

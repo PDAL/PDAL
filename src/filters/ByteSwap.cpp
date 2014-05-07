@@ -51,11 +51,10 @@ namespace filters
 
 void ByteSwap::initialize()
 {
-    Filter::initialize();
-
     const Stage& stage = getPrevStage();
-    this->setNumPoints(stage.getNumPoints());
+    setNumPoints(stage.getNumPoints());
 
+//ABELL - Build schema.
     schema::index_by_index const& dimensions =
         m_schema.getDimensions().get<schema::index>();
 

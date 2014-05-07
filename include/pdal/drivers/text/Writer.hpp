@@ -81,9 +81,7 @@ public:
     SET_STAGE_ENABLED(true)
 
     Writer(const Options&);
-    ~Writer();
 
-    virtual void initialize();
     static Options getDefaultOptions();
 
 protected:
@@ -92,9 +90,9 @@ protected:
     virtual void writeEnd(boost::uint64_t actualNumPointsWritten);
 
 private:
-
     Writer& operator=(const Writer&); // not implemented
     Writer(const Writer&); // not implemented
+    virtual void processOptions(const Options&);
 
     void putStringRepresentation(PointBuffer const& data,
                                         Dimension const& d,

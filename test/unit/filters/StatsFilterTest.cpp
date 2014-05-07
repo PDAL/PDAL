@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(StatsFilterTest_test1)
     filter.setInput(&reader);
     BOOST_CHECK_EQUAL(filter.getName(), "filters.stats");
     BOOST_CHECK_EQUAL(filter.getDescription(), "Statistics Filter");
-    filter.initialize();
+    filter.prepare();
 
     const Schema& schema = filter.getSchema();
     PointBuffer data(schema, 1000);
@@ -107,7 +107,7 @@ BOOST_AUTO_TEST_CASE(test_random_iterator)
 
     pdal::filters::Stats filter;
     filter.setInput(&reader);
-    filter.initialize();
+    filter.prepare();
 
     const Schema& schema = reader.getSchema();
 
@@ -183,7 +183,7 @@ BOOST_AUTO_TEST_CASE(test_multiple_dims_same_name)
     reprojectionFilter.setInput(&reader);
     pdal::filters::Stats filter(options);    
     filter.setInput(&reprojectionFilter);
-    filter.initialize();
+    filter.prepare();
 
     const pdal::Schema& schema = filter.getSchema();
     pdal::PointBuffer data(schema, 1000u);
@@ -252,7 +252,7 @@ BOOST_AUTO_TEST_CASE(test_specified_stats)
     reprojectionFilter.setInput(&reader);
     pdal::filters::Stats filter(options);
     filter.setInput(&reprojectionFilter);
-    filter.initialize();
+    filter.prepare();
 
     const pdal::Schema& schema = filter.getSchema();
     pdal::PointBuffer data(schema, 1000u);
@@ -322,11 +322,10 @@ BOOST_AUTO_TEST_CASE(test_pointbuffer_stats)
     reprojectionFilter.setInput(&reader);
     pdal::filters::Stats filter(options);
     filter.setInput(&reprojectionFilter);
-    filter.initialize();
+    filter.prepare();
 
     const pdal::Schema& schema = filter.getSchema();
     pdal::PointBuffer data(schema, 1000u);
-    
 
     boost::scoped_ptr<pdal::StageSequentialIterator> iter(filter.createSequentialIterator(data));
     {

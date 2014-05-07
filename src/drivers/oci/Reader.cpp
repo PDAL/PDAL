@@ -103,27 +103,27 @@ boost::uint64_t Reader::getNumPoints() const
 
 void Reader::initialize()
 {
-    pdal::Reader::initialize();
-
     pdal::GlobalEnvironment::get().getGDALDebug()->addLog(log());
     m_connection = connect();
     m_block = BlockPtr(new Block(m_connection));
 
     if (getQueryString().size() == 0)
-        throw pdal_error("'query' statement is empty. No data can be read from pdal::drivers::oci::Reader");
+        throw pdal_error("'query' statement is empty. No data can be read "
+            "from pdal::drivers::oci::Reader");
 
-    m_initialQueryStatement = Statement(m_connection->CreateStatement(getQueryString().c_str()));
+    m_initialQueryStatement =
+        Statement(m_connection->CreateStatement(getQueryString().c_str()));
 
     m_initialQueryStatement->Execute(0);
 
     m_querytype = describeQueryType();
     if (m_querytype == QUERY_SDO_BLK_PC_VIEW)
     {
-
         defineBlock(m_initialQueryStatement, m_block);
         bool bDidRead = m_initialQueryStatement->Fetch();
 
-        if (!bDidRead) throw pdal_error("Unable to fetch a point cloud entry entry!");
+        if (!bDidRead)
+            throw pdal_error("Unable to fetch a point cloud entry entry!");
 
         try
         {

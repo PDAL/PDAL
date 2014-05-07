@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE(test_one)
     nitf_opts.add(nitf_opt);
 
     pdal::drivers::nitf::Reader nitf_reader(nitf_opts);
-    nitf_reader.initialize();
+    nitf_reader.prepare();
 
     BOOST_CHECK_EQUAL(nitf_reader.getDescription(), "NITF Reader");
 
@@ -95,7 +95,7 @@ BOOST_AUTO_TEST_CASE(test_one)
     las_opts.add(las_opt);
 
     pdal::drivers::las::Reader las_reader(las_opts);
-    las_reader.initialize();
+    las_reader.prepare();
     const Schema& las_schema = las_reader.getSchema();
 
     PointBuffer las_data(las_schema, 750);
@@ -146,8 +146,7 @@ BOOST_AUTO_TEST_CASE(test_chipper)
     pdal::Options options(option);
 
     pdal::drivers::pipeline::Reader reader(options);
-    reader.initialize();
-    
+    reader.prepare();
     
     pdal::filters::Chipper* chipper = static_cast<pdal::filters::Chipper*>(reader.getManager().getStage());
 

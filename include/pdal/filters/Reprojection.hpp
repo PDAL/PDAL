@@ -71,9 +71,6 @@ public:
     Reprojection(const SpatialReference& outSRS);
     Reprojection(const SpatialReference& inSRS, const SpatialReference& outSRS);
 
-    virtual void initialize();
-    static Options getDefaultOptions();
-
     pdal::StageSequentialIterator*
         createSequentialIterator(PointBuffer& buffer) const;
     pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const
@@ -81,6 +78,7 @@ public:
     void processBuffer(PointBuffer& data) const;
 
 private:
+    virtual void initialize();
     void updateBounds();
     void checkImpedance();
     void transform(double& x, double& y, double& z) const;

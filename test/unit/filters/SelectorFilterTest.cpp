@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(test1)
     pdal::Options options(option);
 
     pdal::drivers::pipeline::Reader reader(options);
-    reader.initialize();
+    reader.prepare();
     
     pdal::Schema const& schema = reader.getSchema();
     pdal::PointBuffer data(schema, 1000);

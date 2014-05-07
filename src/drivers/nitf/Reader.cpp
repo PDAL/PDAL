@@ -140,13 +140,12 @@ std::vector<Dimension> getDefaultDimensions()
 
 void Reader::initialize()
 {
-    pdal::Reader::initialize();
-
     boost::uint64_t offset(0), length(0);
 
     Metadata nitf_metadata(getName());
     {
         NitfFile nitf(m_filename);
+
         nitf.open();
 
         nitf.getLasPosition(offset, length);
@@ -158,8 +157,10 @@ void Reader::initialize()
 
     m_streamFactory = new FilenameSubsetStreamFactory(m_filename, offset, length);
 
+    //ABELL - Huh?  Seems weird.
     m_lasReader = new pdal::drivers::las::Reader(m_streamFactory);
-    m_lasReader->initialize();
+m_lasReader->prepare();
+//    m_lasReader->initialize();
 
 
     Metadata LAS = m_lasReader->getMetadata();

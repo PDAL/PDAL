@@ -49,9 +49,8 @@ namespace filters
 
 void Scaling::initialize()
 {
-    Filter::initialize();
     checkImpedance();
-
+    //ABELL - buildSchema().
     m_schema = alterSchema(m_schema);
 }
 

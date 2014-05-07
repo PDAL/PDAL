@@ -58,7 +58,6 @@ public:
     Reader(const Options&);
     ~Reader();
 
-    virtual void initialize();
     static Options getDefaultOptions();
     static std::vector<Dimension> getDefaultDimensions();
 
@@ -66,6 +65,9 @@ public:
 
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer&) const;
     pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const;
+
+private:
+    virtual void initialize();
 
 }; // class Reader
 

@@ -50,11 +50,7 @@ namespace filters
 
 void Selector::initialize()
 {
-    Filter::initialize();
-
     checkImpedance();
-
-    return;
 }
 
 

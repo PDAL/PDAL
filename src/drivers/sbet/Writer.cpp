@@ -53,12 +53,15 @@ Writer::~Writer()
 }
 
 
+void Writer::processOptions(const Options& options)
+{
+    m_filename = options.getOption("filename").getValue<std::string>();
+}
+
+
 void Writer::initialize()
 {
-    pdal::Writer::initialize();
-    std::string filename = getOptions().getOption("filename").getValue<std::string>();
-    m_ostream = FileUtils::createFile(filename, true);
-    return;
+    m_ostream = FileUtils::createFile(m_filename, true);
 }
 
 

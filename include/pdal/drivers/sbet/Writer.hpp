@@ -57,7 +57,6 @@ public:
         {}
     virtual ~Writer();
 
-    virtual void initialize();
     static Options getDefaultOptions();
 
 protected:
@@ -66,6 +65,10 @@ protected:
     virtual void writeEnd(boost::uint64_t);
 
 private:
+    virtual void processOptions(const Options&);
+    virtual void initialize();
+
+    std::string m_filename;
     std::ostream* m_ostream;
 
 }; // class Writer

@@ -117,17 +117,14 @@ Writer::~Writer()
     {
         // destructors shouldn't throw
     }
-
-    return;
 }
-
 
 
 void Writer::initialize()
 {
-    pdal::Writer::initialize();
-    pdal::GlobalEnvironment::get().getGDALDebug()->addLog(log());    
+    GlobalEnvironment::get().getGDALDebug()->addLog(log());    
 }
+
 
 Options Writer::getDefaultOptions()
 {

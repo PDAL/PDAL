@@ -114,10 +114,9 @@ std::vector<Dimension> Reader::getDefaultDimensions()
     return output;
 }
 
+
 void Reader::initialize()
 {
-    pdal::Reader::initialize();
-
     setBounds(m_bounds);
 }
 

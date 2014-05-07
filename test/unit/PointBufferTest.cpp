@@ -446,11 +446,9 @@ BOOST_AUTO_TEST_CASE(PointBufferTest_copy_like_Dimensions)
 
 BOOST_AUTO_TEST_CASE(test_indexed)
 {
-
     pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
     BOOST_CHECK(reader.getDescription() == "Las Reader");
-    reader.initialize();
-
+    reader.prepare();
 
     const Schema& schema = reader.getSchema();
     boost::uint32_t capacity(1000);

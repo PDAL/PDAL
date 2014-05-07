@@ -246,7 +246,7 @@ int Delta::execute()
         sourceOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
     }
     Stage* source = AppSupport::makeReader(sourceOptions);
-    source->initialize();
+    source->prepare();
     
     boost::uint32_t totalPointCount(source->getNumPoints());
     
@@ -269,9 +269,7 @@ int Delta::execute()
     }
 
     Stage* candidate = AppSupport::makeReader(candidateOptions);
-
-    candidate->initialize();    
-
+    candidate->prepare();    
 
     IndexedPointBuffer candidate_data(candidate->getSchema(), totalPointCount);
     StageSequentialIterator* candidate_iter = candidate->createSequentialIterator(candidate_data);

@@ -166,21 +166,6 @@ void Stats::addMetadata()
                                           getOptions().getValueOrDefault<boost::uint32_t>("num_bins", 20));
 }
 
-Stats::~Stats()
-{
-
-}
-
-void Stats::initialize()
-{
-    Filter::initialize();
-
-
-
-
-    return;
-}
-
 
 Options Stats::getDefaultOptions()
 {

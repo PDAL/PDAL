@@ -395,10 +395,10 @@ Reader::Reader(const Options& options)
 }
 
 
+//ABELL
+/**
 void Reader::initialize()
 {
-    pdal::Reader::initialize();
-
     std::ostringstream oss;
     oss << "flipping coordinates?: " << m_flip_x;
     log()->get(logDEBUG) << oss.str() << std::endl;
@@ -408,6 +408,7 @@ void Reader::initialize()
     oss << "setting z scale to: " << m_scale_z;
     log()->get(logDEBUG) << oss.str() << std::endl;
 }
+**/
 
 
 Options Reader::getDefaultOptions()

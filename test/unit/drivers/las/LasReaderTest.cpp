@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE(test_sequential)
 {
     pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
     BOOST_CHECK(reader.getDescription() == "Las Reader");
-    reader.initialize();
+    reader.prepare();
 
     const Schema& schema = reader.getSchema();
 
@@ -123,7 +123,7 @@ BOOST_AUTO_TEST_CASE(test_random)
 {
     pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
     BOOST_CHECK(reader.getDescription() == "Las Reader");
-    reader.initialize();
+    reader.prepare();
 
     const Schema& schema = reader.getSchema();
 
@@ -167,7 +167,7 @@ BOOST_AUTO_TEST_CASE(test_random_laz)
 {
     pdal::drivers::las::Reader reader(Support::datapath("laszip/laszip-generated.laz"));
     BOOST_CHECK(reader.getDescription() == "Las Reader");
-    reader.initialize();
+    reader.prepare();
 
     const Schema& schema = reader.getSchema();
 
@@ -211,7 +211,7 @@ BOOST_AUTO_TEST_CASE(test_two_iters)
 {
     pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
     BOOST_CHECK(reader.getDescription() == "Las Reader");
-    reader.initialize();
+    reader.prepare();
 
     const Schema& schema = reader.getSchema();
 
@@ -252,7 +252,7 @@ BOOST_AUTO_TEST_CASE(test_simultaneous_iters)
 {
     pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
     BOOST_CHECK_EQUAL(reader.getDescription(), "Las Reader");
-    reader.initialize();
+    reader.prepare();
 
     BOOST_CHECK_EQUAL(reader.getNumPoints(), 1065);
     BOOST_CHECK_EQUAL(355 * 3, 1065);
@@ -367,7 +367,7 @@ static void test_a_format(const std::string& file, boost::uint8_t majorVersion, 
                           double xref, double yref, double zref, double tref, boost::uint16_t rref,  boost::uint16_t gref,  boost::uint16_t bref)
 {
     pdal::drivers::las::Reader reader(Support::datapath(file));
-    reader.initialize();
+    reader.prepare();
 
     BOOST_CHECK_EQUAL(reader.getLasHeader().getPointFormat(), pointFormat);
     BOOST_CHECK_EQUAL(reader.getLasHeader().GetVersionMajor(), majorVersion);
@@ -407,7 +407,7 @@ BOOST_AUTO_TEST_CASE(test_different_formats)
 BOOST_AUTO_TEST_CASE(test_vlr)
 {
     pdal::drivers::las::Reader reader(Support::datapath("lots_of_vlr.las"));
-    reader.initialize();
+    reader.prepare();
 
     BOOST_CHECK_EQUAL(reader.getLasHeader().getVLRs().getAll().size(), 390);
 }
@@ -419,7 +419,7 @@ BOOST_AUTO_TEST_CASE(test_no_xyz)
     // still read LAS data #123
     pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
     BOOST_CHECK(reader.getDescription() == "Las Reader");
-    reader.initialize();
+    reader.prepare();
 
     Schema schema = reader.getSchema();
     
@@ -468,7 +468,7 @@ BOOST_AUTO_TEST_CASE(testInvalidFileSignature)
     pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las.wkt"));
     try
     {
-        reader.initialize();
+        reader.prepare();
     }
     catch (const std::invalid_argument& e)
     {
@@ -476,7 +476,7 @@ BOOST_AUTO_TEST_CASE(testInvalidFileSignature)
         BOOST_CHECK(msg.find("1.2-with-color.las.wkt") != std::string::npos);
         return;
     }
-    BOOST_FAIL("reader.initialize() did not throw std::invalid_argument");
+    BOOST_FAIL("reader.prepare() did not throw std::invalid_argument");
 }
 
 

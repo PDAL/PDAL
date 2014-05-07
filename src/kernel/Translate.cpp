@@ -306,7 +306,7 @@ int Translate::execute()
         writer->setSpatialReference(m_output_srs);
     }
 
-    writer->initialize();
+    writer->prepare();
 
     const boost::uint64_t numPointsToRead = final_stage->getNumPoints();
     

@@ -87,29 +87,18 @@ InPlaceReprojection::~InPlaceReprojection()
 {
 
 }
+
+
 void InPlaceReprojection::initialize()
 {
-    Filter::initialize();
-
-    if (!getOptions().hasOption("in_srs"))
-    {
+    //ABELL - Move to processOptions().
+    if (!m_options.hasOption("in_srs"))
         m_inSRS = getPrevStage().getSpatialReference();
-    } else
-    {
-        m_inSRS = getOptions().getValueOrThrow<pdal::SpatialReference>("in_srs");
-    }
-
-
-    m_outSRS = getOptions().getValueOrThrow<pdal::SpatialReference>("out_srs");
+    else
+        m_inSRS = m_options.getValueOrThrow<pdal::SpatialReference>("in_srs");
+    m_outSRS = m_options.getValueOrThrow<pdal::SpatialReference>("out_srs");
     setSpatialReference(m_outSRS);
-
-    return;
 }
-
-
-
-
-
 
 
 Options InPlaceReprojection::getDefaultOptions()

@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test1)
     BOOST_CHECK(filter.getDescription() == "Predicate Filter");
     pdal::drivers::faux::Writer writer;
     writer.setInput(&filter);
-    writer.initialize();
+    writer.prepare();
 
     boost::uint64_t numWritten = writer.write(1000);
 
@@ -128,7 +128,7 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test2)
     BOOST_CHECK(filter.getDescription() == "Predicate Filter");
     pdal::drivers::faux::Writer writer;
     writer.setInput(&filter);
-    writer.initialize();
+    writer.prepare();
 
     boost::uint64_t numWritten = writer.write(1000);
 
@@ -203,7 +203,7 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test3)
 
     pdal::drivers::faux::Writer writer;
     writer.setInput(&filter2);
-    writer.initialize();
+    writer.prepare();
 
     boost::uint64_t numWritten = writer.write(1000);
 
@@ -251,8 +251,7 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test4)
 
     pdal::filters::Predicate filter(opts);
     filter.setInput(&reader);
-
-    filter.initialize();
+    filter.prepare();
 
     const Schema& schema = filter.getSchema();
     PointBuffer data(schema, 1000);
@@ -298,8 +297,7 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test5)
 
     pdal::filters::Predicate filter(opts);
     filter.setInput(&reader);
-
-    filter.initialize();
+    filter.prepare();
 
     const Schema& schema = filter.getSchema();
     PointBuffer data(schema, 1000);
@@ -315,8 +313,7 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_Pipeline)
     Options options(option);
 
     pdal::drivers::pipeline::Reader reader(options);
-
-    reader.initialize();
+    reader.prepare();
 
     {
         const Schema& schema = reader.getSchema();
@@ -335,8 +332,7 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_Embed)
     Options options(option);
 
     pdal::drivers::pipeline::Reader reader(options);
-
-    reader.initialize();
+    reader.prepare();
 
     {
         const Schema& schema = reader.getSchema();

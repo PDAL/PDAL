@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE(basic_test)
     pdal::filters::Mosaic mosaic(options);
     mosaic.setInput(vec);
     BOOST_CHECK(mosaic.getDescription() == "Mosaic Filter");
-    mosaic.initialize();
+    mosaic.prepare();
 
     const Schema& schema = mosaic.getSchema();
 
@@ -137,7 +137,7 @@ BOOST_AUTO_TEST_CASE(pipeline_mosaic)
     reader.readPipeline(Support::datapath("pipeline/mosaic.xml"));
     Stage* stage = manager.getStage();
     BOOST_CHECK(stage != NULL);
-    stage->initialize();
+    stage->prepare();
 
     const Schema& schema = stage->getSchema();
     PointBuffer data(schema, 2*1065);

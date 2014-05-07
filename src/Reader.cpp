@@ -38,24 +38,6 @@
 namespace pdal
 {
 
-Reader::Reader(const Options& options) : Stage(options)
-{}
-
-
-Reader::~Reader()
-{}
-
-
-void Reader::initialize()
-{
-    Metadata& m = getMetadataRef();
-    m.setName(getName());
-
-    Stage::initialize();
-
-    return;
-}
-
 
 boost::property_tree::ptree Reader::serializePipeline() const
 {

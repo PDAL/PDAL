@@ -140,22 +140,6 @@ PCLBlock::processBuffer(PointBuffer& srcData, std::string& filename, PointBuffer
 }
 
 
-void PCLBlock::initialize()
-{
-    Filter::initialize();
-    log()->get(logDEBUG2) << "PCLBlock initialized" << std::endl;
-    return;
-}
-
-
-
-
-Options PCLBlock::getDefaultOptions()
-{
-    Options options;
-    return options;
-}
-
 pdal::StageSequentialIterator* PCLBlock::createSequentialIterator(PointBuffer& buffer) const
 {
     return new pdal::filters::iterators::sequential::PCLBlock(*this, buffer);
@@ -178,7 +162,8 @@ PCLBlock::PCLBlock(const pdal::filters::PCLBlock& filter, PointBuffer& buffer)
 boost::uint32_t PCLBlock::readBufferImpl(PointBuffer& buffer)
 {
 #ifdef PDAL_HAVE_PCL
-    std::string filename = m_pclblockFilter.getOptions().getValueOrThrow<std::string>("filename");
+    std::string filename =
+        m_pclblockFilter.getOptions().getValueOrThrow<std::string>("filename");
     m_pclblockFilter.log()->get(logDEBUG2) << "Using " << filename << std::endl;
 
     boost::uint32_t originalCapacity = buffer.getCapacity();
@@ -234,6 +219,7 @@ boost::uint32_t PCLBlock::readBufferImpl(PointBuffer& buffer)
 
     return numPointsAchieved;
 #else
+    (void)m_pclblockFilter;
     return buffer.getNumPoints();
 #endif
 }

@@ -57,18 +57,9 @@ Reader::Reader(const Options& options, const PointBuffer& buffer)
 }
 
 
-void Reader::initialize()
-{
-    pdal::Reader::initialize();
-
-    return;
-}
-
-
 Options Reader::getDefaultOptions()
 {
-    Options options;
-    return options;
+    return Options();
 }
 
 

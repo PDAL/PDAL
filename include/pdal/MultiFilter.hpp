@@ -55,8 +55,6 @@ public:
     MultiFilter(const Options& options) : Stage(options)
     {}
 
-    virtual void initialize();
-
     // for xml serializion of pipelines
     virtual boost::property_tree::ptree serializePipeline() const;
 

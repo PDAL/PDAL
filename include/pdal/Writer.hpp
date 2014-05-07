@@ -64,8 +64,6 @@ public:
 
     /// "Wakes up" the Writer and starts the process of walking down the 
     /// pipeline to wake up all subsequent stages of the pipeline.
-    virtual void initialize();
-
     /// Read the given number of points (or less, if the reader runs out first),
     /// and then write them out to wherever.  Returns total number of points
     /// actually written.

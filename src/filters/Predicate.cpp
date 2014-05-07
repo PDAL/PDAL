@@ -54,13 +54,7 @@ Predicate::~Predicate()
 
 void Predicate::initialize()
 {
-    Filter::initialize();
-
     m_script = new pdal::plang::Script(getOptions());
-
-    log()->get(logDEBUG)  << "script " << *m_script << std::endl;
-
-    return;
 }
 
 

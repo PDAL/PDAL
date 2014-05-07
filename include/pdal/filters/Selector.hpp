@@ -64,7 +64,6 @@ public:
         {}
 
     static Options getDefaultOptions();
-    virtual void initialize();
 
     pdal::StageSequentialIterator*
         createSequentialIterator(PointBuffer& buffer) const;
@@ -79,7 +78,7 @@ public:
     
 private:
     void checkImpedance();
-
+    virtual void initialize();
 
     Selector& operator=(const Selector&); // not implemented
     Selector(const Selector&); // not implemented

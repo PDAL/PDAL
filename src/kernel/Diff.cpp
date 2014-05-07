@@ -176,7 +176,7 @@ int Diff::execute()
         sourceOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
     }
     boost::scoped_ptr<Stage> source(AppSupport::makeReader(sourceOptions));
-    source->initialize();
+    source->prepare();
     
     boost::uint32_t chunkSize(source->getNumPoints());
     if (m_chunkSize)
@@ -197,7 +197,7 @@ int Diff::execute()
     }
 
     boost::scoped_ptr<Stage> candidate(AppSupport::makeReader(candidateOptions));
-    candidate->initialize();    
+    candidate->prepare();    
 
 
     PointBuffer candidate_data(candidate->getSchema(), chunkSize);

@@ -67,12 +67,9 @@ struct GDALSourceDeleter
 
 void Colorization::initialize()
 {
-    Filter::initialize();
-    collectOptions();
-
 #ifdef PDAL_HAVE_GDAL
-    pdal::GlobalEnvironment::get().getGDALEnvironment();
-    pdal::GlobalEnvironment::get().getGDALDebug()->addLog(log());
+    GlobalEnvironment::get().getGDALEnvironment();
+    GlobalEnvironment::get().getGDALDebug()->addLog(log());
 #endif
 }
 
@@ -123,10 +120,8 @@ Options Colorization::getDefaultOptions()
 }
 
 
-void Colorization::collectOptions()
+void Colorization::processOptions(const Options& options)
 {
-    Options options = getOptions();
-
     std::vector<Option> dimensions = options.getOptions("dimension");
 
     if (dimensions.size() == 0)

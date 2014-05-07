@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE(testConstructor)
     BOOST_CHECK(writer.getDescription() == "SBET Writer");
     BOOST_CHECK_EQUAL(writer.getName(), "drivers.sbet.writer");
 
-    writer.initialize();
+    writer.prepare();
 }
 
 
@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE(testWrite)
         pdal::drivers::sbet::Reader reader(makeReaderOptions());
         pdal::drivers::sbet::Writer writer(makeWriterOptions());
         writer.setInput(&reader);
-        writer.initialize();
+        writer.prepare();
 
         writer.write(2);
     }

@@ -59,11 +59,6 @@ Writer::Writer() : m_userCallback(0), m_writer_buffer(0)
 {}
 
 
-void Writer::initialize()
-{
-    Stage::initialize();
-}
-
 Writer::~Writer()
 {
     delete m_writer_buffer;

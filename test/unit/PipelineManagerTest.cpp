@@ -62,8 +62,7 @@ BOOST_AUTO_TEST_CASE(PipelineManagerTest_test1)
         Options optsW;
         optsW.add("filename", "temp.las", "file to write to");
         Writer* writer = mgr.addWriter("drivers.las.writer", *filter, optsW);
-
-        writer->initialize();
+        writer->prepare();
 
         const boost::uint64_t np = writer->write(reader->getNumPoints());
         BOOST_CHECK(np == 1065);
@@ -106,8 +105,7 @@ BOOST_AUTO_TEST_CASE(PipelineManagerTest_test2)
         Options optsW;
         optsW.add("filename", "temp.las", "file to write to");
         Writer* writer = mgr.addWriter("drivers.las.writer", *filter, optsW);
-
-        writer->initialize();
+        writer->prepare();
 
         // check all the prev/next stage linkages
 

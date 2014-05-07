@@ -60,7 +60,6 @@ public:
     Mosaic(const Options& options) : MultiFilter(options)
         {}
 
-    virtual void initialize();
     static Options getDefaultOptions();
 
     pdal::StageSequentialIterator*
@@ -71,6 +70,7 @@ public:
 private:
     Mosaic& operator=(const Mosaic&); // not implemented
     Mosaic(const Mosaic&); // not implemented
+    virtual void initialize();
 };
 
 

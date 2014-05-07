@@ -252,7 +252,7 @@ bool WriteUnprojectedData()
     pdal::drivers::oci::Writer writer(options);
     writer.setInput(&chipper);
 
-    writer.initialize();
+    writer.prepare();
     boost::uint64_t numPointsToRead = chipper.getNumPoints();
     
     boost::uint32_t count(1065);
@@ -291,7 +291,7 @@ bool WriteUnprojectedData()
 //     writerOpts.add(chunk_size);
 // 
 //     pdal::drivers::las::Writer writer(reader_reader, writerOpts);
-//     writer.initialize();
+//     writer.prepare();
 //     boost::uint64_t numWritten = writer.write(0);
 //     BOOST_CHECK_EQUAL(numWritten, 1065u);
 // 
@@ -309,7 +309,7 @@ bool WriteUnprojectedData()
 // 
 //     query.setValue<std::string>("SELECT CLOUD FROM PDAL_TEST_BASE where ID=1");
 //     pdal::drivers::oci::Reader reader_reader(options);
-//     reader_reader.initialize();
+//     reader_reader.prepare();
 // 
 //     pdal::PointBuffer data(reader_reader.getSchema(), 110);
 // 
@@ -351,7 +351,7 @@ bool WriteUnprojectedData()
 //     Option& query = options.getOptionByRef("query");
 //     query.setValue<std::string>("SELECT CLOUD FROM PDAL_TEST_BASE where ID=1");
 //     pdal::drivers::oci::Reader reader_reader(options);
-//     reader_reader.initialize();
+//     reader_reader.prepare();
 // 
 //     pdal::PointBuffer data2(reader_reader.getSchema(), 1500);
 //     boost::scoped_ptr<pdal::StageSequentialIterator> iter2(reader_reader.createSequentialIterator(data2));
@@ -431,7 +431,7 @@ void compareAgainstSourceBuffer(PointBuffer const& candidate, std::string filena
     options.add(f);
     
     pdal::drivers::las::Reader reader(options);
-    reader.initialize();
+    reader.prepare();
     
     BOOST_CHECK_EQUAL(candidate.getNumPoints(), reader.getNumPoints());
     
@@ -527,7 +527,7 @@ BOOST_AUTO_TEST_CASE(read_unprojected_data)
     verbose.setValue<std::string>( "7");
     
     pdal::drivers::oci::Reader reader(options);
-    reader.initialize();
+    reader.prepare();
     
     pdal::PointBuffer data(reader.getSchema(), reader.getNumPoints());
     pdal::StageSequentialIterator* iter = reader.createSequentialIterator(data);
@@ -602,7 +602,7 @@ BOOST_AUTO_TEST_CASE(read_unprojected_data)
 //     
 //     pdal::drivers::oci::Reader reader_reader(options);
 //     // pdal::filters::InPlaceReprojection reproj(reader_reader, options);
-//     reader_reader.initialize();
+//     reader_reader.prepare();
 // 
 //     pdal::PointBuffer data(reader_reader.getSchema(), chunk_size+30);
 //     pdal::StageSequentialIterator* iter = reader_reader.createSequentialIterator(data);
@@ -635,7 +635,7 @@ BOOST_AUTO_TEST_CASE(read_unprojected_data)
 //     Option& query = options.getOptionByRef("query");
 //     query.setValue<std::string>(oss.str());
 //     pdal::drivers::oci::Reader reader_reader(options);
-//     reader_reader.initialize();
+//     reader_reader.prepare();
 // 
 //     pdal::PointBuffer data(reader_reader.getSchema(), 2500);
 //     boost::scoped_ptr<pdal::StageSequentialIterator> iter(reader_reader.createSequentialIterator(data));
@@ -685,7 +685,7 @@ BOOST_AUTO_TEST_CASE(read_unprojected_data)
 //     Option& query = options.getOptionByRef("query");
 //     query.setValue<std::string>(oss.str());
 //     pdal::drivers::oci::Reader reader_reader(options);
-//     reader_reader.initialize();
+//     reader_reader.prepare();
 // 
 //     pdal::PointBuffer data(reader_reader.getSchema(), chunk_size+30);
 //     boost::scoped_ptr<pdal::StageSequentialIterator> iter(reader_reader.createSequentialIterator(data));

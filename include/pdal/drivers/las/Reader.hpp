@@ -77,7 +77,6 @@ public:
     Reader(StreamFactory* factory);
     ~Reader();
 
-    virtual void initialize();
     static Options getDefaultOptions();
     static std::vector<Dimension> getDefaultDimensions();
     
@@ -109,6 +108,7 @@ private:
     bool m_ownsStreamFactory;
     LasHeader m_lasHeader;
 
+    virtual void initialize();
     void readMetadata();
 
     Reader& operator=(const Reader&); // not implemented

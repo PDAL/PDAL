@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE(FauxWriterTest_test_1)
     pdal::drivers::faux::Writer writer;
     writer.setInput(&reader);
     BOOST_CHECK(writer.getDescription() == "Faux Writer");
-    writer.initialize();
+    writer.prepare();
 
     boost::uint64_t numWritten = writer.write(750);
 
@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE(test_2)
 
     pdal::drivers::faux::Writer writer;
     writer.setInput(&reader);
-    writer.initialize();
+    writer.prepare();
 
     boost::uint64_t numWritten = writer.write(750);
 
@@ -140,7 +140,7 @@ BOOST_AUTO_TEST_CASE(test_callbacks)
         pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Random);
         pdal::drivers::faux::Writer writer;
         writer.setInput(&reader);
-        writer.initialize();
+        writer.prepare();
 
         MyUserCallback_0 cb;
         writer.setUserCallback(&cb);
@@ -157,7 +157,7 @@ BOOST_AUTO_TEST_CASE(test_callbacks)
         pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Random);
         pdal::drivers::faux::Writer writer;
         writer.setInput(&reader);
-        writer.initialize();
+        writer.prepare();
 
         MyUserCallback_0 cb;
         writer.setUserCallback(&cb);
@@ -174,7 +174,7 @@ BOOST_AUTO_TEST_CASE(test_callbacks)
         pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Random);
         pdal::drivers::faux::Writer writer;
         writer.setInput(&reader);
-        writer.initialize();
+        writer.prepare();
 
         MyUserCallback_1 cb;
         writer.setUserCallback(&cb);
@@ -191,7 +191,7 @@ BOOST_AUTO_TEST_CASE(test_callbacks)
         pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Random);
         pdal::drivers::faux::Writer writer;
         writer.setInput(&reader);
-        writer.initialize();
+        writer.prepare();
 
         MyUserCallback_2 cb;
         writer.setUserCallback(&cb);
@@ -209,7 +209,7 @@ BOOST_AUTO_TEST_CASE(test_buffer_resize)
     pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Random);
     pdal::drivers::faux::Writer writer;
     writer.setInput(&reader);
-    writer.initialize();
+    writer.prepare();
 
     BOOST_CHECK_EQUAL(writer.write(750, 0, 101), 750);
 }

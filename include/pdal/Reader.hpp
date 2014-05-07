@@ -56,16 +56,13 @@ class ReaderBlockIterator;
 class PDAL_DLL Reader : public Stage
 {
 public:
-    Reader(Options const& options);
-    virtual ~Reader();
-
-    virtual void initialize();
+    Reader(Options const& options) : Stage(options)
+        {};
+    virtual ~Reader()
+        {};
 
     /// Serialization
     virtual boost::property_tree::ptree serializePipeline() const;
-
-    // for dumping
-    // virtual boost::property_tree::ptree toPTree() const;
 };
 
 } // namespace pdal

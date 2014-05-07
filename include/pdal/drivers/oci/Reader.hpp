@@ -69,7 +69,6 @@ public:
     Reader(const Options&);
     ~Reader();
 
-    virtual void initialize();
     static Options getDefaultOptions();
     virtual boost::uint64_t getNumPoints() const;
     pdal::StageSequentialIterator*
@@ -103,9 +102,9 @@ private:
 
     Reader& operator=(const Reader&); // not implemented
     Reader(const Reader&); // not implemented
-    //
 
-    QueryType describeQueryType() ;
+    virtual void initialize();
+    QueryType describeQueryType();
     
 
     Connection m_connection;

@@ -63,8 +63,6 @@ Reader::~Reader()
 
 void Reader::initialize()
 {
-    pdal::Reader::initialize();
-
     boost::scoped_ptr<PipelineManager> tmp(new PipelineManager());
     m_manager.swap(tmp);
 
@@ -75,22 +73,19 @@ void Reader::initialize()
         m_manager->removeWriter();
     }
     m_stage = m_manager->getStage();
-    m_stage->initialize();
+    m_stage->prepare();
 
     setSchema(m_stage->getSchema());
 
     setNumPoints(m_stage->getNumPoints());
     setBounds(m_stage->getBounds());
     setSpatialReference(m_stage->getSpatialReference());
-
-    return;
 }
 
 
 Options Reader::getDefaultOptions()
 {
-    Options options;
-    return options;
+    return Options();
 }
 
 

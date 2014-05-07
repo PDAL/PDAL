@@ -51,24 +51,10 @@ Decimation::Decimation(const Options& options)
 
 void Decimation::initialize()
 {
-    Filter::initialize();
-
     if (m_step < 1)
-    {
         throw pdal_error("Decimation step value cannot be less than 1!");
-    }
-    this->setNumPoints(this->getNumPoints() / m_step);
-
-    log()->get(logDEBUG) << "decimation step: " << m_step << std::endl;
-
-    return;
-}
-
-
-Options Decimation::getDefaultOptions()
-{
-    Options options;
-    return options;
+    setNumPoints(this->getNumPoints() / m_step);
+//    log()->get(logDEBUG) << "decimation step: " << m_step << std::endl;
 }
 
 

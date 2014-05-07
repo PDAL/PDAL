@@ -68,9 +68,6 @@ public:
     ~PCLBlock()
         {}
 
-    virtual void initialize();
-    static Options getDefaultOptions();
-
     pdal::StageSequentialIterator*
     createSequentialIterator(PointBuffer& buffer) const;
     pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const
@@ -83,11 +80,8 @@ public:
                                   PointBuffer& dstData) const;
 
 private:
-
-
     PCLBlock& operator=(const PCLBlock&); // not implemented
     PCLBlock(const PCLBlock&); // not implemented
-
 };
 
 namespace iterators
@@ -105,7 +99,6 @@ private:
     boost::uint64_t skipImpl(boost::uint64_t);
     boost::uint32_t readBufferImpl(PointBuffer&);
     bool atEndImpl() const;
-
     const pdal::filters::PCLBlock& m_pclblockFilter;
 };
 

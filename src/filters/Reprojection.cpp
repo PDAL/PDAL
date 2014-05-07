@@ -117,8 +117,6 @@ Reprojection::Reprojection(const SpatialReference& inSRS,
 
 void Reprojection::initialize()
 {
-    Filter::initialize();
-
     checkImpedance();
 
     if (m_inferInputSRS)
@@ -127,7 +125,6 @@ void Reprojection::initialize()
     }
 
 #ifdef PDAL_HAVE_GDAL
-
     m_gdal_debug = boost::shared_ptr<pdal::gdal::Debug>(new pdal::gdal::Debug(isDebug(), log()));
 
     m_in_ref_ptr = ReferencePtr(OSRNewSpatialReference(0), OGRSpatialReferenceDeleter());
@@ -168,15 +165,6 @@ void Reprojection::initialize()
     setSpatialReference(m_outSRS);
 
     updateBounds();
-
-    return;
-}
-
-
-Options Reprojection::getDefaultOptions()
-{
-    Options options;
-    return options;
 }
 
 

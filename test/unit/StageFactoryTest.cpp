@@ -78,8 +78,7 @@ BOOST_AUTO_TEST_CASE(StageFactoryTest_test1)
     optsW.add("filename", "temp.las", "file to write to");
     Writer* writer = factory.createWriter("drivers.las.writer", *filter, optsW);
     BOOST_CHECK(writer->getName() == "drivers.las.writer");
-
-    writer->initialize();
+    writer->prepare();
 
     const boost::uint64_t np = writer->write(reader->getNumPoints());
     BOOST_CHECK(np == 1065);
@@ -182,7 +181,7 @@ BOOST_AUTO_TEST_CASE(StageFactoryTest_test2)
     optsW.add("flag",44,"my flag");
     Writer* writer = factory.createWriter("demoW", *reader, optsW);
     BOOST_CHECK(writer->getName() == "drivers.las.writer");
-    writer->initialize();
+    writer->prepare();
     BOOST_CHECK(s_demoflag == 44);
 
     delete writer;

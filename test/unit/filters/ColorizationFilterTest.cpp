@@ -94,8 +94,7 @@ BOOST_AUTO_TEST_CASE(ColorizationFilterTest_test_1)
 
         pdal::filters::Colorization filter(reader_options);
         filter.setInput(&reader);
-
-        filter.initialize();
+        filter.prepare();
 
         const pdal::Schema& schema = filter.getSchema();
         pdal::PointBuffer data(schema, 1);

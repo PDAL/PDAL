@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE(test_10_word)
     pdal::drivers::qfit::Reader reader(options);
     BOOST_CHECK(reader.getDescription() == "QFIT Reader");
     BOOST_CHECK_EQUAL(reader.getName(), "drivers.qfit.reader");
-    reader.initialize();
+    reader.prepare();
 
     const Schema& schema = reader.getSchema();
 
@@ -138,7 +138,7 @@ BOOST_AUTO_TEST_CASE(test_14_word)
     options.add(flip_coordinates);
 
     pdal::drivers::qfit::Reader reader(options);
-    reader.initialize();
+    reader.prepare();
 
     const Schema& schema = reader.getSchema();
 

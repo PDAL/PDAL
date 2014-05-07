@@ -140,7 +140,7 @@ BOOST_AUTO_TEST_CASE(test_parallel)
 
     for (int threadId=0; threadId<TEN; threadId++)
     {
-        stages[threadId][TEN-1]->initialize();
+        stages[threadId][TEN-1]->prepare();
     }
 
     //reader.log()->setLevel(logDEBUG5);

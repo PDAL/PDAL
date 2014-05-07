@@ -71,7 +71,6 @@ public:
     Writer(const Options&);
     ~Writer();
 
-    virtual void initialize();
     static Options getDefaultOptions();
 
     void run(std::ostringstream const& command);
@@ -97,11 +96,10 @@ protected:
     virtual void writeEnd(boost::uint64_t actualNumPointsWritten);
 
 private:
-
-
     Writer& operator=(const Writer&); // not implemented
     Writer(const Writer&); // not implemented
 
+    virtual void initialize();
     void WipeBlockTable();
     void CreateBlockIndex();
     void CreateBlockTable();

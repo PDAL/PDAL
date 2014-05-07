@@ -73,7 +73,7 @@ public:
     void setInput(const std::vector<Stage *>& inputs);
     void setInput(Stage *input);
 
-    virtual void initialize();
+    void prepare();
     bool isInitialized() const
         { return m_initialized; }
 
@@ -174,6 +174,14 @@ private:
     Stage& operator=(const Stage&); // not implemented
     Stage(const Stage&); // not implemented
     void Init();
+    void l_processOptions(const Options& options);
+    virtual void processOptions(const Options& options)
+        {}
+    void l_initialize();
+    virtual void initialize()
+        {}
+    virtual void buildSchema(Schema *schema)
+        {}
 };
 
 PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const Stage&);

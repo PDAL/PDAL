@@ -119,11 +119,12 @@ Writer::~Writer()
     m_streamManager.close();
 }
 
+
 void Writer::initialize()
 {
-    pdal::Writer::initialize();
     m_streamManager.open();
 }
+
 
 Options Writer::getDefaultOptions()
 {

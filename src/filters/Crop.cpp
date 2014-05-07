@@ -118,8 +118,6 @@ Crop::~Crop()
 
 void Crop::initialize()
 {
-    Filter::initialize();
-
 #ifdef PDAL_HAVE_GEOS
     std::string wkt =
         getOptions().getValueOrDefault<std::string>("polygon", "");

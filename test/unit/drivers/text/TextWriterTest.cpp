@@ -129,7 +129,7 @@ BOOST_AUTO_TEST_CASE(TextWriterTest_geojson)
     writer.setInput(&filter);
 
     BOOST_CHECK_EQUAL(writer.getDescription(), "Text Writer");
-    writer.initialize();
+    writer.prepare();
 
     writer.write(20);
 

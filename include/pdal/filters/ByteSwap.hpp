@@ -65,7 +65,6 @@ public:
     ByteSwap()
         {}
 
-    virtual void initialize();
     static Options getDefaultOptions();
 
     pdal::StageSequentialIterator*
@@ -82,6 +81,7 @@ public:
 private:
     ByteSwap& operator=(const ByteSwap&); // not implemented
     ByteSwap(const ByteSwap&); // not implemented
+    virtual void initialize();
 };
 
 

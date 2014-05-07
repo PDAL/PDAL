@@ -73,10 +73,7 @@ Cache::~Cache()
 
 void Cache::initialize()
 {
-    Filter::initialize();
-
     resetCache();
-    return;
 }
 
 

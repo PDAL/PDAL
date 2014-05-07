@@ -161,7 +161,7 @@ int PCL::execute()
 
     Writer* writer = AppSupport::makeWriter(writerOptions, *final_stage);
 
-    writer->initialize();
+    writer->prepare();
 
     const boost::uint64_t numPointsToRead = final_stage->getNumPoints();
 

@@ -76,23 +76,14 @@ Writer::Writer(const Options& options)
 {}
 
 
-Writer::~Writer()
+void Writer::processOptions(const Options& options)
 {
-    return;
-}
-
-
-void Writer::initialize()
-{
-    pdal::Writer::initialize();
-
-    std::string filename = getOptions().getValueOrThrow<std::string>("filename");
+    std::string filename = options.getValueOrThrow<std::string>("filename");
 
     // This is so the stream gets closed down if we throw any sort of
     // exception
-    m_stream = FileStreamPtr(FileUtils::createFile(filename, true), FileStreamDeleter());
-
-    return;
+    m_stream = FileStreamPtr(FileUtils::createFile(filename, true),
+        FileStreamDeleter());
 }
 
 

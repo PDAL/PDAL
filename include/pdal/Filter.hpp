@@ -52,12 +52,10 @@ namespace pdal
 class PDAL_DLL Filter : public Stage
 {
 public:
-    Filter(const Options& options) : Stage{options}
+    Filter(const Options& options) : Stage(options)
         {}
     Filter()
         {}
-
-    virtual void initialize();
 
     // for xml serializion of pipelines
     virtual boost::property_tree::ptree serializePipeline() const;

@@ -106,41 +106,58 @@ void Stage::setInput(Stage *input)
 }
 
 
-void Stage::initialize()
+void Stage::prepare()
 {
 
     for (size_t i = 0; i < m_inputs.size(); ++i)
     {
         Stage *prev = m_inputs[i];
-        prev->initialize();
+        prev->prepare();
     }
+    l_processOptions(m_options);
+    processOptions(m_options);
+    l_initialize();
+    initialize();
+    buildSchema(m_context.getSchema());
+}
 
+
+void Stage::l_initialize()
+{
+    m_metadata.setName(getName());
+    if (m_inputs.size())
+        setCoreProperties(getPrevStage());
+}
+
+
+void Stage::l_processOptions(const Options& options)
+{
     // it is illegal to call initialize() twice
     if (m_initialized)
         throw pdal_error("Class already initialized: " + this->getName());
 
-    m_debug = m_options.getValueOrDefault<bool>("debug", false);
-    m_verbose = m_options.getValueOrDefault<boost::uint32_t>("verbose", 0);
+    m_debug = options.getValueOrDefault<bool>("debug", false);
+    m_verbose = options.getValueOrDefault<boost::uint32_t>("verbose", 0);
     if (m_debug && !m_verbose)
         m_verbose = 1;
 
     if (m_inputs.empty())
     {
         std::string logname =
-            m_options.getValueOrDefault<std::string>("log", "stdlog");
+            options.getValueOrDefault<std::string>("log", "stdlog");
         m_log = boost::shared_ptr<pdal::Log>(new Log(getName(), logname));
     }
     else
     {
-        if (m_options.hasOption("log"))
+        if (options.hasOption("log"))
         {
             std::string logname = m_options.getValueOrThrow<std::string>("log");
-            m_log = boost::shared_ptr<pdal::Log>(new Log(getName(), logname));
+            m_log.reset(new Log(getName(), logname));
         }
         else
         {
             std::ostream* v = getPrevStage().log()->getLogStream();
-            m_log = boost::shared_ptr<pdal::Log>(new Log(getName(), v));
+            m_log.reset(new Log(getName(), v));
         }
     }
     m_log->setLevel((LogLevel)m_verbose);

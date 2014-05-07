@@ -39,21 +39,6 @@ namespace pdal
 {
 
 
-void Filter::initialize()
-{
-    Metadata& m = getMetadataRef();
-    m.setName(getName());
-
-    Stage::initialize();
-
-    // by default, we set our core properties to be the same as those
-    // of the previous stage
-    this->setCoreProperties(getPrevStage());
-
-    return;
-}
-
-
 boost::property_tree::ptree Filter::serializePipeline() const
 {
     boost::property_tree::ptree tree;

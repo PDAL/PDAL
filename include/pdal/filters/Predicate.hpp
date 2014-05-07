@@ -64,7 +64,6 @@ public:
         {}
     ~Predicate();
 
-    virtual void initialize();
     static Options getDefaultOptions();
 
     pdal::StageSequentialIterator*
@@ -87,6 +86,7 @@ private:
 
     Predicate& operator=(const Predicate&); // not implemented
     Predicate(const Predicate&); // not implemented
+    virtual void initialize();
 };
 
 
