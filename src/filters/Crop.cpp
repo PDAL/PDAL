@@ -91,17 +91,17 @@ Crop::Crop(const Options& options) :
 Crop::Crop(Bounds<double> const& bounds)
 {
     m_bounds = bounds;
-    Init();
+    Construct();
 }
 
 
 Crop::Crop()
 {
-    Init();
+    Construct();
 }
 
 
-void Crop::Init()
+void Crop::Construct()
 {
     bCropOutside = false;
     m_geosEnvironment = 0;

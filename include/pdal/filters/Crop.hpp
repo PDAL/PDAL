@@ -101,7 +101,7 @@ private:
 
     Bounds <double> computeBounds(GEOSGeometry const* geometry);
     virtual void initialize();
-    void Init();
+    void Construct();
     
     Crop& operator=(const Crop&); // not implemented
     Crop(const Crop&); // not implemented

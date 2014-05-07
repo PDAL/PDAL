@@ -45,12 +45,12 @@ namespace pdal
 Stage::Stage()
 {
     m_context = GlobalEnvironment::get().context();
-    Init();
+    Construct();
 }
 
 Stage::Stage(PointContext context, const Options& options) : m_context(context)
 {
-    Init();
+    Construct();
     m_options = options;
     m_debug = m_options.getValueOrDefault<bool>("debug", false);
     m_verbose = m_options.getValueOrDefault<boost::uint32_t>("verbose", 0);
@@ -61,7 +61,7 @@ Stage::Stage(PointContext context, const Options& options) : m_context(context)
 
 Stage::Stage(const Options& options)
 {
-    Init();
+    Construct();
     m_context = GlobalEnvironment::get().context();
     m_options = options;
     m_debug = m_options.getValueOrDefault<bool>("debug", false);
@@ -75,11 +75,11 @@ Stage::Stage(const Options& options)
 Stage::Stage(PointContext context) :
     m_context(context)
 {
-    Init();
+    Construct();
 }
 
 
-void Stage::Init()
+void Stage::Construct()
 {
     m_initialized = false;
     m_debug = false;

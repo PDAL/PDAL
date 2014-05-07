@@ -173,7 +173,7 @@ private:
 
     Stage& operator=(const Stage&); // not implemented
     Stage(const Stage&); // not implemented
-    void Init();
+    void Construct();
     void l_processOptions(const Options& options);
     virtual void processOptions(const Options& options)
         {}
