@@ -79,10 +79,8 @@ public:
     SET_STAGE_ENABLED(false)
 #endif
     
-    Writer(Stage& prevStage, const Options&);
-    ~Writer();
+    Writer(const Options&);
 
-    virtual void initialize();
     static Options getDefaultOptions();
 
 protected:
@@ -91,9 +89,10 @@ protected:
     virtual void writeEnd(boost::uint64_t actualNumPointsWritten);
 
 private:
-
     Writer& operator=(const Writer&); // not implemented
     Writer(const Writer&); // not implemented
+    virtual void initialize();
+    virtual void processOptions(const Options&);
 
     boost::scoped_ptr<OutCoreInterp> m_interpolator;
     boost::uint64_t m_pointCount;

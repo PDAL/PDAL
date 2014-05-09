@@ -50,80 +50,48 @@ namespace p2g
 {
 
 
-Writer::Writer(Stage& prevStage, const Options& options)
-    : pdal::Writer(prevStage, options)
+Writer::Writer(const Options& options)
+    : pdal::Writer(options)
     , m_outputTypes(0)
     , m_outputFormat(OUTPUT_FORMAT_ARC_ASCII)
+{}
+
+
+void Writer::processOptions(const Options& options)
 {
+    m_GRID_DIST_X = options.getValueOrDefault<double>("grid_dist_x", 6.0);
+    m_GRID_DIST_Y = options.getValueOrDefault<double>("grid_dist_y", 6.0);
+    m_RADIUS_SQ = options.getValueOrDefault<double>("radius",
+        8.4852813742385713);
+    m_fill_window_size = options.getValueOrDefault<boost::uint32_t>(
+        "fill_window_size", 3);
+    m_filename = options.getValueOrThrow<std::string>("filename");
 
-    return;
-}
-
-
-Writer::~Writer()
-{
-    return;
-}
-
-
-void Writer::initialize()
-{
-    pdal::Writer::initialize();
-
-    m_GRID_DIST_X = getOptions().getValueOrDefault<double>("grid_dist_x", 6.0);
-    m_GRID_DIST_Y = getOptions().getValueOrDefault<double>("grid_dist_y", 6.0);
-    m_RADIUS_SQ = getOptions().getValueOrDefault<double>("radius", 8.4852813742385713);
-    m_fill_window_size = getOptions().getValueOrDefault<boost::uint32_t>("fill_window_size", 3);
-    m_filename = getOptions().getValueOrThrow<std::string>("filename");
-    std::string output_format = getOptions().getValueOrDefault<std::string>("output_format", "grid");
-
-    double min_x = (std::numeric_limits<double>::max)();
-    double max_x = (std::numeric_limits<double>::min)();
-    double min_y = (std::numeric_limits<double>::max)();
-    double max_y = (std::numeric_limits<double>::min)();
-
-    setBounds(pdal::Bounds<double>(min_x, min_y, max_x, max_y));
-
-    std::vector<Option> types = getOptions().getOptions("output_type");
+    std::vector<Option> types = options.getOptions("output_type");
 
     if (!types.size())
         m_outputTypes = OUTPUT_TYPE_ALL;
     else
     {
-        for (std::vector<Option>::const_iterator i = types.begin(); i != types.end(); ++i)
+        for (auto i = types.begin(); i != types.end(); ++i)
         {
             if (boost::iequals(i->getValue<std::string>(), "min"))
-            {
                 m_outputTypes |= OUTPUT_TYPE_MIN;
-            }
-
             if (boost::iequals(i->getValue<std::string>(), "max"))
-            {
                 m_outputTypes |= OUTPUT_TYPE_MAX;
-            }
-
             if (boost::iequals(i->getValue<std::string>(), "mean"))
-            {
                 m_outputTypes |= OUTPUT_TYPE_MEAN;
-            }
-
             if (boost::iequals(i->getValue<std::string>(), "idw"))
-            {
                 m_outputTypes |= OUTPUT_TYPE_IDW;
-            }
-
             if (boost::iequals(i->getValue<std::string>(), "den"))
-            {
                 m_outputTypes |= OUTPUT_TYPE_DEN;
-            }
-
             if (boost::iequals(i->getValue<std::string>(), "all"))
-            {
                 m_outputTypes = OUTPUT_TYPE_ALL;
-            }
         }
     }
 
+    std::string output_format =
+        options.getValueOrDefault<std::string>("output_format", "grid");
     if (boost::iequals(output_format, "grid"))
         m_outputFormat = OUTPUT_FORMAT_GRID_ASCII;
     else if (boost::iequals(output_format, "asc"))
@@ -134,8 +102,16 @@ void Writer::initialize()
         oss << "Unrecognized output format " << output_format;
         throw p2g_error("Unrecognized output format");
     }
+}
 
-    return;
+
+void Writer::initialize()
+{
+    double min_x = (std::numeric_limits<double>::max)();
+    double max_x = (std::numeric_limits<double>::min)();
+    double min_y = (std::numeric_limits<double>::max)();
+    double max_y = (std::numeric_limits<double>::min)();
+    setBounds(pdal::Bounds<double>(min_x, min_y, max_x, max_y));
 }
 
 

@@ -70,6 +70,7 @@ public:
 
     Writer(const Options&);
     Writer(std::ostream*);
+    Writer(const Options&, std::ostream*);
     virtual ~Writer();
 
     static Options getDefaultOptions();
@@ -101,6 +102,7 @@ protected:
     OutputStreamManager m_streamManager;
 
 private:
+    void Construct();
     virtual void initialize();
 
     LasHeader m_lasHeader;

@@ -76,13 +76,10 @@ public:
     
     Writer(const Options& options) : las::Writer(options, &m_oss)
         {}
-    ~Writer();
-
-    virtual void initialize();
     static Options getDefaultOptions();
 
 private:
-
+    virtual void processOptions(const Options&);
     virtual void writeBegin(boost::uint64_t targetNumPointsToWrite);
     virtual void writeBufferBegin(PointBuffer const&);
     virtual boost::uint32_t writeBuffer(const PointBuffer&);

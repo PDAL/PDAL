@@ -47,12 +47,6 @@ namespace filters
 {
 
 
-Options HexBin::getDefaultOptions()
-{
-    Options options;
-    return options;
-}
-
 pdal::StageSequentialIterator* HexBin::createSequentialIterator(PointBuffer& buffer) const
 {
     return new pdal::filters::iterators::sequential::HexBin(*this, buffer, getNumPoints(), getName(), log(), getOptions());

@@ -111,7 +111,7 @@ BOOST_AUTO_TEST_CASE(testConstructor)
     BOOST_CHECK(reader.getDescription() == "Icebridge Reader");
     BOOST_CHECK_EQUAL(reader.getName(), "drivers.icebridge.reader");
 
-    reader.initialize();
+    reader.prepare();
 
     BOOST_CHECK_EQUAL(reader.getNumPoints(), 2);
 }
@@ -122,7 +122,7 @@ BOOST_AUTO_TEST_CASE(testRead)
     pdal::Options options(filename);
     pdal::drivers::icebridge::Reader reader(options);
 
-    reader.initialize();
+    reader.prepare();
 
     const pdal::Schema& schema = reader.getSchema();
     pdal::PointBuffer data(schema, 2);
@@ -174,7 +174,7 @@ BOOST_AUTO_TEST_CASE(testSkip)
     pdal::Options options(filename);
     pdal::drivers::icebridge::Reader reader(options);
 
-    reader.initialize();
+    reader.prepare();
 
     const pdal::Schema& schema = reader.getSchema();
     pdal::PointBuffer data(schema, 2);
@@ -222,7 +222,7 @@ BOOST_AUTO_TEST_CASE(testRandomIterator)
     pdal::Options options(filename);
     pdal::drivers::icebridge::Reader reader(options);
 
-    reader.initialize();
+    reader.prepare();
 
     const pdal::Schema& schema = reader.getSchema();
     pdal::PointBuffer data(schema, 1);

@@ -74,7 +74,7 @@ boost::uint64_t Reader::getNumPoints() const
 
     std::ostringstream query_oss;
     std::string const& query =
-        getOptions().getValueOrThrow<std::string>("query");
+        m_options.getValueOrThrow<std::string>("query");
     query_oss << "select sum(num_points) from (" << query << ") as summation";
 
 
@@ -96,19 +96,16 @@ void Reader::initialize()
 {
     using namespace std;
 
-    pdal::Reader::initialize();
-
-    Options const& ops = getOptions();
-
-    string const& query = ops.getValueOrThrow<string>("query");
-    string const& connection = ops.getValueOrThrow<string>("connection");
+    string const& query = m_options.getValueOrThrow<string>("query");
+    string const& connection = m_options.getValueOrThrow<string>("connection");
 
     m_session->set_log_stream(&(log()->get(logDEBUG2)));
     m_schema = fetchSchema(query);
     try
     {
         setSpatialReference(
-            ops.getValueOrThrow<pdal::SpatialReference>("spatialreference"));
+            m_options.getValueOrThrow<pdal::SpatialReference>(
+                "spatialreference"));
     }
     catch (pdal::option_not_found const&)
     {
@@ -234,10 +231,10 @@ IteratorBase::IteratorBase(const pdal::drivers::sqlite::Reader& reader)
     , m_buffer_position(0)
     , m_reader(reader)
 {
-    pdal::Options const& options = reader.getOptions();
     std::string const& connection =
-        options.getValueOrThrow<std::string>("connection");
-    std::string const& query = options.getValueOrThrow<std::string>("query");
+        m_reader.getOptions().getValueOrThrow<std::string>("connection");
+    std::string const& query =
+        m_reader.getOptions().getValueOrThrow<std::string>("query");
 }
 
 

@@ -74,10 +74,9 @@ BOOST_AUTO_TEST_CASE(HexbinFilterTest_test_1)
         options.add(y_dim);
 
         pdal::drivers::las::Reader reader(options);
-        pdal::filters::HexBin hexbin(reader, options);
-        
-
-        hexbin.initialize();
+        pdal::filters::HexBin hexbin(options);
+        hexbin.setInput(&reader);
+        hexbin.prepare();
 
         const pdal::Schema& schema = reader.getSchema();
         pdal::PointBuffer data(schema, reader.getNumPoints());

@@ -77,7 +77,6 @@ public:
     Reader(const Options& options);
     Reader(LizardTech::PointSource *ps);
 
-    virtual void initialize();
     static Options getDefaultOptions();
     static std::vector<Dimension> getDefaultDimensions();
     pdal::StageSequentialIterator*
@@ -89,6 +88,8 @@ public:
 private:
     LizardTech::PointSource *m_PS;
     LizardTech::PointIterator *m_iter;
+
+    virtual void initialize();
     int SchemaToPointInfo(const Schema &schema, LizardTech::PointInfo &pointInfo) const;
     Dimension LTChannelToPDalDimension(const LizardTech::ChannelInfo & channel, pdal::Schema const& dimensions) const;
     Reader& operator=(const Reader&); // not implemented

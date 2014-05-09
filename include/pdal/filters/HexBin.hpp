@@ -68,8 +68,6 @@ public:
     HexBin(const Options& options) : Filter(options)
         {}
 
-    static Options getDefaultOptions();
-
     pdal::StageSequentialIterator*
         createSequentialIterator(PointBuffer& buffer) const;
     pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const

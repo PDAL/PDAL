@@ -61,8 +61,8 @@ namespace sqlite
 {
 
 
-Writer::Writer(Stage& prevStage, const Options& options)
-    : pdal::Writer(prevStage, options)
+Writer::Writer(const Options& options)
+    : pdal::Writer(options)
     , m_session(0)
     , m_block_statement(0)
     , m_doCreateIndex(false)
@@ -73,10 +73,8 @@ Writer::Writer(Stage& prevStage, const Options& options)
 
 void Writer::initialize()
 {
-    pdal::Writer::initialize();
-
     std::string connection =
-        getOptions().getValueOrDefault<std::string>("connection", "");
+        m_options.getValueOrDefault<std::string>("connection", "");
     if (!connection.size())
     {
         throw sqlite_driver_error("unable to connect to database, "
@@ -99,22 +97,16 @@ void Writer::initialize()
 }
 
 
-Options Writer::getDefaultOptions()
-{
-    return Options();
-}
-
-
 void Writer::writeBegin(boost::uint64_t /*targetNumPointsToWrite*/)
 {
     using namespace std;
 
     string block_table =
-        getOptions().getValueOrThrow<string>("block_table");
+        m_options.getValueOrThrow<string>("block_table");
     string cloud_table =
-        getOptions().getValueOrThrow<string>("cloud_table");
+        m_options.getValueOrThrow<string>("cloud_table");
     string cloud_column =
-        getOptions().getValueOrDefault<string>("cloud_column", "id");
+        m_options.getValueOrDefault<string>("cloud_column", "id");
 
     m_block_insert_query << "INSERT INTO " <<
         boost::to_lower_copy(block_table) << " ("<<
@@ -128,7 +120,7 @@ void Writer::writeBegin(boost::uint64_t /*targetNumPointsToWrite*/)
     bool bHaveBlockTable = CheckTableExists(block_table);
     bool bHaveCloudTable = CheckTableExists(cloud_table);
 
-    if (getOptions().getValueOrDefault<bool>("overwrite", true))
+    if (m_options.getValueOrDefault<bool>("overwrite", true))
     {
         if (bHaveBlockTable)
         {
@@ -142,7 +134,7 @@ void Writer::writeBegin(boost::uint64_t /*targetNumPointsToWrite*/)
         }
     }
 
-    string pre_sql = getOptions().getValueOrDefault<string>("pre_sql", "");
+    string pre_sql = m_options.getValueOrDefault<string>("pre_sql", "");
     if (pre_sql.size())
     {
         string sql = FileUtils::readFileAsString(pre_sql);
@@ -159,14 +151,14 @@ void Writer::writeBegin(boost::uint64_t /*targetNumPointsToWrite*/)
     if (!bHaveCloudTable)
     {
         CreateCloudTable(cloud_table,
-            getOptions().getValueOrDefault<uint32_t>("srid", 4326));
+            m_options.getValueOrDefault<uint32_t>("srid", 4326));
     }
 
     if (!bHaveBlockTable)
     {
         m_doCreateIndex = true;
         CreateBlockTable(block_table,
-            getOptions().getValueOrDefault<uint32_t>("srid", 4326));
+            m_options.getValueOrDefault<uint32_t>("srid", 4326));
     }
 }
 
@@ -202,9 +194,9 @@ void Writer::CreateBlockTable(std::string const& name, boost::uint32_t srid)
     std::ostringstream oss;
 
     std::string cloud_column =
-        getOptions().getValueOrDefault<std::string>("cloud_column", "id");
+        m_options.getValueOrDefault<std::string>("cloud_column", "id");
     std::string cloud_table =
-        getOptions().getValueOrThrow<std::string>("cloud_table");
+        m_options.getValueOrThrow<std::string>("cloud_table");
 
     oss << "CREATE TABLE " << boost::to_lower_copy(name)
         << "(" << boost::to_lower_copy(cloud_column)  <<
@@ -268,14 +260,14 @@ void Writer::CreateCloudTable(std::string const& name, boost::uint32_t srid)
     oss.str("");
 
     std::string cloud_column =
-        getOptions().getValueOrDefault<std::string>("cloud_column", "id");
+        m_options.getValueOrDefault<std::string>("cloud_column", "id");
     oss << "CREATE TABLE " << boost::to_lower_copy(name) << " (" <<
         boost::to_lower_copy(cloud_column) <<
         " INTEGER PRIMARY KEY AUTOINCREMENT," << " schema TEXT," <<
         " block_table varchar(64)" << ")";
 
     m_session->once << oss.str();
-    bool is3d = getOptions().getValueOrDefault<bool>("is3d", false);
+    bool is3d = m_options.getValueOrDefault<bool>("is3d", false);
     boost::uint32_t nDim = 2;
 
     oss.str("");
@@ -427,7 +419,7 @@ void Writer::CreateSDOEntry(std::string const& block_table, uint32_t srid,
     std::ostringstream oss;
     oss.setf(std::ios_base::fixed, std::ios_base::floatfield);
     uint32_t precision =
-        getOptions().getValueOrDefault<uint32_t>("stream_output_precision", 8);
+        m_options.getValueOrDefault<uint32_t>("stream_output_precision", 8);
     oss.precision(precision);
 
     std::ostringstream s_srid;
@@ -479,12 +471,12 @@ void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
     if (m_doCreateIndex)
     {
         std::string block_table_name =
-            getOptions().getValueOrThrow<std::string>("block_table");
+            m_options.getValueOrThrow<std::string>("block_table");
         std::string cloud_table_name =
-            getOptions().getValueOrThrow<std::string>("cloud_table");
+            m_options.getValueOrThrow<std::string>("cloud_table");
         boost::uint32_t srid =
-            getOptions().getValueOrThrow<boost::uint32_t>("srid");
-        bool is3d = getOptions().getValueOrDefault<bool>("is3d", false);
+            m_options.getValueOrThrow<boost::uint32_t>("srid");
+        bool is3d = m_options.getValueOrDefault<bool>("is3d", false);
 
         CreateIndexes(block_table_name, "extent", is3d);
     }
@@ -507,19 +499,19 @@ void Writer::CreateCloud(Schema const& buffer_schema)
 {
     using namespace std;
 
-    string cloud_table = getOptions().getValueOrThrow<string>("cloud_table");
-    string block_table = getOptions().getValueOrThrow<string>("block_table");
+    string cloud_table = m_options.getValueOrThrow<string>("cloud_table");
+    string block_table = m_options.getValueOrThrow<string>("block_table");
 
     ostringstream oss;
 
     pdal::Schema output_schema(buffer_schema);
     bool pack =
-        getOptions().getValueOrDefault<bool>("pack_ignored_fields", true);
+        m_options.getValueOrDefault<bool>("pack_ignored_fields", true);
 
     if (pack)
         output_schema = getPackedSchema(buffer_schema);
 
-    string bounds = getOptions().getValueOrDefault<string>(
+    string bounds = m_options.getValueOrDefault<string>(
         "cloud_boundary_wkt", "");
     if (bounds.size())
     {
@@ -529,7 +521,7 @@ void Writer::CreateCloud(Schema const& buffer_schema)
     }
 
     string cloud_column =
-        getOptions().getValueOrDefault<string>("cloud_column", "id");
+        m_options.getValueOrDefault<string>("cloud_column", "id");
 
     oss << "INSERT INTO " << boost::to_lower_copy(cloud_table) << "(" <<
         " block_table, schema) VALUES ('" <<
@@ -557,9 +549,8 @@ void Writer::CreateCloud(Schema const& buffer_schema)
 
     if (bounds.size())
     {
-        uint32_t srid =
-            getOptions().getValueOrDefault<uint32_t>("srid", 4326);
-        bool is3d = getOptions().getValueOrDefault<bool>("is3d", false);
+        uint32_t srid = m_options.getValueOrDefault<uint32_t>("srid", 4326);
+        bool is3d = m_options.getValueOrDefault<bool>("is3d", false);
         string force =  "ST_Force_2D";
 
         oss << "UPDATE " << boost::to_lower_copy(cloud_table) <<
@@ -589,8 +580,7 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     boost::uint32_t point_data_length;
     boost::uint32_t schema_byte_size;
 
-    bool pack =
-        getOptions().getValueOrDefault<bool>("pack_ignored_fields", true);
+    bool pack = m_options.getValueOrDefault<bool>("pack_ignored_fields", true);
     if (pack)
         PackPointData(buffer, &point_data, point_data_length, schema_byte_size);
     else
@@ -600,14 +590,14 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
             buffer.getSchema().getByteSize() * buffer.getNumPoints();
     }
 
-    string block_table = getOptions().getValueOrThrow<string>("block_table");
+    string block_table = m_options.getValueOrThrow<string>("block_table");
 
     // // Pluck the block id out of the first point in the buffer
     pdal::Schema const& schema = buffer.getSchema();
     Dimension const& blockDim = schema.getDimension("BlockID");
 
     m_block_id  = buffer.getFieldAs<boost::int32_t>(blockDim, 0, false);
-    m_obj_id = getOptions().getValueOrThrow<boost::int32_t>("pc_id");
+    m_obj_id = m_options.getValueOrThrow<boost::int32_t>("pc_id");
     m_num_points = static_cast<boost::int64_t>(buffer.getNumPoints());
 
     return true;

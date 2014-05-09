@@ -87,10 +87,10 @@ Dimension Reader::LTChannelToPDalDimension(const LizardTech::ChannelInfo & chann
 
     return retval;
 }
+
+
 void Reader::initialize()
 {
-    pdal::Reader::initialize();
-
     const LizardTech::PointInfo& pointinfo = m_PS->getPointInfo();
 
     Schema const& dimensions(getDefaultDimensions());
@@ -102,9 +102,12 @@ void Reader::initialize()
     }
 
     setNumPoints(m_PS->getNumPoints());
-    pdal::Bounds<double> b(m_PS->getBounds().x.min, m_PS->getBounds().x.max, m_PS->getBounds().y.min, m_PS->getBounds().y.max, m_PS->getBounds().z.min,m_PS->getBounds().z.max);
+    pdal::Bounds<double> b(m_PS->getBounds().x.min, m_PS->getBounds().x.max,
+        m_PS->getBounds().y.min, m_PS->getBounds().y.max,
+        m_PS->getBounds().z.min,m_PS->getBounds().z.max);
     setBounds(b);
-    m_iter = m_PS->createIterator(m_PS->getBounds(), 1.0, m_PS->getPointInfo(), NULL);
+    m_iter = m_PS->createIterator(m_PS->getBounds(), 1.0,
+        m_PS->getPointInfo(), NULL);
 }
 
 

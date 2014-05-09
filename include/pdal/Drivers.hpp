@@ -64,7 +64,7 @@
 
 #ifdef PDAL_HAVE_CARIS
 #ifndef USE_PDAL_PLUGIN_CARIS
-#include <pdal/drivers/caris/Reader.hpp>
+#include <pdal/drivers/caris/CloudReader.hpp>
 #endif
 #endif
 

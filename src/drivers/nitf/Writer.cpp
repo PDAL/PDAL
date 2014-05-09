@@ -57,24 +57,10 @@ namespace drivers
 namespace nitf
 {
 
-Writer::Writer(const Options& options)
-    :  pdal::drivers::las::Writer(static_cast<std::ostream*>(&m_oss))
+
+void Writer::processOptions(const Options& options)
 {
-    m_options = options;
-}
-
-Writer::~Writer()
-{}
-
-
-void Writer::initialize()
-{
-    // call super class
-    pdal::drivers::las::Writer::initialize();
-
-    m_filename = getOptions().getValueOrThrow<std::string>("filename");
-
-    return;
+    m_filename = options.getValueOrThrow<std::string>("filename");
 }
 
 

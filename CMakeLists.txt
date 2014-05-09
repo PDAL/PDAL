@@ -74,6 +74,9 @@ endif(WIN32)
 option(WITH_APPS "Choose if PDAL utilities should be built" TRUE)
 option(WITH_TESTS "Choose if PDAL unit tests should be built" TRUE)
 
+option(WITH_STUBS "Use stubs if libraries are not enabled" TRUE)
+set(PDAL_STUB_DIR "${PDAL_SOURCE_DIR}/include/stubs")
+
 # Choose to use pkg-config or not
 option(WITH_PKGCONFIG "Choose whether a pkgconfig file (PDAL.pc) should be installed" TRUE)
 
@@ -278,6 +281,7 @@ if(WITH_PCL)
     find_package(PCL 1.7)
     if(PCL_FOUND)
         set(PDAL_HAVE_PCL 1)
+        set(WITH_PCL_TEST 1)
         include_directories(${PCL_INCLUDE_DIRS})
         link_directories(${PCL_LIBRARY_DIRS})
         add_definitions(${PCL_DEFINITIONS})
@@ -290,8 +294,11 @@ if(WITH_PCL)
     else()
         set(PCL_LIBRARIES "")
     endif()
+else(WITH_STUBS)
+    set(PDAL_HAVE_PCL 1)
+    set(WITH_PCL_TEST 0)
+    include_directories(${PDAL_STUB_DIR})
 endif()
-
 
 #------------------------------------------------------------------------------
 # settings for GDAL & related dependencies

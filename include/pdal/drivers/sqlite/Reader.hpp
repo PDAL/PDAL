@@ -66,8 +66,6 @@ public:
 #endif
 
     Reader(const Options&);
-
-    virtual void initialize();
     static Options getDefaultOptions();
     virtual boost::uint64_t getNumPoints() const;
     pdal::StageSequentialIterator*
@@ -77,12 +75,11 @@ public:
         fetchSpatialReference(std::string const& query) const;
 
 private:
-
     Reader& operator=(const Reader&); // not implemented
     Reader(const Reader&); // not implemented
+    virtual void initialize();
 
     mutable boost::uint64_t m_cachedPointCount;
-
 
     ::soci::session* m_session;
 

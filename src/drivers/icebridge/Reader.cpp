@@ -73,8 +73,6 @@ Reader::Reader(const Options& options)
 
 void Reader::initialize()
 {
-    pdal::Reader::initialize();
-
     Hdf5Handler hdf5Handler;
     hdf5Handler.initialize(getFileName(), hdf5Columns);
     setNumPoints(hdf5Handler.getNumPoints());

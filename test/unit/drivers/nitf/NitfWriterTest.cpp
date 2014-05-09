@@ -55,7 +55,7 @@ static void compare_contents(const std::string& las_file, const std::string& ntf
     las_opts.add(las_opt);
 
     pdal::drivers::las::Reader las_reader(las_opts);
-    las_reader.initialize();
+    las_reader.prepare();
     const Schema& las_schema = las_reader.getSchema();
     PointBuffer las_data(las_schema, 750);
     StageSequentialIterator* las_iter = las_reader.createSequentialIterator(las_data);
@@ -69,7 +69,7 @@ static void compare_contents(const std::string& las_file, const std::string& ntf
     ntf_opts.add(ntf_opt);
 
     pdal::drivers::nitf::Reader ntf_reader(ntf_opts);
-    ntf_reader.initialize();
+    ntf_reader.prepare();
     const Schema& ntf_schema = ntf_reader.getSchema();
     PointBuffer ntf_data(ntf_schema, 750);
     StageSequentialIterator* ntf_iter = ntf_reader.createSequentialIterator(ntf_data);
@@ -153,8 +153,8 @@ BOOST_AUTO_TEST_CASE(test1)
         writer_opts.add(writer_opt1);
         
         pdal::drivers::las::Reader reader(reader_opts);
-
-        pdal::drivers::nitf::Writer writer(reader, writer_opts);
+        pdal::drivers::nitf::Writer writer(writer_opts);
+        writer.setInput(&reader);
         {
             // writer.setCompressed(false);
             // // writer.setDate(0, 0);
@@ -163,7 +163,7 @@ BOOST_AUTO_TEST_CASE(test1)
             // writer.setGeneratingSoftware("PDAL-NITF");
             // writer.setChunkSize(100);
         }
-        writer.initialize();
+        writer.prepare();
 
         writer.write(0);
     }

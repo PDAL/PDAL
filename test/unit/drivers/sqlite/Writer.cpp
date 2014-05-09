@@ -160,14 +160,18 @@ BOOST_AUTO_TEST_CASE(SqliteWriterTest_test_simple_las)
     {
 
         pdal::drivers::las::Reader writer_reader(getSQLITEOptions());
-        pdal::filters::Cache writer_cache(writer_reader, getSQLITEOptions());
-        pdal::filters::Chipper writer_chipper(writer_cache, getSQLITEOptions());
-        pdal::filters::InPlaceReprojection writer_reproj(writer_chipper, getSQLITEOptions());
-        pdal::drivers::sqlite::Writer writer_writer(writer_reproj, getSQLITEOptions());
+        pdal::filters::Cache writer_cache(getSQLITEOptions());
+        writer_cache.setInput(&writer_reader);
+        pdal::filters::Chipper writer_chipper(getSQLITEOptions());
+        writer_reader.setInput(&writer_cache);
+        pdal::filters::InPlaceReprojection writer_reproj(getSQLITEOptions());
+        writer_reproj.setInput(&writer_chipper);
+        pdal::drivers::sqlite::Writer writer_writer(getSQLITEOptions());
+        writer_writer.setInput(&writer_reproj);
         
         try
         {
-            writer_writer.initialize();
+            writer_writer.prepare();
             boost::uint64_t numPointsToRead = writer_reader.getNumPoints();
 
             BOOST_CHECK_EQUAL(numPointsToRead, 1065u);

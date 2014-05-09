@@ -67,7 +67,6 @@ public:
     Reader(const Options& options);
     virtual ~Reader() { }
 
-    virtual void initialize();
     static Options getDefaultOptions();
     static std::vector<Dimension> getDefaultDimensions();
 
@@ -85,6 +84,7 @@ private:
     std::map<std::string, Dimension> m_dimensionNamesMap;
     Reader& operator=(const Reader&);   // Not implemented.
     Reader(const Reader&);              // Not implemented.
+    virtual void initialize();
 };
 
 namespace iterators

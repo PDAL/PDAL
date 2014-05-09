@@ -60,12 +60,33 @@ namespace las
 Writer::Writer(const Options& options)
     : pdal::Writer(options)
     , m_streamManager(options.getOption("filename").getValue<std::string>())
-    , m_numPointsWritten(0)
-    , m_headerInitialized(false)
-    , m_streamOffset(0)
 {
+    Construct();
+}
+
+
+Writer::Writer(std::ostream *ostream) :
+    m_streamManager(ostream)
+{
+    Construct();
+}
+
+
+Writer::Writer(const Options& options, std::ostream *ostream) :
+    pdal::Writer(options), m_streamManager(ostream)
+{
+    Construct();
+}
+
+
+void Writer::Construct()
+{
+    m_numPointsWritten = 0;
+    m_headerInitialized = false;
+    m_streamOffset = 0;
     setOptions();
 }
+
 
 void Writer::setOptions()
 {
@@ -101,14 +122,6 @@ void Writer::setOptions()
     catch (pdal::option_not_found&) {};
 }
 
-Writer::Writer(std::ostream* ostream) :
-    m_streamManager(ostream)
-    , m_numPointsWritten(0)
-    , m_headerInitialized(false)
-    , m_streamOffset(0)
-{
-    setOptions();
-}
 
 Writer::~Writer()
 {

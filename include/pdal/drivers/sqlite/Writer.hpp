@@ -58,10 +58,7 @@ public:
 #else
     SET_STAGE_ENABLED(false)
 #endif
-    Writer(Stage& prevStage, const Options&);
-
-    virtual void initialize();
-    static Options getDefaultOptions();
+    Writer(const Options&);
 
 protected:
     virtual void writeBegin(boost::uint64_t targetNumPointsToWrite);
@@ -75,6 +72,7 @@ private:
     Writer& operator=(const Writer&); // not implemented
     Writer(const Writer&); // not implemented
 
+    virtual void initialize();
     void CreateBlockTable(std::string const& name, boost::uint32_t srid);
     void CreateCloudTable(std::string const& name, boost::uint32_t srid);    
     bool CheckTableExists(std::string const& name);

@@ -144,7 +144,7 @@ if (WITH_NITRO)
     ENDFOREACH(file)
 endif (WITH_NITRO)
 
-if (WITH_PCL)
+if (WITH_PCL AND WITH_PCL_TEST)
     set(PDAL_PCL_TEST_CPP
         filters/PCLBlockFilterTest.cpp
         )
@@ -153,7 +153,7 @@ if (WITH_PCL)
         SET(PDAL_UNITTEST_TEST_SRC "${PDAL_UNITTEST_TEST_SRC};${file}"
             CACHE INTERNAL "source files for test")
     ENDFOREACH(file)
-endif (WITH_PCL)
+endif (WITH_PCL AND WITH_PCL_TEST)
 
 if (WITH_HDF5)
     set(PDAL_ICEBRIDGE_TEST_CPP

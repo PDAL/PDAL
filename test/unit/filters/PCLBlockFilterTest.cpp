@@ -67,9 +67,9 @@ BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_passthrough)
 
     filter_options.add(fname);
 
-    pdal::filters::PCLBlock pcl_block(reader, filter_options);
-
-    pcl_block.initialize();
+    pdal::filters::PCLBlock pcl_block(filter_options);
+    pcl_block.setInput(&reader);
+    pcl_block.prepare();
 
     const pdal::Schema& schema = reader.getSchema();
     pdal::PointBuffer data(schema, reader.getNumPoints());
@@ -104,9 +104,9 @@ BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_outlier_removal)
 
     filter_options.add(fname);
 
-    pdal::filters::PCLBlock pcl_block(reader, filter_options);
-
-    pcl_block.initialize();
+    pdal::filters::PCLBlock pcl_block(filter_options);
+    pcl_block.setInput(&reader);
+    pcl_block.prepare();
 
     const pdal::Schema& schema = reader.getSchema();
     pdal::PointBuffer data(schema, reader.getNumPoints());
