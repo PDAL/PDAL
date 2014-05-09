@@ -102,12 +102,12 @@ libxml2, iconv.
 
      c:\dev> git clone https://github.com/PDAL/PDAL.git
 
-3. From the root of your PDAL tree, run "config.bat". This will create the
+3. From the root of your PDAL tree, run "./cmake/examples/mpg-config.bat". This will create the
    VStudio solution file and .vcxproj files.
 
   ::
 
-     c:\dev\PDAL> config.bat
+     c:\dev\PDAL> ./cmake/examples/mpg-config.bat
 
   .. note::
 
