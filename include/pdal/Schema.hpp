@@ -173,7 +173,7 @@ public:
 /// @name Dimension manipulation
     /// adds (copies) a Dimension instance to the Schema
     /// @param dim a Dimension that is copied and added to the end of the Schema
-    void appendDimension(Dimension const& dim);
+    Dimension *appendDimension(Dimension const& dim);
 
     /*! overwrites an existing Dimension with the same name as dim
         \param dim the Dimension instance that contains the name and namespace
@@ -324,6 +324,7 @@ private:
     schema::Map m_index;
     schema::Orientation m_orientation;
 };
+typedef std::shared_ptr<Schema> SchemaPtr;
 
 PDAL_DLL std::ostream& operator<<(std::ostream& os, pdal::Schema const& d);
 

@@ -65,7 +65,6 @@ BOOST_AUTO_TEST_CASE(test_construction)
     boost::int16_t i16(-16);
     boost::uint16_t u16(16);
     
-    
     std::vector<boost::uint8_t> v;
     for (boost::uint8_t i=0; i < 100; i++) v.push_back(i);
 
@@ -75,11 +74,8 @@ BOOST_AUTO_TEST_CASE(test_construction)
 
     m.setValue<boost::uint32_t>(u32);
 
-
     BOOST_CHECK_EQUAL(m.getValue<boost::uint32_t>(), 32u);
     BOOST_CHECK_EQUAL(m.getType(), "nonNegativeInteger");
-
-    //BOOST_CHECK_THROW(m.getValue<boost::int32_t>(), boost::bad_get);
 
     BOOST_CHECK_EQUAL(m.getValue<boost::int32_t>(), 32);
     m.setValue<pdal::ByteArray>(bytes);
@@ -195,21 +191,26 @@ BOOST_AUTO_TEST_CASE(test_metadata_set)
 
 BOOST_AUTO_TEST_CASE(test_metadata_stage)
 {
-    pdal::drivers::las::Reader reader(Support::datapath("interesting.las"));
-    BOOST_CHECK(reader.getDescription() == "Las Reader");
-    reader.prepare();
+    using namespace pdal;
 
-    pdal::Metadata file_metadata = reader.getMetadata();
+    PointContext ctx;
+
+    drivers::las::Reader reader(Support::datapath("interesting.las"));
+    BOOST_CHECK(reader.getDescription() == "Las Reader");
+    reader.prepare(ctx);
+
+    Metadata file_metadata = reader.getMetadata();
 
     BOOST_CHECK_EQUAL(file_metadata.toPTree().get_child("metadata").size(), 32u);
 
-    pdal::Option option("filename", Support::datapath("pipeline/pipeline_metadata_reader.xml"));
-    pdal::Options options(option);
+    PointContext readerCtx;
+    Option option("filename", Support::datapath("pipeline/pipeline_metadata_reader.xml"));
+    Options options(option);
 
-    pdal::drivers::pipeline::Reader pipeline(options);
-    pipeline.prepare();
-
-    pdal::Metadata pipeline_metadata = pipeline.getMetadata();
+    drivers::pipeline::Reader pipeline(options);
+    pipeline.prepare(readerCtx);
+    
+    Metadata pipeline_metadata = pipeline.getMetadata();
     BOOST_CHECK_EQUAL(pipeline_metadata.toPTree().get_child("metadata").size(), 32u);
 }
 

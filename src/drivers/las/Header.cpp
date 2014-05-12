@@ -321,19 +321,21 @@ pdal::drivers::las::PointFormat LasHeader::getPointFormat() const
 
 void LasHeader::setPointFormat(pdal::drivers::las::PointFormat v)
 {
-    pdal::drivers::las::PointFormat old = m_pointFormat;
-    boost::uint16_t oldpad = m_dataRecordLength - Support::getPointDataSize(old);
+    size_t oldpad = m_dataRecordLength - getPointDataSize();
     m_pointFormat = v;
-    m_dataRecordLength = Support::getPointDataSize(v) + oldpad;
+    m_dataRecordLength = getPointDataSize() + oldpad;
 }
 
 void LasHeader::SetDataRecordLength(boost::uint16_t v)
 {
-    boost::uint16_t requiredsize = Support::getPointDataSize(m_pointFormat);
+    size_t requiredsize = getPointDataSize();
     if (requiredsize < v)
-        throw std::invalid_argument("record size too small to hold current point format required size");
+        throw std::invalid_argument("record size too small to hold current "
+            "point format required size");
     m_dataRecordLength = v;
 }
+
+
 boost::uint16_t LasHeader::GetDataRecordLength() const
 {
     return m_dataRecordLength;
@@ -499,7 +501,7 @@ void LasHeader::initialize()
     m_isCompressed = false;
     m_headerPadding = 0;
     m_compressionInfo = std::string("");
-    m_dataRecordLength = Support::getPointDataSize(m_pointFormat);
+    m_dataRecordLength = getPointDataSize();
 }
 
 

@@ -26,6 +26,7 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/pdal_error.hpp"
   "${PDAL_HEADERS_DIR}/pdal_types.hpp"
   "${PDAL_HEADERS_DIR}/Bounds.hpp"
+  "${PDAL_HEADERS_DIR}/Charbuf.hpp"
   "${PDAL_HEADERS_DIR}/Dimension.hpp"
   "${PDAL_HEADERS_DIR}/Drivers.hpp"
   "${PDAL_HEADERS_DIR}/FileUtils.hpp"
@@ -77,6 +78,7 @@ endif()
 
 set(PDAL_BASE_CPP
   Bounds.cpp
+  Charbuf.cpp
   Dimension.cpp
   FileUtils.cpp
   Filter.cpp
@@ -168,7 +170,6 @@ set (PDAL_DRIVERS_LAS_HPP
   "${PDAL_LAS_SRC}/ZipPoint.hpp"
   "${PDAL_LAS_HEADERS}/Header.hpp"
   "${PDAL_LAS_HEADERS}/Reader.hpp"
-  "${PDAL_LAS_HEADERS}/ReaderBase.hpp"
   "${PDAL_LAS_HEADERS}/SummaryData.hpp"
   "${PDAL_LAS_HEADERS}/Support.hpp"
   "${PDAL_LAS_HEADERS}/Writer.hpp"

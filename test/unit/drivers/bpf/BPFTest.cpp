@@ -52,21 +52,22 @@ void test_file_type(const std::string& filename)
 {
     using namespace pdal;
 
-    pdal::BpfReader reader(Support::datapath(filename));
+    PointContext context;
 
-    reader.prepare();
-    const Schema& schema = reader.getSchema();
+    pdal::BpfReader reader(Support::datapath(filename));
+    reader.prepare(context);
+    const Schema *schema = context.getSchema();
     
-    PointBuffer data(schema, 3);
-    StageSequentialIterator *it = reader.createSequentialIterator(data);
-    boost::uint32_t numRead = it->read(data);
+    PointBuffer data(context);
+    StageSequentialIterator *it = reader.createSequentialIterator();
+    boost::uint32_t numRead = it->read(data, 3);
     BOOST_CHECK(numRead = 3);
-    Dimension dimX = schema.getDimension("X");
-    Dimension dimY = schema.getDimension("Y");
-    Dimension dimZ = schema.getDimension("Z");
+    Dimension dimX = schema->getDimension("X");
+    Dimension dimY = schema->getDimension("Y");
+    Dimension dimZ = schema->getDimension("Z");
     try
     {
-        Dimension dimQ = schema.getDimension("Q");
+        Dimension dimQ = schema->getDimension("Q");
         BOOST_ERROR("Found unexpected dimension");
     }
     catch (std::runtime_error err)
@@ -99,7 +100,8 @@ void test_file_type(const std::string& filename)
     // Skip by 500, which should put us at 503.
 
     it->skip(500);
-    numRead = it->read(data);
+    PointBuffer data2(context);
+    numRead = it->read(data2, 3);
     BOOST_CHECK(numRead = 3);
     PtData pts[3] = { {494915.25, 4878096.5, 128.220001},
                       {494917.062, 4878124.5, 128.539993},
@@ -107,9 +109,9 @@ void test_file_type(const std::string& filename)
 
     for (int i = 0; i < 3; ++i)
     {
-        float x = data.getFieldAs<float>(dimX, i);
-        float y = data.getFieldAs<float>(dimY, i);
-        float z = data.getFieldAs<float>(dimZ, i);
+        float x = data2.getFieldAs<float>(dimX, i);
+        float y = data2.getFieldAs<float>(dimY, i);
+        float z = data2.getFieldAs<float>(dimZ, i);
         
         BOOST_CHECK_CLOSE(x, pts[i].x, 0.001);
         BOOST_CHECK_CLOSE(y, pts[i].y, 0.001);

@@ -55,20 +55,22 @@ public:
 
     virtual boost::uint64_t getNumPoints() const
         {  return m_header.m_numPts; }
-    StageSequentialIterator*
-        createSequentialIterator(PointBuffer& buffer) const;
+
+    StageSequentialIterator* createSequentialIterator() const;
     StageRandomIterator* createRandomIterator(PointBuffer& buffer) const;
 
 private:
     ILeStream m_stream;
     BpfHeader m_header;
     std::vector<BpfDimension> m_dims;
+    std::vector<Dimension *> m_schemaDims;
     BpfUlemHeader m_ulemHeader;
     std::vector<BpfUlemFrame> m_ulemFrames;
     BpfPolarHeader m_polarHeader;
     std::vector<BpfPolarFrame> m_polarFrames;
 
     virtual void initialize();
+    virtual void buildSchema(Schema *schema);
     bool readUlemData();
     bool readPolarData();
 };

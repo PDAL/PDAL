@@ -157,9 +157,9 @@ void Reader::initialize()
 
     m_streamFactory = new FilenameSubsetStreamFactory(m_filename, offset, length);
 
-    //ABELL - Huh?  Seems weird.
+//ABELL - Huh?  Seems weird.
     m_lasReader = new pdal::drivers::las::Reader(m_streamFactory);
-m_lasReader->prepare();
+//m_lasReader->prepare();
 //    m_lasReader->initialize();
 
 

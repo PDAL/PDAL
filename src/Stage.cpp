@@ -42,27 +42,10 @@
 namespace pdal
 {
 
-Stage::Stage()
-{
-    m_context = GlobalEnvironment::get().context();
-    Construct();
-}
-
-Stage::Stage(PointContext context, const Options& options) : m_context(context)
-{
-    Construct();
-    m_options = options;
-    m_debug = m_options.getValueOrDefault<bool>("debug", false);
-    m_verbose = m_options.getValueOrDefault<boost::uint32_t>("verbose", 0);
-    m_id = m_options.getValueOrDefault<boost::uint32_t>("id", 0);
-    if (m_debug && !m_verbose)
-        m_verbose = 1;
-}
 
 Stage::Stage(const Options& options)
 {
     Construct();
-    m_context = GlobalEnvironment::get().context();
     m_options = options;
     m_debug = m_options.getValueOrDefault<bool>("debug", false);
     m_verbose = m_options.getValueOrDefault<boost::uint32_t>("verbose", 0);
@@ -72,8 +55,7 @@ Stage::Stage(const Options& options)
 }
 
 
-Stage::Stage(PointContext context) :
-    m_context(context)
+Stage::Stage()
 {
     Construct();
 }
@@ -106,19 +88,19 @@ void Stage::setInput(Stage *input)
 }
 
 
-void Stage::prepare()
+void Stage::prepare(PointContext ctx)
 {
 
     for (size_t i = 0; i < m_inputs.size(); ++i)
     {
         Stage *prev = m_inputs[i];
-        prev->prepare();
+        prev->prepare(ctx);
     }
     l_processOptions(m_options);
     processOptions(m_options);
     l_initialize();
     initialize();
-    buildSchema(m_context.getSchema());
+    buildSchema(ctx.getSchema());
 }
 
 

@@ -93,6 +93,9 @@ public:
     void setCompressed(bool);
 
 protected:
+    void Construct();
+    virtual void initialize();
+
     virtual void writeBegin(boost::uint64_t targetNumPointsToWrite);
     virtual void writeBufferBegin(PointBuffer const&);
     virtual boost::uint32_t writeBuffer(const PointBuffer&);
@@ -102,9 +105,6 @@ protected:
     OutputStreamManager m_streamManager;
 
 private:
-    void Construct();
-    virtual void initialize();
-
     LasHeader m_lasHeader;
     boost::uint32_t m_numPointsWritten;
     SummaryData m_summaryData;

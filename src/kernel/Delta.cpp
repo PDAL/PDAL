@@ -238,6 +238,7 @@ void Delta::outputDetail(PointBuffer& source_data,
 }
 int Delta::execute()
 {
+    PointContext sourceCtx;
 
     Options sourceOptions;
     {
@@ -246,7 +247,7 @@ int Delta::execute()
         sourceOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
     }
     Stage* source = AppSupport::makeReader(sourceOptions);
-    source->prepare();
+    source->prepare(sourceCtx);
     
     boost::uint32_t totalPointCount(source->getNumPoints());
     
@@ -259,8 +260,7 @@ int Delta::execute()
     delete source_iter;
     delete source;
 
-
-
+    PointContext candidateCtx;
     Options candidateOptions;
     {
         candidateOptions.add<std::string>("filename", m_candidateFile);
@@ -269,7 +269,7 @@ int Delta::execute()
     }
 
     Stage* candidate = AppSupport::makeReader(candidateOptions);
-    candidate->prepare();    
+    candidate->prepare(candidateCtx);
 
     IndexedPointBuffer candidate_data(candidate->getSchema(), totalPointCount);
     StageSequentialIterator* candidate_iter = candidate->createSequentialIterator(candidate_data);

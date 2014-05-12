@@ -45,6 +45,7 @@
 
 #include <pdal/pdal_internal.hpp>
 #include <pdal/Bounds.hpp>
+#include <pdal/PointContext.hpp>
 #include <pdal/Schema.hpp>
 #include <pdal/Metadata.hpp>
 #include <pdal/third/nanoflann.hpp>
@@ -83,6 +84,8 @@ namespace pdal
 class PDAL_DLL PointBuffer
 {
 public:
+    PointBuffer();
+    PointBuffer(PointContext context);
 
     /** @name Constructors
     */
@@ -122,7 +125,11 @@ public:
     /// an arbitrary number that must be <= getCapacity() is the number of
     /// active points for the PointBuffer
     virtual boost::uint32_t getNumPoints() const
-        { return m_numPoints; }
+//        { return m_numPoints; }
+        { return size(); }
+
+    point_count_t size() const
+        { return m_index.size(); }
 
     /// sets the number of active points for the PointBuffer.
     /// @param v number of points to set.
@@ -148,7 +155,7 @@ public:
     /// A const reference to the internally copied pdal::Schema instance that
     /// was given at construction time.
     const Schema& getSchema() const
-        { return m_schema; }
+        { return *(m_context.getSchema()); }
 
     /// @return the size of the currently allocated raw byte array
     pointbuffer::PointBufferByteSize getBufferByteLength() const
@@ -236,8 +243,7 @@ public:
             types should be ensured to match via an accurate schema.
         \endverbatim
     */
-    void setRawField(Dimension const& dim,
-            boost::uint32_t pointIndex,
+    void setRawField(Dimension const& dim, boost::uint32_t pointIndex,
             const void* value);
 
     /*! bulk copy all the fields from the given point into this object
@@ -465,6 +471,9 @@ protected:
     boost::uint32_t m_capacity;
     Bounds<double> m_bounds;
 
+    PointContext m_context;
+    std::vector<PointId> m_index;
+
     // We cache m_schema.getByteSize() here because it would end up
     // being dereferenced for every point read otherwise.
     schema::size_type m_byteSize;
@@ -485,119 +494,31 @@ protected:
 };
 
 template <class T>
-inline void PointBuffer::setField(pdal::Dimension const& dim,
-    boost::uint32_t pointIndex, T value)
+inline void PointBuffer::setField(pdal::Dimension const& dim, PointId id,
+    T value)
 {
-    if (!getBufferByteLength())
-        return;
-
-    if (dim.getPosition() == -1)
+    PointId rawId = 0;
+    if (id == m_index.size())
     {
-        throw buffer_error(
-            "This dimension has no identified position in a schema.");
+        rawId = m_context.getRawPtBuf()->addPoint();
+        m_index.resize(id + 1);
+        m_index[id] = rawId;
     }
-    
-    pointbuffer::PointBufferByteSize point_start_byte_position(0); 
-    pointbuffer::PointBufferByteSize offset(0);
-    
-    if (m_orientation == schema::POINT_INTERLEAVED)
+    else if (id > m_index.size())
     {
-        point_start_byte_position =
-            static_cast<pointbuffer::PointBufferByteSize>(pointIndex) * \
-            static_cast<pointbuffer::PointBufferByteSize>(m_byteSize); 
-        offset = point_start_byte_position + \
-            static_cast<pointbuffer::PointBufferByteSize>(dim.getByteOffset());
-    } 
-    else if (m_orientation == schema::DIMENSION_INTERLEAVED)
-    {
-        point_start_byte_position =
-            static_cast<pointbuffer::PointBufferByteSize>(m_capacity) *
-            static_cast<pointbuffer::PointBufferByteSize>(dim.getByteOffset());
-        offset = point_start_byte_position +
-            static_cast<pointbuffer::PointBufferByteSize>(dim.getByteSize()) *
-            static_cast<pointbuffer::PointBufferByteSize>(pointIndex);
+        std::cerr << "Point index must increment.\n";
+        //error - throw?
+        return;
     }
     else
-    {
-        throw buffer_error("unknown pdal::Schema::m_orientation provided!");
-    }
-
-    assert(offset + sizeof(T) <= getBufferByteLength());
-
-    boost::uint8_t* p = (boost::uint8_t*)m_data.get() + offset;
-
-    if (sizeof(T) == dim.getByteSize())
-    {
-        // Winner, winner, chicken dinner. We're not going to try to
-        // do anything magical. It's up to you to get the interpretation right.
-        *(T*)(void*)p = value;
-    }
-    else 
-    {
-        std::ostringstream oss;
-        oss << "setField size of type T " << sizeof(T) <<
-            " does not match the size of dimension '" 
-            << dim.getFQName() << "' which is " << dim.getByteSize();
-        throw pdal_error(oss.str());
-    }
+        rawId = m_index[id];
+    m_context.getRawPtBuf()->setField(dim, rawId, value);
 }
 
 template <class T>
-inline T PointBuffer::getField(pdal::Dimension const& dim,
-    boost::uint32_t pointIndex) const
+T PointBuffer::getField(pdal::Dimension const& dim, PointId id) const
 {
-    if (!getBufferByteLength())
-        return (T)0;
-
-    if (dim.getPosition() == -1)
-    {
-        // this is a little harsh, but we'll keep it for now as we
-        // shake things out
-        throw buffer_error("This dimension has no identified position "
-            "in a schema.");
-    }
-
-    pointbuffer::PointBufferByteSize point_start_byte_position(0); 
-    pointbuffer::PointBufferByteSize offset(0);
-    
-    if (m_orientation == schema::POINT_INTERLEAVED)
-    {
-        point_start_byte_position =
-            static_cast<pointbuffer::PointBufferByteSize>(pointIndex) *
-            static_cast<pointbuffer::PointBufferByteSize>(m_byteSize); 
-        offset = point_start_byte_position +
-            static_cast<pointbuffer::PointBufferByteSize>(dim.getByteOffset());
-    }
-    else if (m_orientation == schema::DIMENSION_INTERLEAVED)
-    {
-        point_start_byte_position =
-            static_cast<pointbuffer::PointBufferByteSize>(m_capacity) *
-            static_cast<pointbuffer::PointBufferByteSize>(dim.getByteOffset());
-        offset = point_start_byte_position +
-            static_cast<pointbuffer::PointBufferByteSize>(dim.getByteSize()) *
-            static_cast<pointbuffer::PointBufferByteSize>(pointIndex);
-    }
-    else
-    {
-        throw buffer_error("unknown pdal::Schema::m_orientation provided!");
-    }
-
-    assert(offset + sizeof(T) <= getBufferByteLength());
-
-    boost::uint8_t const* p = (boost::uint8_t const*)m_data.get() + offset;
-    
-    if (static_cast<dimension::size_type>(sizeof(T)) <= dim.getByteSize())
-    {
-        return *(const T *)(const void *)p;
-    }
-    else
-    {
-        std::ostringstream oss;
-        oss << "getField size of type T " << sizeof(T) <<
-            " is greater than the size of dimension '" 
-            << dim.getFQName() << "' which is " << dim.getByteSize();
-        throw pdal_error(oss.str());
-    }
+    return m_context.getRawPtBuf()->getField<T>(dim, m_index[id]);
 }
 
 

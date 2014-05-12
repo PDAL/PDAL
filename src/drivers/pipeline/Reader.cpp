@@ -49,16 +49,7 @@ Reader::Reader(const Options& options)
     : pdal::Reader(options)
     , m_filename(options.getValueOrThrow<std::string>("filename"))
     , m_manager(NULL)
-{
-    return;
-}
-
-
-Reader::~Reader()
-{
-    m_manager.reset();
-    return;
-}
+{}
 
 
 void Reader::initialize()
@@ -73,7 +64,9 @@ void Reader::initialize()
         m_manager->removeWriter();
     }
     m_stage = m_manager->getStage();
-    m_stage->prepare();
+
+    PointContext ctx;
+    m_stage->prepare(ctx);
 
     setSchema(m_stage->getSchema());
 

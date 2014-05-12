@@ -101,7 +101,8 @@ void PipelineManager::removeWriter()
     m_lastWriter = 0;
 }
 
-Reader* PipelineManager::addReader(const std::string& type, const Options& options)
+Reader* PipelineManager::addReader(const std::string& type,
+    const Options& options)
 {
     registerPluginIfExists(options);
 
@@ -112,22 +113,26 @@ Reader* PipelineManager::addReader(const std::string& type, const Options& optio
 }
 
 
-Filter* PipelineManager::addFilter(const std::string& type, Stage& prevStage, const Options& options)
+Filter* PipelineManager::addFilter(const std::string& type, Stage& prevStage,
+    const Options& options)
 {
     registerPluginIfExists(options);
 
-    Filter* stage = m_factory.createFilter(type, prevStage, options);
+    Filter* stage = m_factory.createFilter(type, options);
+    stage->setInput(&prevStage);
     m_filters.push_back(stage);
     m_lastStage = stage;
     return stage;
 }
 
 
-MultiFilter* PipelineManager::addMultiFilter(const std::string& type, const std::vector<Stage*>& prevStages, const Options& options)
+MultiFilter* PipelineManager::addMultiFilter(const std::string& type,
+    const std::vector<Stage*>& prevStages, const Options& options)
 {
     registerPluginIfExists(options);
 
-    MultiFilter* stage = m_factory.createMultiFilter(type, prevStages, options);
+    MultiFilter* stage = m_factory.createMultiFilter(type, options);
+    stage->setInput(prevStages);
     m_multifilters.push_back(stage);
     m_lastStage = stage;
     return stage;
@@ -141,13 +146,15 @@ void PipelineManager::registerPluginIfExists(const Options& options)
     }
 }
 
-Writer* PipelineManager::addWriter(const std::string& type, Stage& prevStage, const Options& options)
+Writer* PipelineManager::addWriter(const std::string& type, Stage& prevStage,
+    const Options& options)
 {
     m_isWriterPipeline = true;
 
     registerPluginIfExists(options);
 
-    Writer* writer = m_factory.createWriter(type, prevStage, options);
+    Writer* writer = m_factory.createWriter(type, options);
+    writer->setInput(&prevStage);
     m_writers.push_back(writer);
     m_lastWriter = writer;
     return writer;
@@ -168,10 +175,12 @@ Stage* PipelineManager::getStage() const
 
 boost::uint64_t PipelineManager::execute()
 {
+    PointContext ctx;
+
     if (!isWriterPipeline())
         throw pdal_error("This pipeline does not have a writer, unable "
             "to execute");
-    getWriter()->prepare();
+    getWriter()->prepare(ctx);
     return getWriter()->write(0);
 }
 

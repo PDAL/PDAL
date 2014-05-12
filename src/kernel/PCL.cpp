@@ -160,8 +160,8 @@ int PCL::execute()
     Stage* final_stage = makeReader(readerOptions);
 
     Writer* writer = AppSupport::makeWriter(writerOptions, *final_stage);
-
-    writer->prepare();
+    PointContext ctx;
+    writer->prepare(ctx);
 
     const boost::uint64_t numPointsToRead = final_stage->getNumPoints();
 

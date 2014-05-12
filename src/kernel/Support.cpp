@@ -108,11 +108,12 @@ pdal::Writer* AppSupport::makeWriter(pdal::Options& options, pdal::Stage& stage)
     }
     factory.inferWriterOptionsChanges(outputFile, options);
         
-    pdal::Writer* writer = factory.createWriter(driver, stage, options);
+    pdal::Writer* writer = factory.createWriter(driver, options);
     if (!writer)
     {
         throw app_runtime_error("writer creation failed");
     }
+    writer->setInput(&stage);
 
     return writer;
 }

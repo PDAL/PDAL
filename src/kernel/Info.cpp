@@ -197,62 +197,22 @@ vector<boost::uint32_t> getListOfPoints(std::string p)
 
 } //namespace
 
-void Info::dumpPoints(const Stage& stage,
+void Info::dumpPoints(PointContext ctx, const Stage& stage,
     std::string const& pointsString) const
 {
-    PointBuffer readData(stage.getSchema(), 1);
+    PointBuffer readData(ctx);
     std::vector<boost::uint32_t> points = getListOfPoints(pointsString);
         
-    std::unique_ptr<pdal::StageRandomIterator> random(
-        stage.createRandomIterator(readData));
-    if (!random)
-    {
-        std::unique_ptr<pdal::StageSequentialIterator> seq(
-            stage.createSequentialIterator(readData));
-        if (!seq)
-            throw app_runtime_error("Unable to iterator retrieve points");
-        dumpPointsSequential(points, seq.get());
-    }
-    else
-        dumpPointsRandom(points, random.get());
+    std::unique_ptr<pdal::StageSequentialIterator> seq(
+        stage.createSequentialIterator());
+    if (!seq)
+        throw app_runtime_error("Unable to create iterator retrieve points");
+    dumpPointsSequential(readData, points, seq.get());
 }
 
-
-void Info::dumpPointsRandom(const std::vector<uint32_t>& points,
-    StageRandomIterator *iter) const
-{ 
-    PointBuffer& readData = iter->getBuffer();
-    PointBuffer outputData(readData.getSchema(), points.size());
-    for (size_t i = 0; i < points.size(); ++i )
-    {
-        boost::uint64_t s = iter->seek(points[i]);
-        if (s != points[i])
-        {
-            std::ostringstream oss;
-            oss << "Unable to seek to " << points[i] <<
-                " file too large?";
-            throw app_runtime_error(oss.str());
-        }
-        const boost::uint32_t numRead = iter->read(readData);
-        if (numRead != 1)
-        {
-            std::ostringstream oss;
-            oss << "problem reading point number " << points[i];
-            throw app_runtime_error(oss.str());
-        }
-        outputData.copyPointFast(i, 0, readData);
-    }
-    outputData.setNumPoints(points.size());
-    dumpPointData(outputData);
-}
-
-
-void Info::dumpPointsSequential(const std::vector<uint32_t>& points,
-    StageSequentialIterator *iter) const
+void Info::dumpPointsSequential(PointBuffer& ptBuf,
+    const std::vector<uint32_t>& points, StageSequentialIterator *iter) const
 {
-    PointBuffer& readData = iter->getBuffer();
-    PointBuffer outputData(readData.getSchema(), points.size());
-
     int64_t lastPt = -1;
     uint32_t writePos = 0;
     for (uint32_t pt : points)
@@ -262,18 +222,16 @@ void Info::dumpPointsSequential(const std::vector<uint32_t>& points,
                 "out of order (must be monotonically increasing)");
         uint64_t numSkipped = iter->skip(pt - lastPt - 1);
         assert((int)numSkipped == (int)(pt - lastPt - 1));
-        uint32_t numRead = iter->read(readData);
+        uint32_t numRead = iter->read(ptBuf, 1);
         if (numRead != 1)
         {
             std::ostringstream oss;
             oss << "problem reading point number " << pt;
             throw app_runtime_error(oss.str());
         }
-        outputData.copyPointFast(writePos++, 0, readData);
         lastPt = pt;
     }
-    outputData.setNumPoints(points.size());
-    dumpPointData(outputData);
+    dumpPointData(ptBuf);
 }
 
 
@@ -294,11 +252,10 @@ void Info::dumpPointData(PointBuffer& outputData) const
 }
 
 
-void Info::dumpStats(pdal::filters::Stats& filter, pdal::PipelineManager* manager) const
+void Info::dumpStats(PointContext ctx, pdal::filters::Stats& filter,
+    pdal::PipelineManager* manager) const
 {
 
-    const Schema& schema = filter.getSchema();
-    
     boost::uint32_t chunkSize(131072);
     if (filter.getNumPoints() > 0 )
     {
@@ -307,14 +264,13 @@ void Info::dumpStats(pdal::filters::Stats& filter, pdal::PipelineManager* manage
     
     pdal::PipelineWriter* writer(0);
     
-    PointBuffer data(schema, chunkSize);
+    PointBuffer data(ctx);
 
     if (m_pipelineFile.size() > 0)
     {
          writer = new pdal::PipelineWriter(*manager);
          writer->setPointBuffer(&data);
     }
-
     StageSequentialIterator* iter = filter.createSequentialIterator(data);
 
     boost::uint64_t totRead = 0;
@@ -349,7 +305,9 @@ void Info::dumpStats(pdal::filters::Stats& filter, pdal::PipelineManager* manage
 
 void Info::dumpSchema(const Stage& stage, pdal::PipelineManager* manager) const
 {
-    PointBuffer data(stage.getSchema(), 1);
+//ABELL
+//    PointBuffer data(stage.getSchema(), 1);
+PointBuffer data(stage.getSchema());
     pdal::PipelineWriter pwriter(*manager);
     pwriter.setPointBuffer(&data);
 
@@ -413,13 +371,18 @@ void Info::dumpQuery(Stage const& stage, IndexedPointBuffer& data) const
     double d(0.0);
     std::vector<std::size_t> ids = data.neighbors(x, y, z, d, count);
     
-    PointBuffer response(data.getSchema(), count);
+//ABELL
+//    PointBuffer response(data.getSchema(), count);
+PointBuffer response(data.getSchema());
     typedef std::vector<std::size_t>::const_iterator Iterator;
     std::vector<std::size_t>::size_type pos(0);
     for (Iterator i = ids.begin(); i != ids.end(); ++i)
     {
+//ABELL
+/**
         response.copyPointFast(pos, *i, data);
         response.setNumPoints(response.getNumPoints() + 1);
+**/
         pos++;
     }
 
@@ -484,8 +447,6 @@ void Info::dumpMetadata(const Stage& stage) const
 
 int Info::execute()
 {
-
-
     Options readerOptions;
     {
         if (m_usestdin)
@@ -497,8 +458,6 @@ int Info::execute()
 
     PipelineManager* manager = AppSupport::makePipeline(readerOptions);
     
-    // Stage* reader = AppSupport::makeReader(readerOptions);
-
     if (m_seed != 0)
     {
         Option seed_option("seed", m_seed, "seed value");
@@ -525,21 +484,21 @@ int Info::execute()
     pdal::Options options = m_options + readerOptions;
     
     Stage* reader = manager->getStage();
-    manager->addFilter("filters.stats", *reader, options);
-    // pdal::filters::Stats* filter = new pdal::filters::Stats(*reader, options);
-    
+    if (m_showStats)
+        manager->addFilter("filters.stats", *reader, options);
     Stage* filter = manager->getStage();
+    std::cerr << filter->getName() << "!\n";
 
-    filter->prepare();
-
+    PointContext ctx;
+    filter->prepare(ctx);
     if (m_pointIndexes.size())
     {
-        dumpPoints(*filter, m_pointIndexes);
+        dumpPoints(ctx, *filter, m_pointIndexes);
     }
 
     if (m_showStats)
     {
-        dumpStats(*dynamic_cast<pdal::filters::Stats*>(filter), manager);
+        dumpStats(ctx, *dynamic_cast<pdal::filters::Stats*>(filter), manager);
     }
     
     if (m_showSchema)
@@ -563,7 +522,9 @@ int Info::execute()
     
     if (m_QueryPoint.size())
     {
-        IndexedPointBuffer buffer(filter->getSchema(), filter->getNumPoints());
+//ABELL
+//        IndexedPointBuffer buffer(filter->getSchema(), filter->getNumPoints());
+        IndexedPointBuffer buffer(filter->getSchema());
         dumpQuery(*filter, buffer);
     }
     

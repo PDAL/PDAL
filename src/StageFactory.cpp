@@ -252,7 +252,8 @@ void StageFactory::inferWriterOptionsChanges(const std::string& filename, pdal::
 }
 
 
-Reader* StageFactory::createReader(const std::string& type, const Options& options)
+Reader* StageFactory::createReader(const std::string& type,
+    const Options& options)
 {
     ReaderCreator* f = getReaderCreator(type);
     if (!f)
@@ -266,7 +267,8 @@ Reader* StageFactory::createReader(const std::string& type, const Options& optio
 }
 
 
-Filter* StageFactory::createFilter(const std::string& type, Stage& prevStage, const Options& options)
+Filter* StageFactory::createFilter(const std::string& type,
+    const Options& options)
 {
     FilterCreator* f = getFilterCreator(type);
     if (!f)
@@ -276,38 +278,39 @@ Filter* StageFactory::createFilter(const std::string& type, Stage& prevStage, co
         throw pdal_error(oss.str());
     }
 
-    Filter* stage = f(prevStage, options);
-    return stage;
+    return f(options);
 }
 
 
-MultiFilter* StageFactory::createMultiFilter(const std::string& type, const std::vector<Stage*>& prevStages, const Options& options)
+MultiFilter* StageFactory::createMultiFilter(const std::string& type,
+    const Options& options)
 {
     MultiFilterCreator* f = getMultiFilterCreator(type);
     if (!f)
     {
         std::ostringstream oss;
-        oss << "Unable to create multifilter for type '" << type << "'. Does a driver with this type name exist?";
+        oss << "Unable to create multifilter for type '" << type <<
+            "'. Does a driver with this type name exist?";
         throw pdal_error(oss.str());
     }
 
-    MultiFilter* stage = f(prevStages, options);
-    return stage;
+    return f(options);
 }
 
 
-Writer* StageFactory::createWriter(const std::string& type, Stage& prevStage, const Options& options)
+Writer* StageFactory::createWriter(const std::string& type,
+    const Options& options)
 {
     WriterCreator* f = getWriterCreator(type);
     if (!f)
     {
         std::ostringstream oss;
-        oss << "Unable to create writer for type '" << type << "'. Does a driver with this type name exist?";
+        oss << "Unable to create writer for type '" << type <<
+            "'. Does a driver with this type name exist?";
         throw pdal_error(oss.str());
     }
 
-    Writer* stage = f(prevStage, options);
-    return stage;
+    return f(options);
 }
 
 

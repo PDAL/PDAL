@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Andrew Bell
+* Copyright (c) 2014, Hobu Inc.
 *
 * All rights reserved.
 *
@@ -34,6 +34,7 @@
 
 #pragma once
 
+#include <pdal/Charbuf.hpp>
 #include <pdal/IStream.hpp>
 #include <pdal/ReaderIterator.hpp>
 #include "BpfHeader.hpp"
@@ -49,36 +50,22 @@ class PointBuffer;
 
 class BpfSeqIterator : public ReaderSequentialIterator
 {
-    class Charbuf : public std::streambuf
-    {
-    public:
-        Charbuf() : m_bufOffset(0)
-            {}
-        void initialize(std::vector<char>& v, pos_type bufOffset);
-    protected:
-        pos_type seekpos(pos_type pos, std::ios_base::openmode which =
-            std::ios_base::in | std::ios_base::out);
-        pos_type seekoff(off_type off, std::ios_base::seekdir dir,
-            std::ios_base::openmode which =
-                std::ios_base::in | std::ios_base::out);
-    private:
-        pos_type m_bufOffset;
-    };
-
 public:
-    BpfSeqIterator(PointBuffer& buffer, boost::uint32_t numPoints,
-        BpfFormat::Enum pointFormat, bool compression, ILeStream& stream);
+    BpfSeqIterator(const std::vector<Dimension *>& dims,
+        point_count_t numPoints, BpfFormat::Enum pointFormat, bool compression,
+        ILeStream& stream);
     ~BpfSeqIterator();
 
 protected:
     boost::uint32_t readBufferImpl(PointBuffer&);
+    virtual point_count_t readImpl(PointBuffer& data, point_count_t count);
     boost::uint64_t skipImpl(boost::uint64_t);
     bool atEndImpl() const;
 
-    boost::uint32_t read(PointBuffer& data);
-    boost::uint32_t readPointMajor(PointBuffer& data);
-    boost::uint32_t readDimMajor(PointBuffer& data);
-    boost::uint32_t readByteMajor(PointBuffer& data);
+    boost::uint32_t read(PointBuffer& data, uint32_t count);
+    boost::uint32_t readPointMajor(PointBuffer& data, uint32_t count);
+    boost::uint32_t readDimMajor(PointBuffer& data, uint32_t count);
+    boost::uint32_t readByteMajor(PointBuffer& data, uint32_t count);
 
 private:
     size_t readBlock(std::vector<char>& outBuf, size_t index);
@@ -88,9 +75,9 @@ private:
     void seekByteMajor(size_t dimIdx, size_t byteIdx, uint32_t ptIdx);
 
     /// Dimensions
-    std::vector<Dimension> m_dims;
+    std::vector<Dimension *> m_dims;
     /// Total number of points in the file.
-    boost::uint32_t m_numPoints;
+    point_count_t m_numPoints;
     /// Bpf point format being read.
     BpfFormat::Enum m_pointFormat;
     /// Input stream

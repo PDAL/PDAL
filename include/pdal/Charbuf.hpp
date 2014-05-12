@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2014, Hobu Inc.
 *
 * All rights reserved.
 *
@@ -32,32 +32,35 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_DRIVERS_LAS_READERBASE_HPP
-#define INCLUDED_DRIVERS_LAS_READERBASE_HPP
-
-#include <pdal/Reader.hpp>
-
+#include <streambuf>
+#include <vector>
 
 namespace pdal
 {
-namespace drivers
-{
-namespace las
-{
 
-
-// this class gives the interfaces for the LAS-specific header data access
-// functions -- we use this to make sure that the native las and liblas
-// readers both have the same API
-class PDAL_DLL ReaderBase: public pdal::Reader
+// Turns a vector into a streambuf.
+class Charbuf : public std::streambuf
 {
 public:
-    ReaderBase(const Options& options) : Reader(options) {}
-    virtual ~ReaderBase() {}
+    Charbuf() : m_bufOffset(0)
+        {}
+    Charbuf (std::vector<char>& v, pos_type bufOffset = 0)
+        { initialize(v.data(), v.size(), bufOffset); }
+    Charbuf (char *buf, size_t count, pos_type bufOffset = 0)
+        { initialize(buf, count, bufOffset); }
+
+    void initialize(char *buf, size_t count, pos_type bufOffset = 0);
+
+protected:
+    pos_type seekpos(pos_type pos, std::ios_base::openmode which =
+        std::ios_base::in | std::ios_base::out);
+    pos_type seekoff(off_type off, std::ios_base::seekdir dir,
+        std::ios_base::openmode which = std::ios_base::in | std::ios_base::out);
+
+private:
+    // The offset allows one to use offsets when seeking that refer not to
+    // the positions in the backing vector, but to some other reference point.
+    pos_type m_bufOffset;
 };
 
-}
-}
-} // namespaces
-
-#endif
+} //namespace

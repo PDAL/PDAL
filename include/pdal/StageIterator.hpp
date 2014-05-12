@@ -48,6 +48,7 @@ class PDAL_DLL StageIterator
 {
 public:
     StageIterator(PointBuffer& buffer);
+    StageIterator();
     virtual ~StageIterator()
         {}
 
@@ -62,6 +63,13 @@ public:
     //
     // (This function really just performs the readBegin..readEnd sequence)
     boost::uint32_t read(PointBuffer& buffer);
+
+    point_count_t read(PointBuffer& buffer, point_count_t count)
+    {
+        point_count_t numRead = readImpl(buffer, count);
+        m_index += numRead;
+        return numRead;
+    }
 
     // These functions just call into the corresponding 'Impls that the derived
     // stage provides, plus some of them do a little internal bookkeeping we
@@ -108,12 +116,15 @@ public:
     void setChunkSize(boost::uint32_t size);
     boost::uint32_t getChunkSize() const;
 
+/**
     PointBuffer& getBuffer()
     {
         return m_buffer;
     }
+**/
 
 protected:
+    virtual point_count_t readImpl(PointBuffer& data, point_count_t count) = 0;
     virtual void readBeginImpl() {}
     virtual void readBufferBeginImpl(PointBuffer&) {}
     virtual boost::uint32_t readBufferImpl(PointBuffer&) = 0;
@@ -124,7 +135,7 @@ protected:
     boost::uint64_t m_index;
 
 private:
-    PointBuffer& m_buffer;
+//    PointBuffer& m_buffer;
     boost::uint32_t m_chunkSize;
 
     bool m_readBeginPerformed;
@@ -132,6 +143,7 @@ private:
 
     StageIterator& operator=(const StageIterator&); // not implemented
     StageIterator(const StageIterator&); // not implemented
+    void Construct();
 };
 
 
@@ -139,6 +151,8 @@ class PDAL_DLL StageSequentialIterator : public StageIterator
 {
 public:
     StageSequentialIterator(PointBuffer& buffer);
+    StageSequentialIterator()
+        {}
     virtual ~StageSequentialIterator();
 
     // returns true after we've read all the points available to this stage
@@ -146,6 +160,8 @@ public:
 
 protected:
     // from Iterator
+    virtual point_count_t readImpl(PointBuffer& data, point_count_t count)
+        { std::cerr << "No sequential readImpl for stage/iterator!\n"; return 0; }
     virtual boost::uint32_t readBufferImpl(PointBuffer&) = 0;
     virtual bool atEndImpl() const = 0;
 };
@@ -169,6 +185,8 @@ public:
 
 protected:
     // from Iterator
+    virtual point_count_t readImpl(PointBuffer& data, point_count_t count)
+        { std::cerr << "No random readImpl for stage/iterator!\n"; return 0; }
     virtual boost::uint64_t seekImpl(boost::uint64_t position) = 0;
     virtual boost::uint64_t skipImpl(boost::uint64_t position);
 };

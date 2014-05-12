@@ -39,7 +39,6 @@
 
 #include <pdal/Schema.hpp>
 
-
 #include <iostream>
 
 #ifdef PDAL_HAVE_LASZIP
@@ -54,6 +53,9 @@ typedef struct LASunzipperH *LASunzipper;
 
 namespace pdal
 {
+
+class Stage;
+
 namespace drivers
 {
 namespace las
@@ -62,17 +64,6 @@ namespace las
 class Reader;
 class SummaryData;
 class ZipPoint;
-
-enum PointFormat
-{
-    PointFormat0 = 0,         // base
-    PointFormat1 = 1,         // base + time
-    PointFormat2 = 2,         // base + color
-    PointFormat3 = 3,         // base + time + color
-    PointFormat4 = 4,         // base + time + wave
-    PointFormat5 = 5,         // base + time + color + wave  (NOT SUPPORTED)
-    PointFormatUnknown = 99
-};
 
 class PDAL_DLL PointDimensions
 {
@@ -103,14 +94,6 @@ public:
 class PDAL_DLL Support
 {
 public:
-    static void registerFields(Reader& stage, Schema& schema, PointFormat pointFormat);
-    static void setScaling(Schema& schema, double scaleX, double scaleY, double scaleZ, double offsetX, double offsetY, double offsetZ);
-
-    static bool hasTime(PointFormat);
-    static bool hasColor(PointFormat);
-    static bool hasWave(PointFormat);
-    static boost::uint16_t getPointDataSize(PointFormat pointFormat);
-
     // assumes the stream position is pointing to the first byte of the header
     // this function updates the header's min/max xyz fields, and the point return counts fields
     static void rewriteHeader(std::ostream& stream, const SummaryData& data);

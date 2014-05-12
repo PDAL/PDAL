@@ -95,11 +95,12 @@ public:
 
     /// Constructs a Bounds instance from a vector
     /// of Range
-    Bounds(RangeVector const& ranges)
-        :
-        m_ranges(ranges)
+    Bounds(RangeVector const& ranges) : m_ranges(ranges)
     {
     }
+
+    Bounds(size_t numDims)
+        { m_ranges.resize(numDims); }
 
     /// Convenience constructor for typical 3D case
     Bounds(T minx,

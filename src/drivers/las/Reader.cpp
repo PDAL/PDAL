@@ -41,9 +41,11 @@
 #include <laszip/lasunzipper.hpp>
 #endif
 
+#include <pdal/Charbuf.hpp>
 #include <pdal/FileUtils.hpp>
 #include <pdal/drivers/las/Header.hpp>
 #include <pdal/drivers/las/VariableLengthRecord.hpp>
+#include <pdal/IStream.hpp>
 #include "LasHeaderReader.hpp"
 #include <pdal/PointBuffer.hpp>
 #include <pdal/Metadata.hpp>
@@ -57,17 +59,8 @@
 #include "cpl_string.h"
 #endif
 
-#if defined(EQUAL) && defined(PDAL_PLATFORM_WIN32)
-#undef EQUAL
-#define EQUAL(a,b) (_stricmp(a,b)==0)
-#endif
-
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/json_parser.hpp>
-
-#if defined(max) && defined(PDAL_PLATFORM_WIN32)
-#undef max
-#endif
 
 namespace pdal
 {
@@ -78,7 +71,7 @@ namespace las
 
 
 Reader::Reader(const Options& options)
-    : ReaderBase(options)
+    : pdal::Reader(options)
     , m_streamFactory(new FilenameStreamFactory(
         options.getValueOrThrow<std::string>("filename")))
     , m_ownsStreamFactory(true)
@@ -86,14 +79,14 @@ Reader::Reader(const Options& options)
 
 
 Reader::Reader(const std::string& filename)
-    : ReaderBase(Option("filename", filename))
+    : pdal::Reader(Option("filename", filename))
     , m_streamFactory(new FilenameStreamFactory(filename))
     , m_ownsStreamFactory(true)
 {}
 
 
 Reader::Reader(StreamFactory* factory)
-    : ReaderBase(Options::none())
+    : pdal::Reader(Options::none())
     , m_streamFactory(factory)
     , m_ownsStreamFactory(false)
 {}
@@ -102,9 +95,7 @@ Reader::Reader(StreamFactory* factory)
 Reader::~Reader()
 {
     if (m_ownsStreamFactory)
-    {
         delete m_streamFactory;
-    }
 }
 
 
@@ -167,7 +158,13 @@ pdal::StageSequentialIterator*
 Reader::createSequentialIterator(PointBuffer& buffer) const
 {
     return new pdal::drivers::las::iterators::sequential::Reader(*this,
-        buffer, getNumPoints());
+        getNumPoints());
+}
+
+pdal::StageSequentialIterator* Reader::createSequentialIterator() const
+{
+    return new pdal::drivers::las::iterators::sequential::Reader(*this,
+        getNumPoints());
 }
 
 
@@ -178,224 +175,6 @@ Reader::createRandomIterator(PointBuffer& buffer) const
         getNumPoints());
 }
 
-
-boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream,
-    boost::uint64_t numPointsLeft, LASunzipper* unzipper, ZipPoint* zipPoint,
-    PointDimensions* dimensions, std::vector<boost::uint8_t>& read_buffer) const
-{
-    if (!dimensions)
-    {
-        throw pdal_error("No dimension positions are available!");
-    } 
- 
-    // we must not read more points than are left in the file
-    boost::uint64_t numPoints64 =
-        std::min<boost::uint64_t>(data.getCapacity(), numPointsLeft);
-    boost::uint64_t numPoints =
-        std::min<boost::uint64_t>(numPoints64,
-            std::numeric_limits<boost::uint32_t>::max());
-    
-    if (numPoints64 >= std::numeric_limits<boost::uint32_t>::max())
-    {
-        throw pdal_error("Unable to read more than 2**32 points at a time");
-    }
-    
-    const LasHeader& lasHeader = getLasHeader();
-    const PointFormat pointFormat = lasHeader.getPointFormat();
-
-    const bool hasTime = Support::hasTime(pointFormat);
-    const bool hasColor = Support::hasColor(pointFormat);
-    pointbuffer::PointBufferByteSize pointByteCount =
-        Support::getPointDataSize(pointFormat);
-    
-    pointbuffer::PointBufferByteSize numBytesToRead = pointByteCount * numPoints;
-    if (read_buffer.size() < numBytesToRead)
-    {
-        read_buffer.resize(numBytesToRead);
-    }
-
-
-    if (zipPoint)
-    {
-#ifdef PDAL_HAVE_LASZIP
-        boost::uint8_t* p = &(read_buffer.front());
-
-        bool ok = false;
-        for (boost::uint32_t i=0; i<numPoints; i++)
-        {
-            ok = unzipper->read(zipPoint->m_lz_point);
-            if (!ok)
-            {
-                std::ostringstream oss;
-                const char* err = unzipper->get_error();
-                if (err==NULL) err="(unknown error)";
-                oss << "Error reading compressed point data: " <<
-                    std::string(err);
-                throw pdal_error(oss.str());
-            }
-
-            memcpy(p, zipPoint->m_lz_point_data.get(),
-                zipPoint->m_lz_point_size);
-            p += zipPoint->m_lz_point_size;
-        }
-#else
-        boost::ignore_unused_variable_warning(unzipper);
-        throw pdal_error("LASzip is not enabled for this "
-            "pdal::drivers::las::Reader::processBuffer");
-#endif
-    }
-    else
-    {
-        try
-        {
-            Utils::read_n(read_buffer.front(), stream, numBytesToRead);
-        } catch (std::out_of_range&)
-        {
-            if (stream.gcount())
-            {
-                // We weren't able to read as many bytes as asked 
-                // The header must have lied or something, but we 
-                // do have some data here. Figure out how many 
-                // points we read and set things to that
-                numPoints = stream.gcount()/pointByteCount;
-
-            } else
-            {
-                throw;
-            }
-        } catch (pdal::invalid_stream&)
-        {
-            numPoints = 0;
-        }
-        
-    }
-
-    pdal::Bounds<double> bounds;
-    pdal::Vector<double> point(0.0, 0.0, 0.0);
-    bool bFirstPoint(true);
-    for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
-    {
-        boost::uint8_t* p = &(read_buffer.front()) +
-            static_cast<pointbuffer::PointBufferByteSize>(pointByteCount) *
-            static_cast<pointbuffer::PointBufferByteSize>(pointIndex);
-
-        {
-            const boost::int32_t x = Utils::read_field<boost::int32_t>(p);
-            const boost::int32_t y = Utils::read_field<boost::int32_t>(p);
-            const boost::int32_t z = Utils::read_field<boost::int32_t>(p);
-            
-            if (dimensions->X && dimensions->Y && dimensions->Z)
-            {
-                double X = dimensions->X->applyScaling(x);
-                double Y = dimensions->Y->applyScaling(y);
-                double Z = dimensions->Z->applyScaling(z);
-
-                if (bFirstPoint)
-                {
-                    bounds = pdal::Bounds<double>(X, Y, Z, X, Y, Z);
-                    bFirstPoint = false;
-                }
-
-                point.set(0, X);
-                point.set(1, Y);
-                point.set(2, Z);
-                bounds.grow(point);
-            }
-
-
-            boost::uint16_t intensity = Utils::read_field<boost::uint16_t>(p);
-            boost::uint8_t flags = Utils::read_field<boost::uint8_t>(p);
-            boost::uint8_t classification =
-                Utils::read_field<boost::uint8_t>(p) & 31;
-            boost::int8_t scanAngleRank = Utils::read_field<boost::int8_t>(p);
-            boost::uint8_t user = Utils::read_field<boost::uint8_t>(p);
-            boost::uint16_t pointSourceId =
-                Utils::read_field<boost::uint16_t>(p);
-
-            boost::uint8_t returnNum = flags & 0x07;
-            boost::uint8_t numReturns = (flags >> 3) & 0x07;
-            boost::uint8_t scanDirFlag = (flags >> 6) & 0x01;
-            boost::uint8_t flight = (flags >> 7) & 0x01;
-            
-            if (dimensions->X)
-                data.setField<boost::int32_t>(*dimensions->X, pointIndex, x);
-            
-            if (dimensions->Y)
-                data.setField<boost::int32_t>(*dimensions->Y, pointIndex, y);
-            
-            if (dimensions->Z)
-                data.setField<boost::int32_t>(*dimensions->Z, pointIndex, z);
-
-            if (dimensions->Intensity)
-                data.setField<boost::uint16_t>(*dimensions->Intensity,
-                    pointIndex, intensity);
-
-            if (dimensions->ReturnNumber)
-                data.setField<boost::uint8_t>(*dimensions->ReturnNumber,
-                    pointIndex, returnNum);
-
-            if (dimensions->NumberOfReturns)
-                data.setField<boost::uint8_t>(*dimensions->NumberOfReturns,
-                    pointIndex, numReturns);
-
-            if (dimensions->ScanDirectionFlag)
-                data.setField<boost::uint8_t>(*dimensions->ScanDirectionFlag,
-                    pointIndex, scanDirFlag);
-
-            if (dimensions->EdgeOfFlightLine)
-                data.setField<boost::uint8_t>(*dimensions->EdgeOfFlightLine,
-                    pointIndex, flight);
-
-            if (dimensions->Classification)
-                data.setField<boost::uint8_t>(*dimensions->Classification,
-                    pointIndex, classification);
-
-            if (dimensions->ScanAngleRank)
-                data.setField<boost::int8_t>(*dimensions->ScanAngleRank,
-                    pointIndex, scanAngleRank);
-
-            if (dimensions->UserData)
-                data.setField<boost::uint8_t>(*dimensions->UserData,
-                    pointIndex, user);
-
-            if (dimensions->PointSourceId)
-                data.setField<boost::uint16_t>(*dimensions->PointSourceId,
-                    pointIndex, pointSourceId);
-        }
-
-        if (hasTime)
-        {
-            double time = Utils::read_field<double>(p);
-
-            if (dimensions->Time)
-                data.setField<double>(*dimensions->Time, pointIndex, time);
-        }
-
-        if (hasColor)
-        {
-            boost::uint16_t red = Utils::read_field<boost::uint16_t>(p);
-            boost::uint16_t green = Utils::read_field<boost::uint16_t>(p);
-            boost::uint16_t blue = Utils::read_field<boost::uint16_t>(p);
-
-            if (dimensions->Red)
-                data.setField<boost::uint16_t>(*dimensions->Red,
-                    pointIndex, red);
-
-            if (dimensions->Green)
-                data.setField<boost::uint16_t>(*dimensions->Green,
-                    pointIndex, green);
-
-            if (dimensions->Blue)
-                data.setField<boost::uint16_t>(*dimensions->Blue,
-                    pointIndex, blue);
-        }
-
-        data.setNumPoints(pointIndex+1);
-    }
-
-    data.setSpatialBounds(bounds);
-    return numPoints;
-}
 
 void Reader::readMetadata()
 {
@@ -605,38 +384,37 @@ void Reader::readMetadata()
     }
 }
 
-std::vector<Dimension> Reader::getDefaultDimensions()
+void Reader::buildSchema(Schema *s)
 {
+    const LasHeader& h = getLasHeader();
+
     std::vector<Dimension> output;
     Dimension x("X", dimension::SignedInteger, 4, "X coordinate as a long "
         "integer. You must use the scale and offset information of the "
         "header to determine the double value.");
     x.setUUID("2ee118d1-119e-4906-99c3-42934203f872");
     x.setNamespace(s_getName());
-    output.push_back(x);
+    x.setNumericOffset(h.GetOffsetX());
+    x.setNumericScale(h.GetScaleX());
+    s->appendDimension(x);
 
     Dimension y("Y", dimension::SignedInteger, 4, "Y coordinate as a long "
         "integer. You must use the scale and offset information of the "
         "header to determine the double value.");
     y.setUUID("87707eee-2f30-4979-9987-8ef747e30275");
     y.setNamespace(s_getName());
-    output.push_back(y);
+    y.setNumericOffset(h.GetOffsetY());
+    y.setNumericScale(h.GetScaleY());
+    s->appendDimension(y);
 
     Dimension z("Z", dimension::SignedInteger, 4, "Z coordinate as a long "
         "integer. You must use the scale and offset information of the "
         "header to determine the double value.");
     z.setUUID("e74b5e41-95e6-4cf2-86ad-e3f5a996da5d");
     z.setNamespace(s_getName());
-    output.push_back(z);
-
-    Dimension time("Time", dimension::Float, 8, "The GPS Time is the double "
-        "floating point time tag value at which the point was acquired. It "
-        "is GPS Week Time if the Global Encoding low bit is clear and Adjusted "
-        "Standard GPS Time if the Global Encoding low bit is set (see Global "
-        "Encoding in the Public Header Block description).");
-    time.setUUID("aec43586-2711-4e59-9df0-65aca78a4ffc");
-    time.setNamespace(s_getName());
-    output.push_back(time);
+    z.setNumericOffset(h.GetOffsetZ());
+    z.setNumericScale(h.GetScaleZ());
+    s->appendDimension(z);
 
     Dimension intensity("Intensity", dimension::UnsignedInteger, 2,
         "The intensity value is the integer representation of the pulse "
@@ -644,7 +422,7 @@ std::vector<Dimension> Reader::getDefaultDimensions()
         "However, it should always be included if available.");
     intensity.setUUID("61e90c9a-42fc-46c7-acd3-20d67bd5626f");
     intensity.setNamespace(s_getName());
-    output.push_back(intensity);
+    s->appendDimension(intensity);
 
     Dimension return_number("ReturnNumber", dimension::UnsignedInteger, 1,
         "Return Number: The Return Number is the pulse return number for "
@@ -654,7 +432,7 @@ std::vector<Dimension> Reader::getDefaultDimensions()
         "Number of two, and so on up to five returns.");
     return_number.setUUID("ffe5e5f8-4cec-4560-abf0-448008f7b89e");
     return_number.setNamespace(s_getName());
-    output.push_back(return_number);
+    s->appendDimension(return_number);
 
     Dimension number_of_returns("NumberOfReturns", dimension::UnsignedInteger,
         1, "Number of Returns (for this emitted pulse): The Number of Returns "
@@ -663,7 +441,7 @@ std::vector<Dimension> Reader::getDefaultDimensions()
         "total number of five returns.");
     number_of_returns.setUUID("7c28bfd4-a9ed-4fb2-b07f-931c076fbaf0");
     number_of_returns.setNamespace(s_getName());
-    output.push_back(number_of_returns);
+    s->appendDimension(number_of_returns);
 
     Dimension scan_direction("ScanDirectionFlag", dimension::UnsignedInteger, 1,
         "The Scan Direction Flag denotes the direction at which the "
@@ -674,7 +452,7 @@ std::vector<Dimension> Reader::getDefaultDimensions()
         "the right side and negative the opposite).");
     scan_direction.setUUID("13019a2c-cf88-480d-a995-0162055fe5f9");
     scan_direction.setNamespace(s_getName());
-    output.push_back(scan_direction);
+    s->appendDimension(scan_direction);
 
     Dimension edge("EdgeOfFlightLine", dimension::UnsignedInteger, 1,
         "The Edge of Flight Line data bit has a value of 1 only when "
@@ -682,7 +460,7 @@ std::vector<Dimension> Reader::getDefaultDimensions()
         "a given scan line before it changes direction.");
     edge.setUUID("108c18f2-5cc0-4669-ae9a-f41eb4006ea5");
     edge.setNamespace(s_getName());
-    output.push_back(edge);
+    s->appendDimension(edge);
 
     Dimension classification("Classification", dimension::UnsignedInteger, 1,
         "Classification in LAS 1.0 was essentially user defined and optional. "
@@ -695,7 +473,7 @@ std::vector<Dimension> Reader::getDefaultDimensions()
         "the three high bits used for flags.");
     classification.setUUID("b4c67de9-cef1-432c-8909-7c751b2a4e0b");
     classification.setNamespace(s_getName());
-    output.push_back(classification);
+    s->appendDimension(classification);
 
     Dimension scan_angle("ScanAngleRank", dimension::SignedInteger, 1,
         "The Scan Angle Rank is a signed one-byte number with a "
@@ -709,13 +487,13 @@ std::vector<Dimension> Reader::getDefaultDimensions()
         "direction of flight.");
     scan_angle.setUUID("aaadaf77-e0c9-4df0-81a7-27060794cd69");
     scan_angle.setNamespace(s_getName());
-    output.push_back(scan_angle);
+    s->appendDimension(scan_angle);
 
     Dimension user_data("UserData", dimension::UnsignedInteger, 1,
         "This field may be used at the users discretion");
     user_data.setUUID("70eb558e-63d4-4804-b1db-fc2fd716927c");
     user_data.setNamespace(s_getName());
-    output.push_back(user_data);
+    s->appendDimension(user_data);
 
     Dimension point_source("PointSourceId", dimension::UnsignedInteger, 2,
         "This value indicates the file from which this point originated. "
@@ -729,15 +507,52 @@ std::vector<Dimension> Reader::getDefaultDimensions()
         "at some time during processing. ");
     point_source.setUUID("4e42e96a-6af0-4fdd-81cb-6216ff47bf6b");
     point_source.setNamespace(s_getName());
-    output.push_back(point_source);
+    s->appendDimension(point_source);
 
+    if (h.hasTime())
+    {
+        Dimension time("Time", dimension::Float, 8, "The GPS Time is the "
+            "double floating point time tag value at which the point was "
+            "acquired. It is GPS Week Time if the Global Encoding low bit "
+            "is clear and Adjusted Standard GPS Time if the Global Encoding "
+            "low bit is set (see Global Encoding in the Public Header Block "
+            "description).");
+        time.setUUID("aec43586-2711-4e59-9df0-65aca78a4ffc");
+        time.setNamespace(s_getName());
+        s->appendDimension(time);
+    }
+
+    if (h.hasColor())
+    {
+        Dimension red("Red", dimension::UnsignedInteger, 2,
+                "The red image channel value associated with this point");
+        red.setUUID("a42ce297-6aa2-4a62-bd29-2db19ba862d5");
+        red.setNamespace(s_getName());
+        s->appendDimension(red);
+
+        Dimension green("Green", dimension::UnsignedInteger, 2,
+                "The green image channel value associated with this point");
+        green.setUUID("7752759d-5713-48cd-9842-51db350cc979");
+        green.setNamespace(s_getName());
+        s->appendDimension(green);
+
+        Dimension blue("Blue", dimension::UnsignedInteger, 2,
+                "The blue image channel value associated with this point");
+        blue.setUUID("5c1a99c8-1829-4d5b-8735-4f6f393a7970");
+        blue.setNamespace(s_getName());
+        s->appendDimension(blue);
+    }
+
+//ABELL - These don't seem to be used.
+/**
     Dimension packet_descriptor("WavePacketDescriptorIndex",
         dimension::UnsignedInteger, 1);
     packet_descriptor.setUUID("1d095eb0-099f-4800-abb6-2272be486f81");
     packet_descriptor.setNamespace(s_getName());
     output.push_back(packet_descriptor);
 
-    Dimension packet_offset("WaveformDataOffset", dimension::UnsignedInteger, 8);
+    Dimension packet_offset("WaveformDataOffset",
+        dimension::UnsignedInteger, 8);
     packet_offset.setUUID("6dee8edf-0c2a-4554-b999-20c9d5f0e7b9");
     packet_offset.setNamespace(s_getName());
     output.push_back(packet_offset);
@@ -762,35 +577,16 @@ std::vector<Dimension> Reader::getDefaultDimensions()
     wave_z.setUUID("7499ae66-462f-4d0b-a449-6e5c721fb087");
     wave_z.setNamespace(s_getName());
     output.push_back(wave_z);
-
-    Dimension red("Red", dimension::UnsignedInteger, 2,
-        "The red image channel value associated with this point");
-    red.setUUID("a42ce297-6aa2-4a62-bd29-2db19ba862d5");
-    red.setNamespace(s_getName());
-    output.push_back(red);
-
-    Dimension blue("Blue", dimension::UnsignedInteger, 2,
-        "The blue image channel value associated with this point");
-    blue.setUUID("5c1a99c8-1829-4d5b-8735-4f6f393a7970");
-    blue.setNamespace(s_getName());
-    output.push_back(blue);
-
-    Dimension green("Green", dimension::UnsignedInteger, 2,
-        "The green image channel value associated with this point");
-    green.setUUID("7752759d-5713-48cd-9842-51db350cc979");
-    green.setNamespace(s_getName());
-    output.push_back(green);
-    return output;
+**/
 }
 
 namespace iterators
 {
 
 Base::Base(pdal::drivers::las::Reader const& reader)
-    : m_reader(reader)
-    , m_istream(m_reader.getStreamFactory().allocate())
-    , m_zipPoint(NULL)
-    , m_unzipper(NULL)
+    : m_bounds{3}, m_reader{reader},
+    m_istream{m_reader.getStreamFactory().allocate()} , m_zipPoint{NULL},
+    m_unzipper{NULL}
 {
     m_istream.seekg(m_reader.getLasHeader().GetDataOffset());
 
@@ -812,7 +608,6 @@ Base::~Base()
     m_zipPoint.reset();
     m_unzipper.reset();
 #endif
-
     m_reader.getStreamFactory().deallocate(m_istream);
 }
 
@@ -824,7 +619,7 @@ void Base::initialize()
     {
         PointFormat format = m_reader.getLasHeader().getPointFormat();
         boost::scoped_ptr<ZipPoint> z(new ZipPoint(format,
-            getReader().getLasHeader().getVLRs().getAll(), true));
+            m_reader.getLasHeader().getVLRs().getAll(), true));
         m_zipPoint.swap(z);
     }
 
@@ -833,15 +628,9 @@ void Base::initialize()
         boost::scoped_ptr<LASunzipper> z(new LASunzipper());
         m_unzipper.swap(z);
 
-        bool stat(false);
-
         m_istream.seekg(static_cast<std::streampos>(
             m_reader.getLasHeader().GetDataOffset()), std::ios::beg);
-        stat = m_unzipper->open(m_istream, m_zipPoint->GetZipper());
-
-        // Martin moves the stream on us
-        m_zipReadStartPosition = m_istream.tellg();
-        if (!stat)
+        if (!m_unzipper->open(m_istream, m_zipPoint->GetZipper()))
         {
             std::ostringstream oss;
             const char* err = m_unzipper->get_error();
@@ -854,32 +643,158 @@ void Base::initialize()
 #endif
 }
 
-void Base::read(PointBuffer&)
-{}
+point_count_t Base::processBuffer(PointBuffer& data, std::istream& stream,
+    point_count_t count, LASunzipper* unzipper, ZipPoint* zipPoint,
+    PointDimensions* dimensions)
+{
+    if (!dimensions)
+        throw pdal_error("No dimension positions are available!");
+ 
+    const LasHeader& h = m_reader.getLasHeader();
+    size_t pointByteCount = h.getPointDataSize();
+
+    PointId i = 0;
+    if (zipPoint)
+    {
+#ifdef PDAL_HAVE_LASZIP
+        for (i = 0; i < count; i++)
+        {
+            if (!unzipper->read(zipPoint->m_lz_point))
+            {
+                std::string error = "Error reading compressed point data: ";
+                const char* err = unzipper->get_error();
+                if (!err)
+                    err = "(unknown error)";
+                error += err;
+                throw pdal_error(error);
+            }
+            loadPoint(data, dimensions, zipPoint->m_lz_point_data.get(),
+                pointByteCount);
+        }
+#else
+        boost::ignore_unused_variable_warning(unzipper);
+        throw pdal_error("LASzip is not enabled for this "
+            "pdal::drivers::las::Reader::processBuffer");
+#endif
+    }
+    else
+    {
+        std::vector<char> buf(pointByteCount);
+        try
+        {
+            for (; i < count; ++i)
+            {
+                stream.read(buf.data(), pointByteCount);
+                loadPoint(data, dimensions, buf.data(), pointByteCount);
+            }
+        }
+        catch (std::out_of_range&)
+        {}
+        catch (pdal::invalid_stream&)
+        {}
+    }
+//ABELL
+//    data.setSpatialBounds(m_bounds);
+    return (point_count_t)i;
+}
+
+
+void Base::loadPoint(PointBuffer& data, PointDimensions *dimensions,
+    char *buf, size_t bufsize)
+{
+    Charbuf charstreambuf(buf, bufsize, 0);
+    std::istream stream(&charstreambuf);
+    ILeStream istream(&stream);
+    PointId nextId = data.size();
+
+    int32_t x, y, z;
+    istream >> x >> y >> z;
+            
+    if (dimensions->X && dimensions->Y && dimensions->Z)
+    {
+        Vector<double> point(dimensions->X->applyScaling(x),
+            dimensions->X->applyScaling(y),
+            dimensions->X->applyScaling(z));
+        m_bounds.grow(point);
+    }
+
+    uint16_t intensity;
+    uint8_t flags;
+    uint8_t classification;
+    int8_t scanAngleRank;
+    uint8_t user;
+    uint16_t pointSourceId;
+
+    istream >> intensity >> flags >> classification >> scanAngleRank >> 
+        user >> pointSourceId;
+    classification &= 31;
+
+    uint8_t returnNum = flags & 0x07;
+    uint8_t numReturns = (flags >> 3) & 0x07;
+    uint8_t scanDirFlag = (flags >> 6) & 0x01;
+    uint8_t flight = (flags >> 7) & 0x01;
+            
+    if (dimensions->X)
+        data.setField(*dimensions->X, nextId, x);
+    if (dimensions->Y)
+        data.setField(*dimensions->Y, nextId, y);
+    if (dimensions->Z)
+        data.setField(*dimensions->Z, nextId, z);
+    if (dimensions->Intensity)
+        data.setField(*dimensions->Intensity, nextId, intensity);
+    if (dimensions->ReturnNumber)
+        data.setField(*dimensions->ReturnNumber, nextId, returnNum);
+    if (dimensions->NumberOfReturns)
+        data.setField(*dimensions->NumberOfReturns, nextId, numReturns);
+    if (dimensions->ScanDirectionFlag)
+        data.setField(*dimensions->ScanDirectionFlag, nextId, scanDirFlag);
+    if (dimensions->EdgeOfFlightLine)
+        data.setField(*dimensions->EdgeOfFlightLine, nextId, flight);
+    if (dimensions->Classification)
+        data.setField(*dimensions->Classification, nextId, classification);
+    if (dimensions->ScanAngleRank)
+        data.setField(*dimensions->ScanAngleRank, nextId, scanAngleRank);
+    if (dimensions->UserData)
+        data.setField(*dimensions->UserData, nextId, user);
+    if (dimensions->PointSourceId)
+        data.setField(*dimensions->PointSourceId, nextId, pointSourceId);
+
+    const LasHeader& h = m_reader.getLasHeader();
+    if (h.hasTime())
+    {
+        double time;
+        istream >> time;
+        if (dimensions->Time)
+            data.setField(*dimensions->Time, nextId, time);
+    }
+
+    if (h.hasColor())
+    {
+        uint16_t red, green, blue;
+        istream >> red >> green >> blue;
+        if (dimensions->Red)
+            data.setField(*dimensions->Red, nextId, red);
+        if (dimensions->Green)
+            data.setField(*dimensions->Green, nextId, green);
+        if (dimensions->Blue)
+            data.setField(*dimensions->Blue, nextId, blue);
+    }
+}
+
 
 namespace sequential
 {
 
-
-Reader::Reader(pdal::drivers::las::Reader const& reader, PointBuffer& buffer,
+Reader::Reader(pdal::drivers::las::Reader const& reader,
         boost::uint32_t numPoints)
-    : Base(reader), pdal::ReaderSequentialIterator(buffer),
-    m_numPoints(numPoints)
+    : Base(reader), m_numPoints(numPoints)
 {}
 
-
-Reader::~Reader()
-{}
-
-void Reader::readBeginImpl()
-{}
-
-
-void Reader::readBufferBeginImpl(PointBuffer& buffer)
-{}
 
 boost::uint64_t Reader::skipImpl(boost::uint64_t count)
 {
+    const LasHeader& h = m_reader.getLasHeader();
+
 #ifdef PDAL_HAVE_LASZIP
     if (m_unzipper)
     {
@@ -889,13 +804,11 @@ boost::uint64_t Reader::skipImpl(boost::uint64_t count)
     }
     else
     {
-        pointbuffer::PointBufferByteSize delta =
-            Support::getPointDataSize(m_reader.getLasHeader().getPointFormat());
+        std::streamoff delta = h.getPointDataSize();
         m_istream.seekg(delta * count, std::ios::cur);
     }
 #else
-    pointbuffer::PointBufferByteSize delta =
-        Support::getPointDataSize(m_reader.getLasHeader().getPointFormat());
+    std::streamoff delta = h.getPointDataSize();
     m_istream.seekg(delta * count, std::ios::cur);
 #endif
     return count;
@@ -908,17 +821,30 @@ bool Reader::atEndImpl() const
 }
 
 
+point_count_t Reader::readImpl(PointBuffer& data, point_count_t count)
+{
+    PointDimensions cachedDimensions(data.getSchema(), m_reader.getName());
+
+    boost::uint32_t numToRead = m_numPoints - getIndex();
+#ifdef PDAL_HAVE_LASZIP
+    return processBuffer(data, m_istream, count, m_unzipper.get(),
+        m_zipPoint.get(), &cachedDimensions);
+#else
+    return processBuffer(data, m_istream, count, NULL, NULL, &cachedDimensions);
+#endif
+}
+
 boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
 {
     PointDimensions cachedDimensions(data.getSchema(), m_reader.getName());
 
     boost::uint32_t numToRead = m_numPoints - getIndex();
 #ifdef PDAL_HAVE_LASZIP
-    return m_reader.processBuffer(data, m_istream, numToRead, m_unzipper.get(),
-        m_zipPoint.get(), &cachedDimensions, m_read_buffer);
+    return processBuffer(data, m_istream, numToRead, m_unzipper.get(),
+        m_zipPoint.get(), &cachedDimensions);
 #else
-    return m_reader.processBuffer(data, m_istream, numToRead, NULL, NULL,
-        &cachedDimensions, m_read_buffer);
+    return processBuffer(data, m_istream, numToRead, NULL, NULL,
+        &cachedDimensions);
 #endif
 }
 
@@ -933,20 +859,10 @@ Reader::Reader(const pdal::drivers::las::Reader& reader, PointBuffer& buffer,
 {}
 
 
-Reader::~Reader()
-{}
-
-
-void Reader::readBufferBeginImpl(PointBuffer& /* buffer*/)
-{}
-
-
-void Reader::readBeginImpl()
-{
-}
-
 boost::uint64_t Reader::seekImpl(boost::uint64_t count)
 {
+    const LasHeader& h = m_reader.getLasHeader();
+
 #ifdef PDAL_HAVE_LASZIP
     if (m_unzipper)
     {
@@ -955,15 +871,12 @@ boost::uint64_t Reader::seekImpl(boost::uint64_t count)
     }
     else
     {
-        pointbuffer::PointBufferByteSize delta =
-            Support::getPointDataSize(m_reader.getLasHeader().getPointFormat());
-        m_istream.seekg(m_reader.getLasHeader().GetDataOffset() +
-            delta * count);
+        std::streamoff delta = h.getPointDataSize();
+        m_istream.seekg(h.GetDataOffset() + delta * count);
     }
 #else
-    pointbuffer::PointBufferByteSize delta =
-        Support::getPointDataSize(m_reader.getLasHeader().getPointFormat());
-    m_istream.seekg(m_reader.getLasHeader().GetDataOffset() + delta * count);
+    std::streamoff delta = h.getPointDataSize();
+    m_istream.seekg(h.GetDataOffset() + delta * count);
 #endif
     return count;
 }
@@ -975,11 +888,11 @@ boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
 
     boost::uint32_t numToRead = m_numPoints - getIndex();
 #ifdef PDAL_HAVE_LASZIP
-    return m_reader.processBuffer(data, m_istream, numToRead, m_unzipper.get(),
-        m_zipPoint.get(), &cachedDimensions, m_read_buffer);
+    return processBuffer(data, m_istream, numToRead, m_unzipper.get(),
+        m_zipPoint.get(), &cachedDimensions);
 #else
-    return m_reader.processBuffer(data, m_istream, numToRead, NULL, NULL,
-         &cachedDimensions, m_read_buffer);
+    return processBuffer(data, m_istream, numToRead, NULL, NULL,
+         &cachedDimensions);
 #endif
 }
 

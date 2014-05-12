@@ -36,7 +36,7 @@
 #define INCLUDED_DRIVERS_LAS_ZIPPOINT_HPP
 
 
-#include <pdal/drivers/las/Support.hpp>
+#include <pdal/drivers/las/Header.hpp>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
@@ -51,7 +51,8 @@ class VariableLengthRecord;
 class ZipPoint
 {
 public:
-    ZipPoint(PointFormat, const std::vector<VariableLengthRecord>& vlrs, bool isReadMode);
+    ZipPoint(PointFormat, const std::vector<VariableLengthRecord>& vlrs,
+        bool isReadMode);
     ~ZipPoint();
 
     VariableLengthRecord ConstructVLR() const;

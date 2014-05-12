@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2014, Hobu Inc.
 *
 * All rights reserved.
 *
@@ -32,35 +32,50 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_READERITERATOR_HPP
-#define INCLUDED_READERITERATOR_HPP
-
-#include <pdal/pdal_internal.hpp>
-
-#include <pdal/StageIterator.hpp>
+#include <pdal/Charbuf.hpp>
 
 namespace pdal
 {
-class Reader;
-class PointBuffer;
 
-class PDAL_DLL ReaderSequentialIterator : public StageSequentialIterator
+
+void Charbuf::initialize(char *buf, size_t count, pos_type bufOffset)
 {
-public:
-    ReaderSequentialIterator(PointBuffer& buffer);
-    ReaderSequentialIterator()
-        {}
-    virtual ~ReaderSequentialIterator();
-};
+    m_bufOffset = bufOffset;
+    setg(buf, buf, buf + count);
+}
 
 
-class PDAL_DLL ReaderRandomIterator : public StageRandomIterator
+Charbuf::pos_type Charbuf::seekpos(pos_type pos, std::ios_base::openmode which)
 {
-public:
-    ReaderRandomIterator(PointBuffer& buffer);
-    virtual ~ReaderRandomIterator();
-};
+    pos -= m_bufOffset;
+    if (pos >= egptr() - eback())
+        return -1;
+    char *cpos = eback() + pos;
+    setg(eback(), cpos, egptr());
+    return pos;
+}
 
-} // namespace pdal
+Charbuf::pos_type
+Charbuf::seekoff(off_type off, std::ios_base::seekdir dir,
+    std::ios_base::openmode which)
+{
+    char *cpos = nullptr;
+    switch (dir)
+    {
+        case std::ios::beg:
+            cpos = eback() + off - m_bufOffset;
+            break;
+        case std::ios::cur:
+            cpos = gptr() + off;
+            break;
+        case std::ios::end:
+            cpos = egptr() - off;
+            break;
+    }
+    if (cpos < eback() || cpos > egptr())
+        return -1;
+    setg(eback(), cpos, egptr());
+    return eback() - cpos;
+}
 
-#endif
+} //namespace

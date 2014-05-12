@@ -54,9 +54,8 @@ public:
     SET_STAGE_NAME("drivers.pipeline.reader", "Pipeline Reader")
     SET_STAGE_ENABLED(true)
 
-
     Reader(const Options& options);
-    ~Reader();
+    Reader(PointContext ctx, const Options& options);
 
     static Options getDefaultOptions();
 

@@ -132,12 +132,10 @@ Writer::~Writer()
     m_streamManager.close();
 }
 
-
 void Writer::initialize()
 {
     m_streamManager.open();
 }
-
 
 Options Writer::getDefaultOptions()
 {
@@ -645,8 +643,8 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& pointBuffer)
 
     boost::uint8_t buf[64]; // BUG: fixed size
 
-    bool hasColor = Support::hasColor(pointFormat);
-    bool hasTime = Support::hasTime(pointFormat);
+    bool hasColor = m_lasHeader.hasColor();
+    bool hasTime = m_lasHeader.hasTime();
     boost::uint16_t record_length = m_lasHeader.GetDataRecordLength();
 
     for (uint32_t idx = 0; idx < pointBuffer.getNumPoints(); idx++)

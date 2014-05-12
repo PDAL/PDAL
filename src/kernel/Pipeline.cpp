@@ -109,7 +109,8 @@ int Pipeline::execute()
     if (!manager.isWriterPipeline())
         throw pdal_error("This pipeline does not have a writer, unable to execute");
         
-    manager.getWriter()->prepare();
+    PointContext ctx;
+    manager.getWriter()->prepare(ctx);
 
 
     const boost::uint64_t numPointsToRead = manager.getStage()->getNumPoints();

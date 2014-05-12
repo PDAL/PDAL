@@ -196,7 +196,6 @@ void LasHeaderReader::read(Reader& stage, Schema& schema)
         const pdal::drivers::las::PointFormat format =
             (pdal::drivers::las::PointFormat)n1;
         m_header.setPointFormat(format);
-        pdal::drivers::las::Support::registerFields(stage, schema, format);
     }
     else
     {
@@ -243,9 +242,6 @@ void LasHeaderReader::read(Reader& stage, Schema& schema)
     Utils::read_n(yOffset, m_istream, sizeof(yOffset));
     Utils::read_n(zOffset, m_istream, sizeof(zOffset));
     m_header.SetOffset(xOffset, yOffset, zOffset);
-
-    Support::setScaling(schema, xScale, yScale, zScale,
-        xOffset, yOffset, zOffset);
 
     // 27-28. Max/Min X
     Utils::read_n(x1, m_istream, sizeof(x1));

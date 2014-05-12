@@ -34,6 +34,8 @@
 
 #pragma once
 
+#include <memory>
+
 #include "pdal/Schema.hpp"
 #include "pdal/RawPtBuf.hpp"
 
@@ -46,18 +48,18 @@ class PointContext
 {
 private:
     // Provides information on the dimensions/layout inforamtion for the points.
-    Schema *m_schema;
+    SchemaPtr m_schema;
     // Provides storage for the point data.
-    RawPtBuf *m_ptBuf;
+    RawPtBufPtr m_ptBuf;
 
 public:
     PointContext() : m_schema(new Schema), m_ptBuf(new RawPtBuf(m_schema))
     {}
 
-    Schema *getSchema()
-        { return m_schema; }
-    RawPtBuf *getRawPtBuf()
-        { return m_ptBuf; }
+    Schema *getSchema() const
+        { return m_schema.get(); }
+    RawPtBuf *getRawPtBuf() const
+        { return m_ptBuf.get(); }
 };
 
 } //namespace

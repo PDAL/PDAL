@@ -54,9 +54,11 @@ class IStream
 
 public:
     IStream(const std::string& filename)
-        { m_stream = new std::ifstream(filename); }
+        { m_stream = m_fstream = new std::ifstream(filename); }
+    IStream(std::istream *stream) : m_stream{stream}, m_fstream{NULL}
+        {}
     ~IStream()
-        { delete m_stream; }
+        { delete m_fstream; }
 
     operator bool ()
         { return (bool)(*m_stream); }
@@ -84,6 +86,7 @@ public:
 
 protected:
     std::istream *m_stream;
+    std::istream *m_fstream; // Dup of above to facilitate cleanup;
 
 private:
     std::stack<std::istream *> m_streams;
@@ -95,6 +98,8 @@ class ILeStream : public IStream
 {
 public:
     ILeStream(const std::string& filename) : IStream(filename)
+    {}
+    ILeStream(std::istream *stream) : IStream(stream)
     {}
 
     void get(std::string& s, size_t size)

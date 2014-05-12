@@ -43,9 +43,10 @@ BpfReader::BpfReader(const Options& options) : Reader(options),
     m_stream(options.getValueOrThrow<std::string>("filename"))
 {}
 
-BpfReader::BpfReader(const std::string& filename) : Reader(Options::none()),
-    m_stream(filename)
+
+BpfReader::BpfReader(const std::string& filename) : m_stream(filename)
 {}
+
 
 // When the stage is intialized, the schema needs to be populated with the
 // dimensions in order to allow subsequent stages to be aware of or append to
@@ -60,17 +61,6 @@ void BpfReader::initialize()
     if (!BpfDimension::read(m_stream, m_dims))
         return;
 
-    for (size_t i = 0; i < m_dims.size(); ++i)
-    {
-        BpfDimension& dim = m_dims[i];
-        Dimension pd(dim.m_label, dimension::Float, sizeof(float));
-        pd.setMinimum(dim.m_min);
-        pd.setMaximum(dim.m_max);
-        pd.setEndianness(Endian_Little);
-        pd.setNumericOffset(dim.m_offset);
-        pd.setNamespace("bpf");
-        m_schema.appendDimension(pd);
-    }
     readUlemData();
     if (!m_stream)
         return;
@@ -82,6 +72,21 @@ void BpfReader::initialize()
         throw "BPF Header length exceeded that reported by file.";
     else if (pos < m_header.m_len)
         m_stream.seek(m_header.m_len);
+}
+
+void BpfReader::buildSchema(Schema *schema)
+{
+    for (size_t i = 0; i < m_dims.size(); ++i)
+    {
+        BpfDimension& dim = m_dims[i];
+        Dimension pd(dim.m_label, dimension::Float, sizeof(float));
+        pd.setMinimum(dim.m_min);
+        pd.setMaximum(dim.m_max);
+        pd.setEndianness(Endian_Little);
+        pd.setNumericOffset(dim.m_offset);
+        pd.setNamespace("bpf");
+        m_schemaDims.push_back(schema->appendDimension(pd));
+    }
 }
 
 bool BpfReader::readUlemData()
@@ -118,11 +123,11 @@ bool BpfReader::readPolarData()
     return (bool)m_stream;
 }
 
-StageSequentialIterator *
-BpfReader::createSequentialIterator(PointBuffer& pb) const
+StageSequentialIterator *BpfReader::createSequentialIterator() const
 {
-    return new BpfSeqIterator(pb, m_header.m_numPts, m_header.m_pointFormat, 
-        m_header.m_compression, const_cast<ILeStream&>(m_stream));
+    return new BpfSeqIterator(m_schemaDims, m_header.m_numPts,
+        m_header.m_pointFormat, m_header.m_compression,
+        const_cast<ILeStream&>(m_stream));
 }
 
 StageRandomIterator *

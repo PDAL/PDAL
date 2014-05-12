@@ -51,12 +51,25 @@ static boost::uint32_t s_defaultChunkSize = 65536;
 //---------------------------------------------------------------------------
 
 StageIterator::StageIterator(PointBuffer& buffer)
-    : m_index(0)
-    , m_buffer(buffer)
-    , m_chunkSize(s_defaultChunkSize)
-    , m_readBeginPerformed(false)
-    , m_readBufferBeginPerformed(false)
-{}
+{
+    (void)buffer;
+    Construct();
+}
+
+
+StageIterator::StageIterator()
+{
+    Construct();
+}
+
+
+void StageIterator::Construct()
+{
+    m_index = 0;
+    m_chunkSize = s_defaultChunkSize;
+    m_readBeginPerformed = false;
+    m_readBufferBeginPerformed = false;
+}
 
 boost::uint64_t StageIterator::getIndex() const
 {

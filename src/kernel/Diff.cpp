@@ -168,6 +168,7 @@ void Diff::checkPoints(  StageSequentialIterator* source_iter,
 
 int Diff::execute()
 {
+    PointContext sourceCtx;
 
     Options sourceOptions;
     {
@@ -176,7 +177,7 @@ int Diff::execute()
         sourceOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
     }
     boost::scoped_ptr<Stage> source(AppSupport::makeReader(sourceOptions));
-    source->prepare();
+    source->prepare(sourceCtx);
     
     boost::uint32_t chunkSize(source->getNumPoints());
     if (m_chunkSize)
@@ -189,6 +190,7 @@ int Diff::execute()
 
 
 
+    PointContext candidateCtx;
     Options candidateOptions;
     {
         candidateOptions.add<std::string>("filename", m_candidateFile);
@@ -197,7 +199,7 @@ int Diff::execute()
     }
 
     boost::scoped_ptr<Stage> candidate(AppSupport::makeReader(candidateOptions));
-    candidate->prepare();    
+    candidate->prepare(candidateCtx);
 
 
     PointBuffer candidate_data(candidate->getSchema(), chunkSize);

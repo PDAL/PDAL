@@ -215,6 +215,8 @@ HexBin::~HexBin()
 
 
 #ifdef PDAL_HAVE_HEXER
+//ABELL
+/**
     if (m_grid)
     {
         m_grid->findShapes();
@@ -247,8 +249,8 @@ HexBin::~HexBin()
 
     }
 
+**/
 #endif
-
 }
 
 

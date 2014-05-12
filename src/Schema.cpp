@@ -134,7 +134,7 @@ bool Schema::operator!=(const Schema& other) const
 }
 
 
-void Schema::appendDimension(const Dimension& dim)
+Dimension *Schema::appendDimension(const Dimension& dim)
 {
     // Copy the Dimension because we're going to overwrite/set some of
     // its attributes
@@ -169,18 +169,20 @@ void Schema::appendDimension(const Dimension& dim)
     if (id_count >0)
     {
         std::ostringstream oss;
-        oss << "Dimension with uuid '" << d.getUUID() << "' already exists with name '" << d.getName() << "' and namespace '" << d.getNamespace() << "'";
+        oss << "Dimension with uuid '" << d.getUUID() <<
+            "' already exists with name '" << d.getName() <<
+            "' and namespace '" << d.getNamespace() << "'";
         throw duplicate_dimension_id(oss.str());
     }
-    std::pair<schema::index_by_position::iterator, bool> q = position_index.insert(d);
+    auto q = position_index.insert(d);
     if (!q.second)
     {
         std::ostringstream oss;
-        oss << "Could not insert into schema index because of " << q.first->getName();
+        oss << "Could not insert into schema index because of " <<
+            q.first->getName();
         throw schema_error(oss.str());
     }
-
-    return;
+    return &(const_cast<Dimension&>(*q.first));
 }
 
 

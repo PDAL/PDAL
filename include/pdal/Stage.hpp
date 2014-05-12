@@ -63,22 +63,20 @@ class PointBuffer;
 class PDAL_DLL Stage
 {
 public:
-    Stage(PointContext ctx);
-    Stage(PointContext ctx, const Options& options);
-    Stage(const Options& options);
     Stage();
+    Stage(const Options& options);
     virtual ~Stage()
         {}
 
     void setInput(const std::vector<Stage *>& inputs);
     void setInput(Stage *input);
 
-    void prepare();
+    void prepare(PointContext ctx);
     bool isInitialized() const
         { return m_initialized; }
 
     inline Schema const& getSchema() const
-        { return m_schema; }
+        { return *(m_context.getSchema()); }
     
     virtual boost::uint64_t getNumPoints() const;
     const Bounds<double>& getBounds() const;
@@ -129,8 +127,11 @@ public:
     bool isEnabled() const { return YES_OR_NO; }
 
     virtual StageSequentialIterator*
-            createSequentialIterator(PointBuffer&) const
+    createSequentialIterator(PointBuffer&) const
         { return NULL; }
+    virtual StageSequentialIterator*
+    createSequentialIterator() const
+        { std::cerr << "Created crap sequential iterator!\n"; return NULL; }
     virtual StageRandomIterator* createRandomIterator(PointBuffer&) const
         { return NULL; }
 

@@ -65,6 +65,31 @@ PointBuffer::PointBuffer(const Schema& schema, boost::uint32_t capacity)
         static_cast<pointbuffer::PointBufferByteSize>(capacity);
 
     GlobalEnvironment& env = pdal::GlobalEnvironment::get();
+    m_context = env.context();
+    boost::uuids::basic_random_generator<boost::mt19937> gen(env.getRNG());
+    m_uuid = gen();
+}
+
+PointBuffer::PointBuffer()
+    : m_bounds(Bounds<double>::getDefaultSpatialExtent())
+    , m_byteSize(0)
+    , m_orientation(schema::POINT_INTERLEAVED)
+    , m_metadata("pointbuffer")
+{
+    GlobalEnvironment& env = pdal::GlobalEnvironment::get();
+    m_context = env.context();
+    boost::uuids::basic_random_generator<boost::mt19937> gen(env.getRNG());
+    m_uuid = gen();
+}
+
+PointBuffer::PointBuffer(PointContext context)
+    : m_bounds(Bounds<double>::getDefaultSpatialExtent())
+    , m_context(context)
+    , m_byteSize(0)
+    , m_orientation(schema::POINT_INTERLEAVED)
+    , m_metadata("pointbuffer")
+{
+    GlobalEnvironment& env = pdal::GlobalEnvironment::get();
     boost::uuids::basic_random_generator<boost::mt19937> gen(env.getRNG());
     m_uuid = gen();
 }
@@ -76,6 +101,7 @@ PointBuffer::PointBuffer(PointBuffer const& other)
     , m_numPoints(other.m_numPoints)
     , m_capacity(other.m_capacity)
     , m_bounds(other.m_bounds)
+    , m_context(other.m_context)
     , m_byteSize(other.m_byteSize)
     , m_orientation(other.m_orientation)
     , m_metadata(other.m_metadata)

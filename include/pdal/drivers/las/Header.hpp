@@ -64,6 +64,17 @@ namespace drivers
 namespace las
 {
 
+enum PointFormat
+{
+    PointFormat0 = 0,         // base
+    PointFormat1 = 1,         // base + time
+    PointFormat2 = 2,         // base + color
+    PointFormat3 = 3,         // base + time + color
+    PointFormat4 = 4,         // base + time + wave
+    PointFormat5 = 5,         // base + time + color + wave  (NOT SUPPORTED)
+    PointFormatUnknown = 99
+};
+
 std::string GetDefaultSoftwareId();
 
 class PDAL_DLL LasHeader
@@ -312,6 +323,42 @@ public:
     void setBounds(const Bounds<double>& bounds)
     {
         m_bounds = bounds;
+    }
+
+    bool hasTime() const
+    {
+        PointFormat f = getPointFormat();
+        return f == PointFormat1 || f == PointFormat3 || f == PointFormat4 ||
+            f == PointFormat5;
+    }
+
+    bool hasColor() const
+    {
+        PointFormat f = getPointFormat();
+        return f == PointFormat2 || f == PointFormat3 || f == PointFormat5;
+    }
+
+    bool hasWave() const
+    {
+        PointFormat f = getPointFormat();
+        return f == PointFormat4 || f == PointFormat5;
+    }
+
+    size_t getPointDataSize() const
+    {
+        switch (getPointFormat())
+        {
+        case PointFormat0:
+            return 20;
+        case PointFormat1:
+            return 28;
+        case PointFormat2:
+            return 26;
+        case PointFormat3:
+            return 34;
+        default:
+            throw invalid_format("point format unsupported");
+        }
     }
 
     const VLRList& getVLRs() const;

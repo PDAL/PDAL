@@ -46,7 +46,7 @@ namespace pdal
 class RawPtBuf
 {
 public:
-    RawPtBuf(const Schema *schema) : m_numPts{0}, m_allocPts{0},
+    RawPtBuf(SchemaPtr schema) : m_numPts{0}, m_allocPts{0},
         m_schema{schema}
     {}
 
@@ -69,7 +69,7 @@ private:
     std::vector<char> m_buf;
     point_count_t m_numPts;
     point_count_t m_allocPts;
-    const Schema *m_schema;
+    SchemaPtr m_schema;
     
     size_t pointsToBytes(point_count_t numPts)
         { return m_schema->getByteSize() * numPts; }

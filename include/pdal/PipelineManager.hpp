@@ -80,6 +80,7 @@ public:
 
 private:
     StageFactory m_factory;
+    PointContext m_context;
 
     typedef std::vector<Reader*> ReaderList;
     typedef std::vector<Filter*> FilterList;

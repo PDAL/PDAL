@@ -306,7 +306,8 @@ int Translate::execute()
         writer->setSpatialReference(m_output_srs);
     }
 
-    writer->prepare();
+    PointContext ctx;
+    writer->prepare(ctx);
 
     const boost::uint64_t numPointsToRead = final_stage->getNumPoints();
     
@@ -315,7 +316,6 @@ int Translate::execute()
 
     std::cerr << "Requested to read " << numPointsToRead << " points" << std::endl;
     std::cerr << "Requested to write " << m_numPointsToWrite << " points" << std::endl;
-    // std::cerr << "Buffer capacity is " << writer->getChunkSize() << std::endl;
         
     pdal::UserCallback* callback;
     if (!getProgressShellCommand().size())
