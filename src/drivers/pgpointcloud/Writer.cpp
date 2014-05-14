@@ -269,6 +269,10 @@ boost::uint32_t Writer::SetupSchema(Schema const& buffer_schema, boost::uint32_t
     {
         oss << "SELECT Count(pcid) FROM pointcloud_formats WHERE pcid = " << m_pcid;
         char *count_str = pg_query_once(m_session, oss.str());
+        if (!count_str)
+        {
+            throw pdal_error("Unable to count pcid's in table `pointcloud_formats`");
+        }
         schema_count = atoi(count_str);
         free(count_str);
         oss.str("");
@@ -285,6 +289,10 @@ boost::uint32_t Writer::SetupSchema(Schema const& buffer_schema, boost::uint32_t
     bool bCreatePCPointSchema = true;
     oss << "SELECT Count(pcid) FROM pointcloud_formats";
     char *schema_count_str = pg_query_once(m_session, oss.str());
+    if (!schema_count_str)
+    {
+        throw pdal_error("Unable to count pcid's in table `pointcloud_formats`");
+    }
     schema_count = atoi(schema_count_str);
     free(schema_count_str);
     oss.str("");
@@ -321,6 +329,10 @@ boost::uint32_t Writer::SetupSchema(Schema const& buffer_schema, boost::uint32_t
         else
         {
             char *pcid_str = pg_query_once(m_session, "SELECT Max(pcid)+1 AS pcid FROM pointcloud_formats");
+            if (!pcid_str)
+            {
+                throw pdal_error("Unable to get the max pcid from `pointcloud_formats`");
+            }
             pcid = atoi(pcid_str);
         }
 
@@ -417,6 +429,10 @@ bool Writer::CheckTableExists(std::string const& name)
     log()->get(logDEBUG) << "checking for table '" << name << "' existence ... " << std::endl;
 
     char *count_str = pg_query_once(m_session, oss.str());
+    if (!count_str)
+    {
+        throw pdal_error("Unable to check for the existence of `pg_table`");
+    }
     int count = atoi(count_str);
     free(count_str);
 
