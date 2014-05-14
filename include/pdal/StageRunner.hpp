@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2014, Hobu Inc.
 *
 * All rights reserved.
 *
@@ -32,48 +32,36 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_READER_HPP
-#define INCLUDED_READER_HPP
+#pragma once
+
+#include <memory>
 
 #include <pdal/Stage.hpp>
-#include <pdal/Options.hpp>
-#include <pdal/StageIterator.hpp>
+#include <pdal/PointBuffer.hpp>
 
 namespace pdal
 {
 
-//
-// supported options:
-//   <uint32>id
-//   <bool>debug
-//   <uint32>verbose
-//
-
-class PDAL_DLL Reader : public Stage
+class StageRunner
 {
 public:
-    Reader()
-        {}
-    Reader(Options const& options) : Stage(options)
-        {};
-    virtual ~Reader()
-        {};
+    StageRunner(Stage *s, PointBufferPtr pointBuf) :
+        m_stage(s), m_pointBuf(pointBuf)
+    {}
 
-    /// Serialization
-    virtual boost::property_tree::ptree serializePipeline() const;
+    // For now this is all synchronous
+    void run()
+        { m_bufSet = m_stage->run(m_pointBuf); }
+
+    PointBufferSet wait()
+        { return m_bufSet; }
 
 private:
-    virtual PointBufferSet run(PointBufferPtr buffer)
-    {
-        PointBufferSet pbSet;
-
-        StageSequentialIterator *it = createSequentialIterator();
-        point_count_t num_read = it->read(*buffer);
-        pbSet.insert(buffer);
-        return pbSet;
-    }
+    Stage *m_stage;
+    PointBufferPtr m_pointBuf;
+    PointBufferSet m_bufSet;
 };
+typedef std::shared_ptr<StageRunner> StageRunnerPtr;
 
 } // namespace pdal
 
-#endif

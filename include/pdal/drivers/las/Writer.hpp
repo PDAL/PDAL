@@ -97,8 +97,12 @@ protected:
     virtual void initialize();
 
     virtual void writeBegin(boost::uint64_t targetNumPointsToWrite);
-    virtual void writeBufferBegin(PointBuffer const&);
-    virtual boost::uint32_t writeBuffer(const PointBuffer&);
+    //ABELL
+    virtual void writeBufferBegin(PointBuffer const&)
+    {}
+    //ABELL
+    virtual boost::uint32_t writeBuffer(const PointBuffer&)
+        { return 0; }
     virtual void writeBufferEnd(PointBuffer const&);
     virtual void writeEnd(boost::uint64_t actualNumPointsWritten);
 
@@ -108,12 +112,15 @@ private:
     LasHeader m_lasHeader;
     boost::uint32_t m_numPointsWritten;
     SummaryData m_summaryData;
+    std::unique_ptr<PointDimensions> m_dims;
 
 #ifdef PDAL_HAVE_LASZIP
     boost::scoped_ptr<LASzipper> m_zipper;
     boost::scoped_ptr<ZipPoint> m_zipPoint;
 #endif
 
+    virtual void ready(PointContext ctx);
+    virtual void write(const PointBuffer& pointBuffer);
     bool m_headerInitialized;
     boost::uint64_t m_streamOffset; // the first byte of the LAS file
 	void setOptions();

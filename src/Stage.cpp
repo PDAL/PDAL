@@ -35,9 +35,7 @@
 #include <pdal/GlobalEnvironment.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/SpatialReference.hpp>
-
-#include <boost/concept_check.hpp> // ignore_unused_variable_warning
-#include <boost/foreach.hpp>
+#include <pdal/StageRunner.hpp>
 
 namespace pdal
 {
@@ -90,7 +88,6 @@ void Stage::setInput(Stage *input)
 
 void Stage::prepare(PointContext ctx)
 {
-
     for (size_t i = 0; i < m_inputs.size(); ++i)
     {
         Stage *prev = m_inputs[i];
@@ -103,6 +100,39 @@ void Stage::prepare(PointContext ctx)
     buildSchema(ctx.getSchema());
 }
 
+PointBufferSet Stage::execute(PointContext ctx)
+{
+    PointBufferSet buffers;
+    if (m_inputs.empty())
+        buffers.insert(PointBufferPtr(new PointBuffer(ctx)));
+    else
+    {
+        for (size_t i = 0; i < m_inputs.size(); ++i)
+        {
+            Stage *prev = m_inputs[i];
+            PointBufferSet temp = prev->execute(ctx);
+            buffers.insert(temp.begin(), temp.end());
+        }
+    }
+
+    PointBufferSet outBuffers;
+    std::vector<StageRunnerPtr> runners;
+
+    ready(ctx);
+    for (auto it = buffers.begin(); it != buffers.end(); ++it)
+    {
+        StageRunnerPtr runner(new StageRunner(this, *it));
+        runners.push_back(runner);
+        runner->run();
+    }
+    for (auto it = runners.begin(); it != runners.end(); ++it)
+    {
+        StageRunnerPtr runner(*it);
+        PointBufferSet temp = runner->wait();
+        outBuffers.insert(temp.begin(), temp.end());
+    }
+    return outBuffers;
+}
 
 void Stage::l_initialize()
 {

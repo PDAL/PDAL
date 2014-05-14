@@ -73,7 +73,7 @@ public:
 
     static Options getDefaultOptions();
 
-    void run(std::ostringstream const& command);
+    void runCommand(std::ostringstream const& command);
     inline void setBounds(pdal::Bounds<double> bounds)
     {
         m_bounds = bounds;

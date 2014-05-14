@@ -125,6 +125,13 @@ private:
 
     Writer& operator=(const Writer&); // not implemented
     Writer(const Writer&); // not implemented
+    virtual PointBufferSet run(PointBufferPtr buffer)
+    {
+        write(*buffer);
+        return PointBufferSet();
+    }
+    virtual void write(const PointBuffer& buffer)
+        { std::cerr << "Can't write with stage = " << getName() << "!\n"; }
 };
 
 } // namespace pdal

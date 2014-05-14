@@ -379,37 +379,34 @@ bool Writer::doForwardThisMetadata(std::string const& name) const
     return false;
 }
 
-void Writer::writeBufferBegin(PointBuffer const& data)
+
+void Writer::ready(PointContext ctx)
 {
-    if (m_headerInitialized) return;
+    if (m_headerInitialized)
+        return;
 
     m_lasHeader.setBounds(getPrevStage().getBounds());
 
-    const Schema& schema = data.getSchema();
+    Schema *s = ctx.getSchema();
+    m_dims.reset(new PointDimensions(*ctx.getSchema(), ""));
 
-    const Dimension& dimX = schema.getDimension("X");
-    const Dimension& dimY = schema.getDimension("Y");
-    const Dimension& dimZ = schema.getDimension("Z");
-
-    m_lasHeader.SetScale(dimX.getNumericScale(),
-                         dimY.getNumericScale(),
-                         dimZ.getNumericScale());
-    m_lasHeader.SetOffset(dimX.getNumericOffset(),
-                          dimY.getNumericOffset(),
-                          dimZ.getNumericOffset());
+    m_lasHeader.SetScale(m_dims->X->getNumericScale(),
+                         m_dims->Y->getNumericScale(),
+                         m_dims->Z->getNumericScale());
+    m_lasHeader.SetOffset(m_dims->X->getNumericOffset(),
+                          m_dims->Y->getNumericOffset(),
+                          m_dims->Z->getNumericOffset());
 
     m_lasHeader.setSpatialReference(getSpatialReference());
 
-    bool useMetadata;
+    bool useMetadata = false;
     try
     {
         getOptions().getOption("metadata");
         useMetadata = true;
     }
     catch (pdal::option_not_found&)
-    {
-        useMetadata = false;
-    }
+    {}
 
     if (useMetadata)
     {
@@ -631,13 +628,10 @@ void Writer::writeBufferEnd(PointBuffer const& /*data*/)
 {
 }
 
-boost::uint32_t Writer::writeBuffer(const PointBuffer& pointBuffer)
+
+void Writer::write(const PointBuffer& pointBuffer)
 {
-    const Schema& schema = pointBuffer.getSchema();
-
-    PointFormat pointFormat = m_lasHeader.getPointFormat();
-
-    const PointDimensions dimensions(schema,"");
+    const PointDimensions& dimensions = *m_dims;
 
     boost::uint32_t numValidPoints = 0;
 
@@ -778,7 +772,6 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& pointBuffer)
     }
 
     m_numPointsWritten = m_numPointsWritten + numValidPoints;
-    return numValidPoints;
 }
 
 

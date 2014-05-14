@@ -271,7 +271,7 @@ Options Writer::getDefaultOptions()
 }
 
 
-void Writer::run(std::ostringstream const& command)
+void Writer::runCommand(std::ostringstream const& command)
 {
     Statement statement = Statement(m_connection->CreateStatement(command.str().c_str()));
 
@@ -292,7 +292,7 @@ void Writer::WipeBlockTable()
     oss << "DELETE FROM " << block_table_name;
     try
     {
-        run(oss);
+        runCommand(oss);
     }
     catch (pdal_error const&)
     {
@@ -303,11 +303,11 @@ void Writer::WipeBlockTable()
                       << "_cloud_idx for block_table_name"
                       << std::endl;
         oss << "DROP INDEX " << block_table_name << "_cloud_idx" ;
-        run(oss);
+        runCommand(oss);
         oss.str("");
 
         oss << "DELETE FROM " << block_table_name;
-        run(oss);
+        runCommand(oss);
         oss.str("");
     }
 
@@ -324,11 +324,11 @@ void Writer::WipeBlockTable()
         "', '"
         << cloud_column_name <<
         "'); end;";
-    run(oss);
+    runCommand(oss);
     oss.str("");
 
     oss << "DROP TABLE " << block_table_name;
-    run(oss);
+    runCommand(oss);
     oss.str("");
 
     // Oracle upper cases the table name when inserting it in the
@@ -338,7 +338,7 @@ void Writer::WipeBlockTable()
 
     block_table_name = boost::to_upper_copy(block_table_name);
     oss << "DELETE FROM USER_SDO_GEOM_METADATA WHERE TABLE_NAME='" << block_table_name << "'" ;
-    run(oss);
+    runCommand(oss);
 }
 
 bool Writer::is3d() const
@@ -373,7 +373,7 @@ void Writer::CreateBlockIndex()
         oss <<" PARAMETERS('sdo_indx_dims=3')";
     }
 
-    run(oss);
+    runCommand(oss);
     oss.str("");
 
     index_name.str("");
@@ -383,7 +383,7 @@ void Writer::CreateBlockIndex()
         "  PRIMARY KEY (OBJ_ID, BLK_ID) ENABLE VALIDATE";
     // oss << "CREATE INDEX " << name <<" on "
     //     << block_table_name << "(OBJ_ID,BLK_ID) COMPRESS 2" ;
-    run(oss);
+    runCommand(oss);
     oss.str("");
 
 
@@ -446,7 +446,7 @@ void Writer::CreateSDOEntry()
     }
     oss << ")," << s_srid.str() << ")";
 
-    run(oss);
+    runCommand(oss);
     oss.str("");
 
 }
@@ -498,7 +498,7 @@ void Writer::CreateBlockTable()
 
     oss << "CREATE TABLE " << m_block_table_name << " AS SELECT * FROM MDSYS.SDO_PC_BLK_TABLE";
 
-    run(oss);
+    runCommand(oss);
     m_connection->Commit();
 
 }
@@ -605,7 +605,7 @@ void Writer::RunFileSQL(std::string const& filename)
     if (isDebug())
         std::cout << "running "<< filename << " ..." <<std::endl;
 
-    run(oss);
+    runCommand(oss);
 
 }
 
@@ -965,11 +965,11 @@ void Writer::writeBufferBegin(PointBuffer const& data)
         oss << "DBMS_SESSION.set_sql_trace(sql_trace => TRUE);" << std::endl;
         oss << "DBMS_SESSION.SESSION_TRACE_ENABLE(waits => TRUE, binds => TRUE);" << std::endl;
         oss << "END;" << std::endl;
-        run(oss);
+        runCommand(oss);
         oss.str("");
 
         // oss << "alter session set events ‘10046 trace name context forever, level 12’" << std::endl;
-        // run(oss);
+        // runCommand(oss);
         // oss.str("");
 
         oss << "SELECT VALUE FROM V$DIAG_INFO WHERE NAME = 'Default Trace File'";

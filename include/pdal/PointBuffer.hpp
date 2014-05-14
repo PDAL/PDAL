@@ -1070,6 +1070,10 @@ inline void PointBuffer::scale(Dimension const& source_dimension,
     return;
 }
 
+typedef std::shared_ptr<PointBuffer> PointBufferPtr;
+typedef std::set<PointBufferPtr> PointBufferSet;
+typedef std::vector<PointBufferPtr> PointBufferList;
+
 
 class PDAL_DLL IndexedPointBuffer : public PointBuffer
 {

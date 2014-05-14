@@ -41,8 +41,7 @@
 #include <pdal/Log.hpp>
 #include <pdal/Metadata.hpp>
 #include <pdal/Options.hpp>
-#include <pdal/PointContext.hpp>
-#include <pdal/Schema.hpp>
+#include <pdal/PointBuffer.hpp>
 #include <pdal/SpatialReference.hpp>
 
 namespace pdal
@@ -52,7 +51,7 @@ class Iterator;
 class StageSequentialIterator;
 class StageRandomIterator;
 class StageBlockIterator;
-class PointBuffer;
+class StageRunner;
 //
 // supported options:
 //   <uint32>id
@@ -62,6 +61,7 @@ class PointBuffer;
 
 class PDAL_DLL Stage
 {
+    friend class StageRunner;
 public:
     Stage();
     Stage(const Options& options);
@@ -72,6 +72,7 @@ public:
     void setInput(Stage *input);
 
     void prepare(PointContext ctx);
+    PointBufferSet execute(PointContext ctx);
     bool isInitialized() const
         { return m_initialized; }
 
@@ -182,7 +183,15 @@ private:
     virtual void initialize()
         {}
     virtual void buildSchema(Schema *schema)
-        {}
+        { (void)schema; }
+    virtual void ready(PointContext ctx)
+        { (void)ctx; }
+    virtual PointBufferSet run(PointBufferPtr buffer)
+    {
+        (void)buffer;
+        std::cerr << "Can't run stage = " << getName() << "!\n";
+        return PointBufferSet();
+    }
 };
 
 PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const Stage&);
