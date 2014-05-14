@@ -588,7 +588,8 @@ void Writer::writeBufferBegin(PointBuffer const& data)
         if (!m_zipPoint)
         {
             PointFormat format = m_lasHeader.getPointFormat();
-            boost::scoped_ptr<ZipPoint> z(new ZipPoint(format, m_lasHeader.getVLRs().getAll(), false));
+            boost::scoped_ptr<ZipPoint> z(new ZipPoint(format, m_lasHeader,
+                false));
             m_zipPoint.swap(z);
         }
 

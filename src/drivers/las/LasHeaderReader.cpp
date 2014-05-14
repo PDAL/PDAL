@@ -290,8 +290,7 @@ void LasHeaderReader::read(Reader& stage, Schema& schema)
 
     if (m_header.Compressed())
     {
-        ZipPoint zp(m_header.getPointFormat(), m_header.getVLRs().getAll(),
-            true);
+        ZipPoint zp(m_header.getPointFormat(), m_header, true);
         LASzip* laszip = zp.GetZipper();
         std::ostringstream zip_version;
         zip_version <<"LASzip Version "
