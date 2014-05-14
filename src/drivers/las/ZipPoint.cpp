@@ -67,8 +67,7 @@ static boost::uint16_t laszip_recordid = 22204;
 static const char* laszip_description = "http://laszip.org";
 
 
-ZipPoint::ZipPoint(PointFormat format,
-                   const std::vector<VariableLengthRecord>& vlrs,
+ZipPoint::ZipPoint(PointFormat format, const LasHeader& lasHeader,
                    bool isReadMode)
     : m_readMode(isReadMode)
     , his_vlr_num(0)
@@ -76,11 +75,11 @@ ZipPoint::ZipPoint(PointFormat format,
     , m_lz_point(NULL)
     , m_lz_point_size(0)
 {
-
     boost::scoped_ptr<LASzip> s(new LASzip());
     m_zip.swap(s);
 
     const VariableLengthRecord* vlr = NULL;
+    auto vlrs = lasHeader.getVLRs().getAll();
     for (std::vector<VariableLengthRecord>::size_type i=0; i<vlrs.size(); i++)
     {
         const VariableLengthRecord& p = vlrs[i];
@@ -114,7 +113,7 @@ ZipPoint::ZipPoint(PointFormat format,
             throw pdal_error(oss.str());
         }
 
-        if (!m_zip->setup((boost::uint8_t)format, Support::getPointDataSize(format)))
+        if (!m_zip->setup((boost::uint8_t)format, lasHeader.getPointDataSize()))
         {
             std::ostringstream oss;
             const char* err = m_zip->get_error();

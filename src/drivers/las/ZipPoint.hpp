@@ -51,8 +51,7 @@ class VariableLengthRecord;
 class ZipPoint
 {
 public:
-    ZipPoint(PointFormat, const std::vector<VariableLengthRecord>& vlrs,
-        bool isReadMode);
+    ZipPoint(PointFormat, const LasHeader& lasHeader, bool isReadMode);
     ~ZipPoint();
 
     VariableLengthRecord ConstructVLR() const;

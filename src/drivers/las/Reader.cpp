@@ -584,9 +584,9 @@ namespace iterators
 {
 
 Base::Base(pdal::drivers::las::Reader const& reader)
-    : m_bounds{3}, m_reader{reader},
-    m_istream{m_reader.getStreamFactory().allocate()} , m_zipPoint{NULL},
-    m_unzipper{NULL}
+    : m_bounds(3), m_reader(reader),
+    m_istream(m_reader.getStreamFactory().allocate()) , m_zipPoint(NULL),
+    m_unzipper(NULL)
 {
     m_istream.seekg(m_reader.getLasHeader().GetDataOffset());
 
@@ -619,7 +619,7 @@ void Base::initialize()
     {
         PointFormat format = m_reader.getLasHeader().getPointFormat();
         boost::scoped_ptr<ZipPoint> z(new ZipPoint(format,
-            m_reader.getLasHeader().getVLRs().getAll(), true));
+            m_reader.getLasHeader(), true));
         m_zipPoint.swap(z);
     }
 
@@ -668,7 +668,7 @@ point_count_t Base::processBuffer(PointBuffer& data, std::istream& stream,
                 error += err;
                 throw pdal_error(error);
             }
-            loadPoint(data, dimensions, zipPoint->m_lz_point_data.get(),
+            loadPoint(data, dimensions, (char *)zipPoint->m_lz_point_data.get(),
                 pointByteCount);
         }
 #else
