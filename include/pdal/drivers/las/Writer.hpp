@@ -96,15 +96,21 @@ protected:
     void Construct();
     virtual void initialize();
 
-    virtual void writeBegin(boost::uint64_t targetNumPointsToWrite);
+    //ABELL
+    virtual void writeBegin(boost::uint64_t targetNumPointsToWrite)
+    {}
     //ABELL
     virtual void writeBufferBegin(PointBuffer const&)
     {}
     //ABELL
     virtual boost::uint32_t writeBuffer(const PointBuffer&)
         { return 0; }
-    virtual void writeBufferEnd(PointBuffer const&);
-    virtual void writeEnd(boost::uint64_t actualNumPointsWritten);
+    //ABELL
+    virtual void writeBufferEnd(PointBuffer const&)
+    {}
+    //ABELL
+    virtual void writeEnd(boost::uint64_t actualNumPointsWritten)
+    {}
 
     OutputStreamManager m_streamManager;
 
@@ -121,10 +127,10 @@ private:
 
     virtual void ready(PointContext ctx);
     virtual void write(const PointBuffer& pointBuffer);
+    virtual void done(PointContext ctx);
     bool m_headerInitialized;
     boost::uint64_t m_streamOffset; // the first byte of the LAS file
 	void setOptions();
-    bool doForwardThisMetadata(std::string const& name) const;
     void setVLRsFromMetadata(LasHeader& header, Metadata const& metadata, Options const& opts);
     Writer& operator=(const Writer&); // not implemented
     Writer(const Writer&); // not implemented

@@ -36,10 +36,8 @@
 
 #include "LasHeaderWriter.hpp"
 
-// local
 #include "ZipPoint.hpp"
 
-// laszip
 #ifdef PDAL_HAVE_LASZIP
 #include <laszip/laszipper.hpp>
 #endif
@@ -214,11 +212,6 @@ void Writer::setHeaderPadding(boost::uint32_t const& v)
     m_lasHeader.SetHeaderPadding(v);
 }
 
-void Writer::writeBegin(boost::uint64_t /*targetNumPointsToWrite*/)
-{
-    m_streamOffset = m_streamManager.ostream().tellp();
-}
-
 void Writer::setVLRsFromMetadata(LasHeader& header, Metadata const& metadata,
     Options const& opts)
 {
@@ -310,81 +303,13 @@ void Writer::setVLRsFromMetadata(LasHeader& header, Metadata const& metadata,
     }
 }
 
-bool Writer::doForwardThisMetadata(std::string const& name) const
-{
-    // <Reader type="drivers.las.writer">
-    //     <Option name="metadata">
-    //         <Options>
-    //             <Option name="dataformat_id">
-    //             3
-    //             </Option>
-    //             <Option name="filesource_id">
-    //             forward
-    //             </Option>
-    //             <Option name="creation_year">
-    //             forward
-    //             </Option>
-    //             <Option name="creation_doy">
-    //             forward
-    //             </Option>
-    //             <Option name="vlr">
-    //             forward
-    //             <Options>
-    //                 <Option name="user_id">
-    //                 hobu
-    //                 </Option>
-    //                 <Option name="record">
-    //                 1234
-    //                 </Option>
-    //             </Options>
-    //             </Option>
-    //         </Options>
-    //     </Option>
-    // </Reader>
-
-    Options const& options = getOptions();
-
-    Option const* doMetadata(0);
-    try
-    {
-        doMetadata = &options.getOption("metadata");
-    }
-    catch (pdal::option_not_found&)
-    {
-        return false;
-    }
-
-    boost::optional<Options const&> meta = doMetadata->getOptions();
-    try
-    {
-        if (meta)
-        {
-            try
-            {
-                meta->getOption(name);
-            }
-            catch (pdal::option_not_found&)
-            {
-                return false;
-            }
-
-            std::string value = meta->getOption(name).getValue<std::string>();
-            if (boost::algorithm::iequals(value,"FORWARD"))
-                return true;
-        }
-    }
-    catch (pdal::option_not_found&)
-    {}
-
-    return false;
-}
-
 
 void Writer::ready(PointContext ctx)
 {
     if (m_headerInitialized)
         return;
 
+    m_streamOffset = m_streamManager.ostream().tellp();
     m_lasHeader.setBounds(getPrevStage().getBounds());
 
     Schema *s = ctx.getSchema();
@@ -615,21 +540,6 @@ void Writer::ready(PointContext ctx)
     m_headerInitialized = true;
 }
 
-void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
-{
-    m_lasHeader.SetPointRecordsCount(m_numPointsWritten);
-
-    log()->get(logDEBUG) << "Wrote " << m_numPointsWritten << " points to the LAS file" << std::endl;
-
-    m_streamManager.ostream().seekp(m_streamOffset);
-    Support::rewriteHeader(m_streamManager.ostream(), m_summaryData);
-}
-
-void Writer::writeBufferEnd(PointBuffer const& /*data*/)
-{
-}
-
-
 void Writer::write(const PointBuffer& pointBuffer)
 {
     const PointDimensions& dimensions = *m_dims;
@@ -642,7 +552,7 @@ void Writer::write(const PointBuffer& pointBuffer)
     bool hasTime = m_lasHeader.hasTime();
     boost::uint16_t record_length = m_lasHeader.GetDataRecordLength();
 
-    for (uint32_t idx = 0; idx < pointBuffer.getNumPoints(); idx++)
+    for (uint32_t idx = 0; idx < pointBuffer.size(); idx++)
     {
         boost::uint8_t* p = buf;
 
@@ -773,6 +683,17 @@ void Writer::write(const PointBuffer& pointBuffer)
     }
 
     m_numPointsWritten = m_numPointsWritten + numValidPoints;
+}
+
+void Writer::done(PointContext ctx)
+{
+    m_lasHeader.SetPointRecordsCount(m_numPointsWritten);
+
+    log()->get(logDEBUG) << "Wrote " << m_numPointsWritten <<
+        " points to the LAS file" << std::endl;
+
+    m_streamManager.ostream().seekp(m_streamOffset);
+    Support::rewriteHeader(m_streamManager.ostream(), m_summaryData);
 }
 
 

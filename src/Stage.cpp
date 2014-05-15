@@ -131,6 +131,7 @@ PointBufferSet Stage::execute(PointContext ctx)
         PointBufferSet temp = runner->wait();
         outBuffers.insert(temp.begin(), temp.end());
     }
+    done(ctx);
     return outBuffers;
 }
 

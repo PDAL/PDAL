@@ -186,6 +186,8 @@ private:
         { (void)schema; }
     virtual void ready(PointContext ctx)
         { (void)ctx; }
+    virtual void done(PointContext ctx)
+        { (void)ctx; }
     virtual PointBufferSet run(PointBufferPtr buffer)
     {
         (void)buffer;
