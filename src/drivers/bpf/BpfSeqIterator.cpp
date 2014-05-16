@@ -32,8 +32,6 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <zlib.h>
-
 #include <vector>
 #include <algorithm>
 
@@ -42,6 +40,10 @@
 #include <pdal/drivers/bpf/BpfSeqIterator.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/Schema.hpp>
+
+#ifdef PDAL_HAVE_ZLIB
+#include <zlib.h>
+#endif
 
 namespace pdal
 {
@@ -54,6 +56,7 @@ BpfSeqIterator::BpfSeqIterator(const std::vector<Dimension *>& dims,
 {
     if (compression)
     {
+#ifdef PDAL_HAVE_ZLIB
         m_deflateBuf.resize(m_numPoints * m_dims.size() * sizeof(float));
         size_t index = 0;
         size_t bytesRead = 0;
@@ -64,6 +67,9 @@ BpfSeqIterator::BpfSeqIterator(const std::vector<Dimension *>& dims,
         } while (bytesRead > 0 && index < m_deflateBuf.size());
         m_charbuf.initialize(m_deflateBuf.data(), m_deflateBuf.size(), m_start);
         m_stream.pushStream(new std::istream(&m_charbuf));
+#else
+        throw "BPF compression required, but ZLIB is unavailable.";
+#endif
     }
 }
 
@@ -238,6 +244,7 @@ void BpfSeqIterator::seekByteMajor(size_t dimIdx, size_t byteIdx, uint32_t ptIdx
     m_stream.seek(m_start + offset);
 }
 
+#ifdef PDAL_HAVE_ZLIB
 int BpfSeqIterator::inflate(char *buf, size_t insize, char *outbuf,
     size_t outsize)
 {
@@ -265,5 +272,6 @@ int BpfSeqIterator::inflate(char *buf, size_t insize, char *outbuf,
     (void)inflateEnd(&strm);
     return ret == Z_STREAM_END ? 0 : -1;
 }
+#endif
 
 } //namespace

@@ -35,6 +35,8 @@
 #include <pdal/kernel/Delta.hpp>
 #include <boost/format.hpp>
 
+#include <boost/property_tree/json_parser.hpp>
+#include <boost/property_tree/xml_parser.hpp>
 
 namespace pdal { namespace kernel {
     
@@ -46,6 +48,8 @@ Delta::Delta(int argc, const char* argv[])
     , m_outputFileName("")
     , m_3d(true)
     , m_OutputDetail(false)
+    , m_useXML(false)
+    , m_useJSON(false)
 {
     return;
 }
@@ -73,6 +77,9 @@ void Delta::addSwitches()
         ("2d", po::value<bool>(&m_3d)->zero_tokens()->implicit_value(false), "only 2D comparisons/indexing")
         ("detail", po::value<bool>(&m_OutputDetail)->zero_tokens()->implicit_value(true), "Output deltas per-point")
         ("output", po::value<std::string>(&m_outputFileName), "output file name")
+        ("xml", po::value<bool>(&m_useXML)->zero_tokens()->implicit_value(true), "dump XML")
+        ("json", po::value<bool>(&m_useJSON)->zero_tokens()->implicit_value(true), "dump JSON")
+
         ;
 
     addSwitchSet(file_options);
@@ -173,7 +180,7 @@ void Delta::outputDetail(PointBuffer& source_data,
     candidate_data.build(m_3d);
     boost::uint32_t count(std::min(source_data.getNumPoints(), candidate_data.getNumPoints()));
     
-
+    boost::property_tree::ptree output;
     for (boost::uint32_t i = 0; i < count; ++i)
     {
         double sx = source_data.applyScaling(sDimX, i);
@@ -200,34 +207,53 @@ void Delta::outputDetail(PointBuffer& source_data,
         double xd = sx - cx;
         double yd = sy - cy;
         double zd = sz - cz;
-
+        boost::property_tree::ptree pt;
+        pt.put<boost::int32_t>("i", i);
+        pt.put<float>("xd", xd);
+        pt.put<float>("yd", yd);
+        if (m_3d)        
+            pt.put<float>("zd", zd);
         
-        if (!bWroteHeader)
-        {
-            writeHeader(ostr, m_3d);
-            bWroteHeader = true;
-        }
-        ostr << i << ",";
-        boost::uint32_t precision = Utils::getStreamPrecision(cDimX.getNumericScale());
-        ostr.setf(std::ios_base::fixed, std::ios_base::floatfield);
-        ostr.precision(precision);
-        ostr << xd << ",";
-
-        precision = Utils::getStreamPrecision(cDimY.getNumericScale());
-        ostr.precision(precision);
-        ostr << yd;
-        
-        if (m_3d)
-        {
-            ostr << ",";
-            precision = Utils::getStreamPrecision(cDimZ.getNumericScale());
-            ostr.precision(precision);
-            ostr << zd;
-        }
-        
-        ostr << std::endl;
+        output.add_child("delta", pt);
 
     }
+
+    if (m_useXML)
+    {
+        boost::property_tree::write_xml(ostr, output);
+    } else if (m_useJSON)
+    {
+        boost::property_tree::write_json(ostr, output);
+        
+    } else
+    {
+        writeHeader(ostr, m_3d);
+
+        for (auto b = output.begin(); b != output.end(); ++b)
+        {
+            ostr << b->second.get<boost::int32_t>("i")  << ",";
+            boost::uint32_t precision = Utils::getStreamPrecision(cDimX.getNumericScale());
+            ostr.setf(std::ios_base::fixed, std::ios_base::floatfield);
+            ostr.precision(precision);
+            ostr << b->second.get<float>("xd") << ",";
+  
+            precision = Utils::getStreamPrecision(cDimY.getNumericScale());
+            ostr.precision(precision);
+            ostr << b->second.get<float>("yd");
+    
+            if (m_3d)
+            {
+                ostr << ",";
+                precision = Utils::getStreamPrecision(cDimZ.getNumericScale());
+                ostr.precision(precision);
+                ostr << b->second.get<float>("zd");
+            }
+        }
+   
+    
+        ostr << std::endl;        
+    }
+
 
 
 
@@ -236,6 +262,44 @@ void Delta::outputDetail(PointBuffer& source_data,
         FileUtils::closeFile(m_outputStream);
     }    
 }
+
+void Delta::outputRST(boost::property_tree::ptree const& tree) const
+{
+    std::string headline("------------------------------------------------------------------------------------------");
+    std::cout << headline << std::endl;
+    std::cout << " Delta summary for source '" << m_sourceFile << "' and candidate '" << m_candidateFile <<"'" << std::endl;
+    std::cout << headline << std::endl;
+    std::cout << std::endl;
+    
+    std::string thead("----------- --------------- --------------- --------------");
+    std::cout << thead << std::endl;
+    std::cout << " Dimension       X             Y                  Z    " << std::endl;
+    std::cout << thead << std::endl;
+    
+    boost::format fmt("%.4f");
+ 
+    
+    
+    std::cout << " Min        " << fmt % tree.get<float>("min.x") << "            " << fmt % tree.get<float>("min.y") << "            " << fmt % tree.get<float>("min.z")<<std::endl;
+    std::cout << " Min        " << fmt % tree.get<float>("max.x") << "            " << fmt % tree.get<float>("max.y") << "            " << fmt % tree.get<float>("max.z")<<std::endl;
+    std::cout << " Mean       " << fmt % tree.get<float>("mean.x") << "            " << fmt % tree.get<float>("mean.y") << "            " << fmt % tree.get<float>("mean.z")<<std::endl;
+    std::cout << thead << std::endl;
+    
+}
+
+
+void Delta::outputJSON(boost::property_tree::ptree const& tree) const
+{
+    boost::property_tree::write_json(std::cout, tree);
+    
+}
+
+void Delta::outputXML(boost::property_tree::ptree const& tree) const
+{
+    boost::property_tree::write_xml(std::cout, tree);
+    
+}
+
 int Delta::execute()
 {
     PointContext sourceCtx;
@@ -286,10 +350,6 @@ int Delta::execute()
     }
     
 
-    // m_summary_x(xd);
-    // m_summary_y(yd);
-    // m_summary_z(zd);
-
     if (m_outputFileName.size())
     {
         m_outputStream = FileUtils::createFile(m_outputFileName);
@@ -320,19 +380,10 @@ int Delta::execute()
         m_summary_y(yd);
         m_summary_z(zd);        
     }
-    
-    std::string headline("------------------------------------------------------------------------------------------");
-    std::cout << headline << std::endl;
-    std::cout << " Delta summary for source '" << m_sourceFile << "' and candidate '" << m_candidateFile <<"'" << std::endl;
-    std::cout << headline << std::endl;
-    std::cout << std::endl;
-    
-    std::string thead("----------- --------------- --------------- --------------");
-    std::cout << thead << std::endl;
-    std::cout << " Dimension       X             Y                  Z    " << std::endl;
-    std::cout << thead << std::endl;
-    
-    boost::format fmt("%.4f");
+
+    using boost::property_tree::ptree;
+    ptree output;
+
     double sminx  = (boost::accumulators::min)(m_summary_x);
     double sminy  = (boost::accumulators::min)(m_summary_y);
     double sminz  = (boost::accumulators::min)(m_summary_z);
@@ -343,11 +394,35 @@ int Delta::execute()
     double smeanx  = (boost::accumulators::mean)(m_summary_x);
     double smeany  = (boost::accumulators::mean)(m_summary_y);
     double smeanz  = (boost::accumulators::mean)(m_summary_z);
+
+    output.put<float>("min.x", sminx);
+    output.put<float>("min.y", sminy);
+    output.put<float>("min.z", sminz);
+    output.put<float>("max.x", smaxx);
+    output.put<float>("max.y", smaxy);
+    output.put<float>("max.z", smaxz);
+    output.put<float>("mean.x", smeanx);
+    output.put<float>("mean.y", smeany);
+    output.put<float>("mean.z", smeanz);
+    output.put<std::string>("source", m_sourceFile);
+    output.put<std::string>("candidate", m_candidateFile);
     
-    std::cout << " Min        " << fmt % sminx << "            " << fmt % sminy << "            " << fmt % sminz<<std::endl;
-    std::cout << " Min        " << fmt % smaxx << "            " << fmt % smaxy << "            " << fmt % smaxz<<std::endl;
-    std::cout << " Mean       " << fmt % smeanx << "            " << fmt % smeany << "            " << fmt % smeanz<<std::endl;
-    std::cout << thead << std::endl;
+    
+    if (m_useJSON)
+    {
+        outputJSON(output);
+        return 0;
+    } else if (m_useXML)
+    {
+        outputXML(output);
+        return 0;
+    }
+    else
+    {
+        outputRST(output);
+        return 0;
+    }
+
     
     return 0;
 }

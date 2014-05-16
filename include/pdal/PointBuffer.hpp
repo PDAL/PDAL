@@ -42,6 +42,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/interprocess/managed_shared_memory.hpp>
+#include <boost/math/special_functions/round.hpp>
 
 #include <pdal/pdal_internal.hpp>
 #include <pdal/Bounds.hpp>
@@ -593,7 +594,7 @@ inline T PointBuffer::getFieldAs(pdal::Dimension const& dim,
     try
     {
         if (std::is_integral<T>::value)
-            retval = boost::numeric_cast<T>(lround(val));
+            retval = boost::numeric_cast<T>(boost::math::lround(val));
         else
             retval = boost::numeric_cast<T>(val);
     }
