@@ -41,7 +41,7 @@
 #include <cstdlib>
 #include <cctype>
 
-#ifdef __GNUG__
+#ifdef PDAL_HAVE_DEMANGLER
 #include <cxxabi.h>
 #endif
 
@@ -598,7 +598,7 @@ void Utils::wordWrap(string const& inputString, vector<string>& outputString,
 }
 
 
-#ifdef __GNUG__
+#ifdef PDAL_HAVE_DEMANGLER
 /// Demangle strings using the compiler-provided demangle function.
 /// \param[in] s  String to be demangled.
 /// \return  Demangled string
