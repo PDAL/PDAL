@@ -41,7 +41,9 @@
 #include <cstdlib>
 #include <cctype>
 
+#ifdef __GNUG__
 #include <cxxabi.h>
+#endif
 
 #ifdef PDAL_COMPILER_MSVC
 #  pragma warning(disable: 4127)  // conditional expression is constant
@@ -596,6 +598,7 @@ void Utils::wordWrap(string const& inputString, vector<string>& outputString,
 }
 
 
+#ifdef __GNUG__
 /// Demangle strings using the compiler-provided demangle function.
 /// \param[in] s  String to be demangled.
 /// \return  Demangled string
@@ -606,6 +609,12 @@ std::string Utils::demangle(const std::string& s)
             abi::__cxa_demangle(s.c_str(), 0, 0, &status), std::free);
     return std::string(result.get());
 }
+#else
+std::string Utils::demangle(const std::string& s)
+{
+  return s;
+}
+#endif
 
 //#endif
 
