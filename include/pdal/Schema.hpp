@@ -191,7 +191,12 @@ public:
     bool setDimension(Dimension const& dim);
 
     /// @return the boost::multi_index map that contains the Dimension instances
-    inline schema::Map const& getDimensions() const
+    schema::Map& getDimensions()
+    {
+        return m_index;
+    }
+
+    const schema::Map& getDimensions() const
     {
         return m_index;
     }

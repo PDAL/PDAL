@@ -47,7 +47,7 @@ SET(PDAL_UNITTEST_TEST_SRC
 #    drivers/sbet/SbetReaderTest.cpp
 #    drivers/sbet/SbetWriterTest.cpp
 #    filters/ScalingFilterTest.cpp
-#    filters/SelectorFilterTest.cpp
+    filters/SelectorFilterTest.cpp
 #    SchemaLayoutTest.cpp
 #    SchemaTest.cpp
 #    SpatialReferenceTest.cpp
