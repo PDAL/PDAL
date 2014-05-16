@@ -789,6 +789,10 @@ if (WITH_LIBXML2)
     target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE} ${LIBXML2_LIBRARIES})
 endif()
 
+if (WITH_ZLIB)
+    target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE} ${ZLIB_LIBRARIES})
+endif()
+
 if (WITH_HDF5)
     target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE} ${HDF5_LIBRARIES})
 endif()
@@ -804,7 +808,6 @@ endif()
     "${GEOS_LIBRARY}"
     "${HEXER_LIBRARY}"
     "${ORACLE_LIBRARY}"
-    "z"
 )
 
 message(STATUS "Using boost lib: ${Boost_LIBRARIES}")

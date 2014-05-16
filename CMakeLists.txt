@@ -518,6 +518,21 @@ if(WITH_LASZIP)
     endif()
 endif()
 
+# ZLIB support - optional, default=ON
+option(WITH_ZLIB "Choose of ZLIB support should be built" TRUE)
+if(WITH_ZLIB)
+    find_package(ZLIB)
+    if(ZLIB_FOUND)
+        set(CMAKE_REQUIRED_LIBRARIES "${ZLIB_LIBRARY}")
+	include_directories(${ZLIB_INCLUDE_DIR})
+	mark_as_advanced(CLEAR ZLIB_INCLUDE_DIR)
+	mark_as_advanced(CLEAR ZLIB_LIBRARY)
+	set(PDAL_HAVE_ZLIB 1)
+    else()
+        set(ZLIB_LIBRARIES "")
+	set(WITH_ZLIB FALSE)
+    endif()
+endif()
 
 # MrSID/LiDAR support - optiona, default=OFF
 option(WITH_MRSID "Choose if MrSID/LiDAR support should be built" FALSE)
