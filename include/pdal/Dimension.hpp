@@ -451,9 +451,9 @@ public:
         {
             i64 = static_cast<boost::int64_t>(descaled);
             boost::int64_t mn =
-                static_cast<boost::int64_t>(std::numeric_limits<T>::min()); 
+                static_cast<boost::int64_t>((std::numeric_limits<T>::min)()); 
             boost::int64_t mx =
-                static_cast<boost::int64_t>(std::numeric_limits<T>::max());
+                static_cast<boost::int64_t>((std::numeric_limits<T>::max)());
             bGreater = (i64 > mx);
             bLess = (i64 < mn);
             output = static_cast<T>(i64);
@@ -492,7 +492,7 @@ public:
                 "'. " << "(v - offset)/ scale) is: (" << v << " - " <<
                 m_numericOffset << ")/" << m_numericScale <<") == '" << out <<
                 "' but max() for the datatype is: " <<
-                std::numeric_limits<T>::max();
+                (std::numeric_limits<T>::max)();
             throw std::out_of_range(oss.str());
         }
         else if (bLess)
@@ -512,7 +512,7 @@ public:
                 "'. " << "(v - offset)/ scale) is: (" << v << " - " <<
                 m_numericOffset << ")/" << m_numericScale <<") == '" << out <<
                 "' but min() for the datatype is: " <<
-                std::numeric_limits<T>::min();
+                (std::numeric_limits<T>::min)();
             throw std::out_of_range(oss.str());
         }
         return output;
