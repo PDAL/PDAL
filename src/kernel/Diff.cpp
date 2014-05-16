@@ -47,6 +47,9 @@ Diff::Diff(int argc, const char* argv[])
     : Application(argc, argv, "dif")
     , m_sourceFile("")
     , m_candidateFile("")
+    , m_useXML(false)
+    , m_useJSON(false)
+        
 {
     return;
 }
