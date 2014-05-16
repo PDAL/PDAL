@@ -527,11 +527,11 @@ public:
         std::string const& interpretation_name);
     
     // Helper for below.
-    template <typename OUT, typename IN>
-    OUT convert(void *data)
+    template <typename T_OUT, typename T_IN>
+    T_OUT convert(void *data)
     {
-        IN temp = *(IN*)(void*)data;
-        return Utils::saturation_cast<OUT, IN>(temp);
+        T_IN temp = *(T_IN*)(void*)data;
+        return Utils::saturation_cast<T_OUT, T_IN>(temp);
     }
     
     /// Converts the a pointer to a value to the data type described 
