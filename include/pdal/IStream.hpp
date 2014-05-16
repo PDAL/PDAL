@@ -102,9 +102,10 @@ public:
         // Could do this by appending to a string with a stream, but this
         // is probably fast enough for now (there's only a simple increment
         // to advance an istream iterator, which you'd have to call in a loop).
-        char buf[size + 1];
+        char *buf = (char*)malloc(size+1);
         m_stream->get(buf, size + 1);
         s = buf;
+        free (buf);
     }
 
     void get(std::vector<char>& buf)
