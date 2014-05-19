@@ -63,6 +63,15 @@ public:
 private:
     Filter& operator=(const Filter&); // not implemented
     Filter(const Filter&); // not implemented
+    virtual PointBufferSet run(PointBufferPtr buffer)
+    {
+        PointBufferSet pbSet;
+        filter(buffer);
+        pbSet.insert(buffer);
+        return pbSet;
+    }
+    virtual void filter(PointBufferPtr)
+    {}
 };
 
 }  // namespace pdal

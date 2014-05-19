@@ -84,7 +84,8 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_las)
 
     FileUtils::closeFile(ofs);
 
-    bool filesSame = Support::compare_files(Support::temppath(temp_filename), Support::datapath("simple.las"));
+    bool filesSame = Support::compare_files(Support::temppath(temp_filename),
+        Support::datapath("simple.las"));
     BOOST_CHECK_EQUAL(filesSame, true);
 
     if (filesSame)
@@ -103,8 +104,8 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_laz)
 
     pdal::drivers::las::Reader reader(Support::datapath("laszip/basefile.las"));
 
-    std::ostream* ofs = FileUtils::createFile(Support::temppath("LasWriterTest_test_simple_laz.laz"));
-
+    std::ostream* ofs = FileUtils::createFile(
+        Support::temppath("LasWriterTest_test_simple_laz.laz"));
     {
         const boost::uint64_t numPoints = reader.getNumPoints();
 
@@ -126,25 +127,26 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_laz)
     FileUtils::closeFile(ofs);
 
     {
-        pdal::drivers::las::Reader reader(Support::temppath("LasWriterTest_test_simple_laz.laz"));
+        pdal::drivers::las::Reader reader(
+            Support::temppath("LasWriterTest_test_simple_laz.laz"));
     }
 
     // these two files only differ by the description string in the VLR.
     // This now skips the entire LASzip VLR for comparison.
-    const boost::uint32_t numdiffs =Support::diff_files(Support::temppath("LasWriterTest_test_simple_laz.laz"),
-                                     Support::datapath("laszip/laszip-generated.laz"),
-                                     227, 106);
+    const boost::uint32_t numdiffs =Support::diff_files(
+        Support::temppath("LasWriterTest_test_simple_laz.laz"),
+        Support::datapath("laszip/laszip-generated.laz"),
+        227, 106);
     BOOST_CHECK_EQUAL(numdiffs, 0);
 
-    if (numdiffs==0)
-    {
-        FileUtils::deleteFile(Support::temppath("LasWriterTest_test_simple_laz.laz"));
-    }
+    if (numdiffs == 0)
+        FileUtils::deleteFile(
+            Support::temppath("LasWriterTest_test_simple_laz.laz"));
 }
 #endif
 
-/**
-static void test_a_format(const std::string& refFile, boost::uint8_t majorVersion, boost::uint8_t minorVersion, int pointFormat)
+static void test_a_format(const std::string& refFile,
+    boost::uint8_t majorVersion, boost::uint8_t minorVersion, int pointFormat)
 {
     PointContext ctx;
 
@@ -170,7 +172,9 @@ static void test_a_format(const std::string& refFile, boost::uint8_t majorVersio
         writer.setSystemIdentifier("libLAS");
         writer.setGeneratingSoftware("libLAS 1.2");
 
-        boost::uuids::uuid u = boost::lexical_cast<boost::uuids::uuid>("8388f1b8-aa1b-4108-bca3-6bc68e7b062e");
+        boost::uuids::uuid u =
+            boost::lexical_cast<boost::uuids::uuid>(
+                "8388f1b8-aa1b-4108-bca3-6bc68e7b062e");
         writer.setProjectId(u);
         writer.prepare(ctx);
         writer.execute(ctx);
@@ -188,8 +192,8 @@ static void test_a_format(const std::string& refFile, boost::uint8_t majorVersio
         FileUtils::deleteFile(Support::temppath("temp.las"));
     }
 }
-**/
 
+//ABELL
 /**
 BOOST_AUTO_TEST_CASE(LasWriterTest_test_metadata)
 {
@@ -268,13 +272,13 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_metadata)
 }
 **/
 
-/**
 BOOST_AUTO_TEST_CASE(LasWriterTest_test_ignored_dimensions)
 {
     PointContext ctx;
 
     // remove file from earlier run, if needed
-    std::string temp_filename(Support::temppath("temp-LasWriterTest_test_ignored_dimensions.las"));
+    std::string temp_filename(
+        Support::temppath("temp-LasWriterTest_test_ignored_dimensions.las"));
     FileUtils::deleteFile(temp_filename);
 
     pdal::Options options;
@@ -300,8 +304,6 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_ignored_dimensions)
     options.add(ignored);
     options.add(filename);
     options.add(debug);
-    // options.add(keep);
-    // options.add(verbosity);
     
     pdal::drivers::las::Reader reader(Support::datapath("interesting.las"));
 
@@ -313,7 +315,6 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_ignored_dimensions)
         writer.prepare(ctx);
         writer.execute(ctx);
     }
-
 
     {
         PointContext ctx2;
@@ -340,9 +341,10 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_ignored_dimensions)
     {
         PointContext ctx3;
 
-        pdal::drivers::las::Reader reader3(Support::datapath("interesting.las"));
-        reader3.prepare(ctx);
-        PointBuffer original(ctx);
+        pdal::drivers::las::Reader
+            reader3(Support::datapath("interesting.las"));
+        reader3.prepare(ctx3);
+        PointBuffer original(ctx3);
         pdal::StageSequentialIterator* iter2 =
             reader.createSequentialIterator();
     
@@ -361,9 +363,7 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_ignored_dimensions)
 
     FileUtils::deleteFile(temp_filename);
 }
-**/
 
-/**
 BOOST_AUTO_TEST_CASE(test_different_formats)
 {
     test_a_format("1.0_0.las", 1, 0, 0);
@@ -388,7 +388,6 @@ BOOST_AUTO_TEST_CASE(test_summary_data_add_point)
     BOOST_CHECK_EQUAL(b.getMinimum(0), b.getMaximum(0));
     BOOST_CHECK_EQUAL(b.getMinimum(2), b.getMaximum(2));
 }
-**/
 
 
 BOOST_AUTO_TEST_SUITE_END()
