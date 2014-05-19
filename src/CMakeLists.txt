@@ -302,26 +302,6 @@ endif()
 
 
 #
-# drivers/pipeline
-#
-
-set(PDAL_PIPELINE_PATH drivers/pipeline)
-set(PDAL_PIPELINE_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_PIPELINE_PATH}")
-set(PDAL_PIPELINE_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_PIPELINE_PATH}")
-
-set (PDAL_DRIVERS_PIPELINE_HPP
-  "${PDAL_PIPELINE_HEADERS}/Reader.hpp"
-)
-
-set (PDAL_DRIVERS_PIPELINE_CPP 
-  "${PDAL_PIPELINE_SRC}/Reader.cpp"
-)
-
-list (APPEND PDAL_CPP ${PDAL_DRIVERS_PIPELINE_CPP} )
-list (APPEND PDAL_HPP ${PDAL_DRIVERS_PIPELINE_HPP} )
-
-
-#
 # drivers/qfit
 #
 set(PDAL_QFIT_PATH drivers/qfit)
@@ -694,7 +674,6 @@ source_group("Header Files\\drivers\\caris" FILES ${PDAL_DRIVERS_CARIS_HPP})
 source_group("Header Files\\drivers\\las" FILES ${PDAL_DRIVERS_LAS_HPP})
 source_group("Header Files\\drivers\\nitf" FILES ${PDAL_DRIVERS_NITF_HPP})
 source_group("Header Files\\drivers\\oci" FILES ${PDAL_DRIVERS_OCI_HPP})
-source_group("Header Files\\drivers\\pipeline" FILES ${PDAL_DRIVERS_PIPELINE_HPP})
 source_group("Header Files\\drivers\\qfit" FILES ${PDAL_DRIVERS_QFIT_HPP})
 source_group("Header Files\\drivers\\sbet" FILES ${PDAL_DRIVERS_SBET_HPP})
 source_group("Header Files\\drivers\\terrasolid" FILES ${PDAL_DRIVERS_TERRASOLID_HPP})
@@ -711,7 +690,6 @@ source_group("Source Files\\drivers\\caris" FILES ${PDAL_DRIVERS_CARIS_CPP})
 source_group("Source Files\\drivers\\las" FILES ${PDAL_DRIVERS_LAS_CPP})
 source_group("Source Files\\drivers\\nitf" FILES ${PDAL_DRIVERS_NITF_CPP})
 source_group("Source Files\\drivers\\oci" FILES ${PDAL_DRIVERS_OCI_CPP})
-source_group("Source Files\\drivers\\pipeline" FILES ${PDAL_DRIVERS_PIPELINE_CPP})
 source_group("Source Files\\drivers\\qfit" FILES ${PDAL_DRIVERS_QFIT_CPP})
 source_group("Source Files\\drivers\\sbet" FILES ${PDAL_DRIVERS_SBET_CPP})
 source_group("Source Files\\drivers\\terrasolid" FILES ${PDAL_DRIVERS_TERRASOLID_CPP})

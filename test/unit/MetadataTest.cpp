@@ -37,9 +37,10 @@
 #include <iostream>
 #include <string>
 
-#include <pdal/Metadata.hpp>
 #include <pdal/drivers/las/Reader.hpp>
-#include <pdal/drivers/pipeline/Reader.hpp>
+#include <pdal/Metadata.hpp>
+#include <pdal/PipelineManager.hpp>
+#include <pdal/PipelineReader.hpp>
 #include "Support.hpp"
 
 #include <boost/property_tree/xml_parser.hpp>
@@ -72,9 +73,9 @@ BOOST_AUTO_TEST_CASE(test_construction)
 
     pdal::Bounds<double> b(1.1,2.2,3.3,101.1,102.2,103.3);
 
-    m.setValue<boost::uint32_t>(u32);
+    m.setValue<boost::uint32_t>(32);
 
-    BOOST_CHECK_EQUAL(m.getValue<boost::uint32_t>(), 32u);
+    BOOST_CHECK_EQUAL(m.getValue<boost::uint32_t>(), 32);
     BOOST_CHECK_EQUAL(m.getType(), "nonNegativeInteger");
 
     BOOST_CHECK_EQUAL(m.getValue<boost::int32_t>(), 32);
@@ -118,19 +119,19 @@ BOOST_AUTO_TEST_CASE(test_construction)
     BOOST_CHECK_EQUAL(m.getType(), "integer");
 
     m.setValue<boost::uint8_t>(u8);
-    BOOST_CHECK_EQUAL(m.getValue<boost::uint8_t>(), 8u);
+    BOOST_CHECK_EQUAL(m.getValue<boost::uint8_t>(), 8);
     BOOST_CHECK_EQUAL(m.getType(), "nonNegativeInteger");
 
     m.setValue<boost::uint16_t>(u16);
-    BOOST_CHECK_EQUAL(m.getValue<boost::uint16_t>(), 16u);
+    BOOST_CHECK_EQUAL(m.getValue<boost::uint16_t>(), 16);
     BOOST_CHECK_EQUAL(m.getType(), "nonNegativeInteger");
 
     m.setValue<boost::uint32_t>(u32);
-    BOOST_CHECK_EQUAL(m.getValue<boost::uint32_t>(), 32u);
+    BOOST_CHECK_EQUAL(m.getValue<boost::uint32_t>(), 32);
     BOOST_CHECK_EQUAL(m.getType(), "nonNegativeInteger");
 
     m.setValue<boost::uint64_t>(u64);
-    BOOST_CHECK_EQUAL(m.getValue<boost::uint64_t>(), 64u);
+    BOOST_CHECK_EQUAL(m.getValue<boost::uint64_t>(), 64);
     BOOST_CHECK_EQUAL(m.getType(), "nonNegativeInteger");
 }
 
@@ -201,22 +202,24 @@ BOOST_AUTO_TEST_CASE(test_metadata_stage)
 
     Metadata file_metadata = reader.getMetadata();
 
-    BOOST_CHECK_EQUAL(file_metadata.toPTree().get_child("metadata").size(), 32u);
+    BOOST_CHECK_EQUAL(file_metadata.toPTree().get_child("metadata").size(),
+        32);
 
     PointContext readerCtx;
-    Option option("filename", Support::datapath("pipeline/pipeline_metadata_reader.xml"));
-    Options options(option);
+    PipelineManager mgr;
+    PipelineReader specReader(mgr);
+    specReader.readPipeline(
+        Support::datapath("pipeline/pipeline_metadata_reader.xml"));
+    Stage *stage = mgr.getStage();
 
-    drivers::pipeline::Reader pipeline(options);
-    pipeline.prepare(readerCtx);
-    
-    Metadata pipeline_metadata = pipeline.getMetadata();
-    BOOST_CHECK_EQUAL(pipeline_metadata.toPTree().get_child("metadata").size(), 32u);
+    stage->prepare(readerCtx);
+    Metadata pipeline_metadata = stage->getMetadata();
+    BOOST_CHECK_EQUAL(
+        pipeline_metadata.toPTree().get_child("metadata").size(), 32);
 }
 
 BOOST_AUTO_TEST_CASE(test_metadata_constructor_no_throw)
 {
-
     pdal::Bounds<double> b;
     pdal::Metadata entry("name", b);
 }

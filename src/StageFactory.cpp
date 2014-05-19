@@ -84,7 +84,6 @@ MAKE_READER_CREATOR(PgPcReader, pdal::drivers::pgpointcloud::Reader)
 #endif
 #endif
 
-MAKE_READER_CREATOR(PipelineReader, pdal::drivers::pipeline::Reader)
 MAKE_READER_CREATOR(QfitReader, pdal::drivers::qfit::Reader)
 MAKE_READER_CREATOR(TerrasolidReader, pdal::drivers::terrasolid::Reader)
 
@@ -401,7 +400,6 @@ void StageFactory::registerKnownReaders()
 #endif
 #endif
 
-    REGISTER_READER(PipelineReader, pdal::drivers::pipeline::Reader);
     REGISTER_READER(QfitReader, pdal::drivers::qfit::Reader);
     REGISTER_READER(TerrasolidReader, pdal::drivers::terrasolid::Reader);
     REGISTER_READER(BpfReader, pdal::BpfReader);

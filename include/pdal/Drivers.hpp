@@ -51,8 +51,6 @@
 #include <pdal/drivers/icebridge/Reader.hpp>
 #endif
 
-#include <pdal/drivers/pipeline/Reader.hpp>
-
 #ifdef PDAL_HAVE_ORACLE
 #ifndef USE_PDAL_PLUGIN_OCI
 #include <pdal/drivers/oci/Reader.hpp>
@@ -74,11 +72,8 @@
 #endif
 #endif
 
-
-#include <pdal/drivers/pipeline/Reader.hpp>
 #include <pdal/drivers/qfit/Reader.hpp>
 #include <pdal/drivers/terrasolid/Reader.hpp>
-
 #include <pdal/drivers/text/Writer.hpp>
 
 #ifdef PDAL_HAVE_ORACLE
