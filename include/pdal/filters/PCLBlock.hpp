@@ -104,8 +104,6 @@ private:
     boost::uint64_t skipImpl(boost::uint64_t);
     boost::uint32_t readBufferImpl(PointBuffer&);
     bool atEndImpl() const;
-
-    const pdal::filters::PCLBlock& m_pclblockFilter;
 };
 
 
