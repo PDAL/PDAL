@@ -80,8 +80,8 @@ public:
 
 
     Scaling(Stage& prevStage, const Options&);
-    Scaling& operator=(const Scaling&) = delete;
-    Scaling(const Scaling&) = delete;
+    Scaling& operator=(const Scaling&);
+    Scaling(const Scaling&);
 
     static Options getDefaultOptions();
     virtual void initialize();
