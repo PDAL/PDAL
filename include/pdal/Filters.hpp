@@ -47,7 +47,9 @@
 #include <pdal/filters/HexBin.hpp>
 #include <pdal/filters/InPlaceReprojection.hpp>
 #include <pdal/filters/Mosaic.hpp>
+#ifdef PDAL_HAVE_PCL
 #include <pdal/filters/PCLBlock.hpp>
+#endif
 #include <pdal/filters/Predicate.hpp>
 #include <pdal/filters/Programmable.hpp>
 #include <pdal/filters/Reprojection.hpp>

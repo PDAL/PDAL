@@ -558,7 +558,6 @@ set(PDAL_FILTERS_HPP
   "${PDAL_FILTERS_HEADERS}/HexBin.hpp"
   "${PDAL_FILTERS_HEADERS}/InPlaceReprojection.hpp"
   "${PDAL_FILTERS_HEADERS}/Mosaic.hpp"
-  "${PDAL_FILTERS_HEADERS}/PCLBlock.hpp"
   "${PDAL_FILTERS_HEADERS}/PointBufferCache.hpp"
   "${PDAL_FILTERS_HEADERS}/Predicate.hpp"
   "${PDAL_FILTERS_HEADERS}/Programmable.hpp"
@@ -579,7 +578,6 @@ set (PDAL_FILTERS_CPP
   "${PDAL_FILTERS_SRC}/HexBin.cpp"
   "${PDAL_FILTERS_SRC}/InPlaceReprojection.cpp"
   "${PDAL_FILTERS_SRC}/Mosaic.cpp"
-  "${PDAL_FILTERS_SRC}/PCLBlock.cpp"
   "${PDAL_FILTERS_SRC}/PointBufferCache.cpp"
   "${PDAL_FILTERS_SRC}/Predicate.cpp"
   "${PDAL_FILTERS_SRC}/Programmable.cpp"  
@@ -669,7 +667,6 @@ set(PDAL_KERNEL_HPP
     ${PDAL_KERNEL_HEADERS}/Diff.hpp
     ${PDAL_KERNEL_HEADERS}/Info.hpp
     ${PDAL_KERNEL_HEADERS}/Kernel.hpp
-    ${PDAL_KERNEL_HEADERS}/PCL.hpp
     ${PDAL_KERNEL_HEADERS}/Pipeline.hpp
     ${PDAL_KERNEL_HEADERS}/Delta.hpp
     ${PDAL_KERNEL_HEADERS}/Translate.hpp
@@ -680,7 +677,6 @@ set(PDAL_KERNEL_CPP
     ${PDAL_KERNEL_SRC}/Support.cpp
     ${PDAL_KERNEL_SRC}/Diff.cpp
     ${PDAL_KERNEL_SRC}/Info.cpp
-    ${PDAL_KERNEL_SRC}/PCL.cpp
     ${PDAL_KERNEL_SRC}/Pipeline.cpp
     ${PDAL_KERNEL_SRC}/Delta.cpp
     ${PDAL_KERNEL_SRC}/Translate.cpp
@@ -688,6 +684,26 @@ set(PDAL_KERNEL_CPP
 
 list (APPEND PDAL_CPP ${PDAL_KERNEL_CPP} )
 list (APPEND PDAL_HPP ${PDAL_KERNEL_HPP} )
+
+
+#
+# pcl
+#
+set(PDAL_PCL_HPP
+    ${PDAL_KERNEL_HEADERS}/PCL.hpp
+    ${PDAL_FILTERS_HEADERS}/PCLBlock.hpp
+    )
+set(PDAL_PCL_CPP
+    ${PDAL_FILTERS_SRC}/PCLBlock.cpp
+    ${PDAL_KERNEL_SRC}/PCL.cpp
+    )
+
+if (WITH_PCL)
+    list(APPEND PDAL_HPP ${PDAL_PCL_HPP})
+    list(APPEND PDAL_CPP ${PDAL_PCL_CPP})
+endif (WITH_PCL)
+
+
 #
 # Group source files for IDE source explorers (e.g. Visual Studio)
 #
