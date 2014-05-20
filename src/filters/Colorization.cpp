@@ -355,49 +355,8 @@ void Colorization::setScaledValue(PointBuffer& data, double value,
             break;
 
         case dimension::SignedInteger:
-            if (size == 1)
-            {
-                int8_t i8 = d.removeScaling<boost::int8_t>(value);
-                data.setField(d, pointIndex, i8);
-            }
-            if (size == 2)
-            {
-                int16_t i16 = d.removeScaling<boost::int16_t>(value);
-                data.setField(d, pointIndex, i16);
-            }
-            if (size == 4)
-            {
-                int32_t i32 = d.removeScaling<boost::int32_t>(value);
-                data.setField(d, pointIndex, i32);
-            }
-            if (size == 8)
-            {
-                int64_t i64 = d.removeScaling<boost::int64_t>(value);
-                data.setField(d, pointIndex, i64);
-            }
-            break;
-
         case dimension::UnsignedInteger:
-            if (size == 1)
-            {
-                uint8_t u8 = d.removeScaling<boost::uint8_t>(value);
-                data.setField(d, pointIndex, u8);
-            }
-            if (size == 2)
-            {
-                uint16_t u16 = d.removeScaling<boost::uint16_t>(value);
-                data.setField(d, pointIndex, u16);
-            }
-            if (size == 4)
-            {
-                uint32_t u32 = d.removeScaling<boost::uint32_t>(value);
-                data.setField(d, pointIndex, u32);
-            }
-            if (size == 8)
-            {
-                uint64_t u64 = d.removeScaling<boost::uint64_t>(value);
-                data.setField(d, pointIndex, u64);
-            }
+            data.setFieldUnscaled(d, pointIndex, value);
             break;
 
         case dimension::RawByte:

@@ -545,10 +545,7 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
             {
                 double xd = dimX->applyScaling(x);
                 if (xd > 180)
-                {
-                    xd = xd - 360;
-                    x = dimX->removeScaling<boost::int32_t>(xd);
-                }
+                    x = dimX->removeScaling(xd - 360);
             }
             if (dimensions.X)
                 data.setField<boost::int32_t>(*dimensions.X, pointIndex, x);
@@ -559,8 +556,7 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
             if (dimensions.Z)
             {
                 double zd = dimensions.Z->applyScaling(z);
-                z = dimensions.Z->removeScaling<boost::int32_t>(static_cast<double>(zd));
-                data.setField<boost::int32_t>(*dimensions.Z, pointIndex, z);
+                data.setFieldUnscaled(*dimensions.Z, pointIndex, zd);
             }
 
             boost::int32_t start_pulse = Utils::read_field<boost::int32_t>(p);
@@ -639,10 +635,7 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
             {
                 double xd = dimX->applyScaling(passive_x);
                 if (xd > 180)
-                {
-                    xd = xd - 360;
-                    passive_x = dimPassiveX->removeScaling<boost::int32_t>(xd);
-                }
+                    passive_x = dimPassiveX->removeScaling(xd - 360);
             }
             if (dimensions.PassiveX)
                 data.setField<boost::int32_t>(*dimensions.PassiveX, pointIndex, passive_x);

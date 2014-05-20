@@ -247,6 +247,13 @@ public:
     void setRawField(Dimension const& dim, boost::uint32_t pointIndex,
             const void* value);
 
+    void setFieldUnscaled(pdal::Dimension const& dim, uint32_t idx,
+        double val)
+    {
+        setField(dim, idx, dim.removeScaling(val));
+    }
+
+
     /*! bulk copy all the fields from the given point into this object
         \param destPointIndex the destination point index to copy the data from
                 srcPointBuffer at srcPointIndex.
@@ -492,11 +499,16 @@ protected:
                                  T& value);
     virtual std::string printDimension(Dimension const& dimension,
         boost::uint32_t index) const;
+
+private:
+    template<class T>
+    void setFieldInternal(Dimension const& dim, boost::uint32_t pointIndex,
+        T value);
 };
 
 template <class T>
-inline void PointBuffer::setField(pdal::Dimension const& dim, PointId id,
-    T value)
+inline void PointBuffer::setFieldInternal(pdal::Dimension const& dim,
+    PointId id, T value)
 {
     PointId rawId = 0;
     if (id == m_index.size())
@@ -603,10 +615,92 @@ inline T PointBuffer::getFieldAs(pdal::Dimension const& dim,
         std::ostringstream oss;
         oss << "Unable to fetch data and convert as requested: ";
         oss << dim.getName() << ":" << dim.getInterpretationName() <<
-            "(" << val << ") -> " << Utils::typeidName<T>();
+            "(" << (double)val << ") -> " << Utils::typeidName<T>();
         throw pdal_error(oss.str());
     }
     return retval;
+}
+
+
+template<typename T>
+void PointBuffer::setField(pdal::Dimension const& dim, uint32_t idx, T val)
+{
+    uint32_t size = dim.getByteSize();
+    try {
+        switch (dim.getInterpretation())
+        {
+            case dimension::Float:
+                switch (size)
+                {
+                    case 4:
+                        setFieldInternal(dim, idx,
+                            boost::numeric_cast<float>(val));
+                        break;
+                    case 8:
+                        setFieldInternal(dim, idx,
+                            boost::numeric_cast<double>(val));
+                        break;
+                }
+                break;
+
+            case dimension::SignedInteger:
+                switch (size)
+                {
+                    case 1:
+                        setFieldInternal(dim, idx,
+                            boost::numeric_cast<int8_t>(val));
+                        break;
+                    case 2:
+                        setFieldInternal(dim, idx,
+                            boost::numeric_cast<int16_t>(val));
+                        break;
+                    case 4:
+                        setFieldInternal(dim, idx,
+                            boost::numeric_cast<int32_t>(val));
+                        break;
+                    case 8:
+                        setFieldInternal(dim, idx,
+                            boost::numeric_cast<int64_t>(val));
+                        break;
+                }
+                break;
+
+            case dimension::UnsignedInteger:
+                switch (size)
+                {
+                    case 1:
+                        setFieldInternal(dim, idx,
+                            boost::numeric_cast<uint8_t>(val));
+                        break;
+                    case 2:
+                        setFieldInternal(dim, idx,
+                            boost::numeric_cast<uint16_t>(val));
+                        break;
+                    case 4:
+                        setFieldInternal(dim, idx,
+                            boost::numeric_cast<uint32_t>(val));
+                        break;
+                    case 8:
+                        setFieldInternal(dim, idx,
+                            boost::numeric_cast<uint64_t>(val));
+                        break;
+                }
+                break;
+
+            case dimension::RawByte:
+            case dimension::Pointer:
+            case dimension::Undefined:
+                throw pdal_error("Dimension data type unable to be set.");
+        }
+    }
+    catch (boost::numeric::bad_numeric_cast& e)
+    {
+        std::ostringstream oss;
+        oss << "Unable to set data and convert as requested: ";
+        oss << dim.getName() << ":" << dim.getInterpretationName() <<
+            "(" << (double)val << ") -> " << Utils::typeidName<T>();
+        throw pdal_error(oss.str());
+    }
 }
 
 
@@ -768,8 +862,8 @@ inline void PointBuffer::scaleData(PointBuffer const& source,
             if (source_dimension.getByteSize() == 1)
             {
                 boost::int8_t v = source.getField<boost::int8_t>(source_dimension, source_index);
-                double d = source_dimension.applyScaling<double>(v);
-                d = destination_dimension.removeScaling<double>(d);
+                double d = source_dimension.applyScaling(v);
+                d = destination_dimension.removeScaling(d);
                 if (destination_dimension.getByteSize() == 4)
                     destination.setField<float>(destination_dimension, destination_index, (float)d);
                 else if (destination_dimension.getByteSize() == 8)
@@ -781,8 +875,8 @@ inline void PointBuffer::scaleData(PointBuffer const& source,
             else if (source_dimension.getByteSize() == 2)
             {
                 boost::int16_t v = source.getField<boost::int16_t>(source_dimension, source_index);
-                double d = source_dimension.applyScaling<double>(v);
-                d = destination_dimension.removeScaling<double>(d);
+                double d = source_dimension.applyScaling(v);
+                d = destination_dimension.removeScaling(d);
                 if (destination_dimension.getByteSize() == 4)
                     destination.setField<float>(destination_dimension, destination_index, (float)d);
                 else if (destination_dimension.getByteSize() == 8)
@@ -794,8 +888,8 @@ inline void PointBuffer::scaleData(PointBuffer const& source,
             else if (source_dimension.getByteSize() == 4)
             {
                 boost::int32_t v = source.getField<boost::int32_t>(source_dimension, source_index);
-                double d = source_dimension.applyScaling<double>(v);
-                d = destination_dimension.removeScaling<double>(d);
+                double d = source_dimension.applyScaling(v);
+                d = destination_dimension.removeScaling(d);
                 if (destination_dimension.getByteSize() == 4)
                     destination.setField<float>(destination_dimension, destination_index, (float)d);
                 else if (destination_dimension.getByteSize() == 8)
@@ -807,8 +901,8 @@ inline void PointBuffer::scaleData(PointBuffer const& source,
             else if (source_dimension.getByteSize() == 8)
             {
                 boost::int64_t v = source.getField<boost::int64_t>(source_dimension, source_index);
-                double d = source_dimension.applyScaling<double>(v);
-                d = destination_dimension.removeScaling<double>(d);
+                double d = source_dimension.applyScaling(v);
+                d = destination_dimension.removeScaling(d);
                 if (destination_dimension.getByteSize() == 4)
                     destination.setField<float>(destination_dimension, destination_index, (float)d);
                 else if (destination_dimension.getByteSize() == 8)
@@ -833,122 +927,26 @@ inline void PointBuffer::scaleData(PointBuffer const& source,
             if (source_dimension.getByteSize() == 1)
             {
                 boost::uint8_t v = source.getField<boost::uint8_t>(source_dimension, source_index);
-                double d = source_dimension.applyScaling<double>(v);
-
-                if (destination_dimension.getByteSize() == 1)
-                {
-                    boost::uint8_t i = destination_dimension.removeScaling<boost::uint8_t>(d);
-                    destination.setField<boost::uint8_t>(destination_dimension, destination_index, i);
-                }
-                else if (destination_dimension.getByteSize() == 2)
-                {
-                    boost::uint16_t i = destination_dimension.removeScaling<boost::uint16_t>(d);
-                    destination.setField<boost::uint16_t>(destination_dimension, destination_index, i);
-                }
-                else if (destination_dimension.getByteSize() == 4)
-                {
-                    boost::uint32_t i = destination_dimension.removeScaling<boost::uint32_t>(d);
-                    destination.setField<boost::uint32_t>(destination_dimension, destination_index, i);
-                }
-                else if (destination_dimension.getByteSize() == 8)
-                {
-                    boost::uint64_t i = destination_dimension.removeScaling<boost::uint64_t>(d);
-                    destination.setField<boost::uint64_t>(destination_dimension, destination_index, i);
-                }
-                else
-                    throw pdal_error("Unable to convert dimension from UnsignedInteger 8 to UnsignedInteger of size > 8");
+                double d = source_dimension.applyScaling(v);
+                destination.setFieldUnscaled(destination_dimension,
+                    destination_index, d);
                 return;
             }
             else if (source_dimension.getByteSize() == 2)
             {
                 boost::uint16_t v = source.getField<boost::uint16_t>(source_dimension, source_index);
-                double d = source_dimension.applyScaling<double>(v);
-
-                if (destination_dimension.getByteSize() == 1)
-                {
-                    boost::uint8_t i = destination_dimension.removeScaling<boost::uint8_t>(d);
-                    destination.setField<boost::uint8_t>(destination_dimension, destination_index, i);
-                }
-                else if (destination_dimension.getByteSize() == 2)
-                {
-                    boost::uint16_t i = destination_dimension.removeScaling<boost::uint16_t>(d);
-                    destination.setField<boost::uint16_t>(destination_dimension, destination_index, i);
-                }
-                else if (destination_dimension.getByteSize() == 4)
-                {
-                    boost::uint32_t i = destination_dimension.removeScaling<boost::uint32_t>(d);
-                    destination.setField<boost::uint32_t>(destination_dimension, destination_index, i);
-                }
-                else if (destination_dimension.getByteSize() == 8)
-                {
-                    boost::uint64_t i = destination_dimension.removeScaling<boost::uint64_t>(d);
-                    destination.setField<boost::uint64_t>(destination_dimension, destination_index, i);
-                }
-                else
-                    throw pdal_error("Unable to convert dimension from UnsignedInteger 2 to UnsignedInteger of size > 8");
-                return;
-            }
-            else if (source_dimension.getByteSize() == 4)
-            {
-                boost::uint32_t v = source.getField<boost::uint32_t>(source_dimension, source_index);
-                double d = source_dimension.applyScaling<double>(v);
-
-                if (destination_dimension.getByteSize() == 1)
-                {
-                    boost::uint8_t i = destination_dimension.removeScaling<boost::uint8_t>(d);
-                    destination.setField<boost::uint8_t>(destination_dimension, destination_index, i);
-                }
-                else if (destination_dimension.getByteSize() == 2)
-                {
-                    boost::uint16_t i = destination_dimension.removeScaling<boost::uint16_t>(d);
-                    destination.setField<boost::uint16_t>(destination_dimension, destination_index, i);
-                }
-                else if (destination_dimension.getByteSize() == 4)
-                {
-                    boost::uint32_t i = destination_dimension.removeScaling<boost::uint32_t>(d);
-                    destination.setField<boost::uint32_t>(destination_dimension, destination_index, i);
-                }
-                else if (destination_dimension.getByteSize() == 8)
-                {
-                    boost::uint64_t i = destination_dimension.removeScaling<boost::uint64_t>(d);
-                    destination.setField<boost::uint64_t>(destination_dimension, destination_index, i);
-                }
-                else
-                    throw pdal_error("Unable to convert dimension from UnsignedInteger 4 to UnsignedInteger of size > 8");
+                double d = source_dimension.applyScaling(v);
+                destination.setFieldUnscaled(destination_dimension,
+                    destination_index, d);
                 return;
             }
             else if (source_dimension.getByteSize() == 8)
             {
                 boost::uint64_t v = source.getField<boost::uint64_t>(source_dimension, source_index);
-                double d = source_dimension.applyScaling<double>(v);
-
-                if (destination_dimension.getByteSize() == 1)
-                {
-                    boost::uint8_t i = destination_dimension.removeScaling<boost::uint8_t>(d);
-                    destination.setField<boost::uint8_t>(destination_dimension, destination_index, i);
-                }
-                else if (destination_dimension.getByteSize() == 2)
-                {
-                    boost::uint16_t i = destination_dimension.removeScaling<boost::uint16_t>(d);
-                    destination.setField<boost::uint16_t>(destination_dimension, destination_index, i);
-                }
-                else if (destination_dimension.getByteSize() == 4)
-                {
-                    boost::uint32_t i = destination_dimension.removeScaling<boost::uint32_t>(d);
-                    destination.setField<boost::uint32_t>(destination_dimension, destination_index, i);
-                }
-                else if (destination_dimension.getByteSize() == 8)
-                {
-                    boost::uint64_t i = destination_dimension.removeScaling<boost::uint64_t>(d);
-                    destination.setField<boost::uint64_t>(destination_dimension, destination_index, i);
-                }
-                else
-                    throw pdal_error("Unable to convert dimension from UnsignedInteger 8 to UnsignedInteger of size > 8");
+                double d = source_dimension.applyScaling(v);
+                destination.setFieldUnscaled(destination_dimension,
+                    destination_index, d);
                 return;
-            }
-            else
-            {
-                throw pdal_error("Unable to convert dimension::UnsignedInteger >8 to dimension::UnsignedInteger of size >8");
             }
 
         }
@@ -958,8 +956,8 @@ inline void PointBuffer::scaleData(PointBuffer const& source,
             if (source_dimension.getByteSize() == 1)
             {
                 boost::uint8_t v = source.getField<boost::uint8_t>(source_dimension, source_index);
-                double d = source_dimension.applyScaling<double>(v);
-                d = destination_dimension.removeScaling<double>(d);
+                double d = source_dimension.applyScaling(v);
+                d = destination_dimension.removeScaling(d);
                 if (destination_dimension.getByteSize() == 4)
                     destination.setField<float>(destination_dimension, destination_index, (float)d);
                 else if (destination_dimension.getByteSize() == 8)
@@ -971,8 +969,8 @@ inline void PointBuffer::scaleData(PointBuffer const& source,
             else if (source_dimension.getByteSize() == 2)
             {
                 boost::uint16_t v = source.getField<boost::uint16_t>(source_dimension, source_index);
-                double d = source_dimension.applyScaling<double>(v);
-                d = destination_dimension.removeScaling<double>(d);
+                double d = source_dimension.applyScaling(v);
+                d = destination_dimension.removeScaling(d);
                 if (destination_dimension.getByteSize() == 4)
                     destination.setField<float>(destination_dimension, destination_index, (float)d);
                 else if (destination_dimension.getByteSize() == 8)
@@ -984,8 +982,8 @@ inline void PointBuffer::scaleData(PointBuffer const& source,
             else if (source_dimension.getByteSize() == 4)
             {
                 boost::uint32_t v = source.getField<boost::uint32_t>(source_dimension, source_index);
-                double d = source_dimension.applyScaling<double>(v);
-                d = destination_dimension.removeScaling<double>(d);
+                double d = source_dimension.applyScaling(v);
+                d = destination_dimension.removeScaling(d);
                 if (destination_dimension.getByteSize() == 4)
                     destination.setField<float>(destination_dimension, destination_index, (float)d);
                 else if (destination_dimension.getByteSize() == 8)
@@ -997,8 +995,8 @@ inline void PointBuffer::scaleData(PointBuffer const& source,
             else if (source_dimension.getByteSize() == 8)
             {
                 boost::uint64_t v = source.getField<boost::uint64_t>(source_dimension, source_index);
-                double d = source_dimension.applyScaling<double>(v);
-                d = destination_dimension.removeScaling<double>(d);
+                double d = source_dimension.applyScaling(v);
+                d = destination_dimension.removeScaling(d);
                 if (destination_dimension.getByteSize() == 4)
                     destination.setField<float>(destination_dimension, destination_index, (float)d);
                 else if (destination_dimension.getByteSize() == 8)

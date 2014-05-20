@@ -45,8 +45,12 @@ namespace pdal
 {
 
 template <typename T>
+class Bounds;
+
+template <typename T>
 class PDAL_DLL Range
 {
+    friend class Bounds<T>;
 private:
     T m_minimum;
     T m_maximum;

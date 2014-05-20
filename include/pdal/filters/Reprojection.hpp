@@ -66,22 +66,17 @@ public:
     SET_STAGE_ENABLED(false)
 #endif
 
-
     Reprojection(const Options&);
     Reprojection(const SpatialReference& outSRS);
     Reprojection(const SpatialReference& inSRS, const SpatialReference& outSRS);
 
-    pdal::StageSequentialIterator*
-        createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const
-        { return NULL; }
-    void processBuffer(PointBuffer& data) const;
-
 private:
-    virtual void initialize();
+    virtual void processOptions(const Options& options);
+    virtual void ready(PointContext ctx);
+    virtual void filter(PointBuffer& buffer);
+
     void updateBounds();
-    void checkImpedance();
-    void transform(double& x, double& y, double& z) const;
+    void transform(double& x, double& y, double& z);
 
     SpatialReference m_inSRS;
     SpatialReference m_outSRS;
@@ -99,30 +94,8 @@ private:
 };
 
 
-namespace iterators
-{
-namespace sequential
-{
+} // namespace filter
 
-
-class PDAL_DLL Reprojection : public pdal::FilterSequentialIterator
-{
-public:
-    Reprojection(const pdal::filters::Reprojection& filter, PointBuffer& buffer);
-
-private:
-    boost::uint64_t skipImpl(boost::uint64_t);
-    boost::uint32_t readBufferImpl(PointBuffer&);
-    bool atEndImpl() const;
-
-    const pdal::filters::Reprojection& m_reprojectionFilter;
-};
-
-
-}
-} // iterators::sequential
-
-}
-} // namespaces
+} // namespace pdal
 
 #endif

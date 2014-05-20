@@ -140,6 +140,7 @@ protected:
     PointContext m_context;
     Schema m_schema;
     Options m_options;
+    Bounds<double> m_bounds;
 
     StageOperationType getDimensionOperationType() const
         { return m_dimensionsType; }
@@ -170,7 +171,6 @@ private:
     LogPtr m_log;
     Metadata m_metadata;
     mutable boost::uint64_t m_numPoints;
-    Bounds<double> m_bounds;
     SpatialReference m_spatialReference;
 
     Stage& operator=(const Stage&); // not implemented

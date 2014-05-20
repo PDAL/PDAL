@@ -289,7 +289,16 @@ public:
             }
         }
         return false;
-    }    
+    }
+
+    template <typename XFORMER>
+    void transform(XFORMER xform)
+    {
+        xform(m_ranges[0].m_minimum, m_ranges[1].m_minimum,
+            m_ranges[2].m_minimum);
+        xform(m_ranges[0].m_maximum, m_ranges[1].m_maximum,
+            m_ranges[2].m_maximum);
+    }
 
     /// @name Equality
 

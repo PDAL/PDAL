@@ -66,11 +66,11 @@ private:
     virtual PointBufferSet run(PointBufferPtr buffer)
     {
         PointBufferSet pbSet;
-        filter(buffer);
+        filter(*buffer);
         pbSet.insert(buffer);
         return pbSet;
     }
-    virtual void filter(PointBufferPtr)
+    virtual void filter(PointBuffer& buffer)
     {}
 };
 

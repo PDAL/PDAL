@@ -351,9 +351,9 @@ void Support::check_pN(const pdal::PointBuffer& data,
     boost::int32_t y0raw = data.getField<boost::int32_t>(dimY, index);
     boost::int32_t z0raw = data.getField<boost::int32_t>(dimZ, index);
 
-    double x0 = dimX.applyScaling<boost::int32_t>(x0raw);
-    double y0 = dimY.applyScaling<boost::int32_t>(y0raw);
-    double z0 = dimZ.applyScaling<boost::int32_t>(z0raw);
+    double x0 = dimX.applyScaling(x0raw);
+    double y0 = dimY.applyScaling(y0raw);
+    double z0 = dimZ.applyScaling(z0raw);
 
     BOOST_CHECK_CLOSE(x0, xref, 0.001);
     BOOST_CHECK_CLOSE(y0, yref, 0.001);

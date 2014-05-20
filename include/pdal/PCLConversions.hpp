@@ -87,38 +87,23 @@ void PCDtoPDAL(CloudT &cloud, PointBuffer& data)
         {
             case dimension::Float:
                 for (size_t i = 0; i < cloud.points.size(); ++i)
-                    data.setField<float>(dX, i, dX.removeScaling<float>(cloud.points[i].x));
+                    data.setFieldUnscaled(dX, i, cloud.points[i].x);
                 break;
 
             case dimension::SignedInteger:
-                if (size == 1)
+                if (size == 1 || size == 2 || size == 8)
                     for (size_t i = 0; i < cloud.points.size(); ++i)
-                        data.setField<boost::int8_t>(dX, i, dX.removeScaling<boost::int8_t>(cloud.points[i].x));
-                if (size == 2)
-                    for (size_t i = 0; i < cloud.points.size(); ++i)
-                        data.setField<boost::int16_t>(dX, i, dX.removeScaling<boost::int16_t>(cloud.points[i].x));
+                        data.setFieldUnscaled(dX, i, cloud.points[i].x);
                 if (size == 4)
                     for (size_t i = 0; i < cloud.points.size(); ++i)
-                        data.setField<boost::int32_t>(dX, i, cloud.points[i].x/dX.getNumericScale());
-                        //data.setField<boost::uint16_t>(dX, i, dX.removeScaling<boost::uint16_t>(cloud.points[i].x));
-                if (size == 8)
-                    for (size_t i = 0; i < cloud.points.size(); ++i)
-                        data.setField<boost::int64_t>(dX, i, dX.removeScaling<boost::int64_t>(cloud.points[i].x));
+                        data.setField<boost::int32_t>(dX, i,
+                            cloud.points[i].x/dX.getNumericScale());
+                        //data.setFieldUnscaled(dX, i, cloud.points[i].x);
                 break;
 
             case dimension::UnsignedInteger:
-                if (size == 1)
-                    for (size_t i = 0; i < cloud.points.size(); ++i)
-                        data.setField<boost::uint8_t>(dX, i, dX.removeScaling<boost::uint8_t>(cloud.points[i].x));
-                if (size == 2)
-                    for (size_t i = 0; i < cloud.points.size(); ++i)
-                        data.setField<boost::uint16_t>(dX, i, dX.removeScaling<boost::uint16_t>(cloud.points[i].x));
-                if (size == 4)
-                    for (size_t i = 0; i < cloud.points.size(); ++i)
-                        data.setField<boost::uint32_t>(dX, i, dX.removeScaling<boost::uint32_t>(cloud.points[i].x));
-                if (size == 8)
-                    for (size_t i = 0; i < cloud.points.size(); ++i)
-                        data.setField<boost::uint64_t>(dX, i, dX.removeScaling<boost::uint64_t>(cloud.points[i].x));
+                for (size_t i = 0; i < cloud.points.size(); ++i)
+                    data.setFieldUnscaled(dX, i, cloud.points[i].x);
                 break;
 
             case dimension::RawByte:
@@ -131,88 +116,58 @@ void PCDtoPDAL(CloudT &cloud, PointBuffer& data)
         {
             case dimension::Float:
                 for (size_t i = 0; i < cloud.points.size(); ++i)
-                    data.setField<float>(dY, i, dY.removeScaling<float>(cloud.points[i].y));
+                    data.setFieldUnscaled(dY, i, cloud.points[i].y);
                 break;
-
             case dimension::SignedInteger:
-                if (size == 1)
+                if (size == 1 || size == 2 || size == 8)
                     for (size_t i = 0; i < cloud.points.size(); ++i)
-                        data.setField<boost::int8_t>(dY, i, dY.removeScaling<boost::int8_t>(cloud.points[i].y));
-                if (size == 2)
-                    for (size_t i = 0; i < cloud.points.size(); ++i)
-                        data.setField<boost::int16_t>(dY, i, dY.removeScaling<boost::int16_t>(cloud.points[i].y));
+                        data.setFieldUnscaled(dY, i, cloud.points[i].y);
                 if (size == 4)
                     for (size_t i = 0; i < cloud.points.size(); ++i)
-                        data.setField<boost::int32_t>(dY, i, cloud.points[i].y/dY.getNumericScale());
-                        //data.setField<boost::int32_t>(dY, i, dY.removeScaling<boost::int32_t>(cloud.points[i].y));
-                if (size == 8)
-                    for (size_t i = 0; i < cloud.points.size(); ++i)
-                        data.setField<boost::int64_t>(dY, i, dY.removeScaling<boost::int64_t>(cloud.points[i].y));
+                        data.setField(dY, i,
+                            cloud.points[i].y / dY.getNumericScale());
+                        //data.setFieldUnscaled(dY, i, cloud.points[i].y);
                 break;
 
             case dimension::UnsignedInteger:
-                if (size == 1)
-                    for (size_t i = 0; i < cloud.points.size(); ++i)
-                        data.setField<boost::uint8_t>(dY, i, dY.removeScaling<boost::uint8_t>(cloud.points[i].y));
-                if (size == 2)
-                    for (size_t i = 0; i < cloud.points.size(); ++i)
-                        data.setField<boost::uint16_t>(dY, i, dY.removeScaling<boost::uint16_t>(cloud.points[i].y));
-                if (size == 4)
-                    for (size_t i = 0; i < cloud.points.size(); ++i)
-                        data.setField<boost::uint32_t>(dY, i, dY.removeScaling<boost::uint32_t>(cloud.points[i].y));
-                if (size == 8)
-                    for (size_t i = 0; i < cloud.points.size(); ++i)
-                        data.setField<boost::uint64_t>(dY, i, dY.removeScaling<boost::uint64_t>(cloud.points[i].y));
+                for (size_t i = 0; i < cloud.points.size(); ++i)
+                    data.setFieldUnscaled(dY, i, cloud.points[i].y);
                 break;
 
             case dimension::RawByte:
             case dimension::Pointer:
             case dimension::Undefined:
-                throw pdal_error("Dimension data type unable to be scaled in conversion from PCL to PDAL");
+                throw pdal_error("Dimension data type unable to be scaled "
+                    "in conversion from PCL to PDAL");
         }
 
         switch (dZ.getInterpretation())
         {
             case dimension::Float:
                 for (size_t i = 0; i < cloud.points.size(); ++i)
-                    data.setField<float>(dZ, i, dZ.removeScaling<float>(cloud.points[i].z));
+                    data.setFieldUnscaled(dZ, i, cloud.points[i].z);
                 break;
 
             case dimension::SignedInteger:
-                if (size == 1)
+                if (size == 1 || size == 2 || size == 8)
                     for (size_t i = 0; i < cloud.points.size(); ++i)
-                        data.setField<boost::int8_t>(dZ, i, dZ.removeScaling<boost::int8_t>(cloud.points[i].z));
-                if (size == 2)
-                    for (size_t i = 0; i < cloud.points.size(); ++i)
-                        data.setField<boost::int16_t>(dZ, i, dZ.removeScaling<boost::int16_t>(cloud.points[i].z));
+                        data.setFieldUnscaled(dZ, i, cloud.points[i].z);
                 if (size == 4)
                     for (size_t i = 0; i < cloud.points.size(); ++i)
-                        data.setField<boost::int32_t>(dZ, i, cloud.points[i].z/dZ.getNumericScale());
-                        //data.setField<boost::int32_t>(dZ, i, dZ.removeScaling<boost::int32_t>(cloud.points[i].z));
-                if (size == 8)
-                    for (size_t i = 0; i < cloud.points.size(); ++i)
-                        data.setField<boost::int64_t>(dZ, i, dZ.removeScaling<boost::int64_t>(cloud.points[i].z));
+                        data.setField<boost::int32_t>(dZ, i,
+                            cloud.points[i].z/dZ.getNumericScale());
                 break;
 
             case dimension::UnsignedInteger:
-                if (size == 1)
-                    for (size_t i = 0; i < cloud.points.size(); ++i)
-                        data.setField<boost::uint8_t>(dZ, i, dZ.removeScaling<boost::uint8_t>(cloud.points[i].z));
-                if (size == 2)
-                    for (size_t i = 0; i < cloud.points.size(); ++i)
-                        data.setField<boost::uint16_t>(dZ, i, dZ.removeScaling<boost::uint16_t>(cloud.points[i].z));
-                if (size == 4)
-                    for (size_t i = 0; i < cloud.points.size(); ++i)
-                        data.setField<boost::uint32_t>(dZ, i, dZ.removeScaling<boost::uint32_t>(cloud.points[i].z));
-                if (size == 8)
-                    for (size_t i = 0; i < cloud.points.size(); ++i)
-                        data.setField<boost::uint64_t>(dZ, i, dZ.removeScaling<boost::uint64_t>(cloud.points[i].z));
+                for (size_t i = 0; i < cloud.points.size(); ++i)
+                    data.setFieldUnscaled(dZ, i, cloud.points[i].z);
                 break;
 
             case dimension::RawByte:
             case dimension::Pointer:
             case dimension::Undefined:
-                throw pdal_error("Dimension data type unable to be scaled in conversion from PCL to PDAL");
+                throw pdal_error("Dimension data type unable to be scaled "
+                    "in conversion from PCL to PDAL");
         }
     }
 

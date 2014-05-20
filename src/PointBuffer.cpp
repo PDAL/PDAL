@@ -534,7 +534,7 @@ std::string PointBuffer::printDimension(Dimension const& dimension,
                 else
                 {
                     boost::int8_t v = GETFIELDAS(boost::int8_t);
-                    double d = dimension.applyScaling<boost::int8_t>(v);
+                    double d = dimension.applyScaling(v);
                     output += STRINGIFY(double, d);
                 }
             }
@@ -546,7 +546,7 @@ std::string PointBuffer::printDimension(Dimension const& dimension,
                 else
                 {
                     boost::int16_t v = GETFIELDAS(boost::int16_t);
-                    double d = dimension.applyScaling<boost::int16_t>(v);
+                    double d = dimension.applyScaling(v);
                     output += STRINGIFY(double, d);
                 }
             }
@@ -558,7 +558,7 @@ std::string PointBuffer::printDimension(Dimension const& dimension,
                 else
                 {
                     boost::int32_t v = GETFIELDAS(boost::int32_t);
-                    double d = dimension.applyScaling<boost::int32_t>(v);
+                    double d = dimension.applyScaling(v);
                     output += STRINGIFY(double, d);
                 }
             }
@@ -570,7 +570,7 @@ std::string PointBuffer::printDimension(Dimension const& dimension,
                 else
                 {
                     boost::int64_t v = GETFIELDAS(boost::int64_t);
-                    double d = dimension.applyScaling<boost::int64_t>(v);
+                    double d = dimension.applyScaling(v);
                     output += STRINGIFY(double, d);
                 }
             }
@@ -584,7 +584,7 @@ std::string PointBuffer::printDimension(Dimension const& dimension,
                 else
                 {
                     boost::uint8_t v = GETFIELDAS(boost::uint8_t);
-                    double d = dimension.applyScaling<boost::uint8_t>(v);
+                    double d = dimension.applyScaling(v);
                     output += STRINGIFY(double, d);
                 }
             }
@@ -596,7 +596,7 @@ std::string PointBuffer::printDimension(Dimension const& dimension,
                 else
                 {
                     boost::uint16_t v = GETFIELDAS(boost::uint16_t);
-                    double d = dimension.applyScaling<boost::uint16_t>(v);
+                    double d = dimension.applyScaling(v);
                     output += STRINGIFY(double, d);
                 }
             }
@@ -608,7 +608,7 @@ std::string PointBuffer::printDimension(Dimension const& dimension,
                 else
                 {
                     boost::uint32_t v = GETFIELDAS(boost::uint32_t);
-                    double d = dimension.applyScaling<boost::uint32_t>(v);
+                    double d = dimension.applyScaling(v);
                     output += STRINGIFY(double, d);
                 }
             }
@@ -619,7 +619,7 @@ std::string PointBuffer::printDimension(Dimension const& dimension,
                 else
                 {
                     boost::uint64_t v = GETFIELDAS(boost::uint64_t);
-                    double d = dimension.applyScaling<boost::uint64_t>(v);
+                    double d = dimension.applyScaling(v);
                     output += STRINGIFY(double, d);
                 }
             }
@@ -634,7 +634,7 @@ std::string PointBuffer::printDimension(Dimension const& dimension,
                 else
                 {
                     float v = GETFIELDAS(float);
-                    double d = dimension.applyScaling<float>(v);
+                    double d = dimension.applyScaling(v);
                     output += STRINGIFY(float, d);
                 }
             }
@@ -645,7 +645,7 @@ std::string PointBuffer::printDimension(Dimension const& dimension,
                 else
                 {
                     double v = GETFIELDAS(double);
-                    double d = dimension.applyScaling<double>(v);
+                    double d = dimension.applyScaling(v);
                     output += STRINGIFY(double, d);
                 }
             }
@@ -771,22 +771,22 @@ double PointBuffer::applyScaling(Dimension const& d,
             if (size == 1)
             {
                 i8 = getField<boost::int8_t>(d, pointIndex);
-                output = d.applyScaling<boost::int8_t>(i8);
+                output = d.applyScaling(i8);
             }
             if (size == 2)
             {
                 i16 = getField<boost::int16_t>(d, pointIndex);
-                output = d.applyScaling<boost::int16_t>(i16);
+                output = d.applyScaling(i16);
             }
             if (size == 4)
             {
                 i32 = getField<boost::int32_t>(d, pointIndex);
-                output = d.applyScaling<boost::int32_t>(i32);
+                output = d.applyScaling(i32);
             }
             if (size == 8)
             {
                 i64 = getField<boost::int64_t>(d, pointIndex);
-                output = d.applyScaling<boost::int64_t>(i64);
+                output = d.applyScaling(i64);
             }
             break;
 
@@ -794,22 +794,22 @@ double PointBuffer::applyScaling(Dimension const& d,
             if (size == 1)
             {
                 u8 = getField<boost::uint8_t>(d, pointIndex);
-                output = d.applyScaling<boost::uint8_t>(u8);
+                output = d.applyScaling(u8);
             }
             if (size == 2)
             {
                 u16 = getField<boost::uint16_t>(d, pointIndex);
-                output = d.applyScaling<boost::uint16_t>(u16);
+                output = d.applyScaling(u16);
             }
             if (size == 4)
             {
                 u32 = getField<boost::uint32_t>(d, pointIndex);
-                output = d.applyScaling<boost::uint32_t>(u32);
+                output = d.applyScaling(u32);
             }
             if (size == 8)
             {
                 u64 = getField<boost::uint64_t>(d, pointIndex);
-                output = d.applyScaling<boost::uint64_t>(u64);
+                output = d.applyScaling(u64);
             }
             break;
 

@@ -408,11 +408,16 @@ public:
             The value ``v`` is casted to a double before math is applied.
         \endverbatim
     */
-    template<class T>
-    inline double applyScaling(T const& v) const
+    double applyScaling(double v) const
     {
-        return static_cast<double>(v) * m_numericScale + m_numericOffset;
+        return v * m_numericScale + m_numericOffset;
     }
+
+    double removeScaling(double v) const
+    {
+        return (v - m_numericOffset) / m_numericScale;
+    }
+
 
     /// Removes the scale and offset values from an imprecise double value
     /// @param v The value to descale
@@ -425,101 +430,6 @@ public:
             a std::out_of_range exception will be thrown.
         \endverbatim
     */
-#if (__GNUC__ == 4 && __GNUC_MINOR__ >= 6 && !defined(_MSC_VER))    
-# pragma GCC diagnostic push
-# pragma GCC diagnostic ignored "-Wsign-compare"
-#endif
-
-    template<class T>
-    inline T removeScaling(double const& v) const
-    {
-        double descaled = Utils::sround((v - m_numericOffset)/ m_numericScale);
-
-        T output(0);
-        boost::int64_t i64(0);
-        boost::uint64_t u64(0);
-        if (boost::is_floating_point<T>::value)
-        {   
-            output = static_cast<T>(descaled);
-            return output;
-        }
-        
-        bool bSigned(boost::is_signed<T>::value);
-        bool bGreater(false);
-        bool bLess(false);
-        if (bSigned)
-        {
-            i64 = static_cast<boost::int64_t>(descaled);
-            boost::int64_t mn =
-                static_cast<boost::int64_t>((std::numeric_limits<T>::min)()); 
-            boost::int64_t mx =
-                static_cast<boost::int64_t>((std::numeric_limits<T>::max)());
-            bGreater = (i64 > mx);
-            bLess = (i64 < mn);
-            output = static_cast<T>(i64);
-            if (!bGreater && !bLess)
-                return output;
-        }
-        else
-        {
-            u64 = static_cast<boost::uint64_t>(descaled);
-            boost::uint64_t mn =
-                static_cast<boost::uint64_t>((std::numeric_limits<T>::min)());
-            boost::uint64_t mx =
-                static_cast<boost::uint64_t>((std::numeric_limits<T>::max)());
-            bGreater = (u64 > mx);
-            bLess = (u64 < mn);
-            output = static_cast<T>(u64);
-            if (!bGreater && !bLess)
-                return output;
-        }
-
-        if (bGreater)
-        {
-            std::ostringstream oss;
-            boost::int64_t out(0);
-            if (bSigned)
-                out = static_cast<boost::int64_t>(i64);
-            else
-                out = static_cast<boost::int64_t>(u64);
-            
-            oss.precision(12);
-            oss.setf(std::ios::fixed);
-            oss << "Dimension::removeScaling: scale: '" << m_numericScale <<
-                "' and/or offset: " << m_numericOffset <<
-                "' combination causes de-scaled value to be greater than "
-                "std::numeric_limits::max for dimension '" << getFQName() <<
-                "'. " << "(v - offset)/ scale) is: (" << v << " - " <<
-                m_numericOffset << ")/" << m_numericScale <<") == '" << out <<
-                "' but max() for the datatype is: " <<
-                (std::numeric_limits<T>::max)();
-            throw std::out_of_range(oss.str());
-        }
-        else if (bLess)
-        {
-            std::ostringstream oss;
-            boost::int64_t out(0);
-            if (bSigned)
-                out = static_cast<boost::int64_t>(i64);
-            else
-                out = static_cast<boost::int64_t>(u64);
-            oss.precision(12);
-            oss.setf(std::ios::fixed);
-            oss << "Dimension::removeScaling: scale: '" << m_numericScale <<
-                "' and/or offset: " << m_numericOffset <<
-                "' combination causes de-scaled value to be less than "
-                "std::numeric_limits::min for dimension '" << getFQName() <<
-                "'. " << "(v - offset)/ scale) is: (" << v << " - " <<
-                m_numericOffset << ")/" << m_numericScale <<") == '" << out <<
-                "' but min() for the datatype is: " <<
-                (std::numeric_limits<T>::min)();
-            throw std::out_of_range(oss.str());
-        }
-        return output;
-    }
-#if (__GNUC__ == 4 && __GNUC_MINOR__ >= 6 && !defined(_MSC_VER))
-# pragma GCC diagnostic pop
-#endif
     
     /// Return the dimension::Interpretation for a given stdint.h-style
     /// type name such as `int32_t` or `uint8_t`.

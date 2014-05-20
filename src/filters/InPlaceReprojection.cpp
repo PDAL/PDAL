@@ -171,49 +171,8 @@ void InPlaceReprojection::setScaledValue(PointBuffer& data,
             break;
 
         case dimension::SignedInteger:
-            if (size == 1)
-            {
-                i8 = d.removeScaling<boost::int8_t>(value);
-                data.setField<boost::int8_t>(d, pointIndex, i8);
-            }
-            if (size == 2)
-            {
-                i16 = d.removeScaling<boost::int16_t>(value);
-                data.setField<boost::int16_t>(d, pointIndex, i16);
-            }
-            if (size == 4)
-            {
-                i32 = d.removeScaling<boost::int32_t>(value);
-                data.setField<boost::int32_t>(d, pointIndex, i32);
-            }
-            if (size == 8)
-            {
-                i64 = d.removeScaling<boost::int64_t>(value);
-                data.setField<boost::int64_t>(d, pointIndex, i64);
-            }
-            break;
-
         case dimension::UnsignedInteger:
-            if (size == 1)
-            {
-                u8 = d.removeScaling<boost::uint8_t>(value);
-                data.setField<boost::uint8_t>(d, pointIndex, u8);
-            }
-            if (size == 2)
-            {
-                u16 = d.removeScaling<boost::uint16_t>(value);
-                data.setField<boost::uint16_t>(d, pointIndex, u16);
-            }
-            if (size == 4)
-            {
-                u32 = d.removeScaling<boost::uint32_t>(value);
-                data.setField<boost::uint32_t>(d, pointIndex, u32);
-            }
-            if (size == 8)
-            {
-                u64 = d.removeScaling<boost::uint64_t>(value);
-                data.setField<boost::uint64_t>(d, pointIndex, u64);
-            }
+            data.setFieldUnscaled(d, pointIndex, value);
             break;
 
         case dimension::RawByte:

@@ -723,16 +723,16 @@ void IteratorBase::fillUserBuffer(PointBuffer& user_buffer)
         for (unsigned i =  m_buffer_position; i < howManyThisRead; ++i)
         {
             double x = m_oracle_buffer->applyScaling(src_x, i);
-            boost::int32_t xi = dst_x.removeScaling<boost::int32_t>(x);
-            user_buffer.setField<boost::int32_t>(dst_x, user_buffer.getNumPoints()+i, xi);
+            user_buffer.setFieldUnscaled(dst_x,
+                user_buffer.getNumPoints() + i, x);
 
             double y = m_oracle_buffer->applyScaling(src_y, i);
-            boost::int32_t yi = dst_y.removeScaling<boost::int32_t>(y);
-            user_buffer.setField<boost::int32_t>(dst_y, user_buffer.getNumPoints()+i, yi);
+            user_buffer.setFieldUnscaled(dst_y,
+                user_buffer.getNumPoints() + i, y);
  
             double z = m_oracle_buffer->applyScaling(src_z, i);
-            boost::int32_t zi = dst_z.removeScaling<boost::int32_t>(z);
-            user_buffer.setField<boost::int32_t>(dst_z, user_buffer.getNumPoints()+i, zi);
+            user_buffer.setFieldUnscaled(dst_z,
+                user_buffer.getNumPoints() + i, z);
         }
     }
 
