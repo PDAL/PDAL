@@ -101,7 +101,9 @@ MAKE_FILTER_CREATOR(ByteSwap, pdal::filters::ByteSwap)
 MAKE_FILTER_CREATOR(Cache, pdal::filters::Cache)
 MAKE_FILTER_CREATOR(Chipper, pdal::filters::Chipper)
 MAKE_FILTER_CREATOR(Color, pdal::filters::Color)
+#ifdef PDAL_HAVE_GDAL
 MAKE_FILTER_CREATOR(Colorization, pdal::filters::Colorization)
+#endif
 MAKE_FILTER_CREATOR(Crop, pdal::filters::Crop)
 MAKE_FILTER_CREATOR(Decimation, pdal::filters::Decimation)
 MAKE_FILTER_CREATOR(HexBin, pdal::filters::HexBin)
@@ -417,7 +419,9 @@ void StageFactory::registerKnownFilters()
     REGISTER_FILTER(Cache, pdal::filters::Cache);
     REGISTER_FILTER(Chipper, pdal::filters::Chipper);
     REGISTER_FILTER(Color, pdal::filters::Color);
+#ifdef PDAL_HAVE_GDAL
     REGISTER_FILTER(Colorization, pdal::filters::Colorization);
+#endif
     REGISTER_FILTER(Crop, pdal::filters::Crop);
     REGISTER_FILTER(Decimation, pdal::filters::Decimation);
     REGISTER_FILTER(Reprojection, pdal::filters::Reprojection);

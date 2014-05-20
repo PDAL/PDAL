@@ -20,7 +20,6 @@ SET(PDAL_UNITTEST_TEST_SRC
     drivers/caris/CarisReaderTest.cpp
     filters/ChipperTest.cpp
     filters/ColorFilterTest.cpp
-    filters/ColorizationFilterTest.cpp
     ConfigTest.cpp
     filters/CropFilterTest.cpp
     filters/DecimationFilterTest.cpp
@@ -124,6 +123,7 @@ endif (WITH_SQLITE)
 if (WITH_GDAL)
     set(PDAL_GDAL_TEST_CPP
         GDALUtilsTest.cpp
+        filters/ColorizationFilterTest.cpp
         drivers/nitf/NitfReaderTest.cpp
         )
 

@@ -32,7 +32,6 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/Filter.hpp"
   "${PDAL_HEADERS_DIR}/Filters.hpp"
   "${PDAL_HEADERS_DIR}/FilterIterator.hpp"
-  "${PDAL_HEADERS_DIR}/GDALUtils.hpp"
   "${PDAL_HEADERS_DIR}/GlobalEnvironment.hpp"
   "${PDAL_HEADERS_DIR}/gitsha.h"
   "${PDAL_HEADERS_DIR}/IStream.hpp"
@@ -108,10 +107,6 @@ set(PDAL_BASE_CPP
   third/md5-pdal.c
   ${PDAL_XML_SRC}
 )
-
-if (GDAL_FOUND)
-    set (PDAL_BASE_CPP  GDALUtils.cpp ${PDAL_BASE_CPP})
-endif(GDAL_FOUND)
 
 list (APPEND PDAL_CPP ${PDAL_BASE_CPP} )
 list (APPEND PDAL_HPP ${PDAL_BASE_HPP} )
@@ -558,7 +553,6 @@ set(PDAL_FILTERS_HPP
   "${PDAL_FILTERS_HEADERS}/Cache.hpp"
   "${PDAL_FILTERS_HEADERS}/Chipper.hpp"
   "${PDAL_FILTERS_HEADERS}/Color.hpp"
-  "${PDAL_FILTERS_HEADERS}/Colorization.hpp"
   "${PDAL_FILTERS_HEADERS}/Crop.hpp"
   "${PDAL_FILTERS_HEADERS}/Decimation.hpp"
   "${PDAL_FILTERS_HEADERS}/HexBin.hpp"
@@ -580,7 +574,6 @@ set (PDAL_FILTERS_CPP
   "${PDAL_FILTERS_SRC}/Cache.cpp"
   "${PDAL_FILTERS_SRC}/Chipper.cpp"
   "${PDAL_FILTERS_SRC}/Color.cpp"
-  "${PDAL_FILTERS_SRC}/Colorization.cpp"
   "${PDAL_FILTERS_SRC}/Crop.cpp"
   "${PDAL_FILTERS_SRC}/Decimation.cpp"
   "${PDAL_FILTERS_SRC}/HexBin.cpp"
@@ -599,6 +592,25 @@ set (PDAL_FILTERS_CPP
 
 list (APPEND PDAL_CPP ${PDAL_FILTERS_CPP} )
 list (APPEND PDAL_HPP ${PDAL_FILTERS_HPP} )
+
+
+#
+# Core components that depend on GDAL
+#
+set(PDAL_GDAL_HPP
+    "${PDAL_HEADERS_DIR}/GDALUtils.hpp"
+    "${PDAL_FILTERS_HEADERS}/Colorization.hpp"
+    )
+
+set(PDAL_GDAL_CPP
+    GDALUtils.cpp
+    "${PDAL_FILTERS_SRC}/Colorization.cpp"
+    )
+
+if (WITH_GDAL)
+    list(APPEND PDAL_HPP ${PDAL_GDAL_HPP})
+    list(APPEND PDAL_CPP ${PDAL_GDAL_CPP})
+endif (WITH_GDAL)
 
 
 #
