@@ -154,6 +154,7 @@ namespace sequential
 
 PCLBlock::PCLBlock(const pdal::filters::PCLBlock& filter, PointBuffer& buffer)
     : pdal::FilterSequentialIterator(filter, buffer)
+    , m_pclblockFilter(filter)
 {
     return;
 }
