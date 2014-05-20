@@ -277,6 +277,10 @@ pdal::Schema Reader::fetchSchema() const
     oss << "SELECT schema FROM pointcloud_formats WHERE pcid = " << pcid;
 
     char *xml_str = pg_query_once(m_session, oss.str());
+    if (!xml_str)
+    {
+        throw pdal_error("Unable to fetch schema from `pointcloud_formats`");
+    }
     std::string xml = std::string(xml_str);
     free(xml_str);
 

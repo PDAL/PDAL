@@ -20,6 +20,9 @@ mark_as_advanced(CMAKE_VERBOSE_MAKEFILE)
 # Path to additional CMake modules
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/modules" ${CMAKE_MODULE_PATH})
 
+# Provided modules
+include(CMakeDependentOption)
+
 
 #------------------------------------------------------------------------------
 # PDAL general settings
@@ -381,6 +384,13 @@ if (WITH_SQLITE)
 endif()
 
 option(WITH_PGPOINTCLOUD "Choose if PostgreSQL PointCloud support should be built" TRUE)
+cmake_dependent_option(
+    WITH_PGPOINTCLOUD_TESTS
+    "Choose if PostgreSQL PointCloud tests should be built"
+    OFF
+    WITH_PGPOINTCLOUD
+    OFF
+    )
 if (WITH_PGPOINTCLOUD)
     find_package(PostgreSQL)
     if (POSTGRESQL_FOUND)

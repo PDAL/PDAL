@@ -166,6 +166,29 @@ if (WITH_HDF5)
     ENDFOREACH(file)
 endif(WITH_HDF5)
 
+if (WITH_PGPOINTCLOUD AND WITH_PGPOINTCLOUD_TESTS)
+    set(PDAL_PGPOINTCLOUD_TEST_CPP
+        drivers/pgpointcloud/PgpointcloudWriterTest.cpp
+        )
+
+    set(PGPOINTCLOUD_TEST_DB_HOST localhost CACHE STRING "Postgres test database host")
+    set(PGPOINTCLOUD_TEST_DB_PORT 5432 CACHE STRING "Postgres test database port")
+    set(PGPOINTCLOUD_TEST_DB_NAME pdal_test CACHE STRING
+        "Postgres test database name, must exist and must be able to create databases")
+    set(PGPOINTCLOUD_TEST_DB_TEMPNAME pdal_test_tmp CACHE STRING "Postgres test database temp database name")
+
+    configure_file(
+        drivers/pgpointcloud/Support.hpp.in
+        ${CMAKE_CURRENT_BINARY_DIR}/drivers/pgpointcloud/Support.hpp
+        )
+
+    set(PDAL_UNITTEST_TEST_SRC
+        ${PDAL_UNITTEST_TEST_SRC}
+        ${PDAL_PGPOINTCLOUD_TEST_CPP}
+        CACHE INTERNAL "source files for test"
+        )
+endif (WITH_PGPOINTCLOUD AND WITH_PGPOINTCLOUD_TESTS)
+
 set(PDAL_UNITTEST_SOURCES "")
 FOREACH(file ${PDAL_UNITTEST_TEST_SRC})
     SET(PDAL_UNITTEST_SOURCES "${PDAL_UNITTEST_SOURCES};${file}"
@@ -194,6 +217,7 @@ source_group("Source Files\\config" FILES ${PDAL_UNITTEST_CONFIG_SRC})
 
 INCLUDE_DIRECTORIES(
     .
+    ${CMAKE_CURRENT_BINARY_DIR}
     ../../include
     ${GDAL_INCLUDE_DIR}
     ${GEOTIFF_INCLUDE_DIR}

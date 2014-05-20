@@ -78,11 +78,8 @@ public:
     SET_STAGE_LINK("http://pdal.io/stages/filters.scaling.html")  
     SET_STAGE_ENABLED(true)
 
-
     Scaling(const Options& options) : Filter(options)
         {}
-    Scaling& operator=(const Scaling&) = delete;
-    Scaling(const Scaling&) = delete;
 
     static Options getDefaultOptions();
 
@@ -98,6 +95,11 @@ public:
     dimension::Interpretation getInterpretation(std::string t) const;
     
 private:
+    // Not implemented
+    Scaling& operator=(const Scaling&);
+    // Not implemented
+    Scaling(const Scaling&);
+
     void checkImpedance();
     Schema alterSchema(Schema const& schema);
     virtual void initialize();

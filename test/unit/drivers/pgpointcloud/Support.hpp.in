@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2013, Bradley J Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2014, Peter J. Gadomski (pete.gadomski@gmail.com)
 *
 * All rights reserved.
 *
@@ -32,82 +32,32 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_FILTERS_PCLBLOCK_HPP
-#define INCLUDED_FILTERS_PCLBLOCK_HPP
+#ifndef UNITTEST_DRIVERS_PGPOINTCLOUD_SUPPORT_INCLUDED
+#define UNITTEST_DRIVERS_PGPOINTCLOUD_SUPPORT_INCLUDED
 
-#include <pdal/Filter.hpp>
-#include <pdal/FilterIterator.hpp>
-
-#include <boost/shared_ptr.hpp>
-
-#ifdef PDAL_HAVE_PCL
-// pcl includes
-#endif
 
 namespace pdal
 {
-class PointBuffer;
-
-namespace filters
+namespace drivers
+{
+namespace pgpointcloud
 {
 
 
-class PDAL_DLL PCLBlock : public Filter
-{
-public:
-    SET_STAGE_NAME("filters.pclblock", "PCL Block implementation")
-    SET_STAGE_LINK("http://www.pdal.io/stages/filters.pclblock.html")  
-#ifdef PDAL_HAVE_PCL
-    SET_STAGE_ENABLED(true)
-#else
-    SET_STAGE_ENABLED(false)
-#endif
-        
-    PCLBlock(const Options& options) : Filter(options)
-        {}
-    ~PCLBlock()
-        {}
+static const std::string testDbHost("@PGPOINTCLOUD_TEST_DB_HOST@");
+static const std::string testDbPort("@PGPOINTCLOUD_TEST_DB_PORT@");
+static const std::string testDbName("@PGPOINTCLOUD_TEST_DB_NAME@");
+static const std::string testDbTempname("@PGPOINTCLOUD_TEST_DB_TEMPNAME@");
 
-    pdal::StageSequentialIterator*
-    createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const
-    {
-        throw pdal::not_yet_implemented(
-            "PCLBlock random iterator not implemented");
-    }
-
-    boost::uint32_t processBuffer(PointBuffer& srcData, std::string& filename,
-                                  PointBuffer& dstData) const;
-
-private:
-    PCLBlock& operator=(const PCLBlock&); // not implemented
-    PCLBlock(const PCLBlock&); // not implemented
-};
-
-namespace iterators
-{
-namespace sequential
-{
+static const std::string testDbConn(std::string("dbname='@PGPOINTCLOUD_TEST_DB_NAME@' ") +
+        "host='@PGPOINTCLOUD_TEST_DB_HOST@' port='@PGPOINTCLOUD_TEST_DB_PORT@'");
+static const std::string testDbTempConn(std::string("dbname='@PGPOINTCLOUD_TEST_DB_TEMPNAME@'") +
+        "host='@PGPOINTCLOUD_TEST_DB_HOST@' port='@PGPOINTCLOUD_TEST_DB_PORT@'");
 
 
-class PDAL_DLL PCLBlock : public pdal::FilterSequentialIterator
-{
-public:
-    PCLBlock(const pdal::filters::PCLBlock& filter, PointBuffer& buffer);
-
-private:
-    boost::uint64_t skipImpl(boost::uint64_t);
-    boost::uint32_t readBufferImpl(PointBuffer&);
-    bool atEndImpl() const;
-};
+}
+}
+} // namespace pdal::drivers::pgpointcloud
 
 
-
-} // sequential
-} // iterators
-
-} // filters
-} // pdal
-
-#endif
-
+#endif // UNITTEST_DRIVERS_PGPOINTCLOUD_SUPPORT_INCLUDED
