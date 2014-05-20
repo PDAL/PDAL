@@ -223,29 +223,13 @@ public:
             saturated.
         \endverbatim
     */
-    template<class T>
-    void setField(Dimension const& dim, boost::uint32_t pointIndex, T value);
+    template<typename T>
+    void setField(Dimension const& dim, PointId idx, T val);
 
-    /*! set the value for a given  :cpp:class:`pdal::Dimension` dim
-        at the given point index, inferring the size of the value from
-        the byteSize of the dimension.
-        \param dim The dimension to select.
-        \param pointIndex The point index of the PointBuffer to select.
-        \param value The value to set, which must have a width of at least
-        dim.byteSize().
-        \verbatim embed:rst
-        .. warning::
-
-            This operation performs a memcpy from input parameter 'value'
-            of length dim.getByteSize(), so 'value' must be guaranteed by
-            the caller to be at least as long as the dimension's byte size.
-            This operation will hammer the contents of the pdal::Dimension
-            with the contents of parameter 'value', so their underlying
-            types should be ensured to match via an accurate schema.
-        \endverbatim
-    */
-    void setRawField(Dimension const& dim, boost::uint32_t pointIndex,
-            const void* value);
+    void setRawField(Dimension const& dim, PointId idx, void *val)
+    {
+        setFieldInternal(dim, idx, val);
+    }
 
     void setFieldUnscaled(pdal::Dimension const& dim, uint32_t idx,
         double val)
@@ -501,32 +485,12 @@ protected:
         boost::uint32_t index) const;
 
 private:
-    template<class T>
-    void setFieldInternal(Dimension const& dim, boost::uint32_t pointIndex,
-        T value);
-};
+    template<typename IN, typename OUT>
+    void convertAndSet(pdal::Dimension const& dim, PointId idx, IN in);
 
-template <class T>
-inline void PointBuffer::setFieldInternal(pdal::Dimension const& dim,
-    PointId id, T value)
-{
-    PointId rawId = 0;
-    if (id == m_index.size())
-    {
-        rawId = m_context.getRawPtBuf()->addPoint();
-        m_index.resize(id + 1);
-        m_index[id] = rawId;
-    }
-    else if (id > m_index.size())
-    {
-        std::cerr << "Point index must increment.\n";
-        //error - throw?
-        return;
-    }
-    else
-        rawId = m_index[id];
-    m_context.getRawPtBuf()->setField(dim, rawId, value);
-}
+    inline void setFieldInternal(Dimension const& dim, PointId pointIndex,
+        void *value);
+};
 
 template <class T>
 T PointBuffer::getField(pdal::Dimension const& dim, PointId id) const
@@ -622,6 +586,15 @@ inline T PointBuffer::getFieldAs(pdal::Dimension const& dim,
 }
 
 
+template<typename IN, typename OUT>
+void PointBuffer::convertAndSet(pdal::Dimension const& dim, PointId idx,
+    IN in)
+{
+    OUT out = boost::numeric_cast<OUT>(in);
+    setFieldInternal(dim, idx, (void *)&out);
+}
+
+
 template<typename T>
 void PointBuffer::setField(pdal::Dimension const& dim, uint32_t idx, T val)
 {
@@ -633,12 +606,10 @@ void PointBuffer::setField(pdal::Dimension const& dim, uint32_t idx, T val)
                 switch (size)
                 {
                     case 4:
-                        setFieldInternal(dim, idx,
-                            boost::numeric_cast<float>(val));
+                        convertAndSet<T, float>(dim, idx, val);
                         break;
                     case 8:
-                        setFieldInternal(dim, idx,
-                            boost::numeric_cast<double>(val));
+                        convertAndSet<T, double>(dim, idx, val);
                         break;
                 }
                 break;
@@ -647,20 +618,16 @@ void PointBuffer::setField(pdal::Dimension const& dim, uint32_t idx, T val)
                 switch (size)
                 {
                     case 1:
-                        setFieldInternal(dim, idx,
-                            boost::numeric_cast<int8_t>(val));
+                        convertAndSet<T, int8_t>(dim, idx, val);
                         break;
                     case 2:
-                        setFieldInternal(dim, idx,
-                            boost::numeric_cast<int16_t>(val));
+                        convertAndSet<T, int16_t>(dim, idx, val);
                         break;
                     case 4:
-                        setFieldInternal(dim, idx,
-                            boost::numeric_cast<int32_t>(val));
+                        convertAndSet<T, int32_t>(dim, idx, val);
                         break;
                     case 8:
-                        setFieldInternal(dim, idx,
-                            boost::numeric_cast<int64_t>(val));
+                        convertAndSet<T, int64_t>(dim, idx, val);
                         break;
                 }
                 break;
@@ -669,25 +636,24 @@ void PointBuffer::setField(pdal::Dimension const& dim, uint32_t idx, T val)
                 switch (size)
                 {
                     case 1:
-                        setFieldInternal(dim, idx,
-                            boost::numeric_cast<uint8_t>(val));
+                        convertAndSet<T, uint8_t>(dim, idx, val);
                         break;
                     case 2:
-                        setFieldInternal(dim, idx,
-                            boost::numeric_cast<uint16_t>(val));
+                        convertAndSet<T, uint16_t>(dim, idx, val);
                         break;
                     case 4:
-                        setFieldInternal(dim, idx,
-                            boost::numeric_cast<uint32_t>(val));
+                        convertAndSet<T, uint32_t>(dim, idx, val);
                         break;
                     case 8:
-                        setFieldInternal(dim, idx,
-                            boost::numeric_cast<uint64_t>(val));
+                        convertAndSet<T, uint64_t>(dim, idx, val);
                         break;
                 }
                 break;
 
             case dimension::RawByte:
+                setFieldInternal(dim, idx, &val);
+                break;
+
             case dimension::Pointer:
             case dimension::Undefined:
                 throw pdal_error("Dimension data type unable to be set.");
@@ -702,6 +668,29 @@ void PointBuffer::setField(pdal::Dimension const& dim, uint32_t idx, T val)
         throw pdal_error(oss.str());
     }
 }
+
+
+inline void PointBuffer::setFieldInternal(pdal::Dimension const& dim,
+    PointId id, void *value)
+{
+    PointId rawId = 0;
+    if (id == m_index.size())
+    {
+        rawId = m_context.getRawPtBuf()->addPoint();
+        m_index.resize(id + 1);
+        m_index[id] = rawId;
+    }
+    else if (id > m_index.size())
+    {
+        std::cerr << "Point index must increment.\n";
+        //error - throw?
+        return;
+    }
+    else
+        rawId = m_index[id];
+    m_context.getRawPtBuf()->setField(dim, rawId, value);
+}
+
 
 
 #ifdef PDAL_COMPILER_MSVC

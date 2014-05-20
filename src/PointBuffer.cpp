@@ -131,49 +131,6 @@ PointBuffer& PointBuffer::operator=(PointBuffer const& rhs)
     return *this;
 }
 
-void PointBuffer::setRawField(
-        Dimension const& dim,
-        boost::uint32_t pointIndex,
-        const void* value)
-{
-    if (!getBufferByteLength())
-        return;
-
-    if (dim.getPosition() == -1)
-    {
-        throw buffer_error(
-            "This dimension has no identified position in a schema.");
-    }
-    
-    pointbuffer::PointBufferByteSize point_start_byte_position(0); 
-    pointbuffer::PointBufferByteSize offset(0);
-    
-    if (m_orientation == schema::POINT_INTERLEAVED)
-    {
-        point_start_byte_position =
-            static_cast<pointbuffer::PointBufferByteSize>(pointIndex) * \
-            static_cast<pointbuffer::PointBufferByteSize>(m_byteSize); 
-        offset = point_start_byte_position + \
-            static_cast<pointbuffer::PointBufferByteSize>(dim.getByteOffset());
-    } 
-    else if (m_orientation == schema::DIMENSION_INTERLEAVED)
-    {
-        point_start_byte_position =
-            static_cast<pointbuffer::PointBufferByteSize>(m_capacity) *
-            static_cast<pointbuffer::PointBufferByteSize>(dim.getByteOffset());
-        offset = point_start_byte_position +
-            static_cast<pointbuffer::PointBufferByteSize>(dim.getByteSize()) *
-            static_cast<pointbuffer::PointBufferByteSize>(pointIndex);
-    }
-    else
-    {
-        throw buffer_error("unknown pdal::Schema::m_orientation provided!");
-    }
-
-    void* p = static_cast<void*>(m_data.get() + offset);
-
-    std::memcpy(p, value, dim.getByteSize());
-}
 
 void PointBuffer::reset(Schema const& new_schema)
 {

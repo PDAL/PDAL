@@ -60,8 +60,12 @@ public:
         return m_numPts++;
     }
 
-    template <typename T>
-    void setField(const Dimension& dim, PointId idx, T value); 
+    void setField(const Dimension& dim, PointId idx, void *value)
+    {
+        size_t offset = pointsToBytes(idx) + dim.getByteOffset();
+        memcpy(m_buf.data() + offset, value, dim.getByteSize());
+    }
+
     template <typename T>
     T getField(const Dimension& dim, PointId idx);
 
@@ -76,14 +80,6 @@ private:
 
 };
 typedef std::shared_ptr<RawPtBuf> RawPtBufPtr;
-
-
-template <typename T>
-void RawPtBuf::setField(const Dimension& dim, PointId idx, T value)
-{
-    size_t offset = pointsToBytes(idx) + dim.getByteOffset();
-    memcpy(m_buf.data() + offset, &value, sizeof(T));
-}
 
 
 template <typename T>
