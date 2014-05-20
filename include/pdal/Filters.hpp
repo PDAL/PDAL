@@ -50,8 +50,10 @@
 #ifdef PDAL_HAVE_PCL
 #include <pdal/filters/PCLBlock.hpp>
 #endif
+#ifdef PDAL_HAVE_PYTHON
 #include <pdal/filters/Predicate.hpp>
 #include <pdal/filters/Programmable.hpp>
+#endif
 #include <pdal/filters/Reprojection.hpp>
 #include <pdal/filters/Scaling.hpp>
 #include <pdal/filters/Selector.hpp>
