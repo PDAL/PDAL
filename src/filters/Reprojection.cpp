@@ -116,7 +116,9 @@ void Reprojection::processOptions(const Options& options)
 void Reprojection::ready(PointContext ctx)
 {
     if (m_inferInputSRS)
+    {
         m_inSRS = getPrevStage().getSpatialReference();
+    }
 
 #ifdef PDAL_HAVE_GDAL
     m_gdal_debug = boost::shared_ptr<pdal::gdal::Debug>(
@@ -170,15 +172,9 @@ void Reprojection::ready(PointContext ctx)
 
 void Reprojection::transform(double& x, double& y, double& z)
 {
-
-    x *= 2;
-    y *= 2;
-    z *= 2;
-
-/**
 #ifdef PDAL_HAVE_GDAL
     int ret = OCTTransform(m_transform_ptr.get(), 1, &x, &y, &z);
-    if (ret != 0)
+    if (ret == 0)
     {
         std::ostringstream msg;
         msg << "Could not project point for ReprojectionTransform::" <<
@@ -190,7 +186,6 @@ void Reprojection::transform(double& x, double& y, double& z)
     boost::ignore_unused_variable_warning(y);
     boost::ignore_unused_variable_warning(z);
 #endif
-**/
 }
 
 
@@ -212,9 +207,14 @@ void Reprojection::filter(PointBuffer& data)
 
         transform(x, y, z);
 
-        data.setField(dimX, id, x);
-        data.setField(dimY, id, y);
-        data.setField(dimZ, id, z);
+        // If you get an exception out of this, you're probably reading from
+        // a scaled int and writing to a scaled int and you've overflowed
+        // the integer.
+        // ABELL - Need auto-scaling to deal with this, or always use X,Y,Z
+        //   as doubles, or something more sophisticated..
+        data.setFieldUnscaled(dimX, id, x);
+        data.setFieldUnscaled(dimY, id, y);
+        data.setFieldUnscaled(dimZ, id, z);
     }
 }
 

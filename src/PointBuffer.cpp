@@ -82,12 +82,13 @@ PointBuffer::PointBuffer()
     m_uuid = gen();
 }
 
-PointBuffer::PointBuffer(PointContext context)
-    : m_bounds(Bounds<double>::getDefaultSpatialExtent())
-    , m_context(context)
-    , m_byteSize(0)
-    , m_orientation(schema::POINT_INTERLEAVED)
-    , m_metadata("pointbuffer")
+PointBuffer::PointBuffer(PointContext context) :
+    m_data_size(0),
+    m_bounds(Bounds<double>::getDefaultSpatialExtent()),
+    m_context(context),
+    m_byteSize(0),
+    m_orientation(schema::POINT_INTERLEAVED),
+    m_metadata("pointbuffer")
 {
     GlobalEnvironment& env = pdal::GlobalEnvironment::get();
     boost::uuids::basic_random_generator<boost::mt19937> gen(env.getRNG());

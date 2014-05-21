@@ -663,8 +663,8 @@ void PointBuffer::setField(pdal::Dimension const& dim, uint32_t idx, T val)
     {
         std::ostringstream oss;
         oss << "Unable to set data and convert as requested: ";
-        oss << dim.getName() << ":" << dim.getInterpretationName() <<
-            "(" << (double)val << ") -> " << Utils::typeidName<T>();
+        oss << dim.getName() << ":" << Utils::typeidName<T>() <<
+            "(" << (double)val << ") -> " << dim.getInterpretationName();
         throw pdal_error(oss.str());
     }
 }

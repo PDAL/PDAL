@@ -52,6 +52,7 @@ class StageSequentialIterator;
 class StageRandomIterator;
 class StageBlockIterator;
 class StageRunner;
+class StageTester;
 //
 // supported options:
 //   <uint32>id
@@ -61,6 +62,7 @@ class StageRunner;
 
 class PDAL_DLL Stage
 {
+    friend class StageTester;
     friend class StageRunner;
 public:
     Stage();

@@ -49,8 +49,11 @@ namespace pdal
 //   <uint32>verbose
 //
 
+class FilterTester;
+
 class PDAL_DLL Filter : public Stage
 {
+    friend class FilterTester;
 public:
     Filter(const Options& options) : Stage(options)
         {}
