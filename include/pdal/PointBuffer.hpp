@@ -51,6 +51,7 @@
 #include <pdal/Metadata.hpp>
 #include <pdal/third/nanoflann.hpp>
 
+#include <set>
 #include <vector>
 
 namespace pdal
@@ -485,8 +486,8 @@ protected:
         boost::uint32_t index) const;
 
 private:
-    template<typename IN, typename OUT>
-    void convertAndSet(pdal::Dimension const& dim, PointId idx, IN in);
+    template<typename T_IN, typename T_OUT>
+    void convertAndSet(pdal::Dimension const& dim, PointId idx, T_IN in);
 
     inline void setFieldInternal(Dimension const& dim, PointId pointIndex,
         void *value);
@@ -586,11 +587,11 @@ inline T PointBuffer::getFieldAs(pdal::Dimension const& dim,
 }
 
 
-template<typename IN, typename OUT>
+template<typename T_IN, typename T_OUT>
 void PointBuffer::convertAndSet(pdal::Dimension const& dim, PointId idx,
-    IN in)
+    T_IN in)
 {
-    OUT out = boost::numeric_cast<OUT>(in);
+    T_OUT out = boost::numeric_cast<T_OUT>(in);
     setFieldInternal(dim, idx, (void *)&out);
 }
 
