@@ -117,8 +117,6 @@ class Base
 public:
     Base(pdal::drivers::las::Reader const& reader);
     ~Base();
-    Base& operator=(Base const&) = delete;
-    Base(Base const&) = delete; // not implemented
 
 protected:
     point_count_t processBuffer(PointBuffer& PointBuffer,
@@ -137,6 +135,9 @@ protected:
 #endif
 
 private:
+    Base& operator=(Base const&);
+    Base(Base const&); // not implemented
+
     void initialize();
     void loadPoint(PointBuffer& data, PointDimensions *dimensions,
         char *buf, size_t bufsize);
