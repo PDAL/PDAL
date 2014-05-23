@@ -32,8 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_PDAL_MACROS_HPP
-#define INCLUDED_PDAL_MACROS_HPP
+#pragma once
 
 #include <pdal/pdal_internal.hpp>
 //
@@ -115,5 +114,16 @@
     PDAL_C_END 
 
 
+#ifdef _WIN32
+inline long lround(double d) 
+{
+    long l;
+
+    if (d < 0)
+        l = (long)ceil(d - .5);
+    else
+        l = (long)floor(d + .5);
+    return l;
+}
 #endif
 
