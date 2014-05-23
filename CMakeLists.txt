@@ -660,6 +660,16 @@ if (USE_PDAL_PLUGIN_TEXT OR USE_PDAL_PLUGIN_SOCI OR USE_PDAL_PLUGIN_OCI OR
   endif()
 endif()
 
+# check for demangling support
+try_compile(DEMANGLER_FOUND
+    ${CMAKE_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}/cmake/check_demangle.cpp
+)
+
+if(DEMANGLER_FOUND)
+    set(PDAL_HAVE_DEMANGLER 1)
+endif()
+
 #------------------------------------------------------------------------------
 # installation commands
 #------------------------------------------------------------------------------
