@@ -46,8 +46,8 @@ namespace pdal
 class RawPtBuf
 {
 public:
-    RawPtBuf(SchemaPtr schema) : m_numPts{0}, m_allocPts{0},
-        m_schema{schema}
+    RawPtBuf(SchemaPtr schema) : m_numPts(0), m_allocPts(0),
+        m_schema(schema)
     {}
 
     PointId addPoint()
