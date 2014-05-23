@@ -191,8 +191,6 @@ void Reprojection::transform(double& x, double& y, double& z)
 
 void Reprojection::filter(PointBuffer& data)
 {
-    const boost::uint32_t numPoints = data.getNumPoints();
-
     const Schema& schema = data.getSchema();
 
     Dimension const& dimX = schema.getDimension("X");

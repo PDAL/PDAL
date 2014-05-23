@@ -236,6 +236,13 @@ public:
                                      string_ref ns = string_ref(),
                                      std::string* errorMsg = 0) const;
 
+    Dimension *getDimensionPtr(string_ref name, string_ref ns = string_ref())
+    {
+        const Dimension *d =
+            const_cast<const Schema *>(this)->getDimensionPtr(name, ns);
+        return const_cast<Dimension *>(d);
+    }
+
     /// @return a boost::optional-wrapped const& to a Dimension with the
     /// given name and namespace. If no matching dimension is found, the
     /// optional will be empty.

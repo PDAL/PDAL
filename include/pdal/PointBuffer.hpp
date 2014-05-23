@@ -586,11 +586,16 @@ inline T PointBuffer::getFieldAs(pdal::Dimension const& dim,
 }
 
 
-template<typename IN, typename OUT>
+template<typename T_IN, typename T_OUT>
 void PointBuffer::convertAndSet(pdal::Dimension const& dim, PointId idx,
-    IN in)
+    T_IN in)
 {
-    OUT out = boost::numeric_cast<OUT>(in);
+    T_OUT out;
+
+    if (std::is_integral<T_OUT>::value)
+        out = boost::numeric_cast<T_OUT>(lround(in));
+    else
+        out = boost::numeric_cast<T_OUT>(in);
     setFieldInternal(dim, idx, (void *)&out);
 }
 
