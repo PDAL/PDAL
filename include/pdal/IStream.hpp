@@ -56,7 +56,7 @@ class IStream
 public:
     IStream(const std::string& filename)
         { m_stream = m_fstream = new std::ifstream(filename); }
-    IStream(std::istream *stream) : m_stream{stream}, m_fstream{NULL}
+    IStream(std::istream *stream) : m_stream(stream), m_fstream(NULL)
         {}
     ~IStream()
         { delete m_fstream; }
