@@ -18,7 +18,7 @@ SET(PDAL_UNITTEST_TEST_SRC
 #    filters/ByteSwapFilterTest.cpp
 #    filters/CacheFilterTest.cpp
 #    drivers/caris/CarisReaderTest.cpp
-#    filters/ChipperTest.cpp
+    filters/ChipperTest.cpp
 #    filters/ColorFilterTest.cpp
 #    filters/ColorizationFilterTest.cpp
 #    ConfigTest.cpp
