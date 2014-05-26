@@ -131,6 +131,8 @@ public:
     point_count_t size() const
         { return m_index.size(); }
 
+    inline void appendPoint(PointBuffer& buffer, PointId id);
+
     /// sets the number of active points for the PointBuffer.
     /// @param v number of points to set.
     virtual void setNumPoints(boost::uint32_t v)
@@ -156,6 +158,10 @@ public:
     /// was given at construction time.
     const Schema& getSchema() const
         { return *(m_context.getSchema()); }
+
+    /// Get the buffer's point context.
+    PointContext context() const
+        { return m_context; }
 
     /// @return the size of the currently allocated raw byte array
     pointbuffer::PointBufferByteSize getBufferByteLength() const
@@ -695,6 +701,14 @@ inline void PointBuffer::setFieldInternal(pdal::Dimension const& dim,
     m_context.getRawPtBuf()->setField(dim, rawId, value);
 }
 
+
+inline void PointBuffer::appendPoint(PointBuffer& buffer, PointId id)
+{
+    PointId rawId = buffer.m_index[id];
+    id = m_index.size();
+    m_index.resize(id + 1);
+    m_index[id] = rawId;
+}
 
 
 #ifdef PDAL_COMPILER_MSVC
