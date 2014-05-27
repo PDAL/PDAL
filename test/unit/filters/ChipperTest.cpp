@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE(test_construction)
         PointBufferSet pbSet = chipper.execute(ctx);
         BOOST_CHECK(pbSet.size() == 71);
 
-        vector<PointBufferPtr> buffers;
+        std::vector<PointBufferPtr> buffers;
         for (auto it = pbSet.begin(); it != pbSet.end(); ++it)
             buffers.push_back(*it);
 
