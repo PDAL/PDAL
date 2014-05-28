@@ -66,8 +66,11 @@ public:
         memcpy(m_buf.data() + offset, value, dim.getByteSize());
     }
 
-    template <typename T>
-    T getField(const Dimension& dim, PointId idx);
+    void getField(const Dimension& dim, PointId idx, void *value)
+    {
+        size_t offset = pointsToBytes(idx) + dim.getByteOffset();
+        memcpy(value, m_buf.data() + offset, dim.getByteSize());
+    }
 
 private:
     std::vector<char> m_buf;
@@ -80,18 +83,6 @@ private:
 
 };
 typedef std::shared_ptr<RawPtBuf> RawPtBufPtr;
-
-
-template <typename T>
-T RawPtBuf::getField(const Dimension& dim, PointId idx)
-{
-    T t;
-
-    size_t offset = pointsToBytes(idx) + dim.getByteOffset();
-    memcpy(&t, m_buf.data() + offset, sizeof(T));
-    return t;
-}
-
 
 } // namespace pdal
 

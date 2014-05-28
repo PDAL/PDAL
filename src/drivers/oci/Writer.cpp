@@ -67,43 +67,19 @@ namespace oci
 Writer::Writer(const Options& options)
     : pdal::Writer(options)
     , OracleDriver(getOptions())
-    , m_doCreateIndex(false)
-    , m_bHaveOutputTable(false)
+    , m_createIndex(false)
+    , m_pcExtent(3)
     , m_pc_id(0)
     , m_srid(0)
-    , m_gtype(0)
-    , m_is3d(false)
-    , m_issolid(false)
+    , m_3d(false)
+    , m_solid(false)
     , m_sdo_pc_is_initialized(false)
     , m_chunkCount(16)
     , m_streamChunks(false)
     , m_orientation(schema::POINT_INTERLEAVED)
 {
     m_connection = connect();
-
-    boost::uint32_t capacity = getOptions().getValueOrDefault<boost::uint32_t>("capacity", 0);
-
-    m_block_table_name = boost::to_upper_copy(getOptions().getValueOrThrow<std::string>("block_table_name"));
-    m_block_table_partition_column = boost::to_upper_copy(getDefaultedOption<std::string>("block_table_partition_column"));
-    m_block_table_partition_value = getDefaultedOption<boost::uint32_t>("block_table_partition_value");
-    m_srid = getOptions().getValueOrThrow<boost::uint32_t>("srid");
-    m_gtype = GetGType();
-    m_is3d = is3d();
-    m_issolid = isSolid();
-    m_base_table_name = boost::to_upper_copy(getOptions().getValueOrThrow<std::string>("base_table_name"));
-    m_cloud_column_name = boost::to_upper_copy(getOptions().getValueOrThrow<std::string>("cloud_column_name"));
-    m_base_table_aux_columns = getDefaultedOption<std::string>("base_table_aux_columns");
-    m_base_table_aux_values = getDefaultedOption<std::string>("base_table_aux_values");
-
-    m_base_table_boundary_column = getDefaultedOption<std::string>("base_table_boundary_column");
-    m_base_table_boundary_wkt = getDefaultedOption<std::string>("base_table_boundary_wkt");
-    m_chunkCount = getOptions().getValueOrDefault<boost::uint32_t>("blob_chunk_count", 16);
-    m_streamChunks = getOptions().getValueOrDefault<bool>("stream_chunks", false);
-
-    bool bFlipDimensional = getOptions().getValueOrDefault<bool>("store_dimensional_orientation", false);
-    if (bFlipDimensional)
-        m_orientation = schema::DIMENSION_INTERLEAVED;
-    
+    m_gtype = getGType();
 }
 
 Writer::~Writer()
@@ -111,7 +87,6 @@ Writer::~Writer()
     try
     {
         m_connection->Commit();
-
     }
     catch (...)
     {
@@ -142,10 +117,6 @@ Options Writer::getDefaultOptions()
     Option verbose("verbose",false,"Wipe the block table and recreate it before loading data");
     Option srid("srid", 0, "The Oracle numerical SRID value to use \
                                              for PC_EXTENT, BLK_EXTENT, and indexing");
-    Option capacity("capacity",
-                    0,
-                    "The block capacity or maximum number of \
-                                     points a block can contain");
     Option stream_output_precision("stream_output_precision",
                                    8,
                                    "The number of digits past the decimal place for \
@@ -243,7 +214,6 @@ Options Writer::getDefaultOptions()
     options.add(overwrite);
     options.add(verbose);
     options.add(srid);
-    options.add(capacity);
     options.add(stream_output_precision);
     options.add(cloud_id);
     options.add(connection);
@@ -273,7 +243,7 @@ Options Writer::getDefaultOptions()
 
 void Writer::runCommand(std::ostringstream const& command)
 {
-    Statement statement = Statement(m_connection->CreateStatement(command.str().c_str()));
+    Statement statement(m_connection->CreateStatement(command.str().c_str()));
 
     // Because of OCIGDALErrorHandler, this is going to throw if there is a
     // problem.  When it does, the statement should go out of scope and
@@ -281,189 +251,143 @@ void Writer::runCommand(std::ostringstream const& command)
     statement->Execute();
 }
 
-void Writer::WipeBlockTable()
+
+void Writer::wipeBlockTable()
 {
     std::ostringstream oss;
 
-    std::string block_table_name = getOptions().getValueOrThrow<std::string>("block_table_name");
-    std::string base_table_name = getOptions().getValueOrThrow<std::string>("base_table_name");
-    std::string cloud_column_name = getOptions().getValueOrThrow<std::string>("cloud_column_name");
-
-    oss << "DELETE FROM " << block_table_name;
+    oss << "DELETE FROM " << m_blockTableName;
     try
     {
         runCommand(oss);
     }
     catch (pdal_error const&)
     {
-        // if we failed, let's try dropping the spatial index for the block_table_name
+        // if we failed, let's try dropping the spatial index for the
+        // block_table_name
         oss.str("");
         if (isDebug())
-            std::cout << "Dropping index " << block_table_name
+            std::cout << "Dropping index " << m_blockTableName
                       << "_cloud_idx for block_table_name"
                       << std::endl;
-        oss << "DROP INDEX " << block_table_name << "_cloud_idx" ;
+        oss << "DROP INDEX " << m_blockTableName << "_cloud_idx" ;
         runCommand(oss);
         oss.str("");
 
-        oss << "DELETE FROM " << block_table_name;
+        oss << "DELETE FROM " << m_blockTableName;
         runCommand(oss);
-        oss.str("");
     }
 
     oss.str("");
-
-    // These need to be uppercase to satisfy the PLSQL function
-    cloud_column_name = boost::to_upper_copy(cloud_column_name);
-    base_table_name = boost::to_upper_copy(base_table_name);
-
     oss << "declare\n"
         "begin \n"
         "  mdsys.sdo_pc_pkg.drop_dependencies('"
-        << base_table_name <<
+        << m_baseTableName <<
         "', '"
-        << cloud_column_name <<
+        << m_cloudColumnName <<
         "'); end;";
     runCommand(oss);
-    oss.str("");
 
-    oss << "DROP TABLE " << block_table_name;
-    runCommand(oss);
     oss.str("");
+    oss << "DROP TABLE " << m_blockTableName;
+    runCommand(oss);
 
     // Oracle upper cases the table name when inserting it in the
     // USER_SDO_GEOM_METADATA.  We'll use std::transform to do it.
     // See http://forums.devx.com/showthread.php?t=83058 for the
     // technique
 
-    block_table_name = boost::to_upper_copy(block_table_name);
-    oss << "DELETE FROM USER_SDO_GEOM_METADATA WHERE TABLE_NAME='" << block_table_name << "'" ;
+    oss.str("");
+    oss << "DELETE FROM USER_SDO_GEOM_METADATA WHERE TABLE_NAME='" <<
+        m_blockTableName << "'" ;
     runCommand(oss);
 }
 
-bool Writer::is3d() const
-{
-    return getDefaultedOption<bool>("is3d");
-}
-bool Writer::isSolid() const
-{
-    return getDefaultedOption<bool>("solid");
-}
 
-boost::int32_t Writer::getPCID() const
-{
-    return m_pc_id;
-}
-
-void Writer::CreateBlockIndex()
+void Writer::createBlockIndex()
 {
     std::ostringstream oss;
-    std::string block_table_name = getOptions().getValueOrThrow<std::string>("block_table_name");
 
     std::ostringstream index_name;
-    index_name << block_table_name << "_cloud_idx";
-    std::string name;
-    name = index_name.str().substr(0,29);
+    index_name << m_blockTableName << "_cloud_idx";
+    std::string name = index_name.str().substr(0, 29);
 
     oss << "CREATE INDEX "<< name << " on "
-        << block_table_name << "(blk_extent) INDEXTYPE IS MDSYS.SPATIAL_INDEX";
+        << m_blockTableName << "(blk_extent) INDEXTYPE IS MDSYS.SPATIAL_INDEX";
 
-    if (m_is3d)
-    {
-        oss <<" PARAMETERS('sdo_indx_dims=3')";
-    }
+    if (m_3d)
+        oss << " PARAMETERS('sdo_indx_dims=3')";
 
     runCommand(oss);
-    oss.str("");
 
     index_name.str("");
-    index_name <<  block_table_name <<"_objectid_idx";
-    name = index_name.str().substr(0,29);
-    oss << "ALTER TABLE "<< block_table_name <<  " ADD CONSTRAINT "<< name <<
-        "  PRIMARY KEY (OBJ_ID, BLK_ID) ENABLE VALIDATE";
-    // oss << "CREATE INDEX " << name <<" on "
-    //     << block_table_name << "(OBJ_ID,BLK_ID) COMPRESS 2" ;
-    runCommand(oss);
+    index_name << m_blockTableName << "_objectid_idx";
+    name = index_name.str().substr(0, 29);
+
     oss.str("");
-
-
+    oss << "ALTER TABLE "<< m_blockTableName <<  " ADD CONSTRAINT "<< name <<
+        "  PRIMARY KEY (OBJ_ID, BLK_ID) ENABLE VALIDATE";
+    runCommand(oss);
 }
 
-void Writer::CreateSDOEntry()
+
+void Writer::createSDOEntry()
 {
-
-    boost::uint32_t precision = getDefaultedOption<boost::uint32_t>("stream_output_precision");
-
-
     std::ostringstream oss;
-
-    std::ostringstream oss_geom;
-
     oss.setf(std::ios_base::fixed, std::ios_base::floatfield);
-    oss.precision(precision);
+    oss.precision(m_precision);
 
     std::ostringstream s_srid;
-
-
     if (m_srid == 0)
-    {
         s_srid << "NULL";
-    }
     else
-    {
         s_srid << m_srid;
-    }
 
     double tolerance = 0.05;
-
-
     pdal::Bounds<double> e = m_bounds;
-
-    if (IsGeographic(m_srid))
+    if (isGeographic(m_srid))
     {
         // FIXME: This should be overrideable
-        e.setMinimum(0,-180.0);
-        e.setMaximum(0,180.0);
-        e.setMinimum(1,-90.0);
-        e.setMaximum(1,90.0);
-        e.setMinimum(2,0.0);
-        e.setMaximum(2,20000.0);
+        e.setMinimum(0, -180.0);
+        e.setMaximum(0, 180.0);
+        e.setMinimum(1, -90.0);
+        e.setMaximum(1, 90.0);
+        e.setMinimum(2, 0.0);
+        e.setMaximum(2, 20000.0);
 
         tolerance = 0.0005;
     }
 
+    oss <<  "INSERT INTO user_sdo_geom_metadata VALUES ('" <<
+        m_blockTableName << "','blk_extent', MDSYS.SDO_DIM_ARRAY(";
+    oss << "MDSYS.SDO_DIM_ELEMENT('X', " << e.getMinimum(0) << "," <<
+        e.getMaximum(0) <<"," << tolerance << "),"
+        "MDSYS.SDO_DIM_ELEMENT('Y', " << e.getMinimum(1) << "," <<
+        e.getMaximum(1) <<"," << tolerance << ")";
 
-    oss <<  "INSERT INTO user_sdo_geom_metadata VALUES ('" << m_block_table_name <<
-        "','blk_extent', MDSYS.SDO_DIM_ARRAY(";
-
-    oss << "MDSYS.SDO_DIM_ELEMENT('X', " << e.getMinimum(0) << "," << e.getMaximum(0) <<"," << tolerance << "),"
-        "MDSYS.SDO_DIM_ELEMENT('Y', " << e.getMinimum(1) << "," << e.getMaximum(1) <<"," << tolerance << ")";
-
-    if (m_is3d)
+    if (m_3d)
     {
         oss << ",";
-        oss <<"MDSYS.SDO_DIM_ELEMENT('Z', "<< e.getMinimum(2) << "," << e.getMaximum(2) << "," << tolerance << ")";
+        oss <<"MDSYS.SDO_DIM_ELEMENT('Z', "<< e.getMinimum(2) << "," <<
+            e.getMaximum(2) << "," << tolerance << ")";
     }
     oss << ")," << s_srid.str() << ")";
 
     runCommand(oss);
-    oss.str("");
-
 }
 
-bool Writer::BlockTableExists()
+
+bool Writer::blockTableExists()
 {
-
     std::ostringstream oss;
-    std::string block_table_name = getOptions().getValueOrThrow<std::string>("block_table_name");
 
-
-    char szTable[OWNAME]= "";
+    char szTable[OWNAME] = "";
     oss << "select table_name from user_tables";
 
-    log()->get(logDEBUG) << "checking for " << block_table_name << " existence ... " ;
+    log()->get(logDEBUG) << "checking for " << m_blockTableName <<
+        " existence ... " ;
 
-    Statement statement = Statement(m_connection->CreateStatement(oss.str().c_str()));
+    Statement statement(m_connection->CreateStatement(oss.str().c_str()));
 
     // Because of OCIGDALErrorHandler, this is going to throw if there is a
     // problem.  When it does, the statement should go out of scope and
@@ -472,54 +396,43 @@ bool Writer::BlockTableExists()
     statement->Execute();
 
     log()->get(logDEBUG) << "checking ... " << szTable ;
-
-    bool bDidRead(true);
-
-    while (bDidRead)
+    do
     {
         log()->get(logDEBUG) << ", " << szTable;
-        if (boost::iequals(szTable, block_table_name))
+        if (boost::iequals(szTable, m_blockTableName))
         {
-            log()->get(logDEBUG) << " -- '" << block_table_name << "' found." <<std::endl;
+            log()->get(logDEBUG) << " -- '" << m_blockTableName <<
+                "' found." <<std::endl;
             return true;
         }
-        bDidRead = statement->Fetch();
-    }
+    } while (statement->Fetch());
 
-    log()->get(logDEBUG) << " -- '" << block_table_name << "' not found." << std::endl;
-
+    log()->get(logDEBUG) << " -- '" << m_blockTableName <<
+        "' not found." << std::endl;
     return false;
-
 }
 
-void Writer::CreateBlockTable()
+
+void Writer::createBlockTable()
 {
     std::ostringstream oss;
-
-    oss << "CREATE TABLE " << m_block_table_name << " AS SELECT * FROM MDSYS.SDO_PC_BLK_TABLE";
+    oss << "CREATE TABLE " << m_blockTableName <<
+        " AS SELECT * FROM MDSYS.SDO_PC_BLK_TABLE";
 
     runCommand(oss);
     m_connection->Commit();
-
 }
 
-bool Writer::IsGeographic(boost::int32_t srid)
 
+bool Writer::isGeographic(int32_t srid)
 {
-    typedef boost::shared_ptr<long> shared_long;
-    typedef boost::shared_ptr<char> shared_char;
+    std::unique_ptr<char> kind(new char[OWNAME]);
+    std::string stmt("SELECT COORD_REF_SYS_KIND from "
+        "MDSYS.SDO_COORD_REF_SYSTEM WHERE SRID = :1");
 
-    std::ostringstream oss;
-    // char* kind = (char* ) malloc (OWNAME * sizeof(char));
-    shared_char kind = boost::shared_ptr<char>(new char[OWNAME]);
-    oss << "SELECT COORD_REF_SYS_KIND from MDSYS.SDO_COORD_REF_SYSTEM WHERE SRID = :1";
-
-    Statement statement = Statement(m_connection->CreateStatement(oss.str().c_str()));
-
-    shared_long p_srid = boost::shared_ptr<long>(new long);
-    *p_srid = srid;
-
-    statement->Bind(p_srid.get());
+    Statement statement(m_connection->CreateStatement(stmt.c_str()));
+    long l_srid = srid;
+    statement->Bind(&l_srid);
     statement->Define(kind.get());
 
     try
@@ -529,24 +442,17 @@ bool Writer::IsGeographic(boost::int32_t srid)
     catch (pdal_error const& e)
     {
         std::ostringstream oss;
-        oss << "Failed to fetch geographicness of srid " << srid << std::endl << e.what() << std::endl;
+        oss << "Failed to fetch geographicness of srid " << srid << std::endl;
+        oss << e.what() << std::endl;
         throw std::runtime_error(oss.str());
     }
 
-    if (boost::iequals(kind.get(), "GEOGRAPHIC2D"))
-    {
-        return true;
-    }
-    if (boost::iequals(kind.get(), "GEOGRAPHIC3D"))
-    {
-        return true;
-    }
-
-    return false;
-
+    return (boost::iequals(kind.get(), "GEOGRAPHIC2D") ||
+        boost::iequals(kind.get(), "GEOGRAPHIC3D"));
 }
 
-std::string Writer::LoadSQLData(std::string const& filename)
+
+std::string Writer::loadSQLData(std::string const& filename)
 {
     if (!FileUtils::fileExists(filename))
     {
@@ -557,167 +463,79 @@ std::string Writer::LoadSQLData(std::string const& filename)
 
     std::istream::pos_type size;
     std::istream* input = FileUtils::openFile(filename, true);
-
-
-    if (input->good())
-    {
-        std::string output;
-        std::string line;
-        while (input->good())
-        {
-            getline(*input, line);
-            if (output.size())
-            {
-                output = output + "\n" + line;
-            }
-            else
-            {
-                output = line;
-            }
-        }
-
-        return output;
-    }
-    else
+    if (!input->good())
     {
         FileUtils::closeFile(input);
-        return std::string("");
+        return std::string();
     }
 
+    std::string output;
+    std::string line;
+    while (input->good())
+    {
+        getline(*input, line);
+        if (output.size())
+            output += "\n" + line;
+        else
+            output = line;
+    }
+    return output;
 }
 
-void Writer::RunFileSQL(std::string const& filename)
+
+void Writer::runFileSQL(std::string const& filename)
 {
     std::ostringstream oss;
     std::string sql = getOptions().getValueOrDefault<std::string>(filename, "");
 
-    if (!sql.size()) return;
+    if (!sql.size())
+        return;
 
     if (!FileUtils::fileExists(sql))
-    {
         oss << sql;
-    }
     else
-    {
-        oss << LoadSQLData(sql);  // Our "sql" is really the filename in the ptree
-    }
+        // Our "sql" is really the filename in the ptree
+        oss << loadSQLData(sql);
 
     if (isDebug())
         std::cout << "running "<< filename << " ..." <<std::endl;
-
     runCommand(oss);
-
-}
-
-long Writer::GetGType()
-{
-    bool bUse3d = is3d();
-    bool bUseSolidGeometry = getDefaultedOption<bool>("solid");
-    long gtype = 0;
-    if (bUse3d)
-    {
-        if (bUseSolidGeometry == true)
-        {
-            gtype = 3008;
-
-        }
-        else
-        {
-            gtype = 3003;
-        }
-    }
-    else
-    {
-        if (bUseSolidGeometry == true)
-        {
-            gtype = 2008;
-        }
-        else
-        {
-            gtype = 2003;
-        }
-    }
-
-    return gtype;
 }
 
 
-std::string Writer::CreatePCElemInfo()
+// Get the geometry type
+long Writer::getGType()
 {
-    bool bUse3d = is3d();
-    bool bUseSolidGeometry = getDefaultedOption<bool>("solid");
-
-    std::ostringstream s_eleminfo;
-    if (bUse3d)
-    {
-        if (bUseSolidGeometry == true)
-        {
-            // s_gtype << "3008";
-            s_eleminfo << "(1,1007,3)";
-
-        }
-        else
-        {
-            // s_gtype << "3003";
-            s_eleminfo  << "(1,1003,3)";
-
-        }
-    }
-    else
-    {
-        if (bUseSolidGeometry == true)
-        {
-            // s_gtype << "2008";
-            s_eleminfo << "(1,1007,3)";
-
-        }
-        else
-        {
-            // s_gtype << "2003";
-            s_eleminfo  << "(1,1003,3)";
-
-        }
-    }
-
-    return s_eleminfo.str();
-
+    if (m_3d)
+        return (m_solid ? 3008 : 3003);
+    return (m_solid ? 2008 : 2003);
 }
 
-void Writer::CreatePCEntry(Schema const& buffer_schema)
+
+std::string Writer::createPCElemInfo()
 {
+    if (m_3d)
+        return m_solid ? "(1,1007,3)" : "(1,1003,3)";
+    return m_solid ? "(1,1007,3)" : "(1,1003,3)";
+}
 
 
-    boost::uint32_t precision = getDefaultedOption<boost::uint32_t>("stream_output_precision");
-    boost::uint64_t capacity = getDefaultedOption<boost::uint64_t>("capacity");
-
-    if (capacity == 0)
-    {
-        capacity = getPrevStage().getNumPoints();
-        if (capacity == 0)
-            throw pdal_error("blk_capacity for drivers.oci.writer cannot be 0!");
-    }
-
-
-
+void Writer::createPCEntry(Schema const& buffer_schema)
+{
     std::ostringstream oss;
 
-
     oss.setf(std::ios_base::fixed, std::ios_base::floatfield);
-    oss.precision(precision);
+    oss.precision(m_precision);
 
     std::ostringstream columns;
     std::ostringstream values;
 
-    if (!m_base_table_aux_columns.empty())
+    columns << m_cloudColumnName;
+    values << "pc";
+    if (!m_baseTableAuxColumns.empty())
     {
-        columns << m_cloud_column_name << "," << m_base_table_aux_columns;
-
-        values << "pc," << m_base_table_aux_values;
-    }
-    else
-    {
-        columns << m_cloud_column_name;
-        values << "pc";
+        columns << "," << m_baseTableAuxColumns;
+        values << "," << m_baseTableAuxValues;
     }
 
     int nPCPos = 1;
@@ -726,185 +544,140 @@ void Writer::CreatePCEntry(Schema const& buffer_schema)
 
     int nPos = nSchemaPos; // Bind column position
 
-    if (!m_base_table_boundary_column.empty())
+    if (!m_baseTableBoundaryColumn.empty())
     {
-        columns << "," << m_base_table_boundary_column;
+        columns << "," << m_baseTableBoundaryColumn;
         nPos++;
-        values <<", SDO_GEOMETRY(:"<<nPos;
+        values << ", SDO_GEOMETRY(:" << nPos;
         nPos++;
-        values <<", :"<<nPos<<")";
+        values << ", :"<< nPos << ")";
     }
-
-
 
     std::ostringstream s_srid;
     std::ostringstream s_geom;
     std::ostringstream s_schema;
 
-
-    // IsGeographic(srid);
-
     if (m_srid == 0)
-    {
         s_srid << "NULL";
-    }
     else
-    {
         s_srid << m_srid;
-    }
+    s_schema << "xmltype(:" << nSchemaPos << ")";
 
-    s_schema << "xmltype(:"<<nSchemaPos<<")";
-
-
-
-    std::string eleminfo = CreatePCElemInfo();
-
-    pdal::Bounds<double> base_table_bounds = getDefaultedOption<pdal::Bounds<double> >("base_table_bounds");
-
-    if (base_table_bounds.empty())
+    std::string eleminfo = createPCElemInfo();
+    Bounds<double> bounds = m_baseTableBounds;
+    if (bounds.empty())
     {
-        if (IsGeographic(m_srid))
+        if (isGeographic(m_srid))
         {
-            base_table_bounds.setMinimum(0, -179.99);
-            base_table_bounds.setMinimum(1, -89.99);
-            base_table_bounds.setMinimum(2, 0.0);
-            base_table_bounds.setMaximum(0, 179.99);
-            base_table_bounds.setMaximum(1, 89.99);
-            base_table_bounds.setMaximum(2, 20000.0);
+            bounds.setMinimum(0, -179.99);
+            bounds.setMinimum(1, -89.99);
+            bounds.setMinimum(2, 0.0);
+            bounds.setMaximum(0, 179.99);
+            bounds.setMaximum(1, 89.99);
+            bounds.setMaximum(2, 20000.0);
         }
         else
         {
-            base_table_bounds.setMinimum(0, 0.0);
-            base_table_bounds.setMinimum(1, 0.0);
-            base_table_bounds.setMinimum(2, 0.0);
-            base_table_bounds.setMaximum(0, 100.0);
-            base_table_bounds.setMaximum(1, 100.0);
-            base_table_bounds.setMaximum(2, 20000.0);
+            bounds.setMinimum(0, 0.0);
+            bounds.setMinimum(1, 0.0);
+            bounds.setMinimum(2, 0.0);
+            bounds.setMaximum(0, 100.0);
+            bounds.setMaximum(1, 100.0);
+            bounds.setMaximum(2, 20000.0);
         }
     }
-    s_geom << "           mdsys.sdo_geometry("<< m_gtype <<", "<<s_srid.str()<<", null,\n"
-           "              mdsys.sdo_elem_info_array"<< eleminfo <<",\n"
-           "              mdsys.sdo_ordinate_array(\n";
+    s_geom << "           mdsys.sdo_geometry(" << m_gtype << ", " <<
+        s_srid.str() << ", null,\n"
+        "              mdsys.sdo_elem_info_array"<< eleminfo <<",\n"
+        "              mdsys.sdo_ordinate_array(\n";
 
-    s_geom << base_table_bounds.getMinimum(0) << "," << base_table_bounds.getMinimum(1) << ",";
+    s_geom << bounds.getMinimum(0) << "," << bounds.getMinimum(1) << ",";
 
-    if (m_is3d)
-    {
-        s_geom << base_table_bounds.getMinimum(2) << ",";
-    }
+    if (m_3d)
+        s_geom << bounds.getMinimum(2) << ",";
 
-    s_geom << base_table_bounds.getMaximum(0) << "," << base_table_bounds.getMaximum(1);
+    s_geom << bounds.getMaximum(0) << "," << bounds.getMaximum(1);
 
-    if (m_is3d)
-    {
-        s_geom << "," << base_table_bounds.getMaximum(2);
-    }
+    if (m_3d)
+        s_geom << "," << bounds.getMaximum(2);
 
     s_geom << "))";
 
-    boost::uint32_t dimensions(8);
-    std::string schema_data;
-
-    bool pack = getOptions().getValueOrDefault<bool>("pack_ignored_fields", true);
-    if (pack)
-    {
-        log()->get(logDEBUG3) << "Packing ignored dimension from PointBuffer " << std::endl;
-        
-        pdal::Schema clean_schema = buffer_schema.pack();
-        clean_schema.setOrientation(m_orientation);
-        schema_data = pdal::Schema::to_xml(clean_schema);
-        dimensions = clean_schema.size();
-
-    }
-    else
-    {
-        pdal::Schema oriented_schema(buffer_schema);
-        oriented_schema.setOrientation(m_orientation);
-        schema_data = pdal::Schema::to_xml(oriented_schema);
-        dimensions  = buffer_schema.size();
-    }
-
+    Schema schema(m_dims);
+    schema.setOrientation(m_orientation);
+    std::string schemaData = Schema::to_xml(schema);
 
     oss << "declare\n"
-        "  pc_id NUMBER := :"<<nPCPos<<";\n"
+        "  pc_id NUMBER := :" << nPCPos << ";\n"
         "  pc sdo_pc;\n"
 
         "begin\n"
         "  -- Initialize the Point Cloud object.\n"
         "  pc := sdo_pc_pkg.init( \n"
-        "          '"<< m_base_table_name<<"', -- Table that has the SDO_POINT_CLOUD column defined\n"
-        "          '"<< m_cloud_column_name<<"',   -- Column name of the SDO_POINT_CLOUD object\n"
-        "          '"<< m_block_table_name <<"', -- Table to store blocks of the point cloud\n"
-        "           'blk_capacity="<< capacity <<"', -- max # of points per block\n"
+        "          '" << m_baseTableName <<
+        "', -- Table that has the SDO_POINT_CLOUD column defined\n"
+        "          '" << m_cloudColumnName <<
+        "',   -- Column name of the SDO_POINT_CLOUD object\n"
+        "          '" << m_blockTableName <<
+        "', -- Table to store blocks of the point cloud\n"
         << s_geom.str() <<
         ",  -- Extent\n"
         "     0.5, -- Tolerance for point cloud\n"
-        "           "<<dimensions<<", -- Total number of dimensions\n"
+        "           " << m_dims.size() << ", -- Total number of dimensions\n"
         "           NULL,"
         "            NULL,"
-        "            "<< s_schema.str() <<");\n"
-        "  :"<<nPCPos<<" := pc.pc_id;\n"
+        "            " << s_schema.str() << ");\n"
+        "  :" << nPCPos << " := pc.pc_id;\n"
 
         "  -- Insert the Point Cloud object  into the \"base\" table.\n"
-        "  insert into " << m_base_table_name << " ( ID, "<< columns.str() <<
+        "  insert into " << m_baseTableName << " ( ID, "<< columns.str() <<
         ") values ( pc.pc_id, " << values.str() << ");\n"
 
         "  "
         "end;\n";
 
-    Statement statement = Statement(m_connection->CreateStatement(oss.str().c_str()));
-
+    Statement statement(m_connection->CreateStatement(oss.str().c_str()));
     statement->Bind(&m_pc_id);
 
+    OCILobLocator *schema_locator;
+    OCILobLocator *boundary_locator;
 
-    OCILobLocator* schema_locator ;
-    OCILobLocator* boundary_locator ;
-
-    char* schema = (char*) malloc(schema_data.size() * sizeof(char) + 1);
-    strncpy(schema, schema_data.c_str(), schema_data.size());
-    schema[schema_data.size()] = '\0';
-    statement->WriteCLob(&schema_locator, schema);
+    statement->WriteCLob(&schema_locator, (char *)schemaData.c_str());
     statement->BindClob(&schema_locator);
 
     std::ostringstream wkt_s;
-
-    if (!m_base_table_boundary_column.empty())
+    if (!m_baseTableBoundaryColumn.empty())
     {
-        if (!FileUtils::fileExists(m_base_table_boundary_wkt))
+        if (!FileUtils::fileExists(m_baseTableBoundaryWkt))
         {
-            if (!IsValidWKT(m_base_table_boundary_wkt))
+            if (!isValidWKT(m_baseTableBoundaryWkt))
             {
                 std::ostringstream oss;
-                oss << "WKT for base_table_boundary_wkt was not valid and '" << m_base_table_boundary_wkt
-                    << "' doesn't exist as a file";
+                oss << "WKT for base_table_boundary_wkt was not valid and '" <<
+                    m_baseTableBoundaryWkt << "' doesn't exist as a file";
                 throw pdal::pdal_error(oss.str());
             }
-            wkt_s << m_base_table_boundary_wkt;
+            wkt_s << m_baseTableBoundaryWkt;
         }
         else
         {
-            std::string wkt = LoadSQLData(m_base_table_boundary_wkt);
-            if (!IsValidWKT(wkt))
+            std::string wkt = loadSQLData(m_baseTableBoundaryWkt);
+            if (!isValidWKT(wkt))
             {
                 std::ostringstream oss;
-                oss << "WKT for base_table_boundary_wkt was from file '" << m_base_table_boundary_wkt
-                    << "' is not valid";
+                oss << "WKT for base_table_boundary_wkt was from file '" <<
+                    m_baseTableBoundaryWkt << "' is not valid";
                 throw pdal::pdal_error(oss.str());
             }
             wkt_s << wkt;
         }
     }
 
-    std::string wkt_string = wkt_s.str();
-    char* wkt = (char*) malloc(wkt_string.size() * sizeof(char)+1);
-    strncpy(wkt, wkt_string.c_str(), wkt_string.size());
-    wkt[wkt_string.size()] = '\0';
-    if (!m_base_table_boundary_column.empty())
+    if (!m_baseTableBoundaryColumn.empty())
     {
-        statement->WriteCLob(&boundary_locator, wkt);
+        statement->WriteCLob(&boundary_locator, (char *)wkt_s.str().c_str());
         statement->BindClob(&boundary_locator);
         statement->Bind((int*)&m_srid);
-
     }
 
     try
@@ -914,13 +687,13 @@ void Writer::CreatePCEntry(Schema const& buffer_schema)
     catch (std::runtime_error const& e)
     {
         std::ostringstream oss;
-        oss << "Failed at creating Point Cloud entry into " << m_base_table_name << " table. Does the table exist? "  << e.what();
+        oss << "Failed at creating Point Cloud entry into " <<
+            m_baseTableName << " table. Does the table exist? " << e.what();
         throw pdal_error(oss.str());
     }
 
-    free(wkt);
-    free(schema);
-
+    //ABELL - I don't get this.  Why do we get the value?  It doesn't look
+    //  like we ever retreive the option anyplace else.
     try
     {
         Option& pc_id = m_options.getOptionByRef("pc_id");
@@ -933,7 +706,8 @@ void Writer::CreatePCEntry(Schema const& buffer_schema)
     }
 }
 
-bool Writer::IsValidWKT(std::string const& input)
+
+bool Writer::isValidWKT(std::string const& input)
 {
 #ifdef PDAL_HAVE_GDAL
 
@@ -942,115 +716,150 @@ bool Writer::IsValidWKT(std::string const& input)
     char* wkt = const_cast<char*>(input.c_str());
     OGRErr e = OGR_G_CreateFromWkt(&wkt, NULL, &g);
     OGR_G_DestroyGeometry(g);
-    if (e != 0) return false;
-
-    return true;
+    return (e == 0);
 #else
-
     throw pdal_error("GDAL support not available for WKT validation");
 #endif
 }
 
-void Writer::writeBufferBegin(PointBuffer const& data)
-{
-    if (m_sdo_pc_is_initialized) return;
 
-    bool bTrace = getOptions().getValueOrDefault<bool>("do_trace", false);
-    if (bTrace)
+void Writer::processOptions(const Options& options)
+{
+    m_precision = getDefaultedOption<uint32_t>(options,
+        "stream_output_precision");
+    m_createIndex = options.getValueOrDefault<bool>("create_index", true);
+    m_overwrite = getDefaultedOption<bool>(options, "overwrite");
+    m_reenableCloudTrigger =
+        options.getValueOrDefault<bool>("reenable_cloud_trigger", false);
+    m_disableCloudTrigger =
+        options.getValueOrDefault<bool>("disable_cloud_trigger", false);
+    m_trace = options.getValueOrDefault<bool>("do_trace", false);
+    m_solid = getDefaultedOption<bool>(options, "solid");
+    m_3d = getDefaultedOption<bool>(options, "is3d");
+    m_srid = options.getValueOrThrow<uint32_t>("srid");
+    m_pack = options.getValueOrDefault<bool>("pack_ignored_fields", true);
+    m_baseTableBounds =
+        getDefaultedOption<pdal::Bounds<double>>(options, "base_table_bounds");
+    m_baseTableName = boost::to_upper_copy(
+        options.getValueOrThrow<std::string>("base_table_name"));
+    m_blockTableName = boost::to_upper_copy(
+        options.getValueOrThrow<std::string>("block_table_name"));
+    m_cloudColumnName = boost::to_upper_copy(
+        options.getValueOrThrow<std::string>("cloud_column_name"));
+    m_blockTablePartitionColumn = boost::to_upper_copy(
+        getDefaultedOption<std::string>(options,
+            "block_table_partition_column"));
+    m_blockTablePartitionValue =
+        getDefaultedOption<uint32_t>(options, "block_table_partition_value");
+    m_baseTableAuxColumns =
+        getDefaultedOption<std::string>(options, "base_table_aux_columns");
+    m_baseTableAuxValues =
+        getDefaultedOption<std::string>(options, "base_table_aux_values");
+    m_baseTableBoundaryColumn =
+        getDefaultedOption<std::string>(options, "base_table_boundary_column");
+    m_baseTableBoundaryWkt =
+        getDefaultedOption<std::string>(options, "base_table_boundary_wkt");
+
+    m_chunkCount =
+        options.getValueOrDefault<boost::uint32_t>("blob_chunk_count", 16);
+    m_streamChunks = options.getValueOrDefault<bool>("stream_chunks", false);
+
+    bool dimInterleaved =
+        options.getValueOrDefault<bool>("store_dimensional_orientation", false);
+    m_orientation = dimInterleaved ? schema::DIMENSION_INTERLEAVED :
+        schema::POINT_INTERLEAVED;
+}
+
+
+void Writer::write(const PointBuffer& buffer)
+{
+    writeInit(buffer.getSchema());
+    writeTile(buffer);
+}
+
+
+void Writer::writeInit(const Schema& schema)
+{
+    if (m_sdo_pc_is_initialized)
+        return;
+
+    if (m_trace)
     {
         log()->get(logDEBUG) << "Setting database trace..." << std::endl;
         std::ostringstream oss;
-        // oss << "ALTER SESSION SET SQL_TRACE=TRUE";
         oss << "BEGIN " << std::endl;
         oss << "DBMS_SESSION.set_sql_trace(sql_trace => TRUE);" << std::endl;
-        oss << "DBMS_SESSION.SESSION_TRACE_ENABLE(waits => TRUE, binds => TRUE);" << std::endl;
+        oss << "DBMS_SESSION.SESSION_TRACE_ENABLE(waits => TRUE, "
+            "binds => TRUE);" << std::endl;
         oss << "END;" << std::endl;
         runCommand(oss);
-        oss.str("");
 
-        // oss << "alter session set events ‘10046 trace name context forever, level 12’" << std::endl;
-        // runCommand(oss);
-        // oss.str("");
+        char selectCmd[] = "SELECT VALUE FROM V$DIAG_INFO WHERE NAME = "
+            "'Default Trace File'";
+        Statement statement(m_connection->CreateStatement(selectCmd));
 
-        oss << "SELECT VALUE FROM V$DIAG_INFO WHERE NAME = 'Default Trace File'";
-        Statement statement = Statement(m_connection->CreateStatement(oss.str().c_str()));
-        int trace_table_name_length = 1024;
-        char* trace_table_name = (char*) malloc(sizeof(char*) * trace_table_name_length);
-        trace_table_name[trace_table_name_length-1] = '\0'; //added trailing null to fix ORA-01480
-        statement->Define(trace_table_name, trace_table_name_length);
+        char traceTableName[1024] = {0};
+        statement->Define(traceTableName, sizeof(traceTableName));
         statement->Execute();
-        // statement->Fetch();
-        log()->get(logDEBUG) << "Trace location name:  " << trace_table_name << std::endl;
-        free(trace_table_name);
-
+        log()->get(logDEBUG) << "Trace location name:  " <<
+            traceTableName << std::endl;
 
     }
-    CreatePCEntry(data.getSchema());
-    m_trigger_name = ShutOff_SDO_PC_Trigger();
-
+    createPCEntry(schema);
+    m_triggerName = shutOff_SDO_PC_Trigger();
     m_sdo_pc_is_initialized = true;
-
-    return;
-
 }
 
-void Writer::writeBegin(boost::uint64_t)
+
+void Writer::ready(PointContext ctx)
 {
+    bool haveOutputTable = blockTableExists();
+    if (m_overwrite && haveOutputTable)
+        wipeBlockTable();
+    runFileSQL("pre_sql");
+    if (!haveOutputTable)
+        createBlockTable();
 
-    m_bHaveOutputTable = BlockTableExists();
-
-    if (getDefaultedOption<bool>("overwrite"))
+    m_pcExtent.clear();
+    m_dims.clear();
+    m_lastBlockId = 0;
+    Schema *schema = ctx.getSchema();
+    m_pointSize = 0;
+    for (schema::size_type i = 0; i < schema->numDimensions(); ++i)
     {
-        if (m_bHaveOutputTable)
+        const Dimension& d = schema->getDimension(i);
+        if (!m_pack || !d.isIgnored())
         {
-            WipeBlockTable();
+            m_dims.push_back(d);
+            m_pointSize += d.getByteSize();
         }
     }
-
-    RunFileSQL("pre_sql");
-    if (!m_bHaveOutputTable)
-    {
-        CreateBlockTable();
-    }
-
-    if (getOptions().getValueOrDefault<bool>("create_index", true) && !m_bHaveOutputTable)
-        m_doCreateIndex = true;
-
-    return;
 }
 
 
-void Writer::writeEnd(boost::uint64_t)
+void Writer::done(PointContext ctx)
 {
     m_connection->Commit();
-
-    if (m_doCreateIndex)
+    if (m_createIndex)
     {
-        CreateSDOEntry();
-        CreateBlockIndex();
+        createSDOEntry();
+        createBlockIndex();
     }
-
 
     // Update extent of SDO_PC entry
-    UpdatePCExtent();
+    updatePCExtent();
 
-    if (getOptions().getValueOrDefault<bool>("reenable_cloud_trigger", false))
-        TurnOn_SDO_PC_Trigger(m_trigger_name);
-
+    if (m_reenableCloudTrigger)
+        turnOn_SDO_PC_Trigger(m_triggerName);
     m_connection->Commit();
-
-    RunFileSQL("post_block_sql");
-    return;
+    runFileSQL("post_block_sql");
 }
 
 
-void Writer::SetElements(Statement statement,
-                         OCIArray* elem_info)
+void Writer::setElements(Statement statement, OCIArray* elem_info)
 {
-
-
     statement->AddElement(elem_info, 1);
-    if (m_issolid == true)
+    if (m_solid == true)
     {
         //"(1,1007,3)";
         statement->AddElement(elem_info, 1007);
@@ -1060,220 +869,124 @@ void Writer::SetElements(Statement statement,
         //"(1,1003,3)";
         statement->AddElement(elem_info, 1003);
     }
-
     statement->AddElement(elem_info, 3);
-
 }
 
-void Writer::SetOrdinates(Statement statement,
-                          OCIArray* ordinates,
-                          pdal::Bounds<double> const& extent)
+
+void Writer::setOrdinates(Statement statement, OCIArray* ordinates,
+    pdal::Bounds<double> const& extent)
 {
 
     statement->AddElement(ordinates, extent.getMinimum(0));
     statement->AddElement(ordinates, extent.getMinimum(1));
-    if (is3d())
+    if (m_3d)
         statement->AddElement(ordinates, extent.getMinimum(2));
 
     statement->AddElement(ordinates, extent.getMaximum(0));
     statement->AddElement(ordinates, extent.getMaximum(1));
-    if (is3d())
+    if (m_3d)
         statement->AddElement(ordinates, extent.getMaximum(2));
-
-
 }
 
-pdal::Bounds<double> Writer::CalculateBounds(PointBuffer const& buffer)
+
+void Writer::writeTile(PointBuffer const& buffer)
 {
-    pdal::Schema const& schema = buffer.getSchema();
-
-    pdal::Bounds<double> output;
-
-    boost::optional<Dimension const&> dimX = schema.getDimension("X");
-    boost::optional<Dimension const&> dimY = schema.getDimension("Y");
-    boost::optional<Dimension const&> dimZ = schema.getDimension("Z");
-
-
-    bool first = true;
-    Vector<double> v(0.0, 0.0, 0.0);
-    for (uint32_t idx = 0; idx < buffer.getNumPoints(); idx++)
-    {
-        int32_t xd = buffer.getFieldAs<double>(*dimX, idx);
-        int32_t yd = buffer.getFieldAs<double>(*dimY, idx);
-        int32_t zd = buffer.getFieldAs<double>(*dimZ, idx);
-
-        v[0] = xd;
-        v[1] = yd;
-        v[2] = zd;
-        if (first)
-        {
-            output = pdal::Bounds<double>(xd, yd, zd, xd, yd, zd);
-            if (m_pcExtent.empty())
-                m_pcExtent = output;
-            first = false;
-        }
-        output.grow(v);
-    }
-    m_pcExtent.grow(output);
-    return output;
-}
-
-bool Writer::WriteBlock(PointBuffer const& buffer)
-{
-    bool bUsePartition = m_block_table_partition_column.size() != 0;
-
-    // Pluck the block id out of the first point in the buffer
-    pdal::Schema const& schema = buffer.getSchema();
-    Dimension const* blockDim(0);
-    blockDim = schema.getDimensionPtr("BlockID");
-    
-    boost::int32_t block_id(1);
-    if (blockDim)
-        block_id  = buffer.getFieldAs<int32_t>(*blockDim, 0, false);
+    bool usePartition = (m_blockTablePartitionColumn.size() != 0);
 
     std::ostringstream oss;
-    std::ostringstream partition;
-
-    if (bUsePartition)
-    {
-        partition << "," << m_block_table_partition_column;
-    }
-
-    oss << "INSERT INTO "<< m_block_table_name <<
-        "(OBJ_ID, BLK_ID, NUM_POINTS, POINTS,   "
-        "PCBLK_MIN_RES, BLK_EXTENT, PCBLK_MAX_RES, NUM_UNSORTED_POINTS, PT_SORT_DIM";
-    if (bUsePartition)
-        oss << partition.str();
+    oss << "INSERT INTO "<< m_blockTableName <<
+        "(OBJ_ID, BLK_ID, NUM_POINTS, POINTS, PCBLK_MIN_RES, BLK_EXTENT, "
+        "PCBLK_MAX_RES, NUM_UNSORTED_POINTS, PT_SORT_DIM";
+    if (usePartition)
+        oss << "," << m_blockTablePartitionColumn;
     oss << ") "
         "VALUES ( :1, :2, :3, :4, 1, mdsys.sdo_geometry(:5, :6, null,:7, :8)"
         ", 1, 0, 1";
-    if (bUsePartition)
+    if (usePartition)
         oss << ", :9";
-
     oss <<")";
 
-    Statement statement = Statement(m_connection->CreateStatement(oss.str().c_str()));
+    Statement statement(m_connection->CreateStatement(oss.str().c_str()));
 
     // :1
     statement->Bind(&m_pc_id);
 
     // :2
-    long long_block_id =  static_cast<long>(block_id);
-    statement->Bind(&(long_block_id));
+    statement->Bind(&m_lastBlockId);
+    m_lastBlockId++;
 
     // :3
-    long long_num_points = static_cast<long>(buffer.getNumPoints());
+    long long_num_points = static_cast<long>(buffer.size());
     statement->Bind(&long_num_points);
 
     // :4
-    // statement->Define(locator, 1);
-
-
-
-    // std::vector<liblas::uint8_t> data;
-    // bool gotdata = GetResultData(result, reader, data, 3);
-    // if (! gotdata) throw std::runtime_error("unable to fetch point data byte array");
-    // boost::uint8_t* point_data = buffer.getData(0);
-    boost::uint8_t* point_data;
-    boost::uint32_t point_data_length;
-    boost::uint32_t schema_byte_size;
-    PointBuffer* output_buffer(0);
-    
-    bool pack = getOptions().getValueOrDefault<bool>("pack_ignored_fields", true);
-    if (pack)
+    size_t outbufSize = m_pointSize * buffer.size();
+    std::unique_ptr<char> outbuf(new char[outbufSize]);
+    char *pos = outbuf.get();
+    if (m_orientation == schema::DIMENSION_INTERLEAVED)
     {
-        log()->get(logDEBUG4) << "packing out ignored fields" << std::endl;
-        output_buffer = buffer.pack();
-        assert (output_buffer->getCapacity() == buffer.getNumPoints());
-
-        // The requested orientation is m_orientation, and it does not match 
-        // the orientation of the output_buffer. Flip it.
-        if (m_orientation != output_buffer->getSchema().getOrientation())
-        {
-            PointBuffer* flipped = output_buffer->flipOrientation();
-            delete output_buffer;
-            output_buffer = flipped;
-        }
-        point_data = output_buffer->getData(0);
-        
-        if (m_orientation == schema::DIMENSION_INTERLEAVED)
-            point_data_length = output_buffer->getSchema().getByteSize() * output_buffer->getCapacity();
-        else
-            point_data_length = output_buffer->getSchema().getByteSize() * output_buffer->getNumPoints();
+        for (size_t dim = 0; dim < m_dims.size(); ++dim)
+            for (PointId id = 0; id < buffer.size(); ++id)
+            {
+                buffer.getRawField(m_dims[dim], id, pos);
+                pos += m_dims[dim].getByteSize();
+            }
     }
-    else
+    else if (m_orientation == schema::POINT_INTERLEAVED)
     {
-        if (m_orientation != buffer.getSchema().getOrientation())
-        {
-            output_buffer = buffer.flipOrientation();
-            point_data = output_buffer->getData(0);
-            if (m_orientation == schema::DIMENSION_INTERLEAVED)
-                point_data_length = output_buffer->getSchema().getByteSize() * output_buffer->getCapacity();
-            else
-                point_data_length = output_buffer->getSchema().getByteSize() * output_buffer->getNumPoints();
-        }
-        else
-        {
-            point_data = buffer.getData(0);
-            if (m_orientation == schema::DIMENSION_INTERLEAVED)
-                point_data_length = buffer.getSchema().getByteSize() * buffer.getCapacity();
-            else
-                point_data_length = buffer.getSchema().getByteSize() * buffer.getNumPoints();
-        }
+        for (PointId id = 0; id < buffer.size(); ++id)
+            for (size_t dim = 0; dim < m_dims.size(); ++dim)
+            {
+                buffer.getRawField(m_dims[dim], id, pos);
+                pos += m_dims[dim].getByteSize();
+            }
     }
-    
-    log()->get(logDEBUG4) << "Writing blob of size " << point_data_length << std::endl;
+
+    log()->get(logDEBUG4) << "Writing blob of size " << outbufSize << std::endl;
     OCILobLocator* locator;
     if (m_streamChunks)
     {
-        statement->WriteBlob(&locator, (void*) point_data, point_data_length, m_chunkCount);
+        statement->WriteBlob(&locator, outbuf.get(), outbufSize, m_chunkCount);
         statement->BindBlob(&locator);
     }
     else
-    {
-        statement->Bind((char*)point_data,(long)(point_data_length));
-    }
+        statement->Bind(outbuf.get(), (long)outbufSize);
 
     // :5
     long long_gtype = static_cast<long>(m_gtype);
     statement->Bind(&long_gtype);
 
     // :6
-    long* p_srid  = 0;
-
+    long* p_srid = 0;
 
     if (m_srid != 0)
-    {
-        p_srid = (long*) malloc(1 * sizeof(long));
-        p_srid[0] = m_srid;
-    }
+        *p_srid = m_srid;
     statement->Bind(p_srid);
 
     // :7
-    OCIArray* sdo_elem_info=0;
+    OCIArray* sdo_elem_info = 0;
     m_connection->CreateType(&sdo_elem_info, m_connection->GetElemInfoType());
-    SetElements(statement, sdo_elem_info);
+    setElements(statement, sdo_elem_info);
     statement->Bind(&sdo_elem_info, m_connection->GetElemInfoType());
 
     // :8
-    OCIArray* sdo_ordinates=0;
+    OCIArray* sdo_ordinates = 0;
     m_connection->CreateType(&sdo_ordinates, m_connection->GetOrdinateType());
 
     // x0, x1, y0, y1, z0, z1, bUse3d
+    //ABELL - Should we keep buffer's bounds correct always?  They are if
+    //  they come throught the chipper.  Perhaps we can dispense with this.
     pdal::Bounds<double> bounds = buffer.calculateBounds(true);
-
-    // Cumulate a total bounds for the iterator
-    if (m_pcExtent.empty())
-        m_pcExtent = bounds;
+    // Cumulate a total bounds for the file.
     m_pcExtent.grow(bounds);
 
-    SetOrdinates(statement, sdo_ordinates, bounds);
+    setOrdinates(statement, sdo_ordinates, bounds);
     statement->Bind(&sdo_ordinates, m_connection->GetOrdinateType());
 
     // :9
-    if (bUsePartition)
+    if (usePartition)
     {
-        long long_partition_id = static_cast<long>(m_block_table_partition_value);
+        long long_partition_id = (long)m_blockTablePartitionValue;
         statement->Bind(&long_partition_id);
     }
 
@@ -1284,52 +997,38 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     catch (std::runtime_error const& e)
     {
         std::ostringstream oss;
-        oss << "Failed to insert block # into '" << m_block_table_name << "' table. Does the table exist? "  << std::endl << e.what() << std::endl;
+        oss << "Failed to insert block # into '" << m_blockTableName <<
+            "' table. Does the table exist? "  << std::endl;
+        oss << e.what() << std::endl;
         throw std::runtime_error(oss.str());
     }
 
-    oss.str("");
-
-
     if (m_streamChunks)
-    {
         // We don't use a locator unless we're stream-writing the data.
         OWStatement::Free(&locator, 1);
-    }
-
-    if (p_srid != 0) free(p_srid);
-
 
     m_connection->DestroyType(&sdo_elem_info);
     m_connection->DestroyType(&sdo_ordinates);
-
-    if (output_buffer)
-        delete output_buffer;
-
-
-    return true;
 }
 
-std::string Writer::ShutOff_SDO_PC_Trigger()
-{
-    std::string base_table_name = boost::to_upper_copy(getOptions().getValueOrThrow<std::string>("base_table_name"));
-    std::string cloud_column_name = boost::to_upper_copy(getOptions().getValueOrThrow<std::string>("cloud_column_name"));
 
+std::string Writer::shutOff_SDO_PC_Trigger()
+{
     // Don't monkey with the trigger unless the user says to.
-    if (!getOptions().getValueOrDefault<bool>("disable_cloud_trigger", false))
+    if (!m_disableCloudTrigger)
         return std::string("");
 
     std::ostringstream oss;
-
     char szTrigger[OWNAME] = "";
     char szStatus[OWNAME] = "";
 
-    oss << "select trigger_name, status from all_triggers where table_name = '" << base_table_name << "' AND TRIGGER_NAME like upper('%%MDTNPC_%%') ";
-    Statement statement = Statement(m_connection->CreateStatement(oss.str().c_str()));
+    oss << "select trigger_name, status from all_triggers where "
+        "table_name = '" << m_baseTableName <<
+        "' AND TRIGGER_NAME like upper('%%MDTNPC_%%') ";
+    Statement statement(m_connection->CreateStatement(oss.str().c_str()));
 
     statement->Define(szTrigger);
     statement->Define(szStatus);
-
     statement->Execute();
 
     // Yes, we're assuming there's only one trigger that met these criteria.
@@ -1337,9 +1036,8 @@ std::string Writer::ShutOff_SDO_PC_Trigger()
     if (!strlen(szStatus))
     {
         // No rows returned, no trigger exists
-        return std::string("");
+        return std::string();
     }
-
 
     if (boost::iequals(szStatus, "ENABLED"))
     {
@@ -1348,85 +1046,56 @@ std::string Writer::ShutOff_SDO_PC_Trigger()
 
         statement = Statement(m_connection->CreateStatement(oss.str().c_str()));
         statement->Execute();
-
         return std::string(szTrigger);
     }
-    else
-    {
-        return std::string("");
-    }
-
-
-
+    return std::string();
 }
 
-void Writer::TurnOn_SDO_PC_Trigger(std::string trigger_name)
-{
 
-    if (!trigger_name.size()) return;
+void Writer::turnOn_SDO_PC_Trigger(std::string trigger_name)
+{
+    if (!trigger_name.size())
+        return;
 
     std::ostringstream oss;
-
-    std::string base_table_name = boost::to_upper_copy(getOptions().getValueOrThrow<std::string>("base_table_name"));
-
     oss << "ALTER TRIGGER " << trigger_name << " ENABLE ";
 
-    Statement statement = Statement(m_connection->CreateStatement(oss.str().c_str()));
+    Statement statement(m_connection->CreateStatement(oss.str().c_str()));
     statement->Execute();
-
-
 }
 
-void Writer::UpdatePCExtent()
+
+void Writer::updatePCExtent()
 {
-
-    std::string block_table_name = boost::to_upper_copy(getOptions().getValueOrThrow<std::string>("block_table_name"));
-    std::string base_table_name = boost::to_upper_copy(getOptions().getValueOrThrow<std::string>("base_table_name"));
-    std::string cloud_column_name = boost::to_upper_copy(getOptions().getValueOrThrow<std::string>("cloud_column_name"));
-
-    boost::uint32_t srid = getOptions().getValueOrThrow<boost::uint32_t>("srid");
-
-    pdal::Bounds<double> base_table_bounds = getDefaultedOption<pdal::Bounds<double> >("base_table_bounds");
-    if (base_table_bounds.empty()) base_table_bounds = m_pcExtent;
-
-
-
-    std::string eleminfo = CreatePCElemInfo();
-
+    Bounds<double> bounds = m_baseTableBounds;
+    if (bounds.empty())
+        bounds = m_pcExtent;
 
     std::ostringstream s_geom;
-    boost::uint32_t precision = getDefaultedOption<boost::uint32_t>("stream_output_precision");
     s_geom.setf(std::ios_base::fixed, std::ios_base::floatfield);
-    s_geom.precision(precision);
+    s_geom.precision(m_precision);
 
-    s_geom << "           mdsys.sdo_geometry("<< m_gtype <<", " << srid << ", null,\n"
-           "              mdsys.sdo_elem_info_array"<< eleminfo <<",\n"
-           "              mdsys.sdo_ordinate_array(\n";
+    s_geom << "           mdsys.sdo_geometry(" << m_gtype << ", " << m_srid <<
+        ", null,\n"
+        "              mdsys.sdo_elem_info_array" << createPCElemInfo() << ",\n"
+        "              mdsys.sdo_ordinate_array(\n";
 
-    s_geom << base_table_bounds.getMinimum(0) << "," << base_table_bounds.getMinimum(1) << ",";
+    s_geom << bounds.getMinimum(0) << "," << bounds.getMinimum(1) << ",";
+    if (m_3d)
+        s_geom << bounds.getMinimum(2) << ",";
 
-    if (m_is3d)
-    {
-        s_geom << base_table_bounds.getMinimum(2) << ",";
-    }
-
-    s_geom << base_table_bounds.getMaximum(0) << "," << base_table_bounds.getMaximum(1);
-
-    if (m_is3d)
-    {
-        s_geom << "," << base_table_bounds.getMaximum(2);
-    }
-
+    s_geom << bounds.getMaximum(0) << "," << bounds.getMaximum(1);
+    if (m_3d)
+        s_geom << "," << bounds.getMaximum(2);
     s_geom << "))";
-
 
     std::ostringstream oss;
 
-    oss << "UPDATE "<< base_table_name <<
-        " A SET A." << cloud_column_name <<".PC_EXTENT = " << s_geom.str() <<
-        " WHERE A.ID = " << getPCID();
+    oss << "UPDATE "<< m_baseTableName <<
+        " A SET A." << m_cloudColumnName <<".PC_EXTENT = " << s_geom.str() <<
+        " WHERE A.ID = " << m_pc_id;
 
-    Statement statement = Statement(m_connection->CreateStatement(oss.str().c_str()));
+    Statement statement(m_connection->CreateStatement(oss.str().c_str()));
     try
     {
         statement->Execute();
@@ -1434,21 +1103,14 @@ void Writer::UpdatePCExtent()
     catch (std::runtime_error const& e)
     {
         std::ostringstream oss;
-        oss << "Failed to update cloud extent in '" << base_table_name << "' table with id " << getPCID() << ". Does the table exist? "  << std::endl << e.what() << std::endl;
+        oss << "Failed to update cloud extent in '" << m_baseTableName <<
+            "' table with id " << m_pc_id << ". Does the table exist? " <<
+            std::endl << e.what() << std::endl;
         throw std::runtime_error(oss.str());
     }
     m_connection->Commit();
-
 }
 
-boost::uint32_t Writer::writeBuffer(const PointBuffer& buffer)
-{
-    boost::uint32_t numPoints = buffer.getNumPoints();
-
-    WriteBlock(buffer);
-
-    return numPoints;
-}
 
 }
 }

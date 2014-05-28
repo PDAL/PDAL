@@ -59,20 +59,13 @@ public:
     typedef T value_type;
 
     Range()
-        : m_minimum((std::numeric_limits<T>::max)())
-        , m_maximum((std::numeric_limits<T>::min)())
     {
+        clear();
     }
 
     Range(T minimum, T maximum)
         : m_minimum(minimum)
         , m_maximum(maximum)
-    {
-    }
-
-    Range(Range const& other)
-        : m_minimum(other.m_minimum)
-        , m_maximum(other.m_maximum)
     {
     }
 
@@ -108,13 +101,8 @@ public:
 
     bool equal(Range const& other) const
     {
-        if (!Utils::compare_distance(m_minimum, other.m_minimum) ||
-                !Utils::compare_distance(m_maximum, other.m_maximum))
-        {
-            return false;
-        }
-
-        return true;
+        return Utils::compare_distance(m_minimum, other.m_minimum) &&
+            Utils::compare_distance(m_maximum, other.m_maximum);
     }
 
     bool overlaps(Range const& r) const
@@ -134,8 +122,11 @@ public:
 
     bool empty(void) const
     {
-        return Utils::compare_distance(m_minimum, (std::numeric_limits<T>::max)()) &&
-               Utils::compare_distance(m_maximum, (std::numeric_limits<T>::min)());
+        return
+            Utils::compare_distance(m_minimum,
+                (std::numeric_limits<T>::max)()) &&
+            Utils::compare_distance(m_maximum,
+                (std::numeric_limits<T>::min)());
     }
 
     void shift(T v)
@@ -176,6 +167,12 @@ public:
     {
         grow(lo);
         grow(hi);
+    }
+
+    void clear()
+    {
+        m_minimum = (std::numeric_limits<T>::max)();
+        m_maximum = (std::numeric_limits<T>::min)();
     }
 
     T length() const

@@ -236,6 +236,11 @@ public:
         setFieldInternal(dim, idx, val);
     }
 
+    void getRawField(const Dimension& dim, PointId idx, void *buf) const
+    {
+        getFieldInternal(dim, idx, buf);
+    }
+
     void setFieldUnscaled(pdal::Dimension const& dim, uint32_t idx,
         double val)
     {
@@ -495,12 +500,18 @@ private:
 
     inline void setFieldInternal(Dimension const& dim, PointId pointIndex,
         void *value);
+    inline void getFieldInternal(Dimension const& dim, PointId pointIndex,
+        void *value) const;
 };
+
 
 template <class T>
 T PointBuffer::getField(pdal::Dimension const& dim, PointId id) const
 {
-    return m_context.getRawPtBuf()->getField<T>(dim, m_index[id]);
+    T t;
+
+    getFieldInternal(dim, id, &t);
+    return t;
 }
 
 
@@ -677,6 +688,13 @@ void PointBuffer::setField(pdal::Dimension const& dim, uint32_t idx, T val)
             "(" << (double)val << ") -> " << dim.getInterpretationName();
         throw pdal_error(oss.str());
     }
+}
+
+
+inline void PointBuffer::getFieldInternal(pdal::Dimension const& dim,
+    PointId id, void *buf) const
+{
+    m_context.getRawPtBuf()->getField(dim, m_index[id], buf);
 }
 
 

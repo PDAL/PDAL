@@ -455,6 +455,12 @@ public:
         }
     }
 
+    void clear()
+    {
+        for (size_t i = 0; i < m_ranges.size(); ++i)
+            m_ranges[i].clear();
+    }
+
 
 
     /// Verifies that the minimums and maximums of each dimension within the
