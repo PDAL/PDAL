@@ -98,7 +98,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       config.vm.synced_folder "/Users/hobu/dev/git/pointcloud", "/pointcloud", nfs: use_nfs
     end
   end
-  
+
+  if RUBY_PLATFORM.include? "win32"
+    config.vm.synced_folder ".", "/vagrant", type: "smb"
+  end
   
 
   ppaRepos = [
