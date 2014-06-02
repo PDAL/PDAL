@@ -144,6 +144,7 @@ BOOST_AUTO_TEST_CASE(test_random_iterator)
 }
 
 
+#ifdef PDAL_SRS_ENABLED
 BOOST_AUTO_TEST_CASE(test_multiple_dims_same_name)
 {
     const char* epsg4326_wkt = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4326\"]]";
@@ -205,9 +206,10 @@ BOOST_AUTO_TEST_CASE(test_multiple_dims_same_name)
     
     pdal::Metadata m = iterator->toMetadata();
 }
+#endif
 
 
-
+#ifdef PDAL_SRS_ENABLED
 BOOST_AUTO_TEST_CASE(test_specified_stats)
 {
 
@@ -274,7 +276,10 @@ BOOST_AUTO_TEST_CASE(test_specified_stats)
     BOOST_CHECK_CLOSE(statsX.minimum(), -117.2686466233, 0.0001);
     BOOST_CHECK_CLOSE(statsY.minimum(), 848899.700, 0.0001);    
 }
+#endif
 
+
+#ifdef PDAL_SRS_ENABLED
 BOOST_AUTO_TEST_CASE(test_pointbuffer_stats)
 {
 
@@ -334,5 +339,7 @@ BOOST_AUTO_TEST_CASE(test_pointbuffer_stats)
     
     BOOST_CHECK_EQUAL(m.toPTree().get<int>("metadata.filters_stats.metadata.Classification.metadata.counts.metadata.count-1.metadata.count.value"), 737);
 }
+#endif
+
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -86,25 +86,8 @@ BOOST_AUTO_TEST_CASE(test_construction)
     BOOST_CHECK_EQUAL(m.getType(), "base64Binary");
 
     std::string base64("AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygpKissLS4vMDEyMzQ1Njc4OTo7PD0+P0BBQkNERUZHSElKS0xNTk9QUVJTVFVWV1hZWltcXV5fYGFiYw==");
-    BOOST_CHECK_EQUAL(boost::lexical_cast<std::string>(m.getValue<pdal::ByteArray>()), base64);
+    BOOST_CHECK_EQUAL(boost::lexical_cast<std::string>(m.getValue<pdal::ByteArray>()), base64); 
 
-    pdal::SpatialReference ref("EPSG:4326");
-    m.setValue<pdal::SpatialReference>(ref);
-    BOOST_CHECK_EQUAL(m.getType(), "spatialreference");
-
-    pdal::SpatialReference ref2 = m.getValue<pdal::SpatialReference>();
-    // std::string ref_text("GEOGCS[\"WGS 84\","
-    //     DATUM[\"WGS_1984\","
-    //         SPHEROID[\"WGS 84\",6378137,298.257223563,
-    //             AUTHORITY[\"EPSG\",\"7030\"]],
-    //         AUTHORITY[\"EPSG\",\"6326\"]],
-    //     PRIMEM[\"Greenwich\",0,
-    //         AUTHORITY[\"EPSG\",\"8901\"]],
-    //     UNIT[\"degree\",0.0174532925199433,
-    //         AUTHORITY[\"EPSG\",\"9122\"]],
-    //     AUTHORITY[\"EPSG\",\"4326\"]]");
-
-    // std::cout << boost::lexical_cast<std::string>(m.getValue<pdal::SpatialReference>());
     m.setValue<boost::int8_t>(i8);
     BOOST_CHECK_EQUAL(m.getValue<boost::int8_t>(), -8);
     BOOST_CHECK_EQUAL(m.getType(), "integer");
@@ -137,6 +120,32 @@ BOOST_AUTO_TEST_CASE(test_construction)
     BOOST_CHECK_EQUAL(m.getValue<boost::uint64_t>(), 64u);
     BOOST_CHECK_EQUAL(m.getType(), "nonNegativeInteger");
 }
+
+
+#ifdef PDAL_SRS_ENABLED
+BOOST_AUTO_TEST_CASE(test_construction_with_srs)
+{
+    pdal::Metadata m("test");
+    pdal::SpatialReference ref("EPSG:4326");
+    m.setValue<pdal::SpatialReference>(ref);
+    BOOST_CHECK_EQUAL(m.getType(), "spatialreference");
+
+    pdal::SpatialReference ref2 = m.getValue<pdal::SpatialReference>();
+    // std::string ref_text("GEOGCS[\"WGS 84\","
+    //     DATUM[\"WGS_1984\","
+    //         SPHEROID[\"WGS 84\",6378137,298.257223563,
+    //             AUTHORITY[\"EPSG\",\"7030\"]],
+    //         AUTHORITY[\"EPSG\",\"6326\"]],
+    //     PRIMEM[\"Greenwich\",0,
+    //         AUTHORITY[\"EPSG\",\"8901\"]],
+    //     UNIT[\"degree\",0.0174532925199433,
+    //         AUTHORITY[\"EPSG\",\"9122\"]],
+    //     AUTHORITY[\"EPSG\",\"4326\"]]");
+
+    // std::cout << boost::lexical_cast<std::string>(m.getValue<pdal::SpatialReference>());
+}
+#endif
+
 
 BOOST_AUTO_TEST_CASE(test_metadata_copy)
 {

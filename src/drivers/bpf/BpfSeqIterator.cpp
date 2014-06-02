@@ -139,6 +139,7 @@ boost::uint32_t BpfSeqIterator::readBufferImpl(PointBuffer& data)
 
 size_t BpfSeqIterator::readBlock(std::vector<char>& outBuf, size_t index)
 {
+#ifdef PDAL_HAVE_ZLIB
     boost::uint32_t finalBytes;
     boost::uint32_t compressBytes;
 
@@ -152,6 +153,9 @@ size_t BpfSeqIterator::readBlock(std::vector<char>& outBuf, size_t index)
     int ret = inflate(in.data(), compressBytes,
         outBuf.data() + index, finalBytes);
     return (ret ? 0 : finalBytes);
+#else
+    throw pdal_error("BPF compression required, but ZLIB is unavailable");
+#endif
 }
     
 boost::uint32_t BpfSeqIterator::read(PointBuffer& data)

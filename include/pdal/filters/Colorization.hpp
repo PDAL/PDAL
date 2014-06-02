@@ -155,11 +155,7 @@ private:
     boost::array<double, 6> m_forward_transform;
     boost::array<double, 6> m_inverse_transform;
 
-#ifdef PDAL_HAVE_GDAL
     GDALDatasetH m_ds;
-#else
-    void* m_ds;
-#endif
     
 };
 

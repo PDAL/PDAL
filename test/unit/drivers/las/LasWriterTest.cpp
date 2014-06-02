@@ -246,7 +246,11 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_metadata)
     BOOST_CHECK_EQUAL(h.GetCreationYear(), 2012u);
     
     pdal::drivers::las::VLRList const& vlrs = h.getVLRs();
+#ifdef PDAL_SRS_ENABLED
     BOOST_CHECK_EQUAL(vlrs.count(), 5u);
+#else
+    BOOST_CHECK_EQUAL(vlrs.count(), 2u);
+#endif
     pdal::drivers::las::VariableLengthRecord const& r = vlrs.get(0);
     
     BOOST_CHECK_EQUAL(r.getRecordId(), 1234u);
