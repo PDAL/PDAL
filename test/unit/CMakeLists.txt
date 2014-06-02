@@ -102,11 +102,11 @@ SET(PDAL_UNITTEST_CONFIG_INC
 
 if (WITH_ORACLE)
 if (NOT USE_PDAL_PLUGIN_OCI)
-#    set(PDAL_OCI_TEST_CPP drivers/oci/OCITest.cpp)
+   set(PDAL_OCI_TEST_CPP drivers/oci/OCITest.cpp)
 
-#    FOREACH(file ${PDAL_OCI_TEST_CPP})
-#            SET(PDAL_UNITTEST_TEST_SRC "${PDAL_UNITTEST_TEST_SRC};${file}" CACHE INTERNAL "source files for test")
-#    ENDFOREACH(file)
+   FOREACH(file ${PDAL_OCI_TEST_CPP})
+           SET(PDAL_UNITTEST_TEST_SRC "${PDAL_UNITTEST_TEST_SRC};${file}" CACHE INTERNAL "source files for test")
+   ENDFOREACH(file)
 endif()
 
 endif (WITH_ORACLE)
