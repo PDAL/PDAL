@@ -11,7 +11,6 @@ git clone https://github.com/PDAL/PDAL.git pdal
 cd pdal
 mkdir build
 cd build
-git checkout feature/pcl-block
 cmake   -G "Unix Makefiles"  \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=/usr \
