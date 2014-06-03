@@ -9,13 +9,14 @@ PDAL Applications
 :Date: 10/21/2013
 
 PDAL contains a single `git`_-style application, called *pdal*. The `pdal` 
-application currently contains four commands:
+application currently contains six commands:
 
-* :ref:`translate <translate_command>`
-* :ref:`info <info_command>`
-* :ref:`pipeline <pipeline_command>`
 * :ref:`delta <delta_command>`
 * :ref:`diff <diff_command>`
+* :ref:`info <info_command>`
+* :ref:`pcl <pcl_command>`
+* :ref:`pipeline <pipeline_command>`
+* :ref:`translate <translate_command>`
 
 Applications are run by invoking the *pdal* application along with the 
 command name:
@@ -39,109 +40,6 @@ particular drivers and their options
 
 .. _`git`: http://git-scm.com/
 
-
-.. _translate_command:
-
-``translate`` command 
-------------------------------------------------------------------------------
-
-The *translate* command is used for simple conversion of files based on their 
-file extensions. Use the :ref:`pipeline_command` for more significant 
-translation operations.
-
-::
-
-    -i [ --input ] arg           input file name
-    -o [ --output ] arg          output file name
-    --a_srs arg                  Assign input coordinate system (if supported by
-                               output format)
-    --t_srs arg                  Transform to output coordinate system (if
-                               supported by output format)
-    -z [ --compress ]            Compress output data (if supported by output
-                               format)
-    --count arg (=0)             How many points should we write?
-    --skip arg (=0)              How many points should we skip?
-    --bounds arg                 Extent (in XYZ to clip output to)
-    --polygon arg                POLYGON WKT to use for precise crop of data (2d
-                               or 3d)
-    --scale arg                  A comma-separated or quoted, space-separated
-                               list of scales to set on the output file:
-                               --scale 0.1,0.1,0.00001
-                               --scale "0.1 0.1 0.00001"
-    --offset arg                 A comma-separated or quoted, space-separated
-                               list of offsets to set on the output file:
-                               --offset 0,0,0
-                               --offset "1234 5678 91011"
-    -m [ --metadata ] [=arg(=1)] Forward metadata (VLRs, header entries, etc)
-                               from previous stages
-                           
-.. _info_command:
-
-``info`` command
-------------------------------------------------------------------------------
-
-Dumps information about a point cloud file, such as:
-
-* basic properties (extents, number of points, point format)
-
-* coordinate reference system
-
-* additional metadata
-
-* summary statistics about the points
-
-* the plain text format should be reStructured text if possible to allow 
-  a user to retransform the output into whatever they want with ease
-
-::
-
-    $ pdal info  test/data/1.2-with-color.las --count 3 --query "636601.87, 849018.59, 425.10"
-
-Print the first 10 points of the file as `reStructuredText`_
-
-::
-    $ pdal info test/data/1.2-with-color.las -p 0-10
-
-Print three selected points of the file as `reStructuredText`_
-
-::
-    $ pdal info test/data/1.2-with-color.las -p 4, 16, 28
-
-
-.. _`reStructuredText`: http://docutils.sourceforge.net/docs/user/rst/quickref.html
-
-:: 
-
-    -p [ --point ] [=arg(=0)] point to dump
-    --query arg               A 2d or 3d point query point
-    --distance arg            A query distance
-    -a [ --stats ]            dump stats on all points (reads entire dataset)
-    --count arg (=0)          How many points should we write?
-    --dimensions arg          dump stats on all points (reads entire dataset)
-    -s [ --schema ]           dump the schema
-    -m [ --metadata ]         dump the metadata
-    --sdo_pc                  dump the SDO_PC Oracle Metadata
-    -r [ --stage ]            dump the stage info
-    --xml                     dump XML instead of JSON
-    --seed arg (=0)           Seed value for random sample
-    --sample_size arg (=1000) Sample size for random sample
-
-.. _pipeline_command:
-
-``pipeline`` command
-------------------------------------------------------------------------------
-
-The pipeline command is used to execute :ref:`pipeline` XML. See :ref:`reading` 
-or :ref:`pipeline` for more information.
-
-::
-
-    -i [ --input ] arg           input file name
-    --pipeline-serialization arg
-    --validate                   Validate the pipeline (including serialization),
-                               but do not execute writing of points
-    --count arg (=0)             How many points should we write?
-    --skip arg (=0)              How many points should we skip?
 
 .. _delta_command:
 
@@ -216,3 +114,128 @@ checking the following:
 * Metadata
 * Actual point count
 * Byte-by-byte point data
+
+
+.. _info_command:
+
+``info`` command
+------------------------------------------------------------------------------
+
+Dumps information about a point cloud file, such as:
+
+* basic properties (extents, number of points, point format)
+
+* coordinate reference system
+
+* additional metadata
+
+* summary statistics about the points
+
+* the plain text format should be reStructured text if possible to allow 
+  a user to retransform the output into whatever they want with ease
+
+::
+
+    $ pdal info  test/data/1.2-with-color.las --count 3 --query "636601.87, 849018.59, 425.10"
+
+Print the first 10 points of the file as `reStructuredText`_
+
+::
+    $ pdal info test/data/1.2-with-color.las -p 0-10
+
+Print three selected points of the file as `reStructuredText`_
+
+::
+    $ pdal info test/data/1.2-with-color.las -p 4, 16, 28
+
+
+.. _`reStructuredText`: http://docutils.sourceforge.net/docs/user/rst/quickref.html
+
+:: 
+
+    -p [ --point ] [=arg(=0)] point to dump
+    --query arg               A 2d or 3d point query point
+    --distance arg            A query distance
+    -a [ --stats ]            dump stats on all points (reads entire dataset)
+    --count arg (=0)          How many points should we write?
+    --dimensions arg          dump stats on all points (reads entire dataset)
+    -s [ --schema ]           dump the schema
+    -m [ --metadata ]         dump the metadata
+    --sdo_pc                  dump the SDO_PC Oracle Metadata
+    -r [ --stage ]            dump the stage info
+    --xml                     dump XML instead of JSON
+    --seed arg (=0)           Seed value for random sample
+    --sample_size arg (=1000) Sample size for random sample
+
+
+.. _pcl_command:
+
+``pcl`` command
+------------------------------------------------------------------------------
+
+The *pcl* command is used to invoke a PCL JSON pipeline. See
+:ref:`pcl_block_tutorial` for more information.
+
+::
+
+    -i [ --input ] arg      input file name
+    -o [ --output ] arg     output file name
+    -p [ --pcl ] arg        pcl file name
+    -z [ --compress ]       Compress output data (if supported by output format)
+
+The *pcl* command is only available when PDAL is build with PCL support.
+
+
+.. _pipeline_command:
+
+``pipeline`` command
+------------------------------------------------------------------------------
+
+The *pipeline* command is used to execute :ref:`pipeline` XML. See :ref:`reading` 
+or :ref:`pipeline` for more information.
+
+::
+
+    -i [ --input ] arg           input file name
+    --pipeline-serialization arg
+    --validate                   Validate the pipeline (including serialization),
+                               but do not execute writing of points
+    --count arg (=0)             How many points should we write?
+    --skip arg (=0)              How many points should we skip?
+
+
+.. _translate_command:
+
+``translate`` command 
+------------------------------------------------------------------------------
+
+The *translate* command is used for simple conversion of files based on their 
+file extensions. Use the :ref:`pipeline_command` for more significant 
+translation operations.
+
+::
+
+    -i [ --input ] arg           input file name
+    -o [ --output ] arg          output file name
+    --a_srs arg                  Assign input coordinate system (if supported by
+                               output format)
+    --t_srs arg                  Transform to output coordinate system (if
+                               supported by output format)
+    -z [ --compress ]            Compress output data (if supported by output
+                               format)
+    --count arg (=0)             How many points should we write?
+    --skip arg (=0)              How many points should we skip?
+    --bounds arg                 Extent (in XYZ to clip output to)
+    --polygon arg                POLYGON WKT to use for precise crop of data (2d
+                               or 3d)
+    --scale arg                  A comma-separated or quoted, space-separated
+                               list of scales to set on the output file:
+                               --scale 0.1,0.1,0.00001
+                               --scale "0.1 0.1 0.00001"
+    --offset arg                 A comma-separated or quoted, space-separated
+                               list of offsets to set on the output file:
+                               --offset 0,0,0
+                               --offset "1234 5678 91011"
+    -m [ --metadata ] [=arg(=1)] Forward metadata (VLRs, header entries, etc)
+                               from previous stages
+
