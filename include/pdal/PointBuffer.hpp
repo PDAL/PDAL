@@ -43,6 +43,7 @@
 #include <boost/interprocess/managed_shared_memory.hpp>
 
 #include <pdal/pdal_internal.hpp>
+#include <pdal/pdal_macros.hpp>
 #include <pdal/Bounds.hpp>
 #include <pdal/PointContext.hpp>
 #include <pdal/Schema.hpp>

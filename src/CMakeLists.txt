@@ -33,7 +33,6 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/Filter.hpp"
   "${PDAL_HEADERS_DIR}/Filters.hpp"
   "${PDAL_HEADERS_DIR}/FilterIterator.hpp"
-  "${PDAL_HEADERS_DIR}/GDALUtils.hpp"
   "${PDAL_HEADERS_DIR}/GlobalEnvironment.hpp"
   "${PDAL_HEADERS_DIR}/gitsha.h"
   "${PDAL_HEADERS_DIR}/IStream.hpp"
@@ -113,10 +112,6 @@ set(PDAL_BASE_CPP
   third/md5-pdal.c
   ${PDAL_XML_SRC}
 )
-
-if (GDAL_FOUND)
-    set (PDAL_BASE_CPP  GDALUtils.cpp ${PDAL_BASE_CPP})
-endif(GDAL_FOUND)
 
 list (APPEND PDAL_CPP ${PDAL_BASE_CPP} )
 list (APPEND PDAL_HPP ${PDAL_BASE_HPP} )
@@ -542,16 +537,12 @@ set(PDAL_FILTERS_HPP
   "${PDAL_FILTERS_HEADERS}/Cache.hpp"
   "${PDAL_FILTERS_HEADERS}/Chipper.hpp"
   "${PDAL_FILTERS_HEADERS}/Color.hpp"
-  "${PDAL_FILTERS_HEADERS}/Colorization.hpp"
   "${PDAL_FILTERS_HEADERS}/Crop.hpp"
   "${PDAL_FILTERS_HEADERS}/Decimation.hpp"
   "${PDAL_FILTERS_HEADERS}/HexBin.hpp"
   "${PDAL_FILTERS_HEADERS}/InPlaceReprojection.hpp"
   "${PDAL_FILTERS_HEADERS}/Mosaic.hpp"
-  "${PDAL_FILTERS_HEADERS}/PCLBlock.hpp"
   "${PDAL_FILTERS_HEADERS}/PointBufferCache.hpp"
-  "${PDAL_FILTERS_HEADERS}/Predicate.hpp"
-  "${PDAL_FILTERS_HEADERS}/Programmable.hpp"
   "${PDAL_FILTERS_HEADERS}/Reprojection.hpp"
   "${PDAL_FILTERS_HEADERS}/Scaling.hpp"
   "${PDAL_FILTERS_HEADERS}/Selector.hpp"
@@ -564,16 +555,12 @@ set (PDAL_FILTERS_CPP
   "${PDAL_FILTERS_SRC}/Cache.cpp"
   "${PDAL_FILTERS_SRC}/Chipper.cpp"
   "${PDAL_FILTERS_SRC}/Color.cpp"
-  "${PDAL_FILTERS_SRC}/Colorization.cpp"
   "${PDAL_FILTERS_SRC}/Crop.cpp"
   "${PDAL_FILTERS_SRC}/Decimation.cpp"
   "${PDAL_FILTERS_SRC}/HexBin.cpp"
   "${PDAL_FILTERS_SRC}/InPlaceReprojection.cpp"
   "${PDAL_FILTERS_SRC}/Mosaic.cpp"
-  "${PDAL_FILTERS_SRC}/PCLBlock.cpp"
   "${PDAL_FILTERS_SRC}/PointBufferCache.cpp"
-  "${PDAL_FILTERS_SRC}/Predicate.cpp"
-  "${PDAL_FILTERS_SRC}/Programmable.cpp"  
   "${PDAL_FILTERS_SRC}/Reprojection.cpp"
   "${PDAL_FILTERS_SRC}/Scaling.cpp"
   "${PDAL_FILTERS_SRC}/Selector.cpp"
@@ -583,6 +570,44 @@ set (PDAL_FILTERS_CPP
 
 list (APPEND PDAL_CPP ${PDAL_FILTERS_CPP} )
 list (APPEND PDAL_HPP ${PDAL_FILTERS_HPP} )
+
+
+#
+# Core components that depend on Python
+#
+set(PDAL_PYTHON_HPP
+    ${PDAL_FILTERS_HEADERS}/Predicate.hpp
+    ${PDAL_FILTERS_HEADERS}/Programmable.hpp
+    )
+
+set(PDAL_PYTHON_CPP
+    ${PDAL_FILTERS_SRC}/Predicate.cpp
+    ${PDAL_FILTERS_SRC}/Programmable.cpp
+    )
+
+if (WITH_PYTHON)
+    list(APPEND PDAL_HPP ${PDAL_PYTHON_HPP})
+    list(APPEND PDAL_CPP ${PDAL_PYTHON_CPP})
+endif (WITH_PYTHON)
+
+
+#
+# Core components that depend on GDAL
+#
+set(PDAL_GDAL_HPP
+    "${PDAL_HEADERS_DIR}/GDALUtils.hpp"
+    "${PDAL_FILTERS_HEADERS}/Colorization.hpp"
+    )
+
+set(PDAL_GDAL_CPP
+    GDALUtils.cpp
+    "${PDAL_FILTERS_SRC}/Colorization.cpp"
+    )
+
+if (WITH_GDAL)
+    list(APPEND PDAL_HPP ${PDAL_GDAL_HPP})
+    list(APPEND PDAL_CPP ${PDAL_GDAL_CPP})
+endif (WITH_GDAL)
 
 
 #
@@ -641,7 +666,6 @@ set(PDAL_KERNEL_HPP
     ${PDAL_KERNEL_HEADERS}/Diff.hpp
     ${PDAL_KERNEL_HEADERS}/Info.hpp
     ${PDAL_KERNEL_HEADERS}/Kernel.hpp
-    ${PDAL_KERNEL_HEADERS}/PCL.hpp
     ${PDAL_KERNEL_HEADERS}/Pipeline.hpp
     ${PDAL_KERNEL_HEADERS}/Delta.hpp
     ${PDAL_KERNEL_HEADERS}/Translate.hpp
@@ -652,7 +676,6 @@ set(PDAL_KERNEL_CPP
     ${PDAL_KERNEL_SRC}/Support.cpp
     ${PDAL_KERNEL_SRC}/Diff.cpp
     ${PDAL_KERNEL_SRC}/Info.cpp
-    ${PDAL_KERNEL_SRC}/PCL.cpp
     ${PDAL_KERNEL_SRC}/Pipeline.cpp
     ${PDAL_KERNEL_SRC}/Delta.cpp
     ${PDAL_KERNEL_SRC}/Translate.cpp
@@ -660,6 +683,26 @@ set(PDAL_KERNEL_CPP
 
 list (APPEND PDAL_CPP ${PDAL_KERNEL_CPP} )
 list (APPEND PDAL_HPP ${PDAL_KERNEL_HPP} )
+
+
+#
+# pcl
+#
+set(PDAL_PCL_HPP
+    ${PDAL_KERNEL_HEADERS}/PCL.hpp
+    ${PDAL_FILTERS_HEADERS}/PCLBlock.hpp
+    )
+set(PDAL_PCL_CPP
+    ${PDAL_FILTERS_SRC}/PCLBlock.cpp
+    ${PDAL_KERNEL_SRC}/PCL.cpp
+    )
+
+if (WITH_PCL)
+    list(APPEND PDAL_HPP ${PDAL_PCL_HPP})
+    list(APPEND PDAL_CPP ${PDAL_PCL_CPP})
+endif (WITH_PCL)
+
+
 #
 # Group source files for IDE source explorers (e.g. Visual Studio)
 #

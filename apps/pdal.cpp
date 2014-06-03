@@ -50,7 +50,9 @@ void outputVersion()
     std::cout << "     - delta" << std::endl;
     std::cout << "     - diff" << std::endl;
     std::cout << "     - info" << std::endl;
+#ifdef PDAL_HAVE_PCL
     std::cout << "     - pcl" << std::endl;
+#endif
     std::cout << "     - pipeline" << std::endl;
     std::cout << "     - translate" << std::endl;
     std::cout << std::endl;
@@ -123,11 +125,13 @@ int main(int argc, char* argv[])
         return app.run();
     }
 
+#ifdef PDAL_HAVE_PCL
     if (boost::iequals(action, "pcl"))
     {
         pdal::kernel::PCL app(count, args);
         return app.run();
     }
+#endif
 
     if (boost::iequals(action, "pipeline"))
     {
