@@ -66,7 +66,6 @@ namespace oci
 
 Writer::Writer(const Options& options)
     : pdal::Writer(options)
-    , OracleDriver(getOptions())
     , m_createIndex(false)
     , m_pcExtent(3)
     , m_pc_id(0)
@@ -77,10 +76,7 @@ Writer::Writer(const Options& options)
     , m_chunkCount(16)
     , m_streamChunks(false)
     , m_orientation(schema::POINT_INTERLEAVED)
-{
-    m_connection = connect();
-    m_gtype = getGType();
-}
+{}
 
 Writer::~Writer()
 {
@@ -98,6 +94,8 @@ Writer::~Writer()
 void Writer::initialize()
 {
     GlobalEnvironment::get().getGDALDebug()->addLog(log());    
+    m_connection = connect(m_connSpec);
+    m_gtype = getGType();
 }
 
 
@@ -768,6 +766,7 @@ void Writer::processOptions(const Options& options)
         options.getValueOrDefault<bool>("store_dimensional_orientation", false);
     m_orientation = dimInterleaved ? schema::DIMENSION_INTERLEAVED :
         schema::POINT_INTERLEAVED;
+    m_connSpec = options.getValueOrDefault<std::string>("connection", "");
 }
 
 

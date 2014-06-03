@@ -32,8 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_PDAL_DRIVER_OCI_WRITER_HPP
-#define INCLUDED_PDAL_DRIVER_OCI_WRITER_HPP
+#pragma once
 
 #include <pdal/Writer.hpp>
 #include <pdal/Bounds.hpp>
@@ -58,7 +57,7 @@ namespace drivers
 namespace oci
 {
 
-class PDAL_DLL Writer : public pdal::Writer, pdal::drivers::oci::OracleDriver
+class PDAL_DLL Writer : public pdal::Writer
 {
 public:
     SET_STAGE_NAME("drivers.oci.writer", "OCI Writer")
@@ -161,13 +160,12 @@ private:
     boost::uint32_t m_chunkCount;
     bool m_streamChunks;
     schema::Orientation m_orientation;
+    std::string m_connSpec;
 
     std::vector<Dimension> m_dims;
 };
 
-}
-}
-} // namespace pdal::driver::oci
+} // namespace oci
+} // namespace drivers
+} // namespace pdal
 
-
-#endif // INCLUDED_OCIWRITER_HPP

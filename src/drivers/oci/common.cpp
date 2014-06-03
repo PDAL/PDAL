@@ -38,6 +38,8 @@
 #include <iostream>
 
 #include <pdal/Bounds.hpp>
+#include <pdal/Dimension.hpp>
+#include <pdal/Schema.hpp>
 #include <pdal/Utils.hpp>
 
 namespace pdal
@@ -47,16 +49,86 @@ namespace drivers
 namespace oci
 {
 
-Block::Block(Connection connection)
-    : num_points(0)
-    , m_connection(connection)
+
+Connection connect(std::string connSpec)
+{
+    using namespace std;
+
+    if (connSpec.empty())
+        throw pdal_error("Oracle connection string empty! Unable to connect");
+
+    string::size_type pos = connSpec.find("/", 0);
+    string username = connSpec.substr(0, pos);
+    connSpec = connSpec.substr(pos + 1);
+    pos = connSpec.find("@", 0);
+    string password = connSpec.substr(0, pos);
+    string instance = connSpec.substr(pos + 1);
+
+    Connection con = make_shared<OWConnection>(username.c_str(),
+        password.c_str(), instance.c_str());
+    if (!con->Succeeded())
+        throw connection_failed("Oracle connection failed");
+    return con;
+}
+
+
+Schema fetchSchema(Statement stmt, BlockPtr block)
+{
+    // Fetch the XML that defines the schema for this point cloud
+    std::ostringstream schemaQuery;
+    OCILobLocator* metadata = NULL;
+    schemaQuery <<
+        "DECLARE" << std::endl << "PC_TABLE VARCHAR2(32) := '" <<
+            stmt->GetString(block->pc->base_table) << "';" << std::endl <<
+        "PC_ID NUMBER := " << stmt->GetInteger(&(block->pc->pc_id)) <<
+            ";" << std::endl <<
+        "PC_COLUMN VARCHAR2(32) := '" <<
+            stmt->GetString(block->pc->base_column) << "';" << std::endl <<
+        "BEGIN" << std::endl <<
+        std::endl <<
+        "EXECUTE IMMEDIATE" << std::endl <<
+        " 'SELECT T.'||PC_COLUMN||'.PC_OTHER_ATTRS.getClobVal(), T.'||"
+            "PC_COLUMN||'.PTN_PARAMS FROM '||pc_table||' T WHERE T.ID='||"
+            "PC_ID INTO :metadata, :capacity;" << std::endl <<
+        "END;" << std::endl;
+
+    Statement getSchemaStmt(
+        block->m_connection->CreateStatement(schemaQuery.str().c_str()));
+    getSchemaStmt->BindName(":metadata", &metadata);
+
+    // ABELL
+    // We don't use this anymore.  Need to change query.
+    char ptn_params[1024] = {0};
+    getSchemaStmt->BindName(":capacity", ptn_params, sizeof(ptn_params));
+    getSchemaStmt->Execute();
+
+    // ABELL
+    // And this.
+    if (ptn_params)
+        free(ptn_params);
+
+    char* pc_schema = getSchemaStmt->ReadCLob(metadata);
+    std::string pc_schema_xml;
+    if (pc_schema)
+    {
+        pc_schema_xml = pc_schema;
+        CPLFree(pc_schema);
+    }
+    return Schema::from_xml(pc_schema_xml);
+}
+
+
+Block::Block(Connection connection) : num_points(0) , m_connection(connection)
 {
     m_connection->CreateType(&blk_extent);
-    m_connection->CreateType(&blk_extent->sdo_ordinates, m_connection->GetOrdinateType());
-    m_connection->CreateType(&blk_extent->sdo_elem_info, m_connection->GetElemInfoType());
+    m_connection->CreateType(&blk_extent->sdo_ordinates,
+        m_connection->GetOrdinateType());
+    m_connection->CreateType(&blk_extent->sdo_elem_info,
+        m_connection->GetElemInfoType());
     m_connection->CreateType(&blk_domain);
     m_connection->CreateType(&pc);
 }
+
 
 Block::~Block()
 {
@@ -70,10 +142,31 @@ Block::~Block()
 }
 
 
+void Block::updateScaling(const Schema& s)
+{
+    m_orientation = s.getOrientation();
+    auto dimupdate = [&s](const std::string& name, Scale& scale)
+    {
+        const Dimension *d = s.getDimensionPtr(name);
+        if (d)
+        {
+             scale.m_scale = d->getNumericScale();
+             scale.m_offset = d->getNumericOffset();
+        }
+        else
+        {
+             scale.m_scale = 1.0;
+             scale.m_offset = 0.0;
+        }
+    };
 
+    dimupdate("X", m_scaleX);
+    dimupdate("Y", m_scaleY);
+    dimupdate("Z", m_scaleZ);
 }
-}
-} // namespace pdal::driver::oci
 
 
+} // namespace oci
+} // namespace drivers
+} // namespace pdal
 

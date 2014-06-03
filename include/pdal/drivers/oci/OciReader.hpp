@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Howard Butler, hobu.inc@gmail.com
+* Copyright (c) 2014, Hobu Inc., hobu.inc@gmail.com
 *
 * All rights reserved.
 *
@@ -32,86 +32,71 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_PDAL_DRIVERS_HPP
-#define INCLUDED_PDAL_DRIVERS_HPP
+#pragma once
 
-#include <pdal/pdal_config.hpp>
+#include <vector>
 
-#include <pdal/drivers/faux/Reader.hpp>
-#include <pdal/drivers/faux/Writer.hpp>
+#include <pdal/Reader.hpp>
+#include <pdal/drivers/oci/common.hpp>
 
-#include <pdal/drivers/las/Reader.hpp>
-#include <pdal/drivers/las/Writer.hpp>
+namespace pdal
+{
 
-#include <pdal/drivers/bpf/BpfReader.hpp>
+class Dimension;
+class PointContext;
 
-#include <pdal/drivers/sbet/Reader.hpp>
+namespace drivers
+{
+namespace oci
+{
 
-#ifdef PDAL_HAVE_HDF5
-#include <pdal/drivers/icebridge/Reader.hpp>
-#endif
-
+class PDAL_DLL OciReader : public pdal::Reader
+{
+public:
+    SET_STAGE_NAME("drivers.oci.reader", "OCI Reader")
+    SET_STAGE_LINK("http://pdal.io/stages/drivers.oci.reader.html")
 #ifdef PDAL_HAVE_ORACLE
-#ifndef USE_PDAL_PLUGIN_OCI
-#include <pdal/drivers/oci/OciReader.hpp>
+    SET_STAGE_ENABLED(true)
+#else
+    SET_STAGE_ENABLED(false)
 #endif
-#endif
+    
+    OciReader(const Options& options) : pdal::Reader(options)
+    {}
 
+    static Options getDefaultOptions();
+    StageSequentialIterator* createSequentialIterator() const;
 
-#include <pdal/drivers/buffer/Reader.hpp>
+private:
+    OciReader& operator=(const OciReader&); // not implemented
+    OciReader(const OciReader&); // not implemented
 
-#ifdef PDAL_HAVE_CARIS
-#ifndef USE_PDAL_PLUGIN_CARIS
-#include <pdal/drivers/caris/CloudReader.hpp>
-#endif
-#endif
+    virtual void initialize();
+    virtual void processOptions(const Options& options);
+    virtual void buildSchema(Schema *schema);
+    void validateQuery();
+    void defineBlock(Statement statement, BlockPtr block) const;
+    pdal::SpatialReference fetchSpatialReference(Statement statement,
+        BlockPtr block) const;
 
-#ifdef PDAL_HAVE_MRSID
-#ifndef USE_PDAL_PLUGIN_MRSID
-#include <pdal/drivers/mrsid/Reader.hpp>
-#endif
-#endif
+    Connection m_connection;
+    Statement m_stmt;
+    BlockPtr m_block;
+    std::vector<Dimension *> m_dims;
+    std::string m_query;
+    std::string m_schemaFile;
+    std::string m_connSpec;
+    bool m_normalizeXYZ;
+    boost::optional<double> m_offsetX;
+    boost::optional<double> m_offsetY;
+    boost::optional<double> m_offsetZ;
+    boost::optional<double> m_scaleX;
+    boost::optional<double> m_scaleY;
+    boost::optional<double> m_scaleZ;
+    boost::optional<SpatialReference> m_spatialRef;
+};
 
-#include <pdal/drivers/qfit/Reader.hpp>
-#include <pdal/drivers/terrasolid/Reader.hpp>
-#include <pdal/drivers/text/Writer.hpp>
+} // namespace oci
+} // namespace drivers
+} // namespace pdal
 
-#ifdef PDAL_HAVE_ORACLE
-#ifndef USE_PDAL_PLUGIN_OCI
-#include <pdal/drivers/oci/Writer.hpp>
-#endif
-#endif
-
-#ifdef PDAL_HAVE_NITRO
-#ifndef USE_PDAL_PLUGIN_NITF
-#include <pdal/drivers/nitf/Writer.hpp>
-#endif
-#endif
-
-#ifdef PDAL_HAVE_GDAL
-#include <pdal/drivers/nitf/Reader.hpp>
-#endif
-
-#ifdef PDAL_HAVE_P2G
-#include <pdal/drivers/p2g/Writer.hpp>
-#endif
-
-#ifdef PDAL_HAVE_HDF5
-#include <pdal/drivers/icebridge/Reader.hpp>
-#endif
-
-#ifdef PDAL_HAVE_SQLITE
-#ifndef USE_PDAL_PLUGIN_SQLITE
-#include <pdal/drivers/sqlite/Reader.hpp>
-#include <pdal/drivers/sqlite/Writer.hpp>
-#endif
-#endif
-
-#ifdef PDAL_HAVE_POSTGRESQL
-#ifndef USE_PDAL_PLUGIN_PGPOINTCLOUD
-#include <pdal/drivers/pgpointcloud/Reader.hpp>
-#include <pdal/drivers/pgpointcloud/Writer.hpp>
-#endif
-#endif
-
-#endif

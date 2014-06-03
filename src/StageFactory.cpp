@@ -65,7 +65,7 @@ MAKE_READER_CREATOR(LasReader, pdal::drivers::las::Reader)
 MAKE_READER_CREATOR(BpfReader, pdal::BpfReader)
 #ifdef PDAL_HAVE_ORACLE
 #ifndef USE_PDAL_PLUGIN_OCI
-MAKE_READER_CREATOR(OciReader, pdal::drivers::oci::Reader)
+MAKE_READER_CREATOR(OciReader, pdal::drivers::oci::OciReader)
 #endif
 #endif
 #ifdef PDAL_HAVE_GDAL
@@ -381,7 +381,7 @@ void StageFactory::registerKnownReaders()
     REGISTER_READER(LasReader, pdal::drivers::las::Reader);
 #ifdef PDAL_HAVE_ORACLE
 #ifndef USE_PDAL_PLUGIN_OCI
-    REGISTER_READER(OciReader, pdal::drivers::oci::Reader);
+    REGISTER_READER(OciReader, pdal::drivers::oci::OciReader);
 #endif
 #endif
 #ifdef PDAL_HAVE_GDAL
