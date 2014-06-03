@@ -16,6 +16,14 @@ case "$PDAL_OPTIONAL_COMPONENTS" in
         exit 1
 esac
 
+if [[ "$CXX" == "g++" ]]
+then
+    export CXX="g++-4.8"
+    export PDAL_EMBED_BOOST=OFF
+else
+    export PDAL_EMBED_BOOST=ON
+fi
+
 cmake \
     -DWITH_APPS=ON \
     -DWITH_TESTS=ON \
@@ -34,8 +42,8 @@ cmake \
     -DWITH_CARIS=OFF \
     -DWITH_SQLITE=OFF \
     -DENABLE_CTEST=OFF \
-    -DPDAL_EMBED_BOOST=OFF \
     -DWITH_HDF5=OFF \
+    -DPDAL_EMBED_BOOST=$PDAL_EMBED_BOOST \
     ..
 
 make -j ${NUMTHREADS}
