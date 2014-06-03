@@ -296,8 +296,8 @@ void InPlaceReprojection::ready(PointContext ctx)
 
 void InPlaceReprojection::reprojectOffsets(double& x, double& y, double& z)
 {
-#ifdef PDAL_HAVE_GDAL
     double temp = z;
+#ifdef PDAL_HAVE_GDAL
     int ret = OCTTransform(m_transform_ptr.get(), 1, &x, &y, &z);
     if (!ret)
     {
