@@ -157,7 +157,8 @@ private:
     bool m_reenableCloudTrigger;
     bool m_disableCloudTrigger;
     bool m_sdo_pc_is_initialized;
-    boost::uint32_t m_chunkCount;
+    uint32_t m_chunkCount;
+    uint32_t m_capacity;
     bool m_streamChunks;
     schema::Orientation m_orientation;
     std::string m_connSpec;
