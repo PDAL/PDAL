@@ -605,6 +605,8 @@ void Writer::createPCEntry(Schema const& buffer_schema)
     schema.setOrientation(m_orientation);
     std::string schemaData = Schema::to_xml(schema);
 
+    boost::uint32_t capacity = getOptions().getValueOrThrow<boost::uint32_t>("capacity");
+
     oss << "declare\n"
         "  pc_id NUMBER := :" << nPCPos << ";\n"
         "  pc sdo_pc;\n"
@@ -618,6 +620,7 @@ void Writer::createPCEntry(Schema const& buffer_schema)
         "',   -- Column name of the SDO_POINT_CLOUD object\n"
         "          '" << m_blockTableName <<
         "', -- Table to store blocks of the point cloud\n"
+        "           'blk_capacity="<< capacity <<"', -- max # of points per block\n"
         << s_geom.str() <<
         ",  -- Extent\n"
         "     0.5, -- Tolerance for point cloud\n"
@@ -692,6 +695,9 @@ void Writer::createPCEntry(Schema const& buffer_schema)
 
     //ABELL - I don't get this.  Why do we get the value?  It doesn't look
     //  like we ever retreive the option anyplace else.
+    //HOBU - because the SDO_PC.init method returns a database value for the 
+    //  object it created. We want to reflect that in metadata in addition to  
+    //  using it for the obj_id when writing the blocks
     try
     {
         Option& pc_id = m_options.getOptionByRef("pc_id");
@@ -909,14 +915,17 @@ void Writer::writeTile(PointBuffer const& buffer)
 
     // :1
     statement->Bind(&m_pc_id);
+    log()->get(logDEBUG4) << "Block obj_id " << m_pc_id << std::endl;
 
     // :2
     statement->Bind(&m_lastBlockId);
     m_lastBlockId++;
+    log()->get(logDEBUG4) << "Last BlockId " << m_lastBlockId << std::endl;
 
     // :3
     long long_num_points = static_cast<long>(buffer.size());
     statement->Bind(&long_num_points);
+    log()->get(logDEBUG4) << "Num points " << long_num_points << std::endl;
 
     // :4
     size_t outbufSize = m_pointSize * buffer.size();
@@ -941,7 +950,7 @@ void Writer::writeTile(PointBuffer const& buffer)
             }
     }
 
-    log()->get(logDEBUG4) << "Writing blob of size " << outbufSize << std::endl;
+    log()->get(logDEBUG4) << "Blob size " << outbufSize << std::endl;
     OCILobLocator* locator;
     if (m_streamChunks)
     {
@@ -954,13 +963,16 @@ void Writer::writeTile(PointBuffer const& buffer)
     // :5
     long long_gtype = static_cast<long>(m_gtype);
     statement->Bind(&long_gtype);
+    log()->get(logDEBUG4) << "OCI geometry type " << m_gtype << std::endl;
 
     // :6
-    long* p_srid = 0;
+    long* p_srid = (long*)malloc(sizeof(long));
 
     if (m_srid != 0)
         *p_srid = m_srid;
     statement->Bind(p_srid);
+    log()->get(logDEBUG4) << "OCI SRID " << p_srid << std::endl;
+    
 
     // :7
     OCIArray* sdo_elem_info = 0;
@@ -981,12 +993,14 @@ void Writer::writeTile(PointBuffer const& buffer)
 
     setOrdinates(statement, sdo_ordinates, bounds);
     statement->Bind(&sdo_ordinates, m_connection->GetOrdinateType());
+    log()->get(logDEBUG4) << "Bounds " << bounds << std::endl;
 
     // :9
     if (usePartition)
     {
         long long_partition_id = (long)m_blockTablePartitionValue;
         statement->Bind(&long_partition_id);
+        log()->get(logDEBUG4) << "Partition ID " << long_partition_id << std::endl;        
     }
 
     try
@@ -1008,6 +1022,7 @@ void Writer::writeTile(PointBuffer const& buffer)
 
     m_connection->DestroyType(&sdo_elem_info);
     m_connection->DestroyType(&sdo_ordinates);
+    free(p_srid);
 }
 
 
