@@ -57,8 +57,9 @@ namespace sequential
 class OciSeqIterator : public ReaderSequentialIterator
 {
 public:
-    OciSeqIterator(Statement stmt, BlockPtr block) :
-        m_stmt(stmt), m_block(block), m_atEnd(false)
+    OciSeqIterator(Statement stmt, BlockPtr block, bool normalizeXYZ) :
+        m_stmt(stmt), m_block(block), m_normalizeXYZ(normalizeXYZ),
+        m_atEnd(false)
     {}
 
 protected:
@@ -89,14 +90,13 @@ private:
 
     Statement m_stmt;
     BlockPtr m_block;
+    bool m_normalizeXYZ;
     bool m_atEnd;
     std::vector<Dimension *> m_dims;
     Dimension *m_dimX;
     Dimension *m_dimY;
     Dimension *m_dimZ;
     std::map<int32_t, Schema> m_schemas;
-//ABELL
-    bool m_normalizeXYZ;
 };
 
 } // namespace sequential
