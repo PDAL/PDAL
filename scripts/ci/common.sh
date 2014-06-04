@@ -20,11 +20,7 @@ export NUMTHREADS
 # and I haven't found a good boost package built with clang yet
 if [[ "$CXX" == "clang++" ]]
 then
-    # We tried Ninja in 0a72021fee914e28df0ce2dc9fb3291d62b5183d,
-    # but our tests were taking too long so we went back to Unix Makefiles.
-    # If we find/make a cmake 2.8.12  (or close) package from
-    # a PPA we could re-enable Ninja
-    export PDAL_CMAKE_GENERATOR="Unix Makefiles"
+    export PDAL_CMAKE_GENERATOR="Ninja"
     export PDAL_EMBED_BOOST="ON"
 else
     export PDAL_CMAKE_GENERATOR="Unix Makefiles"

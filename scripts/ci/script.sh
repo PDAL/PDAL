@@ -49,7 +49,9 @@ if [[ $PDAL_CMAKE_GENERATOR == "Unix Makefiles" ]]
 then
     make -j ${NUMTHREADS}
 else
-    ninja
+    # Don't use ninja's default number of threads becuase it can
+    # saturate Travis's available memory.
+    ninja -j ${NUMTHREADS}
 fi
 
 ctest -V --output-on-failure .
