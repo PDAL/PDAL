@@ -87,25 +87,16 @@ Schema fetchSchema(Statement stmt, BlockPtr block)
         "BEGIN" << std::endl <<
         std::endl <<
         "EXECUTE IMMEDIATE" << std::endl <<
-        " 'SELECT T.'||PC_COLUMN||'.PC_OTHER_ATTRS.getClobVal(), T.'||"
-            "PC_COLUMN||'.PTN_PARAMS FROM '||pc_table||' T WHERE T.ID='||"
-            "PC_ID INTO :metadata, :capacity;" << std::endl <<
+        " 'SELECT T.'||PC_COLUMN||'.PC_OTHER_ATTRS.getClobVal()"
+            "FROM '||pc_table||' T WHERE T.ID='||"
+            "PC_ID INTO :metadata;" << std::endl <<
         "END;" << std::endl;
 
     Statement getSchemaStmt(
         block->m_connection->CreateStatement(schemaQuery.str().c_str()));
     getSchemaStmt->BindName(":metadata", &metadata);
 
-    // ABELL
-    // We don't use this anymore.  Need to change query.
-    char ptn_params[1024] = {0};
-    getSchemaStmt->BindName(":capacity", ptn_params, sizeof(ptn_params));
     getSchemaStmt->Execute();
-
-    // ABELL
-    // And this.
-    if (ptn_params)
-        free(ptn_params);
 
     char* pc_schema = getSchemaStmt->ReadCLob(metadata);
     std::string pc_schema_xml;

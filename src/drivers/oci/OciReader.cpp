@@ -206,10 +206,12 @@ void OciReader::validateQuery()
     while (m_stmt->GetNextField(col, fieldName, &hType, &size,
         &precision, &scale, typeName))
     {
+        log()->get(logDEBUG) << "Fetched field '" << fieldName << "' of type '" << typeName << "'"<< std::endl;
+
         reqFields.erase(fieldName);
         if (hType == SQLT_NTY)
         {
-            if (strcmp(typeName,"SDO_PC_BLK_TYPE") == 0)
+            if (strcmp(typeName,"SDO_PC") == 0)
                 typeCorrect = true;
         }
         col++;
@@ -219,7 +221,7 @@ void OciReader::validateQuery()
     {
         std::ostringstream oss;
         oss << "Select statement '" << m_query <<
-            "' does not fetch a SDO_PC_BLK_TYPE object.";
+            "' does not fetch a SDO_PC object.";
         throw pdal_error(oss.str());
     }
 
