@@ -16,12 +16,15 @@ fi
 #NUMTHREADS=1 # disable MP
 export NUMTHREADS
 
-# For clang, use embedded boost and ninja as our 'funky' setup
 # pdal_test segfaults when built against external g++-built boost,
 # and I haven't found a good boost package built with clang yet
 if [[ "$CXX" == "clang++" ]]
 then
-    export PDAL_CMAKE_GENERATOR="Ninja"
+    # We tried Ninja in 0a72021fee914e28df0ce2dc9fb3291d62b5183d,
+    # but our tests were taking too long so we went back to Unix Makefiles.
+    # If we find/make a cmake 2.8.12  (or close) package from
+    # a PPA we could re-enable Ninja
+    export PDAL_CMAKE_GENERATOR="Unix Makefiles"
     export PDAL_EMBED_BOOST="ON"
 else
     export PDAL_CMAKE_GENERATOR="Unix Makefiles"
