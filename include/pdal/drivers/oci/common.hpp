@@ -116,7 +116,7 @@ public:
         { return (char *)chunk.data(); }
     schema::Orientation orientation() const
         { return m_orientation; }
-    void updateScaling(const Schema& s);
+    void initialize(Schema *s);
 
     int32_t obj_id;
     int32_t blk_id;
