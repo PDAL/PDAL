@@ -142,12 +142,13 @@ Block::~Block()
 }
 
 
-void Block::updateScaling(const Schema& s)
+void Block::initialize(Schema *s)
 {
-    m_orientation = s.getOrientation();
-    auto dimupdate = [&s](const std::string& name, Scale& scale)
+    m_num_remaining = num_points;
+    m_orientation = s->getOrientation();
+    auto dimupdate = [s](const std::string& name, Scale& scale)
     {
-        const Dimension *d = s.getDimensionPtr(name);
+        const Dimension *d = s->getDimensionPtr(name);
         if (d)
         {
              scale.m_scale = d->getNumericScale();

@@ -242,14 +242,15 @@ bool OciSeqIterator::readOci(Statement stmt, BlockPtr block)
     }
     // Read the point from the blob in the row..
     readBlob(stmt, block);
-    updateScaling(stmt, block);
+    Schema *s = findSchema(stmt, block);
+    block->initialize(s);
     return true;
 }
 
 
 // Each cloud may have its own scaling for X, Y and Z.  Store it away so
 // that it can be applied later if necessary.
-void OciSeqIterator::updateScaling(Statement stmt, BlockPtr block)
+Schema* OciSeqIterator::findSchema(Statement stmt, BlockPtr block)
 {
     int32_t cloudId = stmt->GetInteger(&block->pc->pc_id);
     Schema s;
@@ -257,11 +258,10 @@ void OciSeqIterator::updateScaling(Statement stmt, BlockPtr block)
     if (si == m_schemas.end())
     {
         s = fetchSchema(stmt, block);
-        m_schemas.insert(std::make_pair(cloudId, s));
+        auto i = m_schemas.insert(std::make_pair(cloudId, s));
+        si = i.first;
     }
-    else
-        s = si->second;
-    block->updateScaling(s);
+    return &(si->second);
 }
 
 

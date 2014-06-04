@@ -96,7 +96,7 @@ private:
     void normalize(PointBuffer& buffer, BlockPtr block, PointId begin,
         PointId end);
     bool readOci(Statement stmt, BlockPtr block);
-    void updateScaling(Statement stmt, BlockPtr block);
+    Schema *findSchema(Statement stmt, BlockPtr block);
     pdal::Bounds<double> getBounds(Statement stmt, BlockPtr block);
 
     Statement m_stmt;
