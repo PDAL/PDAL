@@ -116,6 +116,12 @@ public:
         { return (char *)chunk.data(); }
     schema::Orientation orientation() const
         { return m_orientation; }
+    bool fetched() const
+        { return m_fetched; }
+    void setFetched()
+        { m_fetched = true; }
+    void clearFetched()
+        { m_fetched = false; }
     void initialize(Schema *s);
 
     int32_t obj_id;
@@ -136,6 +142,7 @@ public:
     Scale m_scaleY;
     Scale m_scaleZ;
     schema::Orientation m_orientation;
+    bool m_fetched;  // Set when fetched but not initialized
 };
 typedef std::shared_ptr<Block> BlockPtr;
 
