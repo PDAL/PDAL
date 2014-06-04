@@ -66,7 +66,6 @@ namespace oci
 
 Writer::Writer(const Options& options)
     : pdal::Writer(options)
-    , OracleDriver(getOptions())
     , m_createIndex(false)
     , m_pcExtent(3)
     , m_pc_id(0)
@@ -75,12 +74,10 @@ Writer::Writer(const Options& options)
     , m_solid(false)
     , m_sdo_pc_is_initialized(false)
     , m_chunkCount(16)
+    , m_capacity(0)
     , m_streamChunks(false)
     , m_orientation(schema::POINT_INTERLEAVED)
-{
-    m_connection = connect();
-    m_gtype = getGType();
-}
+{}
 
 Writer::~Writer()
 {
@@ -98,6 +95,8 @@ Writer::~Writer()
 void Writer::initialize()
 {
     GlobalEnvironment::get().getGDALDebug()->addLog(log());    
+    m_connection = connect(m_connSpec);
+    m_gtype = getGType();
 }
 
 
@@ -607,8 +606,6 @@ void Writer::createPCEntry(Schema const& buffer_schema)
     schema.setOrientation(m_orientation);
     std::string schemaData = Schema::to_xml(schema);
 
-    boost::uint32_t capacity = getOptions().getValueOrThrow<boost::uint32_t>("capacity");
-
     oss << "declare\n"
         "  pc_id NUMBER := :" << nPCPos << ";\n"
         "  pc sdo_pc;\n"
@@ -622,7 +619,8 @@ void Writer::createPCEntry(Schema const& buffer_schema)
         "',   -- Column name of the SDO_POINT_CLOUD object\n"
         "          '" << m_blockTableName <<
         "', -- Table to store blocks of the point cloud\n"
-        "           'blk_capacity="<< capacity <<"', -- max # of points per block\n"
+        "           'blk_capacity="<< m_capacity <<"', -- max # of points "
+                    "per block\n"
         << s_geom.str() <<
         ",  -- Extent\n"
         "     0.5, -- Tolerance for point cloud\n"
@@ -700,6 +698,9 @@ void Writer::createPCEntry(Schema const& buffer_schema)
     //HOBU - because the SDO_PC.init method returns a database value for the 
     //  object it created. We want to reflect that in metadata in addition to  
     //  using it for the obj_id when writing the blocks
+    //ABELL - But how is it ever written?  What I don't see is that its value
+    //  AS AN OPTION is ever used (we never seem to retrieve the option
+    //  "pc_id").  Do we just scoop up all options as metadata someplace?
     try
     {
         Option& pc_id = m_options.getOptionByRef("pc_id");
@@ -774,6 +775,8 @@ void Writer::processOptions(const Options& options)
         options.getValueOrDefault<bool>("store_dimensional_orientation", false);
     m_orientation = dimInterleaved ? schema::DIMENSION_INTERLEAVED :
         schema::POINT_INTERLEAVED;
+    m_capacity = options.getValueOrThrow<uint32_t>("capacity");
+    m_connSpec = options.getValueOrDefault<std::string>("connection", "");
 }
 
 
@@ -967,12 +970,12 @@ void Writer::writeTile(PointBuffer const& buffer)
     log()->get(logDEBUG4) << "OCI geometry type " << m_gtype << std::endl;
 
     // :6
-    long* p_srid = (long*)malloc(sizeof(long));
+    long srid;
 
     if (m_srid != 0)
-        *p_srid = m_srid;
-    statement->Bind(p_srid);
-    log()->get(logDEBUG4) << "OCI SRID " << p_srid << std::endl;
+        srid = m_srid;
+    statement->Bind(&srid);
+    log()->get(logDEBUG4) << "OCI SRID " << srid << std::endl;
     
 
     // :7
@@ -1001,7 +1004,8 @@ void Writer::writeTile(PointBuffer const& buffer)
     {
         long long_partition_id = (long)m_blockTablePartitionValue;
         statement->Bind(&long_partition_id);
-        log()->get(logDEBUG4) << "Partition ID " << long_partition_id << std::endl;        
+        log()->get(logDEBUG4) << "Partition ID " << long_partition_id <<
+            std::endl;        
     }
 
     try
@@ -1023,7 +1027,6 @@ void Writer::writeTile(PointBuffer const& buffer)
 
     m_connection->DestroyType(&sdo_elem_info);
     m_connection->DestroyType(&sdo_ordinates);
-    free(p_srid);
 }
 
 

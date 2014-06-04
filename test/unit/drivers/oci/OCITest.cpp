@@ -36,7 +36,7 @@
 #include <boost/cstdint.hpp>
 #include <boost/property_tree/ptree.hpp>
 
-#include <pdal/drivers/oci/Reader.hpp>
+#include <pdal/drivers/oci/OciReader.hpp>
 #include <pdal/drivers/oci/Writer.hpp>
 #include <pdal/drivers/oci/common.hpp>
 
@@ -148,7 +148,6 @@ struct OracleTestFixture
     OracleTestFixture() :
         m_options(getOCIOptions())
         , m_connection(pdal::drivers::oci::Connection())
-        , m_driver(m_options)
     {
         if (!ShouldRunTest()) return;
         pdal::drivers::oci::Connection connection = connect();
@@ -167,8 +166,9 @@ struct OracleTestFixture
     {
         if (!m_connection.get())
         {
-            m_connection = m_driver.connect();
-
+           std::string connSpec =
+                m_options.getValueOrThrow<std::string>("connection");
+            m_connection = pdal::drivers::oci::connect(connSpec);
         }
         return m_connection;
 
@@ -182,15 +182,17 @@ struct OracleTestFixture
 
     pdal::Options m_options;
     pdal::drivers::oci::Connection m_connection;
-    pdal::drivers::oci::OracleDriver m_driver;
 
     ~OracleTestFixture()
     {
-        if (!ShouldRunTest()) return;
+        if (!ShouldRunTest())
+            return;
         pdal::drivers::oci::Connection connection = connect();
 
-        std::string base_table_name = m_options.getValueOrThrow<std::string>("base_table_name");
-        std::string block_table_name = m_options.getValueOrThrow<std::string>("block_table_name");
+        std::string base_table_name =
+            m_options.getValueOrThrow<std::string>("base_table_name");
+        std::string block_table_name =
+            m_options.getValueOrThrow<std::string>("block_table_name");
 
         std::string drop_base_table = "DROP TABLE " + base_table_name;
         std::string drop_block_table = "DROP TABLE " + block_table_name;
@@ -529,16 +531,14 @@ BOOST_AUTO_TEST_CASE(read_unprojected_data)
     Option& verbose = options.getOptionByRef("verbose");
     verbose.setValue<std::string>( "7");
     
-    pdal::drivers::oci::Reader reader(options);
+    pdal::drivers::oci::OciReader reader(options);
     PointContext ctx;
     reader.prepare(ctx);
     
-    pdal::PointBuffer data(reader.getSchema(), reader.getNumPoints());
-    pdal::StageSequentialIterator* iter = reader.createSequentialIterator(data);
+    pdal::PointBuffer data(ctx);
+    pdal::StageSequentialIterator* iter = reader.createSequentialIterator();
     
-    boost::uint32_t numRead(0);
-    
-    numRead = iter->read(data, reader.getNumPoints());
+    uint32_t numRead = iter->read(data);
     
     BOOST_CHECK_EQUAL(numRead, 1065u);
     BOOST_CHECK_EQUAL(data.getNumPoints(), 1065u);
