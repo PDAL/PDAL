@@ -1,6 +1,7 @@
 #!/bin/bash -e
 # Builds and tests PDAL
 source ./scripts/ci/common.sh
+
 mkdir -p _build || exit 1
 cd _build || exit 1
 
@@ -19,9 +20,6 @@ esac
 if [[ "$CXX" == "g++" ]]
 then
     export CXX="g++-4.8"
-    export PDAL_EMBED_BOOST=OFF
-else
-    export PDAL_EMBED_BOOST=ON
 fi
 
 cmake \
@@ -44,8 +42,14 @@ cmake \
     -DENABLE_CTEST=OFF \
     -DWITH_HDF5=OFF \
     -DPDAL_EMBED_BOOST=$PDAL_EMBED_BOOST \
+    -G "$PDAL_CMAKE_GENERATOR" \
     ..
 
-make -j ${NUMTHREADS}
+if [[ $PDAL_CMAKE_GENERATOR == "Unix Makefiles" ]]
+then
+    make -j ${NUMTHREADS}
+else
+    ninja
+fi
 
 ctest -V --output-on-failure .
