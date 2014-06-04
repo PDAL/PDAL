@@ -57,10 +57,21 @@ namespace sequential
 class OciSeqIterator : public ReaderSequentialIterator
 {
 public:
-    OciSeqIterator(Statement stmt, BlockPtr block, bool normalizeXYZ) :
-        m_stmt(stmt), m_block(block), m_normalizeXYZ(normalizeXYZ),
-        m_atEnd(false)
-    {}
+    OciSeqIterator(Statement stmt, BlockPtr block,
+        std::vector<Dimension *> dims, bool normalizeXYZ) :
+        m_stmt(stmt), m_block(block), m_dims(dims),
+        m_normalizeXYZ(normalizeXYZ), m_atEnd(false)
+    {
+        for (size_t i = 0; i < m_dims.size(); ++i)
+        {
+            if (m_dims[i]->getName() == "X")
+                m_dimX = m_dims[i];
+            if (m_dims[i]->getName() == "Y")
+                m_dimY = m_dims[i];
+            if (m_dims[i]->getName() == "Z")
+                m_dimZ = m_dims[i];
+        }
+    }
 
 protected:
     point_count_t readBufferImpl(PointBuffer& buffer)
@@ -90,9 +101,9 @@ private:
 
     Statement m_stmt;
     BlockPtr m_block;
+    std::vector<Dimension *> m_dims;
     bool m_normalizeXYZ;
     bool m_atEnd;
-    std::vector<Dimension *> m_dims;
     Dimension *m_dimX;
     Dimension *m_dimY;
     Dimension *m_dimZ;

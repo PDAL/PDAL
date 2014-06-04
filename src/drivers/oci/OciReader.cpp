@@ -312,7 +312,7 @@ StageSequentialIterator* OciReader::createSequentialIterator() const
 {
     using namespace pdal::drivers::oci::iterators::sequential;
 
-    return new OciSeqIterator(m_stmt, m_block, m_normalizeXYZ);
+    return new OciSeqIterator(m_stmt, m_block, m_dims, m_normalizeXYZ);
 }
 
 
