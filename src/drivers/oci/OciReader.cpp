@@ -103,6 +103,7 @@ void OciReader::initialize()
     // Fetch an initial row of data.
     if (!m_stmt->Fetch())
         throw pdal_error("Unable to fetch a point cloud entry entry!");
+    m_block->setFetched();
 
     // Set the spatial reference from options or set the one from the block.
     if (m_spatialRef)

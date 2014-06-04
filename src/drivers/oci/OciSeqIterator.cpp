@@ -166,7 +166,7 @@ point_count_t OciSeqIterator::readImpl(PointBuffer& buffer, point_count_t count)
             if (!readOci(m_stmt, m_block))
                 return totalNumRead;
         PointId bufBegin = buffer.size();
-        point_count_t numRead = read(buffer, m_block, count);
+        point_count_t numRead = read(buffer, m_block, count - totalNumRead);
         PointId bufEnd = bufBegin + numRead;
         totalNumRead += numRead;
         if (m_normalizeXYZ)
