@@ -444,6 +444,14 @@ public:
             m_ranges[i].grow(ds[i]);
         }
     }
+    void grow(double const& x, double const& y, double const& z)
+    {
+        
+        m_ranges[0].grow(x);
+        m_ranges[1].grow(y);
+        if (size() == 3)
+            m_ranges[2].grow(z);
+    }
 
     /// Expand the pdal::Bounds to include this point
     void grow(Vector<T> const& point)
