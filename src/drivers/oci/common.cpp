@@ -118,7 +118,8 @@ Schema fetchSchema(Statement stmt, BlockPtr block)
 }
 
 
-Block::Block(Connection connection) : num_points(0) , m_connection(connection)
+Block::Block(Connection connection) : num_points(0), m_connection(connection),
+    m_num_remaining(0)
 {
     m_connection->CreateType(&blk_extent);
     m_connection->CreateType(&blk_extent->sdo_ordinates,
