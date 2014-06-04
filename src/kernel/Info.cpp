@@ -303,30 +303,16 @@ void Info::dumpStats(PointContext ctx, pdal::filters::Stats& filter,
 }
 
 
-void Info::dumpSchema(const Stage& stage, pdal::PipelineManager* manager) const
+void Info::dumpSchema(PointContext ctx)
 {
-//ABELL
-//    PointBuffer data(stage.getSchema(), 1);
-PointBuffer data(stage.getSchema());
-    pdal::PipelineWriter pwriter(*manager);
-    pwriter.setPointBuffer(&data);
-
-    StageSequentialIterator* iter = stage.createSequentialIterator(data);
-
-    const boost::uint32_t numRead = iter->read(data);
-    
-    pdal::Schema const& schema = data.getSchema();
-
-    boost::property_tree::ptree tree = schema.toPTree();
+    boost::property_tree::ptree tree = ctx.getSchema()->toPTree();
     std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
     if (m_useXML)
         write_xml(ostr, tree);
     else if(m_useJSON)
         write_json(ostr, tree);
     else if (m_useREST)
-        schema.toRST(ostr) << std::endl;    
-    return;
-    
+        ctx.getSchema()->toRST(ostr) << std::endl;    
 }
 
 void Info::dumpQuery(Stage const& stage, IndexedPointBuffer& data) const
@@ -502,9 +488,7 @@ int Info::execute()
     }
     
     if (m_showSchema)
-    {
-        dumpSchema(*filter, manager);
-    }
+        dumpSchema(ctx);
     
     if (m_showMetadata)
     {
