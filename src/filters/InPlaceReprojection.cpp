@@ -302,7 +302,8 @@ void InPlaceReprojection::reprojectOffsets(double& x, double& y, double& z)
     if (!ret)
     {
         std::ostringstream msg;
-        msg << "Could not project offset for InPlaceReprojection::" << CPLGetLastErrorMsg() << ret;
+        msg << "Could not project offset for InPlaceReprojection::" <<
+            CPLGetLastErrorMsg() << ret;
         throw pdal_error(msg.str());
     }
 #endif

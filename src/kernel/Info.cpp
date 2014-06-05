@@ -255,36 +255,18 @@ void Info::dumpPointData(PointBuffer& outputData) const
 void Info::dumpStats(PointContext ctx, pdal::filters::Stats& filter,
     pdal::PipelineManager* manager) const
 {
+    PipelineWriter* writer = NULL;
 
-    boost::uint32_t chunkSize(131072);
-    if (filter.getNumPoints() > 0 )
-    {
-        chunkSize = filter.getNumPoints();
-    } 
-    
-    pdal::PipelineWriter* writer(0);
-    
-    PointBuffer data(ctx);
-
+    filter.execute(ctx);
     if (m_pipelineFile.size() > 0)
     {
-         writer = new pdal::PipelineWriter(*manager);
-         writer->setPointBuffer(&data);
+        PointBuffer buffer(ctx);
+        writer = new pdal::PipelineWriter(*manager);
+        writer->setPointBuffer(&buffer);
     }
-    StageSequentialIterator* iter = filter.createSequentialIterator(data);
 
-    boost::uint64_t totRead = 0;
-    while (!iter->atEnd())
-    {
-
-        const boost::uint32_t numRead = iter->read(data);
-        totRead += numRead;
-    }
-    
-    pdal::Metadata output = static_cast<pdal::filters::iterators::sequential::Stats*>(iter)->toMetadata();
-    delete iter;
     boost::property_tree::ptree tree;
-    tree.add_child("stats", output.toPTree());
+    tree.add_child("stats", filter.toPTree());
     std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
 
     if (m_useXML)
@@ -297,9 +279,6 @@ void Info::dumpStats(PointContext ctx, pdal::filters::Stats& filter,
         writer->writePipeline(m_pipelineFile);
         delete writer;
     }
-
-    
-    return;
 }
 
 
@@ -478,14 +457,10 @@ int Info::execute()
     PointContext ctx;
     filter->prepare(ctx);
     if (m_pointIndexes.size())
-    {
         dumpPoints(ctx, *filter, m_pointIndexes);
-    }
 
     if (m_showStats)
-    {
         dumpStats(ctx, *dynamic_cast<pdal::filters::Stats*>(filter), manager);
-    }
     
     if (m_showSchema)
         dumpSchema(ctx);
