@@ -1,6 +1,7 @@
 #!/bin/bash -e
 # Builds and tests PDAL
 source ./scripts/ci/common.sh
+
 mkdir -p _build || exit 1
 cd _build || exit 1
 
@@ -15,6 +16,11 @@ case "$PDAL_OPTIONAL_COMPONENTS" in
         echo "Unrecognized value for PDAL_OPTIONAL_COMPONENTS=$PDAL_OPTIONAL_COMPONENTS"
         exit 1
 esac
+
+if [[ "$CXX" == "g++" ]]
+then
+    export CXX="g++-4.8"
+fi
 
 cmake \
     -DWITH_APPS=ON \
@@ -34,10 +40,18 @@ cmake \
     -DWITH_CARIS=OFF \
     -DWITH_SQLITE=OFF \
     -DENABLE_CTEST=OFF \
-    -DPDAL_EMBED_BOOST=OFF \
     -DWITH_HDF5=OFF \
+    -DPDAL_EMBED_BOOST=$PDAL_EMBED_BOOST \
+    -G "$PDAL_CMAKE_GENERATOR" \
     ..
 
-make -j ${NUMTHREADS}
+if [[ $PDAL_CMAKE_GENERATOR == "Unix Makefiles" ]]
+then
+    make -j ${NUMTHREADS}
+else
+    # Don't use ninja's default number of threads becuase it can
+    # saturate Travis's available memory.
+    ninja -j ${NUMTHREADS}
+fi
 
 ctest -V --output-on-failure .

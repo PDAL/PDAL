@@ -4,6 +4,7 @@ language: cpp
 
 compiler:
   - g++
+  - clang
 
 env:
   - PDAL_OPTIONAL_COMPONENTS=all
