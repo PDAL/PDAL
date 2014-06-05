@@ -712,10 +712,9 @@ void Base::loadPoint(PointBuffer& data, PointDimensions *dimensions,
             
     if (dimensions->X && dimensions->Y && dimensions->Z)
     {
-        Vector<double> point(dimensions->X->applyScaling(x),
-            dimensions->X->applyScaling(y),
-            dimensions->X->applyScaling(z));
-        m_bounds.grow(point);
+        m_bounds.grow(dimensions->X->applyScaling(x),
+                      dimensions->X->applyScaling(y),
+                      dimensions->X->applyScaling(z));
     }
 
     uint16_t intensity;
