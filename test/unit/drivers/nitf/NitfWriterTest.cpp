@@ -114,7 +114,8 @@ BOOST_AUTO_TEST_CASE(test1)
 #ifdef PDAL_HAVE_NITRO
     const std::string las_input(Support::datapath("1.2-with-color.las"));
     const std::string nitf_output(Support::temppath("temp_nitf.ntf"));
-    const std::string reference_output(Support::datapath("nitf/write_test1.ntf"));
+    const std::string reference_output(
+        Support::datapath("nitf/write_test1.ntf"));
 
     FileUtils::deleteFile(nitf_output);
 
@@ -146,8 +147,6 @@ BOOST_AUTO_TEST_CASE(test1)
         Option ftitle("FTITLE", "LiDAR from somewhere");
         writer_opts.add(ftitle);
         
-        
-        
         // writer_opts.add(debug);
         // writer_opts.add(verbose);
         writer_opts.add(writer_opt1);
@@ -163,9 +162,9 @@ BOOST_AUTO_TEST_CASE(test1)
             // writer.setGeneratingSoftware("PDAL-NITF");
             // writer.setChunkSize(100);
         }
-        writer.prepare();
-
-        writer.write(0);
+        PointContext ctx;
+        writer.prepare(ctx);
+        writer.execute(ctx);
     }
     
     FileUtils::deleteFile(nitf_output);
@@ -193,6 +192,5 @@ BOOST_AUTO_TEST_CASE(test1)
     }
 #endif
 }
-
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -86,27 +86,32 @@ void Writer::Construct()
 }
 
 
+void Writer::processOptions(const Options& options)
+{
+    //ABELL
+    // Rework to set options here.
+}
+
+
 void Writer::setOptions()
 {
     setGeneratingSoftware(getOptions().getValueOrDefault<std::string>(
         "software_id", pdal::drivers::las::GetDefaultSoftwareId()));
 
-    m_lasHeader.SetCreationDOY((boost::uint16_t)getOptions().
-        getValueOrDefault<boost::uint32_t>("creation_doy", 0));
-    m_lasHeader.SetCreationYear((boost::uint16_t)getOptions().
-        getValueOrDefault<boost::uint32_t>("creation_year", 0));
+    m_lasHeader.SetCreationDOY((uint16_t)getOptions().
+        getValueOrDefault<uint32_t>("creation_doy", 0));
+    m_lasHeader.SetCreationYear((uint16_t)getOptions().
+        getValueOrDefault<uint32_t>("creation_year", 0));
     m_lasHeader.setPointFormat(static_cast<PointFormat>(getOptions().
-        getValueOrDefault<boost::uint32_t>("format", 3)));
+        getValueOrDefault<uint32_t>("format", 3)));
     m_lasHeader.SetSystemId(getOptions().getValueOrDefault<std::string>(
         "system_id", LasHeader::SystemIdentifier));
 
     m_lasHeader.SetHeaderPadding(getOptions().
-        getValueOrDefault<boost::uint32_t>("header_padding", 0));
+        getValueOrDefault<uint32_t>("header_padding", 0));
     if (getOptions().hasOption("a_srs"))
-    {
         setSpatialReference(getOptions().getValueOrDefault<std::string>(
             "a_srs",""));
-    }
     m_lasHeader.SetCompressed(getOptions().getValueOrDefault(
         "compression", false));
     m_lasHeader.SetFileSourceId(getOptions().getValueOrDefault<boost::uint16_t>(

@@ -136,7 +136,7 @@ endif (WITH_GDAL)
 
 if (WITH_NITRO)
     set(PDAL_NITRO_TEST_CPP
-#        drivers/nitf/NitfWriterTest.cpp
+        drivers/nitf/NitfWriterTest.cpp
         )
 
     FOREACH(file ${PDAL_NITRO_TEST_CPP})
