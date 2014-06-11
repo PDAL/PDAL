@@ -52,20 +52,11 @@ public:
     };
 
     /// Default constructor.
-    SpatialReference();
+    SpatialReference()
+    {}
 
     // calls setFromUserInput() with the given string
     SpatialReference(const std::string& userInput);
-
-    /// Destructor.
-    /// If libgeotiff is enabled, deallocates libtiff and libgeotiff objects used internally.
-    ~SpatialReference();
-
-    /// Copy constryctor.
-    SpatialReference(SpatialReference const& other);
-
-    /// Assignment operator.
-    SpatialReference& operator=(SpatialReference const& rhs);
 
     bool equals(const SpatialReference& other) const;
     bool operator==(const SpatialReference& other) const;
