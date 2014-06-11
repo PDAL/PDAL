@@ -78,7 +78,7 @@ private:
     void dumpPointData(PointBuffer& outputData) const;
     void dumpStats(PointContext ctx, pdal::filters::Stats& filter,
         PipelineManager* manager) const;
-    void dumpSchema(const Stage&, pdal::PipelineManager* manager) const;
+    void dumpSchema(PointContext ctx);
     void dumpStage(const Stage&) const;
     void dumpQuery(Stage const&, IndexedPointBuffer&) const;
     void dumpMetadata(PointContext ctx, const Stage&) const;

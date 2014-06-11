@@ -69,7 +69,7 @@ MAKE_READER_CREATOR(OciReader, pdal::drivers::oci::OciReader)
 #endif
 #endif
 #ifdef PDAL_HAVE_GDAL
-MAKE_READER_CREATOR(NITFReader, pdal::drivers::nitf::Reader)
+MAKE_READER_CREATOR(NITFReader, pdal::drivers::nitf::NitfReader)
 #endif
 
 #ifdef PDAL_HAVE_SQLITE
@@ -389,7 +389,7 @@ void StageFactory::registerKnownReaders()
 #endif
 #endif
 #ifdef PDAL_HAVE_GDAL
-    REGISTER_READER(NITFReader, pdal::drivers::nitf::Reader);
+    REGISTER_READER(NITFReader, pdal::drivers::nitf::NitfReader);
 #endif
 
 #ifdef PDAL_HAVE_SQLITE

@@ -243,6 +243,13 @@ public:
         return const_cast<Dimension *>(d);
     }
 
+
+    Dimension *getDimensionPtr(schema::size_type t) const
+    {
+        const schema::index_by_index& idx = m_index.get<schema::index>();
+        return const_cast<Dimension *>(&(idx.at(t))); 
+    }
+
     /// @return a boost::optional-wrapped const& to a Dimension with the
     /// given name and namespace. If no matching dimension is found, the
     /// optional will be empty.

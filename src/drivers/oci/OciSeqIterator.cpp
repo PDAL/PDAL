@@ -166,7 +166,7 @@ point_count_t OciSeqIterator::readImpl(PointBuffer& buffer, point_count_t count)
             if (!readOci(m_stmt, m_block))
                 return totalNumRead;
         PointId bufBegin = buffer.size();
-        point_count_t numRead = read(buffer, m_block, count);
+        point_count_t numRead = read(buffer, m_block, count - totalNumRead);
         PointId bufEnd = bufBegin + numRead;
         totalNumRead += numRead;
         if (m_normalizeXYZ)
@@ -234,16 +234,20 @@ void OciSeqIterator::normalize(PointBuffer& buffer, BlockPtr block,
 // Read a block (set of points) from the database.
 bool OciSeqIterator::readOci(Statement stmt, BlockPtr block)
 {
-    // Fetch a row.
-    if (!stmt->Fetch())
+    if (!block->fetched())
     {
-        m_atEnd = true;
-        return false;
+        if (!stmt->Fetch())
+        {
+            m_atEnd = true;
+            return false;
+        }
+        block->setFetched();
     }
-    // Read the point from the blob in the row..
+    // Read the points from the blob in the row.
     readBlob(stmt, block);
     Schema *s = findSchema(stmt, block);
     block->initialize(s);
+    block->clearFetched();
     return true;
 }
 

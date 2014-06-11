@@ -43,10 +43,17 @@
 #include <boost/scoped_ptr.hpp>
 
 
+
 namespace pdal
 {
 namespace drivers
 {
+
+namespace nitf
+{
+    class Writer;
+}
+
 namespace las
 {
 
@@ -62,11 +69,11 @@ namespace las
 //
 class PDAL_DLL Writer : public pdal::Writer
 {
+    friend class nitf::Writer;
 public:
     SET_STAGE_NAME("drivers.las.writer", "Las Writer")
     SET_STAGE_LINK("http://pdal.io/stages/drivers.las.writer.html")
     SET_STAGE_ENABLED(true)
-
 
     Writer(const Options&);
     Writer(std::ostream*);
@@ -124,7 +131,7 @@ private:
     boost::scoped_ptr<LASzipper> m_zipper;
     boost::scoped_ptr<ZipPoint> m_zipPoint;
 #endif
-
+    virtual void processOptions(const Options& options);
     virtual void ready(PointContext ctx);
     virtual void write(const PointBuffer& pointBuffer);
     virtual void done(PointContext ctx);
@@ -136,7 +143,6 @@ private:
         Options const& opts);
     Writer& operator=(const Writer&); // not implemented
     Writer(const Writer&); // not implemented
-
 
     template<typename T>
     T getMetadataOption(pdal::Options const& options,

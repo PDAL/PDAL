@@ -103,6 +103,7 @@ void OciReader::initialize(PointContext)
     // Fetch an initial row of data.
     if (!m_stmt->Fetch())
         throw pdal_error("Unable to fetch a point cloud entry entry!");
+    m_block->setFetched();
 
     // Set the spatial reference from options or set the one from the block.
     if (m_spatialRef)
@@ -206,7 +207,8 @@ void OciReader::validateQuery()
     while (m_stmt->GetNextField(col, fieldName, &hType, &size,
         &precision, &scale, typeName))
     {
-        log()->get(logDEBUG) << "Fetched field '" << fieldName << "' of type '" << typeName << "'"<< std::endl;
+        log()->get(logDEBUG) << "Fetched field '" << fieldName <<
+            "' of type '" << typeName << "'"<< std::endl;
 
         reqFields.erase(fieldName);
         if (hType == SQLT_NTY)
@@ -224,7 +226,7 @@ void OciReader::validateQuery()
             "' does not fetch a SDO_PC object.";
         throw pdal_error(oss.str());
     }
-
+ 
     // If we found all the fields, the list of required fields will be empty.
     // If not, throw an exception.
     if (!reqFields.empty())
