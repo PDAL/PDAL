@@ -186,12 +186,10 @@ int Diff::execute()
     if (m_chunkSize)
         chunkSize = m_chunkSize;
     PointBuffer source_data(source->getSchema(), chunkSize);
-    boost::scoped_ptr<StageSequentialIterator> source_iter(source->createSequentialIterator(source_data));
+    boost::scoped_ptr<StageSequentialIterator>
+        source_iter(source->createSequentialIterator(source_data));
     
     ptree errors;
-
-
-
 
     PointContext candidateCtx;
     Options candidateOptions;
@@ -214,14 +212,12 @@ int Diff::execute()
         
         oss << "Source and candidate files do not have the same point count";
         errors.put<std::string>("count.error", oss.str());
-        errors.put<boost::uint32_t>("count.candidate" , candidate->getNumPoints());
-        errors.put<boost::uint32_t>("count.source" , source->getNumPoints());
-        
+        errors.put<uint32_t>("count.candidate" , candidate->getNumPoints());
+        errors.put<uint32_t>("count.source" , source->getNumPoints());
     }
     
-    pdal::Metadata source_metadata = source->collectMetadata();
-    pdal::Metadata candidate_metadata = candidate->collectMetadata();
-    
+    MetadataNode source_metadata = sourceCtx.metadata();
+    MetadataNode candidate_metadata = candidateCtx.metadata();
     if (source_metadata != candidate_metadata)
     {
         std::ostringstream oss;
@@ -246,7 +242,6 @@ int Diff::execute()
         errors.put<std::string>("schema.error", oss.str());
         errors.put_child("schema.source", source_schema.toPTree());
         errors.put_child("schema.candidate", candidate_schema.toPTree());
-
     }
 
     

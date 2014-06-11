@@ -102,7 +102,7 @@ private:
 
     void checkImpedance();
     Schema alterSchema(Schema const& schema);
-    virtual void initialize();
+    virtual void initialize(PointContext);
 
     std::vector<scaling::Scaler> m_scalers;
     std::map<dimension::id, dimension::id> m_scale_map;

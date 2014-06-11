@@ -74,12 +74,9 @@ struct OSRTransformDeleter
 
 void InPlaceReprojection::processOptions(const Options& options)
 {
-    if (!options.hasOption("in_srs"))
-        m_inSRS = getPrevStage().getSpatialReference();
-    else
+    if (options.hasOption("in_srs"))
         m_inSRS = m_options.getValueOrThrow<pdal::SpatialReference>("in_srs");
     m_outSRS = m_options.getValueOrThrow<pdal::SpatialReference>("out_srs");
-    setSpatialReference(m_outSRS);
 
     m_x_name = options.getValueOrDefault<std::string>("x_dim", "X");
     m_y_name = options.getValueOrDefault<std::string>("y_dim", "Y");
@@ -204,6 +201,10 @@ Dimension *InPlaceReprojection::appendDimension(Schema *schema, Dimension *src)
 
 void InPlaceReprojection::ready(PointContext ctx)
 {
+    if (m_inSRS.empty())
+        m_inSRS = getPrevStage().getSpatialReference();
+    setSpatialReference(m_outSRS);
+
 #ifdef PDAL_HAVE_GDAL
     pdal::GlobalEnvironment::get().getGDALDebug()->addLog(log());
     m_in_ref_ptr = ReferencePtr(OSRNewSpatialReference(0),
@@ -348,6 +349,7 @@ void InPlaceReprojection::updateBounds(PointBuffer& buffer)
 
 void InPlaceReprojection::filter(PointBuffer& buffer)
 {
+std::cerr << "Filter #1!\n";
     bool logOutput = log()->getLevel() > logDEBUG3;
     if (logOutput)
     {
@@ -360,7 +362,8 @@ void InPlaceReprojection::filter(PointBuffer& buffer)
         log()->get(logDEBUG3) << "new_y: " << *m_dimY;
         log()->get(logDEBUG3) << "new_z: " << *m_dimZ;
     }
-    
+std::cerr << "Filter #2!\n";
+        
     for (PointId idx = 0; idx < buffer.size(); ++idx)
     {
         double x = buffer.getFieldAs<double>(*m_srcDimX, idx);
@@ -373,8 +376,10 @@ void InPlaceReprojection::filter(PointBuffer& buffer)
             log()->get(logDEBUG5) << "input: " <<
                 x << " y: " << y << " z: " << z << std::endl;
         }
+std::cerr << "Filter #3!\n";
 
         transform(x, y, z);
+std::cerr << "Filter #4!\n";
 
         if (logOutput)
         {

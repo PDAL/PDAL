@@ -58,7 +58,6 @@ PointBuffer::PointBuffer(const Schema& schema, boost::uint32_t capacity)
     , m_bounds(Bounds<double>::getDefaultSpatialExtent())
     , m_byteSize(schema.getByteSize())
     , m_orientation(schema.getOrientation())
-    , m_metadata("pointbuffer")
 {
     pointbuffer::PointBufferByteSize size =
         static_cast<pointbuffer::PointBufferByteSize>(schema.getByteSize()) *
@@ -74,7 +73,6 @@ PointBuffer::PointBuffer()
     : m_bounds(Bounds<double>::getDefaultSpatialExtent())
     , m_byteSize(0)
     , m_orientation(schema::POINT_INTERLEAVED)
-    , m_metadata("pointbuffer")
 {
     GlobalEnvironment& env = pdal::GlobalEnvironment::get();
     m_context = env.context();
@@ -87,8 +85,7 @@ PointBuffer::PointBuffer(PointContext context) :
     m_bounds(Bounds<double>::getDefaultSpatialExtent()),
     m_context(context),
     m_byteSize(0),
-    m_orientation(schema::POINT_INTERLEAVED),
-    m_metadata("pointbuffer")
+    m_orientation(schema::POINT_INTERLEAVED)
 {
     GlobalEnvironment& env = pdal::GlobalEnvironment::get();
     boost::uuids::basic_random_generator<boost::mt19937> gen(env.getRNG());

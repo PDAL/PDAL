@@ -59,9 +59,6 @@ public:
     virtual ~Reader()
         {};
 
-    /// Serialization
-    virtual boost::property_tree::ptree serializePipeline() const;
-
 private:
     virtual PointBufferSet run(PointBufferPtr buffer)
     {
@@ -72,6 +69,8 @@ private:
         pbSet.insert(buffer);
         return pbSet;
     }
+    virtual boost::property_tree::ptree
+        serializePipeline(PointContext ctx) const;
 };
 
 } // namespace pdal

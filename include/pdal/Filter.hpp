@@ -61,7 +61,8 @@ public:
         {}
 
     // for xml serializion of pipelines
-    virtual boost::property_tree::ptree serializePipeline() const;
+    virtual boost::property_tree::ptree
+        serializePipeline(PointContext ctx) const;
 
 private:
     Filter& operator=(const Filter&); // not implemented

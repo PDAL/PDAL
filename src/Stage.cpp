@@ -95,9 +95,9 @@ void Stage::prepare(PointContext ctx)
     }
     l_processOptions(m_options);
     processOptions(m_options);
-    l_initialize();
-    initialize();
-    buildSchema(ctx.getSchema());
+    l_initialize(ctx);
+    initialize(ctx);
+    buildSchema(ctx.schema());
 }
 
 PointBufferSet Stage::execute(PointContext ctx)
@@ -135,9 +135,9 @@ PointBufferSet Stage::execute(PointContext ctx)
     return outBuffers;
 }
 
-void Stage::l_initialize()
+void Stage::l_initialize(PointContext ctx)
 {
-    m_metadata.setName(getName());
+    ctx.metadata().addCategory(getName());
     if (m_inputs.size())
         setCoreProperties(getPrevStage());
 }
@@ -187,23 +187,6 @@ void Stage::l_processOptions(const Options& options)
         // If one wasn't set on the options, we'll ignore at this
         // point.  Maybe another stage might forward/set it later.
     }
-}
-
-
-Metadata Stage::collectMetadata() const
-{
-    Metadata output(m_metadata);
-    output = output + m_metadata;
-
-    try
-    {
-        Metadata const& m = getPrevStage().getMetadata();
-        output = output + m;
-    }
-    catch (pdal::internal_error const&)
-    {
-    }
-    return output;
 }
 
 
@@ -280,7 +263,8 @@ void Stage::setSpatialReference(const SpatialReference& spatialReference)
 {
     m_spatialReference = spatialReference;
 
-
+//ABELL
+/**
     boost::optional<SpatialReference> ref =
         m_metadata.getValueOptional<SpatialReference>("spatialreference");
     if (!ref)
@@ -290,6 +274,7 @@ void Stage::setSpatialReference(const SpatialReference& spatialReference)
                 spatialReference,
                 "SRS of this stage");
     }
+**/
 }
 
 void Stage::setCoreProperties(const Stage& stage)

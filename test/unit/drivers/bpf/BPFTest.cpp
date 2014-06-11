@@ -56,7 +56,7 @@ void test_file_type(const std::string& filename)
 
     pdal::BpfReader reader(Support::datapath(filename));
     reader.prepare(context);
-    const Schema *schema = context.getSchema();
+    const Schema *schema = context.schema();
     
     PointBuffer data(context);
     StageSequentialIterator *it = reader.createSequentialIterator();

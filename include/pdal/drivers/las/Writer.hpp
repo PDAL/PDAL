@@ -94,7 +94,7 @@ public:
 
 protected:
     void Construct();
-    virtual void initialize();
+    virtual void initialize(PointContext);
 
     //ABELL
     virtual void writeBegin(boost::uint64_t targetNumPointsToWrite)
@@ -131,39 +131,32 @@ private:
     bool m_headerInitialized;
     boost::uint64_t m_streamOffset; // the first byte of the LAS file
 	void setOptions();
-    void setVLRsFromMetadata(LasHeader& header, Metadata const& metadata, Options const& opts);
+//    bool doForwardThisMetadata(std::string const& name) const;
+    void setVLRsFromMetadata(LasHeader& header, MetadataNode metaNode,
+        Options const& opts);
     Writer& operator=(const Writer&); // not implemented
     Writer(const Writer&); // not implemented
 
 
     template<typename T>
-    T getMetadataOption(   pdal::Options const& options, 
-                                    pdal::Metadata const& metadata, 
-                                    std::string const& name,
-                                    T default_value) const
+    T getMetadataOption(pdal::Options const& options,
+        pdal::MetadataNode const& metaNode, std::string const& name,
+        T default_value) const
     {
-        boost::optional<std::string> candidate = options.getMetadataOption<std::string>(name);
+        boost::optional<std::string> candidate =
+            options.getMetadataOption<std::string>(name);
+
+        // If this field isn't a metadata option, just return the plain option
+        // value or the default value.
         if (!candidate)
-        {
             return options.getValueOrDefault<T>(name, default_value);
-        }
             
+        // If the metadata option for this field is "FORWARD", return the
+        // value from the metadata or the default value.
         if (boost::algorithm::iequals(*candidate, "FORWARD"))
-        {
-            boost::optional<std::string> m =
-                metadata.getValueOptional<std::string>(name);
-            if (m)
-            {
-                T v = boost::lexical_cast<T>(*m) ;                
-                return v;
-            }
-        } 
-        else
-        {
-            T v = boost::lexical_cast<T>(*candidate) ;
-            return v;
-        }
-        return default_value;
+            return metaNode.getValue<T>(name, default_value);
+        // Just return the value from the stored metadata option.
+        return boost::lexical_cast<T>(*candidate);
     }    
 };
 

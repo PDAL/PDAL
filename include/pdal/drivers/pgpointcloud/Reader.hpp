@@ -81,7 +81,7 @@ private:
     Reader& operator=(const Reader&); // not implemented
     Reader(const Reader&); // not implemented
 
-    virtual void initialize();
+    virtual void initialize(PointContext);
     virtual void processOptions(const Options&);
     pdal::SpatialReference fetchSpatialReference() const;
     boost::uint32_t fetchPcid() const;

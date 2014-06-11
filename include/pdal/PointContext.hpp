@@ -36,6 +36,7 @@
 
 #include <memory>
 
+#include "pdal/Metadata.hpp"
 #include "pdal/Schema.hpp"
 #include "pdal/RawPtBuf.hpp"
 
@@ -51,15 +52,20 @@ private:
     SchemaPtr m_schema;
     // Provides storage for the point data.
     RawPtBufPtr m_ptBuf;
+    // Metadata storage;
+    MetadataPtr m_metadata;
 
 public:
-    PointContext() : m_schema(new Schema), m_ptBuf(new RawPtBuf(m_schema))
+    PointContext() : m_schema(new Schema), m_ptBuf(new RawPtBuf(m_schema)),
+        m_metadata(new Metadata)
     {}
 
-    Schema *getSchema() const
+    Schema *schema() const
         { return m_schema.get(); }
-    RawPtBuf *getRawPtBuf() const
+    RawPtBuf *rawPtBuf() const
         { return m_ptBuf.get(); }
+    MetadataNode metadata()
+        { return m_metadata->getNode(); }
 };
 
 } //namespace

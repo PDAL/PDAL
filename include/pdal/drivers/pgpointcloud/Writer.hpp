@@ -76,7 +76,7 @@ private:
     Writer(const Writer&); // not implemented
 
     virtual void processOptions(const Options& options);
-    virtual void initialize();
+    virtual void initialize(PointContext);
     bool CheckTableExists(std::string const& name);
     bool CheckPointCloudExists();
     bool CheckPostGISExists();

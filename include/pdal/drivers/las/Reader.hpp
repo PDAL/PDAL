@@ -100,9 +100,9 @@ private:
     bool m_ownsStreamFactory;
     LasHeader m_lasHeader;
 
-    virtual void initialize();
+    virtual void initialize(PointContext ctx);
     virtual void buildSchema(Schema *schema);
-    void readMetadata();
+    void readMetadata(MetadataNode metaNode);
 
     Reader& operator=(const Reader&); // not implemented
     Reader(const Reader&); // not implemented

@@ -152,7 +152,7 @@ std::cerr << "Executing writer!\n";
             writer.setPointBuffer( manager.getWriter()->getPointBuffer());
         else
             writer.setPointBuffer(dummy);
-        writer.writePipeline(m_pipelineFile);
+        writer.writePipeline(ctx, m_pipelineFile);
     }
     
     if (dummy)

@@ -75,7 +75,7 @@ private:
 
     Decimation& operator=(const Decimation&); // not implemented
     Decimation(const Decimation&); // not implemented
-    virtual void initialize();
+    virtual void initialize(PointContext);
 };
 
 

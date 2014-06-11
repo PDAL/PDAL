@@ -77,7 +77,7 @@ public:
     Reader(const Options& options);
     ~Reader();
 
-    virtual void initialize();
+    virtual void initialize(PointContext ctx);
     static Options getDefaultOptions();
     static std::vector<Dimension> getDefaultDimensions();
 

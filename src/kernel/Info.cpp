@@ -263,7 +263,6 @@ void Info::dumpStats(PointContext ctx, pdal::filters::Stats& filter,
     } 
     
     pdal::PipelineWriter* writer(0);
-    
     PointBuffer data(ctx);
 
     if (m_pipelineFile.size() > 0)
@@ -281,10 +280,10 @@ void Info::dumpStats(PointContext ctx, pdal::filters::Stats& filter,
         totRead += numRead;
     }
     
-    pdal::Metadata output = static_cast<pdal::filters::iterators::sequential::Stats*>(iter)->toMetadata();
+    MetadataNode m = ctx.metadata();
     delete iter;
     boost::property_tree::ptree tree;
-    tree.add_child("stats", output.toPTree());
+    tree.add_child("stats", m.toPTree());
     std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
 
     if (m_useXML)
@@ -294,12 +293,9 @@ void Info::dumpStats(PointContext ctx, pdal::filters::Stats& filter,
 
     if (m_pipelineFile.size() > 0)
     {
-        writer->writePipeline(m_pipelineFile);
+        writer->writePipeline(ctx, m_pipelineFile);
         delete writer;
     }
-
-    
-    return;
 }
 
 
@@ -400,19 +396,14 @@ PointBuffer response(data.getSchema());
     return;
 }
 
-void Info::dumpSDO_PCMetadata(const Stage& stage) const
+void Info::dumpSDO_PCMetadata(PointContext ctx, const Stage& stage) const
 {
-    boost::property_tree::ptree metadata = stage.serializePipeline();
-
-    const Schema& schema = stage.getSchema();
-    
-    std::string xml = pdal::Schema::to_xml(schema, &metadata);  
-    
+    boost::property_tree::ptree metadata = stage.serializePipeline(ctx);
+    std::string xml = pdal::Schema::to_xml(*ctx.schema(), &metadata);  
     std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
-    
     ostr << xml;
-    
 }
+
 
 void Info::dumpStage(const Stage& stage) const
 {
@@ -431,17 +422,15 @@ void Info::dumpStage(const Stage& stage) const
     return;
 }
 
-void Info::dumpMetadata(const Stage& stage) const
+void Info::dumpMetadata(PointContext ctx, const Stage& stage) const
 {
-    boost::property_tree::ptree tree = stage.serializePipeline();
+    boost::property_tree::ptree tree = stage.serializePipeline(ctx);
     std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
 
     if (m_useXML)
         write_xml(ostr, tree);
     else
         write_json(ostr, tree);
-         
-    return;
 }
 
 
@@ -508,7 +497,7 @@ int Info::execute()
     
     if (m_showMetadata)
     {
-        dumpMetadata(*filter);
+        dumpMetadata(ctx, *filter);
     }
     if (m_showStage)
     {
@@ -517,7 +506,7 @@ int Info::execute()
     
     if (m_showSDOPCMetadata)
     {
-        dumpSDO_PCMetadata(*filter);
+        dumpSDO_PCMetadata(ctx, *filter);
     }
     
     if (m_QueryPoint.size())

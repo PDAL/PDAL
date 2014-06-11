@@ -331,7 +331,7 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_ignored_dimensions)
             reader2.createSequentialIterator();
         iter->read(altered, 1);
     
-        Schema *schema2 = ctx2.getSchema();
+        Schema *schema2 = ctx2.schema();
         pdal::Dimension const& dimRed = schema2->getDimension("Red");
         pdal::Dimension const& dimX = schema2->getDimension("X");
         boost::uint16_t r = altered.getField<boost::uint16_t>(dimRed, 0);
@@ -354,7 +354,7 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_ignored_dimensions)
     
         iter2->read(original, 1);
         
-        Schema *schema = ctx.getSchema();
+        Schema *schema = ctx.schema();
         pdal::Dimension const& dimRed2 = schema->getDimension("Red");
         pdal::Dimension const& dimX2 = schema->getDimension("X");
         boost::uint16_t r2 = original.getField<boost::uint16_t>(dimRed2, 0);

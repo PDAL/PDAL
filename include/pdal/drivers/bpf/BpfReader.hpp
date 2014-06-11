@@ -69,7 +69,7 @@ private:
     BpfPolarHeader m_polarHeader;
     std::vector<BpfPolarFrame> m_polarFrames;
 
-    virtual void initialize();
+    virtual void initialize(PointContext);
     virtual void buildSchema(Schema *schema);
     bool readUlemData();
     bool readPolarData();

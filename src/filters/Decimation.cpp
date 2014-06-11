@@ -49,7 +49,7 @@ Decimation::Decimation(const Options& options)
 {}
 
 
-void Decimation::initialize()
+void Decimation::initialize(PointContext)
 {
     if (m_step < 1)
         throw pdal_error("Decimation step value cannot be less than 1!");

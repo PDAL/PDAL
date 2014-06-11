@@ -52,31 +52,29 @@ namespace filters
 namespace stats
 {
 
-pdal::Metadata Summary::toMetadata() const
+void Summary::toMetadata(MetadataNode &m) const
 {
     boost::uint32_t cnt = static_cast<boost::uint32_t>(count());
-    Metadata output;
-    output.addMetadata("count", cnt, "count");
-    output.addMetadata("minimum", minimum(), "minimum");
-    output.addMetadata("maximum", maximum(), "maximum");
-    output.addMetadata("average", average(), "average");
+    m.add("count", cnt, "count");
+    m.add("minimum", minimum(), "minimum");
+    m.add("maximum", maximum(), "maximum");
+    m.add("average", average(), "average");
 
     std::ostringstream sample;
-    for (std::vector<double>::size_type i =0; i < m_sample.size(); ++i)
-    {
+    for (std::vector<double>::size_type i = 0; i < m_sample.size(); ++i)
         sample << m_sample[i] << " ";
-    };
 
-    output.addMetadata("sample", sample.str(), "sample");
+    m.add("sample", sample.str(), "sample");
 
-    if (m_doExact == true)
+//ABELL
+/**
+    if (m_doExact)
     {
         Metadata counts;
         counts.setType("metadata");
         counts.setName("counts");
 
-        for (std::map<boost::int32_t, boost::uint32_t>::const_iterator i = m_counts.begin();
-                i != m_counts.end(); ++i)
+        for (auto i = m_counts.begin(); i != m_counts.end(); ++i)
         {
             Metadata bin;
             std::ostringstream binname;
@@ -90,8 +88,7 @@ pdal::Metadata Summary::toMetadata() const
 
         output.addMetadata(counts);
     }
-    return output;
-
+**/
 }
 
 boost::property_tree::ptree Summary::toPTree() const
@@ -104,34 +101,15 @@ boost::property_tree::ptree Summary::toPTree() const
     tree.put("maximum", maximum());
     tree.put("average", average());
 
-    // boost::property_tree::ptree bins;
-    // histogram_type hist = histogram();
-    // for (boost::int32_t i = 0; i < hist.size(); ++i)
-    // {
-    //     boost::property_tree::ptree bin;
-    //     bin.add("lower_bound", hist[i].first);
-    //     bin.add("count", Utils::sround(hist[i].second*cnt));
-    //     std::ostringstream binname;
-    //     binname << "bin-" <<i;
-    //     bins.add_child(binname.str(), bin);
-    // }
-    // tree.add_child("histogram", bins);
-
     std::ostringstream sample;
-    for (std::vector<double>::size_type i =0; i < m_sample.size(); ++i)
-    {
+    for (size_t i = 0; i < m_sample.size(); ++i)
         sample << m_sample[i] << " ";
-    };
-
     tree.add("sample", sample.str());
-
 
     if (m_doExact == true)
     {
-
         boost::property_tree::ptree counts;
-        for (std::map<boost::int32_t, boost::uint32_t>::const_iterator i = m_counts.begin();
-                i != m_counts.end(); ++i)
+        for (auto i = m_counts.begin(); i != m_counts.end(); ++i)
         {
             boost::property_tree::ptree bin;
             bin.add("value", i->first);
@@ -146,34 +124,36 @@ boost::property_tree::ptree Summary::toPTree() const
     return tree;
 }
 
-
 } // namespace stats
 
 
 //---------------------------------------------------------------------------
 
 
-void Stats::addMetadata()
+void Stats::addMetadata(MetadataNode& m)
 {
-    Metadata& metadata = getMetadataRef();
-    metadata.addMetadata<boost::uint32_t>("sample_size",
-                                          getOptions().getValueOrDefault<boost::uint32_t>("sample_size", 1000));
-    metadata.addMetadata<boost::uint32_t>("seed",
-                                          getOptions().getValueOrDefault<boost::uint32_t>("seed", 0));
-    metadata.addMetadata<boost::uint32_t>("num_bins",
-                                          getOptions().getValueOrDefault<boost::uint32_t>("num_bins", 20));
-    metadata.addMetadata<boost::uint32_t>("stats_cache_size",
-                                          getOptions().getValueOrDefault<boost::uint32_t>("num_bins", 20));
+    m.add<uint32_t>("sample_size",
+        getOptions().getValueOrDefault<uint32_t>("sample_size", 1000));
+    m.add<uint32_t>("seed",
+        getOptions().getValueOrDefault<uint32_t>("seed", 0));
+    m.add<uint32_t>("num_bins",
+        getOptions().getValueOrDefault<uint32_t>("num_bins", 20));
+    m.add<uint32_t>("stats_cache_size",
+        getOptions().getValueOrDefault<uint32_t>("num_bins", 20));
 }
 
 
 Options Stats::getDefaultOptions()
 {
     Options options;
-    Option sample_size("sample_size", 1000, "Number of points to return for uniform random 'sample'");
+    Option sample_size("sample_size", 1000,
+        "Number of points to return for uniform random 'sample'");
     Option num_bins("num_bins", 20, "Number of bins to use for histogram");
-    Option stats_cache_size("stats_cache_size", 100000, "Number of points to use for histogram bin determination. Defaults to total number of points read if no option is specified.");
-    Option seed("seed", 0, "Seed to use for repeatable random sample. A seed value of 0 means no seed is used");
+    Option stats_cache_size("stats_cache_size", 100000, "Number of points "
+        "to use for histogram bin determination. Defaults to total number "
+        "of points read if no option is specified.");
+    Option seed("seed", 0, "Seed to use for repeatable random sample. A "
+        "seed value of 0 means no seed is used");
 
     options.add(sample_size);
     options.add(num_bins);
@@ -182,7 +162,8 @@ Options Stats::getDefaultOptions()
     return options;
 }
 
-pdal::StageSequentialIterator* Stats::createSequentialIterator(PointBuffer& buffer) const
+pdal::StageSequentialIterator*
+Stats::createSequentialIterator(PointBuffer& buffer) const
 {
     return new pdal::filters::iterators::sequential::Stats(*this, buffer,
         log(), getPrevStage().getNumPoints(), getName(), getOptions());
@@ -232,13 +213,17 @@ bool Stats::atEndImpl() const
     return getPrevIterator().atEnd();
 }
 
+
 void Stats::readBufferEndImpl(PointBuffer& buffer)
 {
+    /**
     pdal::Metadata& metadata = buffer.getMetadataRef();
     pdal::Metadata stats = toMetadata();
     stats.setName(m_name);
     metadata.setMetadata(stats);
+    **/
 }
+
 
 void Stats::readBufferBeginImpl(PointBuffer& buffer)
 {
@@ -409,7 +394,7 @@ void Stats::readBufferBeginImpl(PointBuffer& buffer)
 
 }
 
-pdal::Metadata Stats::toMetadata() const
+void Stats::toMetadata(MetadataNode& m) const
 {
     pdal::Metadata output;
 
@@ -422,18 +407,20 @@ pdal::Metadata Stats::toMetadata() const
         i = m_stats.find(d);
         if (i == m_stats.end())
             throw pdal_error("unable to find dimension in summary!");
-        const stats::SummaryPtr stat = i->second;
-
-        pdal::Metadata sub = stat->toMetadata();
+        const stats::SummaryPtr summary = i->second;
+        summary->toMetadata(m);
+//ABELL
+/**
         sub.setName(d->getName());
         sub.addMetadata("namespace", d->getNamespace());
         sub.addMetadata("position", position);
         output.addMetadata(sub);
+**/
         position++;
     }
-
-    return output;
 }
+
+
 boost::property_tree::ptree Stats::toPTree() const
 {
     boost::property_tree::ptree tree;

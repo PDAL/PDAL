@@ -101,7 +101,7 @@ public:
     // }
 
     boost::property_tree::ptree toPTree() const;
-    pdal::Metadata toMetadata() const;
+    void toMetadata(MetadataNode& m) const;
     
 private:
     summary_accumulator m_summary;
@@ -194,9 +194,7 @@ public:
     SET_STAGE_ENABLED(true)
     
     Stats(const Options& options) : Filter(options)
-        { addMetadata(); }
-    Stats()
-        { addMetadata(); }
+        {}
 
     static Options getDefaultOptions();
 
@@ -209,10 +207,14 @@ public:
 private:
     Stats& operator=(const Stats&); // not implemented
     Stats(const Stats&); // not implemented
+    virtual void initialize(PointContext ctx)
+    {
+        MetadataNode m = ctx.metadata();
+        addMetadata(m);
+    }
     
-    void addMetadata();
+    void addMetadata(MetadataNode& m);
 };
-
 
 
 namespace iterators
@@ -229,7 +231,7 @@ public:
         LogPtr log, boost::uint64_t numPoints, const std::string& name,
         const Options& options);
     boost::property_tree::ptree toPTree() const;
-    pdal::Metadata toMetadata() const;
+    void toMetadata(MetadataNode& m) const;
     stats::Summary const& getStats(Dimension const& dim) const;
     void reset();
 

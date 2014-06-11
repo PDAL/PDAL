@@ -115,7 +115,7 @@ std::vector<Dimension> Reader::getDefaultDimensions()
 }
 
 
-void Reader::initialize()
+void Reader::initialize(PointContext ctx)
 {
     setBounds(m_bounds);
 }

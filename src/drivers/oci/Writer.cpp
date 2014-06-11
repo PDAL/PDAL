@@ -92,7 +92,7 @@ Writer::~Writer()
 }
 
 
-void Writer::initialize()
+void Writer::initialize(PointContext)
 {
     GlobalEnvironment::get().getGDALDebug()->addLog(log());    
     m_connection = connect(m_connSpec);
@@ -832,7 +832,7 @@ void Writer::ready(PointContext ctx)
     m_pcExtent.clear();
     m_dims.clear();
     m_lastBlockId = 0;
-    Schema *schema = ctx.getSchema();
+    Schema *schema = ctx.schema();
     m_pointSize = 0;
     for (schema::size_type i = 0; i < schema->numDimensions(); ++i)
     {

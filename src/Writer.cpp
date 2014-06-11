@@ -261,7 +261,7 @@ boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite,
 }
 
 
-boost::property_tree::ptree Writer::serializePipeline() const
+boost::property_tree::ptree Writer::serializePipeline(PointContext ctx) const
 {
     boost::property_tree::ptree tree;
 
@@ -270,7 +270,7 @@ boost::property_tree::ptree Writer::serializePipeline() const
     PipelineWriter::write_option_ptree(tree, getOptions());
 
     const Stage& stage = getPrevStage();
-    boost::property_tree::ptree subtree = stage.serializePipeline();
+    boost::property_tree::ptree subtree = stage.serializePipeline(ctx);
 
     tree.add_child(subtree.begin()->first, subtree.begin()->second);
 

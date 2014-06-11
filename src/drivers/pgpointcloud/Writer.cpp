@@ -128,7 +128,7 @@ void Writer::processOptions(const Options& options)
 // Optional things you can defer or attempt to initialize
 // here.
 //
-void Writer::initialize()
+void Writer::initialize(PointContext)
 {
     m_session = pg_connect(m_connection);
 }
@@ -251,7 +251,7 @@ void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
 }
 
 
-boost::uint32_t Writer::SetupSchema(Schema const& buffer_schema, boost::uint32_t srid)
+uint32_t Writer::SetupSchema(Schema const& buffer_schema, uint32_t srid)
 {
     // We strip any ignored dimensions from the schema before creating the table
     pdal::Schema output_schema = buffer_schema.pack();
@@ -262,18 +262,21 @@ boost::uint32_t Writer::SetupSchema(Schema const& buffer_schema, boost::uint32_t
     long schema_count;
     if (m_pcid)
     {
-        oss << "SELECT Count(pcid) FROM pointcloud_formats WHERE pcid = " << m_pcid;
+        oss << "SELECT Count(pcid) FROM pointcloud_formats WHERE pcid = " <<
+            m_pcid;
         char *count_str = pg_query_once(m_session, oss.str());
         if (!count_str)
         {
-            throw pdal_error("Unable to count pcid's in table `pointcloud_formats`");
+            throw pdal_error("Unable to count pcid's in table "
+                "`pointcloud_formats`");
         }
         schema_count = atoi(count_str);
         free(count_str);
         oss.str("");
         if (schema_count == 0)
         {
-            oss << "requested PCID '" << m_pcid << "' does not exist in POINTCLOUD_FORMATS";
+            oss << "requested PCID '" << m_pcid <<
+                "' does not exist in POINTCLOUD_FORMATS";
             throw pdal_error(oss.str());
         }
         return m_pcid;
@@ -286,7 +289,8 @@ boost::uint32_t Writer::SetupSchema(Schema const& buffer_schema, boost::uint32_t
     char *schema_count_str = pg_query_once(m_session, oss.str());
     if (!schema_count_str)
     {
-        throw pdal_error("Unable to count pcid's in table `pointcloud_formats`");
+        throw pdal_error("Unable to count pcid's in table "
+            "`pointcloud_formats`");
     }
     schema_count = atoi(schema_count_str);
     free(schema_count_str);
@@ -295,8 +299,9 @@ boost::uint32_t Writer::SetupSchema(Schema const& buffer_schema, boost::uint32_t
     // Do any of the existing schemas match the one we want to use?
     if (schema_count > 0)
     {
-        PGresult *result = pg_query_result(m_session, "SELECT pcid, schema FROM pointcloud_formats");
-        for (int i=0; i<PQntuples(result); ++i)
+        PGresult *result = pg_query_result(m_session,
+            "SELECT pcid, schema FROM pointcloud_formats");
+        for (int i = 0; i < PQntuples(result); ++i)
         {
             char *pcid_str = PQgetvalue(result, i, 0);
             char *schema_str = PQgetvalue(result, i, 1);
@@ -323,10 +328,12 @@ boost::uint32_t Writer::SetupSchema(Schema const& buffer_schema, boost::uint32_t
         }
         else
         {
-            char *pcid_str = pg_query_once(m_session, "SELECT Max(pcid)+1 AS pcid FROM pointcloud_formats");
+            char *pcid_str = pg_query_once(m_session,
+                "SELECT Max(pcid)+1 AS pcid FROM pointcloud_formats");
             if (!pcid_str)
             {
-                throw pdal_error("Unable to get the max pcid from `pointcloud_formats`");
+                throw pdal_error("Unable to get the max pcid from "
+                    "`pointcloud_formats`");
             }
             pcid = atoi(pcid_str);
         }
@@ -341,23 +348,24 @@ boost::uint32_t Writer::SetupSchema(Schema const& buffer_schema, boost::uint32_t
             compression = "ght";
         }
 
-        Metadata metadata("compression", compression, "");
+        Metadata metadata;
+        MetadataNode m = metadata.getNode();
+        m.add("compression", compression);
         
-        log()->get(logDEBUG) << "output_schema: " << output_schema.getByteSize() << std::endl;
-        xml = pdal::Schema::to_xml(output_schema, &(metadata.toPTree()));
-
-        const char** paramValues = (const char**)malloc(sizeof(char*));
-        paramValues[0] = xml.c_str();
-
-        oss << "INSERT INTO pointcloud_formats (pcid, srid, schema) VALUES (" << pcid << "," << srid << ",$1)";
-        PGresult *result = PQexecParams(m_session, oss.str().c_str(), 1, NULL, paramValues, NULL, NULL, 0);
+        log()->get(logDEBUG) << "output_schema: " <<
+            output_schema.getByteSize() << std::endl;
+        xml = pdal::Schema::to_xml(output_schema, &(m.toPTree()));
+        const char* paramValues = xml.c_str();
+        oss << "INSERT INTO pointcloud_formats (pcid, srid, schema) "
+            "VALUES (" << pcid << "," << srid << ",$1)";
+        PGresult *result = PQexecParams(m_session, oss.str().c_str(), 1,
+            NULL, &paramValues, NULL, NULL, 0);
         if (PQresultStatus(result) != PGRES_COMMAND_OK)
         {
             throw pdal_error(PQresultErrorMessage(result));
         }
         PQclear(result);
     }
-
     m_pcid = pcid;
     return m_pcid;
 }

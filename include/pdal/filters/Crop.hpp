@@ -100,7 +100,7 @@ private:
     boost::uint32_t m_dimensions;
 
     Bounds <double> computeBounds(GEOSGeometry const* geometry);
-    virtual void initialize();
+    virtual void initialize(PointContext);
     void Construct();
     
     Crop& operator=(const Crop&); // not implemented

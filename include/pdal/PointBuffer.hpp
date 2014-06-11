@@ -158,7 +158,7 @@ public:
     /// A const reference to the internally copied pdal::Schema instance that
     /// was given at construction time.
     const Schema& getSchema() const
-        { return *(m_context.getSchema()); }
+        { return *(m_context.schema()); }
 
     /// Get the buffer's point context.
     PointContext context() const
@@ -695,7 +695,7 @@ void PointBuffer::setField(pdal::Dimension const& dim, uint32_t idx, T val)
 inline void PointBuffer::getFieldInternal(pdal::Dimension const& dim,
     PointId id, void *buf) const
 {
-    m_context.getRawPtBuf()->getField(dim, m_index[id], buf);
+    m_context.rawPtBuf()->getField(dim, m_index[id], buf);
 }
 
 
@@ -705,7 +705,7 @@ inline void PointBuffer::setFieldInternal(pdal::Dimension const& dim,
     PointId rawId = 0;
     if (id == m_index.size())
     {
-        rawId = m_context.getRawPtBuf()->addPoint();
+        rawId = m_context.rawPtBuf()->addPoint();
         m_index.resize(id + 1);
         m_index[id] = rawId;
     }
@@ -717,7 +717,7 @@ inline void PointBuffer::setFieldInternal(pdal::Dimension const& dim,
     }
     else
         rawId = m_index[id];
-    m_context.getRawPtBuf()->setField(dim, rawId, value);
+    m_context.rawPtBuf()->setField(dim, rawId, value);
 }
 
 

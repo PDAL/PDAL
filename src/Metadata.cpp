@@ -50,6 +50,7 @@
 namespace pdal
 {
 
+/**
 Metadata::Metadata()
 
 {
@@ -79,7 +80,6 @@ Metadata Metadata::operator+(const Metadata& rhs) const
     boost::property_tree::ptree tree = this->toPTree();
     tree.add_child(rhs.getName(), rhs.toPTree());
     return Metadata(tree);
-
 }
 
 bool Metadata::equal(Metadata const& rhs) const
@@ -99,8 +99,9 @@ bool Metadata::operator!=(Metadata const& rhs) const
 }
 
 
-} // namespace pdal
+**/
 
+} // namespace pdal
 
 namespace std
 {
@@ -126,6 +127,7 @@ std::istream& operator>>(std::istream& istr, pdal::ByteArray& output)
 }
 
 
+/**
 std::ostream& operator<<(std::ostream& ostr, const pdal::Metadata& metadata)
 {
     boost::property_tree::ptree tree = metadata.toPTree();
@@ -133,6 +135,7 @@ std::ostream& operator<<(std::ostream& ostr, const pdal::Metadata& metadata)
     boost::property_tree::write_json(ostr, tree);
     return ostr;
 }
-
+**/
 
 }
+

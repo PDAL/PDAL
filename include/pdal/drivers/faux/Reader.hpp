@@ -111,7 +111,7 @@ private:
 
     Reader& operator=(const Reader&); // not implemented
     Reader(const Reader&); // not implemented
-    virtual void initialize();
+    virtual void initialize(PointContext);
 };
 
 

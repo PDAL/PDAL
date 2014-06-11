@@ -38,6 +38,7 @@
 #include <pdal/pdal_internal.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/Metadata.hpp>
+#include <pdal/PointContext.hpp>
 
 #include <string>
 
@@ -55,12 +56,15 @@ public:
     PipelineWriter(const PipelineManager&);
     ~PipelineWriter();
 
-    void writePipeline(const std::string& filename) const;
+    void writePipeline(PointContext ctx, const std::string& filename) const;
     inline void setPointBuffer(PointBuffer const* buffer) { m_buffer = buffer; }
 
-    static void write_option_ptree(boost::property_tree::ptree& tree, const Options& opts);
-    static void write_metadata_ptree(boost::property_tree::ptree& tree, const Metadata& mdata);
-    static boost::property_tree::ptree get_metadata_entry(boost::property_tree::ptree const& input);
+    static void write_option_ptree(boost::property_tree::ptree& tree,
+        const Options& opts);
+    static void write_metadata_ptree(boost::property_tree::ptree& tree,
+        const boost::property_tree::ptree& input);
+    static boost::property_tree::ptree get_metadata_entry(
+        boost::property_tree::ptree const& input);
 private:
     const PipelineManager& m_manager;
     

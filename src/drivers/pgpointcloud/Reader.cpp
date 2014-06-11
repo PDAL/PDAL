@@ -140,7 +140,7 @@ void Reader::processOptions(const Options& options)
 }
 
 
-void Reader::initialize()
+void Reader::initialize(PointContext)
 {
     // Database connection
     m_session = pg_connect(m_connection);

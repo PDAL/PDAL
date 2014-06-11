@@ -81,8 +81,8 @@ private:
     void dumpSchema(const Stage&, pdal::PipelineManager* manager) const;
     void dumpStage(const Stage&) const;
     void dumpQuery(Stage const&, IndexedPointBuffer&) const;
-    void dumpMetadata(const Stage&) const;
-    void dumpSDO_PCMetadata(Stage const&) const;
+    void dumpMetadata(PointContext ctx, const Stage&) const;
+    void dumpSDO_PCMetadata(PointContext ctx, Stage const&) const;
 
     std::string m_inputFile;
     bool m_showStats;

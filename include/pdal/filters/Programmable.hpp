@@ -88,7 +88,7 @@ private:
 
     Programmable& operator=(const Programmable&); // not implemented
     Programmable(const Programmable&); // not implemented
-    virtual void initialize();
+    virtual void initialize(PointContext);
 };
 
 

@@ -51,7 +51,7 @@ BpfReader::BpfReader(const std::string& filename) : m_stream(filename)
 // When the stage is intialized, the schema needs to be populated with the
 // dimensions in order to allow subsequent stages to be aware of or append to
 // the dimensions in the PointBuffer.
-void BpfReader::initialize()
+void BpfReader::initialize(PointContext)
 {
     // In order to know the dimensions we must read the file header.
     if (!m_header.read(m_stream))

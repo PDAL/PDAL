@@ -65,7 +65,7 @@ struct GDALSourceDeleter
 #endif
 
 
-void Colorization::initialize()
+void Colorization::initialize(PointContext)
 {
 #ifdef PDAL_HAVE_GDAL
     GlobalEnvironment::get().getGDALEnvironment();

@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE(test1)
     stage->prepare(ctx);
 
     using namespace pdal;
-    Schema *schema = ctx.getSchema();    
+    Schema *schema = ctx.schema();    
 
     schema::Map dm = schema->getDimensions();
     schema::index_by_index& dm_idx = dm.get<schema::index>();

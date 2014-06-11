@@ -97,57 +97,54 @@ BOOST_AUTO_TEST_SUITE(XMLSchemaTest)
 
 BOOST_AUTO_TEST_CASE(test_schema_read)
 {
+    using namespace pdal;
+
     // std::istream* xml_stream = Utils::openFile(TestConfig::g_data_path+"schemas/8-dimension-schema.xml");
     // std::istream* xsd_stream = Utils::openFile(TestConfig::g_data_path+"/schemas/LAS.xsd");
 
-    std::string xml = ReadXML(TestConfig::g_data_path+"../../schemas/8-dimension-schema.xml");
+    std::string xml =
+        ReadXML(TestConfig::g_data_path+"../../schemas/8-dimension-schema.xml");
     std::string xsd = ReadXML(TestConfig::g_data_path+"../../schemas/LAS.xsd");
-    pdal::schema::Reader reader(xml, xsd);
+    schema::Reader reader(xml, xsd);
 
-    pdal::Schema schema = reader.getSchema();
+    Schema schema = reader.getSchema();
 
+    Metadata m1metadata;
+    Metadata m2metadata;
+    Metadata m1primeMetadata;
 
-    pdal::Metadata m1("m1");
-    pdal::Metadata m2("m2");
-    pdal::Metadata m1prime("m1");
+    MetadataNode m1 = m1metadata.getNode();
+    MetadataNode m2 = m2metadata.getNode();
+    MetadataNode m1prime = m1primeMetadata.getNode();
 
-    m1.setValue<boost::uint32_t>(1u);
-    m2.setValue<boost::int32_t>(1);
-    m1prime.setValue<std::string>("Some other metadata");
+    m1.setValue(1u);
+    m2.setValue(1);
+    m1prime.setValue(std::string("Some other metadata"));
 
-    pdal::Metadata b;
-
-    b.addMetadata(m1.getName(), m1);
-
-    pdal::Metadata m3(m1);
-    BOOST_CHECK_EQUAL(m3.getValue<boost::uint32_t>(), 1u);
-    m3.setValue<boost::int64_t>(64);
-    BOOST_CHECK_EQUAL(m3.getValue<boost::int64_t>(), 64);
-
+    Metadata m3metadata(m1metadata);
+    MetadataNode m3 = m3metadata.getNode();
+    BOOST_CHECK_EQUAL(m3.getValue<uint32_t>(), 1u);
+    m3.setValue(64ll);
+    BOOST_CHECK_EQUAL(m3.getValue<int64_t>(), 64);
     
-    b.addMetadata("uuid", boost::uuids::nil_uuid());
+    m1.add("uuid", boost::uuids::nil_uuid());
 
-    
     pdal::schema::Writer writer(schema);
-    writer.setMetadata(b.toPTree());
+    writer.setMetadata(m1.toPTree());
 
     std::string xml_output = writer.getXML();
-// std::ostream* out = FileUtils::createFile("schemadump.xml");
-// out->write(xml_output.c_str(), strlen(xml_output.c_str()));
-// FileUtils::closeFile(out);
     
     pdal::schema::Reader reader2(xml_output, xsd);
     pdal::Schema schema2 = reader2.getSchema();
 
-    schema::index_by_index const& dims1 = schema.getDimensions().get<schema::index>();
-    schema::index_by_index const& dims2 = schema2.getDimensions().get<schema::index>();
-
-    // const std::vector<pdal::Dimension>& dims1 = schema.getDimensions();
-    // const std::vector<pdal::Dimension>& dims2 = schema2.getDimensions();
+    schema::index_by_index const& dims1 =
+        schema.getDimensions().get<schema::index>();
+    schema::index_by_index const& dims2 =
+        schema2.getDimensions().get<schema::index>();
 
     BOOST_CHECK_EQUAL(dims1.size(), dims2.size());
 
-    for (boost::uint32_t i = 0; i < dims2.size(); ++i)
+    for (size_t i = 0; i < dims2.size(); ++i)
     {
         pdal::Dimension const& dim1 = dims1[i];
         pdal::Dimension const& dim2 = dims2[i];
@@ -157,9 +154,7 @@ BOOST_AUTO_TEST_CASE(test_schema_read)
         BOOST_CHECK_EQUAL(dim1.getByteSize(), dim2.getByteSize());
 
         BOOST_CHECK_EQUAL(dim1.getDescription(), dim2.getDescription());
-
     }
-
 }
 
 

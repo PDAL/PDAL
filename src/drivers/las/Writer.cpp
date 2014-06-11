@@ -130,7 +130,7 @@ Writer::~Writer()
     m_streamManager.close();
 }
 
-void Writer::initialize()
+void Writer::initialize(PointContext)
 {
     m_streamManager.open();
 }
@@ -212,7 +212,8 @@ void Writer::setHeaderPadding(boost::uint32_t const& v)
     m_lasHeader.SetHeaderPadding(v);
 }
 
-void Writer::setVLRsFromMetadata(LasHeader& header, Metadata const& metadata,
+
+void Writer::setVLRsFromMetadata(LasHeader& header, MetadataNode metaNode,
     Options const& opts)
 {
     using namespace boost::property_tree;
@@ -233,8 +234,8 @@ void Writer::setVLRsFromMetadata(LasHeader& header, Metadata const& metadata,
 
         if (boost::algorithm::iequals(o->getValue<std::string>(), "FORWARD"))
         {
-            ptree const& entries = metadata.toPTree().get_child("metadata");
-            for (auto m = entries.begin(); m != entries.end(); ++m)
+            const ptree& tree = metaNode.toPTree();
+            for (auto m = tree.begin(); m != tree.end(); ++m)
             {
                 if (boost::algorithm::istarts_with(m->first, "vlr"))
                 {
@@ -312,8 +313,8 @@ void Writer::ready(PointContext ctx)
     m_streamOffset = m_streamManager.ostream().tellp();
     m_lasHeader.setBounds(getPrevStage().getBounds());
 
-    Schema *s = ctx.getSchema();
-    m_dims.reset(new PointDimensions(*ctx.getSchema(), ""));
+    Schema *s = ctx.schema();
+    m_dims.reset(new PointDimensions(*s, ""));
 
     m_lasHeader.SetScale(m_dims->X->getNumericScale(),
                          m_dims->Y->getNumericScale(),
@@ -335,12 +336,10 @@ void Writer::ready(PointContext ctx)
 
     if (useMetadata)
     {
-        pdal::Metadata m;
-
+        MetadataNode m = ctx.metadata();
         try
         {
-            m = getPrevStage().collectMetadata().getMetadata(
-                "drivers.las.reader");
+            m = m.getCategory("drivers.las.reader");
         }
         catch (pdal::metadata_not_found const&)
         {
@@ -351,19 +350,19 @@ void Writer::ready(PointContext ctx)
 
         // Default to PointFormat 3 if not forwarded from a previous metadata
         // or given in a metadata option
-        boost::uint32_t v = getMetadataOption<boost::uint32_t>(getOptions(),
-            m, "dataformat_id", 3);
-        boost::uint32_t v2 = getMetadataOption<boost::uint32_t>(getOptions(),
-            m, "format", 3);
+        uint32_t v = getMetadataOption<uint32_t>(getOptions(), m,
+            "dataformat_id", 3);
+        uint32_t v2 = getMetadataOption<uint32_t>(getOptions(), m, "format", 3);
             
-        // Use the 'format' option specified by the options instead of the metadata one that was set passively
-        if (v2 != v) v = v2; 
+        // Use the 'format' option specified by the options instead of the
+        // metadata one that was set passively
+        v = v2; 
         setPointFormat(static_cast<PointFormat>(v));
         log()->get(logDEBUG) << "Setting point format to "
                              << v
                              << " from metadata " << std::endl;
         
-        boost::uint32_t minor = getMetadataOption<boost::uint32_t>(getOptions(),
+        uint32_t minor = getMetadataOption<uint32_t>(getOptions(),
             m, "minor_version", 2);
 
         setFormatVersion(1, static_cast<boost::uint8_t>(minor));
@@ -382,85 +381,62 @@ void Writer::ready(PointContext ctx)
             year = static_cast<boost::uint16_t>(ptm->tm_year + 1900);
         }
 
-        year = getMetadataOption<boost::uint32_t>(getOptions(), m,
+        year = getMetadataOption<uint32_t>(getOptions(), m,
             "creation_year", year);
-        day = getMetadataOption<boost::uint32_t>(getOptions(), m,
+        day = getMetadataOption<uint32_t>(getOptions(), m,
             "creation_doy", day);
 
-        setDate(static_cast<boost::uint16_t>(day),
-            static_cast<boost::uint16_t>(year));
-        log()->get(logDEBUG) << "Setting date to format "
-                             << day << "/"
-                             << year
-                             << " from metadata " << std::endl;
+        setDate(static_cast<uint16_t>(day), static_cast<uint16_t>(year));
+        log()->get(logDEBUG) << "Setting date to format " << day << "/" <<
+            year << " from metadata " << std::endl;
 
         std::string software_id = getMetadataOption<std::string>(getOptions(),
-                                  m,
-                                  "software_id",
-                                  pdal::drivers::las::GetDefaultSoftwareId());
+            m, "software_id", pdal::drivers::las::GetDefaultSoftwareId());
         setGeneratingSoftware(software_id);
-        log()->get(logDEBUG) << "Setting generating software to '"
-                             << software_id
-                             << "' from metadata " << std::endl;
+        log()->get(logDEBUG) << "Setting generating software to '" <<
+            software_id << "' from metadata " << std::endl;
 
-        std::string system_id = getMetadataOption<std::string>(getOptions(),
-                                m,
-                                "system_id",
-                                pdal::drivers::las::LasHeader::SystemIdentifier);
+        std::string system_id = getMetadataOption<std::string>(getOptions(), m,
+            "system_id", pdal::drivers::las::LasHeader::SystemIdentifier);
         setSystemIdentifier(system_id);
-        log()->get(logDEBUG) << "Setting system identifier to "
-                             << system_id
-                             << " from metadata " << std::endl;
+        log()->get(logDEBUG) << "Setting system identifier to " << system_id <<
+            " from metadata " << std::endl;
 
         boost::uuids::uuid project_id =
             getMetadataOption<boost::uuids::uuid>(getOptions(),
             m, "project_id", boost::uuids::nil_uuid());
         m_lasHeader.SetProjectId(project_id);
-        log()->get(logDEBUG) << "Setting project_id to "
-                             << project_id
-                             << " from metadata " << std::endl;
+        log()->get(logDEBUG) << "Setting project_id to " << project_id <<
+            " from metadata " << std::endl;
         
         std::string global_encoding_data = getMetadataOption<std::string>(
             getOptions(), m, "global_encoding", "");
-        std::vector<boost::uint8_t> data =
-            Utils::base64_decode(global_encoding_data);
+        std::vector<uint8_t> data = Utils::base64_decode(global_encoding_data);
         
-        boost::uint16_t reserved(0);
+        uint16_t reserved = 0;
         if (global_encoding_data.size())
         {
-            boost::uint8_t* ptr = (boost::uint8_t*)&reserved;
-            boost::uint8_t u8(0);
-            boost::uint32_t u32(0);
-            boost::uint64_t u64(0);
-            
             if (data.size() == 0)
-            {
-                // stay 0's
-                reserved = 0;
-            }
+                ;
             else if (data.size() == 1 )
+                reserved = data[0];
+            else if (data.size() == 2 )
+                memcpy(&reserved, data.data(), data.size());
+            else if (data.size() == 4 )
             {
-                boost::uint8_t* p = (boost::uint8_t*)&u8;
-                p[0] = data[0];
-                reserved = static_cast<boost::uint16_t>(u8);
-            } else if (data.size() == 2 )
+                //ABELL - HUH?
+                uint32_t temp;
+                memcpy(&temp, data.data(), data.size());
+                reserved = static_cast<uint16_t>(temp);
+            }
+            else if (data.size() == 8 )
             {
-                boost::uint8_t* p = (boost::uint8_t*)&reserved;
-                for (int i = 0; i < 2; ++i)
-                    p[i] = data[i];
-            } else if (data.size() == 4 )
-            {
-                boost::uint8_t* p = (boost::uint8_t*)&u32;
-                for (int i = 0; i < 4; ++i)
-                    p[i] = data[i];
-                reserved = static_cast<boost::uint16_t>(u32);
-            } else if (data.size() == 8 )
-            {
-                boost::uint8_t* p = (boost::uint8_t*)&u64;
-                for (int i = 0; i < 8; ++i)
-                    p[i] = data[i];
-                reserved = static_cast<boost::uint16_t>(u64);
-            } else 
+                //ABELL - HUH? AGAIN...
+                uint64_t temp;
+                memcpy(&temp, data.data(), data.size());
+                reserved = static_cast<uint16_t>(temp);
+            }
+            else 
             {
                 std::ostringstream oss;
                 oss << "size of global_encoding bytes should == 2, not " <<
@@ -468,24 +444,18 @@ void Writer::ready(PointContext ctx)
                 throw pdal_error(oss.str());                
             }
         }
-
         m_lasHeader.SetReserved(reserved);
-        log()->get(logDEBUG) << "Setting reserved to "
-                             << reserved
-                             << " from metadata " << std::endl;
+        log()->get(logDEBUG) << "Setting reserved to " << reserved <<
+            " from metadata " << std::endl;
 
-
-        boost::uint16_t filesource_id =
-            getMetadataOption<boost::uint16_t>(getOptions(),
-            m, "filesource_id", 0);
+        uint16_t filesource_id = getMetadataOption<uint16_t>(getOptions(), m,
+            "filesource_id", 0);
         m_lasHeader.SetFileSourceId(filesource_id);
-        log()->get(logDEBUG) << "Setting file source id to "
-                             << filesource_id
-                             << " from metadata " << std::endl;
+        log()->get(logDEBUG) << "Setting file source id to " << filesource_id <<
+            " from metadata " << std::endl;
 
         try
         {
-
             boost::optional<pdal::Options const&> opts =
                 getOptions().getOption("metadata").getOptions();
             if (opts)
@@ -493,15 +463,11 @@ void Writer::ready(PointContext ctx)
         }
         catch (pdal::option_not_found&)
         {}
-
-
     } // useMetadata
 
-    LasHeaderWriter lasHeaderWriter(m_lasHeader,
-        m_streamManager.ostream(), m_streamOffset);
-
+    LasHeaderWriter lasHeaderWriter(m_lasHeader, m_streamManager.ostream(),
+        m_streamOffset);
     lasHeaderWriter.write();
-
     m_summaryData.reset();
 
     if (m_lasHeader.Compressed())
@@ -533,10 +499,10 @@ void Writer::ready(PointContext ctx)
             }
         }
 #else
-        throw pdal_error("LASzip compression is not enabled for this compressed file!");
+        throw pdal_error("LASzip compression is not enabled for "
+            "this compressed file!");
 #endif
     }
-
     m_headerInitialized = true;
 }
 

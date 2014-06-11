@@ -79,14 +79,15 @@ public:
         { return m_initialized; }
 
     inline Schema const& getSchema() const
-        { return *(m_context.getSchema()); }
+        { return *(m_context.schema()); }
     
     virtual boost::uint64_t getNumPoints() const;
     const Bounds<double>& getBounds() const;
     const SpatialReference& getSpatialReference() const;
     const Options& getOptions() const
         { return m_options; }
-    virtual boost::property_tree::ptree serializePipeline() const = 0;
+    virtual boost::property_tree::ptree
+        serializePipeline(PointContext ctx) const = 0;
     virtual LogPtr log() const
         { return m_log; }
     bool isDebug() const
@@ -105,9 +106,6 @@ public:
         { return m_outputs; }
     Stage& getPrevStage() const;
     std::vector<Stage *> getPrevStages() const;
-    virtual Metadata getMetadata() const
-        { return m_metadata; }
-    virtual Metadata collectMetadata() const;
     static Options getDefaultOptions()
         { return Options(); }
     static std::vector<Dimension> getDefaultDimensions()
@@ -150,8 +148,6 @@ protected:
     void setNumPoints(boost::uint64_t);
     void setBounds(Bounds<double> const&);
     void setSpatialReference(SpatialReference const&);
-    Metadata& getMetadataRef()
-        { return m_metadata; }
 
     // convenience function, for doing a "copy ctor" on all the core props
     // (used by the Filter stage, for example)
@@ -171,7 +167,6 @@ private:
     std::vector<Stage *> m_outputs;
     StageOperationType m_dimensionsType;
     LogPtr m_log;
-    Metadata m_metadata;
     mutable boost::uint64_t m_numPoints;
     SpatialReference m_spatialReference;
 
@@ -181,8 +176,8 @@ private:
     void l_processOptions(const Options& options);
     virtual void processOptions(const Options& options)
         {}
-    void l_initialize();
-    virtual void initialize()
+    void l_initialize(PointContext ctx);
+    virtual void initialize(PointContext ctx)
         {}
     virtual void buildSchema(Schema *schema)
         { (void)schema; }

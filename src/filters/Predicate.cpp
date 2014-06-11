@@ -52,7 +52,7 @@ Predicate::~Predicate()
 }
 
 
-void Predicate::initialize()
+void Predicate::initialize(PointContext)
 {
     m_script = new pdal::plang::Script(getOptions());
 }

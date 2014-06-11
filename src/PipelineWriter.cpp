@@ -68,9 +68,10 @@ PipelineWriter::~PipelineWriter()
 }
 
 
-static boost::property_tree::ptree generateTreeFromStage(const Stage& stage)
+static boost::property_tree::ptree generateTreeFromStage(PointContext ctx,
+    const Stage& stage)
 {
-    boost::property_tree::ptree subtree = stage.serializePipeline();
+    boost::property_tree::ptree subtree = stage.serializePipeline(ctx);
 
     boost::property_tree::ptree tree;
 
@@ -122,70 +123,70 @@ void PipelineWriter::write_option_ptree(boost::property_tree::ptree& tree, const
     return;
 }
 
-boost::property_tree::ptree PipelineWriter::get_metadata_entry(boost::property_tree::ptree const& input)
+//ABELL - What is this doing?
+boost::property_tree::ptree PipelineWriter::get_metadata_entry(
+    boost::property_tree::ptree const& input)
 {
     using namespace boost;
 
     property_tree::ptree entry;
 
-    // std::ostream* ofile = FileUtils::createFile("metadata.xml");
-    // boost::property_tree::write_xml(*ofile, input);
-    // FileUtils::closeFile(ofile);
-    const std::string& name = input.get_child("name").get_value<std::string>();
-    const std::string& value = input.get_child("value").get_value<std::string>();
-    const std::string& tname = input.get_child("type").get_value<std::string>();
+    const std::string& name =
+        input.get_child("name").get_value<std::string>();
+    const std::string& value =
+        input.get_child("value").get_value<std::string>();
+    const std::string& tname =
+        input.get_child("type").get_value<std::string>();
 
     entry.put_value(value);
     entry.put("<xmlattr>.name", name);
     entry.put("<xmlattr>.type", tname);
 
-    boost::optional<property_tree::ptree const&> entries = input.get_child_optional("metadata");
+    boost::optional<property_tree::ptree const&> entries =
+        input.get_child_optional("metadata");
     if (entries)
     {
         property_tree::ptree::const_iterator iter = entries->begin();
         while (iter != entries->end())
         {
-
             property_tree::ptree e = get_metadata_entry(iter->second);
             entry.add_child("Metadata", e);
-
             ++iter;
         }
-
     }
     return entry;
-
-
-}
-
-void PipelineWriter::write_metadata_ptree(boost::property_tree::ptree& tree, const Metadata& m)
-{
-    using namespace boost;
-
-    property_tree::ptree t = m.toPTree();
-
-    property_tree::ptree output = get_metadata_entry(t);
-
-    tree.add_child("Metadata", output);
-
-    return;
 }
 
 
-void PipelineWriter::writePipeline(const std::string& filename) const
+void PipelineWriter::write_metadata_ptree(boost::property_tree::ptree& tree,
+    const boost::property_tree::ptree& input)
 {
-    const Stage* stage = m_manager.isWriterPipeline() ? (Stage*)m_manager.getWriter() : (Stage*)m_manager.getStage();
+    tree.add_child("Metadata", get_metadata_entry(input));
+}
 
-    boost::property_tree::ptree tree = generateTreeFromStage(*stage);
 
+void PipelineWriter::writePipeline(PointContext ctx,
+    const std::string& filename) const
+{
+    const Stage* stage = m_manager.isWriterPipeline() ?
+        (Stage*)m_manager.getWriter() :
+        (Stage*)m_manager.getStage();
+
+    boost::property_tree::ptree tree = generateTreeFromStage(ctx, *stage);
+
+//ABELL
+/**
     if (m_buffer)
     {
         boost::property_tree::ptree metadata_tree;
 
-        write_metadata_ptree(metadata_tree, m_buffer->getMetadata());
+        //ABELL - Help.
+        Metadata m = m_buffer->getMetadata();
+        write_metadata_ptree(metadata_tree, m.getNode());
         boost::property_tree::ptree & child = tree.get_child("Pipeline");
         child.add_child("PointBuffer", metadata_tree);
     }
+**/
 
     const boost::property_tree::xml_parser::xml_writer_settings<char> settings(' ', 4);
 
