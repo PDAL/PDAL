@@ -47,24 +47,23 @@
 
 namespace pdal
 {
-class PointBuffer;
-}
-
-
-
-namespace pdal
-{
 namespace drivers
 {
+
+namespace nitf
+{
+    class NitfReader;
+}
+
 namespace las
 {
 
 class LasHeader;
 class PointDimensions;
 
-
 class PDAL_DLL Reader : public pdal::Reader
 {
+    friend class nitf::NitfReader;
 public:
     SET_STAGE_NAME("drivers.las.reader", "Las Reader")
     SET_STAGE_LINK("http://pdal.io/stages/drivers.las.reader.html")
@@ -72,8 +71,6 @@ public:
 
     Reader(const Options&);
     Reader(const std::string&);
-    Reader(StreamFactory* factory);
-    ~Reader();
 
     static Options getDefaultOptions();
     StreamFactory& getStreamFactory() const;
@@ -90,19 +87,23 @@ public:
     }
 
 protected:
+    typedef std::unique_ptr<StreamFactory> StreamFactoryPtr;
     LasHeader& getLasHeaderRef()
     {
         return m_lasHeader;
     }
 
 private:
-    StreamFactory* m_streamFactory;
-    bool m_ownsStreamFactory;
+    StreamFactoryPtr m_streamFactory;
     LasHeader m_lasHeader;
+    std::string m_filename;
 
+    virtual void processOptions(const Options& options);
     virtual void initialize();
     virtual void buildSchema(Schema *schema);
     void readMetadata();
+    virtual StreamFactoryPtr createFactory() const
+        { return StreamFactoryPtr(new FilenameStreamFactory(m_filename)); }
 
     Reader& operator=(const Reader&); // not implemented
     Reader(const Reader&); // not implemented

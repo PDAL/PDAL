@@ -123,9 +123,9 @@ endif (WITH_SQLITE)
 
 if (WITH_GDAL)
     set(PDAL_GDAL_TEST_CPP
-#        GDALUtilsTest.cpp
+        GDALUtilsTest.cpp
 #        filters/ColorizationFilterTest.cpp
-#        drivers/nitf/NitfReaderTest.cpp
+        drivers/nitf/NitfReaderTest.cpp
         )
 
     FOREACH(file ${PDAL_GDAL_TEST_CPP})
