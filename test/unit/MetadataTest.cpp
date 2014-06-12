@@ -196,18 +196,63 @@ BOOST_AUTO_TEST_CASE(test_metadata_set)
     std::vector<MetadataNode> ms = mm.children();
     BOOST_CHECK_EQUAL(ms.size(), 3);
 
-    auto pred = [](MetadataNode m)
-        { return m.name() == "m1"; };
-    MetadataNode node = mm.findChild(pred);
+    class Predicate
+    {
+    public:
+        Predicate(const std::string& name) : m_name(name)
+        {}
+
+        bool operator()(MetadataNode m)
+            { return m.name() == m_name; }
+    private:
+        std::string m_name;
+    };
+
+    MetadataNode node = mm.findChild(Predicate("m1"));
     BOOST_CHECK_EQUAL(node.value(), "1");
-    auto pred2 = [](MetadataNode m)
-        { return m.name() == "m2"; };
-    node = mm.find(pred2);
+    node = mm.find(Predicate("m2"));
     BOOST_CHECK_EQUAL(node.value(), "2");
-    auto pred3 = [](MetadataNode m)
-        { return m.name() == "m1prime"; };
-    node = mm.find(pred3);
+    node = mm.find(Predicate("m1prime"));
     BOOST_CHECK_EQUAL(node.value(), "Some other metadata");
+    node = mm.find(Predicate("foo"));
+    BOOST_CHECK_EQUAL(node.value(), "");
+}
+
+BOOST_AUTO_TEST_CASE(test_vlr_metadata)
+{
+    using namespace pdal;
+
+    MetadataNode m;
+
+    MetadataNode bogusvlr = m.add("vlr1", "VLR1VALUE", "VLR1DESC");
+    MetadataNode vlr = m.add("vlr2", "VLR2VALUE", "VLR2DESC");
+    std::string recordId("MYRECOREDID");
+    std::string userId("MYUSERID");
+    vlr.add("record_id", recordId);
+    vlr.add("user_id", userId);
+    // Find a node whose name starts with vlr and that has child nodes
+    // with the name and recordId we're looking for.
+    auto pred = [recordId,userId](MetadataNode n)
+    {
+        auto recPred = [recordId](MetadataNode n)
+        {
+            return n.name() == "record_id" &&
+                n.value() == recordId;
+        };
+        auto userPred = [userId](MetadataNode n)
+        {
+            return n.name() == "user_id" &&
+                n.value() == userId;
+        };
+        return (boost::algorithm::istarts_with(n.name(), "vlr") &&
+            !n.findChild(recPred).empty() &&
+            !n.findChild(userPred).empty());
+    };
+
+    MetadataNode found = m.find(pred);
+    BOOST_CHECK_EQUAL(found.name(), "vlr2");
+    BOOST_CHECK_EQUAL(found.value(), "VLR2VALUE");
+    BOOST_CHECK_EQUAL(found.description(), "VLR2DESC");
 }
 
 BOOST_AUTO_TEST_CASE(test_metadata_stage)

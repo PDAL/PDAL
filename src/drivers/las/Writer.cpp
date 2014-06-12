@@ -227,11 +227,13 @@ MetadataNode Writer::findVlr(MetadataNode node, const std::string& recordId,
     {
         auto recPred = [recordId](MetadataNode n)
         {
-            return n.name() == recordId;
+            return n.name() == "record_id" &&
+                n.value() == recordId;
         };
         auto userPred = [userId](MetadataNode n)
         {
-            return n.name() == userId;
+            return n.name() == "user_id" &&
+                n.value() == userId;
         };
         return (boost::algorithm::istarts_with(n.name(), "vlr") &&
             !n.findChild(recPred).empty() &&
