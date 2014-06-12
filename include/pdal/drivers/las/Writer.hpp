@@ -32,8 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_DRIVERS_LAS_WRITER_HPP
-#define INCLUDED_DRIVERS_LAS_WRITER_HPP
+#pragma once
 
 #include <pdal/Writer.hpp>
 #include <pdal/drivers/las/Support.hpp>
@@ -41,8 +40,6 @@
 #include <pdal/drivers/las/SummaryData.hpp>
 #include <pdal/StreamFactory.hpp>
 #include <boost/scoped_ptr.hpp>
-
-
 
 namespace pdal
 {
@@ -171,7 +168,7 @@ private:
             if (!m.empty())
             {
                 T t;
-                istringstream iss(m.value());
+                std::istringstream iss(m.value());
                 iss >> t;
                 return t;
             }
@@ -182,8 +179,7 @@ private:
     }    
 };
 
-}
-}
-} // namespaces
+} // namespace las
+} // namespace drivers
+} // namespace pdal
 
-#endif
