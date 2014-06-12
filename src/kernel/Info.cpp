@@ -275,10 +275,8 @@ void Info::dumpStats(PointContext ctx, pdal::filters::Stats& filter,
         write_json(ostr, tree);
 
     if (m_pipelineFile.size() > 0)
-    {
-        writer->writePipeline(ctx, m_pipelineFile);
-        delete writer;
-    }
+        writer->writePipeline(m_pipelineFile);
+    delete writer;
 }
 
 
@@ -367,8 +365,10 @@ PointBuffer response(data.getSchema());
 
 void Info::dumpSDO_PCMetadata(PointContext ctx, const Stage& stage) const
 {
-    boost::property_tree::ptree metadata = stage.serializePipeline(ctx);
-    std::string xml = pdal::Schema::to_xml(*ctx.schema(), &metadata);  
+    boost::property_tree::ptree metadata = stage.serializePipeline();
+    std::string xml;
+//ABELL - Fix this.
+//    std::string xml = pdal::Schema::to_xml(*ctx.schema(), &metadata);  
     std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
     ostr << xml;
 }
@@ -393,7 +393,7 @@ void Info::dumpStage(const Stage& stage) const
 
 void Info::dumpMetadata(PointContext ctx, const Stage& stage) const
 {
-    boost::property_tree::ptree tree = stage.serializePipeline(ctx);
+    boost::property_tree::ptree tree = stage.serializePipeline();
     std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
 
     if (m_useXML)

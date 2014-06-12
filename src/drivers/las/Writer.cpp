@@ -218,6 +218,28 @@ void Writer::setHeaderPadding(boost::uint32_t const& v)
 }
 
 
+MetadataNode Writer::findVlr(MetadataNode node, const std::string& recordId,
+    const std::string& userId)
+{
+    // Find a node whose name starts with vlr and that has child nodes
+    // with the name and recordId we're looking for.
+    auto pred = [recordId,userId](MetadataNode n)
+    {
+        auto recPred = [recordId](MetadataNode n)
+        {
+            return n.name() == recordId;
+        };
+        auto userPred = [userId](MetadataNode n)
+        {
+            return n.name() == userId;
+        };
+        return (boost::algorithm::istarts_with(n.name(), "vlr") &&
+            !n.findChild(recPred).empty() &&
+            !n.findChild(userPred).empty());
+    };
+    return node.find(pred);
+}
+
 void Writer::setVLRsFromMetadata(LasHeader& header, MetadataNode metaNode,
     Options const& opts)
 {
@@ -229,7 +251,6 @@ void Writer::setVLRsFromMetadata(LasHeader& header, MetadataNode metaNode,
     for (o = options.begin(); o != options.end(); ++o)
     {
         if (!boost::algorithm::istarts_with(o->getName(), "vlr"))
-            // if (!boost::algorithm::iequals(o->getName(), "VLR"))
             continue;
 
         boost::optional<pdal::Options const&> vo = o->getOptions();
@@ -239,61 +260,30 @@ void Writer::setVLRsFromMetadata(LasHeader& header, MetadataNode metaNode,
 
         if (boost::algorithm::iequals(o->getValue<std::string>(), "FORWARD"))
         {
-            const ptree& tree = metaNode.toPTree();
-            for (auto m = tree.begin(); m != tree.end(); ++m)
-            {
-                if (boost::algorithm::istarts_with(m->first, "vlr"))
-                {
-                    boost::uint16_t option_record_id =
-                        vo->getOption("record_id").getValue<boost::uint16_t>();
-                    boost::uint16_t metadata_record_id =
-                        m->second.get<boost::uint16_t>(
-                            "metadata.record_id.value");
-                    std::string option_user_id =
-                        vo->getOption("user_id").getValue<std::string>();
-                    std::string metadata_user_id =
-                        m->second.get<std::string>("metadata.user_id.value");
+            uint16_t recordId =
+                vo->getOption("record_id").getValue<uint16_t>();
+            std::string userId =
+                vo->getOption("user_id").getValue<std::string>();
 
-                    if (option_record_id == metadata_record_id &&
-                        option_user_id == metadata_user_id)
-                    {
-                        std::string vlr_data =
-                            m->second.get<std::string>("value");
-                        std::vector<boost::uint8_t> data =
-                            Utils::base64_decode(vlr_data);
-                        std::string description =
-                            m->second.get<std::string>(
-                            "metadata.description.value");
+            MetadataNode node = findVlr(metaNode,
+                boost::lexical_cast<std::string>(recordId), userId);
+            if (node.empty())
+                continue;
 
-                        // In case the VLR is 0 in size
-                        boost::uint8_t* bytes = 0;
-                        if (data.size() > 0)
-                            bytes = &data[0];
-
-                        pdal::drivers::las::VariableLengthRecord vlr(0xAABB,
-                                metadata_user_id,
-                                metadata_record_id,
-                                description,
-                                bytes,
-                                static_cast<boost::uint16_t>(data.size()));
-                        header.getVLRs().add(vlr);
-                        log()->get(logDEBUG) << "Forwarding VLR from metadata "
-                            "with user_id='" << option_user_id <<
-                            "' and record_id='" << option_record_id << "'"<<
-                            " with size: " << data.size()<< std::endl;
-                    }
-                }
-            }
+            std::vector<uint8_t> data = Utils::base64_decode(node.value());
+            VariableLengthRecord vlr(0xAABB, userId, recordId,
+                node.description(), data.data(), (uint16_t)data.size());
+            header.getVLRs().add(vlr);
         }
         else
         {
             boost::uint16_t record_id =
-                vo->getValueOrDefault<boost::uint16_t>("record_id", 4321);
+                vo->getValueOrDefault<uint16_t>("record_id", 4321);
             std::string user_id = vo->getValueOrDefault<std::string>("user_id",
                 "PDALUSERID");
             std::string description = vo->getValueOrDefault<std::string>(
                 "description", "PDAL default VLR description");
-            std::vector<boost::uint8_t> data = Utils::base64_decode(
+            std::vector<uint8_t> data = Utils::base64_decode(
                 o->getValue<std::string>());
             pdal::drivers::las::VariableLengthRecord vlr(0xAABB,
                     user_id,
@@ -341,23 +331,12 @@ void Writer::ready(PointContext ctx)
 
     if (useMetadata)
     {
-        MetadataNode m = ctx.metadata();
-        try
-        {
-            m = m.getCategory("drivers.las.reader");
-        }
-        catch (pdal::metadata_not_found const&)
-        {
-            // If there's nothing already prepopulated with the las.reader's
-            // metadata, we're just going to take what ever was set in the
-            // options (if there was any)
-        }
-
         // Default to PointFormat 3 if not forwarded from a previous metadata
         // or given in a metadata option
-        uint32_t v = getMetadataOption<uint32_t>(getOptions(), m,
+        uint32_t v = getMetadataOption<uint32_t>(getOptions(), m_metadata,
             "dataformat_id", 3);
-        uint32_t v2 = getMetadataOption<uint32_t>(getOptions(), m, "format", 3);
+        uint32_t v2 = getMetadataOption<uint32_t>(getOptions(), m_metadata,
+            "format", 3);
             
         // Use the 'format' option specified by the options instead of the
         // metadata one that was set passively
@@ -368,7 +347,7 @@ void Writer::ready(PointContext ctx)
                              << " from metadata " << std::endl;
         
         uint32_t minor = getMetadataOption<uint32_t>(getOptions(),
-            m, "minor_version", 2);
+            m_metadata, "minor_version", 2);
 
         setFormatVersion(1, static_cast<boost::uint8_t>(minor));
         log()->get(logDEBUG) << "Setting version to "
@@ -382,13 +361,13 @@ void Writer::ready(PointContext ctx)
         boost::uint32_t year(0);
         if (0 != ptm)
         {
-            day = static_cast<boost::uint16_t>(ptm->tm_yday);
-            year = static_cast<boost::uint16_t>(ptm->tm_year + 1900);
+            day = static_cast<uint16_t>(ptm->tm_yday);
+            year = static_cast<uint16_t>(ptm->tm_year + 1900);
         }
 
-        year = getMetadataOption<uint32_t>(getOptions(), m,
+        year = getMetadataOption<uint32_t>(getOptions(), m_metadata,
             "creation_year", year);
-        day = getMetadataOption<uint32_t>(getOptions(), m,
+        day = getMetadataOption<uint32_t>(getOptions(), m_metadata,
             "creation_doy", day);
 
         setDate(static_cast<uint16_t>(day), static_cast<uint16_t>(year));
@@ -396,26 +375,26 @@ void Writer::ready(PointContext ctx)
             year << " from metadata " << std::endl;
 
         std::string software_id = getMetadataOption<std::string>(getOptions(),
-            m, "software_id", pdal::drivers::las::GetDefaultSoftwareId());
+            m_metadata, "software_id", GetDefaultSoftwareId());
         setGeneratingSoftware(software_id);
         log()->get(logDEBUG) << "Setting generating software to '" <<
             software_id << "' from metadata " << std::endl;
 
-        std::string system_id = getMetadataOption<std::string>(getOptions(), m,
-            "system_id", pdal::drivers::las::LasHeader::SystemIdentifier);
+        std::string system_id = getMetadataOption<std::string>(getOptions(),
+            m_metadata, "system_id", LasHeader::SystemIdentifier);
         setSystemIdentifier(system_id);
         log()->get(logDEBUG) << "Setting system identifier to " << system_id <<
             " from metadata " << std::endl;
 
         boost::uuids::uuid project_id =
             getMetadataOption<boost::uuids::uuid>(getOptions(),
-            m, "project_id", boost::uuids::nil_uuid());
+            m_metadata, "project_id", boost::uuids::nil_uuid());
         m_lasHeader.SetProjectId(project_id);
         log()->get(logDEBUG) << "Setting project_id to " << project_id <<
             " from metadata " << std::endl;
         
         std::string global_encoding_data = getMetadataOption<std::string>(
-            getOptions(), m, "global_encoding", "");
+            getOptions(), m_metadata, "global_encoding", "");
         std::vector<uint8_t> data = Utils::base64_decode(global_encoding_data);
         
         uint16_t reserved = 0;
@@ -453,8 +432,8 @@ void Writer::ready(PointContext ctx)
         log()->get(logDEBUG) << "Setting reserved to " << reserved <<
             " from metadata " << std::endl;
 
-        uint16_t filesource_id = getMetadataOption<uint16_t>(getOptions(), m,
-            "filesource_id", 0);
+        uint16_t filesource_id = getMetadataOption<uint16_t>(getOptions(),
+            m_metadata, "filesource_id", 0);
         m_lasHeader.SetFileSourceId(filesource_id);
         log()->get(logDEBUG) << "Setting file source id to " << filesource_id <<
             " from metadata " << std::endl;
@@ -464,7 +443,7 @@ void Writer::ready(PointContext ctx)
             boost::optional<pdal::Options const&> opts =
                 getOptions().getOption("metadata").getOptions();
             if (opts)
-                setVLRsFromMetadata(m_lasHeader, m, *opts);
+                setVLRsFromMetadata(m_lasHeader, m_metadata, *opts);
         }
         catch (pdal::option_not_found&)
         {}

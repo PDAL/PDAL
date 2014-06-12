@@ -32,9 +32,11 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/StageInfo.hpp>
-
 #include <iomanip>
+
+#include <boost/algorithm/string.hpp>
+
+#include <pdal/StageInfo.hpp>
 
 namespace pdal
 {

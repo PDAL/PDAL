@@ -118,15 +118,11 @@ BOOST_AUTO_TEST_CASE(InPlaceReprojectionFilterTest_test_1)
 
         StageSequentialIterator* iter = reader.createSequentialIterator();
 
-std::cerr << "#1\n";
         boost::uint32_t numRead = iter->read(buffer, 1);
         BOOST_CHECK(numRead == 1);
 
-std::cerr << "#2\n";
         FilterTester::ready(&reprojectionFilter, ctx);
-std::cerr << "#3\n";
         FilterTester::filter(&reprojectionFilter, buffer);
-std::cerr << "#4\n";
 
 //ABELL
 /**

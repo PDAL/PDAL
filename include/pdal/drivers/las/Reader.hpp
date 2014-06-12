@@ -100,7 +100,7 @@ private:
 
     virtual void initialize(PointContext ctx);
     virtual void buildSchema(Schema *schema);
-    void readMetadata(MetadataNode metaNode);
+    void readMetadata();
     virtual void processOptions(const Options& options);
     virtual StreamFactoryPtr createFactory() const
         { return StreamFactoryPtr(new FilenameStreamFactory(m_filename)); }

@@ -137,9 +137,13 @@ PointBufferSet Stage::execute(PointContext ctx)
 
 void Stage::l_initialize(PointContext ctx)
 {
-    ctx.metadata().addCategory(getName());
-    if (m_inputs.size())
-        setCoreProperties(getPrevStage());
+    m_metadata = ctx.metadata().add(getName());
+    if (m_inputs.size()) {
+        Stage& prevStage = getPrevStage();
+        setSchema(prevStage.getSchema());
+        setBounds(prevStage.getBounds());
+        setSpatialReference(prevStage.getSpatialReference());
+    }
 }
 
 
@@ -279,10 +283,6 @@ void Stage::setSpatialReference(const SpatialReference& spatialReference)
 
 void Stage::setCoreProperties(const Stage& stage)
 {
-    this->setSchema(stage.getSchema());
-    this->setNumPoints(stage.getNumPoints());
-    this->setBounds(stage.getBounds());
-    this->setSpatialReference(stage.getSpatialReference());
 }
 
 std::vector<Stage *> Stage::makeVector(Stage& sref)

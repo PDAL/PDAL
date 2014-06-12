@@ -47,17 +47,9 @@
 
 #include <pdal/pdal_internal.hpp>
 #include <pdal/Dimension.hpp>
-
-// boost
-#include <boost/cstdint.hpp>
-#include <boost/any.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/foreach.hpp>
-#include <boost/array.hpp>
-#include <boost/optional.hpp>
+#include <pdal/Metadata.hpp>
 
 #include <pdal/third/string_ref.hpp>
-
 
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/member.hpp>
@@ -334,7 +326,7 @@ public:
 
     /// @return serialized Schema instance as xml
     static std::string to_xml(Schema const& schema,
-        boost::property_tree::ptree const* metadata=0);
+        MetadataNode m = MetadataNode());
     
 /// @name Private Attributes
 private:

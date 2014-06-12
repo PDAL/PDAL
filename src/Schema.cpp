@@ -497,17 +497,12 @@ Schema Schema::from_xml(std::string const& xml)
 #endif
 }
 
-std::string Schema::to_xml(Schema const& schema, boost::property_tree::ptree const* metadata)
+std::string Schema::to_xml(Schema const& schema, MetadataNode m)
 {
 #ifdef PDAL_HAVE_LIBXML2
-
     pdal::schema::Writer writer(schema);
-
-    if (metadata)
-        writer.setMetadata(*metadata);
-
+    writer.setMetadata(m);
     return writer.getXML();
-
 #else
     boost::ignore_unused_variable_warning(schema);
     return std::string("");

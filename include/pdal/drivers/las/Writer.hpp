@@ -139,6 +139,8 @@ private:
     boost::uint64_t m_streamOffset; // the first byte of the LAS file
 	void setOptions();
 //    bool doForwardThisMetadata(std::string const& name) const;
+    MetadataNode findVlr(MetadataNode node, const std::string& recordId,
+        const std::string& userId);
     void setVLRsFromMetadata(LasHeader& header, MetadataNode metaNode,
         Options const& opts);
     Writer& operator=(const Writer&); // not implemented
@@ -160,7 +162,21 @@ private:
         // If the metadata option for this field is "FORWARD", return the
         // value from the metadata or the default value.
         if (boost::algorithm::iequals(*candidate, "FORWARD"))
-            return metaNode.getValue<T>(name, default_value);
+        {
+            auto pred = [name](MetadataNode n)
+            {
+                return n.name() == name;
+            };
+            MetadataNode m = metaNode.findChild(pred);
+            if (!m.empty())
+            {
+                T t;
+                istringstream iss(m.value());
+                iss >> t;
+                return t;
+            }
+            return default_value;
+        }
         // Just return the value from the stored metadata option.
         return boost::lexical_cast<T>(*candidate);
     }    

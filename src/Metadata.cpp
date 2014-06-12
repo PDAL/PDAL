@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2014, Hobu Inc.
 *
 * All rights reserved.
 *
@@ -36,106 +36,25 @@
 #include <pdal/Utils.hpp>
 
 #include <sstream>
-#include <cstring>
-
-#include <sstream>
 #include <string>
-
-#include <boost/algorithm/string.hpp>
-
-#include <boost/property_tree/xml_parser.hpp>
-#include <boost/property_tree/json_parser.hpp>
-
-
-namespace pdal
-{
-
-/**
-Metadata::Metadata()
-
-{
-    setName("root");
-    setType("blank");
-    setValue<boost::blank>(boost::blank());
-    return;
-}
-
-Metadata::Metadata(Metadata const& other)
-    : m_tree(other.m_tree)
-{}
-
-Metadata::Metadata(std::string const& name)
-{
-    setType("blank");
-    setValue<boost::blank>(boost::blank());
-    setName(name);
-}
-
-Metadata::Metadata(boost::property_tree::ptree const& tree)
-    : m_tree(tree)
-{}
-
-Metadata Metadata::operator+(const Metadata& rhs) const
-{
-    boost::property_tree::ptree tree = this->toPTree();
-    tree.add_child(rhs.getName(), rhs.toPTree());
-    return Metadata(tree);
-}
-
-bool Metadata::equal(Metadata const& rhs) const
-{
-    return m_tree == rhs.m_tree;
-}
-
-
-bool Metadata::operator==(Metadata const& rhs) const
-{
-    return equal(rhs);
-}
-
-bool Metadata::operator!=(Metadata const& rhs) const
-{
-    return !(equal(rhs));
-}
-
-
-**/
-
-} // namespace pdal
 
 namespace std
 {
 
 std::ostream& operator<<(std::ostream& ostr, const pdal::ByteArray& data)
 {
-
-    std::string output = pdal::Utils::base64_encode(data.get());
-
-    ostr << output;
+    ostr << pdal::Utils::base64_encode(data.get());
     return ostr;
 }
 
 std::istream& operator>>(std::istream& istr, pdal::ByteArray& output)
 {
-
     std::string data;
     istr >> data;
-    std::vector<boost::uint8_t> d = pdal::Utils::base64_decode(data);
-
-    output.set(d);
+    output.set(pdal::Utils::base64_decode(data));
     return istr;
 }
 
+} // namespace std;
 
-/**
-std::ostream& operator<<(std::ostream& ostr, const pdal::Metadata& metadata)
-{
-    boost::property_tree::ptree tree = metadata.toPTree();
-
-    boost::property_tree::write_json(ostr, tree);
-    return ostr;
-}
-**/
-
-}
 

@@ -32,6 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <boost/foreach.hpp>
+
 #include <pdal/MultiFilter.hpp>
 #include <pdal/PipelineWriter.hpp>
 
@@ -39,20 +41,18 @@ namespace pdal
 {
 
 
-boost::property_tree::ptree
-MultiFilter::serializePipeline(PointContext ctx) const
+boost::property_tree::ptree MultiFilter::serializePipeline() const
 {
     boost::property_tree::ptree tree;
 
     tree.add("<xmlattr>.type", getName());
 
-    MetadataNode metaNode = ctx.metadata().getCategory(getName());
     PipelineWriter::write_option_ptree(tree, getOptions());
-    PipelineWriter::write_metadata_ptree(tree, metaNode.toPTree());
+    PipelineWriter::writeMetadata(tree, m_metadata);
 
     BOOST_FOREACH(const Stage* stage, getPrevStages())
     {
-        boost::property_tree::ptree subtree = stage->serializePipeline(ctx);
+        boost::property_tree::ptree subtree = stage->serializePipeline();
         tree.add_child(subtree.begin()->first, subtree.begin()->second);
     }
 

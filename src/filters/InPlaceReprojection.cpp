@@ -350,7 +350,6 @@ void InPlaceReprojection::updateBounds(PointBuffer& buffer)
 
 void InPlaceReprojection::filter(PointBuffer& buffer)
 {
-std::cerr << "Filter #1!\n";
     bool logOutput = log()->getLevel() > logDEBUG3;
     if (logOutput)
     {
@@ -363,7 +362,6 @@ std::cerr << "Filter #1!\n";
         log()->get(logDEBUG3) << "new_y: " << *m_dimY;
         log()->get(logDEBUG3) << "new_z: " << *m_dimZ;
     }
-std::cerr << "Filter #2!\n";
         
     for (PointId idx = 0; idx < buffer.size(); ++idx)
     {
@@ -377,10 +375,8 @@ std::cerr << "Filter #2!\n";
             log()->get(logDEBUG5) << "input: " <<
                 x << " y: " << y << " z: " << z << std::endl;
         }
-std::cerr << "Filter #3!\n";
 
         transform(x, y, z);
-std::cerr << "Filter #4!\n";
 
         if (logOutput)
         {

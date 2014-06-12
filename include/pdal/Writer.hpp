@@ -81,8 +81,7 @@ public:
 
     /// Serialize the pipeline to a boost::property_tree::ptree
     /// @return boost::property_tree::ptree with xml attributes
-    virtual boost::property_tree::ptree
-        serializePipeline(PointContext ctx) const;
+    virtual boost::property_tree::ptree serializePipeline() const;
     
     /// @return the internal working PointBuffer of the Writer
     virtual PointBuffer const* getPointBuffer() const 

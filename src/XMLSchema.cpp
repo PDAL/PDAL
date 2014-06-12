@@ -767,12 +767,13 @@ void Writer::write(TextWriterPtr writer)
 
     writeSchema(writer);
 
-    if (m_metadata.size())
+    if (!m_metadata.empty())
     {
-        xmlTextWriterStartElementNS(w, (const xmlChar*) "pc", (const xmlChar*) "metadata", NULL);
+        xmlTextWriterStartElementNS(w, (const xmlChar*) "pc",
+            (const xmlChar*) "metadata", NULL);
 
         boost::property_tree::ptree output;
-        PipelineWriter::write_metadata_ptree(output, m_metadata);
+        PipelineWriter::writeMetadata(output, m_metadata);
         std::ostringstream oss;
         boost::property_tree::xml_parser::write_xml(oss, output);
         std::string xml = oss.str();

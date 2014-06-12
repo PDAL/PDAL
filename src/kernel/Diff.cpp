@@ -224,8 +224,11 @@ int Diff::execute()
         
         oss << "Source and candidate files do not have the same metadata count";
         errors.put<std::string>("metadata.error", oss.str());
+        //ABELL - Fix
+        /**
         errors.put_child("metadata.source", source_metadata.toPTree());
         errors.put_child("metadata.candidate", candidate_metadata.toPTree());
+        **/
     }
 
     

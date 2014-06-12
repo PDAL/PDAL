@@ -69,8 +69,7 @@ private:
         pbSet.insert(buffer);
         return pbSet;
     }
-    virtual boost::property_tree::ptree
-        serializePipeline(PointContext ctx) const;
+    virtual boost::property_tree::ptree serializePipeline() const;
 };
 
 } // namespace pdal

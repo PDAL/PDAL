@@ -56,8 +56,7 @@ public:
     {}
 
     // for xml serializion of pipelines
-    virtual boost::property_tree::ptree
-        serializePipeline(PointContext ctx) const;
+    virtual boost::property_tree::ptree serializePipeline() const;
 
 private:
     MultiFilter& operator=(const MultiFilter&); // not implemented

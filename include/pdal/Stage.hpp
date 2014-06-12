@@ -86,8 +86,7 @@ public:
     const SpatialReference& getSpatialReference() const;
     const Options& getOptions() const
         { return m_options; }
-    virtual boost::property_tree::ptree
-        serializePipeline(PointContext ctx) const = 0;
+    virtual boost::property_tree::ptree serializePipeline() const = 0;
     virtual LogPtr log() const
         { return m_log; }
     bool isDebug() const
@@ -140,6 +139,7 @@ protected:
     PointContext m_context;
     Schema m_schema;
     Options m_options;
+    MetadataNode m_metadata;
     Bounds<double> m_bounds;
 
     StageOperationType getDimensionOperationType() const

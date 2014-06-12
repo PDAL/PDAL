@@ -39,15 +39,14 @@ namespace pdal
 {
 
 
-boost::property_tree::ptree Reader::serializePipeline(PointContext ctx) const
+boost::property_tree::ptree Reader::serializePipeline() const
 {
     boost::property_tree::ptree tree;
 
     tree.add("<xmlattr>.type", getName());
 
-    MetadataNode metaNode = ctx.metadata().getCategory(getName());
     PipelineWriter::write_option_ptree(tree, getOptions());
-    PipelineWriter::write_metadata_ptree(tree, metaNode.toPTree());
+    PipelineWriter::writeMetadata(tree, m_metadata);
 
     boost::property_tree::ptree root;
     root.add_child("Reader", tree);

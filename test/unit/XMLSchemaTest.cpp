@@ -109,29 +109,15 @@ BOOST_AUTO_TEST_CASE(test_schema_read)
 
     Schema schema = reader.getSchema();
 
-    Metadata m1metadata;
-    Metadata m2metadata;
-    Metadata m1primeMetadata;
+    MetadataNode m;
 
-    MetadataNode m1 = m1metadata.getNode();
-    MetadataNode m2 = m2metadata.getNode();
-    MetadataNode m1prime = m1primeMetadata.getNode();
-
-    m1.setValue(1u);
-    m2.setValue(1);
-    m1prime.setValue(std::string("Some other metadata"));
-
-    Metadata m3metadata(m1metadata);
-    MetadataNode m3 = m3metadata.getNode();
-    BOOST_CHECK_EQUAL(m3.getValue<uint32_t>(), 1u);
-    m3.setValue(64ll);
-    BOOST_CHECK_EQUAL(m3.getValue<int64_t>(), 64);
-    
+    MetadataNode m1 = m.add("m1", 1u);
+    MetadataNode m2 = m.add("m2", 1);
+    MetadataNode m1prime = m.add("m1prime", "Some other metadata");
     m1.add("uuid", boost::uuids::nil_uuid());
 
     pdal::schema::Writer writer(schema);
-    writer.setMetadata(m1.toPTree());
-
+    writer.setMetadata(m1);
     std::string xml_output = writer.getXML();
     
     pdal::schema::Reader reader2(xml_output, xsd);

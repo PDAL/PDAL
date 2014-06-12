@@ -354,7 +354,7 @@ uint32_t Writer::SetupSchema(Schema const& buffer_schema, uint32_t srid)
         
         log()->get(logDEBUG) << "output_schema: " <<
             output_schema.getByteSize() << std::endl;
-        xml = pdal::Schema::to_xml(output_schema, &(m.toPTree()));
+        xml = pdal::Schema::to_xml(output_schema, m);
         const char* paramValues = xml.c_str();
         oss << "INSERT INTO pointcloud_formats (pcid, srid, schema) "
             "VALUES (" << pcid << "," << srid << ",$1)";
