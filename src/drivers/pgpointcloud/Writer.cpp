@@ -128,7 +128,7 @@ void Writer::processOptions(const Options& options)
 // Optional things you can defer or attempt to initialize
 // here.
 //
-void Writer::initialize(PointContext)
+void Writer::initialize()
 {
     m_session = pg_connect(m_connection);
 }

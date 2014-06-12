@@ -43,7 +43,7 @@ namespace filters
 {
 
 
-void Mosaic::initialize(PointContext)
+void Mosaic::initialize()
 {
     const std::vector<Stage*>& stages = getPrevStages();
 

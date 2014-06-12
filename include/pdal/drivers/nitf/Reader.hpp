@@ -61,7 +61,7 @@ private:
     uint64_t m_offset;
     uint64_t m_length;
 
-    virtual void initialize(PointContext ctx);
+    virtual void initialize();
     virtual StreamFactoryPtr createFactory() const
     {
         return StreamFactoryPtr(

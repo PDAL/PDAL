@@ -103,7 +103,7 @@ public:
     }
 
 private:
-    virtual void initialize(PointContext);
+    virtual void initialize();
     virtual void processOptions(const Options&);
 
     std::map<std::string, boost::uint32_t> m_band_map;

@@ -66,7 +66,7 @@ protected:
 
 private:
     virtual void processOptions(const Options&);
-    virtual void initialize(PointContext);
+    virtual void initialize();
 
     std::string m_filename;
     std::ostream* m_ostream;

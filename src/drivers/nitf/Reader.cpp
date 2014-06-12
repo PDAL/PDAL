@@ -112,17 +112,15 @@ namespace nitf
 //
 // BUG: fix the reader test that asserts 80 pieces of metadata coming out
 
-void NitfReader::initialize(PointContext ctx)
+void NitfReader::initialize()
 {
     NitfFile nitf(m_filename);
     nitf.open();
     nitf.getLasPosition(m_offset, m_length);
-//ABELL
-    MetadataNode m = ctx.metadata();
-    nitf.extractMetadata(m);
+    nitf.extractMetadata(m_metadata);
     nitf.close();
 
-    las::Reader::initialize(ctx);
+    las::Reader::initialize();
 }
 
 } // namespace nitf

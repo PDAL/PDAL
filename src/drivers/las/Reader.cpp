@@ -86,7 +86,7 @@ void Reader::processOptions(const Options& options)
 }
 
 
-void Reader::initialize(PointContext ctx)
+void Reader::initialize()
 {
     m_streamFactory = createFactory();
 

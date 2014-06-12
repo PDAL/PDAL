@@ -170,7 +170,7 @@ private:
 
     Splitter& operator=(const Splitter&); // not implemented
     Splitter(const Splitter&); // not implemented
-    virtual void initialize(PointContext);
+    virtual void initialize();
 };
 
 namespace iterators

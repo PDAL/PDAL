@@ -49,7 +49,7 @@ namespace filters
 {
 
 
-void ByteSwap::initialize(PointContext)
+void ByteSwap::initialize()
 {
     const Stage& stage = getPrevStage();
     setNumPoints(stage.getNumPoints());

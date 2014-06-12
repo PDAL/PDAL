@@ -67,7 +67,7 @@ public:
     pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const;
 
 private:
-    virtual void initialize(PointContext);
+    virtual void initialize();
 
 }; // class Reader
 

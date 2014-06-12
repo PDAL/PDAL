@@ -56,7 +56,7 @@ Reader::~Reader()
 {}
 
 
-void Reader::initialize(PointContext)
+void Reader::initialize()
 {
     boost::uintmax_t fileSize = FileUtils::fileSize(getFileName());
     if (fileSize % pdal::drivers::sbet::pointByteSize != 0)

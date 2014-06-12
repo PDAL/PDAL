@@ -82,7 +82,7 @@ void OciReader::processOptions(const Options& options)
     m_connSpec = options.getValueOrDefault<std::string>("connection", "");
 }
 
-void OciReader::initialize(PointContext)
+void OciReader::initialize()
 {
     pdal::GlobalEnvironment::get().getGDALDebug()->addLog(log());
     m_connection = connect(m_connSpec);

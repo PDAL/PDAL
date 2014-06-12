@@ -52,7 +52,7 @@ Programmable::~Programmable()
 }
 
 
-void Programmable::initialize(PointContext)
+void Programmable::initialize()
 {
     m_script = new pdal::plang::Script(getOptions());
 }

@@ -78,7 +78,7 @@ private:
     OciReader& operator=(const OciReader&); // not implemented
     OciReader(const OciReader&); // not implemented
 
-    virtual void initialize(PointContext);
+    virtual void initialize();
     virtual void processOptions(const Options& options);
     virtual void buildSchema(Schema *schema);
     void validateQuery();

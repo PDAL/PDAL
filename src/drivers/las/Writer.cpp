@@ -135,7 +135,7 @@ Writer::~Writer()
     m_streamManager.close();
 }
 
-void Writer::initialize(PointContext)
+void Writer::initialize()
 {
     m_streamManager.open();
 }

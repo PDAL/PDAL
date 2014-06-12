@@ -92,7 +92,7 @@ Writer::~Writer()
 }
 
 
-void Writer::initialize(PointContext)
+void Writer::initialize()
 {
     GlobalEnvironment::get().getGDALDebug()->addLog(log());    
     m_connection = connect(m_connSpec);

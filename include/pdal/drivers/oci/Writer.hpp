@@ -98,7 +98,7 @@ private:
     }
 
     virtual void processOptions(const Options& options);
-    virtual void initialize(PointContext);
+    virtual void initialize();
     virtual void ready(PointContext ctx);
     virtual void write(const PointBuffer& buffer);
     virtual void done(PointContext ctx);

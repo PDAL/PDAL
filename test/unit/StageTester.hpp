@@ -8,7 +8,10 @@ class StageTester
 {
 public:
     static void initialize(Stage *s, PointContext ctx)
-        { s->initialize(ctx); }
+    {
+        s->l_initialize(ctx);
+        s->initialize();
+    }
     static void processOptions(Stage *s, const Options& options)
         { s->processOptions(options); }
     static void buildSchema(Stage *s, Schema *schema)

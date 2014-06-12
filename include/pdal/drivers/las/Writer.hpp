@@ -101,7 +101,7 @@ public:
 
 protected:
     void Construct();
-    virtual void initialize(PointContext);
+    virtual void initialize();
 
     //ABELL
     virtual void writeBegin(boost::uint64_t targetNumPointsToWrite)

@@ -60,7 +60,7 @@ Splitter::Splitter(Options const& options)
     m_length = options.getValueOrDefault<boost::uint32_t>("length", 1000);
 }
 
-void Splitter::initialize(PointContext)
+void Splitter::initialize()
 {
     if (m_length == 0)
     {

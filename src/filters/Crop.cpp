@@ -125,7 +125,7 @@ Crop::~Crop()
 }
 
 
-void Crop::initialize(PointContext)
+void Crop::initialize()
 {
 #ifdef PDAL_HAVE_GEOS
     std::string wkt =

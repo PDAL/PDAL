@@ -86,7 +86,7 @@ private:
 
     Predicate& operator=(const Predicate&); // not implemented
     Predicate(const Predicate&); // not implemented
-    virtual void initialize(PointContext);
+    virtual void initialize();
 };
 
 

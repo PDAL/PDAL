@@ -47,7 +47,7 @@ namespace filters
 {
 
 
-void Scaling::initialize(PointContext)
+void Scaling::initialize()
 {
     checkImpedance();
     //ABELL - buildSchema().

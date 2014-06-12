@@ -177,7 +177,7 @@ private:
     virtual void processOptions(const Options& options)
         {}
     void l_initialize(PointContext ctx);
-    virtual void initialize(PointContext ctx)
+    virtual void initialize()
         {}
     virtual void buildSchema(Schema *schema)
         { (void)schema; }

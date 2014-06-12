@@ -59,7 +59,7 @@ void Writer::processOptions(const Options& options)
 }
 
 
-void Writer::initialize(PointContext)
+void Writer::initialize()
 {
     m_ostream = FileUtils::createFile(m_filename, true);
 }

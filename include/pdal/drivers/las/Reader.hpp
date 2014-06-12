@@ -98,7 +98,7 @@ private:
     LasHeader m_lasHeader;
     std::string m_filename;
 
-    virtual void initialize(PointContext ctx);
+    virtual void initialize();
     virtual void buildSchema(Schema *schema);
     void readMetadata();
     virtual void processOptions(const Options& options);

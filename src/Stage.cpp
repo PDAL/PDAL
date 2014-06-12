@@ -96,7 +96,7 @@ void Stage::prepare(PointContext ctx)
     l_processOptions(m_options);
     processOptions(m_options);
     l_initialize(ctx);
-    initialize(ctx);
+    initialize();
     buildSchema(ctx.schema());
 }
 
