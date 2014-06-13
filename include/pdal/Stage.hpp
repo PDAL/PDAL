@@ -148,6 +148,7 @@ protected:
     void setNumPoints(boost::uint64_t);
     void setBounds(Bounds<double> const&);
     void setSpatialReference(SpatialReference const&);
+    void setSpatialReference(MetadataNode& m, SpatialReference const&);
 
     // convenience function, for doing a "copy ctor" on all the core props
     // (used by the Filter stage, for example)

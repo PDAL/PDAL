@@ -130,6 +130,7 @@ private:
 
     template <typename T>
     inline void setValue(const T& t);
+
     template <std::size_t N>
     inline void setValue(const char(& c)[N]);
 

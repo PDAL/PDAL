@@ -88,6 +88,11 @@ void Reader::processOptions(const Options& options)
 
 void Reader::initialize()
 {
+    initialize(m_metadata);
+}
+
+void Reader::initialize(MetadataNode& m)
+{
     m_streamFactory = createFactory();
 
     std::istream& stream = m_streamFactory->allocate();
@@ -112,18 +117,7 @@ void Reader::initialize()
 
     setBounds(m_lasHeader.getBounds());
     setNumPoints(m_lasHeader.GetPointRecordsCount());
-
-    // If the user is already overriding this by setting it on the stage, we'll
-    // take their overridden value
-    const SpatialReference& srs = getSpatialReference();
-    if (srs.getWKT(pdal::SpatialReference::eCompoundOK).empty())
-    {
-        SpatialReference new_srs;
-        m_lasHeader.getVLRs().constructSRS(new_srs);
-        //ABELL - Look back on this one.
-        setSpatialReference(new_srs);
-    }
-    readMetadata();
+    extractMetadata(m);
     m_streamFactory->deallocate(stream);
 }
 
@@ -164,22 +158,31 @@ Reader::createRandomIterator(PointBuffer& buffer) const
 }
 
 
-void Reader::readMetadata()
+void Reader::extractMetadata(MetadataNode& m)
 {
+    // If the user is already overriding this by setting it on the stage, we'll
+    // take their overridden value
+    const SpatialReference& srs = getSpatialReference();
+    if (srs.getWKT(pdal::SpatialReference::eCompoundOK).empty())
+    {
+        SpatialReference new_srs;
+        m_lasHeader.getVLRs().constructSRS(new_srs);
+        setSpatialReference(m, new_srs);
+    }
     LasHeader const& header = getLasHeader();
 
-   m_metadata.add<bool>("compressed", header.Compressed(),
+    m.add<bool>("compressed", header.Compressed(),
         "true if this LAS file is compressed");
-   m_metadata.add<uint32_t>("dataformat_id",
+    m.add<uint32_t>("dataformat_id",
         static_cast<uint32_t>(header.getPointFormat()),
         "The Point Format ID as specified in the LAS specification");
-   m_metadata.add<uint32_t>("major_version",
+    m.add<uint32_t>("major_version",
         static_cast<uint32_t>(header.GetVersionMajor()),
         "The major LAS version for the file, always 1 for now");
-   m_metadata.add<uint32_t>("minor_version",
+    m.add<uint32_t>("minor_version",
         static_cast<uint32_t>(header.GetVersionMinor()),
         "The minor LAS version for the file");
-   m_metadata.add<uint32_t>("filesource_id",
+    m.add<uint32_t>("filesource_id",
         static_cast<uint32_t>(header.GetFileSourceId()),
         "File Source ID (Flight Line Number if this file was derived from "
         "an original flight line): This field should be set to a value "
@@ -198,13 +201,13 @@ void Reader::readMetadata()
         raw_bytes.push_back(start[i]);
     pdal::ByteArray bytearray(raw_bytes);
 
-    m_metadata.add("global_encoding", bytearray, "Global Encoding: "
+    m.add("global_encoding", bytearray, "Global Encoding: "
         "This is a bit field used to "
         "indicate certain global properties about the file. In LAS 1.2 "
         "(the version in which this field was introduced), only the low bit "
         "is defined (this is the bit, that if set, would have the unsigned "
         "integer yield a value of 1).");
-   m_metadata.add<boost::uuids::uuid>("project_id",
+    m.add<boost::uuids::uuid>("project_id",
          header.GetProjectId(), "Project ID (GUID data): The four fields "
          "that comprise a complete Globally Unique Identifier (GUID) are now "
          "reserved for use as a Project Identifier (Project ID). The field "
@@ -213,23 +216,23 @@ void Reader::readMetadata()
          "the same for all files that are associated with a unique project. "
          "By assigning a Project ID and using a File Source ID (defined above) "         "every file within a project and every point within a file can be "
          "uniquely identified, globally.");
-   m_metadata.add<std::string>("system_id", header.GetSystemId(false));
-   m_metadata.add<std::string>("software_id",
+    m.add<std::string>("system_id", header.GetSystemId(false));
+    m.add<std::string>("software_id",
         header.GetSoftwareId(false), "This information is ASCII data "
         "describing the generating software itself. This field provides a "
         "mechanism for specifying which generating software package and "
         "version was used during LAS file creation (e.g. \"TerraScan V-10.8\","
         " \"REALM V-4.2\" and etc.).");
-   m_metadata.add<uint32_t>("creation_doy",
+    m.add<uint32_t>("creation_doy",
         static_cast<uint32_t>(header.GetCreationDOY()),
         "Day, expressed as an unsigned short, on which this file was created. "
         "Day is computed as the Greenwich Mean Time (GMT) day. January 1 is "
         "considered day 1.");
-   m_metadata.add<uint32_t>("creation_year",
+    m.add<uint32_t>("creation_year",
         static_cast<boost::uint32_t>(header.GetCreationYear()),
         "The year, expressed as a four digit number, in which the file was "
         "created.");
-   m_metadata.add<uint32_t>("header_size",
+    m.add<uint32_t>("header_size",
         static_cast<uint32_t>(header.GetHeaderSize()),
         "The size, in bytes, of the Public Header Block itself. In the event "
         "that the header is extended by a software application through the "
@@ -240,13 +243,13 @@ void Reader::readMetadata()
         "generating software package adds data to the Public Header Block, "
         "this data must be placed at the end of the structure and the Header "
         "Size must be updated to reflect the new size.");
-   m_metadata.add<uint32_t>("dataoffset",
+    m.add<uint32_t>("dataoffset",
         static_cast<boost::uint32_t>(header.GetDataOffset()),
         "The actual number of bytes from the beginning of the file to the "
         "first field of the first point record data field. This data offset "
         "must be updated if any software adds data from the Public Header "
         "Block or adds/removes data to/from the Variable Length Records.");
-   m_metadata.add<double>("scale_x", header.GetScaleX(),
+    m.add<double>("scale_x", header.GetScaleX(),
         "The scale factor fields contain a double floating point value that "
         "is used to scale the corresponding X, Y, and Z long values within "
         "the point records. The corresponding X, Y, and Z scale factor must "
@@ -254,7 +257,7 @@ void Reader::readMetadata()
         "X, Y, or Z coordinate. For example, if the X, Y, and Z coordinates "
         "are intended to have two decimal point values, then each scale factor "
         "will contain the number 0.01.");
-   m_metadata.add<double>("scale_y", header.GetScaleY(),
+    m.add<double>("scale_y", header.GetScaleY(),
         "The scale factor fields contain a double floating point value that "
         "is used to scale the corresponding X, Y, and Z long values within "
         "the point records. The corresponding X, Y, and Z scale factor must "
@@ -262,7 +265,7 @@ void Reader::readMetadata()
         "actual X, Y, or Z coordinate. For example, if the X, Y, and Z "
         "coordinates are intended to have two decimal point values, then each "
         "scale factor will contain the number 0.01.");
-   m_metadata.add<double>("scale_z", header.GetScaleZ(),
+    m.add<double>("scale_z", header.GetScaleZ(),
         "The scale factor fields contain a double floating point value that "
         "is used to scale the corresponding X, Y, and Z long values within "
         "the point records. The corresponding X, Y, and Z scale factor must "
@@ -270,49 +273,49 @@ void Reader::readMetadata()
         "X, Y, or Z coordinate. For example, if the X, Y, and Z coordinates "
         "are intended to have two decimal point values, then each scale factor "
         "will contain the number 0.01.");
-   m_metadata.add<double>("offset_x", header.GetOffsetX(),
+    m.add<double>("offset_x", header.GetOffsetX(),
         "The offset fields should be used to set the overall offset for the "
         "point records. In general these numbers will be zero, but for "
         "certain cases the resolution of the point data may not be large "
         "enough for a given projection system. However, it should always be "
         "assumed that these numbers are used.");
-   m_metadata.add<double>("offset_y", header.GetOffsetY(),
+    m.add<double>("offset_y", header.GetOffsetY(),
         "The offset fields should be used to set the overall offset for the "
         "point records. In general these numbers will be zero, but for "
         "certain cases the resolution of the point data may not be large "
         "enough for a given projection system. However, it should always be "
         "assumed that these numbers are used.");
-   m_metadata.add<double>("offset_z", header.GetOffsetZ(),
+    m.add<double>("offset_z", header.GetOffsetZ(),
         "The offset fields should be used to set the overall offset for the "
         "point records. In general these numbers will be zero, but for certain "
         "cases the resolution of the point data may not be large enough for "
         "a given projection system. However, it should always be assumed that "
         "these numbers are used.");
-   m_metadata.add<double>("minx", header.GetMinX(),
+    m.add<double>("minx", header.GetMinX(),
         "The max and min data fields are the actual unscaled extents of the "
         "LAS point file data, specified in the coordinate system of the LAS "
         "data.");
-   m_metadata.add<double>("miny", header.GetMinY(),
+    m.add<double>("miny", header.GetMinY(),
         "The max and min data fields are the actual unscaled extents of the "
         "LAS point file data, specified in the coordinate system of the LAS "
         "data.");
-   m_metadata.add<double>("minz", header.GetMinZ(),
+    m.add<double>("minz", header.GetMinZ(),
         "The max and min data fields are the actual unscaled extents of the "
         "LAS point file data, specified in the coordinate system of the LAS "
         "data.");
-   m_metadata.add<double>("maxx", header.GetMaxX(),
+    m.add<double>("maxx", header.GetMaxX(),
         "The max and min data fields are the actual unscaled extents of the "
         "LAS point file data, specified in the coordinate system of the LAS "
         "data.");
-   m_metadata.add<double>("maxy", header.GetMaxY(),
+    m.add<double>("maxy", header.GetMaxY(),
         "The max and min data fields are the actual unscaled extents of the "
         "LAS point file data, specified in the coordinate system of the LAS "
         "data.");
-   m_metadata.add<double>("maxz", header.GetMaxZ(),
+    m.add<double>("maxz", header.GetMaxZ(),
         "The max and min data fields are the actual unscaled extents of the "
         "LAS point file data, specified in the coordinate system of the LAS "
         "data.");
-   m_metadata.add<uint32_t>("count",
+    m.add<uint32_t>("count",
         header.GetPointRecordsCount(), "This field contains the total number "
         "of point records within the file.");
 
@@ -329,7 +332,7 @@ void Reader::readMetadata()
 
         std::ostringstream name;
         name << "vlr_" << t;
-        MetadataNode vlrNode = m_metadata.add(name.str(), bytearray,
+        MetadataNode vlrNode = m.add(name.str(), bytearray,
             v.getDescription());
 
         vlrNode.add<uint32_t>("reserved", v.getReserved(),

@@ -263,22 +263,21 @@ const SpatialReference& Stage::getSpatialReference() const
 }
 
 
-void Stage::setSpatialReference(const SpatialReference& spatialReference)
+void Stage::setSpatialReference(const SpatialReference& spatialRef)
 {
-    m_spatialReference = spatialReference;
+    setSpatialReference(m_metadata, spatialRef);
+}
 
-//ABELL
-/**
-    boost::optional<SpatialReference> ref =
-        m_metadata.getValueOptional<SpatialReference>("spatialreference");
-    if (!ref)
-    {
-        m_metadata.deleteMetadata("spatialreference");
-        m_metadata.addMetadata<pdal::SpatialReference>("spatialreference",
-                spatialReference,
-                "SRS of this stage");
-    }
-**/
+void Stage::setSpatialReference(MetadataNode& m,
+    const SpatialReference& spatialRef)
+{
+    m_spatialReference = spatialRef;
+
+    auto pred = [](MetadataNode m){ return m.name() == "spatialreference"; };
+
+    MetadataNode spatialNode = m.findChild(pred);
+    if (spatialNode.empty())
+        m.add("spatialreference", spatialRef, "SRS of this stage");
 }
 
 void Stage::setCoreProperties(const Stage& stage)

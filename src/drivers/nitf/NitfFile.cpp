@@ -51,37 +51,24 @@ namespace drivers
 namespace nitf
 {
 
-
-
-
 // this is a copy of the GDAL function, because the GDAL function isn't exported
-static char* myNITFGetField(char *pszTarget, const char *pszSource,
-                            int nStart, int nLength)
+static char* myNITFGetField(char *target, const char *src, int start, int len)
 {
-    memcpy(pszTarget, pszSource + nStart, nLength);
-    pszTarget[nLength] = '\0';
-
-    return pszTarget;
+    memcpy(target, src + start, len);
+    target[len] = '\0';
+    return target;
 }
 
 
-// --------------------------------------------------------------------------
-
-
-NitfFile::NitfFile(const std::string& filename)
-    : m_filename(filename)
-    , m_file(NULL)
-    , m_imageSegmentNumber(0)
-    , m_lidarSegmentNumber(0)
-{
-    return;
-}
+NitfFile::NitfFile(const std::string& filename) :
+    m_filename(filename), m_file(NULL), m_imageSegmentNumber(0),
+    m_lidarSegmentNumber(0)
+{}
 
 
 NitfFile::~NitfFile()
 {
     close();
-    return;
 }
 
 
@@ -89,14 +76,10 @@ void NitfFile::open()
 {
     m_file = NITFOpen(m_filename.c_str(), FALSE);
     if (!m_file)
-    {
         throw pdal_error("unable to open NITF file");
-    }
 
     m_imageSegmentNumber = findIMSegment();
     m_lidarSegmentNumber = findLIDARASegment();
-
-    return;
 }
 
 
@@ -107,27 +90,23 @@ void NitfFile::close()
         NITFClose(m_file);
         m_file = NULL;
     }
-
-    return;
 }
 
 
-void NitfFile::getLasPosition(boost::uint64_t& offset, boost::uint64_t& length) const
+void NitfFile::getLasPosition(boost::uint64_t& offset,
+    boost::uint64_t& length) const
 {
     NITFDES* dataSegment = NITFDESAccess(m_file, m_lidarSegmentNumber);
     if (!dataSegment)
-    {
         throw pdal_error("NITFDESAccess failed");
-    }
 
     // grab the file offset info
-    NITFSegmentInfo* psSegInfo = dataSegment->psFile->pasSegmentInfo + dataSegment->iSegment;
+    NITFSegmentInfo* psSegInfo =
+        dataSegment->psFile->pasSegmentInfo + dataSegment->iSegment;
     offset = psSegInfo->nSegmentStart;
     length = psSegInfo->nSegmentSize;
 
     NITFDESDeaccess(dataSegment);
-
-    return;
 }
 
 
@@ -153,22 +132,14 @@ void NitfFile::extractMetadata(MetadataNode& m)
     {
         NITFImage* imageSegment = NITFImageAccess(m_file, m_imageSegmentNumber);
         if (!imageSegment)
-        {
             throw pdal_error("NITFImageAccess failed");
-        }
 
         std::stringstream parentkey;
         parentkey << "IM." << m_imageSegmentNumber;
-
         processMetadata(imageSegment->papszMetadata, m, parentkey.str());
-
-        //processImageInfo(ms, parentkey.str());
-
         parentkey << ".TRE";
-
         processTREs(imageSegment->nTREBytes, imageSegment->pachTRE,
             m, parentkey.str());
-
         NITFImageDeaccess(imageSegment);
     }
 
@@ -178,19 +149,13 @@ void NitfFile::extractMetadata(MetadataNode& m)
     {
         NITFDES* dataSegment = NITFDESAccess(m_file, m_lidarSegmentNumber);
         if (!dataSegment)
-        {
             throw pdal_error("NITFDESAccess failed");
-        }
 
         std::stringstream parentkey;
         parentkey << "DE." << m_imageSegmentNumber;
-
         processMetadata(dataSegment->papszMetadata, m, parentkey.str());
-
         parentkey << ".TRE";
-
         processTREs_DES(dataSegment, m, parentkey.str());
-
         NITFDESDeaccess(dataSegment);
     }
 }

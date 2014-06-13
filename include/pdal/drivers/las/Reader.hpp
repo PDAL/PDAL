@@ -99,8 +99,9 @@ private:
     std::string m_filename;
 
     virtual void initialize();
+    virtual void initialize(MetadataNode& m);
     virtual void buildSchema(Schema *schema);
-    void readMetadata();
+    void extractMetadata(MetadataNode& m);
     virtual void processOptions(const Options& options);
     virtual StreamFactoryPtr createFactory() const
         { return StreamFactoryPtr(new FilenameStreamFactory(m_filename)); }

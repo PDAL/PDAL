@@ -120,7 +120,9 @@ void NitfReader::initialize()
     nitf.extractMetadata(m_metadata);
     nitf.close();
 
-    las::Reader::initialize();
+    // Initialize the LAS stuff with its own metadata node.
+    MetadataNode lasNode = m_metadata.add(las::Reader::getName());
+    las::Reader::initialize(lasNode);
 }
 
 } // namespace nitf
