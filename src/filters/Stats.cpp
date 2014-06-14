@@ -145,7 +145,7 @@ void Stats::filter(PointBuffer& buffer)
 
 void Stats::done(PointContext ctx)
 {
-//    extractMetadata();
+    extractMetadata();
 }
 
 
