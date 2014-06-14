@@ -97,7 +97,7 @@ public:
         { return boost::accumulators::count(m_summary); }
 
     boost::property_tree::ptree toPTree() const;
-    void toMetadata(MetadataNode &m) const;
+    void extractMetadata(MetadataNode &m) const;
 
     void reset()
     {
@@ -151,7 +151,7 @@ public:
     static Options getDefaultOptions();
 
     boost::property_tree::ptree toPTree() const;
-    void toMetadata(MetadataNode& m) const;
+    void extractMetadata();
     const stats::Summary& getStats(const Dimension& dim) const;
     void reset();
 
@@ -160,6 +160,7 @@ private:
     Stats(const Stats&); // not implemented
     void addMetadata(MetadataNode& m);
     virtual void processOptions(const Options& options);
+    virtual void initialize();
     virtual void ready(PointContext ctx);
     virtual void done(PointContext ctx);
     virtual void filter(PointBuffer& data);

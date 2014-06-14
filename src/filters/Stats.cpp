@@ -45,7 +45,7 @@ namespace filters
 namespace stats
 {
 
-void Summary::toMetadata(MetadataNode &m) const
+void Summary::extractMetadata(MetadataNode &m) const
 {
     uint32_t cnt = static_cast<uint32_t>(count());
     m.add("count", cnt, "count");
@@ -59,28 +59,18 @@ void Summary::toMetadata(MetadataNode &m) const
 
     m.add("sample", sample.str(), "sample");
 
-//ABELL
-/**
     if (m_doExact)
     {
-        Metadata counts;
-        counts.setType("metadata");
-        counts.setName("counts");
-
+        MetadataNode countsNode = m.add("counts");
         for (auto i = m_counts.begin(); i != m_counts.end(); ++i)
         {
-            Metadata bin;
             std::ostringstream binname;
-            binname << "count-" <<i->first;
-            bin.setName(binname.str());
-            bin.setType("metadata");
-            bin.addMetadata("value", i->first);
-            bin.addMetadata("count", i->second);
-            counts.addMetadata(bin);
+            binname << "count-" << i->first;
+            MetadataNode binNode = countsNode.add(binname.str());
+            binNode.add("value", i->first);
+            binNode.add("count", i->second);
         }
-        output.addMetadata(counts);
     }
-**/
 }
 
 
@@ -119,19 +109,6 @@ boost::property_tree::ptree Summary::toPTree() const
 } // namespace stats
 
 
-void Stats::addMetadata(MetadataNode& m)
-{
-    m.add("sample_size",
-        getOptions().getValueOrDefault<uint32_t>("sample_size", 1000));
-    m.add("seed",
-        getOptions().getValueOrDefault<uint32_t>("seed", 0));
-    m.add("num_bins",
-        getOptions().getValueOrDefault<uint32_t>("num_bins", 20));
-    m.add("stats_cache_size",
-        getOptions().getValueOrDefault<uint32_t>("num_bins", 20));
-}
-
-
 Options Stats::getDefaultOptions()
 {
     Options options;
@@ -168,14 +145,7 @@ void Stats::filter(PointBuffer& buffer)
 
 void Stats::done(PointContext ctx)
 {
-(void)ctx;
-//ABELL - Need new metadata.
-/**
-    pdal::Metadata& metadata = buffer.getMetadataRef();
-    pdal::Metadata stats = toMetadata();
-    stats.setName(m_name);
-    metadata.setMetadata(stats);
-**/
+//    extractMetadata();
 }
 
 
@@ -194,6 +164,15 @@ void Stats::processOptions(const Options& options)
         m_do_sample = m_options.getValueOrThrow<bool>("do_sample");
     else
         m_do_sample = !m_exact_dim_opt.size() && !m_dim_opt.size();
+}
+
+
+void Stats::initialize()
+{
+    m_metadata.add("sample_size", m_sample_size);
+    m_metadata.add("seed", m_seed);
+    m_metadata.add("num_bins", m_bin_count);
+    m_metadata.add("stats_cache_size", m_cache_size);
 }
 
 
@@ -277,7 +256,8 @@ void Stats::ready(PointContext ctx)
     }
 }
 
-void Stats::toMetadata(MetadataNode& m) const
+
+void Stats::extractMetadata()
 {
     pdal::Metadata output;
 
@@ -287,14 +267,10 @@ void Stats::toMetadata(MetadataNode& m) const
         const Dimension *d = di->first;
         const SummaryPtr stat = di->second;
 
-        stat->toMetadata(m);
-//ABELL
-/**
-        sub.setName(d->getName());
-        sub.addMetadata("namespace", d->getNamespace());
-        sub.addMetadata("position", position++);
-        output.addMetadata(sub);
-**/
+        MetadataNode statNode = m_metadata.add(d->getName());
+        statNode.add("namespace", d->getNamespace());
+        statNode.add("position", position++);
+        stat->extractMetadata(statNode);
     }
 }
 

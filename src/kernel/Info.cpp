@@ -445,7 +445,6 @@ int Info::execute()
     if (m_showStats)
         manager->addFilter("filters.stats", *reader, options);
     Stage* filter = manager->getStage();
-    std::cerr << filter->getName() << "!\n";
 
     PointContext ctx;
     filter->prepare(ctx);
@@ -454,23 +453,14 @@ int Info::execute()
 
     if (m_showStats)
         dumpStats(ctx, *dynamic_cast<pdal::filters::Stats*>(filter), manager);
-    
     if (m_showSchema)
         dumpSchema(ctx);
-    
     if (m_showMetadata)
-    {
         dumpMetadata(ctx, *filter);
-    }
     if (m_showStage)
-    {
         dumpStage(*filter);
-    }
-    
     if (m_showSDOPCMetadata)
-    {
         dumpSDO_PCMetadata(ctx, *filter);
-    }
     
     if (m_QueryPoint.size())
     {
