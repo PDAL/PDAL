@@ -282,7 +282,10 @@ void Info::dumpStats(PointContext ctx, pdal::filters::Stats& filter,
 
 void Info::dumpSchema(PointContext ctx)
 {
-    boost::property_tree::ptree tree = ctx.schema()->toPTree();
+    boost::property_tree::ptree sch = ctx.schema()->toPTree();
+    
+    boost::property_tree::ptree tree;
+    tree.put_child("schema", sch);
     std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
     if (m_useXML)
         write_xml(ostr, tree);
