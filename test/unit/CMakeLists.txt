@@ -124,7 +124,7 @@ endif (WITH_SQLITE)
 if (WITH_GDAL)
     set(PDAL_GDAL_TEST_CPP
         GDALUtilsTest.cpp
-#        filters/ColorizationFilterTest.cpp
+        filters/ColorizationFilterTest.cpp
         drivers/nitf/NitfReaderTest.cpp
         )
 
