@@ -151,7 +151,8 @@ boost::property_tree::ptree Dimension::toPTree() const
     dim.put("position", getPosition());
     dim.put("byteoffset", getByteOffset());
     dim.put("isIgnored", isIgnored());
-
+    dim.put("interpretation", getInterpretationName());
+    
     std::stringstream oss;
 
     dimension::id t =  getUUID();
