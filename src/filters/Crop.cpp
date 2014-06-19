@@ -74,67 +74,41 @@ static void _GEOSWarningHandler(const char *fmt, ...)
 namespace filters
 {
 
-
-Crop::Crop(const Options& options) : 
-    pdal::Filter(options)
-    , m_geosEnvironment(0)
-    , m_geosGeometry(0)
-    , m_geosPreparedGeometry(0)
-    , m_dimensions(3)
+Crop::Crop(const Options& options) : pdal::Filter(options)
 {
-    m_bounds =
-        options.getValueOrDefault<Bounds<double>>("bounds", Bounds<double>());
-    bCropOutside = options.getValueOrDefault<bool>("outside", false);
-}
-
-
-Crop::Crop(Bounds<double> const& bounds)
-{
-    m_bounds = bounds;
-    Construct();
-}
-
-
-Crop::Crop()
-{
-    Construct();
-}
-
-
-void Crop::Construct()
-{
-    bCropOutside = false;
+    m_cropOutside = false;
     m_geosEnvironment = 0;
     m_geosGeometry = 0;
     m_geosPreparedGeometry = 0;
-    m_dimensions = 3;
-}
-
-Crop::~Crop()
-{
-#ifdef PDAL_HAVE_GEOS
-    if (m_geosPreparedGeometry)
-        GEOSPreparedGeom_destroy_r(m_geosEnvironment, m_geosPreparedGeometry);
-
-    if (m_geosGeometry)
-        GEOSGeom_destroy_r(m_geosEnvironment, m_geosGeometry);
-
-    if (m_geosEnvironment)
-        finishGEOS_r(m_geosEnvironment);
-#endif
 }
 
 
-void Crop::initialize()
+void Crop::processOptions(const Options& options)
 {
+    m_bounds =
+        options.getValueOrDefault<Bounds<double>>("bounds", Bounds<double>());
+    m_cropOutside = options.getValueOrDefault<bool>("outside", false);
+    m_xDimName = options.getValueOrDefault<std::string>("x_dim", "X");
+    m_yDimName = options.getValueOrDefault<std::string>("y_dim", "Y");
+    m_zDimName = options.getValueOrDefault<std::string>("z_dim", "Z");
+
+    m_poly = options.getValueOrDefault<std::string>("polygon", "");
+}
+
+
+void Crop::ready(PointContext ctx)
+{
+    Schema *s = ctx.schema();
+    m_dimX = s->getDimensionPtr(m_xDimName);
+    m_dimY = s->getDimensionPtr(m_yDimName);
+    m_dimZ = s->getDimensionPtr(m_zDimName);
+
 #ifdef PDAL_HAVE_GEOS
-    std::string wkt =
-        getOptions().getValueOrDefault<std::string>("polygon", "");
-    if (!wkt.empty())
+    if (!m_poly.empty())
     {
         m_geosEnvironment = initGEOS_r(pdal::geos::_GEOSWarningHandler,
             pdal::geos::_GEOSErrorHandler);
-        m_geosGeometry = GEOSGeomFromWKT_r(m_geosEnvironment, wkt.c_str());
+        m_geosGeometry = GEOSGeomFromWKT_r(m_geosEnvironment, m_poly.c_str());
         if (!m_geosGeometry)
             throw pdal_error("unable to import polygon WKT");
 
@@ -147,9 +121,7 @@ void Crop::initialize()
             std::string(out_wkt) <<std::endl;
         GEOSFree_r(m_geosEnvironment, out_wkt);
 
-        bool bValid(false);
-        bValid = (bool)(GEOSisValid_r(m_geosEnvironment, m_geosGeometry));
-        if (!bValid)
+        if (!GEOSisValid_r(m_geosEnvironment, m_geosGeometry))
         {
             char* reason =
                 GEOSisValidReason_r(m_geosEnvironment, m_geosGeometry);
@@ -175,9 +147,6 @@ void Crop::initialize()
     }
 
 #endif
-
-    setBounds(m_bounds);
-    setNumPoints(0);
 }
 
 
@@ -198,14 +167,9 @@ Options Crop::getDefaultOptions()
 }
 
 
-const Bounds<double>& Crop::getBounds() const
+Bounds<double> Crop::computeBounds(GEOSGeometry const *geometry)
 {
-    return m_bounds;
-}
-
-
-Bounds<double> Crop::computeBounds(GEOSGeometry const* geometry)
-{
+    uint32_t numInputDims;
     Bounds<double> output;
 
 #ifdef PDAL_HAVE_GEOS
@@ -216,8 +180,8 @@ Bounds<double> Crop::computeBounds(GEOSGeometry const* geometry)
     GEOSCoordSequence const* coords = GEOSGeom_getCoordSeq_r(m_geosEnvironment,
         ring);
 
-    GEOSCoordSeq_getDimensions_r(m_geosEnvironment, coords, &m_dimensions);
-    log()->get(logDEBUG) << "Inputted WKT had " << m_dimensions <<
+    GEOSCoordSeq_getDimensions_r(m_geosEnvironment, coords, &numInputDims);
+    log()->get(logDEBUG) << "Inputted WKT had " << numInputDims <<
         " dimensions" <<std::endl;
 
     uint32_t count(0);
@@ -231,11 +195,11 @@ Bounds<double> Crop::computeBounds(GEOSGeometry const* geometry)
     {
         GEOSCoordSeq_getOrdinate_r(m_geosEnvironment, coords, i, 0, &x);
         GEOSCoordSeq_getOrdinate_r(m_geosEnvironment, coords, i, 1, &y);
-        if (m_dimensions > 2)
+        if (numInputDims > 2)
             GEOSCoordSeq_getOrdinate_r(m_geosEnvironment, coords, i, 2, &z);
         p.set(0, x);
         p.set(1, y);
-        if (m_dimensions > 2)
+        if (numInputDims > 2)
             p.set(2, z);
         if (bFirst)
         {
@@ -251,57 +215,33 @@ Bounds<double> Crop::computeBounds(GEOSGeometry const* geometry)
 }
 
 
-// append all points from src buffer to end of dst buffer, based on the our bounds
-uint32_t Crop::processBuffer(PointBuffer const& srcData,
-    PointBuffer& dstData) const
+PointBufferSet Crop::run(PointBufferPtr buffer)
 {
-    Bounds<double> const& filter_bounds = this->getBounds();
-    Bounds<double> const& buffer_bounds = srcData.getSpatialBounds();
+    PointBufferSet pbSet;
+    PointBufferPtr output(new PointBuffer(buffer->context()));
+    crop(*buffer, *output);
+    pbSet.insert(output);
+    return pbSet;
+}
 
-    dstData.setNumPoints(0);
+
+void Crop::crop(PointBuffer& input, PointBuffer& output)
+{
+    Bounds<double> const& buffer_bounds = input.getSpatialBounds();
 
     if (buffer_bounds.empty())
         log()->get(logDEBUG2) <<
             "Buffer bounds was empty, reader did not set!" << std::endl;
 
-    Schema const& schema = srcData.getSchema();
-    uint32_t count = srcData.getNumPoints();
     bool logOutput = log()->getLevel() > logDEBUG4;
     if (logOutput)
         log()->floatPrecision(8);
 
-    std::string x_name =
-        getOptions().getValueOrDefault<std::string>("x_dim", "X");
-    std::string y_name =
-        getOptions().getValueOrDefault<std::string>("y_dim", "Y");
-    std::string z_name =
-        getOptions().getValueOrDefault<std::string>("z_dim", "Z");
-
-    log()->get(logDEBUG2) << "x_dim '" << x_name <<"' requested" << std::endl;
-    log()->get(logDEBUG2) << "y_dim '" << y_name <<"' requested" << std::endl;
-    log()->get(logDEBUG2) << "z_dim '" << z_name <<"' requested" << std::endl;
-
-    Dimension const& dimX = schema.getDimension(x_name);
-    Dimension const& dimY = schema.getDimension(y_name);
-    Dimension const& dimZ = schema.getDimension(z_name);
-
-    log()->get(logDEBUG2) << "x_dim '" << x_name <<"' fetched: " <<
-        dimX << std::endl;
-    log()->get(logDEBUG2) << "y_dim '" << y_name <<"' fetched: " <<
-        dimY << std::endl;
-    log()->get(logDEBUG2) << "z_dim '" << z_name <<"' fetched: " <<
-        dimZ << std::endl;
-
-    std::string wkt =
-        getOptions().getValueOrDefault<std::string>("polygon", "");
-
-    boost::uint32_t copy_index(0);
-    for (boost::uint32_t index = 0; index<count; index++)
+    for (PointId idx = 0; idx < input.size(); ++idx)
     {
-        // need to scale the values
-        double x = srcData.applyScaling(dimX, index);
-        double y = srcData.applyScaling(dimY, index);
-        double z = srcData.applyScaling(dimZ, index);
+        double x = input.getFieldAs<double>(*m_dimX, idx);
+        double y = input.getFieldAs<double>(*m_dimY, idx);
+        double z = input.getFieldAs<double>(*m_dimZ, idx);
 
         if (logOutput)
         {
@@ -310,21 +250,14 @@ uint32_t Crop::processBuffer(PointBuffer const& srcData,
                 " z: " << z << std::endl;
         }
 
-        if (wkt.empty())
+        if (m_poly.empty())
         {
             // We don't have a polygon, just a bounds. Filter on that
             // by itself.
             Vector<double> p(x,y,z);
 
-            if (!bCropOutside && filter_bounds.contains(p))
-            {
-                dstData.copyPointFast(copy_index, index, srcData);
-                dstData.setNumPoints(copy_index+1);
-                ++copy_index;
-                if (logOutput)
-                    log()->get(logDEBUG5) << "point is inside polygon!" << 
-                        std::endl;
-            }
+            if (!m_cropOutside && m_bounds.contains(p))
+                output.appendPoint(input, idx);
         }
 #ifdef PDAL_HAVE_GEOS
         else
@@ -351,127 +284,29 @@ uint32_t Crop::processBuffer(PointBuffer const& srcData,
                 throw pdal_error("unable to allocate candidate test point");
 
             if (static_cast<bool>(GEOSPreparedContains_r(m_geosEnvironment,
-                m_geosPreparedGeometry, p)) == !bCropOutside)
-            {
-                dstData.copyPointFast(copy_index, index, srcData);
-                dstData.setNumPoints(copy_index + 1);
-                ++copy_index;
-                if (logOutput)
-                    log()->get(logDEBUG5) << "point is inside polygon!" <<
-                        std::endl;
-            }
+                m_geosPreparedGeometry, p)) != m_cropOutside)
+                output.appendPoint(input, idx);
             GEOSGeom_destroy_r(m_geosEnvironment, p);
         }
 #endif
     }
-    return srcData.getNumPoints();
 }
 
 
-pdal::StageSequentialIterator*
-Crop::createSequentialIterator(PointBuffer& buffer) const
+void Crop::done(PointContext ctx)
 {
-    return new iterators::sequential::Crop(*this, buffer);
+#ifdef PDAL_HAVE_GEOS
+    if (m_geosPreparedGeometry)
+        GEOSPreparedGeom_destroy_r(m_geosEnvironment, m_geosPreparedGeometry);
+
+    if (m_geosGeometry)
+        GEOSGeom_destroy_r(m_geosEnvironment, m_geosGeometry);
+
+    if (m_geosEnvironment)
+        finishGEOS_r(m_geosEnvironment);
+#endif
 }
 
 
-namespace iterators
-{
-namespace sequential
-{
-
-
-Crop::Crop(const pdal::filters::Crop& filter, PointBuffer& buffer)
-    : pdal::FilterSequentialIterator(filter, buffer)
-    , m_cropFilter(filter)
-{}
-
-
-boost::uint64_t Crop::skipImpl(boost::uint64_t count)
-{
-    return getPrevIterator().skip(count);
-}
-
-
-boost::uint32_t Crop::readBufferImpl(PointBuffer& data)
-{
-    // The client has asked us for dstData.getCapacity() points.
-    // We will read from our previous stage until we get that amount (or
-    // until the previous stage runs out of points).
-
-    uint32_t originalCapacity = data.getCapacity();
-    int64_t numPointsNeeded = static_cast<int64_t>(data.getCapacity());
-
-    PointBuffer outputData(data.getSchema(), originalCapacity);
-    PointBuffer tmpData(data.getSchema(), originalCapacity);
-    // PointBuffer tmpData(outputData);
-
-    m_cropFilter.log()->get(logDEBUG2) << "Fetching for block of size: " <<
-        numPointsNeeded << std::endl;
-
-    while (numPointsNeeded > 0)
-    {
-        // we got no data, and there is no more to get -- exit the loop
-        if (getPrevIterator().atEnd())
-        {
-            m_cropFilter.log()->get(logDEBUG2) <<
-                "previous iterator is .atEnd, stopping" << std::endl;
-            break;
-        }
-
-        data.resize(static_cast<boost::uint32_t>(numPointsNeeded));
-
-        // read from prev stage
-        const boost::uint32_t numSrcPointsRead = getPrevIterator().read(data);
-        m_cropFilter.log()->get(logDEBUG3) << "Fetched " << numSrcPointsRead <<
-            " from previous iterator. " << std::endl;
-        assert(numSrcPointsRead <= numPointsNeeded);
-
-
-        // copy points from src (prev stage) into dst (our stage)
-        const uint32_t numPointsProcessed =
-            m_cropFilter.processBuffer(data, tmpData);
-        m_cropFilter.log()->get(logDEBUG3) << "Processed " <<
-            numPointsProcessed << " in intersection filter" << std::endl;
-
-        m_cropFilter.log()->get(logDEBUG3) << tmpData.getNumPoints() <<
-            " passed intersection filter" << std::endl;
-
-        if (tmpData.getNumPoints() > 0)
-        {
-            outputData.copyPointsFast(outputData.getNumPoints(), 0, tmpData,
-                tmpData.getNumPoints());
-            outputData.setNumPoints(outputData.getNumPoints() +
-                tmpData.getNumPoints());
-        }
-
-        numPointsNeeded -= tmpData.getNumPoints() ;
-        m_cropFilter.log()->get(logDEBUG3) << numPointsNeeded <<
-            " left to read this block" << std::endl;
-    }
-
-    uint32_t numPointsAchieved = outputData.getNumPoints();
-    data.resize(originalCapacity);
-    data.setNumPoints(0);
-    data.copyPointsFast(0, 0, outputData, outputData.getNumPoints());
-    data.setNumPoints(outputData.getNumPoints());
-    m_cropFilter.log()->get(logDEBUG2) << "Copying " <<
-        outputData.getNumPoints() << " at end of readBufferImpl" << std::endl;
-    return numPointsAchieved;
-}
-
-
-bool Crop::atEndImpl() const
-{
-    // we don't have a fixed point count --
-    // we are at the end only when our source is at the end
-    const StageSequentialIterator& iter = getPrevIterator();
-    return iter.atEnd();
-}
-
-
-}
-} // iterators::sequential
-
-}
-} // namespaces
+} // namespace filters
+} // namespace pdal

@@ -61,30 +61,21 @@ public:
     SET_STAGE_ENABLED(true)
     
     Crop(const Options&);
-    Crop(Bounds<double> const& bounds);
-    Crop();
-    ~Crop();
     
     static Options getDefaultOptions();
 
-    pdal::StageSequentialIterator*
-        createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const
-        { return NULL; }
-
-    // returns number of points accepted into the data buffer (which may
-    // be less than data.getNumPoints(), if we're calling this routine
-    // multiple times with the same buffer
-    boost::uint32_t processBuffer(PointBuffer const& srcData,
-        PointBuffer& dstData) const;
-
     const Bounds<double>& getBounds() const;
-    inline boost::uint32_t getDimensions() const { return m_dimensions; }
-    inline void setDimensions(boost::uint32_t const& dimensions) { m_dimensions = dimensions; }
 
 private:
     Bounds<double> m_bounds;
-    bool bCropOutside;
+    bool m_cropOutside;
+    std::string m_xDimName;
+    std::string m_yDimName;
+    std::string m_zDimName;
+    std::string m_poly;
+    Dimension *m_dimX;
+    Dimension *m_dimY;
+    Dimension *m_dimZ;
 
 #ifdef PDAL_HAVE_GEOS
 	GEOSContextHandle_t m_geosEnvironment;
@@ -97,11 +88,12 @@ private:
     typedef struct GEOSGeometry* GEOSGeometryHS;
 #endif
 
-    boost::uint32_t m_dimensions;
-
-    Bounds <double> computeBounds(GEOSGeometry const* geometry);
-    virtual void initialize();
-    void Construct();
+    virtual void processOptions(const Options& options);
+    virtual void ready(PointContext ctx);
+    virtual PointBufferSet run(PointBufferPtr buffer);
+    virtual void done(PointContext ctx);
+    void crop(PointBuffer& input, PointBuffer& output);
+    Bounds <double> computeBounds(GEOSGeometry const *geometry);
     
     Crop& operator=(const Crop&); // not implemented
     Crop(const Crop&); // not implemented

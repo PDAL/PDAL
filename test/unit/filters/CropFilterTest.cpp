@@ -35,8 +35,11 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 
+//ABELL
+/**
 #include <pdal/drivers/faux/Reader.hpp>
 #include <pdal/drivers/faux/Writer.hpp>
+**/
 #include <pdal/filters/InPlaceReprojection.hpp>
 #include <pdal/drivers/las/Reader.hpp>
 #include <pdal/filters/Crop.hpp>
@@ -44,11 +47,15 @@
 #include <pdal/PointBuffer.hpp>
 #include <pdal/StageIterator.hpp>
 #include "Support.hpp"
+#include "../StageTester.hpp"
 
 using namespace pdal;
 
 BOOST_AUTO_TEST_SUITE(CropFilterTest)
 
+//ABELL
+// Need faux reader
+/**
 BOOST_AUTO_TEST_CASE(test_crop)
 {
     Bounds<double> srcBounds(0.0, 0.0, 0.0, 10.0, 100.0, 1000.0);
@@ -95,70 +102,76 @@ BOOST_AUTO_TEST_CASE(test_crop)
     BOOST_CHECK_CLOSE(avgY, 50.00000, delY);
     BOOST_CHECK_CLOSE(avgZ, 500.00000, delZ);
 }
+**/
 
 
 BOOST_AUTO_TEST_CASE(test_crop_polygon)
 {
+    using namespace pdal;
 
 #ifdef PDAL_HAVE_GEOS
-    pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
+    drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
 
-    pdal::Options options;
-    
-    pdal::Option debug("debug", true, "");
-    pdal::Option verbose("verbose", 9, "");
+    Options options;
+    Option debug("debug", true, "");
+    Option verbose("verbose", 9, "");
     // options.add(debug);
     // options.add(verbose);
     
-    std::istream* wkt_stream = FileUtils::openFile(Support::datapath("autzen-selection.wkt"));
+    std::istream* wkt_stream =
+        FileUtils::openFile(Support::datapath("autzen-selection.wkt"));
 
-    std::stringstream buffer;
-    buffer << wkt_stream->rdbuf();
+    std::stringstream strbuf;
+    strbuf << wkt_stream->rdbuf();
 
-    std::string wkt(buffer.str());
+    std::string wkt(strbuf.str());
 
-    pdal::Option polygon("polygon", wkt, "");
-    
+    Option polygon("polygon", wkt, "");
     options.add(polygon);
 
-
-    pdal::filters::Crop crop(options);
+    filters::Crop crop(options);
     crop.setInput(&reader);
-    crop.prepare();
 
-    pdal::PointBuffer data(crop.getSchema(), 1000);
-    
-    pdal::StageSequentialIterator* iter = crop.createSequentialIterator(data);
+    PointContext ctx;
 
-    boost::uint32_t numRead = iter->read(data);
-    BOOST_CHECK_EQUAL(numRead, 47u);
+    PointBufferPtr buffer(new PointBuffer(ctx));
+    crop.prepare(ctx);
+
+    StageSequentialIterator *iter = reader.createSequentialIterator();
+    boost::uint32_t numRead = iter->read(*buffer);
+    StageTester::ready(&crop, ctx);
+    PointBufferSet pbSet = StageTester::run(&crop, buffer);
+    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    buffer = *pbSet.begin();
+    BOOST_CHECK_EQUAL(buffer->size(), 47u);
     
     delete iter;
     FileUtils::closeFile(wkt_stream);
-    
 #endif
 }
 
 BOOST_AUTO_TEST_CASE(test_crop_polygon_reprojection)
 {
+    using namespace pdal;
 
 #ifdef PDAL_HAVE_GEOS
+    Options options;
 
-
-    pdal::Options options;
-
-
-
-    pdal::Option in_srs("spatialreference","EPSG:2993", "Input SRS");
-    pdal::Option out_srs("out_srs","EPSG:4326", "Output SRS to reproject to");
-    pdal::Option x_dim("x_dim", std::string("drivers.las.reader.X"), "Dimension name to use for 'X' data");
-    pdal::Option y_dim("y_dim", std::string("drivers.las.reader.Y"), "Dimension name to use for 'Y' data");
-    pdal::Option z_dim("z_dim", std::string("drivers.las.reader.Z"), "Dimension name to use for 'Z' data");
-    pdal::Option x_scale("scale_x", 0.0000001f, "Scale for output X data in the case when 'X' dimension data are to be scaled.  Defaults to '1.0'.  If not set, the Dimensions's scale will be used");
-    pdal::Option y_scale("scale_y", 0.0000001f, "Scale for output Y data in the case when 'Y' dimension data are to be scaled.  Defaults to '1.0'.  If not set, the Dimensions's scale will be used");
+    Option in_srs("spatialreference","EPSG:2993", "Input SRS");
+    Option out_srs("out_srs","EPSG:4326", "Output SRS to reproject to");
+    Option x_dim("x_dim", std::string("drivers.las.reader.X"),
+        "Dimension name to use for 'X' data");
+    pdal::Option y_dim("y_dim", std::string("drivers.las.reader.Y"),
+        "Dimension name to use for 'Y' data");
+    pdal::Option z_dim("z_dim", std::string("drivers.las.reader.Z"),
+        "Dimension name to use for 'Z' data");
+    pdal::Option x_scale("scale_x", 0.0000001f, "Scale for output X data "
+        "in the case when 'X' dimension data are to be scaled.  Defaults "
+        "to '1.0'.  If not set, the Dimensions's scale will be used");
+    pdal::Option y_scale("scale_y", 0.0000001f, "Scale for output Y data "
+        "in the case when 'Y' dimension data are to be scaled.  Defaults "
+        "to '1.0'.  If not set, the Dimensions's scale will be used");
     pdal::Option filename("filename", Support::datapath("1.2-with-color.las"));
-
-    
     pdal::Option debug("debug", true, "");
     pdal::Option verbose("verbose", 9, "");
     // options.add(debug);
@@ -172,31 +185,36 @@ BOOST_AUTO_TEST_CASE(test_crop_polygon_reprojection)
     options.add(y_scale);
     options.add(filename);
     
-    std::istream* wkt_stream = FileUtils::openFile(Support::datapath("autzen-selection.wkt"));
-
-    std::stringstream buffer;
-    buffer << wkt_stream->rdbuf();
-
-    std::string wkt(buffer.str());
-
-    pdal::Option polygon("polygon", wkt, "");
-    
+    std::istream* wkt_stream =
+        FileUtils::openFile(Support::datapath("autzen-selection.wkt"));
+    std::stringstream strbuf;
+    strbuf << wkt_stream->rdbuf();
+    std::string wkt(strbuf.str());
+    Option polygon("polygon", wkt, "");
     options.add(polygon);
 
-
-    pdal::drivers::las::Reader reader(options);
-    pdal::filters::InPlaceReprojection reprojection(options);
+    drivers::las::Reader reader(options);
+    filters::InPlaceReprojection reprojection(options);
     reprojection.setInput(&reader);
-    pdal::filters::Crop crop(options);
+    filters::Crop crop(options);
     crop.setInput(&reprojection);
-    crop.prepare();
 
-    pdal::PointBuffer data(crop.getSchema(), 1000);
-    
-    pdal::StageSequentialIterator* iter = crop.createSequentialIterator(data);
+    PointContext ctx;
+    PointBufferPtr buffer(new PointBuffer(ctx));
+    crop.prepare(ctx);
 
-    boost::uint32_t numRead = iter->read(data);
-    BOOST_CHECK_EQUAL(numRead, 47u);
+    pdal::StageSequentialIterator* iter = reader.createSequentialIterator();
+    boost::uint32_t numRead = iter->read(*buffer);
+
+    FilterTester::ready(&reprojection, ctx);
+    FilterTester::filter(&reprojection, *buffer);
+    FilterTester::done(&reprojection, ctx);
+
+    StageTester::ready(&crop, ctx);
+    PointBufferSet pbSet = StageTester::run(&crop, buffer);
+    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    buffer = *pbSet.begin();
+    BOOST_CHECK_EQUAL(buffer->size(), 47u);
     
     delete iter;
     

@@ -21,7 +21,7 @@ SET(PDAL_UNITTEST_TEST_SRC
     filters/ChipperTest.cpp
 #    filters/ColorFilterTest.cpp
 #    ConfigTest.cpp
-#    filters/CropFilterTest.cpp
+    filters/CropFilterTest.cpp
 #    filters/DecimationFilterTest.cpp
 #    DimensionTest.cpp
 #    EnvironmentTest.cpp
