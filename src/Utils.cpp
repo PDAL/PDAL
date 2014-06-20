@@ -41,7 +41,9 @@
 #include <cstdlib>
 #include <cctype>
 
+#ifdef PDAL_HAVE_DEMANGLER
 #include <cxxabi.h>
+#endif
 
 #ifdef PDAL_COMPILER_MSVC
 #  pragma warning(disable: 4127)  // conditional expression is constant
@@ -530,6 +532,12 @@ int Utils::run_shell_command(const string& cmd, string& output)
 
     output = "";
 
+    const char* gdal_debug = ::pdal::Utils::getenv("CPL_DEBUG");
+    if (gdal_debug == 0)
+    {
+        pdal::Utils::putenv("CPL_DEBUG=OFF");
+    }
+
     FILE* fp = portable_popen(cmd.c_str(), "r");
 
     while (!feof(fp))
@@ -590,6 +598,7 @@ void Utils::wordWrap(string const& inputString, vector<string>& outputString,
 }
 
 
+#ifdef PDAL_HAVE_DEMANGLER
 /// Demangle strings using the compiler-provided demangle function.
 /// \param[in] s  String to be demangled.
 /// \return  Demangled string
@@ -600,6 +609,12 @@ std::string Utils::demangle(const std::string& s)
             abi::__cxa_demangle(s.c_str(), 0, 0, &status), std::free);
     return std::string(result.get());
 }
+#else
+std::string Utils::demangle(const std::string& s)
+{
+  return s;
+}
+#endif
 
 //#endif
 

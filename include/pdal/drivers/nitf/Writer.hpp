@@ -38,6 +38,7 @@
 #include <pdal/Writer.hpp>
 #include <pdal/drivers/las/Writer.hpp>
 #include <pdal/StreamFactory.hpp>
+#include <pdal/pdal_defines.h>
 
 namespace pdal
 {
@@ -67,6 +68,11 @@ class PDAL_DLL Writer : public pdal::drivers::las::Writer
 public:
     SET_STAGE_NAME("drivers.nitf.writer", "NITF Writer")
     SET_STAGE_LINK("http://pdal.io/stages/drivers.nitf.writer.html")
+#ifdef PDAL_HAVE_NITRO
+    SET_STAGE_ENABLED(true)
+#else
+    SET_STAGE_ENABLED(false)
+#endif
     
     Writer(Stage& prevStage, const Options&);
     ~Writer();

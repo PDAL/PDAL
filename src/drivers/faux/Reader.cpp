@@ -63,6 +63,7 @@ Reader::Reader(const Options& options)
     , m_mode(string2mode(options.getValueOrThrow<std::string>("mode")))
 {
     m_schema = Schema(getDefaultDimensions());
+    setNumPoints(m_numPoints);
 }
 
 
@@ -73,15 +74,18 @@ Reader::Reader(const Bounds<double>& bounds, boost::uint64_t numPoints, Mode mod
     , m_mode(mode)
 {
     m_schema = Schema(getDefaultDimensions());
+    setNumPoints(m_numPoints);
 }
 
-Reader::Reader(const Bounds<double>& bounds, boost::uint64_t numPoints, Mode mode, const std::vector<Dimension>& dimensions)
+Reader::Reader(const Bounds<double>& bounds, boost::uint64_t numPoints, Mode mode, const std::vector<Dimension>& dimensions,
+               bool forceZeroNumPoints)
     : pdal::Reader(Options::none())
     , m_bounds(bounds)
     , m_numPoints(numPoints)
     , m_mode(mode)
 {
     m_schema = Schema(dimensions);
+    setNumPoints(forceZeroNumPoints ? 0 : m_numPoints);
 }
 
 std::vector<Dimension> Reader::getDefaultDimensions()
@@ -114,9 +118,6 @@ void Reader::initialize()
 {
     pdal::Reader::initialize();
 
-    setNumPoints(m_numPoints);
-    setPointCountType(PointCount_Fixed);
-
     setBounds(m_bounds);
 }
 
@@ -138,7 +139,7 @@ pdal::StageSequentialIterator*
 Reader::createSequentialIterator(PointBuffer& buffer) const
 {
     return new pdal::drivers::faux::iterators::sequential::Reader(*this,
-        buffer, getNumPoints(), log());
+        buffer, m_numPoints, log());
 }
 
 
@@ -159,7 +160,7 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, boost::uint64_t index) 
     boost::uint64_t numPointsWanted = data.getCapacity();
 
     // we can only give them as many as we have left
-    boost::uint64_t numPointsAvailable = getNumPoints() - index;
+    boost::uint64_t numPointsAvailable = m_numPoints - index;
     if (numPointsAvailable < numPointsWanted)
         numPointsWanted = numPointsAvailable;
 
@@ -172,7 +173,7 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, boost::uint64_t index) 
     const double minZ = dims[2].getMinimum();
     const double maxZ = dims[2].getMaximum();
 
-    const double numDeltas = (double)getNumPoints() - 1.0;
+    const double numDeltas = (double)m_numPoints - 1.0;
     const double delX = (maxX - minX) / numDeltas;
     const double delY = (maxY - minY) / numDeltas;
     const double delZ = (maxZ - minZ) / numDeltas;

@@ -82,11 +82,12 @@ public:
 
 public:
     SET_STAGE_NAME("drivers.faux.reader", "Faux Reader")
+    SET_STAGE_ENABLED(true)
 
     Reader(const Options& options);
     Reader(const Bounds<double>&, boost::uint64_t numPoints, Mode mode);
     Reader(const Bounds<double>&, boost::uint64_t numPoints, Mode mode,
-        const std::vector<Dimension>& dimensions);
+        const std::vector<Dimension>& dimensions, bool forceZeroNumPoints = false);
 
     virtual void initialize();
     static Options getDefaultOptions();

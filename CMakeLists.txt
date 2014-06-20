@@ -20,6 +20,9 @@ mark_as_advanced(CMAKE_VERBOSE_MAKEFILE)
 # Path to additional CMake modules
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/modules" ${CMAKE_MODULE_PATH})
 
+# Provided modules
+include(CMakeDependentOption)
+
 
 #------------------------------------------------------------------------------
 # PDAL general settings
@@ -190,13 +193,14 @@ else()
             "${CMAKE_CXX_COMPILER}" MATCHES "clang")
          set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PDAL_COMMON_CXX_FLAGS}")
          set(PDAL_COMPILER_CLANG 1)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
     endif()
 endif(WIN32)
 
 if (APPLE)
     set(SO_EXT dylib)
     set(CMAKE_FIND_FRAMEWORK "LAST")
+    set(CMAKE_MACOSX_RPATH 1) 
 elseif(WIN32)
     set(SO_EXT dll)
 else()
@@ -227,7 +231,7 @@ if(WIN32)
 endif(WIN32)
 
 if (NOT PDAL_EMBED_BOOST)
-  find_package(Boost 1.53 COMPONENTS program_options thread iostreams filesystem system unit_test_framework random)
+  find_package(Boost 1.52 COMPONENTS program_options thread iostreams filesystem system unit_test_framework random)
 endif()
 
 if(Boost_FOUND)
@@ -280,6 +284,11 @@ if(WITH_PCL)
         include_directories(${PCL_INCLUDE_DIRS})
         link_directories(${PCL_LIBRARY_DIRS})
         add_definitions(${PCL_DEFINITIONS})
+        if (NOT PDAL_EMBED_BOOST)
+            # PCL's configuration clobbers Boost find_package - do it again
+          find_package(Boost 1.52 COMPONENTS program_options thread iostreams filesystem system unit_test_framework random)
+        endif()
+        
         message(STATUS "...building with PCL")
     else()
         set(PCL_LIBRARIES "")
@@ -368,6 +377,13 @@ if (WITH_SQLITE)
 endif()
 
 option(WITH_PGPOINTCLOUD "Choose if PostgreSQL PointCloud support should be built" TRUE)
+cmake_dependent_option(
+    WITH_PGPOINTCLOUD_TESTS
+    "Choose if PostgreSQL PointCloud tests should be built"
+    OFF
+    WITH_PGPOINTCLOUD
+    OFF
+    )
 if (WITH_PGPOINTCLOUD)
     find_package(PostgreSQL)
     if (POSTGRESQL_FOUND)
@@ -512,6 +528,21 @@ if(WITH_LASZIP)
     endif()
 endif()
 
+# ZLIB support - optional, default=ON
+option(WITH_ZLIB "Choose of ZLIB support should be built" TRUE)
+if(WITH_ZLIB)
+    find_package(ZLIB)
+    if(ZLIB_FOUND)
+        set(CMAKE_REQUIRED_LIBRARIES "${ZLIB_LIBRARY}")
+	include_directories(${ZLIB_INCLUDE_DIR})
+	mark_as_advanced(CLEAR ZLIB_INCLUDE_DIR)
+	mark_as_advanced(CLEAR ZLIB_LIBRARY)
+	set(PDAL_HAVE_ZLIB 1)
+    else()
+        set(ZLIB_LIBRARIES "")
+	set(WITH_ZLIB FALSE)
+    endif()
+endif()
 
 # MrSID/LiDAR support - optiona, default=OFF
 option(WITH_MRSID "Choose if MrSID/LiDAR support should be built" FALSE)
@@ -538,7 +569,6 @@ if(WITH_CARIS)
 endif()
 
 
-# Points2Grid
 # Points2Grid support - optional, default=OFF
 option(WITH_P2G "Choose if Points2Grid support should be built" FALSE)
 if(WITH_P2G)
@@ -548,6 +578,23 @@ if(WITH_P2G)
         include_directories(${P2G_INCLUDE_DIR})
         add_definitions(-DHAVE_P2G=1)
         set(PDAL_HAVE_P2G 1)
+    endif()
+endif()
+
+# HDF5 support - optional, default=OFF
+option(WITH_HDF5 "Choose if HDF5 support should be built" FALSE)
+if(WITH_HDF5)
+    set (HDF5_FIND_COMPONENTS "CXX")
+    find_package(HDF5 COMPONENTS CXX)
+    if(HDF5_FOUND)
+        include_directories(${HDF5_INCLUDE_DIR})
+        add_definitions(-DHAVE_HDF5=1)
+        set(PDAL_HAVE_HDF5 1)
+        message(STATUS "Found HDF5")
+    else()
+        set(WITH_HDF5 FALSE)
+        set(PDAL_HAVE_HDF5 0)
+        message(STATUS "HDF5 not found")
     endif()
 endif()
 
@@ -604,6 +651,16 @@ if (USE_PDAL_PLUGIN_TEXT OR USE_PDAL_PLUGIN_SOCI OR USE_PDAL_PLUGIN_OCI OR
   if (PDAL_BUILD_STATIC)
     message(SEND_ERROR "Cannot build separate plugins with statically compiled PDAL")
   endif()
+endif()
+
+# check for demangling support
+try_compile(DEMANGLER_FOUND
+    ${CMAKE_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}/cmake/check_demangle.cpp
+)
+
+if(DEMANGLER_FOUND)
+    set(PDAL_HAVE_DEMANGLER 1)
 endif()
 
 #------------------------------------------------------------------------------

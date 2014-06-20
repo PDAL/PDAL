@@ -116,8 +116,6 @@ BOOST_AUTO_TEST_CASE(test_tile_filter)
         BOOST_CHECK(s.getTile(22).getNumPoints() == 34); // lower left xy: 637000, 853000
         BOOST_CHECK(s.getTile(23).getNumPoints() == 37); // lower left xy: 638000, 853000
     }
-
-    return;
 }
 
 BOOST_AUTO_TEST_SUITE_END()

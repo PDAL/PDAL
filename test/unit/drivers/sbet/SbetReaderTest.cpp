@@ -97,7 +97,6 @@ BOOST_AUTO_TEST_CASE(testConstructor)
 
     reader.initialize();
 
-    BOOST_CHECK_EQUAL(reader.getPointCountType(), pdal::PointCount_Fixed);
     BOOST_CHECK_EQUAL(reader.getNumPoints(), 2);
 
 }
@@ -140,8 +139,6 @@ BOOST_AUTO_TEST_CASE(testRead)
                3.252165276637165e-01, -1.558883225990844e-01,
                8.379685112283802e-04, 7.372886784718076e-03,
                7.179027672314571e-02);
-
-    return;
 }
 
 
@@ -170,8 +167,6 @@ BOOST_AUTO_TEST_CASE(testSkip)
                3.252165276637165e-01, -1.558883225990844e-01,
                8.379685112283802e-04, 7.372886784718076e-03,
                7.179027672314571e-02);
-
-    return;
 }
 
 
@@ -195,8 +190,6 @@ BOOST_AUTO_TEST_CASE(testPipeline)
     const boost::uint64_t numPoints = manager.execute();
     BOOST_CHECK_EQUAL(numPoints, 2);
     pdal::FileUtils::deleteFile(Support::datapath("sbet/outfile.txt"));
-
-    return;
 }
 
 
@@ -227,8 +220,6 @@ BOOST_AUTO_TEST_CASE(testRandomIterator)
                3.252165276637165e-01, -1.558883225990844e-01,
                8.379685112283802e-04, 7.372886784718076e-03,
                7.179027672314571e-02);
-
-    return;
 }
 
 

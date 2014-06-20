@@ -121,8 +121,6 @@ BOOST_AUTO_TEST_CASE(test1)
     ok = worker.doWork();
     BOOST_CHECK(!ok);
     BOOST_CHECK_CLOSE(cb.getPercentComplete(), 51.0, 0.001);
-
-    return;
 }
 
 BOOST_AUTO_TEST_SUITE_END()

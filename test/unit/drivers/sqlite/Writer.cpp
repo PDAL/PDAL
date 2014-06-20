@@ -188,8 +188,6 @@ BOOST_AUTO_TEST_CASE(SqliteWriterTest_test_simple_las)
     FileUtils::closeFile(ofs);
 
     FileUtils::deleteFile(temp_filename);
-
-    return;
 #endif
 }
 

@@ -34,6 +34,8 @@
 
 #include <pdal/drivers/sbet/Reader.hpp>
 
+#include <pdal/drivers/sbet/Common.hpp>
+
 
 namespace pdal
 {
@@ -59,13 +61,13 @@ void Reader::initialize()
     pdal::Reader::initialize();
 
     boost::uintmax_t fileSize = FileUtils::fileSize(getFileName());
-    if (fileSize % m_schema.getByteSize() != 0)
+    if (fileSize % pdal::drivers::sbet::pointByteSize != 0)
     {
         throw pdal_error("invalid sbet file size");
     }
     else
     {
-        setNumPoints(fileSize / m_schema.getByteSize());
+        setNumPoints(fileSize / pdal::drivers::sbet::pointByteSize);
     }
 }
 
@@ -221,6 +223,7 @@ boost::uint32_t IteratorBase::readSbetIntoBuffer(PointBuffer& data, const boost:
                                       std::numeric_limits<boost::uint32_t>::max());
 
     m_readBuffer.setNumPoints(0);
+
     schema::DimensionMap* dimensionMap = m_readBuffer.getSchema().mapDimensions(data.getSchema());
 
     boost::uint8_t* bufferData = m_readBuffer.getDataStart();
@@ -229,7 +232,7 @@ boost::uint32_t IteratorBase::readSbetIntoBuffer(PointBuffer& data, const boost:
         throw pdal_error("unable to access point buffer's data");
     }
 
-    Utils::read_n(bufferData, *m_istream, numPoints * m_schema.getByteSize());
+    Utils::read_n(bufferData, *m_istream, numPoints * pdal::drivers::sbet::pointByteSize);
     m_readBuffer.setNumPoints(numPoints);
 
     PointBuffer::copyLikeDimensions(m_readBuffer, data, *dimensionMap, 0,
@@ -261,7 +264,7 @@ Iterator::~Iterator()
 
 boost::uint64_t Iterator::skipImpl(boost::uint64_t count)
 {
-    m_istream->seekg(m_schema.getByteSize() * count, std::ios::cur);
+    m_istream->seekg(pdal::drivers::sbet::pointByteSize * count, std::ios::cur);
     return count;
 }
 
@@ -312,9 +315,9 @@ boost::uint32_t Iterator::readBufferImpl(PointBuffer& data)
 
 boost::uint64_t Iterator::seekImpl(boost::uint64_t numSeek)
 {
-    m_istream->seekg(m_schema.getByteSize() * numSeek);
-    assert(m_istream->tellg() % m_schema.getByteSize() == 0);
-    return m_istream->tellg() / m_schema.getByteSize();
+    m_istream->seekg(pdal::drivers::sbet::pointByteSize * numSeek);
+    assert(m_istream->tellg() % pdal::drivers::sbet::pointByteSize == 0);
+    return m_istream->tellg() / pdal::drivers::sbet::pointByteSize;
 }
 
 

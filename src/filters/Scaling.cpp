@@ -62,9 +62,7 @@ void Scaling::initialize()
 
 void Scaling::checkImpedance()
 {
-    Options& options = getOptions();
-
-    std::vector<Option> dimensions = options.getOptions("dimension");
+    std::vector<Option> dimensions = m_options.getOptions("dimension");
 
     for (Option& option : dimensions)
     {
@@ -100,13 +98,10 @@ Scaling::createRandomIterator(PointBuffer& buffer) const
     return new iterators::random::Scaling(*this, buffer);
 }
 
+
 Options Scaling::getDefaultOptions()
 {
-//ABELL - This looks like a NOOP.  Can it go away?
-    Options options;
-    Option ignore_old_dimensions("ignore_old_dimensions", true,
-        "Mark old, unscaled dimensions as ignored");
-    return options;
+    return Options();
 }
 
 

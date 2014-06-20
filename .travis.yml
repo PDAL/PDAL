@@ -4,6 +4,11 @@ language: cpp
 
 compiler:
   - g++
+  - clang
+
+env:
+  - PDAL_OPTIONAL_COMPONENTS=all
+  - PDAL_OPTIONAL_COMPONENTS=none
 
 before_install: ./scripts/ci/before_install.sh
 

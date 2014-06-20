@@ -82,7 +82,9 @@ protected:
 
 private:
     size_t readBlock(std::vector<char>& outBuf, size_t index);
+#ifdef PDAL_HAVE_ZLIB
     int inflate(char *inbuf, size_t insize, char *outbuf, size_t outsize);
+#endif
     void seekPointMajor(uint32_t ptIdx);
     void seekDimMajor(size_t dimIdx, uint32_t ptIdx);
     void seekByteMajor(size_t dimIdx, size_t byteIdx, uint32_t ptIdx);

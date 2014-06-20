@@ -118,7 +118,12 @@ private:
 	
     bool m_3d;
     bool m_OutputDetail;
-
+    bool m_useXML;
+    bool m_useJSON;
+    
+    void outputRST(boost::property_tree::ptree const&) const;
+    void outputXML(boost::property_tree::ptree const&) const;
+    void outputJSON(boost::property_tree::ptree const&) const;
     void outputDetail(PointBuffer& source_data,
                          IndexedPointBuffer& candidate_data,
                          std::map<Point, Point> *points) const;

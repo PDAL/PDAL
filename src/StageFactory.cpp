@@ -90,6 +90,10 @@ MAKE_READER_CREATOR(TerrasolidReader, pdal::drivers::terrasolid::Reader)
 
 MAKE_READER_CREATOR(SbetReader, pdal::drivers::sbet::Reader)
 
+#ifdef PDAL_HAVE_HDF5
+MAKE_READER_CREATOR(IcebridgeReader, pdal::drivers::icebridge::Reader)
+#endif
+
 //
 // define the functions to create the filters
 //
@@ -97,12 +101,16 @@ MAKE_FILTER_CREATOR(ByteSwap, pdal::filters::ByteSwap)
 MAKE_FILTER_CREATOR(Cache, pdal::filters::Cache)
 MAKE_FILTER_CREATOR(Chipper, pdal::filters::Chipper)
 MAKE_FILTER_CREATOR(Color, pdal::filters::Color)
+#ifdef PDAL_HAVE_GDAL
 MAKE_FILTER_CREATOR(Colorization, pdal::filters::Colorization)
+#endif
 MAKE_FILTER_CREATOR(Crop, pdal::filters::Crop)
 MAKE_FILTER_CREATOR(Decimation, pdal::filters::Decimation)
 MAKE_FILTER_CREATOR(HexBin, pdal::filters::HexBin)
 MAKE_FILTER_CREATOR(InPlaceReprojection, pdal::filters::InPlaceReprojection)
+#ifdef PDAL_HAVE_PCL
 MAKE_FILTER_CREATOR(PCLBlock, pdal::filters::PCLBlock)
+#endif
 
 #ifdef PDAL_HAVE_PYTHON
 MAKE_FILTER_CREATOR(Predicate, pdal::filters::Predicate)
@@ -169,13 +177,10 @@ StageFactory::StageFactory()
     return;
 }
 
-std::string StageFactory::inferReaderDriver(const std::string& filename, pdal::Options& options)
+
+std::string StageFactory::inferReaderDriver(const std::string& filename)
 {
     std::string ext = boost::filesystem::extension(filename);
-
-    pdal::Option& fn = options.getOptionByRef("filename");
-    fn.setValue<std::string>(filename);
-
     std::map<std::string, std::string> drivers;
     drivers["las"] = "drivers.las.reader";
     drivers["laz"] = "drivers.las.reader";
@@ -186,6 +191,7 @@ std::string StageFactory::inferReaderDriver(const std::string& filename, pdal::O
     drivers["ntf"] = "drivers.nitf.reader";
     drivers["bpf"] = "drivers.bpf.reader";
     drivers["sbet"] = "drivers.sbet.reader";
+    drivers["icebridge"] = "drivers.icebridge.reader";
 
     if (boost::algorithm::iequals(filename, "STDIN"))
     {
@@ -201,23 +207,12 @@ std::string StageFactory::inferReaderDriver(const std::string& filename, pdal::O
     return driver; // will be "" if not found
 }
 
-std::string StageFactory::inferWriterDriver(const std::string& filename, pdal::Options& options)
+
+std::string StageFactory::inferWriterDriver(const std::string& filename)
 {
     std::string ext = boost::filesystem::extension(filename);
 
     boost::to_lower(ext);
-
-    if (boost::algorithm::iequals(ext,".laz"))
-    {
-        options.add("compression", true);
-    }
-
-    if (boost::algorithm::iequals(ext,".pcd"))
-    {
-        options.add("format","PCD");
-    }
-
-    options.add<std::string>("filename", filename);
 
     std::map<std::string, std::string> drivers;
     drivers["las"] = "drivers.las.writer";
@@ -240,6 +235,26 @@ std::string StageFactory::inferWriterDriver(const std::string& filename, pdal::O
     std::string driver = drivers[ext];
     return driver; // will be "" if not found
 }
+
+
+void StageFactory::inferWriterOptionsChanges(const std::string& filename, pdal::Options& options)
+{
+    std::string ext = boost::filesystem::extension(filename);
+    boost::to_lower(ext);
+
+    if (boost::algorithm::iequals(ext,".laz"))
+    {
+        options.add("compression", true);
+    }
+
+    if (boost::algorithm::iequals(ext,".pcd"))
+    {
+        options.add("format","PCD");
+    }
+
+    options.add<std::string>("filename", filename);
+}
+
 
 Reader* StageFactory::createReader(const std::string& type, const Options& options)
 {
@@ -393,6 +408,10 @@ void StageFactory::registerKnownReaders()
     REGISTER_READER(BpfReader, pdal::BpfReader);
 
     REGISTER_READER(SbetReader, pdal::drivers::sbet::Reader);
+
+#ifdef PDAL_HAVE_HDF5
+    REGISTER_READER(IcebridgeReader, pdal::drivers::icebridge::Reader);
+#endif
 }
 
 
@@ -402,13 +421,17 @@ void StageFactory::registerKnownFilters()
     REGISTER_FILTER(Cache, pdal::filters::Cache);
     REGISTER_FILTER(Chipper, pdal::filters::Chipper);
     REGISTER_FILTER(Color, pdal::filters::Color);
+#ifdef PDAL_HAVE_GDAL
     REGISTER_FILTER(Colorization, pdal::filters::Colorization);
+#endif
     REGISTER_FILTER(Crop, pdal::filters::Crop);
     REGISTER_FILTER(Decimation, pdal::filters::Decimation);
     REGISTER_FILTER(Reprojection, pdal::filters::Reprojection);
     REGISTER_FILTER(HexBin, pdal::filters::HexBin);
     REGISTER_FILTER(InPlaceReprojection, pdal::filters::InPlaceReprojection);
+#ifdef PDAL_HAVE_PCL
     REGISTER_FILTER(PCLBlock, pdal::filters::PCLBlock);
+#endif
 
 #ifdef PDAL_HAVE_PYTHON
     REGISTER_FILTER(Predicate, pdal::filters::Predicate);

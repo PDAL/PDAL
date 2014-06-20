@@ -134,7 +134,6 @@ BOOST_AUTO_TEST_CASE(test_dump)
     s << v;
 
     BOOST_CHECK(s.str() == "(1, 2, 3)");
-    return;
 }
 
 
@@ -153,8 +152,6 @@ BOOST_AUTO_TEST_CASE(VectorTest_ptree)
     const std::string ref = xml_header + "<0>12</0><1>23</1><2>34</2>";
 
     BOOST_CHECK_EQUAL(ref, out1);
-
-    return;
 }
 
 

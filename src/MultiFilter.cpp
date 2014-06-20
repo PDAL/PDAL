@@ -39,11 +39,10 @@ namespace pdal
 {
 
 
-MultiFilter::MultiFilter(const std::vector<Stage*>& prevStages, const Options& options)
-    : Stage(StageBase::makeVector(prevStages), options)
-{
-    return;
-}
+MultiFilter::MultiFilter(const std::vector<Stage*>& prevStages,
+        const Options& options) :
+    Stage(makeVector(prevStages), options)
+{}
 
 
 void MultiFilter::initialize()

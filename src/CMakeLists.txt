@@ -32,7 +32,6 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/Filter.hpp"
   "${PDAL_HEADERS_DIR}/Filters.hpp"
   "${PDAL_HEADERS_DIR}/FilterIterator.hpp"
-  "${PDAL_HEADERS_DIR}/GDALUtils.hpp"
   "${PDAL_HEADERS_DIR}/GlobalEnvironment.hpp"
   "${PDAL_HEADERS_DIR}/gitsha.h"
   "${PDAL_HEADERS_DIR}/IStream.hpp"
@@ -41,7 +40,6 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/Metadata.hpp"
   "${PDAL_HEADERS_DIR}/MultiFilter.hpp"
   "${PDAL_HEADERS_DIR}/MultiFilterIterator.hpp"
-  "${PDAL_HEADERS_DIR}/NullPointBuffer.hpp"
   "${PDAL_HEADERS_DIR}/Options.hpp"
   "${PDAL_HEADERS_DIR}/OStream.hpp"
   "${PDAL_HEADERS_DIR}/PipelineManager.hpp"
@@ -54,7 +52,6 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/Schema.hpp"
   "${PDAL_HEADERS_DIR}/SpatialReference.hpp"
   "${PDAL_HEADERS_DIR}/Stage.hpp"
-  "${PDAL_HEADERS_DIR}/StageBase.hpp"
   "${PDAL_HEADERS_DIR}/StageFactory.hpp"
   "${PDAL_HEADERS_DIR}/StageInfo.hpp"
   "${PDAL_HEADERS_DIR}/StageIterator.hpp"
@@ -87,7 +84,6 @@ set(PDAL_BASE_CPP
   Metadata.cpp
   MultiFilter.cpp
   MultiFilterIterator.cpp
-  NullPointBuffer.cpp
   Options.cpp
   PipelineManager.cpp
   PipelineReader.cpp
@@ -99,7 +95,6 @@ set(PDAL_BASE_CPP
   Schema.cpp
   SpatialReference.cpp
   Stage.cpp
-  StageBase.cpp
   StageFactory.cpp
   StageInfo.cpp
   StageIterator.cpp
@@ -112,10 +107,6 @@ set(PDAL_BASE_CPP
   third/md5-pdal.c
   ${PDAL_XML_SRC}
 )
-
-if (GDAL_FOUND)
-    set (PDAL_BASE_CPP  GDALUtils.cpp ${PDAL_BASE_CPP})
-endif(GDAL_FOUND)
 
 list (APPEND PDAL_CPP ${PDAL_BASE_CPP} )
 list (APPEND PDAL_HPP ${PDAL_BASE_HPP} )
@@ -500,14 +491,53 @@ set(PDAL_SBET_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_SBET_PATH}")
 
 set(PDAL_DRIVERS_SBET_HPP
     "${PDAL_SBET_HEADERS}/Reader.hpp"
+    "${PDAL_SBET_HEADERS}/Writer.hpp"
 )
 
 set (PDAL_DRIVERS_SBET_CPP 
     "${PDAL_SBET_SRC}/Reader.cpp"
+    "${PDAL_SBET_SRC}/Writer.cpp"
 )
 
 list (APPEND PDAL_CPP ${PDAL_DRIVERS_SBET_CPP} )
 list (APPEND PDAL_HPP ${PDAL_DRIVERS_SBET_HPP} )
+
+#
+# HDF5
+#
+set(PDAL_HDF5_HANDLER_HPP
+    "${PDAL_HEADERS_DIR}/Hdf5Handler.hpp"
+)
+
+set(PDAL_HDF5_HANDLER_CPP
+    "${PDAL_SOURCE_DIR}/src/Hdf5Handler.cpp"
+)
+
+if (HDF5_FOUND)
+    list (APPEND PDAL_CPP ${PDAL_HDF5_HANDLER_CPP})
+    list (APPEND PDAL_HPP ${PDAL_HDF5_HANDLER_HPP})
+endif()
+
+
+#
+# drivers/icebridge
+#
+set(PDAL_ICEBRIDGE_PATH drivers/icebridge)
+set(PDAL_ICEBRIDGE_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_ICEBRIDGE_PATH}")
+set(PDAL_ICEBRIDGE_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_ICEBRIDGE_PATH}")
+
+set(PDAL_DRIVERS_ICEBRIDGE_HPP
+    "${PDAL_ICEBRIDGE_HEADERS}/Reader.hpp"
+)
+
+set(PDAL_DRIVERS_ICEBRIDGE_CPP
+    "${PDAL_ICEBRIDGE_SRC}/Reader.cpp"
+)
+
+if (HDF5_FOUND)
+    list (APPEND PDAL_CPP ${PDAL_DRIVERS_ICEBRIDGE_CPP} )
+    list (APPEND PDAL_HPP ${PDAL_DRIVERS_ICEBRIDGE_HPP} )
+endif()
 
 
 #
@@ -523,16 +553,12 @@ set(PDAL_FILTERS_HPP
   "${PDAL_FILTERS_HEADERS}/Cache.hpp"
   "${PDAL_FILTERS_HEADERS}/Chipper.hpp"
   "${PDAL_FILTERS_HEADERS}/Color.hpp"
-  "${PDAL_FILTERS_HEADERS}/Colorization.hpp"
   "${PDAL_FILTERS_HEADERS}/Crop.hpp"
   "${PDAL_FILTERS_HEADERS}/Decimation.hpp"
   "${PDAL_FILTERS_HEADERS}/HexBin.hpp"
   "${PDAL_FILTERS_HEADERS}/InPlaceReprojection.hpp"
   "${PDAL_FILTERS_HEADERS}/Mosaic.hpp"
-  "${PDAL_FILTERS_HEADERS}/PCLBlock.hpp"
   "${PDAL_FILTERS_HEADERS}/PointBufferCache.hpp"
-  "${PDAL_FILTERS_HEADERS}/Predicate.hpp"
-  "${PDAL_FILTERS_HEADERS}/Programmable.hpp"
   "${PDAL_FILTERS_HEADERS}/Reprojection.hpp"
   "${PDAL_FILTERS_HEADERS}/Scaling.hpp"
   "${PDAL_FILTERS_HEADERS}/Selector.hpp"
@@ -545,16 +571,12 @@ set (PDAL_FILTERS_CPP
   "${PDAL_FILTERS_SRC}/Cache.cpp"
   "${PDAL_FILTERS_SRC}/Chipper.cpp"
   "${PDAL_FILTERS_SRC}/Color.cpp"
-  "${PDAL_FILTERS_SRC}/Colorization.cpp"
   "${PDAL_FILTERS_SRC}/Crop.cpp"
   "${PDAL_FILTERS_SRC}/Decimation.cpp"
   "${PDAL_FILTERS_SRC}/HexBin.cpp"
   "${PDAL_FILTERS_SRC}/InPlaceReprojection.cpp"
   "${PDAL_FILTERS_SRC}/Mosaic.cpp"
-  "${PDAL_FILTERS_SRC}/PCLBlock.cpp"
   "${PDAL_FILTERS_SRC}/PointBufferCache.cpp"
-  "${PDAL_FILTERS_SRC}/Predicate.cpp"
-  "${PDAL_FILTERS_SRC}/Programmable.cpp"  
   "${PDAL_FILTERS_SRC}/Reprojection.cpp"
   "${PDAL_FILTERS_SRC}/Scaling.cpp"
   "${PDAL_FILTERS_SRC}/Selector.cpp"
@@ -564,6 +586,44 @@ set (PDAL_FILTERS_CPP
 
 list (APPEND PDAL_CPP ${PDAL_FILTERS_CPP} )
 list (APPEND PDAL_HPP ${PDAL_FILTERS_HPP} )
+
+
+#
+# Core components that depend on Python
+#
+set(PDAL_PYTHON_HPP
+    ${PDAL_FILTERS_HEADERS}/Predicate.hpp
+    ${PDAL_FILTERS_HEADERS}/Programmable.hpp
+    )
+
+set(PDAL_PYTHON_CPP
+    ${PDAL_FILTERS_SRC}/Predicate.cpp
+    ${PDAL_FILTERS_SRC}/Programmable.cpp
+    )
+
+if (WITH_PYTHON)
+    list(APPEND PDAL_HPP ${PDAL_PYTHON_HPP})
+    list(APPEND PDAL_CPP ${PDAL_PYTHON_CPP})
+endif (WITH_PYTHON)
+
+
+#
+# Core components that depend on GDAL
+#
+set(PDAL_GDAL_HPP
+    "${PDAL_HEADERS_DIR}/GDALUtils.hpp"
+    "${PDAL_FILTERS_HEADERS}/Colorization.hpp"
+    )
+
+set(PDAL_GDAL_CPP
+    GDALUtils.cpp
+    "${PDAL_FILTERS_SRC}/Colorization.cpp"
+    )
+
+if (WITH_GDAL)
+    list(APPEND PDAL_HPP ${PDAL_GDAL_HPP})
+    list(APPEND PDAL_CPP ${PDAL_GDAL_CPP})
+endif (WITH_GDAL)
 
 
 #
@@ -622,7 +682,6 @@ set(PDAL_KERNEL_HPP
     ${PDAL_KERNEL_HEADERS}/Diff.hpp
     ${PDAL_KERNEL_HEADERS}/Info.hpp
     ${PDAL_KERNEL_HEADERS}/Kernel.hpp
-    ${PDAL_KERNEL_HEADERS}/PCL.hpp
     ${PDAL_KERNEL_HEADERS}/Pipeline.hpp
     ${PDAL_KERNEL_HEADERS}/Delta.hpp
     ${PDAL_KERNEL_HEADERS}/Translate.hpp
@@ -633,7 +692,6 @@ set(PDAL_KERNEL_CPP
     ${PDAL_KERNEL_SRC}/Support.cpp
     ${PDAL_KERNEL_SRC}/Diff.cpp
     ${PDAL_KERNEL_SRC}/Info.cpp
-    ${PDAL_KERNEL_SRC}/PCL.cpp
     ${PDAL_KERNEL_SRC}/Pipeline.cpp
     ${PDAL_KERNEL_SRC}/Delta.cpp
     ${PDAL_KERNEL_SRC}/Translate.cpp
@@ -641,6 +699,26 @@ set(PDAL_KERNEL_CPP
 
 list (APPEND PDAL_CPP ${PDAL_KERNEL_CPP} )
 list (APPEND PDAL_HPP ${PDAL_KERNEL_HPP} )
+
+
+#
+# pcl
+#
+set(PDAL_PCL_HPP
+    ${PDAL_KERNEL_HEADERS}/PCL.hpp
+    ${PDAL_FILTERS_HEADERS}/PCLBlock.hpp
+    )
+set(PDAL_PCL_CPP
+    ${PDAL_FILTERS_SRC}/PCLBlock.cpp
+    ${PDAL_KERNEL_SRC}/PCL.cpp
+    )
+
+if (WITH_PCL)
+    list(APPEND PDAL_HPP ${PDAL_PCL_HPP})
+    list(APPEND PDAL_CPP ${PDAL_PCL_CPP})
+endif (WITH_PCL)
+
+
 #
 # Group source files for IDE source explorers (e.g. Visual Studio)
 #
@@ -754,8 +832,15 @@ if (WITH_LIBXML2)
     target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE} ${LIBXML2_LIBRARIES})
 endif()
 
+if (WITH_ZLIB)
+    target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE} ${ZLIB_LIBRARIES})
+endif()
+
+if (WITH_HDF5)
+    target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE} ${HDF5_LIBRARIES})
+endif()
+
   target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE}
-    "${PDAL_LIB_NAME}"
     "${CMAKE_THREAD_LIBS_INIT}"
     "${CMAKE_DL_LIBS}"
     "${TIFF_LIBRARY}"
@@ -766,7 +851,6 @@ endif()
     "${GEOS_LIBRARY}"
     "${HEXER_LIBRARY}"
     "${ORACLE_LIBRARY}"
-    "z"
 )
 
 message(STATUS "Using boost lib: ${Boost_LIBRARIES}")

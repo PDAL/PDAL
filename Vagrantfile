@@ -99,6 +99,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     end
   end
 
+  if RUBY_PLATFORM.include? "win32"
+    config.vm.synced_folder ".", "/vagrant", type: "smb"
+  end
+  
   ppaRepos = [
     "ppa:ubuntugis/ubuntugis-unstable",
     "ppa:boost-latest/ppa"

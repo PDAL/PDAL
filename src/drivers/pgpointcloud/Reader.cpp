@@ -275,6 +275,10 @@ pdal::Schema Reader::fetchSchema() const
     oss << "SELECT schema FROM pointcloud_formats WHERE pcid = " << pcid;
 
     char *xml_str = pg_query_once(m_session, oss.str());
+    if (!xml_str)
+    {
+        throw pdal_error("Unable to fetch schema from `pointcloud_formats`");
+    }
     std::string xml = std::string(xml_str);
     free(xml_str);
 
@@ -399,6 +403,7 @@ Iterator::~Iterator()
         delete m_buffer;
 }
 
+
 const pdal::drivers::pgpointcloud::Reader& Iterator::getReader() const
 {
     return m_reader;
@@ -407,9 +412,26 @@ const pdal::drivers::pgpointcloud::Reader& Iterator::getReader() const
 
 boost::uint64_t Iterator::skipImpl(boost::uint64_t count)
 {
-    getReader().log()->get(logDEBUG) << "skipImpl called" << std::endl;
+    uint64_t skipped = 0;
+    do
+    {
+        uint32_t bufferCount = m_buffer->getNumPoints() - m_buffer_position;
 
-    return naiveSkipImpl(count);
+        // This may advance the position past the end of the buffer, but
+        // that causes no problems.
+        m_buffer_position += count;
+
+        // The most we can skip this time through the loop is the amount left
+        // in the buffer.
+        bufferCount = std::min(count, (uint64_t)bufferCount);
+        skipped += bufferCount;
+        count -= bufferCount;
+
+        // Refill the buffer and try again.
+        if (count && !NextBuffer())
+            break;
+    } while (count);
+    return skipped;
 }
 
 
@@ -443,6 +465,7 @@ bool Iterator::CursorTeardown()
 
 bool Iterator::NextBuffer()
 {
+    m_buffer_position = 0;
     if (! m_cursor)
         CursorSetup();
 
@@ -567,7 +590,6 @@ boost::uint32_t Iterator::readBufferImpl(PointBuffer& user_buffer)
 
             m_buffer->setDataStride(data, 0, m_patch_npoints * point_size);
             m_buffer->setNumPoints(m_patch_npoints);
-            m_buffer_position = 0;
             
             if (logOutput)
                 getReader().log()->get(logDEBUG3) << "Copied patch into cache, npoints = " << m_patch_npoints << std::endl;

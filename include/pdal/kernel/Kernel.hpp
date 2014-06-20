@@ -40,7 +40,9 @@
 #include "Support.hpp"
 
 #include "Info.hpp"
+#ifdef PDAL_HAVE_PCL
 #include "PCL.hpp"
+#endif
 #include "Pipeline.hpp"
 #include "Delta.hpp"
 #include "Translate.hpp"

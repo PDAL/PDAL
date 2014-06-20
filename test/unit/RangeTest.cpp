@@ -211,8 +211,6 @@ BOOST_AUTO_TEST_CASE(test_output)
 
     BOOST_CHECK(out1 == "[1, 2]");
     BOOST_CHECK(out2 == "[1.1, 2.2]");
-
-    return;
 }
 
 
@@ -230,8 +228,6 @@ BOOST_AUTO_TEST_CASE(RangeTest_ptree)
     const std::string ref = xml_header + "<minimum>23</minimum><maximum>56</maximum>";
 
     BOOST_CHECK_EQUAL(ref, out1);
-
-    return;
 }
 
 
@@ -244,8 +240,6 @@ BOOST_AUTO_TEST_CASE(test_input)
 
     const Range<double> r(1.1,2.2);
     BOOST_CHECK(r == rr);
-
-    return;
 }
 
 BOOST_AUTO_TEST_CASE(test_lexicalcast_whitespace)
@@ -254,8 +248,6 @@ BOOST_AUTO_TEST_CASE(test_lexicalcast_whitespace)
     const Range<double> b2 = boost::lexical_cast< Range<double> >("[1, 101] ");
 
     BOOST_CHECK_EQUAL(b1, b2);
-
-    return;
 }
 
 

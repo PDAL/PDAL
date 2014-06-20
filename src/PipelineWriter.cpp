@@ -68,7 +68,7 @@ PipelineWriter::~PipelineWriter()
 }
 
 
-static boost::property_tree::ptree generateTreeFromStageBase(const StageBase& stage)
+static boost::property_tree::ptree generateTreeFromStage(const Stage& stage)
 {
     boost::property_tree::ptree subtree = stage.serializePipeline();
 
@@ -174,9 +174,9 @@ void PipelineWriter::write_metadata_ptree(boost::property_tree::ptree& tree, con
 
 void PipelineWriter::writePipeline(const std::string& filename) const
 {
-    const StageBase* stage = m_manager.isWriterPipeline() ? (StageBase*)m_manager.getWriter() : (StageBase*)m_manager.getStage();
+    const Stage* stage = m_manager.isWriterPipeline() ? (Stage*)m_manager.getWriter() : (Stage*)m_manager.getStage();
 
-    boost::property_tree::ptree tree = generateTreeFromStageBase(*stage);
+    boost::property_tree::ptree tree = generateTreeFromStage(*stage);
 
     if (m_buffer)
     {

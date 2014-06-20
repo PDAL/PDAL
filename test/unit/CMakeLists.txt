@@ -20,7 +20,6 @@ SET(PDAL_UNITTEST_TEST_SRC
     drivers/caris/CarisReaderTest.cpp
     filters/ChipperTest.cpp
     filters/ColorFilterTest.cpp
-    filters/ColorizationFilterTest.cpp
     ConfigTest.cpp
     filters/CropFilterTest.cpp
     filters/DecimationFilterTest.cpp
@@ -45,6 +44,7 @@ SET(PDAL_UNITTEST_TEST_SRC
     drivers/qfit/QFITReaderTest.cpp
     RangeTest.cpp
     drivers/sbet/SbetReaderTest.cpp
+    drivers/sbet/SbetWriterTest.cpp
     filters/ScalingFilterTest.cpp
     filters/SelectorFilterTest.cpp
     SchemaLayoutTest.cpp
@@ -123,6 +123,7 @@ endif (WITH_SQLITE)
 if (WITH_GDAL)
     set(PDAL_GDAL_TEST_CPP
         GDALUtilsTest.cpp
+        filters/ColorizationFilterTest.cpp
         drivers/nitf/NitfReaderTest.cpp
         )
 
@@ -154,6 +155,40 @@ if (WITH_PCL)
     ENDFOREACH(file)
 endif (WITH_PCL)
 
+if (WITH_HDF5)
+    set(PDAL_ICEBRIDGE_TEST_CPP
+        drivers/icebridge/IcebridgeReaderTest.cpp
+        )
+
+    FOREACH(file ${PDAL_ICEBRIDGE_TEST_CPP})
+        SET(PDAL_UNITTEST_TEST_SRC "${PDAL_UNITTEST_TEST_SRC};${file}"
+            CACHE INTERNAL "source files for test")
+    ENDFOREACH(file)
+endif(WITH_HDF5)
+
+if (WITH_PGPOINTCLOUD AND WITH_PGPOINTCLOUD_TESTS)
+    set(PDAL_PGPOINTCLOUD_TEST_CPP
+        drivers/pgpointcloud/PgpointcloudWriterTest.cpp
+        )
+
+    set(PGPOINTCLOUD_TEST_DB_HOST localhost CACHE STRING "Postgres test database host")
+    set(PGPOINTCLOUD_TEST_DB_PORT 5432 CACHE STRING "Postgres test database port")
+    set(PGPOINTCLOUD_TEST_DB_NAME pdal_test CACHE STRING
+        "Postgres test database name, must exist and must be able to create databases")
+    set(PGPOINTCLOUD_TEST_DB_TEMPNAME pdal_test_tmp CACHE STRING "Postgres test database temp database name")
+
+    configure_file(
+        drivers/pgpointcloud/Support.hpp.in
+        ${CMAKE_CURRENT_BINARY_DIR}/drivers/pgpointcloud/Support.hpp
+        )
+
+    set(PDAL_UNITTEST_TEST_SRC
+        ${PDAL_UNITTEST_TEST_SRC}
+        ${PDAL_PGPOINTCLOUD_TEST_CPP}
+        CACHE INTERNAL "source files for test"
+        )
+endif (WITH_PGPOINTCLOUD AND WITH_PGPOINTCLOUD_TESTS)
+
 set(PDAL_UNITTEST_SOURCES "")
 FOREACH(file ${PDAL_UNITTEST_TEST_SRC})
     SET(PDAL_UNITTEST_SOURCES "${PDAL_UNITTEST_SOURCES};${file}"
@@ -182,6 +217,7 @@ source_group("Source Files\\config" FILES ${PDAL_UNITTEST_CONFIG_SRC})
 
 INCLUDE_DIRECTORIES(
     .
+    ${CMAKE_CURRENT_BINARY_DIR}
     ../../include
     ${GDAL_INCLUDE_DIR}
     ${GEOTIFF_INCLUDE_DIR}

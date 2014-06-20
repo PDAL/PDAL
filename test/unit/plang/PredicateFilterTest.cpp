@@ -94,8 +94,6 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test1)
     BOOST_CHECK(Utils::compare_approx<double>(maxX, 1.0, 0.01));
     BOOST_CHECK(Utils::compare_approx<double>(maxY, 1.0, 0.01));
     BOOST_CHECK(Utils::compare_approx<double>(maxZ, 1.0, 0.01));
-
-    return;
 }
 
 
@@ -145,8 +143,6 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test2)
     BOOST_CHECK(Utils::compare_approx<double>(maxX, 2.0, 0.01));
     BOOST_CHECK(Utils::compare_approx<double>(maxY, 2.0, 0.01));
     BOOST_CHECK(Utils::compare_approx<double>(maxZ, 2.0, 0.01));
-
-    return;
 }
 
 
@@ -219,8 +215,6 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test3)
     BOOST_CHECK(Utils::compare_approx<double>(maxX, 1.0, 0.01));
     BOOST_CHECK(Utils::compare_approx<double>(maxY, 1.0, 0.01));
     BOOST_CHECK(Utils::compare_approx<double>(maxZ, 1.0, 0.01));
-
-    return;
 }
 
 
@@ -268,8 +262,6 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test4)
 
     BOOST_CHECK(processed == 1000);
     BOOST_CHECK(passed == 750);
-
-    return;
 }
 
 BOOST_AUTO_TEST_CASE(PredicateFilterTest_test5)
@@ -306,8 +298,6 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test5)
     boost::scoped_ptr<pdal::StageSequentialIterator> iter(filter.createSequentialIterator(data));
 
     BOOST_REQUIRE_THROW(iter->read(data), pdal::python_error);
-
-    return;
 }
 
 BOOST_AUTO_TEST_CASE(PredicateFilterTest_Pipeline)
@@ -328,8 +318,6 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_Pipeline)
 
         delete iter;
     }
-
-    return;
 }
 
 BOOST_AUTO_TEST_CASE(PredicateFilterTest_Embed)
@@ -350,8 +338,6 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_Embed)
 
         delete iter;
     }
-
-    return;
 }
 
 

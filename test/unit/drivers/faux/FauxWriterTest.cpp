@@ -67,9 +67,6 @@ BOOST_AUTO_TEST_CASE(FauxWriterTest_test_1)
     BOOST_CHECK(Utils::compare_approx(writer.getAvgX(), 1.0, (std::numeric_limits<double>::min)()) == true);
     BOOST_CHECK(Utils::compare_approx(writer.getAvgY(), 2.0, (std::numeric_limits<double>::min)()) == true);
     BOOST_CHECK(Utils::compare_approx(writer.getAvgZ(), 3.0, (std::numeric_limits<double>::min)()) == true);
-
-
-    return;
 }
 
 BOOST_AUTO_TEST_CASE(test_2)
@@ -94,8 +91,6 @@ BOOST_AUTO_TEST_CASE(test_2)
     BOOST_CHECK(Utils::compare_approx<double>(writer.getAvgX(), 51.0, 10.0));
     BOOST_CHECK(Utils::compare_approx<double>(writer.getAvgY(), 52.0, 10.0));
     BOOST_CHECK(Utils::compare_approx<double>(writer.getAvgZ(), 53.0, 10.0));
-
-    return;
 }
 
 
@@ -200,8 +195,6 @@ BOOST_AUTO_TEST_CASE(test_callbacks)
         BOOST_CHECK_EQUAL(cb.getHeartbeats(), 7u);
         BOOST_CHECK_EQUAL(cb.getPercentComplete(), 60);
     }
-
-    return;
 }
 
 BOOST_AUTO_TEST_CASE(test_buffer_resize)

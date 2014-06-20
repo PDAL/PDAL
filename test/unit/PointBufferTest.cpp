@@ -56,8 +56,6 @@ BOOST_AUTO_TEST_CASE(test_ctor)
 
     BOOST_CHECK(data.getCapacity() == 10);
     BOOST_CHECK(data.getSchema() == schema);
-
-    return;
 }
 
 
@@ -305,8 +303,6 @@ BOOST_AUTO_TEST_CASE(PointBufferTest_ptree)
     const std::string ref = xml_header + "<0><Classification>1</Classification><X>0</X><Y>0</Y></0><1><Classification>2</Classification><X>10</X><Y>100</Y></1>";
 
     BOOST_CHECK_EQUAL(ref, out1.substr(0, ref.length()));
-
-    return;
 }
 
 
@@ -367,8 +363,6 @@ BOOST_AUTO_TEST_CASE(PointBufferTest_ptree)
 //     BOOST_CHECK_EQUAL(x1, x2);
 //     
 //     delete data;
-// 
-//     return;
 // }
 
 
@@ -404,9 +398,6 @@ BOOST_AUTO_TEST_CASE(PointBufferTest_resetting)
     BOOST_CHECK_EQUAL(data.getBufferByteCapacity(), 5200u);
     BOOST_CHECK_EQUAL(data.getBufferByteLength(), 5200u);
     BOOST_CHECK_EQUAL(data.getCapacity(), 400u);
-    
-
-    return;
 }
 
 
@@ -451,8 +442,6 @@ BOOST_AUTO_TEST_CASE(PointBufferTest_copy_like_Dimensions)
     BOOST_CHECK_EQUAL(150, data_b.getField<boost::int32_t>(x2, 150));
     
     delete dimensions;
-
-    return;
 }
 
 BOOST_AUTO_TEST_CASE(test_indexed)
@@ -513,8 +502,6 @@ BOOST_AUTO_TEST_CASE(test_indexed)
     BOOST_CHECK_EQUAL(rids.size(), 11u);    
     
     delete iter;
-    return;
-
 }
 
 
@@ -570,8 +557,6 @@ BOOST_AUTO_TEST_CASE(test_packing)
     // BOOST_CHECK_CLOSE(packed.getField<double>(y2,7), 7 + 100, 0.000001);    
     
     delete packed;
-    return;
-
 }
 
 
@@ -616,7 +601,6 @@ BOOST_AUTO_TEST_CASE(test_orientation)
         BOOST_CHECK_CLOSE(y, i + 100, 0.000001);
         BOOST_CHECK_EQUAL(c, 7u);
     }
-    return;
 }
 
 BOOST_AUTO_TEST_CASE(test_orientation_packing)
@@ -666,11 +650,6 @@ BOOST_AUTO_TEST_CASE(test_orientation_packing)
 
     delete dims;
     delete packed;
-
-
-
-    return;
-
 }
 
 
@@ -717,11 +696,6 @@ BOOST_AUTO_TEST_CASE(test_orientation_point_interleaved_flipping)
     BOOST_CHECK_EQUAL(flipped->getField<boost::int32_t>(x2,8),8);
     BOOST_CHECK_CLOSE(flipped->getField<double>(y2,7), 7 + 100, 0.000001);
     delete flipped;
-
-
-
-    return;
-
 }
 
 
@@ -799,11 +773,6 @@ BOOST_AUTO_TEST_CASE(test_orientation_dimension_interleaved_flipping)
     
     delete flipped;
     delete again;
-
-
-
-    return;
-
 }
 
 
@@ -893,8 +862,6 @@ BOOST_AUTO_TEST_CASE(test_copyLikeDimensions)
     }  
 
     delete dims_offset;
-    return;
-
 }
 
 BOOST_AUTO_TEST_CASE(test_copyLikeDimensions_All)
@@ -1046,10 +1013,5 @@ BOOST_AUTO_TEST_CASE(PointBufferTest_dataStriding)
     }
     
     // delete dims;
-
-
-
-    return;
-
 }
 BOOST_AUTO_TEST_SUITE_END()

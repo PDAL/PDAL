@@ -82,8 +82,6 @@ BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_passthrough)
     pdal::filters::iterators::sequential::PCLBlock* b = static_cast<pdal::filters::iterators::sequential::PCLBlock*>(iter);
 
     delete iter;
-
-    return;
 }
 
 BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_outlier_removal)
@@ -121,8 +119,6 @@ BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_outlier_removal)
     pdal::filters::iterators::sequential::PCLBlock* b = static_cast<pdal::filters::iterators::sequential::PCLBlock*>(iter);
 
     delete iter;
-
-    return;
 }
 
 #endif

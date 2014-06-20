@@ -85,9 +85,6 @@ BOOST_AUTO_TEST_CASE(test_one)
     {
         FileUtils::deleteFile(Support::temppath("mylog_one.txt"));
     }
-    
-
-    return;
 }
 
 #ifdef PDAL_HAVE_PYTHON
@@ -180,8 +177,6 @@ BOOST_AUTO_TEST_CASE(test_two_a)
     
     //FileUtils::deleteFile(Support::temppath("logtest_2.txt"));
     //FileUtils::deleteFile(Support::temppath("logtest_3.txt"));
-
-    return;
 }
 
 
@@ -286,8 +281,6 @@ BOOST_AUTO_TEST_CASE(test_two_b)
     {
         FileUtils::deleteFile(Support::temppath("logtest_test_two_b_3.txt"));
     }        
-
-    return;
 }
 
 
@@ -352,10 +345,6 @@ BOOST_AUTO_TEST_CASE(test_three)
     {
         FileUtils::deleteFile(Support::temppath("mylog_three.txt"));
     }
-    
-   
-    
-    return;
 }
 
 #endif

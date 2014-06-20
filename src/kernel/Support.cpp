@@ -55,7 +55,7 @@ pdal::PipelineManager* AppSupport::makePipeline(pdal::Options& options)
     
     pdal::PipelineManager* output = new PipelineManager;
     pdal::StageFactory factory;
-    std::string driver = factory.inferReaderDriver(inputFile, options);
+    std::string driver = factory.inferReaderDriver(inputFile);
     if (driver == "")
     {
         throw app_runtime_error("Cannot determine input file type of " + inputFile);
@@ -80,7 +80,7 @@ pdal::Stage* AppSupport::makeReader(pdal::Options& options)
     }
 
     pdal::StageFactory factory;
-    std::string driver = factory.inferReaderDriver(inputFile, options);
+    std::string driver = factory.inferReaderDriver(inputFile);
     if (driver == "")
     {
         throw app_runtime_error("Cannot determine input file type of " + inputFile);
@@ -101,11 +101,12 @@ pdal::Writer* AppSupport::makeWriter(pdal::Options& options, pdal::Stage& stage)
     const std::string outputFile = options.getValueOrThrow<std::string>("filename");
 
     pdal::StageFactory factory;
-    std::string driver = factory.inferWriterDriver(outputFile, options);
+    std::string driver = factory.inferWriterDriver(outputFile);
     if (driver == "")
     {
         throw app_runtime_error("Cannot determine output file type of " + outputFile);
     }
+    factory.inferWriterOptionsChanges(outputFile, options);
         
     pdal::Writer* writer = factory.createWriter(driver, stage, options);
     if (!writer)

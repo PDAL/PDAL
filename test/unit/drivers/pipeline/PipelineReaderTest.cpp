@@ -69,8 +69,6 @@ BOOST_AUTO_TEST_CASE(PipelineReaderTest_test1)
 
         delete iter;
     }
-
-    return;
 }
 
 
@@ -95,8 +93,6 @@ BOOST_AUTO_TEST_CASE(PipelineReaderTest_test2)
     }
 
     FileUtils::deleteFile(Support::datapath("pipeline/pdal-compressed.laz"));
-
-    return;
 }
 
 
@@ -172,8 +168,6 @@ BOOST_AUTO_TEST_CASE(PipelineReaderTest_test3)
     PipelineManager managerComments2;
     PipelineReader readerComments2(managerComments2);
     BOOST_CHECK_NO_THROW(readerComments2.readPipeline(Support::datapath("pipeline/pipeline_writecomments.xml")));
-
-    return;
 }
 
 
@@ -216,8 +210,6 @@ BOOST_AUTO_TEST_CASE(PipelineReaderTest_test4)
     }
 
     FileUtils::deleteFile(Support::datapath("pipeline/out2.las"));
-
-    return;
 }
 #endif
 
@@ -239,8 +231,6 @@ BOOST_AUTO_TEST_CASE(PipelineReaderTest_Reader)
 
         delete iter;
     }
-
-    return;
 }
 
 BOOST_AUTO_TEST_CASE(PipelineReaderTest_MultiOptions)
@@ -265,8 +255,14 @@ BOOST_AUTO_TEST_CASE(PipelineReaderTest_MultiOptions)
     Option meaning_of_life = more->getOption("somemore");
 
     BOOST_CHECK_EQUAL(meaning_of_life.getValue<int>(), 42);
+}
 
-    return;
+
+BOOST_AUTO_TEST_CASE(testNoType)
+{
+    PipelineManager manager;
+    PipelineReader reader(manager);
+    reader.readPipeline(Support::datapath("pipeline/pipeline_read_notype.xml"));
 }
 
 

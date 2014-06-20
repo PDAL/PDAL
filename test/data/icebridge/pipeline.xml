@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<Pipeline version="1.0">
+  <Writer type="drivers.text.writer">
+    <Option name="filename">outfile.txt</Option>
+    <Reader type="drivers.icebridge.reader">
+      <Option name="filename">twoPoints.h5</Option>
+    </Reader>
+  </Writer>
+</Pipeline>

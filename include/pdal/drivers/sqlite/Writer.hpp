@@ -53,7 +53,11 @@ class PDAL_DLL Writer : public pdal::Writer
 {
 public:
     SET_STAGE_NAME("drivers.sqlite.writer", "SQLite Writer")
-
+#ifdef PDAL_HAVE_SQLITE
+    SET_STAGE_ENABLED(true)
+#else
+    SET_STAGE_ENABLED(false)
+#endif
     Writer(Stage& prevStage, const Options&);
 
     virtual void initialize();

@@ -48,33 +48,12 @@ namespace sbet
 {
 
 
-typedef struct
-{
-    double time;
-    double latitude;
-    double longitude;
-    double altitude;
-    double x_velocity;
-    double y_velocity;
-    double z_velocity;
-    double roll;
-    double pitch;
-    double platform_heading;
-    double wander_angle;
-    double x_body_accel;
-    double y_body_accel;
-    double z_body_accel;
-    double x_body_ang_rate;
-    double y_body_ang_rate;
-    double z_body_ang_rate;
-} Record;
-
-
 class PDAL_DLL Reader : public pdal::Reader
 {
 public:
     SET_STAGE_NAME("drivers.sbet.reader", "SBET Reader")
     SET_STAGE_LINK("http://pdal.io/stages/drivers.sbet.reader.html")
+    SET_STAGE_ENABLED(true)
 
     Reader(const Options&);
     ~Reader();
@@ -98,8 +77,8 @@ namespace iterators
 class PDAL_DLL IteratorBase
 {
 public:
-   IteratorBase(const pdal::drivers::sbet::Reader&, PointBuffer&); 
-   ~IteratorBase();
+    IteratorBase(const pdal::drivers::sbet::Reader&, PointBuffer&);
+    ~IteratorBase();
 
 protected:
     boost::uint32_t readSbetIntoBuffer(PointBuffer&, const boost::uint64_t);

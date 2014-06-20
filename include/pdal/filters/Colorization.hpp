@@ -78,7 +78,13 @@ class PDAL_DLL Colorization : public Filter
 public:
     SET_STAGE_NAME("filters.colorization", "Fetch color information from a GDAL datasource")
     SET_STAGE_LINK("http://pdal.io/stages/filters.colorization.html")
-    
+#ifdef PDAL_HAVE_GDAL
+    SET_STAGE_ENABLED(true)
+#else
+    SET_STAGE_ENABLED(false)
+#endif
+
+
     Colorization(Stage& prevStage, const Options&);
     ~Colorization();
 
@@ -149,11 +155,7 @@ private:
     boost::array<double, 6> m_forward_transform;
     boost::array<double, 6> m_inverse_transform;
 
-#ifdef PDAL_HAVE_GDAL
     GDALDatasetH m_ds;
-#else
-    void* m_ds;
-#endif
     
 };
 
