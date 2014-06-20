@@ -32,17 +32,10 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_DRIVERS_FAUX_READER_HPP
-#define INCLUDED_DRIVERS_FAUX_READER_HPP
+#pragma once
 
 #include <pdal/Reader.hpp>
 #include <pdal/ReaderIterator.hpp>
-#include <pdal/Bounds.hpp>
-
-namespace pdal
-{
-class PointBuffer;
-}
 
 namespace pdal
 {
@@ -50,6 +43,13 @@ namespace drivers
 {
 namespace faux
 {
+
+enum Mode
+{
+    Constant,
+    Random,
+    Ramp
+};
 
 
 // The FauxReader doesn't read from disk, but instead just makes up data for its
@@ -72,96 +72,62 @@ namespace faux
 //
 class PDAL_DLL Reader : public pdal::Reader
 {
-public:
-    enum Mode
-    {
-        Constant,
-        Random,
-        Ramp
-    };
 
 public:
     SET_STAGE_NAME("drivers.faux.reader", "Faux Reader")
     SET_STAGE_ENABLED(true)
 
     Reader(const Options& options);
-    Reader(const Bounds<double>&, boost::uint64_t numPoints, Mode mode);
-    Reader(const Bounds<double>&, boost::uint64_t numPoints, Mode mode,
-        const std::vector<Dimension>& dimensions,
-        bool forceZeroNumPoints = false);
 
     static Options getDefaultOptions();
     static std::vector<Dimension> getDefaultDimensions();
 
-    Mode getMode() const;
-
-    pdal::StageSequentialIterator*
-        createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator(PointBuffer& buffer) const;
-
-    // this is called by the stage's iterator
-    boost::uint32_t processBuffer(PointBuffer& data,
-        boost::uint64_t index) const;
+    pdal::StageSequentialIterator *createSequentialIterator() const;
 
 private:
-    Bounds<double> m_bounds;
-    boost::uint64_t m_numPoints;
+    Schema *m_schema;  // Just used to get it to the iterator.
+    uint64_t m_numPoints;
     Mode m_mode;
-    std::vector<Dimension> m_dimensions;
+
+    virtual void processOptions(const Options& options);
+    virtual void buildSchema(Schema *s);
 
     Reader& operator=(const Reader&); // not implemented
     Reader(const Reader&); // not implemented
-    virtual void initialize();
 };
 
+} // namespace faux
+} // namespace drivers
 
-namespace iterators
-{
-namespace sequential
-{
-
-class PDAL_DLL Reader : public pdal::ReaderSequentialIterator
+class PDAL_DLL FauxSeqIterator : public pdal::ReaderSequentialIterator
 {
 public:
-    Reader(pdal::drivers::faux::Reader const& reader, PointBuffer& buffer,
-        boost::uint32_t numPoints, LogPtr log);
+    FauxSeqIterator(const Bounds<double>& bounds, Schema *schema,
+        drivers::faux::Mode mode);
 
 private:
-    boost::uint64_t skipImpl(boost::uint64_t);
-    boost::uint32_t readBufferImpl(PointBuffer&);
-    bool atEndImpl() const;
+    double m_minX;
+    double m_maxX;
+    double m_minY;
+    double m_maxY;
+    double m_minZ;
+    double m_maxZ;
+    Dimension *m_dimX;
+    Dimension *m_dimY;
+    Dimension *m_dimZ;
+    Dimension *m_dimTime;
+    drivers::faux::Mode m_mode;
 
-    pdal::drivers::faux::Reader const& m_reader;
-    boost::uint32_t m_numPoints;
-    LogPtr m_log;
+    //ABELL
+    uint32_t readBufferImpl(PointBuffer&)
+        { throw "Tried to call readBufferImpl"; }
+
+    uint64_t skipImpl(uint64_t numPts)
+        { return numPts; }
+    uint32_t readImpl(PointBuffer& buf, point_count_t count);
+    bool atEndImpl() const
+        { return false; } //ABELL ?
 };
 
-}
-} // iterators::sequential
+} // namespace pdal
 
-namespace iterators
-{
-namespace random
-{
-
-class PDAL_DLL Reader : public pdal::ReaderRandomIterator
-{
-public:
-    Reader(pdal::drivers::faux::Reader const& reader, PointBuffer& buffer);
-
-private:
-    boost::uint64_t seekImpl(boost::uint64_t);
-    boost::uint32_t readBufferImpl(PointBuffer&);
-
-    pdal::drivers::faux::Reader const& m_reader;
-};
-
-}
-} // iterators::random
-
-}
-}
-} // namespaces
-
-
-#endif

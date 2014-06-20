@@ -46,47 +46,36 @@ namespace drivers
 namespace faux
 {
 
-
-static Reader::Mode string2mode(const std::string& str)
+static Mode string2mode(const std::string& str)
 {
-    if (boost::iequals(str, "constant")) return Reader::Constant;
-    if (boost::iequals(str, "random")) return Reader::Random;
-    if (boost::iequals(str, "ramp")) return Reader::Ramp;
+    if (boost::iequals(str, "constant")) return Constant;
+    if (boost::iequals(str, "random")) return Random;
+    if (boost::iequals(str, "ramp")) return Ramp;
     throw pdal_error("invalid Mode option: " + str);
 }
 
 
 Reader::Reader(const Options& options)
     : pdal::Reader(options)
-    , m_bounds(options.getValueOrThrow<Bounds<double> >("bounds"))
-    , m_numPoints(options.getValueOrThrow<boost::uint64_t>("num_points"))
-    , m_mode(string2mode(options.getValueOrThrow<std::string>("mode")))
+{}
+
+
+void Reader::processOptions(const Options& options)
 {
-    m_schema = Schema(getDefaultDimensions());
-    setNumPoints(m_numPoints);
+    m_bounds = options.getValueOrThrow<Bounds<double>>("bounds");
+    m_numPoints = options.getValueOrThrow<uint64_t>("num_points");
+    m_mode = string2mode(options.getValueOrThrow<std::string>("mode"));
 }
 
 
-Reader::Reader(const Bounds<double>& bounds, boost::uint64_t numPoints, Mode mode)
-    : pdal::Reader(Options::none())
-    , m_bounds(bounds)
-    , m_numPoints(numPoints)
-    , m_mode(mode)
+void Reader::buildSchema(Schema *s)
 {
-    m_schema = Schema(getDefaultDimensions());
-    setNumPoints(m_numPoints);
+    m_schema = s;
+    std::vector<Dimension> dims = getDefaultDimensions();
+    for (auto di = dims.begin(); di != dims.end(); ++di)
+        s->appendDimension(*di);
 }
 
-Reader::Reader(const Bounds<double>& bounds, boost::uint64_t numPoints, Mode mode, const std::vector<Dimension>& dimensions,
-               bool forceZeroNumPoints)
-    : pdal::Reader(Options::none())
-    , m_bounds(bounds)
-    , m_numPoints(numPoints)
-    , m_mode(mode)
-{
-    m_schema = Schema(dimensions);
-    setNumPoints(forceZeroNumPoints ? 0 : m_numPoints);
-}
 
 std::vector<Dimension> Reader::getDefaultDimensions()
 {
@@ -115,12 +104,6 @@ std::vector<Dimension> Reader::getDefaultDimensions()
 }
 
 
-void Reader::initialize()
-{
-    setBounds(m_bounds);
-}
-
-
 Options Reader::getDefaultOptions()
 {
     Options options;
@@ -128,170 +111,73 @@ Options Reader::getDefaultOptions()
 }
 
 
-Reader::Mode Reader::getMode() const
+pdal::StageSequentialIterator* Reader::createSequentialIterator() const
 {
-    return m_mode;
+    return new FauxSeqIterator(m_bounds, m_schema, m_mode);
+}
+
+} // namespace faux
+} // namespace drivers
+
+
+FauxSeqIterator::FauxSeqIterator(const Bounds<double>& bounds, Schema *schema,
+    drivers::faux::Mode mode) : m_mode(mode)
+{
+    const std::vector<Range<double>>& ranges = bounds.dimensions();
+    m_minX = ranges[0].getMinimum();
+    m_maxX = ranges[0].getMaximum();
+    m_minY = ranges[1].getMinimum();
+    m_maxY = ranges[1].getMaximum();
+    m_minZ = ranges[2].getMinimum();
+    m_maxZ = ranges[2].getMaximum();
+
+    m_dimX = schema->getDimensionPtr("X", "drivers.faux.reader");
+    m_dimY = schema->getDimensionPtr("Y", "drivers.faux.reader");
+    m_dimZ = schema->getDimensionPtr("Z", "drivers.faux.reader");
+    m_dimTime = schema->getDimensionPtr("Time", "drivers.faux.reader");
 }
 
 
-pdal::StageSequentialIterator*
-Reader::createSequentialIterator(PointBuffer& buffer) const
+point_count_t FauxSeqIterator::readImpl(PointBuffer& buf, point_count_t count)
 {
-    return new pdal::drivers::faux::iterators::sequential::Reader(*this,
-        buffer, m_numPoints, log());
-}
+    using namespace pdal::drivers::faux;
 
+    const double numDeltas = (double)count - 1.0;
+    const double delX = (m_maxX - m_minX) / numDeltas;
+    const double delY = (m_maxY - m_minY) / numDeltas;
+    const double delZ = (m_maxZ - m_minZ) / numDeltas;
 
-pdal::StageRandomIterator*
-Reader::createRandomIterator(PointBuffer& buffer) const
-{
-    return new pdal::drivers::faux::iterators::random::Reader(*this, buffer);
-}
-
-
-boost::uint32_t Reader::processBuffer(PointBuffer& data, boost::uint64_t index) const
-{
-    const Schema& schema = data.getSchema();
-
-    // make up some data and put it into the buffer
-
-    // how many are they asking for?
-    boost::uint64_t numPointsWanted = data.getCapacity();
-
-    // we can only give them as many as we have left
-    boost::uint64_t numPointsAvailable = m_numPoints - index;
-    if (numPointsAvailable < numPointsWanted)
-        numPointsWanted = numPointsAvailable;
-
-    const Bounds<double>& bounds = getBounds();
-    const std::vector< Range<double> >& dims = bounds.dimensions();
-    const double minX = dims[0].getMinimum();
-    const double maxX = dims[0].getMaximum();
-    const double minY = dims[1].getMinimum();
-    const double maxY = dims[1].getMaximum();
-    const double minZ = dims[2].getMinimum();
-    const double maxZ = dims[2].getMaximum();
-
-    const double numDeltas = (double)m_numPoints - 1.0;
-    const double delX = (maxX - minX) / numDeltas;
-    const double delY = (maxY - minY) / numDeltas;
-    const double delZ = (maxZ - minZ) / numDeltas;
-
-    const Dimension& dimX = schema.getDimension("X", getName());
-    const Dimension& dimY = schema.getDimension("Y", getName());
-    const Dimension& dimZ = schema.getDimension("Z", getName());
-    const Dimension& dimTime = schema.getDimension("Time", getName());
-
-    boost::uint64_t time = index;
-
-    const Reader::Mode mode = getMode();
-
-    boost::uint32_t cnt = 0;
-    data.setNumPoints(0);
-
-    for (boost::uint32_t pointIndex=0; pointIndex<numPointsWanted; pointIndex++)
+    for (PointId idx = 0; idx < count; ++idx)
     {
         double x;
         double y;
         double z;
-        switch (mode)
+        switch (m_mode)
         {
-            case Reader::Random:
-                x = Utils::random(minX, maxX);
-                y = Utils::random(minY, maxY);
-                z = Utils::random(minZ, maxZ);
+            case Random:
+                x = Utils::random(m_minX, m_maxX);
+                y = Utils::random(m_minY, m_maxY);
+                z = Utils::random(m_minZ, m_maxZ);
                 break;
-            case Reader::Constant:
-                x = minX;
-                y = minY;
-                z = minZ;
+            case Constant:
+                x = m_minX;
+                y = m_minY;
+                z = m_minZ;
                 break;
-            case Reader::Ramp:
-                x = minX + delX * pointIndex;
-                y = minY + delY * pointIndex;
-                z = minZ + delZ * pointIndex;
-                break;
-            default:
-                throw pdal_error("invalid mode in FauxReader");
+            case Ramp:
+                x = m_minX + delX * idx;
+                y = m_minY + delY * idx;
+                z = m_minZ + delZ * idx;
                 break;
         }
 
-        data.setField<double>(dimX, pointIndex, x);
-        data.setField<double>(dimY, pointIndex, y);
-        data.setField<double>(dimZ, pointIndex, z);
-        data.setField<boost::uint64_t>(dimTime, pointIndex, time);
-
-        ++time;
-
-        ++cnt;
-        data.setNumPoints(cnt);
-        assert(cnt <= data.getCapacity());
+        buf.setField(*m_dimX, idx, x);
+        buf.setField(*m_dimY, idx, y);
+        buf.setField(*m_dimZ, idx, z);
+        buf.setField(*m_dimTime, idx, idx);
     }
-
-    return cnt;
-}
-
-
-namespace iterators
-{
-namespace sequential
-{
-
-
-Reader::Reader(const pdal::drivers::faux::Reader& reader, PointBuffer& buffer,
-        boost::uint32_t numPoints, LogPtr log)
-    : pdal::ReaderSequentialIterator(buffer),
-    m_reader(reader), m_numPoints(numPoints), m_log(log)
-{}
-
-
-boost::uint64_t Reader::skipImpl(boost::uint64_t count)
-{
     return count;
 }
 
 
-bool Reader::atEndImpl() const
-{
-    return getIndex() >= m_numPoints;
-}
-
-
-boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
-{
-    m_log->get(logDEBUG5) << "Reading a point buffer of " <<
-        data.getCapacity() << " points." << std::endl;
-    return m_reader.processBuffer(data, getIndex());
-}
-
-}
-} // iterators::sequential
-
-namespace iterators
-{
-namespace random
-{
-
-Reader::Reader(const pdal::drivers::faux::Reader& reader, PointBuffer& buffer)
-    : pdal::ReaderRandomIterator(buffer), m_reader(reader)
-{}
-
-
-boost::uint64_t Reader::seekImpl(boost::uint64_t count)
-{
-    return count;
-}
-
-
-boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
-{
-    return m_reader.processBuffer(data, getIndex());
-}
-
-}
-} // iterators::random
-
-
-}
-}
-} // namespaces
+} // pdal

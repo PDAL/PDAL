@@ -33,213 +33,50 @@
 ****************************************************************************/
 
 #include <boost/test/unit_test.hpp>
-#include <boost/cstdint.hpp>
 
-#include <boost/uuid/uuid_io.hpp>
-
-#include <pdal/PointBuffer.hpp>
 #include <pdal/drivers/faux/Reader.hpp>
-
-#include <iostream>
-
-#ifdef PDAL_COMPILER_GCC
-#pragma GCC diagnostic ignored "-Wfloat-equal"
-#pragma GCC diagnostic ignored "-Wsign-compare"
-#endif
-
-using namespace pdal;
-
+#include <pdal/Bounds.hpp>
 BOOST_AUTO_TEST_SUITE(FauxReaderTest)
 
 BOOST_AUTO_TEST_CASE(test_constant_mode_sequential_iter)
 {
-    Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
-    pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Constant);
-    reader.prepare();
+    using namespace pdal;
 
+    Options ops;
+
+    Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
+    ops.add("bounds", bounds);
+    ops.add("num_points", 1000);
+    ops.add("mode", "constant");
+    drivers::faux::Reader reader(ops);
+
+    PointContext ctx;
+    reader.prepare(ctx);
     BOOST_CHECK_EQUAL(reader.getDescription(), "Faux Reader");
 
-    const Schema& schema = reader.getSchema();
-
-    PointBuffer data(schema, 750);
-
-    StageSequentialIterator* iter = reader.createSequentialIterator(data);
-    boost::uint32_t numRead = iter->read(data);
+    PointBuffer buf(ctx);
+    StageSequentialIterator* iter = reader.createSequentialIterator();
+    point_count_t numRead = iter->read(buf, 750);
 
     BOOST_CHECK_EQUAL(numRead, 750u);
 
-    Schema const& buffer_schema = data.getSchema();
-    Dimension const& dimX = buffer_schema.getDimension("X");
-    Dimension const& dimY = buffer_schema.getDimension("Y");
-    Dimension const& dimZ = buffer_schema.getDimension("Z");
-    Dimension const& dimTime = buffer_schema.getDimension("Time");
+    Schema *schema = ctx.schema();
+    Dimension const& dimX = schema->getDimension("X");
+    Dimension const& dimY = schema->getDimension("Y");
+    Dimension const& dimZ = schema->getDimension("Z");
+    Dimension const& dimTime = schema->getDimension("Time");
 
-    for (boost::uint32_t i=0; i<numRead; i++)
+    for (uint32_t i = 0; i < numRead; i++)
     {
-        double x = data.getField<double>(dimX, i);
-        double y = data.getField<double>(dimY, i);
-        double z = data.getField<double>(dimZ, i);
-        boost::uint64_t t = data.getField<boost::uint64_t>(dimTime, i);
+        double x = buf.getFieldAs<double>(dimX, i);
+        double y = buf.getFieldAs<double>(dimY, i);
+        double z = buf.getFieldAs<double>(dimZ, i);
+        uint64_t t = buf.getFieldAs<boost::uint64_t>(dimTime, i);
 
         BOOST_CHECK_CLOSE(x, 1.0, 0.00001);
         BOOST_CHECK_CLOSE(y, 2.0, 0.00001);
         BOOST_CHECK_CLOSE(z, 3.0, 0.00001);
         BOOST_CHECK_EQUAL(t, i);
-    }
-
-    delete iter;
-}
-
-
-BOOST_AUTO_TEST_CASE(FauxReaderTest_test_options)
-{
-    const Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
-    Option opt1("bounds", bounds);
-    Option opt2("mode", "conSTanT");
-    Option opt3("num_points", 1000);
-    Option opt4("id", 90210);
-    Options opts;
-    opts.add(opt1);
-    opts.add(opt2);
-    opts.add(opt3);
-    opts.add(opt4);
-    pdal::drivers::faux::Reader reader(opts);
-    reader.prepare();
-
-    BOOST_CHECK_EQUAL(reader.getDescription(), "Faux Reader");
-    BOOST_CHECK_EQUAL(reader.getId(), 90210u);
-
-    const Schema& schema = reader.getSchema();
-
-    PointBuffer data(schema, 750);
-
-    StageSequentialIterator* iter = reader.createSequentialIterator(data);
-    boost::uint32_t numRead = iter->read(data);
-
-    BOOST_CHECK_EQUAL(numRead, 750u);
-
-    Schema const& buffer_schema = data.getSchema();
-    Dimension const& dimX = buffer_schema.getDimension("X");
-    Dimension const& dimY = buffer_schema.getDimension("Y");
-    Dimension const& dimZ = buffer_schema.getDimension("Z");
-    Dimension const& dimTime = buffer_schema.getDimension("Time");
-
-    for (boost::uint32_t i=0; i<numRead; i++)
-    {
-        double x = data.getField<double>(dimX, i);
-        double y = data.getField<double>(dimY, i);
-        double z = data.getField<double>(dimZ, i);
-        boost::uint64_t t = data.getField<boost::uint64_t>(dimTime, i);
-
-        BOOST_CHECK_CLOSE(x, 1.0, 0.00001);
-        BOOST_CHECK_CLOSE(y, 2.0, 0.00001);
-        BOOST_CHECK_CLOSE(z, 3.0, 0.00001);
-        BOOST_CHECK_EQUAL(t, i);
-    }
-
-    delete iter;
-}
-
-
-BOOST_AUTO_TEST_CASE(test_constant_mode_random_iter)
-{
-    Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
-    pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Constant);
-    reader.prepare();
-
-    BOOST_CHECK_EQUAL(reader.getDescription(), "Faux Reader");
-
-    const Schema& schema = reader.getSchema();
-
-    PointBuffer data(schema, 10);
-
-    StageRandomIterator* iter = reader.createRandomIterator(data);
-
-    boost::uint32_t numRead = iter->read(data);
-    BOOST_CHECK_EQUAL(numRead, 10u);
-
-    Schema const& buffer_schema = data.getSchema();
-    Dimension const& dimX = buffer_schema.getDimension("X");
-    Dimension const& dimY = buffer_schema.getDimension("Y");
-    Dimension const& dimZ = buffer_schema.getDimension("Z");
-    Dimension const& dimTime = buffer_schema.getDimension("Time");
-
-
-    {
-        for (boost::uint32_t i=0; i<numRead; i++)
-        {
-            double x = data.getField<double>(dimX, i);
-            double y = data.getField<double>(dimY, i);
-            double z = data.getField<double>(dimZ, i);
-            boost::uint64_t t = data.getField<boost::uint64_t>(dimTime, i);
-
-            BOOST_CHECK_CLOSE(x, 1.0, 0.00001);
-            BOOST_CHECK_CLOSE(y, 2.0, 0.00001);
-            BOOST_CHECK_CLOSE(z, 3.0, 0.00001);
-            BOOST_CHECK_EQUAL(t, i);
-        }
-    }
-
-    numRead = iter->read(data);
-    BOOST_CHECK_EQUAL(numRead, 10u);
-
-    {
-        for (boost::uint32_t i=0; i<numRead; i++)
-        {
-            double x = data.getField<double>(dimX, i);
-            double y = data.getField<double>(dimY, i);
-            double z = data.getField<double>(dimZ, i);
-            boost::uint64_t t = data.getField<boost::uint64_t>(dimTime, i);
-
-
-            BOOST_CHECK_CLOSE(x, 1.0, 0.00001);
-            BOOST_CHECK_CLOSE(y, 2.0, 0.00001);
-            BOOST_CHECK_CLOSE(z, 3.0, 0.00001);
-            BOOST_CHECK_EQUAL(t, i+10);
-        }
-    }
-
-    boost::uint64_t newPos = iter->seek(99);
-    BOOST_CHECK_EQUAL(newPos, 99u);
-    numRead = iter->read(data);
-    BOOST_CHECK_EQUAL(numRead, 10u);
-
-    {
-        for (boost::uint32_t i=0; i<numRead; i++)
-        {
-            double x = data.getField<double>(dimX, i);
-            double y = data.getField<double>(dimY, i);
-            double z = data.getField<double>(dimZ, i);
-            boost::uint64_t t = data.getField<boost::uint64_t>(dimTime, i);
-
-            BOOST_CHECK_CLOSE(x, 1.0, 0.00001);
-            BOOST_CHECK_CLOSE(y, 2.0, 0.00001);
-            BOOST_CHECK_CLOSE(z, 3.0, 0.00001);
-            BOOST_CHECK_EQUAL(t, i+99);
-
-        }
-    }
-
-    newPos = iter->seek(7);
-    BOOST_CHECK_EQUAL(newPos, 7u);
-    numRead = iter->read(data);
-    BOOST_CHECK_EQUAL(numRead, 10u);
-
-    {
-        for (boost::uint32_t i=0; i<numRead; i++)
-        {
-            double x = data.getField<double>(dimX, i);
-            double y = data.getField<double>(dimY, i);
-            double z = data.getField<double>(dimZ, i);
-            boost::uint64_t t = data.getField<boost::uint64_t>(dimTime, i);
-
-
-            BOOST_CHECK_CLOSE(x, 1.0, 0.00001);
-            BOOST_CHECK_CLOSE(y, 2.0, 0.00001);
-            BOOST_CHECK_CLOSE(z, 3.0, 0.00001);
-            BOOST_CHECK_EQUAL(t, i+7);
-
-        }
     }
 
     delete iter;
@@ -248,32 +85,37 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_random_iter)
 
 BOOST_AUTO_TEST_CASE(test_random_mode)
 {
+    using namespace pdal;
+
     Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
-    pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Random);
-    reader.prepare();
+    Options ops;
+    ops.add("bounds", bounds);
+    ops.add("num_points", 1000);
+    ops.add("mode", "constant");
 
-    const Schema& schema = reader.getSchema();
+    drivers::faux::Reader reader(ops);
 
-    PointBuffer data(schema, 750);
+    PointContext ctx;
+    reader.prepare(ctx);
 
-    StageSequentialIterator* iter = reader.createSequentialIterator(data);
-    boost::uint32_t numRead = iter->read(data);
+    PointBuffer buf(ctx);
+    StageSequentialIterator* iter = reader.createSequentialIterator();
+    uint32_t numRead = iter->read(buf, 750);
 
     BOOST_CHECK_EQUAL(numRead, 750u);
 
-    Schema const& buffer_schema = data.getSchema();
-    Dimension const& dimX = buffer_schema.getDimension("X");
-    Dimension const& dimY = buffer_schema.getDimension("Y");
-    Dimension const& dimZ = buffer_schema.getDimension("Z");
-    Dimension const& dimTime = buffer_schema.getDimension("Time");
+    Schema *schema = ctx.schema();
+    Dimension const& dimX = schema->getDimension("X");
+    Dimension const& dimY = schema->getDimension("Y");
+    Dimension const& dimZ = schema->getDimension("Z");
+    Dimension const& dimTime = schema->getDimension("Time");
 
-
-    for (boost::uint32_t i=0; i<numRead; i++)
+    for (point_count_t i = 0; i < numRead; ++i)
     {
-        double x = data.getField<double>(dimX, i);
-        double y = data.getField<double>(dimY, i);
-        double z = data.getField<double>(dimZ, i);
-        boost::uint64_t t = data.getField<boost::uint64_t>(dimTime, i);
+        double x = buf.getField<double>(dimX, i);
+        double y = buf.getField<double>(dimY, i);
+        double z = buf.getField<double>(dimZ, i);
+        uint64_t t = buf.getField<uint64_t>(dimTime, i);
 
         BOOST_CHECK_GE(x, 1.0);
         BOOST_CHECK_LE(x, 101.0);
@@ -285,45 +127,48 @@ BOOST_AUTO_TEST_CASE(test_random_mode)
         BOOST_CHECK_LE(z, 103.0);
 
         BOOST_CHECK_EQUAL(t, i);
-        // BOOST_CHECK(x >= 1.0 && x <= 101.0);
-        // BOOST_CHECK(y >= 2.0 && y <= 102.0);
-        // BOOST_CHECK(z >= 3.0 && z <= 103.0);
-        // BOOST_CHECK(t == i);
     }
 
     delete iter;
 }
 
+
 BOOST_AUTO_TEST_CASE(test_ramp_mode_1)
 {
-    Bounds<double> bounds(0,0,0,4,4,4);
-    pdal::drivers::faux::Reader reader(bounds, 2, pdal::drivers::faux::Reader::Ramp);
-    reader.prepare();
+    using namespace pdal;
 
-    const Schema& schema = reader.getSchema();
+    Bounds<double> bounds(0, 0, 0, 4, 4, 4);
+    Options ops;
+    ops.add("bounds", bounds);
+    ops.add("num_points", 2);
+    ops.add("mode", "ramp");
+    drivers::faux::Reader reader(ops);
+    
+    PointContext ctx;
+    reader.prepare(ctx);
 
-    PointBuffer data(schema, 2);
+    PointBuffer buf(ctx);
 
-    StageSequentialIterator* iter = reader.createSequentialIterator(data);
-    boost::uint32_t numRead = iter->read(data);
+    StageSequentialIterator* iter = reader.createSequentialIterator();
+    uint32_t numRead = iter->read(buf, 2);
 
     BOOST_CHECK_EQUAL(numRead, 2u);
 
-    Schema const& buffer_schema = data.getSchema();
-    Dimension const& dimX = buffer_schema.getDimension("X");
-    Dimension const& dimY = buffer_schema.getDimension("Y");
-    Dimension const& dimZ = buffer_schema.getDimension("Z");
-    Dimension const& dimTime = buffer_schema.getDimension("Time");
+    Schema *schema = ctx.schema();
+    Dimension const& dimX = schema->getDimension("X");
+    Dimension const& dimY = schema->getDimension("Y");
+    Dimension const& dimZ = schema->getDimension("Z");
+    Dimension const& dimTime = schema->getDimension("Time");
 
-    const double x0 = data.getField<double>(dimX, 0);
-    const double y0 = data.getField<double>(dimY, 0);
-    const double z0 = data.getField<double>(dimZ, 0);
-    const boost::uint64_t t0 = data.getField<boost::uint64_t>(dimTime, 0);
+    double x0 = buf.getField<double>(dimX, 0);
+    double y0 = buf.getField<double>(dimY, 0);
+    double z0 = buf.getField<double>(dimZ, 0);
+    uint64_t t0 = buf.getField<uint64_t>(dimTime, 0);
 
-    const double x1 = data.getField<double>(dimX, 1);
-    const double y1 = data.getField<double>(dimY, 1);
-    const double z1 = data.getField<double>(dimZ, 1);
-    const boost::uint64_t t1 = data.getField<boost::uint64_t>(dimTime, 1);
+    double x1 = buf.getField<double>(dimX, 1);
+    double y1 = buf.getField<double>(dimY, 1);
+    double z1 = buf.getField<double>(dimZ, 1);
+    uint64_t t1 = buf.getField<uint64_t>(dimTime, 1);
 
     BOOST_CHECK_CLOSE(x0, 0.0, 0.00001);
     BOOST_CHECK_CLOSE(y0, 0.0, 0.00001);
@@ -335,87 +180,53 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode_1)
     BOOST_CHECK_CLOSE(z1, 4.0, 0.00001);
     BOOST_CHECK_EQUAL(t1, 1u);
 
-
     delete iter;
 }
 
 
 BOOST_AUTO_TEST_CASE(test_ramp_mode_2)
 {
+    using namespace pdal;
+
     Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 152.0, 203.0);
-    pdal::drivers::faux::Reader reader(bounds, 750, pdal::drivers::faux::Reader::Ramp);
-    reader.prepare();
+    Options ops;
+    ops.add("bounds", bounds);
+    ops.add("num_points", 750);
+    ops.add("mode", "ramp");
+    drivers::faux::Reader reader(ops);
 
-    const Schema& schema = reader.getSchema();
+    PointContext ctx;
+    reader.prepare(ctx);
 
-    PointBuffer data(schema, 750);
+    PointBuffer buf(ctx);
 
-    StageSequentialIterator* iter = reader.createSequentialIterator(data);
-    boost::uint32_t numRead = iter->read(data);
+    StageSequentialIterator* iter = reader.createSequentialIterator();
+    point_count_t numRead = iter->read(buf, 750);
 
     BOOST_CHECK_EQUAL(numRead,750u);
 
-    Schema const& buffer_schema = data.getSchema();
-    Dimension const& dimX = buffer_schema.getDimension("X");
-    Dimension const& dimY = buffer_schema.getDimension("Y");
-    Dimension const& dimZ = buffer_schema.getDimension("Z");
-    Dimension const& dimTime = buffer_schema.getDimension("Time");
+    Schema *schema = ctx.schema();
+    Dimension const& dimX = schema->getDimension("X");
+    Dimension const& dimY = schema->getDimension("Y");
+    Dimension const& dimZ = schema->getDimension("Z");
+    Dimension const& dimTime = schema->getDimension("Time");
 
     double delX = (101.0 - 1.0) / (750.0 - 1.0);
     double delY = (152.0 - 2.0) / (750.0 - 1.0);
     double delZ = (203.0 - 3.0) / (750.0 - 1.0);
 
-    for (boost::uint32_t i=0; i<numRead; i++)
+    for (point_count_t i = 0; i < numRead; ++i)
     {
-        double x = data.getField<double>(dimX, i);
-        double y = data.getField<double>(dimY, i);
-        double z = data.getField<double>(dimZ, i);
-        boost::uint64_t t = data.getField<boost::uint64_t>(dimTime, i);
+        double x = buf.getField<double>(dimX, i);
+        double y = buf.getField<double>(dimY, i);
+        double z = buf.getField<double>(dimZ, i);
+        uint64_t t = buf.getField<uint64_t>(dimTime, i);
 
-        BOOST_CHECK_CLOSE(x, 1.0 + delX*i, 0.00001);
-        BOOST_CHECK_CLOSE(y, 2.0 + delY*i, 0.00001);
-        BOOST_CHECK_CLOSE(z, 3.0 + delZ*i, 0.00001);
+        BOOST_CHECK_CLOSE(x, 1.0 + delX * i, 0.00001);
+        BOOST_CHECK_CLOSE(y, 2.0 + delY * i, 0.00001);
+        BOOST_CHECK_CLOSE(z, 3.0 + delZ * i, 0.00001);
         BOOST_CHECK_EQUAL(t, i);
-
     }
-
-    delete iter;
-}
-
-
-BOOST_AUTO_TEST_CASE(test_custom_fields)
-{
-    Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
-
-    Dimension dimY("Red", dimension::UnsignedInteger, 1);//DimensionId::Red_u8);
-    dimY.createUUID();
-    Dimension dimX("Blue", dimension::UnsignedInteger, 1);//::Blue_u8);
-    dimX.createUUID();
-    std::vector<Dimension> dims;
-    dims.push_back(dimY);
-    dims.push_back(dimX);
-
-    pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Random, dims);
-    reader.prepare();
-
-    const Schema& schema = reader.getSchema();
-    BOOST_CHECK_EQUAL(schema.getDimensions().size(), 2u);
-}
-
-
-BOOST_AUTO_TEST_CASE(testUnknownPointCountType)
-{
-    Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
-    std::vector<Dimension> dims = pdal::drivers::faux::Reader::getDefaultDimensions();
-    pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Constant,
-                                       dims, true);
-    reader.prepare();
-    BOOST_CHECK_EQUAL(reader.getNumPoints(), 0);
-
-    PointBuffer data(reader.getSchema(), 1250);
-    StageSequentialIterator* iter = reader.createSequentialIterator(data);
-    boost::uint32_t numRead = iter->read(data);
-    BOOST_CHECK_EQUAL(numRead, 1000);
 
     delete iter;
 }

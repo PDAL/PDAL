@@ -25,7 +25,7 @@ SET(PDAL_UNITTEST_TEST_SRC
 #    filters/DecimationFilterTest.cpp
 #    DimensionTest.cpp
 #    EnvironmentTest.cpp
-#    drivers/faux/FauxReaderTest.cpp
+    drivers/faux/FauxReaderTest.cpp
 #    drivers/faux/FauxWriterTest.cpp
 #    FileUtilsTest.cpp
 #    filters/HexbinFilterTest.cpp
