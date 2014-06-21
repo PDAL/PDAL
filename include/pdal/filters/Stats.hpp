@@ -151,7 +151,6 @@ public:
     static Options getDefaultOptions();
 
     boost::property_tree::ptree toPTree() const;
-    void extractMetadata();
     const stats::Summary& getStats(const Dimension& dim) const;
     void reset();
 
@@ -164,6 +163,7 @@ private:
     virtual void ready(PointContext ctx);
     virtual void done(PointContext ctx);
     virtual void filter(PointBuffer& data);
+    void extractMetadata();
 
     std::string m_exact_dim_opt;
     std::string m_dim_opt;

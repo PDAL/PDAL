@@ -33,21 +33,14 @@
 ****************************************************************************/
 
 #include <boost/test/unit_test.hpp>
-#include <boost/cstdint.hpp>
-#include <boost/scoped_ptr.hpp>
 
 #include <pdal/drivers/faux/Reader.hpp>
 #include <pdal/drivers/las/Reader.hpp>
 #include <pdal/filters/InPlaceReprojection.hpp>
-#include <boost/property_tree/json_parser.hpp>
-
-#include "Support.hpp"
-
 #include <pdal/filters/Stats.hpp>
 
-#ifdef PDAL_COMPILER_GCC
-#pragma GCC diagnostic ignored "-Wfloat-equal"
-#endif
+#include "../StageTester.hpp"
+#include "Support.hpp"
 
 using namespace pdal;
 
@@ -56,29 +49,39 @@ BOOST_AUTO_TEST_SUITE(StatsFilterTest)
 BOOST_AUTO_TEST_CASE(StatsFilterTest_test1)
 {
     Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
-    pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Constant);
+    Options ops;
+    ops.add("bounds", bounds);
+    ops.add("num_points", 1000);
+    ops.add("mode", "constant");
+    drivers::faux::Reader reader(ops);
 
-    pdal::filters::Stats filter(Options::none());
+    filters::Stats filter(Options::none());
     filter.setInput(&reader);
     BOOST_CHECK_EQUAL(filter.getName(), "filters.stats");
     BOOST_CHECK_EQUAL(filter.getDescription(), "Statistics Filter");
-    filter.prepare();
 
-    const Schema& schema = filter.getSchema();
-    PointBuffer data(schema, 1000);
+    PointContext ctx;
+    filter.prepare(ctx);
 
-    boost::scoped_ptr<pdal::StageSequentialIterator> iter(filter.createSequentialIterator(data));
-    {
-        boost::uint32_t numRead = iter->read(data);
-        BOOST_CHECK_EQUAL(numRead, 1000u);
+    PointBuffer buf(ctx);
 
-    }
+    std::unique_ptr<StageSequentialIterator>
+        iter(reader.createSequentialIterator());
+    boost::uint32_t numRead = iter->read(buf, 1000);
+    BOOST_CHECK_EQUAL(numRead, 1000u);
 
-    pdal::filters::iterators::sequential::Stats* iterator = static_cast<pdal::filters::iterators::sequential::Stats*>(iter.get());
+    FilterTester::ready(&filter, ctx);
+    FilterTester::filter(&filter, buf);
+    FilterTester::done(&filter, ctx);
 
-    const pdal::filters::stats::Summary& statsX = iterator->getStats(schema.getDimension("X"));
-    const pdal::filters::stats::Summary& statsY = iterator->getStats(schema.getDimension("Y"));
-    const pdal::filters::stats::Summary& statsZ = iterator->getStats(schema.getDimension("Z"));
+    Schema *schema = ctx.schema();
+
+    const filters::stats::Summary& statsX =
+        filter.getStats(schema->getDimension("X"));
+    const filters::stats::Summary& statsY =
+        filter.getStats(schema->getDimension("Y"));
+    const filters::stats::Summary& statsZ =
+        filter.getStats(schema->getDimension("Z"));
 
     BOOST_CHECK_EQUAL(statsX.count(), 1000u);
     BOOST_CHECK_EQUAL(statsY.count(), 1000u);
@@ -98,77 +101,33 @@ BOOST_AUTO_TEST_CASE(StatsFilterTest_test1)
 }
 
 
-
-
-BOOST_AUTO_TEST_CASE(test_random_iterator)
-{
-    pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
-    BOOST_CHECK(reader.getDescription() == "Las Reader");
-
-    pdal::filters::Stats filter;
-    filter.setInput(&reader);
-    filter.prepare();
-
-    const Schema& schema = reader.getSchema();
-
-    PointBuffer data(schema, 3);
-
-    pdal::StageRandomIterator* iter = reader.createRandomIterator(data);
-
-    {
-        boost::uint32_t numRead = iter->read(data);
-        BOOST_CHECK(numRead == 3);
-
-        Support::check_p0_p1_p2(data);
-    }
-
-    // Can we seek it? Yes, we can!
-    iter->seek(100);
-    {
-        BOOST_CHECK(iter->getIndex() == 100);
-        boost::uint32_t numRead = iter->read(data);
-        BOOST_CHECK(numRead == 3);
-
-        Support::check_p100_p101_p102(data);
-    }
-
-    // Can we seek to beginning? Yes, we can!
-    iter->seek(0);
-    {
-        BOOST_CHECK(iter->getIndex() == 0);
-        boost::uint32_t numRead = iter->read(data);
-        BOOST_CHECK(numRead == 3);
-
-        Support::check_p0_p1_p2(data);
-    }
-
-    delete iter;
-}
-
-
 #ifdef PDAL_SRS_ENABLED
 BOOST_AUTO_TEST_CASE(test_multiple_dims_same_name)
 {
     const char* epsg4326_wkt = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4326\"]]";
-    const pdal::SpatialReference out_ref(epsg4326_wkt);
+    const SpatialReference out_ref(epsg4326_wkt);
 
-
-    pdal::Options options;
+    Options options;
     
-    pdal::Option debug("debug", true, "");
-    pdal::Option verbose("verbose", 5, "");
+    Option debug("debug", true, "");
+    Option verbose("verbose", 5, "");
     // options.add(debug);
     // options.add(verbose);
-    pdal::Option out_srs("out_srs",out_ref.getWKT(), "Output SRS to reproject to");
-    pdal::Option spatialreference("spatialreference","EPSG:2993", "Output SRS to reproject to");
-    pdal::Option x_dim("x_dim", std::string("X"), "Dimension name to use for 'X' data");
-    pdal::Option y_dim("y_dim", std::string("Y"), "Dimension name to use for 'Y' data");
-    pdal::Option z_dim("z_dim", std::string("Z"), "Dimension name to use for 'Z' data");
-    pdal::Option x_scale("scale_x", 0.0000001f, "Scale for output X data in the case when 'X' dimension data are to be scaled.  Defaults to '1.0'.  If not set, the Dimensions's scale will be used");
-    pdal::Option y_scale("scale_y", 0.0000001f, "Scale for output Y data in the case when 'Y' dimension data are to be scaled.  Defaults to '1.0'.  If not set, the Dimensions's scale will be used");
+    Option out_srs("out_srs",out_ref.getWKT(), "Output SRS to reproject to");
+    Option spatialreference("spatialreference","EPSG:2993",
+        "Output SRS to reproject to");
+    Option x_dim("x_dim", "X", "Dimension name to use for 'X' data");
+    Option y_dim("y_dim", "Y", "Dimension name to use for 'Y' data");
+    Option z_dim("z_dim", "Z", "Dimension name to use for 'Z' data");
+    Option x_scale("scale_x", 0.0000001f, "Scale for output X data in the "
+        "case when 'X' dimension data are to be scaled.  Defaults to '1.0'.  "
+        "If not set, the Dimensions's scale will be used");
+    Option y_scale("scale_y", 0.0000001f, "Scale for output Y data in the "
+        "case when 'Y' dimension data are to be scaled.  Defaults to '1.0'.  "
+        "If not set, the Dimensions's scale will be used");
 
-    pdal::Option filename("filename", Support::datapath("1.2-with-color.las"), "");
-    pdal::Option ignore("ignore_old_dimensions", false, "");
+    Option filename("filename", Support::datapath("1.2-with-color.las"), "");
+    Option ignore("ignore_old_dimensions", false, "");
     options.add(out_srs);
     options.add(x_dim);
     options.add(y_dim);
@@ -179,35 +138,41 @@ BOOST_AUTO_TEST_CASE(test_multiple_dims_same_name)
     options.add(filename);
     options.add(ignore);
 
-    pdal::drivers::las::Reader reader(options);
-    pdal::filters::InPlaceReprojection reprojectionFilter(options);
+    drivers::las::Reader reader(options);
+    filters::InPlaceReprojection reprojectionFilter(options);
     reprojectionFilter.setInput(&reader);
-    pdal::filters::Stats filter(options);    
+    filters::Stats filter(options);    
     filter.setInput(&reprojectionFilter);
-    filter.prepare();
 
-    const pdal::Schema& schema = filter.getSchema();
-    pdal::PointBuffer data(schema, 1000u);
-    
+    PointContext ctx;
+    filter.prepare(ctx);
 
-    boost::scoped_ptr<pdal::StageSequentialIterator> iter(filter.createSequentialIterator(data));
-    {
-        boost::uint32_t numRead = iter->read(data);
-        BOOST_CHECK_EQUAL(numRead, 1000u);
+    PointBuffer buf(ctx);
 
-    }
+    std::unique_ptr<StageSequentialIterator> iter(
+        reader.createSequentialIterator());
+    point_count_t numRead = iter->read(buf, 1000);
+    BOOST_CHECK_EQUAL(numRead, 1000u);
 
-    pdal::filters::iterators::sequential::Stats* iterator = static_cast<pdal::filters::iterators::sequential::Stats*>(iter.get());
+    FilterTester::ready(&reprojectionFilter, ctx);
+    FilterTester::filter(&reprojectionFilter, buf);
+    FilterTester::done(&reprojectionFilter, ctx);
 
-    const pdal::filters::stats::Summary& statsX = iterator->getStats(schema.getDimension("X"));
-    const pdal::filters::stats::Summary& statsY = iterator->getStats(schema.getDimension("Y"));
-    const pdal::filters::stats::Summary& statsZ = iterator->getStats(schema.getDimension("Z"));
+    FilterTester::ready(&filter, ctx);
+    FilterTester::filter(&filter, buf);
+    FilterTester::done(&filter, ctx);
+
+    Schema *schema = ctx.schema();
+    const filters::stats::Summary& statsX =
+        filter.getStats(schema->getDimension("X"));
+    const filters::stats::Summary& statsY =
+        filter.getStats(schema->getDimension("Y"));
+    const filters::stats::Summary& statsZ =
+        filter.getStats(schema->getDimension("Z"));
 
     BOOST_CHECK_EQUAL(statsX.count(), 1000u);
     BOOST_CHECK_EQUAL(statsY.count(), 1000u);
     BOOST_CHECK_EQUAL(statsZ.count(), 1000u);
-    
-    pdal::Metadata m = iterator->toMetadata();
 }
 #endif
 
@@ -215,28 +180,33 @@ BOOST_AUTO_TEST_CASE(test_multiple_dims_same_name)
 #ifdef PDAL_SRS_ENABLED
 BOOST_AUTO_TEST_CASE(test_specified_stats)
 {
-
     const char* epsg4326_wkt = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4326\"]]";
-    const pdal::SpatialReference out_ref(epsg4326_wkt);
+    const SpatialReference out_ref(epsg4326_wkt);
 
-    pdal::Options options;
+    Options options;
     
-    pdal::Option dimensions("dimensions", "X,drivers.las.reader.Y Z filters.inplacereprojection.X", "");
+    Option dimensions("dimensions",
+        "X,drivers.las.reader.Y Z filters.inplacereprojection.X", "");
 
-    pdal::Option debug("debug", true, "");
-    pdal::Option verbose("verbose", 5, "");
+    Option debug("debug", true);
+    Option verbose("verbose", 5);
     // options.add(debug);
     // options.add(verbose);
-    pdal::Option out_srs("out_srs",out_ref.getWKT(), "Output SRS to reproject to");
-    pdal::Option spatialreference("spatialreference","EPSG:2993", "Output SRS to reproject to");
-    pdal::Option x_dim("x_dim", std::string("X"), "Dimension name to use for 'X' data");
-    pdal::Option y_dim("y_dim", std::string("Y"), "Dimension name to use for 'Y' data");
-    pdal::Option z_dim("z_dim", std::string("Z"), "Dimension name to use for 'Z' data");
-    pdal::Option x_scale("scale_x", 0.0000001f, "Scale for output X data in the case when 'X' dimension data are to be scaled.  Defaults to '1.0'.  If not set, the Dimensions's scale will be used");
-    pdal::Option y_scale("scale_y", 0.0000001f, "Scale for output Y data in the case when 'Y' dimension data are to be scaled.  Defaults to '1.0'.  If not set, the Dimensions's scale will be used");
+    Option out_srs("out_srs",out_ref.getWKT(), "Output SRS to reproject to");
+    Option spatialreference("spatialreference", "EPSG:2993",
+        "Output SRS to reproject to");
+    Option x_dim("x_dim", "X", "Dimension name to use for 'X' data");
+    Option y_dim("y_dim", "Y", "Dimension name to use for 'Y' data");
+    Option z_dim("z_dim", "Z", "Dimension name to use for 'Z' data");
+    Option x_scale("scale_x", 0.0000001f, "Scale for output X data in the "
+        "case when 'X' dimension data are to be scaled.  Defaults to '1.0'.  "
+        "If not set, the Dimensions's scale will be used");
+    Option y_scale("scale_y", 0.0000001f, "Scale for output Y data in the "
+        "case when 'Y' dimension data are to be scaled.  Defaults to '1.0'.  "
+        "If not set, the Dimensions's scale will be used");
 
-    pdal::Option filename("filename", Support::datapath("1.2-with-color.las"), "");
-    pdal::Option ignore("ignore_old_dimensions", false, "");
+    Option filename("filename", Support::datapath("1.2-with-color.las"), "");
+    Option ignore("ignore_old_dimensions", false, "");
     options.add(out_srs);
     options.add(x_dim);
     options.add(y_dim);
@@ -248,30 +218,38 @@ BOOST_AUTO_TEST_CASE(test_specified_stats)
     options.add(ignore);
     options.add(dimensions);
 
-    pdal::drivers::las::Reader reader(options);
+    drivers::las::Reader reader(options);
 
-    pdal::filters::InPlaceReprojection reprojectionFilter(options);
+    filters::InPlaceReprojection reprojectionFilter(options);
     reprojectionFilter.setInput(&reader);
-    pdal::filters::Stats filter(options);
+
+    filters::Stats filter(options);
     filter.setInput(&reprojectionFilter);
-    filter.prepare();
 
-    const pdal::Schema& schema = filter.getSchema();
-    pdal::PointBuffer data(schema, 1000u);
-    
+    PointContext ctx;
+    PointBuffer buf(ctx);
+    filter.prepare(ctx);
 
-    boost::scoped_ptr<pdal::StageSequentialIterator> iter(filter.createSequentialIterator(data));
-    {
-        boost::uint32_t numRead = iter->read(data);
-        BOOST_CHECK_EQUAL(numRead, 1000u);
+    std::unique_ptr<StageSequentialIterator>
+        iter(reader.createSequentialIterator());
+    point_count_t numRead = iter->read(buf, 1000);
+    BOOST_CHECK_EQUAL(numRead, 1000u);
 
-    }
+    FilterTester::ready(&reprojectionFilter, ctx);
+    FilterTester::filter(&reprojectionFilter, buf);
+    FilterTester::done(&reprojectionFilter, ctx);
 
-    pdal::filters::iterators::sequential::Stats* iterator = static_cast<pdal::filters::iterators::sequential::Stats*>(iter.get());
+    FilterTester::ready(&filter, ctx);
+    FilterTester::filter(&filter, buf);
+    FilterTester::done(&filter, ctx);
 
-    const pdal::filters::stats::Summary& statsX = iterator->getStats(data.getSchema().getDimension("filters.inplacereprojection.X"));
-    const pdal::filters::stats::Summary& statsY = iterator->getStats(data.getSchema().getDimension("drivers.las.reader.Y"));
-    const pdal::filters::stats::Summary& statsZ = iterator->getStats(data.getSchema().getDimension("Z"));
+    Schema *schema = ctx.schema();
+    const filters::stats::Summary& statsX =
+        filter.getStats(schema->getDimension("filters.inplacereprojection.X"));
+    const filters::stats::Summary& statsY =
+        filter.getStats(schema->getDimension("drivers.las.reader.Y"));
+    const filters::stats::Summary& statsZ =
+        filter.getStats(schema->getDimension("filters.inplacereprojection.Z"));
 
     BOOST_CHECK_EQUAL(statsX.count(), 1000u);
     BOOST_CHECK_EQUAL(statsY.count(), 1000u);
@@ -282,33 +260,36 @@ BOOST_AUTO_TEST_CASE(test_specified_stats)
 }
 #endif
 
-
 #ifdef PDAL_SRS_ENABLED
 BOOST_AUTO_TEST_CASE(test_pointbuffer_stats)
 {
 
     const char* epsg4326_wkt = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4326\"]]";
-    const pdal::SpatialReference out_ref(epsg4326_wkt);
+    const SpatialReference out_ref(epsg4326_wkt);
 
-    pdal::Options options;
+    Options options;
     
-    pdal::Option dimensions("dimensions", "X,drivers.las.reader.Y Z filters.inplacereprojection.X, Classification", "");
-    pdal::Option exact_dimensions("exact_dimensions", "Classification, X", "");
+    Option dimensions("dimensions", "X,drivers.las.reader.Y Z filters.inplacereprojection.X, Classification", "");
+    Option exact_dimensions("exact_dimensions", "Classification, X", "");
 
     pdal::Option debug("debug", true, "");
     pdal::Option verbose("verbose", 5, "");
     // options.add(debug);
     // options.add(verbose);
-    pdal::Option out_srs("out_srs",out_ref.getWKT(), "Output SRS to reproject to");
-    pdal::Option spatialreference("spatialreference","EPSG:2993", "Output SRS to reproject to");
-    pdal::Option x_dim("x_dim", std::string("X"), "Dimension name to use for 'X' data");
-    pdal::Option y_dim("y_dim", std::string("Y"), "Dimension name to use for 'Y' data");
-    pdal::Option z_dim("z_dim", std::string("Z"), "Dimension name to use for 'Z' data");
-    pdal::Option x_scale("scale_x", 0.0000001f, "Scale for output X data in the case when 'X' dimension data are to be scaled.  Defaults to '1.0'.  If not set, the Dimensions's scale will be used");
-    pdal::Option y_scale("scale_y", 0.0000001f, "Scale for output Y data in the case when 'Y' dimension data are to be scaled.  Defaults to '1.0'.  If not set, the Dimensions's scale will be used");
-
-    pdal::Option filename("filename", Support::datapath("1.2-with-color.las"), "");
-    pdal::Option ignore("ignore_old_dimensions", false, "");
+    Option out_srs("out_srs",out_ref.getWKT(), "Output SRS to reproject to");
+    Option spatialreference("spatialreference","EPSG:2993",
+        "Output SRS to reproject to");
+    Option x_dim("x_dim", "X", "Dimension name to use for 'X' data");
+    Option y_dim("y_dim", "Y", "Dimension name to use for 'Y' data");
+    Option z_dim("z_dim", "Z", "Dimension name to use for 'Z' data");
+    Option x_scale("scale_x", 0.0000001f, "Scale for output X data in the "
+        "case when 'X' dimension data are to be scaled.  Defaults to '1.0'.  "
+        "If not set, the Dimensions's scale will be used");
+    Option y_scale("scale_y", 0.0000001f, "Scale for output Y data in the "
+        "case when 'Y' dimension data are to be scaled.  Defaults to '1.0'.  "
+        "If not set, the Dimensions's scale will be used");
+    Option filename("filename", Support::datapath("1.2-with-color.las"));
+    Option ignore("ignore_old_dimensions", false);
     options.add(out_srs);
     options.add(x_dim);
     options.add(y_dim);
@@ -321,29 +302,36 @@ BOOST_AUTO_TEST_CASE(test_pointbuffer_stats)
     options.add(dimensions);
     options.add(exact_dimensions);
 
-    pdal::drivers::las::Reader reader(options);
+    drivers::las::Reader reader(options);
 
-    pdal::filters::InPlaceReprojection reprojectionFilter(options);
+    filters::InPlaceReprojection reprojectionFilter(options);
     reprojectionFilter.setInput(&reader);
+
     pdal::filters::Stats filter(options);
     filter.setInput(&reprojectionFilter);
-    filter.prepare();
 
-    const pdal::Schema& schema = filter.getSchema();
-    pdal::PointBuffer data(schema, 1000u);
+    PointContext ctx;
+    PointBuffer buf(ctx);
+    filter.prepare(ctx);
 
-    boost::scoped_ptr<pdal::StageSequentialIterator> iter(filter.createSequentialIterator(data));
-    {
-        boost::uint32_t numRead = iter->read(data);
-        BOOST_CHECK_EQUAL(numRead, 1000u);
-
-    }
+    std::unique_ptr<StageSequentialIterator>
+        iter(reader.createSequentialIterator());
+    point_count_t numRead = iter->read(buf, 1000);
+    BOOST_CHECK_EQUAL(numRead, 1000u);
     
-    pdal::Metadata m = data.getMetadata();
-    
-    BOOST_CHECK_EQUAL(m.toPTree().get<int>("metadata.filters_stats.metadata.Classification.metadata.counts.metadata.count-1.metadata.count.value"), 737);
+    FilterTester::ready(&reprojectionFilter, ctx);
+    FilterTester::filter(&reprojectionFilter, buf);
+    FilterTester::done(&reprojectionFilter, ctx);
+
+    FilterTester::ready(&filter, ctx);
+    FilterTester::filter(&filter, buf);
+    FilterTester::done(&filter, ctx);
+
+    MetadataNode m = ctx.metadata();
+    m = m.findChild(
+        "filters.stats:Classification:counts:count-1:count");
+    BOOST_CHECK_EQUAL(m.value(), "737");
 }
 #endif
-
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -352,6 +352,45 @@ public:
         return MetadataNode();
     }
 
+    MetadataNode findChild(const char *s) const
+        { return findChild(std::string(s)); }
+
+    MetadataNode findChild(std::string s) const
+    {
+        auto splitString = [](std::string& s) -> std::string
+        {
+            std::string val;
+            size_t pos = s.find(':');
+            if (pos == std::string::npos)
+            {
+                val = s;
+                s.clear();
+            }
+            else
+            {
+                val = s.substr(0, pos);
+                s = (pos == s.size() - 1) ? "" : s.substr(pos + 1);
+            }
+            return val;
+        };
+
+        if (s.empty())
+            return *this;
+        std::string lname = splitString(s);
+        auto nodes = children();
+        for (auto ai = nodes.begin(); ai != nodes.end(); ++ai)
+        {
+            MetadataNode& n = *ai;
+            if (n.name() == lname)
+            {
+                MetadataNode child = n.findChild(s);
+                if (!child.empty())
+                    return child;
+            }
+        }
+        return MetadataNode();
+    }
+
 private:
     MetadataNodeImplPtr m_impl;
 

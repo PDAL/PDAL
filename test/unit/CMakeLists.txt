@@ -53,7 +53,7 @@ SET(PDAL_UNITTEST_TEST_SRC
     SpatialReferenceTest.cpp
 #    filters/SplitterTest.cpp
 #    StageFactoryTest.cpp
-#    filters/StatsFilterTest.cpp
+    filters/StatsFilterTest.cpp
 #    StreamFactoryTest.cpp
 #    SupportTest.cpp
 #    drivers/terrasolid/TerraSolidReaderTest.cpp
