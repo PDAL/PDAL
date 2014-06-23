@@ -22,7 +22,7 @@ SET(PDAL_UNITTEST_TEST_SRC
 #    filters/ColorFilterTest.cpp
 #    ConfigTest.cpp
     filters/CropFilterTest.cpp
-#    filters/DecimationFilterTest.cpp
+    filters/DecimationFilterTest.cpp
 #    DimensionTest.cpp
 #    EnvironmentTest.cpp
     drivers/faux/FauxReaderTest.cpp

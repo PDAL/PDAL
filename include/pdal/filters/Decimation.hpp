@@ -32,22 +32,14 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_FILTERS_DECIMATIONFILTER_HPP
-#define INCLUDED_FILTERS_DECIMATIONFILTER_HPP
+#pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/FilterIterator.hpp>
-
-namespace pdal
-{
-class PointBuffer;
-}
 
 namespace pdal
 {
 namespace filters
 {
-
 
 // we keep only 1 out of every step points; if step=100, we get 1% of the file
 class PDAL_DLL Decimation : public Filter
@@ -58,90 +50,19 @@ public:
     SET_STAGE_ENABLED(true)
 
     Decimation(const Options&);
-    Decimation(boost::uint32_t step) : m_step(step)
-        {}
-
-    pdal::StageSequentialIterator*
-        createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const;
-
-    boost::uint32_t getStep() const;
-
-    boost::uint32_t processBuffer(PointBuffer& dstData,
-        const PointBuffer& srcData, boost::uint64_t srcStartIndex) const;
 
 private:
-    boost::uint32_t m_step;
+    uint32_t m_step;
+    uint32_t m_offset;
+
+    virtual void processOptions(const Options& options);
+    PointBufferSet run(PointBufferPtr buffer);
+    void decimate(PointBuffer& input, PointBuffer& output);
 
     Decimation& operator=(const Decimation&); // not implemented
     Decimation(const Decimation&); // not implemented
-    virtual void initialize();
 };
-
-
-namespace iterators
-{
-    
-namespace decimation
-{
-
-class PDAL_DLL IteratorBase
-{
-
-public:
-    IteratorBase(pdal::filters::Decimation const& filter, PointBuffer& buffer);
-
-protected:
-    const pdal::filters::Decimation& m_decimationFilter;
-    boost::int64_t m_startingIndex;
-
-    boost::uint32_t decimateData(PointBuffer& buffer, StageSequentialIterator& iterator);        
-
-private:
-    IteratorBase& operator=(IteratorBase const&);
-};
-} // decimation
-namespace sequential
-{
-
-
-class PDAL_DLL Decimation : public pdal::FilterSequentialIterator, public decimation::IteratorBase
-{
-public:
-    Decimation(const pdal::filters::Decimation& filter, PointBuffer& buffer);
-    virtual ~Decimation(){};
-    
-private:
-    boost::uint64_t skipImpl(boost::uint64_t);
-    boost::uint32_t readBufferImpl(PointBuffer&);
-    bool atEndImpl() const;
-};
-
-
-} //sequential
-
-namespace random
-{
-    
-class PDAL_DLL Decimation : public pdal::FilterRandomIterator, public decimation::IteratorBase
-{
-public:
-    Decimation(const pdal::filters::Decimation& filter, PointBuffer& buffer,
-        boost::uint32_t offset);
-    virtual ~Decimation() {};
-
-protected:
-    virtual boost::uint32_t readBufferImpl(PointBuffer& buffer);
-    
-    virtual boost::uint64_t seekImpl(boost::uint64_t);
-
-    boost::uint32_t m_offset;
-};    
-} // random
-
-} // iterators
 
 } // filters
 } // pdal
 
-#endif

@@ -116,6 +116,7 @@ private:
     Dimension *m_dimY;
     Dimension *m_dimZ;
     Dimension *m_dimTime;
+    uint64_t m_time;
     drivers::faux::Mode m_mode;
 
     //ABELL
@@ -123,7 +124,10 @@ private:
         { throw "Tried to call readBufferImpl"; }
 
     uint64_t skipImpl(uint64_t numPts)
-        { return numPts; }
+    {
+        m_time += numPts;
+        return numPts;
+    }
     uint32_t readImpl(PointBuffer& buf, point_count_t count);
     bool atEndImpl() const
         { return false; } //ABELL ?

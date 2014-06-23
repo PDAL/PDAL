@@ -121,7 +121,7 @@ pdal::StageSequentialIterator* Reader::createSequentialIterator() const
 
 
 FauxSeqIterator::FauxSeqIterator(const Bounds<double>& bounds, Schema *schema,
-    drivers::faux::Mode mode) : m_mode(mode)
+    drivers::faux::Mode mode) : m_time(0), m_mode(mode)
 {
     const std::vector<Range<double>>& ranges = bounds.dimensions();
     m_minX = ranges[0].getMinimum();
@@ -174,7 +174,7 @@ point_count_t FauxSeqIterator::readImpl(PointBuffer& buf, point_count_t count)
         buf.setField(*m_dimX, idx, x);
         buf.setField(*m_dimY, idx, y);
         buf.setField(*m_dimZ, idx, z);
-        buf.setField(*m_dimTime, idx, idx);
+        buf.setField(*m_dimTime, idx, m_time++);
     }
     return count;
 }

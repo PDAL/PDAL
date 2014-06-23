@@ -33,14 +33,12 @@
 ****************************************************************************/
 
 #include <boost/test/unit_test.hpp>
-#include <boost/cstdint.hpp>
 
-#include <pdal/StageIterator.hpp>
-#include <pdal/Schema.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/drivers/faux/Reader.hpp>
-#include <pdal/drivers/faux/Writer.hpp>
 #include <pdal/filters/Decimation.hpp>
+
+#include "../StageTester.hpp"
 
 using namespace pdal;
 
@@ -50,63 +48,38 @@ BOOST_AUTO_TEST_CASE(DecimationFilterTest_test1)
 {
     Bounds<double> srcBounds(0.0, 0.0, 0.0, 100.0, 100.0, 100.0);
 
-    pdal::drivers::faux::Reader reader(srcBounds, 1000, pdal::drivers::faux::Reader::Random);
+    Options ops;
+    ops.add("bounds", srcBounds);
+    ops.add("mode", "random");
+    ops.add("num_points", 1000);
+    drivers::faux::Reader reader(ops);
 
-    pdal::filters::Decimation filter(10);
+    Options decimationOps;
+    decimationOps.add("step", 10);
+    filters::Decimation filter(decimationOps);
     filter.setInput(&reader);
     BOOST_CHECK(filter.getDescription() == "Decimation Filter");
-    filter.prepare();
 
-    const Schema& schema = filter.getSchema();
+    PointContext ctx;
+    PointBufferPtr buf(new PointBuffer(ctx));
 
-    PointBuffer data(schema, 3);
+    filter.prepare(ctx);
 
-    StageSequentialIterator* iter = filter.createSequentialIterator(data);
-    boost::uint32_t numRead = iter->read(data);
+    StageSequentialIterator* iter = reader.createSequentialIterator();
+    point_count_t numRead = iter->read(*buf, 30);
 
-    BOOST_CHECK_EQUAL(numRead, 3);
+    BOOST_CHECK_EQUAL(numRead, 30);
 
-    Dimension const& dimT = data.getSchema().getDimension("Time");
+    PointBufferSet pbSet = FilterTester::run(&filter, buf);
+    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    buf = *pbSet.begin();
+    BOOST_CHECK_EQUAL(buf->size(), 3);
 
-    boost::uint64_t t0 = data.getField<boost::uint64_t>(dimT, 0);
-    boost::uint64_t t1 = data.getField<boost::uint64_t>(dimT, 1);
-    boost::uint64_t t2 = data.getField<boost::uint64_t>(dimT, 2);
+    Dimension const& dimT = ctx.schema()->getDimension("Time");
 
-    BOOST_CHECK_EQUAL(t0, 0);
-    BOOST_CHECK_EQUAL(t1, 10);
-    BOOST_CHECK_EQUAL(t2, 20);
-
-    delete iter;
-}
-
-BOOST_AUTO_TEST_CASE(DecimationFilterTest_test_options)
-{
-    Bounds<double> srcBounds(0.0, 0.0, 0.0, 100.0, 100.0, 100.0);
-
-    pdal::drivers::faux::Reader reader(srcBounds, 1000, pdal::drivers::faux::Reader::Random);
-
-    pdal::Option opt("step", "10");
-    pdal::Options opts(opt);
-    pdal::filters::Decimation filter(opts);
-    filter.setInput(&reader);
-    BOOST_CHECK(filter.getDescription() == "Decimation Filter");
-    filter.prepare();
-
-    const Schema& schema = filter.getSchema();
-
-    PointBuffer data(schema, 3);
-
-    StageSequentialIterator* iter = filter.createSequentialIterator(data);
-    boost::uint32_t numRead = iter->read(data);
-
-    BOOST_CHECK_EQUAL(numRead, 3);
-    BOOST_CHECK_EQUAL(data.getCapacity(), 3);
-    BOOST_CHECK_EQUAL(data.getNumPoints(), 3);
-    
-    Dimension const& dimT = data.getSchema().getDimension("Time");
-    boost::uint64_t t0 = data.getField<boost::uint64_t>(dimT, 0);
-    boost::uint64_t t1 = data.getField<boost::uint64_t>(dimT, 1);
-    boost::uint64_t t2 = data.getField<boost::uint64_t>(dimT, 2);
+    uint64_t t0 = buf->getFieldAs<uint64_t>(dimT, 0);
+    uint64_t t1 = buf->getFieldAs<uint64_t>(dimT, 1);
+    uint64_t t2 = buf->getFieldAs<uint64_t>(dimT, 2);
 
     BOOST_CHECK_EQUAL(t0, 0);
     BOOST_CHECK_EQUAL(t1, 10);
@@ -119,44 +92,48 @@ BOOST_AUTO_TEST_CASE(DecimationFilterTest_test_options)
 BOOST_AUTO_TEST_CASE(DecimationFilterTest_test_random)
 {
     Bounds<double> srcBounds(0.0, 0.0, 0.0, 100.0, 100.0, 100.0);
-    
+    Options ops;
+    ops.add("bounds", srcBounds);
+    ops.add("num_points", 1000);
+    ops.add("mode", "random");
     
     // FIXME: Skipping with decimation filter isn't working correctly right now
-    pdal::drivers::faux::Reader reader(srcBounds, 1000, pdal::drivers::faux::Reader::Random);
+    drivers::faux::Reader reader(ops);
 
-    pdal::Option step("step", "10");
-    pdal::Option offset("offset", 1);
-    pdal::Options opts;
-    opts.add(step);
-    opts.add(offset);
-    pdal::Option debug("debug", true, "");
-    pdal::Option verbose("verbose", 9, "");
+    Options decimationOps;
+    decimationOps.add("step", 10);
+    decimationOps.add("offset", 1);
+    Option debug("debug", true, "");
+    Option verbose("verbose", 9, "");
     // opts.add(debug);
     // opts.add(verbose);
-    pdal::filters::Decimation filter(opts);
+    filters::Decimation filter(decimationOps);
     filter.setInput(&reader);
     BOOST_CHECK(filter.getDescription() == "Decimation Filter");
-    filter.prepare();
 
-    const Schema& schema = filter.getSchema();
+    PointContext ctx;
+    PointBufferPtr buf(new PointBuffer(ctx));
+    filter.prepare(ctx);
 
-    PointBuffer data(schema, 3);
+    StageSequentialIterator* iter = reader.createSequentialIterator();
+    iter->skip(7);
+    point_count_t numRead = iter->read(*buf, 50);
 
-    StageRandomIterator* iter = filter.createRandomIterator(data);
-    iter->seek(7);
-    boost::uint32_t numRead = iter->read(data);
+    BOOST_CHECK(numRead == 50);
 
-    BOOST_CHECK(numRead == 3);
+    Dimension const& dimT = ctx.schema()->getDimension("Time");
 
-    Dimension const& dimT = data.getSchema().getDimension("Time");
+    PointBufferSet pbSet = FilterTester::run(&filter, buf);
+    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    buf = *pbSet.begin();
 
-    boost::uint64_t t0 = data.getField<boost::uint64_t>(dimT, 0);
-    boost::uint64_t t1 = data.getField<boost::uint64_t>(dimT, 1);
-    boost::uint64_t t2 = data.getField<boost::uint64_t>(dimT, 2);
+    uint64_t t0 = buf->getFieldAs<uint64_t>(dimT, 0);
+    uint64_t t1 = buf->getFieldAs<uint64_t>(dimT, 1);
+    uint64_t t2 = buf->getFieldAs<uint64_t>(dimT, 2);
 
-    // BOOST_CHECK_EQUAL(t0, 8);
-    // BOOST_CHECK_EQUAL(t1, 18);
-    // BOOST_CHECK_EQUAL(t2, 28);
+    BOOST_CHECK_EQUAL(t0, 8);
+    BOOST_CHECK_EQUAL(t1, 18);
+    BOOST_CHECK_EQUAL(t2, 28);
 
     delete iter;
 }
