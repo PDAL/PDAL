@@ -33,19 +33,12 @@
 ****************************************************************************/
 
 #include <boost/test/unit_test.hpp>
-#include <boost/cstdint.hpp>
 
 #include <pdal/filters/Splitter.hpp>
-#include <pdal/drivers/las/Writer.hpp>
-#include <pdal/filters/Cache.hpp>
 #include <pdal/drivers/las/Reader.hpp>
-#include <pdal/Options.hpp>
 
+#include "../StageTester.hpp"
 #include "Support.hpp"
-
-#ifdef PDAL_COMPILER_GCC
-#pragma GCC diagnostic ignored "-Wfloat-equal"
-#endif
 
 using namespace pdal;
 
@@ -54,68 +47,52 @@ BOOST_AUTO_TEST_SUITE(SplitterTest)
 BOOST_AUTO_TEST_CASE(test_tile_filter)
 {
     // create the reader
-    pdal::drivers::las::Reader r(Support::datapath("1.2-with-color.las"));
+    drivers::las::Reader r(Support::datapath("1.2-with-color.las"));
 
+    Options o;
+    Option length("length", 1000, "length");
+    o.add(length);
+
+    // create the tile filter and prepare
+    pdal::filters::Splitter s(o);
+    s.setInput(&r);
+
+    PointContext ctx;
+    PointBufferPtr buf(new PointBuffer(ctx));
+    s.prepare(ctx);
+
+    StageTester::ready(&r, ctx);
+    PointBufferSet pbSet = StageTester::run(&r, buf);
+    StageTester::done(&r, ctx);
+    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    buf = *pbSet.begin();
+
+    StageTester::ready(&s, ctx);
+    pbSet = StageTester::run(&s, buf);
+    StageTester::done(&s, ctx);
+
+    std::vector<PointBufferPtr> buffers;
+    for (auto it = pbSet.begin(); it != pbSet.end(); ++it)
+        buffers.push_back(*it);
+
+    auto sorter = [](PointBufferPtr p1, PointBufferPtr p2)
     {
-        // need to scope the writer, so that's it dtor can use the stream
+        pdal::Bounds<double> b1 = p1->getSpatialBounds();
+        pdal::Bounds<double> b2 = p2->getSpatialBounds();
 
-        // create the options
-        pdal::Options o;
-        pdal::Option length("length", 1000, "length");
-        o.add(length);
+        return b1.getMinimum(0) < b2.getMinimum(0) ?  true :
+            b1.getMinimum(0) > b2.getMinimum(0) ? false :
+            b1.getMinimum(1) < b2.getMinimum(1);
+    };
+    std::sort(buffers.begin(), buffers.end(), sorter);
 
-        // create the tile filter and prepare
-        pdal::filters::Splitter s(o);
-        s.setInput(&r);
-        s.prepare();
-
-        // get the bounds of the entire dataset
-        pdal::Bounds<double> const& b = s.getPrevStage().getBounds();
-
-        // verify bounds
-        BOOST_CHECK_CLOSE(b.getMinimum(0), 635619.85, 0.05);
-        BOOST_CHECK_CLOSE(b.getMaximum(0), 638982.55, 0.05);
-        BOOST_CHECK_CLOSE(b.getMinimum(1), 848899.70, 0.05);
-        BOOST_CHECK_CLOSE(b.getMaximum(1), 853535.43, 0.05);
-        BOOST_CHECK_CLOSE(b.getMinimum(2), 406.59, 0.05);
-        BOOST_CHECK_CLOSE(b.getMaximum(2), 586.38, 0.05);
-
-        // create buffer and generate tiles
-        PointBuffer buffer(s.getSchema(), s.getNumPoints());
-        PointBuffer tiled_buffer(s.getSchema(), s.getNumPoints());
-        s.generateTiles(buffer, tiled_buffer);
-
-        // verify the correct number of tiles computed at the given tile size
-        BOOST_CHECK(s.getTileCount() == 24);
-
-        // tiled buffer is the same size as the input buffer
-        BOOST_CHECK(buffer.getNumPoints() == tiled_buffer.getNumPoints());
-
-        // check block point counts - how many points are allocated within each tile
-        BOOST_CHECK(s.getTile(0).getNumPoints() ==  1);  // lower left xy: 635000, 848000
-        BOOST_CHECK(s.getTile(1).getNumPoints() ==  3);  // lower left xy: 636000, 848000
-        BOOST_CHECK(s.getTile(2).getNumPoints() ==  4);  // lower left xy: 637000, 848000
-        BOOST_CHECK(s.getTile(3).getNumPoints() ==  4);  // lower left xy: 638000, 848000
-        BOOST_CHECK(s.getTile(4).getNumPoints() == 25);  // lower left xy: 635000, 849000
-        BOOST_CHECK(s.getTile(5).getNumPoints() == 57);  // lower left xy: 636000, 849000
-        BOOST_CHECK(s.getTile(6).getNumPoints() == 70);  // lower left xy: 637000, 849000
-        BOOST_CHECK(s.getTile(7).getNumPoints() == 58);  // lower left xy: 638000, 849000
-        BOOST_CHECK(s.getTile(8).getNumPoints() == 24);  // lower left xy: 635000, 850000
-        BOOST_CHECK(s.getTile(9).getNumPoints() == 78);  // lower left xy: 636000, 850000
-        BOOST_CHECK(s.getTile(10).getNumPoints() == 87); // lower left xy: 637000, 850000
-        BOOST_CHECK(s.getTile(11).getNumPoints() == 67); // lower left xy: 638000, 850000
-        BOOST_CHECK(s.getTile(12).getNumPoints() == 25); // lower left xy: 635000, 851000
-        BOOST_CHECK(s.getTile(13).getNumPoints() == 71); // lower left xy: 636000, 851000
-        BOOST_CHECK(s.getTile(14).getNumPoints() == 72); // lower left xy: 637000, 851000
-        BOOST_CHECK(s.getTile(15).getNumPoints() == 62); // lower left xy: 638000, 851000
-        BOOST_CHECK(s.getTile(16).getNumPoints() == 24); // lower left xy: 635000, 852000
-        BOOST_CHECK(s.getTile(17).getNumPoints() == 74); // lower left xy: 636000, 852000
-        BOOST_CHECK(s.getTile(18).getNumPoints() == 62); // lower left xy: 637000, 852000
-        BOOST_CHECK(s.getTile(19).getNumPoints() == 70); // lower left xy: 638000, 852000
-        BOOST_CHECK(s.getTile(20).getNumPoints() == 10); // lower left xy: 635000, 853000
-        BOOST_CHECK(s.getTile(21).getNumPoints() == 46); // lower left xy: 636000, 853000
-        BOOST_CHECK(s.getTile(22).getNumPoints() == 34); // lower left xy: 637000, 853000
-        BOOST_CHECK(s.getTile(23).getNumPoints() == 37); // lower left xy: 638000, 853000
+    BOOST_CHECK_EQUAL(buffers.size(), 15);
+    int counts[] = {27, 24, 26, 27, 10, 141, 166, 142, 132, 76, 63, 67, 60,
+        70, 34 };
+    for (size_t i = 0; i < buffers.size(); ++i)
+    {
+        PointBufferPtr& buf = buffers[i];
+        BOOST_CHECK_EQUAL(buf->size(), counts[i]);
     }
 }
 

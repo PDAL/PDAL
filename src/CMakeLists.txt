@@ -553,8 +553,6 @@ set(PDAL_FILTERS_HPP
 )
 
 set (PDAL_FILTERS_CPP 
-  "${PDAL_FILTERS_SRC}/ByteSwap.cpp"
-  "${PDAL_FILTERS_SRC}/Cache.cpp"
   "${PDAL_FILTERS_SRC}/Chipper.cpp"
   "${PDAL_FILTERS_SRC}/Color.cpp"
   "${PDAL_FILTERS_SRC}/Crop.cpp"

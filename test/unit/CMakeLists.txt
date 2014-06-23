@@ -15,8 +15,6 @@ SET(PDAL_UNITTEST_TEST_SRC
     BoundsTest.cpp
     drivers/bpf/BPFTest.cpp
 #    drivers/buffer/BufferReaderTest.cpp
-#    filters/ByteSwapFilterTest.cpp
-#    filters/CacheFilterTest.cpp
 #    drivers/caris/CarisReaderTest.cpp
     filters/ChipperTest.cpp
 #    filters/ColorFilterTest.cpp
@@ -51,7 +49,7 @@ SET(PDAL_UNITTEST_TEST_SRC
 #    SchemaLayoutTest.cpp
 #    SchemaTest.cpp
     SpatialReferenceTest.cpp
-#    filters/SplitterTest.cpp
+    filters/SplitterTest.cpp
 #    StageFactoryTest.cpp
     filters/StatsFilterTest.cpp
 #    StreamFactoryTest.cpp

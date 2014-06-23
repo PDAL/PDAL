@@ -48,9 +48,18 @@ public:
     SET_STAGE_LINK("http://pdal.io/stages/filters.cache.html")
     SET_STAGE_ENABLED(true)
     
-    Cache(const Options&);
+    Cache(const Options& options) : Filter(options)
+        { std::cerr << "Cache filter is deprecated.\n"; }
 
-    static Options getDefaultOptions();
+    static Options getDefaultOptions()
+    {
+        Options options;
+        Option max_cache_blocks("max_cache_blocks", 1);
+        Option cache_block_size("cache_block_size", 32768);
+        options.add(max_cache_blocks);
+        options.add(cache_block_size);
+        return options;
+    }
 
 private:
     virtual void filter(PointBuffer& buffer)

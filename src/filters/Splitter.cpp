@@ -44,29 +44,9 @@ namespace pdal
 namespace filters
 {
 
-Splitter::Splitter(Options const& options)
-    : pdal::Filter(options)
-    , m_leaf_size(0)
-    , m_inverse_leaf_size(0)
-    , m_min_b_x(0)
-    , m_min_b_y(0)
-    , m_max_b_x(0)
-    , m_max_b_y(0)
-    , m_div_b_x(0)
-    , m_div_b_y(0)
-    , m_divb_mul_x(0)
-    , m_divb_mul_y(0)
+void Splitter::processOptions(const Options& options)
 {
-    m_length = options.getValueOrDefault<boost::uint32_t>("length", 1000);
-}
-
-void Splitter::initialize()
-{
-    if (m_length == 0)
-    {
-        throw pdal_error("splitter length cannot be 0!");
-    }
-    setLeafSize(m_length);
+    m_length = options.getValueOrDefault<uint32_t>("length", 1000);
 }
 
 
@@ -79,246 +59,64 @@ Options Splitter::getDefaultOptions()
     return options;
 }
 
-struct tile_point_idx
+
+void Splitter::ready(PointContext ctx)
 {
-    boost::uint32_t tile_idx;
-    boost::uint32_t point_idx;
+    m_xDim = ctx.schema()->getDimensionPtr("X");
+    m_yDim = ctx.schema()->getDimensionPtr("Y");
+}
 
-    tile_point_idx(boost::uint32_t tile_idx_,
-                   boost::uint32_t point_idx_)
-        : tile_idx(tile_idx_)
-        , point_idx(point_idx_) {};
-    bool operator < (const tile_point_idx &p) const
-    {
-        return (tile_idx < p.tile_idx);
-    }
-};
 
-void Splitter::generateTiles(PointBuffer& buffer, PointBuffer& tiled_buffer)
+PointBufferSet Splitter::run(PointBufferPtr buf)
 {
-    boost::uint64_t count = getPrevStage().getNumPoints();
-    if (count > std::numeric_limits<boost::uint32_t>::max())
-        throw pdal_error("numPoints too large for Splitter");
+    PointBufferSet pbSet;
+    if (!buf->size())
+        return pbSet;
 
-    Schema const& schema = buffer.getSchema();
-    Dimension const& dimX = schema.getDimension("X");
-    Dimension const& dimY = schema.getDimension("Y");
-
-    // get bounds of the entire dataset
-    Bounds<double> const& b = getPrevStage().getBounds();
-    double minx = b.getMinimum(0);
-    double maxx = b.getMaximum(0);
-    double miny = b.getMinimum(1);
-    double maxy = b.getMaximum(1);
-
-    // check that the leaf size is not too small
-    boost::int64_t dx = static_cast<boost::int64_t>((maxx-minx) * m_inverse_leaf_size)+1;
-    boost::int64_t dy = static_cast<boost::int64_t>((maxy-miny) * m_inverse_leaf_size)+1;
-    if ((dx*dy) > static_cast<boost::int64_t>(std::numeric_limits<boost::int32_t>::max()))
-        throw pdal_error("Leaf size too small for the input dataset. Integer indices would overflow.");
-
-    // compute the minimum and maximum bounding box values
-    m_min_b_x = static_cast<boost::uint32_t>(std::floor(minx * m_inverse_leaf_size));
-    m_max_b_x = static_cast<boost::uint32_t>(std::floor(maxx * m_inverse_leaf_size));
-    m_min_b_y = static_cast<boost::uint32_t>(std::floor(miny * m_inverse_leaf_size));
-    m_max_b_y = static_cast<boost::uint32_t>(std::floor(maxy * m_inverse_leaf_size));
-
-    // compute the number of divisions in x and y
-    m_div_b_x = m_max_b_x - m_min_b_x + 1;
-    m_div_b_y = m_max_b_y - m_min_b_y + 1;
-
-    // setup the division multiplier
-    m_divb_mul_x = 1;
-    m_divb_mul_y = m_div_b_x;
-
-    // create index_vector to collect indices of points falling within each tile
-    std::vector<tile_point_idx> index_vector;
-    index_vector.reserve(buffer.getNumPoints());
-
-    // we want to use the incoming buffer because we probably
-    // have a cache filter on here, so we want to only read
-    // all the data one time.
-    boost::scoped_ptr<StageSequentialIterator> iter(getPrevStage().createSequentialIterator(buffer));
-
-    // go over all points and insert them into the index_vector with calculated idx
-    // points with the same idx lie within the same tile
-    boost::uint32_t counter(0);
-    while (!iter->atEnd())
+    typedef std::pair<int, int> Coord;
+    auto CoordCompare = [](const Coord& c1, const Coord& c2) -> bool
     {
-        boost::uint32_t numRead =  iter->read(buffer);
+        return c1.first < c2.first ? true :
+            c1.first > c2.first ? false :
+            c1.second < c2.second ? true :
+            false;
+    };
+    std::map<Coord, PointBufferPtr, decltype(CoordCompare)>
+        buffers(CoordCompare);
 
-        double x(0.0);
-        double y(0.0);
-        for (boost::uint32_t j = 0; j < numRead; j++)
-        {
-            x = buffer.applyScaling(dimX, j);
-            y = buffer.applyScaling(dimY, j);
+    // Use the location of the first point as the origin.
+    double xOrigin = buf->getFieldAs<double>(*m_xDim, 0);
+    double yOrigin = buf->getFieldAs<double>(*m_yDim, 0);
 
-            boost::uint32_t ij0 = static_cast<boost::uint32_t>(std::floor(x * m_inverse_leaf_size) - static_cast<float>(m_min_b_x));
-            boost::uint32_t ij1 = static_cast<boost::uint32_t>(std::floor(y * m_inverse_leaf_size) - static_cast<float>(m_min_b_y));
-
-            boost::uint32_t tile_idx = ij0 * m_divb_mul_x + ij1 * m_divb_mul_y;
-            index_vector.push_back(tile_point_idx(static_cast<boost::uint32_t>(tile_idx), counter));
-
-            counter++;
-        }
-
-        if (iter->atEnd())
-        {
-            break;
-        }
+    // Overlay a grid of squares on the points (m_length sides).  Each square
+    // corresponds to a new point buffer.  Place the points falling in the
+    // each square in the corresponding point buffer.
+    for (PointId idx = 0; idx < buf->size(); idx++)
+    {
+        int xpos = (buf->getFieldAs<double>(*m_xDim, idx) - xOrigin) / m_length;
+        int ypos = (buf->getFieldAs<double>(*m_yDim, idx) - yOrigin) / m_length;
+        Coord loc(xpos, ypos);
+        PointBufferPtr& outbuf = buffers[loc];
+        if (!outbuf)
+            outbuf.reset(new PointBuffer(buf->context()));
+        outbuf->appendPoint(*buf, idx);
     }
 
-    // sort index_vector by target cell, all points belonging to the same cell will be adjacent
-    std::sort(index_vector.begin(), index_vector.end(), std::less<tile_point_idx>());
-
-    // count output cells
-    boost::uint32_t index = 0;
-    std::vector<std::pair<boost::uint32_t, boost::uint32_t> > first_and_last_indices_vector;
-    first_and_last_indices_vector.reserve(index_vector.size());
-    while (index < index_vector.size())
+    // Pull the buffers out of the map and stick them in the standard
+    // output set, setting the bounds as we go.
+    for (auto bi = buffers.begin(); bi != buffers.end(); ++bi)
     {
-        boost::uint32_t i = index + 1;
-        while (i < index_vector.size() && index_vector[i].tile_idx == index_vector[index].tile_idx)
-            ++i;
-        first_and_last_indices_vector.push_back(std::pair<boost::uint32_t, boost::uint32_t>(index, i-1));
-        index = i;
+        PointBufferPtr buf = bi->second;
+        Coord coord = bi->first;
+        Bounds<double> bounds(coord.first + xOrigin, coord.second + yOrigin,
+            coord.first + xOrigin + m_length,
+            coord.second + yOrigin + m_length);
+        buf->setSpatialBounds(bounds);
+        pbSet.insert(buf);
     }
-
-    PointBuffer outputData(buffer.getSchema(), buffer.getCapacity());
-    outputData.setNumPoints(0);
-
-    boost::uint32_t fidx = 0;
-    boost::uint32_t lidx = 0;
-
-    for (boost::uint32_t cp = 0; cp < first_and_last_indices_vector.size(); ++cp)
-    {
-        boost::uint32_t first_index = first_and_last_indices_vector[cp].first;
-        boost::uint32_t last_index = first_and_last_indices_vector[cp].second;
-
-        boost::uint32_t tile_size = last_index - first_index + 1;
-
-        PointBuffer tmpData(buffer.getSchema(), tile_size);
-        tmpData.setNumPoints(0);
-
-        boost::uint32_t ii = 0;
-        for (boost::uint32_t j = first_index; j <= last_index; ++j)
-        {
-            tmpData.copyPointFast(ii, index_vector[j].point_idx, buffer);
-            ii++;
-        }
-        tmpData.setNumPoints(tile_size);
-
-        outputData.copyPointsFast(outputData.getNumPoints(), 0, tmpData, tmpData.getNumPoints());
-        outputData.setNumPoints(outputData.getNumPoints() + tmpData.getNumPoints());
-
-        lidx = fidx + tile_size-1;
-
-        pdal::filters::splitter::Tile t;
-        t.m_first = fidx;
-        t.m_last = lidx;
-        m_tiles.push_back(t);
-
-        fidx = lidx+1;
-    }
-
-    tiled_buffer.resize(outputData.getNumPoints());
-    tiled_buffer.setNumPoints(0);
-    tiled_buffer.copyPointsFast(0, 0, outputData, outputData.getNumPoints());
-    tiled_buffer.setNumPoints(outputData.getNumPoints());
-
-    return;
+    return pbSet;
 }
 
-pdal::StageRandomIterator* Splitter::createRandomIterator(PointBuffer&) const
-{
-    throw iterator_not_found("Splitter random iterator not implemented");
-}
-
-pdal::StageSequentialIterator* Splitter::createSequentialIterator(PointBuffer& buffer) const
-{
-    return new pdal::filters::iterators::sequential::Splitter(*this, buffer);
-}
-
-namespace iterators
-{
-namespace sequential
-{
-
-Splitter::Splitter(pdal::filters::Splitter const& filter, PointBuffer& buffer)
-    : pdal::FilterSequentialIterator(filter, buffer)
-    , m_splitter(filter)
-    , m_currentTileId(0)
-    , m_tiled_buffer(0)
-{
-
-    m_tiled_buffer = new PointBuffer(buffer.getSchema(), buffer.getNumPoints());
-    const_cast<pdal::filters::Splitter&>(m_splitter).generateTiles(buffer, *m_tiled_buffer);
-
-    m_splitter.log()->get(logDEBUG3) << "generated temporary tiled buffer with " << m_splitter.getTileCount()
-                                     << " tiles\n";
-
-    return;
-}
-
-boost::uint64_t Splitter::skipImpl(boost::uint64_t count)
-{
-    // Skipping points doesn't make much sense when the splitter works in
-    // terms of tiles.
-    assert(false);
-    return 0;
-}
-
-boost::uint32_t Splitter::fillUserBuffer(PointBuffer& buffer,
-        filters::splitter::Tile const& tile)
-{
-    boost::uint32_t numPointsThisTile = tile.getNumPoints();
-
-    buffer.resize(numPointsThisTile);
-    buffer.setNumPoints(0);
-    buffer.copyPointsFast(0, tile.first(), *m_tiled_buffer, numPointsThisTile);
-    buffer.setNumPoints(numPointsThisTile);
-
-    return numPointsThisTile;
-}
-
-boost::uint32_t Splitter::readBufferImpl(PointBuffer& buffer)
-{
-    if (m_currentTileId == m_splitter.getTileCount())
-        return 0; // we're done
-
-    filters::splitter::Tile const& tile = m_splitter.getTile(m_currentTileId);
-    boost::uint32_t numPointsThisTile = tile.getNumPoints();
-
-    boost::uint32_t numRead = fillUserBuffer(buffer, tile);
-
-    //buffer.setSpatialBounds(tile.getBounds());
-    buffer.setNumPoints(numRead);
-
-    m_splitter.log()->get(logDEBUG3) << "filled tile " << m_currentTileId
-                                     << " of " << m_splitter.getTileCount()
-                                     << " with " << numRead << " points\n";
-
-    m_currentTileId++;
-
-    return numRead;
-}
-
-bool Splitter::atEndImpl() const
-{
-    if (m_currentTileId == m_splitter.getTileCount())
-        return true;
-    else
-        return false;
-}
-
-Splitter::~Splitter()
-{
-    delete m_tiled_buffer;
-}
-
-} // sequential
-} // iterators
 
 } // filters
 } // pdal
