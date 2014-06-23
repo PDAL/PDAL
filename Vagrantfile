@@ -22,10 +22,10 @@ end
 
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-  config.vm.box = "precise64"
+  config.vm.box = "trusty64"
 
   config.vm.hostname = "pdal-vagrant"
-  config.vm.box_url = "http://files.vagrantup.com/precise64.box"
+  config.vm.box_url = "https://vagrantcloud.com/ubuntu/trusty64/version/1/provider/virtualbox.box"  
   config.vm.host_name = "pdal-vagrant"
 
   # Set the bash environment variable PDAL_VAGRANT_SSH_FORWARD_AGENT to any
@@ -103,9 +103,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.vm.synced_folder ".", "/vagrant", type: "smb"
   end
   
-
   ppaRepos = [
-    "ppa:ubuntugis/ppa",
+    "ppa:ubuntugis/ubuntugis-unstable",
     "ppa:boost-latest/ppa"
   ]
 
@@ -122,15 +121,15 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     "libproj-dev",
     "libtiff4-dev",
     "libxml2-dev",
-    "boost1.55",
+    "libboost-all-dev",
     "libbz2-dev",
     "libsqlite0-dev",
     "cmake-curses-gui",
     "screen",
     "postgis",
     "libcunit1-dev",
-    "postgresql-server-dev-9.1",
-    "postgresql-9.1-postgis",
+    "postgresql-server-dev-9.3",
+    "postgresql-9.3-postgis-2.1",
     "libmsgpack-dev",
     "libgeos++-dev",
     "vim",
