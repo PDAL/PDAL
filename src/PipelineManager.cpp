@@ -173,15 +173,17 @@ Stage* PipelineManager::getStage() const
 }
 
 
-boost::uint64_t PipelineManager::execute()
+point_count_t PipelineManager::execute()
 {
-    PointContext ctx;
-
-    if (!isWriterPipeline())
-        throw pdal_error("This pipeline does not have a writer, unable "
-            "to execute");
-    getWriter()->prepare(ctx);
-    return getWriter()->write(0);
+    m_lastStage->prepare(m_context);
+    m_pbSet = m_lastStage->execute(m_context);
+    point_count_t cnt = 0;
+    for (auto pi = m_pbSet.begin(); pi != m_pbSet.end(); ++pi)
+    {
+        PointBufferPtr buf = *pi;
+        cnt += buf->size();
+    }
+    return cnt;
 }
 
 

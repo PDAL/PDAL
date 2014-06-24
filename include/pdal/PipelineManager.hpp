@@ -32,8 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_PIPELINEMANAGER_HPP
-#define INCLUDED_PIPELINEMANAGER_HPP
+#pragma once
 
 #include <pdal/pdal_internal.hpp>
 #include <pdal/StageFactory.hpp>
@@ -41,15 +40,12 @@
 #include <boost/shared_ptr.hpp>
 
 #include <vector>
-#include <map>
 #include <string>
-
 
 namespace pdal
 {
 
 class Options;
-
 
 class PDAL_DLL PipelineManager
 {
@@ -59,9 +55,12 @@ public:
 
     // Use these to manually add stages into the pipeline manager.
     Reader* addReader(const std::string& type, const Options&);
-    Filter* addFilter(const std::string& type, Stage& prevStage, const Options&);
-    MultiFilter* addMultiFilter(const std::string& type, const std::vector<Stage*>& prevStages, const Options&);
-    Writer* addWriter(const std::string& type, Stage& prevStage, const Options&);
+    Filter* addFilter(const std::string& type, Stage& prevStage,
+        const Options&);
+    MultiFilter* addMultiFilter(const std::string& type,
+        const std::vector<Stage*>& prevStages, const Options&);
+    Writer* addWriter(const std::string& type, Stage& prevStage,
+        const Options&);
     
     void removeWriter();
     // returns true if the pipeline endpoint is a writer
@@ -73,14 +72,20 @@ public:
     // return the pipeline reader endpoint (or NULL, if not a reader pipeline)
     Stage* getStage() const;
 
-    // for writer pipelines, this convenience function calls getWriter()->write() so that
-    // the user doesn't even need to know anything about the Writer class
-    boost::uint64_t execute();
-    
+    point_count_t execute();
+
+    // Get the schema.
+    Schema *schema() const
+        { return m_context.schema(); }
+
+    // Get the resulting point buffers.
+    const PointBufferSet& buffers() const
+        { return m_pbSet; }
 
 private:
     StageFactory m_factory;
     PointContext m_context;
+    PointBufferSet m_pbSet;
 
     typedef std::vector<Reader*> ReaderList;
     typedef std::vector<Filter*> FilterList;
@@ -99,10 +104,8 @@ private:
     PipelineManager(const PipelineManager&); // not implemented
 
     void registerPluginIfExists( const Options& options );
-    
 };
 
 
 } // namespace pdal
 
-#endif

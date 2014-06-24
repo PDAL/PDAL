@@ -44,7 +44,7 @@ SET(PDAL_UNITTEST_TEST_SRC
     filters/ReprojectionFilterTest.cpp
 #    drivers/sbet/SbetReaderTest.cpp
 #    drivers/sbet/SbetWriterTest.cpp
-#    filters/ScalingFilterTest.cpp
+    filters/ScalingFilterTest.cpp
     filters/SelectorFilterTest.cpp
 #    SchemaLayoutTest.cpp
 #    SchemaTest.cpp

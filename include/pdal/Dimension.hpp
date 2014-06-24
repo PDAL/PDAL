@@ -156,6 +156,16 @@ public:
         return m_name;
     }
 
+    void setInterpretation(dimension::Interpretation interp)
+    {
+        m_interpretation = interp;
+    }
+
+    void setByteSize(dimension::size_type byteSize)
+    {
+        m_byteSize = byteSize;
+    }
+
     /// @return the interpretation of this dimension at construction time
     dimension::Interpretation getInterpretation() const
     {
@@ -177,6 +187,9 @@ public:
         m_flags = flags;
     }
 
+    void setIgnored()
+        { m_flags |= dimension::IsIgnored; }
+
     /// @return is the dimension valid?
     bool isValid() const
     {
@@ -186,19 +199,19 @@ public:
     /// @return should we read this dimension?
     bool isRead() const
     {
-        return (m_flags & dimension::IsRead) == dimension::IsRead;
+        return (m_flags & dimension::IsRead);
     }
 
     /// @return should we write this dimension?
     bool isWritten() const
     {
-        return (m_flags & dimension::IsWritten) == dimension::IsWritten;
+        return (m_flags & dimension::IsWritten);
     }
 
     /// @return is this dimension ignored?
     bool isIgnored() const
     {
-        return (m_flags & dimension::IsIgnored) == dimension::IsIgnored;
+        return (m_flags & dimension::IsIgnored);
     }
 
     /// @return Number of bytes required to serialize this dimension
@@ -417,7 +430,6 @@ public:
     {
         return (v - m_numericOffset) / m_numericScale;
     }
-
 
     /// Removes the scale and offset values from an imprecise double value
     /// @param v The value to descale
