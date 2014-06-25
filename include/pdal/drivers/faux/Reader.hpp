@@ -103,7 +103,7 @@ class PDAL_DLL FauxSeqIterator : public pdal::ReaderSequentialIterator
 {
 public:
     FauxSeqIterator(const Bounds<double>& bounds, Schema *schema,
-        drivers::faux::Mode mode);
+        drivers::faux::Mode mode, point_count_t numPoints);
 
 private:
     double m_minX;
@@ -118,16 +118,17 @@ private:
     Dimension *m_dimTime;
     uint64_t m_time;
     drivers::faux::Mode m_mode;
+    point_count_t m_numPoints;
 
-    //ABELL
-    uint32_t readBufferImpl(PointBuffer&)
-        { throw "Tried to call readBufferImpl"; }
+    uint32_t readBufferImpl(PointBuffer& buf)
+        { return readImpl(buf, m_numPoints); }
 
     uint64_t skipImpl(uint64_t numPts)
     {
         m_time += numPts;
         return numPts;
     }
+
     uint32_t readImpl(PointBuffer& buf, point_count_t count);
     bool atEndImpl() const
         { return false; } //ABELL ?

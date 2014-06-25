@@ -79,7 +79,7 @@ endif(WITH_APPS)
 set(PDAL_PLANG_TEST_SRC
 #    plang/PLangTest.cpp
 #    plang/PredicateFilterTest.cpp
-#    plang/ProgrammableFilterTest.cpp
+    plang/ProgrammableFilterTest.cpp
 )
 
 SET(PDAL_UNITTEST_TEST_INC

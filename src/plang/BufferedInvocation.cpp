@@ -61,21 +61,29 @@ void BufferedInvocation::beginChunk(PointBuffer& buffer)
 
     schema::Map const& map = schema.getDimensions();
     schema::index_by_index const& idx = map.get<schema::index>();
-    for (schema::index_by_index::const_iterator iter = idx.begin(); iter != idx.end(); ++iter)
+    for (auto iter = idx.begin(); iter != idx.end(); ++iter)
     {
         const Dimension& dim = *iter;
+
+        //ABELL - does the interface allow us to use a fixed-size buffer
+        //  and then call beginChunk in a loop or something similar?
+        void *data = malloc(dim.getByteSize() * buffer.size());
+        m_buffers.push_back(data);  // Hold pointer for deallocation
+        char *p = (char *)data;
+        for (PointId idx = 0; idx < buffer.size(); ++idx)
+        {
+            buffer.getRawField(dim, idx, (void *)p);
+            p += dim.getByteSize();
+        }
+
         const std::string& name = dim.getName();
-
-        boost::uint8_t* data = buffer.getData(0) + dim.getByteOffset();
-
         const boost::uint32_t numPoints = buffer.getNumPoints();
-        const boost::uint32_t stride = buffer.getSchema().getByteSize();
+        const boost::uint32_t stride = dim.getByteSize();
         const dimension::Interpretation datatype = dim.getInterpretation();
         const boost::uint32_t numBytes = dim.getByteSize();
-        this->insertArgument(name, data, numPoints, stride, datatype, numBytes);
+        insertArgument(name, (uint8_t *)data, numPoints, stride,
+            datatype, numBytes);
     }
-
-    return;
 }
 
 
@@ -91,7 +99,7 @@ void BufferedInvocation::endChunk(PointBuffer& buffer)
 
     const Schema& schema = buffer.getSchema();
 
-    for (unsigned int i=0; i<names.size(); i++)
+    for (size_t i = 0; i < names.size(); i++)
     {
         schema::Map map = schema.getDimensions();
         schema::index_by_name& name_index = map.get<schema::name>();
@@ -99,25 +107,25 @@ void BufferedInvocation::endChunk(PointBuffer& buffer)
         if (it != name_index.end())
         {
             const Dimension& dim = *it;
-            const std::string& name = dim.getName();
 
+            const std::string& name = dim.getName();
             assert(name == names[i]);
             assert(hasOutputVariable(name));
-
+            const dimension::Interpretation datatype = dim.getInterpretation();
+            const boost::uint32_t numBytes = dim.getByteSize();
+            void *data = extractResult(name, datatype, numBytes);
+            char *p = (char *)data;
+            for (PointId idx = 0; idx < buffer.size(); ++idx)
             {
-                boost::uint8_t* data = buffer.getData(0) + dim.getByteOffset();
-                const boost::uint32_t numPoints = buffer.getNumPoints();
-                const boost::uint32_t stride = buffer.getSchema().getByteSize();
-                const dimension::Interpretation datatype = dim.getInterpretation();
-                const boost::uint32_t numBytes = dim.getByteSize();
-                extractResult(name, data, numPoints, stride, datatype, numBytes);
+                buffer.setRawField(dim, idx, (void *)p);
+                p += dim.getByteSize();
             }
         }
     }
-
-    return;
+    for (auto bi = m_buffers.begin(); bi != m_buffers.end(); ++bi)
+        free(*bi);
+    m_buffers.clear();
 }
-
 
 }
 } //namespaces

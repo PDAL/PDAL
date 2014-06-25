@@ -56,6 +56,7 @@ public:
     void endChunk(PointBuffer&);
 
 private:
+    std::vector<void *> m_buffers;
     BufferedInvocation& operator=(BufferedInvocation const& rhs); // nope
 };
 

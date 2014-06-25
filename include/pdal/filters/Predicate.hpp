@@ -83,10 +83,15 @@ public:
 
 private:
     pdal::plang::Script* m_script;
+    std::string m_source;
+    std::string m_module;
+    std::string m_function;
+
+    virtual void processOptions(const Options& options);
+    virtual void initialize();
 
     Predicate& operator=(const Predicate&); // not implemented
     Predicate(const Predicate&); // not implemented
-    virtual void initialize();
 };
 
 

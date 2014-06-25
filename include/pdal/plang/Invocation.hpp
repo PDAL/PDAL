@@ -69,10 +69,7 @@ public:
                         boost::uint32_t data_stride,
                         dimension::Interpretation dataType,
                         boost::uint32_t numBytes);
-    void extractResult(const std::string& name,
-                       boost::uint8_t* data,
-                       boost::uint32_t data_len,
-                       boost::uint32_t data_stride,
+    void *extractResult(const std::string& name,
                        dimension::Interpretation dataType,
                        boost::uint32_t numBytes);
 

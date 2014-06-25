@@ -32,8 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_FILTERS_PROGRAMMABLEFILTER_HPP
-#define INCLUDED_FILTERS_PROGRAMMABLEFILTER_HPP
+#pragma once
 
 #include <pdal/pdal_internal.hpp>
 #ifdef PDAL_HAVE_PYTHON
@@ -63,69 +62,28 @@ public:
     
     Programmable(const Options& options) : Filter(options), m_script(NULL)
         {}
-    ~Programmable();
 
     static Options getDefaultOptions();
 
-    pdal::StageSequentialIterator*
-        createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const
-    {
-        throw iterator_not_found(
-            "filters.programmable random iterator not implemented");
-    }
-
-    void processBuffer(PointBuffer& data,
-        pdal::plang::BufferedInvocation& python) const;
-
-    const pdal::plang::Script& getScript() const
-    {
-        return *m_script;
-    }
-
 private:
-    pdal::plang::Script* m_script;
+    plang::Script* m_script;
+    plang::BufferedInvocation *m_pythonMethod;
+    std::string m_source;
+    std::string m_module;
+    std::string m_function;
+
+    virtual void processOptions(const Options& options);
+    virtual void ready(PointContext ctx);
+    virtual void filter(PointBuffer& buf);
+    virtual void done(PointContext ctx);
 
     Programmable& operator=(const Programmable&); // not implemented
     Programmable(const Programmable&); // not implemented
-    virtual void initialize();
 };
 
 
-namespace iterators
-{
-namespace sequential
-{
+} // namespace filters
+} // namespace pdal
 
+#endif // HAVE_PYTHON
 
-class PDAL_DLL Programmable : public pdal::FilterSequentialIterator
-{
-public:
-    Programmable(const pdal::filters::Programmable& filter, PointBuffer& buffer);
-    ~Programmable();
-
-private:
-    boost::uint64_t skipImpl(boost::uint64_t);
-    void readBeginImpl();
-    boost::uint32_t readBufferImpl(PointBuffer&);
-    void readEndImpl();
-    bool atEndImpl() const;
-
-    void createParser();
-
-    const pdal::filters::Programmable& m_programmableFilter;
-
-    pdal::plang::BufferedInvocation* m_pythonMethod;
-};
-
-}
-} // iterators::sequential
-
-
-
-}
-} // pdal::filteers
-
-#endif
-
-#endif

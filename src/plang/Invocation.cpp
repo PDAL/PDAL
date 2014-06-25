@@ -169,22 +169,16 @@ void Invocation::insertArgument(const std::string& name,
 
     const int pyDataType = getPythonDataType(dataType, numBytes);
 
-    PyObject* pyArray = PyArray_New(&PyArray_Type, nd, dims, pyDataType, strides, data, 0, flags, NULL);
-
+    PyObject* pyArray = PyArray_New(&PyArray_Type, nd, dims, pyDataType,
+        strides, data, 0, flags, NULL);
     m_pyInputArrays.push_back(pyArray);
-
     PyDict_SetItemString(m_varsIn, name.c_str(), pyArray);
-
-    return;
 }
 
 
-void Invocation::extractResult(const std::string& name,
-                               boost::uint8_t* dst,
-                               boost::uint32_t data_len,
-                               boost::uint32_t data_stride,
-                               dimension::Interpretation dataType,
-                               boost::uint32_t numBytes)
+void *Invocation::extractResult(const std::string& name,
+    dimension::Interpretation dataType,
+    boost::uint32_t numBytes)
 {
     PyObject* xarr = PyDict_GetItemString(m_varsOut, name.c_str());
     if (!xarr)
@@ -193,7 +187,8 @@ void Invocation::extractResult(const std::string& name,
     }
     if (!PyArray_Check(xarr))
     {
-        throw python_error("plang output variable  '" + name + "' is not a numpy array");
+        throw python_error("plang output variable  '" + name +
+            "' is not a numpy array");
     }
 
     PyArrayObject* arr = (PyArrayObject*)xarr;
@@ -215,144 +210,29 @@ void Invocation::extractResult(const std::string& name,
     if (dtype->kind == 'i' && dataType != dimension::SignedInteger)
     {
         std::ostringstream oss;
-        oss << "dtype of array has a signed integer type but the "
-            << "dimension data type of '" << name << "' is not pdal::SignedInteger"; 
+        oss << "dtype of array has a signed integer type but the " <<
+            "dimension data type of '" << name <<
+            "' is not pdal::SignedInteger"; 
         throw python_error(oss.str());
     }
 
     if (dtype->kind == 'u' && dataType != dimension::UnsignedInteger)
     {
         std::ostringstream oss;
-        oss << "dtype of array has a unsigned integer type but the "
-            << "dimension data type of '" << name << "' is not pdal::UnsignedInteger"; 
+        oss << "dtype of array has a unsigned integer type but the " <<
+            "dimension data type of '" << name <<
+            "' is not pdal::UnsignedInteger"; 
         throw python_error(oss.str());
     }
 
     if (dtype->kind == 'f' && dataType != dimension::Float)
     {
         std::ostringstream oss;
-        oss << "dtype of array has a float type but the "
-            << "dimension data type of '" << name << "' is not pdal::Float"; 
+        oss << "dtype of array has a float type but the " <<
+            "dimension data type of '" << name << "' is not pdal::Float"; 
         throw python_error(oss.str());
     }    
-    boost::uint8_t* p = dst;
-
-    if (pyDataType == PyArray_DOUBLE)
-    {
-        double* src = (double*)PyArray_GetPtr(arr, &one);
-        for (unsigned int i=0; i<data_len; i++)
-        {
-            double* d = reinterpret_cast<double*>(p);
-            *d = src[i];
-            // *(double*)p = src[i];
-            p += data_stride;
-        }
-    }
-    else if (pyDataType == PyArray_FLOAT)
-    {
-        float* src = (float*)PyArray_GetPtr(arr, &one);
-        for (unsigned int i=0; i<data_len; i++)
-        {
-            float* f = reinterpret_cast<float*>(p);
-            *f = src[i];
-            // *(float*)p = src[i];
-            p += data_stride;
-        }
-    }
-    else if (pyDataType == PyArray_BYTE)
-    {
-        boost::int8_t* src = (boost::int8_t*)PyArray_GetPtr(arr, &one);
-        for (unsigned int i=0; i<data_len; i++)
-        {
-            boost::int8_t* t = reinterpret_cast<boost::int8_t*>(p);
-            *t = src[i];
-            // *(boost::int8_t*)p = src[i];
-            p += data_stride;
-        }
-    }
-    else if (pyDataType == PyArray_UBYTE)
-    {
-        boost::uint8_t* src = (boost::uint8_t*)PyArray_GetPtr(arr, &one);
-        for (unsigned int i=0; i<data_len; i++)
-        {
-            boost::uint8_t* t = reinterpret_cast<boost::uint8_t*>(p);
-            *t = src[i];
-            // *(boost::uint8_t*)p = src[i];
-            p += data_stride;
-        }
-    }
-    else if (pyDataType == PyArray_SHORT)
-    {
-        boost::int16_t* src = (boost::int16_t*)PyArray_GetPtr(arr, &one);
-        for (unsigned int i=0; i<data_len; i++)
-        {
-            boost::int16_t* t = reinterpret_cast<boost::int16_t*>(p);
-            *t = src[i];
-            // *(boost::int16_t*)p = src[i];
-            p += data_stride;
-        }
-    }
-    else if (pyDataType == PyArray_USHORT)
-    {
-        boost::uint16_t* src = (boost::uint16_t*)PyArray_GetPtr(arr, &one);
-        for (unsigned int i=0; i<data_len; i++)
-        {
-            boost::uint16_t* t = reinterpret_cast<boost::uint16_t*>(p);
-            *t = src[i];
-            // *(boost::uint16_t*)p = src[i];
-            p += data_stride;
-        }
-    }
-    else if (pyDataType == PyArray_INT)
-    {
-        boost::int32_t* src = (boost::int32_t*)PyArray_GetPtr(arr, &one);
-        for (unsigned int i=0; i<data_len; i++)
-        {
-            boost::int32_t* t = reinterpret_cast<boost::int32_t*>(p);
-            *t = src[i];
-            // *(boost::int32_t*)p = src[i];
-            p += data_stride;
-        }
-    }
-    else if (pyDataType == PyArray_UINT)
-    {
-        boost::uint32_t* src = (boost::uint32_t*)PyArray_GetPtr(arr, &one);
-        for (unsigned int i=0; i<data_len; i++)
-        {
-            boost::uint32_t* t = reinterpret_cast<boost::uint32_t*>(p);
-            *t = src[i];
-            // *(boost::uint32_t*)p = src[i];
-            p += data_stride;
-        }
-    }
-    else if (pyDataType == PyArray_LONGLONG)
-    {
-        boost::int64_t* src = (boost::int64_t*)PyArray_GetPtr(arr, &one);
-        for (unsigned int i=0; i<data_len; i++)
-        {
-            boost::int64_t* t = reinterpret_cast<boost::int64_t*>(p);
-            *t = src[i];
-            // *(boost::int64_t*)p = src[i];
-            p += data_stride;
-        }
-    }
-    else if (pyDataType == PyArray_ULONGLONG)
-    {
-        boost::uint64_t* src = (boost::uint64_t*)PyArray_GetPtr(arr, &one);
-        for (unsigned int i=0; i<data_len; i++)
-        {
-            boost::uint64_t* t = reinterpret_cast<boost::uint64_t*>(p);
-            *t = src[i];
-            // *(boost::uint64_t*)p = src[i];
-            p += data_stride;
-        }
-    }
-    else
-    {
-        assert(0);
-    }
-
-    return;
+    return PyArray_GetPtr(arr, &one);
 }
 
 

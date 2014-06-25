@@ -113,7 +113,7 @@ Options Reader::getDefaultOptions()
 
 pdal::StageSequentialIterator* Reader::createSequentialIterator() const
 {
-    return new FauxSeqIterator(m_bounds, m_schema, m_mode);
+    return new FauxSeqIterator(m_bounds, m_schema, m_mode, m_numPoints);
 }
 
 } // namespace faux
@@ -121,7 +121,8 @@ pdal::StageSequentialIterator* Reader::createSequentialIterator() const
 
 
 FauxSeqIterator::FauxSeqIterator(const Bounds<double>& bounds, Schema *schema,
-    drivers::faux::Mode mode) : m_time(0), m_mode(mode)
+        drivers::faux::Mode mode, point_count_t numPoints) :
+    m_time(0), m_mode(mode), m_numPoints(numPoints)
 {
     const std::vector<Range<double>>& ranges = bounds.dimensions();
     m_minX = ranges[0].getMinimum();

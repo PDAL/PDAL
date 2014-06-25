@@ -35,108 +35,111 @@
 #include <pdal/pdal_internal.hpp>
 #ifdef PDAL_HAVE_PYTHON
 
-#include "Support.hpp"
 #include <boost/test/unit_test.hpp>
 
 #include <pdal/filters/Programmable.hpp>
-#include <pdal/filters/Programmable.hpp>
+#include <pdal/filters/Stats.hpp>
 #include <pdal/drivers/faux/Reader.hpp>
-#include <pdal/drivers/faux/Writer.hpp>
-#include <pdal/drivers/pipeline/Reader.hpp>
-
 
 #include <pdal/PipelineReader.hpp>
 #include <pdal/PipelineManager.hpp>
+
+#include "Support.hpp"
 
 BOOST_AUTO_TEST_SUITE(ProgrammableFilterTest)
 
 using namespace pdal;
 
-
 BOOST_AUTO_TEST_CASE(ProgrammableFilterTest_test1)
 {
     Bounds<double> bounds(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
-    pdal::drivers::faux::Reader reader(bounds, 10, pdal::drivers::faux::Reader::Ramp);
 
-    const pdal::Option source("source",
-                              "import numpy as np\n"
-                              "def myfunc(ins,outs):\n"
-                              "  X = ins['X']\n"
-                              "  Y = ins['Y']\n"
-                              "  Z = ins['Z']\n"
-                              "  #print ins['X']\n"
-                              "  X = X + 10.0\n"
-                              "  # Y: leave as-is, don't export back out\n"
-                              "  # Z: goofiness to make it a numpy array of a constant\n"
-                              "  Z = np.zeros(X.size) + 3.14\n"
-                              "  outs['X'] = X\n"
-                              "  #print outs['X']\n"
-                              "  outs['Z'] = Z\n"
-                              "  return True\n"
-                             );
-    const pdal::Option module("module", "MyModule");
-    const pdal::Option function("function", "myfunc");
-    pdal::Options opts;
+    Options ops;
+    ops.add("bounds", bounds);
+    ops.add("num_points", 10);
+    ops.add("mode", "ramp");
+
+    drivers::faux::Reader reader(ops);
+
+    Option source("source", "import numpy as np\n"
+        "def myfunc(ins,outs):\n"
+        "  X = ins['X']\n"
+        "  Y = ins['Y']\n"
+        "  Z = ins['Z']\n"
+        "  #print ins['X']\n"
+        "  X = X + 10.0\n"
+        "  # Y: leave as-is, don't export back out\n"
+        "  # Z: goofiness to make it a numpy array of a constant\n"
+        "  Z = np.zeros(X.size) + 3.14\n"
+        "  outs['X'] = X\n"
+        "  #print outs['X']\n"
+        "  outs['Z'] = Z\n"
+        "  return True\n"
+    );
+    Option module("module", "MyModule");
+    Option function("function", "myfunc");
+    Options opts;
     opts.add(source);
     opts.add(module);
     opts.add(function);
 
-    pdal::filters::Programmable filter(opts);
+    filters::Programmable filter(opts);
     filter.setInput(&reader);
     BOOST_CHECK(filter.getDescription() == "Programmable Filter");
-    pdal::drivers::faux::Writer writer;
-    writer.setInput(&filter);
-    writer.prepare();
 
-    boost::uint64_t numWritten = writer.write(10);
+    Options filterOps;
+    filters::Stats stats(filterOps);
+    stats.setInput(&filter);
 
-    BOOST_CHECK(numWritten == 10);
+    PointContext ctx;
 
-    const double minX = writer.getMinX();
-    const double maxX = writer.getMaxX();
-    const double minY = writer.getMinY();
-    const double maxY = writer.getMaxY();
-    const double minZ = writer.getMinZ();
-    const double maxZ = writer.getMaxZ();
+    stats.prepare(ctx);
+    PointBufferSet pbSet = stats.execute(ctx);
+    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    PointBufferPtr buf = *pbSet.begin();
 
-    BOOST_CHECK_CLOSE(minX, 10.0, 0.001);
-    BOOST_CHECK_CLOSE(maxX, 11.0, 0.001);
+    Schema *schema = ctx.schema();
+    
+    const filters::stats::Summary& statsX =
+        stats.getStats(schema->getDimension("X"));
+    const filters::stats::Summary& statsY =
+        stats.getStats(schema->getDimension("Y"));
+    const filters::stats::Summary& statsZ =
+        stats.getStats(schema->getDimension("Z"));
 
-    BOOST_CHECK_CLOSE(minY, 0.0, 0.001);
-    BOOST_CHECK_CLOSE(maxY, 1.0, 0.001);
+    BOOST_CHECK_CLOSE(statsX.minimum(), 10.0, 0.001);
+    BOOST_CHECK_CLOSE(statsX.maximum(), 11.0, 0.001);
 
-    BOOST_CHECK_CLOSE(minZ, 3.14, 0.001);
-    BOOST_CHECK_CLOSE(maxZ, 3.14, 0.001);
+    BOOST_CHECK_CLOSE(statsY.minimum(), 0.0, 0.001);
+    BOOST_CHECK_CLOSE(statsY.maximum(), 1.0, 0.001);
+
+    BOOST_CHECK_CLOSE(statsZ.minimum(), 3.14, 0.001);
+    BOOST_CHECK_CLOSE(statsZ.maximum(), 3.14, 0.001);
 }
 
 BOOST_AUTO_TEST_CASE(pipeline)
 {
 
-    pdal::PipelineManager manager;
+    PipelineManager manager;
     PipelineReader reader(manager);
 
     reader.readPipeline(Support::datapath("pipeline/create-dimension.xml"));
     Stage* stage = manager.getStage();
     BOOST_CHECK(stage != NULL);
-    stage->prepare();
 
-    const Schema& schema = stage->getSchema();
-    PointBuffer data(schema, 2*1065);
-    StageSequentialIterator* iter = stage->createSequentialIterator(data);
-    boost::uint32_t np = iter->read(data);
-    BOOST_CHECK_EQUAL(np, 1065u);
+    manager.execute();
+    PointBufferSet pbSet = manager.buffers();
+    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    PointBufferPtr buf = *pbSet.begin();
 
-
-    Dimension const& dimX = data.getSchema().getDimension("Y");
-    // std::cout << data.getSchema() << std::endl;
-    for (boost::uint32_t i=0; i<10; i++)
+    Dimension const& dimY = manager.schema()->getDimension("Y");
+    for (PointId idx = 0; idx < 10; ++idx)
     {
-        boost::int32_t x = data.getField<boost::int32_t>(dimX, i);
-        BOOST_CHECK_EQUAL(x, 314);
+        int32_t y = buf->getField<int32_t>(dimY, idx);
+        BOOST_CHECK_EQUAL(y, 314);
     }
-            
-    delete iter;
 }
 
 BOOST_AUTO_TEST_SUITE_END()
-#endif
+
+#endif  // PDAL_HAVE_PYTHON

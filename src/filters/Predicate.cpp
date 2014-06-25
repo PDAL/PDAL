@@ -52,76 +52,53 @@ Predicate::~Predicate()
 }
 
 
+void Predicate::processOptions(const Options& options)
+{
+    m_source = options.getValueOrDefault<std::string>("source", "");
+    if (m_source.empty())
+        m_source = FileUtils::readFileIntoString(
+            options.getValueOrThrow<std::string>("filename"));
+    m_module = options.getValueOrThrow<std::string>("module");
+    m_function = options.getValueOrThrow<std::string>("function");
+}
+
+
 void Predicate::initialize()
 {
-    m_script = new pdal::plang::Script(getOptions());
+    m_script = new pdal::plang::Script(m_source, m_module, m_function);
 }
 
 
 Options Predicate::getDefaultOptions()
 {
     Options options;
-
-    Option script("script", "");
-    options.add(script);
-
-    Option module("module", "");
-    options.add(module);
-
-    Option function("function", "");
-    options.add(function);
-
+    options.add("script", "");
+    options.add("module", "");
+    options.add("function", "");
     return options;
 }
 
 
-boost::uint32_t Predicate::processBuffer(PointBuffer& data, pdal::plang::BufferedInvocation& python) const
+boost::uint32_t Predicate::processBuffer(PointBuffer& data,
+    plang::BufferedInvocation& python) const
 {
     python.resetArguments();
-
     python.beginChunk(data);
-
     python.execute();
 
     if (!python.hasOutputVariable("Mask"))
-    {
-        throw python_error("Mask variable not set in predicate filter function");
-    }
+        throw python_error("Mask variable not set in predicate "
+            "filter function");
 
-    boost::uint8_t* mask = new boost::uint8_t[data.getNumPoints()];
+    //ABELL - This is half-fixed.  Need to return the output point buffer.
+    PointBufferPtr outbuf(new PointBuffer(data.context()));
 
-    PointBuffer dstData(data.getSchema(), data.getCapacity());
-
-    python.extractResult("Mask", (boost::uint8_t*)mask, data.getNumPoints(), 1, pdal::dimension::RawByte, 1);
-
-    boost::uint8_t* dst = dstData.getData(0);
-    boost::uint8_t* src = data.getData(0);
-
-    const Schema& schema = dstData.getSchema();
-    boost::uint32_t numBytes = schema.getByteSize();
-    assert(numBytes == data.getSchema().getByteSize());
-
-    boost::uint32_t numSrcPoints = data.getNumPoints();
-    boost::uint32_t count = 0;
-    for (boost::uint32_t srcIndex=0; srcIndex<numSrcPoints; srcIndex++)
-    {
-        if (mask[srcIndex])
-        {
-            memcpy(dst, src, numBytes);
-            dst += numBytes;
-            ++count;
-            dstData.setNumPoints(count);
-        }
-        src += numBytes;
-    }
-
-
-    data.copyPointsFast(0, 0, dstData, count);
-    data.setNumPoints(count);
-
-    delete[] mask;
-
-    return count;
+    void *pydata = python.extractResult("Mask", pdal::dimension::RawByte, 1);
+    char *ok = (char *)pydata;
+    for (PointId idx = 0; idx < data.size(); ++idx)
+        if (*ok++)
+            outbuf->appendPoint(data, idx);
+    return outbuf->size();
 }
 
 
