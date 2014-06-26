@@ -46,12 +46,6 @@ namespace filters
 {
 
 
-Predicate::~Predicate()
-{
-    delete m_script;
-}
-
-
 void Predicate::processOptions(const Options& options)
 {
     m_source = options.getValueOrDefault<std::string>("source", "");
@@ -60,12 +54,6 @@ void Predicate::processOptions(const Options& options)
             options.getValueOrThrow<std::string>("filename"));
     m_module = options.getValueOrThrow<std::string>("module");
     m_function = options.getValueOrThrow<std::string>("function");
-}
-
-
-void Predicate::initialize()
-{
-    m_script = new pdal::plang::Script(m_source, m_module, m_function);
 }
 
 
@@ -79,130 +67,49 @@ Options Predicate::getDefaultOptions()
 }
 
 
-boost::uint32_t Predicate::processBuffer(PointBuffer& data,
-    plang::BufferedInvocation& python) const
+void Predicate::ready(PointContext ctx)
 {
-    python.resetArguments();
-    python.beginChunk(data);
-    python.execute();
+    m_script = new plang::Script(m_source, m_module, m_function);
+    m_pythonMethod = new plang::BufferedInvocation(*m_script);
+    m_pythonMethod->compile();
+    GlobalEnvironment::get().getPythonEnvironment().set_stdout(
+        log()->getLogStream());
+}
 
-    if (!python.hasOutputVariable("Mask"))
+
+PointBufferSet Predicate::run(PointBufferPtr buf)
+{
+    m_pythonMethod->resetArguments();
+    m_pythonMethod->beginChunk(*buf);
+    m_pythonMethod->execute();
+
+    if (!m_pythonMethod->hasOutputVariable("Mask"))
         throw python_error("Mask variable not set in predicate "
             "filter function");
 
-    //ABELL - This is half-fixed.  Need to return the output point buffer.
-    PointBufferPtr outbuf(new PointBuffer(data.context()));
+    PointBufferPtr outbuf(new PointBuffer(buf->context()));
 
-    void *pydata = python.extractResult("Mask", pdal::dimension::RawByte, 1);
+    void *pydata =
+        m_pythonMethod->extractResult("Mask", pdal::dimension::RawByte, 1);
     char *ok = (char *)pydata;
-    for (PointId idx = 0; idx < data.size(); ++idx)
+    for (PointId idx = 0; idx < buf->size(); ++idx)
         if (*ok++)
-            outbuf->appendPoint(data, idx);
-    return outbuf->size();
+            outbuf->appendPoint(*buf, idx);
+
+    PointBufferSet pbSet;
+    pbSet.insert(outbuf);
+    return pbSet;
 }
 
 
-pdal::StageSequentialIterator* Predicate::createSequentialIterator(PointBuffer& buffer) const
+void Predicate::done(PointContext ctx)
 {
-    return new pdal::filters::iterators::sequential::Predicate(*this, buffer);
-}
-
-
-//---------------------------------------------------------------------------
-
-
-namespace iterators
-{
-namespace sequential
-{
-
-Predicate::Predicate(const pdal::filters::Predicate& filter, PointBuffer& buffer)
-    : pdal::FilterSequentialIterator(filter, buffer)
-    , m_predicateFilter(filter)
-    , m_pythonMethod(NULL)
-    , m_numPointsProcessed(0)
-    , m_numPointsPassed(0)
-{
-    return;
-}
-
-
-Predicate::~Predicate()
-{
+    GlobalEnvironment::get().getPythonEnvironment().reset_stdout();
     delete m_pythonMethod;
+    delete m_script;
 }
 
-
-void Predicate::createParser()
-{
-    const pdal::plang::Script& script = m_predicateFilter.getScript();
-
-    m_pythonMethod = new pdal::plang::BufferedInvocation(script);
-
-    m_pythonMethod->compile();
-
-    return;
-}
-
-
-void Predicate::readBeginImpl()
-{
-    if (!m_pythonMethod)
-    {
-        createParser();
-    }
-
-    m_numPointsProcessed = m_numPointsPassed = 0;
-
-    pdal::GlobalEnvironment::get().getPythonEnvironment().set_stdout(m_predicateFilter.log()->getLogStream());
-
-    return;
-}
-
-
-void Predicate::readEndImpl()
-{
-    pdal::GlobalEnvironment::get().getPythonEnvironment().reset_stdout();
-
-    return;
-}
-
-
-boost::uint32_t Predicate::readBufferImpl(PointBuffer& dstData)
-{
-    // read in a full block of points
-
-    const boost::uint32_t numRead = getPrevIterator().read(dstData);
-    if (numRead > 0)
-    {
-        m_numPointsProcessed = dstData.getNumPoints();
-
-        // copies the points as they pass in-place
-        m_predicateFilter.processBuffer(dstData, *m_pythonMethod);
-    }
-
-    m_numPointsPassed = dstData.getNumPoints();
-
-    return dstData.getNumPoints();
-}
-
-
-boost::uint64_t Predicate::skipImpl(boost::uint64_t count)
-{
-    getPrevIterator().skip(count);
-    return count;
-}
-
-
-bool Predicate::atEndImpl() const
-{
-    return getPrevIterator().atEnd();
-}
-
-}
-} // iterators::sequential
-
-}
-} // pdal::filters
+} // namespace filters
+} // namespace pdal
 
 #endif

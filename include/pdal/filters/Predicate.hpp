@@ -32,8 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_FILTERS_PREDICATEFILTER_HPP
-#define INCLUDED_FILTERS_PREDICATEFILTER_HPP
+#pragma once
 
 #include <pdal/pdal_internal.hpp>
 #ifdef PDAL_HAVE_PYTHON
@@ -62,86 +61,26 @@ public:
     
     Predicate(const Options& options) : Filter(options), m_script(NULL)
         {}
-    ~Predicate();
 
     static Options getDefaultOptions();
 
-    pdal::StageSequentialIterator*
-        createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const
-    {
-        throw iterator_not_found(
-            "filters.predicate random iterator not implemented");
-    }
-
-    boost::uint32_t processBuffer(PointBuffer& data, pdal::plang::BufferedInvocation&) const;
-
-    const pdal::plang::Script& getScript() const
-    {
-        return *m_script;
-    }
-
 private:
-    pdal::plang::Script* m_script;
+    plang::BufferedInvocation* m_pythonMethod;
+    plang::Script* m_script;
     std::string m_source;
     std::string m_module;
     std::string m_function;
 
     virtual void processOptions(const Options& options);
-    virtual void initialize();
+    virtual void ready(PointContext ctx);
+    virtual PointBufferSet run(PointBufferPtr buf);
+    virtual void done(PointContext ctx);
 
     Predicate& operator=(const Predicate&); // not implemented
     Predicate(const Predicate&); // not implemented
 };
 
+} // namespace filters
+} // namespace pdal
 
-namespace iterators
-{
-namespace sequential
-{
-
-
-class PDAL_DLL Predicate : public pdal::FilterSequentialIterator
-{
-public:
-    Predicate(const pdal::filters::Predicate& filter, PointBuffer& buffer);
-    ~Predicate();
-
-    void read();
-
-    boost::uint64_t getNumPointsProcessed() const
-    {
-        return m_numPointsProcessed;
-    }
-    boost::uint64_t getNumPointsPassed() const
-    {
-        return m_numPointsPassed;
-    }
-
-private:
-    boost::uint64_t skipImpl(boost::uint64_t);
-    void readBeginImpl();
-    boost::uint32_t readBufferImpl(PointBuffer&);
-    void readEndImpl();
-    bool atEndImpl() const;
-
-    void createParser();
-
-    const pdal::filters::Predicate& m_predicateFilter;
-    pdal::plang::BufferedInvocation* m_pythonMethod;
-
-    boost::uint64_t m_numPointsProcessed;
-    boost::uint64_t m_numPointsPassed;
-};
-
-}
-} // iterators::sequential
-
-
-
-}
-} // pdal::filteers
-
-#endif
-
-#endif
+#endif // PDAL_HAVE_PYTHON

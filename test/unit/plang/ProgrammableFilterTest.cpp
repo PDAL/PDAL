@@ -119,14 +119,10 @@ BOOST_AUTO_TEST_CASE(ProgrammableFilterTest_test1)
 
 BOOST_AUTO_TEST_CASE(pipeline)
 {
-
     PipelineManager manager;
     PipelineReader reader(manager);
 
     reader.readPipeline(Support::datapath("pipeline/create-dimension.xml"));
-    Stage* stage = manager.getStage();
-    BOOST_CHECK(stage != NULL);
-
     manager.execute();
     PointBufferSet pbSet = manager.buffers();
     BOOST_CHECK_EQUAL(pbSet.size(), 1);
