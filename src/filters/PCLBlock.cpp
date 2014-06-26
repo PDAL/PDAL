@@ -32,15 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <iostream>
-
 #include <pdal/PCLConversions.hpp>
 #include <pdal/filters/PCLBlock.hpp>
-
-#include <boost/concept_check.hpp> // ignore_unused_variable_warning
-
-#include <pdal/PointBuffer.hpp>
-#include <pdal/GlobalEnvironment.hpp>
 
 #ifdef PDAL_HAVE_PCL
 #include <pcl/console/print.h>
@@ -55,34 +48,45 @@ namespace filters
 {
 
 /** \brief This method processes the PointBuffer through the given pipeline. */
-boost::uint32_t
-PCLBlock::processBuffer(PointBuffer& srcData, std::string& filename, PointBuffer& dstData) const
+
+void PCLBlock::processOptions(const Options& options)
 {
-    boost::uint32_t numPointsAfterFiltering = srcData.getNumPoints();
+    m_filename = options.getValueOrThrow<std::string>("filename");
+}
+
+
+void PCLBlock::ready(PointContext ctx)
+{
+    m_iDim = ctx.schema()->getDimensionPtr("Intensity");
+    m_xDim = ctx.schema()->getDimensionPtr("X");
+    m_yDim = ctx.schema()->getDimensionPtr("Y");
+    m_zDim = ctx.schema()->getDimensionPtr("Z");
+}
+
+
+PointBufferSet PCLBlock::run(PointBufferPtr input)
+{
+    PointBufferPtr output(new PointBuffer(input->context()));
+    PointBufferSet pbSet;
+    pbSet.insert(output);
 
 #ifdef PDAL_HAVE_PCL
     bool logOutput = log()->getLevel() > logDEBUG1;
     if (logOutput)
         log()->floatPrecision(8);
 
-    Schema const& schema = srcData.getSchema();
-
-    Dimension const& dX = schema.getDimension("X");
-    Dimension const& dY = schema.getDimension("Y");
-    Dimension const& dZ = schema.getDimension("Z");
-
-    log()->get(logDEBUG2) << srcData.applyScaling(dX, 0) << ", " << srcData.applyScaling(dY, 0) << ", " << srcData.applyScaling(dZ, 0) << std::endl;
-
+    log()->get(logDEBUG2) << input->getFieldAs<double>(*m_xDim, 0) << ", " <<
+        input->getFieldAs<double>(*m_yDim, 0) << ", " <<
+        input->getFieldAs<double>(*m_zDim, 0) << std::endl;
     log()->get(logDEBUG2) << "Process PCLBlock..." << std::endl;
 
     // convert PointBuffer to PointNormal
-    pcl::PointCloud<pcl::PointNormal>::Ptr cloud(new pcl::PointCloud<pcl::PointNormal>);
-    pdal::PDALtoPCD(srcData, *cloud);
+    typedef pcl::PointCloud<pcl::PointNormal> Cloud;
+    Cloud::Ptr cloud(new Cloud);
+    PDALtoPCD(*input, *cloud, m_xDim, m_yDim, m_zDim, m_iDim);
 
-    log()->get(logDEBUG2) << cloud->points[0].x << ", " << cloud->points[0].y << ", " << cloud->points[0].z << std::endl;
-
-    // create PointCloud for results
-    pcl::PointCloud<pcl::PointNormal>::Ptr cloud_f(new pcl::PointCloud<pcl::PointNormal>);
+    log()->get(logDEBUG2) << cloud->points[0].x << ", " <<
+        cloud->points[0].y << ", " << cloud->points[0].z << std::endl;
 
     int level = log()->getLevel();
     switch (level)
@@ -90,23 +94,18 @@ PCLBlock::processBuffer(PointBuffer& srcData, std::string& filename, PointBuffer
         case 0:
             pcl::console::setVerbosityLevel(pcl::console::L_ALWAYS);
             break;
-
         case 1:
             pcl::console::setVerbosityLevel(pcl::console::L_ERROR);
             break;
-
         case 2:
             pcl::console::setVerbosityLevel(pcl::console::L_WARN);
             break;
-
         case 3:
             pcl::console::setVerbosityLevel(pcl::console::L_INFO);
             break;
-
         case 4:
             pcl::console::setVerbosityLevel(pcl::console::L_DEBUG);
             break;
-
         default:
             pcl::console::setVerbosityLevel(pcl::console::L_VERBOSE);
             break;
@@ -114,132 +113,31 @@ PCLBlock::processBuffer(PointBuffer& srcData, std::string& filename, PointBuffer
 
     pcl::Pipeline<pcl::PointNormal> pipeline;
     pipeline.setInputCloud(cloud);
-    pipeline.setFilename(filename);
-    pipeline.setOffsets(dX.getNumericOffset(), dY.getNumericOffset(), dZ.getNumericOffset());
+    pipeline.setFilename(m_filename);
+    pipeline.setOffsets(m_xDim->getNumericOffset(), m_yDim->getNumericOffset(),
+        m_zDim->getNumericOffset());
+
+    // create PointCloud for results
+    Cloud::Ptr cloud_f(new Cloud);
     pipeline.filter(*cloud_f);
 
-    if (cloud_f->points.size() > 0)
-    {
-        pdal::PCDtoPDAL(*cloud_f, dstData);
-
-        log()->get(logDEBUG2) << cloud->points.size() << " before, " << cloud_f->points.size() << " after" << std::endl;
-
-        log()->get(logDEBUG2) << dstData.getNumPoints() << std::endl;
-
-        log()->get(logDEBUG2) << dstData.applyScaling(dX, 0) << ", " << dstData.applyScaling(dY, 0) << ", " << dstData.applyScaling(dZ, 0) << std::endl;
-    }
-    else
+    if (cloud_f->points.empty())
     {
         log()->get(logDEBUG2) << "Filtered cloud has no points!" << std::endl;
+        return pbSet;
     }
 
-    numPointsAfterFiltering = cloud_f->points.size();
+    PCDtoPDAL(*cloud_f, *output, m_xDim, m_yDim, m_zDim, m_iDim);
+
+    log()->get(logDEBUG2) << cloud->points.size() << " before, " <<
+        cloud_f->points.size() << " after" << std::endl;
+    log()->get(logDEBUG2) << output->size() << std::endl;
+    log()->get(logDEBUG2) << output->getFieldAs<double>(*m_xDim, 0) << ", " <<
+        output->getFieldAs<double>(*m_yDim, 0) << ", " << 
+        output->getFieldAs<double>(*m_zDim, 0) << std::endl;
 #endif
-
-    return numPointsAfterFiltering;
+    return pbSet;
 }
-
-
-pdal::StageSequentialIterator* PCLBlock::createSequentialIterator(PointBuffer& buffer) const
-{
-    return new pdal::filters::iterators::sequential::PCLBlock(*this, buffer);
-}
-
-
-namespace iterators
-{
-namespace sequential
-{
-
-
-PCLBlock::PCLBlock(const pdal::filters::PCLBlock& filter, PointBuffer& buffer)
-    : pdal::FilterSequentialIterator(filter, buffer)
-    , m_pclblockFilter(filter)
-{
-    return;
-}
-
-boost::uint32_t PCLBlock::readBufferImpl(PointBuffer& buffer)
-{
-#ifdef PDAL_HAVE_PCL
-    std::string filename =
-        m_pclblockFilter.getOptions().getValueOrThrow<std::string>("filename");
-    m_pclblockFilter.log()->get(logDEBUG2) << "Using " << filename << std::endl;
-
-    boost::uint32_t originalCapacity = buffer.getCapacity();
-    boost::int64_t numPointsNeeded = static_cast<boost::int64_t>(buffer.getCapacity());
-
-    PointBuffer outputData(buffer.getSchema(), originalCapacity);
-    PointBuffer tmpData(buffer.getSchema(), originalCapacity);
-
-    m_pclblockFilter.log()->get(logDEBUG2) << "Fetching for block of size: " << numPointsNeeded << std::endl;
-
-    while (numPointsNeeded > 0)
-    {
-        if (getPrevIterator().atEnd())
-        {
-            m_pclblockFilter.log()->get(logDEBUG2) << "previous iterator is .atEnd, stopping"
-                                                   << std::endl;
-            break;
-        }
-
-        buffer.resize(static_cast<boost::uint32_t>(numPointsNeeded));
-
-        const boost::uint32_t numSrcPointsRead = getPrevIterator().read(buffer);
-
-        m_pclblockFilter.log()->get(logDEBUG3) << "Fetched "
-                                               << numSrcPointsRead << " from previous iterator."
-                                               << std::endl;
-
-        assert(numSrcPointsRead <= numPointsNeeded);
-
-        const boost::uint32_t numPointsProcessed = m_pclblockFilter.processBuffer(buffer, filename, tmpData);
-        m_pclblockFilter.log()->get(logDEBUG3) << "Processed " << numPointsProcessed << " in PCL block filter" << std::endl;
-
-        m_pclblockFilter.log()->get(logDEBUG3) << tmpData.getNumPoints() << " passed PCL block filter" << std::endl;
-
-        if (tmpData.getNumPoints() > 0)
-        {
-            outputData.copyPointsFast(outputData.getNumPoints(), 0, tmpData, tmpData.getNumPoints());
-            outputData.setNumPoints(outputData.getNumPoints() + tmpData.getNumPoints());
-        }
-
-        numPointsNeeded -= numSrcPointsRead;
-        m_pclblockFilter.log()->get(logDEBUG3) << numPointsNeeded << " left to read this block" << std::endl;
-
-    }
-
-    const boost::uint32_t numPointsAchieved = outputData.getNumPoints();
-
-    buffer.resize(originalCapacity);
-    buffer.setNumPoints(0);
-    buffer.copyPointsFast(0, 0, outputData, outputData.getNumPoints());
-    buffer.setNumPoints(outputData.getNumPoints());
-    m_pclblockFilter.log()->get(logDEBUG2) << "Copying " << outputData.getNumPoints() << " at end of readBufferImpl" << std::endl;
-
-    return numPointsAchieved;
-#else
-    (void)m_pclblockFilter;
-    return buffer.getNumPoints();
-#endif
-}
-
-
-boost::uint64_t PCLBlock::skipImpl(boost::uint64_t count)
-{
-    getPrevIterator().skip(count);
-    return count;
-}
-
-
-bool PCLBlock::atEndImpl() const
-{
-    return getPrevIterator().atEnd();
-}
-
-
-} // sequential
-} // iterators
 
 } // filters
 } // pdal

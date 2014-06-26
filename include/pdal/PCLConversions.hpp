@@ -35,22 +35,9 @@
 * https://github.com/daviddoria/VTK_PCL_Conversions
 ****************************************************************************/
 
-#ifndef INCLUDED_PCL_CONVERSIONS_HPP
-#define INCLUDED_PCL_CONVERSIONS_HPP
+#pragma once
 
-#include <fstream>
-#include <string>
-
-#include <boost/filesystem.hpp>
-
-#include <pdal/Dimension.hpp>
-#include <pdal/FileUtils.hpp>
-#include <pdal/Options.hpp>
 #include <pdal/PointBuffer.hpp>
-#include <pdal/Reader.hpp>
-#include <pdal/Schema.hpp>
-#include <pdal/StageFactory.hpp>
-#include <pdal/StageIterator.hpp>
 
 #ifdef PDAL_HAVE_PCL
 #include <pcl/io/pcd_io.h>
@@ -58,6 +45,33 @@
 #include <pcl/point_types.h>
 #include <pcl/point_traits.h>
 #endif
+
+namespace
+{
+
+using namespace pdal;
+
+template<typename CLOUDFETCH>
+void setValues(PointBuffer& buf, Dimension *dim, size_t numPts,
+    CLOUDFETCH fetcher)
+{
+    switch (dim->getInterpretation())
+    {
+        case dimension::Float:
+        case dimension::UnsignedInteger:
+        case dimension::SignedInteger:
+            for (size_t i = 0; i < numPts; ++i)
+                buf.setField(*dim, i, fetcher(i) / dim->getNumericScale());
+            break;
+        case dimension::RawByte:
+        case dimension::Pointer:
+        case dimension::Undefined:
+            throw pdal_error("Dimension data type unable to be scaled "
+                    "in conversion from PCL to PDAL");
+    }
+}
+
+} //namespace
 
 namespace pdal
 {
@@ -67,128 +81,43 @@ namespace pdal
  * Converts PCD data to PDAL format.
  */
 template <typename CloudT>
-void PCDtoPDAL(CloudT &cloud, PointBuffer& data)
+void PCDtoPDAL(CloudT &cloud, PointBuffer& buf, Dimension *xDim,
+    Dimension *yDim, Dimension *zDim, Dimension *iDim)
 {
 #ifdef PDAL_HAVE_PCL
-    typedef typename pcl::traits::fieldList<typename CloudT::PointType>::type FieldList;
-
-    const pdal::Schema &buffer_schema = data.getSchema();
-
-    data.setNumPoints(cloud.points.size());
-
-    const pdal::Dimension &dX = buffer_schema.getDimension("X");
-    const pdal::Dimension &dY = buffer_schema.getDimension("Y");
-    const pdal::Dimension &dZ = buffer_schema.getDimension("Z");
+    typedef typename pcl::traits::fieldList<typename CloudT::PointType>::type
+        FieldList;
 
     if (pcl::traits::has_xyz<typename CloudT::PointType>::value)
     {
-        boost::uint32_t size = dX.getByteSize();
-        switch (dX.getInterpretation())
-        {
-            case dimension::Float:
-                for (size_t i = 0; i < cloud.points.size(); ++i)
-                    data.setFieldUnscaled(dX, i, cloud.points[i].x);
-                break;
-
-            case dimension::SignedInteger:
-                if (size == 1 || size == 2 || size == 8)
-                    for (size_t i = 0; i < cloud.points.size(); ++i)
-                        data.setFieldUnscaled(dX, i, cloud.points[i].x);
-                if (size == 4)
-                    for (size_t i = 0; i < cloud.points.size(); ++i)
-                        data.setField<boost::int32_t>(dX, i,
-                            cloud.points[i].x/dX.getNumericScale());
-                        //data.setFieldUnscaled(dX, i, cloud.points[i].x);
-                break;
-
-            case dimension::UnsignedInteger:
-                for (size_t i = 0; i < cloud.points.size(); ++i)
-                    data.setFieldUnscaled(dX, i, cloud.points[i].x);
-                break;
-
-            case dimension::RawByte:
-            case dimension::Pointer:
-            case dimension::Undefined:
-                throw pdal_error("Dimension data type unable to be scaled in conversion from PCL to PDAL");
-        }
-
-        switch (dY.getInterpretation())
-        {
-            case dimension::Float:
-                for (size_t i = 0; i < cloud.points.size(); ++i)
-                    data.setFieldUnscaled(dY, i, cloud.points[i].y);
-                break;
-            case dimension::SignedInteger:
-                if (size == 1 || size == 2 || size == 8)
-                    for (size_t i = 0; i < cloud.points.size(); ++i)
-                        data.setFieldUnscaled(dY, i, cloud.points[i].y);
-                if (size == 4)
-                    for (size_t i = 0; i < cloud.points.size(); ++i)
-                        data.setField(dY, i,
-                            cloud.points[i].y / dY.getNumericScale());
-                        //data.setFieldUnscaled(dY, i, cloud.points[i].y);
-                break;
-
-            case dimension::UnsignedInteger:
-                for (size_t i = 0; i < cloud.points.size(); ++i)
-                    data.setFieldUnscaled(dY, i, cloud.points[i].y);
-                break;
-
-            case dimension::RawByte:
-            case dimension::Pointer:
-            case dimension::Undefined:
-                throw pdal_error("Dimension data type unable to be scaled "
-                    "in conversion from PCL to PDAL");
-        }
-
-        switch (dZ.getInterpretation())
-        {
-            case dimension::Float:
-                for (size_t i = 0; i < cloud.points.size(); ++i)
-                    data.setFieldUnscaled(dZ, i, cloud.points[i].z);
-                break;
-
-            case dimension::SignedInteger:
-                if (size == 1 || size == 2 || size == 8)
-                    for (size_t i = 0; i < cloud.points.size(); ++i)
-                        data.setFieldUnscaled(dZ, i, cloud.points[i].z);
-                if (size == 4)
-                    for (size_t i = 0; i < cloud.points.size(); ++i)
-                        data.setField<boost::int32_t>(dZ, i,
-                            cloud.points[i].z/dZ.getNumericScale());
-                break;
-
-            case dimension::UnsignedInteger:
-                for (size_t i = 0; i < cloud.points.size(); ++i)
-                    data.setFieldUnscaled(dZ, i, cloud.points[i].z);
-                break;
-
-            case dimension::RawByte:
-            case dimension::Pointer:
-            case dimension::Undefined:
-                throw pdal_error("Dimension data type unable to be scaled "
-                    "in conversion from PCL to PDAL");
-        }
+        auto getX = [&cloud](size_t i)
+            { return cloud.points[i].x; };
+        auto getY = [&cloud](size_t i)
+            { return cloud.points[i].y; };
+        auto getZ = [&cloud](size_t i)
+            { return cloud.points[i].z; };
+        setValues(buf, xDim, cloud.points.size(), getX);
+        setValues(buf, yDim, cloud.points.size(), getY);
+        setValues(buf, zDim, cloud.points.size(), getZ);
     }
 
-    boost::optional<pdal::Dimension const &> dI = buffer_schema.getDimensionOptional("Intensity");
-
-    if (pcl::traits::has_intensity<typename CloudT::PointType>::value && dI)
+    if (pcl::traits::has_intensity<typename CloudT::PointType>::value && iDim)
     {
-        bool has_i = true;
-
         for (size_t i = 0; i < cloud.points.size(); ++i)
         {
-            float v;
+            float f;
+            bool hasIntensity = true;
 
             typename CloudT::PointType p = cloud.points[i];
-            pcl::for_each_type<FieldList> (pcl::CopyIfFieldExists<typename CloudT::PointType, float> (p, "intensity", has_i, v));
-
-            data.setField<float>(*dI, i, v);
+            pcl::for_each_type<FieldList>
+                (pcl::CopyIfFieldExists<typename CloudT::PointType, float>
+                    (p, "intensity", hasIntensity, f));
+            buf.setField(*iDim, i, f);
         }
     }
 #endif
 }
+
 
 /**
  * \brief Convert PDAL point cloud to PCD.
@@ -196,54 +125,52 @@ void PCDtoPDAL(CloudT &cloud, PointBuffer& data)
  * Converts PDAL data to PCD format.
  */
 template <typename CloudT>
-void PDALtoPCD(PointBuffer& data, CloudT &cloud)
+void PDALtoPCD(PointBuffer& data, CloudT &cloud, Dimension *xDim,
+    Dimension *yDim, Dimension *zDim, Dimension *iDim)
 {
 #ifdef PDAL_HAVE_PCL
-    typedef typename pcl::traits::fieldList<typename CloudT::PointType>::type FieldList;
+    typedef typename pcl::traits::fieldList<typename CloudT::PointType>::type
+        FieldList;
 
-    const pdal::Schema &buffer_schema = data.getSchema();
-
-    cloud.width = data.getNumPoints();
+    cloud.width = data.size();
     cloud.height = 1;  // unorganized point cloud
     cloud.is_dense = false;
     cloud.points.resize(cloud.width);
 
-    const pdal::Dimension &dX = buffer_schema.getDimension("X");
-    const pdal::Dimension &dY = buffer_schema.getDimension("Y");
-    const pdal::Dimension &dZ = buffer_schema.getDimension("Z");
-    
     if (pcl::traits::has_xyz<typename CloudT::PointType>::value)
     {
         for (size_t i = 0; i < cloud.points.size(); ++i)
         {
-            float xd = data.getField<int32_t>(dX, i) * dX.getNumericScale();
-            float yd = data.getField<int32_t>(dY, i) * dY.getNumericScale();
-            float zd = data.getField<int32_t>(dZ, i) * dZ.getNumericScale();
+            double xd = data.getFieldAs<int32_t>(*xDim, i, false) *
+                xDim->getNumericScale();
+            double yd = data.getFieldAs<int32_t>(*yDim, i, false) *
+                yDim->getNumericScale();
+            double zd = data.getFieldAs<double>(*zDim, i, false) *
+                zDim->getNumericScale();
 
             typename CloudT::PointType p = cloud.points[i];
-            p.x = xd; p.y = yd; p.z = zd;
+            p.x = (float)xd;
+            p.y = (float)yd;
+            p.z = (float)zd;
             cloud.points[i] = p;
         }
     }
 
-    boost::optional<pdal::Dimension const &> dI = buffer_schema.getDimensionOptional("Intensity");
-
-    if (pcl::traits::has_intensity<typename CloudT::PointType>::value && dI)
+    if (pcl::traits::has_intensity<typename CloudT::PointType>::value && iDim)
     {
         for (size_t i = 0; i < cloud.points.size(); ++i)
         {
-            boost::int32_t vi = data.getField<boost::int32_t>(*dI, i);
-
-            float vd = dI->applyScaling(vi);
+            float f = data.getFieldAs<float>(*iDim, i);
 
             typename CloudT::PointType p = cloud.points[i];
-            pcl::for_each_type<FieldList> (pcl::SetIfFieldExists<typename CloudT::PointType, float> (p, "intensity", vd));
+            pcl::for_each_type<FieldList>
+                (pcl::SetIfFieldExists<typename CloudT::PointType, float>
+                    (p, "intensity", f));
             cloud.points[i] = p;
         }
     }
-#endif
+#endif //
 }
-}  // pdal
 
-#endif  // INCLUDED_PCL_CONVERSIONS_HPP
+}  // namespace pdal
 

@@ -32,25 +32,15 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_FILTERS_PCLBLOCK_HPP
-#define INCLUDED_FILTERS_PCLBLOCK_HPP
+#pragma once
 
 #include <pdal/Filter.hpp>
 #include <pdal/FilterIterator.hpp>
 
-#include <boost/shared_ptr.hpp>
-
-#ifdef PDAL_HAVE_PCL
-// pcl includes
-#endif
-
 namespace pdal
 {
-class PointBuffer;
-
 namespace filters
 {
-
 
 class PDAL_DLL PCLBlock : public Filter
 {
@@ -65,51 +55,22 @@ public:
         
     PCLBlock(const Options& options) : Filter(options)
         {}
-    ~PCLBlock()
-        {}
-
-    pdal::StageSequentialIterator*
-    createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const
-    {
-        throw pdal::not_yet_implemented(
-            "PCLBlock random iterator not implemented");
-    }
-
-    boost::uint32_t processBuffer(PointBuffer& srcData, std::string& filename,
-                                  PointBuffer& dstData) const;
 
 private:
+    std::string m_filename;
+    Dimension *m_xDim;
+    Dimension *m_yDim;
+    Dimension *m_zDim;
+    Dimension *m_iDim;
+
+    virtual void processOptions(const Options& options);
+    virtual void ready(PointContext ctx);
+    virtual PointBufferSet run(PointBufferPtr buf);
+
     PCLBlock& operator=(const PCLBlock&); // not implemented
     PCLBlock(const PCLBlock&); // not implemented
 };
 
-namespace iterators
-{
-namespace sequential
-{
-
-
-class PDAL_DLL PCLBlock : public pdal::FilterSequentialIterator
-{
-public:
-    PCLBlock(const pdal::filters::PCLBlock& filter, PointBuffer& buffer);
-
-private:
-    boost::uint64_t skipImpl(boost::uint64_t);
-    boost::uint32_t readBufferImpl(PointBuffer&);
-    bool atEndImpl() const;
-
-    const pdal::filters::PCLBlock& m_pclblockFilter;
-};
-
-
-
-} // sequential
-} // iterators
-
 } // filters
 } // pdal
-
-#endif
 

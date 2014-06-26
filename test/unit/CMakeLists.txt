@@ -145,7 +145,7 @@ endif (WITH_NITRO)
 
 if (WITH_PCL AND WITH_PCL_TEST)
     set(PDAL_PCL_TEST_CPP
-#        filters/PCLBlockFilterTest.cpp
+        filters/PCLBlockFilterTest.cpp
         )
 
     FOREACH(file ${PDAL_PCL_TEST_CPP})
