@@ -32,9 +32,11 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_DRIVERS_SBET_COMMON_HPP
-#define INCLUDED_DRIVERS_SBET_COMMON_HPP
+#pragma once
 
+#include <vector>
+
+#include <pdal/Dimension.hpp>
 
 namespace pdal
 {
@@ -43,38 +45,9 @@ namespace drivers
 namespace sbet
 {
 
+std::vector<Dimension> fileDimensions(const std::string& stageName);
 
-// The definition of the sbet format. Not used but included here for
-// documentation purposes
-//
-// typedef struct
-// {
-//    double time;
-//    double latitude;
-//    double longitude;
-//    double altitude;
-//    double x_velocity;
-//    double y_velocity;
-//    double z_velocity;
-//    double roll;
-//    double pitch;
-//    double platform_heading;
-//    double wander_angle;
-//    double x_body_accel;
-//    double y_body_accel;
-//    double z_body_accel;
-//    double x_body_ang_rate;
-//    double y_body_ang_rate;
-//    double z_body_ang_rate;
-// } Record;
+} // namespace sbet
+} // namespace drivers
+} // namespace pdal
 
-
-const int pointByteSize = 136;
-
-
-}
-}
-} // namespace pdal::drivers::sbet
-
-
-#endif // INCLUDED_DRIVERS_SBET_COMMON_HPP

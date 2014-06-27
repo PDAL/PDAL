@@ -32,12 +32,10 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-
 #include <pdal/drivers/sbet/Writer.hpp>
 
 #include <pdal/drivers/sbet/Common.hpp>
 #include <pdal/PointBuffer.hpp>
-
 
 namespace pdal
 {
@@ -46,97 +44,41 @@ namespace drivers
 namespace sbet
 {
 
-
-Writer::~Writer()
-{
-    FileUtils::closeFile(m_ostream);
-}
-
-
-void Writer::processOptions(const Options& options)
+void SbetWriter::processOptions(const Options& options)
 {
     m_filename = options.getOption("filename").getValue<std::string>();
 }
 
 
-void Writer::initialize()
+void SbetWriter::ready(PointContext ctx)
 {
-    m_ostream = FileUtils::createFile(m_filename, true);
-}
+    m_stream.reset(new OLeStream(m_filename));
 
-
-void Writer::writeBegin(boost::uint64_t)
-{
-    return;
-}
-
-
-boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
-{
-    if (!m_ostream->good())
+    // Find dimensions in the current schema that map to the SBET dimensions.
+    std::vector<Dimension> neededDims = getDefaultDimensions();
+    m_dims.clear();
+    for (auto di = neededDims.begin(); di != neededDims.end(); ++di)
     {
-        throw pdal_error("sbet outstream is no good");
+        Dimension& dim = *di;
+        m_dims.push_back(ctx.schema()->getDimensionPtr(dim.getName()));
     }
-
-    const Schema& schema = data.getSchema();
-    const Dimension& dimTime = schema.getDimension("Time");
-    const Dimension& dimY = schema.getDimension("Y");
-    const Dimension& dimX = schema.getDimension("X");
-    const Dimension& dimZ = schema.getDimension("Z");
-    const Dimension& dimXVelocity = schema.getDimension("XVelocity");
-    const Dimension& dimYVelocity = schema.getDimension("YVelocity");
-    const Dimension& dimZVelocity = schema.getDimension("ZVelocity");
-    const Dimension& dimRoll = schema.getDimension("Roll");
-    const Dimension& dimPitch = schema.getDimension("Pitch");
-    const Dimension& dimPlatformHeading = schema.getDimension("PlatformHeading");
-    const Dimension& dimWanderAngle = schema.getDimension("WanderAngle");
-    const Dimension& dimXBodyAccel = schema.getDimension("XBodyAccel");
-    const Dimension& dimYBodyAccel = schema.getDimension("YBodyAccel");
-    const Dimension& dimZBodyAccel = schema.getDimension("ZBodyAccel");
-    const Dimension& dimXBodyAngRate = schema.getDimension("XBodyAngRate");
-    const Dimension& dimYBodyAngRate = schema.getDimension("YBodyAngRate");
-    const Dimension& dimZBodyAngRate = schema.getDimension("ZBodyAngRate");
-
-    boost::uint8_t buf[pdal::drivers::sbet::pointByteSize];
-    boost::uint32_t numPointsWritten = 0;
-
-    for (boost::uint32_t idx = 0; idx < data.getNumPoints(); idx++)
-    {
-        boost::uint8_t* p = buf;
-
-        Utils::write_field(p, data.getFieldAs<double>(dimTime, idx, false));
-        Utils::write_field(p, data.getFieldAs<double>(dimY, idx, false));
-        Utils::write_field(p, data.getFieldAs<double>(dimX, idx, false));
-        Utils::write_field(p, data.getFieldAs<double>(dimZ, idx, false));
-        Utils::write_field(p, data.getFieldAs<double>(dimXVelocity, idx, false));
-        Utils::write_field(p, data.getFieldAs<double>(dimYVelocity, idx, false));
-        Utils::write_field(p, data.getFieldAs<double>(dimZVelocity, idx, false));
-        Utils::write_field(p, data.getFieldAs<double>(dimRoll, idx, false));
-        Utils::write_field(p, data.getFieldAs<double>(dimPitch, idx, false));
-        Utils::write_field(p, data.getFieldAs<double>(dimPlatformHeading, idx, false));
-        Utils::write_field(p, data.getFieldAs<double>(dimWanderAngle, idx, false));
-        Utils::write_field(p, data.getFieldAs<double>(dimXBodyAccel, idx, false));
-        Utils::write_field(p, data.getFieldAs<double>(dimYBodyAccel, idx, false));
-        Utils::write_field(p, data.getFieldAs<double>(dimZBodyAccel, idx, false));
-        Utils::write_field(p, data.getFieldAs<double>(dimXBodyAngRate, idx, false));
-        Utils::write_field(p, data.getFieldAs<double>(dimYBodyAngRate, idx, false));
-        Utils::write_field(p, data.getFieldAs<double>(dimZBodyAngRate, idx, false));
-
-        // TODO should we be using StreamFactory?
-        Utils::write_n(*m_ostream, buf, pdal::drivers::sbet::pointByteSize);
-        ++numPointsWritten;
-    }
-
-    return numPointsWritten;
 }
 
 
-void Writer::writeEnd(boost::uint64_t)
+void SbetWriter::write(const PointBuffer& buf)
 {
-    return;
+    for (PointId idx = 0; idx < buf.size(); ++idx)
+    {
+        for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
+        {
+            // If a dimension doesn't exist, write 0.
+            Dimension *d = *di;
+            *m_stream << (d ? buf.getFieldAs<double>(*d, idx) : 0.0);
+        }
+    }
 }
 
+} // namespace sbet
+} // namespace drivers
+} // namespace pdal
 
-}
-}
-} // namespace pdal::drivers::sbet

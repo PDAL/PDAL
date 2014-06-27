@@ -38,6 +38,7 @@
 #include <pdal/PointBuffer.hpp>
 #include <pdal/Reader.hpp>
 #include <pdal/ReaderIterator.hpp>
+#include <pdal/drivers/sbet/Common.hpp>
 
 namespace pdal
 {
@@ -57,7 +58,8 @@ public:
         {}
 
     static Options getDefaultOptions();
-    static std::vector<Dimension> getDefaultDimensions();
+    static std::vector<Dimension> getDefaultDimensions()
+        { return fileDimensions(s_getName()); }
 
     virtual StageSequentialIterator* createSequentialIterator() const;
 private:

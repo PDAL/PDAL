@@ -32,12 +32,11 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_DRIVERS_SBET_WRITER_HPP
-#define INCLUDED_DRIVERS_SBET_WRITER_HPP
+#pragma once
 
-
+#include <pdal/drivers/sbet/Common.hpp>
+#include <pdal/OStream.hpp>
 #include <pdal/Writer.hpp>
-
 
 namespace pdal
 {
@@ -46,37 +45,29 @@ namespace drivers
 namespace sbet
 {
 
-
-class PDAL_DLL Writer : public pdal::Writer
+class PDAL_DLL SbetWriter : public pdal::Writer
 {
 public:
     SET_STAGE_NAME("drivers.sbet.writer", "SBET Writer")
     SET_STAGE_LINK("http://pdal.io/stages/drivers.sbet.writer.html")
 
-    Writer(const Options& options) : pdal::Writer(options)
+    SbetWriter(const Options& options) : pdal::Writer(options)
         {}
-    virtual ~Writer();
 
-    static Options getDefaultOptions();
-
-protected:
-    virtual void writeBegin(boost::uint64_t);
-    virtual boost::uint32_t writeBuffer(const PointBuffer&);
-    virtual void writeEnd(boost::uint64_t);
+    static std::vector<Dimension> getDefaultDimensions()
+        { return fileDimensions(s_getName()); }
 
 private:
-    virtual void processOptions(const Options&);
-    virtual void initialize();
-
+    std::unique_ptr<OLeStream> m_stream;
     std::string m_filename;
-    std::ostream* m_ostream;
+    std::vector<Dimension *> m_dims;
 
-}; // class Writer
+    virtual void processOptions(const Options& options);
+    virtual void ready(PointContext ctx);
+    virtual void write(const PointBuffer& buf);
+};
 
+} // namespace sbet
+} // namespace drivers
+} // namespace pdal
 
-}
-}
-} // namespace pdal::drivers::sbet
-
-
-#endif // INCLUDED_DRIVERS_SBET_WRITER_HPP

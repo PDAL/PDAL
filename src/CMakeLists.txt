@@ -474,11 +474,13 @@ set(PDAL_SBET_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_SBET_PATH}")
 set(PDAL_SBET_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_SBET_PATH}")
 
 set(PDAL_DRIVERS_SBET_HPP
+    "${PDAL_SBET_HEADERS}/Common.hpp"
     "${PDAL_SBET_HEADERS}/Reader.hpp"
     "${PDAL_SBET_HEADERS}/Writer.hpp"
 )
 
 set (PDAL_DRIVERS_SBET_CPP 
+    "${PDAL_SBET_SRC}/Common.cpp"
     "${PDAL_SBET_SRC}/Reader.cpp"
     "${PDAL_SBET_SRC}/Writer.cpp"
 )

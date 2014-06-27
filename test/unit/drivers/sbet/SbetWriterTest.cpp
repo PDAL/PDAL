@@ -39,21 +39,21 @@
 
 #include "Support.hpp"
 
+using namespace pdal;
 
-pdal::Options makeReaderOptions()
+Options makeReaderOptions()
 {
-    pdal::Options options;
-    pdal::Option filename("filename", Support::datapath("sbet/2-points.sbet"), "");
+    Options options;
+    Option filename("filename", Support::datapath("sbet/2-points.sbet"), "");
     options.add(filename);
     return options;
 }
 
 
-pdal::Options makeWriterOptions()
+Options makeWriterOptions()
 {
-    pdal::Options options;
-    pdal::Option filename("filename",
-                          Support::temppath("SbetWriterTest.sbet"), "");
+    Options options;
+    Option filename("filename", Support::temppath("SbetWriterTest.sbet"), "");
     options.add(filename);
     return options;
 }
@@ -61,38 +61,35 @@ pdal::Options makeWriterOptions()
 
 BOOST_AUTO_TEST_SUITE(SbetWriterTest)
 
-
 BOOST_AUTO_TEST_CASE(testConstructor)
 {
-    pdal::drivers::sbet::Reader reader(makeReaderOptions());
-    pdal::drivers::sbet::Writer writer(makeWriterOptions());
+    drivers::sbet::SbetReader reader(makeReaderOptions());
+    drivers::sbet::SbetWriter writer(makeWriterOptions());
     writer.setInput(&reader);
 
     BOOST_CHECK(writer.getDescription() == "SBET Writer");
     BOOST_CHECK_EQUAL(writer.getName(), "drivers.sbet.writer");
-
-    writer.prepare();
 }
-
 
 BOOST_AUTO_TEST_CASE(testWrite)
 {
-    {
-        pdal::drivers::sbet::Reader reader(makeReaderOptions());
-        pdal::drivers::sbet::Writer writer(makeWriterOptions());
-        writer.setInput(&reader);
-        writer.prepare();
+    FileUtils::deleteFile(Support::temppath("SbetWriterTest.sbet"));
 
-        writer.write(2);
+    // Scope forces the writer's buffer to get written to the file.  Otherwise
+    // the output file will show a file size of zero and no contents.
+    {
+        drivers::sbet::SbetReader reader(makeReaderOptions());
+        drivers::sbet::SbetWriter writer(makeWriterOptions());
+        writer.setInput(&reader);
+
+        PointContext ctx;
+        writer.prepare(ctx);
+        writer.execute(ctx);
     }
 
     BOOST_CHECK(Support::compare_files(
-                    Support::temppath("SbetWriterTest.sbet"),
-                    Support::datapath("sbet/2-points.sbet")));
-
-    pdal::FileUtils::deleteFile(
-        Support::temppath("SbetWriterTest.sbet"));
+        Support::temppath("SbetWriterTest.sbet"),
+        Support::datapath("sbet/2-points.sbet")));
 }
-
 
 BOOST_AUTO_TEST_SUITE_END()

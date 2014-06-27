@@ -103,20 +103,28 @@ public:
     UserCallback* getUserCallback() const;
     
 protected:
+    //ABELL
     // this is called once before the loop with all the writeBuffer calls
-    virtual void writeBegin(boost::uint64_t targetNumPointsToWrite) = 0;
+    virtual void writeBegin(boost::uint64_t targetNumPointsToWrite)
+    {}
 
+    //ABELL
     // this is called before each writeBuffer call
     virtual void writeBufferBegin(const PointBuffer&) {}
 
     // called repeatedly, until out of data
-    virtual boost::uint32_t writeBuffer(const PointBuffer&) = 0;
+    //ABELL
+    virtual boost::uint32_t writeBuffer(const PointBuffer&)
+    { return 0; }
 
+    //ABELL
     // this is called after each writeBuffer call
     virtual void writeBufferEnd(const PointBuffer&) {}
 
+    //ABELL
     // called once, after all the the writeBuffer calls
-    virtual void writeEnd(boost::uint64_t actualNumPointsWritten) = 0;
+    virtual void writeEnd(boost::uint64_t actualNumPointsWritten)
+    {}
 
 private:
     SpatialReference m_spatialReference;
