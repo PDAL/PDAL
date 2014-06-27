@@ -41,87 +41,63 @@
 
 #include <pdal/drivers/sbet/Reader.hpp>
 
+#include "../../StageTester.hpp"
 #include "Support.hpp"
 
+using namespace pdal;
 
-void checkDimension(const pdal::PointBuffer& data,
-                    std::size_t index, const std::string& name, double expected)
+void checkPoint(PointContext ctx, const pdal::PointBuffer& data,
+    std::size_t index, double time, double latitude, double longitude,
+    double altitude, double xvelocity, double yvelocity, double zvelocity,
+    double roll, double pitch, double heading, double wander, double xaccel,
+    double yaccel, double zaccel, double xangrate, double yangrate,
+    double zangrate)
 {
-    pdal::Dimension const& dimension = data.getSchema().getDimension(name);
-    double actual = data.getField<double>(dimension, index);
-    BOOST_CHECK_CLOSE(expected, actual, 0.000001);
-}
+    auto checkDimension = [&ctx,&data,index](std::string name, double expected)
+    {
+        Dimension *dim = ctx.schema()->getDimensionPtr(name);
+        double actual = data.getFieldAs<double>(*dim, index);
+        BOOST_CHECK_CLOSE(expected, actual, 0.0000001);
+    };
 
-
-void checkPoint(const pdal::PointBuffer& data, std::size_t index,
-                double time, double latitude, double longitude,
-                double altitude,
-                double xvelocity, double yvelocity, double zvelocity,
-                double roll, double pitch, double heading,
-                double wander,
-                double xaccel, double yaccel, double zaccel,
-                double xangrate, double yangrate, double zangrate)
-{
-    checkDimension(data, index, "Time", time);
-    checkDimension(data, index, "Y", latitude);
-    checkDimension(data, index, "X", longitude);
-    checkDimension(data, index, "Z", altitude);
-    checkDimension(data, index, "XVelocity", xvelocity);
-    checkDimension(data, index, "YVelocity", yvelocity);
-    checkDimension(data, index, "ZVelocity", zvelocity);
-    checkDimension(data, index, "Roll", roll);
-    checkDimension(data, index, "Pitch", pitch);
-    checkDimension(data, index, "PlatformHeading", heading);
-    checkDimension(data, index, "WanderAngle", wander);
-    checkDimension(data, index, "XBodyAccel", xaccel);
-    checkDimension(data, index, "YBodyAccel", yaccel);
-    checkDimension(data, index, "ZBodyAccel", zaccel);
-    checkDimension(data, index, "XBodyAngRate", xangrate);
-    checkDimension(data, index, "YBodyAngRate", yangrate);
-    checkDimension(data, index, "ZBodyAngRate", zangrate);
+    checkDimension("Time", time);
+    checkDimension("Y", latitude);
+    checkDimension("X", longitude);
+    checkDimension("Z", altitude);
+    checkDimension("XVelocity", xvelocity);
+    checkDimension("YVelocity", yvelocity);
+    checkDimension("ZVelocity", zvelocity);
+    checkDimension("Roll", roll);
+    checkDimension("Pitch", pitch);
+    checkDimension("PlatformHeading", heading);
+    checkDimension("WanderAngle", wander);
+    checkDimension("XBodyAccel", xaccel);
+    checkDimension("YBodyAccel", yaccel);
+    checkDimension("ZBodyAccel", zaccel);
+    checkDimension("XBodyAngRate", xangrate);
+    checkDimension("YBodyAngRate", yangrate);
+    checkDimension("ZBodyAngRate", zangrate);
 }
 
 
 BOOST_AUTO_TEST_SUITE(SbetReaderTest)
 
-
-BOOST_AUTO_TEST_CASE(testConstructor)
-{
-    pdal::Options options;
-    pdal::Option filename("filename", Support::datapath("sbet/2-points.sbet"), "");
-    options.add(filename);
-
-    pdal::drivers::sbet::Reader reader(options);
-    BOOST_CHECK(reader.getDescription() == "SBET Reader");
-    BOOST_CHECK_EQUAL(reader.getName(), "drivers.sbet.reader");
-
-    reader.prepare();
-
-    BOOST_CHECK_EQUAL(reader.getNumPoints(), 2);
-
-}
-
-
 BOOST_AUTO_TEST_CASE(testRead)
 {
-    pdal::Option filename("filename", Support::datapath("sbet/2-points.sbet"), "");
-    pdal::Options options(filename);
-    pdal::drivers::sbet::Reader reader(options);
-    reader.prepare();
+    Option filename("filename", Support::datapath("sbet/2-points.sbet"), "");
+    Options options(filename);
+    drivers::sbet::SbetReader reader(options);
 
-    const pdal::Schema& schema = reader.getSchema();
-    pdal::PointBuffer data(schema, 2);
+    PointContext ctx;
 
-    pdal::StageSequentialIterator* iter = reader.createSequentialIterator(data);
-    BOOST_CHECK(!iter->atEnd());
+    reader.prepare(ctx);
+    PointBufferSet pbSet = reader.execute(ctx);
+    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    PointBufferPtr buf = *pbSet.begin();
 
-    boost::uint32_t numRead = iter->read(data);
-    BOOST_CHECK_EQUAL(numRead, 2);
-    BOOST_CHECK(iter->atEnd());
+    BOOST_CHECK_EQUAL(buf->size(), 2);
 
-    delete iter;
-
-    checkPoint(data, 0, 1.516310028360710e+05, 5.680211852972264e-01,
+    checkPoint(ctx, *buf, 0, 1.516310028360710e+05, 5.680211852972264e-01,
                -2.041654392303940e+00, 1.077152953296560e+02,
                -2.332420866600025e+00, -3.335067504871401e-01,
                -3.093961631767838e-02, -2.813407149321339e-02,
@@ -130,7 +106,7 @@ BOOST_AUTO_TEST_CASE(testRead)
                7.849084719295495e-01, -2.978807916450262e-01,
                6.226807982589819e-05, 9.312162756440178e-03,
                7.217812320996525e-02);
-    checkPoint(data, 1, 1.516310078318641e+05, 5.680211834722869e-01,
+    checkPoint(ctx, *buf, 1, 1.516310078318641e+05, 5.680211834722869e-01,
                -2.041654392034053e+00, 1.077151424357507e+02,
                -2.336228229691271e+00, -3.324663118952635e-01,
                -3.022948961008987e-02, -2.813856631423094e-02,
@@ -140,25 +116,26 @@ BOOST_AUTO_TEST_CASE(testRead)
                8.379685112283802e-04, 7.372886784718076e-03,
                7.179027672314571e-02);
 }
-
 
 BOOST_AUTO_TEST_CASE(testSkip)
 {
-    pdal::Option filename("filename", Support::datapath("sbet/2-points.sbet"), "");
-    pdal::Options options(filename);
-    pdal::drivers::sbet::Reader reader(options);
-    reader.prepare();
+    Option filename("filename", Support::datapath("sbet/2-points.sbet"), "");
+    Options options(filename);
+    drivers::sbet::SbetReader reader(options);
 
-    const pdal::Schema& schema = reader.getSchema();
-    pdal::PointBuffer data(schema, 1);
+    PointContext ctx;
+    PointBuffer buf(ctx);
+    reader.prepare(ctx);
 
-    pdal::StageSequentialIterator* iter = reader.createSequentialIterator(data);
+    StageTester::ready(&reader, ctx);
+    StageSequentialIterator* iter = reader.createSequentialIterator();
     iter->skip(1);
-    iter->read(data);
+    iter->read(buf, 1);
+    StageTester::done(&reader, ctx);
 
     delete iter;
 
-    checkPoint(data, 0, 1.516310078318641e+05, 5.680211834722869e-01,
+    checkPoint(ctx, buf, 0, 1.516310078318641e+05, 5.680211834722869e-01,
                -2.041654392034053e+00, 1.077151424357507e+02,
                -2.336228229691271e+00, -3.324663118952635e-01,
                -3.022948961008987e-02, -2.813856631423094e-02,
@@ -169,58 +146,25 @@ BOOST_AUTO_TEST_CASE(testSkip)
                7.179027672314571e-02);
 }
 
-
 BOOST_AUTO_TEST_CASE(testBadFile)
 {
-    pdal::Option filename("filename", Support::datapath("sbet/badfile.sbet"), "");
-    pdal::Options options(filename);
-    pdal::drivers::sbet::Reader reader(options);
-    BOOST_CHECK_THROW(reader.prepare(), pdal::pdal_error);
+    Option filename("filename", Support::datapath("sbet/badfile.sbet"), "");
+    Options options(filename);
+    drivers::sbet::SbetReader reader(options);
+    PointContext ctx;
+    reader.prepare(ctx);
+    BOOST_CHECK_THROW(reader.execute(ctx), pdal::pdal_error);
 }
-
 
 BOOST_AUTO_TEST_CASE(testPipeline)
 {
-    pdal::PipelineManager manager;
-    pdal::PipelineReader reader(manager);
-
-    bool isWriter = reader.readPipeline(Support::datapath("sbet/pipeline.xml"));
-    BOOST_CHECK(isWriter);
+    PipelineManager manager;
+    PipelineReader reader(manager);
+    reader.readPipeline(Support::datapath("sbet/pipeline.xml"));
 
     const boost::uint64_t numPoints = manager.execute();
     BOOST_CHECK_EQUAL(numPoints, 2);
     pdal::FileUtils::deleteFile(Support::datapath("sbet/outfile.txt"));
 }
-
-
-BOOST_AUTO_TEST_CASE(testRandomIterator)
-{
-    pdal::Option filename("filename", Support::datapath("sbet/2-points.sbet"), "");
-    pdal::Options options(filename);
-    pdal::drivers::sbet::Reader reader(options);
-    reader.prepare();
-
-    pdal::PointBuffer data(reader.getSchema(), 1);
-
-    pdal::StageRandomIterator* iter = reader.createRandomIterator(data);
-    boost::uint64_t numSeek = iter->seek(1);
-    BOOST_CHECK_EQUAL(numSeek, 1);
-
-    boost::uint32_t numRead = iter->read(data);
-
-    delete iter;
-
-    BOOST_CHECK_EQUAL(numRead, 1);
-    checkPoint(data, 0, 1.516310078318641e+05, 5.680211834722869e-01,
-               -2.041654392034053e+00, 1.077151424357507e+02,
-               -2.336228229691271e+00, -3.324663118952635e-01,
-               -3.022948961008987e-02, -2.813856631423094e-02,
-               -2.425215669392169e-02, 3.047131105236811e+00,
-               -2.198416007932108e-02, 8.397590491636475e-01,
-               3.252165276637165e-01, -1.558883225990844e-01,
-               8.379685112283802e-04, 7.372886784718076e-03,
-               7.179027672314571e-02);
-}
-
 
 BOOST_AUTO_TEST_SUITE_END()

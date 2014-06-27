@@ -32,13 +32,12 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_DRIVERS_SBET_READER_HPP
-#define INCLUDED_DRIVERS_SBET_READER_HPP
+#pragma once
 
+#include <pdal/IStream.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/Reader.hpp>
 #include <pdal/ReaderIterator.hpp>
-
 
 namespace pdal
 {
@@ -47,96 +46,61 @@ namespace drivers
 namespace sbet
 {
 
-
-class PDAL_DLL Reader : public pdal::Reader
+class PDAL_DLL SbetReader : public pdal::Reader
 {
 public:
     SET_STAGE_NAME("drivers.sbet.reader", "SBET Reader")
     SET_STAGE_LINK("http://pdal.io/stages/drivers.sbet.reader.html")
     SET_STAGE_ENABLED(true)
 
-    Reader(const Options&);
-    ~Reader();
+    SbetReader(const Options& options) : Reader(options)
+        {}
 
     static Options getDefaultOptions();
     static std::vector<Dimension> getDefaultDimensions();
 
-    std::string getFileName() const;
-
-    pdal::StageSequentialIterator* createSequentialIterator(PointBuffer&) const;
-    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const;
-
+    virtual StageSequentialIterator* createSequentialIterator() const;
 private:
-    virtual void initialize();
+    std::string m_filename;
+    std::vector<Dimension *> m_dims;
+    std::unique_ptr<ILeStream> m_stream;
+    point_count_t m_numPts;
 
-}; // class Reader
-
+    virtual void processOptions(const Options& options);
+    virtual void buildSchema(Schema *schema);
+    virtual void ready(PointContext ctx);
+};
 
 namespace iterators
 {
-
-
-class PDAL_DLL IteratorBase
-{
-public:
-    IteratorBase(const pdal::drivers::sbet::Reader&, PointBuffer&);
-    ~IteratorBase();
-
-protected:
-    boost::uint32_t readSbetIntoBuffer(PointBuffer&, const boost::uint64_t);
-    std::istream* m_istream;
-    const boost::uint64_t m_numPoints;
-    const Schema m_schema;
-    PointBuffer m_readBuffer;
-
-private:
-    IteratorBase& operator=(const IteratorBase&); // not implemented
-    IteratorBase(const IteratorBase&); // not implemented
-}; // class Iterator Base
-
-
 namespace sequential
 {
 
-
-class PDAL_DLL Iterator : public pdal::ReaderSequentialIterator, public IteratorBase
+class PDAL_DLL SbetSeqIterator : public pdal::ReaderSequentialIterator
 {
 public:
-    Iterator(const pdal::drivers::sbet::Reader&, PointBuffer&);
-    ~Iterator();
+    SbetSeqIterator(std::vector<Dimension *> dims, point_count_t numPts,
+        ILeStream& stream) : m_dims(dims), m_numPts(numPts), m_stream(stream)
+    {}
 
 private:
-    boost::uint64_t skipImpl(boost::uint64_t);
-    boost::uint32_t readBufferImpl(PointBuffer&);
-    bool atEndImpl() const;
-};
+    std::vector<Dimension *> m_dims;
+    point_count_t m_numPts;
+    ILeStream& m_stream;
 
+    virtual uint32_t readBufferImpl(PointBuffer& buf)
+        { return readImpl(buf, std::numeric_limits<point_count_t>::max()); }
+
+    boost::uint64_t skipImpl(boost::uint64_t);
+    point_count_t readImpl(PointBuffer& buf, point_count_t numPts);
+    bool atEndImpl() const;
+    void seek(PointId idx);
+};
 
 } // namespace sequential
-
-
-namespace random
-{
-
-
-class PDAL_DLL Iterator : public pdal::ReaderRandomIterator, public IteratorBase
-{
-public:
-    Iterator(const pdal::drivers::sbet::Reader&, PointBuffer&);
-    ~Iterator();
-
-private:
-    boost::uint64_t seekImpl(boost::uint64_t);
-    boost::uint32_t readBufferImpl(PointBuffer&);
-};
-
-
-} // namespace random
 } // namespace iterators
 
-}
-}
-} // namespace pdal::drivers::sbet
+} // namespace sbet
+} // namespace drivers
+} // namespace pdal
 
-
-#endif // INCLUDED_DRIVERS_SBET_READER_HPP

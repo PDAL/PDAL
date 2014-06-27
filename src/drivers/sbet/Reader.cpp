@@ -34,9 +34,6 @@
 
 #include <pdal/drivers/sbet/Reader.hpp>
 
-#include <pdal/drivers/sbet/Common.hpp>
-
-
 namespace pdal
 {
 namespace drivers
@@ -44,42 +41,22 @@ namespace drivers
 namespace sbet
 {
 
-
-Reader::Reader(const Options& options)
-    : pdal::Reader(options)
-{
-    setSchema(Schema(getDefaultDimensions()));
-}
-
-
-Reader::~Reader()
-{}
-
-
-void Reader::initialize()
-{
-    boost::uintmax_t fileSize = FileUtils::fileSize(getFileName());
-    if (fileSize % pdal::drivers::sbet::pointByteSize != 0)
-    {
-        throw pdal_error("invalid sbet file size");
-    }
-    else
-    {
-        setNumPoints(fileSize / pdal::drivers::sbet::pointByteSize);
-    }
-}
-
-
-Options Reader::getDefaultOptions()
+Options SbetReader::getDefaultOptions()
 {
     Options options;
     return options;
 }
 
 
-std::vector<Dimension> Reader::getDefaultDimensions()
+std::vector<Dimension> SbetReader::getDefaultDimensions()
 {
     std::vector<Dimension> output;
+
+    // Data for each point is in the source file in the order these dimensions
+    // are listed, I would suppose.  Would be really nice to have a reference
+    // to the file spec.  I searched the Internet and found that it is from
+    // some company called Applanix (Trimble), but I can't find anything
+    // describing the file format on their website.
 
     Dimension time("Time", dimension::Float, 8);
     time.setUUID("D228D324-B40E-4C85-A0DB-ED741A665AFA");
@@ -170,159 +147,97 @@ std::vector<Dimension> Reader::getDefaultDimensions()
 }
 
 
-std::string Reader::getFileName() const
+void SbetReader::processOptions(const Options& options)
 {
-    return getOptions().getOption("filename").getValue<std::string>();
+    m_filename = options.getOption("filename").getValue<std::string>();
 }
 
 
-pdal::StageSequentialIterator*
-Reader::createSequentialIterator(PointBuffer& buffer) const
+void SbetReader::buildSchema(Schema *s)
 {
-    return new pdal::drivers::sbet::iterators::sequential::Iterator(*this, buffer);
+    std::vector<Dimension> dims = getDefaultDimensions();
+    for (auto di = dims.begin(); di != dims.end(); ++di)
+        m_dims.push_back(s->appendDimension(*di));
 }
 
 
-pdal::StageRandomIterator*
-Reader::createRandomIterator(PointBuffer& buffer) const
+void SbetReader::ready(PointContext ctx)
 {
-    return new pdal::drivers::sbet::iterators::random::Iterator(*this, buffer);
+    size_t pointSize = 0;
+    for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
+    {
+        Dimension *dim = *di;
+        pointSize += dim->getByteSize();
+    }
+
+    boost::uintmax_t fileSize = FileUtils::fileSize(m_filename);
+    if (fileSize % pointSize != 0)
+        throw pdal_error("invalid sbet file size");
+    m_numPts = fileSize / pointSize;
+    m_stream.reset(new ILeStream(m_filename));
+}
+
+
+StageSequentialIterator* SbetReader::createSequentialIterator() const
+{
+    return new drivers::sbet::iterators::sequential::SbetSeqIterator(m_dims,
+        m_numPts, *m_stream);
 }
 
 
 namespace iterators
 {
-
-
-IteratorBase::IteratorBase(const pdal::drivers::sbet::Reader& reader,
-                           PointBuffer& buffer)
-    : m_numPoints(reader.getNumPoints())
-    , m_schema(reader.getSchema())
-    , m_readBuffer(pdal::PointBuffer(m_schema, m_numPoints))
-{
-    m_istream = FileUtils::openFile(reader.getFileName());
-}
-
-
-IteratorBase::~IteratorBase()
-{
-    FileUtils::closeFile(m_istream);
-}
-
-
-boost::uint32_t IteratorBase::readSbetIntoBuffer(PointBuffer& data, const boost::uint64_t numPoints64)
-{
-    if (!m_istream->good())
-    {
-        throw pdal_error("sbet stream is no good");
-    }
-
-    const boost::uint32_t numPoints = (boost::uint32_t)std::min<boost::uint64_t>(numPoints64,
-                                      std::numeric_limits<boost::uint32_t>::max());
-
-    m_readBuffer.setNumPoints(0);
-
-    schema::DimensionMap* dimensionMap = m_readBuffer.getSchema().mapDimensions(data.getSchema());
-
-    boost::uint8_t* bufferData = m_readBuffer.getDataStart();
-    if (!bufferData)
-    {
-        throw pdal_error("unable to access point buffer's data");
-    }
-
-    Utils::read_n(bufferData, *m_istream, numPoints * pdal::drivers::sbet::pointByteSize);
-    m_readBuffer.setNumPoints(numPoints);
-
-    PointBuffer::copyLikeDimensions(m_readBuffer, data, *dimensionMap, 0,
-                                    data.getNumPoints(), numPoints);
-    data.setNumPoints(data.getNumPoints() + numPoints);
-
-    return numPoints;
-}
-
-
 namespace sequential
 {
 
-
-Iterator::Iterator(const pdal::drivers::sbet::Reader& reader,
-                   PointBuffer& buffer)
-    : pdal::ReaderSequentialIterator(buffer)
-    , IteratorBase(reader, buffer)
+point_count_t SbetSeqIterator::readImpl(PointBuffer& buf, point_count_t numPts)
 {
-    return;
+    PointId nextId = buf.size();
+    PointId idx = m_index;
+    point_count_t numRead = 0;
+    seek(idx);
+    while (numRead < numPts && idx < m_numPts)
+    {
+        for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
+        {
+            double d;
+            m_stream >> d;
+            Dimension *dim = *di;
+            buf.setField(*dim, nextId, d);
+        }
+        idx++;
+        nextId++;
+        numRead++;
+    }
+    m_index = idx;
+    return numRead;
 }
 
 
-Iterator::~Iterator()
+uint64_t SbetSeqIterator::skipImpl(uint64_t pointsToSkip)
 {
-    return;
+    uint32_t lastIndex = (uint32_t)m_index;
+    uint64_t newIndex = m_index + pointsToSkip;
+    m_index = (uint32_t)std::min((uint64_t)m_numPts, newIndex);
+    return std::min(pointsToSkip, m_index - lastIndex);
 }
 
 
-boost::uint64_t Iterator::skipImpl(boost::uint64_t count)
+bool SbetSeqIterator::atEndImpl() const
 {
-    m_istream->seekg(pdal::drivers::sbet::pointByteSize * count, std::ios::cur);
-    return count;
+    return m_index >= m_numPts;
 }
 
 
-bool Iterator::atEndImpl() const
+void SbetSeqIterator::seek(PointId idx)
 {
-    return m_numPoints <=  getIndex();
+    m_stream.seek(idx * sizeof(double) * m_dims.size());
 }
-
-
-boost::uint32_t Iterator::readBufferImpl(PointBuffer& data)
-{
-    const boost::uint64_t numPoints64 = std::min<boost::uint64_t>(data.getCapacity(),
-                                        m_numPoints - getIndex());
-    return readSbetIntoBuffer(data, numPoints64);
-}
-
 
 } // namespace sequential
-
-
-namespace random
-{
-
-
-Iterator::Iterator(const pdal::drivers::sbet::Reader& reader,
-                   PointBuffer& buffer)
-    : pdal::ReaderRandomIterator(buffer)
-    , IteratorBase(reader, buffer)
-{
-    return;
-}
-
-
-Iterator::~Iterator()
-{
-    return;
-}
-
-
-boost::uint32_t Iterator::readBufferImpl(PointBuffer& data)
-{
-    const boost::uint64_t numPoints64 = std::min<boost::uint64_t>(data.getCapacity(),
-                                        m_numPoints - getIndex());
-    return readSbetIntoBuffer(data, numPoints64);
-}
-
-
-boost::uint64_t Iterator::seekImpl(boost::uint64_t numSeek)
-{
-    m_istream->seekg(pdal::drivers::sbet::pointByteSize * numSeek);
-    assert(m_istream->tellg() % pdal::drivers::sbet::pointByteSize == 0);
-    return m_istream->tellg() / pdal::drivers::sbet::pointByteSize;
-}
-
-
-} // namespace random
 } // namespace iterators
 
+} // namespace sbet
+} // namespace drivers
+} // namespace pdal
 
-}
-}
-} // namespace pdal::drivers::sbet

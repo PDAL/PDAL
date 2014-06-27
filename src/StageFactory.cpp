@@ -87,7 +87,7 @@ MAKE_READER_CREATOR(PgPcReader, pdal::drivers::pgpointcloud::Reader)
 MAKE_READER_CREATOR(QfitReader, pdal::drivers::qfit::Reader)
 MAKE_READER_CREATOR(TerrasolidReader, pdal::drivers::terrasolid::Reader)
 
-MAKE_READER_CREATOR(SbetReader, pdal::drivers::sbet::Reader)
+MAKE_READER_CREATOR(SbetReader, pdal::drivers::sbet::SbetReader)
 
 #ifdef PDAL_HAVE_HDF5
 MAKE_READER_CREATOR(IcebridgeReader, pdal::drivers::icebridge::Reader)
@@ -407,7 +407,7 @@ void StageFactory::registerKnownReaders()
     REGISTER_READER(TerrasolidReader, pdal::drivers::terrasolid::Reader);
     REGISTER_READER(BpfReader, pdal::BpfReader);
 
-    REGISTER_READER(SbetReader, pdal::drivers::sbet::Reader);
+    REGISTER_READER(SbetReader, pdal::drivers::sbet::SbetReader);
 
 #ifdef PDAL_HAVE_HDF5
     REGISTER_READER(IcebridgeReader, pdal::drivers::icebridge::Reader);
