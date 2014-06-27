@@ -34,13 +34,6 @@
 
 #include <boost/test/unit_test.hpp>
 
-/**
-#include <pdal/SpatialReference.hpp>
-#include <pdal/StageIterator.hpp>
-#include <pdal/Schema.hpp>
-#include <pdal/PointBuffer.hpp>
-**/
-
 #include <pdal/drivers/las/Reader.hpp>
 #include <pdal/filters/PCLBlock.hpp>
 

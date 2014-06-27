@@ -130,7 +130,6 @@ MAKE_MULTIFILTER_CREATOR(Mosaic, pdal::filters::Mosaic)
 //
 // define the functions to create the writers
 //
-MAKE_WRITER_CREATOR(FauxWriter, pdal::drivers::faux::Writer)
 MAKE_WRITER_CREATOR(LasWriter, pdal::drivers::las::Writer)
 
 #ifndef USE_PDAL_PLUGIN_TEXT
@@ -455,7 +454,6 @@ void StageFactory::registerKnownMultiFilters()
 
 void StageFactory::registerKnownWriters()
 {
-    REGISTER_WRITER(FauxWriter, pdal::drivers::faux::Writer);
     REGISTER_WRITER(LasWriter, pdal::drivers::las::Writer);
 
 #ifndef USE_PDAL_PLUGIN_TEXT
