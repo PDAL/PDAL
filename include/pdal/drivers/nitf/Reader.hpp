@@ -68,8 +68,8 @@ private:
             new FilenameSubsetStreamFactory(m_filename, m_offset, m_length));
     }
 
-    NitfReader& operator=(const Reader&); // not implemented
-    NitfReader(const Reader&); // not implemented
+    NitfReader& operator=(const NitfReader&); // not implemented
+    NitfReader(const NitfReader&); // not implemented
 };
 
 } // namespace nitf

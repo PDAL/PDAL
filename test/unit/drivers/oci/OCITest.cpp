@@ -48,7 +48,6 @@
 #include <pdal/filters/InPlaceReprojection.hpp>
 
 #include <pdal/drivers/faux/Reader.hpp>
-#include <pdal/drivers/faux/Writer.hpp>
 #include <pdal/filters/InPlaceReprojection.hpp>
 
 #include <pdal/drivers/las/Writer.hpp>

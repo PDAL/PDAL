@@ -18,6 +18,7 @@ CPackSourceConfig.cmake
 cmake_install.cmake
 CTestTestfile.cmake
 Testing/
+test/temp/
 apps/pdal-config
 apps/pdal.pc
 src/CMakeScripts/

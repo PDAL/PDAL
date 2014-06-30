@@ -38,7 +38,6 @@
 #include <pdal/pdal_config.hpp>
 
 #include <pdal/drivers/faux/Reader.hpp>
-#include <pdal/drivers/faux/Writer.hpp>
 
 #include <pdal/drivers/las/Reader.hpp>
 #include <pdal/drivers/las/Writer.hpp>
@@ -56,9 +55,6 @@
 #include <pdal/drivers/oci/OciReader.hpp>
 #endif
 #endif
-
-
-#include <pdal/drivers/buffer/Reader.hpp>
 
 #ifdef PDAL_HAVE_CARIS
 #ifndef USE_PDAL_PLUGIN_CARIS
