@@ -67,22 +67,31 @@ void Splitter::ready(PointContext ctx)
 }
 
 
-PointBufferSet Splitter::run(PointBufferPtr buf)
+//ABELL - This used to be a lambda, but the VS compiler exploded, I guess.
+typedef std::pair<int, int> Coord;
+namespace
 {
-    PointBufferSet pbSet;
-    if (!buf->size())
-        return pbSet;
-
-    typedef std::pair<int, int> Coord;
-    auto CoordCompare = [](const Coord& c1, const Coord& c2) -> bool
+class CoordCompare
+{
+public:
+    bool operator () (const Coord& c1, const Coord& c2) const
     {
         return c1.first < c2.first ? true :
             c1.first > c2.first ? false :
             c1.second < c2.second ? true :
             false;
     };
-    std::map<Coord, PointBufferPtr, decltype(CoordCompare)>
-        buffers(CoordCompare);
+};
+}
+
+PointBufferSet Splitter::run(PointBufferPtr buf)
+{
+    PointBufferSet pbSet;
+    if (!buf->size())
+        return pbSet;
+
+    CoordCompare compare;
+    std::map<Coord, PointBufferPtr, CoordCompare> buffers(compare);
 
     // Use the location of the first point as the origin.
     double xOrigin = buf->getFieldAs<double>(*m_xDim, 0);
