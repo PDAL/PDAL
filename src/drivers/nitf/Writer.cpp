@@ -32,12 +32,14 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <memory>
+#include <vector>
+
 #include <pdal/drivers/nitf/Writer.hpp>
 #include <pdal/drivers/las/Writer.hpp>
 
 #include <pdal/PointBuffer.hpp>
 #include <pdal/GlobalEnvironment.hpp>
-
 
 #ifdef PDAL_HAVE_NITRO
 #define IMPORT_NITRO_API
@@ -116,7 +118,7 @@ void Writer::done(PointContext ctx)
         long size = buf->pubseekoff(0, m_oss.end);
         buf->pubseekoff(0, m_oss.beg);
 
-        vector<char> bytes(size);
+        std::vector<char> bytes(size);
         buf->sgetn(bytes.data(), size);
 
         des.getSubheader().setSubheaderFields(usrHdr);
@@ -160,7 +162,7 @@ void Writer::done(PointContext ctx)
         // 64 char string
         std::string zeros(64, '0');
 
-        unique_ptr<::nitf::BandSource> band(new ::nitf::MemorySource(
+        std::unique_ptr<::nitf::BandSource> band(new ::nitf::MemorySource(
             const_cast<char*>(zeros.c_str()),
             zeros.size() /* memory size */,
             0 /* starting offset */,

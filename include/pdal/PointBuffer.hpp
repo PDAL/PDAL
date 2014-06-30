@@ -522,7 +522,7 @@ inline T PointBuffer::getFieldAs(pdal::Dimension const& dim,
 {
     T retval;
     boost::uint32_t size = dim.getByteSize();
-    double val;
+    double val(0.0);
 
     switch (dim.getInterpretation())
     {
