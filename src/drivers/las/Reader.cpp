@@ -307,7 +307,8 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream,
             boost::uint16_t intensity = Utils::read_field<boost::uint16_t>(p);
             boost::uint8_t flags = Utils::read_field<boost::uint8_t>(p);
             boost::uint8_t classification =
-                Utils::read_field<boost::uint8_t>(p) & 31;
+                Utils::read_field<boost::uint8_t>(p);
+
             boost::int8_t scanAngleRank = Utils::read_field<boost::int8_t>(p);
             boost::uint8_t user = Utils::read_field<boost::uint8_t>(p);
             boost::uint16_t pointSourceId =
