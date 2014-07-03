@@ -8,7 +8,8 @@ sudo apt-get update -qq
 
 sudo apt-get install \
     software-properties-common \
-    python-software-properties
+    python-software-properties \
+    libeigen3-dev
 sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable -y
 sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
 sudo add-apt-repository ppa:boost-latest/ppa -y
