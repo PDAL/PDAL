@@ -100,7 +100,8 @@ void Reader::initialize()
     string const& connection = m_options.getValueOrThrow<string>("connection");
 
     m_session->set_log_stream(&(log()->get(logDEBUG2)));
-    m_schema = fetchSchema(query);
+//ABELL - Fix
+//    m_schema = fetchSchema(query);
     try
     {
         setSpatialReference(

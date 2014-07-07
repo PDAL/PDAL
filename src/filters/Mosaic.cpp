@@ -50,6 +50,8 @@ void Mosaic::initialize()
     const Stage& stage0 = *stages[0];
     const SpatialReference& srs0 = stage0.getSpatialReference();
     bool respectSrs = getOptions().getValueOrDefault<bool>("require_matching_srs", false);
+//ABELL
+/**
     const Schema& schema0 = stage0.getSchema();
     boost::uint64_t totalPoints = stage0.getNumPoints();
     Bounds<double> bigbox(stage0.getBounds());
@@ -68,6 +70,7 @@ void Mosaic::initialize()
 
         bigbox.grow(stage.getBounds());
     }
+**/
 }
 
 

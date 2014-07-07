@@ -32,8 +32,6 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-
-
 #include <pdal/drivers/terrasolid/Reader.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/FileUtils.hpp>
@@ -49,89 +47,20 @@ namespace terrasolid
 
 PointDimensions::PointDimensions(const Schema& schema, std::string const& ns)
 {
-
-    X = &schema.getDimension("X", ns);
-    Y = &schema.getDimension("Y", ns);
-    Z = &schema.getDimension("Z", ns);
-
-    Classification = &schema.getDimension("Classification", ns);
-    PointSourceId = &schema.getDimension("PointSourceId", ns);
-    ReturnNumber = &schema.getDimension("ReturnNumber", ns);
-
-    try
-    {
-        Intensity = &schema.getDimension("Intensity", ns);
-    }
-    catch (pdal::dimension_not_found&)
-    {
-        Intensity = 0;
-    }
-
-    try
-    {
-        Mark = &schema.getDimension("Mark", ns);
-    }
-    catch (pdal::dimension_not_found&)
-    {
-        Mark = 0;
-    }
-
-    try
-    {
-        Flag = &schema.getDimension("Flag", ns);
-    }
-    catch (pdal::dimension_not_found&)
-    {
-        Flag = 0;
-    }
-
-    try
-    {
-        Time = &schema.getDimension("Time", ns);
-    }
-    catch (pdal::dimension_not_found&)
-    {
-        Time = 0;
-    }
-
-    try
-    {
-        Red = &schema.getDimension("Red", ns);
-    }
-    catch (pdal::dimension_not_found&)
-    {
-        Red = 0;
-    }
-
-    try
-    {
-        Green = &schema.getDimension("Green", ns);
-    }
-    catch (pdal::dimension_not_found&)
-    {
-        Green = 0;
-    }
-
-    try
-    {
-        Blue = &schema.getDimension("Blue", ns);
-    }
-    catch (pdal::dimension_not_found&)
-    {
-        Blue = 0;
-    }
-
-    try
-    {
-        Alpha = &schema.getDimension("Alpha", ns);
-    }
-    catch (pdal::dimension_not_found&)
-    {
-        Alpha = 0;
-    }
-
-
-    return;
+    X = schema.getDimensionPtr("X", ns);
+    Y = schema.getDimensionPtr("Y", ns);
+    Z = schema.getDimensionPtr("Z", ns);
+    Classification = schema.getDimensionPtr("Classification", ns);
+    PointSourceId = schema.getDimensionPtr("PointSourceId", ns);
+    ReturnNumber = schema.getDimensionPtr("ReturnNumber", ns);
+    Intensity = schema.getDimensionPtr("Intensity", ns);
+    Mark = schema.getDimensionPtr("Mark", ns);
+    Flag = schema.getDimensionPtr("Flag", ns);
+    Time = schema.getDimensionPtr("Time", ns);
+    Red = schema.getDimensionPtr("Red", ns);
+    Green = schema.getDimensionPtr("Green", ns);
+    Blue = schema.getDimensionPtr("Blue", ns);
+    Alpha = schema.getDimensionPtr("Alpha", ns);
 }
 
 
@@ -152,8 +81,8 @@ Reader::Reader(const Options& options)
     Utils::read_n(*m_header, *stream, sizeof(TerraSolidHeader));
 
     if (m_header->RecogVal != 970401)
-        throw terrasolid_error("Header identifier was not '970401', is this a TerraSolid .bin file?");
-
+        throw terrasolid_error("Header identifier was not '970401', is this "
+            "a TerraSolid .bin file?");
 
     setNumPoints(m_header->PntCnt);
 
@@ -161,20 +90,19 @@ Reader::Reader(const Options& options)
     m_haveTime = (m_header->Time != 0);
     m_format = static_cast<TERRASOLID_Format_Type>(m_header->HdrVersion);
 
-
     if (!((m_format==TERRASOLID_Format_1) || (m_format == TERRASOLID_Format_2)))
     {
         std::ostringstream oss;
-        oss << "Version was '" << m_format << "', not '" << TERRASOLID_Format_1 << "' or '" << TERRASOLID_Format_2 << "'";
+        oss << "Version was '" << m_format << "', not '" <<
+            TERRASOLID_Format_1 << "' or '" << TERRASOLID_Format_2 << "'";
         throw terrasolid_error(oss.str());
 
     }
 
-    registerFields();
-
     m_offset = 56;
-    const Schema& schema = getSchema();
-    m_size = schema.getByteSize();
+//ABELL - This should be done in ready().
+    m_size = 0;
+//    m_size = schema.getByteSize();
 
     delete stream;
 }
@@ -209,7 +137,7 @@ std::string Reader::getFileName() const
     return getOptions().getValueOrThrow<std::string>("filename");
 }
 
-void Reader::registerFields()
+void Reader::buildSchema(Schema *s)
 {
     Schema dimensions(getDefaultDimensions());
 
@@ -228,55 +156,52 @@ void Reader::registerFields()
 
     if (m_format == TERRASOLID_Format_1)
     {
-        m_schema.appendDimension(dimensions.getDimension("Classification"));
+        s->appendDimension(dimensions.getDimension("Classification"));
 
         // Fetch PointSource ID Uint8 dimension by UUID because dimensions
         // has two "PointSourceId" dimensions added.
 
-        m_schema.appendDimension(dimensions.getDimension(
-                                   boost::uuids::string_generator()("68c03b56-4248-4cca-ade5-33e90d5c5563")));
+        s->appendDimension(dimensions.getDimension(
+            boost::uuids::string_generator()("68c03b56-4248-4cca-ade5-33e90d5c5563")));
 
-        m_schema.appendDimension(dimensions.getDimension("Intensity"));
-
-        m_schema.appendDimension(x);
-        m_schema.appendDimension(y);
-        m_schema.appendDimension(z);
+        s->appendDimension(dimensions.getDimension("Intensity"));
+        s->appendDimension(x);
+        s->appendDimension(y);
+        s->appendDimension(z);
     }
 
     if (m_format == TERRASOLID_Format_2)
     {
-        m_schema.appendDimension(x);
-        m_schema.appendDimension(y);
-        m_schema.appendDimension(z);
+        s->appendDimension(x);
+        s->appendDimension(y);
+        s->appendDimension(z);
 
-        m_schema.appendDimension(dimensions.getDimension("Classification"));
+        s->appendDimension(dimensions.getDimension("Classification"));
 
-        m_schema.appendDimension(dimensions.getDimension(
-                                   boost::uuids::string_generator()("465a9a7e-1e04-47b0-97b6-4f826411bc71")));
+        s->appendDimension(dimensions.getDimension(
+            boost::uuids::string_generator()("465a9a7e-1e04-47b0-97b6-4f826411bc71")));
 
-        m_schema.appendDimension(dimensions.getDimension("Flag"));
-        m_schema.appendDimension(dimensions.getDimension("Mark"));
+        s->appendDimension(dimensions.getDimension("Flag"));
+        s->appendDimension(dimensions.getDimension("Mark"));
 
-        m_schema.appendDimension(dimensions.getDimension(
-                                   boost::uuids::string_generator()("7193bb9f-3ca2-491f-ba18-594321493789")));
+        s->appendDimension(dimensions.getDimension(
+            boost::uuids::string_generator()("7193bb9f-3ca2-491f-ba18-594321493789")));
 
-        m_schema.appendDimension(dimensions.getDimension("Intensity"));
+        s->appendDimension(dimensions.getDimension("Intensity"));
     }
 
     if (m_haveTime)
     {
-        m_schema.appendDimension(dimensions.getDimension("Time"));
+        s->appendDimension(dimensions.getDimension("Time"));
     }
 
     if (m_haveColor)
     {
-        m_schema.appendDimension(dimensions.getDimension("Red"));
-        m_schema.appendDimension(dimensions.getDimension("Green"));
-        m_schema.appendDimension(dimensions.getDimension("Blue"));
-        m_schema.appendDimension(dimensions.getDimension("Alpha"));
+        s->appendDimension(dimensions.getDimension("Red"));
+        s->appendDimension(dimensions.getDimension("Green"));
+        s->appendDimension(dimensions.getDimension("Blue"));
+        s->appendDimension(dimensions.getDimension("Alpha"));
     }
-
-    return;
 }
 
 

@@ -32,8 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_STAGE_HPP
-#define INCLUDED_STAGE_HPP
+#pragma once
 
 #include <pdal/pdal_internal.hpp>
 
@@ -78,11 +77,9 @@ public:
     bool isInitialized() const
         { return m_initialized; }
 
-    inline Schema const& getSchema() const
-        { return *(m_context.schema()); }
-    
     virtual boost::uint64_t getNumPoints() const;
     const Bounds<double>& getBounds() const;
+    void setSpatialReference(SpatialReference const&);
     const SpatialReference& getSpatialReference() const;
     const Options& getOptions() const
         { return m_options; }
@@ -126,8 +123,6 @@ public:
     static bool s_isEnabled() { return YES_OR_NO; } \
     bool isEnabled() const { return YES_OR_NO; }
 
-    void setSpatialReference(SpatialReference const&);
-
     virtual StageSequentialIterator*
     createSequentialIterator(PointBuffer&) const
         { return NULL; }
@@ -138,15 +133,12 @@ public:
         { return NULL; }
 
 protected:
-    PointContext m_context;
-    Schema m_schema;
     Options m_options;
     MetadataNode m_metadata;
     Bounds<double> m_bounds;
 
     StageOperationType getDimensionOperationType() const
         { return m_dimensionsType; }
-    void setSchema(Schema const&);
     void setNumPoints(boost::uint64_t);
     void setBounds(Bounds<double> const&);
     void setSpatialReference(MetadataNode& m, SpatialReference const&);
@@ -200,4 +192,3 @@ PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const Stage&);
 
 } // namespace pdal
 
-#endif

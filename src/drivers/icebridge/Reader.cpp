@@ -68,7 +68,8 @@ namespace icebridge
 Reader::Reader(const Options& options)
     : pdal::Reader(options)
 {
-    setSchema(Schema(getDefaultDimensions()));
+//ABELL
+//    setSchema(Schema(getDefaultDimensions()));
 }
 
 void Reader::initialize()
@@ -215,7 +216,6 @@ namespace iterators
 IteratorBase::IteratorBase(const pdal::drivers::icebridge::Reader& reader)
     : m_numPoints(reader.getNumPoints())
     , m_dimensionNamesMap(reader.getDimensionNamesMap())
-    , m_schema(reader.getSchema())
     , m_hdf5Handler()
 {
     m_hdf5Handler.initialize(reader.getFileName(), hdf5Columns);

@@ -136,7 +136,6 @@ public:
 
 
     Reader(const Options& options);
-    ~Reader();
 
     static Options getDefaultOptions();
     static std::vector<Dimension> getDefaultDimensions();
@@ -162,10 +161,6 @@ protected:
     }
 
 private:
-
-    Reader& operator=(const Reader&); // not implemented
-    Reader(const Reader&); // not implemented
-
     QFIT_Format_Type m_format;
     std::size_t m_offset;
     boost::uint32_t m_size;
@@ -173,9 +168,10 @@ private:
     double m_scale_z;
     bool m_littleEndian;
 
-    void registerFields();
+    virtual void buildSchema(Schema *s);
 
-
+    Reader& operator=(const Reader&); // not implemented
+    Reader(const Reader&); // not implemented
 };
 
 namespace iterators

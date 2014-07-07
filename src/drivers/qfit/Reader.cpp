@@ -342,10 +342,6 @@ Reader::Reader(const Options& options)
 
     m_offset = static_cast<std::size_t>(int4);
 
-    registerFields();
-
-    const Schema& schema = getSchema();
-
     // Seek to the beginning
     str->seekg(0, std::ios::beg);
     std::ios::pos_type beginning = str->tellg();
@@ -357,7 +353,9 @@ Reader::Reader(const Options& options)
 
     // First integer is the format of the file
     std::ios::off_type offset = static_cast<std::ios::off_type>(m_offset);
-    std::ios::off_type length = static_cast<std::ios::off_type>(schema.getByteSize());
+//ABELL - This stuff needs to happen in ready()
+std::ios::off_type length = 0;
+//    std::ios::off_type length = static_cast<std::ios::off_type>(schema.getByteSize());
     std::ios::off_type point_bytes = end - offset;
 
     // Figure out how many points we have and whether or not we have
@@ -380,7 +378,7 @@ Reader::Reader(const Options& options)
             "as determined by subtracting the data offset ("
             << m_offset << ") from the file length ("
             << size <<  ") and dividing by the point record length ("
-            << schema.getByteSize() << ")."
+            << length << ")."
             " It also does not perfectly contain an exact number of"
             " point data and we cannot infer a point count."
             " Calculated number of points: " << count <<
@@ -431,55 +429,41 @@ std::string Reader::getFileName() const
     return getOptions().getOption("filename").getValue<std::string>();
 }
 
-void Reader::registerFields()
+void Reader::buildSchema(Schema *s)
 {
     Schema dimensions(getDefaultDimensions());
 
-    m_schema.appendDimension(dimensions.getDimension("Time"));
-    m_schema.appendDimension(dimensions.getDimension("Y"));
-    m_schema.appendDimension(dimensions.getDimension("X"));
+    s->appendDimension(dimensions.getDimension("Time"));
+    s->appendDimension(dimensions.getDimension("Y"));
+    s->appendDimension(dimensions.getDimension("X"));
 
     Dimension z = dimensions.getDimension("Z");
     z.setNumericScale(m_scale_z);
-    m_schema.appendDimension(z);
+    s->appendDimension(z);
 
-    m_schema.appendDimension(dimensions.getDimension("StartPulse"));
-    m_schema.appendDimension(dimensions.getDimension("ReflectedPulse"));
-    m_schema.appendDimension(dimensions.getDimension("ScanAngleRank"));
-    m_schema.appendDimension(dimensions.getDimension("Pitch"));
-    m_schema.appendDimension(dimensions.getDimension("Roll"));
+    s->appendDimension(dimensions.getDimension("StartPulse"));
+    s->appendDimension(dimensions.getDimension("ReflectedPulse"));
+    s->appendDimension(dimensions.getDimension("ScanAngleRank"));
+    s->appendDimension(dimensions.getDimension("Pitch"));
+    s->appendDimension(dimensions.getDimension("Roll"));
 
     if (m_format == QFIT_Format_12)
     {
-        m_schema.appendDimension(dimensions.getDimension("PDOP"));
-        m_schema.appendDimension(dimensions.getDimension("PulseWidth"));
-        m_schema.appendDimension(dimensions.getDimension("GPSTime"));
-
+        s->appendDimension(dimensions.getDimension("PDOP"));
+        s->appendDimension(dimensions.getDimension("PulseWidth"));
     }
     else if (m_format == QFIT_Format_14)
     {
-        m_schema.appendDimension(dimensions.getDimension("PassiveSignal"));
-        m_schema.appendDimension(dimensions.getDimension("PassiveY"));
-        m_schema.appendDimension(dimensions.getDimension("PassiveX"));
+        s->appendDimension(dimensions.getDimension("PassiveSignal"));
+        s->appendDimension(dimensions.getDimension("PassiveY"));
+        s->appendDimension(dimensions.getDimension("PassiveX"));
         Dimension z = dimensions.getDimension("PassiveZ");
         z.setNumericScale(m_scale_z);
-        m_schema.appendDimension(z);
-        m_schema.appendDimension(dimensions.getDimension("GPSTime"));
+        s->appendDimension(z);
     }
-    else
-    {
-        m_schema.appendDimension(dimensions.getDimension("GPSTime"));
-    }
-
-    return;
+    s->appendDimension(dimensions.getDimension("GPSTime"));
 }
 
-
-Reader::~Reader()
-{
-
-    return;
-}
 
 boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream,
     uint64_t numPointsLeft) const

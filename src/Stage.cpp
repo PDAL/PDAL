@@ -141,7 +141,6 @@ void Stage::l_initialize(PointContext ctx)
     m_metadata = ctx.metadata().add(getName());
     if (m_inputs.size()) {
         Stage& prevStage = getPrevStage();
-        setSchema(prevStage.getSchema());
         setBounds(prevStage.getBounds());
     }
 }
@@ -226,12 +225,6 @@ void Stage::setBounds(const Bounds<double>& bounds)
 }
 
 
-void Stage::setSchema(const Schema& schema)
-{
-    m_schema = schema;
-}
-
-
 boost::uint64_t Stage::getNumPoints() const
 {
     // The Stage's getNumPoints() can't change. If it is 0, we'll try to
@@ -309,10 +302,6 @@ std::ostream& operator<<(std::ostream& ostr, const Stage& stage)
 
     ostr << "  Bounds:" << std::endl;
     ostr << "    " << stage.getBounds() << std::endl;
-
-    ostr << "  Schema: " << std::endl;
-    ostr << "    Num dims: " << stage.getSchema().getDimensions().size() <<
-        std::endl;
 
     ostr << "  Spatial Reference:" << std::endl;
     ostr << "    WKT: " << stage.getSpatialReference().getWKT() << std::endl;

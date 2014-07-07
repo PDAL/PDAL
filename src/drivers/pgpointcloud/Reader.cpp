@@ -146,7 +146,8 @@ void Reader::initialize()
     m_session = pg_connect(m_connection);
 
     // Read schema from pointcloud_formats if possible
-    m_schema = fetchSchema();
+//ABELL - Fix
+//    m_schema = fetchSchema();
 
     // Allow spatialreference override if desired
 //ABELL - Move to processOptions()
@@ -538,7 +539,8 @@ boost::uint32_t Iterator::readBufferImpl(PointBuffer& user_buffer)
         uint32_t max_points = getReader().getMaxPoints();
         m_buffer = new pdal::PointBuffer(user_buffer.context());
         m_buffer_position = 0;
-        binary_data.reserve(max_points * getReader().getSchema().getByteSize());
+//ABELL - Fix
+//        binary_data.reserve(max_points * getReader().getSchema().getByteSize());
         getReader().log()->get(logDEBUG2) << "allocated a cached point buffer with capacity of " << max_points << std::endl;
     }
 

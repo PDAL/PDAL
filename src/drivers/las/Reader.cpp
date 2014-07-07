@@ -100,7 +100,7 @@ void Reader::initialize(MetadataNode& m)
     LasHeaderReader lasHeaderReader(m_lasHeader, stream);
     try
     {
-        lasHeaderReader.read(*this, m_schema);
+        lasHeaderReader.read(*this);
     }
     catch (const std::invalid_argument& e)
     {
