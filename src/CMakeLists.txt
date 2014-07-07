@@ -817,7 +817,11 @@ if (WITH_HDF5)
     target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE} ${HDF5_LIBRARIES})
 endif()
 
-  target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE}
+if (WITH_JSONCPP)
+    target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE} ${JSONCPP_LIBRARIES})
+endif()
+
+target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE}
     "${CMAKE_THREAD_LIBS_INIT}"
     "${CMAKE_DL_LIBS}"
     "${TIFF_LIBRARY}"

@@ -43,47 +43,77 @@ namespace greyhound
 
 Options GreyhoundReader::getDefaultOptions()
 {
+    Options options;
 
+    // TODO
+
+    return options;
 }
 
 std::vector<Dimension> GreyhoundReader::getDefaultDimensions()
 {
+    std::vector<Dimension> output;
 
+    // TODO
+
+    return output;
 }
 
 StageSequentialIterator* GreyhoundReader::createSequentialIterator() const
 {
-
-}
-
-StageRandomIterator* GreyhoundReader::createRandomIterator(
-        PointBuffer& pointBuffer) const
-{
-
+    return new iterators::sequential::Iterator();
 }
 
 void GreyhoundReader::processOptions(const Options& options)
 {
-
+    // TODO Initialize connection info
 }
 
 void GreyhoundReader::buildSchema(Schema* schema)
 {
-
+    std::vector<Dimension> dims = getDefaultDimensions();
+    for (auto d = dims.begin(); d != dims.end(); ++d)
+        m_dims.push_back(schema->appendDimension(*d));
 }
 
 void GreyhoundReader::ready(PointContext ctx)
 {
-
+    // TODO
 }
 
 namespace iterators
 {
-sequential::GreyhoundSequentialIterator::GreyhoundSequentialIterator(
-        const std::vector<Dimension*>& dims,
-        point_count_t numPoints)
+sequential::Iterator::Iterator()
 {
 
+}
+
+point_count_t sequential::Iterator::readImpl(
+        PointBuffer& data,
+        point_count_t count)
+{
+    // TODO
+    std::cerr << "No sequential readImpl for stage/iterator!\n";
+    return 0;
+}
+
+boost::uint64_t sequential::Iterator::skipImpl(
+        const boost::uint64_t pointsToSkip)
+{
+    // TODO
+    return 0;
+}
+
+boost::uint32_t sequential::Iterator::readBufferImpl(PointBuffer&)
+{
+    // TODO
+    return 0;
+}
+
+bool sequential::Iterator::atEndImpl() const
+{
+    // TODO
+    return true;
 }
 
 } // namespace iterators

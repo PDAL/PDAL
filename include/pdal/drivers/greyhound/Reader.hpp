@@ -57,8 +57,8 @@ public:
     static std::vector<Dimension> getDefaultDimensions();
 
     virtual StageSequentialIterator* createSequentialIterator() const;
-    virtual StageRandomIterator* createRandomIterator(
-            PointBuffer& pointBuffer) const;
+    //virtual StageRandomIterator* createRandomIterator(
+     //       PointBuffer& pointBuffer) const;
 
 private:
     std::vector<Dimension*> m_dims;
@@ -73,16 +73,17 @@ namespace iterators
 namespace sequential
 {
 
-class PDAL_DLL GreyhoundSequentialIterator :
+class PDAL_DLL Iterator:
     public pdal::ReaderSequentialIterator
 {
 public:
-    GreyhoundSequentialIterator(
-            const std::vector<Dimension*>& dims,
-            point_count_t numPoints);
+    Iterator();
 
 private:
-
+    virtual point_count_t readImpl(PointBuffer& data, point_count_t count);
+    boost::uint64_t skipImpl(boost::uint64_t pointsToSkip);
+    virtual boost::uint32_t readBufferImpl(PointBuffer&);
+    virtual bool atEndImpl() const;
 };
 
 } // namespace sequential
