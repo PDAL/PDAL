@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Howard Butler, hobu.inc@gmail.com
+* Copyright (c) 2014, Connor Manning (connor@hobu.co)
 *
 * All rights reserved.
 *
@@ -32,84 +32,63 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_PDAL_DRIVERS_HPP
-#define INCLUDED_PDAL_DRIVERS_HPP
-
-#include <pdal/pdal_config.hpp>
-
-#include <pdal/drivers/faux/Reader.hpp>
-
-#include <pdal/drivers/las/Reader.hpp>
-#include <pdal/drivers/las/Writer.hpp>
-
-#include <pdal/drivers/bpf/BpfReader.hpp>
-
-#include <pdal/drivers/sbet/Reader.hpp>
-
 #include <pdal/drivers/greyhound/Reader.hpp>
 
-#ifdef PDAL_HAVE_HDF5
-#include <pdal/drivers/icebridge/Reader.hpp>
-#endif
+namespace pdal
+{
+namespace drivers
+{
+namespace greyhound
+{
 
-#ifdef PDAL_HAVE_ORACLE
-#ifndef USE_PDAL_PLUGIN_OCI
-#include <pdal/drivers/oci/OciReader.hpp>
-#endif
-#endif
+Options GreyhoundReader::getDefaultOptions()
+{
 
-#ifdef PDAL_HAVE_CARIS
-#ifndef USE_PDAL_PLUGIN_CARIS
-#include <pdal/drivers/caris/CloudReader.hpp>
-#endif
-#endif
+}
 
-#ifdef PDAL_HAVE_MRSID
-#ifndef USE_PDAL_PLUGIN_MRSID
-#include <pdal/drivers/mrsid/Reader.hpp>
-#endif
-#endif
+std::vector<Dimension> GreyhoundReader::getDefaultDimensions()
+{
 
-#include <pdal/drivers/qfit/Reader.hpp>
-#include <pdal/drivers/terrasolid/Reader.hpp>
-#include <pdal/drivers/text/Writer.hpp>
+}
 
-#ifdef PDAL_HAVE_ORACLE
-#ifndef USE_PDAL_PLUGIN_OCI
-#include <pdal/drivers/oci/Writer.hpp>
-#endif
-#endif
+StageSequentialIterator* GreyhoundReader::createSequentialIterator() const
+{
 
-#ifdef PDAL_HAVE_NITRO
-#ifndef USE_PDAL_PLUGIN_NITF
-#include <pdal/drivers/nitf/Writer.hpp>
-#endif
-#endif
+}
 
-#ifdef PDAL_HAVE_GDAL
-#include <pdal/drivers/nitf/Reader.hpp>
-#endif
+StageRandomIterator* GreyhoundReader::createRandomIterator(
+        PointBuffer& pointBuffer) const
+{
 
-#ifdef PDAL_HAVE_P2G
-#include <pdal/drivers/p2g/Writer.hpp>
-#endif
+}
 
-#ifdef PDAL_HAVE_HDF5
-#include <pdal/drivers/icebridge/Reader.hpp>
-#endif
+void GreyhoundReader::processOptions(const Options& options)
+{
 
-#ifdef PDAL_HAVE_SQLITE
-#ifndef USE_PDAL_PLUGIN_SQLITE
-#include <pdal/drivers/sqlite/Reader.hpp>
-#include <pdal/drivers/sqlite/Writer.hpp>
-#endif
-#endif
+}
 
-#ifdef PDAL_HAVE_POSTGRESQL
-#ifndef USE_PDAL_PLUGIN_PGPOINTCLOUD
-#include <pdal/drivers/pgpointcloud/Reader.hpp>
-#include <pdal/drivers/pgpointcloud/Writer.hpp>
-#endif
-#endif
+void GreyhoundReader::buildSchema(Schema* schema)
+{
 
-#endif
+}
+
+void GreyhoundReader::ready(PointContext ctx)
+{
+
+}
+
+namespace iterators
+{
+sequential::GreyhoundSequentialIterator::GreyhoundSequentialIterator(
+        const std::vector<Dimension*>& dims,
+        point_count_t numPoints)
+{
+
+}
+
+} // namespace iterators
+
+} // namespace greyhound
+} // namespace drivers
+} // namespace pdal
+

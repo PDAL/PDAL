@@ -62,6 +62,7 @@ namespace pdal
 //
 MAKE_READER_CREATOR(FauxReader, pdal::drivers::faux::Reader)
 MAKE_READER_CREATOR(LasReader, pdal::drivers::las::Reader)
+MAKE_READER_CREATOR(GreyhoundReader, pdal::drivers::greyhound::GreyhoundReader)
 MAKE_READER_CREATOR(BpfReader, pdal::BpfReader)
 #ifdef PDAL_HAVE_ORACLE
 #ifndef USE_PDAL_PLUGIN_OCI
@@ -183,6 +184,7 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
     drivers["las"] = "drivers.las.reader";
     drivers["laz"] = "drivers.las.reader";
     drivers["bin"] = "drivers.terrasolid.reader";
+    drivers["greyhound"] = "drivers.greyhound.reader";
     drivers["qi"] = "drivers.qfit.reader";
     drivers["xml"] = "drivers.pipeline.reader";
     drivers["nitf"] = "drivers.nitf.reader";
@@ -406,7 +408,7 @@ void StageFactory::registerKnownReaders()
     REGISTER_READER(QfitReader, pdal::drivers::qfit::Reader);
     REGISTER_READER(TerrasolidReader, pdal::drivers::terrasolid::Reader);
     REGISTER_READER(BpfReader, pdal::BpfReader);
-
+    REGISTER_READER(GreyhoundReader, pdal::drivers::greyhound::GreyhoundReader);
     REGISTER_READER(SbetReader, pdal::drivers::sbet::SbetReader);
 
 #ifdef PDAL_HAVE_HDF5

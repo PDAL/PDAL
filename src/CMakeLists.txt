@@ -176,7 +176,7 @@ list (APPEND PDAL_HPP ${PDAL_DRIVERS_LAS_HPP} )
 
 #
 # drivers/bpf
-
+#
 set(PDAL_BPF_PATH drivers/bpf)
 set(PDAL_BPF_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_BPF_PATH}")
 set(PDAL_BPF_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_BPF_PATH}")
@@ -192,8 +192,27 @@ set(PDAL_DRIVERS_BPF_CPP
     "${PDAL_BPF_SRC}/BpfReader.cpp"
     "${PDAL_BPF_SRC}/BpfSeqIterator.cpp"
 )
+
 list (APPEND PDAL_CPP ${PDAL_DRIVERS_BPF_CPP} )
 list (APPEND PDAL_HPP ${PDAL_DRIVERS_BPF_HPP} )
+
+#
+# drivers/greyhound
+#
+set(PDAL_GREYHOUND_PATH drivers/greyhound)
+set(PDAL_GREYHOUND_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_GREYHOUND_PATH}")
+set(PDAL_GREYHOUND_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_GREYHOUND_PATH}")
+
+set(PDAL_DRIVERS_GREYHOUND_HPP
+    "${PDAL_GREYHOUND_HEADERS}/Reader.hpp"
+)
+
+set(PDAL_DRIVERS_GREYHOUND_CPP
+    "${PDAL_GREYHOUND_SRC}/Reader.cpp"
+)
+
+list (APPEND PDAL_CPP ${PDAL_DRIVERS_GREYHOUND_CPP} )
+list (APPEND PDAL_HPP ${PDAL_DRIVERS_GREYHOUND_HPP} )
 
 #
 # drivers/mrsid
@@ -248,7 +267,6 @@ endif()
 #
 # drivers/oci
 #
-
 set(PDAL_ORACLE_PATH drivers/oci)
 set(PDAL_ORACLE_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_ORACLE_PATH}")
 set(PDAL_ORACLE_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_ORACLE_PATH}")
@@ -316,7 +334,6 @@ list (APPEND PDAL_HPP ${PDAL_DRIVERS_TERRASOLID_HPP} )
 #
 # drivers/p2g
 #
-
 set(PDAL_P2G_PATH drivers/p2g)
 set(PDAL_P2G_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_P2G_PATH}")
 set(PDAL_P2G_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_P2G_PATH}")
@@ -510,7 +527,6 @@ endif()
 #
 # filters
 #
-
 set(PDAL_FILTERS_PATH filters)
 set(PDAL_FILTERS_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_FILTERS_PATH}")
 set(PDAL_FILTERS_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_FILTERS_PATH}")
@@ -697,6 +713,7 @@ source_group("Header Files\\drivers\\nitf" FILES ${PDAL_DRIVERS_NITF_HPP})
 source_group("Header Files\\drivers\\oci" FILES ${PDAL_DRIVERS_OCI_HPP})
 source_group("Header Files\\drivers\\qfit" FILES ${PDAL_DRIVERS_QFIT_HPP})
 source_group("Header Files\\drivers\\sbet" FILES ${PDAL_DRIVERS_SBET_HPP})
+source_group("Header Files\\drivers\\greyhound" FILES ${PDAL_DRIVERS_GREYHOUND_HPP})
 source_group("Header Files\\drivers\\terrasolid" FILES ${PDAL_DRIVERS_TERRASOLID_HPP})
 source_group("Header Files\\drivers\\text" FILES ${PDAL_DRIVERS_TEXT_HPP})
 source_group("Header Files\\drivers\\pgpointcloud" FILES ${PDAL_DRIVERS_PGPOINTCLOUD_HPP})
@@ -712,6 +729,7 @@ source_group("Source Files\\drivers\\nitf" FILES ${PDAL_DRIVERS_NITF_CPP})
 source_group("Source Files\\drivers\\oci" FILES ${PDAL_DRIVERS_OCI_CPP})
 source_group("Source Files\\drivers\\qfit" FILES ${PDAL_DRIVERS_QFIT_CPP})
 source_group("Source Files\\drivers\\sbet" FILES ${PDAL_DRIVERS_SBET_CPP})
+source_group("Source Files\\drivers\\greyhound" FILES ${PDAL_DRIVERS_GREYHOUND_CPP})
 source_group("Source Files\\drivers\\terrasolid" FILES ${PDAL_DRIVERS_TERRASOLID_CPP})
 source_group("Source Files\\drivers\\text" FILES ${PDAL_DRIVERS_TEXT_CPP})
 source_group("Source Files\\drivers\\pgpointcloud" FILES ${PDAL_DRIVERS_PGPOINTCLOUD_CPP})
