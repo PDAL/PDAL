@@ -112,26 +112,24 @@ boost::property_tree::ptree Summary::toPTree() const
 Options Stats::getDefaultOptions()
 {
     Options options;
-    Option sample_size("sample_size", 1000,
-        "Number of points to return for uniform random 'sample'");
-    Option num_bins("num_bins", 20, "Number of bins to use for histogram");
-    Option stats_cache_size("stats_cache_size", 100000, "Number of points "
+    options.add("sample_size", 1000, "Number of points to return for "
+        "uniform random 'sample'");
+    options.add("num_bins", 20, "Number of bins to use for histogram");
+    options.add("stats_cache_size", 100000, "Number of points "
         "to use for histogram bin determination. Defaults to total number "
         "of points read if no option is specified.");
-    Option seed("seed", 0, "Seed to use for repeatable random sample. A "
+    options.add("seed", 0, "Seed to use for repeatable random sample. A "
         "seed value of 0 means no seed is used");
-
-    options.add(sample_size);
-    options.add(num_bins);
-    options.add(stats_cache_size);
-    options.add(seed);
+    options.add("num_points", 0, "Total number of points to be processed. "
+        "(0 indicates all points will be processed).");
     return options;
 }
 
 
 void Stats::filter(PointBuffer& buffer)
 {
-    for (PointId idx = 0; idx < buffer.size(); ++idx)
+    point_count_t limit = (std::min)(buffer.size(), m_numPoints);
+    for (PointId idx = 0; idx < limit; ++idx)
     {
         for (auto p = m_stats.begin(); p != m_stats.end(); ++p)
         {
@@ -160,6 +158,9 @@ void Stats::processOptions(const Options& options)
         "sample_size", 100000);
     m_seed = m_options.getValueOrDefault<uint32_t>("seed", 0);
     m_bin_count = m_options.getValueOrDefault<uint32_t>("num_bins", 20);
+    m_numPoints = m_options.getValueOrDefault<point_count_t>("num_points", 0);
+    if (m_numPoints == 0)
+        m_numPoints = (std::numeric_limits<point_count_t>::max)();
     if (m_options.hasOption("do_sample"))
         m_do_sample = m_options.getValueOrThrow<bool>("do_sample");
     else

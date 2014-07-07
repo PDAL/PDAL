@@ -128,12 +128,6 @@ void SpatialReference::setFromUserInput(std::string const& v)
 }
 
 
-void SpatialReference::setWKT(std::string const& v)
-{
-    m_wkt = v;
-}
-
-
 std::string SpatialReference::getProj4() const
 {
     std::string tmp;

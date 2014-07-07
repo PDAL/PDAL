@@ -35,14 +35,11 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 
-//ABELL
-/**
 #include <pdal/drivers/faux/Reader.hpp>
-#include <pdal/drivers/faux/Writer.hpp>
-**/
 #include <pdal/filters/InPlaceReprojection.hpp>
 #include <pdal/drivers/las/Reader.hpp>
 #include <pdal/filters/Crop.hpp>
+#include <pdal/filters/Stats.hpp>
 #include <pdal/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/StageIterator.hpp>
@@ -53,40 +50,54 @@ using namespace pdal;
 
 BOOST_AUTO_TEST_SUITE(CropFilterTest)
 
-//ABELL
-// Need faux reader
-/**
 BOOST_AUTO_TEST_CASE(test_crop)
 {
     Bounds<double> srcBounds(0.0, 0.0, 0.0, 10.0, 100.0, 1000.0);
+    Options opts;
+    opts.add("bounds", srcBounds);
+    opts.add("num_points", 1000);
+    opts.add("mode", "ramp");
+    drivers::faux::Reader reader(opts);
 
     // crop the window to 1/3rd the size in each dimension
-    Bounds<double> dstBounds(3.33333, 33.33333, 333.33333, 6.66666, 66.66666, 666.66666);
+    Bounds<double> dstBounds(3.33333, 33.33333, 333.33333,
+        6.66666, 66.66666, 666.66666);
+    Options cropOpts;
+    cropOpts.add("bounds", dstBounds);
 
-    pdal::drivers::faux::Reader reader(srcBounds, 1000, pdal::drivers::faux::Reader::Ramp);
-
-    pdal::filters::Crop filter(dstBounds);
+    filters::Crop filter(cropOpts);
     filter.setInput(&reader);
     BOOST_CHECK(filter.getDescription() == "Crop Filter");
-    pdal::drivers::faux::Writer writer(Options::none());
-    writer.setInput(&filter);
-    writer.prepare();
 
-    boost::uint64_t numWritten = writer.write(1000);
-    BOOST_CHECK_EQUAL(numWritten, 333u);
+    Options statOpts;
+    filters::Stats stats(statOpts);
+    stats.setInput(&filter);
 
-    // 1000 * 1/3 = 333, plus or minus a bit for rounding
-    BOOST_CHECK(Utils::compare_approx<double>(static_cast<double>(numWritten), 333, 6));
+    PointContext ctx;
+    stats.prepare(ctx);
+    PointBufferSet pbSet = stats.execute(ctx);
+    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    PointBufferPtr buf = *pbSet.begin();
 
-    const double minX = writer.getMinX();
-    const double minY = writer.getMinY();
-    const double minZ = writer.getMinZ();
-    const double maxX = writer.getMaxX();
-    const double maxY = writer.getMaxY();
-    const double maxZ = writer.getMaxZ();
-    const double avgX = writer.getAvgX();
-    const double avgY = writer.getAvgY();
-    const double avgZ = writer.getAvgZ();
+    Schema *schema = ctx.schema();
+
+    const filters::stats::Summary& statsX =
+        stats.getStats(schema->getDimension("X"));
+    const filters::stats::Summary& statsY =
+        stats.getStats(schema->getDimension("Y"));
+    const filters::stats::Summary& statsZ =
+        stats.getStats(schema->getDimension("Z"));   
+    BOOST_CHECK_EQUAL(buf->size(), 333);
+
+    const double minX = statsX.minimum();
+    const double minY = statsY.minimum();
+    const double minZ = statsZ.minimum();
+    const double maxX = statsX.maximum();
+    const double maxY = statsY.maximum();
+    const double maxZ = statsZ.maximum();
+    const double avgX = statsX.average();
+    const double avgY = statsY.average();
+    const double avgZ = statsZ.average();
 
     const double delX = 10.0 / 999.0 * 100.0;
     const double delY = 100.0 / 999.0 * 100.0;
@@ -102,7 +113,6 @@ BOOST_AUTO_TEST_CASE(test_crop)
     BOOST_CHECK_CLOSE(avgY, 50.00000, delY);
     BOOST_CHECK_CLOSE(avgZ, 500.00000, delZ);
 }
-**/
 
 
 BOOST_AUTO_TEST_CASE(test_crop_polygon)
@@ -134,18 +144,12 @@ BOOST_AUTO_TEST_CASE(test_crop_polygon)
 
     PointContext ctx;
 
-    PointBufferPtr buffer(new PointBuffer(ctx));
     crop.prepare(ctx);
-
-    StageSequentialIterator *iter = reader.createSequentialIterator();
-    boost::uint32_t numRead = iter->read(*buffer);
-    StageTester::ready(&crop, ctx);
-    PointBufferSet pbSet = StageTester::run(&crop, buffer);
+    PointBufferSet pbSet = crop.execute(ctx);
     BOOST_CHECK_EQUAL(pbSet.size(), 1);
-    buffer = *pbSet.begin();
+    PointBufferPtr buffer = *pbSet.begin();
     BOOST_CHECK_EQUAL(buffer->size(), 47u);
     
-    delete iter;
     FileUtils::closeFile(wkt_stream);
 #endif
 }
@@ -202,21 +206,10 @@ BOOST_AUTO_TEST_CASE(test_crop_polygon_reprojection)
     PointContext ctx;
     PointBufferPtr buffer(new PointBuffer(ctx));
     crop.prepare(ctx);
-
-    pdal::StageSequentialIterator* iter = reader.createSequentialIterator();
-    boost::uint32_t numRead = iter->read(*buffer);
-
-    FilterTester::ready(&reprojection, ctx);
-    FilterTester::filter(&reprojection, *buffer);
-    FilterTester::done(&reprojection, ctx);
-
-    StageTester::ready(&crop, ctx);
-    PointBufferSet pbSet = StageTester::run(&crop, buffer);
+    PointBufferSet pbSet = crop.execute(ctx);
     BOOST_CHECK_EQUAL(pbSet.size(), 1);
     buffer = *pbSet.begin();
     BOOST_CHECK_EQUAL(buffer->size(), 47u);
-    
-    delete iter;
     
     FileUtils::closeFile(wkt_stream);
     

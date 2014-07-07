@@ -50,12 +50,12 @@ namespace pdal
 {
 
 
-Writer::Writer(const Options& options) : Stage(options), m_userCallback(0),
-    m_writer_buffer(0)
+Writer::Writer(const Options& options) : Stage(options),
+    m_callback(new UserCallback), m_writer_buffer(0)
 {}
 
 
-Writer::Writer() : m_userCallback(0), m_writer_buffer(0)
+Writer::Writer() : m_callback(new UserCallback), m_writer_buffer(0)
 {}
 
 
@@ -78,51 +78,9 @@ void Writer::setSpatialReference(const SpatialReference& srs)
 
 void Writer::setUserCallback(UserCallback* userCallback)
 {
-    m_userCallback = userCallback;
+    m_callback.reset(userCallback);
 }
 
-
-UserCallback* Writer::getUserCallback() const
-{
-    return m_userCallback;
-}
-
-
-static void do_callback(double perc, UserCallback* callback)
-{
-    if (!callback) return;
-
-    bool ok = callback->check(perc);
-    if (!ok)
-    {
-        throw pipeline_interrupt("user requested interrupt");
-    }
-
-    return;
-}
-
-
-static void do_callback(boost::uint64_t pointsWritten, boost::uint64_t pointsToWrite, UserCallback* callback)
-{
-    if (!callback) return;
-
-    bool ok = false;
-    if (pointsToWrite == 0)
-    {
-        ok = callback->check();
-    }
-    else
-    {
-        double perc = ((double)pointsWritten / (double)pointsToWrite) * 100.0;
-        ok = callback->check(perc);
-    }
-    if (!ok)
-    {
-        throw pipeline_interrupt("user requested interrupt");
-    }
-
-    return;
-}
 
 boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite,
                               boost::uint64_t startingPosition,
@@ -134,9 +92,6 @@ boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite,
     }
 
     boost::uint64_t actualNumPointsWritten = 0;
-
-    UserCallback* callback = getUserCallback();
-    do_callback(0.0, callback);
 
     const Schema& schema = getPrevStage().getSchema();
 
@@ -236,8 +191,6 @@ boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite,
         // update count
         actualNumPointsWritten += numPointsWrittenThisChunk;
 
-        do_callback(actualNumPointsWritten, targetNumPointsToWrite, callback);
-
         if (targetNumPointsToWrite != 0)
         {
             // have we done enough yet?
@@ -253,9 +206,6 @@ boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite,
     writeEnd(actualNumPointsWritten);
 
     assert((targetNumPointsToWrite == 0) || (actualNumPointsWritten <= targetNumPointsToWrite));
-
-    do_callback(100.0, callback);
-
 
     return actualNumPointsWritten;
 }

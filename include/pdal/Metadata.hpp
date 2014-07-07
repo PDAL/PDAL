@@ -304,6 +304,31 @@ public:
         return MetadataNode(impl);
     }
 
+    template<typename T>
+    MetadataNode addOrUpdate(const std::string& lname, const T& value)
+    {
+        auto nodes = children();
+        for (auto ai = nodes.begin(); ai != nodes.end(); ++ai)
+        {
+            MetadataNode& n = *ai;
+            if (n.name() == lname)
+            {
+                n.m_impl->setValue(value);
+                return n;
+            }
+        }
+        return add(lname, value);
+    }
+
+    template<typename T>
+    MetadataNode addOrUpdate(const std::string& lname, const T& value,
+        const std::string& descrip)
+    {
+        MetadataNode m = addOrUpdate(lname, value);
+        m_impl->m_descrip = descrip;
+        return m;
+    }
+
     std::string type() const
         { return m_impl->m_type; }
     std::string name() const
@@ -321,6 +346,10 @@ public:
             outnodes.push_back(MetadataNode(*ci));
         return outnodes;
     }
+    bool operator ! ()
+        { return empty(); }
+    bool valid() const
+        { return !empty(); }
     bool empty() const
         { return m_impl->m_name.empty() && m_impl->m_value.empty(); }
 
@@ -411,6 +440,8 @@ inline bool operator != (const MetadataNode& m1, const MetadataNode& m2)
 
 class Metadata
 {
+    friend class PointContext;
+
 public:
     Metadata()
     {}
@@ -423,7 +454,11 @@ public:
 
 private:
     MetadataNode m_root;
+    MetadataNode m_private;
     std::string m_name;
+
+    MetadataNode privateNode() const
+        { return m_private; }
 };
 typedef std::shared_ptr<Metadata> MetadataPtr;
 

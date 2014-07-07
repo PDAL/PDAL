@@ -131,6 +131,7 @@ PointBufferSet Stage::execute(PointContext ctx)
         PointBufferSet temp = runner->wait();
         outBuffers.insert(temp.begin(), temp.end());
     }
+    l_done(ctx);
     done(ctx);
     return outBuffers;
 }
@@ -142,10 +143,8 @@ void Stage::l_initialize(PointContext ctx)
         Stage& prevStage = getPrevStage();
         setSchema(prevStage.getSchema());
         setBounds(prevStage.getBounds());
-        setSpatialReference(prevStage.getSpatialReference());
     }
 }
-
 
 void Stage::l_processOptions(const Options& options)
 {
@@ -191,6 +190,13 @@ void Stage::l_processOptions(const Options& options)
         // If one wasn't set on the options, we'll ignore at this
         // point.  Maybe another stage might forward/set it later.
     }
+}
+
+
+void Stage::l_done(PointContext ctx)
+{
+    if (!m_spatialReference.empty())
+        ctx.setSpatialRef(m_spatialReference);
 }
 
 

@@ -116,9 +116,7 @@ void Reprojection::processOptions(const Options& options)
 void Reprojection::ready(PointContext ctx)
 {
     if (m_inferInputSRS)
-    {
-        m_inSRS = getPrevStage().getSpatialReference();
-    }
+        m_inSRS = ctx.spatialRef();
 
 #ifdef PDAL_HAVE_GDAL
     m_gdal_debug = boost::shared_ptr<pdal::gdal::Debug>(

@@ -178,6 +178,7 @@ private:
     virtual void processOptions(const Options& options)
         {}
     void l_initialize(PointContext ctx);
+    void l_done(PointContext ctx);
     virtual void initialize()
         {}
     virtual void buildSchema(Schema *schema)

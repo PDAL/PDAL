@@ -935,24 +935,35 @@ void Writer::writeTile(PointBuffer const& buffer)
     size_t outbufSize = m_pointSize * buffer.size();
     std::unique_ptr<char> outbuf(new char[outbufSize]);
     char *pos = outbuf.get();
+    m_callback->setTotal(buffer.size());
+    m_callback->invoke(0);
     if (m_orientation == schema::DIMENSION_INTERLEAVED)
     {
+        size_t clicks = 0;
+        size_t interrupt = m_dims.size() * 100;
         for (size_t dim = 0; dim < m_dims.size(); ++dim)
             for (PointId id = 0; id < buffer.size(); ++id)
             {
                 buffer.getRawField(m_dims[dim], id, pos);
                 pos += m_dims[dim].getByteSize();
+                if (clicks++ % interrupt == 0)
+                    m_callback->invoke(clicks / m_dims.size());
             }
     }
     else if (m_orientation == schema::POINT_INTERLEAVED)
     {
         for (PointId id = 0; id < buffer.size(); ++id)
+        {
             for (size_t dim = 0; dim < m_dims.size(); ++dim)
             {
                 buffer.getRawField(m_dims[dim], id, pos);
                 pos += m_dims[dim].getByteSize();
             }
+            if (id % 100 == 0)
+                m_callback->invoke(id);
+        }
     }
+    m_callback->invoke(buffer.size());
 
     log()->get(logDEBUG4) << "Blob size " << outbufSize << std::endl;
     OCILobLocator* locator;

@@ -202,7 +202,7 @@ Dimension *InPlaceReprojection::appendDimension(Schema *schema, Dimension *src)
 void InPlaceReprojection::ready(PointContext ctx)
 {
     if (m_inSRS.empty())
-        m_inSRS = getPrevStage().getSpatialReference();
+        m_inSRS = ctx.spatialRef();
     setSpatialReference(m_outSRS);
 
 #ifdef PDAL_HAVE_GDAL

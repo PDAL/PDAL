@@ -32,8 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_PDAL_KERNEL_SUPPORT_HPP
-#define INCLUDED_PDAL_KERNEL_SUPPORT_HPP
+#pragma once
 
 #include <string>
 
@@ -43,7 +42,10 @@
 #include <pdal/UserCallback.hpp>
 #include <pdal/PipelineManager.hpp>
 
-namespace pdal { namespace kernel {
+namespace pdal
+{
+namespace kernel
+{
     
 class app_usage_error : public pdal::pdal_error
 {
@@ -85,8 +87,9 @@ private:
 class PercentageCallback : public pdal::UserCallback
 {
 public:
-    PercentageCallback(double major=10.0, double minor=2.0);
+    PercentageCallback(double major = 10.0, double minor = 2.0);
     virtual void callback();
+
 protected:
     double m_lastMajorPerc;
     double m_lastMinorPerc;
@@ -97,19 +100,21 @@ protected:
 class HeartbeatCallback : public pdal::UserCallback
 {
 public:
-    HeartbeatCallback();
-    virtual void callback();
-private:
+    virtual void callback()
+        { std::cerr << "."; }
 };
+
 
 class ShellScriptCallback : public PercentageCallback
 {
 public:
-    ShellScriptCallback(std::vector<std::string> const& command);
+    ShellScriptCallback(const std::vector<std::string>& command);
     virtual void callback();
+
 private:
     std::string m_command;
 };
 
-}} // pdal::kernel
-#endif
+} // namespace kernel
+} // namespace pdal
+
