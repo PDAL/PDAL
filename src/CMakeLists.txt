@@ -107,7 +107,6 @@ set(PDAL_BASE_CPP
   StageIterator.cpp
   StreamFactory.cpp
   ThreadEnvironment.cpp
-  UserCallback.cpp
   Utils.cpp
   Vector.cpp  
   Writer.cpp

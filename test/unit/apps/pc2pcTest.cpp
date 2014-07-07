@@ -44,20 +44,20 @@
 #include <string>
 
 
-BOOST_AUTO_TEST_SUITE(pc2pcTest)
+using namespace pdal;
 
+BOOST_AUTO_TEST_SUITE(pc2pcTest)
 
 static std::string appName()
 {
-    const std::string app = Support::binpath(Support::exename("pdal translate"));
-    return app;
+    return Support::binpath(Support::exename("pdal translate"));
 }
 
 
 #ifdef PDAL_COMPILER_MSVC
 BOOST_AUTO_TEST_CASE(pc2pcTest_test_no_input)
 {
-    const std::string cmd = appName();
+    std::string cmd = appName();
 
     std::string output;
     int stat = pdal::Utils::run_shell_command(cmd, output);
@@ -71,44 +71,51 @@ BOOST_AUTO_TEST_CASE(pc2pcTest_test_no_input)
 
 BOOST_AUTO_TEST_CASE(pc2pcTest_test_common_opts)
 {
-    const std::string cmd = appName();
+    std::string cmd = appName();
 
     std::string output;
-    int stat = pdal::Utils::run_shell_command(cmd + " -h", output);
+    int stat = Utils::run_shell_command(cmd + " -h", output);
     BOOST_CHECK_EQUAL(stat, 0);
 
-    stat = pdal::Utils::run_shell_command(cmd + " --version", output);
+    stat = Utils::run_shell_command(cmd + " --version", output);
     BOOST_CHECK_EQUAL(stat, 0);
 }
 
 
 static bool fileIsOkay(const std::string& name)
 {
-    if (!pdal::FileUtils::fileExists(name)) return false;
-    if (pdal::FileUtils::fileSize(name) < 1000) return false;
+    if (!FileUtils::fileExists(name))
+        return false;
+    if (FileUtils::fileSize(name) < 1000)
+        return false;
     return true;
 }
 
 
 static bool fileIsCompressed(const std::string& name)
 {
-    pdal::drivers::las::Reader reader(name);
-    reader.prepare();
+    PointContext ctx;
+
+    drivers::las::Reader reader(name);
+    reader.prepare(ctx);
+
     return reader.getLasHeader().Compressed();
 }
 
 
 static bool fileHasSrs(const std::string& name)
 {
-    pdal::drivers::las::Reader reader(name);
-    reader.prepare();
+    PointContext ctx;
+
+    drivers::las::Reader reader(name);
+    reader.prepare(ctx);
     return !reader.getSpatialReference().empty();
 }
 
 
 BOOST_AUTO_TEST_CASE(pc2pc_test_switches)
 {
-    const std::string cmd = appName();
+    std::string cmd = appName();
 
     std::string inputLas = Support::datapath("apps/simple.las");
     std::string inputLaz = Support::datapath("apps/simple.laz");
@@ -119,13 +126,16 @@ BOOST_AUTO_TEST_CASE(pc2pc_test_switches)
 
     int stat = 0;
 
-    // We don't generally test the outputted files against a reference file, because
-    // we don't want to have to update the reference files everytime we change the driver
-    // implementation -- those issues are covered by the unit tests for the drivers.
-    // Instead, here we just check certain rough characteristics of the outputted file.
+    // We don't generally test the output files against a reference file
+    // because we don't want to have to update the reference files every time
+    // we change the driver implementation -- those issues are covered by the
+    // unit tests for the drivers.  Instead, here we just check certain rough
+    // characteristics of the output file.
 
     // do --input and --output work?
-    stat = pdal::Utils::run_shell_command(cmd + " --input=" + inputLas + " --output=" + outputLas, output);
+    std::string fullCmd = cmd + " --input=" + inputLas + " --output=" +
+        outputLas;
+    stat = Utils::run_shell_command(fullCmd, output);
     BOOST_CHECK_EQUAL(stat, 0);
     BOOST_CHECK(fileIsOkay(outputLas));
     BOOST_CHECK(!fileIsCompressed(outputLas));
@@ -133,7 +143,8 @@ BOOST_AUTO_TEST_CASE(pc2pc_test_switches)
 
 #ifdef PDAL_HAVE_LASZIP
     // does --compress make a compressed file?
-    stat = pdal::Utils::run_shell_command(cmd + " --input=" + inputLas + " --output=" + outputLas + " --compress", output);
+    stat = Utils::run_shell_command(cmd + " --input=" + inputLas +
+        " --output=" + outputLas + " --compress", output);
     BOOST_CHECK_EQUAL(stat, 0);
     BOOST_CHECK(fileIsOkay(outputLas));
     BOOST_CHECK(fileIsCompressed(outputLas));
@@ -141,16 +152,17 @@ BOOST_AUTO_TEST_CASE(pc2pc_test_switches)
 
 #ifdef PDAL_HAVE_LASZIP
     // does "--output foo.laz" make a compressed output?
-    stat = pdal::Utils::run_shell_command(cmd + " --input=" + inputLas + " --output=" + outputLaz, output);
+    stat = Utils::run_shell_command(cmd + " --input=" + inputLas +
+        " --output=" + outputLaz, output);
     BOOST_CHECK_EQUAL(stat, 0);
     BOOST_CHECK(fileIsOkay(outputLaz));
     BOOST_CHECK(fileIsCompressed(outputLaz));
 #endif
 
-
 #ifdef PDAL_HAVE_LIBLAS
     // does --liblas work?
-    stat = pdal::Utils::run_shell_command(cmd + " --input=" + inputLas + " --output=" + outputLas + " --liblas", output);
+    stat = Utils::run_shell_command(cmd + " --input=" + inputLas +
+        " --output=" + outputLas + " --liblas", output);
     BOOST_CHECK_EQUAL(stat, 0);
     BOOST_CHECK(fileIsOkay(outputLas));
     BOOST_CHECK(!fileIsCompressed(outputLas));
@@ -159,7 +171,8 @@ BOOST_AUTO_TEST_CASE(pc2pc_test_switches)
 #ifdef PDAL_HAVE_LIBLAS
 #ifdef PDAL_HAVE_LASZIP
     // do --liblas and --compress work together?
-    stat = pdal::Utils::run_shell_command(cmd + " --input=" + inputLas + " --output=" + outputLas + " --compress --liblas", output);
+    stat = Utils::run_shell_command(cmd + " --input=" + inputLas +
+        " --output=" + outputLas + " --compress --liblas", output);
     BOOST_CHECK_EQUAL(stat, 0);
     BOOST_CHECK(fileIsOkay(outputLas));
     BOOST_CHECK(fileIsCompressed(outputLas));
@@ -168,15 +181,16 @@ BOOST_AUTO_TEST_CASE(pc2pc_test_switches)
 
 #ifdef PDAL_HAVE_GDAL
     // does --a_srs add an SRS?
-    stat = pdal::Utils::run_shell_command(cmd + " --input=" + inputLas + " --output=" + outputLas + " --a_srs=epsg:4326", output);
+    fullCmd = cmd + " --input=" + inputLas + " --output=" + outputLas +
+        " --a_srs=epsg:4326";
+    stat = Utils::run_shell_command(fullCmd, output);
     BOOST_CHECK_EQUAL(stat, 0);
     BOOST_CHECK(fileIsOkay(outputLas));
     BOOST_CHECK(fileHasSrs(outputLas));
 #endif
 
-    pdal::FileUtils::deleteFile(outputLas);
-    pdal::FileUtils::deleteFile(outputLaz);
+    FileUtils::deleteFile(outputLas);
+    FileUtils::deleteFile(outputLaz);
 }
-
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -146,21 +146,7 @@ BOOST_AUTO_TEST_CASE(test_multiple_dims_same_name)
 
     PointContext ctx;
     filter.prepare(ctx);
-
-    PointBuffer buf(ctx);
-
-    std::unique_ptr<StageSequentialIterator> iter(
-        reader.createSequentialIterator());
-    point_count_t numRead = iter->read(buf, 1000);
-    BOOST_CHECK_EQUAL(numRead, 1000u);
-
-    FilterTester::ready(&reprojectionFilter, ctx);
-    FilterTester::filter(&reprojectionFilter, buf);
-    FilterTester::done(&reprojectionFilter, ctx);
-
-    FilterTester::ready(&filter, ctx);
-    FilterTester::filter(&filter, buf);
-    FilterTester::done(&filter, ctx);
+    filter.execute(ctx);
 
     Schema *schema = ctx.schema();
     const filters::stats::Summary& statsX =
@@ -170,9 +156,9 @@ BOOST_AUTO_TEST_CASE(test_multiple_dims_same_name)
     const filters::stats::Summary& statsZ =
         filter.getStats(schema->getDimension("Z"));
 
-    BOOST_CHECK_EQUAL(statsX.count(), 1000u);
-    BOOST_CHECK_EQUAL(statsY.count(), 1000u);
-    BOOST_CHECK_EQUAL(statsZ.count(), 1000u);
+    BOOST_CHECK_EQUAL(statsX.count(), 1065u);
+    BOOST_CHECK_EQUAL(statsY.count(), 1065u);
+    BOOST_CHECK_EQUAL(statsZ.count(), 1065u);
 }
 #endif
 
@@ -229,19 +215,7 @@ BOOST_AUTO_TEST_CASE(test_specified_stats)
     PointContext ctx;
     PointBuffer buf(ctx);
     filter.prepare(ctx);
-
-    std::unique_ptr<StageSequentialIterator>
-        iter(reader.createSequentialIterator());
-    point_count_t numRead = iter->read(buf, 1000);
-    BOOST_CHECK_EQUAL(numRead, 1000u);
-
-    FilterTester::ready(&reprojectionFilter, ctx);
-    FilterTester::filter(&reprojectionFilter, buf);
-    FilterTester::done(&reprojectionFilter, ctx);
-
-    FilterTester::ready(&filter, ctx);
-    FilterTester::filter(&filter, buf);
-    FilterTester::done(&filter, ctx);
+    filter.execute(ctx);
 
     Schema *schema = ctx.schema();
     const filters::stats::Summary& statsX =
@@ -251,9 +225,9 @@ BOOST_AUTO_TEST_CASE(test_specified_stats)
     const filters::stats::Summary& statsZ =
         filter.getStats(schema->getDimension("filters.inplacereprojection.Z"));
 
-    BOOST_CHECK_EQUAL(statsX.count(), 1000u);
-    BOOST_CHECK_EQUAL(statsY.count(), 1000u);
-    BOOST_CHECK_EQUAL(statsZ.count(), 1000u);
+    BOOST_CHECK_EQUAL(statsX.count(), 1065u);
+    BOOST_CHECK_EQUAL(statsY.count(), 1065u);
+    BOOST_CHECK_EQUAL(statsZ.count(), 1065u);
     
     BOOST_CHECK_CLOSE(statsX.minimum(), -117.2686466233, 0.0001);
     BOOST_CHECK_CLOSE(statsY.minimum(), 848899.700, 0.0001);    
@@ -307,25 +281,14 @@ BOOST_AUTO_TEST_CASE(test_pointbuffer_stats)
     filters::InPlaceReprojection reprojectionFilter(options);
     reprojectionFilter.setInput(&reader);
 
+    Options statsOptions = options;
+    options.add("num_points", 1000);
     pdal::filters::Stats filter(options);
     filter.setInput(&reprojectionFilter);
 
     PointContext ctx;
-    PointBuffer buf(ctx);
     filter.prepare(ctx);
-
-    std::unique_ptr<StageSequentialIterator>
-        iter(reader.createSequentialIterator());
-    point_count_t numRead = iter->read(buf, 1000);
-    BOOST_CHECK_EQUAL(numRead, 1000u);
-    
-    FilterTester::ready(&reprojectionFilter, ctx);
-    FilterTester::filter(&reprojectionFilter, buf);
-    FilterTester::done(&reprojectionFilter, ctx);
-
-    FilterTester::ready(&filter, ctx);
-    FilterTester::filter(&filter, buf);
-    FilterTester::done(&filter, ctx);
+    filter.execute(ctx);
 
     MetadataNode m = ctx.metadata();
     m = m.findChild(

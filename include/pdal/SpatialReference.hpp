@@ -76,11 +76,14 @@ public:
     /// available.
     std::string getWKT(WKTModeFlag mode_flag = eHorizontalOnly) const;
     std::string getWKT(WKTModeFlag mode_flag, bool pretty) const;
+    std::string getRawWKT() const
+        { return m_wkt; }
 
     /// Sets the SRS using GDAL's OGC WKT. If GDAL is not linked, this
     /// operation has no effect.
     /// \param v - a string containing the WKT string.
-    void setWKT(std::string const& v);
+    void setWKT(std::string const& v)
+        { m_wkt = v; }
 
     /// Sets the SRS using GDAL's SetFromUserInput function. If GDAL is not linked, this
     /// operation has no effect.

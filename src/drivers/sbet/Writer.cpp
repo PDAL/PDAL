@@ -67,6 +67,8 @@ void SbetWriter::ready(PointContext ctx)
 
 void SbetWriter::write(const PointBuffer& buf)
 {
+    m_callback->setTotal(buf.size());
+    m_callback->invoke(0);
     for (PointId idx = 0; idx < buf.size(); ++idx)
     {
         for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
@@ -75,7 +77,10 @@ void SbetWriter::write(const PointBuffer& buf)
             Dimension *d = *di;
             *m_stream << (d ? buf.getFieldAs<double>(*d, idx) : 0.0);
         }
+        if (idx % 100 == 0)
+            m_callback->invoke(idx + 1);
     }
+    m_callback->invoke(buf.size());
 }
 
 } // namespace sbet

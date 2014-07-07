@@ -32,32 +32,14 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_PDAL_KERNEL_TRANSLATE_HPP
-#define INCLUDED_PDAL_KERNEL_TRANSLATE_HPP
-
-#include <pdal/FileUtils.hpp>
-
-#include <pdal/drivers/las/Reader.hpp>
-#include <pdal/drivers/las/Writer.hpp>
-
-#include <pdal/filters/Cache.hpp>
-#include <pdal/filters/Chipper.hpp>
-#include <pdal/filters/Crop.hpp>
-#include <pdal/filters/Decimation.hpp>
-#include <pdal/filters/InPlaceReprojection.hpp>
-#include <pdal/filters/Scaling.hpp>
-#include <pdal/SpatialReference.hpp>
-#include <pdal/Bounds.hpp>
+#pragma once
 
 #include "Application.hpp"
 
-#define SEPARATORS ",| "
-
-#include <boost/tokenizer.hpp>
-typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-
-
-namespace pdal { namespace kernel {
+namespace pdal
+{
+namespace kernel
+{
 
 class PDAL_DLL Translate : public Application
 {
@@ -68,7 +50,6 @@ public:
 private:
     void addSwitches();
     void validateSwitches();
-
     
     Stage* makeReader(Options readerOptions);
     void forwardMetadata(Options & options, Metadata metadata);
@@ -89,6 +70,6 @@ private:
     boost::uint32_t m_decimation_offset;
 };
 
-}} // pdal::kernel
+} // namespace kernel
+} // namespace pdal
 
-#endif

@@ -320,7 +320,8 @@ void Writer::ready(PointContext ctx)
                           m_dims->Y->getNumericOffset(),
                           m_dims->Z->getNumericOffset());
 
-    m_lasHeader.setSpatialReference(getSpatialReference());
+    m_lasHeader.setSpatialReference(getSpatialReference().empty() ?
+        ctx.spatialRef() : getSpatialReference());
 
     bool useMetadata = false;
     try
@@ -504,6 +505,8 @@ void Writer::write(const PointBuffer& pointBuffer)
     bool hasTime = m_lasHeader.hasTime();
     boost::uint16_t record_length = m_lasHeader.GetDataRecordLength();
 
+    m_callback->setTotal(pointBuffer.size());
+    m_callback->invoke(0);
     for (uint32_t idx = 0; idx < pointBuffer.size(); idx++)
     {
         boost::uint8_t* p = buf;
@@ -632,7 +635,12 @@ void Writer::write(const PointBuffer& pointBuffer)
         double yValue = pointBuffer.getFieldAs<double>(*dimensions.Y, idx);
         double zValue = pointBuffer.getFieldAs<double>(*dimensions.Z, idx);
         m_summaryData.addPoint(xValue, yValue, zValue, returnNumber);
+
+        // Perhaps the interval should come out of the callback itself.
+        if (idx % 100 == 0)
+            m_callback->invoke(idx + 1);
     }
+    m_callback->invoke(pointBuffer.size());
 
     m_numPointsWritten = m_numPointsWritten + numValidPoints;
 }

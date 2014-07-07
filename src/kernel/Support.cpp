@@ -41,7 +41,10 @@
 #include <pdal/Utils.hpp>
 
 
-namespace pdal { namespace kernel {
+namespace pdal
+{
+namespace kernel
+{
     
 
 pdal::PipelineManager* AppSupport::makePipeline(pdal::Options& options)
@@ -123,14 +126,13 @@ PercentageCallback::PercentageCallback(double major, double minor)
     : m_lastMajorPerc(-1 * major)
     , m_lastMinorPerc(-1 * minor)
     , m_done(false)
-{
-    return;
-}
+{}
 
 
 void PercentageCallback::callback()
 {
-    if (m_done) return;
+    if (m_done)
+        return;
 
     double currPerc = getPercentComplete();
     
@@ -150,76 +152,50 @@ void PercentageCallback::callback()
         std::cerr << '.' << std::flush;
         m_lastMinorPerc = currPerc;
     }
-
-    return;
 }
 
-ShellScriptCallback::ShellScriptCallback(std::vector<std::string> const& command)
+ShellScriptCallback::ShellScriptCallback(
+    const std::vector<std::string>& command)
 {
     double major_tick(10.0);
     double minor_tick(2.0);
     
-    if (!command.size())
-    {
-        m_command = "";        
-    }
-    else
+    if (command.size())
     {
         m_command = command[0];
-
         if (command.size() == 3)
         {
             major_tick = boost::lexical_cast<double>(command[1]);
             minor_tick = boost::lexical_cast<double>(command[2]);
         } 
         else if (command.size() == 2)
-        {
             major_tick = boost::lexical_cast<double>(command[1]);
-        }
     }
-
     PercentageCallback(major_tick, minor_tick);
-
-    return;
 }
 
 
 void ShellScriptCallback::callback()
 {
-    if (m_done) return;
+    if (m_done)
+        return;
 
     double currPerc = getPercentComplete();
-    
-    if (pdal::Utils::compare_distance<double>(currPerc, 100.0))
-    {
+    if (Utils::compare_distance<double>(currPerc, 100.0))
         m_done = true;
-    }
     else if (currPerc >= m_lastMajorPerc + 10.0)
     {
         std::string output;
-        int stat = pdal::Utils::run_shell_command(m_command + " " + boost::lexical_cast<std::string>(static_cast<int>(currPerc)), output);
+        int stat = Utils::run_shell_command(m_command + " " +
+            boost::lexical_cast<std::string>(static_cast<int>(currPerc)),
+            output);
         m_lastMajorPerc = currPerc;
         m_lastMinorPerc = currPerc;
     }
     else if (currPerc >= m_lastMinorPerc + 2.0)
-    {
         m_lastMinorPerc = currPerc;
-    }
-
-    return;
 }
 
-HeartbeatCallback::HeartbeatCallback()
-{
-    return;
-}
+} // namespace kernel
+} // namespace pdal
 
-
-void HeartbeatCallback::callback()
-{
-    std::cerr << '.';
-
-    return;
-}
-
-}} // pdal::kernel

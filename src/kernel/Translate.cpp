@@ -34,78 +34,90 @@
 
 #include <pdal/kernel/Translate.hpp>
 
+#include <boost/tokenizer.hpp>
+typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
 
-namespace pdal { namespace kernel {
+#include <pdal/filters/Crop.hpp>
+#include <pdal/filters/Decimation.hpp>
+#include <pdal/filters/InPlaceReprojection.hpp>
+#include <pdal/kernel/Support.hpp>
 
-Translate::Translate(int argc, const char* argv[])
-    : Application(argc, argv, "translate")
-    , m_inputFile("")
-    , m_outputFile("")
-    , m_bCompress(false)
-    , m_numPointsToWrite(0)
-    , m_numSkipPoints(0)
-    , m_input_srs(pdal::SpatialReference())
-    , m_output_srs(pdal::SpatialReference())
-    , m_wkt("")
-    , m_scales("")
-    , m_offsets("")
-    , m_bForwardMetadata(false)
-    , m_decimation_step(1)
-    , m_decimation_offset(0)
+namespace pdal
 {
-    return;
-}
+namespace kernel
+{
+
+Translate::Translate(int argc, const char* argv[]) :
+    Application(argc, argv, "translate"), m_bCompress(false),
+    m_numPointsToWrite(0), m_numSkipPoints(0),
+    m_input_srs(pdal::SpatialReference()),
+    m_output_srs(pdal::SpatialReference()), m_bForwardMetadata(false),
+    m_decimation_step(1), m_decimation_offset(0)
+{}
 
 
 void Translate::validateSwitches()
 {
     if (m_inputFile == "")
-    {
         throw app_usage_error("--input/-i required");
-    }
-
     if (m_outputFile == "")
-    {
         throw app_usage_error("--output/-o required");
-    }
-
-    return;
 }
 
 
 void Translate::addSwitches()
 {
-    
-    // Action translate("translate");
-    
-    po::options_description* file_options = new po::options_description("file options");
+    po::options_description* file_options =
+        new po::options_description("file options");
 
     file_options->add_options()
-        ("input,i", po::value<std::string>(&m_inputFile)->default_value(""), "input file name")
-        ("output,o", po::value<std::string>(&m_outputFile)->default_value(""), "output file name")
-        ("a_srs", po::value<pdal::SpatialReference>(&m_input_srs), "Assign input coordinate system (if supported by output format)")
-        ("t_srs", po::value<pdal::SpatialReference>(&m_output_srs), "Transform to output coordinate system (if supported by output format)")
-        ("compress,z", po::value<bool>(&m_bCompress)->zero_tokens()->implicit_value(true), "Compress output data (if supported by output format)")
-        ("count", po::value<boost::uint64_t>(&m_numPointsToWrite)->default_value(0), "How many points should we write?")
-        ("skip", po::value<boost::uint64_t>(&m_numSkipPoints)->default_value(0), "How many points should we skip?")
-        ("bounds", po::value<pdal::Bounds<double> >(&m_bounds), "Extent (in XYZ to clip output to)")
-        ("polygon", po::value<std::string >(&m_wkt), "POLYGON WKT to use for precise crop of data (2d or 3d)")
-        ("scale", po::value< std::string >(&m_scales), "A comma-separated or quoted, space-separated list of scales to set on the output file: \n--scale 0.1,0.1,0.00001\n--scale \"0.1 0.1 0.00001\"")
-        ("offset", po::value< std::string >(&m_offsets), "A comma-separated or quoted, space-separated list of offsets to set on the output file: \n--offset 0,0,0\n--offset \"1234 5678 91011\"")
-        ("metadata,m", po::value< bool >(&m_bForwardMetadata)->implicit_value(true), "Forward metadata (VLRs, header entries, etc) from previous stages")
-        ("d_step", po::value<boost::uint32_t>(&m_decimation_step)->default_value(1), "Decimation filter step")
-        ("d_offset", po::value<boost::uint32_t>(&m_decimation_offset)->default_value(0), "Decimation filter offset")
+        ("input,i", po::value<std::string>(&m_inputFile)->default_value(""),
+         "input file name")
+        ("output,o", po::value<std::string>(&m_outputFile)->default_value(""),
+         "output file name")
+        ("a_srs", po::value<pdal::SpatialReference>(&m_input_srs),
+         "Assign input coordinate system (if supported by output format)")
+        ("t_srs", po::value<pdal::SpatialReference>(&m_output_srs),
+         "Transform to output coordinate system (if supported by "
+         "output format)")
+        ("compress,z",
+         po::value<bool>(&m_bCompress)->zero_tokens()->implicit_value(true),
+         "Compress output data (if supported by output format)")
+        ("count",
+         po::value<boost::uint64_t>(&m_numPointsToWrite)->default_value(0),
+         "How many points should we write?")
+        ("skip", po::value<boost::uint64_t>(&m_numSkipPoints)->default_value(0),
+         "How many points should we skip?")
+        ("bounds", po::value<pdal::Bounds<double> >(&m_bounds),
+         "Extent (in XYZ to clip output to)")
+        ("polygon", po::value<std::string >(&m_wkt),
+         "POLYGON WKT to use for precise crop of data (2d or 3d)")
+        ("scale", po::value< std::string >(&m_scales),
+         "A comma-separated or quoted, space-separated list of scales to "
+         "set on the output file: \n--scale 0.1,0.1,0.00001\n--scale \""
+         "0.1 0.1 0.00001\"")
+        ("offset", po::value< std::string >(&m_offsets),
+         "A comma-separated or quoted, space-separated list of offsets to "
+         "set on the output file: \n--offset 0,0,0\n--offset "
+         "\"1234 5678 91011\"")
+        ("metadata,m",
+         po::value< bool >(&m_bForwardMetadata)->implicit_value(true),
+         "Forward metadata (VLRs, header entries, etc) from previous stages")
+        ("d_step",
+         po::value<boost::uint32_t>(&m_decimation_step)->default_value(1),
+         "Decimation filter step")
+        ("d_offset",
+         po::value<boost::uint32_t>(&m_decimation_offset)->default_value(0),
+         "Decimation filter offset")
         ;
 
     addSwitchSet(file_options);
-    
     addPositionalSwitch("input", 1);
     addPositionalSwitch("output", 1);    
 }
 
 Stage* Translate::makeReader(Options readerOptions)
 {
-
     if (isDebug())
     {
         readerOptions.add<bool>("debug", true);
@@ -117,41 +129,32 @@ Stage* Translate::makeReader(Options readerOptions)
         readerOptions.add<std::string>("log", "STDERR");
     }
 
-
     Stage* reader_stage = AppSupport::makeReader(readerOptions);
-    
-    Stage* final_stage(0);
+    Stage* final_stage = reader_stage;
     if (!m_bounds.empty() || !m_wkt.empty() || !m_output_srs.empty())
     {
         Stage* next_stage = reader_stage;
-        
         Stage* crop_stage(0);
         Stage* reprojection_stage(0);
 
         if (!m_output_srs.empty())
         {
-            readerOptions.add<std::string >("out_srs", m_output_srs.getWKT());
-
-            boost::char_separator<char> sep(SEPARATORS);
+            readerOptions.add<std::string>("out_srs", m_output_srs.getWKT());
+            boost::char_separator<char> sep(",| ");
             std::vector<double> offsets;
             tokenizer off_tokens(m_offsets, sep);
-            for (tokenizer::iterator t = off_tokens.begin(); t != off_tokens.end(); ++t) {
+            for (auto t = off_tokens.begin(); t != off_tokens.end(); ++t)
                 offsets.push_back(boost::lexical_cast<double>(*t));
-            }
 
             std::vector<double> scales;
             tokenizer scale_tokens(m_scales, sep);
-            for (tokenizer::iterator t = scale_tokens.begin(); t != scale_tokens.end(); ++t) {
+            for (auto t = scale_tokens.begin(); t != scale_tokens.end(); ++t)
                 scales.push_back(boost::lexical_cast<double>(*t));
-            }
             
             if (scales.size())
             {
                 if (scales.size() <= 1)
-                {
                     readerOptions.add<double >("scale_x", scales[0]);
-                    
-                }
                 else if (scales.size() <= 2)
                 {
                     readerOptions.add<double >("scale_x", scales[0]);
@@ -170,7 +173,6 @@ Stage* Translate::makeReader(Options readerOptions)
                 if (offsets.size() <= 1)
                 {
                     readerOptions.add<double >("offset_x", offsets[0]);
-                    
                 }
                 else if (offsets.size() <= 2)
                 {
@@ -185,14 +187,14 @@ Stage* Translate::makeReader(Options readerOptions)
                 }
             }
             reprojection_stage =
-                new pdal::filters::InPlaceReprojection(readerOptions);
+                new filters::InPlaceReprojection(readerOptions);
             reprojection_stage->setInput(next_stage);
             next_stage = reprojection_stage;
         }
         
         if (!m_bounds.empty() && m_wkt.empty())
         {
-            readerOptions.add<pdal::Bounds<double> >("bounds", m_bounds);
+            readerOptions.add<pdal::Bounds<double>>("bounds", m_bounds);
             crop_stage = new pdal::filters::Crop(readerOptions);
             crop_stage->setInput(next_stage);
             next_stage = crop_stage;
@@ -209,7 +211,8 @@ Stage* Translate::makeReader(Options readerOptions)
                 m_wkt = buffer.str();
                 FileUtils::closeFile(wkt_stream);
                 
-            } catch (pdal::pdal_error const&)
+            }
+            catch (pdal::pdal_error const&)
             {
                 // If we couldn't open the file given in m_wkt because it 
                 // was likely actually wkt, leave it alone
@@ -219,46 +222,22 @@ Stage* Translate::makeReader(Options readerOptions)
             crop_stage->setInput(next_stage);
             next_stage = crop_stage;
         }
-        
         final_stage = next_stage;
     }
-
-    if (final_stage == 0) 
-        final_stage = reader_stage;
  
-    Stage* decimation_stage(0);
     if (m_decimation_step > 1)
     {
         Options decimationOptions;
         decimationOptions.add<bool>("debug", isDebug());
-        decimationOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
-        decimationOptions.add<boost::uint32_t>("step", m_decimation_step);
-        decimationOptions.add<boost::uint32_t>("offset", m_decimation_offset);
-        decimation_stage = new pdal::filters::Decimation(decimationOptions);
+        decimationOptions.add<uint32_t>("verbose", getVerboseLevel());
+        decimationOptions.add<uint32_t>("step", m_decimation_step);
+        decimationOptions.add<uint32_t>("offset", m_decimation_offset);
+        Stage *decimation_stage = new filters::Decimation(decimationOptions);
         decimation_stage->setInput(final_stage);
-    }
-    if (decimation_stage != 0)
         final_stage = decimation_stage;
-   
+    }
     return final_stage;    
-
 }
-
-void Translate::forwardMetadata(Options& options, Metadata metadata)
-{
-    // boost::property_tree::ptree::const_iterator m;
-    // Metadata mdata = metadata.getMetadata("drivers.las.reader");
-    // boost::property_tree::ptree const& entries = mdata.toPTree();
-    // Option metadata_opt;
-    // boost::property_tree::xml_parser::write_xml(std::cout, entries);
-    // for (m = entries.begin(); m != entries.end(); ++m)
-    // {
-    //     std::string const& name = m->first;
-    //     std::string value = m->second.get_value<std::string>();
-    // }            
-
-}
-
 
 int Translate::execute()
 {
@@ -266,74 +245,50 @@ int Translate::execute()
     {
         readerOptions.add<std::string>("filename", m_inputFile);
         readerOptions.add<bool>("debug", isDebug());
-        readerOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
+        readerOptions.add<uint32_t>("verbose", getVerboseLevel());
         if (!m_input_srs.empty())
-        {
-            readerOptions.add<std::string>("spatialreference", m_input_srs.getWKT());
-        }
+            readerOptions.add<std::string>("spatialreference",
+                m_input_srs.getWKT());
     }
 
     Options writerOptions;
     {
         writerOptions.add<std::string>("filename", m_outputFile);
         writerOptions.add<bool>("debug", isDebug());
-        writerOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
-
+        writerOptions.add<uint32_t>("verbose", getVerboseLevel());
+    
         if (!m_input_srs.empty())
-        {
-            writerOptions.add<std::string>("spatialreference", m_input_srs.getWKT());
-        }
+            writerOptions.add<std::string>("spatialreference",
+                m_input_srs.getWKT());
 
         if (m_bCompress)
-        {
             writerOptions.add<bool>("compression", true);
-        }
-
         if (m_bForwardMetadata)
-        {
             writerOptions.add<bool>("forward_metadata", true);
-        }
-
     }
-
-    
     Stage* final_stage = makeReader(readerOptions);
-    
-    Writer* writer = AppSupport::makeWriter(writerOptions, *final_stage);
 
+    std::vector<std::string> cmd = getProgressShellCommand();
+    UserCallback *callback =
+        cmd.size() ? (UserCallback *)new ShellScriptCallback(cmd) :
+        m_numPointsToWrite ? (UserCallback *)new PercentageCallback() :
+        (UserCallback *)new HeartbeatCallback();
+
+    Writer* writer = AppSupport::makeWriter(writerOptions, *final_stage);
     if (!m_output_srs.empty())
-    {
         writer->setSpatialReference(m_output_srs);
-    }
 
     PointContext ctx;
-    writer->prepare(ctx);
-
-    const boost::uint64_t numPointsToRead = final_stage->getNumPoints();
-    
-    if (m_numPointsToWrite == 0)
-        m_numPointsToWrite = numPointsToRead;
-
-    std::cerr << "Requested to read " << numPointsToRead << " points" << std::endl;
-    std::cerr << "Requested to write " << m_numPointsToWrite << " points" << std::endl;
-        
-    pdal::UserCallback* callback;
-    if (!getProgressShellCommand().size())
-        if (m_numPointsToWrite == 0)
-            callback = static_cast<pdal::UserCallback*>(new HeartbeatCallback);
-        else
-            callback = static_cast<pdal::UserCallback*>(new PercentageCallback);
-    else
-        callback = static_cast<pdal::UserCallback*>(new ShellScriptCallback(getProgressShellCommand()));
     writer->setUserCallback(callback);
+    writer->prepare(ctx);
+    writer->execute(ctx);
 
-//ABELL
-//    uint64_t numPointsRead = writer->write(m_numPointsToWrite, m_numSkipPoints, m_chunkSize);
-
+    //ABELL - This looks like there are probably stage leaks.
     delete writer;
     delete final_stage;
 
     return 0;
 }
 
-}} // pdal::kernel
+} // namespace kernel
+} // namespace pdal

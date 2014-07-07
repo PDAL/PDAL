@@ -32,11 +32,11 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_WRITER_HPP
-#define INCLUDED_WRITER_HPP
+#pragma once
 
 #include <pdal/pdal_internal.hpp>
 #include <pdal/Options.hpp>
+#include <pdal/UserCallback.hpp>
 #include <pdal/Stage.hpp>
 
 #include <string>
@@ -53,40 +53,25 @@ class PDAL_DLL Writer : public Stage
 public:
     /// Constructs an end-stage consumer of a pipeline of data -- a writer
     /// @param options options to be passed into the writer.
-    Writer(Options const& options) : Stage(options), m_userCallback(NULL)
+    Writer(Options const& options) : Stage(options),
+            m_callback(new UserCallback)
         {}
-    //
-    /// Constructs an end-stage consumer of a pipeline of data -- a writer
-    Writer() : m_userCallback(NULL)
+
+    Writer() : m_callback(new UserCallback)
         {}
     
     /// Serialize the pipeline to a boost::property_tree::ptree
     /// @return boost::property_tree::ptree with xml attributes
     virtual boost::property_tree::ptree serializePipeline() const;
     
-    /// @return the SpatialReference for the pdal::Writer. 
-    SpatialReference const& getSpatialReference() const
-        { return m_spatialReference; }
-    
-    /// Set this SpatialReference to assign the output 
-    /// SpatialReference of the written data.
-    void setSpatialReference(const SpatialReference& srs)
-        { m_spatialReference = srs; }
-    
     /// Sets the UserCallback to manage progress/cancel operations
     void setUserCallback(UserCallback* userCallback)
-        { m_userCallback = userCallback; }
+        { m_callback.reset(userCallback); }
 
-    /// @return the UserCallback that manages progress/cancel operations
-    UserCallback* getUserCallback() const
-        { return m_userCallback; }
-    
+protected:
+    std::unique_ptr<UserCallback> m_callback;
+
 private:
-    SpatialReference m_spatialReference;
-    UserCallback* m_userCallback;
-
-    Writer& operator=(const Writer&); // not implemented
-    Writer(const Writer&); // not implemented
     virtual PointBufferSet run(PointBufferPtr buffer)
     {
         write(*buffer);
@@ -94,8 +79,10 @@ private:
     }
     virtual void write(const PointBuffer& buffer)
         { std::cerr << "Can't write with stage = " << getName() << "!\n"; }
+
+    Writer& operator=(const Writer&); // not implemented
+    Writer(const Writer&); // not implemented
 };
 
 } // namespace pdal
 
-#endif

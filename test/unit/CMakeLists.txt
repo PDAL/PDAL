@@ -71,7 +71,7 @@ if(WITH_APPS)
   endif(LIBXML2_FOUND)
 
   list(APPEND PDAL_UNITTEST_TEST_SRC
-#    apps/pc2pcTest.cpp
+    apps/pc2pcTest.cpp
 #    apps/pcpipelineTest.cpp
   )
 endif(WITH_APPS)
