@@ -57,7 +57,6 @@ public:
 private:
     void addSwitches();
     void validateSwitches();
-    pdal::PointBuffer* dummyWrite(pdal::PipelineManager& manager);
     
     std::string m_inputFile;
     std::string m_pipelineFile;

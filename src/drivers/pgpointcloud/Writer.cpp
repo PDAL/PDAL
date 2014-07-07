@@ -498,16 +498,14 @@ void Writer::CreateIndex(std::string const& schema_name,
 
 boost::uint32_t Writer::writeBuffer(const PointBuffer& buffer)
 {
-    boost::uint32_t numPoints = buffer.getNumPoints();
-
     WriteBlock(buffer);
-
-    return numPoints;
+    return buffer.size();
 }
 
 bool Writer::WriteBlock(PointBuffer const& buffer)
 {
-
+//ABELL
+/**
     if (!m_output_buffer)
     {
         m_output_buffer = buffer.pack();
@@ -515,11 +513,17 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     {
         PointBuffer::pack(&buffer, m_output_buffer, true, false);
     }
+**/
     
-    pointbuffer::PointBufferByteSize  point_data_length = m_output_buffer->getBufferByteLength();
-    boost::uint8_t* point_data = m_output_buffer->getData(0);
+//ABELL
+//    pointbuffer::PointBufferByteSize  point_data_length =
+//        m_output_buffer->getBufferByteLength();
+size_t point_data_length = 0;
+//ABELL    
+//    uint8_t* point_data = m_output_buffer->getData(0);
+uint8_t *point_data = NULL;
 
-    boost::uint32_t num_points = static_cast<boost::uint32_t>(m_output_buffer->getNumPoints());
+    point_count_t num_points = m_output_buffer->size();
 
     if (num_points > m_patch_capacity)
     {

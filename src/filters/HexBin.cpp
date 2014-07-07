@@ -135,7 +135,7 @@ boost::uint32_t HexBin::readBufferImpl(PointBuffer& buffer)
     const boost::uint32_t numPoints = getPrevIterator().read(buffer);
 
 #ifdef PDAL_HAVE_HEXER
-    for (boost::uint32_t i = 0; i < buffer.getNumPoints(); ++i)
+    for (boost::uint32_t i = 0; i < buffer.size(); ++i)
     {
         boost::int32_t xi = buffer.getField<boost::int32_t>(*m_dim_x, i);
         boost::int32_t yi = buffer.getField<boost::int32_t>(*m_dim_y, i);

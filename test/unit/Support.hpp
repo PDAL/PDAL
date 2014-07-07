@@ -75,8 +75,6 @@ public:
     // returns "name" on unix and "name + .exe" on windows
     static std::string exename(const std::string& name);
 
-    static bool compare_stage_data(pdal::Stage const& a, pdal::Stage const& b);
-    
     // returns number of bytes different for two binary files (or maxint if a file doesn't exist)
     static boost::uint32_t diff_files(const std::string& file1, const std::string& file2);
 

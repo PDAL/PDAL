@@ -100,72 +100,43 @@ void Diff::addSwitches()
 }
 
 
-
-void Diff::checkPoints(  StageSequentialIterator* source_iter,
-                         PointBuffer& source_data,
-                         StageSequentialIterator* candidate_iter,
-                         PointBuffer& candidate_data,
-                         ptree& errors)
+void Diff::checkPoints(const PointBuffer& source_data,
+    const PointBuffer& candidate_data, ptree& errors)
 {
+    uint32_t i(0);
+    uint32_t MAX_BADBYTES(20);
+    uint32_t badbytes(0);
 
-    boost::uint32_t i(0);
-    boost::uint32_t chunk(0);    
-    boost::uint32_t MAX_BADBYTES(20);
-    boost::uint32_t badbytes(0);
-    while (!source_iter->atEnd())
+    // Both schemas have already been determined to be equal, so are the
+    // same size and in the same order.
+    std::vector<Dimension *> sourceDims;
+    std::vector<Dimension *> candidateDims;
+    for (size_t d = 0; d < source_data.getSchema().numDimensions(); ++d)
     {
-        const boost::uint32_t numSrcRead = source_iter->read(source_data);
-        const boost::uint32_t numCandidateRead = candidate_iter->read(candidate_data);
-        if (numSrcRead != numCandidateRead)
+        sourceDims.push_back(source_data.getSchema().getDimensionPtr(d));
+        candidateDims.push_back(candidate_data.getSchema().getDimensionPtr(d));
+    }
+    char sbuf[8];
+    char cbuf[8];
+    for (PointId idx = 0; idx < source_data.size(); ++idx)
+    {
+        for (size_t d = 0; d < sourceDims.size(); ++d)
         {
-            std::ostringstream oss;
-        
-            oss << "Unable to read same number of points for chunk number";
-            errors.put<std::string>("points.error", oss.str());
-            errors.put<boost::uint32_t>("points.candidate" , numCandidateRead);
-            errors.put<boost::uint32_t>("points.source" , numSrcRead);         
-        }
-        
-        chunk++;
-        
-        pdal::pointbuffer::PointBufferByteSize source_byte_length(0);
-        pdal::pointbuffer::PointBufferByteSize candidate_byte_length(0);
-        source_byte_length =  static_cast<pdal::pointbuffer::PointBufferByteSize>(source_data.getSchema().getByteSize()) * 
-                              static_cast<pdal::pointbuffer::PointBufferByteSize>(source_data.getNumPoints());
-
-        candidate_byte_length =  static_cast<pdal::pointbuffer::PointBufferByteSize>(candidate_data.getSchema().getByteSize()) * 
-                                 static_cast<pdal::pointbuffer::PointBufferByteSize>(candidate_data.getNumPoints());
-        
-        if (source_byte_length != candidate_byte_length)
-        {
-            std::ostringstream oss;
-        
-            oss << "Source byte length != candidate byte length";
-            errors.put<std::string>("buffer.error", oss.str());
-            errors.put<boost::uint32_t>("buffer.candidate" , candidate_byte_length);
-            errors.put<boost::uint32_t>("buffer.source" , source_byte_length);            
-        }
-        boost::uint8_t* s = source_data.getData(0);
-        boost::uint8_t* c = candidate_data.getData(0);
-
-        for (boost::uint32_t p = 0; p < std::min(source_byte_length, candidate_byte_length); ++p)
-        {
-            if (s[p] != c[p])
+            source_data.getRawField(*sourceDims[d], idx, (void *)sbuf);
+            candidate_data.getRawField(*candidateDims[d], idx, (void *)cbuf);
+            if (memcmp(sbuf, cbuf, sourceDims[d]->getByteSize()))
             {
                 std::ostringstream oss;
         
-                oss << "Byte number " << p << " is not equal for source and candidate";
+                oss << "Point " << idx << " differs for dimension \"" <<
+                    sourceDims[d]->getName() << "\" for source and candidate";
                 errors.put<std::string>("data.error", oss.str());
                 badbytes++;                        
             }
-            
         }
-        
         if (badbytes > MAX_BADBYTES )
             break;
-        
     }
-
 }
 
 
@@ -179,15 +150,9 @@ int Diff::execute()
         sourceOptions.add<bool>("debug", isDebug());
         sourceOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
     }
-    boost::scoped_ptr<Stage> source(AppSupport::makeReader(sourceOptions));
+    std::unique_ptr<Stage> source(AppSupport::makeReader(sourceOptions));
     source->prepare(sourceCtx);
-    
-    boost::uint32_t chunkSize(source->getNumPoints());
-    if (m_chunkSize)
-        chunkSize = m_chunkSize;
-    PointBuffer source_data(source->getSchema(), chunkSize);
-    boost::scoped_ptr<StageSequentialIterator>
-        source_iter(source->createSequentialIterator(source_data));
+    PointBufferSet sourceSet = source->execute(sourceCtx);
     
     ptree errors;
 
@@ -199,14 +164,15 @@ int Diff::execute()
         candidateOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
     }
 
-    boost::scoped_ptr<Stage> candidate(AppSupport::makeReader(candidateOptions));
+    std::unique_ptr<Stage> candidate(AppSupport::makeReader(candidateOptions));
     candidate->prepare(candidateCtx);
+    PointBufferSet candidateSet = candidate->execute(candidateCtx);
 
-
-    PointBuffer candidate_data(candidate->getSchema(), chunkSize);
-    boost::scoped_ptr<StageSequentialIterator> candidate_iter(candidate->createSequentialIterator(candidate_data));
-
-    if (candidate->getNumPoints() != source->getNumPoints())
+    assert(sourceSet.size() == 1);
+    assert(candidateSet.size() == 1);
+    PointBufferPtr sourceBuf = *sourceSet.begin();
+    PointBufferPtr candidateBuf = *candidateSet.begin();
+    if (candidateBuf->size() != sourceBuf->size())
     {
         std::ostringstream oss;
         
@@ -223,45 +189,34 @@ int Diff::execute()
         std::ostringstream oss;
         
         oss << "Source and candidate files do not have the same metadata count";
-        errors.put<std::string>("metadata.error", oss.str());
-        //ABELL - Fix
+        //ABELL
         /**
+        errors.put<std::string>("metadata.error", oss.str());
         errors.put_child("metadata.source", source_metadata.toPTree());
         errors.put_child("metadata.candidate", candidate_metadata.toPTree());
         **/
     }
 
-    
-    Schema const& candidate_schema = candidate_data.getSchema();
-
-
-    Schema const& source_schema = source_data.getSchema();
-    
-    if (! ( candidate_schema == source_schema))
+    if (*candidateCtx.schema() != *sourceCtx.schema())
     {
         std::ostringstream oss;
         
         oss << "Source and candidate files do not have the same schema";
         errors.put<std::string>("schema.error", oss.str());
-        errors.put_child("schema.source", source_schema.toPTree());
-        errors.put_child("schema.candidate", candidate_schema.toPTree());
+        errors.put_child("schema.source", sourceCtx.schema()->toPTree());
+        errors.put_child("schema.candidate", candidateCtx.schema()->toPTree());
     }
-
-    
 
     if (errors.size())
     {
         write_json(std::cout, errors);
         return 1;
-    } else
+    }
+    else
     {
         // If we made it this far with no errors, now we'll 
         // check the points.
-        checkPoints(source_iter.get(), 
-                    source_data, 
-                    candidate_iter.get(), 
-                    candidate_data, 
-                    errors);
+        checkPoints(*sourceBuf, *candidateBuf, errors);
         if (errors.size())
         {
             write_json(std::cout, errors);

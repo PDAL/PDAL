@@ -417,7 +417,7 @@ boost::uint64_t Iterator::skipImpl(boost::uint64_t count)
     uint64_t skipped = 0;
     do
     {
-        uint32_t bufferCount = m_buffer->getNumPoints() - m_buffer_position;
+        uint32_t bufferCount = m_buffer->size() - m_buffer_position;
 
         // This may advance the position past the end of the buffer, but
         // that causes no problems.
@@ -520,7 +520,9 @@ static inline void hex_string_to_binary(char const* source,
 
 boost::uint32_t Iterator::readBufferImpl(PointBuffer& user_buffer)
 {
-    getReader().log()->get(logDEBUG) << "readBufferImpl called with PointBuffer filled to (" << user_buffer.getNumPoints() << "/" << user_buffer.getCapacity() << ") points" << std::endl;
+    getReader().log()->get(logDEBUG) << "readBufferImpl called with "
+        "PointBuffer filled to " << user_buffer.size() << " points" <<
+        std::endl;
 
     // First time through, create the SQL statement, allocate holding pens
     // and fire it off!
@@ -534,8 +536,7 @@ boost::uint32_t Iterator::readBufferImpl(PointBuffer& user_buffer)
     if (! m_buffer)
     {
         uint32_t max_points = getReader().getMaxPoints();
-        m_buffer = new pdal::PointBuffer(getReader().getSchema(), max_points);
-        m_buffer->setNumPoints(0);
+        m_buffer = new pdal::PointBuffer(user_buffer.context());
         m_buffer_position = 0;
         binary_data.reserve(max_points * getReader().getSchema().getByteSize());
         getReader().log()->get(logDEBUG2) << "allocated a cached point buffer with capacity of " << max_points << std::endl;
@@ -555,7 +556,9 @@ boost::uint32_t Iterator::readBufferImpl(PointBuffer& user_buffer)
     {
         // User buffer is full? We need to get out of this loop and
         // let the writer decide what to do next.
-        if (user_buffer.getNumPoints() == user_buffer.getCapacity())
+//ABELL
+//        if (user_buffer.getNumPoints() == user_buffer.getCapacity())
+        if (true)
         {
             getReader().log()->get(logDEBUG2) << "User buffer is full, returning control to pdal core" << std::endl;
             break;
@@ -563,7 +566,7 @@ boost::uint32_t Iterator::readBufferImpl(PointBuffer& user_buffer)
 
         // If we've read all the contents of the cache buffer, get a fresh
         // patch from the database
-        if (m_buffer_position >= m_buffer->getNumPoints())
+        if (m_buffer_position >= m_buffer->size())
         {
             // No more patches! We're done!
             if (! NextBuffer())
@@ -576,31 +579,38 @@ boost::uint32_t Iterator::readBufferImpl(PointBuffer& user_buffer)
                 getReader().log()->get(logDEBUG3) << "Fetched a patch from the database" << std::endl;
 
             // Copy data from the hex WKB string obtained by the database
-            // into a pdal::PointBuffer for transfer to the user data buffer later
+            // into a pdal::PointBuffer for transfer to the user data buffer
+            // later
             //
-            // Note: pointcloud hex WKB  has some header matter we need to trim off
+            // Note: pointcloud hex WKB  has some header matter we need to
+            // trim off
             // before we can copy the raw data into the pdal::PointBuffer
-            // endian (2) + pcid (8) + compression (8) + npoints (8) = 26 characters
+            // endian (2) + pcid (8) + compression (8) + npoints (8) = 26
+            // characters
             const boost::uint32_t trim = 26;
             schema::size_type point_size = m_buffer->getSchema().getByteSize();
             
-            // resize our vector to 0, but we've reserved max_points * getByteSize 
-            // for the vector so the next push_back won't have allocation costs.
+            // resize our vector to 0, but we've reserved max_points *
+            // getByteSize for the vector so the next push_back won't
+            // have allocation costs.
             binary_data.resize(0);
             hex_string_to_binary(m_patch_hex, binary_data, trim);
             unsigned char* data = (unsigned char*) &(binary_data.front());
 
-            m_buffer->setDataStride(data, 0, m_patch_npoints * point_size);
-            m_buffer->setNumPoints(m_patch_npoints);
+//ABELL
+//            m_buffer->setDataStride(data, 0, m_patch_npoints * point_size);
             
             if (logOutput)
                 getReader().log()->get(logDEBUG3) << "Copied patch into cache, npoints = " << m_patch_npoints << std::endl;
         }
 
         // Much many more points do we have to process in this cache?
-        boost::uint32_t points_in_cache = m_buffer->getNumPoints() - m_buffer_position;
+        uint32_t points_in_cache = m_buffer->size() - m_buffer_position;
         // How much space is left in the user buffer?
-        boost::uint32_t space_in_user_buffer = user_buffer.getCapacity() - user_buffer.getNumPoints();
+//ABELL
+//        uint32_t space_in_user_buffer =
+//        user_buffer.getCapacity() - user_buffer.getNumPoints();
+uint32_t space_in_user_buffer = 0;
         boost::uint32_t points_to_copy = 0;
         // If there's space, put the whole cache into the user buffer,
         if (space_in_user_buffer > points_in_cache)
@@ -621,25 +631,28 @@ boost::uint32_t Iterator::readBufferImpl(PointBuffer& user_buffer)
             getReader().log()->get(logDEBUG3) << "points_in_cache = " << points_in_cache << std::endl;
             getReader().log()->get(logDEBUG3) << "points_to_copy = " << points_to_copy << std::endl;
             getReader().log()->get(logDEBUG3) << "m_buffer_position = " << m_buffer_position << std::endl;
-            getReader().log()->get(logDEBUG3) << "user_buffer.getNumPoints() = " << user_buffer.getNumPoints() << std::endl;
+            getReader().log()->get(logDEBUG3) << "user_buffer.size() = " <<
+                user_buffer.size() << std::endl;
         }
 
         // Do the copying from cache to user buffer
         // To do: this should be more tolerant of variations in source/dest schema
+//ABELL
+/**
         PointBuffer::copyLikeDimensions(*m_buffer, user_buffer,
                                         *m_dimension_map,
-                                        m_buffer_position, user_buffer.getNumPoints(),
+                                        m_buffer_position, user_buffer.size(),
                                         points_to_copy);
+**/
 
         // Update the buffers regarding how full/empty they are                                        
         m_buffer_position += points_to_copy;
-        user_buffer.setNumPoints(user_buffer.getNumPoints()+points_to_copy);
 
         num_loops++;
         getReader().log()->get(logDEBUG2) << "User buffer filling loop, iteration " << num_loops << std::endl;
     }
 
-    return user_buffer.getNumPoints();
+    return user_buffer.size();
 }
 
 

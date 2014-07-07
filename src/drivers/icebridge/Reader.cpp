@@ -225,16 +225,10 @@ boost::uint32_t IteratorBase::readIcebridgeIntoBuffer(
         PointBuffer& pointBuffer,
         const boost::uint64_t index)
 {
-    const boost::uint64_t numPoints64 =
-        std::min<boost::uint64_t>(
-                pointBuffer.getCapacity(), m_numPoints - index);
+    PointBuffer tmpPointBuffer(pointBuffer.context());
 
-    const boost::uint32_t numPoints =
-        boost::numeric_cast<boost::uint32_t>(std::min<boost::uint64_t>(
-                numPoints64, std::numeric_limits<boost::uint32_t>::max()));
-
-    PointBuffer tmpPointBuffer(m_schema, numPoints);
-
+    point_count_t numPoints = pointBuffer.size();
+    //ABELL - Didn't think this worked on VS. Check with Brad.
     for (auto column : hdf5Columns)
     {
         const Dimension dimension =
@@ -251,7 +245,7 @@ boost::uint32_t IteratorBase::readIcebridgeIntoBuffer(
                     numPoints,
                     index);
 
-            for (std::size_t i = 0; i < numPoints; ++i)
+            for (PointId i = 0; i < numPoints; ++i)
             {
                 tmpPointBuffer.setRawField(
                         m_schema.getDimension(dimension.getName()),
@@ -271,6 +265,8 @@ boost::uint32_t IteratorBase::readIcebridgeIntoBuffer(
     boost::scoped_ptr<schema::DimensionMap> dimensionMap(
         tmpPointBuffer.getSchema().mapDimensions(pointBuffer.getSchema()));
 
+//ABELL
+/**
     PointBuffer::copyLikeDimensions(
             tmpPointBuffer,
             pointBuffer,
@@ -278,10 +274,9 @@ boost::uint32_t IteratorBase::readIcebridgeIntoBuffer(
             0,
             pointBuffer.getNumPoints(),
             numPoints);
+**/
 
-    pointBuffer.setNumPoints(pointBuffer.getNumPoints() + numPoints);
-
-    return numPoints;
+    return pointBuffer.size();
 }
 
 namespace sequential

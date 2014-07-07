@@ -77,7 +77,7 @@ void BufferedInvocation::beginChunk(PointBuffer& buffer)
         }
 
         const std::string& name = dim.getName();
-        const boost::uint32_t numPoints = buffer.getNumPoints();
+        const boost::uint32_t numPoints = buffer.size();
         const boost::uint32_t stride = dim.getByteSize();
         const dimension::Interpretation datatype = dim.getInterpretation();
         const boost::uint32_t numBytes = dim.getByteSize();

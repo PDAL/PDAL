@@ -566,9 +566,8 @@ void Writer::CreateCloud(Schema const& buffer_schema)
 
 boost::uint32_t Writer::writeBuffer(const PointBuffer& buffer)
 {
-    boost::uint32_t numPoints = buffer.getNumPoints();
     WriteBlock(buffer);
-    return numPoints;
+    return buffer.size();
 }
 
 
@@ -585,9 +584,10 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
         PackPointData(buffer, &point_data, point_data_length, schema_byte_size);
     else
     {
-        point_data = buffer.getData(0);
+//ABELL
+//        point_data = buffer.getData(0);
         point_data_length =
-            buffer.getSchema().getByteSize() * buffer.getNumPoints();
+            buffer.getSchema().getByteSize() * buffer.size();
     }
 
     string block_table = m_options.getValueOrThrow<string>("block_table");
@@ -598,8 +598,7 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
 
     m_block_id  = buffer.getFieldAs<boost::int32_t>(blockDim, 0, false);
     m_obj_id = m_options.getValueOrThrow<boost::int32_t>("pc_id");
-    m_num_points = static_cast<boost::int64_t>(buffer.getNumPoints());
-
+    m_num_points = static_cast<int64_t>(buffer.size());
     return true;
 }
 
@@ -623,14 +622,16 @@ void Writer::PackPointData(PointBuffer const& buffer,
     log()->get(logDEBUG) << "Packed schema byte size " <<
         schema_byte_size << std::endl;
 
-    point_data_len = buffer.getNumPoints() * schema_byte_size;
+    point_data_len = buffer.size() * schema_byte_size;
     *point_data = new boost::uint8_t[point_data_len];
 
     boost::uint8_t* current_position = *point_data;
 
-    for (boost::uint32_t i = 0; i < buffer.getNumPoints(); ++i)
+    for (point_count_t i = 0; i < buffer.size(); ++i)
     {
-        boost::uint8_t* data = buffer.getData(i);
+//ABELL
+//        boost::uint8_t* data = buffer.getData(i);
+boost::uint8_t *data = NULL;
         for (boost::uint32_t d = 0; d < idx.size(); ++d)
         {
             if (! idx[d].isIgnored())

@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Howard Butler (howard@hobu.co)
+* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
 *
 * All rights reserved.
 *
@@ -32,42 +32,56 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_PDAL_KERNEL_DIFF_HPP
-#define INCLUDED_PDAL_KERNEL_DIFF_HPP
+#include <pdal/KDIndex.hpp>
 
-#include <pdal/Stage.hpp>
-#include <pdal/StageIterator.hpp>
-#include <pdal/FileUtils.hpp>
-#include <pdal/PointBuffer.hpp>
-
-#include <boost/property_tree/ptree.hpp>
-
-
-#include "Application.hpp"
-
-namespace pdal { namespace kernel {
-    
-
-class PDAL_DLL Diff : public Application
+namespace pdal
 {
-public:
-    Diff(int argc, const char* argv[]);
-    int execute(); // overrride
-    
-    
-private:
-    void addSwitches(); // overrride
-    void validateSwitches(); // overrride
-    
-    void checkPoints(const PointBuffer& source_data,
-        const PointBuffer& candidate_data,
-        boost::property_tree::ptree& errors);
-    std::string m_sourceFile;
-    std::string m_candidateFile;
-    bool m_useXML;
-    bool m_useJSON;
-};
 
-}} // pdal::kernel
+void KDIndex::build(bool b3D)
+{
+    m_3d = b3D;
+    size_t nDims = m_3d && m_dim[2] ? 3 : 2;
+    delete m_index;
+    m_index = new my_kd_tree_t(nDims, *this,
+        nanoflann::KDTreeSingleIndexAdaptorParams(10, nDims));
+    m_index->buildIndex();
+}
 
-#endif
+std::vector<size_t> KDIndex::radius(double const& x, double const& y, 
+    double const& z, double const& r)
+{
+    std::vector<size_t> output;
+    std::vector<std::pair<size_t, double>> ret_matches;
+    nanoflann::SearchParams params;
+    params.sorted = true;
+    
+    std::vector<double> pt;
+    pt.push_back(x);
+    pt.push_back(y);
+    pt.push_back(z);
+    const size_t count = m_index->radiusSearch(&pt[0], r, ret_matches, params);
+    
+    for (size_t i = 0; i < count; ++i)
+        output.push_back(ret_matches[i].first);
+    return output;
+}
+
+std::vector<size_t> KDIndex::neighbors(double const& x, double const& y, 
+    double const& z, double distance, boost::uint32_t k)
+{
+    std::vector<size_t> output(k);
+    std::vector<double> out_dist_sqr(k);
+    nanoflann::KNNResultSet<double> resultSet(k);
+    
+    resultSet.init(&output[0], &out_dist_sqr[0]);
+    
+    std::vector<double> pt;
+    pt.push_back(x);
+    pt.push_back(y);
+    if (m_3d)
+        pt.push_back(z);
+    m_index->findNeighbors(resultSet, &pt[0], nanoflann::SearchParams(10));
+    return output;
+}
+
+} // namespace pdal

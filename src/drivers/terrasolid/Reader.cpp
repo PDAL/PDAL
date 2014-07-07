@@ -289,8 +289,8 @@ Reader::~Reader()
 boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, boost::uint64_t numPointsLeft) const
 {
     // we must not read more points than are left in the file
-    const boost::uint64_t numPoints64 = std::min<boost::uint64_t>(data.getCapacity(), numPointsLeft);
-    const boost::uint32_t numPoints = (boost::uint32_t)std::min<boost::uint64_t>(numPoints64, std::numeric_limits<boost::uint32_t>::max());
+    uint32_t numPoints =
+        (uint32_t)std::min((uint64_t)data.size(), numPointsLeft);
 
     const Schema& schema = data.getSchema();
 
@@ -412,8 +412,6 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
                 data.setField<boost::uint8_t>(*dimensions.Alpha, pointIndex, alpha);
 
         }
-
-        data.setNumPoints(pointIndex+1);
     }
 
     delete[] buf;

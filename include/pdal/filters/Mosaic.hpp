@@ -78,9 +78,8 @@ private:
 namespace iterators
 {
     typedef boost::shared_ptr<schema::DimensionMap> DimensionMapPtr;
-    typedef boost::shared_ptr<PointBuffer> BufferPtr;
     typedef std::map<int, DimensionMapPtr> DimensionMaps;
-    typedef std::map<int, BufferPtr> BufferMap;
+    typedef std::map<int, PointBufferPtr> PointBufferMap;
     
 namespace sequential
 {
@@ -97,12 +96,12 @@ private:
     boost::uint32_t readBufferImpl(PointBuffer&);
     bool atEndImpl() const;
     DimensionMapPtr fetchDimensionMap(PointBuffer const& user_buffer,
-        BufferPtr stage_buffer);
-    BufferPtr fetchPointBuffer(PointBuffer const& user_buffer);
+        PointBufferPtr stage_buffer);
+    PointBufferPtr fetchPointBuffer(PointBuffer const& user_buffer);
     DimensionMapPtr m_active_dimension;
     DimensionMaps m_dimensions;
 
-    BufferMap m_buffers;
+    PointBufferMap m_buffers;
     LogPtr m_log;
     Options m_options;
 };

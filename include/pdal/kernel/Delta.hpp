@@ -69,10 +69,12 @@ public:
     double z;
     boost::uint64_t id;
     
-    Point(double x, double y, double z, uint64_t id=0)
-        : x(x), y(y),z(z), id(id) {};
-    Point(Point const& other) : x(other.x), y(other.y), z(other.z), id(other.id) {};
-    Point() : x(0.0), y(0.0), z(0.0), id(0) {};
+    Point(double x, double y, double z, uint64_t id = 0) :
+           x(x), y(y),z(z), id(id)
+        {}
+    Point() : x(0.0), y(0.0), z(0.0), id(0)
+        {}
+
     bool equal(Point const& other) const
     {
         return (Utils::compare_distance(x, other.x) && 
@@ -80,6 +82,7 @@ public:
                 Utils::compare_distance(z, other.z));
         
     }
+
     bool operator==(Point const& other) const
     {
         return equal(other);
@@ -100,10 +103,8 @@ public:
     Delta(int argc, const char* argv[]);
     int execute(); // overrride
     
-    
 private:
     void addSwitches(); // overrride
-    void validateSwitches(); // overrride
     
     std::string m_sourceFile;
     std::string m_candidateFile;
@@ -124,9 +125,8 @@ private:
     void outputRST(boost::property_tree::ptree const&) const;
     void outputXML(boost::property_tree::ptree const&) const;
     void outputJSON(boost::property_tree::ptree const&) const;
-    void outputDetail(PointBuffer& source_data,
-                         IndexedPointBuffer& candidate_data,
-                         std::map<Point, Point> *points) const;
+    void outputDetail(PointBuffer& source_data, PointBuffer& candidate_data,
+        std::map<Point, Point> *points) const;
 
 };
 
