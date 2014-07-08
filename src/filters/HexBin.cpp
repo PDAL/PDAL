@@ -56,6 +56,7 @@ void HexBin::processOptions(const Options& options)
 
 void HexBin::ready(PointContext ctx)
 {
+#ifdef PDAL_HAVE_HEXER
     m_xDim = ctx.schema()->getDimensionPtr(m_xDimName);
     m_yDim = ctx.schema()->getDimensionPtr(m_yDimName);
     if (m_edgeLength == 0.0)  // 0 can always be represented exactly.
@@ -65,6 +66,7 @@ void HexBin::ready(PointContext ctx)
     }
     else
         m_grid.reset(new hexer::HexGrid(m_edgeLength * sqrt(3), m_density));
+#endif
 }
 
 

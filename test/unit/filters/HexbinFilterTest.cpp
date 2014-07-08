@@ -86,6 +86,7 @@ BOOST_AUTO_TEST_CASE(HexbinFilterTest_test_1)
     hexbin.prepare(ctx);
     hexbin.execute(ctx);
 
+    /**
     MetadataNode m = ctx.metadata();
     m = m.findChild(hexbin.getName());
     std::vector<MetadataNode> children = m.children();
@@ -94,6 +95,7 @@ BOOST_AUTO_TEST_CASE(HexbinFilterTest_test_1)
         MetadataNode& c = *mi;
         std::cerr << c.name() << " : " << c.value() << "\n\n";
     }
+    **/
 }
 
 #endif
