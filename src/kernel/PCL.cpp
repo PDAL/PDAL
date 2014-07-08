@@ -185,9 +185,8 @@ int PCL::execute()
     }
     writer->setUserCallback(callback);
 
-    const boost::uint64_t numPointsRead = writer->write(numPointsToRead, 0, m_chunkSize);
-
-    std::cerr << "Wrote " << numPointsRead << " points\n";
+//ABELL
+//    boost::uint64_t numPointsRead = writer->write(numPointsToRead, 0, m_chunkSize);
 
     delete writer;
     delete final_stage;

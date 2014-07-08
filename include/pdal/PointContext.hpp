@@ -66,6 +66,18 @@ public:
         { return m_ptBuf.get(); }
     MetadataNode metadata()
         { return m_metadata->getNode(); }
+    SpatialReference spatialRef() const
+    {
+        MetadataNode m = m_metadata->m_private.findChild("spatialreference");
+        SpatialReference sref;
+        sref.setWKT(m.value());
+        return sref;
+    }
+    void setSpatialRef(const SpatialReference& sref)
+    {
+        MetadataNode mp = m_metadata->m_private;
+        mp.addOrUpdate("spatialreference", sref.getRawWKT());
+    }
 };
 
 } //namespace

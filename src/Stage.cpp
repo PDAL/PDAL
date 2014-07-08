@@ -131,6 +131,7 @@ PointBufferSet Stage::execute(PointContext ctx)
         PointBufferSet temp = runner->wait();
         outBuffers.insert(temp.begin(), temp.end());
     }
+    l_done(ctx);
     done(ctx);
     return outBuffers;
 }
@@ -140,12 +141,9 @@ void Stage::l_initialize(PointContext ctx)
     m_metadata = ctx.metadata().add(getName());
     if (m_inputs.size()) {
         Stage& prevStage = getPrevStage();
-        setSchema(prevStage.getSchema());
         setBounds(prevStage.getBounds());
-        setSpatialReference(prevStage.getSpatialReference());
     }
 }
-
 
 void Stage::l_processOptions(const Options& options)
 {
@@ -194,6 +192,13 @@ void Stage::l_processOptions(const Options& options)
 }
 
 
+void Stage::l_done(PointContext ctx)
+{
+    if (!m_spatialReference.empty())
+        ctx.setSpatialRef(m_spatialReference);
+}
+
+
 Stage& Stage::getPrevStage() const
 {
     if (m_inputs.empty())
@@ -217,12 +222,6 @@ const Bounds<double>& Stage::getBounds() const
 void Stage::setBounds(const Bounds<double>& bounds)
 {
     m_bounds = bounds;
-}
-
-
-void Stage::setSchema(const Schema& schema)
-{
-    m_schema = schema;
 }
 
 
@@ -303,10 +302,6 @@ std::ostream& operator<<(std::ostream& ostr, const Stage& stage)
 
     ostr << "  Bounds:" << std::endl;
     ostr << "    " << stage.getBounds() << std::endl;
-
-    ostr << "  Schema: " << std::endl;
-    ostr << "    Num dims: " << stage.getSchema().getDimensions().size() <<
-        std::endl;
 
     ostr << "  Spatial Reference:" << std::endl;
     ostr << "    WKT: " << stage.getSpatialReference().getWKT() << std::endl;

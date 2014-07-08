@@ -71,7 +71,6 @@ void HexBin::ready(PointContext ctx)
 void HexBin::filter(PointBuffer& buf)
 {
 #ifdef PDAL_HAVE_HEXER
-
     for (PointId idx = 0; idx < buf.size(); ++idx)
     {
         double x = buf.getFieldAs<double>(*m_xDim, idx);

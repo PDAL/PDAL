@@ -90,8 +90,7 @@ namespace iterators
 
 namespace sequential
 {
-typedef boost::shared_ptr<PointBuffer> BufferPtr;
-typedef std::map<int, BufferPtr> BufferMap;
+typedef std::map<int, PointBufferPtr> BufferMap;
 
 class IteratorBase
 {
@@ -105,13 +104,13 @@ protected:
 
     boost::uint32_t myReadBlocks(PointBuffer& data);
     // 
-    BufferPtr fetchPointBuffer( boost::int32_t const& cloud_id,
+    PointBufferPtr fetchPointBuffer( boost::int32_t const& cloud_id,
                                 std::string const& schema_xml,
                                 boost::uint32_t capacity);
 
     bool m_at_end;
     boost::int32_t m_active_cloud_id;
-    BufferPtr m_active_buffer;
+    PointBufferPtr m_active_buffer;
     BufferMap m_buffers;
     boost::uint32_t m_buffer_position;
 

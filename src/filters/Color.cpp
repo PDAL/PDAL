@@ -66,7 +66,7 @@ std::vector<Dimension> Color::getDefaultDimensions()
 
 void Color::processBuffer(PointBuffer& data) const
 {
-    const boost::uint32_t numPoints = data.getNumPoints();
+    const boost::uint32_t numPoints = data.size();
 
     const Schema& schema = data.getSchema();
 
@@ -94,7 +94,6 @@ void Color::processBuffer(PointBuffer& data) const
         data.setField<uint16_t>(*dimRed, pointIndex, red);
         data.setField<uint16_t>(*dimGreen, pointIndex, green);
         data.setField<uint16_t>(*dimBlue, pointIndex, blue);
-        data.setNumPoints(pointIndex+1);
     }
 }
 

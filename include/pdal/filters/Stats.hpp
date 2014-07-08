@@ -172,6 +172,7 @@ private:
     uint32_t m_seed;
     uint32_t m_bin_count;
     bool m_do_sample;
+    point_count_t m_numPoints;
     std::set<std::string> m_dimension_names;
     std::set<std::string> m_exact_dimension_names;
     std::map<const Dimension *, SummaryPtr> m_stats;

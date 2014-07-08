@@ -19,7 +19,10 @@ public:
     static void ready(Stage *s, PointContext ctx)
         { s->ready(ctx); }
     static void done(Stage *s, PointContext ctx)
-        { s->done(ctx); }
+    {
+        s->l_done(ctx);
+        s->done(ctx);
+    }
     static PointBufferSet run(Stage *s, PointBufferPtr buffer)
         { return s->run(buffer); }
 };

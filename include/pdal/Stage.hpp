@@ -32,8 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_STAGE_HPP
-#define INCLUDED_STAGE_HPP
+#pragma once
 
 #include <pdal/pdal_internal.hpp>
 
@@ -78,11 +77,9 @@ public:
     bool isInitialized() const
         { return m_initialized; }
 
-    inline Schema const& getSchema() const
-        { return *(m_context.schema()); }
-    
     virtual boost::uint64_t getNumPoints() const;
     const Bounds<double>& getBounds() const;
+    void setSpatialReference(SpatialReference const&);
     const SpatialReference& getSpatialReference() const;
     const Options& getOptions() const
         { return m_options; }
@@ -136,18 +133,14 @@ public:
         { return NULL; }
 
 protected:
-    PointContext m_context;
-    Schema m_schema;
     Options m_options;
     MetadataNode m_metadata;
     Bounds<double> m_bounds;
 
     StageOperationType getDimensionOperationType() const
         { return m_dimensionsType; }
-    void setSchema(Schema const&);
     void setNumPoints(boost::uint64_t);
     void setBounds(Bounds<double> const&);
-    void setSpatialReference(SpatialReference const&);
     void setSpatialReference(MetadataNode& m, SpatialReference const&);
 
     // convenience function, for doing a "copy ctor" on all the core props
@@ -178,6 +171,7 @@ private:
     virtual void processOptions(const Options& options)
         {}
     void l_initialize(PointContext ctx);
+    void l_done(PointContext ctx);
     virtual void initialize()
         {}
     virtual void buildSchema(Schema *schema)
@@ -198,4 +192,3 @@ PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const Stage&);
 
 } // namespace pdal
 
-#endif

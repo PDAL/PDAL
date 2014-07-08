@@ -93,24 +93,16 @@ BOOST_AUTO_TEST_CASE(ReprojectionFilterTest_test_1)
         reprojectionFilter.setInput(&reader);
 
         reprojectionFilter.prepare(ctx);
-
-        PointBuffer buffer(ctx);
-
-        StageSequentialIterator* iter = reader.createSequentialIterator();
-
-        point_count_t numRead = iter->read(buffer, 1);
-        BOOST_CHECK(numRead == 1);
-
-        FilterTester::ready(&reprojectionFilter, ctx);
-        FilterTester::filter(&reprojectionFilter, buffer);
+        PointBufferSet pbSet = reprojectionFilter.execute(ctx);
+        BOOST_CHECK_EQUAL(pbSet.size(), 1);
+        PointBufferPtr buffer = *pbSet.begin();
 
         double x, y, z;
-        getPoint(buffer, x, y, z);
+        getPoint(*buffer, x, y, z);
 
         BOOST_CHECK_CLOSE(x, postX, 0.1);
         BOOST_CHECK_CLOSE(y, postY, 0.1);
         BOOST_CHECK_CLOSE(z, postZ, 0.1);
-        delete iter;
     }
 }
 

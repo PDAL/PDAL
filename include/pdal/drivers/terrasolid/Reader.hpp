@@ -32,8 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_PDAL_DRIVER_TERRASOLID_READER_HPP
-#define INCLUDED_PDAL_DRIVER_TERRASOLID_READER_HPP
+#pragma once
 
 #include <pdal/Reader.hpp>
 #include <pdal/ReaderIterator.hpp>
@@ -107,24 +106,24 @@ class PointDimensions
 public:
     PointDimensions(const Schema& schema, std::string const& ns);
 
-    pdal::Dimension const* Time;
-    pdal::Dimension const* X;
-    pdal::Dimension const* Y;
-    pdal::Dimension const* Z;
+    Dimension const* Time;
+    Dimension const* X;
+    Dimension const* Y;
+    Dimension const* Z;
 
-    pdal::Dimension const* Classification;
-    pdal::Dimension const* PointSourceId;
-    pdal::Dimension const* ReturnNumber;
-    pdal::Dimension const* Intensity;
-    pdal::Dimension const* Mark;
-    pdal::Dimension const* Flag;
+    Dimension const* Classification;
+    Dimension const* PointSourceId;
+    Dimension const* ReturnNumber;
+    Dimension const* Intensity;
+    Dimension const* Mark;
+    Dimension const* Flag;
 
-    pdal::Dimension const* Red;
-    pdal::Dimension const* Green;
-    pdal::Dimension const* Blue;
-    pdal::Dimension const* Alpha;
-
+    Dimension const* Red;
+    Dimension const* Green;
+    Dimension const* Blue;
+    Dimension const* Alpha;
 };
+//
 //
 // supported options:
 //   <uint32>id
@@ -155,7 +154,8 @@ public:
         { return m_size; }
 
     // this is called by the stage's iterator
-    boost::uint32_t processBuffer(PointBuffer& PointBuffer, std::istream& stream, boost::uint64_t numPointsLeft) const;
+    uint32_t processBuffer(PointBuffer& PointBuffer, std::istream& stream,
+        uint64_t numPointsLeft) const;
 
 protected:
     inline TERRASOLID_Format_Type getFormat() const
@@ -176,9 +176,7 @@ private:
     bool m_haveColor;
     bool m_haveTime;
 
-    void registerFields();
-
-
+    virtual void buildSchema(Schema *s);
 };
 
 namespace iterators
@@ -229,9 +227,7 @@ private:
 } // random
 } // iterators
 
-}
-}
-} // namespace pdal::driver::terrasolid
+} // namespace terrasolid
+} // namespace drivers
+} // namespace pdal
 
-
-#endif // INCLUDED_PDAL_DRIVER_OCI_READER_HPP

@@ -42,63 +42,52 @@ namespace pdal { namespace kernel {
     
 Delta::Delta(int argc, const char* argv[])
     : Application(argc, argv, "delta")
-    , m_sourceFile("")
-    , m_candidateFile("")
     , m_outputStream(0)
-    , m_outputFileName("")
     , m_3d(true)
     , m_OutputDetail(false)
     , m_useXML(false)
     , m_useJSON(false)
-{
-    return;
-}
-
-
-void Delta::validateSwitches()
-{
-    m_chunkSize = 1048576;     
-
-    return;
-}
+{}
 
 
 void Delta::addSwitches()
 {
     namespace po = boost::program_options;
 
-    po::options_description* file_options = new po::options_description("file options");
-    
+    po::options_description* file_options =
+        new po::options_description("file options");
 
     file_options->add_options()
-        ("source", po::value<std::string>(&m_sourceFile), "source file name")
-        ("candidate", po::value<std::string>(&m_candidateFile), "candidate file name")
-        ("output", po::value<std::string>(&m_outputFileName), "output file name")
-        ("2d", po::value<bool>(&m_3d)->zero_tokens()->implicit_value(false), "only 2D comparisons/indexing")
-        ("detail", po::value<bool>(&m_OutputDetail)->zero_tokens()->implicit_value(true), "Output deltas per-point")
-        ("output", po::value<std::string>(&m_outputFileName), "output file name")
-        ("xml", po::value<bool>(&m_useXML)->zero_tokens()->implicit_value(true), "dump XML")
-        ("json", po::value<bool>(&m_useJSON)->zero_tokens()->implicit_value(true), "dump JSON")
-
-        ;
-
+        ("source", po::value<std::string>(&m_sourceFile),
+         "source file name")
+        ("candidate", po::value<std::string>(&m_candidateFile),
+         "candidate file name")
+        ("output", po::value<std::string>(&m_outputFileName),
+         "output file name")
+        ("2d", po::value<bool>(&m_3d)->zero_tokens()->implicit_value(false),
+         "only 2D comparisons/indexing")
+        ("detail",
+         po::value<bool>(&m_OutputDetail)->zero_tokens()->implicit_value(true),
+         "Output deltas per-point")
+        ("output", po::value<std::string>(&m_outputFileName),
+         "output file name")
+        ("xml", po::value<bool>(&m_useXML)->zero_tokens()->implicit_value(true),
+         "dump XML")
+        ("json",
+         po::value<bool>(&m_useJSON)->zero_tokens()->implicit_value(true),
+         "dump JSON");
     addSwitchSet(file_options);
 
-    po::options_description* processing_options = new po::options_description("processing options");
+    po::options_description* processing_options =
+        new po::options_description("processing options");
     
-    processing_options->add_options()
-
-        ;
-    
+    processing_options->add_options();
     addSwitchSet(processing_options);
 
     addPositionalSwitch("source", 1);
     addPositionalSwitch("candidate", 2);
     addPositionalSwitch("output", 3);
-
-    return;
 }
-
 
 
 std::ostream& writeHeader(std::ostream& strm, bool b3D)
@@ -108,15 +97,14 @@ std::ostream& writeHeader(std::ostream& strm, bool b3D)
         strm << ",\"DeltaZ\"";
     strm << std::endl;
     return strm;
-    
 }
 
+
 std::map<Point, Point>* cumulatePoints(PointBuffer& source_data,
-                  IndexedPointBuffer& candidate_data)
+    PointBuffer& candidate_data)
 {
     std::map<Point, Point> *output = new std::map<Point, Point>;
-    boost::uint32_t count(std::min(source_data.getNumPoints(), candidate_data.getNumPoints()));
-    
+    uint32_t count(std::min(source_data.size(), candidate_data.size()));
 
     Schema const& candidate_schema = candidate_data.getSchema();
     Dimension const& cDimX = candidate_schema.getDimension("X");
@@ -127,13 +115,15 @@ std::map<Point, Point>* cumulatePoints(PointBuffer& source_data,
     Dimension const& sDimX = source_schema.getDimension("X");
     Dimension const& sDimY = source_schema.getDimension("Y");
     Dimension const& sDimZ = source_schema.getDimension("Z");    
-    for (boost::uint32_t i = 0; i < count; ++i)
+    for (uint32_t i = 0; i < count; ++i)
     {
         double sx = source_data.applyScaling(sDimX, i);
         double sy = source_data.applyScaling(sDimY, i);
-        double sz = source_data.applyScaling(sDimZ, i);                
+        double sz = source_data.applyScaling(sDimZ, i);
         
-        std::vector<std::size_t> ids = candidate_data.neighbors(sx, sy, sz, 1);
+//ABELL
+//       std::vector<std::size_t> ids = candidate_data.neighbors(sx, sy, sz, 1);
+std::vector<std::size_t> ids;
         
         if (!ids.size())
         {
@@ -159,9 +149,8 @@ std::map<Point, Point>* cumulatePoints(PointBuffer& source_data,
     return output;
 }
 
-void Delta::outputDetail(PointBuffer& source_data,
-                         IndexedPointBuffer& candidate_data,
-                         std::map<Point, Point> *points) const
+void Delta::outputDetail(PointBuffer& source_data, PointBuffer& candidate_data,
+    std::map<Point, Point> *points) const
 {
     Schema const& candidate_schema = candidate_data.getSchema();
     Dimension const& cDimX = candidate_schema.getDimension("X");
@@ -176,18 +165,20 @@ void Delta::outputDetail(PointBuffer& source_data,
     bool bWroteHeader(false);
     
     std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
-    
-    candidate_data.build(m_3d);
-    boost::uint32_t count(std::min(source_data.getNumPoints(), candidate_data.getNumPoints()));
+//ABELL - Indexing
+//    candidate_data.build(m_3d);
+    uint32_t count(std::min(source_data.size(), candidate_data.size()));
     
     boost::property_tree::ptree output;
-    for (boost::uint32_t i = 0; i < count; ++i)
+    for (uint32_t i = 0; i < count; ++i)
     {
         double sx = source_data.applyScaling(sDimX, i);
         double sy = source_data.applyScaling(sDimY, i);
         double sz = source_data.applyScaling(sDimZ, i);                
         
-        std::vector<std::size_t> ids = candidate_data.neighbors(sx, sy, sz, 1);
+//ABELL - Indexing.
+//       std::vector<std::size_t> ids = candidate_data.neighbors(sx, sy, sz, 1);
+std::vector<std::size_t> ids;
         
         if (!ids.size())
         {
@@ -303,26 +294,18 @@ void Delta::outputXML(boost::property_tree::ptree const& tree) const
 int Delta::execute()
 {
     PointContext sourceCtx;
-
     Options sourceOptions;
     {
         sourceOptions.add<std::string>("filename", m_sourceFile);
         sourceOptions.add<bool>("debug", isDebug());
         sourceOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
     }
-    Stage* source = AppSupport::makeReader(sourceOptions);
+    std::unique_ptr<Stage> source(AppSupport::makeReader(sourceOptions));
     source->prepare(sourceCtx);
-    
-    boost::uint32_t totalPointCount(source->getNumPoints());
-    
-    PointBuffer source_data(source->getSchema(), totalPointCount);
-    StageSequentialIterator* source_iter = source->createSequentialIterator(source_data);
-
-    boost::uint32_t  numRead = source_iter->read(source_data);
-    assert(numRead == source_data.getNumPoints());
-
-    delete source_iter;
-    delete source;
+    PointBufferSet pbSet = source->execute(sourceCtx);
+    assert(pbSet.size() == 1);
+    PointBufferPtr sourceBuf = *pbSet.begin();
+    point_count_t sourceCount = sourceBuf->size();
 
     PointContext candidateCtx;
     Options candidateOptions;
@@ -332,53 +315,43 @@ int Delta::execute()
         candidateOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
     }
 
-    Stage* candidate = AppSupport::makeReader(candidateOptions);
+    std::unique_ptr<Stage> candidate(AppSupport::makeReader(candidateOptions));
     candidate->prepare(candidateCtx);
+    pbSet = candidate->execute(candidateCtx);
+    assert(pbSet.size() == 1);
+    PointBufferPtr candidateBuf = *pbSet.begin();
+    point_count_t candidateCount = candidateBuf->size();
 
-    IndexedPointBuffer candidate_data(candidate->getSchema(), totalPointCount);
-    StageSequentialIterator* candidate_iter = candidate->createSequentialIterator(candidate_data);
-
-    numRead = candidate_iter->read(candidate_data);
-    assert(numRead == candidate_data.getNumPoints());
-        
-    delete candidate_iter;    
-
-
-    if (source_data.getNumPoints() != candidate_data.getNumPoints())
-    {
-        std::cerr << "Source and candidate files do not have the same point count, testing each source point only!" << std::endl;
-    }
-    
+    if (sourceCount != candidateCount)
+        std::cerr << "Source and candidate files do not have the same "
+            "point count, testing each source point only!" << std::endl;
 
     if (m_outputFileName.size())
-    {
         m_outputStream = FileUtils::createFile(m_outputFileName);
-    }
 
-    candidate_data.build(m_3d);
-    boost::uint32_t count(std::min(source_data.getNumPoints(), candidate_data.getNumPoints()));
-    
+//ABELL - Need indexing.
+//    candidate_data.build(m_3d);
+    uint32_t count(std::min(sourceCount, candidateCount));
 
-
-    boost::scoped_ptr<std::map<Point, Point> > points(cumulatePoints(source_data, candidate_data));
+    std::unique_ptr<std::map<Point, Point>>
+        points(cumulatePoints(*sourceBuf, *candidateBuf));
     if (m_OutputDetail)
     {
-        outputDetail(source_data, candidate_data, points.get());
+        outputDetail(*sourceBuf, *candidateBuf, points.get());
         return 0;
     }
     
-    std::map<Point, Point>::const_iterator i;
-    for(i = points->begin(); i != points->end(); ++i)
+    for (auto i = points->begin(); i != points->end(); ++i)
     {
         Point const& s = i->first;
         Point const& c = i->second;
 
         double xd = s.x - c.x;
         double yd = s.y - c.y;
-        double zd = s.z - c.z;        
+        double zd = s.z - c.z;
         m_summary_x(xd);
         m_summary_y(yd);
-        m_summary_z(zd);        
+        m_summary_z(zd);
     }
 
     using boost::property_tree::ptree;
@@ -407,23 +380,12 @@ int Delta::execute()
     output.put<std::string>("source", m_sourceFile);
     output.put<std::string>("candidate", m_candidateFile);
     
-    
     if (m_useJSON)
-    {
         outputJSON(output);
-        return 0;
-    } else if (m_useXML)
-    {
+    else if (m_useXML)
         outputXML(output);
-        return 0;
-    }
     else
-    {
         outputRST(output);
-        return 0;
-    }
-
-    
     return 0;
 }
 

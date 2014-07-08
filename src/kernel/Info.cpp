@@ -35,6 +35,7 @@
 #include <algorithm>
 
 #include <pdal/kernel/Info.hpp>
+#include <pdal/KDIndex.hpp>
 #include <pdal/PipelineWriter.hpp>
 
 namespace pdal { namespace kernel {
@@ -295,64 +296,38 @@ void Info::dumpSchema(PointContext ctx)
         ctx.schema()->toRST(ostr) << std::endl;    
 }
 
-void Info::dumpQuery(Stage const& stage, IndexedPointBuffer& data) const
+void Info::dumpQuery(PointContext ctx, Stage& stage) const
 {
-
     boost::char_separator<char> sep(SEPARATORS);
     tokenizer tokens(m_QueryPoint, sep);
     std::vector<double> values;
-    for (tokenizer::iterator t = tokens.begin(); t != tokens.end(); ++t) {
+    for (tokenizer::iterator t = tokens.begin(); t != tokens.end(); ++t)
         values.push_back(boost::lexical_cast<double>(*t));
-    }
     
-    if (values.size() < 2)
+    if (values.size() != 2 && values.size() != 3)
         throw app_runtime_error("--points must be two or three values");
 
-    boost::scoped_ptr<StageSequentialIterator> iter(stage.createSequentialIterator(data));
-
-    const boost::uint32_t numRead = iter->read(data);
+    PointBufferSet pbSet = stage.execute(ctx);
+    assert(pbSet.size() == 1);
+    PointBufferPtr buf = *pbSet.begin();
     
-    bool is3D(true);
-    if (values.size() < 3) 
-        is3D = false;
+    bool is3d = (values.size() >= 3);
 
-    data.build(is3D);
-
-    Schema const& schema = data.getSchema();
-    Dimension const& dimX = schema.getDimension("X");
-    Dimension const& dimY = schema.getDimension("Y");
-    Dimension const& dimZ = schema.getDimension("Z");
+    KDIndex kdi(*buf);
+    kdi.build(is3d);
 
     double x = values[0];
     double y = values[1];
+    double z = is3d ? values[2] : 0.0;
     
-    double z(0.0);
-    if (is3D)
-        z = values[2];                
+    std::vector<size_t> ids = kdi.neighbors(x, y, z, 0.0, buf->size());
     
-    boost::uint32_t count(m_numPointsToWrite);
-    if (!m_numPointsToWrite)
-        count = 1;
-    
-    double d(0.0);
-    std::vector<std::size_t> ids = data.neighbors(x, y, z, d, count);
-    
-//ABELL
-//    PointBuffer response(data.getSchema(), count);
-PointBuffer response(data.getSchema());
-    typedef std::vector<std::size_t>::const_iterator Iterator;
-    std::vector<std::size_t>::size_type pos(0);
-    for (Iterator i = ids.begin(); i != ids.end(); ++i)
-    {
-//ABELL
-/**
-        response.copyPointFast(pos, *i, data);
-        response.setNumPoints(response.getNumPoints() + 1);
-**/
-        pos++;
-    }
+    PointBuffer outbuf(ctx);
 
-    boost::property_tree::ptree tree = response.toPTree();
+    for (auto i = ids.begin(); i != ids.end(); ++i)
+       outbuf.appendPoint(*buf, *i); 
+
+    boost::property_tree::ptree tree = outbuf.toPTree();
    
     std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
 
@@ -362,8 +337,6 @@ PointBuffer response(data.getSchema());
         write_xml(ostr, output);
     else
         write_json(ostr, tree);
-    
-    return;
 }
 
 void Info::dumpSDO_PCMetadata(PointContext ctx, const Stage& stage) const
@@ -466,12 +439,7 @@ int Info::execute()
         dumpSDO_PCMetadata(ctx, *filter);
     
     if (m_QueryPoint.size())
-    {
-//ABELL
-//        IndexedPointBuffer buffer(filter->getSchema(), filter->getNumPoints());
-        IndexedPointBuffer buffer(filter->getSchema());
-        dumpQuery(*filter, buffer);
-    }
+        dumpQuery(ctx, *filter);
     
     std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
     ostr << std::endl;
@@ -479,9 +447,7 @@ int Info::execute()
     delete manager;
 
     if (m_outputStream)
-    {
         FileUtils::closeFile(m_outputStream);
-    }
     
     return 0;
 }

@@ -100,7 +100,8 @@ void Reader::initialize()
     string const& connection = m_options.getValueOrThrow<string>("connection");
 
     m_session->set_log_stream(&(log()->get(logDEBUG2)));
-    m_schema = fetchSchema(query);
+//ABELL - Fix
+//    m_schema = fetchSchema(query);
     try
     {
         setSpatialReference(
@@ -226,10 +227,7 @@ namespace sequential
 
 
 IteratorBase::IteratorBase(const pdal::drivers::sqlite::Reader& reader)
-    : m_at_end(false)
-    , m_active_buffer(BufferPtr())
-    , m_buffer_position(0)
-    , m_reader(reader)
+    : m_at_end(false), m_buffer_position(0), m_reader(reader)
 {
     std::string const& connection =
         m_reader.getOptions().getValueOrThrow<std::string>("connection");
@@ -271,8 +269,8 @@ void IteratorBase::readBlob(::soci::row& block, boost::uint32_t howMany)
         throw sqlite_driver_error(oss.str());
     }
     boost::uint32_t howMuchToRead = howMany * oracle_schema.getByteSize();
-    m_active_buffer->setDataStride(data, 0, howMuchToRead);
-    m_active_buffer->setNumPoints(howMany);
+//ABELL
+//    m_active_buffer->setDataStride(data, 0, howMuchToRead);
 }
 
 
@@ -282,13 +280,14 @@ void IteratorBase::fillUserBuffer(PointBuffer& user_buffer)
     schema::index_by_index const& idx =
         user_schema.getDimensions().get<schema::index>();
 
-    boost::int32_t numUserSpace =
-        user_buffer.getCapacity() - user_buffer.getNumPoints();
+//ABELL
+    boost::int32_t numUserSpace = 0;
+//        user_buffer.getCapacity() - user_buffer.getNumPoints();
     if (numUserSpace < 0)
         throw pdal_error("We ran out of space!");
 
     boost::int32_t numOraclePoints =
-        m_active_buffer->getNumPoints() - m_buffer_position;
+        m_active_buffer->size() - m_buffer_position;
 
     schema::index_by_index::size_type i;
     for (i = 0; i < idx.size(); ++i)
@@ -296,7 +295,7 @@ void IteratorBase::fillUserBuffer(PointBuffer& user_buffer)
                          user_buffer,
                          idx[i],
                          m_buffer_position,
-                         user_buffer.getNumPoints(),
+                         user_buffer.size(),
                          (std::min)(numOraclePoints,numUserSpace));
 
     bool bSetPointSourceId =
@@ -322,9 +321,6 @@ void IteratorBase::fillUserBuffer(PointBuffer& user_buffer)
         m_buffer_position = m_buffer_position + numUserSpace;
     else if (numOraclePoints < numUserSpace)
         m_buffer_position = 0;
-
-    boost::uint32_t howManyThisRead = (std::min)(numUserSpace, numOraclePoints);
-    user_buffer.setNumPoints(howManyThisRead + user_buffer.getNumPoints());
 }
 
 
@@ -351,27 +347,35 @@ void IteratorBase::copyDatabaseData(PointBuffer& source,
             dest_dim.getEndianness() == source_dim->getEndianness())
         {
             // FIXME: This test could produce false positives
-            uint8_t *source_position =
-                source.getData(source_starting_position+i) +
-                source_dim->getByteOffset();
-            uint8_t *destination_position =
-                destination.getData(destination_starting_position + i) +
-                dest_dim.getByteOffset();
+//ABELL
+uint8_t *source_position = NULL;
+//            uint8_t *source_position =
+//                source.getData(source_starting_position+i) +
+//                source_dim->getByteOffset();
+//ABELL
+uint8_t *destination_position = NULL;
+//            uint8_t *destination_position =
+//                destination.getData(destination_starting_position + i) +
+//                dest_dim.getByteOffset();
             memcpy(destination_position, source_position,
                 source_dim->getByteSize());
         }
         else
         {
+            //ABELL - No scaling.
+            ;
+/**
             PointBuffer::scaleData(source, destination, *source_dim, dest_dim,
                 source_starting_position + i,
                 destination_starting_position + i);
+**/
         }
     }
 }
 
 
 
-BufferPtr IteratorBase::fetchPointBuffer(int32_t const& cloud_id,
+PointBufferPtr IteratorBase::fetchPointBuffer(int32_t const& cloud_id,
     std::string const& schema_xml, uint32_t capacity)
 {
     BufferMap::const_iterator i = m_buffers.find(cloud_id);
@@ -387,8 +391,10 @@ BufferPtr IteratorBase::fetchPointBuffer(int32_t const& cloud_id,
         std::stringstream query;
 
         Schema schema = Schema::from_xml(schema_xml);
-        BufferPtr output  = BufferPtr(new PointBuffer(schema, capacity));
-        std::pair<int, BufferPtr> p(cloud_id, output);
+//ABELL
+//        PointBufferPtr output  = BufferPtr(new PointBuffer(schema, capacity));
+PointBufferPtr output;
+        std::pair<int, PointBufferPtr> p(cloud_id, output);
         m_buffers.insert(p);
         getReader().log()->get(logDEBUG2) <<
             "IteratorBase::fetchPointBuffer: creating new PointBuffer "
@@ -414,18 +420,19 @@ uint32_t IteratorBase::myReadBlocks(PointBuffer& user_buffer)
     bool bDidRead = blocks.fetch();
     if (!m_active_buffer)
     {
+        //ABELL
         m_active_buffer = fetchPointBuffer(block.get<int>("cloud_id"),
-            block.get<std::string>("schema"), user_buffer.getCapacity());
+            block.get<std::string>("schema"), user_buffer.size());
         m_active_cloud_id = block.get<int>("cloud_id");
     }
 
     // This shouldn't ever happen
     int num_points = block.get<int>("num_points");
-    if (num_points > static_cast<int32_t>(m_active_buffer->getCapacity()))
+    if (num_points > static_cast<int32_t>(m_active_buffer->size()))
     {
         std::ostringstream oss;
         oss << "Block size, " << num_points << ", is too large to fit in " <<
-            "buffer of size " << user_buffer.getCapacity() <<
+            "buffer of size " << user_buffer.size() <<
             ". Increase buffer capacity with writer's \"chunk_size\" option " <<
             "or increase the read buffer size";
         throw buffer_too_small(oss.str());
@@ -435,8 +442,10 @@ uint32_t IteratorBase::myReadBlocks(PointBuffer& user_buffer)
     {
         uint32_t numReadThisBlock =
             static_cast<uint32_t>(block.get<int>("num_points"));
+
+        //ABELL - Borken and broken.
         uint32_t numSpaceLeftThisBuffer =
-            user_buffer.getCapacity() - user_buffer.getNumPoints();
+            user_buffer.size() - user_buffer.size();
 
         getReader().log()->get(logDEBUG4) << "IteratorBase::myReadBlocks:"
             "numReadThisBlock: " << numReadThisBlock <<
@@ -456,9 +465,9 @@ uint32_t IteratorBase::myReadBlocks(PointBuffer& user_buffer)
                 current_cloud_id << " m_active_cloud_id: " <<
                 m_active_cloud_id << std::endl;
             m_active_buffer = fetchPointBuffer(current_cloud_id,
-                block.get<std::string>("schema"), user_buffer.getCapacity());
+                block.get<std::string>("schema"), user_buffer.size());
             m_active_cloud_id = current_cloud_id;
-            return user_buffer.getNumPoints();
+            return user_buffer.size();
         }
     }
     return numPointsRead;
@@ -491,8 +500,9 @@ uint64_t Reader::skipImpl(uint64_t count)
         boost::uint32_t thisCount =
             static_cast<boost::uint32_t>(thisCount64);
 
-        PointBuffer junk(getReader().getSchema(), thisCount);
-        boost::uint32_t numRead = read(junk);
+//ABELL
+//        uint32_t numRead = read(junk);
+uint32_t numRead = 0;
         if (numRead == 0)
             break; // end of file or something
 

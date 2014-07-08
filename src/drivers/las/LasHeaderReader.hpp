@@ -40,24 +40,20 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#ifndef INCLUDED_DRIVERS_LAS_LASHEADERREADER_HPP
-#define INCLUDED_DRIVERS_LAS_LASHEADERREADER_HPP
+#pragma once
 
 #include <pdal/pdal_internal.hpp>
 
 #include <iosfwd>
 
 namespace pdal {
-    class Schema;
+
+class Schema;
+
 namespace drivers {
 namespace las {
-    class Reader;
-}
-}
-}
 
-namespace pdal { namespace drivers { namespace las {
-
+class Reader;
 class LasHeader;
 
 class PDAL_DLL LasHeaderReader
@@ -65,7 +61,7 @@ class PDAL_DLL LasHeaderReader
 public:
     LasHeaderReader(LasHeader& header, std::istream& istream);
 
-    void read(Reader&, Schema&);
+    void read(Reader&); 
 
 private:
     LasHeader& m_header;
@@ -83,7 +79,7 @@ private:
     LasHeaderReader(const LasHeaderReader&); // nope
 };
 
+} // namespace las
+} // namespace drivers
+} // namespace pdal
 
-} } } // namespaces
-
-#endif

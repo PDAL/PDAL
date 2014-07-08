@@ -36,6 +36,7 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/GlobalEnvironment.hpp"
   "${PDAL_HEADERS_DIR}/gitsha.h"
   "${PDAL_HEADERS_DIR}/IStream.hpp"
+  "${PDAL_HEADERS_DIR}/KDIndex.hpp"
   "${PDAL_HEADERS_DIR}/Kernel.hpp"
   "${PDAL_HEADERS_DIR}/Log.hpp"
   "${PDAL_HEADERS_DIR}/Metadata.hpp"
@@ -85,6 +86,7 @@ set(PDAL_BASE_CPP
   FilterIterator.cpp
   gitsha.cpp
   GlobalEnvironment.cpp
+  KDIndex.cpp
   Log.cpp
   Metadata.cpp
   MultiFilter.cpp
@@ -105,7 +107,6 @@ set(PDAL_BASE_CPP
   StageIterator.cpp
   StreamFactory.cpp
   ThreadEnvironment.cpp
-  UserCallback.cpp
   Utils.cpp
   Vector.cpp  
   Writer.cpp
