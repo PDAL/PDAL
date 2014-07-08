@@ -26,7 +26,7 @@ SET(PDAL_UNITTEST_TEST_SRC
     drivers/faux/FauxReaderTest.cpp
 #    drivers/faux/FauxWriterTest.cpp
 #    FileUtilsTest.cpp
-#    filters/HexbinFilterTest.cpp
+    filters/HexbinFilterTest.cpp
     filters/InPlaceReprojectionFilterTest.cpp
     drivers/las/LasReaderTest.cpp
     drivers/las/LasWriterTest.cpp

@@ -45,57 +45,56 @@
 
 BOOST_AUTO_TEST_SUITE(HexbinFilterTest)
 
-
 #ifdef PDAL_HAVE_HEXER
+
+using namespace pdal;
 
 BOOST_AUTO_TEST_CASE(HexbinFilterTest_test_1)
 {
-
-
-        pdal::Options options;
+    Options options;
         
-        pdal::Option filename("filename", Support::datapath("1.2-with-color.las"));
+    Option filename("filename", Support::datapath("1.2-with-color.las"));
 
-        pdal::Option debug("debug", true, "");
-        pdal::Option verbose("verbose", 9, "");
-        // options.add(debug);
-        // options.add(verbose);
-        pdal::Option sample_size("sample_size",5000, "Number of samples to use when estimating hexagon edge size. Specify 0.0 for edge_size if you want to compute one.");
-        pdal::Option threshold("threshold", 10, "Number of points necessary inside a hexagon to be considered full");
-        pdal::Option edge_size("edge_size", 0.0, "The edge size of the hexagon to use in situations where you do not want to estimate based on a sample");
-        pdal::Option x_dim("x_dim", "X", "dot-qualified name of X dimension to use");
-        pdal::Option y_dim("y_dim", "Y", "dot-qualified name of Y dimension to use");
+    Option debug("debug", true, "");
+    Option verbose("verbose", 9, "");
+    // options.add(debug);
+    // options.add(verbose);
+    Option sampleSize("sample_size", 5000, "Number of samples to use "
+        "when estimating hexagon edge size. Specify 0.0 for edge_size if "
+        "you want to compute one.");
+    Option threshold("threshold", 10, "Number of points necessary inside "
+        "a hexagon to be considered full");
+    Option edgeLength("edge_length", 0.0, "The edge size of the hexagon to "
+        "use in situations where you do not want to estimate based on "
+        "a sample");
+    Option x_dim("x_dim", "X", "dot-qualified name of X dimension to use");
+    Option y_dim("y_dim", "Y", "dot-qualified name of Y dimension to use");
             
-        options.add(filename);
-        options.add(sample_size);
-        options.add(threshold);
-        options.add(edge_size);
-        options.add(x_dim);
-        options.add(y_dim);
+    options.add(filename);
+    options.add(sampleSize);
+    options.add(threshold);
+    options.add(edgeLength);
+    options.add(x_dim);
+    options.add(y_dim);
 
-        pdal::drivers::las::Reader reader(options);
-        pdal::filters::HexBin hexbin(options);
-        hexbin.setInput(&reader);
-        hexbin.prepare();
+    drivers::las::Reader reader(options);
+    filters::HexBin hexbin(options);
+    hexbin.setInput(&reader);
 
-        const pdal::Schema& schema = reader.getSchema();
-        pdal::PointBuffer data(schema, reader.getNumPoints());
-        
+    PointContext ctx;
 
-        pdal::StageSequentialIterator* iter = hexbin.createSequentialIterator(data);
+    hexbin.prepare(ctx);
+    hexbin.execute(ctx);
 
-
-
-        boost::uint32_t numRead = iter->read(data);
-        BOOST_CHECK_EQUAL(numRead, 1065);
-
-        pdal::filters::iterators::sequential::HexBin* b = static_cast<pdal::filters::iterators::sequential::HexBin*>(iter);
-
-
-        delete iter;
+    MetadataNode m = ctx.metadata();
+    m = m.findChild(hexbin.getName());
+    std::vector<MetadataNode> children = m.children();
+    for (auto mi = children.begin(); mi != children.end(); ++mi)
+    {
+        MetadataNode& c = *mi;
+        std::cerr << c.name() << " : " << c.value() << "\n\n";
+    }
 }
-
-
 
 #endif
 
