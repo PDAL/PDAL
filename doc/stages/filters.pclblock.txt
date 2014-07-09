@@ -99,5 +99,44 @@ GridMinimum
 setLeafSize (x, y, z)
   default = 1.0
 
+.. _ProgressiveMorphologicalFilter:
+
 ProgressiveMorphologicalFilter
 ...............................................................................
+
+setMaxWindowSize
+  The maximum window size for applying morphological operations. Objects larger
+  than the specified window size will be retained, while objects that are
+  smaller than the window size will be replaced by the minimum z value for the
+  window. [Default: **33.0**]
+
+setSlope
+  The terrain slope is used to compute the elevation difference threshold for a
+  given iteration (i.e., window size). Slope is given as the ratio of rise over
+  run, not degrees. Therefore, the default of 1 corresponds to a slope of 45
+  degrees. [Default: **1.0**]
+
+setMaxDistance
+  The maximum elevation difference threshold. For scenes with buildings, this
+  should be the height of the lowest building. For more rural settings, this is
+  commonly the largest elevation difference in the study area. [Default:
+  **2.5**]
+
+setInitialDistance
+  The initial elevation difference threshold. Points within this threshold of
+  the estimated surface are classified as ground returns. [Default: **0.15**]
+
+setCellSize
+  The cell size. [Default: **1.0**]
+
+setBase
+  The base of an exponential function/initial cell size in computing
+  progressive window size at each iteration. [Default: **2.0**]
+
+setExponential
+  Whether or not to increase the window size exponentially, thus reducing the
+  number of iterations. [Default: **true**]
+
+setNegative
+  Whether to return non-ground (true) or ground (false) measurements. [Default:
+  **false**]
