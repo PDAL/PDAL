@@ -30,9 +30,10 @@ CC=$CC CXX=$CXX cmake   -G "$CONFIG"  \
         -DWITH_P2G=ON \
         -DWITH_HEXER=ON \
         -DWITH_NITRO=ON \
-        -DWITH_MRSID=ON \
+        -DWITH_MRSID=OFF \
         -DWITH_HDF5=ON \
         -DWITH_PCL=ON \
+        -DWITH_PGPOINTCLOUD=ON \
         -DPCL_DIR=/Users/hobu/dev/git/pcl/installed/share/pcl-1.7/ \
         -DMRSID_INCLUDE_DIR=/Users/hobu/dev/release/mrsid/Lidar_DSDK/include \
         -DMRSID_LIBRARY=/Users/hobu/dev/release/mrsid/Lidar_DSDK/lib/liblti_lidar_dsdk.dylib \
