@@ -40,8 +40,9 @@
 #include <sstream>
 #include <string>
 
-
 BOOST_AUTO_TEST_SUITE(pdalinfoTest)
+
+using namespace pdal;
 
 static std::string appName()
 {
@@ -61,6 +62,24 @@ BOOST_AUTO_TEST_CASE(pdalinfoTest_no_input)
     BOOST_CHECK_EQUAL(output.substr(0, expected.length()), expected);
 }
 
+BOOST_AUTO_TEST_CASE(test_pipe_file_input)
+{
+    std::string output;
+    std::string outfile = Support::temppath("schemaout.txt");
+    std::string cmd = appName() + " " +
+        Support::datapath("pipeline/pipeline_read.xml") + " --schema > " +
+        outfile;
+
+    int stat = Utils::run_shell_command(cmd, output);
+    BOOST_CHECK_EQUAL(stat, 0);
+    cmd = "grep -c drivers.las.reader.X " + outfile;
+    stat = Utils::run_shell_command(cmd, output);
+    BOOST_CHECK_EQUAL(stat, 0);
+    // Strip off newline
+    output = output.substr(0, output.size() - 1);
+    BOOST_CHECK_EQUAL(output, "2");
+    FileUtils::deleteFile(outfile);
+}
 
 BOOST_AUTO_TEST_CASE(pdalinfo_test_common_opts)
 {

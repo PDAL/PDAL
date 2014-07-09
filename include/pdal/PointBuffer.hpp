@@ -272,8 +272,6 @@ protected:
     template<class T> static void scale(Dimension const& source_dimension,
                                  Dimension const& destination_dimension,
                                  T& value);
-    virtual std::string printDimension(Dimension const& dimension,
-        boost::uint32_t index) const;
 
 private:
     template<typename T_IN, typename T_OUT>
