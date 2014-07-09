@@ -38,7 +38,10 @@
 #include <pdal/KDIndex.hpp>
 #include <pdal/PipelineWriter.hpp>
 
-namespace pdal { namespace kernel {
+namespace pdal
+{
+namespace kernel
+{
 
 Info::Info(int argc, const char* argv[])
     : Application(argc, argv, "info")
@@ -55,14 +58,11 @@ Info::Info(int argc, const char* argv[])
     , m_QueryDistance(0.0)
     , m_numPointsToWrite(0)
     , m_showSample(false)
-{
-    return;
-}
+{}
 
 
 void Info::validateSwitches()
 {
-
     const bool got_something =
         m_showStats ||
         m_showSchema ||
@@ -72,11 +72,7 @@ void Info::validateSwitches()
         m_QueryPoint.size() > 0 ||
         m_pointIndexes.size() > 0;
     if (!got_something)
-    {
         throw app_usage_error("no action option specified");
-    }
-
-    return;
 }
 
 
@@ -84,41 +80,63 @@ void Info::addSwitches()
 {
     namespace po = boost::program_options;
 
-    po::options_description* file_options = new po::options_description("file options");
+    po::options_description* file_options =
+        new po::options_description("file options");
 
     file_options->add_options()
-        ("input,i", po::value<std::string>(&m_inputFile)->default_value(""), "input file name")
+        ("input,i", po::value<std::string>(&m_inputFile)->default_value(""),
+         "input file name")
         ;
 
     addSwitchSet(file_options);
 
-    po::options_description* processing_options = new po::options_description("processing options");
+    po::options_description* processing_options =
+        new po::options_description("processing options");
     
     processing_options->add_options()
         ("point,p", po::value<std::string >(&m_pointIndexes), "point to dump")
-        ("query", po::value< std::string>(&m_QueryPoint), "A 2d or 3d point query point")
+        ("query", po::value< std::string>(&m_QueryPoint),
+         "A 2d or 3d point query point")
         ("distance", po::value< double>(&m_QueryDistance), "A query distance")
-        ("stats,a", po::value<bool>(&m_showStats)->zero_tokens()->implicit_value(true), "dump stats on all points (reads entire dataset)")
-        ("count", po::value<boost::uint64_t>(&m_numPointsToWrite)->default_value(0), "How many points should we write?")
-        ("dimensions", po::value<std::string >(&m_Dimensions), "dump stats on all points (reads entire dataset)")
-        ("schema", po::value<bool>(&m_showSchema)->zero_tokens()->implicit_value(true), "dump the schema")
-        ("metadata,m", po::value<bool>(&m_showMetadata)->zero_tokens()->implicit_value(true), "dump the metadata")
-        ("sdo_pc", po::value<bool>(&m_showSDOPCMetadata)->zero_tokens()->implicit_value(true), "dump the SDO_PC Oracle Metadata")
-        ("stage,r", po::value<bool>(&m_showStage)->zero_tokens()->implicit_value(true), "dump the stage info")
-        ("pipeline-serialization", po::value<std::string>(&m_pipelineFile)->default_value(""), "")
-        ("xml", po::value<bool>(&m_useXML)->zero_tokens()->implicit_value(true), "dump XML")
-        ("json", po::value<bool>(&m_useJSON)->zero_tokens()->implicit_value(true), "dump JSON")
-        ("sample", po::value<bool>(&m_showSample)->zero_tokens()->implicit_value(true), "randomly sample dimension for stats")
-        ("seed", po::value<boost::uint32_t>(&m_seed)->default_value(0), "Seed value for random sample")
-        ("sample_size", po::value<boost::uint32_t>(&m_sample_size)->default_value(1000), "Sample size for random sample")
-
+        ("stats,a",
+         po::value<bool>(&m_showStats)->zero_tokens()->implicit_value(true),
+         "dump stats on all points (reads entire dataset)")
+        ("count", po::value<uint64_t>(&m_numPointsToWrite)->default_value(0),
+         "How many points should we write?")
+        ("dimensions", po::value<std::string >(&m_Dimensions),
+         "dump stats on all points (reads entire dataset)")
+        ("schema",
+         po::value<bool>(&m_showSchema)->zero_tokens()->implicit_value(true),
+         "dump the schema")
+        ("metadata,m",
+         po::value<bool>(&m_showMetadata)->zero_tokens()->implicit_value(true),
+         "dump the metadata")
+        ("sdo_pc",
+         po::value<bool>(&m_showSDOPCMetadata)->zero_tokens()->
+             implicit_value(true),
+         "dump the SDO_PC Oracle Metadata")
+        ("stage,r",
+         po::value<bool>(&m_showStage)->zero_tokens()->implicit_value(true),
+         "dump the stage info")
+        ("pipeline-serialization",
+         po::value<std::string>(&m_pipelineFile)->default_value(""), "")
+        ("xml", po::value<bool>(&m_useXML)->zero_tokens()->implicit_value(true),
+         "dump XML")
+        ("json",
+         po::value<bool>(&m_useJSON)->zero_tokens()->implicit_value(true),
+         "dump JSON")
+        ("sample",
+         po::value<bool>(&m_showSample)->zero_tokens()->implicit_value(true),
+         "randomly sample dimension for stats")
+        ("seed", po::value<uint32_t>(&m_seed)->default_value(0),
+         "Seed value for random sample")
+        ("sample_size",
+         po::value<uint32_t>(&m_sample_size)->default_value(1000),
+         "Sample size for random sample")
         ;
     
     addSwitchSet(processing_options);
-
     addPositionalSwitch("input", 1);
-
-    return;
 }
 
 // Support for parsing point numbers.  Points can be specified singly or as
@@ -202,10 +220,10 @@ void Info::dumpPoints(PointContext ctx, const Stage& stage,
     std::string const& pointsString) const
 {
     PointBuffer readData(ctx);
-    std::vector<boost::uint32_t> points = getListOfPoints(pointsString);
+    std::vector<uint32_t> points = getListOfPoints(pointsString);
         
-    std::unique_ptr<pdal::StageSequentialIterator> seq(
-        stage.createSequentialIterator());
+    std::unique_ptr<StageSequentialIterator>
+        seq(stage.createSequentialIterator());
     if (!seq)
         throw app_runtime_error("Unable to create iterator retrieve points");
     dumpPointsSequential(readData, points, seq.get());
@@ -387,7 +405,7 @@ int Info::execute()
             m_inputFile = "STDIN";
         readerOptions.add<std::string>("filename", m_inputFile);
         readerOptions.add<bool>("debug", isDebug());
-        readerOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
+        readerOptions.add<uint32_t>("verbose", getVerboseLevel());
     }
 
     PipelineManager* manager = AppSupport::makePipeline(readerOptions);
@@ -398,24 +416,20 @@ int Info::execute()
         m_options.add(seed_option);
     }
     
-    Option sample_size("sample_size", m_sample_size, "sample size for random sample");
-    m_options.add(sample_size);
-    
-    Option cls("exact_count", "Classification", "use exact counts for classification stats");
-    Option rn("exact_count", "ReturnNumber", "use exact counts for ReturnNumber stats");
-    Option nr("exact_count", "NumberOfReturns", "use exact counts for ReturnNumber stats");
-    m_options.add(cls);
-    m_options.add(rn);
-    m_options.add(nr);
-    Option do_sample("do_sample", m_showSample, "Dont do sampling");
-    m_options.add(do_sample);
+    m_options.add("sample_size", m_sample_size,
+        "sample size for random sample");
+    m_options.add("exact_count", "Classification",
+        "use exact counts for classification stats");
+    m_options.add("exact_count", "ReturnNumber",
+        "use exact counts for ReturnNumber stats");
+    m_options.add("exact_count", "NumberOfReturns",
+        "use exact counts for ReturnNumber stats");
+    m_options.add("do_sample", m_showSample, "Dont do sampling");
     if (m_Dimensions.size())
-    {
-        Option dimensions("dimensions", m_Dimensions, "Use explicit list of dimensions");
-        m_options.add(dimensions);
-    }
+        m_options.add("dimensions", m_Dimensions,
+            "Use explicit list of dimensions");
     
-    pdal::Options options = m_options + readerOptions;
+    Options options = m_options + readerOptions;
     
     Stage* reader = manager->getStage();
     if (m_showStats)

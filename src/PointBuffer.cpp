@@ -133,52 +133,13 @@ boost::property_tree::ptree PointBuffer::toPTree() const
         for (size_t i = 0; i < dimensions.size(); i++)
         {
             const Dimension& dimension = dimensions[i];
-            const std::string key = pointstring + dimension.getName();
-            tree.add(key, printDimension(dimension, idx));
+            std::string key = pointstring + dimension.getName();
+            double v = getFieldAs<double>(dimension, idx);
+            std::string value = boost::lexical_cast<std::string>(v);
+            tree.add(key, value);
         }
     }
     return tree;
-}
-
-std::string PointBuffer::printDimension(Dimension const& dimension,
-    boost::uint32_t index) const
-{
-
-    boost::uint32_t const& size = dimension.getByteSize();
-
-    std::string output;
-
-    double scale = dimension.getNumericScale();
-    double offset = dimension.getNumericOffset();
-
-    bool applyScaling = !Utils::compare_distance(scale, 1.0) ||
-        !Utils::compare_distance(offset, 0.0);
-
-//ABELL - Just left this as example code.
-/**
-    switch (dimension.getInterpretation())
-    {
-
-#define GETFIELDAS(T) getField<T>(dimension, index)
-#define STRINGIFY(T,x) boost::lexical_cast<std::string>(boost::numeric_cast<T>(x))
-        // note we convert 8-bit fields to ints, so they aren't treated as
-        // chars
-        case dimension::SignedInteger:
-            if (size == 1)
-            {
-                if (!applyScaling)
-                    output += STRINGIFY(boost::int32_t,
-                        GETFIELDAS(boost::int8_t));
-                else
-                {
-                    boost::int8_t v = GETFIELDAS(boost::int8_t);
-                    double d = dimension.applyScaling(v);
-                    output += STRINGIFY(double, d);
-                }
-            }
-    }
-**/
-    return output;
 }
 
 
@@ -230,7 +191,8 @@ std::ostream& PointBuffer::toRST(std::ostream& os) const
         for (size_t i = 0; i < dimensions.size(); i++)
         {
             const Dimension& dimension = dimensions[i];
-            std::string value = printDimension(dimension, idx);
+            double v = getFieldAs<double>(dimension, idx);
+            std::string value = boost::lexical_cast<std::string>(v);
             std::string name = dimension.getName();
             std::string ns = dimension.getNamespace();
             os << std::left << std::setw(name_column) << name <<
