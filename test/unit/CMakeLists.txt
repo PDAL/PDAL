@@ -66,7 +66,7 @@ SET(PDAL_UNITTEST_TEST_SRC
 if(WITH_APPS)
   if(LIBXML2_FOUND)
     list(APPEND PDAL_UNITTEST_TEST_SRC 
-#      apps/pcinfoTest.cpp
+      apps/pcinfoTest.cpp
     )
   endif(LIBXML2_FOUND)
 
