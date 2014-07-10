@@ -49,33 +49,33 @@ BOOST_AUTO_TEST_SUITE(HexbinFilterTest)
 
 using namespace pdal;
 
+void printChildren(std::ostream& out, MetadataNode m, int depth = 0)
+{
+    std::vector<MetadataNode> children = m.children();
+    for (auto mi = children.begin(); mi != children.end(); ++mi)
+    {
+        MetadataNode& c = *mi;
+        for (int i = 0; i < depth; i++)
+            out << "\t";
+        out << c.name() << " : " << c.value() << "\n";
+        printChildren(out, c, depth + 1);
+    }
+}
+
 BOOST_AUTO_TEST_CASE(HexbinFilterTest_test_1)
 {
     Options options;
-        
-    Option filename("filename", Support::datapath("1.2-with-color.las"));
-
-    Option debug("debug", true, "");
-    Option verbose("verbose", 9, "");
-    // options.add(debug);
-    // options.add(verbose);
-    Option sampleSize("sample_size", 5000, "Number of samples to use "
+    options.add("filename", Support::datapath("hextest.las"));
+    options.add("sample_size", 5000, "Number of samples to use "
         "when estimating hexagon edge size. Specify 0.0 for edge_size if "
         "you want to compute one.");
-    Option threshold("threshold", 10, "Number of points necessary inside "
+    options.add("threshold", 1, "Number of points necessary inside "
         "a hexagon to be considered full");
-    Option edgeLength("edge_length", 0.0, "The edge size of the hexagon to "
+    options.add("edge_length", 0.666666666, "The edge size of the hexagon to "
         "use in situations where you do not want to estimate based on "
         "a sample");
-    Option x_dim("x_dim", "X", "dot-qualified name of X dimension to use");
-    Option y_dim("y_dim", "Y", "dot-qualified name of Y dimension to use");
-            
-    options.add(filename);
-    options.add(sampleSize);
-    options.add(threshold);
-    options.add(edgeLength);
-    options.add(x_dim);
-    options.add(y_dim);
+    options.add("x_dim", "X", "dot-qualified name of X dimension to use");
+    options.add("y_dim", "Y", "dot-qualified name of Y dimension to use");
 
     drivers::las::Reader reader(options);
     filters::HexBin hexbin(options);
@@ -86,16 +86,18 @@ BOOST_AUTO_TEST_CASE(HexbinFilterTest_test_1)
     hexbin.prepare(ctx);
     hexbin.execute(ctx);
 
-    /**
     MetadataNode m = ctx.metadata();
     m = m.findChild(hexbin.getName());
-    std::vector<MetadataNode> children = m.children();
-    for (auto mi = children.begin(); mi != children.end(); ++mi)
-    {
-        MetadataNode& c = *mi;
-        std::cerr << c.name() << " : " << c.value() << "\n\n";
-    }
-    **/
+
+    std::string filename = Support::temppath("hexbin.txt");
+    std::ofstream out(filename);
+    printChildren(out, m);
+    out.close();
+
+    BOOST_CHECK(Support::compare_text_files(filename,
+        Support::datapath("filters/hexbin.txt")));
+
+    FileUtils::deleteFile(filename);
 }
 
 #endif

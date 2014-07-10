@@ -33,6 +33,9 @@
 ****************************************************************************/
 
 #include <pdal/filters/HexBin.hpp>
+#include <hexer/HexIter.hpp>
+
+using namespace hexer;
 
 namespace pdal
 {
@@ -61,11 +64,11 @@ void HexBin::ready(PointContext ctx)
     m_yDim = ctx.schema()->getDimensionPtr(m_yDimName);
     if (m_edgeLength == 0.0)  // 0 can always be represented exactly.
     {
-        m_grid.reset(new hexer::HexGrid(m_density));
+        m_grid.reset(new HexGrid(m_density));
         m_grid->setSampleSize(m_sampleSize);
     }
     else
-        m_grid.reset(new hexer::HexGrid(m_edgeLength * sqrt(3), m_density));
+        m_grid.reset(new HexGrid(m_edgeLength * sqrt(3), m_density));
 #endif
 }
 
@@ -91,6 +94,17 @@ void HexBin::done(PointContext ctx)
     m_grid->findShapes();
     m_grid->findParentPaths();
 
+    std::ostringstream offsets;
+    offsets << "MULTIPOINT (";
+    for (int i = 0; i < 6; ++i)
+    {
+        hexer::Point p = m_grid->offset(i);
+        offsets << p.m_x << " " << p.m_y;
+        if (i != 5)
+            offsets << ", ";
+    }
+    offsets << ")";
+
     m_metadata.add("edge_length", m_edgeLength, "The edge length of the "
         "hexagon to use in situations where you do not want to estimate "
         "based on a sample");
@@ -99,6 +113,25 @@ void HexBin::done(PointContext ctx)
     m_metadata.add("sample_size", m_sampleSize, "Number of samples to use "
         "when estimating hexagon edge size. Specify 0.0 or omit options "
         "for edge_size if you want to compute one.");
+    m_metadata.add("hex_offsets", offsets.str(), "Offset of hex corners from "
+        "hex centers.");
+    MetadataNode hexes = m_metadata.add("hexagons");
+    for (HexIter hi = m_grid->hexBegin(); hi != m_grid->hexEnd(); ++hi)
+    {
+        using namespace boost;
+
+        HexInfo h = *hi;
+
+        MetadataNode hex = hexes.add("hexagon");
+        hex.add("density", h.density());
+
+        hex.add("gridpos", lexical_cast<std::string>(h.xgrid()) + " " +
+            lexical_cast<std::string>(h.ygrid()));
+        std::ostringstream oss;
+        // Using stream limits precision (default 6)
+        oss << "POINT (" << h.x() << " " << h.y() << ")";
+        hex.add("center", oss.str());
+    }
 
     std::ostringstream polygon;
     polygon.setf(std::ios_base::fixed, std::ios_base::floatfield);
