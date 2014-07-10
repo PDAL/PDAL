@@ -706,7 +706,6 @@ void Base::loadPoint(PointBuffer& data, PointDimensions *dimensions,
 
     istream >> intensity >> flags >> classification >> scanAngleRank >> 
         user >> pointSourceId;
-    classification &= 31;
 
     uint8_t returnNum = flags & 0x07;
     uint8_t numReturns = (flags >> 3) & 0x07;
