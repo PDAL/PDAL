@@ -232,7 +232,7 @@ public:
     template<typename T>
     void setField(Dimension const& dim, PointId idx, T val);
 
-    void setRawField(Dimension const& dim, PointId idx, void *val)
+    void setRawField(Dimension const& dim, PointId idx, const void *val)
     {
         setFieldInternal(dim, idx, val);
     }
@@ -500,7 +500,7 @@ private:
     void convertAndSet(pdal::Dimension const& dim, PointId idx, T_IN in);
 
     inline void setFieldInternal(Dimension const& dim, PointId pointIndex,
-        void *value);
+        const void *value);
     inline void getFieldInternal(Dimension const& dim, PointId pointIndex,
         void *value) const;
 };
@@ -700,7 +700,7 @@ inline void PointBuffer::getFieldInternal(pdal::Dimension const& dim,
 
 
 inline void PointBuffer::setFieldInternal(pdal::Dimension const& dim,
-    PointId id, void *value)
+    PointId id, const void *value)
 {
     PointId rawId = 0;
     if (id == m_index.size())
@@ -716,7 +716,10 @@ inline void PointBuffer::setFieldInternal(pdal::Dimension const& dim,
         return;
     }
     else
+    {
         rawId = m_index[id];
+    }
+
     m_context.rawPtBuf()->setField(dim, rawId, value);
 }
 

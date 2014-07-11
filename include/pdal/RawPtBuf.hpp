@@ -60,7 +60,7 @@ public:
         return m_numPts++;
     }
 
-    void setField(const Dimension& dim, PointId idx, void *value)
+    void setField(const Dimension& dim, PointId idx, const void *value)
     {
         size_t offset = pointsToBytes(idx) + dim.getByteOffset();
         memcpy(m_buf.data() + offset, value, dim.getByteSize());
@@ -70,11 +70,6 @@ public:
     {
         size_t offset = pointsToBytes(idx) + dim.getByteOffset();
         memcpy(value, m_buf.data() + offset, dim.getByteSize());
-    }
-
-    std::vector<char>& getBuffer()
-    {
-        return m_buf;
     }
 
 private:

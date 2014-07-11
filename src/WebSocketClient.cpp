@@ -141,7 +141,7 @@ void WebSocketClient::exchange(WebSocketExchange& exchange)
                     exchange.res().at(0)->get_payload(),
                     jsonResponse);
 
-            message += ":'n" + jsonResponse.toStyledString();
+            message += ":\n" + jsonResponse.toStyledString();
         }
 
         throw new pdal_error(message);

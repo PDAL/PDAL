@@ -55,16 +55,12 @@ public:
     GreyhoundReader(const Options& options);
     ~GreyhoundReader();
 
-    static Options getDefaultOptions();
-    static std::vector<Dimension> getDefaultDimensions();
-
     virtual StageSequentialIterator* createSequentialIterator() const;
 
 private:
     std::string m_uri;
     std::string m_pipelineId;
     std::string m_sessionId;
-    std::vector<Dimension*> m_dims;
     point_count_t m_numPoints;
     WebSocketClient m_wsClient;
 
@@ -86,7 +82,7 @@ public:
             WebSocketClient& wsClient,
             std::string sessionId,
             point_count_t numPoints,
-            schema::size_type m_byteSize);
+            Schema schema);
 
 private:
     virtual point_count_t readImpl(
@@ -106,7 +102,7 @@ private:
     WebSocketClient& m_wsClient;
     std::string m_sessionId;
     point_count_t m_numPoints;
-    schema::size_type m_byteSize;
+    Schema m_schema;
 };
 
 } // namespace sequential

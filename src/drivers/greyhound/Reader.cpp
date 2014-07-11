@@ -47,7 +47,6 @@ GreyhoundReader::GreyhoundReader(const Options& options)
     , m_uri()
     , m_pipelineId()
     , m_sessionId()
-    , m_dims()
     , m_numPoints()
     , m_wsClient()
 { }
@@ -58,28 +57,13 @@ GreyhoundReader::~GreyhoundReader()
     m_wsClient.exchange(destroyExchange);
 }
 
-Options GreyhoundReader::getDefaultOptions()
-{
-    Options options;
-    return options;
-}
-
-std::vector<Dimension> GreyhoundReader::getDefaultDimensions()
-{
-    std::cout << "DIMS" << std::endl;
-    std::vector<Dimension> output;
-
-    return output;
-}
-
 StageSequentialIterator* GreyhoundReader::createSequentialIterator() const
 {
-    std::cout << "CREATING ITERATOR: " << m_numPoints << std::endl;
     return new iterators::sequential::Iterator(
             const_cast<WebSocketClient&>(m_wsClient),
             m_sessionId,
             m_numPoints,
-            m_schema.getByteSize());
+            m_schema);
 }
 
 void GreyhoundReader::processOptions(const Options& options)
@@ -92,33 +76,28 @@ void GreyhoundReader::processOptions(const Options& options)
 
 void GreyhoundReader::buildSchema(Schema* schema)
 {
-    std::cout << "BUILD SCHEMA" << std::endl;
-    Json::Value jsonResponse;
-    Json::Reader jsonReader;
-
     // Create session.
     exchanges::CreateSession createExchange(m_pipelineId);
     m_wsClient.exchange(createExchange);
     m_sessionId = createExchange.getSession();
 
-    // Get schema
+    // Get schema.
     exchanges::GetSchema schemaExchange(m_sessionId);
     m_wsClient.exchange(schemaExchange);
     m_schema = Schema::from_xml(schemaExchange.schema());
 
-    schema::Map dims(m_schema.getDimensions());
-    for (auto dim = dims.begin(); dim != dims.end(); ++dim)
+    const pdal::schema::index_by_index& idx(
+            m_schema.getDimensions().get<pdal::schema::index>());
+
+    // Populate passed-in schema.
+    for (boost::uint32_t d = 0; d < idx.size(); ++d)
     {
-        m_dims.push_back(schema->appendDimension(*dim));
+        schema->appendDimension(idx[d]);
     }
 }
 
-void GreyhoundReader::ready(PointContext ctx)
+void GreyhoundReader::ready(PointContext)
 {
-    std::cout << "READY" << std::endl;
-    Json::Value jsonResponse;
-    Json::Reader jsonReader;
-
     // Get number of points.
     exchanges::GetNumPoints numPointsExchange(m_sessionId);
     m_wsClient.exchange(numPointsExchange);
@@ -132,39 +111,57 @@ sequential::Iterator::Iterator(
         WebSocketClient& wsClient,
         std::string sessionId,
         point_count_t numPoints,
-        schema::size_type byteSize)
+        Schema schema)
     : m_wsClient(wsClient)
     , m_sessionId(sessionId)
     , m_numPoints(numPoints)
-    , m_byteSize(byteSize)
+    , m_schema(schema)
 { }
 
 point_count_t sequential::Iterator::readImpl(
         PointBuffer& pointBuffer,
         point_count_t count)
 {
-    Json::Value jsonResponse;
-    Json::Reader jsonReader;
-
+    // Read data.
     exchanges::Read readExchange(m_sessionId, m_index, count);
     m_wsClient.exchange(readExchange);
     std::vector<const std::string*> data(readExchange.data());
-    point_count_t numRead(readExchange.numRead());
 
-    std::vector<char>& rawBuffer(
-            pointBuffer.context().rawPtBuf()->getBuffer());
+    // TODO Reconcile this.
+    //point_count_t numRead(readExchange.numRead());
 
-    std::cout << "PB: " << pointBuffer.size() << std::endl;
+    PointId nextId = pointBuffer.size();
+    PointId idx = m_index;
+    point_count_t numRead = 0;
+
+    const pdal::schema::index_by_index& schemaIndex(
+            m_schema.getDimensions().get<pdal::schema::index>());
 
     for (std::size_t i(0); i < data.size(); ++i)
     {
-        std::memcpy(
-                rawBuffer.data() + (m_index * m_byteSize),
-                data[i]->data(),
-                data[i]->size());
+        std::size_t dataIndex(0);
 
-        m_index += data[i]->size();
+        while (dataIndex < data[i]->size())
+        {
+            for (boost::uint32_t d = 0; d < schemaIndex.size(); ++d)
+            {
+                pointBuffer.setRawField(
+                        schemaIndex[d],
+                        nextId,
+                        data[i]->data() + dataIndex);
+
+                dataIndex += schemaIndex[d].getByteSize();
+            }
+
+            ++idx;
+            ++nextId;
+            ++numRead;
+        }
     }
+
+    m_index = idx;
+
+    std::cout << numRead << " " << readExchange.numRead() << std::endl;
 
     return numRead;
 }
