@@ -54,7 +54,6 @@ class StageRunner;
 class StageTester;
 //
 // supported options:
-//   <uint32>id
 //   <bool>debug
 //   <uint32>verbose
 //
@@ -93,8 +92,6 @@ public:
         { return m_verbose; }
     virtual std::string getName() const = 0;
     virtual std::string getDescription() const = 0;
-    boost::uint32_t getId() const
-        { return m_id; }
     const std::vector<Stage *>& getInputs() const
         { return m_inputs; }
     Stage& getPrevStage() const;
@@ -134,17 +131,13 @@ protected:
     MetadataNode m_metadata;
     Bounds<double> m_bounds;
 
-    StageOperationType getDimensionOperationType() const
-        { return m_dimensionsType; }
     void setBounds(Bounds<double> const&);
     void setSpatialReference(MetadataNode& m, SpatialReference const&);
 
 private:
     bool m_debug;
     boost::uint32_t m_verbose;
-    boost::uint32_t m_id;
     std::vector<Stage *> m_inputs;
-    StageOperationType m_dimensionsType;
     LogPtr m_log;
     SpatialReference m_spatialReference;
 

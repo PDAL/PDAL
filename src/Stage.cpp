@@ -47,7 +47,6 @@ Stage::Stage(const Options& options)
     m_options = options;
     m_debug = m_options.getValueOrDefault<bool>("debug", false);
     m_verbose = m_options.getValueOrDefault<boost::uint32_t>("verbose", 0);
-    m_id = m_options.getValueOrDefault<boost::uint32_t>("id", 0);
     if (m_debug && !m_verbose)
         m_verbose = 1;
 }
@@ -63,9 +62,6 @@ void Stage::Construct()
 {
     m_debug = false;
     m_verbose = 0;
-    m_id = 0;
-    m_dimensionsType = StageOperation_All;
-//    m_numPoints = 0;
 }
 
 
@@ -120,6 +116,7 @@ PointBufferSet Stage::execute(PointContext ctx)
     return outBuffers;
 }
 
+
 void Stage::l_initialize(PointContext ctx)
 {
     m_metadata = ctx.metadata().add(getName());
@@ -128,6 +125,7 @@ void Stage::l_initialize(PointContext ctx)
         setBounds(prevStage.getBounds());
     }
 }
+
 
 void Stage::l_processOptions(const Options& options)
 {

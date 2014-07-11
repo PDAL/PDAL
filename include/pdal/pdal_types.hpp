@@ -32,44 +32,17 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_TYPES_HPP
-#define INCLUDED_TYPES_HPP
+#pragma once
 
 #include <stdint.h>
 
 #include <pdal/pdal_internal.hpp>
-
 
 namespace pdal
 {
 
 typedef uint32_t point_count_t;
 typedef uint32_t PointId;
-
-enum EndianType
-{
-    Endian_Little,
-    Endian_Big,
-    Endian_Unknown = 128
-};
-
-
-enum StageIteratorType
-{
-    StageIterator_Sequential = (1u << 0),
-    StageIterator_Random = (1u << 1),
-    StageIterator_Block = (1u << 2),
-    StageIterator_Unknown = (1u << 8)
-};
-
-
-
-enum StageOperationType
-{
-    StageOperation_All = (1u << 0),
-    StageOperation_Type = (1u << 1),
-    STageOperation_Id = (1u << 2)
-};
 
 enum LogLevel
 {
@@ -84,7 +57,5 @@ enum LogLevel
     logDEBUG5
 };
 
+} // namespace pdal
 
-} // namespace
-
-#endif
