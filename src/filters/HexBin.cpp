@@ -33,9 +33,12 @@
 ****************************************************************************/
 
 #include <pdal/filters/HexBin.hpp>
+
+#ifdef PDAL_HAVE_HEXER
 #include <hexer/HexIter.hpp>
 
 using namespace hexer;
+#endif
 
 namespace pdal
 {
