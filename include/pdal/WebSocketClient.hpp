@@ -34,23 +34,63 @@
 
 #pragma once
 
+#include <condition_variable>
+#include <mutex>
+
 #include <websocketpp/config/asio_no_tls_client.hpp>
 #include <websocketpp/client.hpp>
 
-#include <boost/algorithm/string.hpp>
 #include <json/json.h>
 
 namespace pdal
 {
 
+typedef websocketpp::client<websocketpp::config::asio_client> asioClient;
+typedef websocketpp::config::asio_client::message_type::ptr message_ptr;
+    
+class WebSocketExchange
+{
+public:
+    const Json::Value& req() const { return m_req; }
+    const std::vector<message_ptr>& res() const { return m_res; }
+    void addResponse(message_ptr message)
+    {
+        handleRx(message);
+        m_res.push_back(message);
+    }
+
+    virtual bool done() const { return true; }
+
+protected:
+    WebSocketExchange() : m_req(), m_res() { }
+    virtual void handleRx(const message_ptr) { }
+
+    Json::Value m_req;
+
+private:
+    std::vector<message_ptr> m_res;
+};
+
 class WebSocketClient
 {
 public:
-    WebSocketClient(const std::string& uri);
+    WebSocketClient(bool enableLogging = false);
+    WebSocketClient(const std::string& uri, bool enableLogging = false);
+
+    void initialize(const std::string& uri);
+    
+    void exchange(WebSocketExchange& exchange);
+    std::string exchangeDouble(const Json::Value& req);
 
 private:
-    const std::string m_uri;
-    websocketpp::client<websocketpp::config::asio_client> m_client;
+    std::string m_uri;
+    asioClient m_client;
+    Json::Reader m_jsonReader;
+
+    std::condition_variable m_cv;
+    std::mutex m_mutex;
+
+    bool m_initialized;
 };
 
 } // namespace pdal

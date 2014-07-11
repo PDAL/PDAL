@@ -36,6 +36,7 @@
 
 #include <pdal/Reader.hpp>
 #include <pdal/ReaderIterator.hpp>
+#include <pdal/WebSocketClient.hpp>
 
 namespace pdal
 {
@@ -51,7 +52,8 @@ public:
     SET_STAGE_LINK("http://pdal.io/stages/drivers.greyhound.reader.html")
     SET_STAGE_ENABLED(true)
 
-    GreyhoundReader(const Options& options) : Reader(options) { }
+    GreyhoundReader(const Options& options);
+    ~GreyhoundReader();
 
     static Options getDefaultOptions();
     static std::vector<Dimension> getDefaultDimensions();
@@ -59,7 +61,12 @@ public:
     virtual StageSequentialIterator* createSequentialIterator() const;
 
 private:
+    std::string m_uri;
+    std::string m_pipelineId;
+    std::string m_sessionId;
     std::vector<Dimension*> m_dims;
+    point_count_t m_numPoints;
+    WebSocketClient m_wsClient;
 
     virtual void processOptions(const Options& options);
     virtual void buildSchema(Schema* schema);
@@ -75,13 +82,26 @@ class PDAL_DLL Iterator:
     public pdal::ReaderSequentialIterator
 {
 public:
-    Iterator();
+    Iterator(
+            WebSocketClient& wsClient,
+            std::string sessionId,
+            point_count_t numPoints,
+            schema::size_type m_byteSize);
 
 private:
     virtual point_count_t readImpl(PointBuffer& data, point_count_t count);
+    virtual uint32_t readBufferImpl(PointBuffer& data)
+    {
+        return readImpl(data, std::numeric_limits<point_count_t>::max());
+    }
+
     boost::uint64_t skipImpl(boost::uint64_t pointsToSkip);
-    virtual boost::uint32_t readBufferImpl(PointBuffer&);
     virtual bool atEndImpl() const;
+
+    WebSocketClient& m_wsClient;
+    std::string m_sessionId;
+    point_count_t m_numPoints;
+    schema::size_type m_byteSize;
 };
 
 } // namespace sequential

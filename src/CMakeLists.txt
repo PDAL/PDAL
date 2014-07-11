@@ -835,7 +835,7 @@ if (WITH_HDF5)
     target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE} ${HDF5_LIBRARIES})
 endif()
 
-if (WITH_JSONCPP)
+if (WITH_JSONCPP OR WITH_GREYHOUND)
     target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE} ${JSONCPP_LIBRARIES})
 endif()
 

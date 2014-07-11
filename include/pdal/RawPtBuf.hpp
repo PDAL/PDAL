@@ -72,6 +72,11 @@ public:
         memcpy(value, m_buf.data() + offset, dim.getByteSize());
     }
 
+    std::vector<char>& getBuffer()
+    {
+        return m_buf;
+    }
+
 private:
     std::vector<char> m_buf;
     point_count_t m_numPts;
