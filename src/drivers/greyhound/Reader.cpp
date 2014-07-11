@@ -54,8 +54,8 @@ GreyhoundReader::GreyhoundReader(const Options& options)
 
 GreyhoundReader::~GreyhoundReader()
 {
-    exchanges::Destroy exchange(m_sessionId);
-    m_wsClient.exchange(exchange);
+    exchanges::Destroy destroyExchange(m_sessionId);
+    m_wsClient.exchange(destroyExchange);
 }
 
 Options GreyhoundReader::getDefaultOptions()
@@ -66,17 +66,17 @@ Options GreyhoundReader::getDefaultOptions()
 
 std::vector<Dimension> GreyhoundReader::getDefaultDimensions()
 {
+    std::cout << "DIMS" << std::endl;
     std::vector<Dimension> output;
-
-    // TODO
 
     return output;
 }
 
 StageSequentialIterator* GreyhoundReader::createSequentialIterator() const
 {
+    std::cout << "CREATING ITERATOR: " << m_numPoints << std::endl;
     return new iterators::sequential::Iterator(
-            const_cast<WebSocketClient&>(m_wsClient), // TODO
+            const_cast<WebSocketClient&>(m_wsClient),
             m_sessionId,
             m_numPoints,
             m_schema.getByteSize());
@@ -92,37 +92,37 @@ void GreyhoundReader::processOptions(const Options& options)
 
 void GreyhoundReader::buildSchema(Schema* schema)
 {
+    std::cout << "BUILD SCHEMA" << std::endl;
     Json::Value jsonResponse;
     Json::Reader jsonReader;
 
     // Create session.
-    {
-        exchanges::CreateSession exchange(m_pipelineId);
-        m_wsClient.exchange(exchange);
-        m_sessionId = exchange.getSession();
-    }
+    exchanges::CreateSession createExchange(m_pipelineId);
+    m_wsClient.exchange(createExchange);
+    m_sessionId = createExchange.getSession();
 
     // Get schema
-    {
-        exchanges::GetSchema exchange(m_sessionId);
-        m_wsClient.exchange(exchange);
-        m_schema = Schema::from_xml(exchange.schema());
+    exchanges::GetSchema schemaExchange(m_sessionId);
+    m_wsClient.exchange(schemaExchange);
+    m_schema = Schema::from_xml(schemaExchange.schema());
 
-        schema = &m_schema;
+    schema::Map dims(m_schema.getDimensions());
+    for (auto dim = dims.begin(); dim != dims.end(); ++dim)
+    {
+        m_dims.push_back(schema->appendDimension(*dim));
     }
 }
 
 void GreyhoundReader::ready(PointContext ctx)
 {
+    std::cout << "READY" << std::endl;
     Json::Value jsonResponse;
     Json::Reader jsonReader;
 
     // Get number of points.
-    {
-        exchanges::GetNumPoints exchange(m_sessionId);
-        m_wsClient.exchange(exchange);
-        m_numPoints = exchange.count();
-    }
+    exchanges::GetNumPoints numPointsExchange(m_sessionId);
+    m_wsClient.exchange(numPointsExchange);
+    m_numPoints = numPointsExchange.count();
 }
 
 namespace iterators
@@ -146,10 +146,10 @@ point_count_t sequential::Iterator::readImpl(
     Json::Value jsonResponse;
     Json::Reader jsonReader;
 
-    exchanges::Read exchange(m_sessionId, m_index, count);
-    m_wsClient.exchange(exchange);
-    std::vector<const std::string*> data(exchange.data());
-    point_count_t numRead(exchange.numRead());
+    exchanges::Read readExchange(m_sessionId, m_index, count);
+    m_wsClient.exchange(readExchange);
+    std::vector<const std::string*> data(readExchange.data());
+    point_count_t numRead(readExchange.numRead());
 
     std::vector<char>& rawBuffer(
             pointBuffer.context().rawPtBuf()->getBuffer());
