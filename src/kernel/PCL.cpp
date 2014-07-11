@@ -163,21 +163,17 @@ int PCL::execute()
     PointContext ctx;
     writer->prepare(ctx);
 
-    const boost::uint64_t numPointsToRead = final_stage->getNumPoints();
-
-    std::cerr << "Requested to read " << numPointsToRead << " points" << std::endl;
+//ABELL - Not sure to work.
+//    const boost::uint64_t numPointsToRead = final_stage->getNumPoints();
+const boost::uint64_t numPointsToRead = 0;
 
     pdal::UserCallback* callback;
     if (!getProgressShellCommand().size())
     {
         if (numPointsToRead == 0)
-        {
             callback = static_cast<pdal::UserCallback*>(new HeartbeatCallback);
-        }
         else
-        {
             callback = static_cast<pdal::UserCallback*>(new PercentageCallback);
-        }
     }
     else
     {

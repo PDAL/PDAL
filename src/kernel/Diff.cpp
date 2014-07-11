@@ -178,8 +178,8 @@ int Diff::execute()
         
         oss << "Source and candidate files do not have the same point count";
         errors.put<std::string>("count.error", oss.str());
-        errors.put<uint32_t>("count.candidate" , candidate->getNumPoints());
-        errors.put<uint32_t>("count.source" , source->getNumPoints());
+        errors.put<uint32_t>("count.candidate", candidateBuf->size());
+        errors.put<uint32_t>("count.source", sourceBuf->size());
     }
     
     MetadataNode source_metadata = sourceCtx.metadata();

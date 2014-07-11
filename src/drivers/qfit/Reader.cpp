@@ -386,8 +386,8 @@ std::ios::off_type length = 0;
         throw qfit_error(msg.str());
 
     }
-    setNumPoints(count);
 
+    m_numPoints = count;
     if (str != 0)
         delete str;
 }
@@ -658,7 +658,7 @@ pdal::StageSequentialIterator*
 Reader::createSequentialIterator(PointBuffer& buffer) const
 {
     return new pdal::drivers::qfit::iterators::sequential::Reader(*this,
-        buffer, getNumPoints());
+        buffer);
 }
 
 
@@ -666,7 +666,7 @@ pdal::StageRandomIterator*
 Reader::createRandomIterator(PointBuffer& buffer) const
 {
     return new pdal::drivers::qfit::iterators::random::Reader(*this,
-        buffer, getNumPoints());
+        buffer);
 }
 
 std::vector<Dimension> Reader::getDefaultDimensions()
@@ -791,10 +791,8 @@ namespace sequential
 {
 
 
-Reader::Reader(const pdal::drivers::qfit::Reader& reader, PointBuffer& buffer,
-        boost::uint32_t numPoints)
-    : pdal::ReaderSequentialIterator(buffer)
-    , m_reader(reader), m_numPoints(numPoints)
+Reader::Reader(const pdal::drivers::qfit::Reader& reader, PointBuffer& buffer)
+    : pdal::ReaderSequentialIterator(buffer), m_reader(reader)
 {
     m_istream = FileUtils::openFile(m_reader.getFileName());
     m_istream->seekg(m_reader.getPointDataOffset());
@@ -814,15 +812,9 @@ boost::uint64_t Reader::skipImpl(boost::uint64_t count)
 }
 
 
-bool Reader::atEndImpl() const
-{
-    return getIndex() >= m_numPoints;
-}
-
-
 boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
 {
-    boost::uint32_t numToRead = m_numPoints - getIndex();
+    boost::uint32_t numToRead = m_reader.getNumPoints() - getIndex();
     return m_reader.processBuffer(data, *m_istream, numToRead);
 }
 
@@ -832,10 +824,8 @@ namespace random
 {
 
 
-Reader::Reader(const pdal::drivers::qfit::Reader& reader, PointBuffer& buffer,
-        boost::uint32_t numPoints)
-    : pdal::ReaderRandomIterator(buffer),
-    m_reader(reader), m_numPoints(numPoints)
+Reader::Reader(const pdal::drivers::qfit::Reader& reader, PointBuffer& buffer)
+    : pdal::ReaderRandomIterator(buffer), m_reader(reader)
 {
     m_istream = FileUtils::openFile(m_reader.getFileName());
     m_istream->seekg(m_reader.getPointDataOffset());
@@ -870,7 +860,7 @@ boost::uint64_t Reader::seekImpl(boost::uint64_t count)
 
 boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
 {
-    boost::uint64_t numToRead = m_numPoints - getIndex();
+    boost::uint64_t numToRead = m_reader.getNumPoints() - getIndex();
     return m_reader.processBuffer(data, *m_istream, numToRead);
 }
 

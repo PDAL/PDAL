@@ -357,7 +357,9 @@ void Writer::WritePCDHeader(pdal::Schema const& schema)
     }
     *m_stream << std::endl;
 
-    boost::uint64_t width = getPrevStage().getNumPoints();
+//ABELL - Get point count from PointBuffer
+//    boost::uint64_t width = getPrevStage().getNumPoints();
+boost::uint64_t width = 0;
     *m_stream << "WIDTH " << width << std::endl;
 
     *m_stream << "HEIGHT 1" << std::endl;

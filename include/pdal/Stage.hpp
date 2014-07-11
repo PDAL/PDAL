@@ -76,10 +76,7 @@ public:
 
     void prepare(PointContext ctx);
     PointBufferSet execute(PointContext ctx);
-    bool isInitialized() const
-        { return m_initialized; }
 
-    virtual boost::uint64_t getNumPoints() const;
     const Bounds<double>& getBounds() const;
     void setSpatialReference(SpatialReference const&);
     const SpatialReference& getSpatialReference() const;
@@ -139,19 +136,16 @@ protected:
 
     StageOperationType getDimensionOperationType() const
         { return m_dimensionsType; }
-    void setNumPoints(boost::uint64_t);
     void setBounds(Bounds<double> const&);
     void setSpatialReference(MetadataNode& m, SpatialReference const&);
 
 private:
-    bool m_initialized;
     bool m_debug;
     boost::uint32_t m_verbose;
     boost::uint32_t m_id;
     std::vector<Stage *> m_inputs;
     StageOperationType m_dimensionsType;
     LogPtr m_log;
-    mutable boost::uint64_t m_numPoints;
     SpatialReference m_spatialReference;
 
     Stage& operator=(const Stage&); // not implemented

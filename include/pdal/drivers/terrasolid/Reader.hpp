@@ -152,6 +152,8 @@ public:
         { return m_offset; }
     boost::uint32_t getPointDataSize() const
         { return m_size; }
+    point_count_t getNumPoints() const
+        { return m_header->PntCnt; }
 
     // this is called by the stage's iterator
     uint32_t processBuffer(PointBuffer& PointBuffer, std::istream& stream,
@@ -189,7 +191,7 @@ class Reader : public pdal::ReaderSequentialIterator
 {
 public:
     Reader(const pdal::drivers::terrasolid::Reader& reader,
-        PointBuffer& buffer, uint32_t m_numPoints);
+        PointBuffer& buffer);
     ~Reader();
 
 private:
@@ -199,7 +201,6 @@ private:
 
     const pdal::drivers::terrasolid::Reader& m_reader;
     std::istream* m_istream;
-    boost::uint32_t m_numPoints;
 };
 
 
@@ -212,7 +213,7 @@ class Reader : public pdal::ReaderRandomIterator
 {
 public:
     Reader(const pdal::drivers::terrasolid::Reader& reader,
-        PointBuffer& buffer, uint32_t numPoints);
+        PointBuffer& buffer);
     ~Reader();
 
 private:
@@ -221,7 +222,6 @@ private:
 
     const pdal::drivers::terrasolid::Reader& m_reader;
     std::istream* m_istream;
-    uint32_t m_numPoints;
 };
 
 } // random

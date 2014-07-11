@@ -61,12 +61,11 @@ Stage::Stage()
 
 void Stage::Construct()
 {
-    m_initialized = false;
     m_debug = false;
     m_verbose = 0;
     m_id = 0;
     m_dimensionsType = StageOperation_All;
-    m_numPoints = 0;
+//    m_numPoints = 0;
 }
 
 
@@ -132,10 +131,6 @@ void Stage::l_initialize(PointContext ctx)
 
 void Stage::l_processOptions(const Options& options)
 {
-    // it is illegal to call initialize() twice
-    if (m_initialized)
-        throw pdal_error("Class already initialized: " + this->getName());
-
     m_debug = options.getValueOrDefault<bool>("debug", false);
     m_verbose = options.getValueOrDefault<boost::uint32_t>("verbose", 0);
     if (m_debug && !m_verbose)
@@ -161,7 +156,6 @@ void Stage::l_processOptions(const Options& options)
         }
     }
     m_log->setLevel((LogLevel)m_verbose);
-    m_initialized = true;
 
     // If the user gave us an SRS via options, take that.
     try
@@ -210,37 +204,6 @@ void Stage::setBounds(const Bounds<double>& bounds)
 }
 
 
-boost::uint64_t Stage::getNumPoints() const
-{
-    // The Stage's getNumPoints() can't change. If it is 0, we'll try to
-    // forward the getPrevStage()'s count. This will continue down the
-    // pipeline until a count is returned. If the end stage does
-    // actually return a 0 because the Stage has an unknown or indefinite
-    // point count, this will ask and return 0 every time.
-
-    // We will cache this value on the stage once we've returned
-    // it because the point count of a stage is not expected to change.
-    // m_numPoints is mutable to support the setting of its value
-    // to cache the previous stage's value.
-    if (m_numPoints == 0)
-    {
-        try
-        {
-            m_numPoints = getPrevStage().getNumPoints();
-        }
-        catch (pdal::internal_error const&)
-        {}
-    }
-    return m_numPoints;
-}
-
-
-void Stage::setNumPoints(boost::uint64_t numPoints)
-{
-    m_numPoints = numPoints;
-}
-
-
 const SpatialReference& Stage::getSpatialReference() const
 {
     return m_spatialReference;
@@ -267,11 +230,8 @@ void Stage::setSpatialReference(MetadataNode& m,
 std::ostream& operator<<(std::ostream& ostr, const Stage& stage)
 {
     ostr << "  Name: " << stage.getName() << std::endl;
-    ostr << "  Num points: " << stage.getNumPoints() << std::endl;
-
     ostr << "  Bounds:" << std::endl;
     ostr << "    " << stage.getBounds() << std::endl;
-
     ostr << "  Spatial Reference:" << std::endl;
     ostr << "    WKT: " << stage.getSpatialReference().getWKT() << std::endl;
 

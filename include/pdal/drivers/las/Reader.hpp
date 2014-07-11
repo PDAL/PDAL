@@ -32,8 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_DRIVERS_LAS_READER_HPP
-#define INCLUDED_DRIVERS_LAS_READER_HPP
+#pragma once
 
 #include <pdal/Reader.hpp>
 #include <pdal/ReaderIterator.hpp>
@@ -75,16 +74,12 @@ public:
     static Options getDefaultOptions();
     StreamFactory& getStreamFactory() const;
 
-    pdal::StageSequentialIterator*
-        createSequentialIterator(PointBuffer& buffer) const;
     pdal::StageSequentialIterator* createSequentialIterator() const;
-    pdal::StageRandomIterator* createRandomIterator(PointBuffer& buffer) const;
-
 
     const LasHeader& getLasHeader() const
-    {
-        return m_lasHeader;
-    }
+        { return m_lasHeader; }
+    point_count_t getNumPoints() const
+        { return m_lasHeader.GetPointRecordsCount(); }
 
 protected:
     typedef std::unique_ptr<StreamFactory> StreamFactoryPtr;
@@ -151,41 +146,21 @@ namespace sequential
 class Reader : public Base, public pdal::ReaderSequentialIterator
 {
 public:
-    Reader(const pdal::drivers::las::Reader& reader, boost::uint32_t numPoints);
+    Reader(const pdal::drivers::las::Reader& reader);
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t);
     boost::uint32_t readBufferImpl(PointBuffer&);
     point_count_t readImpl(PointBuffer&, point_count_t count);
-    bool atEndImpl() const;
-
-    boost::uint32_t m_numPoints;
+    bool atEndImpl() const
+        { return getIndex() >= m_reader.getNumPoints(); }
 };
 
 } // sequential
 
-namespace random
-{
-
-class Reader : public Base, public pdal::ReaderRandomIterator
-{
-public:
-    Reader(const pdal::drivers::las::Reader& reader, PointBuffer& buffer,
-        boost::uint32_t numPoints);
-
-private:
-    boost::uint64_t seekImpl(boost::uint64_t);
-    boost::uint32_t readBufferImpl(PointBuffer&);
-
-    boost::uint32_t m_numPoints;
-};
-
-} // random
-
 } // iterators
 
-}
-}
-} // namespaces
+} // namespace las
+} // namespace drivers
+} // namespace pdal
 
-#endif
