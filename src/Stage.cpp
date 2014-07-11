@@ -69,22 +69,6 @@ void Stage::Construct()
     m_numPoints = 0;
 }
 
-void Stage::setInput(const std::vector<Stage *>& inputs)
-{
-    m_inputs = inputs;
-    for (size_t i = 0; i < m_inputs.size(); ++i)
-    {
-        Stage *input = m_inputs[i];
-        input->m_outputs.push_back(this);
-    }
-}
-
-void Stage::setInput(Stage *input)
-{
-    m_inputs.push_back(input);
-    input->m_outputs.push_back(this);
-}
-
 
 void Stage::prepare(PointContext ctx)
 {
@@ -99,6 +83,7 @@ void Stage::prepare(PointContext ctx)
     initialize();
     buildSchema(ctx.schema());
 }
+
 
 PointBufferSet Stage::execute(PointContext ctx)
 {
@@ -277,22 +262,6 @@ void Stage::setSpatialReference(MetadataNode& m,
     MetadataNode spatialNode = m.findChild(pred);
     if (spatialNode.empty())
         m.add("spatialreference", spatialRef, "SRS of this stage");
-}
-
-void Stage::setCoreProperties(const Stage& stage)
-{
-}
-
-std::vector<Stage *> Stage::makeVector(Stage& sref)
-{
-    std::vector<Stage *> v;
-    v.push_back(&sref);
-    return v;
-}
-
-std::vector<Stage*> Stage::makeVector(const std::vector<Stage*>& stages)
-{
-    return stages;
 }
 
 std::ostream& operator<<(std::ostream& ostr, const Stage& stage)

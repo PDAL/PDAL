@@ -69,8 +69,10 @@ public:
     virtual ~Stage()
         {}
 
-    void setInput(const std::vector<Stage *>& inputs);
-    void setInput(Stage *input);
+    void setInput(const std::vector<Stage *>& inputs)
+        { m_inputs = inputs; }
+    void setInput(Stage *input)
+        { m_inputs.push_back(input); }
 
     void prepare(PointContext ctx);
     PointBufferSet execute(PointContext ctx);
@@ -98,8 +100,6 @@ public:
         { return m_id; }
     const std::vector<Stage *>& getInputs() const
         { return m_inputs; }
-    const std::vector<Stage *>& getOutputs() const
-        { return m_outputs; }
     Stage& getPrevStage() const;
     std::vector<Stage *> getPrevStages() const;
     static Options getDefaultOptions()
@@ -143,22 +143,12 @@ protected:
     void setBounds(Bounds<double> const&);
     void setSpatialReference(MetadataNode& m, SpatialReference const&);
 
-    // convenience function, for doing a "copy ctor" on all the core props
-    // (used by the Filter stage, for example)
-    void setCoreProperties(const Stage&);
-
-    static std::vector<Stage *> makeVector()
-        { return std::vector<Stage *>(); }
-    static std::vector<Stage *> makeVector(Stage& src);
-    static std::vector<Stage *> makeVector(const std::vector<Stage *>& src);
-
 private:
     bool m_initialized;
     bool m_debug;
     boost::uint32_t m_verbose;
     boost::uint32_t m_id;
     std::vector<Stage *> m_inputs;
-    std::vector<Stage *> m_outputs;
     StageOperationType m_dimensionsType;
     LogPtr m_log;
     mutable boost::uint64_t m_numPoints;
