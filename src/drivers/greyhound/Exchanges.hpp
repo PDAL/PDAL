@@ -35,6 +35,7 @@
 #pragma once
 
 #include <pdal/WebSocketClient.hpp>
+#include <pdal/pdal_error.hpp>
 
 namespace pdal
 {
@@ -52,46 +53,160 @@ protected:
     {
         m_req["command"] = type;
     }
+
+    bool checkStatus() const
+    {
+        bool valid(false);
+
+        if (res().size())
+        {
+            Json::Value jsonResponse;
+            Json::Reader jsonReader;
+            jsonReader.parse(res().at(0)->get_payload(), jsonResponse);
+
+            if (jsonResponse.isMember("status") &&
+                jsonResponse["status"].isIntegral() &&
+                jsonResponse["status"].asInt() == 1)
+            {
+                valid = true;
+            }
+        }
+
+        return valid;
+    }
 };
 
-class CreateSession: public Exchange
+class CreateSession : public Exchange
 {
 public:
     CreateSession(const std::string& pipelineId)
         : Exchange("create")
+        , m_session()
     {
         m_req["pipelineId"] = pipelineId;
     }
+
+    virtual bool check()
+    {
+        bool valid(false);
+
+        if (checkStatus() && res().size() == 1)
+        {
+            Json::Value jsonResponse;
+            Json::Reader jsonReader;
+            jsonReader.parse(res().at(0)->get_payload(), jsonResponse);
+
+            if (jsonResponse.isMember("session") &&
+                jsonResponse["session"].isString())
+            {
+                m_session = jsonResponse["session"].asString();
+                valid = true;
+            }
+        }
+
+        return valid;
+    }
+
+    std::string getSession() const
+    {
+        return m_session;
+    }
+
+private:
+    std::string m_session;
 };
 
-class GetNumPoints: public Exchange
+class GetNumPoints : public Exchange
 {
 public:
     GetNumPoints(const std::string& sessionId)
         : Exchange("pointsCount")
+        , m_count()
     {
         m_req["session"] = sessionId;
     }
+
+    virtual bool check()
+    {
+        bool valid(false);
+
+        if (checkStatus() && res().size() == 1)
+        {
+            Json::Value jsonResponse;
+            Json::Reader jsonReader;
+            jsonReader.parse(res().at(0)->get_payload(), jsonResponse);
+
+            if (jsonResponse.isMember("count") &&
+                jsonResponse["count"].isIntegral())
+            {
+                m_count = jsonResponse["count"].asUInt();
+                valid = true;
+            }
+        }
+
+        return valid;
+    }
+
+    std::size_t count() const
+    {
+        return m_count;
+    }
+
+private:
+    std::size_t m_count;
 };
 
-class GetSchema: public Exchange
+class GetSchema : public Exchange
 {
 public:
     GetSchema(const std::string& sessionId)
         : Exchange("schema")
+        , m_schema()
     {
         m_req["session"] = sessionId;
     }
+
+    virtual bool check()
+    {
+        bool valid(false);
+
+        if (checkStatus() && res().size() == 1)
+        {
+            Json::Value jsonResponse;
+            Json::Reader jsonReader;
+            jsonReader.parse(res().at(0)->get_payload(), jsonResponse);
+
+            if (jsonResponse.isMember("schema") &&
+                jsonResponse["schema"].isString())
+            {
+                m_schema = jsonResponse["schema"].asString();
+                valid = true;
+            }
+        }
+
+        return valid;
+    }
+
+    std::string schema() const
+    {
+        return m_schema;
+    }
+
+private:
+    std::string m_schema;
 };
 
-class Read: public Exchange
+class Read : public Exchange
 {
 public:
     Read(const std::string& sessionId, int offset = 0, int count = -1)
         : Exchange("read")
         , m_initialized(false)
+        , m_error(false)
+        , m_pointsToRead(0)
         , m_numBytes(0)
         , m_numBytesReceived(0)
+        , m_data()
     {
         m_req["session"] = sessionId;
         m_req["start"] = offset;
@@ -100,44 +215,80 @@ public:
 
     virtual bool done() const
     {
-        return m_initialized && m_numBytesReceived >= m_numBytes;
+        return (m_initialized && m_numBytesReceived >= m_numBytes) || m_error;
+    }
+
+    virtual bool check()
+    {
+        bool valid(false);
+
+        if (!m_error && checkStatus() && res().size() >= 1)
+        {
+            Json::Value jsonResponse;
+            Json::Reader jsonReader;
+            jsonReader.parse(res().at(0)->get_payload(), jsonResponse);
+
+            if (jsonResponse.isMember("pointsRead") &&
+                jsonResponse["pointsRead"].isIntegral() &&
+                jsonResponse.isMember("bytesCount") &&
+                jsonResponse["bytesCount"].isIntegral())
+            {
+                m_pointsToRead =
+                    std::max<int>(jsonResponse["pointsRead"].asInt(), 0);
+                m_numBytes =
+                    std::max<int>(jsonResponse["bytesCount"].asInt(), 0);
+
+                valid = true;
+            }
+        }
+
+        return valid;
     }
 
     virtual void handleRx(const message_ptr message)
     {
         if (!m_initialized)
         {
-            Json::Value jsonValue;
-            Json::Reader jsonReader;
-            jsonReader.parse(message->get_payload(), jsonValue);
-            
-            if (jsonValue.isMember("bytesCount"))
+            if (check())
             {
-                m_numBytes = jsonValue["bytesCount"].asInt();
                 m_initialized = true;
             }
             else
             {
-                // TODO Handle this.
+                m_error = true;
             }
         }
         else
         {
             if (message->get_opcode() == websocketpp::frame::opcode::binary)
             {
+                m_data.push_back(&message->get_payload());
                 m_numBytesReceived += message->get_payload().length();
             }
             else
             {
-                // TODO Handle this.
+                m_error = true;
             }
         }
     }
 
+    std::vector<const std::string*> data() const
+    {
+        return m_data;
+    }
+
+    std::size_t numRead() const
+    {
+        return m_pointsToRead;
+    }
+
 private:
     bool m_initialized;
-    int m_numBytes;
-    int m_numBytesReceived;
+    bool m_error;
+    std::size_t m_pointsToRead;
+    std::size_t m_numBytes;
+    std::size_t m_numBytesReceived;
+    std::vector<const std::string*> m_data;
 };
 
 class Destroy: public Exchange
@@ -147,6 +298,11 @@ public:
         : Exchange("destroy")
     {
         m_req["session"] = sessionId;
+    }
+
+    virtual bool check()
+    {
+        return checkStatus() && res().size() == 1;
     }
 };
 

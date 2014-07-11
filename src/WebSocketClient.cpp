@@ -35,6 +35,8 @@
 #include <thread>
 
 #include <pdal/WebSocketClient.hpp>
+#include <pdal/pdal_error.hpp>
+
 #include <websocketpp/config/asio_no_tls_client.hpp>
 #include <websocketpp/client.hpp>
 
@@ -119,12 +121,31 @@ void WebSocketClient::exchange(WebSocketExchange& exchange)
         m_client.connect(m_client.get_connection(m_uri, ec));
         m_client.run();
     });
+
     t.detach();
 
     std::unique_lock<std::mutex> lock(m_mutex);
     m_cv.wait(lock, [&done]()->bool { return done; });
 
     m_client.stop();
+
+    if (!exchange.check())
+    {
+        Json::Value jsonResponse;
+        Json::Reader jsonReader;
+        std::string message("Websocket exchange response validation failed");
+
+        if (exchange.res().size())
+        {
+            jsonReader.parse(
+                    exchange.res().at(0)->get_payload(),
+                    jsonResponse);
+
+            message += ":'n" + jsonResponse.toStyledString();
+        }
+
+        throw new pdal_error(message);
+    }
 }
 
 } // namespace pdal

@@ -54,16 +54,8 @@ GreyhoundReader::GreyhoundReader(const Options& options)
 
 GreyhoundReader::~GreyhoundReader()
 {
-    Json::Value jsonResponse;
-    Json::Reader jsonReader;
-    exchanges::Destroy exchange(m_pipelineId);
+    exchanges::Destroy exchange(m_sessionId);
     m_wsClient.exchange(exchange);
-    jsonReader.parse(exchange.res().at(0)->get_payload(), jsonResponse);
-
-    if (jsonResponse["status"] != 1)
-    {
-        throw new pdal_error("Could not destroy Greyhound session");
-    }
 }
 
 Options GreyhoundReader::getDefaultOptions()
@@ -94,68 +86,42 @@ void GreyhoundReader::processOptions(const Options& options)
 {
     m_uri = options.getValueOrThrow<std::string>("uri");
     m_pipelineId = options.getValueOrThrow<std::string>("pipelineId");
+
+    m_wsClient.initialize(m_uri);
 }
 
 void GreyhoundReader::buildSchema(Schema* schema)
 {
-    // TODO
-    std::vector<Dimension> dims = getDefaultDimensions();
-    for (auto d = dims.begin(); d != dims.end(); ++d)
-        m_dims.push_back(schema->appendDimension(*d));
-}
-
-void GreyhoundReader::ready(PointContext ctx)
-{
     Json::Value jsonResponse;
     Json::Reader jsonReader;
-    m_wsClient.initialize(m_uri);
 
     // Create session.
     {
         exchanges::CreateSession exchange(m_pipelineId);
         m_wsClient.exchange(exchange);
-        jsonReader.parse(exchange.res().at(0)->get_payload(), jsonResponse);
-
-        if (jsonResponse["status"] == 1)
-        {
-            m_sessionId = jsonResponse["session"].asString();
-        }
-        else
-        {
-            throw new pdal_error("Could not create Greyhound session");
-        }
-    }
-
-    // Get number of points.
-    {
-        exchanges::GetNumPoints exchange(m_sessionId);
-        m_wsClient.exchange(exchange);
-        jsonReader.parse(exchange.res().at(0)->get_payload(), jsonResponse);
-
-        if (jsonResponse["status"] == 1)
-        {
-            m_numPoints = jsonResponse["count"].asInt();
-        }
-        else
-        {
-            throw new pdal_error("Could not get number of points");
-        }
+        m_sessionId = exchange.getSession();
     }
 
     // Get schema
     {
         exchanges::GetSchema exchange(m_sessionId);
         m_wsClient.exchange(exchange);
-        jsonReader.parse(exchange.res().at(0)->get_payload(), jsonResponse);
+        m_schema = Schema::from_xml(exchange.schema());
 
-        if (jsonResponse["status"] == 1)
-        {
-            m_schema = Schema::from_xml(jsonResponse["schema"].asString());
-        }
-        else
-        {
-            throw new pdal_error("Could not get schema");
-        }
+        schema = &m_schema;
+    }
+}
+
+void GreyhoundReader::ready(PointContext ctx)
+{
+    Json::Value jsonResponse;
+    Json::Reader jsonReader;
+
+    // Get number of points.
+    {
+        exchanges::GetNumPoints exchange(m_sessionId);
+        m_wsClient.exchange(exchange);
+        m_numPoints = exchange.count();
     }
 }
 
@@ -174,33 +140,30 @@ sequential::Iterator::Iterator(
 { }
 
 point_count_t sequential::Iterator::readImpl(
-        PointBuffer& data,
+        PointBuffer& pointBuffer,
         point_count_t count)
 {
     Json::Value jsonResponse;
     Json::Reader jsonReader;
-    point_count_t numRead(0);
 
     exchanges::Read exchange(m_sessionId, m_index, count);
     m_wsClient.exchange(exchange);
-    jsonReader.parse(exchange.res().at(0)->get_payload(), jsonResponse);
+    std::vector<const std::string*> data(exchange.data());
+    point_count_t numRead(exchange.numRead());
 
-    // TODO Should probably tally as we copy instead of trusting this.
-    numRead = jsonResponse["pointsRead"].asInt();
+    std::vector<char>& rawBuffer(
+            pointBuffer.context().rawPtBuf()->getBuffer());
 
-    std::vector<char>& rawBuffer(data.context().rawPtBuf()->getBuffer());
+    std::cout << "PB: " << pointBuffer.size() << std::endl;
 
-    std::cout << "PB: " << data.size() << std::endl;
-
-    // TODO Optimize
-    for (std::size_t i = 1; i < exchange.res().size(); ++i)
+    for (std::size_t i(0); i < data.size(); ++i)
     {
         std::memcpy(
                 rawBuffer.data() + (m_index * m_byteSize),
-                exchange.res().at(i)->get_payload().data(),
-                exchange.res().at(i)->get_payload().size());
+                data[i]->data(),
+                data[i]->size());
 
-        m_index += exchange.res().at(i)->get_payload().size() / m_byteSize;
+        m_index += data[i]->size();
     }
 
     return numRead;

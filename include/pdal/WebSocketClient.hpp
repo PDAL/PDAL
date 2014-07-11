@@ -55,11 +55,12 @@ public:
     const std::vector<message_ptr>& res() const { return m_res; }
     void addResponse(message_ptr message)
     {
-        handleRx(message);
         m_res.push_back(message);
+        handleRx(message);
     }
 
     virtual bool done() const { return true; }
+    virtual bool check() { return true; }
 
 protected:
     WebSocketExchange() : m_req(), m_res() { }

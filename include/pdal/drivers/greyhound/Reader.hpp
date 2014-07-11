@@ -89,10 +89,15 @@ public:
             schema::size_type m_byteSize);
 
 private:
-    virtual point_count_t readImpl(PointBuffer& data, point_count_t count);
-    virtual uint32_t readBufferImpl(PointBuffer& data)
+    virtual point_count_t readImpl(
+            PointBuffer& pointBuffer,
+            point_count_t count);
+
+    virtual uint32_t readBufferImpl(PointBuffer& pointBuffer)
     {
-        return readImpl(data, std::numeric_limits<point_count_t>::max());
+        return readImpl(
+                pointBuffer,
+                std::numeric_limits<point_count_t>::max());
     }
 
     boost::uint64_t skipImpl(boost::uint64_t pointsToSkip);
