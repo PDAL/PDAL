@@ -78,9 +78,7 @@ public:
     WebSocketClient(const std::string& uri, bool enableLogging = false);
 
     void initialize(const std::string& uri);
-    
     void exchange(WebSocketExchange& exchange);
-    std::string exchangeDouble(const Json::Value& req);
 
 private:
     std::string m_uri;

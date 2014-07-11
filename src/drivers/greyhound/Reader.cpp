@@ -126,8 +126,6 @@ void GreyhoundReader::ready(PointContext ctx)
         }
     }
 
-    std::cout << "GH SESSION: " << m_sessionId << std::endl;
-
     // Get number of points.
     {
         exchanges::GetNumPoints exchange(m_sessionId);

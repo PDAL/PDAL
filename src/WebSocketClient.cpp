@@ -85,17 +85,13 @@ void WebSocketClient::exchange(WebSocketExchange& exchange)
 {
     if (!m_initialized) return;
 
-    bool gotRes(false);
+    bool done(false);
 
-    std::cout << "Exchanging..." << std::endl;
-    std::cout << exchange.req().toStyledString() << std::endl;
-
-    std::thread t([this, &exchange, &gotRes]()
+    std::thread t([this, &exchange, &done]()
     {
         m_client.set_open_handler(
             [this, &exchange](websocketpp::connection_hdl hdl)
         {
-            std::cout << "In open handler" << std::endl;
             m_client.send(
                     hdl,
                     exchange.req().toStyledString(),
@@ -103,17 +99,16 @@ void WebSocketClient::exchange(WebSocketExchange& exchange)
         });
 
         m_client.set_message_handler(
-                [this, &exchange, &gotRes](
+                [this, &exchange, &done](
                     websocketpp::connection_hdl,
                     message_ptr msg)
         {
-            std::cout << "In msg handler" << std::endl;
             exchange.addResponse(msg);
 
             if (exchange.done())
             {
                 std::unique_lock<std::mutex> lock(this->m_mutex);
-                gotRes = true;
+                done = true;
                 lock.unlock();
                 this->m_cv.notify_all();
             }
@@ -126,84 +121,10 @@ void WebSocketClient::exchange(WebSocketExchange& exchange)
     });
     t.detach();
 
-    std::cout << "Blocking return" << std::endl;
     std::unique_lock<std::mutex> lock(m_mutex);
-    m_cv.wait(lock, [&gotRes]()->bool { return gotRes; });
+    m_cv.wait(lock, [&done]()->bool { return done; });
 
     m_client.stop();
-}
-
-// TODO Temp hack
-std::string WebSocketClient::exchangeDouble(const Json::Value& req)
-{
-    std::string res;
-
-    if (!m_initialized)
-    {
-        return res;
-    }
-
-    bool gotRes(false);
-
-    std::cout << "Exchanging..." << std::endl;
-    std::cout << req.toStyledString() << std::endl;
-
-    std::thread t([this, &req, &res, &gotRes]()
-    {
-        m_client.set_open_handler(
-            [this, &req](websocketpp::connection_hdl hdl) {
-            std::cout << "In double open handler" << std::endl;
-            m_client.send(
-                    hdl,
-                    req.toStyledString(),
-                    websocketpp::frame::opcode::text);
-        });
-
-        m_client.set_message_handler(
-                [this, &res, &gotRes](
-                    websocketpp::connection_hdl,
-                    message_ptr msg) {
-                /*
-            std::unique_lock<std::mutex> lock(this->m_mutex);
-            //this->m_jsonReader.parse(msg->get_payload(), res);
-            gotRes = true;
-            lock.unlock();
-            this->m_cv.notify_all();
-            */
-
-
-
-
-            std::cout << "In first msg handler" << std::endl;
-
-            m_client.set_message_handler(
-                    [this, &res, &gotRes](
-                        websocketpp::connection_hdl,
-                        message_ptr msg) {
-                std::cout << "In second msg handler" << std::endl;
-
-                std::unique_lock<std::mutex> lock(this->m_mutex);
-                if (msg->get_opcode() == websocketpp::frame::opcode::binary)
-                    res = msg->get_payload();
-                gotRes = true;
-                lock.unlock();
-                this->m_cv.notify_all();
-            });
-        });
-
-        websocketpp::lib::error_code ec;
-        m_client.reset();
-        m_client.connect(m_client.get_connection(m_uri, ec));
-        m_client.run();
-    });
-    t.detach();
-
-    std::unique_lock<std::mutex> lock(m_mutex);
-    m_cv.wait(lock, [&gotRes]()->bool { return gotRes; });
-
-    m_client.stop();
-
-    return res;
 }
 
 } // namespace pdal
