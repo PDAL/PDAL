@@ -14,30 +14,25 @@ endif()
 SET(PDAL_UNITTEST_TEST_SRC
     BoundsTest.cpp
     drivers/bpf/BPFTest.cpp
-#    drivers/buffer/BufferReaderTest.cpp
 #    drivers/caris/CarisReaderTest.cpp
     filters/ChipperTest.cpp
 #    filters/ColorFilterTest.cpp
-#    ConfigTest.cpp
+    ConfigTest.cpp
     filters/CropFilterTest.cpp
     filters/DecimationFilterTest.cpp
-#    DimensionTest.cpp
-#    EnvironmentTest.cpp
+    DimensionTest.cpp
+    EnvironmentTest.cpp
     drivers/faux/FauxReaderTest.cpp
-#    drivers/faux/FauxWriterTest.cpp
-#    FileUtilsTest.cpp
+    FileUtilsTest.cpp
     filters/HexbinFilterTest.cpp
     filters/InPlaceReprojectionFilterTest.cpp
     drivers/las/LasReaderTest.cpp
     drivers/las/LasWriterTest.cpp
-#    LogTest.cpp
+    LogTest.cpp
     MetadataTest.cpp
 #    filters/MosaicFilterTest.cpp
     OptionsTest.cpp
 #    PipelineManagerTest.cpp
-#    drivers/pipeline/PipelineReaderTest.cpp
-#    drivers/pipeline/PipelineWriterTest.cpp
-#    PointBufferCacheTest.cpp
 #    PointBufferTest.cpp
 #    drivers/qfit/QFITReaderTest.cpp
 #    RangeTest.cpp

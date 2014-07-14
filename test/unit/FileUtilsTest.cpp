@@ -87,7 +87,8 @@ BOOST_AUTO_TEST_CASE(test_readFileIntoString)
 
     std::string source = FileUtils::readFileIntoString(filename);
 
-    const std::string ref = "Redistribution and use in source and binary forms, with or without modification...";
+    std::string ref = "This is a file that allows us to test that we "
+        "can read a text file into a string through the file utils.\n";
 
     BOOST_CHECK(source == ref);
 }
