@@ -46,7 +46,9 @@
 
 #include <pdal/drivers/sbet/Reader.hpp>
 
+#ifdef PDAL_HAVE_GREYHOUND
 #include <pdal/drivers/greyhound/Reader.hpp>
+#endif
 
 #ifdef PDAL_HAVE_HDF5
 #include <pdal/drivers/icebridge/Reader.hpp>
