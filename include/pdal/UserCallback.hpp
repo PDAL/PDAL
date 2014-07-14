@@ -64,13 +64,11 @@ public:
     // The pipeline calls this to report the percentage progress, check for
     // interrupts, and call the user's callback function.
     //
-    // percentComplete should be in range [0..100]
-    //
     // returns true if everything is okay, or false if an interrupt has
     // been requested
     void invoke(point_count_t count)
     {
-        m_percentComplete = count / m_total;
+        m_percentComplete = 100.0 * count / m_total;
         invoke();
     }
 

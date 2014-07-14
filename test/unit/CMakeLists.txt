@@ -52,9 +52,9 @@ SET(PDAL_UNITTEST_TEST_SRC
 #    drivers/terrasolid/TerraSolidReaderTest.cpp
 #    drivers/text/TextWriterTest.cpp
 #    ThreadTest.cpp
-#    UserCallbackTest.cpp
-#    UtilsTest.cpp
-#    VectorTest.cpp
+    UserCallbackTest.cpp
+    UtilsTest.cpp
+    VectorTest.cpp
     ${PDAL_UNITTEST_XMLSCHEMA_TEST}
     )
 
