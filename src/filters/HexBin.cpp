@@ -34,259 +34,117 @@
 
 #include <pdal/filters/HexBin.hpp>
 
-#include <boost/concept_check.hpp> // ignore_unused_variable_warning
+#ifdef PDAL_HAVE_HEXER
+#include <hexer/HexIter.hpp>
 
-#include <pdal/PointBuffer.hpp>
-#include <pdal/GlobalEnvironment.hpp>
-
-
+using namespace hexer;
+#endif
 
 namespace pdal
 {
 namespace filters
 {
 
-
-pdal::StageSequentialIterator* HexBin::createSequentialIterator(PointBuffer& buffer) const
+void HexBin::processOptions(const Options& options)
 {
-    return new pdal::filters::iterators::sequential::HexBin(*this, buffer, getNumPoints(), getName(), log(), getOptions());
+    m_xDimName = options.getValueOrDefault<std::string>("x_dim", "X");
+    m_yDimName = options.getValueOrDefault<std::string>("y_dim", "Y");
+    m_sampleSize = options.getValueOrDefault<uint32_t>("sample_size", 5000);
+    m_density = options.getValueOrDefault<uint32_t>("threshold", 15);
+
+    if (options.hasOption("edge_length"))
+        m_edgeLength = options.getValueOrDefault<double>("edge_length", 0.0);
+    else
+        // Backward compatability.
+        m_edgeLength = options.getValueOrDefault<double>("edge_size", 0.0);
 }
 
-// pdal::StageRandomIterator* HexBin::createRandomIterator(PointBuffer& buffer) const
-// {
-//     return new pdal::filters::iterators::random::HexBin(*this, buffer);
-// }
 
-
-namespace iterators
-{
-
-namespace hexbin
-{
-
-IteratorBase::IteratorBase(pdal::filters::HexBin const& filter,
-                           PointBuffer& buffer,
-                           boost::uint32_t numPoints,
-                           std::string const& name,
-                           LogPtr log,
-                           Options const& options)
-    : m_filter(filter)
-    , m_numPoints(numPoints)
-    , m_name(name)
-    , m_log(log)
-    , m_options(options)
-#ifdef PDAL_HAVE_HEXER
-    , m_grid(0)
-#endif
-    , m_sample_size(0)
-    , m_sample_number(0)
-    , m_density(10)
-{
-    Schema const& schema = buffer.getSchema();
-
-    const std::string x_name = filter.getOptions().getValueOrDefault<std::string>("x_dim", "X");
-    const std::string y_name = filter.getOptions().getValueOrDefault<std::string>("y_dim", "Y");
-
-    filter.log()->get(logDEBUG2) << "x_dim '" << x_name <<"' requested" << std::endl;
-    filter.log()->get(logDEBUG2) << "y_dim '" << y_name <<"' requested" << std::endl;
-
-    m_dim_x = &(schema.getDimension(x_name));
-    m_dim_y = &(schema.getDimension(y_name));
-
-    filter.log()->get(logDEBUG2) << "Fetched x_name: " << x_name << std::endl;
-    filter.log()->get(logDEBUG2) << "Fetched y_name: " << y_name << std::endl;;
-
-    m_sample_size = filter.getOptions().getValueOrDefault<boost::uint32_t>("sample_size", 5000);
-    m_density = filter.getOptions().getValueOrDefault<boost::uint32_t>("threshold", 15);
-    m_edge_size = filter.getOptions().getValueOrDefault<double>("edge_size", 0.0);
-}
-
-IteratorBase::~IteratorBase()
+void HexBin::ready(PointContext ctx)
 {
 #ifdef PDAL_HAVE_HEXER
-    //if (m_grid)
-    //delete m_grid;
-#endif
-
-}
-
-} // hexbin
-
-namespace sequential
-{
-
-
-HexBin::HexBin(            pdal::filters::HexBin const& filter, 
-                           PointBuffer& buffer,
-                           boost::uint32_t numPoints,
-                           std::string const& name,
-                           LogPtr log,
-                           Options options)
-    : pdal::FilterSequentialIterator(filter, buffer)
-    , hexbin::IteratorBase(filter, buffer, numPoints, name, log, options)
-
-{
-    return;
-}
-
-boost::uint32_t HexBin::readBufferImpl(PointBuffer& buffer)
-{
-
-    const boost::uint32_t numPoints = getPrevIterator().read(buffer);
-
-#ifdef PDAL_HAVE_HEXER
-    for (boost::uint32_t i = 0; i < buffer.getNumPoints(); ++i)
+    m_xDim = ctx.schema()->getDimensionPtr(m_xDimName);
+    m_yDim = ctx.schema()->getDimensionPtr(m_yDimName);
+    if (m_edgeLength == 0.0)  // 0 can always be represented exactly.
     {
-        boost::int32_t xi = buffer.getField<boost::int32_t>(*m_dim_x, i);
-        boost::int32_t yi = buffer.getField<boost::int32_t>(*m_dim_y, i);
-        double x = m_dim_x->applyScaling(xi);
-        double y = m_dim_y->applyScaling(yi);
+        m_grid.reset(new HexGrid(m_density));
+        m_grid->setSampleSize(m_sampleSize);
+    }
+    else
+        m_grid.reset(new HexGrid(m_edgeLength * sqrt(3), m_density));
+#endif
+}
 
-        if (!m_grid)
-        {
-            bool bDoSample = pdal::Utils::compare_distance(m_edge_size, 0.0);
-            if (bDoSample)
-            {
-                if (m_numPoints < m_sample_size)
-                {
-                    if (m_numPoints >= std::numeric_limits<boost::uint32_t>::max())
-                    {
-                        throw pdal_error("point count >= size of 32bit integer, set a sample size");
-                    }
 
-                    m_sample_size = m_numPoints;
-                }
+void HexBin::filter(PointBuffer& buf)
+{
+#ifdef PDAL_HAVE_HEXER
+    for (PointId idx = 0; idx < buf.size(); ++idx)
+    {
+        double x = buf.getFieldAs<double>(*m_xDim, idx);
+        double y = buf.getFieldAs<double>(*m_yDim, idx);
 
-                if (m_sample_number < m_sample_size)
-                {
-                    m_samples.push_back(hexer::Point(x,y));
-                    m_sample_number++;
-
-                    if (m_sample_number == m_sample_size)
-                    {
-                        m_edge_size = hexer::computeHexSize(m_samples, m_density);
-                        m_grid = new hexer::HexGrid(m_edge_size, m_density);
-
-                        m_log->get(logDEBUG2) << "Created hexgrid of edge size :'" << m_edge_size << "' and density '" << m_density << "'" << std::endl;
-                        // Add back the points we used for the sample.
-                        typedef std::vector<hexer::Point>::const_iterator iterator;
-                        iterator i;
-                        for (i=m_samples.begin(); i != m_samples.end(); ++i)
-                        {
-                            m_grid->addPoint(*i);
-                        }
-                    }
-                }
-            }
-            else
-            {
-                m_grid = new hexer::HexGrid(m_edge_size, m_density);
-                m_log->get(logDEBUG2) << "Created hexgrid of edge size :'" << m_edge_size << "' and density '" << m_density << "'" << std::endl;
-
-            }
-        }
-        else
-        {
-            m_grid->addPoint(hexer::Point(x,y));
-        }
+        m_grid->addPoint(x, y);
     }
 #endif
-
-    return numPoints;
 }
+
     
-
-boost::uint64_t HexBin::skipImpl(boost::uint64_t count)
+void HexBin::done(PointContext ctx)
 {
-    getPrevIterator().skip(count);
-    return count;
-}
-
-
-bool HexBin::atEndImpl() const
-{
-    return getPrevIterator().atEnd();
-}
-
-HexBin::~HexBin()
-{
-
-
 #ifdef PDAL_HAVE_HEXER
-//ABELL
-/**
-    if (m_grid)
+    m_grid->processSample();
+    m_grid->findShapes();
+    m_grid->findParentPaths();
+
+    std::ostringstream offsets;
+    offsets << "MULTIPOINT (";
+    for (int i = 0; i < 6; ++i)
     {
-        m_grid->findShapes();
-        m_grid->findParentPaths();
+        hexer::Point p = m_grid->offset(i);
+        offsets << p.m_x << " " << p.m_y;
+        if (i != 5)
+            offsets << ", ";
+    }
+    offsets << ")";
 
-        pdal::Metadata& metadata = getBuffer().getMetadataRef();
+    m_metadata.add("edge_length", m_edgeLength, "The edge length of the "
+        "hexagon to use in situations where you do not want to estimate "
+        "based on a sample");
+    m_metadata.add("threshold", m_density, "Minimum number of points inside "
+        "a hexagon to be considered full");
+    m_metadata.add("sample_size", m_sampleSize, "Number of samples to use "
+        "when estimating hexagon edge size. Specify 0.0 or omit options "
+        "for edge_size if you want to compute one.");
+    m_metadata.add("hex_offsets", offsets.str(), "Offset of hex corners from "
+        "hex centers.");
+    MetadataNode hexes = m_metadata.add("hexagons");
+    for (HexIter hi = m_grid->hexBegin(); hi != m_grid->hexEnd(); ++hi)
+    {
+        using namespace boost;
 
+        HexInfo h = *hi;
 
-        pdal::Metadata m;
-        m.setName(m_name);
-        m.addMetadata<double>("edge_size",
-                              m_edge_size,
-                              "The edge size of the hexagon to use in situations where you do not want to estimate based on a sample");
-        m.addMetadata<boost::uint32_t>("threshold",
-                                       m_density,
-                                       "Number of points necessary inside a hexagon to be considered full");
-        m.addMetadata<boost::uint32_t>("sample_size",
-                                       m_sample_size,
-                                       "Number of samples to use when estimating hexagon edge size. Specify 0.0 for edge_size if you want to compute one.");
+        MetadataNode hex = hexes.add("hexagon");
+        hex.add("density", h.density());
 
-        std::ostringstream polygon;
-        polygon.setf(std::ios_base::fixed, std::ios_base::floatfield);
-        polygon.precision(m_options.getValueOrDefault<boost::uint32_t>("precision", 8));
-        m_grid->toWKT(polygon);
-        m.addMetadata<std::string>("boundary",
-                                   polygon.str(),
-                                   "Boundary MULTIPOLYGON of domain");
-
-        metadata.setMetadata(m);
-
+        hex.add("gridpos", lexical_cast<std::string>(h.xgrid()) + " " +
+            lexical_cast<std::string>(h.ygrid()));
+        std::ostringstream oss;
+        // Using stream limits precision (default 6)
+        oss << "POINT (" << h.x() << " " << h.y() << ")";
+        hex.add("center", oss.str());
     }
 
-**/
+    std::ostringstream polygon;
+    polygon.setf(std::ios_base::fixed, std::ios_base::floatfield);
+    polygon.precision(m_options.getValueOrDefault<uint32_t>("precision", 8));
+    m_grid->toWKT(polygon);
+    m_metadata.add("boundary", polygon.str(),
+        "Boundary MULTIPOLYGON of domain");
 #endif
 }
 
+} // namespace filters
+} // namespace pdal
 
-
-} // sequential
-
-// namespace random
-// {
-//
-//
-// HexBin::HexBin(const pdal::filters::HexBin& filter, PointBuffer& buffer)
-//     : pdal::FilterRandomIterator(filter, buffer)
-//     , hexbin::IteratorBase(filter, buffer)
-// {
-//     return;
-// }
-//
-// boost::uint32_t HexBin::readBufferImpl(PointBuffer& buffer)
-// {
-//
-//     pdal::StageRandomIterator& iterator = getPrevIterator();
-//
-//     const boost::uint32_t numPoints = iterator.read(buffer);
-//
-//     return numPoints;
-// }
-//
-//
-// boost::uint64_t HexBin::seekImpl(boost::uint64_t count)
-// {
-//
-//     return getPrevIterator().seek(count);
-// }
-//
-// } // random
-
-
-
-} // filters
-} // pdal
-} // namespaces

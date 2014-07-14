@@ -4,11 +4,6 @@
 Filtering data with PCL
 ===============================================================================
 
-
-.. contents:: Contents
-   :depth: 3
-   :backlinks: none
-
 Introduction
 ------------------------------------------------------------------------------
 
@@ -28,7 +23,45 @@ development of point cloud processing pipelines.
 
 .. _`PCL`: http://www.pointclouds.org
 
-PCL Block as a stage in the PDAL Pipeline
+.. contents:: Contents
+   :depth: 3
+   :backlinks: none
+
+Quick Start
+------------------------------------------------------------------------------
+
+.. note::
+
+    Instructions for getting started with PDAL using Vagrant and VirtualBox
+    can be found in the :ref:`vagrant` document.
+
+PDAL's Vagrant configuration now includes the PCL Block and all necessary
+dependencies. Assuming you've got Vagrant all set up, once you checkout the
+PDAL source code, just do the following:
+
+::
+
+    $ cd pdal
+    $ vagrant up
+    $ vagrant ssh
+
+The ``vagrant up`` command will take a considerable amount of time, but once
+its completed you have a fully functional VM with both PCL and PDAL installed.
+Try entering
+
+::
+
+    $ pdal pipeline --version
+
+at the command line. You should see output similar to the following:
+
+::
+    
+    ------------------------------------------------------------------------------------------
+    pdal pipeline (PDAL 0.9.9 (2c6aa8) with GeoTIFF 1.4.0 GDAL 1.9.2 LASzip 2.2.0 System )
+    ------------------------------------------------------------------------------------------
+
+PDAL Pipeline kernel
 ------------------------------------------------------------------------------
 
 .. note::
@@ -71,6 +104,98 @@ And is run from the command line thusly.
 ::
 
     $ pdal pipeline -i /path/to/xml
+
+This simple pipeline reads the input LAS (``input_cloud.las``), passes it
+through the PCL Block (``block.json``), and writes the output LAS
+(``filtered_cloud.las``).
+
+You can also try running the PassThrough PCL Block pipeline similar to our
+example above by typing
+
+::
+
+    $ pdal pipeline -i pdal/test/data/filters/pcl_passthrough.xml -v4
+
+which should produce
+
+::
+
+    Requested to read 106 points
+    Requested to write 106 points
+    0
+    Processing /home/vagrant/pdal/test/data/filters/pcl/passthrough.json
+
+    --------------------------------------------------------------------------------
+    NAME:   PassThroughExample ()
+    HELP:
+    AUTHOR:
+    --------------------------------------------------------------------------------
+    106 points copied
+
+       Step 1) PassThrough
+
+          Field name: z
+          Limits: 410.000000, 440.000000
+
+    76(drivers.las.writer DEBUG: 3): Wrote 81 points to the LAS file
+    .100
+
+PDAL PCL kernel
+------------------------------------------------------------------------------
+
+For users that would like to bypass the creation (and subsequent modification)
+of the pipeline XML for every file they wish to process, there is another
+option--the ``pdal pcl`` command.
+
+::
+
+    $ pdal pcl -i /path/to/input/las -p /path/to/pcl/block/json -o /path/to/output/las
+
+This is functionally equivalent to the original pipeline, but does not afford
+the flexibility of constructing the pipeline (i.e., none the other PDAL filters
+are accessible).
+
+The same can be accomplished with the ``pdal pcl`` command. The basic syntax
+for the command is
+
+::
+
+    $ pdal pcl -i <input cloud> -p <PCL Block JSON> -o <output cloud>
+
+where the JSON file specified with ``-p`` is the same file that would be
+embedded in the pipeline XML file. This can be useful when the pipeline
+does not change frequently, but the input/output filenames do.
+
+::
+
+    $ pdal pcl -i test/data/autzen-point-format-3.las -p test/data/filters/pcl/passthrough.json -o test/temp/foo.las -v4
+
+which should produce
+
+::
+
+    Requested to read 106 points
+    Requested to write 106 points
+    0
+    Processing /home/vagrant/pdal/test/data/filters/pcl/passthrough.json
+
+    --------------------------------------------------------------------------------
+    NAME:   PassThroughExample ()
+    HELP:
+    AUTHOR:
+    --------------------------------------------------------------------------------
+    106 points copied
+
+       Step 1) PassThrough
+
+          Field name: z
+          Limits: 410.000000, 440.000000
+
+    76(drivers.las.writer DEBUG: 3): Wrote 81 points to the LAS file
+    .100
+
+Examples
+------------------------------------------------------------------------------
 
 Simple point cloud cropping
 ..............................................................................
@@ -127,72 +252,53 @@ their public member functions by name.
     }
   }
 
-PCL Block Quick Start
-------------------------------------------------------------------------------
+Ground return filtering
+..............................................................................
 
-.. note::
+The Progressive Morphological Filter (PMF) is an openly published approach to
+identifying ground vs. non-ground returns in point cloud data. An
+implementation of PMF is included with PCL and accessible through the PDAL's
+PCL Block filter.
 
-    Instructions for getting started with PDAL using Vagrant and VirtualBox
-    can be found in the :ref:`vagrant` document.
+A complete description of the algorithm can be found in the article `"A
+Progressive Morphological Filter for Removing Nonground Measurements from
+Airborne LIDAR Data" <http://users.cis.fiu.edu/~chens/PDF/TGRS.pdf>`_ by K.
+Zhang, S.  Chen, D. Whitman, M. Shyu, J. Yan, and C. Zhang.
 
-PDAL's Vagrant configuration now includes the PCL Block and all necessary
-dependencies. Assuming you've got Vagrant all set up, once you checkout the
-PDAL source code, just do the following:
+To run the PMF with default settings, the PCL Block JSON is simply:
 
-::
+.. code-block:: json
 
-    $ cd pdal
-    $ vagrant up
-    $ vagrant ssh
+  {
+    "pipeline": {
+      "name": "ProgressiveMorphologicalFilterDefaultExample",
+      "filters": [{
+          "name": "ProgressiveMorphologicalFilter"
+      }]
+    }
+  }
 
-The ```vagrant up``` command will take a considerable amount of time, but once
-its completed you have a fully functional VM with both PCL and PDAL installed.
-Try entering
+Additional parameters can be set by advanced users:
 
-::
+.. code-block:: json
 
-    $ pdal pipeline --version
+  {
+    "pipeline": {
+      "name": "ProgressiveMorphologicalFilterAdvancedExample",
+      "filters": [{
+          "name": "ProgressiveMorphologicalFilter",
+          "setCellSize": 1.0,
+          "setMaxWindowSize": 20,
+          "setSlope": 1.0,
+          "setInitialDistance": 0.5,
+          "setMaxDistance": 3.0,
+          "setExponential": true
+      }]
+    }
+  }
 
-at the command line. You should see
-
-::
-    
-    ------------------------------------------------------------------------------------------
-    pdal pipeline (PDAL 0.9.9 (2c6aa8) with GeoTIFF 1.4.0 GDAL 1.9.2 LASzip 2.2.0 System )
-    ------------------------------------------------------------------------------------------
-
-(though the versions may differ slightly).
-
-You can also try running the a PassThrough PCL Block pipeline similar to our
-example above by typing
-
-::
-
-    $ pdal pipeline -i pdal/test/data/filters/pcl_passthrough.xml -v4
-
-which should produce
-
-::
-
-    Requested to read 106 points
-    Requested to write 106 points
-    0
-    Processing /home/vagrant/pdal/test/data/filters/pcl/passthrough.json
-
-    --------------------------------------------------------------------------------
-    NAME:   PassThroughExample ()
-    HELP:
-    AUTHOR:
-    --------------------------------------------------------------------------------
-    106 points copied
-
-       Step 1) PassThrough
-
-          Field name: z
-          Limits: 410.000000, 440.000000
-
-    76(drivers.las.writer DEBUG: 3): Wrote 81 points to the LAS file
-    .100
+See :ref:`here <ProgressiveMorphologicalFilter>` for a more detailed
+explanation of the PMF parameters.
 
 .. _`JSON`: http://www.json.org/
 .. _`PassThrough`: http://pointclouds.org/documentation/tutorials/passthrough.php

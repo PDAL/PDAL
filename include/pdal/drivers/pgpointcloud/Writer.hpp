@@ -65,18 +65,20 @@ public:
 
     static Options getDefaultOptions();
 
-protected:
-    virtual void writeBegin(boost::uint64_t targetNumPointsToWrite);
-    virtual void writeBufferBegin(PointBuffer const& data);
-    virtual boost::uint32_t writeBuffer(const PointBuffer&);
-    virtual void writeEnd(boost::uint64_t actualNumPointsWritten);
 
 private:
     Writer& operator=(const Writer&); // not implemented
     Writer(const Writer&); // not implemented
 
     virtual void processOptions(const Options& options);
+    virtual void ready(PointContext ctx);
+    virtual void write(const PointBuffer& pointBuffer);
+    virtual void done(PointContext ctx);
     virtual void initialize();
+
+    void writeInit(const Schema& schema);
+    void writeTile(const PointBuffer& buffer);
+    
     bool CheckTableExists(std::string const& name);
     bool CheckPointCloudExists();
     bool CheckPostGISExists();
@@ -110,8 +112,11 @@ private:
     bool m_overwrite;
     std::string m_insert;
     std::string m_hex;
-    PointBuffer* m_output_buffer;
-
+    size_t m_pointSize;
+    schema::Orientation m_orientation;
+    std::vector<Dimension> m_dims;
+    bool m_pack;    
+    
     // lose this
     bool m_schema_is_initialized;
 };

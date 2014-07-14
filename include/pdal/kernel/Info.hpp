@@ -80,7 +80,7 @@ private:
         PipelineManager* manager) const;
     void dumpSchema(PointContext ctx);
     void dumpStage(const Stage&) const;
-    void dumpQuery(Stage const&, IndexedPointBuffer&) const;
+    void dumpQuery(PointContext ctx, Stage&) const;
     void dumpMetadata(PointContext ctx, const Stage&) const;
     void dumpSDO_PCMetadata(PointContext ctx, Stage const&) const;
 

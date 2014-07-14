@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2013, Andrew Bell (andrew.bell.ia@gmail.com)
+* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
 *
 * All rights reserved.
 *
@@ -32,57 +32,56 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
-
-#include <pdal/Filter.hpp>
-
-#ifdef PDAL_HAVE_HEXER
-#include <hexer/Mathpair.hpp>
-#include <hexer/HexGrid.hpp>
-#include <hexer/Processor.hpp>
-#endif
+#include <pdal/KDIndex.hpp>
 
 namespace pdal
 {
-namespace filters
+
+void KDIndex::build(bool b3D)
 {
+    m_3d = b3D;
+    size_t nDims = m_3d && m_dim[2] ? 3 : 2;
+    delete m_index;
+    m_index = new my_kd_tree_t(nDims, *this,
+        nanoflann::KDTreeSingleIndexAdaptorParams(10, nDims));
+    m_index->buildIndex();
+}
 
-class PDAL_DLL HexBin : public Filter
+std::vector<size_t> KDIndex::radius(double const& x, double const& y, 
+    double const& z, double const& r)
 {
-public:
-    SET_STAGE_NAME("filters.hexbin", "Hexbin implementation")
-    SET_STAGE_LINK("http://pdal.io/stages/filters.hexbin.html")       
-#ifdef PDAL_HAVE_HEXER
-    SET_STAGE_ENABLED(true)
-#else
-    SET_STAGE_ENABLED(false)
-#endif
+    std::vector<size_t> output;
+    std::vector<std::pair<size_t, double>> ret_matches;
+    nanoflann::SearchParams params;
+    params.sorted = true;
+    
+    std::vector<double> pt;
+    pt.push_back(x);
+    pt.push_back(y);
+    pt.push_back(z);
+    const size_t count = m_index->radiusSearch(&pt[0], r, ret_matches, params);
+    
+    for (size_t i = 0; i < count; ++i)
+        output.push_back(ret_matches[i].first);
+    return output;
+}
 
-    HexBin(const Options& options) : Filter(options)
-        {}
+std::vector<size_t> KDIndex::neighbors(double const& x, double const& y, 
+    double const& z, double distance, boost::uint32_t k)
+{
+    std::vector<size_t> output(k);
+    std::vector<double> out_dist_sqr(k);
+    nanoflann::KNNResultSet<double> resultSet(k);
+    
+    resultSet.init(&output[0], &out_dist_sqr[0]);
+    
+    std::vector<double> pt;
+    pt.push_back(x);
+    pt.push_back(y);
+    if (m_3d)
+        pt.push_back(z);
+    m_index->findNeighbors(resultSet, &pt[0], nanoflann::SearchParams(10));
+    return output;
+}
 
-private:
-
-#ifdef PDAL_HAVE_HEXER
-    std::unique_ptr<hexer::HexGrid> m_grid;
-#endif
-    std::string m_xDimName;
-    std::string m_yDimName;
-    uint32_t m_sampleSize;
-    int32_t m_density;
-    double m_edgeLength;
-    Dimension *m_xDim;
-    Dimension *m_yDim;
-
-    virtual void processOptions(const Options& options);
-    virtual void ready(PointContext ctx);
-    virtual void filter(PointBuffer& buf);
-    virtual void done(PointContext ctx);
-
-    HexBin& operator=(const HexBin&); // not implemented
-    HexBin(const HexBin&); // not implemented
-};
-
-} // namespace filters
 } // namespace pdal
-

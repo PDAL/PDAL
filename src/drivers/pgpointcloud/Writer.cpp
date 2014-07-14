@@ -84,7 +84,6 @@ Writer::Writer(const Options& options)
     , m_have_postgis(false)
     , m_create_index(true)
     , m_overwrite(true)
-    , m_output_buffer(0)
     , m_schema_is_initialized(false)
 {
 }
@@ -120,7 +119,25 @@ void Writer::processOptions(const Options& options)
         options.getValueOrDefault<boost::uint32_t>("capacity", 400);
     m_srid = options.getValueOrDefault<boost::uint32_t>("srid", 4326);
     m_pcid = options.getValueOrDefault<boost::uint32_t>("pcid", 0);
+    m_pack = options.getValueOrDefault<bool>("pack_ignored_fields", true);
+    
 }
+
+void Writer::ready(PointContext ctx)
+{
+    Schema *schema = ctx.schema();
+    m_pointSize = 0;
+    for (schema::size_type i = 0; i < schema->numDimensions(); ++i)
+    {
+        const Dimension& d = schema->getDimension(i);
+        if (!m_pack || !d.isIgnored())
+        {
+            m_dims.push_back(d);
+            m_pointSize += d.getByteSize();
+        }
+    }
+}
+
 
 //
 // Called from PDAL core during start-up. Do everything
@@ -130,7 +147,7 @@ void Writer::processOptions(const Options& options)
 //
 void Writer::initialize()
 {
-    m_session = pg_connect(m_connection);
+    m_session = pg_connect(m_connection);  
 }
 
 //
@@ -166,16 +183,7 @@ Options Writer::getDefaultOptions()
     return options;
 }
 
-void Writer::writeBegin(boost::uint64_t /*targetNumPointsToWrite*/)
-{}
-//
-// Called by PDAL core before the start of the writing process, but
-// after the initialization. At this point, the machinery is all set
-// up and we can apply actions to the target database, like pre-SQL and
-// preparing new tables and/or deleting old ones.
-//
-
-void Writer::writeBufferBegin(PointBuffer const& data)
+void Writer::writeInit(const Schema& schema)
 {
     if (m_schema_is_initialized) return;
 
@@ -208,7 +216,7 @@ void Writer::writeBufferBegin(PointBuffer const& data)
     }
 
     // Read or create a PCID for our new table
-    m_pcid = SetupSchema(data.getSchema(), m_srid);
+    m_pcid = SetupSchema(schema, m_srid);
 
     // Create the table!
     if (! bHaveTable)
@@ -219,11 +227,17 @@ void Writer::writeBufferBegin(PointBuffer const& data)
 
     m_schema_is_initialized = true;
 
-    return;
-
+    return;    
 }
 
-void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
+void Writer::write(const PointBuffer& buffer)
+{
+    writeInit(buffer.getSchema());
+    writeTile(buffer);
+}
+
+
+void Writer::done(PointContext ctx)
 {
     if (m_create_index && m_have_postgis)
     {
@@ -496,35 +510,38 @@ void Writer::CreateIndex(std::string const& schema_name,
 }
 
 
-boost::uint32_t Writer::writeBuffer(const PointBuffer& buffer)
-{
-    boost::uint32_t numPoints = buffer.getNumPoints();
 
-    WriteBlock(buffer);
-
-    return numPoints;
-}
-
-bool Writer::WriteBlock(PointBuffer const& buffer)
+void Writer::writeTile(PointBuffer const& buffer)
 {
 
-    if (!m_output_buffer)
+    if (buffer.size() > m_patch_capacity)
     {
-        m_output_buffer = buffer.pack();
-    } else
-    {
-        PointBuffer::pack(&buffer, m_output_buffer, true, false);
+        std::ostringstream oss;
+        oss << "drivers.pgpointcloud.writer buffer size (" << buffer.size() 
+            << ") is greater than capacity (" << m_patch_capacity << ")";
+        throw pdal_error(oss.str());
     }
     
-    pointbuffer::PointBufferByteSize  point_data_length = m_output_buffer->getBufferByteLength();
-    boost::uint8_t* point_data = m_output_buffer->getData(0);
-
-    boost::uint32_t num_points = static_cast<boost::uint32_t>(m_output_buffer->getNumPoints());
-
-    if (num_points > m_patch_capacity)
+    size_t outbufSize = m_pointSize * buffer.size();
+    std::unique_ptr<char> outbuf(new char[outbufSize]);
+    char *pos = outbuf.get();
+    size_t clicks = 0;
+    size_t interrupt = m_dims.size() * 100;
+    
+    for (PointId id = 0; id < buffer.size(); ++id)
     {
-        throw pdal_error("drivers.pgpointcloud.writer num_points > m_patch_capacity!");
+        for (size_t dim = 0; dim < m_dims.size(); ++dim)
+        {
+            buffer.getRawField(m_dims[dim], id, pos);
+            pos += m_dims[dim].getByteSize();
+        }
+        if (id % 100 == 0)
+            m_callback->invoke(id);        
     }
+
+    m_callback->invoke(buffer.size());    
+
+    uint32_t num_points = buffer.size();
 
     /* We are always getting uncompressed bytes off the block_data */
     /* so we always used compression type 0 (uncompressed) in writing our WKB */
@@ -533,13 +550,13 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     boost::uint32_t compression = static_cast<boost::uint32_t>(compression_v);
 
     static char syms[] = "0123456789ABCDEF";
-    std::string hex;
-    m_hex.resize(point_data_length*2);
-    for (unsigned i = 0; i != point_data_length; i++)
+    m_hex.resize(outbufSize*2);
+    for (unsigned i = 0; i != outbufSize; i++)
     {
-        m_hex[i*2] = syms[((point_data[i] >> 4) & 0xf)];
-        m_hex[i*2+1] = syms[point_data[i] & 0xf];
+        m_hex[i*2]   = syms[((outbuf.get()[i] >> 4) & 0xf)];
+        m_hex[i*2+1] = syms[outbuf.get()[i] & 0xf];
     }
+
     
     m_insert.clear();
   
@@ -582,7 +599,8 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
 
 
     pg_execute(m_session, m_insert);
-    return true;
+
+
 }
 
 

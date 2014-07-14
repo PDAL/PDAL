@@ -70,20 +70,29 @@ Writer::Writer(const Options& options)
     , m_sdo_pc_is_initialized(false)
 {}
 
-
-void Writer::initialize()
+void Writer::processOptions(const Options& options)
 {
-    std::string connection =
-        m_options.getValueOrDefault<std::string>("connection", "");
-    if (!connection.size())
+    std::string m_connection =
+        options.getValueOrDefault<std::string>("connection", "");
+    if (!m_connection.size())
     {
         throw sqlite_driver_error("unable to connect to database, "
             "no connection string was given!");
     }
+    m_block_table =
+        options.getValueOrThrow<std::string>("block_table");
+    m_cloud_table =
+        options.getValueOrThrow<std::string>("cloud_table");
+    m_cloud_column =
+        options.getValueOrDefault<std::string>("cloud_column", "id");    
+}
 
+
+void Writer::initialize()
+{
     try
     {
-        m_session = new ::soci::session(::soci::sqlite3, connection);
+        m_session = new ::soci::session(::soci::sqlite3, m_connection);
         log()->get(logDEBUG) << "Connected to database" << std::endl;
 
     }
@@ -96,40 +105,60 @@ void Writer::initialize()
     m_session->set_log_stream(&(log()->get(logDEBUG2)));
 }
 
+void Writer::ready(PointContext ctx)
+{
 
-void Writer::writeBegin(boost::uint64_t /*targetNumPointsToWrite*/)
+    Schema *schema = ctx.schema();
+    m_pointSize = 0;
+    for (schema::size_type i = 0; i < schema->numDimensions(); ++i)
+    {
+        const Dimension& d = schema->getDimension(i);
+        if (!m_pack || !d.isIgnored())
+        {
+            m_dims.push_back(d);
+            m_pointSize += d.getByteSize();
+        }
+    }
+    
+ 
+}
+
+void Writer::write(const PointBuffer& buffer)
+{
+    writeInit(buffer.getSchema());
+    writeTile(buffer);
+}
+
+void Writer::writeInit(const Schema& schema)
 {
     using namespace std;
 
-    string block_table =
-        m_options.getValueOrThrow<string>("block_table");
-    string cloud_table =
-        m_options.getValueOrThrow<string>("cloud_table");
-    string cloud_column =
-        m_options.getValueOrDefault<string>("cloud_column", "id");
+    if (m_sdo_pc_is_initialized)
+        return;
+    
 
     m_block_insert_query << "INSERT INTO " <<
-        boost::to_lower_copy(block_table) << " ("<<
-        boost::to_lower_copy(cloud_column) <<
+        boost::to_lower_copy(m_block_table) << " ("<<
+        boost::to_lower_copy(m_cloud_column) <<
         ", block_id, num_points, points, extent, bbox) VALUES (" <<
         " :obj_id, :block_id, :num_points, decode(:hex, 'hex'), "
         "ST_Force_2D(ST_GeometryFromText(:extent,:srid)), :bbox)";
 
     m_session->begin();
 
-    bool bHaveBlockTable = CheckTableExists(block_table);
-    bool bHaveCloudTable = CheckTableExists(cloud_table);
+    bool bHaveBlockTable = CheckTableExists(m_block_table);
+    bool bHaveCloudTable = CheckTableExists(m_cloud_table);
 
     if (m_options.getValueOrDefault<bool>("overwrite", true))
     {
         if (bHaveBlockTable)
         {
-            DeleteBlockTable(cloud_table, cloud_column, block_table);
+            DeleteBlockTable(m_cloud_table, m_cloud_column, m_block_table);
             bHaveBlockTable = false;
         }
         if (bHaveCloudTable)
         {
-            DeleteCloudTable(cloud_table, cloud_column);
+            DeleteCloudTable(m_cloud_table, m_cloud_column);
             bHaveCloudTable = false;
         }
     }
@@ -150,17 +179,22 @@ void Writer::writeBegin(boost::uint64_t /*targetNumPointsToWrite*/)
 
     if (!bHaveCloudTable)
     {
-        CreateCloudTable(cloud_table,
+        CreateCloudTable(m_cloud_table,
             m_options.getValueOrDefault<uint32_t>("srid", 4326));
     }
 
     if (!bHaveBlockTable)
     {
         m_doCreateIndex = true;
-        CreateBlockTable(block_table,
+        CreateBlockTable(m_block_table,
             m_options.getValueOrDefault<uint32_t>("srid", 4326));
     }
+
+    CreateCloud(schema);
+    m_sdo_pc_is_initialized = true;
+
 }
+
 
 
 bool Writer::CheckTableExists(std::string const& name)
@@ -466,7 +500,7 @@ void Writer::CreateSDOEntry(std::string const& block_table, uint32_t srid,
 }
 
 
-void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
+void Writer::done(PointContext ctx)
 {
     if (m_doCreateIndex)
     {
@@ -485,14 +519,10 @@ void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
 }
 
 
-void Writer::writeBufferBegin(PointBuffer const& data)
-{
-    if (!m_sdo_pc_is_initialized)
-    {
-        CreateCloud(data.getSchema());
-        m_sdo_pc_is_initialized = true;
-    }
-}
+// void Writer::writeBufferBegin(PointBuffer const& data)
+// {
+//
+// }
 
 
 void Writer::CreateCloud(Schema const& buffer_schema)
@@ -564,43 +594,36 @@ void Writer::CreateCloud(Schema const& buffer_schema)
 }
 
 
-boost::uint32_t Writer::writeBuffer(const PointBuffer& buffer)
-{
-    boost::uint32_t numPoints = buffer.getNumPoints();
-    WriteBlock(buffer);
-    return numPoints;
-}
-
-
-bool Writer::WriteBlock(PointBuffer const& buffer)
+void Writer::writeTile(PointBuffer const& buffer)
 {
     using namespace std;
 
-    boost::uint8_t* point_data;
-    boost::uint32_t point_data_length;
-    boost::uint32_t schema_byte_size;
+    boost::uint8_t* point_data(0);
+    boost::uint32_t point_data_length(0);
+    boost::uint32_t schema_byte_size(0);
 
-    bool pack = m_options.getValueOrDefault<bool>("pack_ignored_fields", true);
-    if (pack)
-        PackPointData(buffer, &point_data, point_data_length, schema_byte_size);
-    else
-    {
-        point_data = buffer.getData(0);
-        point_data_length =
-            buffer.getSchema().getByteSize() * buffer.getNumPoints();
-    }
 
-    string block_table = m_options.getValueOrThrow<string>("block_table");
 
-    // // Pluck the block id out of the first point in the buffer
-    pdal::Schema const& schema = buffer.getSchema();
-    Dimension const& blockDim = schema.getDimension("BlockID");
-
-    m_block_id  = buffer.getFieldAs<boost::int32_t>(blockDim, 0, false);
-    m_obj_id = m_options.getValueOrThrow<boost::int32_t>("pc_id");
-    m_num_points = static_cast<boost::int64_t>(buffer.getNumPoints());
-
-    return true;
+ //    bool pack = m_options.getValueOrDefault<bool>("pack_ignored_fields", true);
+//     if (pack)
+//         PackPointData(buffer, &point_data, point_data_length, schema_byte_size);
+//     else
+//     {
+// //ABELL
+// //        point_data = buffer.getData(0);
+//         point_data_length =
+//             buffer.getSchema().getByteSize() * buffer.size();
+//     }
+//
+//     string block_table = m_options.getValueOrThrow<string>("block_table");
+//
+//     // // Pluck the block id out of the first point in the buffer
+//     pdal::Schema const& schema = buffer.getSchema();
+//     Dimension const& blockDim = schema.getDimension("BlockID");
+//
+//     m_block_id  = buffer.getFieldAs<boost::int32_t>(blockDim, 0, false);
+//     m_obj_id = m_options.getValueOrThrow<boost::int32_t>("pc_id");
+//     m_num_points = static_cast<int64_t>(buffer.size());
 }
 
 
@@ -623,14 +646,16 @@ void Writer::PackPointData(PointBuffer const& buffer,
     log()->get(logDEBUG) << "Packed schema byte size " <<
         schema_byte_size << std::endl;
 
-    point_data_len = buffer.getNumPoints() * schema_byte_size;
+    point_data_len = buffer.size() * schema_byte_size;
     *point_data = new boost::uint8_t[point_data_len];
 
     boost::uint8_t* current_position = *point_data;
 
-    for (boost::uint32_t i = 0; i < buffer.getNumPoints(); ++i)
+    for (point_count_t i = 0; i < buffer.size(); ++i)
     {
-        boost::uint8_t* data = buffer.getData(i);
+//ABELL
+//        boost::uint8_t* data = buffer.getData(i);
+boost::uint8_t *data = NULL;
         for (boost::uint32_t d = 0; d < idx.size(); ++d)
         {
             if (! idx[d].isIgnored())

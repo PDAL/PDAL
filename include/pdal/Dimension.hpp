@@ -274,18 +274,6 @@ public:
         m_max = max;
     }
 
-    /// Gets the endianness of this intance (defaults to little)
-    EndianType getEndianness() const
-    {
-        return m_endian;
-    }
-
-    /// Sets the endianness of this Dimension
-    /// \param v EndianType value to set for the dimension
-    void setEndianness(EndianType v)
-    {
-        m_endian = v;
-    }
 
     /// @return the byte offset of the Dimension instance within the
     /// context of a Schema. Schema will set this value when
@@ -524,7 +512,6 @@ public:
 private:
     std::string m_name;
     boost::uint32_t m_flags;
-    EndianType m_endian;
     dimension::size_type m_byteSize;
     std::string m_description;
     double m_min;

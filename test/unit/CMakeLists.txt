@@ -14,30 +14,25 @@ endif()
 SET(PDAL_UNITTEST_TEST_SRC
     BoundsTest.cpp
     drivers/bpf/BPFTest.cpp
-#    drivers/buffer/BufferReaderTest.cpp
 #    drivers/caris/CarisReaderTest.cpp
     filters/ChipperTest.cpp
 #    filters/ColorFilterTest.cpp
-#    ConfigTest.cpp
+    ConfigTest.cpp
     filters/CropFilterTest.cpp
     filters/DecimationFilterTest.cpp
-#    DimensionTest.cpp
-#    EnvironmentTest.cpp
+    DimensionTest.cpp
+    EnvironmentTest.cpp
     drivers/faux/FauxReaderTest.cpp
-#    drivers/faux/FauxWriterTest.cpp
-#    FileUtilsTest.cpp
-#    filters/HexbinFilterTest.cpp
+    FileUtilsTest.cpp
+    filters/HexbinFilterTest.cpp
     filters/InPlaceReprojectionFilterTest.cpp
     drivers/las/LasReaderTest.cpp
     drivers/las/LasWriterTest.cpp
-#    LogTest.cpp
+    LogTest.cpp
     MetadataTest.cpp
 #    filters/MosaicFilterTest.cpp
     OptionsTest.cpp
 #    PipelineManagerTest.cpp
-#    drivers/pipeline/PipelineReaderTest.cpp
-#    drivers/pipeline/PipelineWriterTest.cpp
-#    PointBufferCacheTest.cpp
 #    PointBufferTest.cpp
 #    drivers/qfit/QFITReaderTest.cpp
 #    RangeTest.cpp
@@ -66,7 +61,7 @@ SET(PDAL_UNITTEST_TEST_SRC
 if(WITH_APPS)
   if(LIBXML2_FOUND)
     list(APPEND PDAL_UNITTEST_TEST_SRC 
-#      apps/pcinfoTest.cpp
+      apps/pcinfoTest.cpp
     )
   endif(LIBXML2_FOUND)
 
@@ -110,12 +105,12 @@ endif (WITH_ORACLE)
 
 if (WITH_SQLITE)
     if (NOT USE_PDAL_PLUGIN_SQLITE)
-#        set(PDAL_SQLITE_TEST_CPP drivers/sqlite/Writer.cpp)
+       set(PDAL_SQLITE_TEST_CPP drivers/sqlite/Writer.cpp)
 
-#        FOREACH(file ${PDAL_SQLITE_TEST_CPP})
-#            SET(PDAL_UNITTEST_TEST_SRC "${PDAL_UNITTEST_TEST_SRC};${file}"
-#                CACHE INTERNAL "source files for test")
-#        ENDFOREACH(file)
+       FOREACH(file ${PDAL_SQLITE_TEST_CPP})
+           SET(PDAL_UNITTEST_TEST_SRC "${PDAL_UNITTEST_TEST_SRC};${file}"
+               CACHE INTERNAL "source files for test")
+       ENDFOREACH(file)
     endif()
 endif (WITH_SQLITE)
 

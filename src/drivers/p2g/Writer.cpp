@@ -209,8 +209,7 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
     pdal::Dimension const& dimZ = schema.getDimension(z_name);
 
 
-    boost::uint32_t numPoints = 0;
-    for (uint32_t idx = 0; idx < data.getNumPoints(); idx++)
+    for (PointId idx = 0; idx < data.size(); idx++)
     {
         double x = data.getFieldAs<double>(dimX, idx);
         double y = data.getFieldAs<double>(dimY, idx);
@@ -221,9 +220,8 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
         m_bounds.setMaximum(0, (std::max)(x, m_bounds.getMaximum(0)));
         m_bounds.setMaximum(1, (std::max)(y, m_bounds.getMaximum(1)));
         m_coordinates.push_back(boost::tuple<double, double, double>(x, y, z));
-        numPoints++;
     }
-    return numPoints;
+    return data.size();
 }
 
 void Writer::calculateGridSizes()

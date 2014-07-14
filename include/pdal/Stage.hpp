@@ -32,8 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_STAGE_HPP
-#define INCLUDED_STAGE_HPP
+#pragma once
 
 #include <pdal/pdal_internal.hpp>
 
@@ -55,7 +54,6 @@ class StageRunner;
 class StageTester;
 //
 // supported options:
-//   <uint32>id
 //   <bool>debug
 //   <uint32>verbose
 //
@@ -70,19 +68,16 @@ public:
     virtual ~Stage()
         {}
 
-    void setInput(const std::vector<Stage *>& inputs);
-    void setInput(Stage *input);
+    void setInput(const std::vector<Stage *>& inputs)
+        { m_inputs = inputs; }
+    void setInput(Stage *input)
+        { m_inputs.push_back(input); }
 
     void prepare(PointContext ctx);
     PointBufferSet execute(PointContext ctx);
-    bool isInitialized() const
-        { return m_initialized; }
 
-    inline Schema const& getSchema() const
-        { return *(m_context.schema()); }
-    
-    virtual boost::uint64_t getNumPoints() const;
     const Bounds<double>& getBounds() const;
+    void setSpatialReference(SpatialReference const&);
     const SpatialReference& getSpatialReference() const;
     const Options& getOptions() const
         { return m_options; }
@@ -97,12 +92,8 @@ public:
         { return m_verbose; }
     virtual std::string getName() const = 0;
     virtual std::string getDescription() const = 0;
-    boost::uint32_t getId() const
-        { return m_id; }
     const std::vector<Stage *>& getInputs() const
         { return m_inputs; }
-    const std::vector<Stage *>& getOutputs() const
-        { return m_outputs; }
     Stage& getPrevStage() const;
     std::vector<Stage *> getPrevStages() const;
     static Options getDefaultOptions()
@@ -136,39 +127,18 @@ public:
         { return NULL; }
 
 protected:
-    PointContext m_context;
-    Schema m_schema;
     Options m_options;
     MetadataNode m_metadata;
     Bounds<double> m_bounds;
 
-    StageOperationType getDimensionOperationType() const
-        { return m_dimensionsType; }
-    void setSchema(Schema const&);
-    void setNumPoints(boost::uint64_t);
     void setBounds(Bounds<double> const&);
-    void setSpatialReference(SpatialReference const&);
     void setSpatialReference(MetadataNode& m, SpatialReference const&);
 
-    // convenience function, for doing a "copy ctor" on all the core props
-    // (used by the Filter stage, for example)
-    void setCoreProperties(const Stage&);
-
-    static std::vector<Stage *> makeVector()
-        { return std::vector<Stage *>(); }
-    static std::vector<Stage *> makeVector(Stage& src);
-    static std::vector<Stage *> makeVector(const std::vector<Stage *>& src);
-
 private:
-    bool m_initialized;
     bool m_debug;
     boost::uint32_t m_verbose;
-    boost::uint32_t m_id;
     std::vector<Stage *> m_inputs;
-    std::vector<Stage *> m_outputs;
-    StageOperationType m_dimensionsType;
     LogPtr m_log;
-    mutable boost::uint64_t m_numPoints;
     SpatialReference m_spatialReference;
 
     Stage& operator=(const Stage&); // not implemented
@@ -199,4 +169,3 @@ PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const Stage&);
 
 } // namespace pdal
 
-#endif

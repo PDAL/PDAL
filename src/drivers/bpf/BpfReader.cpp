@@ -82,7 +82,6 @@ void BpfReader::buildSchema(Schema *schema)
         Dimension pd(dim.m_label, dimension::Float, sizeof(float));
         pd.setMinimum(dim.m_min);
         pd.setMaximum(dim.m_max);
-        pd.setEndianness(Endian_Little);
         pd.setNumericOffset(dim.m_offset);
         pd.setNamespace("bpf");
         m_schemaDims.push_back(schema->appendDimension(pd));

@@ -210,7 +210,6 @@ std::vector<boost::tuple<std::string, std::string> >  Writer::getDimensionOrder(
     }
 
     return output;
-
 }
 
 void Writer::WriteGeoJSONHeader(pdal::Schema const&)
@@ -358,7 +357,9 @@ void Writer::WritePCDHeader(pdal::Schema const& schema)
     }
     *m_stream << std::endl;
 
-    boost::uint64_t width = getPrevStage().getNumPoints();
+//ABELL - Get point count from PointBuffer
+//    boost::uint64_t width = getPrevStage().getNumPoints();
+boost::uint64_t width = 0;
     *m_stream << "WIDTH " << width << std::endl;
 
     *m_stream << "HEIGHT 1" << std::endl;
@@ -448,12 +449,6 @@ void Writer::putStringRepresentation(PointBuffer const& data,
             output << data.getFieldAs<double>(d, pointIndex);
             break;
         case dimension::RawByte:
-            {
-                unsigned char* raw  = data.getData(pointIndex) +
-                    d.getByteOffset();
-                Utils::binary_to_hex_stream(raw, output, 0, d.getByteSize());
-                break;
-            }
         case dimension::Pointer:    // stored as 64 bits, even on a 32-bit box
         case dimension::Undefined:
             break;
@@ -484,7 +479,7 @@ void Writer::WriteCSVBuffer(const PointBuffer& data)
 
     std::vector<boost::tuple<std::string, std::string> > dimensions = getDimensionOrder(schema);
 
-    while (pointIndex != data.getNumPoints())
+    while (pointIndex != data.size())
     {
         std::vector<boost::tuple<std::string, std::string> >::const_iterator iter =  dimensions.begin();
 
@@ -537,7 +532,7 @@ void Writer::WritePCDBuffer(const PointBuffer& data)
     bool bRGBPacked = getOptions().getValueOrDefault<bool>("pack_rgb", true);
 
     boost::uint32_t idx(0);
-    while (idx != data.getNumPoints())
+    while (idx != data.size())
     {
         putStringRepresentation(data, x, idx, *m_stream);
         *m_stream << " ";
@@ -595,10 +590,8 @@ void Writer::WriteGeoJSONBuffer(const PointBuffer& data)
     Dimension const& dimY = schema.getDimension("Y");
     Dimension const& dimZ = schema.getDimension("Z");
 
-    while (pointIndex != data.getNumPoints())
+    while (pointIndex != data.size())
     {
-
-
         if (bWroteFirstPoint)
             *m_stream << ",";
 
@@ -681,10 +674,7 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
     {
         WritePCDBuffer(data);
     }
-
-
-
-    return data.getNumPoints();
+    return data.size();
 }
 
 

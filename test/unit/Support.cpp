@@ -54,68 +54,12 @@
 //#pragma GCC diagnostic ignored "-Wsign-compare"
 #endif
 
+using namespace pdal;
 using namespace std;
 
 string Support::datapath()
 {
     return TestConfig::g_data_path;
-}
-
-bool Support::compare_stage_data(pdal::Stage const& a, pdal::Stage const& b)
-{
-    pdal::Schema const& a_schema = a.getSchema();
-    pdal::Schema const& b_schema = b.getSchema();
-    if (a_schema != b_schema) return false;
-
-    boost::uint64_t a_num_points64 = a.getNumPoints();
-    boost::uint64_t b_num_points64 = b.getNumPoints();
-    if (a_num_points64 > std::numeric_limits<boost::uint32_t>::max() ||
-            b_num_points64 > std::numeric_limits<boost::uint32_t>::max())
-        throw pdal::pdal_error("unable to do compare_stage_data for "
-            "> 2^32 points");
-    boost::uint32_t a_num_points = static_cast<boost::uint32_t>(a_num_points64);
-    boost::uint32_t b_num_points = static_cast<boost::uint32_t>(b_num_points64);
-    if (a_num_points != b_num_points) return false;
-
-    // if we don't have any sizes here, we'll just use a small default
-    if (a_num_points == 0) a_num_points = 1024;
-    if (b_num_points == 0) b_num_points = 1024;
-
-    pdal::PointBuffer a_data(a_schema, a_num_points);
-    pdal::PointBuffer b_data(b_schema, b_num_points);
-
-    pdal::StageSequentialIterator* a_itr = a.createSequentialIterator(a_data);
-    pdal::StageSequentialIterator* b_itr = b.createSequentialIterator(b_data);
-
-    if (!a_itr)
-        throw pdal::pdal_error("unable to create sequential iterator for "
-            "compare_stage_data for stage a");
-    if (!b_itr)
-        throw pdal::pdal_error("unable to create sequential iterator for "
-            "compare_stage_data for stage b");
-
-    {
-        boost::uint32_t a_numRead = a_itr->read(a_data);
-        boost::uint32_t b_numRead = b_itr->read(b_data);
-        if (a_numRead != b_numRead) return false;
-
-        boost::uint8_t const* a_bytes = a_data.getData(0);
-        boost::uint8_t const* b_bytes = b_data.getData(0);
-
-        boost::uint64_t a_length = a_data.getBufferByteLength();
-        // boost::uint64_t b_length = b_data.getBufferByteLength();
-
-        for (boost::uintmax_t i=0; i<a_length; i++)
-        {
-            if (*a_bytes != *b_bytes)
-            {
-                return false;
-            }
-            ++a_bytes;
-            ++b_bytes;
-        }
-    }
-    return true;
 }
 
 std::string Support::datapath(const std::string& file)

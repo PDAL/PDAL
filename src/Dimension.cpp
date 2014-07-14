@@ -63,7 +63,6 @@ Dimension::Dimension(std::string const& name,
                      std::string description)
     : m_name(name)
     , m_flags(0)
-    , m_endian(pdal::Endian_Little)
     , m_byteSize(sizeInBytes)
     , m_description(description)
     , m_min(0.0)
@@ -102,7 +101,6 @@ bool Dimension::operator==(const Dimension& other) const
 {
     return (boost::iequals(m_name, other.m_name) &&
         m_flags == other.m_flags &&
-        m_endian == other.m_endian &&
         m_byteSize == other.m_byteSize &&
         boost::iequals(m_description, other.m_description) &&
         Utils::compare_approx(m_min, other.m_min,
@@ -135,11 +133,6 @@ boost::property_tree::ptree Dimension::toPTree() const
     dim.put("parent", getParent());
     dim.put("description", getDescription());
     dim.put("bytesize", getByteSize());
-
-    std::string e("little");
-    if (getEndianness() == Endian_Big)
-        e = std::string("big");
-    dim.put("endianness", e);
 
     dim.put("minimum", getMinimum());
     dim.put("maximum", getMaximum());

@@ -1,1 +1,1 @@
-Hi!
+Testing log output through python script.

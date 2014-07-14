@@ -186,17 +186,11 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
     drivers["bin"] = "drivers.terrasolid.reader";
     drivers["greyhound"] = "drivers.greyhound.reader";
     drivers["qi"] = "drivers.qfit.reader";
-    drivers["xml"] = "drivers.pipeline.reader";
     drivers["nitf"] = "drivers.nitf.reader";
     drivers["ntf"] = "drivers.nitf.reader";
     drivers["bpf"] = "drivers.bpf.reader";
     drivers["sbet"] = "drivers.sbet.reader";
     drivers["icebridge"] = "drivers.icebridge.reader";
-
-    if (boost::algorithm::iequals(filename, "STDIN"))
-    {
-        return drivers["xml"];
-    }
 
     if (ext == "") return "";
     ext = ext.substr(1, ext.length()-1);
@@ -509,10 +503,9 @@ void StageFactory::loadPlugins()
 
 
     // If we don't have a driver path, we're not loading anything
-    // FIXME: support setting the plugin name directly from the
-    // PipelineReader
 
-    if (pluginDir.size() == 0) return;
+    if (pluginDir.size() == 0)
+        return;
 
     directory_iterator dir(pluginDir), it, end;
 

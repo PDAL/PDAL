@@ -70,7 +70,7 @@ LasHeaderReader::LasHeaderReader(LasHeader& header, std::istream& istream)
 }
 
 
-void LasHeaderReader::read(Reader& stage, Schema& schema)
+void LasHeaderReader::read(Reader& stage)
 {
     // Helper variables
     boost::uint8_t n1 = 0;

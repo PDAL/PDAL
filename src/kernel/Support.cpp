@@ -38,70 +38,70 @@
 #include <boost/algorithm/string.hpp>
 
 #include <pdal/FileUtils.hpp>
+#include <pdal/PipelineReader.hpp>
 #include <pdal/Utils.hpp>
-
 
 namespace pdal
 {
 namespace kernel
 {
     
-
-pdal::PipelineManager* AppSupport::makePipeline(pdal::Options& options)
+PipelineManager* AppSupport::makePipeline(pdal::Options& options)
 {
-    const std::string inputFile = options.getValueOrThrow<std::string>("filename");
+    std::string inputFile = options.getValueOrThrow<std::string>("filename");
 
     if (!pdal::FileUtils::fileExists(inputFile))
-    {
         throw app_runtime_error("file not found: " + inputFile);
-    }
     
-    pdal::PipelineManager* output = new PipelineManager;
-    pdal::StageFactory factory;
-    std::string driver = factory.inferReaderDriver(inputFile);
-    if (driver == "")
-    {
-        throw app_runtime_error("Cannot determine input file type of " + inputFile);
-    }
+    PipelineManager* output = new PipelineManager;
 
-    pdal::Stage* stage = output->addReader(driver, options);
-    if (!stage)
+    if (inputFile == "STDIN")
     {
-        throw app_runtime_error("reader creation failed");
+        PipelineReader pipeReader(*output);
+        pipeReader.readPipeline(std::cin);
     }
-
+    else if (boost::filesystem::extension(inputFile) == ".xml")
+    {
+        PipelineReader pipeReader(*output);
+        pipeReader.readPipeline(inputFile);
+    }
+    else
+    {
+        StageFactory factory;
+        std::string driver = factory.inferReaderDriver(inputFile);
+        if (driver.empty())
+            throw app_runtime_error("Cannot determine input file type of " +
+                inputFile);
+        if (!output->addReader(driver, options))
+            throw app_runtime_error("reader creation failed");
+    }
     return output;
 }
     
-pdal::Stage* AppSupport::makeReader(pdal::Options& options)
+
+Stage *AppSupport::makeReader(pdal::Options& options)
 {
-    const std::string inputFile = options.getValueOrThrow<std::string>("filename");
+    std::string inputFile = options.getValueOrThrow<std::string>("filename");
 
-    if (!pdal::FileUtils::fileExists(inputFile))
-    {
+    if (!FileUtils::fileExists(inputFile))
         throw app_runtime_error("file not found: " + inputFile);
-    }
 
-    pdal::StageFactory factory;
+    StageFactory factory;
     std::string driver = factory.inferReaderDriver(inputFile);
-    if (driver == "")
-    {
-        throw app_runtime_error("Cannot determine input file type of " + inputFile);
-    }
+    if (driver.empty())
+        throw app_runtime_error("Cannot determine input file type of " +
+            inputFile);
 
-    pdal::Stage* stage = factory.createReader(driver, options);
+    Stage* stage = factory.createReader(driver, options);
     if (!stage)
-    {
         throw app_runtime_error("reader creation failed");
-    }
-
     return stage;
 }
 
 
-pdal::Writer* AppSupport::makeWriter(pdal::Options& options, pdal::Stage& stage)
+Writer* AppSupport::makeWriter(Options& options, Stage& stage)
 {
-    const std::string outputFile = options.getValueOrThrow<std::string>("filename");
+    std::string outputFile = options.getValueOrThrow<std::string>("filename");
 
     pdal::StageFactory factory;
     std::string driver = factory.inferWriterDriver(outputFile);

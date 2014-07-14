@@ -100,7 +100,7 @@ void Reader::initialize(MetadataNode& m)
     LasHeaderReader lasHeaderReader(m_lasHeader, stream);
     try
     {
-        lasHeaderReader.read(*this, m_schema);
+        lasHeaderReader.read(*this);
     }
     catch (const std::invalid_argument& e)
     {
@@ -116,7 +116,6 @@ void Reader::initialize(MetadataNode& m)
     }
 
     setBounds(m_lasHeader.getBounds());
-    setNumPoints(m_lasHeader.GetPointRecordsCount());
     extractMetadata(m);
     m_streamFactory->deallocate(stream);
 }
@@ -136,25 +135,9 @@ StreamFactory& Reader::getStreamFactory() const
 }
 
 
-pdal::StageSequentialIterator*
-Reader::createSequentialIterator(PointBuffer& buffer) const
-{
-    return new pdal::drivers::las::iterators::sequential::Reader(*this,
-        getNumPoints());
-}
-
 pdal::StageSequentialIterator* Reader::createSequentialIterator() const
 {
-    return new pdal::drivers::las::iterators::sequential::Reader(*this,
-        getNumPoints());
-}
-
-
-pdal::StageRandomIterator*
-Reader::createRandomIterator(PointBuffer& buffer) const
-{
-    return new pdal::drivers::las::iterators::random::Reader(*this, buffer,
-        getNumPoints());
+    return new drivers::las::iterators::sequential::Reader(*this);
 }
 
 
@@ -706,7 +689,6 @@ void Base::loadPoint(PointBuffer& data, PointDimensions *dimensions,
 
     istream >> intensity >> flags >> classification >> scanAngleRank >> 
         user >> pointSourceId;
-    classification &= 31;
 
     uint8_t returnNum = flags & 0x07;
     uint8_t numReturns = (flags >> 3) & 0x07;
@@ -764,9 +746,7 @@ void Base::loadPoint(PointBuffer& data, PointDimensions *dimensions,
 namespace sequential
 {
 
-Reader::Reader(pdal::drivers::las::Reader const& reader,
-        boost::uint32_t numPoints)
-    : Base(reader), m_numPoints(numPoints)
+Reader::Reader(pdal::drivers::las::Reader const& reader) : Base(reader)
 {}
 
 
@@ -794,17 +774,11 @@ boost::uint64_t Reader::skipImpl(boost::uint64_t count)
 }
 
 
-bool Reader::atEndImpl() const
-{
-    return getIndex() >= m_numPoints;
-}
-
-
 point_count_t Reader::readImpl(PointBuffer& data, point_count_t count)
 {
     PointDimensions cachedDimensions(data.getSchema(), m_reader.getName());
 
-    boost::uint32_t numToRead = m_numPoints - getIndex();
+    point_count_t numToRead = m_reader.getNumPoints() - getIndex();
 #ifdef PDAL_HAVE_LASZIP
     return processBuffer(data, m_istream, count, m_unzipper.get(),
         m_zipPoint.get(), &cachedDimensions);
@@ -817,7 +791,7 @@ boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
 {
     PointDimensions cachedDimensions(data.getSchema(), m_reader.getName());
 
-    boost::uint32_t numToRead = m_numPoints - getIndex();
+    boost::uint32_t numToRead = m_reader.getNumPoints() - getIndex();
 #ifdef PDAL_HAVE_LASZIP
     return processBuffer(data, m_istream, numToRead, m_unzipper.get(),
         m_zipPoint.get(), &cachedDimensions);
@@ -828,56 +802,9 @@ boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
 }
 
 } // sequential
-
-namespace random
-{
-
-Reader::Reader(const pdal::drivers::las::Reader& reader, PointBuffer& buffer,
-        boost::uint32_t numPoints)
-    : Base(reader), pdal::ReaderRandomIterator(buffer), m_numPoints(numPoints)
-{}
-
-
-boost::uint64_t Reader::seekImpl(boost::uint64_t count)
-{
-    const LasHeader& h = m_reader.getLasHeader();
-
-#ifdef PDAL_HAVE_LASZIP
-    if (m_unzipper)
-    {
-        const boost::uint32_t pos32 = Utils::safeconvert64to32(count);
-        m_unzipper->seek(pos32);
-    }
-    else
-    {
-        std::streamoff delta = h.getPointDataSize();
-        m_istream.seekg(h.GetDataOffset() + delta * count);
-    }
-#else
-    std::streamoff delta = h.getPointDataSize();
-    m_istream.seekg(h.GetDataOffset() + delta * count);
-#endif
-    return count;
-}
-
-
-boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
-{
-    PointDimensions cachedDimensions(data.getSchema(), m_reader.getName());
-
-    boost::uint32_t numToRead = m_numPoints - getIndex();
-#ifdef PDAL_HAVE_LASZIP
-    return processBuffer(data, m_istream, numToRead, m_unzipper.get(),
-        m_zipPoint.get(), &cachedDimensions);
-#else
-    return processBuffer(data, m_istream, numToRead, NULL, NULL,
-         &cachedDimensions);
-#endif
-}
-
-} // random
 } // iterators
 
-}
-}
-} // namespaces
+} // namespace las
+} // namespace drivers
+} // namespace pdal
+

@@ -136,6 +136,12 @@ private:
 } // namespace stats
 typedef boost::shared_ptr<stats::Summary> SummaryPtr;
 
+struct DimPtrComparator
+{
+    bool operator ()(const Dimension *d1, const Dimension *d2) const
+        { return *d1 < *d2; }
+};
+
 // This is just a pass-thorugh filter, which collects some stats about
 // the points that are fed through it
 class PDAL_DLL Stats : public Filter
@@ -145,7 +151,7 @@ public:
     SET_STAGE_LINK("http://pdal.io/stages/filters.stats.html")  
     SET_STAGE_ENABLED(true)
     
-    Stats(const Options& options) : Filter(options)
+    Stats(const Options& options) : Filter(options), m_stats(DimPtrComparator())
         {}
 
     static Options getDefaultOptions();
@@ -175,7 +181,7 @@ private:
     point_count_t m_numPoints;
     std::set<std::string> m_dimension_names;
     std::set<std::string> m_exact_dimension_names;
-    std::map<const Dimension *, SummaryPtr> m_stats;
+    std::map<const Dimension *, SummaryPtr, DimPtrComparator> m_stats;
 };
 
 

@@ -60,12 +60,12 @@ public:
 #endif
     Writer(const Options&);
 
-protected:
-    virtual void writeBegin(boost::uint64_t targetNumPointsToWrite);
-    virtual void writeBufferBegin(PointBuffer const&);
-
-    virtual boost::uint32_t writeBuffer(const PointBuffer&);
-    virtual void writeEnd(boost::uint64_t actualNumPointsWritten);
+// protected:
+    // virtual void writeBegin(boost::uint64_t targetNumPointsToWrite);
+    // virtual void writeBufferBegin(PointBuffer const&);
+    //
+    // virtual boost::uint32_t writeBuffer(const PointBuffer&);
+    // virtual void writeEnd(boost::uint64_t actualNumPointsWritten);
 
 private:
 
@@ -73,6 +73,13 @@ private:
     Writer(const Writer&); // not implemented
 
     virtual void initialize();
+    virtual void processOptions(const Options& options);
+    virtual void ready(PointContext ctx);
+    virtual void write(const PointBuffer& pointBuffer);
+    virtual void done(PointContext ctx);
+    
+    void writeInit(const Schema& schema);
+    void writeTile(const PointBuffer& buffer);
     void CreateBlockTable(std::string const& name, boost::uint32_t srid);
     void CreateCloudTable(std::string const& name, boost::uint32_t srid);    
     bool CheckTableExists(std::string const& name);
@@ -115,6 +122,15 @@ private:
 	boost::int32_t m_block_id;
 	boost::uint32_t m_srid;
 	boost::int64_t m_num_points;
+    size_t m_pointSize;    
+    schema::Orientation m_orientation;
+    std::vector<Dimension> m_dims;
+    bool m_pack;
+    std::string m_block_table;
+    std::string m_cloud_table;
+    std::string m_cloud_column;    
+    std::string m_connection;  
+    
 };
 
 }

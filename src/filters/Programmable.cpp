@@ -78,6 +78,9 @@ void Programmable::ready(PointContext ctx)
 
 void Programmable::filter(PointBuffer& buf)
 {
+    log()->get(logDEBUG5) << "Python script " << *m_script << " processing " <<
+        buf.size() << " points." << std::endl;
+
     m_pythonMethod->resetArguments();
     m_pythonMethod->beginChunk(buf);
     m_pythonMethod->execute();

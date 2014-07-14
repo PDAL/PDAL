@@ -536,7 +536,6 @@ void Reader::Load()
         double scale(0.0);
         double minimum(0.0);
         double maximum(0.0);
-        EndianType endianness = Endian_Little;
 
         while (properties != NULL)
         {
@@ -639,19 +638,6 @@ void Reader::Load()
                 xmlFree(n);
                 // std::cout << "Dimension scale: " << scale << std::endl;
             }
-            if (boost::iequals((const char*)properties->name, "endianness"))
-            {
-                xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
-                if (!n) throw schema_loading_error("Unable to fetch endianness value!");
-
-                if (boost::iequals((const char*) n, "big"))
-                    endianness = Endian_Big;
-                else
-                    endianness = Endian_Little;
-
-                xmlFree(n);
-                // std::cout << "Dimension endianness: " << endianness << std::endl;
-            }
             if (boost::iequals((const char*)properties->name, "uuid"))
             {
                 xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
@@ -700,8 +686,6 @@ void Reader::Load()
         {
             d.setMaximum(maximum);
         }
-
-        d.setEndianness(endianness);
 
         d.setPosition(position);
 

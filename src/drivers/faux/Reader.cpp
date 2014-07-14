@@ -113,7 +113,7 @@ Options Reader::getDefaultOptions()
 
 pdal::StageSequentialIterator* Reader::createSequentialIterator() const
 {
-    return new FauxSeqIterator(m_bounds, m_schema, m_mode, m_numPoints);
+    return new FauxSeqIterator(m_bounds, m_schema, m_mode, m_numPoints, log());
 }
 
 } // namespace faux
@@ -121,8 +121,8 @@ pdal::StageSequentialIterator* Reader::createSequentialIterator() const
 
 
 FauxSeqIterator::FauxSeqIterator(const Bounds<double>& bounds, Schema *schema,
-        drivers::faux::Mode mode, point_count_t numPoints) :
-    m_time(0), m_mode(mode), m_numPoints(numPoints)
+        drivers::faux::Mode mode, point_count_t numPoints, LogPtr log) :
+    m_time(0), m_mode(mode), m_numPoints(numPoints), m_log(log)
 {
     const std::vector<Range<double>>& ranges = bounds.dimensions();
     m_minX = ranges[0].getMinimum();
@@ -147,6 +147,9 @@ point_count_t FauxSeqIterator::readImpl(PointBuffer& buf, point_count_t count)
     const double delX = (m_maxX - m_minX) / numDeltas;
     const double delY = (m_maxY - m_minY) / numDeltas;
     const double delZ = (m_maxZ - m_minZ) / numDeltas;
+
+    m_log->get(logDEBUG5) << "Reading a point buffer of " <<
+        count << " points." << std::endl;
 
     for (PointId idx = 0; idx < count; ++idx)
     {

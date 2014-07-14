@@ -536,11 +536,9 @@ schema::DimensionMap* Schema::mapDimensions(Schema const& destination, bool bIgn
         if (d->getInterpretation() == s->getInterpretation() &&
                 d->getByteSize() == s->getByteSize() &&
                 pdal::Utils::compare_distance(d->getNumericScale(), s->getNumericScale()) &&
-                pdal::Utils::compare_distance(d->getNumericOffset(), s->getNumericOffset()) &&
-                d->getEndianness() == s->getEndianness()
+                pdal::Utils::compare_distance(d->getNumericOffset(), s->getNumericOffset())
            )
         {
-
             dims->insert(std::pair<Dimension const*, Dimension const*>(s, d));
         }
     }

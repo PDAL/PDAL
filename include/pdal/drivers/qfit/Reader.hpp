@@ -136,7 +136,6 @@ public:
 
 
     Reader(const Options& options);
-    ~Reader();
 
     static Options getDefaultOptions();
     static std::vector<Dimension> getDefaultDimensions();
@@ -151,6 +150,8 @@ public:
         { return m_offset; }
     boost::uint32_t getPointDataSize() const
         { return m_size; }
+    point_count_t getNumPoints() const
+        { return m_numPoints; }
 
     // this is called by the stage's iterator
     boost::uint32_t processBuffer(PointBuffer& PointBuffer, std::istream& stream, boost::uint64_t numPointsLeft) const;
@@ -162,20 +163,18 @@ protected:
     }
 
 private:
-
-    Reader& operator=(const Reader&); // not implemented
-    Reader(const Reader&); // not implemented
-
     QFIT_Format_Type m_format;
     std::size_t m_offset;
     boost::uint32_t m_size;
     bool m_flip_x;
     double m_scale_z;
     bool m_littleEndian;
+    point_count_t m_numPoints;
 
-    void registerFields();
+    virtual void buildSchema(Schema *s);
 
-
+    Reader& operator=(const Reader&); // not implemented
+    Reader(const Reader&); // not implemented
 };
 
 namespace iterators
@@ -187,18 +186,17 @@ namespace sequential
 class Reader : public pdal::ReaderSequentialIterator
 {
 public:
-    Reader(const pdal::drivers::qfit::Reader& reader, PointBuffer& buffer,
-        boost::uint32_t numPoints);
+    Reader(const pdal::drivers::qfit::Reader& reader, PointBuffer& buffer);
     ~Reader();
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t);
     boost::uint32_t readBufferImpl(PointBuffer&);
-    bool atEndImpl() const;
+    bool atEndImpl() const
+        { return getIndex() >= m_reader.getNumPoints(); }
 
     const pdal::drivers::qfit::Reader& m_reader;
     std::istream* m_istream;
-    boost::uint32_t m_numPoints;
 };
 
 } // sequential
@@ -209,8 +207,7 @@ namespace random
 class Reader : public pdal::ReaderRandomIterator
 {
 public:
-    Reader(const pdal::drivers::qfit::Reader& reader, PointBuffer& buffer,
-        boost::uint32_t numPoints);
+    Reader(const pdal::drivers::qfit::Reader& reader, PointBuffer& buffer);
     ~Reader();
 
 private:
@@ -219,14 +216,12 @@ private:
 
     const pdal::drivers::qfit::Reader& m_reader;
     std::istream* m_istream;
-    boost::uint32_t m_numPoints;
 };
 
-} // random
-} // iterators
-}
-}
-} // namespace pdal::driver::qfit
-
+} // namespace random
+} // namespace iterators
+} // namespace qfit
+} // namespace drivers
+} // namespace pdal
 
 #endif // INCLUDED_PDAL_DRIVER_QFIT_READER_HPP
