@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Hobu Inc.
+* Copyright (c) 2014, Connor Manning (connor@hobu.co)
 *
 * All rights reserved.
 *
@@ -31,61 +31,66 @@
 * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 * OF SUCH DAMAGE.
 ****************************************************************************/
+
 #pragma once
 
-#include <memory>
-#include <vector>
+#include <condition_variable>
+#include <mutex>
 
-#include "pdal/Dimension.hpp"
-#include "pdal/Schema.hpp"
+#include <websocketpp/config/asio_no_tls_client.hpp>
+#include <websocketpp/client.hpp>
+
+#include <json/json.h>
 
 namespace pdal
 {
 
-/// This class provides a place to store the point data.
-class RawPtBuf
+typedef websocketpp::client<websocketpp::config::asio_client> asioClient;
+typedef websocketpp::config::asio_client::message_type::ptr message_ptr;
+    
+class WebSocketExchange
 {
 public:
-    RawPtBuf(SchemaPtr schema)
-        : m_numPts(0)
-        , m_allocPts(0)
-        , m_schema(schema)
-    {}
-
-    PointId addPoint()
+    const Json::Value& req() const { return m_req; }
+    const std::vector<message_ptr>& res() const { return m_res; }
+    void addResponse(message_ptr message)
     {
-        if (m_numPts >= m_allocPts)
-        {
-            m_allocPts += m_blockSize;
-            m_buf.resize(pointsToBytes(m_allocPts));
-        }
-        return m_numPts++;
+        m_res.push_back(message);
+        handleRx(message);
     }
 
-    void setField(const Dimension& dim, PointId idx, const void *value)
-    {
-        std::size_t offset = pointsToBytes(idx) + dim.getByteOffset();
-        memcpy(m_buf.data() + offset, value, dim.getByteSize());
-    }
+    virtual bool done() const { return true; }
+    virtual bool check() { return true; }
 
-    void getField(const Dimension& dim, PointId idx, void *value)
-    {
-        std::size_t offset = pointsToBytes(idx) + dim.getByteOffset();
-        memcpy(value, m_buf.data() + offset, dim.getByteSize());
-    }
+protected:
+    WebSocketExchange() : m_req(), m_res() { }
+    virtual void handleRx(const message_ptr) { }
+
+    Json::Value m_req;
 
 private:
-    std::vector<char> m_buf;
-    point_count_t m_numPts;
-    point_count_t m_allocPts;
-    SchemaPtr m_schema;
-
-    static const point_count_t m_blockSize = 100000;
-    
-    std::size_t pointsToBytes(point_count_t numPts)
-        { return m_schema->getByteSize() * numPts; }
+    std::vector<message_ptr> m_res;
 };
-typedef std::shared_ptr<RawPtBuf> RawPtBufPtr;
+
+class WebSocketClient
+{
+public:
+    WebSocketClient(bool enableLogging = false);
+    WebSocketClient(const std::string& uri, bool enableLogging = false);
+
+    void initialize(const std::string& uri);
+    void exchange(WebSocketExchange& exchange);
+
+private:
+    std::string m_uri;
+    asioClient m_client;
+    Json::Reader m_jsonReader;
+
+    std::condition_variable m_cv;
+    std::mutex m_mutex;
+
+    bool m_initialized;
+};
 
 } // namespace pdal
 
