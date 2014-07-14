@@ -61,9 +61,11 @@ private:
     std::string m_uri;
     std::string m_pipelineId;
     std::string m_sessionId;
+    pdal::Schema m_remoteSchema;
     point_count_t m_numPoints;
     WebSocketClient m_wsClient;
 
+    virtual void initialize();
     virtual void processOptions(const Options& options);
     virtual void buildSchema(Schema* schema);
     virtual void ready(PointContext ctx);
@@ -81,8 +83,8 @@ public:
     Iterator(
             WebSocketClient& wsClient,
             std::string sessionId,
-            point_count_t numPoints,
-            Schema schema);
+            Schema remoteSchema,
+            point_count_t numPoints);
 
 private:
     virtual point_count_t readImpl(
@@ -99,10 +101,15 @@ private:
     boost::uint64_t skipImpl(boost::uint64_t pointsToSkip);
     virtual bool atEndImpl() const;
 
+    point_count_t setPoints(
+            PointBuffer& pointBuffer,
+            const char* data,
+            point_count_t pointsToRead);
+
     WebSocketClient& m_wsClient;
     std::string m_sessionId;
+    Schema m_remoteSchema;
     point_count_t m_numPoints;
-    Schema m_schema;
 };
 
 } // namespace sequential

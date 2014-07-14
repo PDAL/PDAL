@@ -47,6 +47,7 @@ GreyhoundReader::GreyhoundReader(const Options& options)
     , m_uri()
     , m_pipelineId()
     , m_sessionId()
+    , m_remoteSchema()
     , m_numPoints()
     , m_wsClient()
 { }
@@ -62,8 +63,21 @@ StageSequentialIterator* GreyhoundReader::createSequentialIterator() const
     return new iterators::sequential::Iterator(
             const_cast<WebSocketClient&>(m_wsClient),
             m_sessionId,
-            m_numPoints,
-            m_schema);
+            m_remoteSchema,
+            m_numPoints);
+}
+
+void GreyhoundReader::initialize()
+{
+    // Create remote PDAL session.
+    exchanges::CreateSession createExchange(m_pipelineId);
+    m_wsClient.exchange(createExchange);
+    m_sessionId = createExchange.getSession();
+
+    // Get remote schema.
+    exchanges::GetSchema schemaExchange(m_sessionId);
+    m_wsClient.exchange(schemaExchange);
+    m_remoteSchema = Schema::from_xml(schemaExchange.schema());
 }
 
 void GreyhoundReader::processOptions(const Options& options)
@@ -76,20 +90,9 @@ void GreyhoundReader::processOptions(const Options& options)
 
 void GreyhoundReader::buildSchema(Schema* schema)
 {
-    // Create session.
-    exchanges::CreateSession createExchange(m_pipelineId);
-    m_wsClient.exchange(createExchange);
-    m_sessionId = createExchange.getSession();
-
-    // Get schema.
-    exchanges::GetSchema schemaExchange(m_sessionId);
-    m_wsClient.exchange(schemaExchange);
-    m_schema = Schema::from_xml(schemaExchange.schema());
-
     const pdal::schema::index_by_index& idx(
-            m_schema.getDimensions().get<pdal::schema::index>());
+            m_remoteSchema.getDimensions().get<pdal::schema::index>());
 
-    // Populate passed-in schema.
     for (boost::uint32_t d = 0; d < idx.size(); ++d)
     {
         schema->appendDimension(idx[d]);
@@ -110,12 +113,12 @@ namespace iterators
 sequential::Iterator::Iterator(
         WebSocketClient& wsClient,
         std::string sessionId,
-        point_count_t numPoints,
-        Schema schema)
+        Schema remoteSchema,
+        point_count_t numPoints)
     : m_wsClient(wsClient)
     , m_sessionId(sessionId)
+    , m_remoteSchema(remoteSchema)
     , m_numPoints(numPoints)
-    , m_schema(schema)
 { }
 
 point_count_t sequential::Iterator::readImpl(
@@ -129,32 +132,31 @@ point_count_t sequential::Iterator::readImpl(
 
     std::size_t leftover(0);
     std::size_t offset(0);
-    const std::size_t schemaByteSize(m_schema.getByteSize());
-
     std::size_t numRead(0);
+
+    const schema::size_type remotePointSize(m_remoteSchema.getByteSize());
 
     for (std::size_t i(0); i < data.size(); ++i)
     {
         if (leftover != 0)
         {
-            std::string stitchedPoint = 
+            const std::string stitchedPoint = 
                 data[i - 1]->substr(data[i - 1]->size() - leftover) +
                 data[i]->substr(0, offset);
 
-            pointBuffer.appendRaw(stitchedPoint.data(), 1);
-            ++numRead;
+            numRead += setPoints(pointBuffer, stitchedPoint.data(), 1);
         }
 
         const point_count_t wholePoints(
-                ((data[i]->size() - offset) / schemaByteSize));
+                ((data[i]->size() - offset) / remotePointSize));
         const std::size_t pointBoundedSize(
-            wholePoints * schemaByteSize);
+            wholePoints * remotePointSize);
 
-        pointBuffer.appendRaw(data[i]->data() + offset, pointBoundedSize);
+        numRead +=
+            setPoints(pointBuffer, data[i]->data() + offset, wholePoints);
 
-        numRead += wholePoints;
         leftover = (data[i]->size() - offset) - pointBoundedSize;
-        offset = schemaByteSize - leftover;
+        offset = remotePointSize - leftover;
     }
 
     m_index += numRead;
@@ -174,6 +176,36 @@ boost::uint64_t sequential::Iterator::skipImpl(
 bool sequential::Iterator::atEndImpl() const
 {
     return m_index >= m_numPoints;
+}
+
+point_count_t sequential::Iterator::setPoints(
+        PointBuffer& pointBuffer,
+        const char* data,
+        const point_count_t pointsToRead)
+{
+    PointId nextId(pointBuffer.size());
+
+    std::size_t dataOffset(0);
+    point_count_t numRead(0);
+    const schema::Map dims(m_remoteSchema.getDimensions());
+
+    while (numRead < pointsToRead)
+    {
+        for (auto dim : dims)
+        {
+            pointBuffer.setRawField(
+                    dim,
+                    nextId,
+                    data + dataOffset);
+
+            dataOffset += dim.getByteSize();
+        }
+
+        ++nextId;
+        ++numRead;
+    }
+
+    return numRead;
 }
 
 } // namespace iterators

@@ -213,22 +213,6 @@ void PointBuffer::getData(boost::uint8_t** data, boost::uint64_t* array_size) co
     memcpy(*data, m_data.get(), static_cast<size_t>(*array_size));
 }
 
-void PointBuffer::appendRaw(const char* data, const std::size_t length)
-{
-    point_count_t rawIdStart(
-            m_context.rawPtBuf()->appendRaw(data, length));
-
-    const std::size_t indexStart(m_index.size());
-
-    m_index.resize(
-            m_index.size() + length / m_context.schema()->getByteSize());
-
-    for (std::size_t i(indexStart); i < m_index.size(); ++i)
-    {
-        m_index[i] = rawIdStart++;
-    }
-}
-
 PointBuffer* PointBuffer::pack(bool bRemoveIgnoredDimensions) const
 {
 

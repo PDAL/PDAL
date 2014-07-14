@@ -74,26 +74,6 @@ public:
         memcpy(value, m_buf.data() + offset, dim.getByteSize());
     }
 
-    PointId appendRaw(const char* data, std::size_t length)
-    {
-        const point_count_t pointIdStart(m_numPts);
-        const std::size_t offset(pointsToBytes(m_numPts));
-        m_numPts += bytesToPoints(length);
-
-        if (m_numPts >= m_allocPts)
-        {
-            // Notch up allocation to the next blockSize greater than m_numPts.
-            m_allocPts =
-                (m_numPts / m_blockSize) * m_blockSize + m_blockSize;
-
-            m_buf.resize(pointsToBytes(m_allocPts));
-        }
-
-        std::memcpy(m_buf.data() + offset, data, length);
-
-        return pointIdStart;
-    }
-
 private:
     std::vector<char> m_buf;
     point_count_t m_numPts;
@@ -104,9 +84,6 @@ private:
     
     std::size_t pointsToBytes(point_count_t numPts)
         { return m_schema->getByteSize() * numPts; }
-
-    point_count_t bytesToPoints(std::size_t numBytes)
-        { return numBytes / m_schema->getByteSize(); }
 };
 typedef std::shared_ptr<RawPtBuf> RawPtBufPtr;
 
