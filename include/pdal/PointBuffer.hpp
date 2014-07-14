@@ -248,6 +248,7 @@ public:
         setField(dim, idx, dim.removeScaling(val));
     }
 
+    void appendRaw(const char* data, std::size_t length);
 
     /*! bulk copy all the fields from the given point into this object
         \param destPointIndex the destination point index to copy the data from

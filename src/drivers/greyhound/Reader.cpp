@@ -127,41 +127,37 @@ point_count_t sequential::Iterator::readImpl(
     m_wsClient.exchange(readExchange);
     std::vector<const std::string*> data(readExchange.data());
 
-    // TODO Reconcile this.
-    //point_count_t numRead(readExchange.numRead());
+    std::size_t leftover(0);
+    std::size_t offset(0);
+    const std::size_t schemaByteSize(m_schema.getByteSize());
 
-    PointId nextId = pointBuffer.size();
-    PointId idx = m_index;
-    point_count_t numRead = 0;
-
-    const pdal::schema::index_by_index& schemaIndex(
-            m_schema.getDimensions().get<pdal::schema::index>());
+    std::size_t numRead(0);
 
     for (std::size_t i(0); i < data.size(); ++i)
     {
-        std::size_t dataIndex(0);
-
-        while (dataIndex < data[i]->size())
+        if (leftover != 0)
         {
-            for (boost::uint32_t d = 0; d < schemaIndex.size(); ++d)
-            {
-                pointBuffer.setRawField(
-                        schemaIndex[d],
-                        nextId,
-                        data[i]->data() + dataIndex);
+            std::string stitchedPoint = 
+                data[i - 1]->substr(data[i - 1]->size() - leftover) +
+                data[i]->substr(0, offset);
 
-                dataIndex += schemaIndex[d].getByteSize();
-            }
-
-            ++idx;
-            ++nextId;
+            pointBuffer.appendRaw(stitchedPoint.data(), 1);
             ++numRead;
         }
+
+        const point_count_t wholePoints(
+                ((data[i]->size() - offset) / schemaByteSize));
+        const std::size_t pointBoundedSize(
+            wholePoints * schemaByteSize);
+
+        pointBuffer.appendRaw(data[i]->data() + offset, pointBoundedSize);
+
+        numRead += wholePoints;
+        leftover = (data[i]->size() - offset) - pointBoundedSize;
+        offset = schemaByteSize - leftover;
     }
 
-    m_index = idx;
-
-    std::cout << numRead << " " << readExchange.numRead() << std::endl;
+    m_index += numRead;
 
     return numRead;
 }
