@@ -74,8 +74,10 @@ protected:
 private:
     virtual PointBufferSet run(PointBufferPtr buffer)
     {
+        PointBufferSet pbSet;
         write(*buffer);
-        return PointBufferSet();
+        pbSet.insert(buffer);
+        return pbSet;
     }
     virtual void write(const PointBuffer& buffer)
         { std::cerr << "Can't write with stage = " << getName() << "!\n"; }

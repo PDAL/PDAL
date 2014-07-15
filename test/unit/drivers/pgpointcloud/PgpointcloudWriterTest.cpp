@@ -150,9 +150,9 @@ BOOST_AUTO_TEST_CASE(testWrite)
     {
         count += (*i)->size();
     }
-    BOOST_CHECK_EQUAL(written.size(), 0);
-    BOOST_CHECK_EQUAL(count, 0);
-    // BOOST_CHECK_EQUAL(count, 1065);
+    BOOST_CHECK_EQUAL(written.size(), 1);
+    // BOOST_CHECK_EQUAL(count, 0);
+    BOOST_CHECK_EQUAL(count, 1065);
 }
 
 
