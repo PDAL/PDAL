@@ -343,8 +343,7 @@ void IteratorBase::copyDatabaseData(PointBuffer& source,
             pdal::Utils::compare_distance(dest_dim.getNumericScale(),
                 source_dim->getNumericScale()) &&
             pdal::Utils::compare_distance(dest_dim.getNumericOffset(),
-                source_dim->getNumericOffset())  &&
-            dest_dim.getEndianness() == source_dim->getEndianness())
+                source_dim->getNumericOffset()) )
         {
             // FIXME: This test could produce false positives
 //ABELL
