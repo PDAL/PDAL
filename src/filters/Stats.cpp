@@ -135,7 +135,7 @@ void Stats::filter(PointBuffer& buffer)
         {
             const Dimension *d = p->first;
             SummaryPtr c = p->second;
-            c->insert(buffer.applyScaling(*d, idx));
+            c->insert(buffer.getFieldAs<double>(*d, idx));
         }
     }
 }

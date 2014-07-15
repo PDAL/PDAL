@@ -32,6 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <boost/algorithm/string.hpp>
+
 #include <pdal/GDALUtils.hpp>
 #include <pdal/GlobalEnvironment.hpp>
 #include <pdal/drivers/oci/OciReader.hpp>

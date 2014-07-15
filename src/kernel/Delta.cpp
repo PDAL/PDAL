@@ -117,9 +117,9 @@ std::map<Point, Point>* cumulatePoints(PointBuffer& source_data,
     Dimension const& sDimZ = source_schema.getDimension("Z");    
     for (uint32_t i = 0; i < count; ++i)
     {
-        double sx = source_data.applyScaling(sDimX, i);
-        double sy = source_data.applyScaling(sDimY, i);
-        double sz = source_data.applyScaling(sDimZ, i);
+        double sx = source_data.getFieldAs<double>(sDimX, i);
+        double sy = source_data.getFieldAs<double>(sDimY, i);
+        double sz = source_data.getFieldAs<double>(sDimZ, i);
         
 //ABELL
 //       std::vector<std::size_t> ids = candidate_data.neighbors(sx, sy, sz, 1);
@@ -133,9 +133,9 @@ std::vector<std::size_t> ids;
 		}
         
         std::size_t id = ids[0];
-        double cx = candidate_data.applyScaling(cDimX, id);
-        double cy = candidate_data.applyScaling(cDimY, id);
-        double cz = candidate_data.applyScaling(cDimZ, id);
+        double cx = candidate_data.getFieldAs<double>(cDimX, id);
+        double cy = candidate_data.getFieldAs<double>(cDimY, id);
+        double cz = candidate_data.getFieldAs<double>(cDimZ, id);
         
         Point s(sx, sy, sz, i);
         Point c(cx, cy, cz, id);
@@ -172,9 +172,9 @@ void Delta::outputDetail(PointBuffer& source_data, PointBuffer& candidate_data,
     boost::property_tree::ptree output;
     for (uint32_t i = 0; i < count; ++i)
     {
-        double sx = source_data.applyScaling(sDimX, i);
-        double sy = source_data.applyScaling(sDimY, i);
-        double sz = source_data.applyScaling(sDimZ, i);                
+        double sx = source_data.getFieldAs<double>(sDimX, i);
+        double sy = source_data.getFieldAs<double>(sDimY, i);
+        double sz = source_data.getFieldAs<double>(sDimZ, i);                
         
 //ABELL - Indexing.
 //       std::vector<std::size_t> ids = candidate_data.neighbors(sx, sy, sz, 1);
@@ -188,9 +188,9 @@ std::vector<std::size_t> ids;
 		}
         
         std::size_t id = ids[0];
-        double cx = candidate_data.applyScaling(cDimX, id);
-        double cy = candidate_data.applyScaling(cDimY, id);
-        double cz = candidate_data.applyScaling(cDimZ, id);
+        double cx = candidate_data.getFieldAs<double>(cDimX, id);
+        double cy = candidate_data.getFieldAs<double>(cDimY, id);
+        double cz = candidate_data.getFieldAs<double>(cDimZ, id);
         
         Point s(sx, sy, sz, id);
         Point c(cx, cy, cz, id);

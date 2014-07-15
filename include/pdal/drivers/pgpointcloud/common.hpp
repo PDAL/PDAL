@@ -36,6 +36,8 @@
 #ifndef INCLUDED_DRIVER_PGPOINTCLOUD_COMMON_HPP
 #define INCLUDED_DRIVER_PGPOINTCLOUD_COMMON_HPP
 
+#include <boost/algorithm/string.hpp>
+
 #include "libpq-fe.h"
 #include <pdal/pdal_error.hpp>
 #include <pdal/Options.hpp>
