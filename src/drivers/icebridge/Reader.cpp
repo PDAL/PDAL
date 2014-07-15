@@ -76,7 +76,7 @@ void Reader::initialize()
 {
     Hdf5Handler hdf5Handler;
     hdf5Handler.initialize(getFileName(), hdf5Columns);
-    setNumPoints(hdf5Handler.getNumPoints());
+    // setNumPoints(hdf5Handler.getNumPoints());
     hdf5Handler.close();
 
     const std::vector<Dimension> dimensions(getDefaultDimensions());
@@ -214,8 +214,7 @@ namespace iterators
 {
 
 IteratorBase::IteratorBase(const pdal::drivers::icebridge::Reader& reader)
-    : m_numPoints(reader.getNumPoints())
-    , m_dimensionNamesMap(reader.getDimensionNamesMap())
+    : m_dimensionNamesMap(reader.getDimensionNamesMap())
     , m_hdf5Handler()
 {
     m_hdf5Handler.initialize(reader.getFileName(), hdf5Columns);
@@ -291,10 +290,10 @@ Iterator::Iterator(
 
 boost::uint64_t Iterator::skipImpl(boost::uint64_t count)
 {
-    const boost::uint64_t skipped =
-        std::min<boost::uint64_t>(count, m_numPoints - m_index);
-
-    m_index += skipped;
+    const boost::uint64_t skipped (0);
+    //     std::min<boost::uint64_t>(count, m_numPoints - m_index);
+    //
+    // m_index += skipped;
 
     return skipped;
 }
@@ -306,7 +305,7 @@ boost::uint32_t Iterator::readBufferImpl(PointBuffer& data)
 
 bool Iterator::atEndImpl() const
 {
-    return m_index >= m_numPoints;
+    return false;
 }
 
 } // namespace sequential
@@ -328,10 +327,8 @@ boost::uint32_t Iterator::readBufferImpl(PointBuffer& data)
 
 boost::uint64_t Iterator::seekImpl(const boost::uint64_t numSeek)
 {
-    const boost::uint64_t skipped =
-        std::min<boost::uint64_t>(numSeek, m_numPoints - m_index);
-
-    m_index += skipped;
+    const boost::uint64_t skipped(0); 
+        
 
     return skipped;
 }

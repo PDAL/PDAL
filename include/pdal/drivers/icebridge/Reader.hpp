@@ -101,7 +101,6 @@ protected:
             PointBuffer& pointBuffer,
             boost::uint64_t index);
 
-    const boost::uint32_t m_numPoints;
     const std::map<std::string, Dimension> m_dimensionNamesMap;
     const Schema m_schema;
 
