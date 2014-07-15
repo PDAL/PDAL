@@ -151,7 +151,7 @@ endif (WITH_PCL AND WITH_PCL_TEST)
 
 if (WITH_HDF5)
     set(PDAL_ICEBRIDGE_TEST_CPP
-#        drivers/icebridge/IcebridgeReaderTest.cpp
+        drivers/icebridge/IcebridgeReaderTest.cpp
         )
 
     FOREACH(file ${PDAL_ICEBRIDGE_TEST_CPP})

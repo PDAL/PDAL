@@ -41,32 +41,35 @@
 
 #include <pdal/drivers/icebridge/Reader.hpp>
 
+#include "StageTester.hpp"
 #include "Support.hpp"
 
+using namespace pdal;
+
 void checkDimension(
-        const pdal::PointBuffer& data,
+        const PointBuffer& data,
         const std::size_t index,
         const std::string& name,
         const float expected)
 {
-    const pdal::Dimension& dimension = data.getSchema().getDimension(name);
+    const Dimension& dimension = data.getSchema().getDimension(name);
     float actual = data.getField<float>(dimension, index);
     BOOST_CHECK_CLOSE(expected, actual, 0.000001);
 }
 
 void checkDimension(
-        const pdal::PointBuffer& data,
+        const PointBuffer& data,
         const std::size_t index,
         const std::string& name,
         const int expected)
 {
-    const pdal::Dimension& dimension = data.getSchema().getDimension(name);
+    const Dimension& dimension = data.getSchema().getDimension(name);
     int actual = data.getField<int>(dimension, index);
     BOOST_CHECK_EQUAL(expected, actual);
 }
 
 void checkPoint(
-        const pdal::PointBuffer& data,
+        const PointBuffer& data,
         std::size_t index,
         float time,
         float latitude,
@@ -102,41 +105,21 @@ std::string getFilePath()
 
 BOOST_AUTO_TEST_SUITE(IcebridgeReaderTest)
 
-BOOST_AUTO_TEST_CASE(testConstructor)
-{
-    pdal::Option filename("filename", getFilePath(), "");
-    pdal::Options options(filename);
-    pdal::drivers::icebridge::Reader reader(options);
-
-    BOOST_CHECK(reader.getDescription() == "Icebridge Reader");
-    BOOST_CHECK_EQUAL(reader.getName(), "drivers.icebridge.reader");
-
-    reader.prepare();
-
-    BOOST_CHECK_EQUAL(reader.getNumPoints(), 2);
-}
-
 BOOST_AUTO_TEST_CASE(testRead)
 {
-    pdal::Option filename("filename", getFilePath(), "");
-    pdal::Options options(filename);
-    pdal::drivers::icebridge::Reader reader(options);
+    Option filename("filename", getFilePath(), "");
+    Options options(filename);
+    drivers::icebridge::Reader reader(options);
 
-    reader.prepare();
-
-    const pdal::Schema& schema = reader.getSchema();
-    pdal::PointBuffer data(schema, 2);
-
-    boost::scoped_ptr<pdal::StageSequentialIterator> it(
-            reader.createSequentialIterator(data));
-    BOOST_CHECK(!it->atEnd());
-
-    const boost::uint32_t numRead = it->read(data);
-    BOOST_CHECK_EQUAL(numRead, 2);
-    BOOST_CHECK(it->atEnd());
+    PointContext ctx;
+    reader.prepare(ctx);
+    PointBufferSet pbSet = reader.execute(ctx);
+    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    PointBufferPtr buf = *pbSet.begin();
+    BOOST_CHECK_EQUAL(buf->size(), 2);
 
     checkPoint(
-            data,
+            *buf,
             0,
             141437.548,     // time
             82.605319,      // latitude
@@ -152,7 +135,7 @@ BOOST_AUTO_TEST_CASE(testRead)
             0.0);           // relTime
 
     checkPoint(
-            data,
+            *buf,
             1,
             141437.548,     // time
             82.605287,      // latitude
@@ -170,20 +153,23 @@ BOOST_AUTO_TEST_CASE(testRead)
 
 BOOST_AUTO_TEST_CASE(testSkip)
 {
-    pdal::Option filename("filename", getFilePath(), "");
-    pdal::Options options(filename);
-    pdal::drivers::icebridge::Reader reader(options);
+    Option filename("filename", getFilePath(), "");
+    Options options(filename);
 
-    reader.prepare();
+    drivers::icebridge::Reader reader(options);
 
-    const pdal::Schema& schema = reader.getSchema();
-    pdal::PointBuffer data(schema, 2);
+    PointContext ctx;
+    reader.prepare(ctx);
 
-    boost::scoped_ptr<pdal::StageSequentialIterator> it(
-            reader.createSequentialIterator(data));
+    StageTester::ready(&reader, ctx);
+
+    PointBuffer data(ctx);
+    std::unique_ptr<StageSequentialIterator> it(
+        reader.createSequentialIterator());
 
     it->skip(1);
-    it->read(data);
+    it->read(data, 1);
+    StageTester::done(&reader, ctx);
 
     checkPoint(
             data,
@@ -204,54 +190,18 @@ BOOST_AUTO_TEST_CASE(testSkip)
 
 BOOST_AUTO_TEST_CASE(testPipeline)
 {
-    pdal::PipelineManager manager;
-    pdal::PipelineReader reader(manager);
+    PipelineManager manager;
+    PipelineReader reader(manager);
 
     bool isWriter =
         reader.readPipeline(Support::datapath("icebridge/pipeline.xml"));
     BOOST_CHECK(isWriter);
 
-    const boost::uint64_t numPoints = manager.execute();
+    const uint64_t numPoints = manager.execute();
     BOOST_CHECK_EQUAL(numPoints, 2);
-    pdal::FileUtils::deleteFile(Support::datapath("icebridge/outfile.txt"));
+    FileUtils::deleteFile(Support::datapath("icebridge/outfile.txt"));
 }
 
-BOOST_AUTO_TEST_CASE(testRandomIterator)
-{
-    pdal::Option filename("filename", getFilePath(), "");
-    pdal::Options options(filename);
-    pdal::drivers::icebridge::Reader reader(options);
-
-    reader.prepare();
-
-    const pdal::Schema& schema = reader.getSchema();
-    pdal::PointBuffer data(schema, 1);
-
-    boost::scoped_ptr<pdal::StageRandomIterator> it(
-            reader.createRandomIterator(data));
-
-    const boost::uint64_t numSeek = it->seek(1);
-    BOOST_CHECK_EQUAL(numSeek, 1);
-
-    const boost::uint32_t numRead = it->read(data);
-    BOOST_CHECK_EQUAL(numRead, 1);
-
-    checkPoint(
-            data,
-            0,
-            141437.548,     // time
-            82.605287,      // latitude
-            301.404862,     // longitude
-            18.688,         // elevation
-            2642,           // xmtSig
-            173,            // rcvSig
-            52.006,         // azimuth
-            -4.376,         // pitch
-            0.609,          // roll
-            2.9,            // gpsPdop
-            17.0,           // pulseWidth
-            0.0);           // relTime
-}
 
 BOOST_AUTO_TEST_SUITE_END()
 
