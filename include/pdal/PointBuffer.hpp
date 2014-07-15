@@ -89,9 +89,6 @@ public:
     virtual ~PointBuffer()
         {}
 
-    /// Assignment constructor.
-    PointBuffer& operator=(const PointBuffer&);
-
     /** @name Attribute access
     */
     /*! @return the pdal::Bounds instance associated with this pdal::PointBuffer.
@@ -195,20 +192,6 @@ public:
         setField(dim, idx, dim.removeScaling(val));
     }
 
-    /** @name Metadata
-    */
-    /// return  Metadata const& for the PointBuffer
-    inline Metadata const& getMetadata() const
-    {
-        return m_metadata;
-    }
-
-    /// @return Metadata& for the PointBuffer
-    inline Metadata& getMetadataRef()
-    {
-        return m_metadata;
-    }
-
     /** @name Serialization
     */
     /*! returns a boost::property_tree containing the point records, which is
@@ -251,23 +234,9 @@ public:
         std::size_t pointIndex) const;
 
 protected:
-    Schema m_schema;
     Bounds<double> m_bounds;
-
     PointContext m_context;
     std::vector<PointId> m_index;
-
-    // We cache m_schema.getByteSize() here because it would end up
-    // being dereferenced for every point read otherwise.
-    schema::size_type m_byteSize;
-    
-    // We cache m_schema.getOrientation() here because it would end 
-    // up being dereferenced for every point read
-    schema::Orientation m_orientation;
-
-    Metadata m_metadata;
-    pointbuffer::id m_uuid;
-    
 
     template<class T> static void scale(Dimension const& source_dimension,
                                  Dimension const& destination_dimension,

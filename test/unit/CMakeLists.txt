@@ -33,7 +33,7 @@ SET(PDAL_UNITTEST_TEST_SRC
 #    filters/MosaicFilterTest.cpp
     OptionsTest.cpp
     PipelineManagerTest.cpp
-#    PointBufferTest.cpp
+    PointBufferTest.cpp
 #    drivers/qfit/QFITReaderTest.cpp
 #    RangeTest.cpp
     filters/ReprojectionFilterTest.cpp

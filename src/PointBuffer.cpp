@@ -47,11 +47,7 @@ namespace pdal
 PointBuffer::PointBuffer(PointContext context) :
     m_bounds(Bounds<double>::getDefaultSpatialExtent()),
     m_context(context)
-{
-    GlobalEnvironment& env = pdal::GlobalEnvironment::get();
-    boost::uuids::basic_random_generator<boost::mt19937> gen(env.getRNG());
-    m_uuid = gen();
-}
+{}
 
 
 const Bounds<double>& PointBuffer::getSpatialBounds() const
