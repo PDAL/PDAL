@@ -55,18 +55,16 @@ static const std::string testDbTempConn(std::string("dbname='@PGPOINTCLOUD_TEST_
         "host='@PGPOINTCLOUD_TEST_DB_HOST@' port='@PGPOINTCLOUD_TEST_DB_PORT@'");
 
 
+
+
+
+//boost::property_tree::ptree Reader::serializePipeline(PointContext ctx) const
+//{
+//    return m_stage->serializePipeline(ctx);
+//}
+
 }
 }
 } // namespace pdal::drivers::pgpointcloud
-
-
-boost::property_tree::ptree Reader::serializePipeline(PointContext ctx) const
-{
-    return m_stage->serializePipeline(ctx);
-}
-
-}
-}
-} // namespaces
 
 #endif // UNITTEST_DRIVERS_PGPOINTCLOUD_SUPPORT_INCLUDED

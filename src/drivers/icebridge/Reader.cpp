@@ -36,7 +36,6 @@
 #include <pdal/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
 
-//#include <algorithm>
 #include <map>
 
 namespace

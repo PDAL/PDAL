@@ -172,8 +172,8 @@ if (WITH_PGPOINTCLOUD AND WITH_PGPOINTCLOUD_TESTS)
     set(PGPOINTCLOUD_TEST_DB_TEMPNAME pdal_test_tmp CACHE STRING "Postgres test database temp database name")
 
     configure_file(
-        drivers/pgpointcloud/Support.hpp.in
-        ${CMAKE_CURRENT_BINARY_DIR}/drivers/pgpointcloud/Support.hpp
+        drivers/pgpointcloud/Pgtest-Support.hpp.in
+        ${CMAKE_CURRENT_BINARY_DIR}/drivers/pgpointcloud/Pgtest-Support.hpp
         )
 
     set(PDAL_UNITTEST_TEST_SRC

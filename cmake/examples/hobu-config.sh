@@ -5,7 +5,7 @@ LASZIP_HOME=$USR_LOCAL
 LIBXML2_HOME=$USR
 GEOTIFF_HOME=$USR_LOCAL
 P2G_HOME=$USR_LOCAL
-HEXER_HOME="/Users/hobu/dev/git/hexer"
+HEXER_HOME="/usr/local"
 SQLITE_HOME="/usr/local/opt/sqlite"
 SO_EXT=dylib
 EMBED=ON
@@ -38,7 +38,7 @@ CC=$CC CXX=$CXX cmake   -G "$CONFIG"  \
         -DMRSID_INCLUDE_DIR=/Users/hobu/dev/release/mrsid/Lidar_DSDK/include \
         -DMRSID_LIBRARY=/Users/hobu/dev/release/mrsid/Lidar_DSDK/lib/liblti_lidar_dsdk.dylib \
         -DHEXER_INCLUDE_DIR=${HEXER_HOME}/include \
-        -DHEXER_LIBRARY=${HEXER_HOME}/bin/libhexer.${SO_EXT} \
+        -DHEXER_LIBRARY=${HEXER_HOME}/lib/libhexer.${SO_EXT} \
         -DGEOTIFF_INCLUDE_DIR=${GEOTIFF_HOME}/include/ \
         -DGEOTIFF_LIBRARY=${GEOTIFF_HOME}/lib/libgeotiff.${SO_EXT} \
         -DICONV_INCLUDE_DIR=/usr/include \
