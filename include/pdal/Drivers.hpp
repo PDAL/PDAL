@@ -109,7 +109,7 @@
 
 #ifdef PDAL_HAVE_POSTGRESQL
 #ifndef USE_PDAL_PLUGIN_PGPOINTCLOUD
-#include <pdal/drivers/pgpointcloud/Reader.hpp>
+#include <pdal/drivers/pgpointcloud/PgReader.hpp>
 #include <pdal/drivers/pgpointcloud/Writer.hpp>
 #endif
 #endif

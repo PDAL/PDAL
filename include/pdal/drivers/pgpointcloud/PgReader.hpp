@@ -32,8 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_PDAL_DRIVER_PGPOINTCLOUD_READER_HPP
-#define INCLUDED_PDAL_DRIVER_PGPOINTCLOUD_READER_HPP
+#pragma once
 
 #include <pdal/Reader.hpp>
 #include <pdal/ReaderIterator.hpp>
@@ -45,6 +44,7 @@
 
 #include <vector>
 
+#include <pdal/drivers/pgpointcloud/PgIterator.hpp>
 
 namespace pdal
 {
@@ -54,7 +54,7 @@ namespace pgpointcloud
 {
 
 
-class PDAL_DLL Reader : public pdal::Reader
+class PDAL_DLL PgReader : public pdal::Reader
 {
 public:
     SET_STAGE_NAME("drivers.pgpointcloud.reader", "PostgreSQL Pointcloud Database Reader")
@@ -65,24 +65,26 @@ public:
     SET_STAGE_ENABLED(false)
 #endif
     
-    Reader(const Options&);
-    ~Reader();
+    PgReader(const Options&);
+    ~PgReader();
 
     static Options getDefaultOptions();
     virtual boost::uint64_t getNumPoints() const;
     boost::uint64_t getMaxPoints() const;
     std::string getDataQuery() const;
     void getSession() const;
-    pdal::StageSequentialIterator*
-        createSequentialIterator(PointBuffer& buffer) const;
+    
+    StageSequentialIterator* createSequentialIterator() const;
 
 private:
 
-    Reader& operator=(const Reader&); // not implemented
-    Reader(const Reader&); // not implemented
+    PgReader& operator=(const PgReader&); // not implemented
+    PgReader(const PgReader&); // not implemented
 
     virtual void initialize();
-    virtual void processOptions(const Options&);
+    virtual void buildSchema(Schema *schema);
+    virtual void processOptions(const Options& options);
+    
     pdal::SpatialReference fetchSpatialReference() const;
     boost::uint32_t fetchPcid() const;
     pdal::Schema fetchSchema() const;
@@ -96,75 +98,13 @@ private:
     mutable boost::uint32_t m_pcid;
     mutable boost::uint64_t m_cached_point_count;
     mutable boost::uint64_t m_cached_max_points;
+    std::vector<Dimension *> m_dims;    
 
-}; // pdal.drivers.pgpointcloud.Reader
+}; // pdal.drivers.pgpointcloud.PgReader
 
-
-namespace iterators
-{
-namespace sequential
-{
-
-typedef boost::shared_ptr<PointBuffer> BufferPtr;
-
-
-class Iterator : public pdal::StageSequentialIterator
-{
-public:
-    Iterator(const pdal::drivers::pgpointcloud::Reader& reader, PointBuffer& buffer);
-    ~Iterator();
-
-protected:
-
-
-private:
-    //
-    // Methods
-    //
-    const pdal::drivers::pgpointcloud::Reader& getReader() const;
-
-    // Skip count points, return number of points skipped
-    boost::uint64_t skipImpl(boost::uint64_t count);
-
-    // Fill the provided pointbuffer, return the number of points written
-    boost::uint32_t readBufferImpl(PointBuffer& data);
-
-    // True when there are no more points to read
-    bool atEndImpl() const;
-
-    // Internal functions for managing scroll cursor
-    bool CursorSetup();
-    bool CursorTeardown();
-    bool NextBuffer();
-
-    //
-    // Members
-    //
-    const pdal::drivers::pgpointcloud::Reader& m_reader;
-    bool m_at_end;
-    pdal::PointBuffer* m_buffer;
-    boost::uint64_t m_buffer_position;
-
-    bool m_cursor;
-    char* m_patch_hex;
-    boost::uint32_t m_patch_npoints;
-    PGconn* m_session;
-    pdal::schema::DimensionMap* m_dimension_map;
-
-    boost::uint32_t m_cur_row;
-    boost::uint32_t m_cur_nrows;
-    PGresult* m_cur_result;
-
-}; // pdal.drivers.pgpointcloud.sequential.iterators.Iterator
-
-
-} // sequential
-} // iterators
 
 
 } // pgpointcloud
 } // driver
 } // pdal
 
-
-#endif // INCLUDED_PDAL_DRIVER_PGPOINTCLOUD_READER_HPP

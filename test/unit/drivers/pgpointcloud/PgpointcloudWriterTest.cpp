@@ -53,8 +53,8 @@ Options getWriterOptions()
     options.add(Option("table", "pdal_test_table"));
     options.add(Option("srid", "4326"));
     options.add(Option("capacity", "10000"));
-    options.add(Option("debug", true));
-    options.add(Option("verbose", 7));
+    // options.add(Option("debug", true));
+    // options.add(Option("verbose", 7));
     
     return options;
 }
