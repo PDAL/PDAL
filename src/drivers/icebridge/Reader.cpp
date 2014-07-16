@@ -36,7 +36,6 @@
 #include <pdal/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
 
-#include <algorithm>
 #include <map>
 
 namespace
@@ -65,49 +64,20 @@ namespace drivers
 namespace icebridge
 {
 
-Reader::Reader(const Options& options)
-    : pdal::Reader(options)
-{
-//ABELL
-//    setSchema(Schema(getDefaultDimensions()));
-}
-
-void Reader::initialize()
-{
-    Hdf5Handler hdf5Handler;
-    hdf5Handler.initialize(getFileName(), hdf5Columns);
-    // setNumPoints(hdf5Handler.getNumPoints());
-    hdf5Handler.close();
-
-    const std::vector<Dimension> dimensions(getDefaultDimensions());
-
-    // Populate our mapping of HDF5 column names to their Dimensions.
-    if (dimensions.size() == hdf5Columns.size())
-    {
-        for (std::size_t i = 0; i < dimensions.size(); ++i)
-        {
-            m_dimensionNamesMap.insert(
-                    std::make_pair(hdf5Columns[i].name, dimensions[i]));
-        }
-    }
-    else
-    {
-        throw icebridge_error("Inconsistent number of columns");
-    }
-}
-
 Options Reader::getDefaultOptions()
 {
     Options options;
-    Option filename("filename", "", "file to read from");
-    options.add(filename);
+    options.add("filename", "", "file to read from");
     return options;
 }
+
 
 std::vector<Dimension> Reader::getDefaultDimensions()
 {
     std::vector<Dimension> output;
 
+    //IMPORTANT - The order of these dimensions must match the order of the
+    //  corresponding HDF5 columns (above).
     Dimension time("Time", dimension::Float, 4,
             "Relative Time (seconds from start of data file)");
     time.setUUID("4a1e8fcb-321d-41d6-a0fb-b9cb8bad9216");
@@ -184,160 +154,111 @@ std::vector<Dimension> Reader::getDefaultDimensions()
     return output;
 }
 
-std::string Reader::getFileName() const
+
+void Reader::processOptions(const Options& options)
 {
-    return getOptions().getOption("filename").getValue<std::string>();
+    m_filename = options.getOption("filename").getValue<std::string>();
 }
 
-pdal::StageSequentialIterator* 
-Reader::createSequentialIterator(PointBuffer& buffer) const
+
+void Reader::buildSchema(Schema *s)
 {
-    return new pdal::drivers::icebridge::iterators::sequential::Iterator(
-                *this,
-                buffer);
+   std::vector<Dimension> dims = getDefaultDimensions();
+   for (auto di = dims.begin(); di != dims.end(); ++di)
+       m_dims.push_back(s->appendDimension(*di));
 }
 
-pdal::StageRandomIterator*
-Reader::createRandomIterator(PointBuffer& buffer) const
+
+StageSequentialIterator *Reader::createSequentialIterator() const
 {
-    return new pdal::drivers::icebridge::iterators::random::Iterator(
-                *this,
-                buffer);
+    return new iterators::sequential::IcebridgeSeqIter(m_dims,
+        const_cast<Hdf5Handler *>(&m_hdf5Handler));
 }
 
-std::map<std::string, Dimension> Reader::getDimensionNamesMap() const
+
+void Reader::ready(PointContext ctx)
 {
-    return m_dimensionNamesMap;
+    m_hdf5Handler.initialize(m_filename, hdf5Columns);
 }
+
+void Reader::done(PointContext ctx)
+{
+    m_hdf5Handler.close();
+}
+
 
 namespace iterators
 {
-
-IteratorBase::IteratorBase(const pdal::drivers::icebridge::Reader& reader)
-    : m_dimensionNamesMap(reader.getDimensionNamesMap())
-    , m_hdf5Handler()
-{
-    m_hdf5Handler.initialize(reader.getFileName(), hdf5Columns);
-}
-
-boost::uint32_t IteratorBase::readIcebridgeIntoBuffer(
-        PointBuffer& pointBuffer,
-        const boost::uint64_t index)
-{
-    PointBuffer tmpPointBuffer(pointBuffer.context());
-
-    point_count_t numPoints = pointBuffer.size();
-    //ABELL - Didn't think this worked on VS. Check with Brad.
-    for (auto column : hdf5Columns)
-    {
-        const Dimension dimension =
-            m_dimensionNamesMap.find(column.name)->second;
-
-        unsigned char* rawData = static_cast<unsigned char*>(
-                ::operator new(numPoints * dimension.getByteSize()));
-
-        try
-        {
-            m_hdf5Handler.getColumnEntries(
-                    rawData,
-                    column.name,
-                    numPoints,
-                    index);
-
-            for (PointId i = 0; i < numPoints; ++i)
-            {
-                tmpPointBuffer.setRawField(
-                        m_schema.getDimension(dimension.getName()),
-                        i,
-                        rawData + dimension.getByteSize() * i);
-            }
-
-            delete[] rawData;
-        }
-        catch(...)
-        {
-            delete[] rawData;
-            throw icebridge_error("Error fetching column data");
-        }
-    }
-
-    boost::scoped_ptr<schema::DimensionMap> dimensionMap(
-        tmpPointBuffer.getSchema().mapDimensions(pointBuffer.getSchema()));
-
-//ABELL
-/**
-    PointBuffer::copyLikeDimensions(
-            tmpPointBuffer,
-            pointBuffer,
-            *dimensionMap.get(),
-            0,
-            pointBuffer.getNumPoints(),
-            numPoints);
-**/
-
-    return pointBuffer.size();
-}
-
 namespace sequential
 {
 
-Iterator::Iterator(
-        const pdal::drivers::icebridge::Reader& reader,
-        PointBuffer& pointBuffer)
-    : pdal::ReaderSequentialIterator(pointBuffer)
-    , IteratorBase(reader)
-{ }
-
-boost::uint64_t Iterator::skipImpl(boost::uint64_t count)
+uint32_t IcebridgeSeqIter::readBufferImpl(PointBuffer& buf)
 {
-    const boost::uint64_t skipped (0);
-    //     std::min<boost::uint64_t>(count, m_numPoints - m_index);
-    //
-    // m_index += skipped;
+    return readImpl(buf, (std::numeric_limits<point_count_t>::max)());
+}
 
+
+point_count_t IcebridgeSeqIter::readImpl(PointBuffer& buf, point_count_t count)
+{
+    //ABELL - All data we read for icebridge is currently 4 bytes wide, so
+    //  just allocate once and forget it.
+    //ABELL - This could be a huge allocation.  Perhaps we should do something
+    //  in the icebridge handler?
+
+    PointId startId = buf.size();
+    point_count_t remaining = m_hdf5Handler->getNumPoints() - m_index;
+    count = std::min(count, remaining);
+    std::unique_ptr<unsigned char>
+        rawData(new unsigned char[count * sizeof(float)]);
+
+    //ABELL - Not loving the position-linked data, but fine for now.
+    auto di = m_dims.begin();
+    for (auto ci = hdf5Columns.begin(); ci != hdf5Columns.end(); ++ci, ++di)
+    {
+        PointId nextId = startId;
+        PointId idx = m_index;
+        const hdf5::Hdf5ColumnData& column = *ci;
+        Dimension *d = *di;
+
+        try
+        {
+            m_hdf5Handler->getColumnEntries(rawData.get(), column.name, count,
+                m_index);
+            unsigned char *p = rawData.get();
+            for (PointId i = 0; i < count; ++i)
+            {
+                buf.setRawField(*d, nextId, p);
+                nextId++;
+                p += sizeof(float);
+            }
+        }
+        catch(...)
+        {
+            throw icebridge_error("Error fetching column data");
+        }
+    }
+    return count;
+}
+
+
+uint64_t IcebridgeSeqIter::skipImpl(uint64_t count)
+{
+    const uint64_t skipped = std::min<uint64_t>(count,
+        m_hdf5Handler->getNumPoints() - m_index);
+    m_index += skipped;
     return skipped;
 }
 
-boost::uint32_t Iterator::readBufferImpl(PointBuffer& data)
-{
-    return readIcebridgeIntoBuffer(data, m_index);
-}
 
-bool Iterator::atEndImpl() const
+bool IcebridgeSeqIter::atEndImpl() const
 {
-    return false;
+    return m_index >= m_hdf5Handler->getNumPoints();
 }
 
 } // namespace sequential
+} // namespace iterators
 
-namespace random
-{
-
-Iterator::Iterator(
-        const pdal::drivers::icebridge::Reader& reader,
-        PointBuffer& pointBuffer)
-    : pdal::ReaderRandomIterator(pointBuffer)
-    , IteratorBase(reader)
-    { }
-
-boost::uint32_t Iterator::readBufferImpl(PointBuffer& data)
-{
-    return readIcebridgeIntoBuffer(data, m_index);
-}
-
-boost::uint64_t Iterator::seekImpl(const boost::uint64_t numSeek)
-{
-    const boost::uint64_t skipped(0); 
-        
-
-    return skipped;
-}
-
-} // namespace random
-
-} // iterators
-
-} // icebridge
-} // drivers
-} // pdal
+} // namespace icebridge
+} // namespace drivers
+} // namespace pdal
 

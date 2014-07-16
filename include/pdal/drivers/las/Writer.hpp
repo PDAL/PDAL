@@ -39,6 +39,7 @@
 #include <pdal/drivers/las/Header.hpp>
 #include <pdal/drivers/las/SummaryData.hpp>
 #include <pdal/StreamFactory.hpp>
+#include <boost/algorithm/string.hpp>
 #include <boost/scoped_ptr.hpp>
 
 namespace pdal

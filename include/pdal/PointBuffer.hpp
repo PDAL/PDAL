@@ -34,43 +34,21 @@
 
 #pragma once
 
-#include <boost/cstdint.hpp>
-#include <boost/scoped_array.hpp>
-#include <boost/shared_array.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/interprocess/managed_shared_memory.hpp>
-
 #include <pdal/pdal_internal.hpp>
 #include <pdal/pdal_macros.hpp>
 #include <pdal/Bounds.hpp>
 #include <pdal/PointContext.hpp>
 #include <pdal/Schema.hpp>
-#include <pdal/Metadata.hpp>
-#include <pdal/third/nanoflann.hpp>
 
-#include <set>
 #include <vector>
 
 namespace pdal
 {
     namespace pointbuffer
     {
-        typedef boost::uuids::uuid id;
         typedef boost::uint64_t PointBufferByteSize;
     } // pointbuffer
 
-    
-/// A PointBuffer is the object that is passed through pdal::Stage instances
-/// to form a pipeline. A PointBuffer is composed of a pdal::Schema that
-/// determines the layout of the data contained within, along with a dictionary
-/// of pdal::Metadata entries. The capacity of a PointBuffer is determined by
-/// the number of points it contains, and the number of points possible in a
-/// PointBuffer is limited to std::numeric_limits<boost::uint32_t>::max().
-/// Underneath the covers, a PointBuffer is simply the composed array of bytes
-/// described in the pdal::Schema. You can operate on the raw bytes if you need
-/// to, but PointBuffer provides a number of convienence methods to make things
-/// easier. 
 /*! 
     \verbatim embed:rst
     .. note::
@@ -85,12 +63,9 @@ class PDAL_DLL PointBuffer
 {
 public:
     PointBuffer();
-    PointBuffer(PointContext context);
-    virtual ~PointBuffer()
-        {}
-
-    /// Assignment constructor.
-    PointBuffer& operator=(const PointBuffer&);
+    PointBuffer(PointContext context) :
+        m_bounds(Bounds<double>::getDefaultSpatialExtent()), m_context(context)
+    {}
 
     /** @name Attribute access
     */
@@ -102,11 +77,13 @@ public:
             up-to-date when operating on the PointBuffer.
         \endverbatim
     */
-    virtual const Bounds<double>& getSpatialBounds() const;
+    const Bounds<double>& getSpatialBounds() const
+        { return m_bounds; }
 
     /// sets the pdal::Bounds instance for this pdal::PointBuffer
     /// @param bounds bounds instance to set.
-    virtual void setSpatialBounds(const Bounds<double>& bounds);
+    void setSpatialBounds(const Bounds<double>& bounds)
+        { m_bounds = bounds; }
 
     point_count_t size() const
         { return m_index.size(); }
@@ -195,20 +172,6 @@ public:
         setField(dim, idx, dim.removeScaling(val));
     }
 
-    /** @name Metadata
-    */
-    /// return  Metadata const& for the PointBuffer
-    inline Metadata const& getMetadata() const
-    {
-        return m_metadata;
-    }
-
-    /// @return Metadata& for the PointBuffer
-    inline Metadata& getMetadataRef()
-    {
-        return m_metadata;
-    }
-
     /** @name Serialization
     */
     /*! returns a boost::property_tree containing the point records, which is
@@ -232,8 +195,8 @@ public:
             dumper.
         \endverbatim
     */
-    virtual boost::property_tree::ptree toPTree() const;
-    virtual std::ostream& toRST(std::ostream& os) const;
+    boost::property_tree::ptree toPTree() const;
+    std::ostream& toRST(std::ostream& os) const;
 
     /*! @return a cumulated bounds of all points in the PointBuffer.
         \verbatim embed:rst
@@ -245,33 +208,12 @@ public:
             method. Otherwise, an exception will be thrown.
         \endverbatim
     */    
-    virtual pdal::Bounds<double> calculateBounds(bool bis3d=true) const;
-
-    virtual double applyScaling(Dimension const& d,
-        std::size_t pointIndex) const;
+    pdal::Bounds<double> calculateBounds(bool bis3d=true) const;
 
 protected:
-    Schema m_schema;
     Bounds<double> m_bounds;
-
     PointContext m_context;
     std::vector<PointId> m_index;
-
-    // We cache m_schema.getByteSize() here because it would end up
-    // being dereferenced for every point read otherwise.
-    schema::size_type m_byteSize;
-    
-    // We cache m_schema.getOrientation() here because it would end 
-    // up being dereferenced for every point read
-    schema::Orientation m_orientation;
-
-    Metadata m_metadata;
-    pointbuffer::id m_uuid;
-    
-
-    template<class T> static void scale(Dimension const& source_dimension,
-                                 Dimension const& destination_dimension,
-                                 T& value);
 
 private:
     template<typename T_IN, typename T_OUT>
@@ -510,58 +452,8 @@ inline void PointBuffer::appendPoint(PointBuffer& buffer, PointId id)
     m_index[id] = rawId;
 }
 
-
-#ifdef PDAL_COMPILER_MSVC
-// when template T is know, std::numeric_limits<T>::is_exact is a constant...
-#  pragma warning(push)
-#  pragma warning(disable: 4127)  // conditional expression is constant
-#endif
-// #pragma GCC diagnostic ignored "-Wfloat-equal"
-// #pragma GCC diagnostic push
-
-//ABELL - Why is this here?  It seems to have nothing to do with a
-//  PointBuffer.
-template <class T>
-inline void PointBuffer::scale(Dimension const& source_dimension,
-    Dimension const& destination_dimension, T& value)
-{
-    double v = static_cast<double>(value);
-    double out = (v*source_dimension.getNumericScale() +
-        source_dimension.getNumericOffset() -
-        destination_dimension.getNumericOffset()) /
-            destination_dimension.getNumericScale();
-
-    T output = static_cast<T>(out);
-
-    if (std::numeric_limits<T>::is_exact)
-    {
-        if (Utils::compare_distance<T>(output, (std::numeric_limits<T>::max)()))
-        {
-            std::ostringstream oss;
-            oss << "PointBuffer::scale: scale and/or offset combination causes "
-                "re-scaled value to be greater than std::numeric_limits::max "
-                "for dimension '" << destination_dimension.getName() <<
-                "'. " << "value is: " << output << " and max() is: " <<
-                (std::numeric_limits<T>::max)();
-        }
-        else if (Utils::compare_distance<T>(output, (std::numeric_limits<T>::min)()))
-        {
-            std::ostringstream oss;
-            oss << "PointBuffer::scale: scale and/or offset combination causes "
-                "re-scaled value to be less than std::numeric_limits::min for dimension '" << destination_dimension.getName() << "'. " <<
-                "value is: " << output << " and min() is: " << (std::numeric_limits<T>::min)();
-            throw std::out_of_range(oss.str());
-
-        }
-    }
-    value = output;
-
-    return;
-}
-
 typedef std::shared_ptr<PointBuffer> PointBufferPtr;
 typedef std::set<PointBufferPtr> PointBufferSet;
-typedef std::vector<PointBufferPtr> PointBufferList;
 
 PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const PointBuffer&);
 

@@ -37,34 +37,8 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include <boost/uuid/uuid_io.hpp>
-#include <boost/uuid/random_generator.hpp>
-#include <algorithm>
-
 namespace pdal
 {
-
-PointBuffer::PointBuffer(PointContext context) :
-    m_bounds(Bounds<double>::getDefaultSpatialExtent()),
-    m_context(context)
-{
-    GlobalEnvironment& env = pdal::GlobalEnvironment::get();
-    boost::uuids::basic_random_generator<boost::mt19937> gen(env.getRNG());
-    m_uuid = gen();
-}
-
-
-const Bounds<double>& PointBuffer::getSpatialBounds() const
-{
-    return m_bounds;
-}
-
-
-void PointBuffer::setSpatialBounds(const Bounds<double>& bounds)
-{
-    m_bounds = bounds;
-}
-
 
 pdal::Bounds<double> PointBuffer::calculateBounds(bool is3d) const
 {
@@ -203,92 +177,6 @@ std::ostream& PointBuffer::toRST(std::ostream& os) const
     }
     os << std::endl << std::endl;;
     return os;
-}
-
-double PointBuffer::applyScaling(Dimension const& d,
-    std::size_t pointIndex) const
-{
-    double output(0.0);
-
-    float flt(0.0);
-    boost::int8_t i8(0);
-    boost::uint8_t u8(0);
-    boost::int16_t i16(0);
-    boost::uint16_t u16(0);
-    boost::int32_t i32(0);
-    boost::uint32_t u32(0);
-    boost::int64_t i64(0);
-    boost::uint64_t u64(0);
-
-    boost::uint32_t size = d.getByteSize();
-    switch (d.getInterpretation())
-    {
-        case dimension::Float:
-            if (size == 4)
-            {
-                flt = getField<float>(d, pointIndex);
-                output = static_cast<double>(flt);
-            }
-            if (size == 8)
-            {
-                output = getField<double>(d, pointIndex);
-            }
-            break;
-
-        case dimension::SignedInteger:
-            if (size == 1)
-            {
-                i8 = getField<boost::int8_t>(d, pointIndex);
-                output = d.applyScaling(i8);
-            }
-            if (size == 2)
-            {
-                i16 = getField<boost::int16_t>(d, pointIndex);
-                output = d.applyScaling(i16);
-            }
-            if (size == 4)
-            {
-                i32 = getField<boost::int32_t>(d, pointIndex);
-                output = d.applyScaling(i32);
-            }
-            if (size == 8)
-            {
-                i64 = getField<boost::int64_t>(d, pointIndex);
-                output = d.applyScaling(i64);
-            }
-            break;
-
-        case dimension::UnsignedInteger:
-            if (size == 1)
-            {
-                u8 = getField<boost::uint8_t>(d, pointIndex);
-                output = d.applyScaling(u8);
-            }
-            if (size == 2)
-            {
-                u16 = getField<boost::uint16_t>(d, pointIndex);
-                output = d.applyScaling(u16);
-            }
-            if (size == 4)
-            {
-                u32 = getField<boost::uint32_t>(d, pointIndex);
-                output = d.applyScaling(u32);
-            }
-            if (size == 8)
-            {
-                u64 = getField<boost::uint64_t>(d, pointIndex);
-                output = d.applyScaling(u64);
-            }
-            break;
-
-        case dimension::RawByte:
-        case dimension::Pointer:    // stored as 64 bits, even on a 32-bit box
-        case dimension::Undefined:
-            throw pdal_error("Dimension data type unable to be scaled in "
-                "index filter");
-    }
-
-    return output;
 }
 
 

@@ -32,8 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_PDAL_DRIVER_ICEBRIDGE_READER_HPP
-#define INCLUDED_PDAL_DRIVER_ICEBRIDGE_READER_HPP
+#pragma once
 
 #include <pdal/Reader.hpp>
 #include <pdal/ReaderIterator.hpp>
@@ -64,95 +63,54 @@ public:
     SET_STAGE_LINK("http://pdal.io/stages/drivers.icebridge.reader.html")   // TODO
     SET_STAGE_ENABLED(true)
 
-    Reader(const Options& options);
-    virtual ~Reader() { }
+    Reader(const Options& options) : pdal::Reader(options)
+        {}
 
     static Options getDefaultOptions();
     static std::vector<Dimension> getDefaultDimensions();
 
-    std::string getFileName() const;
-
-    pdal::StageSequentialIterator*
-        createSequentialIterator(PointBuffer& buffer) const;
-
-    pdal::StageRandomIterator*
-        createRandomIterator(PointBuffer& buffer) const;
-
-    std::map<std::string, Dimension> getDimensionNamesMap() const;
+    StageSequentialIterator* createSequentialIterator() const;
 
 private:
-    std::map<std::string, Dimension> m_dimensionNamesMap;
+    std::string m_filename;
+    Hdf5Handler m_hdf5Handler;
+    std::vector<Dimension *> m_dims;
+
+    virtual void processOptions(const Options& options);
+    virtual void buildSchema(Schema *s);
+    virtual void ready(PointContext ctx);
+    virtual void done(PointContext ctx);
+
     Reader& operator=(const Reader&);   // Not implemented.
     Reader(const Reader&);              // Not implemented.
-    virtual void initialize();
 };
 
 namespace iterators
 {
-
-class PDAL_DLL IteratorBase
-{
-public:
-    IteratorBase(const pdal::drivers::icebridge::Reader& reader);
-    virtual ~IteratorBase() { }
-
-protected:
-    boost::uint32_t readIcebridgeIntoBuffer(
-            PointBuffer& pointBuffer,
-            boost::uint64_t index);
-
-    const std::map<std::string, Dimension> m_dimensionNamesMap;
-    const Schema m_schema;
-
-    Hdf5Handler m_hdf5Handler;
-
-private:
-    IteratorBase& operator=(const IteratorBase&);   // Not implemented.
-    IteratorBase(const IteratorBase&);              // Not implemented.
-};
-
 namespace sequential
 {
 
-class PDAL_DLL Iterator : public ReaderSequentialIterator, public IteratorBase
+class PDAL_DLL IcebridgeSeqIter : public ReaderSequentialIterator
 {
 public:
-    Iterator(
-            const pdal::drivers::icebridge::Reader& reader,
-            PointBuffer& buffer);
-    virtual ~Iterator() { }
+    IcebridgeSeqIter(const std::vector<Dimension *> dims,
+        Hdf5Handler *hdf5Handler) : m_dims(dims), m_hdf5Handler(hdf5Handler)
+    {}
 
 private:
-    boost::uint64_t skipImpl(boost::uint64_t);
-    boost::uint32_t readBufferImpl(PointBuffer& pointBuffer);
-    bool atEndImpl() const;
+    std::vector<Dimension *> m_dims;
+    Hdf5Handler *m_hdf5Handler;
+
+    virtual point_count_t readImpl(PointBuffer& data, point_count_t count);
+    virtual uint64_t skipImpl(boost::uint64_t);
+    virtual uint32_t readBufferImpl(PointBuffer& pointBuffer);
+    virtual bool atEndImpl() const;
 };
 
-} // sequential
+} // namespace sequential
+} // namespace iterators
 
-namespace random
-{
+} // namespace icebridge
+} // namespace drivers
+} // namespace pdal
 
-class PDAL_DLL Iterator : public ReaderRandomIterator, public IteratorBase
-{
-public:
-    Iterator(
-            const pdal::drivers::icebridge::Reader& reader,
-            PointBuffer& buffer);
-    virtual ~Iterator() { }
-
-private:
-    boost::uint64_t seekImpl(boost::uint64_t numSeek);
-    boost::uint32_t readBufferImpl(PointBuffer& pointBuffer);
-};
-
-} // random
-
-} // iterators
-
-} // icebridge
-} // drivers
-} // pdal
-
-#endif // INCLUDED_PDAL_DRIVER_ICEBRIDGE_READER_HPP
- 

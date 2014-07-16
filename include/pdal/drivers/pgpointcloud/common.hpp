@@ -35,6 +35,8 @@
 
 #pragma once
 
+#include <boost/algorithm/string.hpp>
+
 #include "libpq-fe.h"
 #include <pdal/pdal_error.hpp>
 #include <pdal/Options.hpp>
