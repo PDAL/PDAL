@@ -39,6 +39,8 @@
 
 #include <pdal/plang/Invocation.hpp>
 
+using namespace pdal;
+using namespace pdal::plang;
 
 BOOST_AUTO_TEST_SUITE(PLangTest)
 
@@ -50,9 +52,8 @@ BOOST_AUTO_TEST_CASE(PLangTest_basic)
         "  #print 'hi'\n"
         "  return True\n"
         ;
-    pdal::plang::Script script(source, "MyTest", "yow");
-
-    pdal::plang::Invocation meth(script);
+    Script script(source, "MyTest", "yow");
+    Invocation meth(script);
     meth.compile();
     meth.execute();
 }
@@ -71,11 +72,10 @@ BOOST_AUTO_TEST_CASE(PLangTest_compile_error)
         "def yow(ins,outs):\n"
         "return True\n"
         ;
-    pdal::plang::Script script(source, "MyTest", "yow");
+    Script script(source, "MyTest", "yow");
+    Invocation meth(script);
 
-    pdal::plang::Invocation meth(script);
-
-    BOOST_REQUIRE_THROW(meth.compile(), pdal::python_error);
+    BOOST_REQUIRE_THROW(meth.compile(), python_error);
 }
 
 
@@ -87,9 +87,8 @@ BOOST_AUTO_TEST_CASE(PLangTest_runtime_error)
         "  z['s'] = 9\n"
         "  return True\n"
         ;
-    pdal::plang::Script script(source, "MyTest", "yow");
-
-    pdal::plang::Invocation meth(script);
+    Script script(source, "MyTest", "yow");
+    Invocation meth(script);
     meth.compile();
 
     BOOST_REQUIRE_THROW(meth.execute(), pdal::python_error);
@@ -104,9 +103,8 @@ BOOST_AUTO_TEST_CASE(PLangTest_toofewinputs)
         "  #print 'foo'\n"
         "  return True\n"
         ;
-    pdal::plang::Script script(source, "MyTest", "yow");
-
-    pdal::plang::Invocation meth(script);
+    Script script(source, "MyTest", "yow");
+    Invocation meth(script);
     meth.compile();
 
     BOOST_REQUIRE_THROW(meth.execute(), pdal::python_error);
@@ -121,9 +119,8 @@ BOOST_AUTO_TEST_CASE(PLangTest_toomanyinputs)
         "  #print 'foo'\n"
         "  return True\n"
         ;
-    pdal::plang::Script script(source, "MyTest", "yow");
-
-    pdal::plang::Invocation meth(script);
+    Script script(source, "MyTest", "yow");
+    Invocation meth(script);
     meth.compile();
 
     BOOST_REQUIRE_THROW(meth.execute(), pdal::python_error);
@@ -138,9 +135,8 @@ BOOST_AUTO_TEST_CASE(PLangTest_returnvoid)
         "  #print 'foo'\n"
         "  return\n"
         ;
-    pdal::plang::Script script(source, "MyTest", "yow");
-
-    pdal::plang::Invocation meth(script);
+    Script script(source, "MyTest", "yow");
+    Invocation meth(script);
     meth.compile();
 
     BOOST_REQUIRE_THROW(meth.execute(), pdal::python_error);
@@ -155,9 +151,8 @@ BOOST_AUTO_TEST_CASE(PLangTest_returnint)
         "  #print 'foo'\n"
         "  return 7\n"
         ;
-    pdal::plang::Script script(source, "MyTest", "yow");
-
-    pdal::plang::Invocation meth(script);
+    Script script(source, "MyTest", "yow");
+    Invocation meth(script);
     meth.compile();
 
     BOOST_REQUIRE_THROW(meth.execute(), pdal::python_error);
@@ -183,13 +178,10 @@ BOOST_AUTO_TEST_CASE(PLangTest_ins)
         "  #print X\n"
         "  return True\n"
         ;
-    pdal::plang::Script script(source, "MyTest", "yow");
-
-    pdal::plang::Invocation meth(script);
+    Script script(source, "MyTest", "yow");
+    Invocation meth(script);
     meth.compile();
-
-    meth.insertArgument("X", (boost::uint8_t*)data, 5, 8, pdal::dimension::Float, 8);
-
+    meth.insertArgument("X", (boost::uint8_t*)data, 5, 8, dimension::Float, 8);
     meth.execute();
 }
 
@@ -206,30 +198,24 @@ BOOST_AUTO_TEST_CASE(PLangTest_outs)
         "  #print outs['X']\n"
         "  return True\n"
         ;
-    pdal::plang::Script script(source, "MyTest", "yow");
-
-    pdal::plang::Invocation meth(script);
+    Script script(source, "MyTest", "yow");
+    Invocation meth(script);
     meth.compile();
-
     meth.execute();
-
     BOOST_CHECK(meth.hasOutputVariable("X"));
+    void *output = meth.extractResult("X", dimension::Float, 8);
 
-    double data[5] = {1.0, 2.0, 3.0, 4.0, 5.0};
-    meth.extractResult("X", (boost::uint8_t*)data, 5, 8, pdal::dimension::Float, 8);
-
-    BOOST_CHECK_CLOSE(data[0], 1.0, 0.00001);
-    BOOST_CHECK_CLOSE(data[1], 1.0, 0.00001);
-    BOOST_CHECK_CLOSE(data[2], 1.0, 0.00001);
-    BOOST_CHECK_CLOSE(data[3], 1.0, 0.00001);
-    BOOST_CHECK_CLOSE(data[4], 1.0, 0.00001);
+    double *d = (double *)output;
+    BOOST_CHECK_CLOSE(*d++, 1.0, 0.00001);
+    BOOST_CHECK_CLOSE(*d++, 1.0, 0.00001);
+    BOOST_CHECK_CLOSE(*d++, 1.0, 0.00001);
+    BOOST_CHECK_CLOSE(*d++, 1.0, 0.00001);
+    BOOST_CHECK_CLOSE(*d++, 1.0, 0.00001);
 }
 
 
 BOOST_AUTO_TEST_CASE(PLangTest_aliases)
 {
-    double data[5] = {1.0, 2.0, 3.0, 4.0, 5.0};
-
     const char* source =
         "import numpy as np\n"
         "def yow(ins,outs):\n"
@@ -256,37 +242,37 @@ BOOST_AUTO_TEST_CASE(PLangTest_aliases)
         "  #print outs['prefix.Y']\n"
         "  return True\n"
         ;
-    pdal::plang::Script script(source, "MyTest", "yow");
-
-    pdal::plang::Invocation meth(script);
+    Script script(source, "MyTest", "yow");
+    Invocation meth(script);
     meth.compile();
 
     {
-        meth.insertArgument("X", (boost::uint8_t*)data, 5, 8, pdal::dimension::Float, 8);
-        meth.insertArgument("prefix.X", (boost::uint8_t*)data, 5, 8, pdal::dimension::Float, 8);
+        double data[5] = {1.0, 2.0, 3.0, 4.0, 5.0};
+        meth.insertArgument("X", (uint8_t*)data, 5, 8, dimension::Float, 8);
+        meth.insertArgument("prefix.X", (uint8_t*)data, 5, 8,
+            dimension::Float, 8);
     }
-
     meth.execute();
 
     {
         BOOST_CHECK(meth.hasOutputVariable("Y"));
         BOOST_CHECK(meth.hasOutputVariable("prefix.Y"));
 
-        double data[5];
+        void *output = meth.extractResult("Y", dimension::Float, 8);
+        double *d = (double *)output;
+        BOOST_CHECK_CLOSE(*d++, 2.0, 0.00001);
+        BOOST_CHECK_CLOSE(*d++, 4.0, 0.00001);
+        BOOST_CHECK_CLOSE(*d++, 6.0, 0.00001);
+        BOOST_CHECK_CLOSE(*d++, 8.0, 0.00001);
+        BOOST_CHECK_CLOSE(*d++, 10.0, 0.00001);
 
-        meth.extractResult("Y", (boost::uint8_t*)data, 5, 8, pdal::dimension::Float, 8);
-        BOOST_CHECK_CLOSE(data[0], 2.0, 0.00001);
-        BOOST_CHECK_CLOSE(data[1], 4.0, 0.00001);
-        BOOST_CHECK_CLOSE(data[2], 6.0, 0.00001);
-        BOOST_CHECK_CLOSE(data[3], 8.0, 0.00001);
-        BOOST_CHECK_CLOSE(data[4], 10.0, 0.00001);
-
-        meth.extractResult("prefix.Y", (boost::uint8_t*)data, 5, 8, pdal::dimension::Float, 8);
-        BOOST_CHECK_CLOSE(data[0], 2.0, 0.00001);
-        BOOST_CHECK_CLOSE(data[1], 4.0, 0.00001);
-        BOOST_CHECK_CLOSE(data[2], 6.0, 0.00001);
-        BOOST_CHECK_CLOSE(data[3], 8.0, 0.00001);
-        BOOST_CHECK_CLOSE(data[4], 10.0, 0.00001);
+        output = meth.extractResult("prefix.Y", dimension::Float, 8);
+        d = (double *)output;
+        BOOST_CHECK_CLOSE(*d++, 2.0, 0.00001);
+        BOOST_CHECK_CLOSE(*d++, 4.0, 0.00001);
+        BOOST_CHECK_CLOSE(*d++, 6.0, 0.00001);
+        BOOST_CHECK_CLOSE(*d++, 8.0, 0.00001);
+        BOOST_CHECK_CLOSE(*d++, 10.0, 0.00001);
     }
 
     {
@@ -306,9 +292,8 @@ BOOST_AUTO_TEST_CASE(PLangTest_returntrue)
         "def yow(ins,outs):\n"
         "  return True\n"
         ;
-    pdal::plang::Script script(source, "MyTest", "yow");
-
-    pdal::plang::Invocation meth(script);
+    Script script(source, "MyTest", "yow");
+    Invocation meth(script);
     meth.compile();
 
     bool sts = meth.execute();
@@ -323,9 +308,8 @@ BOOST_AUTO_TEST_CASE(PLangTest_returnfalse)
         "def yow(ins,outs):\n"
         "  return False\n"
         ;
-    pdal::plang::Script script(source, "MyTest", "yow");
-
-    pdal::plang::Invocation meth(script);
+    Script script(source, "MyTest", "yow");
+    Invocation meth(script);
     meth.compile();
 
     bool sts = meth.execute();
@@ -350,45 +334,38 @@ BOOST_AUTO_TEST_CASE(PLangTest_reentry)
         "  outs['Y'] = Y\n"
         "  return True\n"
         ;
-    pdal::plang::Script script(source, "MyTest", "yow");
-
-    double indata1[5] = {0.0, 1.0, 2.0, 3.0, 4.0};
-    double outdata1[5] = {0.0, 0.0, 0.0, 0.0, 0.0};
-    double indata2[5] = {10.0, 20.0, 30.0, 40.0, 50.0};
-    double outdata2[5] = {0.0, 0.0, 0.0, 0.0, 0.0};
-
-    pdal::plang::Invocation meth(script);
+    Script script(source, "MyTest", "yow");
+    Invocation meth(script);
     meth.compile();
 
     {
-        meth.insertArgument("X", (boost::uint8_t*)indata1, 5, 8, pdal::dimension::Float, 8);
-
+        double indata1[5] = {0.0, 1.0, 2.0, 3.0, 4.0};
+        meth.insertArgument("X", (uint8_t*)indata1, 5, 8, dimension::Float, 8);
         meth.execute();
+        void *output = meth.extractResult("Y", dimension::Float, 8);
 
-        meth.extractResult("Y", (boost::uint8_t*)outdata1, 5, 8, pdal::dimension::Float, 8);
-
-        BOOST_CHECK_CLOSE(outdata1[0], 1.0, 0.00001);
-        BOOST_CHECK_CLOSE(outdata1[1], 2.0, 0.00001);
-        BOOST_CHECK_CLOSE(outdata1[2], 3.0, 0.00001);
-        BOOST_CHECK_CLOSE(outdata1[3], 4.0, 0.00001);
-        BOOST_CHECK_CLOSE(outdata1[4], 5.0, 0.00001);
+        double *d = (double *)output;
+        BOOST_CHECK_CLOSE(*d++, 1.0, 0.00001);
+        BOOST_CHECK_CLOSE(*d++, 2.0, 0.00001);
+        BOOST_CHECK_CLOSE(*d++, 3.0, 0.00001);
+        BOOST_CHECK_CLOSE(*d++, 4.0, 0.00001);
+        BOOST_CHECK_CLOSE(*d++, 5.0, 0.00001);
     }
 
     {
-        meth.insertArgument("X", (boost::uint8_t*)indata2, 5, 8, pdal::dimension::Float, 8);
-
+        double indata2[5] = {10.0, 20.0, 30.0, 40.0, 50.0};
+        meth.insertArgument("X", (uint8_t*)indata2, 5, 8, dimension::Float, 8);
         meth.execute();
+        void *output = meth.extractResult("Y", dimension::Float, 8);
 
-        meth.extractResult("Y", (boost::uint8_t*)outdata2, 5, 8, pdal::dimension::Float, 8);
-
-        BOOST_CHECK_CLOSE(outdata2[0], 11.0, 0.00001);
-        BOOST_CHECK_CLOSE(outdata2[1], 21.0, 0.00001);
-        BOOST_CHECK_CLOSE(outdata2[2], 31.0, 0.00001);
-        BOOST_CHECK_CLOSE(outdata2[3], 41.0, 0.00001);
-        BOOST_CHECK_CLOSE(outdata2[4], 51.0, 0.00001);
+        double *d = (double *)output;
+        BOOST_CHECK_CLOSE(*d++, 11.0, 0.00001);
+        BOOST_CHECK_CLOSE(*d++, 21.0, 0.00001);
+        BOOST_CHECK_CLOSE(*d++, 31.0, 0.00001);
+        BOOST_CHECK_CLOSE(*d++, 41.0, 0.00001);
+        BOOST_CHECK_CLOSE(*d++, 51.0, 0.00001);
     }
 }
-
 
 BOOST_AUTO_TEST_SUITE_END()
 

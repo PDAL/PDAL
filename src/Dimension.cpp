@@ -76,10 +76,7 @@ Dimension::Dimension(std::string const& name,
     , m_parentDimensionID(boost::uuids::nil_uuid())
 
 {
-    GlobalEnvironment& env = pdal::GlobalEnvironment::get();
-    boost::uuids::basic_random_generator<boost::mt19937> gen(env.getRNG());
-    m_uuid = gen();
-
+    createUUID();
 
     if (!m_name.size())
     {
@@ -157,24 +154,12 @@ boost::property_tree::ptree Dimension::toPTree() const
 
 void Dimension::setUUID(std::string const& id)
 {
-    boost::uuids::string_generator gen;
-    m_uuid = gen(id);
+    m_uuid = GlobalEnvironment::get().generateUUID(id);
 }
 
 void Dimension::createUUID()
 {
-    // Global RNG
-    GlobalEnvironment& env = pdal::GlobalEnvironment::get();
-    boost::uuids::basic_random_generator<boost::mt19937> gen(env.getRNG());
-    m_uuid = gen();
-
-    // Stack-allocated, uninitialized RNG
-    // boost::mt19937 ran;
-    // boost::uuids::basic_random_generator<boost::mt19937> gen(&ran);
-    // m_uuid = gen();
-
-    // Single call, uninitialized RNG
-    // m_uuid = boost::uuids::random_generator()();
+    m_uuid = GlobalEnvironment::get().generateUUID();
 }
 
 std::string Dimension::getInterpretationName() const

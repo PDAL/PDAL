@@ -89,23 +89,10 @@ BOOST_AUTO_TEST_CASE(test1)
 
 static void check_contents_sub(std::istream& s)
 {
-    int c;
-
-    c = s.get();
-    BOOST_CHECK(c == 'd');
-
-    c = s.get();
-    BOOST_CHECK(c == 'i');
-
-    c = s.get();
-    BOOST_CHECK(c == 's');
-
-    c = s.get();
-    BOOST_CHECK(c == 't');
-
-    c = s.get();
-    BOOST_CHECK(c == -1);
-
+    std::string buf;
+    s >> buf;
+    BOOST_CHECK_EQUAL(buf, "allows");
+    s.get();
     BOOST_CHECK(s.eof());
 }
 
@@ -114,27 +101,14 @@ static void check_contents(std::istream& s)
 {
     int c;
 
-    c = s.get();
-    BOOST_CHECK(c == 'R');
-
-    c = s.get();
-    BOOST_CHECK(c == 'e');
-
-    s.seekg(-4, std::ios_base::end);
-
-    std::streamoff e = s.tellg();
-    BOOST_CHECK(e == 78);
-
-    c = s.get();
-    BOOST_CHECK(c == 'n');
-
-    BOOST_CHECK(!s.eof());
-
-    BOOST_CHECK(s.get() == '.');
-    BOOST_CHECK(s.get() == '.');
-    BOOST_CHECK(s.get() == '.');
+    std::string buf;
+    s >> buf;
+    BOOST_CHECK_EQUAL(buf, "This");
+    s.seekg(-7, std::ios_base::end);
+    s >> buf;
+    BOOST_CHECK_EQUAL(buf, "utils.");
+    s.get();
     BOOST_CHECK(s.get() == -1);
-
     BOOST_CHECK(s.eof());
 }
 
@@ -175,8 +149,7 @@ BOOST_AUTO_TEST_CASE(test2)
     }
 
     {
-        const std::string nam = Support::datapath("text.txt");
-        FilenameSubsetStreamFactory f(nam,2,4);
+        FilenameSubsetStreamFactory f(Support::datapath("text.txt"), 20, 6);
 
         std::istream& s1 = f.allocate();
         std::istream& s2 = f.allocate();

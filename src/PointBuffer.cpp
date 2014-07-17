@@ -32,6 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <iomanip>
+
 #include <pdal/PointBuffer.hpp>
 #include <pdal/GlobalEnvironment.hpp>
 
