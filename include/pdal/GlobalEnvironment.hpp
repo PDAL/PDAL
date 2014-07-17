@@ -32,20 +32,15 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef PDAL_GLOBAL_ENVIRONMENT_H
-#define PDAL_GLOBAL_ENVIRONMENT_H
+#pragma once
 
 #include <pdal/pdal_internal.hpp>
 #include <pdal/PointBuffer.hpp>
 
-#include <pdal/ThreadEnvironment.hpp>
 #include <pdal/plang/PythonEnvironment.hpp>
-#include <pdal/PointContext.hpp>
 
 #include <boost/thread/once.hpp>
-#include <boost/interprocess/managed_shared_memory.hpp>
-
-#include <map>
+#include <boost/uuid/uuid.hpp>
 
 namespace pdal
 {
@@ -54,43 +49,21 @@ namespace gdal
 class GlobalDebug;
 }
 
-}
-
-namespace pdal
-{
-
-
 class PDAL_DLL GlobalEnvironment
 {
 public:
-    typedef std::map<boost::uuids::uuid,
-        boost::interprocess::managed_shared_memory*> segments_map;
-
     static GlobalEnvironment& get();
     static void startup();
     static void shutdown();
 
-    // create a new thread context
-    void createThreadEnvironment(boost::thread::id);
     void createPythonEnvironment();
     
-    // returns the thread context for a thread
-    // with no args, returns the not-a-thread thread environment
-    ThreadEnvironment& getThreadEnvironment(boost::thread::id=boost::thread::id());
-
     // get the plang (python) environment
     plang::PythonEnvironment& getPythonEnvironment();
-
-    // forwarded function
-    boost::random::mt19937* getRNG();
-    
     void getGDALEnvironment();
-    
-    pdal::gdal::GlobalDebug* getGDALDebug();
-    
-    segments_map const& getSegments() const { return m_segmentsMap; }
-    PointContext context()
-        { return m_context; }
+    gdal::GlobalDebug* getGDALDebug();
+    boost::uuids::uuid generateUUID();
+    boost::uuids::uuid generateUUID(const std::string& s);
 
 private:
     GlobalEnvironment();
@@ -98,22 +71,14 @@ private:
 
     static void init();
 
-    typedef std::map<boost::thread::id, ThreadEnvironment*> thread_map;
-    
-    thread_map m_threadMap;
-    segments_map m_segmentsMap;
     plang::PythonEnvironment* m_pythonEnvironment;
     bool m_bIsGDALInitialized;
     pdal::gdal::GlobalDebug* m_gdal_debug;
-    // This really shouldn't be global since it kind of defeats the purpose,
-    // but it works for now.
-    PointContext m_context;
+    boost::random::mt19937 m_rng;
     
     GlobalEnvironment(const GlobalEnvironment&); // nope
     GlobalEnvironment& operator=(const GlobalEnvironment&); // nope
 };
 
+} // namespace pdal
 
-} // namespaces
-
-#endif

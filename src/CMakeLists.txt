@@ -61,7 +61,6 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/StageIterator.hpp"
   "${PDAL_HEADERS_DIR}/StageRunner.hpp"
   "${PDAL_HEADERS_DIR}/StreamFactory.hpp"
-  "${PDAL_HEADERS_DIR}/ThreadEnvironment.hpp"
   "${PDAL_HEADERS_DIR}/UserCallback.hpp"
   "${PDAL_HEADERS_DIR}/Utils.hpp"
   "${PDAL_HEADERS_DIR}/Vector.hpp"  
@@ -106,7 +105,6 @@ set(PDAL_BASE_CPP
   StageInfo.cpp
   StageIterator.cpp
   StreamFactory.cpp
-  ThreadEnvironment.cpp
   Utils.cpp
   Vector.cpp  
   Writer.cpp

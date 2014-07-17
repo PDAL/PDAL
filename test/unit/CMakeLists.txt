@@ -35,7 +35,7 @@ SET(PDAL_UNITTEST_TEST_SRC
     PipelineManagerTest.cpp
     PointBufferTest.cpp
 #    drivers/qfit/QFITReaderTest.cpp
-#    RangeTest.cpp
+    RangeTest.cpp
     filters/ReprojectionFilterTest.cpp
     drivers/sbet/SbetReaderTest.cpp
     drivers/sbet/SbetWriterTest.cpp
@@ -47,11 +47,10 @@ SET(PDAL_UNITTEST_TEST_SRC
     filters/SplitterTest.cpp
 #    StageFactoryTest.cpp
     filters/StatsFilterTest.cpp
-#    StreamFactoryTest.cpp
-#    SupportTest.cpp
+    StreamFactoryTest.cpp
+    SupportTest.cpp
 #    drivers/terrasolid/TerraSolidReaderTest.cpp
 #    drivers/text/TextWriterTest.cpp
-#    ThreadTest.cpp
     UserCallbackTest.cpp
     UtilsTest.cpp
     VectorTest.cpp
@@ -72,7 +71,7 @@ if(WITH_APPS)
 endif(WITH_APPS)
 
 set(PDAL_PLANG_TEST_SRC
-#    plang/PLangTest.cpp
+    plang/PLangTest.cpp
     plang/PredicateFilterTest.cpp
     plang/ProgrammableFilterTest.cpp
 )
