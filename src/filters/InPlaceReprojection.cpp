@@ -314,39 +314,39 @@ void InPlaceReprojection::reprojectOffsets(double& x, double& y, double& z)
 
 
 //ABELL
-void InPlaceReprojection::updateBounds(PointBuffer& buffer)
-{
-    Bounds<double> bounds = buffer.getSpatialBounds();
-    Bounds<double> newbounds = buffer.getSpatialBounds();
-
-    try
-    {
-        newbounds.transform([this](double& x, double& y, double& z)
-            { this->transform(x, y, z); } );
-    }
-    catch (pdal::pdal_error&)
-    {
-        return;
-    }
-
-    try
-    {
-        buffer.setSpatialBounds(newbounds);
-    }
-    catch (pdal::bounds_error&)
-    {
-        try
-        {
-            newbounds.setMinimum(2, bounds.getMinimum(2));
-            newbounds.setMaximum(2, bounds.getMaximum(2));
-            buffer.setSpatialBounds(newbounds);
-        }
-        catch (pdal::bounds_error&)
-        {
-            buffer.setSpatialBounds(buffer.calculateBounds(true));
-        }
-    }
-}
+// void InPlaceReprojection::updateBounds(PointBuffer& buffer)
+// {
+//     Bounds<double> bounds = buffer.getSpatialBounds();
+//     Bounds<double> newbounds = buffer.getSpatialBounds();
+//
+//     try
+//     {
+//         newbounds.transform([this](double& x, double& y, double& z)
+//             { this->transform(x, y, z); } );
+//     }
+//     catch (pdal::pdal_error&)
+//     {
+//         return;
+//     }
+//
+//     try
+//     {
+//         buffer.setSpatialBounds(newbounds);
+//     }
+//     catch (pdal::bounds_error&)
+//     {
+//         try
+//         {
+//             newbounds.setMinimum(2, bounds.getMinimum(2));
+//             newbounds.setMaximum(2, bounds.getMaximum(2));
+//             buffer.setSpatialBounds(newbounds);
+//         }
+//         catch (pdal::bounds_error&)
+//         {
+//             buffer.setSpatialBounds(buffer.calculateBounds(true));
+//         }
+//     }
+// }
 
 void InPlaceReprojection::filter(PointBuffer& buffer)
 {
@@ -398,7 +398,7 @@ void InPlaceReprojection::filter(PointBuffer& buffer)
     }
     if (logOutput)
         log()->clearFloat();
-    updateBounds(buffer);
+    // updateBounds(buffer);
 }
 
 
