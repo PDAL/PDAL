@@ -33,8 +33,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_DRIVER_PGPOINTCLOUD_COMMON_HPP
-#define INCLUDED_DRIVER_PGPOINTCLOUD_COMMON_HPP
+#pragma once
 
 #include <boost/algorithm/string.hpp>
 
@@ -157,5 +156,3 @@ inline PGresult* pg_query_result(PGconn* session, std::string const& sql)
 } // drivers
 } // pdal
 
-
-#endif // INCLUDED_DRIVER_PGPOINTCLOUD_COMMON_HPP

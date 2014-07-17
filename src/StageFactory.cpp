@@ -86,7 +86,7 @@ MAKE_READER_CREATOR(SqliteReader, pdal::drivers::sqlite::Reader)
 
 #ifdef PDAL_HAVE_POSTGRESQL
 #ifndef USE_PDAL_PLUGIN_PGPOINTCLOUD
-MAKE_READER_CREATOR(PgPcReader, pdal::drivers::pgpointcloud::Reader)
+MAKE_READER_CREATOR(PgPcReader, pdal::drivers::pgpointcloud::PgReader)
 #endif
 #endif
 
@@ -400,7 +400,7 @@ void StageFactory::registerKnownReaders()
 
 #ifdef PDAL_HAVE_POSTGRESQL
 #ifndef USE_PDAL_PLUGIN_PGPOINTCLOUD
-    REGISTER_READER(PgPcReader, pdal::drivers::pgpointcloud::Reader);
+    REGISTER_READER(PgPcReader, pdal::drivers::pgpointcloud::PgReader);
 #endif
 #endif
 
