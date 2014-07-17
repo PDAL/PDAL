@@ -122,7 +122,6 @@ void Stage::l_initialize(PointContext ctx)
     m_metadata = ctx.metadata().add(getName());
     if (m_inputs.size()) {
         Stage& prevStage = getPrevStage();
-        setBounds(prevStage.getBounds());
     }
 }
 
@@ -190,18 +189,6 @@ std::vector<Stage*> Stage::getPrevStages() const
 }
 
 
-const Bounds<double>& Stage::getBounds() const
-{
-    return m_bounds;
-}
-
-
-void Stage::setBounds(const Bounds<double>& bounds)
-{
-    m_bounds = bounds;
-}
-
-
 const SpatialReference& Stage::getSpatialReference() const
 {
     return m_spatialReference;
@@ -228,8 +215,6 @@ void Stage::setSpatialReference(MetadataNode& m,
 std::ostream& operator<<(std::ostream& ostr, const Stage& stage)
 {
     ostr << "  Name: " << stage.getName() << std::endl;
-    ostr << "  Bounds:" << std::endl;
-    ostr << "    " << stage.getBounds() << std::endl;
     ostr << "  Spatial Reference:" << std::endl;
     ostr << "    WKT: " << stage.getSpatialReference().getWKT() << std::endl;
 

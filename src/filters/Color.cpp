@@ -142,9 +142,9 @@ void Color::getColor_F32_U8(float value, uint8_t& red, uint8_t& green,
 {
     double fred, fgreen, fblue;
 
-    const Range<double>& zrange = getBounds().dimensions()[2];
-    interpolateColor(value, zrange.getMinimum(), zrange.getMaximum(),
-        fred, fblue, fgreen);
+    // const Range<double>& zrange = getBounds().dimensions()[2];
+    // interpolateColor(value, zrange.getMinimum(), zrange.getMaximum(),
+    //     fred, fblue, fgreen);
 
     const double vmax = (std::numeric_limits<boost::uint8_t>::max)();
     red = (uint8_t)(fred * vmax);
@@ -158,9 +158,9 @@ void Color::getColor_F64_U16(double value, uint16_t& red, uint16_t& green,
 {
     double fred, fgreen, fblue;
 
-    const Range<double>& zrange = getBounds().dimensions()[2];
-    interpolateColor(value, zrange.getMinimum(), zrange.getMaximum(),
-        fred, fblue, fgreen);
+    // const Range<double>& zrange = getBounds().dimensions()[2];
+    // interpolateColor(value, zrange.getMinimum(), zrange.getMaximum(),
+    //     fred, fblue, fgreen);
 
     const double vmax = std::numeric_limits<uint16_t>::max();
     red = (uint16_t)(fred * vmax);

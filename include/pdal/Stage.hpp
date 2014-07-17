@@ -36,7 +36,6 @@
 
 #include <pdal/pdal_internal.hpp>
 
-#include <pdal/Bounds.hpp>
 #include <pdal/Log.hpp>
 #include <pdal/Metadata.hpp>
 #include <pdal/Options.hpp>
@@ -76,7 +75,6 @@ public:
     void prepare(PointContext ctx);
     PointBufferSet execute(PointContext ctx);
 
-    const Bounds<double>& getBounds() const;
     void setSpatialReference(SpatialReference const&);
     const SpatialReference& getSpatialReference() const;
     const Options& getOptions() const
@@ -129,9 +127,7 @@ public:
 protected:
     Options m_options;
     MetadataNode m_metadata;
-    Bounds<double> m_bounds;
 
-    void setBounds(Bounds<double> const&);
     void setSpatialReference(MetadataNode& m, SpatialReference const&);
 
 private:

@@ -163,8 +163,6 @@ void Reprojection::ready(PointContext ctx)
 
 #endif
     setSpatialReference(m_outSRS);
-    m_bounds.transform([this](double& x, double& y, double& z) mutable
-        { this->transform(x, y, z); } );
 }
 
 

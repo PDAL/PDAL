@@ -308,7 +308,7 @@ void Writer::ready(PointContext ctx)
         return;
 
     m_streamOffset = m_streamManager.ostream().tellp();
-    m_lasHeader.setBounds(getPrevStage().getBounds());
+    // m_lasHeader.setBounds(getPrevStage().getBounds());
 
     Schema *s = ctx.schema();
     m_dims.reset(new PointDimensions(*s, ""));

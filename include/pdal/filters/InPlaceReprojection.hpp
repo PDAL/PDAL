@@ -80,7 +80,6 @@ private:
 
     Dimension *appendDimension(Schema *schema, Dimension *src);
     void reprojectOffsets(double& x, double& y, double& z);
-    // void updateBounds(PointBuffer& buffer);
     void transform(double& x, double& y, double& z) const;
 
     typedef boost::shared_ptr<void> ReferencePtr;

@@ -88,6 +88,8 @@ private:
     Schema *m_schema;  // Just used to get it to the iterator.
     uint64_t m_numPoints;
     Mode m_mode;
+    
+    Bounds<double> m_bounds;
 
     virtual void processOptions(const Options& options);
     virtual void buildSchema(Schema *s);
