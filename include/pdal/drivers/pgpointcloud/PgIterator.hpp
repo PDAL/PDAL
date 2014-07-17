@@ -129,30 +129,26 @@ public:
     std::vector<uint8_t> binary;
     static const boost::uint32_t trim = 26;
 
+#define _base(x) ((x >= '0' && x <= '9') ? '0' : \
+         (x >= 'a' && x <= 'f') ? 'a' - 10 : \
+         (x >= 'A' && x <= 'F') ? 'A' - 10 : \
+            '\255')
+#define HEXOF(x) (x - _base(x))
 
     inline void update_binary()
     {
-        // Stolen from http://stackoverflow.com/questions/7363774/c-converting-binary-data-to-a-hex-string-and-back
-        binary.reserve(2*count);    
-        binary.resize(0);
+        // http://stackoverflow.com/questions/8197838/convert-a-long-hex-string-in-to-int-array-with-sscanf
+        binary.resize((hex.size() - trim)/2);
+        
+        char const* source = hex.c_str() + trim;
+        char const* p = 0;
 
-        char const* source = hex.c_str();
-        std::size_t len = std::strlen(source);
-        static int nibbles[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0, 0, 10, 11, 12, 13, 14, 15 };
-    
-        for (std::size_t i = trim; i < len; i+=2) {
-            unsigned char v = 0;
-            if (::isxdigit(source[i]))
-                v = (unsigned char)nibbles[source[i] - '0'] << 4;
-            if (i + 1 < hex.size() && ::isxdigit(source[i+1]))
-                v += (unsigned char)nibbles[source[i+1] - '0'];
-            binary.push_back(v);
-        }
-    }
-
-    
-    
-};
+        for (p = source; p && *p; p+=2 ) {
+                 binary[(p - source) >> 1] =
+                 ((HEXOF(*p)) << 4) + HEXOF(*(p+1));
+         }
+     }
+ };
 
 } // sequential
 } // iterators
