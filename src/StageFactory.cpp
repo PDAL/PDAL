@@ -105,7 +105,6 @@ MAKE_READER_CREATOR(IcebridgeReader, pdal::drivers::icebridge::Reader)
 MAKE_FILTER_CREATOR(ByteSwap, pdal::filters::ByteSwap)
 MAKE_FILTER_CREATOR(Cache, pdal::filters::Cache)
 MAKE_FILTER_CREATOR(Chipper, pdal::filters::Chipper)
-MAKE_FILTER_CREATOR(Color, pdal::filters::Color)
 #ifdef PDAL_HAVE_GDAL
 MAKE_FILTER_CREATOR(Colorization, pdal::filters::Colorization)
 #endif
@@ -425,7 +424,6 @@ void StageFactory::registerKnownFilters()
     REGISTER_FILTER(ByteSwap, pdal::filters::ByteSwap);
     REGISTER_FILTER(Cache, pdal::filters::Cache);
     REGISTER_FILTER(Chipper, pdal::filters::Chipper);
-    REGISTER_FILTER(Color, pdal::filters::Color);
 #ifdef PDAL_HAVE_GDAL
     REGISTER_FILTER(Colorization, pdal::filters::Colorization);
 #endif

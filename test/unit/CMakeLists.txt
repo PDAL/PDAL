@@ -16,7 +16,6 @@ SET(PDAL_UNITTEST_TEST_SRC
     drivers/bpf/BPFTest.cpp
 #    drivers/caris/CarisReaderTest.cpp
     filters/ChipperTest.cpp
-#    filters/ColorFilterTest.cpp
     ConfigTest.cpp
     filters/CropFilterTest.cpp
     filters/DecimationFilterTest.cpp

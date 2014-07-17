@@ -38,7 +38,6 @@
 #include <pdal/filters/ByteSwap.hpp>
 #include <pdal/filters/Cache.hpp>
 #include <pdal/filters/Chipper.hpp>
-#include <pdal/filters/Color.hpp>
 #ifdef PDAL_HAVE_GDAL
 #include <pdal/filters/Colorization.hpp>
 #endif
