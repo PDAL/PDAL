@@ -115,7 +115,6 @@ void Reader::initialize(MetadataNode& m)
         throw std::invalid_argument(msg.str());
     }
 
-    setBounds(m_lasHeader.getBounds());
     extractMetadata(m);
     m_streamFactory->deallocate(stream);
 }
