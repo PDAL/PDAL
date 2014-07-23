@@ -114,7 +114,7 @@ public:
         { return m_scaleZ.m_scale; }
     char *data() const
         { return (char *)chunk.data(); }
-    schema::Orientation orientation() const
+    Orientation::Enum orientation() const
         { return m_orientation; }
     bool fetched() const
         { return m_fetched; }
@@ -136,12 +136,12 @@ public:
     std::vector<uint8_t> chunk;
     OCILobLocator *locator;
     Connection m_connection;
+    Orientation::Enum m_orientation;
     sdo_pc* pc;
     int32_t m_num_remaining;
     Scale m_scaleX;
     Scale m_scaleY;
     Scale m_scaleZ;
-    schema::Orientation m_orientation;
     bool m_fetched;  // Set when fetched but not initialized
 };
 typedef std::shared_ptr<Block> BlockPtr;

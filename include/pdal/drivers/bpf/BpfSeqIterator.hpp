@@ -51,7 +51,7 @@ class PointBuffer;
 class BpfSeqIterator : public ReaderSequentialIterator
 {
 public:
-    BpfSeqIterator(const std::vector<Dimension *>& dims,
+    BpfSeqIterator(const std::vector<DimensionPtr>& dims,
         point_count_t numPoints, BpfFormat::Enum pointFormat, bool compression,
         ILeStream& stream);
     ~BpfSeqIterator();
@@ -77,7 +77,7 @@ private:
     void seekByteMajor(size_t dimIdx, size_t byteIdx, uint32_t ptIdx);
 
     /// Dimensions
-    std::vector<Dimension *> m_dims;
+    std::vector<DimensionPtr> m_dims;
     /// Total number of points in the file.
     point_count_t m_numPoints;
     /// Bpf point format being read.

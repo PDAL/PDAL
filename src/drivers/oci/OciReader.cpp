@@ -264,6 +264,29 @@ pdal::SpatialReference OciReader::fetchSpatialReference(Statement stmt,
 }
 
 
+void OciReader::normalizeDimension(DimensionPtr d)
+{
+    if (!m_normalizeXYZ)
+        return;
+
+    auto optionSetter = [d](boost::optional<double> scaleOp,
+        boost::optional<double> offsetOp)
+    {
+        if (scaleOp)
+            d->setNumericScale(*scaleOp);
+        if (offsetOp)
+            d->setNumericScale(*offsetOp);
+    };
+
+    if (d->getName() == "X")
+        optionSetter(m_scaleX, m_offsetX);
+    if (d->getName() == "Y")
+        optionSetter(m_scaleY, m_offsetY);
+    if (d->getName() == "Z")
+        optionSetter(m_scaleZ, m_offsetZ);
+}
+
+
 void OciReader::buildSchema(Schema *schema)
 {
     log()->get(logDEBUG) << "Fetching schema from SDO_PC object" << std::endl;
@@ -277,40 +300,33 @@ void OciReader::buildSchema(Schema *schema)
         FileUtils::closeFile(out);
     }
 
-    for (size_t i = 0; i < storedSchema.numDimensions(); ++i)
+    DimensionList dims = storedSchema.getDimensions();
+    for (auto di = dims.begin(); di != dims.end(); ++di)
     {
-        Dimension d = storedSchema.getDimension(i);
+        DimensionPtr d = *di;
 
         // For dimensions that do not have namespaces, we'll set the namespace
         // to the namespace of the current stage
-        if (d.getNamespace().empty())
+        if (d->getNamespace().empty())
         {
             log()->get(logDEBUG4) << "setting namespace for dimension " <<
-                d.getName() << " to "  << getName() << std::endl;
+                d->getName() << " to "  << getName() << std::endl;
 
-            if (d.getUUID().is_nil())
-                d.createUUID();
-            d.setNamespace(getName());
+            if (d->getUUID().is_nil())
+                d->createUUID();
+            d->setNamespace(getName());
         }
-        m_dims.push_back(schema->appendDimension(d));
+        normalizeDimension(d);
+        schema->appendDimension(*d);
     }
+}
 
-    if (m_normalizeXYZ)
-    {
-        auto optionSetter = [](Schema *s, std::string dimName,
-            boost::optional<double> scaleOp, boost::optional<double> offsetOp)
-        {
-            Dimension *d = s->getDimensionPtr(dimName);
-            if (scaleOp)
-                d->setNumericScale(*scaleOp);
-            if (offsetOp)
-                d->setNumericScale(*offsetOp);
-        };
 
-        optionSetter(schema, "drivers.oci.reader.X", m_scaleX, m_offsetX);
-        optionSetter(schema, "drivers.oci.reader.Y", m_scaleY, m_offsetY);
-        optionSetter(schema, "drivers.oci.reader.Z", m_scaleZ, m_offsetZ);
-    }
+void OciReader::ready(PointContext ctx)
+{
+    //ABELL - Need to make sure the dimensions that are the source dimensions
+    //  are mapped in the same order to the dimensions from the input.
+    ctx.schema()->getDimensions(getName());
 }
 
 

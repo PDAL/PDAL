@@ -74,9 +74,9 @@ void OciSeqIterator::readBlob(Statement stmt, BlockPtr block)
 point_count_t OciSeqIterator::read(PointBuffer& buffer, BlockPtr block,
     point_count_t numPts)
 {
-    if (block->orientation() == schema::DIMENSION_INTERLEAVED)
+    if (block->orientation() == Orientation::DimensionMajor)
         return readDimMajor(buffer, block, numPts);
-    else if (block->orientation() == schema::POINT_INTERLEAVED)
+    else if (block->orientation() == Orientation::PointMajor)
         return readPointMajor(buffer, block, numPts);
     throw pdal_error("Unsupported orientation.");
 }
@@ -98,7 +98,7 @@ point_count_t OciSeqIterator::readDimMajor(PointBuffer& buffer, BlockPtr block,
         numRead = 0;
         while (numRead < numPts && blockRemaining > 0)
         {
-            buffer.setRawField(*m_dims[d], nextId, pos);
+            buffer.setRawField(m_dims[d], nextId, pos);
             pos += m_dims[d]->getByteSize();
             nextId++;
             numRead++;
@@ -122,7 +122,7 @@ point_count_t OciSeqIterator::readPointMajor(PointBuffer& buffer,
     {
         for (size_t d = 0; d < m_dims.size(); ++d)
         {
-            buffer.setRawField(*m_dims[d], nextId, pos);
+            buffer.setRawField(m_dims[d], nextId, pos);
             pos += m_dims[d]->getByteSize();
         }
         numRemaining--;
@@ -216,17 +216,17 @@ void OciSeqIterator::normalize(PointBuffer& buffer, BlockPtr block,
     for (PointId i = begin; i < end; ++i)
     {
         double d;
-        d = buffer.getFieldAs<double>(*m_dimX, i, false);
+        d = buffer.getFieldAs<double>(m_dimX, i, false);
         d = d * block->xScale() + block->xOffset();
-        buffer.setFieldUnscaled(*m_dimX, i, d);
+        buffer.setFieldUnscaled(m_dimX, i, d);
 
-        d = buffer.getFieldAs<double>(*m_dimY, i, false);
+        d = buffer.getFieldAs<double>(m_dimY, i, false);
         d = d * block->yScale() + block->yOffset();
-        buffer.setFieldUnscaled(*m_dimY, i, d);
+        buffer.setFieldUnscaled(m_dimY, i, d);
 
-        d = buffer.getFieldAs<double>(*m_dimZ, i, false);
+        d = buffer.getFieldAs<double>(m_dimZ, i, false);
         d = d * block->zScale() + block->zOffset();
-        buffer.setFieldUnscaled(*m_dimZ, i, d);
+        buffer.setFieldUnscaled(m_dimZ, i, d);
     }
 }
 

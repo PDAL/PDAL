@@ -58,7 +58,7 @@ class OciSeqIterator : public ReaderSequentialIterator
 {
 public:
     OciSeqIterator(Statement stmt, BlockPtr block,
-        std::vector<Dimension *> dims, bool normalizeXYZ) :
+        std::vector<DimensionPtr> dims, bool normalizeXYZ) :
         m_stmt(stmt), m_block(block), m_dims(dims),
         m_normalizeXYZ(normalizeXYZ), m_atEnd(false)
     {
@@ -101,12 +101,12 @@ private:
 
     Statement m_stmt;
     BlockPtr m_block;
-    std::vector<Dimension *> m_dims;
+    std::vector<DimensionPtr> m_dims;
     bool m_normalizeXYZ;
     bool m_atEnd;
-    Dimension *m_dimX;
-    Dimension *m_dimY;
-    Dimension *m_dimZ;
+    DimensionPtr m_dimX;
+    DimensionPtr m_dimY;
+    DimensionPtr m_dimZ;
     std::map<int32_t, Schema> m_schemas;
 };
 

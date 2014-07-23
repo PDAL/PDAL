@@ -106,22 +106,22 @@ class PointDimensions
 public:
     PointDimensions(const Schema& schema, std::string const& ns);
 
-    Dimension const* Time;
-    Dimension const* X;
-    Dimension const* Y;
-    Dimension const* Z;
+    DimensionPtr Time;
+    DimensionPtr X;
+    DimensionPtr Y;
+    DimensionPtr Z;
 
-    Dimension const* Classification;
-    Dimension const* PointSourceId;
-    Dimension const* ReturnNumber;
-    Dimension const* Intensity;
-    Dimension const* Mark;
-    Dimension const* Flag;
+    DimensionPtr Classification;
+    DimensionPtr PointSourceId;
+    DimensionPtr ReturnNumber;
+    DimensionPtr Intensity;
+    DimensionPtr Mark;
+    DimensionPtr Flag;
 
-    Dimension const* Red;
-    Dimension const* Green;
-    Dimension const* Blue;
-    Dimension const* Alpha;
+    DimensionPtr Red;
+    DimensionPtr Green;
+    DimensionPtr Blue;
+    DimensionPtr Alpha;
 };
 //
 //
@@ -139,7 +139,6 @@ public:
     SET_STAGE_ENABLED(true)
 
     Reader(const Options&);
-    ~Reader();
 
     static Options getDefaultOptions();
     static std::vector<Dimension> getDefaultDimensions();

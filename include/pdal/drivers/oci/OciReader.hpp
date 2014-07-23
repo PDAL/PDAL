@@ -81,7 +81,9 @@ private:
     virtual void initialize();
     virtual void processOptions(const Options& options);
     virtual void buildSchema(Schema *schema);
+    virtual void ready(PointContext ctx);
     void validateQuery();
+    void normalizeDimension(DimensionPtr d);
     void defineBlock(Statement statement, BlockPtr block) const;
     pdal::SpatialReference fetchSpatialReference(Statement statement,
         BlockPtr block) const;
@@ -89,7 +91,7 @@ private:
     Connection m_connection;
     Statement m_stmt;
     BlockPtr m_block;
-    std::vector<Dimension *> m_dims;
+    std::vector<DimensionPtr> m_dims;
     std::string m_query;
     std::string m_schemaFile;
     std::string m_connSpec;

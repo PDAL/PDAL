@@ -33,13 +33,10 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_DRIVERS_PGPOINTCLOUD_WRITER_HPP
-#define INCLUDED_DRIVERS_PGPOINTCLOUD_WRITER_HPP
-
+#pragma once
 
 #include <pdal/Writer.hpp>
 #include <pdal/drivers/pgpointcloud/common.hpp>
-
 
 namespace pdal
 {
@@ -103,17 +100,17 @@ private:
     std::string m_table_name;
     std::string m_column_name;
     std::string m_connection;
-    schema::CompressionType m_patch_compression_type;
-    boost::uint32_t m_patch_capacity;
-    boost::uint32_t m_srid;
-    boost::uint32_t m_pcid;
+    CompressionType::Enum m_patch_compression_type;
+    uint32_t m_patch_capacity;
+    uint32_t m_srid;
+    uint32_t m_pcid;
     bool m_have_postgis;
     bool m_create_index;
     bool m_overwrite;
     std::string m_insert;
     std::string m_hex;
     size_t m_pointSize;
-    schema::Orientation m_orientation;
+    Orientation::Enum m_orientation;
     std::vector<Dimension> m_dims;
     bool m_pack;    
     
@@ -121,8 +118,7 @@ private:
     bool m_schema_is_initialized;
 };
 
-} // pgpointcloud
-} // drivers
-} // pdal
+} // namespace pgpointcloud
+} // namespace drivers
+} // namespace pdal
 
-#endif  // INCLUDED_DRIVERS_PGPOINTCLOUD_WRITER_HPP

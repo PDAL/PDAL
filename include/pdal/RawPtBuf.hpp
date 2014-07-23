@@ -31,6 +31,7 @@
 * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 * OF SUCH DAMAGE.
 ****************************************************************************/
+
 #pragma once
 
 #include <memory>
@@ -62,16 +63,20 @@ public:
         return m_numPts++;
     }
 
-    void setField(const Dimension& dim, PointId idx, const void *value)
+    void setField(DimensionPtr dim, PointId idx, const void *value)
     {
-        std::size_t offset = pointsToBytes(idx) + dim.getByteOffset();
-        memcpy(m_buf.data() + offset, value, dim.getByteSize());
+//ABELL
+//        std::size_t offset = pointsToBytes(idx) + dim->getByteOffset();
+std::size_t offset = pointsToBytes(idx);
+        memcpy(m_buf.data() + offset, value, dim->getByteSize());
     }
 
-    void getField(const Dimension& dim, PointId idx, void *value)
+    void getField(DimensionPtr dim, PointId idx, void *value)
     {
-        std::size_t offset = pointsToBytes(idx) + dim.getByteOffset();
-        memcpy(value, m_buf.data() + offset, dim.getByteSize());
+//ABELL
+//        std::size_t offset = pointsToBytes(idx) + dim->getByteOffset();
+std::size_t offset = pointsToBytes(idx);
+        memcpy(value, m_buf.data() + offset, dim->getByteSize());
     }
 
 private:

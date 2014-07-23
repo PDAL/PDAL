@@ -114,10 +114,10 @@ private:
     double m_maxY;
     double m_minZ;
     double m_maxZ;
-    Dimension *m_dimX;
-    Dimension *m_dimY;
-    Dimension *m_dimZ;
-    Dimension *m_dimTime;
+    DimensionPtr m_dimX;
+    DimensionPtr m_dimY;
+    DimensionPtr m_dimZ;
+    DimensionPtr m_dimTime;
     uint64_t m_time;
     drivers::faux::Mode m_mode;
     point_count_t m_numPoints;

@@ -80,13 +80,23 @@ void BpfReader::buildSchema(Schema *schema)
     {
         BpfDimension& dim = m_dims[i];
         Dimension pd(dim.m_label, dimension::Float, sizeof(float));
-        pd.setMinimum(dim.m_min);
-        pd.setMaximum(dim.m_max);
         pd.setNumericOffset(dim.m_offset);
         pd.setNamespace("bpf");
-        m_schemaDims.push_back(schema->appendDimension(pd));
+        schema->appendDimension(pd);
     }
 }
+
+
+void BpfReader::ready(PointContext ctx)
+{
+    Schema *s = ctx.schema();
+    for (auto bdi = m_dims.begin(); bdi != m_dims.end(); ++bdi)
+    {
+        BpfDimension& bpfDim = *bdi;
+        m_schemaDims.push_back(s->getDimension(bpfDim.m_label, "bpf"));
+    }
+}
+
 
 bool BpfReader::readUlemData()
 {

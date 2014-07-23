@@ -70,25 +70,25 @@ class PDAL_DLL PointDimensions
 public:
     PointDimensions(const Schema& schema, std::string const& ns);
 
-    pdal::Dimension const* X;
-    pdal::Dimension const* Y;
-    pdal::Dimension const* Z;
+    DimensionPtr X;
+    DimensionPtr Y;
+    DimensionPtr Z;
 
-    pdal::Dimension const* Intensity;
-    pdal::Dimension const* ReturnNumber;
-    pdal::Dimension const* NumberOfReturns;
-    pdal::Dimension const* ScanDirectionFlag;
-    pdal::Dimension const* EdgeOfFlightLine;
-    pdal::Dimension const* Classification;
-    pdal::Dimension const* ScanAngleRank;
-    pdal::Dimension const* UserData;
-    pdal::Dimension const* PointSourceId;
+    DimensionPtr Intensity;
+    DimensionPtr ReturnNumber;
+    DimensionPtr NumberOfReturns;
+    DimensionPtr ScanDirectionFlag;
+    DimensionPtr EdgeOfFlightLine;
+    DimensionPtr Classification;
+    DimensionPtr ScanAngleRank;
+    DimensionPtr UserData;
+    DimensionPtr PointSourceId;
 
-    pdal::Dimension const* Time;
+    DimensionPtr Time;
 
-    pdal::Dimension const* Red;
-    pdal::Dimension const* Green;
-    pdal::Dimension const* Blue;
+    DimensionPtr Red;
+    DimensionPtr Green;
+    DimensionPtr Blue;
 };
 
 class PDAL_DLL Support

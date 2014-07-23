@@ -385,7 +385,8 @@ Schema Writer::getPackedSchema(Schema const& schema) const
         {
 
             Dimension d(idx[i]);
-            d.setPosition(position);
+//ABELL
+//            d.setPosition(position);
 
             // Wipe off parent/child relationships if we're ignoring
             // same-named dimensions

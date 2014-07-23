@@ -268,7 +268,9 @@ void Writer::done(PointContext ctx)
 uint32_t Writer::SetupSchema(Schema const& buffer_schema, uint32_t srid)
 {
     // We strip any ignored dimensions from the schema before creating the table
-    pdal::Schema output_schema = buffer_schema.pack();
+//ABELL
+//    pdal::Schema output_schema = buffer_schema.pack();
+pdal::Schema output_schema = buffer_schema;
 
     // If the user has specified a PCID they want to use,
     // does it exist in the database?
@@ -320,6 +322,8 @@ uint32_t Writer::SetupSchema(Schema const& buffer_schema, uint32_t srid)
             char *pcid_str = PQgetvalue(result, i, 0);
             char *schema_str = PQgetvalue(result, i, 1);
 
+            //ABELL - This seems like the same mess I purged from OCI.
+            //  Probably needs to go.
             if (pdal::Schema::from_xml(schema_str) == output_schema)
             {
                 bCreatePCPointSchema = false;

@@ -35,10 +35,10 @@
 #pragma once
 
 #include <pdal/pdal_internal.hpp>
-#include <pdal/PointBuffer.hpp>
 
 #include <pdal/plang/PythonEnvironment.hpp>
 
+#include <boost/random/mersenne_twister.hpp>
 #include <boost/thread/once.hpp>
 #include <boost/uuid/uuid.hpp>
 

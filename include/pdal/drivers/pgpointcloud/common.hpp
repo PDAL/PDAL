@@ -48,18 +48,26 @@ namespace drivers
 namespace pgpointcloud
 {
 
-inline schema::CompressionType getCompressionType(std::string const& compression_type)
+namespace CompressionType
 {
-    schema::CompressionType output;
 
+enum Enum
+{
+    COMPRESSION_DIMENSIONAL,
+    COMPRESSION_GHT,
+    COMPRESSION_NONE
+};
+
+} // namespace CompressionType
+
+
+CompressionType::Enum getCompressionType(std::string const& compression_type)
+{
     if (boost::iequals(compression_type, "dimensional"))
-        output = schema::COMPRESSION_DIMENSIONAL;
+        return CompressionType::COMPRESSION_DIMENSIONAL;
     else if (boost::iequals(compression_type, "ght"))
-        output = schema::COMPRESSION_GHT;
-    else
-        output = schema::COMPRESSION_NONE;
-    
-    return output;
+        return CompressionType::COMPRESSION_GHT;
+    return CompressionType::COMPRESSION_NONE;
 }
 
 inline PGconn* pg_connect(std::string const& connection)

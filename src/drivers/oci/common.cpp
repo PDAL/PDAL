@@ -137,10 +137,9 @@ Block::~Block()
 void Block::initialize(Schema *s)
 {
     m_num_remaining = num_points;
-    m_orientation = s->getOrientation();
     auto dimupdate = [s](const std::string& name, Scale& scale)
     {
-        const Dimension *d = s->getDimensionPtr(name);
+        DimensionPtr d = s->getDimension(name);
         if (d)
         {
              scale.m_scale = d->getNumericScale();

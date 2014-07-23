@@ -47,9 +47,9 @@ public:
     KDIndex(PointBuffer& buf) : m_buf(buf), m_index(0)
     {
         const Schema& s = m_buf.getSchema();
-        m_dim[0] = s.getDimensionPtr("X");
-        m_dim[1] = s.getDimensionPtr("Y");
-        m_dim[2] = s.getDimensionPtr("Z");
+        m_dim[0] = s.getDimension("X");
+        m_dim[1] = s.getDimension("Y");
+        m_dim[2] = s.getDimension("Z");
         m_3d = (bool)m_dim[2];
     }
 
@@ -61,22 +61,22 @@ public:
 
     double kdtree_get_pt(const size_t idx, int dim) const
     {
-        return m_buf.getFieldAs<double>(*m_dim[dim], idx);
+        return m_buf.getFieldAs<double>(m_dim[dim], idx);
     }
 
     double kdtree_distance(const double *p1, const size_t idx_p2,
         size_t size) const
     {
-        double d0 = m_buf.getFieldAs<double>(*m_dim[0], idx_p2) -
-            m_buf.getFieldAs<double>(*m_dim[0], size - 1);
-        double d1 = m_buf.getFieldAs<double>(*m_dim[1], idx_p2) -
-            m_buf.getFieldAs<double>(*m_dim[1], size - 1);
+        double d0 = m_buf.getFieldAs<double>(m_dim[0], idx_p2) -
+            m_buf.getFieldAs<double>(m_dim[0], size - 1);
+        double d1 = m_buf.getFieldAs<double>(m_dim[1], idx_p2) -
+            m_buf.getFieldAs<double>(m_dim[1], size - 1);
 
         double output(d0 * d0 + d1 * d1);
         if (m_3d && m_dim[2])
         {
-            double d2 = m_buf.getFieldAs<double>(*m_dim[2], idx_p2) -
-                m_buf.getFieldAs<double>(*m_dim[2], size - 1);
+            double d2 = m_buf.getFieldAs<double>(m_dim[2], idx_p2) -
+                m_buf.getFieldAs<double>(m_dim[2], size - 1);
             output += d2 * d2;
         }
         return output;
@@ -106,7 +106,7 @@ public:
     
 private:
     PointBuffer& m_buf;
-    const Dimension* m_dim[3];
+    DimensionPtr m_dim[3];
     bool m_3d;
 
     typedef nanoflann::KDTreeSingleIndexAdaptor<

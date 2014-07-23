@@ -95,9 +95,7 @@ private:
     virtual void processOptions(const Options&);
 
     void putStringRepresentation(PointBuffer const& data,
-                                        Dimension const& d,
-                                        std::size_t pointIndex,
-                                        std::ostream& strm);
+        DimensionPtr d, std::size_t pointIndex, std::ostream& strm);
 
     void WriteHeader(pdal::Schema const& schema);
     

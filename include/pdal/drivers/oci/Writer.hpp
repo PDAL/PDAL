@@ -160,10 +160,10 @@ private:
     uint32_t m_chunkCount;
     uint32_t m_capacity;
     bool m_streamChunks;
-    schema::Orientation m_orientation;
+    Orientation::Enum m_orientation;
     std::string m_connSpec;
 
-    std::vector<Dimension> m_dims;
+    DimensionList m_dims;
 };
 
 } // namespace oci

@@ -57,5 +57,15 @@ enum LogLevel
     logDEBUG5
 };
 
+namespace Orientation
+{
+enum Enum
+{
+    PointMajor,
+    DimensionMajor
+};
+
+}
+
 } // namespace pdal
 

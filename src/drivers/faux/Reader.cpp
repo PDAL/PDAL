@@ -132,10 +132,10 @@ FauxSeqIterator::FauxSeqIterator(const Bounds<double>& bounds, Schema *schema,
     m_minZ = ranges[2].getMinimum();
     m_maxZ = ranges[2].getMaximum();
 
-    m_dimX = schema->getDimensionPtr("X", "drivers.faux.reader");
-    m_dimY = schema->getDimensionPtr("Y", "drivers.faux.reader");
-    m_dimZ = schema->getDimensionPtr("Z", "drivers.faux.reader");
-    m_dimTime = schema->getDimensionPtr("Time", "drivers.faux.reader");
+    m_dimX = schema->getDimension("X", "drivers.faux.reader");
+    m_dimY = schema->getDimension("Y", "drivers.faux.reader");
+    m_dimZ = schema->getDimension("Z", "drivers.faux.reader");
+    m_dimTime = schema->getDimension("Time", "drivers.faux.reader");
 }
 
 
@@ -175,13 +175,13 @@ point_count_t FauxSeqIterator::readImpl(PointBuffer& buf, point_count_t count)
                 break;
         }
 
-        buf.setField(*m_dimX, idx, x);
-        buf.setField(*m_dimY, idx, y);
-        buf.setField(*m_dimZ, idx, z);
-        buf.setField(*m_dimTime, idx, m_time++);
+        buf.setField(m_dimX, idx, x);
+        buf.setField(m_dimY, idx, y);
+        buf.setField(m_dimZ, idx, z);
+        buf.setField(m_dimTime, idx, m_time++);
     }
     return count;
 }
 
+} // namespace pdal
 
-} // pdal

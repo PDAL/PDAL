@@ -43,8 +43,10 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/erase.hpp>
-#include <boost/uuid/uuid_io.hpp>
 #include <boost/property_tree/xml_parser.hpp>
+#include <boost/uuid/string_generator.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
 
 #include <string.h>
 #include <stdlib.h>
@@ -488,16 +490,7 @@ void Reader::Load()
         // Read off orientation setting
         if (boost::equals((const char*)dimension->name, "orientation"))
         {
-            xmlChar* n = xmlNodeListGetString(doc, dimension->children, 1);
-            if (!n) throw schema_loading_error("Unable to fetch orientation!");
-            std::string orientation = std::string((const char*)n);
-            xmlFree(n);
-            
-            if (boost::iequals(orientation, "dimension"))
-                m_schema.setOrientation(schema::DIMENSION_INTERLEAVED);
-            else
-                m_schema.setOrientation(schema::POINT_INTERLEAVED);
-            
+            //ABELL - No longer used.
             dimension = dimension->next;
             continue;
         }
@@ -665,11 +658,6 @@ void Reader::Load()
         Dimension d(name, interp, size, description);
         if (uuid.size())
             d.setUUID(uuid);
-        if (parent_uuid.size())
-        {
-            boost::uuids::string_generator gen;
-            d.setParent(gen(parent_uuid));
-        }
         if (! Utils::compare_distance(scale, 0.0))
         {
             d.setNumericScale(scale);
@@ -678,16 +666,6 @@ void Reader::Load()
         {
             d.setNumericOffset(offset);
         }
-        if (! Utils::compare_distance(minimum, 0.0))
-        {
-            d.setMinimum(minimum);
-        }
-        if (! Utils::compare_distance(maximum, 0.0))
-        {
-            d.setMaximum(maximum);
-        }
-
-        d.setPosition(position);
 
         if (d.getUUID() == boost::uuids::nil_uuid())
         {
@@ -768,14 +746,6 @@ void Writer::write(TextWriterPtr writer)
         xmlTextWriterEndElement(w);
     }
     
-    std::ostringstream orientation;
-    if (m_schema.getOrientation() == schema::POINT_INTERLEAVED)
-        orientation << "point";
-    if (m_schema.getOrientation() == schema::DIMENSION_INTERLEAVED)
-        orientation << "dimension";
-    xmlTextWriterWriteElementNS(w, (const xmlChar*) "pc", (const xmlChar*) "orientation", NULL, (const xmlChar*) orientation.str().c_str());
-    
-
     xmlTextWriterEndElement(w);
     xmlTextWriterEndDocument(w);
 #endif
@@ -788,105 +758,82 @@ void Writer::writeSchema(TextWriterPtr writer)
 
     xmlTextWriterPtr w = static_cast<xmlTextWriterPtr>(writer.get());
 
-    schema::index_by_index const& dims = m_schema.getDimensions().get<schema::index>();
+    DimensionList dims = m_schema.getDimensions();
 
-    for (boost::uint32_t i = 0; i < dims.size(); i++)
+    int pos = 0;
+    for (auto di = dims.begin(); di != dims.end(); ++di, ++pos)
     {
-        Dimension const& dim = dims[i];
-        xmlTextWriterStartElementNS(w, (const xmlChar*) "pc", (const xmlChar*) "dimension", NULL);
+        DimensionPtr d = *di;
+
+        xmlTextWriterStartElementNS(w, (const xmlChar*)"pc",
+            (const xmlChar*)"dimension", NULL);
 
         std::ostringstream position;
-        position << i+1;
-        xmlTextWriterWriteElementNS(w, (const xmlChar*) "pc", (const xmlChar*) "position", NULL, (const xmlChar*) position.str().c_str());
+        position << (pos + 1);
+        xmlTextWriterWriteElementNS(w, (const xmlChar*)"pc",
+            (const xmlChar*)"position", NULL,
+            (const xmlChar*)position.str().c_str());
 
         std::ostringstream size;
-        size << dim.getByteSize();
-        xmlTextWriterWriteElementNS(w, (const xmlChar*) "pc", (const xmlChar*) "size", NULL, (const xmlChar*) size.str().c_str());
+        size << d->getByteSize();
+        xmlTextWriterWriteElementNS(w, (const xmlChar*)"pc",
+            (const xmlChar*)"size", NULL, (const xmlChar*)size.str().c_str());
 
-        std::ostringstream description;
-        description << dim.getDescription();
-        if (description.str().size())
-            xmlTextWriterWriteElementNS(w, (const xmlChar*) "pc", (const xmlChar*) "description", NULL, (const xmlChar*) description.str().c_str());
+        std::string description = d->getDescription();
+        if (description.size())
+            xmlTextWriterWriteElementNS(w, (const xmlChar*)"pc",
+                (const xmlChar*)"description", NULL,
+                (const xmlChar*)description.c_str());
 
-        std::ostringstream name;
-        name << dim.getName();
-        if (name.str().size())
-            xmlTextWriterWriteElementNS(w, (const xmlChar*) "pc", (const xmlChar*) "name", NULL, (const xmlChar*) name.str().c_str());
+        std::string name = d->getName();;
+        if (name.size())
+            xmlTextWriterWriteElementNS(w, (const xmlChar*)"pc",
+                (const xmlChar*)"name", NULL, (const xmlChar*)name.c_str());
 
-        xmlTextWriterWriteElementNS(w, (const xmlChar*) "pc", (const xmlChar*) "interpretation", NULL, (const xmlChar*) dim.getInterpretationName().c_str());
+        xmlTextWriterWriteElementNS(w, (const xmlChar*)"pc",
+            (const xmlChar*)"interpretation", NULL,
+            (const xmlChar*) d->getInterpretationName().c_str());
 
-        double minimum = dim.getMinimum();
-        if (!Utils::compare_distance<double>(minimum, 0.0))
-        {
-            std::ostringstream mn;
-            mn.setf(std::ios_base::fixed, std::ios_base::floatfield);
-            mn.precision(12);
-            mn << minimum;
-            xmlTextWriterStartElementNS(w, (const xmlChar*) "pc", (const xmlChar*) "minimum", NULL);
-
-            xmlTextWriterWriteAttributeNS(w, (const xmlChar*) "pc", (const xmlChar*) "units", NULL, (const xmlChar*) "double");
-            xmlTextWriterWriteAttributeNS(w, (const xmlChar*) "pc", (const xmlChar*) "value", NULL, (const xmlChar*) mn.str().c_str());
-            xmlTextWriterEndElement(w);
-        }
-
-
-        double maximum = dim.getMaximum();
-        if (!Utils::compare_distance<double>(minimum, 0.0))
-        {
-            std::ostringstream mn;
-            mn.setf(std::ios_base::fixed, std::ios_base::floatfield);
-            mn.precision(12);
-            mn << maximum;
-            xmlTextWriterStartElementNS(w, (const xmlChar*) "pc", (const xmlChar*) "maximum", NULL);
-
-            xmlTextWriterWriteAttributeNS(w, (const xmlChar*) "pc", (const xmlChar*) "units", NULL, (const xmlChar*) "double");
-            xmlTextWriterWriteAttributeNS(w, (const xmlChar*) "pc", (const xmlChar*) "value", NULL, (const xmlChar*) mn.str().c_str());
-            xmlTextWriterEndElement(w);
-
-        }
-
-        double scale = dim.getNumericScale();
+        double scale = d->getNumericScale();
         if (!Utils::compare_distance<double>(scale, 0.0))
         {
             std::ostringstream out;
             out.setf(std::ios_base::fixed, std::ios_base::floatfield);
             out.precision(14);
             out << scale;
-            xmlTextWriterWriteElementNS(w, (const xmlChar*) "pc", (const xmlChar*) "scale", NULL, (const xmlChar*) out.str().c_str());
-
+            xmlTextWriterWriteElementNS(w, (const xmlChar*)"pc",
+                (const xmlChar*)"scale", NULL,
+                (const xmlChar*)out.str().c_str());
         }
 
-        double offset = dim.getNumericOffset();
+        double offset = d->getNumericOffset();
         if (!Utils::compare_distance<double>(offset, 0.0))
         {
             std::ostringstream out;
             out.setf(std::ios_base::fixed, std::ios_base::floatfield);
             out.precision(12);
             out << offset;
-            xmlTextWriterWriteElementNS(w, (const xmlChar*) "pc", (const xmlChar*) "offset", NULL, (const xmlChar*) out.str().c_str());
-
+            xmlTextWriterWriteElementNS(w, (const xmlChar*)"pc",
+                (const xmlChar*)"offset", NULL,
+                (const xmlChar*)out.str().c_str());
         }
 
-        xmlTextWriterWriteElementNS(w, (const xmlChar*) "pc", (const xmlChar*) "active", NULL, (const xmlChar*) "true");
+        xmlTextWriterWriteElementNS(w, (const xmlChar*)"pc",
+            (const xmlChar*)"active", NULL, (const xmlChar*)"true");
 
         std::ostringstream uuid;
-        uuid << dim.getUUID();
+        uuid << d->getUUID();
         if (uuid.str().size())
-            xmlTextWriterWriteElementNS(w, (const xmlChar*) "pc", (const xmlChar*) "uuid", NULL, (const xmlChar*) uuid.str().c_str());
-
-        std::ostringstream parent;
-        parent << dim.getParent();
-        if (parent.str().size())
-            xmlTextWriterWriteElementNS(w, (const xmlChar*) "pc", (const xmlChar*) "parent_uuid", NULL, (const xmlChar*) parent.str().c_str());
+            xmlTextWriterWriteElementNS(w, (const xmlChar*)"pc",
+                (const xmlChar*)"uuid", NULL,
+                (const xmlChar*)uuid.str().c_str());
 
         xmlTextWriterEndElement(w);
-
         xmlTextWriterFlush(w);
     }
 #endif
-
 }
 
+} // namespace schema
+} // namespace pdal
 
-}
-} // namespaces

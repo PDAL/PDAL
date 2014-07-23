@@ -33,6 +33,8 @@
 ****************************************************************************/
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <boost/uuid/random_generator.hpp>
+#include <boost/uuid/string_generator.hpp>
 
 #include <pdal/GlobalEnvironment.hpp>
 

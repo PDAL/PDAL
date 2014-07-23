@@ -41,85 +41,25 @@
 
 #include <pdal/Dimension.hpp>
 
-#include <pdal/GlobalEnvironment.hpp>
-
 #include <boost/algorithm/string.hpp>
-#include <boost/uuid/string_generator.hpp>
-#include <boost/uuid/random_generator.hpp>
 #include <boost/uuid/uuid_io.hpp>
-#include <map>
-
-#include <time.h>
-#include <cstdlib>
 
 namespace pdal
 {
 
-
-
-Dimension::Dimension(std::string const& name,
-                     dimension::Interpretation interpretation,
-                     dimension::size_type sizeInBytes,
-                     std::string description)
-    : m_name(name)
-    , m_flags(0)
-    , m_byteSize(sizeInBytes)
-    , m_description(description)
-    , m_min(0.0)
-    , m_max(0.0)
-    , m_numericScale(1.0)
-    , m_numericOffset(0.0)
-    , m_byteOffset(0)
-    , m_position(-1)
-    , m_interpretation(interpretation)
-    , m_namespace(std::string(""))
-    , m_parentDimensionID(boost::uuids::nil_uuid())
-
+Dimension::Dimension(const std::string& name,
+        dimension::Interpretation interpretation, size_t sizeInBytes,
+        std::string description) :
+    m_name(name), m_flags(0), m_byteSize(sizeInBytes),
+    m_description(description), m_numericScale(1.0), m_numericOffset(0.0),
+    m_interpretation(interpretation)
 {
     createUUID();
 
-    if (!m_name.size())
-    {
-        // Generate a random name from the time
-        ::time_t seconds;
-        ::time(&seconds);
-
-        std::ostringstream oss;
-        srand(static_cast<unsigned int>(seconds));
-        oss << "unnamed" << rand();
-        m_name = oss.str();
-
-    }
-
+    if (name.empty())
+        throw pdal_error("Dimensions must be named");
 }
 
-
-bool Dimension::operator==(const Dimension& other) const
-{
-    return (boost::iequals(m_name, other.m_name) &&
-        m_flags == other.m_flags &&
-        m_byteSize == other.m_byteSize &&
-        boost::iequals(m_description, other.m_description) &&
-        Utils::compare_approx(m_min, other.m_min,
-            std::numeric_limits<double>::min()) &&
-        Utils::compare_approx(m_max, other.m_max,
-            std::numeric_limits<double>::min()) &&
-        Utils::compare_approx(m_numericScale, other.m_numericScale,
-            std::numeric_limits<double>::min()) &&
-        Utils::compare_approx(m_numericOffset, other.m_numericOffset,
-            std::numeric_limits<double>::min()) &&
-        m_byteOffset == other.m_byteOffset &&
-        m_position == other.m_position &&
-        m_interpretation == other.m_interpretation &&
-        m_uuid == other.m_uuid &&
-        m_parentDimensionID == other.m_parentDimensionID);
-}
-
-
-bool Dimension::operator!=(const Dimension& other) const
-{
-    return !(*this==other);
-}
 
 boost::property_tree::ptree Dimension::toPTree() const
 {
@@ -127,54 +67,30 @@ boost::property_tree::ptree Dimension::toPTree() const
     ptree dim;
     dim.put("name", getName());
     dim.put("namespace", getNamespace());
-    dim.put("parent", getParent());
     dim.put("description", getDescription());
     dim.put("bytesize", getByteSize());
-
-    dim.put("minimum", getMinimum());
-    dim.put("maximum", getMaximum());
     dim.put("scale", getNumericScale());
     dim.put("offset", getNumericOffset());
-
     dim.put("scale", getNumericScale());
-
-    dim.put("position", getPosition());
-    dim.put("byteoffset", getByteOffset());
     dim.put("isIgnored", isIgnored());
     dim.put("interpretation", getInterpretationName());
     
     std::stringstream oss;
-
-    dimension::id t =  getUUID();
+    boost::uuids::uuid t = getUUID();
     oss << t;
-
     dim.put("uuid", oss.str());
+
     return dim;
 }
 
-void Dimension::setUUID(std::string const& id)
-{
-    m_uuid = GlobalEnvironment::get().generateUUID(id);
-}
-
-void Dimension::createUUID()
-{
-    m_uuid = GlobalEnvironment::get().generateUUID();
-}
 
 std::string Dimension::getInterpretationName() const
 {
     std::ostringstream type;
-    dimension::Interpretation t = getInterpretation();
-    boost::uint32_t bytesize = getByteSize();
+    uint32_t bytesize = getByteSize();
 
-    switch (t)
+    switch (getInterpretation())
     {
-        case dimension::RawByte:
-            if (bytesize == 1)
-                type << "uint8_t";
-            break;
-
         case dimension::SignedInteger:
             if (bytesize == 1)
                 type << "int8_t";
@@ -209,9 +125,6 @@ std::string Dimension::getInterpretationName() const
                 type << "unknown";
             break;
 
-        case dimension::Pointer:
-            type << "pointer";
-            break;
         case dimension::Undefined:
             type << "unknown";
             break;
@@ -267,6 +180,7 @@ Dimension::getInterpretation(std::string const& interpretation)
     return dimension::Undefined;
 }
 
+
 std::ostream& operator<<(std::ostream& os, pdal::Dimension const& d)
 {
     using boost::property_tree::ptree;
@@ -303,5 +217,5 @@ std::ostream& operator<<(std::ostream& os, pdal::Dimension const& d)
     return os;
 }
 
-
 } // namespace pdal
+

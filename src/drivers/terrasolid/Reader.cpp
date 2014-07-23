@@ -47,20 +47,20 @@ namespace terrasolid
 
 PointDimensions::PointDimensions(const Schema& schema, std::string const& ns)
 {
-    X = schema.getDimensionPtr("X", ns);
-    Y = schema.getDimensionPtr("Y", ns);
-    Z = schema.getDimensionPtr("Z", ns);
-    Classification = schema.getDimensionPtr("Classification", ns);
-    PointSourceId = schema.getDimensionPtr("PointSourceId", ns);
-    ReturnNumber = schema.getDimensionPtr("ReturnNumber", ns);
-    Intensity = schema.getDimensionPtr("Intensity", ns);
-    Mark = schema.getDimensionPtr("Mark", ns);
-    Flag = schema.getDimensionPtr("Flag", ns);
-    Time = schema.getDimensionPtr("Time", ns);
-    Red = schema.getDimensionPtr("Red", ns);
-    Green = schema.getDimensionPtr("Green", ns);
-    Blue = schema.getDimensionPtr("Blue", ns);
-    Alpha = schema.getDimensionPtr("Alpha", ns);
+    X = schema.getDimension("X", ns);
+    Y = schema.getDimension("Y", ns);
+    Z = schema.getDimension("Z", ns);
+    Classification = schema.getDimension("Classification", ns);
+    PointSourceId = schema.getDimension("PointSourceId", ns);
+    ReturnNumber = schema.getDimension("ReturnNumber", ns);
+    Intensity = schema.getDimension("Intensity", ns);
+    Mark = schema.getDimension("Mark", ns);
+    Flag = schema.getDimension("Flag", ns);
+    Time = schema.getDimension("Time", ns);
+    Red = schema.getDimension("Red", ns);
+    Green = schema.getDimension("Green", ns);
+    Blue = schema.getDimension("Blue", ns);
+    Alpha = schema.getDimension("Alpha", ns);
 }
 
 
@@ -137,32 +137,39 @@ std::string Reader::getFileName() const
 
 void Reader::buildSchema(Schema *s)
 {
-    Schema dimensions(getDefaultDimensions());
+    std::vector<Dimension> dims = getDefaultDimensions();
+    std::map<std::string, Dimension> dimMap;
+    for (auto di = dims.begin(); di != dims.end(); ++di)
+        dimMap.insert(std::make_pair(di->getName(), *di));
 
     double xyz_scale = 1/static_cast<double>(m_header->Units);
-    Dimension x = dimensions.getDimension("X");
+    Dimension& x = dimMap["X"];
     x.setNumericScale(xyz_scale);
     x.setNumericOffset(-m_header->OrgX);
 
-    Dimension y = dimensions.getDimension("Y");
+    Dimension& y = dimMap["Y"];
     y.setNumericScale(xyz_scale);
     y.setNumericOffset(-m_header->OrgY);
 
-    Dimension z = dimensions.getDimension("Z");
+    Dimension& z = dimMap["Z"];
     z.setNumericScale(xyz_scale);
     z.setNumericOffset(-m_header->OrgZ);
 
     if (m_format == TERRASOLID_Format_1)
     {
-        s->appendDimension(dimensions.getDimension("Classification"));
+        s->appendDimension(dimMap["Classification"]);
 
         // Fetch PointSource ID Uint8 dimension by UUID because dimensions
         // has two "PointSourceId" dimensions added.
-
+        //ABELL - Huh?
+        /**
         s->appendDimension(dimensions.getDimension(
-            boost::uuids::string_generator()("68c03b56-4248-4cca-ade5-33e90d5c5563")));
+            boost::uuids::string_generator()(
+                "68c03b56-4248-4cca-ade5-33e90d5c5563")));
+        **/
+        s->appendDimension(dimMap["PointSourceId"]);
 
-        s->appendDimension(dimensions.getDimension("Intensity"));
+        s->appendDimension(dimMap["Intensity"]);
         s->appendDimension(x);
         s->appendDimension(y);
         s->appendDimension(z);
@@ -174,42 +181,45 @@ void Reader::buildSchema(Schema *s)
         s->appendDimension(y);
         s->appendDimension(z);
 
-        s->appendDimension(dimensions.getDimension("Classification"));
+        s->appendDimension(dimMap["Classification"]);
 
+        //ABELL
+        /**
         s->appendDimension(dimensions.getDimension(
-            boost::uuids::string_generator()("465a9a7e-1e04-47b0-97b6-4f826411bc71")));
+            boost::uuids::string_generator()(
+                "465a9a7e-1e04-47b0-97b6-4f826411bc71")));
+        **/
+        s->appendDimension(dimMap["ReturnNumber"]);
 
-        s->appendDimension(dimensions.getDimension("Flag"));
-        s->appendDimension(dimensions.getDimension("Mark"));
+        s->appendDimension(dimMap["Flag"]);
+        s->appendDimension(dimMap["Mark"]);
 
+        //ABELL
+        /**
         s->appendDimension(dimensions.getDimension(
-            boost::uuids::string_generator()("7193bb9f-3ca2-491f-ba18-594321493789")));
+            boost::uuids::string_generator()(
+                "7193bb9f-3ca2-491f-ba18-594321493789")));
+        **/
+        s->appendDimension(dimMap["PointSourceId"]);
 
-        s->appendDimension(dimensions.getDimension("Intensity"));
+        s->appendDimension(dimMap["Intensity"]);
     }
 
     if (m_haveTime)
-    {
-        s->appendDimension(dimensions.getDimension("Time"));
-    }
+        s->appendDimension(dimMap["Time"]);
 
     if (m_haveColor)
     {
-        s->appendDimension(dimensions.getDimension("Red"));
-        s->appendDimension(dimensions.getDimension("Green"));
-        s->appendDimension(dimensions.getDimension("Blue"));
-        s->appendDimension(dimensions.getDimension("Alpha"));
+        s->appendDimension(dimMap["Red"]);
+        s->appendDimension(dimMap["Green"]);
+        s->appendDimension(dimMap["Blue"]);
+        s->appendDimension(dimMap["Alpha"]);
     }
 }
 
 
-Reader::~Reader()
-{
-
-    return;
-}
-
-boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, boost::uint64_t numPointsLeft) const
+uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream,
+    uint64_t numPointsLeft) const
 {
     // we must not read more points than are left in the file
     uint32_t numPoints =
@@ -221,119 +231,123 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
 
     const PointDimensions dimensions(schema, getName());
 
-    boost::uint8_t* buf = new boost::uint8_t[pointByteCount * numPoints];
+    uint8_t *buf = new uint8_t[pointByteCount * numPoints];
     Utils::read_n(buf, stream, pointByteCount * numPoints);
 
-    for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
+    for (uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
-        boost::uint8_t* p = buf + pointByteCount * pointIndex;
+        uint8_t* p = buf + pointByteCount * pointIndex;
 
         if (m_format == TERRASOLID_Format_1)
         {
-            boost::uint8_t classification = Utils::read_field<boost::uint8_t>(p);
+            uint8_t classification = Utils::read_field<uint8_t>(p);
             if (dimensions.Classification)
-                data.setField<boost::uint8_t>(*dimensions.Classification, pointIndex, classification);
+                data.setField(dimensions.Classification, pointIndex,
+                    classification);
 
-            boost::uint8_t flight_line = Utils::read_field<boost::uint8_t>(p);
+            uint8_t flight_line = Utils::read_field<uint8_t>(p);
             if (dimensions.PointSourceId)
-                data.setField<boost::uint8_t>(*dimensions.PointSourceId, pointIndex, flight_line);
+                data.setField(dimensions.PointSourceId, pointIndex,
+                    flight_line);
 
-            boost::uint16_t echo_int = Utils::read_field<boost::uint16_t>(p);
+            uint16_t echo_int = Utils::read_field<uint16_t>(p);
             if (dimensions.ReturnNumber)
-                data.setField<boost::uint16_t>(*dimensions.ReturnNumber, pointIndex, echo_int);
+                data.setField(dimensions.ReturnNumber, pointIndex, echo_int);
 
-            boost::int32_t x = Utils::read_field<boost::int32_t>(p);
+            int32_t x = Utils::read_field<int32_t>(p);
 
             if (dimensions.X)
-                data.setField<boost::int32_t>(*dimensions.X, pointIndex, x);
+                data.setField(dimensions.X, pointIndex, x);
 
-            boost::int32_t y = Utils::read_field<boost::int32_t>(p);
+            int32_t y = Utils::read_field<int32_t>(p);
             if (dimensions.Y)
-                data.setField<boost::int32_t>(*dimensions.Y, pointIndex, y);
+                data.setField(dimensions.Y, pointIndex, y);
 
-            boost::int32_t z = Utils::read_field<boost::int32_t>(p);
+            int32_t z = Utils::read_field<int32_t>(p);
             if (dimensions.Z)
-                data.setField<boost::int32_t>(*dimensions.Z, pointIndex, z);
+                data.setField(dimensions.Z, pointIndex, z);
 
-            boost::uint32_t time = Utils::read_field<boost::uint32_t>(p);
+            uint32_t time = Utils::read_field<uint32_t>(p);
             if (dimensions.Time)
-                data.setField<boost::uint32_t>(*dimensions.Time, pointIndex, time);
+                data.setField(dimensions.Time, pointIndex, time);
 
-            boost::uint8_t red = Utils::read_field<boost::uint8_t>(p);
+            uint8_t red = Utils::read_field<uint8_t>(p);
             if (dimensions.Red)
-                data.setField<boost::uint8_t>(*dimensions.Red, pointIndex, red);
+                data.setField(dimensions.Red, pointIndex, red);
 
-            boost::uint8_t green = Utils::read_field<boost::uint8_t>(p);
+            uint8_t green = Utils::read_field<uint8_t>(p);
             if (dimensions.Green)
-                data.setField<boost::uint8_t>(*dimensions.Green, pointIndex, green);
+                data.setField(dimensions.Green, pointIndex, green);
 
-            boost::uint8_t blue = Utils::read_field<boost::uint8_t>(p);
+            uint8_t blue = Utils::read_field<uint8_t>(p);
             if (dimensions.Blue)
-                data.setField<boost::uint8_t>(*dimensions.Blue, pointIndex,  blue);
+                data.setField<uint8_t>(dimensions.Blue, pointIndex,  blue);
 
-            boost::uint8_t alpha = Utils::read_field<boost::uint8_t>(p);
+            uint8_t alpha = Utils::read_field<uint8_t>(p);
             if (dimensions.Alpha)
-                data.setField<boost::uint8_t>(*dimensions.Alpha, pointIndex,  alpha);
+                data.setField(dimensions.Alpha, pointIndex,  alpha);
         }
 
         if (m_format == TERRASOLID_Format_2)
         {
-            boost::int32_t x = Utils::read_field<boost::int32_t>(p);
+            int32_t x = Utils::read_field<int32_t>(p);
             if (dimensions.X)
-                data.setField<boost::int32_t>(*dimensions.X, pointIndex, x);
+                data.setField(dimensions.X, pointIndex, x);
 
-            boost::int32_t y = Utils::read_field<boost::int32_t>(p);
+            int32_t y = Utils::read_field<int32_t>(p);
             if (dimensions.Y)
-                data.setField<boost::int32_t>(*dimensions.Y, pointIndex, y);
+                data.setField(dimensions.Y, pointIndex, y);
 
-            boost::int32_t z = Utils::read_field<boost::int32_t>(p);
+            int32_t z = Utils::read_field<int32_t>(p);
             if (dimensions.Z)
-                data.setField<boost::int32_t>(*dimensions.Z, pointIndex, z);
+                data.setField(dimensions.Z, pointIndex, z);
 
-            boost::uint8_t classification = Utils::read_field<boost::uint8_t>(p);
+            uint8_t classification = Utils::read_field<uint8_t>(p);
             if (dimensions.Classification)
-                data.setField<boost::uint8_t>(*dimensions.Classification, pointIndex, classification);
+                data.setField(dimensions.Classification, pointIndex,
+                    classification);
 
-            boost::uint8_t return_number = Utils::read_field<boost::uint8_t>(p);
+            uint8_t return_number = Utils::read_field<uint8_t>(p);
             if (dimensions.ReturnNumber)
-                data.setField<boost::uint8_t>(*dimensions.ReturnNumber, pointIndex, return_number);
+                data.setField(dimensions.ReturnNumber, pointIndex,
+                    return_number);
 
-            boost::uint8_t flag = Utils::read_field<boost::uint8_t>(p);
+            uint8_t flag = Utils::read_field<uint8_t>(p);
             if (dimensions.Flag)
-                data.setField<boost::uint8_t>(*dimensions.Flag, pointIndex, flag);
+                data.setField(dimensions.Flag, pointIndex, flag);
 
-            boost::uint8_t mark = Utils::read_field<boost::uint8_t>(p);
+            boost::uint8_t mark = Utils::read_field<uint8_t>(p);
             if (dimensions.Mark)
-                data.setField<boost::uint8_t>(*dimensions.Mark, pointIndex, mark);
+                data.setField(dimensions.Mark, pointIndex, mark);
 
-            boost::uint16_t flight_line = Utils::read_field<boost::uint16_t>(p);
+            uint16_t flight_line = Utils::read_field<uint16_t>(p);
             if (dimensions.PointSourceId)
-                data.setField<boost::uint16_t>(*dimensions.PointSourceId, pointIndex, flight_line);
+                data.setField(dimensions.PointSourceId, pointIndex,
+                    flight_line);
 
-            boost::uint16_t intensity = Utils::read_field<boost::uint16_t>(p);
+            uint16_t intensity = Utils::read_field<uint16_t>(p);
             if (dimensions.Intensity)
-                data.setField<boost::uint16_t>(*dimensions.Intensity, pointIndex, intensity);
+                data.setField(dimensions.Intensity, pointIndex, intensity);
 
-            boost::uint32_t time = Utils::read_field<boost::uint32_t>(p);
+            uint32_t time = Utils::read_field<uint32_t>(p);
             if (dimensions.Time)
-                data.setField<boost::uint32_t>(*dimensions.Time, pointIndex, time);
+                data.setField(dimensions.Time, pointIndex, time);
 
-            boost::uint8_t red = Utils::read_field<boost::uint8_t>(p);
+            uint8_t red = Utils::read_field<uint8_t>(p);
             if (dimensions.Red)
-                data.setField<boost::uint8_t>(*dimensions.Red, pointIndex, red);
+                data.setField(dimensions.Red, pointIndex, red);
 
-            boost::uint8_t green = Utils::read_field<boost::uint8_t>(p);
+            uint8_t green = Utils::read_field<uint8_t>(p);
             if (dimensions.Green)
-                data.setField<boost::uint8_t>(*dimensions.Green, pointIndex,  green);
+                data.setField(dimensions.Green, pointIndex,  green);
 
-            boost::uint8_t blue = Utils::read_field<boost::uint8_t>(p);
+            uint8_t blue = Utils::read_field<uint8_t>(p);
             if (dimensions.Blue)
-                data.setField<boost::uint8_t>(*dimensions.Blue, pointIndex, blue);
+                data.setField(dimensions.Blue, pointIndex, blue);
 
-            boost::uint8_t alpha = Utils::read_field<boost::uint8_t>(p);
+            uint8_t alpha = Utils::read_field<uint8_t>(p);
             if (dimensions.Alpha)
-                data.setField<boost::uint8_t>(*dimensions.Alpha, pointIndex, alpha);
-
+                data.setField(dimensions.Alpha, pointIndex, alpha);
         }
     }
 

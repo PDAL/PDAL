@@ -695,29 +695,29 @@ void Base::loadPoint(PointBuffer& data, PointDimensions *dimensions,
     uint8_t flight = (flags >> 7) & 0x01;
             
     if (dimensions->X)
-        data.setField(*dimensions->X, nextId, x);
+        data.setField(dimensions->X, nextId, x);
     if (dimensions->Y)
-        data.setField(*dimensions->Y, nextId, y);
+        data.setField(dimensions->Y, nextId, y);
     if (dimensions->Z)
-        data.setField(*dimensions->Z, nextId, z);
+        data.setField(dimensions->Z, nextId, z);
     if (dimensions->Intensity)
-        data.setField(*dimensions->Intensity, nextId, intensity);
+        data.setField(dimensions->Intensity, nextId, intensity);
     if (dimensions->ReturnNumber)
-        data.setField(*dimensions->ReturnNumber, nextId, returnNum);
+        data.setField(dimensions->ReturnNumber, nextId, returnNum);
     if (dimensions->NumberOfReturns)
-        data.setField(*dimensions->NumberOfReturns, nextId, numReturns);
+        data.setField(dimensions->NumberOfReturns, nextId, numReturns);
     if (dimensions->ScanDirectionFlag)
-        data.setField(*dimensions->ScanDirectionFlag, nextId, scanDirFlag);
+        data.setField(dimensions->ScanDirectionFlag, nextId, scanDirFlag);
     if (dimensions->EdgeOfFlightLine)
-        data.setField(*dimensions->EdgeOfFlightLine, nextId, flight);
+        data.setField(dimensions->EdgeOfFlightLine, nextId, flight);
     if (dimensions->Classification)
-        data.setField(*dimensions->Classification, nextId, classification);
+        data.setField(dimensions->Classification, nextId, classification);
     if (dimensions->ScanAngleRank)
-        data.setField(*dimensions->ScanAngleRank, nextId, scanAngleRank);
+        data.setField(dimensions->ScanAngleRank, nextId, scanAngleRank);
     if (dimensions->UserData)
-        data.setField(*dimensions->UserData, nextId, user);
+        data.setField(dimensions->UserData, nextId, user);
     if (dimensions->PointSourceId)
-        data.setField(*dimensions->PointSourceId, nextId, pointSourceId);
+        data.setField(dimensions->PointSourceId, nextId, pointSourceId);
 
     const LasHeader& h = m_reader.getLasHeader();
     if (h.hasTime())
@@ -725,7 +725,7 @@ void Base::loadPoint(PointBuffer& data, PointDimensions *dimensions,
         double time;
         istream >> time;
         if (dimensions->Time)
-            data.setField(*dimensions->Time, nextId, time);
+            data.setField(dimensions->Time, nextId, time);
     }
 
     if (h.hasColor())
@@ -733,11 +733,11 @@ void Base::loadPoint(PointBuffer& data, PointDimensions *dimensions,
         uint16_t red, green, blue;
         istream >> red >> green >> blue;
         if (dimensions->Red)
-            data.setField(*dimensions->Red, nextId, red);
+            data.setField(dimensions->Red, nextId, red);
         if (dimensions->Green)
-            data.setField(*dimensions->Green, nextId, green);
+            data.setField(dimensions->Green, nextId, green);
         if (dimensions->Blue)
-            data.setField(*dimensions->Blue, nextId, blue);
+            data.setField(dimensions->Blue, nextId, blue);
     }
 }
 

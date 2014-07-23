@@ -101,15 +101,14 @@ private:
     //
     const pdal::drivers::pgpointcloud::PgReader& m_reader;
     bool m_at_end;
-    // boost::uint64_t m_buffer_position;
 
     bool m_cursor;
     PGconn* m_session;
 
-    std::vector<Dimension *> m_dims;
-    schema::size_type m_point_size;
-    boost::uint32_t m_cur_row;
-    boost::uint32_t m_cur_nrows;
+    std::vector<DimensionPtr> m_dims;
+    size_t m_point_size;
+    uint32_t m_cur_row;
+    uint32_t m_cur_nrows;
     PGresult* m_cur_result;
     std::unique_ptr<Patch> m_patch;
 

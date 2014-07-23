@@ -32,6 +32,10 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <boost/property_tree/xml_parser.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <iostream>
+
 #include <pdal/drivers/las/Writer.hpp>
 
 #include "LasHeaderWriter.hpp"
@@ -44,8 +48,6 @@
 
 #include <pdal/Stage.hpp>
 #include <pdal/PointBuffer.hpp>
-#include <boost/property_tree/xml_parser.hpp>
-#include <iostream>
 
 namespace pdal
 {
@@ -512,9 +514,9 @@ void Writer::write(const PointBuffer& pointBuffer)
         boost::uint8_t* p = buf;
 
         // we always write the base fields
-        int32_t x = pointBuffer.getFieldAs<int32_t>(*dimensions.X, idx, false);
-        int32_t y = pointBuffer.getFieldAs<int32_t>(*dimensions.Y, idx, false);
-        int32_t z = pointBuffer.getFieldAs<int32_t>(*dimensions.Z, idx, false);
+        int32_t x = pointBuffer.getFieldAs<int32_t>(dimensions.X, idx, false);
+        int32_t y = pointBuffer.getFieldAs<int32_t>(dimensions.Y, idx, false);
+        int32_t z = pointBuffer.getFieldAs<int32_t>(dimensions.Z, idx, false);
 
         Utils::write_field(p, x);
         Utils::write_field(p, y);
@@ -522,7 +524,7 @@ void Writer::write(const PointBuffer& pointBuffer)
 
         uint16_t intensity = 0;
         if (dimensions.Intensity)
-            intensity = pointBuffer.getFieldAs<uint16_t>(*dimensions.Intensity,
+            intensity = pointBuffer.getFieldAs<uint16_t>(dimensions.Intensity,
                 idx, false);
         Utils::write_field(p, intensity);
 
@@ -530,22 +532,22 @@ void Writer::write(const PointBuffer& pointBuffer)
         boost::uint8_t returnNumber(0);
         if (dimensions.ReturnNumber)
             returnNumber = pointBuffer.getFieldAs<uint8_t>(
-                *dimensions.ReturnNumber, idx, false);
+                dimensions.ReturnNumber, idx, false);
 
         boost::uint8_t numberOfReturns(0);
         if (dimensions.NumberOfReturns)
             numberOfReturns = pointBuffer.getFieldAs<uint8_t>(
-                *dimensions.NumberOfReturns, idx, false);
+                dimensions.NumberOfReturns, idx, false);
 
         boost::uint8_t scanDirectionFlag(0);
         if (dimensions.ScanDirectionFlag)
             scanDirectionFlag = pointBuffer.getFieldAs<boost::uint8_t>(
-                *dimensions.ScanDirectionFlag, idx, false);
+                dimensions.ScanDirectionFlag, idx, false);
 
         boost::uint8_t edgeOfFlightLine(0);
         if (dimensions.EdgeOfFlightLine)
             edgeOfFlightLine = pointBuffer.getFieldAs<boost::uint8_t>(
-                *dimensions.EdgeOfFlightLine, idx, false);
+                dimensions.EdgeOfFlightLine, idx, false);
 
         boost::uint8_t bits = returnNumber | (numberOfReturns<<3) |
             (scanDirectionFlag << 6) | (edgeOfFlightLine << 7);
@@ -554,33 +556,32 @@ void Writer::write(const PointBuffer& pointBuffer)
         uint8_t classification = 0;
         if (dimensions.Classification)
             classification = pointBuffer.getFieldAs<uint8_t>(
-                *dimensions.Classification, idx, false);
+                dimensions.Classification, idx, false);
         Utils::write_field(p, classification);
 
         int8_t scanAngleRank = 0;
         if (dimensions.ScanAngleRank)
             scanAngleRank = pointBuffer.getFieldAs<int8_t>(
-                *dimensions.ScanAngleRank, idx, false);
+                dimensions.ScanAngleRank, idx, false);
         Utils::write_field(p, scanAngleRank);
 
         uint8_t userData = 0;
         if (dimensions.UserData)
             userData = pointBuffer.getFieldAs<uint8_t>(
-                *dimensions.UserData, idx, false);
+                dimensions.UserData, idx, false);
         Utils::write_field(p, userData);
 
         uint16_t pointSourceId = 0;
         if (dimensions.PointSourceId)
             pointSourceId = pointBuffer.getFieldAs<uint16_t>(
-                *dimensions.PointSourceId, idx, false);
+                dimensions.PointSourceId, idx, false);
         Utils::write_field(p, pointSourceId);
 
         if (hasTime)
         {
             double t = 0.0;
             if (dimensions.Time)
-                t = pointBuffer.getFieldAs<double>(
-                    *dimensions.Time, idx, false);
+                t = pointBuffer.getFieldAs<double>(dimensions.Time, idx, false);
             Utils::write_field(p, t);
         }
 
@@ -591,13 +592,13 @@ void Writer::write(const PointBuffer& pointBuffer)
             uint16_t blue = 0;
             if (dimensions.Red)
                 red = pointBuffer.getFieldAs<uint16_t>(
-                    *dimensions.Red, idx, false);
+                    dimensions.Red, idx, false);
             if (dimensions.Green)
                 green = pointBuffer.getFieldAs<uint16_t>(
-                    *dimensions.Green, idx, false);
+                    dimensions.Green, idx, false);
             if (dimensions.Blue)
                 blue = pointBuffer.getFieldAs<uint16_t>(
-                    *dimensions.Blue, idx, false);
+                    dimensions.Blue, idx, false);
 
             Utils::write_field(p, red);
             Utils::write_field(p, green);
@@ -631,9 +632,9 @@ void Writer::write(const PointBuffer& pointBuffer)
 #endif
         ++numValidPoints;
 
-        double xValue = pointBuffer.getFieldAs<double>(*dimensions.X, idx);
-        double yValue = pointBuffer.getFieldAs<double>(*dimensions.Y, idx);
-        double zValue = pointBuffer.getFieldAs<double>(*dimensions.Z, idx);
+        double xValue = pointBuffer.getFieldAs<double>(dimensions.X, idx);
+        double yValue = pointBuffer.getFieldAs<double>(dimensions.Y, idx);
+        double zValue = pointBuffer.getFieldAs<double>(dimensions.Z, idx);
         m_summaryData.addPoint(xValue, yValue, zValue, returnNumber);
 
         // Perhaps the interval should come out of the callback itself.

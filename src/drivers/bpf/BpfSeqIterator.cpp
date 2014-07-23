@@ -48,7 +48,7 @@
 namespace pdal
 {
 
-BpfSeqIterator::BpfSeqIterator(const std::vector<Dimension *>& dims,
+BpfSeqIterator::BpfSeqIterator(const std::vector<DimensionPtr>& dims,
     point_count_t numPoints, BpfFormat::Enum pointFormat, bool compression,
     ILeStream& stream) :
     m_dims(dims), m_numPoints(numPoints), m_pointFormat(pointFormat),
@@ -152,7 +152,7 @@ boost::uint32_t BpfSeqIterator::readPointMajor(PointBuffer& data,
             float f;
 
             m_stream >> f;
-            data.setField<float>(*m_dims[d], nextId, f);
+            data.setField(m_dims[d], nextId, f);
         }
         idx++;
         numRead++;
@@ -178,7 +178,7 @@ uint32_t BpfSeqIterator::readDimMajor(PointBuffer& data, uint32_t count)
             float f;
 
             m_stream >> f;
-            data.setField<float>(*m_dims[d], nextId, f);
+            data.setField(m_dims[d], nextId, f);
         }
     }
     m_index = idx;
@@ -213,12 +213,12 @@ point_count_t BpfSeqIterator::readByteMajor(PointBuffer& data,
 
                 if (b)
                 {
-                    u.f = data.getField<float>(*m_dims[d], nextId);
+                    u.f = data.getField<float>(m_dims[d], nextId);
                 }
                 uint8_t u8;
                 m_stream >> u8;
                 u.u32 |= ((uint32_t)u8 << (b * CHAR_BIT));
-                data.setField<float>(*m_dims[d], nextId, u.f);
+                data.setField(m_dims[d], nextId, u.f);
             }
         }
     }

@@ -150,19 +150,17 @@ std::vector<boost::tuple<std::string, std::string> >  Writer::getDimensionOrder(
         // from the map as we go. We'll then add what's left at the end based on
         // whether or not the user wants to do so.
         std::map<std::string, bool> all_names;
-        schema::index_by_index const& dims = schema.getDimensions().get<schema::index>();
-        schema::index_by_index::const_iterator iter = dims.begin();
-//        schema::index_by_name const& name_index = schema.getDimensions().get<schema::name>();
-        while (iter != dims.end())
+        std::vector<DimensionPtr> dims = schema.getDimensions();
+        for (auto di = dims.begin(); di != dims.end(); ++di)
         {
-            all_names.insert(std::pair<std::string, bool>(iter->getName(), true));
-            ++iter;
+            DimensionPtr d = *di;
+            all_names.insert(std::make_pair(d->getName(), true));
         }
 
         tokenizer parameters(dimension_order, separator);
         for (tokenizer::iterator t = parameters.begin(); t != parameters.end(); ++t)
         {
-            boost::optional<Dimension const&> d = schema.getDimensionOptional(*t);
+            DimensionPtr d = schema.getDimension(*t);
             if (d)
             {
                 if (boost::equals(d->getName(), *t))
@@ -198,14 +196,12 @@ std::vector<boost::tuple<std::string, std::string> >  Writer::getDimensionOrder(
     }
     else
     {
-        // No order was specified, just use the order of the schema
-        schema::index_by_index const& dims = schema.getDimensions().get<schema::index>();
-        schema::index_by_index::const_iterator iter = dims.begin();
-        while (iter != dims.end())
+        std::vector<DimensionPtr> dims = schema.getDimensions();
+        for (auto di = dims.begin(); di != dims.end(); ++di)
         {
-            if (!iter->isIgnored())
-                output.push_back(iter->getName());
-            ++iter;
+            DimensionPtr d = *di;
+            if (!d->isIgnored())
+                output.push_back(d->getName());
         }
     }
 
@@ -250,8 +246,8 @@ void Writer::WriteCSVHeader(pdal::Schema const& schema)
         std::string name = i->get<0>();
         std::string namespc = i->get<1>();
 
-        Dimension const& d = schema.getDimension(name, namespc);
-        if (d.isIgnored())
+        DimensionPtr d = schema.getDimension(name, namespc);
+        if (d->isIgnored())
         {
             i++;
             if (i == dimensions.end())
@@ -275,8 +271,8 @@ void Writer::WriteCSVHeader(pdal::Schema const& schema)
         if (bWroteProperty)
             *m_stream << delimiter;
 
-        Dimension const& d = schema.getDimension(iter->get<0>(), iter->get<1>());
-        if (d.isIgnored())
+        DimensionPtr d = schema.getDimension(iter->get<0>(), iter->get<1>());
+        if (d->isIgnored())
         {
             iter++;
             bWroteProperty = false;
@@ -300,15 +296,12 @@ void Writer::WriteCSVHeader(pdal::Schema const& schema)
 
 void Writer::WritePCDHeader(pdal::Schema const& schema)
 {
-
-    boost::optional<Dimension const&> dimRed = schema.getDimensionOptional("Red");
-    boost::optional<Dimension const&> dimGreen = schema.getDimensionOptional("Green");
-    boost::optional<Dimension const&> dimBlue = schema.getDimensionOptional("Blue");
+    DimensionPtr dimRed = schema.getDimension("Red");
+    DimensionPtr dimGreen = schema.getDimension("Green");
+    DimensionPtr dimBlue = schema.getDimension("Blue");
 
     bool bHaveColor(false);
-    bool bRGBPacked  = getOptions().getValueOrDefault<bool>("pack_rgb", true);
-
-
+    bool bRGBPacked = getOptions().getValueOrDefault<bool>("pack_rgb", true);
 
     if (dimRed && dimGreen && dimBlue)
         bHaveColor = true;
@@ -427,29 +420,25 @@ void Writer::WriteHeader(pdal::Schema const& schema)
 }
 
 void Writer::putStringRepresentation(PointBuffer const& data,
-                                     Dimension const& d,
-                                     std::size_t pointIndex,
-                                     std::ostream& output)
+    DimensionPtr d, std::size_t pointIndex, std::ostream& output)
 {
     std::streamsize old_precision = output.precision();
 
-    bool bHaveScaling = !Utils::compare_distance(d.getNumericScale(), 1.0);
+    bool bHaveScaling = !Utils::compare_distance(d->getNumericScale(), 1.0);
 
     // FIXME: Allow selective scaling of requested dimensions
     if (bHaveScaling)
     {
         output.setf(std::ios::fixed, std::ios::floatfield);
-        output.precision(Utils::getStreamPrecision(d.getNumericScale()));
+        output.precision(Utils::getStreamPrecision(d->getNumericScale()));
     }
-    switch (d.getInterpretation())
+    switch (d->getInterpretation())
     {
         case dimension::Float:
         case dimension::SignedInteger:
         case dimension::UnsignedInteger:
             output << data.getFieldAs<double>(d, pointIndex);
             break;
-        case dimension::RawByte:
-        case dimension::Pointer:    // stored as 64 bits, even on a 32-bit box
         case dimension::Undefined:
             break;
     }
@@ -489,8 +478,8 @@ void Writer::WriteCSVBuffer(const PointBuffer& data)
             if (!bFirstProperty)
                 *m_stream << delimiter;
 
-            Dimension const& d = schema.getDimension(iter->get<0>(), iter->get<1>());
-            if (d.isIgnored())
+            DimensionPtr d = schema.getDimension(iter->get<0>(), iter->get<1>());
+            if (d->isIgnored())
             {
                 iter++;
                 continue;
@@ -517,13 +506,13 @@ void Writer::WritePCDBuffer(const PointBuffer& data)
 {
     pdal::Schema const& schema = data.getSchema();
 
-    Dimension const& x = schema.getDimension("X");
-    Dimension const& y = schema.getDimension("Y");
-    Dimension const& z = schema.getDimension("Z");
+    DimensionPtr x = schema.getDimension("X");
+    DimensionPtr y = schema.getDimension("Y");
+    DimensionPtr z = schema.getDimension("Z");
 
-    boost::optional<Dimension const&> dimRed = schema.getDimensionOptional("Red");
-    boost::optional<Dimension const&> dimGreen = schema.getDimensionOptional("Green");
-    boost::optional<Dimension const&> dimBlue = schema.getDimensionOptional("Blue");
+    DimensionPtr dimRed = schema.getDimension("Red");
+    DimensionPtr dimGreen = schema.getDimension("Green");
+    DimensionPtr dimBlue = schema.getDimension("Blue");
 
     bool bHaveColor(false);
     if (dimRed && dimGreen && dimBlue)
@@ -546,22 +535,22 @@ void Writer::WritePCDBuffer(const PointBuffer& data)
         {
             if (bRGBPacked)
             {
-                uint16_t r = data.getFieldAs<uint16_t>(*dimRed, idx, false);
-                uint16_t g = data.getFieldAs<uint16_t>(*dimGreen, idx, false);
-                uint16_t b = data.getFieldAs<uint16_t>(*dimBlue, idx, false);
+                uint16_t r = data.getFieldAs<uint16_t>(dimRed, idx, false);
+                uint16_t g = data.getFieldAs<uint16_t>(dimGreen, idx, false);
+                uint16_t b = data.getFieldAs<uint16_t>(dimBlue, idx, false);
                 int rgb = ((int)r) << 16 | ((int)g) << 8 | ((int)b);
                 m_stream->precision(8);
                 *m_stream << static_cast<float>(rgb);
             }
             else
             {
-                putStringRepresentation(data, *dimRed, idx, *m_stream);
+                putStringRepresentation(data, dimRed, idx, *m_stream);
                 *m_stream << " ";
 
-                putStringRepresentation(data, *dimGreen, idx, *m_stream);
+                putStringRepresentation(data, dimGreen, idx, *m_stream);
                 *m_stream << " ";
 
-                putStringRepresentation(data, *dimBlue, idx, *m_stream);
+                putStringRepresentation(data, dimBlue, idx, *m_stream);
                 *m_stream << " ";
             }
         }
@@ -578,17 +567,17 @@ void Writer::WriteGeoJSONBuffer(const PointBuffer& data)
     std::vector<boost::tuple<std::string, std::string> > ordering = getDimensionOrder(schema);
     std::vector<boost::tuple<std::string, std::string> >::const_iterator ord =  ordering.begin();
 
-    std::vector<Dimension const*> dimensions;
+    std::vector<DimensionPtr> dimensions;
 //    bool bFirstProperty(true);
     while (ord != ordering.end())
     {
-        Dimension const& d = schema.getDimension(ord->get<0>(), ord->get<1>());
-        dimensions.push_back(&d);
+        DimensionPtr d = schema.getDimension(ord->get<0>(), ord->get<1>());
+        dimensions.push_back(d);
         ord++;
     }
-    Dimension const& dimX = schema.getDimension("X");
-    Dimension const& dimY = schema.getDimension("Y");
-    Dimension const& dimZ = schema.getDimension("Z");
+    DimensionPtr dimX = schema.getDimension("X");
+    DimensionPtr dimY = schema.getDimension("Y");
+    DimensionPtr dimZ = schema.getDimension("Z");
 
     while (pointIndex != data.size())
     {
@@ -605,15 +594,15 @@ void Writer::WriteGeoJSONBuffer(const PointBuffer& data)
 
         *m_stream << "\"properties\": {";
 
-        std::vector<Dimension const* >::const_iterator iter =  dimensions.begin();
+        auto di = dimensions.begin();
 
         bool bFirstProperty(true);
-        while (iter != dimensions.end())
+        while (di != dimensions.end())
         {
-            Dimension const* d = *iter;
+            DimensionPtr d = *di;
             if (d->isIgnored())
             {
-                iter++;
+                di++;
                 continue;
             }
 
@@ -622,12 +611,11 @@ void Writer::WriteGeoJSONBuffer(const PointBuffer& data)
 
             *m_stream << "\"" << d->getName() << "\":";
 
-
             *m_stream << "\"";
-            putStringRepresentation(data, *d, pointIndex, *m_stream);
+            putStringRepresentation(data, d, pointIndex, *m_stream);
             *m_stream <<"\"";
 
-            iter++;
+            di++;
             bFirstProperty = false;
         }
 

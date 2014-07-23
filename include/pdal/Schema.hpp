@@ -39,66 +39,19 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#ifndef PDAL_SCHEMA_HPP_INCLUDED
-#define PDAL_SCHEMA_HPP_INCLUDED
+#pragma once
 
+#include <unordered_map>
 #include <vector>
-#include <map>
 
 #include <pdal/pdal_internal.hpp>
 #include <pdal/Dimension.hpp>
 #include <pdal/Metadata.hpp>
 
-#include <pdal/third/string_ref.hpp>
-
-#include <boost/multi_index_container.hpp>
-#include <boost/multi_index/member.hpp>
-#include <boost/multi_index/ordered_index.hpp>
-#include <boost/multi_index/hashed_index.hpp>
-#include <boost/multi_index/sequenced_index.hpp>
-#include <boost/multi_index/mem_fun.hpp>
-#include <boost/multi_index/random_access_index.hpp>
-#include <boost/functional/hash.hpp>
-
 namespace pdal
 {
 
-namespace schema
-{
-struct name {};
-struct position {};
-struct index {};
-struct uid {};
-
-typedef boost::multi_index::multi_index_container
-<
-    Dimension,
-    boost::multi_index::indexed_by
-    <
-        // sort by Dimension::operator<
-        boost::multi_index::ordered_non_unique<boost::multi_index::tag<position>,
-            boost::multi_index::identity<Dimension> >,
-
-        // Random access
-        boost::multi_index::random_access<boost::multi_index::tag<index> >,
-
-        // sort by less<string> on GetName
-        boost::multi_index::hashed_non_unique<boost::multi_index::tag<name>,
-            boost::multi_index::const_mem_fun<Dimension,std::string const&,&Dimension::getName> >,
-
-        // sort by less on UUID
-        boost::multi_index::hashed_non_unique<boost::multi_index::tag<uid>,
-            boost::multi_index::const_mem_fun<Dimension,dimension::id const&,&Dimension::getUUID> >
-    >
-> Map;
-
-typedef Map::index<name>::type index_by_name;
-typedef Map::index<position>::type index_by_position;
-typedef Map::index<index>::type index_by_index;
-typedef Map::index<uid>::type index_by_uid;
-
-typedef boost::uint32_t size_type;
-
+/**
 class PDAL_DLL DimensionMap
 {
 public:
@@ -113,34 +66,14 @@ private:
     std::size_t update();
     
 };
-
-
-enum Orientation
-{
-    POINT_INTERLEAVED = 1,
-    DIMENSION_INTERLEAVED = 2,
-    UNKNOWN_INTERLEAVED = 256
-};    
-
-enum CompressionType
-{
-    COMPRESSION_NONE = 0,
-    COMPRESSION_GHT = 1,
-    COMPRESSION_DIMENSIONAL = 2,
-    COMPRESSION_POINT = 4,
-    COMPRESSION_LASZIP = 8,
-    COMPRESSION_UNKNOWN = 256
-};
-
-
-}
+**/
 
 /// A pdal::Schema is a composition of pdal::Dimension instances that form
 /// a point cloud.
 class PDAL_DLL Schema
 {
+    friend class RawPtBuf;
 public:
-
 /// @name Constructors
     /// An empty constructor with no Dimension instances
     Schema();
@@ -148,6 +81,7 @@ public:
     /// construct an instance given the order and dimensions in the dimensions
     /// vector @param dimensions the list of dimensions (and their order) to
     /// use to construct the Schema
+/**
     Schema(std::vector<Dimension> const& dimensions);
 
     /// Copy constructor
@@ -155,6 +89,7 @@ public:
 
     /// Assignment constructor
     Schema& operator=(Schema const& rhs);
+**/
 
 /// @name Equality
     /// Equality
@@ -165,130 +100,21 @@ public:
 /// @name Dimension manipulation
     /// adds (copies) a Dimension instance to the Schema
     /// @param dim a Dimension that is copied and added to the end of the Schema
-    Dimension *appendDimension(Dimension const& dim);
+    void appendDimension(Dimension const& dim);
 
-    /*! overwrites an existing Dimension with the same name as dim
-        \param dim the Dimension instance that contains the name and namespace
-        to overwrite in the Schema.
-        \verbatim embed:rst
-        .. note::
-
-            If no namespace is given, the *first* dimension with a matching
-            :cpp:func:`pdal::Dimension::getName()` will be overwritten. To be
-            sure, have set the namespace of the pdal::Dimension using
-            :cpp:func:`pdal::Dimension::setNamespace()` beforehand.
-
-        \endverbatim
-    */
-    bool setDimension(Dimension const& dim);
-
-    /// @return the boost::multi_index map that contains the Dimension instances
-    schema::Map& getDimensions()
-    {
-        return m_index;
-    }
-
-    const schema::Map& getDimensions() const
-    {
-        return m_index;
-    }
+    DimensionPtr getDimension(const std::string& name) const;
+    DimensionPtr getDimension(const std::string& name,
+        const std::string& nsName) const;
+    DimensionPtr getDimension(int pos) const
+        { return m_dimPos[(size_t)pos]; }
+    DimensionList getDimensions() const
+        { return m_dimPos; }
+    DimensionList getDimensions(const std::string& nsName) const;
 
     /// @return  Number of dimensions in the schema.
-    size_t numDimensions() const
-        { return getDimensions().size(); }
+    size_t size() const
+        { return m_dimPos.size(); }
 
-/// @name Dimension access
-    /// @return a const& to a Dimension with the given name and namespace. If
-    /// no matching dimension is found, pdal::dimension_not_found is thrown.
-    /// @param name name to use when searching
-    /// @param ns namespace to use when searching. If none is given, the first
-    /// matching Dimension instance with name \b name is returned.
-    const Dimension& getDimension(pdal::string_ref name,
-                                  pdal::string_ref ns = string_ref()) const;
-
-    /// @return a const& to a Dimension with the given dimension::id. If
-    /// no matching dimension is found, pdal::dimension_not_found is thrown.
-    /// @param id id to use when searching
-    const Dimension& getDimension(dimension::id const& id) const;
-
-    /// @return a const& to Dimension with the given index. If the
-    /// index is out of range, pdal::dimension_not_found is thrown.
-    /// @param index position index to return.
-    const Dimension& getDimension(schema::size_type index) const;
-
-    /// @return A pointer to a Dimension with the given name and namespace.  If
-    /// no matching dimension is found, the null pointer is returned.  The
-    /// optional errorMsg parameter will be filled with a descriptive error
-    /// message in the case that the dimension cannot found.
-    /// @param name name to use when searching
-    /// @param ns namespace to use when searching. If none is given, the first
-    /// matching Dimension instance with name \b name is returned.
-    /// @param errorMsg optional location for storing error messages
-    const Dimension* getDimensionPtr(string_ref name,
-                                     string_ref ns = string_ref(),
-                                     std::string* errorMsg = 0) const;
-
-    Dimension *getDimensionPtr(string_ref name, string_ref ns = string_ref())
-    {
-        const Dimension *d =
-            const_cast<const Schema *>(this)->getDimensionPtr(name, ns);
-        return const_cast<Dimension *>(d);
-    }
-
-
-    Dimension *getDimensionPtr(schema::size_type t) const
-    {
-        const schema::index_by_index& idx = m_index.get<schema::index>();
-        return const_cast<Dimension *>(&(idx.at(t))); 
-    }
-
-    /// @return a boost::optional-wrapped const& to a Dimension with the
-    /// given name and namespace. If no matching dimension is found, the
-    /// optional will be empty.
-    /// @param name name to use when searching
-    /// @param ns namespace to use when searching. If none is given, the first
-    /// matching Dimension instance with name \b name is returned.
-    boost::optional<Dimension const&> getDimensionOptional(string_ref name,
-        string_ref ns=string_ref()) const;
-
-    /// @return a boost::optional-wrapped const& to a Dimension with the
-    /// given dimension::id.  If no matching dimension is found, the optional
-    /// will be empty.
-    /// @param id id to use when searching
-    boost::optional<Dimension const&>
-    getDimensionOptional(dimension::id const& id) const;
-
-    /// @return a boost::optional-wrapped const& to a Dimension with the given
-    /// index. If the index is out of range, the optional will be empty.
-    /// @param index position index to return.
-    boost::optional<Dimension const&>
-    getDimensionOptional(schema::size_type index) const;
-
-    /// @return the total cumulative byte size of all dimensions
-    inline schema::size_type const& getByteSize() const
-    {
-        return m_byteSize;
-    }
-
-    /// @return the number of dimensions in this Schema instance
-    inline schema::size_type size() const
-    {
-        return m_index.get<schema::name>().size();
-    }
-
-    inline schema::Orientation getOrientation() const
-    {
-        return m_orientation;
-    }
-
-    inline void setOrientation(schema::Orientation v)
-    {
-        m_orientation = v;
-    }
-    
-    /// @return a new schema with all ignored fields removed.
-    Schema pack() const;
-    
 /// @name Summary and serialization
     /// @return  a boost::property_tree representing the Schema
     /*!
@@ -306,8 +132,10 @@ public:
     boost::property_tree::ptree toPTree() const;
 
     /// @return a schema::DimensionMap instance that maps dimension names
+/**
     schema::DimensionMap* mapDimensions(Schema const& destination,
         bool bIgnoreNamespace=false) const;
+**/
 
     std::ostream& toRST(std::ostream& os) const;
     
@@ -330,10 +158,15 @@ public:
     
 /// @name Private Attributes
 private:
+    std::unordered_map<std::string, DimensionPtr> m_index;
+    std::unordered_map<std::string, DimensionPtr> m_fqIndex;
+    std::vector<DimensionPtr> m_dimPos;
+    //ABELL - make sure this gets set
+    size_t m_byteSize;
 
-    schema::size_type m_byteSize;
-    schema::Map m_index;
-    schema::Orientation m_orientation;
+    /// @return the total cumulative byte size of all dimensions
+    size_t getByteSize() const
+        { return m_byteSize; }
 };
 typedef std::shared_ptr<Schema> SchemaPtr;
 
@@ -341,4 +174,3 @@ PDAL_DLL std::ostream& operator<<(std::ostream& os, pdal::Schema const& d);
 
 } // namespace pdal
 
-#endif // PDAL_SCHEMA_HPP_INCLUDED

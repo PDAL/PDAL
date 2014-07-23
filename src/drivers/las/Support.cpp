@@ -49,13 +49,14 @@ PointDimensions::PointDimensions(const Schema& schema, std::string const& ns)
 
 
 #   define CACHE_DIM(x) \
-    x = schema.getDimensionPtr(#x, ns.c_str()); \
-    if (x && x->isIgnored()) x = 0;
+    x = schema.getDimension(#x, ns.c_str()); \
+    if (x && x->isIgnored()) \
+        x.reset();
     
     // don't ever wipe off ignored XYZ dims.
-    X = schema.getDimensionPtr("X", ns);
-    Y = schema.getDimensionPtr("Y", ns);
-    Z = schema.getDimensionPtr("Z", ns);
+    X = schema.getDimension("X", ns);
+    Y = schema.getDimension("Y", ns);
+    Z = schema.getDimension("Z", ns);
     
     CACHE_DIM(Intensity)
     CACHE_DIM(ReturnNumber)

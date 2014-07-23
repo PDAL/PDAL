@@ -166,14 +166,14 @@ Word #       Content
 
 */
 
+#include <algorithm>
+#include <map>
 
 #include <pdal/drivers/qfit/Reader.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/FileUtils.hpp>
 #include <pdal/Utils.hpp>
 
-
-#include <map>
 
 #ifdef PDAL_COMPILER_MSVC
 #  pragma warning(disable: 4127)  // conditional expression is constant
@@ -189,21 +189,21 @@ namespace qfit
 PointDimensions::PointDimensions(const Schema& schema, std::string const& ns)
 {
 
-    Time = &schema.getDimension("Time", ns);
+    Time = schema.getDimension("Time", ns);
 
-    X = &schema.getDimension("X", ns);
-    Y = &schema.getDimension("Y", ns);
-    Z = &schema.getDimension("Z", ns);
+    X = schema.getDimension("X", ns);
+    Y = schema.getDimension("Y", ns);
+    Z = schema.getDimension("Z", ns);
 
-    StartPulse = &schema.getDimension("StartPulse", ns);
-    ReflectedPulse = &schema.getDimension("ReflectedPulse", ns);
-    ScanAngleRank = &schema.getDimension("ScanAngleRank", ns);
-    Pitch = &schema.getDimension("Pitch", ns);
-    Roll = &schema.getDimension("Roll", ns);
+    StartPulse = schema.getDimension("StartPulse", ns);
+    ReflectedPulse = schema.getDimension("ReflectedPulse", ns);
+    ScanAngleRank = schema.getDimension("ScanAngleRank", ns);
+    Pitch = schema.getDimension("Pitch", ns);
+    Roll = schema.getDimension("Roll", ns);
 
     try
     {
-        GPSTime = &schema.getDimension("GPSTime", ns);
+        GPSTime = schema.getDimension("GPSTime", ns);
     }
     catch (pdal::dimension_not_found&)
     {
@@ -212,7 +212,7 @@ PointDimensions::PointDimensions(const Schema& schema, std::string const& ns)
 
     try
     {
-        PulseWidth = &schema.getDimension("PulseWidth", ns);
+        PulseWidth = schema.getDimension("PulseWidth", ns);
     }
     catch (pdal::dimension_not_found&)
     {
@@ -221,7 +221,7 @@ PointDimensions::PointDimensions(const Schema& schema, std::string const& ns)
 
     try
     {
-        PDOP = &schema.getDimension("PDOP", ns);
+        PDOP = schema.getDimension("PDOP", ns);
     }
     catch (pdal::dimension_not_found&)
     {
@@ -230,7 +230,7 @@ PointDimensions::PointDimensions(const Schema& schema, std::string const& ns)
 
     try
     {
-        PassiveSignal = &schema.getDimension("PassiveSignal", ns);
+        PassiveSignal = schema.getDimension("PassiveSignal", ns);
     }
     catch (pdal::dimension_not_found&)
     {
@@ -239,7 +239,7 @@ PointDimensions::PointDimensions(const Schema& schema, std::string const& ns)
 
     try
     {
-        PassiveY = &schema.getDimension("PassiveY", ns);
+        PassiveY = schema.getDimension("PassiveY", ns);
     }
     catch (pdal::dimension_not_found&)
     {
@@ -248,7 +248,7 @@ PointDimensions::PointDimensions(const Schema& schema, std::string const& ns)
 
     try
     {
-        PassiveX = &schema.getDimension("PassiveX", ns);
+        PassiveX = schema.getDimension("PassiveX", ns);
     }
     catch (pdal::dimension_not_found&)
     {
@@ -257,15 +257,12 @@ PointDimensions::PointDimensions(const Schema& schema, std::string const& ns)
 
     try
     {
-        PassiveZ = &schema.getDimension("PassiveZ", ns);
+        PassiveZ = schema.getDimension("PassiveZ", ns);
     }
     catch (pdal::dimension_not_found&)
     {
         PassiveZ = 0;
     }
-
-
-    return;
 }
 
 Reader::Reader(const Options& options)
@@ -326,7 +323,8 @@ Reader::Reader(const Options& options)
         QFIT_SWAP_BE_TO_LE(int4);
 
     if (int4 % 4 != 0)
-        throw qfit_error("Base QFIT format is not a multiple of 4, unrecognized format!");
+        throw qfit_error("Base QFIT format is not a multiple of 4, "
+            "unrecognized format!");
 
     m_size = int4;
 
@@ -413,9 +411,12 @@ Options Reader::getDefaultOptions()
 {
     Options options;
     Option filename("filename", "", "file to read from");
-    Option flip_coordinates("flip_coordinates", true, "Flip coordinates from 0-360 to -180-180");
-    Option convert_z_units("scale_z", 0.001f, "Z scale. Use 0.001 to go from mm to m");
-    Option little_endian("little_endian", false, "Are data in little endian format?");
+    Option flip_coordinates("flip_coordinates", true,
+        "Flip coordinates from 0-360 to -180-180");
+    Option convert_z_units("scale_z", 0.001f,
+        "Z scale. Use 0.001 to go from mm to m");
+    Option little_endian("little_endian", false,
+        "Are data in little endian format?");
     options.add(filename);
     options.add(flip_coordinates);
     options.add(convert_z_units);
@@ -431,37 +432,40 @@ std::string Reader::getFileName() const
 
 void Reader::buildSchema(Schema *s)
 {
-    Schema dimensions(getDefaultDimensions());
+    std::vector<Dimension> dims = getDefaultDimensions();
+    std::map<std::string, Dimension> dimMap;
+    for (auto di = dims.begin(); di != dims.end(); ++di)
+        dimMap.insert(std::make_pair(di->getName(), *di));
 
-    s->appendDimension(dimensions.getDimension("Time"));
-    s->appendDimension(dimensions.getDimension("Y"));
-    s->appendDimension(dimensions.getDimension("X"));
+    s->appendDimension(dimMap["Time"]);
+    s->appendDimension(dimMap["Y"]);
+    s->appendDimension(dimMap["X"]);
 
-    Dimension z = dimensions.getDimension("Z");
+    Dimension z = dimMap["Z"];
     z.setNumericScale(m_scale_z);
     s->appendDimension(z);
 
-    s->appendDimension(dimensions.getDimension("StartPulse"));
-    s->appendDimension(dimensions.getDimension("ReflectedPulse"));
-    s->appendDimension(dimensions.getDimension("ScanAngleRank"));
-    s->appendDimension(dimensions.getDimension("Pitch"));
-    s->appendDimension(dimensions.getDimension("Roll"));
+    s->appendDimension(dimMap["StartPulse"]);
+    s->appendDimension(dimMap["ReflectedPulse"]);
+    s->appendDimension(dimMap["ScanAngleRank"]);
+    s->appendDimension(dimMap["Pitch"]);
+    s->appendDimension(dimMap["Roll"]);
 
     if (m_format == QFIT_Format_12)
     {
-        s->appendDimension(dimensions.getDimension("PDOP"));
-        s->appendDimension(dimensions.getDimension("PulseWidth"));
+        s->appendDimension(dimMap["PDOP"]);
+        s->appendDimension(dimMap["PulseWidth"]);
     }
     else if (m_format == QFIT_Format_14)
     {
-        s->appendDimension(dimensions.getDimension("PassiveSignal"));
-        s->appendDimension(dimensions.getDimension("PassiveY"));
-        s->appendDimension(dimensions.getDimension("PassiveX"));
-        Dimension z = dimensions.getDimension("PassiveZ");
+        s->appendDimension(dimMap["PassiveSignal"]);
+        s->appendDimension(dimMap["PassiveY"]);
+        s->appendDimension(dimMap["PassiveX"]);
+        Dimension z = dimMap["PassiveZ"];
         z.setNumericScale(m_scale_z);
         s->appendDimension(z);
     }
-    s->appendDimension(dimensions.getDimension("GPSTime"));
+    s->appendDimension(dimMap["GPSTime"]);
 }
 
 
@@ -476,18 +480,15 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream,
     const int pointByteCount = getPointDataSize();
     const PointDimensions dimensions(schema, getName());
 
-    Dimension const* dimX = &schema.getDimension("X", getName());
-    Dimension const* dimPassiveX(0);
+    DimensionPtr dimX = schema.getDimension("X", getName());
+    DimensionPtr dimPassiveX;
     try
     {
-        dimPassiveX = &schema.getDimension("PassiveX", getName());
+        dimPassiveX = schema.getDimension("PassiveX", getName());
     }
     catch (pdal::dimension_not_found&)
-    {
-        dimPassiveX = 0;
-    }
-    boost::uint8_t* buf = new boost::uint8_t[pointByteCount * numPoints];
-
+    {}
+    uint8_t* buf = new uint8_t[pointByteCount * numPoints];
 
     if (!stream.good())
     {
@@ -500,30 +501,29 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream,
 
     Utils::read_n(buf, stream, pointByteCount * numPoints);
 
-    for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
+    for (uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
-        boost::uint8_t* p = buf + pointByteCount * pointIndex;
+        uint8_t* p = buf + pointByteCount * pointIndex;
 
         // always read the base fields
         {
 
-            boost::int32_t time = Utils::read_field<boost::int32_t>(p);
+            int32_t time = Utils::read_field<boost::int32_t>(p);
             if (!m_littleEndian)
                 QFIT_SWAP_BE_TO_LE(time);
 
             if (dimensions.Time)
-                data.setField<boost::int32_t>(*dimensions.Time, pointIndex, time);
+                data.setField(dimensions.Time, pointIndex, time);
 
-            boost::int32_t y = Utils::read_field<boost::int32_t>(p);
+            int32_t y = Utils::read_field<int32_t>(p);
             if (!m_littleEndian)
                 QFIT_SWAP_BE_TO_LE(y);
             if (dimensions.Y)
-                data.setField<boost::int32_t>(*dimensions.Y, pointIndex, y);
+                data.setField(dimensions.Y, pointIndex, y);
 
-            boost::int32_t x = Utils::read_field<boost::int32_t>(p);
+            int32_t x = Utils::read_field<int32_t>(p);
             if (!m_littleEndian)
                 QFIT_SWAP_BE_TO_LE(x);
-
 
             if (m_flip_x)
             {
@@ -532,86 +532,88 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream,
                     x = dimX->removeScaling(xd - 360);
             }
             if (dimensions.X)
-                data.setField<boost::int32_t>(*dimensions.X, pointIndex, x);
+                data.setField(dimensions.X, pointIndex, x);
 
-            boost::int32_t z = Utils::read_field<boost::int32_t>(p);
+            int32_t z = Utils::read_field<int32_t>(p);
             if (!m_littleEndian)
                 QFIT_SWAP_BE_TO_LE(z);
             if (dimensions.Z)
             {
                 double zd = dimensions.Z->applyScaling(z);
-                data.setFieldUnscaled(*dimensions.Z, pointIndex, zd);
+                data.setFieldUnscaled(dimensions.Z, pointIndex, zd);
             }
 
-            boost::int32_t start_pulse = Utils::read_field<boost::int32_t>(p);
+            int32_t start_pulse = Utils::read_field<int32_t>(p);
             if (!m_littleEndian)
                 QFIT_SWAP_BE_TO_LE(start_pulse);
             if (dimensions.StartPulse)
-                data.setField<boost::int32_t>(*dimensions.StartPulse, pointIndex, start_pulse);
+                data.setField(dimensions.StartPulse, pointIndex, start_pulse);
 
-            boost::int32_t reflected_pulse = Utils::read_field<boost::int32_t>(p);
+            boost::int32_t reflected_pulse = Utils::read_field<int32_t>(p);
             if (!m_littleEndian)
                 QFIT_SWAP_BE_TO_LE(reflected_pulse);
             if (dimensions.ReflectedPulse)
-                data.setField<boost::int32_t>(*dimensions.ReflectedPulse, pointIndex, reflected_pulse);
+                data.setField(dimensions.ReflectedPulse, pointIndex,
+                    reflected_pulse);
 
-            boost::int32_t scan_angle = Utils::read_field<boost::int32_t>(p);
+            int32_t scan_angle = Utils::read_field<int32_t>(p);
             if (!m_littleEndian)
                 QFIT_SWAP_BE_TO_LE(scan_angle);
             if (dimensions.ScanAngleRank)
-                data.setField<boost::int32_t>(*dimensions.ScanAngleRank, pointIndex, scan_angle);
+                data.setField<int32_t>(dimensions.ScanAngleRank, pointIndex,
+                    scan_angle);
 
-            boost::int32_t pitch = Utils::read_field<boost::int32_t>(p);
+            int32_t pitch = Utils::read_field<int32_t>(p);
             if (!m_littleEndian)
                 QFIT_SWAP_BE_TO_LE(pitch);
             if (dimensions.Pitch)
-                data.setField<boost::int32_t>(*dimensions.Pitch, pointIndex, pitch);
+                data.setField(dimensions.Pitch, pointIndex, pitch);
 
-            boost::int32_t roll = Utils::read_field<boost::int32_t>(p);
+            int32_t roll = Utils::read_field<int32_t>(p);
             if (!m_littleEndian)
                 QFIT_SWAP_BE_TO_LE(roll);
             if (dimensions.Roll)
-                data.setField<boost::int32_t>(*dimensions.Roll, pointIndex, roll);
-
+                data.setField(dimensions.Roll, pointIndex, roll);
         }
 
         if (m_format == QFIT_Format_12)
         {
-            boost::int32_t pdop = Utils::read_field<boost::int32_t>(p);
+            int32_t pdop = Utils::read_field<int32_t>(p);
             if (!m_littleEndian)
                 QFIT_SWAP_BE_TO_LE(pdop);
             if (dimensions.PDOP)
-                data.setField<boost::int32_t>(*dimensions.PDOP, pointIndex, pdop);
+                data.setField(dimensions.PDOP, pointIndex, pdop);
 
-            boost::int32_t pulse_width = Utils::read_field<boost::int32_t>(p);
+            int32_t pulse_width = Utils::read_field<int32_t>(p);
             if (!m_littleEndian)
                 QFIT_SWAP_BE_TO_LE(pulse_width);
             if (dimensions.PulseWidth)
-                data.setField<boost::int32_t>(*dimensions.PulseWidth, pointIndex, pulse_width);
+                data.setField(dimensions.PulseWidth, pointIndex, pulse_width);
 
-            boost::int32_t gpstime = Utils::read_field<boost::int32_t>(p);
+            int32_t gpstime = Utils::read_field<int32_t>(p);
             if (!m_littleEndian)
                 QFIT_SWAP_BE_TO_LE(gpstime);
             if (dimensions.GPSTime)
-                data.setField<boost::int32_t>(*dimensions.GPSTime, pointIndex, gpstime);
+                data.setField(dimensions.GPSTime, pointIndex, gpstime);
 
         }
 
         else if (m_format == QFIT_Format_14)
         {
-            boost::int32_t passive_signal = Utils::read_field<boost::int32_t>(p);
+            int32_t passive_signal = Utils::read_field<int32_t>(p);
             if (!m_littleEndian)
                 QFIT_SWAP_BE_TO_LE(passive_signal);
             if (dimensions.PassiveSignal)
-                data.setField<boost::int32_t>(*dimensions.PassiveSignal, pointIndex, passive_signal);
+                data.setField(dimensions.PassiveSignal, pointIndex,
+                    passive_signal);
 
-            boost::int32_t passive_y = Utils::read_field<boost::int32_t>(p);
+            int32_t passive_y = Utils::read_field<int32_t>(p);
             if (!m_littleEndian)
                 QFIT_SWAP_BE_TO_LE(passive_y);
             if (dimensions.PassiveY)
-                data.setField<boost::int32_t>(*dimensions.PassiveY, pointIndex, passive_y);
+                data.setField(dimensions.PassiveY, pointIndex, passive_y);
 
-            boost::int32_t passive_x = Utils::read_field<boost::int32_t>(p);
+            int32_t passive_x = Utils::read_field<int32_t>(p);
             if (!m_littleEndian)
                 QFIT_SWAP_BE_TO_LE(passive_x);
 
@@ -622,33 +624,30 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream,
                     passive_x = dimPassiveX->removeScaling(xd - 360);
             }
             if (dimensions.PassiveX)
-                data.setField<boost::int32_t>(*dimensions.PassiveX, pointIndex, passive_x);
+                data.setField(dimensions.PassiveX, pointIndex, passive_x);
 
-            boost::int32_t passive_z = Utils::read_field<boost::int32_t>(p);
+            int32_t passive_z = Utils::read_field<int32_t>(p);
             if (!m_littleEndian)
                 QFIT_SWAP_BE_TO_LE(passive_z);
             if (dimensions.PassiveZ)
-                data.setField<boost::int32_t>(*dimensions.PassiveZ, pointIndex, passive_z);
+                data.setField(dimensions.PassiveZ, pointIndex, passive_z);
 
-            boost::int32_t gpstime = Utils::read_field<boost::int32_t>(p);
+            int32_t gpstime = Utils::read_field<int32_t>(p);
             if (!m_littleEndian)
                 QFIT_SWAP_BE_TO_LE(gpstime);
             if (dimensions.GPSTime)
-                data.setField<boost::int32_t>(*dimensions.GPSTime, pointIndex, gpstime);
-
-
+                data.setField(dimensions.GPSTime, pointIndex, gpstime);
         }
         else
         {
-            boost::int32_t gpstime = Utils::read_field<boost::int32_t>(p);
+            int32_t gpstime = Utils::read_field<int32_t>(p);
             if (!m_littleEndian)
                 QFIT_SWAP_BE_TO_LE(gpstime);
             if (dimensions.GPSTime)
-                data.setField<boost::int32_t>(*dimensions.GPSTime, pointIndex, gpstime);
+                data.setField(dimensions.GPSTime, pointIndex, gpstime);
 
         }
     }
-
     delete[] buf;
 
     return numPoints;

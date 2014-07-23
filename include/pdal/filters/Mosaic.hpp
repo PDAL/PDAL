@@ -32,8 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_FILTERS_MOSAICFILTER_HPP
-#define INCLUDED_FILTERS_MOSAICFILTER_HPP
+#pragma once
 
 #include <vector>
 #include <map>
@@ -77,8 +76,6 @@ private:
 
 namespace iterators
 {
-    typedef boost::shared_ptr<schema::DimensionMap> DimensionMapPtr;
-    typedef std::map<int, DimensionMapPtr> DimensionMaps;
     typedef std::map<int, PointBufferPtr> PointBufferMap;
     
 namespace sequential
@@ -95,22 +92,20 @@ private:
     boost::uint64_t skipImpl(boost::uint64_t);
     boost::uint32_t readBufferImpl(PointBuffer&);
     bool atEndImpl() const;
-    DimensionMapPtr fetchDimensionMap(PointBuffer const& user_buffer,
-        PointBufferPtr stage_buffer);
+//    DimensionMapPtr fetchDimensionMap(PointBuffer const& user_buffer,
+//        PointBufferPtr stage_buffer);
     PointBufferPtr fetchPointBuffer(PointBuffer const& user_buffer);
-    DimensionMapPtr m_active_dimension;
-    DimensionMaps m_dimensions;
+//    DimensionMapPtr m_active_dimension;
+//    DimensionMaps m_dimensions;
 
     PointBufferMap m_buffers;
     LogPtr m_log;
     Options m_options;
 };
 
+} // namespace sequential
+} // namespace iterators
 
-}
-} // iterators::sequential
+} // namespace filters
+} // namespace pdal
 
-}
-} // namespaces
-
-#endif

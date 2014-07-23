@@ -39,17 +39,17 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#ifndef PDAL_DIMENSION_HPP_INCLUDED
-#define PDAL_DIMENSION_HPP_INCLUDED
+#pragma once
+
+#include <vector>
+
+#include <boost/property_tree/ptree.hpp>
+#include <boost/uuid/uuid.hpp>
 
 #include <pdal/pdal_internal.hpp>
 #include <pdal/Utils.hpp>
 
-#include <boost/property_tree/ptree.hpp>
-
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_generators.hpp>
-#include <boost/type_traits.hpp>
+#include <pdal/GlobalEnvironment.hpp>
 
 #include <limits>
 
@@ -64,29 +64,15 @@ namespace pdal
 namespace dimension
 {
 
-/// Explicit, 64-bit UUID for the Dimension. A random one is created 
-/// for each new Dimension instance, but it can be explicitly set if 
-/// desired.
-typedef boost::uuids::uuid id;
-
-
 /// Dimension flags to denote behaviors of the instance such as 
 /// whether to ignore the data or not. Currently, only IsIgnored is 
 /// used and respected to any degree by drivers such as 
 /// pdal::filters::InPlaceReprojection and pdal::drivers::oci::Writer.
 enum Flags
 {
-    Invalid   = 0x0,
-    IsAdded   = 0x1,
-    IsRead    = 0x2,
-    IsWritten = 0x4,
-    IsIgnored = 0x8
+    IsIgnored = 0x8,
+    ForceKeep = 0x10
 };
-
-/// Size type for Dimension. It can be negative, and a ``-1`` value 
-/// is used as an indicator of dimension position not being set.
-typedef boost::int32_t size_type;
-
 
 /// Interpretation for a Dimension denotes what *kind* of data type the 
 /// values stored in the dimension should be interpreted as. It can be used
@@ -95,15 +81,13 @@ typedef boost::int32_t size_type;
 /// values `uint32_t` or `int64_t`).
 enum Interpretation
 {
-    RawByte,
     SignedInteger,
     UnsignedInteger,
-    Pointer,
     Float,
     Undefined
 };
 
-} // dimension
+} // namespace dimension
 
 /*! 
     A Dimension is the description of a single data field in a
@@ -118,9 +102,14 @@ enum Interpretation
 class PDAL_DLL Dimension
 {
 public:
+    friend class Schema;
 
     /** @name Constructors
     */
+    Dimension() : m_flags(0), m_byteSize(4), m_numericScale(1.0),
+        m_numericOffset(0.0), m_interpretation(dimension::SignedInteger)
+        {}
+
     /// Base constructor for Dimension
     /// @param name the name to use for the dimension.
     /// Typically "X" or "Y" or "Interesting Scanner Attribute"
@@ -130,180 +119,74 @@ public:
     /// less-than-a-byte dimensions are allowed.
     /// @param description a string description of the dimension. (defaults
     /// to empty)
-    Dimension(std::string const& name,
-              dimension::Interpretation interpretation,
-              dimension::size_type sizeInBytes,
-              std::string description=std::string(""));
+    Dimension(const std::string& name, dimension::Interpretation interpretation,
+        size_t sizeInBytes, std::string description = std::string());
 
     /** @name Equality and comparisons operators
     */
     /// Equality
-    bool operator==(const Dimension& other) const;
+    bool operator==(const Dimension& other) const
+        { return m_uuid == other.m_uuid; }
     /// Inequality
-    bool operator!=(const Dimension& other) const;
+    bool operator!=(const Dimension& other) const
+        { return m_uuid != other.m_uuid; }
 
-    /// Less than. Determined by getPosition() for sorting.
     bool operator < (Dimension const& dim) const
     {
-        return m_position < dim.m_position;
+        return m_offset < dim.m_offset;
     }
 
     /** @name Attributes
     */
     /// @return the name of this dimension as given at construction time
     std::string const& getName() const
-    {
-        return m_name;
-    }
+        { return m_name; }
 
     void setInterpretation(dimension::Interpretation interp)
-    {
-        m_interpretation = interp;
-    }
+        { m_interpretation = interp; }
 
-    void setByteSize(dimension::size_type byteSize)
-    {
-        m_byteSize = byteSize;
-    }
+    void setByteSize(size_t byteSize)
+        { m_byteSize = byteSize; }
 
     /// @return the interpretation of this dimension at construction time
     dimension::Interpretation getInterpretation() const
-    {
-        return m_interpretation;
-    }
+        { return m_interpretation; }
 
     /// @return dimension attribute flags (isValid, isRead, isWritten,
     /// isIgnored, etc) composition of dimension::Flags
     boost::uint32_t getFlags() const
-    {
-        return m_flags;
-    }
+        { return m_flags; }
 
     /// sets the dimension attribute flags (isValid, isRead, etc) of
     /// dimension::Flags
     /// @param flags composited dimension::Flags
-    void setFlags(boost::uint32_t flags)
-    {
-        m_flags = flags;
-    }
+    void setFlags(uint32_t flags)
+        { m_flags = flags; }
 
     void setIgnored()
         { m_flags |= dimension::IsIgnored; }
 
-    /// @return is the dimension valid?
-    bool isValid() const
-    {
-        return (m_flags != dimension::Invalid);
-    }
-
-    /// @return should we read this dimension?
-    bool isRead() const
-    {
-        return (m_flags & dimension::IsRead);
-    }
-
-    /// @return should we write this dimension?
-    bool isWritten() const
-    {
-        return (m_flags & dimension::IsWritten);
-    }
-
+    //
     /// @return is this dimension ignored?
     bool isIgnored() const
-    {
-        return (m_flags & dimension::IsIgnored);
-    }
+        { return (m_flags & dimension::IsIgnored); }
+
+    bool forceKeep() const
+        { return (m_flags & dimension::ForceKeep); }
 
     /// @return Number of bytes required to serialize this dimension
-    dimension::size_type getByteSize() const
-    {
-        return m_byteSize;
-    }
+    size_t getByteSize() const
+       { return m_byteSize; }
 
     /// @return a string description of the dimension
     std::string getDescription() const
-    {
-        return m_description;
-    }
+        { return m_description; }
 
     /// sets the string description for the dimension. Overrides whatever was
     /// given in the constructor.
     /// @param v string to use to set value
     void setDescription(std::string const& v)
-    {
-        m_description = v;
-    }
-
-    /// @return the minimum value of this dimension as a double
-    double getMinimum() const
-    {
-        return m_min;
-    }
-
-    /*! Sets the minimum value of this dimension as a double.
-        \param max The minimum value for this dimension
-        \verbatim embed:rst
-        .. note::
-
-            The maximum and minimum values are simply data placeholders
-            and in most cases will be ``0.0``.
-        \endverbatim
-    */
-    void setMinimum(double min)
-    {
-        m_min = min;
-    }
-
-    /// @return the maximum value of this dimension as a double.
-    double getMaximum() const
-    {
-        return m_max;
-    }
-
-    /*! Sets the maximum value of this dimension as a double.
-        \param max The maximum value for this dimension
-        \verbatim embed:rst
-        .. note::
-
-            The maximum and minimum values are simply data placeholders
-            and in most cases will be ``0.0``.
-        \endverbatim
-    */
-    void setMaximum(double max)
-    {
-        m_max = max;
-    }
-
-
-    /// @return the byte offset of the Dimension instance within the
-    /// context of a Schema. Schema will set this value when
-    /// adding the Dimension to itself so as to not require calculating
-    /// it for every lookup.
-    std::size_t getByteOffset() const
-    {
-        return m_byteOffset;
-    }
-
-    /// sets the byte offset of the Dimension
-    /// @param v the value to set
-    void setByteOffset(std::size_t v)
-    {
-        m_byteOffset = v;
-    }
-
-    /// @return the position of the Dimension within a Schema.
-    /// If the instance is not in a Schema instance, this value is
-    /// initialized to -1.
-    dimension::size_type getPosition() const
-    {
-        return m_position;
-    }
-
-    /// Sets the position of the Dimension instance within a Schema
-    void setPosition(dimension::size_type v)
-    {
-        m_position = v;
-    }
+        { m_description = v; }
 
     /// @name Summary and serialization
     /// @return a boost::property_tree::ptree representation
@@ -315,58 +198,35 @@ public:
     /// @name Identification
     /// @return the dimension::id for the Dimension instance.
     /// This value is the nil UUID by default.
-    dimension::id const& getUUID() const
-    {
-        return m_uuid;
-    }
+    boost::uuids::uuid const& getUUID() const
+        { return m_uuid; }
 
     /// sets the dimension::id from a string representation of the UUID.
     /// @param id
-    void setUUID(std::string const& id);
+    void setUUID(std::string const& id)
+        { m_uuid = GlobalEnvironment::get().generateUUID(id); }
 
     /// sets the dimension::id from an existing dimension::id (copied)
-    void setUUID(dimension::id const& id)
-    {
-        m_uuid = id;
-    }
+    void setUUID(boost::uuids::uuid const& id)
+        { m_uuid = id; }
 
     /// creates and sets the dimension::id for the instance
-    void createUUID();
-
-    /// denotes the parent relationship of this instance to another
-    /// with a given dimension::id. By default, the parent of an instance 
-    /// is the nil uuid.
-    /// @param id the dimension::id of the parent dimension to this instance
-    void setParent(dimension::id const& id)
-    {
-        m_parentDimensionID = id;
-    }
-
-    /// @return the dimension::id of the parent dimension to this one.
-    dimension::id const& getParent() const
-    {
-        return m_parentDimensionID;
-    }
+    void createUUID()
+        { m_uuid = GlobalEnvironment::get().generateUUID(); }
 
     /// @name Namespaces
     /// sets the namespace for this instance
     /// @param name value to set. Typically this is a Stage::getName()
     void setNamespace(std::string const& name)
-    {
-        m_namespace = name;
-    }
+        { m_namespace = name; }
 
     /// @return the namespace for this instance
     std::string const& getNamespace() const
-    {
-        return m_namespace;
-    }
+        { return m_namespace; }
 
     /// @return the fully qualified (namespace.name) name for this instance.
     std::string getFQName() const
-    {
-        return m_namespace + "." + m_name;
-    }
+        { return m_namespace + "." + m_name; }
 
 /** @name Data Scaling
     Scale and offset of Dimension instances are available to describe
@@ -376,28 +236,20 @@ public:
     /// @return the numerical scale value for this dimension as a double. The
     /// default value is \b 1.0
     double getNumericScale() const
-    {
-        return m_numericScale;
-    }
+        { return m_numericScale; }
 
     /// Sets the numerical scale value for this dimension.
     inline void setNumericScale(double v)
-    {
-        m_numericScale = v;
-    }
+        { m_numericScale = v; }
 
     /// @return the numerical offset value for this dimension. The default
     /// value is \b 0.0.
     inline double getNumericOffset() const
-    {
-        return m_numericOffset;
-    }
+        { return m_numericOffset; }
 
     /// Sets the numerical offset value for this dimension.
     inline void setNumericOffset(double v)
-    {
-        m_numericOffset = v;
-    }
+        { m_numericOffset = v; }
     
     /// Applies the scale and offset values from the dimension to a the
     /// given value
@@ -410,14 +262,10 @@ public:
         \endverbatim
     */
     double applyScaling(double v) const
-    {
-        return v * m_numericScale + m_numericOffset;
-    }
+       { return v * m_numericScale + m_numericOffset; }
 
     double removeScaling(double v) const
-    {
-        return (v - m_numericOffset) / m_numericScale;
-    }
+       { return (v - m_numericOffset) / m_numericScale; }
 
     /// Removes the scale and offset values from an imprecise double value
     /// @param v The value to descale
@@ -454,8 +302,6 @@ public:
     {
         switch (getInterpretation())
         {
-        case dimension::RawByte:
-            return convert<T, uint8_t>(data);
         case dimension::SignedInteger:
             switch (getByteSize())
             {
@@ -500,8 +346,6 @@ public:
                     "for Float");
                 break;
             }
-        case dimension::Pointer:
-            break;
         default:
             throw buffer_error("Undefined interpretation for convert");
         }
@@ -511,30 +355,26 @@ public:
 /// @name Private Attributes
 private:
     std::string m_name;
-    boost::uint32_t m_flags;
-    dimension::size_type m_byteSize;
+    unsigned m_flags;
+    size_t m_byteSize;
     std::string m_description;
     double m_min;
     double m_max;
     double m_numericScale;
     double m_numericOffset;
-    dimension::size_type m_byteOffset;
-    dimension::size_type m_position;
     dimension::Interpretation m_interpretation;
-    dimension::id m_uuid;
+    boost::uuids::uuid m_uuid;
     std::string m_namespace;
-    dimension::id m_parentDimensionID;
+    int m_offset;
 };
-
+typedef std::shared_ptr<Dimension> DimensionPtr;
+typedef std::vector<DimensionPtr> DimensionList;
 
 PDAL_DLL std::ostream& operator<<(std::ostream& os, pdal::Dimension const& d);
 
 } // namespace pdal
 
-
 #ifdef PDAL_COMPILER_MSVC
 #  pragma warning(pop)
 #endif
 
-
-#endif // PDAL_DIMENSION_HPP_INCLUDED

@@ -138,7 +138,7 @@ typedef boost::shared_ptr<stats::Summary> SummaryPtr;
 
 struct DimPtrComparator
 {
-    bool operator ()(const Dimension *d1, const Dimension *d2) const
+    bool operator ()(DimensionPtr d1, DimensionPtr d2) const
         { return *d1 < *d2; }
 };
 

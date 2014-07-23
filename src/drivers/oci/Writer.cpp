@@ -76,7 +76,7 @@ Writer::Writer(const Options& options)
     , m_chunkCount(16)
     , m_capacity(0)
     , m_streamChunks(false)
-    , m_orientation(schema::POINT_INTERLEAVED)
+    , m_orientation(Orientation::PointMajor)
 {}
 
 Writer::~Writer()
@@ -602,8 +602,14 @@ void Writer::createPCEntry(Schema const& buffer_schema)
 
     s_geom << "))";
 
-    Schema schema(m_dims);
-    schema.setOrientation(m_orientation);
+    Schema schema;
+    for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
+    {
+        DimensionPtr d = *di;
+        schema.appendDimension(*d);
+    }
+//ABELL
+//    schema.setOrientation(m_orientation);
     std::string schemaData = Schema::to_xml(schema);
 
     oss << "declare\n"
@@ -773,8 +779,8 @@ void Writer::processOptions(const Options& options)
 
     bool dimInterleaved =
         options.getValueOrDefault<bool>("store_dimensional_orientation", false);
-    m_orientation = dimInterleaved ? schema::DIMENSION_INTERLEAVED :
-        schema::POINT_INTERLEAVED;
+    m_orientation = dimInterleaved ? Orientation::DimensionMajor :
+        Orientation::PointMajor;
     m_capacity = options.getValueOrThrow<uint32_t>("capacity");
     m_connSpec = options.getValueOrDefault<std::string>("connection", "");
 }
@@ -834,13 +840,14 @@ void Writer::ready(PointContext ctx)
     m_lastBlockId = 0;
     Schema *schema = ctx.schema();
     m_pointSize = 0;
-    for (schema::size_type i = 0; i < schema->numDimensions(); ++i)
+    DimensionList dims = schema->getDimensions();
+    for (auto di = dims.begin(); di != dims.end(); ++di)
     {
-        const Dimension& d = schema->getDimension(i);
-        if (!m_pack || !d.isIgnored())
+        DimensionPtr d = *di;
+        if (!m_pack || !d->isIgnored())
         {
             m_dims.push_back(d);
-            m_pointSize += d.getByteSize();
+            m_pointSize += d->getByteSize();
         }
     }
 }
@@ -937,27 +944,32 @@ void Writer::writeTile(PointBuffer const& buffer)
     char *pos = outbuf.get();
     m_callback->setTotal(buffer.size());
     m_callback->invoke(0);
-    if (m_orientation == schema::DIMENSION_INTERLEAVED)
+    if (m_orientation == Orientation::DimensionMajor)
     {
         size_t clicks = 0;
         size_t interrupt = m_dims.size() * 100;
-        for (size_t dim = 0; dim < m_dims.size(); ++dim)
+        for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
+        {
+            DimensionPtr d = *di;
             for (PointId id = 0; id < buffer.size(); ++id)
             {
-                buffer.getRawField(m_dims[dim], id, pos);
-                pos += m_dims[dim].getByteSize();
+                buffer.getRawField(d, id, pos);
+                pos += d->getByteSize();
                 if (clicks++ % interrupt == 0)
                     m_callback->invoke(clicks / m_dims.size());
             }
+        }
     }
-    else if (m_orientation == schema::POINT_INTERLEAVED)
+    else if (m_orientation == Orientation::PointMajor)
     {
         for (PointId id = 0; id < buffer.size(); ++id)
         {
-            for (size_t dim = 0; dim < m_dims.size(); ++dim)
+            for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
             {
-                buffer.getRawField(m_dims[dim], id, pos);
-                pos += m_dims[dim].getByteSize();
+                DimensionPtr d = *di;
+
+                buffer.getRawField(d, id, pos);
+                pos += d->getByteSize();
             }
             if (id % 100 == 0)
                 m_callback->invoke(id);

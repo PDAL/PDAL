@@ -40,6 +40,7 @@
 #include <pdal/PointContext.hpp>
 #include <pdal/Schema.hpp>
 
+#include <set>
 #include <vector>
 
 namespace pdal
@@ -49,16 +50,6 @@ namespace pdal
         typedef boost::uint64_t PointBufferByteSize;
     } // pointbuffer
 
-/*! 
-    \verbatim embed:rst
-    .. note::
-
-        The arrangement of PointBuffer's bytes might either be
-        point-interleaved or dimension-interleaved, with point-interleave being
-        the default organization.  If you are directly modifying a PointBuffer's
-        bytes, you must respect the :cpp:class:`pdal::pointbuffer::Orientation`. 
-    \endverbatim
-*/    
 class PDAL_DLL PointBuffer
 {
 public:
@@ -117,7 +108,7 @@ public:
         \endverbatim
     */
     template<class T>
-    T getField(Dimension const& dim, boost::uint32_t pointIndex) const;
+    T getField(DimensionPtr dim, uint32_t pointIndex) const;
 
     /*! fetch the value T for a given :cpp:class:`pdal::Dimension` dim at
         pointIndex `i`.
@@ -134,7 +125,7 @@ public:
         \endverbatim
     */
     template<class T>
-    T getFieldAs(Dimension const& dim, boost::uint32_t pointIndex,
+    T getFieldAs(DimensionPtr dim, boost::uint32_t pointIndex,
         bool applyScaling = true) const;
 
     /*! set the value T for a given  :cpp:class:`pdal::Dimension` dim
@@ -154,22 +145,21 @@ public:
         \endverbatim
     */
     template<typename T>
-    void setField(Dimension const& dim, PointId idx, T val);
+    void setField(const DimensionPtr dim, PointId idx, T val);
 
-    void setRawField(Dimension const& dim, PointId idx, const void *val)
+    void setRawField(DimensionPtr dim, PointId idx, const void *val)
     {
         setFieldInternal(dim, idx, val);
     }
 
-    void getRawField(const Dimension& dim, PointId idx, void *buf) const
+    void getRawField(DimensionPtr dim, PointId idx, void *buf) const
     {
         getFieldInternal(dim, idx, buf);
     }
 
-    void setFieldUnscaled(pdal::Dimension const& dim, uint32_t idx,
-        double val)
+    void setFieldUnscaled(DimensionPtr dim, uint32_t idx, double val)
     {
-        setField(dim, idx, dim.removeScaling(val));
+        setField(dim, idx, dim->removeScaling(val));
     }
 
     /** @name Serialization
@@ -217,17 +207,17 @@ protected:
 
 private:
     template<typename T_IN, typename T_OUT>
-    void convertAndSet(pdal::Dimension const& dim, PointId idx, T_IN in);
+    void convertAndSet(DimensionPtr dim, PointId idx, T_IN in);
 
-    inline void setFieldInternal(Dimension const& dim, PointId pointIndex,
+    inline void setFieldInternal(DimensionPtr dim, PointId pointIndex,
         const void *value);
-    inline void getFieldInternal(Dimension const& dim, PointId pointIndex,
+    inline void getFieldInternal(DimensionPtr dim, PointId pointIndex,
         void *value) const;
 };
 
 
 template <class T>
-T PointBuffer::getField(pdal::Dimension const& dim, PointId id) const
+T PointBuffer::getField(DimensionPtr dim, PointId id) const
 {
     T t;
 
@@ -237,14 +227,14 @@ T PointBuffer::getField(pdal::Dimension const& dim, PointId id) const
 
 
 template <class T>
-inline T PointBuffer::getFieldAs(pdal::Dimension const& dim,
-    boost::uint32_t pointIndex, bool applyScaling) const
+inline T PointBuffer::getFieldAs(DimensionPtr dim,
+    uint32_t pointIndex, bool applyScaling) const
 {
     T retval;
-    boost::uint32_t size = dim.getByteSize();
+    boost::uint32_t size = dim->getByteSize();
     double val(0.0);
 
-    switch (dim.getInterpretation())
+    switch (dim->getInterpretation())
     {
         case dimension::Float:
             switch (size)
@@ -294,15 +284,13 @@ inline T PointBuffer::getFieldAs(pdal::Dimension const& dim,
             }
             break;
 
-        case dimension::RawByte:
-        case dimension::Pointer:
         case dimension::Undefined:
             throw pdal_error("Dimension data type unable to be retrieved "
                 "in getFieldAs");
     }
 
     if (applyScaling)
-        val = dim.applyScaling(val);
+        val = dim->applyScaling(val);
 
     try
     {
@@ -315,7 +303,7 @@ inline T PointBuffer::getFieldAs(pdal::Dimension const& dim,
     {
         std::ostringstream oss;
         oss << "Unable to fetch data and convert as requested: ";
-        oss << dim.getName() << ":" << dim.getInterpretationName() <<
+        oss << dim->getName() << ":" << dim->getInterpretationName() <<
             "(" << (double)val << ") -> " << Utils::typeidName<T>();
         throw pdal_error(oss.str());
     }
@@ -324,8 +312,7 @@ inline T PointBuffer::getFieldAs(pdal::Dimension const& dim,
 
 
 template<typename T_IN, typename T_OUT>
-void PointBuffer::convertAndSet(pdal::Dimension const& dim, PointId idx,
-    T_IN in)
+void PointBuffer::convertAndSet(DimensionPtr dim, PointId idx, T_IN in)
 {
     T_OUT out;
 
@@ -338,11 +325,11 @@ void PointBuffer::convertAndSet(pdal::Dimension const& dim, PointId idx,
 
 
 template<typename T>
-void PointBuffer::setField(pdal::Dimension const& dim, uint32_t idx, T val)
+void PointBuffer::setField(DimensionPtr dim, uint32_t idx, T val)
 {
-    uint32_t size = dim.getByteSize();
+    uint32_t size = dim->getByteSize();
     try {
-        switch (dim.getInterpretation())
+        switch (dim->getInterpretation())
         {
             case dimension::Float:
                 switch (size)
@@ -391,12 +378,6 @@ void PointBuffer::setField(pdal::Dimension const& dim, uint32_t idx, T val)
                         break;
                 }
                 break;
-
-            case dimension::RawByte:
-                setFieldInternal(dim, idx, &val);
-                break;
-
-            case dimension::Pointer:
             case dimension::Undefined:
                 throw pdal_error("Dimension data type unable to be set.");
         }
@@ -405,21 +386,21 @@ void PointBuffer::setField(pdal::Dimension const& dim, uint32_t idx, T val)
     {
         std::ostringstream oss;
         oss << "Unable to set data and convert as requested: ";
-        oss << dim.getName() << ":" << Utils::typeidName<T>() <<
-            "(" << (double)val << ") -> " << dim.getInterpretationName();
+        oss << dim->getName() << ":" << Utils::typeidName<T>() <<
+            "(" << (double)val << ") -> " << dim->getInterpretationName();
         throw pdal_error(oss.str());
     }
 }
 
 
-inline void PointBuffer::getFieldInternal(pdal::Dimension const& dim,
+inline void PointBuffer::getFieldInternal(DimensionPtr dim,
     PointId id, void *buf) const
 {
     m_context.rawPtBuf()->getField(dim, m_index[id], buf);
 }
 
 
-inline void PointBuffer::setFieldInternal(pdal::Dimension const& dim,
+inline void PointBuffer::setFieldInternal(DimensionPtr dim,
     PointId id, const void *value)
 {
     PointId rawId = 0;

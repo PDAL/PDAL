@@ -98,25 +98,25 @@ class PointDimensions
 public:
     PointDimensions(const Schema& schema, std::string const& ns);
 
-    pdal::Dimension const* Time;
-    pdal::Dimension const* X;
-    pdal::Dimension const* Y;
-    pdal::Dimension const* Z;
+    DimensionPtr Time;
+    DimensionPtr X;
+    DimensionPtr Y;
+    DimensionPtr Z;
 
-    pdal::Dimension const* StartPulse;
-    pdal::Dimension const* ReflectedPulse;
-    pdal::Dimension const* ScanAngleRank;
-    pdal::Dimension const* Pitch;
-    pdal::Dimension const* Roll;
-    pdal::Dimension const* PDOP;
-    pdal::Dimension const* PulseWidth;
-    pdal::Dimension const* GPSTime;
+    DimensionPtr StartPulse;
+    DimensionPtr ReflectedPulse;
+    DimensionPtr ScanAngleRank;
+    DimensionPtr Pitch;
+    DimensionPtr Roll;
+    DimensionPtr PDOP;
+    DimensionPtr PulseWidth;
+    DimensionPtr GPSTime;
 
-    pdal::Dimension const* PassiveSignal;
+    DimensionPtr PassiveSignal;
 
-    pdal::Dimension const* PassiveX;
-    pdal::Dimension const* PassiveY;
-    pdal::Dimension const* PassiveZ;
+    DimensionPtr PassiveX;
+    DimensionPtr PassiveY;
+    DimensionPtr PassiveZ;
 };
 
 //
