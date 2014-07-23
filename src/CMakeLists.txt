@@ -842,7 +842,6 @@ endif()
 target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE}
     "${CMAKE_THREAD_LIBS_INIT}"
     "${CMAKE_DL_LIBS}"
-    "${TIFF_LIBRARY}"
     "${MRSID_LIBRARY}"
     "${GEOTIFF_LIBRARY}"
     "${GDAL_LIBRARY}"
