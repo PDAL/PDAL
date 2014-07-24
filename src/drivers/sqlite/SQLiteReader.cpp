@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/drivers/sqlite/Reader.hpp>
+#include <pdal/drivers/sqlite/SQLiteReader.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/FileUtils.hpp>
 #include <pdal/Utils.hpp>
@@ -62,7 +62,7 @@ namespace sqlite
 {
 
 
-Reader::Reader(const Options& options)
+SQLiteReader::SQLiteReader(const Options& options)
     : pdal::Reader(options)
     , m_cachedPointCount(0)
 {}
@@ -70,7 +70,7 @@ Reader::Reader(const Options& options)
 
 
 
-void Reader::initialize()
+void SQLiteReader::initialize()
 {
     using namespace std;
 
@@ -94,7 +94,7 @@ void Reader::initialize()
 }
 
 
-Options Reader::getDefaultOptions()
+Options SQLiteReader::getDefaultOptions()
 {
     Options options;
 
@@ -113,7 +113,7 @@ Options Reader::getDefaultOptions()
 
 
 pdal::SpatialReference
-Reader::fetchSpatialReference(std::string const& query) const
+SQLiteReader::fetchSpatialReference(std::string const& query) const
 {
     // Fetch the WKT for the SRID to set the coordinate system of this stage
     log()->get(logDEBUG) << "Fetching schema object" << std::endl;
@@ -146,7 +146,7 @@ Reader::fetchSpatialReference(std::string const& query) const
 }
 
 
-pdal::Schema Reader::fetchSchema(std::string const& query) const
+pdal::Schema SQLiteReader::fetchSchema(std::string const& query) const
 {
     log()->get(logDEBUG) << "Fetching schema object" << std::endl;
 
@@ -160,7 +160,7 @@ pdal::Schema Reader::fetchSchema(std::string const& query) const
     // clouds.execute();
 
     // bool bDidRead = clouds.fetch();
-    std::string xml;// = r.get<std::string>("schema");
+    std::string xml;//  = r.get<std::string>("schema");
     Schema schema = Schema::from_xml(xml);
     schema::index_by_index const& dims =
         schema.getDimensions().get<schema::index>();
@@ -187,9 +187,9 @@ pdal::Schema Reader::fetchSchema(std::string const& query) const
 
 
 pdal::StageSequentialIterator*
-Reader::createSequentialIterator(PointBuffer& buffer) const
+SQLiteReader::createSequentialIterator(PointBuffer& buffer) const
 {
-    return new iterators::sequential::Reader(*this, buffer);
+    return new iterators::sequential::SQLiteReader(*this, buffer);
 }
 
 
@@ -200,7 +200,7 @@ namespace sequential
 {
 
 
-IteratorBase::IteratorBase(const pdal::drivers::sqlite::Reader& reader)
+IteratorBase::IteratorBase(const pdal::drivers::sqlite::SQLiteReader& reader)
     : m_at_end(false), m_buffer_position(0), m_reader(reader)
 {
     std::string const& connection =
@@ -210,7 +210,7 @@ IteratorBase::IteratorBase(const pdal::drivers::sqlite::Reader& reader)
 }
 
 
-const pdal::drivers::sqlite::Reader& IteratorBase::getReader() const
+const pdal::drivers::sqlite::SQLiteReader& IteratorBase::getReader() const
 {
     return m_reader;
 }
@@ -453,13 +453,13 @@ uint32_t IteratorBase::myReadBlocks(PointBuffer& user_buffer)
 //
 //---------------------------------------------------------------------------
 
-Reader::Reader(const pdal::drivers::sqlite::Reader& reader, PointBuffer& buffer)
+SQLiteReader::SQLiteReader(const pdal::drivers::sqlite::SQLiteReader& reader, PointBuffer& buffer)
     : IteratorBase(reader)
     , pdal::StageSequentialIterator(buffer)
 {}
 
 
-uint64_t Reader::skipImpl(uint64_t count)
+uint64_t SQLiteReader::skipImpl(uint64_t count)
 {
     uint64_t totalNumRead = 0;
 
@@ -486,13 +486,13 @@ uint32_t numRead = 0;
 }
 
 
-bool Reader::atEndImpl() const
+bool SQLiteReader::atEndImpl() const
 {
     return m_at_end;
 }
 
 
-uint32_t Reader::readBufferImpl(PointBuffer& data)
+uint32_t SQLiteReader::readBufferImpl(PointBuffer& data)
 {
     return myReadBlocks(data);
 }

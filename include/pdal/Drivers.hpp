@@ -102,8 +102,8 @@
 
 #ifdef PDAL_HAVE_SQLITE
 #ifndef USE_PDAL_PLUGIN_SQLITE
-#include <pdal/drivers/sqlite/Reader.hpp>
-#include <pdal/drivers/sqlite/Writer.hpp>
+#include <pdal/drivers/sqlite/SQLiteReader.hpp>
+#include <pdal/drivers/sqlite/SQLiteWriter.hpp>
 #endif
 #endif
 

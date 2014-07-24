@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/drivers/sqlite/Writer.hpp>
+#include <pdal/drivers/sqlite/SQLiteWriter.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/pdal_macros.hpp>
@@ -61,7 +61,7 @@ namespace sqlite
 {
 
 
-Writer::Writer(const Options& options)
+SQLiteWriter::SQLiteWriter(const Options& options)
     : pdal::Writer(options)
     , m_doCreateIndex(false)
     , m_bounds(Bounds<double>())
@@ -74,7 +74,7 @@ Writer::Writer(const Options& options)
     , m_is3d(false)
 {}
 
-void Writer::processOptions(const Options& options)
+void SQLiteWriter::processOptions(const Options& options)
 {
     m_connection =
         options.getValueOrDefault<std::string>("connection", "");
@@ -95,7 +95,7 @@ void Writer::processOptions(const Options& options)
 }
 
 
-void Writer::initialize()
+void SQLiteWriter::initialize()
 {
     try
     {
@@ -113,7 +113,7 @@ void Writer::initialize()
     }
 }
 
-void Writer::ready(PointContext ctx)
+void SQLiteWriter::ready(PointContext ctx)
 {
 
     Schema *schema = ctx.schema();
@@ -131,13 +131,13 @@ void Writer::ready(PointContext ctx)
  
 }
 
-void Writer::write(const PointBuffer& buffer)
+void SQLiteWriter::write(const PointBuffer& buffer)
 {
     writeInit(buffer.getSchema());
     writeTile(buffer);
 }
 
-void Writer::writeInit(const Schema& schema)
+void SQLiteWriter::writeInit(const Schema& schema)
 {
     if (m_sdo_pc_is_initialized)
         return;
@@ -210,7 +210,7 @@ void Writer::writeInit(const Schema& schema)
 }
 
 
-bool Writer::CheckTableExists(std::string const& name)
+bool SQLiteWriter::CheckTableExists(std::string const& name)
 {
     std::ostringstream oss;
 
@@ -240,7 +240,7 @@ bool Writer::CheckTableExists(std::string const& name)
 }
 
 
-void Writer::CreateBlockTable()
+void SQLiteWriter::CreateBlockTable()
 {
     std::ostringstream oss;
 
@@ -267,7 +267,7 @@ void Writer::CreateBlockTable()
     }
 }
 
-void Writer::DeleteBlockTable()
+void SQLiteWriter::DeleteBlockTable()
 {
     std::ostringstream oss;
 
@@ -297,7 +297,7 @@ void Writer::DeleteBlockTable()
 }
 
 
-void Writer::CreateCloudTable()
+void SQLiteWriter::CreateCloudTable()
 {
     std::ostringstream oss;
 
@@ -321,7 +321,7 @@ void Writer::CreateCloudTable()
                          << boost::to_lower_copy(m_cloud_table) << "'" <<std::endl;        
 }
 
-void Writer::DeleteCloudTable()
+void SQLiteWriter::DeleteCloudTable()
 {
     std::ostringstream oss;
 
@@ -375,7 +375,7 @@ void Writer::DeleteCloudTable()
 }
 
 
-void Writer::CreateIndexes(std::string const& table_name,
+void SQLiteWriter::CreateIndexes(std::string const& table_name,
     std::string const& spatial_column_name, bool is3d)
 {
     std::ostringstream oss;
@@ -392,7 +392,7 @@ void Writer::CreateIndexes(std::string const& table_name,
 }
 
 
-std::string Writer::loadGeometryWKT(std::string const& filename_or_wkt) const
+std::string SQLiteWriter::loadGeometryWKT(std::string const& filename_or_wkt) const
 {
     std::ostringstream wkt_s;
 
@@ -426,7 +426,7 @@ std::string Writer::loadGeometryWKT(std::string const& filename_or_wkt) const
 }
 
 
-bool Writer::IsValidGeometryWKT(std::string const& input) const
+bool SQLiteWriter::IsValidGeometryWKT(std::string const& input) const
 {
 #ifdef PDAL_HAVE_GDAL
     OGRGeometryH g;
@@ -440,7 +440,7 @@ bool Writer::IsValidGeometryWKT(std::string const& input) const
 #endif
 }
 
-void Writer::done(PointContext ctx)
+void SQLiteWriter::done(PointContext ctx)
 {
     if (m_doCreateIndex)
     {
@@ -466,7 +466,7 @@ void Writer::done(PointContext ctx)
 }
 
 
-void Writer::CreateCloud(Schema const& buffer_schema)
+void SQLiteWriter::CreateCloud(Schema const& buffer_schema)
 {
     using namespace std;
 
@@ -540,7 +540,7 @@ void Writer::CreateCloud(Schema const& buffer_schema)
 }
 
 
-void Writer::writeTile(PointBuffer const& buffer)
+void SQLiteWriter::writeTile(PointBuffer const& buffer)
 {
     using namespace std;
 

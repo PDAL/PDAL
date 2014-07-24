@@ -40,7 +40,7 @@
 
 #include <pdal/FileUtils.hpp>
 #include <pdal/drivers/faux/Reader.hpp>
-#include <pdal/drivers/sqlite/Writer.hpp>
+#include <pdal/drivers/sqlite/SQLiteWriter.hpp>
 #include <pdal/drivers/las/Reader.hpp>
 #include <pdal/filters/Cache.hpp>
 #include <pdal/filters/Chipper.hpp>
@@ -164,7 +164,7 @@ BOOST_AUTO_TEST_CASE(SqliteWriterTest_test_simple_las)
         writer_chipper.setInput(&writer_reader);
         pdal::filters::InPlaceReprojection writer_reproj(getSQLITEOptions());
         writer_reproj.setInput(&writer_chipper);
-        pdal::drivers::sqlite::Writer writer_writer(getSQLITEOptions());
+        pdal::drivers::sqlite::SQLiteWriter writer_writer(getSQLITEOptions());
         writer_writer.setInput(&writer_chipper);
         
         // try

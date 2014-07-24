@@ -80,7 +80,7 @@ MAKE_READER_CREATOR(NITFReader, pdal::drivers::nitf::NitfReader)
 
 #ifdef PDAL_HAVE_SQLITE
 #ifndef USE_PDAL_PLUGIN_SQLITE
-MAKE_READER_CREATOR(SqliteReader, pdal::drivers::sqlite::Reader)
+MAKE_READER_CREATOR(SqliteReader, pdal::drivers::sqlite::SQLiteReader)
 #endif
 #endif
 
@@ -153,7 +153,7 @@ MAKE_WRITER_CREATOR(P2GWriter, pdal::drivers::p2g::Writer)
 
 #ifdef PDAL_HAVE_SQLITE
 #ifndef USE_PDAL_PLUGIN_SQLITE
-MAKE_WRITER_CREATOR(SqliteWriter, pdal::drivers::sqlite::Writer)
+MAKE_WRITER_CREATOR(SqliteWriter, pdal::drivers::sqlite::SQLiteWriter)
 #endif
 #endif
 
@@ -393,7 +393,7 @@ void StageFactory::registerKnownReaders()
 
 #ifdef PDAL_HAVE_SQLITE
 #ifndef USE_PDAL_PLUGIN_SQLITE
-    REGISTER_READER(SqliteReader, pdal::drivers::sqlite::Reader);
+    REGISTER_READER(SqliteReader, pdal::drivers::sqlite::SQLiteReader);
 #endif
 #endif
 
@@ -475,7 +475,7 @@ void StageFactory::registerKnownWriters()
 
 #ifdef PDAL_HAVE_SQLITE
 #ifndef USE_PDAL_PLUGIN_SQLITE
-    REGISTER_WRITER(SqliteWriter, pdal::drivers::sqlite::Writer);
+    REGISTER_WRITER(SqliteWriter, pdal::drivers::sqlite::SQLiteWriter);
 #endif
 #endif
 

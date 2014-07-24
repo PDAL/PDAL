@@ -32,14 +32,13 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_PDAL_DRIVER_SQLITE_READER_HPP
-#define INCLUDED_PDAL_DRIVER_SQLITE_READER_HPP
+#pragma once
 
 #include <pdal/Reader.hpp>
 #include <pdal/ReaderIterator.hpp>
 
 
-#include <pdal/drivers/sqlite/common.hpp>
+#include <pdal/drivers/sqlite/SQliteCommon.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/scoped_array.hpp>
 
@@ -55,7 +54,7 @@ namespace sqlite
 
 
 
-class PDAL_DLL Reader : public pdal::Reader
+class PDAL_DLL SQLiteReader : public pdal::Reader
 {
 public:
     SET_STAGE_NAME("drivers.sqlite.reader", "SQLite3 Reader")
@@ -65,7 +64,7 @@ public:
     SET_STAGE_ENABLED(false)
 #endif
 
-    Reader(const Options&);
+    SQLiteReader(const Options&);
     static Options getDefaultOptions();
     pdal::StageSequentialIterator*
         createSequentialIterator(PointBuffer& buffer) const;
@@ -74,8 +73,8 @@ public:
         fetchSpatialReference(std::string const& query) const;
 
 private:
-    Reader& operator=(const Reader&); // not implemented
-    Reader(const Reader&); // not implemented
+    SQLiteReader& operator=(const SQLiteReader&); // not implemented
+    SQLiteReader(const SQLiteReader&); // not implemented
     virtual void initialize();
 
     mutable boost::uint64_t m_cachedPointCount;
@@ -94,10 +93,10 @@ typedef std::map<int, PointBufferPtr> BufferMap;
 class IteratorBase
 {
 public:
-    IteratorBase(const pdal::drivers::sqlite::Reader& reader);
+    IteratorBase(const pdal::drivers::sqlite::SQLiteReader& reader);
 
 protected:
-    const pdal::drivers::sqlite::Reader& getReader() const;
+    const pdal::drivers::sqlite::SQLiteReader& getReader() const;
 
     boost::uint32_t myReadBuffer(PointBuffer& data);
 
@@ -114,7 +113,7 @@ protected:
     boost::uint32_t m_buffer_position;
 
 private:
-    const pdal::drivers::sqlite::Reader& m_reader;
+    const pdal::drivers::sqlite::SQLiteReader& m_reader;
     sqlite3* m_session;
     
     // ::soci::statement getNextCloud(std::string const& cloud_table_name,
@@ -134,10 +133,10 @@ private:
 };
 
 
-class Reader : public IteratorBase, public pdal::StageSequentialIterator
+class SQLiteReader : public IteratorBase, public pdal::StageSequentialIterator
 {
 public:
-    Reader(const pdal::drivers::sqlite::Reader& reader, PointBuffer& buffer);
+    SQLiteReader(const pdal::drivers::sqlite::SQLiteReader& reader, PointBuffer& buffer);
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t count);
@@ -153,5 +152,3 @@ private:
 }
 } // namespace pdal::driver::oci
 
-
-#endif // INCLUDED_PDAL_DRIVER_OCI_READER_HPP

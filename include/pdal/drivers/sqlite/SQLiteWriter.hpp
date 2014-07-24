@@ -32,15 +32,11 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_DRIVERS_SQLITE_WRITER_HPP
-#define INCLUDED_DRIVERS_SQLITE_WRITER_HPP
-
+#pragma once
 
 #include <pdal/Writer.hpp>
-#include <pdal/drivers/sqlite/common.hpp>
+#include <pdal/drivers/sqlite/SqliteCommon.hpp>
 #include <pdal/third/nanoflann.hpp>
-
-
 
 namespace pdal
 {
@@ -50,7 +46,7 @@ namespace sqlite
 {
 
 
-class PDAL_DLL Writer : public pdal::Writer
+class PDAL_DLL SQLiteWriter : public pdal::Writer
 {
 public:
     SET_STAGE_NAME("drivers.sqlite.writer", "SQLite Writer")
@@ -59,12 +55,12 @@ public:
 #else
     SET_STAGE_ENABLED(false)
 #endif
-    Writer(const Options&);
+    SQLiteWriter(const Options&);
 
 private:
 
-    Writer& operator=(const Writer&); // not implemented
-    Writer(const Writer&); // not implemented
+    SQLiteWriter& operator=(const SQLiteWriter&); // not implemented
+    SQLiteWriter(const SQLiteWriter&); // not implemented
 
     virtual void initialize();
     virtual void processOptions(const Options& options);
@@ -113,4 +109,3 @@ private:
 }
 } // namespaces
 
-#endif

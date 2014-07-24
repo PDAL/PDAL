@@ -32,19 +32,13 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_DRIVER_SOCI_COMMON_HPP
-#define INCLUDED_DRIVER_SOCI_COMMON_HPP
-
+#pragma once
 
 #include <pdal/pdal_error.hpp>
 #include <pdal/Options.hpp>
 
 #include <sqlite3.h>
 #include <sstream>
-
-#include <boost/bind/placeholders.hpp>
-#include <boost/function.hpp>
-#include <boost/bind.hpp>
 
 namespace pdal
 {
@@ -404,5 +398,3 @@ private:
 }
 } // namespace pdal::driver::soci
 
-
-#endif
