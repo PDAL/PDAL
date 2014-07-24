@@ -71,10 +71,10 @@ Options getSQLITEOptions()
     options.add(connection);
 
     Option debug("debug", true, "debug");
-    // options.add(debug);
+    options.add(debug);
 
     Option verbose("verbose", 7, "verbose");
-    // options.add(verbose);
+    options.add(verbose);
 
     Option block_table_name("block_table", "PDAL_TEST_BLOCKS", "block_table_name");
     options.add(block_table_name);

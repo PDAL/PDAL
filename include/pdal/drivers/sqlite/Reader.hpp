@@ -58,7 +58,7 @@ namespace sqlite
 class PDAL_DLL Reader : public pdal::Reader
 {
 public:
-    SET_STAGE_NAME("drivers.sqlite.reader", "SOCI Reader")
+    SET_STAGE_NAME("drivers.sqlite.reader", "SQLite3 Reader")
 #ifdef PDAL_HAVE_SQLITE
     SET_STAGE_ENABLED(true)
 #else
@@ -67,7 +67,6 @@ public:
 
     Reader(const Options&);
     static Options getDefaultOptions();
-    virtual boost::uint64_t getNumPoints() const;
     pdal::StageSequentialIterator*
         createSequentialIterator(PointBuffer& buffer) const;
     pdal::Schema fetchSchema(std::string const& query) const;
@@ -81,7 +80,7 @@ private:
 
     mutable boost::uint64_t m_cachedPointCount;
 
-    ::soci::session* m_session;
+    sqlite3* m_session;
 
 };
 
@@ -116,11 +115,11 @@ protected:
 
 private:
     const pdal::drivers::sqlite::Reader& m_reader;
-    ::soci::session* m_session;
+    sqlite3* m_session;
     
-    ::soci::statement getNextCloud(std::string const& cloud_table_name, 
-        boost::int32_t& cloud_id, ::soci::row& r);
-    void readBlob(::soci::row& block, boost::uint32_t howMany);
+    // ::soci::statement getNextCloud(std::string const& cloud_table_name,
+    //     boost::int32_t& cloud_id, ::soci::row& r);
+    // void readBlob(::soci::row& block, boost::uint32_t howMany);
     void fillUserBuffer(PointBuffer& user_buffer);
     // 
     void copyDatabaseData(PointBuffer& source, 

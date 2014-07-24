@@ -785,7 +785,7 @@ endif()
 
 PDAL_ADD_LIBRARY(${PDAL_LIB_NAME} ${PDAL_SOURCES})
 
-set (SQLITE_LIBRARIES ${SOCI_LIBRARY} ${SOCI_sqlite3_PLUGIN} ${SQLITE3_LIBRARY})
+set (SQLITE_LIBRARIES ${SQLITE3_LIBRARY})
 
 if (WITH_SQLITE)
 if (NOT USE_PDAL_PLUGIN_SQLITE)
@@ -885,7 +885,7 @@ endif()
 
 if (WITH_SQLITE)
 if (USE_PDAL_PLUGIN_SQLITE)
-    set(PDAL_SOCI_WRITER_LIB_NAME pdal_plugin_writer_sqlite)
+    set(PDAL_SQLITE_WRITER_LIB_NAME pdal_plugin_writer_sqlite)
     add_library(${PDAL_SQLITE_WRITER_LIB_NAME} SHARED "${PDAL_SQLITE_SRC}/Writer.cpp")
     target_link_libraries(${PDAL_SQLITE_WRITER_LIB_NAME} INTERFACE general
                           "${PDAL_LIB_NAME}"
@@ -899,16 +899,16 @@ if (USE_PDAL_PLUGIN_SQLITE)
       INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib")
     endif()
 
-    set(PDAL_SOCI_READER_LIB_NAME pdal_plugin_reader_sqlite)
+    set(PDAL_SQLITE_READER_LIB_NAME pdal_plugin_reader_sqlite)
     add_library(${PDAL_SQLITE_READER_LIB_NAME} SHARED ${PDAL_SQLITE_SRC}/Reader.cpp)
-    target_link_libraries(${PDAL_SOCI_READER_LIB_NAME} INTERFACE general
+    target_link_libraries(${PDAL_SQLITE_READER_LIB_NAME} INTERFACE general
                           "${PDAL_LIB_NAME}"
                           ${SQLITE_LIBRARIES})
     set_target_properties(${PDAL_SQLITE_READER_LIB_NAME}
     PROPERTIES SOVERSION "${PDAL_LIB_SOVERSION}" )
     if (APPLE)
     set_target_properties(
-      "${PDAL_SOCI_READER_LIB_NAME}"
+      "${PDAL_SQLITE_READER_LIB_NAME}"
       PROPERTIES
       INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib")
     endif()
