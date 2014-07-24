@@ -195,7 +195,8 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
     drivers["bpf"] = "drivers.bpf.reader";
     drivers["sbet"] = "drivers.sbet.reader";
     drivers["icebridge"] = "drivers.icebridge.reader";
-
+    drivers["sqlite"] = "drivers.sqlite.reader";
+    
     if (ext == "") return "";
     ext = ext.substr(1, ext.length()-1);
     if (ext == "") return "";
@@ -219,6 +220,7 @@ std::string StageFactory::inferWriterDriver(const std::string& filename)
     drivers["xyz"] = "drivers.text.writer";
     drivers["txt"] = "drivers.text.writer";
     drivers["ntf"] = "drivers.nitf.writer";
+    drivers["sqlite"] = "drivers.sqlite.writer";    
 
     if (boost::algorithm::iequals(filename, "STDOUT"))
     {
