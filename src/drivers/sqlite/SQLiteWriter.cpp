@@ -80,15 +80,19 @@ void SQLiteWriter::processOptions(const Options& options)
         options.getValueOrDefault<std::string>("connection", "");
     if (!m_connection.size())
     {
+        m_connection =
+            options.getValueOrDefault<std::string>("filename", "");
+        
+        if (!m_connection.size())
         throw sqlite_driver_error("unable to connect to database, "
             "no connection string was given!");
     }
     m_block_table =
-        options.getValueOrThrow<std::string>("block_table");
+        options.getValueOrThrow<std::string>("block_table_name");
     m_cloud_table =
-        options.getValueOrThrow<std::string>("cloud_table");
+        options.getValueOrThrow<std::string>("cloud_table_name");
     m_cloud_column =
-        options.getValueOrDefault<std::string>("cloud_column", "id");
+        options.getValueOrDefault<std::string>("cloud_column_name", "id");
     m_srid =
         m_options.getValueOrDefault<boost::uint32_t>("srid", 4326);
     m_is3d = m_options.getValueOrDefault<bool>("is3d", false);    
@@ -103,7 +107,17 @@ void SQLiteWriter::initialize()
         m_session = std::unique_ptr<SQLite>(new SQLite(m_connection, log()));
         m_session->connect(true);
         log()->get(logDEBUG) << "Connected to database" << std::endl;
+        bool bHaveSpatialite = CheckTableExists("geometry_columns");
+        log()->get(logDEBUG) << "Have spatialite?: " << bHaveSpatialite << std::endl;
+        m_session->spatialite("dylib");
 
+        if (!bHaveSpatialite)
+        {
+            std::ostringstream oss;
+            oss << "SELECT InitSpatialMetadata()";
+            m_session->execute(oss.str());
+        }
+        
     }
     catch (sqlite::sqlite_driver_error const& e)
     {
@@ -248,7 +262,7 @@ void SQLiteWriter::CreateBlockTable()
         << "(" << boost::to_lower_copy(m_cloud_column)  <<
         " INTEGER REFERENCES " << boost::to_lower_copy(m_cloud_column)  <<
         "," << " block_id INTEGER," << " num_points INTEGER," <<
-        " points bytea," << " bbox box3d " << ")";
+        " points BLOB," << " bbox box3d " << ")";
 
     m_session->execute(oss.str());
     log()->get(logDEBUG) << "Created block table '" 
@@ -281,7 +295,7 @@ void SQLiteWriter::DeleteBlockTable()
    
     // Drop the table's dependencies
     // We need to clean up the geometry column before dropping the table
-    oss << "SELECT DropGeometryColumn('" <<
+    oss << "SELECT DiscardGeometryColumn('" <<
         boost::to_lower_copy(m_block_table) << "', 'extent')";
     m_session->execute(oss.str());
     log()->get(logDEBUG) << "Dropped geometry column for block table" 

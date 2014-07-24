@@ -88,17 +88,18 @@ public:
 
     std::string data;
     bool null;
-    char * blobBuf;
+    const char * blobBuf;
     std::size_t blobLen;
 };
 
 class blob : public column
 {
 public:
-    blob(char* buffer, std::size_t size) : column()
+    blob(const char* buffer, std::size_t size) : column()
     {
         blobBuf = buffer;
         blobLen = size;
+        null = false;
         
     }
 };
@@ -159,7 +160,6 @@ public:
         {
             check_error("unable to connect to database");
         }
-        spatialite();
     }
     
     void execute(std::string const& sql, std::string errmsg="")
@@ -306,7 +306,7 @@ public:
                 {
                     didBind = sqlite3_bind_null(m_statement, pos+1);
                 }
-                else if (c.blobBuf)
+                else if (c.blobLen != 0)
                 {
                     didBind = sqlite3_bind_blob(m_statement, pos+1,
                                                 c.blobBuf,
@@ -330,7 +330,7 @@ public:
                 }
             }
             
-            int const res = sqlite3_step(m_statement);
+            res = sqlite3_step(m_statement);
 
             if (SQLITE_DONE == res)
             {
@@ -351,7 +351,27 @@ public:
         
         return true;
     }
-    
+
+    bool spatialite(std::string so_extension="so")
+    {
+        int code = sqlite3_enable_load_extension(m_session, 1);
+        if (code != SQLITE_OK)
+        {
+            std::ostringstream oss;
+            oss << "Unable to load spatialite extension!";
+            throw sqlite_driver_error(oss.str());
+        }
+
+        std::ostringstream oss;
+        
+        oss << "SELECT load_extension('libspatialite." << so_extension <<"')";
+        execute(oss.str());
+        oss.str("");
+
+        return true;
+
+    }
+        
 private:  
     pdal::LogPtr m_log;
     std::string m_connection;
@@ -369,28 +389,7 @@ private:
         throw sqlite_driver_error(ss.str());        
     }
     
-    bool spatialite()
-    {
-        int code = sqlite3_enable_load_extension(m_session, 1);
-        if (code != SQLITE_OK)
-        {
-            std::ostringstream oss;
-            oss << "Unable to load spatialite extension!";
-            throw sqlite_driver_error(oss.str());
-        }
 
-        std::ostringstream oss;
-        oss << "SELECT load_extension('libspatialite.dylib')";
-        execute(oss.str());
-        oss.str("");
-
-        oss << "SELECT InitSpatialMetadata()";
-        execute(oss.str());
-        oss.str("");
-        
-        return true;
-
-    }
     
 };
 
