@@ -238,6 +238,9 @@ bool SQLiteWriter::CheckTableExists(std::string const& name)
     while (m_session->next())
     {
         row* r = m_session->get();
+        if (!r)
+            break ;// didn't have anything
+        
         column const& c = r->at(0); // First column is table name!
         debug << ", " << c.data;
         if (boost::iequals(c.data, name))
@@ -511,9 +514,8 @@ void SQLiteWriter::CreateCloud(Schema const& buffer_schema)
     
     records rs;
     row r;
-    column c;
-    c.data = xml;        
-    r.push_back(c); rs.push_back(r);
+    r.push_back(column(xml)); 
+    rs.push_back(r);
     m_session->insert(oss.str(), rs);
     oss.str("");
 

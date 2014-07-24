@@ -262,7 +262,10 @@ public:
     
     row* get()
     {
-        return &m_data[m_position];
+        if (m_data.size())
+            return &m_data[m_position];
+        else
+            return 0;
     }
     
     std::vector<std::string> const& columns() const
