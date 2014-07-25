@@ -136,19 +136,20 @@ public:
         , m_statement(0)
         , m_position(0)
     {
+        m_log->get(logDEBUG3) << "Setting up config " << std::endl;
+        sqlite3_shutdown();
         sqlite3_config(SQLITE_CONFIG_LOG, log_callback, this);
+        sqlite3_initialize();
+        m_log->get(logDEBUG3) << "Set up config " << std::endl;  
     }
     
     ~SQLite()
     {
-        if (m_statement)
-        {
-            sqlite3_finalize(m_statement);
-
-        }
         
         if (m_session)
             sqlite3_close_v2(m_session);
+        sqlite3_shutdown();
+
     }
     void log(int num, char const* msg)
     {
@@ -170,11 +171,18 @@ public:
         {
             throw connection_failed("unable to connect to sqlite3 database, no connection string was given!");
         }
-        
+              
         int flags = SQLITE_OPEN_NOMUTEX;
-        if (bWrite) flags |= SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
+        if (bWrite) 
+        {
+            m_log->get(logDEBUG3) << "Connecting db for write"<< std::endl;  
+            flags |= SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
+        }
         else
+        {
+            m_log->get(logDEBUG3) << "Connecting db for read"<< std::endl;  
             flags |= SQLITE_OPEN_READONLY;
+        }
         
         int code = sqlite3_open_v2(m_connection.c_str(), &m_session, flags, 0);
         if ( (code != SQLITE_OK) ) 
@@ -187,6 +195,7 @@ public:
     {
         if (!m_session)
             throw sqlite_driver_error("Session not opened!");
+        m_log->get(logDEBUG3) << "Executing '" << sql <<"'"<< std::endl;  
         
         int code = sqlite3_exec(m_session, sql.c_str(), NULL, NULL, NULL);
         if (code != SQLITE_OK)
@@ -215,7 +224,9 @@ public:
         m_position = 0;
         m_columns.clear();
         m_data.clear();
+        m_log->get(logDEBUG3) << "Executing '" << query <<"'"<< std::endl;  
         sqlite3_reset(m_statement);
+        m_log->get(logDEBUG3) << "reset sqlite3_reset" << std::endl;  
         
         char const* tail = 0; // unused;
         int res = sqlite3_prepare_v2(m_session,
@@ -299,7 +310,7 @@ public:
     
     const row* get() const
     {
-        if (m_data.size())
+        if ( m_position < m_data.size())
             return &m_data[m_position];
         else
             return 0;
@@ -323,7 +334,8 @@ public:
     
     bool insert(std::string const& statement, records const& rs)
     {
-        sqlite3_reset(m_statement);
+        // if (m_statement)
+        //     sqlite3_reset(m_statement);
         records::size_type rows = rs.size();
 
         int res = sqlite3_prepare_v2(m_session,
@@ -394,7 +406,7 @@ public:
                 throw sqlite_driver_error(ss.str());                
             }
         }
-        
+        sqlite3_finalize(m_statement);
         return true;
     }
 
