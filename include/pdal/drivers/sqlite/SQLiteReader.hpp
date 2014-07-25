@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2012, Howard Butler, hobu.inc@gmail.com
+* Copyright (c) 2014, Howard Butler, howard@hobu.co
 *
 * All rights reserved.
 *
@@ -67,87 +67,32 @@ public:
     SQLiteReader(const Options&);
     static Options getDefaultOptions();
     pdal::StageSequentialIterator*
-        createSequentialIterator(PointBuffer& buffer) const;
+        createSequentialIterator() const;
     pdal::Schema fetchSchema(std::string const& query) const;
     pdal::SpatialReference
         fetchSpatialReference(std::string const& query) const;
-
+    
+    SQLite& getSession() { return *m_session.get(); }
+    
 private:
     SQLiteReader& operator=(const SQLiteReader&); // not implemented
     SQLiteReader(const SQLiteReader&); // not implemented
-    virtual void initialize();
-
-    mutable boost::uint64_t m_cachedPointCount;
-
-    sqlite3* m_session;
-
-};
-
-namespace iterators
-{
-
-namespace sequential
-{
-typedef std::map<int, PointBufferPtr> BufferMap;
-
-class IteratorBase
-{
-public:
-    IteratorBase(const pdal::drivers::sqlite::SQLiteReader& reader);
-
-protected:
-    const pdal::drivers::sqlite::SQLiteReader& getReader() const;
-
-    boost::uint32_t myReadBuffer(PointBuffer& data);
-
-    boost::uint32_t myReadBlocks(PointBuffer& data);
-    // 
-    PointBufferPtr fetchPointBuffer( boost::int32_t const& cloud_id,
-                                std::string const& schema_xml,
-                                boost::uint32_t capacity);
-
-    bool m_at_end;
-    boost::int32_t m_active_cloud_id;
-    PointBufferPtr m_active_buffer;
-    BufferMap m_buffers;
-    boost::uint32_t m_buffer_position;
-
-private:
-    const pdal::drivers::sqlite::SQLiteReader& m_reader;
-    sqlite3* m_session;
+    std::vector<Dimension *> m_dims;
     
-    // ::soci::statement getNextCloud(std::string const& cloud_table_name,
-    //     boost::int32_t& cloud_id, ::soci::row& r);
-    // void readBlob(::soci::row& block, boost::uint32_t howMany);
-    void fillUserBuffer(PointBuffer& user_buffer);
-    // 
-    void copyDatabaseData(PointBuffer& source, 
-                          PointBuffer& destination, 
-                          Dimension const& dest_dim, 
-                          boost::uint32_t source_starting_position, 
-                          boost::uint32_t destination_starting_position,
-                          boost::uint32_t howMany);
-    // pdal::Bounds<double> getBounds(Statement statement, BlockPtr block);
-    IteratorBase& operator=(const IteratorBase&); // not implemented
-    IteratorBase(const IteratorBase&); // not implemented;
+    virtual void initialize();
+    virtual void processOptions(const Options& options);
+    virtual void buildSchema(Schema *schema);
+
+    void validateQuery() const;
+    
+    pdal::Schema fetchSchema() const;
+    std::unique_ptr<SQLite> m_session;
+    std::string m_query;
+    std::string m_schemaFile;
+    std::string m_connection;
+    boost::optional<SpatialReference> m_spatialRef;
 };
 
-
-class SQLiteReader : public IteratorBase, public pdal::StageSequentialIterator
-{
-public:
-    SQLiteReader(const pdal::drivers::sqlite::SQLiteReader& reader, PointBuffer& buffer);
-
-private:
-    boost::uint64_t skipImpl(boost::uint64_t count);
-    boost::uint32_t readBufferImpl(PointBuffer& data);
-    bool atEndImpl() const;
-};
-
-
-} // sequential
-
-} // iterators
 }
 }
 } // namespace pdal::driver::oci

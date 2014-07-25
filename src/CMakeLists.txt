@@ -435,11 +435,13 @@ set(PDAL_SQLITE_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_SQLITE_PATH}")
 
 set(PDAL_DRIVERS_SQLITE_HPP
   "${PDAL_SQLITE_HEADERS}/SqliteCommon.hpp"
+  "${PDAL_SQLITE_HEADERS}/SqliteIterator.hpp"
   "${PDAL_SQLITE_HEADERS}/SqliteReader.hpp"
   "${PDAL_SQLITE_HEADERS}/SqliteWriter.hpp"
 )
 
 set (PDAL_DRIVERS_SQLITE_CPP 
+  "${PDAL_SQLITE_SRC}/SqliteIterator.cpp"
   "${PDAL_SQLITE_SRC}/SqliteReader.cpp"
   "${PDAL_SQLITE_SRC}/SqliteWriter.cpp"
 )

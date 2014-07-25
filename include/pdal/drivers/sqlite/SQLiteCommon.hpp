@@ -36,6 +36,9 @@
 
 #include <pdal/pdal_error.hpp>
 #include <pdal/Options.hpp>
+#include <pdal/Log.hpp>
+
+#include <boost/algorithm/string.hpp>
 
 #include <sqlite3.h>
 #include <sstream>
@@ -107,6 +110,22 @@ public:
 typedef std::vector<column> row;
 typedef std::vector<row> records;
 
+class Patch
+{
+public:
+    Patch() : count(0), remaining(0), byte_size(0), bytes(0)
+    {
+    };
+    
+    point_count_t count;
+    point_count_t remaining;
+    
+    size_t byte_size;
+    const char* bytes;
+
+};
+ 
+ 
 class SQLite
 {
 public:
@@ -154,6 +173,8 @@ public:
         
         int flags = SQLITE_OPEN_NOMUTEX;
         if (bWrite) flags |= SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
+        else
+            flags |= SQLITE_OPEN_READONLY;
         
         int code = sqlite3_open_v2(m_connection.c_str(), &m_session, flags, 0);
         if ( (code != SQLITE_OK) ) 
@@ -228,22 +249,38 @@ public:
                 row r;
                 for (int v = 0; v < numCols; ++v)
                 {
+                
                     if (m_columns.size() != static_cast<std::vector<std::string>::size_type > (numCols))
                     {
-                        const char* ccolumnName = sqlite3_column_name(m_statement, v);
-                        m_columns.push_back(std::string(ccolumnName));
+                        std::string ccolumnName = boost::to_upper_copy(std::string(sqlite3_column_name(m_statement, v)));
+                        std::string ccolumnType = boost::to_upper_copy(std::string(sqlite3_column_decltype(m_statement, v)));                            
+                        m_columns.insert(std::pair<std::string, int32_t>(ccolumnName, v));
+                        m_types.push_back(ccolumnType);
                     }
-                    
+
                     column c;
-                    char const* buf =
-                        reinterpret_cast<char const*>(sqlite3_column_text(m_statement, v));
-                    c.null = false;
-                    if (0 == buf)
+                    
+                    if (sqlite3_column_type(m_statement, v) == SQLITE_BLOB)
+                    {
+                        c.blobLen = sqlite3_column_bytes(m_statement, v);
+                        c.blobBuf = (char*) sqlite3_column_blob(m_statement, v);
+                    } else if (sqlite3_column_type(m_statement, v) == SQLITE_NULL)
                     {
                         c.null = true;
-                        buf = "";
+                    } else
+                    {
+                        char const* buf =
+                            reinterpret_cast<char const*>(sqlite3_column_text(m_statement, v));
+
+                        if (0 == buf)
+                        {
+                            c.null = true;
+                            buf = "";
+                        }
+                        c.data = buf;                        
                     }
-                    c.data = buf;
+
+
                     r.push_back(c);
                 }
                 m_data.push_back(r);
@@ -260,7 +297,7 @@ public:
         return true;
     }
     
-    row* get()
+    const row* get() const
     {
         if (m_data.size())
             return &m_data[m_position];
@@ -268,11 +305,17 @@ public:
             return 0;
     }
     
-    std::vector<std::string> const& columns() const
+    std::map<std::string, int32_t> const& columns() const
     {
         return m_columns;
     }
+
+    std::vector<std::string> const& types() const
+    {
+        return m_types;
+    }
     
+
     int64_t last_row_id() const
     {
         return (int64_t)sqlite3_last_insert_rowid(m_session);
@@ -355,8 +398,20 @@ public:
         return true;
     }
 
-    bool spatialite(std::string so_extension="so")
+    bool spatialite()
     {
+        std::string so_extension;
+#ifdef __APPLE__
+        so_extension = "dylib";
+#endif
+
+#ifdef __linux__
+        so_extension = "so";
+#endif
+
+#ifdef _WIN32
+        so_extension = "dll";
+#endif
         int code = sqlite3_enable_load_extension(m_session, 1);
         if (code != SQLITE_OK)
         {
@@ -374,7 +429,33 @@ public:
         return true;
 
     }
+
+
+
+    bool doesTableExist(std::string const& name)
+    {
+        std::ostringstream oss;
+
+        oss << "SELECT name FROM sqlite_master WHERE type = \"table\"";
+
+        query(oss.str());
+    
+        std::ostringstream debug;
+        while (next())
+        {
+            const row* r = get();
+            if (!r)
+                break ;// didn't have anything
         
+            column const& c = r->at(0); // First column is table name!
+            if (boost::iequals(c.data, name))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+            
 private:  
     pdal::LogPtr m_log;
     std::string m_connection;
@@ -382,8 +463,9 @@ private:
     sqlite3_stmt* m_statement;
     records m_data;
     records::size_type m_position;
-    std::vector<std::string> m_columns;
-    
+    std::map<std::string, int32_t> m_columns;
+    std::vector<std::string> m_types;
+        
     void check_error(std::string const& msg)
     {
         const char *zErrMsg = sqlite3_errmsg(m_session);

@@ -38,7 +38,6 @@
 #include <pdal/pdal_macros.hpp>
 #include <pdal/FileUtils.hpp>
 
-#include <boost/algorithm/string.hpp>
 
 #include <sstream>
 
@@ -107,9 +106,9 @@ void SQLiteWriter::initialize()
         m_session = std::unique_ptr<SQLite>(new SQLite(m_connection, log()));
         m_session->connect(true);
         log()->get(logDEBUG) << "Connected to database" << std::endl;
-        bool bHaveSpatialite = CheckTableExists("geometry_columns");
+        bool bHaveSpatialite = m_session->doesTableExist("geometry_columns");
         log()->get(logDEBUG) << "Have spatialite?: " << bHaveSpatialite << std::endl;
-        m_session->spatialite("dylib");
+        m_session->spatialite();
 
         if (!bHaveSpatialite)
         {
@@ -178,8 +177,8 @@ void SQLiteWriter::writeInit(const Schema& schema)
 
     m_session->begin();
 
-    bool bHaveBlockTable = CheckTableExists(m_block_table);
-    bool bHaveCloudTable = CheckTableExists(m_cloud_table);
+    bool bHaveBlockTable = m_session->doesTableExist(m_block_table);
+    bool bHaveCloudTable = m_session->doesTableExist(m_cloud_table);
 
     if (m_options.getValueOrDefault<bool>("overwrite", true))
     {
@@ -223,38 +222,6 @@ void SQLiteWriter::writeInit(const Schema& schema)
     m_sdo_pc_is_initialized = true;
 }
 
-
-bool SQLiteWriter::CheckTableExists(std::string const& name)
-{
-    std::ostringstream oss;
-
-    oss << "SELECT name FROM sqlite_master WHERE type = \"table\"";
-    log()->get(logDEBUG) << "checking for " << name <<
-        " existence ... " << std::endl;
-
-    m_session->query(oss.str());
-    
-    std::ostringstream debug;
-    while (m_session->next())
-    {
-        row* r = m_session->get();
-        if (!r)
-            break ;// didn't have anything
-        
-        column const& c = r->at(0); // First column is table name!
-        debug << ", " << c.data;
-        if (boost::iequals(c.data, name))
-        {
-            log()->get(logDEBUG) << "it exists!" << std::endl;
-            log()->get(logDEBUG) << debug.str();
-            return true;
-        }
-    }
-
-    log()->get(logDEBUG) << debug.str();
-    log()->get(logDEBUG) << " -- '" << name << "' not found." << std::endl;
-    return false;
-}
 
 
 void SQLiteWriter::CreateBlockTable()
