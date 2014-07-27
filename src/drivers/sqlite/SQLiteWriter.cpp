@@ -180,6 +180,13 @@ void SQLiteWriter::writeInit(const Schema& schema)
     bool bHaveBlockTable = m_session->doesTableExist(m_block_table);
     bool bHaveCloudTable = m_session->doesTableExist(m_cloud_table);
 
+    log()->get(logDEBUG) << "bHaveBlockTable '" 
+                         << bHaveBlockTable
+                         <<"'"<< std::endl;   
+    log()->get(logDEBUG) << "bHaveCloudTable '" 
+                         << bHaveCloudTable
+                         <<"'"<< std::endl;   
+        
     if (m_options.getValueOrDefault<bool>("overwrite", true))
     {
         if (bHaveBlockTable)
@@ -319,43 +326,20 @@ void SQLiteWriter::DeleteCloudTable()
 
     // Go drop the table
     // We need to clean up the geometry column before dropping the table
-
-    try
-    {
-        oss << "SELECT DropGeometryColumn('" <<
-            boost::to_lower_copy(m_cloud_table) << "', 'extent')";
-        m_session->execute(oss.str());
-        log()->get(logDEBUG) << "Dropped geometry column from cloud table '" 
-                             << boost::to_lower_copy(m_cloud_table) 
-                             << "'" <<std::endl;
-    }
-    catch (sqlite::sqlite_driver_error const& )
-    {}
+    oss << "SELECT DiscardGeometryColumn('" <<
+        boost::to_lower_copy(m_cloud_table) << "', 'extent')";
+    m_session->execute(oss.str());
     oss.str("");
+    log()->get(logDEBUG) << "Dropped geometry column from cloud table '" 
+                         << boost::to_lower_copy(m_cloud_table) 
+                         << "'" <<std::endl;
 
-    try
-    {
-        oss << "DROP TABLE " << boost::to_lower_copy(m_cloud_table);
-        m_session->execute(oss.str());
-        log()->get(logDEBUG) << "Dropped cloud table '" 
-                             << boost::to_lower_copy(m_cloud_table) 
-                             << "'" <<std::endl;
-    }
-    catch (sqlite::sqlite_driver_error const& )
-    {}
-
-    try
-    {
-        oss.str("");
-        oss << "DROP SEQUENCE " <<
-            boost::to_lower_copy(m_cloud_table)<<"_id_seq";
-        m_session->execute(oss.str());
-        log()->get(logDEBUG) << "Dropped sequence'" 
-                             << boost::to_lower_copy(m_cloud_table)<<"_id_seq" 
-                             << "'" <<std::endl;
-    }
-    catch (sqlite::sqlite_driver_error const& )
-    {}
+    oss << "DROP TABLE " << boost::to_lower_copy(m_cloud_table);
+    m_session->execute(oss.str());
+    oss.str("");
+    log()->get(logDEBUG) << "Dropped cloud table '" 
+                         << boost::to_lower_copy(m_cloud_table) 
+                         << "'" <<std::endl;
 }
 
 
@@ -502,8 +486,6 @@ void SQLiteWriter::CreateCloud(Schema const& buffer_schema)
     }
     if (bounds.size())
     {
-        string force =  "ST_Force_2D";
-
         records rs;
         row r;
           
@@ -534,8 +516,6 @@ void SQLiteWriter::writeTile(PointBuffer const& buffer)
     size_t outbufSize = m_pointSize * buffer.size();
     std::unique_ptr<char> outbuf(new char[outbufSize]);
     char *pos = outbuf.get();
-    size_t clicks = 0;
-    size_t interrupt = m_dims.size() * 100;
     
     for (PointId id = 0; id < buffer.size(); ++id)
     {
@@ -544,8 +524,6 @@ void SQLiteWriter::writeTile(PointBuffer const& buffer)
             buffer.getRawField(m_dims[dim], id, pos);
             pos += m_dims[dim].getByteSize();
         }
-        if (id % 100 == 0)
-            m_callback->invoke(id);        
     }
 
     records rs;
