@@ -91,7 +91,7 @@ public:
 
     std::string data;
     bool null;
-    const char * blobBuf;
+    std::vector<uint8_t> blobBuf;
     std::size_t blobLen;
 };
 
@@ -100,7 +100,8 @@ class blob : public column
 public:
     blob(const char* buffer, std::size_t size) : column()
     {
-        blobBuf = buffer;
+        blobBuf.resize(size);
+        std::copy(buffer, buffer+size, blobBuf.begin());
         blobLen = size;
         null = false;
         
@@ -121,7 +122,7 @@ public:
     point_count_t remaining;
     
     size_t byte_size;
-    const char* bytes;
+    std::vector<uint8_t> bytes;
 
 };
  
@@ -147,7 +148,13 @@ public:
     {
         
         if (m_session)
+        {
+#ifdef sqlite3_close_v2            
             sqlite3_close_v2(m_session);
+#else
+            sqlite3_close(m_session);
+#endif
+        }
         sqlite3_shutdown();
 
     }
@@ -225,7 +232,6 @@ public:
         m_columns.clear();
         m_data.clear();
         sqlite3_reset(m_statement);
-        m_log->get(logDEBUG3) << "reset sqlite3_reset" << std::endl;  
 
         m_log->get(logDEBUG3) << "Querying '" << query.c_str() <<"'"<< std::endl;  
         
@@ -274,8 +280,11 @@ public:
                     
                     if (sqlite3_column_type(m_statement, v) == SQLITE_BLOB)
                     {
-                        c.blobLen = sqlite3_column_bytes(m_statement, v);
-                        c.blobBuf = (char*) sqlite3_column_blob(m_statement, v);
+                        int len = sqlite3_column_bytes(m_statement, v);
+                        const char* buf = (char*) sqlite3_column_blob(m_statement, v);
+                        c.blobLen = len;
+                        c.blobBuf.resize(len);
+                        std::copy(buf, buf+len, c.blobBuf.begin());
                     } else if (sqlite3_column_type(m_statement, v) == SQLITE_NULL)
                     {
                         c.null = true;
@@ -368,7 +377,7 @@ public:
                 else if (c.blobLen != 0)
                 {
                     didBind = sqlite3_bind_blob(m_statement, pos+1,
-                                                c.blobBuf,
+                                                &(c.blobBuf.front()),
                                                 static_cast<int>(c.blobLen),
                                                 SQLITE_STATIC);
                 }
@@ -424,6 +433,10 @@ public:
 
 #ifdef _WIN32
         so_extension = "dll";
+#endif
+
+#ifndef sqlite3_enable_load_extension
+#error "sqlite3_enable_load_extension and spatialite is required for sqlite PDAL support"
 #endif
         int code = sqlite3_enable_load_extension(m_session, 1);
         if (code != SQLITE_OK)

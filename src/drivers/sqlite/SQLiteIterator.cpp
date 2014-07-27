@@ -338,7 +338,7 @@ point_count_t SQLiteIterator::readPatch(PointBuffer& buffer, point_count_t numPt
     size_t size = (*r)[position].blobLen;
     position = columns.find("NUM_POINTS")->second;
     int32_t count = boost::lexical_cast<int32_t>((*r)[position].data);
-    m_reader.log()->get(logDEBUG) << "fetched patch with " << count 
+    m_reader.log()->get(logDEBUG4) << "fetched patch with " << count 
          << " points and " << size << " bytes bytesize: " << size << std::endl;    
     m_patch->remaining = count;
     m_patch->count = count;
@@ -350,7 +350,7 @@ point_count_t SQLiteIterator::readPatch(PointBuffer& buffer, point_count_t numPt
     point_count_t numRead = 0;
 
     size_t offset = ((m_patch->count - m_patch->remaining) * m_point_size);
-    uint8_t *pos = (uint8_t*)m_patch->bytes + offset;
+    uint8_t *pos = &(m_patch->bytes.front()) + offset;
     assert(offset <= m_patch->byte_size);
     while (numRead < numPts && numRemaining > 0)
     {
@@ -373,7 +373,7 @@ point_count_t SQLiteIterator::readImpl(PointBuffer& buffer, point_count_t count)
     if (atEndImpl())
         return 0;
     
-    m_reader.log()->get(logDEBUG) << "readBufferImpl called with "
+    m_reader.log()->get(logDEBUG4) << "readBufferImpl called with "
         "PointBuffer filled to " << buffer.size() << " points" <<
         std::endl;
 
@@ -398,8 +398,6 @@ point_count_t SQLiteIterator::readImpl(PointBuffer& buffer, point_count_t count)
             }
         }
         PointId bufBegin = buffer.size();
-        if (patch_count >= 4 && patch_count < 7)
-            std::cout << buffer << std::endl;
         point_count_t numRead = readPatch(buffer, count - totalNumRead);
         PointId bufEnd = bufBegin + numRead;
         totalNumRead += numRead;
