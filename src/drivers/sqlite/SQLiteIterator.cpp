@@ -318,11 +318,18 @@ void SQLiteIterator::validateQuery() const
     }
 }
 
-bool SQLiteIterator::getPatch()
+
+bool SQLiteIterator::NextBuffer()
 {
+    return m_session->next();
+}
+
+point_count_t SQLiteIterator::readPatch(PointBuffer& buffer, point_count_t numPts)
+{
+
     const row* r = m_session->get();
     if (!r)
-        return false;    
+        throw pdal_error("readPatch with no data in session!");
     std::map<std::string, int32_t> const& columns = m_session->columns();
 
     // Availability of positions already validated
@@ -332,28 +339,19 @@ bool SQLiteIterator::getPatch()
     position = columns.find("NUM_POINTS")->second;
     int32_t count = boost::lexical_cast<int32_t>((*r)[position].data);
     m_reader.log()->get(logDEBUG) << "fetched patch with " << count 
-         << " points and " << size << " bytes bytesize: " << count * m_point_size << std::endl;    
+         << " points and " << size << " bytes bytesize: " << size << std::endl;    
     m_patch->remaining = count;
     m_patch->count = count;
     m_patch->bytes = bytes;
-    m_patch->byte_size = count * m_point_size;
-    return true;
-}
-bool SQLiteIterator::NextBuffer()
-{
-    return m_session->next();
-}
-
-point_count_t SQLiteIterator::readPatch(PointBuffer& buffer, point_count_t numPts)
-{
-    getPatch();
+    m_patch->byte_size = size;
+    
     point_count_t numRemaining = m_patch->remaining;
     PointId nextId = buffer.size();
     point_count_t numRead = 0;
 
     size_t offset = ((m_patch->count - m_patch->remaining) * m_point_size);
     uint8_t *pos = (uint8_t*)m_patch->bytes + offset;
-    assert(offset < m_patch->byte_size);
+    assert(offset <= m_patch->byte_size);
     while (numRead < numPts && numRemaining > 0)
     {
         for (size_t d = 0; d < m_dims.size(); ++d)
@@ -374,33 +372,41 @@ point_count_t SQLiteIterator::readImpl(PointBuffer& buffer, point_count_t count)
 {
     if (atEndImpl())
         return 0;
-
-    if (!b_doneQuery)
-    {
-        doQuery();
-        b_doneQuery = true;
-        validateQuery();
-    }
     
     m_reader.log()->get(logDEBUG) << "readBufferImpl called with "
         "PointBuffer filled to " << buffer.size() << " points" <<
         std::endl;
 
     point_count_t totalNumRead = 0;
-    point_count_t numChips(0);
+
+    if (! b_doneQuery)
+    {
+        // read first patch
+        doQuery();
+        validateQuery();
+        b_doneQuery = true;
+        totalNumRead = readPatch(buffer, count); 
+    }
+    int patch_count(0);
     while (totalNumRead < count)
     {
-        m_reader.log()->get(logDEBUG) << "read totalNumRead: " << totalNumRead << " chip #: " << numChips <<
-            std::endl;        
         if (m_patch->remaining == 0)
+        {
             if (!NextBuffer())
+            {
                 return totalNumRead;
+            }
+        }
         PointId bufBegin = buffer.size();
+        if (patch_count >= 4 && patch_count < 7)
+            std::cout << buffer << std::endl;
         point_count_t numRead = readPatch(buffer, count - totalNumRead);
         PointId bufEnd = bufBegin + numRead;
         totalNumRead += numRead;
+        patch_count++;
 
     }
+
     return totalNumRead;
 
 }

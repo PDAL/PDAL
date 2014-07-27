@@ -124,7 +124,6 @@ private:
                               point_count_t numPts);
     bool NextBuffer();
     bool doQuery();
-    bool getPatch();
     void validateQuery() const;
     bool m_at_end;
     std::vector<Dimension *> const& m_dims;

@@ -134,7 +134,7 @@ public:
         , m_connection(connection)
         , m_session(0)
         , m_statement(0)
-        , m_position(0)
+        , m_position(-1)
     {
         m_log->get(logDEBUG3) << "Setting up config " << std::endl;
         sqlite3_shutdown();
@@ -224,9 +224,10 @@ public:
         m_position = 0;
         m_columns.clear();
         m_data.clear();
-        m_log->get(logDEBUG3) << "Executing '" << query <<"'"<< std::endl;  
         sqlite3_reset(m_statement);
         m_log->get(logDEBUG3) << "reset sqlite3_reset" << std::endl;  
+
+        m_log->get(logDEBUG3) << "Querying '" << query.c_str() <<"'"<< std::endl;  
         
         char const* tail = 0; // unused;
         int res = sqlite3_prepare_v2(m_session,
@@ -303,17 +304,17 @@ public:
     {
         m_position++;
         
-        if (m_data.size() - 1 == m_position)
+        if (m_position >= m_data.size())
             return false;
         return true;
     }
     
     const row* get() const
     {
-        if ( m_position < m_data.size())
-            return &m_data[m_position];
-        else
+        if ( m_position >= m_data.size() )
             return 0;
+        else
+            return &m_data[m_position];
     }
     
     std::map<std::string, int32_t> const& columns() const
@@ -334,8 +335,6 @@ public:
     
     bool insert(std::string const& statement, records const& rs)
     {
-        // if (m_statement)
-        //     sqlite3_reset(m_statement);
         records::size_type rows = rs.size();
 
         int res = sqlite3_prepare_v2(m_session,
@@ -343,6 +342,8 @@ public:
                                   static_cast<int>(statement.size()),
                                   &m_statement,
                                   0);
+        m_log->get(logDEBUG3) << "Inserting '" << statement <<"'"<< std::endl;  
+
         if (res != SQLITE_OK)
         {
             char const* zErrMsg = sqlite3_errmsg(m_session);
