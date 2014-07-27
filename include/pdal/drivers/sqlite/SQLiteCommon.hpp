@@ -435,9 +435,9 @@ public:
         so_extension = "dll";
 #endif
 
-#ifndef sqlite3_enable_load_extension
-#error "sqlite3_enable_load_extension and spatialite is required for sqlite PDAL support"
-#endif
+// #if !defined(sqlite3_enable_load_extension)
+// #error "sqlite3_enable_load_extension and spatialite is required for sqlite PDAL support"
+// #endif
         int code = sqlite3_enable_load_extension(m_session, 1);
         if (code != SQLITE_OK)
         {
