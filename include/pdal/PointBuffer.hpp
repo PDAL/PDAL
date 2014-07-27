@@ -446,6 +446,8 @@ inline void PointBuffer::setFieldInternal(pdal::Dimension const& dim,
 
 inline void PointBuffer::appendPoint(PointBuffer& buffer, PointId id)
 {
+    // FIXME: hobu -- what happens if id is out of range of m_index
+    // or m_index isn't ordered?
     PointId rawId = buffer.m_index[id];
     id = m_index.size();
     m_index.resize(id + 1);
