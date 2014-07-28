@@ -111,7 +111,7 @@ private:
     std::string m_hex;
     size_t m_pointSize;
     Orientation::Enum m_orientation;
-    std::vector<Dimension> m_dims;
+    std::vector<DimensionPtr> m_dims;
     bool m_pack;    
     
     // lose this

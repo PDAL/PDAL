@@ -77,7 +77,7 @@ Writer::Writer(const Options& options)
     , m_schema_name("")
     , m_table_name("")
     , m_column_name("")
-    , m_patch_compression_type(schema::COMPRESSION_NONE)
+    , m_patch_compression_type(CompressionType::None)
     , m_patch_capacity(400)
     , m_srid(0)
     , m_pcid(0)
@@ -125,15 +125,15 @@ void Writer::processOptions(const Options& options)
 
 void Writer::ready(PointContext ctx)
 {
-    Schema *schema = ctx.schema();
     m_pointSize = 0;
-    for (schema::size_type i = 0; i < schema->numDimensions(); ++i)
+    DimensionList dims = ctx.schema()->getDimensions();
+    for (auto di = dims.begin(); di != dims.end(); ++di)
     {
-        const Dimension& d = schema->getDimension(i);
-        if (!m_pack || !d.isIgnored())
+        DimensionPtr d = *di;
+        if (!m_pack || !d->isIgnored())
         {
             m_dims.push_back(d);
-            m_pointSize += d.getByteSize();
+            m_pointSize += d->getByteSize();
         }
     }
 }
@@ -185,7 +185,8 @@ Options Writer::getDefaultOptions()
 
 void Writer::writeInit(const Schema& schema)
 {
-    if (m_schema_is_initialized) return;
+    if (m_schema_is_initialized)
+        return;
 
     // Start up the database connection
     pg_begin(m_session);
@@ -357,11 +358,11 @@ pdal::Schema output_schema = buffer_schema;
         }
 
         /* If the writer specifies a compression, we should set that */
-        if (m_patch_compression_type == schema::COMPRESSION_DIMENSIONAL)
+        if (m_patch_compression_type == CompressionType::Dimensional)
         {
             compression = "dimensional";
         }
-        else if (m_patch_compression_type == schema::COMPRESSION_GHT)
+        else if (m_patch_compression_type == CompressionType::Ght)
         {
             compression = "ght";
         }
@@ -370,8 +371,10 @@ pdal::Schema output_schema = buffer_schema;
         MetadataNode m = metadata.getNode();
         m.add("compression", compression);
         
+        /**
         log()->get(logDEBUG) << "output_schema: " <<
             output_schema.getByteSize() << std::endl;
+        **/
         xml = pdal::Schema::to_xml(output_schema, m);
         const char* paramValues = xml.c_str();
         oss << "INSERT INTO pointcloud_formats (pcid, srid, schema) "
@@ -549,9 +552,9 @@ void Writer::writeTile(PointBuffer const& buffer)
 
     /* We are always getting uncompressed bytes off the block_data */
     /* so we always used compression type 0 (uncompressed) in writing our WKB */
-    boost::int32_t pcid = m_pcid;
-    schema::CompressionType compression_v = schema::COMPRESSION_NONE;
-    boost::uint32_t compression = static_cast<boost::uint32_t>(compression_v);
+    int32_t pcid = m_pcid;
+    CompressionType::Enum compression_v = CompressionType::None;
+    uint32_t compression = static_cast<uint32_t>(compression_v);
 
     static char syms[] = "0123456789ABCDEF";
     m_hex.resize(outbufSize*2);

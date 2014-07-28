@@ -53,9 +53,9 @@ namespace CompressionType
 
 enum Enum
 {
-    COMPRESSION_DIMENSIONAL,
-    COMPRESSION_GHT,
-    COMPRESSION_NONE
+    Dimensional,
+    Ght,
+    None
 };
 
 } // namespace CompressionType
@@ -64,10 +64,10 @@ enum Enum
 CompressionType::Enum getCompressionType(std::string const& compression_type)
 {
     if (boost::iequals(compression_type, "dimensional"))
-        return CompressionType::COMPRESSION_DIMENSIONAL;
+        return CompressionType::Dimensional;
     else if (boost::iequals(compression_type, "ght"))
-        return CompressionType::COMPRESSION_GHT;
-    return CompressionType::COMPRESSION_NONE;
+        return CompressionType::Ght;
+    return CompressionType::None;
 }
 
 inline PGconn* pg_connect(std::string const& connection)
