@@ -134,7 +134,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     "libgeos++-dev",
     "vim",
     "libeigen3-dev",
-    "libvtk5-dev",
     "libflann-dev"
   ];
 
