@@ -866,7 +866,7 @@ if (APPLE)
   set_target_properties(
     ${PDAL_LIB_NAME}
     PROPERTIES
-    INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib")
+    INSTALL_NAME_DIR "@rpath" BUILD_WITH_INSTALL_RPATH ON)
 endif()
 
 
@@ -881,7 +881,7 @@ if (USE_PDAL_PLUGIN_TEXT)
     set_target_properties(
       "${PDAL_TEXT_WRITER_LIB_NAME}"
       PROPERTIES
-      INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib")
+      INSTALL_NAME_DIR "@rpath" BUILD_WITH_INSTALL_RPATH ON)
     endif()
 endif()
 
@@ -898,7 +898,7 @@ if (USE_PDAL_PLUGIN_SQLITE)
     set_target_properties(
       "${PDAL_SQLITE_WRITER_LIB_NAME}"
       PROPERTIES
-      INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib")
+      INSTALL_NAME_DIR "@rpath" BUILD_WITH_INSTALL_RPATH ON)
     endif()
 
     set(PDAL_SQLITE_READER_LIB_NAME pdal_plugin_reader_sqlite)
@@ -912,7 +912,7 @@ if (USE_PDAL_PLUGIN_SQLITE)
     set_target_properties(
       "${PDAL_SQLITE_READER_LIB_NAME}"
       PROPERTIES
-      INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib")
+      INSTALL_NAME_DIR "@rpath" BUILD_WITH_INSTALL_RPATH ON)
     endif()
     
 endif()
@@ -933,7 +933,7 @@ if (USE_PDAL_PLUGIN_OCI)
     set_target_properties(
       "${PDAL_OCI_WRITER_LIB_NAME}"
       PROPERTIES
-      INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib")
+      INSTALL_NAME_DIR "@rpath" BUILD_WITH_INSTALL_RPATH ON)
     endif()
 endif()
 endif()

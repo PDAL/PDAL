@@ -25,6 +25,10 @@ cmake_policy(SET CMP0022 OLD) # interface link libraries
 cmake_policy(SET CMP0042 OLD) # osx rpath
 endif()
 
+if (CMAKE_SYSTEM_NAME MATCHES "Linux")
+set(CMAKE_SKIP_RPATH ON)
+endif()
+
 # Provided modules
 include(CMakeDependentOption)
 
