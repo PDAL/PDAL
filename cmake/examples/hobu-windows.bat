@@ -18,7 +18,8 @@ REM set BUILD_TYPE=Debug
 set PDAL_DIR=.
 
 :: Where is your OSGeo4W installed (recommended basic way to satisfy dependent libs)
-set OSGEO4W_DIR=C:\OSGeo4W
+set OSGEO4W_DIR=C:\OSGeo4W64
+set BOOST=c:\boost\1.55
 
 :: Where is boost installed?
 REM set PDAL_EMBED_BOOST=ON
@@ -53,8 +54,8 @@ set LASZIP_LIBRARY=%OSGEO4W_DIR%\lib\laszip.lib
 :: Oracle
 set ORACLE_ENABLED=ON
 set ORACLE_HOME=%OSGEO4W_DIR%
-REM set ORACLE_INCLUDE_DIR=%ORACLE_HOME%\include
-REM set ORACLE_OCI_LIBRARY=%ORACLE_HOME%\lib\oci.lib
+set ORACLE_INCLUDE_DIR=%ORACLE_HOME%\include
+set ORACLE_OCI_LIBRARY=%ORACLE_HOME%\lib\oci.lib
 
 :: LibXML2
 set LIBXML2_ENABLED=ON
@@ -72,25 +73,13 @@ REM set PYTHON_EXECUTABLE=%OSGEO4W_DIR\bin\python27.exe
 REM set PYTHON_INCLUDE_DIR=%OSGEO4W_DIR\apps\python27\include
 REM set PYTHON_LIBRARY=%OSGEO4W_DIR\apps\python27\libs\python27.lib
 
-:: Set this if you are building SWIG bindings for C#. Visual Studio
-:: needs to use this env var to find where boost lives.
-set PDAL_SWIG_ENABLED=OFF
-set PDAL_SWIG_BOOST_HOME=%BOOST_DIR%
 
-:: OpenGL support, for pcview
-set FREEGLUT_ENABLED=OFF
-:: special config for mpg
-if %USERDOMAIN% == T5500 set FREEGLUT_LIBRARY=d:\dev\freeglut-2.6.0-3.mp\lib\freeglut.lib
-if %USERDOMAIN% == T5500 set FREEGLUT_INCLUDE_DIR=d:\dev\freeglut-2.6.0-3.mp\include
-if %USERDOMAIN% == T5500 set FREEGLUT_ENABLED=ON
-if %USERDOMAIN% == PDC set FREEGLUT_LIBRARY=c:\dev\freeglut-2.6.0-3.mp\lib\freeglut.lib
-if %USERDOMAIN% == PDC set FREEGLUT_INCLUDE_DIR=c:\dev\freeglut-2.6.0-3.mp\include
-if %USERDOMAIN% == PDC set FREEGLUT_ENABLED=ON
 
 rem if EXIST CMakeCache.txt del CMakeCache.txt
 cmake -G %GENERATOR% ^
+    -DBOOST_INCLUDEDIR=%BOOST% ^
     -DWITH_GDAL=%GDAL_ENABLED% ^
-    -DCMAKE_INSTALL_PREFIX=D:\PDAL\package ^
+    -DCMAKE_INSTALL_PREFIX=c:\dev\PDAL\package ^
     -DWITH_GEOTIFF=%GEOTIFF_ENABLED% ^
     -DWITH_ORACLE=%ORACLE_ENABLED% ^
     -DWITH_PGPOINTCLOUD=ON ^

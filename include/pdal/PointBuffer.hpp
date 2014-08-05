@@ -41,6 +41,7 @@
 #include <pdal/Schema.hpp>
 
 #include <vector>
+#include <set>
 
 namespace pdal
 {
