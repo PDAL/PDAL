@@ -54,4 +54,5 @@ else
     ninja -j ${NUMTHREADS}
 fi
 
-LD_LIBRARY_PATH=./lib ctest -V --output-on-failure .
+#LD_LIBRARY_PATH=./lib ctest -V --output-on-failure .
+LD_LIBRARY_PATH=./lib ./bin/pdal_test "../test/data" "--catch_system_errors=no"
