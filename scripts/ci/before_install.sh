@@ -7,7 +7,7 @@ sudo apt-get update -y
 sudo apt-get install software-properties-common -y
 sudo apt-get install python-software-properties -y
 # sudo add-apt-repository ppa:ubuntugis/ppa -y
-sudo add-apt-repository ppa:ubuntugis-unstable/ppa -y
+sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable -y
 sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
 if [[ $PDAL_EMBED_BOOST == "OFF" ]]
 then
