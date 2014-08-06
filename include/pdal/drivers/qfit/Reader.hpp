@@ -122,23 +122,24 @@ public:
         { return m_numPoints; }
 
     // this is called by the stage's iterator
-    uint32_t processBuffer(PointBuffer& PointBuffer, std::istream& stream,
-        uint64_t numPointsLeft) const;
-
-protected:
-    inline QFIT_Format_Type getFormat() const
-        { return m_format; }
+    point_count_t processBuffer(PointBuffer& PointBuffer, std::istream& stream,
+        point_count_t count) const;
 
 private:
+    std::string m_filename;
     QFIT_Format_Type m_format;
+    std::ios::off_type m_point_bytes;
     std::size_t m_offset;
-    boost::uint32_t m_size;
+    uint32_t m_size;
     bool m_flip_x;
     double m_scale_z;
     bool m_littleEndian;
     point_count_t m_numPoints;
 
+    virtual void processOptions(const Options& ops);
+    virtual void initialize();
     virtual void addDimensions(PointContext ctx);
+    virtual void ready(PointContext ctx);
 
     Reader& operator=(const Reader&); // not implemented
     Reader(const Reader&); // not implemented
@@ -153,7 +154,7 @@ namespace sequential
 class Reader : public pdal::ReaderSequentialIterator
 {
 public:
-    Reader(const pdal::drivers::qfit::Reader& reader, PointBuffer& buffer);
+    Reader(const qfit::Reader& reader);
     ~Reader();
 
 private:

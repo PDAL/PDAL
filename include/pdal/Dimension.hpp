@@ -435,9 +435,9 @@ std::string name(Id::Enum id)
     case Id::Flag:
         return "Flag";
     case Id::Unknown:
-        throw pdal_error("No size for undefined dimension ID.");
+        return "";
     }
-    throw pdal_error("No size for undefined dimension ID.");
+    return "";
 }
 
 

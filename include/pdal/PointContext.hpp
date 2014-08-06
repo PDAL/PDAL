@@ -158,6 +158,18 @@ public:
             Dimension::Id::Unknown);
     }
 
+    std::string dimName(Dimension::Id::Enum id) const
+    {
+        std::string name = Dimension::name(id);
+        if (!name.empty())
+            return name;
+        for (auto pi = m_dims->m_propIds.begin();
+                pi != m_dims->m_propIds.end(); ++pi)
+            if (pi->second == id)
+                return pi->first;
+        return "";
+    }
+
     bool hasDim(Dimension::Id::Enum id) const
         { return m_dims->m_detail[id].m_type != Dimension::Type::None; }
 
