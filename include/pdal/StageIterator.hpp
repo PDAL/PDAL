@@ -160,7 +160,7 @@ public:
 
 protected:
     // from Iterator
-    virtual point_count_t readImpl(PointBuffer& data, point_count_t count)
+    virtual point_count_t readImpl(PointBuffer& /*data*/, point_count_t /*count*/)
         { std::cerr << "No sequential readImpl for stage/iterator!\n"; return 0; }
     virtual boost::uint32_t readBufferImpl(PointBuffer&) = 0;
     virtual bool atEndImpl() const = 0;
@@ -185,7 +185,7 @@ public:
 
 protected:
     // from Iterator
-    virtual point_count_t readImpl(PointBuffer& data, point_count_t count)
+    virtual point_count_t readImpl(PointBuffer& /*data*/, point_count_t /*count*/)
         { std::cerr << "No random readImpl for stage/iterator!\n"; return 0; }
     virtual boost::uint64_t seekImpl(boost::uint64_t position) = 0;
     virtual boost::uint64_t skipImpl(boost::uint64_t position);
