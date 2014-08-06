@@ -188,8 +188,8 @@ if(WIN32)
 
   endif(MSVC)
   
-  set(CMAKE_INCLUDE_PATH "c:/osgeo4w/include;c:/OSGeo4W64/include;$ENV{CMAKE_INCLUDE_PATH}")
-  set(CMAKE_LIBRARY_PATH "c:/osgeo4w/lib;c:/OSGeo4W64/lib;$ENV{CMAKE_LIBRARY_PATH}")
+  set(CMAKE_INCLUDE_PATH "c:/OSGeo4W64/include;$ENV{CMAKE_INCLUDE_PATH}")
+  set(CMAKE_LIBRARY_PATH "c:/OSGeo4W64/lib;$ENV{CMAKE_LIBRARY_PATH}")
 
   set(PDAL_PLATFORM_WIN32 1)
 else()
