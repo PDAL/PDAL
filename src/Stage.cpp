@@ -76,7 +76,7 @@ void Stage::prepare(PointContext ctx)
     processOptions(m_options);
     l_initialize(ctx);
     initialize();
-    buildSchema(ctx.schema());
+    addDimensions(ctx);
 }
 
 
@@ -152,7 +152,7 @@ void Stage::l_processOptions(const Options& options)
             m_log.reset(new Log(getName(), v));
         }
     }
-    m_log->setLevel((LogLevel)m_verbose);
+    m_log->setLevel((LogLevel::Enum)m_verbose);
 
     // If the user gave us an SRS via options, take that.
     try

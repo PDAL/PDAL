@@ -71,8 +71,6 @@ private:
     uint32_t m_sampleSize;
     int32_t m_density;
     double m_edgeLength;
-    Dimension *m_xDim;
-    Dimension *m_yDim;
 
     virtual void processOptions(const Options& options);
     virtual void ready(PointContext ctx);

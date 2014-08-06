@@ -73,13 +73,15 @@ private:
     virtual void done(PointContext ctx);
     virtual void initialize();
 
-    void writeInit(const Schema& schema);
+//ABELL
+//    void writeInit(const Schema& schema);
     void writeTile(const PointBuffer& buffer);
     
     bool CheckTableExists(std::string const& name);
     bool CheckPointCloudExists();
     bool CheckPostGISExists();
-    boost::uint32_t SetupSchema(Schema const& buffer_schema, boost::uint32_t srid);
+//ABELL
+//    boost::uint32_t SetupSchema(Schema const& buffer_schema, boost::uint32_t srid);
 
     void CreateTable(std::string const& schema_name, 
                      std::string const& table_name,
@@ -111,7 +113,8 @@ private:
     std::string m_hex;
     size_t m_pointSize;
     Orientation::Enum m_orientation;
-    std::vector<DimensionPtr> m_dims;
+//ABELL
+//    std::vector<DimensionPtr> m_dims;
     bool m_pack;    
     
     // lose this

@@ -74,10 +74,6 @@ public:
 
     point_count_t execute();
 
-    // Get the schema.
-    Schema *schema() const
-        { return m_context.schema(); }
-
     // Get the resulting point buffers.
     const PointBufferSet& buffers() const
         { return m_pbSet; }

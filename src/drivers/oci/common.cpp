@@ -39,7 +39,6 @@
 
 #include <pdal/Bounds.hpp>
 #include <pdal/Dimension.hpp>
-#include <pdal/Schema.hpp>
 #include <pdal/Utils.hpp>
 
 namespace pdal
@@ -48,7 +47,6 @@ namespace drivers
 {
 namespace oci
 {
-
 
 Connection connect(std::string connSpec)
 {
@@ -72,7 +70,7 @@ Connection connect(std::string connSpec)
 }
 
 
-Schema fetchSchema(Statement stmt, BlockPtr block)
+schema::XMLSchema fetchSchema(Statement stmt, BlockPtr block)
 {
     // Fetch the XML that defines the schema for this point cloud
     std::ostringstream schemaQuery;
@@ -105,7 +103,7 @@ Schema fetchSchema(Statement stmt, BlockPtr block)
         pc_schema_xml = pc_schema;
         CPLFree(pc_schema);
     }
-    return Schema::from_xml(pc_schema_xml);
+    return schema::Reader(pc_schema_xml).schema();
 }
 
 
@@ -134,29 +132,31 @@ Block::~Block()
 }
 
 
-void Block::initialize(Schema *s)
+void Block::update(schema::XMLSchema *s)
 {
     m_num_remaining = num_points;
-    auto dimupdate = [s](const std::string& name, Scale& scale)
+    m_schema.m_orientation = s->m_orientation;
+    for (auto di = s->m_dims.begin(); di != s->m_dims.end(); ++di)
     {
-        DimensionPtr d = s->getDimension(name);
-        if (d)
+        schema::DimInfo& d = *di;
+        Dimension::Id::Enum id = m_ctx.findDim(d.m_name);
+        if (id == Dimension::Id::X)
         {
-             scale.m_scale = d->getNumericScale();
-             scale.m_offset = d->getNumericOffset();
+            m_schema.m_scale.m_x.m_scale = d.m_scale;
+            m_schema.m_scale.m_x.m_offset = d.m_offset;
         }
-        else
+        if (id == Dimension::Id::Y)
         {
-             scale.m_scale = 1.0;
-             scale.m_offset = 0.0;
+            m_schema.m_scale.m_y.m_scale = d.m_scale;
+            m_schema.m_scale.m_y.m_offset = d.m_offset;
         }
-    };
-
-    dimupdate("X", m_scaleX);
-    dimupdate("Y", m_scaleY);
-    dimupdate("Z", m_scaleZ);
+        if (id == Dimension::Id::Z)
+        {
+            m_schema.m_scale.m_z.m_scale = d.m_scale;
+            m_schema.m_scale.m_z.m_offset = d.m_offset;
+        }
+    }
 }
-
 
 } // namespace oci
 } // namespace drivers

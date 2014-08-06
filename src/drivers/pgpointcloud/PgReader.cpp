@@ -289,25 +289,27 @@ void PgReader::buildSchema(Schema *s)
 
     Schema storedSchema = Schema::from_xml(xml);
 
-    for (size_t i = 0; i < storedSchema.numDimensions(); ++i)
+    DimensionList dims = storedSchema.getDimensions();
+    for (auto di = dims.begin(); di != dims.end(); ++di)
     {
-        Dimension d = storedSchema.getDimension(i);
+        DimensionPtr d = *di;
 
         // For dimensions that do not have namespaces, we'll set the namespace
         // to the namespace of the current stage
-        if (d.getNamespace().empty())
+        if (d->getNamespace().empty())
         {
             log()->get(logDEBUG4) << "setting namespace for dimension " <<
-                d.getName() << " to "  << getName() << std::endl;
+                d->getName() << " to "  << getName() << std::endl;
 
-            if (d.getUUID().is_nil())
-                d.createUUID();
-            d.setNamespace(getName());
+            if (d->getUUID().is_nil())
+                d->createUUID();
+            d->setNamespace(getName());
         }
-        m_dims.push_back(s->appendDimension(d));
+        s->appendDimension(*d);
     }    
-
+    //ABELL - Need to fill m_dims with necessary dimensions.
 }
+
 
 pdal::SpatialReference PgReader::fetchSpatialReference() const
 {

@@ -63,12 +63,13 @@ private:
     Selector& operator=(const Selector&); // not implemented
     Selector(const Selector&); // not implemented
     virtual void processOptions(const Options& options);
-    virtual void buildSchema(Schema *schema);
+//ABELL
+//    virtual void buildSchema(Schema *schema);
     
     std::map<std::string, bool> m_ignoredMap;
     bool m_ignoreDefault;
     bool m_overwriteExisting;
-    std::vector<Dimension> m_createDimensions;
+//    std::vector<Dimension> m_createDimensions;
 };
 
 } // filters

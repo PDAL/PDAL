@@ -55,13 +55,17 @@ class PDAL_DLL Scaling: public Filter
         uint32_t size;
     };
 
-    struct DimPair
+/**
+    struct DimInfo
     {
-        DimPair(Dimension *fromA, Dimension *toA) : from(fromA), to(toA)
+        DimInfo(const std::string& name, const std::string& fromNs)
             {}
-        Dimension *from;
-        Dimension *to;
+        std::string name;
+        std::string fromNs;
+        DimensionPtr from;
+        DimensionPtr to;
     };
+**/
 
 public:
     SET_STAGE_NAME("filters.scaling", "Scaling Filter")
@@ -73,11 +77,12 @@ public:
 
 private:
     bool m_markIgnored;
-    std::vector<DimPair> m_dims;
+//    std::vector<DimInfo> m_dims;
     std::vector<Scaler> m_scalers;
 
     virtual void processOptions(const Options& options);
-    virtual void buildSchema(Schema *schema);
+    virtual void addDimensions(PointContext ctx);
+    virtual void ready(PointContext ctx);
     virtual void filter(PointBuffer& buf);
 
     // Not implemented

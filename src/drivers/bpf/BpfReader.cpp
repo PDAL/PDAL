@@ -74,26 +74,13 @@ void BpfReader::initialize()
         m_stream.seek(m_header.m_len);
 }
 
-void BpfReader::buildSchema(Schema *schema)
+
+void BpfReader::addDimensions(PointContext ctx)
 {
     for (size_t i = 0; i < m_dims.size(); ++i)
     {
         BpfDimension& dim = m_dims[i];
-        Dimension pd(dim.m_label, dimension::Float, sizeof(float));
-        pd.setNumericOffset(dim.m_offset);
-        pd.setNamespace("bpf");
-        schema->appendDimension(pd);
-    }
-}
-
-
-void BpfReader::ready(PointContext ctx)
-{
-    Schema *s = ctx.schema();
-    for (auto bdi = m_dims.begin(); bdi != m_dims.end(); ++bdi)
-    {
-        BpfDimension& bpfDim = *bdi;
-        m_schemaDims.push_back(s->getDimension(bpfDim.m_label, "bpf"));
+        dim.m_id = ctx.registerOrAssignDim(dim.m_label, Dimension::Type::Float);
     }
 }
 
@@ -134,7 +121,7 @@ bool BpfReader::readPolarData()
 
 StageSequentialIterator *BpfReader::createSequentialIterator() const
 {
-    return new BpfSeqIterator(m_schemaDims, m_header.m_numPts,
+    return new BpfSeqIterator(m_dims, m_header.m_numPts,
         m_header.m_pointFormat, m_header.m_compression,
         const_cast<ILeStream&>(m_stream));
 }

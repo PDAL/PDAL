@@ -51,8 +51,7 @@ namespace icebridge
 class icebridge_error : public pdal_error
 {
 public:
-    icebridge_error(std::string const& msg)
-        : pdal_error(msg)
+    icebridge_error(std::string const& msg) : pdal_error(msg)
     { }
 };
 
@@ -67,17 +66,16 @@ public:
         {}
 
     static Options getDefaultOptions();
-    static std::vector<Dimension> getDefaultDimensions();
+    static Dimension::IdList getDefaultDimensions();
 
     StageSequentialIterator* createSequentialIterator() const;
 
 private:
     std::string m_filename;
     Hdf5Handler m_hdf5Handler;
-    std::vector<Dimension *> m_dims;
 
     virtual void processOptions(const Options& options);
-    virtual void buildSchema(Schema *s);
+    virtual void addDimensions(PointContext ctx);
     virtual void ready(PointContext ctx);
     virtual void done(PointContext ctx);
 
@@ -93,12 +91,10 @@ namespace sequential
 class PDAL_DLL IcebridgeSeqIter : public ReaderSequentialIterator
 {
 public:
-    IcebridgeSeqIter(const std::vector<Dimension *> dims,
-        Hdf5Handler *hdf5Handler) : m_dims(dims), m_hdf5Handler(hdf5Handler)
+    IcebridgeSeqIter(Hdf5Handler *hdf5Handler) : m_hdf5Handler(hdf5Handler)
     {}
 
 private:
-    std::vector<Dimension *> m_dims;
     Hdf5Handler *m_hdf5Handler;
 
     virtual point_count_t readImpl(PointBuffer& data, point_count_t count);

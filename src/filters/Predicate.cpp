@@ -90,7 +90,7 @@ PointBufferSet Predicate::run(PointBufferPtr buf)
     PointBufferPtr outbuf(new PointBuffer(buf->context()));
 
     void *pydata =
-        m_pythonMethod->extractResult("Mask", pdal::dimension::RawByte, 1);
+        m_pythonMethod->extractResult("Mask", dimension::UnsignedInteger, 1);
     char *ok = (char *)pydata;
     for (PointId idx = 0; idx < buf->size(); ++idx)
         if (*ok++)

@@ -39,7 +39,6 @@
 #include <pdal/drivers/bpf/BpfReader.hpp>
 #include <pdal/drivers/bpf/BpfSeqIterator.hpp>
 #include <pdal/PointBuffer.hpp>
-#include <pdal/Schema.hpp>
 
 #ifdef PDAL_HAVE_ZLIB
 #include <zlib.h>
@@ -48,7 +47,7 @@
 namespace pdal
 {
 
-BpfSeqIterator::BpfSeqIterator(const std::vector<DimensionPtr>& dims,
+BpfSeqIterator::BpfSeqIterator(const BpfDimensionList& dims,
     point_count_t numPoints, BpfFormat::Enum pointFormat, bool compression,
     ILeStream& stream) :
     m_dims(dims), m_numPoints(numPoints), m_pointFormat(pointFormat),
@@ -152,7 +151,7 @@ boost::uint32_t BpfSeqIterator::readPointMajor(PointBuffer& data,
             float f;
 
             m_stream >> f;
-            data.setField(m_dims[d], nextId, f);
+            data.setField(m_dims[d].m_id, nextId, f + m_dims[d].m_offset);
         }
         idx++;
         numRead++;
@@ -178,7 +177,7 @@ uint32_t BpfSeqIterator::readDimMajor(PointBuffer& data, uint32_t count)
             float f;
 
             m_stream >> f;
-            data.setField(m_dims[d], nextId, f);
+            data.setField(m_dims[d].m_id, nextId, f + m_dims[d].m_offset);
         }
     }
     m_index = idx;
@@ -213,12 +212,14 @@ point_count_t BpfSeqIterator::readByteMajor(PointBuffer& data,
 
                 if (b)
                 {
-                    u.f = data.getField<float>(m_dims[d], nextId);
+                    u.f = data.getField<float>(m_dims[d].m_id, nextId);
+                    if (b == 3)
+                        u.f += m_dims[d].m_offset;
                 }
                 uint8_t u8;
                 m_stream >> u8;
                 u.u32 |= ((uint32_t)u8 << (b * CHAR_BIT));
-                data.setField(m_dims[d], nextId, u.f);
+                data.setField(m_dims[d].m_id, nextId, u.f);
             }
         }
     }

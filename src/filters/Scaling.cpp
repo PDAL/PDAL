@@ -49,16 +49,8 @@ pdal::dimension::Interpretation stringToType(std::string t)
         return dimension::SignedInteger;
     if (t == "unsignedinteger")
         return dimension::UnsignedInteger;
-    if (t == "signedbyte")
-        return dimension::RawByte;
-    if (t == "unsignedbyte")
-        return dimension::RawByte;
-    if (t == "rawbyte")
-        return dimension::RawByte;
     if (t == "float")
         return dimension::Float;
-    if (t == "pointer")
-        return dimension::Pointer;
     return dimension::Undefined;
 }
 
@@ -106,7 +98,7 @@ void Scaling::buildSchema(Schema *schema)
     for (auto si = m_scalers.begin(); si != m_scalers.end(); ++si)
     {
         Scaler& s = *si;
-        Dimension *fromDim = schema->getDimensionPtr(s.name);
+        DimensionPtr fromDim = schema->getDimension(s.name);
         if (!fromDim)
             continue;
         Dimension dim(*fromDim);
@@ -118,11 +110,24 @@ void Scaling::buildSchema(Schema *schema)
             dim.setNumericOffset(boost::lexical_cast<double>(s.offset));
         dim.createUUID();
         dim.setNamespace(getName());
-        dim.setParent(fromDim->getUUID());
-        Dimension *toDim = schema->appendDimension(dim);
+        schema->appendDimension(dim);
         if (m_markIgnored)
             fromDim->setIgnored();
-        m_dims.push_back(DimPair(fromDim, toDim));
+        m_dims.push_back(DimInfo(fromDim->getName(), fromDim->getNamespace()));
+    }
+}
+
+
+void Scaling::ready(PointContext ctx)
+{
+    Schema *s = ctx.schema();
+
+    // Fill info with dim pointers.
+    for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
+    {
+        DimInfo& dimInfo = *di;
+        dimInfo.from = s->getDimension(dimInfo.name, dimInfo.fromNs);
+        dimInfo.to = s->getDimension(dimInfo.name, getName());
     }
 }
 
@@ -133,9 +138,9 @@ void Scaling::filter(PointBuffer& buf)
     {
         for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
         {
-            DimPair& dimPair = *di;
-            double d = buf.getFieldAs<double>(*dimPair.from, idx);
-            buf.setFieldUnscaled(*dimPair.to, idx, d);
+            DimInfo& dimInfo = *di;
+            double d = buf.getFieldAs<double>(dimInfo.from, idx);
+            buf.setFieldUnscaled(dimInfo.to, idx, d);
         }
     }
 }

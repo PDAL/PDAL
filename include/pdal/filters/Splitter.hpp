@@ -54,12 +54,9 @@ public:
     static Options getDefaultOptions();
 
 private:
-    Dimension *m_xDim;
-    Dimension *m_yDim;
     uint32_t m_length;
 
     virtual void processOptions(const Options& options);
-    virtual void ready(PointContext ctx);
     virtual PointBufferSet run(PointBufferPtr buf);
 
     Splitter& operator=(const Splitter&); // not implemented

@@ -1,11 +1,4 @@
 /******************************************************************************
- * $Id$
- *
- * Project:  libLAS - http://liblas.org - A BSD library for LAS format data.
- * Purpose:  LAS Schema implementation for C++ libLAS
- * Author:   Howard Butler, hobu.inc@gmail.com
- *
- ******************************************************************************
  * Copyright (c) 2010, Howard Butler
  *
  * All rights reserved.
@@ -51,23 +44,6 @@
 namespace pdal
 {
 
-/**
-class PDAL_DLL DimensionMap
-{
-public:
-    inline void insert(std::pair<Dimension const*, Dimension const*> p) { m.insert(p); update();}
-    
-    std::map<Dimension const*, Dimension const*> m;
-    
-    static const int MAX_OFFSETS_LENGTH = 256;
-    boost::uint64_t offsets[MAX_OFFSETS_LENGTH];
-
-private:
-    std::size_t update();
-    
-};
-**/
-
 /// A pdal::Schema is a composition of pdal::Dimension instances that form
 /// a point cloud.
 class PDAL_DLL Schema
@@ -75,21 +51,9 @@ class PDAL_DLL Schema
     friend class RawPtBuf;
 public:
 /// @name Constructors
-    /// An empty constructor with no Dimension instances
-    Schema();
-
     /// construct an instance given the order and dimensions in the dimensions
     /// vector @param dimensions the list of dimensions (and their order) to
     /// use to construct the Schema
-/**
-    Schema(std::vector<Dimension> const& dimensions);
-
-    /// Copy constructor
-    Schema(Schema const& other);
-
-    /// Assignment constructor
-    Schema& operator=(Schema const& rhs);
-**/
 
 /// @name Equality
     /// Equality
@@ -100,7 +64,7 @@ public:
 /// @name Dimension manipulation
     /// adds (copies) a Dimension instance to the Schema
     /// @param dim a Dimension that is copied and added to the end of the Schema
-    void appendDimension(Dimension const& dim);
+//    void appendDimension(Dimension const& dim);
 
     DimensionPtr getDimension(const std::string& name) const;
     DimensionPtr getDimension(const std::string& name,
@@ -130,13 +94,6 @@ public:
         \endverbatim
     */
     boost::property_tree::ptree toPTree() const;
-
-    /// @return a schema::DimensionMap instance that maps dimension names
-/**
-    schema::DimensionMap* mapDimensions(Schema const& destination,
-        bool bIgnoreNamespace=false) const;
-**/
-
     std::ostream& toRST(std::ostream& os) const;
     
     /// dumps a string representation of the Schema instance to std::cout

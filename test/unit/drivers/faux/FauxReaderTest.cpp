@@ -61,10 +61,10 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_sequential_iter)
     BOOST_CHECK_EQUAL(numRead, 750u);
 
     Schema *schema = ctx.schema();
-    Dimension const& dimX = schema->getDimension("X");
-    Dimension const& dimY = schema->getDimension("Y");
-    Dimension const& dimZ = schema->getDimension("Z");
-    Dimension const& dimTime = schema->getDimension("Time");
+    DimensionPtr dimX = schema->getDimension("X");
+    DimensionPtr dimY = schema->getDimension("Y");
+    DimensionPtr dimZ = schema->getDimension("Z");
+    DimensionPtr dimTime = schema->getDimension("Time");
 
     for (uint32_t i = 0; i < numRead; i++)
     {
@@ -105,10 +105,10 @@ BOOST_AUTO_TEST_CASE(test_random_mode)
     BOOST_CHECK_EQUAL(numRead, 750u);
 
     Schema *schema = ctx.schema();
-    Dimension const& dimX = schema->getDimension("X");
-    Dimension const& dimY = schema->getDimension("Y");
-    Dimension const& dimZ = schema->getDimension("Z");
-    Dimension const& dimTime = schema->getDimension("Time");
+    DimensionPtr dimX = schema->getDimension("X");
+    DimensionPtr dimY = schema->getDimension("Y");
+    DimensionPtr dimZ = schema->getDimension("Z");
+    DimensionPtr dimTime = schema->getDimension("Time");
 
     for (point_count_t i = 0; i < numRead; ++i)
     {
@@ -155,10 +155,10 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode_1)
     BOOST_CHECK_EQUAL(numRead, 2u);
 
     Schema *schema = ctx.schema();
-    Dimension const& dimX = schema->getDimension("X");
-    Dimension const& dimY = schema->getDimension("Y");
-    Dimension const& dimZ = schema->getDimension("Z");
-    Dimension const& dimTime = schema->getDimension("Time");
+    DimensionPtr dimX = schema->getDimension("X");
+    DimensionPtr dimY = schema->getDimension("Y");
+    DimensionPtr dimZ = schema->getDimension("Z");
+    DimensionPtr dimTime = schema->getDimension("Time");
 
     double x0 = buf.getField<double>(dimX, 0);
     double y0 = buf.getField<double>(dimY, 0);
@@ -206,10 +206,10 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode_2)
     BOOST_CHECK_EQUAL(numRead,750u);
 
     Schema *schema = ctx.schema();
-    Dimension const& dimX = schema->getDimension("X");
-    Dimension const& dimY = schema->getDimension("Y");
-    Dimension const& dimZ = schema->getDimension("Z");
-    Dimension const& dimTime = schema->getDimension("Time");
+    DimensionPtr dimX = schema->getDimension("X");
+    DimensionPtr dimY = schema->getDimension("Y");
+    DimensionPtr dimZ = schema->getDimension("Z");
+    DimensionPtr dimTime = schema->getDimension("Time");
 
     double delX = (101.0 - 1.0) / (750.0 - 1.0);
     double delY = (152.0 - 2.0) / (750.0 - 1.0);

@@ -108,9 +108,9 @@ BOOST_AUTO_TEST_CASE(ColorizationFilterTest_test_1)
 
     Schema *s = ctx.schema();
 
-    Dimension const& dimRed = s->getDimension("Red");
-    Dimension const& dimGreen = s->getDimension("Green");
-    Dimension const& dimBlue = s->getDimension("Blue");
+    DimensionPtr dimRed = s->getDimension("Red");
+    DimensionPtr dimGreen = s->getDimension("Green");
+    DimensionPtr dimBlue = s->getDimension("Blue");
 
     uint16_t r = buffer.getFieldAs<uint16_t>(dimRed, 0);
     uint16_t g = buffer.getFieldAs<uint16_t>(dimGreen, 0);

@@ -40,8 +40,7 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#ifndef INCLUDED_DRIVERS_LAS_HEADER_HPP
-#define INCLUDED_DRIVERS_LAS_HEADER_HPP
+#pragma once
 
 #include <vector>
 
@@ -49,7 +48,6 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/array.hpp>
 
-#include <pdal/Schema.hpp>
 #include <pdal/Bounds.hpp>
 #include <pdal/SpatialReference.hpp>
 #include <pdal/pdal_config.hpp>
@@ -251,11 +249,7 @@ public:
 
     /// The length in bytes of each point.  All points in the file are
     /// considered to be fixed in size, and the PointFormatName is used
-    /// to determine the fixed portion of the dimensions in the point.  Any
-    /// other byte space in the point record beyond the liblas::Schema::GetBaseByteSize()
-    /// can be used for other, optional, dimensions.  If no schema is
-    /// available for the file in the form of a liblas.org VLR schema record,
-    /// These extra bytes are available via liblas::Point::GetExtraData().
+    /// to determine the fixed portion of the dimensions in the point.
     boost::uint16_t GetDataRecordLength() const;
 	void SetDataRecordLength(boost::uint16_t v);
 
@@ -451,8 +445,7 @@ private:
 
 PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const LasHeader&);
 
-}
-}
-} // namespace
+} // namespace las
+} // namespace drivers
+} // namespace pdal
 
-#endif

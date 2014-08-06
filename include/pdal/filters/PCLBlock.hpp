@@ -58,10 +58,6 @@ public:
 
 private:
     std::string m_filename;
-    Dimension *m_xDim;
-    Dimension *m_yDim;
-    Dimension *m_zDim;
-    Dimension *m_iDim;
 
     virtual void processOptions(const Options& options);
     virtual void ready(PointContext ctx);

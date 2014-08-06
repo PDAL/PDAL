@@ -43,8 +43,6 @@
 namespace pdal
 {
 
-class Dimension;
-
 namespace drivers
 {
 namespace oci
@@ -57,21 +55,9 @@ namespace sequential
 class OciSeqIterator : public ReaderSequentialIterator
 {
 public:
-    OciSeqIterator(Statement stmt, BlockPtr block,
-        std::vector<DimensionPtr> dims, bool normalizeXYZ) :
-        m_stmt(stmt), m_block(block), m_dims(dims),
-        m_normalizeXYZ(normalizeXYZ), m_atEnd(false)
-    {
-        for (size_t i = 0; i < m_dims.size(); ++i)
-        {
-            if (m_dims[i]->getName() == "X")
-                m_dimX = m_dims[i];
-            if (m_dims[i]->getName() == "Y")
-                m_dimY = m_dims[i];
-            if (m_dims[i]->getName() == "Z")
-                m_dimZ = m_dims[i];
-        }
-    }
+    OciSeqIterator(Statement stmt, BlockPtr block) :
+        m_stmt(stmt), m_block(block), m_atEnd(false)
+    {}
 
 protected:
     point_count_t readBufferImpl(PointBuffer& buffer)
@@ -91,23 +77,16 @@ private:
         point_count_t numPts);
     point_count_t readPointMajor(PointBuffer& buffer, BlockPtr block,
         point_count_t numPts);
-    char *seekDimMajor(size_t dimIdx, BlockPtr block);
+    char *seekDimMajor(const schema::DimInfo& d, BlockPtr block);
     char *seekPointMajor(BlockPtr block);
-    void normalize(PointBuffer& buffer, BlockPtr block, PointId begin,
-        PointId end);
     bool readOci(Statement stmt, BlockPtr block);
-    Schema *findSchema(Statement stmt, BlockPtr block);
+    schema::XMLSchema *findSchema(Statement stmt, BlockPtr block);
     pdal::Bounds<double> getBounds(Statement stmt, BlockPtr block);
 
     Statement m_stmt;
     BlockPtr m_block;
-    std::vector<DimensionPtr> m_dims;
-    bool m_normalizeXYZ;
     bool m_atEnd;
-    DimensionPtr m_dimX;
-    DimensionPtr m_dimY;
-    DimensionPtr m_dimZ;
-    std::map<int32_t, Schema> m_schemas;
+    std::map<int32_t, schema::XMLSchema> m_schemas;
 };
 
 } // namespace sequential

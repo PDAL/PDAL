@@ -55,27 +55,6 @@ void OciReader::processOptions(const Options& options)
 {
     m_schemaFile = options.getValueOrDefault<std::string>(
         "xml_schema_dump", std::string());
-    m_normalizeXYZ = options.getValueOrDefault<bool>("do_normalize_xyz", true);
-    if (options.hasOption("scale_x"))
-        m_scaleX = boost::optional<double>(
-            options.getValueOrThrow<double>("scale_x"));
-    if (options.hasOption("scale_y"))
-        m_scaleX = boost::optional<double>(
-            options.getValueOrThrow<double>("scale_y"));
-    if (options.hasOption("scale_z"))
-        m_scaleX = boost::optional<double>(
-            options.getValueOrThrow<double>("scale_z"));
-
-    if (options.hasOption("offset_x"))
-        m_offsetX = boost::optional<double>(
-            options.getValueOrThrow<double>("offset_x"));
-    if (options.hasOption("offset_y"))
-        m_offsetX = boost::optional<double>(
-            options.getValueOrThrow<double>("offset_y"));
-    if (options.hasOption("offset_z"))
-        m_offsetX = boost::optional<double>(
-            options.getValueOrThrow<double>("offset_z"));
-
     if (options.hasOption("spatialreference"))
         m_spatialRef = boost::optional<SpatialReference>(
             options.getValueOrThrow<pdal::SpatialReference>(
@@ -209,7 +188,7 @@ void OciReader::validateQuery()
     while (m_stmt->GetNextField(col, fieldName, &hType, &size,
         &precision, &scale, typeName))
     {
-        log()->get(logDEBUG) << "Fetched field '" << fieldName <<
+        log()->get(LogLevel::DEBUG) << "Fetched field '" << fieldName <<
             "' of type '" << typeName << "'"<< std::endl;
 
         reqFields.erase(fieldName);
@@ -264,34 +243,15 @@ pdal::SpatialReference OciReader::fetchSpatialReference(Statement stmt,
 }
 
 
-void OciReader::normalizeDimension(DimensionPtr d)
+void OciReader::addDimensions(PointContext ctx)
 {
-    if (!m_normalizeXYZ)
-        return;
+    log()->get(LogLevel::DEBUG) << "Fetching schema from SDO_PC object" <<
+        std::endl;
 
-    auto optionSetter = [d](boost::optional<double> scaleOp,
-        boost::optional<double> offsetOp)
-    {
-        if (scaleOp)
-            d->setNumericScale(*scaleOp);
-        if (offsetOp)
-            d->setNumericScale(*offsetOp);
-    };
-
-    if (d->getName() == "X")
-        optionSetter(m_scaleX, m_offsetX);
-    if (d->getName() == "Y")
-        optionSetter(m_scaleY, m_offsetY);
-    if (d->getName() == "Z")
-        optionSetter(m_scaleZ, m_offsetZ);
-}
-
-
-void OciReader::buildSchema(Schema *schema)
-{
-    log()->get(logDEBUG) << "Fetching schema from SDO_PC object" << std::endl;
-
-    Schema storedSchema = fetchSchema(m_stmt, m_block);
+    m_block->m_ctx = ctx;
+    m_block->m_schema = fetchSchema(m_stmt, m_block);
+//ABELL - Deal with this later.
+/**
     if (m_schemaFile.size())
     {
         std::string pcSchema = Schema::to_xml(storedSchema);
@@ -299,34 +259,7 @@ void OciReader::buildSchema(Schema *schema)
         out->write(pcSchema.c_str(), pcSchema.size());
         FileUtils::closeFile(out);
     }
-
-    DimensionList dims = storedSchema.getDimensions();
-    for (auto di = dims.begin(); di != dims.end(); ++di)
-    {
-        DimensionPtr d = *di;
-
-        // For dimensions that do not have namespaces, we'll set the namespace
-        // to the namespace of the current stage
-        if (d->getNamespace().empty())
-        {
-            log()->get(logDEBUG4) << "setting namespace for dimension " <<
-                d->getName() << " to "  << getName() << std::endl;
-
-            if (d->getUUID().is_nil())
-                d->createUUID();
-            d->setNamespace(getName());
-        }
-        normalizeDimension(d);
-        schema->appendDimension(*d);
-    }
-}
-
-
-void OciReader::ready(PointContext ctx)
-{
-    //ABELL - Need to make sure the dimensions that are the source dimensions
-    //  are mapped in the same order to the dimensions from the input.
-    ctx.schema()->getDimensions(getName());
+**/
 }
 
 
@@ -334,7 +267,7 @@ StageSequentialIterator* OciReader::createSequentialIterator() const
 {
     using namespace pdal::drivers::oci::iterators::sequential;
 
-    return new OciSeqIterator(m_stmt, m_block, m_dims, m_normalizeXYZ);
+    return new OciSeqIterator(m_stmt, m_block);
 }
 
 

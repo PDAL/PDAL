@@ -285,19 +285,15 @@ void Support::check_pN(const pdal::PointBuffer& data,
                        std::size_t index,
                        double xref, double yref, double zref)
 {
-    const ::pdal::Schema& schema = data.getSchema();
+    const Schema& schema = data.getSchema();
 
-    pdal::Dimension const& dimX = schema.getDimension("X");
-    pdal::Dimension const& dimY = schema.getDimension("Y");
-    pdal::Dimension const& dimZ = schema.getDimension("Z");
+    DimensionPtr dimX = schema.getDimension("X");
+    DimensionPtr dimY = schema.getDimension("Y");
+    DimensionPtr dimZ = schema.getDimension("Z");
 
-    boost::int32_t x0raw = data.getField<boost::int32_t>(dimX, index);
-    boost::int32_t y0raw = data.getField<boost::int32_t>(dimY, index);
-    boost::int32_t z0raw = data.getField<boost::int32_t>(dimZ, index);
-
-    double x0 = dimX.applyScaling(x0raw);
-    double y0 = dimY.applyScaling(y0raw);
-    double z0 = dimZ.applyScaling(z0raw);
+    double x0 = data.getFieldAs<double>(dimX, index);
+    double y0 = data.getField<int32_t>(dimY, index);
+    double z0 = data.getField<int32_t>(dimZ, index);
 
     BOOST_CHECK_CLOSE(x0, xref, 0.001);
     BOOST_CHECK_CLOSE(y0, yref, 0.001);
@@ -305,35 +301,31 @@ void Support::check_pN(const pdal::PointBuffer& data,
 }
 
 
-void Support::check_pN(const pdal::PointBuffer& data,
-                       std::size_t index,
-                       double xref, double yref, double zref,
-                       double tref,
-                       boost::uint16_t rref, boost::uint16_t gref, boost::uint16_t bref)
+void Support::check_pN(const pdal::PointBuffer& data, size_t index,
+    double xref, double yref, double zref, double tref,
+    uint16_t rref, uint16_t gref, uint16_t bref)
 {
     check_pN(data, index, xref, yref, zref);
 
-    const ::pdal::Schema& schema = data.getSchema();
+    const Schema& schema = data.getSchema();
 
-
-    boost::optional<pdal::Dimension const&> dimTime = schema.getDimensionOptional("Time");
+    DimensionPtr dimTime = schema.getDimension("Time");
 
     if (dimTime)
     {
-        double t0 = data.getField<double>(*dimTime, index);
+        double t0 = data.getField<double>(dimTime, index);
         BOOST_CHECK_EQUAL(t0, tref);
-
     }
 
-    boost::optional<pdal::Dimension const&> dimRed = schema.getDimensionOptional("Red");
-    boost::optional<pdal::Dimension const&> dimGreen = schema.getDimensionOptional("Green");
-    boost::optional<pdal::Dimension const&> dimBlue = schema.getDimensionOptional("Blue");
+    DimensionPtr dimRed = schema.getDimension("Red");
+    DimensionPtr dimGreen = schema.getDimension("Green");
+    DimensionPtr dimBlue = schema.getDimension("Blue");
 
     if (dimRed)
     {
-        boost::uint16_t r0 = data.getField<boost::uint16_t>(*dimRed, index);
-        boost::uint16_t g0 = data.getField<boost::uint16_t>(*dimGreen, index);
-        boost::uint16_t b0 = data.getField<boost::uint16_t>(*dimBlue, index);
+        boost::uint16_t r0 = data.getField<uint16_t>(dimRed, index);
+        boost::uint16_t g0 = data.getField<uint16_t>(dimGreen, index);
+        boost::uint16_t b0 = data.getField<uint16_t>(dimBlue, index);
         BOOST_CHECK_EQUAL(r0, rref);
         BOOST_CHECK_EQUAL(g0, gref);
         BOOST_CHECK_EQUAL(b0, bref);

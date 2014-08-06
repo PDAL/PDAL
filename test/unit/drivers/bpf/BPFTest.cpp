@@ -62,17 +62,11 @@ void test_file_type(const std::string& filename)
     StageSequentialIterator *it = reader.createSequentialIterator();
     boost::uint32_t numRead = it->read(data, 3);
     BOOST_CHECK(numRead = 3);
-    Dimension dimX = schema->getDimension("X");
-    Dimension dimY = schema->getDimension("Y");
-    Dimension dimZ = schema->getDimension("Z");
-    try
-    {
-        Dimension dimQ = schema->getDimension("Q");
-        BOOST_ERROR("Found unexpected dimension");
-    }
-    catch (std::runtime_error err)
-    {
-    }
+    DimensionPtr dimX = schema->getDimension("X");
+    DimensionPtr dimY = schema->getDimension("Y");
+    DimensionPtr dimZ = schema->getDimension("Z");
+    DimensionPtr dimQ = schema->getDimension("Q");
+    BOOST_CHECK(dimQ.get() == NULL);
 
     struct PtData
     {

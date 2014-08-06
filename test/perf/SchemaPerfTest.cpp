@@ -22,43 +22,41 @@ using namespace pdal;
 // Lookup dimension in schema, forcing the creation of two boost::string_refs
 // from const char* (a couple of extra strlen() calls per lookup)
 //
-PDAL_NOINLINE const Dimension* lookup(Schema& schema, const char* name,
-                                      const char* namespc)
+PDAL_NOINLINE const DimensionPtr lookup(Schema& schema, const char* name,
+    const char* namespc)
 {
-    return schema.getDimensionPtr(name, namespc);
+    return schema.getDimension(name, namespc);
 }
 
 
 // Lookup dimension, inefficiently swallowing exception if not found
-PDAL_NOINLINE const Dimension* lookupEx(Schema& schema,
-                                        const char* name,
-                                        const char* namespc)
+PDAL_NOINLINE const DimensionPtr lookupEx(Schema& schema, const char* name,
+    const char* namespc)
 {
+    DimensionPtr d;
     try
     {
-        const Dimension& d = schema.getDimension(name, namespc);
-        return &d;
+        d = schema.getDimension(name, namespc);
     }
     catch(pdal::dimension_not_found&)
     {
-        return 0;
     }
+    return d;
 }
 
 
 // Lookup dimensions, forcing the allocation of a pair of std::string instances
 // each time.
-PDAL_NOINLINE const Dimension* lookupStdStr(Schema& schema, const std::string& name,
-                                            const std::string& namespc)
+PDAL_NOINLINE const DimensionPtr lookupStdStr(Schema& schema,
+    const std::string& name, const std::string& namespc)
 {
-    return schema.getDimensionPtr(name, namespc);
+    return schema.getDimension(name, namespc);
 }
 
 
 Dimension makeDimension(const std::string& name,
-                        dimension::Interpretation interpretation,
-                        dimension::size_type sizeInBytes,
-                        const std::string& namespc)
+    dimension::Interpretation interpretation, size_t sizeInBytes,
+    const std::string& namespc)
 {
     Dimension d(name, interpretation, sizeInBytes);
     d.setNamespace(namespc);

@@ -44,22 +44,16 @@ namespace pdal
 
 pdal::Bounds<double> PointBuffer::calculateBounds(bool is3d) const
 {
-    pdal::Schema const& schema = getSchema();
-
     pdal::Bounds<double> output;
-
-    DimensionPtr dimX = schema.getDimension("X");
-    DimensionPtr dimY = schema.getDimension("Y");
-    DimensionPtr dimZ = schema.getDimension("Z");
 
     Vector<double> v;
 
     bool first = true;
     for (PointId idx = 0; idx < size(); idx++)
     {
-        double x = getFieldAs<double>(dimX, idx);
-        double y = getFieldAs<double>(dimY, idx);
-        double z = getFieldAs<double>(dimZ, idx);
+        double x = getFieldAs<double>(Dimension::Id::X, idx);
+        double y = getFieldAs<double>(Dimension::Id::Y, idx);
+        double z = getFieldAs<double>(Dimension::Id::Z, idx);
 
         if (is3d)
         {
@@ -98,7 +92,7 @@ boost::property_tree::ptree PointBuffer::toPTree() const
 {
     boost::property_tree::ptree tree;
 
-    DimensionList dims = getSchema().getDimensions();
+    const Dimension::IdList& dims = m_context.dims();
 
     for (PointId idx = 0; idx < size(); idx++)
     {
@@ -106,9 +100,8 @@ boost::property_tree::ptree PointBuffer::toPTree() const
 
         for (auto di = dims.begin(); di != dims.end(); ++di)
         {
-            DimensionPtr d = *di;
-            std::string key = pointstring + d->getName();
-            double v = getFieldAs<double>(d, idx);
+            std::string key = pointstring + Dimension::name(*di);
+            double v = getFieldAs<double>(*di, idx);
             std::string value = boost::lexical_cast<std::string>(v);
             tree.add(key, value);
         }
@@ -119,28 +112,24 @@ boost::property_tree::ptree PointBuffer::toPTree() const
 
 std::ostream& PointBuffer::toRST(std::ostream& os) const
 {
-    DimensionList dims = getSchema().getDimensions();
+    const Dimension::IdList dims = m_context.dims();
 
-    uint32_t ns_column(32);
     uint32_t name_column(20);
     uint32_t value_column(40);
     
     for (auto di = dims.begin(); di != dims.end(); ++di)
     {
-        DimensionPtr d = *di;
-        name_column = std::max(name_column, (uint32_t)d->getName().size());
-        ns_column = std::max(ns_column, (uint32_t)d->getNamespace().size());
+        std::string name = Dimension::name(*di);
+        name_column = std::max(name_column, (uint32_t)name.size());
     }
     
     std::ostringstream thdr;
-    for (unsigned i = 0; i < name_column-1; ++i)
+    for (unsigned i = 0; i < name_column - 1; ++i)
         thdr << "=";
     thdr << " ";
-    for (unsigned i = 0; i < value_column-1; ++i)
-        thdr << "=";        
+    for (unsigned i = 0; i < value_column - 1; ++i)
+        thdr << "=";
     thdr << " ";
-    for (unsigned i = 0; i < ns_column-1; ++i)
-        thdr << "=";    
     thdr << " ";
 
     name_column--;
@@ -153,17 +142,14 @@ std::ostream& PointBuffer::toRST(std::ostream& os) const
         os << hdr << std::endl << std::endl;
         os << thdr.str() << std::endl;
         os << std::setw(name_column-step_back) << "Name" <<
-            std::setw(value_column-step_back) << "Value"  <<
-            std::setw(ns_column-step_back) << "Namespace" << std::endl;
+            std::setw(value_column-step_back) << "Value"  << std::endl;
         os << thdr.str() << std::endl;        
         for (auto di = dims.begin(); di != dims.end(); ++di)
         {
-            DimensionPtr d = *di;
-            double v = getFieldAs<double>(d, idx);
+            double v = getFieldAs<double>(*di, idx);
             std::string value = boost::lexical_cast<std::string>(v);
-            os << std::left << std::setw(name_column) << d->getName() <<
-                std::right << std::setw(value_column) << value <<
-                std::setw(ns_column) << d->getNamespace() << std::endl;
+            os << std::left << std::setw(name_column) << Dimension::name(*di) <<
+                std::right << std::setw(value_column) << value << std::endl;
         }
         os << thdr.str() << std::endl << std::endl;
     }
@@ -172,13 +158,12 @@ std::ostream& PointBuffer::toRST(std::ostream& os) const
 }
 
 
-std::ostream& operator<<(std::ostream& ostr, const PointBuffer& buf)
+void PointBuffer::dump(std::ostream& ostr) const
 {
     using std::endl;
+    const Dimension::IdList& dims = context().dims();
 
-    DimensionList dims = buf.getSchema().getDimensions();
-
-    point_count_t numPoints = buf.size();
+    point_count_t numPoints = size();
     ostr << "Contains " << numPoints << "  points" << endl;
     for (PointId idx = 0; idx < numPoints; idx++)
     {
@@ -186,46 +171,45 @@ std::ostream& operator<<(std::ostream& ostr, const PointBuffer& buf)
 
         for (auto di = dims.begin(); di != dims.end(); ++di)
         {
-            DimensionPtr d = *di;
+            Dimension::Id::Enum d = *di;
+            Dimension::Detail *dd = m_context.dimDetail(d);
+            ostr << Dimension::name(d) << " (" <<
+                Dimension::interpretationName(dd->type()) << ") : ";
 
-            ostr << d->getName() << " (" << d->getInterpretationName() <<
-                ") : ";
-
-            switch (d->getInterpretation())
+            switch (dd->type())
             {
-                case dimension::SignedInteger:
-                    if (d->getByteSize() == 1)
-                        ostr << (int)(buf.getField<int8_t>(d, idx));
-                    if (d->getByteSize() == 2)
-                        ostr << buf.getField<int16_t>(d, idx);
-                    if (d->getByteSize() == 4)
-                        ostr << buf.getField<int32_t>(d, idx);
-                    if (d->getByteSize() == 8)
-                        ostr << buf.getField<int64_t>(d, idx);
-                    break;
-                case dimension::UnsignedInteger:
-                    if (d->getByteSize() == 1)
-                        ostr << (unsigned)(buf.getField<uint8_t>(d, idx));
-                    if (d->getByteSize() == 2)
-                        ostr << buf.getField<uint16_t>(d, idx);
-                    if (d->getByteSize() == 4)
-                        ostr << buf.getField<uint32_t>(d, idx);
-                    if (d->getByteSize() == 8)
-                        ostr << buf.getField<uint64_t>(d, idx);
-                    break;
-                case dimension::Float:
-                    if (d->getByteSize() == 4)
-                        ostr << buf.getField<float>(d, idx);
-                    if (d->getByteSize() == 8)
-                        ostr << buf.getField<double>(d, idx);
-                    break;
-                default:
-                    throw;
+            case Dimension::Type::Signed8:
+                ostr << (int)(getField<int8_t>(d, idx));
+            case Dimension::Type::Signed16:
+                ostr << getField<int16_t>(d, idx);
+            case Dimension::Type::Signed32:
+                ostr << getField<int32_t>(d, idx);
+            case Dimension::Type::Signed64:
+                ostr << getField<int64_t>(d, idx);
+            case Dimension::Type::Unsigned8:
+                ostr << (unsigned)(getField<uint8_t>(d, idx));
+            case Dimension::Type::Unsigned16:
+                ostr << getField<uint16_t>(d, idx);
+            case Dimension::Type::Unsigned32:
+                ostr << getField<uint32_t>(d, idx);
+            case Dimension::Type::Unsigned64:
+                ostr << getField<uint64_t>(d, idx);
+            case Dimension::Type::Float:
+                ostr << getField<float>(d, idx);
+            case Dimension::Type::Double:
+                ostr << getField<double>(d, idx);
+            default:
+                throw;
             }
-
             ostr << endl;
         }
     }
+}
+
+
+std::ostream& operator<<(std::ostream& ostr, const PointBuffer& buf)
+{
+    buf.dump(ostr);
     return ostr;
 }
 

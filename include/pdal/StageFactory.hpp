@@ -148,24 +148,13 @@ inline void StageFactory::registerDriverInfo()
     pdal::StageInfo info(T::s_getName(), T::s_getDescription());
     info.setInfoLink(T::s_getInfoLink());
     info.setIsEnabled(T::s_isEnabled());
-    std::vector<Dimension> dimensions = T::getDefaultDimensions();
-    
-    for (std::vector<Dimension>::const_iterator i = dimensions.begin();
-         i != dimensions.end();
-         ++i)
-    {
-        info.addProvidedDimension(*i);
-    }
+    info.addProvidedDimensions(T::getDefaultDimensions());
     
     std::vector<Option> options = T::getDefaultOptions().getOptions();
-    for (std::vector<Option>::const_iterator i = options.begin();
-        i != options.end();
-        ++i)
-    {
+    for (auto i = options.begin(); i != options.end(); ++i)
         info.addProvidedOption(*i);
-    }
-    m_driver_info.insert(std::pair<std::string, pdal::StageInfo>(T::s_getName(), info));
-
+    m_driver_info.insert(
+        std::pair<std::string, pdal::StageInfo>(T::s_getName(), info));
 }
 
 } // namespace pdal

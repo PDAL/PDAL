@@ -42,7 +42,6 @@
 namespace pdal
 {
 
-class Dimension;
 class PointContext;
 
 namespace drivers
@@ -80,10 +79,9 @@ private:
 
     virtual void initialize();
     virtual void processOptions(const Options& options);
-    virtual void buildSchema(Schema *schema);
+    virtual void addDimensions(PointContext ctx);
     virtual void ready(PointContext ctx);
     void validateQuery();
-    void normalizeDimension(DimensionPtr d);
     void defineBlock(Statement statement, BlockPtr block) const;
     pdal::SpatialReference fetchSpatialReference(Statement statement,
         BlockPtr block) const;
@@ -91,17 +89,9 @@ private:
     Connection m_connection;
     Statement m_stmt;
     BlockPtr m_block;
-    std::vector<DimensionPtr> m_dims;
     std::string m_query;
     std::string m_schemaFile;
     std::string m_connSpec;
-    bool m_normalizeXYZ;
-    boost::optional<double> m_offsetX;
-    boost::optional<double> m_offsetY;
-    boost::optional<double> m_offsetZ;
-    boost::optional<double> m_scaleX;
-    boost::optional<double> m_scaleY;
-    boost::optional<double> m_scaleZ;
     boost::optional<SpatialReference> m_spatialRef;
 };
 

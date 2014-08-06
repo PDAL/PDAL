@@ -59,6 +59,23 @@
 namespace pdal
 {
 
+bool Schema::operator==(const Schema& other) const
+{
+    if (m_fqIndex.size() != other.m_fqIndex.size())
+        return false;
+    std::map<std::string, DimensionPtr> idx(
+        m_fqIndex.begin(), m_fqIndex.end());
+    std::map<std::string, DimensionPtr> oidx(
+        other.m_fqIndex.begin(), other.m_fqIndex.end());
+
+    auto oi = oidx.begin();
+    for (auto ii = idx.begin(); ii != idx.end(); ++ii, ++oi)
+        if (ii->first != oi->first || ii->second != oi->second)
+            return false;
+    return true;
+}
+
+
 bool Schema::operator!=(const Schema& other) const
 {
     return !(*this==other);
@@ -90,6 +107,7 @@ void Schema::appendDimension(const Dimension& dim)
     // we used to use.
     if (m_index.find(name) != m_index.end() || d->forceKeep())
         m_dimPos.push_back(d);
+    std::cerr << "Adding dimension = " << name << " = " << d->getName() << "!\n";
     m_index[name] = d;
 }
 
@@ -97,7 +115,18 @@ void Schema::appendDimension(const Dimension& dim)
 DimensionPtr Schema::getDimension(const std::string& name) const
 {
     auto di = m_index.find(name);
-    return (di == m_index.end() ? DimensionPtr() : di->second);
+//    return (di == m_index.end() ? DimensionPtr() : di->second);
+    if (di == m_index.end())
+    {
+        std::cerr << "Returning null ptr for " << name << "!\n";
+        return DimensionPtr();
+    }
+    else
+    {
+        std::cerr << "Returning dim = " << di->second->getName() << " for " <<
+            name << "!\n";
+        return di->second;
+    }
 }
 
 
@@ -169,45 +198,6 @@ std::string Schema::to_xml(Schema const& schema, MetadataNode m)
 #endif
     return xml;
 }
-
-
-/***
-schema::DimensionMap* Schema::mapDimensions(Schema const& destination, bool bIgnoreNamespace) const
-{
-
-    schema::index_by_index const& dimensions = getDimensions().get<schema::index>();
-    schema::index_by_index::size_type d(0);
-
-    schema::DimensionMap* dims = new schema::DimensionMap;
-
-    for (d = 0; d < dimensions.size(); ++d)
-    {
-        Dimension const& source_dim = dimensions[d];
-        std::string ns = source_dim.getNamespace();
-        if (bIgnoreNamespace) ns = std::string("");
-        boost::optional<Dimension const&> dest_dim_ptr = destination.getDimensionOptional(source_dim.getName(),
-                ns);
-        if (!dest_dim_ptr)
-        {
-            continue;
-        }
-
-        Dimension const* s = &source_dim;
-        Dimension const* d = &(*dest_dim_ptr);
-
-        if (d->getInterpretation() == s->getInterpretation() &&
-                d->getByteSize() == s->getByteSize() &&
-                pdal::Utils::compare_distance(d->getNumericScale(), s->getNumericScale()) &&
-                pdal::Utils::compare_distance(d->getNumericOffset(), s->getNumericOffset())
-           )
-        {
-            dims->insert(std::pair<Dimension const*, Dimension const*>(s, d));
-        }
-    }
-
-    return dims;
-}
-***/
 
 
 boost::property_tree::ptree Schema::toPTree() const
@@ -397,44 +387,6 @@ std::ostream& Schema::toRST(std::ostream& os) const
     }
     return os;
 }
-
-
-/**
-std::size_t pdal::schema::DimensionMap::update()
-{
-    typedef std::map<Dimension const*, Dimension const*>::const_iterator Iterator;
-    
-    std::map<Dimension const*, Dimension const*>::size_type l = static_cast<std::map<Dimension const*, Dimension const*>::size_type >(MAX_OFFSETS_LENGTH);
-    assert(m.size() <= l);
-    
-    std::size_t entIndex = 0;
-    for (Iterator d = m.begin(); d != m.end(); ++d, ++entIndex)
-    {
-        Dimension const& source_dim = *d->first;
-        Dimension const& dest_dim = *d->second;
-
-        pointbuffer::PointBufferByteSize source_byteoffset = static_cast<pointbuffer::PointBufferByteSize>(source_dim.getByteOffset());
-        pointbuffer::PointBufferByteSize destination_byteoffset = static_cast<pointbuffer::PointBufferByteSize>(dest_dim.getByteOffset());
-
-        if (source_dim.getByteSize() != dest_dim.getByteSize())
-        {
-            std::ostringstream oss;
-            oss << "Dimension '" << dest_dim.getName() << "' are not the same byte size and cannot be copied";
-            throw buffer_error(oss.str());
-        }
-
-        uint64_t encoded =
-            ((source_byteoffset & 0xFFFF) << 32)  |
-            ((destination_byteoffset & 0xFFFF) << 16) |
-            (source_dim.getByteSize() & 0xFFFF);
-
-        offsets[entIndex] = encoded;
-    }
-
-    return entIndex;
-    
-}
-**/
 
 
 std::ostream& operator<<(std::ostream& os, pdal::Schema const& schema)

@@ -128,7 +128,7 @@ BOOST_AUTO_TEST_CASE(pipeline)
     BOOST_CHECK_EQUAL(pbSet.size(), 1);
     PointBufferPtr buf = *pbSet.begin();
 
-    Dimension const& dimY = manager.schema()->getDimension("Y");
+    DimensionPtr dimY = manager.schema()->getDimension("Y");
     for (PointId idx = 0; idx < 10; ++idx)
     {
         int32_t y = buf->getField<int32_t>(dimY, idx);

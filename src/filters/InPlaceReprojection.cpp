@@ -162,27 +162,26 @@ Options InPlaceReprojection::getDefaultOptions()
 
 void InPlaceReprojection::buildSchema(Schema *schema)
 {
-    m_srcDimX = schema->getDimensionPtr(m_x_name);
-    m_srcDimY = schema->getDimensionPtr(m_y_name);
-    m_srcDimZ = schema->getDimensionPtr(m_z_name);
+    m_srcDimX = schema->getDimension(m_x_name);
+    m_srcDimY = schema->getDimension(m_y_name);
+    m_srcDimZ = schema->getDimension(m_z_name);
 
     log()->get(logDEBUG3) << "Fetched x_name: " << *m_srcDimX;
     log()->get(logDEBUG3) << "Fetched y_name: " << *m_srcDimY;
     log()->get(logDEBUG3) << "Fetched z_name: " << *m_srcDimZ;
 
-    m_dimX = appendDimension(schema, m_srcDimX);
-    m_dimY = appendDimension(schema, m_srcDimY);
-    m_dimZ = appendDimension(schema, m_srcDimZ);
+    appendDimension(schema, m_srcDimX);
+    appendDimension(schema, m_srcDimY);
+    appendDimension(schema, m_srcDimZ);
 }
 
 
-Dimension *InPlaceReprojection::appendDimension(Schema *schema, Dimension *src)
+void InPlaceReprojection::appendDimension(Schema *schema, DimensionPtr src)
 {
     Dimension dim(*src);
-    dim.setParent(src->getUUID());
     dim.setNamespace(getName());
     dim.createUUID();
-    Dimension *d = schema->appendDimension(dim);
+    schema->appendDimension(dim);
 
     log()->get(logDEBUG2) << "source  dimension: " << *src << std::endl;
     log()->get(logDEBUG2) << "derived dimension: " << dim << std::endl;
@@ -195,12 +194,14 @@ Dimension *InPlaceReprojection::appendDimension(Schema *schema, Dimension *src)
             " as ignored with uuid "  << src->getUUID() << std::endl;
         src->setFlags(src->getFlags() | dimension::IsIgnored);
     }
-    return d;
 }
 
 
 void InPlaceReprojection::ready(PointContext ctx)
 {
+    m_dimX = ctx.schema()->getDimension(m_x_name, getName());
+    m_dimY = ctx.schema()->getDimension(m_y_name, getName());
+    m_dimZ = ctx.schema()->getDimension(m_z_name, getName());
     if (m_inSRS.empty())
         m_inSRS = ctx.spatialRef();
     setSpatialReference(m_outSRS);
@@ -330,9 +331,9 @@ void InPlaceReprojection::filter(PointBuffer& buffer)
         
     for (PointId idx = 0; idx < buffer.size(); ++idx)
     {
-        double x = buffer.getFieldAs<double>(*m_srcDimX, idx);
-        double y = buffer.getFieldAs<double>(*m_srcDimY, idx);
-        double z = buffer.getFieldAs<double>(*m_srcDimZ, idx);
+        double x = buffer.getFieldAs<double>(m_srcDimX, idx);
+        double y = buffer.getFieldAs<double>(m_srcDimY, idx);
+        double z = buffer.getFieldAs<double>(m_srcDimZ, idx);
 
         if (logOutput)
         {
@@ -349,16 +350,16 @@ void InPlaceReprojection::filter(PointBuffer& buffer)
                 x << " y: " << y << " z: " << z << std::endl;
         }
 
-        buffer.setFieldUnscaled(*m_dimX, idx, x);
-        buffer.setFieldUnscaled(*m_dimY, idx, y);
-        buffer.setFieldUnscaled(*m_dimZ, idx, z);
+        buffer.setFieldUnscaled(m_dimX, idx, x);
+        buffer.setFieldUnscaled(m_dimY, idx, y);
+        buffer.setFieldUnscaled(m_dimZ, idx, z);
 
         if (logOutput)
         {
             log()->get(logDEBUG5) << "scaled:" <<
-                " x: " << buffer.getFieldAs<double>(*m_dimX, idx) <<
-                " y: " << buffer.getFieldAs<double>(*m_dimY, idx) <<
-                " z: " << buffer.getFieldAs<double>(*m_dimZ, idx) << std::endl;
+                " x: " << buffer.getFieldAs<double>(m_dimX, idx) <<
+                " y: " << buffer.getFieldAs<double>(m_dimY, idx) <<
+                " z: " << buffer.getFieldAs<double>(m_dimZ, idx) << std::endl;
         }
     }
     if (logOutput)

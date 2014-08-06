@@ -57,10 +57,10 @@ void PCLBlock::processOptions(const Options& options)
 
 void PCLBlock::ready(PointContext ctx)
 {
-    m_iDim = ctx.schema()->getDimensionPtr("Intensity");
-    m_xDim = ctx.schema()->getDimensionPtr("X");
-    m_yDim = ctx.schema()->getDimensionPtr("Y");
-    m_zDim = ctx.schema()->getDimensionPtr("Z");
+    m_iDim = ctx.schema()->getDimension("Intensity");
+    m_xDim = ctx.schema()->getDimension("X");
+    m_yDim = ctx.schema()->getDimension("Y");
+    m_zDim = ctx.schema()->getDimension("Z");
 }
 
 
@@ -75,9 +75,9 @@ PointBufferSet PCLBlock::run(PointBufferPtr input)
     if (logOutput)
         log()->floatPrecision(8);
 
-    log()->get(logDEBUG2) << input->getFieldAs<double>(*m_xDim, 0) << ", " <<
-        input->getFieldAs<double>(*m_yDim, 0) << ", " <<
-        input->getFieldAs<double>(*m_zDim, 0) << std::endl;
+    log()->get(logDEBUG2) << input->getFieldAs<double>(m_xDim, 0) << ", " <<
+        input->getFieldAs<double>(m_yDim, 0) << ", " <<
+        input->getFieldAs<double>(m_zDim, 0) << std::endl;
     log()->get(logDEBUG2) << "Process PCLBlock..." << std::endl;
 
     // convert PointBuffer to PointNormal
@@ -132,9 +132,9 @@ PointBufferSet PCLBlock::run(PointBufferPtr input)
     log()->get(logDEBUG2) << cloud->points.size() << " before, " <<
         cloud_f->points.size() << " after" << std::endl;
     log()->get(logDEBUG2) << output->size() << std::endl;
-    log()->get(logDEBUG2) << output->getFieldAs<double>(*m_xDim, 0) << ", " <<
-        output->getFieldAs<double>(*m_yDim, 0) << ", " << 
-        output->getFieldAs<double>(*m_zDim, 0) << std::endl;
+    log()->get(logDEBUG2) << output->getFieldAs<double>(m_xDim, 0) << ", " <<
+        output->getFieldAs<double>(m_yDim, 0) << ", " << 
+        output->getFieldAs<double>(m_zDim, 0) << std::endl;
 #endif
     return pbSet;
 }

@@ -80,19 +80,18 @@ public:
     Reader(const Options& options);
 
     static Options getDefaultOptions();
-    static std::vector<Dimension> getDefaultDimensions();
+    static Dimension::IdList getDefaultDimensions();
 
     pdal::StageSequentialIterator *createSequentialIterator() const;
 
 private:
-    Schema *m_schema;  // Just used to get it to the iterator.
     uint64_t m_numPoints;
     Mode m_mode;
     
     Bounds<double> m_bounds;
 
     virtual void processOptions(const Options& options);
-    virtual void buildSchema(Schema *s);
+    virtual void addDimensions(PointContext ctx);
 
     Reader& operator=(const Reader&); // not implemented
     Reader(const Reader&); // not implemented
@@ -104,8 +103,8 @@ private:
 class PDAL_DLL FauxSeqIterator : public pdal::ReaderSequentialIterator
 {
 public:
-    FauxSeqIterator(const Bounds<double>& bounds, Schema *schema,
-        drivers::faux::Mode mode, point_count_t numPoints, LogPtr log);
+    FauxSeqIterator(const Bounds<double>& bounds, drivers::faux::Mode mode,
+        point_count_t numPoints, LogPtr log);
 
 private:
     double m_minX;
@@ -114,10 +113,6 @@ private:
     double m_maxY;
     double m_minZ;
     double m_maxZ;
-    DimensionPtr m_dimX;
-    DimensionPtr m_dimY;
-    DimensionPtr m_dimZ;
-    DimensionPtr m_dimTime;
     uint64_t m_time;
     drivers::faux::Mode m_mode;
     point_count_t m_numPoints;

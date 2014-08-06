@@ -50,7 +50,6 @@
 
 using namespace pdal;
 
-
 BOOST_AUTO_TEST_SUITE(LasWriterTest)
 
 BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_las)
@@ -332,11 +331,11 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_ignored_dimensions)
         iter->read(altered, 1);
     
         Schema *schema2 = ctx2.schema();
-        pdal::Dimension const& dimRed = schema2->getDimension("Red");
-        pdal::Dimension const& dimX = schema2->getDimension("X");
-        boost::uint16_t r = altered.getField<boost::uint16_t>(dimRed, 0);
+        DimensionPtr dimRed = schema2->getDimension("Red");
+        DimensionPtr dimX = schema2->getDimension("X");
+        uint16_t r = altered.getField<boost::uint16_t>(dimRed, 0);
         BOOST_CHECK_EQUAL(r, 0u);
-        boost::int32_t x = altered.getField<boost::int32_t>(dimX, 0);
+        int32_t x = altered.getField<boost::int32_t>(dimX, 0);
         BOOST_CHECK_EQUAL(x, 63701224);
 
         delete iter;
@@ -345,21 +344,19 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_ignored_dimensions)
     {
         PointContext ctx3;
 
-        pdal::drivers::las::Reader
-            reader3(Support::datapath("interesting.las"));
+        drivers::las::Reader reader3(Support::datapath("interesting.las"));
         reader3.prepare(ctx3);
         PointBuffer original(ctx3);
-        pdal::StageSequentialIterator* iter2 =
-            reader.createSequentialIterator();
+        StageSequentialIterator* iter2 = reader.createSequentialIterator();
     
         iter2->read(original, 1);
         
         Schema *schema = ctx.schema();
-        pdal::Dimension const& dimRed2 = schema->getDimension("Red");
-        pdal::Dimension const& dimX2 = schema->getDimension("X");
-        boost::uint16_t r2 = original.getField<boost::uint16_t>(dimRed2, 0);
+        DimensionPtr dimRed2 = schema->getDimension("Red");
+        DimensionPtr dimX2 = schema->getDimension("X");
+        uint16_t r2 = original.getField<uint16_t>(dimRed2, 0);
         BOOST_CHECK_EQUAL(r2, 68u);
-        boost::int32_t x2 = original.getField<boost::int32_t>(dimX2, 0);
+        int32_t x2 = original.getField<int32_t>(dimX2, 0);
         BOOST_CHECK_EQUAL(x2, 63701224);
 
         delete iter2;
@@ -385,10 +382,11 @@ BOOST_AUTO_TEST_CASE(test_different_formats)
 
 BOOST_AUTO_TEST_CASE(test_summary_data_add_point)
 {
-    pdal::drivers::las::SummaryData summaryData;
+    drivers::las::SummaryData summaryData;
 
-    summaryData.addPoint(-95.329381929535259, 29.71948951835612, -17.515486778166398, 0);
-    pdal::Bounds<double> b = summaryData.getBounds();
+    summaryData.addPoint(-95.329381929535259, 29.71948951835612,
+        -17.515486778166398, 0);
+    Bounds<double> b = summaryData.getBounds();
     BOOST_CHECK_EQUAL(b.getMinimum(0), b.getMaximum(0));
     BOOST_CHECK_EQUAL(b.getMinimum(2), b.getMaximum(2));
 }

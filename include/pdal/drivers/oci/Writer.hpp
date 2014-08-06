@@ -102,7 +102,7 @@ private:
     virtual void ready(PointContext ctx);
     virtual void write(const PointBuffer& buffer);
     virtual void done(PointContext ctx);
-    void writeInit(const Schema& schema);
+    void writeInit();
     void writeTile(const PointBuffer& buffer);
 
     void runCommand(std::ostringstream const& command);
@@ -110,7 +110,7 @@ private:
     void createBlockIndex();
     void createBlockTable();
     void createSDOEntry();
-    void createPCEntry(Schema const& buffer_schema);
+    void createPCEntry();
     long getGType();
     std::string createPCElemInfo();
     bool blockTableExists();
@@ -144,6 +144,8 @@ private:
     bool m_overwrite;
     bool m_trace;
     bool m_pack;
+    Dimension::IdList m_dims;
+    std::vector<Dimension::Type::Enum> m_types;
 
     std::string m_baseTableName;
     std::string m_cloudColumnName;
@@ -162,8 +164,6 @@ private:
     bool m_streamChunks;
     Orientation::Enum m_orientation;
     std::string m_connSpec;
-
-    DimensionList m_dims;
 };
 
 } // namespace oci

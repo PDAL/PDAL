@@ -37,8 +37,7 @@
 #include <memory>
 #include <vector>
 
-#include "pdal/Dimension.hpp"
-#include "pdal/Schema.hpp"
+#include "pdal/pdal_internal.hpp"
 
 namespace pdal
 {
@@ -47,10 +46,7 @@ namespace pdal
 class RawPtBuf
 {
 public:
-    RawPtBuf(SchemaPtr schema)
-        : m_numPts(0)
-        , m_allocPts(0)
-        , m_schema(schema)
+    RawPtBuf() : m_numPts(0), m_allocPts(0)
     {}
 
     PointId addPoint()
@@ -63,32 +59,28 @@ public:
         return m_numPts++;
     }
 
-    void setField(DimensionPtr dim, PointId idx, const void *value)
+    void setField(Dimension::Detail *d, PointId idx, const void *value)
     {
-//ABELL
-//        std::size_t offset = pointsToBytes(idx) + dim->getByteOffset();
-std::size_t offset = pointsToBytes(idx);
-        memcpy(m_buf.data() + offset, value, dim->getByteSize());
+        std::size_t offset = pointsToBytes(idx) + d->offset();
+        memcpy(m_buf.data() + offset, value, d->size());
     }
 
-    void getField(DimensionPtr dim, PointId idx, void *value)
+    void getField(Dimension::Detail *d, PointId idx, void *value)
     {
-//ABELL
-//        std::size_t offset = pointsToBytes(idx) + dim->getByteOffset();
-std::size_t offset = pointsToBytes(idx);
-        memcpy(value, m_buf.data() + offset, dim->getByteSize());
+        std::size_t offset = pointsToBytes(idx) + d->offset();
+        memcpy(value, m_buf.data() + offset, d->size());
     }
 
 private:
     std::vector<char> m_buf;
     point_count_t m_numPts;
     point_count_t m_allocPts;
-    SchemaPtr m_schema;
+    size_t m_pointSize;
 
     static const point_count_t m_blockSize = 100000;
     
     std::size_t pointsToBytes(point_count_t numPts)
-        { return m_schema->getByteSize() * numPts; }
+        { return m_pointSize * numPts; }
 };
 typedef std::shared_ptr<RawPtBuf> RawPtBufPtr;
 

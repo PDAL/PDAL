@@ -109,21 +109,17 @@ void Diff::checkPoints(const PointBuffer& source_data,
 
     // Both schemas have already been determined to be equal, so are the
     // same size and in the same order.
-    std::vector<Dimension *> sourceDims;
-    std::vector<Dimension *> candidateDims;
-    for (size_t d = 0; d < source_data.getSchema().numDimensions(); ++d)
-    {
-        sourceDims.push_back(source_data.getSchema().getDimensionPtr(d));
-        candidateDims.push_back(candidate_data.getSchema().getDimensionPtr(d));
-    }
+    DimensionList sourceDims = source_data.getSchema().getDimensions();
+    DimensionList candidateDims = candidate_data.getSchema().getDimensions();
+
     char sbuf[8];
     char cbuf[8];
     for (PointId idx = 0; idx < source_data.size(); ++idx)
     {
         for (size_t d = 0; d < sourceDims.size(); ++d)
         {
-            source_data.getRawField(*sourceDims[d], idx, (void *)sbuf);
-            candidate_data.getRawField(*candidateDims[d], idx, (void *)cbuf);
+            source_data.getRawField(sourceDims[d], idx, (void *)sbuf);
+            candidate_data.getRawField(candidateDims[d], idx, (void *)cbuf);
             if (memcmp(sbuf, cbuf, sourceDims[d]->getByteSize()))
             {
                 std::ostringstream oss;

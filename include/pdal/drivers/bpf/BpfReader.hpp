@@ -62,15 +62,15 @@ public:
 private:
     ILeStream m_stream;
     BpfHeader m_header;
-    std::vector<BpfDimension> m_dims;
-    std::vector<DimensionPtr> m_schemaDims;
+    BpfDimensionList m_dims;
+    Dimension::IdList m_schemaDims;
     BpfUlemHeader m_ulemHeader;
     std::vector<BpfUlemFrame> m_ulemFrames;
     BpfPolarHeader m_polarHeader;
     std::vector<BpfPolarFrame> m_polarFrames;
 
     virtual void initialize();
-    virtual void buildSchema(Schema *schema);
+    virtual void addDimensions(PointContext ctx);
     virtual void ready(PointContext ctx);
     bool readUlemData();
     bool readPolarData();

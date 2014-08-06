@@ -50,17 +50,13 @@ PointBuffer* makeTestBuffer(PointContext ctx)
     Dimension d2("X", dimension::SignedInteger, 4);
     Dimension d3("Y", dimension::Float, 8);
 
-    Dimension *dimC = ctx.schema()->appendDimension(d1);
-    Dimension *dimX = ctx.schema()->appendDimension(d2);
-    Dimension *dimY = ctx.schema()->appendDimension(d3);
+    ctx.schema()->appendDimension(d1);
+    ctx.schema()->appendDimension(d2);
+    ctx.schema()->appendDimension(d3);
 
-    //ABELL - This should go away.  Data locations should be opaque
-    std::size_t offX = dimC->getByteOffset();
-    BOOST_CHECK(offX==0);
-    std::size_t offY = dimX->getByteOffset();
-    BOOST_CHECK(offY==1);
-    std::size_t offZ = dimY->getByteOffset();
-    BOOST_CHECK(offZ==5);
+    DimensionPtr dimC = ctx.schema()->getDimension("Classification");
+    DimensionPtr dimX = ctx.schema()->getDimension("X");
+    DimensionPtr dimY = ctx.schema()->getDimension("Y");
 
     PointBuffer* data = new PointBuffer(ctx);
 
@@ -71,9 +67,9 @@ PointBuffer* makeTestBuffer(PointContext ctx)
         const int32_t y = i * 10;
         const double z = i * 100;
 
-        data->setField(*dimC, i, x);
-        data->setField(*dimX, i, y);
-        data->setField(*dimY, i, z);
+        data->setField(dimC, i, x);
+        data->setField(dimX, i, y);
+        data->setField(dimY, i, z);
     }
     BOOST_CHECK(data->size() == 17);
     return data;
@@ -82,16 +78,16 @@ PointBuffer* makeTestBuffer(PointContext ctx)
 
 static void verifyTestBuffer(const PointBuffer& data)
 {
-    const Dimension *dimC = data.getSchema().getDimensionPtr("Classification");
-    const Dimension *dimX = data.getSchema().getDimensionPtr("X");
-    const Dimension *dimY = data.getSchema().getDimensionPtr("Y");
+    DimensionPtr dimC = data.getSchema().getDimension("Classification");
+    DimensionPtr dimX = data.getSchema().getDimension("X");
+    DimensionPtr dimY = data.getSchema().getDimension("Y");
 
     // read the data back out
     for (int i = 0; i < 17; i++)
     {
-        const uint8_t x = data.getField<uint8_t>(*dimC, i);
-        const int32_t y = data.getField<uint32_t>(*dimX, i);
-        const double z = data.getField<double>(*dimY, i);
+        const uint8_t x = data.getField<uint8_t>(dimC, i);
+        const int32_t y = data.getField<uint32_t>(dimX, i);
+        const double z = data.getField<double>(dimY, i);
 
         BOOST_CHECK_EQUAL(x, i + 1);
         BOOST_CHECK_EQUAL(y, i * 10);
@@ -113,16 +109,16 @@ BOOST_AUTO_TEST_CASE(test_getFieldAs_uint8)
     PointContext ctx;
     PointBuffer* data = makeTestBuffer(ctx);
 
-    Dimension *dimC = ctx.schema()->getDimensionPtr("Classification");
-    Dimension *dimX = ctx.schema()->getDimensionPtr("X");
-    Dimension *dimY = ctx.schema()->getDimensionPtr("Y");
+    DimensionPtr dimC = ctx.schema()->getDimension("Classification");
+    DimensionPtr dimX = ctx.schema()->getDimension("X");
+    DimensionPtr dimY = ctx.schema()->getDimension("Y");
 
     // read the data back out
     for (int i = 0; i < 3; i++)
     {
-        uint8_t x = data->getFieldAs<uint8_t>(*dimC, i);
-        uint8_t y = data->getFieldAs<uint8_t>(*dimX, i);
-        uint8_t z = data->getFieldAs<uint8_t>(*dimY, i);
+        uint8_t x = data->getFieldAs<uint8_t>(dimC, i);
+        uint8_t y = data->getFieldAs<uint8_t>(dimX, i);
+        uint8_t z = data->getFieldAs<uint8_t>(dimY, i);
         
         BOOST_CHECK_EQUAL(x, i + 1);
         BOOST_CHECK_EQUAL(y, i * 10);
@@ -132,9 +128,9 @@ BOOST_AUTO_TEST_CASE(test_getFieldAs_uint8)
     // read the data back out
     for (int i = 3; i < 17; i++)
     {
-        uint8_t x = data->getFieldAs<uint8_t>(*dimC, i);
-        uint8_t y = data->getFieldAs<uint8_t>(*dimX, i);
-        BOOST_CHECK_THROW(data->getFieldAs<uint8_t>(*dimY, i), pdal_error);
+        uint8_t x = data->getFieldAs<uint8_t>(dimC, i);
+        uint8_t y = data->getFieldAs<uint8_t>(dimX, i);
+        BOOST_CHECK_THROW(data->getFieldAs<uint8_t>(dimY, i), pdal_error);
         BOOST_CHECK(x == i + 1);
         BOOST_CHECK(y == i * 10);
     }
@@ -146,16 +142,16 @@ BOOST_AUTO_TEST_CASE(test_getFieldAs_int32)
     PointContext ctx;
     PointBuffer* data = makeTestBuffer(ctx);
 
-    Dimension *dimC = ctx.schema()->getDimensionPtr("Classification");
-    Dimension *dimX = ctx.schema()->getDimensionPtr("X");
-    Dimension *dimY = ctx.schema()->getDimensionPtr("Y");
+    DimensionPtr dimC = ctx.schema()->getDimension("Classification");
+    DimensionPtr dimX = ctx.schema()->getDimension("X");
+    DimensionPtr dimY = ctx.schema()->getDimension("Y");
 
     // read the data back out
     for (int i = 0; i < 17; i++)
     {
-        int32_t x = data->getFieldAs<int32_t>(*dimC, i);
-        int32_t y = data->getFieldAs<int32_t>(*dimX, i);
-        int32_t z = data->getFieldAs<int32_t>(*dimY, i);
+        int32_t x = data->getFieldAs<int32_t>(dimC, i);
+        int32_t y = data->getFieldAs<int32_t>(dimX, i);
+        int32_t z = data->getFieldAs<int32_t>(dimY, i);
         
         BOOST_CHECK_EQUAL(x, i + 1);
         BOOST_CHECK_EQUAL(y, i * 10);
@@ -171,16 +167,16 @@ BOOST_AUTO_TEST_CASE(test_getFieldAs_float)
     PointContext ctx;
     PointBuffer* data = makeTestBuffer(ctx);
 
-    Dimension *dimC = ctx.schema()->getDimensionPtr("Classification");
-    Dimension *dimX = ctx.schema()->getDimensionPtr("X");
-    Dimension *dimY = ctx.schema()->getDimensionPtr("Y");
+    DimensionPtr dimC = ctx.schema()->getDimension("Classification");
+    DimensionPtr dimX = ctx.schema()->getDimension("X");
+    DimensionPtr dimY = ctx.schema()->getDimension("Y");
 
     // read the data back out
     for (int i = 0; i < 17; i++)
     {
-        float x = data->getFieldAs<float>(*dimC, i);
-        float y = data->getFieldAs<float>(*dimX, i);
-        float z = data->getFieldAs<float>(*dimY, i);
+        float x = data->getFieldAs<float>(dimC, i);
+        float y = data->getFieldAs<float>(dimX, i);
+        float z = data->getFieldAs<float>(dimY, i);
         
         BOOST_CHECK_CLOSE(x, i + 1.0f, std::numeric_limits<float>::min());
         BOOST_CHECK_CLOSE(y, i * 10.0f, std::numeric_limits<float>::min());
@@ -198,25 +194,25 @@ BOOST_AUTO_TEST_CASE(test_copy)
 
     PointBuffer d2(*data);
 
-    Dimension *dimC = ctx.schema()->getDimensionPtr("Classification");
-    Dimension *dimX = ctx.schema()->getDimensionPtr("X");
-    Dimension *dimY = ctx.schema()->getDimensionPtr("Y");
+    DimensionPtr dimC = ctx.schema()->getDimension("Classification");
+    DimensionPtr dimX = ctx.schema()->getDimension("X");
+    DimensionPtr dimY = ctx.schema()->getDimension("Y");
 
     // read the data back out
     {
-        BOOST_CHECK_EQUAL(d2.getField<uint8_t>(*dimC, 0),
-            data->getField<uint8_t>(*dimC, 0));
-        BOOST_CHECK_EQUAL(d2.getField<int32_t>(*dimX, 0),
-            data->getField<int32_t>(*dimX, 0));
-        BOOST_CHECK_EQUAL(d2.getField<double>(*dimY, 0),
-            data->getField<double>(*dimY, 0));
+        BOOST_CHECK_EQUAL(d2.getField<uint8_t>(dimC, 0),
+            data->getField<uint8_t>(dimC, 0));
+        BOOST_CHECK_EQUAL(d2.getField<int32_t>(dimX, 0),
+            data->getField<int32_t>(dimX, 0));
+        BOOST_CHECK_EQUAL(d2.getField<double>(dimY, 0),
+            data->getField<double>(dimY, 0));
     }
 
     for (int i = 1; i < 17; i++)
     {
-        uint8_t x = d2.getField<uint8_t>(*dimC, i);
-        int32_t y = d2.getField<int32_t>(*dimX, i);
-        double z = d2.getField<double>(*dimY, i);
+        uint8_t x = d2.getField<uint8_t>(dimC, i);
+        int32_t y = d2.getField<int32_t>(dimX, i);
+        double z = d2.getField<double>(dimY, i);
 
         BOOST_CHECK_EQUAL(x, i + 1);
         BOOST_CHECK_EQUAL(y, i * 10);
@@ -271,7 +267,7 @@ BOOST_AUTO_TEST_CASE(PointBufferTest_ptree)
 /**
 BOOST_AUTO_TEST_CASE(test_indexed)
 {
-    pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
+    drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
     BOOST_CHECK(reader.getDescription() == "Las Reader");
     reader.prepare();
 
@@ -279,10 +275,10 @@ BOOST_AUTO_TEST_CASE(test_indexed)
     boost::uint32_t capacity(1000);
     PointBuffer data(schema, capacity);
 
-    pdal::StageSequentialIterator* iter = reader.createSequentialIterator(data);
+    StageSequentialIterator* iter = reader.createSequentialIterator(data);
 
     {
-        boost::uint32_t numRead = iter->read(data);
+        uint32_t numRead = iter->read(data);
         BOOST_CHECK_EQUAL(numRead, capacity);
     }
 

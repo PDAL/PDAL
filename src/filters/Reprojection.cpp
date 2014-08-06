@@ -189,9 +189,9 @@ void Reprojection::filter(PointBuffer& data)
 {
     const Schema& schema = data.getSchema();
 
-    Dimension const& dimX = schema.getDimension("X");
-    Dimension const& dimY = schema.getDimension("Y");
-    Dimension const& dimZ = schema.getDimension("Z");
+    DimensionPtr dimX = schema.getDimension("X");
+    DimensionPtr dimY = schema.getDimension("Y");
+    DimensionPtr dimZ = schema.getDimension("Z");
 
     for (PointId id = 0; id < data.size(); ++id)
     {

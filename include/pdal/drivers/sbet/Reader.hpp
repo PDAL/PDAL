@@ -58,18 +58,17 @@ public:
         {}
 
     static Options getDefaultOptions();
-    static std::vector<Dimension> getDefaultDimensions()
-        { return fileDimensions(s_getName()); }
+    static Dimension::IdList getDefaultDimensions()
+        { return fileDimensions(); }
 
     virtual StageSequentialIterator* createSequentialIterator() const;
 private:
     std::string m_filename;
-    std::vector<Dimension *> m_dims;
     std::unique_ptr<ILeStream> m_stream;
     point_count_t m_numPts;
 
     virtual void processOptions(const Options& options);
-    virtual void buildSchema(Schema *schema);
+    virtual void addDimensions(PointContext ctx);
     virtual void ready(PointContext ctx);
 };
 
@@ -81,12 +80,11 @@ namespace sequential
 class PDAL_DLL SbetSeqIterator : public pdal::ReaderSequentialIterator
 {
 public:
-    SbetSeqIterator(std::vector<Dimension *> dims, point_count_t numPts,
-        ILeStream& stream) : m_dims(dims), m_numPts(numPts), m_stream(stream)
+    SbetSeqIterator(point_count_t numPts, ILeStream& stream) :
+        m_numPts(numPts), m_stream(stream)
     {}
 
 private:
-    std::vector<Dimension *> m_dims;
     point_count_t m_numPts;
     ILeStream& m_stream;
 

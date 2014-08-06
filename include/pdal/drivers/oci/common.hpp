@@ -38,11 +38,12 @@
 
 #include <cpl_port.h>
 
-#include <pdal/pdal_internal.hpp>
-#include <pdal/Schema.hpp>
+#include <pdal/PointContext.hpp>
+#include <pdal/XMLSchema.hpp>
 
 namespace pdal
 {
+
 namespace drivers
 {
 namespace oci
@@ -79,15 +80,6 @@ public:
 
 class Block
 {
-private:
-    struct Scale
-    {
-        friend class Block;
-
-        double m_scale;
-        double m_offset;
-    };
-
 public:
     Block(Connection connection);
     ~Block();
@@ -101,28 +93,28 @@ public:
     point_count_t numPoints() const
         { return num_points; }
     double xOffset() const
-        { return m_scaleX.m_offset; }
+        { return m_schema.m_scale.m_x.m_offset; }
     double yOffset() const
-        { return m_scaleY.m_offset; }
+        { return m_schema.m_scale.m_y.m_offset; }
     double zOffset() const
-        { return m_scaleZ.m_offset; }
+        { return m_schema.m_scale.m_z.m_offset; }
     double xScale() const
-        { return m_scaleX.m_scale; }
+        { return m_schema.m_scale.m_x.m_scale; }
     double yScale() const
-        { return m_scaleY.m_scale; }
+        { return m_schema.m_scale.m_y.m_scale; }
     double zScale() const
-        { return m_scaleZ.m_scale; }
+        { return m_schema.m_scale.m_z.m_scale; }
     char *data() const
         { return (char *)chunk.data(); }
     Orientation::Enum orientation() const
-        { return m_orientation; }
+        { return m_schema.m_orientation; }
+    void update(schema::XMLSchema *s);
     bool fetched() const
         { return m_fetched; }
     void setFetched()
         { m_fetched = true; }
     void clearFetched()
         { m_fetched = false; }
-    void initialize(Schema *s);
 
     int32_t obj_id;
     int32_t blk_id;
@@ -136,18 +128,16 @@ public:
     std::vector<uint8_t> chunk;
     OCILobLocator *locator;
     Connection m_connection;
-    Orientation::Enum m_orientation;
     sdo_pc* pc;
     int32_t m_num_remaining;
-    Scale m_scaleX;
-    Scale m_scaleY;
-    Scale m_scaleZ;
+    PointContext m_ctx;
+    schema::XMLSchema m_schema;
     bool m_fetched;  // Set when fetched but not initialized
 };
 typedef std::shared_ptr<Block> BlockPtr;
 
 Connection connect(std::string connSpec);
-Schema fetchSchema(Statement stmt, BlockPtr block);
+schema::XMLSchema fetchSchema(Statement stmt, BlockPtr block);
 
 } // namespace oci
 } // namespace drivers

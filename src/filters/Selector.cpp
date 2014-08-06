@@ -34,11 +34,10 @@
 
 #include <pdal/filters/Selector.hpp>
 
-//#include <iostream>
 #include <map>
 
-//#include <boost/algorithm/string.hpp>
 #include <boost/uuid/string_generator.hpp>
+#include <boost/uuid/uuid_generators.hpp>
 
 namespace pdal
 {
@@ -113,11 +112,8 @@ void Selector::processOptions(const Options &options)
                 std::string interpretation =
                     ops.getValueOrDefault<std::string>("interpretation",
                         "int32_t");
-                dimension::id uuid =
-                    ops.getValueOrDefault<dimension::id>("uuid",
-                        boost::uuids::nil_uuid());
-                dimension::id parent_uuid =
-                    ops.getValueOrDefault<dimension::id>("parent_uuid",
+                boost::uuids::uuid uuid =
+                    ops.getValueOrDefault<boost::uuids::uuid>("uuid",
                         boost::uuids::nil_uuid());
                 double minimum = ops.getValueOrDefault<double>("minimum", 0.0);
                 double maximum = ops.getValueOrDefault<double>("maximum", 0.0);
@@ -130,11 +126,8 @@ void Selector::processOptions(const Options &options)
 
                 if (d.getUUID().is_nil())
                     d.createUUID();
-                d.setParent(parent_uuid);
                 d.setNumericScale(scale);
                 d.setNumericOffset(offset);
-                d.setMinimum(minimum);
-                d.setMaximum(maximum);
                 d.setNamespace(getName());
                 m_createDimensions.push_back(d);
             }
@@ -153,33 +146,23 @@ void Selector::buildSchema(Schema *schema)
         di != m_createDimensions.end(); ++di)
     {
         Dimension& d = *di;
-        boost::optional<Dimension const&> old_dim =
-            schema->getDimensionOptional(d.getName());
+        DimensionPtr old_dim = schema->getDimension(d.getName());
 
         if (old_dim && !m_overwriteExisting)
             continue;
 
-        if (old_dim)
-            d.setParent(old_dim->getUUID());
         m_ignoredMap[d.getName()] = false;
         schema->appendDimension(d);
     }
 
-    schema::Map& dimensions = schema->getDimensions();
-    schema::index_by_index& dims = dimensions.get<schema::index>();
+    DimensionList dims = schema->getDimensions();
     for (auto di = dims.begin(); di != dims.end(); ++di)
     {
-        Dimension d = *di;
-        auto ii = m_ignoredMap.find(d.getName());
+        DimensionPtr d = *di;
+        auto ii = m_ignoredMap.find(d->getName());
         if  ((ii == m_ignoredMap.end() && m_ignoreDefault) ||
-            ii->second)
-        {
-            // Set the ingore flag on these dimensions.
-            dims.modify(di,
-                [d](Dimension &dr)
-                { dr.setFlags(d.getFlags() | dimension::IsIgnored); }
-            );
-        }
+                ii->second)
+            d->setFlags(d->getFlags() | dimension::IsIgnored);
     }
 }
 

@@ -99,9 +99,9 @@ void Crop::processOptions(const Options& options)
 void Crop::ready(PointContext ctx)
 {
     Schema *s = ctx.schema();
-    m_dimX = s->getDimensionPtr(m_xDimName);
-    m_dimY = s->getDimensionPtr(m_yDimName);
-    m_dimZ = s->getDimensionPtr(m_zDimName);
+    m_dimX = s->getDimension(m_xDimName);
+    m_dimY = s->getDimension(m_yDimName);
+    m_dimZ = s->getDimension(m_zDimName);
 
 #ifdef PDAL_HAVE_GEOS
     if (!m_poly.empty())
@@ -239,9 +239,9 @@ void Crop::crop(PointBuffer& input, PointBuffer& output)
 
     for (PointId idx = 0; idx < input.size(); ++idx)
     {
-        double x = input.getFieldAs<double>(*m_dimX, idx);
-        double y = input.getFieldAs<double>(*m_dimY, idx);
-        double z = input.getFieldAs<double>(*m_dimZ, idx);
+        double x = input.getFieldAs<double>(m_dimX, idx);
+        double y = input.getFieldAs<double>(m_dimY, idx);
+        double z = input.getFieldAs<double>(m_dimZ, idx);
 
         if (logOutput)
         {

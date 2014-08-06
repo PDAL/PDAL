@@ -55,9 +55,9 @@ static void getPoint(const pdal::PointBuffer& data,
 
     const Schema& schema = data.getSchema();
 
-    Dimension const& dim_x = schema.getDimension("X");
-    Dimension const& dim_y = schema.getDimension("Y");
-    Dimension const& dim_z = schema.getDimension("Z");
+    DimensionPtr dim_x = schema.getDimension("X");
+    DimensionPtr dim_y = schema.getDimension("Y");
+    DimensionPtr dim_z = schema.getDimension("Z");
     
     x = data.getFieldAs<double>(dim_x, 0);
     y = data.getFieldAs<double>(dim_y, 0);

@@ -32,23 +32,20 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_STAGEINFO_HPP
-#define INCLUDED_STAGEINFO_HPP
-
-#include <pdal/pdal_internal.hpp>
-#include <pdal/Options.hpp>
-#include <pdal/Metadata.hpp>
-#include <pdal/Dimension.hpp>
+#pragma once
 
 #include <string>
 #include <vector>
 #include <iosfwd>
 
+#include <pdal/Dimension.hpp>
+#include <pdal/Options.hpp>
+#include <pdal/Metadata.hpp>
+
 namespace pdal
 {
 
 class Stage;
-class Dimension;
 
 class PDAL_DLL StageInfo
 {
@@ -71,16 +68,18 @@ public:
 
 
     /// Gets the dimensions that a give stage produces
+/**
     inline std::vector<Dimension> const& getProvidedDimensions() const
     {
         return m_dimensions;
     }
+**/    
     
-    inline void addProvidedDimension(Dimension const& dim)
+    void addProvidedDimensions(const Dimension::IdList& dims)
     {
-        m_dimensions.push_back(dim);
+        std::copy(dims.begin(), dims.end(), std::back_inserter(m_dimensions));
     }
-    
+
     inline std::vector<Option> const& getProvidedOptions() const
     {
         return m_options;
@@ -161,13 +160,10 @@ public:
 private:
     std::string m_name;
     std::string m_description;
-    std::vector<Dimension> m_dimensions;
+    Dimension::IdList m_dimensions;
     std::vector<Option> m_options;
     std::string m_link;
     bool m_isEnabled;
-
-
-
 };
 
 /// Output operator for serialization
@@ -181,4 +177,3 @@ PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const StageInfo& src);
 
 } // namespace pdal
 
-#endif

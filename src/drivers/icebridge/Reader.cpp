@@ -72,86 +72,25 @@ Options Reader::getDefaultOptions()
 }
 
 
-std::vector<Dimension> Reader::getDefaultDimensions()
+Dimension::IdList Reader::getDefaultDimensions()
 {
-    std::vector<Dimension> output;
+    Dimension::IdList ids;
 
-    //IMPORTANT - The order of these dimensions must match the order of the
-    //  corresponding HDF5 columns (above).
-    Dimension time("Time", dimension::Float, 4,
-            "Relative Time (seconds from start of data file)");
-    time.setUUID("4a1e8fcb-321d-41d6-a0fb-b9cb8bad9216");
-    time.setNamespace(s_getName());
-    output.push_back(time);
+    using namespace Dimension;
 
-    Dimension y("Y", dimension::Float, 4,
-            "Laser Spot Latitude (degrees).");
-    y.setUUID("e2a153ff-5717-425d-9965-2ed744611c44");
-    y.setNamespace(s_getName());
-    output.push_back(y);
-
-    Dimension x("X", dimension::Float, 4,
-            "Laser Spot Longitude (degrees).");
-    x.setUUID("577bbb27-263b-431b-beef-3fae07042207");
-    x.setNamespace(s_getName());
-    output.push_back(x);
-
-    Dimension z("Z", dimension::Float, 4,
-            "Elevation (meters)");
-    z.setUUID("68e255e6-5463-4f2e-9b35-8b7c159a6a79");
-    z.setNamespace(s_getName());
-    output.push_back(z);
-
-    Dimension startPulse("StartPulse", dimension::SignedInteger, 4,
-            "Start Pulse Signal Strength (relative)");
-    startPulse.setUUID("37963e29-baf3-49f8-97e0-9c901fe9a611");
-    startPulse.setNamespace(s_getName());
-    output.push_back(startPulse);
-
-    Dimension reflectedPulse("ReflectedPulse", dimension::SignedInteger, 4,
-            "Reflected Pulse Signal Strength (relative)");
-    reflectedPulse.setUUID("ae4bbfbd-a275-46e3-b1b7-acd1d8a6e7ae");
-    reflectedPulse.setNamespace(s_getName());
-    output.push_back(reflectedPulse);
-
-    Dimension scanAngle("ScanAngleRank", dimension::Float, 4,
-            "Scan Azimuth (degrees)");
-    scanAngle.setUUID("5d75f366-075e-4e5a-b7c0-0627eddd529e");
-    scanAngle.setNamespace(s_getName());
-    output.push_back(scanAngle);
-
-    Dimension pitch("Pitch", dimension::Float, 4,
-            "Pitch (degrees)");
-    pitch.setUUID("6720a2cd-7ccf-4c19-a71c-48bfb77abf5a");
-    pitch.setNamespace(s_getName());
-    output.push_back(pitch);
-
-    Dimension roll("Roll", dimension::Float, 4,
-            "Roll (degrees)");
-    roll.setUUID("28565c97-aaae-4099-9b8c-4f38630993da");
-    roll.setNamespace(s_getName());
-    output.push_back(roll);
-                    
-    Dimension pdop("PDOP", dimension::Float, 4,
-            "GPS PDOP (dilution of precision)");
-    pdop.setUUID("34db8b9c-f488-4c8a-a93f-a96ff74b1d8d");
-    pdop.setNamespace(s_getName());
-    output.push_back(pdop);
-
-    Dimension width("PulseWidth", dimension::Float, 4,
-            "Laser Received Pulse Width (digitizer samples)");
-    width.setUUID("4f66ef25-97e2-4f6e-8335-ad706b9164dc");
-    width.setNamespace(s_getName());
-    output.push_back(width);
-
-    Dimension gpsTime("GpsTime", dimension::Float, 4,
-            "GPS Time packed (seconds) "
-            "(example: 153320.100 = 15h 33m 20s 100m)");
-    gpsTime.setUUID("d8868d61-49b9-4c7b-a75b-6acd8b26818e");
-    gpsTime.setNamespace(s_getName());
-    output.push_back(gpsTime);
-
-    return output;
+    ids.push_back(Id::OffsetTime);
+    ids.push_back(Id::Y);
+    ids.push_back(Id::X);
+    ids.push_back(Id::Z);
+    ids.push_back(Id::StartPulse);
+    ids.push_back(Id::ReflectedPulse);
+    ids.push_back(Id::ScanAngleRank);
+    ids.push_back(Id::Pitch);
+    ids.push_back(Id::Roll);
+    ids.push_back(Id::Pdop);
+    ids.push_back(Id::PulseWidth);
+    ids.push_back(Id::GpsTime);
+    return ids;
 }
 
 
@@ -161,11 +100,9 @@ void Reader::processOptions(const Options& options)
 }
 
 
-void Reader::buildSchema(Schema *s)
+void Reader::buildSchema(PointContext ctx)
 {
-   std::vector<Dimension> dims = getDefaultDimensions();
-   for (auto di = dims.begin(); di != dims.end(); ++di)
-       m_dims.push_back(s->appendDimension(*di));
+    return ctx.addDims(getDefaultDimensions());
 }
 
 
@@ -212,13 +149,13 @@ point_count_t IcebridgeSeqIter::readImpl(PointBuffer& buf, point_count_t count)
         rawData(new unsigned char[count * sizeof(float)]);
 
     //ABELL - Not loving the position-linked data, but fine for now.
-    auto di = m_dims.begin();
+    Dimension::IdList dims = Reader::getDefaultDimensions();
+    auto di = dims.begin();
     for (auto ci = hdf5Columns.begin(); ci != hdf5Columns.end(); ++ci, ++di)
     {
         PointId nextId = startId;
         PointId idx = m_index;
         const hdf5::Hdf5ColumnData& column = *ci;
-        Dimension *d = *di;
 
         try
         {
@@ -227,7 +164,7 @@ point_count_t IcebridgeSeqIter::readImpl(PointBuffer& buf, point_count_t count)
             unsigned char *p = rawData.get();
             for (PointId i = 0; i < count; ++i)
             {
-                buf.setRawField(*d, nextId, p);
+                buf.setRawField(*di, nextId, p);
                 nextId++;
                 p += sizeof(float);
             }

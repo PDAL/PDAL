@@ -325,12 +325,14 @@ pdal::Schema output_schema = buffer_schema;
 
             //ABELL - This seems like the same mess I purged from OCI.
             //  Probably needs to go.
+            /**
             if (pdal::Schema::from_xml(schema_str) == output_schema)
             {
                 bCreatePCPointSchema = false;
                 pcid = atoi(pcid_str);
                 break;
             }
+            **/
         }
         PQclear(result);
     }
@@ -540,7 +542,7 @@ void Writer::writeTile(PointBuffer const& buffer)
         for (size_t dim = 0; dim < m_dims.size(); ++dim)
         {
             buffer.getRawField(m_dims[dim], id, pos);
-            pos += m_dims[dim].getByteSize();
+            pos += m_dims[dim]->getByteSize();
         }
         if (id % 100 == 0)
             m_callback->invoke(id);        

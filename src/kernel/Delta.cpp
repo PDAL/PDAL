@@ -107,14 +107,14 @@ std::map<Point, Point>* cumulatePoints(PointBuffer& source_data,
     uint32_t count(std::min(source_data.size(), candidate_data.size()));
 
     Schema const& candidate_schema = candidate_data.getSchema();
-    Dimension const& cDimX = candidate_schema.getDimension("X");
-    Dimension const& cDimY = candidate_schema.getDimension("Y");
-    Dimension const& cDimZ = candidate_schema.getDimension("Z");
+    DimensionPtr cDimX = candidate_schema.getDimension("X");
+    DimensionPtr cDimY = candidate_schema.getDimension("Y");
+    DimensionPtr cDimZ = candidate_schema.getDimension("Z");
 
     Schema const& source_schema = source_data.getSchema();
-    Dimension const& sDimX = source_schema.getDimension("X");
-    Dimension const& sDimY = source_schema.getDimension("Y");
-    Dimension const& sDimZ = source_schema.getDimension("Z");    
+    DimensionPtr sDimX = source_schema.getDimension("X");
+    DimensionPtr sDimY = source_schema.getDimension("Y");
+    DimensionPtr sDimZ = source_schema.getDimension("Z");    
     for (uint32_t i = 0; i < count; ++i)
     {
         double sx = source_data.getFieldAs<double>(sDimX, i);
@@ -153,14 +153,14 @@ void Delta::outputDetail(PointBuffer& source_data, PointBuffer& candidate_data,
     std::map<Point, Point> *points) const
 {
     Schema const& candidate_schema = candidate_data.getSchema();
-    Dimension const& cDimX = candidate_schema.getDimension("X");
-    Dimension const& cDimY = candidate_schema.getDimension("Y");
-    Dimension const& cDimZ = candidate_schema.getDimension("Z");
+    DimensionPtr cDimX = candidate_schema.getDimension("X");
+    DimensionPtr cDimY = candidate_schema.getDimension("Y");
+    DimensionPtr cDimZ = candidate_schema.getDimension("Z");
 
     Schema const& source_schema = source_data.getSchema();
-    Dimension const& sDimX = source_schema.getDimension("X");
-    Dimension const& sDimY = source_schema.getDimension("Y");
-    Dimension const& sDimZ = source_schema.getDimension("Z");
+    DimensionPtr sDimX = source_schema.getDimension("X");
+    DimensionPtr sDimY = source_schema.getDimension("Y");
+    DimensionPtr sDimZ = source_schema.getDimension("Z");
     
     bool bWroteHeader(false);
     
@@ -223,19 +223,20 @@ std::vector<std::size_t> ids;
         for (auto b = output.begin(); b != output.end(); ++b)
         {
             ostr << b->second.get<boost::int32_t>("i")  << ",";
-            boost::uint32_t precision = Utils::getStreamPrecision(cDimX.getNumericScale());
+            uint32_t precision = Utils::getStreamPrecision(
+                cDimX->getNumericScale());
             ostr.setf(std::ios_base::fixed, std::ios_base::floatfield);
             ostr.precision(precision);
             ostr << b->second.get<float>("xd") << ",";
   
-            precision = Utils::getStreamPrecision(cDimY.getNumericScale());
+            precision = Utils::getStreamPrecision(cDimY->getNumericScale());
             ostr.precision(precision);
             ostr << b->second.get<float>("yd");
     
             if (m_3d)
             {
                 ostr << ",";
-                precision = Utils::getStreamPrecision(cDimZ.getNumericScale());
+                precision = Utils::getStreamPrecision(cDimZ->getNumericScale());
                 ostr.precision(precision);
                 ostr << b->second.get<float>("zd");
             }

@@ -100,29 +100,6 @@ public:
     {}
 };
 
-
-class PointDimensions
-{
-public:
-    PointDimensions(const Schema& schema, std::string const& ns);
-
-    DimensionPtr Time;
-    DimensionPtr X;
-    DimensionPtr Y;
-    DimensionPtr Z;
-
-    DimensionPtr Classification;
-    DimensionPtr PointSourceId;
-    DimensionPtr ReturnNumber;
-    DimensionPtr Intensity;
-    DimensionPtr Mark;
-    DimensionPtr Flag;
-
-    DimensionPtr Red;
-    DimensionPtr Green;
-    DimensionPtr Blue;
-    DimensionPtr Alpha;
-};
 //
 //
 // supported options:
@@ -141,7 +118,7 @@ public:
     Reader(const Options&);
 
     static Options getDefaultOptions();
-    static std::vector<Dimension> getDefaultDimensions();
+    static Dimension::IdList getDefaultDimensions();
     std::string getFileName() const;
     pdal::StageSequentialIterator*
         createSequentialIterator(PointBuffer& buffer) const;
@@ -165,19 +142,18 @@ protected:
     }
 
 private:
-
-    Reader& operator=(const Reader&); // not implemented
-    Reader(const Reader&); // not implemented
-
     TerraSolidHeaderPtr m_header;
     TERRASOLID_Format_Type m_format;
     std::size_t m_offset;
-    boost::uint32_t m_size;
-
+    uint32_t m_size;
     bool m_haveColor;
     bool m_haveTime;
 
-    virtual void buildSchema(Schema *s);
+    virtual void initialize();
+    virtual void addDimensions(PointContext ctx);
+
+    Reader& operator=(const Reader&); // not implemented
+    Reader(const Reader&); // not implemented
 };
 
 namespace iterators

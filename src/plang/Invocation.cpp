@@ -264,13 +264,6 @@ int Invocation::getPythonDataType(dimension::Interpretation datatype, boost::uin
 {
     switch (datatype)
     {
-        case dimension::RawByte:
-            switch (siz)
-            {
-                case 1:
-                    return PyArray_BYTE;
-            }
-            break;
         case dimension::Float:
             switch (siz)
             {

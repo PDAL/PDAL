@@ -32,19 +32,16 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_PDAL_DRIVER_QFIT_READER_HPP
-#define INCLUDED_PDAL_DRIVER_QFIT_READER_HPP
-
-#include <pdal/Reader.hpp>
-#include <pdal/ReaderIterator.hpp>
-#include <pdal/Options.hpp>
-
-#include <pdal/StageIterator.hpp>
-
+#pragma once
 
 #include <vector>
 
 #include <boost/detail/endian.hpp>
+
+#include <pdal/Reader.hpp>
+#include <pdal/ReaderIterator.hpp>
+#include <pdal/Options.hpp>
+#include <pdal/StageIterator.hpp>
 
 #ifdef BOOST_LITTLE_ENDIAN
 # define QFIT_SWAP_BE_TO_LE(p) \
@@ -93,40 +90,12 @@ public:
     {}
 };
 
-class PointDimensions
-{
-public:
-    PointDimensions(const Schema& schema, std::string const& ns);
-
-    DimensionPtr Time;
-    DimensionPtr X;
-    DimensionPtr Y;
-    DimensionPtr Z;
-
-    DimensionPtr StartPulse;
-    DimensionPtr ReflectedPulse;
-    DimensionPtr ScanAngleRank;
-    DimensionPtr Pitch;
-    DimensionPtr Roll;
-    DimensionPtr PDOP;
-    DimensionPtr PulseWidth;
-    DimensionPtr GPSTime;
-
-    DimensionPtr PassiveSignal;
-
-    DimensionPtr PassiveX;
-    DimensionPtr PassiveY;
-    DimensionPtr PassiveZ;
-};
-
-//
 // supported options:
 //   <uint32>id
 //   <bool>debug
 //   <uint32>verbose
 //   <string>filename  [required]
 //
-
 class PDAL_DLL Reader : public pdal::Reader
 {
 public:
@@ -134,11 +103,10 @@ public:
     SET_STAGE_LINK("http://pdal.io/stages/drivers.qfit.reader.html")
     SET_STAGE_ENABLED(true)
 
-
     Reader(const Options& options);
 
     static Options getDefaultOptions();
-    static std::vector<Dimension> getDefaultDimensions();
+    static Dimension::IdList getDefaultDimensions();
 
     std::string getFileName() const;
 
@@ -154,13 +122,12 @@ public:
         { return m_numPoints; }
 
     // this is called by the stage's iterator
-    boost::uint32_t processBuffer(PointBuffer& PointBuffer, std::istream& stream, boost::uint64_t numPointsLeft) const;
+    uint32_t processBuffer(PointBuffer& PointBuffer, std::istream& stream,
+        uint64_t numPointsLeft) const;
 
 protected:
     inline QFIT_Format_Type getFormat() const
-    {
-        return m_format;
-    }
+        { return m_format; }
 
 private:
     QFIT_Format_Type m_format;
@@ -171,7 +138,7 @@ private:
     bool m_littleEndian;
     point_count_t m_numPoints;
 
-    virtual void buildSchema(Schema *s);
+    virtual void addDimensions(PointContext ctx);
 
     Reader& operator=(const Reader&); // not implemented
     Reader(const Reader&); // not implemented
@@ -190,8 +157,8 @@ public:
     ~Reader();
 
 private:
-    boost::uint64_t skipImpl(boost::uint64_t);
-    boost::uint32_t readBufferImpl(PointBuffer&);
+    uint64_t skipImpl(uint64_t);
+    uint32_t readBufferImpl(PointBuffer&);
     bool atEndImpl() const
         { return getIndex() >= m_reader.getNumPoints(); }
 
@@ -211,8 +178,8 @@ public:
     ~Reader();
 
 private:
-    boost::uint64_t seekImpl(boost::uint64_t);
-    boost::uint32_t readBufferImpl(PointBuffer&);
+    uint64_t seekImpl(uint64_t);
+    uint32_t readBufferImpl(PointBuffer&);
 
     const pdal::drivers::qfit::Reader& m_reader;
     std::istream* m_istream;
@@ -224,4 +191,3 @@ private:
 } // namespace drivers
 } // namespace pdal
 
-#endif // INCLUDED_PDAL_DRIVER_QFIT_READER_HPP

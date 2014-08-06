@@ -82,12 +82,13 @@ private:
     PgReader(const PgReader&); // not implemented
 
     virtual void initialize();
-    virtual void buildSchema(Schema *schema);
+    virtual void addDimensions(PointContext ctx);
     virtual void processOptions(const Options& options);
     
     pdal::SpatialReference fetchSpatialReference() const;
     boost::uint32_t fetchPcid() const;
-    pdal::Schema fetchSchema() const;
+//ABELL
+//    pdal::Schema fetchSchema() const;
 
     PGconn* m_session;
     std::string m_connection;
@@ -98,7 +99,8 @@ private:
     mutable boost::uint32_t m_pcid;
     mutable boost::uint64_t m_cached_point_count;
     mutable boost::uint64_t m_cached_max_points;
-    std::vector<Dimension *> m_dims;    
+//ABELL
+//    DimensionList m_dims;    
 
 }; // pdal.drivers.pgpointcloud.PgReader
 

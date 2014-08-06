@@ -117,8 +117,8 @@ void Chipper::load(PointBuffer& buffer, ChipRefList& xvec, ChipRefList& yvec,
     spare.resize(buffer.size());
 
     Schema const& schema = buffer.getSchema();
-    Dimension const& dimX = schema.getDimension("X");
-    Dimension const& dimY = schema.getDimension("Y");
+    DimensionPtr dimX = schema.getDimension("X");
+    DimensionPtr dimY = schema.getDimension("Y");
     
     for (PointId i = 0; i < buffer.size(); ++i)
     {

@@ -41,9 +41,9 @@ namespace drivers
 namespace sbet
 {
 
-std::vector<Dimension> fileDimensions(const std::string& stageName)
+Dimension::IdList fileDimensions()
 {
-    std::vector<Dimension> output;
+    Dimension::IdList ids;
 
     // Data for each point is in the source file in the order these dimensions
     // are listed, I would suppose.  Would be really nice to have a reference
@@ -51,92 +51,27 @@ std::vector<Dimension> fileDimensions(const std::string& stageName)
     // some company called Applanix (Trimble), but I can't find anything
     // describing the file format on their website.
 
-    Dimension time("Time", dimension::Float, 8);
-    time.setUUID("D228D324-B40E-4C85-A0DB-ED741A665AFA");
-    time.setNamespace(stageName);
-    output.push_back(time);
+    using namespace Dimension;
+    ids.push_back(Id::GpsTime);
+    ids.push_back(Id::Y);
+    ids.push_back(Id::X);
+    ids.push_back(Id::Z);
+    ids.push_back(Id::XVelocity);
+    ids.push_back(Id::YVelocity);
+    ids.push_back(Id::ZVelocity);
+    ids.push_back(Id::GpsTime);
+    ids.push_back(Id::Roll);
+    ids.push_back(Id::Pitch);
+    ids.push_back(Id::PlatformHeading);
+    ids.push_back(Id::WanderAngle);
+    ids.push_back(Id::XBodyAccel);
+    ids.push_back(Id::YBodyAccel);
+    ids.push_back(Id::ZBodyAccel);
+    ids.push_back(Id::XBodyAngRate);
+    ids.push_back(Id::YBodyAngRate);
+    ids.push_back(Id::ZBodyAngRate);
 
-    Dimension y("Y", dimension::Float, 8);
-    y.setUUID("A1322536-C086-42C8-924A-A9B3BB290A1E");
-    y.setNamespace(stageName);
-    output.push_back(y);
-
-    Dimension x("X", dimension::Float, 8);
-    x.setUUID("57E88FE8-DD3C-4232-A70A-C840AC7129F3");
-    x.setNamespace(stageName);
-    output.push_back(x);
-
-    Dimension z("Z", dimension::Float, 8);
-    z.setUUID("7344D3CF-A943-4CA7-90BD-5B55838E610A");
-    z.setNamespace(stageName);
-    output.push_back(z);
-
-    Dimension xVelocity("XVelocity", dimension::Float, 8);
-    xVelocity.setUUID("0F482EC5-7F9B-44E2-A9D6-4248D99C7E82");
-    xVelocity.setNamespace(stageName);
-    output.push_back(xVelocity);
-
-    Dimension yVelocity("YVelocity", dimension::Float, 8);
-    yVelocity.setUUID("C221E33D-6AD9-4FE0-8090-D7BDD3826E51");
-    yVelocity.setNamespace(stageName);
-    output.push_back(yVelocity);
-
-    Dimension zVelocity("ZVelocity", dimension::Float, 8);
-    zVelocity.setUUID("B073200F-80EE-4DE1-BEE9-0B982695EDFA");
-    zVelocity.setNamespace(stageName);
-    output.push_back(zVelocity);
-
-    Dimension roll("Roll", dimension::Float, 8);
-    roll.setUUID("C2BD0053-34AB-4699-8AFF-0EA7DBC015E7");
-    roll.setNamespace(stageName);
-    output.push_back(roll);
-
-    Dimension pitch("Pitch", dimension::Float, 8);
-    pitch.setUUID("CD305166-B474-4047-AA93-7F2C98B22532");
-    pitch.setNamespace(stageName);
-    output.push_back(pitch);
-
-    Dimension platformHeading("PlatformHeading", dimension::Float, 8);
-    platformHeading.setUUID("F619BC08-3FF8-40ED-8DEB-4F18EF695C0C");
-    platformHeading.setNamespace(stageName);
-    output.push_back(platformHeading);
-
-    Dimension wanderAngle("WanderAngle", dimension::Float, 8);
-    wanderAngle.setUUID("E9B6061B-B221-47C8-905C-0E6CA266727C");
-    wanderAngle.setNamespace(stageName);
-    output.push_back(wanderAngle);
-
-    Dimension xBodyAccel("XBodyAccel", dimension::Float, 8);
-    xBodyAccel.setUUID("24781F89-083C-43BD-9F14-CAF801D70E03");
-    xBodyAccel.setNamespace(stageName);
-    output.push_back(xBodyAccel);
-
-    Dimension yBodyAccel("YBodyAccel", dimension::Float, 8);
-    yBodyAccel.setUUID("6F3CC468-8871-4E54-8B8B-E66DEA16A90A");
-    yBodyAccel.setNamespace(stageName);
-    output.push_back(yBodyAccel);
-
-    Dimension zBodyAccel("ZBodyAccel", dimension::Float, 8);
-    zBodyAccel.setUUID("23A5AF6E-97B2-4BDF-9565-B0CBEF5F4BD1");
-    zBodyAccel.setNamespace(stageName);
-    output.push_back(zBodyAccel);
-
-    Dimension xBodyAngRate("XBodyAngRate", dimension::Float, 8);
-    xBodyAngRate.setUUID("34593AC6-2E46-4E45-BE7E-60B027012052");
-    xBodyAngRate.setNamespace(stageName);
-    output.push_back(xBodyAngRate);
-
-    Dimension yBodyAngRate("YBodyAngRate", dimension::Float, 8);
-    yBodyAngRate.setUUID("C76A0C32-57FA-4007-BFC7-C7867D50E9AC");
-    yBodyAngRate.setNamespace(stageName);
-    output.push_back(yBodyAngRate);
-
-    Dimension zBodyAngRate("ZBodyAngRate", dimension::Float, 8);
-    zBodyAngRate.setUUID("A30B9BB8-363D-467A-933A-B1EBD227AA5C");
-    zBodyAngRate.setNamespace(stageName);
-    output.push_back(zBodyAngRate);
-
-    return output;
+    return ids;
 }
 
 } // namespace sbet

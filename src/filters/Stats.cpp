@@ -133,9 +133,9 @@ void Stats::filter(PointBuffer& buffer)
     {
         for (auto p = m_stats.begin(); p != m_stats.end(); ++p)
         {
-            const Dimension *d = p->first;
+            DimensionPtr d = p->first;
             SummaryPtr c = p->second;
-            c->insert(buffer.getFieldAs<double>(*d, idx));
+            c->insert(buffer.getFieldAs<double>(d, idx));
         }
     }
 }
@@ -224,7 +224,7 @@ void Stats::ready(PointContext ctx)
             std::string const& name = *i;
             log()->get(logDEBUG2) << "Requested to cumulate stats for "
                 "dimension with name '" << name <<"'"<< std::endl;
-            const Dimension* d = schema->getDimensionPtr(name);
+            DimensionPtr d = schema->getDimension(name);
             if (!d)
                 continue;
             log()->get(logDEBUG2) << "Found dimension with name '" <<
@@ -241,13 +241,12 @@ void Stats::ready(PointContext ctx)
                 m_sample_size, m_cache_size, m_seed, doExact, m_do_sample));
         }
     }
-        
-    else {
-        for (size_t i = 0; i < schema->numDimensions(); ++i)
+    else
+    {
+        DimensionList dims = schema->getDimensions();
+        for (auto di = dims.begin(); di != dims.end(); ++di)
         {
-            const Dimension *d = schema->getDimensionPtr(i);
-            if (!d)
-                continue;
+            DimensionPtr d = *di;
             log()->get(logDEBUG2) << "Cumulating stats for dimension " <<
                 d->getName() << " with namespace: " << d->getNamespace() <<
                 std::endl;
@@ -265,7 +264,7 @@ void Stats::extractMetadata()
     boost::uint32_t position(0);
     for (auto di = m_stats.begin(); di != m_stats.end(); ++di)
     {
-        const Dimension *d = di->first;
+        DimensionPtr d = di->first;
         const SummaryPtr stat = di->second;
 
         MetadataNode statNode = m_metadata.add(d->getName());
@@ -283,7 +282,7 @@ boost::property_tree::ptree Stats::toPTree() const
     boost::uint32_t position(0);
     for (auto di = m_stats.begin(); di != m_stats.end(); ++di)
     {
-        const Dimension *d = di->first;
+        DimensionPtr d = di->first;
         const SummaryPtr stat = di->second;
 
         boost::property_tree::ptree subtree = stat->toPTree();
@@ -294,16 +293,16 @@ boost::property_tree::ptree Stats::toPTree() const
 }
 
 
-stats::Summary const& Stats::getStats(Dimension const& dim) const
+stats::Summary const& Stats::getStats(DimensionPtr dim) const
 {
     for (auto di = m_stats.begin(); di != m_stats.end(); ++di)
     {
-        const Dimension *d = di->first;
-        if (*d == dim)
+        DimensionPtr d = di->first;
+        if (*d == *dim)
             return *(di->second);
     }
     std::ostringstream oss;
-    oss <<"Dimension with name '" << dim.getName() << "' not found";
+    oss <<"Dimension with name '" << dim->getName() << "' not found";
     throw pdal_error(oss.str());
 }
 

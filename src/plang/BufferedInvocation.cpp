@@ -59,28 +59,27 @@ void BufferedInvocation::beginChunk(PointBuffer& buffer)
 {
     const Schema& schema = buffer.getSchema();
 
-    schema::Map const& map = schema.getDimensions();
-    schema::index_by_index const& idx = map.get<schema::index>();
-    for (auto iter = idx.begin(); iter != idx.end(); ++iter)
+    DimensionList dims = buffer.getSchema().getDimensions();
+    for (auto di = dims.begin(); di != dims.end(); ++di)
     {
-        const Dimension& dim = *iter;
+        DimensionPtr d = *di;
 
         //ABELL - does the interface allow us to use a fixed-size buffer
         //  and then call beginChunk in a loop or something similar?
-        void *data = malloc(dim.getByteSize() * buffer.size());
+        void *data = malloc(d->getByteSize() * buffer.size());
         m_buffers.push_back(data);  // Hold pointer for deallocation
         char *p = (char *)data;
         for (PointId idx = 0; idx < buffer.size(); ++idx)
         {
-            buffer.getRawField(dim, idx, (void *)p);
-            p += dim.getByteSize();
+            buffer.getRawField(d, idx, (void *)p);
+            p += d->getByteSize();
         }
 
-        const std::string& name = dim.getName();
-        const boost::uint32_t numPoints = buffer.size();
-        const boost::uint32_t stride = dim.getByteSize();
-        const dimension::Interpretation datatype = dim.getInterpretation();
-        const boost::uint32_t numBytes = dim.getByteSize();
+        const std::string& name = d->getName();
+        uint32_t numPoints = buffer.size();
+        uint32_t stride = d->getByteSize();
+        dimension::Interpretation datatype = d->getInterpretation();
+        uint32_t numBytes = d->getByteSize();
         insertArgument(name, (uint8_t *)data, numPoints, stride,
             datatype, numBytes);
     }
@@ -101,24 +100,20 @@ void BufferedInvocation::endChunk(PointBuffer& buffer)
 
     for (size_t i = 0; i < names.size(); i++)
     {
-        schema::Map map = schema.getDimensions();
-        schema::index_by_name& name_index = map.get<schema::name>();
-        schema::index_by_name::const_iterator it = name_index.find(names[i]);
-        if (it != name_index.end())
+        DimensionPtr d = schema.getDimension(names[i]);
+        if (d)
         {
-            const Dimension& dim = *it;
-
-            const std::string& name = dim.getName();
+            const std::string& name = d->getName();
             assert(name == names[i]);
             assert(hasOutputVariable(name));
-            const dimension::Interpretation datatype = dim.getInterpretation();
-            const boost::uint32_t numBytes = dim.getByteSize();
+            const dimension::Interpretation datatype = d->getInterpretation();
+            const boost::uint32_t numBytes = d->getByteSize();
             void *data = extractResult(name, datatype, numBytes);
             char *p = (char *)data;
             for (PointId idx = 0; idx < buffer.size(); ++idx)
             {
-                buffer.setRawField(dim, idx, (void *)p);
-                p += dim.getByteSize();
+                buffer.setRawField(d, idx, (void *)p);
+                p += d->getByteSize();
             }
         }
     }

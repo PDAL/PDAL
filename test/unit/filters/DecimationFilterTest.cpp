@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE(DecimationFilterTest_test1)
     buf = *pbSet.begin();
     BOOST_CHECK_EQUAL(buf->size(), 3);
 
-    Dimension const& dimT = ctx.schema()->getDimension("Time");
+    DimensionPtr dimT = ctx.schema()->getDimension("Time");
 
     uint64_t t0 = buf->getFieldAs<uint64_t>(dimT, 0);
     uint64_t t1 = buf->getFieldAs<uint64_t>(dimT, 1);
@@ -121,7 +121,7 @@ BOOST_AUTO_TEST_CASE(DecimationFilterTest_test_random)
 
     BOOST_CHECK(numRead == 50);
 
-    Dimension const& dimT = ctx.schema()->getDimension("Time");
+    DimensionPtr dimT = ctx.schema()->getDimension("Time");
 
     PointBufferSet pbSet = FilterTester::run(&filter, buf);
     BOOST_CHECK_EQUAL(pbSet.size(), 1);

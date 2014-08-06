@@ -36,6 +36,7 @@
 
 #include <pdal/pdal_internal.hpp>
 
+#include <pdal/Dimension.hpp>
 #include <pdal/Log.hpp>
 #include <pdal/Metadata.hpp>
 #include <pdal/Options.hpp>
@@ -96,8 +97,8 @@ public:
     std::vector<Stage *> getPrevStages() const;
     static Options getDefaultOptions()
         { return Options(); }
-    static std::vector<Dimension> getDefaultDimensions()
-        { return std::vector<Dimension>(); }
+    static Dimension::IdList getDefaultDimensions()
+        { return Dimension::IdList(); }
     static std::string s_getInfoLink()
         { return std::string(); }
 
@@ -147,8 +148,8 @@ private:
     void l_done(PointContext ctx);
     virtual void initialize()
         {}
-    virtual void buildSchema(Schema *schema)
-        { (void)schema; }
+    virtual void addDimensions(PointContext ctx)
+        { (void)ctx; }
     virtual void ready(PointContext ctx)
         { (void)ctx; }
     virtual void done(PointContext ctx)

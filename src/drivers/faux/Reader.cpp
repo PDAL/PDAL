@@ -68,39 +68,21 @@ void Reader::processOptions(const Options& options)
 }
 
 
-void Reader::buildSchema(Schema *s)
+void Reader::addDimensions(PointContext ctx)
 {
-    m_schema = s;
-    std::vector<Dimension> dims = getDefaultDimensions();
-    for (auto di = dims.begin(); di != dims.end(); ++di)
-        s->appendDimension(*di);
+    ctx.registerDims(getDefaultDimensions());
 }
 
 
-std::vector<Dimension> Reader::getDefaultDimensions()
+Dimension::IdList Reader::getDefaultDimensions()
 {
-    std::vector<Dimension> output;
-    Dimension x("X", dimension::Float, 8);
-    x.setUUID("c74a80bd-8eca-4ab6-9e90-972738e122f0");
-    x.setNamespace(s_getName());
-    output.push_back(x);
+    Dimension::IdList ids;
 
-    Dimension y("Y", dimension::Float, 8);
-    y.setUUID("1b102a72-daa5-4a81-8a23-8aa907350473");
-    y.setNamespace(s_getName());
-    output.push_back(y);
-
-    Dimension z("Z", dimension::Float, 8);
-    z.setUUID("fb54cf8c-1a01-45d1-a92e-75b7d487ac54");
-    z.setNamespace(s_getName());
-    output.push_back(z);
-
-    Dimension t("Time", dimension::UnsignedInteger, 8);
-    t.setUUID("96b94034-3d25-4e72-b474-ccbdb14d53f6");
-    t.setNamespace(s_getName());
-    output.push_back(t);
-
-    return output;
+    ids.push_back(Dimension::Id::X);
+    ids.push_back(Dimension::Id::Y);
+    ids.push_back(Dimension::Id::Z);
+    ids.push_back(Dimension::Id::OffsetTime);
+    return ids;
 }
 
 
@@ -113,14 +95,14 @@ Options Reader::getDefaultOptions()
 
 pdal::StageSequentialIterator* Reader::createSequentialIterator() const
 {
-    return new FauxSeqIterator(m_bounds, m_schema, m_mode, m_numPoints, log());
+    return new FauxSeqIterator(m_bounds, m_mode, m_numPoints, log());
 }
 
 } // namespace faux
 } // namespace drivers
 
 
-FauxSeqIterator::FauxSeqIterator(const Bounds<double>& bounds, Schema *schema,
+FauxSeqIterator::FauxSeqIterator(const Bounds<double>& bounds,
         drivers::faux::Mode mode, point_count_t numPoints, LogPtr log) :
     m_time(0), m_mode(mode), m_numPoints(numPoints), m_log(log)
 {
@@ -131,11 +113,6 @@ FauxSeqIterator::FauxSeqIterator(const Bounds<double>& bounds, Schema *schema,
     m_maxY = ranges[1].getMaximum();
     m_minZ = ranges[2].getMinimum();
     m_maxZ = ranges[2].getMaximum();
-
-    m_dimX = schema->getDimension("X", "drivers.faux.reader");
-    m_dimY = schema->getDimension("Y", "drivers.faux.reader");
-    m_dimZ = schema->getDimension("Z", "drivers.faux.reader");
-    m_dimTime = schema->getDimension("Time", "drivers.faux.reader");
 }
 
 
@@ -148,7 +125,7 @@ point_count_t FauxSeqIterator::readImpl(PointBuffer& buf, point_count_t count)
     const double delY = (m_maxY - m_minY) / numDeltas;
     const double delZ = (m_maxZ - m_minZ) / numDeltas;
 
-    m_log->get(logDEBUG5) << "Reading a point buffer of " <<
+    m_log->get(LogLevel::DEBUG5) << "Reading a point buffer of " <<
         count << " points." << std::endl;
 
     for (PointId idx = 0; idx < count; ++idx)
@@ -175,10 +152,10 @@ point_count_t FauxSeqIterator::readImpl(PointBuffer& buf, point_count_t count)
                 break;
         }
 
-        buf.setField(m_dimX, idx, x);
-        buf.setField(m_dimY, idx, y);
-        buf.setField(m_dimZ, idx, z);
-        buf.setField(m_dimTime, idx, m_time++);
+        buf.setField(Dimension::Id::X, idx, x);
+        buf.setField(Dimension::Id::Y, idx, y);
+        buf.setField(Dimension::Id::Z, idx, z);
+        buf.setField(Dimension::Id::OffsetTime, idx, m_time++);
     }
     return count;
 }

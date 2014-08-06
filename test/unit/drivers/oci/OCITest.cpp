@@ -382,13 +382,13 @@ void checkUnProjectedPoints(PointBuffer const& data)
 {
     pdal::Schema const& schema = data.getSchema();
     
-    pdal::Dimension const& dimX = schema.getDimension("X");
-    pdal::Dimension const& dimY = schema.getDimension("Y");
-    pdal::Dimension const& dimZ = schema.getDimension("Z");
-    pdal::Dimension const& dimIntensity = schema.getDimension("Intensity");
-    pdal::Dimension const& dimRed = schema.getDimension("Red");
-    pdal::Dimension const& dimGreen = schema.getDimension("Green");
-    pdal::Dimension const& dimBlue = schema.getDimension("Blue");
+    DimensionPtr dimX = schema.getDimension("X");
+    DimensionPtr dimY = schema.getDimension("Y");
+    DimensionPtr dimZ = schema.getDimension("Z");
+    DimensionPtr dimIntensity = schema.getDimension("Intensity");
+    DimensionPtr dimRed = schema.getDimension("Red");
+    DimensionPtr dimGreen = schema.getDimension("Green");
+    DimensionPtr dimBlue = schema.getDimension("Blue");
 
     int X[] = { 49405730, 49413382, 49402110, 49419289, 49418622, 49403411 };
     int Y[] = { 487743335, 487743982, 487743983, 487744219, 487744254, 487745019 };
@@ -400,13 +400,13 @@ void checkUnProjectedPoints(PointBuffer const& data)
         
     for (unsigned i = 0; i < 6; ++i)
     {
-        boost::int32_t x = data.getField<boost::int32_t>(dimX, i);
-        boost::int32_t y = data.getField<boost::int32_t>(dimY, i);
-        boost::int32_t z = data.getField<boost::int32_t>(dimZ, i);
-        boost::uint16_t intensity = data.getField<boost::uint16_t>(dimIntensity, i);
-        boost::uint16_t red = data.getField<boost::uint16_t>(dimRed, i);
-        boost::uint16_t green = data.getField<boost::uint16_t>(dimGreen, i);
-        boost::uint16_t blue = data.getField<boost::uint16_t>(dimBlue, i);
+        boost::int32_t x = data.getField<int32_t>(dimX, i);
+        boost::int32_t y = data.getField<int32_t>(dimY, i);
+        boost::int32_t z = data.getField<int32_t>(dimZ, i);
+        boost::uint16_t intensity = data.getField<uint16_t>(dimIntensity, i);
+        boost::uint16_t red = data.getField<uint16_t>(dimRed, i);
+        boost::uint16_t green = data.getField<uint16_t>(dimGreen, i);
+        boost::uint16_t blue = data.getField<uint16_t>(dimBlue, i);
 
         BOOST_CHECK_EQUAL(x, X[i]);
         BOOST_CHECK_EQUAL(y, Y[i]);
@@ -444,21 +444,21 @@ void compareAgainstSourceBuffer(PointBuffer const& candidate,
     Schema const& cs = candidate.getSchema();
     Schema const& ss = *ctx.schema();
     
-    Dimension const& sdimX = ss.getDimension("X");
-    Dimension const& sdimY = ss.getDimension("Y");
-    Dimension const& sdimZ = ss.getDimension("Z");
-    Dimension const& sdimIntensity = ss.getDimension("Intensity");
-    Dimension const& sdimRed = ss.getDimension("Red");
-    Dimension const& sdimGreen = ss.getDimension("Green");
-    Dimension const& sdimBlue = ss.getDimension("Blue");
+    DimensionPtr sdimX = ss.getDimension("X");
+    DimensionPtr sdimY = ss.getDimension("Y");
+    DimensionPtr sdimZ = ss.getDimension("Z");
+    DimensionPtr sdimIntensity = ss.getDimension("Intensity");
+    DimensionPtr sdimRed = ss.getDimension("Red");
+    DimensionPtr sdimGreen = ss.getDimension("Green");
+    DimensionPtr sdimBlue = ss.getDimension("Blue");
 
-    Dimension const& cdimX = cs.getDimension("X");
-    Dimension const& cdimY = cs.getDimension("Y");
-    Dimension const& cdimZ = cs.getDimension("Z");
-    Dimension const& cdimIntensity = cs.getDimension("Intensity");
-    Dimension const& cdimRed = cs.getDimension("Red");
-    Dimension const& cdimGreen = cs.getDimension("Green");
-    Dimension const& cdimBlue = cs.getDimension("Blue");
+    DimensionPtr cdimX = cs.getDimension("X");
+    DimensionPtr cdimY = cs.getDimension("Y");
+    DimensionPtr cdimZ = cs.getDimension("Z");
+    DimensionPtr cdimIntensity = cs.getDimension("Intensity");
+    DimensionPtr cdimRed = cs.getDimension("Red");
+    DimensionPtr cdimGreen = cs.getDimension("Green");
+    DimensionPtr cdimBlue = cs.getDimension("Blue");
     // 
     // int X[] = { 49405730, 49413382, 49402110, 494192890, 49418622, 49403411 };
     // int Y[] = { 487743335, 487743982, 487743983, 487744219, 487744254, 487745019 };

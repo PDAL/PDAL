@@ -44,18 +44,21 @@ namespace pdal
 typedef uint32_t point_count_t;
 typedef uint32_t PointId;
 
-enum LogLevel
+namespace LogLevel
 {
-    logERROR = 0,
-    logWARNING,
-    logINFO,
-    logDEBUG,
-    logDEBUG1,
-    logDEBUG2,
-    logDEBUG3,
-    logDEBUG4,
-    logDEBUG5
+enum Enum
+{
+    ERROR = 0,
+    WARNING,
+    INFO,
+    DEBUG,
+    DEBUG1,
+    DEBUG2,
+    DEBUG3,
+    DEBUG4,
+    DEBUG5
 };
+} // namespace LogLevel
 
 namespace Orientation
 {
@@ -64,8 +67,7 @@ enum Enum
     PointMajor,
     DimensionMajor
 };
-
-}
+} // namespace Orientation
 
 } // namespace pdal
 

@@ -32,15 +32,12 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef PYTHONINVOCATION_H
-#define PYTHONINVOCATION_H
+#pragma once
 
 #include <pdal/pdal_internal.hpp>
 #ifdef PDAL_HAVE_PYTHON
 
-#include <pdal/pdal_internal.hpp>
-#include <pdal/PointBuffer.hpp>
-#include <pdal/Options.hpp>
+#include <pdal/Dimension.hpp>
 #include <pdal/plang/PythonEnvironment.hpp>
 #include <pdal/plang/Script.hpp>
 
@@ -67,11 +64,9 @@ public:
                         boost::uint8_t* data,
                         boost::uint32_t data_len,
                         boost::uint32_t data_stride,
-                        dimension::Interpretation dataType,
-                        boost::uint32_t numBytes);
+                        Dimension::Type::Enum dataType);
     void *extractResult(const std::string& name,
-                       dimension::Interpretation dataType,
-                       boost::uint32_t numBytes);
+                        Dimension::Type::Enum dataType);
 
     bool hasOutputVariable(const std::string& name) const;
 
@@ -87,8 +82,7 @@ public:
     // the schema)
     void getOutputNames(std::vector<std::string>& names);
 
-    static int getPythonDataType(dimension::Interpretation datatype, boost::uint32_t siz);
-
+    static int getPythonDataType(Dimension::Type::Enum datatype);
     static void numpy_init();
 
 private:
@@ -115,6 +109,5 @@ private:
 }
 } // namespaces
 
-#endif
+#endif // PDAL_HAVE_PYTHON
 
-#endif

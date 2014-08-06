@@ -32,12 +32,9 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_DRIVERS_LAS_SUPPORT_HPP
-#define INCLUDED_DRIVERS_LAS_SUPPORT_HPP
+#pragma once
 
 #include <pdal/pdal_export.hpp>
-
-#include <pdal/Schema.hpp>
 
 #include <iostream>
 
@@ -65,43 +62,16 @@ class Reader;
 class SummaryData;
 class ZipPoint;
 
-class PDAL_DLL PointDimensions
-{
-public:
-    PointDimensions(const Schema& schema, std::string const& ns);
-
-    DimensionPtr X;
-    DimensionPtr Y;
-    DimensionPtr Z;
-
-    DimensionPtr Intensity;
-    DimensionPtr ReturnNumber;
-    DimensionPtr NumberOfReturns;
-    DimensionPtr ScanDirectionFlag;
-    DimensionPtr EdgeOfFlightLine;
-    DimensionPtr Classification;
-    DimensionPtr ScanAngleRank;
-    DimensionPtr UserData;
-    DimensionPtr PointSourceId;
-
-    DimensionPtr Time;
-
-    DimensionPtr Red;
-    DimensionPtr Green;
-    DimensionPtr Blue;
-};
-
 class PDAL_DLL Support
 {
 public:
     // assumes the stream position is pointing to the first byte of the header
-    // this function updates the header's min/max xyz fields, and the point return counts fields
+    // this function updates the header's min/max xyz fields, and the point
+    // return counts fields
     static void rewriteHeader(std::ostream& stream, const SummaryData& data);
 };
 
+} // namespace las
+} // namespace drivers
+} // namespace pdal
 
-}
-}
-} // namespace
-
-#endif

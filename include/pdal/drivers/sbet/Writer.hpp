@@ -60,7 +60,7 @@ public:
 private:
     std::unique_ptr<OLeStream> m_stream;
     std::string m_filename;
-    std::vector<Dimension *> m_dims;
+    std::vector<DimensionPtr> m_dims;
 
     virtual void processOptions(const Options& options);
     virtual void ready(PointContext ctx);

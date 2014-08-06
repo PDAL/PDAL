@@ -36,6 +36,7 @@
 #include <boost/cstdint.hpp>
 #include <boost/property_tree/ptree.hpp>
 
+#include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
 #include <pdal/XMLSchema.hpp>
@@ -52,10 +53,8 @@
 #include "TestConfig.hpp"
 
 #include <fstream>
+
 using namespace pdal;
-
-
-
 
 std::string ReadXML(std::string filename)
 {
@@ -121,23 +120,25 @@ BOOST_AUTO_TEST_CASE(test_schema_read)
     pdal::schema::Reader reader2(xml_output, xsd);
     pdal::Schema schema2 = reader2.getSchema();
 
-    schema::index_by_index const& dims1 =
-        schema.getDimensions().get<schema::index>();
-    schema::index_by_index const& dims2 =
-        schema2.getDimensions().get<schema::index>();
+    DimensionList dims1 = schema.getDimensions();
+    DimensionList dims2 = schema2.getDimensions();
 
     BOOST_CHECK_EQUAL(dims1.size(), dims2.size());
 
-    for (size_t i = 0; i < dims2.size(); ++i)
+    auto di1 = dims1.begin();
+    auto di2 = dims2.begin();
+    while (di1 != dims1.end() && di2 != dims2.end())
     {
-        pdal::Dimension const& dim1 = dims1[i];
-        pdal::Dimension const& dim2 = dims2[i];
+        DimensionPtr dim1 = *di1;
+        DimensionPtr dim2 = *di2;
 
-        BOOST_CHECK_EQUAL(dim1.getName(), dim2.getName());
-        BOOST_CHECK_EQUAL(dim1.getInterpretation(), dim2.getInterpretation());
-        BOOST_CHECK_EQUAL(dim1.getByteSize(), dim2.getByteSize());
+        BOOST_CHECK_EQUAL(dim1->getName(), dim2->getName());
+        BOOST_CHECK_EQUAL(dim1->getInterpretation(), dim2->getInterpretation());
+        BOOST_CHECK_EQUAL(dim1->getByteSize(), dim2->getByteSize());
 
-        BOOST_CHECK_EQUAL(dim1.getDescription(), dim2.getDescription());
+        BOOST_CHECK_EQUAL(dim1->getDescription(), dim2->getDescription());
+        di1++;
+        di2++;
     }
 }
 
@@ -154,8 +155,6 @@ BOOST_AUTO_TEST_CASE(test_schema_orientation)
     schema.appendDimension(x);
     schema.appendDimension(y);
     schema.appendDimension(cls);
-    schema.setOrientation(schema::DIMENSION_INTERLEAVED);
-  
     
     pdal::schema::Writer writer(schema);
 
@@ -167,31 +166,25 @@ FileUtils::closeFile(out);
     pdal::schema::Reader reader2(xml_output, std::string(""));
     pdal::Schema schema2 = reader2.getSchema();
     
-    BOOST_CHECK_EQUAL(schema2.getOrientation(), schema.getOrientation());
-
-    schema::index_by_index const& dims1 = schema.getDimensions().get<schema::index>();
-    schema::index_by_index const& dims2 = schema2.getDimensions().get<schema::index>();
-
-    // const std::vector<pdal::Dimension>& dims1 = schema.getDimensions();
-    // const std::vector<pdal::Dimension>& dims2 = schema2.getDimensions();
+    DimensionList dims1 = schema.getDimensions();
+    DimensionList dims2 = schema2.getDimensions();
 
     BOOST_CHECK_EQUAL(dims1.size(), dims2.size());
 
-    for (boost::uint32_t i = 0; i < dims2.size(); ++i)
+    auto di1 = dims1.begin();
+    auto di2 = dims2.begin();
+    while (di1 != dims1.end() && di2 != dims2.end())
     {
-        pdal::Dimension const& dim1 = dims1[i];
-        pdal::Dimension const& dim2 = dims2[i];
+        DimensionPtr dim1 = *di1;
+        DimensionPtr dim2 = *di2;
 
-        BOOST_CHECK_EQUAL(dim1.getName(), dim2.getName());
-        BOOST_CHECK_EQUAL(dim1.getInterpretation(), dim2.getInterpretation());
-        BOOST_CHECK_EQUAL(dim1.getByteSize(), dim2.getByteSize());
-
-        BOOST_CHECK_EQUAL(dim1.getDescription(), dim2.getDescription());
-
+        BOOST_CHECK_EQUAL(dim1->getName(), dim2->getName());
+        BOOST_CHECK_EQUAL(dim1->getInterpretation(), dim2->getInterpretation());
+        BOOST_CHECK_EQUAL(dim1->getByteSize(), dim2->getByteSize());
+        BOOST_CHECK_EQUAL(dim1->getDescription(), dim2->getDescription());
+        di1++;
+        di2++;
     }
-
 }
-
-
 
 BOOST_AUTO_TEST_SUITE_END()

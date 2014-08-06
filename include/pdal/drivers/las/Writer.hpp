@@ -123,7 +123,6 @@ private:
     LasHeader m_lasHeader;
     boost::uint32_t m_numPointsWritten;
     SummaryData m_summaryData;
-    std::unique_ptr<PointDimensions> m_dims;
 
 #ifdef PDAL_HAVE_LASZIP
     boost::scoped_ptr<LASzipper> m_zipper;

@@ -38,7 +38,6 @@
 #include <pdal/pdal_macros.hpp>
 #include <pdal/Bounds.hpp>
 #include <pdal/PointContext.hpp>
-#include <pdal/Schema.hpp>
 
 #include <set>
 #include <vector>
@@ -81,11 +80,6 @@ public:
 
     inline void appendPoint(PointBuffer& buffer, PointId id);
 
-    /// A const reference to the internally copied pdal::Schema instance that
-    /// was given at construction time.
-    const Schema& getSchema() const
-        { return *(m_context.schema()); }
-
     /// Get the buffer's point context.
     PointContext context() const
         { return m_context; }
@@ -108,7 +102,7 @@ public:
         \endverbatim
     */
     template<class T>
-    T getField(DimensionPtr dim, uint32_t pointIndex) const;
+    T getField(Dimension::Id::Enum dim, uint32_t pointIndex) const;
 
     /*! fetch the value T for a given :cpp:class:`pdal::Dimension` dim at
         pointIndex `i`.
@@ -125,42 +119,29 @@ public:
         \endverbatim
     */
     template<class T>
-    T getFieldAs(DimensionPtr dim, boost::uint32_t pointIndex,
+    T getFieldAs(Dimension::Id::Enum dim, boost::uint32_t pointIndex,
         bool applyScaling = true) const;
 
-    /*! set the value T for a given  :cpp:class:`pdal::Dimension` dim
-        at pointIndex i.
-        \param dim  The dimension to select.
-        \param pointIndex the point index of the PointBuffer to select.
-        \param value the T value to set
-        \verbatim embed:rst
-        .. warning::
-
-            If the data type of T is not the same as described in
-            :cpp:class:`pdal::Dimension`, the data value will be cast 
-            into the appropriate type. In some situations this may not
-            be what you want. In situations where the T is smaller than
-            the datatype given by `dim`, the return value T will simply be
-            saturated.
-        \endverbatim
-    */
     template<typename T>
-    void setField(const DimensionPtr dim, PointId idx, T val);
+    void setField(Dimension::Id::Enum dim, PointId idx, T val);
 
-    void setRawField(DimensionPtr dim, PointId idx, const void *val)
+    void setRawField(Dimension::Id::Enum dim, PointId idx, const void *val)
     {
         setFieldInternal(dim, idx, val);
     }
 
-    void getRawField(DimensionPtr dim, PointId idx, void *buf) const
+    void getRawField(Dimension::Id::Enum dim, PointId idx, void *buf) const
     {
         getFieldInternal(dim, idx, buf);
     }
 
-    void setFieldUnscaled(DimensionPtr dim, uint32_t idx, double val)
+/**
+//ABELL
+    void setFieldUnscaled(Dimension::Id::Enum dim, uint32_t idx, double val)
     {
         setField(dim, idx, dim->removeScaling(val));
     }
+**/
 
     /** @name Serialization
     */
@@ -178,11 +159,6 @@ public:
                 Y: 2.00
                 Z: 3.00
 
-        .. note::
-
-            If you want to print out details about the fields, e.g. the byte
-            offset or the datatype, use the :cpp:func:`pdal::Schema::getPtree()`
-            dumper.
         \endverbatim
     */
     boost::property_tree::ptree toPTree() const;
@@ -199,6 +175,9 @@ public:
         \endverbatim
     */    
     pdal::Bounds<double> calculateBounds(bool bis3d=true) const;
+    void dump(std::ostream& ostr) const;
+    bool hasDim(Dimension::Id::Enum id) const
+        { return m_context.hasDim(id); }
 
 protected:
     Bounds<double> m_bounds;
@@ -207,17 +186,17 @@ protected:
 
 private:
     template<typename T_IN, typename T_OUT>
-    void convertAndSet(DimensionPtr dim, PointId idx, T_IN in);
+    void convertAndSet(Dimension::Id::Enum dim, PointId idx, T_IN in);
 
-    inline void setFieldInternal(DimensionPtr dim, PointId pointIndex,
+    inline void setFieldInternal(Dimension::Id::Enum dim, PointId pointIndex,
         const void *value);
-    inline void getFieldInternal(DimensionPtr dim, PointId pointIndex,
+    inline void getFieldInternal(Dimension::Id::Enum dim, PointId pointIndex,
         void *value) const;
 };
 
 
 template <class T>
-T PointBuffer::getField(DimensionPtr dim, PointId id) const
+T PointBuffer::getField(Dimension::Id::Enum dim, PointId id) const
 {
     T t;
 
@@ -226,71 +205,57 @@ T PointBuffer::getField(DimensionPtr dim, PointId id) const
 }
 
 
+//ABELL - Remove applyScaling
 template <class T>
-inline T PointBuffer::getFieldAs(DimensionPtr dim,
+inline T PointBuffer::getFieldAs(Dimension::Id::Enum dim,
     uint32_t pointIndex, bool applyScaling) const
 {
     T retval;
-    boost::uint32_t size = dim->getByteSize();
-    double val(0.0);
+    Dimension::Detail *dd = m_context.dimDetail(dim);
+    double val;
 
-    switch (dim->getInterpretation())
+    switch (dd->type())
     {
-        case dimension::Float:
-            switch (size)
-            {
-                case 4:
-                    val = getField<float>(dim, pointIndex);
-                    break;
-                case 8:
-                    val = getField<double>(dim, pointIndex);
-                    break;
-            }
-            break;
-
-        case dimension::SignedInteger:
-            switch (size)
-            {
-              case 1:
-                  val = getField<boost::int8_t>(dim, pointIndex);
-                  break;
-              case 2:
-                  val = getField<boost::int16_t>(dim, pointIndex);
-                  break;
-              case 4:
-                  val = getField<boost::int32_t>(dim, pointIndex);
-                  break;
-              case 8:
-                  val = getField<boost::int64_t>(dim, pointIndex);
-                  break;
-            }
-            break;
-
-        case dimension::UnsignedInteger:
-            switch (size)
-            {
-                case 1:
-                    val = getField<boost::uint8_t>(dim, pointIndex);
-                    break;
-                case 2:
-                    val = getField<boost::uint16_t>(dim, pointIndex);
-                    break;
-                case 4:
-                    val = getField<boost::uint32_t>(dim, pointIndex);
-                    break;
-                case 8:
-                    val = getField<boost::uint64_t>(dim, pointIndex);
-                    break;
-            }
-            break;
-
-        case dimension::Undefined:
-            throw pdal_error("Dimension data type unable to be retrieved "
-                "in getFieldAs");
+    case Dimension::Type::Float:
+        val = getField<float>(dim, pointIndex);
+        break;
+    case Dimension::Type::Double:
+        val = getField<double>(dim, pointIndex);
+        break;
+    case Dimension::Type::Signed8:
+        val = getField<int8_t>(dim, pointIndex);
+        break;
+    case Dimension::Type::Signed16:
+        val = getField<int16_t>(dim, pointIndex);
+        break;
+    case Dimension::Type::Signed32:
+        val = getField<int32_t>(dim, pointIndex);
+        break;
+    case Dimension::Type::Signed64:
+        val = getField<int64_t>(dim, pointIndex);
+        break;
+    case Dimension::Type::Unsigned8:
+        val = getField<uint8_t>(dim, pointIndex);
+        break;
+    case Dimension::Type::Unsigned16:
+        val = getField<uint16_t>(dim, pointIndex);
+        break;
+    case Dimension::Type::Unsigned32:
+        val = getField<uint32_t>(dim, pointIndex);
+        break;
+    case Dimension::Type::Unsigned64:
+        val = getField<uint64_t>(dim, pointIndex);
+        break;
+    case Dimension::Type::None:
+        val = 0;
+        break;
     }
 
+//ABELL
+/**
     if (applyScaling)
         val = dim->applyScaling(val);
+**/
 
     try
     {
@@ -303,7 +268,8 @@ inline T PointBuffer::getFieldAs(DimensionPtr dim,
     {
         std::ostringstream oss;
         oss << "Unable to fetch data and convert as requested: ";
-        oss << dim->getName() << ":" << dim->getInterpretationName() <<
+        oss << Dimension::name(dim) << ":" <<
+            Dimension::interpretationName(dd->type()) <<
             "(" << (double)val << ") -> " << Utils::typeidName<T>();
         throw pdal_error(oss.str());
     }
@@ -312,7 +278,7 @@ inline T PointBuffer::getFieldAs(DimensionPtr dim,
 
 
 template<typename T_IN, typename T_OUT>
-void PointBuffer::convertAndSet(DimensionPtr dim, PointId idx, T_IN in)
+void PointBuffer::convertAndSet(Dimension::Id::Enum dim, PointId idx, T_IN in)
 {
     T_OUT out;
 
@@ -325,82 +291,68 @@ void PointBuffer::convertAndSet(DimensionPtr dim, PointId idx, T_IN in)
 
 
 template<typename T>
-void PointBuffer::setField(DimensionPtr dim, uint32_t idx, T val)
+void PointBuffer::setField(Dimension::Id::Enum dim, uint32_t idx, T val)
 {
-    uint32_t size = dim->getByteSize();
+    Dimension::Detail *dd = m_context.dimDetail(dim);
+
     try {
-        switch (dim->getInterpretation())
+        switch (dd->type())
         {
-            case dimension::Float:
-                switch (size)
-                {
-                    case 4:
-                        convertAndSet<T, float>(dim, idx, val);
-                        break;
-                    case 8:
-                        convertAndSet<T, double>(dim, idx, val);
-                        break;
-                }
-                break;
-
-            case dimension::SignedInteger:
-                switch (size)
-                {
-                    case 1:
-                        convertAndSet<T, int8_t>(dim, idx, val);
-                        break;
-                    case 2:
-                        convertAndSet<T, int16_t>(dim, idx, val);
-                        break;
-                    case 4:
-                        convertAndSet<T, int32_t>(dim, idx, val);
-                        break;
-                    case 8:
-                        convertAndSet<T, int64_t>(dim, idx, val);
-                        break;
-                }
-                break;
-
-            case dimension::UnsignedInteger:
-                switch (size)
-                {
-                    case 1:
-                        convertAndSet<T, uint8_t>(dim, idx, val);
-                        break;
-                    case 2:
-                        convertAndSet<T, uint16_t>(dim, idx, val);
-                        break;
-                    case 4:
-                        convertAndSet<T, uint32_t>(dim, idx, val);
-                        break;
-                    case 8:
-                        convertAndSet<T, uint64_t>(dim, idx, val);
-                        break;
-                }
-                break;
-            case dimension::Undefined:
-                throw pdal_error("Dimension data type unable to be set.");
+        case Dimension::Type::Float:
+            convertAndSet<T, float>(dim, idx, val);
+            break;
+        case Dimension::Type::Double:
+            convertAndSet<T, double>(dim, idx, val);
+            break;
+        case Dimension::Type::Signed8:
+            convertAndSet<T, int8_t>(dim, idx, val);
+            break;
+        case Dimension::Type::Signed16:
+            convertAndSet<T, int16_t>(dim, idx, val);
+            break;
+        case Dimension::Type::Signed32:
+            convertAndSet<T, int32_t>(dim, idx, val);
+            break;
+        case Dimension::Type::Signed64:
+            convertAndSet<T, int64_t>(dim, idx, val);
+            break;
+        case Dimension::Type::Unsigned8:
+            convertAndSet<T, uint8_t>(dim, idx, val);
+            break;
+        case Dimension::Type::Unsigned16:
+            convertAndSet<T, uint16_t>(dim, idx, val);
+            break;
+        case Dimension::Type::Unsigned32:
+            convertAndSet<T, uint32_t>(dim, idx, val);
+            break;
+        case Dimension::Type::Unsigned64:
+            convertAndSet<T, uint64_t>(dim, idx, val);
+            break;
+        case Dimension::Type::None:
+            val = 0;
+            break;
         }
     }
     catch (boost::numeric::bad_numeric_cast& e)
     {
         std::ostringstream oss;
         oss << "Unable to set data and convert as requested: ";
-        oss << dim->getName() << ":" << Utils::typeidName<T>() <<
-            "(" << (double)val << ") -> " << dim->getInterpretationName();
+        oss << Dimension::name(dim) << ":" << Utils::typeidName<T>() <<
+            "(" << (double)val << ") -> " <<
+            Dimension::interpretationName(dd->type());
         throw pdal_error(oss.str());
     }
 }
 
 
-inline void PointBuffer::getFieldInternal(DimensionPtr dim,
+inline void PointBuffer::getFieldInternal(Dimension::Id::Enum dim,
     PointId id, void *buf) const
 {
-    m_context.rawPtBuf()->getField(dim, m_index[id], buf);
+    m_context.rawPtBuf()->getField(m_context.dimDetail(dim), m_index[id], buf);
 }
 
 
-inline void PointBuffer::setFieldInternal(DimensionPtr dim,
+inline void PointBuffer::setFieldInternal(Dimension::Id::Enum dim,
     PointId id, const void *value)
 {
     PointId rawId = 0;
@@ -421,7 +373,7 @@ inline void PointBuffer::setFieldInternal(DimensionPtr dim,
         rawId = m_index[id];
     }
 
-    m_context.rawPtBuf()->setField(dim, rawId, value);
+    m_context.rawPtBuf()->setField(m_context.dimDetail(dim), rawId, value);
 }
 
 

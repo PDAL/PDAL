@@ -32,8 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_FILTERS_COLORIZATIONFILTER_HPP
-#define INCLUDED_FILTERS_COLORIZATIONFILTER_HPP
+#pragma once
 
 #include <pdal/Filter.hpp>
 
@@ -97,14 +96,12 @@ private:
     std::string m_yDimName;
     std::map<std::string, uint32_t> m_band_map;
     std::map<std::string, double> m_scale_map;
-    std::vector<Dimension const*> m_dimensions;
-    std::vector<boost::uint32_t> m_bands;
+//    std::vector<DimensionPtr> m_dimensions;
+    std::vector<uint32_t> m_bands;
     std::vector<double> m_scales;
 
     boost::array<double, 6> m_forward_transform;
     boost::array<double, 6> m_inverse_transform;
-    Dimension const* m_dimX;
-    Dimension const* m_dimY;
 
     GDALDatasetH m_ds;
 
@@ -115,4 +112,3 @@ private:
 } // namespace filters
 } // namespace pdal
 
-#endif

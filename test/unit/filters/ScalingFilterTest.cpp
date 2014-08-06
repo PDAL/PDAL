@@ -59,8 +59,8 @@ BOOST_AUTO_TEST_CASE(ScalingFilterTest_test_1)
     PointBufferPtr buf = *pbSet.begin();
 
     Schema *schema = mgr.schema();
-    const Dimension& xDim = schema->getDimension("X", "filters.scaling");
-    const Dimension& yDim = schema->getDimension("Y", "filters.scaling");
+    DimensionPtr xDim = schema->getDimension("X", "filters.scaling");
+    DimensionPtr yDim = schema->getDimension("Y", "filters.scaling");
     
     int32_t x = buf->getFieldAs<int32_t>(xDim, 0, false);
     int32_t y = buf->getFieldAs<int32_t>(yDim, 0, false);
@@ -72,8 +72,8 @@ BOOST_AUTO_TEST_CASE(ScalingFilterTest_test_1)
     BOOST_CHECK_EQUAL(x, 6360365);
     BOOST_CHECK_EQUAL(y, 8493365);
 
-    const Dimension& xDimRaw = schema->getDimension("X", "drivers.las.reader");
-    const Dimension& yDimRaw = schema->getDimension("Y", "drivers.las.reader");
+    DimensionPtr xDimRaw = schema->getDimension("X", "drivers.las.reader");
+    DimensionPtr yDimRaw = schema->getDimension("Y", "drivers.las.reader");
 
     x = buf->getFieldAs<int32_t>(xDimRaw, 0, false);
     y = buf->getFieldAs<int32_t>(yDimRaw, 0, false);
@@ -157,10 +157,10 @@ BOOST_AUTO_TEST_CASE(ScalingFilterFloat_test)
     FilterTester::done(&scaling, ctx);
 
     Schema *schema = ctx.schema();
-    Dimension const& dimX = schema->getDimension("X");
-    Dimension const& dimY = schema->getDimension("Y");
-    Dimension const& dimZ = schema->getDimension("Z");
-    Dimension const& dimTime = schema->getDimension("Time");
+    DimensionPtr dimX = schema->getDimension("X");
+    DimensionPtr dimY = schema->getDimension("Y");
+    DimensionPtr dimZ = schema->getDimension("Z");
+    DimensionPtr dimTime = schema->getDimension("Time");
 
     for (PointId i = 0; i < 2; ++i)
     {

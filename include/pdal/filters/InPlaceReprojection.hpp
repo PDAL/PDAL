@@ -74,11 +74,11 @@ public:
 
 private:
     virtual void processOptions(const Options& options);
-    virtual void buildSchema(Schema *schema);
+    virtual void addDimensions(PointContext ctx);
     virtual void ready(PointContext ctx);
     virtual void filter(PointBuffer& buffer);
 
-    Dimension *appendDimension(Schema *schema, Dimension *src);
+//    void appendDimension(Schema *schema, DimensionPtr src);
     void reprojectOffsets(double& x, double& y, double& z);
     void transform(double& x, double& y, double& z) const;
 
@@ -96,17 +96,8 @@ private:
     boost::optional<double> m_scale_x;
     boost::optional<double> m_scale_y;
     boost::optional<double> m_scale_z;
-    std::string m_x_name;
-    std::string m_y_name;
-    std::string m_z_name;
     bool m_markIgnored;
     bool m_doOffsetZ;
-    Dimension *m_srcDimX;
-    Dimension *m_srcDimY;
-    Dimension *m_srcDimZ;
-    Dimension *m_dimX;
-    Dimension *m_dimY;
-    Dimension *m_dimZ;
 
     InPlaceReprojection& operator=(
         const InPlaceReprojection&); // not implemented

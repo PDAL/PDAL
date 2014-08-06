@@ -95,7 +95,7 @@ private:
 
     virtual void initialize();
     virtual void initialize(MetadataNode& m);
-    virtual void buildSchema(Schema *schema);
+    virtual void addDimensions(PointContext ctx);
     void extractMetadata(MetadataNode& m);
     virtual void processOptions(const Options& options);
     virtual StreamFactoryPtr createFactory() const
@@ -118,7 +118,7 @@ public:
 protected:
     point_count_t processBuffer(PointBuffer& PointBuffer,
         std::istream& stream, point_count_t count, LASunzipper* unzipper,
-        ZipPoint* zipPoint, PointDimensions* dimensions);
+        ZipPoint* zipPoint);
 
     Bounds<double> m_bounds;
     const pdal::drivers::las::Reader& m_reader;
@@ -136,8 +136,7 @@ private:
     Base(Base const&); // not implemented
 
     void initialize();
-    void loadPoint(PointBuffer& data, PointDimensions *dimensions,
-        char *buf, size_t bufsize);
+    void loadPoint(PointBuffer& data, char *buf, size_t bufsize);
 };
 
 namespace sequential

@@ -81,6 +81,64 @@ point_count_t OciSeqIterator::read(PointBuffer& buffer, BlockPtr block,
     throw pdal_error("Unsupported orientation.");
 }
 
+namespace
+{
+
+void setField(PointBuffer& buf, char *pos, schema::DimInfo& d, PointId nextId)
+{
+    union
+    {
+        float f;
+        double d;
+        int8_t s8;
+        int16_t s16;
+        int32_t s32;
+        int64_t s64;
+        uint8_t u8;
+        uint16_t u16;
+        uint32_t u32;
+        uint64_t u64;
+    } e;  // e - for Everything.
+
+    memcpy(&e, pos, Dimension::size(d.m_type));
+    switch (d.m_type)
+    {
+        case Dimension::Type::Float:
+            buf.setField(d.m_id, nextId, e.f);
+            break;
+        case Dimension::Type::Double:
+            buf.setField(d.m_id, nextId, e.d);
+            break;
+        case Dimension::Type::Signed8:
+            buf.setField(d.m_id, nextId, e.s8);
+            break;
+        case Dimension::Type::Signed16:
+            buf.setField(d.m_id, nextId, e.s16);
+            break;
+        case Dimension::Type::Signed32:
+            buf.setField(d.m_id, nextId, e.s32);
+            break;
+        case Dimension::Type::Signed64:
+            buf.setField(d.m_id, nextId, e.s64);
+            break;
+        case Dimension::Type::Unsigned8:
+            buf.setField(d.m_id, nextId, e.u8);
+            break;
+        case Dimension::Type::Unsigned16:
+            buf.setField(d.m_id, nextId, e.u16);
+            break;
+        case Dimension::Type::Unsigned32:
+            buf.setField(d.m_id, nextId, e.u32);
+            break;
+        case Dimension::Type::Unsigned64:
+            buf.setField(d.m_id, nextId, e.u64);
+            break;
+        case Dimension::Type::None:
+            break;
+    }
+}
+
+} // namespace
 
 point_count_t OciSeqIterator::readDimMajor(PointBuffer& buffer, BlockPtr block,
     point_count_t numPts)
@@ -90,16 +148,18 @@ point_count_t OciSeqIterator::readDimMajor(PointBuffer& buffer, BlockPtr block,
     point_count_t blockRemaining;
     point_count_t numRead = 0;
 
-    for (size_t d = 0; d < m_dims.size(); ++d)
+    schema::DimInfoList& dims = block->m_schema.m_dims;
+    for (auto di = dims.begin(); di != dims.end(); ++di)
     {
+        schema::DimInfo& d = *di;
         PointId nextId = startId;
         char *pos = seekDimMajor(d, block);
         blockRemaining = numRemaining;
         numRead = 0;
         while (numRead < numPts && blockRemaining > 0)
         {
-            buffer.setRawField(m_dims[d], nextId, pos);
-            pos += m_dims[d]->getByteSize();
+            setField(buffer, pos, d, nextId);
+            pos += Dimension::size(d.m_type);
             nextId++;
             numRead++;
             blockRemaining--;
@@ -117,14 +177,31 @@ point_count_t OciSeqIterator::readPointMajor(PointBuffer& buffer,
     PointId nextId = buffer.size();
     point_count_t numRead = 0;
 
+
+    schema::DimInfoList& dims = block->m_schema.m_dims;
     char *pos = seekPointMajor(block);
     while (numRead < numPts && numRemaining > 0)
     {
-        for (size_t d = 0; d < m_dims.size(); ++d)
+        for (auto di = dims.begin(); di != dims.end(); ++di)
         {
-            buffer.setRawField(m_dims[d], nextId, pos);
-            pos += m_dims[d]->getByteSize();
+            schema::DimInfo& d = *di;
+            setField(buffer, pos, d, nextId);
+            pos += Dimension::size(d.m_type);
         }
+
+        // Scale X, Y and Z
+        double v = buffer.getFieldAs<double>(Dimension::Id::X, nextId);
+        v = v * block->xScale() + block->xOffset();
+        buffer.setField(Dimension::Id::X, nextId, v);
+
+        v = buffer.getFieldAs<double>(Dimension::Id::Y, nextId);
+        v = v * block->yScale() + block->yOffset();
+        buffer.setField(Dimension::Id::Y, nextId, v);
+
+        v = buffer.getFieldAs<double>(Dimension::Id::Z, nextId);
+        v = v * block->zScale() + block->zOffset();
+        buffer.setField(Dimension::Id::Z, nextId, v);
+
         numRemaining--;
         nextId++;
         numRead++;
@@ -134,22 +211,24 @@ point_count_t OciSeqIterator::readPointMajor(PointBuffer& buffer,
 }
 
 
-char *OciSeqIterator::seekDimMajor(size_t dimIdx, BlockPtr block)
+char *OciSeqIterator::seekDimMajor(const schema::DimInfo& d, BlockPtr block)
 {
     size_t size = 0;
-    for (size_t d = 0; d < dimIdx; ++d)
-        size += m_dims[d]->getByteSize();    
+    schema::DimInfoList dims = block->m_schema.m_dims;
+    for (auto di = dims.begin(); di->m_id != d.m_id; ++di)
+        size += Dimension::size(di->m_type);
     return block->data() +
         (size * block->numPoints()) +
-        (m_dims[dimIdx]->getByteSize() * block->numRead());
+        (Dimension::size(d.m_type) * block->numRead());
 }
 
 
 char *OciSeqIterator::seekPointMajor(BlockPtr block)
 {
     size_t size = 0;
-    for (size_t d = 0; d < m_dims.size(); ++d)
-        size += m_dims[d]->getByteSize();    
+    schema::DimInfoList dims = block->m_schema.m_dims;
+    for (auto di = dims.begin(); di != dims.end(); ++di)
+        size += Dimension::size(di->m_type);
     return block->data() + (block->numRead() * size);
 }
 
@@ -169,8 +248,6 @@ point_count_t OciSeqIterator::readImpl(PointBuffer& buffer, point_count_t count)
         point_count_t numRead = read(buffer, m_block, count - totalNumRead);
         PointId bufEnd = bufBegin + numRead;
         totalNumRead += numRead;
-        if (m_normalizeXYZ)
-            normalize(buffer, m_block, bufBegin, bufEnd);
     }
     return totalNumRead;
 }
@@ -195,42 +272,6 @@ uint64_t OciSeqIterator::skipImpl(uint64_t count)
 }
 
 
-void OciSeqIterator::normalize(PointBuffer& buffer, BlockPtr block,
-    PointId begin, PointId end)
-{
-    // If the scales/offsets of this block are the same as the schema's,
-    // then we're done.
-    if (Utils::compare_distance(m_dimX->getNumericScale(), block->xScale()) &&
-        Utils::compare_distance(m_dimX->getNumericOffset(), block->xOffset()) &&
-        Utils::compare_distance(m_dimY->getNumericScale(), block->yScale()) &&
-        Utils::compare_distance(m_dimY->getNumericOffset(), block->yOffset()) &&
-        Utils::compare_distance(m_dimZ->getNumericScale(), block->zScale()) &&
-        Utils::compare_distance(m_dimZ->getNumericOffset(), block->zOffset()))
-    {
-        return;
-    }
-
-    // Get the value from the buffer unscaled.  Scale the value as specified
-    // in the block (the clould's scaling) and then set the value back into
-    // the buffer, taking the final scaling out.
-    for (PointId i = begin; i < end; ++i)
-    {
-        double d;
-        d = buffer.getFieldAs<double>(m_dimX, i, false);
-        d = d * block->xScale() + block->xOffset();
-        buffer.setFieldUnscaled(m_dimX, i, d);
-
-        d = buffer.getFieldAs<double>(m_dimY, i, false);
-        d = d * block->yScale() + block->yOffset();
-        buffer.setFieldUnscaled(m_dimY, i, d);
-
-        d = buffer.getFieldAs<double>(m_dimZ, i, false);
-        d = d * block->zScale() + block->zOffset();
-        buffer.setFieldUnscaled(m_dimZ, i, d);
-    }
-}
-
-
 // Read a block (set of points) from the database.
 bool OciSeqIterator::readOci(Statement stmt, BlockPtr block)
 {
@@ -245,23 +286,23 @@ bool OciSeqIterator::readOci(Statement stmt, BlockPtr block)
     }
     // Read the points from the blob in the row.
     readBlob(stmt, block);
-    Schema *s = findSchema(stmt, block);
-    block->initialize(s);
+    schema::XMLSchema *s = findSchema(stmt, block);
+    block->update(s);
     block->clearFetched();
     return true;
 }
 
 
-// Each cloud may have its own scaling for X, Y and Z.  Store it away so
-// that it can be applied later if necessary.
-Schema* OciSeqIterator::findSchema(Statement stmt, BlockPtr block)
+// All of the schemas should be the same with regard to actual dimension
+// name, order, etc, but each cloud may have its own scaling for X, Y and Z.
+// Store it away so that it can be applied later if necessary.
+schema::XMLSchema* OciSeqIterator::findSchema(Statement stmt, BlockPtr block)
 {
     int32_t cloudId = stmt->GetInteger(&block->pc->pc_id);
-    Schema s;
     auto si = m_schemas.find(cloudId);
     if (si == m_schemas.end())
     {
-        s = fetchSchema(stmt, block);
+        schema::XMLSchema s = fetchSchema(stmt, block);
         auto i = m_schemas.insert(std::make_pair(cloudId, s));
         si = i.first;
     }
@@ -279,7 +320,6 @@ pdal::Bounds<double> OciSeqIterator::getBounds(Statement stmt, BlockPtr block)
     stmt->GetElement(&(block->blk_extent->sdo_ordinates), 3, &ymax);
     return pdal::Bounds<double>(xmin, ymin, xmax, ymax);
 }
-
 
 } // namespace sequential
 } // namespace iterators

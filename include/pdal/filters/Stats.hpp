@@ -39,7 +39,6 @@
 
 #include <pdal/Range.hpp>
 #include <pdal/PointBuffer.hpp>
-#include <pdal/Schema.hpp>
 
 #include <iostream>
 #include <boost/accumulators/accumulators.hpp>
@@ -136,12 +135,6 @@ private:
 } // namespace stats
 typedef boost::shared_ptr<stats::Summary> SummaryPtr;
 
-struct DimPtrComparator
-{
-    bool operator ()(DimensionPtr d1, DimensionPtr d2) const
-        { return *d1 < *d2; }
-};
-
 // This is just a pass-thorugh filter, which collects some stats about
 // the points that are fed through it
 class PDAL_DLL Stats : public Filter
@@ -151,13 +144,13 @@ public:
     SET_STAGE_LINK("http://pdal.io/stages/filters.stats.html")  
     SET_STAGE_ENABLED(true)
     
-    Stats(const Options& options) : Filter(options), m_stats(DimPtrComparator())
+    Stats(const Options& options) : Filter(options)
         {}
 
     static Options getDefaultOptions();
 
     boost::property_tree::ptree toPTree() const;
-    const stats::Summary& getStats(const Dimension& dim) const;
+    const stats::Summary& getStats(Dimension::Id::Enum d) const;
     void reset();
 
 private:
@@ -181,7 +174,7 @@ private:
     point_count_t m_numPoints;
     std::set<std::string> m_dimension_names;
     std::set<std::string> m_exact_dimension_names;
-    std::map<const Dimension *, SummaryPtr, DimPtrComparator> m_stats;
+    std::map<Dimension::Id::Enum, SummaryPtr> m_stats;
 };
 
 

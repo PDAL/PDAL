@@ -45,13 +45,7 @@ class PDAL_DLL KDIndex
 {
 public:
     KDIndex(PointBuffer& buf) : m_buf(buf), m_index(0)
-    {
-        const Schema& s = m_buf.getSchema();
-        m_dim[0] = s.getDimension("X");
-        m_dim[1] = s.getDimension("Y");
-        m_dim[2] = s.getDimension("Z");
-        m_3d = (bool)m_dim[2];
-    }
+        { m_3d = buf.context().hasDim(Dimension::Id::Z); }
 
     ~KDIndex()
         { delete m_index; }
@@ -61,22 +55,35 @@ public:
 
     double kdtree_get_pt(const size_t idx, int dim) const
     {
-        return m_buf.getFieldAs<double>(m_dim[dim], idx);
+        Dimension::Id::Enum id = Dimension::Id::Unknown;
+        switch (dim)
+        {
+        case 0:
+            id = Dimension::Id::X;
+            break;
+        case 1:
+            id = Dimension::Id::Y;
+            break;
+        case 3:
+            id = Dimension::Id::Z;
+            break;
+        }
+        return m_buf.getFieldAs<double>(id, idx);
     }
 
     double kdtree_distance(const double *p1, const size_t idx_p2,
         size_t size) const
     {
-        double d0 = m_buf.getFieldAs<double>(m_dim[0], idx_p2) -
-            m_buf.getFieldAs<double>(m_dim[0], size - 1);
-        double d1 = m_buf.getFieldAs<double>(m_dim[1], idx_p2) -
-            m_buf.getFieldAs<double>(m_dim[1], size - 1);
+        double d0 = m_buf.getFieldAs<double>(Dimension::Id::X, idx_p2) -
+            m_buf.getFieldAs<double>(Dimension::Id::X, size - 1);
+        double d1 = m_buf.getFieldAs<double>(Dimension::Id::Y, idx_p2) -
+            m_buf.getFieldAs<double>(Dimension::Id::Y, size - 1);
 
         double output(d0 * d0 + d1 * d1);
-        if (m_3d && m_dim[2])
+        if (m_3d)
         {
-            double d2 = m_buf.getFieldAs<double>(m_dim[2], idx_p2) -
-                m_buf.getFieldAs<double>(m_dim[2], size - 1);
+            double d2 = m_buf.getFieldAs<double>(Dimension::Id::Z, idx_p2) -
+                m_buf.getFieldAs<double>(Dimension::Id::Z, size - 1);
             output += d2 * d2;
         }
         return output;
@@ -88,7 +95,7 @@ public:
         if (bounds.empty())
             return false;
 
-        size_t nDims = m_3d && m_dim[2] ? 3 : 2;
+        size_t nDims = m_3d ? 3 : 2;
         for (size_t i = 0; i < nDims; ++i)
         {
             bb[i].low = bounds.getMinimum(i);
@@ -102,11 +109,10 @@ public:
         double distance, boost::uint32_t count = 1);
     std::vector<size_t> radius(double const& x, double const& y,
         double const& z, double const& r);
-    void build(bool b3d = true);
+    void build(PointContext ctx, bool b3d = true);
     
 private:
     PointBuffer& m_buf;
-    DimensionPtr m_dim[3];
     bool m_3d;
 
     typedef nanoflann::KDTreeSingleIndexAdaptor<

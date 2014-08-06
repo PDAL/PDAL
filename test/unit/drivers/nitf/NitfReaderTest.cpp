@@ -110,15 +110,15 @@ BOOST_AUTO_TEST_CASE(test_one)
     //
     BOOST_CHECK_EQUAL(las_numRead, nitf_numRead);
 
-    Dimension const& nitf_dimX = ctx.schema()->getDimension("X");
-    Dimension const& nitf_dimY = ctx.schema()->getDimension("Y");
-    Dimension const& nitf_dimZ = ctx.schema()->getDimension("Z");
+    DimensionPtr nitf_dimX = ctx.schema()->getDimension("X");
+    DimensionPtr nitf_dimY = ctx.schema()->getDimension("Y");
+    DimensionPtr nitf_dimZ = ctx.schema()->getDimension("Z");
 
-    Dimension const& las_dimX = ctx2.schema()->getDimension("X");
-    Dimension const& las_dimY = ctx2.schema()->getDimension("Y");
-    Dimension const& las_dimZ = ctx2.schema()->getDimension("Z");
+    DimensionPtr las_dimX = ctx2.schema()->getDimension("X");
+    DimensionPtr las_dimY = ctx2.schema()->getDimension("Y");
+    DimensionPtr las_dimZ = ctx2.schema()->getDimension("Z");
 
-    for (uint32_t i=0; i<las_numRead; i++)
+    for (uint32_t i = 0; i < las_numRead; i++)
     {
         const int32_t nitf_x = nitf_data.getField<int32_t>(nitf_dimX, i);
         const int32_t nitf_y = nitf_data.getField<int32_t>(nitf_dimY, i);

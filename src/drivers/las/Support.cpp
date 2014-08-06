@@ -44,45 +44,6 @@ namespace drivers
 namespace las
 {
 
-PointDimensions::PointDimensions(const Schema& schema, std::string const& ns)
-{
-
-
-#   define CACHE_DIM(x) \
-    x = schema.getDimension(#x, ns.c_str()); \
-    if (x && x->isIgnored()) \
-        x.reset();
-    
-    // don't ever wipe off ignored XYZ dims.
-    X = schema.getDimension("X", ns);
-    Y = schema.getDimension("Y", ns);
-    Z = schema.getDimension("Z", ns);
-    
-    CACHE_DIM(Intensity)
-    CACHE_DIM(ReturnNumber)
-    CACHE_DIM(NumberOfReturns)
-    CACHE_DIM(ScanDirectionFlag)
-    CACHE_DIM(EdgeOfFlightLine)
-    CACHE_DIM(Classification)
-    CACHE_DIM(ScanAngleRank)
-    CACHE_DIM(UserData)
-    CACHE_DIM(PointSourceId)
-    CACHE_DIM(Time)
-    CACHE_DIM(Red)
-    CACHE_DIM(Green)
-    CACHE_DIM(Blue)
-
-#   undef CACHE_DIM
-
-    // WavePacketDescriptorIndex = (Support::hasWave(format) ? schema.getDimensionIndex(DimensionId::Las_WavePacketDescriptorIndex) : 0);
-    // WaveformDataOffset = (Support::hasWave(format) ? schema.getDimensionIndex(DimensionId::Las_WaveformDataOffset) : 0);
-    // ReturnPointWaveformLocation = (Support::hasWave(format) ? schema.getDimensionIndex(DimensionId::Las_ReturnPointWaveformLocation) : 0);
-    // WaveformXt = (Support::hasWave(format) ? schema.getDimensionIndex(DimensionId::Las_WaveformXt) : 0);
-    // WaveformYt = (Support::hasWave(format) ? schema.getDimensionIndex(DimensionId::Las_WaveformYt) : 0);
-    // WaveformZt = (Support::hasWave(format) ? schema.getDimensionIndex(DimensionId::Las_WaveformZt) : 0);
-}
-
-
 void Support::rewriteHeader(std::ostream& stream, const SummaryData& data)
 {
     // move from header start to "number of point records" field

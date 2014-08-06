@@ -66,7 +66,8 @@ namespace sequential
 class PgIterator : public pdal::StageSequentialIterator
 {
 public:
-    PgIterator(const pdal::drivers::pgpointcloud::PgReader& reader, std::vector<Dimension *> const& dims);
+    PgIterator(const pdal::drivers::pgpointcloud::PgReader& reader);
+//        const DimensionList& dims);
     ~PgIterator();
 
 protected:
@@ -105,7 +106,8 @@ private:
     bool m_cursor;
     PGconn* m_session;
 
-    std::vector<DimensionPtr> m_dims;
+//ABELL
+//    DimensionList m_dims;
     size_t m_point_size;
     uint32_t m_cur_row;
     uint32_t m_cur_nrows;

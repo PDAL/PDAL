@@ -82,7 +82,7 @@ namespace sequential
 {
 
 PgIterator::PgIterator(const pdal::drivers::pgpointcloud::PgReader& reader,
-                       std::vector<Dimension *> const& dims)
+        const DimensionList& dims)
     : m_reader(reader)
     , m_at_end(false)
     , m_cursor(false)
@@ -185,7 +185,7 @@ point_count_t PgIterator::readPgPatch(PointBuffer& buffer, point_count_t numPts)
     {
         for (size_t d = 0; d < m_dims.size(); ++d)
         {
-            buffer.setRawField(*m_dims[d], nextId, pos);
+            buffer.setRawField(m_dims[d], nextId, pos);
             pos += m_dims[d]->getByteSize();
         }
         numRemaining--;

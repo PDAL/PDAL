@@ -60,13 +60,6 @@ Options Splitter::getDefaultOptions()
 }
 
 
-void Splitter::ready(PointContext ctx)
-{
-    m_xDim = ctx.schema()->getDimensionPtr("X");
-    m_yDim = ctx.schema()->getDimensionPtr("Y");
-}
-
-
 //ABELL - This used to be a lambda, but the VS compiler exploded, I guess.
 typedef std::pair<int, int> Coord;
 namespace
@@ -94,16 +87,18 @@ PointBufferSet Splitter::run(PointBufferPtr buf)
     std::map<Coord, PointBufferPtr, CoordCompare> buffers(compare);
 
     // Use the location of the first point as the origin.
-    double xOrigin = buf->getFieldAs<double>(*m_xDim, 0);
-    double yOrigin = buf->getFieldAs<double>(*m_yDim, 0);
+    double xOrigin = buf->getFieldAs<double>(Dimension::Id::X, 0);
+    double yOrigin = buf->getFieldAs<double>(Dimension::Id::X, 0);
 
     // Overlay a grid of squares on the points (m_length sides).  Each square
     // corresponds to a new point buffer.  Place the points falling in the
     // each square in the corresponding point buffer.
     for (PointId idx = 0; idx < buf->size(); idx++)
     {
-        int xpos = (buf->getFieldAs<double>(*m_xDim, idx) - xOrigin) / m_length;
-        int ypos = (buf->getFieldAs<double>(*m_yDim, idx) - yOrigin) / m_length;
+        int xpos = (buf->getFieldAs<double>(Dimension::Id::X, idx) - xOrigin) /
+            m_length;
+        int ypos = (buf->getFieldAs<double>(Dimension::Id::Y, idx) - yOrigin) /
+            m_length;
         Coord loc(xpos, ypos);
         PointBufferPtr& outbuf = buffers[loc];
         if (!outbuf)

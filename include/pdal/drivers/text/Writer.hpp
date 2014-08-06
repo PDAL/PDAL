@@ -95,19 +95,24 @@ private:
     virtual void processOptions(const Options&);
 
     void putStringRepresentation(PointBuffer const& data,
-        DimensionPtr d, std::size_t pointIndex, std::ostream& strm);
+        Dimension::Id::Enum d, std::size_t pointIndex, std::ostream& strm);
 
+/**
     void WriteHeader(pdal::Schema const& schema);
     
     void WriteGeoJSONHeader(pdal::Schema const& schema);
     void WriteCSVHeader(pdal::Schema const& schema);
     void WritePCDHeader(pdal::Schema const& schema);
-    
+**/    
+
     void WriteCSVBuffer(const PointBuffer& data);
     void WriteGeoJSONBuffer(const PointBuffer& data);
     void WritePCDBuffer(const PointBuffer& data);
     
+/**
     std::vector<boost::tuple<std::string, std::string> >  getDimensionOrder(pdal::Schema const& schema) const;
+**/
+
     FileStreamPtr m_stream;
     bool bWroteHeader;
     bool bWroteFirstPoint;

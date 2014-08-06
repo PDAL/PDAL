@@ -52,7 +52,7 @@ void checkDimension(
         const std::string& name,
         const float expected)
 {
-    const Dimension& dimension = data.getSchema().getDimension(name);
+    DimensionPtr dimension = data.getSchema().getDimension(name);
     float actual = data.getField<float>(dimension, index);
     BOOST_CHECK_CLOSE(expected, actual, 0.000001);
 }
@@ -63,7 +63,7 @@ void checkDimension(
         const std::string& name,
         const int expected)
 {
-    const Dimension& dimension = data.getSchema().getDimension(name);
+    DimensionPtr dimension = data.getSchema().getDimension(name);
     int actual = data.getField<int>(dimension, index);
     BOOST_CHECK_EQUAL(expected, actual);
 }

@@ -75,9 +75,6 @@ Options Colorization::getDefaultOptions()
 {
     Options options;
 
-    Option x("x_dim", std::string("X"), "Dimension name to use for 'X' data");
-    Option y("y_dim", std::string("Y"), "Dimension name to use for 'Y' data");
-
     pdal::Option red("dimension", "Red", "");
     pdal::Option b0("band",1, "");
     pdal::Option s0("scale", 1.0f, "scale factor for this dimension");
@@ -106,8 +103,6 @@ Options Colorization::getDefaultOptions()
         "Reproject the input data into the same coordinate system as "
         "the raster?");
 
-    options.add(x);
-    options.add(y);
     options.add(red);
     options.add(green);
     options.add(blue);
@@ -120,8 +115,6 @@ Options Colorization::getDefaultOptions()
 void Colorization::processOptions(const Options& options)
 {
     m_rasterFilename = options.getValueOrThrow<std::string>("raster");
-    m_xDimName = options.getValueOrDefault<std::string>("x_dim", "X");
-    m_yDimName = options.getValueOrDefault<std::string>("y_dim", "Y");
     std::vector<Option> dimensions = options.getOptions("dimension");
 
     if (dimensions.size() == 0)
@@ -182,10 +175,6 @@ void Colorization::ready(PointContext ctx)
         throw pdal_error("unable to fetch inverse geotransform for raster!");
 #endif
 
-    Schema *schema = ctx.schema();
-    m_dimX = schema->getDimensionPtr(m_xDimName);
-    m_dimY = schema->getDimensionPtr(m_yDimName);
-
     m_dimensions.clear();
     m_bands.clear();
     m_scales.clear();
@@ -196,7 +185,7 @@ void Colorization::ready(PointContext ctx)
     for (auto i = m_band_map.begin(); i != m_band_map.end(); ++i)
     {
         // Dimension
-        pdal::Dimension const* dim = schema->getDimensionPtr(i->first);
+        DimensionPtr dim = schema->getDimension(i->first);
         m_dimensions.push_back(dim);
         // Band number.
         m_bands.push_back(i->second);
@@ -215,8 +204,8 @@ void Colorization::filter(PointBuffer& buffer)
     std::array<double, 2> pix = { {0.0, 0.0} };
     for (PointId idx = 0; idx < buffer.size(); ++idx)
     {
-        double x = buffer.getFieldAs<double>(*m_dimX, idx);
-        double y = buffer.getFieldAs<double>(*m_dimY, idx);
+        double x = buffer.getFieldAs<double>(Dimension::Id::X, idx);
+        double y = buffer.getFieldAs<double>(Dimension::Id::Y, idx);
 
         if (!getPixelAndLinePosition(x, y, m_inverse_transform, pixel,
             line, m_ds))
@@ -234,7 +223,7 @@ void Colorization::filter(PointBuffer& buffer)
             }
             if (GDALRasterIO(hBand, GF_Read, pixel, line, 1, 1,
                 &pix[0], 1, 1, GDT_CFloat64, 0, 0) == CE_None)
-                buffer.setFieldUnscaled(*m_dimensions[i], idx,
+                buffer.setFieldUnscaled(m_dimensions[i], idx,
                     pix[0] * m_scales[i]);
         }
     }

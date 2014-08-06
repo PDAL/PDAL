@@ -53,7 +53,7 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/RawPtBuf.hpp"
   "${PDAL_HEADERS_DIR}/Reader.hpp"
   "${PDAL_HEADERS_DIR}/ReaderIterator.hpp"
-  "${PDAL_HEADERS_DIR}/Schema.hpp"
+#  "${PDAL_HEADERS_DIR}/Schema.hpp"
   "${PDAL_HEADERS_DIR}/SpatialReference.hpp"
   "${PDAL_HEADERS_DIR}/Stage.hpp"
   "${PDAL_HEADERS_DIR}/StageFactory.hpp"
@@ -79,7 +79,7 @@ endif()
 set(PDAL_BASE_CPP
   Bounds.cpp
   Charbuf.cpp
-  Dimension.cpp
+#  Dimension.cpp
   FileUtils.cpp
   Filter.cpp
   FilterIterator.cpp
@@ -98,7 +98,7 @@ set(PDAL_BASE_CPP
   Range.cpp
   Reader.cpp
   ReaderIterator.cpp
-  Schema.cpp
+#  Schema.cpp
   SpatialReference.cpp
   Stage.cpp
   StageFactory.cpp
@@ -559,7 +559,7 @@ set(PDAL_FILTERS_HPP
   "${PDAL_FILTERS_HEADERS}/Decimation.hpp"
   "${PDAL_FILTERS_HEADERS}/HexBin.hpp"
   "${PDAL_FILTERS_HEADERS}/InPlaceReprojection.hpp"
-  "${PDAL_FILTERS_HEADERS}/Mosaic.hpp"
+#  "${PDAL_FILTERS_HEADERS}/Mosaic.hpp"
   "${PDAL_FILTERS_HEADERS}/Reprojection.hpp"
   "${PDAL_FILTERS_HEADERS}/Scaling.hpp"
   "${PDAL_FILTERS_HEADERS}/Selector.hpp"
@@ -573,7 +573,7 @@ set (PDAL_FILTERS_CPP
   "${PDAL_FILTERS_SRC}/Decimation.cpp"
   "${PDAL_FILTERS_SRC}/HexBin.cpp"
   "${PDAL_FILTERS_SRC}/InPlaceReprojection.cpp"
-  "${PDAL_FILTERS_SRC}/Mosaic.cpp"
+#  "${PDAL_FILTERS_SRC}/Mosaic.cpp"
   "${PDAL_FILTERS_SRC}/Reprojection.cpp"
   "${PDAL_FILTERS_SRC}/Scaling.cpp"
   "${PDAL_FILTERS_SRC}/Selector.cpp"

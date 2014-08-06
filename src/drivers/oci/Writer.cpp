@@ -383,7 +383,7 @@ bool Writer::blockTableExists()
     char szTable[OWNAME] = "";
     oss << "select table_name from user_tables";
 
-    log()->get(logDEBUG) << "checking for " << m_blockTableName <<
+    log()->get(LogLevel::DEBUG) << "checking for " << m_blockTableName <<
         " existence ... " ;
 
     Statement statement(m_connection->CreateStatement(oss.str().c_str()));
@@ -394,19 +394,19 @@ bool Writer::blockTableExists()
     statement->Define(szTable);
     statement->Execute();
 
-    log()->get(logDEBUG) << "checking ... " << szTable ;
+    log()->get(LogLevel::DEBUG) << "checking ... " << szTable ;
     do
     {
-        log()->get(logDEBUG) << ", " << szTable;
+        log()->get(LogLevel::DEBUG) << ", " << szTable;
         if (boost::iequals(szTable, m_blockTableName))
         {
-            log()->get(logDEBUG) << " -- '" << m_blockTableName <<
+            log()->get(LogLevel::DEBUG) << " -- '" << m_blockTableName <<
                 "' found." <<std::endl;
             return true;
         }
     } while (statement->Fetch());
 
-    log()->get(logDEBUG) << " -- '" << m_blockTableName <<
+    log()->get(LogLevel::DEBUG) << " -- '" << m_blockTableName <<
         "' not found." << std::endl;
     return false;
 }
@@ -519,7 +519,7 @@ std::string Writer::createPCElemInfo()
 }
 
 
-void Writer::createPCEntry(Schema const& buffer_schema)
+void Writer::createPCEntry()
 {
     std::ostringstream oss;
 
@@ -589,28 +589,16 @@ void Writer::createPCEntry(Schema const& buffer_schema)
         s_srid.str() << ", null,\n"
         "              mdsys.sdo_elem_info_array"<< eleminfo <<",\n"
         "              mdsys.sdo_ordinate_array(\n";
-
     s_geom << bounds.getMinimum(0) << "," << bounds.getMinimum(1) << ",";
-
     if (m_3d)
         s_geom << bounds.getMinimum(2) << ",";
-
     s_geom << bounds.getMaximum(0) << "," << bounds.getMaximum(1);
-
     if (m_3d)
         s_geom << "," << bounds.getMaximum(2);
-
     s_geom << "))";
 
-    Schema schema;
-    for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
-    {
-        DimensionPtr d = *di;
-        schema.appendDimension(*d);
-    }
-//ABELL
-//    schema.setOrientation(m_orientation);
-    std::string schemaData = Schema::to_xml(schema);
+    schema::Writer writer(m_dims, m_types);
+    std::string schemaData = writer.getXML();
 
     oss << "declare\n"
         "  pc_id NUMBER := :" << nPCPos << ";\n"
@@ -788,19 +776,19 @@ void Writer::processOptions(const Options& options)
 
 void Writer::write(const PointBuffer& buffer)
 {
-    writeInit(buffer.getSchema());
+    writeInit();
     writeTile(buffer);
 }
 
 
-void Writer::writeInit(const Schema& schema)
+void Writer::writeInit()
 {
     if (m_sdo_pc_is_initialized)
         return;
 
     if (m_trace)
     {
-        log()->get(logDEBUG) << "Setting database trace..." << std::endl;
+        log()->get(LogLevel::DEBUG) << "Setting database trace..." << std::endl;
         std::ostringstream oss;
         oss << "BEGIN " << std::endl;
         oss << "DBMS_SESSION.set_sql_trace(sql_trace => TRUE);" << std::endl;
@@ -816,11 +804,11 @@ void Writer::writeInit(const Schema& schema)
         char traceTableName[1024] = {0};
         statement->Define(traceTableName, sizeof(traceTableName));
         statement->Execute();
-        log()->get(logDEBUG) << "Trace location name:  " <<
+        log()->get(LogLevel::DEBUG) << "Trace location name:  " <<
             traceTableName << std::endl;
 
     }
-    createPCEntry(schema);
+    createPCEntry();
     m_triggerName = shutOff_SDO_PC_Trigger();
     m_sdo_pc_is_initialized = true;
 }
@@ -836,19 +824,18 @@ void Writer::ready(PointContext ctx)
         createBlockTable();
 
     m_pcExtent.clear();
-    m_dims.clear();
     m_lastBlockId = 0;
-    Schema *schema = ctx.schema();
     m_pointSize = 0;
-    DimensionList dims = schema->getDimensions();
-    for (auto di = dims.begin(); di != dims.end(); ++di)
+    m_dims = ctx.dims();
+    // Determine types for the dimensions.  We use the default types when
+    // they exist, float otherwise.
+    for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
     {
-        DimensionPtr d = *di;
-        if (!m_pack || !d->isIgnored())
-        {
-            m_dims.push_back(d);
-            m_pointSize += d->getByteSize();
-        }
+        Dimension::Type::Enum type = Dimension::defaultType(*di);
+        if (type == Dimension::Type::None)
+            type = Dimension::Type::Float;
+        m_types.push_back(type);
+        m_pointSize += Dimension::size(type);
     }
 }
 
@@ -905,6 +892,67 @@ void Writer::setOrdinates(Statement statement, OCIArray* ordinates,
 }
 
 
+namespace
+{
+
+void fillBuf(const PointBuffer& buf, char *pos, Dimension::Id::Enum d,
+    Dimension::Type::Enum type, PointId id)
+{
+    union
+    {
+        float f;
+        double d;
+        int8_t s8;
+        int16_t s16;
+        int32_t s32;
+        int64_t s64;
+        uint8_t u8;
+        uint16_t u16;
+        uint32_t u32;
+        uint64_t u64;
+    } e;  // e - for Everything.
+
+    switch (type)
+    {
+    case Dimension::Type::Float:
+        e.f = buf.getFieldAs<float>(d, id);
+        break;
+    case Dimension::Type::Double:
+        e.d = buf.getFieldAs<double>(d, id);
+        break;
+    case Dimension::Type::Signed8:
+        e.s8 = buf.getFieldAs<int8_t>(d, id);
+        break;
+    case Dimension::Type::Signed16:
+        e.s16 = buf.getFieldAs<int16_t>(d, id);
+        break;
+    case Dimension::Type::Signed32:
+        e.s32 = buf.getFieldAs<int32_t>(d, id);
+        break;
+    case Dimension::Type::Signed64:
+        e.s64 = buf.getFieldAs<int64_t>(d, id);
+        break;
+    case Dimension::Type::Unsigned8:
+        e.u8 = buf.getFieldAs<uint8_t>(d, id);
+        break;
+    case Dimension::Type::Unsigned16:
+        e.u16 = buf.getFieldAs<uint16_t>(d, id);
+        break;
+    case Dimension::Type::Unsigned32:
+        e.u32 = buf.getFieldAs<uint32_t>(d, id);
+        break;
+    case Dimension::Type::Unsigned64:
+        e.u64 = buf.getFieldAs<uint64_t>(d, id);
+        break;
+    case Dimension::Type::None:
+        break;
+    }
+    memcpy(pos, &e, Dimension::size(type));
+}
+
+} // anonymous namespace.
+
+
 void Writer::writeTile(PointBuffer const& buffer)
 {
     bool usePartition = (m_blockTablePartitionColumn.size() != 0);
@@ -926,17 +974,21 @@ void Writer::writeTile(PointBuffer const& buffer)
 
     // :1
     statement->Bind(&m_pc_id);
-    log()->get(logDEBUG4) << "Block obj_id " << m_pc_id << std::endl;
+    log()->get(LogLevel::DEBUG4) << "Block obj_id " << m_pc_id << std::endl;
 
     // :2
     statement->Bind(&m_lastBlockId);
     m_lastBlockId++;
-    log()->get(logDEBUG4) << "Last BlockId " << m_lastBlockId << std::endl;
+    log()->get(LogLevel::DEBUG4) << "Last BlockId " <<
+        m_lastBlockId << std::endl;
 
     // :3
     long long_num_points = static_cast<long>(buffer.size());
     statement->Bind(&long_num_points);
-    log()->get(logDEBUG4) << "Num points " << long_num_points << std::endl;
+    log()->get(LogLevel::DEBUG4) << "Num points " <<
+        long_num_points << std::endl;
+
+
 
     // :4
     size_t outbufSize = m_pointSize * buffer.size();
@@ -948,13 +1000,13 @@ void Writer::writeTile(PointBuffer const& buffer)
     {
         size_t clicks = 0;
         size_t interrupt = m_dims.size() * 100;
-        for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
+        auto ti = m_types.begin();
+        for (auto di = m_dims.begin(); di != m_dims.end(); ++di, ++ti)
         {
-            DimensionPtr d = *di;
             for (PointId id = 0; id < buffer.size(); ++id)
             {
-                buffer.getRawField(d, id, pos);
-                pos += d->getByteSize();
+                fillBuf(buffer, pos, *di, *ti, id);
+                pos += Dimension::size(*ti);
                 if (clicks++ % interrupt == 0)
                     m_callback->invoke(clicks / m_dims.size());
             }
@@ -964,12 +1016,11 @@ void Writer::writeTile(PointBuffer const& buffer)
     {
         for (PointId id = 0; id < buffer.size(); ++id)
         {
-            for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
+            auto ti = m_types.begin();
+            for (auto di = m_dims.begin(); di != m_dims.end(); ++di, ++ti)
             {
-                DimensionPtr d = *di;
-
-                buffer.getRawField(d, id, pos);
-                pos += d->getByteSize();
+                fillBuf(buffer, pos, *di, *ti, id);
+                pos += Dimension::size(*ti);
             }
             if (id % 100 == 0)
                 m_callback->invoke(id);
@@ -977,7 +1028,7 @@ void Writer::writeTile(PointBuffer const& buffer)
     }
     m_callback->invoke(buffer.size());
 
-    log()->get(logDEBUG4) << "Blob size " << outbufSize << std::endl;
+    log()->get(LogLevel::DEBUG4) << "Blob size " << outbufSize << std::endl;
     OCILobLocator* locator;
     if (m_streamChunks)
     {
@@ -990,7 +1041,8 @@ void Writer::writeTile(PointBuffer const& buffer)
     // :5
     long long_gtype = static_cast<long>(m_gtype);
     statement->Bind(&long_gtype);
-    log()->get(logDEBUG4) << "OCI geometry type " << m_gtype << std::endl;
+    log()->get(LogLevel::DEBUG4) << "OCI geometry type " <<
+        m_gtype << std::endl;
 
     // :6
     long srid;
@@ -998,7 +1050,7 @@ void Writer::writeTile(PointBuffer const& buffer)
     if (m_srid != 0)
         srid = m_srid;
     statement->Bind(&srid);
-    log()->get(logDEBUG4) << "OCI SRID " << srid << std::endl;
+    log()->get(LogLevel::DEBUG4) << "OCI SRID " << srid << std::endl;
     
 
     // :7
@@ -1020,14 +1072,14 @@ void Writer::writeTile(PointBuffer const& buffer)
 
     setOrdinates(statement, sdo_ordinates, bounds);
     statement->Bind(&sdo_ordinates, m_connection->GetOrdinateType());
-    log()->get(logDEBUG4) << "Bounds " << bounds << std::endl;
+    log()->get(LogLevel::DEBUG4) << "Bounds " << bounds << std::endl;
 
     // :9
     if (usePartition)
     {
         long long_partition_id = (long)m_blockTablePartitionValue;
         statement->Bind(&long_partition_id);
-        log()->get(logDEBUG4) << "Partition ID " << long_partition_id <<
+        log()->get(LogLevel::DEBUG4) << "Partition ID " << long_partition_id <<
             std::endl;        
     }
 

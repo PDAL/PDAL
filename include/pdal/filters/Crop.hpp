@@ -69,13 +69,7 @@ public:
 private:
     Bounds<double> m_bounds;
     bool m_cropOutside;
-    std::string m_xDimName;
-    std::string m_yDimName;
-    std::string m_zDimName;
     std::string m_poly;
-    Dimension *m_dimX;
-    Dimension *m_dimY;
-    Dimension *m_dimZ;
 
 #ifdef PDAL_HAVE_GEOS
 	GEOSContextHandle_t m_geosEnvironment;

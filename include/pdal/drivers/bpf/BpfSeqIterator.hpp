@@ -45,21 +45,19 @@ namespace pdal
 {
 
 class BpfReader;
-class Dimension;
 class PointBuffer;
 
 class BpfSeqIterator : public ReaderSequentialIterator
 {
 public:
-    BpfSeqIterator(const std::vector<DimensionPtr>& dims,
-        point_count_t numPoints, BpfFormat::Enum pointFormat, bool compression,
-        ILeStream& stream);
+    BpfSeqIterator(const BpfDimensionList& dims, point_count_t numPoints,
+        BpfFormat::Enum pointFormat, bool compression, ILeStream& stream);
     ~BpfSeqIterator();
 
 protected:
     boost::uint32_t readBufferImpl(PointBuffer&);
     virtual point_count_t readImpl(PointBuffer& data, point_count_t count);
-    boost::uint64_t skipImpl(boost::uint64_t);
+    boost::uint64_t skipImpl(uint64_t);
     bool atEndImpl() const;
 
     boost::uint32_t read(PointBuffer& data, uint32_t count);
@@ -77,7 +75,7 @@ private:
     void seekByteMajor(size_t dimIdx, size_t byteIdx, uint32_t ptIdx);
 
     /// Dimensions
-    std::vector<DimensionPtr> m_dims;
+    BpfDimensionList m_dims;
     /// Total number of points in the file.
     point_count_t m_numPoints;
     /// Bpf point format being read.

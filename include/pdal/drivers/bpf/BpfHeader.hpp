@@ -32,11 +32,13 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#pragma once
+
 #include <stdint.h>
 #include <string>
 #include <vector>
 
-#pragma once
+#include <pdal/Dimension.hpp>
 
 namespace pdal
 {
@@ -85,9 +87,11 @@ struct BpfDimension
     double m_min;
     double m_max;
     std::string m_label;
+    Dimension::Id::Enum m_id;
 
     static bool read(ILeStream& stream, std::vector<BpfDimension>& dims);
 };
+typedef std::vector<BpfDimension> BpfDimensionList;
 
 struct BpfUlemHeader
 {

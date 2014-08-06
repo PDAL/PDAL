@@ -34,8 +34,6 @@
 
 #pragma once
 
-#include <vector>
-
 #include <pdal/Dimension.hpp>
 
 namespace pdal
@@ -45,7 +43,7 @@ namespace drivers
 namespace sbet
 {
 
-std::vector<Dimension> fileDimensions(const std::string& stageName);
+Dimension::IdList fileDimensions();
 
 } // namespace sbet
 } // namespace drivers

@@ -436,20 +436,14 @@ BOOST_AUTO_TEST_CASE(test_no_xyz)
 
     Schema *schema = ctx.schema();
     
-    Dimension x = schema->getDimension("X");
-    boost::uint32_t flags = x.getFlags();
-    x.setFlags(flags | dimension::IsIgnored);
-    schema->setDimension(x);
+    DimensionPtr x = schema->getDimension("X");
+    x->setIgnored();
 
-    Dimension y = schema->getDimension("Y");
-    flags = y.getFlags();
-    y.setFlags(flags | dimension::IsIgnored);
-    schema->setDimension(y);
+    DimensionPtr y = schema->getDimension("Y");
+    y->setIgnored();
 
-    Dimension z = schema->getDimension("Z");
-    flags = z.getFlags();
-    z.setFlags(flags | dimension::IsIgnored);
-    schema->setDimension(z);
+    DimensionPtr z = schema->getDimension("Z");
+    z->setIgnored();
         
     pdal::StageSequentialIterator* iter = reader.createSequentialIterator();
 

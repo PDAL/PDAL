@@ -61,7 +61,8 @@ enum Enum
 } // namespace CompressionType
 
 
-CompressionType::Enum getCompressionType(std::string const& compression_type)
+inline CompressionType::Enum getCompressionType(
+    std::string const& compression_type)
 {
     if (boost::iequals(compression_type, "dimensional"))
         return CompressionType::Dimensional;

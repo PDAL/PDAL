@@ -46,7 +46,7 @@
 
 using namespace pdal;
 
-void checkPoint(PointContext ctx, const pdal::PointBuffer& data,
+void checkPoint(PointContext ctx, const PointBuffer& data,
     std::size_t index, double time, double latitude, double longitude,
     double altitude, double xvelocity, double yvelocity, double zvelocity,
     double roll, double pitch, double heading, double wander, double xaccel,
@@ -55,8 +55,8 @@ void checkPoint(PointContext ctx, const pdal::PointBuffer& data,
 {
     auto checkDimension = [&ctx,&data,index](std::string name, double expected)
     {
-        Dimension *dim = ctx.schema()->getDimensionPtr(name);
-        double actual = data.getFieldAs<double>(*dim, index);
+        DimensionPtr dim = ctx.schema()->getDimension(name);
+        double actual = data.getFieldAs<double>(dim, index);
         BOOST_CHECK_CLOSE(expected, actual, 0.0000001);
     };
 
@@ -153,7 +153,7 @@ BOOST_AUTO_TEST_CASE(testBadFile)
     drivers::sbet::SbetReader reader(options);
     PointContext ctx;
     reader.prepare(ctx);
-    BOOST_CHECK_THROW(reader.execute(ctx), pdal::pdal_error);
+    BOOST_CHECK_THROW(reader.execute(ctx), pdal_error);
 }
 
 BOOST_AUTO_TEST_CASE(testPipeline)
@@ -164,7 +164,7 @@ BOOST_AUTO_TEST_CASE(testPipeline)
 
     const boost::uint64_t numPoints = manager.execute();
     BOOST_CHECK_EQUAL(numPoints, 2);
-    pdal::FileUtils::deleteFile(Support::datapath("sbet/outfile.txt"));
+    FileUtils::deleteFile(Support::datapath("sbet/outfile.txt"));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

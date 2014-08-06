@@ -60,7 +60,7 @@ void SbetWriter::ready(PointContext ctx)
     for (auto di = neededDims.begin(); di != neededDims.end(); ++di)
     {
         Dimension& dim = *di;
-        m_dims.push_back(ctx.schema()->getDimensionPtr(dim.getName()));
+        m_dims.push_back(ctx.schema()->getDimension(dim.getName(), getName()));
     }
 }
 
@@ -74,8 +74,8 @@ void SbetWriter::write(const PointBuffer& buf)
         for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
         {
             // If a dimension doesn't exist, write 0.
-            Dimension *d = *di;
-            *m_stream << (d ? buf.getFieldAs<double>(*d, idx) : 0.0);
+            DimensionPtr d = *di;
+            *m_stream << (d ? buf.getFieldAs<double>(d, idx) : 0.0);
         }
         if (idx % 100 == 0)
             m_callback->invoke(idx + 1);

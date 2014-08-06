@@ -1,12 +1,5 @@
 /******************************************************************************
- * $Id$
- *
- * Project:  libLAS - http://liblas.org - A BSD library for LAS format data.
- * Purpose:  LAS Dimension implementation for C++ libLAS
- * Author:   Howard Butler, hobu.inc@gmail.com
- *
- ******************************************************************************
- * Copyright (c) 2010, Howard Butler
+ * Copyright (c) 2014, Hobu Inc.
  *
  * All rights reserved.
  *
@@ -41,340 +34,565 @@
 
 #pragma once
 
+#include <sstream>
+#include <string>
 #include <vector>
 
-#include <boost/property_tree/ptree.hpp>
-#include <boost/uuid/uuid.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include <pdal/pdal_internal.hpp>
-#include <pdal/Utils.hpp>
 
-#include <pdal/GlobalEnvironment.hpp>
-
-#include <limits>
-
-#ifdef PDAL_COMPILER_MSVC
-#  pragma warning(push)
-#  pragma warning(disable: 4127)  // conditional expression is constant
-#endif
-
+//ABELL - Expect this to be generated from JSON soon.
 namespace pdal
 {
-
-namespace dimension
+namespace Dimension
 {
 
-/// Dimension flags to denote behaviors of the instance such as 
-/// whether to ignore the data or not. Currently, only IsIgnored is 
-/// used and respected to any degree by drivers such as 
-/// pdal::filters::InPlaceReprojection and pdal::drivers::oci::Writer.
-enum Flags
+namespace BaseType
 {
-    IsIgnored = 0x8,
-    ForceKeep = 0x10
+enum Enum
+{
+    Signed = 0x100,
+    Unsigned = 0x200,
+    Floating = 0x400
 };
+}
 
-/// Interpretation for a Dimension denotes what *kind* of data type the 
-/// values stored in the dimension should be interpreted as. It can be used
-/// in combination with Dimension::getByteSize() to determine the 
-/// explicity type/size of the Dimension (such as the ``cstint.h``-style 
-/// values `uint32_t` or `int64_t`).
-enum Interpretation
+namespace Type
 {
-    SignedInteger,
-    UnsignedInteger,
-    Float,
-    Undefined
+enum Enum
+{
+    None = 0,
+    Signed8 = BaseType::Signed | 1,
+    Signed16 = BaseType::Signed | 2,
+    Signed32 = BaseType::Signed | 4,
+    Signed64 = BaseType::Signed | 8,
+    Unsigned8 = BaseType::Unsigned | 1,
+    Unsigned16 = BaseType::Unsigned | 2,
+    Unsigned32 = BaseType::Unsigned | 4,
+    Unsigned64 = BaseType::Unsigned | 8,
+    Float = BaseType::Floating | 4,
+    Double = BaseType::Floating | 8
 };
+}
 
-} // namespace dimension
-
-/*! 
-    A Dimension is the description of a single data field in a
-    Schema. It is composed of a name, interpretation, a uuid (dimension::id),
-    and a size. Upon creation, the dimension::id is set to a random value
-    (this can be overridden, and it is expected that each dimension added to
-    a Schema have a unique dimension::id. When a dimension is added to a Schema,
-    two more properties are also modified: the position (index) of this
-    dimension in the schema's list of dimensions, and the byte offset where
-    the dimension is stored in the PointBuffer's raw bytes
-*/
-class PDAL_DLL Dimension
+inline size_t size(Type::Enum t)
 {
-public:
-    friend class Schema;
+    return t | 0xFF;
+}
 
-    /** @name Constructors
-    */
-    Dimension() : m_flags(0), m_byteSize(4), m_numericScale(1.0),
-        m_numericOffset(0.0), m_interpretation(dimension::SignedInteger)
-        {}
+inline BaseType::Enum base(Type::Enum t)
+{
+    return BaseType::Enum(t >> 16);
+}
 
-    /// Base constructor for Dimension
-    /// @param name the name to use for the dimension.
-    /// Typically "X" or "Y" or "Interesting Scanner Attribute"
-    /// @param interpretation the dimension::Interpretation to use for the
-    /// dimension.
-    /// @param sizeInBytes the size of the Dimension in bytes. No
-    /// less-than-a-byte dimensions are allowed.
-    /// @param description a string description of the dimension. (defaults
-    /// to empty)
-    Dimension(const std::string& name, dimension::Interpretation interpretation,
-        size_t sizeInBytes, std::string description = std::string());
+struct Detail
+{
+    Detail() : m_offset(-1), m_type(Type::None)
+    {}
 
-    /** @name Equality and comparisons operators
-    */
-    /// Equality
-    bool operator==(const Dimension& other) const
-        { return m_uuid == other.m_uuid; }
-    /// Inequality
-    bool operator!=(const Dimension& other) const
-        { return m_uuid != other.m_uuid; }
-
-    bool operator < (Dimension const& dim) const
-    {
-        return m_offset < dim.m_offset;
-    }
-
-    /** @name Attributes
-    */
-    /// @return the name of this dimension as given at construction time
-    std::string const& getName() const
-        { return m_name; }
-
-    void setInterpretation(dimension::Interpretation interp)
-        { m_interpretation = interp; }
-
-    void setByteSize(size_t byteSize)
-        { m_byteSize = byteSize; }
-
-    /// @return the interpretation of this dimension at construction time
-    dimension::Interpretation getInterpretation() const
-        { return m_interpretation; }
-
-    /// @return dimension attribute flags (isValid, isRead, isWritten,
-    /// isIgnored, etc) composition of dimension::Flags
-    boost::uint32_t getFlags() const
-        { return m_flags; }
-
-    /// sets the dimension attribute flags (isValid, isRead, etc) of
-    /// dimension::Flags
-    /// @param flags composited dimension::Flags
-    void setFlags(uint32_t flags)
-        { m_flags = flags; }
-
-    void setIgnored()
-        { m_flags |= dimension::IsIgnored; }
-
-    //
-    /// @return is this dimension ignored?
-    bool isIgnored() const
-        { return (m_flags & dimension::IsIgnored); }
-
-    bool forceKeep() const
-        { return (m_flags & dimension::ForceKeep); }
-
-    /// @return Number of bytes required to serialize this dimension
-    size_t getByteSize() const
-       { return m_byteSize; }
-
-    /// @return a string description of the dimension
-    std::string getDescription() const
-        { return m_description; }
-
-    /// sets the string description for the dimension. Overrides whatever was
-    /// given in the constructor.
-    /// @param v string to use to set value
-    void setDescription(std::string const& v)
-        { m_description = v; }
-
-    /// @name Summary and serialization
-    /// @return a boost::property_tree::ptree representation
-    /// of the Dimension instance
-    boost::property_tree::ptree toPTree() const;
-
-    std::string getInterpretationName() const;
-
-    /// @name Identification
-    /// @return the dimension::id for the Dimension instance.
-    /// This value is the nil UUID by default.
-    boost::uuids::uuid const& getUUID() const
-        { return m_uuid; }
-
-    /// sets the dimension::id from a string representation of the UUID.
-    /// @param id
-    void setUUID(std::string const& id)
-        { m_uuid = GlobalEnvironment::get().generateUUID(id); }
-
-    /// sets the dimension::id from an existing dimension::id (copied)
-    void setUUID(boost::uuids::uuid const& id)
-        { m_uuid = id; }
-
-    /// creates and sets the dimension::id for the instance
-    void createUUID()
-        { m_uuid = GlobalEnvironment::get().generateUUID(); }
-
-    /// @name Namespaces
-    /// sets the namespace for this instance
-    /// @param name value to set. Typically this is a Stage::getName()
-    void setNamespace(std::string const& name)
-        { m_namespace = name; }
-
-    /// @return the namespace for this instance
-    std::string const& getNamespace() const
-        { return m_namespace; }
-
-    /// @return the fully qualified (namespace.name) name for this instance.
-    std::string getFQName() const
-        { return m_namespace + "." + m_name; }
-
-/** @name Data Scaling
-    Scale and offset of Dimension instances are available to describe
-    the conversion of these dimensions to floating point values.
-*/
-
-    /// @return the numerical scale value for this dimension as a double. The
-    /// default value is \b 1.0
-    double getNumericScale() const
-        { return m_numericScale; }
-
-    /// Sets the numerical scale value for this dimension.
-    inline void setNumericScale(double v)
-        { m_numericScale = v; }
-
-    /// @return the numerical offset value for this dimension. The default
-    /// value is \b 0.0.
-    inline double getNumericOffset() const
-        { return m_numericOffset; }
-
-    /// Sets the numerical offset value for this dimension.
-    inline void setNumericOffset(double v)
-        { m_numericOffset = v; }
-    
-    /// Applies the scale and offset values from the dimension to a the
-    /// given value
-    /// @param v The value of type T to scale.
-    /// @return v scaled by getNumericOffset() and getNumericScale() values.
-    /*!    \verbatim embed:rst
-        .. note::
-
-            The value ``v`` is casted to a double before math is applied.
-        \endverbatim
-    */
-    double applyScaling(double v) const
-       { return v * m_numericScale + m_numericOffset; }
-
-    double removeScaling(double v) const
-       { return (v - m_numericOffset) / m_numericScale; }
-
-    /// Removes the scale and offset values from an imprecise double value
-    /// @param v The value to descale
-    /// @return a value that has been descaled by the Dimension's
-    /// getNumericOffset and getNumericScale values
-    /*!    \verbatim embed:rst
-        .. warning::
-
-            If the value will overflow the give ``T``,
-            a std::out_of_range exception will be thrown.
-        \endverbatim
-    */
-    
-    /// Return the dimension::Interpretation for a given stdint.h-style
-    /// type name such as `int32_t` or `uint8_t`.
-    static dimension::Interpretation getInterpretation(
-        std::string const& interpretation_name);
-    
-    // Helper for below.
-    template <typename T_OUT, typename T_IN>
-    T_OUT convert(void *data)
-    {
-        T_IN temp = *(T_IN*)(void*)data;
-        return Utils::saturation_cast<T_OUT, T_IN>(temp);
-    }
-    
-    /// Converts the a pointer to a value to the data type described 
-    /// by the Dimension instance.
-    /// @param data a pointer to the data value to be used. The value is 
-    /// casted via a Utils::saturation_cast so if it overflows, it will be 
-    /// the max (or min) value of the Dimension's type.
-    template <class T>
-    T convert(void* data) const
-    {
-        switch (getInterpretation())
-        {
-        case dimension::SignedInteger:
-            switch (getByteSize())
-            {
-            case 1:
-                return convert<T, int8_t>(data);
-            case 2:
-                return convert<T, int16_t>(data);
-            case 4:
-                return convert<T, int32_t>(data);
-            case 8:
-                return convert<T, int64_t>(data);
-            default:
-                throw buffer_error("convert: Unhandled datatype size "
-                    "for SignedInteger");
-                break;
-            }
-        case dimension::UnsignedInteger:
-            switch (getByteSize())
-            {
-            case 1:
-                return convert<T, uint8_t>(data);
-            case 2:
-                return convert<T, uint16_t>(data);
-            case 4:
-                return convert<T, uint32_t>(data);
-            case 8:
-                return convert<T, uint64_t>(data);
-            default:
-                throw buffer_error("convert: Unhandled datatype size "
-                    "for UnsignedInteger");
-                break;
-            }
-        case dimension::Float:
-            switch (getByteSize())
-            {
-            case 4:
-                return convert<T, float>(data);
-            case 8:
-                return convert<T, double>(data);
-            default:
-                throw buffer_error("convert: Unhandled datatype size "
-                    "for Float");
-                break;
-            }
-        default:
-            throw buffer_error("Undefined interpretation for convert");
-        }
-        return T(0);
-    }
-
-/// @name Private Attributes
-private:
-    std::string m_name;
-    unsigned m_flags;
-    size_t m_byteSize;
-    std::string m_description;
-    double m_min;
-    double m_max;
-    double m_numericScale;
-    double m_numericOffset;
-    dimension::Interpretation m_interpretation;
-    boost::uuids::uuid m_uuid;
-    std::string m_namespace;
     int m_offset;
+    Type::Enum m_type;
+
+    int offset() const
+        { return m_offset; }
+    Type::Enum type() const
+        { return m_type; }
+    size_t size() const
+        { return Dimension::size(m_type); }
 };
-typedef std::shared_ptr<Dimension> DimensionPtr;
-typedef std::vector<DimensionPtr> DimensionList;
 
-PDAL_DLL std::ostream& operator<<(std::ostream& os, pdal::Dimension const& d);
+namespace Id
+{
+enum Enum
+{
+    Unknown,
+    X,
+    Y,
+    Z,
+    Intensity,
+    ReturnNumber,
+    NumberOfReturns,
+    ScanDirectionFlag,
+    EdgeOfFlightLine,
+    Classification,
+    ScanAngleRank,
+    UserData,
+    PointSourceId,
+    Red,
+    Green,
+    Blue,
+    GpsTime,
+    OffsetTime,
+    StartPulse,
+    ReflectedPulse,
+    Pdop,
+    Pitch,
+    Roll,
+    PulseWidth,
+    PassiveSignal,
+    PassiveX,
+    PassiveY,
+    PassiveZ,
+    XVelocity,
+    YVelocity,
+    ZVelocity,
+    PlatformHeading,
+    WanderAngle,
+    XBodyAccel,
+    YBodyAccel,
+    ZBodyAccel,
+    XBodyAngRate,
+    YBodyAngRate,
+    ZBodyAngRate,
+    Flag,
+    Mark,
+    Alpha
+};
+} // namespace Id
+typedef std::vector<Id::Enum> IdList;
 
+static const int COUNT = sizeof(Id::Enum) / sizeof(Id::Alpha);
+static const int PROPRIETARY = 0xFF00;
+
+std::string description(Id::Enum id)
+{
+    switch (id)
+    {
+    case Id::X:
+        return "X coordinate";
+    case Id::Y:
+        return "Y coordinate";
+    case Id::Z:
+        return "Z coordinate";
+    case Id::Intensity:
+        return "Representation of the pulse return magnitude";
+    case Id::ReturnNumber:
+        return "Pulse return number for a given output pulse. A given output "
+            "laser pulse can have many returns, and they must be marked in "
+            "order, starting with 1";
+    case Id::NumberOfReturns:
+        return "Total number of returns for a given pulse.";
+    case Id::ScanDirectionFlag:
+        return "Direction at which the scanner mirror was traveling at the "
+            "time of the output pulse. A value of 1 is a positive scan "
+            "direction, and a bit value of 0 is a negative scan direction, "
+            "where positive scan direction is a scan moving from the left "
+            "side of the in-track direction to the right side and negative "
+            "the opposite";
+    case Id::EdgeOfFlightLine:
+        return "Indicates the end of scanline before a direction change "
+            "with a value of 1 - 0 otherwise";
+    case Id::Classification:
+        return "ASPRS classification.  0 for no classification.  See "
+            "LAS specification for details";
+    case Id::ScanAngleRank:
+        return "Angle degree at which the laster point was output from "
+            "the system, including the roll of the aircraft.  The scan "
+            "angle is based on being nadir, and -90 the left side of the "
+            "aircraft in the direction of flight";
+    case Id::UserData:
+        return "Unspecified user data";
+    case Id::PointSourceId:
+        return "File source ID from which the point originated.  Zero "
+            "indicates that the point originated in the current file";
+    case Id::GpsTime:
+        return "GPS time that the point was acquired";
+    case Id::OffsetTime:
+        return "Milliseconds from first acquired point";
+    case Id::Red:
+        return "Red image channel value";
+    case Id::Green:
+        return "Green image channel value";
+    case Id::Blue:
+        return "Blue image channel value";
+    case Id::Alpha:
+        return "Alpha image channel value";
+    case Id::StartPulse:
+        return "Relative pulse signal strength";
+    case Id::ReflectedPulse:
+        return "Relative reflected pulse signal strength";
+    case Id::Pitch:
+        return "Pitch in degrees";
+    case Id::Roll:
+        return "Roll in degrees";
+    case Id::Pdop:
+        return "GPS PDOP (dilution of precision)";
+    case Id::PulseWidth:
+        return "Laser received pulse width (digitizer samples)";
+    case Id::PassiveSignal:
+        return "Relative passive signal";
+    case Id::PassiveX:
+        return "Passive X footprint";
+    case Id::PassiveY:
+        return "Passive Y footprint";
+    case Id::PassiveZ:
+        return "Passive Z footprint";
+    case Id::XVelocity:
+        return "X Velocity";
+    case Id::YVelocity:
+        return "Y Velocity";
+    case Id::ZVelocity:
+        return "Z Velocity";
+    case Id::PlatformHeading:
+        return "Platform Heading";
+    case Id::WanderAngle:
+        return "Wander Angle";
+    case Id::XBodyAccel:
+        return "X Body Acceleration";
+    case Id::YBodyAccel:
+        return "Y Body Acceleration";
+    case Id::ZBodyAccel:
+        return "Z Body Acceleration";
+    case Id::XBodyAngRate:
+        return "X Body Angle Rate";
+    case Id::YBodyAngRate:
+        return "Y Body Angle Rate";
+    case Id::ZBodyAngRate:
+        return "Z Body Angle Rate";
+    case Id::Mark:
+        return "Mark";
+    case Id::Flag:
+        return "Flag";
+    case Id::Unknown:
+        return "";
+    }
+    return "";
+}
+
+Id::Enum id(std::string s)
+{
+    boost::to_upper(s);
+    if (s == "X")
+        return Id::X;
+    else if (s == "Y")
+        return Id::Y;
+    else if (s == "Z")
+        return Id::Z;
+    else if (s == "INTENSITY")
+        return Id::Intensity;
+    else if (s == "RETURNNUMBER")
+        return Id::ReturnNumber;
+    else if (s == "NUMBEROFRETURNS")
+        return Id::NumberOfReturns;
+    else if (s == "SCANDIRECTIONFLAG")
+        return Id::ScanDirectionFlag;
+    else if (s == "EDGEOFLIGHTLINE")
+        return Id::EdgeOfFlightLine;
+    else if (s == "CLASSIFICATION")
+        return Id::Classification;
+    else if (s == "SCANANGLERANK")
+        return Id::ScanAngleRank;
+    else if (s == "USERDATA")
+        return Id::UserData;
+    else if (s == "POINTSOURCEID")
+        return Id::PointSourceId;
+    else if (s == "RED")
+        return Id::Red;
+    else if (s == "GREEN")
+        return Id::Green;
+    else if (s == "BLUE")
+        return Id::Blue;
+    else if (s == "ALPHA")
+        return Id::Alpha;
+    else if (s == "GPSTIME")
+        return Id::GpsTime;
+    else if (s == "TIME" || s == "OFFSETTIME")
+        return Id::OffsetTime;
+    else if (s == "STARTPULSE")
+        return Id::StartPulse;
+    else if (s == "RELFECTEDPULSE")
+        return Id::ReflectedPulse;
+    else if (s == "PITCH")
+        return Id::Pitch;
+    else if (s == "ROLL")
+        return Id::Roll;
+    else if (s == "PDOP")
+        return Id::Pdop;
+    else if (s == "PULSEWIDTH")
+        return Id::PulseWidth;
+    else if (s == "PASSIVESIGNAL")
+        return Id::PassiveSignal;
+    else if (s == "PASSIVEX")
+        return Id::PassiveX;
+    else if (s == "PASSIVEY")
+        return Id::PassiveY;
+    else if (s == "PASSIVEZ")
+        return Id::PassiveZ;
+    else if (s == "XVELOCITY")
+        return Id::XVelocity;
+    else if (s == "YVELOCITY")
+        return Id::YVelocity;
+    else if (s == "ZVELOCITY")
+        return Id::ZVelocity;
+    else if (s == "PLATFORMHEADING")
+        return Id::PlatformHeading;
+    else if (s == "WANDERANGLE")
+        return Id::WanderAngle;
+    else if (s == "XBODYACCEL")
+        return Id::XBodyAccel;
+    else if (s == "YBODYACCEL")
+        return Id::YBodyAccel;
+    else if (s == "ZBODYACCEL")
+        return Id::ZBodyAccel;
+    else if (s == "XBODYANGRATE")
+        return Id::XBodyAngRate;
+    else if (s == "YBODYANGRATE")
+        return Id::YBodyAngRate;
+    else if (s == "ZBODYANGRATE")
+        return Id::ZBodyAngRate;
+    else if (s == "MARK")
+        return Id::Mark;
+    else if (s == "FLAG")
+        return Id::Flag;
+    return Id::Unknown;
+}
+
+std::string name(Id::Enum id)
+{
+    switch (id)
+    {
+    case Id::X:
+        return "X";
+    case Id::Y:
+        return "Y";
+    case Id::Z:
+        return "Z";
+    case Id::Intensity:
+        return "Intensity";
+    case Id::ReturnNumber:
+        return "ReturnNumber";
+    case Id::NumberOfReturns:
+        return "NumberOfReturns";
+    case Id::ScanDirectionFlag:
+        return "ScanDirectionFlag";
+    case Id::EdgeOfFlightLine:
+        return "EdgeOfFlightLine";
+    case Id::Classification:
+        return "Classification";
+    case Id::ScanAngleRank:
+        return "ScanAngleRank";
+    case Id::UserData:
+        return "UserData";
+    case Id::PointSourceId:
+        return "PointSourceId";
+    case Id::Red:
+        return "Red";
+    case Id::Green:
+        return "Green";
+    case Id::Blue:
+        return "Blue";
+    case Id::Alpha:
+        return "Alpha";
+    case Id::GpsTime:
+        return "GpsTime";
+    case Id::OffsetTime:
+        return "OffsetTime";
+    case Id::StartPulse:
+        return "StartPulse";
+    case Id::ReflectedPulse:
+        return "ReflectedPulse";
+    case Id::Pitch:
+        return "Pitch";
+    case Id::Roll:
+        return "Roll";
+    case Id::Pdop:
+        return "Pdop";
+    case Id::PulseWidth:
+        return "PulseWidth";
+    case Id::PassiveSignal:
+        return "PassiveSignal";
+    case Id::PassiveX:
+        return "PassiveX";
+    case Id::PassiveY:
+        return "PassiveY";
+    case Id::PassiveZ:
+        return "PassiveZ";
+    case Id::XVelocity:
+        return "XVelocity";
+    case Id::YVelocity:
+        return "YVelocity";
+    case Id::ZVelocity:
+        return "YVelocity";
+    case Id::PlatformHeading:
+        return "PlatformHeading";
+    case Id::WanderAngle:
+        return "WanderAngle";
+    case Id::XBodyAccel:
+        return "XBodyAccel";
+    case Id::YBodyAccel:
+        return "YBodyAccel";
+    case Id::ZBodyAccel:
+        return "ZBodyAccel";
+    case Id::XBodyAngRate:
+        return "XBodyAngRate";
+    case Id::YBodyAngRate:
+        return "YBodyAngRate";
+    case Id::ZBodyAngRate:
+        return "ZBodyAngRate";
+    case Id::Mark:
+        return "Mark";
+    case Id::Flag:
+        return "Flag";
+    case Id::Unknown:
+        throw pdal_error("No size for undefined dimension ID.");
+    }
+    throw pdal_error("No size for undefined dimension ID.");
+}
+
+
+Type::Enum defaultType(Id::Enum id)
+{
+    using namespace Type;
+
+    switch (id)
+    {
+    case Id::X:
+        return Double;
+    case Id::Y:
+        return Double;
+    case Id::Z:
+        return Double;
+    case Id::Intensity:
+        return Unsigned8;
+    case Id::ReturnNumber:
+        return Unsigned8;
+    case Id::NumberOfReturns:
+        return Unsigned8;
+    case Id::ScanDirectionFlag:
+        return Unsigned8;
+    case Id::EdgeOfFlightLine:
+        return Unsigned8;
+    case Id::Classification:
+        return Unsigned8;
+    case Id::ScanAngleRank:
+        return Float;
+    case Id::UserData:
+        return Unsigned8;
+    case Id::PointSourceId:
+        return Unsigned16;
+    case Id::GpsTime:
+        return Double;
+    case Id::OffsetTime:
+        return Unsigned32;
+    case Id::Red:
+        return Unsigned16;
+    case Id::Green:
+        return Unsigned16;
+    case Id::Blue:
+        return Unsigned16;
+    case Id::Alpha:
+        return Unsigned16;
+    case Id::StartPulse:
+        return Signed32;
+    case Id::ReflectedPulse:
+        return Signed32;
+    case Id::Pitch:
+        return Float;
+    case Id::Roll:
+        return Float;
+    case Id::Pdop:
+        return Float;
+    case Id::PulseWidth:
+        return Float;
+    case Id::PassiveSignal:
+        return Signed32;
+    case Id::PassiveX:
+        return Double;
+    case Id::PassiveY:
+        return Double;
+    case Id::PassiveZ:
+        return Double;
+    case Id::XVelocity:
+        return Double;
+    case Id::YVelocity:
+        return Double;
+    case Id::ZVelocity:
+        return Double;
+    case Id::PlatformHeading:
+        return Double;
+    case Id::WanderAngle:
+        return Double;
+    case Id::XBodyAccel:
+        return Double;
+    case Id::YBodyAccel:
+        return Double;
+    case Id::ZBodyAccel:
+        return Double;
+    case Id::XBodyAngRate:
+        return Double;
+    case Id::YBodyAngRate:
+        return Double;
+    case Id::ZBodyAngRate:
+        return Double;
+    case Id::Mark:
+        return Unsigned8;
+    case Id::Flag:
+        return Unsigned8;
+    case Id::Unknown:
+        throw pdal_error("No type for undefined dimension ID.");
+    }
+    throw pdal_error("No type for undefined dimension ID.");
+}
+
+std::string interpretationName(Type::Enum dimtype)
+{
+    switch (dimtype)
+    {
+    case Type::None:
+        return "unknown";
+    case Type::Signed8:
+        return "int8_t";
+    case Type::Signed16:
+        return "int16_t";
+    case Type::Signed32:
+        return "int32_t";
+    case Type::Signed64:
+        return "int64_t";
+    case Type::Unsigned8:
+        return "uint8_t";
+    case Type::Unsigned16:
+        return "uint16_t";
+    case Type::Unsigned32:
+        return "uint32_t";
+    case Type::Unsigned64:
+        return "uint64_t";
+    case Type::Float:
+        return "float";
+    case Type::Double:
+        return "double";
+    }
+    return "unknown";
+}
+
+
+inline Type::Enum type(std::string s)
+{
+    boost::to_lower(s);
+
+    if (s == "int8_t" || s == "int8")
+       return Type::Signed8;
+    if (s == "int16_t" || s == "int16")
+       return Type::Signed16;
+    if (s == "int32_t" || s == "int32")
+       return Type::Signed32;
+    if (s == "int64_t" || s == "int64")
+       return Type::Signed64;
+    if (s == "uint8_t" || s == "uint8")
+        return Type::Unsigned8;
+    if (s == "uint16_t" || s == "uint16")
+        return Type::Unsigned16;
+    if (s == "uint32_t" || s == "uint32")
+        return Type::Unsigned32;
+    if (s == "uint64_t" || s == "uint64")
+        return Type::Unsigned64;
+    if (s == "float")
+        return Type::Float;
+    if (s == "double")
+        return Type::Double;
+    throw pdal_error("Unrecognized dimension type");
+}
+
+} // namespace Dimension
 } // namespace pdal
-
-#ifdef PDAL_COMPILER_MSVC
-#  pragma warning(pop)
-#endif
 

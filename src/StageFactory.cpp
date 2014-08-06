@@ -130,7 +130,7 @@ MAKE_FILTER_CREATOR(Stats, pdal::filters::Stats)
 //
 // define the functions to create the multifilters
 //
-MAKE_MULTIFILTER_CREATOR(Mosaic, pdal::filters::Mosaic)
+//MAKE_MULTIFILTER_CREATOR(Mosaic, pdal::filters::Mosaic)
 
 //
 // define the functions to create the writers
@@ -451,7 +451,7 @@ void StageFactory::registerKnownFilters()
 
 void StageFactory::registerKnownMultiFilters()
 {
-    REGISTER_MULTIFILTER(Mosaic, pdal::filters::Mosaic);
+//    REGISTER_MULTIFILTER(Mosaic, pdal::filters::Mosaic);
 }
 
 

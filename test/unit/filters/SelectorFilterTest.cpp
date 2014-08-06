@@ -59,24 +59,19 @@ BOOST_AUTO_TEST_CASE(test1)
     using namespace pdal;
     Schema *schema = ctx.schema();    
 
-    schema::Map dm = schema->getDimensions();
-    schema::index_by_index& dm_idx = dm.get<schema::index>();
-    
-    BOOST_CHECK_EQUAL(schema->getDimension("Red").isIgnored(), true);
-    BOOST_CHECK_EQUAL(schema->getDimension("Green").isIgnored(), true);
-    BOOST_CHECK_EQUAL(schema->getDimension("Blue").isIgnored(), true);
+    BOOST_CHECK_EQUAL(schema->getDimension("Red")->isIgnored(), true);
+    BOOST_CHECK_EQUAL(schema->getDimension("Green")->isIgnored(), true);
+    BOOST_CHECK_EQUAL(schema->getDimension("Blue")->isIgnored(), true);
     
     // ignore by default is true because not set on the pipeline
-    BOOST_CHECK_EQUAL(schema->getDimension("PointSourceId").isIgnored(), true); 
+    BOOST_CHECK_EQUAL(schema->getDimension("PointSourceId")->isIgnored(), true);
 
     // We explicitly kept X
-    BOOST_CHECK_EQUAL(schema->getDimension("X").isIgnored(), false);
+    BOOST_CHECK_EQUAL(schema->getDimension("X")->isIgnored(), false);
 
     // We created Greenish
-    BOOST_CHECK_EQUAL(schema->getDimension("Greenish").isIgnored(), false);
+    BOOST_CHECK_EQUAL(schema->getDimension("Greenish")->isIgnored(), false);
 }
-
-
 
 
 BOOST_AUTO_TEST_SUITE_END()
