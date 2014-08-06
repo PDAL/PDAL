@@ -51,7 +51,8 @@ then
         python-numpy \
         libxml2-dev \
         libflann-dev \
-        libtiff4-dev 
+        libtiff4-dev \
+        libgeotiff-dev
         
 
     # install libgeotiff from sources
