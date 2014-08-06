@@ -47,11 +47,7 @@ fi
 if [[ $PDAL_OPTIONAL_COMPONENTS == "all" ]]
 then
     sudo apt-get install \
-        libgdal1-dev \
-        libgeos-dev \
-        libgeos++-dev \
-        libpq-dev \
-        libproj-dev \
+        libgdal-dev \
         python-numpy \
         libxml2-dev \
         libflann-dev \
