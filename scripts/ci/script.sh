@@ -40,7 +40,7 @@ cmake \
     -DWITH_CARIS=OFF \
     -DWITH_SQLITE=OFF \
     -DENABLE_CTEST=OFF \
-    -DWITH_HDF5=OFF \
+    -DWITH_HDF5=$OPTIONAL_COMPONENT_SWITCH \
     -DPDAL_EMBED_BOOST=$PDAL_EMBED_BOOST \
     -G "$PDAL_CMAKE_GENERATOR" \
     ..
@@ -54,4 +54,4 @@ else
     ninja -j ${NUMTHREADS}
 fi
 
-ctest -V --output-on-failure .
+LD_LIBRARY_PATH=./lib ctest -V --output-on-failure .
