@@ -109,7 +109,7 @@ size_t BpfSeqIterator::readBlock(std::vector<char>& outBuf, size_t index)
 #endif
 }
     
-boost::uint32_t BpfSeqIterator::read(PointBuffer& data, uint32_t count)
+point_count_t BpfSeqIterator::read(PointBuffer& data, point_count_t count)
 {
     switch (m_pointFormat)
     {
@@ -127,10 +127,10 @@ boost::uint32_t BpfSeqIterator::read(PointBuffer& data, uint32_t count)
 
 boost::uint64_t BpfSeqIterator::skipImpl(boost::uint64_t pointsToSkip)
 {
-    boost::uint32_t lastIndex = m_index;
-    m_index += (boost::uint32_t)pointsToSkip;
+    point_count_t lastIndex = m_index;
+    m_index += (point_count_t)pointsToSkip;
     m_index = std::min(m_index, m_numPoints);
-    return std::min((uint32_t)pointsToSkip, m_index - lastIndex);
+    return std::min((point_count_t)pointsToSkip, m_index - lastIndex);
 }
 
 bool BpfSeqIterator::atEndImpl() const
@@ -138,8 +138,8 @@ bool BpfSeqIterator::atEndImpl() const
     return m_index >= m_numPoints;
 }
 
-boost::uint32_t BpfSeqIterator::readPointMajor(PointBuffer& data,
-    uint32_t count)
+point_count_t BpfSeqIterator::readPointMajor(PointBuffer& data,
+    point_count_t count)
 {
     PointId nextId = data.size();
     PointId idx = m_index;
@@ -162,7 +162,7 @@ boost::uint32_t BpfSeqIterator::readPointMajor(PointBuffer& data,
     return numRead;
 }
 
-uint32_t BpfSeqIterator::readDimMajor(PointBuffer& data, uint32_t count)
+point_count_t BpfSeqIterator::readDimMajor(PointBuffer& data, point_count_t count)
 {
     PointId idx;
     PointId startId = data.size();

@@ -89,11 +89,11 @@ boost::uint32_t StageIterator::getChunkSize() const
 }
 
 
-boost::uint32_t StageIterator::read(PointBuffer& buffer)
+point_count_t StageIterator::read(PointBuffer& buffer)
 {
     readBegin();
     readBufferBegin(buffer);
-    boost::uint32_t numRead = readBuffer(buffer);
+    point_count_t numRead = readBuffer(buffer);
     readBufferEnd(buffer);
     readEnd();
 

@@ -57,15 +57,15 @@ public:
     ~BpfSeqIterator();
 
 protected:
-    boost::uint32_t readBufferImpl(PointBuffer&);
+    point_count_t readBufferImpl(PointBuffer&);
     virtual point_count_t readImpl(PointBuffer& data, point_count_t count);
     boost::uint64_t skipImpl(boost::uint64_t);
     bool atEndImpl() const;
 
-    boost::uint32_t read(PointBuffer& data, uint32_t count);
-    boost::uint32_t readPointMajor(PointBuffer& data, uint32_t count);
-    boost::uint32_t readDimMajor(PointBuffer& data, uint32_t count);
-    boost::uint32_t readByteMajor(PointBuffer& data, uint32_t count);
+    point_count_t read(PointBuffer& data, point_count_t count);
+    point_count_t readPointMajor(PointBuffer& data, point_count_t count);
+    point_count_t readDimMajor(PointBuffer& data, point_count_t count);
+    point_count_t readByteMajor(PointBuffer& data, point_count_t count);
 
 private:
     size_t readBlock(std::vector<char>& outBuf, size_t index);
@@ -85,7 +85,7 @@ private:
     /// Input stream
     ILeStream& m_stream;
     /// Index of the next point to read.
-    boost::uint32_t m_index;
+    point_count_t m_index;
     /// Stream position when the iterator is created (should always be
     /// the start of point data).
     std::streampos m_start;

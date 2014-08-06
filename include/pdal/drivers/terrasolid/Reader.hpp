@@ -196,7 +196,7 @@ public:
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t);
-    boost::uint32_t readBufferImpl(PointBuffer&);
+    point_count_t readBufferImpl(PointBuffer&);
     bool atEndImpl() const;
 
     const pdal::drivers::terrasolid::Reader& m_reader;
@@ -218,7 +218,7 @@ public:
 
 private:
     boost::uint64_t seekImpl(boost::uint64_t);
-    boost::uint32_t readBufferImpl(PointBuffer&);
+    point_count_t readBufferImpl(PointBuffer&);
 
     const pdal::drivers::terrasolid::Reader& m_reader;
     std::istream* m_istream;

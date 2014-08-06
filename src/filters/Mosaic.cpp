@@ -213,11 +213,11 @@ PointBufferPtr Mosaic::fetchPointBuffer(PointBuffer const& user_buffer)
     }
 }
 
-boost::uint32_t Mosaic::readBufferImpl(PointBuffer& user_buffer)
+point_count_t Mosaic::readBufferImpl(PointBuffer& user_buffer)
 {
-    boost::uint32_t totalNumPointsToRead = user_buffer.size();
-    boost::uint32_t totalNumPointsRead = 0;
-    boost::uint32_t destPointIndex = 0;
+    point_count_t totalNumPointsToRead = user_buffer.size();
+    point_count_t totalNumPointsRead = 0;
+    point_count_t destPointIndex = 0;
 
     // for each stage, we read as many points as we can
     
@@ -228,9 +228,9 @@ boost::uint32_t Mosaic::readBufferImpl(PointBuffer& user_buffer)
 
         PointBufferPtr tmp = fetchPointBuffer(user_buffer);
         
-        uint32_t howMany(totalNumPointsToRead-totalNumPointsRead);
+        point_count_t howMany(totalNumPointsToRead-totalNumPointsRead);
         
-        uint32_t numRead = m_prevIterator->read(*tmp);
+        point_count_t numRead = m_prevIterator->read(*tmp);
         totalNumPointsRead += numRead;
 
         DimensionMapPtr d = fetchDimensionMap(user_buffer, tmp);

@@ -93,7 +93,7 @@ public:
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t);
-    boost::uint32_t readBufferImpl(PointBuffer&);
+    point_count_t readBufferImpl(PointBuffer&);
     bool atEndImpl() const;
     DimensionMapPtr fetchDimensionMap(PointBuffer const& user_buffer,
         PointBufferPtr stage_buffer);

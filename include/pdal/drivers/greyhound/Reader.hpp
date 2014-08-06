@@ -91,7 +91,7 @@ private:
             PointBuffer& pointBuffer,
             point_count_t count);
 
-    virtual uint32_t readBufferImpl(PointBuffer& pointBuffer)
+    virtual point_count_t readBufferImpl(PointBuffer& pointBuffer)
     {
         return readImpl(
                 pointBuffer,

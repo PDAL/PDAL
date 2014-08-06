@@ -786,11 +786,11 @@ point_count_t Reader::readImpl(PointBuffer& data, point_count_t count)
 #endif
 }
 
-boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
+point_count_t Reader::readBufferImpl(PointBuffer& data)
 {
     PointDimensions cachedDimensions(data.getSchema(), m_reader.getName());
 
-    boost::uint32_t numToRead = m_reader.getNumPoints() - getIndex();
+    point_count_t numToRead = m_reader.getNumPoints() - getIndex();
 #ifdef PDAL_HAVE_LASZIP
     return processBuffer(data, m_istream, numToRead, m_unzipper.get(),
         m_zipPoint.get(), &cachedDimensions);
