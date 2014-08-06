@@ -20,6 +20,15 @@ mark_as_advanced(CMAKE_VERBOSE_MAKEFILE)
 # Path to additional CMake modules
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/modules" ${CMAKE_MODULE_PATH})
 
+if (CMAKE_MAJOR_VERSION GREATER 2)
+cmake_policy(SET CMP0022 OLD) # interface link libraries
+cmake_policy(SET CMP0042 OLD) # osx rpath
+endif()
+
+if (CMAKE_SYSTEM_NAME MATCHES "Linux")
+set(CMAKE_SKIP_RPATH ON)
+endif()
+
 # Provided modules
 include(CMakeDependentOption)
 
@@ -155,6 +164,7 @@ if(WIN32)
       add_definitions(-D_CRT_SECURE_NO_WARNINGS)
       add_definitions(-D_CRT_NONSTDC_NO_WARNING)
       add_definitions(-D_SCL_SECURE_NO_WARNINGS)
+	  add_definitions(-DNOMINMAX)
     endif()
     
     if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
@@ -178,8 +188,8 @@ if(WIN32)
 
   endif(MSVC)
   
-  set(CMAKE_INCLUDE_PATH "c:/osgeo4w/include;c:/OSGeo4W64/include;$ENV{CMAKE_INCLUDE_PATH}")
-  set(CMAKE_LIBRARY_PATH "c:/osgeo4w/lib;c:/OSGeo4W64/lib;$ENV{CMAKE_LIBRARY_PATH}")
+  set(CMAKE_INCLUDE_PATH "c:/OSGeo4W64/include;$ENV{CMAKE_INCLUDE_PATH}")
+  set(CMAKE_LIBRARY_PATH "c:/OSGeo4W64/lib;$ENV{CMAKE_LIBRARY_PATH}")
 
   set(PDAL_PLATFORM_WIN32 1)
 else()
@@ -207,7 +217,6 @@ endif(WIN32)
 if (APPLE)
     set(SO_EXT dylib)
     set(CMAKE_FIND_FRAMEWORK "LAST")
-    set(CMAKE_MACOSX_RPATH 1) 
 elseif(WIN32)
     set(SO_EXT dll)
 else()
@@ -349,10 +358,6 @@ if(WITH_GEOTIFF)
         if (WIN32)
             set(TIFF_NAMES libtiff_i)
         endif(WIN32)
-        find_package(TIFF) 
-        if (TIFF_FOUND)
-            include_directories("${TIFF_INCLUDE_DIR}")
-        endif()
     else()
         set(WITH_GEOTIFF FALSE)
         set(GEOTIFF_LIBRARY "")
@@ -368,18 +373,6 @@ endif()
 
 option(WITH_SQLITE "Choose if sqlite database support should be built" FALSE)
 if (WITH_SQLITE)
-    find_package(Soci 3.1.0 )
-    if (NOT SOCI_sqlite3_FOUND)
-        message(FATAL_ERROR
-          "No SOCI driver for sqlite found! SOCI must be compiled with SQLite support for the SQLite driver to be built")
-    endif()
-    
-    mark_as_advanced(CLEAR SOCI_INCLUDE_DIRS) 
-    mark_as_advanced(CLEAR SOCI_LIBRARY)
-    mark_as_advanced(CLEAR SOCI_sqlite3_PLUGIN)
-    include_directories(${SOCI_INCLUDE_DIRS})
-    set(PDAL_HAVE_SOCI 1)
-
     find_package(SQLite3)
     mark_as_advanced(CLEAR SQLITE3_INCLUDE_DIR) 
     mark_as_advanced(CLEAR SQLITE3_LIBRARY)

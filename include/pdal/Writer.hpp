@@ -79,7 +79,7 @@ private:
         pbSet.insert(buffer);
         return pbSet;
     }
-    virtual void write(const PointBuffer& buffer)
+    virtual void write(const PointBuffer& /*buffer*/)
         { std::cerr << "Can't write with stage = " << getName() << "!\n"; }
 
     Writer& operator=(const Writer&); // not implemented

@@ -159,7 +159,7 @@ public:
 
 private:
     uint64_t skipImpl(uint64_t);
-    uint32_t readBufferImpl(PointBuffer&);
+    point_count_t readBufferImpl(PointBuffer&);
     bool atEndImpl() const
         { return getIndex() >= m_reader.getNumPoints(); }
 
@@ -180,7 +180,7 @@ public:
 
 private:
     uint64_t seekImpl(uint64_t);
-    uint32_t readBufferImpl(PointBuffer&);
+    point_count_t readBufferImpl(PointBuffer&);
 
     const pdal::drivers::qfit::Reader& m_reader;
     std::istream* m_istream;

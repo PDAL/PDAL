@@ -43,7 +43,7 @@ namespace drivers
 namespace sbet
 {
 
-Dimension::IdList fileDimensions();
+PDAL_DLL Dimension::IdList fileDimensions();
 
 } // namespace sbet
 } // namespace drivers

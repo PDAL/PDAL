@@ -109,7 +109,7 @@ public:
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t);
-    boost::uint32_t readBufferImpl(PointBuffer&);
+    point_count_t readBufferImpl(PointBuffer&);
     bool atEndImpl() const;
     boost::uint32_t m_numPoints;
 

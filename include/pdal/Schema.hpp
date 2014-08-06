@@ -44,6 +44,81 @@
 namespace pdal
 {
 
+<<<<<<< HEAD
+=======
+namespace schema
+{
+struct name {};
+struct position {};
+struct index {};
+struct uid {};
+
+typedef boost::multi_index::multi_index_container
+<
+    Dimension,
+    boost::multi_index::indexed_by
+    <
+        // sort by Dimension::operator<
+        boost::multi_index::ordered_non_unique<boost::multi_index::tag<position>,
+            boost::multi_index::identity<Dimension> >,
+
+        // Random access
+        boost::multi_index::random_access<boost::multi_index::tag<index> >,
+
+        // sort by less<string> on GetName
+        boost::multi_index::hashed_non_unique<boost::multi_index::tag<name>,
+            boost::multi_index::const_mem_fun<Dimension,std::string const&,&Dimension::getName> >,
+
+        // sort by less on UUID
+        boost::multi_index::hashed_non_unique<boost::multi_index::tag<uid>,
+            boost::multi_index::const_mem_fun<Dimension,dimension::id const&,&Dimension::getUUID> >
+    >
+> Map;
+
+typedef Map::index<name>::type index_by_name;
+typedef Map::index<position>::type index_by_position;
+typedef Map::index<index>::type index_by_index;
+typedef Map::index<uid>::type index_by_uid;
+
+typedef size_t size_type;
+
+class PDAL_DLL DimensionMap
+{
+public:
+    inline void insert(std::pair<Dimension const*, Dimension const*> p) { m.insert(p); update();}
+    
+    std::map<Dimension const*, Dimension const*> m;
+    
+    static const int MAX_OFFSETS_LENGTH = 256;
+    boost::uint64_t offsets[MAX_OFFSETS_LENGTH];
+
+private:
+    std::size_t update();
+    
+};
+
+
+enum Orientation
+{
+    POINT_INTERLEAVED = 1,
+    DIMENSION_INTERLEAVED = 2,
+    UNKNOWN_INTERLEAVED = 256
+};    
+
+enum CompressionType
+{
+    COMPRESSION_NONE = 0,
+    COMPRESSION_GHT = 1,
+    COMPRESSION_DIMENSIONAL = 2,
+    COMPRESSION_POINT = 4,
+    COMPRESSION_LASZIP = 8,
+    COMPRESSION_UNKNOWN = 256
+};
+
+
+}
+
+>>>>>>> 3a2ac5c9acf296d3cc13427c81c5fea560871399
 /// A pdal::Schema is a composition of pdal::Dimension instances that form
 /// a point cloud.
 class PDAL_DLL Schema

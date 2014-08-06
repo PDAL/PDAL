@@ -149,7 +149,7 @@ public:
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t);
-    boost::uint32_t readBufferImpl(PointBuffer&);
+    point_count_t readBufferImpl(PointBuffer&);
     point_count_t readImpl(PointBuffer&, point_count_t count);
     bool atEndImpl() const
         { return getIndex() >= m_reader.getNumPoints(); }

@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2012, Howard Butler, hobu.inc@gmail.com
+* Copyright (c) 2014, Howard Butler, howard@hobu.co
 *
 * All rights reserved.
 *
@@ -32,18 +32,18 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_DRIVER_SOCI_COMMON_HPP
-#define INCLUDED_DRIVER_SOCI_COMMON_HPP
+#pragma once
 
-#ifdef PDAL_HAVE_SOCI
-#include <soci/soci.h>
-#include <soci/sqlite3/soci-sqlite3.h>
-#include <soci/error.h>
-#include <soci/use.h>
-#endif
+#include <pdal/Reader.hpp>
+#include <pdal/ReaderIterator.hpp>
 
-#include <pdal/pdal_error.hpp>
-#include <pdal/Options.hpp>
+
+#include <pdal/drivers/sqlite/SQliteCommon.hpp>
+#include <boost/scoped_ptr.hpp>
+#include <boost/scoped_array.hpp>
+
+#include <vector>
+
 
 namespace pdal
 {
@@ -52,46 +52,48 @@ namespace drivers
 namespace sqlite
 {
 
-    class sqlite_driver_error : public pdal_error
-    {
-    public:
-        sqlite_driver_error(std::string const& msg)
-            : pdal_error(msg)
-        {}
-    };
-
-    class connection_failed : public sqlite_driver_error
-    {
-    public:
-        connection_failed(std::string const& msg)
-            : sqlite_driver_error(msg)
-        {}
-    };
-
-    class buffer_too_small : public sqlite_driver_error
-    {
-    public:
-        buffer_too_small(std::string const& msg)
-            : sqlite_driver_error(msg)
-        {}
-    };
 
 
-
-    enum QueryType
-    {
-        QUERY_CLOUD = 0,
-        QUERY_BLOCKS_PLUS_CLOUD_VIEW,
-        QUERY_UNKNOWN = 512
-    };
-
-
-
-
-
-}
-}
-} // namespace pdal::driver::soci
-
-
+class PDAL_DLL SQLiteReader : public pdal::Reader
+{
+public:
+    SET_STAGE_NAME("drivers.sqlite.reader", "SQLite3 Reader")
+#ifdef PDAL_HAVE_SQLITE
+    SET_STAGE_ENABLED(true)
+#else
+    SET_STAGE_ENABLED(false)
 #endif
+
+    SQLiteReader(const Options&);
+    static Options getDefaultOptions();
+    pdal::StageSequentialIterator*
+        createSequentialIterator() const;
+    pdal::Schema fetchSchema(std::string const& query) const;
+    pdal::SpatialReference
+        fetchSpatialReference(std::string const& query) const;
+    
+    SQLite& getSession() { return *m_session.get(); }
+    
+private:
+    SQLiteReader& operator=(const SQLiteReader&); // not implemented
+    SQLiteReader(const SQLiteReader&); // not implemented
+    std::vector<Dimension *> m_dims;
+    
+    virtual void initialize();
+    virtual void processOptions(const Options& options);
+    virtual void buildSchema(Schema *schema);
+
+    void validateQuery() const;
+    
+    pdal::Schema fetchSchema() const;
+    std::unique_ptr<SQLite> m_session;
+    std::string m_query;
+    std::string m_schemaFile;
+    std::string m_connection;
+    boost::optional<SpatialReference> m_spatialRef;
+};
+
+}
+}
+} // namespace pdal::driver::oci
+

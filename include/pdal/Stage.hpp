@@ -86,7 +86,7 @@ public:
     bool isDebug() const
         { return m_debug; }
     bool isVerbose() const
-        { return (bool)m_verbose; }
+        { return (m_verbose != 0 ); }
     boost::uint32_t getVerboseLevel() const
         { return m_verbose; }
     virtual std::string getName() const = 0;
@@ -142,7 +142,7 @@ private:
     Stage(const Stage&); // not implemented
     void Construct();
     void l_processOptions(const Options& options);
-    virtual void processOptions(const Options& options)
+    virtual void processOptions(const Options& /*options*/)
         {}
     void l_initialize(PointContext ctx);
     void l_done(PointContext ctx);

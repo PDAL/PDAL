@@ -32,14 +32,11 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_DRIVERS_SQLITE_WRITER_HPP
-#define INCLUDED_DRIVERS_SQLITE_WRITER_HPP
-
+#pragma once
 
 #include <pdal/Writer.hpp>
-#include <pdal/drivers/sqlite/common.hpp>
+#include <pdal/drivers/sqlite/SqliteCommon.hpp>
 #include <pdal/third/nanoflann.hpp>
-
 
 namespace pdal
 {
@@ -49,7 +46,7 @@ namespace sqlite
 {
 
 
-class PDAL_DLL Writer : public pdal::Writer
+class PDAL_DLL SQLiteWriter : public pdal::Writer
 {
 public:
     SET_STAGE_NAME("drivers.sqlite.writer", "SQLite Writer")
@@ -58,19 +55,12 @@ public:
 #else
     SET_STAGE_ENABLED(false)
 #endif
-    Writer(const Options&);
-
-// protected:
-    // virtual void writeBegin(boost::uint64_t targetNumPointsToWrite);
-    // virtual void writeBufferBegin(PointBuffer const&);
-    //
-    // virtual boost::uint32_t writeBuffer(const PointBuffer&);
-    // virtual void writeEnd(boost::uint64_t actualNumPointsWritten);
+    SQLiteWriter(const Options&);
 
 private:
 
-    Writer& operator=(const Writer&); // not implemented
-    Writer(const Writer&); // not implemented
+    SQLiteWriter& operator=(const SQLiteWriter&); // not implemented
+    SQLiteWriter(const SQLiteWriter&); // not implemented
 
     virtual void initialize();
     virtual void processOptions(const Options& options);
@@ -80,44 +70,25 @@ private:
     
     void writeInit(const Schema& schema);
     void writeTile(const PointBuffer& buffer);
-    void CreateBlockTable(std::string const& name, boost::uint32_t srid);
-    void CreateCloudTable(std::string const& name, boost::uint32_t srid);    
+    void CreateBlockTable();
+    void CreateCloudTable();    
     bool CheckTableExists(std::string const& name);
-    void DeleteBlockTable(std::string const& cloud_table_name,
-                          std::string const& cloud_column_name, 
-                          std::string const& block_table_name);
-    void DeleteCloudTable(std::string const& cloud_table_name,
-                          std::string const& cloud_column_name);                          
+    void DeleteBlockTable();
+    void DeleteCloudTable();                          
     void CreateIndexes(std::string const& table_name, 
                        std::string const& spatial_column_name, 
-                       bool is3d,
-                       bool isBlockTable=true);
-    void CreateSDOEntry(std::string const& block_table, 
-                        boost::uint32_t srid, 
-                        pdal::Bounds<double> bounds,
-                        bool is3d);
-    Schema getPackedSchema( Schema const& schema) const;
+                       bool is3d);
+
     bool IsValidGeometryWKT(std::string const& wkt) const;
     std::string loadGeometryWKT(std::string const& filename_or_wkt) const;
-    void CreateCloud(Schema const& buffer_schema);    
-
-    void PackPointData( PointBuffer const& buffer,
-                        boost::uint8_t** point_data,
-                        boost::uint32_t& point_data_len,
-                        boost::uint32_t& schema_byte_size);
-    bool WriteBlock(PointBuffer const& buffer);                        
+    void CreateCloud(Schema const& buffer_schema);                       
     
-    ::soci::session* m_session;
-	::soci::statement* m_block_statement;
+    std::unique_ptr<SQLite> m_session;
 
     bool m_doCreateIndex;
     pdal::Bounds<double> m_bounds; // Bounds of the entire point cloud    
     bool m_sdo_pc_is_initialized;
 	std::ostringstream m_block_insert_query;
-	std::ostringstream m_block_bytes;
-	std::string m_block_data;
-	std::string m_extent;
-	std::string m_bbox;
 	boost::int32_t m_obj_id;
 	boost::int32_t m_block_id;
 	boost::uint32_t m_srid;
@@ -129,7 +100,8 @@ private:
     std::string m_block_table;
     std::string m_cloud_table;
     std::string m_cloud_column;    
-    std::string m_connection;  
+    std::string m_connection;
+    bool m_is3d;
     
 };
 
@@ -137,4 +109,3 @@ private:
 }
 } // namespaces
 
-#endif

@@ -23,11 +23,20 @@ IF(NITRO_INCLUDE_DIR)
   SET(NITRO_FIND_QUIETLY TRUE)
 ENDIF()
 
+IF(WIN32)
+  IF(DEFINED ENV{OSGEO4W_ROOT})
+    SET(OSGEO4W_ROOT_DIR $ENV{OSGEO4W_ROOT})
+  ELSE()
+    SET(OSGEO4W_ROOT_DIR c:/OSGeo4W64)
+  ENDIF()
+ENDIF()
+
 FIND_PATH(NITRO_INCLUDE_DIR
   nitro
   PATHS
   /usr/include
-  /usr/local/include)
+  /usr/local/include
+  ${OSGEO4W_ROOT_DIR}/include)
 
 SET(NITRO_C_NAME  nitf-c)
 
@@ -35,7 +44,8 @@ FIND_LIBRARY(NITRO_C_LIBRARY
   NAMES ${NITRO_C_NAME}
   PATHS
   /usr/lib
-  /usr/local/lib)
+  /usr/local/lib
+  ${OSGEO4W_ROOT_DIR}/lib)
 
 SET(NITRO_CPP_NAME  nitf-cpp)
 
@@ -52,31 +62,9 @@ SET(NITRO_LIBRARIES ${NITRO_CPP_LIBRARY} ${NITRO_C_LIBRARY})
 IF(NITRO_INCLUDE_DIR)
   SET(NITRO_VERSION 0)
 
-  SET(NITRO_VERSION_H "${NITRO_INCLUDE_DIR}/nitro/c/nitf/Defines.h")
-  FILE(READ ${NITRO_VERSION_H} NITRO_VERSION_H_CONTENTS)
-  # 
-  # IF (DEFINED NITRO_VERSION_H_CONTENTS)
-  #   # STRING(REGEX REPLACE ".*#define[ \t]LIBGEOTIFF_VERSION[ \t]+([0-9]+).*" "\\1" GEOTIFF_VERSION_NUM "${GEOTIFF_VERSION_H_CONTENTS}")
-  # 
-  #   string(REGEX REPLACE "#define NITF_LIB_VERSION\w([0-9])\\.([0-9]).*" "\\1" NITRO_VERSION "${NITRO_VERSION_H_CONTENTS}")
-  #   
-  #   message(STATUS "NITRO_VERSION: ${NITRO_VERSION}")
-  #   STRING(REGEX REPLACE "([0-9]+)\\.([0-9]+)" "\\1" NITRO_VERSION_MAJOR "${NITRO_VERSION}")
-  #   STRING(REGEX REPLACE "([0-9]+)\\.([0-9]+)" "\\2" NITRO_VERSION_MINOR "${NITRO_VERSION}")
-  # 
-  # 
-  #   SET(NITRO_VERSION "${NITRO_VERSION}"
-  #     CACHE INTERNAL "The version string for Nitro library")
-  # 
-  #   IF (NITRO_VERSION VERSION_EQUAL Nitro_FIND_VERSION OR
-  #       NITRO_VERSION VERSION_GREATER Nitro_FIND_VERSION)
-  #     # MESSAGE(STATUS "Found Nitro version: ${NITRO_VERSION}")
-  #   ELSE()
-  #     MESSAGE(FATAL_ERROR "Nitro version check failed. Version ${NITRO_VERSION} was found, at least version ${Nitro_FIND_VERSION} is required")
-  #   ENDIF()
-  # ELSE()
-  #   MESSAGE(FATAL_ERROR "Failed to open ${NITRO_VERSION_H} file")
-  # ENDIF()
+#  SET(NITRO_VERSION_H "${NITRO_INCLUDE_DIR}/nitro/c/nitf/nitf/Defines.h")
+#  FILE(READ ${NITRO_VERSION_H} NITRO_VERSION_H_CONTENTS)
+
 
 ENDIF()
 

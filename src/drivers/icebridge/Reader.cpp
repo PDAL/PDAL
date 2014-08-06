@@ -129,7 +129,7 @@ namespace iterators
 namespace sequential
 {
 
-uint32_t IcebridgeSeqIter::readBufferImpl(PointBuffer& buf)
+point_count_t IcebridgeSeqIter::readBufferImpl(PointBuffer& buf)
 {
     return readImpl(buf, (std::numeric_limits<point_count_t>::max)());
 }

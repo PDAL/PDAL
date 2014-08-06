@@ -344,9 +344,9 @@ bool Reader::atEndImpl() const
 }
 
 
-boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
+point_count_t Reader::readBufferImpl(PointBuffer& data)
 {
-    uint32_t numToRead = m_reader.getNumPoints() - getIndex();
+    point_count_t numToRead = m_reader.getNumPoints() - getIndex();
     return m_reader.processBuffer(data, *m_istream, numToRead);
 }
 
@@ -382,9 +382,9 @@ boost::uint64_t Reader::seekImpl(boost::uint64_t count)
 }
 
 
-boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
+point_count_t Reader::readBufferImpl(PointBuffer& data)
 {
-    boost::uint32_t numToRead = m_reader.getNumPoints() - getIndex();
+    point_count_t numToRead = m_reader.getNumPoints() - getIndex();
     return m_reader.processBuffer(data, *m_istream, numToRead);
 }
 

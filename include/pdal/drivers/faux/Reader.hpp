@@ -118,7 +118,7 @@ private:
     point_count_t m_numPoints;
     LogPtr m_log;
 
-    uint32_t readBufferImpl(PointBuffer& buf)
+    point_count_t readBufferImpl(PointBuffer& buf)
         { return readImpl(buf, m_numPoints); }
 
     uint64_t skipImpl(uint64_t numPts)
@@ -127,7 +127,7 @@ private:
         return numPts;
     }
 
-    uint32_t readImpl(PointBuffer& buf, point_count_t count);
+    point_count_t readImpl(PointBuffer& buf, point_count_t count);
     bool atEndImpl() const
         { return false; } //ABELL ?
 };

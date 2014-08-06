@@ -41,6 +41,7 @@
 
 #include <set>
 #include <vector>
+#include <set>
 
 namespace pdal
 {
@@ -137,7 +138,7 @@ public:
 
 /**
 //ABELL
-    void setFieldUnscaled(Dimension::Id::Enum dim, uint32_t idx, double val)
+    void setFieldUnscaled(Dimension::Id::Enum dim, PointId idx, double val)
     {
         setField(dim, idx, dim->removeScaling(val));
     }
@@ -208,7 +209,7 @@ T PointBuffer::getField(Dimension::Id::Enum dim, PointId id) const
 //ABELL - Remove applyScaling
 template <class T>
 inline T PointBuffer::getFieldAs(Dimension::Id::Enum dim,
-    uint32_t pointIndex, bool applyScaling) const
+    PointId pointIndex, bool applyScaling) const
 {
     T retval;
     Dimension::Detail *dd = m_context.dimDetail(dim);
@@ -259,12 +260,13 @@ inline T PointBuffer::getFieldAs(Dimension::Id::Enum dim,
 
     try
     {
-        if (std::is_integral<T>::value)
+
+    	if (std::is_integral<T>::value == true )
             retval = boost::numeric_cast<T>(lround(val));
         else
             retval = boost::numeric_cast<T>(val);
     }
-    catch (boost::numeric::bad_numeric_cast& e)
+    catch (boost::numeric::bad_numeric_cast& )
     {
         std::ostringstream oss;
         oss << "Unable to fetch data and convert as requested: ";
@@ -274,6 +276,10 @@ inline T PointBuffer::getFieldAs(Dimension::Id::Enum dim,
         throw pdal_error(oss.str());
     }
     return retval;
+#ifdef PDAL_COMPILER_MSVC
+// warning C4127: conditional expression is constant
+#pragma warning(pop)
+#endif	
 }
 
 
@@ -281,17 +287,28 @@ template<typename T_IN, typename T_OUT>
 void PointBuffer::convertAndSet(Dimension::Id::Enum dim, PointId idx, T_IN in)
 {
     T_OUT out;
-
-    if (std::is_integral<T_OUT>::value)
+	
+#ifdef PDAL_COMPILER_MSVC
+// warning C4127: conditional expression is constant
+#pragma warning(push)
+#pragma warning(disable:4127)
+#endif
+    if (std::is_integral<T_OUT>::value == true)
         out = boost::numeric_cast<T_OUT>(lround(in));
     else
         out = boost::numeric_cast<T_OUT>(in);
+
+#ifdef PDAL_COMPILER_MSVC
+// warning C4127: conditional expression is constant
+#pragma warning(pop)
+#endif
+
     setFieldInternal(dim, idx, (void *)&out);
 }
 
 
 template<typename T>
-void PointBuffer::setField(Dimension::Id::Enum dim, uint32_t idx, T val)
+void PointBuffer::setField(Dimension::Id::Enum dim, PointId idx, T val)
 {
     Dimension::Detail *dd = m_context.dimDetail(dim);
 
@@ -333,7 +350,7 @@ void PointBuffer::setField(Dimension::Id::Enum dim, uint32_t idx, T val)
             break;
         }
     }
-    catch (boost::numeric::bad_numeric_cast& e)
+    catch (boost::numeric::bad_numeric_cast& )
     {
         std::ostringstream oss;
         oss << "Unable to set data and convert as requested: ";
@@ -379,10 +396,14 @@ inline void PointBuffer::setFieldInternal(Dimension::Id::Enum dim,
 
 inline void PointBuffer::appendPoint(PointBuffer& buffer, PointId id)
 {
+    // FIXME: hobu -- what happens if id is out of range of m_index
+    // or m_index isn't ordered?
+    //ABELL - The programmer is saying take point "id" from "buffer" and stick
+    //  it in this buffer.  If "id" isn't valid, it's a programmer error.
     PointId rawId = buffer.m_index[id];
-    id = m_index.size();
-    m_index.resize(id + 1);
-    m_index[id] = rawId;
+    point_count_t newid = m_index.size();
+    m_index.resize(newid + 1);
+    m_index[newid] = rawId;
 }
 
 typedef std::shared_ptr<PointBuffer> PointBufferPtr;

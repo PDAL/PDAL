@@ -33,6 +33,8 @@
 ****************************************************************************/
 
 #include <pdal/kernel/Delta.hpp>
+
+
 #include <boost/format.hpp>
 
 #include <boost/property_tree/json_parser.hpp>
@@ -101,7 +103,7 @@ std::ostream& writeHeader(std::ostream& strm, bool b3D)
 
 
 std::map<Point, Point>* cumulatePoints(PointBuffer& source_data,
-    PointBuffer& candidate_data)
+    PointBuffer& candidate_data, KDIndex* index)
 {
     std::map<Point, Point> *output = new std::map<Point, Point>;
     uint32_t count(std::min(source_data.size(), candidate_data.size()));
@@ -112,19 +114,17 @@ std::map<Point, Point>* cumulatePoints(PointBuffer& source_data,
     DimensionPtr cDimZ = candidate_schema.getDimension("Z");
 
     Schema const& source_schema = source_data.getSchema();
-    DimensionPtr sDimX = source_schema.getDimension("X");
-    DimensionPtr sDimY = source_schema.getDimension("Y");
-    DimensionPtr sDimZ = source_schema.getDimension("Z");    
+    Dimension const& sDimX = source_schema.getDimension("X");
+    Dimension const& sDimY = source_schema.getDimension("Y");
+    Dimension const& sDimZ = source_schema.getDimension("Z");
+    
     for (uint32_t i = 0; i < count; ++i)
     {
         double sx = source_data.getFieldAs<double>(sDimX, i);
         double sy = source_data.getFieldAs<double>(sDimY, i);
         double sz = source_data.getFieldAs<double>(sDimZ, i);
         
-//ABELL
-//       std::vector<std::size_t> ids = candidate_data.neighbors(sx, sy, sz, 1);
-std::vector<std::size_t> ids;
-        
+        std::vector<std::size_t> ids = index->neighbors(sx, sy, sz, 1);
         if (!ids.size())
         {
 			std::ostringstream oss;
@@ -165,8 +165,7 @@ void Delta::outputDetail(PointBuffer& source_data, PointBuffer& candidate_data,
     bool bWroteHeader(false);
     
     std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
-//ABELL - Indexing
-//    candidate_data.build(m_3d);
+    
     uint32_t count(std::min(source_data.size(), candidate_data.size()));
     
     boost::property_tree::ptree output;
@@ -176,9 +175,7 @@ void Delta::outputDetail(PointBuffer& source_data, PointBuffer& candidate_data,
         double sy = source_data.getFieldAs<double>(sDimY, i);
         double sz = source_data.getFieldAs<double>(sDimZ, i);                
         
-//ABELL - Indexing.
-//       std::vector<std::size_t> ids = candidate_data.neighbors(sx, sy, sz, 1);
-std::vector<std::size_t> ids;
+        std::vector<std::size_t> ids = m_index->neighbors(sx, sy, sz, 1);
         
         if (!ids.size())
         {
@@ -333,9 +330,15 @@ int Delta::execute()
 //ABELL - Need indexing.
 //    candidate_data.build(m_3d);
     uint32_t count(std::min(sourceCount, candidateCount));
+    
+    // Index the candidate data.
+    m_index = std::unique_ptr<KDIndex>(new KDIndex(*candidateBuf));
 
+    
+    m_index->build(m_3d);
+    
     std::unique_ptr<std::map<Point, Point>>
-        points(cumulatePoints(*sourceBuf, *candidateBuf));
+        points(cumulatePoints(*sourceBuf, *candidateBuf, m_index.get()));
     if (m_OutputDetail)
     {
         outputDetail(*sourceBuf, *candidateBuf, points.get());

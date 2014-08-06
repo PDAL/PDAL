@@ -62,7 +62,7 @@ public:
     // Returns the number of valid points read.
     //
     // (This function really just performs the readBegin..readEnd sequence)
-    boost::uint32_t read(PointBuffer& buffer);
+    point_count_t read(PointBuffer& buffer);
 
     point_count_t read(PointBuffer& buffer, point_count_t count)
     {
@@ -127,7 +127,7 @@ protected:
     virtual point_count_t readImpl(PointBuffer& data, point_count_t count) = 0;
     virtual void readBeginImpl() {}
     virtual void readBufferBeginImpl(PointBuffer&) {}
-    virtual boost::uint32_t readBufferImpl(PointBuffer&) = 0;
+    virtual point_count_t readBufferImpl(PointBuffer&) = 0;
     virtual void readBufferEndImpl(PointBuffer&) {}
     virtual void readEndImpl() {}
     virtual boost::uint64_t skipImpl(boost::uint64_t pointNum) = 0;
@@ -160,9 +160,9 @@ public:
 
 protected:
     // from Iterator
-    virtual point_count_t readImpl(PointBuffer& data, point_count_t count)
+    virtual point_count_t readImpl(PointBuffer& /*data*/, point_count_t /*count*/)
         { std::cerr << "No sequential readImpl for stage/iterator!\n"; return 0; }
-    virtual boost::uint32_t readBufferImpl(PointBuffer&) = 0;
+    virtual point_count_t readBufferImpl(PointBuffer&) = 0;
     virtual bool atEndImpl() const = 0;
 };
 
@@ -185,7 +185,7 @@ public:
 
 protected:
     // from Iterator
-    virtual point_count_t readImpl(PointBuffer& data, point_count_t count)
+    virtual point_count_t readImpl(PointBuffer& /*data*/, point_count_t /*count*/)
         { std::cerr << "No random readImpl for stage/iterator!\n"; return 0; }
     virtual boost::uint64_t seekImpl(boost::uint64_t position) = 0;
     virtual boost::uint64_t skipImpl(boost::uint64_t position);

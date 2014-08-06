@@ -99,7 +99,7 @@ private:
 
     virtual point_count_t readImpl(PointBuffer& data, point_count_t count);
     virtual uint64_t skipImpl(boost::uint64_t);
-    virtual uint32_t readBufferImpl(PointBuffer& pointBuffer);
+    virtual point_count_t readBufferImpl(PointBuffer& pointBuffer);
     virtual bool atEndImpl() const;
 };
 

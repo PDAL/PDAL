@@ -512,7 +512,7 @@ uint64_t Reader::skipImpl(boost::uint64_t count)
 }
 
 
-uint32_t Reader::readBufferImpl(PointBuffer& data)
+point_count_t Reader::readBufferImpl(PointBuffer& data)
 {
     point_count_t numToRead = m_reader.getNumPoints() - getIndex();
     return m_reader.processBuffer(data, *m_istream, numToRead);

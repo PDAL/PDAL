@@ -80,7 +80,7 @@ MAKE_READER_CREATOR(NITFReader, pdal::drivers::nitf::NitfReader)
 
 #ifdef PDAL_HAVE_SQLITE
 #ifndef USE_PDAL_PLUGIN_SQLITE
-MAKE_READER_CREATOR(SqliteReader, pdal::drivers::sqlite::Reader)
+MAKE_READER_CREATOR(SqliteReader, pdal::drivers::sqlite::SQLiteReader)
 #endif
 #endif
 
@@ -153,7 +153,7 @@ MAKE_WRITER_CREATOR(P2GWriter, pdal::drivers::p2g::Writer)
 
 #ifdef PDAL_HAVE_SQLITE
 #ifndef USE_PDAL_PLUGIN_SQLITE
-MAKE_WRITER_CREATOR(SqliteWriter, pdal::drivers::sqlite::Writer)
+MAKE_WRITER_CREATOR(SqliteWriter, pdal::drivers::sqlite::SQLiteWriter)
 #endif
 #endif
 
@@ -195,7 +195,8 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
     drivers["bpf"] = "drivers.bpf.reader";
     drivers["sbet"] = "drivers.sbet.reader";
     drivers["icebridge"] = "drivers.icebridge.reader";
-
+    drivers["sqlite"] = "drivers.sqlite.reader";
+    
     if (ext == "") return "";
     ext = ext.substr(1, ext.length()-1);
     if (ext == "") return "";
@@ -219,6 +220,7 @@ std::string StageFactory::inferWriterDriver(const std::string& filename)
     drivers["xyz"] = "drivers.text.writer";
     drivers["txt"] = "drivers.text.writer";
     drivers["ntf"] = "drivers.nitf.writer";
+    drivers["sqlite"] = "drivers.sqlite.writer";    
 
     if (boost::algorithm::iequals(filename, "STDOUT"))
     {
@@ -393,7 +395,7 @@ void StageFactory::registerKnownReaders()
 
 #ifdef PDAL_HAVE_SQLITE
 #ifndef USE_PDAL_PLUGIN_SQLITE
-    REGISTER_READER(SqliteReader, pdal::drivers::sqlite::Reader);
+    REGISTER_READER(SqliteReader, pdal::drivers::sqlite::SQLiteReader);
 #endif
 #endif
 
@@ -475,7 +477,7 @@ void StageFactory::registerKnownWriters()
 
 #ifdef PDAL_HAVE_SQLITE
 #ifndef USE_PDAL_PLUGIN_SQLITE
-    REGISTER_WRITER(SqliteWriter, pdal::drivers::sqlite::Writer);
+    REGISTER_WRITER(SqliteWriter, pdal::drivers::sqlite::SQLiteWriter);
 #endif
 #endif
 

@@ -587,7 +587,7 @@ point_count_t Reader::readImpl(PointBuffer& data, point_count_t count)
 #endif
 }
 
-boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
+point_count_t Reader::readBufferImpl(PointBuffer& data)
 {
     point_count_t numToRead = m_reader.getNumPoints() - getIndex();
 #ifdef PDAL_HAVE_LASZIP

@@ -103,7 +103,7 @@ endif (WITH_ORACLE)
 
 if (WITH_SQLITE)
     if (NOT USE_PDAL_PLUGIN_SQLITE)
-       set(PDAL_SQLITE_TEST_CPP drivers/sqlite/Writer.cpp)
+       set(PDAL_SQLITE_TEST_CPP drivers/sqlite/SqliteTest.cpp)
 
        FOREACH(file ${PDAL_SQLITE_TEST_CPP})
            SET(PDAL_UNITTEST_TEST_SRC "${PDAL_UNITTEST_TEST_SRC};${file}"

@@ -665,7 +665,7 @@ std::string Writer::getXML()
     xmlTextWriterPtr w = static_cast<xmlTextWriterPtr>(writer.get());
     xmlTextWriterFlush(w);
     // printf("xml: %s", (const char *) b->content);
-    return std::string((const char *) b->content, b->size);
+    return std::string((const char *) b->content, b->use);
 #else
     return std::string();
 #endif

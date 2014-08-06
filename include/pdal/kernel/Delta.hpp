@@ -39,6 +39,7 @@
 #include <pdal/StageIterator.hpp>
 #include <pdal/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
+#include <pdal/KDIndex.hpp>
 
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/json_parser.hpp>
@@ -121,6 +122,8 @@ private:
     bool m_OutputDetail;
     bool m_useXML;
     bool m_useJSON;
+    std::unique_ptr<KDIndex> m_index;
+
     
     void outputRST(boost::property_tree::ptree const&) const;
     void outputXML(boost::property_tree::ptree const&) const;

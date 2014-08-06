@@ -161,16 +161,16 @@ private:
     void decideSplit(ChipRefList& v1, ChipRefList& v2,
         ChipRefList& spare, PointId left, PointId right);
     void split(ChipRefList& wide, ChipRefList& narrow,
-        ChipRefList& spare, uint32_t left, uint32_t right);
+        ChipRefList& spare, PointId left, PointId right);
     void finalSplit(ChipRefList& wide, ChipRefList& narrow,
-        uint32_t pleft, uint32_t pcenter);
-    void emit(ChipRefList& wide, uint32_t widemin, uint32_t widemax,
-        ChipRefList& narrow, uint32_t narrowmin, uint32_t narrowmax);
+        PointId pleft, PointId pcenter);
+    void emit(ChipRefList& wide, PointId widemin, PointId widemax,
+        ChipRefList& narrow, PointId narrowmin, PointId narrowmax);
 
-    uint32_t m_threshold;
+    PointId m_threshold;
     PointBufferPtr m_inbuf;
     PointBufferSet m_buffers;
-    std::vector<uint32_t> m_partitions;
+    std::vector<PointId> m_partitions;
     ChipRefList m_xvec;
     ChipRefList m_yvec;
     ChipRefList m_spare;

@@ -114,13 +114,13 @@ std::ostream& PointBuffer::toRST(std::ostream& os) const
 {
     const Dimension::IdList dims = m_context.dims();
 
-    uint32_t name_column(20);
-    uint32_t value_column(40);
+    size_t name_column(20);
+    size_t value_column(40);
     
     for (auto di = dims.begin(); di != dims.end(); ++di)
     {
         std::string name = Dimension::name(*di);
-        name_column = std::max(name_column, (uint32_t)name.size());
+        name_column = std::max(name_column, name.size());
     }
     
     std::ostringstream thdr;

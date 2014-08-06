@@ -53,7 +53,7 @@ public:
     virtual ~CloudIterator();
 
 protected:
-    virtual boost::uint32_t readBufferImpl(pdal::PointBuffer& io_buffer);
+    virtual point_count_t readBufferImpl(pdal::PointBuffer& io_buffer);
     virtual boost::uint64_t skipImpl(boost::uint64_t in_pointNum);
     virtual bool atEndImpl() const;
 

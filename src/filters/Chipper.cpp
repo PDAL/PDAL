@@ -178,7 +178,7 @@ void Chipper::partition(point_count_t size)
 
 
 void Chipper::decideSplit(ChipRefList& v1, ChipRefList& v2, ChipRefList& spare,
-    boost::uint32_t pleft, boost::uint32_t pright)
+    PointId pleft, PointId pright)
 {
     double v1range;
     double v2range;
@@ -196,14 +196,14 @@ void Chipper::decideSplit(ChipRefList& v1, ChipRefList& v2, ChipRefList& spare,
 }
 
 void Chipper::split(ChipRefList& wide, ChipRefList& narrow, ChipRefList& spare,
-    boost::uint32_t pleft, boost::uint32_t pright)
+    PointId pleft, PointId pright)
 {
-    boost::uint32_t lstart;
-    boost::uint32_t rstart;
-    boost::uint32_t pcenter;
-    boost::uint32_t left;
-    boost::uint32_t right;
-    boost::uint32_t center;
+    PointId lstart;
+    PointId rstart;
+    PointId pcenter;
+    PointId left;
+    PointId right;
+    PointId center;
 
     left = m_partitions[pleft];
     right = m_partitions[pright] - 1;
@@ -227,7 +227,7 @@ void Chipper::split(ChipRefList& wide, ChipRefList& narrow, ChipRefList& spare,
         // for the [left,right] partition.
         lstart = left;
         rstart = center;
-        for (boost::uint32_t i = left; i <= right; ++i)
+        for (PointId i = left; i <= right; ++i)
         {
             if (narrow[i].m_oindex < center)
             {
@@ -257,7 +257,7 @@ void Chipper::split(ChipRefList& wide, ChipRefList& narrow, ChipRefList& spare,
 // ordered, but not for our split, so we have to find the max/min entries
 // for each partition in the final split.
 void Chipper::finalSplit(ChipRefList& wide, ChipRefList& narrow,
-    boost::uint32_t pleft, boost::uint32_t pright)
+    PointId pleft, PointId pright)
 {
 
     boost::int64_t left1 = -1;
@@ -270,7 +270,7 @@ void Chipper::finalSplit(ChipRefList& wide, ChipRefList& narrow,
     // think so.  These casts will at least shut up the compiler, but
     // I think this code should be revisited to use std::vector<boost::uint32_t>::const_iterator
     // or std::vector<boost::uint32_t>::size_type instead of this int64_t stuff -- hobu 11/15/10
-    boost::int64_t left = static_cast<boost::int64_t>(m_partitions[pleft]);
+    boost::int64_t left = m_partitions[pleft];
     boost::int64_t right = static_cast<boost::int64_t>(m_partitions[pright] - 1);
     boost::int64_t center = static_cast<boost::int64_t>(m_partitions[pright - 1]);
 
@@ -311,21 +311,21 @@ void Chipper::finalSplit(ChipRefList& wide, ChipRefList& narrow,
 
     // Emit results.
     emit(wide,
-         static_cast<boost::uint32_t>(left),
-         static_cast<boost::uint32_t>(center - 1),
+         left,
+         center - 1,
          narrow,
-         static_cast<boost::uint32_t>(left1),
-         static_cast<boost::uint32_t>(right1));
+         left1,
+         right1);
     emit(wide,
-         static_cast<boost::uint32_t>(center),
-         static_cast<boost::uint32_t>(right),
+         center,
+         right,
          narrow,
-         static_cast<boost::uint32_t>(left2),
-         static_cast<boost::uint32_t>(right2));
+         left2,
+         right2);
 }
 
-void Chipper::emit(ChipRefList& wide, uint32_t widemin, uint32_t widemax,
-    ChipRefList& narrow, uint32_t narrowmin, uint32_t narrowmax)
+void Chipper::emit(ChipRefList& wide, PointId widemin, PointId widemax,
+    ChipRefList& narrow, PointId narrowmin, PointId narrowmax)
 {
     PointBufferPtr buf(new PointBuffer(m_inbuf->context()));
     for (size_t idx = widemin; idx <= widemax; ++idx)
