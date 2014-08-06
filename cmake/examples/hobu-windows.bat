@@ -75,7 +75,9 @@ REM set PYTHON_LIBRARY=%OSGEO4W_DIR\apps\python27\libs\python27.lib
 
 
 
-rem if EXIST CMakeCache.txt del CMakeCache.txt
+if EXIST CMakeCache.txt del CMakeCache.txt
+del /S /Q CMakeFiles
+cd %PDAL_DIR%/build
 cmake -G %GENERATOR% ^
     -DBOOST_INCLUDEDIR=%BOOST% ^
     -DWITH_GDAL=%GDAL_ENABLED% ^
@@ -97,7 +99,8 @@ cmake -G %GENERATOR% ^
 	-DNUMPY_VERSION=1.5.1 ^
     -DCMAKE_BUILD_TYPE=%BUILD_TYPE% ^
     -DCMAKE_VERBOSE_MAKEFILE=OFF ^
-    %PDAL_DIR%
+	-DWITH_SQLITE=ON ^
+    ..
     
 rem    -DBOOST_INCLUDEDIR=%BOOST_DIR% ^
 rem 	-DNUMPY_INCLUDE_DIR=%OSGEO4W_DIR%\apps\python27\lib\site-packages\numpy\core\include ^
