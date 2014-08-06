@@ -47,7 +47,7 @@ fi
 if [[ $PDAL_OPTIONAL_COMPONENTS == "all" ]]
 then
     sudo apt-get install \
-        libgdal-dev \
+        libgdal1-dev \
         libgeos-dev \
         libgeos++-dev \
         libpq-dev \
