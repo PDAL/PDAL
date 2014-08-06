@@ -35,14 +35,15 @@
 #pragma once
 
 #include <stdint.h>
+#include <vector>
 
 #include <pdal/pdal_internal.hpp>
 
 namespace pdal
 {
 
-typedef uint32_t point_count_t;
 typedef uint32_t PointId;
+typedef std::vector<PointId>::size_type point_count_t;
 
 enum LogLevel
 {

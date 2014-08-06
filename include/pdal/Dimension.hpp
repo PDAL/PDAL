@@ -199,19 +199,19 @@ public:
     /// @return should we read this dimension?
     bool isRead() const
     {
-        return (m_flags & dimension::IsRead);
+        return ((m_flags & dimension::IsRead) != 0);
     }
 
     /// @return should we write this dimension?
     bool isWritten() const
     {
-        return (m_flags & dimension::IsWritten);
+        return ((m_flags & dimension::IsWritten) != 0);
     }
 
     /// @return is this dimension ignored?
     bool isIgnored() const
     {
-        return (m_flags & dimension::IsIgnored);
+        return ((m_flags & dimension::IsIgnored) != 0);
     }
 
     /// @return Number of bytes required to serialize this dimension

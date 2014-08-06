@@ -73,7 +73,7 @@ private:
         pbSet.insert(buffer);
         return pbSet;
     }
-    virtual void filter(PointBuffer& buffer)
+    virtual void filter(PointBuffer& /*buffer*/)
     {}
 };
 
