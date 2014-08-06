@@ -118,7 +118,7 @@ public:
         \endverbatim
     */
     template<class T>
-    T getField(Dimension const& dim, boost::uint32_t pointIndex) const;
+    T getField(Dimension const& dim, PointId pointIndex) const;
 
     /*! fetch the value T for a given :cpp:class:`pdal::Dimension` dim at
         pointIndex `i`.
@@ -135,7 +135,7 @@ public:
         \endverbatim
     */
     template<class T>
-    T getFieldAs(Dimension const& dim, boost::uint32_t pointIndex,
+    T getFieldAs(Dimension const& dim, PointId pointIndex,
         bool applyScaling = true) const;
 
     /*! set the value T for a given  :cpp:class:`pdal::Dimension` dim
@@ -167,7 +167,7 @@ public:
         getFieldInternal(dim, idx, buf);
     }
 
-    void setFieldUnscaled(pdal::Dimension const& dim, uint32_t idx,
+    void setFieldUnscaled(pdal::Dimension const& dim, PointId idx,
         double val)
     {
         setField(dim, idx, dim.removeScaling(val));
@@ -239,12 +239,16 @@ T PointBuffer::getField(pdal::Dimension const& dim, PointId id) const
 
 template <class T>
 inline T PointBuffer::getFieldAs(pdal::Dimension const& dim,
-    boost::uint32_t pointIndex, bool applyScaling) const
+    PointId pointIndex, bool applyScaling) const
 {
     T retval;
     boost::uint32_t size = dim.getByteSize();
     double val(0.0);
-
+#ifdef PDAL_COMPILER_MSVC
+// warning C4127: conditional expression is constant
+#pragma warning(push)
+#pragma warning(disable:4127 4244)
+#endif
     switch (dim.getInterpretation())
     {
         case dimension::Float:
@@ -307,12 +311,13 @@ inline T PointBuffer::getFieldAs(pdal::Dimension const& dim,
 
     try
     {
-        if (std::is_integral<T>::value == true )
+
+    	if (std::is_integral<T>::value == true )
             retval = boost::numeric_cast<T>(lround(val));
         else
             retval = boost::numeric_cast<T>(val);
     }
-    catch (boost::numeric::bad_numeric_cast& e)
+    catch (boost::numeric::bad_numeric_cast& )
     {
         std::ostringstream oss;
         oss << "Unable to fetch data and convert as requested: ";
@@ -321,6 +326,10 @@ inline T PointBuffer::getFieldAs(pdal::Dimension const& dim,
         throw pdal_error(oss.str());
     }
     return retval;
+#ifdef PDAL_COMPILER_MSVC
+// warning C4127: conditional expression is constant
+#pragma warning(pop)
+#endif	
 }
 
 
@@ -350,7 +359,7 @@ void PointBuffer::convertAndSet(pdal::Dimension const& dim, PointId idx,
 
 
 template<typename T>
-void PointBuffer::setField(pdal::Dimension const& dim, uint32_t idx, T val)
+void PointBuffer::setField(pdal::Dimension const& dim, PointId idx, T val)
 {
     uint32_t size = dim.getByteSize();
     try {

@@ -65,7 +65,7 @@ private:
         PointBufferSet pbSet;
 
         StageSequentialIterator *it = createSequentialIterator();
-        point_count_t num_read = it->read(*buffer);
+        it->read(*buffer);
         pbSet.insert(buffer);
         return pbSet;
     }

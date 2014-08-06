@@ -279,14 +279,14 @@ public:
     /// context of a Schema. Schema will set this value when
     /// adding the Dimension to itself so as to not require calculating
     /// it for every lookup.
-    std::size_t getByteOffset() const
+    pdal::dimension::size_type getByteOffset() const
     {
         return m_byteOffset;
     }
 
     /// sets the byte offset of the Dimension
     /// @param v the value to set
-    void setByteOffset(std::size_t v)
+    void setByteOffset(pdal::dimension::size_type v)
     {
         m_byteOffset = v;
     }

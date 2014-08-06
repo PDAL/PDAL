@@ -42,7 +42,7 @@
 namespace pdal
 {
 
-typedef uint32_t PointId;
+typedef std::vector<uint8_t>::size_type PointId;
 typedef std::vector<PointId>::size_type point_count_t;
 
 enum LogLevel

@@ -125,9 +125,9 @@ std::ostream& PointBuffer::toRST(std::ostream& os) const
     schema::index_by_index const& dimensions =
         schema.getDimensions().get<schema::index>();
 
-    boost::uint32_t ns_column(32);    
-    boost::uint32_t name_column(20);
-    boost::uint32_t value_column(40);
+    size_t ns_column(32);    
+    size_t name_column(20);
+    size_t value_column(40);
     
     std::ostringstream hdr;
     for (int i = 0; i < 80; ++i)
@@ -135,9 +135,9 @@ std::ostream& PointBuffer::toRST(std::ostream& os) const
 
     for (std::size_t i=0; i< dimensions.size(); i++)
     {
-        name_column = std::max(static_cast<std::size_t>(name_column),
+        name_column = std::max(name_column,
             dimensions[i].getName().size());
-        ns_column = std::max(static_cast<std::size_t>(name_column),
+        ns_column = std::max(name_column,
             dimensions[i].getNamespace().size());
     }
     
