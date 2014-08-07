@@ -33,18 +33,15 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <boost/format.hpp>
+
 #include <pdal/drivers/pgpointcloud/Writer.hpp>
+
 #include <pdal/PointBuffer.hpp>
 #include <pdal/StageFactory.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/FileUtils.hpp>
 #include <pdal/Endian.hpp>
-
-#include <boost/algorithm/string.hpp>
-#include <boost/format.hpp>
-#include <boost/scoped_ptr.hpp>
-
-
+#include <pdal/XMLSchema.hpp>
 
 #ifdef USE_PDAL_PLUGIN_PGPOINTCLOUD
 MAKE_WRITER_CREATOR(pgpointcloudWriter, pdal::drivers::pgpointcloud::Writer)
@@ -120,21 +117,21 @@ void Writer::processOptions(const Options& options)
     m_srid = options.getValueOrDefault<boost::uint32_t>("srid", 4326);
     m_pcid = options.getValueOrDefault<boost::uint32_t>("pcid", 0);
     m_pack = options.getValueOrDefault<bool>("pack_ignored_fields", true);
-    
+    m_pre_sql = getOptions().getValueOrDefault<std::string>("pre_sql", "");
 }
+
 
 void Writer::ready(PointContext ctx)
 {
     m_pointSize = 0;
-    DimensionList dims = ctx.schema()->getDimensions();
-    for (auto di = dims.begin(); di != dims.end(); ++di)
+    m_dims = ctx.dims();
+    for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
     {
-        DimensionPtr d = *di;
-        if (!m_pack || !d->isIgnored())
-        {
-            m_dims.push_back(d);
-            m_pointSize += d->getByteSize();
-        }
+        Dimension::Type::Enum type = Dimension::defaultType(*di);
+        if (type == Dimension::Type::None)
+            type = Dimension::Type::Float;
+        m_types.push_back(type);
+        m_pointSize += Dimension::size(type);
     }
 }
 
@@ -183,7 +180,7 @@ Options Writer::getDefaultOptions()
     return options;
 }
 
-void Writer::writeInit(const Schema& schema)
+void Writer::writeInit()
 {
     if (m_schema_is_initialized)
         return;
@@ -193,16 +190,15 @@ void Writer::writeInit(const Schema& schema)
 
     // Pre-SQL can be *either* a SQL file to execute, *or* a SQL statement
     // to execute. We find out which one here.
-    std::string pre_sql = getOptions().getValueOrDefault<std::string>("pre_sql", "");
-    if (pre_sql.size())
+    if (m_pre_sql.size())
     {
-        std::string sql = FileUtils::readFileAsString(pre_sql);
+        std::string sql = FileUtils::readFileAsString(m_pre_sql);
         if (!sql.size())
         {
             // if there was no file to read because the data in pre_sql was
             // actually the sql code the user wanted to run instead of the
             // filename to open, we'll use that instead.
-            sql = pre_sql;
+            sql = m_pre_sql;
         }
         pg_execute(m_session, sql);
     }
@@ -217,7 +213,7 @@ void Writer::writeInit(const Schema& schema)
     }
 
     // Read or create a PCID for our new table
-    m_pcid = SetupSchema(schema, m_srid);
+    m_pcid = SetupSchema(m_srid);
 
     // Create the table!
     if (! bHaveTable)
@@ -225,15 +221,12 @@ void Writer::writeInit(const Schema& schema)
         CreateTable(m_schema_name, m_table_name, m_column_name, m_pcid);
     }
 
-
     m_schema_is_initialized = true;
-
-    return;    
 }
 
 void Writer::write(const PointBuffer& buffer)
 {
-    writeInit(buffer.getSchema());
+    writeInit();
     writeTile(buffer);
 }
 
@@ -266,12 +259,8 @@ void Writer::done(PointContext ctx)
 }
 
 
-uint32_t Writer::SetupSchema(Schema const& buffer_schema, uint32_t srid)
+uint32_t Writer::SetupSchema(uint32_t srid)
 {
-    // We strip any ignored dimensions from the schema before creating the table
-//ABELL
-//    pdal::Schema output_schema = buffer_schema.pack();
-pdal::Schema output_schema = buffer_schema;
 
     // If the user has specified a PCID they want to use,
     // does it exist in the database?
@@ -283,10 +272,8 @@ pdal::Schema output_schema = buffer_schema;
             m_pcid;
         char *count_str = pg_query_once(m_session, oss.str());
         if (!count_str)
-        {
             throw pdal_error("Unable to count pcid's in table "
                 "`pointcloud_formats`");
-        }
         schema_count = atoi(count_str);
         free(count_str);
         oss.str("");
@@ -301,17 +288,18 @@ pdal::Schema output_schema = buffer_schema;
 
     // Do we have any existing schemas in the POINTCLOUD_FORMATS table?
     boost::uint32_t pcid = 0;
-    bool bCreatePCPointSchema = true;
     oss << "SELECT Count(pcid) FROM pointcloud_formats";
     char *schema_count_str = pg_query_once(m_session, oss.str());
     if (!schema_count_str)
-    {
         throw pdal_error("Unable to count pcid's in table "
             "`pointcloud_formats`");
-    }
     schema_count = atoi(schema_count_str);
     free(schema_count_str);
     oss.str("");
+
+    // Create an XML output schema.
+    schema::Writer writer(m_dims, m_types);
+    std::string xml = writer.getXML();
 
     // Do any of the existing schemas match the one we want to use?
     if (schema_count > 0)
@@ -323,72 +311,47 @@ pdal::Schema output_schema = buffer_schema;
             char *pcid_str = PQgetvalue(result, i, 0);
             char *schema_str = PQgetvalue(result, i, 1);
 
-            //ABELL - This seems like the same mess I purged from OCI.
-            //  Probably needs to go.
-            /**
-            if (pdal::Schema::from_xml(schema_str) == output_schema)
+            if (xml == schema_str)
             {
-                bCreatePCPointSchema = false;
-                pcid = atoi(pcid_str);
-                break;
+                m_pcid = atoi(pcid_str);
+                PQclear(result);
+                return m_pcid;
             }
-            **/
         }
         PQclear(result);
     }
 
-    if (bCreatePCPointSchema)
+    if (schema_count == 0)
+        pcid = 1;
+    else
     {
-        std::string xml;
-        std::string compression;
-        char *pcid_str;
-
-        if (schema_count == 0)
-        {
-            pcid = 1;
-        }
-        else
-        {
-            char *pcid_str = pg_query_once(m_session,
+        char *pcid_str = pg_query_once(m_session,
                 "SELECT Max(pcid)+1 AS pcid FROM pointcloud_formats");
-            if (!pcid_str)
-            {
-                throw pdal_error("Unable to get the max pcid from "
-                    "`pointcloud_formats`");
-            }
-            pcid = atoi(pcid_str);
-        }
-
-        /* If the writer specifies a compression, we should set that */
-        if (m_patch_compression_type == CompressionType::Dimensional)
-        {
-            compression = "dimensional";
-        }
-        else if (m_patch_compression_type == CompressionType::Ght)
-        {
-            compression = "ght";
-        }
-
-        Metadata metadata;
-        MetadataNode m = metadata.getNode();
-        m.add("compression", compression);
-        
-        /**
-        log()->get(logDEBUG) << "output_schema: " <<
-            output_schema.getByteSize() << std::endl;
-        **/
-        xml = pdal::Schema::to_xml(output_schema, m);
-        const char* paramValues = xml.c_str();
-        oss << "INSERT INTO pointcloud_formats (pcid, srid, schema) "
-            "VALUES (" << pcid << "," << srid << ",$1)";
-        PGresult *result = PQexecParams(m_session, oss.str().c_str(), 1,
-            NULL, &paramValues, NULL, NULL, 0);
-        if (PQresultStatus(result) != PGRES_COMMAND_OK)
-        {
-            throw pdal_error(PQresultErrorMessage(result));
-        }
-        PQclear(result);
+        if (!pcid_str)
+            throw pdal_error("Unable to get the max pcid from "
+                "`pointcloud_formats`");
+        pcid = atoi(pcid_str);
     }
+
+    std::string compression;
+    /* If the writer specifies a compression, we should set that */
+    if (m_patch_compression_type == CompressionType::Dimensional)
+        compression = "dimensional";
+    else if (m_patch_compression_type == CompressionType::Ght)
+        compression = "ght";
+
+    Metadata metadata;
+    MetadataNode m = metadata.getNode();
+    m.add("compression", compression);
+
+    const char* paramValues = xml.c_str();
+    oss << "INSERT INTO pointcloud_formats (pcid, srid, schema) "
+        "VALUES (" << pcid << "," << srid << ",$1)";
+    PGresult *result = PQexecParams(m_session, oss.str().c_str(), 1,
+            NULL, &paramValues, NULL, NULL, 0);
+    if (PQresultStatus(result) != PGRES_COMMAND_OK)
+        throw pdal_error(PQresultErrorMessage(result));
+    PQclear(result);
     m_pcid = pcid;
     return m_pcid;
 }
@@ -410,12 +373,13 @@ void Writer::DeleteTable(std::string const& schema_name,
     pg_execute(m_session, oss.str());
 }
 
+
 bool Writer::CheckPointCloudExists()
 {
-    log()->get(logDEBUG) << "checking for pointcloud existence ... " << std::endl;
+    log()->get(LogLevel::DEBUG) << "checking for pointcloud existence ... " <<
+        std::endl;
 
     std::string q = "SELECT PC_Version()";
-
     try
     {
         pg_execute(m_session, q);
@@ -424,16 +388,16 @@ bool Writer::CheckPointCloudExists()
     {
         return false;
     }
-
     return true;
 }
 
+
 bool Writer::CheckPostGISExists()
 {
+    log()->get(LogLevel::DEBUG) << "checking for PostGIS existence ... " <<
+        std::endl;
+
     std::string q = "SELECT PostGIS_Version()";
-
-    log()->get(logDEBUG) << "checking for PostGIS existence ... " << std::endl;
-
     try
     {
         pg_execute(m_session, q);
@@ -442,7 +406,6 @@ bool Writer::CheckPostGISExists()
     {
         return false;
     }
-
     return true;
 }
 
@@ -450,68 +413,54 @@ bool Writer::CheckPostGISExists()
 bool Writer::CheckTableExists(std::string const& name)
 {
     std::ostringstream oss;
-    oss << "SELECT count(*) FROM pg_tables WHERE tablename ILIKE '" << name << "'";
+    oss << "SELECT count(*) FROM pg_tables WHERE tablename ILIKE '" <<
+        name << "'";
 
-    log()->get(logDEBUG) << "checking for table '" << name << "' existence ... " << std::endl;
+    log()->get(LogLevel::DEBUG) << "checking for table '" << name <<
+        "' existence ... " << std::endl;
 
     char *count_str = pg_query_once(m_session, oss.str());
     if (!count_str)
-    {
         throw pdal_error("Unable to check for the existence of `pg_table`");
-    }
     int count = atoi(count_str);
     free(count_str);
 
     if (count == 1)
-    {
         return true;
-    }
     else if (count > 1)
-    {
-        log()->get(logDEBUG) << "found more than 1 table named '" << name << "'" << std::endl;
-        return false;
-    }
-    else
-    {
-        return false;
-    }
+        log()->get(LogLevel::DEBUG) << "found more than 1 table named '" <<
+            name << "'" << std::endl;
+    return false;
 }
 
 
 void Writer::CreateTable(std::string const& schema_name,
-                         std::string const& table_name,
-                         std::string const& column_name,
-                         boost::uint32_t pcid)
+    std::string const& table_name, std::string const& column_name,
+    boost::uint32_t pcid)
 {
     std::ostringstream oss;
     oss << "CREATE TABLE ";
     if (schema_name.size())
-    {
         oss << schema_name << ".";
-    }
     oss << table_name;
     oss << " (id SERIAL PRIMARY KEY, " << column_name << " PcPatch";
     if (pcid)
-    {
         oss << "(" << pcid << ")";
-    }
     oss << ")";
 
     pg_execute(m_session, oss.str());
 }
 
+
 // Make sure you test for the presence of PostGIS before calling this
 void Writer::CreateIndex(std::string const& schema_name,
-                         std::string const& table_name,
-                         std::string const& column_name)
+    std::string const& table_name, std::string const& column_name)
 {
     std::ostringstream oss;
 
     oss << "CREATE INDEX ";
     if (schema_name.size())
-    {
         oss << schema_name << "_";
-    }
     oss << table_name << "_pc_gix";
     oss << " USING GIST (Geometry(" << column_name << "))";
 
@@ -519,10 +468,69 @@ void Writer::CreateIndex(std::string const& schema_name,
 }
 
 
+namespace
+{
+
+void fillBuf(const PointBuffer& buf, char *pos, Dimension::Id::Enum d,
+    Dimension::Type::Enum type, PointId id)
+{
+    union
+    {
+        float f;
+        double d;
+        int8_t s8;
+        int16_t s16;
+        int32_t s32;
+        int64_t s64;
+        uint8_t u8;
+        uint16_t u16;
+        uint32_t u32;
+        uint64_t u64;
+    } e;  // e - for Everything.
+
+    switch (type)
+    {
+    case Dimension::Type::Float:
+        e.f = buf.getFieldAs<float>(d, id);
+        break;
+    case Dimension::Type::Double:
+        e.d = buf.getFieldAs<double>(d, id);
+        break;
+    case Dimension::Type::Signed8:
+        e.s8 = buf.getFieldAs<int8_t>(d, id);
+        break;
+    case Dimension::Type::Signed16:
+        e.s16 = buf.getFieldAs<int16_t>(d, id);
+        break;
+    case Dimension::Type::Signed32:
+        e.s32 = buf.getFieldAs<int32_t>(d, id);
+        break;
+    case Dimension::Type::Signed64:
+        e.s64 = buf.getFieldAs<int64_t>(d, id);
+        break;
+    case Dimension::Type::Unsigned8:
+        e.u8 = buf.getFieldAs<uint8_t>(d, id);
+        break;
+    case Dimension::Type::Unsigned16:
+        e.u16 = buf.getFieldAs<uint16_t>(d, id);
+        break;
+    case Dimension::Type::Unsigned32:
+        e.u32 = buf.getFieldAs<uint32_t>(d, id);
+        break;
+    case Dimension::Type::Unsigned64:
+        e.u64 = buf.getFieldAs<uint64_t>(d, id);
+        break;
+    case Dimension::Type::None:
+        break;
+    }
+    memcpy(pos, &e, Dimension::size(type));
+}
+
+} // anonymous namespace.
+
 
 void Writer::writeTile(PointBuffer const& buffer)
 {
-
     if (buffer.size() > m_patch_capacity)
     {
         std::ostringstream oss;
@@ -539,10 +547,11 @@ void Writer::writeTile(PointBuffer const& buffer)
     
     for (PointId id = 0; id < buffer.size(); ++id)
     {
-        for (size_t dim = 0; dim < m_dims.size(); ++dim)
+        auto ti = m_types.begin();
+        for (auto di = m_dims.begin(); di != m_dims.end(); ++di, ++ti)
         {
-            buffer.getRawField(m_dims[dim], id, pos);
-            pos += m_dims[dim]->getByteSize();
+            fillBuf(buffer, pos, *di, *ti, id);
+            pos += Dimension::size(*ti);
         }
         if (id % 100 == 0)
             m_callback->invoke(id);        
@@ -550,7 +559,7 @@ void Writer::writeTile(PointBuffer const& buffer)
 
     m_callback->invoke(buffer.size());    
 
-    uint32_t num_points = buffer.size();
+    point_count_t num_points = buffer.size();
 
     /* We are always getting uncompressed bytes off the block_data */
     /* so we always used compression type 0 (uncompressed) in writing our WKB */
@@ -559,16 +568,14 @@ void Writer::writeTile(PointBuffer const& buffer)
     uint32_t compression = static_cast<uint32_t>(compression_v);
 
     static char syms[] = "0123456789ABCDEF";
-    m_hex.resize(outbufSize*2);
+    m_hex.resize(outbufSize * 2);
     for (unsigned i = 0; i != outbufSize; i++)
     {
-        m_hex[i*2]   = syms[((outbuf.get()[i] >> 4) & 0xf)];
-        m_hex[i*2+1] = syms[outbuf.get()[i] & 0xf];
+        m_hex[i * 2]   = syms[((outbuf.get()[i] >> 4) & 0xf)];
+        m_hex[i * 2 + 1] = syms[outbuf.get()[i] & 0xf];
     }
 
-    
     m_insert.clear();
-  
     m_insert.resize(m_hex.size() + 3000);
     
     std::string insert_into("INSERT INTO ");
@@ -606,14 +613,10 @@ void Writer::writeTile(PointBuffer const& buffer)
     std::string tail("')");
     m_insert.insert(position, tail);
 
-
     pg_execute(m_session, m_insert);
-
-
 }
 
+} // namespace pgpointcloud
+} // namespace drivers
+} // namespace pdal
 
-
-}
-}
-} // namespaces

@@ -53,7 +53,6 @@ namespace drivers
 namespace pgpointcloud
 {
 
-
 class PDAL_DLL PgReader : public pdal::Reader
 {
 public:
@@ -72,23 +71,19 @@ public:
     virtual boost::uint64_t getNumPoints() const;
     boost::uint64_t getMaxPoints() const;
     std::string getDataQuery() const;
+    std::string connString() const
+        { return m_connection; }
     void getSession() const;
     
     StageSequentialIterator* createSequentialIterator() const;
 
 private:
-
-    PgReader& operator=(const PgReader&); // not implemented
-    PgReader(const PgReader&); // not implemented
-
     virtual void initialize();
     virtual void addDimensions(PointContext ctx);
     virtual void processOptions(const Options& options);
     
     pdal::SpatialReference fetchSpatialReference() const;
     boost::uint32_t fetchPcid() const;
-//ABELL
-//    pdal::Schema fetchSchema() const;
 
     PGconn* m_session;
     std::string m_connection;
@@ -99,12 +94,11 @@ private:
     mutable boost::uint32_t m_pcid;
     mutable boost::uint64_t m_cached_point_count;
     mutable boost::uint64_t m_cached_max_points;
-//ABELL
-//    DimensionList m_dims;    
+    schema::XMLSchema m_schema;
 
-}; // pdal.drivers.pgpointcloud.PgReader
-
-
+    PgReader& operator=(const PgReader&); // not implemented
+    PgReader(const PgReader&); // not implemented
+};
 
 } // pgpointcloud
 } // driver

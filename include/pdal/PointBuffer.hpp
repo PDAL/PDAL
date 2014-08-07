@@ -103,7 +103,7 @@ public:
         \endverbatim
     */
     template<class T>
-    T getField(Dimension::Id::Enum dim, uint32_t pointIndex) const;
+    T getField(Dimension::Id::Enum dim, PointId pointIndex) const;
 
     /*! fetch the value T for a given :cpp:class:`pdal::Dimension` dim at
         pointIndex `i`.
@@ -120,15 +120,65 @@ public:
         \endverbatim
     */
     template<class T>
-    T getFieldAs(Dimension::Id::Enum dim, boost::uint32_t pointIndex,
+    T getFieldAs(Dimension::Id::Enum dim, PointId pointIndex,
         bool applyScaling = true) const;
 
     template<typename T>
     void setField(Dimension::Id::Enum dim, PointId idx, T val);
 
-    void setRawField(Dimension::Id::Enum dim, PointId idx, const void *val)
+    void setField(Dimension::Id::Enum dim, Dimension::Type::Enum type,
+        PointId idx, const void *val)
     {
-        setFieldInternal(dim, idx, val);
+        union
+        {
+            float f;
+            double d;
+            int8_t s8;
+            int16_t s16;
+            int32_t s32;
+            int64_t s64;
+            uint8_t u8;
+            uint16_t u16;
+            uint32_t u32;
+            uint64_t u64;
+        } e;  // e - for Everything.
+
+        memcpy(&e, val, Dimension::size(type));
+        switch (type)
+        {
+            case Dimension::Type::Float:
+                setField(dim, idx, e.f);
+                break;
+            case Dimension::Type::Double:
+                setField(dim, idx, e.d);
+                break;
+            case Dimension::Type::Signed8:
+                setField(dim, idx, e.s8);
+                break;
+            case Dimension::Type::Signed16:
+                setField(dim, idx, e.s16);
+                break;
+            case Dimension::Type::Signed32:
+                setField(dim, idx, e.s32);
+                break;
+            case Dimension::Type::Signed64:
+                setField(dim, idx, e.s64);
+                break;
+            case Dimension::Type::Unsigned8:
+                setField(dim, idx, e.u8);
+                break;
+            case Dimension::Type::Unsigned16:
+                setField(dim, idx, e.u16);
+                break;
+            case Dimension::Type::Unsigned32:
+                setField(dim, idx, e.u32);
+                break;
+            case Dimension::Type::Unsigned64:
+                setField(dim, idx, e.u64);
+                break;
+            case Dimension::Type::None:
+                break;
+        }
     }
 
     void getRawField(Dimension::Id::Enum dim, PointId idx, void *buf) const

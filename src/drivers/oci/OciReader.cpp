@@ -260,16 +260,16 @@ void OciReader::addDimensions(PointContext ctx)
         FileUtils::closeFile(out);
     }
 **/
+    schema::DimInfoList& dims = m_block->m_schema.m_dims;
+    for (auto di = dims.begin(); di != dims.end(); ++di)
+        di->m_id = ctx.registerOrAssignDim(di->m_name, di->m_type);
 }
 
 
 StageSequentialIterator* OciReader::createSequentialIterator() const
 {
-    using namespace pdal::drivers::oci::iterators::sequential;
-
-    return new OciSeqIterator(m_stmt, m_block);
+    return new iterators::sequential::OciSeqIterator(m_stmt, m_block);
 }
-
 
 } // namespace oci
 } // namespace drivers

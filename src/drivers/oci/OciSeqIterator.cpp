@@ -81,64 +81,6 @@ point_count_t OciSeqIterator::read(PointBuffer& buffer, BlockPtr block,
     throw pdal_error("Unsupported orientation.");
 }
 
-namespace
-{
-
-void setField(PointBuffer& buf, char *pos, schema::DimInfo& d, PointId nextId)
-{
-    union
-    {
-        float f;
-        double d;
-        int8_t s8;
-        int16_t s16;
-        int32_t s32;
-        int64_t s64;
-        uint8_t u8;
-        uint16_t u16;
-        uint32_t u32;
-        uint64_t u64;
-    } e;  // e - for Everything.
-
-    memcpy(&e, pos, Dimension::size(d.m_type));
-    switch (d.m_type)
-    {
-        case Dimension::Type::Float:
-            buf.setField(d.m_id, nextId, e.f);
-            break;
-        case Dimension::Type::Double:
-            buf.setField(d.m_id, nextId, e.d);
-            break;
-        case Dimension::Type::Signed8:
-            buf.setField(d.m_id, nextId, e.s8);
-            break;
-        case Dimension::Type::Signed16:
-            buf.setField(d.m_id, nextId, e.s16);
-            break;
-        case Dimension::Type::Signed32:
-            buf.setField(d.m_id, nextId, e.s32);
-            break;
-        case Dimension::Type::Signed64:
-            buf.setField(d.m_id, nextId, e.s64);
-            break;
-        case Dimension::Type::Unsigned8:
-            buf.setField(d.m_id, nextId, e.u8);
-            break;
-        case Dimension::Type::Unsigned16:
-            buf.setField(d.m_id, nextId, e.u16);
-            break;
-        case Dimension::Type::Unsigned32:
-            buf.setField(d.m_id, nextId, e.u32);
-            break;
-        case Dimension::Type::Unsigned64:
-            buf.setField(d.m_id, nextId, e.u64);
-            break;
-        case Dimension::Type::None:
-            break;
-    }
-}
-
-} // namespace
 
 point_count_t OciSeqIterator::readDimMajor(PointBuffer& buffer, BlockPtr block,
     point_count_t numPts)
@@ -158,7 +100,7 @@ point_count_t OciSeqIterator::readDimMajor(PointBuffer& buffer, BlockPtr block,
         numRead = 0;
         while (numRead < numPts && blockRemaining > 0)
         {
-            setField(buffer, pos, d, nextId);
+            buffer.setField(d.m_id, d.m_type, nextId, pos);
             pos += Dimension::size(d.m_type);
             nextId++;
             numRead++;
@@ -185,7 +127,7 @@ point_count_t OciSeqIterator::readPointMajor(PointBuffer& buffer,
         for (auto di = dims.begin(); di != dims.end(); ++di)
         {
             schema::DimInfo& d = *di;
-            setField(buffer, pos, d, nextId);
+            buffer.setField(d.m_id, d.m_type, nextId, pos);
             pos += Dimension::size(d.m_type);
         }
 

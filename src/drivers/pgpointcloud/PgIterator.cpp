@@ -35,6 +35,8 @@
 
 #include <pdal/drivers/pgpointcloud/PgReader.hpp>
 #include <pdal/PointBuffer.hpp>
+#include <pdal/XMLSchema.hpp>
+/**
 #include <pdal/FileUtils.hpp>
 #include <pdal/Utils.hpp>
 #include <pdal/StageFactory.hpp>
@@ -46,11 +48,7 @@
 #include <boost/algorithm/string.hpp>
 
 #include <iostream>
-#include <map>
-
-
-
-
+**/
 
 namespace pdal
 {
@@ -59,30 +57,12 @@ namespace drivers
 namespace pgpointcloud
 {
 
-//*********************************************************************************
-//  pdal.drivers.pgpointcloud.Reader
-//
-//  The iterator downbelow controls the actual reading, the Reader just does some
-//  basic setup and returning of metadata to the Writer at the other end of
-//  the chain.
-//
-//  The core of PDAL only calls the following methods:
-//
-//  Options Reader::getDefaultOptions()
-//  void Reader::initialize()
-//  boost::uint64_t Reader::getNumPoints() const
-//  pdal::StageSequentialIterator* Reader::createSequentialIterator(PointBuffer& buffer) const
-//
-//*********************************************************************************
-
-
 namespace iterators
 {
 namespace sequential
 {
 
-PgIterator::PgIterator(const pdal::drivers::pgpointcloud::PgReader& reader,
-        const DimensionList& dims)
+PgIterator::PgIterator(const PgReader& reader, const schema::DimInfoList& dims)
     : m_reader(reader)
     , m_at_end(false)
     , m_cursor(false)
@@ -92,46 +72,28 @@ PgIterator::PgIterator(const pdal::drivers::pgpointcloud::PgReader& reader,
     , m_cur_row(0)
     , m_cur_nrows(0)
     , m_cur_result(NULL)
-    , m_patch(std::unique_ptr<Patch>(new Patch))
+    , m_patch(new Patch)
 {
-    pdal::Options const& options = reader.getOptions();
-    std::string const& connection = options.getValueOrThrow<std::string>("connection");
-    m_session = pg_connect(connection);
+    m_session = pg_connect(reader.connString());
 
+    //ABELL - Need to calc elsewhere.
     m_point_size = 0;
-    for (size_t i = 0; i < m_dims.size(); ++i)
-    {
-        m_point_size += m_dims[i]->getByteSize();
-    }
-    return;
+    for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
+        m_point_size += Dimension::size(di->m_type);
 }
 
 PgIterator::~PgIterator()
 {
     if (m_session)
-    {
         PQfinish(m_session);
-        m_session = NULL;
-    }
-
     if (m_cur_result)
-    {
         PQclear(m_cur_result);
-        m_cur_result = NULL;
-    }
-
 }
 
 
-const pdal::drivers::pgpointcloud::PgReader& PgIterator::getReader() const
+uint64_t PgIterator::skipImpl(uint64_t count)
 {
-    return m_reader;
-}
-
-
-boost::uint64_t PgIterator::skipImpl(boost::uint64_t count)
-{
-    boost::uint64_t initialCount = count;
+    uint64_t initialCount = count;
     while (count)
     {
         point_count_t numRem = m_patch->remaining;
@@ -139,7 +101,7 @@ boost::uint64_t PgIterator::skipImpl(boost::uint64_t count)
         m_patch->remaining = (numRem - blockCount);
         count -= blockCount;
         if (count > 0)
-            if (! NextBuffer())
+            if (!NextBuffer())
                 break;
     }
     return initialCount - count;
@@ -148,30 +110,35 @@ boost::uint64_t PgIterator::skipImpl(boost::uint64_t count)
 
 bool PgIterator::atEndImpl() const
 {
-    getReader().log()->get(logDEBUG) << "atEndImpl called" << std::endl;
+    m_reader.log()->get(LogLevel::DEBUG) << "atEndImpl called" << std::endl;
     return m_at_end;
 }
+
 
 bool PgIterator::CursorSetup()
 {
     std::ostringstream oss;
-    oss << "DECLARE cur CURSOR FOR " << getReader().getDataQuery();
+    oss << "DECLARE cur CURSOR FOR " << m_reader.getDataQuery();
     pg_begin(m_session);
     pg_execute(m_session, oss.str());
     m_cursor = true;
 
-    getReader().log()->get(logDEBUG) << "SQL cursor prepared: " << oss.str() << std::endl;
+    m_reader.log()->get(LogLevel::DEBUG) << "SQL cursor prepared: " <<
+        oss.str() << std::endl;
     return true;
 }
+
 
 bool PgIterator::CursorTeardown()
 {
     pg_execute(m_session, "CLOSE cur");
     pg_commit(m_session);
     m_cursor = false;
-    getReader().log()->get(logDEBUG) << "SQL cursor closed." << std::endl;
+    m_reader.log()->get(LogLevel::DEBUG) << "SQL cursor closed." <<
+        std::endl;
     return true;
 }
+
 
 point_count_t PgIterator::readPgPatch(PointBuffer& buffer, point_count_t numPts)
 {
@@ -183,10 +150,11 @@ point_count_t PgIterator::readPgPatch(PointBuffer& buffer, point_count_t numPts)
     uint8_t *pos = &(m_patch->binary.front()) + offset;
     while (numRead < numPts && numRemaining > 0)
     {
-        for (size_t d = 0; d < m_dims.size(); ++d)
+        for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
         {
-            buffer.setRawField(m_dims[d], nextId, pos);
-            pos += m_dims[d]->getByteSize();
+            schema::DimInfo& d = *di;
+            buffer.setField(d.m_id, d.m_type, nextId, pos);
+            pos += Dimension::size(d.m_type);
         }
         numRemaining--;
         nextId++;
@@ -196,6 +164,7 @@ point_count_t PgIterator::readPgPatch(PointBuffer& buffer, point_count_t numPts)
     return numRead;
 }
 
+
 bool PgIterator::NextBuffer()
 {
     if (! m_cursor)
@@ -204,12 +173,15 @@ bool PgIterator::NextBuffer()
     if (m_cur_row >= m_cur_nrows || ! m_cur_result)
     {
         static std::string fetch = "FETCH 2 FROM cur";
-        if (m_cur_result) PQclear(m_cur_result);
+        if (m_cur_result)
+            PQclear(m_cur_result);
         m_cur_result = pg_query_result(m_session, fetch);
-        bool logOutput = getReader().log()->getLevel() > logDEBUG3;
+        bool logOutput = (m_reader.log()->getLevel() > LogLevel::DEBUG3);
         if (logOutput)
-            getReader().log()->get(logDEBUG3) << "SQL: " << fetch << std::endl;
-        if (PQresultStatus(m_cur_result) != PGRES_TUPLES_OK || PQntuples(m_cur_result) == 0)
+            m_reader.log()->get(LogLevel::DEBUG3) << "SQL: " <<
+                fetch << std::endl;
+        if ((PQresultStatus(m_cur_result) != PGRES_TUPLES_OK) ||
+            (PQntuples(m_cur_result) == 0))
         {
             PQclear(m_cur_result);
             m_cur_result = NULL;
@@ -220,8 +192,6 @@ bool PgIterator::NextBuffer()
         m_cur_row = 0;
         m_cur_nrows = PQntuples(m_cur_result);
     }
-
-    
     m_patch->hex = PQgetvalue(m_cur_result, m_cur_row, 0);
     m_patch->count = atoi(PQgetvalue(m_cur_result, m_cur_row, 1));
     m_patch->remaining = m_patch->count;
@@ -236,16 +206,14 @@ point_count_t PgIterator::readImpl(PointBuffer& buffer, point_count_t count)
     if (atEndImpl())
         return 0;
     
-    getReader().log()->get(logDEBUG) << "readBufferImpl called with "
+    m_reader.log()->get(LogLevel::DEBUG) << "readBufferImpl called with "
         "PointBuffer filled to " << buffer.size() << " points" <<
         std::endl;
 
     // First time through, create the SQL statement, allocate holding pens
     // and fire it off!
     if (! m_cursor)
-    {
         CursorSetup();
-    }
 
     point_count_t totalNumRead = 0;
     while (totalNumRead < count)
@@ -257,17 +225,13 @@ point_count_t PgIterator::readImpl(PointBuffer& buffer, point_count_t count)
         point_count_t numRead = readPgPatch(buffer, count - totalNumRead);
         PointId bufEnd = bufBegin + numRead;
         totalNumRead += numRead;
-
     }
     return totalNumRead;
-
 }
 
+} // namespace sequential
+} // namespace iterators
 
-
-}
-} // pdal.drivers.pgpointcloud.iterators.sequential.Iterator
-
-} // pgpointcloud
-} // drivers
-} // pdal
+} // namespace pgpointcloud
+} // namespace drivers
+} // namespace pdal

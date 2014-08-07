@@ -35,26 +35,14 @@
 
 #include <pdal/drivers/pgpointcloud/PgReader.hpp>
 #include <pdal/PointBuffer.hpp>
-#include <pdal/FileUtils.hpp>
-#include <pdal/Utils.hpp>
-#include <pdal/StageFactory.hpp>
-
-#include <boost/shared_ptr.hpp>
-#include <boost/scoped_ptr.hpp>
-#include <boost/tokenizer.hpp>
-#include <boost/make_shared.hpp>
-#include <boost/algorithm/string.hpp>
+#include <pdal/XMLSchema.hpp>
 
 #include <iostream>
-#include <map>
-
-
 
 #ifdef USE_PDAL_PLUGIN_PGPOINTCLOUD
 MAKE_READER_CREATOR(pgpointcloudReader, pdal::drivers::pgpointcloud::PgReader)
 CREATE_READER_PLUGIN(pgpointcloud, pdal::drivers::pgpointcloud::PgReader)
 #endif
-
 
 namespace pdal
 {
@@ -63,63 +51,32 @@ namespace drivers
 namespace pgpointcloud
 {
 
-//*********************************************************************************
-//  pdal.drivers.pgpointcloud.Reader
-//
-//  The iterator downbelow controls the actual reading, the Reader just does some
-//  basic setup and returning of metadata to the Writer at the other end of
-//  the chain.
-//
-//  The core of PDAL only calls the following methods:
-//
-//  Options PgReader::getDefaultOptions()
-//  void PgReader::initialize()
-//  boost::uint64_t PgReader::getNumPoints() const
-//  pdal::StageSequentialIterator* PgReader::createSequentialIterator(PointBuffer& buffer) const
-//
-//*********************************************************************************
-
-
 PgReader::PgReader(const Options& options)
-    : pdal::Reader(options)
-    , m_session(NULL)
-    , m_connection("")
-    , m_table_name("")
-    , m_schema_name("")
-    , m_column_name("")
-    , m_where("")
-    , m_pcid(0)
-    , m_cached_point_count(0)
-    , m_cached_max_points(0)
+    : pdal::Reader(options), m_session(NULL), m_pcid(0),
+    m_cached_point_count(0), m_cached_max_points(0)
 {}
+
 
 PgReader::~PgReader()
 {
     if (m_session)
         PQfinish(m_session);
-
-    return;
 }
+
 
 Options PgReader::getDefaultOptions()
 {
-    Options options;
+    Options ops;
 
-    Option connection("connection", "", "Connection string to connect to database");
-    Option table("table", "", "Table to read out of");
-    Option schema("schema", "", "Schema to read out of");
-    Option column("column", "", "Column to read out of");
-    Option where("where", "", "SQL where clause to filter query");
-    Option spatialreference("spatialreference", "", "override the source data spatialreference");
+    ops.add("connection", "", "Connection string to connect to database");
+    ops.add("table", "", "Table to read out of");
+    ops.add("schema", "", "Schema to read out of");
+    ops.add("column", "", "Column to read out of");
+    ops.add("where", "", "SQL where clause to filter query");
+    ops.add("spatialreference", "",
+        "override the source data spatialreference");
 
-    options.add(connection);
-    options.add(table);
-    options.add(schema);
-    options.add(column);
-    options.add(where);
-    options.add(spatialreference);
-
-    return options;
+    return ops;
 }
 
 
@@ -140,16 +97,10 @@ void PgReader::processOptions(const Options& options)
 }
 
 
-
-
 void PgReader::initialize()
 {
     // Database connection
     m_session = pg_connect(m_connection);
-
-    // Read schema from pointcloud_formats if possible
-//ABELL - Fix
-//    m_schema = fetchSchema();
 
     // Allow spatialreference override if desired
 //ABELL - Move to processOptions()
@@ -164,36 +115,34 @@ void PgReader::initialize()
     }
 }
 
-boost::uint64_t PgReader::getNumPoints() const
+
+uint64_t PgReader::getNumPoints() const
 {
-    if (m_cached_point_count == 0)
+    if (m_cached_point_count)
+        return m_cached_point_count;
+
+    std::ostringstream oss;
+    oss << "SELECT Sum(PC_NumPoints(" << m_column_name << ")) AS numpoints, ";
+    oss << "Max(PC_NumPoints(" << m_column_name << ")) AS maxpoints FROM ";
+    if (m_schema_name.size())
+        oss << m_schema_name << ".";
+    oss << m_table_name;
+    if (m_where.size())
+        oss << " WHERE " << m_where;
+
+    PGresult *result = pg_query_result(m_session, oss.str());
+
+    if (PQresultStatus(result) != PGRES_TUPLES_OK)
     {
-        std::ostringstream oss;
-        oss << "SELECT Sum(PC_NumPoints(" << m_column_name << ")) AS numpoints, ";
-        oss << "Max(PC_NumPoints(" << m_column_name << ")) AS maxpoints FROM ";
-        if (m_schema_name.size())
-        {
-            oss << m_schema_name << ".";
-        }
-        oss << m_table_name;
-        if (m_where.size())
-        {
-            oss << " WHERE " << m_where;
-        }
-
-        PGresult *result = pg_query_result(m_session, oss.str());
-
-        if (PQresultStatus(result) != PGRES_TUPLES_OK)
-        {
-            throw pdal_error("unable to get point count");
-        }
-        m_cached_point_count = atoi(PQgetvalue(result, 0, 0));
-        m_cached_max_points = atoi(PQgetvalue(result, 0, 1));
-        PQclear(result);
+        throw pdal_error("unable to get point count");
     }
+    m_cached_point_count = atoi(PQgetvalue(result, 0, 0));
+    m_cached_max_points = atoi(PQgetvalue(result, 0, 1));
+    PQclear(result);
 
     return m_cached_point_count;
 }
+
 
 std::string PgReader::getDataQuery() const
 {
@@ -201,36 +150,31 @@ std::string PgReader::getDataQuery() const
     oss << "SELECT text(PC_Uncompress(" << m_column_name << ")) AS pa, ";
     oss << "PC_NumPoints(" << m_column_name << ") AS npoints FROM ";
     if (m_schema_name.size())
-    {
         oss << m_schema_name << ".";
-    }
     oss << m_table_name;
     if (m_where.size())
-    {
         oss << " WHERE " << m_where;
-    }
 
-    log()->get(logDEBUG) << "Constructed data query " << oss.str() << std::endl;
+    log()->get(LogLevel::DEBUG) << "Constructed data query " <<
+        oss.str() << std::endl;
     return oss.str();
 }
 
-boost::uint64_t PgReader::getMaxPoints() const
+
+uint64_t PgReader::getMaxPoints() const
 {
     if (m_cached_point_count == 0)
-    {
-        boost::uint64_t npoints = getNumPoints();
-    }
+        getNumPoints();  // Fills m_cached_max_points.
     return m_cached_max_points;
 }
 
 
-boost::uint32_t PgReader::fetchPcid() const
-{
-    boost::uint32_t pcid = 0;
+uint32_t PgReader::fetchPcid() const
+{ 
+    if (m_pcid)
+        return m_pcid;
 
-    if (m_pcid) return m_pcid;
-
-    log()->get(logDEBUG) << "Fetching pcid ..." << std::endl;
+    log()->get(LogLevel::DEBUG) << "Fetching pcid ..." << std::endl;
 
     std::ostringstream oss;
     oss << "SELECT PC_Typmod_Pcid(a.atttypmod) AS pcid ";
@@ -238,8 +182,7 @@ boost::uint32_t PgReader::fetchPcid() const
     oss << "WHERE c.relname = '" << m_table_name << "' ";
     oss << "AND a.attname = '" << m_column_name << "' ";
 
-    char *pcid_str(0);
-    pcid_str = pg_query_once(m_session, oss.str());
+    char *pcid_str = pg_query_once(m_session, oss.str());
 
     if (! pcid_str)
     {
@@ -250,10 +193,10 @@ boost::uint32_t PgReader::fetchPcid() const
         throw pdal_error(oss.str());
     }
 
-    pcid = atoi(pcid_str);
+    uint32_t pcid = atoi(pcid_str);
     free(pcid_str);
 
-    if (! pcid)
+    if (!pcid)
     {
         // Are pcid == 0 valid?
         std::ostringstream oss;
@@ -263,63 +206,40 @@ boost::uint32_t PgReader::fetchPcid() const
         throw pdal_error(oss.str());
     }
 
-
-    log()->get(logDEBUG) << "     got pcid = " << pcid << std::endl;
-
+    log()->get(LogLevel::DEBUG) << "     got pcid = " << pcid << std::endl;
     m_pcid = pcid;
     return pcid;
 }
 
-void PgReader::buildSchema(Schema *s)
-{
-    log()->get(logDEBUG) << "Fetching schema object" << std::endl;
 
-    boost::uint32_t pcid = fetchPcid();
+void PgReader::addDimensions(PointContext ctx)
+{
+    log()->get(LogLevel::DEBUG) << "Fetching schema object" << std::endl;
+
+    uint32_t pcid = fetchPcid();
 
     std::ostringstream oss;
     oss << "SELECT schema FROM pointcloud_formats WHERE pcid = " << pcid;
 
     char *xml_str = pg_query_once(m_session, oss.str());
     if (!xml_str)
-    {
         throw pdal_error("Unable to fetch schema from `pointcloud_formats`");
-    }
-    std::string xml = std::string(xml_str);
+
+    m_schema = schema::Reader(xml_str).schema();
     free(xml_str);
 
-    Schema storedSchema = Schema::from_xml(xml);
-
-    DimensionList dims = storedSchema.getDimensions();
+    schema::DimInfoList& dims = m_schema.m_dims;
     for (auto di = dims.begin(); di != dims.end(); ++di)
-    {
-        DimensionPtr d = *di;
-
-        // For dimensions that do not have namespaces, we'll set the namespace
-        // to the namespace of the current stage
-        if (d->getNamespace().empty())
-        {
-            log()->get(logDEBUG4) << "setting namespace for dimension " <<
-                d->getName() << " to "  << getName() << std::endl;
-
-            if (d->getUUID().is_nil())
-                d->createUUID();
-            d->setNamespace(getName());
-        }
-        s->appendDimension(*d);
-    }    
-    //ABELL - Need to fill m_dims with necessary dimensions.
+        di->m_id = ctx.registerOrAssignDim(di->m_name, di->m_type);
 }
 
 
 pdal::SpatialReference PgReader::fetchSpatialReference() const
 {
     // Fetch the WKT for the SRID to set the coordinate system of this stage
-    log()->get(logDEBUG) << "Fetching SRID ..." << std::endl;
+    log()->get(LogLevel::DEBUG) << "Fetching SRID ..." << std::endl;
 
-    boost::uint32_t pcid = fetchPcid();
-
-    // query_oss << "select ST_SRID(query.extent)::integer as code from (" << query << ") as query";
-    // query_oss << "SELECT ST_SRID(extent)::integer as code from cloud";
+    uint32_t pcid = fetchPcid();
 
     std::ostringstream oss;
     oss << "SELECT srid FROM pointcloud_formats WHERE pcid = " << pcid;
@@ -328,9 +248,8 @@ pdal::SpatialReference PgReader::fetchSpatialReference() const
     if (! srid_str)
         throw pdal_error("Unable to fetch srid for this table and column");
 
-    boost::int32_t srid = atoi(srid_str);
-
-    log()->get(logDEBUG) << "     got SRID = " << srid << std::endl;
+    int32_t srid = atoi(srid_str);
+    log()->get(LogLevel::DEBUG) << "     got SRID = " << srid << std::endl;
 
     oss.str("");
     oss << "EPSG:" << srid;
@@ -344,9 +263,8 @@ pdal::SpatialReference PgReader::fetchSpatialReference() const
 
 pdal::StageSequentialIterator* PgReader::createSequentialIterator() const
 {
-    return new pdal::drivers::pgpointcloud::iterators::sequential::PgIterator(*this, m_dims);
+    return new iterators::sequential::PgIterator(*this, m_schema.m_dims);
 }
-
 
 } // pgpointcloud
 } // drivers

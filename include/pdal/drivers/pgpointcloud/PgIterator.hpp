@@ -37,14 +37,16 @@
 #include <pdal/Reader.hpp>
 #include <pdal/ReaderIterator.hpp>
 #include <pdal/PointBuffer.hpp>
+#include <pdal/XMLSchema.hpp>
 
 #include <pdal/drivers/pgpointcloud/common.hpp>
+/**
 #include <boost/scoped_ptr.hpp>
 #include <boost/scoped_array.hpp>
 
-#include <vector>
 #include <memory>
-
+**/
+#include <vector>
 
 namespace pdal
 {
@@ -53,30 +55,26 @@ namespace drivers
 namespace pgpointcloud
 {
 
-    class PgReader;
+class PgReader;
 
 namespace iterators
 {
 namespace sequential
 {
-
     class Patch;
-
 
 class PgIterator : public pdal::StageSequentialIterator
 {
 public:
-    PgIterator(const pdal::drivers::pgpointcloud::PgReader& reader);
-//        const DimensionList& dims);
+    PgIterator(const PgReader& reader, const schema::DimInfoList& dims);
     ~PgIterator();
 
 protected:
     // Skip count points, return number of points skipped
-    boost::uint64_t skipImpl(boost::uint64_t count);
+    uint64_t skipImpl(uint64_t count);
 
     // Fill the provided pointbuffer, return the number of points written
     point_count_t readImpl(PointBuffer& user_buffer, point_count_t count);
-
     point_count_t readBufferImpl(PointBuffer& buffer)
     {
         return readImpl(buffer, (std::numeric_limits<point_count_t>::max)());
@@ -85,50 +83,37 @@ protected:
     bool atEndImpl() const;
 
 private:
-    //
-    // Methods
-    //
-    const pdal::drivers::pgpointcloud::PgReader& getReader() const;
+    point_count_t readPgPatch(PointBuffer& buffer, point_count_t numPts);
 
-    point_count_t readPgPatch(PointBuffer& buffer, 
-                              point_count_t numPts);
     // Internal functions for managing scroll cursor
     bool CursorSetup();
     bool CursorTeardown();
     bool NextBuffer();
 
-    //
-    // Members
-    //
-    const pdal::drivers::pgpointcloud::PgReader& m_reader;
+    const PgReader& m_reader;
     bool m_at_end;
-
     bool m_cursor;
     PGconn* m_session;
-
-//ABELL
-//    DimensionList m_dims;
+    schema::DimInfoList m_dims;
     size_t m_point_size;
     uint32_t m_cur_row;
     uint32_t m_cur_nrows;
     PGresult* m_cur_result;
     std::unique_ptr<Patch> m_patch;
-
-}; // pdal.drivers.pgpointcloud.sequential.iterators.Iterator
+};
 
 class Patch
 {
 public:
     Patch() : count(0), remaining(0)
-    {
-    };
+    {}
     
     point_count_t count;
     point_count_t remaining;
     std::string hex;
     
     std::vector<uint8_t> binary;
-    static const boost::uint32_t trim = 26;
+    static const uint32_t trim = 26;
 
 #define _base(x) ((x >= '0' && x <= '9') ? '0' : \
          (x >= 'a' && x <= 'f') ? 'a' - 10 : \
@@ -144,19 +129,15 @@ public:
         char const* source = hex.c_str() + trim;
         char const* p = 0;
 
-        for (p = source; p && *p; p+=2 ) {
-                 binary[(p - source) >> 1] =
-                 ((HEXOF(*p)) << 4) + HEXOF(*(p+1));
-         }
-     }
- };
+        for (p = source; p && *p; p += 2)
+            binary[(p - source) >> 1] = ((HEXOF(*p)) << 4) + HEXOF(*(p + 1));
+    }
+};
 
 } // sequential
 } // iterators
 
-
 } // pgpointcloud
 } // driver
 } // pdal
-
 
