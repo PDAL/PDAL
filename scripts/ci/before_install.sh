@@ -47,8 +47,7 @@ fi
 if [[ $PDAL_OPTIONAL_COMPONENTS == "all" ]]
 then
     sudo apt-get install \
-        libgdal1h libgdal-dev \
-        libproj-dev \
+        gdal-bin libgdal-dev libgdal1-dev netcdf-bin libproj-dev libgdal1h \
         python-numpy \
         libxml2-dev \
         libflann-dev \
