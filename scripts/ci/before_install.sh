@@ -3,7 +3,9 @@
 source ./scripts/ci/common.sh
 
 sudo apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 16126D3A3E5C1192
-sudo apt-get update -y
+sudo mv /etc/apt/sources.list.d/pgdg-source.list* /tmp
+sudo apt-get -qq remove postgis
+sudo apt-get update -qq
 sudo apt-get install software-properties-common -y
 sudo apt-get install python-software-properties -y
 # sudo add-apt-repository ppa:ubuntugis/ppa -y
