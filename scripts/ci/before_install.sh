@@ -48,7 +48,7 @@ fi
 
 if [[ $PDAL_OPTIONAL_COMPONENTS == "all" ]]
 then
-    sudo apt-get install libgdal1h libgdal-dev libhdf5-dev 
+    sudo apt-get install libgdal1h libgdal-dev libhdf5-serial-dev
     sudo apt-get install \
         libproj-dev \
         python-numpy \
