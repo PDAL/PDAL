@@ -100,15 +100,15 @@ void Reader::processOptions(const Options& options)
 }
 
 
-void Reader::buildSchema(PointContext ctx)
+void Reader::addDimensions(PointContext ctx)
 {
-    return ctx.addDims(getDefaultDimensions());
+    return ctx.registerDims(getDefaultDimensions());
 }
 
 
 StageSequentialIterator *Reader::createSequentialIterator() const
 {
-    return new iterators::sequential::IcebridgeSeqIter(m_dims,
+    return new iterators::sequential::IcebridgeSeqIter(
         const_cast<Hdf5Handler *>(&m_hdf5Handler));
 }
 
@@ -117,6 +117,7 @@ void Reader::ready(PointContext ctx)
 {
     m_hdf5Handler.initialize(m_filename, hdf5Columns);
 }
+
 
 void Reader::done(PointContext ctx)
 {
@@ -161,12 +162,19 @@ point_count_t IcebridgeSeqIter::readImpl(PointBuffer& buf, point_count_t count)
         {
             m_hdf5Handler->getColumnEntries(rawData.get(), column.name, count,
                 m_index);
-            unsigned char *p = rawData.get();
-            for (PointId i = 0; i < count; ++i)
+            void *p = (void *)rawData.get();
+            // This is ugly but avoids a test in a tight loop.
+            if (column.predType == H5::PredType::NATIVE_FLOAT)
             {
-                buf.setRawField(*di, nextId, p);
-                nextId++;
-                p += sizeof(float);
+                float *fval = (float *)p;
+                for (PointId i = 0; i < count; ++i)
+                    buf.setField(*di, nextId++, *fval++);
+            }
+            else if (column.predType == H5::PredType::NATIVE_INT)
+            {
+                int32_t *ival = (int32_t *)p;
+                for (PointId i = 0; i < count; ++i)
+                    buf.setField(*di, nextId++, *ival++);
             }
         }
         catch(...)
