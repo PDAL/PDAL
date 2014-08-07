@@ -34,19 +34,14 @@
 
 #pragma once
 
+#include <vector>
+
 #include <pdal/Reader.hpp>
 #include <pdal/ReaderIterator.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/XMLSchema.hpp>
 
 #include <pdal/drivers/pgpointcloud/common.hpp>
-/**
-#include <boost/scoped_ptr.hpp>
-#include <boost/scoped_array.hpp>
-
-#include <memory>
-**/
-#include <vector>
 
 namespace pdal
 {
