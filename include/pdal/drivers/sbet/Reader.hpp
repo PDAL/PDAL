@@ -80,11 +80,13 @@ namespace sequential
 class PDAL_DLL SbetSeqIterator : public pdal::ReaderSequentialIterator
 {
 public:
-    SbetSeqIterator(point_count_t numPts, ILeStream& stream) :
-        m_numPts(numPts), m_stream(stream)
+    SbetSeqIterator(const Dimension::IdList& dims, point_count_t numPts,
+            ILeStream& stream) :
+        m_dims(dims), m_numPts(numPts), m_stream(stream)
     {}
 
 private:
+    Dimension::IdList m_dims;
     point_count_t m_numPts;
     ILeStream& m_stream;
 

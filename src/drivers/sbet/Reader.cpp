@@ -54,23 +54,16 @@ void SbetReader::processOptions(const Options& options)
 }
 
 
-void SbetReader::buildSchema(PointContext ctx)
+void SbetReader::addDimensions(PointContext ctx)
 {
-    ctx.addDims(getDefaultDimensions());
+    ctx.registerDims(getDefaultDimensions());
 }
 
 
 void SbetReader::ready(PointContext ctx)
 {
-    std::vector<Dimension> dims = getDefaultDimensions();
-    for (auto di = dims.begin(); di != dims.end(); ++di)
-    {
-        Dimension& d = *di;
-        m_dims.push_back(ctx.schema()->getDimension(d.getName(), getName()));
-    }
-
     size_t fileSize = FileUtils::fileSize(m_filename);
-    size_t pointSize = m_dims.size() * sizeof(double);
+    size_t pointSize = getDefaultDimensions().size() * sizeof(double);
     if (fileSize % pointSize != 0)
         throw pdal_error("invalid sbet file size");
     m_numPts = fileSize / pointSize;
@@ -80,7 +73,7 @@ void SbetReader::ready(PointContext ctx)
 
 StageSequentialIterator* SbetReader::createSequentialIterator() const
 {
-    return new drivers::sbet::iterators::sequential::SbetSeqIterator(m_dims,
+    return new iterators::sequential::SbetSeqIterator(getDefaultDimensions(),
         m_numPts, *m_stream);
 }
 
@@ -102,7 +95,7 @@ point_count_t SbetSeqIterator::readImpl(PointBuffer& buf, point_count_t numPts)
         {
             double d;
             m_stream >> d;
-            DimensionPtr dim = *di;
+            Dimension::Id::Enum dim = *di;
             buf.setField(dim, nextId, d);
         }
         idx++;

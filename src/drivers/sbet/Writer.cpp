@@ -53,15 +53,6 @@ void SbetWriter::processOptions(const Options& options)
 void SbetWriter::ready(PointContext ctx)
 {
     m_stream.reset(new OLeStream(m_filename));
-
-    // Find dimensions in the current schema that map to the SBET dimensions.
-    std::vector<Dimension> neededDims = getDefaultDimensions();
-    m_dims.clear();
-    for (auto di = neededDims.begin(); di != neededDims.end(); ++di)
-    {
-        Dimension& dim = *di;
-        m_dims.push_back(ctx.schema()->getDimension(dim.getName(), getName()));
-    }
 }
 
 
@@ -69,13 +60,16 @@ void SbetWriter::write(const PointBuffer& buf)
 {
     m_callback->setTotal(buf.size());
     m_callback->invoke(0);
+
+    Dimension::IdList dims = getDefaultDimensions();
     for (PointId idx = 0; idx < buf.size(); ++idx)
     {
-        for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
+        for (auto di = dims.begin(); di != dims.end(); ++di)
         {
             // If a dimension doesn't exist, write 0.
-            DimensionPtr d = *di;
-            *m_stream << (d ? buf.getFieldAs<double>(d, idx) : 0.0);
+            Dimension::Id::Enum dim = *di;
+            *m_stream << (buf.hasDim(dim) ?
+                buf.getFieldAs<double>(dim, idx) : 0.0);
         }
         if (idx % 100 == 0)
             m_callback->invoke(idx + 1);

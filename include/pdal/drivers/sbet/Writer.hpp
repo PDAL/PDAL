@@ -54,13 +54,12 @@ public:
     SbetWriter(const Options& options) : pdal::Writer(options)
         {}
 
-    static std::vector<Dimension> getDefaultDimensions()
-        { return fileDimensions(s_getName()); }
+    static Dimension::IdList getDefaultDimensions()
+        { return fileDimensions(); }
 
 private:
     std::unique_ptr<OLeStream> m_stream;
     std::string m_filename;
-    std::vector<DimensionPtr> m_dims;
 
     virtual void processOptions(const Options& options);
     virtual void ready(PointContext ctx);
