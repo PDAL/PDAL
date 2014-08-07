@@ -199,19 +199,19 @@ public:
     /// @return should we read this dimension?
     bool isRead() const
     {
-        return (m_flags & dimension::IsRead);
+        return ((m_flags & dimension::IsRead) != 0);
     }
 
     /// @return should we write this dimension?
     bool isWritten() const
     {
-        return (m_flags & dimension::IsWritten);
+        return ((m_flags & dimension::IsWritten) != 0);
     }
 
     /// @return is this dimension ignored?
     bool isIgnored() const
     {
-        return (m_flags & dimension::IsIgnored);
+        return ((m_flags & dimension::IsIgnored) != 0);
     }
 
     /// @return Number of bytes required to serialize this dimension
@@ -279,14 +279,14 @@ public:
     /// context of a Schema. Schema will set this value when
     /// adding the Dimension to itself so as to not require calculating
     /// it for every lookup.
-    std::size_t getByteOffset() const
+    pdal::dimension::size_type getByteOffset() const
     {
         return m_byteOffset;
     }
 
     /// sets the byte offset of the Dimension
     /// @param v the value to set
-    void setByteOffset(std::size_t v)
+    void setByteOffset(pdal::dimension::size_type v)
     {
         m_byteOffset = v;
     }

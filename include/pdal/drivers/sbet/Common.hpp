@@ -45,7 +45,7 @@ namespace drivers
 namespace sbet
 {
 
-std::vector<Dimension> fileDimensions(const std::string& stageName);
+PDAL_DLL std::vector<Dimension> fileDimensions(const std::string& stageName);
 
 } // namespace sbet
 } // namespace drivers

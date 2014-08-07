@@ -97,7 +97,7 @@ typedef Map::index<position>::type index_by_position;
 typedef Map::index<index>::type index_by_index;
 typedef Map::index<uid>::type index_by_uid;
 
-typedef boost::uint32_t size_type;
+typedef size_t size_type;
 
 class PDAL_DLL DimensionMap
 {

@@ -90,7 +90,7 @@ private:
     point_count_t m_numPts;
     ILeStream& m_stream;
 
-    virtual uint32_t readBufferImpl(PointBuffer& buf)
+    virtual point_count_t readBufferImpl(PointBuffer& buf)
         { return readImpl(buf, std::numeric_limits<point_count_t>::max()); }
 
     boost::uint64_t skipImpl(boost::uint64_t);

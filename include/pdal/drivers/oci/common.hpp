@@ -146,8 +146,8 @@ public:
 };
 typedef std::shared_ptr<Block> BlockPtr;
 
-Connection connect(std::string connSpec);
-Schema fetchSchema(Statement stmt, BlockPtr block);
+PDAL_DLL Connection connect(std::string connSpec);
+PDAL_DLL Schema fetchSchema(Statement stmt, BlockPtr block);
 
 } // namespace oci
 } // namespace drivers

@@ -51,7 +51,7 @@ public:
 
 protected:
     // from StageSequentialIterator
-    virtual boost::uint32_t readBufferImpl(PointBuffer&) = 0;
+    virtual point_count_t readBufferImpl(PointBuffer&) = 0;
     virtual boost::uint64_t skipImpl(boost::uint64_t pointNum) = 0;
     virtual bool atEndImpl() const = 0;
 
@@ -72,7 +72,7 @@ public:
 
 protected:
     // from StageRandomIterator
-    virtual boost::uint32_t readBufferImpl(PointBuffer&) = 0;
+    virtual point_count_t readBufferImpl(PointBuffer&) = 0;
     virtual boost::uint64_t seekImpl(boost::uint64_t pointNum) = 0;
 
     StageRandomIterator& getPrevIterator();

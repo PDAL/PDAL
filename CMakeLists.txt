@@ -25,6 +25,10 @@ cmake_policy(SET CMP0022 OLD) # interface link libraries
 cmake_policy(SET CMP0042 OLD) # osx rpath
 endif()
 
+if (CMAKE_SYSTEM_NAME MATCHES "Linux")
+set(CMAKE_SKIP_RPATH ON)
+endif()
+
 # Provided modules
 include(CMakeDependentOption)
 
@@ -160,6 +164,7 @@ if(WIN32)
       add_definitions(-D_CRT_SECURE_NO_WARNINGS)
       add_definitions(-D_CRT_NONSTDC_NO_WARNING)
       add_definitions(-D_SCL_SECURE_NO_WARNINGS)
+	  add_definitions(-DNOMINMAX)
     endif()
     
     if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
@@ -183,8 +188,8 @@ if(WIN32)
 
   endif(MSVC)
   
-  set(CMAKE_INCLUDE_PATH "c:/osgeo4w/include;c:/OSGeo4W64/include;$ENV{CMAKE_INCLUDE_PATH}")
-  set(CMAKE_LIBRARY_PATH "c:/osgeo4w/lib;c:/OSGeo4W64/lib;$ENV{CMAKE_LIBRARY_PATH}")
+  set(CMAKE_INCLUDE_PATH "c:/OSGeo4W64/include;$ENV{CMAKE_INCLUDE_PATH}")
+  set(CMAKE_LIBRARY_PATH "c:/OSGeo4W64/lib;$ENV{CMAKE_LIBRARY_PATH}")
 
   set(PDAL_PLATFORM_WIN32 1)
 else()
