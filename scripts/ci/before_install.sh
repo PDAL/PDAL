@@ -48,6 +48,7 @@ if [[ $PDAL_OPTIONAL_COMPONENTS == "all" ]]
 then
     sudo apt-get install \
         libgdal1h \
+        libproj-dev \
         python-numpy \
         libxml2-dev \
         libflann-dev \
