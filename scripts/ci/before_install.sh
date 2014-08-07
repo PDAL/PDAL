@@ -50,7 +50,7 @@ if [[ $PDAL_OPTIONAL_COMPONENTS == "all" ]]
 then
     sudo apt-get install libgdal1h libgdal-dev libhdf5-serial-dev
     sudo apt-get install \
-        libproj-dev \
+        libproj-dev libgeos++-dev \
         python-numpy \
         libxml2-dev \
         libflann-dev \
