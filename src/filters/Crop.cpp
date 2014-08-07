@@ -88,21 +88,12 @@ void Crop::processOptions(const Options& options)
     m_bounds =
         options.getValueOrDefault<Bounds<double>>("bounds", Bounds<double>());
     m_cropOutside = options.getValueOrDefault<bool>("outside", false);
-    m_xDimName = options.getValueOrDefault<std::string>("x_dim", "X");
-    m_yDimName = options.getValueOrDefault<std::string>("y_dim", "Y");
-    m_zDimName = options.getValueOrDefault<std::string>("z_dim", "Z");
-
     m_poly = options.getValueOrDefault<std::string>("polygon", "");
 }
 
 
 void Crop::ready(PointContext ctx)
 {
-    Schema *s = ctx.schema();
-    m_dimX = s->getDimension(m_xDimName);
-    m_dimY = s->getDimension(m_yDimName);
-    m_dimZ = s->getDimension(m_zDimName);
-
 #ifdef PDAL_HAVE_GEOS
     if (!m_poly.empty())
     {
@@ -117,7 +108,7 @@ void Crop::ready(PointContext ctx)
             throw pdal_error("input WKT was not a POLYGON or MULTIPOLYGON");
 
         char* out_wkt = GEOSGeomToWKT_r(m_geosEnvironment, m_geosGeometry);
-        log()->get(logDEBUG2) << "Ingested WKT for filters.crop: " <<
+        log()->get(LogLevel::DEBUG2) << "Ingested WKT for filters.crop: " <<
             std::string(out_wkt) <<std::endl;
         GEOSFree_r(m_geosEnvironment, out_wkt);
 
@@ -137,13 +128,13 @@ void Crop::ready(PointContext ctx)
             throw pdal_error("unable to prepare geometry for "
                 "index-accellerated intersection");
         m_bounds = computeBounds(m_geosGeometry);
-        log()->get(logDEBUG) << "Computed bounds from given WKT: " <<
+        log()->get(LogLevel::DEBUG) << "Computed bounds from given WKT: " <<
             m_bounds <<std::endl;
     }
     else
     {
-        log()->get(logDEBUG) << "Using simple bounds for filters.crop: " <<
-            m_bounds << std::endl;
+        log()->get(LogLevel::DEBUG) << "Using simple bounds for "
+            "filters.crop: " << m_bounds << std::endl;
     }
 
 #endif
@@ -181,7 +172,7 @@ Bounds<double> Crop::computeBounds(GEOSGeometry const *geometry)
         ring);
 
     GEOSCoordSeq_getDimensions_r(m_geosEnvironment, coords, &numInputDims);
-    log()->get(logDEBUG) << "Inputted WKT had " << numInputDims <<
+    log()->get(LogLevel::DEBUG) << "Inputted WKT had " << numInputDims <<
         " dimensions" <<std::endl;
 
     uint32_t count(0);
@@ -230,23 +221,23 @@ void Crop::crop(PointBuffer& input, PointBuffer& output)
     Bounds<double> const& buffer_bounds = input.getSpatialBounds();
 
     if (buffer_bounds.empty())
-        log()->get(logDEBUG2) <<
+        log()->get(LogLevel::DEBUG2) <<
             "Buffer bounds was empty, reader did not set!" << std::endl;
 
-    bool logOutput = log()->getLevel() > logDEBUG4;
+    bool logOutput = (log()->getLevel() > LogLevel::DEBUG4);
     if (logOutput)
         log()->floatPrecision(8);
 
     for (PointId idx = 0; idx < input.size(); ++idx)
     {
-        double x = input.getFieldAs<double>(m_dimX, idx);
-        double y = input.getFieldAs<double>(m_dimY, idx);
-        double z = input.getFieldAs<double>(m_dimZ, idx);
+        double x = input.getFieldAs<double>(Dimension::Id::X, idx);
+        double y = input.getFieldAs<double>(Dimension::Id::Y, idx);
+        double z = input.getFieldAs<double>(Dimension::Id::Z, idx);
 
         if (logOutput)
         {
             log()->floatPrecision(10);
-            log()->get(logDEBUG5) << "input: " << x << " y: " << y <<
+            log()->get(LogLevel::DEBUG5) << "input: " << x << " y: " << y <<
                 " z: " << z << std::endl;
         }
 

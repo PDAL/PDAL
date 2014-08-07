@@ -1,10 +1,4 @@
 /******************************************************************************
- *
- * Project:  libLAS - http://liblas.org - A BSD library for LAS format data.
- * Purpose:  Point Partitioning/blocking for OPC
- * Author:   Andrew Bell andrew.bell.ia at gmail.com
- *
- ******************************************************************************
  * Copyright (c) 2010, Andrew Bell
  *
  * All rights reserved.
@@ -116,21 +110,17 @@ void Chipper::load(PointBuffer& buffer, ChipRefList& xvec, ChipRefList& yvec,
     yvec.reserve(buffer.size());
     spare.resize(buffer.size());
 
-    Schema const& schema = buffer.getSchema();
-    DimensionPtr dimX = schema.getDimension("X");
-    DimensionPtr dimY = schema.getDimension("Y");
-    
     for (PointId i = 0; i < buffer.size(); ++i)
     {
         ChipPtRef xref;
 
-        xref.m_pos = buffer.getFieldAs<double>(dimX, i);
+        xref.m_pos = buffer.getFieldAs<double>(Dimension::Id::X, i);
         xref.m_ptindex = i;
         xvec.push_back(xref);
 
         ChipPtRef yref;
 
-        yref.m_pos = buffer.getFieldAs<double>(dimY, i);
+        yref.m_pos = buffer.getFieldAs<double>(Dimension::Id::Y, i);
         yref.m_ptindex = i;
         yvec.push_back(yref);
     }

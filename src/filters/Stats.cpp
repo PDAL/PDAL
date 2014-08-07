@@ -74,7 +74,7 @@ void Summary::extractMetadata(MetadataNode &m) const
 }
 
 
-boost::property_tree::ptree Summary::toPTree() const
+boost::property_tree::ptree Summary::toPTree(PointContext ctx) const
 {
     boost::property_tree::ptree tree;
 
@@ -133,7 +133,7 @@ void Stats::filter(PointBuffer& buffer)
     {
         for (auto p = m_stats.begin(); p != m_stats.end(); ++p)
         {
-            DimensionPtr d = p->first;
+            Dimension::Id::Enum d = p->first;
             SummaryPtr c = p->second;
             c->insert(buffer.getFieldAs<double>(d, idx));
         }
@@ -143,7 +143,7 @@ void Stats::filter(PointBuffer& buffer)
 
 void Stats::done(PointContext ctx)
 {
-    extractMetadata();
+    extractMetadata(ctx);
 }
 
 
@@ -181,7 +181,7 @@ void Stats::ready(PointContext ctx)
 {
     using namespace std;
 
-    log()->get(logDEBUG) << "Calculating histogram statistics for "
+    log()->get(LogLevel::DEBUG) << "Calculating histogram statistics for "
         "exact names '" << m_exact_dim_opt << "'"<< std::endl;
 
     vector<string> dims;
@@ -194,8 +194,8 @@ void Stats::ready(PointContext ctx)
         boost::trim(dimName);
         if (dimName.size())
         {
-            log()->get(logDEBUG) << "adding '" << dimName << "' as exact "
-                "dimension name to cumulate stats for" << std::endl;
+            log()->get(LogLevel::DEBUG) << "adding '" << dimName <<
+                "' as exact dimension name to cumulate stats for" << std::endl;
             m_exact_dimension_names.insert(dimName);
             m_dimension_names.insert(dimName);
             exact_dimensions[dimName] = true;
@@ -212,30 +212,27 @@ void Stats::ready(PointContext ctx)
             m_dimension_names.insert(dimName);
     }
 
-    Schema *schema = ctx.schema();
     if (m_dimension_names.size())
     {
-        log()->get(logDEBUG2) << "Explicit dimension size:" <<
+        log()->get(LogLevel::DEBUG2) << "Explicit dimension size:" <<
             m_dimension_names.size() << std::endl;
 
         for (auto i = m_dimension_names.begin();
                 i != m_dimension_names.end(); i++)
         {
             std::string const& name = *i;
-            log()->get(logDEBUG2) << "Requested to cumulate stats for "
+            log()->get(LogLevel::DEBUG2) << "Requested to cumulate stats for "
                 "dimension with name '" << name <<"'"<< std::endl;
-            DimensionPtr d = schema->getDimension(name);
-            if (!d)
+            Dimension::Id::Enum d = ctx.findDim(name);
+            if (d == Dimension::Id::Unknown)
                 continue;
-            log()->get(logDEBUG2) << "Found dimension with name '" <<
-                d->getName() << "' and namespace '" <<
-                d->getNamespace() << "'"<< std::endl;
-            log()->get(logDEBUG2) << "Cumulating stats for dimension " <<
-                d->getName() << " with namespace: " <<
-                d->getNamespace() << std::endl;
+            log()->get(LogLevel::DEBUG2) << "Found dimension with name '" <<
+                name << "'"<< std::endl;
+            log()->get(LogLevel::DEBUG2) << "Cumulating stats for dimension " <<
+                name << std::endl;
 
             bool doExact =
-                (exact_dimensions.find(d->getName()) != exact_dimensions.end());
+                (exact_dimensions.find(name) != exact_dimensions.end());
 
             m_stats[d] = SummaryPtr(new stats::Summary(m_bin_count,
                 m_sample_size, m_cache_size, m_seed, doExact, m_do_sample));
@@ -243,13 +240,12 @@ void Stats::ready(PointContext ctx)
     }
     else
     {
-        DimensionList dims = schema->getDimensions();
+        Dimension::IdList dims = ctx.dims();
         for (auto di = dims.begin(); di != dims.end(); ++di)
         {
-            DimensionPtr d = *di;
-            log()->get(logDEBUG2) << "Cumulating stats for dimension " <<
-                d->getName() << " with namespace: " << d->getNamespace() <<
-                std::endl;
+            Dimension::Id::Enum d = *di;
+            log()->get(LogLevel::DEBUG2) << "Cumulating stats for dimension " <<
+                ctx.dimName(d) << std::endl;
             m_stats[d] = SummaryPtr(new stats::Summary(m_bin_count,
                 m_sample_size, m_cache_size, m_seed, false, m_do_sample));
         }
@@ -257,53 +253,50 @@ void Stats::ready(PointContext ctx)
 }
 
 
-void Stats::extractMetadata()
+void Stats::extractMetadata(PointContext ctx)
 {
     pdal::Metadata output;
 
     boost::uint32_t position(0);
     for (auto di = m_stats.begin(); di != m_stats.end(); ++di)
     {
-        DimensionPtr d = di->first;
+        Dimension::Id::Enum d = di->first;
         const SummaryPtr stat = di->second;
 
-        MetadataNode statNode = m_metadata.add(d->getName());
-        statNode.add("namespace", d->getNamespace());
+        MetadataNode statNode = m_metadata.add(ctx.dimName(d));
         statNode.add("position", position++);
         stat->extractMetadata(statNode);
     }
 }
 
 
-boost::property_tree::ptree Stats::toPTree() const
+boost::property_tree::ptree Stats::toPTree(PointContext ctx) const
 {
     boost::property_tree::ptree tree;
 
     boost::uint32_t position(0);
     for (auto di = m_stats.begin(); di != m_stats.end(); ++di)
     {
-        DimensionPtr d = di->first;
+        Dimension::Id::Enum d = di->first;
         const SummaryPtr stat = di->second;
 
-        boost::property_tree::ptree subtree = stat->toPTree();
+        boost::property_tree::ptree subtree = stat->toPTree(ctx);
         subtree.add("position", position++);
-        tree.add_child(d->getName(), subtree);
+        tree.add_child(ctx.dimName(d), subtree);
     }
     return tree;
 }
 
 
-stats::Summary const& Stats::getStats(DimensionPtr dim) const
+stats::Summary const& Stats::getStats(Dimension::Id::Enum dim) const
 {
     for (auto di = m_stats.begin(); di != m_stats.end(); ++di)
     {
-        DimensionPtr d = di->first;
-        if (*d == *dim)
+        Dimension::Id::Enum d = di->first;
+        if (d == dim)
             return *(di->second);
     }
-    std::ostringstream oss;
-    oss <<"Dimension with name '" << dim->getName() << "' not found";
-    throw pdal_error(oss.str());
+    throw pdal_error("Dimension not found");
 }
 
 } // namespace filters

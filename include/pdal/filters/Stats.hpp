@@ -95,7 +95,7 @@ public:
     boost::uint64_t count() const
         { return boost::accumulators::count(m_summary); }
 
-    boost::property_tree::ptree toPTree() const;
+    boost::property_tree::ptree toPTree(PointContext ctx) const;
     void extractMetadata(MetadataNode &m) const;
 
     void reset()
@@ -149,7 +149,7 @@ public:
 
     static Options getDefaultOptions();
 
-    boost::property_tree::ptree toPTree() const;
+    boost::property_tree::ptree toPTree(PointContext ctx) const;
     const stats::Summary& getStats(Dimension::Id::Enum d) const;
     void reset();
 
@@ -162,7 +162,7 @@ private:
     virtual void ready(PointContext ctx);
     virtual void done(PointContext ctx);
     virtual void filter(PointBuffer& data);
-    void extractMetadata();
+    void extractMetadata(PointContext ctx);
 
     std::string m_exact_dim_opt;
     std::string m_dim_opt;

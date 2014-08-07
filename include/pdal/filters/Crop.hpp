@@ -32,8 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_FILTERS_CROPFILTER_HPP
-#define INCLUDED_FILTERS_CROPFILTER_HPP
+#pragma once
 
 #include <pdal/Filter.hpp>
 #include <pdal/FilterIterator.hpp>
@@ -93,31 +92,6 @@ private:
     Crop(const Crop&); // not implemented
 };
 
-
-namespace iterators
-{
-namespace sequential
-{
-
-
-class PDAL_DLL Crop : public pdal::FilterSequentialIterator
-{
-public:
-    Crop(const pdal::filters::Crop& filter, PointBuffer& buffer);
-
-private:
-    boost::uint64_t skipImpl(boost::uint64_t);
-    point_count_t readBufferImpl(PointBuffer&);
-    bool atEndImpl() const;
-
-    const pdal::filters::Crop& m_cropFilter;
-};
-
-
-} // sequential
-} // iterators
-
 } // filters
 } // pdal
 
-#endif

@@ -187,28 +187,17 @@ void Reprojection::transform(double& x, double& y, double& z)
 
 void Reprojection::filter(PointBuffer& data)
 {
-    const Schema& schema = data.getSchema();
-
-    DimensionPtr dimX = schema.getDimension("X");
-    DimensionPtr dimY = schema.getDimension("Y");
-    DimensionPtr dimZ = schema.getDimension("Z");
-
     for (PointId id = 0; id < data.size(); ++id)
     {
-        double x = data.getFieldAs<double>(dimX, id);
-        double y = data.getFieldAs<double>(dimY, id);
-        double z = data.getFieldAs<double>(dimZ, id);
+        double x = data.getFieldAs<double>(Dimension::Id::X, id);
+        double y = data.getFieldAs<double>(Dimension::Id::Y, id);
+        double z = data.getFieldAs<double>(Dimension::Id::Z, id);
 
         transform(x, y, z);
 
-        // If you get an exception out of this, you're probably reading from
-        // a scaled int and writing to a scaled int and you've overflowed
-        // the integer.
-        // ABELL - Need auto-scaling to deal with this, or always use X,Y,Z
-        //   as doubles, or something more sophisticated..
-        data.setFieldUnscaled(dimX, id, x);
-        data.setFieldUnscaled(dimY, id, y);
-        data.setFieldUnscaled(dimZ, id, z);
+        data.setField(Dimension::Id::X, id, x);
+        data.setField(Dimension::Id::Y, id, y);
+        data.setField(Dimension::Id::Z, id, z);
     }
 }
 
