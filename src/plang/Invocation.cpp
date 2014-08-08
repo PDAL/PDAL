@@ -153,15 +153,15 @@ void Invocation::resetArguments()
 }
 
 
-void Invocation::insertArgument(boost::uint8_t* data,
+void Invocation::insertArgument(std::string const& name, 
+                                boost::uint8_t* data,
                                 Dimension::Type::Enum t,
                                 point_count_t count)
 {
-    std::string name = Dimension::Type::name(t);
-    npy_intp mydims = data_len;
+    npy_intp mydims = count;
     int nd = 1;
     npy_intp* dims = &mydims;
-    npy_intp stride = Dimension::Type::size(t);
+    npy_intp stride = Dimension::size(t);
     npy_intp* strides = &stride;
     int flags = NPY_CARRAY; // NPY_BEHAVED
 
@@ -174,9 +174,7 @@ void Invocation::insertArgument(boost::uint8_t* data,
 }
 
 
-void *Invocation::extractResult(const std::string& name,
-    dimension::Interpretation dataType,
-    boost::uint32_t numBytes)
+void *Invocation::extractResult( std::string const& name, Dimension::Type::Enum t)
 {
     PyObject* xarr = PyDict_GetItemString(m_varsOut, name.c_str());
     if (!xarr)
@@ -196,16 +194,17 @@ void *Invocation::extractResult(const std::string& name,
     
     PyArray_Descr *dtype = PyArray_DESCR(arr);
     
-    if (static_cast<boost::uint32_t>(dtype->elsize) != numBytes)
+    if (static_cast<boost::uint32_t>(dtype->elsize) != Dimension::size(t))
     {
         std::ostringstream oss;
         oss << "dtype of array has size " << dtype->elsize 
             << " but PDAL dimension '" << name << "' has byte size of "
-            << numBytes << " bytes";
+            << Dimension::size(t) << " bytes";
         throw python_error(oss.str());
     }
-    
-    if (dtype->kind == 'i' && dataType != dimension::SignedInteger)
+
+    Dimension::BaseType::Enum b = Dimension::base(t);    
+    if (dtype->kind == 'i' && b != Dimension::BaseType::Enum::Signed)
     {
         std::ostringstream oss;
         oss << "dtype of array has a signed integer type but the " <<
@@ -214,7 +213,7 @@ void *Invocation::extractResult(const std::string& name,
         throw python_error(oss.str());
     }
 
-    if (dtype->kind == 'u' && dataType != dimension::UnsignedInteger)
+    if (dtype->kind == 'u' && b != Dimension::BaseType::Enum::Unsigned)
     {
         std::ostringstream oss;
         oss << "dtype of array has a unsigned integer type but the " <<
@@ -223,7 +222,7 @@ void *Invocation::extractResult(const std::string& name,
         throw python_error(oss.str());
     }
 
-    if (dtype->kind == 'f' && dataType != dimension::Float)
+    if (dtype->kind == 'f' && b != Dimension::BaseType::Enum::Floating)
     {
         std::ostringstream oss;
         oss << "dtype of array has a float type but the " <<
@@ -260,9 +259,9 @@ void Invocation::getOutputNames(std::vector<std::string>& names)
 
 int Invocation::getPythonDataType(Dimension::Type::Enum t)
 {
-    Dimension::BaseType b = Dimension::Type::base(t);
-    size_t size = Dimension::Type::size(t)
-    switch (t)
+    Dimension::BaseType::Enum b = Dimension::base(t);
+    size_t size = Dimension::size(t);
+    switch (b)
     {
         case Dimension::BaseType::Enum::Floating:
             switch (size)

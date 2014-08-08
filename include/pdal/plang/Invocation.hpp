@@ -60,7 +60,8 @@ public:
 
     // creates a Python variable pointing to a (one dimensional) C array
     // adds the new variable to the arguments dictionary
-    void insertArgument(boost::uint8_t* data,
+    void insertArgument(std::string const& name, 
+                        boost::uint8_t* data,
                         Dimension::Type::Enum t,
                         point_count_t count);
     void *extractResult(const std::string& name,
@@ -80,7 +81,7 @@ public:
     // the schema)
     void getOutputNames(std::vector<std::string>& names);
 
-    static int getPythonDataType(Dimension::BaseType::Enum t);
+    static int getPythonDataType(Dimension::Type::Enum t);
     static void numpy_init();
 
 private:

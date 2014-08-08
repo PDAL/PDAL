@@ -78,7 +78,8 @@ void BufferedInvocation::begin(PointBuffer& buffer)
             buffer.getRawField(d, idx, (void *)p);
             p += size;
         }
-        insertArgument( (uint8_t *)data, t, buffer.size());
+        std::string name = Dimension::name(d);
+        insertArgument(name, (uint8_t *)data, t, buffer.size());
     }
 }
 
@@ -93,24 +94,26 @@ void BufferedInvocation::end(PointBuffer& buffer)
     std::vector<std::string> names;
     getOutputNames(names);
 
-    const Schema& schema = buffer.getSchema();
+    // const Schema& schema = buffer.getSchema();
 
     for (size_t i = 0; i < names.size(); i++)
     {
-        DimensionPtr d = schema.getDimension(names[i]);
-        if (d)
+        Dimension::Id::Enum d = buffer.context().findDim(names[i]);
+        if (d != Dimension::Id::Unknown)
         {
-            const std::string& name = d->getName();
+            Dimension::Type::Enum t = Dimension::defaultType(d);  
+            std::string name = Dimension::name(d);
             assert(name == names[i]);
             assert(hasOutputVariable(name));
-            const dimension::Interpretation datatype = d->getInterpretation();
-            const boost::uint32_t numBytes = d->getByteSize();
-            void *data = extractResult(name, datatype, numBytes);
+            
+
+            size_t size = Dimension::size(t);
+            void *data = extractResult(name, t);
             char *p = (char *)data;
             for (PointId idx = 0; idx < buffer.size(); ++idx)
             {
-                buffer.setRawField(d, idx, (void *)p);
-                p += d->getByteSize();
+                buffer.setField(d, t, idx, (void *)p);
+                p += size;
             }
         }
     }
