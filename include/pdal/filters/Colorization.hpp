@@ -92,11 +92,6 @@ private:
         boost::int32_t& line, void *ds);
 
     std::string m_rasterFilename;
-    std::string m_xDimName;
-    std::string m_yDimName;
-    std::map<std::string, uint32_t> m_band_map;
-    std::map<std::string, double> m_scale_map;
-//    std::vector<DimensionPtr> m_dimensions;
     std::vector<uint32_t> m_bands;
     std::vector<double> m_scales;
 
