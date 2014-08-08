@@ -80,7 +80,7 @@ void Predicate::ready(PointContext ctx)
 PointBufferSet Predicate::run(PointBufferPtr buf)
 {
     m_pythonMethod->resetArguments();
-    m_pythonMethod->beginChunk(*buf);
+    m_pythonMethod->begin(*buf);
     m_pythonMethod->execute();
 
     if (!m_pythonMethod->hasOutputVariable("Mask"))

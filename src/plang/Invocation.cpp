@@ -153,21 +153,19 @@ void Invocation::resetArguments()
 }
 
 
-void Invocation::insertArgument(const std::string& name,
-                                boost::uint8_t* data,
-                                boost::uint32_t data_len,
-                                boost::uint32_t data_stride,
-                                dimension::Interpretation dataType,
-                                boost::uint32_t numBytes)
+void Invocation::insertArgument(boost::uint8_t* data,
+                                Dimension::Type::Enum t,
+                                point_count_t count)
 {
+    std::string name = Dimension::Type::name(t);
     npy_intp mydims = data_len;
     int nd = 1;
     npy_intp* dims = &mydims;
-    npy_intp stride = data_stride;
+    npy_intp stride = Dimension::Type::size(t);
     npy_intp* strides = &stride;
     int flags = NPY_CARRAY; // NPY_BEHAVED
 
-    const int pyDataType = getPythonDataType(dataType, numBytes);
+    const int pyDataType = getPythonDataType(t);
 
     PyObject* pyArray = PyArray_New(&PyArray_Type, nd, dims, pyDataType,
         strides, data, 0, flags, NULL);
@@ -194,7 +192,7 @@ void *Invocation::extractResult(const std::string& name,
     PyArrayObject* arr = (PyArrayObject*)xarr;
 
     npy_intp one=0;
-    const int pyDataType = getPythonDataType(dataType, numBytes);
+    const int pyDataType = getPythonDataType(t);
     
     PyArray_Descr *dtype = PyArray_DESCR(arr);
     
@@ -260,12 +258,14 @@ void Invocation::getOutputNames(std::vector<std::string>& names)
 }
 
 
-int Invocation::getPythonDataType(dimension::Interpretation datatype, boost::uint32_t siz)
+int Invocation::getPythonDataType(Dimension::Type::Enum t)
 {
-    switch (datatype)
+    Dimension::BaseType b = Dimension::Type::base(t);
+    size_t size = Dimension::Type::size(t)
+    switch (t)
     {
-        case dimension::Float:
-            switch (siz)
+        case Dimension::BaseType::Enum::Floating:
+            switch (size)
             {
                 case 4:
                     return PyArray_FLOAT;
@@ -273,8 +273,8 @@ int Invocation::getPythonDataType(dimension::Interpretation datatype, boost::uin
                     return PyArray_DOUBLE;
             }
             break;
-        case dimension::SignedInteger:
-            switch (siz)
+        case Dimension::BaseType::Enum::Signed:
+            switch (size)
             {
                 case 1:
                     return PyArray_BYTE;
@@ -286,8 +286,8 @@ int Invocation::getPythonDataType(dimension::Interpretation datatype, boost::uin
                     return PyArray_LONGLONG;
             }
             break;
-        case dimension::UnsignedInteger:
-            switch (siz)
+        case Dimension::BaseType::Enum::Unsigned:
+            switch (size)
             {
                 case 1:
                     return PyArray_UBYTE;
