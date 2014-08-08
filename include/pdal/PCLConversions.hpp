@@ -52,21 +52,11 @@ namespace
 using namespace pdal;
 
 template<typename CLOUDFETCH>
-void setValues(PointBuffer& buf, DimensionPtr dim, size_t numPts,
+void setValues(PointBuffer& buf, Dimension::Id::Enum dim, size_t numPts,
     CLOUDFETCH fetcher)
 {
-    switch (dim->getInterpretation())
-    {
-        case dimension::Float:
-        case dimension::UnsignedInteger:
-        case dimension::SignedInteger:
-            for (size_t i = 0; i < numPts; ++i)
-                buf.setField(dim, i, fetcher(i) / dim->getNumericScale());
-            break;
-        case dimension::Undefined:
-            throw pdal_error("Dimension data type unable to be scaled "
-                    "in conversion from PCL to PDAL");
-    }
+    for (size_t i = 0; i < numPts; ++i)
+        buf.setField(dim, i, fetcher(i));
 }
 
 } //namespace
@@ -79,8 +69,7 @@ namespace pdal
  * Converts PCD data to PDAL format.
  */
 template <typename CloudT>
-void PCDtoPDAL(CloudT &cloud, PointBuffer& buf, DimensionPtr xDim,
-    DimensionPtr yDim, DimensionPtr zDim, DimensionPtr iDim)
+void PCDtoPDAL(CloudT &cloud, PointBuffer& buf)
 {
 #ifdef PDAL_HAVE_PCL
     typedef typename pcl::traits::fieldList<typename CloudT::PointType>::type
@@ -94,12 +83,12 @@ void PCDtoPDAL(CloudT &cloud, PointBuffer& buf, DimensionPtr xDim,
             { return cloud.points[i].y; };
         auto getZ = [&cloud](size_t i)
             { return cloud.points[i].z; };
-        setValues(buf, xDim, cloud.points.size(), getX);
-        setValues(buf, yDim, cloud.points.size(), getY);
-        setValues(buf, zDim, cloud.points.size(), getZ);
+        setValues(buf, Dimension::Id::X, cloud.points.size(), getX);
+        setValues(buf, Dimension::Id::Y, cloud.points.size(), getY);
+        setValues(buf, Dimension::Id::Z, cloud.points.size(), getZ);
     }
 
-    if (pcl::traits::has_intensity<typename CloudT::PointType>::value && iDim)
+    if (pcl::traits::has_intensity<typename CloudT::PointType>::value)
     {
         for (size_t i = 0; i < cloud.points.size(); ++i)
         {
@@ -110,7 +99,7 @@ void PCDtoPDAL(CloudT &cloud, PointBuffer& buf, DimensionPtr xDim,
             pcl::for_each_type<FieldList>
                 (pcl::CopyIfFieldExists<typename CloudT::PointType, float>
                     (p, "intensity", hasIntensity, f));
-            buf.setField(iDim, i, f);
+            buf.setField(Dimension::Id::Intensity, i, f);
         }
     }
 #endif
@@ -123,8 +112,7 @@ void PCDtoPDAL(CloudT &cloud, PointBuffer& buf, DimensionPtr xDim,
  * Converts PDAL data to PCD format.
  */
 template <typename CloudT>
-void PDALtoPCD(PointBuffer& data, CloudT &cloud, DimensionPtr xDim,
-    DimensionPtr yDim, DimensionPtr zDim, DimensionPtr iDim)
+void PDALtoPCD(PointBuffer& data, CloudT &cloud)
 {
 #ifdef PDAL_HAVE_PCL
     typedef typename pcl::traits::fieldList<typename CloudT::PointType>::type
@@ -139,12 +127,9 @@ void PDALtoPCD(PointBuffer& data, CloudT &cloud, DimensionPtr xDim,
     {
         for (size_t i = 0; i < cloud.points.size(); ++i)
         {
-            double xd = data.getFieldAs<int32_t>(xDim, i, false) *
-                xDim->getNumericScale();
-            double yd = data.getFieldAs<int32_t>(yDim, i, false) *
-                yDim->getNumericScale();
-            double zd = data.getFieldAs<double>(zDim, i, false) *
-                zDim->getNumericScale();
+            double xd = data.getFieldAs<double>(Dimension::Id::X, i);
+            double yd = data.getFieldAs<double>(Dimension::Id::Y, i);
+            double zd = data.getFieldAs<double>(Dimension::Id::Z, i);
 
             typename CloudT::PointType p = cloud.points[i];
             p.x = (float)xd;
@@ -154,11 +139,11 @@ void PDALtoPCD(PointBuffer& data, CloudT &cloud, DimensionPtr xDim,
         }
     }
 
-    if (pcl::traits::has_intensity<typename CloudT::PointType>::value && iDim)
+    if (pcl::traits::has_intensity<typename CloudT::PointType>::value)
     {
         for (size_t i = 0; i < cloud.points.size(); ++i)
         {
-            float f = data.getFieldAs<float>(iDim, i);
+            float f = data.getFieldAs<float>(Dimension::Id::Intensity, i);
 
             typename CloudT::PointType p = cloud.points[i];
             pcl::for_each_type<FieldList>
