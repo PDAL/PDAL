@@ -108,21 +108,11 @@ std::map<Point, Point>* cumulatePoints(PointBuffer& source_data,
     std::map<Point, Point> *output = new std::map<Point, Point>;
     uint32_t count(std::min(source_data.size(), candidate_data.size()));
 
-    Schema const& candidate_schema = candidate_data.getSchema();
-    DimensionPtr cDimX = candidate_schema.getDimension("X");
-    DimensionPtr cDimY = candidate_schema.getDimension("Y");
-    DimensionPtr cDimZ = candidate_schema.getDimension("Z");
-
-    Schema const& source_schema = source_data.getSchema();
-    Dimension const& sDimX = source_schema.getDimension("X");
-    Dimension const& sDimY = source_schema.getDimension("Y");
-    Dimension const& sDimZ = source_schema.getDimension("Z");
-    
     for (uint32_t i = 0; i < count; ++i)
     {
-        double sx = source_data.getFieldAs<double>(sDimX, i);
-        double sy = source_data.getFieldAs<double>(sDimY, i);
-        double sz = source_data.getFieldAs<double>(sDimZ, i);
+        double sx = source_data.getFieldAs<double>(Dimension::Id::X, i);
+        double sy = source_data.getFieldAs<double>(Dimension::Id::Y, i);
+        double sz = source_data.getFieldAs<double>(Dimension::Id::Z, i);
         
         std::vector<std::size_t> ids = index->neighbors(sx, sy, sz, 1);
         if (!ids.size())
@@ -133,9 +123,9 @@ std::map<Point, Point>* cumulatePoints(PointBuffer& source_data,
 		}
         
         std::size_t id = ids[0];
-        double cx = candidate_data.getFieldAs<double>(cDimX, id);
-        double cy = candidate_data.getFieldAs<double>(cDimY, id);
-        double cz = candidate_data.getFieldAs<double>(cDimZ, id);
+        double cx = candidate_data.getFieldAs<double>(Dimension::Id::X, id);
+        double cy = candidate_data.getFieldAs<double>(Dimension::Id::Y, id);
+        double cz = candidate_data.getFieldAs<double>(Dimension::Id::Z, id);
         
         Point s(sx, sy, sz, i);
         Point c(cx, cy, cz, id);
@@ -152,16 +142,7 @@ std::map<Point, Point>* cumulatePoints(PointBuffer& source_data,
 void Delta::outputDetail(PointBuffer& source_data, PointBuffer& candidate_data,
     std::map<Point, Point> *points) const
 {
-    Schema const& candidate_schema = candidate_data.getSchema();
-    DimensionPtr cDimX = candidate_schema.getDimension("X");
-    DimensionPtr cDimY = candidate_schema.getDimension("Y");
-    DimensionPtr cDimZ = candidate_schema.getDimension("Z");
 
-    Schema const& source_schema = source_data.getSchema();
-    DimensionPtr sDimX = source_schema.getDimension("X");
-    DimensionPtr sDimY = source_schema.getDimension("Y");
-    DimensionPtr sDimZ = source_schema.getDimension("Z");
-    
     bool bWroteHeader(false);
     
     std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
@@ -171,9 +152,9 @@ void Delta::outputDetail(PointBuffer& source_data, PointBuffer& candidate_data,
     boost::property_tree::ptree output;
     for (uint32_t i = 0; i < count; ++i)
     {
-        double sx = source_data.getFieldAs<double>(sDimX, i);
-        double sy = source_data.getFieldAs<double>(sDimY, i);
-        double sz = source_data.getFieldAs<double>(sDimZ, i);                
+        double sx = source_data.getFieldAs<double>(Dimension::Id::X, i);
+        double sy = source_data.getFieldAs<double>(Dimension::Id::Y, i);
+        double sz = source_data.getFieldAs<double>(Dimension::Id::Z, i);                
         
         std::vector<std::size_t> ids = m_index->neighbors(sx, sy, sz, 1);
         
@@ -185,9 +166,9 @@ void Delta::outputDetail(PointBuffer& source_data, PointBuffer& candidate_data,
 		}
         
         std::size_t id = ids[0];
-        double cx = candidate_data.getFieldAs<double>(cDimX, id);
-        double cy = candidate_data.getFieldAs<double>(cDimY, id);
-        double cz = candidate_data.getFieldAs<double>(cDimZ, id);
+        double cx = candidate_data.getFieldAs<double>(Dimension::Id::X, id);
+        double cy = candidate_data.getFieldAs<double>(Dimension::Id::Y, id);
+        double cz = candidate_data.getFieldAs<double>(Dimension::Id::Z, id);
         
         Point s(sx, sy, sz, id);
         Point c(cx, cy, cz, id);
@@ -220,20 +201,17 @@ void Delta::outputDetail(PointBuffer& source_data, PointBuffer& candidate_data,
         for (auto b = output.begin(); b != output.end(); ++b)
         {
             ostr << b->second.get<boost::int32_t>("i")  << ",";
-            uint32_t precision = Utils::getStreamPrecision(
-                cDimX->getNumericScale());
+            uint32_t precision = 12; 
             ostr.setf(std::ios_base::fixed, std::ios_base::floatfield);
             ostr.precision(precision);
             ostr << b->second.get<float>("xd") << ",";
   
-            precision = Utils::getStreamPrecision(cDimY->getNumericScale());
             ostr.precision(precision);
             ostr << b->second.get<float>("yd");
     
             if (m_3d)
             {
                 ostr << ",";
-                precision = Utils::getStreamPrecision(cDimZ->getNumericScale());
                 ostr.precision(precision);
                 ostr << b->second.get<float>("zd");
             }
@@ -335,7 +313,7 @@ int Delta::execute()
     m_index = std::unique_ptr<KDIndex>(new KDIndex(*candidateBuf));
 
     
-    m_index->build(m_3d);
+    m_index->build(candidateCtx, m_3d);
     
     std::unique_ptr<std::map<Point, Point>>
         points(cumulatePoints(*sourceBuf, *candidateBuf, m_index.get()));
