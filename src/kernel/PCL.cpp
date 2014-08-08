@@ -121,21 +121,13 @@ Stage* PCL::makeReader(Options readerOptions)
     Stage* selector_stage = new pdal::filters::Selector(selectorOptions);
     selector_stage->setInput(reader_stage);
 
-    Options cacheOptions;
-    cacheOptions.add<bool>("debug", isDebug());
-    cacheOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
-    cacheOptions.add<boost::uint32_t>("max_cache_blocks", 1);
-
-    Stage* cache_stage = new pdal::filters::Cache(cacheOptions);
-    cache_stage->setInput(selector_stage);
-
     Options pclOptions;
     pclOptions.add<std::string>("filename", m_pclFile);
     pclOptions.add<bool>("debug", isDebug());
     pclOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
 
     Stage* pcl_stage = new pdal::filters::PCLBlock(pclOptions);
-    pcl_stage->setInput(cache_stage);
+    pcl_stage->setInput(selector_stage);
 
     return pcl_stage;
 }
