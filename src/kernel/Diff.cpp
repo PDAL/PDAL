@@ -109,8 +109,8 @@ void Diff::checkPoints(const PointBuffer& source_data,
 
     // Both schemas have already been determined to be equal, so are the
     // same size and in the same order.
-    DimensionList sourceDims = source_data.getSchema().getDimensions();
-    DimensionList candidateDims = candidate_data.getSchema().getDimensions();
+    Dimension::IdList const& sourceDims = source_data.context().dims();    
+    Dimension::IdList const& candidateDims = candidate_data.context().dims();   
 
     char sbuf[8];
     char cbuf[8];
@@ -118,14 +118,19 @@ void Diff::checkPoints(const PointBuffer& source_data,
     {
         for (size_t d = 0; d < sourceDims.size(); ++d)
         {
-            source_data.getRawField(sourceDims[d], idx, (void *)sbuf);
-            candidate_data.getRawField(candidateDims[d], idx, (void *)cbuf);
-            if (memcmp(sbuf, cbuf, sourceDims[d]->getByteSize()))
+            Dimension::Id::Enum sd = sourceDims[d];
+            Dimension::Id::Enum cd = candidateDims[d];
+
+            source_data.getRawField(sd, idx, (void *)sbuf);
+            candidate_data.getRawField(cd, idx, (void *)cbuf);
+            Dimension::Type::Enum t = Dimension::defaultType(cd);
+            size_t size = Dimension::size(t);            
+            if (memcmp(sbuf, cbuf, size))
             {
                 std::ostringstream oss;
         
                 oss << "Point " << idx << " differs for dimension \"" <<
-                    sourceDims[d]->getName() << "\" for source and candidate";
+                            Dimension::name(sd) << "\" for source and candidate";
                 errors.put<std::string>("data.error", oss.str());
                 badbytes++;                        
             }
@@ -193,14 +198,15 @@ int Diff::execute()
         **/
     }
 
-    if (*candidateCtx.schema() != *sourceCtx.schema())
+    if (candidateCtx.dims().size() != sourceCtx.dims().size())
     {
         std::ostringstream oss;
         
-        oss << "Source and candidate files do not have the same schema";
+        oss << "Source and candidate files do not have the same number of dimensions";
         errors.put<std::string>("schema.error", oss.str());
-        errors.put_child("schema.source", sourceCtx.schema()->toPTree());
-        errors.put_child("schema.candidate", candidateCtx.schema()->toPTree());
+        // FIXME: Need to "ptree" the PointContext dimension list in some way
+        // errors.put_child("schema.source", sourceCtx.schema()->toPTree());
+        // errors.put_child("schema.candidate", candidateCtx.schema()->toPTree());
     }
 
     if (errors.size())
