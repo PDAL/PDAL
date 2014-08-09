@@ -47,8 +47,6 @@ namespace filters
 
 void HexBin::processOptions(const Options& options)
 {
-    m_xDimName = options.getValueOrDefault<std::string>("x_dim", "X");
-    m_yDimName = options.getValueOrDefault<std::string>("y_dim", "Y");
     m_sampleSize = options.getValueOrDefault<uint32_t>("sample_size", 5000);
     m_density = options.getValueOrDefault<uint32_t>("threshold", 15);
 
@@ -63,8 +61,6 @@ void HexBin::processOptions(const Options& options)
 void HexBin::ready(PointContext ctx)
 {
 #ifdef PDAL_HAVE_HEXER
-    m_xDim = ctx.schema()->getDimensionPtr(m_xDimName);
-    m_yDim = ctx.schema()->getDimensionPtr(m_yDimName);
     if (m_edgeLength == 0.0)  // 0 can always be represented exactly.
     {
         m_grid.reset(new HexGrid(m_density));
@@ -81,9 +77,8 @@ void HexBin::filter(PointBuffer& buf)
 #ifdef PDAL_HAVE_HEXER
     for (PointId idx = 0; idx < buf.size(); ++idx)
     {
-        double x = buf.getFieldAs<double>(*m_xDim, idx);
-        double y = buf.getFieldAs<double>(*m_yDim, idx);
-
+        double x = buf.getFieldAs<double>(pdal::Dimension::Id::X, idx, false);
+        double y = buf.getFieldAs<double>(pdal::Dimension::Id::Y, idx, false);
         m_grid->addPoint(x, y);
     }
 #endif

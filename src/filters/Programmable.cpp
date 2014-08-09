@@ -80,11 +80,10 @@ void Programmable::filter(PointBuffer& buf)
 {
     log()->get(LogLevel::DEBUG5) << "Python script " << *m_script <<
         " processing " << buf.size() << " points." << std::endl;
-
     m_pythonMethod->resetArguments();
-    m_pythonMethod->beginChunk(buf);
+    m_pythonMethod->begin(buf);
     m_pythonMethod->execute();
-    m_pythonMethod->endChunk(buf);
+    m_pythonMethod->end(buf);
 }
 
 

@@ -42,6 +42,8 @@
 #  pragma warning(disable: 4505)  // unreferenced local function has been removed
 #endif
 
+using namespace pdal;
+
 namespace pdal
 {
 namespace plang
@@ -55,38 +57,34 @@ BufferedInvocation::BufferedInvocation(const Script& script)
 }
 
 
-void BufferedInvocation::beginChunk(PointBuffer& buffer)
+void BufferedInvocation::begin(PointBuffer& buffer)
 {
-    const Schema& schema = buffer.getSchema();
-
-    DimensionList dims = buffer.getSchema().getDimensions();
+    // const Schema& schema = buffer.getSchema();
+    Dimension::IdList const& dims = buffer.context().dims();
+    // DimensionList dims = buffer.getSchema().getDimensions();
+    
     for (auto di = dims.begin(); di != dims.end(); ++di)
     {
-        DimensionPtr d = *di;
-
+        Dimension::Id::Enum d = *di;
         //ABELL - does the interface allow us to use a fixed-size buffer
         //  and then call beginChunk in a loop or something similar?
-        void *data = malloc(d->getByteSize() * buffer.size());
+        Dimension::Type::Enum t = Dimension::defaultType(d);
+        size_t size = Dimension::size(t);
+        void *data = malloc(size * buffer.size());
         m_buffers.push_back(data);  // Hold pointer for deallocation
         char *p = (char *)data;
         for (PointId idx = 0; idx < buffer.size(); ++idx)
         {
             buffer.getRawField(d, idx, (void *)p);
-            p += d->getByteSize();
+            p += size;
         }
-
-        const std::string& name = d->getName();
-        uint32_t numPoints = buffer.size();
-        uint32_t stride = d->getByteSize();
-        dimension::Interpretation datatype = d->getInterpretation();
-        uint32_t numBytes = d->getByteSize();
-        insertArgument(name, (uint8_t *)data, numPoints, stride,
-            datatype, numBytes);
+        std::string name = Dimension::name(d);
+        insertArgument(name, (uint8_t *)data, t, buffer.size());
     }
 }
 
 
-void BufferedInvocation::endChunk(PointBuffer& buffer)
+void BufferedInvocation::end(PointBuffer& buffer)
 {
     // for each entry in the script's outs dictionary,
     // look up that entry's name in the schema and then
@@ -96,24 +94,26 @@ void BufferedInvocation::endChunk(PointBuffer& buffer)
     std::vector<std::string> names;
     getOutputNames(names);
 
-    const Schema& schema = buffer.getSchema();
+    // const Schema& schema = buffer.getSchema();
 
     for (size_t i = 0; i < names.size(); i++)
     {
-        DimensionPtr d = schema.getDimension(names[i]);
-        if (d)
+        Dimension::Id::Enum d = buffer.context().findDim(names[i]);
+        if (d != Dimension::Id::Unknown)
         {
-            const std::string& name = d->getName();
+            Dimension::Type::Enum t = Dimension::defaultType(d);  
+            std::string name = Dimension::name(d);
             assert(name == names[i]);
             assert(hasOutputVariable(name));
-            const dimension::Interpretation datatype = d->getInterpretation();
-            const boost::uint32_t numBytes = d->getByteSize();
-            void *data = extractResult(name, datatype, numBytes);
+            
+
+            size_t size = Dimension::size(t);
+            void *data = extractResult(name, t);
             char *p = (char *)data;
             for (PointId idx = 0; idx < buffer.size(); ++idx)
             {
-                buffer.setRawField(d, idx, (void *)p);
-                p += d->getByteSize();
+                buffer.setField(d, t, idx, (void *)p);
+                p += size;
             }
         }
     }

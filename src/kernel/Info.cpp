@@ -285,7 +285,7 @@ void Info::dumpStats(PointContext ctx, pdal::filters::Stats& filter,
     }
 
     boost::property_tree::ptree tree;
-    tree.add_child("stats", filter.toPTree());
+    tree.add_child("stats", filter.toPTree(ctx));
     std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
 
     if (m_useXML)
@@ -301,17 +301,17 @@ void Info::dumpStats(PointContext ctx, pdal::filters::Stats& filter,
 
 void Info::dumpSchema(PointContext ctx)
 {
-    boost::property_tree::ptree sch = ctx.schema()->toPTree();
+    // boost::property_tree::ptree sch = ctx.schema()->toPTree();
     
     boost::property_tree::ptree tree;
-    tree.put_child("schema", sch);
+    // tree.put_child("schema", sch);
     std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
     if (m_useXML)
         write_xml(ostr, tree);
     else if(m_useJSON)
         write_json(ostr, tree);
-    else if (m_useREST)
-        ctx.schema()->toRST(ostr) << std::endl;    
+    // else if (m_useREST)
+        // ctx.schema()->toRST(ostr) << std::endl;
 }
 
 void Info::dumpQuery(PointContext ctx, Stage& stage) const
@@ -332,7 +332,7 @@ void Info::dumpQuery(PointContext ctx, Stage& stage) const
     bool is3d = (values.size() >= 3);
 
     KDIndex kdi(*buf);
-    kdi.build(is3d);
+    kdi.build(ctx, is3d);
 
     double x = values[0];
     double y = values[1];
