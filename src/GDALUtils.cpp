@@ -85,14 +85,10 @@ void Debug::log(::CPLErr code, int num, char const* msg)
     else if (code == CE_Debug)
     {
         oss << "GDAL debug: " << msg;
-        m_log->get(logDEBUG) << oss.str() << std::endl;
-        return;
-    }
-    else
-    {
-        return;
+        m_log->get(LogLevel::DEBUG) << oss.str() << std::endl;
     }
 }
+
 
 void Debug::error(::CPLErr code, int num, char const* msg)
 {
@@ -102,17 +98,14 @@ void Debug::error(::CPLErr code, int num, char const* msg)
         oss <<"GDAL Failure number=" << num << ": " << msg;
         throw pdal::gdal_error(oss.str());
     }
-    else
-    {
-        return;
-    }
 }
+
 
 Debug::~Debug()
 {
     CPLPopErrorHandler();
-
 }
+
 
 GlobalDebug::GlobalDebug()
 {
@@ -157,33 +150,21 @@ void GlobalDebug::log(::CPLErr code, int num, char const* msg)
         for (t = streams.begin(); t != streams.end(); t++)
         {
             LogPtr l = t->second;
-            if (l->getLevel() > logDEBUG)
-                l->get(logDEBUG) << oss.str() << std::endl;
+            if (l->getLevel() > LogLevel::DEBUG)
+                l->get(LogLevel::DEBUG) << oss.str() << std::endl;
         }
-
-        return;
-    }
-    else
-    {
-        return;
     }
 }
 
 GlobalDebug::~GlobalDebug()
 {
     CPLPopErrorHandler();
-
 }
-
-
-//----------------------------------------------------------------------------
 
 #ifdef PDAL_HAVE_GDAL
 VSILFileBuffer::VSILFileBuffer(VSILFILE* fp)
     : m_fp(fp)
-{
-    return;
-}
+{}
 
 
 std::streamsize VSILFileBuffer::read(char* s, std::streamsize n)
