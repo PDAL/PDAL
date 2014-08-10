@@ -155,7 +155,7 @@ typedef std::vector<Id::Enum> IdList;
 static const int COUNT = sizeof(Id::Enum) / sizeof(Id::Alpha);
 static const int PROPRIETARY = 0xFF00;
 
-std::string description(Id::Enum id)
+inline std::string description(Id::Enum id)
 {
     switch (id)
     {
@@ -260,7 +260,7 @@ std::string description(Id::Enum id)
     return "";
 }
 
-Id::Enum id(std::string s)
+inline Id::Enum id(std::string s)
 {
     boost::to_upper(s);
     if (s == "X")
@@ -348,7 +348,7 @@ Id::Enum id(std::string s)
     return Id::Unknown;
 }
 
-std::string name(Id::Enum id)
+inline std::string name(Id::Enum id)
 {
     switch (id)
     {
@@ -441,7 +441,7 @@ std::string name(Id::Enum id)
 }
 
 
-Type::Enum defaultType(Id::Enum id)
+inline Type::Enum defaultType(Id::Enum id)
 {
     using namespace Type;
 
@@ -535,7 +535,7 @@ Type::Enum defaultType(Id::Enum id)
     throw pdal_error("No type for undefined dimension ID.");
 }
 
-std::string interpretationName(Type::Enum dimtype)
+inline std::string interpretationName(Type::Enum dimtype)
 {
     switch (dimtype)
     {

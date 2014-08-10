@@ -494,7 +494,7 @@ namespace sequential
 
 Reader::Reader(const pdal::drivers::qfit::Reader& reader) : m_reader(reader)
 {
-    m_istream = FileUtils::openFile(m_reader.getFileName());
+    m_istream = FileUtils::openFile(m_reader.m_filename);
     m_istream->seekg(m_reader.getPointDataOffset());
 }
 

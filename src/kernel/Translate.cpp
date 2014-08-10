@@ -39,7 +39,7 @@ typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
 
 #include <pdal/filters/Crop.hpp>
 #include <pdal/filters/Decimation.hpp>
-#include <pdal/filters/InPlaceReprojection.hpp>
+#include <pdal/filters/Reprojection.hpp>
 #include <pdal/kernel/Support.hpp>
 
 namespace pdal
@@ -140,54 +140,8 @@ Stage* Translate::makeReader(Options readerOptions)
         if (!m_output_srs.empty())
         {
             readerOptions.add<std::string>("out_srs", m_output_srs.getWKT());
-            boost::char_separator<char> sep(",| ");
-            std::vector<double> offsets;
-            tokenizer off_tokens(m_offsets, sep);
-            for (auto t = off_tokens.begin(); t != off_tokens.end(); ++t)
-                offsets.push_back(boost::lexical_cast<double>(*t));
-
-            std::vector<double> scales;
-            tokenizer scale_tokens(m_scales, sep);
-            for (auto t = scale_tokens.begin(); t != scale_tokens.end(); ++t)
-                scales.push_back(boost::lexical_cast<double>(*t));
-            
-            if (scales.size())
-            {
-                if (scales.size() <= 1)
-                    readerOptions.add<double >("scale_x", scales[0]);
-                else if (scales.size() <= 2)
-                {
-                    readerOptions.add<double >("scale_x", scales[0]);
-                    readerOptions.add<double >("scale_y", scales[1]);
-                }
-                else if (scales.size() <= 3)
-                {
-                    readerOptions.add<double >("scale_x", scales[0]);
-                    readerOptions.add<double >("scale_y", scales[1]);
-                    readerOptions.add<double >("scale_z", scales[2]);
-                }
-            }
-
-            if (offsets.size())
-            {
-                if (offsets.size() <= 1)
-                {
-                    readerOptions.add<double >("offset_x", offsets[0]);
-                }
-                else if (offsets.size() <= 2)
-                {
-                    readerOptions.add<double >("offset_x", offsets[0]);
-                    readerOptions.add<double >("offset_y", offsets[1]);
-                }
-                else if (offsets.size() <= 3)
-                {
-                    readerOptions.add<double >("offset_x", offsets[0]);
-                    readerOptions.add<double >("offset_y", offsets[1]);
-                    readerOptions.add<double >("offset_z", offsets[2]);
-                }
-            }
             reprojection_stage =
-                new filters::InPlaceReprojection(readerOptions);
+                new filters::Reprojection(readerOptions);
             reprojection_stage->setInput(next_stage);
             next_stage = reprojection_stage;
         }

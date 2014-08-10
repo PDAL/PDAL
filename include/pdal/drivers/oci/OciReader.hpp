@@ -80,7 +80,6 @@ private:
     virtual void initialize();
     virtual void processOptions(const Options& options);
     virtual void addDimensions(PointContext ctx);
-    virtual void ready(PointContext ctx);
     void validateQuery();
     void defineBlock(Statement statement, BlockPtr block) const;
     pdal::SpatialReference fetchSpatialReference(Statement statement,

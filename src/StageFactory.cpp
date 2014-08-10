@@ -111,7 +111,7 @@ MAKE_FILTER_CREATOR(Colorization, pdal::filters::Colorization)
 MAKE_FILTER_CREATOR(Crop, pdal::filters::Crop)
 MAKE_FILTER_CREATOR(Decimation, pdal::filters::Decimation)
 MAKE_FILTER_CREATOR(HexBin, pdal::filters::HexBin)
-MAKE_FILTER_CREATOR(InPlaceReprojection, pdal::filters::InPlaceReprojection)
+//MAKE_FILTER_CREATOR(InPlaceReprojection, pdal::filters::InPlaceReprojection)
 #ifdef PDAL_HAVE_PCL
 MAKE_FILTER_CREATOR(PCLBlock, pdal::filters::PCLBlock)
 #endif
@@ -122,8 +122,8 @@ MAKE_FILTER_CREATOR(Programmable, pdal::filters::Programmable)
 #endif
 
 MAKE_FILTER_CREATOR(Reprojection, pdal::filters::Reprojection)
-MAKE_FILTER_CREATOR(Scaling, pdal::filters::Scaling)
-MAKE_FILTER_CREATOR(Selector, pdal::filters::Selector)
+//MAKE_FILTER_CREATOR(Scaling, pdal::filters::Scaling)
+//MAKE_FILTER_CREATOR(Selector, pdal::filters::Selector)
 MAKE_FILTER_CREATOR(Splitter, pdal::filters::Splitter)
 MAKE_FILTER_CREATOR(Stats, pdal::filters::Stats)
 
@@ -433,7 +433,7 @@ void StageFactory::registerKnownFilters()
     REGISTER_FILTER(Decimation, pdal::filters::Decimation);
     REGISTER_FILTER(Reprojection, pdal::filters::Reprojection);
     REGISTER_FILTER(HexBin, pdal::filters::HexBin);
-    REGISTER_FILTER(InPlaceReprojection, pdal::filters::InPlaceReprojection);
+//    REGISTER_FILTER(InPlaceReprojection, pdal::filters::InPlaceReprojection);
 #ifdef PDAL_HAVE_PCL
     REGISTER_FILTER(PCLBlock, pdal::filters::PCLBlock);
 #endif
@@ -444,8 +444,8 @@ void StageFactory::registerKnownFilters()
 #endif
 
     REGISTER_FILTER(Reprojection, pdal::filters::Reprojection);
-    REGISTER_FILTER(Scaling, pdal::filters::Scaling);
-    REGISTER_FILTER(Selector, pdal::filters::Selector);
+//    REGISTER_FILTER(Scaling, pdal::filters::Scaling);
+//    REGISTER_FILTER(Selector, pdal::filters::Selector);
     REGISTER_FILTER(Splitter, pdal::filters::Splitter);
     REGISTER_FILTER(Stats, pdal::filters::Stats);
 }

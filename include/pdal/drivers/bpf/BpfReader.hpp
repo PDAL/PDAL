@@ -71,7 +71,6 @@ private:
 
     virtual void initialize();
     virtual void addDimensions(PointContext ctx);
-    virtual void ready(PointContext ctx);
     bool readUlemData();
     bool readPolarData();
 };

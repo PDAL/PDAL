@@ -72,6 +72,13 @@ namespace drivers
 namespace qfit
 {
 
+namespace iterators
+{
+namespace sequential
+{
+class Reader;
+} //namespace sequential
+} //namespace iterators
 
 enum QFIT_Format_Type
 {
@@ -98,6 +105,7 @@ public:
 //
 class PDAL_DLL Reader : public pdal::Reader
 {
+    friend class iterators::sequential::Reader;
 public:
     SET_STAGE_NAME("drivers.qfit.reader", "QFIT Reader")
     SET_STAGE_LINK("http://pdal.io/stages/drivers.qfit.reader.html")
@@ -112,7 +120,6 @@ public:
 
     pdal::StageSequentialIterator*
         createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator(PointBuffer& buffer) const;
 
     std::size_t getPointDataOffset() const
         { return m_offset; }
@@ -147,7 +154,6 @@ private:
 
 namespace iterators
 {
-
 namespace sequential
 {
 
@@ -167,27 +173,9 @@ private:
     std::istream* m_istream;
 };
 
-} // sequential
-
-namespace random
-{
-
-class Reader : public pdal::ReaderRandomIterator
-{
-public:
-    Reader(const pdal::drivers::qfit::Reader& reader, PointBuffer& buffer);
-    ~Reader();
-
-private:
-    uint64_t seekImpl(uint64_t);
-    point_count_t readBufferImpl(PointBuffer&);
-
-    const pdal::drivers::qfit::Reader& m_reader;
-    std::istream* m_istream;
-};
-
-} // namespace random
+} // namespace sequential
 } // namespace iterators
+
 } // namespace qfit
 } // namespace drivers
 } // namespace pdal

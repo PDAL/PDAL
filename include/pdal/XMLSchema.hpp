@@ -156,7 +156,7 @@ struct DimInfo
     Dimension::Id::Enum m_id;
 };
 typedef std::vector<DimInfo> DimInfoList;
-bool operator < (const DimInfo& d1, const DimInfo& d2)
+inline bool operator < (const DimInfo& d1, const DimInfo& d2)
     { return d1.m_position < d2.m_position; }
 
 struct XMLSchema

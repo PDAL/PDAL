@@ -35,7 +35,6 @@
 #include <pdal/kernel/PCL.hpp>
 #include <pdal/filters/Cache.hpp>
 #include <pdal/filters/PCLBlock.hpp>
-#include <pdal/filters/Selector.hpp>
 
 namespace pdal
 {
@@ -104,38 +103,13 @@ Stage* PCL::makeReader(Options readerOptions)
 
     Stage* reader_stage = AppSupport::makeReader(readerOptions);
 
-    Options keeps;
-    Option x("dimension", "X", "x dim");
-    Option y("dimension", "Y", "y dim");
-    Option z("dimension", "Z", "z dim");
-    keeps.add(x);
-    keeps.add(y);
-    keeps.add(z);
-
-    Options selectorOptions;
-    selectorOptions.add<bool>("debug", isDebug());
-    selectorOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
-    selectorOptions.add<bool>("ignore_default", true);
-    selectorOptions.add<Options>("keep", keeps);
-
-    Stage* selector_stage = new pdal::filters::Selector(selectorOptions);
-    selector_stage->setInput(reader_stage);
-
-    Options cacheOptions;
-    cacheOptions.add<bool>("debug", isDebug());
-    cacheOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
-    cacheOptions.add<boost::uint32_t>("max_cache_blocks", 1);
-
-    Stage* cache_stage = new pdal::filters::Cache(cacheOptions);
-    cache_stage->setInput(selector_stage);
-
     Options pclOptions;
     pclOptions.add<std::string>("filename", m_pclFile);
     pclOptions.add<bool>("debug", isDebug());
     pclOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
 
     Stage* pcl_stage = new pdal::filters::PCLBlock(pclOptions);
-    pcl_stage->setInput(cache_stage);
+    pcl_stage->setInput(reader_stage);
 
     return pcl_stage;
 }
