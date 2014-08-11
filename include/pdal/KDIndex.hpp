@@ -81,7 +81,7 @@ public:
         }
         return output;
     }
-    
+
     template <class BBOX> bool kdtree_get_bbox(BBOX &bb) const
     {
         pdal::Bounds<double> const& bounds = m_buf.getSpatialBounds();
@@ -103,9 +103,9 @@ public:
     std::vector<size_t> radius(double const& x, double const& y,
         double const& z, double const& r);
     void build(bool b3d = true);
-    
+
 private:
-    PointBuffer& m_buf;
+    const PointBuffer& m_buf;
     const Dimension* m_dim[3];
     bool m_3d;
 
