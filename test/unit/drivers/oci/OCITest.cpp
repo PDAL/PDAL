@@ -380,16 +380,6 @@ bool WriteUnprojectedData()
 
 void checkUnProjectedPoints(PointBuffer const& data)
 {
-    pdal::Schema const& schema = data.getSchema();
-    
-    DimensionPtr dimX = schema.getDimension("X");
-    DimensionPtr dimY = schema.getDimension("Y");
-    DimensionPtr dimZ = schema.getDimension("Z");
-    DimensionPtr dimIntensity = schema.getDimension("Intensity");
-    DimensionPtr dimRed = schema.getDimension("Red");
-    DimensionPtr dimGreen = schema.getDimension("Green");
-    DimensionPtr dimBlue = schema.getDimension("Blue");
-
     int X[] = { 49405730, 49413382, 49402110, 49419289, 49418622, 49403411 };
     int Y[] = { 487743335, 487743982, 487743983, 487744219, 487744254, 487745019 };
     int Z[] = { 13063, 13044, 13046, 13050, 13049, 13066 };
@@ -400,13 +390,14 @@ void checkUnProjectedPoints(PointBuffer const& data)
         
     for (unsigned i = 0; i < 6; ++i)
     {
-        boost::int32_t x = data.getField<int32_t>(dimX, i);
-        boost::int32_t y = data.getField<int32_t>(dimY, i);
-        boost::int32_t z = data.getField<int32_t>(dimZ, i);
-        boost::uint16_t intensity = data.getField<uint16_t>(dimIntensity, i);
-        boost::uint16_t red = data.getField<uint16_t>(dimRed, i);
-        boost::uint16_t green = data.getField<uint16_t>(dimGreen, i);
-        boost::uint16_t blue = data.getField<uint16_t>(dimBlue, i);
+        int32_t x = data.getField<int32_t>(Dimension::Id::X, i);
+        int32_t y = data.getField<int32_t>(Dimension::Id::Y, i);
+        int32_t z = data.getField<int32_t>(Dimension::Id::Z, i);
+        uint16_t intensity =
+            data.getField<uint16_t>(Dimension::Id::Intensity, i);
+        uint16_t red = data.getField<uint16_t>(Dimension::Id::Red, i);
+        uint16_t green = data.getField<uint16_t>(Dimension::Id::Green, i);
+        uint16_t blue = data.getField<uint16_t>(Dimension::Id::Blue, i);
 
         BOOST_CHECK_EQUAL(x, X[i]);
         BOOST_CHECK_EQUAL(y, Y[i]);
@@ -416,50 +407,31 @@ void checkUnProjectedPoints(PointBuffer const& data)
         BOOST_CHECK_EQUAL(green, G[i]);
         BOOST_CHECK_EQUAL(blue, B[i]);
     }
-    
 }
 
 
 void compareAgainstSourceBuffer(PointBuffer const& candidate,
     std::string filename)
 {
-
     pdal::Options options;
     pdal::Option f("filename", filename);
     options.add(f);
     
-    PointContext ctx;
+    PointContext tc;
     pdal::drivers::las::Reader reader(options);
 
-    reader.prepare(ctx);
+    reader.prepare(tc);
     
     BOOST_CHECK_EQUAL(candidate.size(), reader.getNumPoints());
     
-    PointBufferSet pbSet = reader.execute(ctx);
+    PointBufferSet pbSet = reader.execute(tc);
     BOOST_CHECK_EQUAL(pbSet.size(), 1);
     PointBufferPtr source = *pbSet.begin();
 
     BOOST_CHECK_EQUAL(source->size(), reader.getNumPoints());
     
-    Schema const& cs = candidate.getSchema();
-    Schema const& ss = *ctx.schema();
+    PointContext cc = candidate.context();
     
-    DimensionPtr sdimX = ss.getDimension("X");
-    DimensionPtr sdimY = ss.getDimension("Y");
-    DimensionPtr sdimZ = ss.getDimension("Z");
-    DimensionPtr sdimIntensity = ss.getDimension("Intensity");
-    DimensionPtr sdimRed = ss.getDimension("Red");
-    DimensionPtr sdimGreen = ss.getDimension("Green");
-    DimensionPtr sdimBlue = ss.getDimension("Blue");
-
-    DimensionPtr cdimX = cs.getDimension("X");
-    DimensionPtr cdimY = cs.getDimension("Y");
-    DimensionPtr cdimZ = cs.getDimension("Z");
-    DimensionPtr cdimIntensity = cs.getDimension("Intensity");
-    DimensionPtr cdimRed = cs.getDimension("Red");
-    DimensionPtr cdimGreen = cs.getDimension("Green");
-    DimensionPtr cdimBlue = cs.getDimension("Blue");
-    // 
     // int X[] = { 49405730, 49413382, 49402110, 494192890, 49418622, 49403411 };
     // int Y[] = { 487743335, 487743982, 487743983, 487744219, 487744254, 487745019 };
     // int Z[] = { 13063, 13044, 13046, 13050, 13049, 13066 };
@@ -470,21 +442,23 @@ void compareAgainstSourceBuffer(PointBuffer const& candidate,
     //     
     for (unsigned i = 0; i < 6; ++i)
     {
-        int32_t sx = source->getField<int32_t>(sdimX, i);
-        int32_t sy = source->getField<int32_t>(sdimY, i);
-        int32_t sz = source->getField<int32_t>(sdimZ, i);
-        uint16_t sintensity = source->getField<uint16_t>(sdimIntensity, i);
-        uint16_t sred = source->getField<uint16_t>(sdimRed, i);
-        uint16_t sgreen = source->getField<uint16_t>(sdimGreen, i);
-        uint16_t sblue = source->getField<uint16_t>(sdimBlue, i);
+        int32_t sx = source->getField<int32_t>(Dimension::Id::X, i);
+        int32_t sy = source->getField<int32_t>(Dimension::Id::Y, i);
+        int32_t sz = source->getField<int32_t>(Dimension::Id::Z, i);
+        uint16_t sintensity = source->getField<uint16_t>(
+            Dimension::Id::Intensity, i);
+        uint16_t sred = source->getField<uint16_t>(Dimension::Id::Red, i);
+        uint16_t sgreen = source->getField<uint16_t>(Dimension::Id::Green, i);
+        uint16_t sblue = source->getField<uint16_t>(Dimension::Id::Blue, i);
 
-        int32_t cx = candidate.getField<int32_t>(cdimX, i);
-        int32_t cy = candidate.getField<int32_t>(cdimY, i);
-        int32_t cz = candidate.getField<int32_t>(cdimZ, i);
-        uint16_t cintensity = candidate.getField<uint16_t>(cdimIntensity, i);
-        uint16_t cred = candidate.getField<uint16_t>(cdimRed, i);
-        uint16_t cgreen = candidate.getField<uint16_t>(cdimGreen, i);
-        uint16_t cblue = candidate.getField<uint16_t>(cdimBlue, i);
+        int32_t cx = candidate.getField<int32_t>(Dimension::Id::X, i);
+        int32_t cy = candidate.getField<int32_t>(Dimension::Id::Y, i);
+        int32_t cz = candidate.getField<int32_t>(Dimension::Id::Z, i);
+        uint16_t cintensity =
+            candidate.getField<uint16_t>(Dimension::Id::Intensity, i);
+        uint16_t cred = candidate.getField<uint16_t>(Dimension::Id::Red, i);
+        uint16_t cgreen = candidate.getField<uint16_t>(Dimension::Id::Green, i);
+        uint16_t cblue = candidate.getField<uint16_t>(Dimension::Id::Blue, i);
 
         BOOST_CHECK_EQUAL(sx, cx);
         BOOST_CHECK_EQUAL(sy, cy);

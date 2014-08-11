@@ -46,26 +46,12 @@
 
 using namespace pdal;
 
-void checkDimension(
-        const PointBuffer& data,
-        const std::size_t index,
-        const std::string& name,
-        const float expected)
+template <typename T>
+void checkDimension(const PointBuffer& data, std::size_t index,
+    Dimension::Id::Enum dim, T expected)
 {
-    DimensionPtr dimension = data.getSchema().getDimension(name);
-    float actual = data.getField<float>(dimension, index);
+    float actual = data.getField<T>(dim, index);
     BOOST_CHECK_CLOSE(expected, actual, 0.000001);
-}
-
-void checkDimension(
-        const PointBuffer& data,
-        const std::size_t index,
-        const std::string& name,
-        const int expected)
-{
-    DimensionPtr dimension = data.getSchema().getDimension(name);
-    int actual = data.getField<int>(dimension, index);
-    BOOST_CHECK_EQUAL(expected, actual);
 }
 
 void checkPoint(
@@ -84,18 +70,19 @@ void checkPoint(
         float pulseWidth,
         float relTime)
 {
-    checkDimension(data, index, "Time", time);
-    checkDimension(data, index, "Y", latitude);
-    checkDimension(data, index, "X", longitude);
-    checkDimension(data, index, "Z", elevation);
-    checkDimension(data, index, "StartPulse", xmtSig);
-    checkDimension(data, index, "ReflectedPulse", rcvSig);
-    checkDimension(data, index, "ScanAngleRank", azimuth);
-    checkDimension(data, index, "Pitch", pitch);
-    checkDimension(data, index, "Roll", roll);
-    checkDimension(data, index, "PDOP", gpsPdop);
-    checkDimension(data, index, "PulseWidth", pulseWidth);
-    checkDimension(data, index, "GpsTime", relTime);
+    using namespace Dimension;
+    checkDimension(data, index, Id::OffsetTime, time);
+    checkDimension(data, index, Id::Y, latitude);
+    checkDimension(data, index, Id::X, longitude);
+    checkDimension(data, index, Id::Z, elevation);
+    checkDimension(data, index, Id::StartPulse, xmtSig);
+    checkDimension(data, index, Id::ReflectedPulse, rcvSig);
+    checkDimension(data, index, Id::ScanAngleRank, azimuth);
+    checkDimension(data, index, Id::Pitch, pitch);
+    checkDimension(data, index, Id::Roll, roll);
+    checkDimension(data, index, Id::Pdop, gpsPdop);
+    checkDimension(data, index, Id::PulseWidth, pulseWidth);
+    checkDimension(data, index, Id::GpsTime, relTime);
 }
 
 std::string getFilePath()

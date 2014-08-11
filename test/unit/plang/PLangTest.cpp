@@ -181,7 +181,7 @@ BOOST_AUTO_TEST_CASE(PLangTest_ins)
     Script script(source, "MyTest", "yow");
     Invocation meth(script);
     meth.compile();
-    meth.insertArgument("X", (boost::uint8_t*)data, 5, 8, dimension::Float, 8);
+    meth.insertArgument("X", (boost::uint8_t*)data, Dimension::Type::Double, 5);
     meth.execute();
 }
 
@@ -203,7 +203,7 @@ BOOST_AUTO_TEST_CASE(PLangTest_outs)
     meth.compile();
     meth.execute();
     BOOST_CHECK(meth.hasOutputVariable("X"));
-    void *output = meth.extractResult("X", dimension::Float, 8);
+    void *output = meth.extractResult("X", Dimension::Type::Double);
 
     double *d = (double *)output;
     BOOST_CHECK_CLOSE(*d++, 1.0, 0.00001);
@@ -248,9 +248,9 @@ BOOST_AUTO_TEST_CASE(PLangTest_aliases)
 
     {
         double data[5] = {1.0, 2.0, 3.0, 4.0, 5.0};
-        meth.insertArgument("X", (uint8_t*)data, 5, 8, dimension::Float, 8);
-        meth.insertArgument("prefix.X", (uint8_t*)data, 5, 8,
-            dimension::Float, 8);
+        meth.insertArgument("X", (uint8_t*)data, Dimension::Type::Double, 5);
+        meth.insertArgument("prefix.X", (uint8_t*)data,
+            Dimension::Type::Double, 5);
     }
     meth.execute();
 
@@ -258,7 +258,7 @@ BOOST_AUTO_TEST_CASE(PLangTest_aliases)
         BOOST_CHECK(meth.hasOutputVariable("Y"));
         BOOST_CHECK(meth.hasOutputVariable("prefix.Y"));
 
-        void *output = meth.extractResult("Y", dimension::Float, 8);
+        void *output = meth.extractResult("Y", Dimension::Type::Double);
         double *d = (double *)output;
         BOOST_CHECK_CLOSE(*d++, 2.0, 0.00001);
         BOOST_CHECK_CLOSE(*d++, 4.0, 0.00001);
@@ -266,7 +266,7 @@ BOOST_AUTO_TEST_CASE(PLangTest_aliases)
         BOOST_CHECK_CLOSE(*d++, 8.0, 0.00001);
         BOOST_CHECK_CLOSE(*d++, 10.0, 0.00001);
 
-        output = meth.extractResult("prefix.Y", dimension::Float, 8);
+        output = meth.extractResult("prefix.Y", Dimension::Type::Double);
         d = (double *)output;
         BOOST_CHECK_CLOSE(*d++, 2.0, 0.00001);
         BOOST_CHECK_CLOSE(*d++, 4.0, 0.00001);
@@ -340,9 +340,9 @@ BOOST_AUTO_TEST_CASE(PLangTest_reentry)
 
     {
         double indata1[5] = {0.0, 1.0, 2.0, 3.0, 4.0};
-        meth.insertArgument("X", (uint8_t*)indata1, 5, 8, dimension::Float, 8);
+        meth.insertArgument("X", (uint8_t*)indata1, Dimension::Type::Double, 5);
         meth.execute();
-        void *output = meth.extractResult("Y", dimension::Float, 8);
+        void *output = meth.extractResult("Y", Dimension::Type::Double);
 
         double *d = (double *)output;
         BOOST_CHECK_CLOSE(*d++, 1.0, 0.00001);
@@ -354,9 +354,9 @@ BOOST_AUTO_TEST_CASE(PLangTest_reentry)
 
     {
         double indata2[5] = {10.0, 20.0, 30.0, 40.0, 50.0};
-        meth.insertArgument("X", (uint8_t*)indata2, 5, 8, dimension::Float, 8);
+        meth.insertArgument("X", (uint8_t*)indata2, Dimension::Type::Double, 5);
         meth.execute();
-        void *output = meth.extractResult("Y", dimension::Float, 8);
+        void *output = meth.extractResult("Y", Dimension::Type::Double);
 
         double *d = (double *)output;
         BOOST_CHECK_CLOSE(*d++, 11.0, 0.00001);

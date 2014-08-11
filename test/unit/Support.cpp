@@ -281,19 +281,12 @@ bool Support::compare_text_files(const std::string& file1, const std::string& fi
     return (numdiffs == 0);
 }
 
-void Support::check_pN(const pdal::PointBuffer& data,
-                       std::size_t index,
-                       double xref, double yref, double zref)
+void Support::check_pN(const pdal::PointBuffer& data, std::size_t index,
+    double xref, double yref, double zref)
 {
-    const Schema& schema = data.getSchema();
-
-    DimensionPtr dimX = schema.getDimension("X");
-    DimensionPtr dimY = schema.getDimension("Y");
-    DimensionPtr dimZ = schema.getDimension("Z");
-
-    double x0 = data.getFieldAs<double>(dimX, index);
-    double y0 = data.getField<int32_t>(dimY, index);
-    double z0 = data.getField<int32_t>(dimZ, index);
+    double x0 = data.getFieldAs<double>(Dimension::Id::X, index);
+    double y0 = data.getField<int32_t>(Dimension::Id::Y, index);
+    double z0 = data.getField<int32_t>(Dimension::Id::Z, index);
 
     BOOST_CHECK_CLOSE(x0, xref, 0.001);
     BOOST_CHECK_CLOSE(y0, yref, 0.001);
@@ -301,31 +294,23 @@ void Support::check_pN(const pdal::PointBuffer& data,
 }
 
 
-void Support::check_pN(const pdal::PointBuffer& data, size_t index,
+void Support::check_pN(const PointBuffer& data, size_t index,
     double xref, double yref, double zref, double tref,
     uint16_t rref, uint16_t gref, uint16_t bref)
 {
     check_pN(data, index, xref, yref, zref);
 
-    const Schema& schema = data.getSchema();
-
-    DimensionPtr dimTime = schema.getDimension("Time");
-
-    if (dimTime)
+    if (data.hasDim(Dimension::Id::GpsTime))
     {
-        double t0 = data.getField<double>(dimTime, index);
+        double t0 = data.getField<double>(Dimension::Id::GpsTime, index);
         BOOST_CHECK_EQUAL(t0, tref);
     }
 
-    DimensionPtr dimRed = schema.getDimension("Red");
-    DimensionPtr dimGreen = schema.getDimension("Green");
-    DimensionPtr dimBlue = schema.getDimension("Blue");
-
-    if (dimRed)
+    if (data.hasDim(Dimension::Id::Red))
     {
-        boost::uint16_t r0 = data.getField<uint16_t>(dimRed, index);
-        boost::uint16_t g0 = data.getField<uint16_t>(dimGreen, index);
-        boost::uint16_t b0 = data.getField<uint16_t>(dimBlue, index);
+        uint16_t r0 = data.getField<uint16_t>(Dimension::Id::Red, index);
+        uint16_t g0 = data.getField<uint16_t>(Dimension::Id::Green, index);
+        uint16_t b0 = data.getField<uint16_t>(Dimension::Id::Blue, index);
         BOOST_CHECK_EQUAL(r0, rref);
         BOOST_CHECK_EQUAL(g0, gref);
         BOOST_CHECK_EQUAL(b0, bref);

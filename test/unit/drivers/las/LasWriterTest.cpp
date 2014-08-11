@@ -42,7 +42,6 @@
 #include <pdal/drivers/faux/Reader.hpp>
 #include <pdal/drivers/las/Writer.hpp>
 #include <pdal/drivers/las/Reader.hpp>
-#include <pdal/filters/Selector.hpp>
 
 #include <pdal/PointBuffer.hpp>
 
@@ -309,10 +308,8 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_ignored_dimensions)
     pdal::drivers::las::Reader reader(Support::datapath("interesting.las"));
 
     {
-        pdal::filters::Selector selector(options);
-        selector.setInput(&reader);
         pdal::drivers::las::Writer writer(options);
-        writer.setInput(&selector);
+        writer.setInput(&reader);
         writer.prepare(ctx);
         writer.execute(ctx);
     }

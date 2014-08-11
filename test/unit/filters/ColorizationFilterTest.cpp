@@ -38,7 +38,6 @@
 #include <pdal/drivers/las/Reader.hpp>
 #include <pdal/filters/Colorization.hpp>
 #include <pdal/StageIterator.hpp>
-#include <pdal/Schema.hpp>
 #include <pdal/PointBuffer.hpp>
 
 #include "Support.hpp"
@@ -106,15 +105,9 @@ BOOST_AUTO_TEST_CASE(ColorizationFilterTest_test_1)
     FilterTester::filter(&filter, buffer);
     FilterTester::done(&filter, ctx);
 
-    Schema *s = ctx.schema();
-
-    DimensionPtr dimRed = s->getDimension("Red");
-    DimensionPtr dimGreen = s->getDimension("Green");
-    DimensionPtr dimBlue = s->getDimension("Blue");
-
-    uint16_t r = buffer.getFieldAs<uint16_t>(dimRed, 0);
-    uint16_t g = buffer.getFieldAs<uint16_t>(dimGreen, 0);
-    uint16_t b = buffer.getFieldAs<uint16_t>(dimBlue, 0);
+    uint16_t r = buffer.getFieldAs<uint16_t>(Dimension::Id::Red, 0);
+    uint16_t g = buffer.getFieldAs<uint16_t>(Dimension::Id::Green, 0);
+    uint16_t b = buffer.getFieldAs<uint16_t>(Dimension::Id::Blue, 0);
 
     BOOST_CHECK_EQUAL(r, 210u);
     BOOST_CHECK_EQUAL(g, 205u);

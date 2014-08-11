@@ -96,15 +96,12 @@ BOOST_AUTO_TEST_CASE(test_schema_read)
 {
     using namespace pdal;
 
-    // std::istream* xml_stream = Utils::openFile(TestConfig::g_data_path+"schemas/8-dimension-schema.xml");
-    // std::istream* xsd_stream = Utils::openFile(TestConfig::g_data_path+"/schemas/LAS.xsd");
-
     std::string xml =
         ReadXML(TestConfig::g_data_path+"../../schemas/8-dimension-schema.xml");
     std::string xsd = ReadXML(TestConfig::g_data_path+"../../schemas/LAS.xsd");
     schema::Reader reader(xml, xsd);
 
-    Schema schema = reader.getSchema();
+    schema::XMLSchema s1 = reader.schema();
 
     MetadataNode m;
 
@@ -113,30 +110,25 @@ BOOST_AUTO_TEST_CASE(test_schema_read)
     MetadataNode m1prime = m.add("m1prime", "Some other metadata");
     m1.add("uuid", boost::uuids::nil_uuid());
 
-    pdal::schema::Writer writer(schema);
-    writer.setMetadata(m1);
+    pdal::schema::Writer writer(s1.dims(), s1.types());
+    writer.setMetadata(m);
     std::string xml_output = writer.getXML();
     
     pdal::schema::Reader reader2(xml_output, xsd);
-    pdal::Schema schema2 = reader2.getSchema();
+    schema::XMLSchema s2 = reader2.schema();
 
-    DimensionList dims1 = schema.getDimensions();
-    DimensionList dims2 = schema2.getDimensions();
+    BOOST_CHECK_EQUAL(s1.m_dims.size(), s2.m_dims.size());
 
-    BOOST_CHECK_EQUAL(dims1.size(), dims2.size());
-
-    auto di1 = dims1.begin();
-    auto di2 = dims2.begin();
-    while (di1 != dims1.end() && di2 != dims2.end())
+    auto di1 = s1.m_dims.begin();
+    auto di2 = s2.m_dims.begin();
+    while (di1 != s1.m_dims.end() && di2 != s2.m_dims.end())
     {
-        DimensionPtr dim1 = *di1;
-        DimensionPtr dim2 = *di2;
+        schema::DimInfo& dim1 = *di1;
+        schema::DimInfo& dim2 = *di2;
 
-        BOOST_CHECK_EQUAL(dim1->getName(), dim2->getName());
-        BOOST_CHECK_EQUAL(dim1->getInterpretation(), dim2->getInterpretation());
-        BOOST_CHECK_EQUAL(dim1->getByteSize(), dim2->getByteSize());
-
-        BOOST_CHECK_EQUAL(dim1->getDescription(), dim2->getDescription());
+        BOOST_CHECK_EQUAL(dim1.m_name, dim2.m_name);
+        BOOST_CHECK_EQUAL(dim1.m_type, dim2.m_type);
+        BOOST_CHECK_EQUAL(dim1.m_description, dim2.m_description);
         di1++;
         di2++;
     }
@@ -145,43 +137,40 @@ BOOST_AUTO_TEST_CASE(test_schema_read)
 
 BOOST_AUTO_TEST_CASE(test_schema_orientation)
 {
+    schema::XMLSchema s;
+    schema::DimInfo d1 { "Classification", "", 0, Dimension::Type::Unsigned8,
+        0.0, 0.0, 1.0, 0.0, Dimension::Id::Unknown };
+    schema::DimInfo d2 { "X", "", 0, Dimension::Type::Signed32,
+        0.0, 0.0, 1.0, 0.0, Dimension::Id::Unknown };
+    schema::DimInfo d3 { "Y", "", 0, Dimension::Type::Double,
+        0.0, 0.0, 1.0, 0.0, Dimension::Id::Unknown };
 
-  
-    Dimension cls("Classification", dimension::UnsignedInteger, 1);
-    Dimension x("X", dimension::SignedInteger, 4);
-    Dimension y("Y", dimension::Float, 8);
+    s.m_dims.push_back(d1);
+    s.m_dims.push_back(d2);
+    s.m_dims.push_back(d3);
     
-    Schema schema;
-    schema.appendDimension(x);
-    schema.appendDimension(y);
-    schema.appendDimension(cls);
-    
-    pdal::schema::Writer writer(schema);
+    schema::Writer writer(s.dims(), s.types());
 
     std::string xml_output = writer.getXML();
-std::ostream* out = FileUtils::createFile("orientation-schema.xml");
-out->write(xml_output.c_str(), strlen(xml_output.c_str()));
-FileUtils::closeFile(out);
+    std::ostream* out = FileUtils::createFile("orientation-schema.xml");
+    out->write(xml_output.c_str(), strlen(xml_output.c_str()));
+    FileUtils::closeFile(out);
     
-    pdal::schema::Reader reader2(xml_output, std::string(""));
-    pdal::Schema schema2 = reader2.getSchema();
+    schema::Reader reader2(xml_output, std::string(""));
+    schema::XMLSchema s2 = reader2.schema();
     
-    DimensionList dims1 = schema.getDimensions();
-    DimensionList dims2 = schema2.getDimensions();
+    BOOST_CHECK_EQUAL(s.m_dims.size(), s2.m_dims.size());
 
-    BOOST_CHECK_EQUAL(dims1.size(), dims2.size());
-
-    auto di1 = dims1.begin();
-    auto di2 = dims2.begin();
-    while (di1 != dims1.end() && di2 != dims2.end())
+    auto di1 = s.m_dims.begin();
+    auto di2 = s2.m_dims.begin();
+    while (di1 != s.m_dims.end() && di2 != s.m_dims.end())
     {
-        DimensionPtr dim1 = *di1;
-        DimensionPtr dim2 = *di2;
+        schema::DimInfo& dim1 = *di1;
+        schema::DimInfo& dim2 = *di2;
 
-        BOOST_CHECK_EQUAL(dim1->getName(), dim2->getName());
-        BOOST_CHECK_EQUAL(dim1->getInterpretation(), dim2->getInterpretation());
-        BOOST_CHECK_EQUAL(dim1->getByteSize(), dim2->getByteSize());
-        BOOST_CHECK_EQUAL(dim1->getDescription(), dim2->getDescription());
+        BOOST_CHECK_EQUAL(dim1.m_name, dim2.m_name);
+        BOOST_CHECK_EQUAL(dim1.m_type, dim2.m_type);
+        BOOST_CHECK_EQUAL(dim1.m_description, dim2.m_description);
         di1++;
         di2++;
     }

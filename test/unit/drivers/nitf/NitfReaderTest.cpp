@@ -110,23 +110,15 @@ BOOST_AUTO_TEST_CASE(test_one)
     //
     BOOST_CHECK_EQUAL(las_numRead, nitf_numRead);
 
-    DimensionPtr nitf_dimX = ctx.schema()->getDimension("X");
-    DimensionPtr nitf_dimY = ctx.schema()->getDimension("Y");
-    DimensionPtr nitf_dimZ = ctx.schema()->getDimension("Z");
-
-    DimensionPtr las_dimX = ctx2.schema()->getDimension("X");
-    DimensionPtr las_dimY = ctx2.schema()->getDimension("Y");
-    DimensionPtr las_dimZ = ctx2.schema()->getDimension("Z");
-
     for (uint32_t i = 0; i < las_numRead; i++)
     {
-        const int32_t nitf_x = nitf_data.getField<int32_t>(nitf_dimX, i);
-        const int32_t nitf_y = nitf_data.getField<int32_t>(nitf_dimY, i);
-        const int32_t nitf_z = nitf_data.getField<int32_t>(nitf_dimZ, i);
+        const int32_t nitf_x = nitf_data.getField<int32_t>(Dimension::Id::X, i);
+        const int32_t nitf_y = nitf_data.getField<int32_t>(Dimension::Id::Y, i);
+        const int32_t nitf_z = nitf_data.getField<int32_t>(Dimension::Id::Z, i);
 
-        const int32_t las_x = las_data.getField<int32_t>(las_dimX, i);
-        const int32_t las_y = las_data.getField<int32_t>(las_dimY, i);
-        const int32_t las_z = las_data.getField<int32_t>(las_dimZ, i);
+        const int32_t las_x = las_data.getField<int32_t>(Dimension::Id::X, i);
+        const int32_t las_y = las_data.getField<int32_t>(Dimension::Id::Y, i);
+        const int32_t las_z = las_data.getField<int32_t>(Dimension::Id::Z, i);
 
         BOOST_CHECK_EQUAL(nitf_x, las_x);
         BOOST_CHECK_EQUAL(nitf_y, las_y);

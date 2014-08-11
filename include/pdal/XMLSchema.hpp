@@ -164,6 +164,21 @@ struct XMLSchema
     Orientation::Enum m_orientation;
     DimInfoList m_dims;
     XYZScale m_scale;  // To support quick access.
+
+    Dimension::IdList dims() const
+    {
+        Dimension::IdList ids;
+        for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
+            ids.push_back(di->m_id);
+        return ids;
+    }
+    std::vector<Dimension::Type::Enum> types() const
+    {
+        std::vector<Dimension::Type::Enum> types;
+        for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
+            types.push_back(di->m_type);
+        return types;
+    }
 };
 
 class PDAL_DLL Reader

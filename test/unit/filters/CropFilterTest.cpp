@@ -36,7 +36,7 @@
 #include <boost/cstdint.hpp>
 
 #include <pdal/drivers/faux/Reader.hpp>
-#include <pdal/filters/InPlaceReprojection.hpp>
+#include <pdal/filters/Reprojection.hpp>
 #include <pdal/drivers/las/Reader.hpp>
 #include <pdal/filters/Crop.hpp>
 #include <pdal/filters/Stats.hpp>
@@ -193,7 +193,7 @@ BOOST_AUTO_TEST_CASE(test_crop_polygon_reprojection)
     options.add(polygon);
 
     drivers::las::Reader reader(options);
-    filters::InPlaceReprojection reprojection(options);
+    filters::Reprojection reprojection(options);
     reprojection.setInput(&reader);
     filters::Crop crop(options);
     crop.setInput(&reprojection);

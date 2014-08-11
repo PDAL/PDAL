@@ -91,14 +91,9 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test1)
     PointBufferSet pbSet = stats.execute(ctx);
     BOOST_CHECK_EQUAL(pbSet.size(), 1);
 
-    Schema *schema = ctx.schema();
-
-    const filters::stats::Summary& statsX =
-        stats.getStats(schema->getDimension("X"));
-    const filters::stats::Summary& statsY =
-        stats.getStats(schema->getDimension("Y"));
-    const filters::stats::Summary& statsZ =
-        stats.getStats(schema->getDimension("Z"));
+    const filters::stats::Summary& statsX = stats.getStats(Dimension::Id::X);
+    const filters::stats::Summary& statsY = stats.getStats(Dimension::Id::Y);
+    const filters::stats::Summary& statsZ = stats.getStats(Dimension::Id::Z);
     
     BOOST_CHECK(Utils::compare_approx<double>(statsX.minimum(), 0.0, 0.01));
     BOOST_CHECK(Utils::compare_approx<double>(statsY.minimum(), 0.0, 0.01));
@@ -152,13 +147,9 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test2)
     PointBufferSet pbSet = stats.execute(ctx);
     BOOST_CHECK_EQUAL(pbSet.size(), 1);
 
-    Schema *schema = ctx.schema();
-    const filters::stats::Summary& statsX =
-        stats.getStats(schema->getDimension("X"));
-    const filters::stats::Summary& statsY =
-        stats.getStats(schema->getDimension("Y"));
-    const filters::stats::Summary& statsZ =
-        stats.getStats(schema->getDimension("Z"));
+    const filters::stats::Summary& statsX = stats.getStats(Dimension::Id::X);
+    const filters::stats::Summary& statsY = stats.getStats(Dimension::Id::Y);
+    const filters::stats::Summary& statsZ = stats.getStats(Dimension::Id::Z);
 
     BOOST_CHECK(Utils::compare_approx<double>(statsX.minimum(), 1.0, 0.01));
     BOOST_CHECK(Utils::compare_approx<double>(statsY.minimum(), 1.0, 0.01));
@@ -231,13 +222,9 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test3)
     stats.prepare(ctx);
     stats.execute(ctx);
 
-    Schema *schema = ctx.schema();
-    const filters::stats::Summary& statsX =
-        stats.getStats(schema->getDimension("X"));
-    const filters::stats::Summary& statsY =
-        stats.getStats(schema->getDimension("Y"));
-    const filters::stats::Summary& statsZ =
-        stats.getStats(schema->getDimension("Z"));
+    const filters::stats::Summary& statsX = stats.getStats(Dimension::Id::X);
+    const filters::stats::Summary& statsY = stats.getStats(Dimension::Id::Y);
+    const filters::stats::Summary& statsZ = stats.getStats(Dimension::Id::Z);
 
     BOOST_CHECK(Utils::compare_approx<double>(statsX.minimum(), 0.5, 0.01));
     BOOST_CHECK(Utils::compare_approx<double>(statsY.minimum(), 0.5, 0.01));
