@@ -117,6 +117,7 @@ public:
 
         m_dims->m_used.push_back(id);
         m_dims->m_detail[id].m_type = Dimension::defaultType(id);
+        update();
     }
 
     // The type and size are REQUESTS, not absolutes.  If someone else
@@ -133,6 +134,7 @@ public:
         Dimension::Id::Enum id = (Dimension::Id::Enum)m_dims->m_nextFree++;
         m_dims->m_used.push_back(id);
         m_dims->m_detail[id].m_type = type;
+        update();
         return id;
     }
 
@@ -179,6 +181,30 @@ public:
 private:
     Dimension::Detail *dimDetail(Dimension::Id::Enum id) const
         { return &(m_dims->m_detail[(size_t)id]); }
+
+    void update()
+    {
+        auto sorter = [this](const Dimension::Id::Enum& d1,
+            const Dimension::Id::Enum& d2) -> bool
+        {
+            size_t s1 = m_dims->m_detail[d1].size();
+            size_t s2 = m_dims->m_detail[d2].size();
+            if (s1 > s2)
+                return true;
+            if (s1 < s2)
+                return false;
+            return d1 < d2;
+        };
+
+        Dimension::IdList& used = m_dims->m_used;
+        std::sort(used.begin(), used.end(), sorter);
+        int offset = 0;
+        for (auto ui = used.begin(); ui != used.end(); ++ui)
+        {
+            m_dims->m_detail[*ui].m_offset = offset;
+            offset += m_dims->m_detail[*ui].size();
+        }
+    }
 };
 
 } //namespace
