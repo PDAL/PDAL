@@ -97,11 +97,19 @@ public:
         return true;
     }
 
-    std::vector<size_t>
-    neighbors(double const& x, double const& y, double const& z,
-        double distance, boost::uint32_t count = 1);
-    std::vector<size_t> radius(double const& x, double const& y,
-        double const& z, double const& r);
+    std::vector<size_t> radius(
+            double const& x,
+            double const& y,
+            double const& z,
+            double const& r) const;
+
+    std::vector<size_t> neighbors(
+            double const& x,
+            double const& y,
+            double const& z,
+            double distance,
+            boost::uint32_t count = 1) const;
+
     void build(bool b3d = true);
 
 private:
