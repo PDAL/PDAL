@@ -36,7 +36,7 @@
 
 #include <pdal/drivers/faux/Reader.hpp>
 #include <pdal/drivers/las/Reader.hpp>
-#include <pdal/filters/InPlaceReprojection.hpp>
+#include <pdal/filters/Reprojection.hpp>
 #include <pdal/filters/Stats.hpp>
 
 #include "../StageTester.hpp"
@@ -74,14 +74,9 @@ BOOST_AUTO_TEST_CASE(StatsFilterTest_test1)
     FilterTester::filter(&filter, buf);
     FilterTester::done(&filter, ctx);
 
-    Schema *schema = ctx.schema();
-
-    const filters::stats::Summary& statsX =
-        filter.getStats(schema->getDimension("X"));
-    const filters::stats::Summary& statsY =
-        filter.getStats(schema->getDimension("Y"));
-    const filters::stats::Summary& statsZ =
-        filter.getStats(schema->getDimension("Z"));
+    const filters::stats::Summary& statsX = filter.getStats(Dimension::Id::X);
+    const filters::stats::Summary& statsY = filter.getStats(Dimension::Id::Y);
+    const filters::stats::Summary& statsZ = filter.getStats(Dimension::Id::Z);
 
     BOOST_CHECK_EQUAL(statsX.count(), 1000u);
     BOOST_CHECK_EQUAL(statsY.count(), 1000u);
@@ -116,30 +111,16 @@ BOOST_AUTO_TEST_CASE(test_multiple_dims_same_name)
     Option out_srs("out_srs",out_ref.getWKT(), "Output SRS to reproject to");
     Option spatialreference("spatialreference","EPSG:2993",
         "Output SRS to reproject to");
-    Option x_dim("x_dim", "X", "Dimension name to use for 'X' data");
-    Option y_dim("y_dim", "Y", "Dimension name to use for 'Y' data");
-    Option z_dim("z_dim", "Z", "Dimension name to use for 'Z' data");
-    Option x_scale("scale_x", 0.0000001f, "Scale for output X data in the "
-        "case when 'X' dimension data are to be scaled.  Defaults to '1.0'.  "
-        "If not set, the Dimensions's scale will be used");
-    Option y_scale("scale_y", 0.0000001f, "Scale for output Y data in the "
-        "case when 'Y' dimension data are to be scaled.  Defaults to '1.0'.  "
-        "If not set, the Dimensions's scale will be used");
 
     Option filename("filename", Support::datapath("1.2-with-color.las"), "");
     Option ignore("ignore_old_dimensions", false, "");
     options.add(out_srs);
-    options.add(x_dim);
-    options.add(y_dim);
-    options.add(z_dim);
-    options.add(x_scale);
-    options.add(y_scale);
     options.add(spatialreference);
     options.add(filename);
     options.add(ignore);
 
     drivers::las::Reader reader(options);
-    filters::InPlaceReprojection reprojectionFilter(options);
+    filters::Reprojection reprojectionFilter(options);
     reprojectionFilter.setInput(&reader);
     filters::Stats filter(options);    
     filter.setInput(&reprojectionFilter);
@@ -148,13 +129,9 @@ BOOST_AUTO_TEST_CASE(test_multiple_dims_same_name)
     filter.prepare(ctx);
     filter.execute(ctx);
 
-    Schema *schema = ctx.schema();
-    const filters::stats::Summary& statsX =
-        filter.getStats(schema->getDimension("X"));
-    const filters::stats::Summary& statsY =
-        filter.getStats(schema->getDimension("Y"));
-    const filters::stats::Summary& statsZ =
-        filter.getStats(schema->getDimension("Z"));
+    const filters::stats::Summary& statsX = filter.getStats(Dimension::Id::X);
+    const filters::stats::Summary& statsY = filter.getStats(Dimension::Id::Y);
+    const filters::stats::Summary& statsZ = filter.getStats(Dimension::Id::Z);
 
     BOOST_CHECK_EQUAL(statsX.count(), 1065u);
     BOOST_CHECK_EQUAL(statsY.count(), 1065u);
@@ -172,7 +149,7 @@ BOOST_AUTO_TEST_CASE(test_specified_stats)
     Options options;
     
     Option dimensions("dimensions",
-        "X,drivers.las.reader.Y Z filters.inplacereprojection.X", "");
+        "X, Y Z X", "");
 
     Option debug("debug", true);
     Option verbose("verbose", 5);
@@ -206,7 +183,7 @@ BOOST_AUTO_TEST_CASE(test_specified_stats)
 
     drivers::las::Reader reader(options);
 
-    filters::InPlaceReprojection reprojectionFilter(options);
+    filters::Reprojection reprojectionFilter(options);
     reprojectionFilter.setInput(&reader);
 
     filters::Stats filter(options);
@@ -217,13 +194,9 @@ BOOST_AUTO_TEST_CASE(test_specified_stats)
     filter.prepare(ctx);
     filter.execute(ctx);
 
-    Schema *schema = ctx.schema();
-    const filters::stats::Summary& statsX =
-        filter.getStats(schema->getDimension("filters.inplacereprojection.X"));
-    const filters::stats::Summary& statsY =
-        filter.getStats(schema->getDimension("drivers.las.reader.Y"));
-    const filters::stats::Summary& statsZ =
-        filter.getStats(schema->getDimension("filters.inplacereprojection.Z"));
+    const filters::stats::Summary& statsX = filter.getStats(Dimension::Id::X);
+    const filters::stats::Summary& statsY = filter.getStats(Dimension::Id::Y);
+    const filters::stats::Summary& statsZ = filter.getStats(Dimension::Id::Z);
 
     BOOST_CHECK_EQUAL(statsX.count(), 1065u);
     BOOST_CHECK_EQUAL(statsY.count(), 1065u);
@@ -278,7 +251,7 @@ BOOST_AUTO_TEST_CASE(test_pointbuffer_stats)
 
     drivers::las::Reader reader(options);
 
-    filters::InPlaceReprojection reprojectionFilter(options);
+    filters::Reprojection reprojectionFilter(options);
     reprojectionFilter.setInput(&reader);
 
     Options statsOptions = options;

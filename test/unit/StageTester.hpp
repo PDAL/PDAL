@@ -14,8 +14,8 @@ public:
     }
     static void processOptions(Stage *s, const Options& options)
         { s->processOptions(options); }
-    static void buildSchema(Stage *s, Schema *schema)
-        { s->buildSchema(schema); }
+    static void addDimensions(Stage *s, PointContext ctx)
+        { s->addDimensions(ctx); }
     static void ready(Stage *s, PointContext ctx)
         { s->ready(ctx); }
     static void done(Stage *s, PointContext ctx)

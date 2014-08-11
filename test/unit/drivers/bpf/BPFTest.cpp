@@ -56,17 +56,11 @@ void test_file_type(const std::string& filename)
 
     pdal::BpfReader reader(Support::datapath(filename));
     reader.prepare(context);
-    const Schema *schema = context.schema();
     
     PointBuffer data(context);
     StageSequentialIterator *it = reader.createSequentialIterator();
     boost::uint32_t numRead = it->read(data, 3);
     BOOST_CHECK(numRead = 3);
-    DimensionPtr dimX = schema->getDimension("X");
-    DimensionPtr dimY = schema->getDimension("Y");
-    DimensionPtr dimZ = schema->getDimension("Z");
-    DimensionPtr dimQ = schema->getDimension("Q");
-    BOOST_CHECK(dimQ.get() == NULL);
 
     struct PtData
     {
@@ -81,9 +75,9 @@ void test_file_type(const std::string& filename)
 
     for (int i = 0; i < 3; ++i)
     {
-        float x = data.getFieldAs<float>(dimX, i);
-        float y = data.getFieldAs<float>(dimY, i);
-        float z = data.getFieldAs<float>(dimZ, i);
+        float x = data.getFieldAs<float>(Dimension::Id::X, i);
+        float y = data.getFieldAs<float>(Dimension::Id::Y, i);
+        float z = data.getFieldAs<float>(Dimension::Id::Z, i);
         
         BOOST_CHECK_CLOSE(x, pts2[i].x, 0.001);
         BOOST_CHECK_CLOSE(y, pts2[i].y, 0.001);
@@ -103,9 +97,9 @@ void test_file_type(const std::string& filename)
 
     for (int i = 0; i < 3; ++i)
     {
-        float x = data2.getFieldAs<float>(dimX, i);
-        float y = data2.getFieldAs<float>(dimY, i);
-        float z = data2.getFieldAs<float>(dimZ, i);
+        float x = data2.getFieldAs<float>(Dimension::Id::X, i);
+        float y = data2.getFieldAs<float>(Dimension::Id::Y, i);
+        float z = data2.getFieldAs<float>(Dimension::Id::Z, i);
         
         BOOST_CHECK_CLOSE(x, pts[i].x, 0.001);
         BOOST_CHECK_CLOSE(y, pts[i].y, 0.001);

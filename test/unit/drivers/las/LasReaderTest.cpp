@@ -117,98 +117,6 @@ BOOST_AUTO_TEST_CASE(test_sequential)
 }
 
 
-/***
-  BOOST_AUTO_TEST_CASE(test_random)
-  {
-  pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
-  BOOST_CHECK(reader.getDescription() == "Las Reader");
-  reader.initialize();
-
-  const Schema& schema = reader.getSchema();
-
-  PointBuffer data(schema);
-  pdal::StageRandomIterator* iter = reader.createRandomIterator(data);
-
-  {
-  point_count_t numRead = iter->read(data);
-  BOOST_CHECK(numRead == 3);
-
-  Support::check_p0_p1_p2(data);
-  }
-
-// Can we seek it? Yes, we can!
-iter->seek(100);
-{
-BOOST_CHECK(iter->getIndex() == 100);
-point_count_t numRead = iter->read(data, 3);
-BOOST_CHECK(numRead == 3);
-
-Support::check_p100_p101_p102(data);
-}
-
-// Can we seek to beginning? Yes, we can!
-iter->seek(0);
-{
-PointBuffer data(schema);
-BOOST_CHECK(iter->getIndex() == 0);
-point_count_t numRead = iter->read(data, 3);
-BOOST_CHECK(numRead == 3);
-
-Support::check_p0_p1_p2(data);
-}
-
-delete iter;
-}
-
-
-#ifdef PDAL_HAVE_LASZIP
-BOOST_AUTO_TEST_CASE(test_random_laz)
-{
-PointContext ctx;
-pdal::drivers::las::Reader reader(Support::datapath("laszip/laszip-generated.laz"));
-BOOST_CHECK(reader.getDescription() == "Las Reader");
-reader.initialize();
-reader.buildSchema(ctx.getSchema());
-Schema& schema = *(ctx.getSchema());
-
-const Schema& schema = reader.getSchema();
-
-PointBuffer data(schema, 3);
-
-pdal::StageRandomIterator* iter = reader.createRandomIterator(data);
-
-{
-point_count_t numRead = iter->read(data);
-BOOST_CHECK(numRead == 3);
-
-Support::check_p0_p1_p2(data);
-}
-
-// Can we seek it? Yes, we can!
-iter->seek(100);
-{
-BOOST_CHECK(iter->getIndex() == 100);
-point_count_t numRead = iter->read(data);
-BOOST_CHECK(numRead == 3);
-
-Support::check_p100_p101_p102(data);
-}
-
-// Can we seek to beginning? Yes, we can!
-iter->seek(0);
-{
-    BOOST_CHECK(iter->getIndex() == 0);
-    point_count_t numRead = iter->read(data);
-    BOOST_CHECK(numRead == 3);
-
-    Support::check_p0_p1_p2(data);
-}
-
-delete iter;
-}
-#endif
-**/
-
 BOOST_AUTO_TEST_CASE(test_two_iters)
 {
     PointContext ctx;
@@ -230,22 +138,6 @@ BOOST_AUTO_TEST_CASE(test_two_iters)
 
         delete iter;
     }
-
-    /**
-      {
-      pdal::StageRandomIterator* iter = reader.createRandomIterator(data);
-      BOOST_CHECK(iter->getIndex() == 0);
-
-      PointBuffer data(schema);
-      boost::uint32_t numRead = iter->read(data);
-      BOOST_CHECK(numRead == 1065);
-      BOOST_CHECK(iter->getIndex() == 1065);
-
-      Support::check_p0_p1_p2(data);
-
-      delete iter;
-      }
-     **/
 }
 
 
@@ -434,17 +326,6 @@ BOOST_AUTO_TEST_CASE(test_no_xyz)
     BOOST_CHECK(reader.getDescription() == "Las Reader");
     reader.prepare(ctx);
 
-    Schema *schema = ctx.schema();
-    
-    DimensionPtr x = schema->getDimension("X");
-    x->setIgnored();
-
-    DimensionPtr y = schema->getDimension("Y");
-    y->setIgnored();
-
-    DimensionPtr z = schema->getDimension("Z");
-    z->setIgnored();
-        
     pdal::StageSequentialIterator* iter = reader.createSequentialIterator();
 
     PointBuffer data(ctx);

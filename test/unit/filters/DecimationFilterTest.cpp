@@ -75,11 +75,9 @@ BOOST_AUTO_TEST_CASE(DecimationFilterTest_test1)
     buf = *pbSet.begin();
     BOOST_CHECK_EQUAL(buf->size(), 3);
 
-    DimensionPtr dimT = ctx.schema()->getDimension("Time");
-
-    uint64_t t0 = buf->getFieldAs<uint64_t>(dimT, 0);
-    uint64_t t1 = buf->getFieldAs<uint64_t>(dimT, 1);
-    uint64_t t2 = buf->getFieldAs<uint64_t>(dimT, 2);
+    uint64_t t0 = buf->getFieldAs<uint64_t>(Dimension::Id::GpsTime, 0);
+    uint64_t t1 = buf->getFieldAs<uint64_t>(Dimension::Id::GpsTime, 1);
+    uint64_t t2 = buf->getFieldAs<uint64_t>(Dimension::Id::GpsTime, 2);
 
     BOOST_CHECK_EQUAL(t0, 0);
     BOOST_CHECK_EQUAL(t1, 10);
@@ -121,15 +119,13 @@ BOOST_AUTO_TEST_CASE(DecimationFilterTest_test_random)
 
     BOOST_CHECK(numRead == 50);
 
-    DimensionPtr dimT = ctx.schema()->getDimension("Time");
-
     PointBufferSet pbSet = FilterTester::run(&filter, buf);
     BOOST_CHECK_EQUAL(pbSet.size(), 1);
     buf = *pbSet.begin();
 
-    uint64_t t0 = buf->getFieldAs<uint64_t>(dimT, 0);
-    uint64_t t1 = buf->getFieldAs<uint64_t>(dimT, 1);
-    uint64_t t2 = buf->getFieldAs<uint64_t>(dimT, 2);
+    uint64_t t0 = buf->getFieldAs<uint64_t>(Dimension::Id::GpsTime, 0);
+    uint64_t t1 = buf->getFieldAs<uint64_t>(Dimension::Id::GpsTime, 1);
+    uint64_t t2 = buf->getFieldAs<uint64_t>(Dimension::Id::GpsTime, 2);
 
     BOOST_CHECK_EQUAL(t0, 8);
     BOOST_CHECK_EQUAL(t1, 18);

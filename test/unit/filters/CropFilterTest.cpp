@@ -79,14 +79,9 @@ BOOST_AUTO_TEST_CASE(test_crop)
     BOOST_CHECK_EQUAL(pbSet.size(), 1);
     PointBufferPtr buf = *pbSet.begin();
 
-    Schema *schema = ctx.schema();
-
-    const filters::stats::Summary& statsX =
-        stats.getStats(schema->getDimension("X"));
-    const filters::stats::Summary& statsY =
-        stats.getStats(schema->getDimension("Y"));
-    const filters::stats::Summary& statsZ =
-        stats.getStats(schema->getDimension("Z"));   
+    const filters::stats::Summary& statsX = stats.getStats(Dimension::Id::X);
+    const filters::stats::Summary& statsY = stats.getStats(Dimension::Id::Y);
+    const filters::stats::Summary& statsZ = stats.getStats(Dimension::Id::Z);
     BOOST_CHECK_EQUAL(buf->size(), 333);
 
     const double minX = statsX.minimum();

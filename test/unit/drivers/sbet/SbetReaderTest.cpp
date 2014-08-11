@@ -53,30 +53,30 @@ void checkPoint(PointContext ctx, const PointBuffer& data,
     double yaccel, double zaccel, double xangrate, double yangrate,
     double zangrate)
 {
-    auto checkDimension = [&ctx,&data,index](std::string name, double expected)
+    auto checkDimension = [&ctx,&data,index](Dimension::Id::Enum dim,
+        double expected)
     {
-        DimensionPtr dim = ctx.schema()->getDimension(name);
         double actual = data.getFieldAs<double>(dim, index);
         BOOST_CHECK_CLOSE(expected, actual, 0.0000001);
     };
 
-    checkDimension("Time", time);
-    checkDimension("Y", latitude);
-    checkDimension("X", longitude);
-    checkDimension("Z", altitude);
-    checkDimension("XVelocity", xvelocity);
-    checkDimension("YVelocity", yvelocity);
-    checkDimension("ZVelocity", zvelocity);
-    checkDimension("Roll", roll);
-    checkDimension("Pitch", pitch);
-    checkDimension("PlatformHeading", heading);
-    checkDimension("WanderAngle", wander);
-    checkDimension("XBodyAccel", xaccel);
-    checkDimension("YBodyAccel", yaccel);
-    checkDimension("ZBodyAccel", zaccel);
-    checkDimension("XBodyAngRate", xangrate);
-    checkDimension("YBodyAngRate", yangrate);
-    checkDimension("ZBodyAngRate", zangrate);
+    checkDimension(Dimension::Id::GpsTime, time);
+    checkDimension(Dimension::Id::Y, latitude);
+    checkDimension(Dimension::Id::X, longitude);
+    checkDimension(Dimension::Id::Z, altitude);
+    checkDimension(Dimension::Id::XVelocity, xvelocity);
+    checkDimension(Dimension::Id::YVelocity, yvelocity);
+    checkDimension(Dimension::Id::ZVelocity, zvelocity);
+    checkDimension(Dimension::Id::Roll, roll);
+    checkDimension(Dimension::Id::Pitch, pitch);
+    checkDimension(Dimension::Id::PlatformHeading, heading);
+    checkDimension(Dimension::Id::WanderAngle, wander);
+    checkDimension(Dimension::Id::XBodyAccel, xaccel);
+    checkDimension(Dimension::Id::YBodyAccel, yaccel);
+    checkDimension(Dimension::Id::ZBodyAccel, zaccel);
+    checkDimension(Dimension::Id::XBodyAngRate, xangrate);
+    checkDimension(Dimension::Id::YBodyAngRate, yangrate);
+    checkDimension(Dimension::Id::ZBodyAngRate, zangrate);
 }
 
 

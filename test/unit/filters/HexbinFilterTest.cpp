@@ -38,7 +38,6 @@
 #include <pdal/drivers/las/Reader.hpp>
 #include <pdal/filters/HexBin.hpp>
 #include <pdal/StageIterator.hpp>
-#include <pdal/Schema.hpp>
 #include <pdal/PointBuffer.hpp>
 
 #include "Support.hpp"
@@ -74,8 +73,6 @@ BOOST_AUTO_TEST_CASE(HexbinFilterTest_test_1)
     options.add("edge_length", 0.666666666, "The edge size of the hexagon to "
         "use in situations where you do not want to estimate based on "
         "a sample");
-    options.add("x_dim", "X", "dot-qualified name of X dimension to use");
-    options.add("y_dim", "Y", "dot-qualified name of Y dimension to use");
 
     drivers::las::Reader reader(options);
     filters::HexBin hexbin(options);

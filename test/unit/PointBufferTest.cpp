@@ -46,17 +46,9 @@ BOOST_AUTO_TEST_SUITE(PointBufferTest)
 
 PointBuffer* makeTestBuffer(PointContext ctx)
 {
-    Dimension d1("Classification", dimension::UnsignedInteger, 1);
-    Dimension d2("X", dimension::SignedInteger, 4);
-    Dimension d3("Y", dimension::Float, 8);
-
-    ctx.schema()->appendDimension(d1);
-    ctx.schema()->appendDimension(d2);
-    ctx.schema()->appendDimension(d3);
-
-    DimensionPtr dimC = ctx.schema()->getDimension("Classification");
-    DimensionPtr dimX = ctx.schema()->getDimension("X");
-    DimensionPtr dimY = ctx.schema()->getDimension("Y");
+    ctx.registerDim(Dimension::Id::Classification);
+    ctx.registerDim(Dimension::Id::X);
+    ctx.registerDim(Dimension::Id::Y);
 
     PointBuffer* data = new PointBuffer(ctx);
 
@@ -67,9 +59,9 @@ PointBuffer* makeTestBuffer(PointContext ctx)
         const int32_t y = i * 10;
         const double z = i * 100;
 
-        data->setField(dimC, i, x);
-        data->setField(dimX, i, y);
-        data->setField(dimY, i, z);
+        data->setField(Dimension::Id::Classification, i, x);
+        data->setField(Dimension::Id::X, i, y);
+        data->setField(Dimension::Id::Y, i, z);
     }
     BOOST_CHECK(data->size() == 17);
     return data;
@@ -78,16 +70,13 @@ PointBuffer* makeTestBuffer(PointContext ctx)
 
 static void verifyTestBuffer(const PointBuffer& data)
 {
-    DimensionPtr dimC = data.getSchema().getDimension("Classification");
-    DimensionPtr dimX = data.getSchema().getDimension("X");
-    DimensionPtr dimY = data.getSchema().getDimension("Y");
-
     // read the data back out
     for (int i = 0; i < 17; i++)
     {
-        const uint8_t x = data.getField<uint8_t>(dimC, i);
-        const int32_t y = data.getField<uint32_t>(dimX, i);
-        const double z = data.getField<double>(dimY, i);
+        const uint8_t x = data.getField<uint8_t>(
+            Dimension::Id::Classification, i);
+        const int32_t y = data.getField<uint32_t>(Dimension::Id::X, i);
+        const double z = data.getField<double>(Dimension::Id::Y, i);
 
         BOOST_CHECK_EQUAL(x, i + 1);
         BOOST_CHECK_EQUAL(y, i * 10);
@@ -109,16 +98,12 @@ BOOST_AUTO_TEST_CASE(test_getFieldAs_uint8)
     PointContext ctx;
     PointBuffer* data = makeTestBuffer(ctx);
 
-    DimensionPtr dimC = ctx.schema()->getDimension("Classification");
-    DimensionPtr dimX = ctx.schema()->getDimension("X");
-    DimensionPtr dimY = ctx.schema()->getDimension("Y");
-
     // read the data back out
     for (int i = 0; i < 3; i++)
     {
-        uint8_t x = data->getFieldAs<uint8_t>(dimC, i);
-        uint8_t y = data->getFieldAs<uint8_t>(dimX, i);
-        uint8_t z = data->getFieldAs<uint8_t>(dimY, i);
+        uint8_t x = data->getFieldAs<uint8_t>(Dimension::Id::Classification, i);
+        uint8_t y = data->getFieldAs<uint8_t>(Dimension::Id::X, i);
+        uint8_t z = data->getFieldAs<uint8_t>(Dimension::Id::Y, i);
         
         BOOST_CHECK_EQUAL(x, i + 1);
         BOOST_CHECK_EQUAL(y, i * 10);
@@ -128,9 +113,10 @@ BOOST_AUTO_TEST_CASE(test_getFieldAs_uint8)
     // read the data back out
     for (int i = 3; i < 17; i++)
     {
-        uint8_t x = data->getFieldAs<uint8_t>(dimC, i);
-        uint8_t y = data->getFieldAs<uint8_t>(dimX, i);
-        BOOST_CHECK_THROW(data->getFieldAs<uint8_t>(dimY, i), pdal_error);
+        uint8_t x = data->getFieldAs<uint8_t>(Dimension::Id::Classification, i);
+        uint8_t y = data->getFieldAs<uint8_t>(Dimension::Id::X, i);
+        BOOST_CHECK_THROW(data->getFieldAs<uint8_t>(Dimension::Id::Y, i),
+            pdal_error);
         BOOST_CHECK(x == i + 1);
         BOOST_CHECK(y == i * 10);
     }
@@ -142,22 +128,17 @@ BOOST_AUTO_TEST_CASE(test_getFieldAs_int32)
     PointContext ctx;
     PointBuffer* data = makeTestBuffer(ctx);
 
-    DimensionPtr dimC = ctx.schema()->getDimension("Classification");
-    DimensionPtr dimX = ctx.schema()->getDimension("X");
-    DimensionPtr dimY = ctx.schema()->getDimension("Y");
-
     // read the data back out
     for (int i = 0; i < 17; i++)
     {
-        int32_t x = data->getFieldAs<int32_t>(dimC, i);
-        int32_t y = data->getFieldAs<int32_t>(dimX, i);
-        int32_t z = data->getFieldAs<int32_t>(dimY, i);
+        int32_t x = data->getFieldAs<int32_t>(Dimension::Id::Classification, i);
+        int32_t y = data->getFieldAs<int32_t>(Dimension::Id::X, i);
+        int32_t z = data->getFieldAs<int32_t>(Dimension::Id::Y, i);
         
         BOOST_CHECK_EQUAL(x, i + 1);
         BOOST_CHECK_EQUAL(y, i * 10);
         BOOST_CHECK_EQUAL(z, i * 100);
     }
-
     delete data;
 }
 
@@ -167,22 +148,17 @@ BOOST_AUTO_TEST_CASE(test_getFieldAs_float)
     PointContext ctx;
     PointBuffer* data = makeTestBuffer(ctx);
 
-    DimensionPtr dimC = ctx.schema()->getDimension("Classification");
-    DimensionPtr dimX = ctx.schema()->getDimension("X");
-    DimensionPtr dimY = ctx.schema()->getDimension("Y");
-
     // read the data back out
     for (int i = 0; i < 17; i++)
     {
-        float x = data->getFieldAs<float>(dimC, i);
-        float y = data->getFieldAs<float>(dimX, i);
-        float z = data->getFieldAs<float>(dimY, i);
+        float x = data->getFieldAs<float>(Dimension::Id::Classification, i);
+        float y = data->getFieldAs<float>(Dimension::Id::X, i);
+        float z = data->getFieldAs<float>(Dimension::Id::Y, i);
         
         BOOST_CHECK_CLOSE(x, i + 1.0f, std::numeric_limits<float>::min());
         BOOST_CHECK_CLOSE(y, i * 10.0f, std::numeric_limits<float>::min());
         BOOST_CHECK_CLOSE(z, i * 100.0f, std::numeric_limits<float>::min());
     }
-
     delete data;
 }
 
@@ -194,25 +170,22 @@ BOOST_AUTO_TEST_CASE(test_copy)
 
     PointBuffer d2(*data);
 
-    DimensionPtr dimC = ctx.schema()->getDimension("Classification");
-    DimensionPtr dimX = ctx.schema()->getDimension("X");
-    DimensionPtr dimY = ctx.schema()->getDimension("Y");
-
     // read the data back out
     {
-        BOOST_CHECK_EQUAL(d2.getField<uint8_t>(dimC, 0),
-            data->getField<uint8_t>(dimC, 0));
-        BOOST_CHECK_EQUAL(d2.getField<int32_t>(dimX, 0),
-            data->getField<int32_t>(dimX, 0));
-        BOOST_CHECK_EQUAL(d2.getField<double>(dimY, 0),
-            data->getField<double>(dimY, 0));
+        BOOST_CHECK_EQUAL(
+            d2.getField<uint8_t>(Dimension::Id::Classification, 0),
+            data->getField<uint8_t>(Dimension::Id::Classification, 0));
+        BOOST_CHECK_EQUAL(d2.getField<int32_t>(Dimension::Id::X, 0),
+            data->getField<int32_t>(Dimension::Id::X, 0));
+        BOOST_CHECK_EQUAL(d2.getField<double>(Dimension::Id::Y, 0),
+            data->getField<double>(Dimension::Id::Y, 0));
     }
 
     for (int i = 1; i < 17; i++)
     {
-        uint8_t x = d2.getField<uint8_t>(dimC, i);
-        int32_t y = d2.getField<int32_t>(dimX, i);
-        double z = d2.getField<double>(dimY, i);
+        uint8_t x = d2.getField<uint8_t>(Dimension::Id::Classification, i);
+        int32_t y = d2.getField<int32_t>(Dimension::Id::X, i);
+        double z = d2.getField<double>(Dimension::Id::Y, i);
 
         BOOST_CHECK_EQUAL(x, i + 1);
         BOOST_CHECK_EQUAL(y, i * 10);
@@ -317,12 +290,13 @@ BOOST_AUTO_TEST_CASE(test_indexed)
     BOOST_CHECK_EQUAL(nids[3], 42u);
     BOOST_CHECK_EQUAL(nids[4], 40u);    
     
-    std::vector<size_t> rids = idata.radius(637012.24, 849028.31, 431.66, 100000);
+    std::vector<size_t> rids = idata.radius(637012.24, 849028.31,
+        431.66, 100000);
     BOOST_CHECK_EQUAL(rids.size(), 11u);    
     
     delete iter;
 }
 **/
 
-
 BOOST_AUTO_TEST_SUITE_END()
+

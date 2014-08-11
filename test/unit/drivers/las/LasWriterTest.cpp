@@ -88,9 +88,7 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_las)
     BOOST_CHECK_EQUAL(filesSame, true);
 
     if (filesSame)
-    {
         FileUtils::deleteFile(Support::temppath(temp_filename));
-    }
 }
 
 #ifdef PDAL_HAVE_LASZIP
@@ -330,12 +328,9 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_ignored_dimensions)
             reader2.createSequentialIterator();
         iter->read(altered, 1);
     
-        Schema *schema2 = ctx2.schema();
-        DimensionPtr dimRed = schema2->getDimension("Red");
-        DimensionPtr dimX = schema2->getDimension("X");
-        uint16_t r = altered.getField<boost::uint16_t>(dimRed, 0);
+        uint16_t r = altered.getField<uint16_t>(Dimension::Id::Red, 0);
         BOOST_CHECK_EQUAL(r, 0u);
-        int32_t x = altered.getField<boost::int32_t>(dimX, 0);
+        int32_t x = altered.getField<int32_t>(Dimension::Id::X, 0);
         BOOST_CHECK_EQUAL(x, 63701224);
 
         delete iter;
@@ -351,12 +346,9 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_ignored_dimensions)
     
         iter2->read(original, 1);
         
-        Schema *schema = ctx.schema();
-        DimensionPtr dimRed2 = schema->getDimension("Red");
-        DimensionPtr dimX2 = schema->getDimension("X");
-        uint16_t r2 = original.getField<uint16_t>(dimRed2, 0);
+        uint16_t r2 = original.getField<uint16_t>(Dimension::Id::Red, 0);
         BOOST_CHECK_EQUAL(r2, 68u);
-        int32_t x2 = original.getField<int32_t>(dimX2, 0);
+        int32_t x2 = original.getField<int32_t>(Dimension::Id::X, 0);
         BOOST_CHECK_EQUAL(x2, 63701224);
 
         delete iter2;

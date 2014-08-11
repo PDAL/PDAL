@@ -60,18 +60,12 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_sequential_iter)
 
     BOOST_CHECK_EQUAL(numRead, 750u);
 
-    Schema *schema = ctx.schema();
-    DimensionPtr dimX = schema->getDimension("X");
-    DimensionPtr dimY = schema->getDimension("Y");
-    DimensionPtr dimZ = schema->getDimension("Z");
-    DimensionPtr dimTime = schema->getDimension("Time");
-
     for (uint32_t i = 0; i < numRead; i++)
     {
-        double x = buf.getFieldAs<double>(dimX, i);
-        double y = buf.getFieldAs<double>(dimY, i);
-        double z = buf.getFieldAs<double>(dimZ, i);
-        uint64_t t = buf.getFieldAs<boost::uint64_t>(dimTime, i);
+        double x = buf.getFieldAs<double>(Dimension::Id::X, i);
+        double y = buf.getFieldAs<double>(Dimension::Id::Y, i);
+        double z = buf.getFieldAs<double>(Dimension::Id::Z, i);
+        uint64_t t = buf.getFieldAs<uint64_t>(Dimension::Id::GpsTime, i);
 
         BOOST_CHECK_CLOSE(x, 1.0, 0.00001);
         BOOST_CHECK_CLOSE(y, 2.0, 0.00001);
@@ -104,18 +98,12 @@ BOOST_AUTO_TEST_CASE(test_random_mode)
 
     BOOST_CHECK_EQUAL(numRead, 750u);
 
-    Schema *schema = ctx.schema();
-    DimensionPtr dimX = schema->getDimension("X");
-    DimensionPtr dimY = schema->getDimension("Y");
-    DimensionPtr dimZ = schema->getDimension("Z");
-    DimensionPtr dimTime = schema->getDimension("Time");
-
     for (point_count_t i = 0; i < numRead; ++i)
     {
-        double x = buf.getField<double>(dimX, i);
-        double y = buf.getField<double>(dimY, i);
-        double z = buf.getField<double>(dimZ, i);
-        uint64_t t = buf.getField<uint64_t>(dimTime, i);
+        double x = buf.getField<double>(Dimension::Id::X, i);
+        double y = buf.getField<double>(Dimension::Id::Y, i);
+        double z = buf.getField<double>(Dimension::Id::Z, i);
+        uint64_t t = buf.getField<uint64_t>(Dimension::Id::GpsTime, i);
 
         BOOST_CHECK_GE(x, 1.0);
         BOOST_CHECK_LE(x, 101.0);
@@ -128,7 +116,6 @@ BOOST_AUTO_TEST_CASE(test_random_mode)
 
         BOOST_CHECK_EQUAL(t, i);
     }
-
     delete iter;
 }
 
@@ -154,21 +141,15 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode_1)
 
     BOOST_CHECK_EQUAL(numRead, 2u);
 
-    Schema *schema = ctx.schema();
-    DimensionPtr dimX = schema->getDimension("X");
-    DimensionPtr dimY = schema->getDimension("Y");
-    DimensionPtr dimZ = schema->getDimension("Z");
-    DimensionPtr dimTime = schema->getDimension("Time");
+    double x0 = buf.getField<double>(Dimension::Id::X, 0);
+    double y0 = buf.getField<double>(Dimension::Id::Y, 0);
+    double z0 = buf.getField<double>(Dimension::Id::Z, 0);
+    uint64_t t0 = buf.getField<uint64_t>(Dimension::Id::GpsTime, 0);
 
-    double x0 = buf.getField<double>(dimX, 0);
-    double y0 = buf.getField<double>(dimY, 0);
-    double z0 = buf.getField<double>(dimZ, 0);
-    uint64_t t0 = buf.getField<uint64_t>(dimTime, 0);
-
-    double x1 = buf.getField<double>(dimX, 1);
-    double y1 = buf.getField<double>(dimY, 1);
-    double z1 = buf.getField<double>(dimZ, 1);
-    uint64_t t1 = buf.getField<uint64_t>(dimTime, 1);
+    double x1 = buf.getField<double>(Dimension::Id::X, 1);
+    double y1 = buf.getField<double>(Dimension::Id::Y, 1);
+    double z1 = buf.getField<double>(Dimension::Id::Z, 1);
+    uint64_t t1 = buf.getField<uint64_t>(Dimension::Id::GpsTime, 1);
 
     BOOST_CHECK_CLOSE(x0, 0.0, 0.00001);
     BOOST_CHECK_CLOSE(y0, 0.0, 0.00001);
@@ -205,22 +186,16 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode_2)
 
     BOOST_CHECK_EQUAL(numRead,750u);
 
-    Schema *schema = ctx.schema();
-    DimensionPtr dimX = schema->getDimension("X");
-    DimensionPtr dimY = schema->getDimension("Y");
-    DimensionPtr dimZ = schema->getDimension("Z");
-    DimensionPtr dimTime = schema->getDimension("Time");
-
     double delX = (101.0 - 1.0) / (750.0 - 1.0);
     double delY = (152.0 - 2.0) / (750.0 - 1.0);
     double delZ = (203.0 - 3.0) / (750.0 - 1.0);
 
     for (point_count_t i = 0; i < numRead; ++i)
     {
-        double x = buf.getField<double>(dimX, i);
-        double y = buf.getField<double>(dimY, i);
-        double z = buf.getField<double>(dimZ, i);
-        uint64_t t = buf.getField<uint64_t>(dimTime, i);
+        double x = buf.getField<double>(Dimension::Id::X, i);
+        double y = buf.getField<double>(Dimension::Id::Y, i);
+        double z = buf.getField<double>(Dimension::Id::Z, i);
+        uint64_t t = buf.getField<uint64_t>(Dimension::Id::GpsTime, i);
 
         BOOST_CHECK_CLOSE(x, 1.0 + delX * i, 0.00001);
         BOOST_CHECK_CLOSE(y, 2.0 + delY * i, 0.00001);

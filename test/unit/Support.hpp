@@ -32,8 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef UNITTEST_SUPPORT_INCLUDED
-#define UNITTEST_SUPPORT_INCLUDED
+#pragma once
 
 // support functions for unit testing
 
@@ -44,7 +43,6 @@
 namespace pdal
 {
     class PointBuffer;
-    class Schema;
     class Stage;
 }
 
@@ -104,10 +102,8 @@ public:
                        
     // validate a point's XYZ, Time, and Color values
     static void check_pN(const pdal::PointBuffer& data,
-                         std::size_t index, 
-                         double xref, double yref, double zref,
-                         double tref,
-                         boost::uint16_t rref, boost::uint16_t gref, boost::uint16_t bref);
+        std::size_t index, double xref, double yref, double zref,
+        double tref, uint16_t rref, uint16_t gref, uint16_t bref);
 
     // these are for the 1.2-with-color image
     static void check_p0_p1_p2(const pdal::PointBuffer& data);
@@ -115,13 +111,12 @@ public:
     static void check_p355_p356_p357(const pdal::PointBuffer& data);
     static void check_p710_p711_p712(const pdal::PointBuffer& data);
 
-    static void compareBounds(const pdal::Bounds<double>& p, const pdal::Bounds<double>& q);
+    static void compareBounds(const pdal::Bounds<double>& p,
+        const pdal::Bounds<double>& q);
 
-    // executes "cmd" via popen, copying stdout into output and returning the status code
-    //
-    // note: under windows, all "/" characrters in cmd will be converted to "\\" for you
+    // executes "cmd" via popen, copying stdout into output and returning
+    // the status code note: under windows, all "/" characrters in cmd will
+    // be converted to "\\" for you
     // static int run_command(const std::string& cmd, std::string& output);
 };
 
-
-#endif

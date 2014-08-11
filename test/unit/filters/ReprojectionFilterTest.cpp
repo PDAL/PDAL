@@ -38,7 +38,6 @@
 #include <pdal/drivers/las/Reader.hpp>
 #include <pdal/filters/Reprojection.hpp>
 #include <pdal/StageIterator.hpp>
-#include <pdal/Schema.hpp>
 #include <pdal/PointBuffer.hpp>
 
 #include "Support.hpp"
@@ -53,15 +52,9 @@ static void getPoint(const pdal::PointBuffer& data,
 {
     using namespace pdal;
 
-    const Schema& schema = data.getSchema();
-
-    DimensionPtr dim_x = schema.getDimension("X");
-    DimensionPtr dim_y = schema.getDimension("Y");
-    DimensionPtr dim_z = schema.getDimension("Z");
-    
-    x = data.getFieldAs<double>(dim_x, 0);
-    y = data.getFieldAs<double>(dim_y, 0);
-    z = data.getFieldAs<double>(dim_z, 0);
+    x = data.getFieldAs<double>(Dimension::Id::X, 0);
+    y = data.getFieldAs<double>(Dimension::Id::Y, 0);
+    z = data.getFieldAs<double>(Dimension::Id::Z, 0);
 }
 
 // Test reprojecting UTM 15 to DD with a filter

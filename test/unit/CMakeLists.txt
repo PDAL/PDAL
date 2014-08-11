@@ -19,12 +19,12 @@ SET(PDAL_UNITTEST_TEST_SRC
     ConfigTest.cpp
     filters/CropFilterTest.cpp
     filters/DecimationFilterTest.cpp
-    DimensionTest.cpp
+#    DimensionTest.cpp
     EnvironmentTest.cpp
     drivers/faux/FauxReaderTest.cpp
     FileUtilsTest.cpp
     filters/HexbinFilterTest.cpp
-    filters/InPlaceReprojectionFilterTest.cpp
+#    filters/InPlaceReprojectionFilterTest.cpp
     drivers/las/LasReaderTest.cpp
     drivers/las/LasWriterTest.cpp
     LogTest.cpp
@@ -38,8 +38,8 @@ SET(PDAL_UNITTEST_TEST_SRC
     filters/ReprojectionFilterTest.cpp
     drivers/sbet/SbetReaderTest.cpp
     drivers/sbet/SbetWriterTest.cpp
-    filters/ScalingFilterTest.cpp
-    filters/SelectorFilterTest.cpp
+#    filters/ScalingFilterTest.cpp
+#    filters/SelectorFilterTest.cpp
 #    SchemaLayoutTest.cpp
 #    SchemaTest.cpp
     SpatialReferenceTest.cpp
