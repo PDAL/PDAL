@@ -71,6 +71,14 @@ public:
         memcpy(value, m_buf.data() + offset, d->size());
     }
 
+    void setPointSize(size_t size)
+    {
+        if (m_numPts != 0)
+            throw pdal_error("Can't set point size after points have "
+                "been added.");
+        m_pointSize = size;
+    }
+
 private:
     std::vector<char> m_buf;
     point_count_t m_numPts;

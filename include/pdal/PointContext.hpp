@@ -204,6 +204,7 @@ private:
             m_dims->m_detail[*ui].m_offset = offset;
             offset += m_dims->m_detail[*ui].size();
         }
+        m_ptBuf->setPointSize((size_t)offset);
     }
 };
 

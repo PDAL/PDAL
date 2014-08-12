@@ -78,7 +78,7 @@ enum Enum
 
 inline size_t size(Type::Enum t)
 {
-    return t | 0xFF;
+    return t & 0xFF;
 }
 
 inline BaseType::Enum base(Type::Enum t)
@@ -152,7 +152,7 @@ enum Enum
 } // namespace Id
 typedef std::vector<Id::Enum> IdList;
 
-static const int COUNT = sizeof(Id::Enum) / sizeof(Id::Alpha);
+static const int COUNT = std::numeric_limits<uint16_t>::max();
 static const int PROPRIETARY = 0xFF00;
 
 inline std::string description(Id::Enum id)
