@@ -60,12 +60,12 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_sequential_iter)
 
     BOOST_CHECK_EQUAL(numRead, 750u);
 
-    for (uint32_t i = 0; i < numRead; i++)
+    for (point_count_t i = 0; i < numRead; i++)
     {
         double x = buf.getFieldAs<double>(Dimension::Id::X, i);
         double y = buf.getFieldAs<double>(Dimension::Id::Y, i);
         double z = buf.getFieldAs<double>(Dimension::Id::Z, i);
-        uint64_t t = buf.getFieldAs<uint64_t>(Dimension::Id::GpsTime, i);
+        uint64_t t = buf.getFieldAs<uint64_t>(Dimension::Id::OffsetTime, i);
 
         BOOST_CHECK_CLOSE(x, 1.0, 0.00001);
         BOOST_CHECK_CLOSE(y, 2.0, 0.00001);
@@ -86,7 +86,6 @@ BOOST_AUTO_TEST_CASE(test_random_mode)
     ops.add("bounds", bounds);
     ops.add("num_points", 1000);
     ops.add("mode", "constant");
-
     drivers::faux::Reader reader(ops);
 
     PointContext ctx;
@@ -94,16 +93,16 @@ BOOST_AUTO_TEST_CASE(test_random_mode)
 
     PointBuffer buf(ctx);
     StageSequentialIterator* iter = reader.createSequentialIterator();
-    uint32_t numRead = iter->read(buf, 750);
+    point_count_t numRead = iter->read(buf, 750);
 
     BOOST_CHECK_EQUAL(numRead, 750u);
 
     for (point_count_t i = 0; i < numRead; ++i)
     {
-        double x = buf.getField<double>(Dimension::Id::X, i);
-        double y = buf.getField<double>(Dimension::Id::Y, i);
-        double z = buf.getField<double>(Dimension::Id::Z, i);
-        uint64_t t = buf.getField<uint64_t>(Dimension::Id::GpsTime, i);
+        double x = buf.getFieldAs<double>(Dimension::Id::X, i);
+        double y = buf.getFieldAs<double>(Dimension::Id::Y, i);
+        double z = buf.getFieldAs<double>(Dimension::Id::Z, i);
+        uint64_t t = buf.getFieldAs<uint64_t>(Dimension::Id::OffsetTime, i);
 
         BOOST_CHECK_GE(x, 1.0);
         BOOST_CHECK_LE(x, 101.0);
@@ -137,19 +136,19 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode_1)
     PointBuffer buf(ctx);
 
     StageSequentialIterator* iter = reader.createSequentialIterator();
-    uint32_t numRead = iter->read(buf, 2);
+    point_count_t numRead = iter->read(buf, 2);
 
     BOOST_CHECK_EQUAL(numRead, 2u);
 
-    double x0 = buf.getField<double>(Dimension::Id::X, 0);
-    double y0 = buf.getField<double>(Dimension::Id::Y, 0);
-    double z0 = buf.getField<double>(Dimension::Id::Z, 0);
-    uint64_t t0 = buf.getField<uint64_t>(Dimension::Id::GpsTime, 0);
+    double x0 = buf.getFieldAs<double>(Dimension::Id::X, 0);
+    double y0 = buf.getFieldAs<double>(Dimension::Id::Y, 0);
+    double z0 = buf.getFieldAs<double>(Dimension::Id::Z, 0);
+    uint64_t t0 = buf.getFieldAs<uint64_t>(Dimension::Id::OffsetTime, 0);
 
-    double x1 = buf.getField<double>(Dimension::Id::X, 1);
-    double y1 = buf.getField<double>(Dimension::Id::Y, 1);
-    double z1 = buf.getField<double>(Dimension::Id::Z, 1);
-    uint64_t t1 = buf.getField<uint64_t>(Dimension::Id::GpsTime, 1);
+    double x1 = buf.getFieldAs<double>(Dimension::Id::X, 1);
+    double y1 = buf.getFieldAs<double>(Dimension::Id::Y, 1);
+    double z1 = buf.getFieldAs<double>(Dimension::Id::Z, 1);
+    uint64_t t1 = buf.getFieldAs<uint64_t>(Dimension::Id::OffsetTime, 1);
 
     BOOST_CHECK_CLOSE(x0, 0.0, 0.00001);
     BOOST_CHECK_CLOSE(y0, 0.0, 0.00001);
@@ -192,10 +191,10 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode_2)
 
     for (point_count_t i = 0; i < numRead; ++i)
     {
-        double x = buf.getField<double>(Dimension::Id::X, i);
-        double y = buf.getField<double>(Dimension::Id::Y, i);
-        double z = buf.getField<double>(Dimension::Id::Z, i);
-        uint64_t t = buf.getField<uint64_t>(Dimension::Id::GpsTime, i);
+        double x = buf.getFieldAs<double>(Dimension::Id::X, i);
+        double y = buf.getFieldAs<double>(Dimension::Id::Y, i);
+        double z = buf.getFieldAs<double>(Dimension::Id::Z, i);
+        uint64_t t = buf.getFieldAs<uint64_t>(Dimension::Id::OffsetTime, i);
 
         BOOST_CHECK_CLOSE(x, 1.0 + delX * i, 0.00001);
         BOOST_CHECK_CLOSE(y, 2.0 + delY * i, 0.00001);

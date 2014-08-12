@@ -63,14 +63,14 @@ namespace Type
 enum Enum
 {
     None = 0,
-    Signed8 = BaseType::Signed | 1,
-    Signed16 = BaseType::Signed | 2,
-    Signed32 = BaseType::Signed | 4,
-    Signed64 = BaseType::Signed | 8,
     Unsigned8 = BaseType::Unsigned | 1,
+    Signed8 = BaseType::Signed | 1,
     Unsigned16 = BaseType::Unsigned | 2,
+    Signed16 = BaseType::Signed | 2,
     Unsigned32 = BaseType::Unsigned | 4,
+    Signed32 = BaseType::Signed | 4,
     Unsigned64 = BaseType::Unsigned | 8,
+    Signed64 = BaseType::Signed | 8,
     Float = BaseType::Floating | 4,
     Double = BaseType::Floating | 8
 };

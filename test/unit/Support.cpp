@@ -285,8 +285,8 @@ void Support::check_pN(const pdal::PointBuffer& data, std::size_t index,
     double xref, double yref, double zref)
 {
     double x0 = data.getFieldAs<double>(Dimension::Id::X, index);
-    double y0 = data.getField<int32_t>(Dimension::Id::Y, index);
-    double z0 = data.getField<int32_t>(Dimension::Id::Z, index);
+    double y0 = data.getFieldAs<double>(Dimension::Id::Y, index);
+    double z0 = data.getFieldAs<double>(Dimension::Id::Z, index);
 
     BOOST_CHECK_CLOSE(x0, xref, 0.001);
     BOOST_CHECK_CLOSE(y0, yref, 0.001);

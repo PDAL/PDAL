@@ -110,13 +110,15 @@ public:
 
     void registerDim(Dimension::Id::Enum id)
     {
-        // This is simple.  We don't try to deal with multiple people
-        // registering dimensions with various sizes/types.
-        if (m_dims->m_detail[id].type() != Dimension::Type::None)
-            return;
+        registerDim(id, Dimension::defaultType(id));
+    }
 
-        m_dims->m_used.push_back(id);
-        m_dims->m_detail[id].m_type = Dimension::defaultType(id);
+    void registerDim(Dimension::Id::Enum id, Dimension::Type::Enum type)
+    {
+        Dimension::Detail& dd = m_dims->m_detail[id];
+        if (dd.type() == Dimension::Type::None)
+            m_dims->m_used.push_back(id);
+        dd.m_type = resolveType(type, dd.m_type);
         update();
     }
 
@@ -126,14 +128,19 @@ public:
     Dimension::Id::Enum assignDim(const std::string& name,
         Dimension::Type::Enum type)
     {
-        auto di = m_dims->m_propIds.find(name);
-        if (di != m_dims->m_propIds.end())
-            return di->second;
+        Dimension::Id::Enum id;
 
-        //ABELL - Right now we don't upgrde dimensions (larger size/type)
-        Dimension::Id::Enum id = (Dimension::Id::Enum)m_dims->m_nextFree++;
-        m_dims->m_used.push_back(id);
-        m_dims->m_detail[id].m_type = type;
+        auto di = m_dims->m_propIds.find(name);
+        if (di == m_dims->m_propIds.end())
+        {
+            id = (Dimension::Id::Enum)m_dims->m_nextFree++;
+            m_dims->m_propIds[name] = id;
+            m_dims->m_used.push_back(id);
+        }
+        else
+            id = di->second;
+        m_dims->m_detail[id].m_type =
+            resolveType(m_dims->m_detail[id].m_type, type);
         update();
         return id;
     }
@@ -144,7 +151,7 @@ public:
         Dimension::Id::Enum id = Dimension::id(name);
         if (id != Dimension::Id::Unknown)
         {
-            registerDim(id);
+            registerDim(id, type);
             return id;
         }
         return assignDim(name, type);
@@ -205,6 +212,44 @@ private:
             offset += m_dims->m_detail[*ui].size();
         }
         m_ptBuf->setPointSize((size_t)offset);
+    }
+
+    Dimension::Type::Enum resolveType(Dimension::Type::Enum t1,
+        Dimension::Type::Enum t2)
+    {
+        using namespace Dimension;
+        using namespace Dimension::BaseType;
+        if (t1 == Type::None && t2 != Type::None)
+           return t2;
+        if (t2 == Type::None && t1 != Type::None)
+           return t1;
+        if (t1 == t2)
+            return t1;
+        if (base(t1) == base(t2))
+            return std::max(t1, t2);
+        //Prefer floating to non-floating.
+        if (base(t1) == Floating && base(t2) != Floating)
+            return t1;
+        if (base(t2) == Floating && base(t1) != Floating)
+            return t2;
+        // Now we're left with cases of a signed/unsigned mix.
+        // If the unsigned type is smaller, take the signed type.
+        if (base(t1) == Unsigned && size(t1) < size(t2))
+            return t2;
+        if (base(t2) == Unsigned && size(t2) < size(t1))
+            return t1;
+        // Signed type is smaller or the the sizes are equal.
+        switch (std::max(size(t1), size(t2)))
+        {
+        case 1:
+            return Type::Signed16;
+        case 2:
+            return Type::Signed32;
+        case 4:
+            return Type::Signed64;
+        default:
+            return Type::Double;
+        }
     }
 };
 

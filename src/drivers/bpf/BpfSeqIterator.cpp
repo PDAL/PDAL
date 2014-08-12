@@ -191,6 +191,15 @@ point_count_t BpfSeqIterator::readByteMajor(PointBuffer& data,
     PointId startId = data.size();
     point_count_t numRead = 0;
 
+    // We need a temp buffer for the point data.
+    union uu
+    {
+        float f;
+        uint32_t u32;
+    };
+    std::unique_ptr<union uu> uArr(
+        new uu[std::min(count, m_numPoints - m_index)]);
+
     for (size_t d = 0; d < m_dims.size(); ++d)
     {
         for (size_t b = 0; b < sizeof(float); ++b)
@@ -200,18 +209,10 @@ point_count_t BpfSeqIterator::readByteMajor(PointBuffer& data,
             PointId nextId = startId;
             seekByteMajor(d, b, idx);
 
-            // We need a temp buffer for the point data.
-            union uu
-            {
-                float f;
-                uint32_t u32;
-            };
-            union uu *uArr = new uu[std::min(count, m_numPoints - m_index)];
-
             for (;numRead < count && idx < m_numPoints;
                 idx++, numRead++, nextId++)
             {
-                union uu& u = uArr[numRead];
+                union uu& u = *(uArr.get() + numRead);
 
                 if (b == 0)
                     u.u32 = 0;
