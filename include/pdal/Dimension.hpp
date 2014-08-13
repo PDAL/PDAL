@@ -83,7 +83,7 @@ inline size_t size(Type::Enum t)
 
 inline BaseType::Enum base(Type::Enum t)
 {
-    return BaseType::Enum(t >> 16);
+    return BaseType::Enum(t & 0xFF00);
 }
 
 struct Detail
