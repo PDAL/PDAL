@@ -47,6 +47,10 @@ namespace pdal
 
 class PointBuffer;
 class PointContext;
+namespace plang
+{
+    class BufferedInvocation;
+}
 
 class DimInfo
 {
@@ -67,6 +71,7 @@ typedef std::shared_ptr<DimInfo> DimInfoPtr;
 class PointContext
 {
     friend class PointBuffer;
+    friend class plang::BufferedInvocation;
 private:
     DimInfoPtr m_dims;
     // Provides storage for the point data.
@@ -228,6 +233,7 @@ private:
         if (base(t1) == base(t2))
             return std::max(t1, t2);
         //Prefer floating to non-floating.
+        //ABELL - Should we force double in some cases?
         if (base(t1) == Floating && base(t2) != Floating)
             return t1;
         if (base(t2) == Floating && base(t1) != Floating)

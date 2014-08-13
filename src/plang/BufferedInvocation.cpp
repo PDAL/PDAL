@@ -59,27 +59,25 @@ BufferedInvocation::BufferedInvocation(const Script& script)
 
 void BufferedInvocation::begin(PointBuffer& buffer)
 {
-    // const Schema& schema = buffer.getSchema();
-    Dimension::IdList const& dims = buffer.context().dims();
-    // DimensionList dims = buffer.getSchema().getDimensions();
+    PointContext ctx = buffer.context(); 
+    Dimension::IdList const& dims = ctx.dims();
     
     for (auto di = dims.begin(); di != dims.end(); ++di)
     {
         Dimension::Id::Enum d = *di;
+        Dimension::Detail *dd = ctx.dimDetail(d);
         //ABELL - does the interface allow us to use a fixed-size buffer
         //  and then call beginChunk in a loop or something similar?
-        Dimension::Type::Enum t = Dimension::defaultType(d);
-        size_t size = Dimension::size(t);
-        void *data = malloc(size * buffer.size());
+        void *data = malloc(dd->size() * buffer.size());
         m_buffers.push_back(data);  // Hold pointer for deallocation
         char *p = (char *)data;
         for (PointId idx = 0; idx < buffer.size(); ++idx)
         {
-            buffer.getRawField(d, idx, (void *)p);
-            p += size;
+            buffer.getFieldInternal(d, idx, (void *)p);
+            p += dd->size();
         }
         std::string name = Dimension::name(d);
-        insertArgument(name, (uint8_t *)data, t, buffer.size());
+        insertArgument(name, (uint8_t *)data, dd->type(), buffer.size());
     }
 }
 
@@ -98,23 +96,23 @@ void BufferedInvocation::end(PointBuffer& buffer)
 
     for (size_t i = 0; i < names.size(); i++)
     {
-        Dimension::Id::Enum d = buffer.context().findDim(names[i]);
-        if (d != Dimension::Id::Unknown)
-        {
-            Dimension::Type::Enum t = Dimension::defaultType(d);  
-            std::string name = Dimension::name(d);
-            assert(name == names[i]);
-            assert(hasOutputVariable(name));
-            
+        PointContext ctx = buffer.context();
+        Dimension::Id::Enum d = ctx.findDim(names[i]);
+        if (d == Dimension::Id::Unknown)
+            continue;
 
-            size_t size = Dimension::size(t);
-            void *data = extractResult(name, t);
-            char *p = (char *)data;
-            for (PointId idx = 0; idx < buffer.size(); ++idx)
-            {
-                buffer.setField(d, t, idx, (void *)p);
-                p += size;
-            }
+        Dimension::Detail *dd = ctx.dimDetail(d);
+        std::string name = Dimension::name(d);
+        assert(name == names[i]);
+        assert(hasOutputVariable(name));
+
+        size_t size = dd->size();
+        void *data = extractResult(name, dd->type());
+        char *p = (char *)data;
+        for (PointId idx = 0; idx < buffer.size(); ++idx)
+        {
+            buffer.setField(d, dd->type(), idx, (void *)p);
+            p += size;
         }
     }
     for (auto bi = m_buffers.begin(); bi != m_buffers.end(); ++bi)

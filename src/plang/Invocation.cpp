@@ -203,30 +203,31 @@ void *Invocation::extractResult( std::string const& name, Dimension::Type::Enum 
         throw python_error(oss.str());
     }
 
-    Dimension::BaseType::Enum b = Dimension::base(t);    
-    if (dtype->kind == 'i' && b != Dimension::BaseType::Enum::Signed)
+    using namespace Dimension;
+    BaseType::Enum b = Dimension::base(t);
+    if (dtype->kind == 'i' && b != BaseType::Signed)
     {
         std::ostringstream oss;
         oss << "dtype of array has a signed integer type but the " <<
             "dimension data type of '" << name <<
-            "' is not pdal::SignedInteger"; 
+            "' is not pdal::Signed"; 
         throw python_error(oss.str());
     }
 
-    if (dtype->kind == 'u' && b != Dimension::BaseType::Enum::Unsigned)
+    if (dtype->kind == 'u' && b != BaseType::Unsigned)
     {
         std::ostringstream oss;
         oss << "dtype of array has a unsigned integer type but the " <<
             "dimension data type of '" << name <<
-            "' is not pdal::UnsignedInteger"; 
+            "' is not pdal::Unsigned"; 
         throw python_error(oss.str());
     }
 
-    if (dtype->kind == 'f' && b != Dimension::BaseType::Enum::Floating)
+    if (dtype->kind == 'f' && b != BaseType::Floating)
     {
         std::ostringstream oss;
         oss << "dtype of array has a float type but the " <<
-            "dimension data type of '" << name << "' is not pdal::Float"; 
+            "dimension data type of '" << name << "' is not pdal::Floating"; 
         throw python_error(oss.str());
     }    
     return PyArray_GetPtr(arr, &one);
@@ -259,49 +260,33 @@ void Invocation::getOutputNames(std::vector<std::string>& names)
 
 int Invocation::getPythonDataType(Dimension::Type::Enum t)
 {
-    Dimension::BaseType::Enum b = Dimension::base(t);
-    size_t size = Dimension::size(t);
-    switch (b)
-    {
-        case Dimension::BaseType::Enum::Floating:
-            switch (size)
-            {
-                case 4:
-                    return PyArray_FLOAT;
-                case 8:
-                    return PyArray_DOUBLE;
-            }
-            break;
-        case Dimension::BaseType::Enum::Signed:
-            switch (size)
-            {
-                case 1:
-                    return PyArray_BYTE;
-                case 2:
-                    return PyArray_SHORT;
-                case 4:
-                    return PyArray_INT;
-                case 8:
-                    return PyArray_LONGLONG;
-            }
-            break;
-        case Dimension::BaseType::Enum::Unsigned:
-            switch (size)
-            {
-                case 1:
-                    return PyArray_UBYTE;
-                case 2:
-                    return PyArray_USHORT;
-                case 4:
-                    return PyArray_UINT;
-                case 8:
-                    return PyArray_ULONGLONG;
-            }
-            break;
-        default:
-            return -1;
-    }
+    using namespace Dimension;
 
+    switch (t)
+    {
+    case Type::Float:
+        return PyArray_FLOAT;
+    case Type::Double:
+        return PyArray_DOUBLE;
+    case Type::Signed8:
+        return PyArray_BYTE;
+    case Type::Signed16:
+        return PyArray_SHORT;
+    case Type::Signed32:
+        return PyArray_INT;
+    case Type::Signed64:
+        return PyArray_LONGLONG;
+    case Type::Unsigned8:
+        return PyArray_UBYTE;
+    case Type::Unsigned16:
+        return PyArray_USHORT;
+    case Type::Unsigned32:
+        return PyArray_UINT;
+    case Type::Unsigned64:
+        return PyArray_ULONGLONG;
+    default:
+        return -1;
+    }
     assert(0);
 
     return -1;

@@ -45,13 +45,14 @@
 
 namespace pdal
 {
-    namespace pointbuffer
-    {
-        typedef boost::uint64_t PointBufferByteSize;
-    } // pointbuffer
+namespace plang
+{
+    class BufferedInvocation;
+}
 
 class PDAL_DLL PointBuffer
 {
+    friend class plang::BufferedInvocation;
 public:
     PointBuffer();
     PointBuffer(PointContext context) :
