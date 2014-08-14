@@ -59,7 +59,6 @@ Dimension::IdList fileDimensions()
     ids.push_back(Id::XVelocity);
     ids.push_back(Id::YVelocity);
     ids.push_back(Id::ZVelocity);
-    ids.push_back(Id::GpsTime);
     ids.push_back(Id::Roll);
     ids.push_back(Id::Pitch);
     ids.push_back(Id::PlatformHeading);

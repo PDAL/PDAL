@@ -49,7 +49,7 @@ using namespace pdal;
 void checkPoint(PointContext ctx, const PointBuffer& data,
     std::size_t index, double time, double latitude, double longitude,
     double altitude, double xvelocity, double yvelocity, double zvelocity,
-    double roll, double pitch, double heading, double wander, double xaccel,
+    float roll, float pitch, double heading, double wander, double xaccel,
     double yaccel, double zaccel, double xangrate, double yangrate,
     double zangrate)
 {
