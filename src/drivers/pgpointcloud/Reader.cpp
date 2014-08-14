@@ -232,6 +232,7 @@ boost::uint32_t Reader::fetchPcid() const
     oss << "FROM pg_class c, pg_attribute a ";
     oss << "WHERE c.relname = '" << m_table_name << "' ";
     oss << "AND a.attname = '" << m_column_name << "' ";
+    oss << "AND c.oid = a.attrelid";
 
     char *pcid_str(0);
     pcid_str = pg_query_once(m_session, oss.str());
