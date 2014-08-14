@@ -1,0 +1,19 @@
+#pragma once
+
+namespace pdal
+{
+namespace drivers
+{
+namespace rxp
+{
+
+
+inline std::string testDataPath()
+{
+    return "@CMAKE_SOURCE_DIR@/plugins/rxp/test/data/";
+}
+
+
+}
+}
+}
