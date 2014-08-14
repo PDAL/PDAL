@@ -44,9 +44,6 @@
 #include <pdal/GDALUtils.hpp>
 #endif
 
-#include <boost/tokenizer.hpp>
-typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
-
 namespace pdal
 {
 namespace filters
@@ -119,57 +116,32 @@ void Colorization::processOptions(const Options& options)
 {
     m_rasterFilename = options.getValueOrThrow<std::string>("raster");
     std::vector<Option> dimensions = options.getOptions("dimension");
-    
-    std::string bands = options.getValueOrDefault<std::string>("bands", "");
-    std::string scales = options.getValueOrDefault<std::string>("scales", "");
-    
-    if (!bands.size())
-    {
-        // Assume RGB in that order
-        m_bands.push_back(1); 
-        m_bands.push_back(2); 
-        m_bands.push_back(3);
-    } else
-    {
-        boost::char_separator<char> separator(" ");
-        tokenizer b(bands, separator);
-        
-        size_t cnt(0);
-        for (tokenizer::iterator ti = b.begin(); ti != b.end(); ++ti)
-        {
-            m_bands.push_back(boost::lexical_cast<uint32_t>(*ti));
-            cnt++;
-            if (cnt == 2) // break on the third 
-                break;
-        }
-        if (m_bands.size() != 3)
-            throw pdal_error("'bands' option is not three items!");                        
-    }
-    
-    if (!scales.size())
-    {
-        // Assume no scaling
-        m_bands.push_back(1.0); 
-        m_bands.push_back(1.0); 
-        m_bands.push_back(1.0);
-    } else
-    {
-        boost::char_separator<char> separator(" ");
-        tokenizer s(scales, separator);
-        
-        size_t cnt(0);
-        for (tokenizer::iterator ti = s.begin(); ti != s.end(); ++ti)
-        {
-            m_scales.push_back(boost::lexical_cast<double>(*ti));
-            cnt++;
-            if (cnt == 2) // break on the third 
-                break;
-        }
-        if (m_scales.size() != 3)
-            throw pdal_error("'m_scales' option is not three items!");                  
-    }
-    
 
+    if (dimensions.size() == 0)
+    {
+        m_bands.push_back({"Red", Dimension::Id::Red, 1, 1.0});
+        m_bands.push_back({"Green", Dimension::Id::Green, 2, 1.0});
+        m_bands.push_back({"Blue", Dimension::Id::Blue, 3, 1.0});
+        log()->get(LogLevel::DEBUG) << "No dimension mappings were given. "
+            "Using default mappings." << std::endl;
+    }
+    for (auto i = dimensions.begin(); i != dimensions.end(); ++i)
+    {
+        std::string name = i->getValue<std::string>();
+        boost::optional<Options const&> dimensionOptions = i->getOptions();
+        if (!dimensionOptions)
+        {
+            std::ostringstream oss;
+            oss << "No band and scaling information given for dimension '" <<
+                name << "'";
+            throw pdal_error(oss.str());
+        }
+        uint32_t bandId =
+            dimensionOptions->getValueOrThrow<uint32_t>("band");
+        double scale =
+            dimensionOptions->getValueOrDefault<double>("scale", 1.0);
+        m_bands.push_back({name, Dimension::Id::Unknown, bandId, scale});
+    }
 }
 
 
@@ -193,23 +165,15 @@ void Colorization::ready(PointContext ctx)
         &(m_inverse_transform.front())))
         throw pdal_error("unable to fetch inverse geotransform for raster!");
 #endif
-    
-    m_bands.clear();
-    m_scales.clear();
 
-/**
-  list<name,bandNumber,scale>
-**/
-    // for (auto i = m_band_map.begin(); i != m_band_map.end(); ++i)
-    // {
-    //     // Dimension
-    //     DimensionPtr dim = schema->getDimension(i->first);
-    //     m_dimensions.push_back(dim);
-    //     // Band number.
-    //     m_bands.push_back(i->second);
-    //     auto si = m_scale_map.find(i->first);
-    //     m_scales.push_back(si != m_scale_map.end() ? si->second : 1.0);
-    // }
+    for (auto bi = m_bands.begin(); bi != m_bands.end(); ++bi)
+    {
+        if (bi->m_dim == Dimension::Id::Unknown)
+            bi->m_dim = ctx.findDim(bi->m_name);
+        if (bi->m_dim == Dimension::Id::Unknown)
+            throw pdal_error((std::string)"Can't colorize - no dimension " +
+                bi->m_name);
+    }
 }
 
 
@@ -219,65 +183,31 @@ void Colorization::filter(PointBuffer& buffer)
     int32_t pixel(0);
     int32_t line(0);
 
-    GDALRasterBandH redBand = GDALGetRasterBand(m_ds, m_bands[0]);    
-    GDALRasterBandH greenBand = GDALGetRasterBand(m_ds, m_bands[1]);    
-    GDALRasterBandH blueBand = GDALGetRasterBand(m_ds, m_bands[2]);    
-
-    if (redBand == NULL)
-    {
-        std::ostringstream oss;
-        oss << "Unable to get red band " << m_bands[0] <<
-            " from data source!";
-        throw pdal_error(oss.str());
-    }
-
-    if (greenBand == NULL)
-    {
-        std::ostringstream oss;
-        oss << "Unable to get green band " << m_bands[1] <<
-            " from data source!";
-        throw pdal_error(oss.str());
-    }
-
-    if (blueBand == NULL)
-    {
-        std::ostringstream oss;
-        oss << "Unable to get blue band " << m_bands[2] <<
-            " from data source!";
-        throw pdal_error(oss.str());
-    }
-
-        
+    std::array<double, 2> pix = { {0.0, 0.0} };
     for (PointId idx = 0; idx < buffer.size(); ++idx)
     {
         double x = buffer.getFieldAs<double>(Dimension::Id::X, idx);
         double y = buffer.getFieldAs<double>(Dimension::Id::Y, idx);
 
-        if (!getPixelAndLinePosition(x, 
-                                     y, 
-                                     m_inverse_transform, 
-                                     pixel,
-                                     line, 
-                                     m_ds))
-            {
-                continue;
-            }
-            
-            double red, green, blue = 0.0;
-            GDALRasterIO(redBand, GF_Read, pixel, line, 1, 1,
-                         &red, 1, 1, GDT_CFloat64, 0, 0);
-            GDALRasterIO(greenBand, GF_Read, pixel, line, 1, 1,
-                         &green, 1, 1, GDT_CFloat64, 0, 0);
-            GDALRasterIO(blueBand, GF_Read, pixel, line, 1, 1,
-                         &blue, 1, 1, GDT_CFloat64, 0, 0);
-            
-            red = red * m_scales[0];
-            green = green * m_scales[1];
-            blue = blue * m_scales[2];
+        if (!getPixelAndLinePosition(x, y, m_inverse_transform, pixel,
+                line, m_ds))
+            continue;
 
-            buffer.setField(Dimension::Id::Red, idx, red);
-            buffer.setField(Dimension::Id::Green, idx, green);
-            buffer.setField(Dimension::Id::Blue, idx, blue);
+        for (auto bi = m_bands.begin(); bi != m_bands.end(); ++bi)
+        {
+            BandInfo& b = *bi;
+            GDALRasterBandH hBand = GDALGetRasterBand(m_ds, b.m_band);
+            if (hBand == NULL)
+            {
+                std::ostringstream oss;
+                oss << "Unable to get band " << b.m_band <<
+                    " from data source!";
+                throw pdal_error(oss.str());
+            }
+            if (GDALRasterIO(hBand, GF_Read, pixel, line, 1, 1,
+                &pix[0], 1, 1, GDT_CFloat64, 0, 0) == CE_None)
+                buffer.setField(b.m_dim, idx, pix[0] * b.m_scale);
+        }
     }
 #endif
 }
@@ -322,6 +252,6 @@ void Colorization::done(PointContext ctx)
 #endif
 }
 
-
 } // namespace filters
 } // namespace pdal
+

@@ -66,6 +66,15 @@ namespace filters
 // on a per-dimension basis.
 class PDAL_DLL Colorization : public Filter
 {
+
+struct BandInfo
+{
+    std::string m_name;
+    Dimension::Id::Enum m_dim;
+    uint32_t m_band;
+    double m_scale;
+};
+
 public:
     SET_STAGE_NAME("filters.colorization", "Fetch color information from a GDAL datasource")
     SET_STAGE_LINK("http://pdal.io/stages/filters.colorization.html")
@@ -92,8 +101,7 @@ private:
         boost::int32_t& line, void *ds);
 
     std::string m_rasterFilename;
-    std::vector<uint32_t> m_bands;
-    std::vector<double> m_scales;
+    std::vector<BandInfo> m_bands;
 
     boost::array<double, 6> m_forward_transform;
     boost::array<double, 6> m_inverse_transform;
