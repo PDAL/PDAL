@@ -156,7 +156,7 @@ BOOST_AUTO_TEST_CASE(test_crop_polygon_reprojection)
 #ifdef PDAL_HAVE_GEOS
     Options options;
 
-    Option in_srs("spatialreference","EPSG:2993", "Input SRS");
+    Option in_srs("spatialreference",Support::datapath("autzen-srs.wkt"), "Input SRS");
     Option out_srs("out_srs","EPSG:4326", "Output SRS to reproject to");
     Option x_dim("x_dim", std::string("drivers.las.reader.X"),
         "Dimension name to use for 'X' data");
@@ -185,7 +185,7 @@ BOOST_AUTO_TEST_CASE(test_crop_polygon_reprojection)
     options.add(filename);
     
     std::istream* wkt_stream =
-        FileUtils::openFile(Support::datapath("autzen-selection.wkt"));
+        FileUtils::openFile(Support::datapath("autzen-selection-dd.wkt"));
     std::stringstream strbuf;
     strbuf << wkt_stream->rdbuf();
     std::string wkt(strbuf.str());
