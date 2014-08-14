@@ -50,7 +50,7 @@ template <typename T>
 void checkDimension(const PointBuffer& data, std::size_t index,
     Dimension::Id::Enum dim, T expected)
 {
-    float actual = data.getField<T>(dim, index);
+    float actual = data.getFieldAs<T>(dim, index);
     BOOST_CHECK_CLOSE(expected, actual, 0.000001);
 }
 
@@ -108,7 +108,7 @@ BOOST_AUTO_TEST_CASE(testRead)
     checkPoint(
             *buf,
             0,
-            141437.548,     // time
+            141437548,     // time
             82.605319,      // latitude
             301.406196,     // longitude
             18.678,         // elevation
@@ -124,7 +124,7 @@ BOOST_AUTO_TEST_CASE(testRead)
     checkPoint(
             *buf,
             1,
-            141437.548,     // time
+            141437548,     // time
             82.605287,      // latitude
             301.404862,     // longitude
             18.688,         // elevation
@@ -161,7 +161,7 @@ BOOST_AUTO_TEST_CASE(testSkip)
     checkPoint(
             data,
             0,
-            141437.548,     // time
+            141437548,     // time
             82.605287,      // latitude
             301.404862,     // longitude
             18.688,         // elevation

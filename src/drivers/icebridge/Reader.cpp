@@ -166,9 +166,22 @@ point_count_t IcebridgeSeqIter::readImpl(PointBuffer& buf, point_count_t count)
             // This is ugly but avoids a test in a tight loop.
             if (column.predType == H5::PredType::NATIVE_FLOAT)
             {
-                float *fval = (float *)p;
-                for (PointId i = 0; i < count; ++i)
-                    buf.setField(*di, nextId++, *fval++);
+                // Offset time is in ms but icebridge stores in seconds.
+                if (*di == Dimension::Id::OffsetTime)
+                {
+                    float *fval = (float *)p;
+                    for (PointId i = 0; i < count; ++i)
+                    {
+                        buf.setField(*di, nextId++, *fval * 1000);
+                        fval++;
+                    }
+                }
+                else
+                {
+                    float *fval = (float *)p;
+                    for (PointId i = 0; i < count; ++i)
+                        buf.setField(*di, nextId++, *fval++);
+                }
             }
             else if (column.predType == H5::PredType::NATIVE_INT)
             {
