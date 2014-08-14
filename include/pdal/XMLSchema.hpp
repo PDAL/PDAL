@@ -169,7 +169,10 @@ struct XMLSchema
     {
         Dimension::IdList ids;
         for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
+        {
+            assert(di->m_id != Dimension::Id::Unknown);
             ids.push_back(di->m_id);
+        }
         return ids;
     }
     std::vector<Dimension::Type::Enum> types() const

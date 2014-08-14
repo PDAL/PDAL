@@ -140,46 +140,4 @@ BOOST_AUTO_TEST_CASE(test_schema_read)
     }
 }
 
-
-BOOST_AUTO_TEST_CASE(test_schema_orientation)
-{
-    schema::XMLSchema s;
-    schema::DimInfo d1 { "Classification", "", 0, Dimension::Type::Unsigned8,
-        0.0, 0.0, 1.0, 0.0, Dimension::Id::Unknown };
-    schema::DimInfo d2 { "X", "", 0, Dimension::Type::Signed32,
-        0.0, 0.0, 1.0, 0.0, Dimension::Id::Unknown };
-    schema::DimInfo d3 { "Y", "", 0, Dimension::Type::Double,
-        0.0, 0.0, 1.0, 0.0, Dimension::Id::Unknown };
-
-    s.m_dims.push_back(d1);
-    s.m_dims.push_back(d2);
-    s.m_dims.push_back(d3);
-    
-    schema::Writer writer(s.dims(), s.types());
-
-    std::string xml_output = writer.getXML();
-    std::ostream* out = FileUtils::createFile("orientation-schema.xml");
-    out->write(xml_output.c_str(), strlen(xml_output.c_str()));
-    FileUtils::closeFile(out);
-    
-    schema::Reader reader2(xml_output, std::string(""));
-    schema::XMLSchema s2 = reader2.schema();
-    
-    BOOST_CHECK_EQUAL(s.m_dims.size(), s2.m_dims.size());
-
-    auto di1 = s.m_dims.begin();
-    auto di2 = s2.m_dims.begin();
-    while (di1 != s.m_dims.end() && di2 != s.m_dims.end())
-    {
-        schema::DimInfo& dim1 = *di1;
-        schema::DimInfo& dim2 = *di2;
-
-        BOOST_CHECK_EQUAL(dim1.m_name, dim2.m_name);
-        BOOST_CHECK_EQUAL(dim1.m_type, dim2.m_type);
-        BOOST_CHECK_EQUAL(dim1.m_description, dim2.m_description);
-        di1++;
-        di2++;
-    }
-}
-
 BOOST_AUTO_TEST_SUITE_END()
