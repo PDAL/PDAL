@@ -540,6 +540,27 @@ endif()
 
 
 #
+# drivers/rxp
+#
+set(PDAL_RXP_PATH drivers/rxp)
+set(PDAL_RXP_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_RXP_PATH}")
+set(PDAL_RXP_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_RXP_PATH}")
+
+set(PDAL_DRIVERS_RXP_HPP
+    "${PDAL_RXP_HEADERS}/RxpReader.hpp"
+)
+
+set (PDAL_DRIVERS_RXP_CPP 
+    "${PDAL_RXP_SRC}/RxpReader.cpp"
+)
+
+if (WITH_RIVLIB)
+    list (APPEND PDAL_CPP ${PDAL_DRIVERS_RXP_CPP} )
+    list (APPEND PDAL_HPP ${PDAL_DRIVERS_RXP_HPP} )
+endif()
+
+
+#
 # filters
 #
 set(PDAL_FILTERS_PATH filters)
@@ -725,6 +746,7 @@ source_group("Header Files\\drivers\\greyhound" FILES ${PDAL_DRIVERS_GREYHOUND_H
 source_group("Header Files\\drivers\\terrasolid" FILES ${PDAL_DRIVERS_TERRASOLID_HPP})
 source_group("Header Files\\drivers\\text" FILES ${PDAL_DRIVERS_TEXT_HPP})
 source_group("Header Files\\drivers\\pgpointcloud" FILES ${PDAL_DRIVERS_PGPOINTCLOUD_HPP})
+source_group("Header Files\\drivers\\rxp" FILES ${PDAL_DRIVERS_RXP_HPP})
 source_group("Header Files\\filters" FILES ${PDAL_FILTERS_HPP})
 source_group("Header Files\\plang" FILES ${PDAL_PLANG_HPP})
 
@@ -741,6 +763,7 @@ source_group("Source Files\\drivers\\greyhound" FILES ${PDAL_DRIVERS_GREYHOUND_C
 source_group("Source Files\\drivers\\terrasolid" FILES ${PDAL_DRIVERS_TERRASOLID_CPP})
 source_group("Source Files\\drivers\\text" FILES ${PDAL_DRIVERS_TEXT_CPP})
 source_group("Source Files\\drivers\\pgpointcloud" FILES ${PDAL_DRIVERS_PGPOINTCLOUD_CPP})
+source_group("Source Files\\drivers\\rxp" FILES ${PDAL_DRIVERS_RXP_CPP})
 source_group("Source Files\\filters" FILES ${PDAL_FILTERS_CPP})
 source_group("Source Files\\plang" FILES ${PDAL_PLANG_CPP})
 
@@ -823,6 +846,10 @@ endif()
 
 if (WITH_HDF5)
     target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE} ${HDF5_LIBRARIES})
+endif()
+
+if (WITH_RIVLIB)
+    target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE} ${RiVLib_SCANLIB_LIBRARY})
 endif()
 
 if (WITH_JSONCPP OR WITH_GREYHOUND)

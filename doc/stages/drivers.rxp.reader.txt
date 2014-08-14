@@ -1,0 +1,90 @@
+.. _drivers.rxp.reader:
+
+drivers.rxp.reader
+==================
+
+The **RXP reader** read from files in the RXP format, the in-house streaming format used by `RIEGL Laser Measurement Systems`_.
+
+
+Installation
+------------
+
+To build PDAL with rxp support, set RiVLib_DIR to the path of your local RiVLib installation.
+RiVLib can be obtained from the `RIEGL download pages`_ with a properly enabled user account.
+The RiVLib files do not need to be in a system-level directory, though they could be (e.g. they could be in ``/usr/local``, or just in your home directory somewhere).
+For help building PDAL with optional libraries, see `the optional library documentation`_.
+
+
+Example
+-------
+
+This example rescales the points, given in the scanner's own coordinate system, to values that can be written to a las file.
+Only points with a valid gps time, as determined by a pps pulse, are read from the rxp, since the ``sync_to_pps`` option is "true".
+
+.. code-block:: xml
+
+    <?xml version="1.0" encoding="utf-8"?>
+    <Pipeline version="1.0">
+        <Writer type="drivers.las.writer">
+            <Option name="filename">output.las</Option>
+            <Filter type="filters.scaling">
+                <Option name="dimension">
+                    X
+                    <Options>
+                        <Option name="scale">0.0001</Option>
+                        <Option name="offset">0</Option>
+                    </Options>
+                </Option>
+                <Option name="dimension">
+                    Y
+                    <Options>
+                        <Option name="scale">0.0001</Option>
+                        <Option name="offset">0</Option>
+                    </Options>
+                </Option>
+                <Option name="dimension">
+                    Z
+                    <Options>
+                        <Option name="scale">0.0001</Option>
+                        <Option name="offset">0</Option>
+                    </Options>
+                </Option>
+                <Reader type="drivers.rxp.reader">
+                    <Option name="filename">120304_204030.rxp</Option>
+                    <Option name="sync_to_pps">true</Option>
+                </Reader>
+            </Filter>
+        </Writer>
+    </Pipeline>
+
+
+Options
+-------
+
+filename
+  File to read from [Required if rdtp is not provided]
+
+rdtp
+  URI for a network-assessable scanner [Required if filename is not provided]
+
+sync_to_pps
+  If "true", ensure all incoming points have a valid pps timestamp, usually provided by some sort of GPS clock.
+  If "false", use the scanner's internal time.
+  Defaults to "true"
+
+
+Caveats
+-------
+
+The rxp reader does not make any assumptions about mapping amplitude or reflectance onto other values (e.g. las's Intensity).
+You are responsible for doing this mapping yourself, using the scaling and selector filters.
+As of this writing, this author has been unable to get said mappings working; contact the PDAL development team for help if you need this feature immediately.
+
+RXP data may include points that have return numbers that are too high for the las spec, which maxes out at five returns.
+As of this writing, the las writer will throw an error if asked to write a point with a too-high return number.
+This is a known issue, and the PDAL team is working on a solution.
+
+
+.. _RIEGL Laser Measurement Systems: http://www.riegl.com
+.. _RIEGL download pages: http://www.riegl.com/members-area/software-downloads/libraries/
+.. _the optional library documentation: http://www.pdal.io/compilation/unix.html#configure-your-optional-libraries

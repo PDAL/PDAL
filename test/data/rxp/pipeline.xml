@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<Pipeline version="1.0">
+  <Writer type="drivers.text.writer">
+    <Option name="filename">outfile.txt</Option>
+    <Reader type="drivers.rxp.reader">
+      <Option name="filename">130501_232206_cut.rxp</Option>
+    </Reader>
+  </Writer>
+</Pipeline>
