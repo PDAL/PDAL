@@ -103,6 +103,13 @@ BOOST_AUTO_TEST_CASE(test_schema_read)
 
     schema::XMLSchema s1 = reader.schema();
 
+    PointContext ctx;
+    for (auto di = s1.m_dims.begin(); di != s1.m_dims.end(); ++di)
+    {
+        schema::DimInfo& dim = *di;
+        dim.m_id = ctx.registerOrAssignDim(dim.m_name, dim.m_type);
+    }
+
     MetadataNode m;
 
     MetadataNode m1 = m.add("m1", 1u);
@@ -113,7 +120,7 @@ BOOST_AUTO_TEST_CASE(test_schema_read)
     pdal::schema::Writer writer(s1.dims(), s1.types());
     writer.setMetadata(m);
     std::string xml_output = writer.getXML();
-    
+
     pdal::schema::Reader reader2(xml_output, xsd);
     schema::XMLSchema s2 = reader2.schema();
 
@@ -128,7 +135,6 @@ BOOST_AUTO_TEST_CASE(test_schema_read)
 
         BOOST_CHECK_EQUAL(dim1.m_name, dim2.m_name);
         BOOST_CHECK_EQUAL(dim1.m_type, dim2.m_type);
-        BOOST_CHECK_EQUAL(dim1.m_description, dim2.m_description);
         di1++;
         di2++;
     }

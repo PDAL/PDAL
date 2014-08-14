@@ -277,7 +277,7 @@ inline Id::Enum id(std::string s)
         return Id::NumberOfReturns;
     else if (s == "SCANDIRECTIONFLAG")
         return Id::ScanDirectionFlag;
-    else if (s == "EDGEOFLIGHTLINE")
+    else if (s == "EDGEOFFLIGHTLINE")
         return Id::EdgeOfFlightLine;
     else if (s == "CLASSIFICATION")
         return Id::Classification;
