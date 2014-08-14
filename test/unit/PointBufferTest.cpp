@@ -73,10 +73,10 @@ static void verifyTestBuffer(const PointBuffer& data)
     // read the data back out
     for (int i = 0; i < 17; i++)
     {
-        const uint8_t x = data.getField<uint8_t>(
+        const uint8_t x = data.getFieldAs<uint8_t>(
             Dimension::Id::Classification, i);
-        const int32_t y = data.getField<uint32_t>(Dimension::Id::X, i);
-        const double z = data.getField<double>(Dimension::Id::Y, i);
+        const int32_t y = data.getFieldAs<uint32_t>(Dimension::Id::X, i);
+        const double z = data.getFieldAs<double>(Dimension::Id::Y, i);
 
         BOOST_CHECK_EQUAL(x, i + 1);
         BOOST_CHECK_EQUAL(y, i * 10);
@@ -173,19 +173,19 @@ BOOST_AUTO_TEST_CASE(test_copy)
     // read the data back out
     {
         BOOST_CHECK_EQUAL(
-            d2.getField<uint8_t>(Dimension::Id::Classification, 0),
-            data->getField<uint8_t>(Dimension::Id::Classification, 0));
-        BOOST_CHECK_EQUAL(d2.getField<int32_t>(Dimension::Id::X, 0),
-            data->getField<int32_t>(Dimension::Id::X, 0));
-        BOOST_CHECK_EQUAL(d2.getField<double>(Dimension::Id::Y, 0),
-            data->getField<double>(Dimension::Id::Y, 0));
+            d2.getFieldAs<uint8_t>(Dimension::Id::Classification, 0),
+            data->getFieldAs<uint8_t>(Dimension::Id::Classification, 0));
+        BOOST_CHECK_EQUAL(d2.getFieldAs<int32_t>(Dimension::Id::X, 0),
+            data->getFieldAs<int32_t>(Dimension::Id::X, 0));
+        BOOST_CHECK_EQUAL(d2.getFieldAs<double>(Dimension::Id::Y, 0),
+            data->getFieldAs<double>(Dimension::Id::Y, 0));
     }
 
     for (int i = 1; i < 17; i++)
     {
-        uint8_t x = d2.getField<uint8_t>(Dimension::Id::Classification, i);
-        int32_t y = d2.getField<int32_t>(Dimension::Id::X, i);
-        double z = d2.getField<double>(Dimension::Id::Y, i);
+        uint8_t x = d2.getFieldAs<uint8_t>(Dimension::Id::Classification, i);
+        int32_t y = d2.getFieldAs<int32_t>(Dimension::Id::X, i);
+        double z = d2.getFieldAs<double>(Dimension::Id::Y, i);
 
         BOOST_CHECK_EQUAL(x, i + 1);
         BOOST_CHECK_EQUAL(y, i * 10);

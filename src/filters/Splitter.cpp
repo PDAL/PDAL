@@ -88,7 +88,7 @@ PointBufferSet Splitter::run(PointBufferPtr buf)
 
     // Use the location of the first point as the origin.
     double xOrigin = buf->getFieldAs<double>(Dimension::Id::X, 0);
-    double yOrigin = buf->getFieldAs<double>(Dimension::Id::X, 0);
+    double yOrigin = buf->getFieldAs<double>(Dimension::Id::Y, 0);
 
     // Overlay a grid of squares on the points (m_length sides).  Each square
     // corresponds to a new point buffer.  Place the points falling in the
