@@ -162,7 +162,7 @@ void Writer::done(PointContext ctx)
         // 64 char string
         std::string zeros(64, '0');
 
-        std::unique_ptr<::nitf::BandSource> band(new ::nitf::MemorySource(
+        std::unique_ptr< ::nitf::BandSource> band(new ::nitf::MemorySource(
             const_cast<char*>(zeros.c_str()),
             zeros.size() /* memory size */,
             0 /* starting offset */,
