@@ -54,7 +54,7 @@
 #include "Support.hpp"
 #include "Application.hpp"
 
-#define SEPARATORS ",| "
+
 typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
 
 
@@ -69,18 +69,15 @@ public:
 private:
     void addSwitches(); // overrride
     void validateSwitches(); // overrride
-
-    void dumpPoints(PointContext ctx, const Stage&,
-        std::string const& points) const;
+    
+    void dump();
+    
+    void dumpPoints() const;
     void dumpPointsSequential(PointBuffer& ptBuf,
         const std::vector<uint32_t>& points,
         StageSequentialIterator *iter) const;
-    void dumpPointData(PointBuffer& outputData) const;
-    void dumpStats(PointContext ctx, pdal::filters::Stats& filter,
-        PipelineManager* manager) const;
-    void dumpSchema(PointContext ctx);
-    void dumpStage(const Stage&) const;
-    void dumpQuery(PointContext ctx, Stage&) const;
+    void dumpStats() const;
+    void dumpQuery() const;
     void dumpMetadata(PointContext ctx, const Stage&) const;
     void dumpSDO_PCMetadata(PointContext ctx, Stage const&) const;
 
@@ -90,9 +87,9 @@ private:
     bool m_showStage;
     bool m_showMetadata;
     bool m_showSDOPCMetadata;
+    bool m_computeBoundary;
     pdal::Options m_options;
     std::string m_pointIndexes;
-    std::ostream* m_outputStream;
     boost::uint32_t m_seed;
     boost::uint32_t m_sample_size;
     bool m_useXML;
@@ -104,6 +101,9 @@ private:
     boost::uint64_t m_numPointsToWrite;
     std::string m_pipelineFile;
     bool m_showSample;
+    std::unique_ptr<PointContext> m_context;
+    std::unique_ptr<boost::property_tree::ptree> m_tree;
+    std::unique_ptr<PipelineManager> m_manager;
 };
 
 }} // pdal::kernel
