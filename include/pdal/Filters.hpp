@@ -32,8 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_PDAL_FILTERS_HPP
-#define INCLUDED_PDAL_FILTERS_HPP
+#pragma once
 
 #include <pdal/filters/ByteSwap.hpp>
 #include <pdal/filters/Cache.hpp>
@@ -45,7 +44,7 @@
 #include <pdal/filters/Decimation.hpp>
 #include <pdal/filters/HexBin.hpp>
 #include <pdal/filters/InPlaceReprojection.hpp>
-#include <pdal/filters/Mosaic.hpp>
+#include <pdal/filters/Merge.hpp>
 #ifdef PDAL_HAVE_PCL
 #include <pdal/filters/PCLBlock.hpp>
 #endif
@@ -59,4 +58,3 @@
 #include <pdal/filters/Splitter.hpp>
 #include <pdal/filters/Stats.hpp>
 
-#endif

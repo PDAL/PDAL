@@ -36,7 +36,6 @@
 
 #include <pdal/PipelineManager.hpp>
 #include <pdal/Filter.hpp>
-#include <pdal/MultiFilter.hpp>
 #include <pdal/Reader.hpp>
 #include <pdal/Writer.hpp>
 #include <pdal/Options.hpp>
@@ -65,11 +64,16 @@ class PipelineReader::StageParserContext
 public:
     enum Cardinality { None, One, Many };
 
-    StageParserContext(Cardinality cardinality)
+    StageParserContext()
         : m_numTypes(0)
-        , m_cardinality(cardinality)
+        , m_cardinality(One)
         , m_numStages(0)
     {}
+
+    void setCardinality(Cardinality cardinality)
+    {
+        m_cardinality = cardinality;
+    }
 
     void addType()
     {
@@ -123,9 +127,6 @@ private:
     Cardinality m_cardinality; // num child stages allowed
     int m_numStages;
 };
-
-
-// ------------------------------------------------------------------------
 
 
 PipelineReader::PipelineReader(PipelineManager& manager, bool isDebug,
@@ -222,10 +223,6 @@ Stage* PipelineReader::parseElement_anystage(const std::string& name,
     {
         stage = parseElement_Filter(subtree);
     }
-    else if (name == "MultiFilter")
-    {
-        stage = parseElement_MultiFilter(subtree);
-    }
     else if (name == "Reader")
     {
         stage = parseElement_Reader(subtree);
@@ -247,7 +244,8 @@ Reader* PipelineReader::parseElement_Reader(const ptree& tree)
 {
     Options options(m_baseOptions);
 
-    StageParserContext context(StageParserContext::None);
+    StageParserContext context;
+    context.setCardinality(StageParserContext::None);
 
     map_t attrs;
     collect_attributes(attrs, tree);
@@ -313,11 +311,12 @@ Filter* PipelineReader::parseElement_Filter(const ptree& tree)
     Options options(m_baseOptions);
     Stage* prevStage = NULL;
 
-    StageParserContext context(StageParserContext::One);
+    StageParserContext context;
 
     map_t attrs;
     collect_attributes(attrs, tree);
 
+    std::vector<Stage *> prevStages;
     for (auto iter = tree.begin(); iter != tree.end(); ++iter)
     {
         const std::string& name = iter->first;
@@ -336,10 +335,10 @@ Filter* PipelineReader::parseElement_Filter(const ptree& tree)
         {
             // FIXME: ignored
         }
-        else if (name == "Filter" || name == "MultiFilter" || name == "Reader")
+        else if (name == "Filter" || name == "Reader")
         {
             context.addStage();
-            prevStage = parseElement_anystage(name, subtree);
+            prevStages.push_back(parseElement_anystage(name, subtree));
         }
         else
         {
@@ -354,64 +353,10 @@ Filter* PipelineReader::parseElement_Filter(const ptree& tree)
         context.addType();
     }
 
+    Filter* ptr = m_manager.addFilter(type, prevStages, options);
+    if (dynamic_cast<MultiFilter *>(ptr))
+        context.setCardinality(StageParserContext::Many);
     context.validate();
-
-    Filter* ptr = m_manager.addFilter(type, *prevStage, options);
-
-    return ptr;
-}
-
-
-MultiFilter* PipelineReader::parseElement_MultiFilter(const ptree& tree)
-{
-    Options options(m_baseOptions);
-    std::vector<Stage*> prevStages;
-    StageParserContext context(StageParserContext::Many);
-
-    map_t attrs;
-    collect_attributes(attrs, tree);
-
-    for (auto iter = tree.begin(); iter != tree.end(); ++iter)
-    {
-        const std::string& name = iter->first;
-        const ptree& subtree = iter->second;
-
-        if (name == "<xmlattr>")
-        {
-            // already parsed
-        }
-        else if (name == "Option")
-        {
-            Option option = parseElement_Option(subtree);
-            options.add(option);
-        }
-        else if (name == "Metadata")
-        {
-            // FIXME: ignored
-        }
-        else if (name == "Filter" || name == "MultiFilter" || name == "Reader")
-        {
-            context.addStage();
-            Stage* prevStage = parseElement_anystage(name, subtree);
-            prevStages.push_back(prevStage);
-        }
-        else
-        {
-            context.addUnknown(name);
-        }
-    }
-
-    std::string type;
-    if (attrs.count("type"))
-    {
-        type = attrs["type"];
-        context.addType();
-    }
-
-    context.validate();
-
-    MultiFilter* ptr = m_manager.addMultiFilter(type, prevStages, options);
-
     return ptr;
 }
 
@@ -443,7 +388,7 @@ Writer* PipelineReader::parseElement_Writer(const ptree& tree)
 {
     Options options(m_baseOptions);
     Stage* prevStage = NULL;
-    StageParserContext context(StageParserContext::One);
+    StageParserContext context;
 
     map_t attrs;
     collect_attributes(attrs, tree);
@@ -466,7 +411,7 @@ Writer* PipelineReader::parseElement_Writer(const ptree& tree)
         {
             // FIXME
         }
-        else if (name == "Filter" || name == "MultiFilter" || name == "Reader")
+        else if (name == "Filter" || name == "Reader")
         {
             context.addStage();
             prevStage = parseElement_anystage(name, subtree);
@@ -485,8 +430,7 @@ Writer* PipelineReader::parseElement_Writer(const ptree& tree)
     }
 
     context.validate();
-
-    return m_manager.addWriter(type, *prevStage, options);
+    return m_manager.addWriter(type, prevStage, options);
 }
 
 
@@ -500,14 +444,9 @@ bool PipelineReader::parseElement_Pipeline(const ptree& tree)
 
     std::string version = "";
     if (attrs.count("version"))
-    {
         version = attrs["version"];
-    }
     if (version != "1.0")
-    {
         throw pipeline_xml_error("unsupported pipeline xml version");
-    }
-
 
     bool isWriter = false;
 
@@ -516,7 +455,7 @@ bool PipelineReader::parseElement_Pipeline(const ptree& tree)
         const std::string& name = iter->first;
         const ptree subtree = iter->second;
 
-        if (name == "Reader" || name == "Filter" || name == "MultiFilter")
+        if (name == "Reader" || name == "Filter" )
         {
             stage = parseElement_anystage(name, subtree);
         }

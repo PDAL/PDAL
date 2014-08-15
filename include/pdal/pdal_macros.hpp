@@ -47,9 +47,6 @@
 #define MAKE_FILTER_CREATOR(T, FullT) \
     pdal::Filter* create_##T(const pdal::Options& options) \
         { pdal::Filter *f = new FullT(options); return f; }
-#define MAKE_MULTIFILTER_CREATOR(T, FullT) \
-    pdal::MultiFilter* create_##T(const pdal::Options& options) \
-        { pdal::MultiFilter *mf = new FullT(options); return mf; }
 #define MAKE_WRITER_CREATOR(T, FullT) \
     pdal::Writer* create_##T(const pdal::Options& options) \
         { pdal::Writer *w = new FullT(options); return w; }
@@ -66,9 +63,6 @@
 #define REGISTER_FILTER(T, FullT) \
     registerDriverInfo<FullT>(); \
     registerFilter(FullT::s_getName(), create_##T)
-#define REGISTER_MULTIFILTER(T, FullT) \
-    registerDriverInfo<FullT>(); \
-    registerMultiFilter(FullT::s_getName(), create_##T)
 
 #define CREATE_READER_PLUGIN(DriverName, DriverFullType) \
     PDAL_C_START PDAL_DLL void PDALRegister_reader_##DriverName(void* factory) \
@@ -85,15 +79,6 @@
         pdal::StageFactory& f = *(pdal::StageFactory*) factory; \
         f.registerDriverInfo< DriverFullType>(); \
         f.registerFilter(DriverFullType::s_getName(), create_##DriverName##Filter); \
-    } \
-    PDAL_C_END 
-
-#define CREATE_MULTIFILTER_PLUGIN(DriverName, DriverFullType) \
-    PDAL_C_START PDAL_DLL void PDALRegister_multifilter_##DriverName(void* factory) \
-    { \
-        pdal::StageFactory& f = *(pdal::StageFactory*) factory; \
-        f.registerDriverInfo< DriverFullType>(); \
-        f.registerMultiFilter(DriverFullType::s_getName(), create_##DriverName##MultiFilter); \
     } \
     PDAL_C_END 
 

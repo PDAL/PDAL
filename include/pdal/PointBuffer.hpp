@@ -81,6 +81,10 @@ public:
         { return m_index.size(); }
 
     inline void appendPoint(PointBuffer& buffer, PointId id);
+    void append(PointBuffer& buf)
+    {
+        m_index.insert(m_index.end(), buf.m_index.begin(), buf.m_index.end());
+    }
 
     /// Get the buffer's point context.
     PointContext context() const

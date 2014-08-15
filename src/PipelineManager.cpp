@@ -35,7 +35,6 @@
 #include <pdal/PipelineManager.hpp>
 
 #include <pdal/Filter.hpp>
-#include <pdal/MultiFilter.hpp>
 #include <pdal/Reader.hpp>
 #include <pdal/Writer.hpp>
 #include <pdal/Utils.hpp>
@@ -72,13 +71,6 @@ PipelineManager::~PipelineManager()
         delete filter;
     }
 
-    while (m_multifilters.size())
-    {
-        MultiFilter* multifilter = m_multifilters.back();
-        m_multifilters.pop_back();
-        delete multifilter;
-    }
-
     while (m_writers.size())
     {
         Writer* writer = m_writers.back();
@@ -113,30 +105,31 @@ Reader* PipelineManager::addReader(const std::string& type,
 }
 
 
-Filter* PipelineManager::addFilter(const std::string& type, Stage& prevStage,
-    const Options& options)
+Filter* PipelineManager::addFilter(const std::string& type,
+    const std::vector<Stage *>& prevStages, const Options& options)
 {
     registerPluginIfExists(options);
 
     Filter* stage = m_factory.createFilter(type, options);
-    stage->setInput(&prevStage);
+    stage->setInput(prevStages);
     m_filters.push_back(stage);
     m_lastStage = stage;
     return stage;
 }
 
 
-MultiFilter* PipelineManager::addMultiFilter(const std::string& type,
-    const std::vector<Stage*>& prevStages, const Options& options)
+Filter* PipelineManager::addFilter(const std::string& type, Stage *prevStage,
+    const Options& options)
 {
     registerPluginIfExists(options);
 
-    MultiFilter* stage = m_factory.createMultiFilter(type, options);
-    stage->setInput(prevStages);
-    m_multifilters.push_back(stage);
+    Filter* stage = m_factory.createFilter(type, options);
+    stage->setInput(prevStage);
+    m_filters.push_back(stage);
     m_lastStage = stage;
     return stage;
 }
+
 
 void PipelineManager::registerPluginIfExists(const Options& options)
 {
@@ -146,7 +139,8 @@ void PipelineManager::registerPluginIfExists(const Options& options)
     }
 }
 
-Writer* PipelineManager::addWriter(const std::string& type, Stage& prevStage,
+
+Writer* PipelineManager::addWriter(const std::string& type, Stage *prevStage,
     const Options& options)
 {
     m_isWriterPipeline = true;
@@ -154,7 +148,7 @@ Writer* PipelineManager::addWriter(const std::string& type, Stage& prevStage,
     registerPluginIfExists(options);
 
     Writer* writer = m_factory.createWriter(type, options);
-    writer->setInput(&prevStage);
+    writer->setInput(prevStage);
     m_writers.push_back(writer);
     m_lastWriter = writer;
     return writer;

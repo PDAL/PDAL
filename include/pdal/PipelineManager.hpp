@@ -55,11 +55,11 @@ public:
 
     // Use these to manually add stages into the pipeline manager.
     Reader* addReader(const std::string& type, const Options&);
-    Filter* addFilter(const std::string& type, Stage& prevStage,
+    Filter* addFilter(const std::string& type, Stage *stage,
         const Options&);
-    MultiFilter* addMultiFilter(const std::string& type,
-        const std::vector<Stage*>& prevStages, const Options&);
-    Writer* addWriter(const std::string& type, Stage& prevStage,
+    Filter* addFilter(const std::string& type,
+        const std::vector<Stage *>& stages, const Options&);
+    Writer* addWriter(const std::string& type, Stage *prevStage,
         const Options&);
     
     void removeWriter();
@@ -85,11 +85,9 @@ private:
 
     typedef std::vector<Reader*> ReaderList;
     typedef std::vector<Filter*> FilterList;
-    typedef std::vector<MultiFilter*> MultiFilterList;
     typedef std::vector<Writer*> WriterList;
     ReaderList m_readers;
     FilterList m_filters;
-    MultiFilterList m_multifilters;
     WriterList m_writers;
 
     Stage* m_lastStage;

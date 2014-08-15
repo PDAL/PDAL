@@ -57,11 +57,11 @@ BOOST_AUTO_TEST_CASE(PipelineManagerTest_test1)
 
         Options optsF;
         optsF.add("bounds", Bounds<double>(0,0,0,1000000,1000000,1000000));
-        Filter* filter = mgr.addFilter("filters.crop", *reader, optsF);
+        Filter* filter = mgr.addFilter("filters.crop", reader, optsF);
 
         Options optsW;
         optsW.add("filename", "temp.las", "file to write to");
-        Writer* writer = mgr.addWriter("drivers.las.writer", *filter, optsW);
+        Writer* writer = mgr.addWriter("drivers.las.writer", filter, optsW);
 
         point_count_t np = mgr.execute();
         BOOST_CHECK(np == 1065);
@@ -101,7 +101,7 @@ BOOST_AUTO_TEST_CASE(PipelineManagerTest_test2)
 
         Options optsF;
         optsF.add("bounds", Bounds<double>(0,0,0,1000000,1000000,1000000));
-        Filter* filter = mgr.addFilter("filters.crop", *multifilter, optsF);
+        Filter* filter = mgr.addFilter("filters.crop", multifilter, optsF);
 
         Options optsW;
         optsW.add("filename", "temp.las", "file to write to");

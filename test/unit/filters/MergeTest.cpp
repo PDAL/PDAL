@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2014, Hobu Inc., hobu.inc@gmail.com
 *
 * All rights reserved.
 *
@@ -32,46 +32,30 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_MULTIFILTERITERATOR_HPP
-#define INCLUDED_MULTIFILTERITERATOR_HPP
+#include <boost/test/unit_test.hpp>
 
-#include <pdal/pdal_internal.hpp>
+#include <pdal/PipelineManager.hpp>
+#include <pdal/PipelineReader.hpp>
 
-#include <vector>
+#include "Support.hpp"
 
-#include <pdal/StageIterator.hpp>
+BOOST_AUTO_TEST_SUITE(MergeTest)
 
-namespace pdal
+BOOST_AUTO_TEST_CASE(test1)
 {
-class MultiFilter;
-class PointBuffer;
+    using namespace pdal;
 
-class PDAL_DLL MultiFilterSequentialIterator : public StageSequentialIterator
-{
-public:
-    MultiFilterSequentialIterator(const MultiFilter&, PointBuffer& buffer);
-    virtual ~MultiFilterSequentialIterator();
+    PipelineManager mgr;
+    PipelineReader specReader(mgr);
+    specReader.readPipeline(Support::datapath("pipeline/merge.xml"));
+    Stage *stage = mgr.getStage();
+    mgr.execute();
 
-protected:
-    // from StageSequentialIterator
-    virtual point_count_t readBufferImpl(PointBuffer&) = 0;
-    virtual boost::uint64_t skipImpl(boost::uint64_t pointNum) = 0;
-    virtual bool atEndImpl() const = 0;
+    PointBufferSet pbSet = mgr.buffers();
 
-    StageSequentialIterator& getPrevIterator();
-    const StageSequentialIterator& getPrevIterator() const;
+    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    PointBufferPtr buf = *pbSet.begin();
+    BOOST_CHECK_EQUAL(buf->size(), 2130);
+}
 
-    const std::vector<StageSequentialIterator*>& getPrevIterators() const;
-
-    const MultiFilter& m_filter;
-    std::vector<StageSequentialIterator*> m_prevIterators;
-    StageSequentialIterator* m_prevIterator;
-    boost::uint32_t m_iteratorIndex;
-
-private:
-};
-
-
-} // namespace pdal
-
-#endif
+BOOST_AUTO_TEST_SUITE_END()

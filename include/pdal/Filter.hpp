@@ -32,8 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_FILTER_HPP
-#define INCLUDED_FILTER_HPP
+#pragma once
 
 #include <pdal/pdal_internal.hpp>
 
@@ -64,8 +63,6 @@ public:
     virtual boost::property_tree::ptree serializePipeline() const;
 
 private:
-    Filter& operator=(const Filter&); // not implemented
-    Filter(const Filter&); // not implemented
     virtual PointBufferSet run(PointBufferPtr buffer)
     {
         PointBufferSet pbSet;
@@ -75,8 +72,17 @@ private:
     }
     virtual void filter(PointBuffer& /*buffer*/)
     {}
+
+    Filter& operator=(const Filter&); // not implemented
+    Filter(const Filter&); // not implemented
+};
+
+class MultiFilter : public Filter
+{
+public:
+    MultiFilter(const Options& options) : Filter(options)
+        {}
 };
 
 }  // namespace pdal
 
-#endif

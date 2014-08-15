@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2014, Hobu Inc., hobu.inc@gmail.com
 *
 * All rights reserved.
 *
@@ -34,77 +34,41 @@
 
 #pragma once
 
-#include <vector>
-#include <map>
-
-#include <pdal/MultiFilter.hpp>
-#include <pdal/MultiFilterIterator.hpp>
-#include <pdal/StageIterator.hpp>
-
+#include <pdal/Filter.hpp>
 
 namespace pdal
 {
 namespace filters
 {
 
-
-// this doesn't derive from Stage since it takes more than one stage as input
-class PDAL_DLL Mosaic : public MultiFilter
+class PDAL_DLL Merge : public MultiFilter
 {
 public:
-    SET_STAGE_NAME("filters.mosaic", "Mosaic Filter")
-    SET_STAGE_LINK("http://pdal.io/stages/filters.mosaic.html")
+    SET_STAGE_NAME("filters.merge", "Merge Filter")
+    SET_STAGE_LINK("http://pdal.io/stages/filters.merge.html")
     SET_STAGE_ENABLED(true)
     
-    Mosaic(const Options& options) : MultiFilter(options)
+    Merge(const Options& options) : MultiFilter(options)
         {}
 
-    static Options getDefaultOptions();
-
-    pdal::StageSequentialIterator*
-        createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const
-        { return NULL; }
-
 private:
-    Mosaic& operator=(const Mosaic&); // not implemented
-    Mosaic(const Mosaic&); // not implemented
-    virtual void initialize();
+    PointBufferPtr m_buf;
+
+    virtual void ready(PointContext ctx)
+        { m_buf.reset(new PointBuffer(ctx)); }
+
+    virtual PointBufferSet run(PointBufferPtr buf)
+    {
+        PointBufferSet pbSet;
+
+        m_buf->append(*buf);
+        pbSet.insert(m_buf);
+        return pbSet;
+    }
+
+    Merge& operator=(const Merge&); // not implemented
+    Merge(const Merge&); // not implemented
 };
-
-
-
-namespace iterators
-{
-    typedef std::map<int, PointBufferPtr> PointBufferMap;
-    
-namespace sequential
-{
-
-class PDAL_DLL Mosaic : public pdal::MultiFilterSequentialIterator
-{
-public:
-    Mosaic(const pdal::filters::Mosaic& filter, PointBuffer& buffer,
-        LogPtr log, const Options& options);
-    ~Mosaic();
-
-private:
-    boost::uint64_t skipImpl(boost::uint64_t);
-    point_count_t readBufferImpl(PointBuffer&);
-    bool atEndImpl() const;
-//    DimensionMapPtr fetchDimensionMap(PointBuffer const& user_buffer,
-//        PointBufferPtr stage_buffer);
-    PointBufferPtr fetchPointBuffer(PointBuffer const& user_buffer);
-//    DimensionMapPtr m_active_dimension;
-//    DimensionMaps m_dimensions;
-
-    PointBufferMap m_buffers;
-    LogPtr m_log;
-    Options m_options;
-};
-
-} // namespace sequential
-} // namespace iterators
 
 } // namespace filters
 } // namespace pdal

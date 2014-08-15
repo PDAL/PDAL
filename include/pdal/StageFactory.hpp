@@ -32,15 +32,13 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_STAGEFACTORY_HPP
-#define INCLUDED_STAGEFACTORY_HPP
+#pragma once
 
 #include <pdal/pdal_internal.hpp>
 #include <pdal/pdal_macros.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/Reader.hpp>
 #include <pdal/Filter.hpp>
-#include <pdal/MultiFilter.hpp>
 #include <pdal/Writer.hpp>
 #include <pdal/StageInfo.hpp>
 #include <boost/shared_ptr.hpp>
@@ -74,12 +72,10 @@ class PDAL_DLL StageFactory
 public:
     typedef Reader* ReaderCreator(const Options&);
     typedef Filter* FilterCreator(const Options&);
-    typedef MultiFilter* MultiFilterCreator(const Options&);
     typedef Writer* WriterCreator(const Options&);
 
     typedef std::map<std::string, ReaderCreator*> ReaderCreatorList;
     typedef std::map<std::string, FilterCreator*> FilterCreatorList;
-    typedef std::map<std::string, MultiFilterCreator*> MultiFilterCreatorList;
     typedef std::map<std::string, WriterCreator*> WriterCreatorList;
 
 public:
@@ -100,13 +96,10 @@ public:
 
     Reader* createReader(const std::string& type, const Options& options);
     Filter* createFilter(const std::string& type, const Options& options);
-    MultiFilter* createMultiFilter(const std::string& type,
-        const Options& options);
     Writer* createWriter(const std::string& type, const Options& options);
 
     void registerReader(const std::string& type, ReaderCreator* f);
     void registerFilter(const std::string& type, FilterCreator* f);
-    void registerMultiFilter(const std::string& type, MultiFilterCreator* f);
     void registerWriter(const std::string& type, WriterCreator* f);
 
     void loadPlugins();
@@ -121,18 +114,15 @@ private:
     // callers take ownership of returned stages
     ReaderCreator* getReaderCreator(const std::string& type) const;
     FilterCreator* getFilterCreator(const std::string& type) const;
-    MultiFilterCreator* getMultiFilterCreator(const std::string& type) const;
     WriterCreator* getWriterCreator(const std::string& type) const;
 
     void registerKnownReaders();
     void registerKnownFilters();
-    void registerKnownMultiFilters();
     void registerKnownWriters();
 
     // these are the "registries" of the factory creator functions
     ReaderCreatorList m_readerCreators;
     FilterCreatorList m_filterCreators;
-    MultiFilterCreatorList m_multifilterCreators;
     WriterCreatorList m_writerCreators;
     
     // driver name + driver description
@@ -159,4 +149,3 @@ inline void StageFactory::registerDriverInfo()
 
 } // namespace pdal
 
-#endif

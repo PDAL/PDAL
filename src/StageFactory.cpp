@@ -35,7 +35,6 @@
 #include <pdal/StageFactory.hpp>
 
 #include <pdal/Filter.hpp>
-#include <pdal/MultiFilter.hpp>
 #include <pdal/Reader.hpp>
 #include <pdal/Writer.hpp>
 
@@ -111,6 +110,7 @@ MAKE_FILTER_CREATOR(Colorization, pdal::filters::Colorization)
 MAKE_FILTER_CREATOR(Crop, pdal::filters::Crop)
 MAKE_FILTER_CREATOR(Decimation, pdal::filters::Decimation)
 MAKE_FILTER_CREATOR(HexBin, pdal::filters::HexBin)
+MAKE_FILTER_CREATOR(Merge, pdal::filters::Merge)
 //MAKE_FILTER_CREATOR(InPlaceReprojection, pdal::filters::InPlaceReprojection)
 #ifdef PDAL_HAVE_PCL
 MAKE_FILTER_CREATOR(PCLBlock, pdal::filters::PCLBlock)
@@ -173,7 +173,6 @@ StageFactory::StageFactory()
 {
     registerKnownReaders();
     registerKnownFilters();
-    registerKnownMultiFilters();
     registerKnownWriters();
 
     loadPlugins();
@@ -286,22 +285,6 @@ Filter* StageFactory::createFilter(const std::string& type,
 }
 
 
-MultiFilter* StageFactory::createMultiFilter(const std::string& type,
-    const Options& options)
-{
-    MultiFilterCreator* f = getMultiFilterCreator(type);
-    if (!f)
-    {
-        std::ostringstream oss;
-        oss << "Unable to create multifilter for type '" << type <<
-            "'. Does a driver with this type name exist?";
-        throw pdal_error(oss.str());
-    }
-
-    return f(options);
-}
-
-
 Writer* StageFactory::createWriter(const std::string& type,
     const Options& options)
 {
@@ -340,12 +323,6 @@ StageFactory::FilterCreator* StageFactory::getFilterCreator(const std::string& t
 }
 
 
-StageFactory::MultiFilterCreator* StageFactory::getMultiFilterCreator(const std::string& type) const
-{
-    return findFirst<MultiFilterCreator>(type, m_multifilterCreators);
-}
-
-
 StageFactory::WriterCreator* StageFactory::getWriterCreator(const std::string& type) const
 {
     return findFirst<WriterCreator>(type, m_writerCreators);
@@ -363,13 +340,6 @@ void StageFactory::registerFilter(const std::string& type, FilterCreator* f)
 {
     std::pair<std::string, FilterCreator*> p(type, f);
     m_filterCreators.insert(p);
-}
-
-
-void StageFactory::registerMultiFilter(const std::string& type, MultiFilterCreator* f)
-{
-    std::pair<std::string, MultiFilterCreator*> p(type, f);
-    m_multifilterCreators.insert(p);
 }
 
 
@@ -433,6 +403,7 @@ void StageFactory::registerKnownFilters()
     REGISTER_FILTER(Decimation, pdal::filters::Decimation);
     REGISTER_FILTER(Reprojection, pdal::filters::Reprojection);
     REGISTER_FILTER(HexBin, pdal::filters::HexBin);
+    REGISTER_FILTER(Merge, pdal::filters::Merge);
 //    REGISTER_FILTER(InPlaceReprojection, pdal::filters::InPlaceReprojection);
 #ifdef PDAL_HAVE_PCL
     REGISTER_FILTER(PCLBlock, pdal::filters::PCLBlock);
@@ -448,12 +419,6 @@ void StageFactory::registerKnownFilters()
 //    REGISTER_FILTER(Selector, pdal::filters::Selector);
     REGISTER_FILTER(Splitter, pdal::filters::Splitter);
     REGISTER_FILTER(Stats, pdal::filters::Stats);
-}
-
-
-void StageFactory::registerKnownMultiFilters()
-{
-//    REGISTER_MULTIFILTER(Mosaic, pdal::filters::Mosaic);
 }
 
 

@@ -40,8 +40,6 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/Kernel.hpp"
   "${PDAL_HEADERS_DIR}/Log.hpp"
   "${PDAL_HEADERS_DIR}/Metadata.hpp"
-  "${PDAL_HEADERS_DIR}/MultiFilter.hpp"
-  "${PDAL_HEADERS_DIR}/MultiFilterIterator.hpp"
   "${PDAL_HEADERS_DIR}/Options.hpp"
   "${PDAL_HEADERS_DIR}/OStream.hpp"
   "${PDAL_HEADERS_DIR}/PipelineManager.hpp"
@@ -53,7 +51,6 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/RawPtBuf.hpp"
   "${PDAL_HEADERS_DIR}/Reader.hpp"
   "${PDAL_HEADERS_DIR}/ReaderIterator.hpp"
-#  "${PDAL_HEADERS_DIR}/Schema.hpp"
   "${PDAL_HEADERS_DIR}/SpatialReference.hpp"
   "${PDAL_HEADERS_DIR}/Stage.hpp"
   "${PDAL_HEADERS_DIR}/StageFactory.hpp"
@@ -79,7 +76,6 @@ endif()
 set(PDAL_BASE_CPP
   Bounds.cpp
   Charbuf.cpp
-#  Dimension.cpp
   FileUtils.cpp
   Filter.cpp
   FilterIterator.cpp
@@ -88,8 +84,6 @@ set(PDAL_BASE_CPP
   KDIndex.cpp
   Log.cpp
   Metadata.cpp
-  MultiFilter.cpp
-  MultiFilterIterator.cpp
   Options.cpp
   PipelineManager.cpp
   PipelineReader.cpp
@@ -98,7 +92,6 @@ set(PDAL_BASE_CPP
   Range.cpp
   Reader.cpp
   ReaderIterator.cpp
-#  Schema.cpp
   SpatialReference.cpp
   Stage.cpp
   StageFactory.cpp
@@ -561,6 +554,7 @@ set(PDAL_FILTERS_HPP
   "${PDAL_FILTERS_HEADERS}/Decimation.hpp"
   "${PDAL_FILTERS_HEADERS}/HexBin.hpp"
 #  "${PDAL_FILTERS_HEADERS}/InPlaceReprojection.hpp"
+  "${PDAL_FILTERS_HEADERS}/Merge.hpp"
 #  "${PDAL_FILTERS_HEADERS}/Mosaic.hpp"
   "${PDAL_FILTERS_HEADERS}/Reprojection.hpp"
 #  "${PDAL_FILTERS_HEADERS}/Scaling.hpp"

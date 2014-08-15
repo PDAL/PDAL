@@ -35,7 +35,6 @@
 #include <pdal/PipelineWriter.hpp>
 
 #include <pdal/Filter.hpp>
-#include <pdal/MultiFilter.hpp>
 #include <pdal/Reader.hpp>
 #include <pdal/Writer.hpp>
 #include <pdal/PipelineManager.hpp>

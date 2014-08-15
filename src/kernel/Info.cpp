@@ -433,7 +433,7 @@ int Info::execute()
     
     Stage* reader = manager->getStage();
     if (m_showStats)
-        manager->addFilter("filters.stats", *reader, options);
+        manager->addFilter("filters.stats", reader, options);
     Stage* filter = manager->getStage();
 
     PointContext ctx;

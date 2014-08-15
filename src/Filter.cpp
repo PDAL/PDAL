@@ -38,7 +38,6 @@
 namespace pdal
 {
 
-
 boost::property_tree::ptree Filter::serializePipeline() const
 {
     boost::property_tree::ptree tree;

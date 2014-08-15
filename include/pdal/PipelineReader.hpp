@@ -32,8 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_PIPELINEREADER_HPP
-#define INCLUDED_PIPELINEREADER_HPP
+#pragma once
 
 #include <pdal/pdal_internal.hpp>
 #include <pdal/StageFactory.hpp>
@@ -73,8 +72,6 @@ private:
         const boost::property_tree::ptree& subtree);
     Reader* parseElement_Reader(const boost::property_tree::ptree& tree);
     Filter* parseElement_Filter(const boost::property_tree::ptree& tree);
-    MultiFilter* parseElement_MultiFilter(
-        const boost::property_tree::ptree& tree);
     Writer* parseElement_Writer(const boost::property_tree::ptree& tree);
     Option parseElement_Option(const boost::property_tree::ptree& tree);
     void collect_attributes(map_t& attrs,
@@ -93,7 +90,5 @@ private:
     PipelineReader(const PipelineReader&); // not implemented
 };
 
-
 } // namespace pdal
 
-#endif
