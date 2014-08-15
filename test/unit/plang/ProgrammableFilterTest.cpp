@@ -125,7 +125,7 @@ BOOST_AUTO_TEST_CASE(pipeline)
 
     for (PointId idx = 0; idx < 10; ++idx)
     {
-        int32_t y = buf->getField<int32_t>(Dimension::Id::Y, idx);
+        int32_t y = buf->getFieldAs<int32_t>(Dimension::Id::Y, idx);
         BOOST_CHECK_EQUAL(y, 314);
     }
 }
