@@ -88,7 +88,7 @@ public:
         }
         return output;
     }
-    
+
     template <class BBOX> bool kdtree_get_bbox(BBOX &bb) const
     {
         pdal::Bounds<double> const& bounds = m_buf.getSpatialBounds();
@@ -104,15 +104,23 @@ public:
         return true;
     }
 
-    std::vector<size_t>
-    neighbors(double const& x, double const& y, double const& z,
-        double distance, boost::uint32_t count = 1);
-    std::vector<size_t> radius(double const& x, double const& y,
-        double const& z, double const& r);
+    std::vector<size_t> radius(
+            double const& x,
+            double const& y,
+            double const& z,
+            double const& r) const;
+
+    std::vector<size_t> neighbors(
+            double const& x,
+            double const& y,
+            double const& z,
+            double distance,
+            boost::uint32_t count = 1) const;
+
     void build(PointContext ctx, bool b3d = true);
-    
+
 private:
-    PointBuffer& m_buf;
+    const PointBuffer& m_buf;
     bool m_3d;
 
     typedef nanoflann::KDTreeSingleIndexAdaptor<

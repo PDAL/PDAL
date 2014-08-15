@@ -3,7 +3,9 @@
 source ./scripts/ci/common.sh
 
 sudo apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 16126D3A3E5C1192
-sudo apt-get update -y
+sudo mv /etc/apt/sources.list.d/pgdg-source.list* /tmp
+sudo apt-get -qq remove postgis
+sudo apt-get update -qq
 sudo apt-get install software-properties-common -y
 sudo apt-get install python-software-properties -y
 # sudo add-apt-repository ppa:ubuntugis/ppa -y
@@ -46,8 +48,9 @@ fi
 
 if [[ $PDAL_OPTIONAL_COMPONENTS == "all" ]]
 then
+    sudo apt-get install libgdal1h libgdal-dev libhdf5-serial-dev
     sudo apt-get install \
-        libgdal1h \
+        libproj-dev libgeos++-dev \
         python-numpy \
         libxml2-dev \
         libflann-dev \
