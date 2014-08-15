@@ -77,7 +77,9 @@ public:
     // Get the resulting point buffers.
     const PointBufferSet& buffers() const
         { return m_pbSet; }
-
+    
+    MetadataNode getMetadata() const;
+    
 private:
     StageFactory m_factory;
     PointContext m_context;
