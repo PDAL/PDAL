@@ -93,7 +93,7 @@
 #endif
 
 #ifdef PDAL_HAVE_P2G
-#include <pdal/drivers/p2g/Writer.hpp>
+#include <pdal/drivers/p2g/P2gWriter.hpp>
 #endif
 
 #ifdef PDAL_HAVE_HDF5

@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/drivers/p2g/Writer.hpp>
+#include <pdal/drivers/p2g/P2gWriter.hpp>
 #include <pdal/PointBuffer.hpp>
 
 #include <iostream>
@@ -50,14 +50,7 @@ namespace p2g
 {
 
 
-Writer::Writer(const Options& options)
-    : pdal::Writer(options)
-    , m_outputTypes(0)
-    , m_outputFormat(OUTPUT_FORMAT_ARC_ASCII)
-{}
-
-
-void Writer::processOptions(const Options& options)
+void P2gWriter::processOptions(const Options& options)
 {
     m_GRID_DIST_X = options.getValueOrDefault<double>("grid_dist_x", 6.0);
     m_GRID_DIST_Y = options.getValueOrDefault<double>("grid_dist_y", 6.0);
@@ -85,6 +78,8 @@ void Writer::processOptions(const Options& options)
                 m_outputTypes |= OUTPUT_TYPE_IDW;
             if (boost::iequals(i->getValue<std::string>(), "den"))
                 m_outputTypes |= OUTPUT_TYPE_DEN;
+            if (boost::iequals(i->getValue<std::string>(), "std"))
+                m_outputTypes |= OUTPUT_TYPE_STD;
             if (boost::iequals(i->getValue<std::string>(), "all"))
                 m_outputTypes = OUTPUT_TYPE_ALL;
         }
@@ -96,6 +91,10 @@ void Writer::processOptions(const Options& options)
         m_outputFormat = OUTPUT_FORMAT_GRID_ASCII;
     else if (boost::iequals(output_format, "asc"))
         m_outputFormat = OUTPUT_FORMAT_ARC_ASCII;
+    else if (boost::iequals(output_format, "tif"))
+        m_outputFormat = OUTPUT_FORMAT_GDAL_GTIFF;
+    else if (boost::iequals(output_format, "all"))
+        m_outputFormat = OUTPUT_FORMAT_ALL;
     else
     {
         std::ostringstream oss;
@@ -105,7 +104,8 @@ void Writer::processOptions(const Options& options)
 }
 
 
-void Writer::initialize()
+/*
+void P2gWriter::ready(PointContext ctx)
 {
     double min_x = (std::numeric_limits<double>::max)();
     double max_x = (std::numeric_limits<double>::min)();
@@ -113,9 +113,10 @@ void Writer::initialize()
     double max_y = (std::numeric_limits<double>::min)();
     setBounds(pdal::Bounds<double>(min_x, min_y, max_x, max_y));
 }
+*/
 
 
-Options Writer::getDefaultOptions()
+Options P2gWriter::getDefaultOptions()
 {
     Options options;
 
@@ -136,17 +137,34 @@ Options Writer::getDefaultOptions()
 }
 
 
-void Writer::writeBegin(boost::uint64_t targetNumPointsToWrite)
+void P2gWriter::write(const PointBuffer& buf)
 {
+    Schema const& schema = buf.getSchema();
+    
+    std::string z_name = getOptions().getValueOrDefault<std::string>("Z", "Z");
+    pdal::Dimension const& dimX = schema.getDimension("X");
+    pdal::Dimension const& dimY = schema.getDimension("Y");
+    pdal::Dimension const& dimZ = schema.getDimension(z_name);
 
-    return;
-}
+    for (point_count_t idx = 0; idx < buf.size(); idx++)
+    {
+        double x = buf.getFieldAs<double>(dimX, idx);
+        double y = buf.getFieldAs<double>(dimY, idx);
+        double z = buf.getFieldAs<double>(dimZ, idx);
 
+    //    m_bounds.setMinimum(0, (std::min)(x, m_bounds.getMinimum(0)));
+    //    m_bounds.setMinimum(1, (std::min)(y, m_bounds.getMinimum(1)));
+    //    m_bounds.setMaximum(0, (std::max)(x, m_bounds.getMaximum(0)));
+    //    m_bounds.setMaximum(1, (std::max)(y, m_bounds.getMaximum(1)));
+        m_coordinates.push_back(boost::tuple<double, double, double>(x, y, z));
+    }
 
-void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
-{
+    m_bounds = buf.calculateBounds();
+    //Bounds<double> count& extent = buf.calculateBounds();
 
-    calculateGridSizes();
+    m_GRID_SIZE_X = (int)(ceil((m_bounds.getMaximum(0) - m_bounds.getMinimum(0))/m_GRID_DIST_X)) + 1;
+    m_GRID_SIZE_Y = (int)(ceil((m_bounds.getMaximum(1) - m_bounds.getMinimum(1))/m_GRID_DIST_Y)) + 1;
+
     log()->get(logDEBUG) << "X grid size: " << m_GRID_SIZE_X << std::endl;
     log()->get(logDEBUG) << "Y grid size: " << m_GRID_SIZE_Y << std::endl;
 
@@ -189,50 +207,24 @@ void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
         }
     }
 
-    if ((rc = m_interpolator->finish(const_cast<char*>(m_filename.c_str()), m_outputFormat, m_outputTypes)) < 0)
+    double adfGeoTransform[6];
+    adfGeoTransform[0] = m_bounds.getMinimum(0);
+    adfGeoTransform[1] = m_GRID_DIST_X;
+    adfGeoTransform[2] = 0.0;
+    adfGeoTransform[3] = m_bounds.getMaximum(1);
+    adfGeoTransform[4] = 0.0;
+    adfGeoTransform[5] = -1 * m_GRID_DIST_Y;
+    
+    SpatialReference const& srs = getSpatialReference();
+
+    if ((rc = m_interpolator->finish(const_cast<char*>(m_filename.c_str()), m_outputFormat, m_outputTypes, adfGeoTransform, srs.getWKT().c_str())) < 0)
     {
         throw p2g_error("interp->finish() error");
     }
 
-
     return;
 }
 
-
-boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
-{
-    const Schema& schema = data.getSchema();
-    
-    std::string z_name = getOptions().getValueOrDefault<std::string>("Z", "Z");
-    pdal::Dimension const& dimX = schema.getDimension("X");
-    pdal::Dimension const& dimY = schema.getDimension("Y");
-    pdal::Dimension const& dimZ = schema.getDimension(z_name);
-
-
-    for (PointId idx = 0; idx < data.size(); idx++)
-    {
-        double x = data.getFieldAs<double>(dimX, idx);
-        double y = data.getFieldAs<double>(dimY, idx);
-        double z = data.getFieldAs<double>(dimZ, idx);
-
-        m_bounds.setMinimum(0, (std::min)(x, m_bounds.getMinimum(0)));
-        m_bounds.setMinimum(1, (std::min)(y, m_bounds.getMinimum(1)));
-        m_bounds.setMaximum(0, (std::max)(x, m_bounds.getMaximum(0)));
-        m_bounds.setMaximum(1, (std::max)(y, m_bounds.getMaximum(1)));
-        m_coordinates.push_back(boost::tuple<double, double, double>(x, y, z));
-    }
-    return data.size();
-}
-
-void Writer::calculateGridSizes()
-{
-    pdal::Bounds<double>& extent = getBounds();
-
-    m_GRID_SIZE_X = (int)(ceil((extent.getMaximum(0) - extent.getMinimum(0))/m_GRID_DIST_X)) + 1;
-    m_GRID_SIZE_Y = (int)(ceil((extent.getMaximum(1) - extent.getMinimum(1))/m_GRID_DIST_Y)) + 1;
-
-
-}
 
 }
 }

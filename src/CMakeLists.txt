@@ -357,11 +357,11 @@ set(PDAL_P2G_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_P2G_PATH}")
 set(PDAL_P2G_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_P2G_PATH}")
 
 set(PDAL_DRIVERS_P2G_HPP
-  "${PDAL_P2G_HEADERS}/Writer.hpp"
+  "${PDAL_P2G_HEADERS}/P2gWriter.hpp"
 )
 
 set (PDAL_DRIVERS_P2G_CPP 
-  "${PDAL_P2G_SRC}/Writer.cpp"
+  "${PDAL_P2G_SRC}/P2gWriter.cpp"
 )
    
 if (P2G_FOUND)
