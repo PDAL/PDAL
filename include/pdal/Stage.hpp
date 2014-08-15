@@ -43,6 +43,8 @@
 #include <pdal/PointBuffer.hpp>
 #include <pdal/SpatialReference.hpp>
 
+#include <boost/property_tree/ptree.hpp>
+
 namespace pdal
 {
 
@@ -101,6 +103,10 @@ public:
         { return Dimension::IdList(); }
     static std::string s_getInfoLink()
         { return std::string(); }
+    virtual boost::property_tree::ptree toPTree(PointContext ctx) const 
+    {
+        return boost::property_tree::ptree();
+    }
 
 #define SET_STAGE_NAME(name, description)  \
     static std::string s_getName() { return name; }  \
@@ -124,6 +130,7 @@ public:
         { std::cerr << "Created crap sequential iterator!\n"; return NULL; }
     virtual StageRandomIterator* createRandomIterator(PointBuffer&) const
         { return NULL; }
+    MetadataNode const& getMetadata() const { return m_metadata; }
 
 protected:
     Options m_options;

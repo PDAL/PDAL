@@ -109,6 +109,13 @@ private:
         return sub;
     }
 
+    MetadataNodeImplPtr add(MetadataNodeImplPtr node)
+    {
+        m_subnodes.push_back(node);
+        return node;
+    }
+
+
     bool operator == (const MetadataNodeImpl& m) const
     {
         if (m_name != m.m_name || m_descrip != m.m_descrip ||
@@ -133,7 +140,9 @@ private:
 
     template <std::size_t N>
     inline void setValue(const char(& c)[N]);
-
+    
+    boost::property_tree::ptree toPTree() const;
+    
     std::string m_name;
     std::string m_descrip;
     std::string m_type;
@@ -294,6 +303,10 @@ public:
     MetadataNode add(const std::string& name)
         { return MetadataNode(m_impl->add(name)); }
 
+    MetadataNode add(MetadataNode node)
+        { return MetadataNode(m_impl->add(node.m_impl)); }
+
+
     template<typename T>
     MetadataNode add(const std::string& name, const T& value,
         const std::string& descrip = std::string())
@@ -418,6 +431,11 @@ public:
             }
         }
         return MetadataNode();
+    }
+
+    inline boost::property_tree::ptree toPTree() const
+    {
+        return m_impl->toPTree();
     }
 
 private:

@@ -51,7 +51,7 @@ Info::Info(int argc, const char* argv[])
     , m_showStage(false)
     , m_showMetadata(false)
     , m_showSDOPCMetadata(false)
-    , m_outputStream(0)
+    , m_computeBoundary(false)
     , m_useXML(false)
     , m_useJSON(false)
     , m_useREST(true)
@@ -68,11 +68,17 @@ void Info::validateSwitches()
         m_showSchema ||
         m_showMetadata ||
         m_showSDOPCMetadata ||
+        m_computeBoundary ||
         m_showStage || 
         m_QueryPoint.size() > 0 ||
         m_pointIndexes.size() > 0;
     if (!got_something)
-        throw app_usage_error("no action option specified");
+    {
+        m_showStats = true;
+        m_computeBoundary = true;
+        m_showSDOPCMetadata = true;
+        
+    }
 }
 
 
@@ -98,9 +104,12 @@ void Info::addSwitches()
         ("query", po::value< std::string>(&m_QueryPoint),
          "A 2d or 3d point query point")
         ("distance", po::value< double>(&m_QueryDistance), "A query distance")
-        ("stats,a",
+        ("stats",
          po::value<bool>(&m_showStats)->zero_tokens()->implicit_value(true),
          "dump stats on all points (reads entire dataset)")
+        ("boundary",
+         po::value<bool>(&m_computeBoundary)->zero_tokens()->implicit_value(true),
+         "compute a hexagonal hull/boundary of dataset")             
         ("count", po::value<uint64_t>(&m_numPointsToWrite)->default_value(0),
          "How many points should we write?")
         ("dimensions", po::value<std::string >(&m_Dimensions),
@@ -216,14 +225,13 @@ vector<boost::uint32_t> getListOfPoints(std::string p)
 
 } //namespace
 
-void Info::dumpPoints(PointContext ctx, const Stage& stage,
-    std::string const& pointsString) const
+void Info::dumpPoints() const
 {
-    PointBuffer readData(ctx);
-    std::vector<uint32_t> points = getListOfPoints(pointsString);
+    PointBuffer readData(*m_context);
+    std::vector<uint32_t> points = getListOfPoints(m_pointIndexes);
         
     std::unique_ptr<StageSequentialIterator>
-        seq(stage.createSequentialIterator());
+        seq(m_manager->getStage()->createSequentialIterator());
     if (!seq)
         throw app_runtime_error("Unable to create iterator retrieve points");
     dumpPointsSequential(readData, points, seq.get());
@@ -250,72 +258,66 @@ void Info::dumpPointsSequential(PointBuffer& ptBuf,
         }
         lastPt = pt;
     }
-    dumpPointData(ptBuf);
+
+    boost::property_tree::ptree buffer_tree = ptBuf.toPTree();
+    m_tree->add_child("point", buffer_tree.get_child("0"));
+
 }
 
 
-void Info::dumpPointData(PointBuffer& outputData) const
-{
-    boost::property_tree::ptree tree = outputData.toPTree();
-   
-    std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
-
-    boost::property_tree::ptree output;
-    output.add_child("point", tree.get_child("0"));
-    if (m_useXML)
-        write_xml(ostr, tree);
-    else if (m_useJSON)
-        write_json(ostr, tree);
-    else if (m_useREST)
-        outputData.toRST(ostr) << std::endl;
-}
-
-
-void Info::dumpStats(PointContext ctx, pdal::filters::Stats& filter,
-    pdal::PipelineManager* manager) const
+void Info::dumpStats() const
 {
     PipelineWriter* writer = NULL;
 
-    filter.execute(ctx);
     if (m_pipelineFile.size() > 0)
     {
-        PointBuffer buffer(ctx);
-        writer = new pdal::PipelineWriter(*manager);
+        PointBuffer buffer(*m_context);
+        writer = new pdal::PipelineWriter(*m_manager);
         writer->setPointBuffer(&buffer);
     }
 
-    boost::property_tree::ptree tree;
-    tree.add_child("stats", filter.toPTree(ctx));
-    std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
-
-    if (m_useXML)
-        write_xml(ostr, tree);
-    else
-        write_json(ostr, tree);
-
+    m_tree->add_child("stats", m_manager->getMetadata().toPTree());
+    
     if (m_pipelineFile.size() > 0)
         writer->writePipeline(m_pipelineFile);
     delete writer;
 }
 
-
-void Info::dumpSchema(PointContext ctx)
+void Info::dump()
 {
-    // boost::property_tree::ptree sch = ctx.schema()->toPTree();
+    if (m_showStats)
+        dumpStats();
+
+
+    if (m_pointIndexes.size())
+        dumpPoints();
+    if (m_showSchema)
+    {
+        // output ptree of PointContext::dimensions()
+    }
+
+    if (m_showSDOPCMetadata)
+    {
+        boost::property_tree::ptree metadata = m_manager->getStage()->serializePipeline();
+
+        // FIXME: output ptree of PointContext::dimensions()::ptree + metadata ptree
+        boost::property_tree::ptree output;
+        // output.add_child("metadata", metadata);
+        m_tree->add_child("stage", output);
+    }
+
+
     
-    boost::property_tree::ptree tree;
-    // tree.put_child("schema", sch);
-    std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
-    if (m_useXML)
-        write_xml(ostr, tree);
-    else if(m_useJSON)
-        write_json(ostr, tree);
-    // else if (m_useREST)
-        // ctx.schema()->toRST(ostr) << std::endl;
+    if (m_QueryPoint.size())
+        dumpQuery();
+    
+    
 }
 
-void Info::dumpQuery(PointContext ctx, Stage& stage) const
+
+void Info::dumpQuery() const
 {
+#define SEPARATORS ",| "
     boost::char_separator<char> sep(SEPARATORS);
     tokenizer tokens(m_QueryPoint, sep);
     std::vector<double> values;
@@ -325,14 +327,14 @@ void Info::dumpQuery(PointContext ctx, Stage& stage) const
     if (values.size() != 2 && values.size() != 3)
         throw app_runtime_error("--points must be two or three values");
 
-    PointBufferSet pbSet = stage.execute(ctx);
+    PointBufferSet pbSet = m_manager->getStage()->execute(*m_context);
     assert(pbSet.size() == 1);
     PointBufferPtr buf = *pbSet.begin();
     
     bool is3d = (values.size() >= 3);
 
     KDIndex kdi(*buf);
-    kdi.build(ctx, is3d);
+    kdi.build(*m_context, is3d);
 
     double x = values[0];
     double y = values[1];
@@ -340,21 +342,14 @@ void Info::dumpQuery(PointContext ctx, Stage& stage) const
     
     std::vector<size_t> ids = kdi.neighbors(x, y, z, 0.0, buf->size());
     
-    PointBuffer outbuf(ctx);
+    PointBuffer outbuf(*m_context);
 
     for (auto i = ids.begin(); i != ids.end(); ++i)
        outbuf.appendPoint(*buf, *i); 
 
     boost::property_tree::ptree tree = outbuf.toPTree();
-   
-    std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
 
-    boost::property_tree::ptree output;
-    output.add_child("point", tree);
-    if (m_useXML)
-        write_xml(ostr, output);
-    else
-        write_json(ostr, tree);
+    m_tree->add_child("point", tree);
 }
 
 void Info::dumpSDO_PCMetadata(PointContext ctx, const Stage& stage) const
@@ -363,32 +358,16 @@ void Info::dumpSDO_PCMetadata(PointContext ctx, const Stage& stage) const
     std::string xml;
 //ABELL - Fix this.
 //    std::string xml = pdal::Schema::to_xml(*ctx.schema(), &metadata);  
-    std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
+    std::ostream& ostr = std::cout;
     ostr << xml;
 }
 
 
-void Info::dumpStage(const Stage& stage) const
-{
-    // FIXME: change this to dumpPipeline now that we've removed toPTree stuff for Stage::
-    // boost::property_tree::ptree tree = stage.toPTree();
-    // 
-    // std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
-    // 
-    // boost::property_tree::ptree output;
-    // output.add_child("stage", tree);
-    // if (m_useXML)
-    //     write_xml(ostr, output);
-    // else
-    //     write_json(ostr, tree);
-
-    return;
-}
 
 void Info::dumpMetadata(PointContext ctx, const Stage& stage) const
 {
     boost::property_tree::ptree tree = stage.serializePipeline();
-    std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
+    std::ostream& ostr = std::cout;
 
     if (m_useXML)
         write_xml(ostr, tree);
@@ -408,7 +387,7 @@ int Info::execute()
         readerOptions.add<uint32_t>("verbose", getVerboseLevel());
     }
 
-    PipelineManager* manager = AppSupport::makePipeline(readerOptions);
+    m_manager = std::unique_ptr<PipelineManager>(AppSupport::makePipeline(readerOptions));
     
     if (m_seed != 0)
     {
@@ -431,37 +410,45 @@ int Info::execute()
     
     Options options = m_options + readerOptions;
     
-    Stage* reader = manager->getStage();
+    Stage* reader = m_manager->getStage();
+    Stage* stage = reader;
     if (m_showStats)
-        manager->addFilter("filters.stats", reader, options);
-    Stage* filter = manager->getStage();
-
-    PointContext ctx;
-    filter->prepare(ctx);
-    if (m_pointIndexes.size())
-        dumpPoints(ctx, *filter, m_pointIndexes);
-
-    if (m_showStats)
-        dumpStats(ctx, *dynamic_cast<pdal::filters::Stats*>(filter), manager);
-    if (m_showSchema)
-        dumpSchema(ctx);
-    if (m_showMetadata)
-        dumpMetadata(ctx, *filter);
-    if (m_showStage)
-        dumpStage(*filter);
-    if (m_showSDOPCMetadata)
-        dumpSDO_PCMetadata(ctx, *filter);
+        stage = m_manager->addFilter("filters.stats", stage, options);
+    if (m_computeBoundary)
+        stage = m_manager->addFilter("filters.hexbin", stage, options);
     
-    if (m_QueryPoint.size())
-        dumpQuery(ctx, *filter);
+    m_context = std::unique_ptr<PointContext>(new PointContext);
+    m_tree = std::unique_ptr<boost::property_tree::ptree>(
+        new boost::property_tree::ptree);
+
+    std::ostream& ostr = std::cout;
+    boost::property_tree::ptree tree;
+    m_manager->execute();
+    dump();
+
+
+    //
+    // if (m_showStats)
+    //     dumpStats(ctx, *dynamic_cast<pdal::filters::Stats*>(filter), manager);
+    // if (m_showSchema)
+    //     dumpSchema(ctx);
+    // if (m_showMetadata)
+    //     dumpMetadata(ctx, *filter);
+    // if (m_showStage)
+    //     dumpStage(*filter);
+    // if (m_showSDOPCMetadata)
+    //     dumpSDO_PCMetadata(ctx, *filter);
+    //
+    // if (m_QueryPoint.size())
+    //     dumpQuery(ctx, *filter);
     
-    std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
+    if (m_useXML)
+        write_xml(ostr, *m_tree);
+    else
+        write_json(ostr, *m_tree);
+    
     ostr << std::endl;
     
-    delete manager;
-
-    if (m_outputStream)
-        FileUtils::closeFile(m_outputStream);
     
     return 0;
 }

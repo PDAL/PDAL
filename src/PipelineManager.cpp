@@ -186,4 +186,24 @@ bool PipelineManager::isWriterPipeline() const
     return (m_lastWriter != NULL);
 }
 
+MetadataNode PipelineManager::getMetadata() const
+{
+    MetadataNode output;
+    
+    // FIXME: stages with same Stage::getName() are going to 
+    // overwrite each other. We need to add arrays instead of 
+    // paths.
+    for (auto ri = m_readers.begin(); ri != m_readers.end(); ++ri)
+        output.add((*ri)->getMetadata());
+    
+    for (auto fi = m_filters.begin(); fi != m_filters.end(); ++fi)
+    {
+        output.add((*fi)->getMetadata());
+    }
+
+    for (auto wi = m_writers.begin(); wi != m_writers.end(); ++wi)
+        output.add((*wi)->getMetadata());
+        
+    return output;
+}
 } // namespace pdal

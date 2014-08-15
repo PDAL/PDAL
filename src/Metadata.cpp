@@ -38,6 +38,27 @@
 #include <sstream>
 #include <string>
 
+namespace pdal
+{
+
+boost::property_tree::ptree MetadataNodeImpl::toPTree() const
+{
+    boost::property_tree::ptree tree;
+    tree.put("name", m_name);
+    tree.put("description", m_descrip);
+    tree.put("type", m_type);
+    tree.put("value", m_value);
+    for (auto mi = m_subnodes.begin(); mi != m_subnodes.end(); ++mi)
+    {
+        std::string name = (*mi)->m_name;
+        if (name.size())
+            tree.add_child(name, (*mi)->toPTree());
+    }
+    
+    return tree;
+}
+
+}
 namespace std
 {
 

@@ -146,7 +146,6 @@ void Stats::done(PointContext ctx)
     extractMetadata(ctx);
 }
 
-
 void Stats::processOptions(const Options& options)
 {
     m_exact_dim_opt = m_options.getValueOrDefault<std::string>(
@@ -255,7 +254,6 @@ void Stats::ready(PointContext ctx)
 
 void Stats::extractMetadata(PointContext ctx)
 {
-    pdal::Metadata output;
 
     boost::uint32_t position(0);
     for (auto di = m_stats.begin(); di != m_stats.end(); ++di)
