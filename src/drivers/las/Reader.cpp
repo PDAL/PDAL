@@ -583,7 +583,7 @@ point_count_t Reader::readImpl(PointBuffer& data, point_count_t count)
     return processBuffer(data, m_istream, count, m_unzipper.get(),
         m_zipPoint.get());
 #else
-    return processBuffer(data, m_istream, count, NULL, NULL, &cachedDimensions);
+    return processBuffer(data, m_istream, count, NULL, NULL);
 #endif
 }
 
