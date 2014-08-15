@@ -95,7 +95,7 @@ public:
     boost::uint64_t count() const
         { return boost::accumulators::count(m_summary); }
 
-    boost::property_tree::ptree toPTree(PointContext ctx) const;
+    virtual boost::property_tree::ptree toPTree(PointContext ctx) const;
     void extractMetadata(MetadataNode &m) const;
 
     void reset()
@@ -156,7 +156,6 @@ public:
 private:
     Stats& operator=(const Stats&); // not implemented
     Stats(const Stats&); // not implemented
-    void addMetadata(MetadataNode& m);
     virtual void processOptions(const Options& options);
     virtual void initialize();
     virtual void ready(PointContext ctx);
