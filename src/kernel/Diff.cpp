@@ -41,7 +41,8 @@
 
 using boost::property_tree::ptree;
 
-namespace pdal { namespace kernel {
+namespace pdal {
+namespace kernel {
     
 Diff::Diff(int argc, const char* argv[])
     : Application(argc, argv, "dif")
@@ -50,21 +51,15 @@ Diff::Diff(int argc, const char* argv[])
     , m_useXML(false)
     , m_useJSON(false)
         
-{
-    return;
-}
+{}
 
 
 void Diff::validateSwitches()
 {
-  
-    
     if (!m_sourceFile.size())
         throw app_runtime_error("No source file given!");
     if (!m_candidateFile.size())
         throw app_runtime_error("No candidate file given!");
-        
-    return;
 }
 
 
@@ -72,31 +67,31 @@ void Diff::addSwitches()
 {
     namespace po = boost::program_options;
 
-    po::options_description* file_options = new po::options_description("file options");
+    po::options_description* file_options =
+        new po::options_description("file options");
     
-
     file_options->add_options()
         ("source", po::value<std::string>(&m_sourceFile), "source file name")
-        ("candidate", po::value<std::string>(&m_candidateFile), "candidate file name")
-        ("xml", po::value<bool>(&m_useXML)->zero_tokens()->implicit_value(true), "dump XML")
-        ("json", po::value<bool>(&m_useJSON)->zero_tokens()->implicit_value(true), "dump JSON")
-
-        ;
+        ("candidate",
+            po::value<std::string>(&m_candidateFile), "candidate file name")
+        ("xml",
+            po::value<bool>(&m_useXML)->zero_tokens()->implicit_value(true),
+            "dump XML")
+        ("json",
+            po::value<bool>(&m_useJSON)->zero_tokens()->implicit_value(true),
+            "dump JSON")
+    ;
 
     addSwitchSet(file_options);
-
-    po::options_description* processing_options = new po::options_description("processing options");
+    po::options_description* processing_options =
+        new po::options_description("processing options");
     
-    processing_options->add_options()
-
-        ;
+    processing_options->add_options();
     
     addSwitchSet(processing_options);
 
     addPositionalSwitch("source", 1);
     addPositionalSwitch("candidate", 2);
-
-    return;
 }
 
 
@@ -130,7 +125,7 @@ void Diff::checkPoints(const PointBuffer& source_data,
                 std::ostringstream oss;
         
                 oss << "Point " << idx << " differs for dimension \"" <<
-                            Dimension::name(sd) << "\" for source and candidate";
+                    Dimension::name(sd) << "\" for source and candidate";
                 errors.put<std::string>("data.error", oss.str());
                 badbytes++;                        
             }
@@ -178,9 +173,9 @@ int Diff::execute()
         std::ostringstream oss;
         
         oss << "Source and candidate files do not have the same point count";
-        errors.put<std::string>("count.error", oss.str());
-        errors.put<uint32_t>("count.candidate", candidateBuf->size());
-        errors.put<uint32_t>("count.source", sourceBuf->size());
+        errors.put("count.error", oss.str());
+        errors.put("count.candidate", candidateBuf->size());
+        errors.put("count.source", sourceBuf->size());
     }
     
     MetadataNode source_metadata = sourceCtx.metadata();
@@ -190,23 +185,22 @@ int Diff::execute()
         std::ostringstream oss;
         
         oss << "Source and candidate files do not have the same metadata count";
-        //ABELL
-        /**
-        errors.put<std::string>("metadata.error", oss.str());
+        errors.put("metadata.error", oss.str());
         errors.put_child("metadata.source", source_metadata.toPTree());
         errors.put_child("metadata.candidate", candidate_metadata.toPTree());
-        **/
     }
 
     if (candidateCtx.dims().size() != sourceCtx.dims().size())
     {
         std::ostringstream oss;
         
-        oss << "Source and candidate files do not have the same number of dimensions";
+        oss << "Source and candidate files do not have the same "
+            "number of dimensions";
         errors.put<std::string>("schema.error", oss.str());
         // FIXME: Need to "ptree" the PointContext dimension list in some way
         // errors.put_child("schema.source", sourceCtx.schema()->toPTree());
-        // errors.put_child("schema.candidate", candidateCtx.schema()->toPTree());
+        // errors.put_child("schema.candidate",
+        //     candidateCtx.schema()->toPTree());
     }
 
     if (errors.size())
@@ -225,9 +219,8 @@ int Diff::execute()
             return 1;
         }
     }
-
     return 0;
-
 }
 
-}} // pdal::kernel
+} // namespace kernel
+} // namespace pdal
