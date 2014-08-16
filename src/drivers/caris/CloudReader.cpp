@@ -131,7 +131,6 @@ void CloudReader::initialize()
 
     setNumPoints(caris_cloud_num_points(m_cloud));
 
-    //ABELL - Should probably be deferred until ready().
 /**
     if (const char* wktSR = caris_cloud_spatial_reference(m_cloud))
         setSpatialReference(pdal::SpatialReference(wktSR));

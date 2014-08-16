@@ -250,19 +250,18 @@ void OciReader::addDimensions(PointContext ctx)
 
     m_block->m_ctx = ctx;
     m_block->m_schema = fetchSchema(m_stmt, m_block);
-//ABELL - Deal with this later.
-/**
+    schema::DimInfoList& dims = m_block->m_schema.m_dims;
+    for (auto di = dims.begin(); di != dims.end(); ++di)
+        di->m_id = ctx.registerOrAssignDim(di->m_name, di->m_type);
     if (m_schemaFile.size())
     {
-        std::string pcSchema = Schema::to_xml(storedSchema);
+        schema::Writer writer(m_block->m_schema.dims(),
+            m_block->m_schema.types());
+        std::string pcSchema = writer.getXML();
         std::ostream* out = FileUtils::createFile(m_schemaFile);
         out->write(pcSchema.c_str(), pcSchema.size());
         FileUtils::closeFile(out);
     }
-**/
-    schema::DimInfoList& dims = m_block->m_schema.m_dims;
-    for (auto di = dims.begin(); di != dims.end(); ++di)
-        di->m_id = ctx.registerOrAssignDim(di->m_name, di->m_type);
 }
 
 

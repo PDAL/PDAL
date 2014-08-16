@@ -138,9 +138,9 @@ point_count_t IcebridgeSeqIter::readBufferImpl(PointBuffer& buf)
 
 point_count_t IcebridgeSeqIter::readImpl(PointBuffer& buf, point_count_t count)
 {
-    //ABELL - All data we read for icebridge is currently 4 bytes wide, so
+    //All data we read for icebridge is currently 4 bytes wide, so
     //  just allocate once and forget it.
-    //ABELL - This could be a huge allocation.  Perhaps we should do something
+    //This could be a huge allocation.  Perhaps we should do something
     //  in the icebridge handler?
 
     PointId startId = buf.size();
@@ -149,7 +149,7 @@ point_count_t IcebridgeSeqIter::readImpl(PointBuffer& buf, point_count_t count)
     std::unique_ptr<unsigned char>
         rawData(new unsigned char[count * sizeof(float)]);
 
-    //ABELL - Not loving the position-linked data, but fine for now.
+    //Not loving the position-linked data, but fine for now.
     Dimension::IdList dims = Reader::getDefaultDimensions();
     auto di = dims.begin();
     for (auto ci = hdf5Columns.begin(); ci != hdf5Columns.end(); ++ci, ++di)
