@@ -52,7 +52,7 @@ private:
     void addSwitches();
     void validateSwitches();
 
-    Stage* makeReader(Options readerOptions);
+    std::unique_ptr<Stage> makeReader(Options readerOptions);
 
     std::string m_inputFile;
     std::string m_outputFile;

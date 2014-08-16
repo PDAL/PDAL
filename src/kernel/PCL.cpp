@@ -45,38 +45,34 @@ PCL::PCL(int argc, const char* argv[])
     : Application(argc, argv, "pcl")
     , m_bCompress(false)
 {
-    return;
 }
 
 void PCL::validateSwitches()
 {
     if (m_inputFile == "")
-    {
         throw app_usage_error("--input/-i required");
-    }
-
     if (m_outputFile == "")
-    {
         throw app_usage_error("--output/-o required");
-    }
-
     if (m_pclFile == "")
-    {
         throw app_usage_error("--pcl/-p required");
-    }
-
-    return;
 }
+
 
 void PCL::addSwitches()
 {
-    po::options_description* file_options = new po::options_description("file options");
+    po::options_description* file_options =
+        new po::options_description("file options");
 
     file_options->add_options()
-    ("input,i", po::value<std::string>(&m_inputFile)->default_value(""), "input file name")
-    ("output,o", po::value<std::string>(&m_outputFile)->default_value(""), "output file name")
-    ("pcl,p", po::value<std::string>(&m_pclFile)->default_value(""), "pcl file name")
-    ("compress,z", po::value<bool>(&m_bCompress)->zero_tokens()->implicit_value(true), "Compress output data (if supported by output format)")
+    ("input,i", po::value<std::string>(&m_inputFile)->default_value(""),
+        "input file name")
+    ("output,o", po::value<std::string>(&m_outputFile)->default_value(""),
+        "output file name")
+    ("pcl,p", po::value<std::string>(&m_pclFile)->default_value(""),
+        "pcl file name")
+    ("compress,z",
+        po::value<bool>(&m_bCompress)->zero_tokens()->implicit_value(true),
+        "Compress output data (if supported by output format)")
     ;
 
     addSwitchSet(file_options);
@@ -86,33 +82,32 @@ void PCL::addSwitches()
     addPositionalSwitch("pcl", 1);
 }
 
-Stage* PCL::makeReader(Options readerOptions)
+std::unique_ptr<Stage> PCL::makeReader(Options readerOptions)
 {
     if (isDebug())
     {
         readerOptions.add<bool>("debug", true);
         boost::uint32_t verbosity(getVerboseLevel());
         if (!verbosity)
-        {
             verbosity = 1;
-        }
 
         readerOptions.add<boost::uint32_t>("verbose", verbosity);
         readerOptions.add<std::string>("log", "STDERR");
     }
 
-    Stage* reader_stage = AppSupport::makeReader(readerOptions);
+    std::unique_ptr<Stage> reader_stage(AppSupport::makeReader(readerOptions));
 
     Options pclOptions;
     pclOptions.add<std::string>("filename", m_pclFile);
     pclOptions.add<bool>("debug", isDebug());
     pclOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
 
-    Stage* pcl_stage = new pdal::filters::PCLBlock(pclOptions);
-    pcl_stage->setInput(reader_stage);
+    std::unique_ptr<Stage> pcl_stage(new filters::PCLBlock(pclOptions));
+    pcl_stage->setInput(reader_stage.get());
 
     return pcl_stage;
 }
+
 
 int PCL::execute()
 {
@@ -127,43 +122,27 @@ int PCL::execute()
     writerOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
 
     if (m_bCompress)
-    {
         writerOptions.add<bool>("compression", true);
-    }
 
-    Stage* final_stage = makeReader(readerOptions);
+    std::unique_ptr<Stage> finalStage = makeReader(readerOptions);
 
-    Writer* writer = AppSupport::makeWriter(writerOptions, final_stage);
+    std::unique_ptr<Writer>
+        writer(AppSupport::makeWriter(writerOptions, finalStage.get()));
     PointContext ctx;
-    writer->prepare(ctx);
 
-//ABELL - Not sure to work.
-//    const boost::uint64_t numPointsToRead = final_stage->getNumPoints();
-const boost::uint64_t numPointsToRead = 0;
-
-    pdal::UserCallback* callback;
+    UserCallback* callback;
     if (!getProgressShellCommand().size())
-    {
-        if (numPointsToRead == 0)
-            callback = static_cast<pdal::UserCallback*>(new HeartbeatCallback);
-        else
-            callback = static_cast<pdal::UserCallback*>(new PercentageCallback);
-    }
+        callback = static_cast<pdal::UserCallback*>(new PercentageCallback);
     else
-    {
-        callback = static_cast<pdal::UserCallback*>(new ShellScriptCallback(getProgressShellCommand()));
-    }
+        callback = static_cast<UserCallback*>(
+            new ShellScriptCallback(getProgressShellCommand()));
     writer->setUserCallback(callback);
-
-//ABELL
-//    boost::uint64_t numPointsRead = writer->write(numPointsToRead, 0, m_chunkSize);
-
-    delete writer;
-    delete final_stage;
+    writer->prepare(ctx);
+    writer->execute(ctx);
 
     return 0;
 }
 
-} // kernel
-} // pdal
+} // namespace kernel
+} // namespace pdal
 
