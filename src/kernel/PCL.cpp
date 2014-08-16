@@ -133,7 +133,7 @@ int PCL::execute()
 
     Stage* final_stage = makeReader(readerOptions);
 
-    Writer* writer = AppSupport::makeWriter(writerOptions, *final_stage);
+    Writer* writer = AppSupport::makeWriter(writerOptions, final_stage);
     PointContext ctx;
     writer->prepare(ctx);
 

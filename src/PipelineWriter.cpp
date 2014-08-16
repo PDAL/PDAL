@@ -173,10 +173,8 @@ void PipelineWriter::writePipeline(const std::string& filename) const
     if (boost::iequals(filename, "STDOUT"))
         boost::property_tree::xml_parser::write_xml(std::cout, tree);
     else
-        boost::property_tree::xml_parser::write_xml(filename, tree, std::locale(), settings);
-
-    return;
+        boost::property_tree::xml_parser::write_xml(filename, tree,
+            std::locale(), settings);
 }
-
 
 } // namespace pdal

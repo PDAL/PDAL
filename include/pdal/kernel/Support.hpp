@@ -70,15 +70,14 @@ class AppSupport
 {
 public:
     // makes a reader/stage, from just the filename and some other options
-    static pdal::Stage* makeReader(pdal::Options& options);
+    static Stage* makeReader(Options& options);
 
-    // makes a writer, from just the filename and some other options (and the input stage)
-    static pdal::Writer* makeWriter(pdal::Options& options, pdal::Stage& stage);
-    
-    static pdal::PipelineManager* makePipeline(pdal::Options& options);
+    // makes a writer, from just the filename and some other
+    // options (and the input stage)
+    static Writer* makeWriter(Options& options, Stage *stage);
+    static PipelineManager* makePipeline(Options& options);
 
 private:
-
     AppSupport& operator=(const AppSupport&); // not implemented
     AppSupport(const AppSupport&); // not implemented
 };

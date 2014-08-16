@@ -196,31 +196,26 @@ Stage* Translate::makeReader(Options readerOptions)
 int Translate::execute()
 {
     Options readerOptions;
-    {
-        readerOptions.add<std::string>("filename", m_inputFile);
-        readerOptions.add<bool>("debug", isDebug());
-        readerOptions.add<uint32_t>("verbose", getVerboseLevel());
-        if (!m_input_srs.empty())
-            readerOptions.add<std::string>("spatialreference",
-                m_input_srs.getWKT());
-    }
+    readerOptions.add("filename", m_inputFile);
+    readerOptions.add("debug", isDebug());
+    readerOptions.add("verbose", getVerboseLevel());
+    if (!m_input_srs.empty())
+        readerOptions.add("spatialreference", m_input_srs.getWKT());
 
     Options writerOptions;
-    {
-        writerOptions.add<std::string>("filename", m_outputFile);
-        writerOptions.add<bool>("debug", isDebug());
-        writerOptions.add<uint32_t>("verbose", getVerboseLevel());
+    writerOptions.add("filename", m_outputFile);
+    writerOptions.add("debug", isDebug());
+    writerOptions.add("verbose", getVerboseLevel());
     
-        if (!m_input_srs.empty())
-            writerOptions.add<std::string>("spatialreference",
-                m_input_srs.getWKT());
+    if (!m_input_srs.empty())
+        writerOptions.add("spatialreference", m_input_srs.getWKT());
 
-        if (m_bCompress)
-            writerOptions.add<bool>("compression", true);
-        if (m_bForwardMetadata)
-            writerOptions.add<bool>("forward_metadata", true);
-    }
-    Stage* final_stage = makeReader(readerOptions);
+    if (m_bCompress)
+        writerOptions.add("compression", true);
+    if (m_bForwardMetadata)
+        writerOptions.add("forward_metadata", true);
+
+    std::unique_ptr<Stage> finalStage(makeReader(readerOptions));
 
     std::vector<std::string> cmd = getProgressShellCommand();
     UserCallback *callback =
@@ -228,7 +223,8 @@ int Translate::execute()
         m_numPointsToWrite ? (UserCallback *)new PercentageCallback() :
         (UserCallback *)new HeartbeatCallback();
 
-    Writer* writer = AppSupport::makeWriter(writerOptions, *final_stage);
+    std::unique_ptr<Writer> writer(
+        AppSupport::makeWriter(writerOptions, finalStage.get()));
     if (!m_output_srs.empty())
         writer->setSpatialReference(m_output_srs);
 
@@ -236,10 +232,6 @@ int Translate::execute()
     writer->setUserCallback(callback);
     writer->prepare(ctx);
     writer->execute(ctx);
-
-    //ABELL - This looks like there are probably stage leaks.
-    delete writer;
-    delete final_stage;
 
     return 0;
 }

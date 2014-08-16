@@ -99,24 +99,21 @@ Stage *AppSupport::makeReader(pdal::Options& options)
 }
 
 
-Writer* AppSupport::makeWriter(Options& options, Stage& stage)
+Writer* AppSupport::makeWriter(Options& options, Stage *stage)
 {
     std::string outputFile = options.getValueOrThrow<std::string>("filename");
 
     pdal::StageFactory factory;
     std::string driver = factory.inferWriterDriver(outputFile);
-    if (driver == "")
-    {
-        throw app_runtime_error("Cannot determine output file type of " + outputFile);
-    }
+    if (driver.empty())
+        throw app_runtime_error("Cannot determine output file type of " +
+            outputFile);
     factory.inferWriterOptionsChanges(outputFile, options);
         
     pdal::Writer* writer = factory.createWriter(driver, options);
     if (!writer)
-    {
         throw app_runtime_error("writer creation failed");
-    }
-    writer->setInput(&stage);
+    writer->setInput(stage);
 
     return writer;
 }
