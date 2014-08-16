@@ -34,7 +34,6 @@
 
 #include <pdal/kernel/Delta.hpp>
 
-
 #include <boost/format.hpp>
 
 #include <boost/property_tree/json_parser.hpp>
@@ -305,14 +304,8 @@ int Delta::execute()
     if (m_outputFileName.size())
         m_outputStream = FileUtils::createFile(m_outputFileName);
 
-//ABELL - Need indexing.
-//    candidate_data.build(m_3d);
-    uint32_t count(std::min(sourceCount, candidateCount));
-    
     // Index the candidate data.
     m_index = std::unique_ptr<KDIndex>(new KDIndex(*candidateBuf));
-
-    
     m_index->build(candidateCtx, m_3d);
     
     std::unique_ptr<std::map<Point, Point>>
