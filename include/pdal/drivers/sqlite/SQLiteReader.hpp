@@ -38,7 +38,7 @@
 #include <pdal/ReaderIterator.hpp>
 
 
-#include <pdal/drivers/sqlite/SQliteCommon.hpp>
+#include <pdal/drivers/sqlite/SQLiteCommon.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/scoped_array.hpp>
 

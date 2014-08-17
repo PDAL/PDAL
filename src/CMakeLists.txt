@@ -436,16 +436,16 @@ set(PDAL_SQLITE_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_SQLITE_PATH}")
 set(PDAL_SQLITE_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_SQLITE_PATH}")
 
 set(PDAL_DRIVERS_SQLITE_HPP
-  "${PDAL_SQLITE_HEADERS}/SqliteCommon.hpp"
-  "${PDAL_SQLITE_HEADERS}/SqliteIterator.hpp"
-  "${PDAL_SQLITE_HEADERS}/SqliteReader.hpp"
-  "${PDAL_SQLITE_HEADERS}/SqliteWriter.hpp"
+  "${PDAL_SQLITE_HEADERS}/SQLiteCommon.hpp"
+  "${PDAL_SQLITE_HEADERS}/SQLiteIterator.hpp"
+  "${PDAL_SQLITE_HEADERS}/SQLiteReader.hpp"
+  "${PDAL_SQLITE_HEADERS}/SQLiteWriter.hpp"
 )
 
 set (PDAL_DRIVERS_SQLITE_CPP
-  "${PDAL_SQLITE_SRC}/SqliteIterator.cpp"
-  "${PDAL_SQLITE_SRC}/SqliteReader.cpp"
-  "${PDAL_SQLITE_SRC}/SqliteWriter.cpp"
+  "${PDAL_SQLITE_SRC}/SQLiteIterator.cpp"
+  "${PDAL_SQLITE_SRC}/SQLiteReader.cpp"
+  "${PDAL_SQLITE_SRC}/SQLiteWriter.cpp"
 )
 
 if (WITH_SQLITE)
