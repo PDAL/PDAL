@@ -36,6 +36,7 @@
 
 #include <pdal/Reader.hpp>
 #include <pdal/ReaderIterator.hpp>
+#include <pdal/XMLSchema.hpp>
 
 
 #include <pdal/drivers/sqlite/SQliteCommon.hpp>
@@ -68,29 +69,28 @@ public:
     static Options getDefaultOptions();
     pdal::StageSequentialIterator*
         createSequentialIterator() const;
-    pdal::Schema fetchSchema(std::string const& query) const;
+    pdal::schema::XMLSchema fetchSchema(std::string const& query) const;
     pdal::SpatialReference
         fetchSpatialReference(std::string const& query) const;
-    
+
     SQLite& getSession() { return *m_session.get(); }
     
 private:
     SQLiteReader& operator=(const SQLiteReader&); // not implemented
     SQLiteReader(const SQLiteReader&); // not implemented
-    std::vector<Dimension *> m_dims;
     
     virtual void initialize();
     virtual void processOptions(const Options& options);
-    virtual void buildSchema(Schema *schema);
-
-    void validateQuery() const;
+    virtual void addDimensions(PointContext ctx);    
     
-    pdal::Schema fetchSchema() const;
+    void validateQuery() const;
+
     std::unique_ptr<SQLite> m_session;
     std::string m_query;
     std::string m_schemaFile;
     std::string m_connection;
     boost::optional<SpatialReference> m_spatialRef;
+    PatchPtr m_patch;
 };
 
 }

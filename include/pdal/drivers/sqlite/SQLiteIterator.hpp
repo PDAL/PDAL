@@ -102,7 +102,7 @@ namespace sequential
 class SQLiteIterator : public pdal::StageSequentialIterator
 {
 public:
-    SQLiteIterator(const pdal::drivers::sqlite::SQLiteReader& reader, std::vector<Dimension *> const& dims);
+    SQLiteIterator(const pdal::drivers::sqlite::SQLiteReader& reader, PatchPtr patch);
 
 protected:
     // Skip count points, return number of points skipped
@@ -126,12 +126,10 @@ private:
     bool doQuery();
     void validateQuery() const;
     bool m_at_end;
-    std::vector<Dimension *> const& m_dims;
     std::unique_ptr<SQLite> m_session;
-    std::unique_ptr<Patch> m_patch;
     bool b_doneQuery;
-    
-    schema::size_type m_point_size;    
+    PatchPtr m_patch;
+    int32_t m_point_size;    
 };
 
 

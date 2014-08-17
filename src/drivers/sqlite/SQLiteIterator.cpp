@@ -61,233 +61,24 @@ namespace iterators
 namespace sequential
 {
 
-
-// SQLiteIterator::SQLiteIterator(const pdal::drivers::sqlite::SQLiteReader& reader)
-//     : m_at_end(false),  m_reader(reader)
-// {
-//     std::string const& connection =
-//         m_reader.getOptions().getValueOrThrow<std::string>("connection");
-//     std::string const& query =
-//         m_reader.getOptions().getValueOrThrow<std::string>("query");
-// }
-//
-//
-// const pdal::drivers::sqlite::SQLiteReader& SQLiteIterator::getReader() const
-// {
-//     return m_reader;
-// }
-//
-// // void IteratorBase::readBlob(::soci::row& block, boost::uint32_t howMany)
-// // {
-// //     boost::uint32_t nAmountRead = 0;
-// //
-// //     std::stringstream hex_data;
-// //     hex_data << block.get<std::string>("points");
-// //
-// //     std::size_t trim = 2;
-// //     std::string trimmed = hex_data.str().substr(trim, hex_data.str().size()-trim);
-// //     std::vector<boost::uint8_t> binary_data = Utils::hex_string_to_binary(trimmed);
-// //
-// //
-// //     unsigned char* data = (unsigned char*) &(binary_data.front());
-// //
-// //     Schema const& oracle_schema = m_active_buffer->getSchema();
-// //
-// //     boost::uint32_t howMuchWeRead = binary_data.size();
-// //     boost::uint32_t howMuchTheBlobShouldBe =
-// //         block.get<int>("num_points") * oracle_schema.getByteSize();
-// //     if (howMuchWeRead != howMuchTheBlobShouldBe)
-// //     {
-// //         std::stringstream oss;
-// //         oss << "Did not read the amount of binary data as expected "
-// //             "-- read: " << howMuchWeRead << " should read: " <<
-// //             howMuchTheBlobShouldBe;
-// //         throw sqlite_driver_error(oss.str());
-// //     }
-// //     boost::uint32_t howMuchToRead = howMany * oracle_schema.getByteSize();
-// // //ABELL
-// // //    m_active_buffer->setDataStride(data, 0, howMuchToRead);
-// // }
-//
-//
-//
-// //
-// // void IteratorBase::copyDatabaseData(PointBuffer& source,
-// //     PointBuffer& destination, Dimension const& dest_dim,
-// //     uint32_t source_starting_position, uint32_t destination_starting_position,
-// //     uint32_t howMany)
-// // {
-// //
-// //     boost::optional<Dimension const&> source_dim =
-// //         source.getSchema().getDimensionOptional(dest_dim.getName());
-// //
-// //     if (!source_dim)
-// //         return;
-// //
-// //     for (uint32_t i = 0; i < howMany; ++i)
-// //     {
-// //         if (dest_dim.getInterpretation() == source_dim->getInterpretation() &&
-// //             dest_dim.getByteSize() == source_dim->getByteSize() &&
-// //             pdal::Utils::compare_distance(dest_dim.getNumericScale(),
-// //                 source_dim->getNumericScale()) &&
-// //             pdal::Utils::compare_distance(dest_dim.getNumericOffset(),
-// //                 source_dim->getNumericOffset()) )
-// //         {
-// //             // FIXME: This test could produce false positives
-// // //ABELL
-// // uint8_t *source_position = NULL;
-// // //            uint8_t *source_position =
-// // //                source.getData(source_starting_position+i) +
-// // //                source_dim->getByteOffset();
-// // //ABELL
-// // uint8_t *destination_position = NULL;
-// // //            uint8_t *destination_position =
-// // //                destination.getData(destination_starting_position + i) +
-// // //                dest_dim.getByteOffset();
-// //             memcpy(destination_position, source_position,
-// //                 source_dim->getByteSize());
-// //         }
-// //         else
-// //         {
-// //             //ABELL - No scaling.
-// //             ;
-// // /**
-// //             PointBuffer::scaleData(source, destination, *source_dim, dest_dim,
-// //                 source_starting_position + i,
-// //                 destination_starting_position + i);
-// // **/
-// //         }
-// //     }
-// // }
-//
-//
-// //
-// // PointBufferPtr IteratorBase::fetchPointBuffer(int32_t const& cloud_id,
-// //     std::string const& schema_xml, uint32_t capacity)
-// // {
-// //     BufferMap::const_iterator i = m_buffers.find(cloud_id);
-// //     if (i != m_buffers.end())
-// //     {
-// //         getReader().log()->get(logDEBUG2) <<
-// //             "IteratorBase::fetchPointBuffer: found existing PointBuffer "
-// //             "with id " << cloud_id << std::endl;
-// //         return i->second;
-// //     }
-// //     else
-// //     {
-// //         std::stringstream query;
-// //
-// //         Schema schema = Schema::from_xml(schema_xml);
-// // //ABELL
-// // //        PointBufferPtr output  = BufferPtr(new PointBuffer(schema, capacity));
-// // PointBufferPtr output;
-// //         std::pair<int, PointBufferPtr> p(cloud_id, output);
-// //         m_buffers.insert(p);
-// //         getReader().log()->get(logDEBUG2) <<
-// //             "IteratorBase::fetchPointBuffer: creating new PointBuffer "
-// //             "with id " << cloud_id << std::endl;
-// //         return p.second;
-// //     }
-// // }
-//
-//
-// uint32_t SQLiteIterator::myReadBlocks(PointBuffer& user_buffer)
-// {
-//     uint32_t numPointsRead = 0;
-//
-//     std::string const& query =
-//         getReader().getOptions().getValueOrThrow<std::string>("query");
-//
-//     // ::soci::row block;
-//    //  ::soci::indicator ind = ::soci::i_null;
-//    //  ::soci::statement blocks =
-//    //      (m_session->prepare << query, ::soci::into(block, ind));
-//    //  blocks.execute();
-//    //
-//    //  bool bDidRead = blocks.fetch();
-//    //  if (!m_active_buffer)
-//    //  {
-//    //      //ABELL
-//    //      m_active_buffer = fetchPointBuffer(block.get<int>("cloud_id"),
-//    //          block.get<std::string>("schema"), user_buffer.size());
-//    //      m_active_cloud_id = block.get<int>("cloud_id");
-//    //  }
-//    //
-//    //  // This shouldn't ever happen
-//    //  int num_points = block.get<int>("num_points");
-//    //  if (num_points > static_cast<int32_t>(m_active_buffer->size()))
-//    //  {
-//    //      std::ostringstream oss;
-//    //      oss << "Block size, " << num_points << ", is too large to fit in " <<
-//    //          "buffer of size " << user_buffer.size() <<
-//    //          ". Increase buffer capacity with writer's \"chunk_size\" option " <<
-//    //          "or increase the read buffer size";
-//    //      throw buffer_too_small(oss.str());
-//    //  }
-//    //
-//    //  while (bDidRead)
-//    //  {
-//    //      uint32_t numReadThisBlock =
-//    //          static_cast<uint32_t>(block.get<int>("num_points"));
-//    //
-//    //      //ABELL - Borken and broken.
-//    //      uint32_t numSpaceLeftThisBuffer =
-//    //          user_buffer.size() - user_buffer.size();
-//    //
-//    //      getReader().log()->get(logDEBUG4) << "IteratorBase::myReadBlocks:"
-//    //          "numReadThisBlock: " << numReadThisBlock <<
-//    //          " numSpaceLeftThisBlock: " << numSpaceLeftThisBuffer <<
-//    //          " total numPointsRead: " << numPointsRead << std::endl;
-//    //
-//    //      numPointsRead = numPointsRead + numReadThisBlock;
-//    //      readBlob(block, std::min(numReadThisBlock, numSpaceLeftThisBuffer));
-//    //      fillUserBuffer(user_buffer);
-//    //      bDidRead = blocks.fetch();
-//    //
-//    //      int32_t const& current_cloud_id = block.get<int>("cloud_id");
-//    //      if (current_cloud_id != m_active_cloud_id)
-//    //      {
-//    //          getReader().log()->get(logDEBUG3) <<
-//    //              "IteratorBase::myReadBlocks: current_cloud_id: " <<
-//    //              current_cloud_id << " m_active_cloud_id: " <<
-//    //              m_active_cloud_id << std::endl;
-//    //          m_active_buffer = fetchPointBuffer(current_cloud_id,
-//    //              block.get<std::string>("schema"), user_buffer.size());
-//    //          m_active_cloud_id = current_cloud_id;
-//    //          return user_buffer.size();
-//    //      }
-//    //  }
-//     return numPointsRead;
-// }
-
-
-//---------------------------------------------------------------------------
-//
-// SequentialIterator
-//
-//---------------------------------------------------------------------------
-
-SQLiteIterator::SQLiteIterator(const pdal::drivers::sqlite::SQLiteReader& reader,
-                               std::vector<Dimension *> const& dims)
+SQLiteIterator::SQLiteIterator(const pdal::drivers::sqlite::SQLiteReader& reader, PatchPtr patch )
     : m_reader(reader)
     , m_at_end(false)
-    , m_dims(dims)
     , b_doneQuery(false)
-    , m_point_size(0)
+    , m_patch(patch)
 {
-    for (size_t i = 0; i < m_dims.size(); ++i)
-    {
-        m_point_size += m_dims[i]->getByteSize();
-    }
 
     pdal::Options const& options = reader.getOptions();
     std::string const& connection = options.getValueOrThrow<std::string>("connection");
 
-    m_reader.log()->get(logDEBUG) << "Connection: '" << connection << "'" << std::endl;
+    m_reader.log()->get(LogLevel::DEBUG) << "Connection: '" << connection << "'" << std::endl;
     m_session = std::unique_ptr<SQLite>(new SQLite(connection, m_reader.log()));
     m_session->connect(false); // don't connect in write mode
 
-    m_patch = std::unique_ptr<Patch>(new Patch());
+
+    schema::DimInfoList dims = patch->m_schema.m_dims;
+    for (auto di = dims.begin(); di != dims.end(); ++di)
+        m_point_size += Dimension::size(di->m_type);    
 }
 
 bool SQLiteIterator::doQuery()
@@ -338,7 +129,7 @@ point_count_t SQLiteIterator::readPatch(PointBuffer& buffer, point_count_t numPt
     size_t size = (*r)[position].blobLen;
     position = columns.find("NUM_POINTS")->second;
     int32_t count = boost::lexical_cast<int32_t>((*r)[position].data);
-    m_reader.log()->get(logDEBUG4) << "fetched patch with " << count 
+    m_reader.log()->get(LogLevel::DEBUG4) << "fetched patch with " << count 
          << " points and " << size << " bytes bytesize: " << size << std::endl;    
     m_patch->remaining = count;
     m_patch->count = count;
@@ -351,19 +142,38 @@ point_count_t SQLiteIterator::readPatch(PointBuffer& buffer, point_count_t numPt
 
     size_t offset = ((m_patch->count - m_patch->remaining) * m_point_size);
     uint8_t *pos = &(m_patch->bytes.front()) + offset;
-    assert(offset <= m_patch->byte_size);
+
+    schema::DimInfoList& dims = m_patch->m_schema.m_dims;
     while (numRead < numPts && numRemaining > 0)
     {
-        for (size_t d = 0; d < m_dims.size(); ++d)
+        for (auto di = dims.begin(); di != dims.end(); ++di)
         {
-            buffer.setRawField(*m_dims[d], nextId, pos);
-            pos += m_dims[d]->getByteSize();
+            schema::DimInfo& d = *di;
+            buffer.setField(d.m_id, d.m_type, nextId, pos);
+            pos += Dimension::size(d.m_type);
         }
+
+        // Scale X, Y and Z
+        // double v = buffer.getFieldAs<double>(Dimension::Id::X, nextId);
+        // v = v * m_patch->xScale() + m_patch->xOffset();
+        // buffer.setField(Dimension::Id::X, nextId, v);
+        //
+        // v = buffer.getFieldAs<double>(Dimension::Id::Y, nextId);
+        // v = v * m_patch->yScale() + m_patch->yOffset();
+        // buffer.setField(Dimension::Id::Y, nextId, v);
+        //
+        // v = buffer.getFieldAs<double>(Dimension::Id::Z, nextId);
+        // v = v * m_patch->zScale() + m_patch->zOffset();
+        // buffer.setField(Dimension::Id::Z, nextId, v);
+
         numRemaining--;
         nextId++;
         numRead++;
     }
+    
     m_patch->remaining = numRemaining;
+    
+    
     return numRead;
 }
 
@@ -373,7 +183,7 @@ point_count_t SQLiteIterator::readImpl(PointBuffer& buffer, point_count_t count)
     if (atEndImpl())
         return 0;
     
-    m_reader.log()->get(logDEBUG4) << "readBufferImpl called with "
+    m_reader.log()->get(LogLevel::DEBUG4) << "readBufferImpl called with "
         "PointBuffer filled to " << buffer.size() << " points" <<
         std::endl;
 

@@ -69,7 +69,8 @@ SQLiteWriter::SQLiteWriter(const Options& options)
     , m_block_id(0)
     , m_srid(0)
     , m_num_points(0)
-    , m_orientation(schema::POINT_INTERLEAVED)
+    , m_pointSize(0)
+    , m_orientation(Orientation::PointMajor)
     , m_is3d(false)
 {}
 
@@ -102,12 +103,12 @@ void SQLiteWriter::initialize()
 {
     try
     {
-        log()->get(logDEBUG) << "Connection: '" << m_connection << "'" << std::endl;
+        log()->get(LogLevel::DEBUG) << "Connection: '" << m_connection << "'" << std::endl;
         m_session = std::unique_ptr<SQLite>(new SQLite(m_connection, log()));
         m_session->connect(true);
-        log()->get(logDEBUG) << "Connected to database" << std::endl;
+        log()->get(LogLevel::DEBUG) << "Connected to database" << std::endl;
         bool bHaveSpatialite = m_session->doesTableExist("geometry_columns");
-        log()->get(logDEBUG) << "Have spatialite?: " << bHaveSpatialite << std::endl;
+        log()->get(LogLevel::DEBUG) << "Have spatialite?: " << bHaveSpatialite << std::endl;
         m_session->spatialite();
 
         if (!bHaveSpatialite)
@@ -128,29 +129,26 @@ void SQLiteWriter::initialize()
 
 void SQLiteWriter::ready(PointContext ctx)
 {
-
-    Schema *schema = ctx.schema();
-    m_pointSize = 0;
-    for (schema::size_type i = 0; i < schema->numDimensions(); ++i)
+    m_dims = ctx.dims();
+    // Determine types for the dimensions.  We use the default types when
+    // they exist, float otherwise.
+    for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
     {
-        const Dimension& d = schema->getDimension(i);
-        if (!m_pack || !d.isIgnored())
-        {
-            m_dims.push_back(d);
-            m_pointSize += d.getByteSize();
-        }
+        Dimension::Type::Enum type = Dimension::defaultType(*di);
+        if (type == Dimension::Type::None)
+            type = Dimension::Type::Float;
+        m_types.push_back(type);
+        m_pointSize += Dimension::size(type);
     }
-    
- 
 }
 
 void SQLiteWriter::write(const PointBuffer& buffer)
 {
-    writeInit(buffer.getSchema());
+    writeInit();
     writeTile(buffer);
 }
 
-void SQLiteWriter::writeInit(const Schema& schema)
+void SQLiteWriter::writeInit()
 {
     if (m_sdo_pc_is_initialized)
         return;
@@ -180,10 +178,10 @@ void SQLiteWriter::writeInit(const Schema& schema)
     bool bHaveBlockTable = m_session->doesTableExist(m_block_table);
     bool bHaveCloudTable = m_session->doesTableExist(m_cloud_table);
 
-    log()->get(logDEBUG) << "bHaveBlockTable '" 
+    log()->get(LogLevel::DEBUG) << "bHaveBlockTable '" 
                          << bHaveBlockTable
                          <<"'"<< std::endl;   
-    log()->get(logDEBUG) << "bHaveCloudTable '" 
+    log()->get(LogLevel::DEBUG) << "bHaveCloudTable '" 
                          << bHaveCloudTable
                          <<"'"<< std::endl;   
         
@@ -225,7 +223,7 @@ void SQLiteWriter::writeInit(const Schema& schema)
         m_doCreateIndex = true;
         CreateBlockTable();
     }
-    CreateCloud(schema);
+    CreateCloud();
     m_sdo_pc_is_initialized = true;
 }
 
@@ -242,7 +240,7 @@ void SQLiteWriter::CreateBlockTable()
         " points BLOB," << " bbox box3d " << ")";
 
     m_session->execute(oss.str());
-    log()->get(logDEBUG) << "Created block table '" 
+    log()->get(LogLevel::DEBUG) << "Created block table '" 
                          << boost::to_lower_copy(m_block_table) 
                          << "'" <<std::endl;        
 
@@ -252,7 +250,7 @@ void SQLiteWriter::CreateBlockTable()
             << "'," << "'extent'" << ","
             << m_srid << ", 'POLYGON', 'XY')";
         m_session->execute(oss.str());
-        log()->get(logDEBUG) << "Added geometry column for block table '" 
+        log()->get(LogLevel::DEBUG) << "Added geometry column for block table '" 
                              << boost::to_lower_copy(m_block_table) 
                              <<"'"<< std::endl;        
     }
@@ -266,7 +264,7 @@ void SQLiteWriter::DeleteBlockTable()
     oss << "DELETE FROM " << m_block_table;
     m_session->execute(oss.str());
     oss.str("");
-    log()->get(logDEBUG) << "Deleted rows from block table '" 
+    log()->get(LogLevel::DEBUG) << "Deleted rows from block table '" 
                          << boost::to_lower_copy(m_block_table) 
                          << "'" <<std::endl;        
    
@@ -275,13 +273,13 @@ void SQLiteWriter::DeleteBlockTable()
     oss << "SELECT DiscardGeometryColumn('" <<
         boost::to_lower_copy(m_block_table) << "', 'extent')";
     m_session->execute(oss.str());
-    log()->get(logDEBUG) << "Dropped geometry column for block table" 
+    log()->get(LogLevel::DEBUG) << "Dropped geometry column for block table" 
                          << std::endl;        
     oss.str("");
 
     oss << "DROP TABLE " << boost::to_lower_copy(m_block_table);
     m_session->execute(oss.str());
-    log()->get(logDEBUG) << "Dropped block table '" 
+    log()->get(LogLevel::DEBUG) << "Dropped block table '" 
                          << boost::to_lower_copy(m_block_table) 
                          << "'" <<std::endl;        
 
@@ -297,7 +295,7 @@ void SQLiteWriter::CreateCloudTable()
         " INTEGER PRIMARY KEY AUTOINCREMENT," << " schema TEXT," <<
         " block_table varchar(64)" << ")";
     m_session->execute(oss.str());
-    log()->get(logDEBUG) << "Created cloud table '" 
+    log()->get(LogLevel::DEBUG) << "Created cloud table '" 
                          << boost::to_lower_copy(m_cloud_table) 
                          << "'" <<std::endl;        
 
@@ -308,7 +306,7 @@ void SQLiteWriter::CreateCloudTable()
         << boost::to_lower_copy(m_cloud_table) 
         << "'," << "'extent'" << "," << m_srid << ", 'POLYGON', 'XY')";
     m_session->execute(oss.str());
-    log()->get(logDEBUG) << "Added geometry column to cloud table '" 
+    log()->get(LogLevel::DEBUG) << "Added geometry column to cloud table '" 
                          << boost::to_lower_copy(m_cloud_table) << "'" <<std::endl;        
 }
 
@@ -320,7 +318,7 @@ void SQLiteWriter::DeleteCloudTable()
     oss << "DELETE FROM " << m_cloud_table;
     m_session->execute(oss.str());
     oss.str("");
-    log()->get(logDEBUG) << "Deleted records from cloud table '" 
+    log()->get(LogLevel::DEBUG) << "Deleted records from cloud table '" 
                          << boost::to_lower_copy(m_cloud_table) 
                          << "'" <<std::endl;        
 
@@ -330,14 +328,14 @@ void SQLiteWriter::DeleteCloudTable()
         boost::to_lower_copy(m_cloud_table) << "', 'extent')";
     m_session->execute(oss.str());
     oss.str("");
-    log()->get(logDEBUG) << "Dropped geometry column from cloud table '" 
+    log()->get(LogLevel::DEBUG) << "Dropped geometry column from cloud table '" 
                          << boost::to_lower_copy(m_cloud_table) 
                          << "'" <<std::endl;
 
     oss << "DROP TABLE " << boost::to_lower_copy(m_cloud_table);
     m_session->execute(oss.str());
     oss.str("");
-    log()->get(logDEBUG) << "Dropped cloud table '" 
+    log()->get(LogLevel::DEBUG) << "Dropped cloud table '" 
                          << boost::to_lower_copy(m_cloud_table) 
                          << "'" <<std::endl;
 }
@@ -356,7 +354,7 @@ void SQLiteWriter::CreateIndexes(std::string const& table_name,
     oss << "SELECT CreateSpatialIndex('"<< boost::to_lower_copy(table_name) <<
         "', 'extent')";
     m_session->execute(oss.str());
-    log()->get(logDEBUG) << "Created spatial index for'" << table_name << "'" <<std::endl;
+    log()->get(LogLevel::DEBUG) << "Created spatial index for'" << table_name << "'" <<std::endl;
 }
 
 
@@ -434,13 +432,12 @@ void SQLiteWriter::done(PointContext ctx)
 }
 
 
-void SQLiteWriter::CreateCloud(Schema const& buffer_schema)
+void SQLiteWriter::CreateCloud()
 {
     using namespace std;
 
     ostringstream oss;
 
-    pdal::Schema output_schema(buffer_schema);
     bool pack =
         m_options.getValueOrDefault<bool>("pack_ignored_fields", true);
 
@@ -448,7 +445,7 @@ void SQLiteWriter::CreateCloud(Schema const& buffer_schema)
         "cloud_boundary_wkt", "");
     if (bounds.size())
     {
-        log()->get(logDEBUG2) << "have cloud_boundary_wkt of size " <<
+        log()->get(LogLevel::DEBUG2) << "have cloud_boundary_wkt of size " <<
             bounds.size() << std::endl;
         bounds = loadGeometryWKT(bounds);
     }
@@ -460,8 +457,8 @@ void SQLiteWriter::CreateCloud(Schema const& buffer_schema)
         " block_table, schema) VALUES ('" <<
         boost::to_lower_copy(m_block_table) << "',?) ";
 
-    Schema s(m_dims);
-    string xml = pdal::Schema::to_xml(s);
+    schema::Writer writer(m_dims, m_types);
+    std::string xml = writer.getXML();
     
     records rs;
     row r;
@@ -473,7 +470,7 @@ void SQLiteWriter::CreateCloud(Schema const& buffer_schema)
     long id = m_session->last_row_id();
     m_obj_id = id;
 
-    log()->get(logDEBUG) << "Point cloud id was " << id << std::endl;
+    log()->get(LogLevel::DEBUG) << "Point cloud id was " << id << std::endl;
     try
     {
         Option& pc_id = m_options.getOptionByRef("pc_id");
@@ -500,10 +497,70 @@ void SQLiteWriter::CreateCloud(Schema const& buffer_schema)
             boost::to_lower_copy(m_cloud_column) <<"=?";
 
         m_session->insert(oss.str(), rs);
-        log()->get(logDEBUG) << "Inserted boundary wkt into cloud table " << std::endl;        
+        log()->get(LogLevel::DEBUG) << "Inserted boundary wkt into cloud table " << std::endl;        
     }
 }
 
+
+namespace
+{
+
+void fillBuf(const PointBuffer& buf, char *pos, Dimension::Id::Enum d,
+    Dimension::Type::Enum type, PointId id)
+{
+    union
+    {
+        float f;
+        double d;
+        int8_t s8;
+        int16_t s16;
+        int32_t s32;
+        int64_t s64;
+        uint8_t u8;
+        uint16_t u16;
+        uint32_t u32;
+        uint64_t u64;
+    } e;  // e - for Everything.
+
+    switch (type)
+    {
+    case Dimension::Type::Float:
+        e.f = buf.getFieldAs<float>(d, id);
+        break;
+    case Dimension::Type::Double:
+        e.d = buf.getFieldAs<double>(d, id);
+        break;
+    case Dimension::Type::Signed8:
+        e.s8 = buf.getFieldAs<int8_t>(d, id);
+        break;
+    case Dimension::Type::Signed16:
+        e.s16 = buf.getFieldAs<int16_t>(d, id);
+        break;
+    case Dimension::Type::Signed32:
+        e.s32 = buf.getFieldAs<int32_t>(d, id);
+        break;
+    case Dimension::Type::Signed64:
+        e.s64 = buf.getFieldAs<int64_t>(d, id);
+        break;
+    case Dimension::Type::Unsigned8:
+        e.u8 = buf.getFieldAs<uint8_t>(d, id);
+        break;
+    case Dimension::Type::Unsigned16:
+        e.u16 = buf.getFieldAs<uint16_t>(d, id);
+        break;
+    case Dimension::Type::Unsigned32:
+        e.u32 = buf.getFieldAs<uint32_t>(d, id);
+        break;
+    case Dimension::Type::Unsigned64:
+        e.u64 = buf.getFieldAs<uint64_t>(d, id);
+        break;
+    case Dimension::Type::None:
+        break;
+    }
+    memcpy(pos, &e, Dimension::size(type));
+}
+
+} // anonymous namespace.
 
 void SQLiteWriter::writeTile(PointBuffer const& buffer)
 {
@@ -519,13 +576,16 @@ void SQLiteWriter::writeTile(PointBuffer const& buffer)
     
     for (PointId id = 0; id < buffer.size(); ++id)
     {
-        for (size_t dim = 0; dim < m_dims.size(); ++dim)
+        auto ti = m_types.begin();
+        for (auto di = m_dims.begin(); di != m_dims.end(); ++di, ++ti)
         {
-            buffer.getRawField(m_dims[dim], id, pos);
-            pos += m_dims[dim].getByteSize();
+            fillBuf(buffer, pos, *di, *ti, id);
+            pos += Dimension::size(*ti);
         }
+        if (id % 100 == 0)
+            m_callback->invoke(id);
     }
-
+    
     records rs;
     row r;
 
@@ -534,8 +594,8 @@ void SQLiteWriter::writeTile(PointBuffer const& buffer)
     std::string bounds = b.toWKT(precision); // polygons are only 2d, not cubes
 
     std::string box = b.toBox(precision, 3);
-    log()->get(logDEBUG3) << "extent: " << bounds << std::endl;
-    log()->get(logDEBUG3) << "bbox: " << box << std::endl;
+    log()->get(LogLevel::DEBUG3) << "extent: " << bounds << std::endl;
+    log()->get(LogLevel::DEBUG3) << "bbox: " << box << std::endl;
   
     r.push_back(column(m_obj_id));
     r.push_back(column(m_block_id));

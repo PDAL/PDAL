@@ -71,12 +71,12 @@ void SQLiteReader::initialize()
 {
     try
     {
-        log()->get(logDEBUG) << "Connection: '" << m_connection << "'" << std::endl;
+        log()->get(LogLevel::DEBUG) << "Connection: '" << m_connection << "'" << std::endl;
         m_session = std::unique_ptr<SQLite>(new SQLite(m_connection, log()));
         m_session->connect(false); // don't connect in write mode
-        log()->get(logDEBUG) << "Connected to database" << std::endl;
+        log()->get(LogLevel::DEBUG) << "Connected to database" << std::endl;
         bool bHaveSpatialite = m_session->doesTableExist("geometry_columns");
-        log()->get(logDEBUG) << "Have spatialite?: " << bHaveSpatialite << std::endl;
+        log()->get(LogLevel::DEBUG) << "Have spatialite?: " << bHaveSpatialite << std::endl;
         m_session->spatialite();
 
         if (!bHaveSpatialite)
@@ -104,6 +104,8 @@ void SQLiteReader::initialize()
         // If one wasn't set on the options, we'll ignore at this
         setSpatialReference(fetchSpatialReference(m_query));
     }
+
+    m_patch = PatchPtr(new Patch());
     
 }
 
@@ -128,7 +130,7 @@ pdal::SpatialReference
 SQLiteReader::fetchSpatialReference(std::string const& query) const
 {
     // Fetch the WKT for the SRID to set the coordinate system of this stage
-    log()->get(logDEBUG) << "Fetching schema object" << std::endl;
+    log()->get(LogLevel::DEBUG) << "Fetching schema object" << std::endl;
 
     // ::soci::row r;
     // ::soci::indicator ind = ::soci::i_null;
@@ -147,7 +149,7 @@ SQLiteReader::fetchSpatialReference(std::string const& query) const
    //  if (!bDidRead)
    //      return pdal::SpatialReference();
    //
-   //  log()->get(logDEBUG) << "query returned " << srid << std::endl;
+   //  log()->get(LogLevel::DEBUG) << "query returned " << srid << std::endl;
    //  std::ostringstream oss;
    //  oss <<"EPSG:" << srid;
 
@@ -162,8 +164,6 @@ void SQLiteReader::processOptions(const Options& options)
     m_schemaFile = options.getValueOrDefault<std::string>(
         "xml_schema_dump", std::string());
 
-
-
     if (options.hasOption("spatialreference"))
         m_spatialRef = boost::optional<SpatialReference>(
             options.getValueOrThrow<pdal::SpatialReference>(
@@ -172,38 +172,6 @@ void SQLiteReader::processOptions(const Options& options)
     m_connection = options.getValueOrDefault<std::string>("connection", "");
 }
 
-void SQLiteReader::buildSchema(Schema *schema)
-{
-    log()->get(logDEBUG) << "Fetching schema from SDO_PC object" << std::endl;
-
-    Schema storedSchema = fetchSchema();
-    if (m_schemaFile.size())
-    {
-        std::string pcSchema = Schema::to_xml(storedSchema);
-        std::ostream* out = FileUtils::createFile(m_schemaFile);
-        out->write(pcSchema.c_str(), pcSchema.size());
-        FileUtils::closeFile(out);
-    }
-
-    for (size_t i = 0; i < storedSchema.numDimensions(); ++i)
-    {
-        Dimension d = storedSchema.getDimension(i);
-
-        // For dimensions that do not have namespaces, we'll set the namespace
-        // to the namespace of the current stage
-        if (d.getNamespace().empty())
-        {
-            log()->get(logDEBUG4) << "setting namespace for dimension " <<
-                d.getName() << " to "  << getName() << std::endl;
-
-            if (d.getUUID().is_nil())
-                d.createUUID();
-            d.setNamespace(getName());
-        }
-        m_dims.push_back(schema->appendDimension(d));
-    }
-    
-}
 
 
 void SQLiteReader::validateQuery() const
@@ -226,9 +194,9 @@ void SQLiteReader::validateQuery() const
     }
 }
 
-pdal::Schema SQLiteReader::fetchSchema() const
+void SQLiteReader::addDimensions(PointContext ctx)
 {
-    log()->get(logDEBUG) << "Fetching schema object" << std::endl;
+    log()->get(LogLevel::DEBUG) << "Fetching schema object" << std::endl;
 
     std::ostringstream oss;
     oss << "SELECT SCHEMA FROM (" << m_query <<") as q LIMIT 1";
@@ -240,36 +208,20 @@ pdal::Schema SQLiteReader::fetchSchema() const
         throw sqlite_driver_error("Unable to select schema from query!");
     
     column const& s = r->at(0); // First column is schema
+
+    m_patch->m_schema = schema::Reader(s.data).schema(); 
+    m_patch->m_ctx = ctx;
     
-    Schema schema = Schema::from_xml(s.data);
-    schema::index_by_index const& dims =
-        schema.getDimensions().get<schema::index>();
-
-    for (auto iter = dims.begin(); iter != dims.end(); ++iter)
-    {
-        // For dimensions that do not have namespaces, we'll set the namespace
-        // to the namespace of the current stage
-
-        if (iter->getNamespace().size() == 0)
-        {
-            log()->get(logDEBUG4) << "setting namespace for dimension " <<
-                iter->getName() << " to "  << getName() << std::endl;
-
-            Dimension d(*iter);
-            if (iter->getUUID().is_nil())
-                d.createUUID();
-            d.setNamespace(getName());
-            schema.setDimension(d);
-        }
-    }
-    return schema;
+    schema::DimInfoList& dims = m_patch->m_schema.m_dims;
+    for (auto di = dims.begin(); di != dims.end(); ++di)
+        di->m_id = ctx.registerOrAssignDim(di->m_name, di->m_type);
 }
 
 
 pdal::StageSequentialIterator*
 SQLiteReader::createSequentialIterator() const
 {
-    return new pdal::drivers::sqlite::iterators::sequential::SQLiteIterator(*this, m_dims);
+    return new pdal::drivers::sqlite::iterators::sequential::SQLiteIterator(*this, m_patch);
 }
 
 
