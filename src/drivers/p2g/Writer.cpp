@@ -147,12 +147,12 @@ void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
 {
 
     calculateGridSizes();
-    log()->get(logDEBUG) << "X grid size: " << m_GRID_SIZE_X << std::endl;
-    log()->get(logDEBUG) << "Y grid size: " << m_GRID_SIZE_Y << std::endl;
+    log()->get(LogLevel::DEBUG) << "X grid size: " << m_GRID_SIZE_X << std::endl;
+    log()->get(LogLevel::DEBUG) << "Y grid size: " << m_GRID_SIZE_Y << std::endl;
 
     log()->floatPrecision(6);
-    log()->get(logDEBUG) << "X grid distance: " << m_GRID_DIST_X << std::endl;
-    log()->get(logDEBUG) << "Y grid distance: " << m_GRID_DIST_Y << std::endl;
+    log()->get(LogLevel::DEBUG) << "X grid distance: " << m_GRID_DIST_X << std::endl;
+    log()->get(LogLevel::DEBUG) << "Y grid distance: " << m_GRID_DIST_Y << std::endl;
     log()->clearFloat();
 
     boost::scoped_ptr<OutCoreInterp> p(new OutCoreInterp(m_GRID_DIST_X,
@@ -201,19 +201,16 @@ void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
 
 boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
 {
-    const Schema& schema = data.getSchema();
-    
+    // FIXME: Fetch the given Z-dim name, not just default 
+    // to Z
     std::string z_name = getOptions().getValueOrDefault<std::string>("Z", "Z");
-    pdal::Dimension const& dimX = schema.getDimension("X");
-    pdal::Dimension const& dimY = schema.getDimension("Y");
-    pdal::Dimension const& dimZ = schema.getDimension(z_name);
-
+    
 
     for (PointId idx = 0; idx < data.size(); idx++)
     {
-        double x = data.getFieldAs<double>(dimX, idx);
-        double y = data.getFieldAs<double>(dimY, idx);
-        double z = data.getFieldAs<double>(dimZ, idx);
+        double x = data.getFieldAs<double>(Dimension::Id::X, idx);
+        double y = data.getFieldAs<double>(Dimension::Id::Y, idx);
+        double z = data.getFieldAs<double>(Dimension::Id::Z, idx);
 
         m_bounds.setMinimum(0, (std::min)(x, m_bounds.getMinimum(0)));
         m_bounds.setMinimum(1, (std::min)(y, m_bounds.getMinimum(1)));

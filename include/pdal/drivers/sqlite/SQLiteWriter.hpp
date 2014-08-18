@@ -68,7 +68,7 @@ private:
     virtual void write(const PointBuffer& pointBuffer);
     virtual void done(PointContext ctx);
     
-    void writeInit(const Schema& schema);
+    void writeInit();
     void writeTile(const PointBuffer& buffer);
     void CreateBlockTable();
     void CreateCloudTable();    
@@ -81,7 +81,7 @@ private:
 
     bool IsValidGeometryWKT(std::string const& wkt) const;
     std::string loadGeometryWKT(std::string const& filename_or_wkt) const;
-    void CreateCloud(Schema const& buffer_schema);                       
+    void CreateCloud();                       
     
     std::unique_ptr<SQLite> m_session;
 
@@ -94,8 +94,9 @@ private:
 	boost::uint32_t m_srid;
 	boost::int64_t m_num_points;
     size_t m_pointSize;    
-    schema::Orientation m_orientation;
-    std::vector<Dimension> m_dims;
+    Orientation::Enum m_orientation;
+    Dimension::IdList m_dims;
+    std::vector<Dimension::Type::Enum> m_types;
     bool m_pack;
     std::string m_block_table;
     std::string m_cloud_table;
