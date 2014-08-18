@@ -60,6 +60,9 @@ public:
             double& xMax,
             double& yMax) const;
 
+    // All getPoints queries will return an empty vector if the tree has not
+    // been successfully built prior to the getPoints call.
+
     // Return all points at depth levels strictly less than depthEnd.
     // A depthEnd value of zero returns all points in the tree.
     std::vector<std::size_t> getPoints(

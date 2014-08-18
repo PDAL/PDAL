@@ -395,7 +395,12 @@ std::vector<std::size_t> QuadIndex::QImpl::getPoints(
         const std::size_t maxDepth) const
 {
     std::vector<std::size_t> results;
-    m_tree->getPoints(results, minDepth, maxDepth);
+
+    if (m_tree)
+    {
+        m_tree->getPoints(results, minDepth, maxDepth);
+    }
+
     return results;
 }
 
@@ -410,13 +415,16 @@ std::vector<std::size_t> QuadIndex::QImpl::getPoints(
     std::vector<std::size_t> results;
 
     // Making BBox from external parameters here, so do some light validation.
-    m_tree->getPoints(
-            results,
-            BBox(
-                Point(std::min(xMin, xMax), std::min(yMin, yMax)),
-                Point(std::max(xMin, xMax), std::max(yMin, yMax))),
-            minDepth,
-            maxDepth);
+    if (m_tree)
+    {
+        m_tree->getPoints(
+                results,
+                BBox(
+                    Point(std::min(xMin, xMax), std::min(yMin, yMax)),
+                    Point(std::max(xMin, xMax), std::max(yMin, yMax))),
+                minDepth,
+                maxDepth);
+    }
 
     return results;
 }
