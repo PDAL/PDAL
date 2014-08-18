@@ -69,7 +69,7 @@ namespace pdal
  * Converts PCD data to PDAL format.
  */
 template <typename CloudT>
-void PCDtoPDAL(CloudT &cloud, PointBuffer& buf)
+void PCDtoPDAL(CloudT &cloud, PointBuffer& buf, Bounds<double> const& bounds)
 {
 #ifdef PDAL_HAVE_PCL
     typedef typename pcl::traits::fieldList<typename CloudT::PointType>::type
@@ -77,12 +77,12 @@ void PCDtoPDAL(CloudT &cloud, PointBuffer& buf)
 
     if (pcl::traits::has_xyz<typename CloudT::PointType>::value)
     {
-        auto getX = [&cloud](size_t i)
-            { return cloud.points[i].x; };
-        auto getY = [&cloud](size_t i)
-            { return cloud.points[i].y; };
-        auto getZ = [&cloud](size_t i)
-            { return cloud.points[i].z; };
+        auto getX = [&cloud, &bounds](size_t i)
+            { return cloud.points[i].x + bounds.getMinimum(0); };
+        auto getY = [&cloud, &bounds](size_t i)
+            { return cloud.points[i].y + bounds.getMinimum(1); };
+        auto getZ = [&cloud, &bounds](size_t i)
+            { return cloud.points[i].z + bounds.getMinimum(2); };
         setValues(buf, Dimension::Id::X, cloud.points.size(), getX);
         setValues(buf, Dimension::Id::Y, cloud.points.size(), getY);
         setValues(buf, Dimension::Id::Z, cloud.points.size(), getZ);
@@ -112,7 +112,7 @@ void PCDtoPDAL(CloudT &cloud, PointBuffer& buf)
  * Converts PDAL data to PCD format.
  */
 template <typename CloudT>
-void PDALtoPCD(PointBuffer& data, CloudT &cloud)
+void PDALtoPCD(PointBuffer& data, CloudT &cloud, Bounds<double> const& bounds)
 {
 #ifdef PDAL_HAVE_PCL
     typedef typename pcl::traits::fieldList<typename CloudT::PointType>::type
@@ -127,9 +127,9 @@ void PDALtoPCD(PointBuffer& data, CloudT &cloud)
     {
         for (size_t i = 0; i < cloud.points.size(); ++i)
         {
-            double xd = data.getFieldAs<double>(Dimension::Id::X, i);
-            double yd = data.getFieldAs<double>(Dimension::Id::Y, i);
-            double zd = data.getFieldAs<double>(Dimension::Id::Z, i);
+            double xd = data.getFieldAs<double>(Dimension::Id::X, i) - bounds.getMinimum(0);
+            double yd = data.getFieldAs<double>(Dimension::Id::Y, i) - bounds.getMinimum(1);
+            double zd = data.getFieldAs<double>(Dimension::Id::Z, i) - bounds.getMinimum(2);
 
             typename CloudT::PointType p = cloud.points[i];
             p.x = (float)xd;
