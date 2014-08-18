@@ -35,7 +35,7 @@
 #pragma once
 
 #include <pdal/Writer.hpp>
-#include <pdal/drivers/sqlite/SqliteCommon.hpp>
+#include <pdal/drivers/sqlite/SQLiteCommon.hpp>
 #include <pdal/third/nanoflann.hpp>
 
 namespace pdal
