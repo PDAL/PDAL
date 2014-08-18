@@ -35,7 +35,6 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/FilterIterator.hpp>
 
 #include <pdal/Range.hpp>
 #include <pdal/PointBuffer.hpp>
@@ -175,7 +174,6 @@ private:
     std::set<std::string> m_exact_dimension_names;
     std::map<Dimension::Id::Enum, SummaryPtr> m_stats;
 };
-
 
 } // namespace filters
 } // namespace pdal

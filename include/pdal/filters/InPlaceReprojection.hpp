@@ -32,29 +32,14 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_FILTERS_INPLACEREPROJECTIONFILTER_HPP
-#define INCLUDED_FILTERS_INPLACEREPROJECTIONFILTER_HPP
+#pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/FilterIterator.hpp>
-
-#include <boost/shared_ptr.hpp>
-
-
-namespace pdal
-{
-class PointBuffer;
-namespace gdal
-{
-class GlobalDebug;
-}
-}
 
 namespace pdal
 {
 namespace filters
 {
-
 
 class PDAL_DLL InPlaceReprojection : public Filter
 {
@@ -62,50 +47,15 @@ public:
     SET_STAGE_NAME("filters.inplacereprojection",
         "In place Reprojection Filter")
     SET_STAGE_LINK("http://pdal.io/stages/filters.inplacereprojection.html")     
-#ifdef PDAL_HAVE_GDAL
-    SET_STAGE_ENABLED(true)
-#else
-    SET_STAGE_ENABLED(false)
-#endif
-    
     InPlaceReprojection(const Options& options) : Filter(options)
          {}
-    static Options getDefaultOptions();
 
 private:
-    virtual void processOptions(const Options& options);
-    virtual void addDimensions(PointContext ctx);
-    virtual void ready(PointContext ctx);
-    virtual void filter(PointBuffer& buffer);
-
-//    void appendDimension(Schema *schema, DimensionPtr src);
-    void reprojectOffsets(double& x, double& y, double& z);
-    void transform(double& x, double& y, double& z) const;
-
-    typedef boost::shared_ptr<void> ReferencePtr;
-    typedef boost::shared_ptr<void> TransformPtr;
-
-    SpatialReference m_inSRS;
-    SpatialReference m_outSRS;
-    ReferencePtr m_in_ref_ptr;
-    ReferencePtr m_out_ref_ptr;
-    TransformPtr m_transform_ptr;
-    boost::optional<double> m_offset_x;
-    boost::optional<double> m_offset_y;
-    boost::optional<double> m_offset_z;
-    boost::optional<double> m_scale_x;
-    boost::optional<double> m_scale_y;
-    boost::optional<double> m_scale_z;
-    bool m_markIgnored;
-    bool m_doOffsetZ;
-
     InPlaceReprojection& operator=(
         const InPlaceReprojection&); // not implemented
     InPlaceReprojection(const InPlaceReprojection&); // not implemented
 };
 
-
 } // namespace filter
 } // namespace pdal
 
-#endif

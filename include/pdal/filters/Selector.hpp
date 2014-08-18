@@ -32,15 +32,9 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_FILTERS_SELECTORFILTER_HPP
-#define INCLUDED_FILTERS_SELECTORFILTER_HPP
-
-#include <boost/shared_ptr.hpp>
+#pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/Utils.hpp>
-
-#include <map>
 
 namespace pdal
 {
@@ -54,26 +48,14 @@ public:
     SET_STAGE_LINK("http://pdal.io/stages/filters.selector.html")  
     SET_STAGE_ENABLED(true)
     
-    Selector(const Options& options) : Filter(options), m_ignoreDefault(true)
+    Selector(const Options& options) : Filter(options)
         {}
-
-    static Options getDefaultOptions();
     
 private:
     Selector& operator=(const Selector&); // not implemented
     Selector(const Selector&); // not implemented
-    virtual void processOptions(const Options& options);
-//ABELL
-//    virtual void buildSchema(Schema *schema);
-    
-    std::map<std::string, bool> m_ignoredMap;
-    bool m_ignoreDefault;
-    bool m_overwriteExisting;
-//    std::vector<Dimension> m_createDimensions;
 };
 
-} // filters
+} // namespace filters
+} // namespace pdal
 
-} // pdal
-
-#endif

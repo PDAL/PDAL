@@ -43,30 +43,6 @@ namespace filters
 
 class PDAL_DLL Scaling: public Filter
 {
-    struct PDAL_DLL Scaler
-    {
-        Scaler() : size(0)
-        {}
-
-        std::string name;
-        std::string type;
-        std::string scale;
-        std::string offset;
-        uint32_t size;
-    };
-
-/**
-    struct DimInfo
-    {
-        DimInfo(const std::string& name, const std::string& fromNs)
-            {}
-        std::string name;
-        std::string fromNs;
-        DimensionPtr from;
-        DimensionPtr to;
-    };
-**/
-
 public:
     SET_STAGE_NAME("filters.scaling", "Scaling Filter")
     SET_STAGE_LINK("http://pdal.io/stages/filters.scaling.html")  
@@ -76,15 +52,6 @@ public:
         {}
 
 private:
-    bool m_markIgnored;
-//    std::vector<DimInfo> m_dims;
-    std::vector<Scaler> m_scalers;
-
-    virtual void processOptions(const Options& options);
-    virtual void addDimensions(PointContext ctx);
-    virtual void ready(PointContext ctx);
-    virtual void filter(PointBuffer& buf);
-
     // Not implemented
     Scaling& operator=(const Scaling&);
     // Not implemented

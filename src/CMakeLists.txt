@@ -32,7 +32,6 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/FileUtils.hpp"
   "${PDAL_HEADERS_DIR}/Filter.hpp"
   "${PDAL_HEADERS_DIR}/Filters.hpp"
-  "${PDAL_HEADERS_DIR}/FilterIterator.hpp"
   "${PDAL_HEADERS_DIR}/GlobalEnvironment.hpp"
   "${PDAL_HEADERS_DIR}/gitsha.h"
   "${PDAL_HEADERS_DIR}/IStream.hpp"
@@ -78,7 +77,6 @@ set(PDAL_BASE_CPP
   Charbuf.cpp
   FileUtils.cpp
   Filter.cpp
-  FilterIterator.cpp
   gitsha.cpp
   GlobalEnvironment.cpp
   KDIndex.cpp
@@ -553,12 +551,11 @@ set(PDAL_FILTERS_HPP
   "${PDAL_FILTERS_HEADERS}/Crop.hpp"
   "${PDAL_FILTERS_HEADERS}/Decimation.hpp"
   "${PDAL_FILTERS_HEADERS}/HexBin.hpp"
-#  "${PDAL_FILTERS_HEADERS}/InPlaceReprojection.hpp"
+  "${PDAL_FILTERS_HEADERS}/InPlaceReprojection.hpp"
   "${PDAL_FILTERS_HEADERS}/Merge.hpp"
-#  "${PDAL_FILTERS_HEADERS}/Mosaic.hpp"
   "${PDAL_FILTERS_HEADERS}/Reprojection.hpp"
-#  "${PDAL_FILTERS_HEADERS}/Scaling.hpp"
-#  "${PDAL_FILTERS_HEADERS}/Selector.hpp"
+  "${PDAL_FILTERS_HEADERS}/Scaling.hpp"
+  "${PDAL_FILTERS_HEADERS}/Selector.hpp"
   "${PDAL_FILTERS_HEADERS}/Splitter.hpp"
   "${PDAL_FILTERS_HEADERS}/Stats.hpp"
 )
@@ -568,18 +565,13 @@ set (PDAL_FILTERS_CPP
   "${PDAL_FILTERS_SRC}/Crop.cpp"
   "${PDAL_FILTERS_SRC}/Decimation.cpp"
   "${PDAL_FILTERS_SRC}/HexBin.cpp"
-#  "${PDAL_FILTERS_SRC}/InPlaceReprojection.cpp"
-#  "${PDAL_FILTERS_SRC}/Mosaic.cpp"
   "${PDAL_FILTERS_SRC}/Reprojection.cpp"
-#  "${PDAL_FILTERS_SRC}/Scaling.cpp"
-#  "${PDAL_FILTERS_SRC}/Selector.cpp"
   "${PDAL_FILTERS_SRC}/Splitter.cpp"
   "${PDAL_FILTERS_SRC}/Stats.cpp"
 )
 
 list (APPEND PDAL_CPP ${PDAL_FILTERS_CPP} )
 list (APPEND PDAL_HPP ${PDAL_FILTERS_HPP} )
-
 
 #
 # Core components that depend on Python

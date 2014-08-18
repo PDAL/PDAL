@@ -35,7 +35,6 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/FilterIterator.hpp>
 #include <pdal/Bounds.hpp>
 
 #ifdef PDAL_HAVE_GEOS
@@ -92,6 +91,6 @@ private:
     Crop(const Crop&); // not implemented
 };
 
-} // filters
-} // pdal
+} // namespace filters
+} // namespace pdal
 

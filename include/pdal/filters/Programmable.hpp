@@ -38,9 +38,7 @@
 #ifdef PDAL_HAVE_PYTHON
 
 #include <pdal/Filter.hpp>
-#include <pdal/FilterIterator.hpp>
 #include <pdal/plang/BufferedInvocation.hpp>
-
 
 namespace pdal
 {
@@ -80,7 +78,6 @@ private:
     Programmable& operator=(const Programmable&); // not implemented
     Programmable(const Programmable&); // not implemented
 };
-
 
 } // namespace filters
 } // namespace pdal

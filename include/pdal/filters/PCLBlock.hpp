@@ -35,7 +35,6 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/FilterIterator.hpp>
 
 namespace pdal
 {
@@ -67,6 +66,6 @@ private:
     PCLBlock(const PCLBlock&); // not implemented
 };
 
-} // filters
-} // pdal
+} // namespace filters
+} // namespace pdal
 

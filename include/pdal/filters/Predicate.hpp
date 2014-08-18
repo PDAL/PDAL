@@ -38,7 +38,6 @@
 #ifdef PDAL_HAVE_PYTHON
 
 #include <pdal/Filter.hpp>
-#include <pdal/FilterIterator.hpp>
 
 #include <pdal/plang/BufferedInvocation.hpp>
 

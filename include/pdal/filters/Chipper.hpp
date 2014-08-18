@@ -39,13 +39,11 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#ifndef PDAL_CHIPPER_H
-#define PDAL_CHIPPER_H
+#pragma once
 
 #include <vector>
 
 #include <pdal/Filter.hpp>
-#include <pdal/FilterIterator.hpp>
 #include <pdal/Bounds.hpp>
 #include <pdal/PointBuffer.hpp>
 
@@ -179,9 +177,6 @@ private:
     Chipper(const Chipper&); // not implemented
 };
 
-
 } // namespace filters
-
 } // namespace liblas
 
-#endif

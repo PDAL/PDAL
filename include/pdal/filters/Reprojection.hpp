@@ -32,14 +32,11 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_FILTERS_REPROJECTIONFILTER_HPP
-#define INCLUDED_FILTERS_REPROJECTIONFILTER_HPP
+#pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/FilterIterator.hpp>
 
 #include <boost/shared_ptr.hpp>
-
 
 namespace pdal
 {
@@ -48,10 +45,7 @@ namespace gdal
 {
 class Debug;
 }
-}
 
-namespace pdal
-{
 namespace filters
 {
 
@@ -93,9 +87,6 @@ private:
     Reprojection(const Reprojection&); // not implemented
 };
 
-
 } // namespace filter
-
 } // namespace pdal
 
-#endif
