@@ -305,6 +305,12 @@ struct QuadIndex::QImpl
 
     void build();
 
+    bool getBounds(
+            double& xMin,
+            double& yMin,
+            double& xMax,
+            double& yMax) const;
+
     std::vector<std::size_t> getPoints(
             std::size_t depthBegin,
             std::size_t depthEnd) const;
@@ -357,9 +363,30 @@ void QuadIndex::QImpl::build()
     }
 
     m_tree.reset(new Tree(BBox(Point(xMin, yMin), Point(xMax, yMax))));
+
     for (std::size_t i = 0; i < m_pointRefVec.size(); ++i)
     {
         m_tree->addPoint(m_pointRefVec[i].get());
+    }
+}
+
+bool QuadIndex::QImpl::getBounds(
+        double& xMin,
+        double& yMin,
+        double& xMax,
+        double& yMax) const
+{
+    if (m_tree)
+    {
+        xMin = m_tree->bbox.min.x;
+        yMin = m_tree->bbox.min.y;
+        xMax = m_tree->bbox.max.x;
+        yMax = m_tree->bbox.max.y;
+        return true;
+    }
+    else
+    {
+        return false;
     }
 }
 
@@ -404,6 +431,15 @@ QuadIndex::~QuadIndex()
 void QuadIndex::build()
 {
     m_qImpl->build();
+}
+
+bool QuadIndex::getBounds(
+        double& xMin,
+        double& yMin,
+        double& xMax,
+        double& yMax) const
+{
+    return m_qImpl->getBounds(xMin, yMin, xMax, yMax);
 }
 
 std::vector<std::size_t> QuadIndex::getPoints(

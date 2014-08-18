@@ -49,8 +49,16 @@ public:
     QuadIndex(const PointBuffer& pointBuffer);
     ~QuadIndex();
 
-    // Build the quadtree index.
+    // Build the quadtree index.  Could throw a runtime_error.
     void build();
+
+    // Get bounds of the quad tree.  Return false if the tree has not been
+    // built.
+    bool getBounds(
+            double& xMin,
+            double& yMin,
+            double& xMax,
+            double& yMax) const;
 
     // Return all points at depth levels strictly less than depthEnd.
     // A depthEnd value of zero returns all points in the tree.
