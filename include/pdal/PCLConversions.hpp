@@ -77,11 +77,11 @@ void PCDtoPDAL(CloudT &cloud, PointBuffer& buf, Bounds<double> const& bounds)
 
     if (pcl::traits::has_xyz<typename CloudT::PointType>::value)
     {
-        auto getX = [&cloud](size_t i)
+        auto getX = [&cloud, &bounds](size_t i)
             { return cloud.points[i].x + bounds.getMinimum(0); };
-        auto getY = [&cloud](size_t i)
+        auto getY = [&cloud, &bounds](size_t i)
             { return cloud.points[i].y + bounds.getMinimum(1); };
-        auto getZ = [&cloud](size_t i)
+        auto getZ = [&cloud, &bounds](size_t i)
             { return cloud.points[i].z + bounds.getMinimum(2); };
         setValues(buf, Dimension::Id::X, cloud.points.size(), getX);
         setValues(buf, Dimension::Id::Y, cloud.points.size(), getY);
