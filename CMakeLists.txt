@@ -247,7 +247,7 @@ if(WIN32)
 endif(WIN32)
 
 if (NOT PDAL_EMBED_BOOST)
-  find_package(Boost 1.52 COMPONENTS program_options thread iostreams filesystem system unit_test_framework random)
+  find_package(Boost 1.55 COMPONENTS program_options thread iostreams filesystem system unit_test_framework random)
 endif()
 
 if(Boost_FOUND)

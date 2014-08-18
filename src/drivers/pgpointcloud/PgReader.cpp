@@ -94,25 +94,20 @@ void PgReader::processOptions(const Options& options)
 
     // Read other preferences
     m_where = options.getValueOrDefault<std::string>("where", "");
+
+    // Spatial reference.
+    setSpatialReference(options.getValueOrDefault<pdal::SpatialReference>(
+        "spatialreference", SpatialReference()));
 }
 
 
-void PgReader::initialize()
+void PgReader::ready()
 {
     // Database connection
     m_session = pg_connect(m_connection);
 
-    // Allow spatialreference override if desired
-//ABELL - Move to processOptions()
-    try
-    {
-        setSpatialReference(getOptions().getValueOrThrow<pdal::SpatialReference>("spatialreference"));
-    }
-    catch (pdal::option_not_found const&)
-    {
-        // Read from pointcloud_formats otherwise
+    if (m_spatialReference.empty())
         setSpatialReference(fetchSpatialReference());
-    }
 }
 
 

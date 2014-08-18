@@ -137,7 +137,7 @@ void Reader::addDimensions(PointContext ctx)
 
     if (m_haveTime)
     {
-        ctx.registerDim(Dimension::Id::OffsetTime);  //ABELL - Is this right?
+        ctx.registerDim(Dimension::Id::OffsetTime);
         m_size += 4;
     }
 

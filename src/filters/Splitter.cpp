@@ -60,7 +60,7 @@ Options Splitter::getDefaultOptions()
 }
 
 
-//ABELL - This used to be a lambda, but the VS compiler exploded, I guess.
+//This used to be a lambda, but the VS compiler exploded, I guess.
 typedef std::pair<int, int> Coord;
 namespace
 {

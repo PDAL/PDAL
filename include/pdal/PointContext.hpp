@@ -62,7 +62,7 @@ public:
     std::vector<Dimension::Detail> m_detail;
     Dimension::IdList m_used;
     std::map<std::string, Dimension::Id::Enum> m_propIds;
-    int m_nextFree = Dimension::PROPRIETARY;
+    int m_nextFree;
 };
 typedef std::shared_ptr<DimInfo> DimInfoPtr;
 
