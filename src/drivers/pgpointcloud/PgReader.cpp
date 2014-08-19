@@ -96,21 +96,17 @@ void PgReader::processOptions(const Options& options)
     m_where = options.getValueOrDefault<std::string>("where", "");
 
     // Spatial reference.
-    if (options.hasOption("spatialreference"))
-        m_spatialRef = boost::optional<SpatialReference>(
-            options.getValueOrThrow<pdal::SpatialReference>(
-                "spatialreference"));
+    setSpatialReference(options.getValueOrDefault<pdal::SpatialReference>(
+        "spatialreference", SpatialReference()));
 }
 
 
-void PgReader::initialize()
+void PgReader::ready(PointContext ctx)
 {
     // Database connection
     m_session = pg_connect(m_connection);
 
-    if (m_spatialRef)
-        setSpatialReference(*m_spatialRef);
-    else
+    if (getSpatialReference().empty())
         setSpatialReference(fetchSpatialReference());    
 }
 
