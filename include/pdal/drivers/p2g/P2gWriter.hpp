@@ -32,11 +32,9 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_DRIVERS_P2G_WRITER_HPP
-#define INCLUDED_DRIVERS_P2G_WRITER_HPP
+#pragma once
 
 #include <pdal/Writer.hpp>
-#include <pdal/drivers/p2g/Writer.hpp>
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
@@ -68,7 +66,7 @@ public:
 
 class CoreInterp;
 
-class PDAL_DLL Writer : public pdal::Writer
+class PDAL_DLL P2gWriter : public pdal::Writer
 {
 public:
     SET_STAGE_NAME("drivers.p2g.writer", "Points2Grid Writer")
@@ -78,21 +76,20 @@ public:
 #else
     SET_STAGE_ENABLED(false)
 #endif
-    
-    Writer(const Options&);
+ 
+    P2gWriter(const Options& options) : Writer(options), m_outputTypes(0), m_outputFormat(OUTPUT_FORMAT_ARC_ASCII) {};
+    ~P2gWriter() {};
 
     static Options getDefaultOptions();
 
-protected:
-    virtual void writeBegin(boost::uint64_t targetNumPointsToWrite);
-    virtual boost::uint32_t writeBuffer(const PointBuffer&);
-    virtual void writeEnd(boost::uint64_t actualNumPointsWritten);
-
 private:
-    Writer& operator=(const Writer&); // not implemented
-    Writer(const Writer&); // not implemented
-    virtual void initialize();
-    virtual void processOptions(const Options&);
+    P2gWriter& operator=(const P2gWriter&); // not implemented
+    
+    virtual void processOptions(const Options& options);
+    virtual void ready(PointContext ctx) {};
+    virtual void write(const PointBuffer& buf);
+    virtual void done(PointContext ctx) {};
+    virtual void initialize() {};
 
     boost::scoped_ptr<OutCoreInterp> m_interpolator;
     boost::uint64_t m_pointCount;
@@ -106,16 +103,15 @@ private:
     double m_RADIUS_SQ;
     unsigned int m_outputTypes;
     boost::uint32_t m_fill_window_size;
-    pdal::Bounds<double> m_bounds;
-    void setBounds(const Bounds<double>& v)
-    {
-        m_bounds = v;
-    }
-    pdal::Bounds<double>& getBounds()
-    {
-        return m_bounds;
-    }
-    void calculateGridSizes() ;
+    Bounds<double> m_bounds;
+    //void setBounds(const Bounds<double>& v)
+    //{
+    //    m_bounds = v;
+    //}
+    //pdal::Bounds<double>& getBounds()
+    //{
+    //    return m_bounds;
+    //}
     std::string m_filename;
     int m_outputFormat;
 
@@ -126,4 +122,3 @@ private:
 }
 } // namespaces
 
-#endif

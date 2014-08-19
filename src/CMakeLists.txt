@@ -44,8 +44,9 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/PipelineManager.hpp"
   "${PDAL_HEADERS_DIR}/PipelineReader.hpp"
   "${PDAL_HEADERS_DIR}/PipelineWriter.hpp"
-  "${PDAL_HEADERS_DIR}/PointBuffer.hpp"  
-  "${PDAL_HEADERS_DIR}/PointContext.hpp"  
+  "${PDAL_HEADERS_DIR}/PointBuffer.hpp"
+  "${PDAL_HEADERS_DIR}/PointContext.hpp"
+  "${PDAL_HEADERS_DIR}/QuadIndex.hpp"
   "${PDAL_HEADERS_DIR}/Range.hpp"
   "${PDAL_HEADERS_DIR}/RawPtBuf.hpp"
   "${PDAL_HEADERS_DIR}/Reader.hpp"
@@ -59,7 +60,7 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/StreamFactory.hpp"
   "${PDAL_HEADERS_DIR}/UserCallback.hpp"
   "${PDAL_HEADERS_DIR}/Utils.hpp"
-  "${PDAL_HEADERS_DIR}/Vector.hpp"  
+  "${PDAL_HEADERS_DIR}/Vector.hpp"
   "${PDAL_HEADERS_DIR}/Writer.hpp"
   "${PDAL_HEADERS_DIR}/XMLSchema.hpp"
   "${PDAL_HEADERS_DIR}/third/nanoflann.hpp"
@@ -87,6 +88,7 @@ set(PDAL_BASE_CPP
   PipelineReader.cpp
   PipelineWriter.cpp
   PointBuffer.cpp
+  QuadIndex.cpp
   Range.cpp
   Reader.cpp
   ReaderIterator.cpp
@@ -97,7 +99,7 @@ set(PDAL_BASE_CPP
   StageIterator.cpp
   StreamFactory.cpp
   Utils.cpp
-  Vector.cpp  
+  Vector.cpp
   Writer.cpp
   third/md5-pdal.c
   ${PDAL_XML_SRC}
@@ -112,7 +114,7 @@ list (APPEND PDAL_HPP ${PDAL_BASE_HPP} )
 set(PDAL_FAUX_PATH drivers/faux)
 set(PDAL_FAUX_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_FAUX_PATH}")
 set(PDAL_FAUX_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_FAUX_PATH}")
-set(PDAL_DRIVERS_FAUX_HPP 
+set(PDAL_DRIVERS_FAUX_HPP
   "${PDAL_FAUX_HEADERS}/Reader.hpp"
 )
 
@@ -234,7 +236,7 @@ set(PDAL_DRIVERS_MRSID_HPP
   "${PDAL_MRSID_HEADERS}/Reader.hpp"
 )
 
-set (PDAL_DRIVERS_MRSID_CPP 
+set (PDAL_DRIVERS_MRSID_CPP
   "${PDAL_MRSID_SRC}/Reader.cpp"
 )
 
@@ -259,7 +261,7 @@ set(PDAL_DRIVERS_CARIS_HPP
   "${PDAL_CARIS_SRC}/caris/caris_pc_wrapper.h"
 )
 
-set (PDAL_DRIVERS_CARIS_CPP 
+set (PDAL_DRIVERS_CARIS_CPP
   "${PDAL_CARIS_SRC}/CloudReader.cpp"
   "${PDAL_CARIS_SRC}/CloudIterator.cpp"
   "${PDAL_CARIS_SRC}/pdal_csar.cpp"
@@ -288,14 +290,14 @@ set(PDAL_DRIVERS_OCI_HPP
   "${PDAL_ORACLE_HEADERS}/common.hpp"
 )
 
-set (PDAL_DRIVERS_OCI_CPP 
+set (PDAL_DRIVERS_OCI_CPP
   "${PDAL_ORACLE_SRC}/oci_wrapper.cpp"
   "${PDAL_ORACLE_SRC}/common.cpp"
   "${PDAL_ORACLE_SRC}/OciReader.cpp"
   "${PDAL_ORACLE_SRC}/OciSeqIterator.cpp"
   "${PDAL_ORACLE_SRC}/Writer.cpp"
 )
-   
+
 if (ORACLE_FOUND)
 if (NOT USE_PDAL_PLUGIN_OCI)
     list (APPEND PDAL_CPP ${PDAL_DRIVERS_OCI_CPP} )
@@ -315,7 +317,7 @@ set(PDAL_DRIVERS_QFIT_HPP
   "${PDAL_QFIT_HEADERS}/Reader.hpp"
 )
 
-set (PDAL_DRIVERS_QFIT_CPP 
+set (PDAL_DRIVERS_QFIT_CPP
   "${PDAL_QFIT_SRC}/Reader.cpp"
 )
 
@@ -333,7 +335,7 @@ set(PDAL_DRIVERS_TERRASOLID_HPP
   "${PDAL_TERRASOLID_HEADERS}/Reader.hpp"
 )
 
-set (PDAL_DRIVERS_TERRASOLID_CPP 
+set (PDAL_DRIVERS_TERRASOLID_CPP
   "${PDAL_TERRASOLID_SRC}/Reader.cpp"
 )
 
@@ -348,13 +350,13 @@ set(PDAL_P2G_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_P2G_PATH}")
 set(PDAL_P2G_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_P2G_PATH}")
 
 set(PDAL_DRIVERS_P2G_HPP
-  "${PDAL_P2G_HEADERS}/Writer.hpp"
+  "${PDAL_P2G_HEADERS}/P2gWriter.hpp"
 )
 
 set (PDAL_DRIVERS_P2G_CPP 
-  "${PDAL_P2G_SRC}/Writer.cpp"
+  "${PDAL_P2G_SRC}/P2gWriter.cpp"
 )
-   
+
 if (P2G_FOUND)
     list (APPEND PDAL_CPP ${PDAL_DRIVERS_P2G_CPP} )
     list (APPEND PDAL_HPP ${PDAL_DRIVERS_P2G_HPP} )
@@ -371,7 +373,7 @@ set(PDAL_DRIVERS_TEXT_HPP
   "${PDAL_TEXT_HEADERS}/Writer.hpp"
 )
 
-set (PDAL_DRIVERS_TEXT_CPP 
+set (PDAL_DRIVERS_TEXT_CPP
   ${PDAL_TEXT_SRC}/Writer.cpp
 )
 
@@ -393,7 +395,7 @@ set(PDAL_DRIVERS_NITF_READER_HPP
   "${PDAL_NITF_HEADERS}/Reader.hpp"
 )
 
-set (PDAL_DRIVERS_NITF_READER_CPP 
+set (PDAL_DRIVERS_NITF_READER_CPP
   "${PDAL_NITF_SRC}/NitfFile.cpp"
   "${PDAL_NITF_SRC}/Reader.cpp"
 )
@@ -407,7 +409,7 @@ set(PDAL_DRIVERS_NITF_WRITER_HPP
   "${PDAL_NITF_HEADERS}/Writer.hpp"
 )
 
-set (PDAL_DRIVERS_NITF_WRITER_CPP 
+set (PDAL_DRIVERS_NITF_WRITER_CPP
   "${PDAL_NITF_SRC}/Writer.cpp"
 )
 
@@ -425,16 +427,16 @@ set(PDAL_SQLITE_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_SQLITE_PATH}")
 set(PDAL_SQLITE_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_SQLITE_PATH}")
 
 set(PDAL_DRIVERS_SQLITE_HPP
-  "${PDAL_SQLITE_HEADERS}/SqliteCommon.hpp"
-  "${PDAL_SQLITE_HEADERS}/SqliteIterator.hpp"
-  "${PDAL_SQLITE_HEADERS}/SqliteReader.hpp"
-  "${PDAL_SQLITE_HEADERS}/SqliteWriter.hpp"
+  "${PDAL_SQLITE_HEADERS}/SQLiteCommon.hpp"
+  "${PDAL_SQLITE_HEADERS}/SQLiteIterator.hpp"
+  "${PDAL_SQLITE_HEADERS}/SQLiteReader.hpp"
+  "${PDAL_SQLITE_HEADERS}/SQLiteWriter.hpp"
 )
 
-set (PDAL_DRIVERS_SQLITE_CPP 
-  "${PDAL_SQLITE_SRC}/SqliteIterator.cpp"
-  "${PDAL_SQLITE_SRC}/SqliteReader.cpp"
-  "${PDAL_SQLITE_SRC}/SqliteWriter.cpp"
+set (PDAL_DRIVERS_SQLITE_CPP
+  "${PDAL_SQLITE_SRC}/SQLiteIterator.cpp"
+  "${PDAL_SQLITE_SRC}/SQLiteReader.cpp"
+  "${PDAL_SQLITE_SRC}/SQLiteWriter.cpp"
 )
 
 if (WITH_SQLITE)
@@ -460,7 +462,7 @@ set(PDAL_DRIVERS_PGPOINTCLOUD_HPP
   "${PDAL_PGPOINTCLOUD_HEADERS}/PgIterator.hpp"
 )
 
-set (PDAL_DRIVERS_PGPOINTCLOUD_CPP 
+set (PDAL_DRIVERS_PGPOINTCLOUD_CPP
   "${PDAL_PGPOINTCLOUD_SRC}/Writer.cpp"
   "${PDAL_PGPOINTCLOUD_SRC}/PgReader.cpp"
   "${PDAL_PGPOINTCLOUD_SRC}/PgIterator.cpp"
@@ -490,7 +492,7 @@ set(PDAL_DRIVERS_SBET_HPP
     "${PDAL_SBET_HEADERS}/Writer.hpp"
 )
 
-set (PDAL_DRIVERS_SBET_CPP 
+set (PDAL_DRIVERS_SBET_CPP
     "${PDAL_SBET_SRC}/Common.cpp"
     "${PDAL_SBET_SRC}/Reader.cpp"
     "${PDAL_SBET_SRC}/Writer.cpp"
@@ -560,7 +562,7 @@ set(PDAL_FILTERS_HPP
   "${PDAL_FILTERS_HEADERS}/Stats.hpp"
 )
 
-set (PDAL_FILTERS_CPP 
+set (PDAL_FILTERS_CPP
   "${PDAL_FILTERS_SRC}/Chipper.cpp"
   "${PDAL_FILTERS_SRC}/Crop.cpp"
   "${PDAL_FILTERS_SRC}/Decimation.cpp"
@@ -627,7 +629,7 @@ set(PDAL_PLANG_HPP
   "${PDAL_PLANG_HEADERS}/Script.hpp"
 )
 
-set (PDAL_PLANG_CPP 
+set (PDAL_PLANG_CPP
   "${PDAL_PLANG_SRC}/BufferedInvocation.cpp"
   "${PDAL_PLANG_SRC}/PythonEnvironment.cpp"
   "${PDAL_PLANG_SRC}/Invocation.cpp"
@@ -649,7 +651,7 @@ set(PDAL_CONFIG_HPP
   "${PROJECT_BINARY_DIR}/include/pdal/pdal_defines.h"
 )
 
-set (PDAL_CONFIG_CPP 
+set (PDAL_CONFIG_CPP
   "${PROJECT_SOURCE_DIR}/src/pdal_config.cpp"
 )
 
@@ -662,7 +664,7 @@ set(PDAL_KERNEL_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_KERNEL_PATH}")
 set(PDAL_KERNEL_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_KERNEL_PATH}")
 
 set(PDAL_KERNEL_HPP
-    ${PDAL_KERNEL_HEADERS}/Application.hpp 
+    ${PDAL_KERNEL_HEADERS}/Application.hpp
     ${PDAL_KERNEL_HEADERS}/Support.hpp
     ${PDAL_KERNEL_HEADERS}/Diff.hpp
     ${PDAL_KERNEL_HEADERS}/Info.hpp
@@ -900,7 +902,7 @@ if (USE_PDAL_PLUGIN_SQLITE)
       PROPERTIES
       INSTALL_NAME_DIR "@rpath" BUILD_WITH_INSTALL_RPATH ON)
     endif()
-    
+
 endif()
 endif()
 

@@ -148,7 +148,7 @@ MAKE_WRITER_CREATOR(OciWriter, pdal::drivers::oci::Writer)
 #endif
 
 #ifdef PDAL_HAVE_P2G
-MAKE_WRITER_CREATOR(P2GWriter, pdal::drivers::p2g::Writer)
+MAKE_WRITER_CREATOR(P2GWriter, pdal::drivers::p2g::P2gWriter)
 #endif
 
 #ifdef PDAL_HAVE_SQLITE
@@ -437,7 +437,7 @@ void StageFactory::registerKnownWriters()
 #endif
 
 #ifdef PDAL_HAVE_P2G
-    REGISTER_WRITER(P2GWriter, pdal::drivers::p2g::Writer);
+    REGISTER_WRITER(P2GWriter, pdal::drivers::p2g::P2gWriter);
 #endif
 
 #ifdef PDAL_HAVE_SQLITE

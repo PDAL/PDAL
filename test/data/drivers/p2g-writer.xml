@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Pipeline version="1.0">
+    <Writer type="drivers.p2g.writer">
+        <Option name="filename">
+            autzen_grid
+        </Option>
+        <Option name="output_type">
+            min
+        </Option>
+        <Option name="output_format">
+            tif
+        </Option> -->
+	<Reader type="drivers.las.reader">
+	    <Option name="filename">
+		../1.2-with-color.las
+	    </Option>
+	</Reader>
+    </Writer>
+</Pipeline>
