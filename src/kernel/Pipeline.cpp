@@ -106,7 +106,11 @@ int Pipeline::execute()
     PointContext ctx;
     manager.getWriter()->prepare(ctx);
     manager.getWriter()->execute(ctx);
-
+    if (m_pipelineFile.size() > 0)
+    {
+        pdal::PipelineWriter writer(manager);
+        writer.writePipeline(m_pipelineFile);
+    }
     return 0;
 }
 
