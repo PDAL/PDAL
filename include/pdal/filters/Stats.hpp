@@ -73,10 +73,10 @@ typedef boost::accumulators::accumulator_set<double, boost::accumulators::featur
 class PDAL_DLL Summary
 {
 public:
-    Summary(uint32_t num_bins, uint32_t sample_size, uint32_t cache_size,
+    Summary(std::string name, uint32_t num_bins, uint32_t sample_size, uint32_t cache_size,
         uint32_t seed, bool doExact, bool doSample) : 
         m_sample_size(sample_size), m_distribution(0, cache_size),
-        m_doExact(doExact), m_doSample(doSample)
+        m_doExact(doExact), m_doSample(doSample), m_name(name)
     {
         if (seed && m_doSample)
         {
@@ -129,6 +129,7 @@ private:
     std::map<int32_t, uint32_t> m_counts;
     bool m_doExact;
     bool m_doSample;
+    std::string m_name;
 };
 
 } // namespace stats

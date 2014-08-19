@@ -37,24 +37,66 @@
 
 #include <sstream>
 #include <string>
+#include <map>
+
+#include <boost/property_tree/xml_parser.hpp>
 
 namespace pdal
 {
 
 boost::property_tree::ptree MetadataNodeImpl::toPTree() const
 {
-    boost::property_tree::ptree tree;
+    using namespace boost::property_tree;
+    typedef ptree::path_type path;
+        
+    ptree tree;
     tree.put("name", m_name);
     tree.put("description", m_descrip);
     tree.put("type", m_type);
     tree.put("value", m_value);
+    
+    typedef std::map<std::string, uint32_t>::iterator NameIterator;
+    std::map<std::string, uint32_t> names;
+    
     for (auto mi = m_subnodes.begin(); mi != m_subnodes.end(); ++mi)
     {
         std::string name = (*mi)->m_name;
-        if (name.size())
-            tree.add_child(name, (*mi)->toPTree());
+        NameIterator i = names.find(name);
+        if (i == names.end())
+            names.insert(std::make_pair(name, 1));
+        else
+            i->second++;
     }
-    
+
+    for (auto mi = m_subnodes.begin(); mi != m_subnodes.end(); ++mi)
+    {
+        std::string name = (*mi)->m_name;
+        boost::property_tree::ptree const& node = (*mi)->toPTree();        
+        NameIterator cnt = names.find(name);
+
+        if (cnt->second > 1 && name.size())
+        {
+            std::string plural(name);
+
+            boost::optional<ptree&> opt = tree.get_child_optional(path(plural, '/'));
+            if (opt)
+            {
+                opt->push_back(std::make_pair("", node));               
+            } else
+            {
+                tree.push_back(ptree::value_type(plural, ptree()));
+                auto& p = tree.get_child(path(plural, '/'));
+                p.push_back(std::make_pair("", node));
+                
+            }
+
+        } else
+        {
+            if (name.size())
+                tree.push_back(std::make_pair(name, node));
+
+        }
+    }    
     return tree;
 }
 
