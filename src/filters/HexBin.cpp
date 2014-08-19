@@ -77,8 +77,8 @@ void HexBin::filter(PointBuffer& buf)
 #ifdef PDAL_HAVE_HEXER
     for (PointId idx = 0; idx < buf.size(); ++idx)
     {
-        double x = buf.getFieldAs<double>(pdal::Dimension::Id::X, idx, false);
-        double y = buf.getFieldAs<double>(pdal::Dimension::Id::Y, idx, false);
+        double x = buf.getFieldAs<double>(pdal::Dimension::Id::X, idx);
+        double y = buf.getFieldAs<double>(pdal::Dimension::Id::Y, idx);
         m_grid->addPoint(x, y);
     }
 #endif

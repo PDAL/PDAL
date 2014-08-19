@@ -515,9 +515,9 @@ void Writer::write(const PointBuffer& pointBuffer)
         // we always write the base fields
         using namespace Dimension;
         //ABELL - May need to unscale.
-        int32_t x = pointBuffer.getFieldAs<int32_t>(Id::X, idx, false);
-        int32_t y = pointBuffer.getFieldAs<int32_t>(Id::Y, idx, false);
-        int32_t z = pointBuffer.getFieldAs<int32_t>(Id::Z, idx, false);
+        int32_t x = pointBuffer.getFieldAs<int32_t>(Id::X, idx);
+        int32_t y = pointBuffer.getFieldAs<int32_t>(Id::Y, idx);
+        int32_t z = pointBuffer.getFieldAs<int32_t>(Id::Z, idx);
 
         Utils::write_field(p, x);
         Utils::write_field(p, y);
@@ -525,29 +525,28 @@ void Writer::write(const PointBuffer& pointBuffer)
 
         uint16_t intensity = 0;
         if (pointBuffer.hasDim(Id::Intensity))
-            intensity = pointBuffer.getFieldAs<uint16_t>(Id::Intensity,
-                idx, false);
+            intensity = pointBuffer.getFieldAs<uint16_t>(Id::Intensity, idx);
         Utils::write_field(p, intensity);
 
         uint8_t returnNumber(0);
         if (pointBuffer.hasDim(Id::ReturnNumber))
             returnNumber = pointBuffer.getFieldAs<uint8_t>(Id::ReturnNumber,
-                idx, false);
+                idx);
 
         uint8_t numberOfReturns(0);
         if (pointBuffer.hasDim(Id::NumberOfReturns))
             numberOfReturns = pointBuffer.getFieldAs<uint8_t>(
-                Id::NumberOfReturns, idx, false);
+                Id::NumberOfReturns, idx);
 
         uint8_t scanDirectionFlag(0);
         if (pointBuffer.hasDim(Id::ScanDirectionFlag))
             scanDirectionFlag = pointBuffer.getFieldAs<uint8_t>(
-                Id::ScanDirectionFlag, idx, false);
+                Id::ScanDirectionFlag, idx);
 
         uint8_t edgeOfFlightLine(0);
         if (pointBuffer.hasDim(Id::EdgeOfFlightLine))
             edgeOfFlightLine = pointBuffer.getFieldAs<uint8_t>(
-                Id::EdgeOfFlightLine, idx, false);
+                Id::EdgeOfFlightLine, idx);
 
         boost::uint8_t bits = returnNumber | (numberOfReturns<<3) |
             (scanDirectionFlag << 6) | (edgeOfFlightLine << 7);
@@ -556,32 +555,31 @@ void Writer::write(const PointBuffer& pointBuffer)
         uint8_t classification = 0;
         if (pointBuffer.hasDim(Id::Classification))
             classification = pointBuffer.getFieldAs<uint8_t>(Id::Classification,
-                idx, false);
+                idx);
         Utils::write_field(p, classification);
 
         int8_t scanAngleRank = 0;
         if (pointBuffer.hasDim(Id::ScanAngleRank))
             scanAngleRank = pointBuffer.getFieldAs<int8_t>(Id::ScanAngleRank,
-                idx, false);
+                idx);
         Utils::write_field(p, scanAngleRank);
 
         uint8_t userData = 0;
         if (pointBuffer.hasDim(Id::UserData))
-            userData = pointBuffer.getFieldAs<uint8_t>(Id::UserData,
-                idx, false);
+            userData = pointBuffer.getFieldAs<uint8_t>(Id::UserData, idx);
         Utils::write_field(p, userData);
 
         uint16_t pointSourceId = 0;
         if (pointBuffer.hasDim(Id::PointSourceId))
             pointSourceId = pointBuffer.getFieldAs<uint16_t>(Id::PointSourceId,
-                idx, false);
+                idx);
         Utils::write_field(p, pointSourceId);
 
         if (hasTime)
         {
             double t = 0.0;
             if (pointBuffer.hasDim(Id::GpsTime))
-                t = pointBuffer.getFieldAs<double>(Id::GpsTime, idx, false);
+                t = pointBuffer.getFieldAs<double>(Id::GpsTime, idx);
             Utils::write_field(p, t);
         }
 
@@ -591,11 +589,11 @@ void Writer::write(const PointBuffer& pointBuffer)
             uint16_t green = 0;
             uint16_t blue = 0;
             if (pointBuffer.hasDim(Id::Red))
-                red = pointBuffer.getFieldAs<uint16_t>(Id::Red, idx, false);
+                red = pointBuffer.getFieldAs<uint16_t>(Id::Red, idx);
             if (pointBuffer.hasDim(Id::Green))
-                green = pointBuffer.getFieldAs<uint16_t>(Id::Green, idx, false);
+                green = pointBuffer.getFieldAs<uint16_t>(Id::Green, idx);
             if (pointBuffer.hasDim(Id::Blue))
-                blue = pointBuffer.getFieldAs<uint16_t>(Id::Blue, idx, false);
+                blue = pointBuffer.getFieldAs<uint16_t>(Id::Blue, idx);
 
             Utils::write_field(p, red);
             Utils::write_field(p, green);

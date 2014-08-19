@@ -78,9 +78,9 @@ public:
     StageSequentialIterator* createSequentialIterator() const;
 
 private:
-    virtual void initialize();
     virtual void addDimensions(PointContext ctx);
     virtual void processOptions(const Options& options);
+    virtual void ready(PointContext ctx);
     
     pdal::SpatialReference fetchSpatialReference() const;
     boost::uint32_t fetchPcid() const;

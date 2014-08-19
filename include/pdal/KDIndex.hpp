@@ -91,7 +91,7 @@ public:
 
     template <class BBOX> bool kdtree_get_bbox(BBOX &bb) const
     {
-        pdal::Bounds<double> const& bounds = m_buf.getSpatialBounds();
+        pdal::Bounds<double> bounds = m_buf.calculateBounds();
         if (bounds.empty())
             return false;
 
