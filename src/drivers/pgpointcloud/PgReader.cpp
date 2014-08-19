@@ -96,7 +96,7 @@ void PgReader::processOptions(const Options& options)
     m_where = options.getValueOrDefault<std::string>("where", "");
 
     // Spatial reference.
-    setSpatialReference(options.getValueOrDefault<pdal::SpatialReference>(
+    setSpatialReference(options.getValueOrDefault<SpatialReference>(
         "spatialreference", SpatialReference()));
 }
 
