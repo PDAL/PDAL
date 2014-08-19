@@ -35,7 +35,6 @@
 #pragma once
 
 #include <pdal/pdal_internal.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/Bounds.hpp>
 #include <pdal/PointContext.hpp>
 
@@ -55,27 +54,8 @@ class PDAL_DLL PointBuffer
     friend class plang::BufferedInvocation;
 public:
     PointBuffer();
-    PointBuffer(PointContext context) :
-        m_bounds(Bounds<double>::getDefaultSpatialExtent()), m_context(context)
+    PointBuffer(PointContext context) : m_context(context)
     {}
-
-    /** @name Attribute access
-    */
-    /*! @return the pdal::Bounds instance associated with this pdal::PointBuffer.
-        \verbatim embed:rst
-        .. note::
-
-            It is not a requirement that stages keep the pdal::Bounds instance
-            up-to-date when operating on the PointBuffer.
-        \endverbatim
-    */
-    const Bounds<double>& getSpatialBounds() const
-        { return m_bounds; }
-
-    /// sets the pdal::Bounds instance for this pdal::PointBuffer
-    /// @param bounds bounds instance to set.
-    void setSpatialBounds(const Bounds<double>& bounds)
-        { m_bounds = bounds; }
 
     point_count_t size() const
         { return m_index.size(); }
@@ -193,7 +173,6 @@ public:
         { return m_context.hasDim(id); }
 
 protected:
-    Bounds<double> m_bounds;
     PointContext m_context;
     std::vector<PointId> m_index;
 

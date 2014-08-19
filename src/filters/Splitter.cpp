@@ -109,18 +109,9 @@ PointBufferSet Splitter::run(PointBufferPtr buf)
     // Pull the buffers out of the map and stick them in the standard
     // output set, setting the bounds as we go.
     for (auto bi = buffers.begin(); bi != buffers.end(); ++bi)
-    {
-        PointBufferPtr buf = bi->second;
-        Coord coord = bi->first;
-        Bounds<double> bounds(coord.first + xOrigin, coord.second + yOrigin,
-            coord.first + xOrigin + m_length,
-            coord.second + yOrigin + m_length);
-        buf->setSpatialBounds(bounds);
-        pbSet.insert(buf);
-    }
+        pbSet.insert(bi->second);
     return pbSet;
 }
-
 
 } // filters
 } // pdal

@@ -77,8 +77,8 @@ BOOST_AUTO_TEST_CASE(test_tile_filter)
 
     auto sorter = [](PointBufferPtr p1, PointBufferPtr p2)
     {
-        pdal::Bounds<double> b1 = p1->getSpatialBounds();
-        pdal::Bounds<double> b2 = p2->getSpatialBounds();
+        Bounds<double> b1 = p1->calculateBounds();
+        Bounds<double> b2 = p2->calculateBounds();
 
         return b1.getMinimum(0) < b2.getMinimum(0) ?  true :
             b1.getMinimum(0) > b2.getMinimum(0) ? false :
@@ -87,8 +87,8 @@ BOOST_AUTO_TEST_CASE(test_tile_filter)
     std::sort(buffers.begin(), buffers.end(), sorter);
 
     BOOST_CHECK_EQUAL(buffers.size(), 15);
-    int counts[] = {27, 24, 26, 27, 10, 141, 166, 142, 132, 76, 63, 67, 60,
-        70, 34 };
+    int counts[] = {24, 27, 26, 27, 10, 166, 142, 76, 141, 132, 63, 70, 67,
+        34, 60 };
     for (size_t i = 0; i < buffers.size(); ++i)
     {
         PointBufferPtr& buf = buffers[i];

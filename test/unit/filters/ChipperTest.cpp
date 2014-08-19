@@ -77,8 +77,9 @@ BOOST_AUTO_TEST_CASE(test_construction)
 
         auto sorter = [](PointBufferPtr p1, PointBufferPtr p2)
         {
-            pdal::Bounds<double> b1 = p1->getSpatialBounds();
-            pdal::Bounds<double> b2 = p2->getSpatialBounds();
+            //This is super inefficient, but we're doing tests.
+            pdal::Bounds<double> b1 = p1->calculateBounds();
+            pdal::Bounds<double> b2 = p2->calculateBounds();
 
             return b1.getMinimum(0) < b2.getMinimum(0) ?  true :
                 b1.getMinimum(0) > b2.getMinimum(0) ? false :
@@ -88,8 +89,8 @@ BOOST_AUTO_TEST_CASE(test_construction)
         std::sort(buffers.begin(), buffers.end(), sorter);
 
         auto buffer = buffers[2];
-        auto bounds = buffer->getSpatialBounds();
-        std::vector< Range<double> > ranges = bounds.dimensions();
+        auto bounds = buffer->calculateBounds();
+        std::vector<Range<double>> ranges = bounds.dimensions();
 
         pdal::Range<double> x = ranges[0];
         pdal::Range<double> y = ranges[1];

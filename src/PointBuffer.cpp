@@ -35,7 +35,6 @@
 #include <iomanip>
 
 #include <pdal/PointBuffer.hpp>
-#include <pdal/GlobalEnvironment.hpp>
 
 #include <boost/lexical_cast.hpp>
 

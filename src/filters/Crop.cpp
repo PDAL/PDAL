@@ -218,11 +218,7 @@ PointBufferSet Crop::run(PointBufferPtr buffer)
 
 void Crop::crop(PointBuffer& input, PointBuffer& output)
 {
-    Bounds<double> const& buffer_bounds = input.getSpatialBounds();
-
-    if (buffer_bounds.empty())
-        log()->get(LogLevel::DEBUG2) <<
-            "Buffer bounds was empty, reader did not set!" << std::endl;
+    Bounds<double> buffer_bounds = input.calculateBounds();
 
     bool logOutput = (log()->getLevel() > LogLevel::DEBUG4);
     if (logOutput)
