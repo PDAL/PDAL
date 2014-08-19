@@ -112,13 +112,13 @@ BOOST_AUTO_TEST_CASE(test_one)
 
     for (uint32_t i = 0; i < las_numRead; i++)
     {
-        const int32_t nitf_x = nitf_data.getField<int32_t>(Dimension::Id::X, i);
-        const int32_t nitf_y = nitf_data.getField<int32_t>(Dimension::Id::Y, i);
-        const int32_t nitf_z = nitf_data.getField<int32_t>(Dimension::Id::Z, i);
+        int32_t nitf_x = nitf_data.getFieldAs<int32_t>(Dimension::Id::X, i);
+        int32_t nitf_y = nitf_data.getFieldAs<int32_t>(Dimension::Id::Y, i);
+        int32_t nitf_z = nitf_data.getFieldAs<int32_t>(Dimension::Id::Z, i);
 
-        const int32_t las_x = las_data.getField<int32_t>(Dimension::Id::X, i);
-        const int32_t las_y = las_data.getField<int32_t>(Dimension::Id::Y, i);
-        const int32_t las_z = las_data.getField<int32_t>(Dimension::Id::Z, i);
+        int32_t las_x = las_data.getFieldAs<int32_t>(Dimension::Id::X, i);
+        int32_t las_y = las_data.getFieldAs<int32_t>(Dimension::Id::Y, i);
+        int32_t las_z = las_data.getFieldAs<int32_t>(Dimension::Id::Z, i);
 
         BOOST_CHECK_EQUAL(nitf_x, las_x);
         BOOST_CHECK_EQUAL(nitf_y, las_y);

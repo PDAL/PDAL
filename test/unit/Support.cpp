@@ -302,15 +302,15 @@ void Support::check_pN(const PointBuffer& data, size_t index,
 
     if (data.hasDim(Dimension::Id::GpsTime))
     {
-        double t0 = data.getField<double>(Dimension::Id::GpsTime, index);
+        double t0 = data.getFieldAs<double>(Dimension::Id::GpsTime, index);
         BOOST_CHECK_EQUAL(t0, tref);
     }
 
     if (data.hasDim(Dimension::Id::Red))
     {
-        uint16_t r0 = data.getField<uint16_t>(Dimension::Id::Red, index);
-        uint16_t g0 = data.getField<uint16_t>(Dimension::Id::Green, index);
-        uint16_t b0 = data.getField<uint16_t>(Dimension::Id::Blue, index);
+        uint16_t r0 = data.getFieldAs<uint16_t>(Dimension::Id::Red, index);
+        uint16_t g0 = data.getFieldAs<uint16_t>(Dimension::Id::Green, index);
+        uint16_t b0 = data.getFieldAs<uint16_t>(Dimension::Id::Blue, index);
         BOOST_CHECK_EQUAL(r0, rref);
         BOOST_CHECK_EQUAL(g0, gref);
         BOOST_CHECK_EQUAL(b0, bref);

@@ -90,43 +90,8 @@ public:
     PointContext context() const
         { return m_context; }
 
-    /** @name Point data access
-    */
-    /*! fetch the value T for a given :cpp:class:`pdal::Dimension` dim at
-        pointIndex `i`.
-        \param dim  The dimension to select
-        \param pointIndex the point index of the PointBuffer to select.
-        \verbatim embed:rst
-        .. warning::
-
-            If the data type of T is not the same as described in
-            :cpp:class:`pdal::Dimension`, the data value will be cast into
-            the appropriate type. In some situations this may not be what
-            you want. In situations where the T is smaller than the
-            datatype given by `dim`, the return value T will simply be
-            saturated.
-        \endverbatim
-    */
     template<class T>
-    T getField(Dimension::Id::Enum dim, PointId pointIndex) const;
-
-    /*! fetch the value T for a given :cpp:class:`pdal::Dimension` dim at
-        pointIndex `i`.
-        \param dim the dimension to select.
-        \param pointIndex the point index of the PointBuffer to select.
-        \param applyScaling whether or not to apply the dimension's scale and
-               offset prior to returning the value.
-        \verbatim embed:rst
-        .. note::
-
-            The method will attempt to cast :cpp:class:`pdal::Dimension` to
-            the requested data type T. If a bad cast is detected, pdal_error
-            is thrown.
-        \endverbatim
-    */
-    template<class T>
-    T getFieldAs(Dimension::Id::Enum dim, PointId pointIndex,
-        bool applyScaling = true) const;
+    T getFieldAs(Dimension::Id::Enum dim, PointId pointIndex) const;
 
     template<typename T>
     void setField(Dimension::Id::Enum dim, PointId idx, T val);
@@ -191,14 +156,6 @@ public:
         getFieldInternal(dim, idx, buf);
     }
 
-/**
-//ABELL
-    void setFieldUnscaled(Dimension::Id::Enum dim, PointId idx, double val)
-    {
-        setField(dim, idx, dim->removeScaling(val));
-    }
-**/
-
     /** @name Serialization
     */
     /*! returns a boost::property_tree containing the point records, which is
@@ -246,13 +203,15 @@ private:
 
     inline void setFieldInternal(Dimension::Id::Enum dim, PointId pointIndex,
         const void *value);
+    template<class T>
+    T getFieldInternal(Dimension::Id::Enum dim, PointId pointIndex) const;
     inline void getFieldInternal(Dimension::Id::Enum dim, PointId pointIndex,
         void *value) const;
 };
 
 
 template <class T>
-T PointBuffer::getField(Dimension::Id::Enum dim, PointId id) const
+T PointBuffer::getFieldInternal(Dimension::Id::Enum dim, PointId id) const
 {
     T t;
 
@@ -261,10 +220,9 @@ T PointBuffer::getField(Dimension::Id::Enum dim, PointId id) const
 }
 
 
-//ABELL - Remove applyScaling
 template <class T>
 inline T PointBuffer::getFieldAs(Dimension::Id::Enum dim,
-    PointId pointIndex, bool applyScaling) const
+    PointId pointIndex) const
 {
     T retval;
     Dimension::Detail *dd = m_context.dimDetail(dim);
@@ -273,45 +231,39 @@ inline T PointBuffer::getFieldAs(Dimension::Id::Enum dim,
     switch (dd->type())
     {
     case Dimension::Type::Float:
-        val = getField<float>(dim, pointIndex);
+        val = getFieldInternal<float>(dim, pointIndex);
         break;
     case Dimension::Type::Double:
-        val = getField<double>(dim, pointIndex);
+        val = getFieldInternal<double>(dim, pointIndex);
         break;
     case Dimension::Type::Signed8:
-        val = getField<int8_t>(dim, pointIndex);
+        val = getFieldInternal<int8_t>(dim, pointIndex);
         break;
     case Dimension::Type::Signed16:
-        val = getField<int16_t>(dim, pointIndex);
+        val = getFieldInternal<int16_t>(dim, pointIndex);
         break;
     case Dimension::Type::Signed32:
-        val = getField<int32_t>(dim, pointIndex);
+        val = getFieldInternal<int32_t>(dim, pointIndex);
         break;
     case Dimension::Type::Signed64:
-        val = getField<int64_t>(dim, pointIndex);
+        val = getFieldInternal<int64_t>(dim, pointIndex);
         break;
     case Dimension::Type::Unsigned8:
-        val = getField<uint8_t>(dim, pointIndex);
+        val = getFieldInternal<uint8_t>(dim, pointIndex);
         break;
     case Dimension::Type::Unsigned16:
-        val = getField<uint16_t>(dim, pointIndex);
+        val = getFieldInternal<uint16_t>(dim, pointIndex);
         break;
     case Dimension::Type::Unsigned32:
-        val = getField<uint32_t>(dim, pointIndex);
+        val = getFieldInternal<uint32_t>(dim, pointIndex);
         break;
     case Dimension::Type::Unsigned64:
-        val = getField<uint64_t>(dim, pointIndex);
+        val = getFieldInternal<uint64_t>(dim, pointIndex);
         break;
     case Dimension::Type::None:
         val = 0;
         break;
     }
-
-//ABELL
-/**
-    if (applyScaling)
-        val = dim->applyScaling(val);
-**/
 
     try
     {

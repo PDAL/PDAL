@@ -324,11 +324,11 @@ bool WriteUnprojectedData()
 //     pdal::Dimension const& dimIntensity = schema.getDimension("Intensity");
 //     pdal::Dimension const& dimRed = schema.getDimension("Red");
 // 
-//     boost::int32_t x = data.getField<boost::int32_t>(dimX, 0);
-//     boost::int32_t y = data.getField<boost::int32_t>(dimY, 0);
-//     boost::int32_t z = data.getField<boost::int32_t>(dimZ, 0);
-//     boost::uint16_t intensity = data.getField<boost::uint16_t>(dimIntensity, 6);
-//     boost::uint16_t red = data.getField<boost::uint16_t>(dimRed, 6);
+//     boost::int32_t x = data.getFieldAs<boost::int32_t>(dimX, 0);
+//     boost::int32_t y = data.getFieldAs<boost::int32_t>(dimY, 0);
+//     boost::int32_t z = data.getFieldAs<boost::int32_t>(dimZ, 0);
+//     boost::uint16_t intensity = data.getFieldAs<boost::uint16_t>(dimIntensity, 6);
+//     boost::uint16_t red = data.getFieldAs<boost::uint16_t>(dimRed, 6);
 // 
 //     BOOST_CHECK_EQUAL(x, -1250367506);
 //     BOOST_CHECK_EQUAL(y, 492519663);
@@ -365,11 +365,11 @@ bool WriteUnprojectedData()
 //     pdal::Dimension const& dimIntensity2 = schema2.getDimension("Intensity");
 //     pdal::Dimension const& dimRed2 = schema2.getDimension("Red");
 // 
-//     boost::int32_t x2 = data2.getField<boost::int32_t>(dimX2, 0);
-//     boost::int32_t y2 = data2.getField<boost::int32_t>(dimY2, 0);
-//     boost::int32_t z2 = data2.getField<boost::int32_t>(dimZ2, 0);
-//     boost::uint16_t intensity2 = data2.getField<boost::uint16_t>(dimIntensity2, 6);
-//     boost::uint16_t red2 = data2.getField<boost::uint16_t>(dimRed2, 6);
+//     boost::int32_t x2 = data2.getFieldAs<boost::int32_t>(dimX2, 0);
+//     boost::int32_t y2 = data2.getFieldAs<boost::int32_t>(dimY2, 0);
+//     boost::int32_t z2 = data2.getFieldAs<boost::int32_t>(dimZ2, 0);
+//     boost::uint16_t intensity2 = data2.getFieldAs<boost::uint16_t>(dimIntensity2, 6);
+//     boost::uint16_t red2 = data2.getFieldAs<boost::uint16_t>(dimRed2, 6);
 // 
 //     BOOST_CHECK_EQUAL(x2, -1250294195);
 //     BOOST_CHECK_EQUAL(y2, 492520900);
@@ -390,14 +390,14 @@ void checkUnProjectedPoints(PointBuffer const& data)
         
     for (unsigned i = 0; i < 6; ++i)
     {
-        int32_t x = data.getField<int32_t>(Dimension::Id::X, i);
-        int32_t y = data.getField<int32_t>(Dimension::Id::Y, i);
-        int32_t z = data.getField<int32_t>(Dimension::Id::Z, i);
+        int32_t x = data.getFieldAs<int32_t>(Dimension::Id::X, i);
+        int32_t y = data.getFieldAs<int32_t>(Dimension::Id::Y, i);
+        int32_t z = data.getFieldAs<int32_t>(Dimension::Id::Z, i);
         uint16_t intensity =
-            data.getField<uint16_t>(Dimension::Id::Intensity, i);
-        uint16_t red = data.getField<uint16_t>(Dimension::Id::Red, i);
-        uint16_t green = data.getField<uint16_t>(Dimension::Id::Green, i);
-        uint16_t blue = data.getField<uint16_t>(Dimension::Id::Blue, i);
+            data.getFieldAs<uint16_t>(Dimension::Id::Intensity, i);
+        uint16_t red = data.getFieldAs<uint16_t>(Dimension::Id::Red, i);
+        uint16_t green = data.getFieldAs<uint16_t>(Dimension::Id::Green, i);
+        uint16_t blue = data.getFieldAs<uint16_t>(Dimension::Id::Blue, i);
 
         BOOST_CHECK_EQUAL(x, X[i]);
         BOOST_CHECK_EQUAL(y, Y[i]);
@@ -442,23 +442,23 @@ void compareAgainstSourceBuffer(PointBuffer const& candidate,
     //     
     for (unsigned i = 0; i < 6; ++i)
     {
-        int32_t sx = source->getField<int32_t>(Dimension::Id::X, i);
-        int32_t sy = source->getField<int32_t>(Dimension::Id::Y, i);
-        int32_t sz = source->getField<int32_t>(Dimension::Id::Z, i);
-        uint16_t sintensity = source->getField<uint16_t>(
+        int32_t sx = source->getFieldAs<int32_t>(Dimension::Id::X, i);
+        int32_t sy = source->getFieldAs<int32_t>(Dimension::Id::Y, i);
+        int32_t sz = source->getFieldAs<int32_t>(Dimension::Id::Z, i);
+        uint16_t sintensity = source->getFieldAs<uint16_t>(
             Dimension::Id::Intensity, i);
-        uint16_t sred = source->getField<uint16_t>(Dimension::Id::Red, i);
-        uint16_t sgreen = source->getField<uint16_t>(Dimension::Id::Green, i);
-        uint16_t sblue = source->getField<uint16_t>(Dimension::Id::Blue, i);
+        uint16_t sred = source->getFieldAs<uint16_t>(Dimension::Id::Red, i);
+        uint16_t sgreen = source->getFieldAs<uint16_t>(Dimension::Id::Green, i);
+        uint16_t sblue = source->getFieldAs<uint16_t>(Dimension::Id::Blue, i);
 
-        int32_t cx = candidate.getField<int32_t>(Dimension::Id::X, i);
-        int32_t cy = candidate.getField<int32_t>(Dimension::Id::Y, i);
-        int32_t cz = candidate.getField<int32_t>(Dimension::Id::Z, i);
+        int32_t cx = candidate.getFieldAs<int32_t>(Dimension::Id::X, i);
+        int32_t cy = candidate.getFieldAs<int32_t>(Dimension::Id::Y, i);
+        int32_t cz = candidate.getFieldAs<int32_t>(Dimension::Id::Z, i);
         uint16_t cintensity =
-            candidate.getField<uint16_t>(Dimension::Id::Intensity, i);
-        uint16_t cred = candidate.getField<uint16_t>(Dimension::Id::Red, i);
-        uint16_t cgreen = candidate.getField<uint16_t>(Dimension::Id::Green, i);
-        uint16_t cblue = candidate.getField<uint16_t>(Dimension::Id::Blue, i);
+            candidate.getFieldAs<uint16_t>(Dimension::Id::Intensity, i);
+        uint16_t cred = candidate.getFieldAs<uint16_t>(Dimension::Id::Red, i);
+        uint16_t cgreen = candidate.getFieldAs<uint16_t>(Dimension::Id::Green, i);
+        uint16_t cblue = candidate.getFieldAs<uint16_t>(Dimension::Id::Blue, i);
 
         BOOST_CHECK_EQUAL(sx, cx);
         BOOST_CHECK_EQUAL(sy, cy);
@@ -620,11 +620,11 @@ BOOST_AUTO_TEST_CASE(read_unprojected_data)
 //     pdal::Dimension const& dimIntensity = schema.getDimension("Intensity");
 //     pdal::Dimension const& dimRed = schema.getDimension("Red");
 // 
-//     boost::int32_t x = data.getField<boost::int32_t>(dimX, 0);
-//     boost::int32_t y = data.getField<boost::int32_t>(dimY, 0);
-//     boost::int32_t z = data.getField<boost::int32_t>(dimZ, 0);
-//     boost::uint16_t intensity = data.getField<boost::uint16_t>(dimIntensity, 6);
-//     boost::uint16_t red = data.getField<boost::uint16_t>(dimRed, 6);
+//     boost::int32_t x = data.getFieldAs<boost::int32_t>(dimX, 0);
+//     boost::int32_t y = data.getFieldAs<boost::int32_t>(dimY, 0);
+//     boost::int32_t z = data.getFieldAs<boost::int32_t>(dimZ, 0);
+//     boost::uint16_t intensity = data.getFieldAs<boost::uint16_t>(dimIntensity, 6);
+//     boost::uint16_t red = data.getFieldAs<boost::uint16_t>(dimRed, 6);
 // 
 //     BOOST_CHECK_EQUAL(x, -1250367506);
 //     BOOST_CHECK_EQUAL(y, 492519663);

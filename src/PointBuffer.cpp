@@ -179,25 +179,25 @@ void PointBuffer::dump(std::ostream& ostr) const
             switch (dd->type())
             {
             case Dimension::Type::Signed8:
-                ostr << (int)(getField<int8_t>(d, idx));
+                ostr << (int)(getFieldInternal<int8_t>(d, idx));
             case Dimension::Type::Signed16:
-                ostr << getField<int16_t>(d, idx);
+                ostr << getFieldInternal<int16_t>(d, idx);
             case Dimension::Type::Signed32:
-                ostr << getField<int32_t>(d, idx);
+                ostr << getFieldInternal<int32_t>(d, idx);
             case Dimension::Type::Signed64:
-                ostr << getField<int64_t>(d, idx);
+                ostr << getFieldInternal<int64_t>(d, idx);
             case Dimension::Type::Unsigned8:
-                ostr << (unsigned)(getField<uint8_t>(d, idx));
+                ostr << (unsigned)(getFieldInternal<uint8_t>(d, idx));
             case Dimension::Type::Unsigned16:
-                ostr << getField<uint16_t>(d, idx);
+                ostr << getFieldInternal<uint16_t>(d, idx);
             case Dimension::Type::Unsigned32:
-                ostr << getField<uint32_t>(d, idx);
+                ostr << getFieldInternal<uint32_t>(d, idx);
             case Dimension::Type::Unsigned64:
-                ostr << getField<uint64_t>(d, idx);
+                ostr << getFieldInternal<uint64_t>(d, idx);
             case Dimension::Type::Float:
-                ostr << getField<float>(d, idx);
+                ostr << getFieldInternal<float>(d, idx);
             case Dimension::Type::Double:
-                ostr << getField<double>(d, idx);
+                ostr << getFieldInternal<double>(d, idx);
             default:
                 throw;
             }
