@@ -81,14 +81,6 @@ Writer::Writer(const Options& options)
 
 Writer::~Writer()
 {
-    try
-    {
-        m_connection->Commit();
-    }
-    catch (...)
-    {
-        // destructors shouldn't throw
-    }
 }
 
 
@@ -848,6 +840,9 @@ void Writer::ready(PointContext ctx)
 
 void Writer::done(PointContext ctx)
 {
+    if (!m_connection)
+        return;
+    
     m_connection->Commit();
     if (m_createIndex)
     {
