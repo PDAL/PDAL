@@ -293,25 +293,23 @@ void Info::dump()
         dumpPoints();
     if (m_showSchema)
     {
-        // output ptree of PointContext::dimensions()
+        // FIXME: output ptree of PointContext::dimensions()
     }
 
     if (m_showSDOPCMetadata)
     {
-        boost::property_tree::ptree metadata = m_manager->getStage()->serializePipeline();
+        boost::property_tree::ptree metadata =
+            m_manager->getStage()->serializePipeline();
 
-        // FIXME: output ptree of PointContext::dimensions()::ptree + metadata ptree
+        // FIXME: output ptree of PointContext::dimensions()::ptree +
+        //   metadata ptree
         boost::property_tree::ptree output;
         // output.add_child("metadata", metadata);
         m_tree->add_child("stage", output);
     }
 
-
-    
     if (m_QueryPoint.size())
         dumpQuery();
-    
-    
 }
 
 

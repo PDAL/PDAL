@@ -310,8 +310,6 @@ void Writer::ready(PointContext ctx)
         return;
 
     m_streamOffset = m_streamManager.ostream().tellp();
-//FIXME - Do we need to do this?
-// m_lasHeader.setBounds(getPrevStage().getBounds());
 
     m_lasHeader.SetScale(m_xXform.m_scale, m_yXform.m_scale, m_zXform.m_scale);
     m_lasHeader.SetOffset(m_xXform.m_offset, m_yXform.m_offset,

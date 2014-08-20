@@ -204,14 +204,6 @@ void LasHeaderReader::read(Reader& stage)
 
     // 18. Point Data Record Length
     Utils::read_n(n2, m_istream, sizeof(n2));
-    // FIXME: We currently only use the DataFormatId, this needs to
-    // adjust the schema based on the difference between the DataRecordLength
-    // and the base size of the pointformat.  If we have an XML schema in the
-    // form of a VLR in the file, we'll use that to apportion the
-    // liblas::Schema.
-    // Otherwise, all bytes after the liblas::Schema::GetBaseByteSize will be
-    // a simple uninterpreted byte field.
-    // SetDataRecordLength(n2);
 
     // 19. Number of point records
     Utils::read_n(n4, m_istream, sizeof(n4));
@@ -423,7 +415,7 @@ void LasHeaderReader::readOneVLR()
 
 void LasHeaderReader::readAllVLRs()
 {
-    const boost::uint32_t count = m_numVLRs;
+    const uint32_t count = m_numVLRs;
     if (count == 0)
     {
         return;
@@ -432,31 +424,8 @@ void LasHeaderReader::readAllVLRs()
     // seek to the start of the VLRs
     m_istream.seekg(m_header.GetHeaderSize(), std::ios::beg);
 
-    for (boost::uint32_t i = 0; i < count; ++i)
-    {
+    for (uint32_t i = 0; i < count; ++i)
         readOneVLR();
-    }
-
-    //SpatialReference srs = m_header.getVLRs().constructSRS();
-    //m_header.setSpatialReference(srs);
-
-    //////// Go fetch the schema from the VLRs if we've got one.
-    //////try {
-    //////    liblas::Schema schema(GetVLRs());
-    //////    SetSchema(schema);
-
-    //////} catch (std::runtime_error const& e)
-    //////{
-    //////    // Create one from the PointFormat if we don't have
-    //////    // one in the VLRs.  Create a custom dimension on the schema
-    //////    // That comprises the rest of the bytes after the end of the
-    //////    // required dimensions.
-    //////    liblas::Schema schema(GetDataFormatId());
-    //////
-    //////    // FIXME: handle custom bytes here.
-    //////    SetSchema(schema);
-    //////    boost::ignore_unused_variable_warning(e);
-    //////}
 }
 
 

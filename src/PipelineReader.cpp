@@ -267,7 +267,7 @@ Reader* PipelineReader::parseElement_Reader(const ptree& tree)
         }
         else if (name == "Metadata")
         {
-            // FIXME ignored for now
+            // ignored for now
         }
         else
         {
@@ -333,7 +333,7 @@ Filter* PipelineReader::parseElement_Filter(const ptree& tree)
         }
         else if (name == "Metadata")
         {
-            // FIXME: ignored
+            // ignored
         }
         else if (name == "Filter" || name == "Reader")
         {
@@ -409,7 +409,7 @@ Writer* PipelineReader::parseElement_Writer(const ptree& tree)
         }
         else if (name == "Metadata")
         {
-            // FIXME
+            // ignored
         }
         else if (name == "Filter" || name == "Reader")
         {

@@ -246,12 +246,10 @@ void LasHeaderWriter::write()
     Utils::write_n(m_ostream, n4, sizeof(n4));
 
     // 19. Number of points by return
-    std::vector<boost::uint32_t>::size_type const srbyr = 5;
-    std::vector<boost::uint32_t> const& vpbr = m_header.GetPointRecordsByReturnCount();
-    // TODO: fix this for 1.3, which has srbyr = 7;  See detail/reader/header.cpp for more details
-    // assert(vpbr.size() <= srbyr);
-    boost::uint32_t pbr[srbyr] = { 0 };
-    std::copy(vpbr.begin(), vpbr.begin() + srbyr, pbr); // FIXME: currently, copies only 5 records, to be improved
+    std::vector<uint32_t>::size_type const srbyr = 5;
+    std::vector<uint32_t> const& vpbr = m_header.GetPointRecordsByReturnCount();
+    uint32_t pbr[srbyr] = { 0 };
+    std::copy(vpbr.begin(), vpbr.begin() + srbyr, pbr);
     Utils::write_n(m_ostream, pbr, sizeof(pbr));
 
     // 20-22. Scale factors

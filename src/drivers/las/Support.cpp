@@ -49,30 +49,28 @@ void Support::rewriteHeader(std::ostream& stream, const SummaryData& data)
     // move from header start to "number of point records" field
     stream.seekp(107, std::ios_base::cur);
 
-    // FIXME: This is only for LAS 1.3 and less!
-    const int maxReturns = 5; 
+    //This is legacy for 1.4 -- only valid on read for 1.3 and before.
+    const int MAX_RETURNS = 5; 
     {
         boost::uint8_t buf[256];
         boost::uint8_t* p = buf;
 
-        Utils::write_field<boost::uint32_t>(p, data.getTotalNumPoints());
+        Utils::write_field<uint32_t>(p, data.getTotalNumPoints());
+        for (int i = 1; i <= MAX_RETURNS; i++)
+            Utils::write_field<uint32_t>(p, data.getReturnCount(i));
 
-        for (int i=1; i<=maxReturns; i++)
-        {
-            Utils::write_field<boost::uint32_t>(p, data.getReturnCount(i));
-        }
-
-        Utils::write_n(stream, buf, 4 + 4*maxReturns);
+        // Write the data to the stream. 
+        Utils::write_n(stream, buf, 4 + 4 * MAX_RETURNS);
     }
 
     // skip over scale/offset fields
-    stream.seekp(8*6, std::ios_base::cur);
+    stream.seekp(8 * 6, std::ios_base::cur);
 
     {
         boost::uint8_t buf[256];
         boost::uint8_t* p = buf;
 
-        pdal::Bounds<double> bounds= data.getBounds();
+        pdal::Bounds<double> bounds = data.getBounds();
         double minX = bounds.getMinimum(0);
         double minY = bounds.getMinimum(1);
         double minZ = bounds.getMinimum(2);

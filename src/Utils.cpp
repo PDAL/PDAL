@@ -172,11 +172,7 @@ boost::uint32_t Utils::getStreamPrecision(double scale)
     double integer = 0;
 
     frac = modf(scale, &integer);
-    double precision = fabs(floor(log10(frac)));
-
-    // FIXME: This should test that precision actually ends up being a
-    // whole number
-    return static_cast<boost::uint32_t>(precision);
+    return abs(floorl(log10(frac)));
 }
 
 boost::uint32_t Utils::safeconvert64to32(boost::uint64_t x64)
