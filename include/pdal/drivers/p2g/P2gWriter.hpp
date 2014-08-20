@@ -104,14 +104,7 @@ private:
     unsigned int m_outputTypes;
     boost::uint32_t m_fill_window_size;
     Bounds<double> m_bounds;
-    //void setBounds(const Bounds<double>& v)
-    //{
-    //    m_bounds = v;
-    //}
-    //pdal::Bounds<double>& getBounds()
-    //{
-    //    return m_bounds;
-    //}
+
     std::string m_filename;
     int m_outputFormat;
 

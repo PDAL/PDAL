@@ -416,6 +416,7 @@ int Info::execute()
         stage = m_manager->addFilter("filters.stats", stage, options);
     if (m_computeBoundary)
         stage = m_manager->addFilter("filters.hexbin", stage, options);
+    stage = m_manager->addFilter("filters.hexbin", stage, options);
     
     m_context = std::unique_ptr<PointContext>(new PointContext);
     m_tree = std::unique_ptr<boost::property_tree::ptree>(
