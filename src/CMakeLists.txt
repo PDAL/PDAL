@@ -864,13 +864,6 @@ target_link_libraries(${PDAL_LIB_NAME}
 set_target_properties(${PDAL_LIB_NAME}
   PROPERTIES SOVERSION "${PDAL_LIB_SOVERSION}" )
 
-if (APPLE)
-  set_target_properties(
-    ${PDAL_LIB_NAME}
-    PROPERTIES
-    INSTALL_NAME_DIR "@rpath" BUILD_WITH_INSTALL_RPATH ON)
-endif()
-
 
 if (USE_PDAL_PLUGIN_TEXT)
     set(PDAL_TEXT_WRITER_LIB_NAME pdal_plugin_writer_text)
@@ -879,12 +872,6 @@ if (USE_PDAL_PLUGIN_TEXT)
                           ${PDAL_LIB_NAME})
     set_target_properties("${PDAL_TEXT_WRITER_LIB_NAME}"
     PROPERTIES SOVERSION "${PDAL_LIB_SOVERSION}" )
-    if (APPLE)
-    set_target_properties(
-      "${PDAL_TEXT_WRITER_LIB_NAME}"
-      PROPERTIES
-      INSTALL_NAME_DIR "@rpath" BUILD_WITH_INSTALL_RPATH ON)
-    endif()
 endif()
 
 if (WITH_SQLITE)
@@ -896,12 +883,6 @@ if (USE_PDAL_PLUGIN_SQLITE)
                           ${SQLITE_LIBRARIES})
     set_target_properties(${PDAL_SQLITE_WRITER_LIB_NAME}
     PROPERTIES SOVERSION "${PDAL_LIB_SOVERSION}" )
-    if (APPLE)
-    set_target_properties(
-      "${PDAL_SQLITE_WRITER_LIB_NAME}"
-      PROPERTIES
-      INSTALL_NAME_DIR "@rpath" BUILD_WITH_INSTALL_RPATH ON)
-    endif()
 
     set(PDAL_SQLITE_READER_LIB_NAME pdal_plugin_reader_sqlite)
     add_library(${PDAL_SQLITE_READER_LIB_NAME} SHARED ${PDAL_SQLITE_SRC}/Reader.cpp)
@@ -910,13 +891,6 @@ if (USE_PDAL_PLUGIN_SQLITE)
                           ${SQLITE_LIBRARIES})
     set_target_properties(${PDAL_SQLITE_READER_LIB_NAME}
     PROPERTIES SOVERSION "${PDAL_LIB_SOVERSION}" )
-    if (APPLE)
-    set_target_properties(
-      "${PDAL_SQLITE_READER_LIB_NAME}"
-      PROPERTIES
-      INSTALL_NAME_DIR "@rpath" BUILD_WITH_INSTALL_RPATH ON)
-    endif()
-
 endif()
 endif()
 
@@ -931,12 +905,6 @@ if (USE_PDAL_PLUGIN_OCI)
                           "${ORACLE_LIBRARY}")
     set_target_properties(${PDAL_OCI_WRITER_LIB_NAME}
     PROPERTIES SOVERSION "${PDAL_LIB_SOVERSION}" )
-    if (APPLE)
-    set_target_properties(
-      "${PDAL_OCI_WRITER_LIB_NAME}"
-      PROPERTIES
-      INSTALL_NAME_DIR "@rpath" BUILD_WITH_INSTALL_RPATH ON)
-    endif()
 endif()
 endif()
 ###############################################################################
