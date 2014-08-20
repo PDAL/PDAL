@@ -550,18 +550,13 @@ schema::DimensionMap* Schema::mapDimensions(Schema const& destination, bool bIgn
 boost::property_tree::ptree Schema::toPTree() const
 {
     boost::property_tree::ptree tree;
-    tree.put_child("dimensions", boost::property_tree::ptree());
-    auto& dimensionsTree = tree.get_child("dimensions");
 
     schema::index_by_index const& idx = m_index.get<schema::index>();
 
-    schema::index_by_index::const_iterator iter = idx.begin();
-    auto end = idx.end();
-
-    for ( ; iter != end; ++iter)
+    for (schema::index_by_index::const_iterator iter = idx.begin(); iter != idx.end(); ++iter)
     {
-        const Dimension& dim = *iter;
-        dimensionsTree.add_child("", dim.toPTree());
+      const Dimension& dim = *iter;
+      tree.add_child("dimension", dim.toPTree());
     }
 
     return tree;
