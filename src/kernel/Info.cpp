@@ -359,10 +359,7 @@ void Info::dumpQuery(PointContext ctx, Stage& stage) const
 
 void Info::dumpSDO_PCMetadata(PointContext ctx, const Stage& stage) const
 {
-    boost::property_tree::ptree metadata = stage.serializePipeline();
-    std::string xml;
-//ABELL - Fix this.
-//    std::string xml = pdal::Schema::to_xml(*ctx.schema(), &metadata);  
+    std::string xml = pdal::Schema::to_xml(*ctx.schema(), stage.getMetadata());
     std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
     ostr << xml;
 }
