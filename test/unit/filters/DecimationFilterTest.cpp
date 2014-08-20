@@ -95,7 +95,6 @@ BOOST_AUTO_TEST_CASE(DecimationFilterTest_test_random)
     ops.add("num_points", 1000);
     ops.add("mode", "random");
     
-    // FIXME: Skipping with decimation filter isn't working correctly right now
     drivers::faux::Reader reader(ops);
 
     Options decimationOps;

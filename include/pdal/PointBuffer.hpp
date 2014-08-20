@@ -382,10 +382,7 @@ inline void PointBuffer::setFieldInternal(Dimension::Id::Enum dim,
 
 inline void PointBuffer::appendPoint(PointBuffer& buffer, PointId id)
 {
-    // FIXME: hobu -- what happens if id is out of range of m_index
-    // or m_index isn't ordered?
-    //ABELL - The programmer is saying take point "id" from "buffer" and stick
-    //  it in this buffer.  If "id" isn't valid, it's a programmer error.
+    // Invalid 'id' is a programmer error.
     PointId rawId = buffer.m_index[id];
     point_count_t newid = m_index.size();
     m_index.resize(newid + 1);

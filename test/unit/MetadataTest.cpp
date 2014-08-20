@@ -256,6 +256,23 @@ BOOST_AUTO_TEST_CASE(test_vlr_metadata)
     BOOST_CHECK_EQUAL(found.description(), "VLR2DESC");
 }
 
+BOOST_AUTO_TEST_CASE(find_child_string)
+{
+    using namespace pdal;
+
+    MetadataNode top;
+    MetadataNode m = top.add("level1");
+    MetadataNode l21 = m.add("level2");
+    MetadataNode l22 = m.add("level2");
+    l21.add("210", "210");
+    l22.add("220", "220");
+
+    MetadataNode n = top.findChild("level1:level2:210");
+    BOOST_CHECK_EQUAL(n.value(), "210");
+    n = top.findChild("level1:level2:220");
+    BOOST_CHECK_EQUAL(n.value(), "220");
+}
+
 BOOST_AUTO_TEST_CASE(test_metadata_stage)
 {
 //ABELL
