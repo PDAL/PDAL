@@ -165,6 +165,9 @@ void Stage::l_processOptions(const Options& options)
         // If one wasn't set on the options, we'll ignore at this
         // point.  Maybe another stage might forward/set it later.
     }
+
+    // Process writer-specific options.
+    writerProcessOptions(options);
 }
 
 

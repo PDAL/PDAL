@@ -310,18 +310,12 @@ void Writer::ready(PointContext ctx)
         return;
 
     m_streamOffset = m_streamManager.ostream().tellp();
+//FIXME - Do we need to do this?
 // m_lasHeader.setBounds(getPrevStage().getBounds());
 
-//ABELL
-//Need a way to determine an appropriate scale/offset.
-/**
-    m_lasHeader.SetScale(m_dims->X->getNumericScale(),
-                         m_dims->Y->getNumericScale(),
-                         m_dims->Z->getNumericScale());
-    m_lasHeader.SetOffset(m_dims->X->getNumericOffset(),
-                          m_dims->Y->getNumericOffset(),
-                          m_dims->Z->getNumericOffset());
-**/
+    m_lasHeader.SetScale(m_xXform.m_scale, m_yXform.m_scale, m_zXform.m_scale);
+    m_lasHeader.SetOffset(m_xXform.m_offset, m_yXform.m_offset,
+        m_zXform.m_offset);
 
     m_lasHeader.setSpatialReference(getSpatialReference().empty() ?
         ctx.spatialRef() : getSpatialReference());
@@ -514,14 +508,18 @@ void Writer::write(const PointBuffer& pointBuffer)
 
         // we always write the base fields
         using namespace Dimension;
-        //ABELL - May need to unscale.
-        int32_t x = pointBuffer.getFieldAs<int32_t>(Id::X, idx);
-        int32_t y = pointBuffer.getFieldAs<int32_t>(Id::Y, idx);
-        int32_t z = pointBuffer.getFieldAs<int32_t>(Id::Z, idx);
 
-        Utils::write_field(p, x);
-        Utils::write_field(p, y);
-        Utils::write_field(p, z);
+        double x = pointBuffer.getFieldAs<double>(Id::X, idx);
+        double y = pointBuffer.getFieldAs<double>(Id::Y, idx);
+        double z = pointBuffer.getFieldAs<double>(Id::Z, idx);
+
+        x = (x - m_xXform.m_offset) / m_xXform.m_scale;
+        y = (y - m_yXform.m_offset) / m_yXform.m_scale;
+        z = (z - m_zXform.m_offset) / m_zXform.m_scale;
+
+        Utils::write_field(p, boost::numeric_cast<int32_t>(lround(x)));
+        Utils::write_field(p, boost::numeric_cast<int32_t>(lround(y)));
+        Utils::write_field(p, boost::numeric_cast<int32_t>(lround(z)));
 
         uint16_t intensity = 0;
         if (pointBuffer.hasDim(Id::Intensity))

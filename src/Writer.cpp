@@ -49,6 +49,17 @@
 namespace pdal
 {
 
+void Writer::writerProcessOptions(const Options& options)
+{
+    m_xXform.m_scale = options.getValueOrDefault("scale_x", 1.0);
+    m_xXform.m_offset = options.getValueOrDefault("offset_x", 0.0);
+    m_yXform.m_scale = options.getValueOrDefault("scale_y", 1.0);
+    m_yXform.m_offset = options.getValueOrDefault("offset_y", 0.0);
+    m_zXform.m_scale = options.getValueOrDefault("scale_z", 1.0);
+    m_zXform.m_offset = options.getValueOrDefault("offset_z", 0.0);
+}
+
+
 boost::property_tree::ptree Writer::serializePipeline() const
 {
     boost::property_tree::ptree tree;

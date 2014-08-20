@@ -70,6 +70,9 @@ public:
 
 protected:
     std::unique_ptr<UserCallback> m_callback;
+    XForm m_xXform;
+    XForm m_yXform;
+    XForm m_zXform;
 
 private:
     virtual PointBufferSet run(PointBufferPtr buffer)
@@ -79,6 +82,7 @@ private:
         pbSet.insert(buffer);
         return pbSet;
     }
+    virtual void writerProcessOptions(const Options& options);
     virtual void write(const PointBuffer& /*buffer*/)
         { std::cerr << "Can't write with stage = " << getName() << "!\n"; }
 

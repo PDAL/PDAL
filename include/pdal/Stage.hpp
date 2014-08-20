@@ -104,9 +104,7 @@ public:
     static std::string s_getInfoLink()
         { return std::string(); }
     virtual boost::property_tree::ptree toPTree(PointContext ctx) const 
-    {
-        return boost::property_tree::ptree();
-    }
+        { return boost::property_tree::ptree(); }
 
 #define SET_STAGE_NAME(name, description)  \
     static std::string s_getName() { return name; }  \
@@ -150,6 +148,8 @@ private:
     void Construct();
     void l_processOptions(const Options& options);
     virtual void processOptions(const Options& /*options*/)
+        {}
+    virtual void writerProcessOptions(const Options& /*options*/)
         {}
     void l_initialize(PointContext ctx);
     void l_done(PointContext ctx);
