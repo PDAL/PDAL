@@ -66,8 +66,6 @@ void BufferedInvocation::begin(PointBuffer& buffer)
     {
         Dimension::Id::Enum d = *di;
         Dimension::Detail *dd = ctx.dimDetail(d);
-        //ABELL - does the interface allow us to use a fixed-size buffer
-        //  and then call beginChunk in a loop or something similar?
         void *data = malloc(dd->size() * buffer.size());
         m_buffers.push_back(data);  // Hold pointer for deallocation
         char *p = (char *)data;

@@ -293,7 +293,7 @@ void Info::dump()
         dumpPoints();
     if (m_showSchema)
     {
-        // FIXME: output ptree of PointContext::dimensions()
+        // output ptree of PointContext::dimensions()
     }
 
     if (m_showSDOPCMetadata)
@@ -301,10 +301,7 @@ void Info::dump()
         boost::property_tree::ptree metadata =
             m_manager->getStage()->serializePipeline();
 
-        // FIXME: output ptree of PointContext::dimensions()::ptree +
-        //   metadata ptree
         boost::property_tree::ptree output;
-        // output.add_child("metadata", metadata);
         m_tree->add_child("stage", output);
     }
 
@@ -352,12 +349,9 @@ void Info::dumpQuery() const
 
 void Info::dumpSDO_PCMetadata(PointContext ctx, const Stage& stage) const
 {
-    boost::property_tree::ptree metadata = stage.serializePipeline();
-    std::string xml;
-//ABELL - Fix this.
-//    std::string xml = pdal::Schema::to_xml(*ctx.schema(), &metadata);  
     std::ostream& ostr = std::cout;
-    ostr << xml;
+    // std::string xml = pdal::Schema::to_xml(*ctx.schema(), stage.getMetadata());
+    // ostr << xml;
 }
 
 

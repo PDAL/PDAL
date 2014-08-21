@@ -42,7 +42,7 @@
 
 #include <pdal/pdal_internal.hpp>
 
-//ABELL - Expect this to be generated from JSON soon.
+//This should be generated from another format - JSON?
 namespace pdal
 {
 namespace Dimension
@@ -481,7 +481,7 @@ inline Type::Enum defaultType(Id::Enum id)
     case Id::EdgeOfFlightLine:
         return Unsigned8;
     case Id::Classification:
-        return Unsigned16;
+        return Unsigned8;
     case Id::ScanAngleRank:
         return Float;
     case Id::UserData:

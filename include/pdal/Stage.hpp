@@ -128,7 +128,8 @@ public:
         { std::cerr << "Created crap sequential iterator!\n"; return NULL; }
     virtual StageRandomIterator* createRandomIterator(PointBuffer&) const
         { return NULL; }
-    MetadataNode const& getMetadata() const { return m_metadata; }
+    inline MetadataNode getMetadata() const 
+        { return m_metadata; }
 
 protected:
     Options m_options;

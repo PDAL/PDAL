@@ -67,6 +67,7 @@ namespace oci
 Writer::Writer(const Options& options)
     : pdal::Writer(options)
     , m_createIndex(false)
+    , m_bDidCreateBlockTable(false)
     , m_pcExtent(3)
     , m_pc_id(0)
     , m_srid(0)
@@ -338,7 +339,7 @@ void Writer::createSDOEntry()
     pdal::Bounds<double> e = m_bounds;
     if (isGeographic(m_srid))
     {
-        // FIXME: This should be overrideable
+        //This should be overrideable
         e.setMinimum(0, -180.0);
         e.setMaximum(0, 180.0);
         e.setMinimum(1, -90.0);
@@ -412,6 +413,7 @@ void Writer::createBlockTable()
 
     runCommand(oss);
     m_connection->Commit();
+    m_bDidCreateBlockTable = true;
 }
 
 
@@ -679,14 +681,6 @@ void Writer::createPCEntry()
         throw pdal_error(oss.str());
     }
 
-    //ABELL - I don't get this.  Why do we get the value?  It doesn't look
-    //  like we ever retreive the option anyplace else.
-    //HOBU - because the SDO_PC.init method returns a database value for the 
-    //  object it created. We want to reflect that in metadata in addition to  
-    //  using it for the obj_id when writing the blocks
-    //ABELL - But how is it ever written?  What I don't see is that its value
-    //  AS AN OPTION is ever used (we never seem to retrieve the option
-    //  "pc_id").  Do we just scoop up all options as metadata someplace?
     try
     {
         Option& pc_id = m_options.getOptionByRef("pc_id");
@@ -838,7 +832,7 @@ void Writer::done(PointContext ctx)
         return;
     
     m_connection->Commit();
-    if (m_createIndex)
+    if (m_createIndex && m_bDidCreateBlockTable)
     {
         createSDOEntry();
         createBlockIndex();
@@ -1059,8 +1053,6 @@ void Writer::writeTile(PointBuffer const& buffer)
     m_connection->CreateType(&sdo_ordinates, m_connection->GetOrdinateType());
 
     // x0, x1, y0, y1, z0, z1, bUse3d
-    //ABELL - Should we keep buffer's bounds correct always?  They are if
-    //  they come throught the chipper.  Perhaps we can dispense with this.
     pdal::Bounds<double> bounds = buffer.calculateBounds(true);
     // Cumulate a total bounds for the file.
     m_pcExtent.grow(bounds);

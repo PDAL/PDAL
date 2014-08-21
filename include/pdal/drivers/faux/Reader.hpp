@@ -129,7 +129,7 @@ private:
 
     point_count_t readImpl(PointBuffer& buf, point_count_t count);
     bool atEndImpl() const
-        { return false; } //ABELL ?
+        { return false; }
 };
 
 } // namespace pdal
