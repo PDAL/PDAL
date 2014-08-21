@@ -98,7 +98,7 @@ public:
     static std::string readFileAsString(std::string const& filename);
 
 private:
-    static std::string addTrailingSlash(const std::string& path);
+    static std::string addTrailingSlash(std::string path);
 
     FileUtils& operator=(const FileUtils&); // not implemented
     FileUtils(const FileUtils&); // not implemented;

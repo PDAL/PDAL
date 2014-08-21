@@ -63,7 +63,6 @@ PgIterator::PgIterator(const PgReader& reader, const schema::DimInfoList& dims)
 {
     m_session = pg_connect(reader.connString());
 
-    //ABELL - Need to calc elsewhere.
     m_point_size = 0;
     for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
         m_point_size += Dimension::size(di->m_type);

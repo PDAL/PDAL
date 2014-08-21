@@ -115,7 +115,6 @@ void FileUtils::closeFile(istream* ifs)
     io::stream<io::file_source>* source =
         dynamic_cast<io::stream<io::file_source>*>(ifs);
 
-    // ABELL - Don't transfer ownership!
     if (source)
     {
         source->close();
@@ -162,15 +161,11 @@ string FileUtils::readFileIntoString(const string& filename)
 }
 
 
-//ABELL - don't pass a reference.
-string FileUtils::addTrailingSlash(const string& path)
+string FileUtils::addTrailingSlash(string path)
 {
-    string ret = path;
-
-    if (ret[ret.size() - 1] != '/')
-        ret += "/";
-
-    return ret;
+    if (path[path.size() - 1] != '/')
+        path += "/";
+    return path;
 }
 
 

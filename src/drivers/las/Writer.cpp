@@ -90,41 +90,37 @@ void Writer::Construct()
 
 void Writer::processOptions(const Options& options)
 {
-    //ABELL
-    // Rework to set options here.
+    setGeneratingSoftware(options.getValueOrDefault("software_id",
+        GetDefaultSoftwareId()));
+
+    m_lasHeader.SetCreationDOY((uint16_t)options.getValueOrDefault(
+        "creation_doy", 0U));
+    m_lasHeader.SetCreationYear((uint16_t)options.getValueOrDefault(
+        "creation_year", 0U));
+    m_lasHeader.setPointFormat(static_cast<PointFormat>(
+        options.getValueOrDefault("format", 3U)));
+    m_lasHeader.SetSystemId(options.getValueOrDefault<std::string>("system_id",
+        LasHeader::SystemIdentifier));
+
+    m_lasHeader.SetHeaderPadding(options.getValueOrDefault(
+        "header_padding", 0U));
+    if (options.hasOption("a_srs"))
+        setSpatialReference(options.getValueOrDefault("a_srs", std::string()));
+    m_lasHeader.SetCompressed(options.getValueOrDefault("compression", false));
+    m_lasHeader.SetFileSourceId(options.getValueOrDefault<uint16_t>(
+        "filesource_id", 0));
+    try
+    {
+        m_lasHeader.SetDataRecordLength(options.getValueOrThrow<uint16_t>(
+            "datarecordlength"));
+    }
+    catch (pdal::option_not_found&) {};
 }
 
 
 void Writer::setOptions()
 {
-    setGeneratingSoftware(getOptions().getValueOrDefault<std::string>(
-        "software_id", pdal::drivers::las::GetDefaultSoftwareId()));
 
-    m_lasHeader.SetCreationDOY((uint16_t)getOptions().
-        getValueOrDefault<uint32_t>("creation_doy", 0));
-    m_lasHeader.SetCreationYear((uint16_t)getOptions().
-        getValueOrDefault<uint32_t>("creation_year", 0));
-    m_lasHeader.setPointFormat(static_cast<PointFormat>(getOptions().
-        getValueOrDefault<uint32_t>("format", 3)));
-    m_lasHeader.SetSystemId(getOptions().getValueOrDefault<std::string>(
-        "system_id", LasHeader::SystemIdentifier));
-
-    m_lasHeader.SetHeaderPadding(getOptions().
-        getValueOrDefault<uint32_t>("header_padding", 0));
-    if (getOptions().hasOption("a_srs"))
-        setSpatialReference(getOptions().getValueOrDefault<std::string>(
-            "a_srs",""));
-    m_lasHeader.SetCompressed(getOptions().getValueOrDefault(
-        "compression", false));
-    m_lasHeader.SetFileSourceId(getOptions().getValueOrDefault<boost::uint16_t>(
-        "filesource_id", 0));
-    try
-    {
-        boost::uint16_t record_length =
-            getOptions().getValueOrThrow<boost::uint16_t>("datarecordlength");
-        m_lasHeader.SetDataRecordLength(record_length);
-    }
-    catch (pdal::option_not_found&) {};
 }
 
 
