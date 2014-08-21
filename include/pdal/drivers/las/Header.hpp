@@ -394,7 +394,7 @@ private:
     char m_signature[eFileSignatureSize];
     uint16_t m_sourceId;
     uint16_t m_reserved;
-    uuids::uuid m_projectGuid;
+    boost::uuids::uuid m_projectGuid;
     uint8_t m_versionMajor;
     uint8_t m_versionMinor;
     char m_systemId[eSystemIdSize];
