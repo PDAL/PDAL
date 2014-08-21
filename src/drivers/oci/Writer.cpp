@@ -67,6 +67,7 @@ namespace oci
 Writer::Writer(const Options& options)
     : pdal::Writer(options)
     , m_createIndex(false)
+    , m_bDidCreateBlockTable(false)
     , m_pcExtent(3)
     , m_pc_id(0)
     , m_srid(0)
@@ -412,6 +413,7 @@ void Writer::createBlockTable()
 
     runCommand(oss);
     m_connection->Commit();
+    m_bDidCreateBlockTable = true;
 }
 
 
@@ -838,7 +840,7 @@ void Writer::done(PointContext ctx)
         return;
     
     m_connection->Commit();
-    if (m_createIndex)
+    if (m_createIndex && m_bDidCreateBlockTable)
     {
         createSDOEntry();
         createBlockIndex();
