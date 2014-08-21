@@ -454,7 +454,7 @@ inline Type::Enum defaultType(Id::Enum id)
     case Id::Z:
         return Double;
     case Id::Intensity:
-        return Unsigned8;
+        return Unsigned16;
     case Id::ReturnNumber:
         return Unsigned8;
     case Id::NumberOfReturns:
