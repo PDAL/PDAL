@@ -94,6 +94,7 @@ private:
     boost::uint32_t m_sample_size;
     bool m_useXML;
     bool m_useJSON;
+    bool m_useREST;
     std::string m_Dimensions;
     std::string m_QueryPoint;
     double m_QueryDistance;

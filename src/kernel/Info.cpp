@@ -54,6 +54,7 @@ Info::Info(int argc, const char* argv[])
     , m_computeBoundary(false)
     , m_useXML(false)
     , m_useJSON(false)
+    , m_useREST(true)
     , m_QueryDistance(0.0)
     , m_numPointsToWrite(0)
     , m_showSample(false)
@@ -346,12 +347,13 @@ void Info::dumpQuery() const
     m_tree->add_child("point", tree);
 }
 
-
 void Info::dumpSDO_PCMetadata(PointContext ctx, const Stage& stage) const
 {
-    boost::property_tree::ptree metadata = stage.serializePipeline();
-    write_xml(std::cout, metadata);
+    std::ostream& ostr = std::cout;
+    // std::string xml = pdal::Schema::to_xml(*ctx.schema(), stage.getMetadata());
+    // ostr << xml;
 }
+
 
 
 void Info::dumpMetadata(PointContext ctx, const Stage& stage) const
