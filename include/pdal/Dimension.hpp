@@ -464,7 +464,7 @@ inline Type::Enum defaultType(Id::Enum id)
     case Id::EdgeOfFlightLine:
         return Unsigned8;
     case Id::Classification:
-        return Unsigned8;
+        return Unsigned16;
     case Id::ScanAngleRank:
         return Float;
     case Id::UserData:
