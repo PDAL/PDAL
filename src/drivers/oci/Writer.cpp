@@ -833,8 +833,10 @@ void Writer::ready(PointContext ctx)
         const Dimension& d = schema->getDimension(i);
         if (!m_pack || !d.isIgnored())
         {
-            m_dims.push_back(d);
-            m_pointSize += d.getByteSize();
+            Dimension n = Dimension(d);
+            n.setParent(boost::uuids::nil_uuid());
+            m_dims.push_back(n);
+            m_pointSize += n.getByteSize();
         }
     }
 }
