@@ -54,8 +54,14 @@ PointDimensions::PointDimensions(const Schema& schema, std::string const& ns)
     
     // don't ever wipe off ignored XYZ dims.
     X = schema.getDimensionPtr("X", ns);
+    if (!X)
+        throw pdal_error("Unable to fetch X dimension with ns " + ns);
     Y = schema.getDimensionPtr("Y", ns);
+    if (!Y)
+        throw pdal_error("Unable to fetch Y dimension with ns " + ns);
     Z = schema.getDimensionPtr("Z", ns);
+    if (!Z)
+        throw pdal_error("Unable to fetch Z dimension with ns " + ns);
     
     CACHE_DIM(Intensity)
     CACHE_DIM(ReturnNumber)
