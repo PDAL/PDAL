@@ -184,7 +184,7 @@ BOOST_AUTO_TEST_CASE(SqliteTest_test_simple_las)
         BOOST_CHECK_EQUAL(r, 68u);
         boost::int32_t x = buffer.getFieldAs<boost::int32_t>(Dimension::Id::X, 0);
         BOOST_CHECK_EQUAL(x, 637012);
-        double xd = buffer.getField<double>(Dimension::Id::X, 0);        
+        double xd = buffer.getFieldAs<double>(Dimension::Id::X, 0);        
         BOOST_CHECK_CLOSE(xd, 637012.240, 0.001);
     }
     // FileUtils::deleteFile(temp_filename);
