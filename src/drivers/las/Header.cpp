@@ -161,8 +161,6 @@ boost::uint16_t LasHeader::GetFileSourceId() const
 
 void LasHeader::SetFileSourceId(boost::uint16_t v)
 {
-    // TODO: Should we warn or throw about type overflow occuring when
-    //       user passes 65535 + 1 = 0
     m_sourceId = v;
 }
 
@@ -173,8 +171,6 @@ boost::uint16_t LasHeader::GetReserved() const
 
 void LasHeader::SetReserved(boost::uint16_t v)
 {
-    // TODO: Should we warn or throw about type overflow occuring when
-    //       user passes 65535 + 1 = 0
     m_reserved = v;
 }
 

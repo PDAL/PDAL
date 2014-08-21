@@ -62,21 +62,11 @@ public:
     
     OciReader(const Options& options) : pdal::Reader(options)
     {}
-    //
-    //ABELL
-    //virtual Metadata getMetadata() const;
-    //ABELL
-    // for xml serializion of pipelines
-    //virtual boost::property_tree::ptree
-    //    serializePipeline(PointContext ctx) const;
 
     static Options getDefaultOptions();
     StageSequentialIterator* createSequentialIterator() const;
 
 private:
-    OciReader& operator=(const OciReader&); // not implemented
-    OciReader(const OciReader&); // not implemented
-
     virtual void initialize();
     virtual void processOptions(const Options& options);
     virtual void addDimensions(PointContext ctx);
@@ -92,6 +82,9 @@ private:
     std::string m_schemaFile;
     std::string m_connSpec;
     boost::optional<SpatialReference> m_spatialRef;
+
+    OciReader& operator=(const OciReader&); // not implemented
+    OciReader(const OciReader&); // not implemented
 };
 
 } // namespace oci

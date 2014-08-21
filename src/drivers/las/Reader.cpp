@@ -477,8 +477,6 @@ point_count_t Base::processBuffer(PointBuffer& data, std::istream& stream,
         catch (pdal::invalid_stream&)
         {}
     }
-//ABELL
-//    data.setSpatialBounds(m_bounds);
     return (point_count_t)i;
 }
 

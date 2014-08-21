@@ -51,7 +51,6 @@ struct BpfMuellerMatrix
 };
 ILeStream& operator >> (ILeStream& stream, BpfMuellerMatrix& m);
 
-//ABELL - Replace with strongly-typed enum C++11
 namespace BpfFormat
 {
 enum Enum

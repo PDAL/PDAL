@@ -197,7 +197,7 @@ int Diff::execute()
         oss << "Source and candidate files do not have the same "
             "number of dimensions";
         errors.put<std::string>("schema.error", oss.str());
-        // FIXME: Need to "ptree" the PointContext dimension list in some way
+        //Need to "ptree" the PointContext dimension list in some way
         // errors.put_child("schema.source", sourceCtx.schema()->toPTree());
         // errors.put_child("schema.candidate",
         //     candidateCtx.schema()->toPTree());

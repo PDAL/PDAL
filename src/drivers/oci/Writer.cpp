@@ -339,7 +339,7 @@ void Writer::createSDOEntry()
     pdal::Bounds<double> e = m_bounds;
     if (isGeographic(m_srid))
     {
-        // FIXME: This should be overrideable
+        //This should be overrideable
         e.setMinimum(0, -180.0);
         e.setMaximum(0, 180.0);
         e.setMinimum(1, -90.0);

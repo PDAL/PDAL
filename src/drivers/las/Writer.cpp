@@ -401,14 +401,12 @@ void Writer::ready(PointContext ctx)
                 memcpy(&reserved, data.data(), data.size());
             else if (data.size() == 4 )
             {
-                //ABELL - HUH?
                 uint32_t temp;
                 memcpy(&temp, data.data(), data.size());
                 reserved = static_cast<uint16_t>(temp);
             }
             else if (data.size() == 8 )
             {
-                //ABELL - HUH? AGAIN...
                 uint64_t temp;
                 memcpy(&temp, data.data(), data.size());
                 reserved = static_cast<uint16_t>(temp);

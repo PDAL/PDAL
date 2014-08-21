@@ -101,7 +101,6 @@ public:
             std::string const& description = "") :
         m_name(name), m_description(description)
     {
-        // FIXME: This shouldn't be able to throw -- hobu
         try
         {
             setValue<T>(value);

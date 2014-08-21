@@ -292,7 +292,7 @@ void Info::dump()
         dumpPoints();
     if (m_showSchema)
     {
-        // FIXME: output ptree of PointContext::dimensions()
+        // output ptree of PointContext::dimensions()
     }
 
     if (m_showSDOPCMetadata)
@@ -300,10 +300,7 @@ void Info::dump()
         boost::property_tree::ptree metadata =
             m_manager->getStage()->serializePipeline();
 
-        // FIXME: output ptree of PointContext::dimensions()::ptree +
-        //   metadata ptree
         boost::property_tree::ptree output;
-        // output.add_child("metadata", metadata);
         m_tree->add_child("stage", output);
     }
 

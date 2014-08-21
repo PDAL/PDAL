@@ -126,7 +126,7 @@ Block::~Block()
     m_connection->DestroyType(&blk_extent->sdo_elem_info);
     m_connection->DestroyType(&blk_extent->sdo_ordinates);
     m_connection->DestroyType(&pc);
-    // FIXME: For some reason having the dtor destroy this
+    // For some reason having the dtor destroy this
     // causes a segfault
     // m_connection->DestroyType(&blk_extent);
 }

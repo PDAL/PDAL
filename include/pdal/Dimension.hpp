@@ -42,7 +42,7 @@
 
 #include <pdal/pdal_internal.hpp>
 
-//ABELL - Expect this to be generated from JSON soon.
+//This should be generated from another format - JSON?
 namespace pdal
 {
 namespace Dimension
