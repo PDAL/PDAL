@@ -54,7 +54,6 @@ Info::Info(int argc, const char* argv[])
     , m_computeBoundary(false)
     , m_useXML(false)
     , m_useJSON(false)
-    , m_useREST(true)
     , m_QueryDistance(0.0)
     , m_numPointsToWrite(0)
     , m_showSample(false)
@@ -349,6 +348,7 @@ void Info::dumpQuery() const
 
     m_tree->add_child("point", tree);
 }
+
 
 void Info::dumpSDO_PCMetadata(PointContext ctx, const Stage& stage) const
 {

@@ -99,7 +99,7 @@ void Writer::processOptions(const Options& options)
         "creation_year", 0U));
     m_lasHeader.setPointFormat(static_cast<PointFormat>(
         options.getValueOrDefault("format", 3U)));
-    m_lasHeader.SetSystemId(options.getValueOrDefault("system_id",
+    m_lasHeader.SetSystemId(options.getValueOrDefault<std::string>("system_id",
         LasHeader::SystemIdentifier));
 
     m_lasHeader.SetHeaderPadding(options.getValueOrDefault(

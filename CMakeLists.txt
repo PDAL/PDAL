@@ -25,9 +25,16 @@ cmake_policy(SET CMP0022 OLD) # interface link libraries
 cmake_policy(SET CMP0042 OLD) # osx rpath
 endif()
 
-if (CMAKE_SYSTEM_NAME MATCHES "Linux")
-set(CMAKE_SKIP_RPATH ON)
-endif()
+# per http://www.cmake.org/Wiki/CMake_RPATH_handling
+SET(CMAKE_SKIP_BUILD_RPATH FALSE)
+SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+LIST(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
+IF("${isSystemDir}" STREQUAL "-1")
+    SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+ENDIF("${isSystemDir}" STREQUAL "-1")
+
 
 # Provided modules
 include(CMakeDependentOption)
