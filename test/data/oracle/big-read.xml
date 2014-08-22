@@ -15,13 +15,13 @@
         </Option>
             <Filter type="filters.inplacereprojection">
                 <Option name="out_srs">
-                    EPSG:4326+4326
+                    EPSG:26910
                 </Option>
                 <Option name="scale_x">
-                    0.0000001
+                    0.001
                 </Option>
                 <Option name="scale_y">
-                    0.0000001
+                    0.001
                 </Option>
                 <Option name="debug">
                     true
@@ -31,10 +31,12 @@
                 </Option>        
         <Reader type="drivers.oci.reader">
             <Option name="query">
-                SELECT CLOUD FROM AUTZEN_BIG_CLOUD where ID=1
+                select l."OBJ_ID", l."BLK_ID", l."BLK_EXTENT", l."BLK_DOMAIN", l."PCBLK_MIN_RES", l."PCBLK_MAX_RES", l."NUM_POINTS", l."NUM_UNSORTED_POINTS", l."PT_SORT_DIM", l."POINTS", b.cloud from AUTZEN_COPY_CLOUD b, autzen_COPY_blocks l 
+                                where b.cloud.pc_id = l.obj_id
+                                and b.id = 1
             </Option>
             <Option name="connection">
-                lidar/lidar@lidar.hobu.biz/lidar
+                grid/grid@localhost/vm
             </Option>
             <Option name="debug">
                 true

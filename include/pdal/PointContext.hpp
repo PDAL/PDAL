@@ -38,6 +38,8 @@
 #include <memory>
 #include <vector>
 
+#include <boost/property_tree/json_parser.hpp>
+
 #include "pdal/Dimension.hpp"
 #include "pdal/Metadata.hpp"
 #include "pdal/RawPtBuf.hpp"
@@ -160,7 +162,7 @@ public:
             return id;
         }
         return assignDim(name, type);
-    } 
+    }
 
     Dimension::Id::Enum findDim(const std::string& name)
     {
@@ -189,6 +191,27 @@ public:
 
     const Dimension::IdList& dims() const
         { return m_dims->m_used; }
+
+    std::string dimsJson() const
+    {
+        boost::property_tree::ptree tree;
+        boost::property_tree::ptree dimsTree;
+
+        for (const auto& id : dims())
+        {
+            boost::property_tree::ptree dim;
+            dim.put("name", Dimension::name(id));
+            dim.put("type", Dimension::toTypeName(dimDetail(id)->base()));
+            dim.put("size", dimDetail(id)->size());
+            dimsTree.push_back(std::make_pair("", dim));
+        }
+
+        tree.add_child("dimensions", dimsTree);
+
+        std::ostringstream oss;
+        boost::property_tree::write_json(oss, tree);
+        return oss.str();
+    }
 
 private:
     Dimension::Detail *dimDetail(Dimension::Id::Enum id) const

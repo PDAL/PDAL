@@ -58,6 +58,21 @@ enum Enum
 };
 }
 
+inline std::string toTypeName(BaseType::Enum b)
+{
+    switch (b)
+    {
+    case BaseType::Signed:
+        return "signed";
+    case BaseType::Unsigned:
+        return "unsigned";
+    case BaseType::Floating:
+        return "floating";
+    default:
+        return "";
+    }
+}
+
 namespace Type
 {
 enum Enum
@@ -100,6 +115,8 @@ struct Detail
         { return m_type; }
     size_t size() const
         { return Dimension::size(m_type); }
+    BaseType::Enum base() const
+        { return Dimension::base(m_type); }
 };
 
 namespace Id
