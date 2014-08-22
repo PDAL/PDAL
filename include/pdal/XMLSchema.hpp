@@ -132,6 +132,7 @@ typedef boost::shared_ptr<void> CharPtr;
 
 struct Scale
 {
+    Scale() : m_scale(1.0), m_offset(0.0) {};
     double m_scale;
     double m_offset;
 };
@@ -145,6 +146,7 @@ struct XYZScale
 
 struct DimInfo
 {
+    DimInfo() : m_min(0.0), m_max(0.0), m_scale(1.0), m_offset(0.0) {};
     std::string m_name;
     std::string m_description;
     uint32_t m_position;
@@ -161,6 +163,7 @@ inline bool operator < (const DimInfo& d1, const DimInfo& d2)
 
 struct XMLSchema
 {
+    XMLSchema() : m_orientation(Orientation::PointMajor) {};
     Orientation::Enum m_orientation;
     DimInfoList m_dims;
     XYZScale m_scale;  // To support quick access.
@@ -227,8 +230,9 @@ class PDAL_DLL Writer
 {
 public:
     Writer(const Dimension::IdList& ids,
-        const std::vector<Dimension::Type::Enum>& types) :
-            m_dims(ids), m_types(types)
+        const std::vector<Dimension::Type::Enum>& types, 
+        Orientation::Enum orientation= Orientation::PointMajor) :
+            m_dims(ids), m_types(types), m_orientation(orientation)
         {}
     void setMetadata(MetadataNode& m)
         { m_metadata = m; }
@@ -242,6 +246,7 @@ private:
     Dimension::IdList m_dims;
     std::vector<Dimension::Type::Enum> m_types;
     MetadataNode m_metadata;
+    Orientation::Enum m_orientation;
 
     Writer& operator=(const Writer&); // not implemented
     Writer(const Writer&); // not implemented;
