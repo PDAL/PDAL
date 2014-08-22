@@ -66,35 +66,31 @@ Dimension::Id::Enum getTimeDimensionId(bool syncToPps)
 }
 
 
-DimTypePairVec getRxpDimensionsAndTypes(bool syncToPps)
+Dimension::IdList getRxpDimensions(bool syncToPps)
 {
     using namespace Dimension;
-    std::vector<DimTypePair> pairs;
+    Dimension::IdList ids;
 
-    pairs.push_back(std::make_pair(Id::X, Type::Float));
-    pairs.push_back(std::make_pair(Id::Y, Type::Float));
-    pairs.push_back(std::make_pair(Id::Z, Type::Float));
-    pairs.push_back(std::make_pair(Id::EchoRange, Type::Double));
-    pairs.push_back(std::make_pair(getTimeDimensionId(syncToPps), Type::Double));
-    pairs.push_back(std::make_pair(Id::Amplitude, Type::Float));
-    pairs.push_back(std::make_pair(Id::Reflectance, Type::Float));
-    pairs.push_back(std::make_pair(Id::Deviation, Type::Float));
-    pairs.push_back(std::make_pair(Id::BackgroundRadiation, Type::Float));
-    pairs.push_back(std::make_pair(Id::IsPpsLocked, Type::Unsigned8));
-    pairs.push_back(std::make_pair(Id::ReturnNumber, Type::Unsigned8));
-    pairs.push_back(std::make_pair(Id::NumberOfReturns, Type::Unsigned8));
+    ids.push_back(Id::X);
+    ids.push_back(Id::Y);
+    ids.push_back(Id::Z);
+    ids.push_back(Id::EchoRange);
+    ids.push_back(getTimeDimensionId(syncToPps));
+    ids.push_back(Id::Amplitude);
+    ids.push_back(Id::Reflectance);
+    ids.push_back(Id::Deviation);
+    ids.push_back(Id::BackgroundRadiation);
+    ids.push_back(Id::IsPpsLocked);
+    ids.push_back(Id::ReturnNumber);
+    ids.push_back(Id::NumberOfReturns);
 
-    return pairs;
+    return ids;
 }
 
 
 void registerRxpDimsOnContext(PointContext ctx, bool syncToPps)
 {
-    DimTypePairVec dimTypePairs = getRxpDimensionsAndTypes(syncToPps);
-    for (auto di = dimTypePairs.begin(); di != dimTypePairs.end(); ++di)
-    {
-        ctx.registerDim(di->first, di->second);
-    }
+    ctx.registerDims(getRxpDimensions(syncToPps));
 }
 
 

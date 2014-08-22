@@ -50,12 +50,10 @@ namespace rxp
 
 
 const bool DEFAULT_SYNC_TO_PPS = true;
-typedef std::pair<Dimension::Id::Enum, Dimension::Type::Enum> DimTypePair;
-typedef std::vector<DimTypePair> DimTypePairVec;
 
 Dimension::Id::Enum getTimeDimensionId(bool syncToPps);
 std::string extractRivlibURI(const Options& options);
-DimTypePairVec getRxpDimensionsAndTypes(bool syncToPps);
+Dimension::IdList getRxpDimensions(bool syncToPps);
 
 
 class PDAL_DLL RxpReader : public pdal::Reader
@@ -75,13 +73,7 @@ public:
     static Options getDefaultOptions();
     static Dimension::IdList getDefaultDimensions()
     {
-        Dimension::IdList ids;
-        DimTypePairVec dimTypePairs = getRxpDimensionsAndTypes(DEFAULT_SYNC_TO_PPS);
-        for (auto di = dimTypePairs.begin(); di != dimTypePairs.end(); ++di)
-        {
-            ids.push_back(di->first);
-        }
-        return ids;
+        return getRxpDimensions(DEFAULT_SYNC_TO_PPS);
     }
 
     virtual StageSequentialIterator* createSequentialIterator() const;
