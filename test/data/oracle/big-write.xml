@@ -8,7 +8,7 @@
             1
         </Option>
         <Option name="connection">
-            lidar/lidar@lidar.hobu.biz/lidar
+            grid/grid@localhost/vm
         </Option>
         <Option name="base_table_name">
             AUTZEN_COPY_CLOUD
@@ -84,7 +84,7 @@
                         </Option>
                         <Reader type="drivers.las.reader">
                             <Option name="filename">
-                                ../autzen-colorized-1.2-3.las
+                                ../local/autzen/autzen-colorized-1.2.3-hole.laz
                             </Option>
                             <Option name="spatialreference">
                                 EPSG:2926
