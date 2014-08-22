@@ -266,6 +266,7 @@ BOOST_AUTO_TEST_CASE(find_child_string)
 
 BOOST_AUTO_TEST_CASE(toJSON)
 {
+/**
     MetadataNode top("stats");
     top.add("test", 1);
     MetadataNode l2 = top.add("test", 2);
@@ -277,6 +278,7 @@ BOOST_AUTO_TEST_CASE(toJSON)
     l2.add("foo", 25);
     std::string s = top.toJSON();
     std::cerr << s << "---\n";
+**/
 }
 
 BOOST_AUTO_TEST_CASE(test_metadata_stage)
