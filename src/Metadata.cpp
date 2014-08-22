@@ -44,6 +44,73 @@
 namespace pdal
 {
 
+std::string MetadataNodeImpl::toJSON() const
+{
+    std::ostringstream o;
+
+    o << "{" << std::endl;
+    o << "  " << m_name << ":" << std::endl;
+    o << "  {" << std::endl;
+    toJSON(o, 2);
+    o << "  }" << std::endl;
+    o << "}" << std::endl;
+    return o.str();
+}
+
+
+void MetadataNodeImpl::toJSON(std::ostream& o, int level) const
+{
+    std::string indent(level * 2, ' ');
+
+    o << indent << "\"description\":\"" << m_descrip << "\"," << std::endl;
+    o << indent << "\"type\":\"" << m_type << "\"," << std::endl;
+    o << indent << "\"value\":\"" << m_value << "\"";
+    if (m_subnodes.size())
+        o << ",";
+    o << std::endl;
+    std::map<std::string, MetadataImplList> nodes;
+    for (auto mi = m_subnodes.begin(); mi != m_subnodes.end(); ++mi)
+    {
+        MetadataNodeImplPtr mp = *mi;
+        nodes[mp->m_name].push_back(mp);
+    }
+    
+    for (auto ni = nodes.begin(); ni != nodes.end(); ++ni)
+    {
+        MetadataImplList& subnodes = ni->second;
+        if (subnodes.size() > 1)
+        {
+            o << indent << "\"" << ni->first << "\": [" << std::endl;
+            for (auto si = subnodes.begin(); si != subnodes.end(); ++si)
+            {
+                MetadataNodeImplPtr node = *si;
+
+                o << indent << "{" << std::endl;
+                node->toJSON(o, level + 1);
+                o << indent << "}";
+                if (si != subnodes.rbegin().base() - 1)
+                    o << ",";
+                o << std::endl;
+            }
+            o << indent << "]";
+        }
+        else
+        {
+            o << indent << "\"" << ni->first << "\":" << std::endl;
+            o << indent << "{" << std::endl;
+            MetadataNodeImplPtr node = *subnodes.begin();
+            node->toJSON(o, level + 2);
+            o << indent << "}";
+        }
+        auto nii = ni;
+        nii++;
+        if (nii != nodes.end())
+            o << ",";
+        o << std::endl;
+    }
+}
+
+
 boost::property_tree::ptree MetadataNodeImpl::toPTree() const
 {
     using namespace boost::property_tree;
