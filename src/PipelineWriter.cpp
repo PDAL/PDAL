@@ -49,61 +49,45 @@
 #include <boost/property_tree/json_parser.hpp>
 #include <pdal/FileUtils.hpp>
 
+using namespace boost::property_tree;
+
 namespace pdal
 {
 
-PipelineWriter::PipelineWriter(const PipelineManager& manager)
-    : m_manager(manager)
-    , m_buffer(0)
+static ptree generateTreeFromStage(const Stage& stage)
 {
-
-    return;
-}
-
-
-PipelineWriter::~PipelineWriter()
-{
-    return;
-}
-
-
-static boost::property_tree::ptree generateTreeFromStage(const Stage& stage)
-{
-    boost::property_tree::ptree subtree = stage.serializePipeline();
-    boost::property_tree::ptree tree;
-    boost::property_tree::ptree& attrtree = tree.add_child("Pipeline", subtree);
+    ptree tree;
+    ptree& attrtree = tree.add_child("Pipeline", stage.serializePipeline());
     attrtree.put("<xmlattr>.version", "1.0");
     return tree;
 }
 
 
-void PipelineWriter::write_option_ptree(boost::property_tree::ptree& tree, const Options& opts)
+void PipelineWriter::write_option_ptree(ptree& tree, const Options& opts)
 {
-    boost::property_tree::ptree m_tree = opts.toPTree();
+    ptree m_tree = opts.toPTree();
 
-    boost::property_tree::ptree::const_iterator iter = m_tree.begin();
-
+    ptree::const_iterator iter = m_tree.begin();
     while (iter != m_tree.end())
     {
         if (iter->first != "Option")
             throw pdal_error("malformed Options ptree");
-        const boost::property_tree::ptree& optionTree = iter->second;
+        const ptree& optionTree = iter->second;
 
         // we want to create this:
         //      ...
         //      <Option name="file">foo.las</Option>
         //      ...
 
-        const std::string& name = optionTree.get_child("Name").get_value<std::string>();
-        const std::string& value = optionTree.get_child("Value").get_value<std::string>();
+        const std::string& name =
+            optionTree.get_child("Name").get_value<std::string>();
+        const std::string& value =
+            optionTree.get_child("Value").get_value<std::string>();
 
-        boost::property_tree::ptree& subtree = tree.add("Option", value);
+        ptree& subtree = tree.add("Option", value);
         subtree.put("<xmlattr>.name", name);
 
-        using namespace boost::property_tree;
-        using namespace boost;
-
-        optional<ptree const&> moreOptions =
+        boost::optional<ptree const&> moreOptions =
             optionTree.get_child_optional("Options");
 
         if (moreOptions)
@@ -114,16 +98,12 @@ void PipelineWriter::write_option_ptree(boost::property_tree::ptree& tree, const
         }
         ++iter;
     }
-
-    return;
 }
 
-boost::property_tree::ptree PipelineWriter::getMetadataEntry(
-    const MetadataNode& input)
-{
-    using namespace boost;
 
-    property_tree::ptree entry;
+ptree PipelineWriter::getMetadataEntry(const MetadataNode& input)
+{
+    ptree entry;
 
     entry.put_value(input.value());
     entry.put("<xmlattr>.name", input.name());
@@ -131,10 +111,7 @@ boost::property_tree::ptree PipelineWriter::getMetadataEntry(
 
     std::vector<MetadataNode> children = input.children();
     for (auto ci = children.begin(); ci != children.end(); ++ci)
-    {
-        property_tree::ptree e = getMetadataEntry(*ci);
-        entry.add_child("Metadata", e);
-    }
+        entry.add_child("Metadata", getMetadataEntry(*ci));
     return entry;
 }
 
@@ -152,16 +129,14 @@ void PipelineWriter::writePipeline(const std::string& filename) const
         (Stage*)m_manager.getWriter() :
         (Stage*)m_manager.getStage();
 
-    boost::property_tree::ptree tree = generateTreeFromStage(*stage);
-
-    const boost::property_tree::xml_parser::xml_writer_settings<char>
-        settings(' ', 4);
+    ptree tree = generateTreeFromStage(*stage);
+    const xml_parser::xml_writer_settings<char> settings(' ', 4);
 
     if (boost::iequals(filename, "STDOUT"))
-        boost::property_tree::xml_parser::write_xml(std::cout, tree);
+        xml_parser::write_xml(std::cout, tree);
     else
-        boost::property_tree::xml_parser::write_xml(filename, tree,
-            std::locale(), settings);
+        xml_parser::write_xml(filename, tree, std::locale(), settings);
 }
 
 } // namespace pdal
+

@@ -50,11 +50,10 @@
 
 BOOST_AUTO_TEST_SUITE(MetadataTest)
 
+using namespace pdal;
 
 BOOST_AUTO_TEST_CASE(test_construction)
 {
-    using namespace pdal;
-
     uint32_t u32(32u);
     int32_t i32(-32);
     uint64_t u64(64u);
@@ -148,8 +147,6 @@ BOOST_AUTO_TEST_CASE(test_construction)
 #ifdef PDAL_SRS_ENABLED
 BOOST_AUTO_TEST_CASE(test_construction_with_srs)
 {
-    using namespace pdal;
-
     MetadataNode m;
     SpatialReference ref("EPSG:4326");
     MetadataNode m2 = m.add("spatialreference", ref);
@@ -174,8 +171,6 @@ BOOST_AUTO_TEST_CASE(test_construction_with_srs)
 
 BOOST_AUTO_TEST_CASE(test_metadata_copy)
 {
-    using namespace pdal;
-
     MetadataNode m;
     MetadataNode m2 = m.add("val", 2u);
     uint32_t t = boost::lexical_cast<uint32_t>(m2.value());
@@ -184,8 +179,6 @@ BOOST_AUTO_TEST_CASE(test_metadata_copy)
 
 BOOST_AUTO_TEST_CASE(test_metadata_set)
 {
-    using namespace pdal;
-
     MetadataNode m;
 
     MetadataNode m1 = m.add("m1", 1u);
@@ -258,8 +251,6 @@ BOOST_AUTO_TEST_CASE(test_vlr_metadata)
 
 BOOST_AUTO_TEST_CASE(find_child_string)
 {
-    using namespace pdal;
-
     MetadataNode top;
     MetadataNode m = top.add("level1");
     MetadataNode l21 = m.add("level2");
@@ -271,6 +262,23 @@ BOOST_AUTO_TEST_CASE(find_child_string)
     BOOST_CHECK_EQUAL(n.value(), "210");
     n = top.findChild("level1:level2:220");
     BOOST_CHECK_EQUAL(n.value(), "220");
+}
+
+BOOST_AUTO_TEST_CASE(toJSON)
+{
+/**
+    MetadataNode top("stats");
+    top.add("test", 1);
+    MetadataNode l2 = top.add("test", 2);
+    top.add("test", "3");
+    top.add("test2", "foo");
+
+    l2.add("foo", 3.56);
+    l2.add("bar", "ballet");
+    l2.add("foo", 25);
+    std::string s = top.toJSON();
+    std::cerr << s << "---\n";
+**/
 }
 
 BOOST_AUTO_TEST_CASE(test_metadata_stage)

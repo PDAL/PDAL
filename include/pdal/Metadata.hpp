@@ -95,12 +95,19 @@ class Metadata;
 class MetadataNode;
 class MetadataNodeImpl;
 typedef std::shared_ptr<MetadataNodeImpl> MetadataNodeImplPtr;
+typedef std::vector<MetadataNodeImplPtr> MetadataImplList;
 
 class MetadataNodeImpl
 {
     friend class MetadataNode;
 
 private:
+    MetadataNodeImpl(const std::string& name) : m_name(name)
+    {}
+
+    MetadataNodeImpl()
+    {}
+
     MetadataNodeImplPtr add(const std::string& name)
     {
         MetadataNodeImplPtr sub(new MetadataNodeImpl());
@@ -141,13 +148,16 @@ private:
     template <std::size_t N>
     inline void setValue(const char(& c)[N]);
     
+    std::string toJSON() const;
+    void toJSON(std::ostream& o, int level) const;
+    void subnodesToJSON(std::ostream& o, int level) const;
     boost::property_tree::ptree toPTree() const;
     
     std::string m_name;
     std::string m_descrip;
     std::string m_type;
     std::string m_value;
-    std::vector<MetadataNodeImplPtr> m_subnodes;
+    MetadataImplList m_subnodes;
 };
 
 template <>
@@ -300,6 +310,9 @@ public:
     MetadataNode() : m_impl(new MetadataNodeImpl())
         {}
 
+    MetadataNode(const std::string& name) : m_impl(new MetadataNodeImpl(name))
+        {}
+
     MetadataNode add(const std::string& name)
         { return MetadataNode(m_impl->add(name)); }
 
@@ -432,6 +445,9 @@ public:
         }
         return MetadataNode();
     }
+
+    std::string toJSON() const
+        { return m_impl->toJSON(); }
 
     inline boost::property_tree::ptree toPTree() const
     {

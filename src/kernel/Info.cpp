@@ -265,18 +265,18 @@ void Info::dumpPointsSequential(PointBuffer& ptBuf,
 }
 
 
-void Info::dumpStats() const
+void Info::dumpStats()
 {
     PipelineWriter* writer = NULL;
 
     if (m_pipelineFile.size() > 0)
-    {
-        PointBuffer buffer(*m_context);
         writer = new pdal::PipelineWriter(*m_manager);
-        writer->setPointBuffer(&buffer);
-    }
 
-    m_tree->add_child("stats", m_manager->getMetadata().toPTree());
+    MetadataNode statsNode("stats");
+
+    statsNode.add(m_manager->getMetadata());
+    m_meta.add(statsNode);
+//    m_tree->add_child("stats", m_manager->getMetadata().toPTree());
     
     if (m_pipelineFile.size() > 0)
         writer->writePipeline(m_pipelineFile);
@@ -287,7 +287,6 @@ void Info::dump()
 {
     if (m_showStats)
         dumpStats();
-
 
     if (m_pointIndexes.size())
         dumpPoints();
@@ -402,20 +401,17 @@ int Info::execute()
     
     Options options = m_options + readerOptions;
     
-    Stage* reader = m_manager->getStage();
-    Stage* stage = reader;
+    Stage* stage = m_manager->getStage();
     if (m_showStats)
         stage = m_manager->addFilter("filters.stats", stage, options);
     if (m_computeBoundary)
         stage = m_manager->addFilter("filters.hexbin", stage, options);
-    stage = m_manager->addFilter("filters.hexbin", stage, options);
     
     m_context = std::unique_ptr<PointContext>(new PointContext);
     m_tree = std::unique_ptr<boost::property_tree::ptree>(
         new boost::property_tree::ptree);
 
     std::ostream& ostr = std::cout;
-    boost::property_tree::ptree tree;
     m_manager->execute();
     dump();
 
@@ -435,13 +431,13 @@ int Info::execute()
     // if (m_QueryPoint.size())
     //     dumpQuery(ctx, *filter);
     
+    /**
     if (m_useXML)
         write_xml(ostr, *m_tree);
     else
         write_json(ostr, *m_tree);
-    
-    ostr << std::endl;
-    
+    **/
+    ostr << m_meta.toJSON() << std::endl;
     
     return 0;
 }
