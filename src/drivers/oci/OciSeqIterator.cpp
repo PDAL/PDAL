@@ -102,6 +102,28 @@ point_count_t OciSeqIterator::readDimMajor(PointBuffer& buffer, BlockPtr block,
         {
             buffer.setField(d.m_id, d.m_type, nextId, pos);
             pos += Dimension::size(d.m_type);
+            
+            if (d.m_id == Dimension::Id::X)
+            {
+                double v = buffer.getFieldAs<double>(Dimension::Id::X, nextId);
+                v = v * block->xScale() + block->xOffset();
+                buffer.setField(Dimension::Id::X, nextId, v);
+            }
+
+            if (d.m_id == Dimension::Id::Y)
+            {
+                double v = buffer.getFieldAs<double>(Dimension::Id::Y, nextId);
+                v = v * block->yScale() + block->yOffset();
+                buffer.setField(Dimension::Id::Y, nextId, v);
+            }
+
+            if (d.m_id == Dimension::Id::Z)
+            {
+                double v = buffer.getFieldAs<double>(Dimension::Id::Z, nextId);
+                v = v * block->zScale() + block->zOffset();
+                buffer.setField(Dimension::Id::Z, nextId, v);
+            }            
+        
             nextId++;
             numRead++;
             blockRemaining--;
