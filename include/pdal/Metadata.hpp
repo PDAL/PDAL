@@ -150,6 +150,7 @@ private:
     
     std::string toJSON() const;
     void toJSON(std::ostream& o, int level) const;
+    void subnodesToJSON(std::ostream& o, int level) const;
     boost::property_tree::ptree toPTree() const;
     
     std::string m_name;

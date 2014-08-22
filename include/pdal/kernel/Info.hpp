@@ -32,8 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_PDAL_KERNEL_INFO_HPP
-#define INCLUDED_PDAL_KERNEL_INFO_HPP
+#pragma once
 
 #include <pdal/Stage.hpp>
 #include <pdal/StageIterator.hpp>
@@ -76,7 +75,7 @@ private:
     void dumpPointsSequential(PointBuffer& ptBuf,
         const std::vector<uint32_t>& points,
         StageSequentialIterator *iter) const;
-    void dumpStats() const;
+    void dumpStats();
     void dumpQuery() const;
     void dumpMetadata(PointContext ctx, const Stage&) const;
     void dumpSDO_PCMetadata(PointContext ctx, Stage const&) const;
@@ -102,9 +101,12 @@ private:
     std::string m_pipelineFile;
     bool m_showSample;
     std::unique_ptr<PointContext> m_context;
+    MetadataNode m_meta;
+    //ABELL
     std::unique_ptr<boost::property_tree::ptree> m_tree;
     std::unique_ptr<PipelineManager> m_manager;
 };
 
-}} // pdal::kernel
-#endif
+} // namespace kernel
+} // namespace pdal
+
