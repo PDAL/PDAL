@@ -271,9 +271,7 @@ void Info::dumpStats() const
 
     if (m_pipelineFile.size() > 0)
     {
-        PointBuffer buffer(*m_context);
         writer = new pdal::PipelineWriter(*m_manager);
-        writer->setPointBuffer(&buffer);
     }
 
     m_tree->add_child("stats", m_manager->getMetadata().toPTree());
@@ -415,7 +413,6 @@ int Info::execute()
         new boost::property_tree::ptree);
 
     std::ostream& ostr = std::cout;
-    boost::property_tree::ptree tree;
     m_manager->execute();
     dump();
 
