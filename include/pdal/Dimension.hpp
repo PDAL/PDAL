@@ -58,7 +58,7 @@ enum Enum
 };
 }
 
-inline std::string toTypeName(BaseType::Enum b)
+inline std::string toName(BaseType::Enum b)
 {
     switch (b)
     {
