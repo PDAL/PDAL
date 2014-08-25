@@ -64,7 +64,7 @@ public:
         case 1:
             id = Dimension::Id::Y;
             break;
-        case 3:
+        case 2:
             id = Dimension::Id::Z;
             break;
         }
