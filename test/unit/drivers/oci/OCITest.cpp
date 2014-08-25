@@ -239,19 +239,19 @@ bool WriteUnprojectedData()
     Option disable_cloud_trigger("disable_cloud_trigger", true, "");
     options.add(disable_cloud_trigger);
 
-    Option max_cache_blocks("max_cache_blocks", 1, "");
-    options.add(max_cache_blocks);
-
+    Option store_dimensional_orientation("store_dimensional_orientation", true, "");
+    options.add(store_dimensional_orientation);
+    
     Option filename("filename", Support::datapath("autzen-utm.las"), "");
     options.add(filename);
     
     PointContext ctx;
     
     pdal::drivers::las::Reader reader(options);
-    pdal::filters::Chipper chipper(options);
-    chipper.setInput(&reader);
+    // pdal::filters::Chipper chipper(options);
+    // chipper.setInput(&reader);
     pdal::drivers::oci::Writer writer(options);
-    writer.setInput(&chipper);
+    writer.setInput(&reader);
 
     writer.prepare(ctx);
     writer.execute(ctx);
@@ -392,8 +392,9 @@ BOOST_AUTO_TEST_CASE(read_unprojected_data)
     
     // checkUnProjectedPoints(data);
     
-    compareAgainstSourceBuffer(data,  Support::datapath("autzen-utm-chipped-25.las"));
-
+    // compareAgainstSourceBuffer(data,  Support::datapath("autzen-utm-chipped-25.las"));
+    compareAgainstSourceBuffer(data,  Support::datapath("autzen-utm.las"));
+    
     delete iter;
 
 }
