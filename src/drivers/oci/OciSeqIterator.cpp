@@ -66,7 +66,7 @@ void OciSeqIterator::readBlob(Statement stmt, BlockPtr block)
         block->chunk.resize(blobLength);
 
     if (!stmt->ReadBlob(block->locator, (void*)(block->chunk.data()),
-        block->chunk.size() , &amountRead))
+                        block->chunk.size() , &amountRead))
         throw pdal_error("Did not read all blob data!");
 }
 
@@ -74,6 +74,7 @@ void OciSeqIterator::readBlob(Statement stmt, BlockPtr block)
 point_count_t OciSeqIterator::read(PointBuffer& buffer, BlockPtr block,
     point_count_t numPts)
 {
+    Orientation::Enum orientation = block->orientation();
     if (block->orientation() == Orientation::DimensionMajor)
         return readDimMajor(buffer, block, numPts);
     else if (block->orientation() == Orientation::PointMajor)
@@ -122,7 +123,7 @@ point_count_t OciSeqIterator::readDimMajor(PointBuffer& buffer, BlockPtr block,
                 double v = buffer.getFieldAs<double>(Dimension::Id::Z, nextId);
                 v = v * block->zScale() + block->zOffset();
                 buffer.setField(Dimension::Id::Z, nextId, v);
-            }            
+            }
         
             nextId++;
             numRead++;
@@ -189,11 +190,7 @@ char *OciSeqIterator::seekDimMajor(const schema::DimInfo& d, BlockPtr block)
 
 char *OciSeqIterator::seekPointMajor(BlockPtr block)
 {
-    size_t size = 0;
-    schema::DimInfoList dims = block->m_schema.m_dims;
-    for (auto di = dims.begin(); di != dims.end(); ++di)
-        size += Dimension::size(di->m_type);
-    return block->data() + (block->numRead() * size);
+    return block->data() + (block->numRead() * block->m_point_size);
 }
 
 

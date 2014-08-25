@@ -49,10 +49,15 @@ std::string MetadataNodeImpl::toJSON() const
     std::ostringstream o;
 
     o << "{" << std::endl;
-    o << "  " << m_name << ":" << std::endl;
-    o << "  {" << std::endl;
-    toJSON(o, 2);
-    o << "  }" << std::endl;
+    if (m_name.empty())
+        subnodesToJSON(o, 1);
+    else
+    {
+        o << "  " << m_name << ":" << std::endl;
+        o << "  {" << std::endl;
+        toJSON(o, 2);
+        o << "  }" << std::endl;
+    }
     o << "}" << std::endl;
     return o.str();
 }
@@ -68,6 +73,14 @@ void MetadataNodeImpl::toJSON(std::ostream& o, int level) const
     if (m_subnodes.size())
         o << ",";
     o << std::endl;
+    subnodesToJSON(o, level);
+}
+
+
+void MetadataNodeImpl::subnodesToJSON(std::ostream& o, int level) const
+{
+    std::string indent(level * 2, ' ');
+
     std::map<std::string, MetadataImplList> nodes;
     for (auto mi = m_subnodes.begin(); mi != m_subnodes.end(); ++mi)
     {
@@ -99,7 +112,7 @@ void MetadataNodeImpl::toJSON(std::ostream& o, int level) const
             o << indent << "\"" << ni->first << "\":" << std::endl;
             o << indent << "{" << std::endl;
             MetadataNodeImplPtr node = *subnodes.begin();
-            node->toJSON(o, level + 2);
+            node->toJSON(o, level + 1);
             o << indent << "}";
         }
         auto nii = ni;

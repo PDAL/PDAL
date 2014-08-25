@@ -755,6 +755,15 @@ void Writer::writeSchema(TextWriterPtr writer)
         xmlTextWriterEndElement(w);
         xmlTextWriterFlush(w);
     }
+    std::ostringstream orientation;
+    if (m_orientation == Orientation::PointMajor)
+        orientation << "point";
+    if (m_orientation == Orientation::DimensionMajor)
+        orientation << "dimension";
+    xmlTextWriterWriteElementNS(w, (const xmlChar*) "pc", (const xmlChar*) "orientation", NULL, (const xmlChar*) orientation.str().c_str());
+    xmlTextWriterEndElement(w);
+    xmlTextWriterFlush(w);
+         
 #endif
 }
 

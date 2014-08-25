@@ -591,7 +591,7 @@ void Writer::createPCEntry()
         s_geom << "," << bounds.getMaximum(2);
     s_geom << "))";
 
-    schema::Writer writer(m_dims, m_types);
+    schema::Writer writer(m_dims, m_types, m_orientation);
     std::string schemaData = writer.getXML();
 
     oss << "declare\n"

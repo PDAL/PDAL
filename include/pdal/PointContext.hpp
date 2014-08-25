@@ -192,6 +192,11 @@ public:
     const Dimension::IdList& dims() const
         { return m_dims->m_used; }
 
+    Dimension::Type::Enum dimType(Dimension::Id::Enum id) const
+    {
+        return hasDim(id) ? dimDetail(id)->type() : Dimension::Type::None;
+    }
+
     std::string dimsJson() const
     {
         boost::property_tree::ptree tree;
@@ -201,7 +206,7 @@ public:
         {
             boost::property_tree::ptree dim;
             dim.put("name", Dimension::name(id));
-            dim.put("type", Dimension::toTypeName(dimDetail(id)->base()));
+            dim.put("type", Dimension::toName(dimDetail(id)->base()));
             dim.put("size", dimDetail(id)->size());
             dimsTree.push_back(std::make_pair("", dim));
         }

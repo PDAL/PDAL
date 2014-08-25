@@ -132,6 +132,7 @@ public:
     int32_t m_num_remaining;
     PointContext m_ctx;
     schema::XMLSchema m_schema;
+    size_t m_point_size;
     bool m_fetched;  // Set when fetched but not initialized
 };
 typedef std::shared_ptr<Block> BlockPtr;

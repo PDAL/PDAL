@@ -135,8 +135,8 @@ Options getOCIOptions()
     Option pack("pack_ignored_fields", true, "");
     options.add(pack);
     
-    Option xml_schema_dump("xml_schema_dump", "oracle-xml-schema-dump.xml", "");
-    // options.add(xml_schema_dump);
+    Option xml_schema_dump("xml_schema_dump", "pcs-oracle-xml-schema-dump.xml", "");
+    options.add(xml_schema_dump);
 
     
     return options;
@@ -239,19 +239,19 @@ bool WriteUnprojectedData()
     Option disable_cloud_trigger("disable_cloud_trigger", true, "");
     options.add(disable_cloud_trigger);
 
-    Option max_cache_blocks("max_cache_blocks", 1, "");
-    options.add(max_cache_blocks);
-
+    Option store_dimensional_orientation("store_dimensional_orientation", true, "");
+    options.add(store_dimensional_orientation);
+    
     Option filename("filename", Support::datapath("autzen-utm.las"), "");
     options.add(filename);
     
     PointContext ctx;
     
     pdal::drivers::las::Reader reader(options);
-    pdal::filters::Chipper chipper(options);
-    chipper.setInput(&reader);
+    // pdal::filters::Chipper chipper(options);
+    // chipper.setInput(&reader);
     pdal::drivers::oci::Writer writer(options);
-    writer.setInput(&chipper);
+    writer.setInput(&reader);
 
     writer.prepare(ctx);
     writer.execute(ctx);
@@ -260,123 +260,6 @@ bool WriteUnprojectedData()
     
     return true;
 }
-
-// 
-// BOOST_AUTO_TEST_CASE(read_basic_smaller_block_view)
-// {
-//     if (!ShouldRunTest()) return;
-// 
-//     WriteDefaultData();
-// 
-//     std::ostringstream oss;
-// 
-//     oss << "SELECT  l.\"OBJ_ID\", l.\"BLK_ID\", l.\"BLK_EXTENT\", l.\"BLK_DOMAIN\","
-//         "        l.\"PCBLK_MIN_RES\", l.\"PCBLK_MAX_RES\", l.\"NUM_POINTS\","
-//         "        l.\"NUM_UNSORTED_POINTS\", l.\"PT_SORT_DIM\", l.\"POINTS\", b.cloud "
-//         "FROM PDAL_TEST_BLOCKS l, PDAL_TEST_BASE b "
-//         "WHERE b.id=1 and l.obj_id = b.id "
-//         "ORDER BY l.obj_id ";
-//     Options options = getOCIOptions();
-//     Option& query = options.getOptionByRef("query");
-//     query.setValue<std::string>(oss.str());
-//     pdal::drivers::oci::Reader reader_reader(options);
-// 
-//     Options writerOpts;
-//     Option filename("filename", "read_basic_smaller_block_view-write.las","");
-//     Option chunk_size("chunk_size", 120,"");
-//     writerOpts.add(filename);
-//     writerOpts.add(chunk_size);
-// 
-//     pdal::drivers::las::Writer writer(reader_reader, writerOpts);
-//     writer.prepare();
-//     boost::uint64_t numWritten = writer.write(0);
-//     BOOST_CHECK_EQUAL(numWritten, 1065u);
-// 
-// 
-// }
-
-// BOOST_AUTO_TEST_CASE(read_basic_small_block)
-// {
-//     if (!ShouldRunTest()) return;
-// 
-//     WriteDefaultData();
-// 
-//     Options options = getOCIOptions();
-//     Option& query = options.getOptionByRef("query");
-// 
-//     query.setValue<std::string>("SELECT CLOUD FROM PDAL_TEST_BASE where ID=1");
-//     pdal::drivers::oci::Reader reader_reader(options);
-//     reader_reader.prepare();
-// 
-//     pdal::PointBuffer data(reader_reader.getSchema(), 110);
-// 
-//     boost::scoped_ptr<pdal::StageSequentialIterator> iter(reader_reader.createSequentialIterator(data));
-// 
-// 
-//     boost::uint32_t numRead = iter->read(data);
-// 
-//     BOOST_CHECK_EQUAL(numRead, 110u);
-// 
-//     pdal::Schema const& schema = data.getSchema();
-//     pdal::Dimension const& dimX = schema.getDimension("X");
-//     pdal::Dimension const& dimY = schema.getDimension("Y");
-//     pdal::Dimension const& dimZ = schema.getDimension("Z");
-//     pdal::Dimension const& dimIntensity = schema.getDimension("Intensity");
-//     pdal::Dimension const& dimRed = schema.getDimension("Red");
-// 
-//     boost::int32_t x = data.getFieldAs<boost::int32_t>(dimX, 0);
-//     boost::int32_t y = data.getFieldAs<boost::int32_t>(dimY, 0);
-//     boost::int32_t z = data.getFieldAs<boost::int32_t>(dimZ, 0);
-//     boost::uint16_t intensity = data.getFieldAs<boost::uint16_t>(dimIntensity, 6);
-//     boost::uint16_t red = data.getFieldAs<boost::uint16_t>(dimRed, 6);
-// 
-//     BOOST_CHECK_EQUAL(x, -1250367506);
-//     BOOST_CHECK_EQUAL(y, 492519663);
-//     BOOST_CHECK_EQUAL(z, 12931);
-//     BOOST_CHECK_EQUAL(intensity, 67);
-//     BOOST_CHECK_EQUAL(red, 113);
-// }
-// 
-// 
-// BOOST_AUTO_TEST_CASE(read_basic_big_block)
-// {
-//     if (!ShouldRunTest()) return;
-// 
-//     WriteDefaultData();
-// 
-//     Options options = getOCIOptions();
-//     Option& query = options.getOptionByRef("query");
-//     query.setValue<std::string>("SELECT CLOUD FROM PDAL_TEST_BASE where ID=1");
-//     pdal::drivers::oci::Reader reader_reader(options);
-//     reader_reader.prepare();
-// 
-//     pdal::PointBuffer data2(reader_reader.getSchema(), 1500);
-//     boost::scoped_ptr<pdal::StageSequentialIterator> iter2(reader_reader.createSequentialIterator(data2));
-// 
-// 
-//     boost::uint32_t numRead2 = iter2->read(data2);
-// 
-//     BOOST_CHECK_EQUAL(numRead2, 1065u);
-// 
-//     pdal::Schema const& schema2 = data2.getSchema();
-//     pdal::Dimension const& dimX2 = schema2.getDimension("X");
-//     pdal::Dimension const& dimY2 = schema2.getDimension("Y");
-//     pdal::Dimension const& dimZ2 = schema2.getDimension("Z");
-//     pdal::Dimension const& dimIntensity2 = schema2.getDimension("Intensity");
-//     pdal::Dimension const& dimRed2 = schema2.getDimension("Red");
-// 
-//     boost::int32_t x2 = data2.getFieldAs<boost::int32_t>(dimX2, 0);
-//     boost::int32_t y2 = data2.getFieldAs<boost::int32_t>(dimY2, 0);
-//     boost::int32_t z2 = data2.getFieldAs<boost::int32_t>(dimZ2, 0);
-//     boost::uint16_t intensity2 = data2.getFieldAs<boost::uint16_t>(dimIntensity2, 6);
-//     boost::uint16_t red2 = data2.getFieldAs<boost::uint16_t>(dimRed2, 6);
-// 
-//     BOOST_CHECK_EQUAL(x2, -1250294195);
-//     BOOST_CHECK_EQUAL(y2, 492520900);
-//     BOOST_CHECK_EQUAL(z2, 12772);
-//     BOOST_CHECK_EQUAL(intensity2, 216);
-//     BOOST_CHECK_EQUAL(red2, 78);
-// }
 
 void checkUnProjectedPoints(PointBuffer const& data)
 {
@@ -507,10 +390,11 @@ BOOST_AUTO_TEST_CASE(read_unprojected_data)
     BOOST_CHECK_EQUAL(numRead, 1065u);
     BOOST_CHECK_EQUAL(data.size(), 1065u);
     
-    checkUnProjectedPoints(data);
+    // checkUnProjectedPoints(data);
     
     // compareAgainstSourceBuffer(data,  Support::datapath("autzen-utm-chipped-25.las"));
-
+    compareAgainstSourceBuffer(data,  Support::datapath("autzen-utm.las"));
+    
     delete iter;
 
 }
