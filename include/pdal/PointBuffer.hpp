@@ -161,12 +161,12 @@ public:
         \verbatim embed:rst
         .. note::
 
-            This method requires that an `X`, `Y`, and `Z` dimension be 
-            available, and that it can be casted into a *double* data 
-            type using the :cpp:func:`pdal::Dimension::applyScaling` 
+            This method requires that an `X`, `Y`, and `Z` dimension be
+            available, and that it can be casted into a *double* data
+            type using the :cpp:func:`pdal::Dimension::applyScaling`
             method. Otherwise, an exception will be thrown.
         \endverbatim
-    */    
+    */
     pdal::Bounds<double> calculateBounds(bool bis3d=true) const;
     void dump(std::ostream& ostr) const;
     bool hasDim(Dimension::Id::Enum id) const
@@ -240,6 +240,7 @@ inline T PointBuffer::getFieldAs(Dimension::Id::Enum dim,
         val = getFieldInternal<uint64_t>(dim, pointIndex);
         break;
     case Dimension::Type::None:
+    default:
         val = 0;
         break;
     }
@@ -265,7 +266,7 @@ inline T PointBuffer::getFieldAs(Dimension::Id::Enum dim,
 #ifdef PDAL_COMPILER_MSVC
 // warning C4127: conditional expression is constant
 #pragma warning(pop)
-#endif	
+#endif
 }
 
 
@@ -273,7 +274,7 @@ template<typename T_IN, typename T_OUT>
 void PointBuffer::convertAndSet(Dimension::Id::Enum dim, PointId idx, T_IN in)
 {
     T_OUT out;
-	
+
 #ifdef PDAL_COMPILER_MSVC
 // warning C4127: conditional expression is constant
 #pragma warning(push)
