@@ -65,12 +65,22 @@ void Reader::processOptions(const Options& options)
     m_bounds = options.getValueOrThrow<Bounds<double>>("bounds");
     m_numPoints = options.getValueOrThrow<uint64_t>("num_points");
     m_mode = string2mode(options.getValueOrThrow<std::string>("mode"));
+    // boost::lexical_cast, which is used by option.getValue<>, doesn't deal
+    // nicely with uint8_t.
+    // http://www.boost.org/doc/libs/1_56_0/doc/html/boost_lexical_cast/frequently_asked_questions.html
+    m_numberOfReturns = boost::numeric_cast<uint8_t>(
+            options.getValueOrDefault<int>("number_of_returns", 0));
 }
 
 
 void Reader::addDimensions(PointContext ctx)
 {
     ctx.registerDims(getDefaultDimensions());
+    if (m_numberOfReturns > 0)
+    {
+        ctx.registerDim(Dimension::Id::ReturnNumber);
+        ctx.registerDim(Dimension::Id::NumberOfReturns);
+    }
 }
 
 
@@ -95,7 +105,8 @@ Options Reader::getDefaultOptions()
 
 pdal::StageSequentialIterator* Reader::createSequentialIterator() const
 {
-    return new FauxSeqIterator(m_bounds, m_mode, m_numPoints, log());
+    return new FauxSeqIterator(m_bounds, m_mode, m_numPoints,
+                               m_numberOfReturns, log());
 }
 
 } // namespace faux
@@ -103,8 +114,10 @@ pdal::StageSequentialIterator* Reader::createSequentialIterator() const
 
 
 FauxSeqIterator::FauxSeqIterator(const Bounds<double>& bounds,
-        drivers::faux::Mode mode, point_count_t numPoints, LogPtr log) :
-    m_time(0), m_mode(mode), m_numPoints(numPoints), m_log(log)
+        drivers::faux::Mode mode, point_count_t numPoints,
+        uint8_t numberOfReturns, LogPtr log) :
+    m_time(0), m_mode(mode), m_numPoints(numPoints), 
+    m_returnNumber(1), m_numberOfReturns(numberOfReturns), m_log(log)
 {
     const std::vector<Range<double>>& ranges = bounds.dimensions();
     m_minX = ranges[0].getMinimum();
@@ -156,6 +169,12 @@ point_count_t FauxSeqIterator::readImpl(PointBuffer& buf, point_count_t count)
         buf.setField(Dimension::Id::Y, idx, y);
         buf.setField(Dimension::Id::Z, idx, z);
         buf.setField(Dimension::Id::OffsetTime, idx, m_time++);
+        if (m_numberOfReturns > 0)
+        {
+            buf.setField(Dimension::Id::ReturnNumber, idx, m_returnNumber);
+            buf.setField(Dimension::Id::NumberOfReturns, idx, m_numberOfReturns);
+            m_returnNumber = (m_returnNumber % 10) + 1;
+        }
     }
     return count;
 }

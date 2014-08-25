@@ -206,4 +206,37 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode_2)
 }
 
 
+BOOST_AUTO_TEST_CASE(test_return_number)
+{
+    using namespace pdal;
+
+    Options ops;
+
+    Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
+    ops.add("bounds", bounds);
+    ops.add("num_points", 100);
+    ops.add("mode", "constant");
+    ops.add("number_of_returns", 10);
+    drivers::faux::Reader reader(ops);
+
+    PointContext ctx;
+    reader.prepare(ctx);
+
+    PointBuffer buf(ctx);
+    StageSequentialIterator* iter = reader.createSequentialIterator();
+    point_count_t numRead = iter->read(buf, 100);
+
+    for (point_count_t i = 0; i < numRead; i++)
+    {
+        uint8_t returnNumber = buf.getFieldAs<uint8_t>(Dimension::Id::ReturnNumber, i);
+        uint8_t numberOfReturns = buf.getFieldAs<uint8_t>(Dimension::Id::NumberOfReturns, i);
+
+        BOOST_CHECK_EQUAL(returnNumber, (i % 10) + 1);
+        BOOST_CHECK_EQUAL(numberOfReturns, 10);
+    }
+
+    delete iter;
+}
+
+
 BOOST_AUTO_TEST_SUITE_END()
