@@ -156,6 +156,7 @@ BOOST_AUTO_TEST_CASE(testSkip)
     BOOST_CHECK_EQUAL(numSkip, 1);
     pdal::point_count_t numRead = iter->read(data, 1);
     BOOST_CHECK_EQUAL(numRead, 1);
+    pdal::StageTester::done(&reader, ctx);
     delete iter;
  
     checkPoint(data, 0, 2.2641847133636475, -0.038409631699323654, -1.3245694637298584, 342656.34235912003,
@@ -177,6 +178,7 @@ BOOST_AUTO_TEST_CASE(testAtEnd)
     pdal::point_count_t numRead = iter->read(data, 177209);
     BOOST_CHECK_EQUAL(numRead, 177208);
     BOOST_CHECK(iter->atEnd());
+    pdal::StageTester::done(&reader, ctx);
     delete iter;
 }
 
@@ -195,6 +197,7 @@ BOOST_AUTO_TEST_CASE(testNoPpsSync)
     pdal::StageTester::ready(&reader, ctx);
     pdal::StageSequentialIterator* iter = reader.createSequentialIterator();
     iter->read(data, 1);
+    pdal::StageTester::done(&reader, ctx);
     delete iter;
 
     checkPoint(data, 0, 0.0705248788, -0.0417557284, 0.0304775704, 31.917255942733149,
