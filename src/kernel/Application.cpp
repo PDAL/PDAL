@@ -75,8 +75,7 @@ Application::~Application()
 {
     if (m_options.size())
     {
-        typedef std::vector<boost::program_options::options_description*>::const_iterator  Iter;
-        for (Iter i = m_options.begin(); i != m_options.end(); ++i)
+        for (auto i = m_options.begin(); i != m_options.end(); ++i)
         {
             delete (*i);
         }        
@@ -312,14 +311,13 @@ void Application::outputDrivers()
 {
     pdal::StageFactory factory;
     std::map<std::string, pdal::StageInfo> const& drivers = factory.getStageInfos();
-    typedef std::map<std::string, pdal::StageInfo>::const_iterator Iterator;
     std::string headline("------------------------------------------------------------------------------------------");
 
     std::cout << headline << std::endl;
     std::cout << "PDAL Drivers" << " (" << pdal::GetFullVersionString() << ")" <<std::endl;
     std::cout << headline << std::endl << std::endl;
     
-    for (Iterator i = drivers.begin(); i != drivers.end(); ++i)
+    for (auto i = drivers.begin(); i != drivers.end(); ++i)
     {
         std::cout << i->second.toRST() << std::endl;
     }
@@ -329,8 +327,8 @@ void Application::outputHelp()
 {
     outputVersion();
 
-    std::vector<po::options_description*>::const_iterator iter;
-    for (iter = m_options.begin(); iter != m_options.end(); ++iter)
+
+    for (auto iter = m_options.begin(); iter != m_options.end(); ++iter)
     {
         const po::options_description* options = *iter;
         std::cout << *options;
@@ -389,10 +387,9 @@ void Application::parseSwitches()
 {
     po::options_description options;
 
-    std::vector<po::options_description*>::iterator iter1;
-    for (iter1 = m_options.begin(); iter1 != m_options.end(); ++iter1)
+    for (auto iter = m_options.begin(); iter != m_options.end(); ++iter)
     {
-        po::options_description* sub_options = *iter1;
+        po::options_description* sub_options = *iter;
         options.add(*sub_options);
     }
 
