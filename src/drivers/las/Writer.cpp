@@ -56,6 +56,11 @@ namespace drivers
 namespace las
 {
 
+namespace
+{
+    const uint8_t MAX_RETURN_NUMBER = 5;
+}
+
 
 Writer::Writer(const Options& options)
     : pdal::Writer(options)
@@ -115,6 +120,9 @@ void Writer::processOptions(const Options& options)
             "datarecordlength"));
     }
     catch (pdal::option_not_found&) {};
+    
+    m_discardHighReturnNumbers = options.getValueOrDefault(
+            "discard_high_return_numbers", false);
 }
 
 
@@ -501,6 +509,25 @@ void Writer::write(const PointBuffer& pointBuffer)
         // we always write the base fields
         using namespace Dimension;
 
+        uint8_t returnNumber(0);
+        uint8_t numberOfReturns(0);
+        if (pointBuffer.hasDim(Id::ReturnNumber))
+            returnNumber = pointBuffer.getFieldAs<uint8_t>(Id::ReturnNumber,
+                idx);
+        if (pointBuffer.hasDim(Id::NumberOfReturns))
+            numberOfReturns = pointBuffer.getFieldAs<uint8_t>(
+                Id::NumberOfReturns, idx);
+        if (m_discardHighReturnNumbers && numberOfReturns > MAX_RETURN_NUMBER)
+        {
+            if (returnNumber > MAX_RETURN_NUMBER)
+            {
+                if (idx % 100 == 0)
+                    m_callback->invoke(idx + 1);
+                continue;
+            }
+            numberOfReturns = MAX_RETURN_NUMBER;
+        }
+
         double x = pointBuffer.getFieldAs<double>(Id::X, idx);
         double y = pointBuffer.getFieldAs<double>(Id::Y, idx);
         double z = pointBuffer.getFieldAs<double>(Id::Z, idx);
@@ -517,16 +544,6 @@ void Writer::write(const PointBuffer& pointBuffer)
         if (pointBuffer.hasDim(Id::Intensity))
             intensity = pointBuffer.getFieldAs<uint16_t>(Id::Intensity, idx);
         Utils::write_field(p, intensity);
-
-        uint8_t returnNumber(0);
-        if (pointBuffer.hasDim(Id::ReturnNumber))
-            returnNumber = pointBuffer.getFieldAs<uint8_t>(Id::ReturnNumber,
-                idx);
-
-        uint8_t numberOfReturns(0);
-        if (pointBuffer.hasDim(Id::NumberOfReturns))
-            numberOfReturns = pointBuffer.getFieldAs<uint8_t>(
-                Id::NumberOfReturns, idx);
 
         uint8_t scanDirectionFlag(0);
         if (pointBuffer.hasDim(Id::ScanDirectionFlag))

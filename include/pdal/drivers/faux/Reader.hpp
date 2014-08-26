@@ -56,9 +56,11 @@ enum Mode
 // points.  The reader is constructed with a given bounding box and a given
 // number of points.
 //
-// This reader knows about 4 fields (Dimensions):
+// This reader knows about these fields (Dimensions):
 //    X,Y,Z - floats
 //    Time  - uint64
+//    ReturnNumber (optional) - uint8
+//    NumberOfReturns (optional) - uint8
 //
 // It supports a few modes:
 //   - "random" generates points that are randomly distributed within the
@@ -69,6 +71,10 @@ enum Mode
 //     bbox to the maximum
 // In all these modes, however, the Time field is always set to the point
 // number.
+//
+// ReturnNumber and NumberOfReturns are not included by default, but can be
+// activated by passing a numeric value as "number_of_returns" to the
+// reader constructor.
 //
 class PDAL_DLL Reader : public pdal::Reader
 {
@@ -87,7 +93,8 @@ public:
 private:
     uint64_t m_numPoints;
     Mode m_mode;
-    
+    uint8_t m_numberOfReturns;
+
     Bounds<double> m_bounds;
 
     virtual void processOptions(const Options& options);
@@ -104,7 +111,7 @@ class PDAL_DLL FauxSeqIterator : public pdal::ReaderSequentialIterator
 {
 public:
     FauxSeqIterator(const Bounds<double>& bounds, drivers::faux::Mode mode,
-        point_count_t numPoints, LogPtr log);
+                    point_count_t numPoints, uint8_t numberOfReturns, LogPtr log);
 
 private:
     double m_minX;
@@ -116,6 +123,8 @@ private:
     uint64_t m_time;
     drivers::faux::Mode m_mode;
     point_count_t m_numPoints;
+    uint8_t m_returnNumber;
+    uint8_t m_numberOfReturns;
     LogPtr m_log;
 
     point_count_t readBufferImpl(PointBuffer& buf)

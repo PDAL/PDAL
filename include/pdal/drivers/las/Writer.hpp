@@ -117,6 +117,7 @@ private:
     virtual void write(const PointBuffer& pointBuffer);
     virtual void done(PointContext ctx);
     bool m_headerInitialized;
+    bool m_discardHighReturnNumbers;
     boost::uint64_t m_streamOffset; // the first byte of the LAS file
 	void setOptions();
     MetadataNode findVlr(MetadataNode node, const std::string& recordId,
