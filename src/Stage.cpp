@@ -178,13 +178,6 @@ void Stage::l_done(PointContext ctx)
         ctx.setSpatialRef(m_spatialReference);
 }
 
-
-std::vector<Stage*> Stage::getPrevStages() const
-{
-    return m_inputs;
-}
-
-
 const SpatialReference& Stage::getSpatialReference() const
 {
     return m_spatialReference;
