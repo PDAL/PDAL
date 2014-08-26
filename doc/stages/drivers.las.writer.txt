@@ -58,7 +58,9 @@ compression
   
 filesource_id
   The file source id number to use for this file (a value between 1 and 65535) [Default: 0]
-  
+
+discard_high_return_numbers
+  If true, discard all points with a return number greater than five, and clamp NumberOfReturns to five. [Default: false]
 
 
 .. _LAS format: http://asprs.org/Committee-General/LASer-LAS-File-Format-Exchange-Activities.html
