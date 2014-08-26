@@ -95,7 +95,6 @@ public:
     virtual std::string getDescription() const = 0;
     const std::vector<Stage *>& getInputs() const
         { return m_inputs; }
-    Stage& getPrevStage() const;
     std::vector<Stage *> getPrevStages() const;
     static Options getDefaultOptions()
         { return Options(); }

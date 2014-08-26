@@ -121,7 +121,7 @@ void Stage::l_initialize(PointContext ctx)
 {
     m_metadata = ctx.metadata().add(getName());
     if (m_inputs.size()) {
-        Stage& prevStage = getPrevStage();
+        Stage& prevStage = *m_inputs[0];
     }
 }
 
@@ -148,7 +148,8 @@ void Stage::l_processOptions(const Options& options)
         }
         else
         {
-            std::ostream* v = getPrevStage().log()->getLogStream();
+            // We know we're not empty at this point
+            std::ostream* v = m_inputs[0]->log()->getLogStream();
             m_log.reset(new Log(getName(), v));
         }
     }
@@ -175,14 +176,6 @@ void Stage::l_done(PointContext ctx)
 {
     if (!m_spatialReference.empty())
         ctx.setSpatialRef(m_spatialReference);
-}
-
-
-Stage& Stage::getPrevStage() const
-{
-    if (m_inputs.empty())
-        throw internal_error("Stage does not have any previous stages");
-    return *m_inputs[0];
 }
 
 
