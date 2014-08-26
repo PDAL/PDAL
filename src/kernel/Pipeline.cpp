@@ -88,7 +88,7 @@ int Pipeline::execute()
     pdal::PipelineReader reader(manager, isDebug(), getVerboseLevel());
     bool isWriter = reader.readPipeline(m_inputFile);
     if (!isWriter)
-        std::cerr << "Pipeline file is not a writer.\n";
+        throw app_runtime_error("Pipeline file does not contain a writer. Use 'pdal info' to read the data.");
     else
     {
 /**

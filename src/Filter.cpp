@@ -47,7 +47,7 @@ boost::property_tree::ptree Filter::serializePipeline() const
     PipelineWriter::write_option_ptree(tree, getOptions());
     PipelineWriter::writeMetadata(tree, m_metadata);
 
-    const Stage& stage = getPrevStage();
+    const Stage& stage = *getInputs()[0];
     boost::property_tree::ptree subtree = stage.serializePipeline();
 
     tree.add_child(subtree.begin()->first, subtree.begin()->second);

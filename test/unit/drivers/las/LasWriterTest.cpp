@@ -381,4 +381,72 @@ BOOST_AUTO_TEST_CASE(test_summary_data_add_point)
 }
 
 
+BOOST_AUTO_TEST_CASE(LasWriterTest_test_drop_extra_returns)
+{
+    using namespace pdal;
+
+    PointContext ctx;
+
+    // remove file from earlier run, if needed
+    std::string temp_filename("temp-LasWriterTest_test_drop_extra_returns.las");
+    FileUtils::deleteFile(Support::temppath(temp_filename));
+
+    Options ops;
+
+    Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
+    ops.add("bounds", bounds);
+    ops.add("num_points", 100);
+    ops.add("mode", "constant");
+    ops.add("number_of_returns", 10);
+    drivers::faux::Reader reader(ops);
+
+    std::ostream* ofs = FileUtils::createFile(Support::temppath(temp_filename));
+
+    {
+        Options writerOptions;
+        writerOptions.add("discard_high_return_numbers", true);
+        pdal::drivers::las::Writer writer(writerOptions, ofs);
+        writer.setInput(&reader);
+        writer.prepare(ctx);
+
+        writer.setCompressed(false);
+        writer.setDate(0, 0);
+        writer.setPointFormat(::pdal::drivers::las::PointFormat3);
+        writer.setSystemIdentifier("");
+        writer.setGeneratingSoftware("TerraScan");
+
+        writer.execute(ctx);
+    }
+
+    {
+        Options readerOptions;
+        readerOptions.add("filename", Support::temppath(temp_filename));
+
+        pdal::drivers::las::Reader reader2(readerOptions);
+
+        PointContext ctx2;
+        reader2.prepare(ctx2);
+        PointBuffer data(ctx2);
+
+        pdal::StageSequentialIterator* iter = 
+            reader2.createSequentialIterator();
+        iter->read(data, 6);
+    
+        uint8_t r1 = data.getFieldAs<uint8_t>(Dimension::Id::ReturnNumber, 0);
+        BOOST_CHECK_EQUAL(r1, 1);
+        uint8_t r2 = data.getFieldAs<uint8_t>(Dimension::Id::ReturnNumber, 5);
+        BOOST_CHECK_EQUAL(r2, 1);
+        uint8_t n1 = data.getFieldAs<uint8_t>(Dimension::Id::NumberOfReturns, 0);
+        BOOST_CHECK_EQUAL(n1, 5);
+        uint8_t n2 = data.getFieldAs<uint8_t>(Dimension::Id::NumberOfReturns, 5);
+        BOOST_CHECK_EQUAL(n1, 5);
+
+        delete iter;
+    }
+
+    FileUtils::closeFile(ofs);
+    FileUtils::deleteFile(Support::temppath(temp_filename));
+}
+
+
 BOOST_AUTO_TEST_SUITE_END()

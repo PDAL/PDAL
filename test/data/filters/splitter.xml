@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Pipeline version="1.0">
+    <Writer type="drivers.las.writer">
+        <Option name="filename">
+            ../../temp/tiled.las
+        </Option>
+        <Filter type="filters.splitter">
+            <Option name="length">
+                100
+            </Option>
+            <Reader type="drivers.las.reader">
+                <Option name="filename">
+                    ../1.2-with-color.las
+                </Option>
+            </Reader>
+        </Filter>
+    </Writer>
+</Pipeline>
