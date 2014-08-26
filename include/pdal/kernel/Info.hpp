@@ -69,14 +69,11 @@ private:
     void addSwitches(); // overrride
     void validateSwitches(); // overrride
     
-    void dump();
+    void dump(PointBufferPtr buf);
     
-    void dumpPoints() const;
-    void dumpPointsSequential(PointBuffer& ptBuf,
-        const std::vector<uint32_t>& points,
-        StageSequentialIterator *iter) const;
+    void dumpPoints(PointBufferPtr buf) const;
     void dumpStats();
-    void dumpQuery() const;
+    void dumpQuery(PointBufferPtr buf) const;
     void dumpMetadata(PointContext ctx, const Stage&) const;
     void dumpSDO_PCMetadata(PointContext ctx, Stage const&) const;
 
@@ -100,7 +97,6 @@ private:
     boost::uint64_t m_numPointsToWrite;
     std::string m_pipelineFile;
     bool m_showSample;
-    std::unique_ptr<PointContext> m_context;
     MetadataNode m_meta;
     //ABELL
     std::unique_ptr<boost::property_tree::ptree> m_tree;

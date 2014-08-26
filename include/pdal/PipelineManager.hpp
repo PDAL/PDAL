@@ -77,6 +77,10 @@ public:
     // Get the resulting point buffers.
     const PointBufferSet& buffers() const
         { return m_pbSet; }
+
+    // Get the point context;
+    PointContext context() const
+        { return m_context; }
     
     MetadataNode getMetadata() const;
     

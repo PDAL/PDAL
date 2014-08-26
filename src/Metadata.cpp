@@ -81,19 +81,15 @@ void MetadataNodeImpl::subnodesToJSON(std::ostream& o, int level) const
 {
     std::string indent(level * 2, ' ');
 
-    std::map<std::string, MetadataImplList> nodes;
-    for (auto mi = m_subnodes.begin(); mi != m_subnodes.end(); ++mi)
+    for (auto si = m_subnodes.begin(); si != m_subnodes.end(); ++si)
     {
-        MetadataNodeImplPtr mp = *mi;
-        nodes[mp->m_name].push_back(mp);
-    }
-    
-    for (auto ni = nodes.begin(); ni != nodes.end(); ++ni)
-    {
-        MetadataImplList& subnodes = ni->second;
-        if (subnodes.size() > 1)
+        const MetadataImplList& subnodes = si->second;
+        if (subnodes.empty())
+            continue;
+        MetadataNodeImplPtr node = *subnodes.begin();
+        if (node->m_nodeType == MetadataType::Array)
         {
-            o << indent << "\"" << ni->first << "\": [" << std::endl;
+            o << indent << "\"" << node->m_name << "\": [" << std::endl;
             for (auto si = subnodes.begin(); si != subnodes.end(); ++si)
             {
                 MetadataNodeImplPtr node = *si;
@@ -109,15 +105,14 @@ void MetadataNodeImpl::subnodesToJSON(std::ostream& o, int level) const
         }
         else
         {
-            o << indent << "\"" << ni->first << "\":" << std::endl;
+            o << indent << "\"" << node->m_name << "\":" << std::endl;
             o << indent << "{" << std::endl;
-            MetadataNodeImplPtr node = *subnodes.begin();
             node->toJSON(o, level + 1);
             o << indent << "}";
         }
-        auto nii = ni;
-        nii++;
-        if (nii != nodes.end())
+        auto sii = si;
+        sii++;
+        if (sii != m_subnodes.end() && sii->second.size())
             o << ",";
         o << std::endl;
     }
@@ -136,45 +131,32 @@ boost::property_tree::ptree MetadataNodeImpl::toPTree() const
     tree.put("value", m_value);
     
     typedef std::map<std::string, uint32_t>::iterator NameIterator;
-    std::map<std::string, uint32_t> names;
-    
-    for (auto mi = m_subnodes.begin(); mi != m_subnodes.end(); ++mi)
-    {
-        std::string name = (*mi)->m_name;
-        NameIterator i = names.find(name);
-        if (i == names.end())
-            names.insert(std::make_pair(name, 1));
-        else
-            i->second++;
-    }
 
     for (auto mi = m_subnodes.begin(); mi != m_subnodes.end(); ++mi)
     {
-        std::string name = (*mi)->m_name;
-        boost::property_tree::ptree const& node = (*mi)->toPTree();        
-        NameIterator cnt = names.find(name);
-
-        if (cnt->second > 1 && name.size())
+        const MetadataImplList& l = mi->second;
+        for (auto li = l.begin(); li != l.end(); ++li)
         {
-            std::string plural(name);
+            const MetadataNodeImplPtr node = *li;
+            std::string& name = node->m_name;
 
-            boost::optional<ptree&> opt = tree.get_child_optional(path(plural, '/'));
-            if (opt)
+            ptree const& pnode = node->toPTree();
+            if (node->m_nodeType == MetadataType::Array)
             {
-                opt->push_back(std::make_pair("", node));               
-            } else
-            {
-                tree.push_back(ptree::value_type(plural, ptree()));
-                auto& p = tree.get_child(path(plural, '/'));
-                p.push_back(std::make_pair("", node));
-                
+                boost::optional<ptree&> opt =
+                    tree.get_child_optional(path(name, '/'));
+                if (opt)
+                    opt->push_back(std::make_pair("", pnode));               
+                else
+                {
+                    tree.push_back(ptree::value_type(m_name, ptree()));
+                    auto& p = tree.get_child(path(m_name, '/'));
+                    p.push_back(std::make_pair("", pnode));
+
+                }
             }
-
-        } else
-        {
-            if (name.size())
-                tree.push_back(std::make_pair(name, node));
-
+            else if (name.size())
+                tree.push_back(std::make_pair(name, pnode));
         }
     }    
     return tree;
