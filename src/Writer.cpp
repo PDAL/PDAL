@@ -68,7 +68,7 @@ boost::property_tree::ptree Writer::serializePipeline() const
 
     PipelineWriter::write_option_ptree(tree, getOptions());
 
-    const Stage& stage = *getPrevStages()[0];
+    const Stage& stage = *getInputs()[0];
     boost::property_tree::ptree subtree = stage.serializePipeline();
 
     tree.add_child(subtree.begin()->first, subtree.begin()->second);
