@@ -188,7 +188,7 @@ bool PipelineManager::isWriterPipeline() const
 
 MetadataNode PipelineManager::getMetadata() const
 {
-    MetadataNode output;
+    MetadataNode output("stages");
     
     for (auto ri = m_readers.begin(); ri != m_readers.end(); ++ri)
         output.add((*ri)->getMetadata());

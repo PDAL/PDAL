@@ -120,7 +120,7 @@ void HexBin::done(PointContext ctx)
 
         HexInfo h = *hi;
 
-        MetadataNode hex = hexes.add("hexagon");
+        MetadataNode hex = hexes.addList("hexagon");
         hex.add("density", h.density());
 
         hex.add("gridpos", lexical_cast<std::string>(h.xgrid()) + " " +

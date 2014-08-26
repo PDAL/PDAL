@@ -264,7 +264,7 @@ void Stats::extractMetadata(PointContext ctx)
         Dimension::Id::Enum d = di->first;
         const SummaryPtr s = di->second;
 
-        MetadataNode t = m_metadata.add("statistic");
+        MetadataNode t = m_metadata.addList("statistic");
         t.add("position", position++);
         s->extractMetadata(t);
     }

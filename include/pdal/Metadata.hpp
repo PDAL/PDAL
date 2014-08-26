@@ -41,10 +41,20 @@
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
+#include <map>
 #include <vector>
 
 namespace pdal
 {
+
+namespace MetadataType
+{
+enum Enum
+{
+    Instance,
+    Array
+};
+}
 
 /// ByteArray simply wrapps a std::vector<boost::uint8_t> such that it can then
 /// be dumped to an ostream in a base64 encoding. For now, it makes a copy of
@@ -96,32 +106,64 @@ class MetadataNode;
 class MetadataNodeImpl;
 typedef std::shared_ptr<MetadataNodeImpl> MetadataNodeImplPtr;
 typedef std::vector<MetadataNodeImplPtr> MetadataImplList;
+typedef std::map<std::string, MetadataImplList> MetadataSubnodes;
 
 class MetadataNodeImpl
 {
     friend class MetadataNode;
 
 private:
-    MetadataNodeImpl(const std::string& name) : m_name(name)
+    MetadataNodeImpl(const std::string& name) :
+        m_name(name), m_nodeType(MetadataType::Instance)
     {}
 
-    MetadataNodeImpl()
+    MetadataNodeImpl() : m_nodeType(MetadataType::Instance)
     {}
+
+    void makeArray(MetadataImplList& l)
+    {
+        for (auto li = l.begin(); li != l.end(); ++li)
+        {
+            MetadataNodeImplPtr node = *li;
+            node->m_nodeType = MetadataType::Array;
+        }
+    }
 
     MetadataNodeImplPtr add(const std::string& name)
     {
-        MetadataNodeImplPtr sub(new MetadataNodeImpl());
-        m_subnodes.push_back(sub);
-        sub->m_name = name;
+        MetadataNodeImplPtr sub(new MetadataNodeImpl(name));
+        MetadataImplList& l = m_subnodes[name];
+        l.push_back(sub);
+        if (l.size() > 1)
+            makeArray(l);
+        return sub;
+    }
+
+    MetadataNodeImplPtr addList(const std::string& name)
+    {
+        MetadataNodeImplPtr sub(new MetadataNodeImpl(name));
+        MetadataImplList& l = m_subnodes[name];
+        l.push_back(sub);
+        makeArray(l);
         return sub;
     }
 
     MetadataNodeImplPtr add(MetadataNodeImplPtr node)
     {
-        m_subnodes.push_back(node);
+        MetadataImplList& l = m_subnodes[node->m_name];
+        l.push_back(node);
+        if (l.size() > 1)
+            makeArray(l);
         return node;
     }
 
+    MetadataNodeImplPtr addList(MetadataNodeImplPtr node)
+    {
+        MetadataImplList& l = m_subnodes[node->m_name];
+        l.push_back(node);
+        makeArray(l);
+        return node;
+    }
 
     bool operator == (const MetadataNodeImpl& m) const
     {
@@ -134,10 +176,20 @@ private:
         auto mi2 = m.m_subnodes.begin();
         for (auto mi = m_subnodes.begin(); mi != m_subnodes.end(); ++mi, ++mi2)
         {
-            auto mp1 = *mi;
-            auto mp2 = *mi2;
-            if (!(*mp1 == *mp2))
+            if (mi->first != mi2->first)
                 return false;
+            const MetadataImplList& ml = mi->second;
+            const MetadataImplList& ml2 = mi->second;
+            if (ml.size() != ml2.size())
+                return false;
+            auto li2 = ml2.begin();
+            for (auto li = ml.begin(); li != ml.end(); ++li, ++li2)
+            {
+                auto node1 = *li;
+                auto node2 = *li2;
+                if (!(*node1 == *node2))
+                    return false;
+            }
         }
         return true;
     }
@@ -147,6 +199,33 @@ private:
 
     template <std::size_t N>
     inline void setValue(const char(& c)[N]);
+
+    MetadataImplList& subnodes(const std::string &name)
+    {
+        auto si = m_subnodes.find(name);
+        if (si != m_subnodes.end())
+            return si->second;
+
+        static MetadataImplList l;
+        return l;
+    }
+
+    const MetadataImplList& subnodes(const std::string& name) const
+    {
+        MetadataNodeImpl *nc_this = const_cast<MetadataNodeImpl *>(this);
+        return nc_this->subnodes(name);
+    }
+
+    MetadataType::Enum nodeType(const std::string& name) const
+    {
+        const MetadataImplList& l = subnodes(name);
+        if (l.size())
+        {
+            MetadataNodeImplPtr node = *l.begin();
+            return node->m_nodeType;
+        }
+        return MetadataType::Instance;
+    }
     
     std::string toJSON() const;
     void toJSON(std::ostream& o, int level) const;
@@ -157,7 +236,8 @@ private:
     std::string m_descrip;
     std::string m_type;
     std::string m_value;
-    MetadataImplList m_subnodes;
+    MetadataType::Enum m_nodeType;
+    MetadataSubnodes m_subnodes;
 };
 
 template <>
@@ -316,9 +396,14 @@ public:
     MetadataNode add(const std::string& name)
         { return MetadataNode(m_impl->add(name)); }
 
+    MetadataNode addList(const std::string& name)
+        { return MetadataNode(m_impl->addList(name)); }
+
     MetadataNode add(MetadataNode node)
         { return MetadataNode(m_impl->add(node.m_impl)); }
 
+    MetadataNode addList(MetadataNode node)
+        { return MetadataNode(m_impl->addList(node.m_impl)); }
 
     template<typename T>
     MetadataNode add(const std::string& name, const T& value,
@@ -331,19 +416,27 @@ public:
     }
 
     template<typename T>
+    MetadataNode addList(const std::string& name, const T& value,
+        const std::string& descrip = std::string())
+    {
+        MetadataNodeImplPtr impl = m_impl->addList(name);
+        impl->setValue(value);
+        impl->m_descrip = descrip;
+        return MetadataNode(impl);
+    }
+
+    template<typename T>
     MetadataNode addOrUpdate(const std::string& lname, const T& value)
     {
-        auto nodes = children();
-        for (auto ai = nodes.begin(); ai != nodes.end(); ++ai)
-        {
-            MetadataNode& n = *ai;
-            if (n.name() == lname)
-            {
-                n.m_impl->setValue(value);
-                return n;
-            }
-        }
-        return add(lname, value);
+        if (m_impl->nodeType(lname) == MetadataType::Array)
+            throw pdal_error("Can't call addOrUpdate() on subnode list.");
+        MetadataImplList& l = m_impl->subnodes(lname);
+
+        if (l.empty())
+            return add(lname, value);
+        MetadataNodeImplPtr impl = *l.begin();
+        impl->setValue(value);
+        return MetadataNode(impl);
     }
 
     template<typename T>
@@ -367,9 +460,26 @@ public:
     {
         std::vector<MetadataNode> outnodes;
 
-        const auto& nodes = m_impl->m_subnodes;
-        for (auto ci = nodes.begin(); ci != nodes.end(); ++ci)
-            outnodes.push_back(MetadataNode(*ci));
+        const MetadataSubnodes& nodes = m_impl->m_subnodes;
+        for (auto si = nodes.begin(); si != nodes.end(); ++si)
+        {
+            const MetadataImplList& l = si->second;
+            for (auto li = l.begin(); li != l.end(); ++li)
+                outnodes.push_back(MetadataNode(*li));
+        }
+        return outnodes;
+    }
+    std::vector<MetadataNode> children(const std::string& name) const
+    {
+        std::vector<MetadataNode> outnodes;
+
+        auto si = m_impl->m_subnodes.find(name);
+        if (si != m_impl->m_subnodes.end())
+        {
+            const MetadataImplList& l = si->second;
+            for (auto li = l.begin(); li != l.end(); ++li)
+                outnodes.push_back(MetadataNode(*li));
+        }
         return outnodes;
     }
     bool operator ! ()
@@ -377,7 +487,7 @@ public:
     bool valid() const
         { return !empty(); }
     bool empty() const
-        { return m_impl->m_name.empty() && m_impl->m_value.empty(); }
+        { return m_impl->m_name.empty(); }
 
     template <typename PREDICATE>
     MetadataNode find(PREDICATE p) const
@@ -432,16 +542,13 @@ public:
         if (s.empty())
             return *this;
         std::string lname = splitString(s);
-        auto nodes = children();
+        auto nodes = children(lname);
         for (auto ai = nodes.begin(); ai != nodes.end(); ++ai)
         {
             MetadataNode& n = *ai;
-            if (n.name() == lname)
-            {
-                MetadataNode child = n.findChild(s);
-                if (!child.empty())
-                    return child;
-            }
+            MetadataNode child = n.findChild(s);
+            if (!child.empty())
+                return child;
         }
         return MetadataNode();
     }
@@ -477,7 +584,7 @@ class Metadata
     friend class PointContext;
 
 public:
-    Metadata()
+    Metadata() : m_root("root"), m_private("private")
     {}
    
     Metadata(const std::string& name) : m_name(name)

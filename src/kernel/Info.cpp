@@ -225,43 +225,20 @@ vector<boost::uint32_t> getListOfPoints(std::string p)
 
 } //namespace
 
-void Info::dumpPoints() const
+void Info::dumpPoints(PointBufferPtr buf) const
 {
-    PointBuffer readData(*m_context);
-    std::vector<uint32_t> points = getListOfPoints(m_pointIndexes);
-        
-    std::unique_ptr<StageSequentialIterator>
-        seq(m_manager->getStage()->createSequentialIterator());
-    if (!seq)
-        throw app_runtime_error("Unable to create iterator retrieve points");
-    dumpPointsSequential(readData, points, seq.get());
-}
+    PointBuffer outbuf(buf->context());
 
-void Info::dumpPointsSequential(PointBuffer& ptBuf,
-    const std::vector<uint32_t>& points, StageSequentialIterator *iter) const
-{
-    int64_t lastPt = -1;
-    uint32_t writePos = 0;
-    for (uint32_t pt : points)
+    std::vector<uint32_t> points = getListOfPoints(m_pointIndexes);
+    for (size_t i = 0; i < points.size(); ++i)
     {
-        if (pt < lastPt)
-            throw app_runtime_error("Unable to read points of this type "
-                "out of order (must be monotonically increasing)");
-        uint64_t numSkipped = iter->skip(pt - lastPt - 1);
-        assert((int)numSkipped == (int)(pt - lastPt - 1));
-        uint32_t numRead = iter->read(ptBuf, 1);
-        if (numRead != 1)
-        {
-            std::ostringstream oss;
-            oss << "problem reading point number " << pt;
-            throw app_runtime_error(oss.str());
-        }
-        lastPt = pt;
+        PointId id = (PointId)points[i];
+        if (id < buf->size())
+            outbuf.appendPoint(*buf, id);
     }
 
-    boost::property_tree::ptree buffer_tree = ptBuf.toPTree();
+    boost::property_tree::ptree buffer_tree = outbuf.toPTree();
     m_tree->add_child("point", buffer_tree.get_child("0"));
-
 }
 
 
@@ -283,13 +260,13 @@ void Info::dumpStats()
     delete writer;
 }
 
-void Info::dump()
+void Info::dump(PointBufferPtr buf)
 {
     if (m_showStats)
         dumpStats();
 
     if (m_pointIndexes.size())
-        dumpPoints();
+        dumpPoints(buf);
     if (m_showSchema)
     {
         // output ptree of PointContext::dimensions()
@@ -305,11 +282,11 @@ void Info::dump()
     }
 
     if (m_QueryPoint.size())
-        dumpQuery();
+        dumpQuery(buf);
 }
 
 
-void Info::dumpQuery() const
+void Info::dumpQuery(PointBufferPtr buf) const
 {
 #define SEPARATORS ",| "
     boost::char_separator<char> sep(SEPARATORS);
@@ -321,30 +298,24 @@ void Info::dumpQuery() const
     if (values.size() != 2 && values.size() != 3)
         throw app_runtime_error("--points must be two or three values");
 
-    PointBufferSet pbSet = m_manager->getStage()->execute(*m_context);
-    assert(pbSet.size() == 1);
-    PointBufferPtr buf = *pbSet.begin();
-    
     bool is3d = (values.size() >= 3);
-
-    KDIndex kdi(*buf);
-    kdi.build(*m_context, is3d);
 
     double x = values[0];
     double y = values[1];
     double z = is3d ? values[2] : 0.0;
     
-    std::vector<size_t> ids = kdi.neighbors(x, y, z, 0.0, buf->size());
-    
-    PointBuffer outbuf(*m_context);
+    PointBuffer outbuf(buf->context());
 
+    KDIndex kdi(*buf);
+    kdi.build(buf->context(), is3d);
+    std::vector<size_t> ids = kdi.neighbors(x, y, z, 0.0, buf->size());
     for (auto i = ids.begin(); i != ids.end(); ++i)
-       outbuf.appendPoint(*buf, *i); 
+        outbuf.appendPoint(*buf, *i); 
 
     boost::property_tree::ptree tree = outbuf.toPTree();
-
     m_tree->add_child("point", tree);
 }
+
 
 void Info::dumpSDO_PCMetadata(PointContext ctx, const Stage& stage) const
 {
@@ -378,7 +349,8 @@ int Info::execute()
         readerOptions.add<uint32_t>("verbose", getVerboseLevel());
     }
 
-    m_manager = std::unique_ptr<PipelineManager>(AppSupport::makePipeline(readerOptions));
+    m_manager = std::unique_ptr<PipelineManager>(
+        AppSupport::makePipeline(readerOptions));
     
     if (m_seed != 0)
     {
@@ -394,7 +366,7 @@ int Info::execute()
         "use exact counts for ReturnNumber stats");
     m_options.add("exact_count", "NumberOfReturns",
         "use exact counts for ReturnNumber stats");
-    m_options.add("do_sample", m_showSample, "Dont do sampling");
+    m_options.add("do_sample", m_showSample, "Don't do sampling");
     if (m_Dimensions.size())
         m_options.add("dimensions", m_Dimensions,
             "Use explicit list of dimensions");
@@ -407,14 +379,14 @@ int Info::execute()
     if (m_computeBoundary)
         stage = m_manager->addFilter("filters.hexbin", stage, options);
     
-    m_context = std::unique_ptr<PointContext>(new PointContext);
     m_tree = std::unique_ptr<boost::property_tree::ptree>(
         new boost::property_tree::ptree);
 
     std::ostream& ostr = std::cout;
     m_manager->execute();
-    dump();
-
+    PointBufferSet pbSet = m_manager->buffers();
+    assert(pbSet.size() == 1);
+    dump(*pbSet.begin());
 
     //
     // if (m_showStats)
