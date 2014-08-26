@@ -45,6 +45,8 @@
 #include <pdal/pdal_config.hpp>
 #include <vector>
 
+#include <boost/tokenizer.hpp>
+typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
 
 
 namespace po = boost::program_options;
@@ -222,6 +224,68 @@ int Application::run()
     return shutdown_status;
 }
 
+void Application::collectExtraOptions()
+{
+    
+    for (auto o: m_extra_options)
+    {
+
+        typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
+        
+        // if we don't have --, we're not an option we 
+        // even care about
+        if (!boost::algorithm::find_first(o, "--")) continue;
+        
+        // Find the dimensions listed and put them on the id list.
+        boost::char_separator<char> equal("=");
+        boost::char_separator<char> dot(".");
+        // boost::erase_all(o, " "); // Wipe off spaces
+        tokenizer option_tokens(o, equal);
+        std::vector<std::string> option_split;
+        for (auto ti = option_tokens.begin(); ti != option_tokens.end(); ++ti)
+            option_split.push_back(boost::lexical_cast<std::string>(*ti));
+        if (! (option_split.size() == 2))
+        {
+            std::ostringstream oss;
+            oss << "option '" << o << "' did not split correctly. Is it in the form --drivers.las.reader.option=foo?";
+            throw app_usage_error(oss.str());   
+        }
+        
+        std::string option_value(option_split[1]);
+        std::string stage_value(option_split[0]);
+        boost::algorithm::erase_all(stage_value, "--");
+
+        tokenizer name_tokens(stage_value, dot);
+        std::vector<std::string> stage_values;
+        for (auto ti = name_tokens.begin(); ti != name_tokens.end(); ++ti)
+        {
+            stage_values.push_back(*ti);
+        }
+        
+        std::string option_name = *stage_values.rbegin();
+        std::ostringstream stage_name_ostr;
+        bool bFirst(true);
+        for (auto s = stage_values.begin(); s != stage_values.end()-1; ++s)
+        {
+            auto s2 = boost::algorithm::erase_all_copy(*s, " ");
+
+            if (bFirst)
+            {
+                bFirst = false;
+            } else
+                stage_name_ostr <<".";
+            stage_name_ostr << s2;
+        }
+        std::string stage_name(stage_name_ostr.str());
+        std::cout << "stage name: '" << stage_name << "' option_name: '" << option_name << "' option value: '" << option_value <<"'"<<std::endl;
+        
+        auto found = m_extra_stage_options.find(stage_name);
+        if (found == m_extra_stage_options.end())
+            m_extra_stage_options.insert(std::make_pair(stage_name, Option(option_name, option_value, "")));
+        else
+            found->second.add(Option(option_name, option_value, ""));
+    }    
+}
 
 int Application::innerRun()
 {
@@ -253,6 +317,7 @@ int Application::innerRun()
     {
         // do any user-level sanity checking
         validateSwitches();
+        collectExtraOptions();
     }
     catch (app_usage_error e)
     {
@@ -387,7 +452,9 @@ void Application::parseSwitches()
 {
     po::options_description options;
 
-    for (auto iter = m_options.begin(); iter != m_options.end(); ++iter)
+    for (auto iter = m_options.begin(); 
+              iter != m_options.end(); 
+              ++iter)
     {
         po::options_description* sub_options = *iter;
         options.add(*sub_options);
@@ -395,17 +462,17 @@ void Application::parseSwitches()
 
     try
     {
-        po::store(po::command_line_parser(m_argc, m_argv).
-            options(options).positional(m_positionalOptions).run(), 
-            m_variablesMap);
+        auto parsed = po::command_line_parser(m_argc, m_argv).
+            options(options).allow_unregistered().positional(m_positionalOptions).run();
+        m_extra_options = po::collect_unrecognized(parsed.options, po::include_positional);
+        
+        po::store(parsed, m_variablesMap);
+            
+
     }
     catch (boost::program_options::unknown_option e)
     {
-#if BOOST_VERSION >= 104200
         throw app_usage_error("unknown option: " + e.get_option_name());
-#else
-        throw app_usage_error("unknown option: " + std::string(e.what()));
-#endif
     }
 
     po::notify(m_variablesMap);

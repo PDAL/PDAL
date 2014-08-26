@@ -82,6 +82,8 @@ public:
     const SpatialReference& getSpatialReference() const;
     const Options& getOptions() const
         { return m_options; }
+    void setOptions(Options options)
+        { m_options = options; }
     virtual boost::property_tree::ptree serializePipeline() const = 0;
     virtual LogPtr log() const
         { return m_log; }
@@ -95,6 +97,7 @@ public:
     virtual std::string getDescription() const = 0;
     const std::vector<Stage *>& getInputs() const
         { return m_inputs; }
+    std::vector<Stage*> findStage(std::string name);
     static Options getDefaultOptions()
         { return Options(); }
     static Dimension::IdList getDefaultDimensions()

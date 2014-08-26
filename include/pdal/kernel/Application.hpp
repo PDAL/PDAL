@@ -96,6 +96,7 @@ protected:
     void setProgressShellCommand(std::vector<std::string> const& command) { m_heartbeat_shell_command = command; }
     std::vector<std::string> getProgressShellCommand() { return m_heartbeat_shell_command; }
     
+    std::map<std::string, Options> const& getExtraStageOptions() { return m_extra_stage_options; }
 private:
     int innerRun();
     void parseSwitches();
@@ -103,6 +104,7 @@ private:
     void outputHelp();
     void outputVersion();
     void addBasicSwitchSet();
+    void collectExtraOptions();
 
     int do_switches();
     int do_startup();
@@ -126,7 +128,9 @@ private:
     std::vector<boost::program_options::options_description*> m_options;
     boost::program_options::positional_options_description m_positionalOptions;
     boost::program_options::variables_map m_variablesMap;
-
+    std::vector<std::string> m_extra_options;
+    std::map<std::string, Options> m_extra_stage_options;
+    
     Application& operator=(const Application&); // not implemented
     Application(const Application&); // not implemented
 
