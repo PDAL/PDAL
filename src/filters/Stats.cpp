@@ -181,7 +181,7 @@ void Stats::ready(PointContext ctx)
 {
     using namespace std;
 
-    log()->get(LogLevel::DEBUG) << "Calculating histogram statistics for "
+    log()->get(LogLevel::Debug) << "Calculating histogram statistics for "
         "exact names '" << m_exact_dim_opt << "'"<< std::endl;
 
     vector<string> dims;
@@ -194,7 +194,7 @@ void Stats::ready(PointContext ctx)
         boost::trim(dimName);
         if (dimName.size())
         {
-            log()->get(LogLevel::DEBUG) << "adding '" << dimName <<
+            log()->get(LogLevel::Debug) << "adding '" << dimName <<
                 "' as exact dimension name to cumulate stats for" << std::endl;
             m_exact_dimension_names.insert(dimName);
             m_dimension_names.insert(dimName);
@@ -214,21 +214,21 @@ void Stats::ready(PointContext ctx)
 
     if (m_dimension_names.size())
     {
-        log()->get(LogLevel::DEBUG2) << "Explicit dimension size:" <<
+        log()->get(LogLevel::Debug2) << "Explicit dimension size:" <<
             m_dimension_names.size() << std::endl;
 
         for (auto i = m_dimension_names.begin();
                 i != m_dimension_names.end(); i++)
         {
             std::string const& name = *i;
-            log()->get(LogLevel::DEBUG2) << "Requested to cumulate stats for "
+            log()->get(LogLevel::Debug2) << "Requested to cumulate stats for "
                 "dimension with name '" << name <<"'"<< std::endl;
             Dimension::Id::Enum d = ctx.findDim(name);
             if (d == Dimension::Id::Unknown)
                 continue;
-            log()->get(LogLevel::DEBUG2) << "Found dimension with name '" <<
+            log()->get(LogLevel::Debug2) << "Found dimension with name '" <<
                 name << "'"<< std::endl;
-            log()->get(LogLevel::DEBUG2) << "Cumulating stats for dimension " <<
+            log()->get(LogLevel::Debug2) << "Cumulating stats for dimension " <<
                 name << std::endl;
 
             bool doExact =
@@ -244,7 +244,7 @@ void Stats::ready(PointContext ctx)
         for (auto di = dims.begin(); di != dims.end(); ++di)
         {
             Dimension::Id::Enum d = *di;
-            log()->get(LogLevel::DEBUG2) << "Cumulating stats for dimension " <<
+            log()->get(LogLevel::Debug2) << "Cumulating stats for dimension " <<
                 ctx.dimName(d) << std::endl;
             m_stats[d] = SummaryPtr(new stats::Summary(ctx.dimName(*di) ,m_bin_count,
                 m_sample_size, m_cache_size, m_seed, false, m_do_sample));

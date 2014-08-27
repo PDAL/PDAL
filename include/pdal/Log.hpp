@@ -111,7 +111,7 @@ public:
     /// If the logging level asked for with
     /// pdal::Log::get is less than the logging level of the pdal::Log instance
     /// an ostream with a boost::iostreams::null_sink is returned.
-    std::ostream& get(LogLevel::Enum level = LogLevel::INFO);
+    std::ostream& get(LogLevel::Enum level = LogLevel::Info);
 
     /// Sets the floating point precision
     void floatPrecision(int level);

@@ -138,7 +138,7 @@ point_count_t FauxSeqIterator::readImpl(PointBuffer& buf, point_count_t count)
     const double delY = (m_maxY - m_minY) / numDeltas;
     const double delZ = (m_maxZ - m_minZ) / numDeltas;
 
-    m_log->get(LogLevel::DEBUG5) << "Reading a point buffer of " <<
+    m_log->get(LogLevel::Debug5) << "Reading a point buffer of " <<
         count << " points." << std::endl;
 
     for (PointId idx = 0; idx < count; ++idx)
