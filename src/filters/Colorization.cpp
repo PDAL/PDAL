@@ -119,9 +119,9 @@ void Colorization::processOptions(const Options& options)
 
     if (dimensions.size() == 0)
     {
-        m_bands.push_back({"Red", Dimension::Id::Red, 1, 1.0});
-        m_bands.push_back({"Green", Dimension::Id::Green, 2, 1.0});
-        m_bands.push_back({"Blue", Dimension::Id::Blue, 3, 1.0});
+        m_bands.emplace_back("Red", Dimension::Id::Red, 1, 1.0);
+        m_bands.emplace_back("Green", Dimension::Id::Green, 2, 1.0);
+        m_bands.emplace_back("Blue", Dimension::Id::Blue, 3, 1.0);
         log()->get(LogLevel::DEBUG) << "No dimension mappings were given. "
             "Using default mappings." << std::endl;
     }
@@ -140,7 +140,7 @@ void Colorization::processOptions(const Options& options)
             dimensionOptions->getValueOrThrow<uint32_t>("band");
         double scale =
             dimensionOptions->getValueOrDefault<double>("scale", 1.0);
-        m_bands.push_back({name, Dimension::Id::Unknown, bandId, scale});
+        m_bands.emplace_back(name, Dimension::Id::Unknown, bandId, scale);
     }
 }
 
