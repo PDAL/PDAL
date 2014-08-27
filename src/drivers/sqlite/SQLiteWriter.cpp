@@ -35,7 +35,7 @@
 #include <pdal/drivers/sqlite/SQLiteWriter.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/StageFactory.hpp>
-#include <pdal/pdal_macros.hpp>
+#include <pdal/pdal_internal.hpp>
 #include <pdal/FileUtils.hpp>
 
 

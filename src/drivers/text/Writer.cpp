@@ -35,7 +35,7 @@
 #include <pdal/drivers/text/Writer.hpp>
 #include <pdal/Algorithm.hpp>
 #include <pdal/PointBuffer.hpp>
-#include <pdal/pdal_macros.hpp>
+#include <pdal/pdal_internal.hpp>
 
 #include <iostream>
 #include <algorithm>

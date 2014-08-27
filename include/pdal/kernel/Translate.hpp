@@ -68,6 +68,7 @@ private:
     bool m_bForwardMetadata;
     boost::uint32_t m_decimation_step;
     boost::uint32_t m_decimation_offset;
+
 };
 
 } // namespace kernel
