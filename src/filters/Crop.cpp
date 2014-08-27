@@ -209,7 +209,7 @@ Bounds<double> Crop::computeBounds(GEOSGeometry const *geometry)
 PointBufferSet Crop::run(PointBufferPtr buffer)
 {
     PointBufferSet pbSet;
-    PointBufferPtr output(new PointBuffer(buffer->context()));
+    PointBufferPtr output = buffer->makeNew();
     crop(*buffer, *output);
     pbSet.insert(output);
     return pbSet;

@@ -37,10 +37,10 @@
 namespace pdal
 {
 
-void KDIndex::build(PointContext ctx, bool b3D)
+void KDIndex::build(bool b3D)
 {
     m_3d = b3D;
-    size_t nDims = m_3d && ctx.hasDim(Dimension::Id::Z) ? 3 : 2;
+    size_t nDims = m_3d && m_buf.hasDim(Dimension::Id::Z) ? 3 : 2;
     delete m_index;
     m_index = new my_kd_tree_t(nDims, *this,
         nanoflann::KDTreeSingleIndexAdaptorParams(10, nDims));

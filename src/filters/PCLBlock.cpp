@@ -63,7 +63,7 @@ void PCLBlock::ready(PointContext ctx)
 
 PointBufferSet PCLBlock::run(PointBufferPtr input)
 {
-    PointBufferPtr output(new PointBuffer(input->context()));
+    PointBufferPtr output = input->makeNew();
     PointBufferSet pbSet;
     pbSet.insert(output);
 

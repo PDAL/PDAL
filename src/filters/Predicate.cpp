@@ -87,7 +87,7 @@ PointBufferSet Predicate::run(PointBufferPtr buf)
         throw python_error("Mask variable not set in predicate "
             "filter function");
 
-    PointBufferPtr outbuf(new PointBuffer(buf->context()));
+    PointBufferPtr outbuf = buf->makeNew();
 
     void *pydata =
         m_pythonMethod->extractResult("Mask", Dimension::Type::Unsigned8);

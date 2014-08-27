@@ -306,7 +306,7 @@ int Delta::execute()
 
     // Index the candidate data.
     m_index = std::unique_ptr<KDIndex>(new KDIndex(*candidateBuf));
-    m_index->build(candidateCtx, m_3d);
+    m_index->build(m_3d);
     
     std::unique_ptr<std::map<Point, Point>>
         points(cumulatePoints(*sourceBuf, *candidateBuf, m_index.get()));

@@ -132,19 +132,24 @@ void Writer::ready(PointContext ctx)
             if (!Algorithm::contains(m_dims, *di))
                 m_dims.push_back(*di);
     }
+
+    if (!m_writeHeader)
+        log()->get(LogLevel::DEBUG) << "Not writing header" << std::endl;
+    else
+        writeHeader(ctx);
 }
 
 
-void Writer::writeHeader(const PointBuffer& buf)
+void Writer::writeHeader(PointContext ctx)
 {
     log()->get(LogLevel::DEBUG) << "Writing header to filename: " <<
         m_filename << std::endl;
     if (m_outputType == "GEOJSON")
         writeGeoJSONHeader();
     else if (m_outputType == "CSV")
-        writeCSVHeader(buf);
+        writeCSVHeader(ctx);
     else if (m_outputType == "PCD")
-        writePCDHeader(buf);
+        writePCDHeader();
 }
 
 
@@ -168,7 +173,7 @@ void Writer::writeGeoJSONHeader()
 }
 
 
-void Writer::writeCSVHeader(const PointBuffer& buf)
+void Writer::writeCSVHeader(PointContext ctx)
 {
     for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
     {
@@ -176,15 +181,15 @@ void Writer::writeCSVHeader(const PointBuffer& buf)
             *m_stream << m_delimiter;
 
         if (m_quoteHeader)
-            *m_stream << "\"" << buf.context().dimName(*di) << "\"";
+            *m_stream << "\"" << ctx.dimName(*di) << "\"";
         else
-            *m_stream << buf.context().dimName(*di);
+            *m_stream << ctx.dimName(*di);
     }
     *m_stream << m_newline;
 }
 
 
-void Writer::writePCDHeader(const PointBuffer& buf)
+void Writer::writePCDHeader()
 {
     bool haveColor = (Algorithm::contains(m_dims, Dimension::Id::Red) &&
         Algorithm::contains(m_dims, Dimension::Id::Green) &&
@@ -211,12 +216,6 @@ void Writer::writePCDHeader(const PointBuffer& buf)
     if (haveColor)
         *m_stream << (m_packRgb ? " 1" : " 1 1 1");
     *m_stream << std::endl;
-
-    *m_stream << "WIDTH " << buf.size() << std::endl;
-    *m_stream << "HEIGHT 1" << std::endl;
-    *m_stream << "VIEWPOINT 0 0 0 1 0 0 0" << std::endl;
-    *m_stream << "POINTS " << buf.size() << std::endl;
-    *m_stream << "DATA ascii" << std::endl;
 }
 
 
@@ -239,6 +238,12 @@ void Writer::writeCSVBuffer(const PointBuffer& data)
 void Writer::writePCDBuffer(const PointBuffer& data)
 {
     using namespace Dimension;
+
+    *m_stream << "WIDTH " << data.size() << std::endl;
+    *m_stream << "HEIGHT 1" << std::endl;
+    *m_stream << "VIEWPOINT 0 0 0 1 0 0 0" << std::endl;
+    *m_stream << "POINTS " << data.size() << std::endl;
+    *m_stream << "DATA ascii" << std::endl;
 
     bool haveColor = (Algorithm::contains(m_dims, Id::Red) &&
         Algorithm::contains(m_dims, Id::Green) &&
@@ -296,7 +301,7 @@ void Writer::writeGeoJSONBuffer(const PointBuffer& data)
             if (di != m_dims.begin())
                 *m_stream << ",";
 
-            *m_stream << "\"" << data.context().dimName(*di) << "\":";
+            *m_stream << "\"" << data.dimName(*di) << "\":";
             *m_stream << "\"";
             *m_stream << data.getFieldAs<double>(*di, idx);
             *m_stream <<"\"";
@@ -309,17 +314,17 @@ void Writer::writeGeoJSONBuffer(const PointBuffer& data)
 
 void Writer::write(const PointBuffer& data)
 {
-    if (!m_writeHeader)
-        log()->get(LogLevel::DEBUG) << "Not writing header" << std::endl;
-    else
-        writeHeader(data);
-
     if (m_outputType == "CSV")
         writeCSVBuffer(data);
     else if (m_outputType == "GEOJSON")
         writeGeoJSONBuffer(data);
     else if (m_outputType == "PCD")
         writePCDBuffer(data);
+}
+
+
+void Writer::done(PointContext ctx)
+{
     writeFooter();
 }
 

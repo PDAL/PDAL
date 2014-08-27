@@ -54,7 +54,7 @@ void Decimation::processOptions(const Options& options)
 PointBufferSet Decimation::run(PointBufferPtr buffer)
 {
     PointBufferSet pbSet;
-    PointBufferPtr output(new PointBuffer(buffer->context()));
+    PointBufferPtr output = buffer->makeNew();
     decimate(*buffer, *output);
     pbSet.insert(output);
     return pbSet;

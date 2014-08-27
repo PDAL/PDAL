@@ -313,8 +313,6 @@ void compareAgainstSourceBuffer(PointBuffer const& candidate,
 
     BOOST_CHECK_EQUAL(source->size(), reader.getNumPoints());
     
-    PointContext cc = candidate.context();
-    
     // int X[] = { 49405730, 49413382, 49402110, 494192890, 49418622, 49403411 };
     // int Y[] = { 487743335, 487743982, 487743983, 487744219, 487744254, 487745019 };
     // int Z[] = { 13063, 13044, 13046, 13050, 13049, 13066 };

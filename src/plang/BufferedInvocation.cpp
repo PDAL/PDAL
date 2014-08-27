@@ -59,7 +59,7 @@ BufferedInvocation::BufferedInvocation(const Script& script)
 
 void BufferedInvocation::begin(PointBuffer& buffer)
 {
-    PointContext ctx = buffer.context(); 
+    PointContext ctx = buffer.m_context;
     Dimension::IdList const& dims = ctx.dims();
     
     for (auto di = dims.begin(); di != dims.end(); ++di)
@@ -94,7 +94,7 @@ void BufferedInvocation::end(PointBuffer& buffer)
 
     for (size_t i = 0; i < names.size(); i++)
     {
-        PointContext ctx = buffer.context();
+        PointContext ctx = buffer.m_context;
         Dimension::Id::Enum d = ctx.findDim(names[i]);
         if (d == Dimension::Id::Unknown)
             continue;

@@ -128,8 +128,6 @@ void Stage::l_initialize(PointContext ctx)
 
 void Stage::l_processOptions(const Options& options)
 {
-    m_debug = options.getValueOrDefault<bool>("debug", false);
-    m_verbose = options.getValueOrDefault<boost::uint32_t>("verbose", 0);
     if (m_debug && !m_verbose)
         m_verbose = 1;
 

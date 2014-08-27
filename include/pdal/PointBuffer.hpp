@@ -49,6 +49,10 @@ namespace plang
     class BufferedInvocation;
 }
 
+class PointBuffer;
+
+typedef std::shared_ptr<PointBuffer> PointBufferPtr;
+
 class PDAL_DLL PointBuffer
 {
     friend class plang::BufferedInvocation;
@@ -66,9 +70,10 @@ public:
         m_index.insert(m_index.end(), buf.m_index.begin(), buf.m_index.end());
     }
 
-    /// Get the buffer's point context.
-    PointContext context() const
-        { return m_context; }
+    /// Return a new point buffer with the same point context as this
+    /// point buffer.
+    PointBufferPtr makeNew() const
+        { return PointBufferPtr(new PointBuffer(m_context)); }
 
     template<class T>
     T getFieldAs(Dimension::Id::Enum dim, PointId pointIndex) const;
@@ -171,6 +176,10 @@ public:
     void dump(std::ostream& ostr) const;
     bool hasDim(Dimension::Id::Enum id) const
         { return m_context.hasDim(id); }
+    std::string dimName(Dimension::Id::Enum id) const
+        { return m_context.dimName(id); }
+    Dimension::IdList dims() const
+        { return m_context.dims(); }
 
 protected:
     PointContext m_context;
@@ -389,8 +398,6 @@ inline void PointBuffer::appendPoint(PointBuffer& buffer, PointId id)
     m_index.resize(newid + 1);
     m_index[newid] = rawId;
 }
-
-typedef std::shared_ptr<PointBuffer> PointBufferPtr;
 typedef std::set<PointBufferPtr> PointBufferSet;
 
 PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const PointBuffer&);

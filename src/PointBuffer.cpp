@@ -160,7 +160,7 @@ std::ostream& PointBuffer::toRST(std::ostream& os) const
 void PointBuffer::dump(std::ostream& ostr) const
 {
     using std::endl;
-    const Dimension::IdList& dims = context().dims();
+    const Dimension::IdList& dims = m_context.dims();
 
     point_count_t numPoints = size();
     ostr << "Contains " << numPoints << "  points" << endl;
