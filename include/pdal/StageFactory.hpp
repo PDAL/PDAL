@@ -35,7 +35,6 @@
 #pragma once
 
 #include <pdal/pdal_internal.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/Reader.hpp>
 #include <pdal/Filter.hpp>

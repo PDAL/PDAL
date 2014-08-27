@@ -43,6 +43,7 @@
 #include <pdal/pdal_defines.h>
 #include <pdal/pdal_types.hpp>
 #include <pdal/pdal_error.hpp>
+#include <pdal/pdal_macros.hpp>
 
 
 // we use explicitly-sized types everywhere, so include this here
