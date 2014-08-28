@@ -67,9 +67,15 @@ void MetadataNodeImpl::toJSON(std::ostream& o, int level) const
 {
     std::string indent(level * 2, ' ');
 
-    o << indent << "\"description\":\"" << m_descrip << "\"," << std::endl;
+    std::string escaped_description(m_descrip);
+    escaped_description = Utils::escapeJSON(escaped_description);
+    std::string escaped_value(m_value);
+    escaped_value = Utils::escapeJSON(escaped_value);
+    
+    o << indent << "\"description\":\"" << escaped_description << "\"," << std::endl;
     o << indent << "\"type\":\"" << m_type << "\"," << std::endl;
-    o << indent << "\"value\":\"" << m_value << "\"";
+    o << indent << "\"value\":\"" << escaped_value << "\"";
+    
     if (m_subnodes.size())
         o << ",";
     o << std::endl;
