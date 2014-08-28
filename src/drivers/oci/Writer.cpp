@@ -376,7 +376,7 @@ bool Writer::blockTableExists()
     char szTable[OWNAME] = "";
     oss << "select table_name from user_tables";
 
-    log()->get(LogLevel::DEBUG) << "checking for " << m_blockTableName <<
+    log()->get(LogLevel::Debug) << "checking for " << m_blockTableName <<
         " existence ... " ;
 
     Statement statement(m_connection->CreateStatement(oss.str().c_str()));
@@ -387,19 +387,19 @@ bool Writer::blockTableExists()
     statement->Define(szTable);
     statement->Execute();
 
-    log()->get(LogLevel::DEBUG) << "checking ... " << szTable ;
+    log()->get(LogLevel::Debug) << "checking ... " << szTable ;
     do
     {
-        log()->get(LogLevel::DEBUG) << ", " << szTable;
+        log()->get(LogLevel::Debug) << ", " << szTable;
         if (boost::iequals(szTable, m_blockTableName))
         {
-            log()->get(LogLevel::DEBUG) << " -- '" << m_blockTableName <<
+            log()->get(LogLevel::Debug) << " -- '" << m_blockTableName <<
                 "' found." <<std::endl;
             return true;
         }
     } while (statement->Fetch());
 
-    log()->get(LogLevel::DEBUG) << " -- '" << m_blockTableName <<
+    log()->get(LogLevel::Debug) << " -- '" << m_blockTableName <<
         "' not found." << std::endl;
     return false;
 }
@@ -774,7 +774,7 @@ void Writer::writeInit()
 
     if (m_trace)
     {
-        log()->get(LogLevel::DEBUG) << "Setting database trace..." << std::endl;
+        log()->get(LogLevel::Debug) << "Setting database trace..." << std::endl;
         std::ostringstream oss;
         oss << "BEGIN " << std::endl;
         oss << "DBMS_SESSION.set_sql_trace(sql_trace => TRUE);" << std::endl;
@@ -790,7 +790,7 @@ void Writer::writeInit()
         char traceTableName[1024] = {0};
         statement->Define(traceTableName, sizeof(traceTableName));
         statement->Execute();
-        log()->get(LogLevel::DEBUG) << "Trace location name:  " <<
+        log()->get(LogLevel::Debug) << "Trace location name:  " <<
             traceTableName << std::endl;
 
     }
@@ -963,18 +963,18 @@ void Writer::writeTile(PointBuffer const& buffer)
 
     // :1
     statement->Bind(&m_pc_id);
-    log()->get(LogLevel::DEBUG4) << "Block obj_id " << m_pc_id << std::endl;
+    log()->get(LogLevel::Debug4) << "Block obj_id " << m_pc_id << std::endl;
 
     // :2
     statement->Bind(&m_lastBlockId);
     m_lastBlockId++;
-    log()->get(LogLevel::DEBUG4) << "Last BlockId " <<
+    log()->get(LogLevel::Debug4) << "Last BlockId " <<
         m_lastBlockId << std::endl;
 
     // :3
     long long_num_points = static_cast<long>(buffer.size());
     statement->Bind(&long_num_points);
-    log()->get(LogLevel::DEBUG4) << "Num points " <<
+    log()->get(LogLevel::Debug4) << "Num points " <<
         long_num_points << std::endl;
 
 
@@ -1017,7 +1017,7 @@ void Writer::writeTile(PointBuffer const& buffer)
     }
     m_callback->invoke(buffer.size());
 
-    log()->get(LogLevel::DEBUG4) << "Blob size " << outbufSize << std::endl;
+    log()->get(LogLevel::Debug4) << "Blob size " << outbufSize << std::endl;
     OCILobLocator* locator;
     if (m_streamChunks)
     {
@@ -1030,7 +1030,7 @@ void Writer::writeTile(PointBuffer const& buffer)
     // :5
     long long_gtype = static_cast<long>(m_gtype);
     statement->Bind(&long_gtype);
-    log()->get(LogLevel::DEBUG4) << "OCI geometry type " <<
+    log()->get(LogLevel::Debug4) << "OCI geometry type " <<
         m_gtype << std::endl;
 
     // :6
@@ -1039,7 +1039,7 @@ void Writer::writeTile(PointBuffer const& buffer)
     if (m_srid != 0)
         srid = m_srid;
     statement->Bind(&srid);
-    log()->get(LogLevel::DEBUG4) << "OCI SRID " << srid << std::endl;
+    log()->get(LogLevel::Debug4) << "OCI SRID " << srid << std::endl;
     
 
     // :7
@@ -1059,14 +1059,14 @@ void Writer::writeTile(PointBuffer const& buffer)
 
     setOrdinates(statement, sdo_ordinates, bounds);
     statement->Bind(&sdo_ordinates, m_connection->GetOrdinateType());
-    log()->get(LogLevel::DEBUG4) << "Bounds " << bounds << std::endl;
+    log()->get(LogLevel::Debug4) << "Bounds " << bounds << std::endl;
 
     // :9
     if (usePartition)
     {
         long long_partition_id = (long)m_blockTablePartitionValue;
         statement->Bind(&long_partition_id);
-        log()->get(LogLevel::DEBUG4) << "Partition ID " << long_partition_id <<
+        log()->get(LogLevel::Debug4) << "Partition ID " << long_partition_id <<
             std::endl;        
     }
 
