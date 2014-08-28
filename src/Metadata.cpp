@@ -53,7 +53,7 @@ std::string MetadataNodeImpl::toJSON() const
         subnodesToJSON(o, 1);
     else
     {
-        o << "  " << m_name << ":" << std::endl;
+        o << "  \"" << m_name << "\":" << std::endl;
         o << "  {" << std::endl;
         toJSON(o, 2);
         o << "  }" << std::endl;
