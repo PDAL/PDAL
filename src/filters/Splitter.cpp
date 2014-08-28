@@ -102,7 +102,7 @@ PointBufferSet Splitter::run(PointBufferPtr buf)
         Coord loc(xpos, ypos);
         PointBufferPtr& outbuf = buffers[loc];
         if (!outbuf)
-            outbuf.reset(new PointBuffer(buf->context()));
+            outbuf = buf->makeNew();
         outbuf->appendPoint(*buf, idx);
     }
 

@@ -119,10 +119,10 @@ void Colorization::processOptions(const Options& options)
 
     if (dimensions.size() == 0)
     {
-        m_bands.push_back({"Red", Dimension::Id::Red, 1, 1.0});
-        m_bands.push_back({"Green", Dimension::Id::Green, 2, 1.0});
-        m_bands.push_back({"Blue", Dimension::Id::Blue, 3, 1.0});
-        log()->get(LogLevel::DEBUG) << "No dimension mappings were given. "
+        m_bands.emplace_back("Red", Dimension::Id::Red, 1, 1.0);
+        m_bands.emplace_back("Green", Dimension::Id::Green, 2, 1.0);
+        m_bands.emplace_back("Blue", Dimension::Id::Blue, 3, 1.0);
+        log()->get(LogLevel::Debug) << "No dimension mappings were given. "
             "Using default mappings." << std::endl;
     }
     for (auto i = dimensions.begin(); i != dimensions.end(); ++i)
@@ -140,7 +140,7 @@ void Colorization::processOptions(const Options& options)
             dimensionOptions->getValueOrThrow<uint32_t>("band");
         double scale =
             dimensionOptions->getValueOrDefault<double>("scale", 1.0);
-        m_bands.push_back({name, Dimension::Id::Unknown, bandId, scale});
+        m_bands.emplace_back(name, Dimension::Id::Unknown, bandId, scale);
     }
 }
 
@@ -152,7 +152,7 @@ void Colorization::ready(PointContext ctx)
 
 #ifdef PDAL_HAVE_GDAL
 
-    log()->get(LogLevel::DEBUG) << "Using " << m_rasterFilename <<
+    log()->get(LogLevel::Debug) << "Using " << m_rasterFilename <<
         " for raster" << std::endl;
     m_ds = GDALOpen(m_rasterFilename.c_str(), GA_ReadOnly);
     if (m_ds == NULL)

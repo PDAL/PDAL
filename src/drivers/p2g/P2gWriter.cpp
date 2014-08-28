@@ -155,13 +155,13 @@ void P2gWriter::write(const PointBuffer& buf)
     m_GRID_SIZE_X = (int)(ceil((m_bounds.getMaximum(0) - m_bounds.getMinimum(0))/m_GRID_DIST_X)) + 1;
     m_GRID_SIZE_Y = (int)(ceil((m_bounds.getMaximum(1) - m_bounds.getMinimum(1))/m_GRID_DIST_Y)) + 1;
 
-    log()->get(LogLevel::DEBUG) << "X grid size: " << m_GRID_SIZE_X << std::endl;
-    log()->get(LogLevel::DEBUG) << "Y grid size: " << m_GRID_SIZE_Y << std::endl;
+    log()->get(LogLevel::Debug) << "X grid size: " << m_GRID_SIZE_X << std::endl;
+    log()->get(LogLevel::Debug) << "Y grid size: " << m_GRID_SIZE_Y << std::endl;
 
 
     log()->floatPrecision(6);
-    log()->get(LogLevel::DEBUG) << "X grid distance: " << m_GRID_DIST_X << std::endl;
-    log()->get(LogLevel::DEBUG) << "Y grid distance: " << m_GRID_DIST_Y << std::endl;
+    log()->get(LogLevel::Debug) << "X grid distance: " << m_GRID_DIST_X << std::endl;
+    log()->get(LogLevel::Debug) << "Y grid distance: " << m_GRID_DIST_Y << std::endl;
     log()->clearFloat();
 
     boost::scoped_ptr<OutCoreInterp> p(new OutCoreInterp(m_GRID_DIST_X,

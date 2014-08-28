@@ -69,6 +69,10 @@ class PDAL_DLL Colorization : public Filter
 
 struct BandInfo
 {
+    BandInfo(const std::string& name, Dimension::Id::Enum dim, uint32_t band,
+        double scale) : m_name(name), m_dim(dim), m_band(band), m_scale(scale)
+    {}
+
     std::string m_name;
     Dimension::Id::Enum m_dim;
     uint32_t m_band;

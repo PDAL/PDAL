@@ -104,8 +104,8 @@ void Diff::checkPoints(const PointBuffer& source_data,
 
     // Both schemas have already been determined to be equal, so are the
     // same size and in the same order.
-    Dimension::IdList const& sourceDims = source_data.context().dims();    
-    Dimension::IdList const& candidateDims = candidate_data.context().dims();   
+    Dimension::IdList const& sourceDims = source_data.dims();    
+    Dimension::IdList const& candidateDims = candidate_data.dims();   
 
     char sbuf[8];
     char cbuf[8];

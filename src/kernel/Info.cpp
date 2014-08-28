@@ -227,17 +227,17 @@ vector<boost::uint32_t> getListOfPoints(std::string p)
 
 void Info::dumpPoints(PointBufferPtr buf) const
 {
-    PointBuffer outbuf(buf->context());
+    PointBufferPtr outbuf = buf->makeNew();
 
     std::vector<uint32_t> points = getListOfPoints(m_pointIndexes);
     for (size_t i = 0; i < points.size(); ++i)
     {
         PointId id = (PointId)points[i];
         if (id < buf->size())
-            outbuf.appendPoint(*buf, id);
+            outbuf->appendPoint(*buf, id);
     }
 
-    boost::property_tree::ptree buffer_tree = outbuf.toPTree();
+    boost::property_tree::ptree buffer_tree = outbuf->toPTree();
     m_tree->add_child("point", buffer_tree.get_child("0"));
 }
 
@@ -304,15 +304,15 @@ void Info::dumpQuery(PointBufferPtr buf) const
     double y = values[1];
     double z = is3d ? values[2] : 0.0;
     
-    PointBuffer outbuf(buf->context());
+    PointBufferPtr outbuf = buf->makeNew();
 
     KDIndex kdi(*buf);
-    kdi.build(buf->context(), is3d);
+    kdi.build(is3d);
     std::vector<size_t> ids = kdi.neighbors(x, y, z, 0.0, buf->size());
     for (auto i = ids.begin(); i != ids.end(); ++i)
-        outbuf.appendPoint(*buf, *i); 
+        outbuf->appendPoint(*buf, *i); 
 
-    boost::property_tree::ptree tree = outbuf.toPTree();
+    boost::property_tree::ptree tree = outbuf->toPTree();
     m_tree->add_child("point", tree);
 }
 

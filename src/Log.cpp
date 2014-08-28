@@ -45,7 +45,7 @@ using namespace LogLevel;
 
 Log::Log(std::string const& leaderString,
          std::string const& outputName)
-    : m_level(ERROR)
+    : m_level(Error)
     , m_deleteStreamOnCleanup(false)
     , m_leader(leaderString)
 {
@@ -73,7 +73,7 @@ Log::Log(std::string const& leaderString,
 
 Log::Log(std::string const& leaderString,
          std::ostream* v)
-    : m_level(ERROR)
+    : m_level(Error)
     , m_deleteStreamOnCleanup(false)
     , m_leader(leaderString)
 {
@@ -112,7 +112,7 @@ std::ostream& Log::get(LogLevel::Enum level)
     if (level <= m_level)
     {
         *m_log << "(" << m_leader << " "<< getLevelString(level) <<": " << level << "): ";
-        *m_log << std::string(level < DEBUG ? 0 : level - DEBUG, '\t');
+        *m_log << std::string(level < Debug ? 0 : level - Debug, '\t');
         return *m_log;
     }
     else
@@ -128,17 +128,17 @@ std::string Log::getLevelString(LogLevel::Enum level) const
 
     switch (level)
     {
-        case ERROR:
-            output << "ERROR";
+        case Error:
+            output << "Error";
             break;
-        case WARNING:
-            output << "WARNING";
+        case Warning:
+            output << "Warning";
             break;
-        case INFO:
-            output << "INFO";
+        case Info:
+            output << "Info";
             break;
         default:
-            output << "DEBUG";
+            output << "Debug";
     }
 
     return output.str();

@@ -376,7 +376,7 @@ void Writer::DeleteTable(std::string const& schema_name,
 
 bool Writer::CheckPointCloudExists()
 {
-    log()->get(LogLevel::DEBUG) << "checking for pointcloud existence ... " <<
+    log()->get(LogLevel::Debug) << "checking for pointcloud existence ... " <<
         std::endl;
 
     std::string q = "SELECT PC_Version()";
@@ -394,7 +394,7 @@ bool Writer::CheckPointCloudExists()
 
 bool Writer::CheckPostGISExists()
 {
-    log()->get(LogLevel::DEBUG) << "checking for PostGIS existence ... " <<
+    log()->get(LogLevel::Debug) << "checking for PostGIS existence ... " <<
         std::endl;
 
     std::string q = "SELECT PostGIS_Version()";
@@ -416,7 +416,7 @@ bool Writer::CheckTableExists(std::string const& name)
     oss << "SELECT count(*) FROM pg_tables WHERE tablename ILIKE '" <<
         name << "'";
 
-    log()->get(LogLevel::DEBUG) << "checking for table '" << name <<
+    log()->get(LogLevel::Debug) << "checking for table '" << name <<
         "' existence ... " << std::endl;
 
     char *count_str = pg_query_once(m_session, oss.str());
@@ -428,7 +428,7 @@ bool Writer::CheckTableExists(std::string const& name)
     if (count == 1)
         return true;
     else if (count > 1)
-        log()->get(LogLevel::DEBUG) << "found more than 1 table named '" <<
+        log()->get(LogLevel::Debug) << "found more than 1 table named '" <<
             name << "'" << std::endl;
     return false;
 }

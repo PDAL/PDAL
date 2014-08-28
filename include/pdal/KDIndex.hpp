@@ -45,7 +45,7 @@ class PDAL_DLL KDIndex
 {
 public:
     KDIndex(PointBuffer& buf) : m_buf(buf), m_index(0)
-        { m_3d = buf.context().hasDim(Dimension::Id::Z); }
+        { m_3d = buf.hasDim(Dimension::Id::Z); }
 
     ~KDIndex()
         { delete m_index; }
@@ -117,7 +117,7 @@ public:
             double distance,
             boost::uint32_t count = 1) const;
 
-    void build(PointContext ctx, bool b3d = true);
+    void build(bool b3d = true);
 
 private:
     const PointBuffer& m_buf;

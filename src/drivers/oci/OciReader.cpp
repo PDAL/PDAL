@@ -188,7 +188,7 @@ void OciReader::validateQuery()
     while (m_stmt->GetNextField(col, fieldName, &hType, &size,
         &precision, &scale, typeName))
     {
-        log()->get(LogLevel::DEBUG) << "Fetched field '" << fieldName <<
+        log()->get(LogLevel::Debug) << "Fetched field '" << fieldName <<
             "' of type '" << typeName << "'"<< std::endl;
 
         reqFields.erase(fieldName);
@@ -245,7 +245,7 @@ pdal::SpatialReference OciReader::fetchSpatialReference(Statement stmt,
 
 void OciReader::addDimensions(PointContext ctx)
 {
-    log()->get(LogLevel::DEBUG) << "Fetching schema from SDO_PC object" <<
+    log()->get(LogLevel::Debug) << "Fetching schema from SDO_PC object" <<
         std::endl;
 
     m_block->m_ctx = ctx;

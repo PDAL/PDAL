@@ -71,7 +71,7 @@ SQLiteIterator::SQLiteIterator(const pdal::drivers::sqlite::SQLiteReader& reader
     pdal::Options const& options = reader.getOptions();
     std::string const& connection = options.getValueOrThrow<std::string>("connection");
 
-    m_reader.log()->get(LogLevel::DEBUG) << "Connection: '" << connection << "'" << std::endl;
+    m_reader.log()->get(LogLevel::Debug) << "Connection: '" << connection << "'" << std::endl;
     m_session = std::unique_ptr<SQLite>(new SQLite(connection, m_reader.log()));
     m_session->connect(false); // don't connect in write mode
 
@@ -129,7 +129,7 @@ point_count_t SQLiteIterator::readPatch(PointBuffer& buffer, point_count_t numPt
     size_t size = (*r)[position].blobLen;
     position = columns.find("NUM_POINTS")->second;
     int32_t count = boost::lexical_cast<int32_t>((*r)[position].data);
-    m_reader.log()->get(LogLevel::DEBUG4) << "fetched patch with " << count 
+    m_reader.log()->get(LogLevel::Debug4) << "fetched patch with " << count 
          << " points and " << size << " bytes bytesize: " << size << std::endl;    
     m_patch->remaining = count;
     m_patch->count = count;
@@ -183,7 +183,7 @@ point_count_t SQLiteIterator::readImpl(PointBuffer& buffer, point_count_t count)
     if (atEndImpl())
         return 0;
     
-    m_reader.log()->get(LogLevel::DEBUG4) << "readBufferImpl called with "
+    m_reader.log()->get(LogLevel::Debug4) << "readBufferImpl called with "
         "PointBuffer filled to " << buffer.size() << " points" <<
         std::endl;
 

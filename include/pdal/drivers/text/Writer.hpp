@@ -74,12 +74,13 @@ private:
     virtual void processOptions(const Options&);
     virtual void ready(PointContext ctx);
     virtual void write(const PointBuffer& buf);
+    virtual void done(PointContext ctx);
 
-    void writeHeader(const PointBuffer& buf);
+    void writeHeader(PointContext ctx);
     void writeFooter();
     void writeGeoJSONHeader();
-    void writeCSVHeader(const PointBuffer& buf);
-    void writePCDHeader(const PointBuffer& buf);
+    void writeCSVHeader(PointContext ctx);
+    void writePCDHeader();
 
     void writeGeoJSONBuffer(const PointBuffer& data);
     void writeCSVBuffer(const PointBuffer& data);

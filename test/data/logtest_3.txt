@@ -1,2 +1,2 @@
-(filters.programmable DEBUG: 8): 					Python script source=[117 bytes], module=yModule, function=yfunc
+(filters.programmable Debug: 8): 					Python script source=[117 bytes], module=yModule, function=yfunc
  processing 750 points.

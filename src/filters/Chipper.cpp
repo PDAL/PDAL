@@ -317,7 +317,7 @@ void Chipper::finalSplit(ChipRefList& wide, ChipRefList& narrow,
 void Chipper::emit(ChipRefList& wide, PointId widemin, PointId widemax,
     ChipRefList& narrow, PointId narrowmin, PointId narrowmax)
 {
-    PointBufferPtr buf(new PointBuffer(m_inbuf->context()));
+    PointBufferPtr buf = m_inbuf->makeNew();
     for (size_t idx = widemin; idx <= widemax; ++idx)
         buf->appendPoint(*m_inbuf, wide[idx].m_ptindex);
 
