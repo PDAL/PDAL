@@ -69,7 +69,7 @@ private:
     void addSwitches(); // overrride
     void validateSwitches(); // overrride
     
-    void dump(PointBufferPtr buf);
+    void dump(PointContext ctx, PointBufferPtr buf);
     
     void dumpPoints(PointBufferPtr buf) const;
     void dumpStats();
@@ -97,8 +97,7 @@ private:
     boost::uint64_t m_numPointsToWrite;
     std::string m_pipelineFile;
     bool m_showSample;
-    MetadataNode m_meta;
-    //ABELL
+
     std::unique_ptr<boost::property_tree::ptree> m_tree;
     std::unique_ptr<PipelineManager> m_manager;
 };
