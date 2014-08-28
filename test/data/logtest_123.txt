@@ -1,5 +1,5 @@
-(drivers.faux.reader DEBUG: 8): 					Reading a point buffer of 750 points.
-(filters.programmable DEBUG: 8): 					Python script source=[117 bytes], module=xModule, function=xfunc
+(drivers.faux.reader Debug: 8): 					Reading a point buffer of 750 points.
+(filters.programmable Debug: 8): 					Python script source=[117 bytes], module=xModule, function=xfunc
  processing 750 points.
-(filters.programmable DEBUG: 8): 					Python script source=[117 bytes], module=yModule, function=yfunc
+(filters.programmable Debug: 8): 					Python script source=[117 bytes], module=yModule, function=yfunc
  processing 750 points.
