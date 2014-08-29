@@ -68,14 +68,14 @@ PointBufferSet PCLBlock::run(PointBufferPtr input)
     pbSet.insert(output);
 
 #ifdef PDAL_HAVE_PCL
-    bool logOutput = log()->getLevel() > LogLevel::DEBUG1;
+    bool logOutput = log()->getLevel() > LogLevel::Debug1;
     if (logOutput)
         log()->floatPrecision(8);
 
-    log()->get(LogLevel::DEBUG2) << input->getFieldAs<double>(Dimension::Id::X, 0) << ", " <<
+    log()->get(LogLevel::Debug2) << input->getFieldAs<double>(Dimension::Id::X, 0) << ", " <<
         input->getFieldAs<double>(Dimension::Id::Y, 0) << ", " <<
         input->getFieldAs<double>(Dimension::Id::Z, 0) << std::endl;
-    log()->get(LogLevel::DEBUG2) << "Process PCLBlock..." << std::endl;
+    log()->get(LogLevel::Debug2) << "Process PCLBlock..." << std::endl;
 
     Bounds<double> const& buffer_bounds = input->calculateBounds();
 
@@ -84,7 +84,7 @@ PointBufferSet PCLBlock::run(PointBufferPtr input)
     Cloud::Ptr cloud(new Cloud);
     PDALtoPCD(*input, *cloud, buffer_bounds);
 
-    log()->get(LogLevel::DEBUG2) << cloud->points[0].x << ", " <<
+    log()->get(LogLevel::Debug2) << cloud->points[0].x << ", " <<
         cloud->points[0].y << ", " << cloud->points[0].z << std::endl;
 
     int level = log()->getLevel();
@@ -124,16 +124,16 @@ PointBufferSet PCLBlock::run(PointBufferPtr input)
 
     if (cloud_f->points.empty())
     {
-        log()->get(LogLevel::DEBUG2) << "Filtered cloud has no points!" << std::endl;
+        log()->get(LogLevel::Debug2) << "Filtered cloud has no points!" << std::endl;
         return pbSet;
     }
 
     PCDtoPDAL(*cloud_f, *output, buffer_bounds);
 
-    log()->get(LogLevel::DEBUG2) << cloud->points.size() << " before, " <<
+    log()->get(LogLevel::Debug2) << cloud->points.size() << " before, " <<
         cloud_f->points.size() << " after" << std::endl;
-    log()->get(LogLevel::DEBUG2) << output->size() << std::endl;
-    log()->get(LogLevel::DEBUG2) << output->getFieldAs<double>(Dimension::Id::X, 0) << ", " <<
+    log()->get(LogLevel::Debug2) << output->size() << std::endl;
+    log()->get(LogLevel::Debug2) << output->getFieldAs<double>(Dimension::Id::X, 0) << ", " <<
         output->getFieldAs<double>(Dimension::Id::Y, 0) << ", " << 
         output->getFieldAs<double>(Dimension::Id::Z, 0) << std::endl;
 #endif

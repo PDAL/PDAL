@@ -53,7 +53,7 @@ std::string MetadataNodeImpl::toJSON() const
         subnodesToJSON(o, 1);
     else
     {
-        o << "  " << m_name << ":" << std::endl;
+        o << "  \"" << m_name << "\":" << std::endl;
         o << "  {" << std::endl;
         toJSON(o, 2);
         o << "  }" << std::endl;
@@ -67,9 +67,15 @@ void MetadataNodeImpl::toJSON(std::ostream& o, int level) const
 {
     std::string indent(level * 2, ' ');
 
-    o << indent << "\"description\":\"" << m_descrip << "\"," << std::endl;
+    std::string escaped_description(m_descrip);
+    escaped_description = Utils::escapeJSON(escaped_description);
+    std::string escaped_value(m_value);
+    escaped_value = Utils::escapeJSON(escaped_value);
+    
+    o << indent << "\"description\":\"" << escaped_description << "\"," << std::endl;
     o << indent << "\"type\":\"" << m_type << "\"," << std::endl;
-    o << indent << "\"value\":\"" << m_value << "\"";
+    o << indent << "\"value\":\"" << escaped_value << "\"";
+    
     if (m_subnodes.size())
         o << ",";
     o << std::endl;
@@ -162,6 +168,11 @@ boost::property_tree::ptree MetadataNodeImpl::toPTree() const
     return tree;
 }
 
+std::string MetadataNode::toJSON() const
+    { return m_impl->toJSON(); }
+
+boost::property_tree::ptree MetadataNode::toPTree() const
+    { return m_impl->toPTree(); }
 }
 namespace std
 {

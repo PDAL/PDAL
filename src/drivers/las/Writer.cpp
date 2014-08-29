@@ -300,7 +300,7 @@ void Writer::setVLRsFromMetadata(LasHeader& header, MetadataNode metaNode,
                     &data[0],
                     static_cast<boost::uint16_t>(data.size()));
             header.getVLRs().add(vlr);
-            log()->get(LogLevel::DEBUG) << "Setting VLR from metadata with "
+            log()->get(LogLevel::Debug) << "Setting VLR from metadata with "
                 "user_id='" << user_id << "' and record_id='" << record_id <<
                 "'"<< " with size: " << data.size() << std::endl;
         }
@@ -344,14 +344,14 @@ void Writer::ready(PointContext ctx)
         // metadata one that was set passively
         v = v2; 
         setPointFormat(static_cast<PointFormat>(v));
-        log()->get(LogLevel::DEBUG) << "Setting point format to " << v <<
+        log()->get(LogLevel::Debug) << "Setting point format to " << v <<
             " from metadata " << std::endl;
         
         uint32_t minor = getMetadataOption<uint32_t>(getOptions(),
             m_metadata, "minor_version", 2);
 
         setFormatVersion(1, static_cast<boost::uint8_t>(minor));
-        log()->get(LogLevel::DEBUG) << "Setting version to "
+        log()->get(LogLevel::Debug) << "Setting version to "
                              << "1." << minor
                              << " from metadata " << std::endl;
 
@@ -372,26 +372,26 @@ void Writer::ready(PointContext ctx)
             "creation_doy", day);
 
         setDate(static_cast<uint16_t>(day), static_cast<uint16_t>(year));
-        log()->get(LogLevel::DEBUG) << "Setting date to format " << day <<
+        log()->get(LogLevel::Debug) << "Setting date to format " << day <<
             "/" << year << " from metadata " << std::endl;
 
         std::string software_id = getMetadataOption<std::string>(getOptions(),
             m_metadata, "software_id", GetDefaultSoftwareId());
         setGeneratingSoftware(software_id);
-        log()->get(LogLevel::DEBUG) << "Setting generating software to '" <<
+        log()->get(LogLevel::Debug) << "Setting generating software to '" <<
             software_id << "' from metadata " << std::endl;
 
         std::string system_id = getMetadataOption<std::string>(getOptions(),
             m_metadata, "system_id", LasHeader::SystemIdentifier);
         setSystemIdentifier(system_id);
-        log()->get(LogLevel::DEBUG) << "Setting system identifier to " <<
+        log()->get(LogLevel::Debug) << "Setting system identifier to " <<
             system_id << " from metadata " << std::endl;
 
         boost::uuids::uuid project_id =
             getMetadataOption<boost::uuids::uuid>(getOptions(),
             m_metadata, "project_id", boost::uuids::nil_uuid());
         m_lasHeader.SetProjectId(project_id);
-        log()->get(LogLevel::DEBUG) << "Setting project_id to " << project_id <<
+        log()->get(LogLevel::Debug) << "Setting project_id to " << project_id <<
             " from metadata " << std::endl;
         
         std::string global_encoding_data = getMetadataOption<std::string>(
@@ -428,13 +428,13 @@ void Writer::ready(PointContext ctx)
             }
         }
         m_lasHeader.SetReserved(reserved);
-        log()->get(LogLevel::DEBUG) << "Setting reserved to " << reserved <<
+        log()->get(LogLevel::Debug) << "Setting reserved to " << reserved <<
             " from metadata " << std::endl;
 
         uint16_t filesource_id = getMetadataOption<uint16_t>(getOptions(),
             m_metadata, "filesource_id", 0);
         m_lasHeader.SetFileSourceId(filesource_id);
-        log()->get(LogLevel::DEBUG) << "Setting file source id to " <<
+        log()->get(LogLevel::Debug) << "Setting file source id to " <<
             filesource_id << " from metadata " << std::endl;
 
         try
@@ -652,7 +652,7 @@ void Writer::done(PointContext ctx)
 {
     m_lasHeader.SetPointRecordsCount(m_numPointsWritten);
 
-    log()->get(LogLevel::DEBUG) << "Wrote " << m_numPointsWritten <<
+    log()->get(LogLevel::Debug) << "Wrote " << m_numPointsWritten <<
         " points to the LAS file" << std::endl;
 
     m_streamManager.ostream().seekp(m_streamOffset);

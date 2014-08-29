@@ -562,6 +562,32 @@ string Utils::replaceAll(string result, const string& replaceWhat,
     return result;
 }
 
+// Stolen from http://stackoverflow.com/questions/7724448/simple-json-string-escape-for-c/11969098#11969098
+
+std::string & Utils::escapeJSON(string &str)
+{
+    str.erase
+    (
+        remove_if
+        (
+            str.begin(),
+            str.end(),
+            [](const char c)
+            {
+                return (c <= 31);
+            }
+        ),
+        str.end()
+    );
+    size_t pos=0;
+    while((pos=str.find_first_of("\"\\/", pos))!=string::npos)
+    {
+        str.insert(pos, "\\");
+        ++++pos;
+    }
+    return str;
+}
+
 /// Break a string into a list of strings, none of which exceeds a specified
 /// length.
 /// \param[in] inputString  String to split

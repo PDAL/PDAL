@@ -1,1 +1,1 @@
-(drivers.faux.reader DEBUG: 8): 					Reading a point buffer of 750 points.
+(drivers.faux.reader Debug: 8): 					Reading a point buffer of 750 points.

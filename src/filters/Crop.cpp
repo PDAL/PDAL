@@ -108,7 +108,7 @@ void Crop::ready(PointContext ctx)
             throw pdal_error("input WKT was not a POLYGON or MULTIPOLYGON");
 
         char* out_wkt = GEOSGeomToWKT_r(m_geosEnvironment, m_geosGeometry);
-        log()->get(LogLevel::DEBUG2) << "Ingested WKT for filters.crop: " <<
+        log()->get(LogLevel::Debug2) << "Ingested WKT for filters.crop: " <<
             std::string(out_wkt) <<std::endl;
         GEOSFree_r(m_geosEnvironment, out_wkt);
 
@@ -128,12 +128,12 @@ void Crop::ready(PointContext ctx)
             throw pdal_error("unable to prepare geometry for "
                 "index-accellerated intersection");
         m_bounds = computeBounds(m_geosGeometry);
-        log()->get(LogLevel::DEBUG) << "Computed bounds from given WKT: " <<
+        log()->get(LogLevel::Debug) << "Computed bounds from given WKT: " <<
             m_bounds <<std::endl;
     }
     else
     {
-        log()->get(LogLevel::DEBUG) << "Using simple bounds for "
+        log()->get(LogLevel::Debug) << "Using simple bounds for "
             "filters.crop: " << m_bounds << std::endl;
     }
 
@@ -172,7 +172,7 @@ Bounds<double> Crop::computeBounds(GEOSGeometry const *geometry)
         ring);
 
     GEOSCoordSeq_getDimensions_r(m_geosEnvironment, coords, &numInputDims);
-    log()->get(LogLevel::DEBUG) << "Inputted WKT had " << numInputDims <<
+    log()->get(LogLevel::Debug) << "Inputted WKT had " << numInputDims <<
         " dimensions" <<std::endl;
 
     uint32_t count(0);
@@ -220,7 +220,7 @@ void Crop::crop(PointBuffer& input, PointBuffer& output)
 {
     Bounds<double> buffer_bounds = input.calculateBounds();
 
-    bool logOutput = (log()->getLevel() > LogLevel::DEBUG4);
+    bool logOutput = (log()->getLevel() > LogLevel::Debug4);
     if (logOutput)
         log()->floatPrecision(8);
 
@@ -233,7 +233,7 @@ void Crop::crop(PointBuffer& input, PointBuffer& output)
         if (logOutput)
         {
             log()->floatPrecision(10);
-            log()->get(LogLevel::DEBUG5) << "input: " << x << " y: " << y <<
+            log()->get(LogLevel::Debug5) << "input: " << x << " y: " << y <<
                 " z: " << z << std::endl;
         }
 

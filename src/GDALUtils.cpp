@@ -85,7 +85,7 @@ void Debug::log(::CPLErr code, int num, char const* msg)
     else if (code == CE_Debug)
     {
         oss << "GDAL debug: " << msg;
-        m_log->get(LogLevel::DEBUG) << oss.str() << std::endl;
+        m_log->get(LogLevel::Debug) << oss.str() << std::endl;
     }
 }
 
@@ -150,8 +150,8 @@ void GlobalDebug::log(::CPLErr code, int num, char const* msg)
         for (t = streams.begin(); t != streams.end(); t++)
         {
             LogPtr l = t->second;
-            if (l->getLevel() > LogLevel::DEBUG)
-                l->get(LogLevel::DEBUG) << oss.str() << std::endl;
+            if (l->getLevel() > LogLevel::Debug)
+                l->get(LogLevel::Debug) << oss.str() << std::endl;
         }
     }
 }

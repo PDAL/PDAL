@@ -71,12 +71,12 @@ void SQLiteReader::initialize()
 {
     try
     {
-        log()->get(LogLevel::DEBUG) << "Connection: '" << m_connection << "'" << std::endl;
+        log()->get(LogLevel::Debug) << "Connection: '" << m_connection << "'" << std::endl;
         m_session = std::unique_ptr<SQLite>(new SQLite(m_connection, log()));
         m_session->connect(false); // don't connect in write mode
-        log()->get(LogLevel::DEBUG) << "Connected to database" << std::endl;
+        log()->get(LogLevel::Debug) << "Connected to database" << std::endl;
         bool bHaveSpatialite = m_session->doesTableExist("geometry_columns");
-        log()->get(LogLevel::DEBUG) << "Have spatialite?: " << bHaveSpatialite << std::endl;
+        log()->get(LogLevel::Debug) << "Have spatialite?: " << bHaveSpatialite << std::endl;
         m_session->spatialite();
 
         if (!bHaveSpatialite)
@@ -130,7 +130,7 @@ pdal::SpatialReference
 SQLiteReader::fetchSpatialReference(std::string const& query) const
 {
     // Fetch the WKT for the SRID to set the coordinate system of this stage
-    log()->get(LogLevel::DEBUG) << "Fetching schema object" << std::endl;
+    log()->get(LogLevel::Debug) << "Fetching schema object" << std::endl;
 
     // ::soci::row r;
     // ::soci::indicator ind = ::soci::i_null;
@@ -149,7 +149,7 @@ SQLiteReader::fetchSpatialReference(std::string const& query) const
    //  if (!bDidRead)
    //      return pdal::SpatialReference();
    //
-   //  log()->get(LogLevel::DEBUG) << "query returned " << srid << std::endl;
+   //  log()->get(LogLevel::Debug) << "query returned " << srid << std::endl;
    //  std::ostringstream oss;
    //  oss <<"EPSG:" << srid;
 
@@ -196,7 +196,7 @@ void SQLiteReader::validateQuery() const
 
 void SQLiteReader::addDimensions(PointContext ctx)
 {
-    log()->get(LogLevel::DEBUG) << "Fetching schema object" << std::endl;
+    log()->get(LogLevel::Debug) << "Fetching schema object" << std::endl;
 
     std::ostringstream oss;
     oss << "SELECT SCHEMA FROM (" << m_query <<") as q LIMIT 1";

@@ -236,7 +236,7 @@ public:
     static void wordWrap(std::string const& inputString, 
                          std::vector<std::string>& outputString, 
                          unsigned int lineLength);
-
+    static std::string& escapeJSON(std::string &s);
     static std::string demangle(const std::string& s);
 
     template<typename T>

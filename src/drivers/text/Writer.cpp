@@ -134,7 +134,7 @@ void Writer::ready(PointContext ctx)
     }
 
     if (!m_writeHeader)
-        log()->get(LogLevel::DEBUG) << "Not writing header" << std::endl;
+        log()->get(LogLevel::Debug) << "Not writing header" << std::endl;
     else
         writeHeader(ctx);
 }
@@ -142,7 +142,7 @@ void Writer::ready(PointContext ctx)
 
 void Writer::writeHeader(PointContext ctx)
 {
-    log()->get(LogLevel::DEBUG) << "Writing header to filename: " <<
+    log()->get(LogLevel::Debug) << "Writing header to filename: " <<
         m_filename << std::endl;
     if (m_outputType == "GEOJSON")
         writeGeoJSONHeader();

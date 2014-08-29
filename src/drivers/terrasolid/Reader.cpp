@@ -87,16 +87,16 @@ Reader::Reader(const Options& options)
 
 void Reader::initialize()
 {
-    log()->get(LogLevel::DEBUG) << "TerraSolid Reader::initialize format: " <<
+    log()->get(LogLevel::Debug) << "TerraSolid Reader::initialize format: " <<
         m_format << std::endl;
-    log()->get(LogLevel::DEBUG) << "OrgX: " << m_header->OrgX << std::endl;
-    log()->get(LogLevel::DEBUG) << "OrgY: " << m_header->OrgY << std::endl;
-    log()->get(LogLevel::DEBUG) << "OrgZ: " << m_header->OrgZ << std::endl;
-    log()->get(LogLevel::DEBUG) << "Units: " << m_header->Units << std::endl;
-    log()->get(LogLevel::DEBUG) << "Time: " << m_header->Time << std::endl;
-    log()->get(LogLevel::DEBUG) << "Color: " << m_header->Color << std::endl;
-    log()->get(LogLevel::DEBUG) << "Count: " << m_header->PntCnt << std::endl;
-    log()->get(LogLevel::DEBUG) << "RecogVal: " << m_header->RecogVal <<
+    log()->get(LogLevel::Debug) << "OrgX: " << m_header->OrgX << std::endl;
+    log()->get(LogLevel::Debug) << "OrgY: " << m_header->OrgY << std::endl;
+    log()->get(LogLevel::Debug) << "OrgZ: " << m_header->OrgZ << std::endl;
+    log()->get(LogLevel::Debug) << "Units: " << m_header->Units << std::endl;
+    log()->get(LogLevel::Debug) << "Time: " << m_header->Time << std::endl;
+    log()->get(LogLevel::Debug) << "Color: " << m_header->Color << std::endl;
+    log()->get(LogLevel::Debug) << "Count: " << m_header->PntCnt << std::endl;
+    log()->get(LogLevel::Debug) << "RecogVal: " << m_header->RecogVal <<
         std::endl;
 }
 

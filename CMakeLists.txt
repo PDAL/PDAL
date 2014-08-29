@@ -116,6 +116,7 @@ option(ENABLE_CTEST "Enable CTest to support submissions of results to CDash at 
 #------------------------------------------------------------------------------
 
 if(WIN32)
+  add_definitions(-DWIN32_LEAN_AND_MEAN)
   if(MSVC)
     option(PDAL_USE_STATIC_RUNTIME "Use the static runtime" FALSE)
 

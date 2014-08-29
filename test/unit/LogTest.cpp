@@ -65,9 +65,9 @@ BOOST_AUTO_TEST_CASE(test_one)
         pdal::drivers::faux::Reader reader(opts);
         reader.prepare(ctx);
 
-        BOOST_CHECK_EQUAL(reader.log()->getLevel(), LogLevel::ERROR);
-        reader.log()->setLevel(LogLevel::DEBUG5);
-        BOOST_CHECK_EQUAL(reader.log()->getLevel(), LogLevel::DEBUG5);
+        BOOST_CHECK_EQUAL(reader.log()->getLevel(), LogLevel::Error);
+        reader.log()->setLevel(LogLevel::Debug5);
+        BOOST_CHECK_EQUAL(reader.log()->getLevel(), LogLevel::Debug5);
 
         PointBufferSet pbSet = reader.execute(ctx);
         BOOST_CHECK_EQUAL(pbSet.size(), 1);
@@ -148,9 +148,9 @@ BOOST_AUTO_TEST_CASE(test_two_a)
         PointContext ctx;
         yfilter.prepare(ctx);
 
-        reader.log()->setLevel(LogLevel::DEBUG5);
-        xfilter.log()->setLevel(LogLevel::DEBUG5);
-        yfilter.log()->setLevel(LogLevel::DEBUG5);
+        reader.log()->setLevel(LogLevel::Debug5);
+        xfilter.log()->setLevel(LogLevel::Debug5);
+        yfilter.log()->setLevel(LogLevel::Debug5);
 
         PointBufferSet pbSet = yfilter.execute(ctx);
         BOOST_CHECK_EQUAL(pbSet.size(), 1);
@@ -235,9 +235,9 @@ BOOST_AUTO_TEST_CASE(test_two_b)
         PointContext ctx;
         yfilter.prepare(ctx);
 
-        reader.log()->setLevel(LogLevel::DEBUG5);
-        xfilter.log()->setLevel(LogLevel::DEBUG5);
-        yfilter.log()->setLevel(LogLevel::DEBUG5);
+        reader.log()->setLevel(LogLevel::Debug5);
+        xfilter.log()->setLevel(LogLevel::Debug5);
+        yfilter.log()->setLevel(LogLevel::Debug5);
 
         PointBufferSet pbSet = yfilter.execute(ctx);
         BOOST_CHECK_EQUAL(pbSet.size(), 1);

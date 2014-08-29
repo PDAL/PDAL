@@ -76,7 +76,7 @@ void Info::validateSwitches()
     {
         m_showStats = true;
         m_computeBoundary = true;
-        m_showSDOPCMetadata = true;
+        m_showSchema = true;
         
     }
 }
@@ -252,15 +252,19 @@ void Info::dumpStats()
     MetadataNode statsNode("stats");
 
     statsNode.add(m_manager->getMetadata());
-    m_meta.add(statsNode);
-//    m_tree->add_child("stats", m_manager->getMetadata().toPTree());
+
+    boost::property_tree::ptree stats;
+    std::stringstream strm;
+    strm << statsNode.toJSON();
+    boost::property_tree::read_json(strm, stats);
+    m_tree->add_child("stats", stats);
     
     if (m_pipelineFile.size() > 0)
         writer->writePipeline(m_pipelineFile);
     delete writer;
 }
 
-void Info::dump(PointBufferPtr buf)
+void Info::dump(PointContext ctx, PointBufferPtr buf)
 {
     if (m_showStats)
         dumpStats();
@@ -269,7 +273,13 @@ void Info::dump(PointBufferPtr buf)
         dumpPoints(buf);
     if (m_showSchema)
     {
-        // output ptree of PointContext::dimensions()
+        boost::property_tree::ptree schema;
+        std::string json = ctx.dimsJson();
+        std::stringstream strm;
+        strm << json;        
+        boost::property_tree::read_json(strm, schema);
+        
+        m_tree->add_child("schema", schema);
     }
 
     if (m_showSDOPCMetadata)
@@ -386,7 +396,7 @@ int Info::execute()
     m_manager->execute();
     PointBufferSet pbSet = m_manager->buffers();
     assert(pbSet.size() == 1);
-    dump(*pbSet.begin());
+    dump(m_manager->context(), *pbSet.begin());
 
     //
     // if (m_showStats)
@@ -403,13 +413,11 @@ int Info::execute()
     // if (m_QueryPoint.size())
     //     dumpQuery(ctx, *filter);
     
-    /**
     if (m_useXML)
         write_xml(ostr, *m_tree);
     else
         write_json(ostr, *m_tree);
-    **/
-    ostr << m_meta.toJSON() << std::endl;
+
     
     return 0;
 }

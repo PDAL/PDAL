@@ -553,13 +553,8 @@ public:
         return MetadataNode();
     }
 
-    std::string toJSON() const
-        { return m_impl->toJSON(); }
-
-    inline boost::property_tree::ptree toPTree() const
-    {
-        return m_impl->toPTree();
-    }
+    std::string toJSON() const;
+    boost::property_tree::ptree toPTree() const;
 
 private:
     MetadataNodeImplPtr m_impl;

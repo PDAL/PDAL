@@ -182,11 +182,11 @@ public:
         , m_statement(0)
         , m_position(-1)
     {
-        m_log->get(LogLevel::DEBUG3) << "Setting up config " << std::endl;
+        m_log->get(LogLevel::Debug3) << "Setting up config " << std::endl;
         sqlite3_shutdown();
         sqlite3_config(SQLITE_CONFIG_LOG, log_callback, this);
         sqlite3_initialize();
-        m_log->get(LogLevel::DEBUG3) << "Set up config " << std::endl;  
+        m_log->get(LogLevel::Debug3) << "Set up config " << std::endl;  
     }
     
     ~SQLite()
@@ -207,7 +207,7 @@ public:
     {
         std::ostringstream oss;
         oss << "SQLite code: " << num << " msg: '" << msg << "'";
-        m_log->get(LogLevel::DEBUG) << oss.str() << std::endl;
+        m_log->get(LogLevel::Debug) << oss.str() << std::endl;
     }
 
     static void log_callback(void *p, int num, char const* msg)
@@ -227,12 +227,12 @@ public:
         int flags = SQLITE_OPEN_NOMUTEX;
         if (bWrite) 
         {
-            m_log->get(LogLevel::DEBUG3) << "Connecting db for write"<< std::endl;  
+            m_log->get(LogLevel::Debug3) << "Connecting db for write"<< std::endl;  
             flags |= SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
         }
         else
         {
-            m_log->get(LogLevel::DEBUG3) << "Connecting db for read"<< std::endl;  
+            m_log->get(LogLevel::Debug3) << "Connecting db for read"<< std::endl;  
             flags |= SQLITE_OPEN_READONLY;
         }
         
@@ -247,7 +247,7 @@ public:
     {
         if (!m_session)
             throw sqlite_driver_error("Session not opened!");
-        m_log->get(LogLevel::DEBUG3) << "Executing '" << sql <<"'"<< std::endl;  
+        m_log->get(LogLevel::Debug3) << "Executing '" << sql <<"'"<< std::endl;  
         
         int code = sqlite3_exec(m_session, sql.c_str(), NULL, NULL, NULL);
         if (code != SQLITE_OK)
@@ -278,7 +278,7 @@ public:
         m_data.clear();
         sqlite3_reset(m_statement);
 
-        m_log->get(LogLevel::DEBUG3) << "Querying '" << query.c_str() <<"'"<< std::endl;  
+        m_log->get(LogLevel::Debug3) << "Querying '" << query.c_str() <<"'"<< std::endl;  
         
         char const* tail = 0; // unused;
         int res = sqlite3_prepare_v2(m_session,
@@ -396,7 +396,7 @@ public:
                                   static_cast<int>(statement.size()),
                                   &m_statement,
                                   0);
-        m_log->get(LogLevel::DEBUG3) << "Inserting '" << statement <<"'"<< std::endl;  
+        m_log->get(LogLevel::Debug3) << "Inserting '" << statement <<"'"<< std::endl;  
 
         if (res != SQLITE_OK)
         {
