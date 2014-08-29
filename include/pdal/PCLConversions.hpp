@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2012-2013, Bradley J Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2012-2014, Bradley J Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -39,12 +39,10 @@
 
 #include <pdal/PointBuffer.hpp>
 
-#ifdef PDAL_HAVE_PCL
 #include <pcl/io/pcd_io.h>
 #include <pcl/for_each_type.h>
 #include <pcl/point_types.h>
 #include <pcl/point_traits.h>
-#endif
 
 namespace
 {
@@ -68,6 +66,13 @@ namespace pdal
  *
  * Converts PCD data to PDAL format.
  */
+template <typename CloudT>
+void PCDtoPDAL(CloudT &cloud, PointBuffer& buf)
+{
+    Bounds<double> buffer_bounds(0,0,0,0,0,0);
+    PCDtoPDAL(cloud, buf, buffer_bounds);
+}
+
 template <typename CloudT>
 void PCDtoPDAL(CloudT &cloud, PointBuffer& buf, Bounds<double> const& bounds)
 {
@@ -102,7 +107,23 @@ void PCDtoPDAL(CloudT &cloud, PointBuffer& buf, Bounds<double> const& bounds)
             buf.setField(Dimension::Id::Intensity, i, f);
         }
     }
-#endif
+
+    if (pcl::traits::has_color<typename CloudT::PointType>::value)
+    {
+        for (size_t i = 0; i < cloud.points.size(); ++i)
+        {
+            boost::uint32_t v;
+            
+            typename CloudT::PointType p = cloud.points[i];
+            pcl::for_each_type<FieldList>
+               (pcl::CopyIfFieldExists<typename CloudT::PointType, boost::uint32_t>
+                   (p, "rgba", v));
+            buf.setField<boost::uint8_t>(Dimension::Id::Red, i, (v & 0x00FF0000) >> 16);
+            buf.setField<boost::uint8_t>(Dimension::Id::Green, i, (v & 0x0000FF00) >> 8);
+            buf.setField<boost::uint8_t>(Dimension::Id::Blue, i, (v & 0x000000FF));
+        }
+    }
+#endif // PDAL_HAVE_PCL
 }
 
 
@@ -111,6 +132,13 @@ void PCDtoPDAL(CloudT &cloud, PointBuffer& buf, Bounds<double> const& bounds)
  *
  * Converts PDAL data to PCD format.
  */
+template <typename CloudT>
+void PDALtoPCD(const PointBuffer& data, CloudT &cloud)
+{
+    Bounds<double> buffer_bounds(0,0,0,0,0,0);
+    PDALtoPCD(const_cast<PointBuffer&>(data), cloud, buffer_bounds);
+}
+
 template <typename CloudT>
 void PDALtoPCD(PointBuffer& data, CloudT &cloud, Bounds<double> const& bounds)
 {
@@ -143,12 +171,30 @@ void PDALtoPCD(PointBuffer& data, CloudT &cloud, Bounds<double> const& bounds)
     {
         for (size_t i = 0; i < cloud.points.size(); ++i)
         {
-            float f = data.getFieldAs<float>(Dimension::Id::Intensity, i);
-
             typename CloudT::PointType p = cloud.points[i];
+
+            float f = data.getFieldAs<float>(Dimension::Id::Intensity, i);
             pcl::for_each_type<FieldList>
                 (pcl::SetIfFieldExists<typename CloudT::PointType, float>
                     (p, "intensity", f));
+            cloud.points[i] = p;
+        }
+    }
+
+    if (pcl::traits::has_color<typename CloudT::PointType>::value)
+    {
+        for (size_t i = 0; i < cloud.points.size(); ++i)
+        {
+            typename CloudT::PointType p = cloud.points[i];
+
+            boost::uint8_t r = data.getFieldAs<boost::uint8_t>(Dimension::Id::Red, i);
+            boost::uint8_t g = data.getFieldAs<boost::uint8_t>(Dimension::Id::Green, i);
+            boost::uint8_t b = data.getFieldAs<boost::uint8_t>(Dimension::Id::Blue, i);
+            pcl::for_each_type<FieldList> (
+                pcl::SetIfFieldExists<typename CloudT::PointType, boost::uint32_t> (
+                    p, "rgba", ((int)r) << 16 | ((int)g) << 8 | ((int)b)
+                )
+            );
             cloud.points[i] = p;
         }
     }

@@ -148,8 +148,6 @@ void Writer::writeHeader(PointContext ctx)
         writeGeoJSONHeader();
     else if (m_outputType == "CSV")
         writeCSVHeader(ctx);
-    else if (m_outputType == "PCD")
-        writePCDHeader();
 }
 
 
@@ -188,37 +186,6 @@ void Writer::writeCSVHeader(PointContext ctx)
     *m_stream << m_newline;
 }
 
-
-void Writer::writePCDHeader()
-{
-    bool haveColor = (Algorithm::contains(m_dims, Dimension::Id::Red) &&
-        Algorithm::contains(m_dims, Dimension::Id::Green) &&
-        Algorithm::contains(m_dims, Dimension::Id::Blue));
-
-    *m_stream << "# .PCD v.7 - Point Cloud Data file format" << std::endl;
-    *m_stream << "VERSION 0.7" << std::endl;
-    *m_stream << "FIELDS x y z";
-    if (haveColor)
-        *m_stream << (m_packRgb ? "rgb" : "r g b");
-    *m_stream << std::endl;
-
-    *m_stream << "SIZE 4 4 4";
-    if (haveColor)
-        *m_stream << (m_packRgb ? " 1" : " 1 1 1");
-    *m_stream << std::endl;
-
-    *m_stream << "TYPE f f f";
-    if (haveColor)
-        *m_stream << (m_packRgb ? " f" : " u u u");
-    *m_stream << std::endl;
-
-    *m_stream << "COUNT 1 1 1";
-    if (haveColor)
-        *m_stream << (m_packRgb ? " 1" : " 1 1 1");
-    *m_stream << std::endl;
-}
-
-
 void Writer::writeCSVBuffer(const PointBuffer& data)
 {
     boost::uint32_t pointIndex(0);
@@ -234,50 +201,6 @@ void Writer::writeCSVBuffer(const PointBuffer& data)
         *m_stream << m_newline;
     }
 }
-
-void Writer::writePCDBuffer(const PointBuffer& data)
-{
-    using namespace Dimension;
-
-    *m_stream << "WIDTH " << data.size() << std::endl;
-    *m_stream << "HEIGHT 1" << std::endl;
-    *m_stream << "VIEWPOINT 0 0 0 1 0 0 0" << std::endl;
-    *m_stream << "POINTS " << data.size() << std::endl;
-    *m_stream << "DATA ascii" << std::endl;
-
-    bool haveColor = (Algorithm::contains(m_dims, Id::Red) &&
-        Algorithm::contains(m_dims, Id::Green) &&
-        Algorithm::contains(m_dims, Id::Blue));
-
-    for (PointId idx = 0; idx < data.size(); ++idx)
-    {
-        *m_stream << data.getFieldAs<double>(Id::X, idx) << " ";
-        *m_stream << data.getFieldAs<double>(Id::Y, idx) << " ";
-        *m_stream << data.getFieldAs<double>(Id::Z, idx) << " ";
-
-        std::string color;
-        if (haveColor)
-        {
-            if (m_packRgb)
-            {
-                auto r = data.getFieldAs<uint16_t>(Id::Red, idx);
-                auto g = data.getFieldAs<uint16_t>(Id::Green, idx);
-                auto b = data.getFieldAs<uint16_t>(Id::Blue, idx);
-                int rgb = ((int)r) << 16 | ((int)g) << 8 | ((int)b);
-                m_stream->precision(8);
-                *m_stream << static_cast<float>(rgb);
-            }
-            else
-            {
-                *m_stream << data.getFieldAs<double>(Id::Red, idx) << " ";
-                *m_stream << data.getFieldAs<double>(Id::Green, idx) << " ";
-                *m_stream << data.getFieldAs<double>(Id::Blue, idx) << " ";
-            }
-        }
-        *m_stream << "\n";
-    }
-}
-
 
 void Writer::writeGeoJSONBuffer(const PointBuffer& data)
 {
@@ -311,15 +234,12 @@ void Writer::writeGeoJSONBuffer(const PointBuffer& data)
     }
 }
 
-
 void Writer::write(const PointBuffer& data)
 {
     if (m_outputType == "CSV")
         writeCSVBuffer(data);
     else if (m_outputType == "GEOJSON")
         writeGeoJSONBuffer(data);
-    else if (m_outputType == "PCD")
-        writePCDBuffer(data);
 }
 
 
