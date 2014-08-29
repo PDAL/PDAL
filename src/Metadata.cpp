@@ -168,6 +168,11 @@ boost::property_tree::ptree MetadataNodeImpl::toPTree() const
     return tree;
 }
 
+std::string MetadataNode::toJSON() const
+    { return m_impl->toJSON(); }
+
+boost::property_tree::ptree MetadataNode::toPTree() const
+    { return m_impl->toPTree(); }
 }
 namespace std
 {
