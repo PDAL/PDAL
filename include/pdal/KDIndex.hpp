@@ -44,7 +44,7 @@ namespace pdal
 class PDAL_DLL KDIndex
 {
 public:
-    KDIndex(PointBuffer& buf) : m_buf(buf), m_index(0)
+    KDIndex(const PointBuffer& buf) : m_buf(buf), m_index(0)
         { m_3d = buf.hasDim(Dimension::Id::Z); }
 
     ~KDIndex()
