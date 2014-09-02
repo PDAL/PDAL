@@ -697,6 +697,25 @@ if(WITH_PYTHON)
     endif()
 endif()
 
+# RiVLib, Riegl's V-Line Scanner Library
+# defaults to off
+#
+# RiVLib uses that funky mixed case to name itself, but PDAL will
+# simply call it 'rivlib' for ease of typing.
+option(WITH_RIVLIB "Choose if rivlib support should be built" FALSE)
+if(WITH_RIVLIB)
+    find_package(RiVLib COMPONENTS scanlib)
+    if(RiVLib_FOUND)
+        set(PDAL_HAVE_RIVLIB 1)
+        include_directories(${RiVLib_INCLUDE_DIRS})
+        add_definitions(-DHAVE_RIVLIB=1)
+        message(STATUS "Found RiVLib at: ${RiVLib_INCLUDE_DIRS}")
+    else()
+        set(RiVLib_SCANLIB_LIBRARY "")
+    endif()
+endif()
+
+
 option(USE_PDAL_PLUGIN_TEXT "Build the text driver as a plugin rather than embedding" FALSE)
 option(USE_PDAL_PLUGIN_SOCI "Build the soci driver as a plugin rather than embedding" FALSE)
 option(USE_PDAL_PLUGIN_OCI "Build the oci driver as a plugin rather than embedding" FALSE)
