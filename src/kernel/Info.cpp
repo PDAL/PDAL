@@ -69,7 +69,7 @@ void Info::validateSwitches()
         m_showMetadata ||
         m_showSDOPCMetadata ||
         m_computeBoundary ||
-        m_showStage || 
+        m_showStage ||
         m_QueryPoint.size() > 0 ||
         m_pointIndexes.size() > 0;
     if (!got_something)
@@ -77,7 +77,7 @@ void Info::validateSwitches()
         m_showStats = true;
         m_computeBoundary = true;
         m_showSchema = true;
-        
+
     }
 }
 
@@ -98,7 +98,7 @@ void Info::addSwitches()
 
     po::options_description* processing_options =
         new po::options_description("processing options");
-    
+
     processing_options->add_options()
         ("point,p", po::value<std::string >(&m_pointIndexes), "point to dump")
         ("query", po::value< std::string>(&m_QueryPoint),
@@ -109,7 +109,7 @@ void Info::addSwitches()
          "dump stats on all points (reads entire dataset)")
         ("boundary",
          po::value<bool>(&m_computeBoundary)->zero_tokens()->implicit_value(true),
-         "compute a hexagonal hull/boundary of dataset")             
+         "compute a hexagonal hull/boundary of dataset")
         ("count", po::value<uint64_t>(&m_numPointsToWrite)->default_value(0),
          "How many points should we write?")
         ("dimensions", po::value<std::string >(&m_Dimensions),
@@ -143,7 +143,7 @@ void Info::addSwitches()
          po::value<uint32_t>(&m_sample_size)->default_value(1000),
          "Sample size for random sample")
         ;
-    
+
     addSwitchSet(processing_options);
     addPositionalSwitch("input", 1);
 }
@@ -237,7 +237,7 @@ void Info::dumpPoints(PointBufferPtr buf) const
             outbuf->appendPoint(*buf, id);
     }
 
-    boost::property_tree::ptree buffer_tree = outbuf->toPTree();
+    boost::property_tree::ptree buffer_tree = pdal::utils::toPTree(*outbuf);
     m_tree->add_child("point", buffer_tree.get_child("0"));
 }
 
@@ -258,7 +258,7 @@ void Info::dumpStats()
     strm << statsNode.toJSON();
     boost::property_tree::read_json(strm, stats);
     m_tree->add_child("stats", stats);
-    
+
     if (m_pipelineFile.size() > 0)
         writer->writePipeline(m_pipelineFile);
     delete writer;
@@ -274,11 +274,11 @@ void Info::dump(PointContext ctx, PointBufferPtr buf)
     if (m_showSchema)
     {
         boost::property_tree::ptree schema;
-        std::string json = ctx.dimsJson();
+        std::string json; //= ctx.dimsJson();
         std::stringstream strm;
-        strm << json;        
+        strm << json;
         boost::property_tree::read_json(strm, schema);
-        
+
         m_tree->add_child("schema", schema);
     }
 
@@ -304,7 +304,7 @@ void Info::dumpQuery(PointBufferPtr buf) const
     std::vector<double> values;
     for (tokenizer::iterator t = tokens.begin(); t != tokens.end(); ++t)
         values.push_back(boost::lexical_cast<double>(*t));
-    
+
     if (values.size() != 2 && values.size() != 3)
         throw app_runtime_error("--points must be two or three values");
 
@@ -313,16 +313,16 @@ void Info::dumpQuery(PointBufferPtr buf) const
     double x = values[0];
     double y = values[1];
     double z = is3d ? values[2] : 0.0;
-    
+
     PointBufferPtr outbuf = buf->makeNew();
 
     KDIndex kdi(*buf);
     kdi.build(is3d);
     std::vector<size_t> ids = kdi.neighbors(x, y, z, 0.0, buf->size());
     for (auto i = ids.begin(); i != ids.end(); ++i)
-        outbuf->appendPoint(*buf, *i); 
+        outbuf->appendPoint(*buf, *i);
 
-    boost::property_tree::ptree tree = outbuf->toPTree();
+    boost::property_tree::ptree tree = pdal::utils::toPTree(*outbuf);
     m_tree->add_child("point", tree);
 }
 
@@ -361,13 +361,13 @@ int Info::execute()
 
     m_manager = std::unique_ptr<PipelineManager>(
         AppSupport::makePipeline(readerOptions));
-    
+
     if (m_seed != 0)
     {
         Option seed_option("seed", m_seed, "seed value");
         m_options.add(seed_option);
     }
-    
+
     m_options.add("sample_size", m_sample_size,
         "sample size for random sample");
     m_options.add("exact_count", "Classification",
@@ -380,15 +380,15 @@ int Info::execute()
     if (m_Dimensions.size())
         m_options.add("dimensions", m_Dimensions,
             "Use explicit list of dimensions");
-    
+
     Options options = m_options + readerOptions;
-    
+
     Stage* stage = m_manager->getStage();
     if (m_showStats)
         stage = m_manager->addFilter("filters.stats", stage, options);
     if (m_computeBoundary)
         stage = m_manager->addFilter("filters.hexbin", stage, options);
-    
+
     m_tree = std::unique_ptr<boost::property_tree::ptree>(
         new boost::property_tree::ptree);
 
@@ -412,13 +412,13 @@ int Info::execute()
     //
     // if (m_QueryPoint.size())
     //     dumpQuery(ctx, *filter);
-    
+
     if (m_useXML)
         write_xml(ostr, *m_tree);
     else
         write_json(ostr, *m_tree);
 
-    
+
     return 0;
 }
 

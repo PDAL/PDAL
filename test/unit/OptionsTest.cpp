@@ -39,6 +39,7 @@
 
 #include <pdal/Options.hpp>
 #include <pdal/Bounds.hpp>
+#include <pdal/PDALUtils.hpp>
 #include <pdal/filters/Crop.hpp>
 #include <pdal/drivers/faux/Reader.hpp>
 
@@ -64,7 +65,7 @@ BOOST_AUTO_TEST_CASE(test_static_options)
 
     BOOST_CHECK(opts.hasOption("bounds"));
     BOOST_CHECK(!opts.hasOption("metes"));
-    const boost::property_tree::ptree& pt = opts.toPTree();
+    const boost::property_tree::ptree& pt = pdal::utils::toPTree(opts);
     BOOST_CHECK(pt.size() == 3);
 }
 
@@ -88,12 +89,12 @@ BOOST_AUTO_TEST_CASE(test_option_writing)
     BOOST_CHECK(option_s.getValue<std::string>() == "Yow.");
     BOOST_CHECK(option_s.getValue<std::string>() == "Yow.");
 
-    const boost::property_tree::ptree tree_i = option_i.toPTree();
+    const boost::property_tree::ptree tree_i = pdal::utils::toPTree(option_i);
     boost::property_tree::xml_parser::write_xml(ostr_i, tree_i);
     const std::string str_i = ostr_i.str();
     BOOST_CHECK(str_i == ref_i);
 
-    const boost::property_tree::ptree tree_s = option_s.toPTree();
+    const boost::property_tree::ptree tree_s = pdal::utils::toPTree(option_s);
     boost::property_tree::xml_parser::write_xml(ostr_s, tree_s);
     const std::string str_s = ostr_s.str();
     BOOST_CHECK(str_s == ref_s);
@@ -114,7 +115,7 @@ BOOST_AUTO_TEST_CASE(test_option_reading)
     BOOST_CHECK(opt_from_istr.getValue<int>() == 17);
 
     // from a ptree (assumed to be built correctly)
-    const boost::property_tree::ptree tree2 = opt_from_istr.toPTree();
+    const boost::property_tree::ptree tree2 = pdal::utils::toPTree(opt_from_istr);
     pdal::Option opt_from_ptree(tree2);
 
     BOOST_CHECK(opt_from_ptree.getName() == "my_int");
@@ -174,7 +175,7 @@ BOOST_AUTO_TEST_CASE(test_options_writing)
     std::ostringstream ostr;
     const std::string ref = xml_header + "<Option>" + xml_int_ref + "</Option><Option>" + xml_str_ref + "</Option>";
 
-    const boost::property_tree::ptree& tree = opts.toPTree();
+    const boost::property_tree::ptree& tree = pdal::utils::toPTree(opts);
     boost::property_tree::xml_parser::write_xml(ostr, tree);
     const std::string str = ostr.str();
     BOOST_CHECK(str == ref);

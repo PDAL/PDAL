@@ -39,6 +39,7 @@
 #include <pdal/Writer.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PointBuffer.hpp>
+#include <pdal/PDALUtils.hpp>
 
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/optional.hpp>
@@ -65,9 +66,9 @@ static ptree generateTreeFromStage(const Stage& stage)
 
 void PipelineWriter::write_option_ptree(ptree& tree, const Options& opts)
 {
-    ptree m_tree = opts.toPTree();
+    ptree m_tree = pdal::utils::toPTree(opts);
 
-    ptree::const_iterator iter = m_tree.begin();
+    auto iter = m_tree.begin();
     while (iter != m_tree.end())
     {
         if (iter->first != "Option")

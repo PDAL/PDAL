@@ -141,27 +141,6 @@ public:
         getFieldInternal(dim, idx, buf);
     }
 
-    /** @name Serialization
-    */
-    /*! returns a boost::property_tree containing the point records, which is
-        useful for dumping and such.
-        \verbatim embed:rst
-        ::
-
-            0:
-                X: 1.00
-                Y: 2.00
-                Z: 3.00
-            1:
-                X: 1.00
-                Y: 2.00
-                Z: 3.00
-
-        \endverbatim
-    */
-    boost::property_tree::ptree toPTree() const;
-    std::ostream& toRST(std::ostream& os) const;
-
     /*! @return a cumulated bounds of all points in the PointBuffer.
         \verbatim embed:rst
         .. note::
