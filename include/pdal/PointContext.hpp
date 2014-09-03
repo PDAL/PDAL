@@ -38,8 +38,6 @@
 #include <memory>
 #include <vector>
 
-#include <boost/property_tree/json_parser.hpp>
-
 #include "pdal/Dimension.hpp"
 #include "pdal/Metadata.hpp"
 #include "pdal/RawPtBuf.hpp"
@@ -164,7 +162,7 @@ public:
         return assignDim(name, type);
     }
 
-    Dimension::Id::Enum findDim(const std::string& name)
+    Dimension::Id::Enum findDim(const std::string& name) const
     {
         Dimension::Id::Enum id = Dimension::id(name);
         if (id != Dimension::Id::Unknown)
@@ -186,36 +184,28 @@ public:
         return "";
     }
 
+    // @return whether or not the PointContext contains a given id
     bool hasDim(Dimension::Id::Enum id) const
         { return m_dims->m_detail[id].m_type != Dimension::Type::None; }
 
+    // @return reference to vector of currently used dimensions
     const Dimension::IdList& dims() const
         { return m_dims->m_used; }
 
+    // @return the current type for a given id
     Dimension::Type::Enum dimType(Dimension::Id::Enum id) const
     {
         return hasDim(id) ? dimDetail(id)->type() : Dimension::Type::None;
     }
 
-    std::string dimsJson() const
+    // @return the current size in bytes of the dimension
+    //         with the given id.
+    size_t dimSize(Dimension::Id::Enum id) const
     {
-        boost::property_tree::ptree tree;
-        boost::property_tree::ptree dimsTree;
-
-        for (const auto& id : dims())
-        {
-            boost::property_tree::ptree dim;
-            dim.put("name", Dimension::name(id));
-            dim.put("type", Dimension::toName(dimDetail(id)->base()));
-            dim.put("size", dimDetail(id)->size());
-            dimsTree.push_back(std::make_pair("", dim));
-        }
-
-        tree.add_child("dimensions", dimsTree);
-
-        std::ostringstream oss;
-        boost::property_tree::write_json(oss, tree);
-        return oss.str();
+        Dimension::Type::Enum t = Dimension::defaultType(id);
+        if (t == Dimension::Type::None)
+            t = Dimension::Type::Float;
+        return hasDim(id) ? dimDetail(id)->size() : Dimension::size(t);
     }
 
 private:

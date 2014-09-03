@@ -42,6 +42,7 @@
 #include <ctype.h>
 
 #include <pdal/Range.hpp>
+#include <pdal/PDALUtils.hpp>
 
 using namespace pdal;
 
@@ -219,7 +220,7 @@ BOOST_AUTO_TEST_CASE(RangeTest_ptree)
     const Range<int> r1(23,56);
     std::stringstream ss1(std::stringstream::in | std::stringstream::out);
 
-    boost::property_tree::ptree tree = r1.toPTree();
+    boost::property_tree::ptree tree = pdal::utils::toPTree(r1);
     boost::property_tree::write_xml(ss1, tree);
 
     const std::string out1 = ss1.str();

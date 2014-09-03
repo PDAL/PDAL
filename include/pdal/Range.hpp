@@ -35,9 +35,6 @@
 #ifndef INCLUDED_RANGE_HPP
 #define INCLUDED_RANGE_HPP
 
-#include <boost/lexical_cast.hpp>
-#include <boost/property_tree/ptree.hpp>
-
 #include <pdal/pdal_internal.hpp>
 #include <pdal/Utils.hpp>
 
@@ -178,14 +175,6 @@ public:
     T length() const
     {
         return m_maximum - m_minimum;
-    }
-
-    boost::property_tree::ptree toPTree() const
-    {
-        boost::property_tree::ptree tree;
-        tree.add("minimum", getMinimum());
-        tree.add("maximum", getMaximum());
-        return tree;
     }
 
     void dump() const

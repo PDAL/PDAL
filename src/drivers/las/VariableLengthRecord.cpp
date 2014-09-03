@@ -38,6 +38,8 @@
 
 #include <pdal/SpatialReference.hpp>
 #include "GeotiffSupport.hpp"
+#include <sstream>
+#include <functional>
 
 
 namespace pdal
@@ -616,7 +618,7 @@ void VLRList::remove(const std::string& name, boost::uint16_t id)
 {
     m_list.erase(std::remove_if(m_list.begin(),
                                 m_list.end(),
-                                boost::bind(&sameVLRs, name, id, _1)),
+                                std::bind(&sameVLRs, name, id, std::placeholders::_1)),
                  m_list.end());
 
     return;

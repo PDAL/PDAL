@@ -37,8 +37,6 @@
 
 #include <pdal/pdal_internal.hpp>
 
-#include <boost/property_tree/ptree.hpp>
-
 namespace pdal
 {
 
@@ -105,10 +103,9 @@ public:
     /// \param v - a string containing the Proj.4 string.
     void setProj4(std::string const& v);
 
-    boost::property_tree::ptree toPTree() const;
     void dump() const;
-    
-    bool isGeographic() const; 
+
+    bool isGeographic() const;
     const std::string& getDescription() const;
     const std::string& getName() const;
 

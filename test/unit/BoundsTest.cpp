@@ -36,6 +36,7 @@
 #include <boost/property_tree/xml_parser.hpp>
 
 #include <pdal/Bounds.hpp>
+#include <pdal/PDALUtils.hpp>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -264,7 +265,7 @@ BOOST_AUTO_TEST_CASE(BoundsTest_ptree)
 
     std::stringstream ss1(std::stringstream::in | std::stringstream::out);
 
-    boost::property_tree::ptree tree = b2.toPTree();
+    boost::property_tree::ptree tree = pdal::utils::toPTree(b2);
     boost::property_tree::write_xml(ss1, tree);
 
     const std::string out1 = ss1.str();

@@ -1,5 +1,4 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
 *
 * All rights reserved.
 *
@@ -33,6 +32,7 @@
 ****************************************************************************/
 
 #include <pdal/Options.hpp>
+#include <pdal/PDALUtils.hpp>
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
@@ -68,22 +68,6 @@ Option::Option(const boost::property_tree::ptree& tree)
         m_options = options::OptionsPtr(new Options(options));
 }
 
-
-boost::property_tree::ptree Option::toPTree() const
-{
-    boost::property_tree::ptree t;
-    t.put("Name", getName());
-    t.put("Value", getValue<std::string>());
-    if (getDescription() != "")
-    {
-        t.put("Description", getDescription());
-    }
-    if (m_options.get())
-    {
-        t.add_child("Options", m_options->toPTree());
-    }
-    return t;
-}
 
 boost::optional<Options const&> Option::getOptions() const
 {
@@ -170,7 +154,7 @@ void Options::add(const Option& option)
 
 Option& Options::getOptionByRef(const std::string& name)
 {
-    options::map_t::iterator iter = m_options.find(name);
+    auto iter = m_options.find(name);
     if (iter == m_options.end())
     {
         std::ostringstream oss;
@@ -184,7 +168,7 @@ Option& Options::getOptionByRef(const std::string& name)
 
 const Option& Options::getOption(const std::string& name) const
 {
-    options::map_t::const_iterator iter = m_options.find(name);
+    auto iter = m_options.find(name);
     if (iter == m_options.end())
     {
         std::ostringstream oss;
@@ -239,20 +223,6 @@ bool Options::hasOption(std::string const& name) const
 }
 
 
-boost::property_tree::ptree Options::toPTree() const
-{
-    boost::property_tree::ptree tree;
-
-    for (auto citer = m_options.begin(); citer != m_options.end(); ++citer)
-    {
-        const Option& option = citer->second;
-        boost::property_tree::ptree subtree = option.toPTree();
-        tree.add_child("Option", subtree);
-    }
-    return tree;
-}
-
-
 void Options::dump() const
 {
     std::cout << *this;
@@ -261,7 +231,7 @@ void Options::dump() const
 
 std::ostream& operator<<(std::ostream& ostr, const Options& options)
 {
-    const boost::property_tree::ptree tree = options.toPTree();
+    const boost::property_tree::ptree tree = pdal::utils::toPTree(options);
 
     boost::property_tree::write_json(ostr, tree);
 

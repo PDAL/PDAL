@@ -38,6 +38,7 @@
 
 #include <pdal/PointBuffer.hpp>
 #include <pdal/drivers/las/Reader.hpp>
+#include <pdal/PDALUtils.hpp>
 #include "Support.hpp"
 
 using namespace pdal;
@@ -104,7 +105,7 @@ BOOST_AUTO_TEST_CASE(test_getFieldAs_uint8)
         uint8_t x = data->getFieldAs<uint8_t>(Dimension::Id::Classification, i);
         uint8_t y = data->getFieldAs<uint8_t>(Dimension::Id::X, i);
         uint8_t z = data->getFieldAs<uint8_t>(Dimension::Id::Y, i);
-        
+
         BOOST_CHECK_EQUAL(x, i + 1);
         BOOST_CHECK_EQUAL(y, i * 10);
         BOOST_CHECK_EQUAL(z, i * 100);
@@ -134,7 +135,7 @@ BOOST_AUTO_TEST_CASE(test_getFieldAs_int32)
         int32_t x = data->getFieldAs<int32_t>(Dimension::Id::Classification, i);
         int32_t y = data->getFieldAs<int32_t>(Dimension::Id::X, i);
         int32_t z = data->getFieldAs<int32_t>(Dimension::Id::Y, i);
-        
+
         BOOST_CHECK_EQUAL(x, i + 1);
         BOOST_CHECK_EQUAL(y, i * 10);
         BOOST_CHECK_EQUAL(z, i * 100);
@@ -154,7 +155,7 @@ BOOST_AUTO_TEST_CASE(test_getFieldAs_float)
         float x = data->getFieldAs<float>(Dimension::Id::Classification, i);
         float y = data->getFieldAs<float>(Dimension::Id::X, i);
         float z = data->getFieldAs<float>(Dimension::Id::Y, i);
-        
+
         BOOST_CHECK_CLOSE(x, i + 1.0f, std::numeric_limits<float>::min());
         BOOST_CHECK_CLOSE(y, i * 10.0f, std::numeric_limits<float>::min());
         BOOST_CHECK_CLOSE(z, i * 100.0f, std::numeric_limits<float>::min());
@@ -224,7 +225,7 @@ BOOST_AUTO_TEST_CASE(PointBufferTest_ptree)
     PointBuffer* data = makeTestBuffer(ctx);
 
     std::stringstream ss1(std::stringstream::in | std::stringstream::out);
-    boost::property_tree::ptree tree = data->toPTree();
+    boost::property_tree::ptree tree = pdal::utils::toPTree(*data);
     delete data;
 
     boost::property_tree::write_xml(ss1, tree);
@@ -258,15 +259,15 @@ BOOST_AUTO_TEST_CASE(test_indexed)
     BOOST_CHECK_EQUAL(data.getCapacity(), capacity);
     BOOST_CHECK_EQUAL(data.getSchema(), schema);
 
-    
+
     IndexedPointBuffer idata(data);
     BOOST_CHECK_EQUAL(idata.getCapacity(), capacity);
     BOOST_CHECK_EQUAL(idata.getSchema(), schema);
 
     idata.build();
-    
+
     unsigned k = 8;
-    
+
     // If the query distance is 0, just return the k nearest neighbors
     std::vector<size_t> ids = idata.neighbors(636199, 849238, 428.05, 0.0, k);
     BOOST_CHECK_EQUAL(ids.size(), k);
@@ -274,26 +275,26 @@ BOOST_AUTO_TEST_CASE(test_indexed)
     BOOST_CHECK_EQUAL(ids[1], 7u);
     BOOST_CHECK_EQUAL(ids[2], 9u);
     BOOST_CHECK_EQUAL(ids[3], 42u);
-    BOOST_CHECK_EQUAL(ids[4], 40u);    
-    
+    BOOST_CHECK_EQUAL(ids[4], 40u);
+
     std::vector<size_t> dist_ids = idata.neighbors(636199, 849238, 428.05, 100.0, 3);
-    
+
     BOOST_CHECK_EQUAL(dist_ids.size(), 3u);
-    BOOST_CHECK_EQUAL(dist_ids[0], 8u);        
-    
+    BOOST_CHECK_EQUAL(dist_ids[0], 8u);
+
     std::vector<size_t> nids = idata.neighbors(636199, 849238, 428.05, 0.0, k);
-    
+
     BOOST_CHECK_EQUAL(nids.size(), k);
     BOOST_CHECK_EQUAL(nids[0], 8u);
     BOOST_CHECK_EQUAL(nids[1], 7u);
     BOOST_CHECK_EQUAL(nids[2], 9u);
     BOOST_CHECK_EQUAL(nids[3], 42u);
-    BOOST_CHECK_EQUAL(nids[4], 40u);    
-    
+    BOOST_CHECK_EQUAL(nids[4], 40u);
+
     std::vector<size_t> rids = idata.radius(637012.24, 849028.31,
         431.66, 100000);
-    BOOST_CHECK_EQUAL(rids.size(), 11u);    
-    
+    BOOST_CHECK_EQUAL(rids.size(), 11u);
+
     delete iter;
 }
 **/
