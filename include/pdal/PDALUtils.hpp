@@ -217,7 +217,7 @@ inline ptree toPTree(const SpatialReference& ref)
     srs.put("prettycompoundwkt", ref.getWKT(SpatialReference::eCompoundOK, true));
 #else
     std::string message;
-    std::string wkg = ref.getWKT();
+    std::string wkt = ref.getWKT();
     if (wkt.size() == 0)
         message = "Reference defined with VLR keys, but GeoTIFF and GDAL "
             "support are not available to produce definition";
