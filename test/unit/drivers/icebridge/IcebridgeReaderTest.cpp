@@ -138,43 +138,6 @@ BOOST_AUTO_TEST_CASE(testRead)
             0.0);           // relTime
 }
 
-BOOST_AUTO_TEST_CASE(testSkip)
-{
-    Option filename("filename", getFilePath(), "");
-    Options options(filename);
-
-    drivers::icebridge::Reader reader(options);
-
-    PointContext ctx;
-    reader.prepare(ctx);
-
-    StageTester::ready(&reader, ctx);
-
-    PointBuffer data(ctx);
-    std::unique_ptr<StageSequentialIterator> it(
-        reader.createSequentialIterator());
-
-    it->skip(1);
-    it->read(data, 1);
-    StageTester::done(&reader, ctx);
-
-    checkPoint(
-            data,
-            0,
-            141437548,     // time
-            82.605287,      // latitude
-            301.404862,     // longitude
-            18.688,         // elevation
-            2642,           // xmtSig
-            173,            // rcvSig
-            52.006,         // azimuth
-            -4.376,         // pitch
-            0.609,          // roll
-            2.9,            // gpsPdop
-            17.0,           // pulseWidth
-            0.0);           // relTime
-}
-
 BOOST_AUTO_TEST_CASE(testPipeline)
 {
     PipelineManager manager;
@@ -184,7 +147,7 @@ BOOST_AUTO_TEST_CASE(testPipeline)
         reader.readPipeline(Support::datapath("icebridge/pipeline.xml"));
     BOOST_CHECK(isWriter);
 
-    const uint64_t numPoints = manager.execute();
+    point_count_t numPoints = manager.execute();
     BOOST_CHECK_EQUAL(numPoints, 2);
     FileUtils::deleteFile(Support::datapath("icebridge/outfile.txt"));
 }

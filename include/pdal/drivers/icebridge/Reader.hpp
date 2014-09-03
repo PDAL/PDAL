@@ -68,43 +68,19 @@ public:
     static Options getDefaultOptions();
     static Dimension::IdList getDefaultDimensions();
 
-    StageSequentialIterator* createSequentialIterator() const;
-
 private:
-    std::string m_filename;
     Hdf5Handler m_hdf5Handler;
+    point_count_t m_index;
 
-    virtual void processOptions(const Options& options);
     virtual void addDimensions(PointContext ctx);
     virtual void ready(PointContext ctx);
+    virtual point_count_t read(PointBuffer& data, point_count_t count);
     virtual void done(PointContext ctx);
+    virtual bool eof();
 
     Reader& operator=(const Reader&);   // Not implemented.
     Reader(const Reader&);              // Not implemented.
 };
-
-namespace iterators
-{
-namespace sequential
-{
-
-class PDAL_DLL IcebridgeSeqIter : public StageSequentialIterator
-{
-public:
-    IcebridgeSeqIter(Hdf5Handler *hdf5Handler) : m_hdf5Handler(hdf5Handler)
-    {}
-
-private:
-    Hdf5Handler *m_hdf5Handler;
-
-    virtual point_count_t readImpl(PointBuffer& data, point_count_t count);
-    virtual uint64_t skipImpl(boost::uint64_t);
-    virtual point_count_t readBufferImpl(PointBuffer& pointBuffer);
-    virtual bool atEndImpl() const;
-};
-
-} // namespace sequential
-} // namespace iterators
 
 } // namespace icebridge
 } // namespace drivers
