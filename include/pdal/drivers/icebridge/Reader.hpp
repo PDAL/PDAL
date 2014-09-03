@@ -35,7 +35,7 @@
 #pragma once
 
 #include <pdal/Reader.hpp>
-#include <pdal/ReaderIterator.hpp>
+#include <pdal/StageIterator.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/Hdf5Handler.hpp>
 
@@ -88,7 +88,7 @@ namespace iterators
 namespace sequential
 {
 
-class PDAL_DLL IcebridgeSeqIter : public ReaderSequentialIterator
+class PDAL_DLL IcebridgeSeqIter : public StageSequentialIterator
 {
 public:
     IcebridgeSeqIter(Hdf5Handler *hdf5Handler) : m_hdf5Handler(hdf5Handler)

@@ -38,11 +38,10 @@
 #include <vector>
 
 #include <pdal/drivers/oci/common.hpp>
-#include <pdal/ReaderIterator.hpp>
+#include <pdal/StageIterator.hpp>
 
 namespace pdal
 {
-
 namespace drivers
 {
 namespace oci
@@ -52,7 +51,7 @@ namespace iterators
 namespace sequential
 {
 
-class OciSeqIterator : public ReaderSequentialIterator
+class OciSeqIterator : public StageSequentialIterator
 {
 public:
     OciSeqIterator(Statement stmt, BlockPtr block) :

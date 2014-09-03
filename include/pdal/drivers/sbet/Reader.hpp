@@ -37,7 +37,7 @@
 #include <pdal/IStream.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/Reader.hpp>
-#include <pdal/ReaderIterator.hpp>
+#include <pdal/StageIterator.hpp>
 #include <pdal/drivers/sbet/Common.hpp>
 
 namespace pdal
@@ -77,7 +77,7 @@ namespace iterators
 namespace sequential
 {
 
-class PDAL_DLL SbetSeqIterator : public pdal::ReaderSequentialIterator
+class PDAL_DLL SbetSeqIterator : public StageSequentialIterator
 {
 public:
     SbetSeqIterator(const Dimension::IdList& dims, point_count_t numPts,

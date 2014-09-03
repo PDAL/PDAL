@@ -39,9 +39,8 @@
 #include <boost/detail/endian.hpp>
 
 #include <pdal/Reader.hpp>
-#include <pdal/ReaderIterator.hpp>
-#include <pdal/Options.hpp>
 #include <pdal/StageIterator.hpp>
+#include <pdal/Options.hpp>
 
 #ifdef BOOST_LITTLE_ENDIAN
 # define QFIT_SWAP_BE_TO_LE(p) \
@@ -118,8 +117,7 @@ public:
 
     std::string getFileName() const;
 
-    pdal::StageSequentialIterator*
-        createSequentialIterator(PointBuffer& buffer) const;
+    StageSequentialIterator *createSequentialIterator() const;
 
     std::size_t getPointDataOffset() const
         { return m_offset; }
@@ -157,7 +155,7 @@ namespace iterators
 namespace sequential
 {
 
-class Reader : public pdal::ReaderSequentialIterator
+class Reader : public StageSequentialIterator
 {
 public:
     Reader(const qfit::Reader& reader);

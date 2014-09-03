@@ -50,7 +50,6 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/Range.hpp"
   "${PDAL_HEADERS_DIR}/RawPtBuf.hpp"
   "${PDAL_HEADERS_DIR}/Reader.hpp"
-  "${PDAL_HEADERS_DIR}/ReaderIterator.hpp"
   "${PDAL_HEADERS_DIR}/SpatialReference.hpp"
   "${PDAL_HEADERS_DIR}/Stage.hpp"
   "${PDAL_HEADERS_DIR}/StageFactory.hpp"
@@ -91,7 +90,6 @@ set(PDAL_BASE_CPP
   QuadIndex.cpp
   Range.cpp
   Reader.cpp
-  ReaderIterator.cpp
   SpatialReference.cpp
   Stage.cpp
   StageFactory.cpp
@@ -176,14 +174,12 @@ set(PDAL_BPF_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_BPF_PATH}")
 
 set(PDAL_DRIVERS_BPF_HPP
     "${PDAL_BPF_HEADERS}/BpfReader.hpp"
-    "${PDAL_BPF_HEADERS}/BpfSeqIterator.hpp"
     "${PDAL_BPF_HEADERS}/BpfHeader.hpp"
 )
 
 set(PDAL_DRIVERS_BPF_CPP
     "${PDAL_BPF_SRC}/BpfHeader.cpp"
     "${PDAL_BPF_SRC}/BpfReader.cpp"
-    "${PDAL_BPF_SRC}/BpfSeqIterator.cpp"
 )
 
 list (APPEND PDAL_CPP ${PDAL_DRIVERS_BPF_CPP} )
@@ -255,7 +251,6 @@ set(PDAL_CARIS_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_CARIS_PATH}")
 
 set(PDAL_DRIVERS_CARIS_HPP
   "${PDAL_CARIS_HEADERS}/CloudReader.hpp"
-  "${PDAL_CARIS_HEADERS}/CloudIterator.hpp"
   "${PDAL_CARIS_SRC}/Utils.hpp"
   "${PDAL_CARIS_SRC}/config.h"
   "${PDAL_CARIS_SRC}/caris/caris_pc_wrapper.h"
@@ -263,7 +258,6 @@ set(PDAL_DRIVERS_CARIS_HPP
 
 set (PDAL_DRIVERS_CARIS_CPP
   "${PDAL_CARIS_SRC}/CloudReader.cpp"
-  "${PDAL_CARIS_SRC}/CloudIterator.cpp"
   "${PDAL_CARIS_SRC}/pdal_csar.cpp"
   "${PDAL_CARIS_SRC}/Utils.cpp"
   "${PDAL_CARIS_SRC}/caris/caris_pc_wrapper.c"

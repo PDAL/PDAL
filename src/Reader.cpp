@@ -38,6 +38,14 @@
 namespace pdal
 {
 
+void Reader::readerProcessOptions(const Options& options)
+{
+    if (options.hasOption("filename"))
+        m_filename = options.getValueOrThrow<std::string>("filename");
+    if (options.hasOption("count"))
+        m_count = options.getValueOrThrow<point_count_t>("count");
+}
+
 
 boost::property_tree::ptree Reader::serializePipeline() const
 {

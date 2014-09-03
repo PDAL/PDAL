@@ -54,13 +54,22 @@ class IStream
     friend class IStreamMarker;
 
 public:
+    IStream() : m_stream(NULL), m_fstream(NULL)
+        {}
     IStream(const std::string& filename)
-        { m_stream = m_fstream = new std::ifstream(filename); }
+        { open(filename); }
     IStream(std::istream *stream) : m_stream(stream), m_fstream(NULL)
         {}
     ~IStream()
         { delete m_fstream; }
 
+    int open(const std::string& filename)
+    {
+        if (m_stream)
+             return -1;
+        m_stream = m_fstream = new std::ifstream(filename);
+        return 0;
+    }
     operator bool ()
         { return (bool)(*m_stream); }
     void seek(std::streampos pos)
@@ -98,6 +107,8 @@ private:
 class ILeStream : public IStream
 {
 public:
+    ILeStream() : IStream()
+    {}
     ILeStream(const std::string& filename) : IStream(filename)
     {}
     ILeStream(std::istream *stream) : IStream(stream)

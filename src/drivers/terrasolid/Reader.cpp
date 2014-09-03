@@ -271,19 +271,11 @@ uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream,
     return numPoints;
 }
 
-pdal::StageSequentialIterator*
-Reader::createSequentialIterator(PointBuffer& buffer) const
+pdal::StageSequentialIterator* Reader::createSequentialIterator() const
 {
-    return new pdal::drivers::terrasolid::iterators::sequential::Reader(
-        *this, buffer);
+    return new iterators::sequential::Reader(*this);
 }
 
-
-pdal::StageRandomIterator* Reader::createRandomIterator(PointBuffer& buffer) const
-{
-    return new pdal::drivers::terrasolid::iterators::random::Reader(
-        *this, buffer);
-}
 
 Dimension::IdList Reader::getDefaultDimensions()
 {
@@ -316,8 +308,7 @@ namespace sequential
 {
 
 
-Reader::Reader(const terrasolid::Reader& reader, PointBuffer& buffer)
-    : pdal::ReaderSequentialIterator(buffer), m_reader(reader)
+Reader::Reader(const terrasolid::Reader& reader) : m_reader(reader)
 {
     m_istream = FileUtils::openFile(m_reader.getFileName());
     m_istream->seekg(m_reader.getPointDataOffset());
@@ -327,7 +318,6 @@ Reader::Reader(const terrasolid::Reader& reader, PointBuffer& buffer)
 Reader::~Reader()
 {
     FileUtils::closeFile(m_istream);
-    return;
 }
 
 
@@ -350,45 +340,7 @@ point_count_t Reader::readBufferImpl(PointBuffer& data)
     return m_reader.processBuffer(data, *m_istream, numToRead);
 }
 
-
 } // sequential
-
-namespace random
-{
-
-
-
-Reader::Reader(const terrasolid::Reader& reader, PointBuffer& buffer)
-    : pdal::ReaderRandomIterator(buffer), m_reader(reader)
-{
-    m_istream = FileUtils::openFile(m_reader.getFileName());
-    m_istream->seekg(m_reader.getPointDataOffset());
-}
-
-
-Reader::~Reader()
-{
-    FileUtils::closeFile(m_istream);
-    return;
-}
-
-
-boost::uint64_t Reader::seekImpl(boost::uint64_t count)
-{
-
-    m_istream->seekg(m_reader.getPointDataSize() * count + m_reader.getPointDataOffset(), std::ios::cur);
-
-    return count;
-}
-
-
-point_count_t Reader::readBufferImpl(PointBuffer& data)
-{
-    point_count_t numToRead = m_reader.getNumPoints() - getIndex();
-    return m_reader.processBuffer(data, *m_istream, numToRead);
-}
-
-} // random
 } // iterators
 
 } // namespace terrasolid

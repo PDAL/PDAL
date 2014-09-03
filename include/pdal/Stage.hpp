@@ -121,13 +121,7 @@ public:
     static bool s_isEnabled() { return YES_OR_NO; } \
     bool isEnabled() const { return YES_OR_NO; }
 
-    virtual StageSequentialIterator*
-    createSequentialIterator(PointBuffer&) const
-        { return NULL; }
-    virtual StageSequentialIterator*
-    createSequentialIterator() const
-        { std::cerr << "Created crap sequential iterator!\n"; return NULL; }
-    virtual StageRandomIterator* createRandomIterator(PointBuffer&) const
+    virtual StageSequentialIterator* createSequentialIterator() const
         { return NULL; }
     inline MetadataNode getMetadata() const 
         { return m_metadata; }
@@ -150,6 +144,8 @@ private:
     void Construct();
     void l_processOptions(const Options& options);
     virtual void processOptions(const Options& /*options*/)
+        {}
+    virtual void readerProcessOptions(const Options& /*options*/)
         {}
     virtual void writerProcessOptions(const Options& /*options*/)
         {}

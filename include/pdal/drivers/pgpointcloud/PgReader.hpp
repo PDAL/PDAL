@@ -35,7 +35,6 @@
 #pragma once
 
 #include <pdal/Reader.hpp>
-#include <pdal/ReaderIterator.hpp>
 #include <pdal/PointBuffer.hpp>
 
 #include <pdal/drivers/pgpointcloud/common.hpp>

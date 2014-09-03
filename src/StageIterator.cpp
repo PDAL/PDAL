@@ -50,13 +50,6 @@ static boost::uint32_t s_defaultChunkSize = 65536;
 //
 //---------------------------------------------------------------------------
 
-StageIterator::StageIterator(PointBuffer& buffer)
-{
-    (void)buffer;
-    Construct();
-}
-
-
 StageIterator::StageIterator()
 {
     Construct();
@@ -191,47 +184,9 @@ boost::uint64_t StageIterator::skip(boost::uint64_t count)
 //
 //---------------------------------------------------------------------------
 
-StageSequentialIterator::StageSequentialIterator(PointBuffer& buffer)
-    : StageIterator(buffer)
-{}
-
-
-StageSequentialIterator::~StageSequentialIterator()
-{}
-
-
 bool StageSequentialIterator::atEnd() const
 {
     return atEndImpl();
-}
-
-//---------------------------------------------------------------------------
-//
-// StageRandomIterator
-//
-//---------------------------------------------------------------------------
-
-StageRandomIterator::StageRandomIterator(PointBuffer& buffer)
-    : StageIterator(buffer)
-{}
-
-
-StageRandomIterator::~StageRandomIterator()
-{}
-
-
-boost::uint64_t StageRandomIterator::seek(boost::uint64_t position)
-{
-    m_index = seekImpl(position);
-    return m_index;
-}
-
-
-boost::uint64_t StageRandomIterator::skipImpl(boost::uint64_t numPts)
-{
-    uint64_t pos = m_index;
-    pos = seekImpl(pos + numPts);
-    return (pos - numPts);
 }
 
 } // namespace pdal

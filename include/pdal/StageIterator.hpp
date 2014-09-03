@@ -47,7 +47,6 @@ class PointBuffer;
 class PDAL_DLL StageIterator
 {
 public:
-    StageIterator(PointBuffer& buffer);
     StageIterator();
     virtual ~StageIterator()
         {}
@@ -150,11 +149,6 @@ private:
 class PDAL_DLL StageSequentialIterator : public StageIterator
 {
 public:
-    StageSequentialIterator(PointBuffer& buffer);
-    StageSequentialIterator()
-        {}
-    virtual ~StageSequentialIterator();
-
     // returns true after we've read all the points available to this stage
     bool atEnd() const;
 
@@ -164,31 +158,6 @@ protected:
         { std::cerr << "No sequential readImpl for stage/iterator!\n"; return 0; }
     virtual point_count_t readBufferImpl(PointBuffer&) = 0;
     virtual bool atEndImpl() const = 0;
-};
-
-
-class PDAL_DLL StageRandomIterator : public StageIterator
-{
-public:
-    StageRandomIterator(PointBuffer& buffer);
-    virtual ~StageRandomIterator();
-
-    // seek to point N (an absolute value)
-    //
-    // In some cases, this might be a very slow, painful function to call
-    // because it might entail physically reading the N points (and dropping
-    // the data on the floor)
-    //
-    // Returns the number actually seeked to (which might be less than asked
-    // for, if the end of the stage was reached first).
-    boost::uint64_t seek(boost::uint64_t position);
-
-protected:
-    // from Iterator
-    virtual point_count_t readImpl(PointBuffer& /*data*/, point_count_t /*count*/)
-        { std::cerr << "No random readImpl for stage/iterator!\n"; return 0; }
-    virtual boost::uint64_t seekImpl(boost::uint64_t position) = 0;
-    virtual boost::uint64_t skipImpl(boost::uint64_t position);
 };
 
 } // namespace pdal

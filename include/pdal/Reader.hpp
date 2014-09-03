@@ -32,8 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_READER_HPP
-#define INCLUDED_READER_HPP
+#pragma once
 
 #include <pdal/Stage.hpp>
 #include <pdal/Options.hpp>
@@ -52,12 +51,13 @@ namespace pdal
 class PDAL_DLL Reader : public Stage
 {
 public:
-    Reader()
-        {}
-    Reader(Options const& options) : Stage(options)
-        {};
-    virtual ~Reader()
-        {};
+    Reader(Options const& options) : Stage(options),
+        m_count(std::numeric_limits<point_count_t>::max())
+    {}
+
+protected:
+    std::string m_filename;
+    point_count_t m_count;
 
 private:
     virtual PointBufferSet run(PointBufferPtr buffer)
@@ -65,13 +65,18 @@ private:
         PointBufferSet pbSet;
 
         StageSequentialIterator *it = createSequentialIterator();
-        it->read(*buffer);
+        if (it)
+            it->read(*buffer);
+        else
+            read(*buffer, m_count);
         pbSet.insert(buffer);
         return pbSet;
     }
+    virtual void readerProcessOptions(const Options& options);
+    virtual point_count_t read(PointBuffer& buf, point_count_t num)
+        { return 0; }
     virtual boost::property_tree::ptree serializePipeline() const;
 };
 
 } // namespace pdal
 
-#endif

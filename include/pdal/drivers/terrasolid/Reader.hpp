@@ -35,10 +35,8 @@
 #pragma once
 
 #include <pdal/Reader.hpp>
-#include <pdal/ReaderIterator.hpp>
-#include <pdal/Options.hpp>
-
 #include <pdal/StageIterator.hpp>
+#include <pdal/Options.hpp>
 
 #include <vector>
 
@@ -120,9 +118,7 @@ public:
     static Options getDefaultOptions();
     static Dimension::IdList getDefaultDimensions();
     std::string getFileName() const;
-    pdal::StageSequentialIterator*
-        createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator(PointBuffer& buffer) const;
+    StageSequentialIterator* createSequentialIterator() const;
 
     std::size_t getPointDataOffset() const
         { return m_offset; }
@@ -162,11 +158,10 @@ namespace iterators
 namespace sequential
 {
 
-class Reader : public pdal::ReaderSequentialIterator
+class Reader : public StageSequentialIterator
 {
 public:
-    Reader(const pdal::drivers::terrasolid::Reader& reader,
-        PointBuffer& buffer);
+    Reader(const pdal::drivers::terrasolid::Reader& reader);
     ~Reader();
 
 private:
@@ -180,26 +175,6 @@ private:
 
 
 } // sequential
-
-namespace random
-{
-
-class Reader : public pdal::ReaderRandomIterator
-{
-public:
-    Reader(const pdal::drivers::terrasolid::Reader& reader,
-        PointBuffer& buffer);
-    ~Reader();
-
-private:
-    boost::uint64_t seekImpl(boost::uint64_t);
-    point_count_t readBufferImpl(PointBuffer&);
-
-    const pdal::drivers::terrasolid::Reader& m_reader;
-    std::istream* m_istream;
-};
-
-} // random
 } // iterators
 
 } // namespace terrasolid

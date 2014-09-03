@@ -36,7 +36,7 @@
 
 #include <pdal/Charbuf.hpp>
 #include <pdal/IStream.hpp>
-#include <pdal/ReaderIterator.hpp>
+#include <pdal/StageIterator.hpp>
 #include "BpfHeader.hpp"
 
 #include <vector>
@@ -47,7 +47,7 @@ namespace pdal
 class BpfReader;
 class PointBuffer;
 
-class BpfSeqIterator : public ReaderSequentialIterator
+class BpfSeqIterator : public StageSequentialIterator
 {
 public:
     BpfSeqIterator(const BpfDimensionList& dims, point_count_t numPoints,

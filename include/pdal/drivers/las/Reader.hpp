@@ -35,10 +35,9 @@
 #pragma once
 
 #include <pdal/Reader.hpp>
-#include <pdal/ReaderIterator.hpp>
 
+#include <pdal/StageIterator.hpp>
 #include <pdal/StreamFactory.hpp>
-
 #include <pdal/drivers/las/Support.hpp>
 #include <pdal/drivers/las/Header.hpp>
 
@@ -74,7 +73,7 @@ public:
     static Options getDefaultOptions();
     StreamFactory& getStreamFactory() const;
 
-    pdal::StageSequentialIterator* createSequentialIterator() const;
+    StageSequentialIterator* createSequentialIterator() const;
 
     const LasHeader& getLasHeader() const
         { return m_lasHeader; }
@@ -142,7 +141,7 @@ private:
 namespace sequential
 {
 
-class Reader : public Base, public pdal::ReaderSequentialIterator
+class Reader : public Base, public StageSequentialIterator
 {
 public:
     Reader(const pdal::drivers::las::Reader& reader);
@@ -156,7 +155,6 @@ private:
 };
 
 } // sequential
-
 } // iterators
 
 } // namespace las

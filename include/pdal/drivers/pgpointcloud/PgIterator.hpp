@@ -37,7 +37,7 @@
 #include <vector>
 
 #include <pdal/Reader.hpp>
-#include <pdal/ReaderIterator.hpp>
+#include <pdal/StageIterator.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/XMLSchema.hpp>
 
@@ -58,7 +58,7 @@ namespace sequential
 {
     class Patch;
 
-class PgIterator : public pdal::StageSequentialIterator
+class PgIterator : public StageSequentialIterator
 {
 public:
     PgIterator(const PgReader& reader, const schema::DimInfoList& dims);

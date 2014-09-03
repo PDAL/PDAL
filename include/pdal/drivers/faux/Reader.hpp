@@ -35,7 +35,7 @@
 #pragma once
 
 #include <pdal/Reader.hpp>
-#include <pdal/ReaderIterator.hpp>
+#include <pdal/StageIterator.hpp>
 
 namespace pdal
 {
@@ -107,7 +107,7 @@ private:
 } // namespace faux
 } // namespace drivers
 
-class PDAL_DLL FauxSeqIterator : public pdal::ReaderSequentialIterator
+class PDAL_DLL FauxSeqIterator : public pdal::StageSequentialIterator
 {
 public:
     FauxSeqIterator(const Bounds<double>& bounds, drivers::faux::Mode mode,

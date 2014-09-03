@@ -456,8 +456,8 @@ point_count_t Reader::processBuffer(PointBuffer& data, std::istream& stream,
     return numRead;
 }
 
-pdal::StageSequentialIterator*
-Reader::createSequentialIterator(PointBuffer& buffer) const
+
+pdal::StageSequentialIterator *Reader::createSequentialIterator() const
 {
     return new iterators::sequential::Reader(*this);
 }
