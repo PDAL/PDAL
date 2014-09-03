@@ -39,7 +39,6 @@
 #include <pdal/Options.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/drivers/qfit/Reader.hpp>
-#include <pdal/drivers/pipeline/Reader.hpp>
 #include <pdal/PipelineReader.hpp>
 #include <pdal/PipelineManager.hpp>
 #include "Support.hpp"
@@ -63,35 +62,31 @@ void Check_Point(const pdal::PointBuffer& data,
                  double xref, double yref, double zref,
                  boost::int32_t tref)
 {
-    const ::pdal::Schema& schema = data.getSchema();
+    const Schema& schema = data.getSchema();
 
     Dimension const& dimX = schema.getDimension("X");
     Dimension const& dimY = schema.getDimension("Y");
     Dimension const& dimZ = schema.getDimension("Z");
     Dimension const& dimTime = schema.getDimension("Time");
 
+    double x = data.getFieldAs<double>(dimX, index);
+    double y = data.getFieldAs<double>(dimY, index);
+    double z = data.getFieldAs<double>(dimZ, index);
+    double t = data.getFieldAs<double>(dimTime, index);
 
-    boost::int32_t x = data.getField<boost::int32_t>(dimX, index);
-    boost::int32_t y = data.getField<boost::int32_t>(dimY, index);
-    boost::int32_t z = data.getField<boost::int32_t>(dimZ, index);
-    boost::int32_t t = data.getField<boost::int32_t>(dimTime, index);
-
-    double x0 = dimX.applyScaling<boost::int32_t>(x);
-    double y0 = dimY.applyScaling<boost::int32_t>(y);
-    double z0 = dimZ.applyScaling<boost::int32_t>(z);
-
-    Compare(x0, xref);
-    Compare(y0, yref);
-    Compare(z0, zref);
+    Compare(x, xref);
+    Compare(y, yref);
+    Compare(z, zref);
     BOOST_CHECK_EQUAL(t, tref);
 }
 
 BOOST_AUTO_TEST_CASE(test_10_word)
 {
-    pdal::Options options;
-    // std::string filename = Support::datapath("20050903_231839.qi");
+    PointContext ctx;
 
-    pdal::Option filename("filename", Support::datapath("qfit/10-word.qi"),
+    Options options;
+
+    Option filename("filename", Support::datapath("qfit/10-word.qi"),
         "Input filename for reader to use");
     Option flip_coordinates("flip_coordinates", false,
         "Flip coordinates from 0-360 to -180-180");
@@ -100,20 +95,16 @@ BOOST_AUTO_TEST_CASE(test_10_word)
     options.add(scale_z);
     options.add(flip_coordinates);
     options.add(filename);
-    pdal::drivers::qfit::Reader reader(options);
+    drivers::qfit::Reader reader(options);
     BOOST_CHECK(reader.getDescription() == "QFIT Reader");
     BOOST_CHECK_EQUAL(reader.getName(), "drivers.qfit.reader");
-    reader.prepare();
+    reader.prepare(ctx);
 
-    const Schema& schema = reader.getSchema();
-
-    PointBuffer data(schema, 3);
-
-    pdal::StageSequentialIterator* iter = reader.createSequentialIterator(data);
-
+    PointBuffer data(ctx);
+    StageSequentialIterator* iter = reader.createSequentialIterator(data);
     {
-        boost::uint32_t numRead = iter->read(data);
-        BOOST_CHECK_EQUAL(numRead,3u);
+        uint32_t numRead = iter->read(data, 3);
+        BOOST_CHECK_EQUAL(numRead, 3);
     }
 
     delete iter;
@@ -125,9 +116,10 @@ BOOST_AUTO_TEST_CASE(test_10_word)
 
 BOOST_AUTO_TEST_CASE(test_14_word)
 {
-    pdal::Options options;
+    PointContext ctx;
+    Options options;
 
-    pdal::Option filename("filename", Support::datapath("qfit/14-word.qi"),
+    Option filename("filename", Support::datapath("qfit/14-word.qi"),
         "Input filename for reader to use");
     options.add(filename);
     Option flip_coordinates("flip_coordinates", false,
@@ -137,55 +129,20 @@ BOOST_AUTO_TEST_CASE(test_14_word)
     options.add(scale_z);
     options.add(flip_coordinates);
 
-    pdal::drivers::qfit::Reader reader(options);
-    reader.prepare();
+    drivers::qfit::Reader reader(options);
+    reader.prepare(ctx);
 
-    const Schema& schema = reader.getSchema();
-
-    PointBuffer data(schema, 3);
-
-    pdal::StageSequentialIterator* iter = reader.createSequentialIterator(data);
-
+    PointBuffer data(ctx);
+    StageSequentialIterator* iter = reader.createSequentialIterator(data);
     {
-        boost::uint32_t numRead = iter->read(data);
-        BOOST_CHECK_EQUAL(numRead,3u);
+        boost::uint32_t numRead = iter->read(data, 3);
+        BOOST_CHECK_EQUAL(numRead, 3);
     }
-
     delete iter;
 
     Check_Point(data, 0, 244.306337, 35.623317, 1056.830000000, 903);
     Check_Point(data, 1, 244.306260, 35.623280, 1056.409000000, 903);
     Check_Point(data, 2, 244.306204, 35.623257, 1056.483000000, 903);
 }
-
-//ABELL - Perhaps this test should go away as it seems to have lots
-//  of issues.
-BOOST_AUTO_TEST_CASE(test_pipeline)
-{
-    PipelineManager manager;
-    PipelineReader reader(manager);
-
-    bool isWriter = reader.readPipeline(Support::datapath("qfit/pipeline.xml"));
-    BOOST_CHECK_EQUAL(isWriter, true);
-
-    // this test doesn't work with the current OSGeo4W (it requires a
-    // newer PROJ)
-#ifndef PDAL_PLATFORM_WIN32
-    try
-    {
-        const boost::uint64_t np = manager.execute();
-        BOOST_CHECK_EQUAL(np, 10314u);
-    }
-    catch (std::runtime_error)
-    {
-        //ABELL
-        //This pipeline tries to stuff a qfit file into a las.  The qfit
-        //has 32 bit input for scan angle rank, but las has only 8.
-    }
-
-    FileUtils::deleteFile(Support::datapath("qfit/qfit-foo.las"));
-#endif
-}
-
 
 BOOST_AUTO_TEST_SUITE_END()
