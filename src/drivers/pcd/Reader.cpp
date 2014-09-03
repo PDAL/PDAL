@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Howard Butler, hobu.inc@gmail.com
+* Copyright (c) 2014, Brad Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -32,77 +32,81 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+#include <pdal/drivers/pcd/Reader.hpp>
 
-#include <pdal/Writer.hpp>
-#include <pdal/FileUtils.hpp>
-#include <pdal/StageFactory.hpp>
+#include <boost/algorithm/string.hpp>
 
-#include <vector>
-#include <string>
+#include <pcl/io/pcd_io.h>
+#include <pcl/io/impl/pcd_io.hpp>
+
+#include <pdal/PointBuffer.hpp>
+#include <pdal/PCLConversions.hpp>
+#include <pdal/drivers/pcd/point_types.hpp>
 
 namespace pdal
 {
 namespace drivers
 {
-namespace text
+namespace pcd
 {
 
-#ifdef USE_PDAL_PLUGIN_TEXT
-PDAL_C_START
 
-PDAL_DLL void PDALRegister_writer_text(void* factory);
-
-PDAL_C_END
-#endif
-
-typedef std::shared_ptr<std::ostream> FileStreamPtr;
-
-class PDAL_DLL Writer : public pdal::Writer
+void PcdReader::ready(PointContext ctx)
 {
-public:
-    SET_STAGE_NAME("drivers.text.writer", "Text Writer")
-    SET_STAGE_LINK("http://pdal.io/stages/drivers.text.writer.html")
-    SET_STAGE_ENABLED(true)
+    pcl::PCLPointCloud2 cloud;
+    pcl::PCDReader r;
+    r.readHeader(m_filename, cloud);
+    m_numPts = cloud.height * cloud.width;
+}
 
-    Writer(const Options& options) : pdal::Writer(options)
-    {}
 
-    static Options getDefaultOptions();
+Options PcdReader::getDefaultOptions()
+{
+    Options options;
+    return options;
+}
 
-private:
-    virtual void processOptions(const Options&);
-    virtual void ready(PointContext ctx);
-    virtual void write(const PointBuffer& buf);
-    virtual void done(PointContext ctx);
 
-    void writeHeader(PointContext ctx);
-    void writeFooter();
-    void writeGeoJSONHeader();
-    void writeCSVHeader(PointContext ctx);
+void PcdReader::addDimensions(PointContext ctx)
+{
+    ctx.registerDims(getDefaultDimensions());
+}
 
-    void writeGeoJSONBuffer(const PointBuffer& data);
-    void writeCSVBuffer(const PointBuffer& data);
-    
-    std::string m_filename;
-    std::string m_outputType;
-    std::string m_callback;
-    bool m_writeAllDims;
-    std::string m_dimOrder;
-    bool m_writeHeader;
-    std::string m_newline;
-    std::string m_delimiter;
-    bool m_quoteHeader;
-    bool m_packRgb;
 
-    FileStreamPtr m_stream;
-    Dimension::IdList m_dims;
+void PcdReader::processOptions(const Options& options)
+{
+    m_filename = options.getOption("filename").getValue<std::string>();
+}
 
-    Writer& operator=(const Writer&); // not implemented
-    Writer(const Writer&); // not implemented
-};
 
-} // namespace text
-} // namespace drivers
-} // namespace pdal
+StageSequentialIterator* PcdReader::createSequentialIterator() const
+{
+    return new iterators::sequential::PcdSeqIterator(getDefaultDimensions(), m_filename);
+}
+
+namespace iterators
+{
+namespace sequential
+{
+
+point_count_t PcdSeqIterator::readImpl(PointBuffer& data, std::string filename)
+{
+    pcl::PointCloud<XYZIRGBA>::Ptr cloud(new pcl::PointCloud<XYZIRGBA>);
+
+    pcl::PCDReader r;
+    r.read<XYZIRGBA>(filename, *cloud);
+
+    pdal::PCDtoPDAL(*cloud, data);
+
+    point_count_t numPoints = cloud->points.size();
+
+    return numPoints;
+}
+
+} // sequential
+} // iterators
+
+}
+}
+} // namespaces
 

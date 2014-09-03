@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Howard Butler, hobu.inc@gmail.com
+* Copyright (c) 2014, Brad Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -34,75 +34,69 @@
 
 #pragma once
 
-#include <pdal/Writer.hpp>
-#include <pdal/FileUtils.hpp>
-#include <pdal/StageFactory.hpp>
-
-#include <vector>
-#include <string>
+#include <pdal/PointBuffer.hpp>
+#include <pdal/Reader.hpp>
+#include <pdal/ReaderIterator.hpp>
+#include <pdal/drivers/pcd/Common.hpp>
 
 namespace pdal
 {
 namespace drivers
 {
-namespace text
+namespace pcd
 {
 
-#ifdef USE_PDAL_PLUGIN_TEXT
-PDAL_C_START
-
-PDAL_DLL void PDALRegister_writer_text(void* factory);
-
-PDAL_C_END
-#endif
-
-typedef std::shared_ptr<std::ostream> FileStreamPtr;
-
-class PDAL_DLL Writer : public pdal::Writer
+class PDAL_DLL PcdReader : public pdal::Reader
 {
 public:
-    SET_STAGE_NAME("drivers.text.writer", "Text Writer")
-    SET_STAGE_LINK("http://pdal.io/stages/drivers.text.writer.html")
-    SET_STAGE_ENABLED(true)
+    SET_STAGE_NAME ("drivers.pcd.reader", "PCD Reader")
+    SET_STAGE_LINK ("http://pdal.io/stages/drivers.pcd.reader.html")
+    SET_STAGE_ENABLED (true)
 
-    Writer(const Options& options) : pdal::Writer(options)
-    {}
+    PcdReader(const Options& options) : Reader(options) {};
 
     static Options getDefaultOptions();
+    static Dimension::IdList getDefaultDimensions()
+        { return fileDimensions(); };
+
+    virtual StageSequentialIterator* createSequentialIterator() const;
 
 private:
-    virtual void processOptions(const Options&);
-    virtual void ready(PointContext ctx);
-    virtual void write(const PointBuffer& buf);
-    virtual void done(PointContext ctx);
-
-    void writeHeader(PointContext ctx);
-    void writeFooter();
-    void writeGeoJSONHeader();
-    void writeCSVHeader(PointContext ctx);
-
-    void writeGeoJSONBuffer(const PointBuffer& data);
-    void writeCSVBuffer(const PointBuffer& data);
-    
     std::string m_filename;
-    std::string m_outputType;
-    std::string m_callback;
-    bool m_writeAllDims;
-    std::string m_dimOrder;
-    bool m_writeHeader;
-    std::string m_newline;
-    std::string m_delimiter;
-    bool m_quoteHeader;
-    bool m_packRgb;
+    point_count_t m_numPts;
 
-    FileStreamPtr m_stream;
-    Dimension::IdList m_dims;
-
-    Writer& operator=(const Writer&); // not implemented
-    Writer(const Writer&); // not implemented
+    virtual void processOptions(const Options& options);
+    virtual void addDimensions(PointContext ctx);
+    virtual void ready(PointContext ctx);
 };
 
-} // namespace text
-} // namespace drivers
-} // namespace pdal
+namespace iterators
+{
+namespace sequential
+{
+
+class PDAL_DLL PcdSeqIterator : public pdal::ReaderSequentialIterator
+{
+public:
+    PcdSeqIterator(const Dimension::IdList& dims, std::string filename) : m_dims(dims), m_filename(filename)
+    {};
+
+private:
+    boost::uint64_t skipImpl(boost::uint64_t) {};
+    point_count_t readImpl(PointBuffer& buf, std::string filename);
+    bool atEndImpl() const {};
+
+    virtual point_count_t readBufferImpl(PointBuffer& buf)
+        { return readImpl(buf, m_filename); }
+
+    Dimension::IdList m_dims;
+    std::string m_filename;
+};
+
+} // sequential
+} // iterators
+
+}
+}
+} // namespaces
 
