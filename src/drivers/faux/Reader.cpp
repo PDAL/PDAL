@@ -173,7 +173,7 @@ point_count_t FauxSeqIterator::readImpl(PointBuffer& buf, point_count_t count)
         {
             buf.setField(Dimension::Id::ReturnNumber, idx, m_returnNumber);
             buf.setField(Dimension::Id::NumberOfReturns, idx, m_numberOfReturns);
-            m_returnNumber = (m_returnNumber % 10) + 1;
+            m_returnNumber = (m_returnNumber % m_numberOfReturns) + 1;
         }
     }
     return count;
