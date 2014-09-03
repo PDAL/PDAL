@@ -40,6 +40,7 @@
 #include "GeotiffSupport.hpp"
 #include <sstream>
 #include <functional>
+#include <cstring>
 
 
 namespace pdal
