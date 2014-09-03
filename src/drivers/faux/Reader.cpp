@@ -38,7 +38,6 @@
 
 #include <boost/algorithm/string.hpp>
 
-
 namespace pdal
 {
 namespace drivers
@@ -57,26 +56,36 @@ static Mode string2mode(const std::string& str)
 
 Reader::Reader(const Options& options)
     : pdal::Reader(options)
-{}
+{
+    m_count = 0;
+}
 
 
 void Reader::processOptions(const Options& options)
 {
-    m_bounds = options.getValueOrThrow<Bounds<double>>("bounds");
-    m_numPoints = options.getValueOrThrow<uint64_t>("num_points");
+    Bounds<double> bounds = options.getValueOrThrow<Bounds<double>>("bounds");
+    const std::vector<Range<double>>& ranges = bounds.dimensions();
+    m_minX = ranges[0].getMinimum();
+    m_maxX = ranges[0].getMaximum();
+    m_minY = ranges[1].getMinimum();
+    m_maxY = ranges[1].getMaximum();
+    m_minZ = ranges[2].getMinimum();
+    m_maxZ = ranges[2].getMaximum();
+
+    // For backward compatibility.
+    if (m_count == 0)
+        m_count = options.getValueOrThrow<point_count_t>("num_points");
     m_mode = string2mode(options.getValueOrThrow<std::string>("mode"));
-    // boost::lexical_cast, which is used by option.getValue<>, doesn't deal
-    // nicely with uint8_t.
-    // http://www.boost.org/doc/libs/1_56_0/doc/html/boost_lexical_cast/frequently_asked_questions.html
-    m_numberOfReturns = boost::numeric_cast<uint8_t>(
-            options.getValueOrDefault<int>("number_of_returns", 0));
+    m_numReturns = options.getValueOrDefault("number_of_returns", 0);
+    if (m_numReturns > 10)
+        throw pdal_error("faux: number_of_returns option must be 10 or less.");
 }
 
 
 void Reader::addDimensions(PointContext ctx)
 {
     ctx.registerDims(getDefaultDimensions());
-    if (m_numberOfReturns > 0)
+    if (m_numReturns > 0)
     {
         ctx.registerDim(Dimension::Id::ReturnNumber);
         ctx.registerDim(Dimension::Id::NumberOfReturns);
@@ -96,49 +105,14 @@ Dimension::IdList Reader::getDefaultDimensions()
 }
 
 
-Options Reader::getDefaultOptions()
+point_count_t Reader::read(PointBuffer& buf, point_count_t count)
 {
-    Options options;
-    return options;
-}
-
-
-pdal::StageSequentialIterator* Reader::createSequentialIterator() const
-{
-    return new FauxSeqIterator(m_bounds, m_mode, m_numPoints,
-                               m_numberOfReturns, log());
-}
-
-} // namespace faux
-} // namespace drivers
-
-
-FauxSeqIterator::FauxSeqIterator(const Bounds<double>& bounds,
-        drivers::faux::Mode mode, point_count_t numPoints,
-        uint8_t numberOfReturns, LogPtr log) :
-    m_time(0), m_mode(mode), m_numPoints(numPoints), 
-    m_returnNumber(1), m_numberOfReturns(numberOfReturns), m_log(log)
-{
-    const std::vector<Range<double>>& ranges = bounds.dimensions();
-    m_minX = ranges[0].getMinimum();
-    m_maxX = ranges[0].getMaximum();
-    m_minY = ranges[1].getMinimum();
-    m_maxY = ranges[1].getMaximum();
-    m_minZ = ranges[2].getMinimum();
-    m_maxZ = ranges[2].getMaximum();
-}
-
-
-point_count_t FauxSeqIterator::readImpl(PointBuffer& buf, point_count_t count)
-{
-    using namespace pdal::drivers::faux;
-
     const double numDeltas = (double)count - 1.0;
     const double delX = (m_maxX - m_minX) / numDeltas;
     const double delY = (m_maxY - m_minY) / numDeltas;
     const double delZ = (m_maxZ - m_minZ) / numDeltas;
 
-    m_log->get(LogLevel::Debug5) << "Reading a point buffer of " <<
+    log()->get(LogLevel::Debug5) << "Reading a point buffer of " <<
         count << " points." << std::endl;
 
     for (PointId idx = 0; idx < count; ++idx)
@@ -169,15 +143,17 @@ point_count_t FauxSeqIterator::readImpl(PointBuffer& buf, point_count_t count)
         buf.setField(Dimension::Id::Y, idx, y);
         buf.setField(Dimension::Id::Z, idx, z);
         buf.setField(Dimension::Id::OffsetTime, idx, m_time++);
-        if (m_numberOfReturns > 0)
+        if (m_numReturns > 0)
         {
-            buf.setField(Dimension::Id::ReturnNumber, idx, m_returnNumber);
-            buf.setField(Dimension::Id::NumberOfReturns, idx, m_numberOfReturns);
-            m_returnNumber = (m_returnNumber % 10) + 1;
+            buf.setField(Dimension::Id::ReturnNumber, idx, m_returnNum);
+            buf.setField(Dimension::Id::NumberOfReturns, idx, m_numReturns);
+            m_returnNum = (m_returnNum % m_numReturns) + 1;
         }
     }
     return count;
 }
 
+} // namespace faux
+} // namespace drivers
 } // namespace pdal
 

@@ -85,35 +85,10 @@ public:
 
     Reader(const Options& options);
 
-    static Options getDefaultOptions();
     static Dimension::IdList getDefaultDimensions();
 
-    pdal::StageSequentialIterator *createSequentialIterator() const;
-
 private:
-    uint64_t m_numPoints;
     Mode m_mode;
-    uint8_t m_numberOfReturns;
-
-    Bounds<double> m_bounds;
-
-    virtual void processOptions(const Options& options);
-    virtual void addDimensions(PointContext ctx);
-
-    Reader& operator=(const Reader&); // not implemented
-    Reader(const Reader&); // not implemented
-};
-
-} // namespace faux
-} // namespace drivers
-
-class PDAL_DLL FauxSeqIterator : public pdal::StageSequentialIterator
-{
-public:
-    FauxSeqIterator(const Bounds<double>& bounds, drivers::faux::Mode mode,
-                    point_count_t numPoints, uint8_t numberOfReturns, LogPtr log);
-
-private:
     double m_minX;
     double m_maxX;
     double m_minY;
@@ -121,25 +96,25 @@ private:
     double m_minZ;
     double m_maxZ;
     uint64_t m_time;
-    drivers::faux::Mode m_mode;
-    point_count_t m_numPoints;
-    uint8_t m_returnNumber;
-    uint8_t m_numberOfReturns;
-    LogPtr m_log;
+    int m_numReturns;
+    int m_returnNum;
 
-    point_count_t readBufferImpl(PointBuffer& buf)
-        { return readImpl(buf, m_numPoints); }
-
-    uint64_t skipImpl(uint64_t numPts)
+    virtual void processOptions(const Options& options);
+    virtual void addDimensions(PointContext ctx);
+    virtual void ready(PointContext ctx)
     {
-        m_time += numPts;
-        return numPts;
+        m_returnNum = 1;
+        m_time = 0;
     }
-
-    point_count_t readImpl(PointBuffer& buf, point_count_t count);
-    bool atEndImpl() const
+    virtual point_count_t read(PointBuffer& buf, point_count_t count);
+    virtual bool eof()
         { return false; }
+
+    Reader& operator=(const Reader&); // not implemented
+    Reader(const Reader&); // not implemented
 };
 
+} // namespace faux
+} // namespace drivers
 } // namespace pdal
 
