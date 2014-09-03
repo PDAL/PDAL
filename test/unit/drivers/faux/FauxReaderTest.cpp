@@ -216,7 +216,7 @@ BOOST_AUTO_TEST_CASE(test_return_number)
     ops.add("bounds", bounds);
     ops.add("num_points", 100);
     ops.add("mode", "constant");
-    ops.add("number_of_returns", 10);
+    ops.add("number_of_returns", 9);
     drivers::faux::Reader reader(ops);
 
     PointContext ctx;
@@ -231,8 +231,8 @@ BOOST_AUTO_TEST_CASE(test_return_number)
         uint8_t returnNumber = buf.getFieldAs<uint8_t>(Dimension::Id::ReturnNumber, i);
         uint8_t numberOfReturns = buf.getFieldAs<uint8_t>(Dimension::Id::NumberOfReturns, i);
 
-        BOOST_CHECK_EQUAL(returnNumber, (i % 10) + 1);
-        BOOST_CHECK_EQUAL(numberOfReturns, 10);
+        BOOST_CHECK_EQUAL(returnNumber, (i % 9) + 1);
+        BOOST_CHECK_EQUAL(numberOfReturns, 9);
     }
 
     delete iter;
