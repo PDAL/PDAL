@@ -8,14 +8,13 @@ P2G_HOME=$USR_LOCAL
 HEXER_HOME="/usr/local"
 SQLITE_HOME="/usr/local/opt/sqlite"
 SO_EXT=dylib
-EMBED=ON
 # CC=/usr/local/bin/gcc-4.8
 # CXX=/usr/local/bin/g++-4.8
 
 ORACLE_HOME=$HOME/oracle
 export ORACLE_HOME
-CONFIG="Unix Makefiles"
-#CONFIG="Ninja"
+# CONFIG="Unix Makefiles"
+CONFIG="Ninja"
 
 if ! [ -z "$1" ]; then
     CONFIG="$1"
@@ -49,7 +48,7 @@ CC=$CC CXX=$CXX cmake   -G "$CONFIG"  \
         -DLIBXML2_INCLUDE_DIR=${LIBXML2_HOME}/include/libxml2 \
         -DLIBXML2_LIBRARIES=${LIBXML2_HOME}/lib/libxml2.${SO_EXT} \
         -DSQLITE3_INCLUDE_DIR=${SQLITE_HOME}/include \
-        -DSQLITE3_LIBRARY=${SQLITE_HOME}/lib/libsqlite3.${SO_EXT} 
+        -DSQLITE3_LIBRARY=${SQLITE_HOME}/lib/libsqlite3.${SO_EXT}
 
     # -DUSE_PDAL_PLUGIN_SOCI=ON \
     # -DUSE_PDAL_PLUGIN_PCD=ON \

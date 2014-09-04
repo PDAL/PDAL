@@ -53,7 +53,7 @@ install(TARGETS ${PDAL_UTILITIES}
 
 if(UNIX)
 
-    get_directory_property(PDAL_DEFINITIONS DIRECTORY ${PDAL_SOURCE_DIR}/../src COMPILE_DEFINITIONS)   
+    get_directory_property(PDAL_DEFINITIONS DIRECTORY ${PDAL_SOURCE_DIR}/../src COMPILE_DEFINITIONS)
 
     set(PDAL_CONFIG_DEFINITIONS "")
     foreach(definition ${PDAL_DEFINITIONS})
@@ -97,11 +97,7 @@ if(UNIX)
         set(PKGCFG_REQUIRES "${PKGCFG_REQUIRES} libmsgpack-dev")
     endif()
 
-    if (NOT PDAL_EMBED_BOOST)
-        set(PKGCFG_REQUIRES "${PKGCFG_REQUIRES} libboost-dev")
-    endif()
-
-
+    set(PKGCFG_REQUIRES "${PKGCFG_REQUIRES} libboost-dev")
 
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/pdal.pc.in
       ${CMAKE_CURRENT_BINARY_DIR}/pdal.pc @ONLY)
@@ -109,17 +105,17 @@ if(UNIX)
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/pdal.pc
         DESTINATION ${PDAL_PKGCFG_DIR}
         PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
-    
+
     # Autoconf compatibility variables to use the same script source.
     set(prefix ${CMAKE_INSTALL_PREFIX})
     set(exec_prefix ${CMAKE_INSTALL_PREFIX}/bin)
     set(libdir ${CMAKE_INSTALL_PREFIX}/lib)
 
 
-     
+
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/pdal-config.in
       ${CMAKE_CURRENT_BINARY_DIR}/pdal-config @ONLY)
-      
+
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/pdal-config
       DESTINATION "${CMAKE_INSTALL_PREFIX}/${PDAL_BIN_DIR}"
       PERMISSIONS
