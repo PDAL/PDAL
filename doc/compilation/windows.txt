@@ -13,9 +13,9 @@ Most Users
 
 If you just want to build PDAL so you can
 
-a. use the utilities or 
-b. investigate PDAL integration 
-c. test / fix / extend the library and 
+a. use the utilities or
+b. investigate PDAL integration
+c. test / fix / extend the library and
 
 you are OK with doing all this with a 32 bit compiler, check the
 `Prerequisites`_ and follow the `Basic Build Steps`_ below.
@@ -78,22 +78,22 @@ libxml2, iconv.
 
   Install from Internet
    .. figure::  media/OSGeo4WInstallFromInternet.png
-  Leave the "Root Directory" for the installation unchanged.  
+  Leave the "Root Directory" for the installation unchanged.
    .. figure::  media/OSGeo4WInstallRootDirectory.png
   You can leave the "Select Local Package Directory" and "Internet Connection Type" at the defaults. Under the "libs" tree, select "gdal-dev" for installation. (You should probably use the latest version, e.g. 1.8pre-6.)
    .. figure::  media/OSGeo4WInstallGDALDev.png
   Select "laszip" (this is not required currently -- see step 0 above).
    .. figure::  media/OSGeo4WInstallLASZip.png
-  Select "libxml2".  
+  Select "libxml2".
    .. figure::  media/OSGeo4WInstallLibXML2.png
-  Select "iconv".  
+  Select "iconv".
    .. figure::  media/OSGeo4WInstallIconv.png
-  Select "oci".  
+  Select "oci".
    .. figure::  media/OSGeo4WInstallOCI.png
 
   There are some other required dependencies (e.g. libtiff, libgeotiff) but
   they are installed by default.
-  
+
   Select Next to continue on to install the packages.
 
 2.  Get the source code for PDAL:
@@ -127,16 +127,16 @@ libxml2, iconv.
 5.  Start Visual Studio and open PDAL.sln.  Build the solution (F6).
 
 6. Set pdal_test as the startup project and run it (F5). You should see a
-   console window startup, print something like "Running 158 test cases..." 
-   (exact number may vary), and then after a short period print something like 
-   "\*\*\* No errors detected". If you do get errors, that means either something is 
-   broken on the version of PDAL you checked out OR something is wrong with your 
+   console window startup, print something like "Running 158 test cases..."
+   (exact number may vary), and then after a short period print something like
+   "\*\*\* No errors detected". If you do get errors, that means either something is
+   broken on the version of PDAL you checked out OR something is wrong with your
    installation.
 
 7. PYTHON/PLANG NOTE: If you build WITH_PLANG=ON in Debug mode, the system will
    try to link against "python27d.lib". You need to change .../Python27/include/pyconfig.h
    as follows:
-   
+
     - change the line #pragma comment(lib,"python27d.lib") to refer to python27.lib instead
 	- comment out the line "#define Py_DEBUG"
 
@@ -173,16 +173,7 @@ situations (including x64 support) where using OSGeo4W is inadequate.
   by BoostPro. If you need to build Boost from source, the following notes will
   be helpful.
 
-  .. note::
-    
-      -DPDAL_EMBED_BOOST=ON is the PDAL `CMake`_ option for using the embedded
-      Boost tree inside of the PDAL source tree. As of 3/19/2012, it should work
-      in all configurations as a provider of Boost for PDAL. Also note that the
-      embedded Boost build is namespaced such that it shouldn't clash with any
-      other Boost installations that might be used in a situation where PDAL is
-      linked to another library.
-    
-  Boost libraries include an "ABI" description as part of the name.  
+  Boost libraries include an "ABI" description as part of the name.
   For example
   ::
 
@@ -194,11 +185,11 @@ situations (including x64 support) where using OSGeo4W is inadequate.
 
 
       s - indicates that the library is statically linked to the C++ Standard Library and Runtime Library.
-     
+
       g - indicates that the debug versions of the standard and runtime support libraries are linked against. On a typical Windows installation you will get a debug version of the runtime libraries to link against, but this need not be the case on Unix boxes.
-    
+
       d - indicates all debug symbols are available in the library, no inlining and optimization has been done while building the code.
-    
+
   This is particularly important on Windows. Unlike other platforms, CRT
   configuration (debug vs release and statically linked vs shared dll), needs to
   match you PDAL configuration.
@@ -231,17 +222,17 @@ situations (including x64 support) where using OSGeo4W is inadequate.
      set LASZIP_LIBRARY=%DEV_DIR%\laszip\bin\Debug\laszip.lib
      set LASZIP_INCLUDE_DIR=%DEV_DIR%\laszip\include
 
-3. While you're still in config.bat, configure the "Generator" for CMake. 
+3. While you're still in config.bat, configure the "Generator" for CMake.
 
-  :: 
+  ::
 
      :: Pick your Generator.  NMake will pick up architecture (x32, x64) from your environment
      rem set GENERATOR="NMake Makefiles"
      rem set GENERATOR="Visual Studio 10 Win64"
      set GENERATOR="Visual Studio 10"
 
-     set BUILD_TYPE=Release 
-     rem set BUILD_TYPE=Debug 
+     set BUILD_TYPE=Release
+     rem set BUILD_TYPE=Debug
 
 4. Run "config.bat" in the PDAL directory. This will create the VStudio solution file and .vcxproj files.
 
