@@ -44,8 +44,6 @@ include(CMakeDependentOption)
 # PDAL general settings
 #------------------------------------------------------------------------------
 
-option(PDAL_EMBED_BOOST "use embedded rather than system boost" FALSE)
-
 include("${PDAL_SOURCE_DIR}/cmake/pdal_options.cmake")
 include("${PDAL_SOURCE_DIR}/cmake/pdal_targets.cmake")
 include("${PDAL_SOURCE_DIR}/cmake/pdal_utils.cmake")
@@ -139,7 +137,7 @@ endif(WIN32)
 # note we default to debug mode
 if(NOT MSVC_IDE)
   if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Debug CACHE STRING 
+  set(CMAKE_BUILD_TYPE Debug CACHE STRING
     "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel" FORCE)
   endif()
   message(STATUS "Setting PDAL build type - ${CMAKE_BUILD_TYPE}")
@@ -174,7 +172,7 @@ if(WIN32)
       add_definitions(-D_SCL_SECURE_NO_WARNINGS)
 	  add_definitions(-DNOMINMAX)
     endif()
-    
+
     if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
       string(REGEX REPLACE "/W[0-4]" "/W4"
         CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
@@ -195,7 +193,7 @@ if(WIN32)
     endif()
 
   endif(MSVC)
-  
+
   set(CMAKE_INCLUDE_PATH "c:/OSGeo4W64/include;$ENV{CMAKE_INCLUDE_PATH}")
   set(CMAKE_LIBRARY_PATH "c:/OSGeo4W64/lib;$ENV{CMAKE_LIBRARY_PATH}")
 
@@ -239,9 +237,9 @@ endif(APPLE)
 
 find_package(Threads)
 
-# Default to using static, multithreaded libraries for 
-# linking under MSVC.  This is because we show users how to 
-# use boostpro.com installer and install those options when linking 
+# Default to using static, multithreaded libraries for
+# linking under MSVC.  This is because we show users how to
+# use boostpro.com installer and install those options when linking
 # on windows in the compilation documentation.
 if(WIN32)
   if (MSVC)
@@ -254,45 +252,16 @@ if(WIN32)
   endif(MSVC)
 endif(WIN32)
 
-if (NOT PDAL_EMBED_BOOST)
-  find_package(Boost 1.55 COMPONENTS program_options thread iostreams filesystem system unit_test_framework random)
-endif()
+find_package(Boost 1.55 COMPONENTS program_options thread iostreams filesystem system unit_test_framework random)
 
 if(Boost_FOUND)
   include_directories(${Boost_INCLUDE_DIRS})
 
   # make these available for the user to set.
-  mark_as_advanced(CLEAR Boost_INCLUDE_DIR) 
-  mark_as_advanced(CLEAR Boost_LIBRARY_DIRS) 
+  mark_as_advanced(CLEAR Boost_INCLUDE_DIR)
+  mark_as_advanced(CLEAR Boost_LIBRARY_DIRS)
   link_directories(${Boost_LIBRARY_DIRS})
- 
-else()
-  set(BOOST_ROOT "${PROJECT_SOURCE_DIR}/boost")
 
-  # find_package would normally set the following variables
-  set(Boost_FOUND TRUE)
-  set(Boost_INCLUDE_DIRS "${BOOST_ROOT}")
-
-  set(PDALBOOST_LIB_NAME "pdalboost" CACHE STRING "use embedded boost")
-  mark_as_advanced(FORCE PDALBOOST_LIB_NAME)
-
-  if (WIN32)
-    set(Boost_LIBRARIES ${PDALBOOST_LIB_NAME})
-  else()
-    # Some Cmake versions are borken here. See
-    # http://www.cmake.org/Bug/view.php?id=12258#c26851
-    # set(CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-isystem")
-    # include_directories(BEFORE SYSTEM ${Boost_INCLUDE_DIRS}/)
-    set(Boost_LIBRARIES "${PDALBOOST_LIB_NAME}")
-  endif()
-
-  # this prevents auto-linking pragmas from depending on wrong lib names
-  add_definitions(-DBOOST_ALL_NO_LIB)
-
-  include_directories("${Boost_INCLUDE_DIRS}/")
-  set(PDAL_EMBED_BOOST TRUE )
-  add_subdirectory(boost)
-  message(STATUS "External boost not found, using embedded boost tree")
 endif(Boost_FOUND)
 
 
@@ -309,11 +278,9 @@ if(WITH_PCL)
         include_directories(${PCL_INCLUDE_DIRS})
         link_directories(${PCL_LIBRARY_DIRS})
         add_definitions(${PCL_DEFINITIONS})
-        if (NOT PDAL_EMBED_BOOST)
-            # PCL's configuration clobbers Boost find_package - do it again
-          find_package(Boost 1.52 COMPONENTS program_options thread iostreams filesystem system unit_test_framework random)
-        endif()
-        
+        # PCL's configuration clobbers Boost find_package - do it again
+        find_package(Boost 1.52 COMPONENTS program_options thread iostreams filesystem system unit_test_framework random)
+
         message(STATUS "...building with PCL")
     else()
         set(PCL_LIBRARIES "")
@@ -327,7 +294,7 @@ endif()
 #------------------------------------------------------------------------------
 # settings for GDAL & related dependencies
 #------------------------------------------------------------------------------
-   
+
 # GDAL/OGR support - optional, default=ON
 option(WITH_GDAL "Choose if GDAL support should be built" TRUE)
 if(WITH_GDAL)
@@ -335,7 +302,7 @@ if(WITH_GDAL)
     if (GDAL_FOUND)
         set(PDAL_HAVE_GDAL 1)
         include_directories("${GDAL_INCLUDE_DIR}")
-        mark_as_advanced(CLEAR GDAL_INCLUDE_DIR) 
+        mark_as_advanced(CLEAR GDAL_INCLUDE_DIR)
         mark_as_advanced(CLEAR GDAL_LIBRARY)
         message(STATUS "...building with GDAL")
     else()
@@ -361,8 +328,8 @@ if(WITH_GEOTIFF)
     if(GEOTIFF_FOUND)
         include_directories("${GEOTIFF_INCLUDE_DIR}")
         set(PDAL_HAVE_LIBGEOTIFF 1)
-        mark_as_advanced(CLEAR TIFF_INCLUDE_DIR) 
-        mark_as_advanced(CLEAR TIFF_LIBRARY) 
+        mark_as_advanced(CLEAR TIFF_INCLUDE_DIR)
+        mark_as_advanced(CLEAR TIFF_LIBRARY)
         if (WIN32)
             set(TIFF_NAMES libtiff_i)
         endif(WIN32)
@@ -382,7 +349,7 @@ endif()
 option(WITH_SQLITE "Choose if sqlite database support should be built" FALSE)
 if (WITH_SQLITE)
     find_package(SQLite3)
-    mark_as_advanced(CLEAR SQLITE3_INCLUDE_DIR) 
+    mark_as_advanced(CLEAR SQLITE3_INCLUDE_DIR)
     mark_as_advanced(CLEAR SQLITE3_LIBRARY)
     include_directories(${SQLITE3_INCLUDE_DIR})
     set(PDAL_HAVE_SQLITE 1)
@@ -428,7 +395,7 @@ if(WITH_NITRO)
         message(STATUS "...building with Nitro")
     else()
         set(WITH_NITRO FALSE)
-        set(NITRO_LIBRARIES "")   
+        set(NITRO_LIBRARIES "")
     endif()
 endif()
 
@@ -527,12 +494,12 @@ mark_as_advanced(WITH_STATIC_LASZIP)
 
 if(WITH_LASZIP)
     find_package(LASzip 1.0.1)
-    if(LASZIP_FOUND)    
+    if(LASZIP_FOUND)
         set(CMAKE_REQUIRED_LIBRARIES "${LASZIP_LIBRARY}")
         include_directories(${LASZIP_INCLUDE_DIR})
-        mark_as_advanced(CLEAR LASZIP_INCLUDE_DIR) 
-        mark_as_advanced(CLEAR LASZIP_LIBRARY) 
-        mark_as_advanced(CLEAR LASZIP_VERSION) 
+        mark_as_advanced(CLEAR LASZIP_INCLUDE_DIR)
+        mark_as_advanced(CLEAR LASZIP_LIBRARY)
+        mark_as_advanced(CLEAR LASZIP_VERSION)
         set(PDAL_HAVE_LASZIP 1)
     else()
         set(LASZIP_LIBRARY "")
@@ -685,9 +652,9 @@ if(WITH_PYTHON)
     if(PYTHONLIBS_FOUND)
         set(CMAKE_REQUIRED_LIBRARIES "${PYTHON_LIBRARY}")
         include_directories(SYSTEM ${PYTHON_INCLUDE_DIR})
-        add_definitions(-DHAVE_PYTHON=1)    
+        add_definitions(-DHAVE_PYTHON=1)
         set(PDAL_HAVE_PYTHON 1)
-    
+
         find_package(NumPy 1.5 REQUIRED)
         include_directories(SYSTEM ${NUMPY_INCLUDE_DIR})
         message(STATUS "Found Python: ${PYTHON_LIBRARY}")
@@ -739,7 +706,7 @@ get_git_head_revision(GIT_REFSPEC GIT_SHA1)
 configure_file(
   "${PROJECT_SOURCE_DIR}/gitsha.cpp.in"
   "${PROJECT_SOURCE_DIR}/src/gitsha.cpp")
-  
+
 set(pdal_defines_h_in "${CMAKE_CURRENT_SOURCE_DIR}/pdal_defines.h.in")
 set(pdal_defines_h "${CMAKE_CURRENT_BINARY_DIR}/include/pdal/pdal_defines.h")
 configure_file(${pdal_defines_h_in} ${pdal_defines_h})
@@ -795,7 +762,7 @@ SET(CPACK_PACKAGE_VENDOR "PDAL Development Team")
 
 set(CPACK_PACKAGE_FILE_NAME
   "${CMAKE_PROJECT_NAME}-${VERSION}")
-  
+
 set(CPACK_SOURCE_IGNORE_FILES
 "/\\\\.gitattributes;/\\\\.vagrant;/\\\\.DS_Store;/CVS/;/\\\\.git/;\\\\.swp$;~$;\\\\.\\\\#;/\\\\#")
 
