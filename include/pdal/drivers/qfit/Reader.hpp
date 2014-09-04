@@ -140,8 +140,7 @@ public:
 
     std::string getFileName() const;
 
-    pdal::StageSequentialIterator*
-        createSequentialIterator(PointBuffer& buffer) const;
+    StageSequentialIterator* createSequentialIterator() const;
 
     std::size_t getPointDataOffset() const
         { return m_offset; }
@@ -188,7 +187,7 @@ namespace sequential
 class Reader : public pdal::ReaderSequentialIterator
 {
 public:
-    Reader(const pdal::drivers::qfit::Reader& reader, PointBuffer& buffer);
+    Reader(const pdal::drivers::qfit::Reader& reader);
     ~Reader();
 
 private:

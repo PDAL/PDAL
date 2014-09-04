@@ -400,7 +400,7 @@ void Reader::buildSchema(Schema *s)
 
 void Reader::ready(PointContext ctx)
 {
-    uint32_t numPoints = m_point_bytes / m_size;
+    m_numPoints = m_point_bytes / m_size;
     if (m_point_bytes % m_size)
     {
         std::ostringstream msg;
@@ -419,6 +419,7 @@ point_count_t Reader::processBuffer(PointBuffer& data, std::istream& stream,
     const int pointByteCount = getPointDataSize();
     const PointDimensions dimensions(schema, getName());
 
+    count = std::min(count, m_numPoints);
     Dimension const* dimX = &schema.getDimension("X", getName());
     Dimension const* dimPassiveX(0);
     try
@@ -429,8 +430,7 @@ point_count_t Reader::processBuffer(PointBuffer& data, std::istream& stream,
     {
         dimPassiveX = 0;
     }
-    boost::uint8_t* buf = new boost::uint8_t[pointByteCount * count];
-
+    uint8_t* buf = new uint8_t[pointByteCount * count];
 
     if (!stream.good())
     {
@@ -595,10 +595,9 @@ point_count_t Reader::processBuffer(PointBuffer& data, std::istream& stream,
 }
 
 pdal::StageSequentialIterator*
-Reader::createSequentialIterator(PointBuffer& buffer) const
+Reader::createSequentialIterator() const
 {
-    return new pdal::drivers::qfit::iterators::sequential::Reader(*this,
-        buffer);
+    return new iterators::sequential::Reader(*this);
 }
 
 
@@ -724,8 +723,8 @@ namespace sequential
 {
 
 
-Reader::Reader(const pdal::drivers::qfit::Reader& reader, PointBuffer& buffer)
-    : pdal::ReaderSequentialIterator(buffer), m_reader(reader)
+Reader::Reader(const pdal::drivers::qfit::Reader& reader)
+    : m_reader(reader)
 {
     m_istream = FileUtils::openFile(m_reader.getFileName());
     m_istream->seekg(m_reader.getPointDataOffset());

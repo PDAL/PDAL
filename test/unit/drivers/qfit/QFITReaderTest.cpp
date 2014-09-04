@@ -101,7 +101,7 @@ BOOST_AUTO_TEST_CASE(test_10_word)
     reader.prepare(ctx);
 
     PointBuffer data(ctx);
-    StageSequentialIterator* iter = reader.createSequentialIterator(data);
+    StageSequentialIterator* iter = reader.createSequentialIterator();
     {
         uint32_t numRead = iter->read(data, 3);
         BOOST_CHECK_EQUAL(numRead, 3);
@@ -133,7 +133,7 @@ BOOST_AUTO_TEST_CASE(test_14_word)
     reader.prepare(ctx);
 
     PointBuffer data(ctx);
-    StageSequentialIterator* iter = reader.createSequentialIterator(data);
+    StageSequentialIterator* iter = reader.createSequentialIterator();
     {
         boost::uint32_t numRead = iter->read(data, 3);
         BOOST_CHECK_EQUAL(numRead, 3);
