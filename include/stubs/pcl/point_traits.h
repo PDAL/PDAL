@@ -16,23 +16,31 @@ struct fieldList
 
 } //namespace traits
 
-template<typename inT, typename outT>
+template<typename PointInT, typename OutT>
 struct CopyIfFieldExists
 {
-    CopyIfFieldExists(const inT& pt, const std::string& field,
-        bool& exists, outT& value)
+    CopyIfFieldExists(const PointInT& pt, const std::string& field,
+        bool& exists, OutT& value)
     {
         (void)pt;
         (void)field;
         (void)exists;
         (void)value;
     }
+
+    CopyIfFieldExists(const PointInT& pt, const std::string& field,
+        OutT& value)
+    {
+        (void)pt;
+        (void)field;
+        (void)value;
+    }
 };
 
-template<typename inT, typename outT>
+template<typename PointOutT, typename InT>
 struct SetIfFieldExists
 {
-    SetIfFieldExists(const inT& pt, const std::string& field, outT& value)
+    SetIfFieldExists(PointOutT& pt, const std::string& field, const InT& value)
     {
         (void)pt;
         (void)field;
