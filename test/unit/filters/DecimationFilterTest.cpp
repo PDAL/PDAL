@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE(DecimationFilterTest_test1)
     Options ops;
     ops.add("bounds", srcBounds);
     ops.add("mode", "random");
-    ops.add("num_points", 1000);
+    ops.add("num_points", 30);
     drivers::faux::Reader reader(ops);
 
     Options decimationOps;
@@ -61,18 +61,11 @@ BOOST_AUTO_TEST_CASE(DecimationFilterTest_test1)
     BOOST_CHECK(filter.getDescription() == "Decimation Filter");
 
     PointContext ctx;
-    PointBufferPtr buf(new PointBuffer(ctx));
 
     filter.prepare(ctx);
-
-    StageSequentialIterator* iter = reader.createSequentialIterator();
-    point_count_t numRead = iter->read(*buf, 30);
-
-    BOOST_CHECK_EQUAL(numRead, 30);
-
-    PointBufferSet pbSet = FilterTester::run(&filter, buf);
+    PointBufferSet pbSet = filter.execute(ctx);
     BOOST_CHECK_EQUAL(pbSet.size(), 1);
-    buf = *pbSet.begin();
+    PointBufferPtr buf = *pbSet.begin();
     BOOST_CHECK_EQUAL(buf->size(), 3);
 
     uint64_t t0 = buf->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, 0);
@@ -82,55 +75,6 @@ BOOST_AUTO_TEST_CASE(DecimationFilterTest_test1)
     BOOST_CHECK_EQUAL(t0, 0);
     BOOST_CHECK_EQUAL(t1, 10);
     BOOST_CHECK_EQUAL(t2, 20);
-
-    delete iter;
-}
-
-
-BOOST_AUTO_TEST_CASE(DecimationFilterTest_test_random)
-{
-    Bounds<double> srcBounds(0.0, 0.0, 0.0, 100.0, 100.0, 100.0);
-    Options ops;
-    ops.add("bounds", srcBounds);
-    ops.add("num_points", 1000);
-    ops.add("mode", "random");
-    
-    drivers::faux::Reader reader(ops);
-
-    Options decimationOps;
-    decimationOps.add("step", 10);
-    decimationOps.add("offset", 1);
-    Option debug("debug", true, "");
-    Option verbose("verbose", 9, "");
-    // opts.add(debug);
-    // opts.add(verbose);
-    filters::Decimation filter(decimationOps);
-    filter.setInput(&reader);
-    BOOST_CHECK(filter.getDescription() == "Decimation Filter");
-
-    PointContext ctx;
-    PointBufferPtr buf(new PointBuffer(ctx));
-    filter.prepare(ctx);
-
-    StageSequentialIterator* iter = reader.createSequentialIterator();
-    iter->skip(7);
-    point_count_t numRead = iter->read(*buf, 50);
-
-    BOOST_CHECK(numRead == 50);
-
-    PointBufferSet pbSet = FilterTester::run(&filter, buf);
-    BOOST_CHECK_EQUAL(pbSet.size(), 1);
-    buf = *pbSet.begin();
-
-    uint64_t t0 = buf->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, 0);
-    uint64_t t1 = buf->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, 1);
-    uint64_t t2 = buf->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, 2);
-
-    BOOST_CHECK_EQUAL(t0, 8);
-    BOOST_CHECK_EQUAL(t1, 18);
-    BOOST_CHECK_EQUAL(t2, 28);
-
-    delete iter;
 }
 
 BOOST_AUTO_TEST_SUITE_END()

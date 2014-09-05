@@ -56,7 +56,7 @@ class IStream
 public:
     IStream() : m_stream(NULL), m_fstream(NULL)
         {}
-    IStream(const std::string& filename)
+    IStream(const std::string& filename) : m_stream(NULL), m_fstream(NULL)
         { open(filename); }
     IStream(std::istream *stream) : m_stream(stream), m_fstream(NULL)
         {}
