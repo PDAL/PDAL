@@ -41,6 +41,7 @@
 #include <pdal/drivers/qfit/Reader.hpp>
 #include <pdal/PipelineReader.hpp>
 #include <pdal/PipelineManager.hpp>
+#include "StageTester.hpp"
 #include "Support.hpp"
 
 #include <iostream>
@@ -100,6 +101,7 @@ BOOST_AUTO_TEST_CASE(test_10_word)
     BOOST_CHECK_EQUAL(reader.getName(), "drivers.qfit.reader");
     reader.prepare(ctx);
 
+    StageTester::ready(&reader, ctx);
     PointBuffer data(ctx);
     StageSequentialIterator* iter = reader.createSequentialIterator();
     {
@@ -132,6 +134,7 @@ BOOST_AUTO_TEST_CASE(test_14_word)
     drivers::qfit::Reader reader(options);
     reader.prepare(ctx);
 
+    StageTester::ready(&reader, ctx);
     PointBuffer data(ctx);
     StageSequentialIterator* iter = reader.createSequentialIterator();
     {
