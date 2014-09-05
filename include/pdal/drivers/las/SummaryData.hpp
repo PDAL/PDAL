@@ -67,6 +67,8 @@ public:
 
     void dump(std::ostream&) const;
 
+    static const int MAXRETURNCOUNT = 7;
+
 private:
     bool m_isFirst;
     double m_minX;

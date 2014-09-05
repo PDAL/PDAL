@@ -73,8 +73,8 @@ void SummaryData::reset()
     m_maxX = 0.0;
     m_maxY = 0.0;
     m_maxZ = 0.0;
-    
-    m_returnCounts.assign(7,0);
+
+    m_returnCounts.assign(MAXRETURNCOUNT,0);
 
     m_totalNumPoints = 0;
 
@@ -84,8 +84,10 @@ void SummaryData::reset()
 
 void SummaryData::addPoint(double x, double y, double z, int returnNumber)
 {
-    if (returnNumber < 0 || returnNumber > static_cast<int>(m_returnCounts.size())-1)
-        throw invalid_point_data("addPoint: point returnNumber is out of range", 0);
+    bool bAddReturn(true);
+    if (returnNumber < 0 || returnNumber > MAXRETURNCOUNT - 1)
+        bAddReturn = false;
+//         throw invalid_point_data("addPoint: point returnNumber is out of range", 0);
 
     if (m_isFirst)
     {
@@ -107,7 +109,8 @@ void SummaryData::addPoint(double x, double y, double z, int returnNumber)
         m_maxZ = std::max(m_maxZ, z);
     }
 
-    m_returnCounts[returnNumber] = m_returnCounts[returnNumber] + 1;
+    if (bAddReturn)
+        m_returnCounts[returnNumber] = m_returnCounts[returnNumber] + 1;
 
     ++m_totalNumPoints;
 
@@ -127,7 +130,7 @@ pdal::Bounds<double> SummaryData::getBounds() const
     output.setMinimum(0, m_minX);
     output.setMinimum(1, m_minY);
     output.setMinimum(2, m_minZ);
-    
+
     output.setMaximum(0, m_maxX);
     output.setMaximum(1, m_maxY);
     output.setMaximum(2, m_maxZ);
@@ -137,9 +140,10 @@ pdal::Bounds<double> SummaryData::getBounds() const
 
 boost::uint32_t SummaryData::getReturnCount(int returnNumber) const
 {
-    if (returnNumber < 0 || returnNumber > static_cast<int>(m_returnCounts.size())-1)
-        throw invalid_point_data("getReturnCount: point returnNumber is out of range", 0);
-    
+    if (returnNumber < 0 || returnNumber > MAXRETURNCOUNT-1)
+        return 0;
+//         throw invalid_point_data("getReturnCount: point returnNumber is out of range", 0);
+
     return m_returnCounts[returnNumber];
 }
 

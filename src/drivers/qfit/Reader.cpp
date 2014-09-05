@@ -265,7 +265,7 @@ PointDimensions::PointDimensions(const Schema& schema, std::string const& ns)
 }
 
 Reader::Reader(const Options& options) : pdal::Reader(options),
-    m_format(QFIT_Format_Unknown), m_size(0), m_littleEndian(false)
+    m_format(QFIT_Format_Unknown), m_size(0), m_littleEndian(false), m_numPoints(0)
 {}
 
 void Reader::initialize()
