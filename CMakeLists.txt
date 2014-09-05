@@ -415,35 +415,6 @@ endif()
 # settings for other 3rd party dependencies
 #------------------------------------------------------------------------------
 
-# swig support
-if (WIN32)
-    # keep C# bindings it off by default, even on windows, since not everyone wants it
-    option(WITH_SWIG_CSHARP "Choose if you want to make C# bindings via Swig" FALSE)
-else()
-    # swig/C# not likely to be supported anytime soon
-    option(WITH_SWIG_CSHARP "Choose if you want to make C# bindings via Swig" FALSE)
-endif()
-
-option(WITH_SWIG_PYTHON "Choose if you want to make Python bindings via Swig" FALSE)
-
-if(WITH_SWIG_CSHARP OR WITH_SWIG_PYTHON)
-    find_package(SWIG 2.0.1 REQUIRED)
-    if (SWIG_FOUND)
-        include("${SWIG_USE_FILE}")
-        message(STATUS "Found Swig version ${SWIG_VERSION}")
-        if(WITH_SWIG_CSHARP)
-            add_subdirectory(csharp)
-            set(PDAL_HAVE_SWIG_CSHARP 1)
-            message(STATUS "...enabling swig for csharp")
-        endif()
-        if(WITH_SWIG_PYTHON)
-            add_subdirectory(python)
-            set(PDAL_HAVE_SWIG_PYTHON 1)
-            message(STATUS "Enabling swig for python")
-        endif()
-    endif()
-endif()
-
 # iconv support - optional, default=ON
 # GDAL and libxml2 require iconv.  The library is supplied by OSGeo4W.
 option(WITH_ICONV "Choose if IConv support should be built" TRUE)

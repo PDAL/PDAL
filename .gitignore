@@ -46,14 +46,6 @@ ipch/
 *.sln.docstates
 
 #
-# generated swig files
-#
-csharp/pdal_swig_cs/*.cs
-csharp/pdal_swig_cpp/pdal_wrap.h
-csharp/pdal_swig_cpp/pdal_wrap.cpp
-*.pyc
-
-#
 # doxygen cruft
 #
 doc/doxygen/html

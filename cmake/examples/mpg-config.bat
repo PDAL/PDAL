@@ -71,11 +71,6 @@ set PYTHON_ENABLED=ON
 set PYTHON_INCLUDE_DIR=c:\Utils\Python27\include
 set PYTHON_LIBRARY=c:\Utils\Python27\libs\python27.lib
 
-:: Set this if you are building SWIG bindings for C#. Visual Studio
-:: needs to use this env var to find where boost lives.
-set PDAL_SWIG_ENABLED=ON
-set PDAL_SWIG_BOOST_HOME=%BOOST_DIR%
-
 :: OpenGL support, for pcview
 set FREEGLUT_ENABLED=OFF
 :: special config for mpg
@@ -94,7 +89,6 @@ cmake -G %GENERATOR% ^
     -DWITH_ORACLE=%ORACLE_ENABLED% ^
     -DWITH_LASZIP=%LASZIP_ENABLED% ^
     -DWITH_LIBXML2=%LIBXML2_ENABLED% ^
-    -DWITH_SWIG_CSHARP=%PDAL_SWIG_ENABLED% ^
     -DWITH_ICONV=%ICONV_ENABLED% ^
 	-DWITH_PYTHON=%PYTHON_ENABLED% ^
 	-DWITH_FREEGLUT=%FREEGLUT_ENABLED% ^

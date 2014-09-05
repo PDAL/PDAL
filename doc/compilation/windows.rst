@@ -257,9 +257,3 @@ Troubleshooting
 * PROJ errors - Set PROJ_LIB system variable to ``C:\OSGeo4W\share\proj``
 * link failures due to _ITERATOR_DEBUG_LEVEL mismatches between (external) boost and PDAL.  Most likely problem is that you are mixing Release and Debug libs (e.g. PDAL is debug but Boost is release).  You can also set _ITERATOR_DEBUG_LEVEL=0 as in Project Pages / Configuration Properties / C,C++ / Preprocessor / Preprocessor Definitions.
 
-To Build the SWIG Bindings
-------------------------------------------------------------------------------
-
-Follow the instructions in csharp/README.txt.  Be sure and follow the note
-about modifying std_basic_string.i and setting the ``PDAL_SWIG_BOOST_HOME``
-environment variable.
