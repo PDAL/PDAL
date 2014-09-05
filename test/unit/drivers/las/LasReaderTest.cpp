@@ -90,204 +90,48 @@ BOOST_AUTO_TEST_CASE(test_sequential)
 {
     PointContext ctx;
 
-    pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
+    Options ops1;
+    ops1.add("filename", Support::datapath("1.2-with-color.las"));
+    ops1.add("count", 103);
+    drivers::las::Reader reader(ops1);
+
     BOOST_CHECK(reader.getDescription() == "Las Reader");
     reader.prepare(ctx);
-    pdal::StageSequentialIterator* iter = reader.createSequentialIterator();
-
-    {
-        PointBuffer data(ctx);
-        point_count_t numRead = iter->read(data, 3);
-        BOOST_CHECK(numRead == 3);
-
-        Support::check_p0_p1_p2(data);
-    }
-
-    // Can we seek it? Yes, we can!
-    iter->skip(97);
-    {
-        PointBuffer data(ctx);
-        BOOST_CHECK(iter->getIndex() == 100);
-        point_count_t numRead = iter->read(data, 3);
-        BOOST_CHECK(numRead == 3);
-
-        Support::check_p100_p101_p102(data);
-    }
-    delete iter;
+    PointBufferSet pbSet = reader.execute(ctx);
+    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    PointBufferPtr buf = *pbSet.begin();
+    Support::check_p0_p1_p2(*buf);
+    PointBufferPtr buf2 = buf->makeNew();
+    buf2->appendPoint(*buf, 100);
+    buf2->appendPoint(*buf, 101);
+    buf2->appendPoint(*buf, 102);
+    Support::check_p100_p101_p102(*buf2);
 }
 
 
-BOOST_AUTO_TEST_CASE(test_two_iters)
-{
-    PointContext ctx;
-    pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
-    BOOST_CHECK(reader.getDescription() == "Las Reader");
-    reader.prepare(ctx);
-
-    BOOST_CHECK(reader.getNumPoints() == 1065);
-    {
-        pdal::StageSequentialIterator* iter = reader.createSequentialIterator();
-        BOOST_CHECK(iter->getIndex() == 0);
-
-        PointBuffer data(ctx);
-        point_count_t numRead = iter->read(data, 1065);
-        BOOST_CHECK(numRead == 1065);
-        BOOST_CHECK(iter->getIndex() == 1065);
-
-        Support::check_p0_p1_p2(data);
-
-        delete iter;
-    }
-}
-
-
-BOOST_AUTO_TEST_CASE(test_simultaneous_iters)
+static void test_a_format(const std::string& file, uint8_t majorVersion,
+    uint8_t minorVersion, int pointFormat,
+    double xref, double yref, double zref, double tref, uint16_t rref,
+    uint16_t gref,  uint16_t bref)
 {
     PointContext ctx;
 
-    pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
-    BOOST_CHECK_EQUAL(reader.getDescription(), "Las Reader");
-    reader.prepare(ctx);
-
-    BOOST_CHECK_EQUAL(reader.getNumPoints(), 1065);
-    BOOST_CHECK_EQUAL(355 * 3, 1065);
-
-    point_count_t numRead;
-
-    pdal::StageSequentialIterator* iterS1 = reader.createSequentialIterator();
-    BOOST_CHECK_EQUAL(iterS1->getIndex(), 0);
-
-    pdal::StageSequentialIterator* iterS2 = reader.createSequentialIterator();
-    BOOST_CHECK_EQUAL(iterS2->getIndex(), 0);
-
-    /**
-      pdal::StageRandomIterator* iterR1 = reader.createRandomIterator(data);
-      BOOST_CHECK_EQUAL(iterR1->getIndex(), 0);
-
-      pdal::StageRandomIterator* iterR2 = reader.createRandomIterator(data);
-      BOOST_CHECK_EQUAL(iterR2->getIndex(), 0);
-     **/
-
-    {
-        PointBuffer data(ctx);
-        numRead = iterS1->read(data, 355);
-        BOOST_CHECK_EQUAL(numRead, 355);
-        BOOST_CHECK_EQUAL(iterS1->getIndex(), 355);
-
-        Support::check_p0_p1_p2(data);
-    }
-
-    {
-        iterS2->skip(355);
-
-        PointBuffer data(ctx);
-        numRead = iterS2->read(data, 355);
-        BOOST_CHECK_EQUAL(numRead, 355);
-        BOOST_CHECK_EQUAL(iterS2->getIndex(), 710);
-
-        Support::check_p355_p356_p357(data);
-    }
-
-    /**
-      {
-      iterR1->seek(355);
-        numRead = iterR1->read(data);
-        BOOST_CHECK_EQUAL(numRead, 355);
-        BOOST_CHECK_EQUAL(iterR1->getIndex(), 710);
-
-        Support::check_p355_p356_p357(data);
-    }
-
-    {
-        iterR2->seek(0);
-        numRead = iterR2->read(data);
-        BOOST_CHECK_EQUAL(numRead, 355);
-        BOOST_CHECK_EQUAL(iterR2->getIndex(), 355);
-
-        Support::check_p0_p1_p2(data);
-    }
-**/
-
-    {
-        PointBuffer data(ctx);
-        iterS1->skip(355);
-        numRead = iterS1->read(data, 355);
-        BOOST_CHECK_EQUAL(numRead, 355);
-        BOOST_CHECK_EQUAL(iterS1->getIndex(), 1065);
-
-        Support::check_p710_p711_p712(data);
-    }
-
-    {
-        PointBuffer data(ctx);
-        iterS2->skip(0);
-        numRead = iterS2->read(data, 355);
-        BOOST_CHECK_EQUAL(numRead, 355);
-        BOOST_CHECK_EQUAL(iterS2->getIndex(), 1065);
-
-        Support::check_p710_p711_p712(data);
-    }
-
-/**
-    {
-        iterR1->seek(355);
-        numRead = iterR1->read(data);
-        BOOST_CHECK_EQUAL(numRead, 355);
-        BOOST_CHECK_EQUAL(iterR1->getIndex(), 710);
-
-        Support::check_p355_p356_p357(data);
-    }
-
-    {
-        iterR2->seek(710);
-        numRead = iterR2->read(data);
-        BOOST_CHECK_EQUAL(numRead, 355);
-        BOOST_CHECK_EQUAL(iterR2->getIndex(), 1065);
-
-        Support::check_p710_p711_p712(data);
-    }
-
-    {
-        iterR1->seek(0);
-        numRead = iterR1->read(data);
-        BOOST_CHECK_EQUAL(numRead, 355);
-        BOOST_CHECK_EQUAL(iterR1->getIndex(), 355);
-
-        Support::check_p0_p1_p2(data);
-    }
-**/
-
-    delete iterS1;
-    delete iterS2;
-/**
-    delete iterR1;
-    delete iterR2;
-**/
-}
-
-static void test_a_format(const std::string& file, boost::uint8_t majorVersion, boost::uint8_t minorVersion, int pointFormat,
-                          double xref, double yref, double zref, double tref, boost::uint16_t rref,  boost::uint16_t gref,  boost::uint16_t bref)
-{
-    PointContext ctx;
-
-    pdal::drivers::las::Reader reader(Support::datapath(file));
+    Options ops1;
+    ops1.add("filename", Support::datapath(file));
+    ops1.add("count", 1);
+    drivers::las::Reader reader(ops1);
     reader.prepare(ctx);
 
     BOOST_CHECK_EQUAL(reader.getLasHeader().getPointFormat(), pointFormat);
     BOOST_CHECK_EQUAL(reader.getLasHeader().GetVersionMajor(), majorVersion);
     BOOST_CHECK_EQUAL(reader.getLasHeader().GetVersionMinor(), minorVersion);
 
-    pdal::StageSequentialIterator* iter = reader.createSequentialIterator();
+    PointBufferSet pbSet = reader.execute(ctx);
+    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    PointBufferPtr buf = *pbSet.begin();
+    BOOST_CHECK_EQUAL(buf->size(), 1);
 
-    {
-        PointBuffer data(ctx);
-        point_count_t numRead = iter->read(data, 1);
-        BOOST_CHECK_EQUAL(numRead, 1);
-
-        Support::check_pN(data, 0, xref, yref, zref, tref, rref, gref, bref);
-    }
-
-    delete iter;
+    Support::check_pN(*buf, 0, xref, yref, zref, tref, rref, gref, bref);
 }
 
 BOOST_AUTO_TEST_CASE(test_different_formats)
@@ -309,47 +153,22 @@ BOOST_AUTO_TEST_CASE(test_vlr)
 {
     PointContext ctx;
 
-    pdal::drivers::las::Reader reader(Support::datapath("lots_of_vlr.las"));
+    Options ops1;
+    ops1.add("filename", Support::datapath("lots_of_vlr.las"));
+    drivers::las::Reader reader(ops1);
     reader.prepare(ctx);
 
     BOOST_CHECK_EQUAL(reader.getLasHeader().getVLRs().getAll().size(), 390);
 }
 
 
-BOOST_AUTO_TEST_CASE(test_no_xyz)
-{
-    PointContext ctx;
-
-    // Wipe off the XYZ dimensions and see if we can 
-    // still read LAS data #123
-    pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
-    BOOST_CHECK(reader.getDescription() == "Las Reader");
-    reader.prepare(ctx);
-
-    pdal::StageSequentialIterator* iter = reader.createSequentialIterator();
-
-    PointBuffer data(ctx);
-    point_count_t numRead = iter->read(data, 3);
-    BOOST_CHECK(numRead == 3);
-
-    delete iter;
-}
-
-
-BOOST_AUTO_TEST_CASE(testFilenameConstructorSetOption)
-{
-    pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
-    BOOST_CHECK_EQUAL(
-        reader.getOptions().getValueOrDefault<std::string>("filename", ""),
-        Support::datapath("1.2-with-color.las"));
-}
-
-
 BOOST_AUTO_TEST_CASE(testInvalidFileSignature)
 {
     PointContext ctx;
-    pdal::drivers::las::Reader reader(
-        Support::datapath("1.2-with-color.las.wkt"));
+
+    Options ops1;
+    ops1.add("filename", Support::datapath("1.2-with-color.las.wkt"));
+    pdal::drivers::las::Reader reader(ops1);
     try
     {
         reader.prepare(ctx);
@@ -362,6 +181,5 @@ BOOST_AUTO_TEST_CASE(testInvalidFileSignature)
     }
     BOOST_FAIL("reader.initialize() did not throw std::invalid_argument");
 }
-
 
 BOOST_AUTO_TEST_SUITE_END()

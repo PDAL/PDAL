@@ -133,12 +133,12 @@ set (PDAL_DRIVERS_LAS_HPP
   "${PDAL_LAS_SRC}/GeotiffSupport.hpp"
   "${PDAL_LAS_SRC}/LasHeaderReader.hpp"
   "${PDAL_LAS_SRC}/LasHeaderWriter.hpp"
-  "${PDAL_LAS_SRC}/ZipPoint.hpp"
   "${PDAL_LAS_HEADERS}/Header.hpp"
   "${PDAL_LAS_HEADERS}/Reader.hpp"
   "${PDAL_LAS_HEADERS}/SummaryData.hpp"
   "${PDAL_LAS_HEADERS}/Support.hpp"
   "${PDAL_LAS_HEADERS}/Writer.hpp"
+  "${PDAL_LAS_HEADERS}/ZipPoint.hpp"
   "${PDAL_LAS_HEADERS}/VariableLengthRecord.hpp"
 )
 

@@ -1,11 +1,4 @@
 /******************************************************************************
- * $Id$
- *
- * Project:  libLAS - http://liblas.org - A BSD library for LAS format data.
- * Purpose:  LAS header class
- * Author:   Mateusz Loskot, mateusz@loskot.net
- *
- ******************************************************************************
  * Copyright (c) 2008, Mateusz Loskot
  * Copyright (c) 2008, Phil Vachon
  *
@@ -42,12 +35,10 @@
 
 #include "LasHeaderWriter.hpp"
 
-#include "ZipPoint.hpp"
-
 #include <pdal/drivers/las/Header.hpp>
+#include <pdal/drivers/las/ZipPoint.hpp>
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/scoped_ptr.hpp>
-
 
 namespace pdal
 {
@@ -55,7 +46,6 @@ namespace drivers
 {
 namespace las
 {
-
 
 LasHeaderWriter::LasHeaderWriter(LasHeader& header, std::ostream& ostream, boost::uint64_t firstPos)
     : m_header(header)

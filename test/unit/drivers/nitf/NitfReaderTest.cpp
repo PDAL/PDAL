@@ -61,16 +61,17 @@ BOOST_AUTO_TEST_SUITE(NitfReaderTest)
 
 BOOST_AUTO_TEST_CASE(test_one)
 {
-    pdal::Option nitf_opt("filename",
-        Support::datapath("nitf/autzen-utm10.ntf"));
-    pdal::Options nitf_opts;
-    nitf_opts.add(nitf_opt);
+    Options nitf_opts;
+    nitf_opts.add("filename", Support::datapath("nitf/autzen-utm10.ntf"));
+    nitf_opts.add("count", 750);
 
     PointContext ctx;
-    pdal::drivers::nitf::NitfReader nitf_reader(nitf_opts);
+    drivers::nitf::NitfReader nitf_reader(nitf_opts);
     nitf_reader.prepare(ctx);
-
+    PointBufferSet pbSet = nitf_reader.execute(ctx);
     BOOST_CHECK_EQUAL(nitf_reader.getDescription(), "NITF Reader");
+    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    PointBufferPtr buf = *pbSet.begin();
 
     // check metadata
 //ABELL
@@ -82,60 +83,44 @@ BOOST_AUTO_TEST_CASE(test_one)
     }
 **/
 
-    PointBuffer nitf_data(ctx);
-
-    StageSequentialIterator* nitf_iter =
-        nitf_reader.createSequentialIterator();
-    const uint32_t nitf_numRead = nitf_iter->read(nitf_data, 750);
-
     //
     // read LAS
     //
-    pdal::Option las_opt("filename",
-        Support::datapath("nitf/autzen-utm10.las"));
     pdal::Options las_opts;
-    las_opts.add(las_opt);
+    las_opts.add("count", 750);
+    las_opts.add("filename", Support::datapath("nitf/autzen-utm10.las"));
 
     PointContext ctx2;
-    pdal::drivers::las::Reader las_reader(las_opts);
+    drivers::las::Reader las_reader(las_opts);
     las_reader.prepare(ctx2);
-
-    PointBuffer las_data(ctx2);
-
-    StageSequentialIterator* las_iter =
-        las_reader.createSequentialIterator();
-    const uint32_t las_numRead = las_iter->read(las_data, 750);
+    PointBufferSet pbSet2 = las_reader.execute(ctx2);
+    BOOST_CHECK_EQUAL(pbSet2.size(), 1);
+    PointBufferPtr buf2 = *pbSet.begin();
+    //
     //
     // compare the two buffers
     //
-    BOOST_CHECK_EQUAL(las_numRead, nitf_numRead);
+    BOOST_CHECK_EQUAL(buf->size(), buf2->size());
 
-    for (uint32_t i = 0; i < las_numRead; i++)
+    for (PointId i = 0; i < buf2->size(); i++)
     {
-        int32_t nitf_x = nitf_data.getFieldAs<int32_t>(Dimension::Id::X, i);
-        int32_t nitf_y = nitf_data.getFieldAs<int32_t>(Dimension::Id::Y, i);
-        int32_t nitf_z = nitf_data.getFieldAs<int32_t>(Dimension::Id::Z, i);
+        int32_t nitf_x = buf->getFieldAs<int32_t>(Dimension::Id::X, i);
+        int32_t nitf_y = buf->getFieldAs<int32_t>(Dimension::Id::Y, i);
+        int32_t nitf_z = buf->getFieldAs<int32_t>(Dimension::Id::Z, i);
 
-        int32_t las_x = las_data.getFieldAs<int32_t>(Dimension::Id::X, i);
-        int32_t las_y = las_data.getFieldAs<int32_t>(Dimension::Id::Y, i);
-        int32_t las_z = las_data.getFieldAs<int32_t>(Dimension::Id::Z, i);
+        int32_t las_x = buf2->getFieldAs<int32_t>(Dimension::Id::X, i);
+        int32_t las_y = buf2->getFieldAs<int32_t>(Dimension::Id::Y, i);
+        int32_t las_z = buf2->getFieldAs<int32_t>(Dimension::Id::Z, i);
 
         BOOST_CHECK_EQUAL(nitf_x, las_x);
         BOOST_CHECK_EQUAL(nitf_y, las_y);
         BOOST_CHECK_EQUAL(nitf_z, las_z);
     }
-
-    delete nitf_iter;
-    delete las_iter;
 }
 
 
 BOOST_AUTO_TEST_CASE(test_chipper)
 {
-    //
-    // read NITF
-    //
-
     pdal::Option option("filename", Support::datapath("nitf/chipper.xml"));
     pdal::Options options(option);
 

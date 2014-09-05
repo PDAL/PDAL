@@ -37,19 +37,15 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/filesystem.hpp>
 
-#ifdef PDAL_HAVE_LASZIP
-#include <laszip/lasunzipper.hpp>
-#endif
-
 #include <pdal/Charbuf.hpp>
 #include <pdal/FileUtils.hpp>
 #include <pdal/drivers/las/Header.hpp>
 #include <pdal/drivers/las/VariableLengthRecord.hpp>
+#include <pdal/drivers/las/ZipPoint.hpp>
 #include <pdal/IStream.hpp>
 #include "LasHeaderReader.hpp"
 #include <pdal/PointBuffer.hpp>
 #include <pdal/Metadata.hpp>
-#include "ZipPoint.hpp"
 #include <stdexcept>
 
 #ifdef PDAL_HAVE_GDAL
@@ -70,14 +66,11 @@ namespace las
 {
 
 
-Reader::Reader(const Options& options)
-    : pdal::Reader(options)
-{}
-
-
-Reader::Reader(const std::string& filename)
-    : pdal::Reader(Option("filename", filename))
-{}
+Reader::~Reader()
+{
+    if (m_istream)
+        m_streamFactory->deallocate(*m_istream);
+}
 
 
 void Reader::processOptions(const Options& options)
@@ -91,13 +84,12 @@ void Reader::initialize()
     initialize(m_metadata);
 }
 
+
 void Reader::initialize(MetadataNode& m)
 {
     m_streamFactory = createFactory();
-
-    std::istream& stream = m_streamFactory->allocate();
-
-    LasHeaderReader lasHeaderReader(m_lasHeader, stream);
+    m_istream = &(m_streamFactory->allocate());
+    LasHeaderReader lasHeaderReader(m_lasHeader, *m_istream);
     try
     {
         lasHeaderReader.read(*this);
@@ -114,9 +106,7 @@ void Reader::initialize(MetadataNode& m)
             << ". It does not have a las file signature.";
         throw std::invalid_argument(msg.str());
     }
-
     extractMetadata(m);
-    m_streamFactory->deallocate(stream);
 }
 
 
@@ -125,18 +115,6 @@ Options Reader::getDefaultOptions()
     Option option1("filename", "", "file to read from");
     Options options(option1);
     return options;
-}
-
-
-StreamFactory& Reader::getStreamFactory() const
-{
-    return *m_streamFactory;
-}
-
-
-pdal::StageSequentialIterator* Reader::createSequentialIterator() const
-{
-    return new drivers::las::iterators::sequential::Reader(*this);
 }
 
 
@@ -151,21 +129,19 @@ void Reader::extractMetadata(MetadataNode& m)
         m_lasHeader.getVLRs().constructSRS(new_srs);
         setSpatialReference(m, new_srs);
     }
-    LasHeader const& header = getLasHeader();
-
-    m.add<bool>("compressed", header.Compressed(),
+    m.add<bool>("compressed", m_lasHeader.Compressed(),
         "true if this LAS file is compressed");
     m.add<uint32_t>("dataformat_id",
-        static_cast<uint32_t>(header.getPointFormat()),
+        static_cast<uint32_t>(m_lasHeader.getPointFormat()),
         "The Point Format ID as specified in the LAS specification");
     m.add<uint32_t>("major_version",
-        static_cast<uint32_t>(header.GetVersionMajor()),
+        static_cast<uint32_t>(m_lasHeader.GetVersionMajor()),
         "The major LAS version for the file, always 1 for now");
     m.add<uint32_t>("minor_version",
-        static_cast<uint32_t>(header.GetVersionMinor()),
+        static_cast<uint32_t>(m_lasHeader.GetVersionMinor()),
         "The minor LAS version for the file");
     m.add<uint32_t>("filesource_id",
-        static_cast<uint32_t>(header.GetFileSourceId()),
+        static_cast<uint32_t>(m_lasHeader.GetFileSourceId()),
         "File Source ID (Flight Line Number if this file was derived from "
         "an original flight line): This field should be set to a value "
         "between 1 and 65,535, inclusive. A value of zero (0) is interpreted "
@@ -176,7 +152,7 @@ void Reader::extractMetadata(MetadataNode& m)
         "result of merge and/or extract operations.");
 
     //Reserved is always 0, making this seem a bit silly.
-    boost::uint16_t reserved = header.GetReserved();
+    boost::uint16_t reserved = m_lasHeader.GetReserved();
     uint8_t *start = (uint8_t*)&reserved;
     std::vector<uint8_t> raw_bytes;
     for (std::size_t i = 0 ; i < sizeof(uint16_t); ++i)
@@ -190,7 +166,7 @@ void Reader::extractMetadata(MetadataNode& m)
         "is defined (this is the bit, that if set, would have the unsigned "
         "integer yield a value of 1).");
     m.add<boost::uuids::uuid>("project_id",
-         header.GetProjectId(), "Project ID (GUID data): The four fields "
+         m_lasHeader.GetProjectId(), "Project ID (GUID data): The four fields "
          "that comprise a complete Globally Unique Identifier (GUID) are now "
          "reserved for use as a Project Identifier (Project ID). The field "
          "remains optional. The time of assignment of the Project ID is at "
@@ -198,24 +174,24 @@ void Reader::extractMetadata(MetadataNode& m)
          "the same for all files that are associated with a unique project. "
          "By assigning a Project ID and using a File Source ID (defined above) "         "every file within a project and every point within a file can be "
          "uniquely identified, globally.");
-    m.add<std::string>("system_id", header.GetSystemId(false));
+    m.add<std::string>("system_id", m_lasHeader.GetSystemId(false));
     m.add<std::string>("software_id",
-        header.GetSoftwareId(false), "This information is ASCII data "
+        m_lasHeader.GetSoftwareId(false), "This information is ASCII data "
         "describing the generating software itself. This field provides a "
         "mechanism for specifying which generating software package and "
         "version was used during LAS file creation (e.g. \"TerraScan V-10.8\","
         " \"REALM V-4.2\" and etc.).");
     m.add<uint32_t>("creation_doy",
-        static_cast<uint32_t>(header.GetCreationDOY()),
+        static_cast<uint32_t>(m_lasHeader.GetCreationDOY()),
         "Day, expressed as an unsigned short, on which this file was created. "
         "Day is computed as the Greenwich Mean Time (GMT) day. January 1 is "
         "considered day 1.");
     m.add<uint32_t>("creation_year",
-        static_cast<boost::uint32_t>(header.GetCreationYear()),
+        static_cast<boost::uint32_t>(m_lasHeader.GetCreationYear()),
         "The year, expressed as a four digit number, in which the file was "
         "created.");
     m.add<uint32_t>("header_size",
-        static_cast<uint32_t>(header.GetHeaderSize()),
+        static_cast<uint32_t>(m_lasHeader.GetHeaderSize()),
         "The size, in bytes, of the Public Header Block itself. In the event "
         "that the header is extended by a software application through the "
         "addition of data at the end of the header, the Header Size field "
@@ -226,12 +202,12 @@ void Reader::extractMetadata(MetadataNode& m)
         "this data must be placed at the end of the structure and the Header "
         "Size must be updated to reflect the new size.");
     m.add<uint32_t>("dataoffset",
-        static_cast<boost::uint32_t>(header.GetDataOffset()),
+        static_cast<boost::uint32_t>(m_lasHeader.GetDataOffset()),
         "The actual number of bytes from the beginning of the file to the "
         "first field of the first point record data field. This data offset "
         "must be updated if any software adds data from the Public Header "
         "Block or adds/removes data to/from the Variable Length Records.");
-    m.add<double>("scale_x", header.GetScaleX(),
+    m.add<double>("scale_x", m_lasHeader.GetScaleX(),
         "The scale factor fields contain a double floating point value that "
         "is used to scale the corresponding X, Y, and Z long values within "
         "the point records. The corresponding X, Y, and Z scale factor must "
@@ -239,7 +215,7 @@ void Reader::extractMetadata(MetadataNode& m)
         "X, Y, or Z coordinate. For example, if the X, Y, and Z coordinates "
         "are intended to have two decimal point values, then each scale factor "
         "will contain the number 0.01.");
-    m.add<double>("scale_y", header.GetScaleY(),
+    m.add<double>("scale_y", m_lasHeader.GetScaleY(),
         "The scale factor fields contain a double floating point value that "
         "is used to scale the corresponding X, Y, and Z long values within "
         "the point records. The corresponding X, Y, and Z scale factor must "
@@ -247,7 +223,7 @@ void Reader::extractMetadata(MetadataNode& m)
         "actual X, Y, or Z coordinate. For example, if the X, Y, and Z "
         "coordinates are intended to have two decimal point values, then each "
         "scale factor will contain the number 0.01.");
-    m.add<double>("scale_z", header.GetScaleZ(),
+    m.add<double>("scale_z", m_lasHeader.GetScaleZ(),
         "The scale factor fields contain a double floating point value that "
         "is used to scale the corresponding X, Y, and Z long values within "
         "the point records. The corresponding X, Y, and Z scale factor must "
@@ -255,53 +231,54 @@ void Reader::extractMetadata(MetadataNode& m)
         "X, Y, or Z coordinate. For example, if the X, Y, and Z coordinates "
         "are intended to have two decimal point values, then each scale factor "
         "will contain the number 0.01.");
-    m.add<double>("offset_x", header.GetOffsetX(),
+    m.add<double>("offset_x", m_lasHeader.GetOffsetX(),
         "The offset fields should be used to set the overall offset for the "
         "point records. In general these numbers will be zero, but for "
         "certain cases the resolution of the point data may not be large "
         "enough for a given projection system. However, it should always be "
         "assumed that these numbers are used.");
-    m.add<double>("offset_y", header.GetOffsetY(),
+    m.add<double>("offset_y", m_lasHeader.GetOffsetY(),
         "The offset fields should be used to set the overall offset for the "
         "point records. In general these numbers will be zero, but for "
         "certain cases the resolution of the point data may not be large "
         "enough for a given projection system. However, it should always be "
         "assumed that these numbers are used.");
-    m.add<double>("offset_z", header.GetOffsetZ(),
+    m.add<double>("offset_z", m_lasHeader.GetOffsetZ(),
         "The offset fields should be used to set the overall offset for the "
         "point records. In general these numbers will be zero, but for certain "
         "cases the resolution of the point data may not be large enough for "
         "a given projection system. However, it should always be assumed that "
         "these numbers are used.");
-    m.add<double>("minx", header.GetMinX(),
+    m.add<double>("minx", m_lasHeader.GetMinX(),
         "The max and min data fields are the actual unscaled extents of the "
         "LAS point file data, specified in the coordinate system of the LAS "
         "data.");
-    m.add<double>("miny", header.GetMinY(),
+    m.add<double>("miny", m_lasHeader.GetMinY(),
         "The max and min data fields are the actual unscaled extents of the "
         "LAS point file data, specified in the coordinate system of the LAS "
         "data.");
-    m.add<double>("minz", header.GetMinZ(),
+    m.add<double>("minz", m_lasHeader.GetMinZ(),
         "The max and min data fields are the actual unscaled extents of the "
         "LAS point file data, specified in the coordinate system of the LAS "
         "data.");
-    m.add<double>("maxx", header.GetMaxX(),
+    m.add<double>("maxx", m_lasHeader.GetMaxX(),
         "The max and min data fields are the actual unscaled extents of the "
         "LAS point file data, specified in the coordinate system of the LAS "
         "data.");
-    m.add<double>("maxy", header.GetMaxY(),
+    m.add<double>("maxy", m_lasHeader.GetMaxY(),
         "The max and min data fields are the actual unscaled extents of the "
         "LAS point file data, specified in the coordinate system of the LAS "
         "data.");
-    m.add<double>("maxz", header.GetMaxZ(),
+    m.add<double>("maxz", m_lasHeader.GetMaxZ(),
         "The max and min data fields are the actual unscaled extents of the "
         "LAS point file data, specified in the coordinate system of the LAS "
         "data.");
     m.add<uint32_t>("count",
-        header.GetPointRecordsCount(), "This field contains the total number "
-        "of point records within the file.");
+        m_lasHeader.GetPointRecordsCount(), "This field contains the total "
+        "number of point records within the file.");
 
-    std::vector<VariableLengthRecord> const& vlrs = header.getVLRs().getAll();
+    std::vector<VariableLengthRecord> const& vlrs =
+        m_lasHeader.getVLRs().getAll();
     for (std::vector<VariableLengthRecord>::size_type t = 0;
         t < vlrs.size(); ++t)
     {
@@ -350,8 +327,6 @@ void Reader::extractMetadata(MetadataNode& m)
 
 void Reader::addDimensions(PointContext ctx)
 {
-    const LasHeader& h = getLasHeader();
-
     using namespace Dimension;
     Id::Enum ids[] = { Id::X, Id::Y, Id::Z, Id::Intensity, Id::ReturnNumber,
         Id::NumberOfReturns, Id::ScanDirectionFlag, Id::EdgeOfFlightLine,
@@ -359,104 +334,81 @@ void Reader::addDimensions(PointContext ctx)
         Id::Unknown };
     ctx.registerDims(ids);
 
-    if (h.hasTime())
+    if (m_lasHeader.hasTime())
         ctx.registerDim(Id::GpsTime);
-    if (h.hasColor())
+    if (m_lasHeader.hasColor())
     {
         Id::Enum ids[] = { Id::Red, Id::Green, Id::Blue, Id::Unknown };
         ctx.registerDims(ids);
     }
 }
 
-namespace iterators
-{
 
-Base::Base(pdal::drivers::las::Reader const& reader)
-    : m_bounds(3), m_reader(reader),
-    m_istream(m_reader.getStreamFactory().allocate()) , m_zipPoint(NULL),
-    m_unzipper(NULL)
+void Reader::ready(PointContext ctx)
 {
-    m_istream.seekg(m_reader.getLasHeader().GetDataOffset());
+    m_index = 0;
+    m_istream->seekg(m_lasHeader.GetDataOffset());
 
-    if (m_reader.getLasHeader().Compressed())
+    if (m_lasHeader.Compressed())
     {
 #ifdef PDAL_HAVE_LASZIP
-        initialize();
-#else
-        throw pdal_error("LASzip is not enabled for this "
-            "pdal::drivers::las::IteratorBase!");
-#endif
-    }
-}
-
-
-Base::~Base()
-{
-#ifdef PDAL_HAVE_LASZIP
-    m_zipPoint.reset();
-    m_unzipper.reset();
-#endif
-    m_reader.getStreamFactory().deallocate(m_istream);
-}
-
-
-void Base::initialize()
-{
-#ifdef PDAL_HAVE_LASZIP
-    if (!m_zipPoint)
-    {
-        PointFormat format = m_reader.getLasHeader().getPointFormat();
-        boost::scoped_ptr<ZipPoint> z(new ZipPoint(format,
-            m_reader.getLasHeader(), true));
-        m_zipPoint.swap(z);
-    }
-
-    if (!m_unzipper)
-    {
-        boost::scoped_ptr<LASunzipper> z(new LASunzipper());
-        m_unzipper.swap(z);
-
-        m_istream.seekg(static_cast<std::streampos>(
-            m_reader.getLasHeader().GetDataOffset()), std::ios::beg);
-        if (!m_unzipper->open(m_istream, m_zipPoint->GetZipper()))
+        if (!m_zipPoint)
         {
-            std::ostringstream oss;
-            const char* err = m_unzipper->get_error();
-            if (err==NULL)
-                err="(unknown error)";
-            oss << "Failed to open LASzip stream: " << std::string(err);
-            throw pdal_error(oss.str());
+            PointFormat format = m_lasHeader.getPointFormat();
+            std::unique_ptr<ZipPoint> z(new ZipPoint(format,
+                m_lasHeader, true));
+            m_zipPoint.swap(z);
         }
-    }
+
+        if (!m_unzipper)
+        {
+            std::unique_ptr<LASunzipper> z(new LASunzipper());
+            m_unzipper.swap(z);
+
+            m_istream->seekg(static_cast<std::streampos>(
+                        m_lasHeader.GetDataOffset()), std::ios::beg);
+            if (!m_unzipper->open(*m_istream, m_zipPoint->GetZipper()))
+            {
+                std::ostringstream oss;
+                const char* err = m_unzipper->get_error();
+                if (err == NULL)
+                    err = "(unknown error)";
+                oss << "Failed to open LASzip stream: " << std::string(err);
+                throw pdal_error(oss.str());
+            }
+        }
+#else
+        throw pdal_error("LASzip is not enabled.  Can't read LAZ data."
 #endif
+    }
 }
 
-point_count_t Base::processBuffer(PointBuffer& data, std::istream& stream,
-    point_count_t count, LASunzipper* unzipper, ZipPoint* zipPoint)
+
+point_count_t Reader::read(PointBuffer& data, point_count_t count)
 {
-    const LasHeader& h = m_reader.getLasHeader();
-    size_t pointByteCount = h.getPointDataSize();
+    size_t pointByteCount = m_lasHeader.getPointDataSize();
+    count = std::min(count, getNumPoints() - m_index);
 
     PointId i = 0;
-    if (zipPoint)
+    if (m_zipPoint)
     {
 #ifdef PDAL_HAVE_LASZIP
         for (i = 0; i < count; i++)
         {
-            if (!unzipper->read(zipPoint->m_lz_point))
+            if (!m_unzipper->read(m_zipPoint->m_lz_point))
             {
                 std::string error = "Error reading compressed point data: ";
-                const char* err = unzipper->get_error();
+                const char* err = m_unzipper->get_error();
                 if (!err)
                     err = "(unknown error)";
                 error += err;
                 throw pdal_error(error);
             }
-            loadPoint(data, (char *)zipPoint->m_lz_point_data.get(),
+            loadPoint(data, (char *)m_zipPoint->m_lz_point_data.get(),
                 pointByteCount);
         }
 #else
-        boost::ignore_unused_variable_warning(unzipper);
+        boost::ignore_unused_variable_warning(m_unzipper);
         throw pdal_error("LASzip is not enabled for this "
             "pdal::drivers::las::Reader::processBuffer");
 #endif
@@ -468,7 +420,7 @@ point_count_t Base::processBuffer(PointBuffer& data, std::istream& stream,
         {
             for (; i < count; ++i)
             {
-                stream.read(buf.data(), pointByteCount);
+                m_istream->read(buf.data(), pointByteCount);
                 loadPoint(data, buf.data(), pointByteCount);
             }
         }
@@ -477,21 +429,28 @@ point_count_t Base::processBuffer(PointBuffer& data, std::istream& stream,
         catch (pdal::invalid_stream&)
         {}
     }
+    m_index += i;
     return (point_count_t)i;
 }
 
 
-void Base::loadPoint(PointBuffer& data, char *buf, size_t bufsize)
+void Reader::loadPoint(PointBuffer& data, char *buf, size_t bufsize)
 {
+    // Turn a raw buffer (array of bytes) into a stream buf.
     Charbuf charstreambuf(buf, bufsize, 0);
+
+    // Make an input stream based on the stream buf.
     std::istream stream(&charstreambuf);
+
+    // Wrap the input stream with byte ordering.
     ILeStream istream(&stream);
+
     PointId nextId = data.size();
 
     int32_t xi, yi, zi;
     istream >> xi >> yi >> zi;
 
-    const LasHeader& h = m_reader.getLasHeader();
+    const LasHeader& h = m_lasHeader;
             
     double x = xi * h.GetScaleX() + h.GetOffsetX();
     double y = yi * h.GetScaleY() + h.GetOffsetY();
@@ -543,61 +502,13 @@ void Base::loadPoint(PointBuffer& data, char *buf, size_t bufsize)
 }
 
 
-namespace sequential
+void Reader::done(PointContext ctx)
 {
-
-Reader::Reader(pdal::drivers::las::Reader const& reader) : Base(reader)
-{}
-
-
-boost::uint64_t Reader::skipImpl(boost::uint64_t count)
-{
-    const LasHeader& h = m_reader.getLasHeader();
-
 #ifdef PDAL_HAVE_LASZIP
-    if (m_unzipper)
-    {
-        const boost::uint32_t pos32 =
-            Utils::safeconvert64to32(getIndex() + count);
-        m_unzipper->seek(pos32);
-    }
-    else
-    {
-        std::streamoff delta = h.getPointDataSize();
-        m_istream.seekg(delta * count, std::ios::cur);
-    }
-#else
-    std::streamoff delta = h.getPointDataSize();
-    m_istream.seekg(delta * count, std::ios::cur);
-#endif
-    return count;
-}
-
-
-point_count_t Reader::readImpl(PointBuffer& data, point_count_t count)
-{
-    point_count_t numToRead = m_reader.getNumPoints() - getIndex();
-#ifdef PDAL_HAVE_LASZIP
-    return processBuffer(data, m_istream, count, m_unzipper.get(),
-        m_zipPoint.get());
-#else
-    return processBuffer(data, m_istream, count, NULL, NULL);
+    m_zipPoint.reset();
+    m_unzipper.reset();
 #endif
 }
-
-point_count_t Reader::readBufferImpl(PointBuffer& data)
-{
-    point_count_t numToRead = m_reader.getNumPoints() - getIndex();
-#ifdef PDAL_HAVE_LASZIP
-    return processBuffer(data, m_istream, numToRead, m_unzipper.get(),
-        m_zipPoint.get());
-#else
-    return processBuffer(data, m_istream, numToRead, NULL, NULL);
-#endif
-}
-
-} // sequential
-} // iterators
 
 } // namespace las
 } // namespace drivers

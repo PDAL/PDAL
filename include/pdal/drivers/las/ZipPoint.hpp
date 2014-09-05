@@ -32,20 +32,25 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_DRIVERS_LAS_ZIPPOINT_HPP
-#define INCLUDED_DRIVERS_LAS_ZIPPOINT_HPP
+#pragma once
 
+#ifdef PDAL_HAVE_LASZIP
+#include <laszip/laszip.hpp>
+#include <laszip/lasunzipper.hpp>
+#include <laszip/laszipper.hpp>
+#endif
 
 #include <pdal/drivers/las/Header.hpp>
 
-#include <boost/shared_ptr.hpp>
-#include <boost/scoped_ptr.hpp>
 #include <boost/scoped_array.hpp>
 
 #include <vector>
 
-namespace pdal { namespace drivers { namespace las {
+namespace pdal {
+namespace drivers {
+namespace las {
 
+#ifdef PDAL_HAVE_LASZIP
 class VariableLengthRecord;
 
 class ZipPoint
@@ -70,14 +75,19 @@ public: // for now
     int his_vlr_num;
     unsigned char* his_vlr_data;
 
-    boost::scoped_ptr<LASzip> m_zip;
+    std::unique_ptr<LASzip> m_zip;
 
     unsigned char** m_lz_point;
     boost::scoped_array<boost::uint8_t> m_lz_point_data;
     unsigned int m_lz_point_size;
 };
+#else // PDAL_HAVE_LASZIP
+typedef void LASzipper;
+typedef void LASunzipper;
+typedef void ZipPoint;
+#endif
 
-} } } // namespace
+} // namespace las
+} // namespace drivers
+} // namespace pdal
 
-
-#endif // LIBLAS_DETAIL_ZIPPOINT_HPP_INCLUDED

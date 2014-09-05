@@ -115,7 +115,9 @@ BOOST_AUTO_TEST_CASE(test_crop_polygon)
     using namespace pdal;
 
 #ifdef PDAL_HAVE_GEOS
-    drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
+    Options ops1;
+    ops1.add("filename", Support::datapath("1.2-with-color.las"));
+    drivers::las::Reader reader(ops1);
 
     Options options;
     Option debug("debug", true, "");
