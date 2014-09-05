@@ -191,7 +191,7 @@ void PDALtoPCD(PointBuffer& data, CloudT &cloud, Bounds<double> const& bounds)
             boost::uint8_t g = data.getFieldAs<boost::uint8_t>(Dimension::Id::Green, i);
             boost::uint8_t b = data.getFieldAs<boost::uint8_t>(Dimension::Id::Blue, i);
             pcl::for_each_type<FieldList> (
-                pcl::SetIfFieldExists<typename CloudT::PointType, boost::uint32_t> (
+                pcl::SetIfFieldExists<typename CloudT::PointType, int> (
                     p, "rgba", ((int)r) << 16 | ((int)g) << 8 | ((int)b)
                 )
             );

@@ -82,9 +82,7 @@ public:
     {};
 
 private:
-    boost::uint64_t skipImpl(boost::uint64_t) {};
     point_count_t readImpl(PointBuffer& buf, std::string filename);
-    bool atEndImpl() const {};
 
     virtual point_count_t readBufferImpl(PointBuffer& buf)
         { return readImpl(buf, m_filename); }
