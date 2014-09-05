@@ -10,8 +10,9 @@ Contents:
 
 .. toctree::
    :maxdepth: 1
-   
+
+   overview
    reading
    writing
    pcl_block_tutorial
- 
+
