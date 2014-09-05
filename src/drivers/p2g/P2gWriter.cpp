@@ -215,7 +215,7 @@ void P2gWriter::write(const PointBuffer& buf)
     adfGeoTransform[4] = 0.0;
     adfGeoTransform[5] = -1 * m_GRID_DIST_Y;
     
-    SpatialReference const& srs = getSpatialReference();
+    SpatialReference const& srs = getSpatialReference().empty() ? buf.context().spatialRef() : getSpatialReference();
 
     if ((rc = m_interpolator->finish(const_cast<char*>(m_filename.c_str()), m_outputFormat, m_outputTypes, adfGeoTransform, srs.getWKT().c_str())) < 0)
     {
