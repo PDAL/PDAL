@@ -82,9 +82,11 @@ public: // for now
     unsigned int m_lz_point_size;
 };
 #else // PDAL_HAVE_LASZIP
-typedef void LASzipper;
-typedef void LASunzipper;
-typedef void ZipPoint;
+// The types here just need to be something suitable for a smart pointer.
+// They aren't ever used beyond testing for NULL.
+typedef char LASzipper;
+typedef char LASunzipper;
+typedef char ZipPoint;
 #endif
 
 } // namespace las

@@ -378,7 +378,7 @@ void Reader::ready(PointContext ctx)
             }
         }
 #else
-        throw pdal_error("LASzip is not enabled.  Can't read LAZ data."
+        throw pdal_error("LASzip is not enabled.  Can't read LAZ data.");
 #endif
     }
 }
