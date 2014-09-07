@@ -574,9 +574,10 @@ void Writer::writeTile(PointBuffer const& buffer)
 
     m_insert.clear();
     std::string::size_type position(0);
-
-    if (m_insert.capacity() < (m_hex.size() + 3000))
-        m_insert.reserve(m_hex.size() + 3000);
+    std::string::size_type string_size = m_hex.size() + 3000;
+    if (m_insert.capacity() < string_size)
+        m_insert.reserve(string_size);
+    m_insert.resize(string_size);
     std::string insert_into("INSERT INTO ");
     std::string values(" (pa) VALUES ('");
 
@@ -591,7 +592,7 @@ void Writer::writeTile(PointBuffer const& buffer)
 
     std::ostringstream options;
 
-    int32_t num_points = static_cast<int32_t>(buffer.size());
+    uint32_t num_points = buffer.size();
     int32_t pcid = m_pcid;
     CompressionType::Enum compression_v = CompressionType::None;
     uint32_t compression = static_cast<uint32_t>(compression_v);
@@ -622,6 +623,7 @@ void Writer::writeTile(PointBuffer const& buffer)
 
     std::string tail("')");
     m_insert.insert(position, tail);
+
     pg_execute(m_session, m_insert);
 }
 
