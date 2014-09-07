@@ -14,7 +14,7 @@ Contents:
    compilation/index
    tutorial/index
    apps
-   stages/index.txt
+   stages/index
    pipeline
    vagrant
    community
