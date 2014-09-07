@@ -340,15 +340,15 @@ void Writer::ready(PointContext ctx)
             "dataformat_id", 3);
         uint32_t v2 = getMetadataOption<uint32_t>(getOptions(), m_metadata,
             "format", 3);
-            
+
         // Use the 'format' option specified by the options instead of the
         // metadata one that was set passively
-        v = v2; 
+        v = v2;
         setPointFormat(static_cast<PointFormat>(v));
         log()->get(logDEBUG) << "Setting point format to "
                              << v
                              << " from metadata " << std::endl;
-        
+
         uint32_t minor = getMetadataOption<uint32_t>(getOptions(),
             m_metadata, "minor_version", 2);
 
@@ -395,11 +395,11 @@ void Writer::ready(PointContext ctx)
         m_lasHeader.SetProjectId(project_id);
         log()->get(logDEBUG) << "Setting project_id to " << project_id <<
             " from metadata " << std::endl;
-        
+
         std::string global_encoding_data = getMetadataOption<std::string>(
             getOptions(), m_metadata, "global_encoding", "");
         std::vector<uint8_t> data = Utils::base64_decode(global_encoding_data);
-        
+
         uint16_t reserved = 0;
         if (global_encoding_data.size())
         {
@@ -423,12 +423,12 @@ void Writer::ready(PointContext ctx)
                 memcpy(&temp, data.data(), data.size());
                 reserved = static_cast<uint16_t>(temp);
             }
-            else 
+            else
             {
                 std::ostringstream oss;
                 oss << "size of global_encoding bytes should == 2, not " <<
                     data.size();
-                throw pdal_error(oss.str());                
+                throw pdal_error(oss.str());
             }
         }
         m_lasHeader.SetReserved(reserved);
@@ -559,8 +559,11 @@ void Writer::write(const PointBuffer& pointBuffer)
 
         int8_t scanAngleRank = 0;
         if (dimensions.ScanAngleRank)
-            scanAngleRank = pointBuffer.getFieldAs<int8_t>(
+        {
+            double angle = pointBuffer.getFieldAs<double>(
                 *dimensions.ScanAngleRank, idx, false);
+            scanAngleRank = (int8_t) angle;
+        }
         Utils::write_field(p, scanAngleRank);
 
         uint8_t userData = 0;
