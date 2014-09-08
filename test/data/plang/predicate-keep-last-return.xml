@@ -3,7 +3,7 @@
     <Writer type="drivers.las.writer">
         <Option name="filename">
             out2.las
-        </Option>    
+        </Option>
         <Filter type="filters.predicate">
             <Option name="module">anything</Option>
             <Option name="function">filter</Option>
@@ -23,7 +23,7 @@ def filter(ins,outs):
             <Filter type="filters.stats">
                 <Reader type="drivers.las.reader">
                     <Option name="filename">
-                        ../autzen.las
+                        ../autzen/autzen.las
                     </Option>
                 </Reader>
             </Filter>

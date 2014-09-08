@@ -65,7 +65,7 @@ Options getSQLITEOptions()
 
     Option overwrite("overwrite", true,"overwrite");
     options.add(overwrite);
-    
+
     std::string temp_filename(Support::temppath("temp-SqliteWriterTest_test_simple_las.sqlite"));
     Option connection("connection",temp_filename, "connection");
     options.add(connection);
@@ -97,7 +97,7 @@ Options getSQLITEOptions()
     Option scale_y("scale_y", 0.0000001f, "");
     options.add(scale_y);
 
-    Option filename("filename", Support::datapath("1.2-with-color.las"), "");
+    Option filename("filename", Support::datapath("las/1.2-with-color.las"), "");
     options.add(filename);
 
     Option query("query", "                SELECT b.schema, l.cloud, l.block_id, l.num_points, l.bbox, l.extent, l.points, b.cloud FROM PDAL_TEST_BLOCKS l, PDAL_TEST_BASE b "
@@ -107,20 +107,20 @@ Options getSQLITEOptions()
 
     Option a_srs("spatialreference", "EPSG:2926", "");
     options.add(a_srs);
-    
+
     Option pack("pack_ignored_fields", true, "");
     options.add(pack);
 
 
     Option cloud_column("cloud_column_name", "CLOUD", "");
     options.add(cloud_column);
-        
+
     // Option xml_schema_dump("xml_schema_dump", "sqlite-xml-schema-dump.xml", "");
     // options.add(xml_schema_dump);
 
     Option con_type("type", "sqlite", "");
     options.add(con_type);
-    
+
     return options;
 }
 
@@ -139,7 +139,7 @@ struct SQLiteTestFixture
         FileUtils::deleteFile(temp_filename);
     }
 
-    pdal::Options m_options;    
+    pdal::Options m_options;
 };
 
 
@@ -152,13 +152,13 @@ BOOST_AUTO_TEST_CASE(SqliteTest_test_simple_las)
     // remove file from earlier run, if needed
     std::string temp_filename = getSQLITEOptions().getValueOrThrow<std::string>("connection");
 
-    pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
+    pdal::drivers::las::Reader reader(Support::datapath("las/1.2-with-color.las"));
 
     {
         pdal::drivers::las::Reader writer_reader(getSQLITEOptions());
         pdal::drivers::sqlite::SQLiteWriter writer_writer(getSQLITEOptions());
         writer_writer.setInput(&writer_reader);
-        
+
         PointContext ctx;
         writer_writer.prepare(ctx);
         boost::uint64_t numPointsToRead = writer_reader.getNumPoints();
@@ -167,7 +167,7 @@ BOOST_AUTO_TEST_CASE(SqliteTest_test_simple_las)
 
         writer_writer.execute(ctx);
     }
-    
+
     {
         // Read the data
 
@@ -179,12 +179,12 @@ BOOST_AUTO_TEST_CASE(SqliteTest_test_simple_las)
         pdal::StageSequentialIterator* iter =
             reader.createSequentialIterator();
         iter->read(buffer);
-        
+
         boost::uint16_t r = buffer.getFieldAs<boost::uint16_t>(Dimension::Id::Red, 0);
         BOOST_CHECK_EQUAL(r, 68u);
         boost::int32_t x = buffer.getFieldAs<boost::int32_t>(Dimension::Id::X, 0);
         BOOST_CHECK_EQUAL(x, 637012);
-        double xd = buffer.getFieldAs<double>(Dimension::Id::X, 0);        
+        double xd = buffer.getFieldAs<double>(Dimension::Id::X, 0);
         BOOST_CHECK_CLOSE(xd, 637012.240, 0.001);
     }
     // FileUtils::deleteFile(temp_filename);

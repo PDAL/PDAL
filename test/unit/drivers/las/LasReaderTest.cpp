@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_SUITE(LasReaderTest)
 
 BOOST_AUTO_TEST_CASE(test_base_options)
 {
-    const std::string file(Support::datapath("1.2-with-color.las"));
+    const std::string file(Support::datapath("las/1.2-with-color.las"));
 
     const pdal::Option opt_filename("filename", file);
     const pdal::Option opt_verbose_string("verbose", "99");
@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE(test_sequential)
 {
     PointContext ctx;
 
-    pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
+    pdal::drivers::las::Reader reader(Support::datapath("las/1.2-with-color.las"));
     BOOST_CHECK(reader.getDescription() == "Las Reader");
     reader.prepare(ctx);
     pdal::StageSequentialIterator* iter = reader.createSequentialIterator();
@@ -120,7 +120,7 @@ BOOST_AUTO_TEST_CASE(test_sequential)
 BOOST_AUTO_TEST_CASE(test_two_iters)
 {
     PointContext ctx;
-    pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
+    pdal::drivers::las::Reader reader(Support::datapath("las/1.2-with-color.las"));
     BOOST_CHECK(reader.getDescription() == "Las Reader");
     reader.prepare(ctx);
 
@@ -145,7 +145,7 @@ BOOST_AUTO_TEST_CASE(test_simultaneous_iters)
 {
     PointContext ctx;
 
-    pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
+    pdal::drivers::las::Reader reader(Support::datapath("las/1.2-with-color.las"));
     BOOST_CHECK_EQUAL(reader.getDescription(), "Las Reader");
     reader.prepare(ctx);
 
@@ -292,16 +292,16 @@ static void test_a_format(const std::string& file, boost::uint8_t majorVersion, 
 
 BOOST_AUTO_TEST_CASE(test_different_formats)
 {
-    test_a_format("1.0_0.las", 1, 0, 0, 470692.440000, 4602888.900000, 16.000000, 0, 0, 0, 0);
-    test_a_format("1.0_1.las", 1, 0, 1, 470692.440000, 4602888.900000, 16.000000, 1205902800.000000, 0, 0, 0);
+    test_a_format("las/permutations/1.0_0.las", 1, 0, 0, 470692.440000, 4602888.900000, 16.000000, 0, 0, 0, 0);
+    test_a_format("las/permutations/1.0_1.las", 1, 0, 1, 470692.440000, 4602888.900000, 16.000000, 1205902800.000000, 0, 0, 0);
 
-    test_a_format("1.1_0.las", 1, 1, 0, 470692.440000, 4602888.900000, 16.000000, 0, 0, 0, 0);
-    test_a_format("1.1_1.las", 1, 1, 1, 470692.440000, 4602888.900000, 16.000000, 1205902800.000000, 0, 0, 0);
+    test_a_format("las/permutations/1.1_0.las", 1, 1, 0, 470692.440000, 4602888.900000, 16.000000, 0, 0, 0, 0);
+    test_a_format("las/permutations/1.1_1.las", 1, 1, 1, 470692.440000, 4602888.900000, 16.000000, 1205902800.000000, 0, 0, 0);
 
-    test_a_format("1.2_0.las", 1, 2, 0, 470692.440000, 4602888.900000, 16.000000, 0, 0, 0, 0);
-    test_a_format("1.2_1.las", 1, 2, 1, 470692.440000, 4602888.900000, 16.000000, 1205902800.000000, 0, 0, 0);
-    test_a_format("1.2_2.las", 1, 2, 2, 470692.440000, 4602888.900000, 16.000000, 0, 255, 12, 234);
-    test_a_format("1.2_3.las", 1, 2, 3, 470692.440000, 4602888.900000, 16.000000, 1205902800.000000, 255, 12, 234);
+    test_a_format("las/permutations/1.2_0.las", 1, 2, 0, 470692.440000, 4602888.900000, 16.000000, 0, 0, 0, 0);
+    test_a_format("las/permutations/1.2_1.las", 1, 2, 1, 470692.440000, 4602888.900000, 16.000000, 1205902800.000000, 0, 0, 0);
+    test_a_format("las/permutations/1.2_2.las", 1, 2, 2, 470692.440000, 4602888.900000, 16.000000, 0, 255, 12, 234);
+    test_a_format("las/permutations/1.2_3.las", 1, 2, 3, 470692.440000, 4602888.900000, 16.000000, 1205902800.000000, 255, 12, 234);
 }
 
 
@@ -309,7 +309,7 @@ BOOST_AUTO_TEST_CASE(test_vlr)
 {
     PointContext ctx;
 
-    pdal::drivers::las::Reader reader(Support::datapath("lots_of_vlr.las"));
+    pdal::drivers::las::Reader reader(Support::datapath("las/lots_of_vlr.las"));
     reader.prepare(ctx);
 
     BOOST_CHECK_EQUAL(reader.getLasHeader().getVLRs().getAll().size(), 390);
@@ -320,9 +320,9 @@ BOOST_AUTO_TEST_CASE(test_no_xyz)
 {
     PointContext ctx;
 
-    // Wipe off the XYZ dimensions and see if we can 
+    // Wipe off the XYZ dimensions and see if we can
     // still read LAS data #123
-    pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
+    pdal::drivers::las::Reader reader(Support::datapath("las/1.2-with-color.las"));
     BOOST_CHECK(reader.getDescription() == "Las Reader");
     reader.prepare(ctx);
 
@@ -338,10 +338,10 @@ BOOST_AUTO_TEST_CASE(test_no_xyz)
 
 BOOST_AUTO_TEST_CASE(testFilenameConstructorSetOption)
 {
-    pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
+    pdal::drivers::las::Reader reader(Support::datapath("las/1.2-with-color.las"));
     BOOST_CHECK_EQUAL(
         reader.getOptions().getValueOrDefault<std::string>("filename", ""),
-        Support::datapath("1.2-with-color.las"));
+        Support::datapath("las/1.2-with-color.las"));
 }
 
 
@@ -349,7 +349,7 @@ BOOST_AUTO_TEST_CASE(testInvalidFileSignature)
 {
     PointContext ctx;
     pdal::drivers::las::Reader reader(
-        Support::datapath("1.2-with-color.las.wkt"));
+        Support::datapath("las/1.2-with-color.las.wkt"));
     try
     {
         reader.prepare(ctx);
@@ -357,7 +357,7 @@ BOOST_AUTO_TEST_CASE(testInvalidFileSignature)
     catch (const std::invalid_argument& e)
     {
         std::string msg(e.what());
-        BOOST_CHECK(msg.find("1.2-with-color.las.wkt") != std::string::npos);
+        BOOST_CHECK(msg.find("las/1.2-with-color.las.wkt") != std::string::npos);
         return;
     }
     BOOST_FAIL("reader.initialize() did not throw std::invalid_argument");

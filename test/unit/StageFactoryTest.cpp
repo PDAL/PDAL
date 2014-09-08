@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE(StageFactoryTest_test1)
     StageFactory factory;
 
     Options optsR;
-    optsR.add("filename", Support::datapath("1.2-with-color.las"));
+    optsR.add("filename", Support::datapath("las/1.2-with-color.las"));
     Reader* reader = factory.createReader("drivers.las.reader", optsR);
     BOOST_CHECK(reader->getName() == "drivers.las.reader");
 
@@ -101,7 +101,7 @@ static Reader* demoReaderCreator(const Options& options)
     //     return new MyCustomXyzReader(options);
 
     Options optsR;
-    optsR.add("filename", Support::datapath("1.2-with-color.las"), "file to read from");
+    optsR.add("filename", Support::datapath("las/1.2-with-color.las"), "file to read from");
     Reader* reader = new pdal::drivers::las::Reader(optsR);
     return reader;
 }

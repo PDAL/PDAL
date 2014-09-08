@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(ColorizationFilterTest_test_1)
 {
     using namespace pdal;
 
-    drivers::las::Reader reader(Support::datapath("autzen-point-format-3.las"));
+    drivers::las::Reader reader(Support::datapath("autzen/autzen-point-format-3.las"));
 
     Options options;
 
@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE(ColorizationFilterTest_test_1)
     blueO.add(s2);
     blue.setOptions(blueO);
 
-    Option datasource("raster", Support::datapath("autzen.jpg"),
+    Option datasource("raster", Support::datapath("autzen/autzen.jpg"),
         "raster to read");
 
     Options reader_options;

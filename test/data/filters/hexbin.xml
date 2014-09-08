@@ -3,7 +3,7 @@
     <Writer type="drivers.las.writer">
         <Option name="filename">
             hexbin.las
-        </Option>    
+        </Option>
     <Filter type="filters.hexbin">
         <Option name="edge_size">
             0.0
@@ -22,10 +22,10 @@
         </Option>
         <Option name="precision">
             4
-        </Option>        
+        </Option>
         <Reader type="drivers.las.reader">
             <Option name="filename">
-                ../1.2-with-color.las
+                ../las/1.2-with-color.las
             </Option>
         </Reader>
     </Filter>

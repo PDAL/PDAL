@@ -82,7 +82,7 @@ BOOST_AUTO_TEST_CASE(test_file_ops)
 
 BOOST_AUTO_TEST_CASE(test_readFileIntoString)
 {
-    const std::string filename = Support::datapath("text.txt");
+    const std::string filename = Support::datapath("text/text.txt");
     BOOST_CHECK(FileUtils::fileExists(filename));
 
     std::string source = FileUtils::readFileIntoString(filename);

@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE(test1)
 
     PipelineManager mgr;
     PipelineReader specReader(mgr);
-    specReader.readPipeline(Support::datapath("pipeline/merge.xml"));
+    specReader.readPipeline(Support::datapath("filters/merge.xml"));
     Stage *stage = mgr.getStage();
     mgr.execute();
 

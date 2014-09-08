@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Pipeline version="1.0">
+    <Writer type="drivers.las.writer">
+        <Option name="filename">
+            out2.las
+        </Option>
+    <Filter type="filters.scaling">
+        <Option name="dimension">
+            X
+            <Options>
+                <Option name="scale">0.01</Option>
+                <Option name="offset">311898.23</Option>
+                <Option name="type">SignedInteger</Option>
+                <Option name="size">4</Option>
+            </Options>
+        </Option>
+        <Option name="dimension">
+            Y
+            <Options>
+                <Option name="scale">0.01</Option>
+                <Option name="type">SignedInteger</Option>
+                <Option name="size">4</Option>
+                <Option name="offset">4703909.84</Option>
+            </Options>
+        </Option>
+        <Option name="dimension">
+            Z
+            <Options>
+                <Option name="scale">0.01</Option>
+                <Option name="offset">7.385474</Option>
+                <Option name="type">SignedInteger</Option>
+                <Option name="size">4</Option>
+            </Options>
+        </Option>
+        <Reader type="drivers.bpf.reader">
+            <Option name="filename">
+                utm15.bpf
+            </Option>
+        </Reader>
+    </Filter>
+</Writer>
+</Pipeline>

@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE(test_one)
 
     bool ok = Support::compare_text_files(
         Support::temppath("mylog_one.txt"),
-        Support::datapath("logtest.txt"));
+        Support::datapath("logs/logtest.txt"));
     BOOST_CHECK(ok);
 
     if (ok)
@@ -160,7 +160,7 @@ BOOST_AUTO_TEST_CASE(test_two_a)
 
     bool ok1 = Support::compare_text_files(
          Support::temppath("logtest_123.txt"),
-         Support::datapath("logtest_123.txt"));
+         Support::datapath("logs/logtest_123.txt"));
     BOOST_CHECK(ok1);
     if (ok1)
         FileUtils::deleteFile(Support::temppath("logtest_123.txt"));
@@ -199,7 +199,7 @@ BOOST_AUTO_TEST_CASE(test_two_b)
         xfilter_opts.add(source);
         xfilter_opts.add(module);
         xfilter_opts.add(function);
-    
+
         Option optlog("log", Support::temppath("logtest_test_two_b_2.txt"));
         xfilter_opts.add(optlog);
     }
@@ -220,7 +220,7 @@ BOOST_AUTO_TEST_CASE(test_two_b)
         yfilter_opts.add(source);
         yfilter_opts.add(module);
         yfilter_opts.add(function);
-    
+
         Option optlog("log", Support::temppath("logtest_test_two_b_3.txt"));
         yfilter_opts.add(optlog);
     }
@@ -247,15 +247,15 @@ BOOST_AUTO_TEST_CASE(test_two_b)
 
     bool ok1 = Support::compare_text_files(
         Support::temppath("logtest_test_two_b_1.txt"),
-        Support::datapath("logtest_1.txt"));
+        Support::datapath("logs/logtest_1.txt"));
     BOOST_CHECK(ok1);
     bool ok2 = Support::compare_text_files(
         Support::temppath("logtest_test_two_b_2.txt"),
-        Support::datapath("logtest_2.txt"));
+        Support::datapath("logs/logtest_2.txt"));
     BOOST_CHECK(ok2);
     bool ok3 = Support::compare_text_files(
         Support::temppath("logtest_test_two_b_3.txt"),
-        Support::datapath("logtest_3.txt"));
+        Support::datapath("logs/logtest_3.txt"));
     BOOST_CHECK(ok3);
 
     if (ok1)
@@ -322,7 +322,7 @@ BOOST_AUTO_TEST_CASE(test_three)
 
     bool ok = Support::compare_text_files(
         Support::temppath("mylog_three.txt"),
-        Support::datapath("log_py.txt"));
+        Support::datapath("logs/log_py.txt"));
     BOOST_CHECK(ok);
 
     if (ok)
