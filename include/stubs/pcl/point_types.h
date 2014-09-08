@@ -22,6 +22,20 @@ struct PointCloud
     bool is_dense;
 };
 
+struct PCLHeader
+{
+};
+
+struct PCLPointCloud2
+{
+    uint32_t height;
+    uint32_t width;
+
+  public:
+    typedef std::shared_ptr<PCLPointCloud2> Ptr;
+    typedef std::shared_ptr<PCLPointCloud2  const> ConstPtr;
+};
+
 namespace traits
 {
 
@@ -34,6 +48,13 @@ struct has_xyz
 
 template<typename T>
 struct has_intensity
+{
+    T t;
+    enum { value = true };
+};
+
+template<typename T>
+struct has_color
 {
     T t;
     enum { value = true };
