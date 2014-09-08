@@ -6,8 +6,8 @@
         </Option>
             <Reader type="drivers.nitf.reader">
                 <Option name="filename">
-                    ../08350_Baghdad2_Tile_000100_nga.ntf
-                </Option>              
+                    autzen-utm10.ntf
+                </Option>
             </Reader>
     </Writer>
 </Pipeline>
