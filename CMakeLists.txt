@@ -91,7 +91,7 @@ endif(WIN32)
 option(WITH_APPS "Choose if PDAL utilities should be built" TRUE)
 option(WITH_TESTS "Choose if PDAL unit tests should be built" TRUE)
 
-option(WITH_STUBS "Use stubs if libraries are not enabled" TRUE)
+option(WITH_STUBS "Use stubs if libraries are not enabled" FALSE)
 set(PDAL_STUB_DIR "${PDAL_SOURCE_DIR}/include/stubs")
 
 # Choose to use pkg-config or not
