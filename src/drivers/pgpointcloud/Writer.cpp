@@ -144,7 +144,7 @@ void Writer::ready(PointContext ctx)
 //
 void Writer::initialize()
 {
-    m_session = pg_connect(m_connection);  
+    m_session = pg_connect(m_connection);
 }
 
 //
@@ -534,17 +534,17 @@ void Writer::writeTile(PointBuffer const& buffer)
     if (buffer.size() > m_patch_capacity)
     {
         std::ostringstream oss;
-        oss << "drivers.pgpointcloud.writer buffer size (" << buffer.size() 
+        oss << "drivers.pgpointcloud.writer buffer size (" << buffer.size()
             << ") is greater than capacity (" << m_patch_capacity << ")";
         throw pdal_error(oss.str());
     }
-    
+
     size_t outbufSize = m_pointSize * buffer.size();
     std::unique_ptr<char> outbuf(new char[outbufSize]);
     char *pos = outbuf.get();
     size_t clicks = 0;
     size_t interrupt = m_dims.size() * 100;
-    
+
     for (PointId id = 0; id < buffer.size(); ++id)
     {
         auto ti = m_types.begin();
@@ -554,18 +554,15 @@ void Writer::writeTile(PointBuffer const& buffer)
             pos += Dimension::size(*ti);
         }
         if (id % 100 == 0)
-            m_callback->invoke(id);        
+            m_callback->invoke(id);
     }
 
-    m_callback->invoke(buffer.size());    
+    m_callback->invoke(buffer.size());
 
-    point_count_t num_points = buffer.size();
 
     /* We are always getting uncompressed bytes off the block_data */
     /* so we always used compression type 0 (uncompressed) in writing our WKB */
-    int32_t pcid = m_pcid;
-    CompressionType::Enum compression_v = CompressionType::None;
-    uint32_t compression = static_cast<uint32_t>(compression_v);
+
 
     static char syms[] = "0123456789ABCDEF";
     m_hex.resize(outbufSize * 2);
@@ -576,14 +573,17 @@ void Writer::writeTile(PointBuffer const& buffer)
     }
 
     m_insert.clear();
-    m_insert.resize(m_hex.size() + 3000);
-    
+    std::string::size_type position(0);
+    std::string::size_type string_size = m_hex.size() + 3000;
+    if (m_insert.capacity() < string_size)
+        m_insert.reserve(string_size);
+    m_insert.resize(string_size);
     std::string insert_into("INSERT INTO ");
     std::string values(" (pa) VALUES ('");
-    
-    std::string::size_type position(0);
+
     m_insert.insert(position, insert_into);
     position += insert_into.size();
+
     m_insert.insert(position, m_table_name);
     position += m_table_name.size();
 
@@ -591,25 +591,36 @@ void Writer::writeTile(PointBuffer const& buffer)
     position += values.size();
 
     std::ostringstream options;
+
+    uint32_t num_points = buffer.size();
+    int32_t pcid = m_pcid;
+    CompressionType::Enum compression_v = CompressionType::None;
+    uint32_t compression = static_cast<uint32_t>(compression_v);
+
 #ifdef BOOST_LITTLE_ENDIAN
+    // needs to be 1 byte
     options << boost::format("%02x") % 1;
     SWAP_ENDIANNESS(pcid);
     SWAP_ENDIANNESS(compression);
     SWAP_ENDIANNESS(num_points);
 #elif BOOST_BIG_ENDIAN
+    // needs to be 1 byte
     options << boost::format("%02x") % 0;
 #endif
 
+    // needs to be 4 bytes
     options << boost::format("%08x") % pcid;
+    // needs to be 4 bytes
     options << boost::format("%08x") % compression;
+    // needs to be 4 bytes
     options << boost::format("%08x") % num_points;
-    
+
     m_insert.insert(position, options.str());
     position += options.str().size();
-    
+
     m_insert.insert(position, m_hex);
     position += m_hex.size();
-    
+
     std::string tail("')");
     m_insert.insert(position, tail);
 

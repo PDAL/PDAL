@@ -33,9 +33,9 @@
  ****************************************************************************/
 
 #include <pdal/SpatialReference.hpp>
+#include <pdal/PDALUtils.hpp>
 
 #include <boost/concept_check.hpp>
-#include <boost/property_tree/xml_parser.hpp>
 #include <boost/concept_check.hpp> // ignore_unused_variable_warning
 
 #include <boost/algorithm/string/trim.hpp>
@@ -228,39 +228,6 @@ bool SpatialReference::isGeographic() const
 }
 
 
-boost::property_tree::ptree SpatialReference::toPTree() const
-{
-    using boost::property_tree::ptree;
-    ptree srs;
-
-#ifdef PDAL_SRS_ENABLED
-    srs.put("proj4", getProj4());
-    srs.put("prettywkt", getWKT(SpatialReference::eHorizontalOnly, true));
-    srs.put("wkt", getWKT(SpatialReference::eHorizontalOnly, false));
-    srs.put("compoundwkt", getWKT(eCompoundOK, false));
-    srs.put("prettycompoundwkt", getWKT(eCompoundOK, true));
-#else
-    std::string message;
-    if (m_wkt.size() == 0)
-        message = "Reference defined with VLR keys, but GeoTIFF and GDAL "
-            "support are not available to produce definition";
-    else if (m_wkt.size() > 0)
-        message = "Reference defined with WKT, but GeoTIFF and GDAL "
-            "support are not available to produce definition";
-    else
-        message = "None";
-
-    srs.put("proj4", message);
-    srs.put("prettywkt", message);
-    srs.put("wkt", message);
-    srs.put("compoundwkt", message);
-    srs.put("prettycompoundwkt", message);
-    srs.put("gtiff", message);
-#endif
-    return srs;
-}
-
-
 void SpatialReference::dump() const
 {
     std::cout << *this;
@@ -270,7 +237,7 @@ void SpatialReference::dump() const
 std::ostream& operator<<(std::ostream& ostr, const SpatialReference& srs)
 {
 #ifdef PDAL_SRS_ENABLED
-    std::string wkt = srs.toPTree().get<std::string>("prettycompoundwkt");
+    std::string wkt = pdal::utils::toPTree(srs).get<std::string>("prettycompoundwkt");
     ostr << wkt;
     return ostr;
 #else

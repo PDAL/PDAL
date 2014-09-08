@@ -53,9 +53,10 @@ namespace CompressionType
 
 enum Enum
 {
-    Dimensional,
-    Ght,
-    None
+    None = 0,
+    Ght = 1,
+    Dimensional = 2,
+    Unknown = 256
 };
 
 } // namespace CompressionType

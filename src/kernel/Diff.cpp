@@ -33,7 +33,8 @@
 ****************************************************************************/
 
 #include <pdal/kernel/Diff.hpp>
-#include <boost/property_tree/ptree.hpp>
+#include <pdal/PDALUtils.hpp>
+
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
@@ -43,14 +44,14 @@ using boost::property_tree::ptree;
 
 namespace pdal {
 namespace kernel {
-    
+
 Diff::Diff(int argc, const char* argv[])
     : Application(argc, argv, "dif")
     , m_sourceFile("")
     , m_candidateFile("")
     , m_useXML(false)
     , m_useJSON(false)
-        
+
 {}
 
 
@@ -69,7 +70,7 @@ void Diff::addSwitches()
 
     po::options_description* file_options =
         new po::options_description("file options");
-    
+
     file_options->add_options()
         ("source", po::value<std::string>(&m_sourceFile), "source file name")
         ("candidate",
@@ -85,9 +86,9 @@ void Diff::addSwitches()
     addSwitchSet(file_options);
     po::options_description* processing_options =
         new po::options_description("processing options");
-    
+
     processing_options->add_options();
-    
+
     addSwitchSet(processing_options);
 
     addPositionalSwitch("source", 1);
@@ -104,8 +105,8 @@ void Diff::checkPoints(const PointBuffer& source_data,
 
     // Both schemas have already been determined to be equal, so are the
     // same size and in the same order.
-    Dimension::IdList const& sourceDims = source_data.dims();    
-    Dimension::IdList const& candidateDims = candidate_data.dims();   
+    Dimension::IdList const& sourceDims = source_data.dims();
+    Dimension::IdList const& candidateDims = candidate_data.dims();
 
     char sbuf[8];
     char cbuf[8];
@@ -119,15 +120,15 @@ void Diff::checkPoints(const PointBuffer& source_data,
             source_data.getRawField(sd, idx, (void *)sbuf);
             candidate_data.getRawField(cd, idx, (void *)cbuf);
             Dimension::Type::Enum t = Dimension::defaultType(cd);
-            size_t size = Dimension::size(t);            
+            size_t size = Dimension::size(t);
             if (memcmp(sbuf, cbuf, size))
             {
                 std::ostringstream oss;
-        
+
                 oss << "Point " << idx << " differs for dimension \"" <<
                     Dimension::name(sd) << "\" for source and candidate";
                 errors.put<std::string>("data.error", oss.str());
-                badbytes++;                        
+                badbytes++;
             }
         }
         if (badbytes > MAX_BADBYTES )
@@ -149,7 +150,7 @@ int Diff::execute()
     std::unique_ptr<Stage> source(AppSupport::makeReader(sourceOptions));
     source->prepare(sourceCtx);
     PointBufferSet sourceSet = source->execute(sourceCtx);
-    
+
     ptree errors;
 
     PointContext candidateCtx;
@@ -171,29 +172,29 @@ int Diff::execute()
     if (candidateBuf->size() != sourceBuf->size())
     {
         std::ostringstream oss;
-        
+
         oss << "Source and candidate files do not have the same point count";
         errors.put("count.error", oss.str());
         errors.put("count.candidate", candidateBuf->size());
         errors.put("count.source", sourceBuf->size());
     }
-    
+
     MetadataNode source_metadata = sourceCtx.metadata();
     MetadataNode candidate_metadata = candidateCtx.metadata();
     if (source_metadata != candidate_metadata)
     {
         std::ostringstream oss;
-        
+
         oss << "Source and candidate files do not have the same metadata count";
         errors.put("metadata.error", oss.str());
-        errors.put_child("metadata.source", source_metadata.toPTree());
-        errors.put_child("metadata.candidate", candidate_metadata.toPTree());
+        errors.put_child("metadata.source", pdal::utils::toPTree(source_metadata));
+        errors.put_child("metadata.candidate", pdal::utils::toPTree(candidate_metadata));
     }
 
     if (candidateCtx.dims().size() != sourceCtx.dims().size())
     {
         std::ostringstream oss;
-        
+
         oss << "Source and candidate files do not have the same "
             "number of dimensions";
         errors.put<std::string>("schema.error", oss.str());
@@ -210,7 +211,7 @@ int Diff::execute()
     }
     else
     {
-        // If we made it this far with no errors, now we'll 
+        // If we made it this far with no errors, now we'll
         // check the points.
         checkPoints(*sourceBuf, *candidateBuf, errors);
         if (errors.size())

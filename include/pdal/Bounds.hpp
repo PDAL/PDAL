@@ -47,7 +47,6 @@
 #include <cassert>
 #include <vector>
 #include <sstream>
-#include <boost/property_tree/ptree.hpp>
 
 #include <pdal/Vector.hpp>
 #include <pdal/Range.hpp>
@@ -56,13 +55,13 @@ namespace pdal
 {
 
 
-/*! 
+/*!
     \verbatim embed:rst
-    
-    Bounds is for manipulating n-dimensional ranges of data.  Typically 
+
+    Bounds is for manipulating n-dimensional ranges of data.  Typically
     used for defining the spatial extents of XYZ data, this class can also be
     used for defining bounds of other dimensions.
-    
+
     \endverbatim
 */
 
@@ -166,7 +165,7 @@ public:
         \verbatim embed:rst
         .. note::
 
-            If `index` is greater than :cpp:func:`size()`, 
+            If `index` is greater than :cpp:func:`size()`,
             a default value of ``0.0`` will be returned.
         \endverbatim
     */
@@ -179,7 +178,7 @@ public:
         return m_ranges[index].getMinimum();
     }
 
-    
+
     /// Sets the minimum value of the Range at the given index
     /// @param index the Range index to set the minimum value at
     /// @param v the value to set for the minimum
@@ -197,7 +196,7 @@ public:
         \verbatim embed:rst
         .. note::
 
-            If `index` is greater than :cpp:func:`size()`, 
+            If `index` is greater than :cpp:func:`size()`,
             a default value of ``0.0`` will be returned.
         \endverbatim
     */
@@ -221,7 +220,7 @@ public:
         }
         m_ranges[index].setMaximum(v);
     }
-    
+
     /// A Vector of minimum values for each Range of the Bounds
     Vector<T> getMinimum()
     {
@@ -234,7 +233,7 @@ public:
 
         return Vector<T>(vec);
     }
-    
+
     /// A Vector of maximum values for each Range of the Bounds
     Vector<T> getMaximum()
     {
@@ -259,7 +258,7 @@ public:
     {
         return m_ranges.size();
     }
-    
+
     /// Calculate a n-dimensional volume for the Bounds instance
     T volume() const
     {
@@ -390,7 +389,7 @@ public:
     }
 
     /// @name Transformation
-    
+
     /// Shift each dimension by a vector of deltas
     void shift(std::vector<T> deltas)
     {
@@ -446,7 +445,7 @@ public:
     }
     void grow(double const& x, double const& y, double const& z)
     {
-        
+
         m_ranges[0].grow(x);
         m_ranges[1].grow(y);
         if (size() == 3)
@@ -494,7 +493,7 @@ public:
         }
         return true;
     }
-    
+
     /** @name Default extent
     */
     /// Returns a staticly-allocated Bounds extent that represents infinity
@@ -508,39 +507,26 @@ public:
 
     /** @name Summary and serialization
     */
-    /// Outputs a string-based boost::property_tree::ptree representation
-    /// of the Bounds instance
-    boost::property_tree::ptree toPTree() const
-    {
-        boost::property_tree::ptree tree;
-        for (std::size_t i = 0; i < size(); ++i)
-        {
-            const Range<T>& r = dimensions()[i];
-            tree.add_child(boost::lexical_cast<std::string>(i), r.toPTree());
-        }
-        return tree;
-    }
-
     /// Returns the Bounds<T> instance as OGC WKT
-    /// @param precision the numerical precision to use for the output stream 
+    /// @param precision the numerical precision to use for the output stream
     /// describing the number of decimal places each point in the WKT will have
-    /// @param dimensions override the dimensionality of the WKT. Defaults to 
+    /// @param dimensions override the dimensionality of the WKT. Defaults to
     /// 0, and if not set, dimensionality of the WKT is determined by Bounds<T>::size()
     std::string toWKT(boost::uint32_t precision = 8) const
     {
         std::stringstream oss;
-		
+
         oss.precision(precision);
 		oss.setf(std::ios_base::fixed, std::ios_base::floatfield);
-        
+
         oss << "POLYGON ((";
-        
+
         oss << getMinimum(0) << " " << getMinimum(1) << ", ";
         oss << getMinimum(0) << " " << getMaximum(1) << ", ";
         oss << getMaximum(0) << " " << getMaximum(1) << ", ";
         oss << getMaximum(0) << " " << getMinimum(1) << ", ";
         oss << getMinimum(0) << " " << getMinimum(1);
-        
+
 		// Nothing happens for 3D bounds.
 		// else if (m_ranges.size() == 3 || (dimensions != 0 && dimensions == 3))
 //         {
@@ -557,18 +543,18 @@ public:
     std::string toBox(boost::uint32_t precision = 8, boost::uint32_t dimensions=2) const
     {
         std::stringstream oss;
-		
+
         oss.precision(precision);
 		oss.setf(std::ios_base::fixed, std::ios_base::floatfield);
-        
-        
+
+
 		if (dimensions  == 2)
 		{
 	        oss << "BOX(";
 	        oss << getMinimum(0) << " " << getMinimum(1) << ", ";
 	        oss << getMaximum(0) << " " << getMaximum(1) << ")";
 		}
-        
+
 		else if (dimensions == 3)
         {
 	        oss << "BOX3D(";
@@ -577,7 +563,7 @@ public:
         }
         return oss.str();
     }
-	
+
 };
 
 

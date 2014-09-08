@@ -21,7 +21,6 @@ export NUMTHREADS
 if [[ "$CXX" == "clang++" ]]
 then
     export PDAL_CMAKE_GENERATOR="Ninja"
-    export PDAL_EMBED_BOOST="ON"
 else
     export PDAL_CMAKE_GENERATOR="Unix Makefiles"
     export PDAL_EMBED_BOOST="OFF"

@@ -25,7 +25,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.box = "trusty64"
 
   config.vm.hostname = "pdal-vagrant"
-  config.vm.box_url = "https://vagrantcloud.com/ubuntu/trusty64/version/1/provider/virtualbox.box"  
+  config.vm.box_url = "https://vagrantcloud.com/ubuntu/trusty64/version/1/provider/virtualbox.box"
   config.vm.host_name = "pdal-vagrant"
 
   # Set the bash environment variable PDAL_VAGRANT_SSH_FORWARD_AGENT to any
@@ -46,7 +46,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   if ENV['PDAL_VAGRANT_SSH_FORWARD_AGENT']
     config.ssh.forward_agent = true
   end
-  
+
   # Set PDAL_VAGRANT_PORT_80_FORWARD to customize the target port
   # for the guest port 80. To disable guest port 80 forwarding, set
   # PDAL_VAGRANT_PORT_80_FORWARD to any value that cannot be parsed to
@@ -102,7 +102,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   if RUBY_PLATFORM.include? "win32"
     config.vm.synced_folder ".", "/vagrant", type: "smb"
   end
-  
+
   ppaRepos = [
     "ppa:ubuntugis/ubuntugis-unstable",
     "ppa:boost-latest/ppa"
@@ -134,7 +134,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     "libgeos++-dev",
     "vim",
     "libeigen3-dev",
-    "libflann-dev"
+    "libflann-dev",
+    "libglew-dev"
   ];
 
   if Dir.glob("#{File.dirname(__FILE__)}/.vagrant/machines/default/*/id").empty?

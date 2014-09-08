@@ -230,12 +230,6 @@ public:
     }
 #endif
 
-/// @name Summary and serialization
-
-    /// @return a boost::property_tree::ptree representation
-    /// of the Option instance
-    boost::property_tree::ptree toPTree() const;
-
 /// @name Private attributes
 private:
     std::string m_name;
@@ -298,8 +292,7 @@ public:
     {
         if (&rhs != this)
         {
-            options::map_t::const_iterator i;
-            for (i = rhs.m_options.begin(); i != rhs.m_options.end(); ++i)
+            for (auto i = rhs.m_options.begin(); i != rhs.m_options.end(); ++i)
             {
                 m_options.insert(std::pair<std::string, Option>(
                     i->first, i->second));
@@ -380,9 +373,6 @@ public:
 
     // returns true iff the option name is valid
     bool hasOption(std::string const& name) const;
-
-    // returns a ptree for the whole option block
-    boost::property_tree::ptree toPTree() const;
 
     // the empty options list
     // BUG: this should be a member variable, not a function, but doing so

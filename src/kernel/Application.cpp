@@ -80,7 +80,7 @@ Application::~Application()
         for (auto i = m_options.begin(); i != m_options.end(); ++i)
         {
             delete (*i);
-        }        
+        }
     }
 }
 
@@ -137,13 +137,13 @@ int Application::do_startup()
 
 int Application::do_execution()
 {
-    
+
     if (m_reportDebug)
     {
         std::cout << getPDALDebugInformation() << std::endl;
         return 0;
     }
-    
+
     if (m_hardCoreDebug)
     {
         int status = innerRun();
@@ -226,16 +226,16 @@ int Application::run()
 
 void Application::collectExtraOptions()
 {
-    
+
     for (auto o: m_extra_options)
     {
 
         typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
-        
-        // if we don't have --, we're not an option we 
+
+        // if we don't have --, we're not an option we
         // even care about
         if (!boost::algorithm::find_first(o, "--")) continue;
-        
+
         // Find the dimensions listed and put them on the id list.
         boost::char_separator<char> equal("=");
         boost::char_separator<char> dot(".");
@@ -248,9 +248,9 @@ void Application::collectExtraOptions()
         {
             std::ostringstream oss;
             oss << "option '" << o << "' did not split correctly. Is it in the form --drivers.las.reader.option=foo?";
-            throw app_usage_error(oss.str());   
+            throw app_usage_error(oss.str());
         }
-        
+
         std::string option_value(option_split[1]);
         std::string stage_value(option_split[0]);
         boost::algorithm::erase_all(stage_value, "--");
@@ -261,7 +261,7 @@ void Application::collectExtraOptions()
         {
             stage_values.push_back(*ti);
         }
-        
+
         std::string option_name = *stage_values.rbegin();
         std::ostringstream stage_name_ostr;
         bool bFirst(true);
@@ -277,31 +277,30 @@ void Application::collectExtraOptions()
             stage_name_ostr << s2;
         }
         std::string stage_name(stage_name_ostr.str());
-        std::cout << "stage name: '" << stage_name << "' option_name: '" << option_name << "' option value: '" << option_value <<"'"<<std::endl;
-        
+
         auto found = m_extra_stage_options.find(stage_name);
         if (found == m_extra_stage_options.end())
             m_extra_stage_options.insert(std::make_pair(stage_name, Option(option_name, option_value, "")));
         else
             found->second.add(Option(option_name, option_value, ""));
-    }    
+    }
 }
 
 int Application::innerRun()
 {
     // handle the well-known options
-    if (m_showVersion) 
+    if (m_showVersion)
     {
         outputVersion();
         return 0;
     }
-    
-    if (m_showHelp) 
+
+    if (m_showHelp)
     {
         outputHelp();
         return 0;
     }
-    
+
     if (m_showDrivers)
     {
         outputDrivers();
@@ -328,9 +327,9 @@ int Application::innerRun()
     }
 
     boost::timer timer;
-    
+
     int status = execute();
-    
+
     if (status == 0 && m_showTime)
     {
         const double t = timer.elapsed();
@@ -381,7 +380,7 @@ void Application::outputDrivers()
     std::cout << headline << std::endl;
     std::cout << "PDAL Drivers" << " (" << pdal::GetFullVersionString() << ")" <<std::endl;
     std::cout << headline << std::endl << std::endl;
-    
+
     for (auto i = drivers.begin(); i != drivers.end(); ++i)
     {
         std::cout << i->second.toRST() << std::endl;
@@ -403,7 +402,7 @@ void Application::outputHelp()
     std::string headline("------------------------------------------------------------------------------------------");
 
     std::cout <<"\nFor more information, see the full documentation for PDAL at:\n";
-    
+
     std::cout << "  http://pdal.io/\n";
     std::cout << headline << std::endl;
     std::cout << std::endl;
@@ -443,7 +442,7 @@ void Application::addBasicSwitchSet()
         ;
 
     addSwitchSet(basic_options);
-    
+
     return;
 }
 
@@ -452,8 +451,8 @@ void Application::parseSwitches()
 {
     po::options_description options;
 
-    for (auto iter = m_options.begin(); 
-              iter != m_options.end(); 
+    for (auto iter = m_options.begin();
+              iter != m_options.end();
               ++iter)
     {
         po::options_description* sub_options = *iter;
@@ -465,9 +464,9 @@ void Application::parseSwitches()
         auto parsed = po::command_line_parser(m_argc, m_argv).
             options(options).allow_unregistered().positional(m_positionalOptions).run();
         m_extra_options = po::collect_unrecognized(parsed.options, po::include_positional);
-        
+
         po::store(parsed, m_variablesMap);
-            
+
 
     }
     catch (boost::program_options::unknown_option e)

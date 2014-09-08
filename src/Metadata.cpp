@@ -71,11 +71,11 @@ void MetadataNodeImpl::toJSON(std::ostream& o, int level) const
     escaped_description = Utils::escapeJSON(escaped_description);
     std::string escaped_value(m_value);
     escaped_value = Utils::escapeJSON(escaped_value);
-    
+
     o << indent << "\"description\":\"" << escaped_description << "\"," << std::endl;
     o << indent << "\"type\":\"" << m_type << "\"," << std::endl;
     o << indent << "\"value\":\"" << escaped_value << "\"";
-    
+
     if (m_subnodes.size())
         o << ",";
     o << std::endl;
@@ -93,7 +93,7 @@ void MetadataNodeImpl::subnodesToJSON(std::ostream& o, int level) const
         if (subnodes.empty())
             continue;
         MetadataNodeImplPtr node = *subnodes.begin();
-        if (node->m_nodeType == MetadataType::Array)
+        if (node->m_kind == MetadataType::Array)
         {
             o << indent << "\"" << node->m_name << "\": [" << std::endl;
             for (auto si = subnodes.begin(); si != subnodes.end(); ++si)
@@ -125,55 +125,13 @@ void MetadataNodeImpl::subnodesToJSON(std::ostream& o, int level) const
 }
 
 
-boost::property_tree::ptree MetadataNodeImpl::toPTree() const
-{
-    using namespace boost::property_tree;
-    typedef ptree::path_type path;
-        
-    ptree tree;
-    tree.put("name", m_name);
-    tree.put("description", m_descrip);
-    tree.put("type", m_type);
-    tree.put("value", m_value);
-    
-    typedef std::map<std::string, uint32_t>::iterator NameIterator;
-
-    for (auto mi = m_subnodes.begin(); mi != m_subnodes.end(); ++mi)
-    {
-        const MetadataImplList& l = mi->second;
-        for (auto li = l.begin(); li != l.end(); ++li)
-        {
-            const MetadataNodeImplPtr node = *li;
-            std::string& name = node->m_name;
-
-            ptree const& pnode = node->toPTree();
-            if (node->m_nodeType == MetadataType::Array)
-            {
-                boost::optional<ptree&> opt =
-                    tree.get_child_optional(path(name, '/'));
-                if (opt)
-                    opt->push_back(std::make_pair("", pnode));               
-                else
-                {
-                    tree.push_back(ptree::value_type(m_name, ptree()));
-                    auto& p = tree.get_child(path(m_name, '/'));
-                    p.push_back(std::make_pair("", pnode));
-
-                }
-            }
-            else if (name.size())
-                tree.push_back(std::make_pair(name, pnode));
-        }
-    }    
-    return tree;
-}
-
 std::string MetadataNode::toJSON() const
     { return m_impl->toJSON(); }
 
-boost::property_tree::ptree MetadataNode::toPTree() const
-    { return m_impl->toPTree(); }
-}
+
+} // close namespace
+
+
 namespace std
 {
 

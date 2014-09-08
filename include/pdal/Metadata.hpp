@@ -68,7 +68,7 @@ public:
     /// Constructs a ByteArray instance with the given array of data.
     ByteArray(std::vector<boost::uint8_t> const& data) : m_bytes(data)
     {}
-    
+
     ByteArray()
     {}
 
@@ -114,10 +114,10 @@ class MetadataNodeImpl
 
 private:
     MetadataNodeImpl(const std::string& name) :
-        m_name(name), m_nodeType(MetadataType::Instance)
+        m_name(name), m_kind(MetadataType::Instance)
     {}
 
-    MetadataNodeImpl() : m_nodeType(MetadataType::Instance)
+    MetadataNodeImpl() : m_kind(MetadataType::Instance)
     {}
 
     void makeArray(MetadataImplList& l)
@@ -125,7 +125,7 @@ private:
         for (auto li = l.begin(); li != l.end(); ++li)
         {
             MetadataNodeImplPtr node = *li;
-            node->m_nodeType = MetadataType::Array;
+            node->m_kind = MetadataType::Array;
         }
     }
 
@@ -222,21 +222,21 @@ private:
         if (l.size())
         {
             MetadataNodeImplPtr node = *l.begin();
-            return node->m_nodeType;
+            return node->m_kind;
         }
         return MetadataType::Instance;
     }
-    
+
+
     std::string toJSON() const;
     void toJSON(std::ostream& o, int level) const;
     void subnodesToJSON(std::ostream& o, int level) const;
-    boost::property_tree::ptree toPTree() const;
-    
+
     std::string m_name;
     std::string m_descrip;
     std::string m_type;
     std::string m_value;
-    MetadataType::Enum m_nodeType;
+    MetadataType::Enum m_kind;
     MetadataSubnodes m_subnodes;
 };
 
@@ -450,6 +450,13 @@ public:
 
     std::string type() const
         { return m_impl->m_type; }
+    std::string kind() const
+        {
+            if (m_impl->m_kind == MetadataType::Array)
+                return "array";
+            else
+                return "instance";
+        }
     std::string name() const
         { return m_impl->m_name; }
     std::string value() const
@@ -554,7 +561,6 @@ public:
     }
 
     std::string toJSON() const;
-    boost::property_tree::ptree toPTree() const;
 
 private:
     MetadataNodeImplPtr m_impl;
@@ -581,7 +587,7 @@ class Metadata
 public:
     Metadata() : m_root("root"), m_private("private")
     {}
-   
+
     Metadata(const std::string& name) : m_name(name)
     {}
 
