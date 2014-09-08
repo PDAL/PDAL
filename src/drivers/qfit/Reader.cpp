@@ -202,7 +202,7 @@ void Reader::initialize()
     }
     str->seekg(0);
 
-    boost::int32_t int4(0);
+    int32_t int4(0);
 
     Utils::read_n(int4, *str, sizeof(int4));
 
@@ -277,7 +277,6 @@ Options Reader::getDefaultOptions()
 
 void Reader::processOptions(const Options& ops)
 {
-    m_filename = ops.getOption("filename").getValue<std::string>();
     m_flip_x = ops.getValueOrDefault("flip_coordinates", true);
     m_scale_z = ops.getValueOrDefault("scale_z", 0.001);
 }
@@ -327,27 +326,30 @@ void Reader::ready(PointContext ctx)
             "inconsistent with point size.";
         throw qfit_error(msg.str());
     }
+    m_index = 0;
+    m_istream = FileUtils::openFile(m_filename);
+    m_istream->seekg(getPointDataOffset());
 }
 
 
-point_count_t Reader::processBuffer(PointBuffer& data, std::istream& stream,
-    point_count_t count) const
+point_count_t Reader::read(PointBuffer& data, point_count_t count)
 {
-    if (!stream.good())
+    if (!m_istream->good())
     {
         throw pdal_error("QFIT Reader::processBuffer stream is no good!");
     }
-    if (stream.eof())
+    if (!m_istream->eof())
     {
         throw pdal_error("QFIT Reader::processBuffer stream is eof!");
     }
 
+    count = std::min(m_numPoints - m_index, count);
     uint8_t *buf = new uint8_t[m_size];
     PointId nextId = data.size();
     point_count_t numRead = 0;
     while (count--)
     {
-        Utils::read_n(buf, stream, m_size);
+        Utils::read_n(buf, *m_istream, m_size);
         uint8_t* p = buf;
 
         // always read the base fields
@@ -452,14 +454,9 @@ point_count_t Reader::processBuffer(PointBuffer& data, std::istream& stream,
         numRead++;
     }
     delete[] buf;
+    m_index += numRead;
 
     return numRead;
-}
-
-
-pdal::StageSequentialIterator *Reader::createSequentialIterator() const
-{
-    return new iterators::sequential::Reader(*this);
 }
 
 
@@ -487,40 +484,12 @@ Dimension::IdList Reader::getDefaultDimensions()
 }
 
 
-namespace iterators
-{
-namespace sequential
-{
-
-Reader::Reader(const pdal::drivers::qfit::Reader& reader) : m_reader(reader)
-{
-    m_istream = FileUtils::openFile(m_reader.m_filename);
-    m_istream->seekg(m_reader.getPointDataOffset());
-}
-
-
-Reader::~Reader()
+void Reader::done(PointContext ctx)
 {
     FileUtils::closeFile(m_istream);
 }
 
-
-uint64_t Reader::skipImpl(boost::uint64_t count)
-{
-    m_istream->seekg(m_reader.getPointDataSize() * count, std::ios::cur);
-    return count;
-}
-
-
-point_count_t Reader::readBufferImpl(PointBuffer& data)
-{
-    point_count_t numToRead = m_reader.getNumPoints() - getIndex();
-    return m_reader.processBuffer(data, *m_istream, numToRead);
-}
-
-} // sequential
-} // iterators
-
 } // namespace qfit
 } // namespace drivers
 } // namespace pdal
+
