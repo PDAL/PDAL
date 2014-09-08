@@ -336,11 +336,11 @@ point_count_t Reader::read(PointBuffer& data, point_count_t count)
 {
     if (!m_istream->good())
     {
-        throw pdal_error("QFIT Reader::processBuffer stream is no good!");
+        throw pdal_error("QFIT file stream is no good!");
     }
-    if (!m_istream->eof())
+    if (m_istream->eof())
     {
-        throw pdal_error("QFIT Reader::processBuffer stream is eof!");
+        throw pdal_error("QFIT file stream is eof!");
     }
 
     count = std::min(m_numPoints - m_index, count);
@@ -452,6 +452,7 @@ point_count_t Reader::read(PointBuffer& data, point_count_t count)
         int32_t gpstime = Utils::read_field<int32_t>(p);
 
         numRead++;
+        nextId++;
     }
     delete[] buf;
     m_index += numRead;

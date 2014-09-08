@@ -61,46 +61,19 @@ public:
     static Dimension::IdList getDefaultDimensions()
         { return fileDimensions(); }
 
-    virtual StageSequentialIterator* createSequentialIterator() const;
 private:
-    std::string m_filename;
     std::unique_ptr<ILeStream> m_stream;
+    // Number of points in the file.
     point_count_t m_numPts;
+    point_count_t m_index;
 
-    virtual void processOptions(const Options& options);
     virtual void addDimensions(PointContext ctx);
     virtual void ready(PointContext ctx);
-};
+    virtual point_count_t read(PointBuffer& buf, point_count_t count);
+    virtual bool eof();
 
-namespace iterators
-{
-namespace sequential
-{
-
-class PDAL_DLL SbetSeqIterator : public StageSequentialIterator
-{
-public:
-    SbetSeqIterator(const Dimension::IdList& dims, point_count_t numPts,
-            ILeStream& stream) :
-        m_dims(dims), m_numPts(numPts), m_stream(stream)
-    {}
-
-private:
-    Dimension::IdList m_dims;
-    point_count_t m_numPts;
-    ILeStream& m_stream;
-
-    virtual point_count_t readBufferImpl(PointBuffer& buf)
-        { return readImpl(buf, std::numeric_limits<point_count_t>::max()); }
-
-    boost::uint64_t skipImpl(boost::uint64_t);
-    point_count_t readImpl(PointBuffer& buf, point_count_t numPts);
-    bool atEndImpl() const;
     void seek(PointId idx);
 };
-
-} // namespace sequential
-} // namespace iterators
 
 } // namespace sbet
 } // namespace drivers
