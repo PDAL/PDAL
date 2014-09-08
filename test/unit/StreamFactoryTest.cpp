@@ -116,7 +116,7 @@ static void check_contents(std::istream& s)
 BOOST_AUTO_TEST_CASE(test2)
 {
     {
-        const std::string nam = Support::datapath("text.txt");
+        const std::string nam = Support::datapath("text/text.txt");
         FilenameStreamFactory f(nam);
 
         std::istream& s1 = f.allocate();
@@ -133,7 +133,7 @@ BOOST_AUTO_TEST_CASE(test2)
     }
 
     {
-        const std::string nam = Support::datapath("text.txt");
+        const std::string nam = Support::datapath("text/text.txt");
         std::istream* s = FileUtils::openFile(nam);
         PassthruStreamFactory f(*s);
 
@@ -149,7 +149,7 @@ BOOST_AUTO_TEST_CASE(test2)
     }
 
     {
-        FilenameSubsetStreamFactory f(Support::datapath("text.txt"), 20, 6);
+        FilenameSubsetStreamFactory f(Support::datapath("text/text.txt"), 20, 6);
 
         std::istream& s1 = f.allocate();
         std::istream& s2 = f.allocate();

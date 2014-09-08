@@ -64,7 +64,7 @@ void printChildren(std::ostream& out, MetadataNode m, int depth = 0)
 BOOST_AUTO_TEST_CASE(HexbinFilterTest_test_1)
 {
     Options options;
-    options.add("filename", Support::datapath("hextest.las"));
+    options.add("filename", Support::datapath("las/hextest.las"));
     options.add("sample_size", 5000, "Number of samples to use "
         "when estimating hexagon edge size. Specify 0.0 for edge_size if "
         "you want to compute one.");

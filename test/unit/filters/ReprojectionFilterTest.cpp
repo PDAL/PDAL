@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE(ReprojectionFilterTest_test_1)
     {
         const SpatialReference out_ref(epsg4326_wkt);
 
-        drivers::las::Reader reader(Support::datapath("utm15.las"));
+        drivers::las::Reader reader(Support::datapath("las/utm15.las"));
 
         Options options;
         Option debug("debug", true, "");
@@ -120,13 +120,13 @@ BOOST_AUTO_TEST_CASE(InPlaceReprojectionFilterTest_test_2)
         const SpatialReference out_ref(epsg4326_wkt);
 
         Options options;
-        
+
         Option debug("debug", true, "");
         Option verbose("verbose", 9, "");
         Option out_srs("out_srs","EPSG:2993", "Output SRS to reproject to");
 
         Option filename("filename",
-            Support::datapath("autzen-dd.las"), "filename");
+            Support::datapath("las/autzen-dd.las"), "filename");
         options.add(out_srs);
         options.add(filename);
 
@@ -137,7 +137,7 @@ BOOST_AUTO_TEST_CASE(InPlaceReprojectionFilterTest_test_2)
 
         PointBuffer buffer(ctx);
         StageSequentialIterator* iter = reader.createSequentialIterator();
-        
+
         point_count_t numRead = iter->read(buffer, 1);
         BOOST_CHECK(numRead == 1);
 

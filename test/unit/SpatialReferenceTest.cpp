@@ -134,7 +134,7 @@ BOOST_AUTO_TEST_CASE(test_read_srs)
 
     PointContext ctx;
 
-    las::Reader reader(Support::datapath("utm17.las"));
+    las::Reader reader(Support::datapath("las/utm17.las"));
     reader.prepare(ctx);
 
     const pdal::SpatialReference& ref = reader.getSpatialReference();
