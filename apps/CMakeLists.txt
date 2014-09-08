@@ -5,10 +5,6 @@
 
 cmake_minimum_required(VERSION 2.8)
 
-if(FREEGLUT_FOUND)
-  subdirs(pcview)
-endif()
-
 set(PDAL_SOURCE_DIR ../src)
 
 #------------------------------------------------------------------------------
