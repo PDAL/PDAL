@@ -9,7 +9,7 @@
         </Option>
         <Option name="FSCLASS">
             U
-        </Option>        
+        </Option>
         <Option name="OPHONE">
             5159664628
         </Option>
@@ -28,7 +28,7 @@
             </Option>
             <Reader type="drivers.las.reader">
                 <Option name="filename">
-                    ../1.2-with-color.las
+                    ../las/1.2-with-color.las
                 </Option>
             </Reader>
         </Filter>

@@ -4,13 +4,10 @@
         <Option name="filename">
             pdal-stats.las
         </Option>
-        <Option name="compression">
-            false
-        </Option>
         <Filter type="filters.stats">
             <Reader type="drivers.las.reader">
                 <Option name="filename">
-                    ../1.2-with-color.las
+                    ../las/1.2-with-color.las
                 </Option>
             </Reader>
         </Filter>

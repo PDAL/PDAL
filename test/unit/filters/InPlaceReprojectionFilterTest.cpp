@@ -58,7 +58,7 @@ static void getPoint(const pdal::PointBuffer& data,
     DimensionPtr dim_x = schema.getDimension("X");
     DimensionPtr dim_y = schema.getDimension("Y");
     DimensionPtr dim_z = schema.getDimension("Z");
-    
+
     x = data.getFieldAs<double>(dim_x, 0);
     y = data.getFieldAs<double>(dim_y, 0);
     z = data.getFieldAs<double>(dim_z, 0);
@@ -151,7 +151,7 @@ BOOST_AUTO_TEST_CASE(InPlaceReprojectionFilterTest_test_2)
         const pdal::SpatialReference out_ref(epsg4326_wkt);
 
         Options options;
-        
+
         Option debug("debug", true, "");
         Option verbose("verbose", 9, "");
         Option out_srs("out_srs","EPSG:2993", "Output SRS to reproject to");
@@ -173,7 +173,7 @@ BOOST_AUTO_TEST_CASE(InPlaceReprojectionFilterTest_test_2)
         Option offset_y("offset_y", 43.0f, "Scale for output Y data in "
             "the case when 'Y' dimension data are to be scaled.  Defaults "
             "to '1.0'.  If not set, the Dimensions's scale will be used");
-        Option filename("filename", Support::datapath("autzen-dd.las"),
+        Option filename("filename", Support::datapath("autzen/autzen-dd.las"),
             "filename");
         options.add(out_srs);
         options.add(x_dim);

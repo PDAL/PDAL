@@ -23,7 +23,7 @@
                     ../autzen-colorized-1.2-3.las
                 </Option> -->
                 <Option name="filename">
-                    ../1.2-with-color.las
+                    ../las/1.2-with-color.las
                 </Option>
             </Reader>
         </Filter>

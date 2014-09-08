@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_SUITE(LasReaderTest)
 
 BOOST_AUTO_TEST_CASE(test_base_options)
 {
-    const std::string file(Support::datapath("1.2-with-color.las"));
+    const std::string file(Support::datapath("las/1.2-with-color.las"));
 
     const pdal::Option opt_filename("filename", file);
     const pdal::Option opt_verbose_string("verbose", "99");
@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE(test_sequential)
 {
     PointContext ctx;
 
-    pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
+    pdal::drivers::las::Reader reader(Support::datapath("las/1.2-with-color.las"));
     BOOST_CHECK(reader.getDescription() == "Las Reader");
     reader.prepare(ctx);
     pdal::StageSequentialIterator* iter = reader.createSequentialIterator();
@@ -120,7 +120,7 @@ BOOST_AUTO_TEST_CASE(test_sequential)
 BOOST_AUTO_TEST_CASE(test_two_iters)
 {
     PointContext ctx;
-    pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
+    pdal::drivers::las::Reader reader(Support::datapath("las/1.2-with-color.las"));
     BOOST_CHECK(reader.getDescription() == "Las Reader");
     reader.prepare(ctx);
 
@@ -145,7 +145,7 @@ BOOST_AUTO_TEST_CASE(test_simultaneous_iters)
 {
     PointContext ctx;
 
-    pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
+    pdal::drivers::las::Reader reader(Support::datapath("las/1.2-with-color.las"));
     BOOST_CHECK_EQUAL(reader.getDescription(), "Las Reader");
     reader.prepare(ctx);
 
@@ -320,9 +320,9 @@ BOOST_AUTO_TEST_CASE(test_no_xyz)
 {
     PointContext ctx;
 
-    // Wipe off the XYZ dimensions and see if we can 
+    // Wipe off the XYZ dimensions and see if we can
     // still read LAS data #123
-    pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
+    pdal::drivers::las::Reader reader(Support::datapath("las/1.2-with-color.las"));
     BOOST_CHECK(reader.getDescription() == "Las Reader");
     reader.prepare(ctx);
 
@@ -338,10 +338,10 @@ BOOST_AUTO_TEST_CASE(test_no_xyz)
 
 BOOST_AUTO_TEST_CASE(testFilenameConstructorSetOption)
 {
-    pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
+    pdal::drivers::las::Reader reader(Support::datapath("las/1.2-with-color.las"));
     BOOST_CHECK_EQUAL(
         reader.getOptions().getValueOrDefault<std::string>("filename", ""),
-        Support::datapath("1.2-with-color.las"));
+        Support::datapath("las/1.2-with-color.las"));
 }
 
 
@@ -349,7 +349,7 @@ BOOST_AUTO_TEST_CASE(testInvalidFileSignature)
 {
     PointContext ctx;
     pdal::drivers::las::Reader reader(
-        Support::datapath("1.2-with-color.las.wkt"));
+        Support::datapath("las/1.2-with-color.las.wkt"));
     try
     {
         reader.prepare(ctx);
@@ -357,7 +357,7 @@ BOOST_AUTO_TEST_CASE(testInvalidFileSignature)
     catch (const std::invalid_argument& e)
     {
         std::string msg(e.what());
-        BOOST_CHECK(msg.find("1.2-with-color.las.wkt") != std::string::npos);
+        BOOST_CHECK(msg.find("las/1.2-with-color.las.wkt") != std::string::npos);
         return;
     }
     BOOST_FAIL("reader.initialize() did not throw std::invalid_argument");

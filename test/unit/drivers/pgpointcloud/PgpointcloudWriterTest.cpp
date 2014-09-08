@@ -55,7 +55,7 @@ Options getWriterOptions()
     options.add(Option("capacity", "10000"));
     // options.add(Option("debug", true));
     // options.add(Option("verbose", 7));
-    
+
     return options;
 }
 
@@ -136,15 +136,15 @@ BOOST_FIXTURE_TEST_SUITE(PgpointcloudWriterTest, PgpointcloudWriterTestFixture)
 
 BOOST_AUTO_TEST_CASE(testWrite)
 {
-    pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
+    pdal::drivers::las::Reader reader(Support::datapath("las/1.2-with-color.las"));
     pdal::drivers::pgpointcloud::Writer writer(getWriterOptions());
     writer.setInput(&reader);
-    
+
     PointContext ctx;
     writer.prepare(ctx);
 
     PointBufferSet written = writer.execute(ctx);
-    
+
     point_count_t count(0);
     for(auto i = written.begin(); i != written.end(); ++i)
     {
@@ -160,13 +160,13 @@ BOOST_AUTO_TEST_CASE(testNoPointcloudExtension)
 {
     executeOnTestDb("DROP EXTENSION pointcloud");
 
-    pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
+    pdal::drivers::las::Reader reader(Support::datapath("las/1.2-with-color.las"));
     pdal::drivers::pgpointcloud::Writer writer(getWriterOptions());
     writer.setInput(&reader);
 
     PointContext ctx;
     writer.prepare(ctx);
-    
+
 
     BOOST_CHECK_THROW(writer.execute(ctx), pdal::pdal_error);
 }
