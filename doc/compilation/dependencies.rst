@@ -172,6 +172,17 @@ provides periodic compression of `ASPRS LAS`_ data. It is used by the
 :ref:`drivers.las.writer` and :ref:`drivers.las.reader` to provide
 compressed LAS support.
 
+
+PCL
+------------------------------------------------------------------------------
+
+The `Point Cloud Library (PCL)`_ is used by the :ref:`drivers.pcd.writer`,
+:ref:`drivers.pcd.reader`, and :ref:`filters.pclblock` to provide support for
+various PCL-related operations.
+
+At the moment, PCL must be built from the `pipeline branch`_, which is not
+maintained by PCL. We do our best to keep this up-to-date with PCL master.
+
 .. _`ASPRS LAS`: http://www.asprs.org/Committee-General/LASer-LAS-File-Format-Exchange-Activities.html
 .. _`LASzip`: http://laszip.org
 .. _`NITF`: http://en.wikipedia.org/wiki/National_Imagery_Transmission_Format
@@ -194,3 +205,6 @@ compressed LAS support.
 .. _`libpq`: http://www.postgresql.org/docs/9.3/static/libpq.html
 
 .. _`Points2Grid`: https://github.com/CRREL/points2grid
+.. _`Point Cloud Library (PCL)`: http://pointclouds.org
+.. _`pipeline branch`: https://github.com/chambbj/pcl/tree/pipeline
+
