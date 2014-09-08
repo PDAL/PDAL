@@ -451,13 +451,11 @@ set(PDAL_DRIVERS_PGPOINTCLOUD_HPP
   "${PDAL_PGPOINTCLOUD_HEADERS}/common.hpp"
   "${PDAL_PGPOINTCLOUD_HEADERS}/Writer.hpp"
   "${PDAL_PGPOINTCLOUD_HEADERS}/PgReader.hpp"
-  "${PDAL_PGPOINTCLOUD_HEADERS}/PgIterator.hpp"
 )
 
 set (PDAL_DRIVERS_PGPOINTCLOUD_CPP
   "${PDAL_PGPOINTCLOUD_SRC}/Writer.cpp"
   "${PDAL_PGPOINTCLOUD_SRC}/PgReader.cpp"
-  "${PDAL_PGPOINTCLOUD_SRC}/PgIterator.cpp"
 )
 
 # no provision is made for building as a plugin

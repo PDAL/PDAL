@@ -36,14 +36,11 @@
 
 #include <pdal/Reader.hpp>
 #include <pdal/PointBuffer.hpp>
+#include <pdal/XMLSchema.hpp>
 
 #include <pdal/drivers/pgpointcloud/common.hpp>
-#include <boost/scoped_ptr.hpp>
-#include <boost/scoped_array.hpp>
 
 #include <vector>
-
-#include <pdal/drivers/pgpointcloud/PgIterator.hpp>
 
 namespace pdal
 {
@@ -54,8 +51,42 @@ namespace pgpointcloud
 
 class PDAL_DLL PgReader : public pdal::Reader
 {
+    class Patch
+    {
+    public:
+        Patch() : count(0), remaining(0)
+        {}
+        
+        point_count_t count;
+        point_count_t remaining;
+        std::string hex;
+        
+        std::vector<uint8_t> binary;
+        static const uint32_t trim = 26;
+
+#define _base(x) ((x >= '0' && x <= '9') ? '0' : \
+             (x >= 'a' && x <= 'f') ? 'a' - 10 : \
+             (x >= 'A' && x <= 'F') ? 'A' - 10 : \
+                '\255')
+#define HEXOF(x) (x - _base(x))
+
+        inline void update_binary()
+        {
+            // http://stackoverflow.com/questions/8197838/convert-a-long-hex-string-in-to-int-array-with-sscanf
+            binary.resize((hex.size() - trim)/2);
+            
+            char const* source = hex.c_str() + trim;
+            char const* p = 0;
+
+            for (p = source; p && *p; p += 2)
+                binary[(p - source) >> 1] =
+                    ((HEXOF(*p)) << 4) + HEXOF(*(p + 1));
+        }
+    };
+
 public:
-    SET_STAGE_NAME("drivers.pgpointcloud.reader", "PostgreSQL Pointcloud Database Reader")
+    SET_STAGE_NAME("drivers.pgpointcloud.reader",
+        "PostgreSQL Pointcloud Database Reader")
     SET_STAGE_LINK("http://pdal.io/stages/drivers.pgpointcloud.reader.html")
 #ifdef PDAL_HAVE_POSTGRESQL
     SET_STAGE_ENABLED(true)
@@ -67,22 +98,30 @@ public:
     ~PgReader();
 
     static Options getDefaultOptions();
-    virtual boost::uint64_t getNumPoints() const;
-    boost::uint64_t getMaxPoints() const;
+    virtual point_count_t getNumPoints() const;
+    point_count_t getMaxPoints() const;
     std::string getDataQuery() const;
     std::string connString() const
         { return m_connection; }
     void getSession() const;
     
-    StageSequentialIterator* createSequentialIterator() const;
-
 private:
     virtual void addDimensions(PointContext ctx);
     virtual void processOptions(const Options& options);
     virtual void ready(PointContext ctx);
+    virtual point_count_t read(PointBuffer& buf, point_count_t count);
+    virtual void done(PointContext ctx);
+    virtual bool eof()
+        { return m_atEnd; }
     
-    pdal::SpatialReference fetchSpatialReference() const;
-    boost::uint32_t fetchPcid() const;
+    SpatialReference fetchSpatialReference() const;
+    uint32_t fetchPcid() const;
+    point_count_t readPgPatch(PointBuffer& buffer, point_count_t numPts);
+
+    // Internal functions for managing scroll cursor
+    void CursorSetup();
+    void CursorTeardown();
+    bool NextBuffer();
 
     PGconn* m_session;
     std::string m_connection;
@@ -90,11 +129,18 @@ private:
     std::string m_schema_name;
     std::string m_column_name;
     std::string m_where;
-    mutable boost::uint32_t m_pcid;
-    mutable boost::uint64_t m_cached_point_count;
-    mutable boost::uint64_t m_cached_max_points;
+    mutable uint32_t m_pcid;
+    mutable point_count_t m_cached_point_count;
+    mutable point_count_t m_cached_max_points;
     schema::XMLSchema m_schema;
-    boost::optional<SpatialReference> m_spatialRef;
+
+    bool m_atEnd;
+    size_t m_point_size;
+    uint32_t m_cur_row;
+    uint32_t m_cur_nrows;
+    PGresult* m_cur_result;
+    Patch m_patch;
+
     PgReader& operator=(const PgReader&); // not implemented
     PgReader(const PgReader&); // not implemented
 };
