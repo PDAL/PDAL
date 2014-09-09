@@ -42,7 +42,6 @@
 #include <pdal/filters/Stats.hpp>
 #include <pdal/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
-#include <pdal/StageIterator.hpp>
 #include "Support.hpp"
 #include "../StageTester.hpp"
 

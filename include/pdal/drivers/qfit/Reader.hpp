@@ -39,7 +39,6 @@
 #include <boost/detail/endian.hpp>
 
 #include <pdal/Reader.hpp>
-#include <pdal/StageIterator.hpp>
 #include <pdal/Options.hpp>
 
 #ifdef BOOST_LITTLE_ENDIAN

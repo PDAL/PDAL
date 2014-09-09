@@ -36,7 +36,6 @@
 
 #include <pdal/Reader.hpp>
 
-#include <pdal/StageIterator.hpp>
 #include <pdal/StreamFactory.hpp>
 #include <pdal/drivers/las/Support.hpp>
 #include <pdal/drivers/las/Header.hpp>

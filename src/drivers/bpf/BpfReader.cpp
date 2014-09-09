@@ -39,7 +39,6 @@
 #endif
 
 #include <pdal/drivers/bpf/BpfReader.hpp>
-#include <pdal/drivers/bpf/BpfSeqIterator.hpp>
 #include <pdal/Options.hpp>
 
 namespace pdal

@@ -35,7 +35,6 @@
 #pragma once
 
 #include <pdal/Reader.hpp>
-#include <pdal/StageIterator.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/Hdf5Handler.hpp>
 

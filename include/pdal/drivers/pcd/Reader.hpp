@@ -36,7 +36,6 @@
 
 #include <pdal/PointBuffer.hpp>
 #include <pdal/Reader.hpp>
-#include <pdal/StageIterator.hpp>
 #include <pdal/drivers/pcd/Common.hpp>
 
 namespace pdal

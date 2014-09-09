@@ -35,7 +35,6 @@
 #include <boost/scoped_ptr.hpp>
 
 #include <pdal/Writer.hpp>
-#include <pdal/StageIterator.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/UserCallback.hpp>

@@ -38,7 +38,6 @@
 #include <pdal/Utils.hpp>
 #include <pdal/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
-#include <pdal/StageIterator.hpp>
 #include <pdal/drivers/bpf/BpfReader.hpp>
 
 #include "Support.hpp"

@@ -37,7 +37,6 @@
 #include <pdal/SpatialReference.hpp>
 #include <pdal/drivers/las/Reader.hpp>
 #include <pdal/filters/InPlaceReprojection.hpp>
-#include <pdal/StageIterator.hpp>
 #include <pdal/Schema.hpp>
 #include <pdal/PointBuffer.hpp>
 

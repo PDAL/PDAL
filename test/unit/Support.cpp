@@ -43,7 +43,6 @@
 
 #include <pdal/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
-#include <pdal/StageIterator.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/Stage.hpp>

@@ -34,7 +34,6 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <pdal/StageIterator.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/drivers/qfit/Reader.hpp>

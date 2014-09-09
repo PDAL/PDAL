@@ -35,7 +35,6 @@
 #pragma once
 
 #include <pdal/Reader.hpp>
-#include <pdal/StageIterator.hpp>
 
 namespace pdal
 {

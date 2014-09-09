@@ -36,17 +36,9 @@
 
 #include <pdal/Stage.hpp>
 #include <pdal/Options.hpp>
-#include <pdal/StageIterator.hpp>
 
 namespace pdal
 {
-
-//
-// supported options:
-//   <uint32>id
-//   <bool>debug
-//   <uint32>verbose
-//
 
 class PDAL_DLL Reader : public Stage
 {
@@ -64,11 +56,7 @@ private:
     {
         PointBufferSet pbSet;
 
-        StageSequentialIterator *it = createSequentialIterator();
-        if (it)
-            it->read(*buffer);
-        else
-            read(*buffer, m_count);
+        read(*buffer, m_count);
         pbSet.insert(buffer);
         return pbSet;
     }
