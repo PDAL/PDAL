@@ -238,7 +238,13 @@ void Info::dumpPoints(PointBufferPtr buf) const
     }
 
     boost::property_tree::ptree buffer_tree = pdal::utils::toPTree(*outbuf);
-    m_tree->add_child("point", buffer_tree.get_child("0"));
+    for (size_t i = 0; i < outbuf->size(); ++i)
+    {
+        std::string name = (std::string)"point " +
+            boost::lexical_cast<std::string>(points[i]);
+        std::string key = boost::lexical_cast<std::string>(i);
+        m_tree->add_child(name, buffer_tree.get_child(key));
+    }
 }
 
 
