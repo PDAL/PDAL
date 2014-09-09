@@ -86,6 +86,9 @@ Writer::Writer(const Options& options, std::ostream *ostream) :
 
 void Writer::Construct()
 {
+    m_xXform.m_scale = .01;
+    m_yXform.m_scale = .01;
+    m_zXform.m_scale = .01;
     m_numPointsWritten = 0;
     m_headerInitialized = false;
     m_streamOffset = 0;
