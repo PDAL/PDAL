@@ -51,12 +51,18 @@ namespace pdal
 
 void Writer::writerProcessOptions(const Options& options)
 {
-    m_xXform.m_scale = options.getValueOrDefault("scale_x", 1.0);
-    m_xXform.m_offset = options.getValueOrDefault("offset_x", 0.0);
-    m_yXform.m_scale = options.getValueOrDefault("scale_y", 1.0);
-    m_yXform.m_offset = options.getValueOrDefault("offset_y", 0.0);
-    m_zXform.m_scale = options.getValueOrDefault("scale_z", 1.0);
-    m_zXform.m_offset = options.getValueOrDefault("offset_z", 0.0);
+    if (options.hasOption("scale_x"))
+        m_xXform.m_scale = options.getValueOrThrow<double>("scale_x");
+    if (options.hasOption("offset_x"))
+        m_xXform.m_offset = options.getValueOrThrow<double>("offset_x");
+    if (options.hasOption("scale_y"))
+        m_yXform.m_scale = options.getValueOrThrow<double>("scale_y");
+    if (options.hasOption("offset_y"))
+        m_yXform.m_offset = options.getValueOrThrow<double>("offset_y");
+    if (options.hasOption("scale_z"))
+        m_zXform.m_scale = options.getValueOrThrow<double>("scale_z");
+    if (options.hasOption("offset_z"))
+        m_zXform.m_offset = options.getValueOrThrow<double>("offset_z");
 }
 
 
