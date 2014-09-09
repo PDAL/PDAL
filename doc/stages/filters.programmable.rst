@@ -21,6 +21,8 @@ This example scales the Z value by a factor of ten (of course, you could also us
 
 Note that the function always returns `True`. If the function returned `False`, an error would be thrown and the translation shut down.
 
+If you want to write a dimension that might not be available, use can use one or more `add_dimension` options.
+
 To filter points based on a `Python`_ function, use the :ref:`filters.predicate` filter.
 
 Example
@@ -75,6 +77,8 @@ function
 source
   The literal `Python`_ code to execute, when the script option is not being used.
 
+add_dimension
+  The name of a dimension to add to the pipeline that does not already exist.
 
 .. _Python: http://python.org/
 .. _NumPy: http://www.numpy.org/
