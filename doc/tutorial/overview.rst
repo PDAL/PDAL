@@ -25,6 +25,8 @@ format-specific writer.  PDAL can merge data from various input sources into a
 single output source, preserving attribute data where supported by the input and
 output formats.
 
+..image ::pipeline.png
+
 The above diagram shows a possible arrangement of PDAL readers, filters and
 writers, all of which are known as stages.  Any merge operation or filter may be
 placed after any reader.  Output filters are distinct from other filters only in
@@ -210,6 +212,118 @@ to be processed by the stage.
     files.
 
 
+Implementing a Reader
+................................................................................
+
+A reader is a stage that takes input from a point clould format supported by
+PDAL and loads points into a point context through a point buffer.
+
+A reader needs to register or assign those dimensions that it will reference
+when adding point data to the point context.  Dimensions that are predefined
+in PDAL can be registered by using the point context's registerDim()
+method.  Dimensions that are not predefined can be added using assignDim().
+If dimensions are determined as named entitied from a point cloud source,
+it may not be known whether the dimensions are predefined or not.  In this
+case the function registerOrAssignDim() can be used.  When a dimension is
+assigned, rather than registered, the reader needs to inform PDAL of the
+type of the variable using the enumeration Dimension::Type::Enum.
+
+In this example, the reader informs the point context that it will reference
+the dimensions X, Y and Z.
+
+::
+    void Reader::addDimensions(PointContext ctx)
+    {
+       ctx.registerDim(Dimension::Id::X);   
+       ctx.registerDim(Dimension::Id::Y);
+       ctx.registerDim(Dimension::Id::Z);
+    }
+
+Here a reader determines dimensions from an input source and registers or
+assigns them.  All of the input dimension values are in this case double
+precision floating point.
+
+::
+
+    void Reader::addDimensions(PointContext ctx)
+    {
+        FileHeader header;
+
+        for (auto di = header.names.begin(), di != header.names.end(); ++di)
+        {
+            std::string dimName = *di;
+            Dimension::Id::Enum id = ctx.registerOrAssignDim(dimName,
+                Dimension::Type::Double);
+        }
+    }
+
+Readers should use the ready() function to reset the input data to a state
+where the first point can be read from the source.  The done() function
+should be used to free resources or reset the state initialized in ready().
+
+Readers should implement a function, read(), that will place the data from
+the input source into the provided point buffer:
+
+point_count_t read(PointBuffer& buf, point_count_t count)
+
+    The reader should read at most 'count' points from the input source and
+    place them in buffer 'buf'.  The reader must keep track of its current
+    position in the input source and points should be read until no points
+    remain or 'count' points have been added to the buffer.  The current
+    location in the input source is typically tracked with a integer variable
+    called the index.
+
+    As each point is read from the input source, it must be placed at the end
+    of the point buffer.  The ID of the end of the point buffer can be
+    determined by calling size() function of the point buffer.  read() should
+    return the number of points read by during the function call.
+
+    ::
+
+        point_count_t MyFormat::read(PointBuffer& buf, point_count_t count)
+        {
+            // Determine the number of points remaining in the input.
+            point_count_t remainingInput = m_totalNumPts - m_index;
+
+            // Determine the number of points to read.
+            count = std::min(count, remainingInput);
+
+            // Determine the ID of the next point in the point buffer
+            PointId nextId = buf.size();
+
+            // Determine the current input position.
+            auto pos = m_pointSize * m_index;
+
+            point_count_t remaining = count;
+            while (remaining--)
+            {
+                double x, y, z;
+
+                // Read X, Y and from input source.
+                x = m_file.read<double>(pos);
+                pos += sizeof(double);
+                y = m_file.read<double>(pos);
+                pos += sizeof(double);
+                z = m_file.read<double>(pos);
+                pos += sizeof(double);
+
+                // Set X, Y and Z into the pointBuffer.
+                buf.setField(Dimension::Id::X, nextId, x);
+                buf.setField(Dimension::Id::Y, nextId, y);
+                buf.setField(Dimension::Id::Z, nextId, z);
+
+                nextId++;
+            }
+            m_index += count;
+            return count;
+        }
+
+    Note that we don't read more points than requested, we don't read past
+    the end of the input stream and we keep track of our location in the
+    input so that subsequent calls to read() will result in all points being
+    read.
+
+
 Implementing a Filter
 ................................................................................
 
@@ -225,7 +339,8 @@ void filter(PointBuffer& buf)
     points currently in the point buffer and apply some transformation or gather
     some data to be output as pipeline metadata.
 
-    Here is an example, the actual filter function from the reprojection filter:
+    Here as an example is the actual filter function from the reprojection
+    filter:
 
     ::
 
