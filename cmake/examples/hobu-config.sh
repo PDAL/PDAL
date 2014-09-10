@@ -13,15 +13,15 @@ SO_EXT=dylib
 
 ORACLE_HOME=$HOME/oracle
 export ORACLE_HOME
-# CONFIG="Unix Makefiles"
-CONFIG="Ninja"
+CONFIG="Unix Makefiles"
+#CONFIG="Ninja"
 
 if ! [ -z "$1" ]; then
     CONFIG="$1"
 fi
 
 CC=$CC CXX=$CXX cmake   -G "$CONFIG"  \
-        -DCMAKE_BUILD_TYPE=Debug \
+        -DCMAKE_BUILD_TYPE=RelWithDebInfo \
         -DCMAKE_INSTALL_PREFIX=/Users/hobu \
         -DWITH_ORACLE=ON \
         -DWITH_GEOTIFF=ON \

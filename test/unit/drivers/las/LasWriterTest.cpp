@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_las)
     std::string temp_filename("temp-LasWriterTest_test_simple_las.las");
     FileUtils::deleteFile(temp_filename);
 
-    pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
+    pdal::drivers::las::Reader reader(Support::datapath("las/1.2-with-color.las"));
     std::ostream* ofs = FileUtils::createFile(Support::temppath(temp_filename));
 
     {
@@ -211,12 +211,12 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_metadata)
     pdal::Option record_id("record_id", 1234);
     pdal::Option user_id("user_id", "hobu");
     pdal::Option global_encoding("global_encoding", "AQA=");
-    
+
     pdal::Options vlr_opts;
     vlr_opts.add(record_id);
     vlr_opts.add(user_id);
     polygon.setOptions(vlr_opts);
-    
+
 
     pdal::Option debug("debug", true);
     pdal::Option verbosity("verbose", 7);
@@ -234,7 +234,7 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_metadata)
     options.add(filename);
     // options.add(debug);
     // options.add(verbosity);
-    
+
     pdal::drivers::las::Reader reader(Support::datapath("interesting.las"));
 
     {
@@ -248,14 +248,14 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_metadata)
     PointContext ctx2;
     pdal::drivers::las::Reader reader2(options);
     reader2.prepare(ctx2);
-    
+
     pdal::drivers::las::LasHeader const& h = reader2.getLasHeader();
-    
+
     BOOST_CHECK_EQUAL(h.GetSoftwareId(), "HOBU-GENERATING");
     BOOST_CHECK_EQUAL(h.GetSystemId(), "HOBU-SYSTEMID");
     BOOST_CHECK_EQUAL(h.GetCreationDOY(), 145u);
     BOOST_CHECK_EQUAL(h.GetCreationYear(), 2012u);
-    
+
     pdal::drivers::las::VLRList const& vlrs = h.getVLRs();
 #ifdef PDAL_SRS_ENABLED
     BOOST_CHECK_EQUAL(vlrs.count(), 5u);
@@ -263,11 +263,11 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_metadata)
     BOOST_CHECK_EQUAL(vlrs.count(), 2u);
 #endif
     pdal::drivers::las::VariableLengthRecord const& r = vlrs.get(0);
-    
+
     BOOST_CHECK_EQUAL(r.getRecordId(), 1234u);
     BOOST_CHECK_EQUAL(r.getUserId(), "hobu");
-    BOOST_CHECK_EQUAL(r.getLength(), 70);    
-    
+    BOOST_CHECK_EQUAL(r.getLength(), 70);
+
     FileUtils::deleteFile(temp_filename);
 }
 **/
@@ -290,21 +290,21 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_ignored_dimensions)
     pdal::Options mignored;
     pdal::Option keep;
     pdal::Options mkeep;
-    
+
     mkeep.add(pdal::Option("dimension", "X"));
     mkeep.add(pdal::Option("dimension", "Y"));
-    
+
     mignored.add(pdal::Option("dimension", "Red"));
     mignored.add(pdal::Option("dimension", "Green"));
     mignored.add(pdal::Option("dimension", "Blue"));
-    
+
     keep.setOptions(mkeep);
     ignored.setOptions(mignored);
 
     options.add(ignored);
     options.add(filename);
     options.add(debug);
-    
+
     pdal::drivers::las::Reader reader(Support::datapath("interesting.las"));
 
     {
@@ -324,7 +324,7 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_ignored_dimensions)
         pdal::StageSequentialIterator* iter =
             reader2.createSequentialIterator();
         iter->read(altered, 1);
-    
+
         uint16_t r = altered.getFieldAs<uint16_t>(Dimension::Id::Red, 0);
         BOOST_CHECK_EQUAL(r, 0u);
         int32_t x = altered.getFieldAs<int32_t>(Dimension::Id::X, 0);
@@ -332,7 +332,7 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_ignored_dimensions)
 
         delete iter;
     }
-    
+
     {
         PointContext ctx3;
 
@@ -340,9 +340,9 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_ignored_dimensions)
         reader3.prepare(ctx3);
         PointBuffer original(ctx3);
         StageSequentialIterator* iter2 = reader.createSequentialIterator();
-    
+
         iter2->read(original, 1);
-        
+
         uint16_t r2 = original.getFieldAs<uint16_t>(Dimension::Id::Red, 0);
         BOOST_CHECK_EQUAL(r2, 68u);
         int32_t x2 = original.getFieldAs<int32_t>(Dimension::Id::X, 0);
@@ -428,10 +428,10 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_drop_extra_returns)
         reader2.prepare(ctx2);
         PointBuffer data(ctx2);
 
-        pdal::StageSequentialIterator* iter = 
+        pdal::StageSequentialIterator* iter =
             reader2.createSequentialIterator();
         iter->read(data, 6);
-    
+
         uint8_t r1 = data.getFieldAs<uint8_t>(Dimension::Id::ReturnNumber, 0);
         BOOST_CHECK_EQUAL(r1, 1);
         uint8_t r2 = data.getFieldAs<uint8_t>(Dimension::Id::ReturnNumber, 5);

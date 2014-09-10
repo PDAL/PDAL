@@ -93,7 +93,7 @@ BOOST_AUTO_TEST_CASE(test_multiple_dims_same_name)
     const SpatialReference out_ref(epsg4326_wkt);
 
     Options options;
-    
+
     Option debug("debug", true, "");
     Option verbose("verbose", 5, "");
     // options.add(debug);
@@ -102,7 +102,7 @@ BOOST_AUTO_TEST_CASE(test_multiple_dims_same_name)
     Option spatialreference("spatialreference","EPSG:2993",
         "Output SRS to reproject to");
 
-    Option filename("filename", Support::datapath("1.2-with-color.las"), "");
+    Option filename("filename", Support::datapath("las/1.2-with-color.las"), "");
     Option ignore("ignore_old_dimensions", false, "");
     options.add(out_srs);
     options.add(spatialreference);
@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE(test_multiple_dims_same_name)
     drivers::las::Reader reader(options);
     filters::Reprojection reprojectionFilter(options);
     reprojectionFilter.setInput(&reader);
-    filters::Stats filter(options);    
+    filters::Stats filter(options);
     filter.setInput(&reprojectionFilter);
 
     PointContext ctx;
@@ -137,7 +137,7 @@ BOOST_AUTO_TEST_CASE(test_specified_stats)
     const SpatialReference out_ref(epsg4326_wkt);
 
     Options options;
-    
+
     Option debug("debug", true);
     Option verbose("verbose", 5);
     // options.add(debug);
@@ -146,7 +146,7 @@ BOOST_AUTO_TEST_CASE(test_specified_stats)
     Option spatialreference("spatialreference", "EPSG:2993",
         "Output SRS to reproject to");
 
-    Option filename("filename", Support::datapath("1.2-with-color.las"), "");
+    Option filename("filename", Support::datapath("las/1.2-with-color.las"), "");
     Option ignore("ignore_old_dimensions", false, "");
     options.add(out_srs);
     options.add(spatialreference);
@@ -179,9 +179,9 @@ BOOST_AUTO_TEST_CASE(test_specified_stats)
     BOOST_CHECK_EQUAL(statsX.count(), 1065u);
     BOOST_CHECK_EQUAL(statsY.count(), 1065u);
     BOOST_CHECK_EQUAL(statsZ.count(), 1065u);
-    
+
     BOOST_CHECK_CLOSE(statsX.minimum(), -117.2686466233, 0.0001);
-    BOOST_CHECK_CLOSE(statsY.minimum(), 848899.700, 0.0001);    
+    BOOST_CHECK_CLOSE(statsY.minimum(), 848899.700, 0.0001);
 }
 #endif
 
@@ -193,7 +193,7 @@ BOOST_AUTO_TEST_CASE(test_pointbuffer_stats)
     const SpatialReference out_ref(epsg4326_wkt);
 
     Options options;
-    
+
     Option dimensions("dimensions", "X,drivers.las.reader.Y Z filters.inplacereprojection.X, Classification", "");
     Option exact_dimensions("exact_dimensions", "Classification, X", "");
 
@@ -213,7 +213,7 @@ BOOST_AUTO_TEST_CASE(test_pointbuffer_stats)
     Option y_scale("scale_y", 0.0000001f, "Scale for output Y data in the "
         "case when 'Y' dimension data are to be scaled.  Defaults to '1.0'.  "
         "If not set, the Dimensions's scale will be used");
-    Option filename("filename", Support::datapath("1.2-with-color.las"));
+    Option filename("filename", Support::datapath("las/1.2-with-color.las"));
     Option ignore("ignore_old_dimensions", false);
     options.add(out_srs);
     options.add(x_dim);

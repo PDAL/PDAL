@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE(pipeline)
     PipelineManager manager;
     PipelineReader reader(manager);
 
-    reader.readPipeline(Support::datapath("pipeline/create-dimension.xml"));
+    reader.readPipeline(Support::datapath("plang/programmable-update-y-dims.xml"));
     manager.execute();
     PointBufferSet pbSet = manager.buffers();
     BOOST_CHECK_EQUAL(pbSet.size(), 1);

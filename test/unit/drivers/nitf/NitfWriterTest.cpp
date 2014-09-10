@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE(test1)
 {
 
 #ifdef PDAL_HAVE_NITRO
-    const std::string las_input(Support::datapath("1.2-with-color.las"));
+    const std::string las_input(Support::datapath("las/1.2-with-color.las"));
     const std::string nitf_output(Support::temppath("temp_nitf.ntf"));
     const std::string reference_output(
         Support::datapath("nitf/write_test1.ntf"));
@@ -134,23 +134,23 @@ BOOST_AUTO_TEST_CASE(test1)
 
         Option datetime("IDATIM", "20110516183337");
         writer_opts.add(datetime);
-        
+
         Option cls("FSCLAS", "S");
         writer_opts.add(cls);
-        
+
         Option phone("OPHONE", "5159664628");
         writer_opts.add(phone);
-        
+
         Option name("ONAME", "Howard Butler");
         writer_opts.add(name);
-        
+
         Option ftitle("FTITLE", "LiDAR from somewhere");
         writer_opts.add(ftitle);
-        
+
         // writer_opts.add(debug);
         // writer_opts.add(verbose);
         writer_opts.add(writer_opt1);
-        
+
         pdal::drivers::las::Reader reader(reader_opts);
         pdal::drivers::nitf::Writer writer(writer_opts);
         writer.setInput(&reader);
@@ -166,7 +166,7 @@ BOOST_AUTO_TEST_CASE(test1)
         writer.prepare(ctx);
         writer.execute(ctx);
     }
-    
+
     FileUtils::deleteFile(nitf_output);
 
 #endif
