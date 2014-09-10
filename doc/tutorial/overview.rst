@@ -25,7 +25,7 @@ format-specific writer.  PDAL can merge data from various input sources into a
 single output source, preserving attribute data where supported by the input and
 output formats.
 
-..image ::pipeline.png
+.. image:: pipeline.png
 
 The above diagram shows a possible arrangement of PDAL readers, filters and
 writers, all of which are known as stages.  Any merge operation or filter may be
@@ -231,13 +231,14 @@ type of the variable using the enumeration Dimension::Type::Enum.
 In this example, the reader informs the point context that it will reference
 the dimensions X, Y and Z.
 
-::
-    void Reader::addDimensions(PointContext ctx)
-    {
-       ctx.registerDim(Dimension::Id::X);   
-       ctx.registerDim(Dimension::Id::Y);
-       ctx.registerDim(Dimension::Id::Z);
-    }
+    ::
+
+        void Reader::addDimensions(PointContext ctx)
+        {
+           ctx.registerDim(Dimension::Id::X);   
+           ctx.registerDim(Dimension::Id::Y);
+           ctx.registerDim(Dimension::Id::Z);
+        }
 
 Here a reader determines dimensions from an input source and registers or
 assigns them.  All of the input dimension values are in this case double
