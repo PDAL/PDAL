@@ -35,7 +35,7 @@ SET(PDAL_UNITTEST_TEST_SRC
     OptionsTest.cpp
     PipelineManagerTest.cpp
     PointBufferTest.cpp
-#    drivers/qfit/QFITReaderTest.cpp
+    drivers/qfit/QFITReaderTest.cpp
     RangeTest.cpp
     filters/ReprojectionFilterTest.cpp
     drivers/sbet/SbetReaderTest.cpp

@@ -56,7 +56,7 @@
 namespace
 {
 //! CARIS CSAR file Point Cloud Reader
-class FileCloudReader : public csar::CloudReader
+class FileCloudReader : public pdal::csar::CloudReader
 {
 
 public:
@@ -77,7 +77,7 @@ public:
 protected:
     virtual std::string getURI() const
     {
-        return csar::utils::systemPathToURI(m_filename);
+        return pdal::csar::utils::systemPathToURI(m_filename);
     }
 
 private:
@@ -92,7 +92,7 @@ private:
 };
 
 //! CARIS Database Point Cloud Reader
-class DBCloudReader : public csar::CloudReader
+class DBCloudReader : public pdal::csar::CloudReader
 {
 
 public:

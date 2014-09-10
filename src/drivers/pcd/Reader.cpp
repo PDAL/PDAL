@@ -50,7 +50,6 @@ namespace drivers
 namespace pcd
 {
 
-
 void PcdReader::ready(PointContext ctx)
 {
     pcl::PCLPointCloud2 cloud;
@@ -60,53 +59,25 @@ void PcdReader::ready(PointContext ctx)
 }
 
 
-Options PcdReader::getDefaultOptions()
-{
-    Options options;
-    return options;
-}
-
-
 void PcdReader::addDimensions(PointContext ctx)
 {
     ctx.registerDims(getDefaultDimensions());
 }
 
 
-void PcdReader::processOptions(const Options& options)
-{
-    m_filename = options.getOption("filename").getValue<std::string>();
-}
-
-
-StageSequentialIterator* PcdReader::createSequentialIterator() const
-{
-    return new iterators::sequential::PcdSeqIterator(getDefaultDimensions(), m_filename);
-}
-
-namespace iterators
-{
-namespace sequential
-{
-
-point_count_t PcdSeqIterator::readImpl(PointBuffer& data, std::string filename)
+point_count_t PcdReader::read(PointBuffer& data, point_count_t count)
 {
     pcl::PointCloud<XYZIRGBA>::Ptr cloud(new pcl::PointCloud<XYZIRGBA>);
 
     pcl::PCDReader r;
-    r.read<XYZIRGBA>(filename, *cloud);
+    r.read<XYZIRGBA>(m_filename, *cloud);
 
-    pdal::PCDtoPDAL(*cloud, data);
+    PCDtoPDAL(*cloud, data);
 
-    point_count_t numPoints = cloud->points.size();
-
-    return numPoints;
+    return cloud->points.size();
 }
 
-} // sequential
-} // iterators
-
-}
-}
-} // namespaces
+} // namespace pcd
+} // namespace drivers
+} // namespace pdal
 

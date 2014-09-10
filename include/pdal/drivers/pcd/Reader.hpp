@@ -36,7 +36,6 @@
 
 #include <pdal/PointBuffer.hpp>
 #include <pdal/Reader.hpp>
-#include <pdal/ReaderIterator.hpp>
 #include <pdal/drivers/pcd/Common.hpp>
 
 namespace pdal
@@ -55,48 +54,18 @@ public:
 
     PcdReader(const Options& options) : Reader(options) {};
 
-    static Options getDefaultOptions();
     static Dimension::IdList getDefaultDimensions()
         { return fileDimensions(); };
 
-    virtual StageSequentialIterator* createSequentialIterator() const;
-
 private:
-    std::string m_filename;
     point_count_t m_numPts;
 
-    virtual void processOptions(const Options& options);
     virtual void addDimensions(PointContext ctx);
     virtual void ready(PointContext ctx);
+    virtual point_count_t read(PointBuffer& buf, point_count_t count);
 };
 
-namespace iterators
-{
-namespace sequential
-{
-
-class PDAL_DLL PcdSeqIterator : public pdal::ReaderSequentialIterator
-{
-public:
-    PcdSeqIterator(const Dimension::IdList& dims, std::string filename) : m_dims(dims), m_filename(filename)
-    {};
-
-private:
-    boost::uint64_t skipImpl(boost::uint64_t) {};
-    point_count_t readImpl(PointBuffer& buf, std::string filename);
-    bool atEndImpl() const {};
-
-    virtual point_count_t readBufferImpl(PointBuffer& buf)
-        { return readImpl(buf, m_filename); }
-
-    Dimension::IdList m_dims;
-    std::string m_filename;
-};
-
-} // sequential
-} // iterators
-
-}
-}
-} // namespaces
+} // namespace pcd
+} // namespace drivers
+} // namespace pdal
 

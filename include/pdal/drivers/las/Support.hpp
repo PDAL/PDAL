@@ -32,35 +32,18 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <pdal/pdal_internal.hpp>
+
 #pragma once
-
-#include <pdal/pdal_export.hpp>
-
-#include <iostream>
-
-#ifdef PDAL_HAVE_LASZIP
-#include <laszip/laszip.hpp>
-#include <laszip/lasunzipper.hpp>
-#include <laszip/laszipper.hpp>
-
-#else
-typedef struct LASzipH *LASzip;
-typedef struct LASunzipperH *LASunzipper;
-#endif
 
 namespace pdal
 {
-
-class Stage;
-
 namespace drivers
 {
 namespace las
 {
 
-class Reader;
 class SummaryData;
-class ZipPoint;
 
 class PDAL_DLL Support
 {

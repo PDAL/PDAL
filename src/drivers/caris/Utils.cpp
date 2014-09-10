@@ -28,12 +28,13 @@
 
 #include "Utils.hpp"
 
-#include <boost/foreach.hpp>
-#include <boost/algorithm/string.hpp>
-#include "boost_range_algorithm_count.hpp"
+#include <string.h>
+
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/detail/utf8_codecvt_facet.hpp>
 
+namespace pdal
+{
 namespace csar
 {
 namespace utils
@@ -48,30 +49,35 @@ namespace utils
     \li pdal::dimension::Interpretation of \e in_type
 */
 //************************************************************************
-pdal::dimension::Interpretation carisTypeToInterpretation(caris_type in_type)
+Dimension::Type::Enum carisTypeToPdal(caris_type in_type)
 {
-    using namespace pdal::dimension;
+    using namespace Dimension;
 
     switch (in_type)
     {
         case CARIS_TYPE_FLOAT32:
+            return Type::Float;
         case CARIS_TYPE_FLOAT64:
-            return Float;
+            return Type::Double;
         case CARIS_TYPE_INT8:
-            return SignedByte; // or SignedInteger
+            return Type::Signed8;
         case CARIS_TYPE_INT16:
+            return Type::Signed16;
         case CARIS_TYPE_INT32:
+            return Type::Signed32;
         case CARIS_TYPE_INT64:
-            return SignedInteger;
+            return Type::Signed64;
         case CARIS_TYPE_UINT8:
-            return UnsignedByte; // or UnsignedInteger
+            return Type::Unsigned8;
         case CARIS_TYPE_UINT16:
+            return Type::Unsigned16;
         case CARIS_TYPE_UINT32:
+            return Type::Unsigned32;
         case CARIS_TYPE_UINT64:
-            return UnsignedInteger;
+            return Type::Unsigned64;
         default:
             assert(false && "Invalid caris_type");
-            return Undefined;
+            return Type::None;
     }
 }
 
@@ -84,6 +90,7 @@ pdal::dimension::Interpretation carisTypeToInterpretation(caris_type in_type)
     \li number of bytes of an element of type \e in_type
 */
 //************************************************************************
+/**
 pdal::dimension::size_type carisTypeToSize(caris_type in_type)
 {
     using namespace pdal::dimension;
@@ -109,6 +116,7 @@ pdal::dimension::size_type carisTypeToSize(caris_type in_type)
             return 0;
     }
 }
+**/
 
 //************************************************************************
 //! convert a filesystem path to a URI
@@ -139,9 +147,11 @@ std::string systemPathToURI(std::string const& in_path)
 
     std::string uri = "file://";
 
-    BOOST_FOREACH(char c, path)
+    for (auto ci = path.begin(); ci != path.end(); ++ci)
     {
-        if (boost::range::count(validChars, c))
+        char c = *ci;
+//        if (!boost::algorithm::find_first(validChars, c).empty())
+        if (strchr(validChars, c))
         {
             uri += c;
         }
@@ -173,5 +183,6 @@ std::string systemPathToURI(std::string const& in_path)
     return uri;
 }
 
-}
-}
+} // namespace utils;
+} // namespace csar
+} // namespace pdal

@@ -94,49 +94,20 @@ Dimension::IdList Reader::getDefaultDimensions()
 }
 
 
-void Reader::processOptions(const Options& options)
-{
-    m_filename = options.getOption("filename").getValue<std::string>();
-}
-
-
 void Reader::addDimensions(PointContext ctx)
 {
     return ctx.registerDims(getDefaultDimensions());
 }
 
 
-StageSequentialIterator *Reader::createSequentialIterator() const
-{
-    return new iterators::sequential::IcebridgeSeqIter(
-        const_cast<Hdf5Handler *>(&m_hdf5Handler));
-}
-
-
 void Reader::ready(PointContext ctx)
 {
     m_hdf5Handler.initialize(m_filename, hdf5Columns);
+    m_index = 0;
 }
 
 
-void Reader::done(PointContext ctx)
-{
-    m_hdf5Handler.close();
-}
-
-
-namespace iterators
-{
-namespace sequential
-{
-
-point_count_t IcebridgeSeqIter::readBufferImpl(PointBuffer& buf)
-{
-    return readImpl(buf, (std::numeric_limits<point_count_t>::max)());
-}
-
-
-point_count_t IcebridgeSeqIter::readImpl(PointBuffer& buf, point_count_t count)
+point_count_t Reader::read(PointBuffer& buf, point_count_t count)
 {
     //All data we read for icebridge is currently 4 bytes wide, so
     //  just allocate once and forget it.
@@ -144,13 +115,14 @@ point_count_t IcebridgeSeqIter::readImpl(PointBuffer& buf, point_count_t count)
     //  in the icebridge handler?
 
     PointId startId = buf.size();
-    point_count_t remaining = m_hdf5Handler->getNumPoints() - m_index;
+    point_count_t remaining = m_hdf5Handler.getNumPoints() - m_index;
     count = std::min(count, remaining);
+
     std::unique_ptr<unsigned char>
         rawData(new unsigned char[count * sizeof(float)]);
 
     //Not loving the position-linked data, but fine for now.
-    Dimension::IdList dims = Reader::getDefaultDimensions();
+    Dimension::IdList dims = getDefaultDimensions();
     auto di = dims.begin();
     for (auto ci = hdf5Columns.begin(); ci != hdf5Columns.end(); ++ci, ++di)
     {
@@ -160,9 +132,10 @@ point_count_t IcebridgeSeqIter::readImpl(PointBuffer& buf, point_count_t count)
 
         try
         {
-            m_hdf5Handler->getColumnEntries(rawData.get(), column.name, count,
+            m_hdf5Handler.getColumnEntries(rawData.get(), column.name, count,
                 m_index);
             void *p = (void *)rawData.get();
+
             // This is ugly but avoids a test in a tight loop.
             if (column.predType == H5::PredType::NATIVE_FLOAT)
             {
@@ -199,22 +172,16 @@ point_count_t IcebridgeSeqIter::readImpl(PointBuffer& buf, point_count_t count)
 }
 
 
-uint64_t IcebridgeSeqIter::skipImpl(uint64_t count)
+void Reader::done(PointContext ctx)
 {
-    const uint64_t skipped = std::min<uint64_t>(count,
-        m_hdf5Handler->getNumPoints() - m_index);
-    m_index += skipped;
-    return skipped;
+    m_hdf5Handler.close();
 }
 
 
-bool IcebridgeSeqIter::atEndImpl() const
+bool Reader::eof()
 {
-    return m_index >= m_hdf5Handler->getNumPoints();
+    return m_index >= m_hdf5Handler.getNumPoints();
 }
-
-} // namespace sequential
-} // namespace iterators
 
 } // namespace icebridge
 } // namespace drivers

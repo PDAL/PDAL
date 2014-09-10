@@ -35,7 +35,6 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 
-#include <pdal/StageIterator.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/drivers/terrasolid/Reader.hpp>

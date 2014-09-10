@@ -51,7 +51,6 @@
 #include <pdal/filters/InPlaceReprojection.hpp>
 
 #include <pdal/drivers/las/Writer.hpp>
-#include <pdal/StageIterator.hpp>
 
 #include "Support.hpp"
 #include "TestConfig.hpp"
@@ -379,22 +378,15 @@ BOOST_AUTO_TEST_CASE(read_unprojected_data)
     pdal::drivers::oci::OciReader reader(options);
     PointContext ctx;
     reader.prepare(ctx);
+    PointBufferSet pbSet = reader.execute(ctx);
+    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    PointBufferPtr buf = *pbSet.begin();
+    BOOST_CHECK_EQUAL(buf->size(), 1065);
     
-    pdal::PointBuffer data(ctx);
-    pdal::StageSequentialIterator* iter = reader.createSequentialIterator();
+    // checkUnProjectedPoints(*buf);
     
-    uint32_t numRead = iter->read(data);
-    
-    BOOST_CHECK_EQUAL(numRead, 1065u);
-    BOOST_CHECK_EQUAL(data.size(), 1065u);
-    
-    // checkUnProjectedPoints(data);
-    
-    // compareAgainstSourceBuffer(data,  Support::datapath("autzen-utm-chipped-25.las"));
-    compareAgainstSourceBuffer(data,  Support::datapath("autzen-utm.las"));
-    
-    delete iter;
-
+    // compareAgainstSourceBuffer(*buf,  Support::datapath("autzen-utm-chipped-25.las"));
+    compareAgainstSourceBuffer(*buf, Support::datapath("autzen-utm.las"));
 }
 
 

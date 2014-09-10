@@ -36,73 +36,65 @@
 
 #include <pdal/drivers/faux/Reader.hpp>
 #include <pdal/Bounds.hpp>
+
 BOOST_AUTO_TEST_SUITE(FauxReaderTest)
+
+using namespace pdal;
 
 BOOST_AUTO_TEST_CASE(test_constant_mode_sequential_iter)
 {
-    using namespace pdal;
-
     Options ops;
 
     Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
     ops.add("bounds", bounds);
-    ops.add("num_points", 1000);
+    ops.add("count", 750);
     ops.add("mode", "constant");
     drivers::faux::Reader reader(ops);
 
     PointContext ctx;
     reader.prepare(ctx);
     BOOST_CHECK_EQUAL(reader.getDescription(), "Faux Reader");
-
-    PointBuffer buf(ctx);
-    StageSequentialIterator* iter = reader.createSequentialIterator();
-    point_count_t numRead = iter->read(buf, 750);
-
-    BOOST_CHECK_EQUAL(numRead, 750u);
-
-    for (point_count_t i = 0; i < numRead; i++)
+    PointBufferSet pbSet = reader.execute(ctx);
+    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    PointBufferPtr buf = *pbSet.begin();
+    BOOST_CHECK_EQUAL(buf->size(), 750);
+    for (point_count_t i = 0; i < buf->size(); i++)
     {
-        double x = buf.getFieldAs<double>(Dimension::Id::X, i);
-        double y = buf.getFieldAs<double>(Dimension::Id::Y, i);
-        double z = buf.getFieldAs<double>(Dimension::Id::Z, i);
-        uint64_t t = buf.getFieldAs<uint64_t>(Dimension::Id::OffsetTime, i);
+        double x = buf->getFieldAs<double>(Dimension::Id::X, i);
+        double y = buf->getFieldAs<double>(Dimension::Id::Y, i);
+        double z = buf->getFieldAs<double>(Dimension::Id::Z, i);
+        uint64_t t = buf->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, i);
 
         BOOST_CHECK_CLOSE(x, 1.0, 0.00001);
         BOOST_CHECK_CLOSE(y, 2.0, 0.00001);
         BOOST_CHECK_CLOSE(z, 3.0, 0.00001);
         BOOST_CHECK_EQUAL(t, i);
     }
-
-    delete iter;
 }
 
 
 BOOST_AUTO_TEST_CASE(test_random_mode)
 {
-    using namespace pdal;
-
     Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
     Options ops;
     ops.add("bounds", bounds);
-    ops.add("num_points", 1000);
+    ops.add("count", 750);
     ops.add("mode", "constant");
     drivers::faux::Reader reader(ops);
 
     PointContext ctx;
     reader.prepare(ctx);
+    PointBufferSet pbSet = reader.execute(ctx);
+    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    PointBufferPtr buf = *pbSet.begin();
+    BOOST_CHECK_EQUAL(buf->size(), 750);
 
-    PointBuffer buf(ctx);
-    StageSequentialIterator* iter = reader.createSequentialIterator();
-    point_count_t numRead = iter->read(buf, 750);
-
-    BOOST_CHECK_EQUAL(numRead, 750u);
-
-    for (point_count_t i = 0; i < numRead; ++i)
+    for (point_count_t i = 0; i < buf->size(); ++i)
     {
-        double x = buf.getFieldAs<double>(Dimension::Id::X, i);
-        double y = buf.getFieldAs<double>(Dimension::Id::Y, i);
-        double z = buf.getFieldAs<double>(Dimension::Id::Z, i);
-        uint64_t t = buf.getFieldAs<uint64_t>(Dimension::Id::OffsetTime, i);
+        double x = buf->getFieldAs<double>(Dimension::Id::X, i);
+        double y = buf->getFieldAs<double>(Dimension::Id::Y, i);
+        double z = buf->getFieldAs<double>(Dimension::Id::Z, i);
+        uint64_t t = buf->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, i);
 
         BOOST_CHECK_GE(x, 1.0);
         BOOST_CHECK_LE(x, 101.0);
@@ -115,7 +107,6 @@ BOOST_AUTO_TEST_CASE(test_random_mode)
 
         BOOST_CHECK_EQUAL(t, i);
     }
-    delete iter;
 }
 
 
@@ -126,29 +117,27 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode_1)
     Bounds<double> bounds(0, 0, 0, 4, 4, 4);
     Options ops;
     ops.add("bounds", bounds);
-    ops.add("num_points", 2);
+    ops.add("count", 2);
     ops.add("mode", "ramp");
+
     drivers::faux::Reader reader(ops);
     
     PointContext ctx;
     reader.prepare(ctx);
+    PointBufferSet pbSet = reader.execute(ctx);
+    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    PointBufferPtr buf = *pbSet.begin();
+    BOOST_CHECK_EQUAL(buf->size(), 2);
 
-    PointBuffer buf(ctx);
+    double x0 = buf->getFieldAs<double>(Dimension::Id::X, 0);
+    double y0 = buf->getFieldAs<double>(Dimension::Id::Y, 0);
+    double z0 = buf->getFieldAs<double>(Dimension::Id::Z, 0);
+    uint64_t t0 = buf->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, 0);
 
-    StageSequentialIterator* iter = reader.createSequentialIterator();
-    point_count_t numRead = iter->read(buf, 2);
-
-    BOOST_CHECK_EQUAL(numRead, 2u);
-
-    double x0 = buf.getFieldAs<double>(Dimension::Id::X, 0);
-    double y0 = buf.getFieldAs<double>(Dimension::Id::Y, 0);
-    double z0 = buf.getFieldAs<double>(Dimension::Id::Z, 0);
-    uint64_t t0 = buf.getFieldAs<uint64_t>(Dimension::Id::OffsetTime, 0);
-
-    double x1 = buf.getFieldAs<double>(Dimension::Id::X, 1);
-    double y1 = buf.getFieldAs<double>(Dimension::Id::Y, 1);
-    double z1 = buf.getFieldAs<double>(Dimension::Id::Z, 1);
-    uint64_t t1 = buf.getFieldAs<uint64_t>(Dimension::Id::OffsetTime, 1);
+    double x1 = buf->getFieldAs<double>(Dimension::Id::X, 1);
+    double y1 = buf->getFieldAs<double>(Dimension::Id::Y, 1);
+    double z1 = buf->getFieldAs<double>(Dimension::Id::Z, 1);
+    uint64_t t1 = buf->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, 1);
 
     BOOST_CHECK_CLOSE(x0, 0.0, 0.00001);
     BOOST_CHECK_CLOSE(y0, 0.0, 0.00001);
@@ -159,8 +148,6 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode_1)
     BOOST_CHECK_CLOSE(y1, 4.0, 0.00001);
     BOOST_CHECK_CLOSE(z1, 4.0, 0.00001);
     BOOST_CHECK_EQUAL(t1, 1u);
-
-    delete iter;
 }
 
 
@@ -171,38 +158,33 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode_2)
     Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 152.0, 203.0);
     Options ops;
     ops.add("bounds", bounds);
-    ops.add("num_points", 750);
+    ops.add("count", 750);
     ops.add("mode", "ramp");
     drivers::faux::Reader reader(ops);
 
     PointContext ctx;
     reader.prepare(ctx);
-
-    PointBuffer buf(ctx);
-
-    StageSequentialIterator* iter = reader.createSequentialIterator();
-    point_count_t numRead = iter->read(buf, 750);
-
-    BOOST_CHECK_EQUAL(numRead,750u);
+    PointBufferSet pbSet = reader.execute(ctx);
+    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    PointBufferPtr buf = *pbSet.begin();
+    BOOST_CHECK_EQUAL(buf->size(), 750);
 
     double delX = (101.0 - 1.0) / (750.0 - 1.0);
     double delY = (152.0 - 2.0) / (750.0 - 1.0);
     double delZ = (203.0 - 3.0) / (750.0 - 1.0);
 
-    for (point_count_t i = 0; i < numRead; ++i)
+    for (point_count_t i = 0; i < buf->size(); ++i)
     {
-        double x = buf.getFieldAs<double>(Dimension::Id::X, i);
-        double y = buf.getFieldAs<double>(Dimension::Id::Y, i);
-        double z = buf.getFieldAs<double>(Dimension::Id::Z, i);
-        uint64_t t = buf.getFieldAs<uint64_t>(Dimension::Id::OffsetTime, i);
+        double x = buf->getFieldAs<double>(Dimension::Id::X, i);
+        double y = buf->getFieldAs<double>(Dimension::Id::Y, i);
+        double z = buf->getFieldAs<double>(Dimension::Id::Z, i);
+        uint64_t t = buf->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, i);
 
         BOOST_CHECK_CLOSE(x, 1.0 + delX * i, 0.00001);
         BOOST_CHECK_CLOSE(y, 2.0 + delY * i, 0.00001);
         BOOST_CHECK_CLOSE(z, 3.0 + delZ * i, 0.00001);
         BOOST_CHECK_EQUAL(t, i);
     }
-
-    delete iter;
 }
 
 
@@ -214,29 +196,28 @@ BOOST_AUTO_TEST_CASE(test_return_number)
 
     Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
     ops.add("bounds", bounds);
-    ops.add("num_points", 100);
+    ops.add("count", 100);
     ops.add("mode", "constant");
     ops.add("number_of_returns", 9);
     drivers::faux::Reader reader(ops);
 
     PointContext ctx;
     reader.prepare(ctx);
+    PointBufferSet pbSet = reader.execute(ctx);
+    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    PointBufferPtr buf = *pbSet.begin();
+    BOOST_CHECK_EQUAL(buf->size(), 100);
 
-    PointBuffer buf(ctx);
-    StageSequentialIterator* iter = reader.createSequentialIterator();
-    point_count_t numRead = iter->read(buf, 100);
-
-    for (point_count_t i = 0; i < numRead; i++)
+    for (point_count_t i = 0; i < buf->size(); i++)
     {
-        uint8_t returnNumber = buf.getFieldAs<uint8_t>(Dimension::Id::ReturnNumber, i);
-        uint8_t numberOfReturns = buf.getFieldAs<uint8_t>(Dimension::Id::NumberOfReturns, i);
+        uint8_t returnNumber = buf->getFieldAs<uint8_t>(
+            Dimension::Id::ReturnNumber, i);
+        uint8_t numberOfReturns =
+            buf->getFieldAs<uint8_t>(Dimension::Id::NumberOfReturns, i);
 
         BOOST_CHECK_EQUAL(returnNumber, (i % 9) + 1);
         BOOST_CHECK_EQUAL(numberOfReturns, 9);
     }
-
-    delete iter;
 }
-
 
 BOOST_AUTO_TEST_SUITE_END()

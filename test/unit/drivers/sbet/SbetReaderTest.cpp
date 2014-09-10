@@ -117,35 +117,6 @@ BOOST_AUTO_TEST_CASE(testRead)
                7.179027672314571e-02);
 }
 
-BOOST_AUTO_TEST_CASE(testSkip)
-{
-    Option filename("filename", Support::datapath("sbet/2-points.sbet"), "");
-    Options options(filename);
-    drivers::sbet::SbetReader reader(options);
-
-    PointContext ctx;
-    PointBuffer buf(ctx);
-    reader.prepare(ctx);
-
-    StageTester::ready(&reader, ctx);
-    StageSequentialIterator* iter = reader.createSequentialIterator();
-    iter->skip(1);
-    iter->read(buf, 1);
-    StageTester::done(&reader, ctx);
-
-    delete iter;
-
-    checkPoint(ctx, buf, 0, 1.516310078318641e+05, 5.680211834722869e-01,
-               -2.041654392034053e+00, 1.077151424357507e+02,
-               -2.336228229691271e+00, -3.324663118952635e-01,
-               -3.022948961008987e-02, -2.813856631423094e-02,
-               -2.425215669392169e-02, 3.047131105236811e+00,
-               -2.198416007932108e-02, 8.397590491636475e-01,
-               3.252165276637165e-01, -1.558883225990844e-01,
-               8.379685112283802e-04, 7.372886784718076e-03,
-               7.179027672314571e-02);
-}
-
 BOOST_AUTO_TEST_CASE(testBadFile)
 {
     Option filename("filename", Support::datapath("sbet/badfile.sbet"), "");
@@ -162,7 +133,7 @@ BOOST_AUTO_TEST_CASE(testPipeline)
     PipelineReader reader(manager);
     reader.readPipeline(Support::datapath("sbet/pipeline.xml"));
 
-    const boost::uint64_t numPoints = manager.execute();
+    point_count_t numPoints = manager.execute();
     BOOST_CHECK_EQUAL(numPoints, 2);
     FileUtils::deleteFile(Support::datapath("sbet/outfile.txt"));
 }

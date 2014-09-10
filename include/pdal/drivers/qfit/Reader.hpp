@@ -39,9 +39,7 @@
 #include <boost/detail/endian.hpp>
 
 #include <pdal/Reader.hpp>
-#include <pdal/ReaderIterator.hpp>
 #include <pdal/Options.hpp>
-#include <pdal/StageIterator.hpp>
 
 #ifdef BOOST_LITTLE_ENDIAN
 # define QFIT_SWAP_BE_TO_LE(p) \
@@ -72,14 +70,6 @@ namespace drivers
 namespace qfit
 {
 
-namespace iterators
-{
-namespace sequential
-{
-class Reader;
-} //namespace sequential
-} //namespace iterators
-
 enum QFIT_Format_Type
 {
     QFIT_Format_10 = 10,
@@ -97,15 +87,8 @@ public:
     {}
 };
 
-// supported options:
-//   <uint32>id
-//   <bool>debug
-//   <uint32>verbose
-//   <string>filename  [required]
-//
 class PDAL_DLL Reader : public pdal::Reader
 {
-    friend class iterators::sequential::Reader;
 public:
     SET_STAGE_NAME("drivers.qfit.reader", "QFIT Reader")
     SET_STAGE_LINK("http://pdal.io/stages/drivers.qfit.reader.html")
@@ -118,22 +101,20 @@ public:
 
     std::string getFileName() const;
 
-    pdal::StageSequentialIterator*
-        createSequentialIterator(PointBuffer& buffer) const;
-
     std::size_t getPointDataOffset() const
         { return m_offset; }
-    boost::uint32_t getPointDataSize() const
+    uint32_t getPointDataSize() const
         { return m_size; }
     point_count_t getNumPoints() const
         { return m_numPoints; }
+    bool eof()
+        { return m_index >= m_numPoints; }
 
     // this is called by the stage's iterator
     point_count_t processBuffer(PointBuffer& PointBuffer, std::istream& stream,
         point_count_t count) const;
 
 private:
-    std::string m_filename;
     QFIT_Format_Type m_format;
     std::ios::off_type m_point_bytes;
     std::size_t m_offset;
@@ -142,39 +123,19 @@ private:
     double m_scale_z;
     bool m_littleEndian;
     point_count_t m_numPoints;
+    std::istream* m_istream;
+    point_count_t m_index;
 
     virtual void processOptions(const Options& ops);
     virtual void initialize();
     virtual void addDimensions(PointContext ctx);
     virtual void ready(PointContext ctx);
+    virtual point_count_t read(PointBuffer& buf, point_count_t count);
+    virtual void done(PointContext ctx);
 
     Reader& operator=(const Reader&); // not implemented
     Reader(const Reader&); // not implemented
 };
-
-namespace iterators
-{
-namespace sequential
-{
-
-class Reader : public pdal::ReaderSequentialIterator
-{
-public:
-    Reader(const qfit::Reader& reader);
-    ~Reader();
-
-private:
-    uint64_t skipImpl(uint64_t);
-    point_count_t readBufferImpl(PointBuffer&);
-    bool atEndImpl() const
-        { return getIndex() >= m_reader.getNumPoints(); }
-
-    const pdal::drivers::qfit::Reader& m_reader;
-    std::istream* m_istream;
-};
-
-} // namespace sequential
-} // namespace iterators
 
 } // namespace qfit
 } // namespace drivers

@@ -32,6 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#pragma once
+
 #include <streambuf>
 #include <vector>
 
@@ -63,4 +65,4 @@ private:
     pos_type m_bufOffset;
 };
 
-} //namespace
+} //namespace pdal

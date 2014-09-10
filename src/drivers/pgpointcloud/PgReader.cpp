@@ -59,6 +59,7 @@ PgReader::PgReader(const Options& options)
 
 PgReader::~PgReader()
 {
+    //ABELL - Do bad things if we don't do this?  Already in done().
     if (m_session)
         PQfinish(m_session);
 }
@@ -101,17 +102,7 @@ void PgReader::processOptions(const Options& options)
 }
 
 
-void PgReader::ready(PointContext ctx)
-{
-    // Database connection
-    m_session = pg_connect(m_connection);
-
-    if (getSpatialReference().empty())
-        setSpatialReference(fetchSpatialReference());    
-}
-
-
-uint64_t PgReader::getNumPoints() const
+point_count_t PgReader::getNumPoints() const
 {
     if (m_cached_point_count)
         return m_cached_point_count;
@@ -131,6 +122,7 @@ uint64_t PgReader::getNumPoints() const
     {
         throw pdal_error("unable to get point count");
     }
+
     m_cached_point_count = atoi(PQgetvalue(result, 0, 0));
     m_cached_max_points = atoi(PQgetvalue(result, 0, 1));
     PQclear(result);
@@ -156,7 +148,7 @@ std::string PgReader::getDataQuery() const
 }
 
 
-uint64_t PgReader::getMaxPoints() const
+point_count_t PgReader::getMaxPoints() const
 {
     if (m_cached_point_count == 0)
         getNumPoints();  // Fills m_cached_max_points.
@@ -256,11 +248,142 @@ pdal::SpatialReference PgReader::fetchSpatialReference() const
 }
 
 
-pdal::StageSequentialIterator* PgReader::createSequentialIterator() const
+void PgReader::ready(PointContext ctx)
 {
-    return new iterators::sequential::PgIterator(*this, m_schema.m_dims);
+    m_atEnd = false;
+    m_cur_row = 0;
+    m_cur_nrows = 0;
+    m_cur_result = NULL;
+
+    m_session = pg_connect(m_connection);
+
+    if (getSpatialReference().empty())
+        setSpatialReference(fetchSpatialReference());    
+
+    m_point_size = 0;
+    schema::DimInfoList& dims = m_schema.m_dims;
+    for (auto di = dims.begin(); di != dims.end(); ++di)
+        m_point_size += Dimension::size(di->m_type);
+
+    CursorSetup();
+}
+
+
+void PgReader::done(PointContext ctx)
+{
+    CursorTeardown();
+    if (m_session)
+        PQfinish(m_session);
+    m_session = NULL;
+    if (m_cur_result)
+        PQclear(m_cur_result);
+}
+
+
+void PgReader::CursorSetup()
+{
+    std::ostringstream oss;
+    oss << "DECLARE cur CURSOR FOR " << getDataQuery();
+    pg_begin(m_session);
+    pg_execute(m_session, oss.str());
+
+    log()->get(LogLevel::Debug) << "SQL cursor prepared: " <<
+        oss.str() << std::endl;
+}
+
+
+void PgReader::CursorTeardown()
+{
+    pg_execute(m_session, "CLOSE cur");
+    pg_commit(m_session);
+    log()->get(LogLevel::Debug) << "SQL cursor closed." << std::endl;
+}
+
+
+point_count_t PgReader::readPgPatch(PointBuffer& buffer, point_count_t numPts)
+{
+    point_count_t numRemaining = m_patch.remaining;
+    PointId nextId = buffer.size();
+    point_count_t numRead = 0;
+
+    size_t offset = ((m_patch.count - m_patch.remaining) * m_point_size);
+    uint8_t *pos = &(m_patch.binary.front()) + offset;
+
+    schema::DimInfoList& dims = m_schema.m_dims;
+    while (numRead < numPts && numRemaining > 0)
+    {
+        for (auto di = dims.begin(); di != dims.end(); ++di)
+        {
+            schema::DimInfo& d = *di;
+            buffer.setField(d.m_id, d.m_type, nextId, pos);
+            pos += Dimension::size(d.m_type);
+        }
+        numRemaining--;
+        nextId++;
+        numRead++;
+    }
+    m_patch.remaining = numRemaining;
+    return numRead;
+}
+
+
+bool PgReader::NextBuffer()
+{
+    if (m_cur_row >= m_cur_nrows || !m_cur_result)
+    {
+        static std::string fetch = "FETCH 2 FROM cur";
+        if (m_cur_result)
+            PQclear(m_cur_result);
+        m_cur_result = pg_query_result(m_session, fetch);
+        bool logOutput = (log()->getLevel() > LogLevel::Debug3);
+        if (logOutput)
+            log()->get(LogLevel::Debug3) << "SQL: " << fetch << std::endl;
+        if ((PQresultStatus(m_cur_result) != PGRES_TUPLES_OK) ||
+            (PQntuples(m_cur_result) == 0))
+        {
+            PQclear(m_cur_result);
+            m_cur_result = NULL;
+            m_atEnd = true;
+            return false;
+        }
+
+        m_cur_row = 0;
+        m_cur_nrows = PQntuples(m_cur_result);
+    }
+    m_patch.hex = PQgetvalue(m_cur_result, m_cur_row, 0);
+    m_patch.count = atoi(PQgetvalue(m_cur_result, m_cur_row, 1));
+    m_patch.remaining = m_patch.count;
+    m_patch.update_binary();
+
+    m_cur_row++;
+    return true;
+}
+
+
+point_count_t PgReader::read(PointBuffer& buffer, point_count_t count)
+{
+    if (eof())
+        return 0;
+    
+    log()->get(LogLevel::Debug) << "readBufferImpl called with "
+        "PointBuffer filled to " << buffer.size() << " points" <<
+        std::endl;
+
+    point_count_t totalNumRead = 0;
+    while (totalNumRead < count)
+    {
+        if (m_patch.remaining == 0)
+            if (!NextBuffer())
+                return totalNumRead;
+        PointId bufBegin = buffer.size();
+        point_count_t numRead = readPgPatch(buffer, count - totalNumRead);
+        PointId bufEnd = bufBegin + numRead;
+        totalNumRead += numRead;
+    }
+    return totalNumRead;
 }
 
 } // pgpointcloud
 } // drivers
 } // pdal
+

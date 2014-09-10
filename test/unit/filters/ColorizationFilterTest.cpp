@@ -37,7 +37,6 @@
 #include <pdal/SpatialReference.hpp>
 #include <pdal/drivers/las/Reader.hpp>
 #include <pdal/filters/Colorization.hpp>
-#include <pdal/StageIterator.hpp>
 #include <pdal/PointBuffer.hpp>
 
 #include "Support.hpp"
@@ -53,7 +52,9 @@ BOOST_AUTO_TEST_CASE(ColorizationFilterTest_test_1)
 {
     using namespace pdal;
 
-    drivers::las::Reader reader(Support::datapath("autzen-point-format-3.las"));
+    Options ops1;
+    ops1.add("filename", Support::datapath("autzen-point-format-3.las"));
+    drivers::las::Reader reader(ops1);
 
     Options options;
 
@@ -94,20 +95,15 @@ BOOST_AUTO_TEST_CASE(ColorizationFilterTest_test_1)
     filter.setInput(&reader);
 
     PointContext ctx;
-    PointBuffer buffer(ctx);
 
     filter.prepare(ctx);
+    PointBufferSet pbSet = filter.execute(ctx);
+    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    PointBufferPtr buf = *pbSet.begin();
 
-    StageSequentialIterator *iter = reader.createSequentialIterator();
-    uint32_t numRead = iter->read(buffer, 1);
-
-    FilterTester::ready(&filter, ctx);
-    FilterTester::filter(&filter, buffer);
-    FilterTester::done(&filter, ctx);
-
-    uint16_t r = buffer.getFieldAs<uint16_t>(Dimension::Id::Red, 0);
-    uint16_t g = buffer.getFieldAs<uint16_t>(Dimension::Id::Green, 0);
-    uint16_t b = buffer.getFieldAs<uint16_t>(Dimension::Id::Blue, 0);
+    uint16_t r = buf->getFieldAs<uint16_t>(Dimension::Id::Red, 0);
+    uint16_t g = buf->getFieldAs<uint16_t>(Dimension::Id::Green, 0);
+    uint16_t b = buf->getFieldAs<uint16_t>(Dimension::Id::Blue, 0);
 
     BOOST_CHECK_EQUAL(r, 210u);
     BOOST_CHECK_EQUAL(g, 205u);
