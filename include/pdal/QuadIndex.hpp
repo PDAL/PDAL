@@ -60,6 +60,8 @@ public:
             double& xMax,
             double& yMax) const;
 
+    std::size_t getDepth() const;
+
     // All getPoints queries will return an empty vector if the tree has not
     // been successfully built prior to the getPoints call.
 
