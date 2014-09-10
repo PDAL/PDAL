@@ -41,12 +41,8 @@
 
 #include <pdal/XMLSchema.hpp>
 #include <pdal/Metadata.hpp>
-
 #include <pdal/drivers/faux/Reader.hpp>
-
 #include <pdal/drivers/las/Reader.hpp>
-
-#include <pdal/StageIterator.hpp>
 #include <pdal/FileUtils.hpp>
 
 #include "Support.hpp"

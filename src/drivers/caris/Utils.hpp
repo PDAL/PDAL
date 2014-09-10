@@ -38,17 +38,19 @@
 
 #include <map>
 #include <boost/optional.hpp>
-#include <pdal/dimension.hpp>
+
+#include <pdal/Dimension.hpp>
 
 #ifdef _MSC_VER
 #   pragma warning(pop)
 #endif
 
+namespace pdal {
 namespace csar {
 namespace utils {
 
-pdal::dimension::Interpretation carisTypeToInterpretation(caris_type in_type);
-pdal::dimension::size_type carisTypeToSize(caris_type in_type);
+pdal::Dimension::Type::Enum carisTypeToPdal(caris_type in_type);
+//pdal::dimension::size_type carisTypeToSize(caris_type in_type);
 std::string systemPathToURI(std::string const& in_path);
 
 /// Lookup an item in a std::map
@@ -70,6 +72,8 @@ boost::optional<U const&> getOptionalCRef(
         return boost::none;
 }
 
-}} // namespace
+} // namespace utils
+} // namespace csar
+} // namespace pdal
 
 #endif

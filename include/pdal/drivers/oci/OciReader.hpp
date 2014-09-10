@@ -64,16 +64,31 @@ public:
     {}
 
     static Options getDefaultOptions();
-    StageSequentialIterator* createSequentialIterator() const;
 
 private:
     virtual void initialize();
     virtual void processOptions(const Options& options);
     virtual void addDimensions(PointContext ctx);
+    virtual void ready(PointContext ctx)
+        { m_atEnd = false; }
+    virtual point_count_t read(PointBuffer& buf, point_count_t);
+    virtual bool eof()
+        { return m_atEnd; }
+
     void validateQuery();
     void defineBlock(Statement statement, BlockPtr block) const;
     pdal::SpatialReference fetchSpatialReference(Statement statement,
         BlockPtr block) const;
+
+    void readBlob(Statement stmt, BlockPtr block);
+    point_count_t readDimMajor(PointBuffer& buffer, BlockPtr block,
+        point_count_t numPts);
+    point_count_t readPointMajor(PointBuffer& buffer, BlockPtr block,
+        point_count_t numPts);
+    char *seekDimMajor(const schema::DimInfo& d, BlockPtr block);
+    char *seekPointMajor(BlockPtr block);
+    bool readOci(Statement stmt, BlockPtr block);
+    schema::XMLSchema *findSchema(Statement stmt, BlockPtr block);
 
     Connection m_connection;
     Statement m_stmt;
@@ -82,6 +97,8 @@ private:
     std::string m_schemaFile;
     std::string m_connSpec;
     boost::optional<SpatialReference> m_spatialRef;
+    bool m_atEnd;
+    std::map<int32_t, schema::XMLSchema> m_schemas;
 
     OciReader& operator=(const OciReader&); // not implemented
     OciReader(const OciReader&); // not implemented

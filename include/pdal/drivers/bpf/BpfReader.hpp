@@ -34,9 +34,11 @@
 
 #pragma once
 
+#include <vector>
+
+#include <pdal/Charbuf.hpp>
 #include <pdal/IStream.hpp>
 #include <pdal/Reader.hpp>
-#include <pdal/ReaderIterator.hpp>
 
 #include "BpfHeader.hpp"
 
@@ -50,15 +52,11 @@ public:
     SET_STAGE_LINK("http://pdal.io/stages/drivers.bpf.reader.html")
     SET_STAGE_ENABLED(true)
 
-    BpfReader(const Options&);
-    BpfReader(const std::string&);
+    BpfReader(const Options& options) : Reader(options)
+        {}
 
-    virtual boost::uint64_t getNumPoints() const
-        {  return m_header.m_numPts; }
-
-    StageSequentialIterator* createSequentialIterator() const;
-    StageRandomIterator* createRandomIterator(PointBuffer& buffer) const;
-
+    virtual point_count_t numPoints() const
+        {  return (point_count_t)m_header.m_numPts; }
 private:
     ILeStream m_stream;
     BpfHeader m_header;
@@ -68,12 +66,36 @@ private:
     std::vector<BpfUlemFrame> m_ulemFrames;
     BpfPolarHeader m_polarHeader;
     std::vector<BpfPolarFrame> m_polarFrames;
+    /// Stream position at the beginning of point records.
+    std::streampos m_start;
+    /// Index of the next point to read.
+    point_count_t m_index;
+    /// Buffer for deflated data.
+    std::vector<char> m_deflateBuf;
+    /// Streambuf for deflated data.
+    Charbuf m_charbuf;
 
+    virtual void processOptions(const Options& options);
     virtual void initialize();
     virtual void addDimensions(PointContext ctx);
+    virtual void ready(PointContext ctx);
+    virtual point_count_t read(PointBuffer& buf, point_count_t num);
+    virtual void done(PointContext ctx);
+    virtual bool eof();
+
     bool readUlemData();
     bool readPolarData();
+    point_count_t readPointMajor(PointBuffer& data, point_count_t count);
+    point_count_t readDimMajor(PointBuffer& data, point_count_t count);
+    point_count_t readByteMajor(PointBuffer& data, point_count_t count);
+    size_t readBlock(std::vector<char>& outBuf, size_t index);
+#ifdef PDAL_HAVE_ZLIB
+    int inflate(char *inbuf, size_t insize, char *outbuf, size_t outsize);
+#endif
+    void seekPointMajor(PointId ptIdx);
+    void seekDimMajor(size_t dimIdx, PointId ptIdx);
+    void seekByteMajor(size_t dimIdx, size_t byteIdx, PointId ptIdx);
 };
 
-} // namespace
+} // namespace pdal
 

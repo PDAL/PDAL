@@ -37,14 +37,9 @@
 #include <iostream>
 
 #include <pdal/drivers/las/Writer.hpp>
+#include <pdal/drivers/las/ZipPoint.hpp>
 
 #include "LasHeaderWriter.hpp"
-
-#include "ZipPoint.hpp"
-
-#ifdef PDAL_HAVE_LASZIP
-#include <laszip/laszipper.hpp>
-#endif
 
 #include <pdal/Stage.hpp>
 #include <pdal/PointBuffer.hpp>
@@ -462,14 +457,14 @@ void Writer::ready(PointContext ctx)
         if (!m_zipPoint)
         {
             PointFormat format = m_lasHeader.getPointFormat();
-            boost::scoped_ptr<ZipPoint> z(new ZipPoint(format, m_lasHeader,
+            std::unique_ptr<ZipPoint> z(new ZipPoint(format, m_lasHeader,
                 false));
             m_zipPoint.swap(z);
         }
 
         if (!m_zipper)
         {
-            boost::scoped_ptr<LASzipper> z(new LASzipper());
+            std::unique_ptr<LASzipper> z(new LASzipper());
             m_zipper.swap(z);
 
             bool stat(false);

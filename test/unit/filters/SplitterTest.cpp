@@ -47,7 +47,9 @@ BOOST_AUTO_TEST_SUITE(SplitterTest)
 BOOST_AUTO_TEST_CASE(test_tile_filter)
 {
     // create the reader
-    drivers::las::Reader r(Support::datapath("1.2-with-color.las"));
+    Options ops1;
+    ops1.add("filename", Support::datapath("1.2-with-color.las"));
+    drivers::las::Reader r(ops1);
 
     Options o;
     Option length("length", 1000, "length");

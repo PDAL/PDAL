@@ -48,12 +48,6 @@ Options SbetReader::getDefaultOptions()
 }
 
 
-void SbetReader::processOptions(const Options& options)
-{
-    m_filename = options.getOption("filename").getValue<std::string>();
-}
-
-
 void SbetReader::addDimensions(PointContext ctx)
 {
     ctx.registerDims(getDefaultDimensions());
@@ -67,34 +61,24 @@ void SbetReader::ready(PointContext ctx)
     if (fileSize % pointSize != 0)
         throw pdal_error("invalid sbet file size");
     m_numPts = fileSize / pointSize;
+    m_index = 0;
     m_stream.reset(new ILeStream(m_filename));
 }
 
 
-StageSequentialIterator* SbetReader::createSequentialIterator() const
-{
-    return new iterators::sequential::SbetSeqIterator(getDefaultDimensions(),
-        m_numPts, *m_stream);
-}
-
-
-namespace iterators
-{
-namespace sequential
-{
-
-point_count_t SbetSeqIterator::readImpl(PointBuffer& buf, point_count_t numPts)
+point_count_t SbetReader::read(PointBuffer& buf, point_count_t count)
 {
     PointId nextId = buf.size();
     PointId idx = m_index;
     point_count_t numRead = 0;
     seek(idx);
-    while (numRead < numPts && idx < m_numPts)
+    Dimension::IdList dims = getDefaultDimensions();
+    while (numRead < count && idx < m_numPts)
     {
-        for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
+        for (auto di = dims.begin(); di != dims.end(); ++di)
         {
             double d;
-            m_stream >> d;
+            *m_stream >> d;
             Dimension::Id::Enum dim = *di;
             buf.setField(dim, nextId, d);
         }
@@ -107,28 +91,16 @@ point_count_t SbetSeqIterator::readImpl(PointBuffer& buf, point_count_t numPts)
 }
 
 
-uint64_t SbetSeqIterator::skipImpl(uint64_t pointsToSkip)
-{
-    uint32_t lastIndex = (uint32_t)m_index;
-    uint64_t newIndex = m_index + pointsToSkip;
-    m_index = (uint32_t)std::min((uint64_t)m_numPts, newIndex);
-    return std::min(pointsToSkip, m_index - lastIndex);
-}
-
-
-bool SbetSeqIterator::atEndImpl() const
+bool SbetReader::eof()
 {
     return m_index >= m_numPts;
 }
 
 
-void SbetSeqIterator::seek(PointId idx)
+void SbetReader::seek(PointId idx)
 {
-    m_stream.seek(idx * sizeof(double) * m_dims.size());
+    m_stream->seek(idx * sizeof(double) * getDefaultDimensions().size());
 }
-
-} // namespace sequential
-} // namespace iterators
 
 } // namespace sbet
 } // namespace drivers

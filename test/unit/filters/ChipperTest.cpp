@@ -56,7 +56,9 @@ BOOST_AUTO_TEST_CASE(test_construction)
 {
     PointContext ctx;
 
-    pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
+    Options ops1;
+    ops1.add("filename", Support::datapath("1.2-with-color.las"));
+    drivers::las::Reader reader(ops1);
 
     {
         // need to scope the writer, so that's it dtor can use the stream

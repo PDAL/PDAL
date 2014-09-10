@@ -165,6 +165,8 @@ void Stage::l_processOptions(const Options& options)
         // point.  Maybe another stage might forward/set it later.
     }
 
+    // Process reader-specific options.
+    readerProcessOptions(options);
     // Process writer-specific options.
     writerProcessOptions(options);
 }

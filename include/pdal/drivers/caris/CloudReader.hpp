@@ -25,26 +25,31 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ************************************************************************/
-#ifndef INCLUDED_DRIVERS_CSAR_CLOUDREADER_HPP
-#define INCLUDED_DRIVERS_CSAR_CLOUDREADER_HPP
 
-#include "config.h"
+#pragma once
 
-#include "caris/caris_pc_wrapper.h"
+//#include "config.h"
+//#include "caris/caris_pc_wrapper.h"
 
 #ifdef _MSC_VER
 #   pragma warning(push, 3)
 #   pragma warning(disable : DISABLED_3RDPARTY_WARNINGS)
 #endif 
 
-#include <pdal/Stage.hpp>
 #include <pdal/Reader.hpp>
 
 #ifdef _MSC_VER
 #   pragma warning(pop)
 #endif
 
-namespace csar {
+struct caris_dimension;
+struct caris_cloud;
+struct caris_itr;
+
+namespace pdal
+{
+namespace csar
+{
 
 //! Base Reader implementaion of CARIS Clouds
 class CloudReader : public pdal::Reader
@@ -57,72 +62,59 @@ public:
     SET_STAGE_ENABLED(false)
 #endif
 
-    
-    explicit CloudReader(const pdal::Options& options);
+    explicit CloudReader(const pdal::Options& options) : pdal::Reader(options)
+        {}
     virtual ~CloudReader();
-    
-    
-    virtual void initialize();
-    virtual pdal::StageSequentialIterator*
-    createSequentialIterator(pdal::PointBuffer& in_buffer) const;
     
     //! Info for mapping between pdal and caris dimensions
     struct DimInfo
     {
         DimInfo()
-            : dimIndex(), tupleIndex(), dimension()
+            : dimIndex(), tupleIndex(), type(Dimension::Type::None), dimension()
         {}
+
         DimInfo(int in_dimIndex, int in_tupleIndex,
+                Dimension::Type::Enum in_type,
                 caris_dimension const* in_dimension) :
             dimIndex(in_dimIndex), tupleIndex(in_tupleIndex),
-            dimension(in_dimension)
+            type(in_type), dimension(in_dimension)
         {}
         
         //! index of the dimension in the related caris_cloud
         int dimIndex;
         //! the tuple index of the caris_dimension to be mapped to pdal
         int tupleIndex;
+        // PDAL type of the dimension
+        Dimension::Type::Enum type;
         //! related dimension
         caris_dimension const* dimension;
     };
     
-    std::map<pdal::dimension::id, DimInfo> const& getDimInfo() const;
-    caris_cloud * getCarisCloud() const;
+    caris_cloud* getCarisCloud() const
+        { return m_cloud; }
+
+    point_count_t numPoints();
     
 protected:
     virtual std::string getURI() const = 0;
     
 private:
     caris_cloud * m_cloud;
-    std::map<pdal::dimension::id, DimInfo> m_dimInfo;
+    std::map<Dimension::Id::Enum, DimInfo> m_dims;
+    caris_itr * m_itr;
+    int32_t m_currentOffset;
+
+    
+    virtual void initialize();
+    virtual void addDimensions(PointContext ctx);
+    virtual void ready(PointContext ctx);
+    virtual point_count_t read(PointBuffer& buf, point_count_t num);
+    virtual bool eof();
+    virtual void done(PointContext ctx);
+
+    void throwIfItrError() const;
 };
 
-//************************************************************************
-//! info for mapping from pdal to caris dimensions
-/*!
-\return 
-    \li info for mapping from pdal to caris dimensions
-*/
-//************************************************************************
-inline
-std::map<pdal::dimension::id, CloudReader::DimInfo> const& CloudReader::getDimInfo() const
-{
-    return m_dimInfo;
-}
+} // namespace csar
+} // namespace pdal
 
-//************************************************************************
-//! get underlying caris_cloud
-/*!
-\return 
-    \li underlying caris_cloud
-*/
-//************************************************************************
-inline
-caris_cloud * CloudReader::getCarisCloud() const
-{
-    return m_cloud;
-}
-
-} // namespace
-
-#endif

@@ -38,9 +38,9 @@
 #include <pdal/drivers/las/Support.hpp>
 #include <pdal/drivers/las/Header.hpp>
 #include <pdal/drivers/las/SummaryData.hpp>
+#include <pdal/drivers/las/ZipPoint.hpp>
 #include <pdal/StreamFactory.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/scoped_ptr.hpp>
 
 namespace pdal
 {
@@ -107,11 +107,9 @@ private:
     LasHeader m_lasHeader;
     boost::uint32_t m_numPointsWritten;
     SummaryData m_summaryData;
+    std::unique_ptr<LASzipper> m_zipper;
+    std::unique_ptr<ZipPoint> m_zipPoint;
 
-#ifdef PDAL_HAVE_LASZIP
-    boost::scoped_ptr<LASzipper> m_zipper;
-    boost::scoped_ptr<ZipPoint> m_zipPoint;
-#endif
     virtual void processOptions(const Options& options);
     virtual void ready(PointContext ctx);
     virtual void write(const PointBuffer& pointBuffer);

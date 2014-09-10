@@ -38,7 +38,6 @@
 #include <pdal/Utils.hpp>
 #include <pdal/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
-#include <pdal/StageIterator.hpp>
 #include <pdal/drivers/bpf/BpfReader.hpp>
 
 #include "Support.hpp"
@@ -54,13 +53,18 @@ void test_file_type(const std::string& filename)
 
     PointContext context;
 
-    pdal::BpfReader reader(Support::datapath(filename));
+    Options ops;
+
+    ops.add("filename", Support::datapath(filename));
+    ops.add("count", 506);
+    BpfReader reader(ops);
+
     reader.prepare(context);
-    
-    PointBuffer data(context);
-    StageSequentialIterator *it = reader.createSequentialIterator();
-    boost::uint32_t numRead = it->read(data, 3);
-    BOOST_CHECK(numRead = 3);
+    PointBufferSet pbSet = reader.execute(context);
+
+    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    PointBufferPtr buf = *pbSet.begin();
+    BOOST_CHECK_EQUAL(buf->size(), 506);
 
     struct PtData
     {
@@ -75,43 +79,29 @@ void test_file_type(const std::string& filename)
 
     for (int i = 0; i < 3; ++i)
     {
-        float x = data.getFieldAs<float>(Dimension::Id::X, i);
-        float y = data.getFieldAs<float>(Dimension::Id::Y, i);
-        float z = data.getFieldAs<float>(Dimension::Id::Z, i);
+        float x = buf->getFieldAs<float>(Dimension::Id::X, i);
+        float y = buf->getFieldAs<float>(Dimension::Id::Y, i);
+        float z = buf->getFieldAs<float>(Dimension::Id::Z, i);
         
         BOOST_CHECK_CLOSE(x, pts2[i].x, 0.001);
         BOOST_CHECK_CLOSE(y, pts2[i].y, 0.001);
         BOOST_CHECK_CLOSE(z, pts2[i].z, 0.001);
     }
 
-    // Should be positioned at point 3.
-    // Skip by 500, which should put us at 503.
-
-    it->skip(500);
-    PointBuffer data2(context);
-    numRead = it->read(data2, 3);
-    BOOST_CHECK(numRead = 3);
     PtData pts[3] = { {494915.25, 4878096.5, 128.220001},
                       {494917.062, 4878124.5, 128.539993},
                       {494920.781, 4877914.5, 127.43} };
 
-    for (int i = 0; i < 3; ++i)
+    for (int i = 503; i < 3; ++i)
     {
-        float x = data2.getFieldAs<float>(Dimension::Id::X, i);
-        float y = data2.getFieldAs<float>(Dimension::Id::Y, i);
-        float z = data2.getFieldAs<float>(Dimension::Id::Z, i);
+        float x = buf->getFieldAs<float>(Dimension::Id::X, i);
+        float y = buf->getFieldAs<float>(Dimension::Id::Y, i);
+        float z = buf->getFieldAs<float>(Dimension::Id::Z, i);
         
         BOOST_CHECK_CLOSE(x, pts[i].x, 0.001);
         BOOST_CHECK_CLOSE(y, pts[i].y, 0.001);
         BOOST_CHECK_CLOSE(z, pts[i].z, 0.001);
     }
-
-    // We should now be at 506.  Skip too far.  Check that we've skipped
-    // to the end.
-    uint32_t numSkipped = it->skip(2000);
-    BOOST_CHECK(numSkipped == 559);
-
-    delete it;
 }
 
 } //namespace

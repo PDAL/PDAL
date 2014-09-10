@@ -36,7 +36,6 @@
 #define INCLUDED_PDAL_KERNEL_DELTA_HPP
 
 #include <pdal/Stage.hpp>
-#include <pdal/StageIterator.hpp>
 #include <pdal/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/KDIndex.hpp>

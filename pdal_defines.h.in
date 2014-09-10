@@ -42,6 +42,7 @@
 #cmakedefine PDAL_HAVE_PCL
 #cmakedefine PDAL_HAVE_PYTHON
 #cmakedefine PDAL_HAVE_SQLITE
+#cmakedefine PDAL_HAVE_GREYHOUND
 #cmakedefine PDAL_HAVE_POSTGRESQL
 #cmakedefine PDAL_HAVE_ZLIB
 #cmakedefine PDAL_HAVE_DEMANGLER

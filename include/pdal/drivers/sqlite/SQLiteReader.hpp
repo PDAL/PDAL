@@ -35,16 +35,11 @@
 #pragma once
 
 #include <pdal/Reader.hpp>
-#include <pdal/ReaderIterator.hpp>
 #include <pdal/XMLSchema.hpp>
 
-
 #include <pdal/drivers/sqlite/SQLiteCommon.hpp>
-#include <boost/scoped_ptr.hpp>
-#include <boost/scoped_array.hpp>
 
 #include <vector>
-
 
 namespace pdal
 {
@@ -52,8 +47,6 @@ namespace drivers
 {
 namespace sqlite
 {
-
-
 
 class PDAL_DLL SQLiteReader : public pdal::Reader
 {
@@ -67,33 +60,39 @@ public:
 
     SQLiteReader(const Options&);
     static Options getDefaultOptions();
-    pdal::StageSequentialIterator*
-        createSequentialIterator() const;
-    pdal::schema::XMLSchema fetchSchema(std::string const& query) const;
-    pdal::SpatialReference
-        fetchSpatialReference(std::string const& query) const;
-
+    schema::XMLSchema fetchSchema(std::string const& query) const;
+    SpatialReference fetchSpatialReference(std::string const& query) const;
     SQLite& getSession() { return *m_session.get(); }
     
 private:
-    SQLiteReader& operator=(const SQLiteReader&); // not implemented
-    SQLiteReader(const SQLiteReader&); // not implemented
-    
-    virtual void initialize();
-    virtual void processOptions(const Options& options);
-    virtual void addDimensions(PointContext ctx);    
-    
-    void validateQuery() const;
-
     std::unique_ptr<SQLite> m_session;
     std::string m_query;
     std::string m_schemaFile;
     std::string m_connection;
     boost::optional<SpatialReference> m_spatialRef;
     PatchPtr m_patch;
+
+    bool m_at_end;
+    bool b_doneQuery;
+    int32_t m_point_size;    
+    
+    virtual void initialize();
+    virtual void processOptions(const Options& options);
+    virtual void addDimensions(PointContext ctx);    
+    virtual void ready(PointContext ctx);
+    point_count_t read(PointBuffer& buf, point_count_t count);
+    bool eof()
+        { return m_at_end; }
+    
+    void validateQuery() const;
+    point_count_t readPatch(PointBuffer& buffer, point_count_t count);
+    bool NextBuffer();
+
+    SQLiteReader& operator=(const SQLiteReader&); // not implemented
+    SQLiteReader(const SQLiteReader&); // not implemented
 };
 
-}
-}
-} // namespace pdal::driver::oci
+} // namespace sqlite
+} // namespace drivers
+} // namespace pdal
 

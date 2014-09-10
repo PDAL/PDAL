@@ -58,6 +58,18 @@ enum Enum
 };
 }
 
+inline BaseType::Enum fromName(std::string name)
+{
+    if (name == "signed")
+        return BaseType::Signed;
+    else if (name == "unsigned")
+        return BaseType::Unsigned;
+    else if (name == "floating")
+        return BaseType::Floating;
+    else
+        throw pdal_error("Invalid BaseType name");
+}
+
 inline std::string toName(BaseType::Enum b)
 {
     switch (b)

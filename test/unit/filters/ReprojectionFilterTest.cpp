@@ -37,7 +37,6 @@
 #include <pdal/SpatialReference.hpp>
 #include <pdal/drivers/las/Reader.hpp>
 #include <pdal/filters/Reprojection.hpp>
-#include <pdal/StageIterator.hpp>
 #include <pdal/PointBuffer.hpp>
 
 #include "Support.hpp"
@@ -73,7 +72,9 @@ BOOST_AUTO_TEST_CASE(ReprojectionFilterTest_test_1)
     {
         const SpatialReference out_ref(epsg4326_wkt);
 
-        drivers::las::Reader reader(Support::datapath("utm15.las"));
+        Options ops1;
+        ops1.add("filename", Support::datapath("utm15.las"));
+        drivers::las::Reader reader(ops1);
 
         Options options;
         Option debug("debug", true, "");

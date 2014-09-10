@@ -1,11 +1,4 @@
 /******************************************************************************
- * $Id$
- *
- * Project:  libLAS - http://liblas.org - A BSD library for LAS format data.
- * Purpose:  LAS header class
- * Author:   Mateusz Loskot, mateusz@loskot.net
- *
- ******************************************************************************
  * Copyright (c) 2008, Mateusz Loskot
  * Copyright (c) 2008, Phil Vachon
  *
@@ -47,7 +40,7 @@
 #include <pdal/drivers/las/Reader.hpp>
 #include <pdal/drivers/las/Header.hpp>
 #include <pdal/drivers/las/VariableLengthRecord.hpp>
-#include "ZipPoint.hpp"
+#include <pdal/drivers/las/ZipPoint.hpp>
 
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/scoped_array.hpp>
@@ -62,12 +55,8 @@ namespace las
 
 
 LasHeaderReader::LasHeaderReader(LasHeader& header, std::istream& istream)
-    : m_header(header)
-    , m_istream(istream)
-    , m_numVLRs(0)
-{
-    return;
-}
+    : m_header(header), m_istream(istream), m_numVLRs(0)
+{}
 
 
 void LasHeaderReader::read(Reader& stage)
@@ -115,7 +104,6 @@ void LasHeaderReader::read(Reader& stage)
     // 8. Version major
     Utils::read_n(n1, m_istream, sizeof(n1));
     m_header.SetVersionMajor(n1);
-
     // 9. Version minor
     Utils::read_n(n1, m_istream, sizeof(n1));
     m_header.SetVersionMinor(n1);

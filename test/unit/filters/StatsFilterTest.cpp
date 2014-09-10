@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE(StatsFilterTest_test1)
     Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
     Options ops;
     ops.add("bounds", bounds);
-    ops.add("num_points", 1000);
+    ops.add("count", 1000);
     ops.add("mode", "constant");
     drivers::faux::Reader reader(ops);
 
@@ -62,17 +62,7 @@ BOOST_AUTO_TEST_CASE(StatsFilterTest_test1)
 
     PointContext ctx;
     filter.prepare(ctx);
-
-    PointBuffer buf(ctx);
-
-    std::unique_ptr<StageSequentialIterator>
-        iter(reader.createSequentialIterator());
-    boost::uint32_t numRead = iter->read(buf, 1000);
-    BOOST_CHECK_EQUAL(numRead, 1000u);
-
-    FilterTester::ready(&filter, ctx);
-    FilterTester::filter(&filter, buf);
-    FilterTester::done(&filter, ctx);
+    filter.execute(ctx);
 
     const filters::stats::Summary& statsX = filter.getStats(Dimension::Id::X);
     const filters::stats::Summary& statsY = filter.getStats(Dimension::Id::Y);

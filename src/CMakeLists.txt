@@ -50,12 +50,10 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/Range.hpp"
   "${PDAL_HEADERS_DIR}/RawPtBuf.hpp"
   "${PDAL_HEADERS_DIR}/Reader.hpp"
-  "${PDAL_HEADERS_DIR}/ReaderIterator.hpp"
   "${PDAL_HEADERS_DIR}/SpatialReference.hpp"
   "${PDAL_HEADERS_DIR}/Stage.hpp"
   "${PDAL_HEADERS_DIR}/StageFactory.hpp"
   "${PDAL_HEADERS_DIR}/StageInfo.hpp"
-  "${PDAL_HEADERS_DIR}/StageIterator.hpp"
   "${PDAL_HEADERS_DIR}/StageRunner.hpp"
   "${PDAL_HEADERS_DIR}/StreamFactory.hpp"
   "${PDAL_HEADERS_DIR}/UserCallback.hpp"
@@ -97,12 +95,10 @@ set(PDAL_BASE_CPP
   QuadIndex.cpp
   Range.cpp
   Reader.cpp
-  ReaderIterator.cpp
   SpatialReference.cpp
   Stage.cpp
   StageFactory.cpp
   StageInfo.cpp
-  StageIterator.cpp
   StreamFactory.cpp
   Utils.cpp
   Vector.cpp
@@ -141,12 +137,12 @@ set (PDAL_DRIVERS_LAS_HPP
   "${PDAL_LAS_SRC}/GeotiffSupport.hpp"
   "${PDAL_LAS_SRC}/LasHeaderReader.hpp"
   "${PDAL_LAS_SRC}/LasHeaderWriter.hpp"
-  "${PDAL_LAS_SRC}/ZipPoint.hpp"
   "${PDAL_LAS_HEADERS}/Header.hpp"
   "${PDAL_LAS_HEADERS}/Reader.hpp"
   "${PDAL_LAS_HEADERS}/SummaryData.hpp"
   "${PDAL_LAS_HEADERS}/Support.hpp"
   "${PDAL_LAS_HEADERS}/Writer.hpp"
+  "${PDAL_LAS_HEADERS}/ZipPoint.hpp"
   "${PDAL_LAS_HEADERS}/VariableLengthRecord.hpp"
 )
 
@@ -182,14 +178,12 @@ set(PDAL_BPF_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_BPF_PATH}")
 
 set(PDAL_DRIVERS_BPF_HPP
     "${PDAL_BPF_HEADERS}/BpfReader.hpp"
-    "${PDAL_BPF_HEADERS}/BpfSeqIterator.hpp"
     "${PDAL_BPF_HEADERS}/BpfHeader.hpp"
 )
 
 set(PDAL_DRIVERS_BPF_CPP
     "${PDAL_BPF_SRC}/BpfHeader.cpp"
     "${PDAL_BPF_SRC}/BpfReader.cpp"
-    "${PDAL_BPF_SRC}/BpfSeqIterator.cpp"
 )
 
 list (APPEND PDAL_CPP ${PDAL_DRIVERS_BPF_CPP} )
@@ -261,7 +255,6 @@ set(PDAL_CARIS_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_CARIS_PATH}")
 
 set(PDAL_DRIVERS_CARIS_HPP
   "${PDAL_CARIS_HEADERS}/CloudReader.hpp"
-  "${PDAL_CARIS_HEADERS}/CloudIterator.hpp"
   "${PDAL_CARIS_SRC}/Utils.hpp"
   "${PDAL_CARIS_SRC}/config.h"
   "${PDAL_CARIS_SRC}/caris/caris_pc_wrapper.h"
@@ -269,7 +262,6 @@ set(PDAL_DRIVERS_CARIS_HPP
 
 set (PDAL_DRIVERS_CARIS_CPP
   "${PDAL_CARIS_SRC}/CloudReader.cpp"
-  "${PDAL_CARIS_SRC}/CloudIterator.cpp"
   "${PDAL_CARIS_SRC}/pdal_csar.cpp"
   "${PDAL_CARIS_SRC}/Utils.cpp"
   "${PDAL_CARIS_SRC}/caris/caris_pc_wrapper.c"
@@ -291,7 +283,6 @@ set(PDAL_ORACLE_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_ORACLE_PATH}")
 set(PDAL_DRIVERS_OCI_HPP
   "${PDAL_ORACLE_HEADERS}/Writer.hpp"
   "${PDAL_ORACLE_HEADERS}/OciReader.hpp"
-  "${PDAL_ORACLE_HEADERS}/OciSeqIterator.hpp"
   "${PDAL_ORACLE_HEADERS}/oci_wrapper.h"
   "${PDAL_ORACLE_HEADERS}/common.hpp"
 )
@@ -300,7 +291,6 @@ set (PDAL_DRIVERS_OCI_CPP
   "${PDAL_ORACLE_SRC}/oci_wrapper.cpp"
   "${PDAL_ORACLE_SRC}/common.cpp"
   "${PDAL_ORACLE_SRC}/OciReader.cpp"
-  "${PDAL_ORACLE_SRC}/OciSeqIterator.cpp"
   "${PDAL_ORACLE_SRC}/Writer.cpp"
 )
 
@@ -461,13 +451,11 @@ set(PDAL_SQLITE_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_SQLITE_PATH}")
 
 set(PDAL_DRIVERS_SQLITE_HPP
   "${PDAL_SQLITE_HEADERS}/SQLiteCommon.hpp"
-  "${PDAL_SQLITE_HEADERS}/SQLiteIterator.hpp"
   "${PDAL_SQLITE_HEADERS}/SQLiteReader.hpp"
   "${PDAL_SQLITE_HEADERS}/SQLiteWriter.hpp"
 )
 
 set (PDAL_DRIVERS_SQLITE_CPP
-  "${PDAL_SQLITE_SRC}/SQLiteIterator.cpp"
   "${PDAL_SQLITE_SRC}/SQLiteReader.cpp"
   "${PDAL_SQLITE_SRC}/SQLiteWriter.cpp"
 )
@@ -492,13 +480,11 @@ set(PDAL_DRIVERS_PGPOINTCLOUD_HPP
   "${PDAL_PGPOINTCLOUD_HEADERS}/common.hpp"
   "${PDAL_PGPOINTCLOUD_HEADERS}/Writer.hpp"
   "${PDAL_PGPOINTCLOUD_HEADERS}/PgReader.hpp"
-  "${PDAL_PGPOINTCLOUD_HEADERS}/PgIterator.hpp"
 )
 
 set (PDAL_DRIVERS_PGPOINTCLOUD_CPP
   "${PDAL_PGPOINTCLOUD_SRC}/Writer.cpp"
   "${PDAL_PGPOINTCLOUD_SRC}/PgReader.cpp"
-  "${PDAL_PGPOINTCLOUD_SRC}/PgIterator.cpp"
 )
 
 # no provision is made for building as a plugin

@@ -33,21 +33,7 @@
 ****************************************************************************/
 
 #include <pdal/drivers/sqlite/SQLiteReader.hpp>
-#include <pdal/drivers/sqlite/SQLiteIterator.hpp>
 #include <pdal/PointBuffer.hpp>
-#include <pdal/FileUtils.hpp>
-#include <pdal/Utils.hpp>
-#include <pdal/StageFactory.hpp>
-
-#include <boost/shared_ptr.hpp>
-#include <boost/scoped_ptr.hpp>
-#include <boost/tokenizer.hpp>
-#include <boost/make_shared.hpp>
-#include <boost/algorithm/string.hpp>
-
-#include <iostream>
-#include <map>
-#include <string>
 
 #ifdef USE_PDAL_PLUGIN_SOCI
 MAKE_READER_CREATOR(sqliteReader, pdal::drivers::sqlite::Reader)
@@ -62,21 +48,21 @@ namespace drivers
 namespace sqlite
 {
 
-
-SQLiteReader::SQLiteReader(const Options& options)
-    : pdal::Reader(options)
+SQLiteReader::SQLiteReader(const Options& options) : pdal::Reader(options)
 {}
 
 void SQLiteReader::initialize()
 {
     try
     {
-        log()->get(LogLevel::Debug) << "Connection: '" << m_connection << "'" << std::endl;
+        log()->get(LogLevel::Debug) << "Connection: '" << m_connection << "'" <<
+            std::endl;
         m_session = std::unique_ptr<SQLite>(new SQLite(m_connection, log()));
         m_session->connect(false); // don't connect in write mode
         log()->get(LogLevel::Debug) << "Connected to database" << std::endl;
         bool bHaveSpatialite = m_session->doesTableExist("geometry_columns");
-        log()->get(LogLevel::Debug) << "Have spatialite?: " << bHaveSpatialite << std::endl;
+        log()->get(LogLevel::Debug) << "Have spatialite?: " <<
+            bHaveSpatialite << std::endl;
         m_session->spatialite();
 
         if (!bHaveSpatialite)
@@ -106,7 +92,6 @@ void SQLiteReader::initialize()
     }
 
     m_patch = PatchPtr(new Patch());
-    
 }
 
 
@@ -173,7 +158,6 @@ void SQLiteReader::processOptions(const Options& options)
 }
 
 
-
 void SQLiteReader::validateQuery() const
 {
     std::set<std::string> reqFields;
@@ -193,6 +177,7 @@ void SQLiteReader::validateQuery() const
         }
     }
 }
+
 
 void SQLiteReader::addDimensions(PointContext ctx)
 {
@@ -218,15 +203,129 @@ void SQLiteReader::addDimensions(PointContext ctx)
 }
 
 
-pdal::StageSequentialIterator*
-SQLiteReader::createSequentialIterator() const
+void SQLiteReader::ready(PointContext ctx)
 {
-    return new pdal::drivers::sqlite::iterators::sequential::SQLiteIterator(*this, m_patch);
+    m_at_end = false;
+    b_doneQuery = false;
+
+    m_session.reset(new SQLite(m_connection, log()));
+    m_session->connect(false); // don't connect in write mode
+
+    schema::DimInfoList dims = m_patch->m_schema.m_dims;
+    m_point_size = 0;
+    for (auto di = dims.begin(); di != dims.end(); ++di)
+        m_point_size += Dimension::size(di->m_type);    
 }
 
 
+bool SQLiteReader::NextBuffer()
+{
+    return m_session->next();
+}
 
 
+point_count_t SQLiteReader::readPatch(PointBuffer& buffer, point_count_t numPts)
+{
+    const row* r = m_session->get();
+    if (!r)
+        throw pdal_error("readPatch with no data in session!");
+    std::map<std::string, int32_t> const& columns = m_session->columns();
+
+    // Availability of positions already validated
+    int32_t position = columns.find("POINTS")->second;
+    auto bytes = (*r)[position].blobBuf;
+    size_t size = (*r)[position].blobLen;
+    position = columns.find("NUM_POINTS")->second;
+    int32_t count = boost::lexical_cast<int32_t>((*r)[position].data);
+    log()->get(LogLevel::Debug4) << "fetched patch with " << count <<
+        " points and " << size << " bytes bytesize: " << size << std::endl;    
+    m_patch->remaining = count;
+    m_patch->count = count;
+    m_patch->bytes = bytes;
+    m_patch->byte_size = size;
+    
+    point_count_t numRemaining = m_patch->remaining;
+    PointId nextId = buffer.size();
+    point_count_t numRead = 0;
+
+    size_t offset = ((m_patch->count - m_patch->remaining) * m_point_size);
+    uint8_t *pos = &(m_patch->bytes.front()) + offset;
+
+    schema::DimInfoList& dims = m_patch->m_schema.m_dims;
+    while (numRead < numPts && numRemaining > 0)
+    {
+        for (auto di = dims.begin(); di != dims.end(); ++di)
+        {
+            schema::DimInfo& d = *di;
+            buffer.setField(d.m_id, d.m_type, nextId, pos);
+            pos += Dimension::size(d.m_type);
+        }
+
+        // Scale X, Y and Z
+        // double v = buffer.getFieldAs<double>(Dimension::Id::X, nextId);
+        // v = v * m_patch->xScale() + m_patch->xOffset();
+        // buffer.setField(Dimension::Id::X, nextId, v);
+        //
+        // v = buffer.getFieldAs<double>(Dimension::Id::Y, nextId);
+        // v = v * m_patch->yScale() + m_patch->yOffset();
+        // buffer.setField(Dimension::Id::Y, nextId, v);
+        //
+        // v = buffer.getFieldAs<double>(Dimension::Id::Z, nextId);
+        // v = v * m_patch->zScale() + m_patch->zOffset();
+        // buffer.setField(Dimension::Id::Z, nextId, v);
+
+        numRemaining--;
+        nextId++;
+        numRead++;
+    }
+    
+    m_patch->remaining = numRemaining;
+    
+    return numRead;
 }
+
+
+point_count_t SQLiteReader::read(PointBuffer& buffer, point_count_t count)
+{
+    if (eof())
+        return 0;
+    
+    log()->get(LogLevel::Debug4) << "readBufferImpl called with "
+        "PointBuffer filled to " << buffer.size() << " points" <<
+        std::endl;
+
+    point_count_t totalNumRead = 0;
+    if (! b_doneQuery)
+    {
+        // read first patch
+        m_session->query(m_query);
+        validateQuery();
+        b_doneQuery = true;
+        totalNumRead = readPatch(buffer, count); 
+    }
+
+    int patch_count(0);
+    while (totalNumRead < count)
+    {
+        if (m_patch->remaining == 0)
+        {
+            if (!NextBuffer())
+            {
+                m_at_end = true;
+                return totalNumRead;
+            }
+        }
+        PointId bufBegin = buffer.size();
+        point_count_t numRead = readPatch(buffer, count - totalNumRead);
+        PointId bufEnd = bufBegin + numRead;
+        totalNumRead += numRead;
+        patch_count++;
+    }
+
+    return totalNumRead;
+
 }
-} // namespace pdal::driver::sqlite
+
+} // namespace sqlite
+} // namespace drivers
+} // namespace pdal
