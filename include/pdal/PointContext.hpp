@@ -195,7 +195,7 @@ public:
     // @return the current type for a given id
     Dimension::Type::Enum dimType(Dimension::Id::Enum id) const
     {
-        return hasDim(id) ? dimDetail(id)->type() : Dimension::Type::None;
+        return dimDetail(id)->type();
     }
 
     // @return the current size in bytes of the dimension

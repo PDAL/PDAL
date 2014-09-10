@@ -203,7 +203,7 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
     drivers["sbet"] = "drivers.sbet.reader";
     drivers["icebridge"] = "drivers.icebridge.reader";
     drivers["sqlite"] = "drivers.sqlite.reader";
-    
+
 #ifdef PDAL_HAVE_PCL
     drivers["pcd"] = "drivers.pcd.reader";
 #endif
@@ -235,7 +235,7 @@ std::string StageFactory::inferWriterDriver(const std::string& filename)
     drivers["xyz"] = "drivers.text.writer";
     drivers["txt"] = "drivers.text.writer";
     drivers["ntf"] = "drivers.nitf.writer";
-    drivers["sqlite"] = "drivers.sqlite.writer";    
+    drivers["sqlite"] = "drivers.sqlite.writer";
 
     if (boost::algorithm::iequals(filename, "STDOUT"))
     {
@@ -616,17 +616,17 @@ std::map<std::string, pdal::StageInfo> const& StageFactory::getStageInfos() cons
 std::string StageFactory::toRST(std::string driverName) const
 {
     std::ostringstream os;
-    
+
     std::map<std::string, pdal::StageInfo> const& drivers = getStageInfos();
     typedef std::map<std::string, pdal::StageInfo>::const_iterator Iterator;
-    
+
     Iterator i = drivers.find(driverName);
     std::string headline("------------------------------------------------------------------------------------------");
-    
+
     os << headline << std::endl;
     os << "PDAL Options" << " (" << pdal::GetFullVersionString() << ")" <<std::endl;
     os << headline << std::endl << std::endl;
-    
+
     // If we were given an explicit driver name, only display that.
     // Otherwise, display output for all of the registered drivers.
     if ( i != drivers.end())

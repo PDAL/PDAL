@@ -34,8 +34,13 @@
 
 #pragma once
 
+#include <string>
+
 #include <pdal/WebSocketClient.hpp>
+#include <pdal/Dimension.hpp>
 #include <pdal/pdal_error.hpp>
+
+#include <pdal/drivers/greyhound/Reader.hpp>
 
 namespace pdal
 {
@@ -161,7 +166,7 @@ class GetSchema : public Exchange
 public:
     GetSchema(const std::string& sessionId)
         : Exchange("schema")
-        , m_schema()
+        , m_dimData()
     {
         m_req["session"] = sessionId;
     }
@@ -179,21 +184,45 @@ public:
             if (jsonResponse.isMember("schema") &&
                 jsonResponse["schema"].isString())
             {
-                m_schema = jsonResponse["schema"].asString();
-                valid = true;
+                Json::Value jsonSchema;
+                jsonReader.parse(jsonResponse["schema"].asString(), jsonSchema);
+
+                if (jsonSchema.isMember("dimensions") &&
+                    jsonSchema["dimensions"].isArray())
+                {
+                    Json::Value jsonDimArray(jsonSchema["dimensions"]);
+
+                    for (std::size_t i(0); i < jsonDimArray.size(); ++i)
+                    {
+                        const Json::Value& jsonDim(jsonDimArray[i]);
+
+                        const Dimension::Id::Enum id(
+                                Dimension::id(jsonDim["name"].asString()));
+
+                        const Dimension::Type::Enum type(
+                            static_cast<Dimension::Type::Enum>(
+                                static_cast<int>(Dimension::fromName(
+                                    jsonDim["type"].asString())) |
+                                std::stoi(jsonDim["size"].asString())));
+
+                        m_dimData.push_back(DimData(id, type));
+                    }
+
+                    valid = true;
+                }
             }
         }
 
         return valid;
     }
 
-    std::string schema() const
+    std::vector<DimData> schema() const
     {
-        return m_schema;
+        return m_dimData;
     }
 
 private:
-    std::string m_schema;
+    std::vector<DimData> m_dimData;
 };
 
 class Read : public Exchange
@@ -228,15 +257,15 @@ public:
             Json::Reader jsonReader;
             jsonReader.parse(res().at(0)->get_payload(), jsonResponse);
 
-            if (jsonResponse.isMember("pointsRead") &&
-                jsonResponse["pointsRead"].isIntegral() &&
-                jsonResponse.isMember("bytesCount") &&
-                jsonResponse["bytesCount"].isIntegral())
+            if (jsonResponse.isMember("numPoints") &&
+                jsonResponse["numPoints"].isIntegral() &&
+                jsonResponse.isMember("numBytes") &&
+                jsonResponse["numBytes"].isIntegral())
             {
                 m_pointsToRead =
-                    std::max<int>(jsonResponse["pointsRead"].asInt(), 0);
+                    std::max<int>(jsonResponse["numPoints"].asInt(), 0);
                 m_numBytes =
-                    std::max<int>(jsonResponse["bytesCount"].asInt(), 0);
+                    std::max<int>(jsonResponse["numBytes"].asInt(), 0);
 
                 valid = true;
             }

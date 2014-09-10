@@ -47,7 +47,7 @@ namespace pdal
 
 typedef websocketpp::client<websocketpp::config::asio_client> asioClient;
 typedef websocketpp::config::asio_client::message_type::ptr message_ptr;
-    
+
 class WebSocketExchange
 {
 public:

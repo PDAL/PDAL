@@ -33,7 +33,24 @@
 ****************************************************************************/
 
 #include <pdal/drivers/greyhound/Reader.hpp>
+
 #include "Exchanges.hpp"
+
+namespace
+{
+    std::size_t getPointByteSize(
+            std::vector<pdal::drivers::greyhound::DimData> dimData)
+    {
+        std::size_t pointByteSize(0);
+
+        for (auto dim : dimData)
+        {
+            pointByteSize += pdal::Dimension::size(dim.type);
+        }
+
+        return pointByteSize;
+    }
+}
 
 namespace pdal
 {
@@ -47,7 +64,7 @@ GreyhoundReader::GreyhoundReader(const Options& options)
     , m_uri()
     , m_pipelineId()
     , m_sessionId()
-    , m_remoteSchema()
+    , m_dimData()
     , m_numPoints()
     , m_wsClient()
 { }
@@ -63,7 +80,7 @@ StageSequentialIterator* GreyhoundReader::createSequentialIterator() const
     return new iterators::sequential::Iterator(
             const_cast<WebSocketClient&>(m_wsClient),
             m_sessionId,
-            m_remoteSchema,
+            m_dimData,
             m_numPoints);
 }
 
@@ -73,11 +90,6 @@ void GreyhoundReader::initialize()
     exchanges::CreateSession createExchange(m_pipelineId);
     m_wsClient.exchange(createExchange);
     m_sessionId = createExchange.getSession();
-
-    // Get remote schema.
-    exchanges::GetSchema schemaExchange(m_sessionId);
-    m_wsClient.exchange(schemaExchange);
-    m_remoteSchema = Schema::from_xml(schemaExchange.schema());
 }
 
 void GreyhoundReader::processOptions(const Options& options)
@@ -88,14 +100,17 @@ void GreyhoundReader::processOptions(const Options& options)
     m_wsClient.initialize(m_uri);
 }
 
-void GreyhoundReader::buildSchema(Schema* schema)
+void GreyhoundReader::addDimensions(PointContext pointContext)
 {
-    const pdal::schema::index_by_index& idx(
-            m_remoteSchema.getDimensions().get<pdal::schema::index>());
+    // Get Greyhound schema.
+    exchanges::GetSchema schemaExchange(m_sessionId);
+    m_wsClient.exchange(schemaExchange);
 
-    for (boost::uint32_t d = 0; d < idx.size(); ++d)
+    m_dimData = schemaExchange.schema();
+
+    for (auto dim : m_dimData)
     {
-        schema->appendDimension(idx[d]);
+        pointContext.registerDim(dim.id, dim.type);
     }
 }
 
@@ -113,12 +128,13 @@ namespace iterators
 sequential::Iterator::Iterator(
         WebSocketClient& wsClient,
         std::string sessionId,
-        Schema remoteSchema,
+        std::vector<DimData> dimData,
         point_count_t numPoints)
     : m_wsClient(wsClient)
     , m_sessionId(sessionId)
-    , m_remoteSchema(remoteSchema)
+    , m_dimData(dimData)
     , m_numPoints(numPoints)
+    , m_pointByteSize(getPointByteSize(m_dimData))
 { }
 
 point_count_t sequential::Iterator::readImpl(
@@ -134,13 +150,11 @@ point_count_t sequential::Iterator::readImpl(
     std::size_t offset(0);
     std::size_t numRead(0);
 
-    const schema::size_type remotePointSize(m_remoteSchema.getByteSize());
-
     for (std::size_t i(0); i < data.size(); ++i)
     {
         if (leftover != 0)
         {
-            const std::string stitchedPoint = 
+            const std::string stitchedPoint =
                 data[i - 1]->substr(data[i - 1]->size() - leftover) +
                 data[i]->substr(0, offset);
 
@@ -148,15 +162,15 @@ point_count_t sequential::Iterator::readImpl(
         }
 
         const point_count_t wholePoints(
-                ((data[i]->size() - offset) / remotePointSize));
-        const std::size_t pointBoundedSize(
-            wholePoints * remotePointSize);
+                ((data[i]->size() - offset) / m_pointByteSize));
+
+        const std::size_t pointBoundedSize(wholePoints * m_pointByteSize);
 
         numRead +=
             setPoints(pointBuffer, data[i]->data() + offset, wholePoints);
 
         leftover = (data[i]->size() - offset) - pointBoundedSize;
-        offset = remotePointSize - leftover;
+        offset = m_pointByteSize - leftover;
     }
 
     m_index += numRead;
@@ -187,18 +201,14 @@ point_count_t sequential::Iterator::setPoints(
 
     std::size_t dataOffset(0);
     point_count_t numRead(0);
-    const schema::Map dims(m_remoteSchema.getDimensions());
 
     while (numRead < pointsToRead)
     {
-        for (auto dim : dims)
+        for (auto dim : m_dimData)
         {
-            pointBuffer.setRawField(
-                    dim,
-                    nextId,
-                    data + dataOffset);
+            pointBuffer.setField(dim.id, dim.type, nextId, data + dataOffset);
 
-            dataOffset += dim.getByteSize();
+            dataOffset += Dimension::size(dim.type);
         }
 
         ++nextId;

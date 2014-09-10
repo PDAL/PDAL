@@ -45,6 +45,17 @@ namespace drivers
 namespace greyhound
 {
 
+struct DimData
+{
+    DimData(Dimension::Id::Enum id, Dimension::Type::Enum type)
+        : id(id)
+        , type(type)
+    { }
+
+    const Dimension::Id::Enum id;
+    const Dimension::Type::Enum type;
+};
+
 class PDAL_DLL GreyhoundReader : public pdal::Reader
 {
 public:
@@ -61,13 +72,13 @@ private:
     std::string m_uri;
     std::string m_pipelineId;
     std::string m_sessionId;
-    pdal::Schema m_remoteSchema;
+    std::vector<DimData> m_dimData;
     point_count_t m_numPoints;
     WebSocketClient m_wsClient;
 
     virtual void initialize();
     virtual void processOptions(const Options& options);
-    virtual void buildSchema(Schema* schema);
+    virtual void addDimensions(PointContext pointContext);
     virtual void ready(PointContext ctx);
 };
 
@@ -83,7 +94,7 @@ public:
     Iterator(
             WebSocketClient& wsClient,
             std::string sessionId,
-            Schema remoteSchema,
+            std::vector<DimData> dimData,
             point_count_t numPoints);
 
 private:
@@ -108,8 +119,9 @@ private:
 
     WebSocketClient& m_wsClient;
     std::string m_sessionId;
-    Schema m_remoteSchema;
+    std::vector<DimData> m_dimData;
     point_count_t m_numPoints;
+    std::size_t m_pointByteSize;
 };
 
 } // namespace sequential

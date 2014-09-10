@@ -142,6 +142,8 @@ void WebSocketClient::exchange(WebSocketExchange& exchange)
                     jsonResponse);
 
             message += ":\n" + jsonResponse.toStyledString();
+
+            std::cout << message << std::endl;
         }
 
         throw new pdal_error(message);
