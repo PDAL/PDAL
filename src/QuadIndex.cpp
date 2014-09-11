@@ -127,7 +127,8 @@ struct Tree
         , sw()
     { }
 
-    void addPoint(const PointRef* toAdd);
+    // Returns depth resulting from the insertion of this point.
+    std::size_t addPoint(const PointRef* toAdd, std::size_t curDepth = 0);
 
     void getPoints(
             std::vector<std::size_t>& results,
@@ -135,6 +136,28 @@ struct Tree
             std::size_t depthEnd) const
     {
         getPoints(results, depthBegin, depthEnd, 0);
+    }
+
+    void getPoints(
+            std::vector<std::size_t>& results,
+            std::size_t rasterize,
+            double xBegin,
+            double xEnd,
+            double xStep,
+            double yBegin,
+            double yEnd,
+            double yStep) const
+    {
+        getPoints(
+                results,
+                rasterize,
+                xBegin,
+                xEnd,
+                xStep,
+                yBegin,
+                yEnd,
+                yStep,
+                0);
     }
 
     void getPoints(
@@ -163,13 +186,24 @@ private:
 
     void getPoints(
             std::vector<std::size_t>& results,
+            std::size_t rasterize,
+            double xBegin,
+            double xEnd,
+            double xStep,
+            double yBegin,
+            double yEnd,
+            double yStep,
+            std::size_t curDepth) const;
+
+    void getPoints(
+            std::vector<std::size_t>& results,
             const BBox& query,
             std::size_t depthBegin,
             std::size_t depthEnd,
             std::size_t curDepth) const;
 };
 
-void Tree::addPoint(const PointRef* toAdd)
+std::size_t Tree::addPoint(const PointRef* toAdd, const std::size_t curDepth)
 {
     if (data)
     {
@@ -180,13 +214,15 @@ void Tree::addPoint(const PointRef* toAdd)
             std::swap(data, toAdd);
         }
 
+        const std::size_t nextDepth(curDepth + 1);
+
         if (toAdd->point.x < center.x)
         {
             if (toAdd->point.y < center.y)
             {
                 if (sw)
                 {
-                    sw->addPoint(toAdd);
+                    return sw->addPoint(toAdd, nextDepth);
                 }
                 else
                 {
@@ -195,13 +231,15 @@ void Tree::addPoint(const PointRef* toAdd)
                                 Point(bbox.min.x, bbox.min.y),
                                 Point(center.x, center.y)),
                             toAdd));
+
+                    return nextDepth;
                 }
             }
             else
             {
                 if (nw)
                 {
-                    nw->addPoint(toAdd);
+                    return nw->addPoint(toAdd, nextDepth);
                 }
                 else
                 {
@@ -210,6 +248,8 @@ void Tree::addPoint(const PointRef* toAdd)
                                 Point(bbox.min.x, center.y),
                                 Point(center.x, bbox.max.y)),
                             toAdd));
+
+                    return nextDepth;
                 }
             }
         }
@@ -219,7 +259,7 @@ void Tree::addPoint(const PointRef* toAdd)
             {
                 if (se)
                 {
-                    se->addPoint(toAdd);
+                    return se->addPoint(toAdd, nextDepth);
                 }
                 else
                 {
@@ -228,13 +268,15 @@ void Tree::addPoint(const PointRef* toAdd)
                                 Point(center.x, bbox.min.y),
                                 Point(bbox.max.x, center.y)),
                             toAdd));
+
+                    return nextDepth;
                 }
             }
             else
             {
                 if (ne)
                 {
-                    ne->addPoint(toAdd);
+                    return ne->addPoint(toAdd, nextDepth);
                 }
                 else
                 {
@@ -243,6 +285,8 @@ void Tree::addPoint(const PointRef* toAdd)
                                 Point(center.x, center.y),
                                 Point(bbox.max.x, bbox.max.y)),
                             toAdd));
+
+                    return nextDepth;
                 }
             }
         }
@@ -250,6 +294,7 @@ void Tree::addPoint(const PointRef* toAdd)
     else
     {
         data = toAdd;
+        return curDepth;
     }
 }
 
@@ -270,6 +315,82 @@ void Tree::getPoints(
         if (ne) ne->getPoints(results, depthBegin, depthEnd, curDepth);
         if (se) se->getPoints(results, depthBegin, depthEnd, curDepth);
         if (sw) sw->getPoints(results, depthBegin, depthEnd, curDepth);
+    }
+}
+
+void Tree::getPoints(
+        std::vector<std::size_t>& results,
+        const std::size_t rasterize,
+        const double xBegin,
+        const double xEnd,
+        const double xStep,
+        const double yBegin,
+        const double yEnd,
+        const double yStep,
+        std::size_t curDepth) const
+{
+    if (curDepth == rasterize)
+    {
+        if (data)
+        {
+            const std::size_t xOffset(
+                    std::round((bbox.center.x - xBegin) / xStep));
+            const double yOffset(
+                    std::round((bbox.center.y - yBegin) / yStep));
+
+            const std::size_t index(
+                yOffset * (xEnd - xBegin) / xStep + xOffset);
+
+            results.at(index) = data->pbIndex;
+        }
+    }
+    else
+    {
+        ++curDepth;
+
+        if (nw) nw->getPoints(
+                results,
+                rasterize,
+                xBegin,
+                xEnd,
+                xStep,
+                yBegin,
+                yEnd,
+                yStep,
+                curDepth);
+
+        if (ne) ne->getPoints(
+                results,
+                rasterize,
+                xBegin,
+                xEnd,
+                xStep,
+                yBegin,
+                yEnd,
+                yStep,
+                curDepth);
+
+        if (se) se->getPoints(
+                results,
+                rasterize,
+                xBegin,
+                xEnd,
+                xStep,
+                yBegin,
+                yEnd,
+                yStep,
+                curDepth);
+
+        if (sw) sw->getPoints(
+                results,
+                rasterize,
+                xBegin,
+                xEnd,
+                xStep,
+                yBegin,
+                yEnd,
+                yStep,
+                curDepth);
     }
 }
 
@@ -311,9 +432,20 @@ struct QuadIndex::QImpl
             double& xMax,
             double& yMax) const;
 
+    std::size_t getDepth() const;
+
     std::vector<std::size_t> getPoints(
             std::size_t depthBegin,
             std::size_t depthEnd) const;
+
+    std::vector<std::size_t> getPoints(
+            std::size_t rasterize,
+            double& xBegin,
+            double& xEnd,
+            double& xStep,
+            double& yBegin,
+            double& yEnd,
+            double& yStep) const;
 
     std::vector<std::size_t> getPoints(
             double xMin,
@@ -326,12 +458,14 @@ struct QuadIndex::QImpl
     const PointBuffer& m_pointBuffer;
     std::vector<std::unique_ptr<PointRef> > m_pointRefVec;
     std::unique_ptr<Tree> m_tree;
+    std::size_t m_depth;
 };
 
 QuadIndex::QImpl::QImpl(const PointBuffer& pointBuffer)
     : m_pointBuffer(pointBuffer)
     , m_pointRefVec()
     , m_tree()
+    , m_depth(0)
 { }
 
 void QuadIndex::QImpl::build()
@@ -364,7 +498,7 @@ void QuadIndex::QImpl::build()
 
     for (std::size_t i = 0; i < m_pointRefVec.size(); ++i)
     {
-        m_tree->addPoint(m_pointRefVec[i].get());
+        m_depth = std::max(m_tree->addPoint(m_pointRefVec[i].get()), m_depth);
     }
 }
 
@@ -388,6 +522,11 @@ bool QuadIndex::QImpl::getBounds(
     }
 }
 
+std::size_t QuadIndex::QImpl::getDepth() const
+{
+    return m_depth;
+}
+
 std::vector<std::size_t> QuadIndex::QImpl::getPoints(
         const std::size_t minDepth,
         const std::size_t maxDepth) const
@@ -397,6 +536,46 @@ std::vector<std::size_t> QuadIndex::QImpl::getPoints(
     if (m_tree)
     {
         m_tree->getPoints(results, minDepth, maxDepth);
+    }
+
+    return results;
+}
+
+std::vector<std::size_t> QuadIndex::QImpl::getPoints(
+        const std::size_t rasterize,
+        double& xBegin,
+        double& xEnd,
+        double& xStep,
+        double& yBegin,
+        double& yEnd,
+        double& yStep) const
+{
+    std::vector<std::size_t> results;
+
+    if (m_tree)
+    {
+        const std::size_t exp(std::pow(2, rasterize));
+        const double xWidth(m_tree->bbox.max.x - m_tree->bbox.min.x);
+        const double yWidth(m_tree->bbox.max.y - m_tree->bbox.min.y);
+
+        xStep = xWidth / exp;
+        yStep = yWidth / exp;
+        xBegin =    m_tree->bbox.min.x + (xStep / 2);
+        yBegin =    m_tree->bbox.min.y + (yStep / 2);
+        xEnd =      m_tree->bbox.max.x + (xStep / 2); // One tick past the end.
+        yEnd =      m_tree->bbox.max.y + (yStep / 2);
+
+        results.resize(exp * exp, std::numeric_limits<std::size_t>::max());
+
+        m_tree->getPoints(
+                results,
+                rasterize,
+                xBegin,
+                xEnd,
+                xStep,
+                yBegin,
+                yEnd,
+                yStep);
     }
 
     return results;
@@ -448,6 +627,11 @@ bool QuadIndex::getBounds(
     return m_qImpl->getBounds(xMin, yMin, xMax, yMax);
 }
 
+std::size_t QuadIndex::getDepth() const
+{
+    return m_qImpl->getDepth();
+}
+
 std::vector<std::size_t> QuadIndex::getPoints(
         std::size_t depthEnd) const
 {
@@ -459,6 +643,25 @@ std::vector<std::size_t> QuadIndex::getPoints(
         std::size_t depthEnd) const
 {
     return m_qImpl->getPoints(depthBegin, depthEnd);
+}
+
+std::vector<std::size_t> QuadIndex::getPoints(
+        const std::size_t rasterize,
+        double& xBegin,
+        double& xEnd,
+        double& xStep,
+        double& yBegin,
+        double& yEnd,
+        double& yStep) const
+{
+    return m_qImpl->getPoints(
+            rasterize,
+            xBegin,
+            xEnd,
+            xStep,
+            yBegin,
+            yEnd,
+            yStep);
 }
 
 std::vector<std::size_t> QuadIndex::getPoints(
@@ -495,4 +698,5 @@ std::vector<std::size_t> QuadIndex::getPoints(
 }
 
 } // namespace pdal
+
 
