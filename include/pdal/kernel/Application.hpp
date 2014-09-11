@@ -137,7 +137,6 @@ private:
 
 protected:
     bool m_usestdin;
-    boost::uint32_t m_chunkSize;
 
 };
 
