@@ -95,7 +95,7 @@ inline ptree toPTree(const PointContext& ctx)
     for (const auto& id : ctx.dims())
     {
         ptree dim;
-        dim.put("name", Dimension::name(id));
+        dim.put("name", ctx.dimName(id));
         Dimension::Type::Enum t = ctx.dimType(id);
         dim.put("type", Dimension::toName(Dimension::base(t)));
         dim.put("size", ctx.dimSize(id));
