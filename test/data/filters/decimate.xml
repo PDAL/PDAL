@@ -4,7 +4,6 @@
     <Option name="delimiter">,</Option>
     <Option name="write_header">false</Option>
     <Option name="filename">junk</Option>
-    <Option name="chunk_size">10</Option>
     <Filter type="filters.colorization">
       <Option name="raster">./autzen.tif</Option>
       <Option name="dimension">Red<Options><Option name="band">1</Option><Option name="scale">1</Option></Options></Option>

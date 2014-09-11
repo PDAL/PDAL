@@ -68,7 +68,6 @@ Application::Application(int argc, const char* argv[], const std::string& appNam
     , m_hardCoreDebug(false)
     , m_reportDebug(false)
     , m_usestdin(false)
-    , m_chunkSize(0)
 {
     return;
 }
@@ -436,7 +435,6 @@ void Application::addBasicSwitchSet()
         ("version", po::value<bool>(&m_showVersion)->zero_tokens()->implicit_value(true), "Show version info")
         ("timer", po::value<bool>(&m_showTime)->zero_tokens()->implicit_value(true), "Show execution time")
         ("stdin,s", po::value<bool>(&m_usestdin)->zero_tokens()->implicit_value(true), "Read pipeline XML from stdin")
-        ("chunk_size", po::value<boost::uint32_t>(&m_chunkSize)->default_value(0), "Use a specified buffer capacity rather than attempting to read the entire pipeline in a single buffer")
         ("heartbeat", po::value< std::vector<std::string> >(&m_heartbeat_shell_command), "Shell command to run for every progress heartbeat")
 
         ;

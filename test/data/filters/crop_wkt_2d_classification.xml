@@ -7,9 +7,6 @@
         <Option name="compression">
             false
         </Option>
-        <Option name="chunk_size">
-            100000
-        </Option>
         <Filter type="filters.predicate"><Option name="function">filter</Option><Option name="source">
 import numpy as np
 
