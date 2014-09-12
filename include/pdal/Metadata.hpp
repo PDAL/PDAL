@@ -54,52 +54,7 @@ enum Enum
     Instance,
     Array
 };
-}
-
-/// ByteArray simply wrapps a std::vector<boost::uint8_t> such that it can then
-/// be dumped to an ostream in a base64 encoding. For now, it makes a copy of
-/// the data it is given, and should not be used for slinging big data around.
-class PDAL_DLL ByteArray
-{
-public:
-
-    /** @name Constructors
-    */
-    /// Constructs a ByteArray instance with the given array of data.
-    ByteArray(std::vector<boost::uint8_t> const& data) : m_bytes(data)
-    {}
-
-    ByteArray()
-    {}
-
-    /** @name Data manipulation
-    */
-    /// resets the array
-    void set(std::vector<boost::uint8_t> const& input)
-        { m_bytes = input; }
-
-    /// fetches a reference to the array
-    std::vector<boost::uint8_t> const& get() const
-        { return m_bytes; }
-
-
-private:
-    std::vector<boost::uint8_t> m_bytes;
-};
-
-} //namespace pdal
-
-namespace std
-{
-extern PDAL_DLL std::ostream& operator<<(std::ostream& ostr,
-    const pdal::ByteArray& output);
-extern PDAL_DLL std::istream& operator>>(std::istream& istr,
-    pdal::ByteArray& output);
-}
-
-
-namespace pdal
-{
+} // namespace MetadataType
 
 class Metadata;
 class MetadataNode;
@@ -269,16 +224,6 @@ inline void MetadataNodeImpl::setValue(const char(& c)[N])
 }
 
 template <>
-inline void MetadataNodeImpl::setValue<pdal::ByteArray>(
-    const pdal::ByteArray& ba)
-{
-    std::ostringstream oss;
-    oss << ba;
-    m_type = "base64Binary";
-    m_value = oss.str();
-}
-
-template <>
 inline void MetadataNodeImpl::setValue<float>(const float& f)
 {
     m_type = "float";
@@ -404,6 +349,28 @@ public:
 
     MetadataNode addList(MetadataNode node)
         { return MetadataNode(m_impl->addList(node.m_impl)); }
+
+    MetadataNode addEncoded(const std::string& name,
+        const unsigned char *buf, size_t size,
+        const std::string& descrip = std::string())
+    {
+        MetadataNodeImplPtr impl = m_impl->add(name);
+        impl->setValue(Utils::base64_encode(buf, size));
+        impl->m_type = "base64Binary";
+        impl->m_descrip = descrip;
+        return MetadataNode(impl);
+    }
+
+    MetadataNode addListEncoded(const std::string& name,
+        const unsigned char *buf, size_t size,
+        const std::string& descrip = std::string())
+    {
+        MetadataNodeImplPtr impl = m_impl->addList(name);
+        impl->setValue(Utils::base64_encode(buf, size));
+        impl->m_type = "base64Binary";
+        impl->m_descrip = descrip;
+        return MetadataNode(impl);
+    }
 
     template<typename T>
     MetadataNode add(const std::string& name, const T& value,

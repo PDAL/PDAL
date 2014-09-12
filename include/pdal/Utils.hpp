@@ -32,8 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_UTILS_HPP
-#define INCLUDED_UTILS_HPP
+#pragma once
 
 #include <pdal/pdal_internal.hpp>
 
@@ -206,6 +205,7 @@ public:
 
     // aid to operator>> parsers
     static void eatwhitespace(std::istream& s);
+    static void removeTrailingBlanks(std::string& s);
 
     // aid to operator>> parsers
     // if char found, eats it and returns true; otherwise, don't eat it and
@@ -222,7 +222,9 @@ public:
 
     static void* getDLLSymbol(std::string const& library,
        std::string const& name);
-    static std::string base64_encode(std::vector<boost::uint8_t> const& bytes);
+    static std::string base64_encode(std::vector<uint8_t> const& bytes)
+        { return base64_encode(bytes.data(), bytes.size()); }
+    static std::string base64_encode(const unsigned char *buf, size_t size);
     static std::vector<boost::uint8_t> base64_decode(std::string const& input);
     
     static FILE* portable_popen(const std::string& command,
@@ -284,4 +286,3 @@ private:
 
 } // namespace pdal
 
-#endif

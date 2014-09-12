@@ -154,6 +154,14 @@ void Utils::eatwhitespace(istream& s)
     return;
 }
 
+void Utils::removeTrailingBlanks(std::string& s)
+{
+    size_t pos = s.size();
+    while (isspace(s[--pos]))
+        ;
+    s = s.substr(0, pos);
+}
+
 bool Utils::eatcharacter(istream& s, char x)
 {
     const char c = (char)s.peek();
@@ -321,7 +329,7 @@ void* Utils::getDLLSymbol(string const& library, string const& name)
     return pSymbol;
 }
 
-string Utils::base64_encode(vector<boost::uint8_t> const& bytes)
+string Utils::base64_encode(const unsigned char *bytes_to_encode, size_t in_len)
 {
 
     /*
@@ -351,13 +359,8 @@ string Utils::base64_encode(vector<boost::uint8_t> const& bytes)
         René Nyffenegger rene.nyffenegger@adp-gmbh.ch
     */
 
-    if (!bytes.size())
-    {
+    if (in_len == 0)
         return string();
-    }
-    unsigned char const* bytes_to_encode = &(bytes.front());
-
-    unsigned int in_len = bytes.size();
 
     const string base64_chars =
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"

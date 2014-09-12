@@ -68,6 +68,9 @@ void BpfReader::initialize()
     readUlemData();
     if (!m_stream)
         return;
+    readUlemFiles();
+    if (!m_stream)
+        return;
     readPolarData();
 
     // Fast forward file to end of header as reported by base header.
@@ -101,11 +104,15 @@ bool BpfReader::readUlemData()
             return false;
         m_ulemFrames.push_back(frame);
     }
+    return (bool)m_stream;
+}
 
+bool BpfReader::readUlemFiles()
+{
     BpfUlemFile file;
     while (file.read(m_stream))
-        ;
-
+        m_metadata.addEncoded(file.m_filename,
+            (const unsigned char *)file.m_buf.data(), file.m_len);
     return (bool)m_stream;
 }
 

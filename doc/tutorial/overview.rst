@@ -206,10 +206,10 @@ to be processed by the stage.
 
 3) void done(PointContext ctx)
 
-    This function allows a point to clean up resources not released by a stage’s
-    destructor.  It also allows other termination functions, such a closing of
-    databases, writing file footers, rewriting headers or closing or renaming
-    files.
+    This function allows a stage to clean up resources not released by a
+    stage’s destructor.  It also allows other termination functions, such
+    a closing of databases, writing file footers, rewriting headers or
+    closing or renaming files.
 
 
 Implementing a Reader
@@ -222,7 +222,7 @@ A reader needs to register or assign those dimensions that it will reference
 when adding point data to the point context.  Dimensions that are predefined
 in PDAL can be registered by using the point context's registerDim()
 method.  Dimensions that are not predefined can be added using assignDim().
-If dimensions are determined as named entitied from a point cloud source,
+If dimensions are determined as named entities from a point cloud source,
 it may not be known whether the dimensions are predefined or not.  In this
 case the function registerOrAssignDim() can be used.  When a dimension is
 assigned, rather than registered, the reader needs to inform PDAL of the

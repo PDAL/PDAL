@@ -84,6 +84,7 @@ private:
     virtual bool eof();
 
     bool readUlemData();
+    bool readUlemFiles();
     bool readPolarData();
     point_count_t readPointMajor(PointBuffer& data, point_count_t count);
     point_count_t readDimMajor(PointBuffer& data, point_count_t count);
