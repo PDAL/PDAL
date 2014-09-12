@@ -105,7 +105,7 @@ PointBufferSet Chipper::run(PointBufferPtr buffer)
 }
 
 
-void Chipper::load(PointBuffer& buffer, ChipRefList& xvec, ChipRefList& yvec, 
+void Chipper::load(PointBuffer& buffer, ChipRefList& xvec, ChipRefList& yvec,
     ChipRefList& spare)
 {
     ChipPtRef ref;
@@ -119,7 +119,7 @@ void Chipper::load(PointBuffer& buffer, ChipRefList& xvec, ChipRefList& yvec,
     Schema const& schema = buffer.getSchema();
     Dimension const& dimX = schema.getDimension("X");
     Dimension const& dimY = schema.getDimension("Y");
-    
+
     for (PointId i = 0; i < buffer.size(); ++i)
     {
         ChipPtRef xref;
@@ -171,7 +171,7 @@ void Chipper::partition(point_count_t size)
     for (size_t i = 0; i < num_partitions; ++i)
     {
         total += partition_size;
-        size_t itotal = lround(total);
+        size_t itotal = Utils::sround(total);
         m_partitions.push_back(itotal);
     }
 }

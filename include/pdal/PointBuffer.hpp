@@ -50,16 +50,16 @@ namespace pdal
         typedef boost::uint64_t PointBufferByteSize;
     } // pointbuffer
 
-/*! 
+/*!
     \verbatim embed:rst
     .. note::
 
         The arrangement of PointBuffer's bytes might either be
         point-interleaved or dimension-interleaved, with point-interleave being
         the default organization.  If you are directly modifying a PointBuffer's
-        bytes, you must respect the :cpp:class:`pdal::pointbuffer::Orientation`. 
+        bytes, you must respect the :cpp:class:`pdal::pointbuffer::Orientation`.
     \endverbatim
-*/    
+*/
 class PDAL_DLL PointBuffer
 {
 public:
@@ -147,7 +147,7 @@ public:
         .. warning::
 
             If the data type of T is not the same as described in
-            :cpp:class:`pdal::Dimension`, the data value will be cast 
+            :cpp:class:`pdal::Dimension`, the data value will be cast
             into the appropriate type. In some situations this may not
             be what you want. In situations where the T is smaller than
             the datatype given by `dim`, the return value T will simply be
@@ -203,12 +203,12 @@ public:
         \verbatim embed:rst
         .. note::
 
-            This method requires that an `X`, `Y`, and `Z` dimension be 
-            available, and that it can be casted into a *double* data 
-            type using the :cpp:func:`pdal::Dimension::applyScaling` 
+            This method requires that an `X`, `Y`, and `Z` dimension be
+            available, and that it can be casted into a *double* data
+            type using the :cpp:func:`pdal::Dimension::applyScaling`
             method. Otherwise, an exception will be thrown.
         \endverbatim
-    */    
+    */
     pdal::Bounds<double> calculateBounds(bool bis3d=true) const;
 
 protected:
@@ -313,7 +313,7 @@ inline T PointBuffer::getFieldAs(pdal::Dimension const& dim,
     {
 
     	if (std::is_integral<T>::value == true )
-            retval = boost::numeric_cast<T>(lround(val));
+            retval = boost::numeric_cast<T>(Utils::sround(val));
         else
             retval = boost::numeric_cast<T>(val);
     }
@@ -329,7 +329,7 @@ inline T PointBuffer::getFieldAs(pdal::Dimension const& dim,
 #ifdef PDAL_COMPILER_MSVC
 // warning C4127: conditional expression is constant
 #pragma warning(pop)
-#endif	
+#endif
 }
 
 
@@ -338,14 +338,14 @@ void PointBuffer::convertAndSet(pdal::Dimension const& dim, PointId idx,
     T_IN in)
 {
     T_OUT out;
-	
+
 #ifdef PDAL_COMPILER_MSVC
 // warning C4127: conditional expression is constant
 #pragma warning(push)
 #pragma warning(disable:4127)
 #endif
     if (std::is_integral<T_OUT>::value == true)
-        out = boost::numeric_cast<T_OUT>(lround(in));
+        out = boost::numeric_cast<T_OUT>(Utils::sround(in));
     else
         out = boost::numeric_cast<T_OUT>(in);
 
