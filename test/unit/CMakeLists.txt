@@ -228,16 +228,7 @@ if(WIN32)
         #add_definitions("-DBOOST_TEST_DYN_LINK")
     endif()
 else()
-    # Our own static build of embedded boost should do BOOST_TEST_DYN_LINK 
-    # when it is compiled, but regular static builds of Boost will 
-    # not do this. 
-    if(Boost_PROGRAM_OPTIONS_LIBRARY MATCHES "\\.a$" )
-        # pass, we can compile static
-        message(STATUS "Static boost for boost::unit_test, not setting BOOST_TEST_DYN_LINK")
-    else()
-        message(STATUS "No non-embed static boost library found, setting BOOST_TEST_DYN_LINK")
-        add_definitions("-DBOOST_TEST_DYN_LINK")
-    endif()
+    add_definitions("-DBOOST_TEST_DYN_LINK")
 endif()
 
 TARGET_LINK_LIBRARIES(  ${PDAL_UNIT_TEST} ${PDAL_LINKAGE}
