@@ -130,6 +130,52 @@ BOOST_AUTO_TEST_CASE(pipeline)
     }
 }
 
+
+BOOST_AUTO_TEST_CASE(add_dimension)
+{
+    Bounds<double> bounds(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
+
+    Options ops;
+    ops.add("bounds", bounds);
+    ops.add("num_points", 10);
+    ops.add("mode", "ramp");
+
+    drivers::faux::Reader reader(ops);
+
+    Option source("source", "import numpy\n"
+        "def myfunc(ins,outs):\n"
+        "  outs['Intensity'] = np.zeros(ins['X'].size, dtype=numpy.uint16) + 1\n"
+        "  outs['PointSourceId'] = np.zeros(ins['X'].size, dtype=numpy.uint16) + 2\n"
+        "  return True\n"
+    );
+    Option module("module", "MyModule");
+    Option function("function", "myfunc");
+    Option intensity("add_dimension", "Intensity");
+    Option scanDirection("add_dimension", "PointSourceId");
+    Options opts;
+    opts.add(source);
+    opts.add(module);
+    opts.add(function);
+    opts.add(intensity);
+    opts.add(scanDirection);
+
+    filters::Programmable filter(opts);
+    filter.setInput(&reader);
+
+    PointContext ctx;
+    filter.prepare(ctx);
+    PointBufferSet pbSet = filter.execute(ctx);
+    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    PointBufferPtr buf = *pbSet.begin();
+
+    for (unsigned int i = 0; i < buf->size(); ++i)
+    {
+        BOOST_CHECK_EQUAL(buf->getFieldAs<uint16_t>(Dimension::Id::Intensity, i), 1);
+        BOOST_CHECK_EQUAL(buf->getFieldAs<uint16_t>(Dimension::Id::PointSourceId, i), 2);
+    }
+}
+
+
 BOOST_AUTO_TEST_SUITE_END()
 
 #endif  // PDAL_HAVE_PYTHON

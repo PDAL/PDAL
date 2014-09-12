@@ -69,8 +69,10 @@ private:
     std::string m_source;
     std::string m_module;
     std::string m_function;
+    Dimension::IdList m_addDimensions;
 
     virtual void processOptions(const Options& options);
+    virtual void addDimensions(PointContext ctx);
     virtual void ready(PointContext ctx);
     virtual void filter(PointBuffer& buf);
     virtual void done(PointContext ctx);
