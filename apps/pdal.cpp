@@ -54,6 +54,7 @@ void outputVersion()
     std::cout << "     - pcl" << std::endl;
 #endif
     std::cout << "     - pipeline" << std::endl;
+    std::cout << "     - random" << std::endl;
     std::cout << "     - translate" << std::endl;
     std::cout << std::endl;
     std::cout << "See http://pdal.io/apps.html for more detail";
@@ -148,6 +149,12 @@ int main(int argc, char* argv[])
     if (boost::iequals(action, "diff"))
     {
         pdal::kernel::Diff app(count, args);
+        return app.run();
+    }
+
+    if (boost::iequals(action, "random"))
+    {
+        pdal::kernel::Random app(count, args);
         return app.run();
     }
     

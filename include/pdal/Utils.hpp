@@ -57,6 +57,8 @@ class PDAL_DLL Utils
 public:
     static void random_seed(unsigned int seed);
     static double random(double minimum, double maximum);
+    static double uniform(const double& minimum=0.0f, const double& maximum=1.0f, boost::uint32_t seed=0);
+    static double normal(const double& mean=0.0f, const double& sigma=1.0f, boost::uint32_t seed=0);
 
     // compares two values to within the datatype's epsilon
     template<class T>

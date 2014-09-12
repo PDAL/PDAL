@@ -34,6 +34,9 @@
 
 #include <boost/algorithm/string/erase.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/uniform_real_distribution.hpp>
+#include <boost/random/normal_distribution.hpp>
 
 #include <pdal/Utils.hpp>
 
@@ -82,6 +85,22 @@ double Utils::random(double minimum, double maximum)
     assert(t <= maximum);
 
     return t;
+}
+
+double Utils::uniform(const double& minimum, const double& maximum, boost::uint32_t seed)
+{
+    boost::random::mt19937 gen(seed);
+    boost::random::uniform_real_distribution<double> dist(minimum, maximum);
+
+    return dist(gen);
+}
+
+double Utils::normal(const double& mean, const double& sigma, boost::uint32_t seed)
+{
+    boost::random::mt19937 gen(seed);
+    boost::random::normal_distribution<double> dist(mean, sigma);
+
+    return dist(gen);
 }
 
 void* Utils::registerPlugin(void* stageFactoryPtr, string const& filename,
