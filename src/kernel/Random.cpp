@@ -150,8 +150,7 @@ int Random::execute()
     Options writerOptions;
     {
         writerOptions.add<std::string>("filename", m_outputFile);
-        writerOptions.add<bool>("debug", isDebug());
-        writerOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
+        setCommonOptions(writerOptions);
 
         if (m_bCompress)
         {
