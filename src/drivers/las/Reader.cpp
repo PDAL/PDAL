@@ -157,9 +157,9 @@ void Reader::extractMetadata(MetadataNode& m)
     std::vector<uint8_t> raw_bytes;
     for (std::size_t i = 0 ; i < sizeof(uint16_t); ++i)
         raw_bytes.push_back(start[i]);
-    ByteArray bytearray(raw_bytes);
 
-    m.add("global_encoding", bytearray, "Global Encoding: "
+    m.addEncoded("global_encoding", raw_bytes.data(), raw_bytes.size(),
+        "Global Encoding: "
         "This is a bit field used to "
         "indicate certain global properties about the file. In LAS 1.2 "
         "(the version in which this field was introduced), only the low bit "
@@ -287,12 +287,11 @@ void Reader::extractMetadata(MetadataNode& m)
         std::vector<boost::uint8_t> raw_bytes;
         for (std::size_t i = 0 ; i < v.getLength(); ++i)
             raw_bytes.push_back(v.getBytes()[i]);
-        pdal::ByteArray bytearray(raw_bytes);
 
         std::ostringstream name;
         name << "vlr_" << t;
-        MetadataNode vlrNode = m.add(name.str(), bytearray,
-            v.getDescription());
+        MetadataNode vlrNode = m.addEncoded(name.str(), raw_bytes.data(),
+            raw_bytes.size(), v.getDescription());
 
         vlrNode.add<uint32_t>("reserved", v.getReserved(),
             "Two bytes of padded, unused space. Some softwares expect the "

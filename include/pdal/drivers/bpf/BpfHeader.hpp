@@ -39,6 +39,7 @@
 #include <vector>
 
 #include <pdal/Dimension.hpp>
+#include <pdal/Metadata.hpp>
 
 namespace pdal
 {
@@ -128,6 +129,7 @@ struct BpfUlemFile
 {
     uint32_t m_len;
     std::string m_filename;
+    std::vector<char> m_buf;
 
     bool read(ILeStream& stream);
 };

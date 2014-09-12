@@ -72,7 +72,8 @@ void MetadataNodeImpl::toJSON(std::ostream& o, int level) const
     std::string escaped_value(m_value);
     escaped_value = Utils::escapeJSON(escaped_value);
 
-    o << indent << "\"description\":\"" << escaped_description << "\"," << std::endl;
+    o << indent << "\"description\":\"" << escaped_description <<
+        "\"," << std::endl;
     o << indent << "\"type\":\"" << m_type << "\"," << std::endl;
     o << indent << "\"value\":\"" << escaped_value << "\"";
 
@@ -128,27 +129,5 @@ void MetadataNodeImpl::subnodesToJSON(std::ostream& o, int level) const
 std::string MetadataNode::toJSON() const
     { return m_impl->toJSON(); }
 
-
-} // close namespace
-
-
-namespace std
-{
-
-std::ostream& operator<<(std::ostream& ostr, const pdal::ByteArray& data)
-{
-    ostr << pdal::Utils::base64_encode(data.get());
-    return ostr;
-}
-
-std::istream& operator>>(std::istream& istr, pdal::ByteArray& output)
-{
-    std::string data;
-    istr >> data;
-    output.set(pdal::Utils::base64_decode(data));
-    return istr;
-}
-
-} // namespace std;
-
+} // namespace pdal
 
