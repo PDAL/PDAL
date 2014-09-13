@@ -270,6 +270,8 @@ private:
         }
     }
 };
+// A point context is in some instances more easily understood as a reference.
+typedef PointContext PointContextRef;
 
 } //namespace
 

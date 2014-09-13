@@ -58,7 +58,7 @@ class PDAL_DLL PointBuffer
     friend class plang::BufferedInvocation;
 public:
     PointBuffer();
-    PointBuffer(PointContext context) : m_context(context)
+    PointBuffer(PointContextRef context) : m_context(context)
     {}
 
     point_count_t size() const
@@ -161,7 +161,7 @@ public:
         { return m_context.dims(); }
 
 protected:
-    PointContext m_context;
+    PointContextRef m_context;
     std::vector<PointId> m_index;
 
 private:

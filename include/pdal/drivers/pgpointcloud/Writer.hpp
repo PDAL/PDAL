@@ -68,9 +68,9 @@ private:
     Writer(const Writer&); // not implemented
 
     virtual void processOptions(const Options& options);
-    virtual void ready(PointContext ctx);
+    virtual void ready(PointContextRef ctx);
     virtual void write(const PointBuffer& pointBuffer);
-    virtual void done(PointContext ctx);
+    virtual void done(PointContextRef ctx);
     virtual void initialize();
 
     void writeInit();

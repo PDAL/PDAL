@@ -120,7 +120,7 @@ void BpfReader::initialize()
 }
 
 
-void BpfReader::addDimensions(PointContext ctx)
+void BpfReader::addDimensions(PointContextRef ctx)
 {
     for (size_t i = 0; i < m_dims.size(); ++i)
     {
@@ -169,7 +169,7 @@ bool BpfReader::readPolarData()
 }
 
 
-void BpfReader::ready(PointContext ctx)
+void BpfReader::ready(PointContextRef ctx)
 {
     m_index = 0;
     m_start = m_stream.position();
@@ -193,7 +193,7 @@ void BpfReader::ready(PointContext ctx)
 }
 
 
-void BpfReader::done(PointContext)
+void BpfReader::done(PointContextRef)
 {
      delete m_stream.popStream();
 }

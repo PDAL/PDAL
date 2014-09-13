@@ -324,7 +324,7 @@ void Reader::extractMetadata(MetadataNode& m)
 }
 
 
-void Reader::addDimensions(PointContext ctx)
+void Reader::addDimensions(PointContextRef ctx)
 {
     using namespace Dimension;
     Id::Enum ids[] = { Id::X, Id::Y, Id::Z, Id::Intensity, Id::ReturnNumber,
@@ -343,7 +343,7 @@ void Reader::addDimensions(PointContext ctx)
 }
 
 
-void Reader::ready(PointContext ctx)
+void Reader::ready(PointContextRef ctx)
 {
     m_index = 0;
     m_istream->seekg(m_lasHeader.GetDataOffset());
@@ -501,7 +501,7 @@ void Reader::loadPoint(PointBuffer& data, char *buf, size_t bufsize)
 }
 
 
-void Reader::done(PointContext ctx)
+void Reader::done(PointContextRef ctx)
 {
 #ifdef PDAL_HAVE_LASZIP
     m_zipPoint.reset();

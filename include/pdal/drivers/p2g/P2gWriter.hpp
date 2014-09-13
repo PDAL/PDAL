@@ -86,9 +86,9 @@ private:
     P2gWriter& operator=(const P2gWriter&); // not implemented
     
     virtual void processOptions(const Options& options);
-    virtual void ready(PointContext ctx) {};
+    virtual void ready(PointContextRef ctx) {};
     virtual void write(const PointBuffer& buf);
-    virtual void done(PointContext ctx) {};
+    virtual void done(PointContextRef ctx) {};
     virtual void initialize() {};
 
     boost::scoped_ptr<OutCoreInterp> m_interpolator;

@@ -88,7 +88,7 @@ void CloudReader::initialize()
 }
 
 
-void CloudReader::addDimensions(PointContext ctx)
+void CloudReader::addDimensions(PointContextRef ctx)
 {
     int numDims = 0;
     const caris_dimension *dimArray = NULL;
@@ -143,14 +143,14 @@ void CloudReader::addDimensions(PointContext ctx)
 
 using namespace csar::utils;
 
-void CloudReader::ready(PointContext ctx)
+void CloudReader::ready(PointContextRef ctx)
 {
     m_itr = caris_cloud_create_itr(m_cloud);
     throwIfItrError();
 }
 
 
-void CloudReader::done(PointContext ctx)
+void CloudReader::done(PointContextRef ctx)
 {
     if (m_itr)
         caris_itr_release(m_itr);

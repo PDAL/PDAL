@@ -110,8 +110,8 @@ private:
     int m_returnNum;
 
     virtual void processOptions(const Options& options);
-    virtual void addDimensions(PointContext ctx);
-    virtual void ready(PointContext ctx)
+    virtual void addDimensions(PointContextRef ctx);
+    virtual void ready(PointContextRef ctx)
     {
         m_returnNum = 1;
         m_time = 0;

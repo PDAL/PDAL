@@ -77,7 +77,7 @@ void Writer::processOptions(const Options& options)
 }
 
 
-void Writer::done(PointContext ctx)
+void Writer::done(PointContextRef ctx)
 {
     las::Writer::done(ctx);
 

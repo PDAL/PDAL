@@ -127,7 +127,7 @@ void SQLiteWriter::initialize()
     }
 }
 
-void SQLiteWriter::ready(PointContext ctx)
+void SQLiteWriter::ready(PointContextRef ctx)
 {
     m_dims = ctx.dims();
     // Determine types for the dimensions.  We use the default types when
@@ -406,7 +406,7 @@ bool SQLiteWriter::IsValidGeometryWKT(std::string const& input) const
 #endif
 }
 
-void SQLiteWriter::done(PointContext ctx)
+void SQLiteWriter::done(PointContextRef ctx)
 {
     if (m_doCreateIndex)
     {

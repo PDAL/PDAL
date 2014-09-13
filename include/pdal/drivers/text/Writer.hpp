@@ -72,14 +72,14 @@ public:
 
 private:
     virtual void processOptions(const Options&);
-    virtual void ready(PointContext ctx);
+    virtual void ready(PointContextRef ctx);
     virtual void write(const PointBuffer& buf);
-    virtual void done(PointContext ctx);
+    virtual void done(PointContextRef ctx);
 
-    void writeHeader(PointContext ctx);
+    void writeHeader(PointContextRef ctx);
     void writeFooter();
     void writeGeoJSONHeader();
-    void writeCSVHeader(PointContext ctx);
+    void writeCSVHeader(PointContextRef ctx);
 
     void writeGeoJSONBuffer(const PointBuffer& data);
     void writeCSVBuffer(const PointBuffer& data);

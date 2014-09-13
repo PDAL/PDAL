@@ -48,13 +48,13 @@ Options SbetReader::getDefaultOptions()
 }
 
 
-void SbetReader::addDimensions(PointContext ctx)
+void SbetReader::addDimensions(PointContextRef ctx)
 {
     ctx.registerDims(getDefaultDimensions());
 }
 
 
-void SbetReader::ready(PointContext ctx)
+void SbetReader::ready(PointContextRef ctx)
 {
     size_t fileSize = FileUtils::fileSize(m_filename);
     size_t pointSize = getDefaultDimensions().size() * sizeof(double);

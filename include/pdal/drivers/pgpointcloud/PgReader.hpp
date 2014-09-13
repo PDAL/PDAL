@@ -106,11 +106,11 @@ public:
     void getSession() const;
     
 private:
-    virtual void addDimensions(PointContext ctx);
+    virtual void addDimensions(PointContextRef ctx);
     virtual void processOptions(const Options& options);
-    virtual void ready(PointContext ctx);
+    virtual void ready(PointContextRef ctx);
     virtual point_count_t read(PointBuffer& buf, point_count_t count);
-    virtual void done(PointContext ctx);
+    virtual void done(PointContextRef ctx);
     virtual bool eof()
         { return m_atEnd; }
     

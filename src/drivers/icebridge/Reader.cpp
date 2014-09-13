@@ -94,13 +94,13 @@ Dimension::IdList Reader::getDefaultDimensions()
 }
 
 
-void Reader::addDimensions(PointContext ctx)
+void Reader::addDimensions(PointContextRef ctx)
 {
     return ctx.registerDims(getDefaultDimensions());
 }
 
 
-void Reader::ready(PointContext ctx)
+void Reader::ready(PointContextRef ctx)
 {
     m_hdf5Handler.initialize(m_filename, hdf5Columns);
     m_index = 0;
@@ -172,7 +172,7 @@ point_count_t Reader::read(PointBuffer& buf, point_count_t count)
 }
 
 
-void Reader::done(PointContext ctx)
+void Reader::done(PointContextRef ctx)
 {
     m_hdf5Handler.close();
 }

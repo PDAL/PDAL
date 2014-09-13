@@ -179,7 +179,7 @@ void SQLiteReader::validateQuery() const
 }
 
 
-void SQLiteReader::addDimensions(PointContext ctx)
+void SQLiteReader::addDimensions(PointContextRef ctx)
 {
     log()->get(LogLevel::Debug) << "Fetching schema object" << std::endl;
 
@@ -203,7 +203,7 @@ void SQLiteReader::addDimensions(PointContext ctx)
 }
 
 
-void SQLiteReader::ready(PointContext ctx)
+void SQLiteReader::ready(PointContextRef ctx)
 {
     m_at_end = false;
     b_doneQuery = false;
