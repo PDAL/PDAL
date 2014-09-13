@@ -65,7 +65,7 @@ void Stage::Construct()
 }
 
 
-void Stage::prepare(PointContext ctx)
+void Stage::prepare(PointContextRef ctx)
 {
     for (size_t i = 0; i < m_inputs.size(); ++i)
     {
@@ -80,7 +80,7 @@ void Stage::prepare(PointContext ctx)
 }
 
 
-PointBufferSet Stage::execute(PointContext ctx)
+PointBufferSet Stage::execute(PointContextRef ctx)
 {
     PointBufferSet buffers;
     if (m_inputs.empty())
@@ -117,7 +117,7 @@ PointBufferSet Stage::execute(PointContext ctx)
 }
 
 
-void Stage::l_initialize(PointContext ctx)
+void Stage::l_initialize(PointContextRef ctx)
 {
     m_metadata = ctx.metadata().add(getName());
     if (m_inputs.size()) {
@@ -172,7 +172,7 @@ void Stage::l_processOptions(const Options& options)
 }
 
 
-void Stage::l_done(PointContext ctx)
+void Stage::l_done(PointContextRef ctx)
 {
     if (!m_spatialReference.empty())
         ctx.setSpatialRef(m_spatialReference);

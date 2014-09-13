@@ -60,8 +60,8 @@ public:
 private:
     point_count_t m_numPts;
 
-    virtual void addDimensions(PointContext ctx);
-    virtual void ready(PointContext ctx);
+    virtual void addDimensions(PointContextRef ctx);
+    virtual void ready(PointContextRef ctx);
     virtual point_count_t read(PointBuffer& buf, point_count_t count);
 };
 

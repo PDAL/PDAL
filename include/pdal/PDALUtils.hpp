@@ -87,7 +87,7 @@ inline ptree toPTree(MetadataNode const& node)
 }
 
 
-inline ptree toPTree(const PointContext& ctx)
+inline ptree toPTree(PointContextRef ctx)
 {
     ptree tree;
     ptree dimsTree;

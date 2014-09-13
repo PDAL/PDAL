@@ -93,7 +93,7 @@ void Reader::processOptions(const Options& options)
 }
 
 
-void Reader::addDimensions(PointContext ctx)
+void Reader::addDimensions(PointContextRef ctx)
 {
     ctx.registerDims(getDefaultDimensions());
     if (m_numReturns > 0)

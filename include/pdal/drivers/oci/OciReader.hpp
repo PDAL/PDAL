@@ -42,8 +42,6 @@
 namespace pdal
 {
 
-class PointContext;
-
 namespace drivers
 {
 namespace oci
@@ -68,8 +66,8 @@ public:
 private:
     virtual void initialize();
     virtual void processOptions(const Options& options);
-    virtual void addDimensions(PointContext ctx);
-    virtual void ready(PointContext ctx)
+    virtual void addDimensions(PointContextRef ctx);
+    virtual void ready(PointContextRef ctx)
         { m_atEnd = false; }
     virtual point_count_t read(PointBuffer& buf, point_count_t);
     virtual bool eof()

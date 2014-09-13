@@ -79,7 +79,7 @@ public:
         { return m_pbSet; }
 
     // Get the point context;
-    PointContext context() const
+    PointContextRef context() const
         { return m_context; }
     
     MetadataNode getMetadata() const;

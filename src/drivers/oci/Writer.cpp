@@ -800,7 +800,7 @@ void Writer::writeInit()
 }
 
 
-void Writer::ready(PointContext ctx)
+void Writer::ready(PointContextRef ctx)
 {
     bool haveOutputTable = blockTableExists();
     if (m_overwrite && haveOutputTable)
@@ -826,7 +826,7 @@ void Writer::ready(PointContext ctx)
 }
 
 
-void Writer::done(PointContext ctx)
+void Writer::done(PointContextRef ctx)
 {
     if (!m_connection)
         return;

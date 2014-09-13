@@ -106,11 +106,11 @@ private:
 
     
     virtual void initialize();
-    virtual void addDimensions(PointContext ctx);
-    virtual void ready(PointContext ctx);
+    virtual void addDimensions(PointContextRef ctx);
+    virtual void ready(PointContextRef ctx);
     virtual point_count_t read(PointBuffer& buf, point_count_t num);
     virtual bool eof();
-    virtual void done(PointContext ctx);
+    virtual void done(PointContextRef ctx);
 
     void throwIfItrError() const;
 };

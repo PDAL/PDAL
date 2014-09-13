@@ -242,7 +242,7 @@ pdal::SpatialReference OciReader::fetchSpatialReference(Statement stmt,
 }
 
 
-void OciReader::addDimensions(PointContext ctx)
+void OciReader::addDimensions(PointContextRef ctx)
 {
     log()->get(LogLevel::Debug) << "Fetching schema from SDO_PC object" <<
         std::endl;

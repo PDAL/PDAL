@@ -90,12 +90,12 @@ private:
         { return StreamFactoryPtr(new FilenameStreamFactory(m_filename)); }
     virtual void initialize();
     virtual void initialize(MetadataNode& m);
-    virtual void addDimensions(PointContext ctx);
+    virtual void addDimensions(PointContextRef ctx);
     void extractMetadata(MetadataNode& m);
     virtual void processOptions(const Options& options);
-    virtual void ready(PointContext ctx);
+    virtual void ready(PointContextRef ctx);
     virtual point_count_t read(PointBuffer& buf, point_count_t count);
-    virtual void done(PointContext ctx);
+    virtual void done(PointContextRef ctx);
     virtual bool eof()
         { return m_index >= getNumPoints(); }
     void loadPoint(PointBuffer& data, char *buf, size_t bufsize);

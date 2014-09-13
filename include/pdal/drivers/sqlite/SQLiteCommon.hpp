@@ -125,7 +125,7 @@ public:
     size_t byte_size;
     std::vector<uint8_t> bytes;
     pdal::schema::XMLSchema m_schema;
-    PointContext m_ctx;    
+    PointContextRef m_ctx;    
     double xOffset() const
         { return m_schema.m_scale.m_x.m_offset; }
     double yOffset() const

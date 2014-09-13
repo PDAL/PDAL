@@ -84,7 +84,7 @@ void Reader::initialize()
 }
 
 
-void Reader::addDimensions(PointContext ctx)
+void Reader::addDimensions(PointContextRef ctx)
 {
     m_size = 0;
     ctx.registerDim(Dimension::Id::Classification);
@@ -145,7 +145,7 @@ Dimension::IdList Reader::getDefaultDimensions()
 }
 
 
-void Reader::ready(PointContext ctx)
+void Reader::ready(PointContextRef ctx)
 {
     m_istream = FileUtils::openFile(m_filename);
     // Skip to the beginning of points.
@@ -269,7 +269,7 @@ point_count_t Reader::read(PointBuffer& data, point_count_t count)
 }
 
 
-void Reader::done(PointContext ctx)
+void Reader::done(PointContextRef ctx)
 {
     FileUtils::closeFile(m_istream);
 }

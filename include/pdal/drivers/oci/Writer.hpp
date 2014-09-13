@@ -99,9 +99,9 @@ private:
 
     virtual void processOptions(const Options& options);
     virtual void initialize();
-    virtual void ready(PointContext ctx);
+    virtual void ready(PointContextRef ctx);
     virtual void write(const PointBuffer& buffer);
-    virtual void done(PointContext ctx);
+    virtual void done(PointContextRef ctx);
     void writeInit();
     void writeTile(const PointBuffer& buffer);
 

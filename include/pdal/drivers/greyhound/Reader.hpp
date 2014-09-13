@@ -78,8 +78,8 @@ private:
 
     virtual void initialize();
     virtual void processOptions(const Options& options);
-    virtual void addDimensions(PointContext pointContext);
-    virtual void ready(PointContext ctx);
+    virtual void addDimensions(PointContextRef pointContext);
+    virtual void ready(PointContextRef ctx);
 };
 
 namespace iterators
