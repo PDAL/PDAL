@@ -60,10 +60,10 @@ void OciReader::processOptions(const Options& options)
         m_scaleX = boost::optional<double>(
             options.getValueOrThrow<double>("scale_x"));
     if (options.hasOption("scale_y"))
-        m_scaleX = boost::optional<double>(
+        m_scaleY = boost::optional<double>(
             options.getValueOrThrow<double>("scale_y"));
     if (options.hasOption("scale_z"))
-        m_scaleX = boost::optional<double>(
+        m_scaleZ= boost::optional<double>(
             options.getValueOrThrow<double>("scale_z"));
 
     if (options.hasOption("offset_x"))
@@ -228,7 +228,7 @@ void OciReader::validateQuery()
             "' does not fetch a SDO_PC object.";
         throw pdal_error(oss.str());
     }
- 
+
     // If we found all the fields, the list of required fields will be empty.
     // If not, throw an exception.
     if (!reqFields.empty())
