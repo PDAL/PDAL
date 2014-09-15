@@ -40,7 +40,6 @@
 
 #include <set>
 #include <vector>
-#include <set>
 
 namespace pdal
 {
