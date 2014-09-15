@@ -237,6 +237,64 @@ BOOST_AUTO_TEST_CASE(PointBufferTest_ptree)
 }
 
 
+BOOST_AUTO_TEST_CASE(bigfile)
+{
+    PointContext ctx;
+
+    point_count_t NUM_PTS = 1000000;
+//    point_count_t NUM_PTS = 10;
+
+    ctx.registerDim(Dimension::Id::X);
+    ctx.registerDim(Dimension::Id::Y);
+    ctx.registerDim(Dimension::Id::Z);
+    PointBuffer buf(ctx);
+
+    for (PointId id = 0; id < NUM_PTS; ++id)
+    {
+        buf.setField(Dimension::Id::X, id, id);
+        buf.setField(Dimension::Id::Y, id, 2 * id);
+        buf.setField(Dimension::Id::Z, id, -(int)id);
+    }
+
+    for (PointId id = 0; id < NUM_PTS; ++id)
+    {
+        BOOST_CHECK_EQUAL(
+            buf.getFieldAs<PointId>(Dimension::Id::X, id), id);
+        BOOST_CHECK_EQUAL(
+            buf.getFieldAs<PointId>(Dimension::Id::Y, id), id * 2);
+        BOOST_CHECK_EQUAL(
+            buf.getFieldAs<int>(Dimension::Id::Z, id), -(int)id);
+    }
+
+    // Test some random access.
+    PointId ids[NUM_PTS];
+    for (PointId idx = 0; idx < NUM_PTS; ++idx)
+        ids[idx] = idx;
+    // Do a bunch of swaps.
+    for (PointId idx = 0; idx < NUM_PTS; ++idx)
+        std::swap(ids[idx], ids[random() % NUM_PTS]);
+
+    for (PointId idx = 0; idx < NUM_PTS; ++idx)
+    {
+        PointId id = ids[idx];
+        buf.setField(Dimension::Id::X, id, idx);
+        buf.setField(Dimension::Id::Y, id, 2 * idx);
+        buf.setField(Dimension::Id::Z, id, -(int)idx);
+    }
+
+    for (PointId idx = 0; idx < NUM_PTS; ++idx)
+    {
+        PointId id = ids[idx];
+        BOOST_CHECK_EQUAL(
+            buf.getFieldAs<PointId>(Dimension::Id::X, id), idx);
+        BOOST_CHECK_EQUAL(
+            buf.getFieldAs<PointId>(Dimension::Id::Y, id), idx * 2);
+        BOOST_CHECK_EQUAL(
+            buf.getFieldAs<int>(Dimension::Id::Z, id), -(int)idx);
+    }
+}
+
+
 //ABELL - Move to KdIndex
 /**
 BOOST_AUTO_TEST_CASE(test_indexed)
