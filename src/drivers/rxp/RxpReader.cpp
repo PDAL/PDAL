@@ -353,7 +353,7 @@ Inclination RxpInclFixPointcloud::getInclMovingAverage() const
 {
     auto middle = m_incl.begin() + m_inclIdx;
     double time = (m_incl[m_inclIdx].time + m_incl[m_inclIdx + 1].time) / 2;
-    int32_t roll(0), pitch(0);
+    long roll(0), pitch(0);
     for (auto it = middle - m_windowSize + 1;
             it != middle + m_windowSize + 1;
             ++it)
@@ -361,11 +361,21 @@ Inclination RxpInclFixPointcloud::getInclMovingAverage() const
         roll += it->roll;
         pitch += it->pitch;
     }
-    return {
-        time,
-        boost::numeric_cast<int16_t>(static_cast<int32_t>(roll / (m_windowSize * 2))),
-        boost::numeric_cast<int16_t>(static_cast<int32_t>(pitch  / (m_windowSize * 2)))
-    };
+    try
+    {
+        return {
+            time,
+            boost::numeric_cast<int16_t>(roll
+                    / (static_cast<long>(m_windowSize) * 2)),
+            boost::numeric_cast<int16_t>(pitch
+                    / (static_cast<long>(m_windowSize) * 2))
+        };
+    }
+    catch (boost::numeric::bad_numeric_cast& e)
+    {
+        throw pdal_error("Unable to calculate inclination moving average due "
+                " to invalid roll or pitch value.");
+    }
 }
 
 
