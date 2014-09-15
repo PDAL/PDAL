@@ -68,6 +68,8 @@ private:
     bool m_bForwardMetadata;
     boost::uint32_t m_decimation_step;
     boost::uint32_t m_decimation_offset;
+    double m_decimation_leaf_size;
+    std::string m_decimation_method;
 
 };
 

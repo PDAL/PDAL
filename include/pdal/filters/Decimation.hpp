@@ -54,10 +54,15 @@ public:
 private:
     uint32_t m_step;
     uint32_t m_offset;
+    double m_leaf_size;
+    std::string m_method;
 
     virtual void processOptions(const Options& options);
     PointBufferSet run(PointBufferPtr buffer);
     void decimate(PointBuffer& input, PointBuffer& output);
+#ifdef PDAL_HAVE_PCL
+    void voxel_grid(PointBuffer& input, PointBuffer& output);
+#endif
 
     Decimation& operator=(const Decimation&); // not implemented
     Decimation(const Decimation&); // not implemented
