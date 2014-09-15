@@ -34,9 +34,9 @@
 
 #include <pdal/PointBuffer.hpp>
 #include <pdal/filters/Decimation.hpp>
-#include <pdal/PCLConversions.hpp>
 
 #ifdef PDAL_HAVE_PCL
+#include <pdal/PCLConversions.hpp>
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/point_types.h>
 #include <pcl/io/pcd_io.h>
