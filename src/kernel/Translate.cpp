@@ -153,14 +153,6 @@ void Translate::addSwitches()
          "Extent (in XYZ to clip output to)")
         ("polygon", po::value<std::string >(&m_wkt),
          "POLYGON WKT to use for precise crop of data (2d or 3d)")
-        ("scale", po::value< std::string >(&m_scales),
-         "A comma-separated or quoted, space-separated list of scales to "
-         "set on the output file: \n--scale 0.1,0.1,0.00001\n--scale \""
-         "0.1 0.1 0.00001\"")
-        ("offset", po::value< std::string >(&m_offsets),
-         "A comma-separated or quoted, space-separated list of offsets to "
-         "set on the output file: \n--offset 0,0,0\n--offset "
-         "\"1234 5678 91011\"")
         ("metadata,m",
          po::value< bool >(&m_bForwardMetadata)->implicit_value(true),
          "Forward metadata (VLRs, header entries, etc) from previous stages")
@@ -290,8 +282,7 @@ int Translate::execute()
 
     Options writerOptions;
     writerOptions.add("filename", m_outputFile);
-    writerOptions.add("debug", isDebug());
-    writerOptions.add("verbose", getVerboseLevel());
+    setCommonOptions(writerOptions);
     
     if (!m_input_srs.empty())
         writerOptions.add("spatialreference", m_input_srs.getWKT());
