@@ -97,15 +97,7 @@ std::unique_ptr<Stage> PCL::makeReader(Options readerOptions)
 
     std::unique_ptr<Stage> reader_stage(AppSupport::makeReader(readerOptions));
 
-    Options pclOptions;
-    pclOptions.add<std::string>("filename", m_pclFile);
-    pclOptions.add<bool>("debug", isDebug());
-    pclOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
-
-    std::unique_ptr<Stage> pcl_stage(new filters::PCLBlock(pclOptions));
-    pcl_stage->setInput(reader_stage.get());
-
-    return pcl_stage;
+    return reader_stage;
 }
 
 
@@ -116,6 +108,16 @@ int PCL::execute()
     readerOptions.add<bool>("debug", isDebug());
     readerOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
 
+    std::unique_ptr<Stage> readerStage = makeReader(readerOptions);
+
+    Options pclOptions;
+    pclOptions.add<std::string>("filename", m_pclFile);
+    pclOptions.add<bool>("debug", isDebug());
+    pclOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
+
+    std::unique_ptr<Stage> pclStage(new filters::PCLBlock(pclOptions));
+    pclStage->setInput(readerStage.get());
+
     Options writerOptions;
     writerOptions.add<std::string>("filename", m_outputFile);
     writerOptions.add<bool>("debug", isDebug());
@@ -124,19 +126,31 @@ int PCL::execute()
     if (m_bCompress)
         writerOptions.add<bool>("compression", true);
 
-    std::unique_ptr<Stage> finalStage = makeReader(readerOptions);
+    std::vector<std::string> cmd = getProgressShellCommand();
+    UserCallback *callback =
+        cmd.size() ? (UserCallback *)new ShellScriptCallback(cmd) :
+        (UserCallback *)new HeartbeatCallback();
 
     std::unique_ptr<Writer>
-        writer(AppSupport::makeWriter(writerOptions, finalStage.get()));
+        writer(AppSupport::makeWriter(writerOptions, pclStage.get()));
+    
     PointContext ctx;
-
-    UserCallback* callback;
-    if (!getProgressShellCommand().size())
-        callback = static_cast<pdal::UserCallback*>(new PercentageCallback);
-    else
-        callback = static_cast<UserCallback*>(
-            new ShellScriptCallback(getProgressShellCommand()));
     writer->setUserCallback(callback);
+
+    for (auto pi: getExtraStageOptions())
+    {
+        std::string name = pi.first;
+        Options options = pi.second;
+        std::vector<Stage*> stages = writer->findStage(name);
+        for (auto s: stages)
+        {
+            Options opts = s->getOptions();
+            for (auto o: options.getOptions())
+                opts.add(o);
+            s->setOptions(opts);
+        }
+    }    
+
     writer->prepare(ctx);
     writer->execute(ctx);
 
