@@ -81,7 +81,7 @@ A few things to note:
   If you do not need Intensity values in your output file, you can delete the programmable filter.
 - We set the ``discard_high_return_numbers`` option to ``true`` on the las writer.
   RXP files can contain more returns per shot than is supported by las, and so we need to explicitly tell the las writer to ignore those high return number points.
-  You could also use ``filters.predicate`` to filter those points earlier in the pipeline, or modify the returns values with a ``filters.programmable``.
+  You could also use ``filters.predicate`` to filter those points earlier in the pipeline, or modify the return values with a ``filters.programmable``.
 
 
 Options
