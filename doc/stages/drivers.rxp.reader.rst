@@ -57,7 +57,7 @@ Only points with a valid gps time, as determined by a pps pulse, are read from t
         ref = ins["Reflectance"]
         min = numpy.amin(ref)
         max = numpy.amax(ref)
-        outs["Intensity"] = (65536 * (ref - min) / (max - min)).astype(numpy.uint16)
+        outs["Intensity"] = (65535 * (ref - min) / (max - min)).astype(numpy.uint16)
         return True
                     </Option>
                     <Option name="function">reflectance_to_intensity</Option>
