@@ -46,29 +46,37 @@ namespace pdal
 class RawPtBuf
 {
 public:
-    RawPtBuf() : m_numPts(0), m_allocPts(0)
+    RawPtBuf() : m_numPts(0)
     {}
+
+    ~RawPtBuf()
+    {
+        for (auto vi = m_blocks.begin(); vi != m_blocks.end(); ++vi)
+            delete [] *vi;
+    }
 
     PointId addPoint()
     {
-        if (m_numPts >= m_allocPts)
+        if (m_numPts % m_blockPtCnt == 0)
         {
-            m_allocPts += m_blockSize;
-            m_buf.resize(pointsToBytes(m_allocPts));
+            char *buf = new char[pointsToBytes(m_blockPtCnt)];
+            m_blocks.push_back(buf);
         }
         return m_numPts++;
     }
 
     void setField(Dimension::Detail *d, PointId idx, const void *value)
     {
-        std::size_t offset = pointsToBytes(idx) + d->offset();
-        memcpy(m_buf.data() + offset, value, d->size());
+        char *buf = m_blocks[idx / m_blockPtCnt];
+        std::size_t offset = pointsToBytes(idx % m_blockPtCnt) + d->offset();
+        memcpy(buf + offset, value, d->size());
     }
 
     void getField(Dimension::Detail *d, PointId idx, void *value)
     {
-        std::size_t offset = pointsToBytes(idx) + d->offset();
-        memcpy(value, m_buf.data() + offset, d->size());
+        char *buf = m_blocks[idx / m_blockPtCnt];
+        std::size_t offset = pointsToBytes(idx % m_blockPtCnt) + d->offset();
+        memcpy(value, buf + offset, d->size());
     }
 
     void setPointSize(size_t size)
@@ -80,12 +88,12 @@ public:
     }
 
 private:
-    std::vector<char> m_buf;
+    std::vector<char *> m_blocks;
     point_count_t m_numPts;
-    point_count_t m_allocPts;
     size_t m_pointSize;
 
-    static const point_count_t m_blockSize = 100000;
+    // The number of points in each memory block.
+    static const point_count_t m_blockPtCnt = 65536;
     
     std::size_t pointsToBytes(point_count_t numPts)
         { return m_pointSize * numPts; }
