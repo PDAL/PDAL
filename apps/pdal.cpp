@@ -1,5 +1,6 @@
 /******************************************************************************
 * Copyright (c) 2013, Howard Butler (hobu.inc@gmail.com)
+* Copyright (c) 2014, Bradley J Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -49,6 +50,7 @@ void outputVersion()
     std::cout << "  available actions: " << std::endl;
     std::cout << "     - delta" << std::endl;
     std::cout << "     - diff" << std::endl;
+    std::cout << "     - ground" << std::endl;
     std::cout << "     - info" << std::endl;
 #ifdef PDAL_HAVE_PCL
     std::cout << "     - pcl" << std::endl;
@@ -155,6 +157,12 @@ int main(int argc, char* argv[])
     if (boost::iequals(action, "random"))
     {
         pdal::kernel::Random app(count, args);
+        return app.run();
+    }
+
+    if (boost::iequals(action, "ground"))
+    {
+        pdal::kernel::Ground app(count, args);
         return app.run();
     }
     

@@ -33,7 +33,6 @@
  ****************************************************************************/
 
 #include <pdal/kernel/PCL.hpp>
-#include <pdal/filters/Cache.hpp>
 #include <pdal/filters/PCLBlock.hpp>
 
 namespace pdal

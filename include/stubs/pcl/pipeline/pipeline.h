@@ -15,6 +15,10 @@ struct Pipeline
     { (void)name; }
 
     template <typename T>
+    void setJSON(T& json)
+    { (void)json; }
+
+    template <typename T>
     void filter(T& cloud)
     { (void)cloud; }
 
