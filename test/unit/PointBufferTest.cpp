@@ -242,7 +242,6 @@ BOOST_AUTO_TEST_CASE(bigfile)
     PointContext ctx;
 
     point_count_t NUM_PTS = 1000000;
-//    point_count_t NUM_PTS = 10;
 
     ctx.registerDim(Dimension::Id::X);
     ctx.registerDim(Dimension::Id::Y);
@@ -270,7 +269,7 @@ BOOST_AUTO_TEST_CASE(bigfile)
     PointId ids[NUM_PTS];
     for (PointId idx = 0; idx < NUM_PTS; ++idx)
         ids[idx] = idx;
-    // Do a bunch of swaps.
+    // Do a bunch of random swaps.
     for (PointId idx = 0; idx < NUM_PTS; ++idx)
         std::swap(ids[idx], ids[random() % NUM_PTS]);
 
