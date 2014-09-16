@@ -36,6 +36,33 @@
 #include <pdal/drivers/bpf/BpfSeqIterator.hpp>
 #include <pdal/Options.hpp>
 
+const std::string utm_wkt1 =
+    "PROJCS[\"WGS 84 / UTM zone ";
+
+const std::string utm_wkt2 =
+    "\",\
+    GEOGCS[\"WGS 84\",\
+        DATUM[\"WGS_1984\",\
+            SPHEROID[\"WGS 84\",6378137,298.257223563,\
+                AUTHORITY[\"EPSG\",\"7030\"]],\
+            AUTHORITY[\"EPSG\",\"6326\"]],\
+        PRIMEM[\"Greenwich\",0,\
+            AUTHORITY[\"EPSG\",\"8901\"]],\
+        UNIT[\"degree\",0.01745329251994328,\
+            AUTHORITY[\"EPSG\",\"9122\"]],\
+        AUTHORITY[\"EPSG\",\"4326\"]],\
+    UNIT[\"metre\",1,\
+        AUTHORITY[\"EPSG\",\"9001\"]],\
+    PROJECTION[\"Transverse_Mercator\"],\
+    PARAMETER[\"latitude_of_origin\",0],\
+    PARAMETER[\"central_meridian\",-57],\
+    PARAMETER[\"scale_factor\",0.9996],\
+    PARAMETER[\"false_easting\",500000],\
+    PARAMETER[\"false_northing\",10000000],\
+    AUTHORITY[\"EPSG\",\"32721\"],\
+    AXIS[\"Easting\",EAST],\
+    AXIS[\"Northing\",NORTH]]";
+
 namespace pdal
 {
 
@@ -65,6 +92,14 @@ void BpfReader::initialize()
     if (!m_stream)
         return;
     readPolarData();
+
+    std::string wkt = utm_wkt1 +
+    boost::lexical_cast<std::string>(abs(m_header.m_coordId)) +
+    (m_header.m_coordId > 0 ? "N" : "S") +
+    utm_wkt2;
+    SpatialReference srs;
+    srs.setWKT(wkt);
+    setSpatialReference(srs);
 
     // Fast forward file to end of header as reported by base header.
     std::streampos pos = m_stream.position();
