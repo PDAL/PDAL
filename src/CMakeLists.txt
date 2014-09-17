@@ -707,7 +707,6 @@ set(PDAL_KERNEL_HPP
     ${PDAL_KERNEL_HEADERS}/Application.hpp
     ${PDAL_KERNEL_HEADERS}/Support.hpp
     ${PDAL_KERNEL_HEADERS}/Diff.hpp
-    ${PDAL_KERNEL_HEADERS}/Ground.hpp
     ${PDAL_KERNEL_HEADERS}/Info.hpp
     ${PDAL_KERNEL_HEADERS}/Kernel.hpp
     ${PDAL_KERNEL_HEADERS}/Pipeline.hpp
@@ -720,7 +719,6 @@ set(PDAL_KERNEL_CPP
     ${PDAL_KERNEL_SRC}/Application.cpp
     ${PDAL_KERNEL_SRC}/Support.cpp
     ${PDAL_KERNEL_SRC}/Diff.cpp
-    ${PDAL_KERNEL_SRC}/Ground.cpp
     ${PDAL_KERNEL_SRC}/Info.cpp
     ${PDAL_KERNEL_SRC}/Pipeline.cpp
     ${PDAL_KERNEL_SRC}/Delta.cpp
@@ -737,12 +735,14 @@ list (APPEND PDAL_HPP ${PDAL_KERNEL_HPP} )
 #
 if (PDAL_HAVE_PCL)
     set(PDAL_PCL_HPP
+	${PDAL_KERNEL_HEADERS}/Ground.hpp
 	${PDAL_KERNEL_HEADERS}/PCL.hpp
 	${PDAL_FILTERS_HEADERS}/PCLBlock.hpp
     )
 
     set(PDAL_PCL_CPP
 	${PDAL_FILTERS_SRC}/PCLBlock.cpp
+	${PDAL_KERNEL_SRC}/Ground.cpp
 	${PDAL_KERNEL_SRC}/PCL.cpp
     )
 

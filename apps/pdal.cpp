@@ -50,7 +50,9 @@ void outputVersion()
     std::cout << "  available actions: " << std::endl;
     std::cout << "     - delta" << std::endl;
     std::cout << "     - diff" << std::endl;
+#ifdef PDAL_HAVE_PCL
     std::cout << "     - ground" << std::endl;
+#endif
     std::cout << "     - info" << std::endl;
 #ifdef PDAL_HAVE_PCL
     std::cout << "     - pcl" << std::endl;
@@ -129,6 +131,12 @@ int main(int argc, char* argv[])
     }
 
 #ifdef PDAL_HAVE_PCL
+    if (boost::iequals(action, "ground"))
+    {
+        pdal::kernel::Ground app(count, args);
+        return app.run();
+    }
+    
     if (boost::iequals(action, "pcl"))
     {
         pdal::kernel::PCL app(count, args);
@@ -160,12 +168,6 @@ int main(int argc, char* argv[])
         return app.run();
     }
 
-    if (boost::iequals(action, "ground"))
-    {
-        pdal::kernel::Ground app(count, args);
-        return app.run();
-    }
-    
     std::cerr << "Action '" << action <<"' not recognized" << std::endl << std::endl;
     outputVersion();
     return 1;
