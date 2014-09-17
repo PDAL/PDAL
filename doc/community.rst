@@ -20,7 +20,7 @@ start hacking on it yourself.
 IRC
 ..............................................................................
 
-Find the PDAL developers on IRC on #liblas at `Freenode`_.
+Find the PDAL developers on IRC on #pdal at `Freenode`_.
 
 
 

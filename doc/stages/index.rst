@@ -24,6 +24,8 @@ Readers & Writers
    drivers.oci.reader
    drivers.oci.writer
    drivers.p2g.writer
+   drivers.pcd.reader
+   drivers.pcd.writer
    drivers.qfit.reader
    drivers.sbet.reader
    drivers.text.writer
@@ -35,19 +37,14 @@ Filters
 .. toctree::
    :maxdepth: 1
 
-   filters.byteswap
-   filters.cache
    filters.color
    filters.colorization
    filters.chipper
    filters.crop
    filters.decimation
    filters.hexbin
-   filters.inplacereprojection
    filters.pclblock
    filters.predicate
    filters.programmable
-   filters.selector
-   filters.scaling
 
 

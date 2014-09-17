@@ -176,9 +176,9 @@ compressed LAS support.
 PCL
 ------------------------------------------------------------------------------
 
-The `Point Cloud Library (PCL)`_ is used by the :ref:`drivers.pcd.writer`,
-:ref:`drivers.pcd.reader`, and :ref:`filters.pclblock` to provide support for
-various PCL-related operations.
+The `Point Cloud Library (PCL)`_ is used by the :ref:`ground_command`,
+:ref:`pcl_command`, :ref:`drivers.pcd.writer`, :ref:`drivers.pcd.reader`, and
+:ref:`filters.pclblock` to provide support for various PCL-related operations.
 
 At the moment, PCL must be built from the `pipeline branch`_, which is not
 maintained by PCL. We do our best to keep this up-to-date with PCL master.
