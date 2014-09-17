@@ -46,7 +46,6 @@
 #cmakedefine PDAL_HAVE_POSTGRESQL
 #cmakedefine PDAL_HAVE_ZLIB
 #cmakedefine PDAL_HAVE_DEMANGLER
-#cmakedefine PDAL_HAVE_RIVLIB
 
 /*
  * plugins

@@ -73,10 +73,6 @@
 #include <libxml/xmlversion.h>
 #endif
 
-#ifdef PDAL_HAVE_RIVLIB
-#include <riegl/config.hpp>
-#endif
-
 #ifdef PDAL_HAVE_PCL
 #include <pcl/pcl_config.h>
 #endif
@@ -338,12 +334,6 @@ std::string getPDALDebugInformation()
               << std::setw(name_column) << "PostgreSQL" << std::right 
               << std::setw(url_column) << "http://github.com/pramsey/pointcloud/" 
               << std::setw(special_column) << ""  << std::endl;
-#endif
-#ifdef PDAL_HAVE_RIVLIB
-    os << std::left
-              << std::setw(name_column) << "RiVLib" << std::right 
-              << std::setw(url_column) << "http://www.riegl.com/index.php?id=224" 
-              << std::setw(special_column) << scanlib::version << std::endl;
 #endif
             
     os << thdr.str() << std::endl;

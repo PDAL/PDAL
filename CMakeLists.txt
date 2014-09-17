@@ -25,12 +25,6 @@ cmake_policy(SET CMP0022 OLD) # interface link libraries
 cmake_policy(SET CMP0042 OLD) # osx rpath
 endif()
 
-# Must come before pdal_options.cmake is included
-# Silences warnings when building with rivlib
-if (WITH_RIVLIB)
-cmake_policy(SET CMP0022 OLD) # interface link libraries
-endif (WITH_RIVLIB)
-
 # per http://www.cmake.org/Wiki/CMake_RPATH_handling
 SET(CMAKE_SKIP_BUILD_RPATH FALSE)
 SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
@@ -630,25 +624,6 @@ if(WITH_PYTHON)
         set(PYTHON_LIBRARY "")
     endif()
 endif()
-
-# RiVLib, Riegl's V-Line Scanner Library
-# defaults to off
-#
-# RiVLib uses that funky mixed case to name itself, but PDAL will
-# simply call it 'rivlib' for ease of typing.
-option(WITH_RIVLIB "Choose if rivlib support should be built" FALSE)
-if(WITH_RIVLIB)
-    find_package(RiVLib COMPONENTS scanlib)
-    if(RiVLib_FOUND)
-        set(PDAL_HAVE_RIVLIB 1)
-        include_directories(${RiVLib_INCLUDE_DIRS})
-        add_definitions(-DHAVE_RIVLIB=1)
-        message(STATUS "Found RiVLib at: ${RiVLib_INCLUDE_DIRS}")
-    else()
-        set(RiVLib_SCANLIB_LIBRARY "")
-    endif()
-endif()
-
 
 option(USE_PDAL_PLUGIN_TEXT "Build the text driver as a plugin rather than embedding" FALSE)
 option(USE_PDAL_PLUGIN_SOCI "Build the soci driver as a plugin rather than embedding" FALSE)

@@ -93,10 +93,6 @@ MAKE_READER_CREATOR(PgPcReader, pdal::drivers::pgpointcloud::PgReader)
 #endif
 #endif
 
-#ifdef PDAL_HAVE_RIVLIB
-MAKE_READER_CREATOR(RxpReader, pdal::drivers::rxp::RxpReader)
-#endif
-
 MAKE_READER_CREATOR(QfitReader, pdal::drivers::qfit::Reader)
 MAKE_READER_CREATOR(TerrasolidReader, pdal::drivers::terrasolid::Reader)
 
@@ -207,7 +203,6 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
     drivers["sbet"] = "drivers.sbet.reader";
     drivers["icebridge"] = "drivers.icebridge.reader";
     drivers["sqlite"] = "drivers.sqlite.reader";
-    drivers["rxp"] = "drivers.rxp.reader";
     
 #ifdef PDAL_HAVE_PCL
     drivers["pcd"] = "drivers.pcd.reader";
@@ -398,10 +393,6 @@ void StageFactory::registerKnownReaders()
 #ifndef USE_PDAL_PLUGIN_PGPOINTCLOUD
     REGISTER_READER(PgPcReader, pdal::drivers::pgpointcloud::PgReader);
 #endif
-#endif
-
-#ifdef PDAL_HAVE_RIVLIB
-    REGISTER_READER(RxpReader, pdal::drivers::rxp::RxpReader);
 #endif
 
     REGISTER_READER(QfitReader, pdal::drivers::qfit::Reader);

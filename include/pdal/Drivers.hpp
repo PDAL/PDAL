@@ -119,8 +119,4 @@
 #endif
 #endif
 
-#ifdef PDAL_HAVE_RIVLIB
-#include <pdal/drivers/rxp/RxpReader.hpp>
-#endif
-
 #endif

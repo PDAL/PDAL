@@ -140,8 +140,6 @@ enum Enum
     Y,
     Z,
     Intensity,
-    Amplitude,
-    Reflectance,
     ReturnNumber,
     NumberOfReturns,
     ScanDirectionFlag,
@@ -154,7 +152,6 @@ enum Enum
     Green,
     Blue,
     GpsTime,
-    InternalTime,
     OffsetTime,
     IsPpsLocked,
     StartPulse,
@@ -163,9 +160,7 @@ enum Enum
     Pitch,
     Roll,
     PulseWidth,
-    Deviation,
     PassiveSignal,
-    BackgroundRadiation,
     PassiveX,
     PassiveY,
     PassiveZ,
@@ -182,8 +177,7 @@ enum Enum
     ZBodyAngRate,
     Flag,
     Mark,
-    Alpha,
-    EchoRange
+    Alpha
 };
 } // namespace Id
 typedef std::vector<Id::Enum> IdList;
@@ -203,16 +197,6 @@ inline std::string description(Id::Enum id)
         return "Z coordinate";
     case Id::Intensity:
         return "Representation of the pulse return magnitude";
-    case Id::Amplitude:
-        return "This is the ratio of the received power to the "
-            "power received at the detection limit expressed in dB";
-    case Id::Reflectance:
-        return "This is the ratio of the received power to the "
-            "power that would be received from a white diffuse target "
-            "at the same distance expressed in dB. The reflectance "
-            "represents a range independent property of the target. "
-            "The surface normal of this target is assumed to be in "
-            "parallel to the laser beam direction.";
     case Id::ReturnNumber:
         return "Pulse return number for a given output pulse. A given output "
             "laser pulse can have many returns, and they must be marked in "
@@ -244,8 +228,6 @@ inline std::string description(Id::Enum id)
             "indicates that the point originated in the current file";
     case Id::GpsTime:
         return "GPS time that the point was acquired";
-    case Id::InternalTime:
-        return "Scanner's internal time when the point was aquired, in seconds";
     case Id::OffsetTime:
         return "Milliseconds from first acquired point";
     case Id::IsPpsLocked:
@@ -271,12 +253,8 @@ inline std::string description(Id::Enum id)
         return "GPS PDOP (dilution of precision)";
     case Id::PulseWidth:
         return "Laser received pulse width (digitizer samples)";
-    case Id::Deviation:
-        return "A larger value for deviation indicates larger distortion.";
     case Id::PassiveSignal:
         return "Relative passive signal";
-    case Id::BackgroundRadiation:
-        return "A measure of background radiation.";
     case Id::PassiveX:
         return "Passive X footprint";
     case Id::PassiveY:
@@ -309,8 +287,6 @@ inline std::string description(Id::Enum id)
         return "Mark";
     case Id::Flag:
         return "Flag";
-    case Id::EchoRange:
-        return "The distance from the laser origin to the target.";
     case Id::Unknown:
         return "";
     }
@@ -328,10 +304,6 @@ inline Id::Enum id(std::string s)
         return Id::Z;
     else if (s == "INTENSITY")
         return Id::Intensity;
-    else if (s == "AMPLITUDE")
-        return Id::Amplitude;
-    else if (s == "REFLECTANCE")
-        return Id::Reflectance;
     else if (s == "RETURNNUMBER")
         return Id::ReturnNumber;
     else if (s == "NUMBEROFRETURNS")
@@ -358,8 +330,6 @@ inline Id::Enum id(std::string s)
         return Id::Alpha;
     else if (s == "GPSTIME")
         return Id::GpsTime;
-    else if (s == "INTERNALTIME")
-        return Id::InternalTime;
     else if (s == "TIME" || s == "OFFSETTIME")
         return Id::OffsetTime;
     else if (s == "ISPPSLOCKED")
@@ -376,12 +346,8 @@ inline Id::Enum id(std::string s)
         return Id::Pdop;
     else if (s == "PULSEWIDTH")
         return Id::PulseWidth;
-    else if (s == "DEVIATION")
-        return Id::Deviation;
     else if (s == "PASSIVESIGNAL")
         return Id::PassiveSignal;
-    else if (s == "BACKGROUNDRADIATION")
-        return Id::BackgroundRadiation;
     else if (s == "PASSIVEX")
         return Id::PassiveX;
     else if (s == "PASSIVEY")
@@ -414,8 +380,6 @@ inline Id::Enum id(std::string s)
         return Id::Mark;
     else if (s == "FLAG")
         return Id::Flag;
-    else if (s == "ECHORANGE")
-        return Id::EchoRange;
     return Id::Unknown;
 }
 
@@ -431,10 +395,6 @@ inline std::string name(Id::Enum id)
         return "Z";
     case Id::Intensity:
         return "Intensity";
-    case Id::Amplitude:
-        return "Amplitude";
-    case Id::Reflectance:
-        return "Reflectance";
     case Id::ReturnNumber:
         return "ReturnNumber";
     case Id::NumberOfReturns:
@@ -461,8 +421,6 @@ inline std::string name(Id::Enum id)
         return "Alpha";
     case Id::GpsTime:
         return "GpsTime";
-    case Id::InternalTime:
-        return "InternalTime";
     case Id::OffsetTime:
         return "OffsetTime";
     case Id::IsPpsLocked:
@@ -479,12 +437,8 @@ inline std::string name(Id::Enum id)
         return "Pdop";
     case Id::PulseWidth:
         return "PulseWidth";
-    case Id::Deviation:
-        return "Deviation";
     case Id::PassiveSignal:
         return "PassiveSignal";
-    case Id::BackgroundRadiation:
-        return "BackgroundRadiation";
     case Id::PassiveX:
         return "PassiveX";
     case Id::PassiveY:
@@ -517,8 +471,6 @@ inline std::string name(Id::Enum id)
         return "Mark";
     case Id::Flag:
         return "Flag";
-    case Id::EchoRange:
-        return "EchoRange";
     case Id::Unknown:
         return "";
     }
@@ -540,10 +492,6 @@ inline Type::Enum defaultType(Id::Enum id)
         return Double;
     case Id::Intensity:
         return Unsigned16;
-    case Id::Amplitude:
-        return Float;
-    case Id::Reflectance:
-        return Float;
     case Id::ReturnNumber:
         return Unsigned8;
     case Id::NumberOfReturns:
@@ -561,8 +509,6 @@ inline Type::Enum defaultType(Id::Enum id)
     case Id::PointSourceId:
         return Unsigned16;
     case Id::GpsTime:
-        return Double;
-    case Id::InternalTime:
         return Double;
     case Id::OffsetTime:
         return Unsigned32;
@@ -588,12 +534,8 @@ inline Type::Enum defaultType(Id::Enum id)
         return Float;
     case Id::PulseWidth:
         return Float;
-    case Id::Deviation:
-        return Float;
     case Id::PassiveSignal:
         return Signed32;
-    case Id::BackgroundRadiation:
-        return Float;
     case Id::PassiveX:
         return Double;
     case Id::PassiveY:
@@ -626,8 +568,6 @@ inline Type::Enum defaultType(Id::Enum id)
         return Unsigned8;
     case Id::Flag:
         return Unsigned8;
-    case Id::EchoRange:
-        return Double;
     case Id::Unknown:
         throw pdal_error("No type for undefined dimension ID.");
     }
