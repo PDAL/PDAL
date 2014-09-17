@@ -77,6 +77,10 @@
 #include <riegl/config.hpp>
 #endif
 
+#ifdef PDAL_HAVE_PCL
+#include <pcl/pcl_config.h>
+#endif
+
 
 namespace pdal
 {
@@ -160,6 +164,11 @@ std::string GetFullVersionString()
        << LASZIP_VERSION_MAJOR << "."
        << LASZIP_VERSION_MINOR << "."
        << LASZIP_VERSION_REVISION;
+#endif
+
+#ifdef PDAL_HAVE_PCL
+    os << " PCL "
+       << PCL_VERSION_PRETTY;
 #endif
 
     std::string info(os.str());
