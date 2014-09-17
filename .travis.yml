@@ -16,11 +16,11 @@ before_install: ./scripts/ci/before_install.sh
 script: ./scripts/ci/script.sh
 
 notifications:
-  on_success: always # [always|never|change] # default: change
-  on_failure: always # [always|never|change] # default: always
-  irc: "chat.freenode.net#pdal"
-  # Uncomment and edit below for notifications by e-mail
-  #email:
-  #  recipients:
-  #    - mateusz@loskot.net
-
+  on_success: always
+  on_failure: always
+  irc: chat.freenode.net#pdal
+  slack:
+    rooms:
+      secure: AjatYRAUpsczjENkpHPFiLLZ/leDlzx4TH+oPQYZCpA4WpJdNRy0IB4oMR2IYiY+qz0nHDbeMTBvF0l8S6NknZAz20f8buf4IkrdXymBQBOTmLHMWbpgHuSCCu7xMwtG6thjMEmBOXm5UgCcdqvlchcaoAUunyprXQWgJwI+tHE=
+    on_failure: always
+    on_success: change
