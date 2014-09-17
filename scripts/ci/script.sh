@@ -42,7 +42,7 @@ cmake \
     -DWITH_SQLITE=OFF \
     -DENABLE_CTEST=OFF \
     -DWITH_HDF5=OFF \
-    -DWITH_STUBS=ON \
+    -DWITH_STUBS=OFF \
     -G "$PDAL_CMAKE_GENERATOR" \
     ..
 
