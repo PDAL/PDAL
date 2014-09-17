@@ -298,7 +298,7 @@ point_count_t RxpInclFixPointcloud::writeSavedPoints(PointBuffer& buf, point_cou
     while (m_buf->getFieldAs<double>(timeDim, m_idx) < m_incl[m_inclIdx].time)
         ++m_idx;
 
-    auto startingIncl = getInclMovingAverage();
+    auto startingIncl = movingAverage(m_incl, m_inclIdx, m_windowSize);
     Inclination movingAverageIncl;
     auto startingIdx = m_inclIdx;
     RotationMatrix mat;
@@ -311,7 +311,7 @@ point_count_t RxpInclFixPointcloud::writeSavedPoints(PointBuffer& buf, point_cou
             ++m_inclIdx;
             if (m_inclIdx == m_incl.size() - m_windowSize)
                 break;
-            movingAverageIncl = getInclMovingAverage();
+            movingAverageIncl = movingAverage(m_incl, m_inclIdx, m_windowSize);
             float dRoll = startingIncl.roll * 0.001 -
                 movingAverageIncl.roll * 0.001;
             float dPitch = startingIncl.pitch * 0.001 -
@@ -349,13 +349,15 @@ void RxpInclFixPointcloud::on_hk_incl(const scanlib::hk_incl<iterator_type>& inc
 }
 
 
-Inclination RxpInclFixPointcloud::getInclMovingAverage() const
+Inclination movingAverage(const InclinationVector& incl,
+                          InclinationVector::size_type idx,
+                          InclinationVector::size_type halfWindowSize)
 {
-    auto middle = m_incl.begin() + m_inclIdx;
-    double time = (m_incl[m_inclIdx].time + m_incl[m_inclIdx + 1].time) / 2;
+    auto middle = incl.begin() + idx;
+    double time = (incl[idx].time + incl[idx + 1].time) / 2;
     long roll(0), pitch(0);
-    for (auto it = middle - m_windowSize + 1;
-            it != middle + m_windowSize + 1;
+    for (auto it = middle - halfWindowSize + 1;
+            it != middle + halfWindowSize + 1;
             ++it)
     {
         roll += it->roll;
@@ -366,9 +368,9 @@ Inclination RxpInclFixPointcloud::getInclMovingAverage() const
         return {
             time,
             boost::numeric_cast<int16_t>(roll
-                    / (static_cast<long>(m_windowSize) * 2)),
+                    / (static_cast<long>(halfWindowSize) * 2)),
             boost::numeric_cast<int16_t>(pitch
-                    / (static_cast<long>(m_windowSize) * 2))
+                    / (static_cast<long>(halfWindowSize) * 2))
         };
     }
     catch (boost::numeric::bad_numeric_cast& e)

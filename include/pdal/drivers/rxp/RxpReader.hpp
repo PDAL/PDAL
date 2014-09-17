@@ -77,6 +77,9 @@ std::string extractRivlibURI(const Options& options);
 Dimension::IdList getRxpDimensions(bool syncToPps, bool minimal);
 RotationMatrix makeRotationMatrix(float roll, float pitch);
 Point rotatePoint(const Point& point, const RotationMatrix& matrix);
+Inclination movingAverage(const InclinationVector& incl,
+                          InclinationVector::size_type idx,
+                          InclinationVector::size_type halfWindowSize);
 
 
 class PDAL_DLL RxpPointcloud : public scanlib::pointcloud
@@ -122,8 +125,6 @@ protected:
     void on_hk_incl(const scanlib::hk_incl<iterator_type>& arg);
 
 private:
-    Inclination getInclMovingAverage() const;
-
     InclinationVector::size_type m_windowSize;
     InclinationVector m_incl;
     InclinationVector::size_type m_inclIdx;

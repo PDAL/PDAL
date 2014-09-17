@@ -191,6 +191,20 @@ BOOST_AUTO_TEST_CASE(testRotatePoint)
 }
 
 
+BOOST_AUTO_TEST_CASE(testMovingAverage)
+{
+    using namespace pdal::drivers::rxp;
+
+    InclinationVector incl;
+    incl.push_back(Inclination{0, 1, 2});
+    incl.push_back(Inclination{2, 3, 4});
+
+    Inclination i1 = movingAverage(incl, 0, 1);    
+    BOOST_CHECK_CLOSE(i1.time, 1, 0.0001);
+    BOOST_CHECK_EQUAL(i1.roll, 2);
+    BOOST_CHECK_EQUAL(i1.pitch, 3);
+}
+
 
 BOOST_AUTO_TEST_CASE(testURILogic)
 {
