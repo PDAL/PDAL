@@ -85,6 +85,47 @@ BOOST_AUTO_TEST_CASE(test_base_options)
 }
 
 
+BOOST_AUTO_TEST_CASE(header)
+{
+    PointContext ctx;
+    Options ops;
+    ops.add("filename", Support::datapath("las/simple.las"));
+    drivers::las::Reader reader(ops);
+
+    reader.prepare(ctx);
+    // This tests the copy ctor, too.
+    drivers::las::LasHeader h = reader.getLasHeader();
+
+    BOOST_CHECK_EQUAL(h.GetFileSignature(), "LASF");
+    BOOST_CHECK_EQUAL(h.GetFileSourceId(), 0);
+    BOOST_CHECK_EQUAL(h.GetReserved(), 0);
+    BOOST_CHECK(h.GetProjectId().is_nil());
+    BOOST_CHECK_EQUAL(h.GetVersionMajor(), 1);
+    BOOST_CHECK_EQUAL(h.GetVersionMinor(), 2);
+    BOOST_CHECK_EQUAL(h.GetCreationDOY(), 0);
+    BOOST_CHECK_EQUAL(h.GetCreationYear(), 0);
+    BOOST_CHECK_EQUAL(h.GetHeaderSize(), 227);
+    BOOST_CHECK_EQUAL(h.getPointFormat(), 3);
+    BOOST_CHECK_EQUAL(h.GetPointRecordsCount(), 1065);
+    BOOST_CHECK_EQUAL(h.GetScaleX(), .01);
+    BOOST_CHECK_EQUAL(h.GetScaleY(), .01);
+    BOOST_CHECK_EQUAL(h.GetScaleZ(), .01);
+    BOOST_CHECK_EQUAL(h.GetOffsetX(), 0);
+    BOOST_CHECK_EQUAL(h.GetOffsetY(), 0);
+    BOOST_CHECK_EQUAL(h.GetOffsetZ(), 0);
+    BOOST_CHECK_CLOSE(h.GetMaxX(), 638982.55, .01);
+    BOOST_CHECK_CLOSE(h.GetMaxY(), 853535.43, .01);
+    BOOST_CHECK_CLOSE(h.GetMaxZ(), 586.38, .01);
+    BOOST_CHECK_CLOSE(h.GetMinX(), 635619.85, .01);
+    BOOST_CHECK_CLOSE(h.GetMinY(), 848899.70, .01);
+    BOOST_CHECK_CLOSE(h.GetMinZ(), 406.59, .01);
+    BOOST_CHECK_EQUAL(h.Compressed(), false);
+    BOOST_CHECK_EQUAL(h.getVLRBlockSize(), 0);
+    BOOST_CHECK_EQUAL(h.getCompressionInfo(), "");
+    BOOST_CHECK_EQUAL(h.GetHeaderPadding(), 0);
+}
+
+
 BOOST_AUTO_TEST_CASE(test_sequential)
 {
     PointContext ctx;
