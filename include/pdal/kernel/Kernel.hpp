@@ -38,7 +38,6 @@
 #include "Application.hpp"
 #include "Delta.hpp"
 #include "Diff.hpp"
-#include "Ground.hpp"
 #include "Info.hpp"
 #include "Pipeline.hpp"
 #include "Random.hpp"
@@ -46,5 +45,6 @@
 #include "Translate.hpp"
 
 #ifdef PDAL_HAVE_PCL
+#include "Ground.hpp"
 #include "PCL.hpp"
 #endif
