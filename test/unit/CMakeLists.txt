@@ -7,6 +7,11 @@
 ###############################################################################
 SET(PDAL_UNIT_TEST pdal_test)
 
+configure_file(
+    TestConfig.hpp.in
+    "${CMAKE_CURRENT_BINARY_DIR}/TestConfig.hpp")
+
+
 if (LIBXML2_FOUND)
 SET (PDAL_UNITTEST_XMLSCHEMA_TEST XMLSchemaTest.cpp)
 endif()

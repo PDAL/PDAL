@@ -35,6 +35,8 @@
 #ifndef UNITTEST_TESTCONFIG_INCLUDED
 #define UNITTEST_TESTCONFIG_INCLUDED
 
+#define UNITTEST_TESTCONFIG_DATA_PATH "@CMAKE_SOURCE_DIR@/test/data"
+
 #include <string>
 
 struct TestConfig 
