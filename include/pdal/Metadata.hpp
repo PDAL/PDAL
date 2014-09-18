@@ -32,467 +32,545 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_METADATA_HPP
-#define INCLUDED_METADATA_HPP
+#pragma once
 
 #include <pdal/pdal_internal.hpp>
-#include <pdal/Options.hpp>
 #include <pdal/Bounds.hpp>
 #include <pdal/SpatialReference.hpp>
 
-
-#include <boost/shared_array.hpp>
-#include <boost/blank.hpp>
 #include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
-#include <boost/optional.hpp>
-
-#include <boost/algorithm/string.hpp>
-
-
-#include <vector>
 #include <map>
+#include <vector>
 
 namespace pdal
 {
 
-/// ByteArray simply wrapps a std::vector<boost::uint8_t> such that it can then
-/// be dumped to an ostream in a base64 encoding. For now, it makes a copy of the data
-/// it is given, and should not be used for slinging big data around.
-class PDAL_DLL ByteArray
+namespace MetadataType
 {
-public:
-
-    /** @name Constructors
-    */
-    /// Constructs a ByteArray instance with the given array of data.
-    ByteArray(std::vector<boost::uint8_t> const& data)
-        : m_bytes(data)
-    {
-    }
-    
-    ByteArray()
-    {
-    }
-
-    /// Copy constructor
-    ByteArray(const ByteArray& rhs)
-        : m_bytes(rhs.m_bytes)
-
-    {
-    }
-
-    /// Assignment operator
-    inline ByteArray& operator=(ByteArray const& rhs)
-    {
-        if (&rhs != this)
-        {
-            m_bytes = rhs.m_bytes;
-        }
-        return *this;
-    }
-
-    /** @name Data manipulation
-    */
-    /// resets the array
-    inline void set(std::vector<boost::uint8_t> const& input)
-    {
-        m_bytes = input;
-    }
-
-    /// fetches a reference to the array
-    inline std::vector<boost::uint8_t> const& get() const
-    {
-        return m_bytes;
-    }
-
-
-    /** @name private attributes
-    */
-private:
-
-    std::vector<boost::uint8_t> m_bytes;
+enum Enum
+{
+    Instance,
+    Array
 };
+} // namespace MetadataType
 
+class Metadata;
+class MetadataNode;
+class MetadataNodeImpl;
+typedef std::shared_ptr<MetadataNodeImpl> MetadataNodeImplPtr;
+typedef std::vector<MetadataNodeImplPtr> MetadataImplList;
+typedef std::map<std::string, MetadataImplList> MetadataSubnodes;
 
-
-/// pdal::Metadata is a container for metadata entries that pdal::Stage and
-/// pdal::PointBuffer carry around as part of their internal operations. Bits of
-/// information might come from a pdal::Reader that opens a file, or a
-/// pdal::Filter that processes as an intermediate stage, and
-/// pdal::Metadata is what is used to hold and pass those metadata
-/// around.  
-class PDAL_DLL Metadata
+class MetadataNodeImpl
 {
-public:
-
-    /** @name Constructors
-    */
-    /// Base constructor
-    /// The Metadata::getType will be "blank" and the returned Metadata::getValue 
-    /// will be `0` instances made with this constructor
-    Metadata();
-
-    /// Defined name constructor
-    /// @param name entry name to use for this metadata entry
-    /// The Metadata::getType will be "blank" and the returned Metadata::getValue 
-    /// will be `0` instances made with this constructor
-    Metadata(std::string const& name);
-    
-    /// Copy constructor
-    Metadata(Metadata const& other);
-
-    /// Property constructor. The boost::property_tree::ptree should be in the 
-    /// same form and have the same nodes as those fetched from a Metadata::toPTree() 
-    /// call.
-    Metadata(boost::property_tree::ptree const& tree);
-    
-    /*! 
-        Convenience constructor
-        
-        Equivalent to manually calling Metadata::setName,
-        Metadata::setDescription, and Metadata::setValue individually for the
-        instance.
-        \param name the name to use for this instance
-        \param value the value to set for this instance.
-        \param description the description to use for this Metadata entry.
-        \verbatim embed:rst
-        .. note::
-
-            This method has a side effect of calling setType with an appropriate 
-            value as determined by the type T.
-        \endverbatim
-    */
-    template <typename T>
-    Metadata(std::string const& name, const T& value, std::string const& description="")
-    {
-        setName(name);
-        setDescription(description);
-        setValue<T>(value);
-    }
-
-
-    /// @name Adding Metadata members
-    /// Convenience addition
-    /// @param name the name to use for the new Metadata instance to be added to this instance.
-    /// @param value the value to set for the new Metadata instance to be added to this instance.
-    /// @param description the description to set for the new Metadata instance to be added to this instance.
-    template <typename T>
-    void addMetadata(   std::string const& name, 
-                        const T& value, 
-                        std::string const& description="");
-    
-    /// Add a new Metadata instance to this instance.
-    void addMetadata( Metadata const& m);
-    
-    /// Overwrites the existing metadata entry with the given @name, otherwise simply
-    /// adds a new one
-    /// @param value the Metadata instance to overwrite.
-    void setMetadata( Metadata const& m);
-
-    
-    /// @name Operators
-    
-    /// @return a new Metadata instance that is the sum of
-    /// two Metadata instances together by placing each in their 
-    /// respective paths as defined by their dotted Metadata::getName() values
-    Metadata operator+(const Metadata& rhs) const;
-    
-    /** @name entry type
-    */
-    /// @return the type for the metadata entry as a string.  These 
-    /// types are roughly mapped to the XSD typenames like integer, 
-    /// nonNegativeInteger, etc
-    inline std::string getType() const
-    {
-        return m_tree.get<std::string>("type");
-    }
-
-    /// sets the type for the metadata entry as a string.  These 
-    /// types are roughly mapped to the XSD typenames like integer, 
-    /// nonNegativeInteger, etc
-    /// @param t value for the type of the entry.  
-    inline void setType(std::string const& t)
-    {
-        m_tree.put<std::string>("type", t);
-    }
-
-    /** @name value
-    */
-    /*! 
-        \param v value to set for this entry
-        \verbatim embed:rst
-        .. note::
-
-            The type T must have a std::ostream<< method and be 
-            copy-constructable to meet the requirements if i/o'ing through a 
-            boost::property_tree.
-        \endverbatim
-    */
-    template <class T> inline void setValue(T const& v);
-    template <class T> inline T getValue() const { return m_tree.get<T>("value"); } 
-
-    /*! \return the value at the given sub-path.
-        \param path The single-name sub-path to select the value
-        \verbatim embed:rst
-        .. note::
-
-            The path given here is the sub-path inside of the `metadata` node 
-            of the boost::property_tree::ptree.  It is not a full node path.
-        \endverbatim
-    */
-    template <class T> inline T getValue(std::string const& path) const 
-    { 
-        return m_tree.get<T>("metadata."+path+".value"); 
-    } 
-    
-    /*! \return a boost::optional-wrapped instance for the given sub-path.
-        \param path The single-name sub-path to select the value
-        \verbatim embed:rst
-        .. note::
-
-            The path given here is the sub-path inside of the `metadata` node 
-            of the boost::property_tree::ptree.  It is not a full node path.
-        \endverbatim
-    */
-    template <class T> inline boost::optional<T> getValueOptional(std::string const& path) const 
-    { 
-        return m_tree.get_optional<T>("metadata." + path+".value"); 
-    } 
-
-    /// @return a Metadata instance at a given path (in 
-    /// boost::property_tree::ptree parlance).
-    inline Metadata getMetadata(std::string const& path) const 
-    {
-        boost::optional<boost::property_tree::ptree const&> t = m_tree.get_child_optional(path); 
-        if (!t)
-        {
-            std::ostringstream oss;
-            oss << "Metadata with path '" << path << "' is not found on this instance";
-            throw metadata_not_found(oss.str());            
-        }
-        return Metadata(m_tree.get_child(path)); 
-    } 
-    
-    inline bool deleteMetadata(std::string const& path)
-    {
-        boost::optional<boost::property_tree::ptree&> t = m_tree.get_child_optional("metadata."+ path);
-        if (t)
-        {
-            boost::property_tree::ptree& m = m_tree.get_child("metadata");
-            m.erase(path);
-            return true;
-        }
-        return false;
-    }
-
-    /** @name name
-    */
-    /// returns the name for the metadata entry
-    inline std::string getName() const
-    {
-        return m_tree.get<std::string>("name");
-    }
-
-    /// resets the name for the metadata entry
-    /// @param name value to use for new name
-    inline void setName(std::string const& name)
-    {
-        m_tree.put("name", name);
-    }
-
-    /** @name description
-    */
-    /// sets the description for the Metadata entry
-    /// @param description new value to use for the description of the Metadata
-    inline void setDescription(const std::string& description)
-    {
-        m_tree.put("description", description);
-    }
-
-    /// @return the description of the Metadata entry
-    inline std::string getDescription() const
-    {
-        return m_tree.get<std::string>("description");
-    }
-
-    /// @name boost::property_tree::ptree output
-    /// @return the pdal::Metadata instance as a boost::property_tree::ptree
-    inline boost::property_tree::ptree const& toPTree() const 
-    {
-        return m_tree; 
-    } 
+    friend class MetadataNode;
 
 private:
-    boost::property_tree::ptree m_tree;
-    
+    MetadataNodeImpl(const std::string& name) :
+        m_name(name), m_kind(MetadataType::Instance)
+    {}
+
+    MetadataNodeImpl() : m_kind(MetadataType::Instance)
+    {}
+
+    void makeArray(MetadataImplList& l)
+    {
+        for (auto li = l.begin(); li != l.end(); ++li)
+        {
+            MetadataNodeImplPtr node = *li;
+            node->m_kind = MetadataType::Array;
+        }
+    }
+
+    MetadataNodeImplPtr add(const std::string& name)
+    {
+        MetadataNodeImplPtr sub(new MetadataNodeImpl(name));
+        MetadataImplList& l = m_subnodes[name];
+        l.push_back(sub);
+        if (l.size() > 1)
+            makeArray(l);
+        return sub;
+    }
+
+    MetadataNodeImplPtr addList(const std::string& name)
+    {
+        MetadataNodeImplPtr sub(new MetadataNodeImpl(name));
+        MetadataImplList& l = m_subnodes[name];
+        l.push_back(sub);
+        makeArray(l);
+        return sub;
+    }
+
+    MetadataNodeImplPtr add(MetadataNodeImplPtr node)
+    {
+        MetadataImplList& l = m_subnodes[node->m_name];
+        l.push_back(node);
+        if (l.size() > 1)
+            makeArray(l);
+        return node;
+    }
+
+    MetadataNodeImplPtr addList(MetadataNodeImplPtr node)
+    {
+        MetadataImplList& l = m_subnodes[node->m_name];
+        l.push_back(node);
+        makeArray(l);
+        return node;
+    }
+
+    bool operator == (const MetadataNodeImpl& m) const
+    {
+        if (m_name != m.m_name || m_descrip != m.m_descrip ||
+            m_type != m.m_type || m_value != m.m_value)
+            return false;
+        if (m_subnodes.size() != m.m_subnodes.size())
+            return false;
+
+        auto mi2 = m.m_subnodes.begin();
+        for (auto mi = m_subnodes.begin(); mi != m_subnodes.end(); ++mi, ++mi2)
+        {
+            if (mi->first != mi2->first)
+                return false;
+            const MetadataImplList& ml = mi->second;
+            const MetadataImplList& ml2 = mi->second;
+            if (ml.size() != ml2.size())
+                return false;
+            auto li2 = ml2.begin();
+            for (auto li = ml.begin(); li != ml.end(); ++li, ++li2)
+            {
+                auto node1 = *li;
+                auto node2 = *li2;
+                if (!(*node1 == *node2))
+                    return false;
+            }
+        }
+        return true;
+    }
+
+    template <typename T>
+    inline void setValue(const T& t);
+
+    template <std::size_t N>
+    inline void setValue(const char(& c)[N]);
+
+    MetadataImplList& subnodes(const std::string &name)
+    {
+        auto si = m_subnodes.find(name);
+        if (si != m_subnodes.end())
+            return si->second;
+
+        static MetadataImplList l;
+        return l;
+    }
+
+    const MetadataImplList& subnodes(const std::string& name) const
+    {
+        MetadataNodeImpl *nc_this = const_cast<MetadataNodeImpl *>(this);
+        return nc_this->subnodes(name);
+    }
+
+    MetadataType::Enum nodeType(const std::string& name) const
+    {
+        const MetadataImplList& l = subnodes(name);
+        if (l.size())
+        {
+            MetadataNodeImplPtr node = *l.begin();
+            return node->m_kind;
+        }
+        return MetadataType::Instance;
+    }
+
+
+    std::string toJSON() const;
+    void toJSON(std::ostream& o, int level) const;
+    void subnodesToJSON(std::ostream& o, int level) const;
+
+    std::string m_name;
+    std::string m_descrip;
+    std::string m_type;
+    std::string m_value;
+    MetadataType::Enum m_kind;
+    MetadataSubnodes m_subnodes;
 };
 
-
 template <>
-inline void Metadata::setValue<bool>(bool const& v)
+inline void MetadataNodeImpl::setValue<bool>(const bool& b)
 {
-    setType("boolean");
-    m_tree.put("value",v);
-}
-
-template <>
-inline void Metadata::setValue<std::string>(std::string const& v)
-{
-    setType("string");
-    m_tree.put("value",v);
+    m_type = "boolean";
+    m_value = b ? "true" : "false";
 }
 
 template <>
-inline void Metadata::setValue<pdal::ByteArray>(pdal::ByteArray const& v)
+inline void MetadataNodeImpl::setValue<std::string>(const std::string& s)
 {
-    setType("base64Binary");
-    m_tree.put("value",v);
+    m_type = "string";
+    m_value = s;
 }
 
 template <>
-inline void Metadata::setValue<float>(float const& v)
+inline void MetadataNodeImpl::setValue<const char *>(const char * const & c)
 {
-    setType("float");
-    m_tree.put("value",v);
+    m_type = "string";
+    m_value = c;
+}
+
+template <std::size_t N>
+inline void MetadataNodeImpl::setValue(const char(& c)[N])
+{
+    m_type = "string";
+    m_value = c;
 }
 
 template <>
-inline void Metadata::setValue<double>(double const& v)
+inline void MetadataNodeImpl::setValue<float>(const float& f)
 {
-    setType("double");
-    m_tree.put("value",v);
+    m_type = "float";
+    m_value = boost::lexical_cast<std::string>(f);
 }
 
 template <>
-inline void Metadata::setValue<pdal::SpatialReference>(pdal::SpatialReference const& v)
+inline void MetadataNodeImpl::setValue<double>(const double& d)
 {
-    setType("spatialreference");
-    m_tree.put("value",v);
+    m_type = "double";
+    m_value = boost::lexical_cast<std::string>(d);
 }
 
 template <>
-inline void Metadata::setValue<pdal::Bounds<double> >(pdal::Bounds<double> const& v)
+inline void MetadataNodeImpl::setValue<SpatialReference>(
+    const SpatialReference& ref)
 {
-    setType("bounds");
-    m_tree.put("value",v);
+    std::ostringstream oss;
+    oss << ref;
+    m_type = "spatialreference";
+    m_value = oss.str();
 }
 
 template <>
-inline void Metadata::setValue<boost::uint8_t>(boost::uint8_t const& v)
+inline void MetadataNodeImpl::setValue<Bounds<double>>(const Bounds<double>& b)
 {
-    setType("nonNegativeInteger");
-    m_tree.put("value",v);
+    std::ostringstream oss;
+    oss << b;
+    m_type = "bounds";
+    m_value = oss.str();
 }
 
 template <>
-inline void Metadata::setValue<boost::uint16_t>(boost::uint16_t const& v)
+inline void MetadataNodeImpl::setValue<uint8_t>(const uint8_t& u)
 {
-    setType("nonNegativeInteger");
-    m_tree.put("value",v);
+    m_type = "nonNegativeInteger";
+    m_value = boost::lexical_cast<std::string>((unsigned)u);
 }
 
 template <>
-inline void Metadata::setValue<boost::uint32_t>(boost::uint32_t const& v)
+inline void MetadataNodeImpl::setValue<uint16_t>(const uint16_t& u)
 {
-    setType("nonNegativeInteger");
-    m_tree.put("value",v);
+    m_type = "nonNegativeInteger";
+    m_value = boost::lexical_cast<std::string>(u);
 }
 
 template <>
-inline void Metadata::setValue<boost::uint64_t>(boost::uint64_t const& v)
+inline void MetadataNodeImpl::setValue<uint32_t>(const uint32_t& u)
 {
-    setType("nonNegativeInteger");
-    m_tree.put("value",v);
+    m_type = "nonNegativeInteger";
+    m_value = boost::lexical_cast<std::string>(u);
 }
 
 template <>
-inline void Metadata::setValue<boost::int8_t>(boost::int8_t const& v)
+inline void MetadataNodeImpl::setValue<uint64_t>(const uint64_t& u)
 {
-    setType("integer");
-    m_tree.put("value",v);
+    m_type = "nonNegativeInteger";
+    m_value = boost::lexical_cast<std::string>(u);
 }
 
 template <>
-inline void Metadata::setValue<boost::int16_t>(boost::int16_t const& v)
+inline void MetadataNodeImpl::setValue<int8_t>(const int8_t& i)
 {
-    setType("integer");
-    m_tree.put("value",v);
+    m_type = "integer";
+    m_value = boost::lexical_cast<std::string>((int)i);
 }
 
 template <>
-inline void Metadata::setValue<boost::int32_t>(boost::int32_t const& v)
+inline void MetadataNodeImpl::setValue<int16_t>(const int16_t& i)
 {
-    setType("integer");
-    m_tree.put("value",v);
+    m_type = "integer";
+    m_value = boost::lexical_cast<std::string>(i);
 }
 
 template <>
-inline void Metadata::setValue<boost::int64_t>(boost::int64_t const& v)
+inline void MetadataNodeImpl::setValue<int32_t>(const int32_t& i)
 {
-    setType("integer");
-    m_tree.put("value",v);
+    m_type = "integer";
+    m_value = boost::lexical_cast<std::string>(i);
 }
 
 template <>
-inline void Metadata::setValue<boost::uuids::uuid>(boost::uuids::uuid const& v)
+inline void MetadataNodeImpl::setValue<int64_t>(const int64_t& i)
 {
-    setType("uuid");
-    m_tree.put("value",v);
+    m_type = "integer";
+    m_value = boost::lexical_cast<std::string>(i);
 }
 
 template <>
-inline void Metadata::setValue<pdal::Metadata>(pdal::Metadata const& v)
+inline void MetadataNodeImpl::setValue<boost::uuids::uuid>(
+    const boost::uuids::uuid& u)
 {
-    setType("metadata");
-    m_tree.add_child("value",v.toPTree());
+    std::ostringstream oss;
+    oss << u;
+    m_type = "uuid";
+    m_value = oss.str();
 }
 
-template <>
-inline void Metadata::setValue<boost::blank>(boost::blank const& v)
+
+class PDAL_DLL MetadataNode
 {
-    setType("blank");
-    m_tree.put("value",v);
+    friend class Metadata;
+    friend inline
+        bool operator == (const MetadataNode& m1, const MetadataNode& m2);
+    friend inline
+        bool operator != (const MetadataNode& m1, const MetadataNode& m2);
+
+public:
+    MetadataNode() : m_impl(new MetadataNodeImpl())
+        {}
+
+    MetadataNode(const std::string& name) : m_impl(new MetadataNodeImpl(name))
+        {}
+
+    MetadataNode add(const std::string& name)
+        { return MetadataNode(m_impl->add(name)); }
+
+    MetadataNode addList(const std::string& name)
+        { return MetadataNode(m_impl->addList(name)); }
+
+    MetadataNode add(MetadataNode node)
+        { return MetadataNode(m_impl->add(node.m_impl)); }
+
+    MetadataNode addList(MetadataNode node)
+        { return MetadataNode(m_impl->addList(node.m_impl)); }
+
+    MetadataNode addEncoded(const std::string& name,
+        const unsigned char *buf, size_t size,
+        const std::string& descrip = std::string())
+    {
+        MetadataNodeImplPtr impl = m_impl->add(name);
+        impl->setValue(Utils::base64_encode(buf, size));
+        impl->m_type = "base64Binary";
+        impl->m_descrip = descrip;
+        return MetadataNode(impl);
+    }
+
+    MetadataNode addListEncoded(const std::string& name,
+        const unsigned char *buf, size_t size,
+        const std::string& descrip = std::string())
+    {
+        MetadataNodeImplPtr impl = m_impl->addList(name);
+        impl->setValue(Utils::base64_encode(buf, size));
+        impl->m_type = "base64Binary";
+        impl->m_descrip = descrip;
+        return MetadataNode(impl);
+    }
+
+    template<typename T>
+    MetadataNode add(const std::string& name, const T& value,
+        const std::string& descrip = std::string())
+    {
+        MetadataNodeImplPtr impl = m_impl->add(name);
+        impl->setValue(value);
+        impl->m_descrip = descrip;
+        return MetadataNode(impl);
+    }
+
+    template<typename T>
+    MetadataNode addList(const std::string& name, const T& value,
+        const std::string& descrip = std::string())
+    {
+        MetadataNodeImplPtr impl = m_impl->addList(name);
+        impl->setValue(value);
+        impl->m_descrip = descrip;
+        return MetadataNode(impl);
+    }
+
+    template<typename T>
+    MetadataNode addOrUpdate(const std::string& lname, const T& value)
+    {
+        if (m_impl->nodeType(lname) == MetadataType::Array)
+            throw pdal_error("Can't call addOrUpdate() on subnode list.");
+        MetadataImplList& l = m_impl->subnodes(lname);
+
+        if (l.empty())
+            return add(lname, value);
+        MetadataNodeImplPtr impl = *l.begin();
+        impl->setValue(value);
+        return MetadataNode(impl);
+    }
+
+    template<typename T>
+    MetadataNode addOrUpdate(const std::string& lname, const T& value,
+        const std::string& descrip)
+    {
+        MetadataNode m = addOrUpdate(lname, value);
+        m_impl->m_descrip = descrip;
+        return m;
+    }
+
+    std::string type() const
+        { return m_impl->m_type; }
+    std::string kind() const
+        {
+            if (m_impl->m_kind == MetadataType::Array)
+                return "array";
+            else
+                return "instance";
+        }
+    std::string name() const
+        { return m_impl->m_name; }
+    std::string value() const
+        { return m_impl->m_value; }
+    std::string description() const
+        { return m_impl->m_descrip; }
+    std::vector<MetadataNode> children() const
+    {
+        std::vector<MetadataNode> outnodes;
+
+        const MetadataSubnodes& nodes = m_impl->m_subnodes;
+        for (auto si = nodes.begin(); si != nodes.end(); ++si)
+        {
+            const MetadataImplList& l = si->second;
+            for (auto li = l.begin(); li != l.end(); ++li)
+                outnodes.push_back(MetadataNode(*li));
+        }
+        return outnodes;
+    }
+    std::vector<MetadataNode> children(const std::string& name) const
+    {
+        std::vector<MetadataNode> outnodes;
+
+        auto si = m_impl->m_subnodes.find(name);
+        if (si != m_impl->m_subnodes.end())
+        {
+            const MetadataImplList& l = si->second;
+            for (auto li = l.begin(); li != l.end(); ++li)
+                outnodes.push_back(MetadataNode(*li));
+        }
+        return outnodes;
+    }
+    bool operator ! ()
+        { return empty(); }
+    bool valid() const
+        { return !empty(); }
+    bool empty() const
+        { return m_impl->m_name.empty(); }
+
+    template <typename PREDICATE>
+    MetadataNode find(PREDICATE p) const
+    {
+        if (p(*this))
+            return *this;
+        auto nodes = children();
+        for (auto ai = nodes.begin(); ai != nodes.end(); ++ai)
+        {
+            MetadataNode n = ai->find(p);
+            if (!n.empty())
+                return n;
+        }
+        return MetadataNode();
+    }
+
+    template <typename PREDICATE>
+    MetadataNode findChild(PREDICATE p) const
+    {
+        auto nodes = children();
+        for (auto ai = nodes.begin(); ai != nodes.end(); ++ai)
+        {
+            MetadataNode& n = *ai;
+            if (p(n))
+                return n;
+        }
+        return MetadataNode();
+    }
+
+    MetadataNode findChild(const char *s) const
+        { return findChild(std::string(s)); }
+
+    MetadataNode findChild(std::string s) const
+    {
+        auto splitString = [](std::string& s) -> std::string
+        {
+            std::string val;
+            size_t pos = s.find(':');
+            if (pos == std::string::npos)
+            {
+                val = s;
+                s.clear();
+            }
+            else
+            {
+                val = s.substr(0, pos);
+                s = (pos == s.size() - 1) ? "" : s.substr(pos + 1);
+            }
+            return val;
+        };
+
+        if (s.empty())
+            return *this;
+        std::string lname = splitString(s);
+        auto nodes = children(lname);
+        for (auto ai = nodes.begin(); ai != nodes.end(); ++ai)
+        {
+            MetadataNode& n = *ai;
+            MetadataNode child = n.findChild(s);
+            if (!child.empty())
+                return child;
+        }
+        return MetadataNode();
+    }
+
+    std::string toJSON() const;
+
+private:
+    MetadataNodeImplPtr m_impl;
+
+    MetadataNode(MetadataNodeImplPtr node) : m_impl(node)
+        {}
+};
+
+inline bool operator == (const MetadataNode& m1, const MetadataNode& m2)
+{
+    return m1.m_impl == m2.m_impl;
 }
 
-inline void Metadata::addMetadata( Metadata const& m)
+inline bool operator != (const MetadataNode& m1, const MetadataNode& m2)
 {
-    
-    std::string n = boost::algorithm::ireplace_all_copy(m.getName(), ".", "_");
-    m_tree.add_child("metadata."+n, m.toPTree());
+    return !(m1.m_impl == m2.m_impl);
 }
 
-inline void Metadata::setMetadata( Metadata const& m)
-{
-    std::string n = boost::algorithm::ireplace_all_copy(m.getName(), ".", "_");    
-    deleteMetadata(n);
-    addMetadata(m);
-}
 
-template <typename T>
-inline void Metadata::addMetadata(  std::string const& name, 
-                                    T const& value, 
-                                    std::string const& description)
+class Metadata
 {
-    Metadata m(name, value, description);
-    addMetadata(m);
-}
+    friend class PointContext;
 
+public:
+    Metadata() : m_root("root"), m_private("private")
+    {}
+
+    Metadata(const std::string& name) : m_name(name)
+    {}
+
+    MetadataNode getNode() const
+        { return m_root; }
+
+private:
+    MetadataNode m_root;
+    MetadataNode m_private;
+    std::string m_name;
+
+    MetadataNode privateNode() const
+        { return m_private; }
+};
+typedef std::shared_ptr<Metadata> MetadataPtr;
 
 } // namespace pdal
 
-namespace std
-{
 
-///
-extern PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const pdal::ByteArray& output);
-extern PDAL_DLL std::istream& operator>>(std::istream& istr, pdal::ByteArray& output);
-extern PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const pdal::Metadata& m);
-
-
-// extern PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const pdal::Metadata& metadata);
-}
-
-#endif

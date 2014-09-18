@@ -1,11 +1,4 @@
 /******************************************************************************
- * $Id$
- *
- * Project:  libLAS - http://liblas.org - A BSD library for LAS format data.
- * Purpose:  LAS header class
- * Author:   Mateusz Loskot, mateusz@loskot.net
- *
- ******************************************************************************
  * Copyright (c) 2008, Mateusz Loskot
  * Copyright (c) 2008, Phil Vachon
  *
@@ -42,12 +35,10 @@
 
 #include "LasHeaderWriter.hpp"
 
-#include "ZipPoint.hpp"
-
 #include <pdal/drivers/las/Header.hpp>
+#include <pdal/drivers/las/ZipPoint.hpp>
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/scoped_ptr.hpp>
-
 
 namespace pdal
 {
@@ -55,7 +46,6 @@ namespace drivers
 {
 namespace las
 {
-
 
 LasHeaderWriter::LasHeaderWriter(LasHeader& header, std::ostream& ostream, boost::uint64_t firstPos)
     : m_header(header)
@@ -98,7 +88,7 @@ void LasHeaderWriter::write()
         if (m_header.Compressed())
         {
 #ifdef PDAL_HAVE_LASZIP
-            ZipPoint zpd(m_header.getPointFormat(), m_header.getVLRs().getAll(), false);
+            ZipPoint zpd(m_header.getPointFormat(), m_header, false);
             VariableLengthRecord v = zpd.ConstructVLR();
             m_header.getVLRs().add(v);
 #else
@@ -246,12 +236,10 @@ void LasHeaderWriter::write()
     Utils::write_n(m_ostream, n4, sizeof(n4));
 
     // 19. Number of points by return
-    std::vector<boost::uint32_t>::size_type const srbyr = 5;
-    std::vector<boost::uint32_t> const& vpbr = m_header.GetPointRecordsByReturnCount();
-    // TODO: fix this for 1.3, which has srbyr = 7;  See detail/reader/header.cpp for more details
-    // assert(vpbr.size() <= srbyr);
-    boost::uint32_t pbr[srbyr] = { 0 };
-    std::copy(vpbr.begin(), vpbr.begin() + srbyr, pbr); // FIXME: currently, copies only 5 records, to be improved
+    std::vector<uint32_t>::size_type const srbyr = 5;
+    std::vector<uint32_t> const& vpbr = m_header.GetPointRecordsByReturnCount();
+    uint32_t pbr[srbyr] = { 0 };
+    std::copy(vpbr.begin(), vpbr.begin() + srbyr, pbr);
     Utils::write_n(m_ostream, pbr, sizeof(pbr));
 
     // 20-22. Scale factors

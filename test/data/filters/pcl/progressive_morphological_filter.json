@@ -1,0 +1,10 @@
+{
+  "pipeline": {
+    "name": "ProgressiveMorphologicalFilterExample",
+    "filters": [
+      { "name": "ProgressiveMorphologicalFilter"
+      }
+    ]
+  }
+}
+

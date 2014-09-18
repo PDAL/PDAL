@@ -32,15 +32,13 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_PDAL_DRIVER_OCI_WRITER_HPP
-#define INCLUDED_PDAL_DRIVER_OCI_WRITER_HPP
+#pragma once
 
 #include <pdal/Writer.hpp>
 #include <pdal/Bounds.hpp>
 #include <pdal/GDALUtils.hpp>
 
-pdal::Writer* createOciWriter(pdal::Stage& prevStage, const pdal::Options& options);
-
+pdal::Writer* createOciWriter(const pdal::Options& options);
 
 #ifdef USE_PDAL_PLUGIN_OCI
 PDAL_C_START
@@ -59,117 +57,117 @@ namespace drivers
 namespace oci
 {
 
-class PDAL_DLL Writer : public pdal::Writer, pdal::drivers::oci::OracleDriver
+class PDAL_DLL Writer : public pdal::Writer
 {
 public:
     SET_STAGE_NAME("drivers.oci.writer", "OCI Writer")
     SET_STAGE_LINK("http://pdal.io/stages/drivers.oci.writer.html")
-    
-    Writer(Stage& prevStage, const Options&);
+#ifdef PDAL_HAVE_ORACLE
+    SET_STAGE_ENABLED(true)
+#else
+    SET_STAGE_ENABLED(false)
+#endif    
+    Writer(const Options&);
     ~Writer();
 
-    virtual void initialize();
     static Options getDefaultOptions();
 
-    void run(std::ostringstream const& command);
-    inline void setBounds(pdal::Bounds<double> bounds)
-    {
-        m_bounds = bounds;
-    }
-    inline pdal::Bounds<double>  getBounds() const
-    {
-        return m_bounds;
-    }
-
-    inline Connection getConnection() const
-    {
-        return m_connection;
-    }
-
 protected:
-    virtual void writeBegin(boost::uint64_t targetNumPointsToWrite);
-    virtual void writeBufferBegin(PointBuffer const&);
+    virtual void writeBegin(boost::uint64_t targetNumPointsToWrite)
+    {}
+    virtual void writeBufferBegin(PointBuffer const&)
+    {}
     
-    virtual boost::uint32_t writeBuffer(const PointBuffer&);
-    virtual void writeEnd(boost::uint64_t actualNumPointsWritten);
+    virtual boost::uint32_t writeBuffer(const PointBuffer&)
+    { return 0; }
+
+    virtual void writeEnd(boost::uint64_t actualNumPointsWritten)
+    {}
 
 private:
-
-
     Writer& operator=(const Writer&); // not implemented
     Writer(const Writer&); // not implemented
 
-    void WipeBlockTable();
-    void CreateBlockIndex();
-    void CreateBlockTable();
-    void CreateSDOEntry();
-    void CreatePCEntry(Schema const& buffer_schema);
-    long GetGType();
-    std::string CreatePCElemInfo();
-    bool BlockTableExists();
-    void RunFileSQL(std::string const& filename);
-    bool IsGeographic(boost::int32_t srid);
-    std::string LoadSQLData(std::string const& filename);
-
-    bool FillOraclePointBuffer(PointBuffer const& buffer,
-                               std::vector<boost::uint8_t>& point_data);
-    bool WriteBlock(PointBuffer const& buffer);
-
-    void SetOrdinates(Statement statement,
-                      OCIArray* ordinates,
-                      pdal::Bounds<double> const& extent);
-    void SetElements(Statement statement,
-                     OCIArray* elem_info);
-
-    template<typename T> T getDefaultedOption(std::string const& option_name) const
+    template<typename T>
+    T getDefaultedOption(const Options& options,
+        const std::string& option_name) const
     {
-        T default_value = getDefaultOptions().getOption(option_name).getValue<T>();
-        return getOptions().getValueOrDefault<T>(option_name, default_value);
+        T default_value =
+            getDefaultOptions().getOption(option_name).getValue<T>();
+        return options.getValueOrDefault<T>(option_name, default_value);
     }
 
-    bool is3d() const;
-    bool isSolid() const;
-    boost::int32_t getPCID() const;
-    void UpdatePCExtent();
-    std::string ShutOff_SDO_PC_Trigger();
-    void TurnOn_SDO_PC_Trigger(std::string trigger_name);
-    pdal::Bounds<double> CalculateBounds(PointBuffer const& buffer);
-    bool IsValidWKT(std::string const& wkt);
+    virtual void processOptions(const Options& options);
+    virtual void initialize();
+    virtual void ready(PointContextRef ctx);
+    virtual void write(const PointBuffer& buffer);
+    virtual void done(PointContextRef ctx);
+    void writeInit();
+    void writeTile(const PointBuffer& buffer);
 
+    void runCommand(std::ostringstream const& command);
+    void wipeBlockTable();
+    void createBlockIndex();
+    void createBlockTable();
+    void createSDOEntry();
+    void createPCEntry();
+    long getGType();
+    std::string createPCElemInfo();
+    bool blockTableExists();
+    void runFileSQL(std::string const& filename);
+    bool isGeographic(boost::int32_t srid);
+    std::string loadSQLData(std::string const& filename);
+    void setOrdinates(Statement statement, OCIArray* ordinates,
+        pdal::Bounds<double> const& extent);
+    void setElements(Statement statement, OCIArray* elem_info);
+    void updatePCExtent();
+    std::string shutOff_SDO_PC_Trigger();
+    void turnOn_SDO_PC_Trigger(std::string trigger_name);
+    bool isValidWKT(std::string const& wkt);
+
+    size_t m_pointSize;
+    long m_lastBlockId;
     pdal::Bounds<double> m_bounds; // Bounds of the entire point cloud
     Connection m_connection;
-    bool m_doCreateIndex;
-    bool m_bHaveOutputTable;
+    bool m_createIndex;
+    bool m_bDidCreateBlockTable;
     Bounds<double> m_pcExtent;
+    Bounds<double> m_baseTableBounds;
     int m_pc_id;
-    std::string m_block_table_name;
-    std::string m_block_table_partition_column;
-    boost::int32_t m_block_table_partition_value;
-    boost::uint32_t m_srid;
+    std::string m_blockTableName;
+    std::string m_blockTablePartitionColumn;
+    int32_t m_blockTablePartitionValue;
+    uint32_t m_srid;
     long m_gtype;
-    bool m_is3d;
-    bool m_issolid;
+    bool m_3d;
+    bool m_solid;
+    uint32_t m_precision;
+    bool m_overwrite;
+    bool m_trace;
+    bool m_pack;
+    Dimension::IdList m_dims;
+    std::vector<Dimension::Type::Enum> m_types;
 
-    std::string m_base_table_name;
-    std::string m_cloud_column_name;
-    std::string m_base_table_aux_columns;
-    std::string m_base_table_aux_values;
+    std::string m_baseTableName;
+    std::string m_cloudColumnName;
+    std::string m_baseTableAuxColumns;
+    std::string m_baseTableAuxValues;
 
-    std::string m_base_table_boundary_column;
-    std::string m_base_table_boundary_wkt;
+    std::string m_baseTableBoundaryColumn;
+    std::string m_baseTableBoundaryWkt;
 
-    std::string m_trigger_name;
+    std::string m_triggerName;
+    bool m_reenableCloudTrigger;
+    bool m_disableCloudTrigger;
     bool m_sdo_pc_is_initialized;
-    boost::uint32_t m_chunkCount;
+    uint32_t m_chunkCount;
+    uint32_t m_capacity;
     bool m_streamChunks;
-    schema::Orientation m_orientation;
-
-
+    Orientation::Enum m_orientation;
+    std::string m_connSpec;
 };
 
-}
-}
-} // namespace pdal::driver::oci
+} // namespace oci
+} // namespace drivers
+} // namespace pdal
 
-
-#endif // INCLUDED_OCIWRITER_HPP

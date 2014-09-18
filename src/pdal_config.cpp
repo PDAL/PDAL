@@ -73,6 +73,10 @@
 #include <libxml/xmlversion.h>
 #endif
 
+#ifdef PDAL_HAVE_PCL
+#include <pcl/pcl_config.h>
+#endif
+
 
 namespace pdal
 {
@@ -101,15 +105,6 @@ bool IsLibGeoTIFFEnabled()
 bool IsLasZipEnabled()
 {
 #ifdef PDAL_HAVE_LASZIP
-    return true;
-#else
-    return false;
-#endif
-}
-
-bool IsEmbeddedBoost()
-{
-#ifdef PDAL_EMBED_BOOST
     return true;
 #else
     return false;
@@ -167,10 +162,10 @@ std::string GetFullVersionString()
        << LASZIP_VERSION_REVISION;
 #endif
 
-    if (IsEmbeddedBoost())
-        os << " Embed ";
-    else
-        os << " System ";
+#ifdef PDAL_HAVE_PCL
+    os << " PCL "
+       << PCL_VERSION_PRETTY;
+#endif
 
     std::string info(os.str());
     os.str("");
@@ -256,7 +251,7 @@ std::string getPDALDebugInformation()
     std::ostringstream hexerver;
     hexerver << HEXER_VERSION_MAJOR << "."
         << HEXER_VERSION_MINOR << "."
-        << HEXER_VERSION_REVISION;
+        << HEXER_VERSION_PATCH;
     os << std::left 
               << std::setw(name_column) << "Hexer" << std::right 
               << std::setw(url_column) << "http://github.com/hobu/hexer/" 
@@ -340,6 +335,7 @@ std::string getPDALDebugInformation()
               << std::setw(url_column) << "http://github.com/pramsey/pointcloud/" 
               << std::setw(special_column) << ""  << std::endl;
 #endif
+            
     os << thdr.str() << std::endl;
     
     return os.str();

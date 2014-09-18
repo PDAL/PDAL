@@ -1,0 +1,27 @@
+Info::dumpSDO_PCMetadata:
+  This used to dump schema info.  It doesn't anymore.  What should it do?
+BufferedInfocation::begin:
+  This uses huge buffers.  Can we do something more sensible?
+oci::Reader
+  Do we need a function to grab metadata?
+  Do we need serializePipeline support?
+oci::Writer::createPcEntry:
+  Why do we set the pc_id value into the options (at the end?)  I don't thing
+  we ever use the value after we set it into the options.  Investigate.
+oci::Writer::createSDOEntry:
+  Allow override of geographic bounds
+oci::Block::~Block
+  Figure out why destroying the extent causes a segfault
+las::Writer::processOptions:
+  Need to move all the options to processOptions.
+las::Writer::ready:
+  Fix or properly comment the strange logic on global_encoding_data when
+  the size is 4 or 8 (what's the point of writing something that doesn't fit?)
+kernel::Info::dump
+  Handle show m_showSchema
+  Handle m_showSDOPCMetaata
+kernel::Diff::execute
+  Output dimensions when source and candidate context sizes don't match.
+PointBuffer::resolveType
+  Reconsider non-float -> float in the case of large ints.  Should we perhaps
+  go non-float -> double?  Probably should make a matrix.

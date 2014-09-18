@@ -32,15 +32,18 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_STAGE_HPP
-#define INCLUDED_STAGE_HPP
+#pragma once
 
 #include <pdal/pdal_internal.hpp>
 
-#include <pdal/StageBase.hpp>
-#include <pdal/Schema.hpp>
-#include <pdal/Bounds.hpp>
+#include <pdal/Dimension.hpp>
+#include <pdal/Log.hpp>
+#include <pdal/Metadata.hpp>
+#include <pdal/Options.hpp>
+#include <pdal/PointBuffer.hpp>
 #include <pdal/SpatialReference.hpp>
+
+#include <boost/property_tree/ptree.hpp>
 
 namespace pdal
 {
@@ -49,71 +52,117 @@ class Iterator;
 class StageSequentialIterator;
 class StageRandomIterator;
 class StageBlockIterator;
-class PointBuffer;
-//
-// supported options:
-//   <uint32>id
-//   <bool>debug
-//   <uint32>verbose
-//
+class StageRunner;
+class StageTester;
 
-class PDAL_DLL Stage : public StageBase
+class PDAL_DLL Stage
 {
+    friend class StageTester;
+    friend class StageRunner;
 public:
-    Stage(const std::vector<StageBase*>& prevs, const Options& options);
-    virtual ~Stage();
+    Stage();
+    Stage(const Options& options);
+    virtual ~Stage()
+        {}
 
-    virtual void initialize();
+    void setInput(const std::vector<Stage *>& inputs)
+        { m_inputs = inputs; }
+    void setInput(Stage *input)
+        { m_inputs.push_back(input); }
 
-    inline Schema const& getSchema() const
-    {
-        return m_schema;
-    }
-    
-    virtual boost::uint64_t getNumPoints() const;
-    PointCountType getPointCountType() const;
-    const Bounds<double>& getBounds() const;
+    void prepare(PointContextRef ctx);
+    PointBufferSet execute(PointContextRef ctx);
+
+    void setSpatialReference(SpatialReference const&);
     const SpatialReference& getSpatialReference() const;
+    const Options& getOptions() const
+        { return m_options; }
+    void setOptions(Options options)
+        { m_options = options; }
+    virtual boost::property_tree::ptree serializePipeline() const = 0;
+    virtual LogPtr log() const
+        { return m_log; }
+    bool isDebug() const
+        { return m_debug; }
+    bool isVerbose() const
+        { return (m_verbose != 0 ); }
+    boost::uint32_t getVerboseLevel() const
+        { return m_verbose; }
+    virtual std::string getName() const = 0;
+    virtual std::string getDescription() const = 0;
+    const std::vector<Stage *>& getInputs() const
+        { return m_inputs; }
+    std::vector<Stage*> findStage(std::string name);
+    static Options getDefaultOptions()
+        { return Options(); }
+    static Dimension::IdList getDefaultDimensions()
+        { return Dimension::IdList(); }
+    static std::string s_getInfoLink()
+        { return std::string(); }
+    virtual boost::property_tree::ptree toPTree(PointContextRef ctx) const 
+        { return boost::property_tree::ptree(); }
 
-    virtual bool supportsIterator(StageIteratorType) const = 0;
+#define SET_STAGE_NAME(name, description)  \
+    static std::string s_getName() { return name; }  \
+    std::string getName() const { return name; }  \
+    static std::string s_getDescription() { return description; }  \
+    std::string getDescription() const { return description; }
 
-    virtual StageSequentialIterator* createSequentialIterator(PointBuffer&) const
-    {
-        return NULL;
-    }
-    virtual StageRandomIterator* createRandomIterator(PointBuffer&) const
-    {
-        return NULL;
-    }
+#define SET_STAGE_LINK(infolink) \
+    static std::string s_getInfoLink() { return infolink; }  \
+    std::string getInfoLink() const { return infolink; }
+
+#define SET_STAGE_ENABLED(YES_OR_NO) \
+    static bool s_isEnabled() { return YES_OR_NO; } \
+    bool isEnabled() const { return YES_OR_NO; }
+
+    virtual StageSequentialIterator* createSequentialIterator() const
+        { return NULL; }
+    inline MetadataNode getMetadata() const 
+        { return m_metadata; }
 
 protected:
-    // setters for the core properties
-    Schema& getSchemaRef();
+    Options m_options;
+    MetadataNode m_metadata;
 
-
-    void setSchema(Schema const&);
-    void setNumPoints(boost::uint64_t);
-    void setPointCountType(PointCountType);
-    void setBounds(Bounds<double> const&);
-    void setSpatialReference(SpatialReference const&);
-
-    // convenience function, for doing a "copy ctor" on all the core props
-    // (used by the Filter stage, for example)
-    void setCoreProperties(const Stage&);
+    void setSpatialReference(MetadataNode& m, SpatialReference const&);
 
 private:
-    Schema m_schema;
-    mutable boost::uint64_t m_numPoints;
-    PointCountType m_pointCountType;
-    Bounds<double> m_bounds;
+    bool m_debug;
+    boost::uint32_t m_verbose;
+    std::vector<Stage *> m_inputs;
+    LogPtr m_log;
     SpatialReference m_spatialReference;
 
     Stage& operator=(const Stage&); // not implemented
     Stage(const Stage&); // not implemented
+    void Construct();
+    void l_processOptions(const Options& options);
+    virtual void processOptions(const Options& /*options*/)
+        {}
+    virtual void readerProcessOptions(const Options& /*options*/)
+        {}
+    virtual void writerProcessOptions(const Options& /*options*/)
+        {}
+    void l_initialize(PointContextRef ctx);
+    void l_done(PointContextRef ctx);
+    virtual void initialize()
+        {}
+    virtual void addDimensions(PointContextRef ctx)
+        { (void)ctx; }
+    virtual void ready(PointContextRef ctx)
+        { (void)ctx; }
+    virtual void done(PointContextRef ctx)
+        { (void)ctx; }
+    virtual PointBufferSet run(PointBufferPtr buffer)
+    {
+        (void)buffer;
+        std::cerr << "Can't run stage = " << getName() << "!\n";
+        return PointBufferSet();
+    }
 };
 
 PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const Stage&);
 
 } // namespace pdal
 
-#endif

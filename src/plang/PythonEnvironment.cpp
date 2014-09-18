@@ -115,28 +115,6 @@ void PythonEnvironment::gil_unlock()
 
 std::string getPythonTraceback()
 {
-    PyObject* tracebackModule;
-    PyObject* tracebackDictionary;
-    PyObject* tracebackFunction;
-    tracebackModule = PyImport_ImportModule("traceback");
-    if (!tracebackModule)
-    {
-        throw python_error("unable to load traceback module while importing numpy inside PDAL");
-    }
-
-    tracebackDictionary = PyModule_GetDict(tracebackModule);
-
-    tracebackFunction = PyDict_GetItemString(tracebackDictionary, "format_exception");
-    if (!tracebackFunction)
-    {
-        throw python_error("unable to find traceback function while importing numpy inside PDAL");
-    }
-
-    if (!PyCallable_Check(tracebackFunction))
-    {
-        throw python_error("invalid traceback function while importing numpy inside PDAL");
-    }
-
 
     // get exception info
     PyObject *type, *value, *traceback;
@@ -146,6 +124,31 @@ std::string getPythonTraceback()
     std::ostringstream mssg;
     if (traceback)
     {
+
+        PyObject* tracebackModule;
+        PyObject* tracebackDictionary;
+        PyObject* tracebackFunction;
+    
+        tracebackModule = PyImport_ImportModule("traceback");
+        if (!tracebackModule)
+        {
+            throw python_error("unable to load traceback module while importing numpy inside PDAL");
+        }
+
+        tracebackDictionary = PyModule_GetDict(tracebackModule);
+
+        tracebackFunction = PyDict_GetItemString(tracebackDictionary, "format_exception");
+        if (!tracebackFunction)
+        {
+            throw python_error("unable to find traceback function while importing numpy inside PDAL");
+        }
+
+        if (!PyCallable_Check(tracebackFunction))
+        {
+            throw python_error("invalid traceback function while importing numpy inside PDAL");
+        }
+
+        
         // create an argument for "format exception"
         PyObject* args = PyTuple_New(3);
         PyTuple_SetItem(args, 0, type);
@@ -157,8 +160,20 @@ std::string getPythonTraceback()
 
         // print error message
         int i, n = PyList_Size(output);
-        for (i=0; i<n; i++) mssg << PyString_AsString(PyList_GetItem(output, i));
 
+#if PY_MAJOR_VERSION >= 3
+        for (i=0; i<n; i++) 
+        {
+            PyObject* u = PyUnicode_AsUTF8String(PyList_GetItem(output, i));
+            const char* p = PyBytes_AsString(u);
+            
+            mssg << p;
+        }
+        
+#else
+        for (i=0; i<n; i++) mssg << PyString_AsString(PyList_GetItem(output, i));
+#endif
+        
         // clean up
         Py_XDECREF(args);
         Py_XDECREF(output);
@@ -166,13 +181,19 @@ std::string getPythonTraceback()
     else if (value != NULL)
     {
         PyObject *s = PyObject_Str(value);
+#if PY_MAJOR_VERSION >= 3
+        // const char* text = PyUnicode_AS_DATA(s);
+        PyObject* u = PyUnicode_AsUTF8String(s);
+        const char* text = PyBytes_AsString(u);        
+#else
         const char* text = PyString_AS_STRING(s);
+#endif
         Py_DECREF(s);
         mssg << text;
     }
     else
     {
-        mssg << "unknown error";
+        mssg << "unknown error that we are unable to get a traceback for. Was it already printed/taken?";
     }
 
     Py_XDECREF(value);

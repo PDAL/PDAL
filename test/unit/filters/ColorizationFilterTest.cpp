@@ -37,11 +37,10 @@
 #include <pdal/SpatialReference.hpp>
 #include <pdal/drivers/las/Reader.hpp>
 #include <pdal/filters/Colorization.hpp>
-#include <pdal/StageIterator.hpp>
-#include <pdal/Schema.hpp>
 #include <pdal/PointBuffer.hpp>
 
 #include "Support.hpp"
+#include "../StageTester.hpp"
 
 BOOST_AUTO_TEST_SUITE(ColorizationFilterTest)
 
@@ -51,93 +50,65 @@ BOOST_AUTO_TEST_SUITE(ColorizationFilterTest)
 
 BOOST_AUTO_TEST_CASE(ColorizationFilterTest_test_1)
 {
+    using namespace pdal;
 
-    {
+    Options ops1;
+    ops1.add("filename", Support::datapath("autzen/autzen-point-format-3.las"));
+    drivers::las::Reader reader(ops1);
 
-        pdal::drivers::las::Reader reader(Support::datapath("autzen-point-format-3.las"));
+    Options options;
 
-        pdal::Options options;
+    Option red("dimension", "Red", "");
+    Option b0("band",1, "");
+    Option s0("scale", 1.0f, "scale factor for this dimension");
+    Options redO;
+    redO.add(b0);
+    redO.add(s0);
+    red.setOptions(redO);
 
-        pdal::Option red("dimension", "Red", "");
-        pdal::Option b0("band",1, "");
-        pdal::Option s0("scale", 1.0f, "scale factor for this dimension");
-        pdal::Options redO;
-        redO.add(b0);
-        redO.add(s0);
-        red.setOptions(redO);
+    Option green("dimension", "Green", "");
+    Option b1("band",2, "");
+    Option s1("scale", 1.0f, "scale factor for this dimension");
+    Options greenO;
+    greenO.add(b1);
+    greenO.add(s1);
+    green.setOptions(greenO);
 
-        pdal::Option green("dimension", "Green", "");
-        pdal::Option b1("band",2, "");
-        pdal::Option s1("scale", 1.0f, "scale factor for this dimension");
-        pdal::Options greenO;
-        greenO.add(b1);
-        greenO.add(s1);
-        green.setOptions(greenO);
+    Option blue("dimension", "Blue", "");
+    Option b2("band",3, "");
+    Option s2("scale", 255.0f, "scale factor for this dimension");
+    Options blueO;
+    blueO.add(b2);
+    blueO.add(s2);
+    blue.setOptions(blueO);
 
-        pdal::Option blue("dimension", "Blue", "");
-        pdal::Option b2("band",3, "");
-        pdal::Option s2("scale", 255.0f, "scale factor for this dimension");
-        pdal::Options blueO;
-        blueO.add(b2);
-        blueO.add(s2);
-        blue.setOptions(blueO);
+    Option datasource("raster", Support::datapath("autzen/autzen.jpg"),
+        "raster to read");
 
-        pdal::Option datasource("raster", Support::datapath("autzen.jpg"), "raster to read");
-        // pdal::Option verbose("verbose", 7, "");
-        // pdal::Option debug("debug", true, "");
+    Options reader_options;
+    reader_options.add(red);
+    reader_options.add(green);
+    reader_options.add(blue);
+    reader_options.add(datasource);
 
-        pdal::Options reader_options;
-        reader_options.add(red);
-        reader_options.add(green);
-        reader_options.add(blue);
-        reader_options.add(datasource);
-        // reader_options.add(debug);
-        // reader_options.add(verbose);
+    filters::Colorization filter(reader_options);
+    filter.setInput(&reader);
 
-        pdal::filters::Colorization filter(reader, reader_options);
+    PointContext ctx;
 
-        filter.initialize();
+    filter.prepare(ctx);
+    PointBufferSet pbSet = filter.execute(ctx);
+    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    PointBufferPtr buf = *pbSet.begin();
 
-        const pdal::Schema& schema = filter.getSchema();
-        pdal::PointBuffer data(schema, 1);
+    uint16_t r = buf->getFieldAs<uint16_t>(Dimension::Id::Red, 0);
+    uint16_t g = buf->getFieldAs<uint16_t>(Dimension::Id::Green, 0);
+    uint16_t b = buf->getFieldAs<uint16_t>(Dimension::Id::Blue, 0);
 
-        pdal::StageSequentialIterator* iter = filter.createSequentialIterator(data);
-        boost::uint32_t numRead = iter->read(data);
-        BOOST_CHECK(numRead == 1);
-        delete iter;
-
-        const pdal::Schema& s = data.getSchema();
-
-        pdal::Dimension const& dimRed = s.getDimension("Red");
-        pdal::Dimension const& dimGreen = s.getDimension("Green");
-        pdal::Dimension const& dimBlue = s.getDimension("Blue");
-
-        boost::uint16_t r = data.getField<boost::uint16_t>(dimRed, 0);
-        boost::uint16_t g = data.getField<boost::uint16_t>(dimGreen, 0);
-        boost::uint16_t b = data.getField<boost::uint16_t>(dimBlue, 0);
-
-// GDAL's JPEG driver was updated in 1.10 to use the libjpeg 
-// capability of computing fast level 2, 4, and 8 overviews. This 
-// means the results are numerically, if not visually, different
-// than before.
-// 1-15-13 -- maybe this is gone now? I get the original results 
-// with a trunk 1.10 build... hobu
-// #if ((GDAL_VERSION_MAJOR == 1 && GDAL_VERSION_MINOR >= 10))
-//         BOOST_CHECK_EQUAL(r, 195u);
-//         BOOST_CHECK_EQUAL(g, 176u);
-//         BOOST_CHECK_EQUAL(b, 36720u); // We scaled this up to 16bit by multiplying by 255
-// 
-// #else
-        BOOST_CHECK_EQUAL(r, 210u);
-        BOOST_CHECK_EQUAL(g, 205u);
-        BOOST_CHECK_EQUAL(b, 47175u); // We scaled this up to 16bit by multiplying by 255
-
-// #endif
-
-    }
-
-
-    return;
+    BOOST_CHECK_EQUAL(r, 210u);
+    BOOST_CHECK_EQUAL(g, 205u);
+    // We scaled this up to 16bit by multiplying by 255
+    BOOST_CHECK_EQUAL(b, 47175u);
 }
 
 #endif

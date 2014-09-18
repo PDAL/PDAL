@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Pipeline version="1.0">
+    <Writer type="drivers.las.writer">
+        <Option name="filename">
+            ./autzen-utm-chipped-25.las
+        </Option>
+        <Filter type="filters.merge">
+            <!-- Merge the chips back together into a single file -->
+            <Filter type="filters.chipper">
+                <Option name="capacity">
+                    25
+                </Option>
+
+                <Reader type="drivers.las.reader">
+                    <Option name="filename">
+                        ../autzen-utm.las
+                    </Option>
+                </Reader>
+            </Filter>
+        </Filter>
+    </Writer>
+</Pipeline>

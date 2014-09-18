@@ -39,6 +39,7 @@
 #ifdef PDAL_HAVE_PYTHON
 
 #include <pdal/plang/Invocation.hpp>
+#include <pdal/PointBuffer.hpp>
 
 namespace pdal
 {
@@ -52,10 +53,11 @@ class PDAL_DLL BufferedInvocation : public Invocation
 public:
     BufferedInvocation(const Script& script);
 
-    void beginChunk(PointBuffer&);
-    void endChunk(PointBuffer&);
+    void begin(PointBuffer& buffer);
+    void end(PointBuffer& buffer);
 
 private:
+    std::vector<void *> m_buffers;
     BufferedInvocation& operator=(BufferedInvocation const& rhs); // nope
 };
 

@@ -1,0 +1,2 @@
+(filters.programmable Debug: 8): 					Python script source=[117 bytes], module=xModule, function=xfunc
+ processing 750 points.

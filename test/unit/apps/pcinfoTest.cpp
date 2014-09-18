@@ -40,9 +40,9 @@
 #include <sstream>
 #include <string>
 
-
 BOOST_AUTO_TEST_SUITE(pdalinfoTest)
 
+using namespace pdal;
 
 static std::string appName()
 {
@@ -60,10 +60,26 @@ BOOST_AUTO_TEST_CASE(pdalinfoTest_no_input)
 
     const std::string expected = "Usage error: no action option specified";
     BOOST_CHECK_EQUAL(output.substr(0, expected.length()), expected);
-
-    return;
 }
 
+BOOST_AUTO_TEST_CASE(test_pipe_file_input)
+{
+    std::string output;
+    std::string outfile = Support::temppath("schemaout.txt");
+    std::string cmd = appName() + " " +
+        Support::datapath("pipeline/pipeline_read.xml") + " --schema > " +
+        outfile;
+
+    int stat = Utils::run_shell_command(cmd, output);
+    BOOST_CHECK_EQUAL(stat, 0);
+    cmd = "grep -c drivers.las.reader.X " + outfile;
+    stat = Utils::run_shell_command(cmd, output);
+    BOOST_CHECK_EQUAL(stat, 0);
+    // Strip off newline
+    output = output.substr(0, output.size() - 1);
+    BOOST_CHECK_EQUAL(output, "2");
+    FileUtils::deleteFile(outfile);
+}
 
 BOOST_AUTO_TEST_CASE(pdalinfo_test_common_opts)
 {
@@ -75,8 +91,6 @@ BOOST_AUTO_TEST_CASE(pdalinfo_test_common_opts)
 
     stat = pdal::Utils::run_shell_command(cmd + " --version", output);
     BOOST_CHECK_EQUAL(stat, 0);
-
-    return;
 }
 
 
@@ -118,7 +132,11 @@ BOOST_AUTO_TEST_CASE(pdalinfo_test_switches)
     BOOST_CHECK_EQUAL(output.substr(0, expected.length()), expected);
 #endif
 
-    return;
+    // does -s work?
+    stat = pdal::Utils::run_shell_command(cmd + " -s", output);
+    BOOST_CHECK_EQUAL(stat, 1);
+    expected = "Usage error: no action option specified";
+    BOOST_CHECK_EQUAL(output.substr(0, expected.length()), expected);
 }
 
 
@@ -199,8 +217,6 @@ BOOST_AUTO_TEST_CASE(pdalinfo_test_dumps)
 //         pdal::FileUtils::deleteFile(stage_test);
 //     else
 //         std::cout << command.str() << std::endl;
-
-    return;
 }
 
 

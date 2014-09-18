@@ -53,7 +53,7 @@ namespace pdal
 {
 
 
-/// pdal::Log is a logging object that is provided by pdal::StageBase to
+/// pdal::Log is a logging object that is provided by pdal::Stage to
 /// facilitate logging operations.
 class PDAL_DLL Log
 {
@@ -82,20 +82,20 @@ public:
     /** @name Logging level
     */
     /// @return the logging level of the pdal::Log instance
-    LogLevel getLevel()
+    LogLevel::Enum getLevel()
     {
         return m_level;
     }
 
     /// Sets the logging level of the pdal::Log instance
     /// @param v logging level to use for get() comparison operations
-    void setLevel(LogLevel v)
+    void setLevel(LogLevel::Enum v)
     {
         m_level = v;
     }
 
     /// @return A string representing the LogLevel
-    std::string getLevelString(LogLevel v) const;
+    std::string getLevelString(LogLevel::Enum v) const;
 
     /** @name Log stream operations
     */
@@ -111,7 +111,7 @@ public:
     /// If the logging level asked for with
     /// pdal::Log::get is less than the logging level of the pdal::Log instance
     /// an ostream with a boost::iostreams::null_sink is returned.
-    std::ostream& get(LogLevel level = logINFO);
+    std::ostream& get(LogLevel::Enum level = LogLevel::Info);
 
     /// Sets the floating point precision
     void floatPrecision(int level);
@@ -130,7 +130,7 @@ private:
     Log(const Log&);
     Log& operator =(const Log&);
 
-    LogLevel m_level;
+    LogLevel::Enum m_level;
     bool m_deleteStreamOnCleanup;
     std::string m_leader;
 };

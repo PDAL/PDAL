@@ -15,10 +15,11 @@ endif (NUMPY_INCLUDE_DIR)
 
 # To set the variables PYTHON_EXECUTABLE
 FIND_PACKAGE(PythonInterp REQUIRED)
+FIND_PACKAGE(PythonLibs REQUIRED)
 
 # Look for the include path
 # WARNING: The variable PYTHON_EXECUTABLE is defined by the script FindPythonInterp.cmake
-EXECUTE_PROCESS(COMMAND "${PYTHON_EXECUTABLE}" -c "import numpy; print numpy.get_include(); print numpy.version.version"
+EXECUTE_PROCESS(COMMAND "${PYTHON_EXECUTABLE}" -c "import numpy; print (numpy.get_include()); print (numpy.version.version)"
                  OUTPUT_VARIABLE NUMPY_OUTPUT
                  ERROR_VARIABLE NUMPY_ERROR)
                  

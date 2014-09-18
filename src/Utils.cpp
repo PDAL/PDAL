@@ -32,11 +32,21 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <boost/algorithm/string/erase.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/uniform_real_distribution.hpp>
+#include <boost/random/normal_distribution.hpp>
+
 #include <pdal/Utils.hpp>
 
 #include <cassert>
 #include <cstdlib>
 #include <cctype>
+
+#ifdef PDAL_HAVE_DEMANGLER
+#include <cxxabi.h>
+#endif
 
 #ifdef PDAL_COMPILER_MSVC
 #  pragma warning(disable: 4127)  // conditional expression is constant
@@ -51,6 +61,8 @@
 #endif
 
 #include <stdio.h>
+
+using namespace std;
 
 namespace pdal
 {
@@ -75,10 +87,24 @@ double Utils::random(double minimum, double maximum)
     return t;
 }
 
-void* Utils::registerPlugin(void* stageFactoryPtr,
-                            std::string const& filename,
-                            std::string const& registerMethod,
-                            std::string const& versionMethod)
+double Utils::uniform(const double& minimum, const double& maximum, boost::uint32_t seed)
+{
+    boost::random::mt19937 gen(seed);
+    boost::random::uniform_real_distribution<double> dist(minimum, maximum);
+
+    return dist(gen);
+}
+
+double Utils::normal(const double& mean, const double& sigma, boost::uint32_t seed)
+{
+    boost::random::mt19937 gen(seed);
+    boost::random::normal_distribution<double> dist(mean, sigma);
+
+    return dist(gen);
+}
+
+void* Utils::registerPlugin(void* stageFactoryPtr, string const& filename,
+    string const& registerMethod, string const& versionMethod)
 {
     void* pRegister;
     void* pVersion;
@@ -89,8 +115,11 @@ void* Utils::registerPlugin(void* stageFactoryPtr,
 
     if (plugins_version != PDAL_PLUGIN_VERSION)
     {
-        std::ostringstream oss;
-        oss << "Unable to register shared library '" << filename << "' with method name '" << registerMethod << "' version of plugin, '" << plugins_version << "' did not match PDALs version '" << PDAL_PLUGIN_VERSION << "'";
+        ostringstream oss;
+        oss << "Unable to register shared library '" << filename <<
+            "' with method name '" << registerMethod <<
+            "' version of plugin, '" << plugins_version <<
+            "' did not match PDALs version '" << PDAL_PLUGIN_VERSION << "'";
         throw pdal_error(oss.str());
     }
 
@@ -102,7 +131,7 @@ void* Utils::registerPlugin(void* stageFactoryPtr,
     }
     else
     {
-        std::ostringstream oss;
+        ostringstream oss;
         oss << "Unable to register shared library '" << filename << "' with method name '" << registerMethod << "'";
         throw pdal_error(oss.str());
     }
@@ -110,20 +139,15 @@ void* Utils::registerPlugin(void* stageFactoryPtr,
     return pRegister;
 }
 
-
-
 char* Utils::getenv(const char* env)
 {
     return ::getenv(env);
 }
 
-std::string Utils::getenv(std::string const& name)
+string Utils::getenv(string const& name)
 {
     char* value = ::getenv(name.c_str());
-    if (value != 0)
-        return std::string(value);
-    else
-        return std::string("");
+    return value ? string(value) : string();
 }
 
 int Utils::putenv(const char* env)
@@ -135,13 +159,13 @@ int Utils::putenv(const char* env)
 #endif
 }
 
-
-void Utils::eatwhitespace(std::istream& s)
+void Utils::eatwhitespace(istream& s)
 {
     while (true)
     {
         const char c = (char)s.peek();
-        if (!isspace(c)) break;
+        if (!isspace(c))
+            break;
 
         // throw it away
         s.get();
@@ -149,11 +173,19 @@ void Utils::eatwhitespace(std::istream& s)
     return;
 }
 
+void Utils::removeTrailingBlanks(std::string& s)
+{
+    size_t pos = s.size();
+    while (isspace(s[--pos]))
+        ;
+    s = s.substr(0, pos);
+}
 
-bool Utils::eatcharacter(std::istream& s, char x)
+bool Utils::eatcharacter(istream& s, char x)
 {
     const char c = (char)s.peek();
-    if (c != x) return false;
+    if (c != x)
+        return false;
 
     // throw it away
     s.get();
@@ -166,18 +198,13 @@ boost::uint32_t Utils::getStreamPrecision(double scale)
     double frac = 0;
     double integer = 0;
 
-    frac = std::modf(scale, &integer);
-    double precision = std::fabs(std::floor(std::log10(frac)));
-
-    // FIXME: This should test that precision actually ends up being a
-    // whole number
-    boost::uint32_t output = static_cast<boost::uint32_t>(precision);
-    return output;
+    frac = modf(scale, &integer);
+    return abs(floorl(log10(frac)));
 }
 
 boost::uint32_t Utils::safeconvert64to32(boost::uint64_t x64)
 {
-    if (x64 > (std::numeric_limits<boost::uint32_t>::max)())
+    if (x64 > (numeric_limits<boost::uint32_t>::max)())
     {
         throw pdal_error("cannot support seek offsets greater than 32-bits");
     }
@@ -186,48 +213,51 @@ boost::uint32_t Utils::safeconvert64to32(boost::uint64_t x64)
     return x32;
 }
 
-std::string Utils::generate_filename()
+string Utils::generate_filename()
 {
-    boost::filesystem::path path = boost::filesystem::unique_path("%%%%%%%%%%%%%%%%");
+    boost::filesystem::path path =
+        boost::filesystem::unique_path("%%%%%%%%%%%%%%%%");
 
-    std::ostringstream oss;
+    ostringstream oss;
     boost::filesystem::path fullpath = path;
     oss << fullpath;
-    std::string output(oss.str());
+    string output(oss.str());
 
     boost::algorithm::erase_all(output, "\"");
     return output;
 }
 
-std::string Utils::generate_tempfile()
+string Utils::generate_tempfile()
 {
-    boost::filesystem::path path = boost::filesystem::unique_path("%%%%%%%%%%%%%%%%");
+    boost::filesystem::path path =
+        boost::filesystem::unique_path("%%%%%%%%%%%%%%%%");
     boost::filesystem::path tempdir = boost::filesystem::temp_directory_path();
 
-    std::ostringstream oss;
+    ostringstream oss;
     boost::filesystem::path fullpath = tempdir/path;
     oss << fullpath;
-    std::string output(oss.str());
+    string output(oss.str());
 
     boost::algorithm::erase_all(output, "\"");
     return output;
 }
 
-void* Utils::getDLLSymbol(std::string const& library, std::string const& name)
+void* Utils::getDLLSymbol(string const& library, string const& name)
 {
     // Completely stolen from GDAL.
-    /******************************************************************************
+    /***************************************************************************
      * $Id: cplgetsymbol.cpp 16702 2009-04-01 20:42:49Z rouault $
      *
      * Project:  Common Portability Library
      * Purpose:  Fetch a function pointer from a shared library / DLL.
      * Author:   Frank Warmerdam, warmerdam@pobox.com
      *
-     ******************************************************************************
+     ***************************************************************************
      * Copyright (c) 1999, Frank Warmerdam
      *
      * Permission is hereby granted, free of charge, to any person obtaining a
-     * copy of this software and associated documentation files (the "Software"),
+     * copy of this software and associated documentation files
+     * (the "Software"),
      * to deal in the Software without restriction, including without limitation
      * the rights to use, copy, modify, merge, publish, distribute, sublicense,
      * and/or sell copies of the Software, and to permit persons to whom the
@@ -237,12 +267,13 @@ void* Utils::getDLLSymbol(std::string const& library, std::string const& name)
      * in all copies or substantial portions of the Software.
      *
      * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-     * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+     * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+     * MERCHANTABILITY,
      * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
-     * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-     * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-     * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-     * DEALINGS IN THE SOFTWARE.
+     * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+     * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+     * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+     * OTHER DEALINGS IN THE SOFTWARE.
      ****************************************************************************/
 
     void* pLibrary = NULL;
@@ -252,7 +283,7 @@ void* Utils::getDLLSymbol(std::string const& library, std::string const& name)
     pLibrary = dlopen(library.c_str(), RTLD_LAZY);
     if (pLibrary == NULL)
     {
-        std::ostringstream oss;
+        ostringstream oss;
         oss << "Unable to open '" << library <<"' with error " << dlerror();
         throw pdal_error(oss.str());
     }
@@ -265,7 +296,7 @@ void* Utils::getDLLSymbol(std::string const& library, std::string const& name)
      */
     if (pSymbol == NULL)
     {
-        std::ostringstream prefixed;
+        ostringstream prefixed;
         prefixed << "_" << name;
         pSymbol = dlsym(pLibrary, prefixed.str().c_str());
     }
@@ -273,7 +304,7 @@ void* Utils::getDLLSymbol(std::string const& library, std::string const& name)
 
     if (pSymbol == NULL)
     {
-        std::ostringstream oss;
+        ostringstream oss;
         oss << "Opened library '" << library << "', but unable to open symbol "
             "'" << name << "' with error " << dlerror();
         throw pdal_error(oss.str());
@@ -296,7 +327,7 @@ void* Utils::getDLLSymbol(std::string const& library, std::string const& name)
                       MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
                       (LPTSTR) &lpMsgBuf, 0, NULL);
 
-        std::ostringstream oss;
+        ostringstream oss;
         oss << "Can't load requested DLL '" << library <<
             " with error code " << nLastError <<
             " and message \"" << (const char *) lpMsgBuf <<"\"";
@@ -307,7 +338,7 @@ void* Utils::getDLLSymbol(std::string const& library, std::string const& name)
 
     if (pSymbol == NULL)
     {
-        std::ostringstream oss;
+        ostringstream oss;
         oss << "Can't find requested entry point '" << name <<"'";
         throw pdal_error(oss.str());
     }
@@ -317,13 +348,7 @@ void* Utils::getDLLSymbol(std::string const& library, std::string const& name)
     return pSymbol;
 }
 
-
-
-
-
-
-
-std::string Utils::base64_encode(std::vector<boost::uint8_t> const& bytes)
+string Utils::base64_encode(const unsigned char *bytes_to_encode, size_t in_len)
 {
 
     /*
@@ -339,33 +364,28 @@ std::string Utils::base64_encode(std::vector<boost::uint8_t> const& bytes)
         including commercial applications, and to alter it and redistribute it
         freely, subject to the following restrictions:
 
-        1. The origin of this source code must not be misrepresented; you must not
-          claim that you wrote the original source code. If you use this source code
-          in a product, an acknowledgment in the product documentation would be
-          appreciated but is not required.
+        1. The origin of this source code must not be misrepresented;
+           you must not claim that you wrote the original source code. If you
+           use this source code in a product, an acknowledgment in the product
+           documentation would be appreciated but is not required.
 
-        2. Altered source versions must be plainly marked as such, and must not be
-          misrepresented as being the original source code.
+        2. Altered source versions must be plainly marked as such, and must
+           not be misrepresented as being the original source code.
 
-        3. This notice may not be removed or altered from any source distribution.
+        3. This notice may not be removed or altered from any source
+           distribution.
 
         René Nyffenegger rene.nyffenegger@adp-gmbh.ch
-
     */
 
-    if (!bytes.size())
-    {
-        return std::string("");
-    }
-    unsigned char const* bytes_to_encode = &(bytes.front());
+    if (in_len == 0)
+        return string();
 
-    unsigned int in_len = bytes.size();
-
-    const std::string base64_chars =
+    const string base64_chars =
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         "abcdefghijklmnopqrstuvwxyz"
         "0123456789+/";
-    std::string ret;
+    string ret;
     int i = 0;
     int j = 0;
     boost::uint8_t char_array_3[3];
@@ -377,8 +397,10 @@ std::string Utils::base64_encode(std::vector<boost::uint8_t> const& bytes)
         if (i == 3)
         {
             char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
-            char_array_4[1] = ((char_array_3[0] & 0x03) << 4) + ((char_array_3[1] & 0xf0) >> 4);
-            char_array_4[2] = ((char_array_3[1] & 0x0f) << 2) + ((char_array_3[2] & 0xc0) >> 6);
+            char_array_4[1] = ((char_array_3[0] & 0x03) << 4) +
+                ((char_array_3[1] & 0xf0) >> 4);
+            char_array_4[2] = ((char_array_3[1] & 0x0f) << 2) +
+                ((char_array_3[2] & 0xc0) >> 6);
             char_array_4[3] = char_array_3[2] & 0x3f;
 
             for (i = 0; (i <4) ; i++)
@@ -393,8 +415,10 @@ std::string Utils::base64_encode(std::vector<boost::uint8_t> const& bytes)
             char_array_3[j] = '\0';
 
         char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
-        char_array_4[1] = ((char_array_3[0] & 0x03) << 4) + ((char_array_3[1] & 0xf0) >> 4);
-        char_array_4[2] = ((char_array_3[1] & 0x0f) << 2) + ((char_array_3[2] & 0xc0) >> 6);
+        char_array_4[1] = ((char_array_3[0] & 0x03) << 4) +
+            ((char_array_3[1] & 0xf0) >> 4);
+        char_array_4[2] = ((char_array_3[1] & 0x0f) << 2) +
+            ((char_array_3[2] & 0xc0) >> 6);
         char_array_4[3] = char_array_3[2] & 0x3f;
 
         for (j = 0; (j < i + 1); j++)
@@ -403,9 +427,7 @@ std::string Utils::base64_encode(std::vector<boost::uint8_t> const& bytes)
         while ((i++ < 3))
             ret += '=';
     }
-
     return ret;
-
 }
 
 static inline bool is_base64(unsigned char c)
@@ -413,20 +435,19 @@ static inline bool is_base64(unsigned char c)
     return (isalnum(c) || (c == '+') || (c == '/'));
 }
 
-
-std::vector<boost::uint8_t> Utils::base64_decode(std::string const& encoded_string)
+vector<boost::uint8_t> Utils::base64_decode(string const& encoded_string)
 {
-    const std::string base64_chars =
+    const string base64_chars =
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         "abcdefghijklmnopqrstuvwxyz"
         "0123456789+/";
 
-    std::string::size_type in_len = encoded_string.size();
+    string::size_type in_len = encoded_string.size();
     int i = 0;
     int j = 0;
     int in_ = 0;
     unsigned char char_array_4[4], char_array_3[3];
-    std::vector<boost::uint8_t> ret;
+    vector<boost::uint8_t> ret;
 
     // while (in_len-- &&
     //       ( encoded_string[in_] != '=') &&
@@ -470,20 +491,15 @@ std::vector<boost::uint8_t> Utils::base64_decode(std::string const& encoded_stri
     return ret;
 }
 
-FILE* Utils::portable_popen(const std::string& command, const std::string& mode)
+FILE* Utils::portable_popen(const string& command, const string& mode)
 {
-    FILE* fp = 0;
-
 #ifdef PDAL_PLATFORM_WIN32
-    const std::string dos_command = Utils::replaceAll(command, "/", "\\");
-    fp = _popen(dos_command.c_str(), mode.c_str());
+    const string dos_command = Utils::replaceAll(command, "/", "\\");
+    return _popen(dos_command.c_str(), mode.c_str());
 #else
-    fp = popen(command.c_str(), mode.c_str());
+    return popen(command.c_str(), mode.c_str());
 #endif
-
-    return fp;
 }
-
 
 int Utils::portable_pclose(FILE* fp)
 {
@@ -495,7 +511,7 @@ int Utils::portable_pclose(FILE* fp)
     status = pclose(fp);
     if (status == -1)
     {
-        throw std::runtime_error("error executing command");
+        throw runtime_error("error executing command");
     }
     if (WIFEXITED(status) != 0)
     {
@@ -521,18 +537,24 @@ int Utils::portable_pclose(FILE* fp)
 // as well as on Hobu's machine.
 
 // Boost's unit test system has a flag on the execution monitor that catches
-// all signals --  p_catch_system_errors, and throws unittest errors when it sees
-// them. We can use --catch_system_errors=no as part of the invocation, or manually
-// turn them off in the execution monitor. -- hobu 7/12/2012
+// all signals --  p_catch_system_errors, and throws unittest errors when
+// it sees them. We can use --catch_system_errors=no as part of the invocation,
+// or manually turn them off in the execution monitor. -- hobu 7/12/2012
 //  boost::unit_test::unit_test_monitor.p_catch_system_errors.set (false);
 // #include <boost/test/unit_test_monitor.hpp>
 
-int Utils::run_shell_command(const std::string& cmd, std::string& output)
+int Utils::run_shell_command(const string& cmd, string& output)
 {
     const int maxbuf = 4096;
     char buf[maxbuf];
 
     output = "";
+
+    const char* gdal_debug = ::pdal::Utils::getenv("CPL_DEBUG");
+    if (gdal_debug == 0)
+    {
+        pdal::Utils::putenv("CPL_DEBUG=OFF");
+    }
 
     FILE* fp = portable_popen(cmd.c_str(), "r");
 
@@ -543,20 +565,15 @@ int Utils::run_shell_command(const std::string& cmd, std::string& output)
             if (feof(fp)) break;
             if (ferror(fp)) break;
         }
-
         output += buf;
     }
-
-    int stat = portable_pclose(fp);
-
-    return stat;
+    return portable_pclose(fp);
 }
 
 //#ifdef PDAL_COMPILER_MSVC
 // http://www.codepedia.com/1/CppStringReplace
-std::string Utils::replaceAll(std::string result,
-                              const std::string& replaceWhat,
-                              const std::string& replaceWithWhat)
+string Utils::replaceAll(string result, const string& replaceWhat,
+    const string& replaceWithWhat)
 {
     while (1)
     {
@@ -567,16 +584,46 @@ std::string Utils::replaceAll(std::string result,
     return result;
 }
 
-void Utils::wordWrap(std::string const& inputString, 
-              std::vector<std::string>& outputString, 
-              unsigned int lineLength)
+// Stolen from http://stackoverflow.com/questions/7724448/simple-json-string-escape-for-c/11969098#11969098
+
+std::string & Utils::escapeJSON(string &str)
+{
+    str.erase
+    (
+        remove_if
+        (
+            str.begin(),
+            str.end(),
+            [](const char c)
+            {
+                return (c <= 31);
+            }
+        ),
+        str.end()
+    );
+    size_t pos=0;
+    while((pos=str.find_first_of("\"\\/", pos))!=string::npos)
+    {
+        str.insert(pos, "\\");
+        ++++pos;
+    }
+    return str;
+}
+
+/// Break a string into a list of strings, none of which exceeds a specified
+/// length.
+/// \param[in] inputString  String to split
+/// \param[out] outputString  Vector of strings split from inputString
+/// \param[in] lineLength  Maximum length of any of the output strings
+void Utils::wordWrap(string const& inputString, vector<string>& outputString, 
+    unsigned int lineLength)
 {
     // stolen from http://stackoverflow.com/questions/5815227/fix-improve-word-wrap-function
-    std::istringstream iss(inputString);
-    std::string line;
+    istringstream iss(inputString);
+    string line;
     do
     {
-        std::string word;
+        string word;
         iss >> word;
 
         if (line.length() + word.length() > lineLength)
@@ -593,6 +640,25 @@ void Utils::wordWrap(std::string const& inputString,
         outputString.push_back(line);
     }
 }
+
+
+#ifdef PDAL_HAVE_DEMANGLER
+/// Demangle strings using the compiler-provided demangle function.
+/// \param[in] s  String to be demangled.
+/// \return  Demangled string
+std::string Utils::demangle(const std::string& s)
+{
+    int status;
+    std::unique_ptr<char[], void (*)(void*)> result(
+            abi::__cxa_demangle(s.c_str(), 0, 0, &status), std::free);
+    return std::string(result.get());
+}
+#else
+std::string Utils::demangle(const std::string& s)
+{
+  return s;
+}
+#endif
 
 //#endif
 

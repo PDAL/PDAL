@@ -42,7 +42,6 @@
 #include <pdal/drivers/faux/Reader.hpp>
 #include <pdal/drivers/las/Writer.hpp>
 #include <pdal/drivers/las/Reader.hpp>
-#include <pdal/filters/Selector.hpp>
 
 #include <pdal/PointBuffer.hpp>
 
@@ -50,24 +49,25 @@
 
 using namespace pdal;
 
-
 BOOST_AUTO_TEST_SUITE(LasWriterTest)
 
 BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_las)
 {
+    PointContext ctx;
+
     // remove file from earlier run, if needed
     std::string temp_filename("temp-LasWriterTest_test_simple_las.las");
     FileUtils::deleteFile(temp_filename);
 
-    pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
-
+    pdal::drivers::las::Reader reader(Support::datapath("las/1.2-with-color.las"));
     std::ostream* ofs = FileUtils::createFile(Support::temppath(temp_filename));
 
     {
         // need to scope the writer, so that's it dtor can use the stream
-        pdal::drivers::las::Writer writer(reader, ofs);
+        pdal::drivers::las::Writer writer(ofs);
+        writer.setInput(&reader);
         BOOST_CHECK_EQUAL(writer.getDescription(), "Las Writer");
-        writer.initialize();
+        writer.prepare(ctx);
 
         const boost::uint64_t numPoints = reader.getNumPoints();
 
@@ -77,37 +77,37 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_las)
         writer.setSystemIdentifier("");
         writer.setGeneratingSoftware("TerraScan");
 
-        writer.write(numPoints);
+        writer.execute(ctx);
     }
 
     FileUtils::closeFile(ofs);
 
-    bool filesSame = Support::compare_files(Support::temppath(temp_filename), Support::datapath("simple.las"));
+    bool filesSame = Support::compare_files(Support::temppath(temp_filename),
+        Support::datapath("simple.las"));
     BOOST_CHECK_EQUAL(filesSame, true);
 
     if (filesSame)
-    {
         FileUtils::deleteFile(Support::temppath(temp_filename));
-    }
-
-    return;
 }
 
 #ifdef PDAL_HAVE_LASZIP
 BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_laz)
 {
+    PointContext ctx;
+
     // remove file from earlier run, if needed
     FileUtils::deleteFile("laszip/LasWriterTest_test_simple_laz.laz");
 
     pdal::drivers::las::Reader reader(Support::datapath("laszip/basefile.las"));
 
-    std::ostream* ofs = FileUtils::createFile(Support::temppath("LasWriterTest_test_simple_laz.laz"));
-
+    std::ostream* ofs = FileUtils::createFile(
+        Support::temppath("LasWriterTest_test_simple_laz.laz"));
     {
         const boost::uint64_t numPoints = reader.getNumPoints();
 
         // need to scope the writer, so that's it dtor can use the stream
-        pdal::drivers::las::Writer writer(reader, ofs);
+        pdal::drivers::las::Writer writer(ofs);
+        writer.setInput(&reader);
 
         writer.setCompressed(true);
         writer.setDate(0, 0);
@@ -116,34 +116,36 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_laz)
         writer.setGeneratingSoftware("TerraScan");
         writer.setHeaderPadding(2);
 
-        writer.initialize();
-        writer.write(numPoints);
+        writer.prepare(ctx);
+        writer.execute(ctx);
     }
 
     FileUtils::closeFile(ofs);
 
     {
-        pdal::drivers::las::Reader reader(Support::temppath("LasWriterTest_test_simple_laz.laz"));
+        pdal::drivers::las::Reader reader(
+            Support::temppath("LasWriterTest_test_simple_laz.laz"));
     }
 
     // these two files only differ by the description string in the VLR.
     // This now skips the entire LASzip VLR for comparison.
-    const boost::uint32_t numdiffs = Support::diff_files(Support::temppath("LasWriterTest_test_simple_laz.laz"),
-                                     Support::datapath("laszip/laszip-generated.laz"),
-                                     227, 106);
+    const boost::uint32_t numdiffs =Support::diff_files(
+        Support::temppath("LasWriterTest_test_simple_laz.laz"),
+        Support::datapath("laszip/laszip-generated.laz"),
+        227, 106);
     BOOST_CHECK_EQUAL(numdiffs, 0);
 
-    if (numdiffs==0)
-    {
-        FileUtils::deleteFile(Support::temppath("LasWriterTest_test_simple_laz.laz"));
-    }
-
-    return;
+    if (numdiffs == 0)
+        FileUtils::deleteFile(
+            Support::temppath("LasWriterTest_test_simple_laz.laz"));
 }
 #endif
 
-static void test_a_format(const std::string& refFile, boost::uint8_t majorVersion, boost::uint8_t minorVersion, int pointFormat)
+static void test_a_format(const std::string& refFile,
+    boost::uint8_t majorVersion, boost::uint8_t minorVersion, int pointFormat)
 {
+    PointContext ctx;
+
     // remove file from earlier run, if needed
     FileUtils::deleteFile("temp.las");
 
@@ -155,7 +157,8 @@ static void test_a_format(const std::string& refFile, boost::uint8_t majorVersio
         const boost::uint64_t numPoints = reader.getNumPoints();
 
         // need to scope the writer, so that's it dtor can use the stream
-        pdal::drivers::las::Writer writer(reader, ofs);
+        pdal::drivers::las::Writer writer(ofs);
+        writer.setInput(&reader);
         BOOST_CHECK_EQUAL(writer.getDescription(), "Las Writer");
 
         writer.setCompressed(false);
@@ -165,11 +168,12 @@ static void test_a_format(const std::string& refFile, boost::uint8_t majorVersio
         writer.setSystemIdentifier("libLAS");
         writer.setGeneratingSoftware("libLAS 1.2");
 
-        boost::uuids::uuid u = boost::lexical_cast<boost::uuids::uuid>("8388f1b8-aa1b-4108-bca3-6bc68e7b062e");
+        boost::uuids::uuid u =
+            boost::lexical_cast<boost::uuids::uuid>(
+                "8388f1b8-aa1b-4108-bca3-6bc68e7b062e");
         writer.setProjectId(u);
-        writer.initialize();
-
-        writer.write(numPoints);
+        writer.prepare(ctx);
+        writer.execute(ctx);
     }
 
     FileUtils::closeFile(ofs);
@@ -183,12 +187,14 @@ static void test_a_format(const std::string& refFile, boost::uint8_t majorVersio
     {
         FileUtils::deleteFile(Support::temppath("temp.las"));
     }
-
-    return;
 }
 
+//ABELL
+/**
 BOOST_AUTO_TEST_CASE(LasWriterTest_test_metadata)
 {
+    PointContext ctx;
+
     // remove file from earlier run, if needed
     std::string temp_filename(Support::temppath("temp-LasWriterTest_test_metadata.las"));
     FileUtils::deleteFile(temp_filename);
@@ -205,12 +211,12 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_metadata)
     pdal::Option record_id("record_id", 1234);
     pdal::Option user_id("user_id", "hobu");
     pdal::Option global_encoding("global_encoding", "AQA=");
-    
+
     pdal::Options vlr_opts;
     vlr_opts.add(record_id);
     vlr_opts.add(user_id);
     polygon.setOptions(vlr_opts);
-    
+
 
     pdal::Option debug("debug", true);
     pdal::Option verbosity("verbose", 7);
@@ -228,46 +234,51 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_metadata)
     options.add(filename);
     // options.add(debug);
     // options.add(verbosity);
-    
+
     pdal::drivers::las::Reader reader(Support::datapath("interesting.las"));
 
     {
-        pdal::drivers::las::Writer writer(reader, options);
-        writer.initialize();
-
-        const boost::uint64_t numPoints = reader.getNumPoints();
-
-        writer.write(numPoints);
+        pdal::drivers::las::Writer writer(options);
+        writer.setInput(&reader);
+        writer.prepare(ctx);
+        writer.execute(ctx);
     }
 
 
+    PointContext ctx2;
     pdal::drivers::las::Reader reader2(options);
-    reader2.initialize();
-    
+    reader2.prepare(ctx2);
+
     pdal::drivers::las::LasHeader const& h = reader2.getLasHeader();
-    
+
     BOOST_CHECK_EQUAL(h.GetSoftwareId(), "HOBU-GENERATING");
     BOOST_CHECK_EQUAL(h.GetSystemId(), "HOBU-SYSTEMID");
     BOOST_CHECK_EQUAL(h.GetCreationDOY(), 145u);
     BOOST_CHECK_EQUAL(h.GetCreationYear(), 2012u);
-    
+
     pdal::drivers::las::VLRList const& vlrs = h.getVLRs();
+#ifdef PDAL_SRS_ENABLED
     BOOST_CHECK_EQUAL(vlrs.count(), 5u);
+#else
+    BOOST_CHECK_EQUAL(vlrs.count(), 2u);
+#endif
     pdal::drivers::las::VariableLengthRecord const& r = vlrs.get(0);
-    
+
     BOOST_CHECK_EQUAL(r.getRecordId(), 1234u);
     BOOST_CHECK_EQUAL(r.getUserId(), "hobu");
-    BOOST_CHECK_EQUAL(r.getLength(), 70);    
-    
-    FileUtils::deleteFile(temp_filename);
+    BOOST_CHECK_EQUAL(r.getLength(), 70);
 
-    return;
+    FileUtils::deleteFile(temp_filename);
 }
+**/
 
 BOOST_AUTO_TEST_CASE(LasWriterTest_test_ignored_dimensions)
 {
+    PointContext ctx;
+
     // remove file from earlier run, if needed
-    std::string temp_filename(Support::temppath("temp-LasWriterTest_test_ignored_dimensions.las"));
+    std::string temp_filename(
+        Support::temppath("temp-LasWriterTest_test_ignored_dimensions.las"));
     FileUtils::deleteFile(temp_filename);
 
     pdal::Options options;
@@ -279,82 +290,68 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_ignored_dimensions)
     pdal::Options mignored;
     pdal::Option keep;
     pdal::Options mkeep;
-    
+
     mkeep.add(pdal::Option("dimension", "X"));
     mkeep.add(pdal::Option("dimension", "Y"));
-    
+
     mignored.add(pdal::Option("dimension", "Red"));
     mignored.add(pdal::Option("dimension", "Green"));
     mignored.add(pdal::Option("dimension", "Blue"));
-    
+
     keep.setOptions(mkeep);
     ignored.setOptions(mignored);
 
     options.add(ignored);
     options.add(filename);
     options.add(debug);
-    // options.add(keep);
-    // options.add(verbosity);
-    
+
     pdal::drivers::las::Reader reader(Support::datapath("interesting.las"));
 
     {
-        pdal::filters::Selector selector(reader, options);
-        pdal::drivers::las::Writer writer(selector, options);
-        writer.initialize();
-
-        const boost::uint64_t numPoints = reader.getNumPoints();
-
-        writer.write(numPoints);
+        pdal::drivers::las::Writer writer(options);
+        writer.setInput(&reader);
+        writer.prepare(ctx);
+        writer.execute(ctx);
     }
 
-
     {
+        PointContext ctx2;
+
         pdal::drivers::las::Reader reader2(options);
-        reader2.initialize();
+        reader2.prepare(ctx2);
+        PointBuffer altered(ctx2);
 
-        const Schema& schema2 = reader2.getSchema();
+        pdal::StageSequentialIterator* iter =
+            reader2.createSequentialIterator();
+        iter->read(altered, 1);
 
-        PointBuffer altered(schema2, 1);
-
-        pdal::StageSequentialIterator* iter = reader2.createSequentialIterator(altered);
-    
-        iter->read(altered);
-
-    
-        pdal::Dimension const& dimRed = schema2.getDimension("Red");
-        pdal::Dimension const& dimX = schema2.getDimension("X");
-        boost::uint16_t r = altered.getField<boost::uint16_t>(dimRed, 0);
+        uint16_t r = altered.getFieldAs<uint16_t>(Dimension::Id::Red, 0);
         BOOST_CHECK_EQUAL(r, 0u);
-        boost::int32_t x = altered.getField<boost::int32_t>(dimX, 0);
+        int32_t x = altered.getFieldAs<int32_t>(Dimension::Id::X, 0);
         BOOST_CHECK_EQUAL(x, 63701224);
 
         delete iter;
     }
-    
+
     {
-        
-        pdal::drivers::las::Reader reader3(Support::datapath("interesting.las"));
-        reader3.initialize();
-        const Schema& schema1 = reader3.getSchema();
-        PointBuffer original(schema1, 1);
-        pdal::StageSequentialIterator* iter2 = reader.createSequentialIterator(original);
-    
-        iter2->read(original);
-        
-        pdal::Dimension const& dimRed2 = schema1.getDimension("Red");
-        pdal::Dimension const& dimX2 = schema1.getDimension("X");
-        boost::uint16_t r2 = original.getField<boost::uint16_t>(dimRed2, 0);
+        PointContext ctx3;
+
+        drivers::las::Reader reader3(Support::datapath("interesting.las"));
+        reader3.prepare(ctx3);
+        PointBuffer original(ctx3);
+        StageSequentialIterator* iter2 = reader.createSequentialIterator();
+
+        iter2->read(original, 1);
+
+        uint16_t r2 = original.getFieldAs<uint16_t>(Dimension::Id::Red, 0);
         BOOST_CHECK_EQUAL(r2, 68u);
-        boost::int32_t x2 = original.getField<boost::int32_t>(dimX2, 0);
+        int32_t x2 = original.getFieldAs<int32_t>(Dimension::Id::X, 0);
         BOOST_CHECK_EQUAL(x2, 63701224);
 
         delete iter2;
     }
 
     FileUtils::deleteFile(temp_filename);
-
-    return;
 }
 
 BOOST_AUTO_TEST_CASE(test_different_formats)
@@ -369,19 +366,86 @@ BOOST_AUTO_TEST_CASE(test_different_formats)
     test_a_format("1.2_1.las", 1, 2, 1);
     test_a_format("1.2_2.las", 1, 2, 2);
     test_a_format("1.2_3.las", 1, 2, 3);
-
-    return;
 }
 
 
 BOOST_AUTO_TEST_CASE(test_summary_data_add_point)
 {
-    pdal::drivers::las::SummaryData summaryData;
+    drivers::las::SummaryData summaryData;
 
-    summaryData.addPoint(-95.329381929535259, 29.71948951835612, -17.515486778166398, 0);
-    pdal::Bounds<double> b = summaryData.getBounds();
+    summaryData.addPoint(-95.329381929535259, 29.71948951835612,
+        -17.515486778166398, 0);
+    Bounds<double> b = summaryData.getBounds();
     BOOST_CHECK_EQUAL(b.getMinimum(0), b.getMaximum(0));
     BOOST_CHECK_EQUAL(b.getMinimum(2), b.getMaximum(2));
+}
+
+
+BOOST_AUTO_TEST_CASE(LasWriterTest_test_drop_extra_returns)
+{
+    using namespace pdal;
+
+    PointContext ctx;
+
+    // remove file from earlier run, if needed
+    std::string temp_filename("temp-LasWriterTest_test_drop_extra_returns.las");
+    FileUtils::deleteFile(Support::temppath(temp_filename));
+
+    Options ops;
+
+    Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
+    ops.add("bounds", bounds);
+    ops.add("num_points", 100);
+    ops.add("mode", "constant");
+    ops.add("number_of_returns", 10);
+    drivers::faux::Reader reader(ops);
+
+    std::ostream* ofs = FileUtils::createFile(Support::temppath(temp_filename));
+
+    {
+        Options writerOptions;
+        writerOptions.add("discard_high_return_numbers", true);
+        pdal::drivers::las::Writer writer(writerOptions, ofs);
+        writer.setInput(&reader);
+        writer.prepare(ctx);
+
+        writer.setCompressed(false);
+        writer.setDate(0, 0);
+        writer.setPointFormat(::pdal::drivers::las::PointFormat3);
+        writer.setSystemIdentifier("");
+        writer.setGeneratingSoftware("TerraScan");
+
+        writer.execute(ctx);
+    }
+
+    {
+        Options readerOptions;
+        readerOptions.add("filename", Support::temppath(temp_filename));
+
+        pdal::drivers::las::Reader reader2(readerOptions);
+
+        PointContext ctx2;
+        reader2.prepare(ctx2);
+        PointBuffer data(ctx2);
+
+        pdal::StageSequentialIterator* iter =
+            reader2.createSequentialIterator();
+        iter->read(data, 6);
+
+        uint8_t r1 = data.getFieldAs<uint8_t>(Dimension::Id::ReturnNumber, 0);
+        BOOST_CHECK_EQUAL(r1, 1);
+        uint8_t r2 = data.getFieldAs<uint8_t>(Dimension::Id::ReturnNumber, 5);
+        BOOST_CHECK_EQUAL(r2, 1);
+        uint8_t n1 = data.getFieldAs<uint8_t>(Dimension::Id::NumberOfReturns, 0);
+        BOOST_CHECK_EQUAL(n1, 5);
+        uint8_t n2 = data.getFieldAs<uint8_t>(Dimension::Id::NumberOfReturns, 5);
+        BOOST_CHECK_EQUAL(n1, 5);
+
+        delete iter;
+    }
+
+    FileUtils::closeFile(ofs);
+    FileUtils::deleteFile(Support::temppath(temp_filename));
 }
 
 

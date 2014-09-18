@@ -6,7 +6,7 @@
             </Option>
             <Reader type="drivers.las.reader">
                 <Option name="filename">
-                    ../1.2-with-color.las
+                    ../las/1.2-with-color.las
                     <Options>
                         <Option name="somemore">
                             42

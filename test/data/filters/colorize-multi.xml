@@ -98,14 +98,14 @@
                     </Options>
                   </Option>
                   <Option name="overwrite_existing_dimensions">false</Option>
-                  <Option name="ignore_default">false</Option>                      
+                  <Option name="ignore_default">false</Option>
                     <Reader type="drivers.las.reader">
                         <Option name="filename">
-                            ../1.2-with-color.las
+                            ../las/1.2-with-color.las
                         </Option>
                         <Option name="spatialreference">
                             EPSG:2993
-                        </Option>                        
+                        </Option>
                     </Reader>
                 </Filter>
             </Filter>

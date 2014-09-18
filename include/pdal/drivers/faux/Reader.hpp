@@ -32,17 +32,9 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_DRIVERS_FAUX_READER_HPP
-#define INCLUDED_DRIVERS_FAUX_READER_HPP
+#pragma once
 
 #include <pdal/Reader.hpp>
-#include <pdal/ReaderIterator.hpp>
-#include <pdal/Bounds.hpp>
-
-namespace pdal
-{
-class PointBuffer;
-}
 
 namespace pdal
 {
@@ -51,114 +43,88 @@ namespace drivers
 namespace faux
 {
 
+enum Mode
+{
+    Constant,
+    Random,
+    Ramp,
+    Uniform,
+    Normal
+};
+
 
 // The FauxReader doesn't read from disk, but instead just makes up data for its
 // points.  The reader is constructed with a given bounding box and a given
 // number of points.
 //
-// This reader knows about 4 fields (Dimensions):
+// This reader knows about these fields (Dimensions):
 //    X,Y,Z - floats
 //    Time  - uint64
+//    ReturnNumber (optional) - uint8
+//    NumberOfReturns (optional) - uint8
 //
 // It supports a few modes:
-//   - "random" generates points that are randomly distributed within the given bounding box
-//   - "constant" generates its points to always be at the minimum of the bounding box
-//   - "ramp" generates its points as a linear ramp from the minimum of the bbox to the maximum
-// In all these modes, however, the Time field is always set to the point number.
+//   - "random" generates points that are randomly distributed within the
+//     given bounding box
+//   - "constant" generates its points to always be at the minimum of the
+//      bounding box
+//   - "ramp" generates its points as a linear ramp from the minimum of the
+//     bbox to the maximum
+//   - "uniform" generates points that are uniformly distributed within the
+//     given bounding box
+//   - "normal" generates points that are normally distributed with a given
+//     mean and standard deviation in each of the XYZ dimensions
+// In all these modes, however, the Time field is always set to the point
+// number.
+//
+// ReturnNumber and NumberOfReturns are not included by default, but can be
+// activated by passing a numeric value as "number_of_returns" to the
+// reader constructor.
 //
 class PDAL_DLL Reader : public pdal::Reader
 {
 public:
-    enum Mode
-    {
-        Constant,
-        Random,
-        Ramp
-    };
-
-public:
     SET_STAGE_NAME("drivers.faux.reader", "Faux Reader")
+    SET_STAGE_ENABLED(true)
 
     Reader(const Options& options);
-    Reader(const Bounds<double>&, boost::uint64_t numPoints, Mode mode);
-    Reader(const Bounds<double>&, boost::uint64_t numPoints, Mode mode, const std::vector<Dimension>& dimensions);
 
-    virtual void initialize();
-    static Options getDefaultOptions();
-    static std::vector<Dimension> getDefaultDimensions();
-
-    Mode getMode() const;
-
-    bool supportsIterator(StageIteratorType t) const
-    {
-        if (t == StageIterator_Sequential) return true;
-        if (t == StageIterator_Random) return true;
-
-        return false;
-    }
-
-    pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator(PointBuffer& buffer) const;
-
-    // this is called by the stage's iterator
-    boost::uint32_t processBuffer(PointBuffer& data, boost::uint64_t index) const;
+    static Dimension::IdList getDefaultDimensions();
 
 private:
-    Bounds<double> m_bounds;
-    boost::uint64_t m_numPoints;
     Mode m_mode;
-    std::vector<Dimension> m_dimensions;
+    double m_minX;
+    double m_maxX;
+    double m_minY;
+    double m_maxY;
+    double m_minZ;
+    double m_maxZ;
+    double m_mean_x;
+    double m_mean_y;
+    double m_mean_z;
+    double m_stdev_x;
+    double m_stdev_y;
+    double m_stdev_z;
+    uint64_t m_time;
+    int m_numReturns;
+    int m_returnNum;
+
+    virtual void processOptions(const Options& options);
+    virtual void addDimensions(PointContextRef ctx);
+    virtual void ready(PointContextRef ctx)
+    {
+        m_returnNum = 1;
+        m_time = 0;
+    }
+    virtual point_count_t read(PointBuffer& buf, point_count_t count);
+    virtual bool eof()
+        { return false; }
 
     Reader& operator=(const Reader&); // not implemented
     Reader(const Reader&); // not implemented
-
 };
 
+} // namespace faux
+} // namespace drivers
+} // namespace pdal
 
-namespace iterators
-{
-namespace sequential
-{
-
-class PDAL_DLL Reader : public pdal::ReaderSequentialIterator
-{
-public:
-    Reader(pdal::drivers::faux::Reader const& reader, PointBuffer& buffer);
-
-private:
-    boost::uint64_t skipImpl(boost::uint64_t);
-    boost::uint32_t readBufferImpl(PointBuffer&);
-    bool atEndImpl() const;
-
-    pdal::drivers::faux::Reader const& m_reader;
-};
-
-}
-} // iterators::sequential
-
-namespace iterators
-{
-namespace random
-{
-
-class PDAL_DLL Reader : public pdal::ReaderRandomIterator
-{
-public:
-    Reader(pdal::drivers::faux::Reader const& reader, PointBuffer& buffer);
-
-private:
-    boost::uint64_t seekImpl(boost::uint64_t);
-    boost::uint32_t readBufferImpl(PointBuffer&);
-
-    pdal::drivers::faux::Reader const& m_reader;
-};
-
-}
-} // iterators::random
-
-}
-}
-} // namespaces
-
-
-#endif

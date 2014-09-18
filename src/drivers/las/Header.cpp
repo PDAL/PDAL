@@ -42,8 +42,8 @@
 
 #include <pdal/drivers/las/Header.hpp>
 
+#include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
-
 
 namespace pdal
 {
@@ -85,6 +85,7 @@ LasHeader::LasHeader(LasHeader const& other) :
     m_headerSize(other.m_headerSize),
     m_dataOffset(other.m_dataOffset),
     m_pointRecordsCount(other.m_pointRecordsCount),
+    m_scales(other.m_scales),
     m_offsets(other.m_offsets),
     m_isCompressed(other.m_isCompressed),
     m_headerPadding(other.m_headerPadding),
@@ -161,8 +162,6 @@ boost::uint16_t LasHeader::GetFileSourceId() const
 
 void LasHeader::SetFileSourceId(boost::uint16_t v)
 {
-    // TODO: Should we warn or throw about type overflow occuring when
-    //       user passes 65535 + 1 = 0
     m_sourceId = v;
 }
 
@@ -173,8 +172,6 @@ boost::uint16_t LasHeader::GetReserved() const
 
 void LasHeader::SetReserved(boost::uint16_t v)
 {
-    // TODO: Should we warn or throw about type overflow occuring when
-    //       user passes 65535 + 1 = 0
     m_reserved = v;
 }
 
@@ -321,19 +318,21 @@ pdal::drivers::las::PointFormat LasHeader::getPointFormat() const
 
 void LasHeader::setPointFormat(pdal::drivers::las::PointFormat v)
 {
-    pdal::drivers::las::PointFormat old = m_pointFormat;
-    boost::uint16_t oldpad = m_dataRecordLength - Support::getPointDataSize(old);
+    size_t oldpad = m_dataRecordLength - getPointDataSize();
     m_pointFormat = v;
-    m_dataRecordLength = Support::getPointDataSize(v) + oldpad;
+    m_dataRecordLength = getPointDataSize() + oldpad;
 }
 
 void LasHeader::SetDataRecordLength(boost::uint16_t v)
 {
-    boost::uint16_t requiredsize = Support::getPointDataSize(m_pointFormat);
+    size_t requiredsize = getPointDataSize();
     if (requiredsize < v)
-        throw std::invalid_argument("record size too small to hold current point format required size");
+        throw std::invalid_argument("record size too small to hold current "
+            "point format required size");
     m_dataRecordLength = v;
 }
+
+
 boost::uint16_t LasHeader::GetDataRecordLength() const
 {
     return m_dataRecordLength;
@@ -499,7 +498,7 @@ void LasHeader::initialize()
     m_isCompressed = false;
     m_headerPadding = 0;
     m_compressionInfo = std::string("");
-    m_dataRecordLength = Support::getPointDataSize(m_pointFormat);
+    m_dataRecordLength = getPointDataSize();
 }
 
 

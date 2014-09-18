@@ -1,4 +1,4 @@
-/******************************************************************************
+/****************************************************************************
 * Copyright (c) 2012, Michael P. Gerlek (mpg@flaxen.com)
 *
 * All rights reserved.
@@ -32,12 +32,14 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <memory>
+#include <vector>
+
 #include <pdal/drivers/nitf/Writer.hpp>
 #include <pdal/drivers/las/Writer.hpp>
 
 #include <pdal/PointBuffer.hpp>
 #include <pdal/GlobalEnvironment.hpp>
-
 
 #ifdef PDAL_HAVE_NITRO
 #define IMPORT_NITRO_API
@@ -57,138 +59,79 @@ namespace drivers
 namespace nitf
 {
 
-Writer::Writer(Stage& prevStage, const Options& options)
-    :  pdal::drivers::las::Writer(prevStage, static_cast<std::ostream*>(&m_oss))
 
-
+void Writer::processOptions(const Options& options)
 {
-    Options&  opts = getOptions();
-    opts = options;
-
-    m_oss.str("");
-    return;
-}
-
-Writer::~Writer()
-{
-    return;
-}
-
-
-void Writer::initialize()
-{
-    // call super class
-    pdal::drivers::las::Writer::initialize();
-
-    m_filename = getOptions().getValueOrThrow<std::string>("filename");
-
-    return;
+    las::Writer::processOptions(options);
+    m_filename = options.getValueOrThrow<std::string>("filename");
+    m_cLevel = options.getValueOrDefault<std::string>("CLEVEL","03");
+    m_sType = options.getValueOrDefault<std::string>("STYPE","BF01");
+    m_oStationId = options.getValueOrDefault<std::string>("OSTAID","PDAL");
+    m_fileTitle = options.getValueOrDefault<std::string>("FTITLE",m_filename);
+    m_fileClass = options.getValueOrDefault<std::string>("FSCLAS","U");
+    m_origName = options.getValueOrDefault<std::string>("ONAME","");
+    m_origPhone = options.getValueOrDefault<std::string>("OPHONE","");
+    m_securityClass = options.getValueOrDefault<std::string>("FSCLAS","U");
+    m_imgSecurityClass = options.getValueOrDefault<std::string>("FSCLAS","U");
+    m_imgDate = getOptions().getValueOrDefault<std::string>("IDATIM", "");
+    m_sic = getOptions().getValueOrDefault<std::string>("FSCLTX", "");
+    m_igeolob = getOptions().getValueOrDefault<std::string>("GEOLOB", "");
 }
 
 
-Options Writer::getDefaultOptions()
+void Writer::done(PointContextRef ctx)
 {
-    Options options;
-    return options;
-}
-
-
-void Writer::writeBegin(boost::uint64_t targetNumPointsToWrite)
-{
-    // call super class
-    pdal::drivers::las::Writer::writeBegin(targetNumPointsToWrite);
-
-    return;
-}
-
-
-void Writer::writeBufferBegin(PointBuffer const& buffer)
-{
-    // call super class
-    pdal::drivers::las::Writer::writeBufferBegin(buffer);
-}
-
-
-boost::uint32_t Writer::writeBuffer(const PointBuffer& buffer)
-{
-    // call super class
-    return pdal::drivers::las::Writer::writeBuffer(buffer);
-}
-
-
-void Writer::writeBufferEnd(PointBuffer const& buffer)
-{
-    // call super class
-    pdal::drivers::las::Writer::writeBufferEnd(buffer);
-}
-
-
-void Writer::writeEnd(boost::uint64_t actualNumPointsWritten)
-{
-    // call super class
-    pdal::drivers::las::Writer::writeEnd(actualNumPointsWritten);
-
-    m_oss.flush();
+    las::Writer::done(ctx);
 
 #ifdef PDAL_HAVE_NITRO
-
     try
     {
-
         ::nitf::Record record(NITF_VER_21);
         ::nitf::FileHeader header = record.getHeader();
         header.getFileHeader().set("NITF");
-        header.getComplianceLevel().set(getOptions().getValueOrDefault<std::string>("CLEVEL","03"));
-        header.getSystemType().set(getOptions().getValueOrDefault<std::string>("STYPE","BF01"));
-        header.getOriginStationID().set(getOptions().getValueOrDefault<std::string>("OSTAID","PDAL"));
-        header.getFileTitle().set(getOptions().getValueOrDefault<std::string>("FTITLE","FTITLE"));
-        header.getClassification().set(getOptions().getValueOrDefault<std::string>("FSCLAS","U"));
+        header.getComplianceLevel().set(m_cLevel);
+        header.getSystemType().set(m_sType);
+        header.getOriginStationID().set(m_oStationId);
+        header.getFileTitle().set(m_fileTitle);
+        header.getClassification().set(m_fileClass);
         header.getMessageCopyNum().set("00000");
         header.getMessageNumCopies().set("00000");
         header.getEncrypted().set("0");
         header.getBackgroundColor().setRawData(const_cast<char*>("000"), 3);
-        header.getOriginatorName().set(getOptions().getValueOrDefault<std::string>("ONAME",""));
-        header.getOriginatorPhone().set(getOptions().getValueOrDefault<std::string>("OPHONE",""));
+        header.getOriginatorName().set(m_origName);
+        header.getOriginatorPhone().set(m_origPhone);
+        header.getSecurityGroup().getClassificationText().set(m_sic);
 
         ::nitf::DESegment des = record.newDataExtensionSegment();
 
         des.getSubheader().getFilePartType().set("DE");
-
         des.getSubheader().getTypeID().set("LIDARA DES");
         des.getSubheader().getVersion().set("01");
-        des.getSubheader().getSecurityClass().set(getOptions().getValueOrDefault<std::string>("FSCLAS","U"));
-
-        ::nitf::FileSecurity security =
-            record.getHeader().getSecurityGroup();
+        des.getSubheader().getSecurityClass().set(m_securityClass);
+        ::nitf::FileSecurity security = record.getHeader().getSecurityGroup();
         des.getSubheader().setSecurityGroup(security.clone());
 
-
         ::nitf::TRE usrHdr("LIDARA DES", "raw_data");
-
         usrHdr.setField("raw_data", "not");
         ::nitf::Field fld = usrHdr.getField("raw_data");
         fld.setType(::nitf::Field::BINARY);
 
-
+        m_oss.flush();
         std::streambuf *buf = m_oss.rdbuf();
-
-
         long size = buf->pubseekoff(0, m_oss.end);
         buf->pubseekoff(0, m_oss.beg);
 
-        char* bytes = new char[size];
-        buf->sgetn(bytes, size);
+        std::vector<char> bytes(size);
+        buf->sgetn(bytes.data(), size);
 
         des.getSubheader().setSubheaderFields(usrHdr);
 
         ::nitf::ImageSegment image = record.newImageSegment();
         ::nitf::ImageSubheader subheader = image.getSubheader();
 
-        subheader.getImageSecurityClass().set(getOptions().getValueOrDefault<std::string>("FSCLAS","U"));
-
-        std::string fdate = getOptions().getValueOrDefault<std::string>("IDATIM", "");
-        if (fdate.size())
-            subheader.getImageDateAndTime().set(fdate);
+        subheader.getImageSecurityClass().set(m_imgSecurityClass);
+        if (m_imgDate.size())
+            subheader.getImageDateAndTime().set(m_imgDate);
 
         ::nitf::BandInfo info;
         ::nitf::LookupTable lt(0,0);
@@ -202,51 +145,51 @@ void Writer::writeEnd(boost::uint64_t actualNumPointsWritten)
 
         std::vector< ::nitf::BandInfo> bands;
         bands.push_back(info);
-        subheader.setPixelInformation("INT",      /* Pixel value type */
-                                      8,         /* Number of bits/pixel */
-                                      8,         /* Actual number of bits/pixel */
-                                      "G",       /* Pixel justification */
-                                      "G",     /* Image representation */
-                                      "VIS",     /* Image category */
-                                      1,         /* Number of bands */
-                                      bands);
+        subheader.setPixelInformation(
+            "INT",      /* Pixel value type */
+            8,         /* Number of bits/pixel */
+            8,         /* Actual number of bits/pixel */
+            "G",       /* Pixel justification */
+            "G",     /* Image representation */
+            "VIS",     /* Image category */
+            1,         /* Number of bands */
+            bands);
 
-        subheader.setBlocking(8,   /*!< The number of rows */
-                              8,  /*!< The number of columns */
-                              8, /*!< The number of rows/block */
-                              8,  /*!< The number of columns/block */
-                              "P"                /*!< Image mode */
-                             );
+        subheader.setBlocking(
+            8,   /*!< The number of rows */
+            8,  /*!< The number of columns */
+            8, /*!< The number of rows/block */
+            8,  /*!< The number of columns/block */
+            "P");                /*!< Image mode */
         subheader.getImageId().set("None");
         // 64 char string
-        const char* buffer = "0000000000000000000000000000000000000000000000000000000000000000";
+        std::string zeros(64, '0');
 
-        ::nitf::BandSource* band =
-            new ::nitf::MemorySource(const_cast<char*>(buffer),
-                                     strlen(buffer) /* memory size */,
-                                     0 /* starting offset */,
-                                     1 /* bytes per pixel */,
-                                     0 /*skip*/);
+        std::unique_ptr< ::nitf::BandSource> band(new ::nitf::MemorySource(
+            const_cast<char*>(zeros.c_str()),
+            zeros.size() /* memory size */,
+            0 /* starting offset */,
+            1 /* bytes per pixel */,
+            0 /*skip*/));
         ::nitf::ImageSource iSource;
         iSource.addBand(*band);
 
         ::nitf::Writer writer;
-        ::nitf::IOHandle output_io(m_filename.c_str(), NITF_ACCESS_WRITEONLY, NITF_CREATE);
+        ::nitf::IOHandle output_io(m_filename.c_str(), NITF_ACCESS_WRITEONLY,
+            NITF_CREATE);
         writer.prepare(output_io, record);
 
         ::nitf::SegmentWriter sWriter = writer.newDEWriter(0);
 
-        ::nitf::SegmentMemorySource sSource(bytes, size, 0, 0, false);
+        ::nitf::SegmentMemorySource sSource(bytes.data(), size, 0, 0, false);
         sWriter.attachSource(sSource);
 
         ::nitf::ImageWriter iWriter = writer.newImageWriter(0);
         iWriter.attachSource(iSource);
 
-
         writer.write();
         output_io.close();
     }
-
     catch (except::Throwable & t)
     {
         std::ostringstream oss;
@@ -254,7 +197,6 @@ void Writer::writeEnd(boost::uint64_t actualNumPointsWritten)
         throw pdal_error(t.getMessage());
     }
 #endif
-    return;
 }
 
 

@@ -32,58 +32,56 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_TYPES_HPP
-#define INCLUDED_TYPES_HPP
+#pragma once
+
+#include <stdint.h>
+#include <vector>
 
 #include <pdal/pdal_internal.hpp>
 
 namespace pdal
 {
 
-enum EndianType
+typedef std::vector<uint8_t>::size_type PointId;
+typedef std::vector<PointId>::size_type point_count_t;
+
+struct XForm
 {
-    Endian_Little,
-    Endian_Big,
-    Endian_Unknown = 128
+public:
+    XForm() : m_scale(1.0), m_offset(0.0)
+    {}
+
+    XForm(double scale, double offset) : m_scale(scale), m_offset(offset)
+    {}
+
+    double m_scale;
+    double m_offset;
 };
 
-enum PointCountType
+namespace LogLevel
 {
-    PointCount_Fixed,       // getNumPoints will return value (which might be zero, though)
-    PointCount_Unknown      // the stage has an unknown count, and getNumPoints will return 0
-};
-
-enum StageIteratorType
+enum Enum
 {
-    StageIterator_Sequential = (1u << 0),
-    StageIterator_Random = (1u << 1),
-    StageIterator_Block = (1u << 2),
-    StageIterator_Unknown = (1u << 8)
+    Error = 0,
+    Warning,
+    Info,
+    Debug,
+    Debug1,
+    Debug2,
+    Debug3,
+    Debug4,
+    Debug5
 };
+} // namespace LogLevel
 
-
-
-enum StageOperationType
+namespace Orientation
 {
-    StageOperation_All = (1u << 0),
-    StageOperation_Type = (1u << 1),
-    STageOperation_Id = (1u << 2)
-};
-
-enum LogLevel
+enum Enum
 {
-    logERROR = 0,
-    logWARNING,
-    logINFO,
-    logDEBUG,
-    logDEBUG1,
-    logDEBUG2,
-    logDEBUG3,
-    logDEBUG4,
-    logDEBUG5
+    PointMajor,
+    DimensionMajor
 };
+} // namespace Orientation
 
+} // namespace pdal
 
-} // namespace
-
-#endif

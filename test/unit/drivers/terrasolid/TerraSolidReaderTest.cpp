@@ -35,7 +35,6 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 
-#include <pdal/StageIterator.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/drivers/terrasolid/Reader.hpp>
@@ -107,7 +106,7 @@ BOOST_AUTO_TEST_CASE(test_tsolid)
     // options.add(verbose);
     options.add(fname);
     pdal::drivers::terrasolid::Reader reader(options);
-    reader.initialize();
+    reader.prepare();
 
     BOOST_CHECK(reader.getDescription() == "TerraSolid Reader");
     BOOST_CHECK_EQUAL(reader.getName(), "drivers.terrasolid.reader");
@@ -129,9 +128,6 @@ BOOST_AUTO_TEST_CASE(test_tsolid)
     Check_Point(data, 0, 363127.94, 3437612.33, 55.26, 580220.5528);
     Check_Point(data, 1, 363128.12, 3437613.01, 55.33, 580220.5530);
     Check_Point(data, 2, 363128.29, 3437613.66, 55.28, 580220.5530);
-
-
-    return;
 }
 
 BOOST_AUTO_TEST_SUITE_END()

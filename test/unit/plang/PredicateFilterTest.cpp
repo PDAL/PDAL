@@ -37,12 +37,13 @@
 #include <boost/test/unit_test.hpp>
 
 #include <pdal/filters/Predicate.hpp>
+#include <pdal/filters/Stats.hpp>
 #include <pdal/drivers/faux/Reader.hpp>
-#include <pdal/drivers/faux/Writer.hpp>
-#include <pdal/drivers/pipeline/Reader.hpp>
-#include "Support.hpp"
+#include <pdal/PipelineManager.hpp>
+#include <pdal/PipelineReader.hpp>
 
-#include <boost/scoped_ptr.hpp>
+#include "../StageTester.hpp"
+#include "Support.hpp"
 
 BOOST_AUTO_TEST_SUITE(PredicateFilterTest)
 
@@ -51,51 +52,55 @@ using namespace pdal;
 BOOST_AUTO_TEST_CASE(PredicateFilterTest_test1)
 {
     Bounds<double> bounds(0.0, 0.0, 0.0, 2.0, 2.0, 2.0);
-    pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Ramp);
-
+    Options readerOps;
+    readerOps.add("bounds", bounds);
+    readerOps.add("num_points", 1000);
+    readerOps.add("mode", "ramp");
+    drivers::faux::Reader reader(readerOps);
+    
     // keep all points where x less than 1.0
     const pdal::Option source("source",
-                              // "X < 1.0"
-                              "import numpy as np\n"
-                              "def yow1(ins,outs):\n"
-                              "  X = ins['X']\n"
-                              "  Mask = np.less(X, 1.0)\n"
-                              "  #print X\n"
-                              "  #print Mask\n"
-                              "  outs['Mask'] = Mask\n"
-                              "  return True\n"
-                             );
-    const pdal::Option module("module", "MyModule1");
-    const pdal::Option function("function", "yow1");
-    pdal::Options opts;
+        // "X < 1.0"
+        "import numpy as np\n"
+        "def yow1(ins,outs):\n"
+        "  X = ins['X']\n"
+        "  Mask = np.less(X, 1.0)\n"
+        "  #print X\n"
+        "  #print Mask\n"
+        "  outs['Mask'] = Mask\n"
+        "  return True\n"
+    );
+    const Option module("module", "MyModule1");
+    const Option function("function", "yow1");
+    Options opts;
     opts.add(source);
     opts.add(module);
     opts.add(function);
 
-    pdal::filters::Predicate filter(reader, opts);
+    filters::Predicate filter(opts);
+    filter.setInput(&reader);
     BOOST_CHECK(filter.getDescription() == "Predicate Filter");
-    pdal::drivers::faux::Writer writer(filter, Options::none());
-    writer.initialize();
 
-    boost::uint64_t numWritten = writer.write(1000);
+    Options statOpts;
+    filters::Stats stats(statOpts);
+    stats.setInput(&filter);
 
-    BOOST_CHECK(numWritten == 500);
+    PointContext ctx;
 
-    const double minX = writer.getMinX();
-    const double minY = writer.getMinY();
-    const double minZ = writer.getMinZ();
-    const double maxX = writer.getMaxX();
-    const double maxY = writer.getMaxY();
-    const double maxZ = writer.getMaxZ();
+    stats.prepare(ctx);
+    PointBufferSet pbSet = stats.execute(ctx);
+    BOOST_CHECK_EQUAL(pbSet.size(), 1);
 
-    BOOST_CHECK(Utils::compare_approx<double>(minX, 0.0, 0.01));
-    BOOST_CHECK(Utils::compare_approx<double>(minY, 0.0, 0.01));
-    BOOST_CHECK(Utils::compare_approx<double>(minZ, 0.0, 0.01));
-    BOOST_CHECK(Utils::compare_approx<double>(maxX, 1.0, 0.01));
-    BOOST_CHECK(Utils::compare_approx<double>(maxY, 1.0, 0.01));
-    BOOST_CHECK(Utils::compare_approx<double>(maxZ, 1.0, 0.01));
-
-    return;
+    const filters::stats::Summary& statsX = stats.getStats(Dimension::Id::X);
+    const filters::stats::Summary& statsY = stats.getStats(Dimension::Id::Y);
+    const filters::stats::Summary& statsZ = stats.getStats(Dimension::Id::Z);
+    
+    BOOST_CHECK(Utils::compare_approx<double>(statsX.minimum(), 0.0, 0.01));
+    BOOST_CHECK(Utils::compare_approx<double>(statsY.minimum(), 0.0, 0.01));
+    BOOST_CHECK(Utils::compare_approx<double>(statsZ.minimum(), 0.0, 0.01));
+    BOOST_CHECK(Utils::compare_approx<double>(statsX.maximum(), 1.0, 0.01));
+    BOOST_CHECK(Utils::compare_approx<double>(statsY.maximum(), 1.0, 0.01));
+    BOOST_CHECK(Utils::compare_approx<double>(statsZ.maximum(), 1.0, 0.01));
 }
 
 
@@ -104,172 +109,180 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test2)
     // same as above, but with 'Y >' instead of 'X <'
 
     Bounds<double> bounds(0.0, 0.0, 0.0, 2.0, 2.0, 2.0);
-    pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Ramp);
+    Options readerOps;
+    readerOps.add("bounds", bounds);
+    readerOps.add("num_points", 1000);
+    readerOps.add("mode", "ramp");
 
-    const pdal::Option source("source",
-                              // "Y > 1.0"
-                              "import numpy as np\n"
-                              "def yow2(ins,outs):\n"
-                              "  Y = ins['Y']\n"
-                              "  Mask = np.greater(Y, 1.0)\n"
-                              "  #print Mask\n"
-                              "  outs['Mask'] = Mask\n"
-                              "  return True\n"
-                             );
-    const pdal::Option module("module", "MyModule1");
-    const pdal::Option function("function", "yow2");
-    pdal::Options opts;
+    drivers::faux::Reader reader(readerOps);
+
+    Option source("source",
+        // "Y > 1.0"
+        "import numpy as np\n"
+        "def yow2(ins,outs):\n"
+        "  Y = ins['Y']\n"
+        "  Mask = np.greater(Y, 1.0)\n"
+        "  #print Mask\n"
+        "  outs['Mask'] = Mask\n"
+        "  return True\n"
+    );
+    Option module("module", "MyModule1");
+    Option function("function", "yow2");
+    Options opts;
     opts.add(source);
     opts.add(module);
     opts.add(function);
 
-    pdal::filters::Predicate filter(reader, opts);
+    filters::Predicate filter(opts);
+    filter.setInput(&reader);
     BOOST_CHECK(filter.getDescription() == "Predicate Filter");
-    pdal::drivers::faux::Writer writer(filter, Options::none());
-    writer.initialize();
 
-    boost::uint64_t numWritten = writer.write(1000);
+    Options statOpts;
+    filters::Stats stats(statOpts);
+    stats.setInput(&filter);
 
-    BOOST_CHECK(numWritten == 500);
+    PointContext ctx;
 
-    const double minX = writer.getMinX();
-    const double minY = writer.getMinY();
-    const double minZ = writer.getMinZ();
-    const double maxX = writer.getMaxX();
-    const double maxY = writer.getMaxY();
-    const double maxZ = writer.getMaxZ();
+    stats.prepare(ctx);
+    PointBufferSet pbSet = stats.execute(ctx);
+    BOOST_CHECK_EQUAL(pbSet.size(), 1);
 
-    BOOST_CHECK(Utils::compare_approx<double>(minX, 1.0, 0.01));
-    BOOST_CHECK(Utils::compare_approx<double>(minY, 1.0, 0.01));
-    BOOST_CHECK(Utils::compare_approx<double>(minZ, 1.0, 0.01));
-    BOOST_CHECK(Utils::compare_approx<double>(maxX, 2.0, 0.01));
-    BOOST_CHECK(Utils::compare_approx<double>(maxY, 2.0, 0.01));
-    BOOST_CHECK(Utils::compare_approx<double>(maxZ, 2.0, 0.01));
+    const filters::stats::Summary& statsX = stats.getStats(Dimension::Id::X);
+    const filters::stats::Summary& statsY = stats.getStats(Dimension::Id::Y);
+    const filters::stats::Summary& statsZ = stats.getStats(Dimension::Id::Z);
 
-    return;
+    BOOST_CHECK(Utils::compare_approx<double>(statsX.minimum(), 1.0, 0.01));
+    BOOST_CHECK(Utils::compare_approx<double>(statsY.minimum(), 1.0, 0.01));
+    BOOST_CHECK(Utils::compare_approx<double>(statsZ.minimum(), 1.0, 0.01));
+    BOOST_CHECK(Utils::compare_approx<double>(statsX.maximum(), 2.0, 0.01));
+    BOOST_CHECK(Utils::compare_approx<double>(statsY.maximum(), 2.0, 0.01));
+    BOOST_CHECK(Utils::compare_approx<double>(statsZ.maximum(), 2.0, 0.01));
 }
-
 
 BOOST_AUTO_TEST_CASE(PredicateFilterTest_test3)
 {
     // can we make a pipeline with TWO python filters in it?
 
     Bounds<double> bounds(0.0, 0.0, 0.0, 2.0, 2.0, 2.0);
-    pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Ramp);
+    Options readerOpts;
+    readerOpts.add("bounds", bounds);
+    readerOpts.add("num_points", 1000);
+    readerOpts.add("mode", "ramp");
+    drivers::faux::Reader reader(readerOpts);
 
     // keep all points where x less than 1.0
-    const pdal::Option source1("source",
-                               // "X < 1.0"
-                               "import numpy as np\n"
-                               "def yow1(ins,outs):\n"
-                               "  X = ins['X']\n"
-                               "  Mask = np.less(X, 1.0)\n"
-                               "  #print X\n"
-                               "  #print Mask\n"
-                               "  outs['Mask'] = Mask\n"
-                               "  return True\n"
-                              );
-    const pdal::Option module1("module", "MyModule1");
-    const pdal::Option function1("function", "yow1");
-    pdal::Options opts1;
+    const Option source1("source",
+        // "X < 1.0"
+        "import numpy as np\n"
+        "def yow1(ins,outs):\n"
+        "  X = ins['X']\n"
+        "  Mask = np.less(X, 1.0)\n"
+        "  #print X\n"
+        "  #print Mask\n"
+        "  outs['Mask'] = Mask\n"
+        "  return True\n"
+    );
+    const Option module1("module", "MyModule1");
+    const Option function1("function", "yow1");
+    Options opts1;
     opts1.add(source1);
     opts1.add(module1);
     opts1.add(function1);
 
-    pdal::filters::Predicate filter1(reader, opts1);
+    filters::Predicate filter1(opts1);
+    filter1.setInput(&reader);
 
     // keep all points where y greater than 0.5
-    const pdal::Option source2("source",
-                               // "Y > 0.5"
-                               "import numpy as np\n"
-                               "def yow2(ins,outs):\n"
-                               "  Y = ins['Y']\n"
-                               "  Mask = np.greater(Y, 0.5)\n"
-                               "  #print X\n"
-                               "  #print Mask\n"
-                               "  outs['Mask'] = Mask\n"
-                               "  return True\n"
-                              );
-    const pdal::Option module2("module", "MyModule2");
-    const pdal::Option function2("function", "yow2");
-    pdal::Options opts2;
+    const Option source2("source",
+        // "Y > 0.5"
+        "import numpy as np\n"
+        "def yow2(ins,outs):\n"
+        "  Y = ins['Y']\n"
+        "  Mask = np.greater(Y, 0.5)\n"
+        "  #print X\n"
+        "  #print Mask\n"
+        "  outs['Mask'] = Mask\n"
+        "  return True\n"
+    );
+    const Option module2("module", "MyModule2");
+    const Option function2("function", "yow2");
+    Options opts2;
     opts2.add(source2);
     opts2.add(module2);
     opts2.add(function2);
 
-    pdal::filters::Predicate filter2(filter1, opts2);
+    filters::Predicate filter2(opts2);
+    filter2.setInput(&filter1);
 
-    pdal::drivers::faux::Writer writer(filter2, Options::none());
-    writer.initialize();
+    Options statOpts;
+    filters::Stats stats(statOpts);
+    stats.setInput(&filter2);
 
-    boost::uint64_t numWritten = writer.write(1000);
+    PointContext ctx;
+    stats.prepare(ctx);
+    stats.execute(ctx);
 
-    BOOST_CHECK(numWritten == 250);
+    const filters::stats::Summary& statsX = stats.getStats(Dimension::Id::X);
+    const filters::stats::Summary& statsY = stats.getStats(Dimension::Id::Y);
+    const filters::stats::Summary& statsZ = stats.getStats(Dimension::Id::Z);
 
-    const double minX = writer.getMinX();
-    const double minY = writer.getMinY();
-    const double minZ = writer.getMinZ();
-    const double maxX = writer.getMaxX();
-    const double maxY = writer.getMaxY();
-    const double maxZ = writer.getMaxZ();
-
-    BOOST_CHECK(Utils::compare_approx<double>(minX, 0.5, 0.01));
-    BOOST_CHECK(Utils::compare_approx<double>(minY, 0.5, 0.01));
-    BOOST_CHECK(Utils::compare_approx<double>(minZ, 0.5, 0.01));
-    BOOST_CHECK(Utils::compare_approx<double>(maxX, 1.0, 0.01));
-    BOOST_CHECK(Utils::compare_approx<double>(maxY, 1.0, 0.01));
-    BOOST_CHECK(Utils::compare_approx<double>(maxZ, 1.0, 0.01));
-
-    return;
+    BOOST_CHECK(Utils::compare_approx<double>(statsX.minimum(), 0.5, 0.01));
+    BOOST_CHECK(Utils::compare_approx<double>(statsY.minimum(), 0.5, 0.01));
+    BOOST_CHECK(Utils::compare_approx<double>(statsZ.minimum(), 0.5, 0.01));
+    BOOST_CHECK(Utils::compare_approx<double>(statsX.maximum(), 1.0, 0.01));
+    BOOST_CHECK(Utils::compare_approx<double>(statsY.maximum(), 1.0, 0.01));
+    BOOST_CHECK(Utils::compare_approx<double>(statsZ.maximum(), 1.0, 0.01));
 }
-
 
 BOOST_AUTO_TEST_CASE(PredicateFilterTest_test4)
 {
     // test the point counters in the Predicate's iterator
 
     Bounds<double> bounds(0.0, 0.0, 0.0, 2.0, 2.0, 2.0);
-    pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Ramp);
+    Options readerOpts;
+    readerOpts.add("bounds", bounds);
+    readerOpts.add("num_points", 1000);
+    readerOpts.add("mode", "ramp");
+    drivers::faux::Reader reader(readerOpts);
 
-    const pdal::Option source("source",
-                              // "Y > 0.5"
-                              "import numpy as np\n"
-                              "def yow2(ins,outs):\n"
-                              "  Y = ins['Y']\n"
-                              "  Mask = np.greater(Y, 0.5)\n"
-                              "  #print Mask\n"
-                              "  outs['Mask'] = Mask\n"
-                              "  return True\n"
-                             );
-    const pdal::Option module("module", "MyModule1");
-    const pdal::Option function("function", "yow2");
-    pdal::Options opts;
+    const Option source("source",
+        // "Y > 0.5"
+        "import numpy as np\n"
+        "def yow2(ins,outs):\n"
+        "  Y = ins['Y']\n"
+        "  Mask = np.greater(Y, 0.5)\n"
+        "  #print Mask\n"
+        "  outs['Mask'] = Mask\n"
+        "  return True\n"
+    );
+    const Option module("module", "MyModule1");
+    const Option function("function", "yow2");
+    Options opts;
     opts.add(source);
     opts.add(module);
     opts.add(function);
 
-    pdal::filters::Predicate filter(reader, opts);
+    filters::Predicate filter(opts);
+    filter.setInput(&reader);
 
-    filter.initialize();
+    PointContext ctx;
+    PointBufferPtr buf(new PointBuffer(ctx));
 
-    const Schema& schema = filter.getSchema();
-    PointBuffer data(schema, 1000);
+    filter.prepare(ctx);
 
-    boost::scoped_ptr<pdal::StageSequentialIterator> iter(filter.createSequentialIterator(data));
-    {
-        boost::uint32_t numRead = iter->read(data);
-        BOOST_CHECK(numRead == 750);
-    }
+    StageTester::ready(&reader, ctx);
+    PointBufferSet pbSet = StageTester::run(&reader, buf);
+    StageTester::done(&reader, ctx);
+    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    buf = *pbSet.begin();
+    BOOST_CHECK_EQUAL(buf->size(), 1000);
 
-    pdal::filters::iterators::sequential::Predicate* iterator = static_cast<pdal::filters::iterators::sequential::Predicate*>(iter.get());
-
-    const boost::uint64_t processed = iterator->getNumPointsProcessed();
-    const boost::uint64_t passed = iterator->getNumPointsPassed();
-
-    BOOST_CHECK(processed == 1000);
-    BOOST_CHECK(passed == 750);
-
-    return;
+    StageTester::ready(&filter, ctx);
+    pbSet = StageTester::run(&filter, buf);
+    StageTester::done(&filter, ctx);
+    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    buf = *pbSet.begin();
+    BOOST_CHECK_EQUAL(buf->size(), 750);
 }
 
 BOOST_AUTO_TEST_CASE(PredicateFilterTest_test5)
@@ -277,83 +290,58 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test5)
     // test error handling if missing Mask
 
     Bounds<double> bounds(0.0, 0.0, 0.0, 2.0, 2.0, 2.0);
-    pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Ramp);
+    Options readerOpts;
+    readerOpts.add("bounds", bounds);
+    readerOpts.add("num_points", 1000);
+    readerOpts.add("mode", "ramp");
+    drivers::faux::Reader reader(readerOpts);
 
-    const pdal::Option source("source",
-                              // "Y > 0.5"
-                              "import numpy as np\n"
-                              "def yow2(ins,outs):\n"
-                              "  Y = ins['Y']\n"
-                              "  Mask = np.greater(Y, 0.5)\n"
-                              "  #print Mask\n"
-                              "  outs['xxxMaskxxx'] = Mask # delierbately rong\n"
-                              "  return True\n"
-                             );
-    const pdal::Option module("module", "MyModule1");
-    const pdal::Option function("function", "yow2");
-    pdal::Options opts;
+    const Option source("source",
+        // "Y > 0.5"
+        "import numpy as np\n"
+        "def yow2(ins,outs):\n"
+        "  Y = ins['Y']\n"
+        "  Mask = np.greater(Y, 0.5)\n"
+        "  #print Mask\n"
+        "  outs['xxxMaskxxx'] = Mask # delierbately rong\n"
+        "  return True\n"
+    );
+    const Option module("module", "MyModule1");
+    const Option function("function", "yow2");
+    Options opts;
     opts.add(source);
     opts.add(module);
     opts.add(function);
 
-    pdal::filters::Predicate filter(reader, opts);
+    filters::Predicate filter(opts);
+    filter.setInput(&reader);
 
-    filter.initialize();
+    PointContext ctx;
+    filter.prepare(ctx);
 
-    const Schema& schema = filter.getSchema();
-    PointBuffer data(schema, 1000);
-
-    boost::scoped_ptr<pdal::StageSequentialIterator> iter(filter.createSequentialIterator(data));
-
-    BOOST_REQUIRE_THROW(iter->read(data), pdal::python_error);
-
-    return;
+    BOOST_REQUIRE_THROW(filter.execute(ctx), pdal::python_error);
 }
 
 BOOST_AUTO_TEST_CASE(PredicateFilterTest_Pipeline)
 {
-    Option option("filename", Support::datapath("plang/from-module.xml"));
-    Options options(option);
+    PipelineManager mgr;
+    PipelineReader reader(mgr);
 
-    pdal::drivers::pipeline::Reader reader(options);
-
-    reader.initialize();
-
-    {
-        const Schema& schema = reader.getSchema();
-        PointBuffer data(schema, 2048);
-        StageSequentialIterator* iter = reader.createSequentialIterator(data);
-        boost::uint32_t np = iter->read(data);
-        BOOST_CHECK(np == 1);
-
-        delete iter;
-    }
-
-    return;
+    reader.readPipeline(Support::datapath("plang/from-module.xml"));
+    point_count_t cnt = mgr.execute();
+    BOOST_CHECK_EQUAL(cnt, 1);
 }
 
 BOOST_AUTO_TEST_CASE(PredicateFilterTest_Embed)
 {
-    Option option("filename", Support::datapath("plang/predicate-embed.xml"));
-    Options options(option);
+    PipelineManager mgr;
+    PipelineReader reader(mgr);
 
-    pdal::drivers::pipeline::Reader reader(options);
-
-    reader.initialize();
-
-    {
-        const Schema& schema = reader.getSchema();
-        PointBuffer data(schema, 2048);
-        StageSequentialIterator* iter = reader.createSequentialIterator(data);
-        boost::uint32_t np = iter->read(data);
-        BOOST_CHECK(np == 1);
-
-        delete iter;
-    }
-
-    return;
+    reader.readPipeline(Support::datapath("plang/predicate-embed.xml"));
+    point_count_t cnt = mgr.execute();
+    BOOST_CHECK_EQUAL(cnt, 1);
 }
 
-
 BOOST_AUTO_TEST_SUITE_END()
-#endif
+
+#endif  // PDAL_HAVE_PYTHON

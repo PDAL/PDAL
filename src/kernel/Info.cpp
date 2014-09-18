@@ -32,13 +32,16 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <algorithm>
+
 #include <pdal/kernel/Info.hpp>
+#include <pdal/KDIndex.hpp>
 #include <pdal/PipelineWriter.hpp>
 
-
-#include <boost/algorithm/string/find.hpp>
-
-namespace pdal { namespace kernel {
+namespace pdal
+{
+namespace kernel
+{
 
 Info::Info(int argc, const char* argv[])
     : Application(argc, argv, "info")
@@ -48,35 +51,32 @@ Info::Info(int argc, const char* argv[])
     , m_showStage(false)
     , m_showMetadata(false)
     , m_showSDOPCMetadata(false)
-    , m_outputStream(0)
+    , m_computeBoundary(false)
     , m_useXML(false)
     , m_useJSON(false)
-    , m_useREST(true)
     , m_QueryDistance(0.0)
     , m_numPointsToWrite(0)
     , m_showSample(false)
-{
-    return;
-}
+{}
 
 
 void Info::validateSwitches()
 {
-
     const bool got_something =
         m_showStats ||
         m_showSchema ||
         m_showMetadata ||
         m_showSDOPCMetadata ||
-        m_showStage || 
+        m_computeBoundary ||
+        m_showStage ||
         m_QueryPoint.size() > 0 ||
         m_pointIndexes.size() > 0;
     if (!got_something)
     {
-        throw app_usage_error("no action option specified");
-    }
+        m_showStats = true;
+        m_showSchema = true;
 
-    return;
+    }
 }
 
 
@@ -84,449 +84,347 @@ void Info::addSwitches()
 {
     namespace po = boost::program_options;
 
-    po::options_description* file_options = new po::options_description("file options");
+    po::options_description* file_options =
+        new po::options_description("file options");
 
     file_options->add_options()
-        ("input,i", po::value<std::string>(&m_inputFile)->default_value(""), "input file name")
+        ("input,i", po::value<std::string>(&m_inputFile)->default_value(""),
+         "input file name")
         ;
 
     addSwitchSet(file_options);
 
-    po::options_description* processing_options = new po::options_description("processing options");
-    
+    po::options_description* processing_options =
+        new po::options_description("processing options");
+
     processing_options->add_options()
         ("point,p", po::value<std::string >(&m_pointIndexes), "point to dump")
-        ("query", po::value< std::string>(&m_QueryPoint), "A 2d or 3d point query point")
+        ("query", po::value< std::string>(&m_QueryPoint),
+         "A 2d or 3d point query point")
         ("distance", po::value< double>(&m_QueryDistance), "A query distance")
-        ("stats,a", po::value<bool>(&m_showStats)->zero_tokens()->implicit_value(true), "dump stats on all points (reads entire dataset)")
-        ("count", po::value<boost::uint64_t>(&m_numPointsToWrite)->default_value(0), "How many points should we write?")
-        ("dimensions", po::value<std::string >(&m_Dimensions), "dump stats on all points (reads entire dataset)")
-        ("schema,s", po::value<bool>(&m_showSchema)->zero_tokens()->implicit_value(true), "dump the schema")
-        ("metadata,m", po::value<bool>(&m_showMetadata)->zero_tokens()->implicit_value(true), "dump the metadata")
-        ("sdo_pc", po::value<bool>(&m_showSDOPCMetadata)->zero_tokens()->implicit_value(true), "dump the SDO_PC Oracle Metadata")
-        ("stage,r", po::value<bool>(&m_showStage)->zero_tokens()->implicit_value(true), "dump the stage info")
-        ("pipeline-serialization", po::value<std::string>(&m_pipelineFile)->default_value(""), "")
-        ("xml", po::value<bool>(&m_useXML)->zero_tokens()->implicit_value(true), "dump XML")
-        ("json", po::value<bool>(&m_useJSON)->zero_tokens()->implicit_value(true), "dump JSON")
-        ("sample", po::value<bool>(&m_showSample)->zero_tokens()->implicit_value(true), "randomly sample dimension for stats")
-        ("seed", po::value<boost::uint32_t>(&m_seed)->default_value(0), "Seed value for random sample")
-        ("sample_size", po::value<boost::uint32_t>(&m_sample_size)->default_value(1000), "Sample size for random sample")
-
+        ("stats",
+         po::value<bool>(&m_showStats)->zero_tokens()->implicit_value(true),
+         "dump stats on all points (reads entire dataset)")
+        ("boundary",
+         po::value<bool>(&m_computeBoundary)->zero_tokens()->implicit_value(true),
+         "compute a hexagonal hull/boundary of dataset")
+        ("count", po::value<uint64_t>(&m_numPointsToWrite)->default_value(0),
+         "How many points should we write?")
+        ("dimensions", po::value<std::string >(&m_Dimensions),
+         "dump stats on all points (reads entire dataset)")
+        ("schema",
+         po::value<bool>(&m_showSchema)->zero_tokens()->implicit_value(true),
+         "dump the schema")
+        ("metadata,m",
+         po::value<bool>(&m_showMetadata)->zero_tokens()->implicit_value(true),
+         "dump the metadata")
+        ("sdo_pc",
+         po::value<bool>(&m_showSDOPCMetadata)->zero_tokens()->
+             implicit_value(true),
+         "dump the SDO_PC Oracle Metadata")
+        ("stage,r",
+         po::value<bool>(&m_showStage)->zero_tokens()->implicit_value(true),
+         "dump the stage info")
+        ("pipeline-serialization",
+         po::value<std::string>(&m_pipelineFile)->default_value(""), "")
+        ("xml", po::value<bool>(&m_useXML)->zero_tokens()->implicit_value(true),
+         "dump XML")
+        ("json",
+         po::value<bool>(&m_useJSON)->zero_tokens()->implicit_value(true),
+         "dump JSON")
+        ("sample",
+         po::value<bool>(&m_showSample)->zero_tokens()->implicit_value(true),
+         "randomly sample dimension for stats")
+        ("seed", po::value<uint32_t>(&m_seed)->default_value(0),
+         "Seed value for random sample")
+        ("sample_size",
+         po::value<uint32_t>(&m_sample_size)->default_value(1000),
+         "Sample size for random sample")
         ;
-    
+
     addSwitchSet(processing_options);
-
     addPositionalSwitch("input", 1);
-
-    return;
 }
 
-std::vector<boost::uint32_t>  getListOfPoints(std::string const& p)
+// Support for parsing point numbers.  Points can be specified singly or as
+// dash-separated ranges.  i.e. 6-7,8,19-20
+namespace {
+
+using namespace std;
+
+vector<string> tokenize(const string s, char c)
 {
-    
-    typedef const boost::iterator_range<std::string::const_iterator> StringRange;
-    
-    std::vector<boost::uint32_t> output;
-    
-    std::string comma(",");
-    std::string dash("-");
-
-    boost::char_separator<char> sep_comma(",");
-
-    StringRange iDash = boost::algorithm::ifind_first(  StringRange(p.begin(), p.end()),
-                                                        StringRange(dash.begin(), dash.end()));
-    bool bHaveDash = !iDash.empty();
-
-    StringRange iComma = boost::algorithm::ifind_first(  StringRange(p.begin(), p.end()),
-                                                        StringRange(comma.begin(), comma.end()));
-    bool bHaveComma = !iComma.empty();
-    
-    if (bHaveComma && bHaveDash)
+    string::const_iterator begin;
+    string::const_iterator end;
+    vector<string> strings;
+    begin = s.begin();
+    while (true)
     {
-        std::ostringstream oss;
-        oss << "list of points cannot contain both a dash for ranges and comma for explicit points";
-        throw app_runtime_error(oss.str());
+        end = find(begin, s.end(), c);
+        strings.push_back(string(begin, end));
+        if (end == s.end())
+            break;
+        begin = end + 1;
     }
+    return strings;
+}
 
-    if (bHaveDash)
+uint32_t parseInt(const string& s)
+{
+    try
     {
-        typedef boost::tokenizer<boost::char_separator<char>  > tokenizer;
-        boost::char_separator<char> sep_dash("-");        
-        tokenizer beg_end(p, sep_dash);
-        unsigned i(0);
-        std::vector<boost::uint32_t> rng;
-        for (tokenizer::iterator t = beg_end.begin(); t != beg_end.end(); ++t)
-        {
-            boost::uint32_t v = boost::lexical_cast<boost::uint32_t>(*t);
-            rng.push_back(v);
-            i++;
-        }
-
-        if (rng.size() != 2)
-        {
-            std::ostringstream oss;
-            oss << "multiple ranges cannot be specified";
-            throw app_runtime_error(oss.str());            
-        }
-        
-        for (unsigned i = rng[0]; i != rng[1]; ++i)
-        {
-            output.push_back(i);
-        }
-
-    } else if (bHaveComma)
-    {
-        typedef boost::tokenizer<boost::char_separator<char>  > tokenizer;
-        boost::char_separator<char> sep_comma(",");        
-        tokenizer indexes(p, sep_comma);
-        for (tokenizer::iterator t = indexes.begin(); t != indexes.end(); ++t)
-        {
-            boost::uint32_t v = boost::lexical_cast<boost::uint32_t>(*t);
-            output.push_back(v);
-        }
-    } else
-    {
-        // Put our string on as an integer and hope for the best
-        output.push_back(boost::lexical_cast<boost::uint32_t>(p));
+        return boost::lexical_cast<uint32_t>(s);
     }
-    
+    catch (boost::bad_lexical_cast)
+    {
+        throw app_runtime_error(string("Invalid integer: ") + s);
+    }
+}
 
+
+void addSingle(const string& s, vector<uint32_t>& points)
+{
+    points.push_back(parseInt(s));
+}
+
+
+void addRange(const string& begin, const string& end,
+    vector<uint32_t>& points)
+{
+    uint32_t low = parseInt(begin);
+    uint32_t high = parseInt(end);
+    if (low > high)
+        throw app_runtime_error(string("Range invalid: ") + begin + "-" + end);
+    while (low <= high)
+        points.push_back(low++);
+}
+
+
+vector<boost::uint32_t> getListOfPoints(std::string p)
+{
+    vector<boost::uint32_t> output;
+
+    //Remove whitespace from string with awful remove/erase idiom.
+    p.erase(remove_if(p.begin(), p.end(), ::isspace), p.end());
+
+    vector<string> ranges = tokenize(p, ',');
+    for (string s : ranges)
+    {
+        vector<string> limits = tokenize(s, '-');
+        if (limits.size() == 1)
+            addSingle(limits[0], output);
+        else if (limits.size() == 2)
+            addRange(limits[0], limits[1], output);
+        else
+            throw app_runtime_error(string("Invalid point range: ") + s);
+    }
     return output;
 }
 
-void Info::dumpPoints(const Stage& stage, std::string const& points_string) const
+} //namespace
+
+void Info::dumpPoints(PointBufferPtr buf) const
 {
-    const Schema& schema = stage.getSchema();
+    PointBufferPtr outbuf = buf->makeNew();
 
-    std::vector<boost::uint32_t> points = getListOfPoints(points_string);
-    
-    PointBuffer output_data(schema, points.size());
-    PointBuffer read_data(schema, 1);
-        
-    StageRandomIterator* iter = stage.createRandomIterator(read_data);
-    
-    if (!iter)
-        throw app_runtime_error("Unable to create random iterator for stage!");
-    
-    for (size_t i = 0; i < points.size(); ++i )
+    std::vector<uint32_t> points = getListOfPoints(m_pointIndexes);
+    for (size_t i = 0; i < points.size(); ++i)
     {
-        boost::uint64_t s = iter->seek(points[i]);
-        if (s != points[i])
-        {
-            std::ostringstream oss;
-            oss << "Unable to seek to " << points[i] << "due to size of file being " << stage.getNumPoints();
-            throw app_runtime_error(oss.str());
-        }
-        const boost::uint32_t numRead = iter->read(read_data);
-        if (numRead != 1)
-        {
-            std::ostringstream oss;
-            oss << "problem reading point number " << points[i];
-            throw app_runtime_error(oss.str());
-        }
-        
-        output_data.copyPointFast(i, 0, read_data);
+        PointId id = (PointId)points[i];
+        if (id < buf->size())
+            outbuf->appendPoint(*buf, id);
     }
-    output_data.setNumPoints(points.size());
 
-
-
-    boost::property_tree::ptree tree = output_data.toPTree();
-   
-    std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
-
-    boost::property_tree::ptree output;
-    output.add_child("point", tree.get_child("0"));
-    if (m_useXML)
-        write_xml(ostr, tree);
-    else if (m_useJSON)
-        write_json(ostr, tree);
-    else if (m_useREST)
-        output_data.toRST(ostr) << std::endl;
-    
-    delete iter;
-    return;
+    boost::property_tree::ptree buffer_tree = pdal::utils::toPTree(*outbuf);
+    for (size_t i = 0; i < outbuf->size(); ++i)
+    {
+        std::string name = (std::string)"point " +
+            boost::lexical_cast<std::string>(points[i]);
+        std::string key = boost::lexical_cast<std::string>(i);
+        m_tree->add_child(name, buffer_tree.get_child(key));
+    }
 }
 
 
-void Info::dumpStats(pdal::filters::Stats& filter, pdal::PipelineManager* manager) const
+void Info::dumpStats()
 {
-
-    const Schema& schema = filter.getSchema();
-    
-    boost::uint32_t chunkSize(131072);
-    if (filter.getNumPoints() > 0 )
-    {
-        chunkSize = filter.getNumPoints();
-    } 
-    
-    pdal::PipelineWriter* writer(0);
-    
-    PointBuffer data(schema, chunkSize);
+    PipelineWriter* writer = NULL;
 
     if (m_pipelineFile.size() > 0)
-    {
-         writer = new pdal::PipelineWriter(*manager);
-         writer->setPointBuffer(&data);
-    }
+        writer = new pdal::PipelineWriter(*m_manager);
 
-    StageSequentialIterator* iter = filter.createSequentialIterator(data);
+    MetadataNode statsNode("stats");
 
-    boost::uint64_t totRead = 0;
-    while (!iter->atEnd())
-    {
+    statsNode.add(m_manager->getMetadata());
 
-        const boost::uint32_t numRead = iter->read(data);
-        totRead += numRead;
-    }
-    
-    pdal::Metadata output = static_cast<pdal::filters::iterators::sequential::Stats*>(iter)->toMetadata();
-    delete iter;
-    boost::property_tree::ptree tree;
-    tree.add_child("stats", output.toPTree());
-    std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
-
-    if (m_useXML)
-        write_xml(ostr, tree);
-    else
-        write_json(ostr, tree);
+    boost::property_tree::ptree stats;
+    std::stringstream strm;
+    strm << statsNode.toJSON();
+    boost::property_tree::read_json(strm, stats);
+    m_tree->add_child("stats", stats);
 
     if (m_pipelineFile.size() > 0)
-    {
         writer->writePipeline(m_pipelineFile);
-        delete writer;
+    delete writer;
+}
+
+void Info::dump(PointContext ctx, PointBufferPtr buf)
+{
+    if (m_showStats)
+    {
+        dumpStats();
     }
 
-    
-    return;
+    if (m_pointIndexes.size())
+    {
+        dumpPoints(buf);
+    }
+
+    if (m_showSchema)
+    {
+        boost::property_tree::ptree dims(pdal::utils::toPTree(ctx));
+        m_tree->add_child("schema", dims);
+    }
+
+    if (m_showSDOPCMetadata)
+    {
+        boost::property_tree::ptree metadata =
+            m_manager->getStage()->serializePipeline();
+
+        boost::property_tree::ptree output;
+        m_tree->add_child("stage", output);
+    }
+
+    if (m_QueryPoint.size())
+    {
+        dumpQuery(buf);
+    }
 }
 
 
-void Info::dumpSchema(const Stage& stage) const
+void Info::dumpQuery(PointBufferPtr buf) const
 {
-    const Schema& schema = stage.getSchema();
-
-    boost::property_tree::ptree schema_tree = schema.toPTree();
-    
-    std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
-
-    boost::property_tree::ptree tree;
-    tree.add_child("schema", schema_tree);
-    
-    if (m_useXML)
-        write_xml(ostr, tree);
-    else
-        write_json(ostr, tree);
-    
-    return;
-}
-
-void Info::dumpQuery(Stage const& stage, IndexedPointBuffer& data) const
-{
-
+#define SEPARATORS ",| "
     boost::char_separator<char> sep(SEPARATORS);
     tokenizer tokens(m_QueryPoint, sep);
     std::vector<double> values;
-    for (tokenizer::iterator t = tokens.begin(); t != tokens.end(); ++t) {
+    for (tokenizer::iterator t = tokens.begin(); t != tokens.end(); ++t)
         values.push_back(boost::lexical_cast<double>(*t));
-    }
-    
-    if (values.size() < 2)
+
+    if (values.size() != 2 && values.size() != 3)
         throw app_runtime_error("--points must be two or three values");
 
-    boost::scoped_ptr<StageSequentialIterator> iter(stage.createSequentialIterator(data));
-
-    const boost::uint32_t numRead = iter->read(data);
-    
-    bool is3D(true);
-    if (values.size() < 3) 
-        is3D = false;
-
-    data.build(is3D);
-
-    Schema const& schema = data.getSchema();
-    Dimension const& dimX = schema.getDimension("X");
-    Dimension const& dimY = schema.getDimension("Y");
-    Dimension const& dimZ = schema.getDimension("Z");
+    bool is3d = (values.size() >= 3);
 
     double x = values[0];
     double y = values[1];
-    
-    double z(0.0);
-    if (is3D)
-        z = values[2];                
-    
-    boost::uint32_t count(m_numPointsToWrite);
-    if (!m_numPointsToWrite)
-        count = 1;
-    
-    double d(0.0);
-    std::vector<std::size_t> ids = data.neighbors(x, y, z, d, count);
-    
-    PointBuffer response(data.getSchema(), count);
-    typedef std::vector<std::size_t>::const_iterator Iterator;
-    std::vector<std::size_t>::size_type pos(0);
-    for (Iterator i = ids.begin(); i != ids.end(); ++i)
-    {
-        response.copyPointFast(pos, *i, data);
-        response.setNumPoints(response.getNumPoints() + 1);
-        pos++;
-    }
+    double z = is3d ? values[2] : 0.0;
 
-    boost::property_tree::ptree tree = response.toPTree();
-   
-    std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
+    PointBufferPtr outbuf = buf->makeNew();
 
-    boost::property_tree::ptree output;
-    output.add_child("point", tree);
-    if (m_useXML)
-        write_xml(ostr, output);
-    else
-        write_json(ostr, tree);
-    
-    return;
+    KDIndex kdi(*buf);
+    kdi.build(is3d);
+    std::vector<size_t> ids = kdi.neighbors(x, y, z, 0.0, buf->size());
+    for (auto i = ids.begin(); i != ids.end(); ++i)
+        outbuf->appendPoint(*buf, *i);
+
+    boost::property_tree::ptree tree = pdal::utils::toPTree(*outbuf);
+    m_tree->add_child("point", tree);
 }
 
-void Info::dumpSDO_PCMetadata(const Stage& stage) const
+
+void Info::dumpSDO_PCMetadata(PointContext ctx, const Stage& stage) const
 {
-    boost::property_tree::ptree metadata = stage.serializePipeline();
-
-    const Schema& schema = stage.getSchema();
-    
-    std::string xml = pdal::Schema::to_xml(schema, &metadata);  
-    
-    std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
-    
-    ostr << xml;
-    
+    std::ostream& ostr = std::cout;
+    // std::string xml = pdal::Schema::to_xml(*ctx.schema(), stage.getMetadata());
+    // ostr << xml;
 }
 
-void Info::dumpStage(const Stage& stage) const
-{
-    // FIXME: change this to dumpPipeline now that we've removed toPTree stuff for Stage::
-    // boost::property_tree::ptree tree = stage.toPTree();
-    // 
-    // std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
-    // 
-    // boost::property_tree::ptree output;
-    // output.add_child("stage", tree);
-    // if (m_useXML)
-    //     write_xml(ostr, output);
-    // else
-    //     write_json(ostr, tree);
 
-    return;
-}
 
-void Info::dumpMetadata(const Stage& stage) const
+void Info::dumpMetadata(PointContext ctx, const Stage& stage) const
 {
     boost::property_tree::ptree tree = stage.serializePipeline();
-    std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
+    std::ostream& ostr = std::cout;
 
     if (m_useXML)
         write_xml(ostr, tree);
     else
         write_json(ostr, tree);
-         
-    return;
 }
 
 
 int Info::execute()
 {
-
-
     Options readerOptions;
     {
         if (m_usestdin)
             m_inputFile = "STDIN";
         readerOptions.add<std::string>("filename", m_inputFile);
         readerOptions.add<bool>("debug", isDebug());
-        readerOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
+        readerOptions.add<uint32_t>("verbose", getVerboseLevel());
     }
 
-    PipelineManager* manager = AppSupport::makePipeline(readerOptions);
-    
-    // Stage* reader = AppSupport::makeReader(readerOptions);
+    m_manager = std::unique_ptr<PipelineManager>(
+        AppSupport::makePipeline(readerOptions));
 
     if (m_seed != 0)
     {
         Option seed_option("seed", m_seed, "seed value");
         m_options.add(seed_option);
     }
-    
-    Option sample_size("sample_size", m_sample_size, "sample size for random sample");
-    m_options.add(sample_size);
-    
-    Option cls("exact_count", "Classification", "use exact counts for classification stats");
-    Option rn("exact_count", "ReturnNumber", "use exact counts for ReturnNumber stats");
-    Option nr("exact_count", "NumberOfReturns", "use exact counts for ReturnNumber stats");
-    m_options.add(cls);
-    m_options.add(rn);
-    m_options.add(nr);
-    Option do_sample("do_sample", m_showSample, "Dont do sampling");
-    m_options.add(do_sample);
+
+    m_options.add("sample_size", m_sample_size,
+        "sample size for random sample");
+    m_options.add("exact_count", "Classification",
+        "use exact counts for classification stats");
+    m_options.add("exact_count", "ReturnNumber",
+        "use exact counts for ReturnNumber stats");
+    m_options.add("exact_count", "NumberOfReturns",
+        "use exact counts for ReturnNumber stats");
+    m_options.add("do_sample", m_showSample, "Don't do sampling");
     if (m_Dimensions.size())
-    {
-        Option dimensions("dimensions", m_Dimensions, "Use explicit list of dimensions");
-        m_options.add(dimensions);
-    }
-    
-    pdal::Options options = m_options + readerOptions;
-    
-    Stage* reader = manager->getStage();
-    manager->addFilter("filters.stats", *reader, options);
-    // pdal::filters::Stats* filter = new pdal::filters::Stats(*reader, options);
-    
-    Stage* filter = manager->getStage();
+        m_options.add("dimensions", m_Dimensions,
+            "Use explicit list of dimensions");
 
-    filter->initialize();
+    Options options = m_options + readerOptions;
 
-    if (m_pointIndexes.size())
-    {
-        dumpPoints(*filter, m_pointIndexes);
-    }
-
+    Stage* stage = m_manager->getStage();
     if (m_showStats)
-    {
-        dumpStats(*dynamic_cast<pdal::filters::Stats*>(filter), manager);
-    }
-    
-    if (m_showSchema)
-    {
-        dumpSchema(*filter);
-    }
-    
-    if (m_showMetadata)
-    {
-        dumpMetadata(*filter);
-    }
-    if (m_showStage)
-    {
-        dumpStage(*filter);
-    }
-    
-    if (m_showSDOPCMetadata)
-    {
-        dumpSDO_PCMetadata(*filter);
-    }
-    
-    if (m_QueryPoint.size())
-    {
-        IndexedPointBuffer buffer(filter->getSchema(), filter->getNumPoints());
-        dumpQuery(*filter, buffer);
-    }
-    
-    std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
-    ostr << std::endl;
-    
-    delete manager;
+        stage = m_manager->addFilter("filters.stats", stage, options);
+    if (m_computeBoundary)
+        stage = m_manager->addFilter("filters.hexbin", stage, options);
 
-    if (m_outputStream)
-    {
-        FileUtils::closeFile(m_outputStream);
-    }
-    
+    m_tree = std::unique_ptr<boost::property_tree::ptree>(
+        new boost::property_tree::ptree);
+
+    std::ostream& ostr = std::cout;
+    m_manager->execute();
+    PointBufferSet pbSet = m_manager->buffers();
+    assert(pbSet.size() == 1);
+    dump(m_manager->context(), *pbSet.begin());
+
+    //
+    // if (m_showStats)
+    //     dumpStats(ctx, *dynamic_cast<pdal::filters::Stats*>(filter), manager);
+    // if (m_showSchema)
+    //     dumpSchema(ctx);
+    // if (m_showMetadata)
+    //     dumpMetadata(ctx, *filter);
+    // if (m_showStage)
+    //     dumpStage(*filter);
+    // if (m_showSDOPCMetadata)
+    //     dumpSDO_PCMetadata(ctx, *filter);
+    //
+    // if (m_QueryPoint.size())
+    //     dumpQuery(ctx, *filter);
+
+    if (m_useXML)
+        write_xml(ostr, *m_tree);
+    else
+        write_json(ostr, *m_tree);
+
+
     return 0;
 }
 

@@ -50,7 +50,6 @@ namespace mrsid
 Reader::Reader(const Options& options)
     : pdal::Reader(options)
 {
-    addDefaultDimensions();
     return;
 }
 
@@ -59,7 +58,6 @@ Reader::Reader(LizardTech::PointSource *ps)
     : pdal::Reader(Options::none())
     , m_PS(ps), m_iter(NULL)
 {
-    addDefaultDimensions();
     m_PS->retain();
     return;
 }
@@ -89,11 +87,10 @@ Dimension Reader::LTChannelToPDalDimension(const LizardTech::ChannelInfo & chann
 
     return retval;
 }
+
+
 void Reader::initialize()
 {
-    pdal::Reader::initialize();
-
-    Schema& schema = getSchemaRef();
     const LizardTech::PointInfo& pointinfo = m_PS->getPointInfo();
 
     Schema const& dimensions(getDefaultDimensions());
@@ -101,14 +98,16 @@ void Reader::initialize()
     {
         const LizardTech::ChannelInfo &channel = pointinfo.getChannel(i);
         Dimension dim = LTChannelToPDalDimension(channel, dimensions);
-        schema.appendDimension(dim);
+        m_schema.appendDimension(dim);
     }
 
     setNumPoints(m_PS->getNumPoints());
-    setPointCountType(PointCount_Fixed);
-    pdal::Bounds<double> b(m_PS->getBounds().x.min, m_PS->getBounds().x.max, m_PS->getBounds().y.min, m_PS->getBounds().y.max, m_PS->getBounds().z.min,m_PS->getBounds().z.max);
+    pdal::Bounds<double> b(m_PS->getBounds().x.min, m_PS->getBounds().x.max,
+        m_PS->getBounds().y.min, m_PS->getBounds().y.max,
+        m_PS->getBounds().z.min,m_PS->getBounds().z.max);
     setBounds(b);
-    m_iter = m_PS->createIterator(m_PS->getBounds(), 1.0, m_PS->getPointInfo(), NULL);
+    m_iter = m_PS->createIterator(m_PS->getBounds(), 1.0,
+        m_PS->getPointInfo(), NULL);
 }
 
 
@@ -120,16 +119,13 @@ Options Reader::getDefaultOptions()
 
 pdal::StageSequentialIterator* Reader::createSequentialIterator(PointBuffer& buffer) const
 {
-    return new pdal::drivers::mrsid::iterators::sequential::Reader(*this, buffer);
+    return new pdal::drivers::mrsid::iterators::sequential::Reader(*this, buffer, getNumPoints());
 }
 
 int Reader::SchemaToPointInfo(const Schema &schema, LizardTech::PointInfo &pointInfo) const
 {
     schema::index_by_index const& dims = schema.getDimensions().get<schema::index>();
 
-    // FIXME: iterating through the dimensions here might return multiple
-    // dimensions of the same name. This code should probably check to make
-    // sure that dim.getNamespace() == 'drivers.mrsid.reader'
     pointInfo.init(dims.size());
     for (unsigned int idx=0; idx<dims.size(); idx++)
     {
@@ -323,82 +319,82 @@ std::vector<Dimension> Reader::getDefaultDimensions()
 
     Dimension x("X", dimension::Float, 8);
     x.setUUID("8c54ff0c-234f-43a2-8959-d9681ad1dea3");
-    x.setNamespace(getName());
+    x.setNamespace(s_getName());
     output.push_back(x);
 
     Dimension y("Y", dimension::Float, 8);
     y.setUUID("9cee971b-2505-40cd-b7e9-f32c399afac7");
-    y.setNamespace(getName());
+    y.setNamespace(s_getName());
     output.push_back(y);
 
     Dimension z("Z", dimension::Float, 8);
     z.setUUID("89dc4e36-6166-4bc8-bf95-5660657b0ea6");
-    z.setNamespace(getName());
+    z.setNamespace(s_getName());
     output.push_back(z);
 
     Dimension t("Time", dimension::Float, 8);
     t.setUUID("3aea2826-4a6e-4c1b-ae27-7b2f24763ce1");
-    t.setNamespace(getName());
+    t.setNamespace(s_getName());
     output.push_back(t);
 
     Dimension blue("Blue", dimension::UnsignedInteger, 2);
     blue.setUUID("f69977e3-23e8-4483-91b6-14cad981e9fd");
-    blue.setNamespace(getName());
+    blue.setNamespace(s_getName());
     output.push_back(blue);
 
     Dimension red("Red", dimension::UnsignedInteger, 2);
     red.setUUID("40a02a80-c399-42f0-a587-a286635b446e");
-    red.setNamespace(getName());
+    red.setNamespace(s_getName());
     output.push_back(red);
 
     Dimension green("Green", dimension::UnsignedInteger, 2);
     green.setUUID("b329df2d-44f1-4f35-8993-d183dacaa1ff");
-    green.setNamespace(getName());
+    green.setNamespace(s_getName());
     output.push_back(green);
 
     Dimension cls("Classification", dimension::UnsignedInteger, 1);
     cls.setUUID("ba1e2af8-6dfd-46a7-972a-ecc00f68914d");
-    cls.setNamespace(getName());
+    cls.setNamespace(s_getName());
     output.push_back(cls);
 
     Dimension edge("EdgeOfFlightLine", dimension::UnsignedInteger, 1);
     edge.setUUID("daed3bfc-650d-4265-93a7-d8093cbd75a0");
-    edge.setNamespace(getName());
+    edge.setNamespace(s_getName());
     output.push_back(edge);
 
     Dimension intensity("Intensity", dimension::UnsignedInteger, 2);
     intensity.setUUID("a43332a8-26b3-4609-a2b1-ddfda30e0565");
-    intensity.setNamespace(getName());
+    intensity.setNamespace(s_getName());
     output.push_back(intensity);
 
     Dimension num_returns("NumberOfReturns", dimension::UnsignedInteger, 1);
     num_returns.setUUID("fa7c5d56-fb2b-4f81-9126-f183000c3cd8");
-    num_returns.setNamespace(getName());
+    num_returns.setNamespace(s_getName());
     output.push_back(num_returns);
 
     Dimension return_no("ReturnNumber", dimension::UnsignedInteger, 1);
     return_no.setUUID("e38cc121-8d26-482a-8920-c5599b2cdd19");
-    return_no.setNamespace(getName());
+    return_no.setNamespace(s_getName());
     output.push_back(return_no);
 
     Dimension scan_angle("ScanAngleRank", dimension::UnsignedInteger, 1);
     scan_angle.setUUID("5d816875-10a5-4048-ad9d-fd3b8d065a6a");
-    scan_angle.setNamespace(getName());
+    scan_angle.setNamespace(s_getName());
     output.push_back(scan_angle);
 
     Dimension scan_dir("ScanDirectionFlag", dimension::UnsignedInteger, 1);
     scan_dir.setUUID("d1054379-8bf6-4685-abfc-1f0ec37aa819");
-    scan_dir.setNamespace(getName());
+    scan_dir.setNamespace(s_getName());
     output.push_back(scan_dir);
 
     Dimension ptsource("PointSourceId", dimension::UnsignedInteger, 2);
     ptsource.setUUID("be6e71af-b2f7-4107-a902-96e2fb71343f");
-    ptsource.setNamespace(getName());
+    ptsource.setNamespace(s_getName());
     output.push_back(ptsource);
 
     Dimension userdata("UserData", dimension::UnsignedInteger, 1);
     userdata.setUUID("551ca4be-cb6e-47a4-93a9-e403e9a06a8a");
-    userdata.setNamespace(getName());
+    userdata.setNamespace(s_getName());
     output.push_back(userdata);
 
     return output;
@@ -412,8 +408,9 @@ namespace sequential
 {
 
 
-Reader::Reader(const pdal::drivers::mrsid::Reader& reader, PointBuffer& buffer)
-    : pdal::ReaderSequentialIterator(reader, buffer)
+Reader::Reader(const pdal::drivers::mrsid::Reader& reader, PointBuffer& buffer, boost::uint32_t numPoints)
+    : pdal::ReaderSequentialIterator(buffer)
+    , m_numPoints(numPoints)
     , m_reader(reader)
 {
     return;
@@ -428,9 +425,9 @@ boost::uint64_t Reader::skipImpl(boost::uint64_t count)
 
 bool Reader::atEndImpl() const
 {
-    const boost::uint64_t numPoints = getStage().getNumPoints();
+    // const boost::uint64_t numPoints = getStage().getNumPoints();
     const boost::uint64_t currPoint = getIndex();
-    return currPoint >= numPoints;
+    return currPoint >= m_numPoints;
 }
 
 

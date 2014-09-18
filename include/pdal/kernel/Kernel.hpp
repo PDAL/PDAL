@@ -1,5 +1,6 @@
 /******************************************************************************
 * Copyright (c) 2013, Howard Butler (hobu.inc@gmail.com)
+* Copyright (c) 2014, Bradley J Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -32,16 +33,18 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_PDAL_KERNEL_HPP
-#define INCLUDED_PDAL_KERNEL_HPP
-
+#pragma once
 
 #include "Application.hpp"
-#include "Support.hpp"
-
+#include "Delta.hpp"
+#include "Diff.hpp"
 #include "Info.hpp"
 #include "Pipeline.hpp"
-#include "Query.hpp"
+#include "Random.hpp"
+#include "Support.hpp"
 #include "Translate.hpp"
 
+#ifdef PDAL_HAVE_PCL
+#include "Ground.hpp"
+#include "PCL.hpp"
 #endif

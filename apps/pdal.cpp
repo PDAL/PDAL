@@ -1,5 +1,6 @@
 /******************************************************************************
 * Copyright (c) 2013, Howard Butler (hobu.inc@gmail.com)
+* Copyright (c) 2014, Bradley J Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -47,9 +48,17 @@ void outputVersion()
     std::cout << "pdal " << "(" << pdal::GetFullVersionString() << ")" << std::endl;
     std::cout << headline << std::endl;
     std::cout << "  available actions: " << std::endl;
+    std::cout << "     - delta" << std::endl;
+    std::cout << "     - diff" << std::endl;
+#ifdef PDAL_HAVE_PCL
+    std::cout << "     - ground" << std::endl;
+#endif
     std::cout << "     - info" << std::endl;
+#ifdef PDAL_HAVE_PCL
+    std::cout << "     - pcl" << std::endl;
+#endif
     std::cout << "     - pipeline" << std::endl;
-    std::cout << "     - query" << std::endl;
+    std::cout << "     - random" << std::endl;
     std::cout << "     - translate" << std::endl;
     std::cout << std::endl;
     std::cout << "See http://pdal.io/apps.html for more detail";
@@ -121,18 +130,44 @@ int main(int argc, char* argv[])
         return app.run();
     }
 
+#ifdef PDAL_HAVE_PCL
+    if (boost::iequals(action, "ground"))
+    {
+        pdal::kernel::Ground app(count, args);
+        return app.run();
+    }
+    
+    if (boost::iequals(action, "pcl"))
+    {
+        pdal::kernel::PCL app(count, args);
+        return app.run();
+    }
+#endif
+
     if (boost::iequals(action, "pipeline"))
     {
         pdal::kernel::Pipeline app(count, args);
         return app.run();
     }
 
-    if (boost::iequals(action, "query"))
+    if (boost::iequals(action, "delta"))
     {
-        pdal::kernel::Query app(count, args);
+        pdal::kernel::Delta app(count, args);
         return app.run();
     }
     
+    if (boost::iequals(action, "diff"))
+    {
+        pdal::kernel::Diff app(count, args);
+        return app.run();
+    }
+
+    if (boost::iequals(action, "random"))
+    {
+        pdal::kernel::Random app(count, args);
+        return app.run();
+    }
+
     std::cerr << "Action '" << action <<"' not recognized" << std::endl << std::endl;
     outputVersion();
     return 1;

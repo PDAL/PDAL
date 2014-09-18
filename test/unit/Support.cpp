@@ -43,7 +43,6 @@
 
 #include <pdal/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
-#include <pdal/StageIterator.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/Stage.hpp>
@@ -54,106 +53,40 @@
 //#pragma GCC diagnostic ignored "-Wsign-compare"
 #endif
 
+using namespace pdal;
+using namespace std;
 
-std::string Support::datapath()
+string Support::datapath()
 {
-    const std::string s = TestConfig::g_data_path;
-    return s;
-}
-
-bool Support::compare_stage_data(pdal::Stage const& a, pdal::Stage const& b)
-{
-    pdal::Schema const& a_schema = a.getSchema();
-    pdal::Schema const& b_schema = b.getSchema();
-    if (a_schema != b_schema) return false;
-
-    boost::uint64_t a_num_points64 = a.getNumPoints();
-    boost::uint64_t b_num_points64 = b.getNumPoints();
-    if (a_num_points64 > std::numeric_limits<boost::uint32_t>::max() ||
-            b_num_points64 > std::numeric_limits<boost::uint32_t>::max())
-        throw pdal::pdal_error("unable to do compare_stage_data for > 2^32 points");
-    boost::uint32_t a_num_points = static_cast<boost::uint32_t>(a_num_points64);
-    boost::uint32_t b_num_points = static_cast<boost::uint32_t>(b_num_points64);
-    if (a_num_points != b_num_points) return false;
-
-
-    // if we don't have any sizes here, we'll just use a small default
-    if (a_num_points == 0) a_num_points = 1024;
-    if (b_num_points == 0) b_num_points = 1024;
-
-    pdal::PointBuffer a_data(a_schema, a_num_points);
-    pdal::PointBuffer b_data(b_schema, b_num_points);
-
-    pdal::StageSequentialIterator* a_itr = a.createSequentialIterator(a_data);
-    pdal::StageSequentialIterator* b_itr = b.createSequentialIterator(b_data);
-
-    if (!a_itr) throw pdal::pdal_error("unable to create sequential iterator for compare_stage_data for stage a");
-    if (!b_itr) throw pdal::pdal_error("unable to create sequential iterator for compare_stage_data for stage b");
-
-
-
-    {
-        boost::uint32_t a_numRead = a_itr->read(a_data);
-        boost::uint32_t b_numRead = b_itr->read(b_data);
-        if (a_numRead != b_numRead) return false;
-
-        boost::uint8_t const* a_bytes = a_data.getData(0);
-        boost::uint8_t const* b_bytes = b_data.getData(0);
-
-        boost::uint64_t a_length = a_data.getBufferByteLength();
-        // boost::uint64_t b_length = b_data.getBufferByteLength();
-
-        for (boost::uintmax_t i=0; i<a_length; i++)
-        {
-            if (*a_bytes != *b_bytes)
-            {
-                return false;
-            }
-            ++a_bytes;
-            ++b_bytes;
-        }
-
-    }
-
-    return true;
-
+    return TestConfig::g_data_path;
 }
 
 std::string Support::datapath(const std::string& file)
 {
-    const std::string s = datapath() + file;
-    return s;
+    return datapath() + file;
 }
-
 
 std::string Support::temppath()
 {
-    const std::string s = TestConfig::g_data_path + "../temp/";
-    return s;
+    return TestConfig::g_data_path + "../temp/";
 }
-
 
 std::string Support::temppath(const std::string& file)
 {
-    const std::string s = temppath() + file;
-    return s;
+    return temppath() + file;
 }
-
 
 std::string Support::binpath()
 {
-    const std::string argv0 = boost::unit_test::framework::master_test_suite().argv[0];
-    const std::string s = pdal::FileUtils::getDirectory(argv0);
-    return s;
+    string argv0 = boost::unit_test::framework::master_test_suite().argv[0];
+    string path = pdal::FileUtils::toAbsolutePath(argv0);
+    return pdal::FileUtils::getDirectory(path);
 }
-
 
 std::string Support::binpath(const std::string& file)
 {
-    const std::string s = binpath() + file;
-    return s;
+    return binpath() + file;
 }
-
 
 std::string Support::exename(const std::string& name)
 {
@@ -236,8 +169,9 @@ boost::uint32_t Support::diff_text_files(const std::string& file1, const std::st
 }
 
 
-boost::uint32_t Support::diff_files(const std::string& file1, const std::string& file2,
-                                    boost::uint32_t ignorable_start, boost::uint32_t ignorable_length)
+boost::uint32_t Support::diff_files(const std::string& file1,
+    const std::string& file2, boost::uint32_t ignorable_start,
+    boost::uint32_t ignorable_length)
 {
     boost::uint32_t start[] = { ignorable_start };
     boost::uint32_t len[] = { ignorable_length };
@@ -246,8 +180,9 @@ boost::uint32_t Support::diff_files(const std::string& file1, const std::string&
 
 
 // do a byte-wise comparison of two (binary) files
-boost::uint32_t Support::diff_files(const std::string& file1, const std::string& file2,
-                                    boost::uint32_t* ignorable_start, boost::uint32_t* ignorable_length, boost::uint32_t num_ignorables)
+boost::uint32_t Support::diff_files(const std::string& file1,
+    const std::string& file2, boost::uint32_t* ignorable_start,
+    boost::uint32_t* ignorable_length, boost::uint32_t num_ignorables)
 {
     if (!pdal::FileUtils::fileExists(file1) ||
             !pdal::FileUtils::fileExists(file2))
@@ -288,12 +223,13 @@ boost::uint32_t Support::diff_files(const std::string& file1, const std::string&
             }
             else
             {
-                // only count the difference if we are NOT in an ignorable region
+                // only count the difference if we are NOT in an ignorable
+                // region
                 bool is_ignorable = false;
                 for (boost::uint32_t region=0; region<num_ignorables; region++)
                 {
-                    const boost::uint32_t start = ignorable_start[region];
-                    const boost::uint32_t end = start + ignorable_length[region];
+                    boost::uint32_t start = ignorable_start[region];
+                    boost::uint32_t end = start + ignorable_length[region];
                     if (i >= start && i < end)
                     {
                         // we are in an ignorable region!
@@ -324,7 +260,8 @@ boost::uint32_t Support::diff_files(const std::string& file1, const std::string&
 }
 
 
-boost::uint32_t Support::diff_files(const std::string& file1, const std::string& file2)
+boost::uint32_t Support::diff_files(const std::string& file1,
+    const std::string& file2)
 {
     return diff_files(file1, file2, NULL, NULL, 0);
 }
@@ -343,23 +280,12 @@ bool Support::compare_text_files(const std::string& file1, const std::string& fi
     return (numdiffs == 0);
 }
 
-void Support::check_pN(const pdal::PointBuffer& data,
-                       std::size_t index,
-                       double xref, double yref, double zref)
+void Support::check_pN(const pdal::PointBuffer& data, std::size_t index,
+    double xref, double yref, double zref)
 {
-    const ::pdal::Schema& schema = data.getSchema();
-
-    pdal::Dimension const& dimX = schema.getDimension("X");
-    pdal::Dimension const& dimY = schema.getDimension("Y");
-    pdal::Dimension const& dimZ = schema.getDimension("Z");
-
-    boost::int32_t x0raw = data.getField<boost::int32_t>(dimX, index);
-    boost::int32_t y0raw = data.getField<boost::int32_t>(dimY, index);
-    boost::int32_t z0raw = data.getField<boost::int32_t>(dimZ, index);
-
-    double x0 = dimX.applyScaling<boost::int32_t>(x0raw);
-    double y0 = dimY.applyScaling<boost::int32_t>(y0raw);
-    double z0 = dimZ.applyScaling<boost::int32_t>(z0raw);
+    double x0 = data.getFieldAs<double>(Dimension::Id::X, index);
+    double y0 = data.getFieldAs<double>(Dimension::Id::Y, index);
+    double z0 = data.getFieldAs<double>(Dimension::Id::Z, index);
 
     BOOST_CHECK_CLOSE(x0, xref, 0.001);
     BOOST_CHECK_CLOSE(y0, yref, 0.001);
@@ -367,41 +293,27 @@ void Support::check_pN(const pdal::PointBuffer& data,
 }
 
 
-void Support::check_pN(const pdal::PointBuffer& data,
-                       std::size_t index,
-                       double xref, double yref, double zref,
-                       double tref,
-                       boost::uint16_t rref, boost::uint16_t gref, boost::uint16_t bref)
+void Support::check_pN(const PointBuffer& data, size_t index,
+    double xref, double yref, double zref, double tref,
+    uint16_t rref, uint16_t gref, uint16_t bref)
 {
     check_pN(data, index, xref, yref, zref);
 
-    const ::pdal::Schema& schema = data.getSchema();
-
-
-    boost::optional<pdal::Dimension const&> dimTime = schema.getDimensionOptional("Time");
-
-    if (dimTime)
+    if (data.hasDim(Dimension::Id::GpsTime))
     {
-        double t0 = data.getField<double>(*dimTime, index);
+        double t0 = data.getFieldAs<double>(Dimension::Id::GpsTime, index);
         BOOST_CHECK_EQUAL(t0, tref);
-
     }
 
-    boost::optional<pdal::Dimension const&> dimRed = schema.getDimensionOptional("Red");
-    boost::optional<pdal::Dimension const&> dimGreen = schema.getDimensionOptional("Green");
-    boost::optional<pdal::Dimension const&> dimBlue = schema.getDimensionOptional("Blue");
-
-    if (dimRed)
+    if (data.hasDim(Dimension::Id::Red))
     {
-        boost::uint16_t r0 = data.getField<boost::uint16_t>(*dimRed, index);
-        boost::uint16_t g0 = data.getField<boost::uint16_t>(*dimGreen, index);
-        boost::uint16_t b0 = data.getField<boost::uint16_t>(*dimBlue, index);
+        uint16_t r0 = data.getFieldAs<uint16_t>(Dimension::Id::Red, index);
+        uint16_t g0 = data.getFieldAs<uint16_t>(Dimension::Id::Green, index);
+        uint16_t b0 = data.getFieldAs<uint16_t>(Dimension::Id::Blue, index);
         BOOST_CHECK_EQUAL(r0, rref);
         BOOST_CHECK_EQUAL(g0, gref);
         BOOST_CHECK_EQUAL(b0, bref);
     }
-
-    return;
 }
 
 

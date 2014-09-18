@@ -32,22 +32,14 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_DRIVERS_TEXT_WRITER_HPP
-#define INCLUDED_DRIVERS_TEXT_WRITER_HPP
+#pragma once
 
 #include <pdal/Writer.hpp>
 #include <pdal/FileUtils.hpp>
 #include <pdal/StageFactory.hpp>
 
-#include <boost/scoped_ptr.hpp>
-#include <boost/tuple/tuple.hpp>
-#include <boost/tokenizer.hpp>
-
 #include <vector>
 #include <string>
-
-// pdal::Writer* createTextWriter(pdal::Stage& prevStage, const pdal::Options& options);
-
 
 namespace pdal
 {
@@ -55,16 +47,6 @@ namespace drivers
 {
 namespace text
 {
-
-typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-
-class text_driver_error : public pdal_error
-{
-public:
-    text_driver_error(std::string const& msg)
-        : pdal_error(msg)
-    {}
-};
 
 #ifdef USE_PDAL_PLUGIN_TEXT
 PDAL_C_START
@@ -74,53 +56,53 @@ PDAL_DLL void PDALRegister_writer_text(void* factory);
 PDAL_C_END
 #endif
 
-typedef boost::shared_ptr<std::ostream> FileStreamPtr;
+typedef std::shared_ptr<std::ostream> FileStreamPtr;
 
 class PDAL_DLL Writer : public pdal::Writer
 {
 public:
     SET_STAGE_NAME("drivers.text.writer", "Text Writer")
     SET_STAGE_LINK("http://pdal.io/stages/drivers.text.writer.html")
+    SET_STAGE_ENABLED(true)
 
-    Writer(Stage& prevStage, const Options&);
-    ~Writer();
+    Writer(const Options& options) : pdal::Writer(options)
+    {}
 
-    virtual void initialize();
     static Options getDefaultOptions();
 
-protected:
-    virtual void writeBegin(boost::uint64_t targetNumPointsToWrite);
-    virtual boost::uint32_t writeBuffer(const PointBuffer&);
-    virtual void writeEnd(boost::uint64_t actualNumPointsWritten);
-
 private:
+    virtual void processOptions(const Options&);
+    virtual void ready(PointContextRef ctx);
+    virtual void write(const PointBuffer& buf);
+    virtual void done(PointContextRef ctx);
+
+    void writeHeader(PointContextRef ctx);
+    void writeFooter();
+    void writeGeoJSONHeader();
+    void writeCSVHeader(PointContextRef ctx);
+
+    void writeGeoJSONBuffer(const PointBuffer& data);
+    void writeCSVBuffer(const PointBuffer& data);
+    
+    std::string m_filename;
+    std::string m_outputType;
+    std::string m_callback;
+    bool m_writeAllDims;
+    std::string m_dimOrder;
+    bool m_writeHeader;
+    std::string m_newline;
+    std::string m_delimiter;
+    bool m_quoteHeader;
+    bool m_packRgb;
+
+    FileStreamPtr m_stream;
+    Dimension::IdList m_dims;
 
     Writer& operator=(const Writer&); // not implemented
     Writer(const Writer&); // not implemented
-
-    void putStringRepresentation(PointBuffer const& data,
-                                        Dimension const& d,
-                                        std::size_t pointIndex,
-                                        std::ostream& strm);
-
-    void WriteHeader(pdal::Schema const& schema);
-    
-    void WriteGeoJSONHeader(pdal::Schema const& schema);
-    void WriteCSVHeader(pdal::Schema const& schema);
-    void WritePCDHeader(pdal::Schema const& schema);
-    
-    void WriteCSVBuffer(const PointBuffer& data);
-    void WriteGeoJSONBuffer(const PointBuffer& data);
-    void WritePCDBuffer(const PointBuffer& data);
-    
-    std::vector<boost::tuple<std::string, std::string> >  getDimensionOrder(pdal::Schema const& schema) const;
-    FileStreamPtr m_stream;
-    bool bWroteHeader;
-    bool bWroteFirstPoint;
 };
 
-}
-}
-} // namespaces
+} // namespace text
+} // namespace drivers
+} // namespace pdal
 
-#endif

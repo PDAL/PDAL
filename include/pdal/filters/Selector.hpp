@@ -32,21 +32,9 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_FILTERS_SELECTORFILTER_HPP
-#define INCLUDED_FILTERS_SELECTORFILTER_HPP
-
-#include <boost/shared_ptr.hpp>
+#pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/FilterIterator.hpp>
-#include <pdal/Utils.hpp>
-
-#include <map>
-
-namespace pdal
-{
-class PointBuffer;
-}
 
 namespace pdal
 {
@@ -58,96 +46,16 @@ class PDAL_DLL Selector: public Filter
 public:
     SET_STAGE_NAME("filters.selector", "Dimension Selection Filter")
     SET_STAGE_LINK("http://pdal.io/stages/filters.selector.html")  
+    SET_STAGE_ENABLED(true)
     
-    Selector(Stage& prevStage, const Options&);
-
-    static Options getDefaultOptions();
-    virtual void initialize();
-
-    bool supportsIterator(StageIteratorType t) const
-    {
-        if (t == StageIterator_Sequential) return true;
-
-        return false;
-    }
-
-    pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const;
-    
-    inline std::map<std::string, bool> const& getIgnoredMap() const { return m_ignoredMap; }
-    
-    inline bool doIgnoreUnspecifiedDimensions() const { return m_ignoreDefault; }
-    std::vector<Dimension> const& getCreatedDimensions() const { return m_createDimensions; }
+    Selector(const Options& options) : Filter(options)
+        {}
     
 private:
-    void checkImpedance();
-
-
     Selector& operator=(const Selector&); // not implemented
     Selector(const Selector&); // not implemented
-    
-    std::map<std::string, bool> m_ignoredMap;
-    bool m_ignoreDefault;
-    std::vector<Dimension> m_createDimensions;
 };
 
+} // namespace filters
+} // namespace pdal
 
-namespace iterators
-{
-
-namespace selector
-{
-
-class PDAL_DLL IteratorBase
-{
-public:
-    IteratorBase(pdal::filters::Selector const& filter, PointBuffer& buffer);
-
-protected:
-    void alterSchema(pdal::PointBuffer&);
-    pdal::filters::Selector const& m_selectorFilter;
-
-private:
-    IteratorBase& operator=(IteratorBase const&);
-};
-} // selector
-    
-namespace sequential
-{
-
-class PDAL_DLL Selector : public pdal::FilterSequentialIterator, public selector::IteratorBase
-{
-public:
-    Selector(const pdal::filters::Selector& filter, PointBuffer& buffer);
-private:
-    boost::uint64_t skipImpl(boost::uint64_t);
-    boost::uint32_t readBufferImpl(PointBuffer&);
-    bool atEndImpl() const;
-};
-
-} // sequential
-
-namespace random
-{
-    
-class PDAL_DLL Selector : public pdal::FilterRandomIterator, public selector::IteratorBase
-{
-public:
-    Selector(const pdal::filters::Selector& filter, PointBuffer& buffer);
-    virtual ~Selector() {};
-
-protected:
-    virtual boost::uint32_t readBufferImpl(PointBuffer& buffer);
-    
-    virtual boost::uint64_t seekImpl(boost::uint64_t);
-
-};
-
-} // namespace random
-
-} // iterators
-
-} // filters
-} // pdal
-
-#endif

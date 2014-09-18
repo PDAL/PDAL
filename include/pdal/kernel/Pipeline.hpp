@@ -36,13 +36,11 @@
 #define INCLUDED_PDAL_KERNEL_PIPELINE_HPP
 
 
-
 #include <pdal/PipelineReader.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineWriter.hpp>
 #include <pdal/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
-#include <pdal/StageIterator.hpp>
 
 #include "Application.hpp"
 
@@ -57,7 +55,6 @@ public:
 private:
     void addSwitches();
     void validateSwitches();
-    pdal::PointBuffer* dummyWrite(pdal::PipelineManager& manager);
     
     std::string m_inputFile;
     std::string m_pipelineFile;

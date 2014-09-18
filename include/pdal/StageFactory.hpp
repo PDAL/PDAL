@@ -32,15 +32,12 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_STAGEFACTORY_HPP
-#define INCLUDED_STAGEFACTORY_HPP
+#pragma once
 
 #include <pdal/pdal_internal.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/Reader.hpp>
 #include <pdal/Filter.hpp>
-#include <pdal/MultiFilter.hpp>
 #include <pdal/Writer.hpp>
 #include <pdal/StageInfo.hpp>
 #include <boost/shared_ptr.hpp>
@@ -73,13 +70,11 @@ class PDAL_DLL StageFactory
 {
 public:
     typedef Reader* ReaderCreator(const Options&);
-    typedef Filter* FilterCreator(Stage& prevStage, const Options&);
-    typedef MultiFilter* MultiFilterCreator(const std::vector<Stage*>& prevStages, const Options&);
-    typedef Writer* WriterCreator(Stage& prevStage, const Options&);
+    typedef Filter* FilterCreator(const Options&);
+    typedef Writer* WriterCreator(const Options&);
 
     typedef std::map<std::string, ReaderCreator*> ReaderCreatorList;
     typedef std::map<std::string, FilterCreator*> FilterCreatorList;
-    typedef std::map<std::string, MultiFilterCreator*> MultiFilterCreatorList;
     typedef std::map<std::string, WriterCreator*> WriterCreatorList;
 
 public:
@@ -87,25 +82,23 @@ public:
 
     // infer the driver to use based on filename extension
     // returns "" if no driver found
-    //
-    // this may also add on an option to pass to the driver, such as the filename
-    static std::string inferReaderDriver(const std::string& filename, pdal::Options& options);
+    static std::string inferReaderDriver(const std::string& filename);
 
     // infer the driver to use based on filename extension
     // returns "" if no driver found
-    // 
-    // this may also add on an option to pass to the driver, such as the filename
-    // (or something inferred from the extension, such as .laz means we need to use compress=true)
-    static std::string inferWriterDriver(const std::string& filename, pdal::Options& options);
+    static std::string inferWriterDriver(const std::string& filename);
+
+    // modify options based upon expectations implicit in a given filename
+    // e.g. output files ending in .laz should be compressed
+    static void inferWriterOptionsChanges(const std::string& filename,
+                                          pdal::Options& options);
 
     Reader* createReader(const std::string& type, const Options& options);
-    Filter* createFilter(const std::string& type, Stage& prevStage, const Options& options);
-    MultiFilter* createMultiFilter(const std::string& type, const std::vector<Stage*>& prevStages, const Options& options);
-    Writer* createWriter(const std::string& type, Stage& prevStage, const Options& options);
+    Filter* createFilter(const std::string& type, const Options& options);
+    Writer* createWriter(const std::string& type, const Options& options);
 
     void registerReader(const std::string& type, ReaderCreator* f);
     void registerFilter(const std::string& type, FilterCreator* f);
-    void registerMultiFilter(const std::string& type, MultiFilterCreator* f);
     void registerWriter(const std::string& type, WriterCreator* f);
 
     void loadPlugins();
@@ -120,18 +113,15 @@ private:
     // callers take ownership of returned stages
     ReaderCreator* getReaderCreator(const std::string& type) const;
     FilterCreator* getFilterCreator(const std::string& type) const;
-    MultiFilterCreator* getMultiFilterCreator(const std::string& type) const;
     WriterCreator* getWriterCreator(const std::string& type) const;
 
     void registerKnownReaders();
     void registerKnownFilters();
-    void registerKnownMultiFilters();
     void registerKnownWriters();
 
     // these are the "registries" of the factory creator functions
     ReaderCreatorList m_readerCreators;
     FilterCreatorList m_filterCreators;
-    MultiFilterCreatorList m_multifilterCreators;
     WriterCreatorList m_writerCreators;
     
     // driver name + driver description
@@ -146,26 +136,15 @@ inline void StageFactory::registerDriverInfo()
     
     pdal::StageInfo info(T::s_getName(), T::s_getDescription());
     info.setInfoLink(T::s_getInfoLink());
-    std::vector<Dimension> dimensions = T::getDefaultDimensions();
-    
-    for (std::vector<Dimension>::const_iterator i = dimensions.begin();
-         i != dimensions.end();
-         ++i)
-    {
-        info.addProvidedDimension(*i);
-    }
+    info.setIsEnabled(T::s_isEnabled());
+    info.addProvidedDimensions(T::getDefaultDimensions());
     
     std::vector<Option> options = T::getDefaultOptions().getOptions();
-    for (std::vector<Option>::const_iterator i = options.begin();
-        i != options.end();
-        ++i)
-    {
+    for (auto i = options.begin(); i != options.end(); ++i)
         info.addProvidedOption(*i);
-    }
-    m_driver_info.insert(std::pair<std::string, pdal::StageInfo>(T::s_getName(), info));
-
+    m_driver_info.insert(
+        std::pair<std::string, pdal::StageInfo>(T::s_getName(), info));
 }
 
 } // namespace pdal
 
-#endif

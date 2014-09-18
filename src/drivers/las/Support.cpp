@@ -44,185 +44,33 @@ namespace drivers
 namespace las
 {
 
-void Support::registerFields(Reader& stage, Schema& schema, PointFormat format)
-{
-    std::ostringstream text;
-
-    std::vector<pdal::Dimension> const& d = stage.getDefaultDimensions();
-
-    Schema dimensions(d);
-
-    schema.appendDimension(dimensions.getDimension("X", stage.getName()));
-    schema.appendDimension(dimensions.getDimension("Y", stage.getName()));
-    schema.appendDimension(dimensions.getDimension("Z", stage.getName()));
-
-    schema.appendDimension(dimensions.getDimension("Intensity", stage.getName()));
-    schema.appendDimension(dimensions.getDimension("ReturnNumber", stage.getName())); // 3 bits only
-    schema.appendDimension(dimensions.getDimension("NumberOfReturns", stage.getName())); // 3 bits only
-    schema.appendDimension(dimensions.getDimension("ScanDirectionFlag", stage.getName()));  // 1 bit only
-    schema.appendDimension(dimensions.getDimension("EdgeOfFlightLine", stage.getName())); // 1 bit only
-
-    schema.appendDimension(dimensions.getDimension("Classification", stage.getName()));
-    schema.appendDimension(dimensions.getDimension("ScanAngleRank", stage.getName()));
-
-    schema.appendDimension(dimensions.getDimension("UserData", stage.getName()));
-    schema.appendDimension(dimensions.getDimension("PointSourceId", stage.getName()));
-
-    if (hasTime(format))
-    {
-        schema.appendDimension(dimensions.getDimension("Time", stage.getName()));
-    }
-
-    if (hasColor(format))
-    {
-        schema.appendDimension(dimensions.getDimension("Red", stage.getName()));
-        schema.appendDimension(dimensions.getDimension("Green", stage.getName()));
-        schema.appendDimension(dimensions.getDimension("Blue", stage.getName()));
-    }
-
-    // if (hasWave(format))
-    // {
-    //
-    //     schema.appendDimension(Dimension(DimensionId::Las_WavePacketDescriptorIndex));
-    //     schema.appendDimension(Dimension(DimensionId::Las_WaveformDataOffset));
-    //     schema.appendDimension(Dimension(DimensionId::Las_ReturnPointWaveformLocation));
-    //     schema.appendDimension(Dimension(DimensionId::Las_WaveformXt));
-    //     schema.appendDimension(Dimension(DimensionId::Las_WaveformYt));
-    //     schema.appendDimension(Dimension(DimensionId::Las_WaveformZt));
-    // }
-
-    return;
-}
-
-
-void Support::setScaling(Schema& schema,
-                         double scaleX,
-                         double scaleY,
-                         double scaleZ,
-                         double offsetX,
-                         double offsetY,
-                         double offsetZ)
-{
-    Dimension dimX = schema.getDimension("X");
-    Dimension dimY = schema.getDimension("Y");
-    Dimension dimZ = schema.getDimension("Z");
-
-    dimX.setNumericScale(scaleX);
-    dimY.setNumericScale(scaleY);
-    dimZ.setNumericScale(scaleZ);
-
-    dimX.setNumericOffset(offsetX);
-    dimY.setNumericOffset(offsetY);
-    dimZ.setNumericOffset(offsetZ);
-
-    schema.setDimension(dimX);
-    schema.setDimension(dimY);
-    schema.setDimension(dimZ);
-
-    return;
-}
-
-
-bool Support::hasTime(PointFormat format)
-{
-    return (format == PointFormat1) || (format == PointFormat3) || (format == PointFormat4) || (format == PointFormat5);
-}
-
-
-bool Support::hasColor(PointFormat format)
-{
-    return (format == PointFormat2) || (format == PointFormat3) || (format == PointFormat5);
-}
-
-
-bool Support::hasWave(PointFormat format)
-{
-    return (format == PointFormat4) || (format == PointFormat5);
-}
-
-
-boost::uint16_t Support::getPointDataSize(PointFormat pointFormat)
-{
-    switch (pointFormat)
-    {
-        case PointFormat0:
-            return 20;
-        case PointFormat1:
-            return 28;
-        case PointFormat2:
-            return 26;
-        case PointFormat3:
-            return 34;
-        default:
-            throw invalid_format("point format unsupported");
-    }
-
-}
-
-PointDimensions::PointDimensions(const Schema& schema, std::string const& ns)
-{
-    X = &schema.getDimension("X", ns);
-    Y = &schema.getDimension("Y", ns);
-    Z = &schema.getDimension("Z", ns);
-
-#   define CACHE_DIM(x) \
-    x = schema.getDimensionPtr(#x, ns.c_str()); \
-    if (x && x->isIgnored()) x = 0;
-
-    CACHE_DIM(Intensity)
-    CACHE_DIM(ReturnNumber)
-    CACHE_DIM(NumberOfReturns)
-    CACHE_DIM(ScanDirectionFlag)
-    CACHE_DIM(EdgeOfFlightLine)
-    CACHE_DIM(Classification)
-    CACHE_DIM(ScanAngleRank)
-    CACHE_DIM(UserData)
-    CACHE_DIM(PointSourceId)
-    CACHE_DIM(Time)
-    CACHE_DIM(Red)
-    CACHE_DIM(Green)
-    CACHE_DIM(Blue)
-
-#   undef CACHE_DIM
-
-    // WavePacketDescriptorIndex = (Support::hasWave(format) ? schema.getDimensionIndex(DimensionId::Las_WavePacketDescriptorIndex) : 0);
-    // WaveformDataOffset = (Support::hasWave(format) ? schema.getDimensionIndex(DimensionId::Las_WaveformDataOffset) : 0);
-    // ReturnPointWaveformLocation = (Support::hasWave(format) ? schema.getDimensionIndex(DimensionId::Las_ReturnPointWaveformLocation) : 0);
-    // WaveformXt = (Support::hasWave(format) ? schema.getDimensionIndex(DimensionId::Las_WaveformXt) : 0);
-    // WaveformYt = (Support::hasWave(format) ? schema.getDimensionIndex(DimensionId::Las_WaveformYt) : 0);
-    // WaveformZt = (Support::hasWave(format) ? schema.getDimensionIndex(DimensionId::Las_WaveformZt) : 0);
-}
-
-
 void Support::rewriteHeader(std::ostream& stream, const SummaryData& data)
 {
     // move from header start to "number of point records" field
     stream.seekp(107, std::ios_base::cur);
 
-    // FIXME: This is only for LAS 1.3 and less!
-    const int maxReturns = 5; 
+    //This is legacy for 1.4 -- only valid on read for 1.3 and before.
+    const int MAX_RETURNS = 5; 
     {
         boost::uint8_t buf[256];
         boost::uint8_t* p = buf;
 
-        Utils::write_field<boost::uint32_t>(p, data.getTotalNumPoints());
+        Utils::write_field<uint32_t>(p, data.getTotalNumPoints());
+        for (int i = 1; i <= MAX_RETURNS; i++)
+            Utils::write_field<uint32_t>(p, data.getReturnCount(i));
 
-        for (int i=1; i<=maxReturns; i++)
-        {
-            Utils::write_field<boost::uint32_t>(p, data.getReturnCount(i));
-        }
-
-        Utils::write_n(stream, buf, 4 + 4*maxReturns);
+        // Write the data to the stream. 
+        Utils::write_n(stream, buf, 4 + 4 * MAX_RETURNS);
     }
 
     // skip over scale/offset fields
-    stream.seekp(8*6, std::ios_base::cur);
+    stream.seekp(8 * 6, std::ios_base::cur);
 
     {
         boost::uint8_t buf[256];
         boost::uint8_t* p = buf;
 
-        pdal::Bounds<double> bounds= data.getBounds();
+        pdal::Bounds<double> bounds = data.getBounds();
         double minX = bounds.getMinimum(0);
         double minY = bounds.getMinimum(1);
         double minZ = bounds.getMinimum(2);

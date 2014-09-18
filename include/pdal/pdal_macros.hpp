@@ -32,8 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_PDAL_MACROS_HPP
-#define INCLUDED_PDAL_MACROS_HPP
+#pragma once
 
 #include <pdal/pdal_internal.hpp>
 //
@@ -46,14 +45,11 @@
         } 
             
 #define MAKE_FILTER_CREATOR(T, FullT) \
-    pdal::Filter* create_##T(pdal::Stage& prevStage, const pdal::Options& options) \
-        { return new FullT(prevStage, options); }
-#define MAKE_MULTIFILTER_CREATOR(T, FullT) \
-    pdal::MultiFilter* create_##T(const std::vector<pdal::Stage*>& prevStages, const pdal::Options& options) \
-        { return new FullT(prevStages, options); }
+    pdal::Filter* create_##T(const pdal::Options& options) \
+        { pdal::Filter *f = new FullT(options); return f; }
 #define MAKE_WRITER_CREATOR(T, FullT) \
-    pdal::Writer* create_##T(pdal::Stage& prevStage, const pdal::Options& options) \
-        { return new FullT(prevStage, options); }
+    pdal::Writer* create_##T(const pdal::Options& options) \
+        { pdal::Writer *w = new FullT(options); return w; }
 
 //
 // macros to register the stage creators
@@ -67,9 +63,6 @@
 #define REGISTER_FILTER(T, FullT) \
     registerDriverInfo<FullT>(); \
     registerFilter(FullT::s_getName(), create_##T)
-#define REGISTER_MULTIFILTER(T, FullT) \
-    registerDriverInfo<FullT>(); \
-    registerMultiFilter(FullT::s_getName(), create_##T)
 
 #define CREATE_READER_PLUGIN(DriverName, DriverFullType) \
     PDAL_C_START PDAL_DLL void PDALRegister_reader_##DriverName(void* factory) \
@@ -86,15 +79,6 @@
         pdal::StageFactory& f = *(pdal::StageFactory*) factory; \
         f.registerDriverInfo< DriverFullType>(); \
         f.registerFilter(DriverFullType::s_getName(), create_##DriverName##Filter); \
-    } \
-    PDAL_C_END 
-
-#define CREATE_MULTIFILTER_PLUGIN(DriverName, DriverFullType) \
-    PDAL_C_START PDAL_DLL void PDALRegister_multifilter_##DriverName(void* factory) \
-    { \
-        pdal::StageFactory& f = *(pdal::StageFactory*) factory; \
-        f.registerDriverInfo< DriverFullType>(); \
-        f.registerMultiFilter(DriverFullType::s_getName(), create_##DriverName##MultiFilter); \
     } \
     PDAL_C_END 
 
@@ -115,5 +99,16 @@
     PDAL_C_END 
 
 
+#ifdef _WIN32
+inline long lround(double d) 
+{
+    long l;
+
+    if (d < 0)
+        l = (long)ceil(d - .5);
+    else
+        l = (long)floor(d + .5);
+    return l;
+}
 #endif
 

@@ -33,8 +33,9 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_DRIVER_PGPOINTCLOUD_COMMON_HPP
-#define INCLUDED_DRIVER_PGPOINTCLOUD_COMMON_HPP
+#pragma once
+
+#include <boost/algorithm/string.hpp>
 
 #include "libpq-fe.h"
 #include <pdal/pdal_error.hpp>
@@ -47,18 +48,28 @@ namespace drivers
 namespace pgpointcloud
 {
 
-inline schema::CompressionType getCompressionType(std::string const& compression_type)
+namespace CompressionType
 {
-    schema::CompressionType output;
 
+enum Enum
+{
+    None = 0,
+    Ght = 1,
+    Dimensional = 2,
+    Unknown = 256
+};
+
+} // namespace CompressionType
+
+
+inline CompressionType::Enum getCompressionType(
+    std::string const& compression_type)
+{
     if (boost::iequals(compression_type, "dimensional"))
-        output = schema::COMPRESSION_DIMENSIONAL;
+        return CompressionType::Dimensional;
     else if (boost::iequals(compression_type, "ght"))
-        output = schema::COMPRESSION_GHT;
-    else
-        output = schema::COMPRESSION_NONE;
-    
-    return output;
+        return CompressionType::Ght;
+    return CompressionType::None;
 }
 
 inline PGconn* pg_connect(std::string const& connection)
@@ -155,5 +166,3 @@ inline PGresult* pg_query_result(PGconn* session, std::string const& sql)
 } // drivers
 } // pdal
 
-
-#endif // INCLUDED_DRIVER_PGPOINTCLOUD_COMMON_HPP

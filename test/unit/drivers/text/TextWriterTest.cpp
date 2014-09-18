@@ -75,33 +75,30 @@ BOOST_AUTO_TEST_CASE(TextWriterTest_test_1)
 
     BOOST_CHECK_EQUAL(np, 106u);
 
-    std::string output_file(Support::temppath("autzen-point-format-3.txt"));
+    std::string output_file(Support::temppath("autzen/autzen-point-format-3.txt"));
 
-    bool were_equal = Support::compare_text_files(output_file, Support::datapath("autzen-point-format-3.txt"));
+    bool were_equal = Support::compare_text_files(output_file, Support::datapath("autzen/autzen-point-format-3.txt"));
     BOOST_CHECK(were_equal);
     if (were_equal)
         pdal::FileUtils::deleteFile(output_file);
     else
-        std::cout << "comparison of " << Support::datapath("autzen-point-format-3.txt") << " and " << output_file << " failed.";
-
-
-    return;
+        std::cout << "comparison of " << Support::datapath("autzen/autzen-point-format-3.txt") << " and " << output_file << " failed.";
 }
 
 
 BOOST_AUTO_TEST_CASE(TextWriterTest_geojson)
 {
-    
+
     pdal::Options options;
     pdal::Option debug("debug", true, "");
     pdal::Option verbose("verbose", 5, "");
     // options.add(debug);
     // options.add(verbose);
     pdal::Option spatialreference("spatialreference","EPSG:2993", "Output SRS to reproject to");
-    pdal::Option filename("filename", Support::datapath("1.2-with-color.las"), "");
+    pdal::Option filename("filename", Support::datapath("las/1.2-with-color.las"), "");
     pdal::Option ignore("ignore_default", true, "");
     pdal::Option output_type("format", "geojson", "text writer output type");
-    
+
     pdal::Option keep("keep", "", "");
     pdal::Options keeps;
     pdal::Option x("dimension", "X", "x dim");
@@ -109,7 +106,7 @@ BOOST_AUTO_TEST_CASE(TextWriterTest_geojson)
     pdal::Option z("dimension", "Z", "z dim");
     pdal::Option intensity("dimension", "Intensity", "intensity dim");
     pdal::Option ReturnNumber("dimension", "ReturnNumber", "return dim");
-    
+
     keeps.add(x); keeps.add(y); keeps.add(z); keeps.add(ReturnNumber); keeps.add(intensity);
     keep.setOptions(keeps);
     options.add(keep);
@@ -119,18 +116,20 @@ BOOST_AUTO_TEST_CASE(TextWriterTest_geojson)
 
 
     pdal::drivers::las::Reader reader(options);
-    pdal::filters::Selector filter(reader, options);
-    
+    pdal::filters::Selector filter(options);
+    filter.setInput(&reader);
+
     std::string output("TextWriterTest-geojson.json");
     pdal::Options writer_options;
     pdal::Option out_filename("filename", Support::temppath(output));
     writer_options.add(out_filename);
     writer_options.add(output_type);
-    
-    pdal::drivers::text::Writer writer(filter, writer_options);
+
+    pdal::drivers::text::Writer writer(writer_options);
+    writer.setInput(&filter);
 
     BOOST_CHECK_EQUAL(writer.getDescription(), "Text Writer");
-    writer.initialize();
+    writer.prepare();
 
     writer.write(20);
 
@@ -140,9 +139,7 @@ BOOST_AUTO_TEST_CASE(TextWriterTest_geojson)
     if (filesSame)
     {
         FileUtils::deleteFile(Support::temppath(output));
-    }    
-
-    return;
+    }
 }
 #endif
 

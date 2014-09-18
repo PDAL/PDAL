@@ -45,155 +45,71 @@ namespace pdal
 namespace filters
 {
 
-
-Programmable::Programmable(Stage& prevStage, const Options& options)
-    : pdal::Filter(prevStage, options)
-    , m_script(NULL)
-{
-    return;
-}
-
-
-Programmable::~Programmable()
-{
-    delete m_script;
-}
-
-
-void Programmable::initialize()
-{
-    Filter::initialize();
-
-    m_script = new pdal::plang::Script(getOptions());
-
-    log()->get(logDEBUG)  << "script " << *m_script << std::endl;
-
-    return;
-}
-
-
 Options Programmable::getDefaultOptions()
 {
     Options options;
-
-    Option script("script", "");
-    options.add(script);
-
-    Option module("module", "");
-    options.add(module);
-
-    Option function("function", "");
-    options.add(function);
-
+    options.add("script", "");
+    options.add("module", "");
+    options.add("function", "");
     return options;
-
 }
 
 
-void Programmable::processBuffer(PointBuffer& data, pdal::plang::BufferedInvocation& python) const
+void Programmable::processOptions(const Options& options)
 {
-    python.resetArguments();
+    m_source = options.getValueOrDefault<std::string>("source", "");
+    if (m_source.empty())
+        m_source = FileUtils::readFileIntoString(
+            options.getValueOrThrow<std::string>("filename"));
+    m_module = options.getValueOrThrow<std::string>("module");
+    m_function = options.getValueOrThrow<std::string>("function");
 
-    python.beginChunk(data);
-
-    python.execute();
-
-    python.endChunk(data);
-
-    return;
-}
-
-
-pdal::StageSequentialIterator* Programmable::createSequentialIterator(PointBuffer& buffer) const
-{
-    return new pdal::filters::iterators::sequential::Programmable(*this, buffer);
-}
-
-
-//---------------------------------------------------------------------------
-
-
-namespace iterators
-{
-namespace sequential
-{
-
-
-Programmable::Programmable(const pdal::filters::Programmable& filter, PointBuffer& buffer)
-    : pdal::FilterSequentialIterator(filter, buffer)
-    , m_programmableFilter(filter)
-    , m_pythonMethod(NULL)
-{
-    return;
-}
-
-
-Programmable::~Programmable()
-{
-    delete m_pythonMethod;
-}
-
-
-void Programmable::createParser()
-{
-    const pdal::plang::Script& script = m_programmableFilter.getScript();
-
-    m_pythonMethod = new pdal::plang::BufferedInvocation(script);
-
-    m_pythonMethod->compile();
-
-    return;
-}
-
-
-void Programmable::readBeginImpl()
-{
-    if (!m_pythonMethod)
+    auto addDims = options.getOptions("add_dimension");
+    for (auto it = addDims.cbegin(); it != addDims.cend(); ++it)
     {
-        createParser();
+        m_addDimensions.push_back(Dimension::id(it->getValue<std::string>()));
     }
-
-    pdal::GlobalEnvironment::get().getPythonEnvironment().set_stdout(m_programmableFilter.log()->getLogStream());
-
-    return;
 }
 
 
-void Programmable::readEndImpl()
+void Programmable::addDimensions(PointContext ctx)
 {
-    pdal::GlobalEnvironment::get().getPythonEnvironment().reset_stdout();
-    return;
+    for (auto it = m_addDimensions.cbegin(); it != m_addDimensions.cend(); ++it)
+    {
+        ctx.registerDim(*it);
+    }
 }
 
 
-boost::uint32_t Programmable::readBufferImpl(PointBuffer& data)
+void Programmable::ready(PointContext ctx)
 {
-    m_programmableFilter.log()->get(logDEBUG5)  << "Python script " << m_programmableFilter.getScript() << " processing " << data.getCapacity() << " points." << std::endl;
-
-    const boost::uint32_t numRead = getPrevIterator().read(data);
-
-    m_programmableFilter.processBuffer(data, *m_pythonMethod);
-
-    return numRead;
+    m_script = new plang::Script(m_source, m_module, m_function);
+    m_pythonMethod = new plang::BufferedInvocation(*m_script);
+    m_pythonMethod->compile();
+    GlobalEnvironment::get().getPythonEnvironment().set_stdout(
+        log()->getLogStream());
 }
 
 
-boost::uint64_t Programmable::skipImpl(boost::uint64_t count)
+void Programmable::filter(PointBuffer& buf)
 {
-    getPrevIterator().skip(count);
-    return count;
+    log()->get(LogLevel::Debug5) << "Python script " << *m_script <<
+        " processing " << buf.size() << " points." << std::endl;
+    m_pythonMethod->resetArguments();
+    m_pythonMethod->begin(buf);
+    m_pythonMethod->execute();
+    m_pythonMethod->end(buf);
 }
 
 
-bool Programmable::atEndImpl() const
+void Programmable::done(PointContext ctx)
 {
-    return getPrevIterator().atEnd();
+    GlobalEnvironment::get().getPythonEnvironment().reset_stdout();
+    delete m_pythonMethod;
+    delete m_script;
 }
 
-}
-} // iterators::sequential
-
-}
-} // pdal::filters
+} // namespace filters
+} // namespace pdal
 
 #endif

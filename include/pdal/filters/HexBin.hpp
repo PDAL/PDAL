@@ -32,20 +32,14 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_FILTERS_HEXBINFILTER_HPP
-#define INCLUDED_FILTERS_HEXBINFILTER_HPP
+#pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/FilterIterator.hpp>
-
-#include <boost/shared_ptr.hpp>
 
 #ifdef PDAL_HAVE_HEXER
-
 #include <hexer/Mathpair.hpp>
 #include <hexer/HexGrid.hpp>
 #include <hexer/Processor.hpp>
-
 #endif
 
 namespace pdal
@@ -53,121 +47,40 @@ namespace pdal
 namespace filters
 {
 
-
 class PDAL_DLL HexBin : public Filter
 {
 public:
     SET_STAGE_NAME("filters.hexbin", "Hexbin implementation")
     SET_STAGE_LINK("http://pdal.io/stages/filters.hexbin.html")       
+#ifdef PDAL_HAVE_HEXER
+    SET_STAGE_ENABLED(true)
+#else
+    SET_STAGE_ENABLED(false)
+#endif
 
-    HexBin(Stage& prevStage, const Options&);
-
-    ~HexBin();
-    virtual void initialize();
-    static Options getDefaultOptions();
-
-    bool supportsIterator(StageIteratorType t) const
-    {
-        if (t == StageIterator_Sequential) return true;
-        // if (t == StageIterator_Random) return true;
-        return false;
-    }
-
-    pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const { throw pdal::not_yet_implemented("HexBin random iterator not implemented"); }
+    HexBin(const Options& options) : Filter(options)
+        {}
 
 private:
-    
+
+#ifdef PDAL_HAVE_HEXER
+    std::unique_ptr<hexer::HexGrid> m_grid;
+#endif
+    std::string m_xDimName;
+    std::string m_yDimName;
+    uint32_t m_sampleSize;
+    int32_t m_density;
+    double m_edgeLength;
+
+    virtual void processOptions(const Options& options);
+    virtual void ready(PointContext ctx);
+    virtual void filter(PointBuffer& buf);
+    virtual void done(PointContext ctx);
 
     HexBin& operator=(const HexBin&); // not implemented
     HexBin(const HexBin&); // not implemented
-    
 };
 
-namespace iterators
-{
+} // namespace filters
+} // namespace pdal
 
-namespace hexbin
-{
-
-class PDAL_DLL IteratorBase
-{
-public:
-    IteratorBase(pdal::filters::HexBin const& filter, PointBuffer& buffer);
-    ~IteratorBase();
-protected:
-    pdal::filters::HexBin const& m_filter;
-    Dimension const* m_dim_x;
-    Dimension const* m_dim_y;
-    
-#ifdef PDAL_HAVE_HEXER
-    hexer::HexGrid* m_grid;
-	std::vector<hexer::Point> m_samples;
-#endif
-    boost::uint32_t m_sample_size;
-    boost::uint32_t m_sample_number;
-    boost::int32_t m_density;
-    double m_edge_size;
-
-private:
-    IteratorBase& operator=(IteratorBase const&);
-
-    
-};
-
-} // hexer
-    
-namespace sequential
-{
-
-
-class PDAL_DLL HexBin : public pdal::FilterSequentialIterator, public hexbin::IteratorBase
-{
-public:
-    HexBin(const pdal::filters::HexBin& filter, PointBuffer& buffer);
-    ~HexBin();
-
-protected:
-    // virtual void readBufferBeginImpl(PointBuffer&);
-    // virtual void readBufferEndImpl(PointBuffer&);
-    // virtual void readEndImpl();    
-
-private:
-    boost::uint64_t skipImpl(boost::uint64_t);
-    boost::uint32_t readBufferImpl(PointBuffer&);
-    bool atEndImpl() const;    
-
-};
-
-
-
-} // sequential
-
-// namespace random
-// {
-// 
-// class PDAL_DLL HexBin : public pdal::FilterRandomIterator, public inplacereprojection::IteratorBase
-// {
-// public:
-//     InPlaceReprojection(const pdal::filters::InPlaceReprojection& filter, PointBuffer& buffer);
-//     virtual ~InPlaceReprojection(){};
-// 
-// protected:
-//     virtual boost::uint32_t readBufferImpl(PointBuffer& buffer);
-// 
-//     
-//     virtual boost::uint64_t seekImpl(boost::uint64_t);
-// 
-// 
-// };    
-//     
-//     
-// } // random
-
-} // iterators
-
-
-}
-} // namespaces
-
-#endif

@@ -46,200 +46,70 @@ namespace filters
 {
 
 
-Predicate::Predicate(Stage& prevStage, const Options& options)
-    : pdal::Filter(prevStage, options)
-    , m_script(NULL)
+void Predicate::processOptions(const Options& options)
 {
-    return;
-}
-
-
-Predicate::~Predicate()
-{
-    delete m_script;
-}
-
-
-void Predicate::initialize()
-{
-    Filter::initialize();
-
-    m_script = new pdal::plang::Script(getOptions());
-
-    log()->get(logDEBUG)  << "script " << *m_script << std::endl;
-
-    return;
+    m_source = options.getValueOrDefault<std::string>("source", "");
+    if (m_source.empty())
+        m_source = FileUtils::readFileIntoString(
+            options.getValueOrThrow<std::string>("filename"));
+    m_module = options.getValueOrThrow<std::string>("module");
+    m_function = options.getValueOrThrow<std::string>("function");
 }
 
 
 Options Predicate::getDefaultOptions()
 {
     Options options;
-
-    Option script("script", "");
-    options.add(script);
-
-    Option module("module", "");
-    options.add(module);
-
-    Option function("function", "");
-    options.add(function);
-
+    options.add("script", "");
+    options.add("module", "");
+    options.add("function", "");
     return options;
 }
 
 
-boost::uint32_t Predicate::processBuffer(PointBuffer& data, pdal::plang::BufferedInvocation& python) const
+void Predicate::ready(PointContext ctx)
 {
-    python.resetArguments();
-
-    python.beginChunk(data);
-
-    python.execute();
-
-    if (!python.hasOutputVariable("Mask"))
-    {
-        throw python_error("Mask variable not set in predicate filter function");
-    }
-
-    boost::uint8_t* mask = new boost::uint8_t[data.getNumPoints()];
-
-    PointBuffer dstData(data.getSchema(), data.getCapacity());
-
-    python.extractResult("Mask", (boost::uint8_t*)mask, data.getNumPoints(), 1, pdal::dimension::RawByte, 1);
-
-    boost::uint8_t* dst = dstData.getData(0);
-    boost::uint8_t* src = data.getData(0);
-
-    const Schema& schema = dstData.getSchema();
-    boost::uint32_t numBytes = schema.getByteSize();
-    assert(numBytes == data.getSchema().getByteSize());
-
-    boost::uint32_t numSrcPoints = data.getNumPoints();
-    boost::uint32_t count = 0;
-    for (boost::uint32_t srcIndex=0; srcIndex<numSrcPoints; srcIndex++)
-    {
-        if (mask[srcIndex])
-        {
-            memcpy(dst, src, numBytes);
-            dst += numBytes;
-            ++count;
-            dstData.setNumPoints(count);
-        }
-        src += numBytes;
-    }
-
-
-    data.copyPointsFast(0, 0, dstData, count);
-    data.setNumPoints(count);
-
-    delete[] mask;
-
-    return count;
-}
-
-
-pdal::StageSequentialIterator* Predicate::createSequentialIterator(PointBuffer& buffer) const
-{
-    return new pdal::filters::iterators::sequential::Predicate(*this, buffer);
-}
-
-
-//---------------------------------------------------------------------------
-
-
-namespace iterators
-{
-namespace sequential
-{
-
-Predicate::Predicate(const pdal::filters::Predicate& filter, PointBuffer& buffer)
-    : pdal::FilterSequentialIterator(filter, buffer)
-    , m_predicateFilter(filter)
-    , m_pythonMethod(NULL)
-    , m_numPointsProcessed(0)
-    , m_numPointsPassed(0)
-{
-    return;
-}
-
-
-Predicate::~Predicate()
-{
-    delete m_pythonMethod;
-}
-
-
-void Predicate::createParser()
-{
-    const pdal::plang::Script& script = m_predicateFilter.getScript();
-
-    m_pythonMethod = new pdal::plang::BufferedInvocation(script);
-
+    m_script = new plang::Script(m_source, m_module, m_function);
+    m_pythonMethod = new plang::BufferedInvocation(*m_script);
     m_pythonMethod->compile();
-
-    return;
+    GlobalEnvironment::get().getPythonEnvironment().set_stdout(
+        log()->getLogStream());
 }
 
 
-void Predicate::readBeginImpl()
+PointBufferSet Predicate::run(PointBufferPtr buf)
 {
-    if (!m_pythonMethod)
-    {
-        createParser();
-    }
+    m_pythonMethod->resetArguments();
+    m_pythonMethod->begin(*buf);
+    m_pythonMethod->execute();
 
-    m_numPointsProcessed = m_numPointsPassed = 0;
+    if (!m_pythonMethod->hasOutputVariable("Mask"))
+        throw python_error("Mask variable not set in predicate "
+            "filter function");
 
-    pdal::GlobalEnvironment::get().getPythonEnvironment().set_stdout(m_predicateFilter.log()->getLogStream());
+    PointBufferPtr outbuf = buf->makeNew();
 
-    return;
+    void *pydata =
+        m_pythonMethod->extractResult("Mask", Dimension::Type::Unsigned8);
+    char *ok = (char *)pydata;
+    for (PointId idx = 0; idx < buf->size(); ++idx)
+        if (*ok++)
+            outbuf->appendPoint(*buf, idx);
+
+    PointBufferSet pbSet;
+    pbSet.insert(outbuf);
+    return pbSet;
 }
 
 
-void Predicate::readEndImpl()
+void Predicate::done(PointContext ctx)
 {
-    pdal::GlobalEnvironment::get().getPythonEnvironment().reset_stdout();
-
-    return;
+    GlobalEnvironment::get().getPythonEnvironment().reset_stdout();
+    delete m_pythonMethod;
+    delete m_script;
 }
 
-
-boost::uint32_t Predicate::readBufferImpl(PointBuffer& dstData)
-{
-    // read in a full block of points
-
-    const boost::uint32_t numRead = getPrevIterator().read(dstData);
-    if (numRead > 0)
-    {
-        m_numPointsProcessed = dstData.getNumPoints();
-
-        // copies the points as they pass in-place
-        m_predicateFilter.processBuffer(dstData, *m_pythonMethod);
-    }
-
-    m_numPointsPassed = dstData.getNumPoints();
-
-    return dstData.getNumPoints();
-}
-
-
-boost::uint64_t Predicate::skipImpl(boost::uint64_t count)
-{
-    getPrevIterator().skip(count);
-    return count;
-}
-
-
-bool Predicate::atEndImpl() const
-{
-    return getPrevIterator().atEnd();
-}
-
-}
-} // iterators::sequential
-
-}
-} // pdal::filters
+} // namespace filters
+} // namespace pdal
 
 #endif

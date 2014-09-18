@@ -38,80 +38,82 @@
 #include <boost/algorithm/string.hpp>
 
 #include <pdal/FileUtils.hpp>
+#include <pdal/PipelineReader.hpp>
 #include <pdal/Utils.hpp>
 
-
-namespace pdal { namespace kernel {
-    
-
-pdal::PipelineManager* AppSupport::makePipeline(pdal::Options& options)
+namespace pdal
 {
-    const std::string inputFile = options.getValueOrThrow<std::string>("filename");
+namespace kernel
+{
+    
+PipelineManager* AppSupport::makePipeline(pdal::Options& options)
+{
+    std::string inputFile = options.getValueOrThrow<std::string>("filename");
 
     if (!pdal::FileUtils::fileExists(inputFile))
-    {
         throw app_runtime_error("file not found: " + inputFile);
-    }
     
-    pdal::PipelineManager* output = new PipelineManager;
-    pdal::StageFactory factory;
-    std::string driver = factory.inferReaderDriver(inputFile, options);
-    if (driver == "")
-    {
-        throw app_runtime_error("Cannot determine input file type of " + inputFile);
-    }
+    PipelineManager* output = new PipelineManager;
 
-    pdal::Stage* stage = output->addReader(driver, options);
-    if (!stage)
+    if (inputFile == "STDIN")
     {
-        throw app_runtime_error("reader creation failed");
+        PipelineReader pipeReader(*output);
+        pipeReader.readPipeline(std::cin);
     }
-
+    else if (boost::filesystem::extension(inputFile) == ".xml")
+    {
+        PipelineReader pipeReader(*output);
+        pipeReader.readPipeline(inputFile);
+    }
+    else
+    {
+        StageFactory factory;
+        std::string driver = factory.inferReaderDriver(inputFile);
+        if (driver.empty())
+            throw app_runtime_error("Cannot determine input file type of " +
+                inputFile);
+        if (!output->addReader(driver, options))
+            throw app_runtime_error("reader creation failed");
+    }
     return output;
 }
     
-pdal::Stage* AppSupport::makeReader(pdal::Options& options)
+
+Stage *AppSupport::makeReader(pdal::Options& options)
 {
-    const std::string inputFile = options.getValueOrThrow<std::string>("filename");
+    std::string inputFile = options.getValueOrThrow<std::string>("filename");
 
-    if (!pdal::FileUtils::fileExists(inputFile))
-    {
+    if (!FileUtils::fileExists(inputFile))
         throw app_runtime_error("file not found: " + inputFile);
-    }
 
-    pdal::StageFactory factory;
-    std::string driver = factory.inferReaderDriver(inputFile, options);
-    if (driver == "")
-    {
-        throw app_runtime_error("Cannot determine input file type of " + inputFile);
-    }
+    StageFactory factory;
+    std::string driver = factory.inferReaderDriver(inputFile);
+    if (driver.empty())
+        throw app_runtime_error("Cannot determine input file type of " +
+            inputFile);
 
-    pdal::Stage* stage = factory.createReader(driver, options);
+    Stage* stage = factory.createReader(driver, options);
     if (!stage)
-    {
         throw app_runtime_error("reader creation failed");
-    }
-
     return stage;
 }
 
 
-pdal::Writer* AppSupport::makeWriter(pdal::Options& options, pdal::Stage& stage)
+Writer* AppSupport::makeWriter(Options& options, Stage *stage)
 {
-    const std::string outputFile = options.getValueOrThrow<std::string>("filename");
+    std::string outputFile = options.getValueOrThrow<std::string>("filename");
 
     pdal::StageFactory factory;
-    std::string driver = factory.inferWriterDriver(outputFile, options);
-    if (driver == "")
-    {
-        throw app_runtime_error("Cannot determine output file type of " + outputFile);
-    }
+    std::string driver = factory.inferWriterDriver(outputFile);
+    if (driver.empty())
+        throw app_runtime_error("Cannot determine output file type of " +
+            outputFile);
+    factory.inferWriterOptionsChanges(outputFile, options);
         
-    pdal::Writer* writer = factory.createWriter(driver, stage, options);
+    pdal::Writer* writer = factory.createWriter(driver, options);
     if (!writer)
-    {
         throw app_runtime_error("writer creation failed");
-    }
+    writer->setInput(stage);
 
     return writer;
 }
@@ -121,14 +123,13 @@ PercentageCallback::PercentageCallback(double major, double minor)
     : m_lastMajorPerc(-1 * major)
     , m_lastMinorPerc(-1 * minor)
     , m_done(false)
-{
-    return;
-}
+{}
 
 
 void PercentageCallback::callback()
 {
-    if (m_done) return;
+    if (m_done)
+        return;
 
     double currPerc = getPercentComplete();
     
@@ -148,76 +149,50 @@ void PercentageCallback::callback()
         std::cerr << '.' << std::flush;
         m_lastMinorPerc = currPerc;
     }
-
-    return;
 }
 
-ShellScriptCallback::ShellScriptCallback(std::vector<std::string> const& command)
+ShellScriptCallback::ShellScriptCallback(
+    const std::vector<std::string>& command)
 {
     double major_tick(10.0);
     double minor_tick(2.0);
     
-    if (!command.size())
-    {
-        m_command = "";        
-    }
-    else
+    if (command.size())
     {
         m_command = command[0];
-
         if (command.size() == 3)
         {
             major_tick = boost::lexical_cast<double>(command[1]);
             minor_tick = boost::lexical_cast<double>(command[2]);
         } 
         else if (command.size() == 2)
-        {
             major_tick = boost::lexical_cast<double>(command[1]);
-        }
     }
-
     PercentageCallback(major_tick, minor_tick);
-
-    return;
 }
 
 
 void ShellScriptCallback::callback()
 {
-    if (m_done) return;
+    if (m_done)
+        return;
 
     double currPerc = getPercentComplete();
-    
-    if (pdal::Utils::compare_distance<double>(currPerc, 100.0))
-    {
+    if (Utils::compare_distance<double>(currPerc, 100.0))
         m_done = true;
-    }
     else if (currPerc >= m_lastMajorPerc + 10.0)
     {
         std::string output;
-        int stat = pdal::Utils::run_shell_command(m_command + " " + boost::lexical_cast<std::string>(static_cast<int>(currPerc)), output);
+        int stat = Utils::run_shell_command(m_command + " " +
+            boost::lexical_cast<std::string>(static_cast<int>(currPerc)),
+            output);
         m_lastMajorPerc = currPerc;
         m_lastMinorPerc = currPerc;
     }
     else if (currPerc >= m_lastMinorPerc + 2.0)
-    {
         m_lastMinorPerc = currPerc;
-    }
-
-    return;
 }
 
-HeartbeatCallback::HeartbeatCallback()
-{
-    return;
-}
+} // namespace kernel
+} // namespace pdal
 
-
-void HeartbeatCallback::callback()
-{
-    std::cerr << '.';
-
-    return;
-}
-
-}} // pdal::kernel

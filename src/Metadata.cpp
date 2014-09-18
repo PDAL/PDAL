@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2014, Hobu Inc.
 *
 * All rights reserved.
 *
@@ -36,87 +36,98 @@
 #include <pdal/Utils.hpp>
 
 #include <sstream>
-#include <cstring>
-
-#include <sstream>
 #include <string>
-
-#include <boost/algorithm/string.hpp>
+#include <map>
 
 #include <boost/property_tree/xml_parser.hpp>
-#include <boost/property_tree/json_parser.hpp>
-
 
 namespace pdal
 {
 
-Metadata::Metadata()
-
+std::string MetadataNodeImpl::toJSON() const
 {
-    setName("root");
-    setType("blank");
-    setValue<boost::blank>(boost::blank());
-    return;
+    std::ostringstream o;
+
+    o << "{" << std::endl;
+    if (m_name.empty())
+        subnodesToJSON(o, 1);
+    else
+    {
+        o << "  \"" << m_name << "\":" << std::endl;
+        o << "  {" << std::endl;
+        toJSON(o, 2);
+        o << "  }" << std::endl;
+    }
+    o << "}" << std::endl;
+    return o.str();
 }
 
-Metadata::Metadata(Metadata const& other)
-    : m_tree(other.m_tree)
-{}
 
-Metadata::Metadata(std::string const& name)
+void MetadataNodeImpl::toJSON(std::ostream& o, int level) const
 {
-    setType("blank");
-    setValue<boost::blank>(boost::blank());
-    setName(name);
+    std::string indent(level * 2, ' ');
+
+    std::string escaped_description(m_descrip);
+    escaped_description = Utils::escapeJSON(escaped_description);
+    std::string escaped_value(m_value);
+    escaped_value = Utils::escapeJSON(escaped_value);
+
+    o << indent << "\"description\":\"" << escaped_description <<
+        "\"," << std::endl;
+    o << indent << "\"type\":\"" << m_type << "\"," << std::endl;
+    o << indent << "\"value\":\"" << escaped_value << "\"";
+
+    if (m_subnodes.size())
+        o << ",";
+    o << std::endl;
+    subnodesToJSON(o, level);
 }
 
-Metadata::Metadata(boost::property_tree::ptree const& tree)
-    : m_tree(tree)
-{}
 
-Metadata Metadata::operator+(const Metadata& rhs) const
+void MetadataNodeImpl::subnodesToJSON(std::ostream& o, int level) const
 {
-    boost::property_tree::ptree tree = this->toPTree();
-    tree.add_child(rhs.getName(), rhs.toPTree());
-    return Metadata(tree);
+    std::string indent(level * 2, ' ');
 
+    for (auto si = m_subnodes.begin(); si != m_subnodes.end(); ++si)
+    {
+        const MetadataImplList& subnodes = si->second;
+        if (subnodes.empty())
+            continue;
+        MetadataNodeImplPtr node = *subnodes.begin();
+        if (node->m_kind == MetadataType::Array)
+        {
+            o << indent << "\"" << node->m_name << "\": [" << std::endl;
+            for (auto si = subnodes.begin(); si != subnodes.end(); ++si)
+            {
+                MetadataNodeImplPtr node = *si;
+
+                o << indent << "{" << std::endl;
+                node->toJSON(o, level + 1);
+                o << indent << "}";
+                if (si != subnodes.rbegin().base() - 1)
+                    o << ",";
+                o << std::endl;
+            }
+            o << indent << "]";
+        }
+        else
+        {
+            o << indent << "\"" << node->m_name << "\":" << std::endl;
+            o << indent << "{" << std::endl;
+            node->toJSON(o, level + 1);
+            o << indent << "}";
+        }
+        auto sii = si;
+        sii++;
+        if (sii != m_subnodes.end() && sii->second.size())
+            o << ",";
+        o << std::endl;
+    }
 }
 
+
+std::string MetadataNode::toJSON() const
+    { return m_impl->toJSON(); }
 
 } // namespace pdal
 
-
-namespace std
-{
-
-std::ostream& operator<<(std::ostream& ostr, const pdal::ByteArray& data)
-{
-
-    std::string output = pdal::Utils::base64_encode(data.get());
-
-    ostr << output;
-    return ostr;
-}
-
-std::istream& operator>>(std::istream& istr, pdal::ByteArray& output)
-{
-
-    std::string data;
-    istr >> data;
-    std::vector<boost::uint8_t> d = pdal::Utils::base64_decode(data);
-
-    output.set(d);
-    return istr;
-}
-
-
-std::ostream& operator<<(std::ostream& ostr, const pdal::Metadata& metadata)
-{
-    boost::property_tree::ptree tree = metadata.toPTree();
-
-    boost::property_tree::write_json(ostr, tree);
-    return ostr;
-}
-
-
-}

@@ -38,28 +38,12 @@
 namespace pdal
 {
 
-Reader::Reader(const Options& options)
-    : Stage(StageBase::makeVector(), options)
-
+void Reader::readerProcessOptions(const Options& options)
 {
-
-}
-
-
-Reader::~Reader()
-{
-    return;
-}
-
-
-void Reader::initialize()
-{
-    Metadata& m = getMetadataRef();
-    m.setName(getName());
-
-    Stage::initialize();
-
-    return;
+    if (options.hasOption("filename"))
+        m_filename = options.getValueOrThrow<std::string>("filename");
+    if (options.hasOption("count"))
+        m_count = options.getValueOrThrow<point_count_t>("count");
 }
 
 
@@ -70,7 +54,7 @@ boost::property_tree::ptree Reader::serializePipeline() const
     tree.add("<xmlattr>.type", getName());
 
     PipelineWriter::write_option_ptree(tree, getOptions());
-    PipelineWriter::write_metadata_ptree(tree, getMetadata());
+    PipelineWriter::writeMetadata(tree, m_metadata);
 
     boost::property_tree::ptree root;
     root.add_child("Reader", tree);

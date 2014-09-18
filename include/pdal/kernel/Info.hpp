@@ -32,11 +32,9 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_PDAL_KERNEL_INFO_HPP
-#define INCLUDED_PDAL_KERNEL_INFO_HPP
+#pragma once
 
 #include <pdal/Stage.hpp>
-#include <pdal/StageIterator.hpp>
 #include <pdal/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/filters/Stats.hpp>
@@ -54,7 +52,7 @@
 #include "Support.hpp"
 #include "Application.hpp"
 
-#define SEPARATORS ",| "
+
 typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
 
 
@@ -69,14 +67,14 @@ public:
 private:
     void addSwitches(); // overrride
     void validateSwitches(); // overrride
-
-    void dumpPoints(const Stage& stage, std::string const& points) const;
-    void dumpStats(pdal::filters::Stats& filter, PipelineManager* manager) const;
-    void dumpSchema(const Stage&) const;
-    void dumpStage(const Stage&) const;
-    void dumpQuery(Stage const&, IndexedPointBuffer&) const;
-    void dumpMetadata(const Stage&) const;
-    void dumpSDO_PCMetadata(Stage const&) const;
+    
+    void dump(PointContext ctx, PointBufferPtr buf);
+    
+    void dumpPoints(PointBufferPtr buf) const;
+    void dumpStats();
+    void dumpQuery(PointBufferPtr buf) const;
+    void dumpMetadata(PointContext ctx, const Stage&) const;
+    void dumpSDO_PCMetadata(PointContext ctx, Stage const&) const;
 
     std::string m_inputFile;
     bool m_showStats;
@@ -84,21 +82,24 @@ private:
     bool m_showStage;
     bool m_showMetadata;
     bool m_showSDOPCMetadata;
+    bool m_computeBoundary;
     pdal::Options m_options;
     std::string m_pointIndexes;
-    std::ostream* m_outputStream;
     boost::uint32_t m_seed;
     boost::uint32_t m_sample_size;
     bool m_useXML;
     bool m_useJSON;
-    bool m_useREST;
     std::string m_Dimensions;
     std::string m_QueryPoint;
     double m_QueryDistance;
     boost::uint64_t m_numPointsToWrite;
     std::string m_pipelineFile;
     bool m_showSample;
+
+    std::unique_ptr<boost::property_tree::ptree> m_tree;
+    std::unique_ptr<PipelineManager> m_manager;
 };
 
-}} // pdal::kernel
-#endif
+} // namespace kernel
+} // namespace pdal
+

@@ -37,8 +37,6 @@
 
 #include <pdal/pdal_internal.hpp>
 
-#include <boost/property_tree/ptree.hpp>
-
 namespace pdal
 {
 
@@ -52,20 +50,11 @@ public:
     };
 
     /// Default constructor.
-    SpatialReference();
+    SpatialReference()
+    {}
 
     // calls setFromUserInput() with the given string
     SpatialReference(const std::string& userInput);
-
-    /// Destructor.
-    /// If libgeotiff is enabled, deallocates libtiff and libgeotiff objects used internally.
-    ~SpatialReference();
-
-    /// Copy constryctor.
-    SpatialReference(SpatialReference const& other);
-
-    /// Assignment operator.
-    SpatialReference& operator=(SpatialReference const& rhs);
 
     bool equals(const SpatialReference& other) const;
     bool operator==(const SpatialReference& other) const;
@@ -85,11 +74,14 @@ public:
     /// available.
     std::string getWKT(WKTModeFlag mode_flag = eHorizontalOnly) const;
     std::string getWKT(WKTModeFlag mode_flag, bool pretty) const;
+    std::string getRawWKT() const
+        { return m_wkt; }
 
     /// Sets the SRS using GDAL's OGC WKT. If GDAL is not linked, this
     /// operation has no effect.
     /// \param v - a string containing the WKT string.
-    void setWKT(std::string const& v);
+    void setWKT(std::string const& v)
+        { m_wkt = v; }
 
     /// Sets the SRS using GDAL's SetFromUserInput function. If GDAL is not linked, this
     /// operation has no effect.
@@ -111,10 +103,9 @@ public:
     /// \param v - a string containing the Proj.4 string.
     void setProj4(std::string const& v);
 
-    boost::property_tree::ptree toPTree() const;
     void dump() const;
-    
-    bool isGeographic() const; 
+
+    bool isGeographic() const;
     const std::string& getDescription() const;
     const std::string& getName() const;
 

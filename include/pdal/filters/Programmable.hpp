@@ -32,16 +32,13 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_FILTERS_PROGRAMMABLEFILTER_HPP
-#define INCLUDED_FILTERS_PROGRAMMABLEFILTER_HPP
+#pragma once
 
 #include <pdal/pdal_internal.hpp>
 #ifdef PDAL_HAVE_PYTHON
 
 #include <pdal/Filter.hpp>
-#include <pdal/FilterIterator.hpp>
 #include <pdal/plang/BufferedInvocation.hpp>
-
 
 namespace pdal
 {
@@ -55,75 +52,37 @@ class PDAL_DLL Programmable : public Filter
 public:
     SET_STAGE_NAME("filters.programmable", "Programmable Filter")
     SET_STAGE_LINK("http://pdal.io/stages/filters.programmable.html")  
+#ifdef PDAL_HAVE_PYTHON
+    SET_STAGE_ENABLED(true)
+#else
+    SET_STAGE_ENABLED(false)
+#endif
     
-    Programmable(Stage& prevStage, const Options&);
-    ~Programmable();
+    Programmable(const Options& options) : Filter(options), m_script(NULL)
+        {}
 
-    virtual void initialize();
     static Options getDefaultOptions();
 
-    bool supportsIterator(StageIteratorType t) const
-    {
-        if (t == StageIterator_Sequential) return true;
-
-        return false;
-    }
-
-    pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const
-    {
-        return NULL;
-    }
-
-    void processBuffer(PointBuffer& data, pdal::plang::BufferedInvocation& python) const;
-
-    const pdal::plang::Script& getScript() const
-    {
-        return *m_script;
-    }
-
 private:
-    pdal::plang::Script* m_script;
+    plang::Script* m_script;
+    plang::BufferedInvocation *m_pythonMethod;
+    std::string m_source;
+    std::string m_module;
+    std::string m_function;
+    Dimension::IdList m_addDimensions;
+
+    virtual void processOptions(const Options& options);
+    virtual void addDimensions(PointContext ctx);
+    virtual void ready(PointContext ctx);
+    virtual void filter(PointBuffer& buf);
+    virtual void done(PointContext ctx);
 
     Programmable& operator=(const Programmable&); // not implemented
     Programmable(const Programmable&); // not implemented
 };
 
+} // namespace filters
+} // namespace pdal
 
-namespace iterators
-{
-namespace sequential
-{
+#endif // HAVE_PYTHON
 
-
-class PDAL_DLL Programmable : public pdal::FilterSequentialIterator
-{
-public:
-    Programmable(const pdal::filters::Programmable& filter, PointBuffer& buffer);
-    ~Programmable();
-
-private:
-    boost::uint64_t skipImpl(boost::uint64_t);
-    void readBeginImpl();
-    boost::uint32_t readBufferImpl(PointBuffer&);
-    void readEndImpl();
-    bool atEndImpl() const;
-
-    void createParser();
-
-    const pdal::filters::Programmable& m_programmableFilter;
-
-    pdal::plang::BufferedInvocation* m_pythonMethod;
-};
-
-}
-} // iterators::sequential
-
-
-
-}
-} // pdal::filteers
-
-#endif
-
-#endif

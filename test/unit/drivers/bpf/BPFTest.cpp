@@ -33,64 +33,110 @@
 ****************************************************************************/
 #include <boost/test/unit_test.hpp>
 
-
 #include <pdal/PipelineReader.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/Utils.hpp>
 #include <pdal/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
-#include <pdal/StageIterator.hpp>
+#include <pdal/drivers/bpf/BpfReader.hpp>
 
 #include "Support.hpp"
 
 BOOST_AUTO_TEST_SUITE(BPFTest)
 
-BOOST_AUTO_TEST_CASE(BPFTest_test)
+namespace
 {
 
+void test_file_type(const std::string& filename)
+{
+    using namespace pdal;
 
-    std::string p = Support::binpath("/../../bpf/test/pipeline_bpf.xml");
+    PointContext context;
 
-    // BPF driver is a (closed source) plugin. If the pipeline file for its
-    // example data isn't alongside the PDAL source tree, we skip the test.
-    if (!pdal::FileUtils::fileExists(p))
-        return;
-    // BPF driver is a (closed source) plugin. If we don't have PDAL_DRIVER_PATH
-    // set, we aren't going to bother trying to run the test.
-    std::string drivers;
-    std::string driver_path("PDAL_DRIVER_PATH");
-    drivers = pdal::Utils::getenv(driver_path);
-    if (drivers.size() == 0)
-        return;
+    Options ops;
 
-    pdal::PipelineManager manager;
+    ops.add("filename", Support::datapath(filename));
+    ops.add("count", 506);
+    BpfReader reader(ops);
 
+    reader.prepare(context);
+    PointBufferSet pbSet = reader.execute(context);
 
-    pdal::Option option("filename", p);
+    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    PointBufferPtr buf = *pbSet.begin();
+    BOOST_CHECK_EQUAL(buf->size(), 506);
 
-    pdal::PipelineReader reader(manager, false, 0);
-    reader.readPipeline(option.getValue<std::string>());
-
-    pdal::Stage* stage = manager.getStage();
-    BOOST_CHECK(stage != NULL);
-    stage->initialize();
-    BOOST_CHECK_EQUAL(stage->getNumPoints(), 1838289u);
-
+    struct PtData
     {
-        const pdal::Schema& schema = stage->getSchema();
-        // std::cout << schema << std::endl;
-        pdal::PointBuffer data(schema, 2048);
-        pdal::StageSequentialIterator* iter = stage->createSequentialIterator(data);
-        boost::uint32_t np = iter->read(data);
-        BOOST_CHECK_EQUAL(np, 2048u);
+        float x;
+        float y;
+        float z;
+    };
 
-        delete iter;
+    PtData pts2[3] = { {494057.312, 4877433.5, 130.630005},
+                       {494133.812, 4877440, 130.440002},
+                       {494021.094, 4877440, 130.460007} };
+
+    for (int i = 0; i < 3; ++i)
+    {
+        float x = buf->getFieldAs<float>(Dimension::Id::X, i);
+        float y = buf->getFieldAs<float>(Dimension::Id::Y, i);
+        float z = buf->getFieldAs<float>(Dimension::Id::Z, i);
+        
+        BOOST_CHECK_CLOSE(x, pts2[i].x, 0.001);
+        BOOST_CHECK_CLOSE(y, pts2[i].y, 0.001);
+        BOOST_CHECK_CLOSE(z, pts2[i].z, 0.001);
     }
 
-    // BOOST_CHECK_EQUAL(np, 106u);
+    PtData pts[3] = { {494915.25, 4878096.5, 128.220001},
+                      {494917.062, 4878124.5, 128.539993},
+                      {494920.781, 4877914.5, 127.43} };
 
-    return;
+    for (int i = 503; i < 3; ++i)
+    {
+        float x = buf->getFieldAs<float>(Dimension::Id::X, i);
+        float y = buf->getFieldAs<float>(Dimension::Id::Y, i);
+        float z = buf->getFieldAs<float>(Dimension::Id::Z, i);
+        
+        BOOST_CHECK_CLOSE(x, pts[i].x, 0.001);
+        BOOST_CHECK_CLOSE(y, pts[i].y, 0.001);
+        BOOST_CHECK_CLOSE(z, pts[i].z, 0.001);
+    }
 }
+
+} //namespace
+
+BOOST_AUTO_TEST_CASE(test_point_major)
+{
+    test_file_type("bpf/autzen-utm-chipped-25-v3-interleaved.bpf");
+}
+
+BOOST_AUTO_TEST_CASE(test_dim_major)
+{
+    test_file_type("bpf/autzen-utm-chipped-25-v3.bpf");
+}
+
+BOOST_AUTO_TEST_CASE(test_byte_major)
+{
+    test_file_type("bpf/autzen-utm-chipped-25-v3-segregated.bpf");
+}
+
+#ifdef PDAL_HAVE_ZLIB
+BOOST_AUTO_TEST_CASE(test_point_major_zlib)
+{
+    test_file_type("bpf/autzen-utm-chipped-25-v3-deflate-interleaved.bpf");
+}
+
+BOOST_AUTO_TEST_CASE(test_dim_major_zlib)
+{
+    test_file_type("bpf/autzen-utm-chipped-25-v3-deflate.bpf");
+}
+
+BOOST_AUTO_TEST_CASE(test_byte_major_zlib)
+{
+    test_file_type("bpf/autzen-utm-chipped-25-v3-deflate-segregated.bpf");
+}
+#endif
 
 
 BOOST_AUTO_TEST_SUITE_END()

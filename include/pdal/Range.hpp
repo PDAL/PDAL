@@ -35,9 +35,6 @@
 #ifndef INCLUDED_RANGE_HPP
 #define INCLUDED_RANGE_HPP
 
-#include <boost/lexical_cast.hpp>
-#include <boost/property_tree/ptree.hpp>
-
 #include <pdal/pdal_internal.hpp>
 #include <pdal/Utils.hpp>
 
@@ -45,8 +42,12 @@ namespace pdal
 {
 
 template <typename T>
+class Bounds;
+
+template <typename T>
 class PDAL_DLL Range
 {
+    friend class Bounds<T>;
 private:
     T m_minimum;
     T m_maximum;
@@ -55,31 +56,14 @@ public:
     typedef T value_type;
 
     Range()
-        : m_minimum((std::numeric_limits<T>::max)())
-        , m_maximum((std::numeric_limits<T>::min)())
     {
+        clear();
     }
 
     Range(T minimum, T maximum)
         : m_minimum(minimum)
         , m_maximum(maximum)
     {
-    }
-
-    Range(Range const& other)
-        : m_minimum(other.m_minimum)
-        , m_maximum(other.m_maximum)
-    {
-    }
-
-    Range& operator=(Range<T> const& rhs)
-    {
-        if (&rhs != this)
-        {
-            m_minimum = rhs.m_minimum;
-            m_maximum = rhs.m_maximum;
-        }
-        return *this;
     }
 
     bool operator==(Range<T> const& rhs) const
@@ -114,13 +98,8 @@ public:
 
     bool equal(Range const& other) const
     {
-        if (!Utils::compare_distance(m_minimum, other.m_minimum) ||
-                !Utils::compare_distance(m_maximum, other.m_maximum))
-        {
-            return false;
-        }
-
-        return true;
+        return Utils::compare_distance(m_minimum, other.m_minimum) &&
+            Utils::compare_distance(m_maximum, other.m_maximum);
     }
 
     bool overlaps(Range const& r) const
@@ -140,8 +119,11 @@ public:
 
     bool empty(void) const
     {
-        return Utils::compare_distance(m_minimum, (std::numeric_limits<T>::max)()) &&
-               Utils::compare_distance(m_maximum, (std::numeric_limits<T>::min)());
+        return
+            Utils::compare_distance(m_minimum,
+                (std::numeric_limits<T>::max)()) &&
+            Utils::compare_distance(m_maximum,
+                (std::numeric_limits<T>::min)());
     }
 
     void shift(T v)
@@ -184,17 +166,15 @@ public:
         grow(hi);
     }
 
+    void clear()
+    {
+        m_minimum = (std::numeric_limits<T>::max)();
+        m_maximum = (std::numeric_limits<T>::min)();
+    }
+
     T length() const
     {
         return m_maximum - m_minimum;
-    }
-
-    boost::property_tree::ptree toPTree() const
-    {
-        boost::property_tree::ptree tree;
-        tree.add("minimum", getMinimum());
-        tree.add("maximum", getMaximum());
-        return tree;
     }
 
     void dump() const

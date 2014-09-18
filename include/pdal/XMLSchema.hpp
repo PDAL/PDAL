@@ -32,16 +32,15 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_XMLSCHEMA_HPP
-#define INCLUDED_XMLSCHEMA_HPP
+#pragma once
 
-#include <pdal/pdal_internal.hpp>
-#include <pdal/Schema.hpp>
+#include <pdal/Dimension.hpp>
 #include <pdal/Metadata.hpp>
 
 #include <string>
 #include <stdarg.h>
-#include <functional>
+//#include <functional>
+#include <vector>
 
 #ifdef PDAL_HAVE_LIBXML2
 #include <libxml/parser.h>
@@ -56,8 +55,8 @@
 #endif
 
 #include <boost/shared_ptr.hpp>
-#include <boost/concept_check.hpp>
-#include <boost/function.hpp>
+//#include <boost/concept_check.hpp>
+//#include <boost/function.hpp>
 
 namespace pdal
 {
@@ -131,33 +130,79 @@ typedef boost::shared_ptr<void> TextWriterPtr;
 typedef boost::shared_ptr<void> BufferPtr;
 typedef boost::shared_ptr<void> CharPtr;
 
+struct Scale
+{
+    Scale() : m_scale(1.0), m_offset(0.0) {};
+    double m_scale;
+    double m_offset;
+};
+
+struct XYZScale
+{
+    Scale m_x;
+    Scale m_y;
+    Scale m_z;
+};
+
+struct DimInfo
+{
+    DimInfo() : m_min(0.0), m_max(0.0), m_scale(1.0), m_offset(0.0) {};
+    std::string m_name;
+    std::string m_description;
+    uint32_t m_position;
+    Dimension::Type::Enum m_type;
+    double m_min;
+    double m_max;
+    double m_scale;
+    double m_offset;
+    Dimension::Id::Enum m_id;
+};
+typedef std::vector<DimInfo> DimInfoList;
+inline bool operator < (const DimInfo& d1, const DimInfo& d2)
+    { return d1.m_position < d2.m_position; }
+
+struct XMLSchema
+{
+    XMLSchema() : m_orientation(Orientation::PointMajor) {};
+    Orientation::Enum m_orientation;
+    DimInfoList m_dims;
+    XYZScale m_scale;  // To support quick access.
+
+    Dimension::IdList dims() const
+    {
+        Dimension::IdList ids;
+        for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
+        {
+            assert(di->m_id != Dimension::Id::Unknown);
+            ids.push_back(di->m_id);
+        }
+        return ids;
+    }
+    std::vector<Dimension::Type::Enum> types() const
+    {
+        std::vector<Dimension::Type::Enum> types;
+        for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
+            types.push_back(di->m_type);
+        return types;
+    }
+};
+
 class PDAL_DLL Reader
 {
 public:
-    Reader(std::string const& xml, std::string const& xmlschema);
-    Reader(std::istream* xml, std::istream* schema);
+    Reader(std::string xml, std::string xsd = "");
+    Reader(std::istream* xml, std::istream* xsd);
     ~Reader();
 
-    inline pdal::Schema const& getSchema()
-    {
-        return m_schema;
-    }
-
-
+    XMLSchema schema() const
+        { return m_schema; }
 protected:
-
     void Initialize();
     void Load();
 
 private:
-
-    Reader& operator=(const Reader&); // not implemented
-    Reader(const Reader&); // not implemented;
-
 #ifdef PDAL_HAVE_LIBXML2
     pdal::Metadata LoadMetadata(xmlNode* node);
-    
-
     std::string remapOldNames(std::string const& input);
 
     DocPtr m_doc;
@@ -170,43 +215,43 @@ private:
     xmlParserOption m_doc_options;
 #endif
 
-    void* m_global_context;
-
-    pdal::Schema m_schema;
-
+    void *m_global_context;
     std::string m_xml;
     std::string m_xsd;
+    uint32_t m_field_position;
+    XMLSchema m_schema;
 
-    boost::uint32_t m_field_position;
+    Reader& operator=(const Reader&); // not implemented
+    Reader(const Reader&); // not implemented;
 };
 
 
 class PDAL_DLL Writer
 {
 public:
-    Writer(pdal::Schema const& schema);
-    ~Writer() {}
-    
-    void setMetadata(boost::property_tree::ptree const& tree) { m_metadata = tree; }
+    Writer(const Dimension::IdList& ids,
+        const std::vector<Dimension::Type::Enum>& types, 
+        Orientation::Enum orientation= Orientation::PointMajor) :
+            m_dims(ids), m_types(types), m_orientation(orientation)
+        {}
+    void setMetadata(MetadataNode& m)
+        { m_metadata = m; }
     std::string getXML();
-protected:
+
 private:
+    void write(TextWriterPtr w);
+    void writeSchema(TextWriterPtr w);
+
+    void* m_global_context;
+    Dimension::IdList m_dims;
+    std::vector<Dimension::Type::Enum> m_types;
+    MetadataNode m_metadata;
+    Orientation::Enum m_orientation;
 
     Writer& operator=(const Writer&); // not implemented
     Writer(const Writer&); // not implemented;
-    void write(TextWriterPtr w);
-    void writeSchema(TextWriterPtr w);
-    void* m_global_context;
-    pdal::Schema const& m_schema;
-    boost::property_tree::ptree m_metadata;
-
-
-
 };
 
+} // namespace schema
+} // namespace pdal
 
-
-}
-} // namespaces
-
-#endif

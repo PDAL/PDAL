@@ -42,6 +42,7 @@
 #include <ctype.h>
 
 #include <pdal/Range.hpp>
+#include <pdal/PDALUtils.hpp>
 
 using namespace pdal;
 
@@ -211,8 +212,6 @@ BOOST_AUTO_TEST_CASE(test_output)
 
     BOOST_CHECK(out1 == "[1, 2]");
     BOOST_CHECK(out2 == "[1.1, 2.2]");
-
-    return;
 }
 
 
@@ -221,7 +220,7 @@ BOOST_AUTO_TEST_CASE(RangeTest_ptree)
     const Range<int> r1(23,56);
     std::stringstream ss1(std::stringstream::in | std::stringstream::out);
 
-    boost::property_tree::ptree tree = r1.toPTree();
+    boost::property_tree::ptree tree = pdal::utils::toPTree(r1);
     boost::property_tree::write_xml(ss1, tree);
 
     const std::string out1 = ss1.str();
@@ -230,8 +229,6 @@ BOOST_AUTO_TEST_CASE(RangeTest_ptree)
     const std::string ref = xml_header + "<minimum>23</minimum><maximum>56</maximum>";
 
     BOOST_CHECK_EQUAL(ref, out1);
-
-    return;
 }
 
 
@@ -244,8 +241,6 @@ BOOST_AUTO_TEST_CASE(test_input)
 
     const Range<double> r(1.1,2.2);
     BOOST_CHECK(r == rr);
-
-    return;
 }
 
 BOOST_AUTO_TEST_CASE(test_lexicalcast_whitespace)
@@ -254,8 +249,6 @@ BOOST_AUTO_TEST_CASE(test_lexicalcast_whitespace)
     const Range<double> b2 = boost::lexical_cast< Range<double> >("[1, 101] ");
 
     BOOST_CHECK_EQUAL(b1, b2);
-
-    return;
 }
 
 

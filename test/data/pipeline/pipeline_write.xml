@@ -1,12 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Pipeline version="1.0">
     <Writer type="drivers.las.writer">
+        <Option name="metadata">
+            <Options/>
+          </Option>
         <Option name="filename">
             pdal-compressed.laz
         </Option>
         <Option name="compression">
             true
         </Option>
+        <Option name="format">
+            2
+        </Option>        
         <Filter type="filters.stats">
             <Option name="exact_dimensions">Classification</Option>
             <Option name="dimensions">drivers.las.reader.X, drivers.las.reader.Y, drivers.las.reader.Z, Classification</Option>

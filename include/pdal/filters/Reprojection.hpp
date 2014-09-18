@@ -32,14 +32,11 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_FILTERS_REPROJECTIONFILTER_HPP
-#define INCLUDED_FILTERS_REPROJECTIONFILTER_HPP
+#pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/FilterIterator.hpp>
 
 #include <boost/shared_ptr.hpp>
-
 
 namespace pdal
 {
@@ -48,10 +45,7 @@ namespace gdal
 {
 class Debug;
 }
-}
 
-namespace pdal
-{
 namespace filters
 {
 
@@ -59,36 +53,24 @@ class PDAL_DLL Reprojection : public Filter
 {
 public:
     SET_STAGE_NAME("filters.reprojection", "Reprojection Filter")
+    SET_STAGE_LINK("http://www.pdal.io/stages/filters.inplacereprojection.html")     
+#ifdef PDAL_HAVE_GDAL
+    SET_STAGE_ENABLED(true)
+#else
+    SET_STAGE_ENABLED(false)
+#endif
 
-    Reprojection(Stage& prevStage, const Options&);
-    Reprojection(Stage& prevStage,
-                 const SpatialReference& outSRS);
-    Reprojection(Stage& prevStage,
-                 const SpatialReference& inSRS,
-                 const SpatialReference& outSRS);
-
-    virtual void initialize();
-    static Options getDefaultOptions();
-
-    bool supportsIterator(StageIteratorType t) const
-    {
-        if (t == StageIterator_Sequential) return true;
-
-        return false;
-    }
-
-    pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const
-    {
-        return NULL;
-    }
-
-    void processBuffer(PointBuffer& data) const;
+    Reprojection(const Options&);
+    Reprojection(const SpatialReference& outSRS);
+    Reprojection(const SpatialReference& inSRS, const SpatialReference& outSRS);
 
 private:
+    virtual void processOptions(const Options& options);
+    virtual void ready(PointContext ctx);
+    virtual void filter(PointBuffer& buffer);
+
     void updateBounds();
-    void checkImpedance();
-    void transform(double& x, double& y, double& z) const;
+    void transform(double& x, double& y, double& z);
 
     SpatialReference m_inSRS;
     SpatialReference m_outSRS;
@@ -105,31 +87,6 @@ private:
     Reprojection(const Reprojection&); // not implemented
 };
 
+} // namespace filter
+} // namespace pdal
 
-namespace iterators
-{
-namespace sequential
-{
-
-
-class PDAL_DLL Reprojection : public pdal::FilterSequentialIterator
-{
-public:
-    Reprojection(const pdal::filters::Reprojection& filter, PointBuffer& buffer);
-
-private:
-    boost::uint64_t skipImpl(boost::uint64_t);
-    boost::uint32_t readBufferImpl(PointBuffer&);
-    bool atEndImpl() const;
-
-    const pdal::filters::Reprojection& m_reprojectionFilter;
-};
-
-
-}
-} // iterators::sequential
-
-}
-} // namespaces
-
-#endif

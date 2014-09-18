@@ -32,14 +32,10 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_PDAL_DRIVER_TERRASOLID_READER_HPP
-#define INCLUDED_PDAL_DRIVER_TERRASOLID_READER_HPP
+#pragma once
 
 #include <pdal/Reader.hpp>
-#include <pdal/ReaderIterator.hpp>
 #include <pdal/Options.hpp>
-
-#include <pdal/StageIterator.hpp>
 
 #include <vector>
 
@@ -77,21 +73,20 @@ struct TerraSolidHeader
         Color(0)
     {}
 
-    boost::int32_t HdrSize;
-    boost::int32_t HdrVersion;
-    boost::int32_t RecogVal;
+    int32_t HdrSize;
+    int32_t HdrVersion;
+    int32_t RecogVal;
     char RecogStr[4];
-    boost::int32_t PntCnt;
-    boost::int32_t Units;
+    int32_t PntCnt;
+    int32_t Units;
     double OrgX;
     double OrgY;
     double OrgZ;
-    boost::int32_t Time;
-    boost::int32_t Color;
-
+    int32_t Time;
+    int32_t Color;
 };
 
-typedef boost::scoped_ptr<TerraSolidHeader> TerraSolidHeaderPtr ;
+typedef boost::scoped_ptr<TerraSolidHeader> TerraSolidHeaderPtr;
 class terrasolid_error : public pdal_error
 {
 public:
@@ -101,148 +96,48 @@ public:
     {}
 };
 
-
-class PointDimensions
-{
-public:
-    PointDimensions(const Schema& schema, std::string const& ns);
-
-    pdal::Dimension const* Time;
-    pdal::Dimension const* X;
-    pdal::Dimension const* Y;
-    pdal::Dimension const* Z;
-
-    pdal::Dimension const* Classification;
-    pdal::Dimension const* PointSourceId;
-    pdal::Dimension const* ReturnNumber;
-    pdal::Dimension const* Intensity;
-    pdal::Dimension const* Mark;
-    pdal::Dimension const* Flag;
-
-    pdal::Dimension const* Red;
-    pdal::Dimension const* Green;
-    pdal::Dimension const* Blue;
-    pdal::Dimension const* Alpha;
-
-};
-//
-// supported options:
-//   <uint32>id
-//   <bool>debug
-//   <uint32>verbose
-//   <string>filename  [required]
-//
-
 class PDAL_DLL Reader : public pdal::Reader
 {
 public:
     SET_STAGE_NAME("drivers.terrasolid.reader", "TerraSolid Reader")
+    SET_STAGE_ENABLED(true)
 
-    Reader(const Options&);
-    ~Reader();
+    Reader(const Options& options) : pdal::Reader(options),
+        m_format(TERRASOLID_Format_Unknown)
+    {}
 
-    virtual void initialize();
-    static Options getDefaultOptions();
-    static std::vector<Dimension> getDefaultDimensions();
+    static Dimension::IdList getDefaultDimensions();
 
-    std::string getFileName() const;
-
-    bool supportsIterator(StageIteratorType t) const
-    {
-        if (t == StageIterator_Sequential) return true;
-        if (t == StageIterator_Random) return true;
-
-        return false;
-    }
-
-
-    pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator(PointBuffer& buffer) const;
-
-
-    std::size_t getPointDataOffset() const
-    {
-        return m_offset;
-    }
-    boost::uint32_t getPointDataSize() const
-    {
-        return m_size;
-    }
+    point_count_t getNumPoints() const
+        { return m_header->PntCnt; }
 
     // this is called by the stage's iterator
-    boost::uint32_t processBuffer(PointBuffer& PointBuffer, std::istream& stream, boost::uint64_t numPointsLeft) const;
-
-protected:
-    inline TERRASOLID_Format_Type getFormat() const
-    {
-        return m_format;
-    }
+    uint32_t processBuffer(PointBuffer& PointBuffer, std::istream& stream,
+        uint64_t numPointsLeft) const;
 
 private:
+    TerraSolidHeaderPtr m_header;
+    TERRASOLID_Format_Type m_format;
+    uint32_t m_size;
+    bool m_haveColor;
+    bool m_haveTime;
+    uint32_t m_baseTime;
+    std::istream* m_istream;
+    point_count_t m_index;
+
+    virtual void initialize();
+    virtual void addDimensions(PointContextRef ctx);
+    virtual void ready(PointContextRef ctx);
+    virtual point_count_t read(PointBuffer& buf, point_count_t count);
+    virtual void done(PointContextRef ctx);
+    virtual bool eof()
+        { return m_index >= getNumPoints(); }
 
     Reader& operator=(const Reader&); // not implemented
     Reader(const Reader&); // not implemented
-
-    TerraSolidHeaderPtr m_header;
-    TERRASOLID_Format_Type m_format;
-    std::size_t m_offset;
-    boost::uint32_t m_size;
-
-    bool m_haveColor;
-    bool m_haveTime;
-
-    void registerFields();
-
-
 };
 
-namespace iterators
-{
+} // namespace terrasolid
+} // namespace drivers
+} // namespace pdal
 
-namespace sequential
-{
-
-class Reader : public pdal::ReaderSequentialIterator
-{
-public:
-    Reader(const pdal::drivers::terrasolid::Reader& reader, PointBuffer& buffer);
-    ~Reader();
-
-private:
-    boost::uint64_t skipImpl(boost::uint64_t);
-    boost::uint32_t readBufferImpl(PointBuffer&);
-    bool atEndImpl() const;
-
-    const pdal::drivers::terrasolid::Reader& m_reader;
-    std::istream* m_istream;
-};
-
-
-} // sequential
-
-namespace random
-{
-
-class Reader : public pdal::ReaderRandomIterator
-{
-public:
-    Reader(const pdal::drivers::terrasolid::Reader& reader, PointBuffer& buffer);
-    ~Reader();
-
-private:
-    boost::uint64_t seekImpl(boost::uint64_t);
-    boost::uint32_t readBufferImpl(PointBuffer&);
-
-    const pdal::drivers::terrasolid::Reader& m_reader;
-    std::istream* m_istream;
-};
-
-} // random
-} // iterators
-
-}
-}
-} // namespace pdal::driver::terrasolid
-
-
-#endif // INCLUDED_PDAL_DRIVER_OCI_READER_HPP

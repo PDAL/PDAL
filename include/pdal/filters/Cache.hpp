@@ -32,183 +32,44 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_FILTER_CACHEFILTER_HPP
-#define INCLUDED_FILTER_CACHEFILTER_HPP
+#pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/FilterIterator.hpp>
-#include <pdal/PointBuffer.hpp>
 
 namespace pdal
 {
-
-class PointBufferCache;
-
-
 namespace filters
 {
 
-//
-// This is just a very simple MRU cache filter. It has the following constraints:
-//   - up to 'numBlocks' will be cached
-//   - we cache blocks of points, of size 'blockSize'
-//   - we only cache full blocks
-//   - we only cache on 'blockSize' boundaries
-//   - we only look into the cache if 1 point is being requested
-//
 class PDAL_DLL Cache : public Filter
 {
 public:
     SET_STAGE_NAME("filters.cache", "Cache Filter")
     SET_STAGE_LINK("http://pdal.io/stages/filters.cache.html")
-    Cache(Stage& prevStage, const Options&);
-    Cache(Stage& prevStage, boost::uint32_t numBlocks, boost::uint32_t blockSize);
-    ~Cache();
-
-    virtual void initialize();
-    static Options getDefaultOptions();
-
-    inline boost::uint32_t getCacheBlockSize() const { return m_cacheBlockSize; }
-    inline boost::uint32_t getMaxCacheBlocks() const { return m_maxCacheBlocks; }
-
-    // this is const only because the m_cache itself is mutable
-    void addToCache(boost::uint64_t pointIndex, const PointBuffer& data) const;
-
-    void lookup(boost::uint64_t pointPosition, boost::uint32_t count) const;
-    bool isCached(boost::uint64_t pointPosition, boost::uint32_t count) const;
-    // clear cache (but leave cache params unchanged)
-    void resetCache();
-
-    // clear cache, and change cache params too
-    void resetCache(boost::uint32_t numBlocks, boost::uint32_t blockSize);
-
-    // number of points requested from this filter via read()
-    inline boost::uint64_t getNumPointsRequested() const
-    {
-        return m_numPointsRequested;
-    }
-
-    // num points this filter read from the previous stage
-    boost::uint64_t getNumPointsRead() const
-    {
-        return m_numPointsRead;
-    }
+    SET_STAGE_ENABLED(true)
     
-    // number of points requested from this filter via read()
-    boost::uint64_t getNumPointsCached() const;
+    Cache(const Options& options) : Filter(options)
+        { std::cerr << "Cache filter is deprecated.\n"; }
 
-
-    void updateStats(boost::uint64_t numRead, boost::uint64_t numRequested) const;
-
-    void getCacheStats(boost::uint64_t& numCacheLookupMisses,
-                       boost::uint64_t& numCacheLookupHits,
-                       boost::uint64_t& numCacheInsertMisses,
-                       boost::uint64_t& numCacheInsertHits) const;
-    Metadata toMetadata() const;
-    bool supportsIterator(StageIteratorType t) const
+    static Options getDefaultOptions()
     {
-        if (t == StageIterator_Sequential) return true;
-        if (t == StageIterator_Random) return true;
-
-        return false;
+        Options options;
+        Option max_cache_blocks("max_cache_blocks", 1);
+        Option cache_block_size("cache_block_size", 32768);
+        options.add(max_cache_blocks);
+        options.add(cache_block_size);
+        return options;
     }
-    
-    boost::uint32_t calculateNumberOfBlocks(boost::uint32_t CacheBlockSize, 
-                                            boost::uint64_t totalNumberOfPoints) const;
-    
-    inline std::vector<PointBuffer const*> const& getCachedBlocks() const { return m_blocks; }
-
-    pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator(PointBuffer& buffer) const;
 
 private:
-    // these are mutable to allow const-ness for updating stats
-    // BUG: need to make thread-safe
-    mutable boost::uint64_t m_numPointsRequested;
-    mutable boost::uint64_t m_numPointsRead;
-
-    // these is mutable to allow const-ness for updating stats
-    // BUG: need to make thread-safe
-    mutable PointBufferCache* m_cache;
-    mutable std::vector<PointBuffer const*> m_blocks;
-
-    boost::uint32_t m_maxCacheBlocks;
-    boost::uint32_t m_cacheBlockSize;
+    virtual void filter(PointBuffer& buffer)
+        { (void)buffer; }
 
     Cache& operator=(const Cache&); // not implemented
     Cache(const Cache&); // not implemented
 };
 
-namespace iterators
-{
-
-namespace cache
-{
-class PDAL_DLL IteratorBase
-{
-
-public:
-    IteratorBase(pdal::filters::Cache const& filter, PointBuffer& buffer);
-    ~IteratorBase();
-
-protected:
-    const pdal::filters::Cache& m_cache_filter;
-    
-    // Each block in the cache has a mapping that 
-    // maps its dimensions to the dimensions that the 
-    // the user instantiated the IteratorBase with.
-    
-    mutable std::map<PointBuffer const*, schema::DimensionMap const*> m_dimension_maps;
-    mutable PointBuffer const* m_mapped_buffer;
-
-    boost::uint32_t copyCachedBlocks(   std::vector<PointBuffer const*> const& blocks, 
-                                        PointBuffer& data, 
-                                        boost::uint32_t pointPosition) const;
-    
-};    
-} // cache
-
-namespace sequential
-{
-
-class PDAL_DLL Cache : public pdal::FilterSequentialIterator, public cache::IteratorBase
-{
-public:
-    Cache(const pdal::filters::Cache& filter, PointBuffer& buffer);
-protected:
-    virtual void readBufferEndImpl(PointBuffer&);
-private:
-    boost::uint64_t skipImpl(boost::uint64_t);
-    boost::uint32_t readBufferImpl(PointBuffer&);
-    bool atEndImpl() const;
-
-};
-
-}
-} // iterators::sequential
-
-
-namespace iterators
-{
-namespace random
-{
-
-class PDAL_DLL Cache : public pdal::FilterRandomIterator, public cache::IteratorBase
-{
-public:
-    Cache(const pdal::filters::Cache& filter, PointBuffer& buffer);
-
-private:
-    boost::uint64_t seekImpl(boost::uint64_t);
-    boost::uint32_t readBufferImpl(PointBuffer&);
-
-};
-
-
-}
-} // iterators::random
 
 }
 } // namespaces
 
-#endif

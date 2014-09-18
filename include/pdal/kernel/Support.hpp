@@ -32,8 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_PDAL_KERNEL_SUPPORT_HPP
-#define INCLUDED_PDAL_KERNEL_SUPPORT_HPP
+#pragma once
 
 #include <string>
 
@@ -43,7 +42,10 @@
 #include <pdal/UserCallback.hpp>
 #include <pdal/PipelineManager.hpp>
 
-namespace pdal { namespace kernel {
+namespace pdal
+{
+namespace kernel
+{
     
 class app_usage_error : public pdal::pdal_error
 {
@@ -68,15 +70,14 @@ class AppSupport
 {
 public:
     // makes a reader/stage, from just the filename and some other options
-    static pdal::Stage* makeReader(pdal::Options& options);
+    static Stage* makeReader(Options& options);
 
-    // makes a writer, from just the filename and some other options (and the input stage)
-    static pdal::Writer* makeWriter(pdal::Options& options, pdal::Stage& stage);
-    
-    static pdal::PipelineManager* makePipeline(pdal::Options& options);
+    // makes a writer, from just the filename and some other
+    // options (and the input stage)
+    static Writer* makeWriter(Options& options, Stage *stage);
+    static PipelineManager* makePipeline(Options& options);
 
 private:
-
     AppSupport& operator=(const AppSupport&); // not implemented
     AppSupport(const AppSupport&); // not implemented
 };
@@ -85,8 +86,9 @@ private:
 class PercentageCallback : public pdal::UserCallback
 {
 public:
-    PercentageCallback(double major=10.0, double minor=2.0);
+    PercentageCallback(double major = 10.0, double minor = 2.0);
     virtual void callback();
+
 protected:
     double m_lastMajorPerc;
     double m_lastMinorPerc;
@@ -97,19 +99,21 @@ protected:
 class HeartbeatCallback : public pdal::UserCallback
 {
 public:
-    HeartbeatCallback();
-    virtual void callback();
-private:
+    virtual void callback()
+        { std::cerr << "."; }
 };
+
 
 class ShellScriptCallback : public PercentageCallback
 {
 public:
-    ShellScriptCallback(std::vector<std::string> const& command);
+    ShellScriptCallback(const std::vector<std::string>& command);
     virtual void callback();
+
 private:
     std::string m_command;
 };
 
-}} // pdal::kernel
-#endif
+} // namespace kernel
+} // namespace pdal
+

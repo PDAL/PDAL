@@ -32,15 +32,14 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_USERCALLBACK_HPP
-#define INCLUDED_USERCALLBACK_HPP
+#pragma once
 
 #include <pdal/pdal_internal.hpp>
 
 namespace pdal
 {
 
-// This is the abstract base class used for out-of-band interactions
+// This is the base class used for out-of-band interactions
 // between the executing pipeline and the main app:
 //   - recording and reporting a "hearbeat"
 //   - recording and reporting percent-complete
@@ -55,103 +54,67 @@ namespace pdal
 class PDAL_DLL UserCallback
 {
 public:
-    UserCallback()
-        : m_percentComplete(0.0)
-        , m_interruptFlag(false)
-        , m_heartbeats(0)
-    {
-        return;
-    }
+    UserCallback() : m_percentComplete(0.0), m_interruptFlag(false),
+        m_heartbeats(0), m_total(1)
+    {}
 
-    virtual ~UserCallback()
-    {
-        return;
-    }
+    void setTotal(point_count_t total)
+        { m_total = std::max((point_count_t)1, total); }
 
     // The pipeline calls this to report the percentage progress, check for
     // interrupts, and call the user's callback function.
     //
-    // percentComplete should be in range [0..100]
-    //
-    // returns true if everything is okay, or false if an interrupt has been requested
-    inline bool check(double percentComplete)
+    // returns true if everything is okay, or false if an interrupt has
+    // been requested
+    void invoke(point_count_t count)
     {
-        incrHeartbeat();
-
-        setPercentComplete(percentComplete);
-
-        callback();
-
-        const bool status = !getInterruptFlag();
-        return status;
+        m_percentComplete = 100.0 * count / m_total;
+        invoke();
     }
 
-    // The pipeline calls this to report the progress in an indeterminate way, check for
-    // interrupts, and call the user's callback function.
+    // The pipeline calls this to report the progress in an indeterminate way,
+    // check for interrupts, and call the user's callback function.
     //
-    // This is same as the check(double) function, except it doesn't record a percent-complete
-    // value.
+    // This is same as the check(double) function, except it doesn't record
+    // a percent-complete value.
     //
-    // returns true if everything is okay, or false if an interrupt has been requested
-    inline bool check()
+    // returns true if everything is okay, or false if an interrupt has
+    // been requested
+    //
+    void invoke()
     {
-        incrHeartbeat();
-
+        ++m_heartbeats;
         callback();
-
-        const bool status = !getInterruptFlag();
-        return status;
+        if (m_interruptFlag)
+            throw pipeline_interrupt("user requested interrupt");
     }
 
-    // This will be called by the pipeline (via check()) at varuous times
+    // This will be called by the pipeline (via check()) at various times
     // during the execution. Applications should override this to perform
     // any desired actions.
     //
     // Examples of things you might do here include printing the percent done,
     // printing a '.' representing a heartbeat, checking some external condition
     // to raise the interrupt flag, etc.
-    inline virtual void callback()
-    {
-        return;
-    }
+    virtual void callback()
+    {}
 
-    inline double getPercentComplete() const
-    {
-        return m_percentComplete;
-    }
+    double getPercentComplete() const
+        { return m_percentComplete; }
 
-    inline boost::uint64_t getHeartbeats() const
-    {
-        return m_heartbeats;
-    }
+    inline uint64_t getHeartbeats() const
+        { return m_heartbeats; }
 
 protected:
-    inline void setInterruptFlag(bool value)
-    {
-        m_interruptFlag = value;
-    }
+    void setInterruptFlag(bool value)
+        { m_interruptFlag = value; }
 
 private:
-    inline bool getInterruptFlag() const
-    {
-        return m_interruptFlag;
-    }
-
-    inline void setPercentComplete(double value)
-    {
-        m_percentComplete = value;
-    }
-
-    inline void incrHeartbeat()
-    {
-        ++m_heartbeats;
-    }
-
     double m_percentComplete;  // in range [0..100]
     bool m_interruptFlag; // true iff user would like the pipeline to abort
-    boost::uint64_t m_heartbeats; // number of times the check routine has been called
+    uint64_t m_heartbeats; // number of times the check routine has been called
+    point_count_t m_total;
 };
 
-}
+} // namespace pdal
 
-#endif

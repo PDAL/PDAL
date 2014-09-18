@@ -34,13 +34,10 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <pdal/SpatialReference.hpp>
-#include <pdal/drivers/pipeline/Reader.hpp>
 #include <pdal/filters/Selector.hpp>
-#include <pdal/StageIterator.hpp>
+#include <pdal/PipelineManager.hpp>
+#include <pdal/PipelineReader.hpp>
 #include <pdal/Schema.hpp>
-#include <pdal/PointBuffer.hpp>
-#include <pdal/Options.hpp>
 
 #include "Support.hpp"
 
@@ -48,44 +45,33 @@ BOOST_AUTO_TEST_SUITE(SelectorFilterTest)
 
 BOOST_AUTO_TEST_CASE(test1)
 {
-    pdal::Option option("filename", Support::datapath("filters/selector.xml"));
-    pdal::Options options(option);
+    using namespace pdal;
 
-    pdal::drivers::pipeline::Reader reader(options);
-    reader.initialize();
-    
-    pdal::Schema const& schema = reader.getSchema();
-    pdal::PointBuffer data(schema, 1000);
+    PointContext ctx;
 
-    boost::scoped_ptr<pdal::StageSequentialIterator> iter(reader.createSequentialIterator(data));
-    
-    {
-        boost::uint32_t numRead = iter->read(data);
-        BOOST_CHECK_EQUAL(numRead, 1000u);
-    }
-    
-    
-    pdal::Schema const& new_schema = data.getSchema();
-    
-    // std::cout << new_schema << std::endl;
-    
-    BOOST_CHECK_EQUAL(new_schema.getDimension("Red").isIgnored(), true);
-    BOOST_CHECK_EQUAL(new_schema.getDimension("Green").isIgnored(), true);
-    BOOST_CHECK_EQUAL(new_schema.getDimension("Blue").isIgnored(), true);
+    PipelineManager mgr;
+    PipelineReader specReader(mgr);
+    specReader.readPipeline(Support::datapath("filters/selector.xml"));
+    Stage *stage = mgr.getStage();
+
+    stage->prepare(ctx);
+
+    using namespace pdal;
+    Schema *schema = ctx.schema();    
+
+    BOOST_CHECK_EQUAL(schema->getDimension("Red")->isIgnored(), true);
+    BOOST_CHECK_EQUAL(schema->getDimension("Green")->isIgnored(), true);
+    BOOST_CHECK_EQUAL(schema->getDimension("Blue")->isIgnored(), true);
     
     // ignore by default is true because not set on the pipeline
-    BOOST_CHECK_EQUAL(new_schema.getDimension("PointSourceId").isIgnored(), true); 
+    BOOST_CHECK_EQUAL(schema->getDimension("PointSourceId")->isIgnored(), true);
 
     // We explicitly kept X
-    BOOST_CHECK_EQUAL(new_schema.getDimension("X").isIgnored(), false);
+    BOOST_CHECK_EQUAL(schema->getDimension("X")->isIgnored(), false);
 
     // We created Greenish
-    BOOST_CHECK_EQUAL(new_schema.getDimension("Greenish").isIgnored(), false);
-
-    return;
+    BOOST_CHECK_EQUAL(schema->getDimension("Greenish")->isIgnored(), false);
 }
-
-
 
 
 BOOST_AUTO_TEST_SUITE_END()

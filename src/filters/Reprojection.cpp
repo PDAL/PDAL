@@ -83,174 +83,98 @@ struct GDALSourceDeleter
 #endif
 
 
+Reprojection::Reprojection(const Options& options)
+    : pdal::Filter(options), m_inferInputSRS(true)
+{}
 
-Reprojection::Reprojection(Stage& prevStage, const Options& options)
-    : pdal::Filter(prevStage, options)
-    , m_outSRS(options.getValueOrThrow<pdal::SpatialReference>("out_srs"))
+
+Reprojection::Reprojection(const SpatialReference& outSRS)
+    : m_outSRS(outSRS)
+    , m_inferInputSRS(true)
+{}
+
+
+Reprojection::Reprojection(const SpatialReference& inSRS,
+        const SpatialReference& outSRS)
+    : m_inSRS(inSRS)
+    , m_outSRS(outSRS)
     , m_inferInputSRS(false)
+{}
+
+
+void Reprojection::processOptions(const Options& options)
 {
+    m_outSRS = options.getValueOrThrow<pdal::SpatialReference>("out_srs");
     if (options.hasOption("in_srs"))
     {
         m_inSRS = options.getValueOrThrow<pdal::SpatialReference>("in_srs");
         m_inferInputSRS = false;
     }
-    else
-    {
-        m_inferInputSRS = true;
-    }
-
-    return;
 }
 
 
-Reprojection::Reprojection(Stage& prevStage,
-                           const SpatialReference& outSRS)
-    : Filter(prevStage, Options::none())
-    , m_outSRS(outSRS)
-    , m_inferInputSRS(true)
+void Reprojection::ready(PointContext ctx)
 {
-    return;
-}
-
-
-Reprojection::Reprojection(Stage& prevStage,
-                           const SpatialReference& inSRS,
-                           const SpatialReference& outSRS)
-    : Filter(prevStage, Options::none())
-    , m_inSRS(inSRS)
-    , m_outSRS(outSRS)
-    , m_inferInputSRS(false)
-{
-    return;
-}
-
-
-void Reprojection::initialize()
-{
-    Filter::initialize();
-
-    checkImpedance();
-
     if (m_inferInputSRS)
-    {
-        m_inSRS = getPrevStage().getSpatialReference();
-    }
+        m_inSRS = ctx.spatialRef();
 
 #ifdef PDAL_HAVE_GDAL
+    m_gdal_debug = boost::shared_ptr<pdal::gdal::Debug>(
+        new pdal::gdal::Debug(isDebug(), log()));
 
-    m_gdal_debug = boost::shared_ptr<pdal::gdal::Debug>(new pdal::gdal::Debug(isDebug(), log()));
+    m_in_ref_ptr = ReferencePtr(OSRNewSpatialReference(0),
+        OGRSpatialReferenceDeleter());
+    m_out_ref_ptr = ReferencePtr(OSRNewSpatialReference(0),
+        OGRSpatialReferenceDeleter());
 
-    m_in_ref_ptr = ReferencePtr(OSRNewSpatialReference(0), OGRSpatialReferenceDeleter());
-    m_out_ref_ptr = ReferencePtr(OSRNewSpatialReference(0), OGRSpatialReferenceDeleter());
-
-    int result = OSRSetFromUserInput(m_in_ref_ptr.get(), m_inSRS.getWKT(pdal::SpatialReference::eCompoundOK).c_str());
+    int result =
+        OSRSetFromUserInput(m_in_ref_ptr.get(),
+            m_inSRS.getWKT(pdal::SpatialReference::eCompoundOK).c_str());
     if (result != OGRERR_NONE)
     {
         std::ostringstream msg;
-        msg << "Could not import input spatial reference for ReprojectionFilter:: "
-            << CPLGetLastErrorMsg() << " code: " << result
-            << " wkt: '" << m_inSRS.getWKT() << "'";
+        msg << "Could not import input spatial reference for "
+            "ReprojectionFilter:: " << CPLGetLastErrorMsg() << " code: " <<
+            result << " wkt: '" << m_inSRS.getWKT() << "'";
         throw std::runtime_error(msg.str());
     }
 
-    result = OSRSetFromUserInput(m_out_ref_ptr.get(), m_outSRS.getWKT(pdal::SpatialReference::eCompoundOK).c_str());
+    result = OSRSetFromUserInput(m_out_ref_ptr.get(),
+        m_outSRS.getWKT(pdal::SpatialReference::eCompoundOK).c_str());
     if (result != OGRERR_NONE)
     {
         std::ostringstream msg;
-        msg << "Could not import output spatial reference for ReprojectionFilter:: "
-            << CPLGetLastErrorMsg() << " code: " << result
-            << " wkt: '" << m_outSRS.getWKT() << "'";
+        msg << "Could not import output spatial reference for "
+            "ReprojectionFilter:: " << CPLGetLastErrorMsg() << " code: " <<
+            result << " wkt: '" << m_outSRS.getWKT() << "'";
         std::string message(msg.str());
         throw std::runtime_error(message);
     }
-    m_transform_ptr = TransformPtr(OCTNewCoordinateTransformation(m_in_ref_ptr.get(), m_out_ref_ptr.get()), OSRTransformDeleter());
+    m_transform_ptr = TransformPtr(
+        OCTNewCoordinateTransformation(m_in_ref_ptr.get(),
+            m_out_ref_ptr.get()), OSRTransformDeleter());
 
     if (!m_transform_ptr.get())
     {
-        std::ostringstream msg;
-        msg << "Could not construct CoordinateTransformation in ReprojectionFilter:: ";
-        std::string message(msg.str());
-        throw std::runtime_error(message);
+        std::string msg = "Could not construct CoordinateTransformation in "
+            "ReprojectionFilter:: ";
+        throw std::runtime_error(msg);
     }
 
 #endif
-
     setSpatialReference(m_outSRS);
-
-    updateBounds();
-
-    return;
 }
 
 
-Options Reprojection::getDefaultOptions()
+void Reprojection::transform(double& x, double& y, double& z)
 {
-    Options options;
-    return options;
-}
-
-
-void Reprojection::updateBounds()
-{
-    const Bounds<double>& oldBounds = getBounds();
-
-    double minx = oldBounds.getMinimum(0);
-    double miny = oldBounds.getMinimum(1);
-    double minz = oldBounds.getMinimum(2);
-    double maxx = oldBounds.getMaximum(0);
-    double maxy = oldBounds.getMaximum(1);
-    double maxz = oldBounds.getMaximum(2);
-
-    try
-    {
-
-        transform(minx, miny, minz);
-        transform(maxx, maxy, maxz);
-
-    }
-    catch (pdal::pdal_error&)
-    {
-        return;
-    }
-
-    Bounds<double> newBounds(minx, miny, minz, maxx, maxy, maxz);
-
-    setBounds(newBounds);
-
-    return;
-}
-
-
-void Reprojection::checkImpedance()
-{
-    const Schema& schema = this->getSchema();
-
-    boost::optional<Dimension const&> x = schema.getDimension("X");
-    boost::optional<Dimension const&> y = schema.getDimension("Y");
-    boost::optional<Dimension const&> z = schema.getDimension("Z");
-
-    if (!(x->getByteSize() != 8) ||
-            !(y->getByteSize() != 8) ||
-            !(z->getByteSize() != 8))
-    {
-        throw impedance_invalid("Reprojection filter requires X,Y,Z dimensions as doubles");
-    }
-
-    return;
-}
-
-
-void Reprojection::transform(double& x, double& y, double& z) const
-{
-
 #ifdef PDAL_HAVE_GDAL
-    int ret = 0;
-
-    ret = OCTTransform(m_transform_ptr.get(), 1, &x, &y, &z);
-    if (!ret)
+    int ret = OCTTransform(m_transform_ptr.get(), 1, &x, &y, &z);
+    if (ret == 0)
     {
         std::ostringstream msg;
-        msg << "Could not project point for ReprojectionTransform::" << CPLGetLastErrorMsg() << ret;
+        msg << "Could not project point for ReprojectionTransform::" <<
+            CPLGetLastErrorMsg() << ret;
         throw pdal_error(msg.str());
     }
 #else
@@ -258,85 +182,25 @@ void Reprojection::transform(double& x, double& y, double& z) const
     boost::ignore_unused_variable_warning(y);
     boost::ignore_unused_variable_warning(z);
 #endif
-
-    return;
 }
 
 
-void Reprojection::processBuffer(PointBuffer& data) const
+void Reprojection::filter(PointBuffer& data)
 {
-    const boost::uint32_t numPoints = data.getNumPoints();
-
-    const Schema& schema = data.getSchema();
-
-    Dimension const& dimX = schema.getDimension("X");
-    Dimension const& dimY = schema.getDimension("Y");
-    Dimension const& dimZ = schema.getDimension("Z");
-
-
-    for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
+    for (PointId id = 0; id < data.size(); ++id)
     {
-        double x = data.getField<double>(dimX, pointIndex);
-        double y = data.getField<double>(dimY, pointIndex);
-        double z = data.getField<double>(dimZ, pointIndex);
+        double x = data.getFieldAs<double>(Dimension::Id::X, id);
+        double y = data.getFieldAs<double>(Dimension::Id::Y, id);
+        double z = data.getFieldAs<double>(Dimension::Id::Z, id);
 
-        this->transform(x,y,z);
+        transform(x, y, z);
 
-        data.setField<double>(dimX, pointIndex, x);
-        data.setField<double>(dimY, pointIndex, y);
-        data.setField<double>(dimZ, pointIndex, z);
-
-        data.setNumPoints(pointIndex+1);
+        data.setField(Dimension::Id::X, id, x);
+        data.setField(Dimension::Id::Y, id, y);
+        data.setField(Dimension::Id::Z, id, z);
     }
-
-    return;
 }
 
+} // namespace filter
 
-pdal::StageSequentialIterator* Reprojection::createSequentialIterator(PointBuffer& buffer) const
-{
-    return new pdal::filters::iterators::sequential::Reprojection(*this, buffer);
-}
-
-
-namespace iterators
-{
-namespace sequential
-{
-
-
-Reprojection::Reprojection(const pdal::filters::Reprojection& filter, PointBuffer& buffer)
-    : pdal::FilterSequentialIterator(filter, buffer)
-    , m_reprojectionFilter(filter)
-{
-    return;
-}
-
-
-boost::uint32_t Reprojection::readBufferImpl(PointBuffer& data)
-{
-    const boost::uint32_t numRead = getPrevIterator().read(data);
-
-    m_reprojectionFilter.processBuffer(data);
-
-    return numRead;
-}
-
-
-boost::uint64_t Reprojection::skipImpl(boost::uint64_t count)
-{
-    getPrevIterator().skip(count);
-    return count;
-}
-
-
-bool Reprojection::atEndImpl() const
-{
-    return getPrevIterator().atEnd();
-}
-
-}
-} // namespaces
-
-}
-} // namespaces
+} // namespace pdal

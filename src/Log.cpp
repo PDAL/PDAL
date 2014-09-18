@@ -41,10 +41,11 @@
 namespace pdal
 {
 
+using namespace LogLevel;
 
 Log::Log(std::string const& leaderString,
          std::string const& outputName)
-    : m_level(logERROR)
+    : m_level(Error)
     , m_deleteStreamOnCleanup(false)
     , m_leader(leaderString)
 {
@@ -72,7 +73,7 @@ Log::Log(std::string const& leaderString,
 
 Log::Log(std::string const& leaderString,
          std::ostream* v)
-    : m_level(logERROR)
+    : m_level(Error)
     , m_deleteStreamOnCleanup(false)
     , m_leader(leaderString)
 {
@@ -105,12 +106,13 @@ void Log::clearFloat()
     m_log->unsetf(std::ios_base::fixed);
     m_log->unsetf(std::ios_base::floatfield);
 }
-std::ostream& Log::get(LogLevel level)
+
+std::ostream& Log::get(LogLevel::Enum level)
 {
     if (level <= m_level)
     {
         *m_log << "(" << m_leader << " "<< getLevelString(level) <<": " << level << "): ";
-        *m_log << std::string(level < logDEBUG ? 0 : level - logDEBUG, '\t');
+        *m_log << std::string(level < Debug ? 0 : level - Debug, '\t');
         return *m_log;
     }
     else
@@ -120,24 +122,23 @@ std::ostream& Log::get(LogLevel level)
 
 }
 
-std::string Log::getLevelString(LogLevel level) const
+std::string Log::getLevelString(LogLevel::Enum level) const
 {
     std::ostringstream output;
 
     switch (level)
     {
-        case logERROR:
-            output << "ERROR";
+        case Error:
+            output << "Error";
             break;
-        case logWARNING:
-            output << "WARNING";
+        case Warning:
+            output << "Warning";
             break;
-        case logINFO:
-            output << "INFO";
+        case Info:
+            output << "Info";
             break;
-
         default:
-            output << "DEBUG";
+            output << "Debug";
     }
 
     return output.str();

@@ -48,47 +48,12 @@ namespace pdal
 namespace plang
 {
 
-Script::Script(const std::string& source, const std::string& module, const std::string& function)
-    : m_source(source)
-    , m_module(module)
-    , m_function(function)
-{
-    return;
-}
-
-Script::Script(const Options& options)
-{
-    if (options.hasOption("source"))
-    {
-        const std::string& source = options.getValueOrThrow<std::string>("source");
-        m_source = source;
-    }
-    else
-    {
-        const std::string& filename = options.getValueOrThrow<std::string>("filename");
-        std::string source = FileUtils::readFileIntoString(filename);
-        m_source = source;
-    }
-
-    const std::string& module = options.getValueOrThrow<std::string>("module");
-    const std::string& function = options.getValueOrThrow<std::string>("function");
-
-    m_module = module;
-    m_function = function;
-
-    return;
-}
-
-Script::Script(const Script& other)
-    : m_source(other.m_source)
-    , m_module(other.m_module)
-    , m_function(other.m_function)
+Script::Script(const std::string& source, const std::string& module,
+    const std::string& function) : m_source(source) , m_module(module),
+    m_function(function)
 {
 }
 
-Script::~Script()
-{
-}
 
 std::ostream& operator<<(std::ostream& os, Script const& script)
 {

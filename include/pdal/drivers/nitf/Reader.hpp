@@ -32,28 +32,12 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_DRIVERS_NITF_READER_HPP
-#define INCLUDED_DRIVERS_NITF_READER_HPP
+#pragma once
 
 #include <pdal/pdal_internal.hpp>
+
 #ifdef PDAL_HAVE_GDAL
-
-#include <pdal/Reader.hpp>
-#include <pdal/ReaderIterator.hpp>
-
-namespace pdal
-{
-class PointBuffer;
-class StreamFactory;
-
-namespace drivers
-{
-namespace las
-{
-class Reader;
-}
-}
-}
+#include <pdal/drivers/las/Reader.hpp>
 
 namespace pdal
 {
@@ -63,45 +47,34 @@ namespace nitf
 {
 
 
-class PDAL_DLL Reader : public pdal::Reader
+class PDAL_DLL NitfReader : public las::Reader
 {
 public:
     SET_STAGE_NAME("drivers.nitf.reader", "NITF Reader")
     SET_STAGE_LINK("http://pdal.io/stages/drivers.nitf.reader.html")
+    SET_STAGE_ENABLED(true)
 
-    Reader(const Options& options);
-    ~Reader();
-
-    virtual void initialize();
-    static Options getDefaultOptions();
-    static std::vector<Dimension> getDefaultDimensions();
-
-    bool supportsIterator(StageIteratorType t) const
-    {
-        if (t == StageIterator_Sequential) return true;
-        if (t == StageIterator_Random) return true;
-
-        return false;
-    }
-
-    pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator(PointBuffer& buffer) const;
+    NitfReader(const Options& options) : las::Reader(options)
+        {}
 
 private:
-    std::string m_filename;
-    StreamFactory* m_streamFactory;
-    pdal::drivers::las::Reader* m_lasReader;
+    uint64_t m_offset;
+    uint64_t m_length;
 
-    Reader& operator=(const Reader&); // not implemented
-    Reader(const Reader&); // not implemented
+    virtual void initialize();
+    virtual StreamFactoryPtr createFactory() const
+    {
+        return StreamFactoryPtr(
+            new FilenameSubsetStreamFactory(m_filename, m_offset, m_length));
+    }
 
+    NitfReader& operator=(const NitfReader&); // not implemented
+    NitfReader(const NitfReader&); // not implemented
 };
 
+} // namespace nitf
+} // namespace drivers
+} // namespace pdal
 
-}
-}
-} // namespaces
+#endif // PDAL_HAVE_GDAL
 
-#endif
-
-#endif

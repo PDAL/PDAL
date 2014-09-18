@@ -32,191 +32,79 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_DRIVERS_LAS_READER_HPP
-#define INCLUDED_DRIVERS_LAS_READER_HPP
+#pragma once
 
 #include <pdal/Reader.hpp>
-#include <pdal/ReaderIterator.hpp>
 
 #include <pdal/StreamFactory.hpp>
-
 #include <pdal/drivers/las/Support.hpp>
-
 #include <pdal/drivers/las/Header.hpp>
-#include <pdal/drivers/las/ReaderBase.hpp>
-
-#include <boost/scoped_ptr.hpp>
-
-namespace pdal
-{
-class PointBuffer;
-}
-
-
+#include <pdal/drivers/las/ZipPoint.hpp>
 
 namespace pdal
 {
 namespace drivers
 {
+
+namespace nitf
+{
+    class NitfReader;
+}
+
 namespace las
 {
 
 class LasHeader;
 class PointDimensions;
 
-
-class PDAL_DLL Reader : public ReaderBase
+class PDAL_DLL Reader : public pdal::Reader
 {
+    friend class nitf::NitfReader;
 public:
     SET_STAGE_NAME("drivers.las.reader", "Las Reader")
     SET_STAGE_LINK("http://pdal.io/stages/drivers.las.reader.html")
+    SET_STAGE_ENABLED(true)
 
-    Reader(const Options&);
-    Reader(const std::string&);
-    Reader(StreamFactory* factory);
-    ~Reader();
+    Reader(const Options& options) : pdal::Reader(options), m_index(0),
+            m_istream(NULL)
+        {}
+    virtual ~Reader();
 
-    virtual void initialize();
     static Options getDefaultOptions();
-    static std::vector<Dimension> getDefaultDimensions();
-    
-    StreamFactory& getStreamFactory() const;
-
-    bool supportsIterator(StageIteratorType t) const
-    {
-        if (t == StageIterator_Sequential) return true;
-        if (t == StageIterator_Random) return true;
-
-        return false;
-    }
-
-    pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator(PointBuffer& buffer) const;
-
-    // this is called by the stage's iterator
-    boost::uint32_t processBuffer(PointBuffer& PointBuffer,
-                                  std::istream& stream,
-                                  boost::uint64_t numPointsLeft,
-                                  LASunzipper* unzipper,
-                                  ZipPoint* zipPoint,
-                                  PointDimensions* dimensions,
-                                  std::vector<boost::uint8_t>& read_buffer) const;
 
     const LasHeader& getLasHeader() const
-    {
-        return m_lasHeader;
-    }
-
-protected:
-    LasHeader& getLasHeaderRef()
-    {
-        return m_lasHeader;
-    }
+        { return m_lasHeader; }
+    point_count_t getNumPoints() const
+        { return m_lasHeader.GetPointRecordsCount(); }
 
 private:
-    StreamFactory* m_streamFactory;
-    bool m_ownsStreamFactory;
-
+    typedef std::unique_ptr<StreamFactory> StreamFactoryPtr;
+    StreamFactoryPtr m_streamFactory;
     LasHeader m_lasHeader;
-	void readMetadata();
+    std::unique_ptr<ZipPoint> m_zipPoint;
+    std::unique_ptr<LASunzipper> m_unzipper;
+    point_count_t m_index;
+    std::istream* m_istream;
+
+    virtual StreamFactoryPtr createFactory() const
+        { return StreamFactoryPtr(new FilenameStreamFactory(m_filename)); }
+    virtual void initialize();
+    virtual void initialize(MetadataNode& m);
+    virtual void addDimensions(PointContextRef ctx);
+    void extractMetadata(MetadataNode& m);
+    virtual void processOptions(const Options& options);
+    virtual void ready(PointContextRef ctx);
+    virtual point_count_t read(PointBuffer& buf, point_count_t count);
+    virtual void done(PointContextRef ctx);
+    virtual bool eof()
+        { return m_index >= getNumPoints(); }
+    void loadPoint(PointBuffer& data, char *buf, size_t bufsize);
 
     Reader& operator=(const Reader&); // not implemented
     Reader(const Reader&); // not implemented
 };
 
+} // namespace las
+} // namespace drivers
+} // namespace pdal
 
-namespace iterators
-{
-
-class Base
-{
-public:
-    Base(pdal::drivers::las::Reader const& reader);
-    ~Base();
-    void read(PointBuffer&);
-
-private:
-    void initialize();
-
-protected:
-    const pdal::drivers::las::Reader& m_reader;
-    std::istream& m_istream;
-
-    inline pdal::drivers::las::Reader const& getReader()
-    {
-        return m_reader;
-    }
-
-public:
-
-#ifdef PDAL_HAVE_LASZIP
-    boost::scoped_ptr<ZipPoint> m_zipPoint;
-    boost::scoped_ptr<LASunzipper> m_unzipper;
-#else
-    void* m_zipPoint;
-    void* m_unzipper;
-#endif
-    
-    std::vector<boost::uint8_t> m_read_buffer;
-    std::streampos m_zipReadStartPosition;
-
-private:
-    Base& operator=(Base const&); // not implemented
-    Base(Base const&); // not implemented
-
-
-};
-
-namespace sequential
-{
-
-class Reader : public Base, public pdal::ReaderSequentialIterator
-{
-public:
-    Reader(const pdal::drivers::las::Reader& reader, PointBuffer& buffer);
-    ~Reader();
-
-protected:
-    virtual void readBeginImpl();
-    virtual void readBufferBeginImpl(PointBuffer&);
-
-private:
-    boost::uint64_t skipImpl(boost::uint64_t);
-    boost::uint32_t readBufferImpl(PointBuffer&);
-    bool atEndImpl() const;
-
-};
-
-
-} // sequential
-
-namespace random
-{
-
-class Reader : public Base, public pdal::ReaderRandomIterator
-{
-public:
-    Reader(const pdal::drivers::las::Reader& reader, PointBuffer& buffer);
-    ~Reader();
-
-protected:
-    virtual void readBeginImpl();
-    virtual void readBufferBeginImpl(PointBuffer&);
-
-private:
-    boost::uint64_t seekImpl(boost::uint64_t);
-    boost::uint32_t readBufferImpl(PointBuffer&);
-
-};
-
-
-} // random
-
-
-} // iterators
-
-}
-}
-} // namespaces
-
-#endif

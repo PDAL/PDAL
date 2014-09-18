@@ -44,7 +44,6 @@ using namespace pdal;
 
 BOOST_AUTO_TEST_SUITE(UserCallbackTest)
 
-
 // our implementation will be that we will request an interrupt
 // when we are more than half done
 class MyUserCallback : public UserCallback
@@ -53,9 +52,7 @@ public:
     virtual void callback()
     {
         if (getPercentComplete() > 50.0)
-        {
             setInterruptFlag(true);
-        }
     }
 };
 
@@ -63,32 +60,18 @@ public:
 class Worker
 {
 public:
-    Worker(UserCallback& cb)
-        : m_cb(cb)
-        , m_ticks(0)
+    Worker(UserCallback& cb) : m_cb(cb), m_ticks(0)
     {
+        m_cb.setTotal(300);
     }
 
     // each invocation of doWork will represent 1% more done
     // returns true if work is going along okay, false otherwise
     bool doWork()
     {
-        if (!m_cb.check())
-        {
-            return false;
-        }
-
-        if (!m_cb.check())
-        {
-            return false;
-        }
-
-        if (!m_cb.check(m_ticks))
-        {
-            return false;
-        }
-
-        ++m_ticks;
+        m_cb.invoke(++m_ticks);
+        m_cb.invoke(++m_ticks);
+        m_cb.invoke(++m_ticks);
         return true;
     }
 
@@ -108,21 +91,27 @@ BOOST_AUTO_TEST_CASE(test1)
     bool ok;
 
     // first 50%
-    for (int i=0; i<=50; i++)
+    for (int i = 0; i < 50; i++)
     {
         ok = worker.doWork();
         BOOST_CHECK(ok);
-        boost::uint32_t hb = 3*(i+1);
+        uint32_t hb = 3 * (i + 1);
         BOOST_CHECK_EQUAL(cb.getHeartbeats(), hb);
-        BOOST_CHECK_CLOSE(cb.getPercentComplete(), (double)i, 0.001);
+        BOOST_CHECK_CLOSE(cb.getPercentComplete(), (double)(i + 1), 0.001);
     }
 
     // to 51%...
-    ok = worker.doWork();
+    try
+    {
+        ok = true;
+        ok = worker.doWork();
+    }
+    catch (pdal::pipeline_interrupt intr)
+    {
+        ok = false;
+    }
     BOOST_CHECK(!ok);
-    BOOST_CHECK_CLOSE(cb.getPercentComplete(), 51.0, 0.001);
-
-    return;
+    BOOST_CHECK_CLOSE(cb.getPercentComplete(), 50.333333, 0.001);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -25,8 +25,9 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ************************************************************************/
+
+#include <pdal/pdal_internal.hpp>
 #include <pdal/drivers/caris/CloudReader.hpp>
-#include <pdal/drivers/caris/CloudIterator.hpp>
 
 #include "Utils.hpp"
 
@@ -37,116 +38,60 @@
 #endif
 
 #include <pdal/Dimension.hpp>
-#include <pdal/Schema.hpp>
-#include <ogr_spatialref.h>
-#include <boost/foreach.hpp>
-#include <boost/uuid/uuid_io.hpp>
-#include <boost/uuid/string_generator.hpp>
-#include <boost/uuid/name_generator.hpp>
 
 #ifdef _MSC_VER
 #   pragma warning(pop)
-
 // decorated name length exceeded, name was truncated
 #   pragma warning(disable : 4503)
 #endif
 
+namespace pdal
+{
 namespace csar
 {
-
-using namespace csar::utils;
 
 namespace
 {
 
-
-//************************************************************************
-//! callback for logging messages
-/*!
-\param in_reader
-    \li CloudReader* to log to
-\param in_message
-    \li message to log
-*/
-//************************************************************************
-void logCallback(void* in_reader, const char* in_message)
+void logCallback(void *in_reader, const char *in_message)
 {
-    CloudReader * reader = (CloudReader *)in_reader;
+    CloudReader *reader = (CloudReader *)in_reader;
     if (reader)
-    {
-        reader->log()->get(pdal::logINFO) << in_message << std::flush;
-    }
+        reader->log()->get(LogLevel::Info) << in_message << std::flush;
 }
 
-}
+} // anonymous namespace
 
-//************************************************************************
-//! constructor
-/*!
-\param options
-    \li Reader options
-*/
-//************************************************************************
-CloudReader::CloudReader(
-    const pdal::Options& options)
-    : pdal::Reader(options)
-{
-}
 
-//************************************************************************
-//! destructor
-//************************************************************************
 CloudReader::~CloudReader()
 {
     if (m_cloud)
         caris_cloud_release(m_cloud);
 }
 
-//! \copydoc pdal::Reader::initialize
+
+point_count_t CloudReader::numPoints()
+{
+    return caris_cloud_num_points(m_cloud);
+}
+
+
 void CloudReader::initialize()
 {
-    pdal::Reader::initialize();
-
-    int status = caris_cloud_open(getURI().c_str(), &m_cloud, &logCallback, this);
+    int status = caris_cloud_open(getURI().c_str(), &m_cloud,
+        &logCallback, this);
     if (status)
     {
         std::string msg = caris_status_message(status, isDebug());
         throw pdal::pdal_error(msg);
     }
+}
 
-    assert(m_cloud);
 
-    // bounds
-    {
-        double minMaxXYZ[2][3];
-        caris_cloud_extents(m_cloud,
-                            &minMaxXYZ[0][0], &minMaxXYZ[0][1], &minMaxXYZ[0][2],
-                            &minMaxXYZ[1][0], &minMaxXYZ[1][1], &minMaxXYZ[1][2]);
-
-        setBounds(pdal::Bounds<double>(
-                      minMaxXYZ[0][0], minMaxXYZ[0][1], minMaxXYZ[0][2],
-                      minMaxXYZ[1][0], minMaxXYZ[1][1], minMaxXYZ[1][2]
-                  ));
-    }
-
-    setNumPoints(caris_cloud_num_points(m_cloud));
-
-    if (const char* wktSR = caris_cloud_spatial_reference(m_cloud))
-    {
-        setSpatialReference(pdal::SpatialReference(wktSR));
-    }
-
-    // Dimensions
-    pdal::Schema & schema = getSchemaRef();
-
-    // generate dimension UUIDs such that they are unique to the driver, but
-    // consistent accoss loads
-    boost::uuids::name_generator uuidGen(
-        boost::uuids::string_generator()(
-            "{5C668903-34CF-40d3-92C3-B8D9AB070902}"));
-
+void CloudReader::addDimensions(PointContextRef ctx)
+{
     int numDims = 0;
-    caris_dimension const* dimArray = NULL;
+    const caris_dimension *dimArray = NULL;
     caris_cloud_dimensions(m_cloud, &dimArray, &numDims);
 
     // caris_dimesions may contain a tuple of numeric elements which need
@@ -155,63 +100,130 @@ void CloudReader::initialize()
     {
         caris_dimension const& carisDim = dimArray[dimIndex];
 
-        for (int tupleIndex = 0; tupleIndex < carisDim.tuple_length; ++tupleIndex)
+        for (int tupleIndex = 0; tupleIndex < carisDim.tuple_length;
+            ++tupleIndex)
         {
-            std::string name;
-
-            if (carisDim.tuple_length == 1)
+            Dimension::Id::Enum dim = Dimension::Id::Unknown;
+            Dimension::Type::Enum inType = Dimension::Type::None;
+            std::string name = carisDim.name;
+            if (carisDim.tuple_length > 1)
             {
-                name = carisDim.name;
-            }
-            else
-            {
-                if (dimIndex == 0
-                        && carisDim.type == CARIS_TYPE_FLOAT64
-                        && carisDim.tuple_length == 3)
+                if (dimIndex == 0 && carisDim.type == CARIS_TYPE_FLOAT64 &&
+                    carisDim.tuple_length == 3)
                 {
-                    // position is always the first dim, name them X,Y,Z
-                    char const* xyzStr[] = {"X", "Y", "Z"};
-                    name = xyzStr[tupleIndex];
+                    Dimension::Id::Enum xyz[] = 
+                        { Dimension::Id::X,
+                          Dimension::Id::Y,
+                          Dimension::Id::Z };
+                    inType = Dimension::Type::Double;
+                    dim = xyz[tupleIndex];
                 }
                 else
-                {
-                    name = std::string(carisDim.name)
-                           + "." + boost::lexical_cast<std::string>(tupleIndex);
-                }
+                    name += "." + boost::lexical_cast<std::string>(tupleIndex);
             }
 
-            pdal::Dimension pdalDim(
-                name,
-                carisTypeToInterpretation(caris_type(carisDim.type)),
-                carisTypeToSize(caris_type(carisDim.type)));
-            pdalDim.setUUID(uuidGen(name));
-            pdalDim.setNamespace(getName());
-            m_dimInfo[pdalDim.getUUID()] = DimInfo(dimIndex, tupleIndex, &carisDim);
-            schema.appendDimension(pdalDim);
+            if (dim != Dimension::Id::Unknown)
+            {
+                inType = utils::carisTypeToPdal((caris_type)carisDim.type);
+                if (inType == Dimension::Type::None)
+                    continue;
+                dim = ctx.registerOrAssignDim(name, inType);
+            }
+            m_dims[dim] = DimInfo(dimIndex, tupleIndex, inType, &carisDim);
         }
     }
 
     if (caris_cloud_status(m_cloud))
     {
-        std::string msg = caris_status_message(caris_cloud_status(m_cloud), isDebug());
+        std::string msg = caris_status_message(caris_cloud_status(m_cloud),
+            isDebug());
         throw pdal::pdal_error(msg);
     }
 }
 
+using namespace csar::utils;
 
-//! \copydoc pdal::Reader::supportsIterator
-bool CloudReader::supportsIterator(pdal::StageIteratorType in_type) const
+void CloudReader::ready(PointContextRef ctx)
 {
-    return in_type == pdal::StageIterator_Sequential;
+    m_itr = caris_cloud_create_itr(m_cloud);
+    throwIfItrError();
 }
 
-//! \copydoc pdal::Reader::createSequentialIterator
-pdal::StageSequentialIterator* CloudReader::createSequentialIterator(
-    pdal::PointBuffer& in_buffer) const
-{
-    assert(m_cloud);
 
-    return new CloudIterator(*this, in_buffer);
+void CloudReader::done(PointContextRef ctx)
+{
+    if (m_itr)
+        caris_itr_release(m_itr);
 }
 
-} // namespace
+
+point_count_t CloudReader::read(pdal::PointBuffer& io_buffer, point_count_t num)
+{
+    assert(m_itr);
+
+    if (eof())
+        return 0;
+
+    // Determine the number of points availabe from the current iterator.
+    point_count_t numPoints = caris_itr_num_points(m_itr);
+    numPoints -= m_currentOffset;
+
+    // We don't want any more points than requested.
+    num = std::min(numPoints, num);
+
+    PointId startIdx = io_buffer.size();
+    for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
+    {
+        Dimension::Id::Enum dim = di->first;
+        DimInfo& dimInfo = di->second;
+
+        int32_t numDimElements = 0;
+        const void *dimElements = caris_itr_read(m_itr, dimInfo.dimIndex,
+            &numDimElements);
+        throwIfItrError();
+        assert((point_count_t)numDimElements == num);
+
+        size_t elementSize = Dimension::size(dimInfo.type);
+        size_t srcStride = dimInfo.dimension->tuple_length * elementSize;
+        uint8_t *src = (uint8_t *)dimElements +
+            (m_currentOffset * srcStride) +
+            (elementSize * dimInfo.tupleIndex);
+
+        PointId idx = startIdx;
+        for (size_t i = 0; i < num; ++i, ++idx, src += srcStride)
+            io_buffer.setField(dim, dimInfo.type, idx, (void *)src);
+    }
+    m_currentOffset += num;
+
+    if ((point_count_t)m_currentOffset == numPoints)
+    {
+        m_currentOffset = 0;
+        caris_itr_next(m_itr);
+    }
+
+    throwIfItrError();
+
+    return num;
+}
+
+
+bool CloudReader::eof()
+{
+    return (bool)caris_itr_done(m_itr);
+}
+
+
+//************************************************************************
+//! throw a pdal::pdal_error if an error has occured in the wrapped caris_itr
+//************************************************************************
+void CloudReader::throwIfItrError() const
+{
+    if (int status = caris_itr_status(m_itr))
+    {
+        std::string msg = caris_status_message(status, isDebug());
+        throw pdal::pdal_error(msg);
+    }
+}
+
+} // namespace csar
+} // namespace pdal

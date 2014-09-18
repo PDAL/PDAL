@@ -32,12 +32,9 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/drivers/nitf/Reader.hpp>
-#ifdef PDAL_HAVE_GDAL
+#include <pdal/pdal_internal.hpp>
 
-#include <pdal/PointBuffer.hpp>
-#include <pdal/StreamFactory.hpp>
-#include <pdal/drivers/las/Reader.hpp>
+#ifdef PDAL_HAVE_GDAL
 
 // local
 #include "NitfFile.hpp"
@@ -49,10 +46,12 @@
 #include "cpl_conv.h"
 #include "cpl_string.h"
 
+#include <pdal/drivers/nitf/Reader.hpp>
+#include <pdal/StreamFactory.hpp>
+
 #if ((GDAL_VERSION_MAJOR == 1 && GDAL_VERSION_MINOR < 10) || (GDAL_VERSION_MAJOR < 1))
 // #error "NITF support requires GDAL 1.10 or GDAL 2.0+"
 #endif
-
 
 
 namespace pdal
@@ -61,7 +60,6 @@ namespace drivers
 {
 namespace nitf
 {
-
 
 // References:
 //   - NITF 2.1 standard: MIL-STD-2500C (01 May 2006)
@@ -94,15 +92,16 @@ namespace nitf
 //         because NITFImageDeaccess() leaks memory?
 //
 // We do not parse out the TRE fields; we leave the data as a byte stream
-// (This would be easy enough to do later, at least for those TREs we have documentation on).
+// (This would be easy enough to do later, at least for those TREs we
+// have documentation on).
 //
-// The dimensions we write out are (precisely) the LAS dimensions; we use the same
-// names, so as not to require upstream stgaes to understand both LAS dimension
-// names and NITF dimension names.
+// The dimensions we write out are (precisely) the LAS dimensions; we use
+// the same names, so as not to require upstream stgaes to understand both
+// LAS dimension names and NITF dimension names.
 //
-// BUG: we should provide an option to set the SRS of the Stage using the IGEOLO
-// field, but the GDAL C API doesn't provide an easy way to get the SRS. (When we
-// add this option, the default will be to use NITF.)
+// BUG: we should provide an option to set the SRS of the Stage using the
+// IGEOLO field, but the GDAL C API doesn't provide an easy way to get
+// the SRS. (When we add this option, the default will be to use NITF.)
 //
 // Need to test on all the other NITF LAS files
 //
@@ -113,91 +112,24 @@ namespace nitf
 //
 // BUG: fix the reader test that asserts 80 pieces of metadata coming out
 
-// ==========================================================================
-
-
-Reader::Reader(const Options& options)
-    : pdal::Reader(options)
-    , m_filename(options.getValueOrThrow<std::string>("filename"))
-    , m_streamFactory(NULL)
-    , m_lasReader(NULL)
+void NitfReader::initialize()
 {
-    return;
+    NitfFile nitf(m_filename);
+    nitf.open();
+    nitf.getLasPosition(m_offset, m_length);
+    nitf.extractMetadata(m_metadata);
+    nitf.close();
+
+    // Initialize the LAS stuff with its own metadata node.
+    MetadataNode lasNode = m_metadata.add(las::Reader::getName());
+    las::Reader::initialize(lasNode);
 }
 
+} // namespace nitf
+} // namespace drivers
+} // namespace pdal
 
-Reader::~Reader()
-{
-    delete m_streamFactory;
-    delete m_lasReader;
-}
+#else // PDAL_HAVE_GDAL
+#include <pdal/drivers/nitf/Reader.hpp>
+#endif // PDAL_HAVE_GDAL
 
-
-std::vector<Dimension> getDefaultDimensions()
-{
-    return pdal::drivers::las::Reader::getDefaultDimensions();
-}
-
-void Reader::initialize()
-{
-    pdal::Reader::initialize();
-
-    boost::uint64_t offset(0), length(0);
-
-    Metadata nitf_metadata(getName());
-    {
-        NitfFile nitf(m_filename);
-        nitf.open();
-
-        nitf.getLasPosition(offset, length);
-
-        nitf.extractMetadata(nitf_metadata);
-
-        nitf.close();
-    }
-
-    m_streamFactory = new FilenameSubsetStreamFactory(m_filename, offset, length);
-
-    m_lasReader = new pdal::drivers::las::Reader(m_streamFactory);
-    m_lasReader->initialize();
-
-
-    Metadata LAS = m_lasReader->getMetadata();
-
-    nitf_metadata.addMetadata(LAS);
-    Metadata& ref = getMetadataRef();
-    ref = nitf_metadata;
-
-    setCoreProperties(*m_lasReader);
-
-    return;
-}
-
-
-Options Reader::getDefaultOptions()
-{
-    Options options;
-    return options;
-}
-
-std::vector<Dimension> Reader::getDefaultDimensions()
-{
-    std::vector<Dimension> output;
-    return output;
-}
-
-
-pdal::StageSequentialIterator* Reader::createSequentialIterator(PointBuffer& buffer) const
-{
-    return m_lasReader->createSequentialIterator(buffer);
-}
-
-pdal::StageRandomIterator* Reader::createRandomIterator(PointBuffer& buffer) const
-{
-    return m_lasReader->createRandomIterator(buffer);
-}
-
-}
-}
-} // namespaces
-#endif

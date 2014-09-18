@@ -32,40 +32,25 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_DRIVER_OCI_COMMON_HPP
-#define INCLUDED_DRIVER_OCI_COMMON_HPP
-
-#include <pdal/Options.hpp>
+#pragma once
 
 #include "oci_wrapper.h"
-#include <pdal/Endian.hpp>
-
-#include <boost/shared_ptr.hpp>
-#include <boost/scoped_ptr.hpp>
-#include <boost/tokenizer.hpp>
-#include <boost/function.hpp>
-#include <boost/concept_check.hpp> // ignore_unused_variable_warning
-#include <boost/make_shared.hpp>
-
-typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
 
 #include <cpl_port.h>
 
-//
-//
-// void CPL_STDCALL OCIGDALErrorHandler(CPLErr eErrClass, int err_no, const char *msg);
-// void CPL_STDCALL OCIGDALDebugErrorHandler(CPLErr eErrClass, int err_no, const char *msg);
-
+#include <pdal/PointContext.hpp>
+#include <pdal/XMLSchema.hpp>
 
 namespace pdal
 {
+
 namespace drivers
 {
 namespace oci
 {
 
-typedef boost::shared_ptr<OWConnection> Connection ;
-typedef boost::shared_ptr<OWStatement> Statement ;
+typedef std::shared_ptr<OWConnection> Connection;
+typedef std::shared_ptr<OWStatement> Statement;
 
 class connection_failed : public pdal_error
 {
@@ -74,6 +59,7 @@ public:
         : pdal_error(msg)
     {}
 };
+
 
 class buffer_too_small : public pdal_error
 {
@@ -92,96 +78,69 @@ public:
     {}
 };
 
-
-class PDAL_DLL OracleDriver
-{
-public:
-    OracleDriver(const Options& options)
-        : m_options(options)
-    {
-
-
-    }
-
-    pdal::drivers::oci::Connection connect()
-    {
-        std::string connection  = m_options.getValueOrThrow<std::string>("connection");
-
-        if (connection.empty())
-            throw pdal_error("Oracle connection string empty! Unable to connect");
-
-        std::string::size_type slash_pos = connection.find("/",0);
-        std::string username = connection.substr(0,slash_pos);
-        std::string::size_type at_pos = connection.find("@",slash_pos);
-
-        std::string password = connection.substr(slash_pos+1, at_pos-slash_pos-1);
-        std::string instance = connection.substr(at_pos+1);
-
-        Connection con = boost::make_shared<OWConnection>(username.c_str(),password.c_str(),instance.c_str());
-
-        if (!con->Succeeded())
-        {
-            throw connection_failed("Oracle connection failed");
-        }
-
-        return con;
-
-    }
-
-private:
-    Options const& m_options;
-
-    OracleDriver& operator=(const OracleDriver&); // not implemented
-    OracleDriver(const OracleDriver&); // not implemented
-};
-
-
-
-
-
-enum QueryType
-{
-    QUERY_SDO_PC = 0,
-    QUERY_SDO_PC_BLK_TYPE,
-    QUERY_SDO_BLK_PC_VIEW,
-    QUERY_UNKNOWN = 512
-};
-
-
 class Block
 {
-
 public:
-
     Block(Connection connection);
-    ~Block() ;
+    ~Block();
 
-    boost::int32_t           obj_id;
-    boost::int32_t           blk_id;
-    sdo_geometry*   blk_extent;
-    sdo_orgscl_type* blk_domain;
+    point_count_t numRemaining() const
+        { return m_num_remaining; }
+    void setNumRemaining(point_count_t num_remaining)
+        { m_num_remaining = num_remaining; }
+    point_count_t numRead() const
+        { return num_points - m_num_remaining; }
+    point_count_t numPoints() const
+        { return num_points; }
+    double xOffset() const
+        { return m_schema.m_scale.m_x.m_offset; }
+    double yOffset() const
+        { return m_schema.m_scale.m_y.m_offset; }
+    double zOffset() const
+        { return m_schema.m_scale.m_z.m_offset; }
+    double xScale() const
+        { return m_schema.m_scale.m_x.m_scale; }
+    double yScale() const
+        { return m_schema.m_scale.m_y.m_scale; }
+    double zScale() const
+        { return m_schema.m_scale.m_z.m_scale; }
+    char *data() const
+        { return (char *)chunk.data(); }
+    Orientation::Enum orientation() const
+        { return m_schema.m_orientation; }
+    void update(schema::XMLSchema *s);
+    bool fetched() const
+        { return m_fetched; }
+    void setFetched()
+        { m_fetched = true; }
+    void clearFetched()
+        { m_fetched = false; }
 
-    double           pcblk_min_res;
-    double           pcblk_max_res;
-    boost::int32_t           num_points;
-    boost::int32_t           num_unsorted_points;
-    boost::int32_t           pt_sort_dim;
-    std::vector<boost::uint8_t> chunk;
-    OCILobLocator           *locator;
-    Connection              m_connection;
-    sdo_pc*                 pc;
-
-
+    int32_t obj_id;
+    int32_t blk_id;
+    sdo_geometry *blk_extent;
+    sdo_orgscl_type *blk_domain;
+    double pcblk_min_res;
+    double pcblk_max_res;
+    int32_t num_points;
+    int32_t num_unsorted_points;
+    int32_t pt_sort_dim;
+    std::vector<uint8_t> chunk;
+    OCILobLocator *locator;
+    Connection m_connection;
+    sdo_pc* pc;
+    int32_t m_num_remaining;
+    PointContextRef m_ctx;
+    schema::XMLSchema m_schema;
+    size_t m_point_size;
+    bool m_fetched;  // Set when fetched but not initialized
 };
+typedef std::shared_ptr<Block> BlockPtr;
 
-typedef boost::shared_ptr<Block> BlockPtr;
+PDAL_DLL Connection connect(std::string connSpec);
+PDAL_DLL schema::XMLSchema fetchSchema(Statement stmt, BlockPtr block);
 
+} // namespace oci
+} // namespace drivers
+} // namespace pdal
 
-
-
-}
-}
-} // namespace pdal::driver::oci
-
-
-#endif

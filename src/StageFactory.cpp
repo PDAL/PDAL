@@ -35,83 +35,12 @@
 #include <pdal/StageFactory.hpp>
 
 #include <pdal/Filter.hpp>
-#include <pdal/MultiFilter.hpp>
 #include <pdal/Reader.hpp>
 #include <pdal/Writer.hpp>
 
-#include <pdal/drivers/faux/Reader.hpp>
-#include <pdal/drivers/las/Reader.hpp>
 
-#ifdef PDAL_HAVE_ORACLE
-#ifndef USE_PDAL_PLUGIN_OCI
-#include <pdal/drivers/oci/Reader.hpp>
-#endif
-#endif
-
-#ifdef PDAL_HAVE_GDAL
-#include <pdal/drivers/nitf/Reader.hpp>
-#endif
-
-#include <pdal/drivers/pipeline/Reader.hpp>
-#include <pdal/drivers/qfit/Reader.hpp>
-#include <pdal/drivers/terrasolid/Reader.hpp>
-
-#include <pdal/drivers/faux/Writer.hpp>
-#include <pdal/drivers/las/Writer.hpp>
-#include <pdal/drivers/text/Writer.hpp>
-
-#ifdef PDAL_HAVE_ORACLE
-#ifndef USE_PDAL_PLUGIN_OCI
-#include <pdal/drivers/oci/Writer.hpp>
-#endif
-#endif
-
-#ifdef PDAL_HAVE_NITRO
-#ifndef USE_PDAL_PLUGIN_NITF
-#include <pdal/drivers/nitf/Writer.hpp>
-#endif
-#endif
-
-#ifdef PDAL_HAVE_P2G
-#include <pdal/drivers/p2g/Writer.hpp>
-#endif
-
-
-#ifdef PDAL_HAVE_SQLITE
-#ifndef USE_PDAL_PLUGIN_SQLITE
-#include <pdal/drivers/sqlite/Reader.hpp>
-#include <pdal/drivers/sqlite/Writer.hpp>
-#endif
-#endif
-
-#ifdef PDAL_HAVE_POSTGRESQL
-#ifndef USE_PDAL_PLUGIN_PGPOINTCLOUD
-#include <pdal/drivers/pgpointcloud/Reader.hpp>
-#include <pdal/drivers/pgpointcloud/Writer.hpp>
-#endif
-#endif
-
-#include <pdal/filters/ByteSwap.hpp>
-#include <pdal/filters/Cache.hpp>
-#include <pdal/filters/Chipper.hpp>
-#include <pdal/filters/Color.hpp>
-#include <pdal/filters/Colorization.hpp>
-#include <pdal/filters/Crop.hpp>
-#include <pdal/filters/Decimation.hpp>
-#include <pdal/filters/HexBin.hpp>
-#include <pdal/filters/InPlaceReprojection.hpp>
-#include <pdal/filters/Reprojection.hpp>
-
-#ifdef PDAL_HAVE_PYTHON
-#include <pdal/filters/Predicate.hpp>
-#include <pdal/filters/Programmable.hpp>
-#endif
-
-#include <pdal/filters/Scaling.hpp>
-#include <pdal/filters/Selector.hpp>
-#include <pdal/filters/Stats.hpp>
-
-#include <pdal/filters/Mosaic.hpp>
+#include <pdal/Drivers.hpp>
+#include <pdal/Filters.hpp>
 
 #include <pdal/Utils.hpp>
 
@@ -132,30 +61,46 @@ namespace pdal
 //
 MAKE_READER_CREATOR(FauxReader, pdal::drivers::faux::Reader)
 MAKE_READER_CREATOR(LasReader, pdal::drivers::las::Reader)
+MAKE_READER_CREATOR(BpfReader, pdal::BpfReader)
+
+#ifdef PDAL_HAVE_GREYHOUND
+MAKE_READER_CREATOR(GreyhoundReader, pdal::drivers::greyhound::GreyhoundReader)
+#endif
+
 #ifdef PDAL_HAVE_ORACLE
 #ifndef USE_PDAL_PLUGIN_OCI
-MAKE_READER_CREATOR(OciReader, pdal::drivers::oci::Reader)
+MAKE_READER_CREATOR(OciReader, pdal::drivers::oci::OciReader)
 #endif
 #endif
+
 #ifdef PDAL_HAVE_GDAL
-MAKE_READER_CREATOR(NITFReader, pdal::drivers::nitf::Reader)
+MAKE_READER_CREATOR(NITFReader, pdal::drivers::nitf::NitfReader)
 #endif
 
 #ifdef PDAL_HAVE_SQLITE
 #ifndef USE_PDAL_PLUGIN_SQLITE
-MAKE_READER_CREATOR(SqliteReader, pdal::drivers::sqlite::Reader)
+MAKE_READER_CREATOR(SqliteReader, pdal::drivers::sqlite::SQLiteReader)
 #endif
+#endif
+
+#ifdef PDAL_HAVE_PCL
+MAKE_READER_CREATOR(PcdReader, pdal::drivers::pcd::PcdReader);
 #endif
 
 #ifdef PDAL_HAVE_POSTGRESQL
 #ifndef USE_PDAL_PLUGIN_PGPOINTCLOUD
-MAKE_READER_CREATOR(PgPcReader, pdal::drivers::pgpointcloud::Reader)
+MAKE_READER_CREATOR(PgPcReader, pdal::drivers::pgpointcloud::PgReader)
 #endif
 #endif
 
-MAKE_READER_CREATOR(PipelineReader, pdal::drivers::pipeline::Reader)
 MAKE_READER_CREATOR(QfitReader, pdal::drivers::qfit::Reader)
 MAKE_READER_CREATOR(TerrasolidReader, pdal::drivers::terrasolid::Reader)
+
+MAKE_READER_CREATOR(SbetReader, pdal::drivers::sbet::SbetReader)
+
+#ifdef PDAL_HAVE_HDF5
+MAKE_READER_CREATOR(IcebridgeReader, pdal::drivers::icebridge::Reader)
+#endif
 
 //
 // define the functions to create the filters
@@ -163,12 +108,17 @@ MAKE_READER_CREATOR(TerrasolidReader, pdal::drivers::terrasolid::Reader)
 MAKE_FILTER_CREATOR(ByteSwap, pdal::filters::ByteSwap)
 MAKE_FILTER_CREATOR(Cache, pdal::filters::Cache)
 MAKE_FILTER_CREATOR(Chipper, pdal::filters::Chipper)
-MAKE_FILTER_CREATOR(Color, pdal::filters::Color)
+#ifdef PDAL_HAVE_GDAL
 MAKE_FILTER_CREATOR(Colorization, pdal::filters::Colorization)
+#endif
 MAKE_FILTER_CREATOR(Crop, pdal::filters::Crop)
 MAKE_FILTER_CREATOR(Decimation, pdal::filters::Decimation)
 MAKE_FILTER_CREATOR(HexBin, pdal::filters::HexBin)
-MAKE_FILTER_CREATOR(InPlaceReprojection, pdal::filters::InPlaceReprojection)
+MAKE_FILTER_CREATOR(Merge, pdal::filters::Merge)
+//MAKE_FILTER_CREATOR(InPlaceReprojection, pdal::filters::InPlaceReprojection)
+#ifdef PDAL_HAVE_PCL
+MAKE_FILTER_CREATOR(PCLBlock, pdal::filters::PCLBlock)
+#endif
 
 #ifdef PDAL_HAVE_PYTHON
 MAKE_FILTER_CREATOR(Predicate, pdal::filters::Predicate)
@@ -176,19 +126,19 @@ MAKE_FILTER_CREATOR(Programmable, pdal::filters::Programmable)
 #endif
 
 MAKE_FILTER_CREATOR(Reprojection, pdal::filters::Reprojection)
-MAKE_FILTER_CREATOR(Scaling, pdal::filters::Scaling)
-MAKE_FILTER_CREATOR(Selector, pdal::filters::Selector)
+//MAKE_FILTER_CREATOR(Scaling, pdal::filters::Scaling)
+//MAKE_FILTER_CREATOR(Selector, pdal::filters::Selector)
+MAKE_FILTER_CREATOR(Splitter, pdal::filters::Splitter)
 MAKE_FILTER_CREATOR(Stats, pdal::filters::Stats)
 
 //
 // define the functions to create the multifilters
 //
-MAKE_MULTIFILTER_CREATOR(Mosaic, pdal::filters::Mosaic)
+//MAKE_MULTIFILTER_CREATOR(Mosaic, pdal::filters::Mosaic)
 
 //
 // define the functions to create the writers
 //
-MAKE_WRITER_CREATOR(FauxWriter, pdal::drivers::faux::Writer)
 MAKE_WRITER_CREATOR(LasWriter, pdal::drivers::las::Writer)
 
 #ifndef USE_PDAL_PLUGIN_TEXT
@@ -202,12 +152,16 @@ MAKE_WRITER_CREATOR(OciWriter, pdal::drivers::oci::Writer)
 #endif
 
 #ifdef PDAL_HAVE_P2G
-MAKE_WRITER_CREATOR(P2GWriter, pdal::drivers::p2g::Writer)
+MAKE_WRITER_CREATOR(P2GWriter, pdal::drivers::p2g::P2gWriter)
+#endif
+
+#ifdef PDAL_HAVE_PCL
+MAKE_WRITER_CREATOR(PcdWriter, pdal::drivers::pcd::PcdWriter);
 #endif
 
 #ifdef PDAL_HAVE_SQLITE
 #ifndef USE_PDAL_PLUGIN_SQLITE
-MAKE_WRITER_CREATOR(SqliteWriter, pdal::drivers::sqlite::Writer)
+MAKE_WRITER_CREATOR(SqliteWriter, pdal::drivers::sqlite::SQLiteWriter)
 #endif
 #endif
 
@@ -227,33 +181,32 @@ StageFactory::StageFactory()
 {
     registerKnownReaders();
     registerKnownFilters();
-    registerKnownMultiFilters();
     registerKnownWriters();
 
     loadPlugins();
     return;
 }
 
-std::string StageFactory::inferReaderDriver(const std::string& filename, pdal::Options& options)
+
+std::string StageFactory::inferReaderDriver(const std::string& filename)
 {
     std::string ext = boost::filesystem::extension(filename);
-
-    pdal::Option& fn = options.getOptionByRef("filename");
-    fn.setValue<std::string>(filename);
-
     std::map<std::string, std::string> drivers;
     drivers["las"] = "drivers.las.reader";
     drivers["laz"] = "drivers.las.reader";
     drivers["bin"] = "drivers.terrasolid.reader";
+    drivers["greyhound"] = "drivers.greyhound.reader";
     drivers["qi"] = "drivers.qfit.reader";
-    drivers["xml"] = "drivers.pipeline.reader";
     drivers["nitf"] = "drivers.nitf.reader";
     drivers["ntf"] = "drivers.nitf.reader";
-
-    if (boost::algorithm::iequals(filename, "STDIN"))
-    {
-        return drivers["xml"];
-    }
+    drivers["bpf"] = "drivers.bpf.reader";
+    drivers["sbet"] = "drivers.sbet.reader";
+    drivers["icebridge"] = "drivers.icebridge.reader";
+    drivers["sqlite"] = "drivers.sqlite.reader";
+    
+#ifdef PDAL_HAVE_PCL
+    drivers["pcd"] = "drivers.pcd.reader";
+#endif
 
     if (ext == "") return "";
     ext = ext.substr(1, ext.length()-1);
@@ -264,25 +217,25 @@ std::string StageFactory::inferReaderDriver(const std::string& filename, pdal::O
     return driver; // will be "" if not found
 }
 
-std::string StageFactory::inferWriterDriver(const std::string& filename, pdal::Options& options)
+
+std::string StageFactory::inferWriterDriver(const std::string& filename)
 {
     std::string ext = boost::filesystem::extension(filename);
 
     boost::to_lower(ext);
 
-    if (boost::algorithm::iequals(ext,".laz"))
-    {
-        options.add("compression", true);
-    }
-
-    options.add<std::string>("filename", filename);
-
     std::map<std::string, std::string> drivers;
     drivers["las"] = "drivers.las.writer";
     drivers["laz"] = "drivers.las.writer";
+#ifdef PDAL_HAVE_PCL
+    drivers["pcd"] = "drivers.pcd.writer";
+#endif
+    drivers["csv"] = "drivers.text.writer";
+    drivers["json"] = "drivers.text.writer";
     drivers["xyz"] = "drivers.text.writer";
     drivers["txt"] = "drivers.text.writer";
     drivers["ntf"] = "drivers.nitf.writer";
+    drivers["sqlite"] = "drivers.sqlite.writer";
 
     if (boost::algorithm::iequals(filename, "STDOUT"))
     {
@@ -298,7 +251,28 @@ std::string StageFactory::inferWriterDriver(const std::string& filename, pdal::O
     return driver; // will be "" if not found
 }
 
-Reader* StageFactory::createReader(const std::string& type, const Options& options)
+
+void StageFactory::inferWriterOptionsChanges(const std::string& filename, pdal::Options& options)
+{
+    std::string ext = boost::filesystem::extension(filename);
+    boost::to_lower(ext);
+
+    if (boost::algorithm::iequals(ext,".laz"))
+    {
+        options.add("compression", true);
+    }
+
+    if (boost::algorithm::iequals(ext,".pcd"))
+    {
+        options.add("format","PCD");
+    }
+
+    options.add<std::string>("filename", filename);
+}
+
+
+Reader* StageFactory::createReader(const std::string& type,
+    const Options& options)
 {
     ReaderCreator* f = getReaderCreator(type);
     if (!f)
@@ -312,7 +286,8 @@ Reader* StageFactory::createReader(const std::string& type, const Options& optio
 }
 
 
-Filter* StageFactory::createFilter(const std::string& type, Stage& prevStage, const Options& options)
+Filter* StageFactory::createFilter(const std::string& type,
+    const Options& options)
 {
     FilterCreator* f = getFilterCreator(type);
     if (!f)
@@ -322,38 +297,23 @@ Filter* StageFactory::createFilter(const std::string& type, Stage& prevStage, co
         throw pdal_error(oss.str());
     }
 
-    Filter* stage = f(prevStage, options);
-    return stage;
+    return f(options);
 }
 
 
-MultiFilter* StageFactory::createMultiFilter(const std::string& type, const std::vector<Stage*>& prevStages, const Options& options)
-{
-    MultiFilterCreator* f = getMultiFilterCreator(type);
-    if (!f)
-    {
-        std::ostringstream oss;
-        oss << "Unable to create multifilter for type '" << type << "'. Does a driver with this type name exist?";
-        throw pdal_error(oss.str());
-    }
-
-    MultiFilter* stage = f(prevStages, options);
-    return stage;
-}
-
-
-Writer* StageFactory::createWriter(const std::string& type, Stage& prevStage, const Options& options)
+Writer* StageFactory::createWriter(const std::string& type,
+    const Options& options)
 {
     WriterCreator* f = getWriterCreator(type);
     if (!f)
     {
         std::ostringstream oss;
-        oss << "Unable to create writer for type '" << type << "'. Does a driver with this type name exist?";
+        oss << "Unable to create writer for type '" << type <<
+            "'. Does a driver with this type name exist?";
         throw pdal_error(oss.str());
     }
 
-    Writer* stage = f(prevStage, options);
-    return stage;
+    return f(options);
 }
 
 
@@ -379,12 +339,6 @@ StageFactory::FilterCreator* StageFactory::getFilterCreator(const std::string& t
 }
 
 
-StageFactory::MultiFilterCreator* StageFactory::getMultiFilterCreator(const std::string& type) const
-{
-    return findFirst<MultiFilterCreator>(type, m_multifilterCreators);
-}
-
-
 StageFactory::WriterCreator* StageFactory::getWriterCreator(const std::string& type) const
 {
     return findFirst<WriterCreator>(type, m_writerCreators);
@@ -405,13 +359,6 @@ void StageFactory::registerFilter(const std::string& type, FilterCreator* f)
 }
 
 
-void StageFactory::registerMultiFilter(const std::string& type, MultiFilterCreator* f)
-{
-    std::pair<std::string, MultiFilterCreator*> p(type, f);
-    m_multifilterCreators.insert(p);
-}
-
-
 void StageFactory::registerWriter(const std::string& type, WriterCreator* f)
 {
     std::pair<std::string, WriterCreator*> p(type, f);
@@ -425,28 +372,42 @@ void StageFactory::registerKnownReaders()
     REGISTER_READER(LasReader, pdal::drivers::las::Reader);
 #ifdef PDAL_HAVE_ORACLE
 #ifndef USE_PDAL_PLUGIN_OCI
-    REGISTER_READER(OciReader, pdal::drivers::oci::Reader);
+    REGISTER_READER(OciReader, pdal::drivers::oci::OciReader);
 #endif
 #endif
 #ifdef PDAL_HAVE_GDAL
-    REGISTER_READER(NITFReader, pdal::drivers::nitf::Reader);
+    REGISTER_READER(NITFReader, pdal::drivers::nitf::NitfReader);
 #endif
 
 #ifdef PDAL_HAVE_SQLITE
 #ifndef USE_PDAL_PLUGIN_SQLITE
-    REGISTER_READER(SqliteReader, pdal::drivers::sqlite::Reader);
+    REGISTER_READER(SqliteReader, pdal::drivers::sqlite::SQLiteReader);
 #endif
+#endif
+
+#ifdef PDAL_HAVE_PCL
+    REGISTER_READER(PcdReader, pdal::drivers::pcd::PcdReader);
 #endif
 
 #ifdef PDAL_HAVE_POSTGRESQL
 #ifndef USE_PDAL_PLUGIN_PGPOINTCLOUD
-    REGISTER_READER(PgPcReader, pdal::drivers::pgpointcloud::Reader);
+    REGISTER_READER(PgPcReader, pdal::drivers::pgpointcloud::PgReader);
 #endif
 #endif
 
-    REGISTER_READER(PipelineReader, pdal::drivers::pipeline::Reader);
     REGISTER_READER(QfitReader, pdal::drivers::qfit::Reader);
     REGISTER_READER(TerrasolidReader, pdal::drivers::terrasolid::Reader);
+    REGISTER_READER(BpfReader, pdal::BpfReader);
+
+#ifdef PDAL_HAVE_GREYHOUND
+    REGISTER_READER(GreyhoundReader, pdal::drivers::greyhound::GreyhoundReader);
+#endif
+
+    REGISTER_READER(SbetReader, pdal::drivers::sbet::SbetReader);
+
+#ifdef PDAL_HAVE_HDF5
+    REGISTER_READER(IcebridgeReader, pdal::drivers::icebridge::Reader);
+#endif
 }
 
 
@@ -455,13 +416,18 @@ void StageFactory::registerKnownFilters()
     REGISTER_FILTER(ByteSwap, pdal::filters::ByteSwap);
     REGISTER_FILTER(Cache, pdal::filters::Cache);
     REGISTER_FILTER(Chipper, pdal::filters::Chipper);
-    REGISTER_FILTER(Color, pdal::filters::Color);
+#ifdef PDAL_HAVE_GDAL
     REGISTER_FILTER(Colorization, pdal::filters::Colorization);
+#endif
     REGISTER_FILTER(Crop, pdal::filters::Crop);
     REGISTER_FILTER(Decimation, pdal::filters::Decimation);
     REGISTER_FILTER(Reprojection, pdal::filters::Reprojection);
     REGISTER_FILTER(HexBin, pdal::filters::HexBin);
-    REGISTER_FILTER(InPlaceReprojection, pdal::filters::InPlaceReprojection);
+    REGISTER_FILTER(Merge, pdal::filters::Merge);
+//    REGISTER_FILTER(InPlaceReprojection, pdal::filters::InPlaceReprojection);
+#ifdef PDAL_HAVE_PCL
+    REGISTER_FILTER(PCLBlock, pdal::filters::PCLBlock);
+#endif
 
 #ifdef PDAL_HAVE_PYTHON
     REGISTER_FILTER(Predicate, pdal::filters::Predicate);
@@ -469,21 +435,15 @@ void StageFactory::registerKnownFilters()
 #endif
 
     REGISTER_FILTER(Reprojection, pdal::filters::Reprojection);
-    REGISTER_FILTER(Scaling, pdal::filters::Scaling);
-    REGISTER_FILTER(Selector, pdal::filters::Selector);
+//    REGISTER_FILTER(Scaling, pdal::filters::Scaling);
+//    REGISTER_FILTER(Selector, pdal::filters::Selector);
+    REGISTER_FILTER(Splitter, pdal::filters::Splitter);
     REGISTER_FILTER(Stats, pdal::filters::Stats);
-}
-
-
-void StageFactory::registerKnownMultiFilters()
-{
-    REGISTER_MULTIFILTER(Mosaic, pdal::filters::Mosaic);
 }
 
 
 void StageFactory::registerKnownWriters()
 {
-    REGISTER_WRITER(FauxWriter, pdal::drivers::faux::Writer);
     REGISTER_WRITER(LasWriter, pdal::drivers::las::Writer);
 
 #ifndef USE_PDAL_PLUGIN_TEXT
@@ -497,12 +457,16 @@ void StageFactory::registerKnownWriters()
 #endif
 
 #ifdef PDAL_HAVE_P2G
-    REGISTER_WRITER(P2GWriter, pdal::drivers::p2g::Writer);
+    REGISTER_WRITER(P2GWriter, pdal::drivers::p2g::P2gWriter);
+#endif
+
+#ifdef PDAL_HAVE_PCL
+    REGISTER_WRITER(PcdWriter, pdal::drivers::pcd::PcdWriter);
 #endif
 
 #ifdef PDAL_HAVE_SQLITE
 #ifndef USE_PDAL_PLUGIN_SQLITE
-    REGISTER_WRITER(SqliteWriter, pdal::drivers::sqlite::Writer);
+    REGISTER_WRITER(SqliteWriter, pdal::drivers::sqlite::SQLiteWriter);
 #endif
 #endif
 
@@ -537,10 +501,9 @@ void StageFactory::loadPlugins()
 
 
     // If we don't have a driver path, we're not loading anything
-    // FIXME: support setting the plugin name directly from the
-    // PipelineReader
 
-    if (pluginDir.size() == 0) return;
+    if (pluginDir.size() == 0)
+        return;
 
     directory_iterator dir(pluginDir), it, end;
 
@@ -653,17 +616,17 @@ std::map<std::string, pdal::StageInfo> const& StageFactory::getStageInfos() cons
 std::string StageFactory::toRST(std::string driverName) const
 {
     std::ostringstream os;
-    
+
     std::map<std::string, pdal::StageInfo> const& drivers = getStageInfos();
     typedef std::map<std::string, pdal::StageInfo>::const_iterator Iterator;
-    
+
     Iterator i = drivers.find(driverName);
     std::string headline("------------------------------------------------------------------------------------------");
-    
+
     os << headline << std::endl;
     os << "PDAL Options" << " (" << pdal::GetFullVersionString() << ")" <<std::endl;
     os << headline << std::endl << std::endl;
-    
+
     // If we were given an explicit driver name, only display that.
     // Otherwise, display output for all of the registered drivers.
     if ( i != drivers.end())

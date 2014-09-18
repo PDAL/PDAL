@@ -42,19 +42,6 @@ namespace filters
 {
 
 
-Color::Color(Stage& prevStage, const Options& options)
-    : pdal::Filter(prevStage, options)
-{
-    return;
-}
-
-
-Color::Color(Stage& prevStage)
-    : Filter(prevStage, Options::none())
-{
-    return;
-}
-
 std::vector<Dimension> Color::getDefaultDimensions()
 {
     std::vector<Dimension> output;
@@ -74,58 +61,46 @@ std::vector<Dimension> Color::getDefaultDimensions()
     output.push_back(blue);
 
     return output;
-
-}
-
-
-void Color::initialize()
-{
-    Filter::initialize();
-}
-
-
-Options Color::getDefaultOptions()
-{
-    Options options;
-    return options;
 }
 
 
 void Color::processBuffer(PointBuffer& data) const
 {
-    const boost::uint32_t numPoints = data.getNumPoints();
+    const boost::uint32_t numPoints = data.size();
 
     const Schema& schema = data.getSchema();
 
-    boost::optional<Dimension const&> dimZ = schema.getDimensionOptional("Z");
-    boost::optional<Dimension const&> dimRed = schema.getDimensionOptional("Red");
-    boost::optional<Dimension const&> dimGreen = schema.getDimensionOptional("Green");
-    boost::optional<Dimension const&> dimBlue = schema.getDimensionOptional("Blue");
+    boost::optional<Dimension const&> dimZ =
+        schema.getDimensionOptional("Z");
+    boost::optional<Dimension const&> dimRed =
+        schema.getDimensionOptional("Red");
+    boost::optional<Dimension const&> dimGreen =
+        schema.getDimensionOptional("Green");
+    boost::optional<Dimension const&> dimBlue =
+        schema.getDimensionOptional("Blue");
 
-    if (!dimZ) throw pdal_error("Unable to get 'Z' dimension for colorization!");
+    if (!dimZ)
+        throw pdal_error("Unable to get 'Z' dimension for colorization!");
 
-    for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
+    for (uint32_t pointIndex = 0; pointIndex < numPoints; pointIndex++)
     {
-        const boost::int32_t zraw = data.getField<boost::int32_t>(*dimZ, pointIndex);
+        const boost::int32_t zraw = data.getField<int32_t>(*dimZ, pointIndex);
         const double z = dimZ->applyScaling(zraw);
 
         boost::uint16_t red, green, blue;
         this->getColor_F64_U16(z, red, green, blue);
 
         // now we store the 3 u16's in the point data...
-        data.setField<boost::uint16_t>(*dimRed, pointIndex, red);
-        data.setField<boost::uint16_t>(*dimGreen, pointIndex, green);
-        data.setField<boost::uint16_t>(*dimBlue, pointIndex, blue);
-
-        data.setNumPoints(pointIndex+1);
+        data.setField<uint16_t>(*dimRed, pointIndex, red);
+        data.setField<uint16_t>(*dimGreen, pointIndex, green);
+        data.setField<uint16_t>(*dimBlue, pointIndex, blue);
     }
-
-    return;
 }
 
 
 // static function to impute a color from within a range
-void Color::interpolateColor(double value, double minValue, double maxValue, double& red, double& green, double& blue)
+void Color::interpolateColor(double value, double minValue, double maxValue,
+    double& red, double& green, double& blue)
 {
     // initialize to white
     red = 1.0;
@@ -133,17 +108,12 @@ void Color::interpolateColor(double value, double minValue, double maxValue, dou
     blue = 1.0;
 
     if (value < minValue)
-    {
         value = minValue;
-    }
 
     if (value > maxValue)
-    {
         value = maxValue;
-    }
 
     double dv = maxValue - minValue;
-
     if (value < (minValue + (0.25 * dv)))
     {
         red = 0;
@@ -164,45 +134,43 @@ void Color::interpolateColor(double value, double minValue, double maxValue, dou
         green = 1 + (4 * (minValue + (0.75 * dv) - value) / dv);
         blue = 0;
     }
-
-    return;
 }
 
 
-
-void Color::getColor_F32_U8(float value, boost::uint8_t& red, boost::uint8_t& green, boost::uint8_t& blue) const
+void Color::getColor_F32_U8(float value, uint8_t& red, uint8_t& green,
+    uint8_t& blue) const
 {
     double fred, fgreen, fblue;
 
-    const Range<double>& zrange = getBounds().dimensions()[2];
-    interpolateColor(value, zrange.getMinimum(), zrange.getMaximum(), fred, fblue, fgreen);
+    // const Range<double>& zrange = getBounds().dimensions()[2];
+    // interpolateColor(value, zrange.getMinimum(), zrange.getMaximum(),
+    //     fred, fblue, fgreen);
 
     const double vmax = (std::numeric_limits<boost::uint8_t>::max)();
-    red = (boost::uint8_t)(fred * vmax);
-    green = (boost::uint8_t)(fgreen * vmax);
-    blue = (boost::uint8_t)(fblue * vmax);
-
-    return;
+    red = (uint8_t)(fred * vmax);
+    green = (uint8_t)(fgreen * vmax);
+    blue = (uint8_t)(fblue * vmax);
 }
 
 
-void Color::getColor_F64_U16(double value, boost::uint16_t& red, boost::uint16_t& green, boost::uint16_t& blue) const
+void Color::getColor_F64_U16(double value, uint16_t& red, uint16_t& green,
+    uint16_t& blue) const
 {
     double fred, fgreen, fblue;
 
-    const Range<double>& zrange = getBounds().dimensions()[2];
-    interpolateColor(value, zrange.getMinimum(), zrange.getMaximum(), fred, fblue, fgreen);
+    // const Range<double>& zrange = getBounds().dimensions()[2];
+    // interpolateColor(value, zrange.getMinimum(), zrange.getMaximum(),
+    //     fred, fblue, fgreen);
 
-    const double vmax = (std::numeric_limits<boost::uint16_t>::max)();
-    red = (boost::uint16_t)(fred * vmax);
-    green = (boost::uint16_t)(fgreen * vmax);
-    blue = (boost::uint16_t)(fblue * vmax);
-
-    return;
+    const double vmax = std::numeric_limits<uint16_t>::max();
+    red = (uint16_t)(fred * vmax);
+    green = (uint16_t)(fgreen * vmax);
+    blue = (uint16_t)(fblue * vmax);
 }
 
 
-pdal::StageSequentialIterator* Color::createSequentialIterator(PointBuffer& buffer) const
+pdal::StageSequentialIterator*
+Color::createSequentialIterator(PointBuffer& buffer) const
 {
     return new pdal::filters::iterators::sequential::Color(*this, buffer);
 }
@@ -217,17 +185,13 @@ namespace sequential
 Color::Color(const pdal::filters::Color& filter, PointBuffer& buffer)
     : pdal::FilterSequentialIterator(filter, buffer)
     , m_colorFilter(filter)
-{
-    return;
-}
+{}
 
 
 boost::uint32_t Color::readBufferImpl(PointBuffer& data)
 {
-    const boost::uint32_t numRead = getPrevIterator().read(data);
-
+    const uint32_t numRead = getPrevIterator().read(data);
     m_colorFilter.processBuffer(data);
-
     return numRead;
 }
 

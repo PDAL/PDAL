@@ -33,13 +33,10 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_DRIVERS_PGPOINTCLOUD_WRITER_HPP
-#define INCLUDED_DRIVERS_PGPOINTCLOUD_WRITER_HPP
-
+#pragma once
 
 #include <pdal/Writer.hpp>
 #include <pdal/drivers/pgpointcloud/common.hpp>
-
 
 namespace pdal
 {
@@ -54,28 +51,35 @@ class PDAL_DLL Writer : public pdal::Writer
 public:
     SET_STAGE_NAME("drivers.pgpointcloud.writer", "PostgresSQL Pointcloud Database Writer")
     SET_STAGE_LINK("http://pdal.io/stages/drivers.pgpointcloud.writer.html")
+#ifdef PDAL_HAVE_POSTGRESQL
+    SET_STAGE_ENABLED(true)
+#else
+    SET_STAGE_ENABLED(false)
+#endif
 
-    Writer(Stage& prevStage, const Options&);
+    Writer(const Options&);
     ~Writer();
 
-    virtual void initialize();
     static Options getDefaultOptions();
 
-protected:
-    virtual void writeBegin(boost::uint64_t targetNumPointsToWrite);
-    virtual void writeBufferBegin(PointBuffer const& data);
-    virtual boost::uint32_t writeBuffer(const PointBuffer&);
-    virtual void writeEnd(boost::uint64_t actualNumPointsWritten);
 
 private:
-
     Writer& operator=(const Writer&); // not implemented
     Writer(const Writer&); // not implemented
 
+    virtual void processOptions(const Options& options);
+    virtual void ready(PointContextRef ctx);
+    virtual void write(const PointBuffer& pointBuffer);
+    virtual void done(PointContextRef ctx);
+    virtual void initialize();
+
+    void writeInit();
+    void writeTile(const PointBuffer& buffer);
+    
     bool CheckTableExists(std::string const& name);
     bool CheckPointCloudExists();
     bool CheckPostGISExists();
-    boost::uint32_t SetupSchema(Schema const& buffer_schema, boost::uint32_t srid);
+    uint32_t SetupSchema(uint32_t srid);
 
     void CreateTable(std::string const& schema_name, 
                      std::string const& table_name,
@@ -95,21 +99,28 @@ private:
     std::string m_schema_name;
     std::string m_table_name;
     std::string m_column_name;
-    schema::CompressionType m_patch_compression_type;
-    boost::uint32_t m_patch_capacity;
-    boost::uint32_t m_srid;
-    boost::uint32_t m_pcid;
+    std::string m_connection;
+    CompressionType::Enum m_patch_compression_type;
+    uint32_t m_patch_capacity;
+    uint32_t m_srid;
+    uint32_t m_pcid;
     bool m_have_postgis;
     bool m_create_index;
     bool m_overwrite;
-
-
+    std::string m_insert;
+    std::string m_hex;
+    size_t m_pointSize;
+    Orientation::Enum m_orientation;
+    bool m_pack;
+    std::string m_pre_sql;
+    Dimension::IdList m_dims;
+    std::vector<Dimension::Type::Enum> m_types;
+    
     // lose this
     bool m_schema_is_initialized;
 };
 
-} // pgpointcloud
-} // drivers
-} // pdal
+} // namespace pgpointcloud
+} // namespace drivers
+} // namespace pdal
 
-#endif  // INCLUDED_DRIVERS_PGPOINTCLOUD_WRITER_HPP

@@ -45,6 +45,8 @@
 #include <pdal/pdal_config.hpp>
 #include <vector>
 
+#include <boost/tokenizer.hpp>
+typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
 
 
 namespace po = boost::program_options;
@@ -66,7 +68,6 @@ Application::Application(int argc, const char* argv[], const std::string& appNam
     , m_hardCoreDebug(false)
     , m_reportDebug(false)
     , m_usestdin(false)
-    , m_chunkSize(0)
 {
     return;
 }
@@ -75,11 +76,10 @@ Application::~Application()
 {
     if (m_options.size())
     {
-        typedef std::vector<boost::program_options::options_description*>::const_iterator  Iter;
-        for (Iter i = m_options.begin(); i != m_options.end(); ++i)
+        for (auto i = m_options.begin(); i != m_options.end(); ++i)
         {
             delete (*i);
-        }        
+        }
     }
 }
 
@@ -136,13 +136,13 @@ int Application::do_startup()
 
 int Application::do_execution()
 {
-    
+
     if (m_reportDebug)
     {
         std::cout << getPDALDebugInformation() << std::endl;
         return 0;
     }
-    
+
     if (m_hardCoreDebug)
     {
         int status = innerRun();
@@ -223,22 +223,83 @@ int Application::run()
     return shutdown_status;
 }
 
+void Application::collectExtraOptions()
+{
+
+    for (auto o: m_extra_options)
+    {
+
+        typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
+
+        // if we don't have --, we're not an option we
+        // even care about
+        if (!boost::algorithm::find_first(o, "--")) continue;
+
+        // Find the dimensions listed and put them on the id list.
+        boost::char_separator<char> equal("=");
+        boost::char_separator<char> dot(".");
+        // boost::erase_all(o, " "); // Wipe off spaces
+        tokenizer option_tokens(o, equal);
+        std::vector<std::string> option_split;
+        for (auto ti = option_tokens.begin(); ti != option_tokens.end(); ++ti)
+            option_split.push_back(boost::lexical_cast<std::string>(*ti));
+        if (! (option_split.size() == 2))
+        {
+            std::ostringstream oss;
+            oss << "option '" << o << "' did not split correctly. Is it in the form --drivers.las.reader.option=foo?";
+            throw app_usage_error(oss.str());
+        }
+
+        std::string option_value(option_split[1]);
+        std::string stage_value(option_split[0]);
+        boost::algorithm::erase_all(stage_value, "--");
+
+        tokenizer name_tokens(stage_value, dot);
+        std::vector<std::string> stage_values;
+        for (auto ti = name_tokens.begin(); ti != name_tokens.end(); ++ti)
+        {
+            stage_values.push_back(*ti);
+        }
+
+        std::string option_name = *stage_values.rbegin();
+        std::ostringstream stage_name_ostr;
+        bool bFirst(true);
+        for (auto s = stage_values.begin(); s != stage_values.end()-1; ++s)
+        {
+            auto s2 = boost::algorithm::erase_all_copy(*s, " ");
+
+            if (bFirst)
+            {
+                bFirst = false;
+            } else
+                stage_name_ostr <<".";
+            stage_name_ostr << s2;
+        }
+        std::string stage_name(stage_name_ostr.str());
+
+        auto found = m_extra_stage_options.find(stage_name);
+        if (found == m_extra_stage_options.end())
+            m_extra_stage_options.insert(std::make_pair(stage_name, Option(option_name, option_value, "")));
+        else
+            found->second.add(Option(option_name, option_value, ""));
+    }
+}
 
 int Application::innerRun()
 {
     // handle the well-known options
-    if (m_showVersion) 
+    if (m_showVersion)
     {
         outputVersion();
         return 0;
     }
-    
-    if (m_showHelp) 
+
+    if (m_showHelp)
     {
         outputHelp();
         return 0;
     }
-    
+
     if (m_showDrivers)
     {
         outputDrivers();
@@ -254,6 +315,7 @@ int Application::innerRun()
     {
         // do any user-level sanity checking
         validateSwitches();
+        collectExtraOptions();
     }
     catch (app_usage_error e)
     {
@@ -264,9 +326,9 @@ int Application::innerRun()
     }
 
     boost::timer timer;
-    
+
     int status = execute();
-    
+
     if (status == 0 && m_showTime)
     {
         const double t = timer.elapsed();
@@ -303,6 +365,67 @@ void Application::addSwitchSet(po::options_description* options)
 }
 
 
+void Application::setCommonOptions(Options &options)
+{
+    options.add("debug", m_isDebug);
+    options.add("verbose", m_verboseLevel);
+
+    boost::char_separator<char> sep(",| ");
+
+    if (m_variablesMap.count("scale"))
+    {
+        std::vector<double> scales;
+        tokenizer scale_tokens(m_scales, sep);
+        for (auto t = scale_tokens.begin(); t != scale_tokens.end(); ++t)
+            scales.push_back(boost::lexical_cast<double>(*t));
+        if(scales.size())
+        {
+            if (scales.size() <= 1)
+            {
+                options.add<double >("scale_x", scales[0]);
+            }
+            else if (scales.size() <= 2)
+            {
+                options.add<double >("scale_x", scales[0]);
+                options.add<double >("scale_y", scales[1]);
+            }
+            else if (scales.size() <= 3)
+            {
+                options.add<double >("scale_x", scales[0]);
+                options.add<double >("scale_y", scales[1]);
+                options.add<double >("scale_z", scales[2]);
+            }
+        }
+    }
+
+    if (m_variablesMap.count("offset"))
+    {
+        std::vector<double> offsets;
+        tokenizer offset_tokens(m_offsets, sep);
+        for (auto t = offset_tokens.begin(); t != offset_tokens.end(); ++t)
+            offsets.push_back(boost::lexical_cast<double>(*t));
+        if(offsets.size())
+        {
+            if (offsets.size() <= 1)
+            {
+                options.add<double >("offset_x", offsets[0]);
+            }
+            else if (offsets.size() <= 2)
+            {
+                options.add<double >("offset_x", offsets[0]);
+                options.add<double >("offset_y", offsets[1]);
+            }
+            else if (offsets.size() <= 3)
+            {
+                options.add<double >("offset_x", offsets[0]);
+                options.add<double >("offset_y", offsets[1]);
+                options.add<double >("offset_z", offsets[2]);
+            }
+        }
+    }
+}
+
+
 void Application::addPositionalSwitch(const char* name, int max_count)
 {
     m_positionalOptions.add(name, max_count);
@@ -312,14 +435,13 @@ void Application::outputDrivers()
 {
     pdal::StageFactory factory;
     std::map<std::string, pdal::StageInfo> const& drivers = factory.getStageInfos();
-    typedef std::map<std::string, pdal::StageInfo>::const_iterator Iterator;
     std::string headline("------------------------------------------------------------------------------------------");
 
     std::cout << headline << std::endl;
     std::cout << "PDAL Drivers" << " (" << pdal::GetFullVersionString() << ")" <<std::endl;
     std::cout << headline << std::endl << std::endl;
-    
-    for (Iterator i = drivers.begin(); i != drivers.end(); ++i)
+
+    for (auto i = drivers.begin(); i != drivers.end(); ++i)
     {
         std::cout << i->second.toRST() << std::endl;
     }
@@ -329,8 +451,8 @@ void Application::outputHelp()
 {
     outputVersion();
 
-    std::vector<po::options_description*>::const_iterator iter;
-    for (iter = m_options.begin(); iter != m_options.end(); ++iter)
+
+    for (auto iter = m_options.begin(); iter != m_options.end(); ++iter)
     {
         const po::options_description* options = *iter;
         std::cout << *options;
@@ -340,7 +462,7 @@ void Application::outputHelp()
     std::string headline("------------------------------------------------------------------------------------------");
 
     std::cout <<"\nFor more information, see the full documentation for PDAL at:\n";
-    
+
     std::cout << "  http://pdal.io/\n";
     std::cout << headline << std::endl;
     std::cout << std::endl;
@@ -374,13 +496,20 @@ void Application::addBasicSwitchSet()
         ("version", po::value<bool>(&m_showVersion)->zero_tokens()->implicit_value(true), "Show version info")
         ("timer", po::value<bool>(&m_showTime)->zero_tokens()->implicit_value(true), "Show execution time")
         ("stdin,s", po::value<bool>(&m_usestdin)->zero_tokens()->implicit_value(true), "Read pipeline XML from stdin")
-        ("chunk_size", po::value<boost::uint32_t>(&m_chunkSize)->default_value(0), "Use a specified buffer capacity rather than attempting to read the entire pipeline in a single buffer")
         ("heartbeat", po::value< std::vector<std::string> >(&m_heartbeat_shell_command), "Shell command to run for every progress heartbeat")
+        ("scale", po::value< std::string >(&m_scales),
+         "A comma-separated or quoted, space-separated list of scales to "
+         "set on the output file: \n--scale 0.1,0.1,0.00001\n--scale \""
+         "0.1 0.1 0.00001\"")
+        ("offset", po::value< std::string >(&m_offsets),
+         "A comma-separated or quoted, space-separated list of offsets to "
+         "set on the output file: \n--offset 0,0,0\n--offset "
+         "\"1234 5678 91011\"")
 
         ;
 
     addSwitchSet(basic_options);
-    
+
     return;
 }
 
@@ -389,31 +518,33 @@ void Application::parseSwitches()
 {
     po::options_description options;
 
-    std::vector<po::options_description*>::iterator iter1;
-    for (iter1 = m_options.begin(); iter1 != m_options.end(); ++iter1)
+    for (auto iter = m_options.begin();
+              iter != m_options.end();
+              ++iter)
     {
-        po::options_description* sub_options = *iter1;
+        po::options_description* sub_options = *iter;
         options.add(*sub_options);
     }
 
     try
     {
-        po::store(po::command_line_parser(m_argc, m_argv).
-            options(options).positional(m_positionalOptions).run(), 
-            m_variablesMap);
+        auto parsed = po::command_line_parser(m_argc, m_argv).
+            options(options).allow_unregistered().positional(m_positionalOptions).run();
+        m_extra_options = po::collect_unrecognized(parsed.options, po::include_positional);
+
+        po::store(parsed, m_variablesMap);
+
+
     }
     catch (boost::program_options::unknown_option e)
     {
-#if BOOST_VERSION >= 104200
         throw app_usage_error("unknown option: " + e.get_option_name());
-#else
-        throw app_usage_error("unknown option: " + std::string(e.what()));
-#endif
     }
 
     po::notify(m_variablesMap);
 
     return;
 }
+
 
 }} // pdal::kernel

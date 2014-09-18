@@ -1,4 +1,4 @@
-/* 
+/*
  * pdal_defines.h.in is used by cmake to generate pdal_defines.h
  *
  * Do not edit pdal_defines.h!
@@ -29,6 +29,7 @@
 #cmakedefine PDAL_HAVE_CARIS
 #cmakedefine PDAL_HAVE_GEOS
 #cmakedefine PDAL_HAVE_GDAL
+#cmakedefine PDAL_HAVE_HDF5
 #cmakedefine PDAL_HAVE_HEXER
 #cmakedefine PDAL_HAVE_LASZIP
 #cmakedefine PDAL_HAVE_LIBXML2
@@ -38,12 +39,15 @@
 #cmakedefine PDAL_HAVE_NITRO
 #cmakedefine PDAL_HAVE_ORACLE
 #cmakedefine PDAL_HAVE_P2G
+#cmakedefine PDAL_HAVE_PCL
 #cmakedefine PDAL_HAVE_PYTHON
-#cmakedefine PDAL_HAVE_SOCI
 #cmakedefine PDAL_HAVE_SQLITE
+#cmakedefine PDAL_HAVE_GREYHOUND
 #cmakedefine PDAL_HAVE_POSTGRESQL
+#cmakedefine PDAL_HAVE_ZLIB
+#cmakedefine PDAL_HAVE_DEMANGLER
 
-/* 
+/*
  * plugins
  */
 #cmakedefine USE_PDAL_PLUGIN_PCD
@@ -71,15 +75,15 @@
 #cmakedefine PDAL_PLATFORM_WIN32
 
 /*
- * platform compiler 
+ * platform compiler
  */
 #cmakedefine PDAL_COMPILER_MSVC
 
 /*
- * Use the embedded boost tree instead of system one 
+ * Use the embedded boost tree instead of system one
  */
-#cmakedefine PDAL_EMBED_BOOST
-
+#cmakedefine PDAL_COMPILER_VC12
+#cmakedefine PDAL_COMPILER_VC11
 #cmakedefine PDAL_COMPILER_VC10
 #cmakedefine PDAL_COMPILER_VC9
 #cmakedefine PDAL_COMPILER_VC8

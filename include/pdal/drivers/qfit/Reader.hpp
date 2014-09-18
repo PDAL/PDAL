@@ -32,19 +32,14 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_PDAL_DRIVER_QFIT_READER_HPP
-#define INCLUDED_PDAL_DRIVER_QFIT_READER_HPP
-
-#include <pdal/Reader.hpp>
-#include <pdal/ReaderIterator.hpp>
-#include <pdal/Options.hpp>
-
-#include <pdal/StageIterator.hpp>
-
+#pragma once
 
 #include <vector>
 
 #include <boost/detail/endian.hpp>
+
+#include <pdal/Reader.hpp>
+#include <pdal/Options.hpp>
 
 #ifdef BOOST_LITTLE_ENDIAN
 # define QFIT_SWAP_BE_TO_LE(p) \
@@ -75,7 +70,6 @@ namespace drivers
 namespace qfit
 {
 
-
 enum QFIT_Format_Type
 {
     QFIT_Format_10 = 10,
@@ -93,147 +87,57 @@ public:
     {}
 };
 
-class PointDimensions
-{
-public:
-    PointDimensions(const Schema& schema, std::string const& ns);
-
-    pdal::Dimension const* Time;
-    pdal::Dimension const* X;
-    pdal::Dimension const* Y;
-    pdal::Dimension const* Z;
-
-    pdal::Dimension const* StartPulse;
-    pdal::Dimension const* ReflectedPulse;
-    pdal::Dimension const* ScanAngleRank;
-    pdal::Dimension const* Pitch;
-    pdal::Dimension const* Roll;
-    pdal::Dimension const* PDOP;
-    pdal::Dimension const* PulseWidth;
-    pdal::Dimension const* GPSTime;
-
-    pdal::Dimension const* PassiveSignal;
-
-    pdal::Dimension const* PassiveX;
-    pdal::Dimension const* PassiveY;
-    pdal::Dimension const* PassiveZ;
-};
-
-//
-// supported options:
-//   <uint32>id
-//   <bool>debug
-//   <uint32>verbose
-//   <string>filename  [required]
-//
-
 class PDAL_DLL Reader : public pdal::Reader
 {
 public:
     SET_STAGE_NAME("drivers.qfit.reader", "QFIT Reader")
     SET_STAGE_LINK("http://pdal.io/stages/drivers.qfit.reader.html")
+    SET_STAGE_ENABLED(true)
 
     Reader(const Options& options);
-    ~Reader();
 
-    virtual void initialize();
     static Options getDefaultOptions();
-    static std::vector<Dimension> getDefaultDimensions();
+    static Dimension::IdList getDefaultDimensions();
 
     std::string getFileName() const;
 
-    bool supportsIterator(StageIteratorType t) const
-    {
-        if (t == StageIterator_Sequential) return true;
-        if (t == StageIterator_Random) return true;
-
-        return false;
-    }
-
-    pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator(PointBuffer& buffer) const;
-
     std::size_t getPointDataOffset() const
-    {
-        return m_offset;
-    }
-    boost::uint32_t getPointDataSize() const
-    {
-        return m_size;
-    }
+        { return m_offset; }
+    uint32_t getPointDataSize() const
+        { return m_size; }
+    point_count_t getNumPoints() const
+        { return m_numPoints; }
+    bool eof()
+        { return m_index >= m_numPoints; }
 
     // this is called by the stage's iterator
-    boost::uint32_t processBuffer(PointBuffer& PointBuffer, std::istream& stream, boost::uint64_t numPointsLeft) const;
-
-protected:
-    inline QFIT_Format_Type getFormat() const
-    {
-        return m_format;
-    }
+    point_count_t processBuffer(PointBuffer& PointBuffer, std::istream& stream,
+        point_count_t count) const;
 
 private:
-
-    Reader& operator=(const Reader&); // not implemented
-    Reader(const Reader&); // not implemented
-
     QFIT_Format_Type m_format;
+    std::ios::off_type m_point_bytes;
     std::size_t m_offset;
-    boost::uint32_t m_size;
+    uint32_t m_size;
     bool m_flip_x;
     double m_scale_z;
     bool m_littleEndian;
-
-    void registerFields();
-
-
-};
-
-namespace iterators
-{
-
-namespace sequential
-{
-
-class Reader : public pdal::ReaderSequentialIterator
-{
-public:
-    Reader(const pdal::drivers::qfit::Reader& reader, PointBuffer& buffer);
-    ~Reader();
-
-private:
-    boost::uint64_t skipImpl(boost::uint64_t);
-    boost::uint32_t readBufferImpl(PointBuffer&);
-    bool atEndImpl() const;
-
-    const pdal::drivers::qfit::Reader& m_reader;
+    point_count_t m_numPoints;
     std::istream* m_istream;
+    point_count_t m_index;
+
+    virtual void processOptions(const Options& ops);
+    virtual void initialize();
+    virtual void addDimensions(PointContextRef ctx);
+    virtual void ready(PointContextRef ctx);
+    virtual point_count_t read(PointBuffer& buf, point_count_t count);
+    virtual void done(PointContextRef ctx);
+
+    Reader& operator=(const Reader&); // not implemented
+    Reader(const Reader&); // not implemented
 };
 
+} // namespace qfit
+} // namespace drivers
+} // namespace pdal
 
-} // sequential
-
-namespace random
-{
-
-class Reader : public pdal::ReaderRandomIterator
-{
-public:
-    Reader(const pdal::drivers::qfit::Reader& reader, PointBuffer& buffer);
-    ~Reader();
-
-private:
-    boost::uint64_t seekImpl(boost::uint64_t);
-    boost::uint32_t readBufferImpl(PointBuffer&);
-
-    const pdal::drivers::qfit::Reader& m_reader;
-    std::istream* m_istream;
-};
-
-} // random
-} // iterators
-}
-}
-} // namespace pdal::driver::qfit
-
-
-#endif // INCLUDED_PDAL_DRIVER_QFIT_READER_HPP

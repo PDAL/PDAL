@@ -32,11 +32,9 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_FILTERS_COLORIZATIONFILTER_HPP
-#define INCLUDED_FILTERS_COLORIZATIONFILTER_HPP
+#pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/FilterIterator.hpp>
 
 #include <map>
 #include <boost/shared_ptr.hpp>
@@ -63,115 +61,61 @@ namespace pdal
 namespace filters
 {
 
-namespace colorization
-{
-
-typedef boost::shared_ptr<void> DataSourcePtr;
-
-} // colorization
-
 // Provides GDAL-based raster overlay that places output data in
 // specified dimensions. It also supports scaling the data by a multiplier
 // on a per-dimension basis.
 class PDAL_DLL Colorization : public Filter
 {
+
+struct BandInfo
+{
+    BandInfo(const std::string& name, Dimension::Id::Enum dim, uint32_t band,
+        double scale) : m_name(name), m_dim(dim), m_band(band), m_scale(scale)
+    {}
+
+    std::string m_name;
+    Dimension::Id::Enum m_dim;
+    uint32_t m_band;
+    double m_scale;
+};
+
 public:
     SET_STAGE_NAME("filters.colorization", "Fetch color information from a GDAL datasource")
     SET_STAGE_LINK("http://pdal.io/stages/filters.colorization.html")
-    
-    Colorization(Stage& prevStage, const Options&);
-    ~Colorization();
+#ifdef PDAL_HAVE_GDAL
+    SET_STAGE_ENABLED(true)
+#else
+    SET_STAGE_ENABLED(false)
+#endif
 
-    virtual void initialize();
+    Colorization(const Options& options) : Filter(options)
+        {}
+
     static Options getDefaultOptions();
 
-    bool supportsIterator(StageIteratorType t) const
-    {
-        if (t == StageIterator_Sequential) return true;
-
-        return false;
-    }
-
-    pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const
-    {
-        return NULL;
-    }
-
-    std::map<std::string, boost::uint32_t> getBandMap() const
-    {
-        return m_band_map;
-    }
-    std::map<std::string, double> getScaleMap() const
-    {
-        return m_scale_map;
-    }
-
 private:
-    void collectOptions();
+    virtual void initialize();
+    virtual void processOptions(const Options&);
+    virtual void ready(PointContext ctx);
+    virtual void filter(PointBuffer& buffer);
+    virtual void done(PointContext ctx);
 
-    std::map<std::string, boost::uint32_t> m_band_map;
-    std::map<std::string, double> m_scale_map;
+    bool getPixelAndLinePosition(double x, double y,
+        boost::array<double, 6> const& inverse, boost::int32_t& pixel,
+        boost::int32_t& line, void *ds);
+
+    std::string m_rasterFilename;
+    std::vector<BandInfo> m_bands;
+
+    boost::array<double, 6> m_forward_transform;
+    boost::array<double, 6> m_inverse_transform;
+
+    GDALDatasetH m_ds;
 
     Colorization& operator=(const Colorization&); // not implemented
     Colorization(const Colorization&); // not implemented
 };
 
-namespace iterators
-{
-namespace sequential
-{
+} // namespace filters
+} // namespace pdal
 
-
-class PDAL_DLL Colorization : public pdal::FilterSequentialIterator
-{
-public:
-    Colorization(const pdal::filters::Colorization& filter, PointBuffer& buffer);
-
-    ~Colorization();
-protected:
-    virtual void readBufferBeginImpl(PointBuffer&);
-
-private:
-    boost::uint64_t skipImpl(boost::uint64_t);
-    boost::uint32_t readBufferImpl(PointBuffer&);
-    bool atEndImpl() const;
-    void setScaledValue(PointBuffer& data,
-                        double value,
-                        Dimension const& d,
-                        std::size_t pointIndex) const;
-    bool getPixelAndLinePosition(double x,
-                                 double y,
-                                 boost::array<double, 6> const& inverse,
-                                 boost::int32_t& pixel,
-                                 boost::int32_t& line,
-                                 void* ds);
-
-    Dimension const* m_dimX;
-    Dimension const* m_dimY;
-
-    std::vector<Dimension const*> m_dimensions;
-    std::vector<boost::uint32_t> m_bands;
-    std::vector<double> m_scales;
-    const pdal::filters::Colorization& m_stage;
-
-    boost::array<double, 6> m_forward_transform;
-    boost::array<double, 6> m_inverse_transform;
-
-#ifdef PDAL_HAVE_GDAL
-    GDALDatasetH m_ds;
-#else
-    void* m_ds;
-#endif
-    
-};
-
-
-}
-} // iterators::sequential
-
-
-}
-} // namespaces
-
-#endif

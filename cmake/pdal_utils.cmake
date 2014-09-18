@@ -39,6 +39,7 @@
 # POSSIBILITY OF SUCH DAMAGE.                                            #
 ##########################################################################
 
+
 ###############################################################################
 # Pull the component parts out of the version number.
 macro(DISSECT_VERSION)
@@ -52,6 +53,7 @@ macro(DISSECT_VERSION)
     string(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.[0-9]+(.*)" "\\1"
         PDAL_CANDIDATE_VERSION "${PDAL_VERSION_STRING}")
 endmacro(DISSECT_VERSION)
+
 
 ###############################################################################
 # Get the operating system information. Generally, CMake does a good job of
@@ -69,17 +71,18 @@ macro(GET_OS_INFO)
     endif(CMAKE_SIZEOF_VOID_P EQUAL 8)
 endmacro(GET_OS_INFO)
 
+
 ###############################################################################
 # Set the destination directories for installing stuff.
-# Sets LIB_INSTALL_DIR. Install libraries here.
-# Sets BIN_INSTALL_DIR. Install binaries here.
-# Sets INCLUDE_INSTALL_DIR. Install include files here, preferably in a
+# Sets PDAL_LIB_DIR. Install libraries here.
+# Sets PDAL_BIN_DIR. Install binaries here.
+# Sets PDAL_INCLUDE_DIR. Install include files here, preferably in a
 # subdirectory named after the library in question (e.g.
 # "registration/blorgle.h")
 macro(SET_INSTALL_DIRS)
-  if (NOT DEFINED LIB_INSTALL_DIR)
+  if (NOT DEFINED PDAL_LIB_DIR)
     set(PDAL_LIB_DIR "lib")
-  endif (NOT DEFINED LIB_INSTALL_DIR)
+  endif (NOT DEFINED PDAL_LIB_DIR)
     set(PDAL_INCLUDE_ROOT
         "include/")
     set(PDAL_INCLUDE_DIR "${PDAL_INCLUDE_ROOT}/${PROJECT_NAME_LOWER}/")
@@ -93,12 +96,3 @@ macro(SET_INSTALL_DIRS)
     endif(WIN32)
 endmacro(SET_INSTALL_DIRS)
 
-###############################################################################
-# Add a set of include files to install.
-# _component The part of PDAL that the install files belong to.
-# _subdir The sub-directory for these include files.
-# ARGN The include files.
-macro(PDAL_ADD_INCLUDES _component _subdir)
-    install(FILES ${ARGN} DESTINATION ${PDAL_INCLUDE_DIR}/${_subdir}
-        COMPONENT ${_component})
-endmacro(PDAL_ADD_INCLUDES)

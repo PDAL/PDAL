@@ -46,8 +46,9 @@
 #include <Python.h>
 
 // This file can only be included once, otherwise we get wierd runtime errors,
-// even if we define NO_IMPORT and stuff, so we include it only here, and provide
-// a backdoor function numpy_init() which gets called from GlobalEnvironment::startup().
+// even if we define NO_IMPORT and stuff, so we include it only here, and
+// provide a backdoor function numpy_init() which gets called from
+// GlobalEnvironment::startup().
 #include <numpy/arrayobject.h>
 
 namespace pdal
@@ -55,14 +56,14 @@ namespace pdal
 namespace plang
 {
 
-
 void Invocation::numpy_init()
 {
     // this macro is defined be NumPy and must be included
     if (_import_array() < 0)
     {
         std::ostringstream oss;
-        oss << "unable to initialize NumPy with error '" << getPythonTraceback() << "'";
+        oss << "unable to initialize NumPy with error '" <<
+            getPythonTraceback() << "'";
         throw python_error(oss.str());
     }
 }
@@ -137,8 +138,6 @@ void Invocation::cleanup()
     m_pyInputArrays.clear();
 
     Py_XDECREF(m_bytecode);
-
-    return;
 }
 
 
@@ -148,43 +147,32 @@ void Invocation::resetArguments()
 
     m_varsIn = PyDict_New();
     m_varsOut = PyDict_New();
-
-    return;
 }
 
 
-void Invocation::insertArgument(const std::string& name,
+void Invocation::insertArgument(std::string const& name, 
                                 boost::uint8_t* data,
-                                boost::uint32_t data_len,
-                                boost::uint32_t data_stride,
-                                dimension::Interpretation dataType,
-                                boost::uint32_t numBytes)
+                                Dimension::Type::Enum t,
+                                point_count_t count)
 {
-    npy_intp mydims = data_len;
+    npy_intp mydims = count;
     int nd = 1;
     npy_intp* dims = &mydims;
-    npy_intp stride = data_stride;
+    npy_intp stride = Dimension::size(t);
     npy_intp* strides = &stride;
     int flags = NPY_CARRAY; // NPY_BEHAVED
 
-    const int pyDataType = getPythonDataType(dataType, numBytes);
+    const int pyDataType = getPythonDataType(t);
 
-    PyObject* pyArray = PyArray_New(&PyArray_Type, nd, dims, pyDataType, strides, data, 0, flags, NULL);
-
+    PyObject* pyArray = PyArray_New(&PyArray_Type, nd, dims, pyDataType,
+        strides, data, 0, flags, NULL);
     m_pyInputArrays.push_back(pyArray);
-
     PyDict_SetItemString(m_varsIn, name.c_str(), pyArray);
-
-    return;
 }
 
 
-void Invocation::extractResult(const std::string& name,
-                               boost::uint8_t* dst,
-                               boost::uint32_t data_len,
-                               boost::uint32_t data_stride,
-                               dimension::Interpretation dataType,
-                               boost::uint32_t numBytes)
+void *Invocation::extractResult(std::string const& name,
+    Dimension::Type::Enum t)
 {
     PyObject* xarr = PyDict_GetItemString(m_varsOut, name.c_str());
     if (!xarr)
@@ -193,112 +181,53 @@ void Invocation::extractResult(const std::string& name,
     }
     if (!PyArray_Check(xarr))
     {
-        throw python_error("plang output variable  '" + name + "' is not a numpy array");
+        throw python_error("plang output variable  '" + name +
+            "' is not a numpy array");
     }
 
     PyArrayObject* arr = (PyArrayObject*)xarr;
 
-    npy_intp one=0;
-    const int pyDataType = getPythonDataType(dataType, numBytes);
-
-    boost::uint8_t* p = dst;
-
-    if (pyDataType == PyArray_DOUBLE)
+    npy_intp one = 0;
+    const int pyDataType = getPythonDataType(t);
+    PyArray_Descr *dtype = PyArray_DESCR(arr);
+    
+    if (static_cast<uint32_t>(dtype->elsize) != Dimension::size(t))
     {
-        double* src = (double*)PyArray_GetPtr(arr, &one);
-        for (unsigned int i=0; i<data_len; i++)
-        {
-            *(double*)p = src[i];
-            p += data_stride;
-        }
-    }
-    else if (pyDataType == PyArray_FLOAT)
-    {
-        float* src = (float*)PyArray_GetPtr(arr, &one);
-        for (unsigned int i=0; i<data_len; i++)
-        {
-            *(float*)p = src[i];
-            p += data_stride;
-        }
-    }
-    else if (pyDataType == PyArray_BYTE)
-    {
-        boost::int8_t* src = (boost::int8_t*)PyArray_GetPtr(arr, &one);
-        for (unsigned int i=0; i<data_len; i++)
-        {
-            *(boost::int8_t*)p = src[i];
-            p += data_stride;
-        }
-    }
-    else if (pyDataType == PyArray_UBYTE)
-    {
-        boost::uint8_t* src = (boost::uint8_t*)PyArray_GetPtr(arr, &one);
-        for (unsigned int i=0; i<data_len; i++)
-        {
-            *(boost::uint8_t*)p = src[i];
-            p += data_stride;
-        }
-    }
-    else if (pyDataType == PyArray_SHORT)
-    {
-        boost::int16_t* src = (boost::int16_t*)PyArray_GetPtr(arr, &one);
-        for (unsigned int i=0; i<data_len; i++)
-        {
-            *(boost::int16_t*)p = src[i];
-            p += data_stride;
-        }
-    }
-    else if (pyDataType == PyArray_USHORT)
-    {
-        boost::uint16_t* src = (boost::uint16_t*)PyArray_GetPtr(arr, &one);
-        for (unsigned int i=0; i<data_len; i++)
-        {
-            *(boost::uint16_t*)p = src[i];
-            p += data_stride;
-        }
-    }
-    else if (pyDataType == PyArray_INT)
-    {
-        boost::int32_t* src = (boost::int32_t*)PyArray_GetPtr(arr, &one);
-        for (unsigned int i=0; i<data_len; i++)
-        {
-            *(boost::int32_t*)p = src[i];
-            p += data_stride;
-        }
-    }
-    else if (pyDataType == PyArray_UINT)
-    {
-        boost::uint32_t* src = (boost::uint32_t*)PyArray_GetPtr(arr, &one);
-        for (unsigned int i=0; i<data_len; i++)
-        {
-            *(boost::uint32_t*)p = src[i];
-            p += data_stride;
-        }
-    }
-    else if (pyDataType == PyArray_LONGLONG)
-    {
-        boost::int64_t* src = (boost::int64_t*)PyArray_GetPtr(arr, &one);
-        for (unsigned int i=0; i<data_len; i++)
-        {
-            *(boost::int64_t*)p = src[i];
-            p += data_stride;
-        }
-    }
-    else if (pyDataType == PyArray_ULONGLONG)
-    {
-        boost::uint64_t* src = (boost::uint64_t*)PyArray_GetPtr(arr, &one);
-        for (unsigned int i=0; i<data_len; i++)
-        {
-            *(boost::uint64_t*)p = src[i];
-            p += data_stride;
-        }
-    }
-    else
-    {
-        assert(0);
+        std::ostringstream oss;
+        oss << "dtype of array has size " << dtype->elsize 
+            << " but PDAL dimension '" << name << "' has byte size of "
+            << Dimension::size(t) << " bytes";
+        throw python_error(oss.str());
     }
 
-    return;
+    using namespace Dimension;
+    BaseType::Enum b = Dimension::base(t);
+    if (dtype->kind == 'i' && b != BaseType::Signed)
+    {
+        std::ostringstream oss;
+        oss << "dtype of array has a signed integer type but the " <<
+            "dimension data type of '" << name <<
+            "' is not pdal::Signed"; 
+        throw python_error(oss.str());
+    }
+
+    if (dtype->kind == 'u' && b != BaseType::Unsigned)
+    {
+        std::ostringstream oss;
+        oss << "dtype of array has a unsigned integer type but the " <<
+            "dimension data type of '" << name <<
+            "' is not pdal::Unsigned"; 
+        throw python_error(oss.str());
+    }
+
+    if (dtype->kind == 'f' && b != BaseType::Floating)
+    {
+        std::ostringstream oss;
+        oss << "dtype of array has a float type but the " <<
+            "dimension data type of '" << name << "' is not pdal::Floating"; 
+        throw python_error(oss.str());
+    }    
+    return PyArray_GetPtr(arr, &one);
 }
 
 
@@ -311,64 +240,48 @@ void Invocation::getOutputNames(std::vector<std::string>& names)
 
     while (PyDict_Next(m_varsOut, &pos, &key, &value))
     {
-        char* p = PyString_AsString(key);
-        names.push_back(p);
+        const char* p(0);
+#if PY_MAJOR_VERSION >= 3
+        PyObject* u = PyUnicode_AsUTF8String(key);
+        p = PyBytes_AsString(u);
+#else
+        p = PyString_AsString(key);
+#endif
+        if (p)
+            names.push_back(p);
     }
-
-    return;
 }
 
 
-int Invocation::getPythonDataType(dimension::Interpretation datatype, boost::uint32_t siz)
+int Invocation::getPythonDataType(Dimension::Type::Enum t)
 {
-    switch (datatype)
-    {
-        case dimension::RawByte:
-            switch (siz)
-            {
-                case 1:
-                    return PyArray_BYTE;
-            }
-            break;
-        case dimension::Float:
-            switch (siz)
-            {
-                case 4:
-                    return PyArray_FLOAT;
-                case 8:
-                    return PyArray_DOUBLE;
-            }
-            break;
-        case dimension::SignedInteger:
-            switch (siz)
-            {
-                case 1:
-                    return PyArray_BYTE;
-                case 2:
-                    return PyArray_SHORT;
-                case 4:
-                    return PyArray_INT;
-                case 8:
-                    return PyArray_LONGLONG;
-            }
-            break;
-        case dimension::UnsignedInteger:
-            switch (siz)
-            {
-                case 1:
-                    return PyArray_UBYTE;
-                case 2:
-                    return PyArray_USHORT;
-                case 4:
-                    return PyArray_UINT;
-                case 8:
-                    return PyArray_ULONGLONG;
-            }
-            break;
-        default:
-            return -1;
-    }
+    using namespace Dimension;
 
+    switch (t)
+    {
+    case Type::Float:
+        return PyArray_FLOAT;
+    case Type::Double:
+        return PyArray_DOUBLE;
+    case Type::Signed8:
+        return PyArray_BYTE;
+    case Type::Signed16:
+        return PyArray_SHORT;
+    case Type::Signed32:
+        return PyArray_INT;
+    case Type::Signed64:
+        return PyArray_LONGLONG;
+    case Type::Unsigned8:
+        return PyArray_UBYTE;
+    case Type::Unsigned16:
+        return PyArray_USHORT;
+    case Type::Unsigned32:
+        return PyArray_UINT;
+    case Type::Unsigned64:
+        return PyArray_ULONGLONG;
+    default:
+        return -1;
+    }
     assert(0);
 
     return -1;
@@ -377,18 +290,14 @@ int Invocation::getPythonDataType(dimension::Interpretation datatype, boost::uin
 
 bool Invocation::hasOutputVariable(const std::string& name) const
 {
-    PyObject* obj = PyDict_GetItemString(m_varsOut, name.c_str());
-
-    return (obj!=NULL);
+    return (PyDict_GetItemString(m_varsOut, name.c_str()) != NULL);
 }
 
 
 bool Invocation::execute()
 {
     if (!m_bytecode)
-    {
         throw python_error("no code has been compiled");
-    }
 
     m_environment.gil_lock();
 
@@ -399,25 +308,17 @@ bool Invocation::execute()
     PyTuple_SetItem(m_scriptArgs, 1, m_varsOut);
 
     m_scriptResult = PyObject_CallObject(m_function, m_scriptArgs);
-    if (!m_scriptResult) throw python_error(getPythonTraceback());
+    if (!m_scriptResult)
+        throw python_error(getPythonTraceback());
 
     if (!PyBool_Check(m_scriptResult))
-    {
         throw python_error("user function return value not a boolean type");
-    }
-    bool sts = false;
-    if (m_scriptResult == Py_True)
-    {
-        sts = true;
-    }
-
     m_environment.gil_unlock();
 
-    return sts;
+    return (m_scriptResult == Py_True);
 }
 
-
-}
-} //namespaces
+} // namespace plang
+} // namespace pdal
 
 #endif

@@ -55,7 +55,7 @@ static void compare_contents(const std::string& las_file, const std::string& ntf
     las_opts.add(las_opt);
 
     pdal::drivers::las::Reader las_reader(las_opts);
-    las_reader.initialize();
+    las_reader.prepare();
     const Schema& las_schema = las_reader.getSchema();
     PointBuffer las_data(las_schema, 750);
     StageSequentialIterator* las_iter = las_reader.createSequentialIterator(las_data);
@@ -69,7 +69,7 @@ static void compare_contents(const std::string& las_file, const std::string& ntf
     ntf_opts.add(ntf_opt);
 
     pdal::drivers::nitf::Reader ntf_reader(ntf_opts);
-    ntf_reader.initialize();
+    ntf_reader.prepare();
     const Schema& ntf_schema = ntf_reader.getSchema();
     PointBuffer ntf_data(ntf_schema, 750);
     StageSequentialIterator* ntf_iter = ntf_reader.createSequentialIterator(ntf_data);
@@ -105,8 +105,6 @@ static void compare_contents(const std::string& las_file, const std::string& ntf
 
     delete ntf_iter;
     delete las_iter;
-
-    return;
 }
 #endif
 
@@ -114,9 +112,10 @@ BOOST_AUTO_TEST_CASE(test1)
 {
 
 #ifdef PDAL_HAVE_NITRO
-    const std::string las_input(Support::datapath("1.2-with-color.las"));
+    const std::string las_input(Support::datapath("las/1.2-with-color.las"));
     const std::string nitf_output(Support::temppath("temp_nitf.ntf"));
-    const std::string reference_output(Support::datapath("nitf/write_test1.ntf"));
+    const std::string reference_output(
+        Support::datapath("nitf/write_test1.ntf"));
 
     FileUtils::deleteFile(nitf_output);
 
@@ -135,28 +134,26 @@ BOOST_AUTO_TEST_CASE(test1)
 
         Option datetime("IDATIM", "20110516183337");
         writer_opts.add(datetime);
-        
+
         Option cls("FSCLAS", "S");
         writer_opts.add(cls);
-        
+
         Option phone("OPHONE", "5159664628");
         writer_opts.add(phone);
-        
+
         Option name("ONAME", "Howard Butler");
         writer_opts.add(name);
-        
+
         Option ftitle("FTITLE", "LiDAR from somewhere");
         writer_opts.add(ftitle);
-        
-        
-        
+
         // writer_opts.add(debug);
         // writer_opts.add(verbose);
         writer_opts.add(writer_opt1);
-        
-        pdal::drivers::las::Reader reader(reader_opts);
 
-        pdal::drivers::nitf::Writer writer(reader, writer_opts);
+        pdal::drivers::las::Reader reader(reader_opts);
+        pdal::drivers::nitf::Writer writer(writer_opts);
+        writer.setInput(&reader);
         {
             // writer.setCompressed(false);
             // // writer.setDate(0, 0);
@@ -165,16 +162,14 @@ BOOST_AUTO_TEST_CASE(test1)
             // writer.setGeneratingSoftware("PDAL-NITF");
             // writer.setChunkSize(100);
         }
-        writer.initialize();
-
-        writer.write(0);
+        PointContext ctx;
+        writer.prepare(ctx);
+        writer.execute(ctx);
     }
-    
+
     FileUtils::deleteFile(nitf_output);
 
 #endif
-
-    return;
 
 #if 0
     //
@@ -196,9 +191,6 @@ BOOST_AUTO_TEST_CASE(test1)
         FileUtils::deleteFile(Support::temppath(nitf_output));
     }
 #endif
-
-    return;
 }
-
 
 BOOST_AUTO_TEST_SUITE_END()

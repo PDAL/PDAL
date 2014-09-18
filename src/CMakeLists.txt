@@ -26,37 +26,39 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/pdal_error.hpp"
   "${PDAL_HEADERS_DIR}/pdal_types.hpp"
   "${PDAL_HEADERS_DIR}/Bounds.hpp"
+  "${PDAL_HEADERS_DIR}/Charbuf.hpp"
   "${PDAL_HEADERS_DIR}/Dimension.hpp"
+  "${PDAL_HEADERS_DIR}/Drivers.hpp"
   "${PDAL_HEADERS_DIR}/FileUtils.hpp"
   "${PDAL_HEADERS_DIR}/Filter.hpp"
-  "${PDAL_HEADERS_DIR}/FilterIterator.hpp"
-  "${PDAL_HEADERS_DIR}/GDALUtils.hpp"
+  "${PDAL_HEADERS_DIR}/Filters.hpp"
   "${PDAL_HEADERS_DIR}/GlobalEnvironment.hpp"
   "${PDAL_HEADERS_DIR}/gitsha.h"
+  "${PDAL_HEADERS_DIR}/IStream.hpp"
+  "${PDAL_HEADERS_DIR}/KDIndex.hpp"
+  "${PDAL_HEADERS_DIR}/Kernel.hpp"
   "${PDAL_HEADERS_DIR}/Log.hpp"
   "${PDAL_HEADERS_DIR}/Metadata.hpp"
-  "${PDAL_HEADERS_DIR}/MultiFilter.hpp"
-  "${PDAL_HEADERS_DIR}/MultiFilterIterator.hpp"
   "${PDAL_HEADERS_DIR}/Options.hpp"
+  "${PDAL_HEADERS_DIR}/OStream.hpp"
   "${PDAL_HEADERS_DIR}/PipelineManager.hpp"
   "${PDAL_HEADERS_DIR}/PipelineReader.hpp"
   "${PDAL_HEADERS_DIR}/PipelineWriter.hpp"
-  "${PDAL_HEADERS_DIR}/PointBuffer.hpp"  
+  "${PDAL_HEADERS_DIR}/PointBuffer.hpp"
+  "${PDAL_HEADERS_DIR}/PointContext.hpp"
+  "${PDAL_HEADERS_DIR}/QuadIndex.hpp"
   "${PDAL_HEADERS_DIR}/Range.hpp"
+  "${PDAL_HEADERS_DIR}/RawPtBuf.hpp"
   "${PDAL_HEADERS_DIR}/Reader.hpp"
-  "${PDAL_HEADERS_DIR}/ReaderIterator.hpp"
-  "${PDAL_HEADERS_DIR}/Schema.hpp"
   "${PDAL_HEADERS_DIR}/SpatialReference.hpp"
   "${PDAL_HEADERS_DIR}/Stage.hpp"
-  "${PDAL_HEADERS_DIR}/StageBase.hpp"
   "${PDAL_HEADERS_DIR}/StageFactory.hpp"
   "${PDAL_HEADERS_DIR}/StageInfo.hpp"
-  "${PDAL_HEADERS_DIR}/StageIterator.hpp"
+  "${PDAL_HEADERS_DIR}/StageRunner.hpp"
   "${PDAL_HEADERS_DIR}/StreamFactory.hpp"
-  "${PDAL_HEADERS_DIR}/ThreadEnvironment.hpp"
   "${PDAL_HEADERS_DIR}/UserCallback.hpp"
   "${PDAL_HEADERS_DIR}/Utils.hpp"
-  "${PDAL_HEADERS_DIR}/Vector.hpp"  
+  "${PDAL_HEADERS_DIR}/Vector.hpp"
   "${PDAL_HEADERS_DIR}/Writer.hpp"
   "${PDAL_HEADERS_DIR}/XMLSchema.hpp"
   "${PDAL_HEADERS_DIR}/third/nanoflann.hpp"
@@ -65,72 +67,48 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/third/string_ref_fwd.hpp"
 )
 
+if (PDAL_HAVE_PCL)
+    if (WITH_PCL OR WITH_STUBS)
+        list (APPEND PDAL_BASE_HPP "${PDAL_HEADERS_DIR}/PCLConversions.hpp")
+    endif(WITH_PCL OR WITH_STUBS)
+endif()
+
 if (PDAL_HAVE_LIBXML2)
   SET (PDAL_XML_SRC XMLSchema.cpp)
 endif()
 
 set(PDAL_BASE_CPP
   Bounds.cpp
-  Dimension.cpp
+  Charbuf.cpp
   FileUtils.cpp
   Filter.cpp
-  FilterIterator.cpp
   gitsha.cpp
   GlobalEnvironment.cpp
+  KDIndex.cpp
   Log.cpp
   Metadata.cpp
-  MultiFilter.cpp
-  MultiFilterIterator.cpp
-#  Object.cpp
   Options.cpp
   PipelineManager.cpp
   PipelineReader.cpp
   PipelineWriter.cpp
   PointBuffer.cpp
+  QuadIndex.cpp
   Range.cpp
   Reader.cpp
-  ReaderIterator.cpp
-  Schema.cpp
   SpatialReference.cpp
   Stage.cpp
-  StageBase.cpp
   StageFactory.cpp
   StageInfo.cpp
-  StageIterator.cpp
   StreamFactory.cpp
-  ThreadEnvironment.cpp
-  UserCallback.cpp
   Utils.cpp
-  Vector.cpp  
+  Vector.cpp
   Writer.cpp
   third/md5-pdal.c
   ${PDAL_XML_SRC}
 )
 
-if (GDAL_FOUND)
-    set (PDAL_BASE_CPP  GDALUtils.cpp ${PDAL_BASE_CPP})
-endif(GDAL_FOUND)
-
 list (APPEND PDAL_CPP ${PDAL_BASE_CPP} )
 list (APPEND PDAL_HPP ${PDAL_BASE_HPP} )
-
-
-#
-# drivers/buffer
-#
-set(PDAL_BUFFER_PATH drivers/buffer)
-set(PDAL_BUFFER_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_BUFFER_PATH}")
-set(PDAL_BUFFER_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_BUFFER_PATH}")
-set(PDAL_DRIVERS_BUFFER_HPP 
-  "${PDAL_BUFFER_HEADERS}/Reader.hpp"
-)
-
-set (PDAL_DRIVERS_BUFFER_CPP
-  "${PDAL_BUFFER_SRC}/Reader.cpp"
-)
-list (APPEND PDAL_CPP ${PDAL_DRIVERS_BUFFER_CPP} )
-list (APPEND PDAL_HPP ${PDAL_DRIVERS_BUFFER_HPP} )
-
 
 #
 # drivers/faux
@@ -138,14 +116,12 @@ list (APPEND PDAL_HPP ${PDAL_DRIVERS_BUFFER_HPP} )
 set(PDAL_FAUX_PATH drivers/faux)
 set(PDAL_FAUX_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_FAUX_PATH}")
 set(PDAL_FAUX_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_FAUX_PATH}")
-set(PDAL_DRIVERS_FAUX_HPP 
+set(PDAL_DRIVERS_FAUX_HPP
   "${PDAL_FAUX_HEADERS}/Reader.hpp"
-  "${PDAL_FAUX_HEADERS}/Writer.hpp"
 )
 
 set (PDAL_DRIVERS_FAUX_CPP
   "${PDAL_FAUX_SRC}/Reader.cpp"
-  "${PDAL_FAUX_SRC}/Writer.cpp" 
 )
 list (APPEND PDAL_CPP ${PDAL_DRIVERS_FAUX_CPP} )
 list (APPEND PDAL_HPP ${PDAL_DRIVERS_FAUX_HPP} )
@@ -161,13 +137,12 @@ set (PDAL_DRIVERS_LAS_HPP
   "${PDAL_LAS_SRC}/GeotiffSupport.hpp"
   "${PDAL_LAS_SRC}/LasHeaderReader.hpp"
   "${PDAL_LAS_SRC}/LasHeaderWriter.hpp"
-  "${PDAL_LAS_SRC}/ZipPoint.hpp"
   "${PDAL_LAS_HEADERS}/Header.hpp"
   "${PDAL_LAS_HEADERS}/Reader.hpp"
-  "${PDAL_LAS_HEADERS}/ReaderBase.hpp"
   "${PDAL_LAS_HEADERS}/SummaryData.hpp"
   "${PDAL_LAS_HEADERS}/Support.hpp"
   "${PDAL_LAS_HEADERS}/Writer.hpp"
+  "${PDAL_LAS_HEADERS}/ZipPoint.hpp"
   "${PDAL_LAS_HEADERS}/VariableLengthRecord.hpp"
 )
 
@@ -195,6 +170,62 @@ list (APPEND PDAL_CPP ${PDAL_DRIVERS_LAS_CPP} )
 list (APPEND PDAL_HPP ${PDAL_DRIVERS_LAS_HPP} )
 
 #
+# drivers/bpf
+#
+set(PDAL_BPF_PATH drivers/bpf)
+set(PDAL_BPF_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_BPF_PATH}")
+set(PDAL_BPF_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_BPF_PATH}")
+
+set(PDAL_DRIVERS_BPF_HPP
+    "${PDAL_BPF_HEADERS}/BpfReader.hpp"
+    "${PDAL_BPF_HEADERS}/BpfHeader.hpp"
+)
+
+set(PDAL_DRIVERS_BPF_CPP
+    "${PDAL_BPF_SRC}/BpfHeader.cpp"
+    "${PDAL_BPF_SRC}/BpfReader.cpp"
+)
+
+list (APPEND PDAL_CPP ${PDAL_DRIVERS_BPF_CPP} )
+list (APPEND PDAL_HPP ${PDAL_DRIVERS_BPF_HPP} )
+
+#
+# WebSocketClient
+#
+set(PDAL_WEBSOCKET_CLIENT_HPP
+    "${PDAL_HEADERS_DIR}/WebSocketClient.hpp"
+)
+
+set(PDAL_WEBSOCKET_CLIENT_CPP
+    "${PDAL_SOURCE_DIR}/src/WebSocketClient.cpp"
+)
+
+if (WEBSOCKETPP_FOUND AND JSONCPP_FOUND)
+    list (APPEND PDAL_CPP ${PDAL_WEBSOCKET_CLIENT_CPP})
+    list (APPEND PDAL_HPP ${PDAL_WEBSOCKET_CLIENT_HPP})
+endif()
+
+#
+# drivers/greyhound - requires WebSocketClient
+#
+set(PDAL_GREYHOUND_PATH drivers/greyhound)
+set(PDAL_GREYHOUND_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_GREYHOUND_PATH}")
+set(PDAL_GREYHOUND_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_GREYHOUND_PATH}")
+
+set(PDAL_DRIVERS_GREYHOUND_HPP
+    "${PDAL_GREYHOUND_HEADERS}/Reader.hpp"
+)
+
+set(PDAL_DRIVERS_GREYHOUND_CPP
+    "${PDAL_GREYHOUND_SRC}/Reader.cpp"
+)
+
+if (WEBSOCKETPP_FOUND AND JSONCPP_FOUND)
+    list (APPEND PDAL_CPP ${PDAL_DRIVERS_GREYHOUND_CPP} )
+    list (APPEND PDAL_HPP ${PDAL_DRIVERS_GREYHOUND_HPP} )
+endif()
+
+#
 # drivers/mrsid
 #
 set(PDAL_MRSID_PATH drivers/mrsid)
@@ -205,7 +236,7 @@ set(PDAL_DRIVERS_MRSID_HPP
   "${PDAL_MRSID_HEADERS}/Reader.hpp"
 )
 
-set (PDAL_DRIVERS_MRSID_CPP 
+set (PDAL_DRIVERS_MRSID_CPP
   "${PDAL_MRSID_SRC}/Reader.cpp"
 )
 
@@ -224,15 +255,13 @@ set(PDAL_CARIS_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_CARIS_PATH}")
 
 set(PDAL_DRIVERS_CARIS_HPP
   "${PDAL_CARIS_HEADERS}/CloudReader.hpp"
-  "${PDAL_CARIS_HEADERS}/CloudIterator.hpp"
   "${PDAL_CARIS_SRC}/Utils.hpp"
   "${PDAL_CARIS_SRC}/config.h"
   "${PDAL_CARIS_SRC}/caris/caris_pc_wrapper.h"
 )
 
-set (PDAL_DRIVERS_CARIS_CPP 
+set (PDAL_DRIVERS_CARIS_CPP
   "${PDAL_CARIS_SRC}/CloudReader.cpp"
-  "${PDAL_CARIS_SRC}/CloudIterator.cpp"
   "${PDAL_CARIS_SRC}/pdal_csar.cpp"
   "${PDAL_CARIS_SRC}/Utils.cpp"
   "${PDAL_CARIS_SRC}/caris/caris_pc_wrapper.c"
@@ -247,51 +276,30 @@ endif()
 #
 # drivers/oci
 #
-
 set(PDAL_ORACLE_PATH drivers/oci)
 set(PDAL_ORACLE_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_ORACLE_PATH}")
 set(PDAL_ORACLE_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_ORACLE_PATH}")
 
 set(PDAL_DRIVERS_OCI_HPP
   "${PDAL_ORACLE_HEADERS}/Writer.hpp"
-  "${PDAL_ORACLE_HEADERS}/Reader.hpp"
+  "${PDAL_ORACLE_HEADERS}/OciReader.hpp"
   "${PDAL_ORACLE_HEADERS}/oci_wrapper.h"
   "${PDAL_ORACLE_HEADERS}/common.hpp"
 )
 
-set (PDAL_DRIVERS_OCI_CPP 
+set (PDAL_DRIVERS_OCI_CPP
   "${PDAL_ORACLE_SRC}/oci_wrapper.cpp"
   "${PDAL_ORACLE_SRC}/common.cpp"
-  "${PDAL_ORACLE_SRC}/Reader.cpp"
+  "${PDAL_ORACLE_SRC}/OciReader.cpp"
   "${PDAL_ORACLE_SRC}/Writer.cpp"
 )
-   
+
 if (ORACLE_FOUND)
 if (NOT USE_PDAL_PLUGIN_OCI)
     list (APPEND PDAL_CPP ${PDAL_DRIVERS_OCI_CPP} )
     list (APPEND PDAL_HPP ${PDAL_DRIVERS_OCI_HPP} )
 endif()
 endif()
-
-
-#
-# drivers/pipeline
-#
-
-set(PDAL_PIPELINE_PATH drivers/pipeline)
-set(PDAL_PIPELINE_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_PIPELINE_PATH}")
-set(PDAL_PIPELINE_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_PIPELINE_PATH}")
-
-set (PDAL_DRIVERS_PIPELINE_HPP
-  "${PDAL_PIPELINE_HEADERS}/Reader.hpp"
-)
-
-set (PDAL_DRIVERS_PIPELINE_CPP 
-  "${PDAL_PIPELINE_SRC}/Reader.cpp"
-)
-
-list (APPEND PDAL_CPP ${PDAL_DRIVERS_PIPELINE_CPP} )
-list (APPEND PDAL_HPP ${PDAL_DRIVERS_PIPELINE_HPP} )
 
 
 #
@@ -305,7 +313,7 @@ set(PDAL_DRIVERS_QFIT_HPP
   "${PDAL_QFIT_HEADERS}/Reader.hpp"
 )
 
-set (PDAL_DRIVERS_QFIT_CPP 
+set (PDAL_DRIVERS_QFIT_CPP
   "${PDAL_QFIT_SRC}/Reader.cpp"
 )
 
@@ -323,7 +331,7 @@ set(PDAL_DRIVERS_TERRASOLID_HPP
   "${PDAL_TERRASOLID_HEADERS}/Reader.hpp"
 )
 
-set (PDAL_DRIVERS_TERRASOLID_CPP 
+set (PDAL_DRIVERS_TERRASOLID_CPP
   "${PDAL_TERRASOLID_SRC}/Reader.cpp"
 )
 
@@ -333,22 +341,48 @@ list (APPEND PDAL_HPP ${PDAL_DRIVERS_TERRASOLID_HPP} )
 #
 # drivers/p2g
 #
-
 set(PDAL_P2G_PATH drivers/p2g)
 set(PDAL_P2G_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_P2G_PATH}")
 set(PDAL_P2G_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_P2G_PATH}")
 
 set(PDAL_DRIVERS_P2G_HPP
-  "${PDAL_P2G_HEADERS}/Writer.hpp"
+  "${PDAL_P2G_HEADERS}/P2gWriter.hpp"
 )
 
 set (PDAL_DRIVERS_P2G_CPP 
-  "${PDAL_P2G_SRC}/Writer.cpp"
+  "${PDAL_P2G_SRC}/P2gWriter.cpp"
 )
-   
+
 if (P2G_FOUND)
     list (APPEND PDAL_CPP ${PDAL_DRIVERS_P2G_CPP} )
     list (APPEND PDAL_HPP ${PDAL_DRIVERS_P2G_HPP} )
+endif()
+
+#
+# drivers/pcd
+#
+if (PDAL_HAVE_PCL)
+    set(PDAL_PCD_PATH drivers/pcd)
+    set(PDAL_PCD_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_PCD_PATH}")
+    set(PDAL_PCD_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_PCD_PATH}")
+
+    set(PDAL_DRIVERS_PCD_HPP
+	"${PDAL_PCD_HEADERS}/point_types.hpp"
+	"${PDAL_PCD_HEADERS}/Common.hpp"
+	"${PDAL_PCD_HEADERS}/Reader.hpp"
+	"${PDAL_PCD_HEADERS}/Writer.hpp"
+    )
+
+    set (PDAL_DRIVERS_PCD_CPP 
+	"${PDAL_PCD_SRC}/Common.cpp"
+	"${PDAL_PCD_SRC}/Reader.cpp"
+	"${PDAL_PCD_SRC}/Writer.cpp"
+    )
+
+    if (WITH_PCL OR WITH_STUBS)
+	list (APPEND PDAL_CPP ${PDAL_DRIVERS_PCD_CPP} )
+	list (APPEND PDAL_HPP ${PDAL_DRIVERS_PCD_HPP} )
+    endif(WITH_PCL OR WITH_STUBS)
 endif()
 
 #
@@ -362,7 +396,7 @@ set(PDAL_DRIVERS_TEXT_HPP
   "${PDAL_TEXT_HEADERS}/Writer.hpp"
 )
 
-set (PDAL_DRIVERS_TEXT_CPP 
+set (PDAL_DRIVERS_TEXT_CPP
   ${PDAL_TEXT_SRC}/Writer.cpp
 )
 
@@ -384,7 +418,7 @@ set(PDAL_DRIVERS_NITF_READER_HPP
   "${PDAL_NITF_HEADERS}/Reader.hpp"
 )
 
-set (PDAL_DRIVERS_NITF_READER_CPP 
+set (PDAL_DRIVERS_NITF_READER_CPP
   "${PDAL_NITF_SRC}/NitfFile.cpp"
   "${PDAL_NITF_SRC}/Reader.cpp"
 )
@@ -398,7 +432,7 @@ set(PDAL_DRIVERS_NITF_WRITER_HPP
   "${PDAL_NITF_HEADERS}/Writer.hpp"
 )
 
-set (PDAL_DRIVERS_NITF_WRITER_CPP 
+set (PDAL_DRIVERS_NITF_WRITER_CPP
   "${PDAL_NITF_SRC}/Writer.cpp"
 )
 
@@ -416,14 +450,14 @@ set(PDAL_SQLITE_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_SQLITE_PATH}")
 set(PDAL_SQLITE_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_SQLITE_PATH}")
 
 set(PDAL_DRIVERS_SQLITE_HPP
-  "${PDAL_SQLITE_HEADERS}/common.hpp"
-  "${PDAL_SQLITE_HEADERS}/Reader.hpp"
-  "${PDAL_SQLITE_HEADERS}/Writer.hpp"
+  "${PDAL_SQLITE_HEADERS}/SQLiteCommon.hpp"
+  "${PDAL_SQLITE_HEADERS}/SQLiteReader.hpp"
+  "${PDAL_SQLITE_HEADERS}/SQLiteWriter.hpp"
 )
 
-set (PDAL_DRIVERS_SQLITE_CPP 
-  "${PDAL_SQLITE_SRC}/Reader.cpp"
-  "${PDAL_SQLITE_SRC}/Writer.cpp"
+set (PDAL_DRIVERS_SQLITE_CPP
+  "${PDAL_SQLITE_SRC}/SQLiteReader.cpp"
+  "${PDAL_SQLITE_SRC}/SQLiteWriter.cpp"
 )
 
 if (WITH_SQLITE)
@@ -445,12 +479,12 @@ set(PDAL_PGPOINTCLOUD_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_PGPOINTCLOUD_PATH}")
 set(PDAL_DRIVERS_PGPOINTCLOUD_HPP
   "${PDAL_PGPOINTCLOUD_HEADERS}/common.hpp"
   "${PDAL_PGPOINTCLOUD_HEADERS}/Writer.hpp"
-  "${PDAL_PGPOINTCLOUD_HEADERS}/Reader.hpp"
+  "${PDAL_PGPOINTCLOUD_HEADERS}/PgReader.hpp"
 )
 
-set (PDAL_DRIVERS_PGPOINTCLOUD_CPP 
+set (PDAL_DRIVERS_PGPOINTCLOUD_CPP
   "${PDAL_PGPOINTCLOUD_SRC}/Writer.cpp"
-  "${PDAL_PGPOINTCLOUD_SRC}/Reader.cpp"
+  "${PDAL_PGPOINTCLOUD_SRC}/PgReader.cpp"
 )
 
 # no provision is made for building as a plugin
@@ -465,9 +499,68 @@ endif()
 
 
 #
+# drivers/sbet
+#
+set(PDAL_SBET_PATH drivers/sbet)
+set(PDAL_SBET_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_SBET_PATH}")
+set(PDAL_SBET_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_SBET_PATH}")
+
+set(PDAL_DRIVERS_SBET_HPP
+    "${PDAL_SBET_HEADERS}/Common.hpp"
+    "${PDAL_SBET_HEADERS}/Reader.hpp"
+    "${PDAL_SBET_HEADERS}/Writer.hpp"
+)
+
+set (PDAL_DRIVERS_SBET_CPP
+    "${PDAL_SBET_SRC}/Common.cpp"
+    "${PDAL_SBET_SRC}/Reader.cpp"
+    "${PDAL_SBET_SRC}/Writer.cpp"
+)
+
+list (APPEND PDAL_CPP ${PDAL_DRIVERS_SBET_CPP} )
+list (APPEND PDAL_HPP ${PDAL_DRIVERS_SBET_HPP} )
+
+#
+# HDF5
+#
+set(PDAL_HDF5_HANDLER_HPP
+    "${PDAL_HEADERS_DIR}/Hdf5Handler.hpp"
+)
+
+set(PDAL_HDF5_HANDLER_CPP
+    "${PDAL_SOURCE_DIR}/src/Hdf5Handler.cpp"
+)
+
+if (HDF5_FOUND)
+    list (APPEND PDAL_CPP ${PDAL_HDF5_HANDLER_CPP})
+    list (APPEND PDAL_HPP ${PDAL_HDF5_HANDLER_HPP})
+endif()
+
+
+#
+# drivers/icebridge
+#
+set(PDAL_ICEBRIDGE_PATH drivers/icebridge)
+set(PDAL_ICEBRIDGE_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_ICEBRIDGE_PATH}")
+set(PDAL_ICEBRIDGE_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_ICEBRIDGE_PATH}")
+
+set(PDAL_DRIVERS_ICEBRIDGE_HPP
+    "${PDAL_ICEBRIDGE_HEADERS}/Reader.hpp"
+)
+
+set(PDAL_DRIVERS_ICEBRIDGE_CPP
+    "${PDAL_ICEBRIDGE_SRC}/Reader.cpp"
+)
+
+if (HDF5_FOUND)
+    list (APPEND PDAL_CPP ${PDAL_DRIVERS_ICEBRIDGE_CPP} )
+    list (APPEND PDAL_HPP ${PDAL_DRIVERS_ICEBRIDGE_HPP} )
+endif()
+
+
+#
 # filters
 #
-
 set(PDAL_FILTERS_PATH filters)
 set(PDAL_FILTERS_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_FILTERS_PATH}")
 set(PDAL_FILTERS_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_FILTERS_PATH}")
@@ -476,44 +569,67 @@ set(PDAL_FILTERS_HPP
   "${PDAL_FILTERS_HEADERS}/ByteSwap.hpp"
   "${PDAL_FILTERS_HEADERS}/Cache.hpp"
   "${PDAL_FILTERS_HEADERS}/Chipper.hpp"
-  "${PDAL_FILTERS_HEADERS}/Color.hpp"
-  "${PDAL_FILTERS_HEADERS}/Colorization.hpp"
   "${PDAL_FILTERS_HEADERS}/Crop.hpp"
   "${PDAL_FILTERS_HEADERS}/Decimation.hpp"
   "${PDAL_FILTERS_HEADERS}/HexBin.hpp"
   "${PDAL_FILTERS_HEADERS}/InPlaceReprojection.hpp"
-  "${PDAL_FILTERS_HEADERS}/Mosaic.hpp"
-  "${PDAL_FILTERS_HEADERS}/PointBufferCache.hpp"
-  "${PDAL_FILTERS_HEADERS}/Predicate.hpp"
-  "${PDAL_FILTERS_HEADERS}/Programmable.hpp"
+  "${PDAL_FILTERS_HEADERS}/Merge.hpp"
   "${PDAL_FILTERS_HEADERS}/Reprojection.hpp"
   "${PDAL_FILTERS_HEADERS}/Scaling.hpp"
   "${PDAL_FILTERS_HEADERS}/Selector.hpp"
+  "${PDAL_FILTERS_HEADERS}/Splitter.hpp"
   "${PDAL_FILTERS_HEADERS}/Stats.hpp"
 )
 
-set (PDAL_FILTERS_CPP 
-  "${PDAL_FILTERS_SRC}/ByteSwap.cpp"
-  "${PDAL_FILTERS_SRC}/Cache.cpp"
+set (PDAL_FILTERS_CPP
   "${PDAL_FILTERS_SRC}/Chipper.cpp"
-  "${PDAL_FILTERS_SRC}/Color.cpp"
-  "${PDAL_FILTERS_SRC}/Colorization.cpp"
   "${PDAL_FILTERS_SRC}/Crop.cpp"
   "${PDAL_FILTERS_SRC}/Decimation.cpp"
   "${PDAL_FILTERS_SRC}/HexBin.cpp"
-  "${PDAL_FILTERS_SRC}/InPlaceReprojection.cpp"
-  "${PDAL_FILTERS_SRC}/Mosaic.cpp"
-  "${PDAL_FILTERS_SRC}/PointBufferCache.cpp"
-  "${PDAL_FILTERS_SRC}/Predicate.cpp"
-  "${PDAL_FILTERS_SRC}/Programmable.cpp"  
   "${PDAL_FILTERS_SRC}/Reprojection.cpp"
-  "${PDAL_FILTERS_SRC}/Scaling.cpp"
-  "${PDAL_FILTERS_SRC}/Selector.cpp"
+  "${PDAL_FILTERS_SRC}/Splitter.cpp"
   "${PDAL_FILTERS_SRC}/Stats.cpp"
 )
 
 list (APPEND PDAL_CPP ${PDAL_FILTERS_CPP} )
 list (APPEND PDAL_HPP ${PDAL_FILTERS_HPP} )
+
+#
+# Core components that depend on Python
+#
+set(PDAL_PYTHON_HPP
+    ${PDAL_FILTERS_HEADERS}/Predicate.hpp
+    ${PDAL_FILTERS_HEADERS}/Programmable.hpp
+    )
+
+set(PDAL_PYTHON_CPP
+    ${PDAL_FILTERS_SRC}/Predicate.cpp
+    ${PDAL_FILTERS_SRC}/Programmable.cpp
+    )
+
+if (WITH_PYTHON)
+    list(APPEND PDAL_HPP ${PDAL_PYTHON_HPP})
+    list(APPEND PDAL_CPP ${PDAL_PYTHON_CPP})
+endif (WITH_PYTHON)
+
+
+#
+# Core components that depend on GDAL
+#
+set(PDAL_GDAL_HPP
+    "${PDAL_HEADERS_DIR}/GDALUtils.hpp"
+    "${PDAL_FILTERS_HEADERS}/Colorization.hpp"
+    )
+
+set(PDAL_GDAL_CPP
+    GDALUtils.cpp
+    "${PDAL_FILTERS_SRC}/Colorization.cpp"
+    )
+
+if (WITH_GDAL)
+    list(APPEND PDAL_HPP ${PDAL_GDAL_HPP})
+    list(APPEND PDAL_CPP ${PDAL_GDAL_CPP})
+endif (WITH_GDAL)
 
 
 #
@@ -532,7 +648,7 @@ set(PDAL_PLANG_HPP
   "${PDAL_PLANG_HEADERS}/Script.hpp"
 )
 
-set (PDAL_PLANG_CPP 
+set (PDAL_PLANG_CPP
   "${PDAL_PLANG_SRC}/BufferedInvocation.cpp"
   "${PDAL_PLANG_SRC}/PythonEnvironment.cpp"
   "${PDAL_PLANG_SRC}/Invocation.cpp"
@@ -554,7 +670,7 @@ set(PDAL_CONFIG_HPP
   "${PROJECT_BINARY_DIR}/include/pdal/pdal_defines.h"
 )
 
-set (PDAL_CONFIG_CPP 
+set (PDAL_CONFIG_CPP
   "${PROJECT_SOURCE_DIR}/src/pdal_config.cpp"
 )
 
@@ -567,26 +683,54 @@ set(PDAL_KERNEL_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_KERNEL_PATH}")
 set(PDAL_KERNEL_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_KERNEL_PATH}")
 
 set(PDAL_KERNEL_HPP
-    ${PDAL_KERNEL_HEADERS}/Application.hpp 
+    ${PDAL_KERNEL_HEADERS}/Application.hpp
     ${PDAL_KERNEL_HEADERS}/Support.hpp
+    ${PDAL_KERNEL_HEADERS}/Diff.hpp
     ${PDAL_KERNEL_HEADERS}/Info.hpp
     ${PDAL_KERNEL_HEADERS}/Kernel.hpp
     ${PDAL_KERNEL_HEADERS}/Pipeline.hpp
-    ${PDAL_KERNEL_HEADERS}/Query.hpp
+    ${PDAL_KERNEL_HEADERS}/Delta.hpp
+    ${PDAL_KERNEL_HEADERS}/Random.hpp
     ${PDAL_KERNEL_HEADERS}/Translate.hpp
 )
 
 set(PDAL_KERNEL_CPP
     ${PDAL_KERNEL_SRC}/Application.cpp
     ${PDAL_KERNEL_SRC}/Support.cpp
+    ${PDAL_KERNEL_SRC}/Diff.cpp
     ${PDAL_KERNEL_SRC}/Info.cpp
     ${PDAL_KERNEL_SRC}/Pipeline.cpp
-    ${PDAL_KERNEL_SRC}/Query.cpp
+    ${PDAL_KERNEL_SRC}/Delta.cpp
+    ${PDAL_KERNEL_SRC}/Random.cpp
     ${PDAL_KERNEL_SRC}/Translate.cpp
 )
 
 list (APPEND PDAL_CPP ${PDAL_KERNEL_CPP} )
 list (APPEND PDAL_HPP ${PDAL_KERNEL_HPP} )
+
+
+#
+# pcl
+#
+if (PDAL_HAVE_PCL)
+    set(PDAL_PCL_HPP
+	${PDAL_KERNEL_HEADERS}/Ground.hpp
+	${PDAL_KERNEL_HEADERS}/PCL.hpp
+	${PDAL_FILTERS_HEADERS}/PCLBlock.hpp
+    )
+
+    set(PDAL_PCL_CPP
+	${PDAL_FILTERS_SRC}/PCLBlock.cpp
+	${PDAL_KERNEL_SRC}/Ground.cpp
+	${PDAL_KERNEL_SRC}/PCL.cpp
+    )
+
+    if (WITH_PCL OR WITH_STUBS)
+	list(APPEND PDAL_HPP ${PDAL_PCL_HPP})
+	list(APPEND PDAL_CPP ${PDAL_PCL_CPP})
+    endif (WITH_PCL OR WITH_STUBS)
+endif()
+
 #
 # Group source files for IDE source explorers (e.g. Visual Studio)
 #
@@ -595,32 +739,34 @@ source_group("CMake Files" FILES CMakeLists.txt)
 
 source_group("Header Files" FILES ${PDAL_BASE_HPP})
 source_group("Header Files\\config" FILES ${PDAL_CONFIG_HPP})
-source_group("Header Files\\drivers\\buffer" FILES ${PDAL_DRIVERS_BUFFER_HPP})
 source_group("Header Files\\drivers\\faux" FILES ${PDAL_DRIVERS_FAUX_HPP})
 source_group("Header Files\\drivers\\caris" FILES ${PDAL_DRIVERS_CARIS_HPP})
 source_group("Header Files\\drivers\\las" FILES ${PDAL_DRIVERS_LAS_HPP})
 source_group("Header Files\\drivers\\nitf" FILES ${PDAL_DRIVERS_NITF_HPP})
 source_group("Header Files\\drivers\\oci" FILES ${PDAL_DRIVERS_OCI_HPP})
-source_group("Header Files\\drivers\\pipeline" FILES ${PDAL_DRIVERS_PIPELINE_HPP})
 source_group("Header Files\\drivers\\qfit" FILES ${PDAL_DRIVERS_QFIT_HPP})
+source_group("Header Files\\drivers\\sbet" FILES ${PDAL_DRIVERS_SBET_HPP})
+source_group("Header Files\\drivers\\greyhound" FILES ${PDAL_DRIVERS_GREYHOUND_HPP})
 source_group("Header Files\\drivers\\terrasolid" FILES ${PDAL_DRIVERS_TERRASOLID_HPP})
 source_group("Header Files\\drivers\\text" FILES ${PDAL_DRIVERS_TEXT_HPP})
+source_group("Header Files\\drivers\\pcd" FILES ${PDAL_DRIVERS_PCD_HPP})
 source_group("Header Files\\drivers\\pgpointcloud" FILES ${PDAL_DRIVERS_PGPOINTCLOUD_HPP})
 source_group("Header Files\\filters" FILES ${PDAL_FILTERS_HPP})
 source_group("Header Files\\plang" FILES ${PDAL_PLANG_HPP})
 
 source_group("Source Files" FILES ${PDAL_BASE_CPP})
 source_group("Source Files\\config" FILES ${PDAL_CONFIG_CPP})
-source_group("Source Files\\drivers\\buffer" FILES ${PDAL_DRIVERS_BUFFER_CPP})
 source_group("Source Files\\drivers\\faux" FILES ${PDAL_DRIVERS_FAUX_CPP})
 source_group("Source Files\\drivers\\caris" FILES ${PDAL_DRIVERS_CARIS_CPP})
 source_group("Source Files\\drivers\\las" FILES ${PDAL_DRIVERS_LAS_CPP})
 source_group("Source Files\\drivers\\nitf" FILES ${PDAL_DRIVERS_NITF_CPP})
 source_group("Source Files\\drivers\\oci" FILES ${PDAL_DRIVERS_OCI_CPP})
-source_group("Source Files\\drivers\\pipeline" FILES ${PDAL_DRIVERS_PIPELINE_CPP})
 source_group("Source Files\\drivers\\qfit" FILES ${PDAL_DRIVERS_QFIT_CPP})
+source_group("Source Files\\drivers\\sbet" FILES ${PDAL_DRIVERS_SBET_CPP})
+source_group("Source Files\\drivers\\greyhound" FILES ${PDAL_DRIVERS_GREYHOUND_CPP})
 source_group("Source Files\\drivers\\terrasolid" FILES ${PDAL_DRIVERS_TERRASOLID_CPP})
 source_group("Source Files\\drivers\\text" FILES ${PDAL_DRIVERS_TEXT_CPP})
+source_group("Source Files\\drivers\\pcd" FILES ${PDAL_DRIVERS_PCD_CPP})
 source_group("Source Files\\drivers\\pgpointcloud" FILES ${PDAL_DRIVERS_PGPOINTCLOUD_CPP})
 source_group("Source Files\\filters" FILES ${PDAL_FILTERS_CPP})
 source_group("Source Files\\plang" FILES ${PDAL_PLANG_CPP})
@@ -649,28 +795,14 @@ set(PDAL_SOURCES
 
 if(WIN32)
     add_definitions("-DPDAL_DLL_EXPORT=1")
-if (NOT WITH_STATIC_LASZIP)
-    add_definitions("-DLASZIP_DLL_IMPORT=1")
-endif()
-endif()
-
-if (PDAL_BUILD_STATIC)
-  set(PDAL_LIB_TYPE STATIC)
-else()
-  set(PDAL_LIB_TYPE SHARED)
+    if (NOT WITH_STATIC_LASZIP)
+        add_definitions("-DLASZIP_DLL_IMPORT=1")
+    endif()
 endif()
 
+PDAL_ADD_LIBRARY(${PDAL_LIB_NAME} ${PDAL_SOURCES})
 
-add_library(${PDAL_LIB_NAME} ${PDAL_LIB_TYPE} ${PDAL_SOURCES})
-if (CMAKE_VERSION VERSION_GREATER 2.8.10)
-    set(PDAL_LINKAGE "PUBLIC;general")
-    set(BOOST_LINKAGE "LINK_PRIVATE;general")
-else()
-    set(PDAL_LINKAGE "")
-    set(BOOST_LINKAGE "")
-endif()
-
-set (SQLITE_LIBRARIES ${SOCI_LIBRARY} ${SOCI_sqlite3_PLUGIN} ${SQLITE3_LIBRARY})
+set (SQLITE_LIBRARIES ${SQLITE3_LIBRARY})
 
 if (WITH_SQLITE)
 if (NOT USE_PDAL_PLUGIN_SQLITE)
@@ -696,17 +828,40 @@ target_link_libraries(${PDAL_LIB_NAME}  ${PDAL_LINKAGE} ${NITRO_LIBRARIES} )
 endif()
 endif()
 
-  target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE}
-    "${PDAL_LIB_NAME}"
+if (WITH_LASZIP)
+    target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE} "${LASZIP_LIBRARY}")
+endif()
+
+if (WITH_PYTHON)
+    target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE} "${PYTHON_LIBRARY}")
+endif()
+
+if (PDAL_HAVE_PCL AND WITH_PCL)
+    target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE} ${PCL_LIBRARIES})
+endif()
+
+if (WITH_LIBXML2)
+    target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE} ${LIBXML2_LIBRARIES})
+endif()
+
+if (WITH_ZLIB)
+    target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE} ${ZLIB_LIBRARIES})
+endif()
+
+if (WITH_HDF5)
+    target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE} ${HDF5_LIBRARIES})
+endif()
+
+if (WITH_JSONCPP OR WITH_GREYHOUND)
+    target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE} ${JSONCPP_LIBRARIES})
+endif()
+
+target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE}
     "${CMAKE_THREAD_LIBS_INIT}"
     "${CMAKE_DL_LIBS}"
-    "${TIFF_LIBRARY}"
     "${MRSID_LIBRARY}"
     "${GEOTIFF_LIBRARY}"
     "${GDAL_LIBRARY}"
-    "${LASZIP_LIBRARY}"
-    ${LIBXML2_LIBRARIES}
-    "${PYTHON_LIBRARY}"
     "${P2G_LIBRARY}"
     "${GEOS_LIBRARY}"
     "${HEXER_LIBRARY}"
@@ -722,13 +877,6 @@ target_link_libraries(${PDAL_LIB_NAME}
 set_target_properties(${PDAL_LIB_NAME}
   PROPERTIES SOVERSION "${PDAL_LIB_SOVERSION}" )
 
-if (APPLE)
-  set_target_properties(
-    ${PDAL_LIB_NAME}
-    PROPERTIES
-    INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib")
-endif()
-
 
 if (USE_PDAL_PLUGIN_TEXT)
     set(PDAL_TEXT_WRITER_LIB_NAME pdal_plugin_writer_text)
@@ -737,44 +885,25 @@ if (USE_PDAL_PLUGIN_TEXT)
                           ${PDAL_LIB_NAME})
     set_target_properties("${PDAL_TEXT_WRITER_LIB_NAME}"
     PROPERTIES SOVERSION "${PDAL_LIB_SOVERSION}" )
-    if (APPLE)
-    set_target_properties(
-      "${PDAL_TEXT_WRITER_LIB_NAME}"
-      PROPERTIES
-      INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib")
-    endif()
 endif()
 
 if (WITH_SQLITE)
 if (USE_PDAL_PLUGIN_SQLITE)
-    set(PDAL_SOCI_WRITER_LIB_NAME pdal_plugin_writer_sqlite)
+    set(PDAL_SQLITE_WRITER_LIB_NAME pdal_plugin_writer_sqlite)
     add_library(${PDAL_SQLITE_WRITER_LIB_NAME} SHARED "${PDAL_SQLITE_SRC}/Writer.cpp")
     target_link_libraries(${PDAL_SQLITE_WRITER_LIB_NAME} INTERFACE general
                           "${PDAL_LIB_NAME}"
                           ${SQLITE_LIBRARIES})
     set_target_properties(${PDAL_SQLITE_WRITER_LIB_NAME}
     PROPERTIES SOVERSION "${PDAL_LIB_SOVERSION}" )
-    if (APPLE)
-    set_target_properties(
-      "${PDAL_SQLITE_WRITER_LIB_NAME}"
-      PROPERTIES
-      INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib")
-    endif()
 
-    set(PDAL_SOCI_READER_LIB_NAME pdal_plugin_reader_sqlite)
+    set(PDAL_SQLITE_READER_LIB_NAME pdal_plugin_reader_sqlite)
     add_library(${PDAL_SQLITE_READER_LIB_NAME} SHARED ${PDAL_SQLITE_SRC}/Reader.cpp)
-    target_link_libraries(${PDAL_SOCI_READER_LIB_NAME} INTERFACE general
+    target_link_libraries(${PDAL_SQLITE_READER_LIB_NAME} INTERFACE general
                           "${PDAL_LIB_NAME}"
                           ${SQLITE_LIBRARIES})
     set_target_properties(${PDAL_SQLITE_READER_LIB_NAME}
     PROPERTIES SOVERSION "${PDAL_LIB_SOVERSION}" )
-    if (APPLE)
-    set_target_properties(
-      "${PDAL_SOCI_READER_LIB_NAME}"
-      PROPERTIES
-      INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib")
-    endif()
-    
 endif()
 endif()
 
@@ -789,21 +918,10 @@ if (USE_PDAL_PLUGIN_OCI)
                           "${ORACLE_LIBRARY}")
     set_target_properties(${PDAL_OCI_WRITER_LIB_NAME}
     PROPERTIES SOVERSION "${PDAL_LIB_SOVERSION}" )
-    if (APPLE)
-    set_target_properties(
-      "${PDAL_OCI_WRITER_LIB_NAME}"
-      PROPERTIES
-      INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib")
-    endif()
 endif()
 endif()
 ###############################################################################
 # Targets installation
-
-install(TARGETS ${PDAL_LIB_NAME} ${PDAL_C_LIB_NAME}
-  RUNTIME DESTINATION ${PDAL_BIN_DIR}
-  LIBRARY DESTINATION ${PDAL_LIB_DIR}
-  ARCHIVE DESTINATION ${PDAL_LIB_DIR})
 
 install(DIRECTORY "${PDAL_HEADERS_DIR}/"
   DESTINATION "${PDAL_INCLUDE_DIR}"

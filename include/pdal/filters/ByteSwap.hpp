@@ -32,85 +32,30 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_FILTERS_BYTESWAPFILTER_HPP
-#define INCLUDED_FILTERS_BYTESWAPFILTER_HPP
+#pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/FilterIterator.hpp>
-#include <pdal/Bounds.hpp>
-
-namespace pdal
-{
-class PointBuffer;
-}
 
 namespace pdal
 {
 namespace filters
 {
 
-class ByteSwapFilterSequentialIterator;
-
-// removes any points outside of the given range
-// updates the header accordingly
 class PDAL_DLL ByteSwap : public Filter
 {
 public:
     SET_STAGE_NAME("filters.byteswap", "Byte-swap Filter")
     SET_STAGE_LINK("http://pdal.io/stages/filters.byteswap.html")
+    SET_STAGE_ENABLED(true)
     
-    ByteSwap(Stage& prevStage, const Options&);
-    ByteSwap(Stage& prevStage);
-
-    virtual void initialize();
-    static Options getDefaultOptions();
-
-    bool supportsIterator(StageIteratorType t) const
-    {
-        if (t == StageIterator_Sequential) return true;
-
-        return false;
-    }
-
-    pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const
-    {
-        return NULL;
-    }
-
-    // returns number of points accepted into the data buffer (which may be less than data.getNumPoints(),
-    // if we're calling this routine multiple times with the same buffer
-    boost::uint32_t processBuffer(PointBuffer& dstData, const PointBuffer& srcData) const;
-
+    ByteSwap(const Options& options) : Filter(options)
+        { std::cerr << "ByteSwap filter is deprecated.\n"; }
 
 private:
     ByteSwap& operator=(const ByteSwap&); // not implemented
     ByteSwap(const ByteSwap&); // not implemented
 };
 
+} // namespace filters
+} // namespace pdal
 
-namespace iterators
-{
-namespace sequential
-{
-
-class PDAL_DLL ByteSwap : public pdal::FilterSequentialIterator
-{
-public:
-    ByteSwap(const pdal::filters::ByteSwap& filter, PointBuffer& buffer);
-
-private:
-    boost::uint64_t skipImpl(boost::uint64_t);
-    boost::uint32_t readBufferImpl(PointBuffer&);
-    bool atEndImpl() const;
-
-    const pdal::filters::ByteSwap& m_swapFilter;
-};
-
-}
-} // iterators::sequential
-
-}
-} // namespaces
-
-#endif

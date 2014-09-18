@@ -60,15 +60,11 @@ BOOST_AUTO_TEST_CASE(test_ctor)
     BOOST_CHECK_EQUAL(d1.getInterpretation(), d2.getInterpretation());
     BOOST_CHECK_EQUAL(d1.getNamespace(), d2.getNamespace());
     BOOST_CHECK_EQUAL(d1.getUUID(), d2.getUUID());
-    BOOST_CHECK_EQUAL(d1.getParent(), d2.getParent());
-    BOOST_CHECK_EQUAL(d1.getPosition(), d2.getPosition());
 
     Dimension d3 = d1;
     BOOST_CHECK_EQUAL(d1.getInterpretation(), d3.getInterpretation());
     BOOST_CHECK_EQUAL(d1.getNamespace(), d3.getNamespace());
     BOOST_CHECK_EQUAL(d1.getUUID(), d3.getUUID());
-    BOOST_CHECK_EQUAL(d1.getParent(), d3.getParent());
-    BOOST_CHECK_EQUAL(d1.getPosition(), d3.getPosition());
 
     BOOST_CHECK(d1 == d1);
     BOOST_CHECK(d1 == d2);
@@ -77,52 +73,9 @@ BOOST_AUTO_TEST_CASE(test_ctor)
     BOOST_CHECK(d3 == d1);
 
     Dimension d4("Y", dimension::SignedInteger, 4);
-    d4.setEndianness(Endian_Big);
     BOOST_CHECK(d1 != d4);
     BOOST_CHECK(d4 != d1);
-
-
 }
-
-BOOST_AUTO_TEST_CASE(test_parents)
-{
-    Dimension parent("X", dimension::SignedInteger, 4);
-    parent.setNamespace("parent");
-    parent.createUUID();
-
-    Dimension child("X", dimension::Float, 4);
-    child.setNamespace("a.child");
-    child.createUUID();
-    dimension::id const& p = parent.getUUID();
-    child.setParent(p);
-
-    Dimension child2("X", dimension::Float, 8);
-    child2.setNamespace("a.child2");
-    child2.createUUID();
-    child2.setParent(child.getUUID());
-
-    Dimension another("Y", dimension::SignedInteger, 4);
-
-    Schema schema;
-    schema.appendDimension(child);
-    schema.appendDimension(parent);
-    schema.appendDimension(another);
-    schema.appendDimension(child2);
-
-    BOOST_CHECK_EQUAL(child.getParent(), parent.getUUID());
-
-    // The parent-child relationship will case getDimension
-    // to return the child dim with name 'X', not the
-    // first-added parent dim
-    Dimension const& c2 = schema.getDimension("X");
-
-    BOOST_CHECK_EQUAL(c2.getUUID(), child2.getUUID());
-    
-    Dimension const& d = schema.getDimension("a.child2.X");
-    BOOST_CHECK_EQUAL(d.getNamespace(), "a.child2");
-    BOOST_CHECK_EQUAL(d.getName(), "X");
-}
-
 
 BOOST_AUTO_TEST_CASE(DimensionTest_ptree)
 {
@@ -130,10 +83,8 @@ BOOST_AUTO_TEST_CASE(DimensionTest_ptree)
 
     boost::uuids::string_generator gen;
     std::string id("9bf8d966-0c0d-4c94-a14e-bce97e860bde");
-    dimension::id uuid = gen(id);
 
-    d1.setUUID(uuid);
-
+    d1.setUUID(gen(id));
 
     boost::property_tree::ptree tree = d1.toPTree();
 
@@ -151,9 +102,6 @@ BOOST_AUTO_TEST_CASE(DimensionTest_ptree)
     BOOST_CHECK_EQUAL(tree.get<std::string>("namespace"), "");
 
     BOOST_CHECK_EQUAL(tree.get<std::string>("uuid"), "9bf8d966-0c0d-4c94-a14e-bce97e860bde");
-
-
-    return;
 }
 
 
@@ -166,7 +114,6 @@ BOOST_AUTO_TEST_CASE(DimensionTest_Interpretation)
     dimension::Interpretation interp = Dimension::getInterpretation(x.getInterpretationName());
     
     BOOST_CHECK_EQUAL(interp, pdal::dimension::SignedInteger);
-    return;
 }
 
 

@@ -32,27 +32,9 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_DRIVERS_NITF_WRITER_HPP
-#define INCLUDED_DRIVERS_NITF_WRITER_HPP
+#pragma once
 
-#include <pdal/Writer.hpp>
 #include <pdal/drivers/las/Writer.hpp>
-#include <pdal/StreamFactory.hpp>
-
-namespace pdal
-{
-class PointBuffer;
-
-namespace drivers
-{
-namespace las
-{
-class Writer;
-}
-}
-}
-
-
 
 namespace pdal
 {
@@ -62,44 +44,44 @@ namespace nitf
 {
 
 
-class PDAL_DLL Writer : public pdal::drivers::las::Writer
+class PDAL_DLL Writer : public las::Writer
 {
 public:
     SET_STAGE_NAME("drivers.nitf.writer", "NITF Writer")
     SET_STAGE_LINK("http://pdal.io/stages/drivers.nitf.writer.html")
-    
-    Writer(Stage& prevStage, const Options&);
-    ~Writer();
+#ifdef PDAL_HAVE_NITRO
+    SET_STAGE_ENABLED(true)
+#else
+    SET_STAGE_ENABLED(false)
+#endif
 
-    virtual void initialize();
-    static Options getDefaultOptions();
+    Writer(const Options& options) : las::Writer(options, &m_oss)
+        {}
 
 private:
-
-    virtual void writeBegin(boost::uint64_t targetNumPointsToWrite);
-    virtual void writeBufferBegin(PointBuffer const&);
-    virtual boost::uint32_t writeBuffer(const PointBuffer&);
-    virtual void writeBufferEnd(PointBuffer const&);
-    virtual void writeEnd(boost::uint64_t actualNumPointsWritten);
+    virtual void processOptions(const Options& options);
+    virtual void done(PointContextRef ctx);
 
     std::string m_filename;
+    std::string m_cLevel;
+    std::string m_sType;
+    std::string m_oStationId;
+    std::string m_fileTitle;
+    std::string m_fileClass;
+    std::string m_origName;
+    std::string m_origPhone;
+    std::string m_securityClass;
+    std::string m_imgSecurityClass;
+    std::string m_imgDate;
+    std::string m_sic;
+    std::string m_igeolob;
+    std::stringstream m_oss;
 
     Writer& operator=(const Writer&); // not implemented
     Writer(const Writer&); // not implemented
-    
-    bool m_bCreatedFile;
-    
-    // From http://stackoverflow.com/questions/3175159/how-do-i-make-a-some-sort-of-istream-for-a-vector-of-unsigned-chars
-    std::stringstream m_oss;
-    // std::ofstream m_oss;
-    // std::vector<unsigned char> m_lasdata;
-    // boost::iostreams::stream<container_device<std::vector<unsigned char> > > *m_io;
 };
 
+} // namespace nitf
+} // namespace drivers
+} // namespace pdal
 
-}
-}
-} // namespaces
-
-
-#endif

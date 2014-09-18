@@ -34,15 +34,13 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <pdal/SpatialReference.hpp>
-#include <pdal/drivers/pipeline/Reader.hpp>
 #include <pdal/drivers/faux/Reader.hpp>
+#include <pdal/PipelineManager.hpp>
+#include <pdal/PipelineReader.hpp>
+#include <pdal/SpatialReference.hpp>
 #include <pdal/filters/Scaling.hpp>
-#include <pdal/StageIterator.hpp>
-#include <pdal/Schema.hpp>
-#include <pdal/PointBuffer.hpp>
-#include <pdal/Options.hpp>
 
+#include "../StageTester.hpp"
 #include "Support.hpp"
 
 using namespace pdal;
@@ -51,48 +49,41 @@ BOOST_AUTO_TEST_SUITE(ScalingFilterTest)
 
 BOOST_AUTO_TEST_CASE(ScalingFilterTest_test_1)
 {
-    pdal::Option option("filename", Support::datapath("filters/scaling.xml"));
-    pdal::Options options(option);
+    PipelineManager mgr;
+    PipelineReader specReader(mgr);
+    specReader.readPipeline(Support::datapath("filters/scaling.xml"));
 
-    pdal::drivers::pipeline::Reader reader(options);
-    reader.initialize();
+    point_count_t count = mgr.execute();
+    PointBufferSet pbSet = mgr.buffers();
+    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    PointBufferPtr buf = *pbSet.begin();
 
-    pdal::filters::Scaling const* filter = static_cast<pdal::filters::Scaling const*>(reader.getManager().getStage());
-    pdal::Options opt = filter->getOptions();
-    // std::cout << "filter ops: " << opt << std::endl;
-
-    const pdal::Schema& schema = filter->getSchema();
-    pdal::PointBuffer data(schema, 1);
-
-    pdal::StageSequentialIterator* iter = filter->createSequentialIterator(data);
-
-    boost::uint32_t numRead = iter->read(data);
-    BOOST_CHECK(numRead == 1);
-    delete iter;
-
-    pdal::Schema const& schema2 = data.getSchema();
-
-    boost::optional<pdal::Dimension const&> scaledDimX = schema2.getDimension("X", "filters.scaling");
-    boost::optional<pdal::Dimension const&> scaledDimY = schema2.getDimension("Y", "filters.scaling");
-
-    if (!scaledDimX) throw pdal::pdal_error("Hey, no dimension was selected");
-    boost::int32_t x = data.getField<boost::int32_t>(*scaledDimX, 0);
-    boost::int32_t y = data.getField<boost::int32_t>(*scaledDimY, 0);
-
+    Schema *schema = mgr.schema();
+    DimensionPtr xDim = schema->getDimension("X", "filters.scaling");
+    DimensionPtr yDim = schema->getDimension("Y", "filters.scaling");
+    
+    int32_t x = buf->getFieldAs<int32_t>(xDim, 0, false);
+    int32_t y = buf->getFieldAs<int32_t>(yDim, 0, false);
     BOOST_CHECK_EQUAL(x, 6370112);
     BOOST_CHECK_EQUAL(y, 8490263);
 
-    boost::optional<pdal::Dimension const&> unscaledDimX = schema2.getDimension("X", "drivers.las.reader");
-    boost::optional<pdal::Dimension const&> unscaledDimY = schema2.getDimension("Y", "drivers.las.reader");
+    x = buf->getFieldAs<int32_t>(xDim, 10, false);
+    y = buf->getFieldAs<int32_t>(yDim, 10, false);
+    BOOST_CHECK_EQUAL(x, 6360365);
+    BOOST_CHECK_EQUAL(y, 8493365);
 
-    if (!unscaledDimX) throw pdal::pdal_error("Hey, no dimension was selected");
-    x = data.getField<boost::int32_t>(*unscaledDimX, 0);
-    y = data.getField<boost::int32_t>(*unscaledDimY, 0);
+    DimensionPtr xDimRaw = schema->getDimension("X", "drivers.las.reader");
+    DimensionPtr yDimRaw = schema->getDimension("Y", "drivers.las.reader");
 
+    x = buf->getFieldAs<int32_t>(xDimRaw, 0, false);
+    y = buf->getFieldAs<int32_t>(yDimRaw, 0, false);
     BOOST_CHECK_EQUAL(x, 63701224);
     BOOST_CHECK_EQUAL(y, 84902831);
 
-    return;
+    x = buf->getFieldAs<int32_t>(xDimRaw, 10, false);
+    y = buf->getFieldAs<int32_t>(yDimRaw, 10, false);
+    BOOST_CHECK_EQUAL(x, 63603753);
+    BOOST_CHECK_EQUAL(y, 84933845);
 }
 
 
@@ -110,7 +101,7 @@ BOOST_AUTO_TEST_CASE(ScalingFilterFloat_test)
     opts.add(opt3);
     opts.add(opt4);
 
-    Option scalex("scale", 0.00001f, "fpscale");
+    Option scalex("scale", 0.00001, "fpscale");
     Option offsetx("offset", 12345, "offset");
     Option xdim("dimension", "X", "dimension to scale");
     Option debug("debug", true, "");
@@ -123,7 +114,7 @@ BOOST_AUTO_TEST_CASE(ScalingFilterFloat_test)
     xdim.setOptions(xs);
     opts.add(xdim);
 
-    Option scaley("scale", 0.001f, "fpscale");
+    Option scaley("scale", 0.001, "fpscale");
     Option offsety("offset", 12345, "offset");
     Option sizey("size", 4, "size");
     Option typey("type", "SignedInteger", "tye");
@@ -136,7 +127,7 @@ BOOST_AUTO_TEST_CASE(ScalingFilterFloat_test)
     ydim.setOptions(ys);
     opts.add(ydim);
 
-    Option scalet("scale", 0.1f, "fpscale");
+    Option scalet("scale", 0.1, "fpscale");
     Option offsett("offset", 0, "offset");
     Option sizet("size", 4, "size");
     Option typet("type", "UnsignedInteger", "tye");
@@ -149,90 +140,42 @@ BOOST_AUTO_TEST_CASE(ScalingFilterFloat_test)
     tdim.setOptions(ts);
     opts.add(tdim);
 
-    pdal::drivers::faux::Reader reader(opts);
-    pdal::filters::Scaling scaling(reader, opts);
-    scaling.initialize();
+    PointContext ctx;
+    PointBuffer buf(ctx);
 
-    const Schema& schema = scaling.getSchema();
+    drivers::faux::Reader reader(opts);
+    filters::Scaling scaling(opts);
+    scaling.setInput(&reader);
+    scaling.prepare(ctx);
 
-    PointBuffer data(schema, 750);
-
-    StageSequentialIterator* iter = scaling.createSequentialIterator(data);
-    boost::uint32_t numRead = iter->read(data);
-
+    StageSequentialIterator* iter = reader.createSequentialIterator();
+    point_count_t numRead = iter->read(buf, 750);
     BOOST_CHECK_EQUAL(numRead, 750u);
 
-    Schema const& buffer_schema = data.getSchema();
-    Dimension const& dimX = buffer_schema.getDimension("X");
-    Dimension const& dimY = buffer_schema.getDimension("Y");
-    Dimension const& dimZ = buffer_schema.getDimension("Z");
-    Dimension const& dimTime = buffer_schema.getDimension("Time");
+    FilterTester::ready(&scaling, ctx);
+    FilterTester::filter(&scaling, buf);
+    FilterTester::done(&scaling, ctx);
 
-    for (boost::uint32_t i=0; i<2; i++)
+    Schema *schema = ctx.schema();
+    DimensionPtr dimX = schema->getDimension("X");
+    DimensionPtr dimY = schema->getDimension("Y");
+    DimensionPtr dimZ = schema->getDimension("Z");
+    DimensionPtr dimTime = schema->getDimension("Time");
+
+    for (PointId i = 0; i < 2; ++i)
     {
-        boost::int32_t x = data.getField<boost::int32_t>(dimX, i);
-        boost::int32_t y = data.getField<boost::int32_t>(dimY, i);
-        double z = data.getField<double>(dimZ, i);
-        boost::int32_t t = data.getField<boost::int32_t>(dimTime, i);
+        int32_t x = buf.getFieldAs<int32_t>(dimX, i, false);
+        int32_t y = buf.getFieldAs<int32_t>(dimY, i, false);
+        double z = buf.getFieldAs<double>(dimZ, i, false);
+        int32_t t = buf.getFieldAs<int32_t>(dimTime, i, false);
 
-        BOOST_CHECK_EQUAL(x, -1234400030);
-        BOOST_CHECK_EQUAL(y, -12342999);
+        BOOST_CHECK_EQUAL(x, -1234400000);
+        BOOST_CHECK_EQUAL(y, -12343000);
         BOOST_CHECK_CLOSE(z, 3.0, 0.00001);
-        BOOST_CHECK_EQUAL(t, i*10); // because of scaling
+        BOOST_CHECK_EQUAL(t, i * 10); // because of scaling
     }
 
     delete iter;
-
-    return;
-}
-
-
-BOOST_AUTO_TEST_CASE(ScalingFilterTest_test_2)
-{
-    pdal::Option option("filename", Support::datapath("filters/scaling.xml"));
-    pdal::Options options(option);
-
-    pdal::drivers::pipeline::Reader reader(options);
-    reader.initialize();
-
-    pdal::filters::Scaling const* filter = static_cast<pdal::filters::Scaling const*>(reader.getManager().getStage());
-    pdal::Options opt = filter->getOptions();
-    // std::cout << "filter ops: " << opt << std::endl;
-
-    const pdal::Schema& schema = filter->getSchema();
-    pdal::PointBuffer data(schema, 1);
-
-    pdal::StageRandomIterator* iter = filter->createRandomIterator(data);
-    
-    if (!iter) throw std::runtime_error("createRandomIterator returned NULL");
-    iter->seek(10);
-    boost::uint32_t numRead = iter->read(data);
-    BOOST_CHECK(numRead == 1);
-    delete iter;
-
-    pdal::Schema const& schema2 = data.getSchema();
-
-    boost::optional<pdal::Dimension const&> scaledDimX = schema2.getDimension("X", "filters.scaling");
-    boost::optional<pdal::Dimension const&> scaledDimY = schema2.getDimension("Y", "filters.scaling");
-
-    if (!scaledDimX) throw pdal::pdal_error("Hey, no dimension was selected");
-    boost::int32_t x = data.getField<boost::int32_t>(*scaledDimX, 0);
-    boost::int32_t y = data.getField<boost::int32_t>(*scaledDimY, 0);
-
-    BOOST_CHECK_EQUAL(x, 6360365);
-    BOOST_CHECK_EQUAL(y, 8493364);
-
-    boost::optional<pdal::Dimension const&> unscaledDimX = schema2.getDimension("X", "drivers.las.reader");
-    boost::optional<pdal::Dimension const&> unscaledDimY = schema2.getDimension("Y", "drivers.las.reader");
-
-    if (!unscaledDimX) throw pdal::pdal_error("Hey, no dimension was selected");
-    x = data.getField<boost::int32_t>(*unscaledDimX, 0);
-    y = data.getField<boost::int32_t>(*unscaledDimY, 0);
-
-    BOOST_CHECK_EQUAL(x, 63603753);
-    BOOST_CHECK_EQUAL(y, 84933845);
-
-    return;
 }
 
 

@@ -32,181 +32,30 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_FILTERS_INPLACEREPROJECTIONFILTER_HPP
-#define INCLUDED_FILTERS_INPLACEREPROJECTIONFILTER_HPP
+#pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/FilterIterator.hpp>
-
-#include <boost/shared_ptr.hpp>
-
-
-namespace pdal
-{
-class PointBuffer;
-namespace gdal
-{
-class GlobalDebug;
-}
-}
 
 namespace pdal
 {
 namespace filters
 {
 
-
 class PDAL_DLL InPlaceReprojection : public Filter
 {
 public:
-    SET_STAGE_NAME("filters.inplacereprojection", "In place Reprojection Filter")
+    SET_STAGE_NAME("filters.inplacereprojection",
+        "In place Reprojection Filter")
     SET_STAGE_LINK("http://pdal.io/stages/filters.inplacereprojection.html")     
-    
-    InPlaceReprojection(Stage& prevStage, const Options&);
-    InPlaceReprojection(Stage& prevStage,
-                        const SpatialReference& outSRS);
-    InPlaceReprojection(Stage& prevStage,
-                        const SpatialReference& inSRS,
-                        const SpatialReference& outSRS);
+    InPlaceReprojection(const Options& options) : Filter(options)
+         {}
 
-    ~InPlaceReprojection();
-    virtual void initialize();
-    static Options getDefaultOptions();
-
-    bool supportsIterator(StageIteratorType t) const
-    {
-        if (t == StageIterator_Sequential) return true;
-        if (t == StageIterator_Random) return true;
-        return false;
-    }
-
-    pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const;
-
-    void setScaledValue(PointBuffer& data,
-                        double value,
-                        Dimension const& d,
-                        std::size_t pointIndex) const;
-
-
-
-    
-    SpatialReference const& getOutSRS() const { return m_outSRS; }
-    SpatialReference const& getInSRS() const { return m_inSRS; }
 private:
-    
-
-    SpatialReference m_inSRS;
-    SpatialReference m_outSRS;
-
-    
-    InPlaceReprojection& operator=(const InPlaceReprojection&); // not implemented
+    InPlaceReprojection& operator=(
+        const InPlaceReprojection&); // not implemented
     InPlaceReprojection(const InPlaceReprojection&); // not implemented
-    
-
 };
 
-namespace iterators
-{
+} // namespace filter
+} // namespace pdal
 
-namespace inplacereprojection
-{
-
-class PDAL_DLL IteratorBase
-{
-public:
-    IteratorBase(pdal::filters::InPlaceReprojection const& filter, PointBuffer& buffer);
-
-protected:
-    pdal::filters::InPlaceReprojection const& m_reprojectionFilter;      
-    void updateBounds(PointBuffer&);
-    Schema alterSchema(Schema const& s);
-
-    void projectData(PointBuffer& buffer, boost::uint32_t numRead);
-    
-    dimension::id const& getOldXId() const { return m_old_x_id; }
-    dimension::id const& getOldYId() const { return m_old_y_id; }
-    dimension::id const& getOldZId() const { return m_old_z_id; }
-
-    dimension::id const& getNewXId() const { return m_new_x_id; }
-    dimension::id const& getNewYId() const { return m_new_y_id; }
-    dimension::id const& getNewZId() const { return m_new_z_id; }
-
-
-private:
-    IteratorBase& operator=(IteratorBase const&);
-    void setDimension( std::string const& name, 
-                       dimension::id& old_id,
-                       dimension::id& new_id,
-                       Schema& schema,
-                       double scale,
-                       double offset);
-    void reprojectOffsets( double& offset_x, double& offset_y, double& offset_z);
-    void transform(double& x, double& y, double& z) const;    
-    typedef boost::shared_ptr<void> ReferencePtr;
-    typedef boost::shared_ptr<void> TransformPtr;
-    ReferencePtr m_in_ref_ptr;
-    ReferencePtr m_out_ref_ptr;
-    TransformPtr m_transform_ptr;
-
-    dimension::id m_new_x_id;
-    dimension::id m_new_y_id;
-    dimension::id m_new_z_id;
-
-    dimension::id m_old_x_id;
-    dimension::id m_old_y_id;
-    dimension::id m_old_z_id;
-                           
-};
-
-} // inplacereprojection
-    
-namespace sequential
-{
-
-
-class PDAL_DLL InPlaceReprojection : public pdal::FilterSequentialIterator, public inplacereprojection::IteratorBase
-{
-public:
-    InPlaceReprojection(const pdal::filters::InPlaceReprojection& filter, PointBuffer& buffer);
-    ~InPlaceReprojection(){};
-
-private:
-    boost::uint64_t skipImpl(boost::uint64_t);
-    boost::uint32_t readBufferImpl(PointBuffer&);
-    bool atEndImpl() const;    
-
-};
-
-
-
-} // sequential
-
-namespace random
-{
-
-class PDAL_DLL InPlaceReprojection : public pdal::FilterRandomIterator, public inplacereprojection::IteratorBase
-{
-public:
-    InPlaceReprojection(const pdal::filters::InPlaceReprojection& filter, PointBuffer& buffer);
-    virtual ~InPlaceReprojection(){};
-
-protected:
-    virtual boost::uint32_t readBufferImpl(PointBuffer& buffer);
-
-    
-    virtual boost::uint64_t seekImpl(boost::uint64_t);
-
-
-};    
-    
-    
-} // random
-
-} // iterators
-
-
-}
-} // namespaces
-
-#endif

@@ -32,8 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_FILTER_HPP
-#define INCLUDED_FILTER_HPP
+#pragma once
 
 #include <pdal/pdal_internal.hpp>
 
@@ -49,21 +48,41 @@ namespace pdal
 //   <uint32>verbose
 //
 
+class FilterTester;
+
 class PDAL_DLL Filter : public Stage
 {
+    friend class FilterTester;
 public:
-    Filter(Stage& prevStage, const Options& options);
-
-    virtual void initialize();
+    Filter(const Options& options) : Stage(options)
+        {}
+    Filter()
+        {}
 
     // for xml serializion of pipelines
     virtual boost::property_tree::ptree serializePipeline() const;
 
 private:
+    virtual PointBufferSet run(PointBufferPtr buffer)
+    {
+        PointBufferSet pbSet;
+        filter(*buffer);
+        pbSet.insert(buffer);
+        return pbSet;
+    }
+    virtual void filter(PointBuffer& /*buffer*/)
+    {}
+
     Filter& operator=(const Filter&); // not implemented
     Filter(const Filter&); // not implemented
 };
 
+class MultiFilter : public Filter
+{
+public:
+    MultiFilter(const Options& options) : Filter(options)
+        {}
+};
+
 }  // namespace pdal
 
-#endif

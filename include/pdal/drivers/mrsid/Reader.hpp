@@ -66,22 +66,21 @@ class PDAL_DLL Reader : public pdal::Reader
 
 public:
     SET_STAGE_NAME("drivers.mrsid.reader", "MrSID Reader")
+    SET_STAGE_LINK("http://www.pdal.io/stages/drivers.mrsid.reader.html")
+#ifdef PDAL_HAVE_MRSID
+    SET_STAGE_ENABLED(true)
+#else
+    SET_STAGE_ENABLED(false)
+#endif
+    
     virtual ~Reader();
     Reader(const Options& options);
     Reader(LizardTech::PointSource *ps);
 
-    virtual void initialize();
     static Options getDefaultOptions();
     static std::vector<Dimension> getDefaultDimensions();
-
-    bool supportsIterator(StageIteratorType t) const
-    {
-        if (t == StageIterator_Sequential) return true;
-
-        return false;
-    }
-
-    pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
+    pdal::StageSequentialIterator*
+        createSequentialIterator(PointBuffer& buffer) const;
 
     // this is called by the stage's iterator
     boost::uint32_t processBuffer(PointBuffer& data, boost::uint64_t index) const;
@@ -89,6 +88,8 @@ public:
 private:
     LizardTech::PointSource *m_PS;
     LizardTech::PointIterator *m_iter;
+
+    virtual void initialize();
     int SchemaToPointInfo(const Schema &schema, LizardTech::PointInfo &pointInfo) const;
     Dimension LTChannelToPDalDimension(const LizardTech::ChannelInfo & channel, pdal::Schema const& dimensions) const;
     Reader& operator=(const Reader&); // not implemented
@@ -104,12 +105,13 @@ namespace sequential
 class Reader : public pdal::ReaderSequentialIterator
 {
 public:
-    Reader(const pdal::drivers::mrsid::Reader& reader, PointBuffer& buffer);
+    Reader(const pdal::drivers::mrsid::Reader& reader, PointBuffer& buffer, boost::uint32_t numPoints);
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t);
-    boost::uint32_t readBufferImpl(PointBuffer&);
+    point_count_t readBufferImpl(PointBuffer&);
     bool atEndImpl() const;
+    boost::uint32_t m_numPoints;
 
     const pdal::drivers::mrsid::Reader& m_reader;
 };
@@ -122,13 +124,16 @@ namespace random
 class Reader : public pdal::ReaderRandomIterator
 {
 public:
-    Reader(const pdal::drivers::mrsid::Reader& reader, PointBuffer& buffer);
+    Reader(const pdal::drivers::mrsid::Reader& reader, 
+           PointBuffer& buffer, boost::uint32_t numPoints);
 
 private:
     boost::uint64_t seekImpl(boost::uint64_t);
     boost::uint32_t readBufferImpl(PointBuffer&);
 
     const pdal::drivers::mrsid::Reader& m_reader;
+    boost::uint32_t m_numPoints;
+    
 };
 
 

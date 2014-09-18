@@ -32,9 +32,11 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/StageInfo.hpp>
-
 #include <iomanip>
+
+#include <boost/algorithm/string.hpp>
+
+#include <pdal/StageInfo.hpp>
 
 namespace pdal
 {
@@ -50,7 +52,7 @@ std::ostream& operator<<(std::ostream& ostr, const StageInfo& info)
 }
 
 StageInfo::StageInfo(std::string const& name, std::string const& description)
-    : m_name(name), m_description(description) {}
+    : m_name(name), m_description(description), m_isEnabled(false) {}
 
 /// copy constructor
 StageInfo::StageInfo(StageInfo const& other)
@@ -59,6 +61,7 @@ StageInfo::StageInfo(StageInfo const& other)
     , m_dimensions(other.m_dimensions)
     , m_options(other.m_options)
     , m_link(other.m_link)
+    , m_isEnabled(other.m_isEnabled)
 {
     return;
 }

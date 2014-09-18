@@ -37,7 +37,7 @@ case $1 in
     ;;
 
   --defines)
-    echo @LIBLPC_CONFIG_DEFINITIONS@
+    echo @PDAL_CONFIG_DEFINITIONS@
     ;;
 
   --includes)

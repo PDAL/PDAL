@@ -18,7 +18,9 @@ CPackSourceConfig.cmake
 cmake_install.cmake
 CTestTestfile.cmake
 Testing/
+test/temp/
 apps/pdal-config
+apps/pdal.pc
 src/CMakeScripts/
 apps/CMakeScripts/
 CMakeScripts/
@@ -44,14 +46,6 @@ ipch/
 *.sln.docstates
 
 #
-# generated swig files
-#
-csharp/pdal_swig_cs/*.cs
-csharp/pdal_swig_cpp/pdal_wrap.h
-csharp/pdal_swig_cpp/pdal_wrap.cpp
-*.pyc
-
-#
 # doxygen cruft
 #
 doc/doxygen/html
@@ -75,6 +69,7 @@ build
 Makefile
 doc/build
 bin/
+lib/
 test/unit/CMakeScripts/
 src/gitsha.cpp
 .vagrant/

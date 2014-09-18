@@ -36,17 +36,13 @@
 
 #ifdef PDAL_HAVE_LASZIP
 
-#include "ZipPoint.hpp"
-
 #include <laszip/laszip.hpp>
 #include <laszip/laszipper.hpp>
 
 #include <pdal/drivers/las/VariableLengthRecord.hpp>
+#include <pdal/drivers/las/ZipPoint.hpp>
 #include <string.h>
 
-
-// laszip
-#include <laszip/laszip.hpp>
 
 // std
 //#include <vector>
@@ -67,8 +63,7 @@ static boost::uint16_t laszip_recordid = 22204;
 static const char* laszip_description = "http://laszip.org";
 
 
-ZipPoint::ZipPoint(PointFormat format,
-                   const std::vector<VariableLengthRecord>& vlrs,
+ZipPoint::ZipPoint(PointFormat format, const LasHeader& lasHeader,
                    bool isReadMode)
     : m_readMode(isReadMode)
     , his_vlr_num(0)
@@ -76,11 +71,11 @@ ZipPoint::ZipPoint(PointFormat format,
     , m_lz_point(NULL)
     , m_lz_point_size(0)
 {
-
-    boost::scoped_ptr<LASzip> s(new LASzip());
+    std::unique_ptr<LASzip> s(new LASzip());
     m_zip.swap(s);
 
     const VariableLengthRecord* vlr = NULL;
+    auto vlrs = lasHeader.getVLRs().getAll();
     for (std::vector<VariableLengthRecord>::size_type i=0; i<vlrs.size(); i++)
     {
         const VariableLengthRecord& p = vlrs[i];
@@ -99,7 +94,8 @@ ZipPoint::ZipPoint(PointFormat format,
         {
             std::ostringstream oss;
             const char* err = m_zip->get_error();
-            if (err==NULL) err="(unknown error)";
+            if (err == NULL) 
+                err = "(unknown error)";
             oss << "Error unpacking zip VLR data: " << std::string(err);
             throw pdal_error(oss.str());
         }
@@ -110,31 +106,32 @@ ZipPoint::ZipPoint(PointFormat format,
         if (m_readMode)
         {
             std::ostringstream oss;
-            oss << "Unable to find LASzip VLR, but the file was opened in read mode!";
+            oss << "Unable to find LASzip VLR, but the file was opened "
+                "in read mode!";
             throw pdal_error(oss.str());
         }
 
-        if (!m_zip->setup((boost::uint8_t)format, Support::getPointDataSize(format)))
+        if (!m_zip->setup((boost::uint8_t)format, lasHeader.getPointDataSize()))
         {
             std::ostringstream oss;
             const char* err = m_zip->get_error();
-            if (err==NULL) err="(unknown error)";
-            oss << "Error setting up LASzip for format " << format <<": " << err;
+            if (err == NULL)
+                err = "(unknown error)";
+            oss << "Error setting up LASzip for format " << format << ": " <<
+                err;
             throw pdal_error(oss.str());
         }
     }
 
     ConstructItems();
-    return;
 }
+
 
 ZipPoint::~ZipPoint()
 {
-
     delete[] m_lz_point;
-
-    return;
 }
+
 
 void ZipPoint::ConstructItems()
 {
@@ -191,13 +188,8 @@ VariableLengthRecord ZipPoint::ConstructVLR() const
 
 bool ZipPoint::IsZipVLR(const VariableLengthRecord& vlr) const
 {
-    if (laszip_userid == vlr.getUserId() &&
-            laszip_recordid == vlr.getRecordId())
-    {
-        return true;
-    }
-
-    return false;
+    return (laszip_userid == vlr.getUserId() &&
+        laszip_recordid == vlr.getRecordId());
 }
 
 

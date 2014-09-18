@@ -38,30 +38,6 @@
 namespace pdal
 {
 
-
-Filter::Filter(Stage& prevStage, const Options& options)
-    : Stage(StageBase::makeVector(prevStage), options)
-{
-
-    return;
-}
-
-
-void Filter::initialize()
-{
-    Metadata& m = getMetadataRef();
-    m.setName(getName());
-
-    Stage::initialize();
-
-    // by default, we set our core properties to be the same as those
-    // of the previous stage
-    this->setCoreProperties(getPrevStage());
-
-    return;
-}
-
-
 boost::property_tree::ptree Filter::serializePipeline() const
 {
     boost::property_tree::ptree tree;
@@ -69,9 +45,9 @@ boost::property_tree::ptree Filter::serializePipeline() const
     tree.add("<xmlattr>.type", getName());
 
     PipelineWriter::write_option_ptree(tree, getOptions());
-    PipelineWriter::write_metadata_ptree(tree, getMetadata());
+    PipelineWriter::writeMetadata(tree, m_metadata);
 
-    const Stage& stage = getPrevStage();
+    const Stage& stage = *getInputs()[0];
     boost::property_tree::ptree subtree = stage.serializePipeline();
 
     tree.add_child(subtree.begin()->first, subtree.begin()->second);

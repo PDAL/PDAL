@@ -32,30 +32,23 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef PYTHONSCRIPT_H
-#define PYTHONSCRIPT_H
+#pragma once
 
 #include <pdal/pdal_internal.hpp>
 #ifdef PDAL_HAVE_PYTHON
 
 #include <pdal/Options.hpp>
 
-
 namespace pdal
 {
 namespace plang
 {
 
-
 class PDAL_DLL Script
 {
 public:
-    Script(std::string const& sourceCode,
-           std::string const& moduleName,
-           std::string const& functionName);
-    Script(const Options&);
-    Script(const Script&);
-    ~Script();
+    Script(const std::string& sourceCode, const std::string& moduleName,
+        const std::string& functionName);
 
     // the Py functions want char* or const char* things, not std::string things
     const char* source() const
@@ -81,11 +74,8 @@ private:
 
 PDAL_DLL std::ostream& operator<<(std::ostream& os, Script const& d);
 
+} // namespace plang
+} // namespace pdal
 
+#endif // PDAL_HAVE_PYTHON
 
-}
-} // namespaces
-
-#endif
-
-#endif

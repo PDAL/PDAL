@@ -32,11 +32,9 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_FILTERS_CROPFILTER_HPP
-#define INCLUDED_FILTERS_CROPFILTER_HPP
+#pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/FilterIterator.hpp>
 #include <pdal/Bounds.hpp>
 
 #ifdef PDAL_HAVE_GEOS
@@ -58,38 +56,18 @@ class PDAL_DLL Crop : public Filter
 public:
     SET_STAGE_NAME("filters.crop", "Crop Filter")
     SET_STAGE_LINK("http://pdal.io/stages/filters.crop.html")
+    SET_STAGE_ENABLED(true)
     
-    Crop(Stage& prevStage, const Options&);
-    Crop(Stage& prevStage, Bounds<double> const& bounds);
-    ~Crop();
+    Crop(const Options&);
     
-    virtual void initialize();
     static Options getDefaultOptions();
 
-    bool supportsIterator(StageIteratorType t) const
-    {
-        if (t == StageIterator_Sequential) return true;
-
-        return false;
-    }
-
-    pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const
-    {
-        return NULL;
-    }
-
-    // returns number of points accepted into the data buffer (which may be less than data.getNumPoints(),
-    // if we're calling this routine multiple times with the same buffer
-    boost::uint32_t processBuffer(PointBuffer const& srcData, PointBuffer& dstData) const;
-
     const Bounds<double>& getBounds() const;
-    inline boost::uint32_t getDimensions() const { return m_dimensions; }
-    inline void setDimensions(boost::uint32_t const& dimensions) { m_dimensions = dimensions; }
 
 private:
     Bounds<double> m_bounds;
-    bool bCropOutside;
+    bool m_cropOutside;
+    std::string m_poly;
 
 #ifdef PDAL_HAVE_GEOS
 	GEOSContextHandle_t m_geosEnvironment;
@@ -102,39 +80,17 @@ private:
     typedef struct GEOSGeometry* GEOSGeometryHS;
 #endif
 
-    boost::uint32_t m_dimensions;
-
-    Bounds <double> computeBounds(GEOSGeometry const* geometry);
+    virtual void processOptions(const Options& options);
+    virtual void ready(PointContext ctx);
+    virtual PointBufferSet run(PointBufferPtr buffer);
+    virtual void done(PointContext ctx);
+    void crop(PointBuffer& input, PointBuffer& output);
+    Bounds <double> computeBounds(GEOSGeometry const *geometry);
     
     Crop& operator=(const Crop&); // not implemented
     Crop(const Crop&); // not implemented
 };
 
+} // namespace filters
+} // namespace pdal
 
-namespace iterators
-{
-namespace sequential
-{
-
-
-class PDAL_DLL Crop : public pdal::FilterSequentialIterator
-{
-public:
-    Crop(const pdal::filters::Crop& filter, PointBuffer& buffer);
-
-private:
-    boost::uint64_t skipImpl(boost::uint64_t);
-    boost::uint32_t readBufferImpl(PointBuffer&);
-    bool atEndImpl() const;
-
-    const pdal::filters::Crop& m_cropFilter;
-};
-
-
-} // sequential
-} // iterators
-
-} // filters
-} // pdal
-
-#endif

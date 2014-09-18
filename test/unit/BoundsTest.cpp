@@ -36,6 +36,7 @@
 #include <boost/property_tree/xml_parser.hpp>
 
 #include <pdal/Bounds.hpp>
+#include <pdal/PDALUtils.hpp>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -218,8 +219,6 @@ BOOST_AUTO_TEST_CASE(test_grow)
     r4.grow(ptHi);
     Bounds<int> r5(-1,-2,20,201);
     BOOST_CHECK(r4 == r5);
-
-    return;
 }
 
 
@@ -257,8 +256,6 @@ BOOST_AUTO_TEST_CASE(test_output)
 
     BOOST_CHECK_EQUAL(out2, "([1, 101], [2, 102])");
     BOOST_CHECK_EQUAL(out3, "([1.1, 101.1], [2.2, 102.2], [3.3, 103.3])");
-
-    return;
 }
 
 
@@ -268,7 +265,7 @@ BOOST_AUTO_TEST_CASE(BoundsTest_ptree)
 
     std::stringstream ss1(std::stringstream::in | std::stringstream::out);
 
-    boost::property_tree::ptree tree = b2.toPTree();
+    boost::property_tree::ptree tree = pdal::utils::toPTree(b2);
     boost::property_tree::write_xml(ss1, tree);
 
     const std::string out1 = ss1.str();
@@ -277,8 +274,6 @@ BOOST_AUTO_TEST_CASE(BoundsTest_ptree)
     const std::string ref = xml_header + "<0><minimum>1</minimum><maximum>101</maximum></0><1><minimum>2</minimum><maximum>102</maximum></1>";
 
     BOOST_CHECK_EQUAL(ref, out1);
-
-    return;
 }
 
 
@@ -297,8 +292,6 @@ BOOST_AUTO_TEST_CASE(test_input)
     Bounds<double> empty2;
     empty2_s >> empty2;
     BOOST_CHECK_EQUAL(true, empty2.empty());
-
-    return;
 }
 
 
@@ -308,16 +301,12 @@ BOOST_AUTO_TEST_CASE(test_lexicalcast_whitespace)
     const Bounds<double> b2 = boost::lexical_cast< Bounds<double> >("([1, 101], [2, 102], [3, 103])");
 
     BOOST_CHECK_EQUAL(b1, b2);
-
-    return;
 }
 
 BOOST_AUTO_TEST_CASE(test_wkt)
 {
     const Bounds<double> b(1.1,2.2,3.3,101.1,102.2,103.3);
     BOOST_CHECK_EQUAL(b.toWKT(1), "POLYGON ((1.1 2.2, 1.1 102.2, 101.1 102.2, 101.1 2.2, 1.1 2.2))");
-
-    return;
 }
 
 BOOST_AUTO_TEST_SUITE_END()

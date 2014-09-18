@@ -32,25 +32,9 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_DRIVERS_LAS_SUPPORT_HPP
-#define INCLUDED_DRIVERS_LAS_SUPPORT_HPP
+#include <pdal/pdal_internal.hpp>
 
-#include <pdal/pdal_export.hpp>
-
-#include <pdal/Schema.hpp>
-
-
-#include <iostream>
-
-#ifdef PDAL_HAVE_LASZIP
-#include <laszip/laszip.hpp>
-#include <laszip/lasunzipper.hpp>
-#include <laszip/laszipper.hpp>
-
-#else
-typedef struct LASzipH *LASzip;
-typedef struct LASunzipperH *LASunzipper;
-#endif
+#pragma once
 
 namespace pdal
 {
@@ -59,66 +43,18 @@ namespace drivers
 namespace las
 {
 
-class Reader;
 class SummaryData;
-class ZipPoint;
-
-enum PointFormat
-{
-    PointFormat0 = 0,         // base
-    PointFormat1 = 1,         // base + time
-    PointFormat2 = 2,         // base + color
-    PointFormat3 = 3,         // base + time + color
-    PointFormat4 = 4,         // base + time + wave
-    PointFormat5 = 5,         // base + time + color + wave  (NOT SUPPORTED)
-    PointFormatUnknown = 99
-};
-
-class PDAL_DLL PointDimensions
-{
-public:
-    PointDimensions(const Schema& schema, std::string const& ns);
-
-    pdal::Dimension const* X;
-    pdal::Dimension const* Y;
-    pdal::Dimension const* Z;
-
-    pdal::Dimension const* Intensity;
-    pdal::Dimension const* ReturnNumber;
-    pdal::Dimension const* NumberOfReturns;
-    pdal::Dimension const* ScanDirectionFlag;
-    pdal::Dimension const* EdgeOfFlightLine;
-    pdal::Dimension const* Classification;
-    pdal::Dimension const* ScanAngleRank;
-    pdal::Dimension const* UserData;
-    pdal::Dimension const* PointSourceId;
-
-    pdal::Dimension const* Time;
-
-    pdal::Dimension const* Red;
-    pdal::Dimension const* Green;
-    pdal::Dimension const* Blue;
-};
 
 class PDAL_DLL Support
 {
 public:
-    static void registerFields(Reader& stage, Schema& schema, PointFormat pointFormat);
-    static void setScaling(Schema& schema, double scaleX, double scaleY, double scaleZ, double offsetX, double offsetY, double offsetZ);
-
-    static bool hasTime(PointFormat);
-    static bool hasColor(PointFormat);
-    static bool hasWave(PointFormat);
-    static boost::uint16_t getPointDataSize(PointFormat pointFormat);
-
     // assumes the stream position is pointing to the first byte of the header
-    // this function updates the header's min/max xyz fields, and the point return counts fields
+    // this function updates the header's min/max xyz fields, and the point
+    // return counts fields
     static void rewriteHeader(std::ostream& stream, const SummaryData& data);
 };
 
+} // namespace las
+} // namespace drivers
+} // namespace pdal
 
-}
-}
-} // namespace
-
-#endif

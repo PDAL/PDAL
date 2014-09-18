@@ -1,0 +1,15 @@
+{
+  "pipeline": {
+    "name": "ConditionalRemovalExample",
+    "filters": [{
+        "name": "NormalEstimation",
+        "setRadiusSearch": 50.0
+      }, {
+        "name": "ConditionalRemoval",
+        "normalZ": {
+          "max": 0.087156
+        }
+    }]
+  }
+}
+

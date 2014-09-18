@@ -32,21 +32,26 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_DRIVERS_LAS_WRITER_HPP
-#define INCLUDED_DRIVERS_LAS_WRITER_HPP
+#pragma once
 
 #include <pdal/Writer.hpp>
 #include <pdal/drivers/las/Support.hpp>
 #include <pdal/drivers/las/Header.hpp>
 #include <pdal/drivers/las/SummaryData.hpp>
+#include <pdal/drivers/las/ZipPoint.hpp>
 #include <pdal/StreamFactory.hpp>
-#include <boost/scoped_ptr.hpp>
-
+#include <boost/algorithm/string.hpp>
 
 namespace pdal
 {
 namespace drivers
 {
+
+namespace nitf
+{
+    class Writer;
+}
+
 namespace las
 {
 
@@ -62,20 +67,22 @@ namespace las
 //
 class PDAL_DLL Writer : public pdal::Writer
 {
+    friend class nitf::Writer;
 public:
     SET_STAGE_NAME("drivers.las.writer", "Las Writer")
     SET_STAGE_LINK("http://pdal.io/stages/drivers.las.writer.html")
+    SET_STAGE_ENABLED(true)
 
-    Writer(Stage& prevStage, const Options&);
-    Writer(Stage& prevStage, std::ostream*);
+    Writer(const Options&);
+    Writer(std::ostream*);
+    Writer(const Options&, std::ostream*);
     virtual ~Writer();
 
-    virtual void initialize();
     static Options getDefaultOptions();
 
-    void setFormatVersion(boost::uint8_t majorVersion, boost::uint8_t minorVersion);
+    void setFormatVersion(uint8_t majorVersion, uint8_t minorVersion);
     void setPointFormat(PointFormat);
-    void setDate(boost::uint16_t dayOfYear, boost::uint16_t year);
+    void setDate(uint16_t dayOfYear, uint16_t year);
 
     void setProjectId(const boost::uuids::uuid&);
 
@@ -91,11 +98,8 @@ public:
     void setCompressed(bool);
 
 protected:
-    virtual void writeBegin(boost::uint64_t targetNumPointsToWrite);
-    virtual void writeBufferBegin(PointBuffer const&);
-    virtual boost::uint32_t writeBuffer(const PointBuffer&);
-    virtual void writeBufferEnd(PointBuffer const&);
-    virtual void writeEnd(boost::uint64_t actualNumPointsWritten);
+    void Construct();
+    virtual void initialize();
 
     OutputStreamManager m_streamManager;
 
@@ -103,54 +107,61 @@ private:
     LasHeader m_lasHeader;
     boost::uint32_t m_numPointsWritten;
     SummaryData m_summaryData;
+    std::unique_ptr<LASzipper> m_zipper;
+    std::unique_ptr<ZipPoint> m_zipPoint;
 
-#ifdef PDAL_HAVE_LASZIP
-    boost::scoped_ptr<LASzipper> m_zipper;
-    boost::scoped_ptr<ZipPoint> m_zipPoint;
-#endif
-
+    virtual void processOptions(const Options& options);
+    virtual void ready(PointContextRef ctx);
+    virtual void write(const PointBuffer& pointBuffer);
+    virtual void done(PointContextRef ctx);
     bool m_headerInitialized;
+    bool m_discardHighReturnNumbers;
     boost::uint64_t m_streamOffset; // the first byte of the LAS file
 	void setOptions();
-    bool doForwardThisMetadata(std::string const& name) const;
-    void setVLRsFromMetadata(LasHeader& header, Metadata const& metadata, Options const& opts);
+    MetadataNode findVlr(MetadataNode node, const std::string& recordId,
+        const std::string& userId);
+    void setVLRsFromMetadata(LasHeader& header, MetadataNode metaNode,
+        Options const& opts);
     Writer& operator=(const Writer&); // not implemented
     Writer(const Writer&); // not implemented
 
-
     template<typename T>
-    T getMetadataOption(   pdal::Options const& options, 
-                                    pdal::Metadata const& metadata, 
-                                    std::string const& name,
-                                    T default_value) const
+    T getMetadataOption(pdal::Options const& options,
+        pdal::MetadataNode const& metaNode, std::string const& name,
+        T default_value) const
     {
-        boost::optional<std::string> candidate = options.getMetadataOption<std::string>(name);
+        boost::optional<std::string> candidate =
+            options.getMetadataOption<std::string>(name);
+
+        // If this field isn't a metadata option, just return the plain option
+        // value or the default value.
         if (!candidate)
-        {
-            return default_value;
-        }
+            return options.getValueOrDefault<T>(name, default_value);
             
+        // If the metadata option for this field is "FORWARD", return the
+        // value from the metadata or the default value.
         if (boost::algorithm::iequals(*candidate, "FORWARD"))
         {
-            boost::optional<std::string> m =
-                metadata.getValueOptional<std::string>(name);
-            if (m)
+            auto pred = [name](MetadataNode n)
             {
-                T v = boost::lexical_cast<T>(*m) ;                
-                return v;
+                return n.name() == name;
+            };
+            MetadataNode m = metaNode.findChild(pred);
+            if (!m.empty())
+            {
+                T t;
+                std::istringstream iss(m.value());
+                iss >> t;
+                return t;
             }
-        } 
-        else
-        {
-            T v = boost::lexical_cast<T>(*candidate) ;
-            return v;
+            return default_value;
         }
-        return default_value;
+        // Just return the value from the stored metadata option.
+        return boost::lexical_cast<T>(*candidate);
     }    
 };
 
-}
-}
-} // namespaces
+} // namespace las
+} // namespace drivers
+} // namespace pdal
 
-#endif
