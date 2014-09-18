@@ -13,9 +13,11 @@ application currently contains six commands:
 
 * :ref:`delta <delta_command>`
 * :ref:`diff <diff_command>`
+* :ref:`ground <ground_command>`
 * :ref:`info <info_command>`
 * :ref:`pcl <pcl_command>`
 * :ref:`pipeline <pipeline_command>`
+* :ref:`random <random_command>`
 * :ref:`translate <translate_command>`
 
 Applications are run by invoking the *pdal* application along with the 
@@ -29,7 +31,8 @@ command name:
 
 .. note::
     
-    The :ref:`pcl` command is only available if PCL is linked.
+    The :ref:`ground <ground_command>` and :ref:`pcl <pcl_command>` commands
+    are only available if PCL is linked.
 
 Help about each command can be retrieved via the ``--help`` switch. 
 The ``--drivers`` and ``--options`` switches can tell you more about 
@@ -136,6 +139,32 @@ checking the following:
 * Byte-by-byte point data
 
 
+.._ground_command:
+
+``ground`` command
+------------------------------------------------------------------------------
+
+The *ground* command is used to segment the input point cloud into ground
+versus non-ground returns. The output is a point cloud containing only ground
+returns. Internally, the tool is calling the Point Cloud Library's
+`ProgressiveMorphologicalFilter`_. As such, *ground* is only available when
+PDAL is linked with PCL.
+
+.. _`ProgressiveMorphologicalFilter`: http://pointclouds.org/documentation/tutorials/progressive_morphological_filtering.php#progressive-morphological-filtering.
+
+::
+
+    -i [ --input ] arg            input file name
+    -o [ --output ] arg           output file name
+    --maxWindowSize arg (=33)     max window size
+    --slope arg (=1)              slope
+    --maxDistance arg (=2.5)      max distance
+    --initialDistance arg (=0.15) initial distance
+    --cellSize arg (=1)           cell size
+    --base arg (=2)               base
+    --exponential arg (=1)        exponential?
+
+
 .. _info_command:
 
 ``info`` command
@@ -224,6 +253,36 @@ or :ref:`pipeline` for more information.
     --skip arg (=0)              How many points should we skip?
 
 
+.. _random_command:
+
+``random`` command
+------------------------------------------------------------------------------
+
+The *random* command is used to create a random point cloud. It uses
+:ref:`drivers.faux.reader` to create a point cloud containing *count* points
+drawn randomly from either a uniform or normal distribution. For the uniform
+distribution, the bounds can be specified (they default to a unit cube). For
+the normal distribution, the mean and standard deviation can both be set for
+each of the x, y, and z dimensions.
+
+::
+
+  -o [ --output ] arg           output file name
+  -z [ --compress ]             Compress output data (if supported by output
+                                format)
+  --count arg (=0)              How many points should we write?
+  --bounds arg                  Extent (in XYZ to clip output to)
+  --mean arg                    A comma-separated or quoted, space-separated
+                                list of means (normal mode):
+                                --mean 0.0,0.0,0.0
+                                --mean "0.0 0.0 0.0"
+  --stdev arg                   A comma-separated or quoted, space-separated
+                                list of standard deviations (normal mode):
+                                --stdev 0.0,0.0,0.0
+                                --stdev "0.0 0.0 0.0"
+  --distribution arg (=uniform) Distribution (uniform / normal)
+
+
 .. _translate_command:
 
 ``translate`` command 
@@ -268,12 +327,12 @@ command line invocation. For example, the following invocation will translate
 * Setting the LAS point format to 1
 * Cropping the file with the given polygon
 
-```
-./bin/pdal translate \
-    --drivers.las.writer.creation_doy="42" \
-    --drivers.las.writer.creation_year="2014" \
-    --drivers.las.writer.format="1" \
-    --filters.crop.polygon="POLYGON ((636889.412951239268295 851528.512293258565478 422.7001953125,636899.14233423944097 851475.000686757150106 422.4697265625,636899.14233423944097 851475.000686757150106 422.4697265625,636928.33048324030824 851494.459452757611871 422.5400390625,636928.33048324030824 851494.459452757611871 422.5400390625,636928.33048324030824 851494.459452757611871 422.5400390625,636976.977398241520859 851513.918218758190051 424.150390625,636976.977398241520859 851513.918218758190051 424.150390625,637069.406536744092591 851475.000686757150106 438.7099609375,637132.647526245797053 851445.812537756282836 425.9501953125,637132.647526245797053 851445.812537756282836 425.9501953125,637336.964569251285866 851411.759697255445644 425.8203125,637336.964569251285866 851411.759697255445644 425.8203125,637473.175931254867464 851158.795739248627797 435.6298828125,637589.928527257987298 850711.244121236610226 420.509765625,637244.535430748714134 850511.791769731207751 420.7998046875,636758.066280735656619 850667.461897735483944 434.609375,636539.155163229792379 851056.63721774588339 422.6396484375,636889.412951239268295 851528.512293258565478 422.7001953125))" \
-    ./test/data/1.2-with-color.las \
-    output.laz
-```
+::
+
+    ./bin/pdal translate \
+        --drivers.las.writer.creation_doy="42" \
+        --drivers.las.writer.creation_year="2014" \
+        --drivers.las.writer.format="1" \
+        --filters.crop.polygon="POLYGON ((636889.412951239268295 851528.512293258565478 422.7001953125,636899.14233423944097 851475.000686757150106 422.4697265625,636899.14233423944097 851475.000686757150106 422.4697265625,636928.33048324030824 851494.459452757611871 422.5400390625,636928.33048324030824 851494.459452757611871 422.5400390625,636928.33048324030824 851494.459452757611871 422.5400390625,636976.977398241520859 851513.918218758190051 424.150390625,636976.977398241520859 851513.918218758190051 424.150390625,637069.406536744092591 851475.000686757150106 438.7099609375,637132.647526245797053 851445.812537756282836 425.9501953125,637132.647526245797053 851445.812537756282836 425.9501953125,637336.964569251285866 851411.759697255445644 425.8203125,637336.964569251285866 851411.759697255445644 425.8203125,637473.175931254867464 851158.795739248627797 435.6298828125,637589.928527257987298 850711.244121236610226 420.509765625,637244.535430748714134 850511.791769731207751 420.7998046875,636758.066280735656619 850667.461897735483944 434.609375,636539.155163229792379 851056.63721774588339 422.6396484375,636889.412951239268295 851528.512293258565478 422.7001953125))" \
+        ./test/data/1.2-with-color.las \
+        output.laz
