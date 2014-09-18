@@ -74,7 +74,6 @@ void Info::validateSwitches()
     if (!got_something)
     {
         m_showStats = true;
-        m_computeBoundary = true;
         m_showSchema = true;
 
     }
