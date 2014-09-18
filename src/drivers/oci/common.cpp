@@ -108,7 +108,7 @@ schema::XMLSchema fetchSchema(Statement stmt, BlockPtr block)
 
 
 Block::Block(Connection connection) : num_points(0), m_connection(connection),
-    m_num_remaining(0), m_fetched(false), m_point_size(0)
+    m_num_remaining(0), m_point_size(0), m_fetched(false)
 {
     m_connection->CreateType(&blk_extent);
     m_connection->CreateType(&blk_extent->sdo_ordinates,
@@ -156,7 +156,7 @@ void Block::update(schema::XMLSchema *s)
             m_schema.m_scale.m_z.m_scale = d.m_scale;
             m_schema.m_scale.m_z.m_offset = d.m_offset;
         }
-        
+
         m_point_size += Dimension::size(di->m_type);
     }
 }
