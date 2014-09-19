@@ -413,17 +413,20 @@ set(PDAL_NITF_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_NITF_PATH}")
 set(PDAL_NITF_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_NITF_PATH}")
 
 set(PDAL_DRIVERS_NITF_READER_HPP
-  "${PDAL_NITF_SRC}/nitflib.h"
+  "${PDAL_NITF_SRC}/MetadataReader.hpp"
   "${PDAL_NITF_SRC}/NitfFile.hpp"
   "${PDAL_NITF_HEADERS}/Reader.hpp"
+  "${PDAL_NITF_SRC}/tre_plugins.hpp"
 )
 
 set (PDAL_DRIVERS_NITF_READER_CPP
+  "${PDAL_NITF_SRC}/MetadataReader.cpp"
   "${PDAL_NITF_SRC}/NitfFile.cpp"
   "${PDAL_NITF_SRC}/Reader.cpp"
+  "${PDAL_NITF_SRC}/tre_plugins.cpp"
 )
 
-if (GDAL_FOUND)
+if (NITRO_FOUND)
     list (APPEND PDAL_CPP ${PDAL_DRIVERS_NITF_READER_CPP} )
     list (APPEND PDAL_HPP ${PDAL_DRIVERS_NITF_READER_HPP} )
 endif()
