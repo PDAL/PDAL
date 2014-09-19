@@ -68,9 +68,8 @@ class MetadataNodeImpl
     friend class MetadataNode;
 
 private:
-    MetadataNodeImpl(const std::string& name) :
-        m_name(name), m_kind(MetadataType::Instance)
-    {}
+    MetadataNodeImpl(const std::string& name);
+
 
     MetadataNodeImpl() : m_kind(MetadataType::Instance)
     {}
