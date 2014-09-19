@@ -252,7 +252,7 @@ if(WIN32)
   endif(MSVC)
 endif(WIN32)
 
-find_package(Boost 1.54 COMPONENTS program_options thread iostreams filesystem system unit_test_framework random REQUIRED)
+find_package(Boost 1.53 COMPONENTS program_options thread iostreams filesystem system unit_test_framework random REQUIRED)
 
 if(Boost_FOUND)
   include_directories(${Boost_INCLUDE_DIRS})
