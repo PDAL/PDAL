@@ -36,7 +36,7 @@
 
 #include <pdal/pdal_internal.hpp>
 
-#ifdef PDAL_HAVE_GDAL
+#ifdef PDAL_HAVE_NITRO
 #include <pdal/drivers/las/Reader.hpp>
 
 namespace pdal
@@ -76,5 +76,4 @@ private:
 } // namespace drivers
 } // namespace pdal
 
-#endif // PDAL_HAVE_GDAL
-
+#endif // PDAL_HAVE_NITRO
