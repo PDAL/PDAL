@@ -376,7 +376,7 @@ void StageFactory::registerKnownReaders()
     REGISTER_READER(OciReader, pdal::drivers::oci::OciReader);
 #endif
 #endif
-#ifdef PDAL_HAVE_GDAL
+#ifdef PDAL_HAVE_NITRO
     REGISTER_READER(NITFReader, pdal::drivers::nitf::NitfReader);
 #endif
 
