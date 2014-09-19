@@ -203,7 +203,7 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
     drivers["sbet"] = "drivers.sbet.reader";
     drivers["icebridge"] = "drivers.icebridge.reader";
     drivers["sqlite"] = "drivers.sqlite.reader";
-
+    
 #ifdef PDAL_HAVE_PCL
     drivers["pcd"] = "drivers.pcd.reader";
 #endif

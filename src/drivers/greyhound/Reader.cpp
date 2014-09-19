@@ -100,7 +100,7 @@ void GreyhoundReader::processOptions(const Options& options)
     m_wsClient.initialize(m_uri);
 }
 
-void GreyhoundReader::addDimensions(PointContext pointContext)
+void GreyhoundReader::addDimensions(PointContextRef pointContext)
 {
     // Get Greyhound schema.
     exchanges::GetSchema schemaExchange(m_sessionId);
@@ -114,7 +114,7 @@ void GreyhoundReader::addDimensions(PointContext pointContext)
     }
 }
 
-void GreyhoundReader::ready(PointContext)
+void GreyhoundReader::ready(PointContextRef)
 {
     // Get number of points.
     exchanges::GetNumPoints numPointsExchange(m_sessionId);

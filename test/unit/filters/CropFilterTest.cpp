@@ -115,7 +115,7 @@ BOOST_AUTO_TEST_CASE(test_crop_polygon)
 
 #ifdef PDAL_HAVE_GEOS
     Options ops1;
-    ops1.add("filename", Support::datapath("1.2-with-color.las"));
+    ops1.add("filename", Support::datapath("las/1.2-with-color.las"));
     drivers::las::Reader reader(ops1);
 
     Options options;
@@ -123,9 +123,9 @@ BOOST_AUTO_TEST_CASE(test_crop_polygon)
     Option verbose("verbose", 9, "");
     // options.add(debug);
     // options.add(verbose);
-    
+
     std::istream* wkt_stream =
-        FileUtils::openFile(Support::datapath("autzen-selection.wkt"));
+        FileUtils::openFile(Support::datapath("autzen/autzen-selection.wkt"));
 
     std::stringstream strbuf;
     strbuf << wkt_stream->rdbuf();
@@ -145,7 +145,7 @@ BOOST_AUTO_TEST_CASE(test_crop_polygon)
     BOOST_CHECK_EQUAL(pbSet.size(), 1);
     PointBufferPtr buffer = *pbSet.begin();
     BOOST_CHECK_EQUAL(buffer->size(), 47u);
-    
+
     FileUtils::closeFile(wkt_stream);
 #endif
 }
@@ -157,7 +157,7 @@ BOOST_AUTO_TEST_CASE(test_crop_polygon_reprojection)
 #ifdef PDAL_HAVE_GEOS
     Options options;
 
-    Option in_srs("spatialreference",Support::datapath("autzen-srs.wkt"), "Input SRS");
+    Option in_srs("spatialreference",Support::datapath("autzen/autzen-srs.wkt"), "Input SRS");
     Option out_srs("out_srs","EPSG:4326", "Output SRS to reproject to");
     Option x_dim("x_dim", std::string("drivers.las.reader.X"),
         "Dimension name to use for 'X' data");
@@ -171,7 +171,7 @@ BOOST_AUTO_TEST_CASE(test_crop_polygon_reprojection)
     pdal::Option y_scale("scale_y", 0.0000001f, "Scale for output Y data "
         "in the case when 'Y' dimension data are to be scaled.  Defaults "
         "to '1.0'.  If not set, the Dimensions's scale will be used");
-    pdal::Option filename("filename", Support::datapath("1.2-with-color.las"));
+    pdal::Option filename("filename", Support::datapath("las/1.2-with-color.las"));
     pdal::Option debug("debug", true, "");
     pdal::Option verbose("verbose", 9, "");
     // options.add(debug);
@@ -184,9 +184,9 @@ BOOST_AUTO_TEST_CASE(test_crop_polygon_reprojection)
     options.add(x_scale);
     options.add(y_scale);
     options.add(filename);
-    
+
     std::istream* wkt_stream =
-        FileUtils::openFile(Support::datapath("autzen-selection-dd.wkt"));
+        FileUtils::openFile(Support::datapath("autzen/autzen-selection-dd.wkt"));
     std::stringstream strbuf;
     strbuf << wkt_stream->rdbuf();
     std::string wkt(strbuf.str());
@@ -206,9 +206,9 @@ BOOST_AUTO_TEST_CASE(test_crop_polygon_reprojection)
     BOOST_CHECK_EQUAL(pbSet.size(), 1);
     buffer = *pbSet.begin();
     BOOST_CHECK_EQUAL(buffer->size(), 47u);
-    
+
     FileUtils::closeFile(wkt_stream);
-    
+
 #endif
 }
 

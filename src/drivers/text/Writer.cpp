@@ -104,7 +104,7 @@ void Writer::processOptions(const Options& ops)
 }
 
 
-void Writer::ready(PointContext ctx)
+void Writer::ready(PointContextRef ctx)
 {
     typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
 
@@ -140,7 +140,7 @@ void Writer::ready(PointContext ctx)
 }
 
 
-void Writer::writeHeader(PointContext ctx)
+void Writer::writeHeader(PointContextRef ctx)
 {
     log()->get(LogLevel::Debug) << "Writing header to filename: " <<
         m_filename << std::endl;
@@ -171,7 +171,7 @@ void Writer::writeGeoJSONHeader()
 }
 
 
-void Writer::writeCSVHeader(PointContext ctx)
+void Writer::writeCSVHeader(PointContextRef ctx)
 {
     for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
     {
@@ -243,7 +243,7 @@ void Writer::write(const PointBuffer& data)
 }
 
 
-void Writer::done(PointContext ctx)
+void Writer::done(PointContextRef ctx)
 {
     writeFooter();
 }

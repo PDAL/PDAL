@@ -50,7 +50,7 @@ namespace drivers
 namespace pcd
 {
 
-void PcdReader::ready(PointContext ctx)
+void PcdReader::ready(PointContextRef ctx)
 {
     pcl::PCLPointCloud2 cloud;
     pcl::PCDReader r;
@@ -59,7 +59,7 @@ void PcdReader::ready(PointContext ctx)
 }
 
 
-void PcdReader::addDimensions(PointContext ctx)
+void PcdReader::addDimensions(PointContextRef ctx)
 {
     ctx.registerDims(getDefaultDimensions());
 }

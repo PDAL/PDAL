@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE(test_tile_filter)
 {
     // create the reader
     Options ops1;
-    ops1.add("filename", Support::datapath("1.2-with-color.las"));
+    ops1.add("filename", Support::datapath("las/1.2-with-color.las"));
     drivers::las::Reader r(ops1);
 
     Options o;

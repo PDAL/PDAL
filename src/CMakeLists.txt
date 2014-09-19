@@ -690,6 +690,7 @@ set(PDAL_KERNEL_HPP
     ${PDAL_KERNEL_HEADERS}/Kernel.hpp
     ${PDAL_KERNEL_HEADERS}/Pipeline.hpp
     ${PDAL_KERNEL_HEADERS}/Delta.hpp
+    ${PDAL_KERNEL_HEADERS}/Random.hpp
     ${PDAL_KERNEL_HEADERS}/Translate.hpp
 )
 
@@ -700,6 +701,7 @@ set(PDAL_KERNEL_CPP
     ${PDAL_KERNEL_SRC}/Info.cpp
     ${PDAL_KERNEL_SRC}/Pipeline.cpp
     ${PDAL_KERNEL_SRC}/Delta.cpp
+    ${PDAL_KERNEL_SRC}/Random.cpp
     ${PDAL_KERNEL_SRC}/Translate.cpp
 )
 
@@ -712,12 +714,14 @@ list (APPEND PDAL_HPP ${PDAL_KERNEL_HPP} )
 #
 if (PDAL_HAVE_PCL)
     set(PDAL_PCL_HPP
+	${PDAL_KERNEL_HEADERS}/Ground.hpp
 	${PDAL_KERNEL_HEADERS}/PCL.hpp
 	${PDAL_FILTERS_HEADERS}/PCLBlock.hpp
     )
 
     set(PDAL_PCL_CPP
 	${PDAL_FILTERS_SRC}/PCLBlock.cpp
+	${PDAL_KERNEL_SRC}/Ground.cpp
 	${PDAL_KERNEL_SRC}/PCL.cpp
     )
 

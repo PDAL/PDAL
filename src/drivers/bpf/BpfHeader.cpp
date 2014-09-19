@@ -152,7 +152,10 @@ bool BpfUlemFile::read(ILeStream& stream)
     }
     stream >> m_len;
     stream.get(m_filename, 32);
-    stream.skip(m_len);
+    Utils::removeTrailingBlanks(m_filename);
+    m_buf.resize(m_len);
+    stream.get(m_buf);
+
     return (bool)stream;
 }
 

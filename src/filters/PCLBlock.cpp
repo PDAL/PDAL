@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2013, Bradley J Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2013-2014, Bradley J Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -49,7 +49,8 @@ namespace filters
 
 void PCLBlock::processOptions(const Options& options)
 {
-    m_filename = options.getValueOrThrow<std::string>("filename");
+    m_filename = options.getValueOrDefault<std::string>("filename", "");
+    m_json = options.getValueOrDefault<std::string>("json", "");
 }
 
 
@@ -109,7 +110,12 @@ PointBufferSet PCLBlock::run(PointBufferPtr input)
 
     pcl::Pipeline<pcl::PointNormal> pipeline;
     pipeline.setInputCloud(cloud);
-    pipeline.setFilename(m_filename);
+    if (!m_filename.empty())
+        pipeline.setFilename(m_filename);
+    else if (!m_json.empty())
+        pipeline.setJSON(m_json);
+    else
+        throw pdal_error("No PCL pipeline specified!");
     // PDALtoPCD subtracts min values in each XYZ dimension to prevent rounding
     // errors in conversion to float. These offsets need to be conveyed to the
     // pipeline to offset any bounds entered as part of a PassThrough filter.

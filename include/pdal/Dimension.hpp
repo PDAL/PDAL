@@ -153,6 +153,7 @@ enum Enum
     Blue,
     GpsTime,
     OffsetTime,
+    IsPpsLocked,
     StartPulse,
     ReflectedPulse,
     Pdop,
@@ -229,6 +230,9 @@ inline std::string description(Id::Enum id)
         return "GPS time that the point was acquired";
     case Id::OffsetTime:
         return "Milliseconds from first acquired point";
+    case Id::IsPpsLocked:
+        return "The external PPS signal was found to be synchronized at the "
+            "time of the current laser shot.";
     case Id::Red:
         return "Red image channel value";
     case Id::Green:
@@ -328,6 +332,8 @@ inline Id::Enum id(std::string s)
         return Id::GpsTime;
     else if (s == "TIME" || s == "OFFSETTIME")
         return Id::OffsetTime;
+    else if (s == "ISPPSLOCKED")
+        return Id::IsPpsLocked;
     else if (s == "STARTPULSE")
         return Id::StartPulse;
     else if (s == "RELFECTEDPULSE")
@@ -417,6 +423,8 @@ inline std::string name(Id::Enum id)
         return "GpsTime";
     case Id::OffsetTime:
         return "OffsetTime";
+    case Id::IsPpsLocked:
+        return "IsPpsLocked";
     case Id::StartPulse:
         return "StartPulse";
     case Id::ReflectedPulse:
@@ -504,6 +512,8 @@ inline Type::Enum defaultType(Id::Enum id)
         return Double;
     case Id::OffsetTime:
         return Unsigned32;
+    case Id::IsPpsLocked:
+        return Unsigned8;
     case Id::Red:
         return Unsigned16;
     case Id::Green:

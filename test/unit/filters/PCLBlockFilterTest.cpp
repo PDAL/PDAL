@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_passthrough)
 {
     Options options;
 
-    Option filename("filename", Support::datapath("autzen-point-format-3.las"));
+    Option filename("filename", Support::datapath("autzen/autzen-point-format-3.las"));
     Option debug("debug", true, "");
     Option verbose("verbose", 9, "");
 
@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_passthrough)
 BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_outlier_removal)
 {
     Options options;
-    Option filename("filename", Support::datapath("autzen-point-format-3.las"));
+    Option filename("filename", Support::datapath("autzen/autzen-point-format-3.las"));
     Option debug("debug", true, "");
     Option verbose("verbose", 9, "");
     options.add(filename);

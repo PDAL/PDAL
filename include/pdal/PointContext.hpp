@@ -201,12 +201,7 @@ public:
     // @return the current size in bytes of the dimension
     //         with the given id.
     size_t dimSize(Dimension::Id::Enum id) const
-    {
-        Dimension::Type::Enum t = Dimension::defaultType(id);
-        if (t == Dimension::Type::None)
-            t = Dimension::Type::Float;
-        return hasDim(id) ? dimDetail(id)->size() : Dimension::size(t);
-    }
+        { return dimDetail(id)->size(); }
 
 private:
     Dimension::Detail *dimDetail(Dimension::Id::Enum id) const
@@ -275,6 +270,8 @@ private:
         }
     }
 };
+// A point context is in some instances more easily understood as a reference.
+typedef PointContext PointContextRef;
 
 } //namespace
 

@@ -54,11 +54,6 @@ class StageRandomIterator;
 class StageBlockIterator;
 class StageRunner;
 class StageTester;
-//
-// supported options:
-//   <bool>debug
-//   <uint32>verbose
-//
 
 class PDAL_DLL Stage
 {
@@ -75,8 +70,8 @@ public:
     void setInput(Stage *input)
         { m_inputs.push_back(input); }
 
-    void prepare(PointContext ctx);
-    PointBufferSet execute(PointContext ctx);
+    void prepare(PointContextRef ctx);
+    PointBufferSet execute(PointContextRef ctx);
 
     void setSpatialReference(SpatialReference const&);
     const SpatialReference& getSpatialReference() const;
@@ -104,7 +99,7 @@ public:
         { return Dimension::IdList(); }
     static std::string s_getInfoLink()
         { return std::string(); }
-    virtual boost::property_tree::ptree toPTree(PointContext ctx) const 
+    virtual boost::property_tree::ptree toPTree(PointContextRef ctx) const 
         { return boost::property_tree::ptree(); }
 
 #define SET_STAGE_NAME(name, description)  \
@@ -149,15 +144,15 @@ private:
         {}
     virtual void writerProcessOptions(const Options& /*options*/)
         {}
-    void l_initialize(PointContext ctx);
-    void l_done(PointContext ctx);
+    void l_initialize(PointContextRef ctx);
+    void l_done(PointContextRef ctx);
     virtual void initialize()
         {}
-    virtual void addDimensions(PointContext ctx)
+    virtual void addDimensions(PointContextRef ctx)
         { (void)ctx; }
-    virtual void ready(PointContext ctx)
+    virtual void ready(PointContextRef ctx)
         { (void)ctx; }
-    virtual void done(PointContext ctx)
+    virtual void done(PointContextRef ctx)
         { (void)ctx; }
     virtual PointBufferSet run(PointBufferPtr buffer)
     {

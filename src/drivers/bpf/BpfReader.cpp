@@ -41,6 +41,37 @@
 #include <pdal/drivers/bpf/BpfReader.hpp>
 #include <pdal/Options.hpp>
 
+namespace
+{
+
+const std::string utm_wkt1 =
+    "PROJCS[\"WGS 84 / UTM zone ";
+
+const std::string utm_wkt2 =
+    "\",\
+    GEOGCS[\"WGS 84\",\
+        DATUM[\"WGS_1984\",\
+            SPHEROID[\"WGS 84\",6378137,298.257223563,\
+                AUTHORITY[\"EPSG\",\"7030\"]],\
+            AUTHORITY[\"EPSG\",\"6326\"]],\
+        PRIMEM[\"Greenwich\",0,\
+            AUTHORITY[\"EPSG\",\"8901\"]],\
+        UNIT[\"degree\",0.01745329251994328,\
+            AUTHORITY[\"EPSG\",\"9122\"]],\
+        AUTHORITY[\"EPSG\",\"4326\"]],\
+    UNIT[\"metre\",1,\
+        AUTHORITY[\"EPSG\",\"9001\"]],\
+    PROJECTION[\"Transverse_Mercator\"],\
+    PARAMETER[\"latitude_of_origin\",0],\
+    PARAMETER[\"central_meridian\",-57],\
+    PARAMETER[\"scale_factor\",0.9996],\
+    PARAMETER[\"false_easting\",500000],\
+    PARAMETER[\"false_northing\",10000000],\
+    AUTHORITY[\"EPSG\",\"32721\"],\
+    AXIS[\"Easting\",EAST],\
+    AXIS[\"Northing\",NORTH]]";
+}
+
 namespace pdal
 {
 
@@ -60,12 +91,22 @@ void BpfReader::initialize()
     // In order to know the dimensions we must read the file header.
     if (!m_header.read(m_stream))
         return;
+    std::string wkt = utm_wkt1 +
+        boost::lexical_cast<std::string>(abs(m_header.m_coordId)) +
+        (m_header.m_coordId > 0 ? "N" : "S") +
+        utm_wkt2;
+    SpatialReference srs;
+    srs.setWKT(wkt);
+    setSpatialReference(srs);
 
     m_dims.insert(m_dims.end(), m_header.m_numDim, BpfDimension());
     if (!BpfDimension::read(m_stream, m_dims))
         return;
 
     readUlemData();
+    if (!m_stream)
+        return;
+    readUlemFiles();
     if (!m_stream)
         return;
     readPolarData();
@@ -79,7 +120,7 @@ void BpfReader::initialize()
 }
 
 
-void BpfReader::addDimensions(PointContext ctx)
+void BpfReader::addDimensions(PointContextRef ctx)
 {
     for (size_t i = 0; i < m_dims.size(); ++i)
     {
@@ -101,11 +142,15 @@ bool BpfReader::readUlemData()
             return false;
         m_ulemFrames.push_back(frame);
     }
+    return (bool)m_stream;
+}
 
+bool BpfReader::readUlemFiles()
+{
     BpfUlemFile file;
     while (file.read(m_stream))
-        ;
-
+        m_metadata.addEncoded(file.m_filename,
+            (const unsigned char *)file.m_buf.data(), file.m_len);
     return (bool)m_stream;
 }
 
@@ -124,7 +169,7 @@ bool BpfReader::readPolarData()
 }
 
 
-void BpfReader::ready(PointContext ctx)
+void BpfReader::ready(PointContextRef ctx)
 {
     m_index = 0;
     m_start = m_stream.position();
@@ -148,7 +193,7 @@ void BpfReader::ready(PointContext ctx)
 }
 
 
-void BpfReader::done(PointContext)
+void BpfReader::done(PointContextRef)
 {
      delete m_stream.popStream();
 }

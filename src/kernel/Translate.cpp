@@ -51,7 +51,7 @@ Translate::Translate(int argc, const char* argv[]) :
     m_numPointsToWrite(0), m_numSkipPoints(0),
     m_input_srs(pdal::SpatialReference()),
     m_output_srs(pdal::SpatialReference()), m_bForwardMetadata(false),
-    m_decimation_step(1), m_decimation_offset(0)
+    m_decimation_step(1), m_decimation_offset(0), m_decimation_leaf_size(1)
 {}
 
 
@@ -153,14 +153,6 @@ void Translate::addSwitches()
          "Extent (in XYZ to clip output to)")
         ("polygon", po::value<std::string >(&m_wkt),
          "POLYGON WKT to use for precise crop of data (2d or 3d)")
-        ("scale", po::value< std::string >(&m_scales),
-         "A comma-separated or quoted, space-separated list of scales to "
-         "set on the output file: \n--scale 0.1,0.1,0.00001\n--scale \""
-         "0.1 0.1 0.00001\"")
-        ("offset", po::value< std::string >(&m_offsets),
-         "A comma-separated or quoted, space-separated list of offsets to "
-         "set on the output file: \n--offset 0,0,0\n--offset "
-         "\"1234 5678 91011\"")
         ("metadata,m",
          po::value< bool >(&m_bForwardMetadata)->implicit_value(true),
          "Forward metadata (VLRs, header entries, etc) from previous stages")
@@ -170,6 +162,12 @@ void Translate::addSwitches()
         ("d_offset",
          po::value<boost::uint32_t>(&m_decimation_offset)->default_value(0),
          "Decimation filter offset")
+        ("d_leaf_size",
+         po::value<double>(&m_decimation_leaf_size)->default_value(1),
+         "Decimation filter leaf size")
+        ("d_method",
+         po::value<std::string>(&m_decimation_method)->default_value("RankOrder"),
+         "Decimation filter method (RankOrder, VoxelGrid)")
         ;
 
     addSwitchSet(file_options);
@@ -263,6 +261,8 @@ Stage* Translate::makeReader(Options readerOptions)
         decimationOptions.add<uint32_t>("verbose", getVerboseLevel());
         decimationOptions.add<uint32_t>("step", m_decimation_step);
         decimationOptions.add<uint32_t>("offset", m_decimation_offset);
+        decimationOptions.add<double>("leaf_size", m_decimation_leaf_size);
+        decimationOptions.add<std::string>("method", m_decimation_method);
         Stage *decimation_stage = new filters::Decimation(decimationOptions);
         decimation_stage->setInput(final_stage);
         final_stage = decimation_stage;
@@ -282,8 +282,7 @@ int Translate::execute()
 
     Options writerOptions;
     writerOptions.add("filename", m_outputFile);
-    writerOptions.add("debug", isDebug());
-    writerOptions.add("verbose", getVerboseLevel());
+    setCommonOptions(writerOptions);
     
     if (!m_input_srs.empty())
         writerOptions.add("spatialreference", m_input_srs.getWKT());

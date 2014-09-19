@@ -61,7 +61,7 @@ public:
 
 private:
     virtual void processOptions(const Options&);
-    virtual void ready(PointContext ctx) {};
+    virtual void ready(PointContextRef ctx) {};
     virtual void write(const PointBuffer& buf);
 
     std::string m_filename;

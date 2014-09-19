@@ -71,10 +71,10 @@ private:
     Hdf5Handler m_hdf5Handler;
     point_count_t m_index;
 
-    virtual void addDimensions(PointContext ctx);
-    virtual void ready(PointContext ctx);
+    virtual void addDimensions(PointContextRef ctx);
+    virtual void ready(PointContextRef ctx);
     virtual point_count_t read(PointBuffer& data, point_count_t count);
-    virtual void done(PointContext ctx);
+    virtual void done(PointContextRef ctx);
     virtual bool eof();
 
     Reader& operator=(const Reader&);   // Not implemented.

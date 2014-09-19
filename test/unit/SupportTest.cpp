@@ -46,7 +46,7 @@ BOOST_AUTO_TEST_SUITE(SupportTest)
 BOOST_AUTO_TEST_CASE(test_paths)
 {
     // does the data path work?
-    string data_file = Support::datapath("simple.las");
+    string data_file = Support::datapath("las/simple.las");
     BOOST_CHECK(FileUtils::fileExists(data_file));
 
     // make sure we have read access

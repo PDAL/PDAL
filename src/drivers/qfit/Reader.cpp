@@ -282,7 +282,7 @@ void Reader::processOptions(const Options& ops)
 }
 
 
-void Reader::addDimensions(PointContext ctx)
+void Reader::addDimensions(PointContextRef ctx)
 {
     using namespace Dimension;
 
@@ -316,7 +316,7 @@ void Reader::addDimensions(PointContext ctx)
 }
 
 
-void Reader::ready(PointContext ctx)
+void Reader::ready(PointContextRef ctx)
 {
     m_numPoints = m_point_bytes / m_size;
     if (m_point_bytes % m_size)
@@ -485,7 +485,7 @@ Dimension::IdList Reader::getDefaultDimensions()
 }
 
 
-void Reader::done(PointContext ctx)
+void Reader::done(PointContextRef ctx)
 {
     FileUtils::closeFile(m_istream);
 }

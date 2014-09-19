@@ -93,6 +93,7 @@ protected:
 
     void addSwitchSet(boost::program_options::options_description* options);
     void addPositionalSwitch(const char* name, int max_count);
+    void setCommonOptions(Options &options);
 
     void setProgressShellCommand(std::vector<std::string> const& command) { m_heartbeat_shell_command = command; }
     std::vector<std::string> getProgressShellCommand() { return m_heartbeat_shell_command; }
@@ -125,6 +126,8 @@ private:
     bool m_hardCoreDebug;
     std::vector<std::string> m_heartbeat_shell_command;
     bool m_reportDebug;
+    std::string m_scales;
+    std::string m_offsets;
 
     std::vector<boost::program_options::options_description*> m_options;
     boost::program_options::positional_options_description m_positionalOptions;
@@ -137,7 +140,6 @@ private:
 
 protected:
     bool m_usestdin;
-    boost::uint32_t m_chunkSize;
 
 };
 

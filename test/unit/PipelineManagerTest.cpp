@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(PipelineManagerTest_test1)
         PipelineManager mgr;
 
         Options optsR;
-        optsR.add("filename", Support::datapath("1.2-with-color.las"));
+        optsR.add("filename", Support::datapath("las/1.2-with-color.las"));
         Reader* reader = mgr.addReader("drivers.las.reader", optsR);
 
         Options optsF;

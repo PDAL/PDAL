@@ -97,18 +97,18 @@ Options getOCIOptions()
 
     Option srid("srid",26910,"");
     options.add(srid);
-    // 
+    //
     // Option out_srs("out_srs", "EPSG:4326","");
     // options.add(out_srs);
-    // 
+    //
     // Option scale_x("scale_x", 0.0000001, "");
     // options.add(scale_x);
-    
+
 
 
     // Option offset_x("offset_x", 493994.875f, "");
     // options.add(offset_x);
-    // 
+    //
     // Option offset_y("offset_y", 4877429.62f, "");
     // options.add(offset_y);
 
@@ -125,19 +125,19 @@ Options getOCIOptions()
     // Option cache_block_size("cache_block_size", capacity.getValue<boost::uint32_t>(), "");
     // options.add(cache_block_size);
 
-    Option filename("filename", Support::datapath("autzen-utm.las"), "");
+    Option filename("filename", Support::datapath("autzen/autzen-utm.las"), "");
     options.add(filename);
 
     Option query("query", "SELECT CLOUD FROM PDAL_TEST_BASE where ID=1", "");
     options.add(query);
-    
+
     Option pack("pack_ignored_fields", true, "");
     options.add(pack);
-    
+
     Option xml_schema_dump("xml_schema_dump", "pcs-oracle-xml-schema-dump.xml", "");
     options.add(xml_schema_dump);
 
-    
+
     return options;
 }
 
@@ -209,7 +209,7 @@ bool WriteUnprojectedData()
 {
     Options options;
 
-    // Note that this corresponds to the autzen-utm-chipped-25.las 
+    // Note that this corresponds to the autzen-utm-chipped-25.las
     // file in test/data/
     Option capacity("capacity", 25,"capacity");
     options.add(capacity);
@@ -240,12 +240,12 @@ bool WriteUnprojectedData()
 
     Option store_dimensional_orientation("store_dimensional_orientation", true, "");
     options.add(store_dimensional_orientation);
-    
-    Option filename("filename", Support::datapath("autzen-utm.las"), "");
+
+    Option filename("filename", Support::datapath("autzen/autzen-utm.las"), "");
     options.add(filename);
-    
+
     PointContext ctx;
-    
+
     pdal::drivers::las::Reader reader(options);
     // pdal::filters::Chipper chipper(options);
     // chipper.setInput(&reader);
@@ -256,7 +256,7 @@ bool WriteUnprojectedData()
     writer.execute(ctx);
 
     //ABELL - This test doesn't test anything anymore.  Perhaps it should.
-    
+
     return true;
 }
 
@@ -269,7 +269,7 @@ void checkUnProjectedPoints(PointBuffer const& data)
     int R[] = { 142, 152, 146, 104, 113, 163 };
     int G[] = { 102, 108, 104, 93, 97, 118 };
     int B[] = { 137, 134, 140, 120, 123, 150 };
-        
+
     for (unsigned i = 0; i < 6; ++i)
     {
         int32_t x = data.getFieldAs<int32_t>(Dimension::Id::X, i);
@@ -298,20 +298,20 @@ void compareAgainstSourceBuffer(PointBuffer const& candidate,
     pdal::Options options;
     pdal::Option f("filename", filename);
     options.add(f);
-    
+
     PointContext tc;
     pdal::drivers::las::Reader reader(options);
 
     reader.prepare(tc);
-    
+
     BOOST_CHECK_EQUAL(candidate.size(), reader.getNumPoints());
-    
+
     PointBufferSet pbSet = reader.execute(tc);
     BOOST_CHECK_EQUAL(pbSet.size(), 1);
     PointBufferPtr source = *pbSet.begin();
 
     BOOST_CHECK_EQUAL(source->size(), reader.getNumPoints());
-    
+
     // int X[] = { 49405730, 49413382, 49402110, 494192890, 49418622, 49403411 };
     // int Y[] = { 487743335, 487743982, 487743983, 487744219, 487744254, 487745019 };
     // int Z[] = { 13063, 13044, 13046, 13050, 13049, 13066 };
@@ -319,7 +319,7 @@ void compareAgainstSourceBuffer(PointBuffer const& candidate,
     // int R[] = { 142, 152, 146, 104, 113, 163 };
     // int G[] = { 102, 108, 104, 96, 97, 118 };
     // int B[] = { 137, 134, 140, 120, 123, 150 };
-    //     
+    //
     for (unsigned i = 0; i < 6; ++i)
     {
         int32_t sx = source->getFieldAs<int32_t>(Dimension::Id::X, i);
@@ -374,7 +374,7 @@ BOOST_AUTO_TEST_CASE(read_unprojected_data)
 
     Option& verbose = options.getOptionByRef("verbose");
     verbose.setValue<std::string>( "7");
-    
+
     pdal::drivers::oci::OciReader reader(options);
     PointContext ctx;
     reader.prepare(ctx);
@@ -382,24 +382,24 @@ BOOST_AUTO_TEST_CASE(read_unprojected_data)
     BOOST_CHECK_EQUAL(pbSet.size(), 1);
     PointBufferPtr buf = *pbSet.begin();
     BOOST_CHECK_EQUAL(buf->size(), 1065);
-    
+
     // checkUnProjectedPoints(*buf);
-    
+
     // compareAgainstSourceBuffer(*buf,  Support::datapath("autzen-utm-chipped-25.las"));
-    compareAgainstSourceBuffer(*buf, Support::datapath("autzen-utm.las"));
+    compareAgainstSourceBuffer(*buf, Support::datapath("autzen/autzen-utm.las"));
 }
 
 
-// 
-// 
+//
+//
 // BOOST_AUTO_TEST_CASE(read_view_reproj)
 // {
 //     if (!ShouldRunTest()) return;
-// 
+//
 //     WriteDefaultData();
-// 
+//
 //     std::ostringstream oss;
-// 
+//
 //     oss << "SELECT  l.\"OBJ_ID\", l.\"BLK_ID\", l.\"BLK_EXTENT\", l.\"BLK_DOMAIN\","
 //            "        l.\"PCBLK_MIN_RES\", l.\"PCBLK_MAX_RES\", l.\"NUM_POINTS\","
 //            "        l.\"NUM_UNSORTED_POINTS\", l.\"PT_SORT_DIM\", l.\"POINTS\", b.cloud "
@@ -409,114 +409,114 @@ BOOST_AUTO_TEST_CASE(read_unprojected_data)
 //     Options options = getOCIOptions();
 //     Option& query = options.getOptionByRef("query");
 //     query.setValue<std::string>(oss.str());
-// 
-//     Option& out_srs = options.getOptionByRef("out_srs"); 
+//
+//     Option& out_srs = options.getOptionByRef("out_srs");
 //     out_srs.setValue<std::string>("EPSG:26910");
-// 
+//
 //     Option& x_scale = options.getOptionByRef("scale_x");
 //     x_scale.setValue<float>(0.01);
-// 
+//
 //     Option& y_scale = options.getOptionByRef("scale_y");
 //     y_scale.setValue<float>(0.01);
-// 
+//
 //     // Option& offset_x = options.getOptionByRef("offset_x");
 //     // offset_x.setValue<float>( -123.0749695f);
 //     // offset_x.setValue<float>( 0.0f);
-// 
+//
 //     // Option& offset_y = options.getOptionByRef("offset_y");
 //     // offset_y.setValue<float>( 44.0500086f);
 //     // offset_y.setValue<float>( 0.0f);
-// 
-// 
+//
+//
 //     pdal::Option x_dim("x_dim", std::string("drivers.oci.reader.X"), "Dimension name to use for 'X' data");
 //     pdal::Option y_dim("y_dim", std::string("drivers.oci.reader.Y"), "Dimension name to use for 'Y' data");
-//     pdal::Option z_dim("z_dim", std::string("drivers.oci.reader.Z"), "Dimension name to use for 'Z' data");    
-// 
+//     pdal::Option z_dim("z_dim", std::string("drivers.oci.reader.Z"), "Dimension name to use for 'Z' data");
+//
 //     options.add(x_dim);
 //     options.add(y_dim);
 //     options.add(z_dim);
-// 
+//
 //     Option& debug = options.getOptionByRef("debug");
 //     debug.setValue<std::string>( "true");
-// 
+//
 //     Option& verbose = options.getOptionByRef("verbose");
 //     verbose.setValue<std::string>( "7");
-//     
+//
 //     pdal::drivers::oci::Reader reader_reader(options);
 //     // pdal::filters::InPlaceReprojection reproj(reader_reader, options);
 //     reader_reader.prepare();
-// 
+//
 //     pdal::PointBuffer data(reader_reader.getSchema(), chunk_size+30);
 //     pdal::StageSequentialIterator* iter = reader_reader.createSequentialIterator(data);
-// 
+//
 //     boost::uint32_t numRead(0);
-// 
+//
 //     numRead = iter->read(data);
-// 
+//
 //     BOOST_CHECK_EQUAL(numRead, chunk_size+30u);
 //     BOOST_CHECK_EQUAL(data.getNumPoints(), chunk_size+30u);
-//     
+//
 //     checkPoints(data);
-// 
+//
 //     delete iter;
-// 
+//
 // }
 
 //
 // BOOST_AUTO_TEST_CASE(read_all)
 // {
 //     if (!ShouldRunTest()) return;
-// 
+//
 //     WriteDefaultData();
 //     WriteDefaultData();
-// 
+//
 //     std::ostringstream oss;
-// 
+//
 //     oss << "SELECT CLOUD FROM PDAL_TEST_BASE";
 //     Options options = getOCIOptions();
 //     Option& query = options.getOptionByRef("query");
 //     query.setValue<std::string>(oss.str());
 //     pdal::drivers::oci::Reader reader_reader(options);
 //     reader_reader.prepare();
-// 
+//
 //     pdal::PointBuffer data(reader_reader.getSchema(), 2500);
 //     boost::scoped_ptr<pdal::StageSequentialIterator> iter(reader_reader.createSequentialIterator(data));
-// 
-// 
+//
+//
 //     boost::uint32_t numRead = iter->read(data);
-// 
+//
 //     BOOST_CHECK_EQUAL(numRead, 2130u);
-// 
+//
 //     pdal::Schema const& schema = data.getSchema();
 //     pdal::Dimension const& dimX = schema.getDimension("X");
 //     pdal::Dimension const& dimY = schema.getDimension("Y");
 //     pdal::Dimension const& dimZ = schema.getDimension("Z");
 //     pdal::Dimension const& dimIntensity = schema.getDimension("Intensity");
 //     pdal::Dimension const& dimRed = schema.getDimension("Red");
-// 
+//
 //     boost::int32_t x = data.getFieldAs<boost::int32_t>(dimX, 0);
 //     boost::int32_t y = data.getFieldAs<boost::int32_t>(dimY, 0);
 //     boost::int32_t z = data.getFieldAs<boost::int32_t>(dimZ, 0);
 //     boost::uint16_t intensity = data.getFieldAs<boost::uint16_t>(dimIntensity, 6);
 //     boost::uint16_t red = data.getFieldAs<boost::uint16_t>(dimRed, 6);
-// 
+//
 //     BOOST_CHECK_EQUAL(x, -1250367506);
 //     BOOST_CHECK_EQUAL(y, 492519663);
 //     BOOST_CHECK_EQUAL(z, 12931);
 //     BOOST_CHECK_EQUAL(intensity, 67);
 //     BOOST_CHECK_EQUAL(red, 113);
-// 
+//
 // }
-// 
+//
 
 // BOOST_AUTO_TEST_CASE(read_view)
 // {
 //     if (!ShouldRunTest()) return;
-// 
+//
 //     WriteDefaultData();
-// 
+//
 //     std::ostringstream oss;
-// 
+//
 //     oss << "SELECT  l.\"OBJ_ID\", l.\"BLK_ID\", l.\"BLK_EXTENT\", l.\"BLK_DOMAIN\","
 //            "        l.\"PCBLK_MIN_RES\", l.\"PCBLK_MAX_RES\", l.\"NUM_POINTS\","
 //            "        l.\"NUM_UNSORTED_POINTS\", l.\"PT_SORT_DIM\", l.\"POINTS\", b.cloud "
@@ -528,29 +528,29 @@ BOOST_AUTO_TEST_CASE(read_unprojected_data)
 //     query.setValue<std::string>(oss.str());
 //     pdal::drivers::oci::Reader reader_reader(options);
 //     reader_reader.prepare();
-// 
+//
 //     pdal::PointBuffer data(reader_reader.getSchema(), chunk_size+30);
 //     boost::scoped_ptr<pdal::StageSequentialIterator> iter(reader_reader.createSequentialIterator(data));
-// 
-// 
+//
+//
 //     boost::uint32_t numTotal(0);
 //     boost::uint32_t numRead(0);
-// 
+//
 //     pdal::PointBuffer data3(reader_reader.getSchema(), 100);
 //     numRead = iter->read(data3);
 //     BOOST_CHECK_EQUAL(numRead, 100u);
 //     numTotal = numRead + numTotal;
-// 
+//
 //     while (numRead !=0)
 //     {
 //         numRead = iter->read(data3);
 //         numTotal = numRead + numTotal;
-// 
+//
 //     }
-// 
+//
 //     BOOST_CHECK_EQUAL(numRead, 0u);
 //     BOOST_CHECK_EQUAL(numTotal, 1065u);
-// 
+//
 // }
 
 BOOST_AUTO_TEST_SUITE_END()

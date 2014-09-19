@@ -8,9 +8,15 @@ cd _build || exit 1
 case "$PDAL_OPTIONAL_COMPONENTS" in
     all)
         OPTIONAL_COMPONENT_SWITCH=ON
+        STUBS_SWITCH=OFF
+        ;;
+    stubs_only)
+        OPTIONAL_COMPONENT_SWITCH=OFF
+        STUBS_SWITCH=ON
         ;;
     none)
         OPTIONAL_COMPONENT_SWITCH=OFF
+        STUBS_SWITCH=OFF
         ;;
     *)
         echo "Unrecognized value for PDAL_OPTIONAL_COMPONENTS=$PDAL_OPTIONAL_COMPONENTS"
@@ -41,7 +47,7 @@ cmake \
     -DWITH_SQLITE=OFF \
     -DENABLE_CTEST=OFF \
     -DWITH_HDF5=OFF \
-    -DWITH_STUBS=ON \
+    -DWITH_STUBS=$STUBS_SWITCH \
     -G "$PDAL_CMAKE_GENERATOR" \
     ..
 

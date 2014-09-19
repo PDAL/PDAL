@@ -68,10 +68,8 @@ BOOST_AUTO_TEST_CASE(test_construction)
         for (uint8_t i = 0; i < 100; i++)
             v.push_back(i);
 
-        ByteArray bytes(v);
-
         MetadataNode m;
-        MetadataNode m2 = m.add("name", bytes);
+        MetadataNode m2 = m.addEncoded("name", v.data(), v.size());
         BOOST_CHECK_EQUAL(m2.type(), "base64Binary");
 
         std::string base64("AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygpKissLS4vMDEyMzQ1Njc4OTo7PD0+P0BBQkNERUZHSElKS0xNTk9QUVJTVFVWV1hZWltcXV5fYGFiYw==");

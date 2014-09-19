@@ -13,9 +13,6 @@
         <Option name="format">
             geojson
         </Option>
-        <Option name="chunk_size">
-            10
-        </Option>
         <Option name="jscallback">
             pointcloud_callback
         </Option>

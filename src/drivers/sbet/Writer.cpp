@@ -50,7 +50,7 @@ void SbetWriter::processOptions(const Options& options)
 }
 
 
-void SbetWriter::ready(PointContext ctx)
+void SbetWriter::ready(PointContextRef ctx)
 {
     m_stream.reset(new OLeStream(m_filename));
 }

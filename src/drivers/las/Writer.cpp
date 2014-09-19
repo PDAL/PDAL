@@ -306,7 +306,7 @@ void Writer::setVLRsFromMetadata(LasHeader& header, MetadataNode metaNode,
 }
 
 
-void Writer::ready(PointContext ctx)
+void Writer::ready(PointContextRef ctx)
 {
     if (m_headerInitialized)
         return;
@@ -646,7 +646,7 @@ void Writer::write(const PointBuffer& pointBuffer)
     m_numPointsWritten = m_numPointsWritten + numValidPoints;
 }
 
-void Writer::done(PointContext ctx)
+void Writer::done(PointContextRef ctx)
 {
     m_lasHeader.SetPointRecordsCount(m_numPointsWritten);
 

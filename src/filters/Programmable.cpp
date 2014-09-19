@@ -63,6 +63,21 @@ void Programmable::processOptions(const Options& options)
             options.getValueOrThrow<std::string>("filename"));
     m_module = options.getValueOrThrow<std::string>("module");
     m_function = options.getValueOrThrow<std::string>("function");
+
+    auto addDims = options.getOptions("add_dimension");
+    for (auto it = addDims.cbegin(); it != addDims.cend(); ++it)
+    {
+        m_addDimensions.push_back(Dimension::id(it->getValue<std::string>()));
+    }
+}
+
+
+void Programmable::addDimensions(PointContext ctx)
+{
+    for (auto it = m_addDimensions.cbegin(); it != m_addDimensions.cend(); ++it)
+    {
+        ctx.registerDim(*it);
+    }
 }
 
 

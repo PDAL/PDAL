@@ -78,8 +78,8 @@ private:
     
     virtual void initialize();
     virtual void processOptions(const Options& options);
-    virtual void addDimensions(PointContext ctx);    
-    virtual void ready(PointContext ctx);
+    virtual void addDimensions(PointContextRef ctx);    
+    virtual void ready(PointContextRef ctx);
     point_count_t read(PointBuffer& buf, point_count_t count);
     bool eof()
         { return m_at_end; }

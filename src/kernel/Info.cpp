@@ -54,7 +54,6 @@ Info::Info(int argc, const char* argv[])
     , m_computeBoundary(false)
     , m_useXML(false)
     , m_useJSON(false)
-    , m_useREST(true)
     , m_QueryDistance(0.0)
     , m_numPointsToWrite(0)
     , m_showSample(false)
@@ -75,7 +74,6 @@ void Info::validateSwitches()
     if (!got_something)
     {
         m_showStats = true;
-        m_computeBoundary = true;
         m_showSchema = true;
 
     }
@@ -273,19 +271,19 @@ void Info::dumpStats()
 void Info::dump(PointContext ctx, PointBufferPtr buf)
 {
     if (m_showStats)
+    {
         dumpStats();
+    }
 
     if (m_pointIndexes.size())
+    {
         dumpPoints(buf);
+    }
+
     if (m_showSchema)
     {
-        boost::property_tree::ptree schema;
-        std::string json; //= ctx.dimsJson();
-        std::stringstream strm;
-        strm << json;
-        boost::property_tree::read_json(strm, schema);
-
-        m_tree->add_child("schema", schema);
+        boost::property_tree::ptree dims(pdal::utils::toPTree(ctx));
+        m_tree->add_child("schema", dims);
     }
 
     if (m_showSDOPCMetadata)
@@ -298,7 +296,9 @@ void Info::dump(PointContext ctx, PointBufferPtr buf)
     }
 
     if (m_QueryPoint.size())
+    {
         dumpQuery(buf);
+    }
 }
 
 

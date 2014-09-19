@@ -68,7 +68,6 @@ Application::Application(int argc, const char* argv[], const std::string& appNam
     , m_hardCoreDebug(false)
     , m_reportDebug(false)
     , m_usestdin(false)
-    , m_chunkSize(0)
 {
     return;
 }
@@ -366,6 +365,67 @@ void Application::addSwitchSet(po::options_description* options)
 }
 
 
+void Application::setCommonOptions(Options &options)
+{
+    options.add("debug", m_isDebug);
+    options.add("verbose", m_verboseLevel);
+
+    boost::char_separator<char> sep(",| ");
+
+    if (m_variablesMap.count("scale"))
+    {
+        std::vector<double> scales;
+        tokenizer scale_tokens(m_scales, sep);
+        for (auto t = scale_tokens.begin(); t != scale_tokens.end(); ++t)
+            scales.push_back(boost::lexical_cast<double>(*t));
+        if(scales.size())
+        {
+            if (scales.size() <= 1)
+            {
+                options.add<double >("scale_x", scales[0]);
+            }
+            else if (scales.size() <= 2)
+            {
+                options.add<double >("scale_x", scales[0]);
+                options.add<double >("scale_y", scales[1]);
+            }
+            else if (scales.size() <= 3)
+            {
+                options.add<double >("scale_x", scales[0]);
+                options.add<double >("scale_y", scales[1]);
+                options.add<double >("scale_z", scales[2]);
+            }
+        }
+    }
+
+    if (m_variablesMap.count("offset"))
+    {
+        std::vector<double> offsets;
+        tokenizer offset_tokens(m_offsets, sep);
+        for (auto t = offset_tokens.begin(); t != offset_tokens.end(); ++t)
+            offsets.push_back(boost::lexical_cast<double>(*t));
+        if(offsets.size())
+        {
+            if (offsets.size() <= 1)
+            {
+                options.add<double >("offset_x", offsets[0]);
+            }
+            else if (offsets.size() <= 2)
+            {
+                options.add<double >("offset_x", offsets[0]);
+                options.add<double >("offset_y", offsets[1]);
+            }
+            else if (offsets.size() <= 3)
+            {
+                options.add<double >("offset_x", offsets[0]);
+                options.add<double >("offset_y", offsets[1]);
+                options.add<double >("offset_z", offsets[2]);
+            }
+        }
+    }
+}
+
+
 void Application::addPositionalSwitch(const char* name, int max_count)
 {
     m_positionalOptions.add(name, max_count);
@@ -436,8 +496,15 @@ void Application::addBasicSwitchSet()
         ("version", po::value<bool>(&m_showVersion)->zero_tokens()->implicit_value(true), "Show version info")
         ("timer", po::value<bool>(&m_showTime)->zero_tokens()->implicit_value(true), "Show execution time")
         ("stdin,s", po::value<bool>(&m_usestdin)->zero_tokens()->implicit_value(true), "Read pipeline XML from stdin")
-        ("chunk_size", po::value<boost::uint32_t>(&m_chunkSize)->default_value(0), "Use a specified buffer capacity rather than attempting to read the entire pipeline in a single buffer")
         ("heartbeat", po::value< std::vector<std::string> >(&m_heartbeat_shell_command), "Shell command to run for every progress heartbeat")
+        ("scale", po::value< std::string >(&m_scales),
+         "A comma-separated or quoted, space-separated list of scales to "
+         "set on the output file: \n--scale 0.1,0.1,0.00001\n--scale \""
+         "0.1 0.1 0.00001\"")
+        ("offset", po::value< std::string >(&m_offsets),
+         "A comma-separated or quoted, space-separated list of offsets to "
+         "set on the output file: \n--offset 0,0,0\n--offset "
+         "\"1234 5678 91011\"")
 
         ;
 
@@ -478,5 +545,6 @@ void Application::parseSwitches()
 
     return;
 }
+
 
 }} // pdal::kernel

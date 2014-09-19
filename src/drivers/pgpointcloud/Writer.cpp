@@ -121,7 +121,7 @@ void Writer::processOptions(const Options& options)
 }
 
 
-void Writer::ready(PointContext ctx)
+void Writer::ready(PointContextRef ctx)
 {
     m_pointSize = 0;
     m_dims = ctx.dims();
@@ -231,7 +231,7 @@ void Writer::write(const PointBuffer& buffer)
 }
 
 
-void Writer::done(PointContext ctx)
+void Writer::done(PointContextRef ctx)
 {
     if (m_create_index && m_have_postgis)
     {

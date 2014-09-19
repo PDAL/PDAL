@@ -85,6 +85,7 @@ LasHeader::LasHeader(LasHeader const& other) :
     m_headerSize(other.m_headerSize),
     m_dataOffset(other.m_dataOffset),
     m_pointRecordsCount(other.m_pointRecordsCount),
+    m_scales(other.m_scales),
     m_offsets(other.m_offsets),
     m_isCompressed(other.m_isCompressed),
     m_headerPadding(other.m_headerPadding),

@@ -36,7 +36,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-std::string TestConfig::g_data_path = "../../test/data";
+std::string TestConfig::g_data_path = UNITTEST_TESTCONFIG_DATA_PATH;
 std::string TestConfig::g_oracle_connection = "";
 
 TestConfig::TestConfig()

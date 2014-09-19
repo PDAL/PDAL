@@ -11,7 +11,7 @@
             <!-- bad: unknown element type -->
             <Reafdsadsafdsafdsafder type="drivers.las.reader">
                 <Option name="filename">
-                    ../1.2-with-color.las
+                    ../las/1.2-with-color.las
                 </Option>
             </Reafdsadsafdsafdsafder>
         </Filter>

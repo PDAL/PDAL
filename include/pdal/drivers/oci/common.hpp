@@ -130,7 +130,7 @@ public:
     Connection m_connection;
     sdo_pc* pc;
     int32_t m_num_remaining;
-    PointContext m_ctx;
+    PointContextRef m_ctx;
     schema::XMLSchema m_schema;
     size_t m_point_size;
     bool m_fetched;  // Set when fetched but not initialized

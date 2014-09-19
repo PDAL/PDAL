@@ -63,11 +63,11 @@ private:
     pdal::SpatialReference m_output_srs;
     pdal::Bounds<double> m_bounds;
     std::string m_wkt;
-    std::string m_scales;
-    std::string m_offsets;
     bool m_bForwardMetadata;
     boost::uint32_t m_decimation_step;
     boost::uint32_t m_decimation_offset;
+    double m_decimation_leaf_size;
+    std::string m_decimation_method;
 
 };
 

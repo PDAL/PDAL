@@ -1,5 +1,6 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2013, Howard Butler (hobu.inc@gmail.com)
+* Copyright (c) 2014, Brad Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -32,17 +33,45 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef UNITTEST_TESTCONFIG_INCLUDED
-#define UNITTEST_TESTCONFIG_INCLUDED
+#ifndef INCLUDED_PDAL_KERNEL_GROUND_HPP
+#define INCLUDED_PDAL_KERNEL_GROUND_HPP
 
-#include <string>
+#include <pdal/FileUtils.hpp>
 
-struct TestConfig 
+#include "Application.hpp"
+
+
+namespace pdal
 {
-    TestConfig();
-    static std::string g_data_path;
-    static std::string g_oracle_connection;
+namespace kernel
+{
+
+class PDAL_DLL Ground : public Application
+{
+public:
+    Ground(int argc, const char* argv[]);
+    int execute();
+
+private:
+    void addSwitches();
+    void validateSwitches();
+
+    
+    std::unique_ptr<Stage> makeReader(Options readerOptions);
+
+    std::string m_inputFile;
+    std::string m_outputFile;
+    double m_maxWindowSize;
+    double m_slope;
+    double m_maxDistance;
+    double m_initialDistance;
+    double m_cellSize;
+    double m_base;
+    bool m_exponential;
+    bool m_bCompress;
 };
 
+} // kernel
+} // pdal
 
 #endif

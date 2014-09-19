@@ -135,7 +135,7 @@ BOOST_AUTO_TEST_CASE(test_read_srs)
     PointContext ctx;
 
     Options ops;
-    ops.add("filename", Support::datapath("utm17.las"));
+    ops.add("filename", Support::datapath("las/utm17.las"));
     las::Reader reader(ops);
     reader.prepare(ctx);
 
@@ -266,7 +266,7 @@ BOOST_AUTO_TEST_CASE(test_vertical_datums)
         PointContext ctx;
         // Write a very simple file with our SRS and one point.
         Options ops1;
-        ops1.add("filename", Support::datapath("1.2-with-color.las"));
+        ops1.add("filename", Support::datapath("las/1.2-with-color.las"));
         las::Reader reader(ops1);
 
         std::ostream* ofs = pdal::FileUtils::createFile(tmpfile);
@@ -347,7 +347,7 @@ BOOST_AUTO_TEST_CASE(test_writing_vlr)
 
         PointContext ctx;
         Options ops;
-        ops.add("filename", Support::datapath("1.2-with-color.las"));
+        ops.add("filename", Support::datapath("las/1.2-with-color.las"));
         las::Reader readerx(ops);
         std::ostream* ofs = pdal::FileUtils::createFile(tmpfile);
         {

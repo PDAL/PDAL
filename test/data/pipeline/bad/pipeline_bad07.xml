@@ -10,12 +10,12 @@
             </Option>
             <Reader type="drivers.las.reader">
                 <Option name="filename">
-                    1.2-with-color.las
+                    las/1.2-with-color.las
                 </Option>
                 <!-- bad: child of reader -->
                 <Reader type="drivers.las.reader">
                     <Option name="filename">
-                        ../1.2-with-color.las
+                        ../las/1.2-with-color.las
                     </Option>
                 </Reader>
             </Reader>

@@ -199,7 +199,7 @@ uint32_t PgReader::fetchPcid() const
 }
 
 
-void PgReader::addDimensions(PointContext ctx)
+void PgReader::addDimensions(PointContextRef ctx)
 {
     log()->get(LogLevel::Debug) << "Fetching schema object" << std::endl;
 
@@ -248,7 +248,7 @@ pdal::SpatialReference PgReader::fetchSpatialReference() const
 }
 
 
-void PgReader::ready(PointContext ctx)
+void PgReader::ready(PointContextRef ctx)
 {
     m_atEnd = false;
     m_cur_row = 0;
@@ -269,7 +269,7 @@ void PgReader::ready(PointContext ctx)
 }
 
 
-void PgReader::done(PointContext ctx)
+void PgReader::done(PointContextRef ctx)
 {
     CursorTeardown();
     if (m_session)

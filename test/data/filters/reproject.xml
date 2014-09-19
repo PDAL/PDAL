@@ -45,7 +45,7 @@ def filter(ins,outs):
                 <Option name="module">anything</Option>
                 <Reader type="drivers.las.reader">
                     <Option name="filename">
-                        ../1.2-with-color.las
+                        ../las/1.2-with-color.las
                     </Option>
                     <Option name="spatialreference">
                         EPSG:2993

@@ -34,7 +34,7 @@
                     </Option>
                     <Option name="dimension">
                         PointSourceId
-                    </Option>                    
+                    </Option>
                 </Options>
             </Option>
             <Filter type="filters.inplacereprojection">
@@ -49,7 +49,7 @@
                 </Option>
             <Reader type="drivers.las.reader">
                 <Option name="filename">
-                    ../1.2-with-color.las
+                    ../las/1.2-with-color.las
                 </Option>
                 <Option name="spatialreference">
                     EPSG:2993

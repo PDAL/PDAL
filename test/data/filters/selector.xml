@@ -86,12 +86,12 @@
                             10.6
                         </Option>
                     </Options>
-                </Option>                
+                </Option>
             </Options>
-        </Option>        
+        </Option>
         <Reader type="drivers.las.reader">
             <Option name="filename">
-                ../1.2-with-color.las
+                ../las/1.2-with-color.las
             </Option>
         </Reader>
     </Filter>

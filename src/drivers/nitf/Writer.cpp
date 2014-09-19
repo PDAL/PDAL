@@ -67,17 +67,19 @@ void Writer::processOptions(const Options& options)
     m_cLevel = options.getValueOrDefault<std::string>("CLEVEL","03");
     m_sType = options.getValueOrDefault<std::string>("STYPE","BF01");
     m_oStationId = options.getValueOrDefault<std::string>("OSTAID","PDAL");
-    m_fileTitle = options.getValueOrDefault<std::string>("FTITLE","FTITLE");
+    m_fileTitle = options.getValueOrDefault<std::string>("FTITLE",m_filename);
     m_fileClass = options.getValueOrDefault<std::string>("FSCLAS","U");
     m_origName = options.getValueOrDefault<std::string>("ONAME","");
     m_origPhone = options.getValueOrDefault<std::string>("OPHONE","");
     m_securityClass = options.getValueOrDefault<std::string>("FSCLAS","U");
     m_imgSecurityClass = options.getValueOrDefault<std::string>("FSCLAS","U");
     m_imgDate = getOptions().getValueOrDefault<std::string>("IDATIM", "");
+    m_sic = getOptions().getValueOrDefault<std::string>("FSCLTX", "");
+    m_igeolob = getOptions().getValueOrDefault<std::string>("GEOLOB", "");
 }
 
 
-void Writer::done(PointContext ctx)
+void Writer::done(PointContextRef ctx)
 {
     las::Writer::done(ctx);
 
@@ -98,6 +100,7 @@ void Writer::done(PointContext ctx)
         header.getBackgroundColor().setRawData(const_cast<char*>("000"), 3);
         header.getOriginatorName().set(m_origName);
         header.getOriginatorPhone().set(m_origPhone);
+        header.getSecurityGroup().getClassificationText().set(m_sic);
 
         ::nitf::DESegment des = record.newDataExtensionSegment();
 

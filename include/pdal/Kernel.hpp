@@ -36,6 +36,9 @@
 #define INCLUDED_PDAL_KERNEL_HPP
 
 #include <pdal/kernel/Application.hpp>
+#ifdef PDAL_HAVE_PCL
+#include <pdal/kernel/Ground.hpp>
+#endif
 #include <pdal/kernel/Info.hpp>
 #include <pdal/kernel/Kernel.hpp>
 #include <pdal/kernel/Pipeline.hpp>
