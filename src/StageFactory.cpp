@@ -73,7 +73,7 @@ MAKE_READER_CREATOR(OciReader, pdal::drivers::oci::OciReader)
 #endif
 #endif
 
-#ifdef PDAL_HAVE_GDAL
+#ifdef PDAL_HAVE_NITRO
 MAKE_READER_CREATOR(NITFReader, pdal::drivers::nitf::NitfReader)
 #endif
 
@@ -199,11 +199,12 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
     drivers["qi"] = "drivers.qfit.reader";
     drivers["nitf"] = "drivers.nitf.reader";
     drivers["ntf"] = "drivers.nitf.reader";
+    drivers["nsf"] = "drivers.nitf.reader";
     drivers["bpf"] = "drivers.bpf.reader";
     drivers["sbet"] = "drivers.sbet.reader";
     drivers["icebridge"] = "drivers.icebridge.reader";
     drivers["sqlite"] = "drivers.sqlite.reader";
-    
+
 #ifdef PDAL_HAVE_PCL
     drivers["pcd"] = "drivers.pcd.reader";
 #endif

@@ -32,16 +32,31 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_DRIVERS_NITF_FILE_HPP
-#define INCLUDED_DRIVERS_NITF_FILE_HPP
+#pragma once
 
 #include <pdal/pdal_internal.hpp>
 
-#ifdef PDAL_HAVE_GDAL
+#ifdef PDAL_HAVE_NITRO
 
 #include <vector>
 
-#include "nitflib.h"
+#ifdef PDAL_COMPILER_GCC
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wredundant-decls"
+#  pragma GCC diagnostic ignored "-Wfloat-equal"
+#  pragma GCC diagnostic ignored "-Wextra"
+#  pragma GCC diagnostic ignored "-Wcast-qual"
+   // The following pragma doesn't actually work:
+   //   https://gcc.gnu.org/bugzilla/show_bug.cgi?id=61653
+#  pragma GCC diagnostic ignored "-Wliteral-suffix"
+#endif
+
+#define IMPORT_NITRO_API
+#include <nitro/c++/import/nitf.hpp>
+
+#ifdef PDAL_COMPILER_GCC
+#  pragma GCC diagnostic pop
+#endif
 
 namespace pdal
 {
@@ -63,28 +78,22 @@ public:
     void open();
     void close();
 
-    void getLasPosition(boost::uint64_t& offset, boost::uint64_t& length) const;
+    void getLasOffset(boost::uint64_t& offset, boost::uint64_t& length);
 
     void extractMetadata(MetadataNode& metadata);
 
 private:
-    std::string getSegmentIdentifier(NITFSegmentInfo* psSegInfo);
-    std::string getDESVER(NITFSegmentInfo* psSegInfo);
-    int findIMSegment();
-    int findLIDARASegment();
+    bool locateLidarImageSegment();
+    bool locateLidarDataSegment();
 
-    static void processTREs(int nTREBytes, const char *pszTREData,
-        MetadataNode& m, const std::string& parentkey);
-    static void processTREs_DES(NITFDES*, MetadataNode& m,
-        const std::string& parentkey);
-    static void processMetadata(char** papszMetadata, MetadataNode& m,
-        const std::string& parentkey);
-    void processImageInfo(MetadataNode& m, const std::string& parentkey);
+    ::nitf::Reader *m_reader;
+    ::nitf::IOHandle *m_io;
+    ::nitf::Record m_record;
 
     const std::string m_filename;
-    NITFFile* m_file;
-    int m_imageSegmentNumber;
-    int m_lidarSegmentNumber;
+    bool m_validLidarSegments;
+    ::nitf::Uint32 m_lidarImageSegment;
+    ::nitf::Uint32 m_lidarDataSegment;
 
     NitfFile(const NitfFile&); // nope
     NitfFile& operator=(const NitfFile&); // nope
@@ -93,6 +102,4 @@ private:
 
 } } } // namespaces
 
-#endif
-
-#endif
+#endif // HAVE_NITRO
