@@ -339,7 +339,7 @@ void Tree::getPoints(
                     std::round((bbox.center.y - yBegin) / yStep));
 
             const std::size_t index(
-                yOffset * (xEnd - xBegin) / xStep + xOffset);
+                std::round(yOffset * (xEnd - xBegin) / xStep + xOffset));
 
             results.at(index) = data->pbIndex;
         }
@@ -698,5 +698,4 @@ std::vector<std::size_t> QuadIndex::getPoints(
 }
 
 } // namespace pdal
-
 
