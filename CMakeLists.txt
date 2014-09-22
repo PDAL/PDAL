@@ -278,6 +278,7 @@ if(WITH_PCL)
         include_directories(${PCL_INCLUDE_DIRS})
         link_directories(${PCL_LIBRARY_DIRS})
         add_definitions(${PCL_DEFINITIONS})
+	add_definitions("-fvisibility-inlines-hidden")
         # PCL's configuration clobbers Boost find_package - do it again
         find_package(Boost 1.52 COMPONENTS program_options thread iostreams filesystem system unit_test_framework random)
 
