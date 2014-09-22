@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2012, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2014, Michael P. Gerlek (mpg@flaxen.com)
 *
 * All rights reserved.
 *
@@ -38,66 +38,12 @@
 
 #ifdef PDAL_HAVE_NITRO
 
-#include <vector>
-
-#ifdef PDAL_COMPILER_GCC
-#  pragma GCC diagnostic push
-#  pragma GCC diagnostic ignored "-Wredundant-decls"
-#  pragma GCC diagnostic ignored "-Wfloat-equal"
-#  pragma GCC diagnostic ignored "-Wextra"
-#  pragma GCC diagnostic ignored "-Wcast-qual"
-   // The following pragma doesn't actually work:
-   //   https://gcc.gnu.org/bugzilla/show_bug.cgi?id=61653
-#  pragma GCC diagnostic ignored "-Wliteral-suffix"
-#endif
-
-#define IMPORT_NITRO_API
-#include <nitro/c++/import/nitf.hpp>
-
-#ifdef PDAL_COMPILER_GCC
-#  pragma GCC diagnostic pop
-#endif
-
-namespace pdal
-{
-    class MetadataNode;
-}
 
 
 namespace pdal { namespace drivers { namespace nitf {
 
-//
-// all the processing that is NITF-file specific goes in here
-//
-class PDAL_DLL NitfFile
-{
-public:
-    NitfFile(const std::string& filename);
-    ~NitfFile();
 
-    void open();
-    void close();
-
-    void getLasOffset(boost::uint64_t& offset, boost::uint64_t& length);
-
-    void extractMetadata(MetadataNode& metadata);
-
-private:
-    bool locateLidarImageSegment();
-    bool locateLidarDataSegment();
-
-    ::nitf::Reader *m_reader;
-    ::nitf::IOHandle *m_io;
-    ::nitf::Record m_record;
-
-    const std::string m_filename;
-    bool m_validLidarSegments;
-    ::nitf::Uint32 m_lidarImageSegment;
-    ::nitf::Uint32 m_lidarDataSegment;
-
-    NitfFile(const NitfFile&); // nope
-    NitfFile& operator=(const NitfFile&); // nope
-};
+void register_tre_plugins();
 
 
 } } } // namespaces

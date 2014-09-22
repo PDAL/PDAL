@@ -42,10 +42,27 @@
 #include <pdal/GlobalEnvironment.hpp>
 
 #ifdef PDAL_HAVE_NITRO
+
+#ifdef PDAL_COMPILER_GCC
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wredundant-decls"
+#  pragma GCC diagnostic ignored "-Wfloat-equal"
+#  pragma GCC diagnostic ignored "-Wextra"
+#  pragma GCC diagnostic ignored "-Wcast-qual"
+   // The following pragma doesn't actually work:
+   //   https://gcc.gnu.org/bugzilla/show_bug.cgi?id=61653
+#  pragma GCC diagnostic ignored "-Wliteral-suffix"
+#endif
+
 #define IMPORT_NITRO_API
 #include <nitro/c++/import/nitf.hpp>
-#include <nitro/c++/except/Trace.h>
+
+#ifdef PDAL_COMPILER_GCC
+#  pragma GCC diagnostic pop
 #endif
+
+#endif
+
 // NOTES
 //
 // is it legal to write a LAZ file?

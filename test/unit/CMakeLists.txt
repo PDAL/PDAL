@@ -65,7 +65,7 @@ SET(PDAL_UNITTEST_TEST_SRC
 
 if(WITH_APPS)
   if(LIBXML2_FOUND)
-    list(APPEND PDAL_UNITTEST_TEST_SRC 
+    list(APPEND PDAL_UNITTEST_TEST_SRC
 #      apps/pcinfoTest.cpp
     )
   endif(LIBXML2_FOUND)
@@ -84,7 +84,7 @@ set(PDAL_PLANG_TEST_SRC
 
 SET(PDAL_UNITTEST_TEST_INC
     )
-    
+
 SET(PDAL_UNITTEST_CONFIG_SRC
     Support.cpp
     TestConfig.cpp
@@ -119,7 +119,7 @@ if (WITH_SQLITE)
     endif()
 endif (WITH_SQLITE)
 
-if (WITH_GDAL)
+if (WITH_NITRO)
     set(PDAL_GDAL_TEST_CPP
         GDALUtilsTest.cpp
         filters/ColorizationFilterTest.cpp
@@ -130,9 +130,6 @@ if (WITH_GDAL)
             SET(PDAL_UNITTEST_TEST_SRC "${PDAL_UNITTEST_TEST_SRC};${file}"
                 CACHE INTERNAL "source files for test")
     ENDFOREACH(file)
-endif (WITH_GDAL)
-
-if (WITH_NITRO)
     set(PDAL_NITRO_TEST_CPP
         drivers/nitf/NitfWriterTest.cpp
         )

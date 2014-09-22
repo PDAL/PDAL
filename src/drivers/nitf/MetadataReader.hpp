@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2012, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2014, Michael P. Gerlek (mpg@flaxen.com)
 *
 * All rights reserved.
 *
@@ -67,36 +67,60 @@ namespace pdal
 namespace pdal { namespace drivers { namespace nitf {
 
 //
-// all the processing that is NITF-file specific goes in here
+// helper class for processing all the metadata fields
 //
-class PDAL_DLL NitfFile
+class PDAL_DLL MetadataReader
 {
 public:
-    NitfFile(const std::string& filename);
-    ~NitfFile();
+    MetadataReader(::nitf::Record&, MetadataNode&, bool showEmptyFields=true);
+    ~MetadataReader();
 
-    void open();
-    void close();
-
-    void getLasOffset(boost::uint64_t& offset, boost::uint64_t& length);
-
-    void extractMetadata(MetadataNode& metadata);
+    void read();
 
 private:
-    bool locateLidarImageSegment();
-    bool locateLidarDataSegment();
-
-    ::nitf::Reader *m_reader;
-    ::nitf::IOHandle *m_io;
     ::nitf::Record m_record;
+    MetadataNode& m_node;
+    const bool m_showEmptyFields;
 
-    const std::string m_filename;
-    bool m_validLidarSegments;
-    ::nitf::Uint32 m_lidarImageSegment;
-    ::nitf::Uint32 m_lidarDataSegment;
+    void writeField(const std::string& parentkey,
+                    const std::string& key,
+                    ::nitf::Field field);
+    void writeInt(const std::string& parentkey,
+                  const std::string& key,
+                  int thevalue);
+    void writeString(const std::string& parentkey,
+                     const std::string& key,
+                     const std::string& thevalue);
+    
+    void doFileHeader(const std::string& parentkey,
+                      ::nitf::FileHeader&);
+    
+    void doSecurity(const std::string& parentkey,
+                    const std::string& prefix,
+                    ::nitf::FileSecurity&);
+    
+    void doBands(const std::string& key,
+                 ::nitf::ImageSubheader&);
+    void doBand(const std::string& key,
+                 ::nitf::BandInfo&);
+    
+    void doImageSubheader(const std::string& key,
+                          ::nitf::ImageSubheader&);
+    
+    void doDESubheader(const std::string& key,
+                      ::nitf::DESubheader&);
 
-    NitfFile(const NitfFile&); // nope
-    NitfFile& operator=(const NitfFile&); // nope
+    void doExtensions(const std::string& key,
+                      ::nitf::Extensions&);
+
+    void doComments(const std::string& key,
+                    ::nitf::List&);
+
+    void doTRE(const std::string& key,
+               ::nitf::TRE&);
+
+    MetadataReader(const MetadataReader&); // nope
+    MetadataReader& operator=(const MetadataReader&); // nope
 };
 
 
