@@ -42,22 +42,25 @@
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/algorithm/string.hpp>
 
-std::string sanitize(const std::string& name)
+namespace
 {
-    auto ischar = [](char c)
+    std::string sanitize(const std::string& name)
     {
-        return c == ';' || c == ':' || c == ' ' || c == '\'' || c == '\"';
-    };
+        auto ischar = [](char c)
+        {
+            return c == ';' || c == ':' || c == ' ' || c == '\'' || c == '\"';
+        };
 
-    std::string v;
-    for (size_t i = 0; i < name.size(); ++i)
-    {
-        if (ischar(name[i]))
-            v += '_';
-        else
-            v += name[i];
+        std::string v;
+        for (size_t i = 0; i < name.size(); ++i)
+        {
+            if (ischar(name[i]))
+                v += '_';
+            else
+                v += name[i];
+        }
+        return v;
     }
-    return v;
 }
 
 namespace pdal
@@ -74,8 +77,11 @@ std::string MetadataNodeImpl::toJSON() const
     std::ostringstream o;
 
     o << "{" << std::endl;
+
     if (m_name.empty())
+    {
         subnodesToJSON(o, 1);
+    }
     else
     {
         o << "  \"" << m_name << "\":" << std::endl;
@@ -83,35 +89,63 @@ std::string MetadataNodeImpl::toJSON() const
         toJSON(o, 2);
         o << "  }" << std::endl;
     }
+
     o << "}" << std::endl;
+
     return o.str();
 }
 
 
 void MetadataNodeImpl::toJSON(std::ostream& o, int level) const
 {
-    std::string indent(level * 2, ' ');
+    const std::string indent(level * 2, ' ');
 
-    std::string escaped_description(m_descrip);
-    escaped_description = Utils::escapeJSON(escaped_description);
-    std::string escaped_value(m_value);
-    escaped_value = Utils::escapeJSON(escaped_value);
+    const std::string escaped_description(Utils::escapeJSON(m_descrip));
+    const std::string escaped_value(Utils::escapeJSON(m_value));
 
-    o << indent << "\"description\":\"" << escaped_description <<
-        "\"," << std::endl;
-    o << indent << "\"type\":\"" << m_type << "\"," << std::endl;
-    o << indent << "\"value\":\"" << escaped_value << "\"";
+    if (escaped_description.size())
+    {
+        o << indent << "\"description\":\"" << escaped_description << "\"";
 
-    if (m_subnodes.size())
-        o << ",";
-    o << std::endl;
+        if (m_type.size() || escaped_value.size() || m_subnodes.size())
+        {
+            o << ",";
+        }
+
+        o << std::endl;
+    }
+
+    if (m_type.size())
+    {
+        o << indent << "\"type\":\"" << m_type << "\"";
+
+        if (escaped_value.size() || m_subnodes.size())
+        {
+            o << ",";
+        }
+
+        o << std::endl;
+    }
+
+    if (escaped_value.size())
+    {
+        o << indent << "\"value\":\"" << escaped_value << "\"";
+
+        if (m_subnodes.size())
+        {
+            o << ",";
+        }
+
+        o << std::endl;
+    }
+
     subnodesToJSON(o, level);
 }
 
 
 void MetadataNodeImpl::subnodesToJSON(std::ostream& o, int level) const
 {
-    std::string indent(level * 2, ' ');
+    const std::string indent(level * 2, ' ');
 
     for (auto si = m_subnodes.begin(); si != m_subnodes.end(); ++si)
     {
@@ -152,7 +186,9 @@ void MetadataNodeImpl::subnodesToJSON(std::ostream& o, int level) const
 
 
 std::string MetadataNode::toJSON() const
-    { return m_impl->toJSON(); }
+{
+    return m_impl->toJSON();
+}
 
 } // namespace pdal
 
