@@ -94,7 +94,8 @@ PointBufferSet Chipper::run(PointBufferPtr buffer)
     m_inbuf = buffer;
     load(*buffer, m_xvec, m_yvec, m_spare);
     partition(m_xvec.size());
-    decideSplit(m_xvec, m_yvec, m_spare, 0, m_partitions.size() - 1);
+    if (m_xvec.size() > 0) // fix for crash 
+		decideSplit(m_xvec, m_yvec, m_spare, 0, m_partitions.size() - 1);
     return m_buffers;
 }
 
@@ -102,7 +103,6 @@ PointBufferSet Chipper::run(PointBufferPtr buffer)
 void Chipper::load(PointBuffer& buffer, ChipRefList& xvec, ChipRefList& yvec, 
     ChipRefList& spare)
 {
-    ChipPtRef ref;
     boost::uint32_t idx;
     std::vector<ChipPtRef>::iterator it;
 
