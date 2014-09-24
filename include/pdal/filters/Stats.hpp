@@ -36,7 +36,6 @@
 
 #include <pdal/Filter.hpp>
 
-#include <pdal/Range.hpp>
 #include <pdal/PointBuffer.hpp>
 
 #include <iostream>
@@ -74,7 +73,7 @@ class PDAL_DLL Summary
 {
 public:
     Summary(std::string name, uint32_t num_bins, uint32_t sample_size, uint32_t cache_size,
-        uint32_t seed, bool doExact, bool doSample) : 
+        uint32_t seed, bool doExact, bool doSample) :
         m_sample_size(sample_size), m_distribution(0, cache_size),
         m_doExact(doExact), m_doSample(doSample), m_name(name)
     {
@@ -141,9 +140,9 @@ class PDAL_DLL Stats : public Filter
 {
 public:
     SET_STAGE_NAME("filters.stats", "Statistics Filter")
-    SET_STAGE_LINK("http://pdal.io/stages/filters.stats.html")  
+    SET_STAGE_LINK("http://pdal.io/stages/filters.stats.html")
     SET_STAGE_ENABLED(true)
-    
+
     Stats(const Options& options) : Filter(options)
         {}
 

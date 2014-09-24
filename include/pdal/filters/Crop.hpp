@@ -62,7 +62,7 @@ public:
 
     static Options getDefaultOptions();
 
-    const Bounds<double>& getBounds() const;
+    const BOX3D& getBounds() const;
 
 private:
     BOX3D m_bounds;

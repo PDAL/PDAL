@@ -34,83 +34,9 @@
 
 
 #include <pdal/Bounds.hpp>
-#include <pdal/Range.hpp>
-#include <pdal/Utils.hpp>
 #include <iostream>
 namespace pdal
 {
-
-
-// std::istream& operator>>(std::istream& istr, Bounds<double>& bounds)
-// {
-//
-//
-//     istr.get();
-//     if (istr.eof())
-//     {
-//         Bounds<double> output;
-//         bounds = output;
-//         return istr;
-//     }
-//
-//     if (!istr.good()) throw pdal_error("stream is unreadable, unable to parse Bounds");
-//
-//     istr.unget();
-//
-//     // A really dirty way to check for an empty bounds object right off
-//     // the bat
-//     const char left_paren = (char)istr.get();
-//     if (!istr.good()) throw pdal_error("stream0 is no good unable to parse Bounds");
-//     const char right_paren = (char)istr.get();
-//
-//     if (left_paren == '(' &&
-//             right_paren == ')')
-//     {
-//         Bounds<double> output;
-//         bounds = output;
-//         return istr;
-//     }
-//     istr.unget();
-//     istr.unget(); // ()
-//
-//     Bounds<double>::RangeVector v;
-//
-//     Utils::eatwhitespace(istr);
-//
-//     if (!Utils::eatcharacter(istr,'('))
-//         throw pdal_error("Bounds parser failed at first parentheses");
-//
-//     bool done = false;
-//     while (!done)
-//     {
-//         Utils::eatwhitespace(istr);
-//
-//         Range<double> r;
-//         istr >> r;
-//         v.push_back(r);
-//
-//         Utils::eatwhitespace(istr);
-//         if (Utils::eatcharacter(istr,','))
-//         {
-//             done = false;
-//         }
-//         else if (Utils::eatcharacter(istr,')'))
-//         {
-//             done = true;
-//         }
-//         else
-//         {
-//             throw pdal_error("Bounds parser failed");
-//         }
-//     }
-//
-//     Bounds<double> xxx(v);
-//     bounds = xxx;
-//
-//     Utils::eatwhitespace(istr);
-//
-//     return istr;
-// }
 std::istream& operator>>(std::istream& istr, BOX3D& bounds)
 {
 
@@ -217,6 +143,5 @@ std::istream& operator>>(std::istream& istr, BOX3D& bounds)
 
     return istr;
 }
-
 
 } // namespace

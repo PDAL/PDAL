@@ -33,7 +33,6 @@
 ****************************************************************************/
 
 
-#include <pdal/Vector.hpp>
 #include <pdal/Bounds.hpp>
 #include <pdal/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
