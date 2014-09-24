@@ -41,11 +41,9 @@
 namespace pdal
 {
 
-pdal::Bounds<double> PointBuffer::calculateBounds(bool is3d) const
+BOX3D PointBuffer::calculateBounds(bool is3d) const
 {
-    pdal::Bounds<double> output;
-
-    Vector<double> v;
+    BOX3D output;
 
     bool first = true;
     for (PointId idx = 0; idx < size(); idx++)
@@ -58,29 +56,19 @@ pdal::Bounds<double> PointBuffer::calculateBounds(bool is3d) const
         {
             if (first)
             {
-                output = pdal::Bounds<double>(x, y, z, x, y, z);
+                output = BOX3D(x, y, z, x, y, z);
                 first = false;
-                v.add(x);
-                v.add(y);
-                v.add(z);
             }
-            v[0] = x;
-            v[1] = y;
-            v[2] = z;
-            output.grow(v);
+            output.grow(x,y,z);
         }
         else
         {
             if (first)
             {
-                output = pdal::Bounds<double>(x, y, x, y);
+                output = BOX3D(x, y, x, y);
                 first = false;
-                v.add(x);
-                v.add(y);
             }
-            v[0] = x;
-            v[1] = y;
-            output.grow(v);
+            output.grow(x, y);
         }
     }
     return output;

@@ -144,7 +144,7 @@ void Crop::ready(PointContext ctx)
 Options Crop::getDefaultOptions()
 {
     Options options;
-    Option bounds("bounds",Bounds<double>(),"bounds to crop to");
+    Option bounds("bounds",BOX3D(),"bounds to crop to");
     Option polygon("polygon", std::string(""),
         "WKT POLYGON() string to use to filter points");
 
@@ -207,7 +207,7 @@ PointBufferSet Crop::run(PointBufferPtr buffer)
 
 void Crop::crop(PointBuffer& input, PointBuffer& output)
 {
-    Bounds<double> buffer_bounds = input.calculateBounds();
+    BOX3D buffer_bounds = input.calculateBounds();
 
     bool logOutput = (log()->getLevel() > LogLevel::Debug4);
     if (logOutput)

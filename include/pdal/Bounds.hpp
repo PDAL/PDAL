@@ -120,7 +120,7 @@ public:
     }
     bool contains(double x, double y, double z) const
     {
-        return minx <= x && x <= maxz &&
+        return minx <= x && x <= maxx &&
                miny <= y && y <= maxy &&
                minz <= z && z <= maxz;
     }
@@ -148,21 +148,26 @@ public:
     {
         return (!equal(rhs));
     }
-    void grow(double x, double y, double z)
+    void grow(double x, double y, double z=mind)
     {
-        if (minx < x) minx = x;
-        if (maxx > x) maxx = x;
-        if (miny < y) miny = y;
-        if (maxy > y) maxy = y;
-        if (minz < z) minz = z;
-        if (maxz > z) maxz = z;
+        if (x < minx) minx = x;
+        if (x > maxx) maxx = x;
+
+        if (y < miny) miny = y;
+        if (y > maxy) maxy = y;
+
+        if (z < minz) minz = z;
+        if (z > maxz) maxz = z;
+
     }
     void grow(const BOX3D& other)
     {
         if (other.minx < minx) minx = other.minx;
         if (other.maxx > maxx) maxx = other.maxx;
+
         if (other.miny < miny) miny = other.miny;
         if (other.maxy > maxy) maxy = other.maxy;
+
         if (other.minz < minz) minz = other.minz;
         if (other.maxz > maxz) maxz = other.maxz;
     }
@@ -171,8 +176,10 @@ public:
     {
         if (x > minx) minx = x;
         if (x < maxx) maxx = x;
+
         if (y > maxy) miny = y;
         if (y < maxy) maxy = y;
+
         if (z > maxz) minz = z;
         if (z < maxz) maxz = z;
     }
@@ -180,8 +187,10 @@ public:
     {
         if (other.minx > minx) minx = other.minx;
         if (other.maxx < maxx) maxx = other.maxx;
+
         if (other.miny > miny) miny = other.miny;
         if (other.maxy < maxy) maxy = other.maxy;
+
         if (other.minz < minz) minz = other.minz;
         if (other.maxz > maxz) maxz = other.maxz;
     }
@@ -205,16 +214,45 @@ public:
         return minx <= other.maxx && maxx >= other.minx &&
                miny <= other.maxy && maxy >= other.miny &&
                minz <= other.maxz && maxz >= other.minz;
-
-
     }
+
+    void clear()
+    {
+        minx = maxd; miny = maxd; minz = maxd;
+        maxx = mind; maxy = maxd; maxz = maxd;
+    }
+
+    std::string toBox(uint32_t precision = 8, uint32_t dimensions=2) const
+    {
+        std::stringstream oss;
+
+        oss.precision(precision);
+        oss.setf(std::ios_base::fixed, std::ios_base::floatfield);
+
+
+        if (dimensions  == 2)
+        {
+            oss << "box(";
+            oss << minx << " " << miny << ", ";
+            oss << maxx << " " << maxy << ")";
+        }
+
+        else if (dimensions == 3)
+        {
+            oss << "box3d(";
+            oss << minx << " " << miny << " " << minz << ", ";
+            oss << maxx << " " << maxy << " " << maxz << ")";
+        }
+        return oss.str();
+    }
+
 
     std::string toWKT(uint32_t precision = 8) const
     {
         std::stringstream oss;
 
         oss.precision(precision);
-		oss.setf(std::ios_base::fixed, std::ios_base::floatfield);
+        oss.setf(std::ios_base::fixed, std::ios_base::floatfield);
 
         oss << "POLYGON ((";
 
@@ -224,8 +262,8 @@ public:
         oss << maxx << " " << miny << ", ";
         oss << minx << " " << miny;
 
-		// Nothing happens for 3D bounds.
-		// else if (m_ranges.size() == 3 || (dimensions != 0 && dimensions == 3))
+        // Nothing happens for 3D bounds.
+        // else if (m_ranges.size() == 3 || (dimensions != 0 && dimensions == 3))
 //         {
 //             oss << minx << " " << miny << " " << getMaximum(2) << ", ";
 //             oss << minx << " " << maxy << " " << getMaximum(2) << ", ";
@@ -691,7 +729,7 @@ public:
         std::stringstream oss;
 
         oss.precision(precision);
-		oss.setf(std::ios_base::fixed, std::ios_base::floatfield);
+        oss.setf(std::ios_base::fixed, std::ios_base::floatfield);
 
         oss << "POLYGON ((";
 
@@ -701,8 +739,8 @@ public:
         oss << getMaximum(0) << " " << getMinimum(1) << ", ";
         oss << getMinimum(0) << " " << getMinimum(1);
 
-		// Nothing happens for 3D bounds.
-		// else if (m_ranges.size() == 3 || (dimensions != 0 && dimensions == 3))
+        // Nothing happens for 3D bounds.
+        // else if (m_ranges.size() == 3 || (dimensions != 0 && dimensions == 3))
 //         {
 //             oss << getMinimum(0) << " " << getMinimum(1) << " " << getMaximum(2) << ", ";
 //             oss << getMinimum(0) << " " << getMaximum(1) << " " << getMaximum(2) << ", ";
@@ -719,19 +757,19 @@ public:
         std::stringstream oss;
 
         oss.precision(precision);
-		oss.setf(std::ios_base::fixed, std::ios_base::floatfield);
+        oss.setf(std::ios_base::fixed, std::ios_base::floatfield);
 
 
-		if (dimensions  == 2)
-		{
-	        oss << "BOX(";
-	        oss << getMinimum(0) << " " << getMinimum(1) << ", ";
-	        oss << getMaximum(0) << " " << getMaximum(1) << ")";
-		}
-
-		else if (dimensions == 3)
+        if (dimensions  == 2)
         {
-	        oss << "BOX3D(";
+            oss << "box(";
+            oss << getMinimum(0) << " " << getMinimum(1) << ", ";
+            oss << getMaximum(0) << " " << getMaximum(1) << ")";
+        }
+
+        else if (dimensions == 3)
+        {
+            oss << "box3d(";
             oss << getMinimum(0) << " " << getMinimum(1) << " " << getMinimum(2) << ", ";
             oss << getMaximum(0) << " " << getMaximum(1) << " " << getMaximum(2) << ")";
         }

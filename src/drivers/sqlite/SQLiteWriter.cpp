@@ -82,7 +82,7 @@ void SQLiteWriter::processOptions(const Options& options)
     {
         m_connection =
             options.getValueOrDefault<std::string>("filename", "");
-        
+
         if (!m_connection.size())
         throw sqlite_driver_error("unable to connect to database, "
             "no connection string was given!");
@@ -95,7 +95,7 @@ void SQLiteWriter::processOptions(const Options& options)
         options.getValueOrDefault<std::string>("cloud_column_name", "id");
     m_srid =
         m_options.getValueOrDefault<boost::uint32_t>("srid", 4326);
-    m_is3d = m_options.getValueOrDefault<bool>("is3d", false);    
+    m_is3d = m_options.getValueOrDefault<bool>("is3d", false);
 }
 
 
@@ -117,7 +117,7 @@ void SQLiteWriter::initialize()
             oss << "SELECT InitSpatialMetadata()";
             m_session->execute(oss.str());
         }
-        
+
     }
     catch (sqlite::sqlite_driver_error const& e)
     {
@@ -152,7 +152,7 @@ void SQLiteWriter::writeInit()
 {
     if (m_sdo_pc_is_initialized)
         return;
-    
+
     // m_block_insert_query << "INSERT INTO " <<
     //     boost::to_lower_copy(m_block_table) << " ("<<
     //     boost::to_lower_copy(m_cloud_column) <<
@@ -164,8 +164,8 @@ void SQLiteWriter::writeInit()
         boost::to_lower_copy(m_cloud_column) <<
         ", block_id, num_points, points, extent, bbox) VALUES (" <<
         " ?, ?, ?, ?, "
-        "ST_GeometryFromText(?,?), ?)";    
-    
+        "ST_GeometryFromText(?,?), ?)";
+
     // m_block_insert_query << "INSERT INTO " <<
     //     boost::to_lower_copy(m_block_table) << " ("<<
     //     boost::to_lower_copy(m_cloud_column) <<
@@ -178,13 +178,13 @@ void SQLiteWriter::writeInit()
     bool bHaveBlockTable = m_session->doesTableExist(m_block_table);
     bool bHaveCloudTable = m_session->doesTableExist(m_cloud_table);
 
-    log()->get(LogLevel::Debug) << "bHaveBlockTable '" 
+    log()->get(LogLevel::Debug) << "bHaveBlockTable '"
                          << bHaveBlockTable
-                         <<"'"<< std::endl;   
-    log()->get(LogLevel::Debug) << "bHaveCloudTable '" 
+                         <<"'"<< std::endl;
+    log()->get(LogLevel::Debug) << "bHaveCloudTable '"
                          << bHaveCloudTable
-                         <<"'"<< std::endl;   
-        
+                         <<"'"<< std::endl;
+
     if (m_options.getValueOrDefault<bool>("overwrite", true))
     {
         if (bHaveBlockTable)
@@ -240,9 +240,9 @@ void SQLiteWriter::CreateBlockTable()
         " points BLOB," << " bbox box3d " << ")";
 
     m_session->execute(oss.str());
-    log()->get(LogLevel::Debug) << "Created block table '" 
-                         << boost::to_lower_copy(m_block_table) 
-                         << "'" <<std::endl;        
+    log()->get(LogLevel::Debug) << "Created block table '"
+                         << boost::to_lower_copy(m_block_table)
+                         << "'" <<std::endl;
 
     oss.str("");
     {
@@ -250,9 +250,9 @@ void SQLiteWriter::CreateBlockTable()
             << "'," << "'extent'" << ","
             << m_srid << ", 'POLYGON', 'XY')";
         m_session->execute(oss.str());
-        log()->get(LogLevel::Debug) << "Added geometry column for block table '" 
-                             << boost::to_lower_copy(m_block_table) 
-                             <<"'"<< std::endl;        
+        log()->get(LogLevel::Debug) << "Added geometry column for block table '"
+                             << boost::to_lower_copy(m_block_table)
+                             <<"'"<< std::endl;
     }
 }
 
@@ -264,24 +264,24 @@ void SQLiteWriter::DeleteBlockTable()
     oss << "DELETE FROM " << m_block_table;
     m_session->execute(oss.str());
     oss.str("");
-    log()->get(LogLevel::Debug) << "Deleted rows from block table '" 
-                         << boost::to_lower_copy(m_block_table) 
-                         << "'" <<std::endl;        
-   
+    log()->get(LogLevel::Debug) << "Deleted rows from block table '"
+                         << boost::to_lower_copy(m_block_table)
+                         << "'" <<std::endl;
+
     // Drop the table's dependencies
     // We need to clean up the geometry column before dropping the table
     oss << "SELECT DiscardGeometryColumn('" <<
         boost::to_lower_copy(m_block_table) << "', 'extent')";
     m_session->execute(oss.str());
-    log()->get(LogLevel::Debug) << "Dropped geometry column for block table" 
-                         << std::endl;        
+    log()->get(LogLevel::Debug) << "Dropped geometry column for block table"
+                         << std::endl;
     oss.str("");
 
     oss << "DROP TABLE " << boost::to_lower_copy(m_block_table);
     m_session->execute(oss.str());
-    log()->get(LogLevel::Debug) << "Dropped block table '" 
-                         << boost::to_lower_copy(m_block_table) 
-                         << "'" <<std::endl;        
+    log()->get(LogLevel::Debug) << "Dropped block table '"
+                         << boost::to_lower_copy(m_block_table)
+                         << "'" <<std::endl;
 
 }
 
@@ -295,19 +295,19 @@ void SQLiteWriter::CreateCloudTable()
         " INTEGER PRIMARY KEY AUTOINCREMENT," << " schema TEXT," <<
         " block_table varchar(64)" << ")";
     m_session->execute(oss.str());
-    log()->get(LogLevel::Debug) << "Created cloud table '" 
-                         << boost::to_lower_copy(m_cloud_table) 
-                         << "'" <<std::endl;        
+    log()->get(LogLevel::Debug) << "Created cloud table '"
+                         << boost::to_lower_copy(m_cloud_table)
+                         << "'" <<std::endl;
 
     boost::uint32_t nDim = 2;
 
     oss.str("");
-    oss << "SELECT AddGeometryColumn('" 
-        << boost::to_lower_copy(m_cloud_table) 
+    oss << "SELECT AddGeometryColumn('"
+        << boost::to_lower_copy(m_cloud_table)
         << "'," << "'extent'" << "," << m_srid << ", 'POLYGON', 'XY')";
     m_session->execute(oss.str());
-    log()->get(LogLevel::Debug) << "Added geometry column to cloud table '" 
-                         << boost::to_lower_copy(m_cloud_table) << "'" <<std::endl;        
+    log()->get(LogLevel::Debug) << "Added geometry column to cloud table '"
+                         << boost::to_lower_copy(m_cloud_table) << "'" <<std::endl;
 }
 
 void SQLiteWriter::DeleteCloudTable()
@@ -318,9 +318,9 @@ void SQLiteWriter::DeleteCloudTable()
     oss << "DELETE FROM " << m_cloud_table;
     m_session->execute(oss.str());
     oss.str("");
-    log()->get(LogLevel::Debug) << "Deleted records from cloud table '" 
-                         << boost::to_lower_copy(m_cloud_table) 
-                         << "'" <<std::endl;        
+    log()->get(LogLevel::Debug) << "Deleted records from cloud table '"
+                         << boost::to_lower_copy(m_cloud_table)
+                         << "'" <<std::endl;
 
     // Go drop the table
     // We need to clean up the geometry column before dropping the table
@@ -328,15 +328,15 @@ void SQLiteWriter::DeleteCloudTable()
         boost::to_lower_copy(m_cloud_table) << "', 'extent')";
     m_session->execute(oss.str());
     oss.str("");
-    log()->get(LogLevel::Debug) << "Dropped geometry column from cloud table '" 
-                         << boost::to_lower_copy(m_cloud_table) 
+    log()->get(LogLevel::Debug) << "Dropped geometry column from cloud table '"
+                         << boost::to_lower_copy(m_cloud_table)
                          << "'" <<std::endl;
 
     oss << "DROP TABLE " << boost::to_lower_copy(m_cloud_table);
     m_session->execute(oss.str());
     oss.str("");
-    log()->get(LogLevel::Debug) << "Dropped cloud table '" 
-                         << boost::to_lower_copy(m_cloud_table) 
+    log()->get(LogLevel::Debug) << "Dropped cloud table '"
+                         << boost::to_lower_copy(m_cloud_table)
                          << "'" <<std::endl;
 }
 
@@ -412,7 +412,7 @@ void SQLiteWriter::done(PointContextRef ctx)
     {
         CreateIndexes(m_block_table, "extent", m_is3d);
     }
-    
+
     std::string post_sql = m_options.getValueOrDefault<std::string>("post_sql", "");
     if (post_sql.size())
     {
@@ -426,9 +426,9 @@ void SQLiteWriter::done(PointContextRef ctx)
         }
         m_session->execute(sql);
     }
-    
+
     m_session->commit();
-    
+
 }
 
 
@@ -459,10 +459,10 @@ void SQLiteWriter::CreateCloud()
 
     schema::Writer writer(m_dims, m_types);
     std::string xml = writer.getXML();
-    
+
     records rs;
     row r;
-    r.push_back(column(xml)); 
+    r.push_back(column(xml));
     rs.push_back(r);
     m_session->insert(oss.str(), rs);
     oss.str("");
@@ -485,8 +485,8 @@ void SQLiteWriter::CreateCloud()
     {
         records rs;
         row r;
-          
-        r.push_back(column(bounds)); 
+
+        r.push_back(column(bounds));
         r.push_back(column(m_srid));
         r.push_back(column(id));
         rs.push_back(r);
@@ -497,7 +497,7 @@ void SQLiteWriter::CreateCloud()
             boost::to_lower_copy(m_cloud_column) <<"=?";
 
         m_session->insert(oss.str(), rs);
-        log()->get(LogLevel::Debug) << "Inserted boundary wkt into cloud table " << std::endl;        
+        log()->get(LogLevel::Debug) << "Inserted boundary wkt into cloud table " << std::endl;
     }
 }
 
@@ -573,7 +573,7 @@ void SQLiteWriter::writeTile(PointBuffer const& buffer)
     size_t outbufSize = m_pointSize * buffer.size();
     std::unique_ptr<char> outbuf(new char[outbufSize]);
     char *pos = outbuf.get();
-    
+
     for (PointId id = 0; id < buffer.size(); ++id)
     {
         auto ti = m_types.begin();
@@ -585,18 +585,18 @@ void SQLiteWriter::writeTile(PointBuffer const& buffer)
         if (id % 100 == 0)
             m_callback->invoke(id);
     }
-    
+
     records rs;
     row r;
 
-    boost::uint32_t precision(9);    
-    pdal::Bounds<double> b = buffer.calculateBounds(true);
+    boost::uint32_t precision(9);
+    BOX3D b = buffer.calculateBounds(true);
     std::string bounds = b.toWKT(precision); // polygons are only 2d, not cubes
 
     std::string box = b.toBox(precision, 3);
     log()->get(LogLevel::Debug3) << "extent: " << bounds << std::endl;
     log()->get(LogLevel::Debug3) << "bbox: " << box << std::endl;
-  
+
     r.push_back(column(m_obj_id));
     r.push_back(column(m_block_id));
     r.push_back(column(buffer.size()));

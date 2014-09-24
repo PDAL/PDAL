@@ -68,7 +68,6 @@ Writer::Writer(const Options& options)
     : pdal::Writer(options)
     , m_createIndex(false)
     , m_bDidCreateBlockTable(false)
-    , m_pcExtent(3)
     , m_pc_id(0)
     , m_srid(0)
     , m_3d(false)
@@ -87,7 +86,7 @@ Writer::~Writer()
 
 void Writer::initialize()
 {
-    GlobalEnvironment::get().getGDALDebug()->addLog(log());    
+    GlobalEnvironment::get().getGDALDebug()->addLog(log());
     m_connection = connect(m_connSpec);
     m_gtype = getGType();
 }
@@ -336,32 +335,32 @@ void Writer::createSDOEntry()
         s_srid << m_srid;
 
     double tolerance = 0.05;
-    pdal::Bounds<double> e = m_bounds;
+    BOX3D e = m_bounds;
     if (isGeographic(m_srid))
     {
         //This should be overrideable
-        e.setMinimum(0, -180.0);
-        e.setMaximum(0, 180.0);
-        e.setMinimum(1, -90.0);
-        e.setMaximum(1, 90.0);
-        e.setMinimum(2, 0.0);
-        e.setMaximum(2, 20000.0);
+        e.minx = -180.0;
+        e.maxx = 180.0;
+        e.miny = -90.0;
+        e.maxy = 90.0;
+        e.minz = 0.0;
+        e.maxz = 20000.0;
 
         tolerance = 0.0005;
     }
 
     oss <<  "INSERT INTO user_sdo_geom_metadata VALUES ('" <<
         m_blockTableName << "','blk_extent', MDSYS.SDO_DIM_ARRAY(";
-    oss << "MDSYS.SDO_DIM_ELEMENT('X', " << e.getMinimum(0) << "," <<
-        e.getMaximum(0) <<"," << tolerance << "),"
-        "MDSYS.SDO_DIM_ELEMENT('Y', " << e.getMinimum(1) << "," <<
-        e.getMaximum(1) <<"," << tolerance << ")";
+    oss << "MDSYS.SDO_DIM_ELEMENT('X', " << e.minx << "," <<
+        e.maxx <<"," << tolerance << "),"
+        "MDSYS.SDO_DIM_ELEMENT('Y', " << e.miny << "," <<
+        e.maxy <<"," << tolerance << ")";
 
     if (m_3d)
     {
         oss << ",";
-        oss <<"MDSYS.SDO_DIM_ELEMENT('Z', "<< e.getMinimum(2) << "," <<
-            e.getMaximum(2) << "," << tolerance << ")";
+        oss <<"MDSYS.SDO_DIM_ELEMENT('Z', "<< e.minz << "," <<
+            e.maxz << "," << tolerance << ")";
     }
     oss << ")," << s_srid.str() << ")";
 
@@ -557,38 +556,38 @@ void Writer::createPCEntry()
     s_schema << "xmltype(:" << nSchemaPos << ")";
 
     std::string eleminfo = createPCElemInfo();
-    Bounds<double> bounds = m_baseTableBounds;
+    BOX3D bounds = m_baseTableBounds;
     if (bounds.empty())
     {
         if (isGeographic(m_srid))
         {
-            bounds.setMinimum(0, -179.99);
-            bounds.setMinimum(1, -89.99);
-            bounds.setMinimum(2, 0.0);
-            bounds.setMaximum(0, 179.99);
-            bounds.setMaximum(1, 89.99);
-            bounds.setMaximum(2, 20000.0);
+            bounds.minx = -179.99;
+            bounds.miny = -89.99;
+            bounds.minz = 0.0;
+            bounds.maxx = 179.99;
+            bounds.maxy = 89.99;
+            bounds.maxz = 20000.0;
         }
         else
         {
-            bounds.setMinimum(0, 0.0);
-            bounds.setMinimum(1, 0.0);
-            bounds.setMinimum(2, 0.0);
-            bounds.setMaximum(0, 100.0);
-            bounds.setMaximum(1, 100.0);
-            bounds.setMaximum(2, 20000.0);
+            bounds.minx = 0.0;
+            bounds.miny = 0.0;
+            bounds.minz = 0.0;
+            bounds.maxx = 100.0;
+            bounds.maxy = 100.0;
+            bounds.maxz = 20000.0;
         }
     }
     s_geom << "           mdsys.sdo_geometry(" << m_gtype << ", " <<
         s_srid.str() << ", null,\n"
         "              mdsys.sdo_elem_info_array"<< eleminfo <<",\n"
         "              mdsys.sdo_ordinate_array(\n";
-    s_geom << bounds.getMinimum(0) << "," << bounds.getMinimum(1) << ",";
+    s_geom << bounds.minx << "," << bounds.miny << ",";
     if (m_3d)
-        s_geom << bounds.getMinimum(2) << ",";
-    s_geom << bounds.getMaximum(0) << "," << bounds.getMaximum(1);
+        s_geom << bounds.minz << ",";
+    s_geom << bounds.maxy<< "," << bounds.maxy;
     if (m_3d)
-        s_geom << "," << bounds.getMaximum(2);
+        s_geom << "," << bounds.maxy;
     s_geom << "))";
 
     schema::Writer writer(m_dims, m_types, m_orientation);
@@ -726,7 +725,7 @@ void Writer::processOptions(const Options& options)
     m_srid = options.getValueOrThrow<uint32_t>("srid");
     m_pack = options.getValueOrDefault<bool>("pack_ignored_fields", true);
     m_baseTableBounds =
-        getDefaultedOption<pdal::Bounds<double>>(options, "base_table_bounds");
+        getDefaultedOption<BOX3D>(options, "base_table_bounds");
     m_baseTableName = boost::to_upper_copy(
         options.getValueOrThrow<std::string>("base_table_name"));
     m_blockTableName = boost::to_upper_copy(
@@ -830,7 +829,7 @@ void Writer::done(PointContextRef ctx)
 {
     if (!m_connection)
         return;
-    
+
     m_connection->Commit();
     if (m_createIndex && m_bDidCreateBlockTable)
     {
@@ -866,18 +865,18 @@ void Writer::setElements(Statement statement, OCIArray* elem_info)
 
 
 void Writer::setOrdinates(Statement statement, OCIArray* ordinates,
-    pdal::Bounds<double> const& extent)
+    const BOX3D& extent)
 {
 
-    statement->AddElement(ordinates, extent.getMinimum(0));
-    statement->AddElement(ordinates, extent.getMinimum(1));
+    statement->AddElement(ordinates, extent.minx);
+    statement->AddElement(ordinates, extent.miny);
     if (m_3d)
-        statement->AddElement(ordinates, extent.getMinimum(2));
+        statement->AddElement(ordinates, extent.minz);
 
-    statement->AddElement(ordinates, extent.getMaximum(0));
-    statement->AddElement(ordinates, extent.getMaximum(1));
+    statement->AddElement(ordinates, extent.maxx);
+    statement->AddElement(ordinates, extent.maxy);
     if (m_3d)
-        statement->AddElement(ordinates, extent.getMaximum(2));
+        statement->AddElement(ordinates, extent.maxz);
 }
 
 
@@ -1040,7 +1039,7 @@ void Writer::writeTile(PointBuffer const& buffer)
         srid = m_srid;
     statement->Bind(&srid);
     log()->get(LogLevel::Debug4) << "OCI SRID " << srid << std::endl;
-    
+
 
     // :7
     OCIArray* sdo_elem_info = 0;
@@ -1053,7 +1052,7 @@ void Writer::writeTile(PointBuffer const& buffer)
     m_connection->CreateType(&sdo_ordinates, m_connection->GetOrdinateType());
 
     // x0, x1, y0, y1, z0, z1, bUse3d
-    pdal::Bounds<double> bounds = buffer.calculateBounds(true);
+    BOX3D bounds = buffer.calculateBounds(true);
     // Cumulate a total bounds for the file.
     m_pcExtent.grow(bounds);
 
@@ -1067,7 +1066,7 @@ void Writer::writeTile(PointBuffer const& buffer)
         long long_partition_id = (long)m_blockTablePartitionValue;
         statement->Bind(&long_partition_id);
         log()->get(LogLevel::Debug4) << "Partition ID " << long_partition_id <<
-            std::endl;        
+            std::endl;
     }
 
     try
@@ -1147,7 +1146,7 @@ void Writer::turnOn_SDO_PC_Trigger(std::string trigger_name)
 
 void Writer::updatePCExtent()
 {
-    Bounds<double> bounds = m_baseTableBounds;
+    BOX3D bounds = m_baseTableBounds;
     if (bounds.empty())
         bounds = m_pcExtent;
 
@@ -1160,13 +1159,13 @@ void Writer::updatePCExtent()
         "              mdsys.sdo_elem_info_array" << createPCElemInfo() << ",\n"
         "              mdsys.sdo_ordinate_array(\n";
 
-    s_geom << bounds.getMinimum(0) << "," << bounds.getMinimum(1) << ",";
+    s_geom << bounds.minx << "," << bounds.miny << ",";
     if (m_3d)
-        s_geom << bounds.getMinimum(2) << ",";
+        s_geom << bounds.minz << ",";
 
-    s_geom << bounds.getMaximum(0) << "," << bounds.getMaximum(1);
+    s_geom << bounds.maxx << "," << bounds.maxy;
     if (m_3d)
-        s_geom << "," << bounds.getMaximum(2);
+        s_geom << "," << bounds.maxz;
     s_geom << "))";
 
     std::ostringstream oss;

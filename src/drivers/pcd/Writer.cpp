@@ -78,7 +78,7 @@ Options PcdWriter::getDefaultOptions()
 void PcdWriter::write(const PointBuffer& data)
 {
     pcl::PointCloud<XYZIRGBA>::Ptr cloud(new pcl::PointCloud<XYZIRGBA>);
-    Bounds<double> const& buffer_bounds = data.calculateBounds();
+    BOX3D const& buffer_bounds = data.calculateBounds();
     pdal::PDALtoPCD(const_cast<PointBuffer&>(data), *cloud, buffer_bounds);
 
     pcl::PCDWriter w;

@@ -91,15 +91,20 @@ public:
 
     template <class BBOX> bool kdtree_get_bbox(BBOX &bb) const
     {
-        pdal::Bounds<double> bounds = m_buf.calculateBounds();
+        BOX3D bounds = m_buf.calculateBounds();
         if (bounds.empty())
             return false;
 
         size_t nDims = m_3d ? 3 : 2;
-        for (size_t i = 0; i < nDims; ++i)
+        bb[0].low = bounds.minx;
+        bb[0].high = bounds.maxx;
+        bb[1].low = bounds.miny;
+        bb[1].high = bounds.maxy;
+
+        if (m_3d)
         {
-            bb[i].low = bounds.getMinimum(i);
-            bb[i].high = bounds.getMaximum(i);
+            bb[2].low = bounds.minx;
+            bb[2].high = bounds.maxx;
         }
         return true;
     }
