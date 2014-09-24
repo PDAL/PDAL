@@ -111,5 +111,112 @@ std::istream& operator>>(std::istream& istr, Bounds<double>& bounds)
 
     return istr;
 }
+std::istream& operator>>(std::istream& istr, BOX3D& bounds)
+{
+
+
+    istr.get();
+    if (istr.eof())
+    {
+        BOX3D output;
+        bounds = output;
+        return istr;
+    }
+
+    if (!istr.good()) throw bounds_error("stream is unreadable, unable to parse BOX3D");
+
+    istr.unget();
+
+    // A really dirty way to check for an empty bounds object right off
+    // the bat
+    const char left_paren = (char)istr.get();
+    if (!istr.good()) throw bounds_error("stream0 is no good unable to parse BOX3D");
+    const char right_paren = (char)istr.get();
+
+    if (left_paren == '(' && right_paren == ')')
+    {
+        BOX3D output;
+        bounds = output;
+        return istr;
+    }
+    istr.unget();
+    istr.unget(); // ()
+
+    std::vector<double> v;
+
+    Utils::eatwhitespace(istr);
+
+    if (!Utils::eatcharacter(istr,'('))
+        throw bounds_error("Bounds parser failed at first parentheses");
+
+    bool done = false;
+    while (!done)
+    {
+        Utils::eatwhitespace(istr);
+        double low, high;
+
+
+        if (!Utils::eatcharacter(istr,'['))
+            throw pdal_error("Range parser failed finding expected '[' character");
+
+        Utils::eatwhitespace(istr);
+
+        istr >> low;
+
+        Utils::eatwhitespace(istr);
+
+        if (!Utils::eatcharacter(istr,','))
+            throw pdal_error("Range parser failed finding expected ',' character");
+
+        Utils::eatwhitespace(istr);
+
+        istr >> high;
+
+        if (!Utils::eatcharacter(istr,']'))
+            throw pdal_error("Range parser failed finding expected ']' character");
+
+        Utils::eatwhitespace(istr);
+        if (Utils::eatcharacter(istr,','))
+        {
+            done = false;
+        }
+        else if (Utils::eatcharacter(istr,')'))
+        {
+            done = true;
+        }
+        else
+        {
+            throw bounds_error("BOX3D parser failed");
+        }
+        v.push_back(low); v.push_back(high);
+    }
+
+    BOX3D xxx;
+    if (v.size() == 4)
+    {
+        xxx.minx = v[0];
+        xxx.maxx = v[1];
+        xxx.miny = v[2];
+        xxx.maxx = v[3];
+    } else if (v.size() == 6)
+    {
+        xxx.minx = v[0];
+        xxx.maxx = v[1];
+        xxx.miny = v[2];
+        xxx.maxy = v[3];
+        xxx.minz = v[4];
+        xxx.maxz = v[5];
+    } else
+    {
+        throw bounds_error("Bounds was not of 4 or 6 items!");
+    }
+
+    bounds = xxx;
+
+    Utils::eatwhitespace(istr);
+
+    return istr;
+}
+
 
 } // namespace

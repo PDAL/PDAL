@@ -57,23 +57,23 @@ public:
     SET_STAGE_NAME("filters.crop", "Crop Filter")
     SET_STAGE_LINK("http://pdal.io/stages/filters.crop.html")
     SET_STAGE_ENABLED(true)
-    
+
     Crop(const Options&);
-    
+
     static Options getDefaultOptions();
 
     const Bounds<double>& getBounds() const;
 
 private:
-    Bounds<double> m_bounds;
+    BOX3D m_bounds;
     bool m_cropOutside;
     std::string m_poly;
 
 #ifdef PDAL_HAVE_GEOS
 	GEOSContextHandle_t m_geosEnvironment;
-    GEOSGeometry* m_geosGeometry; 
+    GEOSGeometry* m_geosGeometry;
     GEOSPreparedGeometry const* m_geosPreparedGeometry;
-#else   
+#else
     void* m_geosEnvironment;
     void* m_geosGeometry;
     void* m_geosPreparedGeometry;
@@ -85,8 +85,8 @@ private:
     virtual PointBufferSet run(PointBufferPtr buffer);
     virtual void done(PointContext ctx);
     void crop(PointBuffer& input, PointBuffer& output);
-    Bounds <double> computeBounds(GEOSGeometry const *geometry);
-    
+    BOX3D computeBounds(GEOSGeometry const *geometry);
+
     Crop& operator=(const Crop&); // not implemented
     Crop(const Crop&); // not implemented
 };

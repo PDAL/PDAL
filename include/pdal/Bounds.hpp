@@ -65,6 +65,190 @@ namespace pdal
     \endverbatim
 */
 
+static const double mind = (std::numeric_limits<double>::min)();
+static const double maxd = (std::numeric_limits<double>::max)();
+class PDAL_DLL BOX3D
+{
+public:
+
+    BOX3D()
+    : minx(maxd)
+    , maxx(mind)
+    , miny(maxd)
+    , maxy(mind)
+    , minz(maxd)
+    , maxz(mind) {}
+
+    BOX3D( double minx,
+           double miny,
+           double maxx,
+           double maxy)
+    : minx(minx)
+    , maxx(maxx)
+    , miny(miny)
+    , maxy(maxy)
+    , minz(maxd)
+    , maxz(mind)
+    {}
+
+    BOX3D( double minx,
+           double miny,
+           double minz,
+           double maxx,
+           double maxy,
+           double maxz)
+    : minx(minx)
+    , maxx(maxx)
+    , miny(miny)
+    , maxy(maxy)
+    , minz(minz)
+    , maxz(maxz)
+    {}
+
+    double minx;
+    double maxx;
+    double miny;
+    double maxy;
+    double minz;
+    double maxz;
+
+    bool empty() const
+    {
+        return  Utils::compare_distance(minx, maxd) && Utils::compare_distance(maxx, mind) &&
+                Utils::compare_distance(miny, maxd) && Utils::compare_distance(maxy, mind) &&
+                Utils::compare_distance(minz, maxd) && Utils::compare_distance(maxz, mind);
+    }
+    bool contains(double x, double y, double z) const
+    {
+        return minx <= x && x <= maxz &&
+               miny <= y && y <= maxy &&
+               minz <= z && z <= maxz;
+    }
+
+    bool contains(const BOX3D& other) const
+    {
+        return minx <= other.minx && other.maxx <= maxx &&
+               miny <= other.miny && other.maxy <= maxy &&
+               minz <= other.minz && other.maxz <= maxz;
+    }
+    bool equal(const BOX3D& other) const
+    {
+        return  Utils::compare_distance(minx, other.minx) && Utils::compare_distance(maxx, other.maxx) &&
+                Utils::compare_distance(miny, other.miny) && Utils::compare_distance(maxy, other.maxy) &&
+                Utils::compare_distance(minz, other.minz) && Utils::compare_distance(maxz, other.maxz);
+
+    }
+    inline bool operator==(BOX3D const& rhs) const
+    {
+        return equal(rhs);
+    }
+
+    /// Inequality operator
+    inline bool operator!=(BOX3D const& rhs) const
+    {
+        return (!equal(rhs));
+    }
+    void grow(double x, double y, double z)
+    {
+        if (minx < x) minx = x;
+        if (maxx > x) maxx = x;
+        if (miny < y) miny = y;
+        if (maxy > y) maxy = y;
+        if (minz < z) minz = z;
+        if (maxz > z) maxz = z;
+    }
+    void grow(const BOX3D& other)
+    {
+        if (other.minx < minx) minx = other.minx;
+        if (other.maxx > maxx) maxx = other.maxx;
+        if (other.miny < miny) miny = other.miny;
+        if (other.maxy > maxy) maxy = other.maxy;
+        if (other.minz < minz) minz = other.minz;
+        if (other.maxz > maxz) maxz = other.maxz;
+    }
+
+    void clip(double x, double y, double z)
+    {
+        if (x > minx) minx = x;
+        if (x < maxx) maxx = x;
+        if (y > maxy) miny = y;
+        if (y < maxy) maxy = y;
+        if (z > maxz) minz = z;
+        if (z < maxz) maxz = z;
+    }
+    void clip(const BOX3D& other)
+    {
+        if (other.minx > minx) minx = other.minx;
+        if (other.maxx < maxx) maxx = other.maxx;
+        if (other.miny > miny) miny = other.miny;
+        if (other.maxy < maxy) maxy = other.maxy;
+        if (other.minz < minz) minz = other.minz;
+        if (other.maxz > maxz) maxz = other.maxz;
+    }
+
+    bool is_z_empty() const
+    {
+        if (Utils::compare_distance<double>(minz, (std::numeric_limits<double>::max)()) &&
+            Utils::compare_distance<double>(maxz, (std::numeric_limits<double>::min)()) )
+            return true;
+        return false;
+    }
+
+    bool overlaps(const BOX3D& other)
+    {
+        if (is_z_empty())
+        {
+            return minx <= other.maxx && maxx >= other.minx &&
+                   miny <= other.maxy && maxy >= other.miny;
+        }
+
+        return minx <= other.maxx && maxx >= other.minx &&
+               miny <= other.maxy && maxy >= other.miny &&
+               minz <= other.maxz && maxz >= other.minz;
+
+
+    }
+
+    std::string toWKT(uint32_t precision = 8) const
+    {
+        std::stringstream oss;
+
+        oss.precision(precision);
+		oss.setf(std::ios_base::fixed, std::ios_base::floatfield);
+
+        oss << "POLYGON ((";
+
+        oss << minx << " " << miny << ", ";
+        oss << minx << " " << maxy << ", ";
+        oss << maxx << " " << maxy << ", ";
+        oss << maxx << " " << miny << ", ";
+        oss << minx << " " << miny;
+
+		// Nothing happens for 3D bounds.
+		// else if (m_ranges.size() == 3 || (dimensions != 0 && dimensions == 3))
+//         {
+//             oss << minx << " " << miny << " " << getMaximum(2) << ", ";
+//             oss << minx << " " << maxy << " " << getMaximum(2) << ", ";
+//             oss << maxx << " " << maxy << " " << getMaximum(2) << ", ";
+//             oss << maxx << " " << miny << " " << getMaximum(2) << ", ";
+//             oss << minx << " " << miny << " " << getMaximum(2);
+//         }
+        oss << "))";
+        return oss.str();
+    }
+
+    /** @name Default extent
+    */
+    /// Returns a staticly-allocated Bounds extent that represents infinity
+    static const BOX3D& getDefaultSpatialExtent()
+    {
+        static BOX3D v(mind,mind,mind,maxd,maxd,maxd);
+        return v;
+    }
+
+
+};
+
 template <typename T>
 class PDAL_DLL Bounds
 {
@@ -260,16 +444,6 @@ public:
     }
 
     /// Calculate a n-dimensional volume for the Bounds instance
-    T volume() const
-    {
-        T output = T(1);
-        for (std::size_t i = 0; i < size(); i++)
-        {
-            output = output * m_ranges[i].length();
-        }
-
-        return output;
-    }
 
     /// Returns true if the pdal::Bounds<T>::size() is 0 or
     /// all dimensions within the bounds are empty.
@@ -344,29 +518,29 @@ public:
 
     /// @name Algebraic operations
 
-    /// Synonym for intersects for now
+//     /// Synonym for intersects for now
     bool overlaps(Bounds const& other) const
     {
         if (other.size() != size())
         {
             return false;
         }
-
+//
         for (std::size_t i = 0; i < size(); i++)
         {
             if (m_ranges[i].overlaps(other.m_ranges[i]))
                 return true;
         }
-
+//
         return false;
     }
-
+//
     /// Does this Bounds contain a point?
     bool contains(Vector<T> point) const
     {
         if (point.size() != size())
             return false;
-
+//
         for (std::size_t i = 0; i < size(); i++)
         {
             // As soon as it is not contains, we're false
@@ -375,7 +549,7 @@ public:
         }
         return true;
     }
-
+//
     /// Does this Bounds contain other?
     bool contains(Bounds<T> const& other) const
     {
@@ -387,9 +561,9 @@ public:
         }
         return true;
     }
-
+//
     /// @name Transformation
-
+//
     /// Shift each dimension by a vector of deltas
     void shift(std::vector<T> deltas)
     {
@@ -406,7 +580,7 @@ public:
             m_ranges[i].shift(deltas[i]);
         }
     }
-
+//
     /// Scale each dimension by a vector of deltas
     void scale(std::vector<T> deltas)
     {
@@ -423,7 +597,7 @@ public:
             m_ranges[i].scale(deltas[i]);
         }
     }
-
+//
     /// Clip this Bounds to the extent of r
     void clip(Bounds const& r)
     {
@@ -433,7 +607,7 @@ public:
             m_ranges[i].clip(ds[i]);
         }
     }
-
+//
     /// Grow to the union of two pdal::Bounds
     void grow(Bounds const& r)
     {
@@ -583,6 +757,24 @@ std::ostream& operator<<(std::ostream& ostr, const Bounds<T>& bounds)
 
 
 extern PDAL_DLL std::istream& operator>>(std::istream& istr, Bounds<double>& bounds);
+
+inline std::ostream& operator<<(std::ostream& ostr, const BOX3D& bounds)
+{
+    if (bounds.empty())
+    {
+        ostr << "()";
+        return ostr;
+    }
+
+    ostr << "(";
+    ostr << "[" << bounds.minx << ", " << bounds.maxx << "], "
+         << "[" << bounds.miny << ", " << bounds.maxy <<"]";
+    if (!bounds.is_z_empty())
+         ostr << ", [" <<  bounds.minz << ", " << bounds.maxz << "]";
+    ostr << ")";
+    return ostr;
+}
+extern PDAL_DLL std::istream& operator>>(std::istream& istr, BOX3D& bounds);
 
 
 } // namespace pdal

@@ -120,14 +120,14 @@ BOOST_AUTO_TEST_CASE(test_contains)
     Range<boost::uint8_t> r5(9,21);
     BOOST_CHECK(!r1.contains(r5));
 
-    BOOST_CHECK(r1.overlaps(r2));
-    BOOST_CHECK(r1.overlaps(r3));
-    BOOST_CHECK(r1.overlaps(r4));
-    BOOST_CHECK(r1.overlaps(r5));
-    BOOST_CHECK(r2.overlaps(r1));
-    BOOST_CHECK(r3.overlaps(r1));
-    BOOST_CHECK(r4.overlaps(r1));
-    BOOST_CHECK(r5.overlaps(r1));
+//     BOOST_CHECK(r1.overlaps(r2));
+//     BOOST_CHECK(r1.overlaps(r3));
+//     BOOST_CHECK(r1.overlaps(r4));
+//     BOOST_CHECK(r1.overlaps(r5));
+//     BOOST_CHECK(r2.overlaps(r1));
+//     BOOST_CHECK(r3.overlaps(r1));
+//     BOOST_CHECK(r4.overlaps(r1));
+//     BOOST_CHECK(r5.overlaps(r1));
 }
 
 BOOST_AUTO_TEST_CASE(test_empty)
@@ -212,23 +212,6 @@ BOOST_AUTO_TEST_CASE(test_output)
 
     BOOST_CHECK(out1 == "[1, 2]");
     BOOST_CHECK(out2 == "[1.1, 2.2]");
-}
-
-
-BOOST_AUTO_TEST_CASE(RangeTest_ptree)
-{
-    const Range<int> r1(23,56);
-    std::stringstream ss1(std::stringstream::in | std::stringstream::out);
-
-    boost::property_tree::ptree tree = pdal::utils::toPTree(r1);
-    boost::property_tree::write_xml(ss1, tree);
-
-    const std::string out1 = ss1.str();
-
-    static std::string xml_header = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
-    const std::string ref = xml_header + "<minimum>23</minimum><maximum>56</maximum>";
-
-    BOOST_CHECK_EQUAL(ref, out1);
 }
 
 

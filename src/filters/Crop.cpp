@@ -86,7 +86,7 @@ Crop::Crop(const Options& options) : pdal::Filter(options)
 void Crop::processOptions(const Options& options)
 {
     m_bounds =
-        options.getValueOrDefault<Bounds<double>>("bounds", Bounds<double>());
+        options.getValueOrDefault<BOX3D>("bounds", BOX3D());
     m_cropOutside = options.getValueOrDefault<bool>("outside", false);
     m_poly = options.getValueOrDefault<std::string>("polygon", "");
 }
@@ -158,13 +158,12 @@ Options Crop::getDefaultOptions()
 }
 
 
-Bounds<double> Crop::computeBounds(GEOSGeometry const *geometry)
+BOX3D Crop::computeBounds(GEOSGeometry const *geometry)
 {
     uint32_t numInputDims;
-    Bounds<double> output;
+    BOX3D output;
 
 #ifdef PDAL_HAVE_GEOS
-    bool bFirst(true);
 
     GEOSGeometry const* ring = GEOSGetExteriorRing_r(m_geosEnvironment,
         geometry);
@@ -177,7 +176,6 @@ Bounds<double> Crop::computeBounds(GEOSGeometry const *geometry)
 
     uint32_t count(0);
     GEOSCoordSeq_getSize_r(m_geosEnvironment, coords, &count);
-    pdal::Vector<double> p(0.0, 0.0, 0.0);
 
     double x(0.0);
     double y(0.0);
@@ -188,16 +186,7 @@ Bounds<double> Crop::computeBounds(GEOSGeometry const *geometry)
         GEOSCoordSeq_getOrdinate_r(m_geosEnvironment, coords, i, 1, &y);
         if (numInputDims > 2)
             GEOSCoordSeq_getOrdinate_r(m_geosEnvironment, coords, i, 2, &z);
-        p.set(0, x);
-        p.set(1, y);
-        if (numInputDims > 2)
-            p.set(2, z);
-        if (bFirst)
-        {
-            output = Bounds<double>(p, p);
-            bFirst = false;
-        }
-        output.grow(p);
+        output.grow(x, y, z);
     }
 #else
     boost::ignore_unused_variable_warning(geometry);
@@ -241,9 +230,7 @@ void Crop::crop(PointBuffer& input, PointBuffer& output)
         {
             // We don't have a polygon, just a bounds. Filter on that
             // by itself.
-            Vector<double> p(x,y,z);
-
-            if (!m_cropOutside && m_bounds.contains(p))
+            if (!m_cropOutside && m_bounds.contains(x, y, z))
                 output.appendPoint(input, idx);
         }
 #ifdef PDAL_HAVE_GEOS
