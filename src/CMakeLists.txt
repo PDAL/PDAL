@@ -349,7 +349,7 @@ set(PDAL_DRIVERS_P2G_HPP
   "${PDAL_P2G_HEADERS}/P2gWriter.hpp"
 )
 
-set (PDAL_DRIVERS_P2G_CPP 
+set (PDAL_DRIVERS_P2G_CPP
   "${PDAL_P2G_SRC}/P2gWriter.cpp"
 )
 
@@ -373,7 +373,7 @@ if (PDAL_HAVE_PCL)
 	"${PDAL_PCD_HEADERS}/Writer.hpp"
     )
 
-    set (PDAL_DRIVERS_PCD_CPP 
+    set (PDAL_DRIVERS_PCD_CPP
 	"${PDAL_PCD_SRC}/Common.cpp"
 	"${PDAL_PCD_SRC}/Reader.cpp"
 	"${PDAL_PCD_SRC}/Writer.cpp"
@@ -574,6 +574,7 @@ set(PDAL_FILTERS_HPP
   "${PDAL_FILTERS_HEADERS}/Chipper.hpp"
   "${PDAL_FILTERS_HEADERS}/Crop.hpp"
   "${PDAL_FILTERS_HEADERS}/Decimation.hpp"
+  "${PDAL_FILTERS_HEADERS}/Ferry.hpp"
   "${PDAL_FILTERS_HEADERS}/HexBin.hpp"
   "${PDAL_FILTERS_HEADERS}/InPlaceReprojection.hpp"
   "${PDAL_FILTERS_HEADERS}/Merge.hpp"
@@ -588,6 +589,7 @@ set (PDAL_FILTERS_CPP
   "${PDAL_FILTERS_SRC}/Chipper.cpp"
   "${PDAL_FILTERS_SRC}/Crop.cpp"
   "${PDAL_FILTERS_SRC}/Decimation.cpp"
+  "${PDAL_FILTERS_SRC}/Ferry.cpp"
   "${PDAL_FILTERS_SRC}/HexBin.cpp"
   "${PDAL_FILTERS_SRC}/Reprojection.cpp"
   "${PDAL_FILTERS_SRC}/Splitter.cpp"
