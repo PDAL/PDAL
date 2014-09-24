@@ -82,7 +82,7 @@ BOOST_AUTO_TEST_CASE(test_ferry_polygon)
     PointBufferSet pbSet = ferry.execute(ctx);
     BOOST_CHECK_EQUAL(pbSet.size(), 1);
     PointBufferPtr buffer = *pbSet.begin();
-    BOOST_CHECK_EQUAL(buffer->size(), 47u);
+    BOOST_CHECK_EQUAL(buffer->size(), 1065u);
 
 }
 
