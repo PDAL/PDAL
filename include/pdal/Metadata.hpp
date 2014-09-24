@@ -247,7 +247,7 @@ inline void MetadataNodeImpl::setValue<SpatialReference>(
 }
 
 template <>
-inline void MetadataNodeImpl::setValue<Bounds<double>>(const Bounds<double>& b)
+inline void MetadataNodeImpl::setValue<BOX3D>(const BOX3D& b)
 {
     std::ostringstream oss;
     oss << b;

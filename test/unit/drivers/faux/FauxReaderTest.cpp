@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_sequential_iter)
 {
     Options ops;
 
-    Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
+    BOX3D bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
     ops.add("bounds", bounds);
     ops.add("count", 750);
     ops.add("mode", "constant");
@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_sequential_iter)
 
 BOOST_AUTO_TEST_CASE(test_random_mode)
 {
-    Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
+    BOX3D bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
     Options ops;
     ops.add("bounds", bounds);
     ops.add("count", 750);
@@ -114,14 +114,14 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode_1)
 {
     using namespace pdal;
 
-    Bounds<double> bounds(0, 0, 0, 4, 4, 4);
+    BOX3D bounds(0, 0, 0, 4, 4, 4);
     Options ops;
     ops.add("bounds", bounds);
     ops.add("count", 2);
     ops.add("mode", "ramp");
 
     drivers::faux::Reader reader(ops);
-    
+
     PointContext ctx;
     reader.prepare(ctx);
     PointBufferSet pbSet = reader.execute(ctx);
@@ -155,7 +155,7 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode_2)
 {
     using namespace pdal;
 
-    Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 152.0, 203.0);
+    BOX3D bounds(1.0, 2.0, 3.0, 101.0, 152.0, 203.0);
     Options ops;
     ops.add("bounds", bounds);
     ops.add("count", 750);
@@ -194,7 +194,7 @@ BOOST_AUTO_TEST_CASE(test_return_number)
 
     Options ops;
 
-    Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
+    BOX3D bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
     ops.add("bounds", bounds);
     ops.add("count", 100);
     ops.add("mode", "constant");

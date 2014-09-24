@@ -188,7 +188,7 @@ Options Writer::getDefaultOptions()
                                        after the block data in 'block_table_name' have been inserted");
 
     Option base_table_bounds("base_table_bounds",
-                             Bounds<double>(),
+                             BOX3D(),
                              "A bounding box, given in the Oracle SRID specified in 'srid' \
                                                     to set on the PC_EXTENT object of the SDO_PC. If none is specified, \
                                                     the cumulated bounds of all of the block data are used.");

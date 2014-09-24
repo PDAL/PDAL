@@ -63,7 +63,6 @@ namespace sqlite
 SQLiteWriter::SQLiteWriter(const Options& options)
     : pdal::Writer(options)
     , m_doCreateIndex(false)
-    , m_bounds(Bounds<double>())
     , m_sdo_pc_is_initialized(false)
     , m_obj_id(0)
     , m_block_id(0)

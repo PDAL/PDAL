@@ -235,7 +235,7 @@ void LasHeaderReader::read(Reader& stage)
     Utils::read_n(z1, m_istream, sizeof(z1));
     Utils::read_n(z2, m_istream, sizeof(z2));
 
-    pdal::Bounds<double> b = pdal::Bounds<double>(x2, y2, z2, x1, y1, z1);
+    BOX3D b = BOX3D(x2, y2, z2, x1, y1, z1);
     m_header.setBounds(b);
 
     {

@@ -52,7 +52,7 @@ using namespace pdal;
 
 BOOST_AUTO_TEST_CASE(ProgrammableFilterTest_test1)
 {
-    Bounds<double> bounds(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
+    BOX3D bounds(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
 
     Options ops;
     ops.add("bounds", bounds);
@@ -133,7 +133,7 @@ BOOST_AUTO_TEST_CASE(pipeline)
 
 BOOST_AUTO_TEST_CASE(add_dimension)
 {
-    Bounds<double> bounds(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
+    BOX3D bounds(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
 
     Options ops;
     ops.add("bounds", bounds);
