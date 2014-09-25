@@ -36,22 +36,6 @@
 
 #include "Exchanges.hpp"
 
-namespace
-{
-    std::size_t getPointByteSize(
-            std::vector<pdal::drivers::greyhound::DimData> dimData)
-    {
-        std::size_t pointByteSize(0);
-
-        for (auto dim : dimData)
-        {
-            pointByteSize += pdal::Dimension::size(dim.type);
-        }
-
-        return pointByteSize;
-    }
-}
-
 namespace pdal
 {
 namespace drivers
@@ -65,23 +49,17 @@ GreyhoundReader::GreyhoundReader(const Options& options)
     , m_pipelineId()
     , m_sessionId()
     , m_dimData()
-    , m_numPoints()
     , m_wsClient()
+    , m_numPoints(0)
+    , m_index(0)
+    , m_pointByteSize(0)
 { }
 
 GreyhoundReader::~GreyhoundReader()
 {
+    // Tell Greyhound we're done using this session.
     exchanges::Destroy destroyExchange(m_sessionId);
     m_wsClient.exchange(destroyExchange);
-}
-
-StageSequentialIterator* GreyhoundReader::createSequentialIterator() const
-{
-    return new iterators::sequential::Iterator(
-            const_cast<WebSocketClient&>(m_wsClient),
-            m_sessionId,
-            m_dimData,
-            m_numPoints);
 }
 
 void GreyhoundReader::initialize()
@@ -111,6 +89,7 @@ void GreyhoundReader::addDimensions(PointContextRef pointContext)
     for (auto dim : m_dimData)
     {
         pointContext.registerDim(dim.id, dim.type);
+        m_pointByteSize += pdal::Dimension::size(dim.type);
     }
 }
 
@@ -122,24 +101,9 @@ void GreyhoundReader::ready(PointContextRef)
     m_numPoints = numPointsExchange.count();
 }
 
-namespace iterators
-{
-
-sequential::Iterator::Iterator(
-        WebSocketClient& wsClient,
-        std::string sessionId,
-        std::vector<DimData> dimData,
-        point_count_t numPoints)
-    : m_wsClient(wsClient)
-    , m_sessionId(sessionId)
-    , m_dimData(dimData)
-    , m_numPoints(numPoints)
-    , m_pointByteSize(getPointByteSize(m_dimData))
-{ }
-
-point_count_t sequential::Iterator::readImpl(
+point_count_t GreyhoundReader::read(
         PointBuffer& pointBuffer,
-        point_count_t count)
+        const point_count_t count)
 {
     // Read data.
     exchanges::Read readExchange(m_sessionId, m_index, count);
@@ -154,9 +118,9 @@ point_count_t sequential::Iterator::readImpl(
     {
         if (leftover != 0)
         {
-            const std::string stitchedPoint =
-                data[i - 1]->substr(data[i - 1]->size() - leftover) +
-                data[i]->substr(0, offset);
+            const std::string stitchedPoint(
+                    data[i - 1]->substr(data[i - 1]->size() - leftover) +
+                    data[i]->substr(0, offset));
 
             numRead += setPoints(pointBuffer, stitchedPoint.data(), 1);
         }
@@ -167,7 +131,7 @@ point_count_t sequential::Iterator::readImpl(
         const std::size_t pointBoundedSize(wholePoints * m_pointByteSize);
 
         numRead +=
-            setPoints(pointBuffer, data[i]->data() + offset, wholePoints);
+                setPoints(pointBuffer, data[i]->data() + offset, wholePoints);
 
         leftover = (data[i]->size() - offset) - pointBoundedSize;
         offset = m_pointByteSize - leftover;
@@ -178,24 +142,15 @@ point_count_t sequential::Iterator::readImpl(
     return numRead;
 }
 
-boost::uint64_t sequential::Iterator::skipImpl(
-        const boost::uint64_t pointsToSkip)
-{
-    const boost::uint64_t skipped(
-            std::min<point_count_t>(pointsToSkip, m_numPoints - m_index));
-    m_index = std::min<point_count_t>(m_index + pointsToSkip, m_numPoints);
-    return skipped;
-}
-
-bool sequential::Iterator::atEndImpl() const
+bool GreyhoundReader::eof() const
 {
     return m_index >= m_numPoints;
 }
 
-point_count_t sequential::Iterator::setPoints(
+point_count_t GreyhoundReader::setPoints(
         PointBuffer& pointBuffer,
         const char* data,
-        const point_count_t pointsToRead)
+        const point_count_t pointsToRead) const
 {
     PointId nextId(pointBuffer.size());
 
@@ -207,7 +162,6 @@ point_count_t sequential::Iterator::setPoints(
         for (auto dim : m_dimData)
         {
             pointBuffer.setField(dim.id, dim.type, nextId, data + dataOffset);
-
             dataOffset += Dimension::size(dim.type);
         }
 
@@ -217,8 +171,6 @@ point_count_t sequential::Iterator::setPoints(
 
     return numRead;
 }
-
-} // namespace iterators
 
 } // namespace greyhound
 } // namespace drivers
