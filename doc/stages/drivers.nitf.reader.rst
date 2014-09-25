@@ -3,13 +3,17 @@
 drivers.nitf.reader
 ===================
 
-The `NITF`_ format is used primarily by the US Department of Defence and supports many kinds of data inside a generic wrapper. The `NITF 2.1`_ version added support for LIDAR point cloud data, and the **NITF file reader** supports reading that data, if the NITF file supports it.
+The `NITF`_ format is used primarily by the US Department of Defence and
+supports many kinds of data inside a generic wrapper. The `NITF 2.1`_ version
+added support for LIDAR point cloud data, and the **NITF file reader** supports
+reading that data, if the NITF file supports it.
 
 * The file must be NITF 2.1
 * There must be at least one Image segment ("IM").
 * There must be at least one `DES segment`_ ("DE") named "LIDARA".
 
-The dimensions produced by the reader match exactly to the LAS dimension names and types for convenience in file format transformation.
+The dimensions produced by the reader match exactly to the LAS dimension names
+and types for convenience in file format transformation.
 
 
 Example
@@ -32,7 +36,7 @@ Options
 -------
 
 filename
-  Filename to read from [Required] 
+  Filename to read from [Required]
 
 
 
