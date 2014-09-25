@@ -42,35 +42,9 @@
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/algorithm/string.hpp>
 
-namespace
-{
-    std::string sanitize(const std::string& name)
-    {
-        auto ischar = [](char c)
-        {
-            return c == ';' || c == ':' || c == ' ' || c == '\'' || c == '\"';
-        };
-
-        std::string v;
-        for (size_t i = 0; i < name.size(); ++i)
-        {
-            if (ischar(name[i]))
-                v += '_';
-            else
-                v += name[i];
-        }
-        return v;
-    }
-}
 
 namespace pdal
 {
-
-MetadataNodeImpl::MetadataNodeImpl(const std::string& name)
-{
-    m_kind = MetadataType::Instance;
-    m_name = sanitize(name);
-}
 
 std::string MetadataNodeImpl::toJSON() const
 {
