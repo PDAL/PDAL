@@ -24,7 +24,7 @@ SET(PDAL_UNITTEST_TEST_SRC
     ConfigTest.cpp
     filters/CropFilterTest.cpp
     filters/DecimationFilterTest.cpp
-#    DimensionTest.cpp
+    filters/FerryFilterTest.cpp
     EnvironmentTest.cpp
     drivers/faux/FauxReaderTest.cpp
     FileUtilsTest.cpp

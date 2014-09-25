@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Howard Butler, hobu.inc@gmail.com
+* Copyright (c) 2014, Howard Butler <hobu.inc@gmail.com>
 *
 * All rights reserved.
 *
@@ -34,28 +34,40 @@
 
 #pragma once
 
-#include <pdal/filters/ByteSwap.hpp>
-#include <pdal/filters/Cache.hpp>
-#include <pdal/filters/Chipper.hpp>
-#ifdef PDAL_HAVE_GDAL
-#include <pdal/filters/Colorization.hpp>
-#endif
-#include <pdal/filters/Crop.hpp>
-#include <pdal/filters/Decimation.hpp>
-#include <pdal/filters/Ferry.hpp>
-#include <pdal/filters/HexBin.hpp>
-#include <pdal/filters/InPlaceReprojection.hpp>
-#include <pdal/filters/Merge.hpp>
-#ifdef PDAL_HAVE_PCL
-#include <pdal/filters/PCLBlock.hpp>
-#endif
-#ifdef PDAL_HAVE_PYTHON
-#include <pdal/filters/Predicate.hpp>
-#include <pdal/filters/Programmable.hpp>
-#endif
-#include <pdal/filters/Reprojection.hpp>
-#include <pdal/filters/Scaling.hpp>
-#include <pdal/filters/Selector.hpp>
-#include <pdal/filters/Splitter.hpp>
-#include <pdal/filters/Stats.hpp>
+#include <pdal/Filter.hpp>
+
+#include <map>
+#include <string>
+namespace pdal
+{
+namespace filters
+{
+
+class PDAL_DLL Ferry : public Filter
+{
+public:
+    SET_STAGE_NAME("filters.ferry", "Data ferrying filter")
+    SET_STAGE_LINK("http://pdal.io/stages/filters.ferry.html")
+    SET_STAGE_ENABLED(true)
+
+    Ferry(const Options& options) : Filter(options) {};
+    static Options getDefaultOptions();
+
+private:
+    virtual void initialize();
+    virtual void processOptions(const Options&);
+    virtual void addDimensions(PointContextRef ctx);
+    virtual void ready(PointContext ctx);
+    virtual void filter(PointBuffer& buffer);
+    virtual void done(PointContext ctx);
+
+    Ferry& operator=(const Ferry&); // not implemented
+    Ferry(const Ferry&); // not implemented
+
+    std::map<std::string, std::string> m_name_map;
+    std::map< Dimension::Id::Enum ,  Dimension::Id::Enum > m_dimensions_map;
+};
+
+} // namespace filters
+} // namespace pdal
 
