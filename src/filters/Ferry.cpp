@@ -51,37 +51,14 @@ Options Ferry::getDefaultOptions()
     Options options;
 
     pdal::Option red("dimension", "Red", "");
-    pdal::Option b0("band",1, "");
-    pdal::Option s0("scale", 1.0f, "scale factor for this dimension");
+    pdal::Option b0("to","Red2", "");
+    pdal::Option def("def","Red2", "");
     pdal::Options redO;
     redO.add(b0);
-    redO.add(s0);
+    redO.add(def);
     red.setOptions(redO);
 
-    pdal::Option green("dimension", "Green", "");
-    pdal::Option b1("band",2, "");
-    pdal::Option s1("scale", 1.0f, "scale factor for this dimension");
-    pdal::Options greenO;
-    greenO.add(b1);
-    greenO.add(s1);
-    green.setOptions(greenO);
-
-    pdal::Option blue("dimension", "Blue", "");
-    pdal::Option b2("band",3, "");
-    pdal::Option s2("scale", 1.0f, "scale factor for this dimension");
-    pdal::Options blueO;
-    blueO.add(b2);
-    blueO.add(s2);
-    blue.setOptions(blueO);
-
-    pdal::Option reproject("reproject", false,
-        "Reproject the input data into the same coordinate system as "
-        "the raster?");
-
     options.add(red);
-    options.add(green);
-    options.add(blue);
-    options.add(reproject);
 
     return options;
 }
@@ -90,15 +67,6 @@ Options Ferry::getDefaultOptions()
 void Ferry::processOptions(const Options& options)
 {
     std::vector<Option> dimensions = options.getOptions("dimension");
-//
-//     if (dimensions.size() == 0)
-//     {
-//         m_bands.emplace_back("Red", Dimension::Id::Red, 1, 1.0);
-//         m_bands.emplace_back("Green", Dimension::Id::Green, 2, 1.0);
-//         m_bands.emplace_back("Blue", Dimension::Id::Blue, 3, 1.0);
-//         log()->get(LogLevel::Debug) << "No dimension mappings were given. "
-//             "Using default mappings." << std::endl;
-//     }
     for (auto i = dimensions.begin(); i != dimensions.end(); ++i)
     {
         std::string name = i->getValue<std::string>();
@@ -120,7 +88,6 @@ void Ferry::processOptions(const Options& options)
             throw pdal_error(oss.str());
         }
         m_name_map.insert(std::make_pair(name, to_dim));
-
     }
 }
 void Ferry::addDimensions(PointContextRef ctx)
@@ -129,10 +96,7 @@ void Ferry::addDimensions(PointContextRef ctx)
     {
         Dimension::Id::Enum id = ctx.registerOrAssignDim(dim_par.second, Dimension::Type::Double);
     }
-
 }
-
-
 
 void Ferry::ready(PointContext ctx)
 {
