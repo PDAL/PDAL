@@ -69,7 +69,7 @@ private:
     std::string m_outputFile;
     bool m_bCompress;
     boost::uint64_t m_numPointsToWrite;
-    pdal::Bounds<double> m_bounds;
+    BOX3D m_bounds;
     std::string m_distribution;
     std::string m_means;
     std::string m_stdevs;

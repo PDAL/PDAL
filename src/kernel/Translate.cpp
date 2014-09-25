@@ -149,7 +149,7 @@ void Translate::addSwitches()
          "How many points should we write?")
         ("skip", po::value<boost::uint64_t>(&m_numSkipPoints)->default_value(0),
          "How many points should we skip?")
-        ("bounds", po::value<pdal::Bounds<double> >(&m_bounds),
+        ("bounds", po::value<BOX3D >(&m_bounds),
          "Extent (in XYZ to clip output to)")
         ("polygon", po::value<std::string >(&m_wkt),
          "POLYGON WKT to use for precise crop of data (2d or 3d)")
@@ -172,7 +172,7 @@ void Translate::addSwitches()
 
     addSwitchSet(file_options);
     addPositionalSwitch("input", 1);
-    addPositionalSwitch("output", 1);    
+    addPositionalSwitch("output", 1);
 }
 
 Stage* Translate::makeReader(Options readerOptions)
@@ -183,7 +183,7 @@ Stage* Translate::makeReader(Options readerOptions)
         boost::uint32_t verbosity(getVerboseLevel());
         if (!verbosity)
             verbosity = 1;
-        
+
         readerOptions.add<boost::uint32_t>("verbose", verbosity);
         readerOptions.add<std::string>("log", "STDERR");
     }
@@ -196,11 +196,11 @@ Stage* Translate::makeReader(Options readerOptions)
         Stage* next_stage = reader_stage;
         Stage* crop_stage(0);
         Stage* reprojection_stage(0);
-        
+
 
         bool bHaveReprojection = extra_opts.find("filters.reprojection") != extra_opts.end();
         bool bHaveCrop = extra_opts.find("filters.crop") != extra_opts.end();
-        
+
         if (!m_output_srs.empty())
         {
             readerOptions.add<std::string>("out_srs", m_output_srs.getWKT());
@@ -213,16 +213,16 @@ Stage* Translate::makeReader(Options readerOptions)
             reprojection_stage =
                 new filters::Reprojection(extra_opts.find("filters.reprojection")->second);
             reprojection_stage->setInput(next_stage);
-            next_stage = reprojection_stage;            
+            next_stage = reprojection_stage;
         }
-        
+
         if ((!m_bounds.empty() && m_wkt.empty()))
         {
-            readerOptions.add<pdal::Bounds<double>>("bounds", m_bounds);
+            readerOptions.add<BOX3D>("bounds", m_bounds);
             crop_stage = new pdal::filters::Crop(readerOptions);
             crop_stage->setInput(next_stage);
             next_stage = crop_stage;
-        } 
+        }
         else if (m_bounds.empty() && !m_wkt.empty())
         {
             std::istream* wkt_stream;
@@ -234,11 +234,11 @@ Stage* Translate::makeReader(Options readerOptions)
 
                 m_wkt = buffer.str();
                 FileUtils::closeFile(wkt_stream);
-                
+
             }
             catch (pdal::pdal_error const&)
             {
-                // If we couldn't open the file given in m_wkt because it 
+                // If we couldn't open the file given in m_wkt because it
                 // was likely actually wkt, leave it alone
             }
             readerOptions.add<std::string >("polygon", m_wkt);
@@ -249,11 +249,11 @@ Stage* Translate::makeReader(Options readerOptions)
         {
             crop_stage = new pdal::filters::Crop(extra_opts.find("filters.crop")->second);
             crop_stage->setInput(next_stage);
-            next_stage = crop_stage;            
+            next_stage = crop_stage;
         }
         final_stage = next_stage;
     }
- 
+
     if (m_decimation_step > 1)
     {
         Options decimationOptions;
@@ -267,8 +267,8 @@ Stage* Translate::makeReader(Options readerOptions)
         decimation_stage->setInput(final_stage);
         final_stage = decimation_stage;
     }
-    
-    return final_stage;    
+
+    return final_stage;
 }
 
 int Translate::execute()
@@ -283,7 +283,7 @@ int Translate::execute()
     Options writerOptions;
     writerOptions.add("filename", m_outputFile);
     setCommonOptions(writerOptions);
-    
+
     if (!m_input_srs.empty())
         writerOptions.add("spatialreference", m_input_srs.getWKT());
 
@@ -320,7 +320,7 @@ int Translate::execute()
                 opts.add(o);
             s->setOptions(opts);
         }
-    }    
+    }
     writer->prepare(ctx);
     writer->execute(ctx);
 

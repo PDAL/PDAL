@@ -46,7 +46,7 @@ BOOST_AUTO_TEST_SUITE(DecimationFilterTest)
 
 BOOST_AUTO_TEST_CASE(DecimationFilterTest_test1)
 {
-    Bounds<double> srcBounds(0.0, 0.0, 0.0, 100.0, 100.0, 100.0);
+    BOX3D srcBounds(0.0, 0.0, 0.0, 100.0, 100.0, 100.0);
 
     Options ops;
     ops.add("bounds", srcBounds);

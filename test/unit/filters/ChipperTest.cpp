@@ -81,27 +81,24 @@ BOOST_AUTO_TEST_CASE(test_construction)
         auto sorter = [](PointBufferPtr p1, PointBufferPtr p2)
         {
             //This is super inefficient, but we're doing tests.
-            pdal::Bounds<double> b1 = p1->calculateBounds();
-            pdal::Bounds<double> b2 = p2->calculateBounds();
+            BOX3D b1 = p1->calculateBounds();
+            BOX3D b2 = p2->calculateBounds();
 
-            return b1.getMinimum(0) < b2.getMinimum(0) ?  true :
-                b1.getMinimum(0) > b2.getMinimum(0) ? false :
-                b1.getMinimum(1) < b2.getMinimum(1);
+            return b1.minx < b2.minx ?  true :
+                b1.minx > b2.minx ? false :
+                b1.miny < b2.miny;
         };
 
         std::sort(buffers.begin(), buffers.end(), sorter);
 
         auto buffer = buffers[2];
         auto bounds = buffer->calculateBounds();
-        std::vector<Range<double>> ranges = bounds.dimensions();
 
-        pdal::Range<double> x = ranges[0];
-        pdal::Range<double> y = ranges[1];
 
-        BOOST_CHECK_CLOSE(x.getMinimum(), 635674.0, 0.05);
-        BOOST_CHECK_CLOSE(x.getMaximum(), 635994.0, 0.05);
-        BOOST_CHECK_CLOSE(y.getMinimum(), 848992.0, 0.05);
-        BOOST_CHECK_CLOSE(y.getMaximum(), 849427.0, 0.05);
+        BOOST_CHECK_CLOSE(bounds.minx, 635674.0, 0.05);
+        BOOST_CHECK_CLOSE(bounds.maxx, 635994.0, 0.05);
+        BOOST_CHECK_CLOSE(bounds.miny, 848992.0, 0.05);
+        BOOST_CHECK_CLOSE(bounds.maxy, 849427.0, 0.05);
 
         for (size_t i = 0; i < buffers.size(); ++i)
             BOOST_CHECK(buffers[i]->size() == 15);

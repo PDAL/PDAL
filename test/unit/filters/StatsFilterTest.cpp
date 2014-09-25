@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_SUITE(StatsFilterTest)
 
 BOOST_AUTO_TEST_CASE(StatsFilterTest_test1)
 {
-    Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
+    BOX3D bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
     Options ops;
     ops.add("bounds", bounds);
     ops.add("count", 1000);

@@ -50,18 +50,18 @@ public:
 private:
     void addSwitches();
     void validateSwitches();
-    
+
     Stage* makeReader(Options readerOptions);
     void forwardMetadata(Options & options, Metadata metadata);
 
     std::string m_inputFile;
     std::string m_outputFile;
     bool m_bCompress;
-    boost::uint64_t m_numPointsToWrite; 
+    boost::uint64_t m_numPointsToWrite;
     boost::uint64_t m_numSkipPoints;
     pdal::SpatialReference m_input_srs;
     pdal::SpatialReference m_output_srs;
-    pdal::Bounds<double> m_bounds;
+    BOX3D m_bounds;
     std::string m_wkt;
     bool m_bForwardMetadata;
     boost::uint32_t m_decimation_step;

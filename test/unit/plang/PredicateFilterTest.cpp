@@ -51,13 +51,13 @@ using namespace pdal;
 
 BOOST_AUTO_TEST_CASE(PredicateFilterTest_test1)
 {
-    Bounds<double> bounds(0.0, 0.0, 0.0, 2.0, 2.0, 2.0);
+    BOX3D bounds(0.0, 0.0, 0.0, 2.0, 2.0, 2.0);
     Options readerOps;
     readerOps.add("bounds", bounds);
     readerOps.add("num_points", 1000);
     readerOps.add("mode", "ramp");
     drivers::faux::Reader reader(readerOps);
-    
+
     // keep all points where x less than 1.0
     const pdal::Option source("source",
         // "X < 1.0"
@@ -94,7 +94,7 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test1)
     const filters::stats::Summary& statsX = stats.getStats(Dimension::Id::X);
     const filters::stats::Summary& statsY = stats.getStats(Dimension::Id::Y);
     const filters::stats::Summary& statsZ = stats.getStats(Dimension::Id::Z);
-    
+
     BOOST_CHECK(Utils::compare_approx<double>(statsX.minimum(), 0.0, 0.01));
     BOOST_CHECK(Utils::compare_approx<double>(statsY.minimum(), 0.0, 0.01));
     BOOST_CHECK(Utils::compare_approx<double>(statsZ.minimum(), 0.0, 0.01));
@@ -108,7 +108,7 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test2)
 {
     // same as above, but with 'Y >' instead of 'X <'
 
-    Bounds<double> bounds(0.0, 0.0, 0.0, 2.0, 2.0, 2.0);
+    BOX3D bounds(0.0, 0.0, 0.0, 2.0, 2.0, 2.0);
     Options readerOps;
     readerOps.add("bounds", bounds);
     readerOps.add("num_points", 1000);
@@ -163,7 +163,7 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test3)
 {
     // can we make a pipeline with TWO python filters in it?
 
-    Bounds<double> bounds(0.0, 0.0, 0.0, 2.0, 2.0, 2.0);
+    BOX3D bounds(0.0, 0.0, 0.0, 2.0, 2.0, 2.0);
     Options readerOpts;
     readerOpts.add("bounds", bounds);
     readerOpts.add("num_points", 1000);
@@ -238,7 +238,7 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test4)
 {
     // test the point counters in the Predicate's iterator
 
-    Bounds<double> bounds(0.0, 0.0, 0.0, 2.0, 2.0, 2.0);
+    BOX3D bounds(0.0, 0.0, 0.0, 2.0, 2.0, 2.0);
     Options readerOpts;
     readerOpts.add("bounds", bounds);
     readerOpts.add("num_points", 1000);
@@ -289,7 +289,7 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test5)
 {
     // test error handling if missing Mask
 
-    Bounds<double> bounds(0.0, 0.0, 0.0, 2.0, 2.0, 2.0);
+    BOX3D bounds(0.0, 0.0, 0.0, 2.0, 2.0, 2.0);
     Options readerOpts;
     readerOpts.add("bounds", bounds);
     readerOpts.add("num_points", 1000);

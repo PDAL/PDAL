@@ -41,7 +41,6 @@ SET(PDAL_UNITTEST_TEST_SRC
     PipelineManagerTest.cpp
     PointBufferTest.cpp
     drivers/qfit/QFITReaderTest.cpp
-    RangeTest.cpp
     filters/ReprojectionFilterTest.cpp
     drivers/sbet/SbetReaderTest.cpp
     drivers/sbet/SbetWriterTest.cpp
@@ -59,7 +58,6 @@ SET(PDAL_UNITTEST_TEST_SRC
 #    drivers/text/TextWriterTest.cpp
     UserCallbackTest.cpp
     UtilsTest.cpp
-    VectorTest.cpp
     ${PDAL_UNITTEST_XMLSCHEMA_TEST}
     )
 

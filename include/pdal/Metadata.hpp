@@ -40,6 +40,7 @@
 
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_io.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include <map>
 #include <vector>
@@ -247,7 +248,7 @@ inline void MetadataNodeImpl::setValue<SpatialReference>(
 }
 
 template <>
-inline void MetadataNodeImpl::setValue<Bounds<double>>(const Bounds<double>& b)
+inline void MetadataNodeImpl::setValue<BOX3D>(const BOX3D& b)
 {
     std::ostringstream oss;
     oss << b;
