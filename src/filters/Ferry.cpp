@@ -119,19 +119,42 @@ void Ferry::processOptions(const Options& options)
                 << " name for dimension '" << name << "'";
             throw pdal_error(oss.str());
         }
-        m_dimensions_map.insert(std::make_pair(name, to_dim));
+        m_name_map.insert(std::make_pair(name, to_dim));
 
     }
 }
+void Ferry::addDimensions(PointContextRef ctx)
+{
+    for(auto dim_par: m_name_map)
+    {
+        Dimension::Id::Enum id = ctx.registerOrAssignDim(dim_par.second, Dimension::Type::Double);
+    }
+
+}
+
 
 
 void Ferry::ready(PointContext ctx)
 {
+    for (auto dim_par: m_name_map)
+    {
+        Dimension::Id::Enum f = ctx.findDim(dim_par.first);
+        Dimension::Id::Enum t = ctx.findDim(dim_par.second);
+        m_dimensions_map.insert(std::make_pair(f,t));
+    }
 }
 
 
 void Ferry::filter(PointBuffer& buffer)
 {
+    for (PointId id = 0; id < buffer.size(); ++id)
+    {
+        for (auto dim_par: m_dimensions_map)
+        {
+            double v = buffer.getFieldAs<double>(dim_par.first, id);
+            buffer.setField(dim_par.second, id, v);
+        }
+    }
 }
 
 void Ferry::done(PointContext ctx)

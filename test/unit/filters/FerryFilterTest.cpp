@@ -41,6 +41,8 @@
 #include <pdal/drivers/las/Reader.hpp>
 #include <pdal/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
+#include <pdal/PipelineManager.hpp>
+#include <pdal/PipelineReader.hpp>
 #include "Support.hpp"
 #include "../StageTester.hpp"
 
@@ -52,38 +54,33 @@ BOOST_AUTO_TEST_SUITE(FerryFilterTest)
 BOOST_AUTO_TEST_CASE(test_ferry_copy)
 {
     using namespace pdal;
+    PipelineManager mgr;
+    PipelineReader specReader(mgr);
+    specReader.readPipeline(Support::datapath("filters/ferry.xml"));
 
-    Options ops1;
-    ops1.add("filename", Support::datapath("las/1.2-with-color.las"));
-    drivers::las::Reader reader(ops1);
+    Stage *stage = mgr.getStage();
+    mgr.execute();
+    PointContext ctx = mgr.context();
 
-    Options options;
+    PointBufferSet pbSet = mgr.buffers();
 
-    Option x("dimension", "X", "");
-    Option toX("to","LONG", "");
-    Options xO;
-    xO.add(toX);
-    x.setOptions(xO);
-    options.add(x);
-
-    Option y("dimension", "Y", "");
-    Option toY("to","LAT", "");
-    Options yO;
-    yO.add(toY);
-    y.setOptions(yO);
-    options.add(y);
-
-    filters::Ferry ferry(options);
-    ferry.setInput(&reader);
-
-    PointContext ctx;
-
-    BOOST_CHECK_THROW(ferry.prepare(ctx), pdal::pdal_error );
-    PointBufferSet pbSet = ferry.execute(ctx);
     BOOST_CHECK_EQUAL(pbSet.size(), 1);
-    PointBufferPtr buffer = *pbSet.begin();
-    BOOST_CHECK_EQUAL(buffer->size(), 1065u);
+    PointBufferPtr buf = *pbSet.begin();
+    BOOST_CHECK_EQUAL(buf->size(), 1065u);
 
+    Dimension::Id::Enum state_plane_x = ctx.findDim("StatePlaneX");
+    Dimension::Id::Enum state_plane_y = ctx.findDim("StatePlaneY");
+
+    double lon = buf->getFieldAs<double>(Dimension::Id::X, 0);
+    double lat = buf->getFieldAs<double>(Dimension::Id::Y, 0);
+
+    double x = buf->getFieldAs<double>(state_plane_x, 0);
+    double y = buf->getFieldAs<double>(state_plane_y, 0);
+
+    BOOST_CHECK_CLOSE(-117.2501328350574, lon, 0.0001);
+    BOOST_CHECK_CLOSE(49.341077824192915, lat, 0.0001);
+    BOOST_CHECK_CLOSE(637012.24, x, 0.0001);
+    BOOST_CHECK_CLOSE(849028.31, y, 0.0001);
 }
 
 BOOST_AUTO_TEST_CASE(test_ferry_invalid)
@@ -103,24 +100,12 @@ BOOST_AUTO_TEST_CASE(test_ferry_invalid)
     x.setOptions(xO);
     options.add(x);
 
-//     Option y("dimension", "Y", "");
-//     Option toY("to","Y", "");
-//     Options yO;
-//     yO.add(toY);
-//     y.setOptions(yO);
-//     options.add(y);
-
     filters::Ferry ferry(options);
     ferry.setInput(&reader);
 
     PointContext ctx;
 
     BOOST_CHECK_THROW(ferry.prepare(ctx), pdal::pdal_error );
-//     PointBufferSet pbSet = ferry.execute(ctx);
-//     BOOST_CHECK_EQUAL(pbSet.size(), 1);
-//     PointBufferPtr buffer = *pbSet.begin();
-//     BOOST_CHECK_EQUAL(buffer->size(), 1065u);
-
 }
 
 BOOST_AUTO_TEST_SUITE_END()

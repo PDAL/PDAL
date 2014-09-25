@@ -56,6 +56,7 @@ public:
 private:
     virtual void initialize();
     virtual void processOptions(const Options&);
+    virtual void addDimensions(PointContextRef ctx);
     virtual void ready(PointContext ctx);
     virtual void filter(PointBuffer& buffer);
     virtual void done(PointContext ctx);
@@ -63,7 +64,8 @@ private:
     Ferry& operator=(const Ferry&); // not implemented
     Ferry(const Ferry&); // not implemented
 
-    std::map<std::string, std::string> m_dimensions_map;
+    std::map<std::string, std::string> m_name_map;
+    std::map< Dimension::Id::Enum ,  Dimension::Id::Enum > m_dimensions_map;
 };
 
 } // namespace filters

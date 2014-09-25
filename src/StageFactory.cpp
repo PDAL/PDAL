@@ -113,6 +113,7 @@ MAKE_FILTER_CREATOR(Colorization, pdal::filters::Colorization)
 #endif
 MAKE_FILTER_CREATOR(Crop, pdal::filters::Crop)
 MAKE_FILTER_CREATOR(Decimation, pdal::filters::Decimation)
+MAKE_FILTER_CREATOR(Ferry, pdal::filters::Ferry)
 MAKE_FILTER_CREATOR(HexBin, pdal::filters::HexBin)
 MAKE_FILTER_CREATOR(Merge, pdal::filters::Merge)
 //MAKE_FILTER_CREATOR(InPlaceReprojection, pdal::filters::InPlaceReprojection)
@@ -422,6 +423,7 @@ void StageFactory::registerKnownFilters()
 #endif
     REGISTER_FILTER(Crop, pdal::filters::Crop);
     REGISTER_FILTER(Decimation, pdal::filters::Decimation);
+    REGISTER_FILTER(Ferry, pdal::filters::Ferry);
     REGISTER_FILTER(Reprojection, pdal::filters::Reprojection);
     REGISTER_FILTER(HexBin, pdal::filters::HexBin);
     REGISTER_FILTER(Merge, pdal::filters::Merge);
