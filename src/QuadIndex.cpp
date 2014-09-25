@@ -38,6 +38,7 @@
 
 #include <pdal/QuadIndex.hpp>
 #include <pdal/PointBuffer.hpp>
+#include <pdal/Utils.hpp>
 
 namespace pdal
 {
@@ -334,12 +335,12 @@ void Tree::getPoints(
         if (data)
         {
             const std::size_t xOffset(
-                    std::round((bbox.center.x - xBegin) / xStep));
+                    Utils::sround((bbox.center.x - xBegin) / xStep));
             const double yOffset(
-                    std::round((bbox.center.y - yBegin) / yStep));
+                    Utils::sround((bbox.center.y - yBegin) / yStep));
 
             const std::size_t index(
-                std::round(yOffset * (xEnd - xBegin) / xStep + xOffset));
+                Utils::sround(yOffset * (xEnd - xBegin) / xStep + xOffset));
 
             results.at(index) = data->pbIndex;
         }
