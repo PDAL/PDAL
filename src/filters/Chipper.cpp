@@ -102,10 +102,9 @@ PointBufferSet Chipper::run(PointBufferPtr buffer)
 }
 
 
-void Chipper::load(PointBuffer& buffer, ChipRefList& xvec, ChipRefList& yvec, 
+void Chipper::load(PointBuffer& buffer, ChipRefList& xvec, ChipRefList& yvec,
     ChipRefList& spare)
 {
-    ChipPtRef ref;
     boost::uint32_t idx;
     std::vector<ChipPtRef>::iterator it;
 
