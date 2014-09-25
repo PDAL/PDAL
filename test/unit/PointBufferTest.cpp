@@ -32,6 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <random>
+
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 #include <boost/property_tree/xml_parser.hpp>
@@ -266,12 +268,19 @@ BOOST_AUTO_TEST_CASE(bigfile)
     }
 
     // Test some random access.
-    PointId ids[NUM_PTS];
+    std::unique_ptr<PointId[]> ids(new PointId[NUM_PTS]);
     for (PointId idx = 0; idx < NUM_PTS; ++idx)
         ids[idx] = idx;
     // Do a bunch of random swaps.
+    std::default_random_engine generator;
+    std::uniform_int_distribution<PointId> distribution(0, NUM_PTS-1);
     for (PointId idx = 0; idx < NUM_PTS; ++idx)
-        std::swap(ids[idx], ids[random() % NUM_PTS]);
+    {
+        PointId y = distribution(generator);
+        PointId temp = std::move(ids[idx]);
+        ids[idx] = std::move(ids[y]);
+        ids[y] = std::move(temp);
+    }
 
     for (PointId idx = 0; idx < NUM_PTS; ++idx)
     {
