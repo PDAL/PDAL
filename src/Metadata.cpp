@@ -44,15 +44,20 @@
 
 std::string sanitize(const std::string& name)
 {
-    std::vector<std::string> to_replace = {";", ":", " ", "'", "\""};
-
-    std::string v(name);
-    for (auto c: to_replace)
+    auto ischar = [](char c)
     {
-        v = boost::algorithm::replace_all_copy(v, c, "_");
+        return c == ';' || c == ':' || c == ' ' || c == '\'' || c == '\"';
+    };
+
+    std::string v;
+    for (size_t i = 0; i < name.size(); ++i)
+    {
+        if (ischar(name[i]))
+            v += '_';
+        else
+            v += name[i];
     }
     return v;
-
 }
 
 namespace pdal
