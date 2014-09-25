@@ -46,7 +46,7 @@ BOOST_AUTO_TEST_SUITE(LogTest)
 
 BOOST_AUTO_TEST_CASE(test_one)
 {
-    const Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
+    BOX3D bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
 
     Option opt1("bounds", bounds);
     Option opt2("log", Support::temppath("mylog_one.txt"));
@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE(test_two_a)
 {
     Options reader_opts;
     {
-        const Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
+        BOX3D bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
         Option opt1("bounds", bounds);
         Option opt2("log", Support::temppath("logtest_123.txt"));
         Option opt3("num_points", 750);
@@ -171,7 +171,7 @@ BOOST_AUTO_TEST_CASE(test_two_b)
 {
     Options reader_opts;
     {
-        const Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
+        BOX3D bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
         Option opt1("bounds", bounds);
         Option opt2("log", Support::temppath("logtest_test_two_b_1.txt"));
         Option opt3("num_points", 750);
@@ -275,7 +275,7 @@ BOOST_AUTO_TEST_CASE(test_three)
 
     Options reader_opts;
     {
-        const Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
+        BOX3D bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
         Option opt1("bounds", bounds);
         Option opt2("num_points", 750);
         Option opt3("mode", "constant");

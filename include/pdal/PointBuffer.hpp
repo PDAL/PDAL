@@ -150,7 +150,7 @@ public:
             method. Otherwise, an exception will be thrown.
         \endverbatim
     */
-    pdal::Bounds<double> calculateBounds(bool bis3d=true) const;
+    BOX3D calculateBounds(bool bis3d=true) const;
     void dump(std::ostream& ostr) const;
     bool hasDim(Dimension::Id::Enum id) const
         { return m_context.hasDim(id); }

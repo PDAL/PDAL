@@ -47,7 +47,6 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/PointBuffer.hpp"
   "${PDAL_HEADERS_DIR}/PointContext.hpp"
   "${PDAL_HEADERS_DIR}/QuadIndex.hpp"
-  "${PDAL_HEADERS_DIR}/Range.hpp"
   "${PDAL_HEADERS_DIR}/RawPtBuf.hpp"
   "${PDAL_HEADERS_DIR}/Reader.hpp"
   "${PDAL_HEADERS_DIR}/SpatialReference.hpp"
@@ -58,7 +57,6 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/StreamFactory.hpp"
   "${PDAL_HEADERS_DIR}/UserCallback.hpp"
   "${PDAL_HEADERS_DIR}/Utils.hpp"
-  "${PDAL_HEADERS_DIR}/Vector.hpp"
   "${PDAL_HEADERS_DIR}/Writer.hpp"
   "${PDAL_HEADERS_DIR}/XMLSchema.hpp"
   "${PDAL_HEADERS_DIR}/third/nanoflann.hpp"
@@ -93,7 +91,6 @@ set(PDAL_BASE_CPP
   PipelineWriter.cpp
   PointBuffer.cpp
   QuadIndex.cpp
-  Range.cpp
   Reader.cpp
   SpatialReference.cpp
   Stage.cpp
@@ -101,7 +98,6 @@ set(PDAL_BASE_CPP
   StageInfo.cpp
   StreamFactory.cpp
   Utils.cpp
-  Vector.cpp
   Writer.cpp
   third/md5-pdal.c
   ${PDAL_XML_SRC}

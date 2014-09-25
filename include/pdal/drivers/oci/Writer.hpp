@@ -66,7 +66,7 @@ public:
     SET_STAGE_ENABLED(true)
 #else
     SET_STAGE_ENABLED(false)
-#endif    
+#endif
     Writer(const Options&);
     ~Writer();
 
@@ -77,7 +77,7 @@ protected:
     {}
     virtual void writeBufferBegin(PointBuffer const&)
     {}
-    
+
     virtual boost::uint32_t writeBuffer(const PointBuffer&)
     { return 0; }
 
@@ -118,7 +118,7 @@ private:
     bool isGeographic(boost::int32_t srid);
     std::string loadSQLData(std::string const& filename);
     void setOrdinates(Statement statement, OCIArray* ordinates,
-        pdal::Bounds<double> const& extent);
+        const BOX3D& extent);
     void setElements(Statement statement, OCIArray* elem_info);
     void updatePCExtent();
     std::string shutOff_SDO_PC_Trigger();
@@ -127,12 +127,12 @@ private:
 
     size_t m_pointSize;
     long m_lastBlockId;
-    pdal::Bounds<double> m_bounds; // Bounds of the entire point cloud
+    BOX3D m_bounds; // Bounds of the entire point cloud
     Connection m_connection;
     bool m_createIndex;
     bool m_bDidCreateBlockTable;
-    Bounds<double> m_pcExtent;
-    Bounds<double> m_baseTableBounds;
+    BOX3D m_pcExtent;
+    BOX3D m_baseTableBounds;
     int m_pc_id;
     std::string m_blockTableName;
     std::string m_blockTablePartitionColumn;

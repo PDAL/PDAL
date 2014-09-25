@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_SUITE(CropFilterTest)
 
 BOOST_AUTO_TEST_CASE(test_crop)
 {
-    Bounds<double> srcBounds(0.0, 0.0, 0.0, 10.0, 100.0, 1000.0);
+    BOX3D srcBounds(0.0, 0.0, 0.0, 10.0, 100.0, 1000.0);
     Options opts;
     opts.add("bounds", srcBounds);
     opts.add("num_points", 1000);
@@ -59,8 +59,7 @@ BOOST_AUTO_TEST_CASE(test_crop)
     drivers::faux::Reader reader(opts);
 
     // crop the window to 1/3rd the size in each dimension
-    Bounds<double> dstBounds(3.33333, 33.33333, 333.33333,
-        6.66666, 66.66666, 666.66666);
+    BOX3D dstBounds(3.33333, 33.33333, 333.33333, 6.66666, 66.66666, 666.66666);
     Options cropOpts;
     cropOpts.add("bounds", dstBounds);
 

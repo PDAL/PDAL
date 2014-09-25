@@ -76,7 +76,7 @@ public:
 #else
     SET_STAGE_ENABLED(false)
 #endif
- 
+
     P2gWriter(const Options& options) : Writer(options), m_outputTypes(0), m_outputFormat(OUTPUT_FORMAT_ARC_ASCII) {};
     ~P2gWriter() {};
 
@@ -84,7 +84,7 @@ public:
 
 private:
     P2gWriter& operator=(const P2gWriter&); // not implemented
-    
+
     virtual void processOptions(const Options& options);
     virtual void ready(PointContextRef ctx) {};
     virtual void write(const PointBuffer& buf);
@@ -103,7 +103,7 @@ private:
     double m_RADIUS_SQ;
     unsigned int m_outputTypes;
     boost::uint32_t m_fill_window_size;
-    Bounds<double> m_bounds;
+    BOX3D m_bounds;
 
     std::string m_filename;
     int m_outputFormat;

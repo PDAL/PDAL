@@ -97,9 +97,9 @@ public:
 
     // validate a point's XYZ values
     static void check_pN(const pdal::PointBuffer& data,
-                         std::size_t index, 
+                         std::size_t index,
                          double xref, double yref, double zref);
-                       
+
     // validate a point's XYZ, Time, and Color values
     static void check_pN(const pdal::PointBuffer& data,
         std::size_t index, double xref, double yref, double zref,
@@ -111,8 +111,8 @@ public:
     static void check_p355_p356_p357(const pdal::PointBuffer& data);
     static void check_p710_p711_p712(const pdal::PointBuffer& data);
 
-    static void compareBounds(const pdal::Bounds<double>& p,
-        const pdal::Bounds<double>& q);
+    static void compareBounds(const pdal::BOX3D& p,
+        const pdal::BOX3D& q);
 
     // executes "cmd" via popen, copying stdout into output and returning
     // the status code note: under windows, all "/" characrters in cmd will
