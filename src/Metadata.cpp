@@ -102,6 +102,7 @@ void MetadataNodeImpl::toJSON(std::ostream& o, int level) const
 
     const std::string escaped_description(Utils::escapeJSON(m_descrip));
     const std::string escaped_value(Utils::escapeJSON(m_value));
+<<<<<<< HEAD
 
     if (escaped_description.size())
     {
@@ -127,6 +128,33 @@ void MetadataNodeImpl::toJSON(std::ostream& o, int level) const
         o << std::endl;
     }
 
+=======
+
+    if (escaped_description.size())
+    {
+        o << indent << "\"description\":\"" << escaped_description << "\"";
+
+        if (m_type.size() || escaped_value.size() || m_subnodes.size())
+        {
+            o << ",";
+        }
+
+        o << std::endl;
+    }
+
+    if (m_type.size())
+    {
+        o << indent << "\"type\":\"" << m_type << "\"";
+
+        if (escaped_value.size() || m_subnodes.size())
+        {
+            o << ",";
+        }
+
+        o << std::endl;
+    }
+
+>>>>>>> 70c4114b9d4fb5977f22ca5d9d88b4c13086706c
     if (escaped_value.size())
     {
         o << indent << "\"value\":\"" << escaped_value << "\"";
