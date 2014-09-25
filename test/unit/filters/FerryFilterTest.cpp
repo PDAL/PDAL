@@ -48,7 +48,8 @@ using namespace pdal;
 
 BOOST_AUTO_TEST_SUITE(FerryFilterTest)
 
-BOOST_AUTO_TEST_CASE(test_ferry_polygon)
+
+BOOST_AUTO_TEST_CASE(test_ferry_copy)
 {
     using namespace pdal;
 
@@ -56,18 +57,17 @@ BOOST_AUTO_TEST_CASE(test_ferry_polygon)
     ops1.add("filename", Support::datapath("las/1.2-with-color.las"));
     drivers::las::Reader reader(ops1);
 
-
     Options options;
 
     Option x("dimension", "X", "");
-    Option toX("to","X", "");
+    Option toX("to","LONG", "");
     Options xO;
     xO.add(toX);
     x.setOptions(xO);
     options.add(x);
 
     Option y("dimension", "Y", "");
-    Option toY("to","Y", "");
+    Option toY("to","LAT", "");
     Options yO;
     yO.add(toY);
     y.setOptions(yO);
@@ -78,11 +78,48 @@ BOOST_AUTO_TEST_CASE(test_ferry_polygon)
 
     PointContext ctx;
 
-    ferry.prepare(ctx);
+    BOOST_CHECK_THROW(ferry.prepare(ctx), pdal::pdal_error );
     PointBufferSet pbSet = ferry.execute(ctx);
     BOOST_CHECK_EQUAL(pbSet.size(), 1);
     PointBufferPtr buffer = *pbSet.begin();
     BOOST_CHECK_EQUAL(buffer->size(), 1065u);
+
+}
+
+BOOST_AUTO_TEST_CASE(test_ferry_invalid)
+{
+    using namespace pdal;
+
+    Options ops1;
+    ops1.add("filename", Support::datapath("las/1.2-with-color.las"));
+    drivers::las::Reader reader(ops1);
+
+    Options options;
+
+    Option x("dimension", "X", "");
+    Option toX("to","X", "");
+    Options xO;
+    xO.add(toX);
+    x.setOptions(xO);
+    options.add(x);
+
+//     Option y("dimension", "Y", "");
+//     Option toY("to","Y", "");
+//     Options yO;
+//     yO.add(toY);
+//     y.setOptions(yO);
+//     options.add(y);
+
+    filters::Ferry ferry(options);
+    ferry.setInput(&reader);
+
+    PointContext ctx;
+
+    BOOST_CHECK_THROW(ferry.prepare(ctx), pdal::pdal_error );
+//     PointBufferSet pbSet = ferry.execute(ctx);
+//     BOOST_CHECK_EQUAL(pbSet.size(), 1);
+//     PointBufferPtr buffer = *pbSet.begin();
+//     BOOST_CHECK_EQUAL(buffer->size(), 1065u);
 
 }
 

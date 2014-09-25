@@ -36,6 +36,8 @@
 
 #include <pdal/Filter.hpp>
 
+#include <map>
+#include <string>
 namespace pdal
 {
 namespace filters
@@ -60,6 +62,8 @@ private:
 
     Ferry& operator=(const Ferry&); // not implemented
     Ferry(const Ferry&); // not implemented
+
+    std::map<std::string, std::string> m_dimensions_map;
 };
 
 } // namespace filters

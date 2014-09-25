@@ -89,8 +89,7 @@ Options Ferry::getDefaultOptions()
 
 void Ferry::processOptions(const Options& options)
 {
-//     m_rasterFilename = options.getValueOrThrow<std::string>("raster");
-//     std::vector<Option> dimensions = options.getOptions("dimension");
+    std::vector<Option> dimensions = options.getOptions("dimension");
 //
 //     if (dimensions.size() == 0)
 //     {
@@ -100,23 +99,29 @@ void Ferry::processOptions(const Options& options)
 //         log()->get(LogLevel::Debug) << "No dimension mappings were given. "
 //             "Using default mappings." << std::endl;
 //     }
-//     for (auto i = dimensions.begin(); i != dimensions.end(); ++i)
-//     {
-//         std::string name = i->getValue<std::string>();
-//         boost::optional<Options const&> dimensionOptions = i->getOptions();
-//         if (!dimensionOptions)
-//         {
-//             std::ostringstream oss;
-//             oss << "No band and scaling information given for dimension '" <<
-//                 name << "'";
-//             throw pdal_error(oss.str());
-//         }
-//         uint32_t bandId =
-//             dimensionOptions->getValueOrThrow<uint32_t>("band");
-//         double scale =
-//             dimensionOptions->getValueOrDefault<double>("scale", 1.0);
-//         m_bands.emplace_back(name, Dimension::Id::Unknown, bandId, scale);
-//     }
+    for (auto i = dimensions.begin(); i != dimensions.end(); ++i)
+    {
+        std::string name = i->getValue<std::string>();
+        boost::optional<Options const&> dimensionOptions = i->getOptions();
+        if (!dimensionOptions)
+        {
+            std::ostringstream oss;
+            oss << "No 'to' dimension given for dimension '" <<
+                name << "'";
+            throw pdal_error(oss.str());
+        }
+        std::string to_dim =
+            dimensionOptions->getValueOrThrow<std::string>("to");
+        if (boost::algorithm::iequals(name, to_dim))
+        {
+            std::ostringstream oss;
+            oss << "The from and to dimension cannot be the same"
+                << " name for dimension '" << name << "'";
+            throw pdal_error(oss.str());
+        }
+        m_dimensions_map.insert(std::make_pair(name, to_dim));
+
+    }
 }
 
 
