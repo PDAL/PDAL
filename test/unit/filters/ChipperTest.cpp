@@ -41,6 +41,7 @@
 #include <pdal/drivers/las/Reader.hpp>
 #include <pdal/Options.hpp>
 
+#include "StageTester.hpp"
 #include "Support.hpp"
 
 #ifdef PDAL_COMPILER_GCC
@@ -107,6 +108,23 @@ BOOST_AUTO_TEST_CASE(test_construction)
     }
 }
 
+
+// Make sure things don't crash if the point buffer is empty.
+BOOST_AUTO_TEST_CASE(empty_buffer)
+{
+    PointContext ctx;
+    PointBufferPtr buf(new PointBuffer(ctx));
+
+    Options ops;
+
+    filters::Chipper chipper(ops);
+    chipper.prepare(ctx);
+    StageTester::ready(&chipper, ctx);
+    PointBufferSet pbSet = StageTester::run(&chipper, buf);
+    StageTester::done(&chipper, ctx);
+
+    BOOST_CHECK_EQUAL(pbSet.size(), 0);
+}
 
 //ABELL
 /**
