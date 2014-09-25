@@ -91,6 +91,9 @@ Options Chipper::getDefaultOptions()
 
 PointBufferSet Chipper::run(PointBufferPtr buffer)
 {
+    if (buffer->size() == 0)
+        return m_buffers;
+
     m_inbuf = buffer;
     load(*buffer, m_xvec, m_yvec, m_spare);
     partition(m_xvec.size());
