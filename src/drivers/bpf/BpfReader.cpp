@@ -62,6 +62,7 @@ void BpfReader::initialize()
     if (!m_header.read(m_stream))
         return;
 
+#ifdef PDAL_HAVE_GDAL
     uint32_t zone(abs(m_header.m_coordId));
     std::string code("");
     if (m_header.m_coordId > 0)
@@ -70,6 +71,7 @@ void BpfReader::initialize()
         code = "EPSG:327" + boost::lexical_cast<std::string>(zone);
     SpatialReference srs(code);
     setSpatialReference(srs);
+#endif
 
     m_dims.insert(m_dims.end(), m_header.m_numDim, BpfDimension());
     if (!BpfDimension::read(m_stream, m_dims))
