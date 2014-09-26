@@ -37,6 +37,7 @@
 
 #include <pdal/pdal_config.hpp>
 
+#include <pdal/drivers/buffer/BufferReader.hpp>
 #include <pdal/drivers/faux/Reader.hpp>
 
 #include <pdal/drivers/las/Reader.hpp>

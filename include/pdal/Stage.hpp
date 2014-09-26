@@ -71,7 +71,7 @@ public:
         { m_inputs.push_back(input); }
 
     void prepare(PointContextRef ctx);
-    PointBufferSet execute(PointContextRef ctx, PointBufferPtr buffer=0);
+    PointBufferSet execute(PointContextRef ctx);
 
     void setSpatialReference(SpatialReference const&);
     const SpatialReference& getSpatialReference() const;

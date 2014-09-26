@@ -62,6 +62,7 @@ namespace pdal
 MAKE_READER_CREATOR(FauxReader, pdal::drivers::faux::Reader)
 MAKE_READER_CREATOR(LasReader, pdal::drivers::las::Reader)
 MAKE_READER_CREATOR(BpfReader, pdal::BpfReader)
+MAKE_READER_CREATOR(BufferReader, drivers::buffer::BufferReader)
 
 #ifdef PDAL_HAVE_GREYHOUND
 MAKE_READER_CREATOR(GreyhoundReader, pdal::drivers::greyhound::GreyhoundReader)
@@ -371,6 +372,7 @@ void StageFactory::registerWriter(const std::string& type, WriterCreator* f)
 void StageFactory::registerKnownReaders()
 {
     REGISTER_READER(FauxReader, pdal::drivers::faux::Reader);
+    REGISTER_READER(BufferReader, pdal::drivers::buffer::BufferReader);
     REGISTER_READER(LasReader, pdal::drivers::las::Reader);
 #ifdef PDAL_HAVE_ORACLE
 #ifndef USE_PDAL_PLUGIN_OCI
