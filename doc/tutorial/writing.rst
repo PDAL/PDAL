@@ -24,7 +24,7 @@ issue a compilation command something like the following:
 
 ::
 
-    g++ pdal-tutorial.cpp -o kp -Iinclude/ -Lbin/ -l pdalcpp -g
+    g++ -g -std=c++11 -o pdal-tutorial -I./include -L./lib -lpdalcpp pdal-tutorial.cpp
 
 .. note::
 
@@ -52,17 +52,12 @@ available subject to having the required include directories pathed:
     selectively include the classes you need as shown in the example below.
 
 
-Compile the example code with the following compile line:
-
-::
-
-    g++ -g -std=c++11 -o example -I./include -L./lib -lpdalcpp example.cpp
-
 
 .. code-block:: cpp
 
     #include <pdal/pdal.hpp>
     #include <pdal/PointBuffer.hpp>
+    #include <pdal/drivers/buffer/BufferReader.hpp>
     #include <pdal/drivers/las/Writer.hpp>
 
     #include <vector>
@@ -128,9 +123,14 @@ Compile the example code with the following compile line:
 
             fillBuffer(buffer, data);
 
+            pdal::drivers::buffer::BufferReader reader(options);
+            reader.addBuffer(buffer);
             pdal::drivers::las::Writer writer(options);
+            writer.setInput(&reader);
             writer.prepare(ctx);
-            writer.execute(ctx, buffer);
+            writer.execute(ctx);
+
+
         }
 
     }

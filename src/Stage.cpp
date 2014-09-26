@@ -80,18 +80,12 @@ void Stage::prepare(PointContextRef ctx)
 }
 
 
-PointBufferSet Stage::execute(PointContextRef ctx, PointBufferPtr buffer)
+PointBufferSet Stage::execute(PointContextRef ctx )
 {
     PointBufferSet buffers;
     if (m_inputs.empty())
     {
-        if (buffer)
-        {
-            buffers.insert(PointBufferPtr(buffer));
-        } else
-        {
-            buffers.insert(PointBufferPtr(new PointBuffer(ctx)));
-        }
+        buffers.insert(PointBufferPtr(new PointBuffer(ctx)));
     }
     else
     {
