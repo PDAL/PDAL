@@ -124,7 +124,7 @@ available subject to having the required include directories pathed:
             fillBuffer(buffer, data);
 
             pdal::drivers::buffer::BufferReader reader(options);
-            reader.add_buffer(buffer);
+            reader.addBuffer(buffer);
             pdal::drivers::las::Writer writer(options);
             writer.setInput(&reader);
             writer.prepare(ctx);
