@@ -51,15 +51,16 @@ public:
     SET_STAGE_LINK("http://pdal.io/stages/drivers.buffer.reader.html")
     SET_STAGE_ENABLED(true)
 
-    BufferReader(const Options& options) : Reader(options) {};
-    inline void add_buffer(const PointBufferPtr& buffer) { m_buffer = buffer; }
+    BufferReader(const Options& options) : Reader(options)
+        {}
+    void addBuffer(const PointBufferPtr& buffer)
+        { m_buffers.insert(buffer); }
 
 private:
+    PointBufferSet m_buffers;
 
-    virtual point_count_t read(PointBuffer& buf, point_count_t count);
-
-    PointBufferPtr m_buffer;
-
+    virtual PointBufferSet run(PointBufferPtr buf)
+        { return m_buffers; }
 };
 
 } // namespace buffer
