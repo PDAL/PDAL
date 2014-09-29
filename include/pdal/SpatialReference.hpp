@@ -95,6 +95,9 @@ public:
     /// support more coordinate systems and descriptions.
     std::string getProj4() const;
 
+    std::string getHorizontal() const;
+    std::string getVertical() const;
+
     /// Sets the Proj.4 string describing the Spatial Reference System.
     /// If GDAL is linked, it uses GDAL's operations and methods to determine
     /// the Proj.4 string -- otherwise, if libgeotiff is linked, it uses

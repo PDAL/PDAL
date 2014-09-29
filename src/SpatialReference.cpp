@@ -151,6 +151,54 @@ std::string SpatialReference::getProj4() const
     return tmp;
 }
 
+std::string SpatialReference::getVertical() const
+{
+    std::string tmp("");
+
+#ifdef PDAL_SRS_ENABLED
+
+    OGRSpatialReference* poSRS =
+        (OGRSpatialReference*)OSRNewSpatialReference(m_wkt.c_str());
+    char *pszWKT = NULL;
+
+    OGR_SRSNode* node = poSRS->GetAttrNode("VERT_CS");
+    if (node && poSRS)
+    {
+        node->exportToWkt(&pszWKT);
+        tmp = pszWKT;
+        CPLFree(pszWKT);
+        OSRDestroySpatialReference(poSRS);
+    }
+
+
+
+#endif
+    return tmp;
+}
+
+std::string SpatialReference::getHorizontal() const
+{
+    std::string tmp("");
+
+#ifdef PDAL_SRS_ENABLED
+
+    OGRSpatialReference* poSRS =
+        (OGRSpatialReference*)OSRNewSpatialReference(m_wkt.c_str());
+    char *pszWKT = NULL;
+
+    if (poSRS)
+    {
+        poSRS->StripVertical();
+
+        poSRS->exportToWkt(&pszWKT);
+        tmp = pszWKT;
+        CPLFree(pszWKT);
+        OSRDestroySpatialReference(poSRS);
+    }
+
+#endif
+    return tmp;
+}
 
 void SpatialReference::setProj4(std::string const& v)
 {
