@@ -296,11 +296,11 @@ public:
     /// Get maximum value of extent of Z coordinate.
     double GetMinZ() const;
 
-    const Bounds<double>& getBounds() const
+    const BOX3D& getBounds() const
     {
         return m_bounds;
     }
-    void setBounds(const Bounds<double>& bounds)
+    void setBounds(const BOX3D& bounds)
     {
         m_bounds = bounds;
     }
@@ -409,10 +409,10 @@ private:
     PointOffsets m_offsets;
     bool m_isCompressed;
     uint32_t m_headerPadding;
-    uint16_t m_dataRecordLength; 
+    uint16_t m_dataRecordLength;
     PointFormat m_pointFormat;
 
-    Bounds<double> m_bounds;
+    BOX3D m_bounds;
 
     VLRList m_vlrList;
 

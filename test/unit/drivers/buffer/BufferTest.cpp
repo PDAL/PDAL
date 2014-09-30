@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Bradley J Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2014, Hobu Inc. (hobu@hobu.inc)
 *
 * All rights reserved.
 *
@@ -31,72 +31,70 @@
 * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 * OF SUCH DAMAGE.
 ****************************************************************************/
-
 #include <boost/test/unit_test.hpp>
 
-#include <pdal/filters/Splitter.hpp>
-#include <pdal/drivers/las/Reader.hpp>
+#include <pdal/PointBuffer.hpp>
+#include <pdal/drivers/buffer/BufferReader.hpp>
+#include <pdal/filters/Stats.hpp>
 
-#include "../StageTester.hpp"
 #include "Support.hpp"
+
+BOOST_AUTO_TEST_SUITE(BufferTest)
 
 using namespace pdal;
 
-BOOST_AUTO_TEST_SUITE(SplitterTest)
-
-BOOST_AUTO_TEST_CASE(test_tile_filter)
+namespace
 {
-    // create the reader
-    Options ops1;
-    ops1.add("filename", Support::datapath("las/1.2-with-color.las"));
-    drivers::las::Reader r(ops1);
 
-    Options o;
-    Option length("length", 1000, "length");
-    o.add(length);
+BOOST_AUTO_TEST_CASE(test_basic)
+{
+    PointContext ctx;
 
-    // create the tile filter and prepare
-    pdal::filters::Splitter s(o);
+    PointBufferPtr buf(new PointBuffer(ctx));
+
+    ctx.registerDim(Dimension::Id::X);
+    ctx.registerDim(Dimension::Id::Y);
+    ctx.registerDim(Dimension::Id::Z);
+
+    for (int i = 0; i < 20; ++i)
+    {
+        buf->setField(Dimension::Id::X, i, i);
+        buf->setField(Dimension::Id::Y, i, 2 * i);
+        buf->setField(Dimension::Id::Z, i, -i);
+    }
+
+    Options ops;
+    drivers::buffer::BufferReader r(ops);
+    r.addBuffer(buf);
+
+    filters::Stats s(ops);
     s.setInput(&r);
 
-    PointContext ctx;
-    PointBufferPtr buf(new PointBuffer(ctx));
     s.prepare(ctx);
-
-    StageTester::ready(&r, ctx);
-    PointBufferSet pbSet = StageTester::run(&r, buf);
-    StageTester::done(&r, ctx);
+    PointBufferSet pbSet = s.execute(ctx);
     BOOST_CHECK_EQUAL(pbSet.size(), 1);
     buf = *pbSet.begin();
+    BOOST_CHECK_EQUAL(buf->size(), 20);
 
-    StageTester::ready(&s, ctx);
-    pbSet = StageTester::run(&s, buf);
-    StageTester::done(&s, ctx);
+    filters::stats::Summary xSummary = s.getStats(Dimension::Id::X);
+    BOOST_CHECK_CLOSE(xSummary.minimum(), 0, .0001);
+    BOOST_CHECK_CLOSE(xSummary.maximum(), 19, .0001);
+    BOOST_CHECK_EQUAL(xSummary.count(), 20);
+    BOOST_CHECK_CLOSE(xSummary.average(), 9.5, .0001);
 
-    std::vector<PointBufferPtr> buffers;
-    for (auto it = pbSet.begin(); it != pbSet.end(); ++it)
-        buffers.push_back(*it);
+    filters::stats::Summary ySummary = s.getStats(Dimension::Id::Y);
+    BOOST_CHECK_CLOSE(ySummary.minimum(), 0, .0001);
+    BOOST_CHECK_CLOSE(ySummary.maximum(), 38, .0001);
+    BOOST_CHECK_EQUAL(ySummary.count(), 20);
+    BOOST_CHECK_CLOSE(ySummary.average(), 19, .0001);
 
-    auto sorter = [](PointBufferPtr p1, PointBufferPtr p2)
-    {
-        BOX3D b1 = p1->calculateBounds();
-        BOX3D b2 = p2->calculateBounds();
+    filters::stats::Summary zSummary = s.getStats(Dimension::Id::Z);
+    BOOST_CHECK_CLOSE(zSummary.minimum(), -19, .0001);
+    BOOST_CHECK_CLOSE(zSummary.maximum(), 0, .0001);
+    BOOST_CHECK_EQUAL(zSummary.count(), 20);
+    BOOST_CHECK_CLOSE(zSummary.average(), -9.5, .0001);
+}
 
-        return b1.minx < b2.minx ?  true :
-            b1.minx > b2.minx ? false :
-            b1.miny < b2.miny;
-    };
-    std::sort(buffers.begin(), buffers.end(), sorter);
-
-    BOOST_CHECK_EQUAL(buffers.size(), 15);
-    int counts[] = {24, 27, 26, 27, 10, 166, 142, 76, 141, 132, 63, 70, 67,
-        34, 60 };
-    for (size_t i = 0; i < buffers.size(); ++i)
-    {
-        PointBufferPtr& buf = buffers[i];
-        BOOST_CHECK_EQUAL(buf->size(), counts[i]);
-    }
 }
 
 BOOST_AUTO_TEST_SUITE_END()
-

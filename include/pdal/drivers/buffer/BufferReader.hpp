@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2014, Howard Butler (howard@hobu.co)
 *
 * All rights reserved.
 *
@@ -32,6 +32,38 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/Vector.hpp>
+#pragma once
 
-// (no code here, everything is in the header)
+#include <pdal/PointBuffer.hpp>
+#include <pdal/Reader.hpp>
+
+namespace pdal
+{
+namespace drivers
+{
+namespace buffer
+{
+
+class PDAL_DLL BufferReader : public pdal::Reader
+{
+public:
+    SET_STAGE_NAME("drivers.buffer.reader", "PointBuffer Reader")
+    SET_STAGE_LINK("http://pdal.io/stages/drivers.buffer.reader.html")
+    SET_STAGE_ENABLED(true)
+
+    BufferReader(const Options& options) : Reader(options)
+        {}
+    void addBuffer(const PointBufferPtr& buffer)
+        { m_buffers.insert(buffer); }
+
+private:
+    PointBufferSet m_buffers;
+
+    virtual PointBufferSet run(PointBufferPtr buf)
+        { return m_buffers; }
+};
+
+} // namespace buffer
+} // namespace drivers
+} // namespace pdal
+

@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE(PipelineManagerTest_test1)
         Reader* reader = mgr.addReader("drivers.las.reader", optsR);
 
         Options optsF;
-        optsF.add("bounds", Bounds<double>(0,0,0,1000000,1000000,1000000));
+        optsF.add("bounds", BOX3D(0,0,0,1000000,1000000,1000000));
         Filter* filter = mgr.addFilter("filters.crop", reader, optsF);
 
         Options optsW;

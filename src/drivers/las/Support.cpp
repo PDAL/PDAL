@@ -50,7 +50,7 @@ void Support::rewriteHeader(std::ostream& stream, const SummaryData& data)
     stream.seekp(107, std::ios_base::cur);
 
     //This is legacy for 1.4 -- only valid on read for 1.3 and before.
-    const int MAX_RETURNS = 5; 
+    const int MAX_RETURNS = 5;
     {
         boost::uint8_t buf[256];
         boost::uint8_t* p = buf;
@@ -59,7 +59,7 @@ void Support::rewriteHeader(std::ostream& stream, const SummaryData& data)
         for (int i = 1; i <= MAX_RETURNS; i++)
             Utils::write_field<uint32_t>(p, data.getReturnCount(i));
 
-        // Write the data to the stream. 
+        // Write the data to the stream.
         Utils::write_n(stream, buf, 4 + 4 * MAX_RETURNS);
     }
 
@@ -70,19 +70,13 @@ void Support::rewriteHeader(std::ostream& stream, const SummaryData& data)
         boost::uint8_t buf[256];
         boost::uint8_t* p = buf;
 
-        pdal::Bounds<double> bounds = data.getBounds();
-        double minX = bounds.getMinimum(0);
-        double minY = bounds.getMinimum(1);
-        double minZ = bounds.getMinimum(2);
-        double maxX = bounds.getMaximum(0);
-        double maxY = bounds.getMaximum(1);
-        double maxZ = bounds.getMaximum(2);
-        Utils::write_field<double>(p, maxX);
-        Utils::write_field<double>(p, minX);
-        Utils::write_field<double>(p, maxY);
-        Utils::write_field<double>(p, minY);
-        Utils::write_field<double>(p, maxZ);
-        Utils::write_field<double>(p, minZ);
+        BOX3D bounds = data.getBounds();
+        Utils::write_field<double>(p, bounds.maxx);
+        Utils::write_field<double>(p, bounds.minx);
+        Utils::write_field<double>(p, bounds.maxy);
+        Utils::write_field<double>(p, bounds.miny);
+        Utils::write_field<double>(p, bounds.maxz);
+        Utils::write_field<double>(p, bounds.minz);
         Utils::write_n(stream, buf, 6*8);
     }
 

@@ -19,12 +19,13 @@ endif()
 SET(PDAL_UNITTEST_TEST_SRC
     BoundsTest.cpp
     drivers/bpf/BPFTest.cpp
+    drivers/buffer/BufferTest.cpp
 #    drivers/caris/CarisReaderTest.cpp
     filters/ChipperTest.cpp
     ConfigTest.cpp
     filters/CropFilterTest.cpp
     filters/DecimationFilterTest.cpp
-#    DimensionTest.cpp
+    filters/FerryFilterTest.cpp
     EnvironmentTest.cpp
     drivers/faux/FauxReaderTest.cpp
     FileUtilsTest.cpp
@@ -41,7 +42,6 @@ SET(PDAL_UNITTEST_TEST_SRC
     PipelineManagerTest.cpp
     PointBufferTest.cpp
     drivers/qfit/QFITReaderTest.cpp
-    RangeTest.cpp
     filters/ReprojectionFilterTest.cpp
     drivers/sbet/SbetReaderTest.cpp
     drivers/sbet/SbetWriterTest.cpp
@@ -59,7 +59,6 @@ SET(PDAL_UNITTEST_TEST_SRC
 #    drivers/text/TextWriterTest.cpp
     UserCallbackTest.cpp
     UtilsTest.cpp
-    VectorTest.cpp
     ${PDAL_UNITTEST_XMLSCHEMA_TEST}
     )
 

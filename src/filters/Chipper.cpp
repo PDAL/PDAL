@@ -91,6 +91,9 @@ Options Chipper::getDefaultOptions()
 
 PointBufferSet Chipper::run(PointBufferPtr buffer)
 {
+    if (buffer->size() == 0)
+        return m_buffers;
+
     m_inbuf = buffer;
     load(*buffer, m_xvec, m_yvec, m_spare);
     partition(m_xvec.size());
@@ -99,10 +102,9 @@ PointBufferSet Chipper::run(PointBufferPtr buffer)
 }
 
 
-void Chipper::load(PointBuffer& buffer, ChipRefList& xvec, ChipRefList& yvec, 
+void Chipper::load(PointBuffer& buffer, ChipRefList& xvec, ChipRefList& yvec,
     ChipRefList& spare)
 {
-    ChipPtRef ref;
     boost::uint32_t idx;
     std::vector<ChipPtRef>::iterator it;
 

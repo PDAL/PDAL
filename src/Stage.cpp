@@ -80,11 +80,13 @@ void Stage::prepare(PointContextRef ctx)
 }
 
 
-PointBufferSet Stage::execute(PointContextRef ctx)
+PointBufferSet Stage::execute(PointContextRef ctx )
 {
     PointBufferSet buffers;
     if (m_inputs.empty())
+    {
         buffers.insert(PointBufferPtr(new PointBuffer(ctx)));
+    }
     else
     {
         for (size_t i = 0; i < m_inputs.size(); ++i)
@@ -206,7 +208,7 @@ std::vector<Stage*> Stage::findStage(std::string name)
     std::vector<Stage*> output;
     if (boost::iequals(getName(), name))
         output.push_back(this);
-    
+
     for (auto s = m_inputs.begin(); s != m_inputs.end(); ++s)
     {
         Stage* stage = (*s);
@@ -219,7 +221,7 @@ std::vector<Stage*> Stage::findStage(std::string name)
                 output.insert(output.end(), hits.begin(), hits.end());
         }
     }
-    
+
     return output;
 }
 

@@ -99,7 +99,7 @@ public:
         { return Dimension::IdList(); }
     static std::string s_getInfoLink()
         { return std::string(); }
-    virtual boost::property_tree::ptree toPTree(PointContextRef ctx) const 
+    virtual boost::property_tree::ptree toPTree(PointContextRef ctx) const
         { return boost::property_tree::ptree(); }
 
 #define SET_STAGE_NAME(name, description)  \
@@ -118,7 +118,7 @@ public:
 
     virtual StageSequentialIterator* createSequentialIterator() const
         { return NULL; }
-    inline MetadataNode getMetadata() const 
+    inline MetadataNode getMetadata() const
         { return m_metadata; }
 
 protected:

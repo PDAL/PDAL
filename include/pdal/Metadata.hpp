@@ -40,9 +40,32 @@
 
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_io.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include <map>
 #include <vector>
+
+
+namespace
+{
+    std::string sanitize(const std::string& name)
+    {
+        auto ischar = [](char c)
+        {
+            return c == ';' || c == ':' || c == ' ' || c == '\'' || c == '\"';
+        };
+
+        std::string v;
+        for (size_t i = 0; i < name.size(); ++i)
+        {
+            if (ischar(name[i]))
+                v += '_';
+            else
+                v += name[i];
+        }
+        return v;
+    }
+}
 
 namespace pdal
 {
@@ -68,8 +91,10 @@ class MetadataNodeImpl
     friend class MetadataNode;
 
 private:
-    MetadataNodeImpl(const std::string& name);
-
+    MetadataNodeImpl(const std::string& name) : m_kind(MetadataType::Instance)
+    {
+      m_name = sanitize(name);
+    }
 
     MetadataNodeImpl() : m_kind(MetadataType::Instance)
     {}
@@ -247,7 +272,7 @@ inline void MetadataNodeImpl::setValue<SpatialReference>(
 }
 
 template <>
-inline void MetadataNodeImpl::setValue<Bounds<double>>(const Bounds<double>& b)
+inline void MetadataNodeImpl::setValue<BOX3D>(const BOX3D& b)
 {
     std::ostringstream oss;
     oss << b;

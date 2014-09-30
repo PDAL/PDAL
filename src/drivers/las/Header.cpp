@@ -417,32 +417,32 @@ void LasHeader::SetOffset(double x, double y, double z)
 
 double LasHeader::GetMaxX() const
 {
-    return m_bounds.getMaximum(0);
+    return m_bounds.maxx;
 }
 
 double LasHeader::GetMinX() const
 {
-    return m_bounds.getMinimum(0);
+    return m_bounds.minx;
 }
 
 double LasHeader::GetMaxY() const
 {
-    return m_bounds.getMaximum(1);
+    return m_bounds.maxy;
 }
 
 double LasHeader::GetMinY() const
 {
-    return m_bounds.getMinimum(1);
+    return m_bounds.miny;
 }
 
 double LasHeader::GetMaxZ() const
 {
-    return m_bounds.getMaximum(2);
+    return m_bounds.maxz;
 }
 
 double LasHeader::GetMinZ() const
 {
-    return m_bounds.getMinimum(2);
+    return m_bounds.minz;
 }
 
 boost::uint32_t LasHeader::GetHeaderPadding() const

@@ -88,7 +88,7 @@ void Decimation::decimate(PointBuffer& input, PointBuffer& output)
 #ifdef PDAL_HAVE_PCL
 void Decimation::voxel_grid(PointBuffer& input, PointBuffer& output)
 {
-    Bounds<double> const& buffer_bounds = input.calculateBounds();
+    BOX3D const& buffer_bounds = input.calculateBounds();
 
     // create PCL cloud objects
     typedef pcl::PointCloud<pcl::PointNormal> Cloud;

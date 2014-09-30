@@ -62,6 +62,7 @@ namespace pdal
 MAKE_READER_CREATOR(FauxReader, pdal::drivers::faux::Reader)
 MAKE_READER_CREATOR(LasReader, pdal::drivers::las::Reader)
 MAKE_READER_CREATOR(BpfReader, pdal::BpfReader)
+MAKE_READER_CREATOR(BufferReader, drivers::buffer::BufferReader)
 
 #ifdef PDAL_HAVE_GREYHOUND
 MAKE_READER_CREATOR(GreyhoundReader, pdal::drivers::greyhound::GreyhoundReader)
@@ -113,6 +114,7 @@ MAKE_FILTER_CREATOR(Colorization, pdal::filters::Colorization)
 #endif
 MAKE_FILTER_CREATOR(Crop, pdal::filters::Crop)
 MAKE_FILTER_CREATOR(Decimation, pdal::filters::Decimation)
+MAKE_FILTER_CREATOR(Ferry, pdal::filters::Ferry)
 MAKE_FILTER_CREATOR(HexBin, pdal::filters::HexBin)
 MAKE_FILTER_CREATOR(Merge, pdal::filters::Merge)
 //MAKE_FILTER_CREATOR(InPlaceReprojection, pdal::filters::InPlaceReprojection)
@@ -370,6 +372,7 @@ void StageFactory::registerWriter(const std::string& type, WriterCreator* f)
 void StageFactory::registerKnownReaders()
 {
     REGISTER_READER(FauxReader, pdal::drivers::faux::Reader);
+    REGISTER_READER(BufferReader, pdal::drivers::buffer::BufferReader);
     REGISTER_READER(LasReader, pdal::drivers::las::Reader);
 #ifdef PDAL_HAVE_ORACLE
 #ifndef USE_PDAL_PLUGIN_OCI
@@ -422,6 +425,7 @@ void StageFactory::registerKnownFilters()
 #endif
     REGISTER_FILTER(Crop, pdal::filters::Crop);
     REGISTER_FILTER(Decimation, pdal::filters::Decimation);
+    REGISTER_FILTER(Ferry, pdal::filters::Ferry);
     REGISTER_FILTER(Reprojection, pdal::filters::Reprojection);
     REGISTER_FILTER(HexBin, pdal::filters::HexBin);
     REGISTER_FILTER(Merge, pdal::filters::Merge);

@@ -69,12 +69,12 @@ namespace pdal
 template <typename CloudT>
 void PCDtoPDAL(CloudT &cloud, PointBuffer& buf)
 {
-    Bounds<double> buffer_bounds(0,0,0,0,0,0);
+    BOX3D buffer_bounds(0,0,0,0,0,0);
     PCDtoPDAL(cloud, buf, buffer_bounds);
 }
 
 template <typename CloudT>
-void PCDtoPDAL(CloudT &cloud, PointBuffer& buf, Bounds<double> const& bounds)
+void PCDtoPDAL(CloudT &cloud, PointBuffer& buf, BOX3D const& bounds)
 {
 #ifdef PDAL_HAVE_PCL
     typedef typename pcl::traits::fieldList<typename CloudT::PointType>::type
@@ -83,11 +83,11 @@ void PCDtoPDAL(CloudT &cloud, PointBuffer& buf, Bounds<double> const& bounds)
     if (pcl::traits::has_xyz<typename CloudT::PointType>::value)
     {
         auto getX = [&cloud, &bounds](size_t i)
-            { return cloud.points[i].x + bounds.getMinimum(0); };
+            { return cloud.points[i].x + bounds.minx; };
         auto getY = [&cloud, &bounds](size_t i)
-            { return cloud.points[i].y + bounds.getMinimum(1); };
+            { return cloud.points[i].y + bounds.miny; };
         auto getZ = [&cloud, &bounds](size_t i)
-            { return cloud.points[i].z + bounds.getMinimum(2); };
+            { return cloud.points[i].z + bounds.minz; };
         setValues(buf, Dimension::Id::X, cloud.points.size(), getX);
         setValues(buf, Dimension::Id::Y, cloud.points.size(), getY);
         setValues(buf, Dimension::Id::Z, cloud.points.size(), getZ);
@@ -113,7 +113,7 @@ void PCDtoPDAL(CloudT &cloud, PointBuffer& buf, Bounds<double> const& bounds)
         for (size_t i = 0; i < cloud.points.size(); ++i)
         {
             boost::uint32_t v;
-            
+
             typename CloudT::PointType p = cloud.points[i];
             pcl::for_each_type<FieldList>
                (pcl::CopyIfFieldExists<typename CloudT::PointType, boost::uint32_t>
@@ -135,12 +135,12 @@ void PCDtoPDAL(CloudT &cloud, PointBuffer& buf, Bounds<double> const& bounds)
 template <typename CloudT>
 void PDALtoPCD(const PointBuffer& data, CloudT &cloud)
 {
-    Bounds<double> buffer_bounds(0,0,0,0,0,0);
+    BOX3D buffer_bounds(0,0,0,0,0,0);
     PDALtoPCD(const_cast<PointBuffer&>(data), cloud, buffer_bounds);
 }
 
 template <typename CloudT>
-void PDALtoPCD(PointBuffer& data, CloudT &cloud, Bounds<double> const& bounds)
+void PDALtoPCD(PointBuffer& data, CloudT &cloud, BOX3D const& bounds)
 {
 #ifdef PDAL_HAVE_PCL
     typedef typename pcl::traits::fieldList<typename CloudT::PointType>::type
@@ -155,9 +155,9 @@ void PDALtoPCD(PointBuffer& data, CloudT &cloud, Bounds<double> const& bounds)
     {
         for (size_t i = 0; i < cloud.points.size(); ++i)
         {
-            double xd = data.getFieldAs<double>(Dimension::Id::X, i) - bounds.getMinimum(0);
-            double yd = data.getFieldAs<double>(Dimension::Id::Y, i) - bounds.getMinimum(1);
-            double zd = data.getFieldAs<double>(Dimension::Id::Z, i) - bounds.getMinimum(2);
+            double xd = data.getFieldAs<double>(Dimension::Id::X, i) - bounds.minx;
+            double yd = data.getFieldAs<double>(Dimension::Id::Y, i) - bounds.miny;
+            double zd = data.getFieldAs<double>(Dimension::Id::Z, i) - bounds.minz;
 
             typename CloudT::PointType p = cloud.points[i];
             p.x = (float)xd;

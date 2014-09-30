@@ -60,7 +60,7 @@ public:
 
     boost::uint32_t getTotalNumPoints() const;
 
-    pdal::Bounds<double> getBounds() const;
+    BOX3D getBounds() const;
 
     // note that returnNumber is in the range [0..4]
     boost::uint32_t getReturnCount(int returnNumber) const;

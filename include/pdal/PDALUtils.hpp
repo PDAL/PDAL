@@ -147,26 +147,30 @@ inline ptree toPTree(const PointBuffer& buffer)
     return tree;
 }
 
-
-template <typename T> ptree toPTree(const Range<T>& rng)
-{
-    ptree tree;
-    tree.add("minimum", rng.getMinimum());
-    tree.add("maximum", rng.getMaximum());
-    return tree;
-}
-
-
 /// Outputs a string-based boost::property_tree::ptree representation
-/// of the Bounds instance
-template <typename T> ptree toPTree(const Bounds<T>& bounds)
+/// of the BOX3D instance
+inline ptree toPTree(const BOX3D& bounds)
 {
     ptree tree;
-    for (std::size_t i = 0; i < bounds.size(); ++i)
+    ptree x;
+    ptree y;
+    ptree z;
+
+    x.add("minimum", bounds.minx);
+    x.add("maximum", bounds.maxx);
+    tree.add_child("0", x);
+
+    y.add("minimum", bounds.miny);
+    y.add("maximum", bounds.maxy);
+    tree.add_child("1", y);
+
+    if (!bounds.is_z_empty())
     {
-        const Range<T>& r = bounds.dimensions()[i];
-        tree.add_child(boost::lexical_cast<std::string>(i), toPTree(r));
+        z.add("minimum", bounds.minz);
+        z.add("maximum", bounds.maxz);
+        tree.add_child("2", z);
     }
+
     return tree;
 }
 

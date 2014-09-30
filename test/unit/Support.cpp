@@ -349,13 +349,13 @@ void Support::check_p710_p711_p712(const pdal::PointBuffer& data)
 }
 
 
-void Support::compareBounds(const pdal::Bounds<double>& p, const pdal::Bounds<double>& q)
+void Support::compareBounds(const BOX3D& p, const BOX3D& q)
 {
-    BOOST_CHECK_CLOSE(p.getMinimum(0), q.getMinimum(0), 1);
-    BOOST_CHECK_CLOSE(p.getMinimum(1), q.getMinimum(1), 1);
-    BOOST_CHECK_CLOSE(p.getMinimum(2), q.getMinimum(2), 1);
-    BOOST_CHECK_CLOSE(p.getMaximum(0), q.getMaximum(0), 1);
-    BOOST_CHECK_CLOSE(p.getMaximum(1), q.getMaximum(1), 1);
-    BOOST_CHECK_CLOSE(p.getMaximum(2), q.getMaximum(2), 1);
+    BOOST_CHECK_CLOSE(p.minx, q.minx, 1);
+    BOOST_CHECK_CLOSE(p.miny, q.miny, 1);
+    BOOST_CHECK_CLOSE(p.minz, q.minz, 1);
+    BOOST_CHECK_CLOSE(p.maxx, q.maxx, 1);
+    BOOST_CHECK_CLOSE(p.maxy, q.maxy, 1);
+    BOOST_CHECK_CLOSE(p.maxz, q.maxz, 1);
 }
 

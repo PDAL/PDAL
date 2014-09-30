@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2014, Howard Butler <hobu.inc@gmail.com>
 *
 * All rights reserved.
 *
@@ -32,44 +32,42 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/Range.hpp>
+#pragma once
 
+#include <pdal/Filter.hpp>
 
+#include <map>
+#include <string>
 namespace pdal
 {
-
-
-std::istream& operator>>(std::istream& istr, Range<double>& range)
+namespace filters
 {
-    double low, high;
 
-    Utils::eatwhitespace(istr);
+class PDAL_DLL Ferry : public Filter
+{
+public:
+    SET_STAGE_NAME("filters.ferry", "Data ferrying filter")
+    SET_STAGE_LINK("http://pdal.io/stages/filters.ferry.html")
+    SET_STAGE_ENABLED(true)
 
-    if (!Utils::eatcharacter(istr,'['))
-        throw pdal_error("Range parser failed finding expected '[' character");
+    Ferry(const Options& options) : Filter(options) {};
+    static Options getDefaultOptions();
 
-    Utils::eatwhitespace(istr);
+private:
+    virtual void initialize();
+    virtual void processOptions(const Options&);
+    virtual void addDimensions(PointContextRef ctx);
+    virtual void ready(PointContext ctx);
+    virtual void filter(PointBuffer& buffer);
+    virtual void done(PointContext ctx);
 
-    istr >> low;
+    Ferry& operator=(const Ferry&); // not implemented
+    Ferry(const Ferry&); // not implemented
 
-    Utils::eatwhitespace(istr);
+    std::map<std::string, std::string> m_name_map;
+    std::map< Dimension::Id::Enum ,  Dimension::Id::Enum > m_dimensions_map;
+};
 
-    if (!Utils::eatcharacter(istr,','))
-        throw pdal_error("Range parser failed finding expected ',' character");
+} // namespace filters
+} // namespace pdal
 
-    Utils::eatwhitespace(istr);
-
-    istr >> high;
-
-    if (!Utils::eatcharacter(istr,']'))
-        throw pdal_error("Range parser failed finding expected ']' character");
-
-    Utils::eatwhitespace(istr);
-
-    range.setMinimum(low);
-    range.setMaximum(high);
-
-    return istr;
-}
-
-} // namespace
