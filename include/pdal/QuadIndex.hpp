@@ -62,6 +62,8 @@ public:
 
     std::size_t getDepth() const;
 
+    std::vector<std::size_t> getFills() const;
+
     // All getPoints queries will return an empty vector if the tree has not
     // been successfully built prior to the getPoints call.
 
@@ -76,6 +78,7 @@ public:
             std::size_t depthBegin,
             std::size_t depthEnd) const;
 
+    // Rasterize a single level of the tree.
     std::vector<std::size_t> getPoints(
             std::size_t rasterize,
             double& xBegin,
@@ -84,6 +87,15 @@ public:
             double& yBegin,
             double& yEnd,
             double& yStep) const;
+
+    // Get custom raster via bounds and resolution query.
+    std::vector<std::size_t> getPoints(
+            double xBegin,
+            double xEnd,
+            double xStep,
+            double yBegin,
+            double yEnd,
+            double yStep) const;
 
     // Return all points within the query bounding box, searching only up to
     // depth levels strictly less than depthEnd.

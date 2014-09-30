@@ -38,6 +38,7 @@
 
 #include <pdal/QuadIndex.hpp>
 #include <pdal/PointBuffer.hpp>
+#include <pdal/Utils.hpp>
 
 namespace pdal
 {
@@ -98,6 +99,19 @@ struct BBox
                 halfHeight + other.halfHeight;
     }
 
+    bool overlaps(
+        const double xBegin,
+        const double xEnd,
+        const double yBegin,
+        const double yEnd) const
+    {
+        const BBox other(
+                Point(xBegin, yBegin),
+                Point(xEnd, yEnd));
+
+        return overlaps(other);
+    }
+
     // Returns true if the requested point is contained within this BBox.
     bool contains(const Point& p) const
     {
@@ -126,6 +140,8 @@ struct Tree
         , se()
         , sw()
     { }
+
+    void getFills(std::vector<std::size_t>& fills, std::size_t level = 0) const;
 
     // Returns depth resulting from the insertion of this point.
     std::size_t addPoint(const PointRef* toAdd, std::size_t curDepth = 0);
@@ -159,6 +175,15 @@ struct Tree
                 yStep,
                 0);
     }
+
+    void getPoints(
+            std::vector<std::size_t>& results,
+            double xBegin,
+            double xEnd,
+            double xStep,
+            double yBegin,
+            double yEnd,
+            double yStep) const;
 
     void getPoints(
             std::vector<std::size_t>& results,
@@ -298,6 +323,26 @@ std::size_t Tree::addPoint(const PointRef* toAdd, const std::size_t curDepth)
     }
 }
 
+void Tree::getFills(std::vector<std::size_t>& fills, std::size_t level) const
+{
+    if (data)
+    {
+        if (level >= fills.size())
+        {
+            fills.resize(level + 1);
+        }
+
+        ++fills.at(level);
+    }
+
+    ++level;
+
+    if (nw) nw->getFills(fills, level);
+    if (ne) ne->getFills(fills, level);
+    if (sw) sw->getFills(fills, level);
+    if (se) se->getFills(fills, level);
+}
+
 void Tree::getPoints(
         std::vector<std::size_t>& results,
         const std::size_t depthBegin,
@@ -334,12 +379,12 @@ void Tree::getPoints(
         if (data)
         {
             const std::size_t xOffset(
-                    std::round((bbox.center.x - xBegin) / xStep));
+                    Utils::sround((bbox.center.x - xBegin) / xStep));
             const double yOffset(
-                    std::round((bbox.center.y - yBegin) / yStep));
+                    Utils::sround((bbox.center.y - yBegin) / yStep));
 
             const std::size_t index(
-                std::round(yOffset * (xEnd - xBegin) / xStep + xOffset));
+                Utils::sround(yOffset * (xEnd - xBegin) / xStep + xOffset));
 
             results.at(index) = data->pbIndex;
         }
@@ -396,6 +441,79 @@ void Tree::getPoints(
 
 void Tree::getPoints(
         std::vector<std::size_t>& results,
+        const double xBegin,
+        const double xEnd,
+        const double xStep,
+        const double yBegin,
+        const double yEnd,
+        const double yStep) const
+{
+    if (!bbox.overlaps(xBegin, xEnd, yBegin, yEnd))
+    {
+        return;
+    }
+
+    if (nw) nw->getPoints(
+            results,
+            xBegin,
+            xEnd,
+            xStep,
+            yBegin,
+            yEnd,
+            yStep);
+
+    if (ne) ne->getPoints(
+            results,
+            xBegin,
+            xEnd,
+            xStep,
+            yBegin,
+            yEnd,
+            yStep);
+
+    if (se) se->getPoints(
+            results,
+            xBegin,
+            xEnd,
+            xStep,
+            yBegin,
+            yEnd,
+            yStep);
+
+    if (sw) sw->getPoints(
+            results,
+            xBegin,
+            xEnd,
+            xStep,
+            yBegin,
+            yEnd,
+            yStep);
+
+    // Add data after calling child nodes so we prefer upper levels of the tree.
+    if (
+            data &&
+            data->point.x >= xBegin &&
+            data->point.y >= yBegin &&
+            data->point.x < xEnd - xStep &&
+            data->point.y < yEnd - yStep)
+    {
+        const std::size_t xOffset(
+                Utils::sround((data->point.x - xBegin) / xStep));
+        const std::size_t yOffset(
+                Utils::sround((data->point.y - yBegin) / yStep));
+
+        const std::size_t index(
+            Utils::sround(yOffset * (xEnd - xBegin) / xStep + xOffset));
+
+        if (index < results.size())
+        {
+            results.at(index) = data->pbIndex;
+        }
+    }
+}
+
+void Tree::getPoints(
+        std::vector<std::size_t>& results,
         const BBox& query,
         const std::size_t depthBegin,
         const std::size_t depthEnd,
@@ -434,6 +552,8 @@ struct QuadIndex::QImpl
 
     std::size_t getDepth() const;
 
+    std::vector<std::size_t> getFills();
+
     std::vector<std::size_t> getPoints(
             std::size_t depthBegin,
             std::size_t depthEnd) const;
@@ -448,6 +568,14 @@ struct QuadIndex::QImpl
             double& yStep) const;
 
     std::vector<std::size_t> getPoints(
+            double xBegin,
+            double xEnd,
+            double xStep,
+            double yBegin,
+            double yEnd,
+            double yStep) const;
+
+    std::vector<std::size_t> getPoints(
             double xMin,
             double yMin,
             double xMax,
@@ -459,6 +587,7 @@ struct QuadIndex::QImpl
     std::vector<std::unique_ptr<PointRef> > m_pointRefVec;
     std::unique_ptr<Tree> m_tree;
     std::size_t m_depth;
+    std::vector<std::size_t> m_fills;
 };
 
 QuadIndex::QImpl::QImpl(const PointBuffer& pointBuffer)
@@ -466,6 +595,7 @@ QuadIndex::QImpl::QImpl(const PointBuffer& pointBuffer)
     , m_pointRefVec()
     , m_tree()
     , m_depth(0)
+    , m_fills()
 { }
 
 void QuadIndex::QImpl::build()
@@ -527,6 +657,16 @@ std::size_t QuadIndex::QImpl::getDepth() const
     return m_depth;
 }
 
+std::vector<std::size_t> QuadIndex::QImpl::getFills()
+{
+    if (m_tree && !m_fills.size())
+    {
+        m_tree->getFills(m_fills);
+    }
+
+    return m_fills;
+}
+
 std::vector<std::size_t> QuadIndex::QImpl::getPoints(
         const std::size_t minDepth,
         const std::size_t maxDepth) const
@@ -570,6 +710,35 @@ std::vector<std::size_t> QuadIndex::QImpl::getPoints(
         m_tree->getPoints(
                 results,
                 rasterize,
+                xBegin,
+                xEnd,
+                xStep,
+                yBegin,
+                yEnd,
+                yStep);
+    }
+
+    return results;
+}
+
+std::vector<std::size_t> QuadIndex::QImpl::getPoints(
+        const double xBegin,
+        const double xEnd,
+        const double xStep,
+        const double yBegin,
+        const double yEnd,
+        const double yStep) const
+{
+    std::vector<std::size_t> results;
+
+    if (m_tree)
+    {
+        const std::size_t width (Utils::sround((xEnd - xBegin) / xStep));
+        const std::size_t height(Utils::sround((yEnd - yBegin) / yStep));
+        results.resize(width * height, std::numeric_limits<std::size_t>::max());
+
+        m_tree->getPoints(
+                results,
                 xBegin,
                 xEnd,
                 xStep,
@@ -632,6 +801,11 @@ std::size_t QuadIndex::getDepth() const
     return m_qImpl->getDepth();
 }
 
+std::vector<std::size_t> QuadIndex::getFills() const
+{
+    return m_qImpl->getFills();
+}
+
 std::vector<std::size_t> QuadIndex::getPoints(
         std::size_t depthEnd) const
 {
@@ -656,6 +830,23 @@ std::vector<std::size_t> QuadIndex::getPoints(
 {
     return m_qImpl->getPoints(
             rasterize,
+            xBegin,
+            xEnd,
+            xStep,
+            yBegin,
+            yEnd,
+            yStep);
+}
+
+std::vector<std::size_t> QuadIndex::getPoints(
+        const double xBegin,
+        const double xEnd,
+        const double xStep,
+        const double yBegin,
+        const double yEnd,
+        const double yStep) const
+{
+    return m_qImpl->getPoints(
             xBegin,
             xEnd,
             xStep,
