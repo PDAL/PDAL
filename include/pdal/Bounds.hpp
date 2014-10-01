@@ -216,7 +216,7 @@ public:
     void clear()
     {
         minx = maxd; miny = maxd; minz = maxd;
-        maxx = mind; maxy = maxd; maxz = maxd;
+        maxx = mind; maxy = mind; maxz = mind;
     }
 
     std::string toBox(uint32_t precision = 8, uint32_t dimensions=2) const

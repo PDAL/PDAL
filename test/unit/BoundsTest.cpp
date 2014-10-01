@@ -50,6 +50,10 @@ BOOST_AUTO_TEST_CASE(test_ctor)
 {
     BOX3D b1;
     BOOST_CHECK(b1.empty());
+
+    b1.clear();
+    BOX3D b2;
+    BOOST_CHECK_EQUAL(b1, b2);
 }
 
 BOOST_AUTO_TEST_CASE(test_equals)
