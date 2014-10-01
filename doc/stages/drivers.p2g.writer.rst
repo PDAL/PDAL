@@ -84,5 +84,5 @@ output_type
   One or many options, specifying "min", "max", "mean", "idw" (inverse distance weighted), "den" (density), or "all" to get all variants with just one option. [Default: **all**]
 
 output_format
-  File output format to use, one of "grid" or "asc". [Default: **grid**]
+  File output format to use, one of "grid", "tif", or "asc". [Default: **grid**]
   
