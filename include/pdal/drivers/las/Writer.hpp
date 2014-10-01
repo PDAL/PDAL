@@ -104,7 +104,7 @@ protected:
     void Construct();
     virtual void initialize();
 
-    OutputStreamManager m_streamManager;
+    std::unique_ptr<OutputStreamManager> m_streamManager;
 
 private:
     LasHeader m_lasHeader;
@@ -112,6 +112,7 @@ private:
     SummaryData m_summaryData;
     std::unique_ptr<LASzipper> m_zipper;
     std::unique_ptr<ZipPoint> m_zipPoint;
+    std::string m_filename;
 
     virtual void processOptions(const Options& options);
     virtual void ready(PointContextRef ctx);

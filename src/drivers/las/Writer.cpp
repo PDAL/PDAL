@@ -59,24 +59,19 @@ namespace
 
 Writer::Writer(const Options& options)
     : pdal::Writer(options)
-    , m_streamManager(options.getOption("filename").getValue<std::string>())
-{
-    Construct();
-}
+{}
 
 
-Writer::Writer(std::ostream *ostream) :
-    m_streamManager(ostream)
-{
-    Construct();
-}
+Writer::Writer(std::ostream *ostream)
+    : pdal::Writer()
+    , m_streamManager(new OutputStreamManager(ostream))
+{}
 
 
-Writer::Writer(const Options& options, std::ostream *ostream) :
-    pdal::Writer(options), m_streamManager(ostream)
-{
-    Construct();
-}
+Writer::Writer(const Options& options, std::ostream *ostream)
+    : pdal::Writer(options)
+    , m_streamManager(new OutputStreamManager(ostream))
+{}
 
 
 void Writer::Construct()
@@ -93,6 +88,9 @@ void Writer::Construct()
 
 void Writer::processOptions(const Options& options)
 {
+    if (!m_streamManager)
+        m_filename = options.getValueOrThrow<std::string>("filename");
+
     setGeneratingSoftware(options.getValueOrDefault("software_id",
         GetDefaultSoftwareId()));
 
@@ -136,7 +134,8 @@ Writer::~Writer()
     m_zipper.reset();
     m_zipPoint.reset();
 #endif
-    m_streamManager.close();
+    if (m_streamManager)
+        m_streamManager->close();
 }
 
 void Writer::flush()
@@ -145,12 +144,15 @@ void Writer::flush()
     m_zipper.reset();
     m_zipPoint.reset();
 #endif
-    m_streamManager.flush();
+    m_streamManager->flush();
 
 }
 void Writer::initialize()
 {
-    m_streamManager.open();
+    Construct();
+    if (!m_streamManager)
+        m_streamManager = std::unique_ptr<OutputStreamManager>(new OutputStreamManager(m_filename));
+    m_streamManager->open();
 }
 
 Options Writer::getDefaultOptions()
@@ -320,7 +322,7 @@ void Writer::ready(PointContextRef ctx)
     if (m_headerInitialized)
         return;
 
-    m_streamOffset = m_streamManager.ostream().tellp();
+    m_streamOffset = m_streamManager->ostream().tellp();
 
     m_lasHeader.SetScale(m_xXform.m_scale, m_yXform.m_scale, m_zXform.m_scale);
     m_lasHeader.SetOffset(m_xXform.m_offset, m_yXform.m_offset,
@@ -455,7 +457,7 @@ void Writer::ready(PointContextRef ctx)
         {}
     } // useMetadata
 
-    LasHeaderWriter lasHeaderWriter(m_lasHeader, m_streamManager.ostream(),
+    LasHeaderWriter lasHeaderWriter(m_lasHeader, m_streamManager->ostream(),
         m_streamOffset);
     lasHeaderWriter.write();
     m_summaryData.reset();
@@ -477,7 +479,7 @@ void Writer::ready(PointContextRef ctx)
             m_zipper.swap(z);
 
             bool stat(false);
-            stat = m_zipper->open(m_streamManager.ostream(),
+            stat = m_zipper->open(m_streamManager->ostream(),
                 m_zipPoint->GetZipper());
             if (!stat)
             {
@@ -634,10 +636,10 @@ void Writer::write(const PointBuffer& pointBuffer)
         }
         else
         {
-            Utils::write_n(m_streamManager.ostream(), buf, record_length);
+            Utils::write_n(m_streamManager->ostream(), buf, record_length);
         }
 #else
-        Utils::write_n(m_streamManager.ostream(), buf, record_length);
+        Utils::write_n(m_streamManager->ostream(), buf, record_length);
 #endif
         ++numValidPoints;
 
@@ -662,8 +664,8 @@ void Writer::done(PointContextRef ctx)
     log()->get(LogLevel::Debug) << "Wrote " << m_numPointsWritten <<
         " points to the LAS file" << std::endl;
 
-    m_streamManager.ostream().seekp(m_streamOffset);
-    Support::rewriteHeader(m_streamManager.ostream(), m_summaryData);
+    m_streamManager->ostream().seekp(m_streamOffset);
+    Support::rewriteHeader(m_streamManager->ostream(), m_summaryData);
 }
 
 } // namespace las
