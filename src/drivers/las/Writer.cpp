@@ -118,7 +118,7 @@ void Writer::processOptions(const Options& options)
             "datarecordlength"));
     }
     catch (pdal::option_not_found&) {};
-    
+
     m_discardHighReturnNumbers = options.getValueOrDefault(
             "discard_high_return_numbers", false);
 }
@@ -139,6 +139,15 @@ Writer::~Writer()
     m_streamManager.close();
 }
 
+void Writer::flush()
+{
+#ifdef PDAL_HAVE_LASZIP
+    m_zipper.reset();
+    m_zipPoint.reset();
+#endif
+    m_streamManager.flush();
+
+}
 void Writer::initialize()
 {
     m_streamManager.open();
@@ -337,14 +346,14 @@ void Writer::ready(PointContextRef ctx)
             "dataformat_id", 3);
         uint32_t v2 = getMetadataOption<uint32_t>(getOptions(), m_metadata,
             "format", 3);
-            
+
         // Use the 'format' option specified by the options instead of the
         // metadata one that was set passively
-        v = v2; 
+        v = v2;
         setPointFormat(static_cast<PointFormat>(v));
         log()->get(LogLevel::Debug) << "Setting point format to " << v <<
             " from metadata " << std::endl;
-        
+
         uint32_t minor = getMetadataOption<uint32_t>(getOptions(),
             m_metadata, "minor_version", 2);
 
@@ -391,11 +400,11 @@ void Writer::ready(PointContextRef ctx)
         m_lasHeader.SetProjectId(project_id);
         log()->get(LogLevel::Debug) << "Setting project_id to " << project_id <<
             " from metadata " << std::endl;
-        
+
         std::string global_encoding_data = getMetadataOption<std::string>(
             getOptions(), m_metadata, "global_encoding", "");
         std::vector<uint8_t> data = Utils::base64_decode(global_encoding_data);
-        
+
         uint16_t reserved = 0;
         if (global_encoding_data.size())
         {
@@ -417,12 +426,12 @@ void Writer::ready(PointContextRef ctx)
                 memcpy(&temp, data.data(), data.size());
                 reserved = static_cast<uint16_t>(temp);
             }
-            else 
+            else
             {
                 std::ostringstream oss;
                 oss << "size of global_encoding bytes should == 2, not " <<
                     data.size();
-                throw pdal_error(oss.str());                
+                throw pdal_error(oss.str());
             }
         }
         m_lasHeader.SetReserved(reserved);

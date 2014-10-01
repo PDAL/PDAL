@@ -245,6 +245,10 @@ OutputStreamManager::~OutputStreamManager()
     return;
 }
 
+void OutputStreamManager::flush()
+{
+    m_ostream->flush();
+}
 
 void OutputStreamManager::open()
 {
