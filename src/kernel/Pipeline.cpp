@@ -103,6 +103,21 @@ int Pipeline::execute()
 **/
     }
 
+    for (auto pi: getExtraStageOptions())
+    {
+        std::string name = pi.first;
+        Options options = pi.second;
+        std::vector<Stage*> stages = manager.getWriter()->findStage(name);
+        for (auto s: stages)
+        {
+            Options opts = s->getOptions();
+            for (auto o: options.getOptions())
+                opts.add(o);
+            s->setOptions(opts);
+            opts.dump();
+        }
+    }
+
     PointContext ctx;
     manager.getWriter()->prepare(ctx);
     manager.getWriter()->execute(ctx);
