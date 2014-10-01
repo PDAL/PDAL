@@ -161,6 +161,7 @@ public:
 
     void open(); // throws
     void close();
+    void flush();
 
     std::ostream& ostream();
 

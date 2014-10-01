@@ -133,6 +133,7 @@ void Writer::done(PointContextRef ctx)
         ::nitf::Field fld = usrHdr.getField("raw_data");
         fld.setType(::nitf::Field::BINARY);
 
+        flush();
         m_oss.flush();
         std::streambuf *buf = m_oss.rdbuf();
         long size = buf->pubseekoff(0, m_oss.end);
