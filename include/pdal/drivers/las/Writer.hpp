@@ -97,6 +97,9 @@ public:
     // default false
     void setCompressed(bool);
 
+    // flush
+    void flush();
+
 protected:
     void Construct();
     virtual void initialize();
@@ -137,7 +140,7 @@ private:
         // value or the default value.
         if (!candidate)
             return options.getValueOrDefault<T>(name, default_value);
-            
+
         // If the metadata option for this field is "FORWARD", return the
         // value from the metadata or the default value.
         if (boost::algorithm::iequals(*candidate, "FORWARD"))
@@ -158,7 +161,7 @@ private:
         }
         // Just return the value from the stored metadata option.
         return boost::lexical_cast<T>(*candidate);
-    }    
+    }
 };
 
 } // namespace las
