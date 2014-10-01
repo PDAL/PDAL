@@ -114,7 +114,6 @@ int Pipeline::execute()
             for (auto o: options.getOptions())
                 opts.add(o);
             s->setOptions(opts);
-            opts.dump();
         }
     }
 
