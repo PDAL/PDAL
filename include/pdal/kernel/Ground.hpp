@@ -68,7 +68,7 @@ private:
     double m_cellSize;
     double m_base;
     bool m_exponential;
-    bool m_bCompress;
+//    bool m_bCompress;  // Currently unused
 };
 
 } // kernel
