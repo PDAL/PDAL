@@ -213,20 +213,25 @@ void OciSeqIterator::normalize(PointBuffer& buffer, BlockPtr block,
     // Get the value from the buffer unscaled.  Scale the value as specified
     // in the block (the clould's scaling) and then set the value back into
     // the buffer, taking the final scaling out.
+    
     for (PointId i = begin; i < end; ++i)
     {
         double d;
-        d = buffer.getFieldAs<double>(*m_dimX, i, false);
-        d = d * block->xScale() + block->xOffset();
-        buffer.setFieldUnscaled(*m_dimX, i, d);
+        int32_t x,y,z;
+        x = buffer.getFieldAs<int32_t>(*m_dimX, i, false);
+        d = x * block->xScale() + block->xOffset();
+        x = m_dimX->removeScaling(d);
+        buffer.setRawField(*m_dimX, i, &x);
 
-        d = buffer.getFieldAs<double>(*m_dimY, i, false);
-        d = d * block->yScale() + block->yOffset();
-        buffer.setFieldUnscaled(*m_dimY, i, d);
+        y = buffer.getFieldAs<int32_t>(*m_dimY, i, false);
+        d = y * block->yScale() + block->yOffset();
+        y = m_dimY->removeScaling(d);
+        buffer.setRawField(*m_dimY, i, &y);
 
-        d = buffer.getFieldAs<double>(*m_dimZ, i, false);
-        d = d * block->zScale() + block->zOffset();
-        buffer.setFieldUnscaled(*m_dimZ, i, d);
+        z = buffer.getFieldAs<int32_t>(*m_dimZ, i, false);
+        d = z * block->zScale() + block->zOffset();
+        z = m_dimZ->removeScaling(d);
+        buffer.setRawField(*m_dimZ, i, &z);
     }
 }
 
