@@ -29,7 +29,6 @@ SET(PDAL_UNITTEST_TEST_SRC
     drivers/faux/FauxReaderTest.cpp
     FileUtilsTest.cpp
     filters/HexbinFilterTest.cpp
-#    filters/InPlaceReprojectionFilterTest.cpp
     filters/MergeTest.cpp
     drivers/las/LasReaderTest.cpp
 #ABELL - Need to fix these.

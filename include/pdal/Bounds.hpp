@@ -39,8 +39,7 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#ifndef INCLUDED_BOUNDS_HPP
-#define INCLUDED_BOUNDS_HPP
+#pragma once
 
 #include <pdal/pdal_internal.hpp>
 
@@ -102,43 +101,15 @@ public:
         { m_ranges.resize(numDims); }
 
     /// Convenience constructor for typical 3D case
-    Bounds(T minx,
-           T miny,
-           T minz,
-           T maxx,
-           T maxy,
-           T maxz)
+    Bounds(T minX, T minY, T minZ, T maxX, T maxY, T maxZ)
     {
-        m_ranges.resize(3);
-
-        m_ranges[0].setMinimum(minx);
-        m_ranges[1].setMinimum(miny);
-        m_ranges[2].setMinimum(minz);
-
-        m_ranges[0].setMaximum(maxx);
-        m_ranges[1].setMaximum(maxy);
-        m_ranges[2].setMaximum(maxz);
-
-        assert(verify());
-
+        set(minX, minY, minZ, maxX, maxY, maxZ);
     }
 
     /// Convenience constructor for typical 2D case
-    Bounds(T minx,
-           T miny,
-           T maxx,
-           T maxy)
+    Bounds(T minX, T minY, T maxX, T maxY)
     {
-
-        m_ranges.resize(2);
-
-        m_ranges[0].setMinimum(minx);
-        m_ranges[1].setMinimum(miny);
-
-        m_ranges[0].setMaximum(maxx);
-        m_ranges[1].setMaximum(maxy);
-
-        assert(verify());
+        set(minX, minY, maxX, maxY);
     }
 
     /// Convenience constructor for Vector of minimum and maximum
@@ -154,8 +125,30 @@ public:
             m_ranges[i].setMinimum(minimum[i]);
             m_ranges[i].setMaximum(maximum[i]);
         }
+    }
 
-        assert(verify());
+    void set(T minX, T minY, T minZ, T maxX, T maxY, T maxZ)
+    {
+        m_ranges.resize(3);
+
+        m_ranges[0].setMinimum(minX);
+        m_ranges[1].setMinimum(minY);
+        m_ranges[2].setMinimum(minZ);
+
+        m_ranges[0].setMaximum(maxX);
+        m_ranges[1].setMaximum(maxY);
+        m_ranges[2].setMaximum(maxZ);
+    }
+
+    void set(T minX, T minY, T maxX, T maxY)
+    {
+        m_ranges.resize(2);
+
+        m_ranges[0].setMinimum(minX);
+        m_ranges[1].setMinimum(minY);
+
+        m_ranges[0].setMaximum(maxX);
+        m_ranges[1].setMaximum(maxY);
     }
 
     /// @name Properties
@@ -472,23 +465,18 @@ public:
 
     /// Verifies that the minimums and maximums of each dimension within the
     /// bounds are not inverted (allows min == +inf and max == -inf, however).
-    bool verify()
+    bool valid() const
     {
         for (std::size_t d = 0; d < size(); ++d)
         {
             if (getMinimum(d) > getMaximum(d))
             {
-
                 // Allow infinity bounds
-                if (!Utils::compare_distance<T>(getMinimum(d), (std::numeric_limits<T>::max)()) &&
-                        !Utils::compare_distance<T>(getMaximum(d), -(std::numeric_limits<T>::min)()))
-                {
-                    std::ostringstream msg;
-                    msg << "pdal::Bounds::verify: Minimum point at dimension " << d
-                        << " is greater than maximum point.  Neither point is infinity."
-                        << " min: " << getMinimum(d) << " max: " << getMaximum(d);
-                    throw pdal::bounds_error(msg.str());
-                }
+                if (!Utils::compare_distance<T>(getMinimum(d),
+                      (std::numeric_limits<T>::max)()) &&
+                    !Utils::compare_distance<T>(getMaximum(d),
+                        -(std::numeric_limits<T>::min)()))
+                    return false;
             }
         }
         return true;
@@ -593,4 +581,3 @@ template class PDAL_DLL pdal::Range<double>;
 template class PDAL_DLL pdal::Bounds<double>;
 #endif
 
-#endif

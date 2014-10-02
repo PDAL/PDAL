@@ -76,6 +76,7 @@ ZipPoint::ZipPoint(PointFormat format, const LasHeader& lasHeader,
 
     const VariableLengthRecord* vlr = NULL;
     auto vlrs = lasHeader.getVLRs().getAll();
+    // Find the LASZip VLR
     for (std::vector<VariableLengthRecord>::size_type i=0; i<vlrs.size(); i++)
     {
         const VariableLengthRecord& p = vlrs[i];
@@ -86,11 +87,10 @@ ZipPoint::ZipPoint(PointFormat format, const LasHeader& lasHeader,
         }
     }
 
+    // If we found it...
     if (vlr)
     {
-        bool ok(false);
-        ok = m_zip->unpack(&(vlr->getBytes()[0]), vlr->getLength());
-        if (!ok)
+        if (!m_zip->unpack(&(vlr->getBytes()[0]), vlr->getLength()))
         {
             std::ostringstream oss;
             const char* err = m_zip->get_error();
@@ -103,6 +103,7 @@ ZipPoint::ZipPoint(PointFormat format, const LasHeader& lasHeader,
     }
     else
     {
+        // We always expect a ZIP VLR when we are reading a LAZ file."
         if (m_readMode)
         {
             std::ostringstream oss;
@@ -111,6 +112,7 @@ ZipPoint::ZipPoint(PointFormat format, const LasHeader& lasHeader,
             throw pdal_error(oss.str());
         }
 
+        // Must be write-mode.
         if (!m_zip->setup((boost::uint8_t)format, lasHeader.getPointDataSize()))
         {
             std::ostringstream oss;

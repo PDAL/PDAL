@@ -50,6 +50,8 @@ namespace pdal
 
 void Writer::writerProcessOptions(const Options& options)
 {
+    if (options.hasOption("filename"))
+        m_filename = options.getValueOrThrow<std::string>("filename");
     if (options.hasOption("scale_x"))
         m_xXform.m_scale = options.getValueOrThrow<double>("scale_x");
     if (options.hasOption("offset_x"))

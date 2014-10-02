@@ -70,6 +70,7 @@ public:
 
 protected:
     std::unique_ptr<UserCallback> m_callback;
+    std::string m_filename;
     XForm m_xXform;
     XForm m_yXform;
     XForm m_zXform;

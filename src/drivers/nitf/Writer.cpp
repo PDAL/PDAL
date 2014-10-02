@@ -63,7 +63,6 @@ namespace nitf
 void Writer::processOptions(const Options& options)
 {
     las::Writer::processOptions(options);
-    m_filename = options.getValueOrThrow<std::string>("filename");
     m_cLevel = options.getValueOrDefault<std::string>("CLEVEL","03");
     m_sType = options.getValueOrDefault<std::string>("STYPE","BF01");
     m_oStationId = options.getValueOrDefault<std::string>("OSTAID","PDAL");

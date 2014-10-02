@@ -42,82 +42,34 @@ namespace drivers
 namespace las
 {
 
-
-SummaryData::SummaryData()
-    : m_isFirst(true)
-    , m_minX(0.0)
-    , m_minY(0.0)
-    , m_minZ(0.0)
-    , m_maxX(0.0)
-    , m_maxY(0.0)
-    , m_maxZ(0.0)
-    , m_totalNumPoints(0)
+SummaryData::SummaryData() :
+    m_minX(std::numeric_limits<double>::max()),
+    m_minY(std::numeric_limits<double>::max()),
+    m_minZ(std::numeric_limits<double>::max()),
+    m_maxX(std::numeric_limits<double>::lowest()),
+    m_maxY(std::numeric_limits<double>::lowest()),
+    m_maxZ(std::numeric_limits<double>::lowest()),
+    m_totalNumPoints(0)
 {
-    reset();
-    return;
-}
-
-
-SummaryData::~SummaryData()
-{
-}
-
-
-void SummaryData::reset()
-{
-    m_isFirst = true;
-
-    m_minX = 0.0;
-    m_minY = 0.0;
-    m_minZ = 0.0;
-    m_maxX = 0.0;
-    m_maxY = 0.0;
-    m_maxZ = 0.0;
-    
-    m_returnCounts.assign(7,0);
-
-    m_totalNumPoints = 0;
-
-    return;
+    m_returnCounts.fill(0);
 }
 
 
 void SummaryData::addPoint(double x, double y, double z, int returnNumber)
 {
-    if (returnNumber < 0 || returnNumber > static_cast<int>(m_returnCounts.size())-1)
-        throw invalid_point_data("addPoint: point returnNumber is out of range", 0);
+    returnNumber--;
+    if (returnNumber < 0 || (size_t)returnNumber > m_returnCounts.size())
+        throw invalid_point_data("addPoint: point returnNumber is out "
+            "of range", 0);
 
-    if (m_isFirst)
-    {
-        m_isFirst = false;
-        m_minX = x;
-        m_minY = y;
-        m_minZ = z;
-        m_maxX = x;
-        m_maxY = y;
-        m_maxZ = z;
-    }
-    else
-    {
-        m_minX = std::min(m_minX, x);
-        m_minY = std::min(m_minY, y);
-        m_minZ = std::min(m_minZ, z);
-        m_maxX = std::max(m_maxX, x);
-        m_maxY = std::max(m_maxY, y);
-        m_maxZ = std::max(m_maxZ, z);
-    }
-
-    m_returnCounts[returnNumber] = m_returnCounts[returnNumber] + 1;
-
+    m_minX = std::min(m_minX, x);
+    m_minY = std::min(m_minY, y);
+    m_minZ = std::min(m_minZ, z);
+    m_maxX = std::max(m_maxX, x);
+    m_maxY = std::max(m_maxY, y);
+    m_maxZ = std::max(m_maxZ, z);
+    m_returnCounts[returnNumber]++;
     ++m_totalNumPoints;
-
-    return;
-}
-
-
-boost::uint32_t SummaryData::getTotalNumPoints() const
-{
-    return m_totalNumPoints;
 }
 
 
@@ -135,11 +87,11 @@ pdal::Bounds<double> SummaryData::getBounds() const
 }
 
 
-boost::uint32_t SummaryData::getReturnCount(int returnNumber) const
+point_count_t SummaryData::getReturnCount(int returnNumber) const
 {
-    if (returnNumber < 0 || returnNumber > static_cast<int>(m_returnCounts.size())-1)
-        throw invalid_point_data("getReturnCount: point returnNumber is out of range", 0);
-    
+    if (returnNumber < 0 || (size_t)returnNumber >= m_returnCounts.size())
+        throw invalid_point_data("getReturnCount: point returnNumber is "
+            "out of range", 0);
     return m_returnCounts[returnNumber];
 }
 
@@ -154,26 +106,21 @@ void SummaryData::dump(std::ostream& str) const
     str << "MaxZ: " << m_maxZ << "\n";
 
     str << "Number of returns:";
-    for (std::vector<boost::uint32_t>::size_type i=0; i<m_returnCounts.size(); i++)
-    {
+    for (size_t i = 0; i < m_returnCounts.size(); ++i)
         str << " " << m_returnCounts[i];
-    }
     str << "\n";
 
     str << "Total number of points: " << m_totalNumPoints << "\n";
-
-    return;
 }
 
 
 std::ostream& operator<<(std::ostream& ostr, const SummaryData& data)
 {
     data.dump(ostr);
-
     return ostr;
 }
 
+} // namespace las
+} // namespace drivers
+} // namespace pdal
 
-}
-}
-} // namespaces

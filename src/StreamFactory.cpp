@@ -224,25 +224,18 @@ OutputStreamManager::OutputStreamManager(const std::string& filename)
     , m_isOpen(false)
     , m_filename(filename)
     , m_ostream(NULL)
-{
-    return;
-}
+{}
 
-
-OutputStreamManager::OutputStreamManager(std::ostream* ostream)
+OutputStreamManager::OutputStreamManager(std::ostream *ostream)
     : m_isFileBased(false)
     , m_isOpen(false)
-    , m_filename("")
     , m_ostream(ostream)
-{
-    return;
-}
+{}
 
 
 OutputStreamManager::~OutputStreamManager()
 {
     close();
-    return;
 }
 
 
@@ -257,40 +250,27 @@ void OutputStreamManager::open()
         if (m_ostream == NULL)
         {
             std::ostringstream oss;
-            oss << "Unable to create file '" << m_filename <<"'. Check access permissions and/or directory location";
+            oss << "Unable to create file '" << m_filename <<
+                "'. Check access permissions and/or directory location";
             throw pdal_error(oss.str());
         }
     }
-    else
-    {
-        // nothing to do
-        if (m_ostream == NULL)
-            throw pdal_error("invalid stream");
-    }
-
+    else if (m_ostream == NULL)
+        throw pdal_error("invalid stream");
     m_isOpen = true;
-
-    return;
 }
 
 
 void OutputStreamManager::close()
 {
-    if (!m_isOpen) return;
+    if (!m_isOpen)
+        return;
 
     if (m_isFileBased)
-    {
         FileUtils::closeFile(m_ostream);
-    }
-    else
-    {
-        // nothing to do
-    }
 
     m_ostream = NULL;
     m_isOpen = false;
-
-    return;
 }
 
 
@@ -300,6 +280,5 @@ std::ostream& OutputStreamManager::ostream()
         throw pdal_error("invalid stream");
     return *m_ostream;
 }
-
 
 } // namespace pdal

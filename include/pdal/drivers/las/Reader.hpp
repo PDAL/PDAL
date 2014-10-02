@@ -37,7 +37,6 @@
 #include <pdal/Reader.hpp>
 
 #include <pdal/StreamFactory.hpp>
-#include <pdal/drivers/las/Support.hpp>
 #include <pdal/drivers/las/Header.hpp>
 #include <pdal/drivers/las/ZipPoint.hpp>
 
@@ -72,10 +71,10 @@ public:
 
     static Options getDefaultOptions();
 
-    const LasHeader& getLasHeader() const
+    const LasHeader& header() const
         { return m_lasHeader; }
     point_count_t getNumPoints() const
-        { return m_lasHeader.GetPointRecordsCount(); }
+        { return m_lasHeader.pointCount(); }
 
 private:
     typedef std::unique_ptr<StreamFactory> StreamFactoryPtr;
@@ -85,15 +84,22 @@ private:
     std::unique_ptr<LASunzipper> m_unzipper;
     point_count_t m_index;
     std::istream* m_istream;
+    VlrList m_vlrs;
 
     virtual StreamFactoryPtr createFactory() const
         { return StreamFactoryPtr(new FilenameStreamFactory(m_filename)); }
     virtual void initialize();
-    virtual void initialize(MetadataNode& m);
     virtual void addDimensions(PointContextRef ctx);
-    void extractMetadata(MetadataNode& m);
+    void fixupVlrs();
+    void setSrsFromVlrs(MetadataNode& m);
+    bool setSrsFromWktVlr(MetadataNode& m);
+    bool setSrsFromGeotiffVlr(MetadataNode& m);
+    void extractHeaderMetadata(MetadataNode& m);
+    void extractVlrMetadata(MetadataNode& m);
     virtual void processOptions(const Options& options);
-    virtual void ready(PointContextRef ctx);
+    virtual void ready(PointContextRef ctx)
+        { ready(ctx, m_metadata); }
+    virtual void ready(PointContextRef ctx, MetadataNode& m);
     virtual point_count_t read(PointBuffer& buf, point_count_t count);
     virtual void done(PointContextRef ctx);
     virtual bool eof()

@@ -62,7 +62,6 @@ private:
     virtual void processOptions(const Options& options);
     virtual void done(PointContextRef ctx);
 
-    std::string m_filename;
     std::string m_cLevel;
     std::string m_sType;
     std::string m_oStationId;

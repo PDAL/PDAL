@@ -32,17 +32,17 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <boost/property_tree/xml_parser.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <iostream>
 
 #include <pdal/drivers/las/Writer.hpp>
 #include <pdal/drivers/las/ZipPoint.hpp>
-
-#include "LasHeaderWriter.hpp"
-
-#include <pdal/Stage.hpp>
+#include <pdal/Charbuf.hpp>
+#include <pdal/OStream.hpp>
 #include <pdal/PointBuffer.hpp>
+#include <pdal/Utils.hpp>
+
+#include "GeotiffSupport.hpp"
 
 namespace pdal
 {
@@ -51,82 +51,26 @@ namespace drivers
 namespace las
 {
 
-namespace
+Writer::Writer(const Options& options) : pdal::Writer(options), m_ostream(NULL)
 {
-    const uint8_t MAX_RETURN_NUMBER = 5;
+    construct();
 }
 
 
-Writer::Writer(const Options& options)
-    : pdal::Writer(options)
-    , m_streamManager(options.getOption("filename").getValue<std::string>())
+Writer::Writer(const Options& options, std::ostream *stream) :
+    pdal::Writer(options), m_ostream(stream)
 {
-    Construct();
+    construct();
 }
 
 
-Writer::Writer(std::ostream *ostream) :
-    m_streamManager(ostream)
-{
-    Construct();
-}
-
-
-Writer::Writer(const Options& options, std::ostream *ostream) :
-    pdal::Writer(options), m_streamManager(ostream)
-{
-    Construct();
-}
-
-
-void Writer::Construct()
+void Writer::construct()
 {
     m_xXform.m_scale = .01;
     m_yXform.m_scale = .01;
     m_zXform.m_scale = .01;
     m_numPointsWritten = 0;
-    m_headerInitialized = false;
     m_streamOffset = 0;
-    setOptions();
-}
-
-
-void Writer::processOptions(const Options& options)
-{
-    setGeneratingSoftware(options.getValueOrDefault("software_id",
-        GetDefaultSoftwareId()));
-
-    m_lasHeader.SetCreationDOY((uint16_t)options.getValueOrDefault(
-        "creation_doy", 0U));
-    m_lasHeader.SetCreationYear((uint16_t)options.getValueOrDefault(
-        "creation_year", 0U));
-    m_lasHeader.setPointFormat(static_cast<PointFormat>(
-        options.getValueOrDefault("format", 3U)));
-    m_lasHeader.SetSystemId(options.getValueOrDefault<std::string>("system_id",
-        LasHeader::SystemIdentifier));
-
-    m_lasHeader.SetHeaderPadding(options.getValueOrDefault(
-        "header_padding", 0U));
-    if (options.hasOption("a_srs"))
-        setSpatialReference(options.getValueOrDefault("a_srs", std::string()));
-    m_lasHeader.SetCompressed(options.getValueOrDefault("compression", false));
-    m_lasHeader.SetFileSourceId(options.getValueOrDefault<uint16_t>(
-        "filesource_id", 0));
-    try
-    {
-        m_lasHeader.SetDataRecordLength(options.getValueOrThrow<uint16_t>(
-            "datarecordlength"));
-    }
-    catch (pdal::option_not_found&) {};
-    
-    m_discardHighReturnNumbers = options.getValueOrDefault(
-            "discard_high_return_numbers", false);
-}
-
-
-void Writer::setOptions()
-{
-
 }
 
 
@@ -136,13 +80,8 @@ Writer::~Writer()
     m_zipper.reset();
     m_zipPoint.reset();
 #endif
-    m_streamManager.close();
 }
 
-void Writer::initialize()
-{
-    m_streamManager.open();
-}
 
 Options Writer::getDefaultOptions()
 {
@@ -150,12 +89,12 @@ Options Writer::getDefaultOptions()
 
     Option filename("filename", "", "file to read from");
     Option compression("compression", false, "Do we LASzip-compress the data?");
-    Option format("format", PointFormat3, "Point format to write");
+    Option format("format", 3, "Point format to write");
     Option major_version("major_version", 1, "LAS Major version");
     Option minor_version("minor_version", 2, "LAS Minor version");
     Option day_of_year("creation_doy", 0, "Day of Year for file");
     Option year("creation_year", 2011, "4-digit year value for file");
-    Option system_id("system_id", LasHeader::SystemIdentifier,
+    Option system_id("system_id", LasHeader::SYSTEM_IDENTIFIER,
         "System ID for this file");
     Option software_id("software_id", GetDefaultSoftwareId(),
         "Software ID for this file");
@@ -178,61 +117,147 @@ Options Writer::getDefaultOptions()
     return options;
 }
 
-void Writer::setCompressed(bool v)
-{
-    m_lasHeader.SetCompressed(v);
-}
 
-void Writer::setFormatVersion(boost::uint8_t majorVersion,
-    boost::uint8_t minorVersion)
+void Writer::processOptions(const Options& options)
 {
-    m_lasHeader.SetVersionMajor(majorVersion);
-    m_lasHeader.SetVersionMinor(minorVersion);
-}
+    if (options.hasOption("a_srs"))
+        setSpatialReference(options.getValueOrDefault("a_srs", std::string()));
+    m_lasHeader.setCompressed(options.getValueOrDefault("compression", false));
+    m_discardHighReturnNumbers = options.getValueOrDefault(
+            "discard_high_return_numbers", false);
 
-void Writer::setPointFormat(PointFormat pointFormat)
-{
-    m_lasHeader.setPointFormat(pointFormat);
-}
-
-void Writer::setDate(boost::uint16_t dayOfYear, boost::uint16_t year)
-{
-    m_lasHeader.SetCreationDOY(dayOfYear);
-    m_lasHeader.SetCreationYear(year);
-}
-
-void Writer::setProjectId(const boost::uuids::uuid& id)
-{
-    m_lasHeader.SetProjectId(id);
-}
-
-void Writer::setSystemIdentifier(const std::string& systemId)
-{
-    m_lasHeader.SetSystemId(systemId);
-}
-
-void Writer::setGeneratingSoftware(const std::string& softwareId)
-{
-    m_lasHeader.SetSoftwareId(softwareId);
-}
-
-void Writer::setHeaderPadding(boost::uint32_t const& v)
-{
-    m_lasHeader.SetHeaderPadding(v);
+    getHeaderOptions(options);
+    getVlrOptions(options);
 }
 
 
-MetadataNode Writer::findVlr(MetadataNode node, const std::string& recordId,
-    const std::string& userId)
+// Get header info from options and store in map for processing with
+// metadata.
+void Writer::getHeaderOptions(const Options &options)
 {
+    typedef boost::optional<std::string> OpString;
+    auto metaOptionValue = [this, options](const std::string& name,
+        const::std::string& defVal)
+    {
+        std::string value;
+        OpString opValue = options.getMetadataOption<std::string>(name);
+        if (opValue)
+        {
+            value = *opValue;
+            if (value == "FORWARD")
+                value += defVal;
+        }
+        else
+            value = options.getValueOrDefault<std::string>(name, defVal);
+        m_headerVals[name] = value;
+    };
+
+    std::time_t now;
+    std::time(&now);
+    std::tm* ptm = std::gmtime(&now);
+    uint16_t year = ptm->tm_year + 1900;
+    uint16_t doy = ptm->tm_yday;
+
+    metaOptionValue("dataformat_id", "3");
+    metaOptionValue("minor_version", "2");
+    metaOptionValue("creation_year", std::to_string(year));
+    metaOptionValue("creation_doy", std::to_string(doy));
+    metaOptionValue("software_id", GetDefaultSoftwareId());
+    metaOptionValue("format", "3");
+    metaOptionValue("system_id", LasHeader::SYSTEM_IDENTIFIER);
+    metaOptionValue("project_id",
+        boost::lexical_cast<std::string>(boost::uuids::uuid()));
+    metaOptionValue("global_encoding", "0");
+    metaOptionValue("filesource_id", "0");
+}
+
+/// Get VLR-specific options and store for processing with metadata.
+/// \param opts  Options to check for VLR info.
+void Writer::getVlrOptions(const Options& opts)
+{
+    std::vector<pdal::Option> options = opts.getOptions("vlr");
+    for (auto o = options.begin(); o != options.end(); ++o)
+    {
+        if (!boost::algorithm::istarts_with(o->getName(), "vlr"))
+            continue;
+
+        boost::optional<pdal::Options const&> vo = o->getOptions();
+        if (!vo)
+            continue;
+
+        VlrOptionInfo info;
+        info.m_name = o->getName().substr(strlen("vlr"));
+        info.m_value = o->getValue<std::string>();
+        try
+        {
+            info.m_recordId = vo->getOption("record_id").getValue<int16_t>();
+            info.m_userId = vo->getOption("user_id").getValue<std::string>();
+        }
+        catch (option_not_found err)
+        {
+            continue;
+        }
+        info.m_description = vo->getValueOrDefault<std::string>
+            ("description", "");
+        m_optionInfos.push_back(info);
+    }
+}
+
+
+void Writer::ready(PointContextRef ctx)
+{
+    const SpatialReference& srs = getSpatialReference().empty() ?
+        ctx.spatialRef() : getSpatialReference();
+
+    if (!m_ostream)
+        m_ostream = FileUtils::createFile(m_filename, true);
+    setVlrsFromMetadata();
+    setVlrsFromSpatialRef(srs);
+    fillHeader(ctx);
+
+    // Write the header.
+    m_ostream->seekp(m_streamOffset);
+
+    OLeStream out(m_ostream);
+    out << m_lasHeader;
+    m_lasHeader.setVlrOffset((uint32_t)m_ostream->tellp());
+
+    for (auto vi = m_vlrs.begin(); vi != m_vlrs.end(); ++vi)
+    {
+        VariableLengthRecord& vlr = *vi;
+        out << vlr;
+    }
+
+    // Write the point data start signature for version 1.0.
+    if (m_lasHeader.versionEquals(1, 0))
+        out << (uint16_t)0xCCDD;
+
+    m_lasHeader.setPointOffset((uint32_t)m_ostream->tellp());
+    //ABELL
+    // We ready compression after the header is written so that the stream is
+    // is properly located.
+    if (m_lasHeader.compressed())
+        readyCompression();
+}
+
+
+/// Search for metadata associated with the provided recordId and userId.
+/// \param  node - Top-level node to use for metadata search.
+/// \param  recordId - Record ID to match.
+/// \param  userId - User ID to match. 
+MetadataNode Writer::findVlrMetadata(MetadataNode node,
+    uint16_t recordId, const std::string& userId)
+{
+    std::string sRecordId = std::to_string(recordId);
+
     // Find a node whose name starts with vlr and that has child nodes
     // with the name and recordId we're looking for.
-    auto pred = [recordId,userId](MetadataNode n)
+    auto pred = [sRecordId,userId](MetadataNode n)
     {
-        auto recPred = [recordId](MetadataNode n)
+        auto recPred = [sRecordId](MetadataNode n)
         {
             return n.name() == "record_id" &&
-                n.value() == recordId;
+                n.value() == sRecordId;
         };
         auto userPred = [userId](MetadataNode n)
         {
@@ -246,263 +271,217 @@ MetadataNode Writer::findVlr(MetadataNode node, const std::string& recordId,
     return node.find(pred);
 }
 
-void Writer::setVLRsFromMetadata(LasHeader& header, MetadataNode metaNode,
-    Options const& opts)
+
+/// Set VLRs from metadata for forwarded info, or from option-provided data
+/// otherwise.
+void Writer::setVlrsFromMetadata()
 {
-    using namespace boost::property_tree;
+    std::vector<uint8_t> data;
 
-    std::vector<pdal::Option> options = opts.getOptions("vlr");
-    std::vector<pdal::Option>::const_iterator o;
-
-    for (o = options.begin(); o != options.end(); ++o)
+    for (auto oi = m_optionInfos.begin(); oi != m_optionInfos.end(); ++oi)
     {
-        if (!boost::algorithm::istarts_with(o->getName(), "vlr"))
-            continue;
+        VlrOptionInfo& vlrInfo = *oi;
 
-        boost::optional<pdal::Options const&> vo = o->getOptions();
-        if (!vo)
-            throw pdal_error("VLR option given, but no sub options "
-                "available to specify which VLRs to copy!");
-
-        if (boost::algorithm::iequals(o->getValue<std::string>(), "FORWARD"))
+        if (vlrInfo.m_name == "FORWARD")
         {
-            uint16_t recordId =
-                vo->getOption("record_id").getValue<uint16_t>();
-            std::string userId =
-                vo->getOption("user_id").getValue<std::string>();
-
-            MetadataNode node = findVlr(metaNode,
-                boost::lexical_cast<std::string>(recordId), userId);
-            if (node.empty())
+            MetadataNode m = findVlrMetadata(m_metadata, vlrInfo.m_recordId,
+                vlrInfo.m_userId);
+            if (m.empty())
                 continue;
-
-            std::vector<uint8_t> data = Utils::base64_decode(node.value());
-            VariableLengthRecord vlr(0xAABB, userId, recordId,
-                node.description(), data.data(), (uint16_t)data.size());
-            header.getVLRs().add(vlr);
+            data = Utils::base64_decode(m.value());
         }
         else
-        {
-            boost::uint16_t record_id =
-                vo->getValueOrDefault<uint16_t>("record_id", 4321);
-            std::string user_id = vo->getValueOrDefault<std::string>("user_id",
-                "PDALUSERID");
-            std::string description = vo->getValueOrDefault<std::string>(
-                "description", "PDAL default VLR description");
-            std::vector<uint8_t> data = Utils::base64_decode(
-                o->getValue<std::string>());
-            pdal::drivers::las::VariableLengthRecord vlr(0xAABB,
-                    user_id,
-                    record_id,
-                    description,
-                    &data[0],
-                    static_cast<boost::uint16_t>(data.size()));
-            header.getVLRs().add(vlr);
-            log()->get(LogLevel::Debug) << "Setting VLR from metadata with "
-                "user_id='" << user_id << "' and record_id='" << record_id <<
-                "'"<< " with size: " << data.size() << std::endl;
-        }
+            data = Utils::base64_decode(vlrInfo.m_value);
+        addVlr(vlrInfo.m_userId, vlrInfo.m_recordId, vlrInfo.m_description,
+            data);
     }
 }
 
 
-void Writer::ready(PointContextRef ctx)
+/// Set VLRs from the active spatial reference.
+/// \param  srs - Active spatial reference.
+void Writer::setVlrsFromSpatialRef(const SpatialReference& srs)
 {
-    if (m_headerInitialized)
-        return;
+    VlrList vlrs;
 
-    m_streamOffset = m_streamManager.ostream().tellp();
+//ABELL - Is this ifdef correct?
+#ifdef PDAL_SRS_ENABLED
+    GeotiffSupport geotiff;
+    geotiff.resetTags();
 
-    m_lasHeader.SetScale(m_xXform.m_scale, m_yXform.m_scale, m_zXform.m_scale);
-    m_lasHeader.SetOffset(m_xXform.m_offset, m_yXform.m_offset,
-        m_zXform.m_offset);
+    std::string wkt = srs.getWKT(SpatialReference::eCompoundOK, false);
+    geotiff.setWkt(wkt);
 
-    m_lasHeader.setSpatialReference(getSpatialReference().empty() ?
-        ctx.spatialRef() : getSpatialReference());
-
-    bool useMetadata = false;
-    try
-    {
-        getOptions().getOption("metadata");
-        useMetadata = true;
-    }
-    catch (pdal::option_not_found&)
-    {}
-
-    if (useMetadata)
-    {
-        // Default to PointFormat 3 if not forwarded from a previous metadata
-        // or given in a metadata option
-        uint32_t v = getMetadataOption<uint32_t>(getOptions(), m_metadata,
-            "dataformat_id", 3);
-        uint32_t v2 = getMetadataOption<uint32_t>(getOptions(), m_metadata,
-            "format", 3);
-            
-        // Use the 'format' option specified by the options instead of the
-        // metadata one that was set passively
-        v = v2; 
-        setPointFormat(static_cast<PointFormat>(v));
-        log()->get(LogLevel::Debug) << "Setting point format to " << v <<
-            " from metadata " << std::endl;
-        
-        uint32_t minor = getMetadataOption<uint32_t>(getOptions(),
-            m_metadata, "minor_version", 2);
-
-        setFormatVersion(1, static_cast<boost::uint8_t>(minor));
-        log()->get(LogLevel::Debug) << "Setting version to "
-                             << "1." << minor
-                             << " from metadata " << std::endl;
-
-        std::time_t now;
-        std::time(&now);
-        std::tm* ptm = std::gmtime(&now);
-        boost::uint32_t day(0);
-        boost::uint32_t year(0);
-        if (0 != ptm)
-        {
-            day = static_cast<uint16_t>(ptm->tm_yday);
-            year = static_cast<uint16_t>(ptm->tm_year + 1900);
-        }
-
-        year = getMetadataOption<uint32_t>(getOptions(), m_metadata,
-            "creation_year", year);
-        day = getMetadataOption<uint32_t>(getOptions(), m_metadata,
-            "creation_doy", day);
-
-        setDate(static_cast<uint16_t>(day), static_cast<uint16_t>(year));
-        log()->get(LogLevel::Debug) << "Setting date to format " << day <<
-            "/" << year << " from metadata " << std::endl;
-
-        std::string software_id = getMetadataOption<std::string>(getOptions(),
-            m_metadata, "software_id", GetDefaultSoftwareId());
-        setGeneratingSoftware(software_id);
-        log()->get(LogLevel::Debug) << "Setting generating software to '" <<
-            software_id << "' from metadata " << std::endl;
-
-        std::string system_id = getMetadataOption<std::string>(getOptions(),
-            m_metadata, "system_id", LasHeader::SystemIdentifier);
-        setSystemIdentifier(system_id);
-        log()->get(LogLevel::Debug) << "Setting system identifier to " <<
-            system_id << " from metadata " << std::endl;
-
-        boost::uuids::uuid project_id =
-            getMetadataOption<boost::uuids::uuid>(getOptions(),
-            m_metadata, "project_id", boost::uuids::nil_uuid());
-        m_lasHeader.SetProjectId(project_id);
-        log()->get(LogLevel::Debug) << "Setting project_id to " << project_id <<
-            " from metadata " << std::endl;
-        
-        std::string global_encoding_data = getMetadataOption<std::string>(
-            getOptions(), m_metadata, "global_encoding", "");
-        std::vector<uint8_t> data = Utils::base64_decode(global_encoding_data);
-        
-        uint16_t reserved = 0;
-        if (global_encoding_data.size())
-        {
-            if (data.size() == 0)
-                ;
-            else if (data.size() == 1 )
-                reserved = data[0];
-            else if (data.size() == 2 )
-                memcpy(&reserved, data.data(), data.size());
-            else if (data.size() == 4 )
-            {
-                uint32_t temp;
-                memcpy(&temp, data.data(), data.size());
-                reserved = static_cast<uint16_t>(temp);
-            }
-            else if (data.size() == 8 )
-            {
-                uint64_t temp;
-                memcpy(&temp, data.data(), data.size());
-                reserved = static_cast<uint16_t>(temp);
-            }
-            else 
-            {
-                std::ostringstream oss;
-                oss << "size of global_encoding bytes should == 2, not " <<
-                    data.size();
-                throw pdal_error(oss.str());                
-            }
-        }
-        m_lasHeader.SetReserved(reserved);
-        log()->get(LogLevel::Debug) << "Setting reserved to " << reserved <<
-            " from metadata " << std::endl;
-
-        uint16_t filesource_id = getMetadataOption<uint16_t>(getOptions(),
-            m_metadata, "filesource_id", 0);
-        m_lasHeader.SetFileSourceId(filesource_id);
-        log()->get(LogLevel::Debug) << "Setting file source id to " <<
-            filesource_id << " from metadata " << std::endl;
-
-        try
-        {
-            boost::optional<pdal::Options const&> opts =
-                getOptions().getOption("metadata").getOptions();
-            if (opts)
-                setVLRsFromMetadata(m_lasHeader, m_metadata, *opts);
-        }
-        catch (pdal::option_not_found&)
-        {}
-    } // useMetadata
-
-    LasHeaderWriter lasHeaderWriter(m_lasHeader, m_streamManager.ostream(),
-        m_streamOffset);
-    lasHeaderWriter.write();
-    m_summaryData.reset();
-
-    if (m_lasHeader.Compressed())
-    {
-#ifdef PDAL_HAVE_LASZIP
-        if (!m_zipPoint)
-        {
-            PointFormat format = m_lasHeader.getPointFormat();
-            std::unique_ptr<ZipPoint> z(new ZipPoint(format, m_lasHeader,
-                false));
-            m_zipPoint.swap(z);
-        }
-
-        if (!m_zipper)
-        {
-            std::unique_ptr<LASzipper> z(new LASzipper());
-            m_zipper.swap(z);
-
-            bool stat(false);
-            stat = m_zipper->open(m_streamManager.ostream(),
-                m_zipPoint->GetZipper());
-            if (!stat)
-            {
-                std::ostringstream oss;
-                const char* err = m_zipper->get_error();
-                if (err==NULL) err="(unknown error)";
-                oss << "Error opening LASzipper: " << std::string(err);
-                throw pdal_error(oss.str());
-            }
-        }
-#else
-        throw pdal_error("LASzip compression is not enabled for "
-            "this compressed file!");
-#endif
-    }
-    m_headerInitialized = true;
+    addGeotiffVlr(geotiff, GEOTIFF_DIRECTORY_RECORD_ID,
+        "GeoTiff GeoKeyDirectoryTag");
+    addGeotiffVlr(geotiff, GEOTIFF_DOUBLES_RECORD_ID,
+        "GeoTiff GeoDoubleParamsTag");
+    addGeotiffVlr(geotiff, GEOTIFF_ASCII_RECORD_ID,
+        "GeoTiff GeoAsciiParamsTag");
+    addWktVlr(srs);
+#endif // PDAL_SRS_ENABLED
 }
+
+
+/// Add a geotiff VLR from the information associated with the record ID.
+/// \param  geotiff - Geotiff support structure reference.
+/// \param  recordId - Record ID associated with the VLR/Geotiff ref.
+/// \param  description - Description to use with the VLR
+/// \return  Whether the VLR was added.
+bool Writer::addGeotiffVlr(GeotiffSupport& geotiff, uint16_t recordId,
+    const std::string& description)
+{
+    void *data;
+    int count;
+
+    size_t size = geotiff.getKey(recordId, &count, &data);
+    if (size == 0)
+        return false;
+
+    std::vector<uint8_t> buf(size);
+    memcpy(buf.data(), data, size);
+    addVlr(TRANSFORM_USER_ID, recordId, description, buf);
+    return true;
+}
+
+
+/// Add a Well-known Text VLR associated with the spatial reference.
+/// \param  srs - Associated spatial reference.
+/// \return  Whether the VLR was added.
+bool Writer::addWktVlr(const SpatialReference& srs)
+{
+    std::string wkt = srs.getWKT(SpatialReference::eCompoundOK);
+    if (wkt.empty())
+        return false;
+
+    std::vector<uint8_t> wktBytes(wkt.begin(), wkt.end());
+    addVlr(TRANSFORM_USER_ID, WKT_RECORD_ID, "OGC Tranformation Record",
+        wktBytes);
+    addVlr(LIBLAS_USER_ID, WKT_RECORD_ID,
+        "OGR variant of OpenGIS WKT SRS", wktBytes);
+    return true;
+}
+
+
+/// Add a standard or variable-length VLR depending on the data size.
+/// \param  userId - VLR user ID
+/// \param  recordId - VLR record ID
+/// \param  description - VLR description
+/// \param  data - Raw VLR data
+void Writer::addVlr(const std::string& userId, uint16_t recordId,
+   const std::string& description, std::vector<uint8_t>& data)
+{
+    if (data.size() > VariableLengthRecord::MAX_DATA_SIZE)
+    {
+        ExtVariableLengthRecord evlr(userId, recordId, description, data);
+        m_eVlrs.push_back(std::move(evlr));
+    }
+    else
+    {
+        VariableLengthRecord vlr(userId, recordId, description, data);
+        m_vlrs.push_back(std::move(vlr));
+    }
+}
+
+/// Find the approriate value for the specified header field.
+/// \param  name - Name of header field.
+/// \return  Value of header field.
+template<typename T>
+T Writer::headerVal(const std::string& name)
+{
+    // The header values either come from options, or are overriden in
+    // the metadata for options which had the value FORWARD.  For those,
+    // grab the value from metadata if it exists, or use the default value,
+    // which was stuck on following the FORWARD value when processing options.
+    auto pred = [name](MetadataNode n)
+    {
+        return n.name() == name;
+    };
+
+    std::string val = m_headerVals[name];
+    if (val.find("FORWARD") == 0)
+    {
+        MetadataNode m = m_metadata.findChild(pred);
+        val = m.empty() ? val.substr(strlen("FORWARD")) : m.value();
+    }
+    return boost::lexical_cast<T>(val);
+}
+
+
+/// Fill the LAS header with values as provided in options or forwarded
+/// metadata.
+void Writer::fillHeader(PointContextRef ctx)
+{
+    m_lasHeader.setScale(m_xXform.m_scale, m_yXform.m_scale,
+        m_zXform.m_scale);
+    m_lasHeader.setOffset(m_xXform.m_offset, m_yXform.m_offset,
+        m_zXform.m_offset);
+    m_lasHeader.setVlrCount(m_vlrs.size());
+    m_lasHeader.setEVlrCount(m_eVlrs.size());
+
+    m_lasHeader.setPointFormat((uint8_t)headerVal<unsigned>("format"));
+    m_lasHeader.setPointLen(m_lasHeader.basePointLen());
+    m_lasHeader.setVersionMinor((uint8_t)headerVal<unsigned>("minor_version"));
+    m_lasHeader.setCreationDOY(headerVal<uint16_t>("creation_year"));
+    m_lasHeader.setCreationDOY(headerVal<uint16_t>("creation_doy"));
+    m_lasHeader.setSoftwareId(headerVal<std::string>("software_id"));
+    m_lasHeader.setSoftwareId(headerVal<std::string>("system_id"));
+    m_lasHeader.setProjectId(headerVal<boost::uuids::uuid>("project_id"));
+    m_lasHeader.setGlobalEncoding(headerVal<uint16_t>("global_encoding"));
+    m_lasHeader.setFileSourceId(headerVal<uint16_t>("filesource_id"));
+}
+
+
+/// Prepare the compressor to write points.
+/// \param  pointFormat - Formt of points we're writing.
+void Writer::readyCompression()
+{
+#ifdef PDAL_HAVE_LASZIP
+    //ABELL - Why are we passing the pointFormat if it's in the header?
+    m_zipPoint.reset(new ZipPoint(m_lastHeader.m_pointFormat, m_lasHeader,
+        false);
+    m_zipper.reset(new LASzipper());
+
+    if (!m_zipper->open(m_ostream, m_zipPoint->GetZipper()))
+    {
+        std::ostringstream oss;
+        const char* err = m_zipper->get_error();
+        if (err == NULL)
+            err = "(unknown error)";
+        oss << "Error opening LASzipper: " << std::string(err);
+        throw pdal_error(oss.str());
+    }
+#else
+    throw pdal_error("LASzip compression is not enabled for "
+        "this compressed file!");
+#endif
+}
+
 
 void Writer::write(const PointBuffer& pointBuffer)
 {
-    boost::uint32_t numValidPoints = 0;
+    uint32_t numValidPoints = 0;
 
-    boost::uint8_t buf[64]; // BUG: fixed size
+    std::vector<char> buf(m_lasHeader.pointLen());
 
     bool hasColor = m_lasHeader.hasColor();
     bool hasTime = m_lasHeader.hasTime();
-    boost::uint16_t record_length = m_lasHeader.GetDataRecordLength();
+    uint16_t record_length = m_lasHeader.pointLen();
 
     m_callback->setTotal(pointBuffer.size());
     m_callback->invoke(0);
 
+    static const size_t returnCount = m_lasHeader.versionAtLeast(1, 4) ?
+        LasHeader::RETURN_COUNT :
+        LasHeader::LEGACY_RETURN_COUNT;
     for (PointId idx = 0; idx < pointBuffer.size(); idx++)
     {
-        boost::uint8_t* p = buf;
+        Charbuf charstreambuf(buf.data(), buf.size());
+
+        std::ostream stream(&charstreambuf);
+
+        // Wrap the output stream with byte ordering
+        OLeStream ostream(&stream);
 
         // we always write the base fields
         using namespace Dimension;
@@ -515,15 +494,12 @@ void Writer::write(const PointBuffer& pointBuffer)
         if (pointBuffer.hasDim(Id::NumberOfReturns))
             numberOfReturns = pointBuffer.getFieldAs<uint8_t>(
                 Id::NumberOfReturns, idx);
-        if (m_discardHighReturnNumbers && numberOfReturns > MAX_RETURN_NUMBER)
+        if (m_discardHighReturnNumbers && numberOfReturns > returnCount)
         {
-            if (returnNumber > MAX_RETURN_NUMBER)
-            {
-                if (idx % 100 == 0)
-                    m_callback->invoke(idx + 1);
+            // If this return number is too high, pitch the point.
+            if (returnNumber > returnCount)
                 continue;
-            }
-            numberOfReturns = MAX_RETURN_NUMBER;
+            numberOfReturns = returnCount;
         }
 
         double x = pointBuffer.getFieldAs<double>(Id::X, idx);
@@ -534,14 +510,14 @@ void Writer::write(const PointBuffer& pointBuffer)
         y = (y - m_yXform.m_offset) / m_yXform.m_scale;
         z = (z - m_zXform.m_offset) / m_zXform.m_scale;
 
-        Utils::write_field(p, boost::numeric_cast<int32_t>(lround(x)));
-        Utils::write_field(p, boost::numeric_cast<int32_t>(lround(y)));
-        Utils::write_field(p, boost::numeric_cast<int32_t>(lround(z)));
+        ostream << boost::numeric_cast<int32_t>(lround(x));
+        ostream << boost::numeric_cast<int32_t>(lround(y));
+        ostream << boost::numeric_cast<int32_t>(lround(z));
 
         uint16_t intensity = 0;
         if (pointBuffer.hasDim(Id::Intensity))
             intensity = pointBuffer.getFieldAs<uint16_t>(Id::Intensity, idx);
-        Utils::write_field(p, intensity);
+        ostream << intensity;
 
         uint8_t scanDirectionFlag(0);
         if (pointBuffer.hasDim(Id::ScanDirectionFlag))
@@ -553,39 +529,39 @@ void Writer::write(const PointBuffer& pointBuffer)
             edgeOfFlightLine = pointBuffer.getFieldAs<uint8_t>(
                 Id::EdgeOfFlightLine, idx);
 
-        boost::uint8_t bits = returnNumber | (numberOfReturns<<3) |
+        uint8_t bits = returnNumber | (numberOfReturns<<3) |
             (scanDirectionFlag << 6) | (edgeOfFlightLine << 7);
-        Utils::write_field(p, bits);
+        ostream << bits;
 
         uint8_t classification = 0;
         if (pointBuffer.hasDim(Id::Classification))
             classification = pointBuffer.getFieldAs<uint8_t>(Id::Classification,
                 idx);
-        Utils::write_field(p, classification);
+        ostream << classification;
 
         int8_t scanAngleRank = 0;
         if (pointBuffer.hasDim(Id::ScanAngleRank))
             scanAngleRank = pointBuffer.getFieldAs<int8_t>(Id::ScanAngleRank,
                 idx);
-        Utils::write_field(p, scanAngleRank);
+        ostream << scanAngleRank;
 
         uint8_t userData = 0;
         if (pointBuffer.hasDim(Id::UserData))
             userData = pointBuffer.getFieldAs<uint8_t>(Id::UserData, idx);
-        Utils::write_field(p, userData);
+        ostream << userData;
 
         uint16_t pointSourceId = 0;
         if (pointBuffer.hasDim(Id::PointSourceId))
             pointSourceId = pointBuffer.getFieldAs<uint16_t>(Id::PointSourceId,
                 idx);
-        Utils::write_field(p, pointSourceId);
+        ostream << pointSourceId;
 
         if (hasTime)
         {
             double t = 0.0;
             if (pointBuffer.hasDim(Id::GpsTime))
                 t = pointBuffer.getFieldAs<double>(Id::GpsTime, idx);
-            Utils::write_field(p, t);
+            ostream << t;
         }
 
         if (hasColor)
@@ -600,36 +576,26 @@ void Writer::write(const PointBuffer& pointBuffer)
             if (pointBuffer.hasDim(Id::Blue))
                 blue = pointBuffer.getFieldAs<uint16_t>(Id::Blue, idx);
 
-            Utils::write_field(p, red);
-            Utils::write_field(p, green);
-            Utils::write_field(p, blue);
+            ostream << red << green << blue;
         }
 
         //Buffer is complete.
 
         // If we're going to compress, do it.
 #ifdef PDAL_HAVE_LASZIP
-        if (m_zipPoint)
+        for (unsigned i = 0; i < m_zipPoint->m_lz_point_size; i++)
+            m_zipPoint->m_lz_point_data[i] = buf[i];
+        if (!m_zipper->write(m_zipPoint->m_lz_point))
         {
-            for (unsigned i = 0; i < m_zipPoint->m_lz_point_size; i++)
-                m_zipPoint->m_lz_point_data[i] = buf[i];
-            if (!m_zipper->write(m_zipPoint->m_lz_point))
-            {
-                std::ostringstream oss;
-                const char* err = m_zipper->get_error();
-                if (err == NULL)
-                    err = "(unknown error)";
-                oss << "Error writing point: " << std::string(err);
-                throw pdal_error(oss.str());
-            }
+            std::ostringstream oss;
+            const char* err = m_zipper->get_error();
+            if (err == NULL)
+                err = "(unknown error)";
+            oss << "Error writing point: " << std::string(err);
+            throw pdal_error(oss.str());
         }
-        else
-        {
-            Utils::write_n(m_streamManager.ostream(), buf, record_length);
-        }
-#else
-        Utils::write_n(m_streamManager.ostream(), buf, record_length);
 #endif
+        m_ostream->write(buf.data(), buf.size());
         ++numValidPoints;
 
         double xValue = pointBuffer.getFieldAs<double>(Id::X, idx);
@@ -646,15 +612,25 @@ void Writer::write(const PointBuffer& pointBuffer)
     m_numPointsWritten = m_numPointsWritten + numValidPoints;
 }
 
+
 void Writer::done(PointContextRef ctx)
 {
-    m_lasHeader.SetPointRecordsCount(m_numPointsWritten);
-
     log()->get(LogLevel::Debug) << "Wrote " << m_numPointsWritten <<
         " points to the LAS file" << std::endl;
 
-    m_streamManager.ostream().seekp(m_streamOffset);
-    Support::rewriteHeader(m_streamManager.ostream(), m_summaryData);
+    OLeStream out(m_ostream);
+
+    for (auto vi = m_eVlrs.begin(); vi != m_eVlrs.end(); ++vi)
+    {
+        ExtVariableLengthRecord evlr = *vi;
+        out << evlr;
+    }
+
+    m_lasHeader.setPointCount(m_numPointsWritten);
+    m_lasHeader.setSummary(m_summaryData);
+    out.seek(m_streamOffset);
+    out << m_lasHeader;
+    FileUtils::closeFile(m_ostream);
 }
 
 } // namespace las

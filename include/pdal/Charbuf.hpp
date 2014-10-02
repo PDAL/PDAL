@@ -63,6 +63,9 @@ private:
     // The offset allows one to use offsets when seeking that refer not to
     // the positions in the backing vector, but to some other reference point.
     pos_type m_bufOffset;
+    // For the put pointer, it seems we need the beginning of the buffer
+    // in order to deal with offsets.
+    char *m_buf;
 };
 
 } //namespace pdal

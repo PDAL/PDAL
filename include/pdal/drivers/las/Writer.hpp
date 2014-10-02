@@ -35,12 +35,9 @@
 #pragma once
 
 #include <pdal/Writer.hpp>
-#include <pdal/drivers/las/Support.hpp>
 #include <pdal/drivers/las/Header.hpp>
 #include <pdal/drivers/las/SummaryData.hpp>
 #include <pdal/drivers/las/ZipPoint.hpp>
-#include <pdal/StreamFactory.hpp>
-#include <boost/algorithm/string.hpp>
 
 namespace pdal
 {
@@ -55,16 +52,17 @@ namespace nitf
 namespace las
 {
 
+class GeotiffSupport;
 
-//
-// supported options:
-//   <uint32>id
-//   <bool>debug
-//   <uint32>verbose
-//   <string>a_srs
-//   <bool>compression
-//   <string>filename  [required]
-//
+struct VlrOptionInfo
+{
+    std::string m_name;
+    std::string m_value;
+    std::string m_userId;
+    uint16_t m_recordId;
+    std::string m_description;
+};
+
 class PDAL_DLL Writer : public pdal::Writer
 {
     friend class nitf::Writer;
@@ -74,34 +72,10 @@ public:
     SET_STAGE_ENABLED(true)
 
     Writer(const Options&);
-    Writer(std::ostream*);
-    Writer(const Options&, std::ostream*);
+    Writer(const Options&, std::ostream *);
     virtual ~Writer();
 
     static Options getDefaultOptions();
-
-    void setFormatVersion(uint8_t majorVersion, uint8_t minorVersion);
-    void setPointFormat(PointFormat);
-    void setDate(uint16_t dayOfYear, uint16_t year);
-
-    void setProjectId(const boost::uuids::uuid&);
-
-    // up to 32 chars (default is "PDAL")
-    void setSystemIdentifier(const std::string& systemId);
-
-    // up to 32 chars (default is "PDAL x.y.z")
-    void setGeneratingSoftware(const std::string& softwareId);
-
-    void setHeaderPadding(boost::uint32_t const& v);
-
-    // default false
-    void setCompressed(bool);
-
-protected:
-    void Construct();
-    virtual void initialize();
-
-    OutputStreamManager m_streamManager;
 
 private:
     LasHeader m_lasHeader;
@@ -109,56 +83,38 @@ private:
     SummaryData m_summaryData;
     std::unique_ptr<LASzipper> m_zipper;
     std::unique_ptr<ZipPoint> m_zipPoint;
+    bool m_discardHighReturnNumbers;
+    std::map<std::string, std::string> m_headerVals;
+    std::vector<VlrOptionInfo> m_optionInfos;
+    uint64_t m_streamOffset; // the first byte of the LAS file
+    std::ostream *m_ostream;
+    std::vector<VariableLengthRecord> m_vlrs;
+    std::vector<ExtVariableLengthRecord> m_eVlrs;
 
     virtual void processOptions(const Options& options);
     virtual void ready(PointContextRef ctx);
     virtual void write(const PointBuffer& pointBuffer);
     virtual void done(PointContextRef ctx);
-    bool m_headerInitialized;
-    bool m_discardHighReturnNumbers;
-    boost::uint64_t m_streamOffset; // the first byte of the LAS file
-	void setOptions();
-    MetadataNode findVlr(MetadataNode node, const std::string& recordId,
+
+    void construct();
+    void getHeaderOptions(const Options& options);
+    void getVlrOptions(const Options& opts);
+    template<typename T>
+    T headerVal(const std::string& name);
+    void fillHeader(PointContextRef ctx);
+    void setVlrsFromMetadata();
+    MetadataNode findVlrMetadata(MetadataNode node, uint16_t recordId,
         const std::string& userId);
-    void setVLRsFromMetadata(LasHeader& header, MetadataNode metaNode,
-        Options const& opts);
+    void setVlrsFromSpatialRef(const SpatialReference& srs);
+    void readyCompression();
+    void addVlr(const std::string& userId, uint16_t recordId,
+        const std::string& description, std::vector<uint8_t>& data);
+    bool addGeotiffVlr(GeotiffSupport& geotiff, uint16_t recordId,
+        const std::string& description);
+    bool addWktVlr(const SpatialReference& srs);
+
     Writer& operator=(const Writer&); // not implemented
     Writer(const Writer&); // not implemented
-
-    template<typename T>
-    T getMetadataOption(pdal::Options const& options,
-        pdal::MetadataNode const& metaNode, std::string const& name,
-        T default_value) const
-    {
-        boost::optional<std::string> candidate =
-            options.getMetadataOption<std::string>(name);
-
-        // If this field isn't a metadata option, just return the plain option
-        // value or the default value.
-        if (!candidate)
-            return options.getValueOrDefault<T>(name, default_value);
-            
-        // If the metadata option for this field is "FORWARD", return the
-        // value from the metadata or the default value.
-        if (boost::algorithm::iequals(*candidate, "FORWARD"))
-        {
-            auto pred = [name](MetadataNode n)
-            {
-                return n.name() == name;
-            };
-            MetadataNode m = metaNode.findChild(pred);
-            if (!m.empty())
-            {
-                T t;
-                std::istringstream iss(m.value());
-                iss >> t;
-                return t;
-            }
-            return default_value;
-        }
-        // Just return the value from the stored metadata option.
-        return boost::lexical_cast<T>(*candidate);
-    }    
 };
 
 } // namespace las

@@ -119,10 +119,14 @@ void NitfReader::initialize()
     nitf.getLasPosition(m_offset, m_length);
     nitf.extractMetadata(m_metadata);
     nitf.close();
+    las::Reader::initialize();
+}
 
+void NitfReader::ready(PointContextRef ctx)
+{
     // Initialize the LAS stuff with its own metadata node.
     MetadataNode lasNode = m_metadata.add(las::Reader::getName());
-    las::Reader::initialize(lasNode);
+    las::Reader::ready(ctx, lasNode);
 }
 
 } // namespace nitf
