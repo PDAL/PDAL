@@ -77,6 +77,8 @@ public:
 
     static Options getDefaultOptions();
 
+    void flush();
+
 private:
     LasHeader m_lasHeader;
     boost::uint32_t m_numPointsWritten;

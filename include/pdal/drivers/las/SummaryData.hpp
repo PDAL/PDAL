@@ -56,7 +56,7 @@ public:
     void addPoint(double x, double y, double z, int returnNumber);
     uint32_t getTotalNumPoints() const
         { return m_totalNumPoints; }
-    pdal::Bounds<double> getBounds() const;
+    BOX3D getBounds() const;
     point_count_t getReturnCount(int returnNumber) const;
 
     void dump(std::ostream&) const;

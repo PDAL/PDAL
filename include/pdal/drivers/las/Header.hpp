@@ -35,6 +35,7 @@
 
 #pragma once
 
+#include <array>
 #include <vector>
 
 #include <boost/uuid/uuid.hpp>
@@ -273,32 +274,32 @@ public:
 
     /// Get minimum value of extent of X coordinate.
     double maxX() const
-        { return m_bounds.getMaximum(0); }
+        { return m_bounds.maxx; }
 
     /// Get maximum value of extent of X coordinate.
     double minX() const
-        { return m_bounds.getMinimum(0); }
+        { return m_bounds.minx; }
 
     /// Get minimum value of extent of Y coordinate.
     double maxY() const
-        { return m_bounds.getMaximum(1); }
+        { return m_bounds.maxy; }
 
     /// Get maximum value of extent of Y coordinate.
     double minY() const
-        { return m_bounds.getMinimum(1); }
+        { return m_bounds.miny; }
 
     /// Get minimum value of extent of Z coordinate.
     double maxZ() const
-        { return m_bounds.getMaximum(2); }
+        { return m_bounds.maxz; }
 
     /// Get maximum value of extent of Z coordinate.
     double minZ() const
-       { return m_bounds.getMinimum(2); }
+       { return m_bounds.minz; }
 
-    const Bounds<double>& bounds() const
+    const BOX3D& getBounds() const
         { return m_bounds; }
-    void setBounds(const Bounds<double>& bounds)
-         { m_bounds = bounds; }
+    void setBounds(const BOX3D& bounds)
+        { m_bounds = bounds; }
 
     bool hasTime() const
     {
@@ -378,7 +379,7 @@ private:
     bool m_isCompressed;
     uint64_t m_eVlrOffset;
     uint32_t m_eVlrCount;
-    Bounds<double> m_bounds;
+    BOX3D m_bounds;
     std::string m_compressionInfo;
 
     static void get(ILeStream& in, boost::uuids::uuid& uuid);

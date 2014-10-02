@@ -54,7 +54,7 @@ public:
 #else
     SET_STAGE_ENABLED(false)
 #endif
-    
+
     Writer(const Options& options) : las::Writer(options, &m_oss)
         {}
 
@@ -72,6 +72,8 @@ private:
     std::string m_securityClass;
     std::string m_imgSecurityClass;
     std::string m_imgDate;
+    std::string m_sic;
+    std::string m_igeolob;
     std::stringstream m_oss;
 
     Writer& operator=(const Writer&); // not implemented

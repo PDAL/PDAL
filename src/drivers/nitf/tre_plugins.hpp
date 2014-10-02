@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2014, Michael P. Gerlek (mpg@flaxen.com)
 *
 * All rights reserved.
 *
@@ -13,7 +13,7 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
+*     * Neither the name of Hobu, Inc. or Flaxen Consulting LLC nor the
 *       names of its contributors may be used to endorse or promote
 *       products derived from this software without specific prior
 *       written permission.
@@ -32,44 +32,20 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/Range.hpp>
+#pragma once
+
+#include <pdal/pdal_internal.hpp>
+
+#ifdef PDAL_HAVE_NITRO
 
 
-namespace pdal
-{
+
+namespace pdal { namespace drivers { namespace nitf {
 
 
-std::istream& operator>>(std::istream& istr, Range<double>& range)
-{
-    double low, high;
+void register_tre_plugins();
 
-    Utils::eatwhitespace(istr);
 
-    if (!Utils::eatcharacter(istr,'['))
-        throw pdal_error("Range parser failed finding expected '[' character");
+} } } // namespaces
 
-    Utils::eatwhitespace(istr);
-
-    istr >> low;
-
-    Utils::eatwhitespace(istr);
-
-    if (!Utils::eatcharacter(istr,','))
-        throw pdal_error("Range parser failed finding expected ',' character");
-
-    Utils::eatwhitespace(istr);
-
-    istr >> high;
-
-    if (!Utils::eatcharacter(istr,']'))
-        throw pdal_error("Range parser failed finding expected ']' character");
-
-    Utils::eatwhitespace(istr);
-
-    range.setMinimum(low);
-    range.setMaximum(high);
-
-    return istr;
-}
-
-} // namespace
+#endif // HAVE_NITRO

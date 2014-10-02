@@ -35,7 +35,6 @@
 #pragma once
 
 #include <pdal/Reader.hpp>
-#include <pdal/ReaderIterator.hpp>
 #include <pdal/WebSocketClient.hpp>
 
 namespace pdal
@@ -66,67 +65,28 @@ public:
     GreyhoundReader(const Options& options);
     ~GreyhoundReader();
 
-    virtual StageSequentialIterator* createSequentialIterator() const;
-
 private:
     std::string m_uri;
     std::string m_pipelineId;
     std::string m_sessionId;
     std::vector<DimData> m_dimData;
-    point_count_t m_numPoints;
     WebSocketClient m_wsClient;
+    point_count_t m_numPoints;
+    point_count_t m_index;
+    std::size_t m_pointByteSize;
 
     virtual void initialize();
     virtual void processOptions(const Options& options);
     virtual void addDimensions(PointContextRef pointContext);
     virtual void ready(PointContextRef ctx);
-};
-
-namespace iterators
-{
-namespace sequential
-{
-
-class PDAL_DLL Iterator:
-    public pdal::ReaderSequentialIterator
-{
-public:
-    Iterator(
-            WebSocketClient& wsClient,
-            std::string sessionId,
-            std::vector<DimData> dimData,
-            point_count_t numPoints);
-
-private:
-    virtual point_count_t readImpl(
-            PointBuffer& pointBuffer,
-            point_count_t count);
-
-    virtual point_count_t readBufferImpl(PointBuffer& pointBuffer)
-    {
-        return readImpl(
-                pointBuffer,
-                std::numeric_limits<point_count_t>::max());
-    }
-
-    boost::uint64_t skipImpl(boost::uint64_t pointsToSkip);
-    virtual bool atEndImpl() const;
+    virtual point_count_t read(PointBuffer& buf, point_count_t count);
+    virtual bool eof() const;
 
     point_count_t setPoints(
             PointBuffer& pointBuffer,
             const char* data,
-            point_count_t pointsToRead);
-
-    WebSocketClient& m_wsClient;
-    std::string m_sessionId;
-    std::vector<DimData> m_dimData;
-    point_count_t m_numPoints;
-    std::size_t m_pointByteSize;
+            const point_count_t pointsToRead) const;
 };
-
-} // namespace sequential
-
-} // namespace iterators
 
 } // namespace greyhound
 } // namespace drivers

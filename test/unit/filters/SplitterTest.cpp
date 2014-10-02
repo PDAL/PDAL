@@ -79,12 +79,12 @@ BOOST_AUTO_TEST_CASE(test_tile_filter)
 
     auto sorter = [](PointBufferPtr p1, PointBufferPtr p2)
     {
-        Bounds<double> b1 = p1->calculateBounds();
-        Bounds<double> b2 = p2->calculateBounds();
+        BOX3D b1 = p1->calculateBounds();
+        BOX3D b2 = p2->calculateBounds();
 
-        return b1.getMinimum(0) < b2.getMinimum(0) ?  true :
-            b1.getMinimum(0) > b2.getMinimum(0) ? false :
-            b1.getMinimum(1) < b2.getMinimum(1);
+        return b1.minx < b2.minx ?  true :
+            b1.minx > b2.minx ? false :
+            b1.miny < b2.miny;
     };
     std::sort(buffers.begin(), buffers.end(), sorter);
 

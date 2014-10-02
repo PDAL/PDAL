@@ -83,6 +83,16 @@ Writer::~Writer()
 }
 
 
+void Writer::flush()
+{
+#ifdef PDAL_HAVE_LASZIP
+    m_zipper.reset();
+    m_zipPoint.reset();
+#endif
+    m_ostream->flush();
+}
+
+
 Options Writer::getDefaultOptions()
 {
     Options options;

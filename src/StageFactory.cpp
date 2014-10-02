@@ -62,6 +62,7 @@ namespace pdal
 MAKE_READER_CREATOR(FauxReader, pdal::drivers::faux::Reader)
 MAKE_READER_CREATOR(LasReader, pdal::drivers::las::Reader)
 MAKE_READER_CREATOR(BpfReader, pdal::BpfReader)
+MAKE_READER_CREATOR(BufferReader, drivers::buffer::BufferReader)
 
 #ifdef PDAL_HAVE_GREYHOUND
 MAKE_READER_CREATOR(GreyhoundReader, pdal::drivers::greyhound::GreyhoundReader)
@@ -73,7 +74,7 @@ MAKE_READER_CREATOR(OciReader, pdal::drivers::oci::OciReader)
 #endif
 #endif
 
-#ifdef PDAL_HAVE_GDAL
+#ifdef PDAL_HAVE_NITRO
 MAKE_READER_CREATOR(NITFReader, pdal::drivers::nitf::NitfReader)
 #endif
 
@@ -113,6 +114,7 @@ MAKE_FILTER_CREATOR(Colorization, pdal::filters::Colorization)
 #endif
 MAKE_FILTER_CREATOR(Crop, pdal::filters::Crop)
 MAKE_FILTER_CREATOR(Decimation, pdal::filters::Decimation)
+MAKE_FILTER_CREATOR(Ferry, pdal::filters::Ferry)
 MAKE_FILTER_CREATOR(HexBin, pdal::filters::HexBin)
 MAKE_FILTER_CREATOR(Merge, pdal::filters::Merge)
 //MAKE_FILTER_CREATOR(InPlaceReprojection, pdal::filters::InPlaceReprojection)
@@ -199,11 +201,12 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
     drivers["qi"] = "drivers.qfit.reader";
     drivers["nitf"] = "drivers.nitf.reader";
     drivers["ntf"] = "drivers.nitf.reader";
+    drivers["nsf"] = "drivers.nitf.reader";
     drivers["bpf"] = "drivers.bpf.reader";
     drivers["sbet"] = "drivers.sbet.reader";
     drivers["icebridge"] = "drivers.icebridge.reader";
     drivers["sqlite"] = "drivers.sqlite.reader";
-    
+
 #ifdef PDAL_HAVE_PCL
     drivers["pcd"] = "drivers.pcd.reader";
 #endif
@@ -369,13 +372,14 @@ void StageFactory::registerWriter(const std::string& type, WriterCreator* f)
 void StageFactory::registerKnownReaders()
 {
     REGISTER_READER(FauxReader, pdal::drivers::faux::Reader);
+    REGISTER_READER(BufferReader, pdal::drivers::buffer::BufferReader);
     REGISTER_READER(LasReader, pdal::drivers::las::Reader);
 #ifdef PDAL_HAVE_ORACLE
 #ifndef USE_PDAL_PLUGIN_OCI
     REGISTER_READER(OciReader, pdal::drivers::oci::OciReader);
 #endif
 #endif
-#ifdef PDAL_HAVE_GDAL
+#ifdef PDAL_HAVE_NITRO
     REGISTER_READER(NITFReader, pdal::drivers::nitf::NitfReader);
 #endif
 
@@ -421,6 +425,7 @@ void StageFactory::registerKnownFilters()
 #endif
     REGISTER_FILTER(Crop, pdal::filters::Crop);
     REGISTER_FILTER(Decimation, pdal::filters::Decimation);
+    REGISTER_FILTER(Ferry, pdal::filters::Ferry);
     REGISTER_FILTER(Reprojection, pdal::filters::Reprojection);
     REGISTER_FILTER(HexBin, pdal::filters::HexBin);
     REGISTER_FILTER(Merge, pdal::filters::Merge);

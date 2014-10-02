@@ -131,7 +131,11 @@ void PipelineWriter::writePipeline(const std::string& filename) const
         (Stage*)m_manager.getStage();
 
     ptree tree = generateTreeFromStage(*stage);
+#if BOOST_VERSION >= 105600
+    const xml_parser::xml_writer_settings<std::string> settings(' ', 4);
+#else
     const xml_parser::xml_writer_settings<char> settings(' ', 4);
+#endif
 
     if (boost::iequals(filename, "STDOUT"))
         xml_parser::write_xml(std::cout, tree);

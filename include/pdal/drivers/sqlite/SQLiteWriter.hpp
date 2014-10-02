@@ -67,43 +67,43 @@ private:
     virtual void ready(PointContextRef ctx);
     virtual void write(const PointBuffer& pointBuffer);
     virtual void done(PointContextRef ctx);
-    
+
     void writeInit();
     void writeTile(const PointBuffer& buffer);
     void CreateBlockTable();
-    void CreateCloudTable();    
+    void CreateCloudTable();
     bool CheckTableExists(std::string const& name);
     void DeleteBlockTable();
-    void DeleteCloudTable();                          
-    void CreateIndexes(std::string const& table_name, 
-                       std::string const& spatial_column_name, 
+    void DeleteCloudTable();
+    void CreateIndexes(std::string const& table_name,
+                       std::string const& spatial_column_name,
                        bool is3d);
 
     bool IsValidGeometryWKT(std::string const& wkt) const;
     std::string loadGeometryWKT(std::string const& filename_or_wkt) const;
-    void CreateCloud();                       
-    
+    void CreateCloud();
+
     std::unique_ptr<SQLite> m_session;
 
     bool m_doCreateIndex;
-    pdal::Bounds<double> m_bounds; // Bounds of the entire point cloud    
+    BOX3D m_bounds; // Bounds of the entire point cloud
     bool m_sdo_pc_is_initialized;
 	std::ostringstream m_block_insert_query;
 	boost::int32_t m_obj_id;
 	boost::int32_t m_block_id;
 	boost::uint32_t m_srid;
 	boost::int64_t m_num_points;
-    size_t m_pointSize;    
+    size_t m_pointSize;
     Orientation::Enum m_orientation;
     Dimension::IdList m_dims;
     std::vector<Dimension::Type::Enum> m_types;
     bool m_pack;
     std::string m_block_table;
     std::string m_cloud_table;
-    std::string m_cloud_column;    
+    std::string m_cloud_column;
     std::string m_connection;
     bool m_is3d;
-    
+
 };
 
 }

@@ -262,6 +262,13 @@ BOOST_AUTO_TEST_CASE(find_child_string)
     BOOST_CHECK_EQUAL(n.value(), "220");
 }
 
+BOOST_AUTO_TEST_CASE(sanitize)
+{
+    MetadataNode top(" Test;semicolon:colon space'apostrophe\"quote:");
+    BOOST_CHECK_EQUAL(top.name(),
+        "_Test_semicolon_colon_space_apostrophe_quote_");
+}
+
 BOOST_AUTO_TEST_CASE(toJSON)
 {
 /**

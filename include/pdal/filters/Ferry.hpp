@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2014, Howard Butler <hobu.inc@gmail.com>
 *
 * All rights reserved.
 *
@@ -32,6 +32,42 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/Vector.hpp>
+#pragma once
 
-// (no code here, everything is in the header)
+#include <pdal/Filter.hpp>
+
+#include <map>
+#include <string>
+namespace pdal
+{
+namespace filters
+{
+
+class PDAL_DLL Ferry : public Filter
+{
+public:
+    SET_STAGE_NAME("filters.ferry", "Data ferrying filter")
+    SET_STAGE_LINK("http://pdal.io/stages/filters.ferry.html")
+    SET_STAGE_ENABLED(true)
+
+    Ferry(const Options& options) : Filter(options) {};
+    static Options getDefaultOptions();
+
+private:
+    virtual void initialize();
+    virtual void processOptions(const Options&);
+    virtual void addDimensions(PointContextRef ctx);
+    virtual void ready(PointContext ctx);
+    virtual void filter(PointBuffer& buffer);
+    virtual void done(PointContext ctx);
+
+    Ferry& operator=(const Ferry&); // not implemented
+    Ferry(const Ferry&); // not implemented
+
+    std::map<std::string, std::string> m_name_map;
+    std::map< Dimension::Id::Enum ,  Dimension::Id::Enum > m_dimensions_map;
+};
+
+} // namespace filters
+} // namespace pdal
+

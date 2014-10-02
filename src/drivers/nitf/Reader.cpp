@@ -34,24 +34,14 @@
 
 #include <pdal/pdal_internal.hpp>
 
-#ifdef PDAL_HAVE_GDAL
+#ifdef PDAL_HAVE_NITRO
 
 // local
 #include "NitfFile.hpp"
-#include "nitflib.h"
-
-// gdal
-#include "gdal.h"
-#include "cpl_vsi.h"
-#include "cpl_conv.h"
-#include "cpl_string.h"
 
 #include <pdal/drivers/nitf/Reader.hpp>
 #include <pdal/StreamFactory.hpp>
 
-#if ((GDAL_VERSION_MAJOR == 1 && GDAL_VERSION_MINOR < 10) || (GDAL_VERSION_MAJOR < 1))
-// #error "NITF support requires GDAL 1.10 or GDAL 2.0+"
-#endif
 
 
 namespace pdal
@@ -61,69 +51,81 @@ namespace drivers
 namespace nitf
 {
 
+//
 // References:
 //   - NITF 2.1 standard: MIL-STD-2500C (01 May 2006)
 //   - Lidar implementation profile v1.0 (2010-09-07)
 //
-// There must be at least one Image segment ("IM").
-// There must be at least one DES segment ("DE") named LIDARA.
+// To be a proper lidar NITF file, the file must:
+//   - have at least one Image segment ("IM")
+//   - have at least one DES segment ("DE") named LIDARA
 //
-// You could have multiple image segments and LIDARA segments, but
-// the standard doesn't seem to say anything about how you associate which
+// You could have multiple image segments and LIDARA segments, but the
+// standard doesn't seem to say anything about how you associate which
 // image segment(s) with which LIDARA segment(s). We will assume only
 // one image segment and only one LIDARA segment.
 //
-// We don't support LIDARA segments that are split into multiple DES segments
-// via the DES INDEX mechanism.
+// We don't support LIDARA segments that are split into multiple DES
+// segments via the DES INDEX mechanism. We also don't support wierd
+// things that Nitro doesn't support: NITF 1.0, streaming segments,
+// and so on.
 //
-// Metadata: we store...
-//    - the file header fields    - namespace <root>.FH.fieldname
-//    - the file header TREs      - namespace <root>.FH.TRE.TREname
-//    - the IM segment fields     - namespace <root>.IM.1.fieldname
-//    - the IM segment TREs       - namespace <root>.IM.1.TRE.TREname
-//    - the DES fields            - namespace <root>.DE.1.fieldname
-//    - the DES TREs              - namespace <root>.DE.1.fieldname
-// Note we use a number to indicate which segment is being used,
+// For the metadata, we store:
+//    - the file header fields    --> FH.field_name
+//    - the file header TREs      --> FH.TRE.tre_name
+//    - the IM segment fields     --> IM:0.field_name
+//    - the IM segment TREs       --> IM:0.tre_name.field_name
+//    - the DES fields            --> DE:0.field_name
+//    - the DES TREs              --> DE:0.field_name
+//
+// Note we use a ":N" syntax to indicate which segment is being used,
 // so there is no ambiuity with multisegment NITFs
 //
-// We also store some basic info for the IM segment: pixel width,
-// pixel height, and number of bands.
-//    BUG: this is commented out right now (see processImageInfo()),
-//         because NITFImageDeaccess() leaks memory?
+// We parse out the TRE fields for those TREs that Nitro recognizes
+// (see tre_plugins.cpp).
 //
-// We do not parse out the TRE fields; we leave the data as a byte stream
-// (This would be easy enough to do later, at least for those TREs we
-// have documentation on).
+// The dimensions we write out are (precisely) the LAS dimensions; we
+// use the same names, so as not to require upstream stgaes to
+// understand both LAS dimension names and NITF dimension names.
 //
-// The dimensions we write out are (precisely) the LAS dimensions; we use
-// the same names, so as not to require upstream stgaes to understand both
-// LAS dimension names and NITF dimension names.
+
 //
-// BUG: we should provide an option to set the SRS of the Stage using the
-// IGEOLO field, but the GDAL C API doesn't provide an easy way to get
-// the SRS. (When we add this option, the default will be to use NITF.)
+// BUG: we should provide an option to set the SRS of the Stage using
+// the IGEOLO field.
 //
-// Need to test on all the other NITF LAS files
+// BUG: need to implement addDefaultDimensions() so it does what LAS
+// does.
 //
-// BUG: need to implement addDefaultDimensions() so it does what LAS does.
+// BUG: findIMSegment() allows "None" as an image type (for now, just
+// to support the autzen test input)
 //
-// BUG: findIMSegment() allows "None" as an image type (for now, just to
-// support the autzen test input)
-//
-// BUG: fix the reader test that asserts 80 pieces of metadata coming out
+
 
 void NitfReader::initialize()
 {
     NitfFile nitf(m_filename);
     nitf.open();
-    nitf.getLasPosition(m_offset, m_length);
+    nitf.getLasOffset(m_offset, m_length);
     nitf.extractMetadata(m_metadata);
     nitf.close();
     las::Reader::initialize();
 }
 
+
 void NitfReader::ready(PointContextRef ctx)
 {
+#if 0
+    // When combined with setting REQUIRE_LIDAR_SEGMENTS, this little
+    // snippet can be used to "pretend" there is a real LAS file
+    // embedded in the NITF file. (This is useful for testing the
+    // metadata parsing routines on non-lidar nitf test files.)
+    if (m_offset == 0 && m_length == 0)
+    {
+        m_filename = "./simple.las";
+        m_offset = 0;
+        m_length = 36437;
+    }
+#endif
     // Initialize the LAS stuff with its own metadata node.
     MetadataNode lasNode = m_metadata.add(las::Reader::getName());
     las::Reader::ready(ctx, lasNode);
@@ -133,7 +135,4 @@ void NitfReader::ready(PointContextRef ctx)
 } // namespace drivers
 } // namespace pdal
 
-#else // PDAL_HAVE_GDAL
-#include <pdal/drivers/nitf/Reader.hpp>
-#endif // PDAL_HAVE_GDAL
-
+#endif // PDAL_HAVE_NITRO

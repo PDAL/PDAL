@@ -38,6 +38,5 @@
 #include <pdal/pdal_config.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/StageFactory.hpp>
-#include <pdal/StageIterator.hpp>
 
 #endif

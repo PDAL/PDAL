@@ -66,7 +66,7 @@ void Random::addSwitches()
     ("output,o", po::value<std::string>(&m_outputFile)->default_value(""), "output file name")
     ("compress,z", po::value<bool>(&m_bCompress)->zero_tokens()->implicit_value(true), "Compress output data (if supported by output format)")
     ("count", po::value<boost::uint64_t>(&m_numPointsToWrite)->default_value(0), "How many points should we write?")
-    ("bounds", po::value<pdal::Bounds<double> >(&m_bounds), "Extent (in XYZ to clip output to)")
+    ("bounds", po::value<BOX3D>(&m_bounds), "Extent (in XYZ to clip output to)")
     ("mean", po::value< std::string >(&m_means), "A comma-separated or quoted, space-separated list of means (normal mode): \n--mean 0.0,0.0,0.0\n--mean \"0.0 0.0 0.0\"")
     ("stdev", po::value< std::string >(&m_stdevs), "A comma-separated or quoted, space-separated list of standard deviations (normal mode): \n--stdev 0.0,0.0,0.0\n--stdev \"0.0 0.0 0.0\"")
     ("distribution", po::value<std::string>(&m_distribution)->default_value("uniform"), "Distribution (uniform / normal)")
@@ -131,8 +131,8 @@ int Random::execute()
             readerOptions.add<double >("stdev_z", stdevs[2]);
         }
 
-        if (m_bounds.size())
-            readerOptions.add<Bounds<double> >("bounds", m_bounds);
+        if (!m_bounds.empty())
+            readerOptions.add<BOX3D >("bounds", m_bounds);
 
         if (boost::iequals(m_distribution, "uniform"))
             readerOptions.add<std::string>("mode", "uniform");

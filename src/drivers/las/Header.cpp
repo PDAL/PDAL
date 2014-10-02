@@ -204,8 +204,6 @@ bool LasHeader::valid() const
         return false;
     if (m_createYear < 1970 || m_createYear > 2100)
        return false;
-    if (!m_bounds.valid())
-        return false;
     return true;
 }
 
@@ -281,7 +279,7 @@ ILeStream& operator>>(ILeStream& in, LasHeader& h)
     double maxY, minY;
     double maxZ, minZ;
     in >> maxX >> minX >> maxY >> minY >> maxZ >> minZ;
-    h.m_bounds.set(minX, minY, minZ, maxX, maxY, maxZ);
+    h.m_bounds = BOX3D(minX, minY, minZ, maxX, maxY, maxZ);
 
     if (h.versionAtLeast(1, 3))
     {

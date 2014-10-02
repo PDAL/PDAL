@@ -47,7 +47,6 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/PointBuffer.hpp"
   "${PDAL_HEADERS_DIR}/PointContext.hpp"
   "${PDAL_HEADERS_DIR}/QuadIndex.hpp"
-  "${PDAL_HEADERS_DIR}/Range.hpp"
   "${PDAL_HEADERS_DIR}/RawPtBuf.hpp"
   "${PDAL_HEADERS_DIR}/Reader.hpp"
   "${PDAL_HEADERS_DIR}/SpatialReference.hpp"
@@ -58,7 +57,6 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/StreamFactory.hpp"
   "${PDAL_HEADERS_DIR}/UserCallback.hpp"
   "${PDAL_HEADERS_DIR}/Utils.hpp"
-  "${PDAL_HEADERS_DIR}/Vector.hpp"
   "${PDAL_HEADERS_DIR}/Writer.hpp"
   "${PDAL_HEADERS_DIR}/XMLSchema.hpp"
   "${PDAL_HEADERS_DIR}/third/nanoflann.hpp"
@@ -93,7 +91,6 @@ set(PDAL_BASE_CPP
   PipelineWriter.cpp
   PointBuffer.cpp
   QuadIndex.cpp
-  Range.cpp
   Reader.cpp
   SpatialReference.cpp
   Stage.cpp
@@ -101,7 +98,6 @@ set(PDAL_BASE_CPP
   StageInfo.cpp
   StreamFactory.cpp
   Utils.cpp
-  Vector.cpp
   Writer.cpp
   third/md5-pdal.c
   ${PDAL_XML_SRC}
@@ -109,6 +105,17 @@ set(PDAL_BASE_CPP
 
 list (APPEND PDAL_CPP ${PDAL_BASE_CPP} )
 list (APPEND PDAL_HPP ${PDAL_BASE_HPP} )
+
+#
+# drivers/buffer
+#
+set(PDAL_READER_PATH drivers/buffer)
+set(PDAL_READER_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_READER_PATH}")
+set(PDAL_DRIVERS_READER_HPP
+  "${PDAL_READER_HEADERS}/BufferReader.hpp"
+)
+
+list (APPEND PDAL_HPP ${PDAL_DRIVERS_READER_HPP} )
 
 #
 # drivers/faux
@@ -343,7 +350,7 @@ set(PDAL_DRIVERS_P2G_HPP
   "${PDAL_P2G_HEADERS}/P2gWriter.hpp"
 )
 
-set (PDAL_DRIVERS_P2G_CPP 
+set (PDAL_DRIVERS_P2G_CPP
   "${PDAL_P2G_SRC}/P2gWriter.cpp"
 )
 
@@ -367,7 +374,7 @@ if (PDAL_HAVE_PCL)
 	"${PDAL_PCD_HEADERS}/Writer.hpp"
     )
 
-    set (PDAL_DRIVERS_PCD_CPP 
+    set (PDAL_DRIVERS_PCD_CPP
 	"${PDAL_PCD_SRC}/Common.cpp"
 	"${PDAL_PCD_SRC}/Reader.cpp"
 	"${PDAL_PCD_SRC}/Writer.cpp"
@@ -407,17 +414,20 @@ set(PDAL_NITF_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_NITF_PATH}")
 set(PDAL_NITF_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_NITF_PATH}")
 
 set(PDAL_DRIVERS_NITF_READER_HPP
-  "${PDAL_NITF_SRC}/nitflib.h"
+  "${PDAL_NITF_SRC}/MetadataReader.hpp"
   "${PDAL_NITF_SRC}/NitfFile.hpp"
   "${PDAL_NITF_HEADERS}/Reader.hpp"
+  "${PDAL_NITF_SRC}/tre_plugins.hpp"
 )
 
 set (PDAL_DRIVERS_NITF_READER_CPP
+  "${PDAL_NITF_SRC}/MetadataReader.cpp"
   "${PDAL_NITF_SRC}/NitfFile.cpp"
   "${PDAL_NITF_SRC}/Reader.cpp"
+  "${PDAL_NITF_SRC}/tre_plugins.cpp"
 )
 
-if (GDAL_FOUND)
+if (NITRO_FOUND)
     list (APPEND PDAL_CPP ${PDAL_DRIVERS_NITF_READER_CPP} )
     list (APPEND PDAL_HPP ${PDAL_DRIVERS_NITF_READER_HPP} )
 endif()
@@ -565,6 +575,7 @@ set(PDAL_FILTERS_HPP
   "${PDAL_FILTERS_HEADERS}/Chipper.hpp"
   "${PDAL_FILTERS_HEADERS}/Crop.hpp"
   "${PDAL_FILTERS_HEADERS}/Decimation.hpp"
+  "${PDAL_FILTERS_HEADERS}/Ferry.hpp"
   "${PDAL_FILTERS_HEADERS}/HexBin.hpp"
   "${PDAL_FILTERS_HEADERS}/InPlaceReprojection.hpp"
   "${PDAL_FILTERS_HEADERS}/Merge.hpp"
@@ -579,6 +590,7 @@ set (PDAL_FILTERS_CPP
   "${PDAL_FILTERS_SRC}/Chipper.cpp"
   "${PDAL_FILTERS_SRC}/Crop.cpp"
   "${PDAL_FILTERS_SRC}/Decimation.cpp"
+  "${PDAL_FILTERS_SRC}/Ferry.cpp"
   "${PDAL_FILTERS_SRC}/HexBin.cpp"
   "${PDAL_FILTERS_SRC}/Reprojection.cpp"
   "${PDAL_FILTERS_SRC}/Splitter.cpp"

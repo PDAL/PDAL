@@ -67,19 +67,18 @@ Reader::Reader(const Options& options)
 
 void Reader::processOptions(const Options& options)
 {
-    Bounds<double> bounds = options.getValueOrDefault<Bounds<double>>("bounds",Bounds<double>(0,0,0,1,1,1));
-    const std::vector<Range<double>>& ranges = bounds.dimensions();
-    m_minX = ranges[0].getMinimum();
-    m_maxX = ranges[0].getMaximum();
-    m_minY = ranges[1].getMinimum();
-    m_maxY = ranges[1].getMaximum();
-    m_minZ = ranges[2].getMinimum();
-    m_maxZ = ranges[2].getMaximum();
+    BOX3D bounds = options.getValueOrDefault<BOX3D>("bounds",BOX3D(0,0,0,1,1,1));
+    m_minX = bounds.minx;
+    m_maxX = bounds.maxx;
+    m_minY = bounds.miny;
+    m_maxY = bounds.maxy;
+    m_minZ = bounds.minz;
+    m_maxZ = bounds.maxz;
 
     // For backward compatibility.
     if (m_count == 0)
         m_count = options.getValueOrThrow<point_count_t>("num_points");
-    
+
     m_mean_x = options.getValueOrDefault<double>("mean_x",0.0);
     m_mean_y = options.getValueOrDefault<double>("mean_y",0.0);
     m_mean_z = options.getValueOrDefault<double>("mean_z",0.0);

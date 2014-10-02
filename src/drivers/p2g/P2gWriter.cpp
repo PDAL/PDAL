@@ -152,8 +152,8 @@ void P2gWriter::write(const PointBuffer& buf)
 
     m_bounds = buf.calculateBounds();
 
-    m_GRID_SIZE_X = (int)(ceil((m_bounds.getMaximum(0) - m_bounds.getMinimum(0))/m_GRID_DIST_X)) + 1;
-    m_GRID_SIZE_Y = (int)(ceil((m_bounds.getMaximum(1) - m_bounds.getMinimum(1))/m_GRID_DIST_Y)) + 1;
+    m_GRID_SIZE_X = (int)(ceil((m_bounds.maxx - m_bounds.minx)/m_GRID_DIST_X)) + 1;
+    m_GRID_SIZE_Y = (int)(ceil((m_bounds.maxy - m_bounds.miny)/m_GRID_DIST_Y)) + 1;
 
     log()->get(LogLevel::Debug) << "X grid size: " << m_GRID_SIZE_X << std::endl;
     log()->get(LogLevel::Debug) << "Y grid size: " << m_GRID_SIZE_Y << std::endl;
@@ -169,10 +169,10 @@ void P2gWriter::write(const PointBuffer& buf)
                                        m_GRID_SIZE_X,
                                        m_GRID_SIZE_Y,
                                        m_RADIUS_SQ,
-                                       m_bounds.getMinimum(0),
-                                       m_bounds.getMaximum(0),
-                                       m_bounds.getMinimum(1),
-                                       m_bounds.getMaximum(1),
+                                       m_bounds.minx,
+                                       m_bounds.maxx,
+                                       m_bounds.miny,
+                                       m_bounds.maxy,
                                        m_fill_window_size));
     m_interpolator.swap(p);
 
@@ -188,8 +188,8 @@ void P2gWriter::write(const PointBuffer& buf)
     {
         double x = i->get<0>();
         double y = i->get<1>();
-        x = x - m_bounds.getMinimum(0);
-        y = y - m_bounds.getMinimum(1);
+        x = x - m_bounds.minx;
+        y = y - m_bounds.miny;
 
         rc = m_interpolator->update(x, y, i->get<2>());
         if (rc < 0)
@@ -199,13 +199,13 @@ void P2gWriter::write(const PointBuffer& buf)
     }
 
     double adfGeoTransform[6];
-    adfGeoTransform[0] = m_bounds.getMinimum(0);
+    adfGeoTransform[0] = m_bounds.minx;
     adfGeoTransform[1] = m_GRID_DIST_X;
     adfGeoTransform[2] = 0.0;
-    adfGeoTransform[3] = m_bounds.getMaximum(1);
+    adfGeoTransform[3] = m_bounds.maxy;
     adfGeoTransform[4] = 0.0;
     adfGeoTransform[5] = -1 * m_GRID_DIST_Y;
-    
+
     SpatialReference const& srs = getSpatialReference();
 
     if ((rc = m_interpolator->finish(const_cast<char*>(m_filename.c_str()), m_outputFormat, m_outputTypes, adfGeoTransform, srs.getWKT().c_str())) < 0)

@@ -44,7 +44,10 @@ table
 
 schema
   Database schema to write to. [Default: **public**]
-  
+
+capacity
+  How many points per patch? [Default: **400**]
+
 column
   Table column to put patches into. [Default: **pa**]
   
@@ -57,7 +60,10 @@ compression
   
 overwrite
   To drop the table before writing set to 'true'. To append to the table set to 'false'. [Default: **true**]
-  
+
+pack_ignored_fields
+  Remove ignored fields from schema before creating schema object in pointcloud_schemas. [Default: **true**]
+
 srid
   Spatial reference ID (relative to the `spatial_ref_sys` table in PostGIS) to store with the point cloud schema. [Default: **4326**]
   

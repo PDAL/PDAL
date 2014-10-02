@@ -42,10 +42,27 @@
 #include <pdal/GlobalEnvironment.hpp>
 
 #ifdef PDAL_HAVE_NITRO
+
+#ifdef PDAL_COMPILER_GCC
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wredundant-decls"
+#  pragma GCC diagnostic ignored "-Wfloat-equal"
+#  pragma GCC diagnostic ignored "-Wextra"
+#  pragma GCC diagnostic ignored "-Wcast-qual"
+   // The following pragma doesn't actually work:
+   //   https://gcc.gnu.org/bugzilla/show_bug.cgi?id=61653
+#  pragma GCC diagnostic ignored "-Wliteral-suffix"
+#endif
+
 #define IMPORT_NITRO_API
 #include <nitro/c++/import/nitf.hpp>
-#include <nitro/c++/except/Trace.h>
+
+#ifdef PDAL_COMPILER_GCC
+#  pragma GCC diagnostic pop
 #endif
+
+#endif
+
 // NOTES
 //
 // is it legal to write a LAZ file?
@@ -66,13 +83,15 @@ void Writer::processOptions(const Options& options)
     m_cLevel = options.getValueOrDefault<std::string>("CLEVEL","03");
     m_sType = options.getValueOrDefault<std::string>("STYPE","BF01");
     m_oStationId = options.getValueOrDefault<std::string>("OSTAID","PDAL");
-    m_fileTitle = options.getValueOrDefault<std::string>("FTITLE","FTITLE");
+    m_fileTitle = options.getValueOrDefault<std::string>("FTITLE",m_filename);
     m_fileClass = options.getValueOrDefault<std::string>("FSCLAS","U");
     m_origName = options.getValueOrDefault<std::string>("ONAME","");
     m_origPhone = options.getValueOrDefault<std::string>("OPHONE","");
     m_securityClass = options.getValueOrDefault<std::string>("FSCLAS","U");
     m_imgSecurityClass = options.getValueOrDefault<std::string>("FSCLAS","U");
     m_imgDate = getOptions().getValueOrDefault<std::string>("IDATIM", "");
+    m_sic = getOptions().getValueOrDefault<std::string>("FSCLTX", "");
+    m_igeolob = getOptions().getValueOrDefault<std::string>("GEOLOB", "");
 }
 
 
@@ -97,6 +116,7 @@ void Writer::done(PointContextRef ctx)
         header.getBackgroundColor().setRawData(const_cast<char*>("000"), 3);
         header.getOriginatorName().set(m_origName);
         header.getOriginatorPhone().set(m_origPhone);
+        header.getSecurityGroup().getClassificationText().set(m_sic);
 
         ::nitf::DESegment des = record.newDataExtensionSegment();
 
@@ -112,6 +132,7 @@ void Writer::done(PointContextRef ctx)
         ::nitf::Field fld = usrHdr.getField("raw_data");
         fld.setType(::nitf::Field::BINARY);
 
+        flush();
         m_oss.flush();
         std::streambuf *buf = m_oss.rdbuf();
         long size = buf->pubseekoff(0, m_oss.end);

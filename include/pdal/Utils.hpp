@@ -141,7 +141,7 @@ public:
     {
         return (r > 0.0) ? floor(r + 0.5) : ceil(r - 0.5);
     }
-    
+
     static inline std::vector<boost::uint8_t>hex_string_to_binary(std::string const& source)
     {
         // Stolen from http://stackoverflow.com/questions/7363774/c-converting-binary-data-to-a-hex-string-and-back
@@ -195,9 +195,9 @@ public:
             return std::numeric_limits<Target>::max();
         }
     }
-    
-    static void* registerPlugin( void* stageFactoryPtr, 
-                                std::string const& filename, 
+
+    static void* registerPlugin( void* stageFactoryPtr,
+                                std::string const& filename,
                                 std::string const& registerMethodName,
                                 std::string const& versionMethodName);
 
@@ -228,25 +228,25 @@ public:
         { return base64_encode(bytes.data(), bytes.size()); }
     static std::string base64_encode(const unsigned char *buf, size_t size);
     static std::vector<boost::uint8_t> base64_decode(std::string const& input);
-    
+
     static FILE* portable_popen(const std::string& command,
         const std::string& mode);
     static int portable_pclose(FILE* fp);
     static int run_shell_command(const std::string& cmd, std::string& output);
-   
-    static std::string replaceAll(std::string result, 
-                                  const std::string& replaceWhat, 
+
+    static std::string replaceAll(std::string result,
+                                  const std::string& replaceWhat,
                                   const std::string& replaceWithWhat);
-    static void wordWrap(std::string const& inputString, 
-                         std::vector<std::string>& outputString, 
+    static void wordWrap(std::string const& inputString,
+                         std::vector<std::string>& outputString,
                          unsigned int lineLength);
-    static std::string& escapeJSON(std::string &s);
+    static std::string escapeJSON(const std::string &s);
     static std::string demangle(const std::string& s);
 
     template<typename T>
     static std::string typeidName()
         { return Utils::demangle(typeid(T).name()); }
- 
+
 private:
     template<typename T>
     static inline char* as_buffer(T& data)

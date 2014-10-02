@@ -587,30 +587,34 @@ string Utils::replaceAll(string result, const string& replaceWhat,
     return result;
 }
 
-// Stolen from http://stackoverflow.com/questions/7724448/simple-json-string-escape-for-c/11969098#11969098
-
-std::string & Utils::escapeJSON(string &str)
+// Adapted from http://stackoverflow.com/a/11969098.
+std::string Utils::escapeJSON(const string &str)
 {
-    str.erase
+    std::string escaped(str);
+
+    escaped.erase
     (
         remove_if
         (
-            str.begin(),
-            str.end(),
+            escaped.begin(),
+            escaped.end(),
             [](const char c)
             {
                 return (c <= 31);
             }
         ),
-        str.end()
+        escaped.end()
     );
-    size_t pos=0;
-    while((pos=str.find_first_of("\"\\/", pos))!=string::npos)
+
+    size_t pos(0);
+
+    while((pos = escaped.find_first_of("\"\\/", pos)) != string::npos)
     {
-        str.insert(pos, "\\");
-        ++++pos;
+        escaped.insert(pos, "\\");
+        pos += 2;
     }
-    return str;
+
+    return escaped;
 }
 
 /// Break a string into a list of strings, none of which exceeds a specified
@@ -618,7 +622,7 @@ std::string & Utils::escapeJSON(string &str)
 /// \param[in] inputString  String to split
 /// \param[out] outputString  Vector of strings split from inputString
 /// \param[in] lineLength  Maximum length of any of the output strings
-void Utils::wordWrap(string const& inputString, vector<string>& outputString, 
+void Utils::wordWrap(string const& inputString, vector<string>& outputString,
     unsigned int lineLength)
 {
     // stolen from http://stackoverflow.com/questions/5815227/fix-improve-word-wrap-function

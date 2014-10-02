@@ -73,16 +73,9 @@ void SummaryData::addPoint(double x, double y, double z, int returnNumber)
 }
 
 
-pdal::Bounds<double> SummaryData::getBounds() const
+BOX3D SummaryData::getBounds() const
 {
-    pdal::Bounds<double> output;
-    output.setMinimum(0, m_minX);
-    output.setMinimum(1, m_minY);
-    output.setMinimum(2, m_minZ);
-    
-    output.setMaximum(0, m_maxX);
-    output.setMaximum(1, m_maxY);
-    output.setMaximum(2, m_maxZ);
+    BOX3D output(m_minX, m_minY, m_minZ, m_maxX, m_maxY, m_maxZ);
     return output;
 }
 

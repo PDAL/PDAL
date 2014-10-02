@@ -120,7 +120,8 @@ includes are:
 * `LASzip`_ support in :ref:`drivers.las.reader` and :ref:`drivers.las.writer`
 * Interpolation with `Points2Grid`_ using :ref:`drivers.p2g.writer`
 * Python manipulation using :ref:`filters.predicate` and :ref:`filters.programmable`
-* `PCL`_ support via :ref:`filters.pclblock`
+* `PCL`_ support via :ref:`filters.pclblock`, :ref:`drivers.pcd.reader`,
+  :ref:`drivers.pcd.writer`, :ref:`ground_command`, and :ref:`pcl_command`
 
 Head to :ref:`pipeline` for more information on using PDAL pipelines. Two pipelines 
 are provided in ``/home/vagrant`` that are used to load the ``st-helens-small.las`` 

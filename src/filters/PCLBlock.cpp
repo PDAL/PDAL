@@ -75,7 +75,7 @@ PointBufferSet PCLBlock::run(PointBufferPtr input)
         input->getFieldAs<double>(Dimension::Id::Z, 0) << std::endl;
     log()->get(LogLevel::Debug2) << "Process PCLBlock..." << std::endl;
 
-    Bounds<double> const& buffer_bounds = input->calculateBounds();
+    BOX3D const& buffer_bounds = input->calculateBounds();
 
     // convert PointBuffer to PointNormal
     typedef pcl::PointCloud<pcl::PointNormal> Cloud;
@@ -119,7 +119,7 @@ PointBufferSet PCLBlock::run(PointBufferPtr input)
     // PDALtoPCD subtracts min values in each XYZ dimension to prevent rounding
     // errors in conversion to float. These offsets need to be conveyed to the
     // pipeline to offset any bounds entered as part of a PassThrough filter.
-    pipeline.setOffsets(buffer_bounds.getMinimum(0), buffer_bounds.getMinimum(1), buffer_bounds.getMinimum(2));
+    pipeline.setOffsets(buffer_bounds.minx, buffer_bounds.miny, buffer_bounds.minz);
 
     // create PointCloud for results
     Cloud::Ptr cloud_f(new Cloud);
@@ -137,7 +137,7 @@ PointBufferSet PCLBlock::run(PointBufferPtr input)
         cloud_f->points.size() << " after" << std::endl;
     log()->get(LogLevel::Debug2) << output->size() << std::endl;
     log()->get(LogLevel::Debug2) << output->getFieldAs<double>(Dimension::Id::X, 0) << ", " <<
-        output->getFieldAs<double>(Dimension::Id::Y, 0) << ", " << 
+        output->getFieldAs<double>(Dimension::Id::Y, 0) << ", " <<
         output->getFieldAs<double>(Dimension::Id::Z, 0) << std::endl;
     return pbSet;
 }
