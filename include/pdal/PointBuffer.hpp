@@ -381,7 +381,7 @@ void PointBuffer::setField(pdal::Dimension const& dim, PointId idx, T val)
                 switch (size)
                 {
                     case 1:
-                        convertAndSet<T, int8_t>(dim, idx, val);
+                        setFieldInternal(dim, idx, &val);
                         break;
                     case 2:
                         convertAndSet<T, int16_t>(dim, idx, val);
@@ -399,7 +399,7 @@ void PointBuffer::setField(pdal::Dimension const& dim, PointId idx, T val)
                 switch (size)
                 {
                     case 1:
-                        convertAndSet<T, uint8_t>(dim, idx, val);
+                        setFieldInternal(dim, idx, &val);
                         break;
                     case 2:
                         convertAndSet<T, uint16_t>(dim, idx, val);
