@@ -42,7 +42,14 @@
 
 // gdal
 #ifdef PDAL_HAVE_GDAL
+#  ifdef PDAL_COMPILER_CLANG
+#    pragma clang diagnostic push
+#    pragma clang diagnostic ignored "-Wfloat-equal"
+#  endif
 #include <ogr_spatialref.h>
+#  ifdef PDAL_COMPILER_CLANG
+#    pragma clang diagnostic pop
+#  endif
 #include <cpl_conv.h>
 #endif
 
@@ -320,4 +327,3 @@ std::istream& operator>>(std::istream& istr, SpatialReference& srs)
 }
 
 } // namespace pdal
-
