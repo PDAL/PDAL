@@ -104,6 +104,7 @@
 #ifdef PDAL_HAVE_PCL
 #include <pdal/drivers/pcd/Reader.hpp>
 #include <pdal/drivers/pcd/Writer.hpp>
+#include <pdal/drivers/pclvisualizer/PCLVisualizer.hpp>
 #endif
 
 #ifdef PDAL_HAVE_SQLITE

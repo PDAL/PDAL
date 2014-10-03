@@ -1,6 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2013, Howard Butler (hobu.inc@gmail.com)
-* Copyright (c) 2014, Bradley J Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2014, Brad Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -33,19 +32,53 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+#include <pdal/drivers/pclvisualizer/PCLVisualizer.hpp>
 
-#include "Application.hpp"
-#include "Delta.hpp"
-#include "Diff.hpp"
-#include "Info.hpp"
-#include "Pipeline.hpp"
-#include "Random.hpp"
-#include "Support.hpp"
-#include "Translate.hpp"
+#include <boost/thread/thread.hpp>
 
-#ifdef PDAL_HAVE_PCL
-#include "Ground.hpp"
-#include "PCL.hpp"
-#include "View.hpp"
-#endif
+#include <pcl/io/pcd_io.h>
+#include <pcl/visualization/pcl_visualizer.h>
+
+#include <pdal/PCLConversions.hpp>
+#include <pdal/PointBuffer.hpp>
+
+namespace pdal
+{
+namespace drivers
+{
+namespace pclvisualizer
+{
+
+
+void PclVisualizer::write(const PointBuffer& data)
+{
+    // Determine XYZ bounds
+    BOX3D const& buffer_bounds = data.calculateBounds();
+
+    // Convert PointBuffer to a PCL PointCloud
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+    pdal::PDALtoPCD(const_cast<PointBuffer&>(data), *cloud, buffer_bounds);
+
+    // Create PCLVisualizer
+    boost::shared_ptr<pcl::visualization::PCLVisualizer> p(new pcl::visualization::PCLVisualizer("3D Viewer"));
+
+    // Set background to black
+    p->setBackgroundColor(0, 0, 0);
+
+    // Use Z dimension to colorize points
+    pcl::visualization::PointCloudColorHandlerGenericField<pcl::PointXYZ> color(cloud, "z");
+
+    // Add point cloud to the viewer with the Z dimension color handler
+    p->addPointCloud<pcl::PointXYZ> (cloud, color, "cloud");
+
+    while (!p->wasStopped())
+    {
+        p->spinOnce(100);
+        boost::this_thread::sleep(boost::posix_time::microseconds(100000));
+    }
+}
+
+
+}
+}
+} // namespaces

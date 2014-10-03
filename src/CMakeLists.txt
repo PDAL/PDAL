@@ -394,6 +394,28 @@ if (PDAL_HAVE_PCL)
 endif()
 
 #
+# drivers/pclvisualizer
+#
+if (PDAL_HAVE_PCL)
+    set(PDAL_PCL_VISUALIZER_PATH drivers/pclvisualizer)
+    set(PDAL_PCL_VISUALIZER_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_PCL_VISUALIZER_PATH}")
+    set(PDAL_PCL_VISUALIZER_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_PCL_VISUALIZER_PATH}")
+
+    set(PDAL_DRIVERS_PCL_VISUALIZER_HPP
+        "${PDAL_PCL_VISUALIZER_HEADERS}/PCLVisualizer.hpp"
+    )
+
+    set (PDAL_DRIVERS_PCL_VISUALIZER_CPP
+        "${PDAL_PCL_VISUALIZER_SRC}/PCLVisualizer.cpp"
+    )
+
+    if (WITH_PCL OR WITH_STUBS)
+        list (APPEND PDAL_CPP ${PDAL_DRIVERS_PCL_VISUALIZER_CPP} )
+	list (APPEND PDAL_HPP ${PDAL_DRIVERS_PCL_VISUALIZER_HPP} )
+    endif(WITH_PCL OR WITH_STUBS)
+endif()
+
+#
 # drivers/text
 #
 set(PDAL_TEXT_PATH drivers/text)
@@ -730,12 +752,14 @@ if (PDAL_HAVE_PCL)
 	${PDAL_KERNEL_HEADERS}/Ground.hpp
 	${PDAL_KERNEL_HEADERS}/PCL.hpp
 	${PDAL_FILTERS_HEADERS}/PCLBlock.hpp
+	${PDAL_KERNEL_HEADERS}/View.hpp
     )
 
     set(PDAL_PCL_CPP
 	${PDAL_FILTERS_SRC}/PCLBlock.cpp
 	${PDAL_KERNEL_SRC}/Ground.cpp
 	${PDAL_KERNEL_SRC}/PCL.cpp
+	${PDAL_KERNEL_SRC}/View.cpp
     )
 
     if (WITH_PCL OR WITH_STUBS)
