@@ -74,15 +74,6 @@ void Writer::construct()
 }
 
 
-Writer::~Writer()
-{
-#ifdef PDAL_HAVE_LASZIP
-    m_zipper.reset();
-    m_zipPoint.reset();
-#endif
-}
-
-
 void Writer::flush()
 {
 #ifdef PDAL_HAVE_LASZIP
@@ -452,12 +443,14 @@ void Writer::fillHeader(PointContextRef ctx)
 void Writer::readyCompression()
 {
 #ifdef PDAL_HAVE_LASZIP
-    //ABELL - Why are we passing the pointFormat if it's in the header?
-    m_zipPoint.reset(new ZipPoint(m_lasHeader.pointFormat(), m_lasHeader,
-        false);
+    m_zipPoint.reset(new ZipPoint(m_lasHeader.pointFormat(),
+        m_lasHeader.pointLen()));
     m_zipper.reset(new LASzipper());
 
-    if (!m_zipper->open(m_ostream, m_zipPoint->GetZipper()))
+    std::vector<uint8_t> data = m_zipPoint->vlrData();
+    addVlr(LASZIP_USER_ID, LASZIP_RECORD_ID, "http://laszip.org", data);
+
+    if (!m_zipper->open(*m_ostream, m_zipPoint->GetZipper()))
     {
         std::ostringstream oss;
         const char* err = m_zipper->get_error();
@@ -596,21 +589,27 @@ void Writer::write(const PointBuffer& pointBuffer)
 
         //Buffer is complete.
 
-        // If we're going to compress, do it.
 #ifdef PDAL_HAVE_LASZIP
-        for (unsigned i = 0; i < m_zipPoint->m_lz_point_size; i++)
-            m_zipPoint->m_lz_point_data[i] = buf[i];
-        if (!m_zipper->write(m_zipPoint->m_lz_point))
+        if (m_lasHeader.compressed())
         {
-            std::ostringstream oss;
-            const char* err = m_zipper->get_error();
-            if (err == NULL)
-                err = "(unknown error)";
-            oss << "Error writing point: " << std::string(err);
-            throw pdal_error(oss.str());
+            // If we're going to compress, do it.
+            for (unsigned i = 0; i < m_zipPoint->m_lz_point_size; i++)
+                m_zipPoint->m_lz_point_data[i] = buf[i];
+            if (!m_zipper->write(m_zipPoint->m_lz_point))
+            {
+                std::ostringstream oss;
+                const char* err = m_zipper->get_error();
+                if (err == NULL)
+                    err = "(unknown error)";
+                oss << "Error writing point: " << std::string(err);
+                throw pdal_error(oss.str());
+            }
         }
-#endif
+        else
+           m_ostream->write(buf.data(), buf.size());
+#else
         m_ostream->write(buf.data(), buf.size());
+#endif
         ++numValidPoints;
 
         double xValue = pointBuffer.getFieldAs<double>(Id::X, idx);
@@ -645,6 +644,10 @@ void Writer::done(PointContextRef ctx)
     m_lasHeader.setSummary(m_summaryData);
     out.seek(m_streamOffset);
     out << m_lasHeader;
+#ifdef PDAL_HAVE_LASZIP
+    m_zipper.reset();
+    m_zipPoint.reset();
+#endif
     FileUtils::closeFile(m_ostream);
 }
 

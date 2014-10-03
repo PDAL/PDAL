@@ -34,52 +34,47 @@
 
 #pragma once
 
+#include <vector>
+
 #ifdef PDAL_HAVE_LASZIP
 #include <laszip/laszip.hpp>
 #include <laszip/lasunzipper.hpp>
 #include <laszip/laszipper.hpp>
 #endif
 
-#include <pdal/drivers/las/Header.hpp>
-
-#include <boost/scoped_array.hpp>
-
-#include <vector>
-
-namespace pdal {
-namespace drivers {
-namespace las {
+namespace pdal
+{
+namespace drivers
+{
+namespace las
+{
 
 #ifdef PDAL_HAVE_LASZIP
+
 class VariableLengthRecord;
 
 class ZipPoint
 {
 public:
-    ZipPoint(PointFormat, const LasHeader& lasHeader, bool isReadMode);
+    ZipPoint(VariableLengthRecord *lasHeader);
+    ZipPoint(uint8_t format, uint16_t pointLen);
     ~ZipPoint();
 
-    VariableLengthRecord ConstructVLR() const;
-
-    bool IsZipVLR(const VariableLengthRecord& vlr) const;
-    
-    LASzip* GetZipper() const { return m_zip.get(); }
+    std::vector<uint8_t> vlrData() const;
+    LASzip* GetZipper() const
+        { return m_zip.get(); }
     
 private:
-    void ConstructItems();
-
-public: // for now
-    // LASzip::pack() allocates/sets vlr_data and vlr_num for us, and deletes it for us  ["his"]
-    // LASzip::unpack() just reads from the vlr_data we give it (we allocate and delete)  ["our"]
-    bool m_readMode;
-    int his_vlr_num;
-    unsigned char* his_vlr_data;
-
     std::unique_ptr<LASzip> m_zip;
 
+//ABELL - This block should be made private.
+public:
     unsigned char** m_lz_point;
-    boost::scoped_array<boost::uint8_t> m_lz_point_data;
     unsigned int m_lz_point_size;
+    std::vector<uint8_t> m_lz_point_data;
+
+private:
+    void ConstructItems();
 };
 #else // PDAL_HAVE_LASZIP
 // The types here just need to be something suitable for a smart pointer.

@@ -73,7 +73,6 @@ public:
 
     Writer(const Options&);
     Writer(const Options&, std::ostream *);
-    virtual ~Writer();
 
     static Options getDefaultOptions();
 

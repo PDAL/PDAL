@@ -32,24 +32,15 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <sstream>
+#include <string.h>
+
 #include <pdal/pdal_internal.hpp>
 
 #ifdef PDAL_HAVE_LASZIP
 
-#include <laszip/laszip.hpp>
-#include <laszip/laszipper.hpp>
-
 #include <pdal/drivers/las/VariableLengthRecord.hpp>
 #include <pdal/drivers/las/ZipPoint.hpp>
-#include <string.h>
-
-
-// std
-//#include <vector>
-//#include <fstream>
-//#include <stdexcept>
-//#include <cstdlib> // std::size_t
-//#include <cassert>
 
 namespace pdal
 {
@@ -58,73 +49,37 @@ namespace drivers
 namespace las
 {
 
-static const char* laszip_userid("laszip encoded");
-static boost::uint16_t laszip_recordid = 22204;
-static const char* laszip_description = "http://laszip.org";
-
-
-ZipPoint::ZipPoint(PointFormat format, const LasHeader& lasHeader,
-                   bool isReadMode)
-    : m_readMode(isReadMode)
-    , his_vlr_num(0)
-    , his_vlr_data(0)
-    , m_lz_point(NULL)
-    , m_lz_point_size(0)
+// Read-mode ctor.
+ZipPoint::ZipPoint(VariableLengthRecord *vlr) :
+    m_zip(new LASzip()), m_lz_point(NULL), m_lz_point_size(0)
 {
-    std::unique_ptr<LASzip> s(new LASzip());
-    m_zip.swap(s);
-
-    const VariableLengthRecord* vlr = NULL;
-    auto vlrs = lasHeader.getVLRs().getAll();
-    // Find the LASZip VLR
-    for (std::vector<VariableLengthRecord>::size_type i=0; i<vlrs.size(); i++)
+    if (!vlr || m_zip->unpack((unsigned char *)vlr->data(), vlr->dataLen()))
     {
-        const VariableLengthRecord& p = vlrs[i];
-        if (IsZipVLR(p))
-        {
-            vlr = &p;
-            break;
-        }
+        std::ostringstream oss;
+        const char* err = m_zip->get_error();
+        if (err == NULL) 
+            err = "(unknown error)";
+        oss << "Error unpacking zip VLR data: " << std::string(err);
+        throw pdal_error(oss.str());
     }
+    ConstructItems();
+}
 
-    // If we found it...
-    if (vlr)
+
+// Write-mode ctor.
+ZipPoint::ZipPoint(uint8_t format, uint16_t pointLen) :
+    m_zip(new LASzip()), m_lz_point(NULL), m_lz_point_size(0)
+{
+    if (!m_zip->setup(format, pointLen))
     {
-        if (!m_zip->unpack(&(vlr->getBytes()[0]), vlr->getLength()))
-        {
-            std::ostringstream oss;
-            const char* err = m_zip->get_error();
-            if (err == NULL) 
-                err = "(unknown error)";
-            oss << "Error unpacking zip VLR data: " << std::string(err);
-            throw pdal_error(oss.str());
-        }
-
+        std::ostringstream oss;
+        const char* err = m_zip->get_error();
+        if (err == NULL)
+            err = "(unknown error)";
+        oss << "Error setting up LASzip for format " << format << ": " <<
+            err;
+        throw pdal_error(oss.str());
     }
-    else
-    {
-        // We always expect a ZIP VLR when we are reading a LAZ file."
-        if (m_readMode)
-        {
-            std::ostringstream oss;
-            oss << "Unable to find LASzip VLR, but the file was opened "
-                "in read mode!";
-            throw pdal_error(oss.str());
-        }
-
-        // Must be write-mode.
-        if (!m_zip->setup((boost::uint8_t)format, lasHeader.getPointDataSize()))
-        {
-            std::ostringstream oss;
-            const char* err = m_zip->get_error();
-            if (err == NULL)
-                err = "(unknown error)";
-            oss << "Error setting up LASzip for format " << format << ": " <<
-                err;
-            throw pdal_error(oss.str());
-        }
-    }
-
     ConstructItems();
 }
 
@@ -143,60 +98,33 @@ void ZipPoint::ConstructItems()
     m_lz_point_size = 0;
     for (unsigned int i = 0; i < m_zip->num_items; i++)
         m_lz_point_size += m_zip->items[i].size;
-
     // create the point data
     unsigned int point_offset = 0;
     m_lz_point = new unsigned char*[m_zip->num_items];
 
-    boost::scoped_array<boost::uint8_t> d(new boost::uint8_t[ m_lz_point_size ]);
-    m_lz_point_data.swap(d);
+    m_lz_point_data.resize(m_lz_point_size);
     for (unsigned i = 0; i < m_zip->num_items; i++)
     {
         m_lz_point[i] = &(m_lz_point_data[point_offset]);
         point_offset += m_zip->items[i].size;
     }
-
-    assert(point_offset == m_lz_point_size);
-    return;
 }
 
 
-VariableLengthRecord ZipPoint::ConstructVLR() const
+std::vector<uint8_t> ZipPoint::vlrData() const
 {
-    unsigned char* data;
+    // This puts a bunch of data into an array of data pointed to by 'data',
+    // suitable for storage in a VLR.
+    uint8_t* data;
     int num;
     m_zip->pack(data, num);
-
-    if (num > (std::numeric_limits<boost::uint16_t>::max)())
-    {
-        std::ostringstream oss;
-        size_t overrun = num - (size_t)(std::numeric_limits<uint16_t>::max)());
-        oss << "The size of the LASzip VLR, " << num << ", is " << overrun <<
-            " bytes too large to fit inside the maximum size of a "
-            "VLR which is " << (std::numeric_limits<boost::uint16_t>::max)() <<
-            " bytes.";
-        throw std::runtime_error(oss.str());
-    }
-
-    VariableLengthRecord vlr(0xAABB,
-                             laszip_userid,
-                             laszip_recordid,
-                             laszip_description,
-                             data,
-                             num);
-    return vlr;
+    return std::vector<uint8_t>(data, data + num);
 }
 
-
-bool ZipPoint::IsZipVLR(const VariableLengthRecord& vlr) const
-{
-    return (laszip_userid == vlr.getUserId() &&
-        laszip_recordid == vlr.getRecordId());
-}
-
-
-}
-}
-} // namespaces
+} // namespace las
+} // namespace drivers
+} // namespace pdal
 
 #endif // PDAL_HAVE_LASZIP
+
+

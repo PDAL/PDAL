@@ -53,9 +53,11 @@ static const int WKT_RECORD_ID = 2112;
 static const uint16_t GEOTIFF_DIRECTORY_RECORD_ID = 34735;
 static const uint16_t GEOTIFF_DOUBLES_RECORD_ID = 34376;
 static const uint16_t GEOTIFF_ASCII_RECORD_ID = 34737;
+static const uint16_t LASZIP_RECORD_ID = 22204;
 
 static const char TRANSFORM_USER_ID[] = "LASF_Projection";
 static const char LIBLAS_USER_ID[] = "liblas";
+static const char LASZIP_USER_ID[] = "laszip encoded";
 
 class VariableLengthRecord;
 typedef std::vector<VariableLengthRecord> VlrList;

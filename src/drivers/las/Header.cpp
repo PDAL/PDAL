@@ -265,6 +265,8 @@ ILeStream& operator>>(ILeStream& in, LasHeader& h)
         h.m_pointOffset >> h.m_vlrCount >> h.m_pointFormat >>
         h.m_pointLen >> legacyPointCount;
     h.m_pointCount = legacyPointCount;
+    if (h.m_pointFormat & 0x80)
+        h.setCompressed(true);
     
     for (size_t i = 0; i < LasHeader::LEGACY_RETURN_COUNT; ++i)
     {
@@ -314,8 +316,13 @@ OLeStream& operator<<(OLeStream& out, const LasHeader& h)
     out << (uint8_t)1 << h.m_versionMinor;
     out.put(h.m_systemId, 32);
     out.put(h.m_softwareId, 32);
+
+    uint8_t pointFormat = h.m_pointFormat;
+    if (h.compressed())
+        pointFormat |= 0x80;
+
     out << h.m_createDOY << h.m_createYear << h.m_vlrOffset <<
-        h.m_pointOffset << h.m_vlrCount << h.m_pointFormat <<
+        h.m_pointOffset << h.m_vlrCount << pointFormat <<
         h.m_pointLen << legacyPointCount;
 
     for (size_t i = 0; i < LasHeader::LEGACY_RETURN_COUNT; ++i)

@@ -108,21 +108,14 @@ void Reader::ready(PointContext ctx, MetadataNode& m)
     if (m_lasHeader.compressed())
     {
 #ifdef PDAL_HAVE_LASZIP
-        if (!m_zipPoint)
-        {
-            PointFormat format = m_lasHeader.getPointFormat();
-            std::unique_ptr<ZipPoint> z(new ZipPoint(format,
-                m_lasHeader, true));
-            m_zipPoint.swap(z);
-        }
+        VariableLengthRecord *vlr = findVlr(LASZIP_USER_ID, LASZIP_RECORD_ID);
+        m_zipPoint.reset(new ZipPoint(vlr));
 
         if (!m_unzipper)
         {
-            std::unique_ptr<LASunzipper> z(new LASunzipper());
-            m_unzipper.swap(z);
+            m_unzipper.reset(new LASunzipper());
 
-            m_istream->seekg(static_cast<std::streampos>(
-                        m_lasHeader.GetDataOffset()), std::ios::beg);
+            m_istream->seekg(m_lasHeader.pointOffset(), std::ios::beg);
             if (!m_unzipper->open(*m_istream, m_zipPoint->GetZipper()))
             {
                 std::ostringstream oss;
@@ -246,29 +239,27 @@ void Reader::fixupVlrs()
     char zeros[8] = {};
 
     // There is currently only one fixup - for the geotiff directory VLR.
-    for (auto vi = m_vlrs.begin(); vi != m_vlrs.end(); ++vi)
+    VariableLengthRecord *vlr =
+        findVlr(TRANSFORM_USER_ID, GEOTIFF_DIRECTORY_RECORD_ID);
+    if (vlr)
     {
-        VariableLengthRecord& vlr = *vi;
-        if (vlr.matches(TRANSFORM_USER_ID, GEOTIFF_DIRECTORY_RECORD_ID))
+        while (vlr->dataLen() > 8)
         {
-            while (vlr.dataLen() > 8)
-            {
-                // If the key at the end has a zero value, remove it
-                // by resizing the array and decrementing the size.
-                char *testPos = vlr.data() + vlr.dataLen() - KEY_SIZE;
-                if (memcmp(zeros, testPos, KEY_SIZE))
-                   break;
-                uint16_t size;
-                vlr.setDataLen(vlr.dataLen() - 8);
+            // If the key at the end has a zero value, remove it
+            // by resizing the array and decrementing the size.
+            char *testPos = vlr->data() + vlr->dataLen() - KEY_SIZE;
+            if (memcmp(zeros, testPos, KEY_SIZE))
+                break;
+            uint16_t size;
+            vlr->setDataLen(vlr->dataLen() - 8);
 
-                // Reduce the size of the data by one.  The size field is
-                // at offset 6 from the beginning of the data.
-                memcpy((void *)&size, vlr.data() + 6, 2);
-                size = le16toh(size);
-                size--;
-                size = htole16(size);
-                memcpy((void *)(vlr.data()  + 6), &size, 2);
-            }
+            // Reduce the size of the data by one.  The size field is
+            // at offset 6 from the beginning of the data.
+            memcpy((void *)&size, vlr->data() + 6, 2);
+            size = le16toh(size);
+            size--;
+            size = htole16(size);
+            memcpy((void *)(vlr->data()  + 6), &size, 2);
         }
     }
 }
@@ -286,35 +277,45 @@ void Reader::setSrsFromVlrs(MetadataNode& m)
 }
 
 
-bool Reader::setSrsFromWktVlr(MetadataNode& m)
+VariableLengthRecord *Reader::findVlr(const std::string& userId,
+    uint16_t recordId)
 {
     for (auto vi = m_vlrs.begin(); vi != m_vlrs.end(); ++vi)
     {
         VariableLengthRecord& vlr = *vi;
-        if (vlr.matches(LIBLAS_USER_ID, WKT_RECORD_ID) ||
-            vlr.matches(TRANSFORM_USER_ID, WKT_RECORD_ID))
-        {
-            SpatialReference srs;
-
-            // Per spec, should never happen, but prevents errors below.
-            if (vlr.dataLen() == 0)
-                return false;
-
-            // There is supposed to be a NULL byte at the end of the data,
-            // but sometimes there isn't because some people don't follow the
-            // rules.  If there is a NULL byte, don't stick it in the
-            // wkt string.
-            size_t len = vlr.dataLen();
-            char *c = vlr.data() + len - 1;
-            if (*c == 0)
-                len--;
-            std::string wkt(vlr.data(), len);
-            srs.setWKT(wkt);
-            setSpatialReference(m, srs);
-            return true;
-        }
+        if (vlr.matches(userId, recordId))
+            return &vlr;
     }
-    return false;
+    return NULL;
+}
+
+
+bool Reader::setSrsFromWktVlr(MetadataNode& m)
+{
+    VariableLengthRecord *vlr = findVlr(TRANSFORM_USER_ID, WKT_RECORD_ID);
+    if (!vlr)
+        vlr = findVlr(LIBLAS_USER_ID, WKT_RECORD_ID);
+    if (!vlr)
+        return false;
+
+    SpatialReference srs;
+
+    // Per spec, should never happen, but prevents errors below.
+    if (vlr->dataLen() == 0)
+        return false;
+
+    // There is supposed to be a NULL byte at the end of the data,
+    // but sometimes there isn't because some people don't follow the
+    // rules.  If there is a NULL byte, don't stick it in the
+    // wkt string.
+    size_t len = vlr->dataLen();
+    char *c = vlr->data() + len - 1;
+    if (*c == 0)
+        len--;
+    std::string wkt(vlr->data(), len);
+    srs.setWKT(wkt);
+    setSpatialReference(m, srs);
+    return true;
 }
 
 
@@ -324,35 +325,32 @@ bool Reader::setSrsFromGeotiffVlr(MetadataNode& m)
     GeotiffSupport geotiff;
     geotiff.resetTags();
 
-    for (auto vi = m_vlrs.begin(); vi != m_vlrs.end(); ++vi)
-    {
-        VariableLengthRecord& vlr = *vi;
-        if (vlr.matches(TRANSFORM_USER_ID, GEOTIFF_DOUBLES_RECORD_ID))
-            geotiff.setKey(vlr.recordId(), (void *)vlr.data(), vlr.dataLen(),
-                STT_DOUBLE);
-        else if (vlr.matches(TRANSFORM_USER_ID, GEOTIFF_ASCII_RECORD_ID))
-            geotiff.setKey(vlr.recordId(), (void *)vlr.data(), vlr.dataLen(),
-                STT_ASCII);
-    }
+    VariableLengthRecord *vlr;
 
-    // We separate the directory case because it makes the code simple.
-    // If we don't have a directory entry things aren't valid.
-    for (auto vi = m_vlrs.begin(); vi != m_vlrs.end(); ++vi)
-    {
-        VariableLengthRecord& vlr = *vi;
-        if (vlr.matches(TRANSFORM_USER_ID, GEOTIFF_DIRECTORY_RECORD_ID))
-        {
-            SpatialReference srs;
-            geotiff.setKey(vlr.recordId(), (void *)vlr.data(), vlr.dataLen(),
-                STT_SHORT);
-            geotiff.setTags();
-            srs.setFromUserInput(geotiff.getWkt(false, false));
-            setSpatialReference(m, srs);
-            return true;
-        }
-    }
-#endif // PDAL_SRS_ENABLED
+    vlr = findVlr(TRANSFORM_USER_ID, GEOTIFF_DIRECTORY_RECORD_ID);
+    // We must have a directory entry.
+    if (!vlr)
+        return false;
+    geotiff.setKey(vlr->recordId(), (void *)vlr->data(), vlr->dataLen(),
+        STT_SHORT);
+
+    vlr = findVlr(TRANSFORM_USER_ID, GEOTIFF_DOUBLES_RECORD_ID);
+    if (vlr)
+        geotiff.setKey(vlr->recordId(), (void *)vlr->data(), vlr->dataLen(),
+            STT_DOUBLE);
+    vlr = findVlr(TRANSFORM_USER_ID, GEOTIFF_ASCII_RECORD_ID);
+    if (vlr)
+        geotiff.setKey(vlr->recordId(), (void *)vlr->data(), vlr->dataLen(),
+            STT_ASCII);
+
+    SpatialReference srs;
+    geotiff.setTags();
+    srs.setFromUserInput(geotiff.getWkt(false, false));
+    setSpatialReference(m, srs);
+    return true;
+#else
     return false;
+#endif // PDAL_SRS_ENABLED
 }
 
 
@@ -421,7 +419,7 @@ point_count_t Reader::read(PointBuffer& data, point_count_t count)
                 error += err;
                 throw pdal_error(error);
             }
-            loadPoint(data, (char *)m_zipPoint->m_lz_point_data.get(),
+            loadPoint(data, (char *)m_zipPoint->m_lz_point_data.data(),
                 pointByteCount);
         }
 #else

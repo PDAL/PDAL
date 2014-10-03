@@ -91,6 +91,7 @@ private:
     virtual void initialize();
     virtual void addDimensions(PointContextRef ctx);
     void fixupVlrs();
+    VariableLengthRecord *findVlr(const std::string& userId, uint16_t recordId);
     void setSrsFromVlrs(MetadataNode& m);
     bool setSrsFromWktVlr(MetadataNode& m);
     bool setSrsFromGeotiffVlr(MetadataNode& m);
