@@ -94,6 +94,7 @@ private:
     std::string m_query;
     std::string m_schemaFile;
     std::string m_connSpec;
+    bool m_updatePointSourceId;
     boost::optional<SpatialReference> m_spatialRef;
     bool m_atEnd;
     std::map<int32_t, schema::XMLSchema> m_schemas;
