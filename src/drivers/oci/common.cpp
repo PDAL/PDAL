@@ -41,6 +41,7 @@
 #include <pdal/Dimension.hpp>
 #include <pdal/Schema.hpp>
 #include <pdal/Utils.hpp>
+#include <pdal/FileUtils.hpp>
 
 namespace pdal
 {
@@ -105,6 +106,12 @@ Schema fetchSchema(Statement stmt, BlockPtr block)
         pc_schema_xml = pc_schema;
         CPLFree(pc_schema);
     }
+    std::ostringstream fname;
+    int cloudId = stmt->GetInteger(&(block->pc->pc_id)) ;
+    fname << "schema-" << cloudId <<".xml";
+          std::ostream* out = FileUtils::createFile(fname.str());
+          out->write(pc_schema_xml.c_str(), pc_schema_xml.size());
+          FileUtils::closeFile(out);    
     return Schema::from_xml(pc_schema_xml);
 }
 
@@ -156,6 +163,12 @@ void Block::initialize(Schema *s)
     dimupdate("X", m_scaleX);
     dimupdate("Y", m_scaleY);
     dimupdate("Z", m_scaleZ);
+    
+    for(size_t i =0; i < s->size(); ++i)
+    {
+        dimensions.push_back(s->getDimension(i));
+    }
+    schema = s;
 }
 
 

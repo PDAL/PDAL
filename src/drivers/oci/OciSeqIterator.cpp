@@ -93,13 +93,23 @@ point_count_t OciSeqIterator::readDimMajor(PointBuffer& buffer, BlockPtr block,
     for (size_t d = 0; d < m_dims.size(); ++d)
     {
         PointId nextId = startId;
-        char *pos = seekDimMajor(d, block);
+        // if the block doesn't have the dimension, don't 
+        // copy it
+        Dimension* source_d = block->schema->getDimensionPtr(m_dims[d]->getName());
+        if (!source_d)
+            continue;
+        
+        // char *pos = seekDimMajor(d, block);
+        char* pos =  block->data() +
+            (source_d->getByteOffset() * block->numPoints()) +
+            (source_d->getByteSize() * block->numRead());
+        
         blockRemaining = numRemaining;
         numRead = 0;
         while (numRead < numPts && blockRemaining > 0)
         {
             buffer.setRawField(*m_dims[d], nextId, pos);
-            pos += m_dims[d]->getByteSize();
+            pos += source_d->getByteSize();
             nextId++;
             numRead++;
             blockRemaining--;
@@ -117,13 +127,24 @@ point_count_t OciSeqIterator::readPointMajor(PointBuffer& buffer,
     PointId nextId = buffer.size();
     point_count_t numRead = 0;
 
-    char *pos = seekPointMajor(block);
+    // char *pos = seekPointMajor(block);
+
+    
     while (numRead < numPts && numRemaining > 0)
     {
         for (size_t d = 0; d < m_dims.size(); ++d)
         {
+            Dimension* source_d = block->schema->getDimensionPtr(m_dims[d]->getName());
+            if (!source_d)
+            {
+                continue;            
+            }
+            char *pos = block->data() + 
+                       (block->numRead() * block->schema->getByteSize()) +
+                        source_d->getByteOffset();
+
             buffer.setRawField(*m_dims[d], nextId, pos);
-            pos += m_dims[d]->getByteSize();
+            // pos += source_d->getByteSize();
         }
         numRemaining--;
         nextId++;
@@ -244,9 +265,10 @@ void OciSeqIterator::setpointids(PointBuffer& buffer, BlockPtr block,
     Dimension const* point_source_field = buffer.getSchema().getDimensionPtr("PointSourceId");
     if (point_source_field)
     {
+        uint16_t t(block->obj_id);
         for (PointId i = begin; i < end; ++i)
         {
-            buffer.setField<int32_t>(*point_source_field, i, block->obj_id);
+            buffer.setField<uint16_t>(*point_source_field, i, t);
         }
     }
     
