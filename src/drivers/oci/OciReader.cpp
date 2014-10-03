@@ -447,6 +447,8 @@ void OciReader::readBlob(Statement stmt, BlockPtr block)
 // All of the schemas should be the same with regard to actual dimension
 // name, order, etc, but each cloud may have its own scaling for X, Y and Z.
 // Store it away so that it can be applied later if necessary.
+// HOBU -- nope. Each Block/cloud combo could potentially have a different
+// schema, with same names but different composition.
 schema::XMLSchema* OciReader::findSchema(Statement stmt, BlockPtr block)
 {
     int32_t cloudId = stmt->GetInteger(&block->pc->pc_id);

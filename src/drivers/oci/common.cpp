@@ -40,6 +40,7 @@
 #include <pdal/Bounds.hpp>
 #include <pdal/Dimension.hpp>
 #include <pdal/Utils.hpp>
+#include <pdal/FileUtils.hpp>
 
 namespace pdal
 {
@@ -103,6 +104,12 @@ schema::XMLSchema fetchSchema(Statement stmt, BlockPtr block)
         pc_schema_xml = pc_schema;
         CPLFree(pc_schema);
     }
+    std::ostringstream fname;
+    int cloudId = stmt->GetInteger(&(block->pc->pc_id)) ;
+    fname << "schema-" << cloudId <<".xml";
+        std::ostream* out = FileUtils::createFile(fname.str());
+        out->write(pc_schema_xml.c_str(), pc_schema_xml.size());
+        FileUtils::closeFile(out);
     return schema::Reader(pc_schema_xml).schema();
 }
 
