@@ -56,6 +56,7 @@ void OciReader::processOptions(const Options& options)
     m_schemaFile = options.getValueOrDefault<std::string>(
         "xml_schema_dump", std::string());
     m_normalizeXYZ = options.getValueOrDefault<bool>("do_normalize_xyz", true);
+    m_setPointSourceId = options.getValueOrDefault<bool>("populate_pointsourceid", false);
     if (options.hasOption("scale_x"))
         m_scaleX = boost::optional<double>(
             options.getValueOrThrow<double>("scale_x"));
@@ -318,7 +319,7 @@ StageSequentialIterator* OciReader::createSequentialIterator() const
 {
     using namespace pdal::drivers::oci::iterators::sequential;
 
-    return new OciSeqIterator(m_stmt, m_block, m_dims, m_normalizeXYZ);
+    return new OciSeqIterator(m_stmt, m_block, m_dims, m_normalizeXYZ, m_setPointSourceId);
 }
 
 

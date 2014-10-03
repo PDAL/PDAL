@@ -171,6 +171,8 @@ point_count_t OciSeqIterator::readImpl(PointBuffer& buffer, point_count_t count)
         totalNumRead += numRead;
         if (m_normalizeXYZ)
             normalize(buffer, m_block, bufBegin, bufEnd);
+        if (m_setPointSourceId)
+            setpointids(buffer, m_block, bufBegin, bufEnd);
     }
     return totalNumRead;
 }
@@ -235,6 +237,20 @@ void OciSeqIterator::normalize(PointBuffer& buffer, BlockPtr block,
     }
 }
 
+void OciSeqIterator::setpointids(PointBuffer& buffer, BlockPtr block,
+    PointId begin, PointId end)
+{
+
+    Dimension const* point_source_field = buffer.getSchema().getDimensionPtr("PointSourceId");
+    if (point_source_field)
+    {
+        for (PointId i = begin; i < end; ++i)
+        {
+            buffer.setField<int32_t>(*point_source_field, i, block->obj_id);
+        }
+    }
+    
+}
 
 // Read a block (set of points) from the database.
 bool OciSeqIterator::readOci(Statement stmt, BlockPtr block)
