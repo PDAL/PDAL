@@ -255,7 +255,7 @@ void Reader::fixupVlrs()
             {
                 // If the key at the end has a zero value, remove it
                 // by resizing the array and decrementing the size.
-                char *testPos = (char *)vlr.data() + vlr.dataLen() - KEY_SIZE;
+                char *testPos = vlr.data() + vlr.dataLen() - KEY_SIZE;
                 if (memcmp(zeros, testPos, KEY_SIZE))
                    break;
                 uint16_t size;

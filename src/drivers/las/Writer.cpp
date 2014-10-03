@@ -314,7 +314,6 @@ void Writer::setVlrsFromSpatialRef(const SpatialReference& srs)
 {
     VlrList vlrs;
 
-//ABELL - Is this ifdef correct?
 #ifdef PDAL_SRS_ENABLED
     GeotiffSupport geotiff;
     geotiff.resetTags();
@@ -341,6 +340,7 @@ void Writer::setVlrsFromSpatialRef(const SpatialReference& srs)
 bool Writer::addGeotiffVlr(GeotiffSupport& geotiff, uint16_t recordId,
     const std::string& description)
 {
+#ifdef PDAL_HAVE_SRS
     void *data;
     int count;
 
@@ -352,6 +352,9 @@ bool Writer::addGeotiffVlr(GeotiffSupport& geotiff, uint16_t recordId,
     memcpy(buf.data(), data, size);
     addVlr(TRANSFORM_USER_ID, recordId, description, buf);
     return true;
+#else
+    return false;
+#endif
 }
 
 
