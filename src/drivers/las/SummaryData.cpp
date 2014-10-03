@@ -43,9 +43,9 @@ namespace las
 {
 
 SummaryData::SummaryData() :
-    m_minX(std::numeric_limits<double>::max()),
-    m_minY(std::numeric_limits<double>::max()),
-    m_minZ(std::numeric_limits<double>::max()),
+    m_minX((std::numeric_limits<double>::max)()),
+    m_minY((std::numeric_limits<double>::max)()),
+    m_minZ((std::numeric_limits<double>::max)()),
     m_maxX(std::numeric_limits<double>::lowest()),
     m_maxY(std::numeric_limits<double>::lowest()),
     m_maxZ(std::numeric_limits<double>::lowest()),
@@ -62,12 +62,12 @@ void SummaryData::addPoint(double x, double y, double z, int returnNumber)
         throw invalid_point_data("addPoint: point returnNumber is out "
             "of range", 0);
 
-    m_minX = std::min(m_minX, x);
-    m_minY = std::min(m_minY, y);
-    m_minZ = std::min(m_minZ, z);
-    m_maxX = std::max(m_maxX, x);
-    m_maxY = std::max(m_maxY, y);
-    m_maxZ = std::max(m_maxZ, z);
+    m_minX = (std::min)(m_minX, x);
+    m_minY = (std::min)(m_minY, y);
+    m_minZ = (std::min)(m_minZ, z);
+    m_maxX = (std::max)(m_maxX, x);
+    m_maxY = (std::max)(m_maxY, y);
+    m_maxZ = (std::max)(m_maxZ, z);
     m_returnCounts[returnNumber]++;
     ++m_totalNumPoints;
 }

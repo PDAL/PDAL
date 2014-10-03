@@ -300,7 +300,7 @@ ILeStream& operator>>(ILeStream& in, LasHeader& h)
 OLeStream& operator<<(OLeStream& out, const LasHeader& h)
 {
     uint32_t legacyPointCount = 0;
-    if (h.m_pointCount <= std::numeric_limits<uint32_t>::max())
+    if (h.m_pointCount <= (std::numeric_limits<uint32_t>::max)())
         legacyPointCount = h.m_pointCount;
 
     out.put(h.m_fileSig, 4);
@@ -321,7 +321,7 @@ OLeStream& operator<<(OLeStream& out, const LasHeader& h)
     for (size_t i = 0; i < LasHeader::LEGACY_RETURN_COUNT; ++i)
     {
         uint32_t legacyReturnCount = std::min(h.m_pointCountByReturn[i],
-            (uint64_t)std::numeric_limits<uint32_t>::max());
+            (uint64_t)(std::numeric_limits<uint32_t>::max)());
         out << legacyReturnCount;
     }
 

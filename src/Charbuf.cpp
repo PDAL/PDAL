@@ -88,6 +88,8 @@ Charbuf::seekoff(off_type off, std::ios_base::seekdir dir,
         case std::ios::end:
             cpos = egptr() - off;
             break;
+        default:
+            break;  // Should never happen.
         }
         if (cpos < eback() || cpos > egptr())
             return -1;
@@ -107,6 +109,8 @@ Charbuf::seekoff(off_type off, std::ios_base::seekdir dir,
         case std::ios::end:
             cpos = egptr() - off;
             break;
+        default:
+            break;  // Should never happen.
         }
         if (cpos < m_buf || cpos > epptr())
             return -1;

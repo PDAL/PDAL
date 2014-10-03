@@ -123,7 +123,7 @@ public:
     /// \param v - value between eVersionMinorMin and eVersionMinorMax.
     void setVersionMinor(uint8_t v)
     {
-        assert(v >= 0 && v <= 4);
+        assert(v > 0 && v <= 4);
         m_versionMinor = v;
     }
 

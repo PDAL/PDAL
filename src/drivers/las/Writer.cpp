@@ -448,7 +448,7 @@ void Writer::readyCompression()
 {
 #ifdef PDAL_HAVE_LASZIP
     //ABELL - Why are we passing the pointFormat if it's in the header?
-    m_zipPoint.reset(new ZipPoint(m_lastHeader.m_pointFormat, m_lasHeader,
+    m_zipPoint.reset(new ZipPoint(m_lasHeader.pointFormat(), m_lasHeader,
         false);
     m_zipper.reset(new LASzipper());
 

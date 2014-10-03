@@ -34,6 +34,7 @@
 
 #pragma once
 
+#include <limits>
 #include <string>
 #include <vector>
 
@@ -62,7 +63,7 @@ typedef std::vector<VariableLengthRecord> VlrList;
 class PDAL_DLL VariableLengthRecord
 {
 public:
-    static const size_t MAX_DATA_SIZE = std::numeric_limits<uint16_t>::max();
+    static const size_t MAX_DATA_SIZE = (std::numeric_limits<uint16_t>::max)();
 
     VariableLengthRecord(const std::string& userId, uint16_t recordId,
             const std::string& description, std::vector<uint8_t>& data) :
