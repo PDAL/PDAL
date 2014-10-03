@@ -140,7 +140,7 @@ point_count_t OciSeqIterator::readPointMajor(PointBuffer& buffer,
                 continue;            
             }
             char *pos = block->data() + 
-                       (block->numRead() * block->schema->getByteSize()) +
+                       ((block->numRead()+numRead) * block->schema->getByteSize()) +
                         source_d->getByteOffset();
 
             buffer.setRawField(*m_dims[d], nextId, pos);
