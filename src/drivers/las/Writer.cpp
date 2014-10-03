@@ -340,7 +340,7 @@ void Writer::setVlrsFromSpatialRef(const SpatialReference& srs)
 bool Writer::addGeotiffVlr(GeotiffSupport& geotiff, uint16_t recordId,
     const std::string& description)
 {
-#ifdef PDAL_HAVE_SRS
+#ifdef PDAL_SRS_ENABLED
     void *data;
     int count;
 
@@ -354,7 +354,7 @@ bool Writer::addGeotiffVlr(GeotiffSupport& geotiff, uint16_t recordId,
     return true;
 #else
     return false;
-#endif
+#endif // PDAL_SRS_ENABLED
 }
 
 
@@ -368,6 +368,8 @@ bool Writer::addWktVlr(const SpatialReference& srs)
         return false;
 
     std::vector<uint8_t> wktBytes(wkt.begin(), wkt.end());
+    // This tacks a NULL to the end of the data, which is required by the spec.
+    wktBytes.resize(wktBytes.size() + 1, 0);
     addVlr(TRANSFORM_USER_ID, WKT_RECORD_ID, "OGC Tranformation Record",
         wktBytes);
     addVlr(LIBLAS_USER_ID, WKT_RECORD_ID,

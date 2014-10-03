@@ -296,7 +296,19 @@ bool Reader::setSrsFromWktVlr(MetadataNode& m)
         {
             SpatialReference srs;
 
-            std::string wkt(vlr.data(), vlr.dataLen());
+            // Per spec, should never happen, but prevents errors below.
+            if (vlr.dataLen() == 0)
+                return false;
+
+            // There is supposed to be a NULL byte at the end of the data,
+            // but sometimes there isn't because some people don't follow the
+            // rules.  If there is a NULL byte, don't stick it in the
+            // wkt string.
+            size_t len = vlr.dataLen();
+            char *c = vlr.data() + len - 1;
+            if (*c == 0)
+                len--;
+            std::string wkt(vlr.data(), len);
             srs.setWKT(wkt);
             setSpatialReference(m, srs);
             return true;

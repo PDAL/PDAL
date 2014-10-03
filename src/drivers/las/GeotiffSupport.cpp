@@ -127,7 +127,7 @@ int GeotiffSupport::setKey(int tag, void *data, int size, int type)
         count = size; 
         break;
     }
-    return ST_SetKey(m_tiff, tag, size, type, data);
+    return ST_SetKey(m_tiff, tag, count, type, data);
 }
 
 

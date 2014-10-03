@@ -86,7 +86,7 @@ public:
         { return matches(userId) && (recordId == m_recordId); }
 
     char* data() const
-        { return (char *)m_data.data(); }
+        { return (char *)(unsigned char *)m_data.data(); }
     uint64_t dataLen() const
         { return m_data.size(); }
     void setDataLen(uint64_t size)

@@ -264,8 +264,8 @@ BOOST_AUTO_TEST_CASE(test_writing_vlr)
         SpatialReference result_ref = reader.getSpatialReference();
 
         BOOST_CHECK_EQUAL(reader.header().vlrCount(), 4);
-        const std::string wkt = result_ref.getWKT();
-        BOOST_CHECK(wkt == reference_wkt);
+        std::string wkt = result_ref.getWKT();
+        BOOST_CHECK_EQUAL(wkt, reference_wkt);
     }
 
     // Cleanup
