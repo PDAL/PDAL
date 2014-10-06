@@ -44,11 +44,11 @@
 #include <pcl/point_types.h>
 #include <pcl/point_traits.h>
 
-namespace
+namespace pdal
 {
-
-using namespace pdal;
-
+namespace pclsupport
+{
+    
 template<typename CLOUDFETCH>
 void setValues(PointBuffer& buf, Dimension::Id::Enum dim, size_t numPts,
     CLOUDFETCH fetcher)
@@ -57,22 +57,11 @@ void setValues(PointBuffer& buf, Dimension::Id::Enum dim, size_t numPts,
         buf.setField(dim, i, fetcher(i));
 }
 
-} //namespace
-
-namespace pdal
-{
 /**
  * \brief Convert PCD point cloud to PDAL.
  *
  * Converts PCD data to PDAL format.
  */
-template <typename CloudT>
-void PCDtoPDAL(CloudT &cloud, PointBuffer& buf)
-{
-    BOX3D buffer_bounds(0,0,0,0,0,0);
-    PCDtoPDAL(cloud, buf, buffer_bounds);
-}
-
 template <typename CloudT>
 void PCDtoPDAL(CloudT &cloud, PointBuffer& buf, BOX3D const& bounds)
 {
@@ -127,18 +116,19 @@ void PCDtoPDAL(CloudT &cloud, PointBuffer& buf, BOX3D const& bounds)
 }
 
 
+template <typename CloudT>
+void PCDtoPDAL(CloudT &cloud, PointBuffer& buf)
+{
+    BOX3D buffer_bounds(0,0,0,0,0,0);
+    pdal::pclsupport::PCDtoPDAL(cloud, buf, buffer_bounds);
+}
+
+
 /**
  * \brief Convert PDAL point cloud to PCD.
  *
  * Converts PDAL data to PCD format.
  */
-template <typename CloudT>
-void PDALtoPCD(const PointBuffer& data, CloudT &cloud)
-{
-    BOX3D buffer_bounds(0,0,0,0,0,0);
-    PDALtoPCD(const_cast<PointBuffer&>(data), cloud, buffer_bounds);
-}
-
 template <typename CloudT>
 void PDALtoPCD(PointBuffer& data, CloudT &cloud, BOX3D const& bounds)
 {
@@ -201,5 +191,14 @@ void PDALtoPCD(PointBuffer& data, CloudT &cloud, BOX3D const& bounds)
 #endif // PDAL_HAVE_PCL
 }
 
-}  // namespace pdal
 
+template <typename CloudT>
+void PDALtoPCD(const PointBuffer& data, CloudT &cloud)
+{
+    BOX3D buffer_bounds(0,0,0,0,0,0);
+    PDALtoPCD(const_cast<PointBuffer&>(data), cloud, buffer_bounds);
+}
+
+
+}  // namespace pcl
+}  // namespace pdal
