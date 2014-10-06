@@ -53,7 +53,6 @@ Ground::Ground(int argc, const char* argv[])
     , m_cellSize(1)
     , m_base(2)
     , m_exponential(true)
-    , m_bCompress(false)
 {
     return;
 }

@@ -138,15 +138,15 @@ void MetadataReader::writeField(const std::string& parentkey,
 {
     std::string v;
   
-    if (field.getType() == NITF_BCS_A)
+    if (field.getType() == (::nitf::Field::FieldType)NITF_BCS_A)
     {
         v = field.toString();
     }
-    else if (field.getType() == NITF_BCS_N)
+    else if (field.getType() == (::nitf::Field::FieldType)NITF_BCS_N)
     {
         v = field.toString();
     }
-    else if (field.getType() == NITF_BINARY)
+    else if (field.getType() == (::nitf::Field::FieldType)NITF_BINARY)
     {
 	if (key == "FBKGC")
 	{

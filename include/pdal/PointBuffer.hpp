@@ -296,7 +296,7 @@ void PointBuffer::setField(Dimension::Id::Enum dim, PointId idx, T val)
             convertAndSet<T, double>(dim, idx, val);
             break;
         case Dimension::Type::Signed8:
-            convertAndSet<T, int8_t>(dim, idx, val);
+            setFieldInternal(dim, idx, &val);
             break;
         case Dimension::Type::Signed16:
             convertAndSet<T, int16_t>(dim, idx, val);
@@ -308,7 +308,7 @@ void PointBuffer::setField(Dimension::Id::Enum dim, PointId idx, T val)
             convertAndSet<T, int64_t>(dim, idx, val);
             break;
         case Dimension::Type::Unsigned8:
-            convertAndSet<T, uint8_t>(dim, idx, val);
+            setFieldInternal(dim, idx, &val);
             break;
         case Dimension::Type::Unsigned16:
             convertAndSet<T, uint16_t>(dim, idx, val);

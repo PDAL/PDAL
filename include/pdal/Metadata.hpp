@@ -52,7 +52,7 @@ namespace
     {
         auto ischar = [](char c)
         {
-            return c == ';' || c == ':' || c == ' ' || c == '\'' || c == '\"';
+            return c == ';' || c == ':' || c == ' ' || c == '\'' || c == '\"' || c == '[' || c ==']';
         };
 
         std::string v;

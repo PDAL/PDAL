@@ -60,6 +60,9 @@ void OciReader::processOptions(const Options& options)
                 "spatialreference"));
     m_query = options.getValueOrThrow<std::string>("query");
     m_connSpec = options.getValueOrDefault<std::string>("connection", "");
+
+    m_updatePointSourceId =  options.getValueOrDefault<bool>(
+        "populate_pointsourceid", false);
 }
 
 void OciReader::initialize()
@@ -206,7 +209,7 @@ void OciReader::validateQuery()
             "' does not fetch a SDO_PC object.";
         throw pdal_error(oss.str());
     }
- 
+
     // If we found all the fields, the list of required fields will be empty.
     // If not, throw an exception.
     if (!reqFields.empty())
@@ -310,7 +313,12 @@ point_count_t OciReader::readDimMajor(PointBuffer& buffer, BlockPtr block,
         {
             buffer.setField(d.m_id, d.m_type, nextId, pos);
             pos += Dimension::size(d.m_type);
-            
+
+            if (d.m_id == Dimension::Id::PointSourceId && m_updatePointSourceId)
+            {
+                buffer.setField(Dimension::Id::PointSourceId, nextId, block->obj_id);
+            }
+
             if (d.m_id == Dimension::Id::X)
             {
                 double v = buffer.getFieldAs<double>(Dimension::Id::X, nextId);
@@ -331,7 +339,7 @@ point_count_t OciReader::readDimMajor(PointBuffer& buffer, BlockPtr block,
                 v = v * block->zScale() + block->zOffset();
                 buffer.setField(Dimension::Id::Z, nextId, v);
             }
-        
+
             nextId++;
             numRead++;
             blockRemaining--;
@@ -439,6 +447,8 @@ void OciReader::readBlob(Statement stmt, BlockPtr block)
 // All of the schemas should be the same with regard to actual dimension
 // name, order, etc, but each cloud may have its own scaling for X, Y and Z.
 // Store it away so that it can be applied later if necessary.
+// HOBU -- nope. Each Block/cloud combo could potentially have a different
+// schema, with same names but different composition.
 schema::XMLSchema* OciReader::findSchema(Statement stmt, BlockPtr block)
 {
     int32_t cloudId = stmt->GetInteger(&block->pc->pc_id);
