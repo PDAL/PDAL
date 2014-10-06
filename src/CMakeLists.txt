@@ -646,7 +646,25 @@ endif (WITH_GDAL)
 
 
 #
-# plag parser
+# PCL support files
+#
+set(PDAL_PCLSUPPORT_HPP
+    "pclsupport/PCLPipeline.h"
+    "pclsupport/PCLPipeline.hpp"
+    )
+
+set(PDAL_PCLSUPPORT_CPP
+    "pclsupport/PCLPipeline.cpp"
+    )
+
+if (WITH_PCL OR WITH_STUBS)
+    list(APPEND PDAL_HPP ${PDAL_PCLSUPPORT_HPP})
+    list(APPEND PDAL_CPP ${PDAL_PCLSUPPORT_CPP})
+endif (WITH_PCL OR WITH_STUBS)
+
+
+#
+# plang parser
 #
 
 set(PDAL_PLANG_PATH plang)
