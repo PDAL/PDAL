@@ -99,7 +99,6 @@ public:
   {
     filename_set_ = true;
     boost::property_tree::read_json (filename.c_str (), pt_);
-    std::cout << "HERE!!!!!!!" << std::endl;
     json_set_ = true;
   }
 
