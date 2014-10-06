@@ -67,11 +67,12 @@ public:
 private:
     void addSwitches(); // overrride
     void validateSwitches(); // overrride
-    
+
     void dump(PointContext ctx, PointBufferPtr buf);
-    
+
     void dumpPoints(PointBufferPtr buf) const;
     void dumpStats();
+    void dumpSummary(PointContext ctx, PointBufferPtr buf);
     void dumpQuery(PointBufferPtr buf) const;
     void dumpMetadata(PointContext ctx, const Stage&) const;
     void dumpSDO_PCMetadata(PointContext ctx, Stage const&) const;
@@ -89,12 +90,14 @@ private:
     boost::uint32_t m_sample_size;
     bool m_useXML;
     bool m_useJSON;
+    bool m_useRST;
     std::string m_Dimensions;
     std::string m_QueryPoint;
     double m_QueryDistance;
     boost::uint64_t m_numPointsToWrite;
     std::string m_pipelineFile;
     bool m_showSample;
+    bool m_showSummary;
 
     std::unique_ptr<boost::property_tree::ptree> m_tree;
     std::unique_ptr<PipelineManager> m_manager;
@@ -102,4 +105,3 @@ private:
 
 } // namespace kernel
 } // namespace pdal
-
