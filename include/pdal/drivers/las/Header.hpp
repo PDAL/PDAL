@@ -210,6 +210,27 @@ public:
     /// Get identifier of point data (record) format.
     uint8_t pointFormat() const
         { return m_pointFormat; }
+    bool pointFormatSupported() const
+    {
+        static const PointFormat validFormats[] = { 0, 1, 2, 3 };
+        static const PointFormat valid14Formats[] = { 0, 1, 2, 3, 6, 7, 8 };
+
+        const PointFormat *formats;
+        size_t size;
+        if (verionAtLeast(1, 4))
+        {
+            formats = &valid14Formats[0];
+            size = sizeof(valid14Formats);
+        }
+        else
+        {
+            formats = &validFormats[0];
+            size = sizeof(validFormats);
+        }
+
+        return (std::any_of(formats, formats + size,
+            [this](PointFormat fmt) { return fmt == m_pointFormat; }));
+    }
 
     /// The length in bytes of each point.  All points in the file are
     /// considered to be fixed in size, and the PointFormatName is used

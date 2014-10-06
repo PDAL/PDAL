@@ -265,8 +265,12 @@ ILeStream& operator>>(ILeStream& in, LasHeader& h)
         h.m_pointOffset >> h.m_vlrCount >> h.m_pointFormat >>
         h.m_pointLen >> legacyPointCount;
     h.m_pointCount = legacyPointCount;
+
+    // Although it isn't part of the LAS spec, the two high bits have been used
+    // to indicate compression, though only the high bit is currently used.
     if (h.m_pointFormat & 0x80)
         h.setCompressed(true);
+    h.m_pointFormat &= ~0xC0;
     
     for (size_t i = 0; i < LasHeader::LEGACY_RETURN_COUNT; ++i)
     {

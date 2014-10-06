@@ -435,6 +435,14 @@ void Writer::fillHeader(PointContextRef ctx)
     m_lasHeader.setProjectId(headerVal<boost::uuids::uuid>("project_id"));
     m_lasHeader.setGlobalEncoding(headerVal<uint16_t>("global_encoding"));
     m_lasHeader.setFileSourceId(headerVal<uint16_t>("filesource_id"));
+
+    if (!m_lasHeader.pointFormatSupported())
+    {
+        std::ostringstream oss;
+        oss << "Unsupported LAS output point format: " <<
+            (int)m_lasHeader.pointFormat() << ".";
+        throw pdal_error(oss.str());
+    }
 }
 
 

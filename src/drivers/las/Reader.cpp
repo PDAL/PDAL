@@ -34,6 +34,7 @@
 
 #include <pdal/drivers/las/Reader.hpp>
 
+#include <sstream>
 #include <string.h>
 
 #include <pdal/Charbuf.hpp>
@@ -75,6 +76,14 @@ void Reader::initialize()
     m_istream->seekg(0);
     ILeStream in(m_istream);
     in >> m_lasHeader;
+
+    if (!m_lasHeader.pointFormatSupported())
+    {
+        std::ostringstream oss;
+        oss << "Unsupported LAS input point format: " <<
+            (int)m_lasHeader.pointFormat() << ".";
+       throw pdal_error(oss.str());
+    }
 }
 
 
@@ -146,9 +155,6 @@ void Reader::extractHeaderMetadata(MetadataNode& m)
 {
     m.add<bool>("compressed", m_lasHeader.compressed(),
         "true if this LAS file is compressed");
-    m.add<uint32_t>("dataformat_id",
-        static_cast<uint32_t>(m_lasHeader.pointFormat()),
-        "The Point Format ID as specified in the LAS specification");
     m.add<uint32_t>("major_version",
         static_cast<uint32_t>(m_lasHeader.versionMajor()),
         "The major LAS version for the file, always 1 for now");
