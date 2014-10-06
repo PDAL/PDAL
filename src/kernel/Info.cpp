@@ -33,10 +33,12 @@
 ****************************************************************************/
 
 #include <algorithm>
+#include <boost/foreach.hpp>
 
 #include <pdal/kernel/Info.hpp>
 #include <pdal/KDIndex.hpp>
 #include <pdal/PipelineWriter.hpp>
+#include <pdal/PDALUtils.hpp>
 
 namespace pdal
 {
@@ -54,9 +56,11 @@ Info::Info(int argc, const char* argv[])
     , m_computeBoundary(false)
     , m_useXML(false)
     , m_useJSON(false)
+    , m_useRST(false)
     , m_QueryDistance(0.0)
     , m_numPointsToWrite(0)
     , m_showSample(false)
+    , m_showSummary(false)
 {}
 
 
@@ -69,6 +73,7 @@ void Info::validateSwitches()
         m_showSDOPCMetadata ||
         m_computeBoundary ||
         m_showStage ||
+        m_showSummary ||
         m_QueryPoint.size() > 0 ||
         m_pointIndexes.size() > 0;
     if (!got_something)
@@ -132,6 +137,8 @@ void Info::addSwitches()
         ("json",
          po::value<bool>(&m_useJSON)->zero_tokens()->implicit_value(true),
          "dump JSON")
+        ("rst", po::value<bool>(&m_useRST)->zero_tokens()->implicit_value(true),
+         "dump RST")
         ("sample",
          po::value<bool>(&m_showSample)->zero_tokens()->implicit_value(true),
          "randomly sample dimension for stats")
@@ -140,6 +147,9 @@ void Info::addSwitches()
         ("sample_size",
          po::value<uint32_t>(&m_sample_size)->default_value(1000),
          "Sample size for random sample")
+        ("summary",
+         po::value<bool>(&m_showSummary)->zero_tokens()->implicit_value(true),
+        "dump summary of the info")
         ;
 
     addSwitchSet(processing_options);
@@ -268,6 +278,101 @@ void Info::dumpStats()
     delete writer;
 }
 
+
+// return a ptree containing min/max for X,Y,Z,
+// based on the stats filter metadata
+static boost::property_tree::ptree getSummaryBounds(MetadataNode root)
+{
+    boost::property_tree::ptree pt;
+    
+    if (root.empty()) return pt;
+    
+    MetadataNode m = root.findChild("filters.stats");
+    if (m.empty()) return pt;
+    
+    std::vector<MetadataNode> ms = m.children("statistic");
+    for (auto dataNode: ms)
+    {
+        if (dataNode.empty()) continue;
+
+        MetadataNode nameNode = dataNode.findChild("name");
+        if (nameNode.empty()) continue;
+        
+        const std::string& name = nameNode.value();
+        if (name=="X" || name=="Y" || name=="Z")
+        {
+            MetadataNode minNode = dataNode.findChild("minimum");
+            MetadataNode maxNode = dataNode.findChild("maximum");
+            if (minNode.empty()) continue;
+            if (maxNode.empty()) continue;
+            
+            boost::property_tree::ptree stats;
+            stats.put("min", minNode.value());
+            stats.put("max", maxNode.value());
+            pt.add_child(name, stats);
+        }
+    }
+
+    return pt;
+}
+
+
+// return a ptree containing list of dimensions
+// based on the stats filter metadata
+static boost::property_tree::ptree getSummaryDimensions(MetadataNode root)
+{
+    boost::property_tree::ptree pt;
+    
+    if (root.empty()) return pt;
+    
+    MetadataNode m = root.findChild("filters.stats");
+    if (m.empty()) return pt;
+    
+    std::vector<MetadataNode> ms = m.children("statistic");
+    for (auto dataNode: ms)
+    {
+        if (dataNode.empty()) continue;
+
+        MetadataNode nameNode = dataNode.findChild("name");
+        if (nameNode.empty()) continue;
+        
+        const std::string& name = nameNode.value();
+        boost::property_tree::ptree item;
+        pt.put(name, "");
+        //pt.add_child("dim", item);
+    }
+
+    return pt;
+}
+
+
+void Info::dumpSummary(PointContext ctx, PointBufferPtr buf)
+{
+    Stage* stage = m_manager->getStage();
+    assert(stage->getName() == "filters.stats");
+
+    MetadataNode metaNode = m_manager->getMetadata();
+
+    {    
+        boost::property_tree::ptree pt;
+        pt.put("NumPoints", buf->size());
+        pt.put("NumDimensions", ctx.dims().size());
+        pt.put("WKT", ctx.spatialRef().getWKT());
+        m_tree->add_child("Summary", pt);
+    }
+    
+    {
+        boost::property_tree::ptree pt = getSummaryBounds(metaNode);
+        m_tree->add_child("Bounds", pt);
+    }
+    
+    {
+        boost::property_tree::ptree pt = getSummaryDimensions(metaNode);
+        m_tree->add_child("Dimensions", pt);
+    }
+}
+
+
 void Info::dump(PointContext ctx, PointBufferPtr buf)
 {
     if (m_showStats)
@@ -298,6 +403,11 @@ void Info::dump(PointContext ctx, PointBufferPtr buf)
     if (m_QueryPoint.size())
     {
         dumpQuery(buf);
+    }
+
+    if (m_showSummary)
+    {
+        dumpSummary(ctx, buf);
     }
 }
 
@@ -349,6 +459,8 @@ void Info::dumpMetadata(PointContext ctx, const Stage& stage) const
 
     if (m_useXML)
         write_xml(ostr, tree);
+    else if (m_useRST)
+        pdal::utils::reST::write_rst(ostr, tree);
     else
         write_json(ostr, tree);
 }
@@ -390,8 +502,16 @@ int Info::execute()
     Options options = m_options + readerOptions;
 
     Stage* stage = m_manager->getStage();
-    if (m_showStats)
+    if (m_showStats || m_showSummary)
+    {
+        if (m_showSummary)
+        {
+            // we need exact dimensions for the bbox, so we need to visit
+            // all the points, alas
+            options.add<point_count_t>("num_points", 0);
+        }
         stage = m_manager->addFilter("filters.stats", stage, options);
+    }
     if (m_computeBoundary)
         stage = m_manager->addFilter("filters.hexbin", stage, options);
 
@@ -404,28 +524,15 @@ int Info::execute()
     assert(pbSet.size() == 1);
     dump(m_manager->context(), *pbSet.begin());
 
-    //
-    // if (m_showStats)
-    //     dumpStats(ctx, *dynamic_cast<pdal::filters::Stats*>(filter), manager);
-    // if (m_showSchema)
-    //     dumpSchema(ctx);
-    // if (m_showMetadata)
-    //     dumpMetadata(ctx, *filter);
-    // if (m_showStage)
-    //     dumpStage(*filter);
-    // if (m_showSDOPCMetadata)
-    //     dumpSDO_PCMetadata(ctx, *filter);
-    //
-    // if (m_QueryPoint.size())
-    //     dumpQuery(ctx, *filter);
-
     if (m_useXML)
         write_xml(ostr, *m_tree);
+    else if (m_useRST)
+        pdal::utils::reST::write_rst(ostr, *m_tree);
     else
         write_json(ostr, *m_tree);
 
-
     return 0;
 }
+
 
 }} // pdal::kernel

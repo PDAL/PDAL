@@ -86,6 +86,7 @@ set(PDAL_BASE_CPP
   Log.cpp
   Metadata.cpp
   Options.cpp
+  PDALUtils.cpp
   PipelineManager.cpp
   PipelineReader.cpp
   PipelineWriter.cpp
