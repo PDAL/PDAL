@@ -36,10 +36,17 @@
 #include <pdal/filters/Decimation.hpp>
 
 #ifdef PDAL_HAVE_PCL
+#ifdef PDAL_COMPILER_CLANG
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wfloat-equal"
+#endif
 #include <pdal/PCLConversions.hpp>
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/point_types.h>
 #include <pcl/io/pcd_io.h>
+#ifdef PDAL_COMPILER_CLANG
+#  pragma clang diagnostic pop
+#endif
 #endif
 
 namespace pdal
