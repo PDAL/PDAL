@@ -1,0 +1,18 @@
+{
+    "pipeline":
+    {
+        "name": "PassThroughExample",
+        "filters":
+        [
+            {
+                "name": "PassThrough",
+                "setFilterFieldName": "z",
+                "setFilterLimits":
+                {
+                    "min": 410.0,
+                    "max": 440.0
+                }
+            }
+        ]
+    }
+}

@@ -64,7 +64,8 @@ BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_example_passthrough_xml)
 }
 
 
-BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_example_passthrough_json)
+static void test_filter(const std::string& jsonFile,
+                        size_t expectedPointCount)
 {
     Options options;
 
@@ -78,7 +79,7 @@ BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_example_passthrough_json)
 
     drivers::las::Reader reader(options);
 
-    Option fname("filename", Support::datapath("filters/pcl/passthrough.json"));
+    Option fname("filename", Support::datapath(jsonFile));
     Options filter_options;
     filter_options.add(fname);
 
@@ -91,84 +92,77 @@ BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_example_passthrough_json)
 
     BOOST_CHECK_EQUAL(pbSet.size(), 1);
     PointBufferPtr buf = *pbSet.begin();
-    BOOST_CHECK_EQUAL(buf->size(), 81);
+    BOOST_CHECK_EQUAL(buf->size(), expectedPointCount);
 }
 
 
-BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_example_outlier_json)
+BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_example_PassThrough)
 {
-    Options options;
-    Option filename("filename", Support::datapath("autzen/autzen-point-format-3.las"));
-    options.add(filename);
-
-    drivers::las::Reader reader(options);
-
-    Option fname("filename",
-                 Support::datapath("filters/pcl/passthrough_outlier_removal.json"));
-    Options filter_options;
-    filter_options.add(fname);
-    filters::PCLBlock pcl_block(filter_options);
-    pcl_block.setInput(&reader);
-
-    PointContext ctx;
-    pcl_block.prepare(ctx);
-    PointBufferSet pbSet = pcl_block.execute(ctx);
-    BOOST_CHECK_EQUAL(pbSet.size(), 1);
-    PointBufferPtr buf = *pbSet.begin();
-
-    BOOST_CHECK_EQUAL(buf->size(), 50);
+    test_filter("filters/pcl/example_PassThrough.json", 81);
 }
 
 
-BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_example_pmf_json)
+BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_example_PassThrough_2)
 {
-    Options options;
-    Option filename("filename", Support::datapath("autzen/autzen-point-format-3.las"));
-    options.add(filename);
-
-    drivers::las::Reader reader(options);
-
-    Option fname("filename",
-        Support::datapath("filters/pcl/progressive_morphological_filter.json"));
-    Options filter_options;
-    filter_options.add(fname);
-    filters::PCLBlock pcl_block(filter_options);
-    pcl_block.setInput(&reader);
-
-    PointContext ctx;
-    pcl_block.prepare(ctx);
-    PointBufferSet pbSet = pcl_block.execute(ctx);
-    BOOST_CHECK_EQUAL(pbSet.size(), 1);
-    PointBufferPtr buf = *pbSet.begin();
-
-    BOOST_CHECK_EQUAL(buf->size(), 93);
+    test_filter("filters/pcl/example_PassThrough_2.json", 50);
 }
 
 
-BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_pmf2_json)
+BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_example_pmf)
 {
-    Options options;
-    Option filename("filename", Support::datapath("autzen/autzen-point-format-3.las"));
-    options.add(filename);
-
-    drivers::las::Reader reader(options);
-
-    Option fname("filename",
-        Support::datapath("filters/pcl/progressive_morphological_filter2.json"));
-    Options filter_options;
-    filter_options.add(fname);
-    filters::PCLBlock pcl_block(filter_options);
-    pcl_block.setInput(&reader);
-
-    PointContext ctx;
-    pcl_block.prepare(ctx);
-    PointBufferSet pbSet = pcl_block.execute(ctx);
-    BOOST_CHECK_EQUAL(pbSet.size(), 1);
-    PointBufferPtr buf = *pbSet.begin();
-
-    BOOST_CHECK_EQUAL(buf->size(), 94);
+    test_filter("filters/pcl/example_PMF.json", 93);
 }
 
+
+BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_example_pmf_2)
+{
+    test_filter("filters/pcl/example_PMF_2.json", 94);
+}
+
+BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_filter_APMF)
+{
+    //test_filter("filters/pcl/filter_APMF.json", 9999);
+}
+
+BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_filter_ConditionalRemoval)
+{
+    //test_filter("filters/pcl/filter_ConditionalRemoval.json", 9999);
+}
+
+BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_filter_GridMinimum)
+{
+    //test_filter("filters/pcl/filter_GridMinimum.json", 9999);
+}
+
+BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_filter_NormalEstimation)
+{
+    //test_filter("filters/pcl/filter_NormalEstimation.json", 9999);
+}
+
+BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_filter_PassThrough)
+{
+    //test_filter("filters/pcl/filter_PassThrough.json", 81);
+}
+
+BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_filter_PMF)
+{
+    //test_filter("filters/pcl/filter_PMF.json", 9999);
+}
+
+BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_filter_RadiusOutlierRemoval)
+{
+    //test_filter("filters/pcl/filter_RadiusOutlierRemoval.json", 9999);
+}
+
+BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_filter_StatisticalOutlierRemoval)
+{
+    //test_filter("filters/pcl/filter_StatisticalOutlierRemoval.json", 9999);
+}
+
+BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_filter_VoxelGrid)
+{
+    //test_filter("filters/pcl/filter_VoxelGrid.json", 9999);
+}
 
 #endif // PDAL_HAVE_PCL
 

@@ -1,0 +1,14 @@
+{
+    "pipeline":
+    {
+        "name": "NormalEstimationExample",
+        "filters":
+        [
+            {
+                "name": "NormalEstimation"
+                "setRadiusSearch": 1.1,
+                "setKSearch": 2.2
+            }
+        ]
+    }
+}

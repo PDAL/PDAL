@@ -1,0 +1,14 @@
+{
+    "pipeline":
+    {
+        "name": "StatisticalOutlierRemoval",
+        "filters":
+        [
+            {
+                "name": "ProgressiveMorphologicalFilter",
+                "setMeanK": 2,
+                "setStddevMulThresh": 1.0
+            }
+        ]
+    }
+}

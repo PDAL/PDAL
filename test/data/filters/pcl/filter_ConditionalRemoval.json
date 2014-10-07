@@ -1,0 +1,17 @@
+{
+    "pipeline":
+    {
+        "name": "ConditionalRemovalExample",
+        "filters":
+        [
+            {
+                "name": "ConditionalRemoval",
+                "normalZ":
+                {
+                    "min": 0.1,
+                    "max": 0.087156
+                }
+            }
+        ]
+    }
+}
