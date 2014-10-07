@@ -124,7 +124,9 @@ public:
     y_offset_ = y;
     z_offset_ = z;
   }
-
+  
+  void dumper (PointCloud &output);
+  
 protected:
   using PCLBase<PointT>::input_;
   using PCLBase<PointT>::indices_;

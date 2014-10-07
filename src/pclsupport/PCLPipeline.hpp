@@ -87,6 +87,28 @@ struct tile_point_idx
 
 
 template <typename PointT> void
+pcl::Pipeline<PointT>::dumper(PointCloud &cloud)
+{
+    for (size_t i = 0; i < cloud.points.size (); ++i)
+    {
+        if (pcl::traits::has_xyz<PointT>::value)
+        {
+            std::cout << cloud.points[i].x << " " 
+                      << cloud.points[i].y << " " 
+                      << cloud.points[i].z << " ";
+        }
+        if (pcl::traits::has_normal<PointT>::value)
+        {
+            std::cout << cloud.points[i].normal[0] << " " 
+                      << cloud.points[i].normal[1] << " " 
+                      << cloud.points[i].normal[2] << " ";
+        }
+        std::cout << std::endl;
+    }
+}
+
+
+template <typename PointT> void
 pcl::Pipeline<PointT>::generateTileIndices (PointCloudConstPtr cloud, const float& resolution, std::vector<PointIndices> &tile_indices)
 {
   Eigen::Vector4f leaf_size;
