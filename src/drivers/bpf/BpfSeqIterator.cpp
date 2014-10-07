@@ -162,7 +162,8 @@ point_count_t BpfSeqIterator::readPointMajor(PointBuffer& data,
     return numRead;
 }
 
-point_count_t BpfSeqIterator::readDimMajor(PointBuffer& data, point_count_t count)
+point_count_t BpfSeqIterator::readDimMajor(PointBuffer& data,
+    point_count_t count)
 {
     PointId idx;
     PointId startId = data.size();

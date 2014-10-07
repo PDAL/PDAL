@@ -34,6 +34,8 @@
 
 #include <iostream>
 
+#include <boost/lexical_cast.hpp>
+
 #include <pdal/drivers/bpf/BpfHeader.hpp>
 #include <pdal/IStream.hpp>
 
@@ -49,6 +51,25 @@ ILeStream& operator >> (ILeStream& stream, BpfMuellerMatrix& m)
 
 bool BpfHeader::read(ILeStream& stream)
 {
+    IStreamMarker mark(stream);
+    if (!readV3(stream))
+    {
+        mark.rewind();
+        if (!readV1(stream))
+        {
+            if (m_version < 1 || m_version > 3)
+                m_log->get(logERROR) << "Unsupported BPF version = " <<
+                    m_version << ".\n";
+            else
+                m_log->get(logERROR) << "Couldn't read BPF header.\n";
+            return false;
+        }
+    }
+    return true;
+}
+
+bool BpfHeader::readV3(ILeStream& stream)
+{
     uint8_t dummyChar;
     uint8_t interleave;
     std::string magic;
@@ -56,10 +77,15 @@ bool BpfHeader::read(ILeStream& stream)
     stream.get(magic, 4);
     if (magic != "BPF!")
         return false;
+
     stream.get(m_ver, 4);
-    stream >> m_len >> m_numDim >> interleave >> m_compression >>
+    m_version = boost::lexical_cast<int32_t>(m_ver);
+
+    uint8_t numDim;
+    stream >> m_len >> numDim >> interleave >> m_compression >>
         dummyChar >> m_numPts >> m_coordType >> m_coordId >> m_spacing >>
         m_xform >> m_startTime >> m_endTime;
+    m_numDim = (int32_t)numDim;
     switch (interleave)
     {
     case 0:
@@ -75,6 +101,54 @@ bool BpfHeader::read(ILeStream& stream)
         throw "Invalid BPF file: unknown interleave type.";
     }
     return (bool)stream;
+}
+    
+
+bool BpfHeader::readV1(ILeStream& stream)
+{
+    stream >> m_len;
+    stream >> m_version;
+
+    stream >> m_numPts >> m_numDim >> m_coordType >> m_coordId >>
+        m_spacing;
+    if (m_version == 1)
+        m_pointFormat = BpfFormat::DimMajor;
+    else if (m_version == 2)
+        m_pointFormat = BpfFormat::PointMajor;
+    else
+        return false;
+
+    // Dimensions should include X, Y, and Z
+    m_numDim += 3;
+
+    BpfDimension xDim;
+    BpfDimension yDim;
+    BpfDimension zDim;
+
+    xDim.m_label = "X";
+    yDim.m_label = "Y";
+    zDim.m_label = "Z";
+
+    stream >> xDim.m_offset >> yDim.m_offset >> zDim.m_offset;
+    stream >> xDim.m_min >> yDim.m_min >> zDim.m_min;
+    stream >> xDim.m_max >> yDim.m_max >> zDim.m_max;
+
+    m_staticDims.push_back(xDim);
+    m_staticDims.push_back(yDim);
+    m_staticDims.push_back(zDim);
+    return (bool)stream;
+}
+
+
+bool BpfHeader::readDimensions(ILeStream& stream,
+    std::vector<BpfDimension>& dims)
+{
+    size_t staticCnt = m_staticDims.size();
+
+    dims.resize(m_numDim);
+    for (size_t d = 0; d < staticCnt; d++)
+        dims[d] = m_staticDims[d];
+    return BpfDimension::read(stream, dims, staticCnt);
 }
 
 void BpfHeader::dump()
@@ -93,24 +167,18 @@ void BpfHeader::dump()
     cerr << "End time: " << m_endTime << "!\n";
 }
 
-bool BpfDimension::read(ILeStream& stream, std::vector<BpfDimension>& dims)
+bool BpfDimension::read(ILeStream& stream, std::vector<BpfDimension>& dims,
+    size_t start)
 {
-    for (size_t d = 0; d < dims.size(); ++d)
-    {
+
+    for (size_t d = start; d < dims.size(); ++d)
         stream >> dims[d].m_offset;
-    }
-    for (size_t d = 0; d < dims.size(); ++d)
-    {
+    for (size_t d = start; d < dims.size(); ++d)
         stream >> dims[d].m_min;
-    }
-    for (size_t d = 0; d < dims.size(); ++d)
-    {
+    for (size_t d = start; d < dims.size(); ++d)
         stream >> dims[d].m_max;
-    }
-    for (size_t d = 0; d < dims.size(); ++d)
-    {
+    for (size_t d = start; d < dims.size(); ++d)
         stream.get(dims[d].m_label, 32);
-    }
     return (bool)stream;
 }
 

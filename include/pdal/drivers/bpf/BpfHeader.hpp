@@ -36,6 +36,8 @@
 #include <string>
 #include <vector>
 
+#include <pdal/Log.hpp>
+
 #pragma once
 
 namespace pdal
@@ -60,11 +62,28 @@ enum Enum
 };
 }
 
+struct BpfDimension
+{
+    double m_offset;
+    double m_min;
+    double m_max;
+    std::string m_label;
+
+    static bool read(ILeStream& stream, std::vector<BpfDimension>& dims,
+        size_t start);
+};
+
 struct BpfHeader
 {
+    BpfHeader(LogPtr log) : m_version(0), m_len(0), m_numDim(0),
+        m_compression(0), m_numPts(0), m_coordId(0), m_spacing(0.0),
+        m_startTime(0.0), m_endTime(0.0), m_log(log)
+    {}
+
+    int32_t m_version;
     std::string m_ver;
     int32_t m_len;
-    uint8_t m_numDim;
+    int32_t m_numDim;
     BpfFormat::Enum m_pointFormat;
     uint8_t m_compression;
     int32_t m_numPts;
@@ -74,19 +93,14 @@ struct BpfHeader
     BpfMuellerMatrix m_xform;
     double m_startTime;
     double m_endTime;
+    std::vector<BpfDimension> m_staticDims;
+    LogPtr m_log;
 
     bool read(ILeStream& stream);
+    bool readV3(ILeStream& stream);
+    bool readV1(ILeStream& stream);
+    bool readDimensions(ILeStream& stream, std::vector<BpfDimension>& dims);
     void dump();
-};
-
-struct BpfDimension
-{
-    double m_offset;
-    double m_min;
-    double m_max;
-    std::string m_label;
-
-    static bool read(ILeStream& stream, std::vector<BpfDimension>& dims);
 };
 
 struct BpfUlemHeader
