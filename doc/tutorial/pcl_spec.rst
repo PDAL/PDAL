@@ -326,12 +326,12 @@ Example:
 **Parameters**
 
 setKSearch: float
-  Set the number of k nearest neighbors to use for the feature estimation.
-  [default: 0.0]
+    Set the number of k nearest neighbors to use for the feature estimation.
+    [default: 0.0]
 
 setRadiusSearch: float
-  Set the sphere radius that is to be used for determining the nearest neighbors used for the feature estimation.
-  [default: 1.0]
+    Set the sphere radius that is to be used for determining the nearest
+    neighbors used for the feature estimation. [default: 1.0]
 
 
 
@@ -492,7 +492,7 @@ Example:
 
 setMinNeighborsInRadius: int
   Set the number of neighbors that need to be present in order to be
-  classified as an inliear. [default: 2]
+  classified as an inlier. [default: 2]
 
 setRadiusSearch: float
   Set te radius of the sphere that will determine which points are neighbors.
