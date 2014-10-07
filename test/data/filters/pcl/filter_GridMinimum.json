@@ -1,12 +1,11 @@
 {
     "pipeline":
     {
-        "name": "GridMinimumExample",
         "filters":
         [
             {
                 "name": "GridMinimum",
-                "setResolution": 9.0
+                "setResolution": 1000.0
             }
         ]
     }

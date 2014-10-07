@@ -5,8 +5,8 @@
         [
             {
                 "name": "RadiusOutlierRemoval",
-                "setMinNeighborsInRadius": 1,
-                "setRadiusSearch": 4.0
+                "setMinNeighborsInRadius": 2,
+                "setRadiusSearch": 100.0
             }
         ]
     }

@@ -41,6 +41,8 @@
 
 #include "Support.hpp"
 
+#undef RUN_SLOW_TESTS
+
 BOOST_AUTO_TEST_SUITE(PCLBlockFilterTest)
 
 #ifdef PDAL_HAVE_PCL
@@ -65,11 +67,16 @@ BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_example_passthrough_xml)
 
 
 static void test_filter(const std::string& jsonFile,
-                        size_t expectedPointCount)
+                        size_t expectedPointCount,
+                        bool useThin=false)
 {
     Options options;
-
-    Option filename("filename", Support::datapath("autzen/autzen-point-format-3.las"));
+    
+    const std::string& autzenThick = "autzen/autzen-point-format-3.las";
+    const std::string& autzenThin = "autzen/autzen-thin.las";
+    const std::string& autzen = useThin ? autzenThin : autzenThick;
+        
+    Option filename("filename", Support::datapath(autzen));
     Option debug("debug", true, "");
     Option verbose("verbose", 9, "");
 
@@ -96,9 +103,9 @@ static void test_filter(const std::string& jsonFile,
 }
 
 
-BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_example_PassThrough)
+BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_example_PassThrough_1)
 {
-    test_filter("filters/pcl/example_PassThrough.json", 81);
+    test_filter("filters/pcl/example_PassThrough_1.json", 81);
 }
 
 
@@ -108,60 +115,127 @@ BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_example_PassThrough_2)
 }
 
 
-BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_example_pmf)
+BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_example_PMF_1)
 {
-    test_filter("filters/pcl/example_PMF.json", 93);
+    test_filter("filters/pcl/example_PMF_1.json", 93);
 }
 
 
-BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_example_pmf_2)
+BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_example_PMF_2)
 {
     test_filter("filters/pcl/example_PMF_2.json", 94);
 }
 
+
+//
+// For the filter tests, we attempt to verify that each parameter "works" (as
+// defined by affecting at least one point, using a setting other than the
+// default).
+//
+
 BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_filter_APMF)
 {
-    //test_filter("filters/pcl/filter_APMF.json", 9999);
+    // BUG: tests still to be developed (seems to either hang or crash inside
+    // Eigen)
+    
+    //test_filter("filters/pcl/filter_APMF_1.json", 106, false);
 }
 
 BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_filter_ConditionalRemoval)
 {
-    //test_filter("filters/pcl/filter_ConditionalRemoval.json", 9999);
+    // NormalEstimation: KSearch 0, RadiusSearch 50
+    // ConditionalRemoval: (0.0, 0.087156)
+    test_filter("filters/pcl/filter_ConditionalRemoval_1.json", 158, true);
+
+    // NormalEstimation: KSearch 0, RadiusSearch 50
+    // ConditionalRemoval: (0.01, 0.10)
+    test_filter("filters/pcl/filter_ConditionalRemoval_2.json", 160, true);
 }
 
 BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_filter_GridMinimum)
 {
-    //test_filter("filters/pcl/filter_GridMinimum.json", 9999);
+    test_filter("filters/pcl/filter_GridMinimum.json", 19);
 }
 
 BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_filter_NormalEstimation)
 {
-    //test_filter("filters/pcl/filter_NormalEstimation.json", 9999);
+    // NormalEstimation: KSearch default (0), RadiusSearch 50
+    test_filter("filters/pcl/filter_NormalEstimation_1.json", 158, true);
+
+    // NormalEstimation: KSearch default (0), RadiusSearch 51
+    test_filter("filters/pcl/filter_NormalEstimation_2.json", 162, true);
+
+    // BUG: need to test KSearch values
 }
 
 BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_filter_PassThrough)
 {
-    //test_filter("filters/pcl/filter_PassThrough.json", 81);
+    // test FilterLimits for Z
+    test_filter("filters/pcl/filter_PassThrough_1.json", 81);
+
+    // test FilterLimits for X
+    test_filter("filters/pcl/filter_PassThrough_2.json", 33);
 }
 
 BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_filter_PMF)
 {
-    //test_filter("filters/pcl/filter_PMF.json", 9999);
+    // explicitly with all defaults
+    // (with the default autzen file, this isn't a meaningful test: it will just
+    // verify the filter is minimally functioning)
+    test_filter("filters/pcl/filter_PMF_1.json", 106, false);
+
+#if RUN_SLOW_TESTS
+    // explicitly with all defaults
+    test_filter("filters/pcl/filter_PMF_1.json", 9223, true);
+    
+    // with CellSize=3
+    test_filter("filters/pcl/filter_PMF_2.json", 8298, true);
+
+    // with WindowSize=50
+    test_filter("filters/pcl/filter_PMF_3.json", 7970, true);
+
+    // with Slope=0.25
+    test_filter("filters/pcl/filter_PMF_4.json", 9206, true);
+
+    // with MaxDistance=5
+    test_filter("filters/pcl/filter_PMF_5.json", 9373, true);
+
+    // with InitialDistance=0.25
+    test_filter("filters/pcl/filter_PMF_6.json", 9229, true);
+
+    // with Base=3
+    test_filter("filters/pcl/filter_PMF_7.json", 8298, true);
+
+    // with Exponential=false
+    test_filter("filters/pcl/filter_PMF_8.json", 9138, true);
+
+    // with Negative=true
+    test_filter("filters/pcl/filter_PMF_9.json", 1430, true);
+#endif
 }
 
 BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_filter_RadiusOutlierRemoval)
 {
-    //test_filter("filters/pcl/filter_RadiusOutlierRemoval.json", 9999);
+    // test MinNeighbors=1 and RadiusSearch=200
+    test_filter("filters/pcl/filter_RadiusOutlierRemoval_1.json", 60);
+
+    // test MinNeighbors=2 and RadiusSearch=100
+    test_filter("filters/pcl/filter_RadiusOutlierRemoval_2.json", 3);
 }
 
 BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_filter_StatisticalOutlierRemoval)
 {
-    //test_filter("filters/pcl/filter_StatisticalOutlierRemoval.json", 9999);
+    // test StdDev=2, MeanK=1.5
+    test_filter("filters/pcl/filter_StatisticalOutlierRemoval_1.json", 96);
+
+    // test StdDev=5, MeanK=0(default)
+    test_filter("filters/pcl/filter_StatisticalOutlierRemoval_2.json", 63);
 }
 
 BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_filter_VoxelGrid)
 {
-    //test_filter("filters/pcl/filter_VoxelGrid.json", 9999);
+    // test LeafSize
+    test_filter("filters/pcl/filter_VoxelGrid.json", 81);
 }
 
 #endif // PDAL_HAVE_PCL
