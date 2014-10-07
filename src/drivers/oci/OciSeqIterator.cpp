@@ -93,13 +93,23 @@ point_count_t OciSeqIterator::readDimMajor(PointBuffer& buffer, BlockPtr block,
     for (size_t d = 0; d < m_dims.size(); ++d)
     {
         PointId nextId = startId;
-        char *pos = seekDimMajor(d, block);
+        // if the block doesn't have the dimension, don't 
+        // copy it
+        Dimension* source_d = block->schema->getDimensionPtr(m_dims[d]->getName());
+        if (!source_d)
+            continue;
+        
+        // char *pos = seekDimMajor(d, block);
+        char* pos =  block->data() +
+            (source_d->getByteOffset() * block->numPoints()) +
+            (source_d->getByteSize() * block->numRead());
+        
         blockRemaining = numRemaining;
         numRead = 0;
         while (numRead < numPts && blockRemaining > 0)
         {
             buffer.setRawField(*m_dims[d], nextId, pos);
-            pos += m_dims[d]->getByteSize();
+            pos += source_d->getByteSize();
             nextId++;
             numRead++;
             blockRemaining--;
@@ -117,13 +127,24 @@ point_count_t OciSeqIterator::readPointMajor(PointBuffer& buffer,
     PointId nextId = buffer.size();
     point_count_t numRead = 0;
 
-    char *pos = seekPointMajor(block);
+    // char *pos = seekPointMajor(block);
+
+    
     while (numRead < numPts && numRemaining > 0)
     {
         for (size_t d = 0; d < m_dims.size(); ++d)
         {
+            Dimension* source_d = block->schema->getDimensionPtr(m_dims[d]->getName());
+            if (!source_d)
+            {
+                continue;            
+            }
+            char *pos = block->data() + 
+                       ((block->numRead()+numRead) * block->schema->getByteSize()) +
+                        source_d->getByteOffset();
+
             buffer.setRawField(*m_dims[d], nextId, pos);
-            pos += m_dims[d]->getByteSize();
+            // pos += source_d->getByteSize();
         }
         numRemaining--;
         nextId++;
@@ -171,6 +192,8 @@ point_count_t OciSeqIterator::readImpl(PointBuffer& buffer, point_count_t count)
         totalNumRead += numRead;
         if (m_normalizeXYZ)
             normalize(buffer, m_block, bufBegin, bufEnd);
+        if (m_setPointSourceId)
+            setpointids(buffer, m_block, bufBegin, bufEnd);
     }
     return totalNumRead;
 }
@@ -213,23 +236,43 @@ void OciSeqIterator::normalize(PointBuffer& buffer, BlockPtr block,
     // Get the value from the buffer unscaled.  Scale the value as specified
     // in the block (the clould's scaling) and then set the value back into
     // the buffer, taking the final scaling out.
+    
     for (PointId i = begin; i < end; ++i)
     {
         double d;
-        d = buffer.getFieldAs<double>(*m_dimX, i, false);
-        d = d * block->xScale() + block->xOffset();
-        buffer.setFieldUnscaled(*m_dimX, i, d);
+        int32_t x,y,z;
+        x = buffer.getFieldAs<int32_t>(*m_dimX, i, false);
+        d = x * block->xScale() + block->xOffset();
+        x = m_dimX->removeScaling(d);
+        buffer.setRawField(*m_dimX, i, &x);
 
-        d = buffer.getFieldAs<double>(*m_dimY, i, false);
-        d = d * block->yScale() + block->yOffset();
-        buffer.setFieldUnscaled(*m_dimY, i, d);
+        y = buffer.getFieldAs<int32_t>(*m_dimY, i, false);
+        d = y * block->yScale() + block->yOffset();
+        y = m_dimY->removeScaling(d);
+        buffer.setRawField(*m_dimY, i, &y);
 
-        d = buffer.getFieldAs<double>(*m_dimZ, i, false);
-        d = d * block->zScale() + block->zOffset();
-        buffer.setFieldUnscaled(*m_dimZ, i, d);
+        z = buffer.getFieldAs<int32_t>(*m_dimZ, i, false);
+        d = z * block->zScale() + block->zOffset();
+        z = m_dimZ->removeScaling(d);
+        buffer.setRawField(*m_dimZ, i, &z);
     }
 }
 
+void OciSeqIterator::setpointids(PointBuffer& buffer, BlockPtr block,
+    PointId begin, PointId end)
+{
+
+    Dimension const* point_source_field = buffer.getSchema().getDimensionPtr("PointSourceId");
+    if (point_source_field)
+    {
+        uint16_t t(block->obj_id);
+        for (PointId i = begin; i < end; ++i)
+        {
+            buffer.setField<uint16_t>(*point_source_field, i, t);
+        }
+    }
+    
+}
 
 // Read a block (set of points) from the database.
 bool OciSeqIterator::readOci(Statement stmt, BlockPtr block)

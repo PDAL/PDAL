@@ -41,7 +41,7 @@
 #include <boost/property_tree/xml_parser.hpp>
 
 namespace pdal { namespace kernel {
-    
+
 Delta::Delta(int argc, const char* argv[])
     : Application(argc, argv, "delta")
     , m_outputStream(0)
@@ -82,7 +82,7 @@ void Delta::addSwitches()
 
     po::options_description* processing_options =
         new po::options_description("processing options");
-    
+
     processing_options->add_options();
     addSwitchSet(processing_options);
 
@@ -117,14 +117,14 @@ std::map<Point, Point>* cumulatePoints(PointBuffer& source_data,
     Dimension const& sDimX = source_schema.getDimension("X");
     Dimension const& sDimY = source_schema.getDimension("Y");
     Dimension const& sDimZ = source_schema.getDimension("Z");
-    
+
 
     for (uint32_t i = 0; i < count; ++i)
     {
         double sx = source_data.getFieldAs<double>(sDimX, i);
         double sy = source_data.getFieldAs<double>(sDimY, i);
         double sz = source_data.getFieldAs<double>(sDimZ, i);
-        
+
         std::vector<std::size_t> ids = index->neighbors(sx, sy, sz, 1);
         if (!ids.size())
         {
@@ -132,12 +132,12 @@ std::map<Point, Point>* cumulatePoints(PointBuffer& source_data,
 			oss << "unable to find point for id '"  << i <<"'";
             throw app_runtime_error(oss.str() );
 		}
-        
+
         std::size_t id = ids[0];
         double cx = candidate_data.getFieldAs<double>(cDimX, id);
         double cy = candidate_data.getFieldAs<double>(cDimY, id);
         double cz = candidate_data.getFieldAs<double>(cDimZ, id);
-        
+
         Point s(sx, sy, sz, i);
         Point c(cx, cy, cz, id);
         output->insert(std::pair<Point, Point>(s, c));
@@ -146,7 +146,7 @@ std::map<Point, Point>* cumulatePoints(PointBuffer& source_data,
         double yd = sy - cy;
         double zd = sz - cz;
     }
-  
+
     return output;
 }
 
@@ -162,37 +162,37 @@ void Delta::outputDetail(PointBuffer& source_data, PointBuffer& candidate_data,
     Dimension const& sDimX = source_schema.getDimension("X");
     Dimension const& sDimY = source_schema.getDimension("Y");
     Dimension const& sDimZ = source_schema.getDimension("Z");
-    
+
     bool bWroteHeader(false);
-    
+
     std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
-    
+
     uint32_t count(std::min(source_data.size(), candidate_data.size()));
-    
+
     boost::property_tree::ptree output;
     for (uint32_t i = 0; i < count; ++i)
     {
         double sx = source_data.getFieldAs<double>(sDimX, i);
         double sy = source_data.getFieldAs<double>(sDimY, i);
-        double sz = source_data.getFieldAs<double>(sDimZ, i);                
-        
+        double sz = source_data.getFieldAs<double>(sDimZ, i);
+
         std::vector<std::size_t> ids = m_index->neighbors(sx, sy, sz, 1);
-        
+
         if (!ids.size())
         {
 			std::ostringstream oss;
 			oss << "unable to find point for id '"  << i <<"'";
             throw app_runtime_error(oss.str() );
 		}
-        
+
         std::size_t id = ids[0];
         double cx = candidate_data.getFieldAs<double>(cDimX, id);
         double cy = candidate_data.getFieldAs<double>(cDimY, id);
         double cz = candidate_data.getFieldAs<double>(cDimZ, id);
-        
+
         Point s(sx, sy, sz, id);
         Point c(cx, cy, cz, id);
-        
+
         double xd = sx - cx;
         double yd = sy - cy;
         double zd = sz - cz;
@@ -200,9 +200,9 @@ void Delta::outputDetail(PointBuffer& source_data, PointBuffer& candidate_data,
         pt.put<boost::int32_t>("i", i);
         pt.put<float>("xd", xd);
         pt.put<float>("yd", yd);
-        if (m_3d)        
+        if (m_3d)
             pt.put<float>("zd", zd);
-        
+
         output.add_child("delta", pt);
 
     }
@@ -213,7 +213,7 @@ void Delta::outputDetail(PointBuffer& source_data, PointBuffer& candidate_data,
     } else if (m_useJSON)
     {
         boost::property_tree::write_json(ostr, output);
-        
+
     } else
     {
         writeHeader(ostr, m_3d);
@@ -225,11 +225,11 @@ void Delta::outputDetail(PointBuffer& source_data, PointBuffer& candidate_data,
             ostr.setf(std::ios_base::fixed, std::ios_base::floatfield);
             ostr.precision(precision);
             ostr << b->second.get<float>("xd") << ",";
-  
+
             precision = Utils::getStreamPrecision(cDimY.getNumericScale());
             ostr.precision(precision);
             ostr << b->second.get<float>("yd");
-    
+
             if (m_3d)
             {
                 ostr << ",";
@@ -237,10 +237,11 @@ void Delta::outputDetail(PointBuffer& source_data, PointBuffer& candidate_data,
                 ostr.precision(precision);
                 ostr << b->second.get<float>("zd");
             }
+            ostr << std::endl;
         }
-   
-    
-        ostr << std::endl;        
+
+
+        ostr << std::endl;
     }
 
 
@@ -249,7 +250,7 @@ void Delta::outputDetail(PointBuffer& source_data, PointBuffer& candidate_data,
     if (m_outputStream)
     {
         FileUtils::closeFile(m_outputStream);
-    }    
+    }
 }
 
 void Delta::outputRST(boost::property_tree::ptree const& tree) const
@@ -259,34 +260,34 @@ void Delta::outputRST(boost::property_tree::ptree const& tree) const
     std::cout << " Delta summary for source '" << m_sourceFile << "' and candidate '" << m_candidateFile <<"'" << std::endl;
     std::cout << headline << std::endl;
     std::cout << std::endl;
-    
+
     std::string thead("----------- --------------- --------------- --------------");
     std::cout << thead << std::endl;
     std::cout << " Dimension       X             Y                  Z    " << std::endl;
     std::cout << thead << std::endl;
-    
+
     boost::format fmt("%.4f");
- 
-    
-    
+
+
+
     std::cout << " Min        " << fmt % tree.get<float>("min.x") << "            " << fmt % tree.get<float>("min.y") << "            " << fmt % tree.get<float>("min.z")<<std::endl;
     std::cout << " Min        " << fmt % tree.get<float>("max.x") << "            " << fmt % tree.get<float>("max.y") << "            " << fmt % tree.get<float>("max.z")<<std::endl;
     std::cout << " Mean       " << fmt % tree.get<float>("mean.x") << "            " << fmt % tree.get<float>("mean.y") << "            " << fmt % tree.get<float>("mean.z")<<std::endl;
     std::cout << thead << std::endl;
-    
+
 }
 
 
 void Delta::outputJSON(boost::property_tree::ptree const& tree) const
 {
     boost::property_tree::write_json(std::cout, tree);
-    
+
 }
 
 void Delta::outputXML(boost::property_tree::ptree const& tree) const
 {
     boost::property_tree::write_xml(std::cout, tree);
-    
+
 }
 
 int Delta::execute()
@@ -330,13 +331,13 @@ int Delta::execute()
 //ABELL - Need indexing.
 //    candidate_data.build(m_3d);
     uint32_t count(std::min(sourceCount, candidateCount));
-    
+
     // Index the candidate data.
     m_index = std::unique_ptr<KDIndex>(new KDIndex(*candidateBuf));
 
-    
+
     m_index->build(m_3d);
-    
+
     std::unique_ptr<std::map<Point, Point>>
         points(cumulatePoints(*sourceBuf, *candidateBuf, m_index.get()));
     if (m_OutputDetail)
@@ -344,7 +345,7 @@ int Delta::execute()
         outputDetail(*sourceBuf, *candidateBuf, points.get());
         return 0;
     }
-    
+
     for (auto i = points->begin(); i != points->end(); ++i)
     {
         Point const& s = i->first;
@@ -367,7 +368,7 @@ int Delta::execute()
     double smaxx  = (boost::accumulators::max)(m_summary_x);
     double smaxy  = (boost::accumulators::max)(m_summary_y);
     double smaxz  = (boost::accumulators::max)(m_summary_z);
-    
+
     double smeanx  = (boost::accumulators::mean)(m_summary_x);
     double smeany  = (boost::accumulators::mean)(m_summary_y);
     double smeanz  = (boost::accumulators::mean)(m_summary_z);
@@ -383,7 +384,7 @@ int Delta::execute()
     output.put<float>("mean.z", smeanz);
     output.put<std::string>("source", m_sourceFile);
     output.put<std::string>("candidate", m_candidateFile);
-    
+
     if (m_useJSON)
         outputJSON(output);
     else if (m_useXML)

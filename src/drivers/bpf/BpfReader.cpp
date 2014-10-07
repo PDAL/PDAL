@@ -69,6 +69,17 @@ void BpfReader::initialize()
         readPolarData();
     }
 
+#ifdef PDAL_HAVE_GDAL
+    uint32_t zone(abs(m_header.m_coordId));
+    std::string code("");
+    if (m_header.m_coordId > 0)
+        code = "EPSG:269" + boost::lexical_cast<std::string>(zone);
+    else
+        code = "EPSG:327" + boost::lexical_cast<std::string>(zone);
+    SpatialReference srs(code);
+    setSpatialReference(srs);
+#endif
+
     // Fast forward file to end of header as reported by base header.
     std::streampos pos = m_stream.position();
     if (pos > m_header.m_len)

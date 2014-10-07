@@ -56,13 +56,33 @@ namespace pdal
 {
 
 
+namespace
+{
+    std::string sanitize(const std::string& name)
+    {
+        auto ischar = [](char c)
+        {
+            return c == ';' || c == ':' || c == ' ' || c == '\'' || c == '\"';
+        };
+
+        std::string v;
+        for (size_t i = 0; i < name.size(); ++i)
+        {
+            if (ischar(name[i]))
+                v += '_';
+            else
+                v += name[i];
+        }
+        return v;
+    }
+}
+
 
 Dimension::Dimension(std::string const& name,
                      dimension::Interpretation interpretation,
                      dimension::size_type sizeInBytes,
                      std::string description)
-    : m_name(name)
-    , m_flags(0)
+    : m_flags(0)
     , m_byteSize(sizeInBytes)
     , m_description(description)
     , m_min(0.0)
@@ -76,6 +96,8 @@ Dimension::Dimension(std::string const& name,
     , m_parentDimensionID(boost::uuids::nil_uuid())
 
 {
+
+    m_name = sanitize(name);
     createUUID();
 
     if (!m_name.size())
@@ -142,7 +164,7 @@ boost::property_tree::ptree Dimension::toPTree() const
     dim.put("byteoffset", getByteOffset());
     dim.put("isIgnored", isIgnored());
     dim.put("interpretation", getInterpretationName());
-    
+
     std::stringstream oss;
 
     dimension::id t =  getUUID();

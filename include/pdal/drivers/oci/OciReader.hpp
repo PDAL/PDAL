@@ -94,6 +94,7 @@ private:
     std::string m_schemaFile;
     std::string m_connSpec;
     bool m_normalizeXYZ;
+    bool m_setPointSourceId;
     boost::optional<double> m_offsetX;
     boost::optional<double> m_offsetY;
     boost::optional<double> m_offsetZ;

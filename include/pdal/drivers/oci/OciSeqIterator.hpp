@@ -58,9 +58,9 @@ class OciSeqIterator : public ReaderSequentialIterator
 {
 public:
     OciSeqIterator(Statement stmt, BlockPtr block,
-        std::vector<Dimension *> dims, bool normalizeXYZ) :
+        std::vector<Dimension *> dims, bool normalizeXYZ, bool setPointSource) :
         m_stmt(stmt), m_block(block), m_dims(dims),
-        m_normalizeXYZ(normalizeXYZ), m_atEnd(false)
+        m_normalizeXYZ(normalizeXYZ), m_setPointSourceId(setPointSource), m_atEnd(false)
     {
         for (size_t i = 0; i < m_dims.size(); ++i)
         {
@@ -95,6 +95,8 @@ private:
     char *seekPointMajor(BlockPtr block);
     void normalize(PointBuffer& buffer, BlockPtr block, PointId begin,
         PointId end);
+    void setpointids(PointBuffer& buffer, BlockPtr block,
+            PointId begin, PointId end);
     bool readOci(Statement stmt, BlockPtr block);
     Schema *findSchema(Statement stmt, BlockPtr block);
     pdal::Bounds<double> getBounds(Statement stmt, BlockPtr block);
@@ -103,6 +105,7 @@ private:
     BlockPtr m_block;
     std::vector<Dimension *> m_dims;
     bool m_normalizeXYZ;
+    bool m_setPointSourceId;
     bool m_atEnd;
     Dimension *m_dimX;
     Dimension *m_dimY;

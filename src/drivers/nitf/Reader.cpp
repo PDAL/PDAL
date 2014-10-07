@@ -122,6 +122,8 @@ void NitfReader::initialize()
 
     // Initialize the LAS stuff with its own metadata node.
     MetadataNode lasNode = m_metadata.add(las::Reader::getName());
+    m_metadata.add("LAS_OFFSET", m_offset);
+    m_metadata.add("LAS_LENGTH", m_length);
     las::Reader::initialize(lasNode);
 }
 

@@ -142,6 +142,8 @@ public:
     Scale m_scaleY;
     Scale m_scaleZ;
     schema::Orientation m_orientation;
+    Schema* schema;
+    std::vector<Dimension> dimensions;
     bool m_fetched;  // Set when fetched but not initialized
 };
 typedef std::shared_ptr<Block> BlockPtr;
