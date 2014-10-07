@@ -69,7 +69,7 @@ void BpfReader::initialize()
     uint32_t zone(abs(m_header.m_coordId));
     std::string code("");
     if (m_header.m_coordId > 0)
-        code = "EPSG:269" + boost::lexical_cast<std::string>(zone);
+        code = "EPSG:326" + boost::lexical_cast<std::string>(zone);
     else
         code = "EPSG:327" + boost::lexical_cast<std::string>(zone);
     SpatialReference srs(code);
