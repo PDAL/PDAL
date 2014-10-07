@@ -82,4 +82,7 @@ BOOST_GLOBAL_FIXTURE(TestConfig)
 //
 //     --detect_memory_leaks=X # X = 0|1  (default=1)
 //
-//     <path>                  # path to data (default=../test/data)
+//     --run_test=X            # where X is a test suite name
+//                               (note test case names don't seem to work)
+//
+//     <path>                  # path to data (default is <pdal>/test/data)
