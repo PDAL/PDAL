@@ -212,24 +212,10 @@ public:
         { return m_pointFormat; }
     bool pointFormatSupported() const
     {
-        static const PointFormat validFormats[] = { 0, 1, 2, 3 };
-        static const PointFormat valid14Formats[] = { 0, 1, 2, 3, 6, 7, 8 };
-
-        const PointFormat *formats;
-        size_t size;
-        if (verionAtLeast(1, 4))
-        {
-            formats = &valid14Formats[0];
-            size = sizeof(valid14Formats);
-        }
+        if (versionAtLeast(1, 4))
+            return m_pointFormat <= 10 && !hasWave();
         else
-        {
-            formats = &validFormats[0];
-            size = sizeof(validFormats);
-        }
-
-        return (std::any_of(formats, formats + size,
-            [this](PointFormat fmt) { return fmt == m_pointFormat; }));
+            return m_pointFormat <= 5 && !hasWave();
     }
 
     /// The length in bytes of each point.  All points in the file are
@@ -325,19 +311,25 @@ public:
     bool hasTime() const
     {
         PointFormat f = pointFormat();
-        return f == 1 || f == 3 || f == 4 || f == 5;
+        return f == 1 || f >= 3;
     }
 
     bool hasColor() const
     {
         PointFormat f = pointFormat();
-        return f == 2 || f == 3 || f == 5;
+        return f == 2 || f == 3 || f == 5 || f == 7 || f == 8 || f == 10;
     }
 
     bool hasWave() const
     {
         PointFormat f = pointFormat();
-        return f == 4 || f == 5;
+        return f == 4 || f == 5 || f == 9 || f == 10;
+    }
+
+    bool hasInfrared() const
+    {
+        PointFormat f = pointFormat();
+        return f == 8;
     }
 
     /// Returns a property_tree that contains

@@ -106,6 +106,8 @@ private:
     virtual bool eof()
         { return m_index >= getNumPoints(); }
     void loadPoint(PointBuffer& data, char *buf, size_t bufsize);
+    void loadPointV10(PointBuffer& data, char *buf, size_t bufsize);
+    void loadPointV14(PointBuffer& data, char *buf, size_t bufsize);
 
     Reader& operator=(const Reader&); // not implemented
     Reader(const Reader&); // not implemented

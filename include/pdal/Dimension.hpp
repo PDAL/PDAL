@@ -177,7 +177,9 @@ enum Enum
     ZBodyAngRate,
     Flag,
     Mark,
-    Alpha
+    Alpha,
+    ScanChannel,
+    Infrared
 };
 } // namespace Id
 typedef std::vector<Id::Enum> IdList;
@@ -287,6 +289,10 @@ inline std::string description(Id::Enum id)
         return "Mark";
     case Id::Flag:
         return "Flag";
+    case Id::ScanChannel:
+        return "Scan Channel";
+    case Id::Infrared:
+        return "Near Infrared";
     case Id::Unknown:
         return "";
     }
@@ -380,6 +386,10 @@ inline Id::Enum id(std::string s)
         return Id::Mark;
     else if (s == "FLAG")
         return Id::Flag;
+    else if (s == "SCANCHANNEL")
+        return Id::ScanChannel;
+    else if (s == "INFRARED" || s == "NEARINFRARED")
+        return Id::Infrared;
     return Id::Unknown;
 }
 
@@ -471,6 +481,10 @@ inline std::string name(Id::Enum id)
         return "Mark";
     case Id::Flag:
         return "Flag";
+    case Id::ScanChannel:
+        return "ScanChannel";
+    case Id::Infrared:
+        return "Infrared";
     case Id::Unknown:
         return "";
     }
@@ -568,6 +582,10 @@ inline Type::Enum defaultType(Id::Enum id)
         return Unsigned8;
     case Id::Flag:
         return Unsigned8;
+    case Id::ScanChannel:
+        return Unsigned8;
+    case Id::Infrared:
+        return Unsigned16;
     case Id::Unknown:
         throw pdal_error("No type for undefined dimension ID.");
     }

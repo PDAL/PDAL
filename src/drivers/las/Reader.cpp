@@ -457,6 +457,15 @@ point_count_t Reader::read(PointBuffer& data, point_count_t count)
 
 void Reader::loadPoint(PointBuffer& data, char *buf, size_t bufsize)
 {
+    if (m_lasHeader.versionAtLeast(1, 4))
+        loadPointV14(data, buf, bufsize);
+    else
+        loadPointV10(data, buf, bufsize);
+}
+
+
+void Reader::loadPointV10(PointBuffer& data, char *buf, size_t bufsize)
+{
     // Turn a raw buffer (array of bytes) into a stream buf.
     Charbuf charstreambuf(buf, bufsize, 0);
 
@@ -519,6 +528,81 @@ void Reader::loadPoint(PointBuffer& data, char *buf, size_t bufsize)
         data.setField(Dimension::Id::Red, nextId, red);
         data.setField(Dimension::Id::Green, nextId, green);
         data.setField(Dimension::Id::Blue, nextId, blue);
+    }
+}
+
+void Reader::loadPointV14(PointBuffer& data, char *buf, size_t bufsize)
+{
+    // Turn a raw buffer (array of bytes) into a stream buf.
+    Charbuf charstreambuf(buf, bufsize, 0);
+
+    // Make an input stream based on the stream buf.
+    std::istream stream(&charstreambuf);
+
+    // Wrap the input stream with byte ordering.
+    ILeStream istream(&stream);
+
+    PointId nextId = data.size();
+
+    int32_t xi, yi, zi;
+    istream >> xi >> yi >> zi;
+
+    const LasHeader& h = m_lasHeader;
+            
+    double x = xi * h.scaleX() + h.offsetX();
+    double y = yi * h.scaleY() + h.offsetY();
+    double z = zi * h.scaleZ() + h.offsetZ();
+
+    uint16_t intensity;
+    uint8_t returnInfo;
+    uint8_t flags;
+    uint8_t classification;
+    uint8_t user;
+    int16_t scanAngle;
+    uint16_t pointSourceId;
+    double gpsTime;
+
+    istream >> intensity >> returnInfo >> flags >> classification >> user >>
+        scanAngle >> pointSourceId >> gpsTime;
+
+    uint8_t returnNum = returnInfo & 0x0F;
+    uint8_t numReturns = (returnInfo >> 4) & 0x0F;
+    uint8_t classFlags = flags & 0x0F;
+    uint8_t scanChannel = (flags >> 4) & 0x03;
+    uint8_t scanDirFlag = (flags >> 6) & 0x01;
+    uint8_t flight = (flags >> 7) & 0x01;
+            
+    //ABELL - Need to do something with the classFlags;
+    data.setField(Dimension::Id::X, nextId, x);
+    data.setField(Dimension::Id::Y, nextId, y);
+    data.setField(Dimension::Id::Z, nextId, z);
+    data.setField(Dimension::Id::Intensity, nextId, intensity);
+    data.setField(Dimension::Id::ReturnNumber, nextId, returnNum);
+    data.setField(Dimension::Id::NumberOfReturns, nextId, numReturns);
+    data.setField(Dimension::Id::ScanChannel, nextId, scanChannel);
+    data.setField(Dimension::Id::ScanDirectionFlag, nextId, scanDirFlag);
+    data.setField(Dimension::Id::EdgeOfFlightLine, nextId, flight);
+    data.setField(Dimension::Id::Classification, nextId, classification);
+    data.setField(Dimension::Id::ScanAngleRank, nextId, scanAngle * .006);
+    data.setField(Dimension::Id::UserData, nextId, user);
+    data.setField(Dimension::Id::PointSourceId, nextId, pointSourceId);
+    data.setField(Dimension::Id::GpsTime, nextId, gpsTime);
+
+    if (h.hasColor())
+    {
+        uint16_t red, green, blue;
+        istream >> red >> green >> blue;
+        data.setField(Dimension::Id::Red, nextId, red);
+        data.setField(Dimension::Id::Green, nextId, green);
+        data.setField(Dimension::Id::Blue, nextId, blue);
+    }
+
+    if (h.hasInfrared())
+    {
+        uint16_t nearInfraRed;
+
+        istream >> nearInfraRed;
+        data.setField(Dimension::Id::Infrared, nextId, nearInfraRed);
     }
 }
 
