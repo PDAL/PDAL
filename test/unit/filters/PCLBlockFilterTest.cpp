@@ -34,6 +34,8 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include <pdal/PipelineManager.hpp>
+#include <pdal/PipelineReader.hpp>
 #include <pdal/drivers/las/Reader.hpp>
 #include <pdal/filters/PCLBlock.hpp>
 
@@ -45,7 +47,24 @@ BOOST_AUTO_TEST_SUITE(PCLBlockFilterTest)
 
 using namespace pdal;
 
-BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_passthrough)
+
+BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_example_passthrough_xml)
+{
+    PipelineManager pipeline;
+    PipelineReader pipelineReader(pipeline);
+    pipelineReader.readPipeline(Support::datapath("filters/pcl/passthrough.xml"));
+
+    pipeline.execute();
+    PointContext ctx = pipeline.context();
+
+    PointBufferSet pbSet = pipeline.buffers();
+    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    PointBufferPtr buf = *pbSet.begin();
+    BOOST_CHECK_EQUAL(buf->size(), 81);
+}
+
+
+BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_example_passthrough_json)
 {
     Options options;
 
@@ -69,26 +88,23 @@ BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_passthrough)
     PointContext ctx;
     pcl_block.prepare(ctx);
     PointBufferSet pbSet = pcl_block.execute(ctx);
+
     BOOST_CHECK_EQUAL(pbSet.size(), 1);
     PointBufferPtr buf = *pbSet.begin();
-
     BOOST_CHECK_EQUAL(buf->size(), 81);
 }
 
-BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_outlier_removal)
+
+BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_example_outlier_json)
 {
     Options options;
     Option filename("filename", Support::datapath("autzen/autzen-point-format-3.las"));
-    Option debug("debug", true, "");
-    Option verbose("verbose", 9, "");
     options.add(filename);
-    options.add(debug);
-    options.add(verbose);
 
     drivers::las::Reader reader(options);
 
     Option fname("filename",
-        Support::datapath("filters/pcl/outlier_removal.json"));
+                 Support::datapath("filters/pcl/passthrough_outlier_removal.json"));
     Options filter_options;
     filter_options.add(fname);
     filters::PCLBlock pcl_block(filter_options);
@@ -100,10 +116,60 @@ BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_outlier_removal)
     BOOST_CHECK_EQUAL(pbSet.size(), 1);
     PointBufferPtr buf = *pbSet.begin();
 
-    BOOST_CHECK_EQUAL(buf->size(), 100);
+    BOOST_CHECK_EQUAL(buf->size(), 50);
 }
+
+
+BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_example_pmf_json)
+{
+    Options options;
+    Option filename("filename", Support::datapath("autzen/autzen-point-format-3.las"));
+    options.add(filename);
+
+    drivers::las::Reader reader(options);
+
+    Option fname("filename",
+        Support::datapath("filters/pcl/progressive_morphological_filter.json"));
+    Options filter_options;
+    filter_options.add(fname);
+    filters::PCLBlock pcl_block(filter_options);
+    pcl_block.setInput(&reader);
+
+    PointContext ctx;
+    pcl_block.prepare(ctx);
+    PointBufferSet pbSet = pcl_block.execute(ctx);
+    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    PointBufferPtr buf = *pbSet.begin();
+
+    BOOST_CHECK_EQUAL(buf->size(), 93);
+}
+
+
+BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_pmf2_json)
+{
+    Options options;
+    Option filename("filename", Support::datapath("autzen/autzen-point-format-3.las"));
+    options.add(filename);
+
+    drivers::las::Reader reader(options);
+
+    Option fname("filename",
+        Support::datapath("filters/pcl/progressive_morphological_filter2.json"));
+    Options filter_options;
+    filter_options.add(fname);
+    filters::PCLBlock pcl_block(filter_options);
+    pcl_block.setInput(&reader);
+
+    PointContext ctx;
+    pcl_block.prepare(ctx);
+    PointBufferSet pbSet = pcl_block.execute(ctx);
+    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    PointBufferPtr buf = *pbSet.begin();
+
+    BOOST_CHECK_EQUAL(buf->size(), 94);
+}
+
 
 #endif // PDAL_HAVE_PCL
 
 BOOST_AUTO_TEST_SUITE_END()
-
