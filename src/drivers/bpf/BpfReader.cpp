@@ -62,6 +62,9 @@ void BpfReader::initialize()
     if (!m_header.read(m_stream))
         return;
 
+    if (!m_header.readDimensions(m_stream, m_dims))
+        return;
+
 #ifdef PDAL_HAVE_GDAL
     uint32_t zone(abs(m_header.m_coordId));
     std::string code("");
@@ -73,17 +76,16 @@ void BpfReader::initialize()
     setSpatialReference(srs);
 #endif
 
-    m_dims.insert(m_dims.end(), m_header.m_numDim, BpfDimension());
-    if (!BpfDimension::read(m_stream, m_dims))
-        return;
-
-    readUlemData();
-    if (!m_stream)
-        return;
-    readUlemFiles();
-    if (!m_stream)
-        return;
-    readPolarData();
+    if (m_header.m_version >= 3)
+    {
+        readUlemData();
+        if (!m_stream)
+            return;
+        readUlemFiles();
+        if (!m_stream)
+            return;
+        readPolarData();
+    }
 
     // Fast forward file to end of header as reported by base header.
     std::streampos pos = m_stream.position();

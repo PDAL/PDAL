@@ -52,7 +52,7 @@ public:
     SET_STAGE_LINK("http://pdal.io/stages/drivers.bpf.reader.html")
     SET_STAGE_ENABLED(true)
 
-    BpfReader(const Options& options) : Reader(options)
+    BpfReader(const Options& options) : Reader(options), m_header(log())
         {}
 
     virtual point_count_t numPoints() const
