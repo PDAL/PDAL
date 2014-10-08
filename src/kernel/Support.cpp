@@ -104,12 +104,13 @@ Writer* AppSupport::makeWriter(const std::string& outputFile, Stage *stage)
     if (driver.empty())
         throw app_runtime_error("Cannot determine output file type of " +
             outputFile);
-    factory.inferWriterOptionsChanges(outputFile);
+    Options options = factory.inferWriterOptionsChanges(outputFile);
 
     pdal::Writer* writer = factory.createWriter(driver);
     if (!writer)
         throw app_runtime_error("writer creation failed");
     writer->setInput(stage);
+    writer->setOptions(options + writer->getOptions());
 
     return writer;
 }

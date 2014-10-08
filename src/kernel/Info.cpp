@@ -502,6 +502,7 @@ int Info::execute()
     Options options = m_options + readerOptions;
 
     Stage* stage = m_manager->getStage();
+    stage->setOptions(options);
     if (m_showStats || m_showSummary)
     {
         if (m_showSummary)

@@ -189,6 +189,7 @@ Stage* Translate::makeReader(Options readerOptions)
     }
 
     Stage* reader_stage = AppSupport::makeReader(m_inputFile);
+    reader_stage->setOptions(readerOptions);
     Stage* final_stage = reader_stage;
     std::map<std::string, Options> extra_opts = getExtraStageOptions();
     if (!m_bounds.empty() || !m_wkt.empty() || !m_output_srs.empty() || extra_opts.size() > 0)
@@ -310,7 +311,10 @@ int Translate::execute()
         AppSupport::makeWriter(m_outputFile, finalStage.get()));
     if (!m_output_srs.empty())
         writer->setSpatialReference(m_output_srs);
-    writer->setOptions(writerOptions);
+
+    // Some options are inferred by makeWriter based on filename
+    // (compression, driver type, etc).
+    writer->setOptions(writerOptions+writer->getOptions());
 
     PointContext ctx;
     writer->setUserCallback(callback);
