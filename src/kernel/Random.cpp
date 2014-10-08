@@ -170,18 +170,9 @@ int Random::execute()
         callback = static_cast<pdal::UserCallback*>(new ShellScriptCallback(getProgressShellCommand()));
     writer->setUserCallback(callback);
     writer->prepare(ctx);
-    writer->execute(ctx);
+    PointBufferSet pbSet = writer->execute(ctx);
 
-    if (getVisualize())
-    {
-        Options viewerOptions;
-        viewerOptions.add<std::string>("filename", "foo.pclviz");
-        setCommonOptions(viewerOptions);
-
-        std::unique_ptr<Writer> viewer(AppSupport::makeWriter(viewerOptions, writer));
-
-        viewer->execute(ctx);
-    }
+    visualize(*pbSet.begin());
 
     delete writer;
     delete final_stage;

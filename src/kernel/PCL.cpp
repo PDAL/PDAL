@@ -33,6 +33,8 @@
  ****************************************************************************/
 
 #include <pdal/kernel/PCL.hpp>
+
+#include <pdal/drivers/buffer/BufferReader.hpp>
 #include <pdal/filters/PCLBlock.hpp>
 
 namespace pdal
@@ -102,6 +104,8 @@ std::unique_ptr<Stage> PCL::makeReader(Options readerOptions)
 
 int PCL::execute()
 {
+    PointContext ctx;
+
     Options readerOptions;
     readerOptions.add<std::string>("filename", m_inputFile);
     readerOptions.add<bool>("debug", isDebug());
@@ -109,13 +113,28 @@ int PCL::execute()
 
     std::unique_ptr<Stage> readerStage = makeReader(readerOptions);
 
+    // go ahead and prepare/execute on reader stage only to grab input
+    // PointBufferSet, this makes the input PointBuffer available to both the
+    // processing pipeline and the visualizer
+    readerStage->prepare(ctx);
+    PointBufferSet pbSetIn = readerStage->execute(ctx);
+
+    // the input PointBufferSet will be used to populate a BufferReader that is
+    // consumed by the processing pipeline
+    PointBufferPtr input_buffer = *pbSetIn.begin();
+    drivers::buffer::BufferReader bufferReader(readerOptions);
+    bufferReader.addBuffer(input_buffer);
+
     Options pclOptions;
     pclOptions.add<std::string>("filename", m_pclFile);
     pclOptions.add<bool>("debug", isDebug());
     pclOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
 
     std::unique_ptr<Stage> pclStage(new filters::PCLBlock(pclOptions));
-    pclStage->setInput(readerStage.get());
+
+    // the PCLBlock stage consumes the BufferReader rather than the
+    // readerStage
+    pclStage->setInput(&bufferReader);
 
     Options writerOptions;
     writerOptions.add<std::string>("filename", m_outputFile);
@@ -132,7 +151,6 @@ int PCL::execute()
     std::unique_ptr<Writer>
         writer(AppSupport::makeWriter(writerOptions, pclStage.get()));
     
-    PointContext ctx;
     writer->setUserCallback(callback);
 
     for (auto pi: getExtraStageOptions())
@@ -150,18 +168,12 @@ int PCL::execute()
     }    
 
     writer->prepare(ctx);
-    writer->execute(ctx);
 
-    if (getVisualize())
-    {
-        Options viewerOptions;
-        viewerOptions.add<std::string>("filename", "foo.pclviz");
-        setCommonOptions(viewerOptions);
+    // process the data, grabbing the PointBufferSet for visualization of the
+    // resulting PointBuffer
+    PointBufferSet pbSetOut = writer->execute(ctx);
 
-        std::unique_ptr<Writer> viewer(AppSupport::makeWriter(viewerOptions, writer.get()));
-
-        viewer->execute(ctx);
-    }
+    visualize(*pbSetIn.begin(), *pbSetOut.begin());
 
     return 0;
 }

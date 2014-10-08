@@ -73,7 +73,8 @@ public:
 
     bool isDebug() const;
     boost::uint32_t getVerboseLevel() const;
-    bool getVisualize() const;
+    void visualize(PointBufferPtr buffer) const;
+    void visualize(PointBufferPtr input_buffer, PointBufferPtr output_buffer) const;
     void printError(const std::string&) const;
 
 protected:
