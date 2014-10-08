@@ -54,14 +54,12 @@ public:
     ~PipelineManager();
 
     // Use these to manually add stages into the pipeline manager.
-    Reader* addReader(const std::string& type, const Options&);
-    Filter* addFilter(const std::string& type, Stage *stage,
-        const Options&);
+    Reader* addReader(const std::string& type);
+    Filter* addFilter(const std::string& type, Stage *stage);
     Filter* addFilter(const std::string& type,
-        const std::vector<Stage *>& stages, const Options&);
-    Writer* addWriter(const std::string& type, Stage *prevStage,
-        const Options&);
-    
+        const std::vector<Stage *>& stages);
+    Writer* addWriter(const std::string& type, Stage *prevStage);
+
     void removeWriter();
     // returns true if the pipeline endpoint is a writer
     bool isWriterPipeline() const;
@@ -81,9 +79,9 @@ public:
     // Get the point context;
     PointContextRef context() const
         { return m_context; }
-    
+
     MetadataNode getMetadata() const;
-    
+
 private:
     StageFactory m_factory;
     PointContext m_context;
@@ -103,7 +101,7 @@ private:
     PipelineManager& operator=(const PipelineManager&); // not implemented
     PipelineManager(const PipelineManager&); // not implemented
 
-    void registerPluginIfExists( const Options& options );
+    void registerPluginIfExists();
 };
 
 

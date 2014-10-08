@@ -53,7 +53,7 @@ public:
     SET_STAGE_LINK("http://pdal.io/stages/drivers.sbet.reader.html")
     SET_STAGE_ENABLED(true)
 
-    SbetReader(const Options& options) : Reader(options)
+    SbetReader() : Reader()
         {}
 
     static Options getDefaultOptions();

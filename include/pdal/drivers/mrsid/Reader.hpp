@@ -72,9 +72,9 @@ public:
 #else
     SET_STAGE_ENABLED(false)
 #endif
-    
+
     virtual ~Reader();
-    Reader(const Options& options);
+    Reader();
     Reader(LizardTech::PointSource *ps);
 
     static Options getDefaultOptions();
@@ -124,7 +124,7 @@ namespace random
 class Reader : public pdal::ReaderRandomIterator
 {
 public:
-    Reader(const pdal::drivers::mrsid::Reader& reader, 
+    Reader(const pdal::drivers::mrsid::Reader& reader,
            PointBuffer& buffer, boost::uint32_t numPoints);
 
 private:
@@ -133,7 +133,7 @@ private:
 
     const pdal::drivers::mrsid::Reader& m_reader;
     boost::uint32_t m_numPoints;
-    
+
 };
 
 

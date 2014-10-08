@@ -54,9 +54,7 @@ class PDAL_DLL Filter : public Stage
 {
     friend class FilterTester;
 public:
-    Filter(const Options& options) : Stage(options)
-        {}
-    Filter()
+    Filter() : Stage()
         {}
 
     // for xml serializion of pipelines
@@ -80,7 +78,7 @@ private:
 class MultiFilter : public Filter
 {
 public:
-    MultiFilter(const Options& options) : Filter(options)
+    MultiFilter() : Filter()
         {}
 };
 

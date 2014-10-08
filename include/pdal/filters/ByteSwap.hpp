@@ -47,8 +47,8 @@ public:
     SET_STAGE_NAME("filters.byteswap", "Byte-swap Filter")
     SET_STAGE_LINK("http://pdal.io/stages/filters.byteswap.html")
     SET_STAGE_ENABLED(true)
-    
-    ByteSwap(const Options& options) : Filter(options)
+
+    ByteSwap() : Filter()
         { std::cerr << "ByteSwap filter is deprecated.\n"; }
 
 private:

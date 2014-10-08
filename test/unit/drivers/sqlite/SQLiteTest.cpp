@@ -153,11 +153,14 @@ BOOST_AUTO_TEST_CASE(SqliteTest_test_simple_las)
     std::string temp_filename = getSQLITEOptions().getValueOrThrow<std::string>("connection");
     Options ops1;
     ops1.add("filename", Support::datapath("las/1.2-with-color.las"));
-    drivers::las::Reader reader(ops1);
+    drivers::las::Reader reader;
+    reader.setOptions(ops1);
 
     {
-        pdal::drivers::las::Reader writer_reader(getSQLITEOptions());
-        pdal::drivers::sqlite::SQLiteWriter writer_writer(getSQLITEOptions());
+        pdal::drivers::las::Reader writer_reader;
+        writer_reader.setOptions(getSQLITEOptions());
+        pdal::drivers::sqlite::SQLiteWriter writer_writer;
+        writer_writer.setOptions(getSQLITEOptions());
         writer_writer.setInput(&writer_reader);
 
         PointContext ctx;

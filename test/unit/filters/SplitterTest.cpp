@@ -49,14 +49,16 @@ BOOST_AUTO_TEST_CASE(test_tile_filter)
     // create the reader
     Options ops1;
     ops1.add("filename", Support::datapath("las/1.2-with-color.las"));
-    drivers::las::Reader r(ops1);
+    drivers::las::Reader r;
+    r.setOptions(ops1);
 
     Options o;
     Option length("length", 1000, "length");
     o.add(length);
 
     // create the tile filter and prepare
-    pdal::filters::Splitter s(o);
+    pdal::filters::Splitter s;
+    s.setOptions(o);
     s.setInput(&r);
 
     PointContext ctx;

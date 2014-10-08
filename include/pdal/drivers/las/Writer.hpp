@@ -73,9 +73,8 @@ public:
     SET_STAGE_LINK("http://pdal.io/stages/drivers.las.writer.html")
     SET_STAGE_ENABLED(true)
 
-    Writer(const Options&);
+    Writer() {};
     Writer(std::ostream*);
-    Writer(const Options&, std::ostream*);
     virtual ~Writer();
 
     static Options getDefaultOptions();
@@ -121,7 +120,6 @@ private:
     bool m_headerInitialized;
     bool m_discardHighReturnNumbers;
     boost::uint64_t m_streamOffset; // the first byte of the LAS file
-	void setOptions();
     MetadataNode findVlr(MetadataNode node, const std::string& recordId,
         const std::string& userId);
     void setVLRsFromMetadata(LasHeader& header, MetadataNode metaNode,

@@ -46,10 +46,10 @@ class PDAL_DLL Decimation : public Filter
 {
 public:
     SET_STAGE_NAME("filters.decimation", "Decimation Filter")
-    SET_STAGE_LINK("http://pdal.io/stages/filters.decimation.html")        
+    SET_STAGE_LINK("http://pdal.io/stages/filters.decimation.html")
     SET_STAGE_ENABLED(true)
 
-    Decimation(const Options&);
+    Decimation();
 
 private:
     uint32_t m_step;

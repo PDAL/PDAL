@@ -61,7 +61,7 @@ public:
     SET_STAGE_LINK("http://pdal.io/stages/drivers.icebridge.reader.html")
     SET_STAGE_ENABLED(true)
 
-    Reader(const Options& options) : pdal::Reader(options)
+    Reader() : pdal::Reader()
         {}
 
     static Options getDefaultOptions();

@@ -246,10 +246,12 @@ bool WriteUnprojectedData()
 
     PointContext ctx;
 
-    pdal::drivers::las::Reader reader(options);
+    pdal::drivers::las::Reader reader;
+    reader.setOptions(options);
     // pdal::filters::Chipper chipper(options);
     // chipper.setInput(&reader);
-    pdal::drivers::oci::Writer writer(options);
+    pdal::drivers::oci::Writer writer;
+    writer.setOptions(options);
     writer.setInput(&reader);
 
     writer.prepare(ctx);
@@ -300,7 +302,8 @@ void compareAgainstSourceBuffer(PointBuffer const& candidate,
     options.add(f);
 
     PointContext tc;
-    pdal::drivers::las::Reader reader(options);
+    pdal::drivers::las::Reader reader;
+    reader.setOptions(options);
 
     reader.prepare(tc);
 
@@ -375,7 +378,8 @@ BOOST_AUTO_TEST_CASE(read_unprojected_data)
     Option& verbose = options.getOptionByRef("verbose");
     verbose.setValue<std::string>( "7");
 
-    pdal::drivers::oci::OciReader reader(options);
+    pdal::drivers::oci::OciReader reader;
+    reader.setOptions(options);
     PointContext ctx;
     reader.prepare(ctx);
     PointBufferSet pbSet = reader.execute(ctx);

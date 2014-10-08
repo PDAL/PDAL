@@ -91,7 +91,8 @@ BOOST_AUTO_TEST_CASE(test_ferry_invalid)
 
     Options ops1;
     ops1.add("filename", Support::datapath("las/1.2-with-color.las"));
-    drivers::las::Reader reader(ops1);
+    drivers::las::Reader reader;
+    reader.setOptions(ops1);
 
     Options options;
 
@@ -102,8 +103,9 @@ BOOST_AUTO_TEST_CASE(test_ferry_invalid)
     x.setOptions(xO);
     options.add(x);
 
-    filters::Ferry ferry(options);
+    filters::Ferry ferry;
     ferry.setInput(&reader);
+    ferry.setOptions(options);
 
     PointContext ctx;
 

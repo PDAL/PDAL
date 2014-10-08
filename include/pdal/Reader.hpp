@@ -43,7 +43,7 @@ namespace pdal
 class PDAL_DLL Reader : public Stage
 {
 public:
-    Reader(Options const& options) : Stage(options),
+    Reader() : Stage(),
         m_count(std::numeric_limits<point_count_t>::max())
     {}
 

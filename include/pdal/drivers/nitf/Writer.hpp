@@ -55,7 +55,7 @@ public:
     SET_STAGE_ENABLED(false)
 #endif
 
-    Writer(const Options& options) : las::Writer(options, &m_oss)
+    Writer() : las::Writer(&m_oss)
         {}
 
 private:

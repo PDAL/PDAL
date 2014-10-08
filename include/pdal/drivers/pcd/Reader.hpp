@@ -52,7 +52,7 @@ public:
     SET_STAGE_LINK ("http://pdal.io/stages/drivers.pcd.reader.html")
     SET_STAGE_ENABLED (true)
 
-    PcdReader(const Options& options) : Reader(options) {};
+    PcdReader() : Reader() {};
 
     static Dimension::IdList getDefaultDimensions()
         { return fileDimensions(); };

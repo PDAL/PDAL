@@ -57,19 +57,9 @@ namespace
 }
 
 
-Writer::Writer(const Options& options)
-    : pdal::Writer(options)
-{}
-
 
 Writer::Writer(std::ostream *ostream)
     : pdal::Writer()
-    , m_streamManager(new OutputStreamManager(ostream))
-{}
-
-
-Writer::Writer(const Options& options, std::ostream *ostream)
-    : pdal::Writer(options)
     , m_streamManager(new OutputStreamManager(ostream))
 {}
 
@@ -82,7 +72,6 @@ void Writer::Construct()
     m_numPointsWritten = 0;
     m_headerInitialized = false;
     m_streamOffset = 0;
-    setOptions();
 }
 
 
@@ -121,11 +110,6 @@ void Writer::processOptions(const Options& options)
             "discard_high_return_numbers", false);
 }
 
-
-void Writer::setOptions()
-{
-
-}
 
 
 Writer::~Writer()

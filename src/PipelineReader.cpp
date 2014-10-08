@@ -302,7 +302,9 @@ Reader* PipelineReader::parseElement_Reader(const ptree& tree)
 
     context.validate();
 
-    return m_manager.addReader(type, options);
+    Reader* reader =m_manager.addReader(type);
+    reader->setOptions(options);
+    return reader;
 }
 
 
@@ -353,7 +355,8 @@ Filter* PipelineReader::parseElement_Filter(const ptree& tree)
         context.addType();
     }
 
-    Filter* ptr = m_manager.addFilter(type, prevStages, options);
+    Filter* ptr = m_manager.addFilter(type, prevStages);
+    ptr->setOptions(options);
     if (dynamic_cast<MultiFilter *>(ptr))
         context.setCardinality(StageParserContext::Many);
     context.validate();
@@ -430,7 +433,9 @@ Writer* PipelineReader::parseElement_Writer(const ptree& tree)
     }
 
     context.validate();
-    return m_manager.addWriter(type, prevStage, options);
+    Writer* writer = m_manager.addWriter(type, prevStage);
+    writer->setOptions(options);
+    return writer;
 }
 
 
