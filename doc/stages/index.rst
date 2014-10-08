@@ -41,6 +41,7 @@ Filters
    filters.chipper
    filters.crop
    filters.decimation
+   filters.ferry
    filters.hexbin
    filters.pclblock
    filters.predicate
