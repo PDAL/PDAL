@@ -172,6 +172,17 @@ int Random::execute()
     writer->prepare(ctx);
     writer->execute(ctx);
 
+    if (getVisualize())
+    {
+        Options viewerOptions;
+        viewerOptions.add<std::string>("filename", "foo.pclviz");
+        setCommonOptions(viewerOptions);
+
+        std::unique_ptr<Writer> viewer(AppSupport::makeWriter(viewerOptions, writer));
+
+        viewer->execute(ctx);
+    }
+
     delete writer;
     delete final_stage;
 

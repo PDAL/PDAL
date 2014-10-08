@@ -47,5 +47,8 @@
 #ifdef PDAL_HAVE_PCL
 #include "Ground.hpp"
 #include "PCL.hpp"
+#endif
+
+#ifdef PDAL_HAVE_PCL_VISUALIZE
 #include "View.hpp"
 #endif

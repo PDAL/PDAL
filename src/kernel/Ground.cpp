@@ -180,6 +180,17 @@ int Ground::execute()
     writer->prepare(ctx);
     writer->execute(ctx);
 
+    if (getVisualize())
+    {
+        Options viewerOptions;
+        viewerOptions.add<std::string>("filename", "foo.pclviz");
+        setCommonOptions(viewerOptions);
+
+        std::unique_ptr<Writer> viewer(AppSupport::makeWriter(viewerOptions, writer.get()));
+
+        viewer->execute(ctx);
+    }
+
     return 0;
 }
 

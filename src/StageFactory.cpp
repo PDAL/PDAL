@@ -159,6 +159,9 @@ MAKE_WRITER_CREATOR(P2GWriter, pdal::drivers::p2g::P2gWriter)
 
 #ifdef PDAL_HAVE_PCL
 MAKE_WRITER_CREATOR(PcdWriter, pdal::drivers::pcd::PcdWriter);
+#endif
+
+#ifdef PDAL_HAVE_PCL_VISUALIZE
 MAKE_WRITER_CREATOR(PclVisualizer, pdal::drivers::pclvisualizer::PclVisualizer);
 #endif
 
@@ -233,6 +236,9 @@ std::string StageFactory::inferWriterDriver(const std::string& filename)
     drivers["laz"] = "drivers.las.writer";
 #ifdef PDAL_HAVE_PCL
     drivers["pcd"] = "drivers.pcd.writer";
+#endif
+
+#ifdef PDAL_HAVE_PCL_VISUALIZE
     drivers["pclviz"] = "drivers.pclvisualizer.writer";
 #endif
     drivers["csv"] = "drivers.text.writer";
@@ -469,6 +475,9 @@ void StageFactory::registerKnownWriters()
 
 #ifdef PDAL_HAVE_PCL
     REGISTER_WRITER(PcdWriter, pdal::drivers::pcd::PcdWriter);
+#endif
+
+#ifdef PDAL_HAVE_PCL_VISUALIZE
     REGISTER_WRITER(PclVisualizer, pdal::drivers::pclvisualizer::PclVisualizer);
 #endif
 

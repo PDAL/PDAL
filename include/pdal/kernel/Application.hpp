@@ -73,6 +73,7 @@ public:
 
     bool isDebug() const;
     boost::uint32_t getVerboseLevel() const;
+    bool getVisualize() const;
     void printError(const std::string&) const;
 
 protected:
@@ -128,6 +129,9 @@ private:
     bool m_reportDebug;
     std::string m_scales;
     std::string m_offsets;
+#ifdef PDAL_HAVE_PCL_VISUALIZE
+    bool m_visualize;
+#endif
 
     std::vector<boost::program_options::options_description*> m_options;
     boost::program_options::positional_options_description m_positionalOptions;

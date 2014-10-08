@@ -60,7 +60,7 @@ void outputVersion()
     std::cout << "     - pipeline" << std::endl;
     std::cout << "     - random" << std::endl;
     std::cout << "     - translate" << std::endl;
-#ifdef PDAL_HAVE_PCL
+#ifdef PDAL_HAVE_PCL_VISUALIZE
     std::cout << "     - view" << std::endl;
 #endif
     std::cout << std::endl;
@@ -145,7 +145,9 @@ int main(int argc, char* argv[])
         pdal::kernel::PCL app(count, args);
         return app.run();
     }
+#endif
 
+#ifdef PDAL_HAVE_PCL_VISUALIZE
     if (boost::iequals(action, "view"))
     {
         pdal::kernel::View app(count, args);

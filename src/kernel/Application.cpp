@@ -68,6 +68,9 @@ Application::Application(int argc, const char* argv[], const std::string& appNam
     , m_hardCoreDebug(false)
     , m_reportDebug(false)
     , m_usestdin(false)
+#ifdef PDAL_HAVE_PCL_VISUALIZE
+    , m_visualize(false)
+#endif
 {
     return;
 }
@@ -358,6 +361,12 @@ boost::uint32_t Application::getVerboseLevel() const
 }
 
 
+bool Application::getVisualize() const
+{
+    return m_visualize;
+}
+
+
 void Application::addSwitchSet(po::options_description* options)
 {
     if (!options) return;
@@ -369,6 +378,9 @@ void Application::setCommonOptions(Options &options)
 {
     options.add("debug", m_isDebug);
     options.add("verbose", m_verboseLevel);
+#ifdef PDAL_HAVE_PCL_VISUALIZE
+    options.add("visualize", m_visualize);
+#endif
 
     boost::char_separator<char> sep(",| ");
 
@@ -494,6 +506,9 @@ void Application::addBasicSwitchSet()
         ("developer-debug", po::value<bool>(&m_hardCoreDebug)->zero_tokens()->implicit_value(true), "Enable developer debug mode (don't trap exceptions so segfaults are thrown)")
         ("verbose,v", po::value<boost::uint32_t>(&m_verboseLevel)->default_value(0), "Set verbose message level")
         ("version", po::value<bool>(&m_showVersion)->zero_tokens()->implicit_value(true), "Show version info")
+#ifdef PDAL_HAVE_PCL_VISUALIZE
+        ("visualize", po::value<bool>(&m_visualize)->zero_tokens()->implicit_value(true), "Visualize result")
+#endif
         ("timer", po::value<bool>(&m_showTime)->zero_tokens()->implicit_value(true), "Show execution time")
         ("stdin,s", po::value<bool>(&m_usestdin)->zero_tokens()->implicit_value(true), "Read pipeline XML from stdin")
         ("heartbeat", po::value< std::vector<std::string> >(&m_heartbeat_shell_command), "Shell command to run for every progress heartbeat")

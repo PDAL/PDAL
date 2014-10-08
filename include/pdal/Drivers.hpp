@@ -104,6 +104,9 @@
 #ifdef PDAL_HAVE_PCL
 #include <pdal/drivers/pcd/Reader.hpp>
 #include <pdal/drivers/pcd/Writer.hpp>
+#endif
+
+#ifdef PDAL_HAVE_PCL_VISUALIZE
 #include <pdal/drivers/pclvisualizer/PCLVisualizer.hpp>
 #endif
 
