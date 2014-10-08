@@ -57,7 +57,8 @@ void test_file_type(const std::string& filename)
 
     ops.add("filename", Support::datapath(filename));
     ops.add("count", 506);
-    BpfReader reader(ops);
+    BpfReader reader;
+    reader.setOptions(ops);
 
     reader.prepare(context);
     PointBufferSet pbSet = reader.execute(context);
@@ -82,7 +83,7 @@ void test_file_type(const std::string& filename)
         float x = buf->getFieldAs<float>(Dimension::Id::X, i);
         float y = buf->getFieldAs<float>(Dimension::Id::Y, i);
         float z = buf->getFieldAs<float>(Dimension::Id::Z, i);
-        
+
         BOOST_CHECK_CLOSE(x, pts2[i].x, 0.001);
         BOOST_CHECK_CLOSE(y, pts2[i].y, 0.001);
         BOOST_CHECK_CLOSE(z, pts2[i].z, 0.001);
@@ -97,7 +98,7 @@ void test_file_type(const std::string& filename)
         float x = buf->getFieldAs<float>(Dimension::Id::X, i);
         float y = buf->getFieldAs<float>(Dimension::Id::Y, i);
         float z = buf->getFieldAs<float>(Dimension::Id::Z, i);
-        
+
         BOOST_CHECK_CLOSE(x, pts[i].x, 0.001);
         BOOST_CHECK_CLOSE(y, pts[i].y, 0.001);
         BOOST_CHECK_CLOSE(z, pts[i].z, 0.001);

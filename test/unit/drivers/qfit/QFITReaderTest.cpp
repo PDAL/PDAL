@@ -80,7 +80,8 @@ BOOST_AUTO_TEST_CASE(test_10_word)
     options.add("scale_z", 0.001f, "Z scale from mm to m");
     options.add("count", 3);
 
-    drivers::qfit::Reader reader(options);
+    drivers::qfit::Reader reader;
+    reader.setOptions(options);
     BOOST_CHECK(reader.getDescription() == "QFIT Reader");
     BOOST_CHECK_EQUAL(reader.getName(), "drivers.qfit.reader");
 
@@ -108,7 +109,8 @@ BOOST_AUTO_TEST_CASE(test_14_word)
     options.add("count", 3);
 
     PointContext ctx;
-    drivers::qfit::Reader reader(options);
+    drivers::qfit::Reader reader;
+    reader.setOptions(options);
     reader.prepare(ctx);
     PointBufferSet pbSet = reader.execute(ctx);
     BOOST_CHECK_EQUAL(pbSet.size(), 1);

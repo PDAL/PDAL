@@ -45,14 +45,14 @@ namespace pdal
 {
 namespace kernel
 {
-    
+
 PipelineManager* AppSupport::makePipeline(pdal::Options& options)
 {
     std::string inputFile = options.getValueOrThrow<std::string>("filename");
 
     if (!pdal::FileUtils::fileExists(inputFile))
         throw app_runtime_error("file not found: " + inputFile);
-    
+
     PipelineManager* output = new PipelineManager;
 
     if (inputFile == "STDIN")
@@ -72,17 +72,15 @@ PipelineManager* AppSupport::makePipeline(pdal::Options& options)
         if (driver.empty())
             throw app_runtime_error("Cannot determine input file type of " +
                 inputFile);
-        if (!output->addReader(driver, options))
+        if (!output->addReader(driver))
             throw app_runtime_error("reader creation failed");
     }
     return output;
 }
-    
 
-Stage *AppSupport::makeReader(pdal::Options& options)
+
+Stage *AppSupport::makeReader(const std::string& inputFile)
 {
-    std::string inputFile = options.getValueOrThrow<std::string>("filename");
-
     if (!FileUtils::fileExists(inputFile))
         throw app_runtime_error("file not found: " + inputFile);
 
@@ -92,25 +90,23 @@ Stage *AppSupport::makeReader(pdal::Options& options)
         throw app_runtime_error("Cannot determine input file type of " +
             inputFile);
 
-    Stage* stage = factory.createReader(driver, options);
+    Stage* stage = factory.createReader(driver);
     if (!stage)
         throw app_runtime_error("reader creation failed");
     return stage;
 }
 
 
-Writer* AppSupport::makeWriter(Options& options, Stage *stage)
+Writer* AppSupport::makeWriter(const std::string& outputFile, Stage *stage)
 {
-    std::string outputFile = options.getValueOrThrow<std::string>("filename");
-
     pdal::StageFactory factory;
     std::string driver = factory.inferWriterDriver(outputFile);
     if (driver.empty())
         throw app_runtime_error("Cannot determine output file type of " +
             outputFile);
-    factory.inferWriterOptionsChanges(outputFile, options);
-        
-    pdal::Writer* writer = factory.createWriter(driver, options);
+    factory.inferWriterOptionsChanges(outputFile);
+
+    pdal::Writer* writer = factory.createWriter(driver);
     if (!writer)
         throw app_runtime_error("writer creation failed");
     writer->setInput(stage);
@@ -132,7 +128,7 @@ void PercentageCallback::callback()
         return;
 
     double currPerc = getPercentComplete();
-    
+
     if (pdal::Utils::compare_distance<double>(currPerc, 100.0))
     {
         std::cerr << ".100" << std::endl;
@@ -156,7 +152,7 @@ ShellScriptCallback::ShellScriptCallback(
 {
     double major_tick(10.0);
     double minor_tick(2.0);
-    
+
     if (command.size())
     {
         m_command = command[0];
@@ -164,7 +160,7 @@ ShellScriptCallback::ShellScriptCallback(
         {
             major_tick = boost::lexical_cast<double>(command[1]);
             minor_tick = boost::lexical_cast<double>(command[2]);
-        } 
+        }
         else if (command.size() == 2)
             major_tick = boost::lexical_cast<double>(command[1]);
     }

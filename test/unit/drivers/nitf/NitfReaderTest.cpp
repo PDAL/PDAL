@@ -66,7 +66,8 @@ BOOST_AUTO_TEST_CASE(test_one)
     nitf_opts.add("count", 750);
 
     PointContext ctx;
-    drivers::nitf::NitfReader nitf_reader(nitf_opts);
+    drivers::nitf::NitfReader nitf_reader;
+    nitf_reader.setOptions(nitf_opts);
     nitf_reader.prepare(ctx);
     PointBufferSet pbSet = nitf_reader.execute(ctx);
     BOOST_CHECK_EQUAL(nitf_reader.getDescription(), "NITF Reader");
@@ -91,7 +92,8 @@ BOOST_AUTO_TEST_CASE(test_one)
     las_opts.add("filename", Support::datapath("nitf/autzen-utm10.las"));
 
     PointContext ctx2;
-    drivers::las::Reader las_reader(las_opts);
+    drivers::las::Reader las_reader;
+    las_reader.setOptions(las_opts);
     las_reader.prepare(ctx2);
     PointBufferSet pbSet2 = las_reader.execute(ctx2);
     BOOST_CHECK_EQUAL(pbSet2.size(), 1);
@@ -134,8 +136,8 @@ BOOST_AUTO_TEST_CASE(test_chipper)
     mgr.execute();
     StageSequentialIterator* iter = reader.createSequentialIterator(data);
     const boost::uint32_t num_read = iter->read(data);
-    BOOST_CHECK_EQUAL(num_read, 13u);    
-    
+    BOOST_CHECK_EQUAL(num_read, 13u);
+
     boost::uint32_t num_blocks = chipper->GetBlockCount();
     BOOST_CHECK_EQUAL(num_blocks, 8u);
     **/

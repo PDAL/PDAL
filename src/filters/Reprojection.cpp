@@ -83,8 +83,8 @@ struct GDALSourceDeleter
 #endif
 
 
-Reprojection::Reprojection(const Options& options)
-    : pdal::Filter(options), m_inferInputSRS(true)
+Reprojection::Reprojection()
+    : pdal::Filter(), m_inferInputSRS(true)
 {}
 
 

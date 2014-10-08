@@ -92,26 +92,26 @@ void Ground::addSwitches()
         ;
 
     addSwitchSet(file_options);
-    
+
     addPositionalSwitch("input", 1);
-    addPositionalSwitch("output", 1);    
+    addPositionalSwitch("output", 1);
 }
 
 std::unique_ptr<Stage> Ground::makeReader(Options readerOptions)
 {
+    std::unique_ptr<Stage> reader_stage(AppSupport::makeReader(m_inputFile));
     if (isDebug())
     {
         readerOptions.add<bool>("debug", true);
         boost::uint32_t verbosity(getVerboseLevel());
         if (!verbosity)
             verbosity = 1;
-        
+
         readerOptions.add<boost::uint32_t>("verbose", verbosity);
         readerOptions.add<std::string>("log", "STDERR");
+        reader_stage->setOptions(readerOptions);
     }
 
-    std::unique_ptr<Stage> reader_stage(AppSupport::makeReader(readerOptions));
-    
     return reader_stage;
 }
 
@@ -123,7 +123,7 @@ int Ground::execute()
     readerOptions.add<bool>("debug", isDebug());
     readerOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
 
-    std::unique_ptr<Stage> readerStage = makeReader(readerOptions);    
+    std::unique_ptr<Stage> readerStage = makeReader(readerOptions);
 
     Options groundOptions;
     std::ostringstream ss;
@@ -146,14 +146,16 @@ int Ground::execute()
     groundOptions.add<bool>("debug", isDebug());
     groundOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
 
-    std::unique_ptr<Stage> groundStage(new filters::PCLBlock(groundOptions));
+    std::unique_ptr<Stage> groundStage(new filters::PCLBlock());
     groundStage->setInput(readerStage.get());
+    groundStage->setOptions(groundOptions);
 
     Options writerOptions;
     writerOptions.add<std::string>("filename", m_outputFile);
     setCommonOptions(writerOptions);
-    
-    std::unique_ptr<Writer> writer(AppSupport::makeWriter(writerOptions, groundStage.get()));
+
+    std::unique_ptr<Writer> writer(AppSupport::makeWriter(m_outputFile, groundStage.get()));
+    writer->setOptions(writerOptions);
 
     std::vector<std::string> cmd = getProgressShellCommand();
     UserCallback *callback =
@@ -175,7 +177,7 @@ int Ground::execute()
                 opts.add(o);
             s->setOptions(opts);
         }
-    }    
+    }
 
     writer->prepare(ctx);
     writer->execute(ctx);

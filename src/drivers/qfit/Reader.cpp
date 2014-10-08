@@ -186,7 +186,7 @@ namespace drivers
 namespace qfit
 {
 
-Reader::Reader(const Options& options) : pdal::Reader(options),
+Reader::Reader() : pdal::Reader(),
     m_format(QFIT_Format_Unknown), m_size(0), m_littleEndian(false)
 {}
 

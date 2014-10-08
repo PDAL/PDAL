@@ -61,7 +61,6 @@ class PDAL_DLL Stage
     friend class StageRunner;
 public:
     Stage();
-    Stage(const Options& options);
     virtual ~Stage()
         {}
 

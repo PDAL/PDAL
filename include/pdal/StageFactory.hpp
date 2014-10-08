@@ -69,9 +69,9 @@ class Options;
 class PDAL_DLL StageFactory
 {
 public:
-    typedef Reader* ReaderCreator(const Options&);
-    typedef Filter* FilterCreator(const Options&);
-    typedef Writer* WriterCreator(const Options&);
+    typedef Reader* ReaderCreator();
+    typedef Filter* FilterCreator();
+    typedef Writer* WriterCreator();
 
     typedef std::map<std::string, ReaderCreator*> ReaderCreatorList;
     typedef std::map<std::string, FilterCreator*> FilterCreatorList;
@@ -90,12 +90,11 @@ public:
 
     // modify options based upon expectations implicit in a given filename
     // e.g. output files ending in .laz should be compressed
-    static void inferWriterOptionsChanges(const std::string& filename,
-                                          pdal::Options& options);
+    static pdal::Options inferWriterOptionsChanges(const std::string& filename);
 
-    Reader* createReader(const std::string& type, const Options& options);
-    Filter* createFilter(const std::string& type, const Options& options);
-    Writer* createWriter(const std::string& type, const Options& options);
+    Reader* createReader(const std::string& type);
+    Filter* createFilter(const std::string& type);
+    Writer* createWriter(const std::string& type);
 
     void registerReader(const std::string& type, ReaderCreator* f);
     void registerFilter(const std::string& type, FilterCreator* f);
@@ -103,10 +102,10 @@ public:
 
     void loadPlugins();
     void registerPlugin(std::string const& filename);
-    
+
     std::map<std::string, pdal::StageInfo> const& getStageInfos() const;
     template<class T> void registerDriverInfo();
-    
+
     std::string toRST(std::string driverName="") const;
 
 private:
@@ -123,7 +122,7 @@ private:
     ReaderCreatorList m_readerCreators;
     FilterCreatorList m_filterCreators;
     WriterCreatorList m_writerCreators;
-    
+
     // driver name + driver description
     std::map<std::string, pdal::StageInfo> m_driver_info;
     StageFactory& operator=(const StageFactory&); // not implemented
@@ -133,12 +132,12 @@ private:
 template <class T>
 inline void StageFactory::registerDriverInfo()
 {
-    
+
     pdal::StageInfo info(T::s_getName(), T::s_getDescription());
     info.setInfoLink(T::s_getInfoLink());
     info.setIsEnabled(T::s_isEnabled());
     info.addProvidedDimensions(T::getDefaultDimensions());
-    
+
     std::vector<Option> options = T::getDefaultOptions().getOptions();
     for (auto i = options.begin(); i != options.end(); ++i)
         info.addProvidedOption(*i);

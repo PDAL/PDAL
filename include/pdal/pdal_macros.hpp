@@ -39,17 +39,17 @@
 // macros for creating the various stage types
 //
 #define MAKE_READER_CREATOR(T, FullT) \
-    pdal::Reader* create_##T(const pdal::Options& options) \
+    pdal::Reader* create_##T() \
         { \
-            return new FullT(options); \
-        } 
-            
+            return new FullT(); \
+        }
+
 #define MAKE_FILTER_CREATOR(T, FullT) \
-    pdal::Filter* create_##T(const pdal::Options& options) \
-        { pdal::Filter *f = new FullT(options); return f; }
+    pdal::Filter* create_##T() \
+        { pdal::Filter *f = new FullT(); return f; }
 #define MAKE_WRITER_CREATOR(T, FullT) \
-    pdal::Writer* create_##T(const pdal::Options& options) \
-        { pdal::Writer *w = new FullT(options); return w; }
+    pdal::Writer* create_##T() \
+        { pdal::Writer *w = new FullT(); return w; }
 
 //
 // macros to register the stage creators
@@ -71,7 +71,7 @@
         f.registerDriverInfo< DriverFullType>(); \
         f.registerReader(DriverFullType::s_getName(), create_##DriverName##Reader); \
     } \
-    PDAL_C_END 
+    PDAL_C_END
 
 #define CREATE_FILTER_PLUGIN(DriverName, DriverFullType) \
     PDAL_C_START PDAL_DLL void PDALRegister_filter_##DriverName(void* factory) \
@@ -80,7 +80,7 @@
         f.registerDriverInfo< DriverFullType>(); \
         f.registerFilter(DriverFullType::s_getName(), create_##DriverName##Filter); \
     } \
-    PDAL_C_END 
+    PDAL_C_END
 
 #define CREATE_WRITER_PLUGIN(DriverName, DriverFullType) \
     PDAL_C_START PDAL_DLL void PDALRegister_writer_##DriverName(void* factory) \
@@ -89,18 +89,18 @@
         f.registerDriverInfo< DriverFullType>(); \
         f.registerWriter(DriverFullType::s_getName(), create_##DriverName##Writer); \
     } \
-    PDAL_C_END 
+    PDAL_C_END
 
 #define SET_PLUGIN_VERSION(DriverName) \
     PDAL_C_START PDAL_DLL int PDALRegister_version_##DriverName() \
     { \
         return PDAL_PLUGIN_VERSION; \
     } \
-    PDAL_C_END 
+    PDAL_C_END
 
 
 #ifdef _WIN32
-inline long lround(double d) 
+inline long lround(double d)
 {
     long l;
 

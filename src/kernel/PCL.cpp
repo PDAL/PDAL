@@ -83,6 +83,7 @@ void PCL::addSwitches()
 
 std::unique_ptr<Stage> PCL::makeReader(Options readerOptions)
 {
+    std::unique_ptr<Stage> reader_stage(AppSupport::makeReader(m_inputFile));
     if (isDebug())
     {
         readerOptions.add<bool>("debug", true);
@@ -92,9 +93,9 @@ std::unique_ptr<Stage> PCL::makeReader(Options readerOptions)
 
         readerOptions.add<boost::uint32_t>("verbose", verbosity);
         readerOptions.add<std::string>("log", "STDERR");
+        reader_stage->setOptions(readerOptions);
     }
 
-    std::unique_ptr<Stage> reader_stage(AppSupport::makeReader(readerOptions));
 
     return reader_stage;
 }
@@ -114,8 +115,9 @@ int PCL::execute()
     pclOptions.add<bool>("debug", isDebug());
     pclOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
 
-    std::unique_ptr<Stage> pclStage(new filters::PCLBlock(pclOptions));
+    std::unique_ptr<Stage> pclStage(new filters::PCLBlock());
     pclStage->setInput(readerStage.get());
+    pclStage->setOptions(pclOptions);
 
     Options writerOptions;
     writerOptions.add<std::string>("filename", m_outputFile);
@@ -130,8 +132,9 @@ int PCL::execute()
         (UserCallback *)new HeartbeatCallback();
 
     std::unique_ptr<Writer>
-        writer(AppSupport::makeWriter(writerOptions, pclStage.get()));
-    
+        writer(AppSupport::makeWriter(m_outputFile, pclStage.get()));
+    writer->setOptions(writerOptions);
+
     PointContext ctx;
     writer->setUserCallback(callback);
 
@@ -147,7 +150,7 @@ int PCL::execute()
                 opts.add(o);
             s->setOptions(opts);
         }
-    }    
+    }
 
     writer->prepare(ctx);
     writer->execute(ctx);

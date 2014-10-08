@@ -54,7 +54,7 @@ namespace pdal
 namespace filters
 {
 
-Decimation::Decimation(const Options& options) : pdal::Filter(options)
+Decimation::Decimation() : pdal::Filter()
 {}
 
 

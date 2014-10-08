@@ -55,7 +55,7 @@ public:
 #else
     SET_STAGE_ENABLED(false)
 #endif
-    SQLiteWriter(const Options&);
+    SQLiteWriter();
 
 private:
 

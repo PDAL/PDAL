@@ -188,7 +188,7 @@ Stage* Translate::makeReader(Options readerOptions)
         readerOptions.add<std::string>("log", "STDERR");
     }
 
-    Stage* reader_stage = AppSupport::makeReader(readerOptions);
+    Stage* reader_stage = AppSupport::makeReader(m_inputFile);
     Stage* final_stage = reader_stage;
     std::map<std::string, Options> extra_opts = getExtraStageOptions();
     if (!m_bounds.empty() || !m_wkt.empty() || !m_output_srs.empty() || extra_opts.size() > 0)
@@ -205,22 +205,25 @@ Stage* Translate::makeReader(Options readerOptions)
         {
             readerOptions.add<std::string>("out_srs", m_output_srs.getWKT());
             reprojection_stage =
-                new filters::Reprojection(readerOptions);
+                new filters::Reprojection();
             reprojection_stage->setInput(next_stage);
+            reprojection_stage->setOptions(readerOptions);
             next_stage = reprojection_stage;
         } else if (bHaveReprojection)
         {
             reprojection_stage =
-                new filters::Reprojection(extra_opts.find("filters.reprojection")->second);
+                new filters::Reprojection();
             reprojection_stage->setInput(next_stage);
+            reprojection_stage->setOptions(extra_opts.find("filters.reprojection")->second);
             next_stage = reprojection_stage;
         }
 
         if ((!m_bounds.empty() && m_wkt.empty()))
         {
             readerOptions.add<BOX3D>("bounds", m_bounds);
-            crop_stage = new pdal::filters::Crop(readerOptions);
+            crop_stage = new pdal::filters::Crop();
             crop_stage->setInput(next_stage);
+            crop_stage->setOptions(readerOptions);
             next_stage = crop_stage;
         }
         else if (m_bounds.empty() && !m_wkt.empty())
@@ -242,13 +245,15 @@ Stage* Translate::makeReader(Options readerOptions)
                 // was likely actually wkt, leave it alone
             }
             readerOptions.add<std::string >("polygon", m_wkt);
-            crop_stage = new pdal::filters::Crop(readerOptions);
+            crop_stage = new pdal::filters::Crop();
             crop_stage->setInput(next_stage);
+            crop_stage->setOptions(readerOptions);
             next_stage = crop_stage;
         } else if (bHaveCrop)
         {
-            crop_stage = new pdal::filters::Crop(extra_opts.find("filters.crop")->second);
+            crop_stage = new pdal::filters::Crop();
             crop_stage->setInput(next_stage);
+            crop_stage->setOptions(extra_opts.find("filters.crop")->second);
             next_stage = crop_stage;
         }
         final_stage = next_stage;
@@ -263,8 +268,9 @@ Stage* Translate::makeReader(Options readerOptions)
         decimationOptions.add<uint32_t>("offset", m_decimation_offset);
         decimationOptions.add<double>("leaf_size", m_decimation_leaf_size);
         decimationOptions.add<std::string>("method", m_decimation_method);
-        Stage *decimation_stage = new filters::Decimation(decimationOptions);
+        Stage *decimation_stage = new filters::Decimation();
         decimation_stage->setInput(final_stage);
+        decimation_stage->setOptions(decimationOptions);
         final_stage = decimation_stage;
     }
 
@@ -301,9 +307,10 @@ int Translate::execute()
         (UserCallback *)new HeartbeatCallback();
 
     std::unique_ptr<Writer> writer(
-        AppSupport::makeWriter(writerOptions, finalStage.get()));
+        AppSupport::makeWriter(m_outputFile, finalStage.get()));
     if (!m_output_srs.empty())
         writer->setSpatialReference(m_output_srs);
+    writer->setOptions(writerOptions);
 
     PointContext ctx;
     writer->setUserCallback(callback);

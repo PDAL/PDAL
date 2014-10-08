@@ -98,7 +98,8 @@ static bool fileIsCompressed(const std::string& name)
 
     Options ops;
     ops.add("filename", name);
-    drivers::las::Reader reader(ops);
+    drivers::las::Reader reader;
+    reader.setOptions(ops);
     reader.prepare(ctx);
     return reader.getLasHeader().Compressed();
 }
@@ -110,7 +111,8 @@ static bool fileHasSrs(const std::string& name)
 
     Options ops;
     ops.add("filename", name);
-    drivers::las::Reader reader(ops);
+    drivers::las::Reader reader;
+    reader.setOptions(ops);
     reader.prepare(ctx);
     return !reader.getSpatialReference().empty();
 }

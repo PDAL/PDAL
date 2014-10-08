@@ -48,7 +48,7 @@ public:
     SET_STAGE_LINK("http://pdal.io/stages/filters.splitter.html")
     SET_STAGE_ENABLED(true)
 
-    Splitter(const Options& options) : Filter(options)
+    Splitter() : Filter()
         {}
 
     static Options getDefaultOptions();

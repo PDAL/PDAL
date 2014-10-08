@@ -88,7 +88,7 @@ public:
     SET_STAGE_ENABLED(false)
 #endif
 
-    Colorization(const Options& options) : Filter(options)
+    Colorization() : Filter()
         {}
 
     static Options getDefaultOptions();

@@ -51,7 +51,7 @@ public:
     SET_STAGE_LINK("http://pdal.io/stages/drivers.buffer.reader.html")
     SET_STAGE_ENABLED(true)
 
-    BufferReader(const Options& options) : Reader(options)
+    BufferReader() : Reader()
         {}
     void addBuffer(const PointBufferPtr& buffer)
         { m_buffers.insert(buffer); }

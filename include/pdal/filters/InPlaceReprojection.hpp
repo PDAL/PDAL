@@ -46,8 +46,8 @@ class PDAL_DLL InPlaceReprojection : public Filter
 public:
     SET_STAGE_NAME("filters.inplacereprojection",
         "In place Reprojection Filter")
-    SET_STAGE_LINK("http://pdal.io/stages/filters.inplacereprojection.html")     
-    InPlaceReprojection(const Options& options) : Filter(options)
+    SET_STAGE_LINK("http://pdal.io/stages/filters.inplacereprojection.html")
+    InPlaceReprojection() : Filter()
          {}
 
 private:

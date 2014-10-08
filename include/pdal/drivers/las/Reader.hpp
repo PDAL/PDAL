@@ -65,7 +65,7 @@ public:
     SET_STAGE_LINK("http://pdal.io/stages/drivers.las.reader.html")
     SET_STAGE_ENABLED(true)
 
-    Reader(const Options& options) : pdal::Reader(options), m_index(0),
+    Reader() : pdal::Reader(), m_index(0),
             m_istream(NULL)
         {}
     virtual ~Reader();

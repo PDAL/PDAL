@@ -143,7 +143,7 @@ public:
     SET_STAGE_LINK("http://pdal.io/stages/filters.stats.html")
     SET_STAGE_ENABLED(true)
 
-    Stats(const Options& options) : Filter(options)
+    Stats() : Filter()
         {}
 
     static Options getDefaultOptions();

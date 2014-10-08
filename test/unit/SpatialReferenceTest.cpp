@@ -136,7 +136,8 @@ BOOST_AUTO_TEST_CASE(test_read_srs)
 
     Options ops;
     ops.add("filename", Support::datapath("las/utm17.las"));
-    las::Reader reader(ops);
+    las::Reader reader;
+    reader.setOptions(ops);
     reader.prepare(ctx);
 
     const pdal::SpatialReference& ref = reader.getSpatialReference();
@@ -267,7 +268,8 @@ BOOST_AUTO_TEST_CASE(test_vertical_datums)
         // Write a very simple file with our SRS and one point.
         Options ops1;
         ops1.add("filename", Support::datapath("las/1.2-with-color.las"));
-        las::Reader reader(ops1);
+        las::Reader reader;
+        reader.setOptions(ops1);
 
         std::ostream* ofs = pdal::FileUtils::createFile(tmpfile);
         {
@@ -288,7 +290,8 @@ BOOST_AUTO_TEST_CASE(test_vertical_datums)
         PointContext ctx;
         Options ops;
         ops.add("filename", tmpfile);
-        las::Reader reader(ops);
+        las::Reader reader;
+        reader.setOptions(ops);
         reader.prepare(ctx);
 
         const SpatialReference ref2 = reader.getSpatialReference();
@@ -348,7 +351,8 @@ BOOST_AUTO_TEST_CASE(test_writing_vlr)
         PointContext ctx;
         Options ops;
         ops.add("filename", Support::datapath("las/1.2-with-color.las"));
-        las::Reader readerx(ops);
+        las::Reader readerx;
+        readerx.setOptions(ops);
         std::ostream* ofs = pdal::FileUtils::createFile(tmpfile);
         {
             const boost::uint64_t numPoints = readerx.getNumPoints();
@@ -368,7 +372,8 @@ BOOST_AUTO_TEST_CASE(test_writing_vlr)
         PointContext ctx;
         Options ops;
         ops.add("filename", tmpfile);
-        las::Reader reader(ops);
+        las::Reader reader;
+        reader.setOptions(ops);
         reader.prepare(ctx);
 
         SpatialReference result_ref = reader.getSpatialReference();

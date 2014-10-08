@@ -91,9 +91,8 @@ Stage* Random::makeReader(Options readerOptions)
         readerOptions.add<std::string>("log", "STDERR");
     }
 
-    //std::unique_ptr<Stage> reader_stage(AppSupport::makeReader(readerOptions));
     StageFactory factory;
-    Stage* reader_stage = factory.createReader("drivers.faux.reader", readerOptions);
+    Stage* reader_stage = factory.createReader("drivers.faux.reader");
 
     return reader_stage;
 }
@@ -160,7 +159,8 @@ int Random::execute()
 
     Stage* final_stage = makeReader(readerOptions);
 
-    Writer* writer = AppSupport::makeWriter(writerOptions, final_stage);
+    Writer* writer = AppSupport::makeWriter(m_outputFile, final_stage);
+    writer->setOptions(writerOptions);
     PointContext ctx;
 
     UserCallback* callback;
