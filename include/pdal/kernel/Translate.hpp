@@ -51,7 +51,8 @@ private:
     void addSwitches();
     void validateSwitches();
 
-    Stage* makeReader(Options readerOptions);
+    std::unique_ptr<Stage> makeReader(Options readerOptions);
+    Stage* makeTranslate(Options translateOptions, Stage* reader);
     void forwardMetadata(Options & options, Metadata metadata);
 
     std::string m_inputFile;

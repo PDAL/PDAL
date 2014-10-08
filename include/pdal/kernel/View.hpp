@@ -1,6 +1,6 @@
 /******************************************************************************
 * Copyright (c) 2013, Howard Butler (hobu.inc@gmail.com)
-* Copyright (c) 2014, Bradley J Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2014, Brad Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -35,20 +35,31 @@
 
 #pragma once
 
+#include <pdal/FileUtils.hpp>
+
 #include "Application.hpp"
-#include "Delta.hpp"
-#include "Diff.hpp"
-#include "Info.hpp"
-#include "Pipeline.hpp"
-#include "Random.hpp"
-#include "Support.hpp"
-#include "Translate.hpp"
 
-#ifdef PDAL_HAVE_PCL
-#include "Ground.hpp"
-#include "PCL.hpp"
-#endif
 
-#ifdef PDAL_HAVE_PCL_VISUALIZE
-#include "View.hpp"
-#endif
+namespace pdal
+{
+namespace kernel
+{
+
+class PDAL_DLL View : public Application
+{
+public:
+    View(int argc, const char* argv[]);
+    int execute();
+
+private:
+    void addSwitches();
+    void validateSwitches();
+
+
+    std::unique_ptr<Stage> makeReader(Options readerOptions);
+
+    std::string m_inputFile;
+};
+
+} // kernel
+} // pdal
