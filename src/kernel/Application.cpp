@@ -360,10 +360,13 @@ boost::uint32_t Application::getVerboseLevel() const
     return m_verboseLevel;
 }
 
-
 bool Application::getVisualize() const
 {
+#ifdef PDAL_HAVE_PCL_VISUALIZE
     return m_visualize;
+#else
+    return false;
+#endif
 }
 
 
