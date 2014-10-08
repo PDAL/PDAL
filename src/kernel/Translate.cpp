@@ -193,7 +193,7 @@ std::unique_ptr<Stage> Translate::makeReader(Options readerOptions)
 }
 
 
-std::unique_ptr<Stage> Translate::makeTranslate(Options translateOptions, Stage* reader_stage)
+Stage* Translate::makeTranslate(Options translateOptions, Stage* reader_stage)
 {
     Stage* final_stage = reader_stage;
     std::map<std::string, Options> extra_opts = getExtraStageOptions();
@@ -274,8 +274,7 @@ std::unique_ptr<Stage> Translate::makeTranslate(Options translateOptions, Stage*
         final_stage = decimation_stage;
     }
 
-    std::unique_ptr<Stage> output(final_stage);
-    return output;
+    return final_stage;
 }
 
 int Translate::execute()
@@ -304,7 +303,7 @@ int Translate::execute()
     bufferReader.addBuffer(input_buffer);
 
     // the translation consumes the BufferReader rather than the readerStage
-    std::unique_ptr<Stage> finalStage(makeTranslate(readerOptions, &bufferReader));
+    Stage* finalStage = makeTranslate(readerOptions, &bufferReader);
 
     Options writerOptions;
     writerOptions.add("filename", m_outputFile);
@@ -325,7 +324,7 @@ int Translate::execute()
         (UserCallback *)new HeartbeatCallback();
 
     std::unique_ptr<Writer> writer(
-        AppSupport::makeWriter(writerOptions, finalStage.get()));
+        AppSupport::makeWriter(writerOptions, finalStage));
     if (!m_output_srs.empty())
         writer->setSpatialReference(m_output_srs);
 
