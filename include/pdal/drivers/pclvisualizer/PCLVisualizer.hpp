@@ -1,6 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2013, Howard Butler (hobu.inc@gmail.com)
-* Copyright (c) 2014, Bradley J Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2014, Brad Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -35,20 +34,38 @@
 
 #pragma once
 
-#include "Application.hpp"
-#include "Delta.hpp"
-#include "Diff.hpp"
-#include "Info.hpp"
-#include "Pipeline.hpp"
-#include "Random.hpp"
-#include "Support.hpp"
-#include "Translate.hpp"
+#include <pdal/Writer.hpp>
 
-#ifdef PDAL_HAVE_PCL
-#include "Ground.hpp"
-#include "PCL.hpp"
-#endif
+#include <string>
 
-#ifdef PDAL_HAVE_PCL_VISUALIZE
-#include "View.hpp"
-#endif
+namespace pdal
+{
+namespace drivers
+{
+namespace pclvisualizer
+{
+
+class PDAL_DLL PclVisualizer : public pdal::Writer
+{
+public:
+    SET_STAGE_NAME("drivers.pclvisualizer.writer", "PCD Writer")
+    SET_STAGE_LINK("http://pdal.io/stages/drivers.pclvisualizer.writer.html")
+    SET_STAGE_ENABLED(true)
+
+    PclVisualizer(const Options& options) : pdal::Writer(options) {};
+
+private:
+    virtual void processOptions(const Options&) {};
+    virtual void ready(PointContextRef ctx) {};
+    virtual void write(const PointBuffer& buf);
+
+    std::string m_filename;
+
+    PclVisualizer& operator=(const PclVisualizer&); // not implemented
+    PclVisualizer(const PclVisualizer&); // not implemented
+};
+
+}
+}
+} // namespaces
+

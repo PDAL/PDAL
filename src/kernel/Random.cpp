@@ -170,7 +170,9 @@ int Random::execute()
         callback = static_cast<pdal::UserCallback*>(new ShellScriptCallback(getProgressShellCommand()));
     writer->setUserCallback(callback);
     writer->prepare(ctx);
-    writer->execute(ctx);
+    PointBufferSet pbSet = writer->execute(ctx);
+
+    visualize(*pbSet.begin());
 
     delete writer;
     delete final_stage;

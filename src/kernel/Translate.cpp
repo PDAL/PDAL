@@ -34,8 +34,7 @@
 
 #include <pdal/kernel/Translate.hpp>
 
-
-
+#include <pdal/drivers/buffer/BufferReader.hpp>
 #include <pdal/filters/Crop.hpp>
 #include <pdal/filters/Decimation.hpp>
 #include <pdal/filters/Reprojection.hpp>
@@ -175,7 +174,7 @@ void Translate::addSwitches()
     addPositionalSwitch("output", 1);
 }
 
-Stage* Translate::makeReader(Options readerOptions)
+std::unique_ptr<Stage> Translate::makeReader(Options readerOptions)
 {
     if (isDebug())
     {
@@ -188,7 +187,14 @@ Stage* Translate::makeReader(Options readerOptions)
         readerOptions.add<std::string>("log", "STDERR");
     }
 
-    Stage* reader_stage = AppSupport::makeReader(readerOptions);
+    std::unique_ptr<Stage> reader_stage(AppSupport::makeReader(readerOptions));
+
+    return reader_stage;
+}
+
+
+Stage* Translate::makeTranslate(Options translateOptions, Stage* reader_stage)
+{
     Stage* final_stage = reader_stage;
     std::map<std::string, Options> extra_opts = getExtraStageOptions();
     if (!m_bounds.empty() || !m_wkt.empty() || !m_output_srs.empty() || extra_opts.size() > 0)
@@ -203,9 +209,9 @@ Stage* Translate::makeReader(Options readerOptions)
 
         if (!m_output_srs.empty())
         {
-            readerOptions.add<std::string>("out_srs", m_output_srs.getWKT());
+            translateOptions.add<std::string>("out_srs", m_output_srs.getWKT());
             reprojection_stage =
-                new filters::Reprojection(readerOptions);
+                new filters::Reprojection(translateOptions);
             reprojection_stage->setInput(next_stage);
             next_stage = reprojection_stage;
         } else if (bHaveReprojection)
@@ -218,8 +224,8 @@ Stage* Translate::makeReader(Options readerOptions)
 
         if ((!m_bounds.empty() && m_wkt.empty()))
         {
-            readerOptions.add<BOX3D>("bounds", m_bounds);
-            crop_stage = new pdal::filters::Crop(readerOptions);
+            translateOptions.add<BOX3D>("bounds", m_bounds);
+            crop_stage = new pdal::filters::Crop(translateOptions);
             crop_stage->setInput(next_stage);
             next_stage = crop_stage;
         }
@@ -241,8 +247,8 @@ Stage* Translate::makeReader(Options readerOptions)
                 // If we couldn't open the file given in m_wkt because it
                 // was likely actually wkt, leave it alone
             }
-            readerOptions.add<std::string >("polygon", m_wkt);
-            crop_stage = new pdal::filters::Crop(readerOptions);
+            translateOptions.add<std::string >("polygon", m_wkt);
+            crop_stage = new pdal::filters::Crop(translateOptions);
             crop_stage->setInput(next_stage);
             next_stage = crop_stage;
         } else if (bHaveCrop)
@@ -273,12 +279,31 @@ Stage* Translate::makeReader(Options readerOptions)
 
 int Translate::execute()
 {
+    PointContext ctx;
+
     Options readerOptions;
     readerOptions.add("filename", m_inputFile);
     readerOptions.add("debug", isDebug());
     readerOptions.add("verbose", getVerboseLevel());
     if (!m_input_srs.empty())
         readerOptions.add("spatialreference", m_input_srs.getWKT());
+
+    std::unique_ptr<Stage> readerStage = makeReader(readerOptions);
+
+    // go ahead and prepare/execute on reader stage only to grab input
+    // PointBufferSet, this makes the input PointBuffer available to both the
+    // processing pipeline and the visualizer
+    readerStage->prepare(ctx);
+    PointBufferSet pbSetIn = readerStage->execute(ctx);
+
+    // the input PointBufferSet will be used to populate a BufferReader that is
+    // consumed by the processing pipeline
+    PointBufferPtr input_buffer = *pbSetIn.begin();
+    drivers::buffer::BufferReader bufferReader(readerOptions);
+    bufferReader.addBuffer(input_buffer);
+
+    // the translation consumes the BufferReader rather than the readerStage
+    Stage* finalStage = makeTranslate(readerOptions, &bufferReader);
 
     Options writerOptions;
     writerOptions.add("filename", m_outputFile);
@@ -292,8 +317,6 @@ int Translate::execute()
     if (m_bForwardMetadata)
         writerOptions.add("forward_metadata", true);
 
-    std::unique_ptr<Stage> finalStage(makeReader(readerOptions));
-
     std::vector<std::string> cmd = getProgressShellCommand();
     UserCallback *callback =
         cmd.size() ? (UserCallback *)new ShellScriptCallback(cmd) :
@@ -301,11 +324,10 @@ int Translate::execute()
         (UserCallback *)new HeartbeatCallback();
 
     std::unique_ptr<Writer> writer(
-        AppSupport::makeWriter(writerOptions, finalStage.get()));
+        AppSupport::makeWriter(writerOptions, finalStage));
     if (!m_output_srs.empty())
         writer->setSpatialReference(m_output_srs);
 
-    PointContext ctx;
     writer->setUserCallback(callback);
 
     for (auto pi: getExtraStageOptions())
@@ -322,7 +344,11 @@ int Translate::execute()
         }
     }
     writer->prepare(ctx);
-    writer->execute(ctx);
+
+    // process the data, grabbing the PointBufferSet for visualization of the
+    PointBufferSet pbSetOut = writer->execute(ctx);
+
+    visualize(*pbSetIn.begin(), *pbSetOut.begin());
 
     return 0;
 }

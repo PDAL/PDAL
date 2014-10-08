@@ -34,8 +34,9 @@
 ****************************************************************************/
 
 #include <pdal/kernel/Ground.hpp>
-#include <pdal/filters/PCLBlock.hpp>
 
+#include <pdal/drivers/buffer/BufferReader.hpp>
+#include <pdal/filters/PCLBlock.hpp>
 
 namespace pdal
 {
@@ -118,12 +119,26 @@ std::unique_ptr<Stage> Ground::makeReader(Options readerOptions)
 
 int Ground::execute()
 {
+    PointContext ctx;
+
     Options readerOptions;
     readerOptions.add<std::string>("filename", m_inputFile);
     readerOptions.add<bool>("debug", isDebug());
     readerOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
 
-    std::unique_ptr<Stage> readerStage = makeReader(readerOptions);    
+    std::unique_ptr<Stage> readerStage = makeReader(readerOptions);
+
+    // go ahead and prepare/execute on reader stage only to grab input
+    // PointBufferSet, this makes the input PointBuffer available to both the
+    // processing pipeline and the visualizer
+    readerStage->prepare(ctx);
+    PointBufferSet pbSetIn = readerStage->execute(ctx);
+
+    // the input PointBufferSet will be used to populate a BufferReader that is
+    // consumed by the processing pipeline
+    PointBufferPtr input_buffer = *pbSetIn.begin();
+    drivers::buffer::BufferReader bufferReader(readerOptions);
+    bufferReader.addBuffer(input_buffer);
 
     Options groundOptions;
     std::ostringstream ss;
@@ -147,7 +162,10 @@ int Ground::execute()
     groundOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
 
     std::unique_ptr<Stage> groundStage(new filters::PCLBlock(groundOptions));
-    groundStage->setInput(readerStage.get());
+
+    // the PCLBlock groundStage consumes the BufferReader rather than the
+    // readerStage
+    groundStage->setInput(&bufferReader);
 
     Options writerOptions;
     writerOptions.add<std::string>("filename", m_outputFile);
@@ -160,7 +178,6 @@ int Ground::execute()
         cmd.size() ? (UserCallback *)new ShellScriptCallback(cmd) :
         (UserCallback *)new HeartbeatCallback();
 
-    PointContext ctx;
     writer->setUserCallback(callback);
 
     for (auto pi: getExtraStageOptions())
@@ -178,7 +195,12 @@ int Ground::execute()
     }    
 
     writer->prepare(ctx);
-    writer->execute(ctx);
+
+    // process the data, grabbing the PointBufferSet for visualization of the
+    // resulting PointBuffer
+    PointBufferSet pbSetOut = writer->execute(ctx);
+
+    visualize(*pbSetIn.begin(), *pbSetOut.begin());
 
     return 0;
 }
