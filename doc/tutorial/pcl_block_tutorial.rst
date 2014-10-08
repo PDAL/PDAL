@@ -176,7 +176,7 @@ like this:
 
     $ cd pdal  # your PDAL source tree
     $ cd test/data
-    $ ../../bin/pdal pcl -i autzen/autzen-point-format-3.las -p filters/pcl/passthrough.json -o ../temp/foo.las -v4
+    $ ../../bin/pdal pcl -i autzen/autzen-point-format-3.las -p filters/pcl/example_PassThrough_1.json -o ../temp/foo.las -v4
 
 This should produce the output
 
@@ -240,7 +240,7 @@ returning only those points with z values in the range 100 to 200.
     }
 
 (This example is taken from the unit test
-`PCLBlockFilterTest_example_passthrough_json`.)
+`PCLBlockFilterTest_example_PassThrough_1`.)
 
 
 
@@ -286,7 +286,7 @@ their public member functions by name.
     }
 
 (This example is taken from the unit test
-`PCLBlockFilterTest_example_outlier_json`.)
+`PCLBlockFilterTest_example_PassThrough_2`.)
 
 
 Ground return filtering
@@ -343,7 +343,7 @@ Additional parameters can be set by advanced users:
     }
 
 (These examples are taken from the unit tests
-`PCLBlockFilterTest_example_pmf_json` and `PCLBlockFilterTest_example_pmf2_json`.)
+`PCLBlockFilterTest_example_PMF_1` and `PCLBlockFilterTest_example_PMF_2`.)
 
 See :ref:`here <ProgressiveMorphologicalFilter>` for a more detailed
 explanation of the PMF parameters.

@@ -123,3 +123,25 @@ StatisticalOutlierRemoval
 VoxelGrid
     assembles a local 3D grid over a given PointCloud, then downsamples and
     filters the data
+
+
+
+Adding a New Filter
+-------------------------------------------------------------------------------
+
+Adding a new PCL filter to the PCLBlock ecosystem is mostly a process of
+judicious copying and pasting.
+
+1. Add the filter function declaration of the form `applyMyFilter` to
+   `PCLPipeline.h`.
+
+2. Add the implementation of `applyMyFilter` to `PCLPipeline.hpp`.
+
+3. Add a one-line description of the shiny new filter to this file,
+   `filters.pclblock.rst`.
+
+4. Add a full description of the new filter to `pcl_spec.rst`, including example
+   JSON, all parameters, and default settings.
+   
+5. Add a test to `PCLBlockFilterTest.cpp`. Make sure each parameter is
+   independently verified.
