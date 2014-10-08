@@ -85,6 +85,7 @@ void PCL::addSwitches()
 
 std::unique_ptr<Stage> PCL::makeReader(Options readerOptions)
 {
+    std::unique_ptr<Stage> reader_stage(AppSupport::makeReader(m_inputFile));
     if (isDebug())
     {
         readerOptions.add<bool>("debug", true);
@@ -94,9 +95,9 @@ std::unique_ptr<Stage> PCL::makeReader(Options readerOptions)
 
         readerOptions.add<boost::uint32_t>("verbose", verbosity);
         readerOptions.add<std::string>("log", "STDERR");
+        reader_stage->setOptions(readerOptions);
     }
 
-    std::unique_ptr<Stage> reader_stage(AppSupport::makeReader(readerOptions));
 
     return reader_stage;
 }
@@ -122,7 +123,7 @@ int PCL::execute()
     // the input PointBufferSet will be used to populate a BufferReader that is
     // consumed by the processing pipeline
     PointBufferPtr input_buffer = *pbSetIn.begin();
-    drivers::buffer::BufferReader bufferReader(readerOptions);
+    drivers::buffer::BufferReader bufferReader;
     bufferReader.addBuffer(input_buffer);
 
     Options pclOptions;
@@ -130,11 +131,12 @@ int PCL::execute()
     pclOptions.add<bool>("debug", isDebug());
     pclOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
 
-    std::unique_ptr<Stage> pclStage(new filters::PCLBlock(pclOptions));
+    std::unique_ptr<Stage> pclStage(new filters::PCLBlock());
+    pclStage->setInput(&bufferReader);
+    pclStage->setOptions(pclOptions);
 
     // the PCLBlock stage consumes the BufferReader rather than the
     // readerStage
-    pclStage->setInput(&bufferReader);
 
     Options writerOptions;
     writerOptions.add<std::string>("filename", m_outputFile);
@@ -149,8 +151,9 @@ int PCL::execute()
         (UserCallback *)new HeartbeatCallback();
 
     std::unique_ptr<Writer>
-        writer(AppSupport::makeWriter(writerOptions, pclStage.get()));
-    
+        writer(AppSupport::makeWriter(m_outputFile, pclStage.get()));
+    writer->setOptions(writerOptions);
+
     writer->setUserCallback(callback);
 
     for (auto pi: getExtraStageOptions())
@@ -165,7 +168,7 @@ int PCL::execute()
                 opts.add(o);
             s->setOptions(opts);
         }
-    }    
+    }
 
     writer->prepare(ctx);
 

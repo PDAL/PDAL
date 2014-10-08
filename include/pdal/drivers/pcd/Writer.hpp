@@ -55,7 +55,7 @@ public:
     SET_STAGE_LINK ("http://pdal.io/stages/drivers.pcd.writer.html")
     SET_STAGE_ENABLED (true)
 
-    PcdWriter(const Options& options) : pdal::Writer(options) {};
+    PcdWriter() : pdal::Writer() {};
 
     static Options getDefaultOptions();
 

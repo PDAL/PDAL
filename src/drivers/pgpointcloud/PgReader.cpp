@@ -51,8 +51,8 @@ namespace drivers
 namespace pgpointcloud
 {
 
-PgReader::PgReader(const Options& options)
-    : pdal::Reader(options), m_session(NULL), m_pcid(0),
+PgReader::PgReader()
+    : pdal::Reader(), m_session(NULL), m_pcid(0),
     m_cached_point_count(0), m_cached_max_points(0)
 {}
 
@@ -157,7 +157,7 @@ point_count_t PgReader::getMaxPoints() const
 
 
 uint32_t PgReader::fetchPcid() const
-{ 
+{
     if (m_pcid)
         return m_pcid;
 
@@ -174,8 +174,8 @@ uint32_t PgReader::fetchPcid() const
     if (! pcid_str)
     {
         std::ostringstream oss;
-        oss << "Unable to fetch pcid with column '" 
-            << m_column_name <<"' and  table '" 
+        oss << "Unable to fetch pcid with column '"
+            << m_column_name <<"' and  table '"
             << m_table_name <<"'";
         throw pdal_error(oss.str());
     }
@@ -187,8 +187,8 @@ uint32_t PgReader::fetchPcid() const
     {
         // Are pcid == 0 valid?
         std::ostringstream oss;
-        oss << "Unable to fetch pcid with column '" 
-            << m_column_name <<"' and  table '" 
+        oss << "Unable to fetch pcid with column '"
+            << m_column_name <<"' and  table '"
             << m_table_name <<"'";
         throw pdal_error(oss.str());
     }
@@ -258,7 +258,7 @@ void PgReader::ready(PointContextRef ctx)
     m_session = pg_connect(m_connection);
 
     if (getSpatialReference().empty())
-        setSpatialReference(fetchSpatialReference());    
+        setSpatialReference(fetchSpatialReference());
 
     m_point_size = 0;
     schema::DimInfoList& dims = m_schema.m_dims;
@@ -364,7 +364,7 @@ point_count_t PgReader::read(PointBuffer& buffer, point_count_t count)
 {
     if (eof())
         return 0;
-    
+
     log()->get(LogLevel::Debug) << "readBufferImpl called with "
         "PointBuffer filled to " << buffer.size() << " points" <<
         std::endl;

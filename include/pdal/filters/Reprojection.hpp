@@ -60,7 +60,7 @@ public:
     SET_STAGE_ENABLED(false)
 #endif
 
-    Reprojection(const Options&);
+    Reprojection();
     Reprojection(const SpatialReference& outSRS);
     Reprojection(const SpatialReference& inSRS, const SpatialReference& outSRS);
 

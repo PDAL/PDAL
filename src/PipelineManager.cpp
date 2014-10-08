@@ -93,12 +93,11 @@ void PipelineManager::removeWriter()
     m_lastWriter = 0;
 }
 
-Reader* PipelineManager::addReader(const std::string& type,
-    const Options& options)
+Reader* PipelineManager::addReader(const std::string& type)
 {
-    registerPluginIfExists(options);
+    registerPluginIfExists();
 
-    Reader* stage = m_factory.createReader(type, options);
+    Reader* stage = m_factory.createReader(type);
     m_readers.push_back(stage);
     m_lastStage = stage;
     return stage;
@@ -106,11 +105,11 @@ Reader* PipelineManager::addReader(const std::string& type,
 
 
 Filter* PipelineManager::addFilter(const std::string& type,
-    const std::vector<Stage *>& prevStages, const Options& options)
+    const std::vector<Stage *>& prevStages)
 {
-    registerPluginIfExists(options);
+    registerPluginIfExists();
 
-    Filter* stage = m_factory.createFilter(type, options);
+    Filter* stage = m_factory.createFilter(type);
     stage->setInput(prevStages);
     m_filters.push_back(stage);
     m_lastStage = stage;
@@ -118,12 +117,11 @@ Filter* PipelineManager::addFilter(const std::string& type,
 }
 
 
-Filter* PipelineManager::addFilter(const std::string& type, Stage *prevStage,
-    const Options& options)
+Filter* PipelineManager::addFilter(const std::string& type, Stage *prevStage)
 {
-    registerPluginIfExists(options);
+    registerPluginIfExists();
 
-    Filter* stage = m_factory.createFilter(type, options);
+    Filter* stage = m_factory.createFilter(type);
     stage->setInput(prevStage);
     m_filters.push_back(stage);
     m_lastStage = stage;
@@ -131,23 +129,22 @@ Filter* PipelineManager::addFilter(const std::string& type, Stage *prevStage,
 }
 
 
-void PipelineManager::registerPluginIfExists(const Options& options)
+void PipelineManager::registerPluginIfExists()
 {
-    if (options.hasOption("plugin"))
-    {
-        m_factory.registerPlugin(options.getValueOrThrow<std::string>("plugin"));
-    }
+//     if (options.hasOption("plugin"))
+//     {
+//         m_factory.registerPlugin(options.getValueOrThrow<std::string>("plugin"));
+//     }
 }
 
 
-Writer* PipelineManager::addWriter(const std::string& type, Stage *prevStage,
-    const Options& options)
+Writer* PipelineManager::addWriter(const std::string& type, Stage *prevStage)
 {
     m_isWriterPipeline = true;
 
-    registerPluginIfExists(options);
+    registerPluginIfExists();
 
-    Writer* writer = m_factory.createWriter(type, options);
+    Writer* writer = m_factory.createWriter(type);
     writer->setInput(prevStage);
     m_writers.push_back(writer);
     m_lastWriter = writer;
@@ -189,16 +186,16 @@ bool PipelineManager::isWriterPipeline() const
 MetadataNode PipelineManager::getMetadata() const
 {
     MetadataNode output("stages");
-    
+
     for (auto ri = m_readers.begin(); ri != m_readers.end(); ++ri)
         output.add((*ri)->getMetadata());
-    
+
     for (auto fi = m_filters.begin(); fi != m_filters.end(); ++fi)
         output.add((*fi)->getMetadata());
 
     for (auto wi = m_writers.begin(); wi != m_writers.end(); ++wi)
         output.add((*wi)->getMetadata());
-        
+
     return output;
 }
 } // namespace pdal

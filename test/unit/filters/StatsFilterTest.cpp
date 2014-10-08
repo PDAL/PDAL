@@ -53,9 +53,10 @@ BOOST_AUTO_TEST_CASE(StatsFilterTest_test1)
     ops.add("bounds", bounds);
     ops.add("count", 1000);
     ops.add("mode", "constant");
-    drivers::faux::Reader reader(ops);
+    drivers::faux::Reader reader;
+    reader.setOptions(ops);
 
-    filters::Stats filter(Options::none());
+    filters::Stats filter;
     filter.setInput(&reader);
     BOOST_CHECK_EQUAL(filter.getName(), "filters.stats");
     BOOST_CHECK_EQUAL(filter.getDescription(), "Statistics Filter");
@@ -109,10 +110,13 @@ BOOST_AUTO_TEST_CASE(test_multiple_dims_same_name)
     options.add(filename);
     options.add(ignore);
 
-    drivers::las::Reader reader(options);
-    filters::Reprojection reprojectionFilter(options);
+    drivers::las::Reader reader;
+    reader.setOptions(options);
+    filters::Reprojection reprojectionFilter;
+    reprojectionFilter.setOptions(options);
     reprojectionFilter.setInput(&reader);
-    filters::Stats filter(options);
+    filters::Stats filter;
+    filter.setOptions(options);
     filter.setInput(&reprojectionFilter);
 
     PointContext ctx;
@@ -153,19 +157,23 @@ BOOST_AUTO_TEST_CASE(test_specified_stats)
     options.add(filename);
     options.add(ignore);
 
-    drivers::las::Reader reader(options);
+    drivers::las::Reader reader;
+    reader.setOptions(options);
 
     Options stats1ops;
     stats1ops.add("dimensions", "Y");
-    filters::Stats filter1(stats1ops);
+    filters::Stats filter1;
+    filter1.setOptions(stats1ops);
     filter1.setInput(&reader);
 
-    filters::Reprojection reprojectionFilter(options);
+    filters::Reprojection reprojectionFilter;
+    reprojectionFilter.setOptions(options);
     reprojectionFilter.setInput(&filter1);
 
     Options stats2ops;
     stats2ops.add("dimensions", "X Z");
-    filters::Stats filter2(stats2ops);
+    filters::Stats filter2;
+    filter2.setOptions(stats2ops);
     filter2.setInput(&reprojectionFilter);
 
     PointContext ctx;
@@ -227,14 +235,17 @@ BOOST_AUTO_TEST_CASE(test_pointbuffer_stats)
     options.add(dimensions);
     options.add(exact_dimensions);
 
-    drivers::las::Reader reader(options);
+    drivers::las::Reader reader;
+    reader.setOptions(options);
 
-    filters::Reprojection reprojectionFilter(options);
+    filters::Reprojection reprojectionFilter;
+    reprojectionFilter.setOptions(options);
     reprojectionFilter.setInput(&reader);
 
     Options statsOptions = options;
     options.add("num_points", 1000);
-    pdal::filters::Stats filter(options);
+    pdal::filters::Stats filter;
+    filter.setOptions(options);
     filter.setInput(&reprojectionFilter);
 
     PointContext ctx;

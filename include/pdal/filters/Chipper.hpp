@@ -143,7 +143,7 @@ public:
     SET_STAGE_LINK("http://pdal.io/stages/filters.chipper.html")
     SET_STAGE_ENABLED(true)
 
-    Chipper(const Options& options) : Filter(options),
+    Chipper() : Filter(),
         m_xvec(DIR_X), m_yvec(DIR_Y), m_spare(DIR_NONE)
     {}
 

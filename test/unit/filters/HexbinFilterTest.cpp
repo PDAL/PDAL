@@ -73,8 +73,10 @@ BOOST_AUTO_TEST_CASE(HexbinFilterTest_test_1)
         "use in situations where you do not want to estimate based on "
         "a sample");
 
-    drivers::las::Reader reader(options);
-    filters::HexBin hexbin(options);
+    drivers::las::Reader reader;
+    reader.setOptions(options);
+    filters::HexBin hexbin;
+    hexbin.setOptions(options);
     hexbin.setInput(&reader);
 
     PointContext ctx;

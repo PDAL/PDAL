@@ -47,8 +47,8 @@ public:
     SET_STAGE_NAME("filters.cache", "Cache Filter")
     SET_STAGE_LINK("http://pdal.io/stages/filters.cache.html")
     SET_STAGE_ENABLED(true)
-    
-    Cache(const Options& options) : Filter(options)
+
+    Cache() : Filter()
         { std::cerr << "Cache filter is deprecated.\n"; }
 
     static Options getDefaultOptions()

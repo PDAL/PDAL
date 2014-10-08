@@ -57,13 +57,15 @@ BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_passthrough)
     options.add(debug);
     options.add(verbose);
 
-    drivers::las::Reader reader(options);
+    drivers::las::Reader reader;
+    reader.setOptions(options);
 
     Option fname("filename", Support::datapath("filters/pcl/passthrough.json"));
     Options filter_options;
     filter_options.add(fname);
 
-    filters::PCLBlock pcl_block(filter_options);
+    filters::PCLBlock pcl_block;
+    pcl_block.setOptions(filter_options);
     pcl_block.setInput(&reader);
 
     PointContext ctx;
@@ -85,13 +87,15 @@ BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_outlier_removal)
     options.add(debug);
     options.add(verbose);
 
-    drivers::las::Reader reader(options);
+    drivers::las::Reader reader;
+    reader.setOptions(options);
 
     Option fname("filename",
         Support::datapath("filters/pcl/outlier_removal.json"));
     Options filter_options;
     filter_options.add(fname);
-    filters::PCLBlock pcl_block(filter_options);
+    filters::PCLBlock pcl_block;
+    pcl_block.setOptions(filter_options);
     pcl_block.setInput(&reader);
 
     PointContext ctx;

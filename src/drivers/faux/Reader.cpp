@@ -58,8 +58,8 @@ static Mode string2mode(const std::string& str)
 }
 
 
-Reader::Reader(const Options& options)
-    : pdal::Reader(options)
+Reader::Reader()
+    : pdal::Reader()
 {
     m_count = 0;
 }

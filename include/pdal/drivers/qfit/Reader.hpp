@@ -94,7 +94,7 @@ public:
     SET_STAGE_LINK("http://pdal.io/stages/drivers.qfit.reader.html")
     SET_STAGE_ENABLED(true)
 
-    Reader(const Options& options);
+    Reader();
 
     static Options getDefaultOptions();
     static Dimension::IdList getDefaultDimensions();

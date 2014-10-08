@@ -56,19 +56,22 @@ BOOST_AUTO_TEST_CASE(test_crop)
     opts.add("bounds", srcBounds);
     opts.add("num_points", 1000);
     opts.add("mode", "ramp");
-    drivers::faux::Reader reader(opts);
+    drivers::faux::Reader reader;
+    reader.setOptions(opts);
 
     // crop the window to 1/3rd the size in each dimension
     BOX3D dstBounds(3.33333, 33.33333, 333.33333, 6.66666, 66.66666, 666.66666);
     Options cropOpts;
     cropOpts.add("bounds", dstBounds);
 
-    filters::Crop filter(cropOpts);
+    filters::Crop filter;
+    filter.setOptions(cropOpts);
     filter.setInput(&reader);
     BOOST_CHECK(filter.getDescription() == "Crop Filter");
 
     Options statOpts;
-    filters::Stats stats(statOpts);
+    filters::Stats stats;
+    stats.setOptions(statOpts);
     stats.setInput(&filter);
 
     PointContext ctx;
@@ -115,7 +118,8 @@ BOOST_AUTO_TEST_CASE(test_crop_polygon)
 #ifdef PDAL_HAVE_GEOS
     Options ops1;
     ops1.add("filename", Support::datapath("las/1.2-with-color.las"));
-    drivers::las::Reader reader(ops1);
+    drivers::las::Reader reader;
+    reader.setOptions(ops1);
 
     Options options;
     Option debug("debug", true, "");
@@ -134,8 +138,9 @@ BOOST_AUTO_TEST_CASE(test_crop_polygon)
     Option polygon("polygon", wkt, "");
     options.add(polygon);
 
-    filters::Crop crop(options);
+    filters::Crop crop;
     crop.setInput(&reader);
+    crop.setOptions(options);
 
     PointContext ctx;
 
@@ -192,10 +197,13 @@ BOOST_AUTO_TEST_CASE(test_crop_polygon_reprojection)
     Option polygon("polygon", wkt, "");
     options.add(polygon);
 
-    drivers::las::Reader reader(options);
-    filters::Reprojection reprojection(options);
+    drivers::las::Reader reader;
+    reader.setOptions(options);
+    filters::Reprojection reprojection;
+    reprojection.setOptions(options);
     reprojection.setInput(&reader);
-    filters::Crop crop(options);
+    filters::Crop crop;
+    crop.setOptions(options);
     crop.setInput(&reprojection);
 
     PointContext ctx;

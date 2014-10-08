@@ -1,6 +1,6 @@
 /******************************************************************************
 * Copyright (c) 2014, Connor Manning, connor@hobu.co
-* 
+*
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -96,7 +96,8 @@ BOOST_AUTO_TEST_CASE(testRead)
 {
     Option filename("filename", getFilePath(), "");
     Options options(filename);
-    drivers::icebridge::Reader reader(options);
+    drivers::icebridge::Reader reader;
+    reader.setOptions(options);
 
     PointContext ctx;
     reader.prepare(ctx);

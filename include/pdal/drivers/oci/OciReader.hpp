@@ -57,8 +57,8 @@ public:
 #else
     SET_STAGE_ENABLED(false)
 #endif
-    
-    OciReader(const Options& options) : pdal::Reader(options)
+
+    OciReader() : pdal::Reader()
     {}
 
     static Options getDefaultOptions();

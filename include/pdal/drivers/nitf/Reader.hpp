@@ -54,7 +54,7 @@ public:
     SET_STAGE_LINK("http://pdal.io/stages/drivers.nitf.reader.html")
     SET_STAGE_ENABLED(true)
 
-    NitfReader(const Options& options) : las::Reader(options)
+    NitfReader() : las::Reader()
         {}
 
 private:
