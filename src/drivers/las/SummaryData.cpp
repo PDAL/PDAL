@@ -59,7 +59,7 @@ void SummaryData::addPoint(double x, double y, double z, int returnNumber)
 {
     returnNumber--;
     if (returnNumber < 0 || (size_t)returnNumber > m_returnCounts.size())
-        throw invalid_point_data("addPoint: point returnNumber is out "
+        throw invalid_point_data("addPoint: returnNumber is out "
             "of range", 0);
 
     m_minX = (std::min)(m_minX, x);

@@ -82,6 +82,9 @@ public:
     void put(const unsigned char *c, size_t len)
         { m_stream->write((const char *)c, len); }
 
+    std::streampos position() const
+        { return m_stream->tellp(); }
+
 protected:
     std::ostream *m_stream;
     std::ostream *m_fstream; // Dup of above to facilitate cleanup.

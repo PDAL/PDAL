@@ -53,7 +53,7 @@ namespace las
 ZipPoint::ZipPoint(VariableLengthRecord *vlr) :
     m_zip(new LASzip()), m_lz_point(NULL), m_lz_point_size(0)
 {
-    if (!vlr || m_zip->unpack((unsigned char *)vlr->data(), vlr->dataLen()))
+    if (!vlr || !m_zip->unpack((unsigned char *)vlr->data(), vlr->dataLen()))
     {
         std::ostringstream oss;
         const char* err = m_zip->get_error();
@@ -98,6 +98,7 @@ void ZipPoint::ConstructItems()
     m_lz_point_size = 0;
     for (unsigned int i = 0; i < m_zip->num_items; i++)
         m_lz_point_size += m_zip->items[i].size;
+
     // create the point data
     unsigned int point_offset = 0;
     m_lz_point = new unsigned char*[m_zip->num_items];

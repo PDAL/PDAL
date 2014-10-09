@@ -108,6 +108,7 @@ private:
         const std::string& userId);
     void setVlrsFromSpatialRef(const SpatialReference& srs);
     void readyCompression();
+    void openCompression();
     void addVlr(const std::string& userId, uint16_t recordId,
         const std::string& description, std::vector<uint8_t>& data);
     bool addGeotiffVlr(GeotiffSupport& geotiff, uint16_t recordId,

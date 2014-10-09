@@ -84,14 +84,9 @@ void Reader::initialize()
             (int)m_lasHeader.pointFormat() << ".";
        throw pdal_error(oss.str());
     }
-}
 
-
-void Reader::ready(PointContext ctx, MetadataNode& m)
-{
-    m_index = 0;
-    ILeStream in(m_istream);
-
+    // We need to read the VLRs in initialize because they may contain an
+    // extra-bytes VLR that is needed to determine dimensions.
     m_istream->seekg(m_lasHeader.vlrOffset());
     for (size_t i = 0; i < m_lasHeader.vlrCount(); ++i)
     {
@@ -111,6 +106,13 @@ void Reader::ready(PointContext ctx, MetadataNode& m)
         }
     }
     fixupVlrs();
+}
+
+
+void Reader::ready(PointContext ctx, MetadataNode& m)
+{
+    m_index = 0;
+
     setSrsFromVlrs(m);
     extractHeaderMetadata(m);
 
@@ -125,6 +127,9 @@ void Reader::ready(PointContext ctx, MetadataNode& m)
             m_unzipper.reset(new LASunzipper());
 
             m_istream->seekg(m_lasHeader.pointOffset(), std::ios::beg);
+
+            // Once we open the zipper, don't touch the stream until the
+            // zipper is closed or bad things happen.
             if (!m_unzipper->open(*m_istream, m_zipPoint->GetZipper()))
             {
                 std::ostringstream oss;
@@ -139,7 +144,6 @@ void Reader::ready(PointContext ctx, MetadataNode& m)
         throw pdal_error("LASzip is not enabled.  Can't read LAZ data.");
 #endif
     }
-    m_istream->seekg(m_lasHeader.pointOffset());
 }
 
 
@@ -402,6 +406,10 @@ void Reader::addDimensions(PointContextRef ctx)
         Id::Enum ids[] = { Id::Red, Id::Green, Id::Blue, Id::Unknown };
         ctx.registerDims(ids);
     }
+    if (m_lasHeader.hasInfrared())
+        ctx.registerDim(Id::Infrared);
+    if (m_lasHeader.versionAtLeast(1, 4))
+        ctx.registerDim(Id::ScanChannel);
 }
 
 
@@ -436,6 +444,7 @@ point_count_t Reader::read(PointBuffer& data, point_count_t count)
     }
     else
     {
+        m_istream->seekg(m_lasHeader.pointOffset());
         std::vector<char> buf(pointByteCount);
         try
         {

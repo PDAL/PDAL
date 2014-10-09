@@ -77,8 +77,11 @@ void Writer::construct()
 void Writer::flush()
 {
 #ifdef PDAL_HAVE_LASZIP
-    m_zipper.reset();
-    m_zipPoint.reset();
+    if (m_lasHeader.compressed())
+    {
+        m_zipper.reset();
+        m_zipPoint.reset();
+    }
 #endif
     m_ostream->flush();
 }
@@ -159,7 +162,7 @@ void Writer::getHeaderOptions(const Options &options)
     uint16_t year = ptm->tm_year + 1900;
     uint16_t doy = ptm->tm_yday;
 
-    metaOptionValue("dataformat_id", "3");
+    metaOptionValue("format", "3");
     metaOptionValue("minor_version", "2");
     metaOptionValue("creation_year", std::to_string(year));
     metaOptionValue("creation_doy", std::to_string(doy));
@@ -216,11 +219,14 @@ void Writer::ready(PointContextRef ctx)
     setVlrsFromSpatialRef(srs);
     fillHeader(ctx);
 
+    if (m_lasHeader.compressed())
+        readyCompression();
+
     // Write the header.
     m_ostream->seekp(m_streamOffset);
-
     OLeStream out(m_ostream);
     out << m_lasHeader;
+
     m_lasHeader.setVlrOffset((uint32_t)m_ostream->tellp());
 
     for (auto vi = m_vlrs.begin(); vi != m_vlrs.end(); ++vi)
@@ -232,13 +238,9 @@ void Writer::ready(PointContextRef ctx)
     // Write the point data start signature for version 1.0.
     if (m_lasHeader.versionEquals(1, 0))
         out << (uint16_t)0xCCDD;
-
     m_lasHeader.setPointOffset((uint32_t)m_ostream->tellp());
-    //ABELL
-    // We ready compression after the header is written so that the stream is
-    // is properly located.
     if (m_lasHeader.compressed())
-        readyCompression();
+        openCompression();
 }
 
 
@@ -363,8 +365,12 @@ bool Writer::addWktVlr(const SpatialReference& srs)
     wktBytes.resize(wktBytes.size() + 1, 0);
     addVlr(TRANSFORM_USER_ID, WKT_RECORD_ID, "OGC Tranformation Record",
         wktBytes);
+
+    // The data in the vector gets moved to the VLR, so we have to recreate it.
+    std::vector<uint8_t> wktBytes2(wkt.begin(), wkt.end());
+    wktBytes2.resize(wktBytes2.size() + 1, 0);
     addVlr(LIBLAS_USER_ID, WKT_RECORD_ID,
-        "OGR variant of OpenGIS WKT SRS", wktBytes);
+        "OGR variant of OpenGIS WKT SRS", wktBytes2);
     return true;
 }
 
@@ -446,18 +452,25 @@ void Writer::fillHeader(PointContextRef ctx)
 }
 
 
-/// Prepare the compressor to write points.
-/// \param  pointFormat - Formt of points we're writing.
 void Writer::readyCompression()
 {
-#ifdef PDAL_HAVE_LASZIP
     m_zipPoint.reset(new ZipPoint(m_lasHeader.pointFormat(),
         m_lasHeader.pointLen()));
     m_zipper.reset(new LASzipper());
-
+#ifdef PDAL_HAVE_LASZIP
+    // Note: this will make the VLR count in the header incorrect, but we
+    // rewrite that bit in done() to fix it up.
     std::vector<uint8_t> data = m_zipPoint->vlrData();
     addVlr(LASZIP_USER_ID, LASZIP_RECORD_ID, "http://laszip.org", data);
+#endif
+}
 
+
+/// Prepare the compressor to write points.
+/// \param  pointFormat - Formt of points we're writing.
+void Writer::openCompression()
+{
+#ifdef PDAL_HAVE_LASZIP
     if (!m_zipper->open(*m_ostream, m_zipPoint->GetZipper()))
     {
         std::ostringstream oss;
@@ -502,8 +515,8 @@ void Writer::write(const PointBuffer& pointBuffer)
         // we always write the base fields
         using namespace Dimension;
 
-        uint8_t returnNumber(0);
-        uint8_t numberOfReturns(0);
+        uint8_t returnNumber(1);
+        uint8_t numberOfReturns(1);
         if (pointBuffer.hasDim(Id::ReturnNumber))
             returnNumber = pointBuffer.getFieldAs<uint8_t>(Id::ReturnNumber,
                 idx);
@@ -626,7 +639,7 @@ void Writer::write(const PointBuffer& pointBuffer)
         m_summaryData.addPoint(xValue, yValue, zValue, returnNumber);
 
         // Perhaps the interval should come out of the callback itself.
-        if (idx % 100 == 0)
+        if (idx % 1000 == 0)
             m_callback->invoke(idx + 1);
     }
     m_callback->invoke(pointBuffer.size());
@@ -637,6 +650,14 @@ void Writer::write(const PointBuffer& pointBuffer)
 
 void Writer::done(PointContextRef ctx)
 {
+    //ABELL - The zipper has to be closed right after all the points
+    // are written or bad things happen since this call expects the
+    // stream to be positioned at a particular position.
+#ifdef PDAL_HAVE_LASZIP
+    if (m_lasHeader.compressed())
+        m_zipper->close();
+#endif
+
     log()->get(LogLevel::Debug) << "Wrote " << m_numPointsWritten <<
         " points to the LAS file" << std::endl;
 
@@ -650,12 +671,11 @@ void Writer::done(PointContextRef ctx)
 
     m_lasHeader.setPointCount(m_numPointsWritten);
     m_lasHeader.setSummary(m_summaryData);
+    m_lasHeader.setVlrCount(m_vlrs.size());
+
     out.seek(m_streamOffset);
     out << m_lasHeader;
-#ifdef PDAL_HAVE_LASZIP
-    m_zipper.reset();
-    m_zipPoint.reset();
-#endif
+    out.seek(m_lasHeader.pointOffset());
     FileUtils::closeFile(m_ostream);
 }
 
