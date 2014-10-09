@@ -8,14 +8,14 @@ Introduction
 ------------------------------------------------------------------------------
 
 PDAL is both a C++ library and a collection of command-line utilities for data
-processing operations. While the PDAL library addresses point cloud
-exploitation and filtering, this takes a back seat to its primary objective of
-being a data translation library, helping developers to navigate the a wide
-variety of point cloud formats. `PCL`_ is another C++ library that is focused
-on developing a rich set of point cloud processing routines, with less of a
-focus on formats and data translation. Acknowledging this, the PCL Block filter
-was developed to serve as a bridge between the two libraries, enabling rapid
-development of point cloud processing pipelines.
+processing operations. While the PDAL library addresses point cloud exploitation
+and filtering, this takes a back seat to its primary objective of being a data
+translation library, helping developers to navigate the a wide variety of point
+cloud formats. `PCL`_ is another C++ library that is focused on developing a
+rich set of point cloud processing routines, with less of a focus on formats and
+data translation. Acknowledging this, the PCL Block filter was developed to
+serve as a bridge between the two libraries, enabling rapid development of point
+cloud processing pipelines.
 
 .. seealso::
     
@@ -27,17 +27,19 @@ development of point cloud processing pipelines.
    :depth: 3
    :backlinks: none
 
+
+
 Quick Start
 ------------------------------------------------------------------------------
 
 .. note::
 
-    Instructions for getting started with PDAL using Vagrant and VirtualBox
-    can be found in the :ref:`vagrant` document.
+    Instructions for getting started with PDAL using Vagrant and VirtualBox can
+    be found in the :ref:`vagrant` document.
 
 PDAL's Vagrant configuration now includes the PCL Block and all necessary
-dependencies. Assuming you've got Vagrant all set up, once you checkout the
-PDAL source code, just do the following:
+dependencies. Assuming you've got Vagrant all set up, once you checkout the PDAL
+source code, just do the following:
 
 ::
 
@@ -45,9 +47,9 @@ PDAL source code, just do the following:
     $ vagrant up
     $ vagrant ssh
 
-The ``vagrant up`` command will take a considerable amount of time, but once
-its completed you have a fully functional VM with both PCL and PDAL installed.
-Try entering
+The ``vagrant up`` command will take a considerable amount of time, but once its
+completed you have a fully functional VM with both PCL and PDAL installed. Try
+entering
 
 ::
 
@@ -61,6 +63,8 @@ at the command line. You should see output similar to the following:
     pdal pipeline (PDAL 0.9.9 (2c6aa8) with GeoTIFF 1.4.0 GDAL 1.9.2 LASzip 2.2.0 System )
     ------------------------------------------------------------------------------------------
 
+
+
 PDAL Pipeline kernel
 ------------------------------------------------------------------------------
 
@@ -71,52 +75,49 @@ PDAL Pipeline kernel
     :ref:`reading` documents contain detailed examples and background
     information.
 
-The :ref:`filters.pclblock` is implemented as a PDAL filter stage and as such
-is easily accessed via the PDAL pipeline. It accepts a single, required option
-- the name of the `JSON`_ file describing the PCL Block.
+The :ref:`filters.pclblock` is implemented as a PDAL filter stage and as such is
+easily accessed via the PDAL pipeline. It accepts a single, required option -
+the name of the `JSON`_ file describing the PCL Block.
 
 A sample pipeline XML which reads/writes LAS and has a single PCL Block filter
 is shown below.
 
 .. code-block:: xml
 
-  <?xml version="1.0" encoding="utf-8"?>
-  <Pipeline version="1.0">
-      <Writer type="drivers.las.writer">
-          <Option name="filename">
-              filtered_cloud.las
-          </Option>
-          <Filter type="filters.pclblock">
-              <Option name="filename">
-                  block.json
-              </Option>
-              <Reader type="drivers.las.reader">
-                  <Option name="filename">
-                      input_cloud.las
-                  </Option>
-              </Reader>
-          </Filter>
-      </Writer>
-  </Pipeline>
+    <?xml version="1.0" encoding="utf-8"?>
+    <Pipeline version="1.0">
+        <Writer type="drivers.las.writer">
+            <Option name="filename">
+                ../../../temp/foo.las
+            </Option>
+            <Filter type="filters.pclblock">
+                <Option name="filename">
+                    ./passthrough.json
+                </Option>
+                <Reader type="drivers.las.reader">
+                    <Option name="filename">
+                        ../../autzen/autzen-point-format-3.las
+                    </Option>
+                </Reader>
+            </Filter>
+        </Writer>
+    </Pipeline>
+
 
 And is run from the command line thusly.
 
 ::
 
-    $ pdal pipeline -i /path/to/xml
+    $ cd pdal # your PDAL source tree
+    $ cd test/data
+    $ ../../bin/pdal pipeline -i filters/pcl/passthrough.xml -v4
 
-This simple pipeline reads the input LAS (``input_cloud.las``), passes it
-through the PCL Block (``block.json``), and writes the output LAS
-(``filtered_cloud.las``).
+This simple pipeline reads the input LAS (``autzen-point-format-3.las``), passes
+it through the PCL Block (``passthrough.json``), and writes the output LAS
+(``foo.las``). Note that the file paths are interpreted relative to the
+directory containing the XML file.
 
-You can also try running the PassThrough PCL Block pipeline similar to our
-example above by typing
-
-::
-
-    $ pdal pipeline -i pdal/test/data/filters/pcl_passthrough.xml -v4
-
-which should produce
+When run, it should produce output similar to this:
 
 ::
 
@@ -139,38 +140,45 @@ which should produce
 
     76(drivers.las.writer DEBUG: 3): Wrote 81 points to the LAS file
     .100
+
+
 
 PDAL PCL kernel
 ------------------------------------------------------------------------------
 
 For users that would like to bypass the creation (and subsequent modification)
 of the pipeline XML for every file they wish to process, there is another
-option--the ``pdal pcl`` command.
+option: the ``pdal pcl`` command.
 
 ::
 
     $ pdal pcl -i /path/to/input/las -p /path/to/pcl/block/json -o /path/to/output/las
 
-This is functionally equivalent to the original pipeline, but does not afford
-the flexibility of constructing the pipeline (i.e., none the other PDAL filters
-are accessible).
+This is functionally equivalent to the original `pdal pipeline` command, but
+does not afford the flexibility of constructing the pipeline (i.e., none the
+other PDAL filters are accessible).
 
-The same can be accomplished with the ``pdal pcl`` command. The basic syntax
-for the command is
+The same can be accomplished with the ``pdal pcl`` command. The basic syntax for
+the command is
 
 ::
 
     $ pdal pcl -i <input cloud> -p <PCL Block JSON> -o <output cloud>
 
 where the JSON file specified with ``-p`` is the same file that would be
-embedded in the pipeline XML file. This can be useful when the pipeline
-does not change frequently, but the input/output filenames do.
+embedded in the pipeline XML file. This can be useful when the pipeline does not
+change frequently, but the input/output filenames do.
+
+For example, the above `pdal pipeline` example can be written with `pdal pcl`
+like this:
 
 ::
 
-    $ pdal pcl -i test/data/autzen-point-format-3.las -p test/data/filters/pcl/passthrough.json -o test/temp/foo.las -v4
+    $ cd pdal  # your PDAL source tree
+    $ cd test/data
+    $ ../../bin/pdal pcl -i autzen/autzen-point-format-3.las -p filters/pcl/example_PassThrough_1.json -o ../temp/foo.las -v4
 
-which should produce
+This should produce the output
 
 ::
 
@@ -194,8 +202,12 @@ which should produce
     76(drivers.las.writer DEBUG: 3): Wrote 81 points to the LAS file
     .100
 
+
+
 Examples
 ------------------------------------------------------------------------------
+
+
 
 Simple point cloud cropping
 ..............................................................................
@@ -208,19 +220,29 @@ returning only those points with z values in the range 100 to 200.
 
 .. code-block:: json
 
-  {
-    "pipeline": {
-      "name": "PassThroughExample",
-      "filters": [{
-          "name": "PassThrough",
-          "setFilterFieldName": "z",
-          "setFilterLimits": {
-            "min": 100,
-            "max": 200
-          }
-      }]
+    {
+        "pipeline":
+        {
+            "name": "PassThroughExample",
+            "filters":
+            [
+                {
+                    "name": "PassThrough",
+                    "setFilterFieldName": "z",
+                    "setFilterLimits":
+                    {
+                        "min": 410.0,
+                        "max": 440.0
+                    }
+                }
+            ]
+        }
     }
-  }
+
+(This example is taken from the unit test
+`PCLBlockFilterTest_example_PassThrough_1`.)
+
+
 
 Point cloud cropping with outlier removal
 ..............................................................................
@@ -234,31 +256,45 @@ their public member functions by name.
 
 .. code-block:: json
 
-  {
-    "pipeline": {
-      "name": "PassThroughAndOutlierRemovalExample",
-      "filters": [{
-          "name": "PassThrough",
-          "setFilterFieldName": "z",
-          "setFilterLimits": {
-            "min": 100,
-            "max": 200
-          }
-        }, {
-          "name": "StatisticalOutlierRemoval",
-          "setMeanK": 8,
-          "setStddevMulThresh": 2.0
-      }]
+    {
+        "pipeline":
+        {
+            "name": "CombinedExample",
+            "help": "Apply passthrough filter followed by statistical outlier removal",
+            "version": 1.0,
+            "author": "Bradley J Chambers",
+            "filters":
+            [
+                {
+                    "name": "PassThrough",
+                    "help": "filter z values to the range [410,440]",
+                    "setFilterFieldName": "z",
+                    "setFilterLimits":
+                    {
+                        "min": 410.0,
+                        "max": 440.0
+                    }
+                },
+                {
+                    "name": "StatisticalOutlierRemoval",
+                    "help": "apply outlier removal",
+                    "setMeanK": 8,
+                    "setStddevMulThresh": 0.2
+                }
+            ]
+        }
     }
-  }
+
+(This example is taken from the unit test
+`PCLBlockFilterTest_example_PassThrough_2`.)
+
 
 Ground return filtering
 ..............................................................................
 
 The Progressive Morphological Filter (PMF) is an openly published approach to
-identifying ground vs. non-ground returns in point cloud data. An
-implementation of PMF is included with PCL and accessible through the PDAL's
-PCL Block filter.
+identifying ground vs. non-ground returns in point cloud data. An implementation
+of PMF is included with PCL and accessible through the PDAL's PCL Block filter.
 
 A complete description of the algorithm can be found in the article `"A
 Progressive Morphological Filter for Removing Nonground Measurements from
@@ -269,33 +305,45 @@ To run the PMF with default settings, the PCL Block JSON is simply:
 
 .. code-block:: json
 
-  {
-    "pipeline": {
-      "name": "ProgressiveMorphologicalFilterDefaultExample",
-      "filters": [{
-          "name": "ProgressiveMorphologicalFilter"
-      }]
+    {
+        "pipeline":
+        {
+            "name": "ProgressiveMorphologicalFilterExample",
+            "filters":
+            [
+                {
+                    "name": "ProgressiveMorphologicalFilter"
+                    "setMaxWindowSize": 200,
+                }
+            ]
+        }
     }
-  }
 
 Additional parameters can be set by advanced users:
 
 .. code-block:: json
 
-  {
-    "pipeline": {
-      "name": "ProgressiveMorphologicalFilterAdvancedExample",
-      "filters": [{
-          "name": "ProgressiveMorphologicalFilter",
-          "setCellSize": 1.0,
-          "setMaxWindowSize": 20,
-          "setSlope": 1.0,
-          "setInitialDistance": 0.5,
-          "setMaxDistance": 3.0,
-          "setExponential": true
-      }]
+    {
+        "pipeline":
+        {
+            "name": "ProgressiveMorphologicalFilterAdvancedExample",
+            "filters":
+            [
+                {
+                    "name": "ProgressiveMorphologicalFilter",
+                    "setCellSize": 1.0,
+                    "setMaxWindowSize": 200,
+                    "setSlope": 1.0,
+                    "setInitialDistance": 0.5,
+                    "setMaxDistance": 3.0,
+                    "setExponential": true
+                }
+            ]
+        }
     }
-  }
+
+(These examples are taken from the unit tests
+`PCLBlockFilterTest_example_PMF_1` and `PCLBlockFilterTest_example_PMF_2`.)
 
 See :ref:`here <ProgressiveMorphologicalFilter>` for a more detailed
 explanation of the PMF parameters.

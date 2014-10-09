@@ -5,32 +5,39 @@ filters.pclblock
 ===============================================================================
 
 The PCL Block filter allows users to specify a block of Point Cloud Library
-(PCL) operations on a PDAL PointBuffer, applying the necessary conversions
+(`PCL`_) operations on a PDAL `PointBuffer`, applying the necessary conversions
 between PDAL and PCL point cloud representations.
 
 This filter is under active development. The current implementation serves as a
 proof of concept for linking PCL into PDAL and converting data. The PCL Block
-creates a PCL Pipeline object (only available in development branch) and passes
-a single argument, the JSON file containing the PCL block definition. After
-filtering, the resulting indices can be retrieved and used to create a new PDAL
-PointBuffer containing only those points that passed the filtering stages.
+filter creates a PCL `Pipeline` object and passes it a single argument, the JSON
+file containing the PCL block definition. After filtering, the resulting indices
+can be retrieved and used to create a new PDAL `PointBuffer` containing only
+those points that passed the filtering stages.
 
-At this stage in its development, the PCL Pipeline does not allow complex
-operations that may change the point type (e.g., PointXYZ to PointNormal) or
+At this stage in its development, the PCL `Pipeline` does not allow complex
+operations that may change the point type (e.g., `PointXYZ` to `PointNormal`) or
 alter points.  We will continue to look into use cases that are of value and
 feasible, but for now are limited primarily to PCL functions that filter or
 segment the point cloud, returning a list of indices of the filtered points
 (e.g., ground or object, noise or signal). The main reason for this design
-decision is that we want to avoid converting all PointBuffer dimensions to the
-PCL PointCloud. In the case of an LAS reader, we may very well not want to
+decision is that we want to avoid converting all `PointBuffer` dimensions to the
+PCL `PointCloud`. In the case of an LAS reader, we may very well not want to
 operate on fields such as return number, but we do not want to lose this
 information post PCL filtering. The easy solution is to simply retain the index
-between the PointBuffer and PointCloud objects and update as necessary.
+between the `PointBuffer` and `PointCloud` objects and update as necessary.
 
 .. seealso::
 
     See :ref:`pcl_block_tutorial` for more on using the PCL Block including
     examples.
+    
+    See :ref:`pcl_spec` for complete details on the PCL Block JSON syntax
+    and the filters available.
+
+.. _`PCL`: http://www.pointclouds.org
+
+
 
 Options
 -------------------------------------------------------------------------------
@@ -38,105 +45,103 @@ Options
 filename
   JSON file to read [Required]
 
+
+
 PCL Block Schema
 -------------------------------------------------------------------------------
+
+The PCL Block json object describes the filter chain to be constructed within
+PCL. Here is an example:
 
 .. code-block:: json
 
     {
-      "pipeline": {
-        "name": "PCL-Block-Name",
-        "filters": [{
-            "name": "FilterName",
-            "setParameter": "value"
-          }, {
-            "name": "AnotherFilterName",
-            "setParameter": "value"
-        }]
-      }
+        "pipeline":
+        {
+            "name": "PCL-Block-Name",
+            "help": "This is an example pipeline with two filters.",
+            "author": "mpg",
+            "filters":
+            [
+                {
+                    "name": "FilterOne",
+                    "setFooParameter": "value"
+                },
+                {
+                    "name": "FilterTwo",
+                    "setBarParameter": false,
+                    "setBounds":
+                    {
+                        "upper": 42,
+                        "lower": 17
+                    }
+                }
+            ]
+        }
     }
+
+
 
 Implemented Filters
 -------------------------------------------------------------------------------
 
-The list of PCL filters that are accessible through the PCL Block depends on
-PCL itself. PDAL is rather dumb in this respect, merely converting the PDAL
-PointBuffer to a PCL PointCloud object and passing the JSON filename. The
+The list of PCL filters that are accessible through the PCL Block depends on PCL
+itself. PDAL is rather dumb in this respect, merely converting the PDAL
+`PointBuffer` to a PCL `PointCloud` object and passing the JSON filename. The
 parsing of the JSON file and implementation of the PCL filters is entirely
-embedded within the PCL Pipeline. The list of filters and their paremeters as
-of this writing includes:
+embedded within the PCL `Pipeline`.
 
-PassThrough
-...............................................................................
+A summary of the currently available filters is listed below. For full details
+of the filters and their parameters, see the :ref:`pcl_spec`.
 
-setFilterFieldName
-  TBD
+ApproximateProgressiveMorphologicalFilter
+    faster (and potentially less accurate) version of the
+    **ProgressiveMorphologicalFilter**
 
-setFilterLimits (min, max)
-  TBD - default = +/- FLT_MAX
-
-StatisticalOutlierRemoval
-...............................................................................
-
-setMeanK
-  default = 2
-
-setStddevMulThresh
-  default = 0.0
-
-RadiusOutlierRemoval
-...............................................................................
-
-setMinNeighborsInRadius
-  default = 2
-
-setRadiusSearch
-  default = 1.0
+ConditionalRemoval
+    filters the data to remove normals outside of a given Z range
 
 GridMinimum
-...............................................................................
+    assembles a local 2D grid over a given PointCloud, then downsamples the data
 
-setLeafSize (x, y, z)
-  default = 1.0
+NormalEstimation
+    computes the surfaces normals of the points in the input
 
-.. _ProgressiveMorphologicalFilter:
+PassThrough
+    allows the user to set min/max bounds on one dimension of the data
 
 ProgressiveMorphologicalFilter
-...............................................................................
+    removes nonground points to produce a bare-earth point cloud
 
-setMaxWindowSize
-  The maximum window size for applying morphological operations. Objects larger
-  than the specified window size will be retained, while objects that are
-  smaller than the window size will be replaced by the minimum z value for the
-  window. [Default: **33.0**]
+RadiusOutlierRemoval
+    removes outliers if the number of neighbors in a certain search radius is
+    smaller than a given K
 
-setSlope
-  The terrain slope is used to compute the elevation difference threshold for a
-  given iteration (i.e., window size). Slope is given as the ratio of rise over
-  run, not degrees. Therefore, the default of 1 corresponds to a slope of 45
-  degrees. [Default: **1.0**]
+StatisticalOutlierRemoval
+    uses point neighborhood statistics to filter outlier data
 
-setMaxDistance
-  The maximum elevation difference threshold. For scenes with buildings, this
-  should be the height of the lowest building. For more rural settings, this is
-  commonly the largest elevation difference in the study area. [Default:
-  **2.5**]
+VoxelGrid
+    assembles a local 3D grid over a given PointCloud, then downsamples and
+    filters the data
 
-setInitialDistance
-  The initial elevation difference threshold. Points within this threshold of
-  the estimated surface are classified as ground returns. [Default: **0.15**]
 
-setCellSize
-  The cell size. [Default: **1.0**]
 
-setBase
-  The base of an exponential function/initial cell size in computing
-  progressive window size at each iteration. [Default: **2.0**]
+Adding a New Filter
+-------------------------------------------------------------------------------
 
-setExponential
-  Whether or not to increase the window size exponentially, thus reducing the
-  number of iterations. [Default: **true**]
+Adding a new PCL filter to the PCLBlock ecosystem is mostly a process of
+judicious copying and pasting.
 
-setNegative
-  Whether to return non-ground (true) or ground (false) measurements. [Default:
-  **false**]
+1. Add the filter function declaration of the form `applyMyFilter` to
+   `PCLPipeline.h`.
+
+2. Add the implementation of `applyMyFilter` to `PCLPipeline.hpp`.
+
+3. Add a one-line description of the shiny new filter to this file,
+   `filters.pclblock.rst`.
+
+4. Add a full description of the new filter to `pcl_spec.rst`, including example
+   JSON, all parameters, and default settings.
+   
+5. Add a test to `PCLBlockFilterTest.cpp`. Make sure each parameter is
+   independently verified.

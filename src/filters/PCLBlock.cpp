@@ -37,8 +37,9 @@
 
 #include <pcl/console/print.h>
 #include <pcl/point_types.h>
-#include <pcl/pipeline/pipeline.h>
 #include <pcl/io/pcd_io.h>
+
+#include "../pclsupport/PCLPipeline.h"
 
 namespace pdal
 {
@@ -80,7 +81,7 @@ PointBufferSet PCLBlock::run(PointBufferPtr input)
     // convert PointBuffer to PointNormal
     typedef pcl::PointCloud<pcl::PointNormal> Cloud;
     Cloud::Ptr cloud(new Cloud);
-    PDALtoPCD(*input, *cloud, buffer_bounds);
+    pclsupport::PDALtoPCD(*input, *cloud, buffer_bounds);
 
     log()->get(LogLevel::Debug2) << cloud->points[0].x << ", " <<
         cloud->points[0].y << ", " << cloud->points[0].z << std::endl;
@@ -131,7 +132,7 @@ PointBufferSet PCLBlock::run(PointBufferPtr input)
         return pbSet;
     }
 
-    PCDtoPDAL(*cloud_f, *output, buffer_bounds);
+    pclsupport::PCDtoPDAL(*cloud_f, *output, buffer_bounds);
 
     log()->get(LogLevel::Debug2) << cloud->points.size() << " before, " <<
         cloud_f->points.size() << " after" << std::endl;
@@ -144,4 +145,3 @@ PointBufferSet PCLBlock::run(PointBufferPtr input)
 
 } // filters
 } // pdal
-

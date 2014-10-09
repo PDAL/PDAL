@@ -1,0 +1,13 @@
+{
+    "pipeline":
+    {
+        "filters":
+        [
+            {
+                "name": "RadiusOutlierRemoval",
+                "setMinNeighborsInRadius": 2,
+                "setRadiusSearch": 100.0
+            }
+        ]
+    }
+}
