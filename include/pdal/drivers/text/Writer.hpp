@@ -65,7 +65,7 @@ public:
     SET_STAGE_LINK("http://pdal.io/stages/drivers.text.writer.html")
     SET_STAGE_ENABLED(true)
 
-    Writer(const Options& options) : pdal::Writer(options)
+    Writer() : pdal::Writer()
     {}
 
     static Options getDefaultOptions();
@@ -83,7 +83,7 @@ private:
 
     void writeGeoJSONBuffer(const PointBuffer& data);
     void writeCSVBuffer(const PointBuffer& data);
-    
+
     std::string m_filename;
     std::string m_outputType;
     std::string m_callback;

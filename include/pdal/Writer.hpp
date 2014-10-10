@@ -52,18 +52,13 @@ class PDAL_DLL Writer : public Stage
 {
 public:
     /// Constructs an end-stage consumer of a pipeline of data -- a writer
-    /// @param options options to be passed into the writer.
-    Writer(Options const& options) : Stage(options),
-            m_callback(new UserCallback)
-        {}
-
     Writer() : m_callback(new UserCallback)
         {}
-    
+
     /// Serialize the pipeline to a boost::property_tree::ptree
     /// @return boost::property_tree::ptree with xml attributes
     virtual boost::property_tree::ptree serializePipeline() const;
-    
+
     /// Sets the UserCallback to manage progress/cancel operations
     void setUserCallback(UserCallback* userCallback)
         { m_callback.reset(userCallback); }

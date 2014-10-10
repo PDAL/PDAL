@@ -98,7 +98,8 @@ static bool fileIsCompressed(const std::string& name)
 
     Options ops;
     ops.add("filename", name);
-    drivers::las::Reader reader(ops);
+    drivers::las::Reader reader;
+    reader.setOptions(ops);
     reader.prepare(ctx);
     return reader.header().compressed();
 }
@@ -110,7 +111,8 @@ static bool fileHasSrs(const std::string& name)
 
     Options ops;
     ops.add("filename", name);
-    drivers::las::Reader reader(ops);
+    drivers::las::Reader reader;
+    reader.setOptions(ops);
     reader.prepare(ctx);
     reader.execute(ctx);
     return !reader.getSpatialReference().empty();
@@ -163,25 +165,6 @@ BOOST_AUTO_TEST_CASE(pc2pc_test_switches)
     BOOST_CHECK(fileIsCompressed(outputLaz));
 #endif
 
-#ifdef PDAL_HAVE_LIBLAS
-    // does --liblas work?
-    stat = Utils::run_shell_command(cmd + " --input=" + inputLas +
-        " --output=" + outputLas + " --liblas", output);
-    BOOST_CHECK_EQUAL(stat, 0);
-    BOOST_CHECK(fileIsOkay(outputLas));
-    BOOST_CHECK(!fileIsCompressed(outputLas));
-#endif
-
-#ifdef PDAL_HAVE_LIBLAS
-#ifdef PDAL_HAVE_LASZIP
-    // do --liblas and --compress work together?
-    stat = Utils::run_shell_command(cmd + " --input=" + inputLas +
-        " --output=" + outputLas + " --compress --liblas", output);
-    BOOST_CHECK_EQUAL(stat, 0);
-    BOOST_CHECK(fileIsOkay(outputLas));
-    BOOST_CHECK(fileIsCompressed(outputLas));
-#endif
-#endif
 
 #ifdef PDAL_HAVE_GDAL
     // does --a_srs add an SRS?

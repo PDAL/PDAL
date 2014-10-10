@@ -72,7 +72,7 @@ point_count_t PcdReader::read(PointBuffer& data, point_count_t count)
     pcl::PCDReader r;
     r.read<XYZIRGBA>(m_filename, *cloud);
 
-    PCDtoPDAL(*cloud, data);
+    pclsupport::PCDtoPDAL(*cloud, data);
 
     return cloud->points.size();
 }
@@ -80,4 +80,3 @@ point_count_t PcdReader::read(PointBuffer& data, point_count_t count)
 } // namespace pcd
 } // namespace drivers
 } // namespace pdal
-

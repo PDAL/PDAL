@@ -138,7 +138,8 @@ BOOST_AUTO_TEST_CASE(test_read_srs)
 
     Options ops;
     ops.add("filename", Support::datapath("las/utm17.las"));
-    las::Reader reader(ops);
+    las::Reader reader;
+    reader.setOptions(ops);
     reader.prepare(ctx);
     reader.execute(ctx);
 
@@ -180,7 +181,8 @@ BOOST_AUTO_TEST_CASE(test_vertical_datums)
         // Write a very simple file with our SRS and one point.
         Options ops1;
         ops1.add("filename", Support::datapath("las/1.2-with-color.las"));
-        las::Reader reader(ops1);
+        las::Reader reader;
+        reader.setOptions(ops1);
 
         const uint64_t numPoints = reader.getNumPoints();
 
@@ -201,7 +203,8 @@ BOOST_AUTO_TEST_CASE(test_vertical_datums)
         PointContext ctx;
         Options ops;
         ops.add("filename", tmpfile);
-        las::Reader reader(ops);
+        las::Reader reader;
+        reader.setOptions(ops);
         reader.prepare(ctx);
         reader.execute(ctx);
 
@@ -238,14 +241,18 @@ BOOST_AUTO_TEST_CASE(test_writing_vlr)
         pdal::FileUtils::deleteFile(tmpfile);
 
         PointContext ctx;
+        pdal::drivers::las::Reader readerx;
         Options readerOpts;
+
         readerOpts.add("filename",
             ::Support::datapath("las/1.2-with-color.las"));
-        pdal::drivers::las::Reader readerx(readerOpts);
+        readerx.setOptions(readerOpts);
 
         Options writerOpts;
+        las::Writer writer;
+
         writerOpts.add("filename", tmpfile);
-        las::Writer writer(writerOpts);
+        writer.setOptions(writerOpts);
         writer.setInput(&readerx);
         writer.prepare(ctx);
         writer.setSpatialReference(ref);
@@ -257,7 +264,8 @@ BOOST_AUTO_TEST_CASE(test_writing_vlr)
         PointContext ctx;
         Options ops;
         ops.add("filename", tmpfile);
-        las::Reader reader(ops);
+        las::Reader reader;
+        reader.setOptions(ops);
         reader.prepare(ctx);
         reader.execute(ctx);
 

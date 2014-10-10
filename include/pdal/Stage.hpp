@@ -61,7 +61,6 @@ class PDAL_DLL Stage
     friend class StageRunner;
 public:
     Stage();
-    Stage(const Options& options);
     virtual ~Stage()
         {}
 
@@ -83,11 +82,15 @@ public:
     virtual LogPtr log() const
         { return m_log; }
     bool isDebug() const
-        { return m_debug; }
+        {
+            return m_options.getValueOrDefault<bool>("debug", false);
+        }
     bool isVerbose() const
-        { return (m_verbose != 0 ); }
+        { return (getVerboseLevel() != 0 ); }
     boost::uint32_t getVerboseLevel() const
-        { return m_verbose; }
+        {
+            return m_options.getValueOrDefault<boost::uint32_t>("verbose", 0);
+        }
     virtual std::string getName() const = 0;
     virtual std::string getDescription() const = 0;
     const std::vector<Stage *>& getInputs() const

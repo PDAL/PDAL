@@ -47,8 +47,8 @@ public:
     SET_STAGE_NAME("filters.merge", "Merge Filter")
     SET_STAGE_LINK("http://pdal.io/stages/filters.merge.html")
     SET_STAGE_ENABLED(true)
-    
-    Merge(const Options& options) : MultiFilter(options)
+
+    Merge() : MultiFilter()
         {}
 
 private:

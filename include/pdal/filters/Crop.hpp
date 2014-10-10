@@ -58,7 +58,7 @@ public:
     SET_STAGE_LINK("http://pdal.io/stages/filters.crop.html")
     SET_STAGE_ENABLED(true)
 
-    Crop(const Options&);
+    Crop();
 
     static Options getDefaultOptions();
 

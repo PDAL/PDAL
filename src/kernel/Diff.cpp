@@ -147,7 +147,8 @@ int Diff::execute()
         sourceOptions.add<bool>("debug", isDebug());
         sourceOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
     }
-    std::unique_ptr<Stage> source(AppSupport::makeReader(sourceOptions));
+    std::unique_ptr<Stage> source(AppSupport::makeReader(m_sourceFile));
+    source->setOptions(sourceOptions);
     source->prepare(sourceCtx);
     PointBufferSet sourceSet = source->execute(sourceCtx);
 
@@ -161,7 +162,8 @@ int Diff::execute()
         candidateOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
     }
 
-    std::unique_ptr<Stage> candidate(AppSupport::makeReader(candidateOptions));
+    std::unique_ptr<Stage> candidate(AppSupport::makeReader(m_candidateFile));
+    candidate->setOptions(candidateOptions);
     candidate->prepare(candidateCtx);
     PointBufferSet candidateSet = candidate->execute(candidateCtx);
 

@@ -74,7 +74,8 @@ BOOST_AUTO_TEST_CASE(ReprojectionFilterTest_test_1)
 
         Options ops1;
         ops1.add("filename", Support::datapath("las/utm15.las"));
-        drivers::las::Reader reader(ops1);
+        drivers::las::Reader reader;
+        reader.setOptions(ops1);
 
         Options options;
         Option debug("debug", true, "");
@@ -83,7 +84,8 @@ BOOST_AUTO_TEST_CASE(ReprojectionFilterTest_test_1)
             "Output SRS to reproject to");
         options.add(out_srs);
 
-        filters::Reprojection reprojectionFilter(options);
+        filters::Reprojection reprojectionFilter;
+        reprojectionFilter.setOptions(options);
         reprojectionFilter.setInput(&reader);
 
         reprojectionFilter.prepare(ctx);

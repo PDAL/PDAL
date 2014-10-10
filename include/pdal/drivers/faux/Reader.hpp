@@ -87,7 +87,7 @@ public:
     SET_STAGE_NAME("drivers.faux.reader", "Faux Reader")
     SET_STAGE_ENABLED(true)
 
-    Reader(const Options& options);
+    Reader();
 
     static Dimension::IdList getDefaultDimensions();
 

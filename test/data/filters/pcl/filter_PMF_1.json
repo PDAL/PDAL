@@ -1,0 +1,19 @@
+{
+    "pipeline":
+    {
+        "filters":
+        [
+            {
+                "name": "ProgressiveMorphologicalFilter",
+                "setMaxWindowSize": 33,
+                "setSlope": 1.0,
+                "setMaxDistance": 2.5,
+                "setInitialDistance": 0.15,
+                "setCellSize": 1.0,
+                "setBase": 2.0,
+                "setExponential": true,
+                "setNegative": false
+            }
+        ]
+    }
+}

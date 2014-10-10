@@ -48,7 +48,7 @@ namespace drivers
 namespace sqlite
 {
 
-SQLiteReader::SQLiteReader(const Options& options) : pdal::Reader(options)
+SQLiteReader::SQLiteReader() : pdal::Reader()
 {}
 
 void SQLiteReader::initialize()
@@ -71,7 +71,7 @@ void SQLiteReader::initialize()
             oss << "no spatialite enabled!";
             throw sqlite_driver_error(oss.str());
         }
-        
+
     }
     catch (sqlite::sqlite_driver_error const& e)
     {
@@ -191,12 +191,12 @@ void SQLiteReader::addDimensions(PointContextRef ctx)
     const row* r = m_session->get(); // First result better have our schema
     if (!r)
         throw sqlite_driver_error("Unable to select schema from query!");
-    
+
     column const& s = r->at(0); // First column is schema
 
-    m_patch->m_schema = schema::Reader(s.data).schema(); 
+    m_patch->m_schema = schema::Reader(s.data).schema();
     m_patch->m_ctx = ctx;
-    
+
     schema::DimInfoList& dims = m_patch->m_schema.m_dims;
     for (auto di = dims.begin(); di != dims.end(); ++di)
         di->m_id = ctx.registerOrAssignDim(di->m_name, di->m_type);
@@ -214,7 +214,7 @@ void SQLiteReader::ready(PointContextRef ctx)
     schema::DimInfoList dims = m_patch->m_schema.m_dims;
     m_point_size = 0;
     for (auto di = dims.begin(); di != dims.end(); ++di)
-        m_point_size += Dimension::size(di->m_type);    
+        m_point_size += Dimension::size(di->m_type);
 }
 
 
@@ -238,12 +238,12 @@ point_count_t SQLiteReader::readPatch(PointBuffer& buffer, point_count_t numPts)
     position = columns.find("NUM_POINTS")->second;
     int32_t count = boost::lexical_cast<int32_t>((*r)[position].data);
     log()->get(LogLevel::Debug4) << "fetched patch with " << count <<
-        " points and " << size << " bytes bytesize: " << size << std::endl;    
+        " points and " << size << " bytes bytesize: " << size << std::endl;
     m_patch->remaining = count;
     m_patch->count = count;
     m_patch->bytes = bytes;
     m_patch->byte_size = size;
-    
+
     point_count_t numRemaining = m_patch->remaining;
     PointId nextId = buffer.size();
     point_count_t numRead = 0;
@@ -278,9 +278,9 @@ point_count_t SQLiteReader::readPatch(PointBuffer& buffer, point_count_t numPts)
         nextId++;
         numRead++;
     }
-    
+
     m_patch->remaining = numRemaining;
-    
+
     return numRead;
 }
 
@@ -289,7 +289,7 @@ point_count_t SQLiteReader::read(PointBuffer& buffer, point_count_t count)
 {
     if (eof())
         return 0;
-    
+
     log()->get(LogLevel::Debug4) << "readBufferImpl called with "
         "PointBuffer filled to " << buffer.size() << " points" <<
         std::endl;
@@ -301,7 +301,7 @@ point_count_t SQLiteReader::read(PointBuffer& buffer, point_count_t count)
         m_session->query(m_query);
         validateQuery();
         b_doneQuery = true;
-        totalNumRead = readPatch(buffer, count); 
+        totalNumRead = readPatch(buffer, count);
     }
 
     int patch_count(0);

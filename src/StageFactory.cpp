@@ -263,10 +263,11 @@ std::string StageFactory::inferWriterDriver(const std::string& filename)
 }
 
 
-void StageFactory::inferWriterOptionsChanges(const std::string& filename, pdal::Options& options)
+pdal::Options StageFactory::inferWriterOptionsChanges(const std::string& filename)
 {
     std::string ext = boost::filesystem::extension(filename);
     boost::to_lower(ext);
+    Options options;
 
     if (boost::algorithm::iequals(ext,".laz"))
     {
@@ -279,11 +280,11 @@ void StageFactory::inferWriterOptionsChanges(const std::string& filename, pdal::
     }
 
     options.add<std::string>("filename", filename);
+    return options;
 }
 
 
-Reader* StageFactory::createReader(const std::string& type,
-    const Options& options)
+Reader* StageFactory::createReader(const std::string& type)
 {
     ReaderCreator* f = getReaderCreator(type);
     if (!f)
@@ -292,13 +293,12 @@ Reader* StageFactory::createReader(const std::string& type,
         oss << "Unable to create reader for type '" << type << "'. Does a driver with this type name exist?";
         throw pdal_error(oss.str());
     }
-    Reader* stage = f(options);
+    Reader* stage = f();
     return stage;
 }
 
 
-Filter* StageFactory::createFilter(const std::string& type,
-    const Options& options)
+Filter* StageFactory::createFilter(const std::string& type)
 {
     FilterCreator* f = getFilterCreator(type);
     if (!f)
@@ -308,12 +308,11 @@ Filter* StageFactory::createFilter(const std::string& type,
         throw pdal_error(oss.str());
     }
 
-    return f(options);
+    return f();
 }
 
 
-Writer* StageFactory::createWriter(const std::string& type,
-    const Options& options)
+Writer* StageFactory::createWriter(const std::string& type)
 {
     WriterCreator* f = getWriterCreator(type);
     if (!f)
@@ -324,7 +323,7 @@ Writer* StageFactory::createWriter(const std::string& type,
         throw pdal_error(oss.str());
     }
 
-    return f(options);
+    return f();
 }
 
 

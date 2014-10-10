@@ -1,0 +1,28 @@
+{
+    "pipeline":
+    {
+        "name": "CombinedExample",
+        "help": "Apply passthrough filter followed by statistical outlier removal",
+        "version": 1.0,
+        "author": "Bradley J Chambers",
+        "filters":
+        [
+            {
+                "name": "PassThrough",
+                "help": "filter z values to the range [410,440]",
+                "setFilterFieldName": "z",
+                "setFilterLimits":
+                {
+                    "min": 410.0,
+                    "max": 440.0
+                }
+            },
+            {
+                "name": "StatisticalOutlierRemoval",
+                "help": "apply outlier removal",
+                "setMeanK": 8,
+                "setStddevMulThresh": 0.2
+            }
+        ]
+    }
+}

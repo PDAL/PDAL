@@ -64,10 +64,12 @@ BOOST_AUTO_TEST_CASE(test_basic)
     }
 
     Options ops;
-    drivers::buffer::BufferReader r(ops);
+    drivers::buffer::BufferReader r;
+    r.setOptions(ops);
     r.addBuffer(buf);
 
-    filters::Stats s(ops);
+    filters::Stats s;
+    s.setOptions(ops);
     s.setInput(&r);
 
     s.prepare(ctx);

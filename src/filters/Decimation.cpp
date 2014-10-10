@@ -54,7 +54,7 @@ namespace pdal
 namespace filters
 {
 
-Decimation::Decimation(const Options& options) : pdal::Filter(options)
+Decimation::Decimation() : pdal::Filter()
 {}
 
 
@@ -103,7 +103,7 @@ void Decimation::voxel_grid(PointBuffer& input, PointBuffer& output)
     Cloud::Ptr cloud_f(new Cloud);
 
     // convert PointBuffer to PointCloud
-    PDALtoPCD(input, *cloud, buffer_bounds);
+    pclsupport::PDALtoPCD(input, *cloud, buffer_bounds);
 
     // apply the voxel grid
     pcl::VoxelGrid<pcl::PointNormal> vg;
@@ -112,7 +112,7 @@ void Decimation::voxel_grid(PointBuffer& input, PointBuffer& output)
     vg.filter(*cloud_f);
 
     // and convert PointCloud back to PointBuffer
-    PCDtoPDAL(*cloud_f, output, buffer_bounds);
+    pclsupport::PCDtoPDAL(*cloud_f, output, buffer_bounds);
 }
 #endif
 

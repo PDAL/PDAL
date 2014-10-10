@@ -58,7 +58,8 @@ BOOST_AUTO_TEST_CASE(test_base_options)
         pdal::Options opts;
         opts.add(opt_filename);
 
-        pdal::drivers::las::Reader reader(opts);
+        pdal::drivers::las::Reader reader;
+        reader.setOptions(opts);
         BOOST_CHECK(reader.getVerboseLevel() == 0);
         BOOST_CHECK(reader.isDebug() == false);
     }
@@ -68,7 +69,8 @@ BOOST_AUTO_TEST_CASE(test_base_options)
         opts.add(opt_filename);
         opts.add(opt_verbose_string);
         opts.add(opt_debug_string);
-        pdal::drivers::las::Reader reader(opts);
+        pdal::drivers::las::Reader reader;
+        reader.setOptions(opts);
         BOOST_CHECK(reader.getVerboseLevel() == 99);
         BOOST_CHECK(reader.isDebug() == true);
     }
@@ -78,7 +80,8 @@ BOOST_AUTO_TEST_CASE(test_base_options)
         opts.add(opt_filename);
         opts.add(opt_verbose_uint8);
         opts.add(opt_debug_bool);
-        pdal::drivers::las::Reader reader(opts);
+        pdal::drivers::las::Reader reader;
+        reader.setOptions(opts);
         BOOST_CHECK(reader.getVerboseLevel() == 99);
         BOOST_CHECK(reader.isDebug() == true);
     }
@@ -90,7 +93,8 @@ BOOST_AUTO_TEST_CASE(header)
     PointContext ctx;
     Options ops;
     ops.add("filename", Support::datapath("las/simple.las"));
-    drivers::las::Reader reader(ops);
+    pdal::drivers::las::Reader reader;
+    reader.setOptions(ops);
 
     reader.prepare(ctx);
     // This tests the copy ctor, too.
@@ -135,7 +139,8 @@ BOOST_AUTO_TEST_CASE(test_sequential)
     Options ops1;
     ops1.add("filename", Support::datapath("las/1.2-with-color.las"));
     ops1.add("count", 103);
-    drivers::las::Reader reader(ops1);
+    pdal::drivers::las::Reader reader;
+    reader.setOptions(ops1);
 
     BOOST_CHECK(reader.getDescription() == "Las Reader");
     reader.prepare(ctx);
@@ -159,7 +164,8 @@ static void test_a_format(const std::string& file, boost::uint8_t majorVersion, 
     Options ops1;
     ops1.add("filename", Support::datapath(file));
     ops1.add("count", 1);
-    drivers::las::Reader reader(ops1);
+    pdal::drivers::las::Reader reader;
+    reader.setOptions(ops1);
     reader.prepare(ctx);
 
     BOOST_CHECK_EQUAL(reader.header().pointFormat(), pointFormat);
@@ -197,7 +203,8 @@ BOOST_AUTO_TEST_CASE(test_vlr)
 
     Options ops1;
     ops1.add("filename", Support::datapath("las/lots_of_vlr.las"));
-    drivers::las::Reader reader(ops1);
+    pdal::drivers::las::Reader reader;
+    reader.setOptions(ops1);
     reader.prepare(ctx);
     reader.execute(ctx);
 
@@ -212,7 +219,9 @@ BOOST_AUTO_TEST_CASE(testInvalidFileSignature)
 
     Options ops1;
     ops1.add("filename", Support::datapath("las/1.2-with-color.las.wkt"));
-    pdal::drivers::las::Reader reader(ops1);
+    pdal::drivers::las::Reader reader;
+    reader.setOptions(ops1);
+
     BOOST_CHECK(reader.header().valid());
 }
 

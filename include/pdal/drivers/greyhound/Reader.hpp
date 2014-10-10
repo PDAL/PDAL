@@ -62,7 +62,7 @@ public:
     SET_STAGE_LINK("http://pdal.io/stages/drivers.greyhound.reader.html")
     SET_STAGE_ENABLED(true)
 
-    GreyhoundReader(const Options& options);
+    GreyhoundReader();
     ~GreyhoundReader();
 
 private:

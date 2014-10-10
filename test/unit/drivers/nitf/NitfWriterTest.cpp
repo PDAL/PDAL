@@ -151,8 +151,10 @@ BOOST_AUTO_TEST_CASE(test1)
         // writer_opts.add(verbose);
         writer_opts.add(writer_opt1);
 
-        pdal::drivers::las::Reader reader(reader_opts);
-        pdal::drivers::nitf::Writer writer(writer_opts);
+        pdal::drivers::las::Reader reader;
+        reader.setOptions(reader_opts);
+        pdal::drivers::nitf::Writer writer;
+        writer.setOptions(writer_opts);
         writer.setInput(&reader);
         {
             // writer.setCompressed(false);

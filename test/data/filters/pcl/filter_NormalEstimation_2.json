@@ -1,0 +1,21 @@
+{
+    "pipeline":
+    {
+        "filters":
+        [
+            {
+                "name": "NormalEstimation",
+                "setKSearch": 0.0,
+                "setRadiusSearch": 51.0
+            },
+            {
+                "name": "ConditionalRemoval",
+                "normalZ":
+                {
+                    "min": 0.0,
+                    "max": 0.087156
+                }
+            }
+        ]
+    }
+}

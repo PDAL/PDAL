@@ -71,8 +71,10 @@ public:
     SET_STAGE_LINK("http://pdal.io/stages/drivers.las.writer.html")
     SET_STAGE_ENABLED(true)
 
-    Writer(const Options&);
-    Writer(const Options&, std::ostream *);
+    Writer() : m_ostream(NULL)
+         { construct(); }
+    Writer(std::ostream *stream) : m_ostream(stream)
+        { construct(); }
 
     static Options getDefaultOptions();
 

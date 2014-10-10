@@ -53,15 +53,18 @@ BOOST_AUTO_TEST_CASE(PipelineManagerTest_test1)
 
         Options optsR;
         optsR.add("filename", Support::datapath("las/1.2-with-color.las"));
-        Reader* reader = mgr.addReader("drivers.las.reader", optsR);
+        Reader* reader = mgr.addReader("drivers.las.reader");
+        reader->setOptions(optsR);
 
         Options optsF;
         optsF.add("bounds", BOX3D(0,0,0,1000000,1000000,1000000));
-        Filter* filter = mgr.addFilter("filters.crop", reader, optsF);
+        Filter* filter = mgr.addFilter("filters.crop", reader);
+        filter->setOptions(optsF);
 
         Options optsW;
         optsW.add("filename", "temp.las", "file to write to");
-        Writer* writer = mgr.addWriter("drivers.las.writer", filter, optsW);
+        Writer* writer = mgr.addWriter("drivers.las.writer", filter);
+        writer->setOptions(optsW);
 
         point_count_t np = mgr.execute();
         BOOST_CHECK(np == 1065);

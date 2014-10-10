@@ -51,14 +51,14 @@ class PDAL_DLL Programmable : public Filter
 {
 public:
     SET_STAGE_NAME("filters.programmable", "Programmable Filter")
-    SET_STAGE_LINK("http://pdal.io/stages/filters.programmable.html")  
+    SET_STAGE_LINK("http://pdal.io/stages/filters.programmable.html")
 #ifdef PDAL_HAVE_PYTHON
     SET_STAGE_ENABLED(true)
 #else
     SET_STAGE_ENABLED(false)
 #endif
-    
-    Programmable(const Options& options) : Filter(options), m_script(NULL)
+
+    Programmable() : Filter(), m_script(NULL)
         {}
 
     static Options getDefaultOptions();

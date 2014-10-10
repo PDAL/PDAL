@@ -51,19 +51,6 @@ namespace drivers
 namespace las
 {
 
-Writer::Writer(const Options& options) : pdal::Writer(options), m_ostream(NULL)
-{
-    construct();
-}
-
-
-Writer::Writer(const Options& options, std::ostream *stream) :
-    pdal::Writer(options), m_ostream(stream)
-{
-    construct();
-}
-
-
 void Writer::construct()
 {
     m_xXform.m_scale = .01;
@@ -128,7 +115,7 @@ void Writer::processOptions(const Options& options)
         setSpatialReference(options.getValueOrDefault("a_srs", std::string()));
     m_lasHeader.setCompressed(options.getValueOrDefault("compression", false));
     m_discardHighReturnNumbers = options.getValueOrDefault(
-            "discard_high_return_numbers", false);
+        "discard_high_return_numbers", false);
 
     getHeaderOptions(options);
     getVlrOptions(options);

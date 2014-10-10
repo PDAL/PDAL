@@ -1,0 +1,17 @@
+{
+    "pipeline":
+    {
+        "filters":
+        [
+            {
+                "name": "PassThrough",
+                "setFilterFieldName": "x",
+                "setFilterLimits":
+                {
+                    "min": 636000,
+                    "max": 637000
+                }
+            }
+        ]
+    }
+}

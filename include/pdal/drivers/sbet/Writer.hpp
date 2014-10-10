@@ -51,7 +51,7 @@ public:
     SET_STAGE_NAME("drivers.sbet.writer", "SBET Writer")
     SET_STAGE_LINK("http://pdal.io/stages/drivers.sbet.writer.html")
 
-    SbetWriter(const Options& options) : pdal::Writer(options)
+    SbetWriter() : pdal::Writer()
         {}
 
     static Dimension::IdList getDefaultDimensions()

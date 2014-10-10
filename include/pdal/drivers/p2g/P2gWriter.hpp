@@ -77,7 +77,7 @@ public:
     SET_STAGE_ENABLED(false)
 #endif
 
-    P2gWriter(const Options& options) : Writer(options), m_outputTypes(0), m_outputFormat(OUTPUT_FORMAT_ARC_ASCII) {};
+    P2gWriter() : Writer(), m_outputTypes(0), m_outputFormat(OUTPUT_FORMAT_ARC_ASCII) {};
     ~P2gWriter() {};
 
     static Options getDefaultOptions();

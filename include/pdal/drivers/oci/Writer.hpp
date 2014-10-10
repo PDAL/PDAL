@@ -38,7 +38,7 @@
 #include <pdal/Bounds.hpp>
 #include <pdal/GDALUtils.hpp>
 
-pdal::Writer* createOciWriter(const pdal::Options& options);
+pdal::Writer* createOciWriter();
 
 #ifdef USE_PDAL_PLUGIN_OCI
 PDAL_C_START
@@ -67,7 +67,7 @@ public:
 #else
     SET_STAGE_ENABLED(false)
 #endif
-    Writer(const Options&);
+    Writer();
     ~Writer();
 
     static Options getDefaultOptions();

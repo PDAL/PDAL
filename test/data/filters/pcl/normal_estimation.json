@@ -1,9 +1,0 @@
-{
-  "pipeline": {
-    "name": "NormalEstimationExample",
-    "filters": [{
-        "name": "NormalEstimation"
-    }]
-  }
-}
-
