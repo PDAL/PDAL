@@ -50,6 +50,8 @@ namespace las
 
 const std::string LasHeader::FILE_SIGNATURE("LASF");
 const std::string LasHeader::SYSTEM_IDENTIFIER("PDAL");
+const size_t LasHeader::LEGACY_RETURN_COUNT;
+const size_t LasHeader::RETURN_COUNT;
 
 std::string GetDefaultSoftwareId()
 {
