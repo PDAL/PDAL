@@ -10,10 +10,10 @@ case "$PDAL_OPTIONAL_COMPONENTS" in
         OPTIONAL_COMPONENT_SWITCH=ON
         STUBS_SWITCH=OFF
         ;;
-    stubs_only)
-        OPTIONAL_COMPONENT_SWITCH=OFF
-        STUBS_SWITCH=ON
-        ;;
+#    stubs_only)
+#        OPTIONAL_COMPONENT_SWITCH=OFF
+#        STUBS_SWITCH=ON
+#        ;;
     none)
         OPTIONAL_COMPONENT_SWITCH=OFF
         STUBS_SWITCH=OFF
