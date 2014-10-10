@@ -87,8 +87,8 @@ public:
     bool matches(const std::string& userId, uint16_t recordId) const
         { return matches(userId) && (recordId == m_recordId); }
 
-    char* data() const
-        { return (char *)(unsigned char *)m_data.data(); }
+    const char* data() const
+        { return (const char *)m_data.data(); }
     uint64_t dataLen() const
         { return m_data.size(); }
     void setDataLen(uint64_t size)

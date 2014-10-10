@@ -275,7 +275,8 @@ void Reader::fixupVlrs()
         {
             // If the key at the end has a zero value, remove it
             // by resizing the array and decrementing the size.
-            char *testPos = vlr->data() + vlr->dataLen() - KEY_SIZE;
+            char *testPos = const_cast<char *>(
+                vlr->data() + vlr->dataLen() - KEY_SIZE);
             if (memcmp(zeros, testPos, KEY_SIZE))
                 break;
             uint16_t size;
@@ -337,7 +338,7 @@ bool Reader::setSrsFromWktVlr(MetadataNode& m)
     // rules.  If there is a NULL byte, don't stick it in the
     // wkt string.
     size_t len = vlr->dataLen();
-    char *c = vlr->data() + len - 1;
+    const char *c = vlr->data() + len - 1;
     if (*c == 0)
         len--;
     std::string wkt(vlr->data(), len);
@@ -384,7 +385,7 @@ bool Reader::setSrsFromGeotiffVlr(MetadataNode& m)
 
 void Reader::extractVlrMetadata(MetadataNode& m)
 {
-    static const int DATA_LEN_MAX = 1000000;
+    static const size_t DATA_LEN_MAX = 1000000;
 
     int i = 0;
     for (auto vi = m_vlrs.begin(); vi != m_vlrs.end(); ++vi, ++i)

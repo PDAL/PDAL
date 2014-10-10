@@ -455,7 +455,7 @@ void Writer::fillHeader(PointContextRef ctx)
 void Writer::readyCompression()
 {
 #ifdef PDAL_HAVE_LASZIP
-    m_zipPoint.reset(new ZipPoint(m_lasHeader.pointFormat(),
+    m_zipPoint.reset(new ZipPoint(m_lasHeader.pointFormat(), 
         m_lasHeader.pointLen()));
     m_zipper.reset(new LASzipper());
     // Note: this will make the VLR count in the header incorrect, but we
