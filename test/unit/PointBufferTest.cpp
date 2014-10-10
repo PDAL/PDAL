@@ -365,5 +365,65 @@ BOOST_AUTO_TEST_CASE(test_indexed)
 }
 **/
 
-BOOST_AUTO_TEST_SUITE_END()
 
+static void set_points(PointBuffer& buf, PointId i,
+                       double x, double y, double z)
+{
+    buf.setField(Dimension::Id::X, i, x);
+    buf.setField(Dimension::Id::Y, i, y);
+    buf.setField(Dimension::Id::Z, i, z);
+}
+
+
+static void check_bounds(const BOX3D& box,
+                         double minx, double maxx,
+                         double miny, double maxy,
+                         double minz, double maxz)
+{
+    const double eps = std::numeric_limits<double>::epsilon();
+    BOOST_CHECK_CLOSE(box.minx, minx, eps);
+    BOOST_CHECK_CLOSE(box.maxx, maxx, eps);
+    BOOST_CHECK_CLOSE(box.miny, miny, eps);
+    BOOST_CHECK_CLOSE(box.maxy, maxy, eps);
+    BOOST_CHECK_CLOSE(box.minz, minz, eps);
+    BOOST_CHECK_CLOSE(box.maxz, maxz, eps);
+}
+
+
+BOOST_AUTO_TEST_CASE(PointBufferTest_calculateBounds)
+{
+    PointContext ctx;
+    ctx.registerDim(Dimension::Id::X);
+    ctx.registerDim(Dimension::Id::Y);
+    ctx.registerDim(Dimension::Id::Z);
+
+    const double lim_min = (std::numeric_limits<double>::lowest)();
+    const double lim_max = (std::numeric_limits<double>::max)();
+    PointBufferPtr b0(new PointBuffer(ctx));
+    const BOX3D box_b0 = b0->calculateBounds(true);
+    check_bounds(box_b0, lim_max, lim_min, lim_max, lim_min, lim_max, lim_min);
+
+    PointBufferPtr b1(new PointBuffer(ctx));
+    set_points(*b1, 0, 0.0, 0.0, 0.0);
+    set_points(*b1, 1, 2.0, 2.0, 2.0);
+
+    PointBufferPtr b2(new PointBuffer(ctx));
+    set_points(*b2, 0, 3.0, 3.0, 3.0);
+    set_points(*b2, 1, 1.0, 1.0, 1.0);
+    
+    PointBufferSet bs;
+    bs.insert(b1);
+    bs.insert(b2);
+
+    const BOX3D box_b1 = b1->calculateBounds(true);
+    check_bounds(box_b1, 0.0, 2.0, 0.0, 2.0, 0.0, 2.0);
+    
+    const BOX3D box_b2 = b2->calculateBounds(true);
+    check_bounds(box_b2, 1.0, 3.0, 1.0, 3.0, 1.0, 3.0);
+
+    BOX3D box_bs = PointBuffer::calculateBounds(bs);
+    check_bounds(box_bs, 0.0, 3.0, 0.0, 3.0, 0.0, 3.0);
+}
+
+
+BOOST_AUTO_TEST_SUITE_END()

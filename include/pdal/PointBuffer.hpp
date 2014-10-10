@@ -51,6 +51,8 @@ namespace plang
 class PointBuffer;
 
 typedef std::shared_ptr<PointBuffer> PointBufferPtr;
+typedef std::set<PointBufferPtr> PointBufferSet;
+
 
 class PDAL_DLL PointBuffer
 {
@@ -151,6 +153,8 @@ public:
         \endverbatim
     */
     BOX3D calculateBounds(bool bis3d=true) const;
+    static BOX3D calculateBounds(const PointBufferSet&, bool bis3d=true);
+
     void dump(std::ostream& ostr) const;
     bool hasDim(Dimension::Id::Enum id) const
         { return m_context.hasDim(id); }
@@ -376,9 +380,8 @@ inline void PointBuffer::appendPoint(PointBuffer& buffer, PointId id)
     m_index.resize(newid + 1);
     m_index[newid] = rawId;
 }
-typedef std::set<PointBufferPtr> PointBufferSet;
+
 
 PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const PointBuffer&);
 
 } // namespace pdal
-

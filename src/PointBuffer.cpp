@@ -75,6 +75,18 @@ BOX3D PointBuffer::calculateBounds(bool is3d) const
 }
 
 
+BOX3D PointBuffer::calculateBounds(const PointBufferSet& set, bool is3d)
+{
+    BOX3D out;
+    for (auto iter = set.begin(); iter != set.end(); ++iter)
+    {
+        PointBufferPtr buf = *iter;
+        out.grow(buf->calculateBounds(is3d));
+    }
+    return out;
+}
+
+
 void PointBuffer::dump(std::ostream& ostr) const
 {
     using std::endl;
@@ -131,4 +143,3 @@ std::ostream& operator<<(std::ostream& ostr, const PointBuffer& buf)
 }
 
 } // namespace pdal
-
