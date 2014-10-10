@@ -46,23 +46,7 @@
 #include <pdal/PointBuffer.hpp>
 #include <pdal/Metadata.hpp>
 
-#include <stdexcept>
-
-/**
-#ifdef PDAL_HAVE_GDAL
-#  ifdef PDAL_COMPILER_CLANG
-#    pragma clang diagnostic push
-#    pragma clang diagnostic ignored "-Wfloat-equal"
-#  endif
-#include "gdal.h"
-#  ifdef PDAL_COMPILER_CLANG
-#    pragma clang diagnostic pop
-#  endif
-#include "cpl_vsi.h"
-#include "cpl_conv.h"
-#include "cpl_string.h"
-#endif
-**/
+//#include <stdexcept>
 
 #include "GeotiffSupport.hpp"
 

@@ -191,7 +191,8 @@ BOOST_AUTO_TEST_CASE(test_vertical_datums)
 
         opts.add("filename", tmpfile);
 
-        las::Writer writer(opts);
+        las::Writer writer;
+        writer.setOptions(opts);
         writer.setInput(&reader);
         writer.prepare(ctx);
         writer.setSpatialReference(ref);
