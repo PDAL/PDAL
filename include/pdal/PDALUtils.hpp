@@ -245,7 +245,13 @@ inline ptree toPTree(const SpatialReference& ref)
 namespace reST
 {
 
+std::ostream& toRST(const ptree&, std::ostream& os);
 
+void write_rst(std::ostream& ost,
+               const boost::property_tree::ptree& pt,
+               int level=0);
+
+                      
 inline std::ostream& toRST(const PointBuffer& buffer, std::ostream& os)
 {
     const Dimension::IdList& dims = buffer.dims();

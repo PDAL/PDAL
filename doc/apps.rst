@@ -19,6 +19,7 @@ application currently contains six commands:
 * :ref:`pipeline <pipeline_command>`
 * :ref:`random <random_command>`
 * :ref:`translate <translate_command>`
+* :ref:`view <view_command>`
 
 Applications are run by invoking the *pdal* application along with the 
 command name:
@@ -31,8 +32,8 @@ command name:
 
 .. note::
     
-    The :ref:`ground <ground_command>` and :ref:`pcl <pcl_command>` commands
-    are only available if PCL is linked.
+    The :ref:`ground <ground_command>`, :ref:`pcl <pcl_command>`, and
+    :ref:`view <view_command>` commands are only available if PCL is linked.
 
 Help about each command can be retrieved via the ``--help`` switch. 
 The ``--drivers`` and ``--options`` switches can tell you more about 
@@ -336,3 +337,55 @@ command line invocation. For example, the following invocation will translate
         --filters.crop.polygon="POLYGON ((636889.412951239268295 851528.512293258565478 422.7001953125,636899.14233423944097 851475.000686757150106 422.4697265625,636899.14233423944097 851475.000686757150106 422.4697265625,636928.33048324030824 851494.459452757611871 422.5400390625,636928.33048324030824 851494.459452757611871 422.5400390625,636928.33048324030824 851494.459452757611871 422.5400390625,636976.977398241520859 851513.918218758190051 424.150390625,636976.977398241520859 851513.918218758190051 424.150390625,637069.406536744092591 851475.000686757150106 438.7099609375,637132.647526245797053 851445.812537756282836 425.9501953125,637132.647526245797053 851445.812537756282836 425.9501953125,637336.964569251285866 851411.759697255445644 425.8203125,637336.964569251285866 851411.759697255445644 425.8203125,637473.175931254867464 851158.795739248627797 435.6298828125,637589.928527257987298 850711.244121236610226 420.509765625,637244.535430748714134 850511.791769731207751 420.7998046875,636758.066280735656619 850667.461897735483944 434.609375,636539.155163229792379 851056.63721774588339 422.6396484375,636889.412951239268295 851528.512293258565478 422.7001953125))" \
         ./test/data/1.2-with-color.las \
         output.laz
+
+.. _view_command:
+
+``view`` command
+------------------------------------------------------------------------------
+
+The *view* command can be used to visualize a point cloud using the
+PCLVisualizer. The command takes a single argument, the input file name.
+
+::
+
+    $ pdal view myfile.las
+
+Once the data has been loaded into the viewer, press h or H to display the
+help.
+
+::
+
+    | Help:
+    -------
+              p, P   : switch to a point-based representation
+              w, W   : switch to a wireframe-based representation (where available)
+              s, S   : switch to a surface-based representation (where available)
+
+              j, J   : take a .PNG snapshot of the current window view
+              c, C   : display current camera/window parameters
+              f, F   : fly to point mode
+
+              e, E   : exit the interactor
+              q, Q   : stop and call VTK's TerminateApp
+
+               +/-   : increment/decrement overall point size
+         +/- [+ ALT] : zoom in/out
+
+              g, G   : display scale grid (on/off)
+              u, U   : display lookup table (on/off)
+
+        o, O         : switch between perspective/parallel projection (default = perspective)
+        r, R [+ ALT] : reset camera [to viewpoint = {0, 0, 0} -> center_{x, y, z}]
+        CTRL + s, S  : save camera parameters
+        CTRL + r, R  : restore camera parameters
+
+        ALT + s, S   : turn stereo mode on/off
+        ALT + f, F   : switch between maximized window mode and original size
+
+              l, L           : list all available geometric and color handlers for the current actor map
+        ALT + 0..9 [+ CTRL]  : switch between different geometric handlers (where available)
+              0..9 [+ CTRL]  : switch between different color handlers (where available)
+
+        SHIFT + left click   : select a point (start with -use_point_picking)
+
+              x, X   : toggle rubber band selection mode for left mouse button

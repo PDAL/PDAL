@@ -10,6 +10,11 @@ struct PointNormal
     int x, y, z;
 };
 
+struct PointXYZ
+{
+    int x, y, z;
+};
+
 template<typename T>
 struct PointCloud
 {

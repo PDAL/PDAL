@@ -44,10 +44,6 @@
 #include "MetadataReader.hpp"
 #include "tre_plugins.hpp"
 
-#ifdef PDAL_COMPILER_GCC
-#  pragma GCC diagnostic ignored "-Wenum-compare"
-#endif
-
 
 // Set to true if you want the metadata to contain
 // NITF fields that are empty; if false, those fields
@@ -79,7 +75,7 @@ NitfFile::NitfFile(const std::string& filename) :
     m_lidarDataSegment(0)
 {
     register_tre_plugins();
-    
+
     return;
 }
 
@@ -115,8 +111,8 @@ void NitfFile::open()
     {
         throw pdal_error("unable to read NITF file (" + e.getMessage() + ")");
     }
-    
-   
+
+
     // find the image segment corresponding the the lidar data, if any
     const bool imageOK = locateLidarImageSegment();
     if (REQUIRE_LIDAR_SEGMENTS && !imageOK)
@@ -132,7 +128,7 @@ void NitfFile::open()
     }
 
     m_validLidarSegments = dataOK && imageOK;
-    
+
     return;
 }
 
@@ -160,7 +156,7 @@ void NitfFile::getLasOffset(boost::uint64_t& offset,
                             boost::uint64_t& length)
 {
     if (!m_validLidarSegments)
-    {        
+    {
         offset = length = 0;
         return;
     }
@@ -174,25 +170,25 @@ void NitfFile::getLasOffset(boost::uint64_t& offset,
             ::nitf::DESegment seg = *iter;
             const ::nitf::Uint64 seg_offset = seg.getOffset();
             const ::nitf::Uint64 seg_end = seg.getEnd();
-            
+
             offset = seg_offset;
             length = seg_end - seg_offset;
 
             return;
         }
-        
+
         iter++;
     }
-    
+
     throw pdal_error("error reading nitf (1)");
 }
-    
+
 
 void NitfFile::extractMetadata(MetadataNode& node)
 {
     MetadataReader mr(m_record, node, SHOW_EMPTY_FIELDS);
     mr.read();
-    
+
     return;
 }
 
@@ -213,7 +209,7 @@ bool NitfFile::locateLidarImageSegment()
 
         ::nitf::Field field = subheader.getImageId();
         ::nitf::Field::FieldType fieldType = field.getType();
-        if (fieldType != NITF_BCS_A)
+        if (fieldType != (::nitf::Field::FieldType)NITF_BCS_A)
             throw pdal_error("error reading nitf (5)");
         std::string iid1 = field.toString();
 
@@ -246,16 +242,16 @@ bool NitfFile::locateLidarDataSegment()
         ::nitf::DESubheader subheader = seg.getSubheader();
 
         ::nitf::Field idField = subheader.getTypeID();
-        if (idField.getType() != NITF_BCS_A)
+        if (idField.getType() != (::nitf::Field::FieldType)NITF_BCS_A)
             throw pdal_error("error reading nitf (6)");
 
         ::nitf::Field verField = subheader.getVersion();
-        if (verField.getType() != NITF_BCS_N)
+        if (verField.getType() != (::nitf::Field::FieldType)NITF_BCS_N)
             throw pdal_error("error reading nitf (7)");
 
         const std::string id = idField.toString();
         const int ver = (int)verField;
-        
+
         if (id == "LIDARA DES               " && ver == 1)
         {
             m_lidarDataSegment = segNum;

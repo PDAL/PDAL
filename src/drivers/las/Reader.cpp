@@ -46,6 +46,24 @@
 #include <pdal/PointBuffer.hpp>
 #include <pdal/Metadata.hpp>
 
+#include <stdexcept>
+
+/**
+#ifdef PDAL_HAVE_GDAL
+#  ifdef PDAL_COMPILER_CLANG
+#    pragma clang diagnostic push
+#    pragma clang diagnostic ignored "-Wfloat-equal"
+#  endif
+#include "gdal.h"
+#  ifdef PDAL_COMPILER_CLANG
+#    pragma clang diagnostic pop
+#  endif
+#include "cpl_vsi.h"
+#include "cpl_conv.h"
+#include "cpl_string.h"
+#endif
+**/
+
 #include "GeotiffSupport.hpp"
 
 namespace pdal
@@ -502,14 +520,14 @@ void Reader::loadPointV10(PointBuffer& data, char *buf, size_t bufsize)
     uint8_t user;
     uint16_t pointSourceId;
 
-    istream >> intensity >> flags >> classification >> scanAngleRank >> 
+    istream >> intensity >> flags >> classification >> scanAngleRank >>
         user >> pointSourceId;
 
     uint8_t returnNum = flags & 0x07;
     uint8_t numReturns = (flags >> 3) & 0x07;
     uint8_t scanDirFlag = (flags >> 6) & 0x01;
     uint8_t flight = (flags >> 7) & 0x01;
-            
+
     data.setField(Dimension::Id::X, nextId, x);
     data.setField(Dimension::Id::Y, nextId, y);
     data.setField(Dimension::Id::Z, nextId, z);
@@ -627,4 +645,3 @@ void Reader::done(PointContextRef ctx)
 } // namespace las
 } // namespace drivers
 } // namespace pdal
-

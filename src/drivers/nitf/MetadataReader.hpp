@@ -50,10 +50,18 @@
    //   https://gcc.gnu.org/bugzilla/show_bug.cgi?id=61653
 #  pragma GCC diagnostic ignored "-Wliteral-suffix"
 #endif
+#ifdef PDAL_COMPILER_CLANG
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wfloat-equal"
+#  pragma clang diagnostic ignored "-Wunused-private-field"
+#endif
 
 #define IMPORT_NITRO_API
 #include <nitro/c++/import/nitf.hpp>
 
+#ifdef PDAL_COMPILER_CLANG
+#  pragma clang diagnostic pop
+#endif
 #ifdef PDAL_COMPILER_GCC
 #  pragma GCC diagnostic pop
 #endif
@@ -91,22 +99,22 @@ private:
     void writeString(const std::string& parentkey,
                      const std::string& key,
                      const std::string& thevalue);
-    
+
     void doFileHeader(const std::string& parentkey,
                       ::nitf::FileHeader&);
-    
+
     void doSecurity(const std::string& parentkey,
                     const std::string& prefix,
                     ::nitf::FileSecurity&);
-    
+
     void doBands(const std::string& key,
                  ::nitf::ImageSubheader&);
     void doBand(const std::string& key,
                  ::nitf::BandInfo&);
-    
+
     void doImageSubheader(const std::string& key,
                           ::nitf::ImageSubheader&);
-    
+
     void doDESubheader(const std::string& key,
                       ::nitf::DESubheader&);
 

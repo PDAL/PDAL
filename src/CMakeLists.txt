@@ -86,6 +86,7 @@ set(PDAL_BASE_CPP
   Log.cpp
   Metadata.cpp
   Options.cpp
+  PDALUtils.cpp
   PipelineManager.cpp
   PipelineReader.cpp
   PipelineWriter.cpp
@@ -385,6 +386,28 @@ if (PDAL_HAVE_PCL)
 	list (APPEND PDAL_HPP ${PDAL_DRIVERS_PCD_HPP} )
     endif(WITH_PCL OR WITH_STUBS)
 endif()
+
+#
+# drivers/pclvisualizer
+#
+if (PDAL_HAVE_PCL AND PDAL_HAVE_PCL_VISUALIZE)
+    set(PDAL_PCL_VISUALIZER_PATH drivers/pclvisualizer)
+    set(PDAL_PCL_VISUALIZER_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_PCL_VISUALIZER_PATH}")
+    set(PDAL_PCL_VISUALIZER_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_PCL_VISUALIZER_PATH}")
+
+    set(PDAL_DRIVERS_PCL_VISUALIZER_HPP
+        "${PDAL_PCL_VISUALIZER_HEADERS}/PCLVisualizer.hpp"
+    )
+
+    set (PDAL_DRIVERS_PCL_VISUALIZER_CPP
+        "${PDAL_PCL_VISUALIZER_SRC}/PCLVisualizer.cpp"
+    )
+
+    if (WITH_PCL OR WITH_STUBS)
+        list (APPEND PDAL_CPP ${PDAL_DRIVERS_PCL_VISUALIZER_CPP} )
+	list (APPEND PDAL_HPP ${PDAL_DRIVERS_PCL_VISUALIZER_HPP} )
+    endif(WITH_PCL OR WITH_STUBS)
+endif(PDAL_HAVE_PCL AND PDAL_HAVE_PCL_VISUALIZE)
 
 #
 # drivers/text
@@ -734,6 +757,11 @@ if (PDAL_HAVE_PCL)
     if (WITH_PCL OR WITH_STUBS)
 	list(APPEND PDAL_HPP ${PDAL_PCL_HPP})
 	list(APPEND PDAL_CPP ${PDAL_PCL_CPP})
+
+	if (PDAL_HAVE_PCL_VISUALIZE)
+	    list(APPEND PDAL_HPP ${PDAL_KERNEL_HEADERS}/View.hpp)
+	    list(APPEND PDAL_CPP ${PDAL_KERNEL_SRC}/View.cpp)
+	endif()
     endif (WITH_PCL OR WITH_STUBS)
 endif()
 

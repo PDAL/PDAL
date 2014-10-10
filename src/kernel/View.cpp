@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2014, Bradley J Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -32,82 +32,93 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/kernel/Pipeline.hpp>
+#include <pdal/kernel/View.hpp>
 
-#include <boost/scoped_ptr.hpp>
-namespace pdal { namespace kernel {
-    
-Pipeline::Pipeline(int argc, const char* argv[])
-    : Application(argc, argv, "pipeline")
+
+namespace pdal
+{
+namespace kernel
+{
+
+View::View(int argc, const char* argv[])
+    : Application(argc, argv, "view")
     , m_inputFile("")
-    , m_validate(false)
-    , m_numPointsToWrite(0)
-    , m_numSkipPoints(0)
 {
     return;
 }
 
 
-void Pipeline::validateSwitches()
+void View::validateSwitches()
 {
-    if (m_usestdin)
-        m_inputFile = "STDIN";
-        
     if (m_inputFile == "")
     {
-        throw app_usage_error("input file name required");
+        throw app_usage_error("--input/-i required");
     }
 
     return;
 }
 
 
-void Pipeline::addSwitches()
+void View::addSwitches()
 {
     po::options_description* file_options = new po::options_description("file options");
 
     file_options->add_options()
-        ("input,i", po::value<std::string>(&m_inputFile)->default_value(""), "input file name")
-        ("pipeline-serialization", po::value<std::string>(&m_pipelineFile)->default_value(""), "")
-        ("validate", po::value<bool>(&m_validate)->zero_tokens()->implicit_value(true), "Validate the pipeline (including serialization), but do not execute writing of points")
-        ("count", po::value<boost::uint64_t>(&m_numPointsToWrite)->default_value(0), "How many points should we write?")
-        ("skip", po::value<boost::uint64_t>(&m_numSkipPoints)->default_value(0), "How many points should we skip?")        
-        ;
+    ("input,i", po::value<std::string>(&m_inputFile)->default_value(""), "input file name")
+    ;
 
     addSwitchSet(file_options);
+
     addPositionalSwitch("input", 1);
 }
 
-int Pipeline::execute()
+std::unique_ptr<Stage> View::makeReader(Options readerOptions)
 {
-    if (!FileUtils::fileExists(m_inputFile))
-        throw app_runtime_error("file not found: " + m_inputFile);
-
-    pdal::PipelineManager manager;
-
-    pdal::PipelineReader reader(manager, isDebug(), getVerboseLevel());
-    bool isWriter = reader.readPipeline(m_inputFile);
-    if (!isWriter)
-        throw app_runtime_error("Pipeline file does not contain a writer. Use 'pdal info' to read the data.");
-    else
+    if (isDebug())
     {
-/**
-    if (!getProgressShellCommand().size())
-        if (m_numPointsToWrite == 0)
-            callback = static_cast<pdal::UserCallback*>(new HeartbeatCallback);
-        else
-            callback = static_cast<pdal::UserCallback*>(new PercentageCallback);
-    else
-        callback = static_cast<pdal::UserCallback*>(new ShellScriptCallback(getProgressShellCommand()));
-    manager.getWriter()->setUserCallback(callback);
-**/
+        readerOptions.add<bool>("debug", true);
+        boost::uint32_t verbosity(getVerboseLevel());
+        if (!verbosity)
+            verbosity = 1;
+
+        readerOptions.add<boost::uint32_t>("verbose", verbosity);
+        readerOptions.add<std::string>("log", "STDERR");
     }
+
+    std::unique_ptr<Stage> reader_stage(AppSupport::makeReader(readerOptions));
+
+    return reader_stage;
+}
+
+
+int View::execute()
+{
+    Options readerOptions;
+    readerOptions.add<std::string>("filename", m_inputFile);
+    readerOptions.add<bool>("debug", isDebug());
+    readerOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
+
+    std::unique_ptr<Stage> readerStage = makeReader(readerOptions);
+
+    Options writerOptions;
+    writerOptions.add<std::string>("filename", "foo.pclviz");
+    setCommonOptions(writerOptions);
+
+    std::unique_ptr<Writer> writer(AppSupport::makeWriter(writerOptions, readerStage.get()));
+
+    std::vector<std::string> cmd = getProgressShellCommand();
+    UserCallback *callback =
+        cmd.size() ? (UserCallback *)new ShellScriptCallback(cmd) :
+        (UserCallback *)new HeartbeatCallback();
+
+    PointContext ctx;
+    writer->setUserCallback(callback);
 
     for (auto pi: getExtraStageOptions())
     {
         std::string name = pi.first;
         Options options = pi.second;
-        std::vector<Stage*> stages = manager.getWriter()->findStage(name);
+        std::vector<Stage*> stages = writer->findStage(name);
         for (auto s: stages)
         {
             Options opts = s->getOptions();
@@ -117,15 +128,11 @@ int Pipeline::execute()
         }
     }
 
-    PointContext ctx;
-    manager.getWriter()->prepare(ctx);
-    manager.getWriter()->execute(ctx);
-    if (m_pipelineFile.size() > 0)
-    {
-        pdal::PipelineWriter writer(manager);
-        writer.writePipeline(m_pipelineFile);
-    }
+    writer->prepare(ctx);
+    writer->execute(ctx);
+
     return 0;
 }
 
-}} // pdal::kernel
+} // kernel
+} // pdal

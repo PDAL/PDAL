@@ -46,11 +46,19 @@
    //   https://gcc.gnu.org/bugzilla/show_bug.cgi?id=61653
 #  pragma GCC diagnostic ignored "-Wliteral-suffix"
 #endif
+#ifdef PDAL_COMPILER_CLANG
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wfloat-equal"
+#  pragma clang diagnostic ignored "-Wunused-private-field"
+#endif
 
 #define IMPORT_NITRO_API
 #include <nitro/c++/import/nitf.hpp>
 #include <nitro/c++/except/Trace.h>
 
+#ifdef PDAL_COMPILER_CLANG
+#  pragma clang diagnostic pop
+#endif
 #ifdef PDAL_COMPILER_GCC
 #  pragma GCC diagnostic pop
 #endif

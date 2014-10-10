@@ -1,6 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2013, Howard Butler (hobu.inc@gmail.com)
-* Copyright (c) 2014, Bradley J Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2014, Michael P. Gerlek (mpg@flaxen.com)
 *
 * All rights reserved.
 *
@@ -33,22 +32,60 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+#include <pdal/PDALUtils.hpp>
 
-#include "Application.hpp"
-#include "Delta.hpp"
-#include "Diff.hpp"
-#include "Info.hpp"
-#include "Pipeline.hpp"
-#include "Random.hpp"
-#include "Support.hpp"
-#include "Translate.hpp"
+using namespace std;
 
-#ifdef PDAL_HAVE_PCL
-#include "Ground.hpp"
-#include "PCL.hpp"
-#endif
+namespace pdal
+{
+namespace utils
+{
+namespace reST
+{
+    
+using namespace boost::property_tree;
 
-#ifdef PDAL_HAVE_PCL_VISUALIZE
-#include "View.hpp"
-#endif
+static std::string indent(int level)
+{
+    std::string s;
+    for (int i=0; i<level; i++) s += "    ";
+    return s;
+}
+
+
+void write_rst(std::ostream& ost,
+               const boost::property_tree::ptree& pt,
+               int level)
+{
+    using boost::property_tree::ptree;
+
+    if (pt.empty())
+    {
+        ost << pt.data();
+        ost << endl << endl;
+    }
+    else
+    {
+        if (level) ost << endl << endl;
+        for (ptree::const_iterator pos = pt.begin(); pos != pt.end();)
+        {
+            ost << indent(level+1) << "- " << pos->first << ": ";
+            write_rst(ost, pos->second, level + 1);
+            ++pos;
+            //ost << endl << endl;
+        }
+    }
+}
+
+
+std::ostream& toRST(const ptree& pt, std::ostream& os)
+{
+    write_rst(os, pt);
+    return os;
+}
+
+
+
+} // namespace reST
+} // namespace utils
+} // namespace pdal
