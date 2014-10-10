@@ -156,11 +156,22 @@ BOOST_AUTO_TEST_CASE(test_grow)
 BOOST_AUTO_TEST_CASE(test_static)
 {
     BOX3D t = BOX3D::getDefaultSpatialExtent();
-    double mind =  (std::numeric_limits<double>::min)();
+    double mind =  (std::numeric_limits<double>::lowest)();
     double maxd =  (std::numeric_limits<double>::max)();
     double epsilon = std::numeric_limits<double>::epsilon();
     BOOST_CHECK_CLOSE(t.minx, mind, epsilon);
     BOOST_CHECK_CLOSE(t.maxx, maxd, epsilon);
+}
+
+
+BOOST_AUTO_TEST_CASE(test_invalid)
+{
+    BOX3D t;
+    double mind =  (std::numeric_limits<double>::lowest)();
+    double maxd =  (std::numeric_limits<double>::max)();
+    double epsilon = std::numeric_limits<double>::epsilon();
+    BOOST_CHECK_CLOSE(t.minx, maxd, epsilon);
+    BOOST_CHECK_CLOSE(t.maxx, mind, epsilon);
 }
 
 
