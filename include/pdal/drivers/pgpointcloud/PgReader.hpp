@@ -56,11 +56,11 @@ class PDAL_DLL PgReader : public pdal::Reader
     public:
         Patch() : count(0), remaining(0)
         {}
-        
+
         point_count_t count;
         point_count_t remaining;
         std::string hex;
-        
+
         std::vector<uint8_t> binary;
         static const uint32_t trim = 26;
 
@@ -74,7 +74,7 @@ class PDAL_DLL PgReader : public pdal::Reader
         {
             // http://stackoverflow.com/questions/8197838/convert-a-long-hex-string-in-to-int-array-with-sscanf
             binary.resize((hex.size() - trim)/2);
-            
+
             char const* source = hex.c_str() + trim;
             char const* p = 0;
 
@@ -93,8 +93,8 @@ public:
 #else
     SET_STAGE_ENABLED(false)
 #endif
-    
-    PgReader(const Options&);
+
+    PgReader();
     ~PgReader();
 
     static Options getDefaultOptions();
@@ -104,7 +104,7 @@ public:
     std::string connString() const
         { return m_connection; }
     void getSession() const;
-    
+
 private:
     virtual void addDimensions(PointContextRef ctx);
     virtual void processOptions(const Options& options);
@@ -113,7 +113,7 @@ private:
     virtual void done(PointContextRef ctx);
     virtual bool eof()
         { return m_atEnd; }
-    
+
     SpatialReference fetchSpatialReference() const;
     uint32_t fetchPcid() const;
     point_count_t readPgPatch(PointBuffer& buffer, point_count_t numPts);

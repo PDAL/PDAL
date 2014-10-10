@@ -284,12 +284,12 @@ void Info::dumpStats()
 static boost::property_tree::ptree getSummaryBounds(MetadataNode root)
 {
     boost::property_tree::ptree pt;
-    
+
     if (root.empty()) return pt;
-    
+
     MetadataNode m = root.findChild("filters.stats");
     if (m.empty()) return pt;
-    
+
     std::vector<MetadataNode> ms = m.children("statistic");
     for (auto dataNode: ms)
     {
@@ -297,7 +297,7 @@ static boost::property_tree::ptree getSummaryBounds(MetadataNode root)
 
         MetadataNode nameNode = dataNode.findChild("name");
         if (nameNode.empty()) continue;
-        
+
         const std::string& name = nameNode.value();
         if (name=="X" || name=="Y" || name=="Z")
         {
@@ -305,7 +305,7 @@ static boost::property_tree::ptree getSummaryBounds(MetadataNode root)
             MetadataNode maxNode = dataNode.findChild("maximum");
             if (minNode.empty()) continue;
             if (maxNode.empty()) continue;
-            
+
             boost::property_tree::ptree stats;
             stats.put("min", minNode.value());
             stats.put("max", maxNode.value());
@@ -322,12 +322,12 @@ static boost::property_tree::ptree getSummaryBounds(MetadataNode root)
 static boost::property_tree::ptree getSummaryDimensions(MetadataNode root)
 {
     boost::property_tree::ptree pt;
-    
+
     if (root.empty()) return pt;
-    
+
     MetadataNode m = root.findChild("filters.stats");
     if (m.empty()) return pt;
-    
+
     std::vector<MetadataNode> ms = m.children("statistic");
     for (auto dataNode: ms)
     {
@@ -335,7 +335,7 @@ static boost::property_tree::ptree getSummaryDimensions(MetadataNode root)
 
         MetadataNode nameNode = dataNode.findChild("name");
         if (nameNode.empty()) continue;
-        
+
         const std::string& name = nameNode.value();
         boost::property_tree::ptree item;
         pt.put(name, "");
@@ -353,19 +353,19 @@ void Info::dumpSummary(PointContext ctx, PointBufferPtr buf)
 
     MetadataNode metaNode = m_manager->getMetadata();
 
-    {    
+    {
         boost::property_tree::ptree pt;
         pt.put("NumPoints", buf->size());
         pt.put("NumDimensions", ctx.dims().size());
         pt.put("WKT", ctx.spatialRef().getWKT());
         m_tree->add_child("Summary", pt);
     }
-    
+
     {
         boost::property_tree::ptree pt = getSummaryBounds(metaNode);
         m_tree->add_child("Bounds", pt);
     }
-    
+
     {
         boost::property_tree::ptree pt = getSummaryDimensions(metaNode);
         m_tree->add_child("Dimensions", pt);
@@ -502,6 +502,7 @@ int Info::execute()
     Options options = m_options + readerOptions;
 
     Stage* stage = m_manager->getStage();
+    stage->setOptions(options);
     if (m_showStats || m_showSummary)
     {
         if (m_showSummary)
@@ -510,10 +511,14 @@ int Info::execute()
             // all the points, alas
             options.add<point_count_t>("num_points", 0);
         }
-        stage = m_manager->addFilter("filters.stats", stage, options);
+        stage = m_manager->addFilter("filters.stats", stage);
+        stage->setOptions(options);
     }
     if (m_computeBoundary)
-        stage = m_manager->addFilter("filters.hexbin", stage, options);
+    {
+        stage = m_manager->addFilter("filters.hexbin", stage);
+        stage->setOptions(options);
+    }
 
     m_tree = std::unique_ptr<boost::property_tree::ptree>(
         new boost::property_tree::ptree);

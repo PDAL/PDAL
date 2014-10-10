@@ -102,7 +102,7 @@ public:
     SET_STAGE_NAME("drivers.terrasolid.reader", "TerraSolid Reader")
     SET_STAGE_ENABLED(true)
 
-    Reader(const Options& options) : pdal::Reader(options),
+    Reader() : pdal::Reader(),
         m_format(TERRASOLID_Format_Unknown)
     {}
 

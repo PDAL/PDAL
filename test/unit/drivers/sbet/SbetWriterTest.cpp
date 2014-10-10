@@ -63,8 +63,10 @@ BOOST_AUTO_TEST_SUITE(SbetWriterTest)
 
 BOOST_AUTO_TEST_CASE(testConstructor)
 {
-    drivers::sbet::SbetReader reader(makeReaderOptions());
-    drivers::sbet::SbetWriter writer(makeWriterOptions());
+    drivers::sbet::SbetReader reader;
+    reader.setOptions(makeReaderOptions());
+    drivers::sbet::SbetWriter writer;
+    writer.setOptions(makeWriterOptions());
     writer.setInput(&reader);
 
     BOOST_CHECK(writer.getDescription() == "SBET Writer");
@@ -78,8 +80,10 @@ BOOST_AUTO_TEST_CASE(testWrite)
     // Scope forces the writer's buffer to get written to the file.  Otherwise
     // the output file will show a file size of zero and no contents.
     {
-        drivers::sbet::SbetReader reader(makeReaderOptions());
-        drivers::sbet::SbetWriter writer(makeWriterOptions());
+        drivers::sbet::SbetReader reader;
+        reader.setOptions(makeReaderOptions());
+        drivers::sbet::SbetWriter writer;
+        writer.setOptions(makeWriterOptions());
         writer.setInput(&reader);
 
         PointContext ctx;

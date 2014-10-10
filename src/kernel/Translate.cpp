@@ -187,7 +187,9 @@ std::unique_ptr<Stage> Translate::makeReader(Options readerOptions)
         readerOptions.add<std::string>("log", "STDERR");
     }
 
-    std::unique_ptr<Stage> reader_stage(AppSupport::makeReader(readerOptions));
+    Stage* stage = AppSupport::makeReader(m_inputFile);
+    stage->setOptions(readerOptions);
+    std::unique_ptr<Stage> reader_stage(stage);
 
     return reader_stage;
 }
@@ -196,6 +198,7 @@ std::unique_ptr<Stage> Translate::makeReader(Options readerOptions)
 Stage* Translate::makeTranslate(Options translateOptions, Stage* reader_stage)
 {
     Stage* final_stage = reader_stage;
+    Options readerOptions = reader_stage->getOptions();
     std::map<std::string, Options> extra_opts = getExtraStageOptions();
     if (!m_bounds.empty() || !m_wkt.empty() || !m_output_srs.empty() || extra_opts.size() > 0)
     {
@@ -211,22 +214,25 @@ Stage* Translate::makeTranslate(Options translateOptions, Stage* reader_stage)
         {
             translateOptions.add<std::string>("out_srs", m_output_srs.getWKT());
             reprojection_stage =
-                new filters::Reprojection(translateOptions);
+                new filters::Reprojection();
             reprojection_stage->setInput(next_stage);
+            reprojection_stage->setOptions(readerOptions);
             next_stage = reprojection_stage;
         } else if (bHaveReprojection)
         {
             reprojection_stage =
-                new filters::Reprojection(extra_opts.find("filters.reprojection")->second);
+                new filters::Reprojection();
             reprojection_stage->setInput(next_stage);
+            reprojection_stage->setOptions(extra_opts.find("filters.reprojection")->second);
             next_stage = reprojection_stage;
         }
 
         if ((!m_bounds.empty() && m_wkt.empty()))
         {
-            translateOptions.add<BOX3D>("bounds", m_bounds);
-            crop_stage = new pdal::filters::Crop(translateOptions);
+            readerOptions.add<BOX3D>("bounds", m_bounds);
+            crop_stage = new pdal::filters::Crop();
             crop_stage->setInput(next_stage);
+            crop_stage->setOptions(readerOptions);
             next_stage = crop_stage;
         }
         else if (m_bounds.empty() && !m_wkt.empty())
@@ -247,14 +253,16 @@ Stage* Translate::makeTranslate(Options translateOptions, Stage* reader_stage)
                 // If we couldn't open the file given in m_wkt because it
                 // was likely actually wkt, leave it alone
             }
-            translateOptions.add<std::string >("polygon", m_wkt);
-            crop_stage = new pdal::filters::Crop(translateOptions);
+            readerOptions.add<std::string >("polygon", m_wkt);
+            crop_stage = new pdal::filters::Crop();
             crop_stage->setInput(next_stage);
+            crop_stage->setOptions(readerOptions);
             next_stage = crop_stage;
         } else if (bHaveCrop)
         {
-            crop_stage = new pdal::filters::Crop(extra_opts.find("filters.crop")->second);
+            crop_stage = new pdal::filters::Crop();
             crop_stage->setInput(next_stage);
+            crop_stage->setOptions(extra_opts.find("filters.crop")->second);
             next_stage = crop_stage;
         }
         final_stage = next_stage;
@@ -269,8 +277,9 @@ Stage* Translate::makeTranslate(Options translateOptions, Stage* reader_stage)
         decimationOptions.add<uint32_t>("offset", m_decimation_offset);
         decimationOptions.add<double>("leaf_size", m_decimation_leaf_size);
         decimationOptions.add<std::string>("method", m_decimation_method);
-        Stage *decimation_stage = new filters::Decimation(decimationOptions);
+        Stage *decimation_stage = new filters::Decimation();
         decimation_stage->setInput(final_stage);
+        decimation_stage->setOptions(decimationOptions);
         final_stage = decimation_stage;
     }
 
@@ -299,7 +308,8 @@ int Translate::execute()
     // the input PointBufferSet will be used to populate a BufferReader that is
     // consumed by the processing pipeline
     PointBufferPtr input_buffer = *pbSetIn.begin();
-    drivers::buffer::BufferReader bufferReader(readerOptions);
+    drivers::buffer::BufferReader bufferReader;
+    bufferReader.setOptions(readerOptions);
     bufferReader.addBuffer(input_buffer);
 
     // the translation consumes the BufferReader rather than the readerStage
@@ -323,10 +333,13 @@ int Translate::execute()
         m_numPointsToWrite ? (UserCallback *)new PercentageCallback() :
         (UserCallback *)new HeartbeatCallback();
 
-    std::unique_ptr<Writer> writer(
-        AppSupport::makeWriter(writerOptions, finalStage));
+    std::unique_ptr<Writer> writer( AppSupport::makeWriter(m_outputFile, finalStage));
     if (!m_output_srs.empty())
         writer->setSpatialReference(m_output_srs);
+
+    // Some options are inferred by makeWriter based on filename
+    // (compression, driver type, etc).
+    writer->setOptions(writerOptions+writer->getOptions());
 
     writer->setUserCallback(callback);
 

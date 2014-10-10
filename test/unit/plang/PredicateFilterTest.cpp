@@ -56,7 +56,8 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test1)
     readerOps.add("bounds", bounds);
     readerOps.add("num_points", 1000);
     readerOps.add("mode", "ramp");
-    drivers::faux::Reader reader(readerOps);
+    drivers::faux::Reader reader;
+    reader.setOptions(readerOps);
 
     // keep all points where x less than 1.0
     const pdal::Option source("source",
@@ -77,12 +78,14 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test1)
     opts.add(module);
     opts.add(function);
 
-    filters::Predicate filter(opts);
+    filters::Predicate filter;
+    filter.setOptions(opts);
     filter.setInput(&reader);
     BOOST_CHECK(filter.getDescription() == "Predicate Filter");
 
     Options statOpts;
-    filters::Stats stats(statOpts);
+    filters::Stats stats;
+    stats.setOptions(statOpts);
     stats.setInput(&filter);
 
     PointContext ctx;
@@ -114,7 +117,8 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test2)
     readerOps.add("num_points", 1000);
     readerOps.add("mode", "ramp");
 
-    drivers::faux::Reader reader(readerOps);
+    drivers::faux::Reader reader;
+    reader.setOptions(readerOps);
 
     Option source("source",
         // "Y > 1.0"
@@ -133,12 +137,14 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test2)
     opts.add(module);
     opts.add(function);
 
-    filters::Predicate filter(opts);
+    filters::Predicate filter;
+    filter.setOptions(opts);
     filter.setInput(&reader);
     BOOST_CHECK(filter.getDescription() == "Predicate Filter");
 
     Options statOpts;
-    filters::Stats stats(statOpts);
+    filters::Stats stats;
+    stats.setOptions(statOpts);
     stats.setInput(&filter);
 
     PointContext ctx;
@@ -168,7 +174,8 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test3)
     readerOpts.add("bounds", bounds);
     readerOpts.add("num_points", 1000);
     readerOpts.add("mode", "ramp");
-    drivers::faux::Reader reader(readerOpts);
+    drivers::faux::Reader reader;
+    reader.setOptions(readerOpts);
 
     // keep all points where x less than 1.0
     const Option source1("source",
@@ -189,7 +196,8 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test3)
     opts1.add(module1);
     opts1.add(function1);
 
-    filters::Predicate filter1(opts1);
+    filters::Predicate filter1;
+    filter1.setOptions(opts1);
     filter1.setInput(&reader);
 
     // keep all points where y greater than 0.5
@@ -211,11 +219,13 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test3)
     opts2.add(module2);
     opts2.add(function2);
 
-    filters::Predicate filter2(opts2);
+    filters::Predicate filter2;
+    filter2.setOptions(opts2);
     filter2.setInput(&filter1);
 
     Options statOpts;
-    filters::Stats stats(statOpts);
+    filters::Stats stats;
+    stats.setOptions(statOpts);
     stats.setInput(&filter2);
 
     PointContext ctx;
@@ -243,7 +253,8 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test4)
     readerOpts.add("bounds", bounds);
     readerOpts.add("num_points", 1000);
     readerOpts.add("mode", "ramp");
-    drivers::faux::Reader reader(readerOpts);
+    drivers::faux::Reader reader;
+    reader.setOptions(readerOpts);
 
     const Option source("source",
         // "Y > 0.5"
@@ -262,7 +273,8 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test4)
     opts.add(module);
     opts.add(function);
 
-    filters::Predicate filter(opts);
+    filters::Predicate filter;
+    filter.setOptions(opts);
     filter.setInput(&reader);
 
     PointContext ctx;
@@ -294,7 +306,8 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test5)
     readerOpts.add("bounds", bounds);
     readerOpts.add("num_points", 1000);
     readerOpts.add("mode", "ramp");
-    drivers::faux::Reader reader(readerOpts);
+    drivers::faux::Reader reader;
+    reader.setOptions(readerOpts);
 
     const Option source("source",
         // "Y > 0.5"
@@ -313,7 +326,8 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test5)
     opts.add(module);
     opts.add(function);
 
-    filters::Predicate filter(opts);
+    filters::Predicate filter;
+    filter.setOptions(opts);
     filter.setInput(&reader);
 
     PointContext ctx;

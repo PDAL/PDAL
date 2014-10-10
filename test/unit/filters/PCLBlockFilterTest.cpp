@@ -71,11 +71,11 @@ static void test_filter(const std::string& jsonFile,
                         bool useThin=false)
 {
     Options options;
-    
+
     const std::string& autzenThick = "autzen/autzen-point-format-3.las";
     const std::string& autzenThin = "autzen/autzen-thin.las";
     const std::string& autzen = useThin ? autzenThin : autzenThick;
-        
+
     Option filename("filename", Support::datapath(autzen));
     Option debug("debug", true, "");
     Option verbose("verbose", 9, "");
@@ -84,13 +84,15 @@ static void test_filter(const std::string& jsonFile,
     options.add(debug);
     options.add(verbose);
 
-    drivers::las::Reader reader(options);
+    drivers::las::Reader reader;
+    reader.setOptions(options);
 
     Option fname("filename", Support::datapath(jsonFile));
     Options filter_options;
     filter_options.add(fname);
 
-    filters::PCLBlock pcl_block(filter_options);
+    filters::PCLBlock pcl_block;
+    pcl_block.setOptions(filter_options);
     pcl_block.setInput(&reader);
 
     PointContext ctx;
@@ -114,7 +116,6 @@ BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_example_PassThrough_2)
     test_filter("filters/pcl/example_PassThrough_2.json", 50);
 }
 
-
 BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_example_PMF_1)
 {
     test_filter("filters/pcl/example_PMF_1.json", 93);
@@ -126,7 +127,6 @@ BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_example_PMF_2)
     test_filter("filters/pcl/example_PMF_2.json", 94);
 }
 
-
 //
 // For the filter tests, we attempt to verify that each parameter "works" (as
 // defined by affecting at least one point, using a setting other than the
@@ -137,7 +137,7 @@ BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_filter_APMF)
 {
     // BUG: tests still to be developed (seems to either hang or crash inside
     // Eigen)
-    
+
     //test_filter("filters/pcl/filter_APMF_1.json", 106, false);
 }
 
@@ -187,7 +187,7 @@ BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_filter_PMF)
 #if RUN_SLOW_TESTS
     // explicitly with all defaults
     test_filter("filters/pcl/filter_PMF_1.json", 9223, true);
-    
+
     // with CellSize=3
     test_filter("filters/pcl/filter_PMF_2.json", 8298, true);
 

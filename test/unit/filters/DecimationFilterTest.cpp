@@ -52,11 +52,13 @@ BOOST_AUTO_TEST_CASE(DecimationFilterTest_test1)
     ops.add("bounds", srcBounds);
     ops.add("mode", "random");
     ops.add("num_points", 30);
-    drivers::faux::Reader reader(ops);
+    drivers::faux::Reader reader;
+    reader.setOptions(ops);
 
     Options decimationOps;
     decimationOps.add("step", 10);
-    filters::Decimation filter(decimationOps);
+    filters::Decimation filter;
+    filter.setOptions(decimationOps);
     filter.setInput(&reader);
     BOOST_CHECK(filter.getDescription() == "Decimation Filter");
 

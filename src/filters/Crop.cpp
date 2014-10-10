@@ -74,7 +74,7 @@ static void _GEOSWarningHandler(const char *fmt, ...)
 namespace filters
 {
 
-Crop::Crop(const Options& options) : pdal::Filter(options)
+Crop::Crop() : pdal::Filter()
 {
     m_cropOutside = false;
     m_geosEnvironment = 0;

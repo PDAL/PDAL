@@ -86,7 +86,8 @@ BOOST_AUTO_TEST_CASE(testRead)
 {
     Option filename("filename", Support::datapath("sbet/2-points.sbet"), "");
     Options options(filename);
-    drivers::sbet::SbetReader reader(options);
+    drivers::sbet::SbetReader reader;
+    reader.setOptions(options);
 
     PointContext ctx;
 
@@ -121,7 +122,8 @@ BOOST_AUTO_TEST_CASE(testBadFile)
 {
     Option filename("filename", Support::datapath("sbet/badfile.sbet"), "");
     Options options(filename);
-    drivers::sbet::SbetReader reader(options);
+    drivers::sbet::SbetReader reader;
+    reader.setOptions(options);
     PointContext ctx;
     reader.prepare(ctx);
     BOOST_CHECK_THROW(reader.execute(ctx), pdal_error);

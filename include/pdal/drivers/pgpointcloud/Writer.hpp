@@ -57,7 +57,7 @@ public:
     SET_STAGE_ENABLED(false)
 #endif
 
-    Writer(const Options&);
+    Writer();
     ~Writer();
 
     static Options getDefaultOptions();
@@ -75,13 +75,13 @@ private:
 
     void writeInit();
     void writeTile(const PointBuffer& buffer);
-    
+
     bool CheckTableExists(std::string const& name);
     bool CheckPointCloudExists();
     bool CheckPostGISExists();
     uint32_t SetupSchema(uint32_t srid);
 
-    void CreateTable(std::string const& schema_name, 
+    void CreateTable(std::string const& schema_name,
                      std::string const& table_name,
                      std::string const& column_name,
                      boost::uint32_t pcid);
@@ -89,12 +89,12 @@ private:
     void DeleteTable(std::string const& schema_name,
                      std::string const& table_name);
 
-    void CreateIndex(std::string const& schema_name, 
-                     std::string const& table_name, 
+    void CreateIndex(std::string const& schema_name,
+                     std::string const& table_name,
                      std::string const& column_name);
 
-    bool WriteBlock(PointBuffer const& buffer);                        
-    
+    bool WriteBlock(PointBuffer const& buffer);
+
     PGconn* m_session;
     std::string m_schema_name;
     std::string m_table_name;
@@ -115,7 +115,7 @@ private:
     std::string m_pre_sql;
     Dimension::IdList m_dims;
     std::vector<Dimension::Type::Enum> m_types;
-    
+
     // lose this
     bool m_schema_is_initialized;
 };

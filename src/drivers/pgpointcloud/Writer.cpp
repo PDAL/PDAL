@@ -68,8 +68,8 @@ namespace drivers
 namespace pgpointcloud
 {
 
-Writer::Writer(const Options& options)
-    : pdal::Writer(options)
+Writer::Writer()
+    : pdal::Writer()
     , m_session(0)
     , m_schema_name("")
     , m_table_name("")

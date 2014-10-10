@@ -54,7 +54,8 @@ BOOST_AUTO_TEST_CASE(ColorizationFilterTest_test_1)
 
     Options ops1;
     ops1.add("filename", Support::datapath("autzen/autzen-point-format-3.las"));
-    drivers::las::Reader reader(ops1);
+    drivers::las::Reader reader;
+    reader.setOptions(ops1);
 
     Options options;
 
@@ -91,7 +92,8 @@ BOOST_AUTO_TEST_CASE(ColorizationFilterTest_test_1)
     reader_options.add(blue);
     reader_options.add(datasource);
 
-    filters::Colorization filter(reader_options);
+    filters::Colorization filter;
+    filter.setOptions(reader_options);
     filter.setInput(&reader);
 
     PointContext ctx;

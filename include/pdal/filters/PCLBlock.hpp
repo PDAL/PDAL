@@ -45,14 +45,14 @@ class PDAL_DLL PCLBlock : public Filter
 {
 public:
     SET_STAGE_NAME("filters.pclblock", "PCL Block implementation")
-    SET_STAGE_LINK("http://www.pdal.io/stages/filters.pclblock.html")  
+    SET_STAGE_LINK("http://www.pdal.io/stages/filters.pclblock.html")
 #ifdef PDAL_HAVE_PCL
     SET_STAGE_ENABLED(true)
 #else
     SET_STAGE_ENABLED(false)
 #endif
-        
-    PCLBlock(const Options& options) : Filter(options)
+
+    PCLBlock() : Filter()
         {}
 
 private:

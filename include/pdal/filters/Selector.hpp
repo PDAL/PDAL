@@ -45,12 +45,12 @@ class PDAL_DLL Selector: public Filter
 {
 public:
     SET_STAGE_NAME("filters.selector", "Dimension Selection Filter")
-    SET_STAGE_LINK("http://pdal.io/stages/filters.selector.html")  
+    SET_STAGE_LINK("http://pdal.io/stages/filters.selector.html")
     SET_STAGE_ENABLED(true)
-    
-    Selector(const Options& options) : Filter(options)
+
+    Selector() : Filter()
         {}
-    
+
 private:
     Selector& operator=(const Selector&); // not implemented
     Selector(const Selector&); // not implemented

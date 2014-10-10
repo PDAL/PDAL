@@ -50,7 +50,7 @@ public:
     SET_STAGE_LINK("http://pdal.io/stages/filters.ferry.html")
     SET_STAGE_ENABLED(true)
 
-    Ferry(const Options& options) : Filter(options) {};
+    Ferry() : Filter() {};
     static Options getDefaultOptions();
 
 private:

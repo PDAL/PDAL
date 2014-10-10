@@ -49,7 +49,8 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_sequential_iter)
     ops.add("bounds", bounds);
     ops.add("count", 750);
     ops.add("mode", "constant");
-    drivers::faux::Reader reader(ops);
+    drivers::faux::Reader reader;
+    reader.setOptions(ops);
 
     PointContext ctx;
     reader.prepare(ctx);
@@ -80,7 +81,8 @@ BOOST_AUTO_TEST_CASE(test_random_mode)
     ops.add("bounds", bounds);
     ops.add("count", 750);
     ops.add("mode", "constant");
-    drivers::faux::Reader reader(ops);
+    drivers::faux::Reader reader;
+    reader.setOptions(ops);
 
     PointContext ctx;
     reader.prepare(ctx);
@@ -120,7 +122,8 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode_1)
     ops.add("count", 2);
     ops.add("mode", "ramp");
 
-    drivers::faux::Reader reader(ops);
+    drivers::faux::Reader reader;
+    reader.setOptions(ops);
 
     PointContext ctx;
     reader.prepare(ctx);
@@ -160,7 +163,8 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode_2)
     ops.add("bounds", bounds);
     ops.add("count", 750);
     ops.add("mode", "ramp");
-    drivers::faux::Reader reader(ops);
+    drivers::faux::Reader reader;
+    reader.setOptions(ops);
 
     PointContext ctx;
     reader.prepare(ctx);
@@ -199,7 +203,8 @@ BOOST_AUTO_TEST_CASE(test_return_number)
     ops.add("count", 100);
     ops.add("mode", "constant");
     ops.add("number_of_returns", 9);
-    drivers::faux::Reader reader(ops);
+    drivers::faux::Reader reader;
+    reader.setOptions(ops);
 
     PointContext ctx;
     reader.prepare(ctx);

@@ -63,8 +63,8 @@ namespace oci
 {
 
 
-Writer::Writer(const Options& options)
-    : pdal::Writer(options)
+Writer::Writer()
+    : pdal::Writer()
     , m_createIndex(false)
     , m_bDidCreateBlockTable(false)
     , m_pc_id(0)

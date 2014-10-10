@@ -58,8 +58,10 @@ BOOST_AUTO_TEST_CASE(test_static_options)
     using namespace pdal;
 
     Options ops;
-    drivers::faux::Reader reader(ops);
-    filters::Crop crop(ops);
+    drivers::faux::Reader reader;
+    reader.setOptions(ops);
+    filters::Crop crop;
+    crop.setOptions(ops);
     crop.setInput(&reader);
     const Options& opts = crop.getDefaultOptions();
 

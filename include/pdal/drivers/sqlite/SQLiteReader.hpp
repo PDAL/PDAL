@@ -58,12 +58,12 @@ public:
     SET_STAGE_ENABLED(false)
 #endif
 
-    SQLiteReader(const Options&);
+    SQLiteReader();
     static Options getDefaultOptions();
     schema::XMLSchema fetchSchema(std::string const& query) const;
     SpatialReference fetchSpatialReference(std::string const& query) const;
     SQLite& getSession() { return *m_session.get(); }
-    
+
 private:
     std::unique_ptr<SQLite> m_session;
     std::string m_query;
@@ -74,16 +74,16 @@ private:
 
     bool m_at_end;
     bool b_doneQuery;
-    int32_t m_point_size;    
-    
+    int32_t m_point_size;
+
     virtual void initialize();
     virtual void processOptions(const Options& options);
-    virtual void addDimensions(PointContextRef ctx);    
+    virtual void addDimensions(PointContextRef ctx);
     virtual void ready(PointContextRef ctx);
     point_count_t read(PointBuffer& buf, point_count_t count);
     bool eof()
         { return m_at_end; }
-    
+
     void validateQuery() const;
     point_count_t readPatch(PointBuffer& buffer, point_count_t count);
     bool NextBuffer();

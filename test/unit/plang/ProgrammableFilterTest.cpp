@@ -59,7 +59,8 @@ BOOST_AUTO_TEST_CASE(ProgrammableFilterTest_test1)
     ops.add("num_points", 10);
     ops.add("mode", "ramp");
 
-    drivers::faux::Reader reader(ops);
+    drivers::faux::Reader reader;
+    reader.setOptions(ops);
 
     Option source("source", "import numpy as np\n"
         "def myfunc(ins,outs):\n"
@@ -83,12 +84,12 @@ BOOST_AUTO_TEST_CASE(ProgrammableFilterTest_test1)
     opts.add(module);
     opts.add(function);
 
-    filters::Programmable filter(opts);
+    filters::Programmable filter;
+    filter.setOptions(opts);
     filter.setInput(&reader);
     BOOST_CHECK(filter.getDescription() == "Programmable Filter");
 
-    Options filterOps;
-    filters::Stats stats(filterOps);
+    filters::Stats stats;
     stats.setInput(&filter);
 
     PointContext ctx;
@@ -140,7 +141,8 @@ BOOST_AUTO_TEST_CASE(add_dimension)
     ops.add("num_points", 10);
     ops.add("mode", "ramp");
 
-    drivers::faux::Reader reader(ops);
+    drivers::faux::Reader reader;
+    reader.setOptions(ops);
 
     Option source("source", "import numpy\n"
         "def myfunc(ins,outs):\n"
@@ -159,7 +161,8 @@ BOOST_AUTO_TEST_CASE(add_dimension)
     opts.add(intensity);
     opts.add(scanDirection);
 
-    filters::Programmable filter(opts);
+    filters::Programmable filter;
+    filter.setOptions(opts);
     filter.setInput(&reader);
 
     PointContext ctx;

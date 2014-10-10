@@ -60,8 +60,8 @@ namespace sqlite
 {
 
 
-SQLiteWriter::SQLiteWriter(const Options& options)
-    : pdal::Writer(options)
+SQLiteWriter::SQLiteWriter()
+    : pdal::Writer()
     , m_doCreateIndex(false)
     , m_sdo_pc_is_initialized(false)
     , m_obj_id(0)

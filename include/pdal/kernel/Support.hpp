@@ -46,7 +46,7 @@ namespace pdal
 {
 namespace kernel
 {
-    
+
 class app_usage_error : public pdal::pdal_error
 {
 public:
@@ -64,17 +64,17 @@ public:
     {}
 };
 
-    
+
 // this is a static class with some helper functions the cmd line apps need
 class AppSupport
 {
 public:
     // makes a reader/stage, from just the filename and some other options
-    static Stage* makeReader(Options& options);
+    static Stage* makeReader(const std::string& filename);
 
     // makes a writer, from just the filename and some other
     // options (and the input stage)
-    static Writer* makeWriter(Options& options, Stage *stage);
+    static Writer* makeWriter(const std::string& filename, Stage *stage);
     static PipelineManager* makePipeline(Options& options);
 
 private:

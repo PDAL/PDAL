@@ -62,7 +62,8 @@ BOOST_AUTO_TEST_CASE(test_one)
     {
         PointContext ctx;
 
-        pdal::drivers::faux::Reader reader(opts);
+        pdal::drivers::faux::Reader reader;
+        reader.setOptions(opts);
         reader.prepare(ctx);
 
         BOOST_CHECK_EQUAL(reader.log()->getLevel(), LogLevel::Error);
@@ -139,10 +140,13 @@ BOOST_AUTO_TEST_CASE(test_two_a)
     }
 
     {
-        drivers::faux::Reader reader(reader_opts);
-        filters::Programmable xfilter(xfilter_opts);
+        drivers::faux::Reader reader;
+        reader.setOptions(reader_opts);
+        filters::Programmable xfilter;
+        xfilter.setOptions(xfilter_opts);
         xfilter.setInput(&reader);
-        filters::Programmable yfilter(yfilter_opts);
+        filters::Programmable yfilter;
+        yfilter.setOptions(yfilter_opts);
         yfilter.setInput(&xfilter);
 
         PointContext ctx;
@@ -226,10 +230,13 @@ BOOST_AUTO_TEST_CASE(test_two_b)
     }
 
     {
-        drivers::faux::Reader reader(reader_opts);
-        filters::Programmable xfilter(xfilter_opts);
+        drivers::faux::Reader reader;
+        reader.setOptions(reader_opts);
+        filters::Programmable xfilter;
+        xfilter.setOptions(xfilter_opts);
         xfilter.setInput(&reader);
-        filters::Programmable yfilter(yfilter_opts);
+        filters::Programmable yfilter;
+        yfilter.setOptions(yfilter_opts);
         yfilter.setInput(&xfilter);
 
         PointContext ctx;
@@ -308,8 +315,10 @@ BOOST_AUTO_TEST_CASE(test_three)
     }
 
     {
-        drivers::faux::Reader reader(reader_opts);
-        filters::Programmable xfilter(xfilter_opts);
+        drivers::faux::Reader reader;
+        reader.setOptions(reader_opts);
+        filters::Programmable xfilter;
+        xfilter.setOptions(xfilter_opts);
         xfilter.setInput(&reader);
 
         PointContext ctx;
