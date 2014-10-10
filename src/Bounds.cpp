@@ -37,6 +37,12 @@
 #include <iostream>
 namespace pdal
 {
+
+    
+const double BOX3D::LOWEST = (std::numeric_limits<double>::lowest)();
+const double BOX3D::HIGHEST = (std::numeric_limits<double>::max)();
+
+
 std::istream& operator>>(std::istream& istr, BOX3D& bounds)
 {
 

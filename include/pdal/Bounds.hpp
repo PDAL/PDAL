@@ -55,19 +55,21 @@ namespace pdal
     \endverbatim
 */
 
-static const double mind = (std::numeric_limits<double>::min)();
-static const double maxd = (std::numeric_limits<double>::max)();
 class PDAL_DLL BOX3D
 {
+private:
+    static const double LOWEST;
+    static const double HIGHEST;
+    
 public:
 
     BOX3D()
-    : minx(maxd)
-    , maxx(mind)
-    , miny(maxd)
-    , maxy(mind)
-    , minz(maxd)
-    , maxz(mind) {}
+    : minx(HIGHEST)
+    , maxx(LOWEST)
+    , miny(HIGHEST)
+    , maxy(LOWEST)
+    , minz(HIGHEST)
+    , maxz(LOWEST) {}
 
     BOX3D( double minx,
            double miny,
@@ -77,8 +79,8 @@ public:
     , maxx(maxx)
     , miny(miny)
     , maxy(maxy)
-    , minz(maxd)
-    , maxz(mind)
+    , minz(HIGHEST)
+    , maxz(LOWEST)
     {}
 
     BOX3D( double minx,
@@ -104,9 +106,9 @@ public:
 
     bool empty() const
     {
-        return  Utils::compare_distance(minx, maxd) && Utils::compare_distance(maxx, mind) &&
-                Utils::compare_distance(miny, maxd) && Utils::compare_distance(maxy, mind) &&
-                Utils::compare_distance(minz, maxd) && Utils::compare_distance(maxz, mind);
+        return  Utils::compare_distance(minx, HIGHEST) && Utils::compare_distance(maxx, LOWEST) &&
+                Utils::compare_distance(miny, HIGHEST) && Utils::compare_distance(maxy, LOWEST) &&
+                Utils::compare_distance(minz, HIGHEST) && Utils::compare_distance(maxz, LOWEST);
     }
     bool contains(double x, double y, double z) const
     {
@@ -138,7 +140,7 @@ public:
     {
         return (!equal(rhs));
     }
-    void grow(double x, double y, double z=mind)
+    void grow(double x, double y, double z=LOWEST)
     {
         if (x < minx) minx = x;
         if (x > maxx) maxx = x;
@@ -187,8 +189,8 @@ public:
 
     bool is_z_empty() const
     {
-        if (Utils::compare_distance<double>(minz, (std::numeric_limits<double>::max)()) &&
-            Utils::compare_distance<double>(maxz, (std::numeric_limits<double>::min)()) )
+        if (Utils::compare_distance<double>(minz, HIGHEST) &&
+            Utils::compare_distance<double>(maxz, LOWEST) )
             return true;
         return false;
     }
@@ -208,8 +210,8 @@ public:
 
     void clear()
     {
-        minx = maxd; miny = maxd; minz = maxd;
-        maxx = mind; maxy = mind; maxz = mind;
+        minx = HIGHEST; miny = HIGHEST; minz = HIGHEST;
+        maxx = LOWEST; maxy = LOWEST; maxz = LOWEST;
     }
 
     std::string toBox(uint32_t precision = 8, uint32_t dimensions=2) const
@@ -270,7 +272,7 @@ public:
     /// Returns a staticly-allocated Bounds extent that represents infinity
     static const BOX3D& getDefaultSpatialExtent()
     {
-        static BOX3D v(mind,mind,mind,maxd,maxd,maxd);
+        static BOX3D v(LOWEST,LOWEST,LOWEST,HIGHEST,HIGHEST,HIGHEST);
         return v;
     }
 
@@ -297,4 +299,3 @@ extern PDAL_DLL std::istream& operator>>(std::istream& istr, BOX3D& bounds);
 
 
 } // namespace pdal
-
