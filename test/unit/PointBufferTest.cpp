@@ -366,7 +366,7 @@ BOOST_AUTO_TEST_CASE(test_indexed)
 **/
 
 
-static void set_bounds(PointBuffer& buf, PointId i,
+static void set_points(PointBuffer& buf, PointId i,
                        double x, double y, double z)
 {
     buf.setField(Dimension::Id::X, i, x);
@@ -380,12 +380,13 @@ static void check_bounds(const BOX3D& box,
                          double miny, double maxy,
                          double minz, double maxz)
 {
-    BOOST_CHECK_CLOSE(box.minx, minx, 0.0001);
-    BOOST_CHECK_CLOSE(box.maxx, maxx, 0.0001);
-    BOOST_CHECK_CLOSE(box.miny, miny, 0.0001);
-    BOOST_CHECK_CLOSE(box.maxy, maxy, 0.0001);
-    BOOST_CHECK_CLOSE(box.minz, minz, 0.0001);
-    BOOST_CHECK_CLOSE(box.maxz, maxz, 0.0001);
+    const double eps = std::numeric_limits<double>::epsilon();
+    BOOST_CHECK_CLOSE(box.minx, minx, eps);
+    BOOST_CHECK_CLOSE(box.maxx, maxx, eps);
+    BOOST_CHECK_CLOSE(box.miny, miny, eps);
+    BOOST_CHECK_CLOSE(box.maxy, maxy, eps);
+    BOOST_CHECK_CLOSE(box.minz, minz, eps);
+    BOOST_CHECK_CLOSE(box.maxz, maxz, eps);
 }
 
 
@@ -396,13 +397,19 @@ BOOST_AUTO_TEST_CASE(PointBufferTest_calculateBounds)
     ctx.registerDim(Dimension::Id::Y);
     ctx.registerDim(Dimension::Id::Z);
 
+    const double lim_min = (std::numeric_limits<double>::lowest)();
+    const double lim_max = (std::numeric_limits<double>::max)();
+    PointBufferPtr b0(new PointBuffer(ctx));
+    const BOX3D box_b0 = b0->calculateBounds(true);
+    check_bounds(box_b0, lim_max, lim_min, lim_max, lim_min, lim_max, lim_min);
+
     PointBufferPtr b1(new PointBuffer(ctx));
-    set_bounds(*b1, 0, 0.0, 0.0, 0.0);
-    set_bounds(*b1, 1, 2.0, 2.0, 2.0);
+    set_points(*b1, 0, 0.0, 0.0, 0.0);
+    set_points(*b1, 1, 2.0, 2.0, 2.0);
 
     PointBufferPtr b2(new PointBuffer(ctx));
-    set_bounds(*b2, 0, 3.0, 3.0, 3.0);
-    set_bounds(*b2, 1, 1.0, 1.0, 1.0);
+    set_points(*b2, 0, 3.0, 3.0, 3.0);
+    set_points(*b2, 1, 1.0, 1.0, 1.0);
     
     PointBufferSet bs;
     bs.insert(b1);
