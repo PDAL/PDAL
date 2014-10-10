@@ -52,14 +52,12 @@ public:
     SET_STAGE_LINK("http://pdal.io/stages/drivers.pclvisualizer.writer.html")
     SET_STAGE_ENABLED(true)
 
-    PclVisualizer(const Options& options) : pdal::Writer(options) {};
+    PclVisualizer() : pdal::Writer() {};
 
 private:
     virtual void processOptions(const Options&) {};
     virtual void ready(PointContextRef ctx) {};
     virtual void write(const PointBuffer& buf);
-
-    std::string m_filename;
 
     PclVisualizer& operator=(const PclVisualizer&); // not implemented
     PclVisualizer(const PclVisualizer&); // not implemented
