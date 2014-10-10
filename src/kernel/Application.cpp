@@ -379,7 +379,7 @@ void Application::visualize(PointBufferPtr buffer) const
 
         // Convert PointBuffer to a PCL PointCloud
         pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
-        pdal::PDALtoPCD(const_cast<PointBuffer&>(*buffer), *cloud, bounds);
+        pclsupport::PDALtoPCD(const_cast<PointBuffer&>(*buffer), *cloud, bounds);
 
         // Create PCLVisualizer
         boost::shared_ptr<pcl::visualization::PCLVisualizer> p(new pcl::visualization::PCLVisualizer("3D Viewer"));
@@ -419,9 +419,9 @@ void Application::visualize(PointBufferPtr input_buffer, PointBufferPtr output_b
 
         // Convert PointBuffer to a PCL PointCloud
         pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud(new pcl::PointCloud<pcl::PointXYZ>);
-        pdal::PDALtoPCD(const_cast<PointBuffer&>(*input_buffer), *input_cloud, input_bounds);
+        pclsupport::PDALtoPCD(const_cast<PointBuffer&>(*input_buffer), *input_cloud, input_bounds);
         pcl::PointCloud<pcl::PointXYZ>::Ptr output_cloud(new pcl::PointCloud<pcl::PointXYZ>);
-        pdal::PDALtoPCD(const_cast<PointBuffer&>(*output_buffer), *output_cloud, output_bounds);
+        pclsupport::PDALtoPCD(const_cast<PointBuffer&>(*output_buffer), *output_cloud, output_bounds);
 
         // Create PCLVisualizer
         boost::shared_ptr<pcl::visualization::PCLVisualizer> p(new pcl::visualization::PCLVisualizer("3D Viewer"));
