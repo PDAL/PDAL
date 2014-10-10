@@ -85,7 +85,9 @@ std::unique_ptr<Stage> View::makeReader(Options readerOptions)
         readerOptions.add<std::string>("log", "STDERR");
     }
 
-    std::unique_ptr<Stage> reader_stage(AppSupport::makeReader(readerOptions));
+    Stage* stage = AppSupport::makeReader(m_inputFile);
+    stage->setOptions(readerOptions);
+    std::unique_ptr<Stage> reader_stage(stage);
 
     return reader_stage;
 }
@@ -101,10 +103,9 @@ int View::execute()
     std::unique_ptr<Stage> readerStage = makeReader(readerOptions);
 
     Options writerOptions;
-    writerOptions.add<std::string>("filename", "foo.pclviz");
     setCommonOptions(writerOptions);
 
-    std::unique_ptr<Writer> writer(AppSupport::makeWriter(writerOptions, readerStage.get()));
+    std::unique_ptr<Writer> writer(AppSupport::makeWriter("foo.pclviz",readerStage.get()));
 
     std::vector<std::string> cmd = getProgressShellCommand();
     UserCallback *callback =
@@ -128,6 +129,7 @@ int View::execute()
         }
     }
 
+    writer->setOptions(writerOptions);
     writer->prepare(ctx);
     writer->execute(ctx);
 

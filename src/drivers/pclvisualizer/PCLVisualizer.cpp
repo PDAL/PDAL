@@ -57,7 +57,7 @@ void PclVisualizer::write(const PointBuffer& data)
 
     // Convert PointBuffer to a PCL PointCloud
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
-    pdal::PDALtoPCD(const_cast<PointBuffer&>(data), *cloud, buffer_bounds);
+    pclsupport::PDALtoPCD(const_cast<PointBuffer&>(data), *cloud, buffer_bounds);
 
     // Create PCLVisualizer
     boost::shared_ptr<pcl::visualization::PCLVisualizer> p(new pcl::visualization::PCLVisualizer("3D Viewer"));
