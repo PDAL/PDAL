@@ -133,6 +133,12 @@ uint16_t LasHeader::basePointLen(uint8_t type)
         return 26;
     case 3:
         return 34;
+    case 6:
+        return 30;
+    case 7:
+        return 36;
+    case 8:
+        return 38;
     }
     return 0;
 }

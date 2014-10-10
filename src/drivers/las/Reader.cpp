@@ -46,8 +46,6 @@
 #include <pdal/PointBuffer.hpp>
 #include <pdal/Metadata.hpp>
 
-//#include <stdexcept>
-
 #include "GeotiffSupport.hpp"
 
 namespace pdal
@@ -87,7 +85,7 @@ void Reader::initialize()
        throw pdal_error(oss.str());
     }
 
-    // We need to read the VLRs in initialize because they may contain an
+    // We need to read the VLRs in initialize() because they may contain an
     // extra-bytes VLR that is needed to determine dimensions.
     m_istream->seekg(m_lasHeader.vlrOffset());
     for (size_t i = 0; i < m_lasHeader.vlrCount(); ++i)
