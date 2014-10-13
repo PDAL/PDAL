@@ -85,7 +85,6 @@ void PCL::addSwitches()
 
 std::unique_ptr<Stage> PCL::makeReader(Options readerOptions)
 {
-    std::unique_ptr<Stage> reader_stage(AppSupport::makeReader(m_inputFile));
     if (isDebug())
     {
         readerOptions.add<bool>("debug", true);
@@ -95,9 +94,11 @@ std::unique_ptr<Stage> PCL::makeReader(Options readerOptions)
 
         readerOptions.add<boost::uint32_t>("verbose", verbosity);
         readerOptions.add<std::string>("log", "STDERR");
-        reader_stage->setOptions(readerOptions);
     }
 
+    Stage* stage = AppSupport::makeReader(m_inputFile);
+    stage->setOptions(readerOptions);
+    std::unique_ptr<Stage> reader_stage(stage);
 
     return reader_stage;
 }
