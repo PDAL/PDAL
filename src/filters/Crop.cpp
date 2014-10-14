@@ -212,8 +212,6 @@ PointBufferSet Crop::run(PointBufferPtr buffer)
 
 void Crop::crop(PointBuffer& input, PointBuffer& output)
 {
-    BOX3D buffer_bounds = input.calculateBounds();
-
     bool logOutput = (log()->getLevel() > LogLevel::Debug4);
     if (logOutput)
         log()->floatPrecision(8);
