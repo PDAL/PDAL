@@ -78,11 +78,6 @@ BOOST_AUTO_TEST_CASE(PipelineManagerTest_test1)
 /**
 BOOST_AUTO_TEST_CASE(PipelineManagerTest_test2)
 {
-#ifndef PDAL_SRS_ENABLED
-    // because mosaicking needs to compare SRSs
-    return;
-#endif
-
     FileUtils::deleteFile("temp.las");
 
     {

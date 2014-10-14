@@ -301,30 +301,25 @@ endif()
 #------------------------------------------------------------------------------
 
 # GDAL/OGR support - optional, default=ON
-option(WITH_GDAL "Choose if GDAL support should be built" TRUE)
-if(WITH_GDAL)
-    find_package(GDAL 1.9.0)
-    if (GDAL_FOUND)
-        set(PDAL_HAVE_GDAL 1)
-        include_directories("${GDAL_INCLUDE_DIR}")
-        mark_as_advanced(CLEAR GDAL_INCLUDE_DIR)
-        mark_as_advanced(CLEAR GDAL_LIBRARY)
-        message(STATUS "...building with GDAL")
-    else()
-        set(WITH_GDAL FALSE)
-        set(GDAL_LIBRARY "")
-    endif()
-
-    find_package(GEOS 3.3)
-    if (GEOS_FOUND)
-        set(PDAL_HAVE_GEOS 1)
-        include_directories("${GEOS_INCLUDE_DIR}")
-        message(STATUS "...building with GEOS")
-    else()
-        set(GEOS_LIBRARY "")
-    endif()
-
+find_package(GDAL 1.9.0)
+if (GDAL_FOUND)
+    include_directories("${GDAL_INCLUDE_DIR}")
+    mark_as_advanced(CLEAR GDAL_INCLUDE_DIR)
+    mark_as_advanced(CLEAR GDAL_LIBRARY)
+    message(STATUS "...building with GDAL")
+else()
+    message(FATAL_ERROR "GDAL support is required")
 endif()
+
+find_package(GEOS 3.3)
+if (GEOS_FOUND)
+    set(PDAL_HAVE_GEOS 1)
+    include_directories("${GEOS_INCLUDE_DIR}")
+    message(STATUS "...building with GEOS")
+else()
+    set(GEOS_LIBRARY "")
+endif()
+
 
 # GeoTIFF support - optional, default=ON
 option(WITH_GEOTIFF "Choose if GeoTIFF support should be built" TRUE)
@@ -344,12 +339,6 @@ if(WITH_GEOTIFF)
     endif()
 endif()
 
-if(WITH_GDAL)
-  if (NOT GEOTIFF_FOUND)
-    message(FATAL_ERROR
-      "GDAL support requires GeoTIFF library which was not selected")
-  endif()
-endif()
 
 option(WITH_SQLITE "Choose if sqlite database support should be built" FALSE)
 if (WITH_SQLITE)
@@ -758,6 +747,3 @@ list(APPEND CPACK_SOURCE_IGNORE_FILES "import-pdal-boost.sh")
 include(CPack)
 
 add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
-
-
-

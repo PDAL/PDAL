@@ -87,7 +87,6 @@ BOOST_AUTO_TEST_CASE(StatsFilterTest_test1)
 }
 
 
-#ifdef PDAL_SRS_ENABLED
 BOOST_AUTO_TEST_CASE(test_multiple_dims_same_name)
 {
     const char* epsg4326_wkt = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4326\"]]";
@@ -131,10 +130,8 @@ BOOST_AUTO_TEST_CASE(test_multiple_dims_same_name)
     BOOST_CHECK_EQUAL(statsY.count(), 1065u);
     BOOST_CHECK_EQUAL(statsZ.count(), 1065u);
 }
-#endif
 
 
-#ifdef PDAL_SRS_ENABLED
 BOOST_AUTO_TEST_CASE(test_specified_stats)
 {
     const char* epsg4326_wkt = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4326\"]]";
@@ -191,9 +188,8 @@ BOOST_AUTO_TEST_CASE(test_specified_stats)
     BOOST_CHECK_CLOSE(statsX.minimum(), -117.2686466233, 0.0001);
     BOOST_CHECK_CLOSE(statsY.minimum(), 848899.700, 0.0001);
 }
-#endif
 
-#ifdef PDAL_SRS_ENABLED
+
 BOOST_AUTO_TEST_CASE(test_pointbuffer_stats)
 {
 
@@ -256,6 +252,6 @@ BOOST_AUTO_TEST_CASE(test_pointbuffer_stats)
     m = m.findChild("filters.stats:statistic:counts:count-1:count");
     BOOST_CHECK_EQUAL(m.value(), "737");
 }
-#endif
+
 
 BOOST_AUTO_TEST_SUITE_END()

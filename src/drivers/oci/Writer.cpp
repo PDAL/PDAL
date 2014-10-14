@@ -44,9 +44,8 @@
 #include <fstream>
 
 #include <boost/algorithm/string.hpp>
-#ifdef PDAL_HAVE_GDAL
+
 #include <ogr_api.h>
-#endif
 
 
 #ifdef USE_PDAL_PLUGIN_OCI
@@ -694,17 +693,12 @@ void Writer::createPCEntry()
 
 bool Writer::isValidWKT(std::string const& input)
 {
-#ifdef PDAL_HAVE_GDAL
-
     OGRGeometryH g;
 
     char* wkt = const_cast<char*>(input.c_str());
     OGRErr e = OGR_G_CreateFromWkt(&wkt, NULL, &g);
     OGR_G_DestroyGeometry(g);
     return (e == 0);
-#else
-    throw pdal_error("GDAL support not available for WKT validation");
-#endif
 }
 
 

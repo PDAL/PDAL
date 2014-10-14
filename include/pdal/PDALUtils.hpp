@@ -213,31 +213,12 @@ inline ptree toPTree(const SpatialReference& ref)
 {
     ptree srs;
 
-#ifdef PDAL_SRS_ENABLED
     srs.put("proj4", ref.getProj4());
     srs.put("prettywkt", ref.getWKT(SpatialReference::eHorizontalOnly, true));
     srs.put("wkt", ref.getWKT(SpatialReference::eHorizontalOnly, false));
     srs.put("compoundwkt", ref.getWKT(SpatialReference::eCompoundOK, false));
     srs.put("prettycompoundwkt", ref.getWKT(SpatialReference::eCompoundOK, true));
-#else
-    std::string message;
-    std::string wkt = ref.getWKT();
-    if (wkt.size() == 0)
-        message = "Reference defined with VLR keys, but GeoTIFF and GDAL "
-            "support are not available to produce definition";
-    else if (wkt.size() > 0)
-        message = "Reference defined with WKT, but GeoTIFF and GDAL "
-            "support are not available to produce definition";
-    else
-        message = "None";
 
-    srs.put("proj4", message);
-    srs.put("prettywkt", message);
-    srs.put("wkt", message);
-    srs.put("compoundwkt", message);
-    srs.put("prettycompoundwkt", message);
-    srs.put("gtiff", message);
-#endif
     return srs;
 }
 

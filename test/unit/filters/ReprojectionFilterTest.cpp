@@ -44,7 +44,6 @@
 
 BOOST_AUTO_TEST_SUITE(ReprojectionFilterTest)
 
-#ifdef PDAL_SRS_ENABLED
 
 static void getPoint(const pdal::PointBuffer& data,
     double& x, double& y, double& z)
@@ -157,6 +156,6 @@ BOOST_AUTO_TEST_CASE(InPlaceReprojectionFilterTest_test_2)
     }
 }
 **/
-#endif
+
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -44,7 +44,6 @@
 
 BOOST_AUTO_TEST_SUITE(SpatialReferenceTest)
 
-#ifdef PDAL_SRS_ENABLED
 
 BOOST_AUTO_TEST_CASE(test_env_vars)
 {
@@ -434,6 +433,5 @@ BOOST_AUTO_TEST_CASE(test_vertical_and_horizontal)
 
 }
 
-#endif
 
 BOOST_AUTO_TEST_SUITE_END()

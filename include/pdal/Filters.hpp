@@ -37,9 +37,7 @@
 #include <pdal/filters/ByteSwap.hpp>
 #include <pdal/filters/Cache.hpp>
 #include <pdal/filters/Chipper.hpp>
-#ifdef PDAL_HAVE_GDAL
 #include <pdal/filters/Colorization.hpp>
-#endif
 #include <pdal/filters/Crop.hpp>
 #include <pdal/filters/Decimation.hpp>
 #include <pdal/filters/Ferry.hpp>
@@ -58,4 +56,3 @@
 #include <pdal/filters/Selector.hpp>
 #include <pdal/filters/Splitter.hpp>
 #include <pdal/filters/Stats.hpp>
-

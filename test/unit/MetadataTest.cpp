@@ -142,7 +142,6 @@ BOOST_AUTO_TEST_CASE(test_construction)
 }
 
 
-#ifdef PDAL_SRS_ENABLED
 BOOST_AUTO_TEST_CASE(test_construction_with_srs)
 {
     MetadataNode m;
@@ -164,7 +163,6 @@ BOOST_AUTO_TEST_CASE(test_construction_with_srs)
 
     // std::cout << boost::lexical_cast<std::string>(m.getValue<pdal::SpatialReference>());
 }
-#endif
 
 
 BOOST_AUTO_TEST_CASE(test_metadata_copy)

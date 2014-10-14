@@ -206,13 +206,9 @@ BOOST_AUTO_TEST_CASE(pdalinfo_test_dumps)
 //     stat = pdal::Utils::run_shell_command(command.str(), output);
 //     BOOST_CHECK_EQUAL(stat, 0);
 // 
-// #ifdef PDAL_HAVE_GDAL
 //     unsigned int check = Support::diff_text_files(stage_test, Support::datapath("apps/pdalinfo_stage.txt"), 15);
 //     BOOST_CHECK_EQUAL(check, 0u);
-// #else
-//     unsigned int check = Support::diff_text_files(stage_test, Support::datapath("apps/pdalinfo_stage_nosrs.txt"), 15);
-//     BOOST_CHECK_EQUAL(check, 0u);
-// #endif
+//
 //     if (check == 0u)
 //         pdal::FileUtils::deleteFile(stage_test);
 //     else
