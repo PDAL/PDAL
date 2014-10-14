@@ -50,20 +50,29 @@ namespace pdal
 
 void Writer::writerProcessOptions(const Options& options)
 {
+    auto setOffset = [options](XForm& xform, const std::string& opName)
+    {
+        if (!options.hasOption(opName))
+            return;
+        std::string offset = options.getValueOrThrow<std::string>(opName);
+        if (offset == "auto")
+            xform.m_autoOffset = true;
+        else
+            xform.m_offset = boost::lexical_cast<double>(offset);
+    };
+
+    setOffset(m_xXform, "offset_x");
+    setOffset(m_yXform, "offset_y");
+    setOffset(m_zXform, "offset_z");
+
     if (options.hasOption("filename"))
         m_filename = options.getValueOrThrow<std::string>("filename");
     if (options.hasOption("scale_x"))
         m_xXform.m_scale = options.getValueOrThrow<double>("scale_x");
-    if (options.hasOption("offset_x"))
-        m_xXform.m_offset = options.getValueOrThrow<double>("offset_x");
     if (options.hasOption("scale_y"))
         m_yXform.m_scale = options.getValueOrThrow<double>("scale_y");
-    if (options.hasOption("offset_y"))
-        m_yXform.m_offset = options.getValueOrThrow<double>("offset_y");
     if (options.hasOption("scale_z"))
         m_zXform.m_scale = options.getValueOrThrow<double>("scale_z");
-    if (options.hasOption("offset_z"))
-        m_zXform.m_offset = options.getValueOrThrow<double>("offset_z");
 }
 
 
