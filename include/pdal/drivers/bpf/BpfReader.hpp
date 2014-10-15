@@ -90,13 +90,12 @@ private:
     point_count_t readDimMajor(PointBuffer& data, point_count_t count);
     point_count_t readByteMajor(PointBuffer& data, point_count_t count);
     size_t readBlock(std::vector<char>& outBuf, size_t index);
-#ifdef PDAL_HAVE_ZLIB
+
     int inflate(char *inbuf, size_t insize, char *outbuf, size_t outsize);
-#endif
+
     void seekPointMajor(PointId ptIdx);
     void seekDimMajor(size_t dimIdx, PointId ptIdx);
     void seekByteMajor(size_t dimIdx, size_t byteIdx, PointId ptIdx);
 };
 
 } // namespace pdal
-
