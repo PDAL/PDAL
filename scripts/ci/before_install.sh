@@ -46,10 +46,13 @@ sudo apt-get install \
     libgdal1h \
     libgdal-dev
 
+echo "1111111111111111111111111"
 ls /usr/include
+echo "2222222222222222222222222"
 ls /usr/include/geos
+echo "3333333333333333333333333"
 ls /usr/local/include
-ls /usr/local/include/geos
+echo "4444444444444444444444444"
 
 if [[ $PDAL_OPTIONAL_COMPONENTS == "all" ]]
 then
