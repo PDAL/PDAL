@@ -32,11 +32,9 @@ SET(PDAL_UNITTEST_TEST_SRC
     filters/HexbinFilterTest.cpp
     filters/MergeTest.cpp
     drivers/las/LasReaderTest.cpp
-#ABELL - Need to fix these.
 #    drivers/las/LasWriterTest.cpp
     LogTest.cpp
     MetadataTest.cpp
-#    filters/MosaicFilterTest.cpp
     OptionsTest.cpp
     PipelineManagerTest.cpp
     PointBufferTest.cpp
@@ -44,10 +42,6 @@ SET(PDAL_UNITTEST_TEST_SRC
     filters/ReprojectionFilterTest.cpp
     drivers/sbet/SbetReaderTest.cpp
     drivers/sbet/SbetWriterTest.cpp
-#    filters/ScalingFilterTest.cpp
-#    filters/SelectorFilterTest.cpp
-#    SchemaLayoutTest.cpp
-#    SchemaTest.cpp
     SpatialReferenceTest.cpp
     filters/SplitterTest.cpp
 #    StageFactoryTest.cpp
