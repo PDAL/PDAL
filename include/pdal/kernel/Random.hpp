@@ -32,32 +32,39 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_PDAL_KERNEL_RANDOM_HPP
-#define INCLUDED_PDAL_KERNEL_RANDOM_HPP
+#pragma once
 
 #include <pdal/FileUtils.hpp>
-
+#include <pdal/kernel/Kernel.hpp>
 #include <pdal/drivers/faux/Reader.hpp>
 #include <pdal/drivers/las/Writer.hpp>
 
 #include <pdal/Bounds.hpp>
-
-#include "Application.hpp"
 
 #define SEPARATORS ",| "
 
 #include <boost/tokenizer.hpp>
 typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
 
+PDAL_C_START
+
+PDAL_DLL void PDALRegister_kernel_random(void* factory);
+
+PDAL_C_END
+
 namespace pdal
 {
 namespace kernel
 {
 
-class PDAL_DLL Random : public Application
+class PDAL_DLL Random : public Kernel
 {
 public:
-    Random(int argc, const char* argv[]);
+    SET_KERNEL_NAME ("drivers.random.kernel", "Random Kernel")
+    SET_KERNEL_LINK ("http://pdal.io/kernels/drivers.random.kernel.html")
+    SET_KERNEL_ENABLED (true)
+
+    Random();
     int execute();
 
 private:
@@ -77,6 +84,3 @@ private:
 
 } // kernel
 } // pdal
-
-#endif
-

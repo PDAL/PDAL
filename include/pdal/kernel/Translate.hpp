@@ -34,17 +34,27 @@
 
 #pragma once
 
-#include "Application.hpp"
+#include <pdal/kernel/Kernel.hpp>
+
+PDAL_C_START
+
+PDAL_DLL void PDALRegister_kernel_translate(void* factory);
+
+PDAL_C_END
 
 namespace pdal
 {
 namespace kernel
 {
 
-class PDAL_DLL Translate : public Application
+class PDAL_DLL Translate : public Kernel
 {
 public:
-    Translate(int argc, const char* argv[]);
+    SET_KERNEL_NAME ("drivers.translate.kernel", "Translate Kernel")
+    SET_KERNEL_LINK ("http://pdal.io/kernels/drivers.translate.kernel.html")
+    SET_KERNEL_ENABLED (true)
+ 
+    Translate();
     int execute();
 
 private:

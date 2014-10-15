@@ -19,6 +19,10 @@ set(PDAL_HEADERS_DIR "${PROJECT_SOURCE_DIR}/include/pdal")
 set(PDAL_HPP "")
 set(PDAL_CPP "")
 
+set(PDAL_KERNEL_PATH kernel)
+set(PDAL_KERNEL_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_KERNEL_PATH}")
+set(PDAL_KERNEL_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_KERNEL_PATH}")
+
 #
 # base
 #
@@ -36,7 +40,6 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/gitsha.h"
   "${PDAL_HEADERS_DIR}/IStream.hpp"
   "${PDAL_HEADERS_DIR}/KDIndex.hpp"
-  "${PDAL_HEADERS_DIR}/Kernel.hpp"
   "${PDAL_HEADERS_DIR}/Log.hpp"
   "${PDAL_HEADERS_DIR}/Metadata.hpp"
   "${PDAL_HEADERS_DIR}/Options.hpp"
@@ -63,13 +66,12 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/third/md5-pdal.h"
   "${PDAL_HEADERS_DIR}/third/string_ref.hpp"
   "${PDAL_HEADERS_DIR}/third/string_ref_fwd.hpp"
+    ${PDAL_KERNEL_HEADERS}/Kernel.hpp
+    ${PDAL_KERNEL_HEADERS}/KernelFactory.hpp
+    ${PDAL_KERNEL_HEADERS}/KernelInfo.hpp
+    ${PDAL_KERNEL_HEADERS}/Kernels.hpp
+    ${PDAL_KERNEL_HEADERS}/Support.hpp
 )
-
-if (PDAL_HAVE_PCL)
-    if (WITH_PCL OR WITH_STUBS)
-        list (APPEND PDAL_BASE_HPP "${PDAL_HEADERS_DIR}/PCLConversions.hpp")
-    endif(WITH_PCL OR WITH_STUBS)
-endif()
 
 if (PDAL_HAVE_LIBXML2)
   SET (PDAL_XML_SRC XMLSchema.cpp)
@@ -102,6 +104,10 @@ set(PDAL_BASE_CPP
   Writer.cpp
   third/md5-pdal.c
   ${PDAL_XML_SRC}
+    ${PDAL_KERNEL_SRC}/Kernel.cpp
+    ${PDAL_KERNEL_SRC}/KernelFactory.cpp
+    ${PDAL_KERNEL_SRC}/KernelInfo.cpp
+    ${PDAL_KERNEL_SRC}/Support.cpp
 )
 
 list (APPEND PDAL_CPP ${PDAL_BASE_CPP} )
@@ -361,55 +367,6 @@ if (P2G_FOUND)
 endif()
 
 #
-# drivers/pcd
-#
-if (PDAL_HAVE_PCL)
-    set(PDAL_PCD_PATH drivers/pcd)
-    set(PDAL_PCD_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_PCD_PATH}")
-    set(PDAL_PCD_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_PCD_PATH}")
-
-    set(PDAL_DRIVERS_PCD_HPP
-	"${PDAL_PCD_HEADERS}/point_types.hpp"
-	"${PDAL_PCD_HEADERS}/Common.hpp"
-	"${PDAL_PCD_HEADERS}/Reader.hpp"
-	"${PDAL_PCD_HEADERS}/Writer.hpp"
-    )
-
-    set (PDAL_DRIVERS_PCD_CPP
-	"${PDAL_PCD_SRC}/Common.cpp"
-	"${PDAL_PCD_SRC}/Reader.cpp"
-	"${PDAL_PCD_SRC}/Writer.cpp"
-    )
-
-    if (WITH_PCL OR WITH_STUBS)
-	list (APPEND PDAL_CPP ${PDAL_DRIVERS_PCD_CPP} )
-	list (APPEND PDAL_HPP ${PDAL_DRIVERS_PCD_HPP} )
-    endif(WITH_PCL OR WITH_STUBS)
-endif()
-
-#
-# drivers/pclvisualizer
-#
-if (PDAL_HAVE_PCL AND PDAL_HAVE_PCL_VISUALIZE)
-    set(PDAL_PCL_VISUALIZER_PATH drivers/pclvisualizer)
-    set(PDAL_PCL_VISUALIZER_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_PCL_VISUALIZER_PATH}")
-    set(PDAL_PCL_VISUALIZER_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_PCL_VISUALIZER_PATH}")
-
-    set(PDAL_DRIVERS_PCL_VISUALIZER_HPP
-        "${PDAL_PCL_VISUALIZER_HEADERS}/PCLVisualizer.hpp"
-    )
-
-    set (PDAL_DRIVERS_PCL_VISUALIZER_CPP
-        "${PDAL_PCL_VISUALIZER_SRC}/PCLVisualizer.cpp"
-    )
-
-    if (WITH_PCL OR WITH_STUBS)
-        list (APPEND PDAL_CPP ${PDAL_DRIVERS_PCL_VISUALIZER_CPP} )
-	list (APPEND PDAL_HPP ${PDAL_DRIVERS_PCL_VISUALIZER_HPP} )
-    endif(WITH_PCL OR WITH_STUBS)
-endif(PDAL_HAVE_PCL AND PDAL_HAVE_PCL_VISUALIZE)
-
-#
 # drivers/text
 #
 set(PDAL_TEXT_PATH drivers/text)
@@ -664,24 +621,6 @@ list(APPEND PDAL_CPP ${PDAL_GDAL_CPP})
 
 
 #
-# PCL support files
-#
-set(PDAL_PCLSUPPORT_HPP
-    "pclsupport/PCLPipeline.h"
-    "pclsupport/PCLPipeline.hpp"
-    )
-
-set(PDAL_PCLSUPPORT_CPP
-    "pclsupport/PCLPipeline.cpp"
-    )
-
-if (WITH_PCL OR WITH_STUBS)
-    list(APPEND PDAL_HPP ${PDAL_PCLSUPPORT_HPP})
-    list(APPEND PDAL_CPP ${PDAL_PCLSUPPORT_CPP})
-endif (WITH_PCL OR WITH_STUBS)
-
-
-#
 # plang parser
 #
 
@@ -726,17 +665,9 @@ set (PDAL_CONFIG_CPP
 list (APPEND PDAL_CPP ${PDAL_CONFIG_CPP} )
 list (APPEND PDAL_HPP ${PDAL_CONFIG_HPP} )
 
-
-set(PDAL_KERNEL_PATH kernel)
-set(PDAL_KERNEL_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_KERNEL_PATH}")
-set(PDAL_KERNEL_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_KERNEL_PATH}")
-
 set(PDAL_KERNEL_HPP
-    ${PDAL_KERNEL_HEADERS}/Application.hpp
-    ${PDAL_KERNEL_HEADERS}/Support.hpp
     ${PDAL_KERNEL_HEADERS}/Diff.hpp
     ${PDAL_KERNEL_HEADERS}/Info.hpp
-    ${PDAL_KERNEL_HEADERS}/Kernel.hpp
     ${PDAL_KERNEL_HEADERS}/Pipeline.hpp
     ${PDAL_KERNEL_HEADERS}/Delta.hpp
     ${PDAL_KERNEL_HEADERS}/Random.hpp
@@ -745,8 +676,6 @@ set(PDAL_KERNEL_HPP
 )
 
 set(PDAL_KERNEL_CPP
-    ${PDAL_KERNEL_SRC}/Application.cpp
-    ${PDAL_KERNEL_SRC}/Support.cpp
     ${PDAL_KERNEL_SRC}/Diff.cpp
     ${PDAL_KERNEL_SRC}/Info.cpp
     ${PDAL_KERNEL_SRC}/Pipeline.cpp
@@ -759,33 +688,6 @@ set(PDAL_KERNEL_CPP
 list (APPEND PDAL_CPP ${PDAL_KERNEL_CPP} )
 list (APPEND PDAL_HPP ${PDAL_KERNEL_HPP} )
 
-
-#
-# pcl
-#
-if (PDAL_HAVE_PCL)
-    set(PDAL_PCL_HPP
-	${PDAL_KERNEL_HEADERS}/Ground.hpp
-	${PDAL_KERNEL_HEADERS}/PCL.hpp
-	${PDAL_FILTERS_HEADERS}/PCLBlock.hpp
-    )
-
-    set(PDAL_PCL_CPP
-	${PDAL_FILTERS_SRC}/PCLBlock.cpp
-	${PDAL_KERNEL_SRC}/Ground.cpp
-	${PDAL_KERNEL_SRC}/PCL.cpp
-    )
-
-    if (WITH_PCL OR WITH_STUBS)
-	list(APPEND PDAL_HPP ${PDAL_PCL_HPP})
-	list(APPEND PDAL_CPP ${PDAL_PCL_CPP})
-
-	if (PDAL_HAVE_PCL_VISUALIZE)
-	    list(APPEND PDAL_HPP ${PDAL_KERNEL_HEADERS}/View.hpp)
-	    list(APPEND PDAL_CPP ${PDAL_KERNEL_SRC}/View.cpp)
-	endif()
-    endif (WITH_PCL OR WITH_STUBS)
-endif()
 
 #
 # Group source files for IDE source explorers (e.g. Visual Studio)
@@ -805,7 +707,6 @@ source_group("Header Files\\drivers\\sbet" FILES ${PDAL_DRIVERS_SBET_HPP})
 source_group("Header Files\\drivers\\greyhound" FILES ${PDAL_DRIVERS_GREYHOUND_HPP})
 source_group("Header Files\\drivers\\terrasolid" FILES ${PDAL_DRIVERS_TERRASOLID_HPP})
 source_group("Header Files\\drivers\\text" FILES ${PDAL_DRIVERS_TEXT_HPP})
-source_group("Header Files\\drivers\\pcd" FILES ${PDAL_DRIVERS_PCD_HPP})
 source_group("Header Files\\drivers\\pgpointcloud" FILES ${PDAL_DRIVERS_PGPOINTCLOUD_HPP})
 source_group("Header Files\\filters" FILES ${PDAL_FILTERS_HPP})
 source_group("Header Files\\plang" FILES ${PDAL_PLANG_HPP})
@@ -822,7 +723,6 @@ source_group("Source Files\\drivers\\sbet" FILES ${PDAL_DRIVERS_SBET_CPP})
 source_group("Source Files\\drivers\\greyhound" FILES ${PDAL_DRIVERS_GREYHOUND_CPP})
 source_group("Source Files\\drivers\\terrasolid" FILES ${PDAL_DRIVERS_TERRASOLID_CPP})
 source_group("Source Files\\drivers\\text" FILES ${PDAL_DRIVERS_TEXT_CPP})
-source_group("Source Files\\drivers\\pcd" FILES ${PDAL_DRIVERS_PCD_CPP})
 source_group("Source Files\\drivers\\pgpointcloud" FILES ${PDAL_DRIVERS_PGPOINTCLOUD_CPP})
 source_group("Source Files\\filters" FILES ${PDAL_FILTERS_CPP})
 source_group("Source Files\\plang" FILES ${PDAL_PLANG_CPP})
@@ -890,10 +790,6 @@ endif()
 
 if (WITH_PYTHON)
     target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE} "${PYTHON_LIBRARY}")
-endif()
-
-if (PDAL_HAVE_PCL AND WITH_PCL)
-    target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE} ${PCL_LIBRARIES})
 endif()
 
 if (WITH_LIBXML2)

@@ -44,8 +44,8 @@
 #include <pdal/XMLSchema.hpp>
 
 #ifdef USE_PDAL_PLUGIN_PGPOINTCLOUD
-MAKE_WRITER_CREATOR(pgpointcloudWriter, pdal::drivers::pgpointcloud::Writer)
-CREATE_WRITER_PLUGIN(pgpointcloud, pdal::drivers::pgpointcloud::Writer)
+//MAKE_WRITER_CREATOR(pgpointcloudWriter, pdal::drivers::pgpointcloud::Writer)
+CREATE_WRITER_PLUGIN(pgpointcloudWriter, pdal::drivers::pgpointcloud::Writer)
 #endif
 
 // TO DO:

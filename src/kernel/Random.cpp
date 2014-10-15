@@ -39,8 +39,8 @@ namespace pdal
 namespace kernel
 {
 
-Random::Random(int argc, const char* argv[])
-    : Application(argc, argv, "random")
+Random::Random()
+    : Kernel()
     , m_outputFile("")
     , m_bCompress(false)
     , m_numPointsToWrite(0)

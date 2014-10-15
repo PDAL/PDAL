@@ -90,9 +90,7 @@ endif(WIN32)
 # Choose package components
 option(WITH_APPS "Choose if PDAL utilities should be built" TRUE)
 option(WITH_TESTS "Choose if PDAL unit tests should be built" TRUE)
-
-option(WITH_STUBS "Use stubs if libraries are not enabled" FALSE)
-set(PDAL_STUB_DIR "${PDAL_SOURCE_DIR}/include/stubs")
+option(WITH_PCL "Choose if PCL support should be built" FALSE)
 
 # Choose to use pkg-config or not
 option(WITH_PKGCONFIG "Choose whether a pkgconfig file (PDAL.pc) should be installed" TRUE)
@@ -268,39 +266,7 @@ endif(Boost_FOUND)
 
 
 #------------------------------------------------------------------------------
-# settings for PCL
-#------------------------------------------------------------------------------
-
-option(WITH_PCL "Choose if PCL support should be built" FALSE)
-option(WITH_PCL_VISUALIZE "Choose if PCL was built with VTK support for visualization" FALSE)
-if(WITH_PCL)
-    find_package(PCL 1.7)
-    if(PCL_FOUND)
-        set(PDAL_HAVE_PCL 1)
-	if(WITH_PCL_VISUALIZE)
-	    set(PDAL_HAVE_PCL_VISUALIZE 1)
-	endif()
-        set(WITH_PCL_TEST 1)
-        include_directories(${PCL_INCLUDE_DIRS})
-        link_directories(${PCL_LIBRARY_DIRS})
-        add_definitions(${PCL_DEFINITIONS})
-	add_definitions("-fvisibility-inlines-hidden")
-        # PCL's configuration clobbers Boost find_package - do it again
-        find_package(Boost 1.52 COMPONENTS program_options thread iostreams filesystem system unit_test_framework random)
-
-        message(STATUS "...building with PCL")
-    else()
-        set(PCL_LIBRARIES "")
-    endif()
-elseif(WITH_STUBS)
-    set(PDAL_HAVE_PCL 1)
-    set(WITH_PCL_TEST 0)
-    include_directories(${PDAL_STUB_DIR})
-endif()
-
-
-#------------------------------------------------------------------------------
-# settings for all upstream project dependencies
+# settings for GDAL & related dependencies
 #------------------------------------------------------------------------------
 
 #
@@ -723,6 +689,7 @@ include_directories("${CMAKE_CURRENT_BINARY_DIR}/include")
 #------------------------------------------------------------------------------
 
 add_subdirectory(src)
+add_subdirectory(plugins)
 
 if(WITH_APPS)
   add_subdirectory(apps)

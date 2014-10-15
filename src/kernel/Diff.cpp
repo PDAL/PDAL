@@ -45,8 +45,8 @@ using boost::property_tree::ptree;
 namespace pdal {
 namespace kernel {
 
-Diff::Diff(int argc, const char* argv[])
-    : Application(argc, argv, "dif")
+Diff::Diff()
+    : Kernel()
     , m_sourceFile("")
     , m_candidateFile("")
     , m_useXML(false)
