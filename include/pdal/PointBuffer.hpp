@@ -65,6 +65,9 @@ public:
     point_count_t size() const
         { return m_index.size(); }
 
+    bool empty() const
+        { return m_index.size() == 0; }
+
     inline void appendPoint(PointBuffer& buffer, PointId id);
     void append(PointBuffer& buf)
     {
