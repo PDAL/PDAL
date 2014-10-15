@@ -92,7 +92,7 @@ void Crop::processOptions(const Options& options)
 
 #if !defined(PDAL_HAVE_GEOS)
     if (!m_poly.empty())
-        throw pdal_error("Polygon cropping not supported unless built with GEOS")
+        throw pdal_error("Polygon cropping not supported unless built with GEOS");
 #endif
 }
 
