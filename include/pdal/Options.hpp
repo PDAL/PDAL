@@ -92,7 +92,7 @@ public:
 /// @name Constructors
 
     /// Empty constructor
-    Option()
+    Option() : m_options(0)
     {}
 
     /// Primary constructor
@@ -194,6 +194,7 @@ public:
     /// @param op Options set to use
     void setOptions(Options const& op);
 
+    bool empty();
 
 /// @name Windows specializations
 #if defined(PDAL_COMPILER_MSVC)
@@ -282,7 +283,7 @@ class PDAL_DLL Options
 {
 public:
     // defult ctor, empy options list
-    Options() {}
+    Options()  {}
 
     // copy ctor
     Options(const Options&);
@@ -301,6 +302,10 @@ public:
         return *this;
     }
 
+    bool empty()
+    {
+        return (m_options.size() == 0);
+    }
     Options const operator+(const Options& rhs)
     {
         return Options(*this) += rhs;

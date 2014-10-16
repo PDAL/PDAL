@@ -61,6 +61,7 @@
 
 #define IMPORT_NITRO_API
 #include <nitro/c++/import/nitf.hpp>
+#include "tre_plugins.hpp"
 
 #ifdef PDAL_COMPILER_CLANG
 #  pragma clang diagnostic pop
@@ -84,6 +85,10 @@ namespace drivers
 namespace nitf
 {
 
+Writer::Writer() :  las::Writer(&m_oss)
+{
+    register_tre_plugins();
+}
 
 void Writer::processOptions(const Options& options)
 {
@@ -97,10 +102,22 @@ void Writer::processOptions(const Options& options)
     m_origName = options.getValueOrDefault<std::string>("ONAME","");
     m_origPhone = options.getValueOrDefault<std::string>("OPHONE","");
     m_securityClass = options.getValueOrDefault<std::string>("FSCLAS","U");
+    m_securityControlAndHandling = options.getValueOrDefault<std::string>("FSCTLH","");
     m_imgSecurityClass = options.getValueOrDefault<std::string>("FSCLAS","U");
     m_imgDate = getOptions().getValueOrDefault<std::string>("IDATIM", "");
+    m_imgIdentifier2 = getOptions().getValueOrDefault<std::string>("IID2", "");
     m_sic = getOptions().getValueOrDefault<std::string>("FSCLTX", "");
     m_igeolob = getOptions().getValueOrDefault<std::string>("GEOLOB", "");
+    try
+    {
+        m_aimidb = getOptions().getOption("AIMIDB");
+    } catch (pdal::option_not_found&)
+    {}
+    try
+    {
+        m_acftb = getOptions().getOption("ACFTB");
+    } catch (pdal::option_not_found&)
+    {}
 }
 
 
@@ -125,6 +142,7 @@ void Writer::done(PointContextRef ctx)
         header.getBackgroundColor().setRawData(const_cast<char*>("000"), 3);
         header.getOriginatorName().set(m_origName);
         header.getOriginatorPhone().set(m_origPhone);
+        header.getSecurityGroup().getControlAndHandling().set(m_securityControlAndHandling);
         header.getSecurityGroup().getClassificationText().set(m_sic);
 
         ::nitf::DESegment des = record.newDataExtensionSegment();
@@ -156,6 +174,7 @@ void Writer::done(PointContextRef ctx)
         ::nitf::ImageSubheader subheader = image.getSubheader();
 
         subheader.getImageSecurityClass().set(m_imgSecurityClass);
+        subheader.setSecurityGroup(security.clone());
         if (m_imgDate.size())
             subheader.getImageDateAndTime().set(m_imgDate);
 
@@ -187,7 +206,11 @@ void Writer::done(PointContextRef ctx)
             8, /*!< The number of rows/block */
             8,  /*!< The number of columns/block */
             "P");                /*!< Image mode */
+
+        //Image Header fields to set
         subheader.getImageId().set("None");
+        subheader.getImageTitle().set(m_imgIdentifier2);
+
         // 64 char string
         std::string zeros(64, '0');
 
@@ -199,6 +222,38 @@ void Writer::done(PointContextRef ctx)
             0 /*skip*/));
         ::nitf::ImageSource iSource;
         iSource.addBand(*band);
+
+        //AIMIDB
+        if (!m_aimidb.empty())
+        {
+            boost::optional<const Options&> options = m_aimidb.getOptions();
+            if (options)
+            {
+                ::nitf::TRE tre("AIMIDB");
+                std::vector<Option> opts = options->getOptions();
+                for (auto i = opts.begin(); i != opts.end(); ++i)
+                {
+                    tre.setField(i->getName(), i->getValue<std::string>());
+                }
+                subheader.getUserDefinedSection().appendTRE(tre);
+            }
+        }
+
+        //ACFTB
+        if (!m_acftb.empty())
+        {
+            boost::optional<const Options&> options = m_acftb.getOptions();
+            if (options)
+            {
+                ::nitf::TRE tre("ACFTB");
+                std::vector<Option> opts = options->getOptions();
+                for (auto i = opts.begin(); i != opts.end(); ++i)
+                {
+                    tre.setField(i->getName(), i->getValue<std::string>());
+                }
+                subheader.getUserDefinedSection().appendTRE(tre);
+            }
+        }
 
         ::nitf::Writer writer;
         ::nitf::IOHandle output_io(m_filename.c_str(), NITF_ACCESS_WRITEONLY,

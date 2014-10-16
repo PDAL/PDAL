@@ -22,6 +22,32 @@
         <Option name="FTITLE">
             This is the title
         </Option>
+        <Option name="FSCTLH">
+            N
+        </Option>
+        <Option name="AIMIDB">
+            <Options>
+                <Option name="COUNTRY">
+                    US
+                </Option>
+                <Option name="ACQUISITION_DATE">
+                    Someday
+                </Option>
+                <Option name="MISSION_IDENTIFICATION">
+                    IDENT
+                </Option>
+                <Option name="LOCATION">
+                    Somewhere
+                </Option>
+            </Options>
+        </Option>
+        <Option name="ACFTB">
+            <Options>
+                <Option name="AC_MSN_ID">
+                    ID
+                </Option>
+            </Options>
+        </Option>
         <Filter type="filters.crop">
             <Option name="bounds">
                 ([0,1000000],[0,1000000],[0,1000000])
