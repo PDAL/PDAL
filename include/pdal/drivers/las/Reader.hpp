@@ -67,7 +67,6 @@ public:
     Reader() : pdal::Reader(), m_index(0),
             m_istream(NULL)
         {}
-    virtual ~Reader();
 
     static Options getDefaultOptions();
 
@@ -97,7 +96,6 @@ private:
     bool setSrsFromGeotiffVlr(MetadataNode& m);
     void extractHeaderMetadata(MetadataNode& m);
     void extractVlrMetadata(MetadataNode& m);
-    virtual void processOptions(const Options& options);
     virtual void ready(PointContextRef ctx)
         { ready(ctx, m_metadata); }
     virtual void ready(PointContextRef ctx, MetadataNode& m);

@@ -55,19 +55,6 @@ namespace drivers
 namespace las
 {
 
-Reader::~Reader()
-{
-    if (m_istream)
-        m_streamFactory->deallocate(*m_istream);
-}
-
-
-void Reader::processOptions(const Options& options)
-{
-    m_filename = options.getValueOrDefault<std::string>("filename", "");
-}
-
-
 void Reader::initialize()
 {
     m_streamFactory = createFactory();
@@ -623,6 +610,8 @@ void Reader::done(PointContextRef ctx)
     m_zipPoint.reset();
     m_unzipper.reset();
 #endif
+    if (m_istream)
+        m_streamFactory->deallocate(*m_istream);
 }
 
 } // namespace las
