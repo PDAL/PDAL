@@ -31,10 +31,10 @@
 * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 * OF SUCH DAMAGE.
 ****************************************************************************/
-#include <pdal/pdal_internal.hpp>
-#ifdef PDAL_HAVE_PYTHON
 
-#include <boost/test/unit_test.hpp>
+#include "UnitTest.hpp"
+
+#ifdef PDAL_HAVE_PYTHON
 
 #include <pdal/filters/Predicate.hpp>
 #include <pdal/filters/Stats.hpp>

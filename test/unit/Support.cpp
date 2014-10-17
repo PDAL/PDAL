@@ -39,7 +39,7 @@
 
 #include <stdio.h>
 
-#include <boost/test/unit_test.hpp>
+#include "UnitTest.hpp"
 
 #include <pdal/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
@@ -358,4 +358,3 @@ void Support::compareBounds(const BOX3D& p, const BOX3D& q)
     BOOST_CHECK_CLOSE(p.maxy, q.maxy, 1);
     BOOST_CHECK_CLOSE(p.maxz, q.maxz, 1);
 }
-
