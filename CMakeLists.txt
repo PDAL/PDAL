@@ -210,6 +210,7 @@ else()
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PDAL_COMMON_CXX_FLAGS}")
         if (CMAKE_COMPILER_IS_GNUCXX)
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -isystem /usr/local/include")
         endif()
         set(PDAL_COMPILER_GCC 1)
     elseif("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" OR
@@ -217,6 +218,7 @@ else()
          set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PDAL_COMMON_CXX_FLAGS}")
          set(PDAL_COMPILER_CLANG 1)
          set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -isystem /usr/local/include")
     endif()
 endif(WIN32)
 
@@ -758,6 +760,3 @@ list(APPEND CPACK_SOURCE_IGNORE_FILES "import-pdal-boost.sh")
 include(CPack)
 
 add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
-
-
-
