@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <boost/test/unit_test.hpp>
+#include "UnitTest.hpp"
 
 #include <pdal/Options.hpp>
 #include <pdal/PointBuffer.hpp>
@@ -155,4 +155,3 @@ BOOST_AUTO_TEST_CASE(testPipeline)
 
 
 BOOST_AUTO_TEST_SUITE_END()
-

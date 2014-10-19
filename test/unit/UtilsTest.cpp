@@ -32,10 +32,11 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include "UnitTest.hpp"
+
 #include <sstream>
 
 #include <pdal/Utils.hpp>
-#include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 
 #include <vector>
