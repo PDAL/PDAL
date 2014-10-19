@@ -41,6 +41,7 @@
 #include <pdal/PointBuffer.hpp>
 #include <pdal/GlobalEnvironment.hpp>
 
+
 #ifdef PDAL_HAVE_NITRO
 
 #ifdef PDAL_COMPILER_GCC
@@ -53,6 +54,8 @@
    //   https://gcc.gnu.org/bugzilla/show_bug.cgi?id=61653
 #  pragma GCC diagnostic ignored "-Wliteral-suffix"
 #endif
+#include <ogr_spatialref.h>
+#include <cpl_conv.h>
 #ifdef PDAL_COMPILER_CLANG
 #  pragma clang diagnostic push
 #  pragma clang diagnostic ignored "-Wfloat-equal"
@@ -85,6 +88,51 @@ namespace drivers
 namespace nitf
 {
 
+
+
+BOX3D reprojectBoxToDD(const SpatialReference& reference, const BOX3D& box)
+{
+
+    BOX3D output(box);
+
+    OGRSpatialReferenceH current =
+        OSRNewSpatialReference(reference.getWKT(SpatialReference::eCompoundOK, false).c_str());
+    OGRSpatialReferenceH dd =
+        OSRNewSpatialReference(0);
+
+
+    OGRErr err = OSRSetFromUserInput(dd, const_cast<char *>("EPSG:4326"));
+    if (err != OGRERR_NONE)
+        throw std::invalid_argument("could not import coordinate system "
+            "into OGRSpatialReference SetFromUserInput");
+
+    OGRCoordinateTransformationH transform = OCTNewCoordinateTransformation(current, dd);
+
+    int ret = OCTTransform(transform, 1, &output.minx, &output.miny, &output.minz);
+    if (ret == 0)
+    {
+        std::ostringstream msg;
+        msg << "Could not project point for reprojectBoxToDD::min" <<
+            CPLGetLastErrorMsg() << ret;
+        throw pdal_error(msg.str());
+    }
+
+    ret = OCTTransform(transform, 1, &output.maxx, &output.maxy, &output.maxz);
+    if (ret == 0)
+    {
+        std::ostringstream msg;
+        msg << "Could not project point for reprojectBoxToDD::max" <<
+            CPLGetLastErrorMsg() << ret;
+        throw pdal_error(msg.str());
+    }
+
+    OCTDestroyCoordinateTransformation(transform);
+    OSRDestroySpatialReference(current);
+    OSRDestroySpatialReference(dd);
+
+    return output;
+}
+
 Writer::Writer() :  las::Writer(&m_oss)
 {
     register_tre_plugins();
@@ -103,6 +151,7 @@ void Writer::processOptions(const Options& options)
     m_origPhone = options.getValueOrDefault<std::string>("OPHONE","");
     m_securityClass = options.getValueOrDefault<std::string>("FSCLAS","U");
     m_securityControlAndHandling = options.getValueOrDefault<std::string>("FSCTLH","");
+    m_securityClassificationSystem = options.getValueOrDefault<std::string>("FSCLSY","");
     m_imgSecurityClass = options.getValueOrDefault<std::string>("FSCLAS","U");
     m_imgDate = getOptions().getValueOrDefault<std::string>("IDATIM", "");
     m_imgIdentifier2 = getOptions().getValueOrDefault<std::string>("IID2", "");
@@ -120,6 +169,12 @@ void Writer::processOptions(const Options& options)
     {}
 }
 
+void Writer::write(const PointBuffer& buffer)
+{
+    m_bounds.grow(buffer.calculateBounds(true));
+
+    drivers::las::Writer::write(buffer);
+}
 
 void Writer::done(PointContextRef ctx)
 {
@@ -142,6 +197,7 @@ void Writer::done(PointContextRef ctx)
         header.getBackgroundColor().setRawData(const_cast<char*>("000"), 3);
         header.getOriginatorName().set(m_origName);
         header.getOriginatorPhone().set(m_origPhone);
+        header.getSecurityGroup().getClassificationSystem().set(m_securityClassificationSystem);
         header.getSecurityGroup().getControlAndHandling().set(m_securityControlAndHandling);
         header.getSecurityGroup().getClassificationText().set(m_sic);
 
@@ -173,6 +229,16 @@ void Writer::done(PointContextRef ctx)
         ::nitf::ImageSegment image = record.newImageSegment();
         ::nitf::ImageSubheader subheader = image.getSubheader();
 
+
+        BOX3D bounds =  reprojectBoxToDD(ctx.spatialRef(), m_bounds);
+
+        double corners[4][2];
+        corners[0][0] = bounds.maxy;     corners[0][1] = bounds.minx;
+        corners[1][0] = bounds.maxy;     corners[1][1] = bounds.maxx;
+        corners[2][0] = bounds.miny;  corners[2][1] = bounds.maxx;
+        corners[3][0] = bounds.miny;  corners[3][1] = bounds.minx;
+        subheader.setCornersFromLatLons(NRT_CORNERS_DECIMAL, corners);
+
         subheader.getImageSecurityClass().set(m_imgSecurityClass);
         subheader.setSecurityGroup(security.clone());
         if (m_imgDate.size())
@@ -194,8 +260,8 @@ void Writer::done(PointContextRef ctx)
             "INT",      /* Pixel value type */
             8,         /* Number of bits/pixel */
             8,         /* Actual number of bits/pixel */
-            "G",       /* Pixel justification */
-            "G",     /* Image representation */
+            "R",       /* Pixel justification */
+            "NODISPLY",     /* Image representation */
             "VIS",     /* Image category */
             1,         /* Number of bands */
             bands);
@@ -235,7 +301,7 @@ void Writer::done(PointContextRef ctx)
                 {
                     tre.setField(i->getName(), i->getValue<std::string>());
                 }
-                subheader.getUserDefinedSection().appendTRE(tre);
+                subheader.getExtendedSection().appendTRE(tre);
             }
         }
 
@@ -251,7 +317,7 @@ void Writer::done(PointContextRef ctx)
                 {
                     tre.setField(i->getName(), i->getValue<std::string>());
                 }
-                subheader.getUserDefinedSection().appendTRE(tre);
+                subheader.getExtendedSection().appendTRE(tre);
             }
         }
 
