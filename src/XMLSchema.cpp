@@ -769,4 +769,3 @@ void Writer::writeSchema(TextWriterPtr writer)
 
 } // namespace schema
 } // namespace pdal
-

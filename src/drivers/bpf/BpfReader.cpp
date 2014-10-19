@@ -34,9 +34,7 @@
 
 #include <pdal/pdal_internal.hpp>
 
-#ifdef PDAL_HAVE_ZLIB
 #include <zlib.h>
-#endif
 
 #include <pdal/drivers/bpf/BpfReader.hpp>
 #include <pdal/Options.hpp>
@@ -65,7 +63,6 @@ void BpfReader::initialize()
     if (!m_header.readDimensions(m_stream, m_dims))
         return;
 
-#ifdef PDAL_HAVE_GDAL
     uint32_t zone(abs(m_header.m_coordId));
     std::string code("");
     if (m_header.m_coordId > 0)
@@ -74,7 +71,6 @@ void BpfReader::initialize()
         code = "EPSG:327" + boost::lexical_cast<std::string>(zone);
     SpatialReference srs(code);
     setSpatialReference(srs);
-#endif
 
     if (m_header.m_version >= 3)
     {
@@ -151,7 +147,6 @@ void BpfReader::ready(PointContextRef ctx)
     m_start = m_stream.position();
     if (m_header.m_compression)
     {
-#ifdef PDAL_HAVE_ZLIB
         m_deflateBuf.resize(numPoints() * m_dims.size() * sizeof(float));
         size_t index = 0;
         size_t bytesRead = 0;
@@ -162,9 +157,6 @@ void BpfReader::ready(PointContextRef ctx)
         } while (bytesRead > 0 && index < m_deflateBuf.size());
         m_charbuf.initialize(m_deflateBuf.data(), m_deflateBuf.size(), m_start);
         m_stream.pushStream(new std::istream(&m_charbuf));
-#else
-        throw "BPF compression required, but ZLIB is unavailable.";
-#endif
     }
 }
 
@@ -194,7 +186,6 @@ point_count_t BpfReader::read(PointBuffer& data, point_count_t count)
 
 size_t BpfReader::readBlock(std::vector<char>& outBuf, size_t index)
 {
-#ifdef PDAL_HAVE_ZLIB
     boost::uint32_t finalBytes;
     boost::uint32_t compressBytes;
 
@@ -208,9 +199,6 @@ size_t BpfReader::readBlock(std::vector<char>& outBuf, size_t index)
     int ret = inflate(in.data(), compressBytes,
         outBuf.data() + index, finalBytes);
     return (ret ? 0 : finalBytes);
-#else
-    throw pdal_error("BPF compression required, but ZLIB is unavailable");
-#endif
 }
 
 
@@ -338,7 +326,6 @@ void BpfReader::seekByteMajor(size_t dimIdx, size_t byteIdx, PointId ptIdx)
 }
 
 
-#ifdef PDAL_HAVE_ZLIB
 int BpfReader::inflate(char *buf, size_t insize, char *outbuf, size_t outsize)
 {
    if (insize == 0)
@@ -365,6 +352,5 @@ int BpfReader::inflate(char *buf, size_t insize, char *outbuf, size_t outsize)
     (void)inflateEnd(&strm);
     return ret == Z_STREAM_END ? 0 : -1;
 }
-#endif
 
 } //namespace pdal

@@ -89,7 +89,7 @@
 #endif
 #endif
 
-#ifdef PDAL_HAVE_GDAL
+#ifdef PDAL_HAVE_NITRO
 #include <pdal/drivers/nitf/Reader.hpp>
 #endif
 

@@ -122,7 +122,6 @@ BOOST_AUTO_TEST_CASE(test_byte_major)
     test_file_type("bpf/autzen-utm-chipped-25-v3-segregated.bpf");
 }
 
-#ifdef PDAL_HAVE_ZLIB
 BOOST_AUTO_TEST_CASE(test_point_major_zlib)
 {
     test_file_type("bpf/autzen-utm-chipped-25-v3-deflate-interleaved.bpf");
@@ -137,7 +136,6 @@ BOOST_AUTO_TEST_CASE(test_byte_major_zlib)
 {
     test_file_type("bpf/autzen-utm-chipped-25-v3-deflate-segregated.bpf");
 }
-#endif
 
 
 BOOST_AUTO_TEST_SUITE_END()

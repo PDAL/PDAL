@@ -65,12 +65,7 @@ Debug::Debug(bool isDebug, pdal::LogPtr log)
         m_gdal_callback = boost::bind(&Debug::error, this, _1, _2, _3);
     }
 
-
-#if ((GDAL_VERSION_MAJOR == 1 && GDAL_VERSION_MINOR >= 9) || (GDAL_VERSION_MAJOR > 1))
     CPLPushErrorHandlerEx(&Debug::trampoline, this);
-#else
-    CPLPushErrorHandler(&Debug::trampoline);
-#endif
 }
 
 void Debug::log(::CPLErr code, int num, char const* msg)
@@ -117,12 +112,7 @@ GlobalDebug::GlobalDebug()
     }
     m_gdal_callback = boost::bind(&GlobalDebug::log, this, _1, _2, _3);
 
-
-#if ((GDAL_VERSION_MAJOR == 1 && GDAL_VERSION_MINOR >= 9) || (GDAL_VERSION_MAJOR > 1))
     CPLPushErrorHandlerEx(&GlobalDebug::trampoline, this);
-#else
-    CPLPushErrorHandler(&GlobalDebug::trampoline);
-#endif
 }
 
 
@@ -161,7 +151,7 @@ GlobalDebug::~GlobalDebug()
     CPLPopErrorHandler();
 }
 
-#ifdef PDAL_HAVE_GDAL
+
 VSILFileBuffer::VSILFileBuffer(VSILFILE* fp)
     : m_fp(fp)
 {}
@@ -213,7 +203,7 @@ std::streampos VSILFileBuffer::seek(boost::iostreams::stream_offset off, std::io
     }
     return static_cast<std::streamoff>(VSIFTellL/*ftell*/(m_fp));
 }
-#endif
+
 
 }
 } // namespace pdal::gdal

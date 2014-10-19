@@ -45,9 +45,6 @@
 BOOST_AUTO_TEST_SUITE(ColorizationFilterTest)
 
 
-#ifdef PDAL_HAVE_GDAL
-
-
 BOOST_AUTO_TEST_CASE(ColorizationFilterTest_test_1)
 {
     using namespace pdal;
@@ -112,7 +109,5 @@ BOOST_AUTO_TEST_CASE(ColorizationFilterTest_test_1)
     // We scaled this up to 16bit by multiplying by 255
     BOOST_CHECK_EQUAL(b, 47175u);
 }
-
-#endif
 
 BOOST_AUTO_TEST_SUITE_END()
