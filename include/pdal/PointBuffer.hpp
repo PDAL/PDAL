@@ -65,8 +65,8 @@ public:
     point_count_t size() const
         { return m_index.size(); }
 
-    inline void appendPoint(PointBuffer& buffer, PointId id);
-    void append(PointBuffer& buf)
+    inline void appendPoint(const PointBuffer& buffer, PointId id);
+    void append(const PointBuffer& buf)
     {
         m_index.insert(m_index.end(), buf.m_index.begin(), buf.m_index.end());
     }
@@ -372,7 +372,7 @@ inline void PointBuffer::setFieldInternal(Dimension::Id::Enum dim,
 }
 
 
-inline void PointBuffer::appendPoint(PointBuffer& buffer, PointId id)
+inline void PointBuffer::appendPoint(const PointBuffer& buffer, PointId id)
 {
     // Invalid 'id' is a programmer error.
     PointId rawId = buffer.m_index[id];
