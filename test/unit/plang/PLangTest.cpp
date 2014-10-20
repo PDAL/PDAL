@@ -32,10 +32,9 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/pdal_internal.hpp>
-#ifdef PDAL_HAVE_PYTHON
+#include "UnitTest.hpp"
 
-#include <boost/test/unit_test.hpp>
+#ifdef PDAL_HAVE_PYTHON
 
 #include <pdal/plang/Invocation.hpp>
 

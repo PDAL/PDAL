@@ -68,7 +68,8 @@ else()
 endif()
 
 list(APPEND _jsoncppnames
-	json_mingw_libmt)
+	json_mingw_libmt
+    jsoncpp)
 
 find_library(JSONCPP_LIBRARY
 	NAMES

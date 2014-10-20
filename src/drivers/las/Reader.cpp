@@ -319,7 +319,7 @@ bool Reader::setSrsFromWktVlr(MetadataNode& m)
 
 bool Reader::setSrsFromGeotiffVlr(MetadataNode& m)
 {
-#ifdef PDAL_SRS_ENABLED
+#ifdef PDAL_HAVE_LIBGEOTIFF
     GeotiffSupport geotiff;
     geotiff.resetTags();
 
@@ -348,7 +348,7 @@ bool Reader::setSrsFromGeotiffVlr(MetadataNode& m)
     return true;
 #else
     return false;
-#endif // PDAL_SRS_ENABLED
+#endif
 }
 
 

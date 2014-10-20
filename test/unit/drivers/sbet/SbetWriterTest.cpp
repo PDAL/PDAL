@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <boost/test/unit_test.hpp>
+#include "UnitTest.hpp"
 
 #include <pdal/drivers/sbet/Reader.hpp>
 #include <pdal/drivers/sbet/Writer.hpp>

@@ -41,10 +41,8 @@
 
 #include <sstream>
 
-#ifdef PDAL_HAVE_GDAL
 #include <gdal.h>
 #include <ogr_api.h>
-#endif
 
 #ifdef USE_PDAL_PLUGIN_SQLITE
 MAKE_WRITER_CREATOR(sqliteWriter, pdal::drivers::sqlite::Writer)
@@ -393,16 +391,12 @@ std::string SQLiteWriter::loadGeometryWKT(std::string const& filename_or_wkt) co
 
 bool SQLiteWriter::IsValidGeometryWKT(std::string const& input) const
 {
-#ifdef PDAL_HAVE_GDAL
     OGRGeometryH g;
 
     char* wkt = const_cast<char*>(input.c_str());
     OGRErr e = OGR_G_CreateFromWkt(&wkt, NULL, &g);
     OGR_G_DestroyGeometry(g);
     return (!e);
-#else
-    throw pdal_error("GDAL support not available for WKT validation");
-#endif
 }
 
 void SQLiteWriter::done(PointContextRef ctx)

@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <boost/test/unit_test.hpp>
+#include "UnitTest.hpp"
 
 #include <pdal/SpatialReference.hpp>
 #include <pdal/FileUtils.hpp>
@@ -46,8 +46,6 @@ BOOST_AUTO_TEST_SUITE(SpatialReferenceTest)
 
 using namespace pdal;
 
-#ifdef PDAL_SRS_ENABLED
-
 BOOST_AUTO_TEST_CASE(test_env_vars)
 {
 
@@ -55,15 +53,15 @@ BOOST_AUTO_TEST_CASE(test_env_vars)
     const char* gdal_data = getenv("GDAL_DATA");
     const char* proj_lib = getenv("PROJ_LIB");
 
-    BOOST_CHECK(pdal::FileUtils::fileExists(gdal_data));
-    BOOST_CHECK(pdal::FileUtils::fileExists(proj_lib));
+    BOOST_CHECK(FileUtils::fileExists(gdal_data));
+    BOOST_CHECK(FileUtils::fileExists(proj_lib));
 #endif
 }
 
 
 BOOST_AUTO_TEST_CASE(test_ctor)
 {
-    pdal::SpatialReference srs;
+    SpatialReference srs;
 
     BOOST_CHECK(srs.getProj4() == "");
     BOOST_CHECK(srs.getWKT() == "");
@@ -74,8 +72,6 @@ BOOST_AUTO_TEST_CASE(test_ctor)
 // Test round-tripping proj.4 string
 BOOST_AUTO_TEST_CASE(test_proj4_roundtrip)
 {
-    using namespace pdal;
-
     std::string proj4 = "+proj=utm +zone=15 +datum=WGS84 +units=m +no_defs";
     std::string proj4_ellps =
         "+proj=utm +zone=15 +ellps=WGS84 +datum=WGS84 +units=m +no_defs";
@@ -111,7 +107,7 @@ BOOST_AUTO_TEST_CASE(test_proj4_roundtrip)
 // Test setting EPSG:4326 from User string
 BOOST_AUTO_TEST_CASE(test_userstring_roundtrip)
 {
-    pdal::SpatialReference ref;
+    SpatialReference ref;
 
     std::string code = "EPSG:4326";
     std::string proj4 = "+proj=longlat +datum=WGS84 +no_defs";
@@ -128,10 +124,10 @@ BOOST_AUTO_TEST_CASE(test_userstring_roundtrip)
 }
 
 
+#ifdef PDAL_HAVE_GEOS
 // Test fetching SRS from an existing file
 BOOST_AUTO_TEST_CASE(test_read_srs)
 {
-    using namespace pdal;
     using namespace pdal::drivers;
 
     PointContext ctx;
@@ -143,7 +139,7 @@ BOOST_AUTO_TEST_CASE(test_read_srs)
     reader.prepare(ctx);
     reader.execute(ctx);
 
-    const pdal::SpatialReference& ref = reader.getSpatialReference();
+    const SpatialReference& ref = reader.getSpatialReference();
 
     const std::string ret_wkt = ref.getWKT();
     const std::string ret_proj4 = ref.getProj4();
@@ -155,13 +151,13 @@ BOOST_AUTO_TEST_CASE(test_read_srs)
     std::string proj4 = "+proj=utm +zone=17 +datum=WGS84 +units=m +no_defs";
     BOOST_CHECK(ret_proj4 == proj4);
 }
+#endif
 
 
 // Try writing a compound coordinate system to file and ensure we get back
 // WKT with the geoidgrids (from the WKT VLR).
 BOOST_AUTO_TEST_CASE(test_vertical_datums)
 {
-    using namespace pdal;
     using namespace pdal::drivers;
 
     std::string tmpfile(Support::temppath("tmp_srs.las"));
@@ -169,63 +165,52 @@ BOOST_AUTO_TEST_CASE(test_vertical_datums)
 
     const std::string wkt = "COMPD_CS[\"WGS 84 + VERT_CS\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]],VERT_CS[\"NAVD88 height\",VERT_DATUM[\"North American Vertical Datum 1988\",2005,AUTHORITY[\"EPSG\",\"5103\"],EXTENSION[\"PROJ4_GRIDS\",\"g2003conus.gtx,g2003alaska.gtx,g2003h01.gtx,g2003p01.gtx\"]],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Up\",UP],AUTHORITY[\"EPSG\",\"5703\"]]]";
 
-    {
-        SpatialReference ref;
-        ref.setFromUserInput(wkt);
-        {
-            const std::string wkt2 = ref.getWKT(SpatialReference::eCompoundOK);
-            BOOST_CHECK(wkt == wkt2); // just to make sure
-        }
+    SpatialReference ref;
+    ref.setFromUserInput(wkt);
+    const std::string wktCheck = ref.getWKT(SpatialReference::eCompoundOK);
+    BOOST_CHECK(wkt == wktCheck); // just to make sure
 
-        PointContext ctx;
-        // Write a very simple file with our SRS and one point.
-        Options ops1;
-        ops1.add("filename", Support::datapath("las/1.2-with-color.las"));
-        las::Reader reader;
-        reader.setOptions(ops1);
+    PointContext ctx;
+    // Write a very simple file with our SRS and one point.
+    Options ops1;
+    ops1.add("filename", Support::datapath("las/1.2-with-color.las"));
+    las::Reader reader;
+    reader.setOptions(ops1);
 
-        const uint64_t numPoints = reader.getNumPoints();
+    // need to scope the writer, so that's it dtor can use the stream
+    Options opts;
+    opts.add("filename", tmpfile);
 
-        // need to scope the writer, so that's it dtor can use the stream
-        Options opts;
-
-        opts.add("filename", tmpfile);
-
-        las::Writer writer;
-        writer.setOptions(opts);
-        writer.setInput(&reader);
-        writer.prepare(ctx);
-        writer.setSpatialReference(ref);
-        writer.execute(ctx);
-    }
+    las::Writer writer;
+    writer.setOptions(opts);
+    writer.setInput(&reader);
+    writer.setSpatialReference(ref);
+    writer.prepare(ctx);
+    writer.execute(ctx);
+    SpatialReference sr = writer.getSpatialReference();
 
     // Reopen and check contents.
-    {
-        PointContext ctx;
-        Options ops;
-        ops.add("filename", tmpfile);
-        las::Reader reader;
-        reader.setOptions(ops);
-        reader.prepare(ctx);
-        reader.execute(ctx);
+    PointContext ctx2;
+    las::Reader reader2;
+    reader2.setOptions(opts);
+    reader2.prepare(ctx2);
+    reader2.execute(ctx2);
 
-        const SpatialReference ref2 = reader.getSpatialReference();
-        const std::string wkt2 =
-            ref2.getWKT(pdal::SpatialReference::eCompoundOK);
+    const SpatialReference ref2 = reader2.getSpatialReference();
+    const std::string wkt2 = ref2.getWKT(SpatialReference::eCompoundOK);
 
-        BOOST_CHECK(wkt == wkt2);
-    }
+    BOOST_CHECK(wkt == wkt2);
 
     // Cleanup
     FileUtils::deleteFile(tmpfile);
 }
 
 
+#ifdef PDAL_HAVE_GEOS
 // Try writing only the WKT VLR to a file, and see if the resulting
 // file still works ok.
 BOOST_AUTO_TEST_CASE(test_writing_vlr)
 {
-    using namespace pdal;
     using namespace pdal::drivers;
 
     std::string tmpfile(Support::temppath("tmp_srs_9.las"));
@@ -239,10 +224,10 @@ BOOST_AUTO_TEST_CASE(test_writing_vlr)
 
     // Write a very simple file with our SRS and one point.
     {
-        pdal::FileUtils::deleteFile(tmpfile);
+        FileUtils::deleteFile(tmpfile);
 
         PointContext ctx;
-        pdal::drivers::las::Reader readerx;
+        drivers::las::Reader readerx;
         Options readerOpts;
 
         readerOpts.add("filename",
@@ -280,13 +265,11 @@ BOOST_AUTO_TEST_CASE(test_writing_vlr)
     // Cleanup
     FileUtils::deleteFile(tmpfile);
 }
-
+#endif
 
 
 BOOST_AUTO_TEST_CASE(test_io)
 {
-    using namespace pdal;
-
     const std::string wkt = "COMPD_CS[\"WGS 84 + VERT_CS\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]],VERT_CS[\"NAVD88 height\",VERT_DATUM[\"North American Vertical Datum 1988\",2005,AUTHORITY[\"EPSG\",\"5103\"],EXTENSION[\"PROJ4_GRIDS\",\"g2003conus.gtx\"]],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Up\",UP],AUTHORITY[\"EPSG\",\"5703\"]]]";
 
     SpatialReference ref;
@@ -306,7 +289,7 @@ BOOST_AUTO_TEST_CASE(test_vertical_and_horizontal)
 {
 
     const std::string wkt = "COMPD_CS[\"WGS 84 + VERT_CS\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]],VERT_CS[\"NAVD88 height\",VERT_DATUM[\"North American Vertical Datum 1988\",2005,AUTHORITY[\"EPSG\",\"5103\"],EXTENSION[\"PROJ4_GRIDS\",\"g2003conus.gtx\"]],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Up\",UP],AUTHORITY[\"EPSG\",\"5703\"]]]";
-    pdal::SpatialReference srs(wkt);
+    SpatialReference srs(wkt);
 
     std::string horiz = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]]";
     std::string vert = "VERT_CS[\"NAVD88 height\",VERT_DATUM[\"North American Vertical Datum 1988\",2005,AUTHORITY[\"EPSG\",\"5103\"],EXTENSION[\"PROJ4_GRIDS\",\"g2003conus.gtx\"]],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Up\",UP],AUTHORITY[\"EPSG\",\"5703\"]]";
@@ -317,7 +300,5 @@ BOOST_AUTO_TEST_CASE(test_vertical_and_horizontal)
     BOOST_CHECK_EQUAL(vert, vertical);
 
 }
-
-#endif
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -100,7 +100,6 @@ void Ground::addSwitches()
 
 std::unique_ptr<Stage> Ground::makeReader(Options readerOptions)
 {
-    std::unique_ptr<Stage> reader_stage(AppSupport::makeReader(m_inputFile));
     if (isDebug())
     {
         readerOptions.add<bool>("debug", true);
@@ -110,8 +109,11 @@ std::unique_ptr<Stage> Ground::makeReader(Options readerOptions)
 
         readerOptions.add<boost::uint32_t>("verbose", verbosity);
         readerOptions.add<std::string>("log", "STDERR");
-        reader_stage->setOptions(readerOptions);
     }
+    
+    Stage* stage = AppSupport::makeReader(m_inputFile);
+    stage->setOptions(readerOptions);
+    std::unique_ptr<Stage> reader_stage(stage);
 
     return reader_stage;
 }
@@ -169,7 +171,7 @@ int Ground::execute()
     // the PCLBlock groundStage consumes the BufferReader rather than the
     // readerStage
     groundStage->setInput(&bufferReader);
-
+    
     Options writerOptions;
     writerOptions.add<std::string>("filename", m_outputFile);
     setCommonOptions(writerOptions);

@@ -65,32 +65,12 @@ public:
 
     static void CPL_STDCALL trampoline(::CPLErr code, int num, char const* msg)
     {
-#if ((GDAL_VERSION_MAJOR == 1 && GDAL_VERSION_MINOR >= 9) || (GDAL_VERSION_MAJOR > 1))
-
-
         Debug* debug = static_cast<Debug*>(CPLGetErrorHandlerUserData());
         if (!debug)
             return;
 
         // if (!debug->m_log->get()) return;
         debug->m_gdal_callback(code, num, msg);
-        
-#else
-        if (code == CE_Failure || code == CE_Fatal)
-        {
-            std::ostringstream oss;
-            oss <<"GDAL Failure number=" << num << ": " << msg;
-            throw gdal_error(oss.str());
-        }
-        else if (code == CE_Debug)
-        {
-            std::clog << " (no log control stdlog) GDAL debug pdal::gdal::Debug: " << msg << std::endl;
-        }
-        else
-        {
-            return;
-        }
-#endif
     }
 
     void log(::CPLErr code, int num, char const* msg);
@@ -119,33 +99,13 @@ public:
     void error(::CPLErr code, int num, char const* msg);
     
     static void CPL_STDCALL trampoline(::CPLErr code, int num, char const* msg)
-        {
-    #if ((GDAL_VERSION_MAJOR == 1 && GDAL_VERSION_MINOR >= 9) || (GDAL_VERSION_MAJOR > 1))
+    {
+        GlobalDebug* debug = static_cast<GlobalDebug*>(CPLGetErrorHandlerUserData());
+        if (!debug)
+            return;
 
-
-            GlobalDebug* debug = static_cast<GlobalDebug*>(CPLGetErrorHandlerUserData());
-            if (!debug)
-                return;
-
-            debug->m_gdal_callback(code, num, msg);
-
-    #else
-            if (code == CE_Failure || code == CE_Fatal)
-            {
-                std::ostringstream oss;
-                oss <<"GDAL Failure number=" << num << ": " << msg;
-                throw gdal_error(oss.str());
-            }
-            else if (code == CE_Debug)
-            {
-                std::clog << " (no log control stdlog) GDAL debug pdal::gdal::Debug: " << msg << std::endl;
-            }
-            else
-            {
-                return;
-            }
-    #endif
-        }
+        debug->m_gdal_callback(code, num, msg);
+    }
     
 private:
     std::vector<LogPtr> m_logs;

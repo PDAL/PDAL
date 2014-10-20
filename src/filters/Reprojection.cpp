@@ -38,13 +38,11 @@
 
 #include <pdal/PointBuffer.hpp>
 
-
-#ifdef PDAL_HAVE_GDAL
 #pragma GCC diagnostic ignored "-Wfloat-equal"
 #include <gdal.h>
 #include <ogr_spatialref.h>
 #include <pdal/GDALUtils.hpp>
-#endif
+
 
 namespace pdal
 {
@@ -52,7 +50,6 @@ namespace filters
 {
 
 
-#ifdef PDAL_HAVE_GDAL
 struct OGRSpatialReferenceDeleter
 {
     template <typename T>
@@ -80,7 +77,6 @@ struct GDALSourceDeleter
         ::GDALClose(ptr);
     }
 };
-#endif
 
 
 Reprojection::Reprojection()
@@ -118,7 +114,6 @@ void Reprojection::ready(PointContext ctx)
     if (m_inferInputSRS)
         m_inSRS = ctx.spatialRef();
 
-#ifdef PDAL_HAVE_GDAL
     m_gdal_debug = boost::shared_ptr<pdal::gdal::Debug>(
         new pdal::gdal::Debug(isDebug(), log()));
 
@@ -161,14 +156,12 @@ void Reprojection::ready(PointContext ctx)
         throw std::runtime_error(msg);
     }
 
-#endif
     setSpatialReference(m_outSRS);
 }
 
 
 void Reprojection::transform(double& x, double& y, double& z)
 {
-#ifdef PDAL_HAVE_GDAL
     int ret = OCTTransform(m_transform_ptr.get(), 1, &x, &y, &z);
     if (ret == 0)
     {
@@ -177,11 +170,6 @@ void Reprojection::transform(double& x, double& y, double& z)
             CPLGetLastErrorMsg() << ret;
         throw pdal_error(msg.str());
     }
-#else
-    boost::ignore_unused_variable_warning(x);
-    boost::ignore_unused_variable_warning(y);
-    boost::ignore_unused_variable_warning(z);
-#endif
 }
 
 

@@ -290,7 +290,7 @@ void Writer::setVlrsFromSpatialRef(const SpatialReference& srs)
 {
     VlrList vlrs;
 
-#ifdef PDAL_SRS_ENABLED
+#ifdef PDAL_HAVE_LIBGEOTIFF
     GeotiffSupport geotiff;
     geotiff.resetTags();
 
@@ -304,7 +304,7 @@ void Writer::setVlrsFromSpatialRef(const SpatialReference& srs)
     addGeotiffVlr(geotiff, GEOTIFF_ASCII_RECORD_ID,
         "GeoTiff GeoAsciiParamsTag");
     addWktVlr(srs);
-#endif // PDAL_SRS_ENABLED
+#endif // PDAL_HAVE_LIBGEOTIFF
 }
 
 
@@ -316,7 +316,7 @@ void Writer::setVlrsFromSpatialRef(const SpatialReference& srs)
 bool Writer::addGeotiffVlr(GeotiffSupport& geotiff, uint16_t recordId,
     const std::string& description)
 {
-#ifdef PDAL_SRS_ENABLED
+#ifdef PDAL_HAVE_LIBGEOTIFF
     void *data;
     int count;
 
@@ -330,7 +330,7 @@ bool Writer::addGeotiffVlr(GeotiffSupport& geotiff, uint16_t recordId,
     return true;
 #else
     return false;
-#endif // PDAL_SRS_ENABLED
+#endif // PDAL_HAVE_LIBGEOTIFF
 }
 
 

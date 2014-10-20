@@ -35,11 +35,8 @@
 #include "GeotiffSupport.hpp"
 
 // GDAL
-#ifdef PDAL_HAVE_GDAL
 #include <geo_normalize.h>
 #include <ogr_spatialref.h>
-
-#endif
 
 #include <sstream>
 
@@ -74,7 +71,7 @@ namespace las
 
 GeotiffSupport::~GeotiffSupport()
 {
-#ifdef PDAL_SRS_ENABLED
+#ifdef PDAL_HAVE_LIBGEOTIFF
     if (m_gtiff != 0)
     {
         GTIFFree(m_gtiff);
@@ -330,107 +327,6 @@ std::string GeotiffSupport::getText() const
     const std::string s = geotiff_printer.output();
     return s;
 }
-
-
-
-
-#if 0
-
-void SpatialReference::setVerticalCS(int32_t verticalCSType,
-    std::string const& citation, int32_t verticalDatum,
-    int32_t verticalUnits)
-{
-    if (!m_tiffstuff->m_gtiff)
-    {
-        rebuildGTIF();
-    }
-
-#ifdef PDAL_SRS_ENABLED
-    if (verticalCSType != KvUserDefined && verticalCSType > 0)
-        GTIFKeySet(m_tiffstuff->m_gtiff, VerticalCSTypeGeoKey, TYPE_SHORT, 1,
-                   verticalCSType);
-
-    if (citation != "")
-        GTIFKeySet(m_tiffstuff->m_gtiff, VerticalCitationGeoKey, TYPE_ASCII, 0,
-                   citation.c_str());
-
-    if (verticalDatum > 0 && verticalDatum != KvUserDefined)
-        GTIFKeySet(m_tiffstuff->m_gtiff, VerticalDatumGeoKey, TYPE_SHORT, 1,
-                   verticalDatum);
-
-    if (verticalUnits > 0 && verticalUnits != KvUserDefined)
-        GTIFKeySet(m_tiffstuff->m_gtiff, VerticalUnitsGeoKey, TYPE_SHORT, 1,
-                   verticalUnits);
-
-    int ret = GTIFWriteKeys(m_tiffstuff->m_gtiff);
-    if (!ret)
-    {
-        throw std::runtime_error("The geotiff keys could not be written");
-    }
-
-    // Clear WKT so it gets regenerated
-    m_wkt = std::string("");
-
-#else
-    boost::ignore_unused_variable_warning(citation);
-    boost::ignore_unused_variable_warning(verticalUnits);
-    boost::ignore_unused_variable_warning(verticalDatum);
-    boost::ignore_unused_variable_warning(verticalCSType);
-#endif
-
-    return;
-}
-
-
-void SpatialReference::setProj4(std::string const& v)
-{
-    if (!m_tiffstuff->m_gtiff)
-    {
-        rebuildGTIF();
-    }
-
-#ifdef PDAL_SRS_ENABLED
-    char* poWKT = 0;
-    const char* poProj4 = v.c_str();
-
-    OGRSpatialReference srs(NULL);
-    if (OGRERR_NONE != srs.importFromProj4(const_cast<char *>(poProj4)))
-    {
-        throw std::invalid_argument("could not import proj4 into OSRSpatialReference SetProj4");
-    }
-
-    srs.exportToWkt(&poWKT);
-
-    std::string tmp(poWKT);
-    CPLFree(poWKT);
-
-    int ret = 0;
-    ret = GTIFSetFromOGISDefn(m_tiffstuff->m_gtiff, tmp.c_str());
-    if (!ret)
-    {
-        throw std::invalid_argument("could not set m_gtiff from Proj4");
-    }
-
-    ret = GTIFWriteKeys(m_tiffstuff->m_gtiff);
-    if (!ret)
-    {
-        throw std::runtime_error("The geotiff keys could not be written");
-    }
-
-    GTIFDefn defn;
-
-    if (m_tiffstuff->m_gtiff && GTIFGetDefn(m_tiffstuff->m_gtiff, &defn))
-    {
-        char* proj4def = GTIFGetProj4Defn(&defn);
-        std::string tmp(proj4def);
-        GTIFFreeMemory(proj4def);
-    }
-#else
-    boost::ignore_unused_variable_warning(v);
-#endif
-}
-
-#endif // if 0
 
 } // namespace las
 } // namespace drivers

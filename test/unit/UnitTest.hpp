@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Hobu Inc. (hobu@hobu.co)
+* Copyright (c) 2014, Michael P. Gerlek (mgerlek@radiantblue.com)
 *
 * All rights reserved.
 *
@@ -32,78 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <cassert>
-#include <sstream>
+#pragma once
 
-#include <pdal/drivers/las/VariableLengthRecord.hpp>
-
-namespace pdal
-{
-namespace drivers
-{
-namespace las
-{
-
-ILeStream& operator>>(ILeStream& in, VariableLengthRecord& v)
-{
-    uint16_t reserved;
-    uint16_t dataLen;
-
-    in >> reserved;
-    in.get(v.m_userId, 16);
-    in >> v.m_recordId >> dataLen;
-    in.get(v.m_description, 32);
-    v.m_data.resize(dataLen);
-    in.get(v.m_data);
-
-    return in;
-}
-
-
-OLeStream& operator<<(OLeStream& out, const VariableLengthRecord& v)
-{
-    uint16_t dataLen;
-
-    out << v.m_recordSig;
-    out.put(v.m_userId, 16);
-    out << v.m_recordId << (uint16_t)v.dataLen();
-    out.put(v.m_description, 32);
-    out.put(v.data(), v.dataLen());
-
-    return out;
-}
-
-
-ILeStream& operator>>(ILeStream& in, ExtVariableLengthRecord& v)
-{
-    uint64_t dataLen;
-
-    in >> v.m_recordSig;
-    in.get(v.m_userId, 16);
-    in >> v.m_recordId >> dataLen;
-    in.get(v.m_description, 32);
-    v.m_data.resize(dataLen);
-    in.get(v.m_data);
-
-    return in;
-}
-
-
-OLeStream& operator<<(OLeStream& out, const ExtVariableLengthRecord& v)
-{
-    uint16_t reserved;
-    uint64_t dataLen;
-
-    out << (uint16_t)0;
-    out.put(v.userId(), 16);
-    out << v.recordId() << v.dataLen();
-    out.put(v.description(), 32);
-    out.put(v.data(), v.dataLen());
-
-    return out;
-}
-
-} // namespace las
-} // namespace drivers
-} // namespace pdal
-
+#include <pdal/pdal_internal.hpp>
+#include <boost/test/unit_test.hpp>

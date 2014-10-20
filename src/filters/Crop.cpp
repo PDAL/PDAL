@@ -89,6 +89,11 @@ void Crop::processOptions(const Options& options)
         options.getValueOrDefault<BOX3D>("bounds", BOX3D());
     m_cropOutside = options.getValueOrDefault<bool>("outside", false);
     m_poly = options.getValueOrDefault<std::string>("polygon", "");
+
+#if !defined(PDAL_HAVE_GEOS)
+    if (!m_poly.empty())
+        throw pdal_error("Polygon cropping not supported unless built with GEOS");
+#endif
 }
 
 
@@ -207,8 +212,6 @@ PointBufferSet Crop::run(PointBufferPtr buffer)
 
 void Crop::crop(PointBuffer& input, PointBuffer& output)
 {
-    BOX3D buffer_bounds = input.calculateBounds();
-
     bool logOutput = (log()->getLevel() > LogLevel::Debug4);
     if (logOutput)
         log()->floatPrecision(8);

@@ -55,13 +55,14 @@ public:
     SET_STAGE_ENABLED(false)
 #endif
 
-    Writer() : las::Writer(&m_oss)
-        {}
+    Writer() ;
 
 private:
     virtual void processOptions(const Options& options);
     virtual void done(PointContextRef ctx);
+    virtual void write(const PointBuffer&);
 
+    BOX3D m_bounds;
     std::string m_cLevel;
     std::string m_sType;
     std::string m_oStationId;
@@ -70,8 +71,13 @@ private:
     std::string m_origName;
     std::string m_origPhone;
     std::string m_securityClass;
+    std::string m_securityControlAndHandling;
+    std::string m_securityClassificationSystem;
     std::string m_imgSecurityClass;
     std::string m_imgDate;
+    pdal::Option m_aimidb;
+    pdal::Option m_acftb;
+    std::string m_imgIdentifier2;
     std::string m_sic;
     std::string m_igeolob;
     std::stringstream m_oss;

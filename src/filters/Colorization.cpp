@@ -38,11 +38,9 @@
 #include <pdal/PointBuffer.hpp>
 #include <pdal/GlobalEnvironment.hpp>
 
-#ifdef PDAL_HAVE_GDAL
 #include <gdal.h>
 #include <ogr_spatialref.h>
 #include <pdal/GDALUtils.hpp>
-#endif
 
 namespace pdal
 {
@@ -50,7 +48,6 @@ namespace filters
 {
 
 
-#ifdef PDAL_HAVE_GDAL
 struct GDALSourceDeleter
 {
     template <typename T>
@@ -59,15 +56,12 @@ struct GDALSourceDeleter
         ::GDALClose(ptr);
     }
 };
-#endif
 
 
 void Colorization::initialize()
 {
-#ifdef PDAL_HAVE_GDAL
     GlobalEnvironment::get().getGDALEnvironment();
     GlobalEnvironment::get().getGDALDebug()->addLog(log());
-#endif
 }
 
 
@@ -150,8 +144,6 @@ void Colorization::ready(PointContext ctx)
     m_forward_transform.assign(0.0);
     m_inverse_transform.assign(0.0);
 
-#ifdef PDAL_HAVE_GDAL
-
     log()->get(LogLevel::Debug) << "Using " << m_rasterFilename <<
         " for raster" << std::endl;
     m_ds = GDALOpen(m_rasterFilename.c_str(), GA_ReadOnly);
@@ -164,7 +156,6 @@ void Colorization::ready(PointContext ctx)
     if (!GDALInvGeoTransform(&(m_forward_transform.front()),
         &(m_inverse_transform.front())))
         throw pdal_error("unable to fetch inverse geotransform for raster!");
-#endif
 
     for (auto bi = m_bands.begin(); bi != m_bands.end(); ++bi)
     {
@@ -179,7 +170,6 @@ void Colorization::ready(PointContext ctx)
 
 void Colorization::filter(PointBuffer& buffer)
 {
-#ifdef PDAL_HAVE_GDAL
     int32_t pixel(0);
     int32_t line(0);
 
@@ -209,7 +199,6 @@ void Colorization::filter(PointBuffer& buffer)
                 buffer.setField(b.m_dim, idx, pix[0] * b.m_scale);
         }
     }
-#endif
 }
 
 
@@ -219,7 +208,6 @@ bool Colorization::getPixelAndLinePosition(double x, double y,
     boost::array<double, 6> const& inverse, int32_t& pixel,
     int32_t& line, void *ds)
 {
-#ifdef PDAL_HAVE_GDAL
     pixel = (int32_t)std::floor(inverse[0] + (inverse[1] * x) +
         (inverse[2] * y));
     line = (int32_t) std::floor(inverse[3] + (inverse[4] * x) +
@@ -236,22 +224,19 @@ bool Colorization::getPixelAndLinePosition(double x, double y,
         // The x, y is not coincident with this raster
         return false;
     }
-#endif
+
     return true;
 }
 
 
 void Colorization::done(PointContext ctx)
 {
-#ifdef PDAL_HAVE_GDAL
     if (m_ds != 0)
     {
         GDALClose(m_ds);
         m_ds = 0;
     }
-#endif
 }
 
 } // namespace filters
 } // namespace pdal
-

@@ -44,7 +44,7 @@
 #include <cstdlib>
 #include <cctype>
 
-#ifdef PDAL_HAVE_DEMANGLER
+#ifdef PDAL_PLATFORM_WIN32
 #include <cxxabi.h>
 #endif
 
@@ -649,24 +649,20 @@ void Utils::wordWrap(string const& inputString, vector<string>& outputString,
 }
 
 
-#ifdef PDAL_HAVE_DEMANGLER
 /// Demangle strings using the compiler-provided demangle function.
 /// \param[in] s  String to be demangled.
 /// \return  Demangled string
 std::string Utils::demangle(const std::string& s)
 {
+#ifdef PDAL_PLATFORM_WIN32
     int status;
     std::unique_ptr<char[], void (*)(void*)> result(
             abi::__cxa_demangle(s.c_str(), 0, 0, &status), std::free);
     return std::string(result.get());
-}
 #else
-std::string Utils::demangle(const std::string& s)
-{
-  return s;
-}
+    return s;
 #endif
+}
 
-//#endif
 
 } // namespace pdal

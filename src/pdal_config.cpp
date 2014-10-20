@@ -53,7 +53,6 @@
 #include <geotiff.h>
 #endif
 
-#ifdef PDAL_HAVE_GDAL
 #ifdef PDAL_COMPILER_CLANG
 #  pragma clang diagnostic push
 #  pragma clang diagnostic ignored "-Wfloat-equal"
@@ -61,7 +60,6 @@
 #include <gdal.h>
 #ifdef PDAL_COMPILER_CLANG
 #  pragma clang diagnostic pop
-#endif
 #endif
 
 #ifdef PDAL_HAVE_LASZIP
@@ -87,16 +85,6 @@
 
 namespace pdal
 {
-
-/// Check if GDAL support has been built in to PDAL
-bool IsGDALEnabled()
-{
-#ifdef PDAL_HAVE_GDAL
-    return true;
-#else
-    return false;
-#endif
-}
 
 /// Check if GeoTIFF support has been built in to PDAL
 bool IsLibGeoTIFFEnabled()
@@ -158,9 +146,7 @@ std::string GetFullVersionString()
        << (LIBGEOTIFF_VERSION % 100 / 10);
 #endif
 
-#ifdef PDAL_HAVE_GDAL
     os << " GDAL " << GDALVersionInfo("RELEASE_NAME");
-#endif
 
 #ifdef PDAL_HAVE_LASZIP
     os << " LASzip "
@@ -248,12 +234,12 @@ std::string getPDALDebugInformation()
               << std::setw(url_column) << "http://trac.osgeo.org/geos"
               << std::setw(special_column) << GEOS_VERSION  << std::endl;
 #endif
-#ifdef PDAL_HAVE_GDAL
+
     os << std::left
               << std::setw(name_column) << "GDAL" << std::right
               << std::setw(url_column) << "http://www.gdal.org"
               << std::setw(special_column) << GDALVersionInfo("RELEASE_NAME")  << std::endl;
-#endif
+
 #ifdef PDAL_HAVE_HEXER
     std::ostringstream hexerver;
     hexerver << HEXER_VERSION_MAJOR << "."
