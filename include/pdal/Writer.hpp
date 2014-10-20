@@ -50,6 +50,8 @@ class UserCallback;
 /// End-stage consumer of PDAL pipeline
 class PDAL_DLL Writer : public Stage
 {
+    friend class WriterTester;
+
 public:
     /// Constructs an end-stage consumer of a pipeline of data -- a writer
     Writer() : m_callback(new UserCallback)

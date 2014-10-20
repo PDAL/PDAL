@@ -66,10 +66,9 @@ ILeStream& operator>>(ILeStream& in, VariableLengthRecord& v)
 
 OLeStream& operator<<(OLeStream& out, const VariableLengthRecord& v)
 {
-    uint16_t reserved = 0xAABB;
     uint16_t dataLen;
 
-    out << reserved;
+    out << v.m_recordSig;
     out.put(v.m_userId, 16);
     out << v.m_recordId << (uint16_t)v.dataLen();
     out.put(v.m_description, 32);
@@ -81,10 +80,9 @@ OLeStream& operator<<(OLeStream& out, const VariableLengthRecord& v)
 
 ILeStream& operator>>(ILeStream& in, ExtVariableLengthRecord& v)
 {
-    uint16_t reserved;
     uint64_t dataLen;
 
-    in >> reserved;
+    in >> v.m_recordSig;
     in.get(v.m_userId, 16);
     in >> v.m_recordId >> dataLen;
     in.get(v.m_description, 32);

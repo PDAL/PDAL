@@ -90,8 +90,6 @@ Options Writer::getDefaultOptions()
     Option software_id("software_id", GetDefaultSoftwareId(),
         "Software ID for this file");
     Option filesourceid("filesource_id", 0, "File Source ID for this file");
-    Option header_padding("header_padding", 0, "Header padding (space between "
-        "end of VLRs and beginning of point data)");
     Option set_metadata("forward_metadata", false, "forward metadata into "
         "the file as necessary");
 
@@ -101,7 +99,6 @@ Options Writer::getDefaultOptions()
     options.add(year);
     options.add(system_id);
     options.add(software_id);
-    options.add(header_padding);
     options.add(format);
     options.add(filename);
     options.add(compression);
@@ -154,7 +151,6 @@ void Writer::getHeaderOptions(const Options &options)
     metaOptionValue("creation_year", std::to_string(year));
     metaOptionValue("creation_doy", std::to_string(doy));
     metaOptionValue("software_id", GetDefaultSoftwareId());
-    metaOptionValue("format", "3");
     metaOptionValue("system_id", LasHeader::SYSTEM_IDENTIFIER);
     metaOptionValue("project_id",
         boost::lexical_cast<std::string>(boost::uuids::uuid()));
@@ -219,7 +215,7 @@ void Writer::ready(PointContextRef ctx)
     for (auto vi = m_vlrs.begin(); vi != m_vlrs.end(); ++vi)
     {
         VariableLengthRecord& vlr = *vi;
-        out << vlr;
+        vlr.write(out, m_lasHeader.versionEquals(1, 0) ? 0xAABB : 0);
     }
 
     // Write the point data start signature for version 1.0.
@@ -473,10 +469,41 @@ void Writer::openCompression()
 #endif
 }
 
+void Writer::setAutoOffset(const PointBuffer& pointBuffer)
+{
+    if (pointBuffer.empty())
+        return;
+
+    if (m_xXform.m_autoOffset)
+        m_xXform.m_offset = (std::numeric_limits<double>::max)();
+    if (m_yXform.m_autoOffset)
+        m_yXform.m_offset = (std::numeric_limits<double>::max)();
+    if (m_zXform.m_autoOffset)
+        m_zXform.m_offset = (std::numeric_limits<double>::max)();
+    for (PointId idx = 0; idx < pointBuffer.size(); idx++)
+    {
+        if (m_xXform.m_autoOffset)
+            m_xXform.m_offset =
+                std::min(pointBuffer.getFieldAs<double>(Dimension::Id::X, idx),
+                    m_xXform.m_offset);
+        if (m_yXform.m_autoOffset)
+            m_yXform.m_offset =
+                std::min(pointBuffer.getFieldAs<double>(Dimension::Id::Y, idx),
+                    m_yXform.m_offset);
+        if (m_zXform.m_autoOffset)
+            m_zXform.m_offset =
+                std::min(pointBuffer.getFieldAs<double>(Dimension::Id::Z, idx),
+                    m_zXform.m_offset);
+    }
+}
+
 
 void Writer::write(const PointBuffer& pointBuffer)
 {
     uint32_t numValidPoints = 0;
+
+    if (m_xXform.m_autoOffset || m_yXform.m_autoOffset || m_zXform.m_autoOffset)
+        setAutoOffset(pointBuffer);
 
     std::vector<char> buf(m_lasHeader.pointLen());
 
@@ -656,14 +683,19 @@ void Writer::done(PointContextRef ctx)
         out << evlr;
     }
 
+    // Reset the offset since it may have been auto-computed
+    m_lasHeader.setOffset(m_xXform.m_offset, m_yXform.m_offset,
+        m_zXform.m_offset);
+    // We didn't know the point count until we go through the points.
     m_lasHeader.setPointCount(m_numPointsWritten);
+    // The summary is calculated as points are written.
     m_lasHeader.setSummary(m_summaryData);
+    // VLR count may change as LAS records are written.
     m_lasHeader.setVlrCount(m_vlrs.size());
 
     out.seek(m_streamOffset);
     out << m_lasHeader;
     out.seek(m_lasHeader.pointOffset());
-    FileUtils::closeFile(m_ostream);
 }
 
 } // namespace las

@@ -70,9 +70,9 @@ public:
     VariableLengthRecord(const std::string& userId, uint16_t recordId,
             const std::string& description, std::vector<uint8_t>& data) :
         m_userId(userId), m_recordId(recordId), m_description(description),
-        m_data(std::move(data))
+        m_data(std::move(data)), m_recordSig(0)
     {}
-    VariableLengthRecord() : m_recordId(0)
+    VariableLengthRecord() : m_recordId(0), m_recordSig(0)
     {}
 
     std::string userId() const
@@ -93,6 +93,11 @@ public:
         { return m_data.size(); }
     void setDataLen(uint64_t size)
         { m_data.resize((size_t)size); }
+    void write(OLeStream& out, uint16_t recordSig)
+    {
+        m_recordSig = recordSig;
+        out << *this;
+    }
 
     friend ILeStream& operator>>(ILeStream& in, VariableLengthRecord& v);
     friend OLeStream& operator<<(OLeStream& out, const VariableLengthRecord& v);
@@ -102,6 +107,7 @@ protected:
     uint16_t m_recordId;
     std::string m_description;
     std::vector<uint8_t> m_data;
+    uint16_t m_recordSig;
 };
 
 class ExtVariableLengthRecord : public VariableLengthRecord

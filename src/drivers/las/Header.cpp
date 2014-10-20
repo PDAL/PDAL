@@ -394,6 +394,7 @@ std::ostream& operator<<(std::ostream& out, const LasHeader& h)
         out << "Ext. VLR offset: " << h.m_eVlrOffset << "\n";
         out << "Ext. VLR count: " << h.m_eVlrCount << "\n";
     }
+    out << "Compressed: " << (h.m_isCompressed ? "true" : "false") << "\n";
     return out;
 }
 
