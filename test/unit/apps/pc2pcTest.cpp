@@ -173,7 +173,9 @@ BOOST_AUTO_TEST_CASE(pc2pc_test_switches)
     stat = Utils::run_shell_command(fullCmd, output);
     BOOST_CHECK_EQUAL(stat, 0);
     BOOST_CHECK(fileIsOkay(outputLas));
+#ifdef PDAL_HAVE_LIBGEOTIFF
     BOOST_CHECK(fileHasSrs(outputLas));
+#endif
 
     FileUtils::deleteFile(outputLas);
     FileUtils::deleteFile(outputLaz);

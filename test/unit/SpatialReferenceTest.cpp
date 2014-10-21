@@ -208,7 +208,7 @@ BOOST_AUTO_TEST_CASE(test_vertical_datums)
     // Cleanup
     FileUtils::deleteFile(tmpfile);
 }
-#endif PDAL_HAVE_LIBGEOTIFF
+#endif //PDAL_HAVE_LIBGEOTIFF
 
 
 #ifdef PDAL_HAVE_GEOS
