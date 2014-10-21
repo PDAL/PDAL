@@ -154,6 +154,10 @@ BOOST_AUTO_TEST_CASE(test_read_srs)
 #endif
 
 
+//NOTE - The source file uses Geotiff spatial reference, so this only
+//  works if we have the necessary library.
+#ifdef PDAL_HAVE_LIBGEOTIFF
+
 // Try writing a compound coordinate system to file and ensure we get back
 // WKT with the geoidgrids (from the WKT VLR).
 BOOST_AUTO_TEST_CASE(test_vertical_datums)
@@ -204,6 +208,7 @@ BOOST_AUTO_TEST_CASE(test_vertical_datums)
     // Cleanup
     FileUtils::deleteFile(tmpfile);
 }
+#endif PDAL_HAVE_LIBGEOTIFF
 
 
 #ifdef PDAL_HAVE_GEOS
