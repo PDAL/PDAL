@@ -1,5 +1,4 @@
 /******************************************************************************
-* Copyright (c) 2013, Howard Butler (hobu.inc@gmail.com)
 * Copyright (c) 2014, Bradley J Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
@@ -36,20 +35,30 @@
 #pragma once
 
 #include "Application.hpp"
-#include "Delta.hpp"
-#include "Diff.hpp"
-#include "Info.hpp"
-#include "Pipeline.hpp"
-#include "Random.hpp"
-#include "Sort.hpp"
-#include "Support.hpp"
-#include "Translate.hpp"
 
-#ifdef PDAL_HAVE_PCL
-#include "Ground.hpp"
-#include "PCL.hpp"
-#endif
+namespace pdal
+{
+namespace kernel
+{
 
-#ifdef PDAL_HAVE_PCL_VISUALIZE
-#include "View.hpp"
-#endif
+class PDAL_DLL Sort : public Application
+{
+public:
+    Sort(int argc, const char* argv[]);
+    int execute();
+
+private:
+    void addSwitches();
+    void validateSwitches();
+
+    std::unique_ptr<Stage> makeReader(Options readerOptions);
+
+    std::string m_inputFile;
+    std::string m_outputFile;
+    bool m_bCompress;
+    bool m_bForwardMetadata;
+};
+
+} // namespace kernel
+} // namespace pdal
+

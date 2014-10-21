@@ -101,15 +101,15 @@ void PCDtoPDAL(CloudT &cloud, PointBuffer& buf, BOX3D const& bounds)
     {
         for (size_t i = 0; i < cloud.points.size(); ++i)
         {
-            boost::uint32_t v;
+            uint32_t v;
 
             typename CloudT::PointType p = cloud.points[i];
             pcl::for_each_type<FieldList>
-               (pcl::CopyIfFieldExists<typename CloudT::PointType, boost::uint32_t>
+               (pcl::CopyIfFieldExists<typename CloudT::PointType, uint32_t>
                    (p, "rgba", v));
-            buf.setField<boost::uint8_t>(Dimension::Id::Red, i, (v & 0x00FF0000) >> 16);
-            buf.setField<boost::uint8_t>(Dimension::Id::Green, i, (v & 0x0000FF00) >> 8);
-            buf.setField<boost::uint8_t>(Dimension::Id::Blue, i, (v & 0x000000FF));
+            buf.setField<uint8_t>(Dimension::Id::Red, i, (v & 0x00FF0000) >> 16);
+            buf.setField<uint8_t>(Dimension::Id::Green, i, (v & 0x0000FF00) >> 8);
+            buf.setField<uint8_t>(Dimension::Id::Blue, i, (v & 0x000000FF));
         }
     }
 #endif // PDAL_HAVE_PCL
@@ -177,12 +177,12 @@ void PDALtoPCD(PointBuffer& data, CloudT &cloud, BOX3D const& bounds)
         {
             typename CloudT::PointType p = cloud.points[i];
 
-            boost::uint8_t r = data.getFieldAs<boost::uint8_t>(Dimension::Id::Red, i);
-            boost::uint8_t g = data.getFieldAs<boost::uint8_t>(Dimension::Id::Green, i);
-            boost::uint8_t b = data.getFieldAs<boost::uint8_t>(Dimension::Id::Blue, i);
+            uint8_t r = data.getFieldAs<uint8_t>(Dimension::Id::Red, i);
+            uint8_t g = data.getFieldAs<uint8_t>(Dimension::Id::Green, i);
+            uint8_t b = data.getFieldAs<uint8_t>(Dimension::Id::Blue, i);
             pcl::for_each_type<FieldList> (
-                pcl::SetIfFieldExists<typename CloudT::PointType, boost::uint32_t> (
-                    p, "rgba", ((int)r) << 16 | ((int)g) << 8 | ((int)b)
+                pcl::SetIfFieldExists<typename CloudT::PointType, uint32_t> (
+                    p, "rgba", ((uint8_t)r) << 16 | ((uint8_t)g) << 8 | ((uint8_t)b)
                 )
             );
             cloud.points[i] = p;

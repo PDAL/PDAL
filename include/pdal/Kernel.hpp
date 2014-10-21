@@ -43,6 +43,7 @@
 #include <pdal/kernel/Kernel.hpp>
 #include <pdal/kernel/Pipeline.hpp>
 #include <pdal/kernel/Query.hpp>
+#include <pdal/kernel/Sort.hpp>
 #include <pdal/kernel/Support.hpp>
 #include <pdal/kernel/Translate.hpp>
 

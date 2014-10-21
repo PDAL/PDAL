@@ -608,6 +608,7 @@ set(PDAL_FILTERS_HPP
   "${PDAL_FILTERS_HEADERS}/HexBin.hpp"
   "${PDAL_FILTERS_HEADERS}/InPlaceReprojection.hpp"
   "${PDAL_FILTERS_HEADERS}/Merge.hpp"
+  "${PDAL_FILTERS_HEADERS}/MortonOrder.hpp"
   "${PDAL_FILTERS_HEADERS}/Reprojection.hpp"
   "${PDAL_FILTERS_HEADERS}/Scaling.hpp"
   "${PDAL_FILTERS_HEADERS}/Selector.hpp"
@@ -621,6 +622,7 @@ set (PDAL_FILTERS_CPP
   "${PDAL_FILTERS_SRC}/Decimation.cpp"
   "${PDAL_FILTERS_SRC}/Ferry.cpp"
   "${PDAL_FILTERS_SRC}/HexBin.cpp"
+  "${PDAL_FILTERS_SRC}/MortonOrder.cpp"
   "${PDAL_FILTERS_SRC}/Reprojection.cpp"
   "${PDAL_FILTERS_SRC}/Splitter.cpp"
   "${PDAL_FILTERS_SRC}/Stats.cpp"
@@ -742,6 +744,7 @@ set(PDAL_KERNEL_HPP
     ${PDAL_KERNEL_HEADERS}/Pipeline.hpp
     ${PDAL_KERNEL_HEADERS}/Delta.hpp
     ${PDAL_KERNEL_HEADERS}/Random.hpp
+    ${PDAL_KERNEL_HEADERS}/Sort.hpp
     ${PDAL_KERNEL_HEADERS}/Translate.hpp
 )
 
@@ -753,6 +756,7 @@ set(PDAL_KERNEL_CPP
     ${PDAL_KERNEL_SRC}/Pipeline.cpp
     ${PDAL_KERNEL_SRC}/Delta.cpp
     ${PDAL_KERNEL_SRC}/Random.cpp
+    ${PDAL_KERNEL_SRC}/Sort.cpp
     ${PDAL_KERNEL_SRC}/Translate.cpp
 )
 
