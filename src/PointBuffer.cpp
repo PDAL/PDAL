@@ -35,11 +35,24 @@
 #include <iomanip>
 
 #include <pdal/PointBuffer.hpp>
+#include <pdal/PointBufferIter.hpp>
 
 #include <boost/lexical_cast.hpp>
 
 namespace pdal
 {
+
+PointBufferIter PointBuffer::begin()
+{
+    return PointBufferIter(this, 0);
+}
+
+
+PointBufferIter PointBuffer::end()
+{
+    return PointBufferIter(this, size());
+}
+
 
 BOX3D PointBuffer::calculateBounds(bool is3d) const
 {

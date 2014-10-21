@@ -49,6 +49,7 @@ namespace plang
 }
 
 class PointBuffer;
+class PointBufferIter;
 
 typedef std::shared_ptr<PointBuffer> PointBufferPtr;
 typedef std::set<PointBufferPtr> PointBufferSet;
@@ -57,10 +58,14 @@ typedef std::set<PointBufferPtr> PointBufferSet;
 class PDAL_DLL PointBuffer
 {
     friend class plang::BufferedInvocation;
+    friend class PointRef;
 public:
     PointBuffer();
     PointBuffer(PointContextRef context) : m_context(context)
     {}
+
+    PointBufferIter begin();
+    PointBufferIter end();
 
     point_count_t size() const
         { return m_index.size(); }
