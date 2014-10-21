@@ -40,11 +40,16 @@ else
     sudo apt-get install cmake
 fi
 
+
+# GDAL is now always required
+sudo apt-get install \
+    libgdal1h \
+    libgdal-dev
+
+
 if [[ $PDAL_OPTIONAL_COMPONENTS == "all" ]]
 then
     sudo apt-get install \
-        libgdal1h \
-        libgdal-dev \
         libhdf5-serial-dev \
         libproj-dev \
         libgeos++-dev \

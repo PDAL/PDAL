@@ -33,7 +33,7 @@
 ****************************************************************************/
 
 #define BOOST_TEST_MODULE Main
-#include <boost/test/unit_test.hpp>
+#include "UnitTest.hpp"
 
 #include <pdal/pdal_internal.hpp>
 

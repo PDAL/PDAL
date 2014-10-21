@@ -42,9 +42,8 @@
 #include <pdal/plang/PythonEnvironment.hpp>
 #endif
 
-#ifdef PDAL_HAVE_GDAL
 #include <pdal/GDALUtils.hpp>
-#endif
+
 
 namespace pdal
 {
@@ -106,13 +105,11 @@ GlobalEnvironment::GlobalEnvironment()
 
 void GlobalEnvironment::getGDALEnvironment()
 {
-#ifdef PDAL_HAVE_GDAL
     if (!m_bIsGDALInitialized)
     {
         (void) GDALAllRegister();
         m_bIsGDALInitialized = true;
     }
-#endif
 }
 
 
@@ -123,14 +120,12 @@ GlobalEnvironment::~GlobalEnvironment()
     m_pythonEnvironment = 0;
 #endif
 
-#ifdef PDAL_HAVE_GDAL
     if (m_bIsGDALInitialized)
     {
         delete m_gdal_debug;
         (void) GDALDestroyDriverManager();
         m_bIsGDALInitialized = false;
     }
-#endif
 }
 
 
@@ -158,10 +153,8 @@ plang::PythonEnvironment& GlobalEnvironment::getPythonEnvironment()
 pdal::gdal::GlobalDebug* GlobalEnvironment::getGDALDebug()
 {
     getGDALEnvironment();
-#ifdef PDAL_HAVE_GDAL
     if (m_gdal_debug == 0)
         m_gdal_debug = new pdal::gdal::GlobalDebug();
-#endif
     return m_gdal_debug;
 }
 

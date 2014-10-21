@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <boost/test/unit_test.hpp>
+#include "UnitTest.hpp"
 #include <boost/cstdint.hpp>
 
 #include <pdal/drivers/faux/Reader.hpp>
@@ -53,7 +53,6 @@ BOOST_AUTO_TEST_SUITE(FerryFilterTest)
 
 BOOST_AUTO_TEST_CASE(test_ferry_copy)
 {
-#ifdef PDAL_HAVE_GDAL
     using namespace pdal;
     PipelineManager mgr;
     PipelineReader specReader(mgr);
@@ -82,7 +81,6 @@ BOOST_AUTO_TEST_CASE(test_ferry_copy)
     BOOST_CHECK_CLOSE(49.341077824192915, lat, 0.0001);
     BOOST_CHECK_CLOSE(637012.24, x, 0.0001);
     BOOST_CHECK_CLOSE(849028.31, y, 0.0001);
-#endif
 }
 
 BOOST_AUTO_TEST_CASE(test_ferry_invalid)

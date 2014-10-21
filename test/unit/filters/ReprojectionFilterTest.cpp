@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <boost/test/unit_test.hpp>
+#include "UnitTest.hpp"
 
 #include <pdal/SpatialReference.hpp>
 #include <pdal/drivers/las/Reader.hpp>
@@ -44,7 +44,6 @@
 
 BOOST_AUTO_TEST_SUITE(ReprojectionFilterTest)
 
-#ifdef PDAL_SRS_ENABLED
 
 static void getPoint(const pdal::PointBuffer& data,
     double& x, double& y, double& z)
@@ -56,6 +55,8 @@ static void getPoint(const pdal::PointBuffer& data,
     z = data.getFieldAs<double>(Dimension::Id::Z, 0);
 }
 
+
+#ifdef PDAL_HAVE_GEOS
 // Test reprojecting UTM 15 to DD with a filter
 BOOST_AUTO_TEST_CASE(ReprojectionFilterTest_test_1)
 {
@@ -101,6 +102,8 @@ BOOST_AUTO_TEST_CASE(ReprojectionFilterTest_test_1)
         BOOST_CHECK_CLOSE(z, postZ, 0.1);
     }
 }
+#endif
+
 
 /**
  This test would pass but for the strange scaling of the dimension, which
@@ -157,6 +160,6 @@ BOOST_AUTO_TEST_CASE(InPlaceReprojectionFilterTest_test_2)
     }
 }
 **/
-#endif
+
 
 BOOST_AUTO_TEST_SUITE_END()

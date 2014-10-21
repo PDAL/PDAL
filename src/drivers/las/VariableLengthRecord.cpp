@@ -239,7 +239,7 @@ static bool setSRSFromVLRs_wkt(const std::vector<VariableLengthRecord>& vlrs, Sp
 
 static bool setSRSFromVLRs_geotiff(const std::vector<VariableLengthRecord>& vlrs, SpatialReference& srs)
 {
-#ifdef PDAL_SRS_ENABLED
+#ifdef PDAL_HAVE_LIBGEOTIFF
     GeotiffSupport geotiff;
 
     geotiff.resetTags();
@@ -354,7 +354,7 @@ void VariableLengthRecord::setSRSFromVLRs(const std::vector<VariableLengthRecord
 
 void VariableLengthRecord::setVLRsFromSRS(const SpatialReference& srs, std::vector<VariableLengthRecord>& vlrs, SpatialReference::WKTModeFlag modeFlag)
 {
-#ifdef PDAL_SRS_ENABLED
+#ifdef PDAL_HAVE_LIBGEOTIFF
 
     int ret = 0;
     short* kdata = 0;

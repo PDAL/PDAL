@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <boost/test/unit_test.hpp>
+#include "UnitTest.hpp"
 
 #include <pdal/FileUtils.hpp>
 #include <pdal/drivers/las/Reader.hpp>
@@ -164,8 +164,6 @@ BOOST_AUTO_TEST_CASE(pc2pc_test_switches)
     BOOST_CHECK(fileIsCompressed(outputLaz));
 #endif
 
-
-#ifdef PDAL_HAVE_GDAL
     // does --a_srs add an SRS?
     fullCmd = cmd + " --input=" + inputLas + " --output=" + outputLas +
         " --a_srs=epsg:4326";
@@ -173,7 +171,6 @@ BOOST_AUTO_TEST_CASE(pc2pc_test_switches)
     BOOST_CHECK_EQUAL(stat, 0);
     BOOST_CHECK(fileIsOkay(outputLas));
     BOOST_CHECK(fileHasSrs(outputLas));
-#endif
 
     FileUtils::deleteFile(outputLas);
     FileUtils::deleteFile(outputLaz);

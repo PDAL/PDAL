@@ -31,7 +31,8 @@
 * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 * OF SUCH DAMAGE.
 ****************************************************************************/
-#include <boost/test/unit_test.hpp>
+
+#include "UnitTest.hpp"
 
 #include <pdal/PointBuffer.hpp>
 #include <pdal/drivers/buffer/BufferReader.hpp>

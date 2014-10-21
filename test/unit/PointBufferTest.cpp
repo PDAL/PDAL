@@ -32,9 +32,10 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include "UnitTest.hpp"
+
 #include <random>
 
-#include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 

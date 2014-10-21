@@ -40,12 +40,10 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/array.hpp>
 
-#ifdef PDAL_HAVE_GDAL
 #pragma GCC diagnostic ignored "-Wfloat-equal"
 #include <gdal.h>
 #include <ogr_spatialref.h>
 #include <pdal/GDALUtils.hpp>
-#endif
 
 namespace pdal
 {
@@ -82,11 +80,7 @@ struct BandInfo
 public:
     SET_STAGE_NAME("filters.colorization", "Fetch color information from a GDAL datasource")
     SET_STAGE_LINK("http://pdal.io/stages/filters.colorization.html")
-#ifdef PDAL_HAVE_GDAL
     SET_STAGE_ENABLED(true)
-#else
-    SET_STAGE_ENABLED(false)
-#endif
 
     Colorization() : Filter()
         {}
@@ -118,4 +112,3 @@ private:
 
 } // namespace filters
 } // namespace pdal
-

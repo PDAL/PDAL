@@ -210,6 +210,7 @@ else()
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PDAL_COMMON_CXX_FLAGS}")
         if (CMAKE_COMPILER_IS_GNUCXX)
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -isystem /usr/local/include")
         endif()
         set(PDAL_COMPILER_GCC 1)
     elseif("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" OR
@@ -217,6 +218,7 @@ else()
          set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PDAL_COMMON_CXX_FLAGS}")
          set(PDAL_COMPILER_CLANG 1)
          set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -isystem /usr/local/include")
     endif()
 endif(WIN32)
 
@@ -296,37 +298,48 @@ elseif(WITH_STUBS)
     include_directories(${PDAL_STUB_DIR})
 endif()
 
+
 #------------------------------------------------------------------------------
-# settings for GDAL & related dependencies
+# settings for all upstream project dependencies
 #------------------------------------------------------------------------------
 
-# GDAL/OGR support - optional, default=ON
-option(WITH_GDAL "Choose if GDAL support should be built" TRUE)
-if(WITH_GDAL)
-    find_package(GDAL 1.9.0)
-    if (GDAL_FOUND)
-        set(PDAL_HAVE_GDAL 1)
-        include_directories("${GDAL_INCLUDE_DIR}")
-        mark_as_advanced(CLEAR GDAL_INCLUDE_DIR)
-        mark_as_advanced(CLEAR GDAL_LIBRARY)
-        message(STATUS "...building with GDAL")
-    else()
-        set(WITH_GDAL FALSE)
-        set(GDAL_LIBRARY "")
-    endif()
-
-    find_package(GEOS 3.3)
-    if (GEOS_FOUND)
-        set(PDAL_HAVE_GEOS 1)
-        include_directories("${GEOS_INCLUDE_DIR}")
-        message(STATUS "...building with GEOS")
-    else()
-        set(GEOS_LIBRARY "")
-    endif()
-
+#
+# GDAL/OGR support (required)
+#
+find_package(GDAL 1.9.0)
+if (GDAL_FOUND)
+    include_directories("${GDAL_INCLUDE_DIR}")
+    mark_as_advanced(CLEAR GDAL_INCLUDE_DIR)
+    mark_as_advanced(CLEAR GDAL_LIBRARY)
+    message(STATUS "...building with GDAL")
+else()
+    message(FATAL_ERROR "GDAL support is required")
 endif()
 
-# GeoTIFF support - optional, default=ON
+
+#
+# GEOS (optional)
+#
+find_package(GEOS 3.3)
+if (GEOS_FOUND)
+    find_file(GEOS_VERSION_H version.h "${GEOS_INCLUDE_DIR}/geos")
+    if ("${GEOS_VERSION_H}" STREQUAL "GEOS_VERSION_H-NOTFOUND")
+        set(GEOS_LIBRARY "")   
+        set(GEOS_FOUND FALSE)
+        set(WITH_GEOS FALSE)
+    else()
+        include_directories("${GEOS_INCLUDE_DIR}")
+        set(PDAL_HAVE_GEOS 1)
+        message(STATUS "...building with GEOS")        
+    endif()
+else()
+    set(GEOS_LIBRARY "")
+endif()
+
+
+#
+# GeoTIFF support (optional)
+#
 option(WITH_GEOTIFF "Choose if GeoTIFF support should be built" TRUE)
 if(WITH_GEOTIFF)
     find_package(GeoTIFF 1.2.5)
@@ -344,13 +357,10 @@ if(WITH_GEOTIFF)
     endif()
 endif()
 
-if(WITH_GDAL)
-  if (NOT GEOTIFF_FOUND)
-    message(FATAL_ERROR
-      "GDAL support requires GeoTIFF library which was not selected")
-  endif()
-endif()
 
+#
+# SQLite (optional)
+#
 option(WITH_SQLITE "Choose if sqlite database support should be built" FALSE)
 if (WITH_SQLITE)
     find_package(SQLite3)
@@ -360,6 +370,10 @@ if (WITH_SQLITE)
     set(PDAL_HAVE_SQLITE 1)
 endif()
 
+
+#
+# PGPointCloud (optional)
+#
 option(WITH_PGPOINTCLOUD "Choose if PostgreSQL PointCloud support should be built" TRUE)
 cmake_dependent_option(
     WITH_PGPOINTCLOUD_TESTS
@@ -382,6 +396,10 @@ if (WITH_PGPOINTCLOUD)
     endif()
 endif()
 
+
+#
+# Nitro (optional)
+#
 option(WITH_NITRO "Choose if Nitro support (only install supported is from http://github.com/hobu/nitro)" TRUE)
 if(WITH_NITRO)
     find_package(Nitro 2.6)
@@ -404,24 +422,12 @@ if(WITH_NITRO)
     endif()
 endif()
 
-option(WITH_MSGPACK "Choose if MessagePack support should be built" TRUE)
-if(WITH_MSGPACK)
-    find_package(MsgPack)
-    if (MSGPACK_FOUND)
-        set(PDAL_HAVE_MSGPACK 1)
-        include_directories("${MsgPack_INCLUDE_DIRS}")
-        message(STATUS "...building with MessagePack")
-    else()
-        set(WITH_MSGPACK FALSE)
-        set(MsgPack_LIBRARIES "")
-    endif()
-endif()
-#------------------------------------------------------------------------------
-# settings for other 3rd party dependencies
-#------------------------------------------------------------------------------
 
-# iconv support - optional, default=ON
+#
+# ICONV (optional)
+#
 # GDAL and libxml2 require iconv.  The library is supplied by OSGeo4W.
+#
 option(WITH_ICONV "Choose if IConv support should be built" TRUE)
 if(WITH_ICONV)
     find_package(ICONV)
@@ -434,22 +440,9 @@ if(WITH_ICONV)
 endif()
 
 
-# libxml2 support - optional, default=ON
-option(WITH_LIBXML2 "Choose if libxml2 support should be built " TRUE)
-if(WITH_LIBXML2)
-    find_package(LibXml2)
-    if(LIBXML2_FOUND)
-        mark_as_advanced(CLEAR LIBXML2_INCLUDE_DIR)
-        mark_as_advanced(CLEAR LIBXML2_LIBRARIES)
-        include_directories(${LIBXML2_INCLUDE_DIR})
-        set(PDAL_HAVE_LIBXML2 1)
-    else()
-        set(WITH_LIBXML2 FALSE)
-        set(LIBXML2_LIBRARIES "")
-    endif()
-endif()
-
-# Oracle support - optional, default=ON
+#
+# Oracle support (optional)
+#
 option(WITH_ORACLE "Choose if Oracle support should be built" TRUE)
 if(WITH_ORACLE)
     find_package(Oracle)
@@ -463,7 +456,10 @@ if(WITH_ORACLE)
     endif()
 endif()
 
-# LASZIP support - optional, default=OFF
+
+#
+# LASZIP support (optional)
+#
 option(WITH_LASZIP "Choose if LASzip support should be built" TRUE)
 option(WITH_STATIC_LASZIP "Choose if LASzip should be statically linked" FALSE)
 mark_as_advanced(WITH_STATIC_LASZIP)
@@ -483,23 +479,25 @@ if(WITH_LASZIP)
     endif()
 endif()
 
-# ZLIB support - optional, default=ON
-option(WITH_ZLIB "Choose of ZLIB support should be built" TRUE)
-if(WITH_ZLIB)
-    find_package(ZLIB)
-    if(ZLIB_FOUND)
-        set(CMAKE_REQUIRED_LIBRARIES "${ZLIB_LIBRARY}")
+
+#
+# ZLIB support - required
+#
+find_package(ZLIB)
+if(ZLIB_FOUND)
+    set(CMAKE_REQUIRED_LIBRARIES "${ZLIB_LIBRARY}")
 	include_directories(${ZLIB_INCLUDE_DIR})
 	mark_as_advanced(CLEAR ZLIB_INCLUDE_DIR)
 	mark_as_advanced(CLEAR ZLIB_LIBRARY)
 	set(PDAL_HAVE_ZLIB 1)
-    else()
-        set(ZLIB_LIBRARIES "")
-	set(WITH_ZLIB FALSE)
-    endif()
+else()
+    message(FATAL_ERROR "ZLIB support is required")
 endif()
 
-# MrSID/LiDAR support - optiona, default=OFF
+
+#
+# MrSID/LiDAR support (optional)
+#
 option(WITH_MRSID "Choose if MrSID/LiDAR support should be built" FALSE)
 
 if(WITH_MRSID)
@@ -516,7 +514,9 @@ if(WITH_MRSID)
 endif()
 
 
-# CARIS/BDB support - optional, default=OFF
+#
+# CARIS/BDB support (optional)
+#
 option(WITH_CARIS "Choose if CARIS/BDB support should be built" FALSE)
 if(WITH_CARIS)
     set(CARIS_FOUND 1)
@@ -524,7 +524,9 @@ if(WITH_CARIS)
 endif()
 
 
-# Points2Grid support - optional, default=OFF
+#
+# Points2Grid (optional)
+#
 option(WITH_P2G "Choose if Points2Grid support should be built" FALSE)
 if(WITH_P2G)
     find_package(Points2Grid)
@@ -536,7 +538,10 @@ if(WITH_P2G)
     endif()
 endif()
 
-# HDF5 support - optional, default=OFF
+
+#
+# HDF5 - optional
+#
 option(WITH_HDF5 "Choose if HDF5 support should be built" FALSE)
 if(WITH_HDF5)
     set (HDF5_FIND_COMPONENTS "CXX")
@@ -553,7 +558,10 @@ if(WITH_HDF5)
     endif()
 endif()
 
-# Json support - optional, default=OFF
+
+#
+# Json - optional
+#
 option(WITH_JSON "Choose if JsonCpp support should be built" FALSE)
 if(WITH_JSON OR WITH_GREYHOUND)
     find_package(JSONCPP)
@@ -569,7 +577,10 @@ if(WITH_JSON OR WITH_GREYHOUND)
     endif()
 endif()
 
-# WebSocket++ support - optional, default=OFF
+
+#
+# WebSocket++ - optional
+#
 option(WITH_WEBSOCKETPP "Choose if WebSocket++ support should be built" FALSE)
 if(WITH_WEBSOCKETPP OR WITH_GREYHOUND)
     find_package(WEBSOCKETPP)
@@ -586,7 +597,10 @@ if(WITH_WEBSOCKETPP OR WITH_GREYHOUND)
     endif()
 endif()
 
-# Greyhound support - optional, default=OFF
+
+#
+# Greyhound - optional
+#
 option(WITH_GREYHOUND "Choose if Greyhound support should be built" FALSE)
 if(WITH_GREYHOUND)
     if(WEBSOCKETPP_FOUND AND JSONCPP_FOUND)
@@ -600,6 +614,10 @@ if(WITH_GREYHOUND)
     endif()
 endif()
 
+
+#
+# Hexer - optional
+#
 option(WITH_HEXER "Whether or not hexbin filter is built" FALSE)
 if(WITH_HEXER)
     find_package(Hexer)
@@ -610,7 +628,10 @@ if(WITH_HEXER)
     endif()
 endif()
 
-# default is false for now
+
+#
+# Python - optional
+#
 option(WITH_PYTHON "Choose if Python support (for PLang filters) should be built" TRUE)
 if(WITH_PYTHON)
     FIND_PACKAGE(PythonInterp)
@@ -630,6 +651,34 @@ if(WITH_PYTHON)
     endif()
 endif()
 
+
+#
+# libxml2 (used iff ORACLE or PGPOINTCLOUD or SQLITE)
+#
+option(WITH_LIBXML2 "Choose if libxml2 support should be built " FALSE)
+if (WITH_LIBXML2 OR
+    (WITH_ORACLE OR
+     WIT_PGPOINTCLOUD OR
+     WITH_SQLITE))
+    set(WITH_LIBXML2 TRUE)
+else()
+    set(WITH_LIBXML2 FALSE)
+endif()
+
+if(WITH_LIBXML2)
+    find_package(LibXml2)
+    if(LIBXML2_FOUND)
+        mark_as_advanced(CLEAR LIBXML2_INCLUDE_DIR)
+        mark_as_advanced(CLEAR LIBXML2_LIBRARIES)
+        include_directories(${LIBXML2_INCLUDE_DIR})
+        set(PDAL_HAVE_LIBXML2 1)
+    else()
+        set(WITH_LIBXML2 FALSE)
+        set(LIBXML2_LIBRARIES "")
+    endif()
+endif()
+
+
 option(USE_PDAL_PLUGIN_TEXT "Build the text driver as a plugin rather than embedding" FALSE)
 option(USE_PDAL_PLUGIN_SOCI "Build the soci driver as a plugin rather than embedding" FALSE)
 option(USE_PDAL_PLUGIN_OCI "Build the oci driver as a plugin rather than embedding" FALSE)
@@ -644,15 +693,6 @@ if (USE_PDAL_PLUGIN_TEXT OR USE_PDAL_PLUGIN_SOCI OR USE_PDAL_PLUGIN_OCI OR
   endif()
 endif()
 
-# check for demangling support
-try_compile(DEMANGLER_FOUND
-    ${CMAKE_BINARY_DIR}
-    ${CMAKE_SOURCE_DIR}/cmake/check_demangle.cpp
-)
-
-if(DEMANGLER_FOUND)
-    set(PDAL_HAVE_DEMANGLER 1)
-endif()
 
 #------------------------------------------------------------------------------
 # installation commands
@@ -758,6 +798,3 @@ list(APPEND CPACK_SOURCE_IGNORE_FILES "import-pdal-boost.sh")
 include(CPack)
 
 add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
-
-
-

@@ -662,10 +662,8 @@ set(PDAL_GDAL_CPP
     "${PDAL_FILTERS_SRC}/Colorization.cpp"
     )
 
-if (WITH_GDAL)
-    list(APPEND PDAL_HPP ${PDAL_GDAL_HPP})
-    list(APPEND PDAL_CPP ${PDAL_GDAL_CPP})
-endif (WITH_GDAL)
+list(APPEND PDAL_HPP ${PDAL_GDAL_HPP})
+list(APPEND PDAL_CPP ${PDAL_GDAL_CPP})
 
 
 #

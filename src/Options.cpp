@@ -112,6 +112,13 @@ template<> void Option::setValue(const bool& value)
     m_value = value ? "true" : "false";
 }
 
+bool Option::empty()
+{
+    if (m_options)
+        return m_options->empty();
+    else
+        return false;
+}
 
 // explicit specialization:
 //   if we want to insert a string, we don't need lexical_cast

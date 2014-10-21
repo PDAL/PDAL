@@ -43,8 +43,8 @@ namespace drivers
 namespace greyhound
 {
 
-GreyhoundReader::GreyhoundReader(const Options& options)
-    : Reader(options)
+GreyhoundReader::GreyhoundReader()
+    : Reader()
     , m_uri()
     , m_pipelineId()
     , m_sessionId()

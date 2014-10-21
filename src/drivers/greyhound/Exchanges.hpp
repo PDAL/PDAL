@@ -194,7 +194,8 @@ public:
 
                     for (std::size_t i(0); i < jsonDimArray.size(); ++i)
                     {
-                        const Json::Value& jsonDim(jsonDimArray[i]);
+                        const Json::Value& jsonDim(
+                                jsonDimArray[static_cast<Json::ArrayIndex>(i)]);
 
                         const Dimension::Id::Enum id(
                                 Dimension::id(jsonDim["name"].asString()));

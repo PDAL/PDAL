@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <boost/test/unit_test.hpp>
+#include "UnitTest.hpp"
 
 #include <pdal/SpatialReference.hpp>
 #include <pdal/FileUtils.hpp>
@@ -44,7 +44,6 @@
 
 BOOST_AUTO_TEST_SUITE(SpatialReferenceTest)
 
-#ifdef PDAL_SRS_ENABLED
 
 BOOST_AUTO_TEST_CASE(test_env_vars)
 {
@@ -126,6 +125,7 @@ BOOST_AUTO_TEST_CASE(test_userstring_roundtrip)
 }
 
 
+#ifdef PDAL_HAVE_GEOS
 // Test fetching SRS from an existing file
 BOOST_AUTO_TEST_CASE(test_read_srs)
 {
@@ -153,8 +153,10 @@ BOOST_AUTO_TEST_CASE(test_read_srs)
     std::string proj4 = "+proj=utm +zone=17 +datum=WGS84 +units=m +no_defs";
     BOOST_CHECK(ret_proj4 == proj4);
 }
+#endif
 
 
+#ifdef PDAL_HAVE_GEOS
 // Test VLR sizes from setting SRS
 BOOST_AUTO_TEST_CASE(test_vlr_sizes)
 {
@@ -172,8 +174,10 @@ BOOST_AUTO_TEST_CASE(test_vlr_sizes)
     BOOST_CHECK(vlrs.size() == boost::uint32_t(4));
     BOOST_CHECK(vlrs[0].getLength() == boost::uint32_t(64));
 }
+#endif
 
 
+#ifdef PDAL_HAVE_GEOS
 // Test incorporation of vertical datum information into WKT string and
 // into GeoTIFF VLRs.
 BOOST_AUTO_TEST_CASE(test_vertical_datum)
@@ -212,8 +216,10 @@ BOOST_AUTO_TEST_CASE(test_vertical_datum)
         BOOST_CHECK_EQUAL(ref3, ref2);
     }
 }
+#endif
 
 
+#ifdef PDAL_HAVE_GEOS
 BOOST_AUTO_TEST_CASE(test_vertical_datum_notcompound)
 {
     using namespace pdal;
@@ -243,6 +249,8 @@ BOOST_AUTO_TEST_CASE(test_vertical_datum_notcompound)
     //BOOST_CHECK(vlrs_horizonly[2].getLength() == 7);
     //BOOST_CHECK(vlrs_horizonly[3].getLength() == 511);
 }
+#endif
+
 
 // Try writing a compound coordinate system to file and ensure we get back
 // WKT with the geoidgrids (from the WKT VLR).
@@ -306,6 +314,7 @@ BOOST_AUTO_TEST_CASE(test_vertical_datums)
 }
 
 
+#ifdef PDAL_HAVE_GEOS
 // Try writing only the WKT VLR to a file, and see if the resulting
 // file still works ok.
 BOOST_AUTO_TEST_CASE(test_writing_vlr)
@@ -396,7 +405,7 @@ BOOST_AUTO_TEST_CASE(test_writing_vlr)
     // Cleanup
     FileUtils::deleteFile(tmpfile);
 }
-
+#endif
 
 
 BOOST_AUTO_TEST_CASE(test_io)
@@ -434,6 +443,5 @@ BOOST_AUTO_TEST_CASE(test_vertical_and_horizontal)
 
 }
 
-#endif
 
 BOOST_AUTO_TEST_SUITE_END()

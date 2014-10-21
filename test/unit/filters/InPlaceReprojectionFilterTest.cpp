@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <boost/test/unit_test.hpp>
+#include "UnitTest.hpp"
 
 #include <pdal/SpatialReference.hpp>
 #include <pdal/drivers/las/Reader.hpp>
@@ -45,7 +45,6 @@
 
 BOOST_AUTO_TEST_SUITE(InPlaceReprojectionFilterTest)
 
-#ifdef PDAL_SRS_ENABLED
 
 static void getPoint(const pdal::PointBuffer& data,
     double & x, double& y, double& z)
@@ -198,6 +197,6 @@ BOOST_AUTO_TEST_CASE(InPlaceReprojectionFilterTest_test_2)
         BOOST_CHECK_CLOSE(z, postZ, 0.0001);
     }
 }
-#endif
+
 
 BOOST_AUTO_TEST_SUITE_END()
