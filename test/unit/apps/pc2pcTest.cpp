@@ -101,7 +101,7 @@ static bool fileIsCompressed(const std::string& name)
     drivers::las::Reader reader;
     reader.setOptions(ops);
     reader.prepare(ctx);
-    return reader.getLasHeader().Compressed();
+    return reader.header().compressed();
 }
 
 
@@ -114,6 +114,7 @@ static bool fileHasSrs(const std::string& name)
     drivers::las::Reader reader;
     reader.setOptions(ops);
     reader.prepare(ctx);
+    reader.execute(ctx);
     return !reader.getSpatialReference().empty();
 }
 
@@ -144,7 +145,9 @@ BOOST_AUTO_TEST_CASE(pc2pc_test_switches)
     BOOST_CHECK_EQUAL(stat, 0);
     BOOST_CHECK(fileIsOkay(outputLas));
     BOOST_CHECK(!fileIsCompressed(outputLas));
+#ifdef PDAL_HAVE_LIBGEOTIFF
     BOOST_CHECK(!fileHasSrs(outputLas));
+#endif
 
 #ifdef PDAL_HAVE_LASZIP
     // does --compress make a compressed file?
@@ -170,7 +173,9 @@ BOOST_AUTO_TEST_CASE(pc2pc_test_switches)
     stat = Utils::run_shell_command(fullCmd, output);
     BOOST_CHECK_EQUAL(stat, 0);
     BOOST_CHECK(fileIsOkay(outputLas));
+#ifdef PDAL_HAVE_LIBGEOTIFF
     BOOST_CHECK(fileHasSrs(outputLas));
+#endif
 
     FileUtils::deleteFile(outputLas);
     FileUtils::deleteFile(outputLaz);

@@ -342,7 +342,7 @@ endif()
 #
 option(WITH_GEOTIFF "Choose if GeoTIFF support should be built" TRUE)
 if(WITH_GEOTIFF)
-    find_package(GeoTIFF 1.2.5)
+    find_package(GeoTIFF 1.3.0)
     if(GEOTIFF_FOUND)
         include_directories("${GEOTIFF_INCLUDE_DIR}")
         set(PDAL_HAVE_LIBGEOTIFF 1)

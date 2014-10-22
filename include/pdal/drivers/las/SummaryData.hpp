@@ -32,13 +32,14 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_DRIVERS_LAS_SUMMARYDATA_HPP
-#define INCLUDED_DRIVERS_LAS_SUMMARYDATA_HPP
+#pragma once
+
+#include <ostream>
+#include <array>
 
 #include <pdal/pdal_internal.hpp>
 #include <pdal/Bounds.hpp>
-
-#include <ostream>
+#include <pdal/drivers/las/Header.hpp>
 
 namespace pdal
 {
@@ -51,43 +52,32 @@ class PDAL_DLL SummaryData
 {
 public:
     SummaryData();
-    ~SummaryData();
 
-    void reset();
-
-    // note that returnNumber is in the range [0..4]
     void addPoint(double x, double y, double z, int returnNumber);
-
-    boost::uint32_t getTotalNumPoints() const;
-
+    uint32_t getTotalNumPoints() const
+        { return m_totalNumPoints; }
     BOX3D getBounds() const;
-
-    // note that returnNumber is in the range [0..4]
-    boost::uint32_t getReturnCount(int returnNumber) const;
+    point_count_t getReturnCount(int returnNumber) const;
 
     void dump(std::ostream&) const;
 
 private:
-    bool m_isFirst;
     double m_minX;
     double m_minY;
     double m_minZ;
     double m_maxX;
     double m_maxY;
     double m_maxZ;
-    std::vector<boost::uint32_t> m_returnCounts;
-    boost::uint32_t m_totalNumPoints;
+    std::array<point_count_t, LasHeader::RETURN_COUNT> m_returnCounts;
+    point_count_t m_totalNumPoints;
 
     SummaryData& operator=(const SummaryData&); // not implemented
     SummaryData(const SummaryData&); // not implemented
 };
 
-
 PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const SummaryData&);
 
+} // namespace las
+} // namespace drivers
+} // namespace pdal
 
-}
-}
-} // namespaces
-
-#endif

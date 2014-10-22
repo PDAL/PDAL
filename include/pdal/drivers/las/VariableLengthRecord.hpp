@@ -32,17 +32,15 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_DRIVERS_LAS_VARIABLELENGTHRECORD_HPP
-#define INCLUDED_DRIVERS_LAS_VARIABLELENGTHRECORD_HPP
+#pragma once
 
-#include <pdal/pdal_export.hpp>
-
+#include <limits>
 #include <string>
 #include <vector>
-#include <boost/array.hpp>
 
+#include <pdal/IStream.hpp>
+#include <pdal/OStream.hpp>
 #include <pdal/SpatialReference.hpp>
-
 
 namespace pdal
 {
@@ -51,109 +49,83 @@ namespace drivers
 namespace las
 {
 
+static const int WKT_RECORD_ID = 2112;
+static const uint16_t GEOTIFF_DIRECTORY_RECORD_ID = 34735;
+static const uint16_t GEOTIFF_DOUBLES_RECORD_ID = 34376;
+static const uint16_t GEOTIFF_ASCII_RECORD_ID = 34737;
+static const uint16_t LASZIP_RECORD_ID = 22204;
+
+static const char TRANSFORM_USER_ID[] = "LASF_Projection";
+static const char LIBLAS_USER_ID[] = "liblas";
+static const char LASZIP_USER_ID[] = "laszip encoded";
+
+class VariableLengthRecord;
+typedef std::vector<VariableLengthRecord> VlrList;
 
 class PDAL_DLL VariableLengthRecord
 {
 public:
-    // makes a local copy of the bytes buffer, which is a shared ptr among by all copes of the metadata record
-    VariableLengthRecord(boost::uint16_t reserved,
-                         std::string userId,
-                         boost::uint16_t recordId,
-                         std::string description,
-                         const boost::uint8_t* bytes,
-                         boost::uint16_t len);
-    VariableLengthRecord(const VariableLengthRecord&);
-    ~VariableLengthRecord();
+    static const size_t MAX_DATA_SIZE = (std::numeric_limits<uint16_t>::max)();
 
-    inline boost::uint16_t getReserved() const
+    VariableLengthRecord(const std::string& userId, uint16_t recordId,
+            const std::string& description, std::vector<uint8_t>& data) :
+        m_userId(userId), m_recordId(recordId), m_description(description),
+        m_data(std::move(data)), m_recordSig(0)
+    {}
+    VariableLengthRecord() : m_recordId(0), m_recordSig(0)
+    {}
+
+    std::string userId() const
+        { return m_userId;}
+    uint16_t recordId() const
+        { return m_recordId; }
+    std::string description() const
+        { return m_description; }
+    
+    bool matches(const std::string& userId) const
+        { return userId == m_userId; }
+    bool matches(const std::string& userId, uint16_t recordId) const
+        { return matches(userId) && (recordId == m_recordId); }
+
+    const char* data() const
+        { return (const char *)m_data.data(); }
+    uint64_t dataLen() const
+        { return m_data.size(); }
+    void setDataLen(uint64_t size)
+        { m_data.resize((size_t)size); }
+    void write(OLeStream& out, uint16_t recordSig)
     {
-        return m_reserved;
+        m_recordSig = recordSig;
+        out << *this;
     }
 
+    friend ILeStream& operator>>(ILeStream& in, VariableLengthRecord& v);
+    friend OLeStream& operator<<(OLeStream& out, const VariableLengthRecord& v);
 
-    inline std::string getUserId() const { return m_userId;}
-    inline void setUserId(std::string const& v) { m_userId = v; }
-    
-    inline boost::uint16_t getRecordId() const { return m_recordId; }
-
-    std::string getDescription() const { return m_description; }
-    inline void setDescription(std::string const& v) { m_description = v; } 
-    
-    bool isGeoVLR() const;
-    enum GeoVLRType
-    {
-        eGeoTIFF = 1,
-        eOGRWKT = 2
-    };
-    static void clearVLRs(GeoVLRType eType, std::vector<VariableLengthRecord>& vlrs);
-
-    bool isMatch(const std::string& userId) const;
-    bool isMatch(const std::string& userId, boost::uint16_t recordId) const;
-
-    bool operator==(const VariableLengthRecord&) const;
-    VariableLengthRecord& operator=(const VariableLengthRecord&);
-
-    const boost::uint8_t* getBytes() const;
-    std::size_t getLength() const;
-    std::size_t getTotalSize() const;
-
-    enum { s_headerLength = 54 };
-
-    static void setSRSFromVLRs(const std::vector<VariableLengthRecord>& vlrs, SpatialReference& srs);
-    static void setVLRsFromSRS(const SpatialReference& srs, std::vector<VariableLengthRecord>& vlrs, SpatialReference::WKTModeFlag modeFlag);
-
-    static std::string bytes2string(const boost::uint8_t* bytes, boost::uint32_t len);
-
-    // bytes array is return, user responsible for deleting
-    // len is the size of the array he wants, it will be padded with zeros if str.length() < len
-    static boost::uint8_t* string2bytes(boost::uint32_t len, const std::string& str);
-
-    enum
-    {
-        eUserIdSize = 16,
-        eDescriptionSize = 32
-    };
-
-private:
-    boost::uint16_t m_reserved;
-    std::string m_userId; // always stored as 16 bytes (padded with 0's)
-    boost::uint16_t m_recordId;
-    std::string m_description; // always stored as 16 bytes (padded with 0's)
-
-    // std::vector<boost::uint8_t> m_data;
-
-    
-    boost::uint8_t* m_bytes;
-    boost::uint16_t m_vlr_length;
+protected:
+    std::string m_userId;
+    uint16_t m_recordId;
+    std::string m_description;
+    std::vector<uint8_t> m_data;
+    uint16_t m_recordSig;
 };
 
-
-class PDAL_DLL VLRList
+class ExtVariableLengthRecord : public VariableLengthRecord
 {
 public:
-    void add(const VariableLengthRecord& v);
+    ExtVariableLengthRecord(const std::string& userId, uint16_t recordId,
+            const std::string& description, std::vector<uint8_t>& data) :
+        VariableLengthRecord(userId, recordId, description, data)
+    {}
+    ExtVariableLengthRecord()
+    {}
 
-    const VariableLengthRecord& get(boost::uint32_t index) const;
-    VariableLengthRecord& get(boost::uint32_t index);
-
-    const std::vector<VariableLengthRecord>& getAll() const;
-    std::vector<VariableLengthRecord>& getAll();
-
-    void remove(boost::uint32_t index);
-    void remove(std::string const& userId, boost::uint16_t recordId);
-
-    boost::uint32_t count() const;
-
-    void constructSRS(SpatialReference&) const;
-    void addVLRsFromSRS(const SpatialReference& srs, SpatialReference::WKTModeFlag modeFlag);
-
-private:
-    std::vector<VariableLengthRecord> m_list;
+    friend ILeStream& operator>>(ILeStream& in, ExtVariableLengthRecord& v);
+    friend OLeStream& operator<<(OLeStream& out,
+        const ExtVariableLengthRecord& v);
 };
 
+} // namespace las
+} // namespace drivers
+} // namespace pdal
 
-}
-}
-} // namespace
-
-#endif

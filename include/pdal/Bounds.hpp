@@ -1,11 +1,4 @@
 /******************************************************************************
- * $Id$
- *
- * Project:  pdal - http://pdal.org - A BSD library for LAS format data.
- * Purpose:  LAS bounds class
- * Author:   Howard Butler, hobu.inc@gmail.com
- *
- ******************************************************************************
  * Copyright (c) 2010, Howard Butler
  *
  * All rights reserved.

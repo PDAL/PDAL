@@ -96,7 +96,6 @@ std::string SpatialReference::getWKT(WKTModeFlag mode_flag , bool pretty) const
 
         if (mode_flag == eHorizontalOnly)
             poSRS->StripVertical();
-
         if (pretty)
             poSRS->exportToPrettyWkt(&pszWKT, FALSE);
         else

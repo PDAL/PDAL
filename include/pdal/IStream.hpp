@@ -94,26 +94,6 @@ public:
         return strm;
     }
 
-protected:
-    std::istream *m_stream;
-    std::istream *m_fstream; // Dup of above to facilitate cleanup;
-
-private:
-    std::stack<std::istream *> m_streams;
-};
-
-/// Stream wrapper for input of binary data that converts from little-endian
-/// to host ordering.
-class ILeStream : public IStream
-{
-public:
-    ILeStream() : IStream()
-    {}
-    ILeStream(const std::string& filename) : IStream(filename)
-    {}
-    ILeStream(std::istream *stream) : IStream(stream)
-    {}
-
     void get(std::string& s, size_t size)
     {
         // Could do this by appending to a string with a stream, but this
@@ -125,9 +105,36 @@ public:
     }
 
     void get(std::vector<char>& buf)
-    {
-        m_stream->read(&buf[0], buf.size());
-    }
+        { m_stream->read(&buf[0], buf.size()); }
+
+    void get(std::vector<unsigned char>& buf)
+        { m_stream->read((char *)&buf[0], buf.size()); }
+
+    void get(char *buf, size_t size)
+        { m_stream->read(buf, size); }
+
+    void get(unsigned char *buf, size_t size)
+        { m_stream->read((char *)buf, size); }
+
+protected:
+    std::istream *m_stream;
+    std::istream *m_fstream; // Dup of above to facilitate cleanup.
+
+private:
+    std::stack<std::istream *> m_streams;
+};
+
+/// Stream wrapper for input of binary data that converts from little-endian
+/// to host ordering.
+class ILeStream : public IStream
+{
+public:
+    ILeStream()
+    {}
+    ILeStream(const std::string& filename) : IStream(filename)
+    {}
+    ILeStream(std::istream *stream) : IStream(stream)
+    {}
 
     ILeStream& operator >> (uint8_t& v)
     {
