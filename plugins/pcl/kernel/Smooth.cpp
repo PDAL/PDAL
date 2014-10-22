@@ -46,14 +46,6 @@ namespace pdal
 namespace kernel
 {
 
-Smooth::Smooth()
-    : Kernel()
-    , m_inputFile("")
-    , m_outputFile("")
-{
-    return;
-}
-
 
 void Smooth::validateSwitches()
 {
@@ -91,13 +83,13 @@ std::unique_ptr<Stage> Smooth::makeReader(Options readerOptions)
 {
     if (isDebug())
     {
-        readerOptions.add<bool>("debug", true);
-        boost::uint32_t verbosity(getVerboseLevel());
+        readerOptions.add("debug", true);
+        uint32_t verbosity(getVerboseLevel());
         if (!verbosity)
             verbosity = 1;
 
-        readerOptions.add<boost::uint32_t>("verbose", verbosity);
-        readerOptions.add<std::string>("log", "STDERR");
+        readerOptions.add("verbose", verbosity);
+        readerOptions.add("log", "STDERR");
     }
 
     Stage* stage = AppSupport::makeReader(m_inputFile);
@@ -113,9 +105,9 @@ int Smooth::execute()
     PointContext ctx;
 
     Options readerOptions;
-    readerOptions.add<std::string>("filename", m_inputFile);
-    readerOptions.add<bool>("debug", isDebug());
-    readerOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
+    readerOptions.add("filename", m_inputFile);
+    readerOptions.add("debug", isDebug());
+    readerOptions.add("verbose", getVerboseLevel());
 
     std::unique_ptr<Stage> readerStage = makeReader(readerOptions);
 
@@ -142,16 +134,16 @@ int Smooth::execute()
     ss << "    }";
     ss << "}";
     std::string json = ss.str();
-    smoothOptions.add<std::string>("json", json);
-    smoothOptions.add<bool>("debug", isDebug());
-    smoothOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
+    smoothOptions.add("json", json);
+    smoothOptions.add("debug", isDebug());
+    smoothOptions.add("verbose", getVerboseLevel());
 
     std::unique_ptr<Stage> smoothStage(new filters::PCLBlock());
     smoothStage->setOptions(smoothOptions);
     smoothStage->setInput(&bufferReader);
 
     Options writerOptions;
-    writerOptions.add<std::string>("filename", m_outputFile);
+    writerOptions.add("filename", m_outputFile);
     setCommonOptions(writerOptions);
 
     std::unique_ptr<Writer> writer(AppSupport::makeWriter(m_outputFile, smoothStage.get()));
@@ -164,17 +156,21 @@ int Smooth::execute()
 
     writer->setUserCallback(callback);
 
-    for (auto pi: getExtraStageOptions())
+    std::map<std::string, Options> extra_opts = getExtraStageOptions();
+    std::map<std::string, Options>::iterator pi;
+    for (pi = extra_opts.begin(); pi != extra_opts.end(); ++pi)
     {
-        std::string name = pi.first;
-        Options options = pi.second;
+        std::string name = pi->first;
+        Options options = pi->second;
         std::vector<Stage*> stages = writer->findStage(name);
-        for (auto s: stages)
+        std::vector<Stage*>::iterator s;
+        for (s = stages.begin(); s != stages.end(); ++s)
         {
-            Options opts = s->getOptions();
-            for (auto o: options.getOptions())
-                opts.add(o);
-            s->setOptions(opts);
+            Options opts = (*s)->getOptions();
+            std::vector<Option>::iterator o;
+            for (o = options.getOptions().begin(); o != options.getOptions().end(); ++o)
+                opts.add(*o);
+            (*s)->setOptions(opts);
         }
     }
 

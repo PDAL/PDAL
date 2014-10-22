@@ -57,7 +57,7 @@ public:
     SET_KERNEL_LINK("http://pdal.io/kernels/drivers.smooth.kernel.html")
     SET_KERNEL_ENABLED(true)
 
-    Smooth();
+    Smooth() {};
     int execute();
 
 private:
