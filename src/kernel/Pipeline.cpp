@@ -41,8 +41,6 @@ Pipeline::Pipeline(int argc, const char* argv[])
     : Application(argc, argv, "pipeline")
     , m_inputFile("")
     , m_validate(false)
-    , m_numPointsToWrite(0)
-    , m_numSkipPoints(0)
 {
     return;
 }
@@ -70,8 +68,6 @@ void Pipeline::addSwitches()
         ("input,i", po::value<std::string>(&m_inputFile)->default_value(""), "input file name")
         ("pipeline-serialization", po::value<std::string>(&m_pipelineFile)->default_value(""), "")
         ("validate", po::value<bool>(&m_validate)->zero_tokens()->implicit_value(true), "Validate the pipeline (including serialization), but do not execute writing of points")
-        ("count", po::value<boost::uint64_t>(&m_numPointsToWrite)->default_value(0), "How many points should we write?")
-        ("skip", po::value<boost::uint64_t>(&m_numSkipPoints)->default_value(0), "How many points should we skip?")        
         ;
 
     addSwitchSet(file_options);
@@ -93,10 +89,7 @@ int Pipeline::execute()
     {
 /**
     if (!getProgressShellCommand().size())
-        if (m_numPointsToWrite == 0)
-            callback = static_cast<pdal::UserCallback*>(new HeartbeatCallback);
-        else
-            callback = static_cast<pdal::UserCallback*>(new PercentageCallback);
+        callback = static_cast<pdal::UserCallback*>(new PercentageCallback);
     else
         callback = static_cast<pdal::UserCallback*>(new ShellScriptCallback(getProgressShellCommand()));
     manager.getWriter()->setUserCallback(callback);

@@ -56,6 +56,7 @@ private:
     uint32_t m_offset;
     double m_leaf_size;
     std::string m_method;
+    point_count_t m_limit;
 
     virtual void processOptions(const Options& options);
     PointBufferSet run(PointBufferPtr buffer);
