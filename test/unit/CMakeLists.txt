@@ -43,6 +43,7 @@ SET(PDAL_UNITTEST_TEST_SRC
     PointBufferTest.cpp
     drivers/qfit/QFITReaderTest.cpp
     filters/ReprojectionFilterTest.cpp
+    filters/SortFilterTest.cpp
     drivers/sbet/SbetReaderTest.cpp
     drivers/sbet/SbetWriterTest.cpp
 #    filters/ScalingFilterTest.cpp

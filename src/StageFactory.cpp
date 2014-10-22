@@ -115,7 +115,11 @@ MAKE_FILTER_CREATOR(Decimation, pdal::filters::Decimation)
 MAKE_FILTER_CREATOR(Ferry, pdal::filters::Ferry)
 MAKE_FILTER_CREATOR(HexBin, pdal::filters::HexBin)
 MAKE_FILTER_CREATOR(Merge, pdal::filters::Merge)
-//MAKE_FILTER_CREATOR(InPlaceReprojection, pdal::filters::InPlaceReprojection)
+MAKE_FILTER_CREATOR(Reprojection, pdal::filters::Reprojection)
+MAKE_FILTER_CREATOR(Sort, pdal::filters::Sort)
+MAKE_FILTER_CREATOR(Splitter, pdal::filters::Splitter)
+MAKE_FILTER_CREATOR(Stats, pdal::filters::Stats)
+
 #ifdef PDAL_HAVE_PCL
 MAKE_FILTER_CREATOR(PCLBlock, pdal::filters::PCLBlock)
 #endif
@@ -124,17 +128,6 @@ MAKE_FILTER_CREATOR(PCLBlock, pdal::filters::PCLBlock)
 MAKE_FILTER_CREATOR(Predicate, pdal::filters::Predicate)
 MAKE_FILTER_CREATOR(Programmable, pdal::filters::Programmable)
 #endif
-
-MAKE_FILTER_CREATOR(Reprojection, pdal::filters::Reprojection)
-//MAKE_FILTER_CREATOR(Scaling, pdal::filters::Scaling)
-//MAKE_FILTER_CREATOR(Selector, pdal::filters::Selector)
-MAKE_FILTER_CREATOR(Splitter, pdal::filters::Splitter)
-MAKE_FILTER_CREATOR(Stats, pdal::filters::Stats)
-
-//
-// define the functions to create the multifilters
-//
-//MAKE_MULTIFILTER_CREATOR(Mosaic, pdal::filters::Mosaic)
 
 //
 // define the functions to create the writers
@@ -429,10 +422,13 @@ void StageFactory::registerKnownFilters()
     REGISTER_FILTER(Crop, pdal::filters::Crop);
     REGISTER_FILTER(Decimation, pdal::filters::Decimation);
     REGISTER_FILTER(Ferry, pdal::filters::Ferry);
-    REGISTER_FILTER(Reprojection, pdal::filters::Reprojection);
     REGISTER_FILTER(HexBin, pdal::filters::HexBin);
     REGISTER_FILTER(Merge, pdal::filters::Merge);
-//    REGISTER_FILTER(InPlaceReprojection, pdal::filters::InPlaceReprojection);
+    REGISTER_FILTER(Reprojection, pdal::filters::Reprojection);
+    REGISTER_FILTER(Sort, pdal::filters::Sort);
+    REGISTER_FILTER(Splitter, pdal::filters::Splitter);
+    REGISTER_FILTER(Stats, pdal::filters::Stats);
+
 #ifdef PDAL_HAVE_PCL
     REGISTER_FILTER(PCLBlock, pdal::filters::PCLBlock);
 #endif
@@ -441,12 +437,6 @@ void StageFactory::registerKnownFilters()
     REGISTER_FILTER(Predicate, pdal::filters::Predicate);
     REGISTER_FILTER(Programmable, pdal::filters::Programmable);
 #endif
-
-    REGISTER_FILTER(Reprojection, pdal::filters::Reprojection);
-//    REGISTER_FILTER(Scaling, pdal::filters::Scaling);
-//    REGISTER_FILTER(Selector, pdal::filters::Selector);
-    REGISTER_FILTER(Splitter, pdal::filters::Splitter);
-    REGISTER_FILTER(Stats, pdal::filters::Stats);
 }
 
 
@@ -493,13 +483,11 @@ void StageFactory::registerKnownWriters()
     REGISTER_WRITER(NitfWriter, pdal::drivers::nitf::Writer);
 #endif
 #endif
-
 }
 
 void StageFactory::loadPlugins()
 {
     using namespace boost::filesystem;
-
 
     std::string driver_path("PDAL_DRIVER_PATH");
     std::string pluginDir = Utils::getenv(driver_path);

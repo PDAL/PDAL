@@ -36,10 +36,7 @@
 
 #include <random>
 
-#include <boost/cstdint.hpp>
 #include <boost/property_tree/xml_parser.hpp>
-
-#include <time.h>
 
 #include <pdal/PointBuffer.hpp>
 #include <pdal/PointBufferIter.hpp>
@@ -432,17 +429,23 @@ BOOST_AUTO_TEST_CASE(sort)
 {
     PointContext ctx;
     PointBuffer buf(ctx);
+    const PointId NUM_PTS = 10000;
+
+    auto cmp = [](const PointRef& p1, const PointRef& p2)
+    {
+        return p1.compare(Dimension::Id::X, p2);
+    };
 
     ctx.registerDim(Dimension::Id::X);
 
     std::default_random_engine generator;
     std::uniform_real_distribution<double> dist(0.0, 10000.0);
-    for (int i = 0; i < 10000000; ++i)
+    for (PointId i = 0; i < NUM_PTS; ++i)
         buf.setField(Dimension::Id::X, i, dist(generator));    
 
-    std::sort(buf.begin(), buf.end());
+    std::sort(buf.begin(), buf.end(), cmp);
 
-    for (int i = 1; i < 10000000; ++i)
+    for (PointId i = 1; i < NUM_PTS; ++i)
     {
         double d1 = buf.getFieldAs<double>(Dimension::Id::X, i - 1);
         double d2 = buf.getFieldAs<double>(Dimension::Id::X, i);

@@ -48,5 +48,5 @@ Filters
    filters.predicate
    filters.programmable
    filters.reprojection
-
+   filters.sort
 

@@ -50,12 +50,15 @@ private:
 public:
     PointRef() : m_buf(NULL), m_id(0)
     {}
-
     PointRef(const PointRef& r) : m_buf(r.m_buf), m_id(r.m_id)
     {}
-
     PointRef(PointBuffer *buf, PointId id) : m_buf(buf), m_id(id)
     {}
+
+    PointId id() const
+        { return m_id; }
+    PointBuffer *buf() const
+        { return m_buf; }
 
     PointRef& operator=(const PointRef& r)
     {
@@ -65,16 +68,9 @@ public:
         return *this;
     }
 
-
-    // Test for sorting.
-    bool operator < (const PointRef& p) const
+    bool compare(Dimension::Id::Enum dim, const PointRef& p) const
     {
-/**
-        return m_buf->compare(Dimension::Id::X, m_id, p.m_id);
-**/
-        double x1 = m_buf->getFieldAs<double>(Dimension::Id::X, m_id);
-        double x2 = p.m_buf->getFieldAs<double>(Dimension::Id::X, p.m_id);
-        return x1 < x2;
+        return m_buf->compare(dim, m_id, p.m_id);
     }
 
     void swap(PointRef& p)
@@ -85,11 +81,10 @@ public:
     }
 };
 
-void swap(PointRef && p1, PointRef && p2)
+inline void swap(PointRef && p1, PointRef && p2)
 {
     p1.swap(p2);
 }
-
 
 class PointBufferIter :
     public std::iterator<std::random_access_iterator_tag, PointRef,
