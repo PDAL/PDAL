@@ -49,6 +49,7 @@
 #include <cpl_port.h>
 #include "gdal.h"
 #include <cpl_vsi.h>
+#include <ogr_api.h>
 
 namespace pdal
 {
@@ -75,7 +76,7 @@ public:
 
     void log(::CPLErr code, int num, char const* msg);
     void error(::CPLErr code, int num, char const* msg);
-    
+
     inline LogPtr getLogger() const { return m_log; }
     inline void setLogger(LogPtr logger) { m_log = logger; }
 
@@ -85,19 +86,19 @@ private:
     pdal::LogPtr m_log;
 };
 
-class PDAL_DLL GlobalDebug 
+class PDAL_DLL GlobalDebug
 {
 public:
     GlobalDebug();
-    
+
     void addLog(LogPtr alog) { m_logs.push_back(alog); }
-    
+
     ~GlobalDebug();
 
-    
+
     void log(::CPLErr code, int num, char const* msg);
     void error(::CPLErr code, int num, char const* msg);
-    
+
     static void CPL_STDCALL trampoline(::CPLErr code, int num, char const* msg)
     {
         GlobalDebug* debug = static_cast<GlobalDebug*>(CPLGetErrorHandlerUserData());
@@ -106,10 +107,10 @@ public:
 
         debug->m_gdal_callback(code, num, msg);
     }
-    
+
 private:
     std::vector<LogPtr> m_logs;
-    boost::function<void(CPLErr, int, char const*)> m_gdal_callback;    
+    boost::function<void(CPLErr, int, char const*)> m_gdal_callback;
 };
 
 
