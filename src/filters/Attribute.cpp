@@ -39,6 +39,7 @@
 #include <pdal/GDALUtils.hpp>
 
 #include <ogr_geometry.h>
+#include <geos_c.h>
 
 namespace pdal
 {

@@ -36,14 +36,16 @@
 
 #include <pdal/Filter.hpp>
 
-#include <ogr_api.h>
-
-#include <geos_c.h>
 
 
 
 #include <map>
 #include <string>
+
+typedef struct GEOSContextHandle_HS *GEOSContextHandle_t;
+
+typedef void *OGRLayerH;
+
 
 namespace pdal
 {
