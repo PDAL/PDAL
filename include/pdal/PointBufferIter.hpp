@@ -69,9 +69,7 @@ public:
     }
 
     bool compare(Dimension::Id::Enum dim, const PointRef& p) const
-    {
-        return m_buf->compare(dim, m_id, p.m_id);
-    }
+        { return m_buf->compare(dim, m_id, p.m_id); }
 
     void swap(PointRef& p)
     {
