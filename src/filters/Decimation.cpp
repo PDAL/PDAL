@@ -64,6 +64,7 @@ void Decimation::processOptions(const Options& options)
     m_offset = options.getValueOrDefault<uint32_t>("offset", 0);
     m_leaf_size = options.getValueOrDefault<double>("leaf_size", 1);
     m_method = options.getValueOrDefault<std::string>("method", "RankOrder");
+    m_limit = options.getValueOrDefault<point_count_t>("limit", 0);
 }
 
 
@@ -88,7 +89,8 @@ PointBufferSet Decimation::run(PointBufferPtr buffer)
 
 void Decimation::decimate(PointBuffer& input, PointBuffer& output)
 {
-    for (PointId idx = m_offset; idx < input.size(); idx += m_step)
+    PointId last_idx = (m_limit > 0) ? m_limit : input.size();
+    for (PointId idx = m_offset; idx < last_idx; idx += m_step)
         output.appendPoint(input, idx);
 }
 

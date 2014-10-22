@@ -58,17 +58,16 @@ private:
     std::string m_inputFile;
     std::string m_outputFile;
     bool m_bCompress;
-    boost::uint64_t m_numPointsToWrite;
-    boost::uint64_t m_numSkipPoints;
     pdal::SpatialReference m_input_srs;
     pdal::SpatialReference m_output_srs;
     BOX3D m_bounds;
     std::string m_wkt;
     bool m_bForwardMetadata;
-    boost::uint32_t m_decimation_step;
-    boost::uint32_t m_decimation_offset;
+    uint32_t m_decimation_step;
+    uint32_t m_decimation_offset;
     double m_decimation_leaf_size;
     std::string m_decimation_method;
+    point_count_t m_decimation_limit;
 
 };
 
