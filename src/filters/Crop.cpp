@@ -131,7 +131,7 @@ void Crop::ready(PointContext ctx)
             GEOSPrepare_r(m_geosEnvironment, m_geosGeometry);
         if (!m_geosPreparedGeometry)
             throw pdal_error("unable to prepare geometry for "
-                "index-accellerated intersection");
+                "index-accelerated intersection");
         m_bounds = computeBounds(m_geosGeometry);
         log()->get(LogLevel::Debug) << "Computed bounds from given WKT: " <<
             m_bounds <<std::endl;
