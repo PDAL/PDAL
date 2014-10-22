@@ -45,6 +45,7 @@ namespace kernel
 PCL::PCL(int argc, const char* argv[])
     : Application(argc, argv, "pcl")
     , m_bCompress(false)
+    , m_bForwardMetadata(false)
 {
 }
 
@@ -74,6 +75,9 @@ void PCL::addSwitches()
     ("compress,z",
         po::value<bool>(&m_bCompress)->zero_tokens()->implicit_value(true),
         "Compress output data (if supported by output format)")
+    ("metadata,m",
+        po::value< bool >(&m_bForwardMetadata)->implicit_value(true),
+        "Forward metadata (VLRs, header entries, etc) from previous stages")
     ;
 
     addSwitchSet(file_options);
@@ -145,6 +149,8 @@ int PCL::execute()
 
     if (m_bCompress)
         writerOptions.add<bool>("compression", true);
+    if (m_bForwardMetadata)
+        writerOptions.add("forward_metadata", true);
 
     std::vector<std::string> cmd = getProgressShellCommand();
     UserCallback *callback =
@@ -153,7 +159,10 @@ int PCL::execute()
 
     std::unique_ptr<Writer>
         writer(AppSupport::makeWriter(m_outputFile, pclStage.get()));
-    writer->setOptions(writerOptions);
+
+    // Some options are inferred by makeWriter based on filename
+    // (compression, driver type, etc).
+    writer->setOptions(writerOptions+writer->getOptions());
 
     writer->setUserCallback(callback);
 

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2014, Brad Chambers (brad.chambers@gmail.com)
+ * Copyright (c) 2014, Bradley J Chambers (brad.chambers@gmail.com)
  *
  * All rights reserved.
  *
@@ -32,37 +32,34 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#ifndef INCLUDED_PDAL_KERNEL_PCL_HPP
-#define INCLUDED_PDAL_KERNEL_PCL_HPP
+#pragma once
 
-#include "Application.hpp"
+#include <pdal/Filter.hpp>
 
 namespace pdal
 {
-namespace kernel
+namespace filters
 {
 
-class PDAL_DLL PCL : public Application
+class PDAL_DLL MortonOrder : public pdal::Filter
 {
 public:
-    PCL(int argc, const char* argv[]);
-    int execute();
+    SET_STAGE_NAME("filters.mortonorder", "MortonOrder")
+    SET_STAGE_LINK("http://pdal.io/stages/filters.morton.html")
+    SET_STAGE_ENABLED(true)
+
+    MortonOrder() : Filter() {}
+
+    static Options getDefaultOptions();
 
 private:
-    void addSwitches();
-    void validateSwitches();
+    virtual void processOptions(const Options& options) {};
+    virtual PointBufferSet run(PointBufferPtr buf);
 
-    std::unique_ptr<Stage> makeReader(Options readerOptions);
-
-    std::string m_inputFile;
-    std::string m_outputFile;
-    std::string m_pclFile;
-    bool m_bCompress;
-    bool m_bForwardMetadata;
+    MortonOrder& operator=(const MortonOrder&); // not implemented
+    MortonOrder(const MortonOrder&); // not implemented
 };
 
-} // kernel
-} // pdal
-
-#endif
+} // namespace filters
+} // namespace pdal
 

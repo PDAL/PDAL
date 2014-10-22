@@ -59,6 +59,7 @@ void outputVersion()
 #endif
     std::cout << "     - pipeline" << std::endl;
     std::cout << "     - random" << std::endl;
+    std::cout << "     - sort" << std::endl;
     std::cout << "     - translate" << std::endl;
 #ifdef PDAL_HAVE_PCL_VISUALIZE
     std::cout << "     - view" << std::endl;
@@ -154,6 +155,12 @@ int main(int argc, char* argv[])
         return app.run();
     }
 #endif
+
+    if (boost::iequals(action, "sort"))
+    {
+      pdal::kernel::Sort app(count, args);
+      return app.run();
+    }
 
     if (boost::iequals(action, "pipeline"))
     {
