@@ -281,10 +281,19 @@ void Attribute::UpdateGEOSBuffer(PointBuffer& buffer, AttributeInfo& info)
         }
 
         OGRGeometry* ogr_g = (OGRGeometry*) geom;
+        GEOSGeometry* geos_g (0);
         if (!m_geosEnvironment)
-            m_geosEnvironment = ogr_g->createGEOSContext();
+        {
 
-        GEOSGeometry* geos_g = ogr_g->exportToGEOS(m_geosEnvironment);
+#if (GDAL_VERSION_MINOR < 11) && (GDAL_VERSION_MAJOR == 1)
+        geos_g = ogr_g->exportToGEOS();
+#else
+        m_geosEnvironment = ogr_g->createGEOSContext();
+        geos_g = ogr_g->exportToGEOS(m_geosEnvironment);
+
+#endif
+        }
+
         GEOSPreparedGeometry const* geos_pg = GEOSPrepare_r(m_geosEnvironment, geos_g);
         if (!geos_pg)
             throw pdal_error("unable to prepare geometry for index-accelerated intersection");
