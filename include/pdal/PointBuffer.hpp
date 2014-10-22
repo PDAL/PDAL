@@ -142,6 +142,55 @@ public:
         }
     }
 
+    template <typename T>
+    bool compare(Dimension::Id::Enum dim, PointId id1, PointId id2)
+    {
+        return (getFieldInternal<T>(dim, id1) < getFieldInternal<T>(dim, id2));
+    }
+
+    bool compare(Dimension::Id::Enum dim, PointId id1, PointId id2)
+    {
+        Dimension::Detail *dd = m_context.dimDetail(dim);
+
+        switch (dd->type())
+        {
+            case Dimension::Type::Float:
+                return compare<float>(dim, id1, id2);
+                break;
+            case Dimension::Type::Double:
+                return compare<double>(dim, id1, id2);
+                break;
+            case Dimension::Type::Signed8:
+                return compare<int8_t>(dim, id1, id2);
+                break;
+            case Dimension::Type::Signed16:
+                return compare<int16_t>(dim, id1, id2);
+                break;
+            case Dimension::Type::Signed32:
+                return compare<int32_t>(dim, id1, id2);
+                break;
+            case Dimension::Type::Signed64:
+                return compare<int64_t>(dim, id1, id2);
+                break;
+            case Dimension::Type::Unsigned8:
+                return compare<uint8_t>(dim, id1, id2);
+                break;
+            case Dimension::Type::Unsigned16:
+                return compare<uint16_t>(dim, id1, id2);
+                break;
+            case Dimension::Type::Unsigned32:
+                return compare<uint32_t>(dim, id1, id2);
+                break;
+            case Dimension::Type::Unsigned64:
+                return compare<uint64_t>(dim, id1, id2);
+                break;
+            case Dimension::Type::None:
+            default:
+                return false;
+                break;
+        }
+    }
+
     void getRawField(Dimension::Id::Enum dim, PointId idx, void *buf) const
     {
         getFieldInternal(dim, idx, buf);

@@ -51,6 +51,9 @@ public:
     PointRef() : m_buf(NULL), m_id(0)
     {}
 
+    PointRef(const PointRef& r) : m_buf(r.m_buf), m_id(r.m_id)
+    {}
+
     PointRef(PointBuffer *buf, PointId id) : m_buf(buf), m_id(id)
     {}
 
@@ -62,14 +65,30 @@ public:
         return *this;
     }
 
+
     // Test for sorting.
-    bool operator < (const PointRef& p)
+    bool operator < (const PointRef& p) const
     {
+/**
+        return m_buf->compare(Dimension::Id::X, m_id, p.m_id);
+**/
         double x1 = m_buf->getFieldAs<double>(Dimension::Id::X, m_id);
         double x2 = p.m_buf->getFieldAs<double>(Dimension::Id::X, p.m_id);
         return x1 < x2;
     }
+
+    void swap(PointRef& p)
+    {
+        PointId id = m_buf->m_index[m_id];
+        m_buf->m_index[m_id] = p.m_buf->m_index[p.m_id];
+        p.m_buf->m_index[p.m_id] = id;
+    }
 };
+
+void swap(PointRef && p1, PointRef && p2)
+{
+    p1.swap(p2);
+}
 
 
 class PointBufferIter :
@@ -114,6 +133,17 @@ public:
         { m_id -= n; return *this; }
     difference_type operator-(const PointBufferIter& i)
         { return m_id - i.m_id; }
+
+    bool operator==(const PointBufferIter& i)
+        { return m_id == i.m_id; }
+    bool operator!=(const PointBufferIter& i)
+        { return m_id != i.m_id; }
+    bool operator>=(const PointBufferIter& i)
+        { return m_id <= i.m_id; }
+    bool operator<(const PointBufferIter& i)
+        { return m_id < i.m_id; }
+    bool operator>(const PointBufferIter& i)
+        { return m_id > i.m_id; }
 
     PointRef operator*() const
         { return PointRef(m_buf, m_id); }

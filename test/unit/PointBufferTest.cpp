@@ -39,6 +39,8 @@
 #include <boost/cstdint.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
+#include <time.h>
+
 #include <pdal/PointBuffer.hpp>
 #include <pdal/PointBufferIter.hpp>
 #include <pdal/drivers/las/Reader.hpp>
@@ -435,15 +437,16 @@ BOOST_AUTO_TEST_CASE(sort)
 
     std::default_random_engine generator;
     std::uniform_real_distribution<double> dist(0.0, 10000.0);
-    for (int i = 0; i < 1000; ++i)
+    for (int i = 0; i < 10000000; ++i)
         buf.setField(Dimension::Id::X, i, dist(generator));    
 
     std::sort(buf.begin(), buf.end());
-    for (int i = 1; i < 1000; ++i)
+
+    for (int i = 1; i < 10000000; ++i)
     {
         double d1 = buf.getFieldAs<double>(Dimension::Id::X, i - 1);
         double d2 = buf.getFieldAs<double>(Dimension::Id::X, i);
-        BOOST_CHECK(d1 < d2);
+        BOOST_CHECK(d1 <= d2);
     }
 }
 

@@ -231,8 +231,6 @@ else()
     set(SO_EXT so)
 endif(APPLE)
 
-
-
 #------------------------------------------------------------------------------
 # settings for Boost dependencies
 #------------------------------------------------------------------------------
@@ -265,7 +263,6 @@ if(Boost_FOUND)
   link_directories(${Boost_LIBRARY_DIRS})
 
 endif(Boost_FOUND)
-
 
 #------------------------------------------------------------------------------
 # settings for PCL
@@ -485,7 +482,7 @@ endif()
 #
 find_package(ZLIB)
 if(ZLIB_FOUND)
-    set(CMAKE_REQUIRED_LIBRARIES "${ZLIB_LIBRARY}")
+    set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} "${ZLIB_LIBRARY}")
 	include_directories(${ZLIB_INCLUDE_DIR})
 	mark_as_advanced(CLEAR ZLIB_INCLUDE_DIR)
 	mark_as_advanced(CLEAR ZLIB_LIBRARY)
@@ -790,10 +787,6 @@ list(APPEND CPACK_SOURCE_IGNORE_FILES "/doc/build/")
 list(APPEND CPACK_SOURCE_IGNORE_FILES "/doc/presentations/")
 list(APPEND CPACK_SOURCE_IGNORE_FILES "pdal-s3cmd.conf")
 list(APPEND CPACK_SOURCE_IGNORE_FILES "import-pdal-boost.sh")
-
-
-
-
 
 include(CPack)
 
