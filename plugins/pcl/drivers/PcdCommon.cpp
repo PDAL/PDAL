@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/drivers/pcd/Common.hpp>
+#include "PcdCommon.hpp"
 
 namespace pdal
 {
