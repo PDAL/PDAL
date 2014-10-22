@@ -58,7 +58,6 @@ Info::Info(int argc, const char* argv[])
     , m_useJSON(false)
     , m_useRST(false)
     , m_QueryDistance(0.0)
-    , m_numPointsToWrite(0)
     , m_showSample(false)
     , m_showSummary(false)
 {}
@@ -113,8 +112,6 @@ void Info::addSwitches()
         ("boundary",
          po::value<bool>(&m_computeBoundary)->zero_tokens()->implicit_value(true),
          "compute a hexagonal hull/boundary of dataset")
-        ("count", po::value<uint64_t>(&m_numPointsToWrite)->default_value(0),
-         "How many points should we write?")
         ("dimensions", po::value<std::string >(&m_Dimensions),
          "dump stats on all points (reads entire dataset)")
         ("schema",

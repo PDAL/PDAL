@@ -47,10 +47,9 @@ namespace kernel
 
 Translate::Translate(int argc, const char* argv[]) :
     Application(argc, argv, "translate"), m_bCompress(false),
-    m_numPointsToWrite(0), m_numSkipPoints(0),
     m_input_srs(pdal::SpatialReference()),
     m_output_srs(pdal::SpatialReference()), m_bForwardMetadata(false),
-    m_decimation_step(1), m_decimation_offset(0), m_decimation_leaf_size(1)
+    m_decimation_step(1), m_decimation_offset(0), m_decimation_leaf_size(1), m_decimation_limit(0)
 {}
 
 
@@ -143,11 +142,6 @@ void Translate::addSwitches()
         ("compress,z",
          po::value<bool>(&m_bCompress)->zero_tokens()->implicit_value(true),
          "Compress output data (if supported by output format)")
-        ("count",
-         po::value<boost::uint64_t>(&m_numPointsToWrite)->default_value(0),
-         "How many points should we write?")
-        ("skip", po::value<boost::uint64_t>(&m_numSkipPoints)->default_value(0),
-         "How many points should we skip?")
         ("bounds", po::value<BOX3D >(&m_bounds),
          "Extent (in XYZ to clip output to)")
         ("polygon", po::value<std::string >(&m_wkt),
@@ -156,10 +150,10 @@ void Translate::addSwitches()
          po::value< bool >(&m_bForwardMetadata)->implicit_value(true),
          "Forward metadata (VLRs, header entries, etc) from previous stages")
         ("d_step",
-         po::value<boost::uint32_t>(&m_decimation_step)->default_value(1),
+         po::value<uint32_t>(&m_decimation_step)->default_value(1),
          "Decimation filter step")
         ("d_offset",
-         po::value<boost::uint32_t>(&m_decimation_offset)->default_value(0),
+         po::value<uint32_t>(&m_decimation_offset)->default_value(0),
          "Decimation filter offset")
         ("d_leaf_size",
          po::value<double>(&m_decimation_leaf_size)->default_value(1),
@@ -167,6 +161,9 @@ void Translate::addSwitches()
         ("d_method",
          po::value<std::string>(&m_decimation_method)->default_value("RankOrder"),
          "Decimation filter method (RankOrder, VoxelGrid)")
+        ("d_limit",
+         po::value<uint32_t>(&m_decimation_limit)->default_value(0),
+         "Decimation limit")
         ;
 
     addSwitchSet(file_options);
@@ -179,11 +176,11 @@ std::unique_ptr<Stage> Translate::makeReader(Options readerOptions)
     if (isDebug())
     {
         readerOptions.add<bool>("debug", true);
-        boost::uint32_t verbosity(getVerboseLevel());
+        uint32_t verbosity(getVerboseLevel());
         if (!verbosity)
             verbosity = 1;
 
-        readerOptions.add<boost::uint32_t>("verbose", verbosity);
+        readerOptions.add<uint32_t>("verbose", verbosity);
         readerOptions.add<std::string>("log", "STDERR");
     }
 
@@ -268,7 +265,7 @@ Stage* Translate::makeTranslate(Options translateOptions, Stage* reader_stage)
         final_stage = next_stage;
     }
 
-    if (m_decimation_step > 1)
+    if (m_decimation_step > 1 || m_decimation_limit > 0)
     {
         Options decimationOptions;
         decimationOptions.add<bool>("debug", isDebug());
@@ -277,6 +274,7 @@ Stage* Translate::makeTranslate(Options translateOptions, Stage* reader_stage)
         decimationOptions.add<uint32_t>("offset", m_decimation_offset);
         decimationOptions.add<double>("leaf_size", m_decimation_leaf_size);
         decimationOptions.add<std::string>("method", m_decimation_method);
+        decimationOptions.add<uint32_t>("limit", m_decimation_limit);
         Stage *decimation_stage = new filters::Decimation();
         decimation_stage->setInput(final_stage);
         decimation_stage->setOptions(decimationOptions);
@@ -330,7 +328,6 @@ int Translate::execute()
     std::vector<std::string> cmd = getProgressShellCommand();
     UserCallback *callback =
         cmd.size() ? (UserCallback *)new ShellScriptCallback(cmd) :
-        m_numPointsToWrite ? (UserCallback *)new PercentageCallback() :
         (UserCallback *)new HeartbeatCallback();
 
     std::unique_ptr<Writer> writer( AppSupport::makeWriter(m_outputFile, finalStage));

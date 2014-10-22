@@ -59,8 +59,6 @@ private:
     std::string m_inputFile;
     std::string m_pipelineFile;
     bool m_validate;
-    boost::uint64_t m_numPointsToWrite;
-    boost::uint64_t m_numSkipPoints;
 };
 
 }} // pdal::kernel
