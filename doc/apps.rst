@@ -140,7 +140,7 @@ checking the following:
 * Byte-by-byte point data
 
 
-.._ground_command:
+.. _ground_command:
 
 ``ground`` command
 ------------------------------------------------------------------------------
@@ -191,11 +191,13 @@ Dumps information about a point cloud file, such as:
 Print the first 10 points of the file as `reStructuredText`_
 
 ::
+
     $ pdal info test/data/1.2-with-color.las -p 0-10
 
 Print three selected points of the file as `reStructuredText`_
 
 ::
+
     $ pdal info test/data/1.2-with-color.las -p 4, 16, 28
 
 
