@@ -63,7 +63,7 @@ void SQLiteReader::initialize()
         bool bHaveSpatialite = m_session->doesTableExist("geometry_columns");
         log()->get(LogLevel::Debug) << "Have spatialite?: " <<
             bHaveSpatialite << std::endl;
-        m_session->spatialite();
+        m_session->spatialite(m_modulename);
 
         if (!bHaveSpatialite)
         {
@@ -155,6 +155,7 @@ void SQLiteReader::processOptions(const Options& options)
                 "spatialreference"));
     m_query = options.getValueOrThrow<std::string>("query");
     m_connection = options.getValueOrDefault<std::string>("connection", "");
+    m_modulename = options.getValueOrDefault<std::string>("module", "");
 }
 
 

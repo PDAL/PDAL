@@ -102,6 +102,7 @@ private:
     std::string m_cloud_table;
     std::string m_cloud_column;
     std::string m_connection;
+    std::string m_modulename;
     bool m_is3d;
 
 };
