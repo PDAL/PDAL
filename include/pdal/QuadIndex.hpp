@@ -37,6 +37,7 @@
 #include <vector>
 
 #include <pdal/pdal_export.hpp>
+#include <pdal/Bounds.hpp>
 
 namespace pdal
 {
@@ -107,6 +108,13 @@ public:
             double xMax,
             double yMax,
             std::size_t depthEnd = 0) const;
+
+    std::vector<std::size_t> getPoints(
+            const BOX3D& box,
+            std::size_t depthEnd=0) const
+    {
+        return getPoints(box.minx, box.miny, box.maxx, box.maxy, depthEnd);
+    }
 
     // Return all points within the bounding box, searching at tree depth
     // levels from [depthBegin, depthEnd).

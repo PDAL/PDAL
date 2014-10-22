@@ -34,6 +34,7 @@
 
 #pragma once
 
+#include <pdal/filters/Attribute.hpp>
 #include <pdal/filters/ByteSwap.hpp>
 #include <pdal/filters/Cache.hpp>
 #include <pdal/filters/Chipper.hpp>

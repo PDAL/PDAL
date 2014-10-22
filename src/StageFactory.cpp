@@ -106,6 +106,7 @@ MAKE_READER_CREATOR(IcebridgeReader, pdal::drivers::icebridge::Reader)
 //
 // define the functions to create the filters
 //
+MAKE_FILTER_CREATOR(Attribute, pdal::filters::Attribute)
 MAKE_FILTER_CREATOR(ByteSwap, pdal::filters::ByteSwap)
 MAKE_FILTER_CREATOR(Cache, pdal::filters::Cache)
 MAKE_FILTER_CREATOR(Chipper, pdal::filters::Chipper)
@@ -422,6 +423,7 @@ void StageFactory::registerKnownReaders()
 
 void StageFactory::registerKnownFilters()
 {
+    REGISTER_FILTER(Attribute, pdal::filters::Attribute);
     REGISTER_FILTER(ByteSwap, pdal::filters::ByteSwap);
     REGISTER_FILTER(Cache, pdal::filters::Cache);
     REGISTER_FILTER(Chipper, pdal::filters::Chipper);
