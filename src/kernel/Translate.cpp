@@ -162,7 +162,7 @@ void Translate::addSwitches()
          po::value<std::string>(&m_decimation_method)->default_value("RankOrder"),
          "Decimation filter method (RankOrder, VoxelGrid)")
         ("d_limit",
-         po::value<uint32_t>(&m_decimation_limit)->default_value(0),
+         po::value<point_count_t>(&m_decimation_limit)->default_value(0),
          "Decimation limit")
         ;
 
@@ -175,13 +175,13 @@ std::unique_ptr<Stage> Translate::makeReader(Options readerOptions)
 {
     if (isDebug())
     {
-        readerOptions.add<bool>("debug", true);
+        readerOptions.add("debug", true);
         uint32_t verbosity(getVerboseLevel());
         if (!verbosity)
             verbosity = 1;
 
-        readerOptions.add<uint32_t>("verbose", verbosity);
-        readerOptions.add<std::string>("log", "STDERR");
+        readerOptions.add("verbose", verbosity);
+        readerOptions.add("log", "STDERR");
     }
 
     Stage* stage = AppSupport::makeReader(m_inputFile);
@@ -209,7 +209,7 @@ Stage* Translate::makeTranslate(Options translateOptions, Stage* reader_stage)
 
         if (!m_output_srs.empty())
         {
-            translateOptions.add<std::string>("out_srs", m_output_srs.getWKT());
+            translateOptions.add("out_srs", m_output_srs.getWKT());
             reprojection_stage =
                 new filters::Reprojection();
             reprojection_stage->setInput(next_stage);
@@ -226,7 +226,7 @@ Stage* Translate::makeTranslate(Options translateOptions, Stage* reader_stage)
 
         if ((!m_bounds.empty() && m_wkt.empty()))
         {
-            readerOptions.add<BOX3D>("bounds", m_bounds);
+            readerOptions.add("bounds", m_bounds);
             crop_stage = new pdal::filters::Crop();
             crop_stage->setInput(next_stage);
             crop_stage->setOptions(readerOptions);
@@ -250,7 +250,7 @@ Stage* Translate::makeTranslate(Options translateOptions, Stage* reader_stage)
                 // If we couldn't open the file given in m_wkt because it
                 // was likely actually wkt, leave it alone
             }
-            readerOptions.add<std::string >("polygon", m_wkt);
+            readerOptions.add("polygon", m_wkt);
             crop_stage = new pdal::filters::Crop();
             crop_stage->setInput(next_stage);
             crop_stage->setOptions(readerOptions);
@@ -268,13 +268,13 @@ Stage* Translate::makeTranslate(Options translateOptions, Stage* reader_stage)
     if (m_decimation_step > 1 || m_decimation_limit > 0)
     {
         Options decimationOptions;
-        decimationOptions.add<bool>("debug", isDebug());
-        decimationOptions.add<uint32_t>("verbose", getVerboseLevel());
-        decimationOptions.add<uint32_t>("step", m_decimation_step);
-        decimationOptions.add<uint32_t>("offset", m_decimation_offset);
-        decimationOptions.add<double>("leaf_size", m_decimation_leaf_size);
-        decimationOptions.add<std::string>("method", m_decimation_method);
-        decimationOptions.add<uint32_t>("limit", m_decimation_limit);
+        decimationOptions.add("debug", isDebug());
+        decimationOptions.add("verbose", getVerboseLevel());
+        decimationOptions.add("step", m_decimation_step);
+        decimationOptions.add("offset", m_decimation_offset);
+        decimationOptions.add("leaf_size", m_decimation_leaf_size);
+        decimationOptions.add("method", m_decimation_method);
+        decimationOptions.add("limit", m_decimation_limit);
         Stage *decimation_stage = new filters::Decimation();
         decimation_stage->setInput(final_stage);
         decimation_stage->setOptions(decimationOptions);

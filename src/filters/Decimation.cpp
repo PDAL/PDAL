@@ -64,7 +64,7 @@ void Decimation::processOptions(const Options& options)
     m_offset = options.getValueOrDefault<uint32_t>("offset", 0);
     m_leaf_size = options.getValueOrDefault<double>("leaf_size", 1);
     m_method = options.getValueOrDefault<std::string>("method", "RankOrder");
-    m_limit = options.getValueOrDefault<uint32_t>("limit", 0);
+    m_limit = options.getValueOrDefault<point_count_t>("limit", 0);
 }
 
 
