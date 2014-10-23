@@ -366,7 +366,7 @@ bool Writer::addWktVlr(const SpatialReference& srs)
 void Writer::addVlr(const std::string& userId, uint16_t recordId,
    const std::string& description, std::vector<uint8_t>& data)
 {
-    if (data.size() > VariableLengthRecord::MAX_DATA_SIZE)
+    if (data.size() > MAX_DATA_SIZE)
     {
         ExtVariableLengthRecord evlr(userId, recordId, description, data);
         m_eVlrs.push_back(std::move(evlr));
