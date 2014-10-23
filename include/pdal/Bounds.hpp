@@ -40,6 +40,12 @@
 #include <vector>
 #include <sstream>
 
+namespace
+{
+    const double LOWEST = (std::numeric_limits<double>::lowest)();
+    const double HIGHEST = (std::numeric_limits<double>::max)();
+}
+
 
 namespace pdal
 {
@@ -57,10 +63,6 @@ namespace pdal
 
 class PDAL_DLL BOX3D
 {
-private:
-    static const double LOWEST;
-    static const double HIGHEST;
-    
 public:
 
     BOX3D()
