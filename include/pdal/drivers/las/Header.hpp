@@ -49,6 +49,16 @@
 #include <pdal/gitsha.h>
 #include <pdal/drivers/las/VariableLengthRecord.hpp>
 
+
+namespace
+{
+    const std::string FILE_SIGNATURE("LASF");
+    const std::string SYSTEM_IDENTIFIER("PDAL");
+    const size_t LEGACY_RETURN_COUNT = 5;
+    const size_t RETURN_COUNT = 15;
+}
+
+
 namespace pdal
 {
 namespace drivers
@@ -63,11 +73,6 @@ class SummaryData;
 class PDAL_DLL LasHeader
 {
 public:
-    static const size_t LEGACY_RETURN_COUNT = 5;
-    static const size_t RETURN_COUNT = 15;
-    static const std::string FILE_SIGNATURE;
-    static const std::string SYSTEM_IDENTIFIER;
-
     LasHeader();
 
     /// Get ASPRS LAS file signature.

@@ -48,10 +48,6 @@ namespace drivers
 namespace las
 {
 
-const std::string LasHeader::FILE_SIGNATURE("LASF");
-const std::string LasHeader::SYSTEM_IDENTIFIER("PDAL");
-const size_t LasHeader::LEGACY_RETURN_COUNT;
-const size_t LasHeader::RETURN_COUNT;
 
 std::string GetDefaultSoftwareId()
 {
@@ -280,7 +276,7 @@ ILeStream& operator>>(ILeStream& in, LasHeader& h)
         h.setCompressed(true);
     h.m_pointFormat &= ~0xC0;
     
-    for (size_t i = 0; i < LasHeader::LEGACY_RETURN_COUNT; ++i)
+    for (size_t i = 0; i < LEGACY_RETURN_COUNT; ++i)
     {
         in >> legacyReturnCount;
         h.m_pointCountByReturn[i] = legacyReturnCount;
@@ -303,7 +299,7 @@ ILeStream& operator>>(ILeStream& in, LasHeader& h)
     if (h.versionAtLeast(1, 4))
     {
         in >> h.m_eVlrOffset >> h.m_eVlrCount >> h.m_pointCount;
-        for (size_t i = 0; i < LasHeader::RETURN_COUNT; ++i)
+        for (size_t i = 0; i < RETURN_COUNT; ++i)
             in >> h.m_pointCountByReturn[i];
     }
 
@@ -337,7 +333,7 @@ OLeStream& operator<<(OLeStream& out, const LasHeader& h)
         h.m_pointOffset << h.m_vlrCount << pointFormat <<
         h.m_pointLen << legacyPointCount;
 
-    for (size_t i = 0; i < LasHeader::LEGACY_RETURN_COUNT; ++i)
+    for (size_t i = 0; i < LEGACY_RETURN_COUNT; ++i)
     {
         uint32_t legacyReturnCount = std::min(h.m_pointCountByReturn[i],
             (uint64_t)(std::numeric_limits<uint32_t>::max)());
@@ -354,7 +350,7 @@ OLeStream& operator<<(OLeStream& out, const LasHeader& h)
     if (h.versionAtLeast(1, 4))
     {
         out << h.m_eVlrOffset << h.m_eVlrCount << h.m_pointCount;
-        for (size_t i = 0; i < LasHeader::RETURN_COUNT; ++i)
+        for (size_t i = 0; i < RETURN_COUNT; ++i)
             out << h.m_pointCountByReturn[i];
     }
 
@@ -378,7 +374,7 @@ std::ostream& operator<<(std::ostream& out, const LasHeader& h)
     out << "Point format: " << (int)h.m_pointFormat << "\n";
     out << "Point offset: " << h.m_pointOffset << "\n";
     out << "Point count: " << h.m_pointCount << "\n";
-    for (size_t i = 0; i < LasHeader::RETURN_COUNT; ++i)
+    for (size_t i = 0; i < RETURN_COUNT; ++i)
         out << "Point count by return[" << i << "]: " <<
             h.m_pointCountByReturn[i] << "\n";
     out << "Scales X/Y/Z: " << h.m_scales[0] << "/" <<
