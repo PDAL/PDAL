@@ -34,17 +34,17 @@
 
 #pragma once
 
-#include "Application.hpp"
+#include <pdal/kernel/Kernel.hpp>
 
 namespace pdal
 {
 namespace kernel
 {
 
-class PDAL_DLL Sort : public Application
+class PDAL_DLL Sort : public Kernel
 {
 public:
-    Sort(int argc, const char* argv[]);
+    Sort();
     int execute();
 
 private:

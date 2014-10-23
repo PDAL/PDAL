@@ -164,8 +164,8 @@ int main(int argc, char* argv[])
 
     if (boost::iequals(action, "sort"))
     {
-      pdal::kernel::Sort app(count, args);
-      return app.run();
+      pdal::kernel::Sort app;
+      return app.run(count, args, "sort");
     }
 
     if (boost::iequals(action, "pipeline"))
