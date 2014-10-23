@@ -68,7 +68,7 @@ KernelFactory::KernelFactory()
 }
 
 
-Kernel* KernelFactory::createKernel(const std::string& type)
+std::unique_ptr<Kernel> KernelFactory::createKernel(const std::string& type)
 {
     KernelCreator* f = getKernelCreator(type);
     if (!f)
@@ -77,7 +77,7 @@ Kernel* KernelFactory::createKernel(const std::string& type)
         oss << "Unable to create kernel for type '" << type << "'. Does a driver with this type name exist?";
         throw pdal_error(oss.str());
     }
-    Kernel* kernel = f();
+    std::unique_ptr<Kernel> kernel(f());
     return kernel;
 }
 

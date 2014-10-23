@@ -79,8 +79,6 @@ protected:
     // this is protected; your derived class ctor will be the public entry point
     //Application(int argc, const char* argv[], const std::string& appName);
     Kernel();
-    virtual ~Kernel()
-    {}
 
 public:
     // implement this, with calls to addOptionSet()

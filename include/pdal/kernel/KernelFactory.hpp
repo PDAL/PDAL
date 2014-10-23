@@ -69,7 +69,7 @@ public:
 public:
     KernelFactory();
 
-    Kernel* createKernel(const std::string& type);
+    std::unique_ptr<Kernel> createKernel(const std::string& type);
 
     void registerKernel(const std::string& type, KernelCreator* f);
 
