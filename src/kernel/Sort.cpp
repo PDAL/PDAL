@@ -174,7 +174,8 @@ int Sort::execute()
     // process the data, grabbing the PointBufferSet for visualization of the
     PointBufferSet pbSetOut = writer->execute(ctx);
 
-    visualize(*pbSetOut.begin());
+    if (isVisualize())
+        visualize(*pbSetOut.begin());
     //visualize(*pbSetIn.begin(), *pbSetOut.begin());
 
     return 0;

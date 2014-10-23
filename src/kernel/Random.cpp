@@ -173,7 +173,8 @@ int Random::execute()
     writer->prepare(ctx);
     PointBufferSet pbSet = writer->execute(ctx);
 
-    visualize(*pbSet.begin());
+    if (isVisualize())
+        visualize(*pbSet.begin());
 
     delete writer;
     delete final_stage;
