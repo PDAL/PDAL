@@ -375,6 +375,7 @@ bool Application::isVisualize() const
 
 void Application::visualize(PointBufferPtr buffer) const
 {
+#ifdef PDAL_HAVE_PCL_VISUALIZE
     // Determine XYZ bounds
     BOX3D const& bounds = buffer->calculateBounds();
 
@@ -401,10 +402,12 @@ void Application::visualize(PointBufferPtr buffer) const
         p->spinOnce(100);
         boost::this_thread::sleep(boost::posix_time::microseconds(100000));
     }
+#endif
 }
 
 void Application::visualize(PointBufferPtr input_buffer, PointBufferPtr output_buffer) const
 {
+#ifdef PDAL_HAVE_PCL_VISUALIZE
     int viewport = 0;
 
     // Determine XYZ bounds
@@ -440,6 +443,7 @@ void Application::visualize(PointBufferPtr input_buffer, PointBufferPtr output_b
         p->spinOnce(100);
         boost::this_thread::sleep(boost::posix_time::microseconds(100000));
     }
+#endif
 }
 
 
