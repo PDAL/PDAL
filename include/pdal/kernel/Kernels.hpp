@@ -40,7 +40,6 @@
 #include <pdal/kernel/Diff.hpp>
 #include <pdal/kernel/Info.hpp>
 #include <pdal/kernel/Pipeline.hpp>
-#include <pdal/kernel/Query.hpp>
 #include <pdal/kernel/Random.hpp>
 #include <pdal/kernel/Sort.hpp>
 #include <pdal/kernel/Support.hpp>
