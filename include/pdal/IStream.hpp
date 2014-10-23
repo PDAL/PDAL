@@ -100,7 +100,8 @@ public:
         // is probably fast enough for now (there's only a simple increment
         // to advance an istream iterator, which you'd have to call in a loop).
         std::unique_ptr<char[]> buf(new char[size+1]);
-        m_stream->get(buf.get(), size + 1);
+        m_stream->read(buf.get(), size);
+        buf[size] = '\0';
         s = buf.get();
     }
 
