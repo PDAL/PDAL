@@ -36,6 +36,12 @@
 
 #include <pdal/kernel/Kernel.hpp>
 
+PDAL_C_START
+
+PDAL_DLL void PDALRegister_kernel_sort(void* factory);
+
+PDAL_C_END
+
 namespace pdal
 {
 namespace kernel
@@ -44,6 +50,10 @@ namespace kernel
 class PDAL_DLL Sort : public Kernel
 {
 public:
+    SET_KERNEL_NAME ("drivers.sort.kernel", "Sort Kernel")
+    SET_KERNEL_LINK ("http://pdal.io/kernels/drivers.sort.kernel.html")
+    SET_KERNEL_ENABLED (true)
+ 
     Sort();
     int execute();
 
