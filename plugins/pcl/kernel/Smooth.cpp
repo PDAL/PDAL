@@ -180,7 +180,8 @@ int Smooth::execute()
     // resulting PointBuffer
     PointBufferSet pbSetOut = writer->execute(ctx);
 
-    visualize(*pbSetOut.begin());
+    if (isVisualize())
+        visualize(*pbSetOut.begin());
     //visualize(*pbSetIn.begin(), *pbSetOut.begin());
 
     return 0;

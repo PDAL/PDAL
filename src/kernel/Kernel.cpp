@@ -360,7 +360,7 @@ boost::uint32_t Kernel::getVerboseLevel() const
 }
 
 
-bool Application::isVisualize() const
+bool Kernel::isVisualize() const
 {
     return m_visualize;
 }
@@ -371,20 +371,13 @@ void Kernel::visualize(PointBufferPtr buffer) const
     StageFactory f;
     if (f.getWriterCreator("drivers.pclvisualizer.writer"))
     {
-        if (m_visualize)
-        {
-            drivers::buffer::BufferReader bufferReader;
-            bufferReader.addBuffer(buffer);
+          drivers::buffer::BufferReader bufferReader;
+          bufferReader.addBuffer(buffer);
 
-            std::unique_ptr<Writer> writer(kernel::AppSupport::makeWriter("foo.pclviz", &bufferReader));
-            PointContext ctx;
-            writer->prepare(ctx);
-            writer->execute(ctx);
-        }
-    }
-    else
-    {
-        printError("Cannot visualize data without PCLVisualizer support.\n");
+          std::unique_ptr<Writer> writer(kernel::AppSupport::makeWriter("foo.pclviz", &bufferReader));
+          PointContext ctx;
+          writer->prepare(ctx);
+          writer->execute(ctx);
     }
 }
 
@@ -392,6 +385,7 @@ void Kernel::visualize(PointBufferPtr buffer) const
 void Kernel::visualize(PointBufferPtr input_buffer, PointBufferPtr output_buffer) const
 {
 #ifdef PDAL_HAVE_PCL_VISUALIZE
+<<<<<<< HEAD
     int viewport = 0;
 
     // Determine XYZ bounds
@@ -427,6 +421,43 @@ void Kernel::visualize(PointBufferPtr input_buffer, PointBufferPtr output_buffer
         p->spinOnce(100);
         boost::this_thread::sleep(boost::posix_time::microseconds(100000));
     }
+=======
+      int viewport = 0;
+
+      // Determine XYZ bounds
+      BOX3D const& input_bounds = input_buffer->calculateBounds();
+      BOX3D const& output_bounds = output_buffer->calculateBounds();
+
+      // Convert PointBuffer to a PCL PointCloud
+      pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+      pclsupport::PDALtoPCD(const_cast<PointBuffer&>(*input_buffer), *input_cloud, input_bounds);
+      pcl::PointCloud<pcl::PointXYZ>::Ptr output_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+      pclsupport::PDALtoPCD(const_cast<PointBuffer&>(*output_buffer), *output_cloud, output_bounds);
+
+      // Create PCLVisualizer
+      boost::shared_ptr<pcl::visualization::PCLVisualizer> p(new pcl::visualization::PCLVisualizer("3D Viewer"));
+
+      // Set background to black
+      p->setBackgroundColor(0, 0, 0);
+
+      // Use Z dimension to colorize points
+      pcl::visualization::PointCloudColorHandlerGenericField<pcl::PointXYZ> input_color(input_cloud, "z");
+      pcl::visualization::PointCloudColorHandlerGenericField<pcl::PointXYZ> output_color(output_cloud, "z");
+
+      // Add point cloud to the viewer with the Z dimension color handler
+      p->createViewPort(0, 0, 0.5, 1, viewport);
+      p->addPointCloud<pcl::PointXYZ> (input_cloud, input_color, "cloud");
+      p->createViewPort(0.5, 0, 1, 1, viewport);
+      p->addPointCloud<pcl::PointXYZ> (output_cloud, output_color, "cloud1");
+
+      p->resetCamera();
+
+      while (!p->wasStopped())
+      {
+          p->spinOnce(100);
+          boost::this_thread::sleep(boost::posix_time::microseconds(100000));
+      }
+>>>>>>> d54925e... port over visualization fix from master
 #endif
 }
 */
