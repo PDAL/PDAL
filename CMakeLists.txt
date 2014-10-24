@@ -483,15 +483,13 @@ endif()
 #
 # ZLIB support - required
 #
-find_package(ZLIB)
+find_package(ZLIB REQUIRED)
 if(ZLIB_FOUND)
     set(CMAKE_REQUIRED_LIBRARIES "${ZLIB_LIBRARY}")
 	include_directories(${ZLIB_INCLUDE_DIR})
 	mark_as_advanced(CLEAR ZLIB_INCLUDE_DIR)
 	mark_as_advanced(CLEAR ZLIB_LIBRARY)
 	set(PDAL_HAVE_ZLIB 1)
-else()
-    message(FATAL_ERROR "ZLIB support is required")
 endif()
 
 
