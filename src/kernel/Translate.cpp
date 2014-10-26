@@ -358,7 +358,8 @@ int Translate::execute()
     // process the data, grabbing the PointBufferSet for visualization of the
     PointBufferSet pbSetOut = writer->execute(ctx);
 
-    visualize(*pbSetIn.begin(), *pbSetOut.begin());
+    if (isVisualize())
+        visualize(*pbSetIn.begin(), *pbSetOut.begin());
 
     return 0;
 }

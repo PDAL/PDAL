@@ -206,7 +206,8 @@ int Ground::execute()
     // resulting PointBuffer
     PointBufferSet pbSetOut = writer->execute(ctx);
 
-    visualize(*pbSetIn.begin(), *pbSetOut.begin());
+    if (isVisualize())
+        visualize(*pbSetIn.begin(), *pbSetOut.begin());
 
     return 0;
 }

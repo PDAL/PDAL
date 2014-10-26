@@ -75,9 +75,7 @@ Application::Application(int argc, const char* argv[], const std::string& appNam
     , m_appName(appName)
     , m_hardCoreDebug(false)
     , m_reportDebug(false)
-#ifdef PDAL_HAVE_PCL_VISUALIZE
     , m_visualize(false)
-#endif
     , m_usestdin(false)
 {
     return;
@@ -369,86 +367,82 @@ boost::uint32_t Application::getVerboseLevel() const
 }
 
 
+bool Application::isVisualize() const
+{
+    return m_visualize;
+}
+
+
 void Application::visualize(PointBufferPtr buffer) const
 {
 #ifdef PDAL_HAVE_PCL_VISUALIZE
-    if (m_visualize)
+    // Determine XYZ bounds
+    BOX3D const& bounds = buffer->calculateBounds();
+
+    // Convert PointBuffer to a PCL PointCloud
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+    pclsupport::PDALtoPCD(const_cast<PointBuffer&>(*buffer), *cloud, bounds);
+
+    // Create PCLVisualizer
+    boost::shared_ptr<pcl::visualization::PCLVisualizer> p(new pcl::visualization::PCLVisualizer("3D Viewer"));
+
+    // Set background to black
+    p->setBackgroundColor(0, 0, 0);
+
+    // Use Z dimension to colorize points
+    pcl::visualization::PointCloudColorHandlerGenericField<pcl::PointXYZ> color(cloud, "z");
+
+    // Add point cloud to the viewer with the Z dimension color handler
+    p->addPointCloud<pcl::PointXYZ> (cloud, color, "cloud");
+
+    p->resetCamera();
+
+    while (!p->wasStopped())
     {
-        // Determine XYZ bounds
-        BOX3D const& bounds = buffer->calculateBounds();
-
-        // Convert PointBuffer to a PCL PointCloud
-        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
-        pclsupport::PDALtoPCD(const_cast<PointBuffer&>(*buffer), *cloud, bounds);
-
-        // Create PCLVisualizer
-        boost::shared_ptr<pcl::visualization::PCLVisualizer> p(new pcl::visualization::PCLVisualizer("3D Viewer"));
-
-        // Set background to black
-        p->setBackgroundColor(0, 0, 0);
-
-        // Use Z dimension to colorize points
-        pcl::visualization::PointCloudColorHandlerGenericField<pcl::PointXYZ> color(cloud, "z");
-
-        // Add point cloud to the viewer with the Z dimension color handler
-        p->addPointCloud<pcl::PointXYZ> (cloud, color, "cloud");
-
-        p->resetCamera();
-
-        while (!p->wasStopped())
-        {
-            p->spinOnce(100);
-            boost::this_thread::sleep(boost::posix_time::microseconds(100000));
-        }
+        p->spinOnce(100);
+        boost::this_thread::sleep(boost::posix_time::microseconds(100000));
     }
-#else
-    printError("Cannot visualize data without PCLVisualizer support.\n");
 #endif
 }
 
 void Application::visualize(PointBufferPtr input_buffer, PointBufferPtr output_buffer) const
 {
 #ifdef PDAL_HAVE_PCL_VISUALIZE
-    if (m_visualize)
+    int viewport = 0;
+
+    // Determine XYZ bounds
+    BOX3D const& input_bounds = input_buffer->calculateBounds();
+    BOX3D const& output_bounds = output_buffer->calculateBounds();
+
+    // Convert PointBuffer to a PCL PointCloud
+    pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+    pclsupport::PDALtoPCD(const_cast<PointBuffer&>(*input_buffer), *input_cloud, input_bounds);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr output_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+    pclsupport::PDALtoPCD(const_cast<PointBuffer&>(*output_buffer), *output_cloud, output_bounds);
+
+    // Create PCLVisualizer
+    boost::shared_ptr<pcl::visualization::PCLVisualizer> p(new pcl::visualization::PCLVisualizer("3D Viewer"));
+
+    // Set background to black
+    p->setBackgroundColor(0, 0, 0);
+
+    // Use Z dimension to colorize points
+    pcl::visualization::PointCloudColorHandlerGenericField<pcl::PointXYZ> input_color(input_cloud, "z");
+    pcl::visualization::PointCloudColorHandlerGenericField<pcl::PointXYZ> output_color(output_cloud, "z");
+
+    // Add point cloud to the viewer with the Z dimension color handler
+    p->createViewPort(0, 0, 0.5, 1, viewport);
+    p->addPointCloud<pcl::PointXYZ> (input_cloud, input_color, "cloud");
+    p->createViewPort(0.5, 0, 1, 1, viewport);
+    p->addPointCloud<pcl::PointXYZ> (output_cloud, output_color, "cloud1");
+
+    p->resetCamera();
+
+    while (!p->wasStopped())
     {
-        int viewport = 0;
-
-        // Determine XYZ bounds
-        BOX3D const& input_bounds = input_buffer->calculateBounds();
-        BOX3D const& output_bounds = output_buffer->calculateBounds();
-
-        // Convert PointBuffer to a PCL PointCloud
-        pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud(new pcl::PointCloud<pcl::PointXYZ>);
-        pclsupport::PDALtoPCD(const_cast<PointBuffer&>(*input_buffer), *input_cloud, input_bounds);
-        pcl::PointCloud<pcl::PointXYZ>::Ptr output_cloud(new pcl::PointCloud<pcl::PointXYZ>);
-        pclsupport::PDALtoPCD(const_cast<PointBuffer&>(*output_buffer), *output_cloud, output_bounds);
-
-        // Create PCLVisualizer
-        boost::shared_ptr<pcl::visualization::PCLVisualizer> p(new pcl::visualization::PCLVisualizer("3D Viewer"));
-
-        // Set background to black
-        p->setBackgroundColor(0, 0, 0);
-
-        // Use Z dimension to colorize points
-        pcl::visualization::PointCloudColorHandlerGenericField<pcl::PointXYZ> input_color(input_cloud, "z");
-        pcl::visualization::PointCloudColorHandlerGenericField<pcl::PointXYZ> output_color(output_cloud, "z");
-
-        // Add point cloud to the viewer with the Z dimension color handler
-        p->createViewPort(0, 0, 0.5, 1, viewport);
-        p->addPointCloud<pcl::PointXYZ> (input_cloud, input_color, "cloud");
-        p->createViewPort(0.5, 0, 1, 1, viewport);
-        p->addPointCloud<pcl::PointXYZ> (output_cloud, output_color, "cloud1");
-
-        p->resetCamera();
-
-        while (!p->wasStopped())
-        {
-            p->spinOnce(100);
-            boost::this_thread::sleep(boost::posix_time::microseconds(100000));
-        }
+        p->spinOnce(100);
+        boost::this_thread::sleep(boost::posix_time::microseconds(100000));
     }
-#else
-    printError("Cannot visualize data without PCLVisualizer support.\n");
 #endif
 }
 
@@ -464,9 +458,7 @@ void Application::setCommonOptions(Options &options)
 {
     options.add("debug", m_isDebug);
     options.add("verbose", m_verboseLevel);
-#ifdef PDAL_HAVE_PCL_VISUALIZE
     options.add("visualize", m_visualize);
-#endif
 
     boost::char_separator<char> sep(",| ");
 
