@@ -68,7 +68,7 @@ private:
     double m_maxX;
     double m_maxY;
     double m_maxZ;
-    std::array<point_count_t, RETURN_COUNT> m_returnCounts;
+    std::array<point_count_t, LasHeader::RETURN_COUNT> m_returnCounts;
     point_count_t m_totalNumPoints;
 
     SummaryData& operator=(const SummaryData&); // not implemented

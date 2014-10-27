@@ -42,13 +42,6 @@
 #include <pdal/OStream.hpp>
 #include <pdal/SpatialReference.hpp>
 
-
-namespace
-{
-    const size_t MAX_DATA_SIZE = (std::numeric_limits<uint16_t>::max)();
-}
-
-
 namespace pdal
 {
 namespace drivers
@@ -72,6 +65,8 @@ typedef std::vector<VariableLengthRecord> VlrList;
 class PDAL_DLL VariableLengthRecord
 {
 public:
+    static const uint16_t MAX_DATA_SIZE;
+
     VariableLengthRecord(const std::string& userId, uint16_t recordId,
             const std::string& description, std::vector<uint8_t>& data) :
         m_userId(userId), m_recordId(recordId), m_description(description),

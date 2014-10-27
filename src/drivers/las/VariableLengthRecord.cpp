@@ -44,6 +44,9 @@ namespace drivers
 namespace las
 {
 
+const uint16_t VariableLengthRecord::MAX_DATA_SIZE =
+    (std::numeric_limits<uint16_t>::max)();
+
 ILeStream& operator>>(ILeStream& in, VariableLengthRecord& v)
 {
     uint16_t reserved;
