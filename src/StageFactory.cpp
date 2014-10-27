@@ -117,10 +117,6 @@ MAKE_WRITER_CREATOR(LasWriter, pdal::drivers::las::Writer)
 MAKE_WRITER_CREATOR(TextWriter, pdal::drivers::text::Writer)
 #endif
 
-#ifdef PDAL_HAVE_P2G
-MAKE_WRITER_CREATOR(P2GWriter, pdal::drivers::p2g::P2gWriter)
-#endif
-
 #ifdef PDAL_HAVE_SQLITE
 #ifndef USE_PDAL_PLUGIN_SQLITE
 MAKE_WRITER_CREATOR(SqliteWriter, pdal::drivers::sqlite::SQLiteWriter)
@@ -397,10 +393,6 @@ void StageFactory::registerKnownWriters()
 
 #ifndef USE_PDAL_PLUGIN_TEXT
     REGISTER_WRITER(TextWriter, pdal::drivers::text::Writer);
-#endif
-
-#ifdef PDAL_HAVE_P2G
-    REGISTER_WRITER(P2GWriter, pdal::drivers::p2g::P2gWriter);
 #endif
 
 #ifdef PDAL_HAVE_SQLITE

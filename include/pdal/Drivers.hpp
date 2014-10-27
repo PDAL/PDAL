@@ -77,10 +77,6 @@
 #include <pdal/drivers/nitf/Reader.hpp>
 #endif
 
-#ifdef PDAL_HAVE_P2G
-#include <pdal/drivers/p2g/P2gWriter.hpp>
-#endif
-
 #ifdef PDAL_HAVE_HDF5
 #include <pdal/drivers/icebridge/Reader.hpp>
 #endif

@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/drivers/p2g/P2gWriter.hpp>
+#include "P2gWriter.hpp"
 #include <pdal/PointBuffer.hpp>
 
 #include <iostream>
@@ -41,6 +41,7 @@
 #include <boost/algorithm/string.hpp>
 #include <points2grid/Interpolation.hpp>
 
+CREATE_WRITER_PLUGIN(p2g, pdal::drivers::p2g::P2gWriter)
 
 namespace pdal
 {

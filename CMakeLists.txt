@@ -92,6 +92,7 @@ option(WITH_APPS "Choose if PDAL utilities should be built" TRUE)
 option(WITH_GREYHOUND "Choose if Greyhound support should be built" FALSE)
 option(WITH_ICEBRIDGE "Choose if Icebridge support should be built" FALSE)
 option(WITH_ORACLE "Choose if Oracle support should be built" TRUE)
+option(WITH_P2G "Choose if Points2Grid support should be built" FALSE)
 option(WITH_PCL "Choose if PCL support should be built" FALSE)
 option(WITH_TESTS "Choose if PDAL unit tests should be built" TRUE)
 
@@ -468,21 +469,6 @@ option(WITH_CARIS "Choose if CARIS/BDB support should be built" FALSE)
 if(WITH_CARIS)
     set(CARIS_FOUND 1)
     set(PDAL_HAVE_CARIS 1)
-endif()
-
-
-#
-# Points2Grid (optional)
-#
-option(WITH_P2G "Choose if Points2Grid support should be built" FALSE)
-if(WITH_P2G)
-    find_package(Points2Grid)
-    if(P2G_FOUND)
-        set(CMAKE_REQUIRED_LIBRARIES "${P2G_LIBRARY}")
-        include_directories(${P2G_INCLUDE_DIR})
-        add_definitions(-DHAVE_P2G=1)
-        set(PDAL_HAVE_P2G 1)
-    endif()
 endif()
 
 

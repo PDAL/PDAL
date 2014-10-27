@@ -283,25 +283,6 @@ set (PDAL_DRIVERS_TERRASOLID_CPP
 list (APPEND PDAL_CPP ${PDAL_DRIVERS_TERRASOLID_CPP} )
 list (APPEND PDAL_HPP ${PDAL_DRIVERS_TERRASOLID_HPP} )
 
-#
-# drivers/p2g
-#
-set(PDAL_P2G_PATH drivers/p2g)
-set(PDAL_P2G_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_P2G_PATH}")
-set(PDAL_P2G_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_P2G_PATH}")
-
-set(PDAL_DRIVERS_P2G_HPP
-  "${PDAL_P2G_HEADERS}/P2gWriter.hpp"
-)
-
-set (PDAL_DRIVERS_P2G_CPP
-  "${PDAL_P2G_SRC}/P2gWriter.cpp"
-)
-
-if (P2G_FOUND)
-    list (APPEND PDAL_CPP ${PDAL_DRIVERS_P2G_CPP} )
-    list (APPEND PDAL_HPP ${PDAL_DRIVERS_P2G_HPP} )
-endif()
 
 #
 # drivers/text
@@ -692,10 +673,8 @@ target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE}
     "${MRSID_LIBRARY}"
     "${GEOTIFF_LIBRARY}"
     "${GDAL_LIBRARY}"
-    "${P2G_LIBRARY}"
     "${GEOS_LIBRARY}"
     "${HEXER_LIBRARY}"
-    "${ORACLE_LIBRARY}"
     "${ZLIB_LIBRARIES}"
 )
 
