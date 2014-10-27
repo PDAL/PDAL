@@ -37,7 +37,15 @@
 #include <vector>
 
 #include <pdal/Reader.hpp>
-#include <pdal/drivers/oci/common.hpp>
+#include <pdal/StageFactory.hpp>
+
+#include "OciCommon.hpp"
+
+PDAL_C_START
+
+PDAL_DLL void PDALRegister_oci_reader(void* factory);
+
+PDAL_C_END
 
 namespace pdal
 {
@@ -52,11 +60,7 @@ class PDAL_DLL OciReader : public pdal::Reader
 public:
     SET_STAGE_NAME("drivers.oci.reader", "OCI Reader")
     SET_STAGE_LINK("http://pdal.io/stages/drivers.oci.reader.html")
-#ifdef PDAL_HAVE_ORACLE
     SET_STAGE_ENABLED(true)
-#else
-    SET_STAGE_ENABLED(false)
-#endif
 
     OciReader() : pdal::Reader()
     {}

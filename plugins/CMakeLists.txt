@@ -6,6 +6,10 @@ if(WITH_ICEBRIDGE)
     add_subdirectory(icebridge)
 endif()
 
+if(WITH_ORACLE)
+    add_subdirectory(oci)
+endif()
+
 if(WITH_PCL)
     add_subdirectory(pcl)
 endif()

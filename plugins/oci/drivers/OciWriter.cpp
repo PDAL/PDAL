@@ -39,7 +39,7 @@
 #include <pdal/StageFactory.hpp>
 #include <pdal/GlobalEnvironment.hpp>
 
-#include <pdal/drivers/oci/Writer.hpp>
+#include "OciWriter.hpp"
 
 #include <fstream>
 
@@ -47,12 +47,7 @@
 
 #include <ogr_api.h>
 
-
-#ifdef USE_PDAL_PLUGIN_OCI
-//MAKE_WRITER_CREATOR(ociWriter, pdal::drivers::oci::Writer)
-CREATE_WRITER_PLUGIN(ociWriter, pdal::drivers::oci::Writer)
-#endif
-
+CREATE_WRITER_PLUGIN(oci, pdal::drivers::oci::OciWriter)
 
 namespace pdal
 {
@@ -62,7 +57,7 @@ namespace oci
 {
 
 
-Writer::Writer()
+OciWriter::OciWriter()
     : pdal::Writer()
     , m_createIndex(false)
     , m_bDidCreateBlockTable(false)
@@ -77,12 +72,12 @@ Writer::Writer()
     , m_orientation(Orientation::PointMajor)
 {}
 
-Writer::~Writer()
+OciWriter::~OciWriter()
 {
 }
 
 
-void Writer::initialize()
+void OciWriter::initialize()
 {
     GlobalEnvironment::get().getGDALDebug()->addLog(log());
     m_connection = connect(m_connSpec);
@@ -90,7 +85,7 @@ void Writer::initialize()
 }
 
 
-Options Writer::getDefaultOptions()
+Options OciWriter::getDefaultOptions()
 {
     Options options;
 
@@ -230,7 +225,7 @@ Options Writer::getDefaultOptions()
 }
 
 
-void Writer::runCommand(std::ostringstream const& command)
+void OciWriter::runCommand(std::ostringstream const& command)
 {
     Statement statement(m_connection->CreateStatement(command.str().c_str()));
 
@@ -241,7 +236,7 @@ void Writer::runCommand(std::ostringstream const& command)
 }
 
 
-void Writer::wipeBlockTable()
+void OciWriter::wipeBlockTable()
 {
     std::ostringstream oss;
 
@@ -293,7 +288,7 @@ void Writer::wipeBlockTable()
 }
 
 
-void Writer::createBlockIndex()
+void OciWriter::createBlockIndex()
 {
     std::ostringstream oss;
 
@@ -320,7 +315,7 @@ void Writer::createBlockIndex()
 }
 
 
-void Writer::createSDOEntry()
+void OciWriter::createSDOEntry()
 {
     std::ostringstream oss;
     oss.setf(std::ios_base::fixed, std::ios_base::floatfield);
@@ -366,7 +361,7 @@ void Writer::createSDOEntry()
 }
 
 
-bool Writer::blockTableExists()
+bool OciWriter::blockTableExists()
 {
     std::ostringstream oss;
 
@@ -402,7 +397,7 @@ bool Writer::blockTableExists()
 }
 
 
-void Writer::createBlockTable()
+void OciWriter::createBlockTable()
 {
     std::ostringstream oss;
     oss << "CREATE TABLE " << m_blockTableName <<
@@ -414,7 +409,7 @@ void Writer::createBlockTable()
 }
 
 
-bool Writer::isGeographic(int32_t srid)
+bool OciWriter::isGeographic(int32_t srid)
 {
     std::unique_ptr<char> kind(new char[OWNAME]);
     std::string stmt("SELECT COORD_REF_SYS_KIND from "
@@ -442,7 +437,7 @@ bool Writer::isGeographic(int32_t srid)
 }
 
 
-std::string Writer::loadSQLData(std::string const& filename)
+std::string OciWriter::loadSQLData(std::string const& filename)
 {
     if (!FileUtils::fileExists(filename))
     {
@@ -473,7 +468,7 @@ std::string Writer::loadSQLData(std::string const& filename)
 }
 
 
-void Writer::runFileSQL(std::string const& filename)
+void OciWriter::runFileSQL(std::string const& filename)
 {
     std::ostringstream oss;
     std::string sql = getOptions().getValueOrDefault<std::string>(filename, "");
@@ -494,7 +489,7 @@ void Writer::runFileSQL(std::string const& filename)
 
 
 // Get the geometry type
-long Writer::getGType()
+long OciWriter::getGType()
 {
     if (m_3d)
         return (m_solid ? 3008 : 3003);
@@ -502,7 +497,7 @@ long Writer::getGType()
 }
 
 
-std::string Writer::createPCElemInfo()
+std::string OciWriter::createPCElemInfo()
 {
     if (m_3d)
         return m_solid ? "(1,1007,3)" : "(1,1003,3)";
@@ -510,7 +505,7 @@ std::string Writer::createPCElemInfo()
 }
 
 
-void Writer::createPCEntry()
+void OciWriter::createPCEntry()
 {
     std::ostringstream oss;
 
@@ -691,7 +686,7 @@ void Writer::createPCEntry()
 }
 
 
-bool Writer::isValidWKT(std::string const& input)
+bool OciWriter::isValidWKT(std::string const& input)
 {
     OGRGeometryH g;
 
@@ -702,7 +697,7 @@ bool Writer::isValidWKT(std::string const& input)
 }
 
 
-void Writer::processOptions(const Options& options)
+void OciWriter::processOptions(const Options& options)
 {
     m_precision = getDefaultedOption<uint32_t>(options,
         "stream_output_precision");
@@ -752,14 +747,14 @@ void Writer::processOptions(const Options& options)
 }
 
 
-void Writer::write(const PointBuffer& buffer)
+void OciWriter::write(const PointBuffer& buffer)
 {
     writeInit();
     writeTile(buffer);
 }
 
 
-void Writer::writeInit()
+void OciWriter::writeInit()
 {
     if (m_sdo_pc_is_initialized)
         return;
@@ -792,7 +787,7 @@ void Writer::writeInit()
 }
 
 
-void Writer::ready(PointContextRef ctx)
+void OciWriter::ready(PointContextRef ctx)
 {
     bool haveOutputTable = blockTableExists();
     if (m_overwrite && haveOutputTable)
@@ -818,7 +813,7 @@ void Writer::ready(PointContextRef ctx)
 }
 
 
-void Writer::done(PointContextRef ctx)
+void OciWriter::done(PointContextRef ctx)
 {
     if (!m_connection)
         return;
@@ -840,7 +835,7 @@ void Writer::done(PointContextRef ctx)
 }
 
 
-void Writer::setElements(Statement statement, OCIArray* elem_info)
+void OciWriter::setElements(Statement statement, OCIArray* elem_info)
 {
     statement->AddElement(elem_info, 1);
     if (m_solid == true)
@@ -857,7 +852,7 @@ void Writer::setElements(Statement statement, OCIArray* elem_info)
 }
 
 
-void Writer::setOrdinates(Statement statement, OCIArray* ordinates,
+void OciWriter::setOrdinates(Statement statement, OCIArray* ordinates,
     const BOX3D& extent)
 {
 
@@ -934,7 +929,7 @@ void fillBuf(const PointBuffer& buf, char *pos, Dimension::Id::Enum d,
 } // anonymous namespace.
 
 
-void Writer::writeTile(PointBuffer const& buffer)
+void OciWriter::writeTile(PointBuffer const& buffer)
 {
     bool usePartition = (m_blockTablePartitionColumn.size() != 0);
 
@@ -1084,7 +1079,7 @@ void Writer::writeTile(PointBuffer const& buffer)
 }
 
 
-std::string Writer::shutOff_SDO_PC_Trigger()
+std::string OciWriter::shutOff_SDO_PC_Trigger()
 {
     // Don't monkey with the trigger unless the user says to.
     if (!m_disableCloudTrigger)
@@ -1124,7 +1119,7 @@ std::string Writer::shutOff_SDO_PC_Trigger()
 }
 
 
-void Writer::turnOn_SDO_PC_Trigger(std::string trigger_name)
+void OciWriter::turnOn_SDO_PC_Trigger(std::string trigger_name)
 {
     if (!trigger_name.size())
         return;
@@ -1137,7 +1132,7 @@ void Writer::turnOn_SDO_PC_Trigger(std::string trigger_name)
 }
 
 
-void Writer::updatePCExtent()
+void OciWriter::updatePCExtent()
 {
     BOX3D bounds = m_baseTableBounds;
     if (bounds.empty())

@@ -91,6 +91,7 @@ endif(WIN32)
 option(WITH_APPS "Choose if PDAL utilities should be built" TRUE)
 option(WITH_GREYHOUND "Choose if Greyhound support should be built" FALSE)
 option(WITH_ICEBRIDGE "Choose if Icebridge support should be built" FALSE)
+option(WITH_ORACLE "Choose if Oracle support should be built" TRUE)
 option(WITH_PCL "Choose if PCL support should be built" FALSE)
 option(WITH_TESTS "Choose if PDAL unit tests should be built" TRUE)
 
@@ -406,23 +407,6 @@ endif()
 
 
 #
-# Oracle support (optional)
-#
-option(WITH_ORACLE "Choose if Oracle support should be built" TRUE)
-if(WITH_ORACLE)
-    find_package(Oracle)
-    if(ORACLE_FOUND)
-        include_directories(${ORACLE_INCLUDE_DIR})
-        set(PDAL_HAVE_ORACLE 1)
-        message(STATUS "...building with Oracle")
-    else()
-        set(WITH_ORACLE FALSE)
-        set(ORACLE_LIBRARY "")
-    endif()
-endif()
-
-
-#
 # LASZIP support (optional)
 #
 option(WITH_LASZIP "Choose if LASzip support should be built" TRUE)
@@ -568,12 +552,11 @@ endif()
 
 option(USE_PDAL_PLUGIN_TEXT "Build the text driver as a plugin rather than embedding" FALSE)
 option(USE_PDAL_PLUGIN_SOCI "Build the soci driver as a plugin rather than embedding" FALSE)
-option(USE_PDAL_PLUGIN_OCI "Build the oci driver as a plugin rather than embedding" FALSE)
 option(USE_PDAL_PLUGIN_MRSID "Build the MrSID driver as a plugin rather than embedding" FALSE)
 option(USE_PDAL_PLUGIN_CARIS "Build the Caris driver as a plugin rather than embedding" FALSE)
 option(USE_PDAL_PLUGIN_NITRO "Build the NITF writer as a plugin rather than embedding" FALSE)
 
-if (USE_PDAL_PLUGIN_TEXT OR USE_PDAL_PLUGIN_SOCI OR USE_PDAL_PLUGIN_OCI OR
+if (USE_PDAL_PLUGIN_TEXT OR USE_PDAL_PLUGIN_SOCI OR
     USE_PDAL_PLUGIN_MRSID OR USE_PDAL_PLUGIN_CARIS OR USE_PDAL_PLUGIN_NITRO)
   if (PDAL_BUILD_STATIC)
     message(SEND_ERROR "Cannot build separate plugins with statically compiled PDAL")

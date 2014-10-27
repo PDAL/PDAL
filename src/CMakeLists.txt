@@ -248,35 +248,6 @@ endif()
 
 
 #
-# drivers/oci
-#
-set(PDAL_ORACLE_PATH drivers/oci)
-set(PDAL_ORACLE_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_ORACLE_PATH}")
-set(PDAL_ORACLE_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_ORACLE_PATH}")
-
-set(PDAL_DRIVERS_OCI_HPP
-  "${PDAL_ORACLE_HEADERS}/Writer.hpp"
-  "${PDAL_ORACLE_HEADERS}/OciReader.hpp"
-  "${PDAL_ORACLE_HEADERS}/oci_wrapper.h"
-  "${PDAL_ORACLE_HEADERS}/common.hpp"
-)
-
-set (PDAL_DRIVERS_OCI_CPP
-  "${PDAL_ORACLE_SRC}/oci_wrapper.cpp"
-  "${PDAL_ORACLE_SRC}/common.cpp"
-  "${PDAL_ORACLE_SRC}/OciReader.cpp"
-  "${PDAL_ORACLE_SRC}/Writer.cpp"
-)
-
-if (ORACLE_FOUND)
-if (NOT USE_PDAL_PLUGIN_OCI)
-    list (APPEND PDAL_CPP ${PDAL_DRIVERS_OCI_CPP} )
-    list (APPEND PDAL_HPP ${PDAL_DRIVERS_OCI_HPP} )
-endif()
-endif()
-
-
-#
 # drivers/qfit
 #
 set(PDAL_QFIT_PATH drivers/qfit)
@@ -630,7 +601,6 @@ source_group("Header Files\\drivers\\faux" FILES ${PDAL_DRIVERS_FAUX_HPP})
 source_group("Header Files\\drivers\\caris" FILES ${PDAL_DRIVERS_CARIS_HPP})
 source_group("Header Files\\drivers\\las" FILES ${PDAL_DRIVERS_LAS_HPP})
 source_group("Header Files\\drivers\\nitf" FILES ${PDAL_DRIVERS_NITF_HPP})
-source_group("Header Files\\drivers\\oci" FILES ${PDAL_DRIVERS_OCI_HPP})
 source_group("Header Files\\drivers\\qfit" FILES ${PDAL_DRIVERS_QFIT_HPP})
 source_group("Header Files\\drivers\\sbet" FILES ${PDAL_DRIVERS_SBET_HPP})
 source_group("Header Files\\drivers\\terrasolid" FILES ${PDAL_DRIVERS_TERRASOLID_HPP})
@@ -645,7 +615,6 @@ source_group("Source Files\\drivers\\faux" FILES ${PDAL_DRIVERS_FAUX_CPP})
 source_group("Source Files\\drivers\\caris" FILES ${PDAL_DRIVERS_CARIS_CPP})
 source_group("Source Files\\drivers\\las" FILES ${PDAL_DRIVERS_LAS_CPP})
 source_group("Source Files\\drivers\\nitf" FILES ${PDAL_DRIVERS_NITF_CPP})
-source_group("Source Files\\drivers\\oci" FILES ${PDAL_DRIVERS_OCI_CPP})
 source_group("Source Files\\drivers\\qfit" FILES ${PDAL_DRIVERS_QFIT_CPP})
 source_group("Source Files\\drivers\\sbet" FILES ${PDAL_DRIVERS_SBET_CPP})
 source_group("Source Files\\drivers\\terrasolid" FILES ${PDAL_DRIVERS_TERRASOLID_CPP})
@@ -696,12 +665,6 @@ endif()
 if (WITH_PGPOINTCLOUD)
 if (NOT USE_PDAL_PLUGIN_PGPOINTCLOUD)
 target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE} ${POSTGRESQL_LIBRARIES})
-endif()
-endif()
-
-if (WITH_ORACLE)
-if (NOT USE_PDAL_PLUGIN_OCI)
-target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE} "${ORACLE_LIBRARY}")
 endif()
 endif()
 
@@ -775,19 +738,6 @@ if (USE_PDAL_PLUGIN_SQLITE)
 endif()
 endif()
 
-if (WITH_ORACLE)
-if (USE_PDAL_PLUGIN_OCI)
-    set(PDAL_OCI_WRITER_LIB_NAME pdal_plugin_writer_oci)
-    add_library(${PDAL_OCI_WRITER_LIB_NAME} SHARED "${PDAL_ORACLE_SRC}/oci_wrapper.cpp"
-                                                    "${PDAL_ORACLE_SRC}/common.cpp"
-                                                    "${PDAL_ORACLE_SRC}/Writer.cpp")
-    target_link_libraries(${PDAL_OCI_WRITER_LIB_NAME} INTERFACE general
-                          "${PDAL_LIB_NAME}"
-                          "${ORACLE_LIBRARY}")
-    set_target_properties(${PDAL_OCI_WRITER_LIB_NAME}
-    PROPERTIES SOVERSION "${PDAL_LIB_SOVERSION}" )
-endif()
-endif()
 ###############################################################################
 # Targets installation
 
