@@ -43,12 +43,6 @@
 
 #include <vector>
 
-PDAL_C_START
-
-PDAL_DLL void PDALRegister_pgpointcloud_reader(void* factory);
-
-PDAL_C_END
-
 namespace pdal
 {
 namespace drivers

@@ -284,45 +284,6 @@ if (NOT USE_PDAL_PLUGIN_TEXT)
     list (APPEND PDAL_HPP ${PDAL_DRIVERS_TEXT_HPP} )
 endif()
 
-#
-# drivers/nitf
-#
-set(PDAL_NITF_PATH drivers/nitf)
-set(PDAL_NITF_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_NITF_PATH}")
-set(PDAL_NITF_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_NITF_PATH}")
-
-set(PDAL_DRIVERS_NITF_READER_HPP
-  "${PDAL_NITF_SRC}/MetadataReader.hpp"
-  "${PDAL_NITF_SRC}/NitfFile.hpp"
-  "${PDAL_NITF_HEADERS}/Reader.hpp"
-  "${PDAL_NITF_SRC}/tre_plugins.hpp"
-)
-
-set (PDAL_DRIVERS_NITF_READER_CPP
-  "${PDAL_NITF_SRC}/MetadataReader.cpp"
-  "${PDAL_NITF_SRC}/NitfFile.cpp"
-  "${PDAL_NITF_SRC}/Reader.cpp"
-  "${PDAL_NITF_SRC}/tre_plugins.cpp"
-)
-
-if (NITRO_FOUND)
-    list (APPEND PDAL_CPP ${PDAL_DRIVERS_NITF_READER_CPP} )
-    list (APPEND PDAL_HPP ${PDAL_DRIVERS_NITF_READER_HPP} )
-endif()
-
-set(PDAL_DRIVERS_NITF_WRITER_HPP
-  "${PDAL_NITF_HEADERS}/Writer.hpp"
-)
-
-set (PDAL_DRIVERS_NITF_WRITER_CPP
-  "${PDAL_NITF_SRC}/Writer.cpp"
-)
-
-if (NITRO_FOUND)
-    list (APPEND PDAL_CPP ${PDAL_DRIVERS_NITF_WRITER_CPP} )
-    list (APPEND PDAL_HPP ${PDAL_DRIVERS_NITF_WRITER_HPP} )
-endif()
-
 
 #
 # drivers/sbet
@@ -505,7 +466,6 @@ source_group("Header Files\\config" FILES ${PDAL_CONFIG_HPP})
 source_group("Header Files\\drivers\\faux" FILES ${PDAL_DRIVERS_FAUX_HPP})
 source_group("Header Files\\drivers\\caris" FILES ${PDAL_DRIVERS_CARIS_HPP})
 source_group("Header Files\\drivers\\las" FILES ${PDAL_DRIVERS_LAS_HPP})
-source_group("Header Files\\drivers\\nitf" FILES ${PDAL_DRIVERS_NITF_HPP})
 source_group("Header Files\\drivers\\qfit" FILES ${PDAL_DRIVERS_QFIT_HPP})
 source_group("Header Files\\drivers\\sbet" FILES ${PDAL_DRIVERS_SBET_HPP})
 source_group("Header Files\\drivers\\terrasolid" FILES ${PDAL_DRIVERS_TERRASOLID_HPP})
@@ -518,7 +478,6 @@ source_group("Source Files\\config" FILES ${PDAL_CONFIG_CPP})
 source_group("Source Files\\drivers\\faux" FILES ${PDAL_DRIVERS_FAUX_CPP})
 source_group("Source Files\\drivers\\caris" FILES ${PDAL_DRIVERS_CARIS_CPP})
 source_group("Source Files\\drivers\\las" FILES ${PDAL_DRIVERS_LAS_CPP})
-source_group("Source Files\\drivers\\nitf" FILES ${PDAL_DRIVERS_NITF_CPP})
 source_group("Source Files\\drivers\\qfit" FILES ${PDAL_DRIVERS_QFIT_CPP})
 source_group("Source Files\\drivers\\sbet" FILES ${PDAL_DRIVERS_SBET_CPP})
 source_group("Source Files\\drivers\\terrasolid" FILES ${PDAL_DRIVERS_TERRASOLID_CPP})
@@ -556,12 +515,6 @@ if(WIN32)
 endif()
 
 PDAL_ADD_LIBRARY(${PDAL_LIB_NAME} ${PDAL_SOURCES})
-
-if (WITH_NITRO)
-if (NOT USE_PDAL_PLUGIN_NITRO)
-target_link_libraries(${PDAL_LIB_NAME}  ${PDAL_LINKAGE} ${NITRO_LIBRARIES} )
-endif()
-endif()
 
 if (WITH_LASZIP)
     target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE} "${LASZIP_LIBRARY}")

@@ -10,6 +10,10 @@ if(WITH_MRSID)
     add_subdirectory(mrsid)
 endif()
 
+if(WITH_NITF)
+    add_subdirectory(nitf)
+endif()
+
 if(WITH_ORACLE)
     add_subdirectory(oci)
 endif()

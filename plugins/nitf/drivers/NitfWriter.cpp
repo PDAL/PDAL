@@ -35,14 +35,12 @@
 #include <memory>
 #include <vector>
 
-#include <pdal/drivers/nitf/Writer.hpp>
+#include "NitfWriter.hpp"
 #include <pdal/drivers/las/Writer.hpp>
+#include <pdal/pdal_macros.hpp>
 
 #include <pdal/PointBuffer.hpp>
 #include <pdal/GlobalEnvironment.hpp>
-
-
-#ifdef PDAL_HAVE_NITRO
 
 #ifdef PDAL_COMPILER_GCC
 #  pragma GCC diagnostic push
@@ -73,13 +71,13 @@
 #  pragma GCC diagnostic pop
 #endif
 
-#endif
-
 // NOTES
 //
 // is it legal to write a LAZ file?
 // syntactically, how do we name all the LAS writer options that we will pass to the las writer?
 //
+
+CREATE_WRITER_PLUGIN(nitf, pdal::drivers::nitf::NitfWriter)
 
 namespace pdal
 {
@@ -135,12 +133,12 @@ BOX3D reprojectBoxToDD(const SpatialReference& reference, const BOX3D& box)
     return output;
 }
 
-Writer::Writer() :  las::Writer(&m_oss)
+NitfWriter::NitfWriter() :  las::Writer(&m_oss)
 {
     register_tre_plugins();
 }
 
-void Writer::processOptions(const Options& options)
+void NitfWriter::processOptions(const Options& options)
 {
     las::Writer::processOptions(options);
     m_cLevel = options.getValueOrDefault<std::string>("CLEVEL","03");
@@ -170,18 +168,17 @@ void Writer::processOptions(const Options& options)
     {}
 }
 
-void Writer::write(const PointBuffer& buffer)
+void NitfWriter::write(const PointBuffer& buffer)
 {
     m_bounds.grow(buffer.calculateBounds(true));
 
     drivers::las::Writer::write(buffer);
 }
 
-void Writer::done(PointContextRef ctx)
+void NitfWriter::done(PointContextRef ctx)
 {
     las::Writer::done(ctx);
 
-#ifdef PDAL_HAVE_NITRO
     try
     {
         ::nitf::Record record(NITF_VER_21);
@@ -344,7 +341,6 @@ void Writer::done(PointContextRef ctx)
         // std::cout << t.getTrace();
         throw pdal_error(t.getMessage());
     }
-#endif
 }
 
 

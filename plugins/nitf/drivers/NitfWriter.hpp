@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2012, Michael P. Gerlek (mpg@flaxen.com)
 *
 * All rights reserved.
 *
@@ -34,18 +34,56 @@
 
 #pragma once
 
-#include <pdal/pdal_internal.hpp>
+#include <pdal/StageFactory.hpp>
+#include <pdal/drivers/las/Writer.hpp>
 
-#ifdef PDAL_HAVE_NITRO
+namespace pdal
+{
+namespace drivers
+{
+namespace nitf
+{
 
 
+class PDAL_DLL NitfWriter : public las::Writer
+{
+public:
+    SET_STAGE_NAME("drivers.nitf.writer", "NITF Writer")
+    SET_STAGE_LINK("http://pdal.io/stages/drivers.nitf.writer.html")
+    SET_STAGE_ENABLED(true)
 
-namespace pdal { namespace drivers { namespace nitf {
+    NitfWriter() ;
 
+private:
+    virtual void processOptions(const Options& options);
+    virtual void done(PointContextRef ctx);
+    virtual void write(const PointBuffer&);
 
-void register_tre_plugins();
+    BOX3D m_bounds;
+    std::string m_cLevel;
+    std::string m_sType;
+    std::string m_oStationId;
+    std::string m_fileTitle;
+    std::string m_fileClass;
+    std::string m_origName;
+    std::string m_origPhone;
+    std::string m_securityClass;
+    std::string m_securityControlAndHandling;
+    std::string m_securityClassificationSystem;
+    std::string m_imgSecurityClass;
+    std::string m_imgDate;
+    pdal::Option m_aimidb;
+    pdal::Option m_acftb;
+    std::string m_imgIdentifier2;
+    std::string m_sic;
+    std::string m_igeolob;
+    std::stringstream m_oss;
 
+    NitfWriter& operator=(const NitfWriter&); // not implemented
+    NitfWriter(const NitfWriter&); // not implemented
+};
 
-} } } // namespaces
+} // namespace nitf
+} // namespace drivers
+} // namespace pdal
 
-#endif // HAVE_NITRO

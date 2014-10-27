@@ -34,59 +34,76 @@
 
 #pragma once
 
-#include <pdal/drivers/las/Writer.hpp>
+#include <pdal/pdal_internal.hpp>
+
+#include <vector>
+
+#ifdef PDAL_COMPILER_GCC
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wredundant-decls"
+#  pragma GCC diagnostic ignored "-Wfloat-equal"
+#  pragma GCC diagnostic ignored "-Wextra"
+#  pragma GCC diagnostic ignored "-Wcast-qual"
+   // The following pragma doesn't actually work:
+   //   https://gcc.gnu.org/bugzilla/show_bug.cgi?id=61653
+#  pragma GCC diagnostic ignored "-Wliteral-suffix"
+#endif
+#ifdef PDAL_COMPILER_CLANG
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wfloat-equal"
+#  pragma clang diagnostic ignored "-Wunused-private-field"
+#endif
+
+#define IMPORT_NITRO_API
+#include <nitro/c++/import/nitf.hpp>
+
+#ifdef PDAL_COMPILER_CLANG
+#  pragma clang diagnostic pop
+#endif
+#ifdef PDAL_COMPILER_GCC
+#  pragma GCC diagnostic pop
+#endif
 
 namespace pdal
 {
-namespace drivers
-{
-namespace nitf
-{
+    class MetadataNode;
+}
 
 
-class PDAL_DLL Writer : public las::Writer
+namespace pdal { namespace drivers { namespace nitf {
+
+//
+// all the processing that is NITF-file specific goes in here
+//
+class PDAL_DLL NitfFile
 {
 public:
-    SET_STAGE_NAME("drivers.nitf.writer", "NITF Writer")
-    SET_STAGE_LINK("http://pdal.io/stages/drivers.nitf.writer.html")
-#ifdef PDAL_HAVE_NITRO
-    SET_STAGE_ENABLED(true)
-#else
-    SET_STAGE_ENABLED(false)
-#endif
+    NitfFile(const std::string& filename);
+    ~NitfFile();
 
-    Writer() ;
+    void open();
+    void close();
+
+    void getLasOffset(boost::uint64_t& offset, boost::uint64_t& length);
+
+    void extractMetadata(MetadataNode& metadata);
 
 private:
-    virtual void processOptions(const Options& options);
-    virtual void done(PointContextRef ctx);
-    virtual void write(const PointBuffer&);
+    bool locateLidarImageSegment();
+    bool locateLidarDataSegment();
 
-    BOX3D m_bounds;
-    std::string m_cLevel;
-    std::string m_sType;
-    std::string m_oStationId;
-    std::string m_fileTitle;
-    std::string m_fileClass;
-    std::string m_origName;
-    std::string m_origPhone;
-    std::string m_securityClass;
-    std::string m_securityControlAndHandling;
-    std::string m_securityClassificationSystem;
-    std::string m_imgSecurityClass;
-    std::string m_imgDate;
-    pdal::Option m_aimidb;
-    pdal::Option m_acftb;
-    std::string m_imgIdentifier2;
-    std::string m_sic;
-    std::string m_igeolob;
-    std::stringstream m_oss;
+    ::nitf::Reader *m_reader;
+    ::nitf::IOHandle *m_io;
+    ::nitf::Record m_record;
 
-    Writer& operator=(const Writer&); // not implemented
-    Writer(const Writer&); // not implemented
+    const std::string m_filename;
+    bool m_validLidarSegments;
+    ::nitf::Uint32 m_lidarImageSegment;
+    ::nitf::Uint32 m_lidarDataSegment;
+
+    NitfFile(const NitfFile&); // nope
+    NitfFile& operator=(const NitfFile&); // nope
 };
 
-} // namespace nitf
-} // namespace drivers
-} // namespace pdal
 
+} } } // namespaces

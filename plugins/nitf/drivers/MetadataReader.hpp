@@ -36,8 +36,6 @@
 
 #include <pdal/pdal_internal.hpp>
 
-#ifdef PDAL_HAVE_NITRO
-
 #include <vector>
 
 #ifdef PDAL_COMPILER_GCC
@@ -133,5 +131,3 @@ private:
 
 
 } } } // namespaces
-
-#endif // HAVE_NITRO

@@ -92,6 +92,7 @@ option(WITH_APPS "Choose if PDAL utilities should be built" TRUE)
 option(WITH_GREYHOUND "Choose if Greyhound support should be built" FALSE)
 option(WITH_ICEBRIDGE "Choose if Icebridge support should be built" FALSE)
 option(WITH_MRSID "Choose if MrSID/LiDAR support should be built" FALSE)
+option(WITH_NITF "Choose if NITF support should be built (only install supported is from http://github.com/hobu/nitro)" TRUE)
 option(WITH_ORACLE "Choose if Oracle support should be built" TRUE)
 option(WITH_P2G "Choose if Points2Grid support should be built" FALSE)
 option(WITH_PCL "Choose if PCL support should be built" FALSE)
@@ -337,32 +338,6 @@ endif()
 
 
 #
-# Nitro (optional)
-#
-option(WITH_NITRO "Choose if Nitro support (only install supported is from http://github.com/hobu/nitro)" TRUE)
-if(WITH_NITRO)
-    find_package(Nitro 2.6)
-    IF (NITRO_FOUND)
-        set(PDAL_HAVE_NITRO 1)
-        include_directories(${NITRO_INCLUDE_DIR})
-        include_directories("${NITRO_INCLUDE_DIR}/nitro/c++")
-        include_directories("${NITRO_INCLUDE_DIR}/nitro/c")
-        add_definitions("-D_REENTRANT")
-        if (WIN32)
-            add_definitions("-DSIZEOF_SIZE_T=4")
-            add_definitions("-DIMPORT_NITRO_API")
-        else()
-            add_definitions("-D__POSIX")
-        endif()
-        message(STATUS "...building with Nitro")
-    else()
-        set(WITH_NITRO FALSE)
-        set(NITRO_LIBRARIES "")
-    endif()
-endif()
-
-
-#
 # ICONV (optional)
 #
 # GDAL and libxml2 require iconv.  The library is supplied by OSGeo4W.
@@ -493,10 +468,9 @@ option(USE_PDAL_PLUGIN_TEXT "Build the text driver as a plugin rather than embed
 option(USE_PDAL_PLUGIN_SOCI "Build the soci driver as a plugin rather than embedding" FALSE)
 option(USE_PDAL_PLUGIN_MRSID "Build the MrSID driver as a plugin rather than embedding" FALSE)
 option(USE_PDAL_PLUGIN_CARIS "Build the Caris driver as a plugin rather than embedding" FALSE)
-option(USE_PDAL_PLUGIN_NITRO "Build the NITF writer as a plugin rather than embedding" FALSE)
 
 if (USE_PDAL_PLUGIN_TEXT OR USE_PDAL_PLUGIN_SOCI OR
-    USE_PDAL_PLUGIN_MRSID OR USE_PDAL_PLUGIN_CARIS OR USE_PDAL_PLUGIN_NITRO)
+    USE_PDAL_PLUGIN_MRSID OR USE_PDAL_PLUGIN_CARIS)
   if (PDAL_BUILD_STATIC)
     message(SEND_ERROR "Cannot build separate plugins with statically compiled PDAL")
   endif()
