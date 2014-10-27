@@ -35,22 +35,27 @@ if(PCL_FOUND)
     # PCL's configuration clobbers Boost find_package - do it again
     find_package(Boost 1.52 COMPONENTS program_options thread iostreams filesystem system unit_test_framework random)
 
-    message(STATUS "...building with PCL")
+    message(STATUS "..building with PCL")
 
-    #
-    # PCLVisualizer Writer
-    #
-    set(srcs
-	drivers/PCLVisualizer.cpp
-    )
+    if (PCL_VISUALIZATION_FOUND)
+        message(STATUS "..building with PCL Visualization")
+	#
+	# PCLVisualizer Writer
+	#
+	set(srcs
+	    drivers/PCLVisualizer.cpp
+	)
 
-    set(incs
-	drivers/PCLVisualizer.hpp
-	PCLConversions.hpp
-    )
+	set(incs
+	    drivers/PCLVisualizer.hpp
+	    PCLConversions.hpp
+	)
 
-    set(PCLVIZ_LIB_NAME pdal_plugin_writer_pclvisualizer)
-    PDAL_ADD_PLUGIN(${PCLVIZ_LIB_NAME} writer pclvisualizer ${srcs} ${incs})
+	set(PCLVIZ_LIB_NAME pdal_plugin_writer_pclvisualizer)
+	PDAL_ADD_PLUGIN(${PCLVIZ_LIB_NAME} writer pclvisualizer ${srcs} ${incs})
+    else()
+        message(STATUS "..building without PCL Visualization")
+    endif()
 
     #
     # PCD Reader
