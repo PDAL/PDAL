@@ -28,7 +28,7 @@
  * DEALINGS IN THE SOFTWARE.
  ****************************************************************************/
 
-#include <pdal/drivers/oci/oci_wrapper.h>
+#include "OciWrapper.h"
 
 #include <iostream>
 

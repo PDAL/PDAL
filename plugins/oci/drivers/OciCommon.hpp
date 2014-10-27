@@ -34,7 +34,7 @@
 
 #pragma once
 
-#include "oci_wrapper.h"
+#include "OciWrapper.h"
 
 #include <cpl_port.h>
 

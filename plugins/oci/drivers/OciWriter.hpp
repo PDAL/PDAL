@@ -40,13 +40,11 @@
 
 pdal::Writer* createOciWriter();
 
-#ifdef USE_PDAL_PLUGIN_OCI
 PDAL_C_START
 
 PDAL_DLL void PDALRegister_writer_oci(void* factory);
 
 PDAL_C_END
-#endif
 
 #include "common.hpp"
 
@@ -57,18 +55,14 @@ namespace drivers
 namespace oci
 {
 
-class PDAL_DLL Writer : public pdal::Writer
+class PDAL_DLL OciWriter : public pdal::Writer
 {
 public:
     SET_STAGE_NAME("drivers.oci.writer", "OCI Writer")
     SET_STAGE_LINK("http://pdal.io/stages/drivers.oci.writer.html")
-#ifdef PDAL_HAVE_ORACLE
     SET_STAGE_ENABLED(true)
-#else
-    SET_STAGE_ENABLED(false)
-#endif
-    Writer();
-    ~Writer();
+    OciWriter();
+    ~OciWriter();
 
     static Options getDefaultOptions();
 
@@ -85,8 +79,8 @@ protected:
     {}
 
 private:
-    Writer& operator=(const Writer&); // not implemented
-    Writer(const Writer&); // not implemented
+    OciWriter& operator=(const OciWriter&); // not implemented
+    OciWriter(const OciWriter&); // not implemented
 
     template<typename T>
     T getDefaultedOption(const Options& options,

@@ -51,12 +51,6 @@
 #include <pdal/drivers/icebridge/Reader.hpp>
 #endif
 
-#ifdef PDAL_HAVE_ORACLE
-#ifndef USE_PDAL_PLUGIN_OCI
-#include <pdal/drivers/oci/OciReader.hpp>
-#endif
-#endif
-
 #ifdef PDAL_HAVE_CARIS
 #ifndef USE_PDAL_PLUGIN_CARIS
 #include <pdal/drivers/caris/CloudReader.hpp>
@@ -72,12 +66,6 @@
 #include <pdal/drivers/qfit/Reader.hpp>
 #include <pdal/drivers/terrasolid/Reader.hpp>
 #include <pdal/drivers/text/Writer.hpp>
-
-#ifdef PDAL_HAVE_ORACLE
-#ifndef USE_PDAL_PLUGIN_OCI
-#include <pdal/drivers/oci/Writer.hpp>
-#endif
-#endif
 
 #ifdef PDAL_HAVE_NITRO
 #ifndef USE_PDAL_PLUGIN_NITF

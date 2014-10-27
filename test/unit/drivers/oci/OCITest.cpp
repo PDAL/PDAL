@@ -37,21 +37,13 @@
 #include <boost/cstdint.hpp>
 #include <boost/property_tree/ptree.hpp>
 
-#include <pdal/drivers/oci/OciReader.hpp>
-#include <pdal/drivers/oci/Writer.hpp>
-#include <pdal/drivers/oci/common.hpp>
-
+#include <pdal/StageFactory.hpp>
+#include <pdal/drivers/faux/Reader.hpp>
 #include <pdal/drivers/las/Reader.hpp>
 #include <pdal/drivers/las/Writer.hpp>
-
 #include <pdal/filters/Cache.hpp>
 #include <pdal/filters/Chipper.hpp>
 #include <pdal/filters/InPlaceReprojection.hpp>
-
-#include <pdal/drivers/faux/Reader.hpp>
-#include <pdal/filters/InPlaceReprojection.hpp>
-
-#include <pdal/drivers/las/Writer.hpp>
 
 #include "Support.hpp"
 #include "TestConfig.hpp"
@@ -251,15 +243,21 @@ bool WriteUnprojectedData()
     reader.setOptions(options);
     // pdal::filters::Chipper chipper(options);
     // chipper.setInput(&reader);
-    pdal::drivers::oci::Writer writer;
-    writer.setOptions(options);
-    writer.setInput(&reader);
+    StageFactory f;
+    StageFactory::WriterCreator* wc = f.getWriterCreator("drivers.oci.writer");
+    if (wc)
+    {
+        BOOST_CHECK(wc);
 
-    writer.prepare(ctx);
-    writer.execute(ctx);
+        std::unique_ptr<Writer> writer(wc());
+        writer->setOptions(options);
+        writer->setInput(&reader);
 
-    //ABELL - This test doesn't test anything anymore.  Perhaps it should.
+        writer->prepare(ctx);
+        writer->execute(ctx);
 
+        //ABELL - This test doesn't test anything anymore.  Perhaps it should.
+    }
     return true;
 }
 
@@ -379,19 +377,27 @@ BOOST_AUTO_TEST_CASE(read_unprojected_data)
     Option& verbose = options.getOptionByRef("verbose");
     verbose.setValue<std::string>( "7");
 
-    pdal::drivers::oci::OciReader reader;
-    reader.setOptions(options);
-    PointContext ctx;
-    reader.prepare(ctx);
-    PointBufferSet pbSet = reader.execute(ctx);
-    BOOST_CHECK_EQUAL(pbSet.size(), 1);
-    PointBufferPtr buf = *pbSet.begin();
-    BOOST_CHECK_EQUAL(buf->size(), 1065);
+    StageFactory f;
+    StageFactory::ReaderCreator* rc = f.getReaderCreator("drivers.oci.reader");
+    if (rc)
+    {
+        BOOST_CHECK(rc);
 
-    // checkUnProjectedPoints(*buf);
+        std::unique_ptr<Reader> reader(rc());
 
-    // compareAgainstSourceBuffer(*buf,  Support::datapath("autzen-utm-chipped-25.las"));
-    compareAgainstSourceBuffer(*buf, Support::datapath("autzen/autzen-utm.las"));
+        reader->setOptions(options);
+        PointContext ctx;
+        reader->prepare(ctx);
+        PointBufferSet pbSet = reader->execute(ctx);
+        BOOST_CHECK_EQUAL(pbSet.size(), 1);
+        PointBufferPtr buf = *pbSet.begin();
+        BOOST_CHECK_EQUAL(buf->size(), 1065);
+
+        // checkUnProjectedPoints(*buf);
+
+        // compareAgainstSourceBuffer(*buf,  Support::datapath("autzen-utm-chipped-25.las"));
+        compareAgainstSourceBuffer(*buf, Support::datapath("autzen/autzen-utm.las"));
+    }
 }
 
 
