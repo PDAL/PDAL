@@ -50,6 +50,9 @@
 #define MAKE_WRITER_CREATOR(T, FullT) \
     pdal::Writer* create_##T() \
         { pdal::Writer *w = new FullT(); return w; }
+#define MAKE_KERNEL_CREATOR(T, FullT) \
+    pdal::Kernel* create_##T() \
+        { pdal::Kernel *a = new FullT(); return a; }
 
 //
 // macros to register the stage creators
@@ -63,33 +66,53 @@
 #define REGISTER_FILTER(T, FullT) \
     registerDriverInfo<FullT>(); \
     registerFilter(FullT::s_getName(), create_##T)
+#define REGISTER_KERNEL(T, FullT) \
+    registerKernelDriverInfo<FullT>(); \
+    registerKernel(FullT::s_getName(), create_##T)
 
-#define CREATE_READER_PLUGIN(DriverName, DriverFullType) \
-    PDAL_C_START PDAL_DLL void PDALRegister_reader_##DriverName(void* factory) \
+#define CREATE_READER_PLUGIN(T, FullT) \
+    MAKE_READER_CREATOR(T, FullT) \
+    PDAL_C_START PDAL_DLL void PDALRegister_reader_##T(void* factory) \
     { \
         pdal::StageFactory& f = *(pdal::StageFactory*) factory; \
-        f.registerDriverInfo< DriverFullType>(); \
-        f.registerReader(DriverFullType::s_getName(), create_##DriverName##Reader); \
+        f.registerDriverInfo< FullT>(); \
+        f.registerReader(FullT::s_getName(), create_##T); \
     } \
-    PDAL_C_END
+    PDAL_C_END \
+    SET_PLUGIN_VERSION(T)
 
-#define CREATE_FILTER_PLUGIN(DriverName, DriverFullType) \
-    PDAL_C_START PDAL_DLL void PDALRegister_filter_##DriverName(void* factory) \
+#define CREATE_FILTER_PLUGIN(T, FullT) \
+    MAKE_FILTER_CREATOR(T, FullT) \
+    PDAL_C_START PDAL_DLL void PDALRegister_filter_##T(void* factory) \
     { \
         pdal::StageFactory& f = *(pdal::StageFactory*) factory; \
-        f.registerDriverInfo< DriverFullType>(); \
-        f.registerFilter(DriverFullType::s_getName(), create_##DriverName##Filter); \
+        f.registerDriverInfo< FullT>(); \
+        f.registerFilter(FullT::s_getName(), create_##T); \
     } \
-    PDAL_C_END
+    PDAL_C_END \
+    SET_PLUGIN_VERSION(T)
 
-#define CREATE_WRITER_PLUGIN(DriverName, DriverFullType) \
-    PDAL_C_START PDAL_DLL void PDALRegister_writer_##DriverName(void* factory) \
+#define CREATE_WRITER_PLUGIN(T, FullT) \
+    MAKE_WRITER_CREATOR(T, FullT) \
+    PDAL_C_START PDAL_DLL void PDALRegister_writer_##T(void* factory) \
     { \
         pdal::StageFactory& f = *(pdal::StageFactory*) factory; \
-        f.registerDriverInfo< DriverFullType>(); \
-        f.registerWriter(DriverFullType::s_getName(), create_##DriverName##Writer); \
+        f.registerDriverInfo< FullT>(); \
+        f.registerWriter(FullT::s_getName(), create_##T); \
     } \
-    PDAL_C_END
+    PDAL_C_END \
+    SET_PLUGIN_VERSION(T)
+
+#define CREATE_KERNEL_PLUGIN(T, FullT) \
+    MAKE_KERNEL_CREATOR(T, FullT) \
+    PDAL_C_START PDAL_DLL void PDALRegister_kernel_##T(void* factory) \
+    { \
+        pdal::KernelFactory& f = *(pdal::KernelFactory*) factory; \
+        f.registerKernelDriverInfo< FullT>(); \
+        f.registerKernel(FullT::s_getName(), create_##T); \
+    } \
+    PDAL_C_END \
+    SET_PLUGIN_VERSION(T)
 
 #define SET_PLUGIN_VERSION(DriverName) \
     PDAL_C_START PDAL_DLL int PDALRegister_version_##DriverName() \

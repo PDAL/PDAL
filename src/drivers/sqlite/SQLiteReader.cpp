@@ -36,8 +36,8 @@
 #include <pdal/PointBuffer.hpp>
 
 #ifdef USE_PDAL_PLUGIN_SOCI
-MAKE_READER_CREATOR(sqliteReader, pdal::drivers::sqlite::Reader)
-CREATE_READER_PLUGIN(sqlite, pdal::drivers::sqlite::Reader)
+//MAKE_READER_CREATOR(sqliteReader, pdal::drivers::sqlite::Reader)
+CREATE_READER_PLUGIN(sqliteReader, pdal::drivers::sqlite::Reader)
 #endif
 
 

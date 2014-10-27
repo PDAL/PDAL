@@ -45,8 +45,8 @@ namespace pdal
 namespace kernel
 {
 
-Info::Info(int argc, const char* argv[])
-    : Application(argc, argv, "info")
+Info::Info()
+    : Kernel()
     , m_inputFile("")
     , m_showStats(false)
     , m_showSchema(false)

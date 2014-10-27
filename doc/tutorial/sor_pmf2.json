@@ -1,0 +1,15 @@
+{
+  "pipeline": {
+    "name": "Progressive Morphological Filter with Outlier Removal",
+    "version": 1.0,
+    "filters": [{
+        "name": "StatisticalOutlierRemoval",
+        "setMeanK": 8,
+        "setStddevMulThresh": 3.0
+      }, {
+        "name": "ProgressiveMorphologicalFilter",
+        "setCellSize": 1.5
+    }]
+  }
+}
+

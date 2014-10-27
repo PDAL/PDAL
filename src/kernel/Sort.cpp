@@ -44,8 +44,8 @@ namespace pdal
 namespace kernel
 {
 
-Sort::Sort(int argc, const char* argv[]) :
-    Application(argc, argv, "sort"), m_bCompress(false), m_bForwardMetadata(false)
+Sort::Sort() :
+    Kernel(), m_bCompress(false), m_bForwardMetadata(false)
 {}
 
 

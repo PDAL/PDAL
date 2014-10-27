@@ -39,8 +39,8 @@
 #include <pdal/drivers/oci/OciReader.hpp>
 
 #ifdef USE_PDAL_PLUGIN_OCI
-MAKE_READER_CREATOR(ociReader, pdal::drivers::oci::Reader)
-CREATE_READER_PLUGIN(oci, pdal::drivers::oci::Reader)
+//MAKE_READER_CREATOR(ociReader, pdal::drivers::oci::Reader)
+CREATE_READER_PLUGIN(ociReader, pdal::drivers::oci::Reader)
 #endif
 
 namespace pdal

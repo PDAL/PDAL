@@ -15,4 +15,5 @@ Contents:
    reading
    writing
    pcl_block_tutorial
+   pcl_ground
 
