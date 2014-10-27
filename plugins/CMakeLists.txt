@@ -6,6 +6,10 @@ if(WITH_ICEBRIDGE)
     add_subdirectory(icebridge)
 endif()
 
+if(WITH_MRSID)
+    add_subdirectory(mrsid)
+endif()
+
 if(WITH_ORACLE)
     add_subdirectory(oci)
 endif()

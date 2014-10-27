@@ -91,6 +91,7 @@ endif(WIN32)
 option(WITH_APPS "Choose if PDAL utilities should be built" TRUE)
 option(WITH_GREYHOUND "Choose if Greyhound support should be built" FALSE)
 option(WITH_ICEBRIDGE "Choose if Icebridge support should be built" FALSE)
+option(WITH_MRSID "Choose if MrSID/LiDAR support should be built" FALSE)
 option(WITH_ORACLE "Choose if Oracle support should be built" TRUE)
 option(WITH_P2G "Choose if Points2Grid support should be built" FALSE)
 option(WITH_PCL "Choose if PCL support should be built" FALSE)
@@ -411,25 +412,6 @@ if(ZLIB_FOUND)
 	mark_as_advanced(CLEAR ZLIB_INCLUDE_DIR)
 	mark_as_advanced(CLEAR ZLIB_LIBRARY)
 	set(PDAL_HAVE_ZLIB 1)
-endif()
-
-
-#
-# MrSID/LiDAR support (optional)
-#
-option(WITH_MRSID "Choose if MrSID/LiDAR support should be built" FALSE)
-
-if(WITH_MRSID)
-
-    set(MRSID_ROOT "/Users/hobu/installs/mrsid/Lidar_DSDK" CACHE STRING "Root directory of MrSID install")
-
-    find_package(MrSID)
-    if(MRSID_FOUND)
-        set(CMAKE_REQUIRED_LIBRARIES "${MRSID_LIBRARY}")
-        include_directories(${MRSID_INCLUDE_DIR})
-        add_definitions(-DHAVE_MRSID=1)
-        set(PDAL_HAVE_MRSID 1)
-    endif()
 endif()
 
 

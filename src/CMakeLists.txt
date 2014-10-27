@@ -199,26 +199,6 @@ list (APPEND PDAL_CPP ${PDAL_DRIVERS_BPF_CPP} )
 list (APPEND PDAL_HPP ${PDAL_DRIVERS_BPF_HPP} )
 
 
-#
-# drivers/mrsid
-#
-set(PDAL_MRSID_PATH drivers/mrsid)
-set(PDAL_MRSID_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_MRSID_PATH}")
-set(PDAL_MRSID_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_MRSID_PATH}")
-
-set(PDAL_DRIVERS_MRSID_HPP
-  "${PDAL_MRSID_HEADERS}/Reader.hpp"
-)
-
-set (PDAL_DRIVERS_MRSID_CPP
-  "${PDAL_MRSID_SRC}/Reader.cpp"
-)
-
-if (MRSID_FOUND)
-    list (APPEND PDAL_CPP ${PDAL_DRIVERS_MRSID_CPP} )
-    list (APPEND PDAL_HPP ${PDAL_DRIVERS_MRSID_HPP} )
-endif()
-
 
 #
 # drivers/caris
@@ -598,7 +578,6 @@ endif()
 target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE}
     "${CMAKE_THREAD_LIBS_INIT}"
     "${CMAKE_DL_LIBS}"
-    "${MRSID_LIBRARY}"
     "${GEOTIFF_LIBRARY}"
     "${GDAL_LIBRARY}"
     "${GEOS_LIBRARY}"

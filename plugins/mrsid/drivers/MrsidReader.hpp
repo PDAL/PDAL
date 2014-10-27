@@ -32,8 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_DRIVERS_MrSID_READER_HPP
-#define INCLUDED_DRIVERS_MrSID_READER_HPP
+#pragma once
 
 #include <pdal/Reader.hpp>
 #include <pdal/ReaderIterator.hpp>
@@ -51,6 +50,12 @@ namespace LizardTech
 class PointSource;
 }
 
+PDAL_C_START
+
+PDAL_DLL void PDALRegister_reader_mrsid(void* factory);
+
+PDAL_C_END
+
 namespace pdal
 {
 namespace drivers
@@ -61,21 +66,17 @@ namespace mrsid
 
 // The MrSIDReader wraps LT's PointSource abstraction
 //
-class PDAL_DLL Reader : public pdal::Reader
+class PDAL_DLL MrsidReader : public pdal::Reader
 {
 
 public:
     SET_STAGE_NAME("drivers.mrsid.reader", "MrSID Reader")
     SET_STAGE_LINK("http://www.pdal.io/stages/drivers.mrsid.reader.html")
-#ifdef PDAL_HAVE_MRSID
     SET_STAGE_ENABLED(true)
-#else
-    SET_STAGE_ENABLED(false)
-#endif
 
-    virtual ~Reader();
-    Reader();
-    Reader(LizardTech::PointSource *ps);
+    virtual ~MrsidReader();
+    MrsidReader() : Writer() {};
+    MrsidReader(LizardTech::PointSource *ps);
 
     static Options getDefaultOptions();
     static std::vector<Dimension> getDefaultDimensions();
@@ -92,8 +93,8 @@ private:
     virtual void initialize();
     int SchemaToPointInfo(const Schema &schema, LizardTech::PointInfo &pointInfo) const;
     Dimension LTChannelToPDalDimension(const LizardTech::ChannelInfo & channel, pdal::Schema const& dimensions) const;
-    Reader& operator=(const Reader&); // not implemented
-    Reader(const Reader&); // not implemented
+    MrsidReader& operator=(const MrsidReader&); // not implemented
+    MrsidReader(const MrsidReader&); // not implemented
 };
 
 namespace iterators
@@ -102,10 +103,10 @@ namespace iterators
 namespace sequential
 {
 
-class Reader : public pdal::ReaderSequentialIterator
+class MrsidReader : public pdal::ReaderSequentialIterator
 {
 public:
-    Reader(const pdal::drivers::mrsid::Reader& reader, PointBuffer& buffer, boost::uint32_t numPoints);
+    MrsidReader(const pdal::drivers::mrsid::MrsidReader& reader, PointBuffer& buffer, boost::uint32_t numPoints);
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t);
@@ -113,7 +114,7 @@ private:
     bool atEndImpl() const;
     boost::uint32_t m_numPoints;
 
-    const pdal::drivers::mrsid::Reader& m_reader;
+    const pdal::drivers::mrsid::MrsidReader& m_reader;
 };
 
 } // sequential
@@ -121,17 +122,17 @@ private:
 namespace random
 {
 
-class Reader : public pdal::ReaderRandomIterator
+class MrsidReader : public pdal::ReaderRandomIterator
 {
 public:
-    Reader(const pdal::drivers::mrsid::Reader& reader,
+    MrsidReader(const pdal::drivers::mrsid::MrsidReader& reader,
            PointBuffer& buffer, boost::uint32_t numPoints);
 
 private:
     boost::uint64_t seekImpl(boost::uint64_t);
     boost::uint32_t readBufferImpl(PointBuffer&);
 
-    const pdal::drivers::mrsid::Reader& m_reader;
+    const pdal::drivers::mrsid::MrsidReader& m_reader;
     boost::uint32_t m_numPoints;
 
 };
@@ -144,6 +145,3 @@ private:
 }
 }
 } // namespaces
-
-
-#endif
