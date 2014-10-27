@@ -32,25 +32,32 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_PDAL_KERNEL_DIFF_HPP
-#define INCLUDED_PDAL_KERNEL_DIFF_HPP
+#pragma once
 
+#include <pdal/kernel/Kernel.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
 
 #include <boost/property_tree/ptree.hpp>
 
+PDAL_C_START
 
-#include "Application.hpp"
+PDAL_DLL void PDALRegister_kernel_diff(void* factory);
+
+PDAL_C_END
 
 namespace pdal { namespace kernel {
     
 
-class PDAL_DLL Diff : public Application
+class PDAL_DLL Diff : public Kernel
 {
 public:
-    Diff(int argc, const char* argv[]);
+    SET_KERNEL_NAME ("drivers.diff.kernel", "Diff Kernel")
+    SET_KERNEL_LINK ("http://pdal.io/kernels/drivers.diff.kernel.html")
+    SET_KERNEL_ENABLED (true)
+ 
+    Diff();
     int execute(); // overrride
     
     
@@ -68,5 +75,3 @@ private:
 };
 
 }} // pdal::kernel
-
-#endif

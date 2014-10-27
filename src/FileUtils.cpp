@@ -140,6 +140,11 @@ void FileUtils::renameFile(const string& dest, const string& src)
 
 bool FileUtils::fileExists(const string& name)
 {
+    // filename may actually be a greyhound uri + pipelineId
+    std::string http = name.substr(0, 4);
+    if (boost::iequals(http, "http"))
+        return true;
+ 
     return boost::filesystem::exists(name) ||
         boost::algorithm::iequals(name, "STDIN");
 }

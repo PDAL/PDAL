@@ -132,16 +132,17 @@ if (WITH_NITRO)
     ENDFOREACH(file)
 endif (WITH_NITRO)
 
-if (WITH_PCL AND WITH_PCL_TEST)
-    set(PDAL_PCL_TEST_CPP
-        filters/PCLBlockFilterTest.cpp
-        )
 
-    FOREACH(file ${PDAL_PCL_TEST_CPP})
-        SET(PDAL_UNITTEST_TEST_SRC "${PDAL_UNITTEST_TEST_SRC};${file}"
-            CACHE INTERNAL "source files for test")
-    ENDFOREACH(file)
-endif (WITH_PCL AND WITH_PCL_TEST)
+# Removed WITH_PCL/WITH_PCL_TEST conditional - StageFactory now tests for PCL
+# internally. This will eventually be moved to plugins/pcl/test.
+set(PDAL_PCL_TEST_CPP
+    filters/PCLBlockFilterTest.cpp
+)
+
+FOREACH(file ${PDAL_PCL_TEST_CPP})
+    SET(PDAL_UNITTEST_TEST_SRC "${PDAL_UNITTEST_TEST_SRC};${file}"
+	CACHE INTERNAL "source files for test")
+ENDFOREACH(file)
 
 if (WITH_HDF5)
     set(PDAL_ICEBRIDGE_TEST_CPP

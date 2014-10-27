@@ -51,8 +51,8 @@
 
 
 #ifdef USE_PDAL_PLUGIN_PGPOINTCLOUD
-MAKE_READER_CREATOR(pgpointcloudReader, pdal::drivers::pgpointcloud::Reader)
-CREATE_READER_PLUGIN(pgpointcloud, pdal::drivers::pgpointcloud::Reader)
+//MAKE_READER_CREATOR(pgpointcloudReader, pdal::drivers::pgpointcloud::Reader)
+CREATE_READER_PLUGIN(pgpointcloudReader, pdal::drivers::pgpointcloud::Reader)
 #endif
 
 

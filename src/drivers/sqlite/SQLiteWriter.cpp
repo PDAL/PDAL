@@ -45,8 +45,8 @@
 #include <ogr_api.h>
 
 #ifdef USE_PDAL_PLUGIN_SQLITE
-MAKE_WRITER_CREATOR(sqliteWriter, pdal::drivers::sqlite::Writer)
-CREATE_WRITER_PLUGIN(sqlite, pdal::drivers::sqlite::Writer)
+//MAKE_WRITER_CREATOR(sqliteWriter, pdal::drivers::sqlite::Writer)
+CREATE_WRITER_PLUGIN(sqliteWriter, pdal::drivers::sqlite::Writer)
 #endif
 
 

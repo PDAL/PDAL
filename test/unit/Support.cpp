@@ -80,7 +80,13 @@ std::string Support::binpath()
 {
     string argv0 = boost::unit_test::framework::master_test_suite().argv[0];
     string path = pdal::FileUtils::toAbsolutePath(argv0);
-    return pdal::FileUtils::getDirectory(path);
+    std::string binpath = pdal::FileUtils::getDirectory(path);
+
+#ifdef PDAL_APP_BUNDLE
+    return binpath + "/pdal.app/Contents/MacOS";
+#else
+    return binpath;
+#endif
 }
 
 std::string Support::binpath(const std::string& file)

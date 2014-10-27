@@ -35,10 +35,11 @@
 #include <pdal/kernel/Pipeline.hpp>
 
 #include <boost/scoped_ptr.hpp>
+
 namespace pdal { namespace kernel {
     
-Pipeline::Pipeline(int argc, const char* argv[])
-    : Application(argc, argv, "pipeline")
+Pipeline::Pipeline()
+    : Kernel()
     , m_inputFile("")
     , m_validate(false)
 {

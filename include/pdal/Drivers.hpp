@@ -101,15 +101,6 @@
 #include <pdal/drivers/icebridge/Reader.hpp>
 #endif
 
-#ifdef PDAL_HAVE_PCL
-#include <pdal/drivers/pcd/Reader.hpp>
-#include <pdal/drivers/pcd/Writer.hpp>
-#endif
-
-#ifdef PDAL_HAVE_PCL_VISUALIZE
-#include <pdal/drivers/pclvisualizer/PCLVisualizer.hpp>
-#endif
-
 #ifdef PDAL_HAVE_SQLITE
 #ifndef USE_PDAL_PLUGIN_SQLITE
 #include <pdal/drivers/sqlite/SQLiteReader.hpp>
