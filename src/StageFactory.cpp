@@ -91,10 +91,6 @@ MAKE_READER_CREATOR(TerrasolidReader, pdal::drivers::terrasolid::Reader)
 
 MAKE_READER_CREATOR(SbetReader, pdal::drivers::sbet::SbetReader)
 
-#ifdef PDAL_HAVE_HDF5
-MAKE_READER_CREATOR(IcebridgeReader, pdal::drivers::icebridge::Reader)
-#endif
-
 //
 // define the functions to create the filters
 //
@@ -385,10 +381,6 @@ void StageFactory::registerKnownReaders()
     REGISTER_READER(TerrasolidReader, pdal::drivers::terrasolid::Reader);
     REGISTER_READER(BpfReader, pdal::BpfReader);
     REGISTER_READER(SbetReader, pdal::drivers::sbet::SbetReader);
-
-#ifdef PDAL_HAVE_HDF5
-    REGISTER_READER(IcebridgeReader, pdal::drivers::icebridge::Reader);
-#endif
 }
 
 

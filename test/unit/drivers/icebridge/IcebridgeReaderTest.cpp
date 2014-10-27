@@ -38,8 +38,7 @@
 #include <pdal/PointBuffer.hpp>
 #include <pdal/PipelineReader.hpp>
 #include <pdal/PipelineManager.hpp>
-
-#include <pdal/drivers/icebridge/Reader.hpp>
+#include <pdal/StageFactory.hpp>
 
 #include "StageTester.hpp"
 #include "Support.hpp"
@@ -94,49 +93,56 @@ BOOST_AUTO_TEST_SUITE(IcebridgeReaderTest)
 
 BOOST_AUTO_TEST_CASE(testRead)
 {
-    Option filename("filename", getFilePath(), "");
-    Options options(filename);
-    drivers::icebridge::Reader reader;
-    reader.setOptions(options);
+    StageFactory f;
+    StageFactory::ReaderCreator* rc = f.getReaderCreator("drivers.icebridge.reader");
+    if (rc)
+    {
+        BOOST_CHECK(rc);
 
-    PointContext ctx;
-    reader.prepare(ctx);
-    PointBufferSet pbSet = reader.execute(ctx);
-    BOOST_CHECK_EQUAL(pbSet.size(), 1);
-    PointBufferPtr buf = *pbSet.begin();
-    BOOST_CHECK_EQUAL(buf->size(), 2);
+        Option filename("filename", getFilePath(), "");
+        Options options(filename);
+        std::unique_ptr<Reader> reader(rc());
+        reader->setOptions(options);
 
-    checkPoint(
-            *buf,
-            0,
-            141437548,     // time
-            82.605319,      // latitude
-            301.406196,     // longitude
-            18.678,         // elevation
-            2408,           // xmtSig
-            181,            // rcvSig
-            49.91,          // azimuth
-            -4.376,         // pitch
-            0.608,          // roll
-            2.9,            // gpsPdop
-            20.0,           // pulseWidth
-            0.0);           // relTime
+        PointContext ctx;
+        reader->prepare(ctx);
+        PointBufferSet pbSet = reader->execute(ctx);
+        BOOST_CHECK_EQUAL(pbSet.size(), 1);
+        PointBufferPtr buf = *pbSet.begin();
+        BOOST_CHECK_EQUAL(buf->size(), 2);
 
-    checkPoint(
-            *buf,
-            1,
-            141437548,     // time
-            82.605287,      // latitude
-            301.404862,     // longitude
-            18.688,         // elevation
-            2642,           // xmtSig
-            173,            // rcvSig
-            52.006,         // azimuth
-            -4.376,         // pitch
-            0.609,          // roll
-            2.9,            // gpsPdop
-            17.0,           // pulseWidth
-            0.0);           // relTime
+        checkPoint(
+                *buf,
+                0,
+                141437548,     // time
+                82.605319,      // latitude
+                301.406196,     // longitude
+                18.678,         // elevation
+                2408,           // xmtSig
+                181,            // rcvSig
+                49.91,          // azimuth
+                -4.376,         // pitch
+                0.608,          // roll
+                2.9,            // gpsPdop
+                20.0,           // pulseWidth
+                0.0);           // relTime
+
+        checkPoint(
+                *buf,
+                1,
+                141437548,     // time
+                82.605287,      // latitude
+                301.404862,     // longitude
+                18.688,         // elevation
+                2642,           // xmtSig
+                173,            // rcvSig
+                52.006,         // azimuth
+                -4.376,         // pitch
+                0.609,          // roll
+                2.9,            // gpsPdop
+                17.0,           // pulseWidth
+                0.0);           // relTime
+    }
 }
 
 BOOST_AUTO_TEST_CASE(testPipeline)

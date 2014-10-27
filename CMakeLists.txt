@@ -90,6 +90,7 @@ endif(WIN32)
 # Choose package components
 option(WITH_APPS "Choose if PDAL utilities should be built" TRUE)
 option(WITH_GREYHOUND "Choose if Greyhound support should be built" FALSE)
+option(WITH_ICEBRIDGE "Choose if Icebridge support should be built" FALSE)
 option(WITH_PCL "Choose if PCL support should be built" FALSE)
 option(WITH_TESTS "Choose if PDAL unit tests should be built" TRUE)
 
@@ -497,26 +498,6 @@ if(WITH_P2G)
         include_directories(${P2G_INCLUDE_DIR})
         add_definitions(-DHAVE_P2G=1)
         set(PDAL_HAVE_P2G 1)
-    endif()
-endif()
-
-
-#
-# HDF5 - optional
-#
-option(WITH_HDF5 "Choose if HDF5 support should be built" FALSE)
-if(WITH_HDF5)
-    set (HDF5_FIND_COMPONENTS "CXX")
-    find_package(HDF5 COMPONENTS CXX)
-    if(HDF5_FOUND)
-        include_directories(${HDF5_INCLUDE_DIR})
-        add_definitions(-DHAVE_HDF5=1)
-        set(PDAL_HAVE_HDF5 1)
-        message(STATUS "Found HDF5")
-    else()
-        set(WITH_HDF5 FALSE)
-        set(PDAL_HAVE_HDF5 0)
-        message(STATUS "HDF5 not found")
     endif()
 endif()
 
