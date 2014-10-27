@@ -36,11 +36,11 @@
 
 #include <string>
 
-#include <pdal/WebSocketClient.hpp>
 #include <pdal/Dimension.hpp>
 #include <pdal/pdal_error.hpp>
 
-#include <pdal/drivers/greyhound/Reader.hpp>
+#include "WebSocketClient.hpp"
+#include "GreyhoundReader.hpp"
 
 namespace pdal
 {

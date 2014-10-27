@@ -89,8 +89,9 @@ endif(WIN32)
 
 # Choose package components
 option(WITH_APPS "Choose if PDAL utilities should be built" TRUE)
-option(WITH_TESTS "Choose if PDAL unit tests should be built" TRUE)
+option(WITH_GREYHOUND "Choose if Greyhound support should be built" FALSE)
 option(WITH_PCL "Choose if PCL support should be built" FALSE)
+option(WITH_TESTS "Choose if PDAL unit tests should be built" TRUE)
 
 # Choose to use pkg-config or not
 option(WITH_PKGCONFIG "Choose whether a pkgconfig file (PDAL.pc) should be installed" TRUE)
@@ -519,62 +520,6 @@ if(WITH_HDF5)
         set(WITH_HDF5 FALSE)
         set(PDAL_HAVE_HDF5 0)
         message(STATUS "HDF5 not found")
-    endif()
-endif()
-
-
-#
-# Json - optional
-#
-option(WITH_JSON "Choose if JsonCpp support should be built" FALSE)
-if(WITH_JSON OR WITH_GREYHOUND)
-    find_package(JSONCPP)
-    if(JSONCPP_FOUND)
-        include_directories(${JSONCPP_INCLUDE_DIR})
-        add_definitions(-DHAVE_JSONCPP=1)
-        set(PDAL_HAVE_JSONCPP 1)
-        message(STATUS "Found Jsoncpp ${JSONCPP_INCLUDE_DIR} ${JSONCPP_LIBRARIES}")
-    else()
-        set(WITH_JSONCPP FALSE)
-        set(PDAL_HAVE_JSONCPP 0)
-        message(STATUS "Jsoncpp not found")
-    endif()
-endif()
-
-
-#
-# WebSocket++ - optional
-#
-option(WITH_WEBSOCKETPP "Choose if WebSocket++ support should be built" FALSE)
-if(WITH_WEBSOCKETPP OR WITH_GREYHOUND)
-    find_package(WEBSOCKETPP)
-    if(WEBSOCKETPP_FOUND)
-        include_directories(${WEBSOCKETPP_INCLUDE_DIR})
-        add_definitions(-D_WEBSOCKETPP_NULLPTR_TOKEN_=0)
-        add_definitions(-DHAVE_WEBSOCKETPP=1)
-        set(PDAL_HAVE_WEBSOCKETPP 1)
-        message(STATUS "Found WebSocket++ ${WEBSOCKETPP_INCLUDE_DIR} ${WEBSOCKETPP_LIBRARIES}")
-    else()
-        set(WITH_WEBSOCKETPP FALSE)
-        set(PDAL_HAVE_WEBSOCKETPP 0)
-        message(STATUS "WebSocket++ not found")
-    endif()
-endif()
-
-
-#
-# Greyhound - optional
-#
-option(WITH_GREYHOUND "Choose if Greyhound support should be built" FALSE)
-if(WITH_GREYHOUND)
-    if(WEBSOCKETPP_FOUND AND JSONCPP_FOUND)
-        set(WITH_GREYHOUND TRUE)
-        set(PDAL_HAVE_GREYHOUND 1)
-        message(STATUS "Building with Greyhound support")
-    else()
-        set(WITH_GREYHOUND FALSE)
-        set(PDAL_HAVE_GREYHOUND 0)
-        message(STATUS "Greyhound dependencies not found")
     endif()
 endif()
 

@@ -64,10 +64,6 @@ MAKE_READER_CREATOR(LasReader, pdal::drivers::las::Reader)
 MAKE_READER_CREATOR(BpfReader, pdal::BpfReader)
 MAKE_READER_CREATOR(BufferReader, drivers::buffer::BufferReader)
 
-#ifdef PDAL_HAVE_GREYHOUND
-MAKE_READER_CREATOR(GreyhoundReader, pdal::drivers::greyhound::GreyhoundReader)
-#endif
-
 #ifdef PDAL_HAVE_ORACLE
 #ifndef USE_PDAL_PLUGIN_OCI
 MAKE_READER_CREATOR(OciReader, pdal::drivers::oci::OciReader)
@@ -180,9 +176,11 @@ StageFactory::StageFactory()
 
 std::string StageFactory::inferReaderDriver(const std::string& filename)
 {
+    StageFactory f;
+
     // filename may actually be a greyhound uri + pipelineId
     std::string http = filename.substr(0, 4);
-    if (boost::iequals(http, "http"))
+    if (boost::iequals(http, "http") && f.getReaderCreator("drivers.greyhound.reader"))
         return "drivers.greyhound.reader";
 
     std::string ext = boost::filesystem::extension(filename);
@@ -190,7 +188,9 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
     drivers["las"] = "drivers.las.reader";
     drivers["laz"] = "drivers.las.reader";
     drivers["bin"] = "drivers.terrasolid.reader";
-    drivers["greyhound"] = "drivers.greyhound.reader";
+
+    if (f.getReaderCreator("drivers.greyhound.reader"))
+        drivers["greyhound"] = "drivers.greyhound.reader";
     drivers["qi"] = "drivers.qfit.reader";
     drivers["nitf"] = "drivers.nitf.reader";
     drivers["ntf"] = "drivers.nitf.reader";
@@ -200,7 +200,6 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
     drivers["icebridge"] = "drivers.icebridge.reader";
     drivers["sqlite"] = "drivers.sqlite.reader";
     
-    StageFactory f;
     if (f.getReaderCreator("drivers.pcd.reader"))
         drivers["pcd"] = "drivers.pcd.reader";
 
@@ -393,11 +392,6 @@ void StageFactory::registerKnownReaders()
     REGISTER_READER(QfitReader, pdal::drivers::qfit::Reader);
     REGISTER_READER(TerrasolidReader, pdal::drivers::terrasolid::Reader);
     REGISTER_READER(BpfReader, pdal::BpfReader);
-
-#ifdef PDAL_HAVE_GREYHOUND
-    REGISTER_READER(GreyhoundReader, pdal::drivers::greyhound::GreyhoundReader);
-#endif
-
     REGISTER_READER(SbetReader, pdal::drivers::sbet::SbetReader);
 
 #ifdef PDAL_HAVE_HDF5
