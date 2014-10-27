@@ -197,41 +197,6 @@ set(PDAL_DRIVERS_BPF_CPP
 list (APPEND PDAL_CPP ${PDAL_DRIVERS_BPF_CPP} )
 list (APPEND PDAL_HPP ${PDAL_DRIVERS_BPF_HPP} )
 
-#
-# WebSocketClient
-#
-set(PDAL_WEBSOCKET_CLIENT_HPP
-    "${PDAL_HEADERS_DIR}/WebSocketClient.hpp"
-)
-
-set(PDAL_WEBSOCKET_CLIENT_CPP
-    "${PDAL_SOURCE_DIR}/src/WebSocketClient.cpp"
-)
-
-if (WEBSOCKETPP_FOUND AND JSONCPP_FOUND)
-    list (APPEND PDAL_CPP ${PDAL_WEBSOCKET_CLIENT_CPP})
-    list (APPEND PDAL_HPP ${PDAL_WEBSOCKET_CLIENT_HPP})
-endif()
-
-#
-# drivers/greyhound - requires WebSocketClient
-#
-set(PDAL_GREYHOUND_PATH drivers/greyhound)
-set(PDAL_GREYHOUND_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_GREYHOUND_PATH}")
-set(PDAL_GREYHOUND_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_GREYHOUND_PATH}")
-
-set(PDAL_DRIVERS_GREYHOUND_HPP
-    "${PDAL_GREYHOUND_HEADERS}/Reader.hpp"
-)
-
-set(PDAL_DRIVERS_GREYHOUND_CPP
-    "${PDAL_GREYHOUND_SRC}/Reader.cpp"
-)
-
-if (WEBSOCKETPP_FOUND AND JSONCPP_FOUND)
-    list (APPEND PDAL_CPP ${PDAL_DRIVERS_GREYHOUND_CPP} )
-    list (APPEND PDAL_HPP ${PDAL_DRIVERS_GREYHOUND_HPP} )
-endif()
 
 #
 # drivers/mrsid
@@ -704,7 +669,6 @@ source_group("Header Files\\drivers\\nitf" FILES ${PDAL_DRIVERS_NITF_HPP})
 source_group("Header Files\\drivers\\oci" FILES ${PDAL_DRIVERS_OCI_HPP})
 source_group("Header Files\\drivers\\qfit" FILES ${PDAL_DRIVERS_QFIT_HPP})
 source_group("Header Files\\drivers\\sbet" FILES ${PDAL_DRIVERS_SBET_HPP})
-source_group("Header Files\\drivers\\greyhound" FILES ${PDAL_DRIVERS_GREYHOUND_HPP})
 source_group("Header Files\\drivers\\terrasolid" FILES ${PDAL_DRIVERS_TERRASOLID_HPP})
 source_group("Header Files\\drivers\\text" FILES ${PDAL_DRIVERS_TEXT_HPP})
 source_group("Header Files\\drivers\\pgpointcloud" FILES ${PDAL_DRIVERS_PGPOINTCLOUD_HPP})
@@ -720,7 +684,6 @@ source_group("Source Files\\drivers\\nitf" FILES ${PDAL_DRIVERS_NITF_CPP})
 source_group("Source Files\\drivers\\oci" FILES ${PDAL_DRIVERS_OCI_CPP})
 source_group("Source Files\\drivers\\qfit" FILES ${PDAL_DRIVERS_QFIT_CPP})
 source_group("Source Files\\drivers\\sbet" FILES ${PDAL_DRIVERS_SBET_CPP})
-source_group("Source Files\\drivers\\greyhound" FILES ${PDAL_DRIVERS_GREYHOUND_CPP})
 source_group("Source Files\\drivers\\terrasolid" FILES ${PDAL_DRIVERS_TERRASOLID_CPP})
 source_group("Source Files\\drivers\\text" FILES ${PDAL_DRIVERS_TEXT_CPP})
 source_group("Source Files\\drivers\\pgpointcloud" FILES ${PDAL_DRIVERS_PGPOINTCLOUD_CPP})
@@ -798,10 +761,6 @@ endif()
 
 if (WITH_HDF5)
     target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE} ${HDF5_LIBRARIES})
-endif()
-
-if (WITH_JSONCPP OR WITH_GREYHOUND)
-    target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE} ${JSONCPP_LIBRARIES})
 endif()
 
 target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE}

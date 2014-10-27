@@ -39,7 +39,6 @@
 #cmakedefine PDAL_HAVE_P2G
 #cmakedefine PDAL_HAVE_PYTHON
 #cmakedefine PDAL_HAVE_SQLITE
-#cmakedefine PDAL_HAVE_GREYHOUND
 #cmakedefine PDAL_HAVE_POSTGRESQL
 
 

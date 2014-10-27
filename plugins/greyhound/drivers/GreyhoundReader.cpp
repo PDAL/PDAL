@@ -32,9 +32,11 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/drivers/greyhound/Reader.hpp>
+#include "GreyhoundReader.hpp"
 
 #include "Exchanges.hpp"
+
+CREATE_READER_PLUGIN(greyhound, pdal::drivers::greyhound::GreyhoundReader)
 
 namespace pdal
 {

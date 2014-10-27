@@ -35,7 +35,15 @@
 #pragma once
 
 #include <pdal/Reader.hpp>
-#include <pdal/WebSocketClient.hpp>
+#include <pdal/StageFactory.hpp>
+
+#include "WebSocketClient.hpp"
+
+PDAL_C_START
+
+PDAL_DLL void PDALRegister_reader_greyhound(void* factory);
+
+PDAL_C_END
 
 namespace pdal
 {
