@@ -32,12 +32,14 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/drivers/mrsid/Reader.hpp>
+#include "MrsidReader.hpp"
 
 #include <pdal/PointBuffer.hpp>
 
 #include <boost/algorithm/string.hpp>
 
+
+CREATE_READER_PLUGIN(mrsid, pdal::drivers::mrsid::MrsidReader)
 
 namespace pdal
 {
@@ -47,28 +49,21 @@ namespace mrsid
 {
 
 
-Reader::Reader(const Options& options)
-    : pdal::Reader(options)
-{
-    return;
-}
-
-
-Reader::Reader(LizardTech::PointSource *ps)
-    : pdal::Reader(Options::none())
+MrsidReader::MrsidReader(LizardTech::PointSource *ps)
+    : pdal::Reader()
     , m_PS(ps), m_iter(NULL)
 {
     m_PS->retain();
     return;
 }
 
-Reader::~Reader()
+MrsidReader::~MrsidReader()
 {
     m_iter->release();
     m_PS->release();
 }
 
-Dimension Reader::LTChannelToPDalDimension(const LizardTech::ChannelInfo & channel, pdal::Schema const& dimensions) const
+Dimension MrsidReader::LTChannelToPDalDimension(const LizardTech::ChannelInfo & channel, pdal::Schema const& dimensions) const
 {
 
     std::string name = channel.getName();
@@ -89,7 +84,7 @@ Dimension Reader::LTChannelToPDalDimension(const LizardTech::ChannelInfo & chann
 }
 
 
-void Reader::initialize()
+void MrsidReader::initialize()
 {
     const LizardTech::PointInfo& pointinfo = m_PS->getPointInfo();
 
@@ -111,18 +106,18 @@ void Reader::initialize()
 }
 
 
-Options Reader::getDefaultOptions()
+Options MrsidReader::getDefaultOptions()
 {
     Options options;
     return options;
 }
 
-pdal::StageSequentialIterator* Reader::createSequentialIterator(PointBuffer& buffer) const
+pdal::StageSequentialIterator* MrsidReader::createSequentialIterator(PointBuffer& buffer) const
 {
-    return new pdal::drivers::mrsid::iterators::sequential::Reader(*this, buffer, getNumPoints());
+    return new pdal::drivers::mrsid::iterators::sequential::MrsidReader(*this, buffer, getNumPoints());
 }
 
-int Reader::SchemaToPointInfo(const Schema &schema, LizardTech::PointInfo &pointInfo) const
+int MrsidReader::SchemaToPointInfo(const Schema &schema, LizardTech::PointInfo &pointInfo) const
 {
     schema::index_by_index const& dims = schema.getDimensions().get<schema::index>();
 
@@ -176,7 +171,7 @@ int Reader::SchemaToPointInfo(const Schema &schema, LizardTech::PointInfo &point
 }
 
 
-boost::uint32_t Reader::processBuffer(PointBuffer& data, boost::uint64_t index) const
+boost::uint32_t MrsidReader::processBuffer(PointBuffer& data, boost::uint64_t index) const
 {
     const Schema& schema = data.getSchema();
 
@@ -313,7 +308,7 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, boost::uint64_t index) 
     return cnt;
 }
 
-std::vector<Dimension> Reader::getDefaultDimensions()
+std::vector<Dimension> MrsidReader::getDefaultDimensions()
 {
     std::vector<Dimension> output;
 
@@ -408,7 +403,7 @@ namespace sequential
 {
 
 
-Reader::Reader(const pdal::drivers::mrsid::Reader& reader, PointBuffer& buffer, boost::uint32_t numPoints)
+MrsidReader::MrsidReader(const pdal::drivers::mrsid::MrsidReader& reader, PointBuffer& buffer, boost::uint32_t numPoints)
     : pdal::ReaderSequentialIterator(buffer)
     , m_numPoints(numPoints)
     , m_reader(reader)
@@ -417,13 +412,13 @@ Reader::Reader(const pdal::drivers::mrsid::Reader& reader, PointBuffer& buffer, 
 }
 
 
-boost::uint64_t Reader::skipImpl(boost::uint64_t count)
+boost::uint64_t MrsidReader::skipImpl(boost::uint64_t count)
 {
     return count;
 }
 
 
-bool Reader::atEndImpl() const
+bool MrsidReader::atEndImpl() const
 {
     // const boost::uint64_t numPoints = getStage().getNumPoints();
     const boost::uint64_t currPoint = getIndex();
@@ -431,7 +426,7 @@ bool Reader::atEndImpl() const
 }
 
 
-boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
+boost::uint32_t MrsidReader::readBufferImpl(PointBuffer& data)
 {
     return m_reader.processBuffer(data, getIndex());
 }
