@@ -32,11 +32,13 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/drivers/icebridge/Reader.hpp>
+#include "IcebridgeReader.hpp"
 #include <pdal/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
 
 #include <map>
+
+CREATE_READER_PLUGIN(icebridge, pdal::drivers::icebridge::IcebridgeReader)
 
 namespace
 {
@@ -64,7 +66,7 @@ namespace drivers
 namespace icebridge
 {
 
-Options Reader::getDefaultOptions()
+Options IcebridgeReader::getDefaultOptions()
 {
     Options options;
     options.add("filename", "", "file to read from");
@@ -72,7 +74,7 @@ Options Reader::getDefaultOptions()
 }
 
 
-Dimension::IdList Reader::getDefaultDimensions()
+Dimension::IdList IcebridgeReader::getDefaultDimensions()
 {
     Dimension::IdList ids;
 
@@ -94,20 +96,20 @@ Dimension::IdList Reader::getDefaultDimensions()
 }
 
 
-void Reader::addDimensions(PointContextRef ctx)
+void IcebridgeReader::addDimensions(PointContextRef ctx)
 {
     return ctx.registerDims(getDefaultDimensions());
 }
 
 
-void Reader::ready(PointContextRef ctx)
+void IcebridgeReader::ready(PointContextRef ctx)
 {
     m_hdf5Handler.initialize(m_filename, hdf5Columns);
     m_index = 0;
 }
 
 
-point_count_t Reader::read(PointBuffer& buf, point_count_t count)
+point_count_t IcebridgeReader::read(PointBuffer& buf, point_count_t count)
 {
     //All data we read for icebridge is currently 4 bytes wide, so
     //  just allocate once and forget it.
@@ -172,13 +174,13 @@ point_count_t Reader::read(PointBuffer& buf, point_count_t count)
 }
 
 
-void Reader::done(PointContextRef ctx)
+void IcebridgeReader::done(PointContextRef ctx)
 {
     m_hdf5Handler.close();
 }
 
 
-bool Reader::eof()
+bool IcebridgeReader::eof()
 {
     return m_index >= m_hdf5Handler.getNumPoints();
 }

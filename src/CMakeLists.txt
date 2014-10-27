@@ -470,43 +470,6 @@ set (PDAL_DRIVERS_SBET_CPP
 list (APPEND PDAL_CPP ${PDAL_DRIVERS_SBET_CPP} )
 list (APPEND PDAL_HPP ${PDAL_DRIVERS_SBET_HPP} )
 
-#
-# HDF5
-#
-set(PDAL_HDF5_HANDLER_HPP
-    "${PDAL_HEADERS_DIR}/Hdf5Handler.hpp"
-)
-
-set(PDAL_HDF5_HANDLER_CPP
-    "${PDAL_SOURCE_DIR}/src/Hdf5Handler.cpp"
-)
-
-if (HDF5_FOUND)
-    list (APPEND PDAL_CPP ${PDAL_HDF5_HANDLER_CPP})
-    list (APPEND PDAL_HPP ${PDAL_HDF5_HANDLER_HPP})
-endif()
-
-
-#
-# drivers/icebridge
-#
-set(PDAL_ICEBRIDGE_PATH drivers/icebridge)
-set(PDAL_ICEBRIDGE_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_ICEBRIDGE_PATH}")
-set(PDAL_ICEBRIDGE_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_ICEBRIDGE_PATH}")
-
-set(PDAL_DRIVERS_ICEBRIDGE_HPP
-    "${PDAL_ICEBRIDGE_HEADERS}/Reader.hpp"
-)
-
-set(PDAL_DRIVERS_ICEBRIDGE_CPP
-    "${PDAL_ICEBRIDGE_SRC}/Reader.cpp"
-)
-
-if (HDF5_FOUND)
-    list (APPEND PDAL_CPP ${PDAL_DRIVERS_ICEBRIDGE_CPP} )
-    list (APPEND PDAL_HPP ${PDAL_DRIVERS_ICEBRIDGE_HPP} )
-endif()
-
 
 #
 # filters
@@ -758,10 +721,6 @@ endif()
 
 if (WITH_LIBXML2)
     target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE} ${LIBXML2_LIBRARIES})
-endif()
-
-if (WITH_HDF5)
-    target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE} ${HDF5_LIBRARIES})
 endif()
 
 target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE}

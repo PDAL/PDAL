@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/Hdf5Handler.hpp>
+#include "Hdf5Handler.hpp"
 #include <pdal/FileUtils.hpp>
 
 #include <boost/numeric/conversion/cast.hpp>

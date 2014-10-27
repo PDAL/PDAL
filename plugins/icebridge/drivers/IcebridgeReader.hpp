@@ -36,9 +36,17 @@
 
 #include <pdal/Reader.hpp>
 #include <pdal/Options.hpp>
-#include <pdal/Hdf5Handler.hpp>
+#include <pdal/StageFactory.hpp>
+
+#include "Hdf5Handler.hpp"
 
 #include <vector>
+
+PDAL_C_START
+
+PDAL_DLL void PDALRegister_icebridge_reader(void* factory);
+
+PDAL_C_END
 
 namespace pdal
 {
@@ -54,14 +62,14 @@ public:
     { }
 };
 
-class PDAL_DLL Reader : public pdal::Reader
+class PDAL_DLL IcebridgeReader : public pdal::Reader
 {
 public:
     SET_STAGE_NAME("drivers.icebridge.reader", "Icebridge Reader")
     SET_STAGE_LINK("http://pdal.io/stages/drivers.icebridge.reader.html")
     SET_STAGE_ENABLED(true)
 
-    Reader() : pdal::Reader()
+    IcebridgeReader() : pdal::Reader()
         {}
 
     static Options getDefaultOptions();
@@ -77,8 +85,8 @@ private:
     virtual void done(PointContextRef ctx);
     virtual bool eof();
 
-    Reader& operator=(const Reader&);   // Not implemented.
-    Reader(const Reader&);              // Not implemented.
+    IcebridgeReader& operator=(const IcebridgeReader&);   // Not implemented.
+    IcebridgeReader(const IcebridgeReader&);              // Not implemented.
 };
 
 } // namespace icebridge
