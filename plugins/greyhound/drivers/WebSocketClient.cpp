@@ -34,7 +34,7 @@
 
 #include <thread>
 
-#include <pdal/WebSocketClient.hpp>
+#include "WebSocketClient.hpp"
 #include <pdal/pdal_error.hpp>
 
 #include <websocketpp/config/asio_no_tls_client.hpp>
