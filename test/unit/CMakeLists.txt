@@ -91,27 +91,15 @@ SET(PDAL_UNITTEST_CONFIG_INC
     )
 
 
-if (WITH_NITRO)
-    set(PDAL_GDAL_TEST_CPP
-        GDALUtilsTest.cpp
-        filters/ColorizationFilterTest.cpp
-        drivers/nitf/NitfReaderTest.cpp
-        )
+set(PDAL_GDAL_TEST_CPP
+    GDALUtilsTest.cpp
+    filters/ColorizationFilterTest.cpp
+)
 
-    FOREACH(file ${PDAL_GDAL_TEST_CPP})
-            SET(PDAL_UNITTEST_TEST_SRC "${PDAL_UNITTEST_TEST_SRC};${file}"
-                CACHE INTERNAL "source files for test")
-    ENDFOREACH(file)
-    set(PDAL_NITRO_TEST_CPP
-        drivers/nitf/NitfWriterTest.cpp
-        )
-
-    FOREACH(file ${PDAL_NITRO_TEST_CPP})
+FOREACH(file ${PDAL_GDAL_TEST_CPP})
         SET(PDAL_UNITTEST_TEST_SRC "${PDAL_UNITTEST_TEST_SRC};${file}"
             CACHE INTERNAL "source files for test")
-    ENDFOREACH(file)
-endif (WITH_NITRO)
-
+ENDFOREACH(file)
 
 set(PDAL_UNITTEST_SOURCES "")
 FOREACH(file ${PDAL_UNITTEST_TEST_SRC})

@@ -34,8 +34,6 @@
 
 #include "tre_plugins.hpp"
 
-#ifdef PDAL_HAVE_NITRO
-
 #ifdef PDAL_COMPILER_GCC
 #  pragma GCC diagnostic push
 #  pragma GCC diagnostic ignored "-Wredundant-decls"
@@ -256,5 +254,3 @@ void register_tre_plugins()
 }
 } // namespaces
 
-
-#endif // HAVE_NITRO

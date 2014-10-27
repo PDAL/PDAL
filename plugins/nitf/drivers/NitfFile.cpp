@@ -34,8 +34,6 @@
 
 #include "NitfFile.hpp"
 
-#ifdef PDAL_HAVE_NITRO
-
 #include <pdal/Metadata.hpp>
 
 #include <boost/algorithm/string.hpp>
@@ -268,5 +266,3 @@ bool NitfFile::locateLidarDataSegment()
 }
 }
 } // namespaces
-
-#endif // PDAL_HAVE_NITRO

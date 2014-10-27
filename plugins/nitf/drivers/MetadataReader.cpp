@@ -34,8 +34,6 @@
 
 #include "MetadataReader.hpp"
 
-#ifdef PDAL_HAVE_NITRO
-
 #include <pdal/Metadata.hpp>
 
 #include <boost/algorithm/string.hpp>
@@ -423,5 +421,3 @@ void MetadataReader::doComments(const std::string& key,
 }
 }
 } // namespaces
-
-#endif // PDAL_HAVE_NITRO

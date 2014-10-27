@@ -52,22 +52,6 @@
 #endif
 #endif
 
-#ifdef PDAL_HAVE_MRSID
-#ifndef USE_PDAL_PLUGIN_MRSID
-#include <pdal/drivers/mrsid/Reader.hpp>
-#endif
-#endif
-
 #include <pdal/drivers/qfit/Reader.hpp>
 #include <pdal/drivers/terrasolid/Reader.hpp>
 #include <pdal/drivers/text/Writer.hpp>
-
-#ifdef PDAL_HAVE_NITRO
-#ifndef USE_PDAL_PLUGIN_NITF
-#include <pdal/drivers/nitf/Writer.hpp>
-#endif
-#endif
-
-#ifdef PDAL_HAVE_NITRO
-#include <pdal/drivers/nitf/Reader.hpp>
-#endif

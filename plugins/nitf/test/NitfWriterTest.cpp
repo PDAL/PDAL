@@ -35,9 +35,8 @@
 #include "UnitTest.hpp"
 
 #include <pdal/PointBuffer.hpp>
+#include <pdal/StageFactory.hpp>
 #include <pdal/drivers/las/Reader.hpp>
-#include <pdal/drivers/nitf/Reader.hpp>
-#include <pdal/drivers/nitf/Writer.hpp>
 #include "Support.hpp"
 
 using namespace pdal;
@@ -111,7 +110,6 @@ static void compare_contents(const std::string& las_file, const std::string& ntf
 BOOST_AUTO_TEST_CASE(test1)
 {
 
-#ifdef PDAL_HAVE_NITRO
     const std::string las_input(Support::datapath("las/1.2-with-color.las"));
     const std::string nitf_output(Support::temppath("temp_nitf.ntf"));
     const std::string reference_output(
@@ -153,25 +151,30 @@ BOOST_AUTO_TEST_CASE(test1)
 
         pdal::drivers::las::Reader reader;
         reader.setOptions(reader_opts);
-        pdal::drivers::nitf::Writer writer;
-        writer.setOptions(writer_opts);
-        writer.setInput(&reader);
+        StageFactory f;
+        StageFactory::WriterCreator* wc = f.getWriterCreator("drivers.nitf.writer");
+        if(wc)
         {
-            // writer.setCompressed(false);
-            // // writer.setDate(0, 0);
-            // // writer.setPointFormat(::pdal::drivers::las::PointFormat3);
-            // // writer.setSystemIdentifier("");
-            // writer.setGeneratingSoftware("PDAL-NITF");
-            // writer.setChunkSize(100);
+            BOOST_CHECK(wc);
+
+            std::unique_ptr<Writer> writer(wc());
+            writer->setOptions(writer_opts);
+            writer->setInput(&reader);
+            {
+                // writer.setCompressed(false);
+                // // writer.setDate(0, 0);
+                // // writer.setPointFormat(::pdal::drivers::las::PointFormat3);
+                // // writer.setSystemIdentifier("");
+                // writer.setGeneratingSoftware("PDAL-NITF");
+                // writer.setChunkSize(100);
+            }
+            PointContext ctx;
+            writer->prepare(ctx);
+            writer->execute(ctx);
         }
-        PointContext ctx;
-        writer.prepare(ctx);
-        writer.execute(ctx);
     }
 
     FileUtils::deleteFile(nitf_output);
-
-#endif
 
 #if 0
     //

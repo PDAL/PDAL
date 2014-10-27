@@ -229,14 +229,13 @@ void KernelFactory::registerPlugin(std::string const& filename)
 
     std::string base = basename.string();
 
-    std::string foo = boost::algorithm::ireplace_first_copy(base, "libpdal_plugin_", "");
-    std::string foobar = foo.substr(0, foo.find_last_of("_"));
-    if (boost::iequals(foobar, "kernel"))
+    std::string pluginName = boost::algorithm::ireplace_first_copy(base, "libpdal_plugin_", "");
+    std::string pluginType = pluginName.substr(0, pluginName.find_last_of("_"));
+    if (boost::iequals(pluginType, "kernel"))
     {
-        std::string registerMethodName = "PDALRegister_" + \
-                                         boost::algorithm::ireplace_first_copy(base, "libpdal_plugin_", "");
+        std::string registerMethodName = "PDALRegister_" + pluginName;
 
-        std::string versionMethodName = "PDALRegister_version_" +  base.substr(base.find_last_of("_")+1, base.size());
+        std::string versionMethodName = "PDALRegister_version_" + pluginName;
 
         Utils::registerPlugin((void*)this, filename, registerMethodName, versionMethodName);
     }

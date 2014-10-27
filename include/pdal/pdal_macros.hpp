@@ -40,10 +40,7 @@
 //
 #define MAKE_READER_CREATOR(T, FullT) \
     pdal::Reader* create_##T() \
-        { \
-            return new FullT(); \
-        }
-
+        { pdal::Reader *r = new FullT(); return r; }
 #define MAKE_FILTER_CREATOR(T, FullT) \
     pdal::Filter* create_##T() \
         { pdal::Filter *f = new FullT(); return f; }
@@ -52,7 +49,7 @@
         { pdal::Writer *w = new FullT(); return w; }
 #define MAKE_KERNEL_CREATOR(T, FullT) \
     pdal::Kernel* create_##T() \
-        { pdal::Kernel *a = new FullT(); return a; }
+        { pdal::Kernel *k = new FullT(); return k; }
 
 //
 // macros to register the stage creators
@@ -70,6 +67,9 @@
     registerKernelDriverInfo<FullT>(); \
     registerKernel(FullT::s_getName(), create_##T)
 
+//
+// macros to create the various plugins types
+//
 #define CREATE_READER_PLUGIN(T, FullT) \
     MAKE_READER_CREATOR(T, FullT) \
     PDAL_C_START PDAL_DLL void PDALRegister_reader_##T(void* factory) \
@@ -79,8 +79,7 @@
         f.registerReader(FullT::s_getName(), create_##T); \
     } \
     PDAL_C_END \
-    SET_PLUGIN_VERSION(T)
-
+    SET_READER_PLUGIN_VERSION(T)
 #define CREATE_FILTER_PLUGIN(T, FullT) \
     MAKE_FILTER_CREATOR(T, FullT) \
     PDAL_C_START PDAL_DLL void PDALRegister_filter_##T(void* factory) \
@@ -90,8 +89,7 @@
         f.registerFilter(FullT::s_getName(), create_##T); \
     } \
     PDAL_C_END \
-    SET_PLUGIN_VERSION(T)
-
+    SET_FILTER_PLUGIN_VERSION(T)
 #define CREATE_WRITER_PLUGIN(T, FullT) \
     MAKE_WRITER_CREATOR(T, FullT) \
     PDAL_C_START PDAL_DLL void PDALRegister_writer_##T(void* factory) \
@@ -101,8 +99,7 @@
         f.registerWriter(FullT::s_getName(), create_##T); \
     } \
     PDAL_C_END \
-    SET_PLUGIN_VERSION(T)
-
+    SET_WRITER_PLUGIN_VERSION(T)
 #define CREATE_KERNEL_PLUGIN(T, FullT) \
     MAKE_KERNEL_CREATOR(T, FullT) \
     PDAL_C_START PDAL_DLL void PDALRegister_kernel_##T(void* factory) \
@@ -112,15 +109,47 @@
         f.registerKernel(FullT::s_getName(), create_##T); \
     } \
     PDAL_C_END \
-    SET_PLUGIN_VERSION(T)
+    SET_KERNEL_PLUGIN_VERSION(T)
 
-#define SET_PLUGIN_VERSION(DriverName) \
-    PDAL_C_START PDAL_DLL int PDALRegister_version_##DriverName() \
-    { \
-        return PDAL_PLUGIN_VERSION; \
-    } \
+//
+// macros to register the plugin creators
+//
+//#define REGISTER_READER_PLUGIN(T) \
+//    PDAL_C_START \
+//    PDAL_DLL void PDALRegister_reader_##T(void* factory); \
+//    PDAL_C_END
+//#define REGISTER_FILTER_PLUGIN(T) \
+//    PDAL_C_START \
+//    PDAL_DLL void PDALRegister_filter_##T(void* factory); \
+//    PDAL_C_END
+//#define REGISTER_WRITER_PLUGIN(T) \
+//    PDAL_C_START \
+//    PDAL_DLL void PDALRegister_writer_##T(void* factory); \
+//    PDAL_C_END
+//#define REGISTER_KERNEL_PLUGIN(T) \
+//    PDAL_C_START \
+//    PDAL_DLL void PDALRegister_kernel_##T(void* factory); \
+//    PDAL_C_END
+
+//
+// macro to register the version of PDAL the plugin was linked against
+//
+#define SET_READER_PLUGIN_VERSION(T) \
+    PDAL_C_START PDAL_DLL int PDALRegister_version_reader_##T() \
+        { return PDAL_PLUGIN_VERSION; } \
     PDAL_C_END
-
+#define SET_FILTER_PLUGIN_VERSION(T) \
+    PDAL_C_START PDAL_DLL int PDALRegister_version_filter_##T() \
+        { return PDAL_PLUGIN_VERSION; } \
+    PDAL_C_END
+#define SET_WRITER_PLUGIN_VERSION(T) \
+    PDAL_C_START PDAL_DLL int PDALRegister_version_writer_##T() \
+        { return PDAL_PLUGIN_VERSION; } \
+    PDAL_C_END
+#define SET_KERNEL_PLUGIN_VERSION(T) \
+    PDAL_C_START PDAL_DLL int PDALRegister_version_kernel_##T() \
+        { return PDAL_PLUGIN_VERSION; } \
+    PDAL_C_END
 
 #ifdef _WIN32
 inline long lround(double d)

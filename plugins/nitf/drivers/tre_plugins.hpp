@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2014, Michael P. Gerlek (mpg@flaxen.com)
 *
 * All rights reserved.
 *
@@ -36,45 +36,12 @@
 
 #include <pdal/pdal_internal.hpp>
 
-#ifdef PDAL_HAVE_NITRO
-#include <pdal/drivers/las/Reader.hpp>
 
-namespace pdal
-{
-namespace drivers
-{
-namespace nitf
-{
+namespace pdal { namespace drivers { namespace nitf {
 
 
-class PDAL_DLL NitfReader : public las::Reader
-{
-public:
-    SET_STAGE_NAME("drivers.nitf.reader", "NITF Reader")
-    SET_STAGE_LINK("http://pdal.io/stages/drivers.nitf.reader.html")
-    SET_STAGE_ENABLED(true)
+void register_tre_plugins();
 
-    NitfReader() : las::Reader()
-        {}
 
-private:
-    uint64_t m_offset;
-    uint64_t m_length;
+} } } // namespaces
 
-    virtual void initialize();
-    virtual void ready(PointContextRef ctx);
-    virtual StreamFactoryPtr createFactory() const
-    {
-        return StreamFactoryPtr(
-            new FilenameSubsetStreamFactory(m_filename, m_offset, m_length));
-    }
-
-    NitfReader& operator=(const NitfReader&); // not implemented
-    NitfReader(const NitfReader&); // not implemented
-};
-
-} // namespace nitf
-} // namespace drivers
-} // namespace pdal
-
-#endif // PDAL_HAVE_NITRO

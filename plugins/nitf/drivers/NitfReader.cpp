@@ -32,17 +32,10 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/pdal_internal.hpp>
-
-#ifdef PDAL_HAVE_NITRO
-
-// local
 #include "NitfFile.hpp"
+#include "NitfReader.hpp"
 
-#include <pdal/drivers/nitf/Reader.hpp>
-#include <pdal/StreamFactory.hpp>
-
-
+CREATE_READER_PLUGIN(nitf, pdal::drivers::nitf::NitfReader)
 
 namespace pdal
 {
@@ -137,5 +130,3 @@ void NitfReader::ready(PointContextRef ctx)
 } // namespace nitf
 } // namespace drivers
 } // namespace pdal
-
-#endif // PDAL_HAVE_NITRO

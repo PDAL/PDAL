@@ -45,12 +45,6 @@
 #include <points2grid/Global.hpp>
 #include <points2grid/OutCoreInterp.hpp>
 
-PDAL_C_START
-
-PDAL_DLL void PDALRegister_writer_p2g(void* factory);
-
-PDAL_C_END
-
 namespace pdal
 {
 namespace drivers

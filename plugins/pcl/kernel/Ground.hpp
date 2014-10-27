@@ -39,12 +39,6 @@
 
 #include <pdal/kernel/Kernel.hpp>
 
-PDAL_C_START
-
-PDAL_DLL void PDALRegister_kernel_ground(void* factory);
-
-PDAL_C_END
-
 namespace pdal
 {
 namespace kernel
