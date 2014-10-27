@@ -35,16 +35,21 @@
 #pragma once
 
 #include <pdal/Writer.hpp>
+#include <pdal/StageFactory.hpp>
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
 
-#ifdef PDAL_HAVE_P2G
 #include <points2grid/config.h>
 #include <points2grid/Interpolation.hpp>
 #include <points2grid/Global.hpp>
 #include <points2grid/OutCoreInterp.hpp>
-#endif
+
+PDAL_C_START
+
+PDAL_DLL void PDALRegister_writer_p2g(void* factory);
+
+PDAL_C_END
 
 namespace pdal
 {
@@ -71,11 +76,7 @@ class PDAL_DLL P2gWriter : public pdal::Writer
 public:
     SET_STAGE_NAME("drivers.p2g.writer", "Points2Grid Writer")
     SET_STAGE_LINK("http://pdal.io/stages/drivers.p2g.writer.html")
-#ifdef PDAL_HAVE_P2G
     SET_STAGE_ENABLED(true)
-#else
-    SET_STAGE_ENABLED(false)
-#endif
 
     P2gWriter() : Writer(), m_outputTypes(0), m_outputFormat(OUTPUT_FORMAT_ARC_ASCII) {};
     ~P2gWriter() {};
