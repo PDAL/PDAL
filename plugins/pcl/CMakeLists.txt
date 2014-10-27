@@ -24,8 +24,10 @@
 include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(${PROJECT_SOURCE_DIR}/plugin/pcl)
 
-find_package(PCL 1.7)
+find_package(PCL 1.7 REQUIRED)
 if(PCL_FOUND)
+    message(STATUS "Building with PCL support")
+
     set(PCL_LINKAGE "LINK_PUBLIC;general")
     include_directories(${PCL_INCLUDE_DIRS})
     link_directories(${PCL_LIBRARY_DIRS})
@@ -35,10 +37,8 @@ if(PCL_FOUND)
     # PCL's configuration clobbers Boost find_package - do it again
     find_package(Boost 1.52 COMPONENTS program_options thread iostreams filesystem system unit_test_framework random)
 
-    message(STATUS "..building with PCL")
-
     if (PCL_VISUALIZATION_FOUND)
-        message(STATUS "..building with PCL Visualization")
+        message(STATUS "Building with PCL Visualization support")
 	#
 	# PCLVisualizer Writer
 	#
@@ -173,4 +173,6 @@ if(PCL_FOUND)
 
     set(VIEW_KERNEL_LIB_NAME pdal_plugin_kernel_view)
     PDAL_ADD_PLUGIN(${VIEW_KERNEL_LIB_NAME} kernel view ${srcs} ${incs})
+else()
+    message(STATUS "Building without PCL support")
 endif()
