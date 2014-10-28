@@ -36,11 +36,18 @@
 
 #include <pdal/Reader.hpp>
 #include <pdal/PointBuffer.hpp>
+#include <pdal/StageFactory.hpp>
 #include <pdal/XMLSchema.hpp>
 
-#include <pdal/drivers/pgpointcloud/common.hpp>
+#include "PgCommon.hpp"
 
 #include <vector>
+
+PDAL_C_START
+
+PDAL_DLL void PDALRegister_pgpointcloud_reader(void* factory);
+
+PDAL_C_END
 
 namespace pdal
 {

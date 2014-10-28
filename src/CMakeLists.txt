@@ -345,36 +345,6 @@ endif()
 
 
 #
-# drivers/pgpointcloud
-# we require PostgreSQL
-#
-set(PDAL_PGPOINTCLOUD_PATH drivers/pgpointcloud)
-set(PDAL_PGPOINTCLOUD_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_PGPOINTCLOUD_PATH}")
-set(PDAL_PGPOINTCLOUD_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_PGPOINTCLOUD_PATH}")
-
-set(PDAL_DRIVERS_PGPOINTCLOUD_HPP
-  "${PDAL_PGPOINTCLOUD_HEADERS}/common.hpp"
-  "${PDAL_PGPOINTCLOUD_HEADERS}/Writer.hpp"
-  "${PDAL_PGPOINTCLOUD_HEADERS}/PgReader.hpp"
-)
-
-set (PDAL_DRIVERS_PGPOINTCLOUD_CPP
-  "${PDAL_PGPOINTCLOUD_SRC}/Writer.cpp"
-  "${PDAL_PGPOINTCLOUD_SRC}/PgReader.cpp"
-)
-
-# no provision is made for building as a plugin
-if (POSTGRESQL_FOUND)
-  if ( USE_PDAL_PLUGIN_PGPOINTCLOUD )
-    message(FATAL_ERROR, "PgPointCloud plugin support unimplemented")
-  else()
-    list (APPEND PDAL_CPP ${PDAL_DRIVERS_PGPOINTCLOUD_CPP} )
-    list (APPEND PDAL_HPP ${PDAL_DRIVERS_PGPOINTCLOUD_HPP} )
-  endif()
-endif()
-
-
-#
 # drivers/sbet
 #
 set(PDAL_SBET_PATH drivers/sbet)
@@ -560,7 +530,6 @@ source_group("Header Files\\drivers\\qfit" FILES ${PDAL_DRIVERS_QFIT_HPP})
 source_group("Header Files\\drivers\\sbet" FILES ${PDAL_DRIVERS_SBET_HPP})
 source_group("Header Files\\drivers\\terrasolid" FILES ${PDAL_DRIVERS_TERRASOLID_HPP})
 source_group("Header Files\\drivers\\text" FILES ${PDAL_DRIVERS_TEXT_HPP})
-source_group("Header Files\\drivers\\pgpointcloud" FILES ${PDAL_DRIVERS_PGPOINTCLOUD_HPP})
 source_group("Header Files\\filters" FILES ${PDAL_FILTERS_HPP})
 source_group("Header Files\\plang" FILES ${PDAL_PLANG_HPP})
 
@@ -574,7 +543,6 @@ source_group("Source Files\\drivers\\qfit" FILES ${PDAL_DRIVERS_QFIT_CPP})
 source_group("Source Files\\drivers\\sbet" FILES ${PDAL_DRIVERS_SBET_CPP})
 source_group("Source Files\\drivers\\terrasolid" FILES ${PDAL_DRIVERS_TERRASOLID_CPP})
 source_group("Source Files\\drivers\\text" FILES ${PDAL_DRIVERS_TEXT_CPP})
-source_group("Source Files\\drivers\\pgpointcloud" FILES ${PDAL_DRIVERS_PGPOINTCLOUD_CPP})
 source_group("Source Files\\filters" FILES ${PDAL_FILTERS_CPP})
 source_group("Source Files\\plang" FILES ${PDAL_PLANG_CPP})
 
@@ -608,12 +576,6 @@ if(WIN32)
 endif()
 
 PDAL_ADD_LIBRARY(${PDAL_LIB_NAME} ${PDAL_SOURCES})
-
-if (WITH_PGPOINTCLOUD)
-if (NOT USE_PDAL_PLUGIN_PGPOINTCLOUD)
-target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE} ${POSTGRESQL_LIBRARIES})
-endif()
-endif()
 
 if (WITH_NITRO)
 if (NOT USE_PDAL_PLUGIN_NITRO)

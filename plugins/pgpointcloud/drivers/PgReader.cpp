@@ -33,16 +33,13 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/drivers/pgpointcloud/PgReader.hpp>
+#include "PgReader.hpp"
 #include <pdal/PointBuffer.hpp>
 #include <pdal/XMLSchema.hpp>
 
 #include <iostream>
 
-#ifdef USE_PDAL_PLUGIN_PGPOINTCLOUD
-//MAKE_READER_CREATOR(pgpointcloudReader, pdal::drivers::pgpointcloud::PgReader)
-CREATE_READER_PLUGIN(pgpointcloudReader, pdal::drivers::pgpointcloud::PgReader)
-#endif
+CREATE_READER_PLUGIN(pgpointcloud, pdal::drivers::pgpointcloud::PgReader)
 
 namespace pdal
 {
