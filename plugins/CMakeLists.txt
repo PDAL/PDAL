@@ -17,3 +17,7 @@ endif()
 if(WITH_PCL)
     add_subdirectory(pcl)
 endif()
+
+if(WITH_SQLITE)
+    add_subdirectory(sqlite)
+endif()

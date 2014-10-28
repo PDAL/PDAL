@@ -72,13 +72,6 @@
 #include <pdal/drivers/nitf/Reader.hpp>
 #endif
 
-#ifdef PDAL_HAVE_SQLITE
-#ifndef USE_PDAL_PLUGIN_SQLITE
-#include <pdal/drivers/sqlite/SQLiteReader.hpp>
-#include <pdal/drivers/sqlite/SQLiteWriter.hpp>
-#endif
-#endif
-
 #ifdef PDAL_HAVE_POSTGRESQL
 #ifndef USE_PDAL_PLUGIN_PGPOINTCLOUD
 #include <pdal/drivers/pgpointcloud/PgReader.hpp>

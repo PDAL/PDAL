@@ -35,8 +35,15 @@
 #pragma once
 
 #include <pdal/Writer.hpp>
-#include <pdal/drivers/sqlite/SQLiteCommon.hpp>
+#include <pdal/StageFactory.hpp>
+#include "SQLiteCommon.hpp"
 #include <pdal/third/nanoflann.hpp>
+
+PDAL_C_START
+
+PDAL_DLL void PDALRegister_sqlite_writer(void* factory);
+
+PDAL_C_END
 
 namespace pdal
 {
@@ -50,11 +57,7 @@ class PDAL_DLL SQLiteWriter : public pdal::Writer
 {
 public:
     SET_STAGE_NAME("drivers.sqlite.writer", "SQLite Writer")
-#ifdef PDAL_HAVE_SQLITE
     SET_STAGE_ENABLED(true)
-#else
-    SET_STAGE_ENABLED(false)
-#endif
     SQLiteWriter();
 
 private:
