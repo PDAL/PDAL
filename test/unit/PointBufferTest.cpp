@@ -89,7 +89,7 @@ static void verifyTestBuffer(const PointBuffer& data)
     }
 }
 
-BOOST_AUTO_TEST_CASE(test_get_set)
+BOOST_AUTO_TEST_CASE(getSet)
 {
     PointContext ctx;
     PointBuffer* data = makeTestBuffer(ctx);
@@ -97,7 +97,7 @@ BOOST_AUTO_TEST_CASE(test_get_set)
     delete data;
 }
 
-BOOST_AUTO_TEST_CASE(test_getFieldAs_uint8)
+BOOST_AUTO_TEST_CASE(getAsUint8)
 {
     PointContext ctx;
     PointBuffer* data = makeTestBuffer(ctx);
@@ -127,7 +127,7 @@ BOOST_AUTO_TEST_CASE(test_getFieldAs_uint8)
     delete data;
 }
 
-BOOST_AUTO_TEST_CASE(test_getFieldAs_int32)
+BOOST_AUTO_TEST_CASE(getAsInt32)
 {
     PointContext ctx;
     PointBuffer* data = makeTestBuffer(ctx);
@@ -147,7 +147,7 @@ BOOST_AUTO_TEST_CASE(test_getFieldAs_int32)
 }
 
 
-BOOST_AUTO_TEST_CASE(test_getFieldAs_float)
+BOOST_AUTO_TEST_CASE(getFloat)
 {
     PointContext ctx;
     PointBuffer* data = makeTestBuffer(ctx);
@@ -167,7 +167,7 @@ BOOST_AUTO_TEST_CASE(test_getFieldAs_float)
 }
 
 
-BOOST_AUTO_TEST_CASE(test_copy)
+BOOST_AUTO_TEST_CASE(copy)
 {
     PointContext ctx;
     PointBuffer* data = makeTestBuffer(ctx);
@@ -201,7 +201,7 @@ BOOST_AUTO_TEST_CASE(test_copy)
     delete data;
 }
 
-BOOST_AUTO_TEST_CASE(test_copy_constructor)
+BOOST_AUTO_TEST_CASE(copyCtor)
 {
     PointContext ctx;
     PointBuffer* data = makeTestBuffer(ctx);
@@ -211,7 +211,7 @@ BOOST_AUTO_TEST_CASE(test_copy_constructor)
     delete data;
 }
 
-BOOST_AUTO_TEST_CASE(test_assignment_constructor)
+BOOST_AUTO_TEST_CASE(assignment)
 {
     PointContext ctx;
     PointBuffer* data = makeTestBuffer(ctx);
@@ -222,7 +222,7 @@ BOOST_AUTO_TEST_CASE(test_assignment_constructor)
 }
 
 
-BOOST_AUTO_TEST_CASE(PointBufferTest_ptree)
+BOOST_AUTO_TEST_CASE(ptree)
 {
     PointContext ctx;
     PointBuffer* data = makeTestBuffer(ctx);
@@ -306,7 +306,7 @@ BOOST_AUTO_TEST_CASE(bigfile)
 
 //ABELL - Move to KdIndex
 /**
-BOOST_AUTO_TEST_CASE(test_indexed)
+BOOST_AUTO_TEST_CASE(kdindex)
 {
     drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
     BOOST_CHECK(reader.getDescription() == "Las Reader");
@@ -391,7 +391,7 @@ static void check_bounds(const BOX3D& box,
 }
 
 
-BOOST_AUTO_TEST_CASE(PointBufferTest_calculateBounds)
+BOOST_AUTO_TEST_CASE(calcBounds)
 {
     PointContext ctx;
     ctx.registerDim(Dimension::Id::X);
