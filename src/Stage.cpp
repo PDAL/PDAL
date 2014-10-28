@@ -136,7 +136,7 @@ void Stage::l_processOptions(const Options& options)
     {
         if (options.hasOption("log"))
         {
-            std::string logname = m_options.getValueOrThrow<std::string>("log");
+            std::string logname = options.getValueOrThrow<std::string>("log");
             m_log.reset(new Log(getName(), logname));
         }
         else
@@ -151,7 +151,7 @@ void Stage::l_processOptions(const Options& options)
     // If the user gave us an SRS via options, take that.
     try
     {
-        m_spatialReference = getOptions().
+        m_spatialReference = options.
             getValueOrThrow<pdal::SpatialReference>("spatialreference");
     }
     catch (pdal_error const&)

@@ -260,7 +260,8 @@ void SpatialReference::dump() const
 
 std::ostream& operator<<(std::ostream& ostr, const SpatialReference& srs)
 {
-    std::string wkt = pdal::utils::toPTree(srs).get<std::string>("prettycompoundwkt");
+    std::string wkt =
+        pdal::utils::toPTree(srs).get<std::string>("prettycompoundwkt");
     ostr << wkt;
     return ostr;
 }
