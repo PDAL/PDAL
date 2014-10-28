@@ -43,7 +43,7 @@
 
 PDAL_C_START
 
-PDAL_DLL void PDALRegister_reader_pcd(void* factory);
+PDAL_DLL void PDALRegister_writer_pcd(void* factory);
 
 PDAL_C_END
 

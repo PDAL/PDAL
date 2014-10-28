@@ -3,7 +3,7 @@
 #
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
-include_directories(${PROJECT_SOURCE_DIR}/plugin/greyhound)
+include_directories(${PROJECT_SOURCE_DIR}/plugins/greyhound)
 
 find_package(JSONCPP REQUIRED)
 find_package(WEBSOCKETPP REQUIRED)

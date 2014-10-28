@@ -22,7 +22,7 @@
 #------------------------------------------------------------------------------
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
-include_directories(${PROJECT_SOURCE_DIR}/plugin/pcl)
+include_directories(${PROJECT_SOURCE_DIR}/plugins/pcl)
 
 find_package(PCL 1.7 REQUIRED)
 if(PCL_FOUND)
@@ -127,7 +127,7 @@ if(PCL_FOUND)
 
     set(PCL_KERNEL_LIB_NAME pdal_plugin_kernel_pcl)
     PDAL_ADD_PLUGIN(${PCL_KERNEL_LIB_NAME} kernel pcl ${srcs} ${incs})
-    target_link_libraries(${PCL_KERNEL_LIB_NAME} ${PCLBLOCK_LIB_NAME})
+    target_link_libraries(${PCL_KERNEL_LIB_NAME} ${PDAL_LINKAGE} ${PCLBLOCK_LIB_NAME})
 
     #
     # Ground Kernel
@@ -142,7 +142,7 @@ if(PCL_FOUND)
 
     set(GROUND_KERNEL_LIB_NAME pdal_plugin_kernel_ground)
     PDAL_ADD_PLUGIN(${GROUND_KERNEL_LIB_NAME} kernel ground ${srcs} ${incs})
-    target_link_libraries(${GROUND_KERNEL_LIB_NAME} ${PCLBLOCK_LIB_NAME})
+    target_link_libraries(${GROUND_KERNEL_LIB_NAME} ${PDAL_LINKAGE} ${PCLBLOCK_LIB_NAME})
 
     #
     # Smooth Kernel
@@ -157,7 +157,7 @@ if(PCL_FOUND)
 
     set(SMOOTH_KERNEL_LIB_NAME pdal_plugin_kernel_smooth)
     PDAL_ADD_PLUGIN(${SMOOTH_KERNEL_LIB_NAME} kernel smooth ${srcs} ${incs})
-    target_link_libraries(${SMOOTH_KERNEL_LIB_NAME} ${PCLBLOCK_LIB_NAME})
+    target_link_libraries(${SMOOTH_KERNEL_LIB_NAME} ${PDAL_LINKAGE} ${PCLBLOCK_LIB_NAME})
 
     #
     # View Kernel
