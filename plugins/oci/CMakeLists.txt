@@ -3,7 +3,7 @@
 #
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
-include_directories(${PROJECT_SOURCE_DIR}/plugin/oci)
+include_directories(${PROJECT_SOURCE_DIR}/plugins/oci)
 
 find_package(Oracle REQUIRED)
 if(ORACLE_FOUND)

@@ -3,7 +3,7 @@
 #
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
-include_directories(${PROJECT_SOURCE_DIR}/plugin/sqlite)
+include_directories(${PROJECT_SOURCE_DIR}/plugins/sqlite)
 
 find_package(SQLite3 REQUIRED)
 if (SQLITE3_FOUND)

@@ -3,7 +3,7 @@
 #
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
-include_directories(${PROJECT_SOURCE_DIR}/plugin/p2g)
+include_directories(${PROJECT_SOURCE_DIR}/plugins/p2g)
 
 find_package(Points2Grid REQUIRED)
 if (P2G_FOUND)
