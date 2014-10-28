@@ -53,15 +53,42 @@ Connection connect(std::string connSpec)
 {
     using namespace std;
 
-    if (connSpec.empty())
+    std::string connection(connSpec);
+
+    if (connection.empty())
         throw pdal_error("Oracle connection string empty! Unable to connect");
 
-    string::size_type pos = connSpec.find("/", 0);
-    string username = connSpec.substr(0, pos);
-    connSpec = connSpec.substr(pos + 1);
-    pos = connSpec.find("@", 0);
-    string password = connSpec.substr(0, pos);
-    string instance = connSpec.substr(pos + 1);
+        if (FileUtils::fileExists(connection))
+        {
+
+        std::istream::pos_type size;
+        std::istream* input = FileUtils::openFile(connection, true);
+        if (!input->good())
+        {
+            FileUtils::closeFile(input);
+            throw pdal_error("Unable to open connection filename for Oracle!");
+        }
+
+        std::string output;
+        std::string line;
+        while (input->good())
+        {
+            getline(*input, line);
+            if (output.size())
+                output += "\n" + line;
+            else
+                output = line;
+        }
+        connection = output;
+
+    }
+
+    string::size_type pos = connection.find("/", 0);
+    string username = connection.substr(0, pos);
+    connection = connection.substr(pos + 1);
+    pos = connection.find("@", 0);
+    string password = connection.substr(0, pos);
+    string instance = connection.substr(pos + 1);
 
     Connection con = make_shared<OWConnection>(username.c_str(),
         password.c_str(), instance.c_str());
