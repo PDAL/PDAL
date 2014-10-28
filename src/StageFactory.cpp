@@ -68,12 +68,6 @@ MAKE_READER_CREATOR(BufferReader, drivers::buffer::BufferReader)
 MAKE_READER_CREATOR(NITFReader, pdal::drivers::nitf::NitfReader)
 #endif
 
-#ifdef PDAL_HAVE_SQLITE
-#ifndef USE_PDAL_PLUGIN_SQLITE
-MAKE_READER_CREATOR(SqliteReader, pdal::drivers::sqlite::SQLiteReader)
-#endif
-#endif
-
 #ifdef PDAL_HAVE_POSTGRESQL
 #ifndef USE_PDAL_PLUGIN_PGPOINTCLOUD
 MAKE_READER_CREATOR(PgPcReader, pdal::drivers::pgpointcloud::PgReader)
@@ -115,12 +109,6 @@ MAKE_WRITER_CREATOR(LasWriter, pdal::drivers::las::Writer)
 
 #ifndef USE_PDAL_PLUGIN_TEXT
 MAKE_WRITER_CREATOR(TextWriter, pdal::drivers::text::Writer)
-#endif
-
-#ifdef PDAL_HAVE_SQLITE
-#ifndef USE_PDAL_PLUGIN_SQLITE
-MAKE_WRITER_CREATOR(SqliteWriter, pdal::drivers::sqlite::SQLiteWriter)
-#endif
 #endif
 
 #ifdef PDAL_HAVE_POSTGRESQL
@@ -344,12 +332,6 @@ void StageFactory::registerKnownReaders()
     REGISTER_READER(NITFReader, pdal::drivers::nitf::NitfReader);
 #endif
 
-#ifdef PDAL_HAVE_SQLITE
-#ifndef USE_PDAL_PLUGIN_SQLITE
-    REGISTER_READER(SqliteReader, pdal::drivers::sqlite::SQLiteReader);
-#endif
-#endif
-
 #ifdef PDAL_HAVE_POSTGRESQL
 #ifndef USE_PDAL_PLUGIN_PGPOINTCLOUD
     REGISTER_READER(PgPcReader, pdal::drivers::pgpointcloud::PgReader);
@@ -393,12 +375,6 @@ void StageFactory::registerKnownWriters()
 
 #ifndef USE_PDAL_PLUGIN_TEXT
     REGISTER_WRITER(TextWriter, pdal::drivers::text::Writer);
-#endif
-
-#ifdef PDAL_HAVE_SQLITE
-#ifndef USE_PDAL_PLUGIN_SQLITE
-    REGISTER_WRITER(SqliteWriter, pdal::drivers::sqlite::SQLiteWriter);
-#endif
 #endif
 
 #ifdef PDAL_HAVE_POSTGRESQL

@@ -32,23 +32,18 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/drivers/sqlite/SQLiteWriter.hpp>
+#include "SQLiteWriter.hpp"
 #include <pdal/PointBuffer.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/pdal_internal.hpp>
 #include <pdal/FileUtils.hpp>
-
 
 #include <sstream>
 
 #include <gdal.h>
 #include <ogr_api.h>
 
-#ifdef USE_PDAL_PLUGIN_SQLITE
-//MAKE_WRITER_CREATOR(sqliteWriter, pdal::drivers::sqlite::Writer)
-CREATE_WRITER_PLUGIN(sqliteWriter, pdal::drivers::sqlite::Writer)
-#endif
-
+CREATE_WRITER_PLUGIN(sqlite, pdal::drivers::sqlite::SQLiteWriter)
 
 namespace pdal
 {

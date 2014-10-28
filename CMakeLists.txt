@@ -94,6 +94,7 @@ option(WITH_ICEBRIDGE "Choose if Icebridge support should be built" FALSE)
 option(WITH_ORACLE "Choose if Oracle support should be built" TRUE)
 option(WITH_P2G "Choose if Points2Grid support should be built" FALSE)
 option(WITH_PCL "Choose if PCL support should be built" FALSE)
+option(WITH_SQLITE "Choose if sqlite database support should be built" FALSE)
 option(WITH_TESTS "Choose if PDAL unit tests should be built" TRUE)
 
 # Choose to use pkg-config or not
@@ -322,19 +323,6 @@ if(WITH_GEOTIFF)
         set(WITH_GEOTIFF FALSE)
         set(GEOTIFF_LIBRARY "")
     endif()
-endif()
-
-
-#
-# SQLite (optional)
-#
-option(WITH_SQLITE "Choose if sqlite database support should be built" FALSE)
-if (WITH_SQLITE)
-    find_package(SQLite3)
-    mark_as_advanced(CLEAR SQLITE3_INCLUDE_DIR)
-    mark_as_advanced(CLEAR SQLITE3_LIBRARY)
-    include_directories(${SQLITE3_INCLUDE_DIR})
-    set(PDAL_HAVE_SQLITE 1)
 endif()
 
 

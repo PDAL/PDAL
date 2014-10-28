@@ -35,11 +35,18 @@
 #pragma once
 
 #include <pdal/Reader.hpp>
+#include <pdal/StageFactory.hpp>
 #include <pdal/XMLSchema.hpp>
 
-#include <pdal/drivers/sqlite/SQLiteCommon.hpp>
+#include "SQLiteCommon.hpp"
 
 #include <vector>
+
+PDAL_C_START
+
+PDAL_DLL void PDALRegister_sqlite_reader(void* factory);
+
+PDAL_C_END
 
 namespace pdal
 {
@@ -52,11 +59,7 @@ class PDAL_DLL SQLiteReader : public pdal::Reader
 {
 public:
     SET_STAGE_NAME("drivers.sqlite.reader", "SQLite3 Reader")
-#ifdef PDAL_HAVE_SQLITE
     SET_STAGE_ENABLED(true)
-#else
-    SET_STAGE_ENABLED(false)
-#endif
 
     SQLiteReader();
     static Options getDefaultOptions();
