@@ -53,6 +53,7 @@ if(PCL_FOUND)
 
 	set(PCLVIZ_LIB_NAME pdal_plugin_writer_pclvisualizer)
 	PDAL_ADD_PLUGIN(${PCLVIZ_LIB_NAME} writer pclvisualizer ${srcs} ${incs})
+	target_link_libraries(${PCLVIZ_LIB_NAME} ${PDAL_LINKAGE} ${PCL_LIBRARIES})
     else()
         message(STATUS "..building without PCL Visualization")
     endif()
@@ -113,6 +114,7 @@ if(PCL_FOUND)
     set(PCLBLOCK_LIB_NAME pdal_plugin_filter_pclblock)
     PDAL_ADD_PLUGIN(${PCLBLOCK_LIB_NAME} filter pclblock ${srcs} ${incs})
     target_link_libraries(${PCLBLOCK_LIB_NAME} ${PDAL_LINKAGE} ${PCL_LIBRARIES})
+    
     #
     # PCL Kernel
     #
@@ -128,6 +130,7 @@ if(PCL_FOUND)
     set(PCL_KERNEL_LIB_NAME pdal_plugin_kernel_pcl)
     PDAL_ADD_PLUGIN(${PCL_KERNEL_LIB_NAME} kernel pcl ${srcs} ${incs})
     target_link_libraries(${PCL_KERNEL_LIB_NAME} ${PDAL_LINKAGE} ${PCLBLOCK_LIB_NAME})
+    target_link_libraries(${PCL_KERNEL_LIB_NAME} ${PDAL_LINKAGE} ${PCL_LIBRARIES})
 
     #
     # Ground Kernel
@@ -143,6 +146,7 @@ if(PCL_FOUND)
     set(GROUND_KERNEL_LIB_NAME pdal_plugin_kernel_ground)
     PDAL_ADD_PLUGIN(${GROUND_KERNEL_LIB_NAME} kernel ground ${srcs} ${incs})
     target_link_libraries(${GROUND_KERNEL_LIB_NAME} ${PDAL_LINKAGE} ${PCLBLOCK_LIB_NAME})
+    target_link_libraries(${GROUND_KERNEL_LIB_NAME} ${PDAL_LINKAGE} ${PCL_LIBRARIES})
 
     #
     # Smooth Kernel
@@ -158,6 +162,7 @@ if(PCL_FOUND)
     set(SMOOTH_KERNEL_LIB_NAME pdal_plugin_kernel_smooth)
     PDAL_ADD_PLUGIN(${SMOOTH_KERNEL_LIB_NAME} kernel smooth ${srcs} ${incs})
     target_link_libraries(${SMOOTH_KERNEL_LIB_NAME} ${PDAL_LINKAGE} ${PCLBLOCK_LIB_NAME})
+    target_link_libraries(${SMOOTH_KERNEL_LIB_NAME} ${PDAL_LINKAGE} ${PCL_LIBRARIES})
 
     #
     # View Kernel
@@ -173,6 +178,7 @@ if(PCL_FOUND)
 
     set(VIEW_KERNEL_LIB_NAME pdal_plugin_kernel_view)
     PDAL_ADD_PLUGIN(${VIEW_KERNEL_LIB_NAME} kernel view ${srcs} ${incs})
+    target_link_libraries(${VIEW_KERNEL_LIB_NAME} ${PDAL_LINKAGE} ${PCL_LIBRARIES})
 else()
     message(STATUS "Building without PCL support")
 endif()
