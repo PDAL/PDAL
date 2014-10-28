@@ -35,7 +35,7 @@
 
 #include <boost/format.hpp>
 
-#include <pdal/drivers/pgpointcloud/Writer.hpp>
+#include "PgWriter.hpp"
 
 #include <pdal/PointBuffer.hpp>
 #include <pdal/StageFactory.hpp>
@@ -43,10 +43,7 @@
 #include <pdal/Endian.hpp>
 #include <pdal/XMLSchema.hpp>
 
-#ifdef USE_PDAL_PLUGIN_PGPOINTCLOUD
-//MAKE_WRITER_CREATOR(pgpointcloudWriter, pdal::drivers::pgpointcloud::Writer)
-CREATE_WRITER_PLUGIN(pgpointcloudWriter, pdal::drivers::pgpointcloud::Writer)
-#endif
+CREATE_WRITER_PLUGIN(pgpointcloud, pdal::drivers::pgpointcloud::PgWriter)
 
 // TO DO:
 // - change INSERT into COPY
@@ -68,7 +65,7 @@ namespace drivers
 namespace pgpointcloud
 {
 
-Writer::Writer()
+PgWriter::PgWriter()
     : pdal::Writer()
     , m_session(0)
     , m_schema_name("")
@@ -86,14 +83,14 @@ Writer::Writer()
 }
 
 
-Writer::~Writer()
+PgWriter::~PgWriter()
 {
     if (m_session)
         PQfinish(m_session);
 }
 
 
-void Writer::processOptions(const Options& options)
+void PgWriter::processOptions(const Options& options)
 {
     // If we don't know the table name, we're SOL
     m_table_name = options.getValueOrThrow<std::string>("table");
@@ -121,7 +118,7 @@ void Writer::processOptions(const Options& options)
 }
 
 
-void Writer::ready(PointContextRef ctx)
+void PgWriter::ready(PointContextRef ctx)
 {
     m_pointSize = 0;
     m_dims = ctx.dims();
@@ -142,7 +139,7 @@ void Writer::ready(PointContextRef ctx)
 // Optional things you can defer or attempt to initialize
 // here.
 //
-void Writer::initialize()
+void PgWriter::initialize()
 {
     m_session = pg_connect(m_connection);
 }
@@ -151,7 +148,7 @@ void Writer::initialize()
 // Called from somewhere (?) in PDAL core presumably to provide a user-friendly
 // means of editing the reader options.
 //
-Options Writer::getDefaultOptions()
+Options PgWriter::getDefaultOptions()
 {
     Options options;
 
@@ -180,7 +177,7 @@ Options Writer::getDefaultOptions()
     return options;
 }
 
-void Writer::writeInit()
+void PgWriter::writeInit()
 {
     if (m_schema_is_initialized)
         return;
@@ -224,14 +221,14 @@ void Writer::writeInit()
     m_schema_is_initialized = true;
 }
 
-void Writer::write(const PointBuffer& buffer)
+void PgWriter::write(const PointBuffer& buffer)
 {
     writeInit();
     writeTile(buffer);
 }
 
 
-void Writer::done(PointContextRef ctx)
+void PgWriter::done(PointContextRef ctx)
 {
     if (m_create_index && m_have_postgis)
     {
@@ -259,7 +256,7 @@ void Writer::done(PointContextRef ctx)
 }
 
 
-uint32_t Writer::SetupSchema(uint32_t srid)
+uint32_t PgWriter::SetupSchema(uint32_t srid)
 {
 
     // If the user has specified a PCID they want to use,
@@ -357,7 +354,7 @@ uint32_t Writer::SetupSchema(uint32_t srid)
 }
 
 
-void Writer::DeleteTable(std::string const& schema_name,
+void PgWriter::DeleteTable(std::string const& schema_name,
                          std::string const& table_name)
 {
     std::ostringstream oss;
@@ -374,7 +371,7 @@ void Writer::DeleteTable(std::string const& schema_name,
 }
 
 
-bool Writer::CheckPointCloudExists()
+bool PgWriter::CheckPointCloudExists()
 {
     log()->get(LogLevel::Debug) << "checking for pointcloud existence ... " <<
         std::endl;
@@ -392,7 +389,7 @@ bool Writer::CheckPointCloudExists()
 }
 
 
-bool Writer::CheckPostGISExists()
+bool PgWriter::CheckPostGISExists()
 {
     log()->get(LogLevel::Debug) << "checking for PostGIS existence ... " <<
         std::endl;
@@ -410,7 +407,7 @@ bool Writer::CheckPostGISExists()
 }
 
 
-bool Writer::CheckTableExists(std::string const& name)
+bool PgWriter::CheckTableExists(std::string const& name)
 {
     std::ostringstream oss;
     oss << "SELECT count(*) FROM pg_tables WHERE tablename ILIKE '" <<
@@ -434,7 +431,7 @@ bool Writer::CheckTableExists(std::string const& name)
 }
 
 
-void Writer::CreateTable(std::string const& schema_name,
+void PgWriter::CreateTable(std::string const& schema_name,
     std::string const& table_name, std::string const& column_name,
     boost::uint32_t pcid)
 {
@@ -453,7 +450,7 @@ void Writer::CreateTable(std::string const& schema_name,
 
 
 // Make sure you test for the presence of PostGIS before calling this
-void Writer::CreateIndex(std::string const& schema_name,
+void PgWriter::CreateIndex(std::string const& schema_name,
     std::string const& table_name, std::string const& column_name)
 {
     std::ostringstream oss;
@@ -529,7 +526,7 @@ void fillBuf(const PointBuffer& buf, char *pos, Dimension::Id::Enum d,
 } // anonymous namespace.
 
 
-void Writer::writeTile(PointBuffer const& buffer)
+void PgWriter::writeTile(PointBuffer const& buffer)
 {
     if (buffer.size() > m_patch_capacity)
     {

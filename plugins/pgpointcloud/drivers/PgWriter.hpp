@@ -36,7 +36,14 @@
 #pragma once
 
 #include <pdal/Writer.hpp>
-#include <pdal/drivers/pgpointcloud/common.hpp>
+#include <pdal/StageFactory.hpp>
+#include "PgCommon.hpp"
+
+PDAL_C_START
+
+PDAL_DLL void PDALRegister_pgpointcloud_writer(void* factory);
+
+PDAL_C_END
 
 namespace pdal
 {
@@ -46,26 +53,22 @@ namespace pgpointcloud
 {
 
 
-class PDAL_DLL Writer : public pdal::Writer
+class PDAL_DLL PgWriter : public pdal::Writer
 {
 public:
     SET_STAGE_NAME("drivers.pgpointcloud.writer", "PostgresSQL Pointcloud Database Writer")
     SET_STAGE_LINK("http://pdal.io/stages/drivers.pgpointcloud.writer.html")
-#ifdef PDAL_HAVE_POSTGRESQL
     SET_STAGE_ENABLED(true)
-#else
-    SET_STAGE_ENABLED(false)
-#endif
 
-    Writer();
-    ~Writer();
+    PgWriter();
+    ~PgWriter();
 
     static Options getDefaultOptions();
 
 
 private:
-    Writer& operator=(const Writer&); // not implemented
-    Writer(const Writer&); // not implemented
+    PgWriter& operator=(const PgWriter&); // not implemented
+    PgWriter(const PgWriter&); // not implemented
 
     virtual void processOptions(const Options& options);
     virtual void ready(PointContextRef ctx);

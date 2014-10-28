@@ -35,8 +35,8 @@
 #include "UnitTest.hpp"
 
 #include <pdal/Writer.hpp>
+#include <pdal/StageFactory.hpp>
 #include <pdal/drivers/las/Reader.hpp>
-#include <pdal/drivers/pgpointcloud/Writer.hpp>
 
 #include "Support.hpp"
 #include "Pgtest-Support.hpp"
@@ -136,39 +136,54 @@ BOOST_FIXTURE_TEST_SUITE(PgpointcloudWriterTest, PgpointcloudWriterTestFixture)
 
 BOOST_AUTO_TEST_CASE(testWrite)
 {
-    pdal::drivers::las::Reader reader(Support::datapath("las/1.2-with-color.las"));
-    pdal::drivers::pgpointcloud::Writer writer(getWriterOptions());
-    writer.setInput(&reader);
-
-    PointContext ctx;
-    writer.prepare(ctx);
-
-    PointBufferSet written = writer.execute(ctx);
-
-    point_count_t count(0);
-    for(auto i = written.begin(); i != written.end(); ++i)
+    StageFactory f;
+    StageFactory::WriterCreator* wc = f.getWriterCreator("drivers.pgpointcloud.writer");
+    if (wc)
     {
-        count += (*i)->size();
+        BOOST_CHECK(wc);
+
+        pdal::drivers::las::Reader reader(Support::datapath("las/1.2-with-color.las"));
+        std::unique_ptr<Writer> writer(wc());
+        writer->setOptions(getWriterOptions());
+        writer->setInput(&reader);
+
+        PointContext ctx;
+        writer->prepare(ctx);
+
+        PointBufferSet written = writer->execute(ctx);
+
+        point_count_t count(0);
+        for(auto i = written.begin(); i != written.end(); ++i)
+        {
+            count += (*i)->size();
+        }
+        BOOST_CHECK_EQUAL(written.size(), 1);
+        // BOOST_CHECK_EQUAL(count, 0);
+        BOOST_CHECK_EQUAL(count, 1065);
     }
-    BOOST_CHECK_EQUAL(written.size(), 1);
-    // BOOST_CHECK_EQUAL(count, 0);
-    BOOST_CHECK_EQUAL(count, 1065);
 }
 
 
 BOOST_AUTO_TEST_CASE(testNoPointcloudExtension)
 {
-    executeOnTestDb("DROP EXTENSION pointcloud");
+    StageFactory f;
+    StageFactory::WriterCreator* wc = f.getWriterCreator("drivers.pgpointcloud.writer");
+    if (wc)
+    {
+        BOOST_CHECK(wc);
 
-    pdal::drivers::las::Reader reader(Support::datapath("las/1.2-with-color.las"));
-    pdal::drivers::pgpointcloud::Writer writer(getWriterOptions());
-    writer.setInput(&reader);
+        executeOnTestDb("DROP EXTENSION pointcloud");
 
-    PointContext ctx;
-    writer.prepare(ctx);
+        pdal::drivers::las::Reader reader(Support::datapath("las/1.2-with-color.las"));
+        std::unique_ptr<Writer> writer(wc());
+        writer->setOptions(getWriterOptions());
+        writer->setInput(&reader);
 
+        PointContext ctx;
+        writer->prepare(ctx);
 
-    BOOST_CHECK_THROW(writer.execute(ctx), pdal::pdal_error);
+        BOOST_CHECK_THROW(writer->execute(ctx), pdal::pdal_error);
+    }
 }
 
 

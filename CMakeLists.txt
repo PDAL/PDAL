@@ -94,11 +94,20 @@ option(WITH_ICEBRIDGE "Choose if Icebridge support should be built" FALSE)
 option(WITH_ORACLE "Choose if Oracle support should be built" TRUE)
 option(WITH_P2G "Choose if Points2Grid support should be built" FALSE)
 option(WITH_PCL "Choose if PCL support should be built" FALSE)
+option(WITH_PGPOINTCLOUD "Choose if PostgreSQL PointCloud support should be built" TRUE)
 option(WITH_SQLITE "Choose if sqlite database support should be built" FALSE)
 option(WITH_TESTS "Choose if PDAL unit tests should be built" TRUE)
 
 # Choose to use pkg-config or not
 option(WITH_PKGCONFIG "Choose whether a pkgconfig file (PDAL.pc) should be installed" TRUE)
+
+cmake_dependent_option(
+    WITH_PGPOINTCLOUD_TESTS
+    "Choose if PostgreSQL PointCloud tests should be built"
+    OFF
+    WITH_PGPOINTCLOUD
+    OFF
+    )
 
 
 #------------------------------------------------------------------------------
@@ -322,32 +331,6 @@ if(WITH_GEOTIFF)
     else()
         set(WITH_GEOTIFF FALSE)
         set(GEOTIFF_LIBRARY "")
-    endif()
-endif()
-
-
-#
-# PGPointCloud (optional)
-#
-option(WITH_PGPOINTCLOUD "Choose if PostgreSQL PointCloud support should be built" TRUE)
-cmake_dependent_option(
-    WITH_PGPOINTCLOUD_TESTS
-    "Choose if PostgreSQL PointCloud tests should be built"
-    OFF
-    WITH_PGPOINTCLOUD
-    OFF
-    )
-if (WITH_PGPOINTCLOUD)
-    find_package(PostgreSQL)
-    if (POSTGRESQL_FOUND)
-        set(PDAL_HAVE_POSTGRESQL 1)
-        mark_as_advanced(CLEAR POSTGRESQL_INCLUDE_DIR)
-        mark_as_advanced(CLEAR POSTGRESQL_LIBRARIES)
-        include_directories(${POSTGRESQL_INCLUDE_DIR})
-        message(STATUS "..building with PgPointCloud")
-    else()
-        set(WITH_PGPOINTCLOUD FALSE)
-        set(POSTGRESQL_LIBRARIES "")
     endif()
 endif()
 

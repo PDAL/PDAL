@@ -68,12 +68,6 @@ MAKE_READER_CREATOR(BufferReader, drivers::buffer::BufferReader)
 MAKE_READER_CREATOR(NITFReader, pdal::drivers::nitf::NitfReader)
 #endif
 
-#ifdef PDAL_HAVE_POSTGRESQL
-#ifndef USE_PDAL_PLUGIN_PGPOINTCLOUD
-MAKE_READER_CREATOR(PgPcReader, pdal::drivers::pgpointcloud::PgReader)
-#endif
-#endif
-
 MAKE_READER_CREATOR(QfitReader, pdal::drivers::qfit::Reader)
 MAKE_READER_CREATOR(TerrasolidReader, pdal::drivers::terrasolid::Reader)
 
@@ -109,12 +103,6 @@ MAKE_WRITER_CREATOR(LasWriter, pdal::drivers::las::Writer)
 
 #ifndef USE_PDAL_PLUGIN_TEXT
 MAKE_WRITER_CREATOR(TextWriter, pdal::drivers::text::Writer)
-#endif
-
-#ifdef PDAL_HAVE_POSTGRESQL
-#ifndef USE_PDAL_PLUGIN_PGPOINTCLOUD
-MAKE_WRITER_CREATOR(PgPcWriter, pdal::drivers::pgpointcloud::Writer)
-#endif
 #endif
 
 #ifdef PDAL_HAVE_NITRO
@@ -332,12 +320,6 @@ void StageFactory::registerKnownReaders()
     REGISTER_READER(NITFReader, pdal::drivers::nitf::NitfReader);
 #endif
 
-#ifdef PDAL_HAVE_POSTGRESQL
-#ifndef USE_PDAL_PLUGIN_PGPOINTCLOUD
-    REGISTER_READER(PgPcReader, pdal::drivers::pgpointcloud::PgReader);
-#endif
-#endif
-
     REGISTER_READER(QfitReader, pdal::drivers::qfit::Reader);
     REGISTER_READER(TerrasolidReader, pdal::drivers::terrasolid::Reader);
     REGISTER_READER(BpfReader, pdal::BpfReader);
@@ -375,12 +357,6 @@ void StageFactory::registerKnownWriters()
 
 #ifndef USE_PDAL_PLUGIN_TEXT
     REGISTER_WRITER(TextWriter, pdal::drivers::text::Writer);
-#endif
-
-#ifdef PDAL_HAVE_POSTGRESQL
-#ifndef USE_PDAL_PLUGIN_PGPOINTCLOUD
-    REGISTER_WRITER(PgPcWriter, pdal::drivers::pgpointcloud::Writer);
-#endif
 #endif
 
 #ifdef PDAL_HAVE_NITRO
