@@ -32,8 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_PDAL_DRIVERS_HPP
-#define INCLUDED_PDAL_DRIVERS_HPP
+#pragma once
 
 #include <pdal/pdal_config.hpp>
 
@@ -46,10 +45,6 @@
 #include <pdal/drivers/bpf/BpfReader.hpp>
 
 #include <pdal/drivers/sbet/Reader.hpp>
-
-#ifdef PDAL_HAVE_HDF5
-#include <pdal/drivers/icebridge/Reader.hpp>
-#endif
 
 #ifdef PDAL_HAVE_CARIS
 #ifndef USE_PDAL_PLUGIN_CARIS
@@ -77,10 +72,6 @@
 #include <pdal/drivers/nitf/Reader.hpp>
 #endif
 
-#ifdef PDAL_HAVE_HDF5
-#include <pdal/drivers/icebridge/Reader.hpp>
-#endif
-
 #ifdef PDAL_HAVE_SQLITE
 #ifndef USE_PDAL_PLUGIN_SQLITE
 #include <pdal/drivers/sqlite/SQLiteReader.hpp>
@@ -93,6 +84,4 @@
 #include <pdal/drivers/pgpointcloud/PgReader.hpp>
 #include <pdal/drivers/pgpointcloud/Writer.hpp>
 #endif
-#endif
-
 #endif
