@@ -106,10 +106,10 @@ schema::XMLSchema fetchSchema(Statement stmt, BlockPtr block)
     }
     std::ostringstream fname;
     int cloudId = stmt->GetInteger(&(block->pc->pc_id)) ;
-    fname << "schema-" << cloudId <<".xml";
-        std::ostream* out = FileUtils::createFile(fname.str());
-        out->write(pc_schema_xml.c_str(), pc_schema_xml.size());
-        FileUtils::closeFile(out);
+//     fname << "schema-" << cloudId <<".xml";
+//         std::ostream* out = FileUtils::createFile(fname.str());
+//         out->write(pc_schema_xml.c_str(), pc_schema_xml.size());
+//         FileUtils::closeFile(out);
     return schema::Reader(pc_schema_xml).schema();
 }
 
