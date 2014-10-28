@@ -1,13 +1,14 @@
 .. _pcl_ground:
 
+===============================================================================
 Identifying ground returns using ProgressiveMorphologicalFilter segmentation
-----------------------------------------------------------------------------
+===============================================================================
 
 Implements the Progressive Morphological Filter for segmentation of ground
 points. 
 
 Background
-----------
+------------------------------------------------------------------------------
 
 A complete description of the algorithm can be found in the article `"A
 Progressive Morphological Filter for Removing Nonground Measurements from
@@ -32,7 +33,7 @@ and save it somewhere to disk.
    :height: 400px
 
 Using the Ground kernel
------------------------
+------------------------------------------------------------------------------
 
 The :ref:`pdal ground <ground_command>` kernel can be used to filter ground
 returns, allowing the user to tweak filtering parameters at the command-line.
