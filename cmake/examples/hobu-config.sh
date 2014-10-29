@@ -21,7 +21,7 @@ if ! [ -z "$1" ]; then
 fi
 
 CC=$CC CXX=$CXX cmake   -G "$CONFIG"  \
-        -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+        -DCMAKE_BUILD_TYPE=Debug \
         -DCMAKE_INSTALL_PREFIX=/Users/hobu \
         -DWITH_ORACLE=ON \
         -DWITH_GEOTIFF=ON \
