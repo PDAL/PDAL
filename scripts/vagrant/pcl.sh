@@ -7,11 +7,12 @@ fi
 export NUMTHREADS
 
 
-git clone https://github.com/chambbj/pcl.git pcl
+git clone https://github.com/PointCloudLibrary/pcl.git
 cd pcl
 mkdir build
 cd build
-git checkout pipeline
+git fetch origin --tags
+git checkout tags/pcl-1.7.2
 cmake .. \
     -G "Unix Makefiles" \
     -DCMAKE_BUILD_TYPE=Release \
@@ -23,7 +24,7 @@ cmake .. \
     -DWITH_CUDA:BOOL=OFF \
     -DWITH_LIBUSB:BOOL=OFF \
     -DBUILD_people:BOOL=OFF \
-    -DBUILD_surface:BOOL=OFF \
+    -DBUILD_surface:BOOL=ON \
     -DBUILD_tools:BOOL=OFF \
     -DBUILD_visualization:BOOL=OFF \
     -DBUILD_sample_consensus:BOOL=ON \
