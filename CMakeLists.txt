@@ -90,7 +90,7 @@ endif(WIN32)
 # Choose package components
 option(WITH_APPS "Choose if PDAL utilities should be built" TRUE)
 option(BUILD_PLUGIN_GREYHOUND "Choose if Greyhound support should be built" FALSE)
-option(BUILD_PLUGIN_HEXER "Whether or not hexbin filter is built" FALSE)
+option(BUILD_PLUGIN_HEXBIN "Whether or not HexBin filter is built" FALSE)
 option(BUILD_PLUGIN_ICEBRIDGE "Choose if Icebridge support should be built" FALSE)
 option(BUILD_PLUGIN_MRSID "Choose if MrSID/LiDAR support should be built" FALSE)
 option(BUILD_PLUGIN_NITF "Choose if NITF support should be built (only install supported is from http://github.com/hobu/nitro)" TRUE)
