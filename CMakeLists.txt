@@ -533,13 +533,6 @@ include_directories("${CMAKE_CURRENT_BINARY_DIR}/include")
 # subdirectory controls
 #------------------------------------------------------------------------------
 
-add_subdirectory(src)
-add_subdirectory(plugins)
-
-if(WITH_APPS)
-  add_subdirectory(apps)
-endif()
-
 if(WITH_TESTS)
   message(STATUS "Building with PDAL unit tests")
   enable_testing()
@@ -561,6 +554,14 @@ else()
     message(WARNING
       "CTest support requested but WITH_TESTS option not specified to build of PDAL unit tests")
   endif()
+endif()
+
+
+add_subdirectory(src)
+add_subdirectory(plugins)
+
+if(WITH_APPS)
+  add_subdirectory(apps)
 endif()
 
 

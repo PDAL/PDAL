@@ -179,6 +179,15 @@ if(PCL_FOUND)
     set(VIEW_KERNEL_LIB_NAME pdal_plugin_kernel_view)
     PDAL_ADD_PLUGIN(${VIEW_KERNEL_LIB_NAME} kernel view ${srcs} ${incs})
     target_link_libraries(${VIEW_KERNEL_LIB_NAME} ${PDAL_LINKAGE} ${PCL_LIBRARIES})
+
+    #
+    # PCL tests
+    #
+    set(srcs
+        test/PCLBlockFilterTest.cpp
+    )
+
+    PDAL_ADD_TEST(pcltest ${srcs})
 else()
     message(STATUS "Building without PCL support")
 endif()
