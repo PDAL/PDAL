@@ -230,7 +230,7 @@ void Writer::ready(PointContextRef ctx)
 /// Search for metadata associated with the provided recordId and userId.
 /// \param  node - Top-level node to use for metadata search.
 /// \param  recordId - Record ID to match.
-/// \param  userId - User ID to match. 
+/// \param  userId - User ID to match.
 MetadataNode Writer::findVlrMetadata(MetadataNode node,
     uint16_t recordId, const std::string& userId)
 {
@@ -422,7 +422,32 @@ void Writer::fillHeader(PointContextRef ctx)
     m_lasHeader.setSoftwareId(headerVal<std::string>("software_id"));
     m_lasHeader.setSoftwareId(headerVal<std::string>("system_id"));
     m_lasHeader.setProjectId(headerVal<boost::uuids::uuid>("project_id"));
-    m_lasHeader.setGlobalEncoding(headerVal<uint16_t>("global_encoding"));
+
+    uint16_t reserved(0);
+
+    try
+    {
+        reserved = headerVal<uint16_t>("global_encoding");
+    } catch (boost::bad_lexical_cast&)
+    {
+        // Try decoding base64
+        std::string global_encoding_data = headerVal<std::string>("global_encoding");
+        std::vector<uint8_t> data = Utils::base64_decode(global_encoding_data);
+        if (data.size() == 0)
+            ;
+        else if (data.size() == 1 )
+            reserved = data[0];
+        else if (data.size() == 2 )
+            memcpy(&reserved, data.data(), data.size());
+        else
+        {
+            std::ostringstream oss;
+            oss << "size of global_encoding bytes should == 2, not " <<
+                data.size();
+            throw pdal_error(oss.str());
+        }
+    }
+    m_lasHeader.setGlobalEncoding(reserved);
     m_lasHeader.setFileSourceId(headerVal<uint16_t>("filesource_id"));
 
     if (!m_lasHeader.pointFormatSupported())
@@ -438,7 +463,7 @@ void Writer::fillHeader(PointContextRef ctx)
 void Writer::readyCompression()
 {
 #ifdef PDAL_HAVE_LASZIP
-    m_zipPoint.reset(new ZipPoint(m_lasHeader.pointFormat(), 
+    m_zipPoint.reset(new ZipPoint(m_lasHeader.pointFormat(),
         m_lasHeader.pointLen()));
     m_zipper.reset(new LASzipper());
     // Note: this will make the VLR count in the header incorrect, but we
