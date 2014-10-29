@@ -35,15 +35,13 @@
 #include "UnitTest.hpp"
 
 #include <pdal/SpatialReference.hpp>
+#include <pdal/StageFactory.hpp>
 #include <pdal/drivers/las/Reader.hpp>
-#include <pdal/filters/HexBin.hpp>
 #include <pdal/PointBuffer.hpp>
 
 #include "Support.hpp"
 
 BOOST_AUTO_TEST_SUITE(HexbinFilterTest)
-
-#ifdef PDAL_HAVE_HEXER
 
 using namespace pdal;
 
@@ -75,29 +73,34 @@ BOOST_AUTO_TEST_CASE(HexbinFilterTest_test_1)
 
     drivers::las::Reader reader;
     reader.setOptions(options);
-    filters::HexBin hexbin;
-    hexbin.setOptions(options);
-    hexbin.setInput(&reader);
+    StageFactory f;
+    StageFactory::FilterCreator* fc = f.getFilterCreator("filters.hexbin");
+    if(fc)
+    {
+        BOOST_CHECK(fc);
 
-    PointContext ctx;
+        std::unique_ptr<Filter> hexbin(fc());
+        hexbin->setOptions(options);
+        hexbin->setInput(&reader);
 
-    hexbin.prepare(ctx);
-    hexbin.execute(ctx);
+        PointContext ctx;
 
-    MetadataNode m = ctx.metadata();
-    m = m.findChild(hexbin.getName());
+        hexbin->prepare(ctx);
+        hexbin->execute(ctx);
 
-    std::string filename = Support::temppath("hexbin.txt");
-    std::ofstream out(filename);
-    printChildren(out, m);
-    out.close();
+        MetadataNode m = ctx.metadata();
+        m = m.findChild(hexbin->getName());
 
-    BOOST_CHECK(Support::compare_text_files(filename,
-        Support::datapath("filters/hexbin.txt")));
+        std::string filename = Support::temppath("hexbin.txt");
+        std::ofstream out(filename);
+        printChildren(out, m);
+        out.close();
 
-    FileUtils::deleteFile(filename);
+        BOOST_CHECK(Support::compare_text_files(filename,
+            Support::datapath("filters/hexbin.txt")));
+
+        FileUtils::deleteFile(filename);
+    }
 }
-
-#endif
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -36,11 +36,9 @@
 
 #include <pdal/Filter.hpp>
 
-#ifdef PDAL_HAVE_HEXER
 #include <hexer/Mathpair.hpp>
 #include <hexer/HexGrid.hpp>
 #include <hexer/Processor.hpp>
-#endif
 
 namespace pdal
 {
@@ -52,20 +50,14 @@ class PDAL_DLL HexBin : public Filter
 public:
     SET_STAGE_NAME("filters.hexbin", "Hexbin implementation")
     SET_STAGE_LINK("http://pdal.io/stages/filters.hexbin.html")
-#ifdef PDAL_HAVE_HEXER
     SET_STAGE_ENABLED(true)
-#else
-    SET_STAGE_ENABLED(false)
-#endif
 
     HexBin() : Filter()
         {}
 
 private:
 
-#ifdef PDAL_HAVE_HEXER
     std::unique_ptr<hexer::HexGrid> m_grid;
-#endif
     std::string m_xDimName;
     std::string m_yDimName;
     uint32_t m_sampleSize;
