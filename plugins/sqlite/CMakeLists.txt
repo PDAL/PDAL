@@ -5,7 +5,7 @@
 include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(${PROJECT_SOURCE_DIR}/plugins/sqlite)
 
-find_package(SQLite3 REQUIRED)
+find_package(SQLite3)
 if (SQLITE3_FOUND)
     message(STATUS "Building with SQLite support")
 

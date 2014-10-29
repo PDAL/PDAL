@@ -5,7 +5,7 @@
 include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(${PROJECT_SOURCE_DIR}/plugins/oci)
 
-find_package(Oracle REQUIRED)
+find_package(Oracle)
 if(ORACLE_FOUND)
     message(STATUS "Building with Oracle support")
 

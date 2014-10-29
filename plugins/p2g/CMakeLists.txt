@@ -5,7 +5,7 @@
 include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(${PROJECT_SOURCE_DIR}/plugins/p2g)
 
-find_package(Points2Grid REQUIRED)
+find_package(Points2Grid)
 if (P2G_FOUND)
     message(STATUS "Building with Points2grid support")
 

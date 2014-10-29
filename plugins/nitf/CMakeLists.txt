@@ -5,7 +5,7 @@
 include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(${PROJECT_SOURCE_DIR}/plugins/nitf)
 
-find_package(Nitro 2.6 REQUIRED)
+find_package(Nitro 2.6)
 if(NITRO_FOUND)
     message(STATUS "Building with NITF support")
 

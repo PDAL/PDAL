@@ -24,7 +24,7 @@
 include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(${PROJECT_SOURCE_DIR}/plugins/pcl)
 
-find_package(PCL 1.7 REQUIRED)
+find_package(PCL 1.7)
 if(PCL_FOUND)
     message(STATUS "Building with PCL support")
 

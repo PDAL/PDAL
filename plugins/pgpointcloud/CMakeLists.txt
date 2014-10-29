@@ -5,7 +5,7 @@
 include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(${PROJECT_SOURCE_DIR}/plugins/pgpointcloud)
 
-find_package(PostgreSQL REQUIRED)
+find_package(PostgreSQL)
 if (POSTGRESQL_FOUND)
     message(STATUS "Building with PgPointCloud support")
 
