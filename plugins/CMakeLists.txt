@@ -2,8 +2,8 @@ if(BUILD_PLUGIN_GREYHOUND)
     add_subdirectory(greyhound)
 endif()
 
-if(BUILD_PLUGIN_HEXER)
-    add_subdirectory(hexer)
+if(BUILD_PLUGIN_HEXBIN)
+    add_subdirectory(hexbin)
 endif()
 
 if(BUILD_PLUGIN_ICEBRIDGE)
