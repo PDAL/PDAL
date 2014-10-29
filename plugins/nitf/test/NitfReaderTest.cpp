@@ -161,21 +161,28 @@ BOOST_AUTO_TEST_CASE(optionSrs)
     nitfOpts.add("spatialreference", sr);
 
     PointContext ctx;
-    drivers::nitf::NitfReader nitfReader;
-    nitfReader.setOptions(nitfOpts);
+    StageFactory f;
+    StageFactory::ReaderCreator* rc = f.getReaderCreator("drivers.nitf.reader");
+    if (rc)
+    {
+        BOOST_CHECK(rc);
 
-    Options lasOpts;
-    lasOpts.add("filename", "/dev/null");
-    drivers::las::Writer lasWriter;
-    lasWriter.setInput(&nitfReader);
-    lasWriter.setOptions(lasOpts);;
+        std::unique_ptr<Reader> nitfReader(rc());
+        nitfReader->setOptions(nitfOpts);
 
-    lasWriter.prepare(ctx);
-    PointBufferSet pbSet = lasWriter.execute(ctx);
+        Options lasOpts;
+        lasOpts.add("filename", "/dev/null");
+        drivers::las::Writer lasWriter;
+        lasWriter.setInput(&nitfReader);
+        lasWriter.setOptions(lasOpts);;
 
-    BOOST_CHECK_EQUAL(sr, nitfReader.getSpatialReference().getWKT());
-    BOOST_CHECK_EQUAL("", lasWriter.getSpatialReference().getWKT());
-    BOOST_CHECK_EQUAL(sr, ctx.spatialRef().getWKT());
+        lasWriter.prepare(ctx);
+        PointBufferSet pbSet = lasWriter.execute(ctx);
+
+        BOOST_CHECK_EQUAL(sr, nitfReader->getSpatialReference().getWKT());
+        BOOST_CHECK_EQUAL("", lasWriter.getSpatialReference().getWKT());
+        BOOST_CHECK_EQUAL(sr, ctx.spatialRef().getWKT());
+    }
 }
 
 BOOST_AUTO_TEST_SUITE_END()
