@@ -5,8 +5,8 @@
 include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(${PROJECT_SOURCE_DIR}/plugins/greyhound)
 
-find_package(JSONCPP REQUIRED)
-find_package(WEBSOCKETPP REQUIRED)
+find_package(JSONCPP)
+find_package(WEBSOCKETPP)
 if(JSONCPP_FOUND AND WEBSOCKETPP_FOUND)
     message(STATUS "Building with Greyhound support")
 
