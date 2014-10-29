@@ -112,26 +112,6 @@
     SET_KERNEL_PLUGIN_VERSION(T)
 
 //
-// macros to register the plugin creators
-//
-//#define REGISTER_READER_PLUGIN(T) \
-//    PDAL_C_START \
-//    PDAL_DLL void PDALRegister_reader_##T(void* factory); \
-//    PDAL_C_END
-//#define REGISTER_FILTER_PLUGIN(T) \
-//    PDAL_C_START \
-//    PDAL_DLL void PDALRegister_filter_##T(void* factory); \
-//    PDAL_C_END
-//#define REGISTER_WRITER_PLUGIN(T) \
-//    PDAL_C_START \
-//    PDAL_DLL void PDALRegister_writer_##T(void* factory); \
-//    PDAL_C_END
-//#define REGISTER_KERNEL_PLUGIN(T) \
-//    PDAL_C_START \
-//    PDAL_DLL void PDALRegister_kernel_##T(void* factory); \
-//    PDAL_C_END
-
-//
 // macro to register the version of PDAL the plugin was linked against
 //
 #define SET_READER_PLUGIN_VERSION(T) \
