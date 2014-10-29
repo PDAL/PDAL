@@ -323,7 +323,6 @@ set(PDAL_FILTERS_HPP
   "${PDAL_FILTERS_HEADERS}/Crop.hpp"
   "${PDAL_FILTERS_HEADERS}/Decimation.hpp"
   "${PDAL_FILTERS_HEADERS}/Ferry.hpp"
-  "${PDAL_FILTERS_HEADERS}/HexBin.hpp"
   "${PDAL_FILTERS_HEADERS}/InPlaceReprojection.hpp"
   "${PDAL_FILTERS_HEADERS}/Merge.hpp"
   "${PDAL_FILTERS_HEADERS}/MortonOrder.hpp"
@@ -340,7 +339,6 @@ set (PDAL_FILTERS_CPP
   "${PDAL_FILTERS_SRC}/Crop.cpp"
   "${PDAL_FILTERS_SRC}/Decimation.cpp"
   "${PDAL_FILTERS_SRC}/Ferry.cpp"
-  "${PDAL_FILTERS_SRC}/HexBin.cpp"
   "${PDAL_FILTERS_SRC}/MortonOrder.cpp"
   "${PDAL_FILTERS_SRC}/Reprojection.cpp"
   "${PDAL_FILTERS_SRC}/Splitter.cpp"
@@ -534,7 +532,6 @@ target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE}
     "${GEOTIFF_LIBRARY}"
     "${GDAL_LIBRARY}"
     "${GEOS_LIBRARY}"
-    "${HEXER_LIBRARY}"
     "${ZLIB_LIBRARIES}"
 )
 

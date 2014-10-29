@@ -32,13 +32,14 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/filters/HexBin.hpp>
+#include "HexBin.hpp"
 
-#ifdef PDAL_HAVE_HEXER
 #include <hexer/HexIter.hpp>
+#include <pdal/StageFactory.hpp>
 
 using namespace hexer;
-#endif
+
+CREATE_FILTER_PLUGIN(hexer, pdal::filters::HexBin)
 
 namespace pdal
 {
@@ -60,7 +61,6 @@ void HexBin::processOptions(const Options& options)
 
 void HexBin::ready(PointContext ctx)
 {
-#ifdef PDAL_HAVE_HEXER
     if (m_edgeLength == 0.0)  // 0 can always be represented exactly.
     {
         m_grid.reset(new HexGrid(m_density));
@@ -68,26 +68,22 @@ void HexBin::ready(PointContext ctx)
     }
     else
         m_grid.reset(new HexGrid(m_edgeLength * sqrt(3), m_density));
-#endif
 }
 
 
 void HexBin::filter(PointBuffer& buf)
 {
-#ifdef PDAL_HAVE_HEXER
     for (PointId idx = 0; idx < buf.size(); ++idx)
     {
         double x = buf.getFieldAs<double>(pdal::Dimension::Id::X, idx);
         double y = buf.getFieldAs<double>(pdal::Dimension::Id::Y, idx);
         m_grid->addPoint(x, y);
     }
-#endif
 }
 
     
 void HexBin::done(PointContext ctx)
 {
-#ifdef PDAL_HAVE_HEXER
     m_grid->processSample();
     m_grid->findShapes();
     m_grid->findParentPaths();
@@ -137,7 +133,6 @@ void HexBin::done(PointContext ctx)
     m_grid->toWKT(polygon);
     m_metadata.add("boundary", polygon.str(),
         "Boundary MULTIPOLYGON of domain");
-#endif
 }
 
 } // namespace filters

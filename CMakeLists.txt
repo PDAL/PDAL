@@ -90,6 +90,7 @@ endif(WIN32)
 # Choose package components
 option(WITH_APPS "Choose if PDAL utilities should be built" TRUE)
 option(BUILD_PLUGIN_GREYHOUND "Choose if Greyhound support should be built" FALSE)
+option(BUILD_PLUGIN_HEXER "Whether or not hexbin filter is built" FALSE)
 option(BUILD_PLUGIN_ICEBRIDGE "Choose if Icebridge support should be built" FALSE)
 option(BUILD_PLUGIN_MRSID "Choose if MrSID/LiDAR support should be built" FALSE)
 option(BUILD_PLUGIN_NITF "Choose if NITF support should be built (only install supported is from http://github.com/hobu/nitro)" TRUE)
@@ -393,20 +394,6 @@ option(WITH_CARIS "Choose if CARIS/BDB support should be built" FALSE)
 if(WITH_CARIS)
     set(CARIS_FOUND 1)
     set(PDAL_HAVE_CARIS 1)
-endif()
-
-
-#
-# Hexer - optional
-#
-option(WITH_HEXER "Whether or not hexbin filter is built" FALSE)
-if(WITH_HEXER)
-    find_package(Hexer)
-    if(HEXER_FOUND)
-        include_directories(${HEXER_INCLUDE_DIR})
-        add_definitions(-DHAVE_HEXER=1)
-        set(PDAL_HAVE_HEXER 1)
-    endif()
 endif()
 
 
