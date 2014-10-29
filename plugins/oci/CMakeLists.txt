@@ -52,11 +52,13 @@ if(ORACLE_FOUND)
     #
     # OCI tests
     #
-    set(srcs
-        test/OCITest.cpp
-    )
+    if(BUILD_OCI_TESTS)
+	set(srcs
+	    test/OCITest.cpp
+	)
 
-    PDAL_ADD_TEST(ocitest ${srcs})
+	PDAL_ADD_TEST(ocitest ${srcs})
+    endif()
 else()
     message(STATUS "Building without Oracle support")
 endif()

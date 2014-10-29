@@ -48,7 +48,7 @@ if (POSTGRESQL_FOUND)
     #
     # PgPointCloud tests
     #
-    if (WITH_PGPOINTCLOUD_TESTS)
+    if (BUILD_PGPOINTCLOUD_TESTS)
 	set(PGPOINTCLOUD_TEST_DB_HOST localhost CACHE STRING "Postgres test database host")
 	set(PGPOINTCLOUD_TEST_DB_PORT 5432 CACHE STRING "Postgres test database port")
 	set(PGPOINTCLOUD_TEST_DB_NAME pdal_test CACHE STRING
