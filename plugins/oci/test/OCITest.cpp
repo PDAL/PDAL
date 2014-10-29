@@ -45,6 +45,7 @@
 #include <pdal/filters/Chipper.hpp>
 #include <pdal/filters/InPlaceReprojection.hpp>
 
+#include "../drivers/OciCommon.hpp"
 #include "Support.hpp"
 #include "TestConfig.hpp"
 

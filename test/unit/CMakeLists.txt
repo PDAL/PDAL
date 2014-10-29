@@ -91,28 +91,6 @@ SET(PDAL_UNITTEST_CONFIG_INC
     )
 
 
-if (WITH_ORACLE)
-if (NOT USE_PDAL_PLUGIN_OCI)
-   set(PDAL_OCI_TEST_CPP drivers/oci/OCITest.cpp)
-
-   FOREACH(file ${PDAL_OCI_TEST_CPP})
-           SET(PDAL_UNITTEST_TEST_SRC "${PDAL_UNITTEST_TEST_SRC};${file}" CACHE INTERNAL "source files for test")
-   ENDFOREACH(file)
-endif()
-
-endif (WITH_ORACLE)
-
-if (WITH_SQLITE)
-    if (NOT USE_PDAL_PLUGIN_SQLITE)
-       set(PDAL_SQLITE_TEST_CPP drivers/sqlite/SqliteTest.cpp)
-
-       FOREACH(file ${PDAL_SQLITE_TEST_CPP})
-           SET(PDAL_UNITTEST_TEST_SRC "${PDAL_UNITTEST_TEST_SRC};${file}"
-               CACHE INTERNAL "source files for test")
-       ENDFOREACH(file)
-    endif()
-endif (WITH_SQLITE)
-
 if (WITH_NITRO)
     set(PDAL_GDAL_TEST_CPP
         GDALUtilsTest.cpp
@@ -134,51 +112,6 @@ if (WITH_NITRO)
     ENDFOREACH(file)
 endif (WITH_NITRO)
 
-
-# Removed WITH_PCL/WITH_PCL_TEST conditional - StageFactory now tests for PCL
-# internally. This will eventually be moved to plugins/pcl/test.
-set(PDAL_PCL_TEST_CPP
-    filters/PCLBlockFilterTest.cpp
-)
-
-FOREACH(file ${PDAL_PCL_TEST_CPP})
-    SET(PDAL_UNITTEST_TEST_SRC "${PDAL_UNITTEST_TEST_SRC};${file}"
-	CACHE INTERNAL "source files for test")
-ENDFOREACH(file)
-
-if (WITH_HDF5)
-    set(PDAL_ICEBRIDGE_TEST_CPP
-        drivers/icebridge/IcebridgeReaderTest.cpp
-        )
-
-    FOREACH(file ${PDAL_ICEBRIDGE_TEST_CPP})
-        SET(PDAL_UNITTEST_TEST_SRC "${PDAL_UNITTEST_TEST_SRC};${file}"
-            CACHE INTERNAL "source files for test")
-    ENDFOREACH(file)
-endif(WITH_HDF5)
-
-if (WITH_PGPOINTCLOUD AND WITH_PGPOINTCLOUD_TESTS)
-    set(PDAL_PGPOINTCLOUD_TEST_CPP
-        drivers/pgpointcloud/PgpointcloudWriterTest.cpp
-        )
-
-    set(PGPOINTCLOUD_TEST_DB_HOST localhost CACHE STRING "Postgres test database host")
-    set(PGPOINTCLOUD_TEST_DB_PORT 5432 CACHE STRING "Postgres test database port")
-    set(PGPOINTCLOUD_TEST_DB_NAME pdal_test CACHE STRING
-        "Postgres test database name, must exist and must be able to create databases")
-    set(PGPOINTCLOUD_TEST_DB_TEMPNAME pdal_test_tmp CACHE STRING "Postgres test database temp database name")
-
-    configure_file(
-        drivers/pgpointcloud/Pgtest-Support.hpp.in
-        ${CMAKE_CURRENT_BINARY_DIR}/drivers/pgpointcloud/Pgtest-Support.hpp
-        )
-
-    set(PDAL_UNITTEST_TEST_SRC
-        ${PDAL_UNITTEST_TEST_SRC}
-        ${PDAL_PGPOINTCLOUD_TEST_CPP}
-        CACHE INTERNAL "source files for test"
-        )
-endif (WITH_PGPOINTCLOUD AND WITH_PGPOINTCLOUD_TESTS)
 
 set(PDAL_UNITTEST_SOURCES "")
 FOREACH(file ${PDAL_UNITTEST_TEST_SRC})
@@ -212,7 +145,8 @@ INCLUDE_DIRECTORIES(
     ../../include
     ${GDAL_INCLUDE_DIR}
     ${GEOTIFF_INCLUDE_DIR}
-    ${ORACLE_INCLUDE_DIR})
+    )
+    #${ORACLE_INCLUDE_DIR})
 
 ADD_EXECUTABLE(${PDAL_UNIT_TEST} ${PDAL_UNITTEST_SOURCES})
 

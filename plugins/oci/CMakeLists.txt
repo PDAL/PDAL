@@ -48,6 +48,15 @@ if(ORACLE_FOUND)
     set(OCI_WRITER_LIB_NAME pdal_plugin_writer_oci)
     PDAL_ADD_PLUGIN(${OCI_WRITER_LIB_NAME} writer oci ${srcs} ${incs})
     target_link_libraries(${OCI_WRITER_LIB_NAME} ${PDAL_LINKAGE} ${ORACLE_LIBRARY})
+
+    #
+    # OCI tests
+    #
+    set(srcs
+        test/OCITest.cpp
+    )
+
+    PDAL_ADD_TEST(ocitest ${srcs})
 else()
     message(STATUS "Building without Oracle support")
 endif()

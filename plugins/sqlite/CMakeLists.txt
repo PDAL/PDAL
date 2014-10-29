@@ -45,6 +45,14 @@ if (SQLITE3_FOUND)
     PDAL_ADD_PLUGIN(${SQLITE_WRITER_LIB_NAME} writer sqlite ${srcs} ${incs})
     target_link_libraries(${SQLITE_WRITER_LIB_NAME} ${PDAL_LINKAGE} ${SQLITE3_LIBRARY})
 
+    #
+    # SQLite tests
+    #
+    set(srcs
+        test/SqliteTest.cpp
+    )
+
+    PDAL_ADD_TEST(sqlitetest ${srcs})
 else()
     message(STATUS "Building without SQLite support")
 endif()
