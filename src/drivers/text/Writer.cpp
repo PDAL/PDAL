@@ -45,11 +45,6 @@
 #include <boost/algorithm/string/erase.hpp>
 #include <boost/tokenizer.hpp>
 
-#ifdef USE_PDAL_PLUGIN_TEXT
-//MAKE_WRITER_CREATOR(textWriter, pdal::drivers::text::Writer)
-CREATE_WRITER_PLUGIN(textWriter, pdal::drivers::text::Writer)
-#endif
-
 
 namespace pdal
 {
