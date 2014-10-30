@@ -132,8 +132,12 @@ void Writer::getHeaderOptions(const Options &options)
         if (opValue)
         {
             value = *opValue;
-            if (value == "FORWARD")
+            // The reassignment makes sure the case is correct.
+            if (boost::iequals(value, "FORWARD"))
+            {
+                value = "FORWARD";
                 value += defVal;
+            }
         }
         else
             value = options.getValueOrDefault<std::string>(name, defVal);
@@ -399,7 +403,17 @@ T Writer::headerVal(const std::string& name)
         MetadataNode m = m_metadata.findChild(pred);
         val = m.empty() ? val.substr(strlen("FORWARD")) : m.value();
     }
-    return boost::lexical_cast<T>(val);
+    try
+    {
+        return boost::lexical_cast<T>(val);
+    }
+    catch (boost::bad_lexical_cast ex)
+    {
+        std::stringstream out;
+        out << "Couldn't convert option \"" << name << "\" with value \"" <<
+            val << "\" from string as necessary.";
+        throw pdal_error(out.str());
+    }
 }
 
 
