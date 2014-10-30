@@ -93,11 +93,7 @@ public:
         { return m_data.size(); }
     void setDataLen(uint64_t size)
         { m_data.resize((size_t)size); }
-    void write(OLeStream& out, uint16_t recordSig)
-    {
-        m_recordSig = recordSig;
-        out << *this;
-    }
+    void write(OLeStream& out, uint16_t recordSig);
 
     friend ILeStream& operator>>(ILeStream& in, VariableLengthRecord& v);
     friend OLeStream& operator<<(OLeStream& out, const VariableLengthRecord& v);
