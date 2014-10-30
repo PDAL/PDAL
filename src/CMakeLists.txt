@@ -279,10 +279,8 @@ set (PDAL_DRIVERS_TEXT_CPP
   ${PDAL_TEXT_SRC}/Writer.cpp
 )
 
-if (NOT USE_PDAL_PLUGIN_TEXT)
-    list (APPEND PDAL_CPP ${PDAL_DRIVERS_TEXT_CPP} )
-    list (APPEND PDAL_HPP ${PDAL_DRIVERS_TEXT_HPP} )
-endif()
+list (APPEND PDAL_CPP ${PDAL_DRIVERS_TEXT_CPP} )
+list (APPEND PDAL_HPP ${PDAL_DRIVERS_TEXT_HPP} )
 
 
 #
@@ -543,16 +541,6 @@ target_link_libraries(${PDAL_LIB_NAME}
 
 set_target_properties(${PDAL_LIB_NAME}
   PROPERTIES SOVERSION "${PDAL_LIB_SOVERSION}" )
-
-
-if (USE_PDAL_PLUGIN_TEXT)
-    set(PDAL_TEXT_WRITER_LIB_NAME pdal_plugin_writer_text)
-    add_library(${PDAL_TEXT_WRITER_LIB_NAME} SHARED "${PDAL_DRIVERS_TEXT_CPP}" "${PDAL_DRIVERS_TEXT_HPP}")
-    target_link_libraries(${PDAL_TEXT_WRITER_LIB_NAME} INTERFACE general
-                          ${PDAL_LIB_NAME})
-    set_target_properties("${PDAL_TEXT_WRITER_LIB_NAME}"
-    PROPERTIES SOVERSION "${PDAL_LIB_SOVERSION}" )
-endif()
 
 
 ###############################################################################

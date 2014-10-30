@@ -47,9 +47,7 @@
 #include <pdal/drivers/sbet/Reader.hpp>
 
 #ifdef PDAL_HAVE_CARIS
-#ifndef USE_PDAL_PLUGIN_CARIS
 #include <pdal/drivers/caris/CloudReader.hpp>
-#endif
 #endif
 
 #include <pdal/drivers/qfit/Reader.hpp>

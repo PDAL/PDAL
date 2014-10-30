@@ -93,10 +93,7 @@ MAKE_FILTER_CREATOR(Programmable, pdal::filters::Programmable)
 // define the functions to create the writers
 //
 MAKE_WRITER_CREATOR(LasWriter, pdal::drivers::las::Writer)
-
-#ifndef USE_PDAL_PLUGIN_TEXT
 MAKE_WRITER_CREATOR(TextWriter, pdal::drivers::text::Writer)
-#endif
 
 StageFactory::StageFactory()
 {
@@ -340,10 +337,7 @@ void StageFactory::registerKnownFilters()
 void StageFactory::registerKnownWriters()
 {
     REGISTER_WRITER(LasWriter, pdal::drivers::las::Writer);
-
-#ifndef USE_PDAL_PLUGIN_TEXT
     REGISTER_WRITER(TextWriter, pdal::drivers::text::Writer);
-#endif
 }
 
 void StageFactory::loadPlugins()

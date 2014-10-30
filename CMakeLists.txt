@@ -448,19 +448,6 @@ if(WITH_LIBXML2)
 endif()
 
 
-option(USE_PDAL_PLUGIN_TEXT "Build the text driver as a plugin rather than embedding" FALSE)
-option(USE_PDAL_PLUGIN_SOCI "Build the soci driver as a plugin rather than embedding" FALSE)
-option(USE_PDAL_PLUGIN_MRSID "Build the MrSID driver as a plugin rather than embedding" FALSE)
-option(USE_PDAL_PLUGIN_CARIS "Build the Caris driver as a plugin rather than embedding" FALSE)
-
-if (USE_PDAL_PLUGIN_TEXT OR USE_PDAL_PLUGIN_SOCI OR
-    USE_PDAL_PLUGIN_MRSID OR USE_PDAL_PLUGIN_CARIS)
-  if (PDAL_BUILD_STATIC)
-    message(SEND_ERROR "Cannot build separate plugins with statically compiled PDAL")
-  endif()
-endif()
-
-
 #------------------------------------------------------------------------------
 # installation commands
 #------------------------------------------------------------------------------
