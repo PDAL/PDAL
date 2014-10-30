@@ -69,14 +69,6 @@ namespace drivers
 namespace las
 {
 
-
-GeotiffSupport::GeotiffSupport()
-    : m_gtiff(0)
-    , m_tiff(0)
-{
-}
-
-
 GeotiffSupport::~GeotiffSupport()
 {
 #ifdef PDAL_HAVE_LIBGEOTIFF
@@ -117,16 +109,46 @@ void GeotiffSupport::resetTags()
 }
 
 
-int GeotiffSupport::setKey(int tag, int count, GeotiffKeyType geotiff_key_type, void *data)
+int GeotiffSupport::setKey(int tag, void *data, int size, int type)
 {
-    return ST_SetKey(m_tiff, tag, count, (int)geotiff_key_type, data);
+    int count;
+    switch (type)
+    {
+    case STT_SHORT:
+        count = size / sizeof(short);
+        break;
+    case STT_DOUBLE:
+        count = size / sizeof(double);
+        break;
+    default:
+        count = size; 
+        break;
+    }
+    return ST_SetKey(m_tiff, tag, count, type, data);
 }
 
 
-int GeotiffSupport::getKey(int tag, int *count, int *st_type, void **data_ptr) const
+/// Get the geotiff data associated with a tag.
+/// \param tag - geotiff tag.
+/// \param count - Number of items fetched.
+/// \param data_ptr - Pointer to fill with address of filled data.
+/// \return  Size of data referred to by \c data_ptr
+size_t GeotiffSupport::getKey(int tag, int *count, void **data_ptr) const
 {
-    if (m_tiff == 0) return 0;
-    return ST_GetKey(m_tiff, tag, count, st_type, data_ptr);
+    int st_type;
+
+    if (m_tiff == 0)
+        return 0;
+    if (!ST_GetKey(m_tiff, tag, count, &st_type, data_ptr))
+        return 0;
+
+    if (st_type == STT_ASCII)
+        return *count;
+    else if (st_type == STT_SHORT)
+        return 2 * *count;
+    else if (st_type == STT_DOUBLE)
+        return 8 * *count;
+    return 8 * *count;
 }
 
 
@@ -306,7 +328,6 @@ std::string GeotiffSupport::getText() const
     return s;
 }
 
-
-}
-}
-} // namespaces
+} // namespace las
+} // namespace drivers
+} // namespace pdal

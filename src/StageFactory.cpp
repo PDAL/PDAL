@@ -64,10 +64,6 @@ MAKE_READER_CREATOR(LasReader, pdal::drivers::las::Reader)
 MAKE_READER_CREATOR(BpfReader, pdal::BpfReader)
 MAKE_READER_CREATOR(BufferReader, drivers::buffer::BufferReader)
 
-#ifdef PDAL_HAVE_GREYHOUND
-MAKE_READER_CREATOR(GreyhoundReader, pdal::drivers::greyhound::GreyhoundReader)
-#endif
-
 #ifdef PDAL_HAVE_ORACLE
 #ifndef USE_PDAL_PLUGIN_OCI
 MAKE_READER_CREATOR(OciReader, pdal::drivers::oci::OciReader)
@@ -82,10 +78,6 @@ MAKE_READER_CREATOR(NITFReader, pdal::drivers::nitf::NitfReader)
 #ifndef USE_PDAL_PLUGIN_SQLITE
 MAKE_READER_CREATOR(SqliteReader, pdal::drivers::sqlite::SQLiteReader)
 #endif
-#endif
-
-#ifdef PDAL_HAVE_PCL
-MAKE_READER_CREATOR(PcdReader, pdal::drivers::pcd::PcdReader);
 #endif
 
 #ifdef PDAL_HAVE_POSTGRESQL
@@ -106,6 +98,7 @@ MAKE_READER_CREATOR(IcebridgeReader, pdal::drivers::icebridge::Reader)
 //
 // define the functions to create the filters
 //
+MAKE_FILTER_CREATOR(Attribute, pdal::filters::Attribute)
 MAKE_FILTER_CREATOR(ByteSwap, pdal::filters::ByteSwap)
 MAKE_FILTER_CREATOR(Cache, pdal::filters::Cache)
 MAKE_FILTER_CREATOR(Chipper, pdal::filters::Chipper)
@@ -148,14 +141,6 @@ MAKE_WRITER_CREATOR(OciWriter, pdal::drivers::oci::Writer)
 MAKE_WRITER_CREATOR(P2GWriter, pdal::drivers::p2g::P2gWriter)
 #endif
 
-#ifdef PDAL_HAVE_PCL
-MAKE_WRITER_CREATOR(PcdWriter, pdal::drivers::pcd::PcdWriter);
-#endif
-
-#ifdef PDAL_HAVE_PCL_VISUALIZE
-MAKE_WRITER_CREATOR(PclVisualizer, pdal::drivers::pclvisualizer::PclVisualizer);
-#endif
-
 #ifdef PDAL_HAVE_SQLITE
 #ifndef USE_PDAL_PLUGIN_SQLITE
 MAKE_WRITER_CREATOR(SqliteWriter, pdal::drivers::sqlite::SQLiteWriter)
@@ -187,12 +172,21 @@ StageFactory::StageFactory()
 
 std::string StageFactory::inferReaderDriver(const std::string& filename)
 {
+    StageFactory f;
+
+    // filename may actually be a greyhound uri + pipelineId
+    std::string http = filename.substr(0, 4);
+    if (boost::iequals(http, "http") && f.getReaderCreator("drivers.greyhound.reader"))
+        return "drivers.greyhound.reader";
+
     std::string ext = boost::filesystem::extension(filename);
     std::map<std::string, std::string> drivers;
     drivers["las"] = "drivers.las.reader";
     drivers["laz"] = "drivers.las.reader";
     drivers["bin"] = "drivers.terrasolid.reader";
-    drivers["greyhound"] = "drivers.greyhound.reader";
+
+    if (f.getReaderCreator("drivers.greyhound.reader"))
+        drivers["greyhound"] = "drivers.greyhound.reader";
     drivers["qi"] = "drivers.qfit.reader";
     drivers["nitf"] = "drivers.nitf.reader";
     drivers["ntf"] = "drivers.nitf.reader";
@@ -201,10 +195,9 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
     drivers["sbet"] = "drivers.sbet.reader";
     drivers["icebridge"] = "drivers.icebridge.reader";
     drivers["sqlite"] = "drivers.sqlite.reader";
-
-#ifdef PDAL_HAVE_PCL
-    drivers["pcd"] = "drivers.pcd.reader";
-#endif
+    
+    if (f.getReaderCreator("drivers.pcd.reader"))
+        drivers["pcd"] = "drivers.pcd.reader";
 
     if (ext == "") return "";
     ext = ext.substr(1, ext.length()-1);
@@ -225,13 +218,11 @@ std::string StageFactory::inferWriterDriver(const std::string& filename)
     std::map<std::string, std::string> drivers;
     drivers["las"] = "drivers.las.writer";
     drivers["laz"] = "drivers.las.writer";
-#ifdef PDAL_HAVE_PCL
-    drivers["pcd"] = "drivers.pcd.writer";
-#endif
-
-#ifdef PDAL_HAVE_PCL_VISUALIZE
-    drivers["pclviz"] = "drivers.pclvisualizer.writer";
-#endif
+    StageFactory f;
+    if (f.getWriterCreator("drivers.pcd.writer"))
+        drivers["pcd"] = "drivers.pcd.writer";
+    if (f.getWriterCreator("drivers.pclvisualizer.writer"))
+        drivers["pclviz"] = "drivers.pclvisualizer.writer";
     drivers["csv"] = "drivers.text.writer";
     drivers["json"] = "drivers.text.writer";
     drivers["xyz"] = "drivers.text.writer";
@@ -265,7 +256,8 @@ pdal::Options StageFactory::inferWriterOptionsChanges(const std::string& filenam
         options.add("compression", true);
     }
 
-    if (boost::algorithm::iequals(ext,".pcd"))
+    StageFactory f;
+    if (boost::algorithm::iequals(ext,".pcd") && f.getWriterCreator("drivers.pcd.writer"))
     {
         options.add("format","PCD");
     }
@@ -387,10 +379,6 @@ void StageFactory::registerKnownReaders()
 #endif
 #endif
 
-#ifdef PDAL_HAVE_PCL
-    REGISTER_READER(PcdReader, pdal::drivers::pcd::PcdReader);
-#endif
-
 #ifdef PDAL_HAVE_POSTGRESQL
 #ifndef USE_PDAL_PLUGIN_PGPOINTCLOUD
     REGISTER_READER(PgPcReader, pdal::drivers::pgpointcloud::PgReader);
@@ -400,11 +388,6 @@ void StageFactory::registerKnownReaders()
     REGISTER_READER(QfitReader, pdal::drivers::qfit::Reader);
     REGISTER_READER(TerrasolidReader, pdal::drivers::terrasolid::Reader);
     REGISTER_READER(BpfReader, pdal::BpfReader);
-
-#ifdef PDAL_HAVE_GREYHOUND
-    REGISTER_READER(GreyhoundReader, pdal::drivers::greyhound::GreyhoundReader);
-#endif
-
     REGISTER_READER(SbetReader, pdal::drivers::sbet::SbetReader);
 
 #ifdef PDAL_HAVE_HDF5
@@ -415,6 +398,7 @@ void StageFactory::registerKnownReaders()
 
 void StageFactory::registerKnownFilters()
 {
+    REGISTER_FILTER(Attribute, pdal::filters::Attribute);
     REGISTER_FILTER(ByteSwap, pdal::filters::ByteSwap);
     REGISTER_FILTER(Cache, pdal::filters::Cache);
     REGISTER_FILTER(Chipper, pdal::filters::Chipper);
@@ -456,14 +440,6 @@ void StageFactory::registerKnownWriters()
 
 #ifdef PDAL_HAVE_P2G
     REGISTER_WRITER(P2GWriter, pdal::drivers::p2g::P2gWriter);
-#endif
-
-#ifdef PDAL_HAVE_PCL
-    REGISTER_WRITER(PcdWriter, pdal::drivers::pcd::PcdWriter);
-#endif
-
-#ifdef PDAL_HAVE_PCL_VISUALIZE
-    REGISTER_WRITER(PclVisualizer, pdal::drivers::pclvisualizer::PclVisualizer);
 #endif
 
 #ifdef PDAL_HAVE_SQLITE
@@ -605,7 +581,6 @@ void StageFactory::registerPlugin(std::string const& filename)
     Utils::registerPlugin((void*)this, filename, registerMethodName, versionMethodName);
 
 }
-
 
 
 std::map<std::string, pdal::StageInfo> const& StageFactory::getStageInfos() const

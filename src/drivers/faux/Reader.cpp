@@ -67,7 +67,8 @@ Reader::Reader()
 
 void Reader::processOptions(const Options& options)
 {
-    BOX3D bounds = options.getValueOrDefault<BOX3D>("bounds",BOX3D(0,0,0,1,1,1));
+    BOX3D bounds = options.getValueOrDefault<BOX3D>("bounds",
+        BOX3D(0, 0, 0, 1, 1, 1));
     m_minX = bounds.minx;
     m_maxX = bounds.maxx;
     m_minY = bounds.miny;

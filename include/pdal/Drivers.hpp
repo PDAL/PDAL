@@ -47,10 +47,6 @@
 
 #include <pdal/drivers/sbet/Reader.hpp>
 
-#ifdef PDAL_HAVE_GREYHOUND
-#include <pdal/drivers/greyhound/Reader.hpp>
-#endif
-
 #ifdef PDAL_HAVE_HDF5
 #include <pdal/drivers/icebridge/Reader.hpp>
 #endif
@@ -99,15 +95,6 @@
 
 #ifdef PDAL_HAVE_HDF5
 #include <pdal/drivers/icebridge/Reader.hpp>
-#endif
-
-#ifdef PDAL_HAVE_PCL
-#include <pdal/drivers/pcd/Reader.hpp>
-#include <pdal/drivers/pcd/Writer.hpp>
-#endif
-
-#ifdef PDAL_HAVE_PCL_VISUALIZE
-#include <pdal/drivers/pclvisualizer/PCLVisualizer.hpp>
 #endif
 
 #ifdef PDAL_HAVE_SQLITE

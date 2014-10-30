@@ -108,12 +108,12 @@ public:
 
     std::string toRST(std::string driverName="") const;
 
-private:
     // callers take ownership of returned stages
     ReaderCreator* getReaderCreator(const std::string& type) const;
     FilterCreator* getFilterCreator(const std::string& type) const;
     WriterCreator* getWriterCreator(const std::string& type) const;
 
+private:
     void registerKnownReaders();
     void registerKnownFilters();
     void registerKnownWriters();

@@ -48,14 +48,20 @@ typedef std::vector<PointId>::size_type point_count_t;
 struct XForm
 {
 public:
-    XForm() : m_scale(1.0), m_offset(0.0)
+    XForm() : m_scale(1.0), m_autoScale(false), m_offset(0.0),
+        m_autoOffset(false)
     {}
 
-    XForm(double scale, double offset) : m_scale(scale), m_offset(offset)
+    XForm(double scale, double offset) : m_scale(scale), m_autoScale(false),
+        m_offset(offset), m_autoOffset(false)
     {}
 
     double m_scale;
+    // Whether a scale value should be determined by examining the data.
+    bool m_autoScale;
     double m_offset;
+    // Whether an offset value should be determined by examining the data.
+    bool m_autoOffset;
 };
 
 namespace LogLevel

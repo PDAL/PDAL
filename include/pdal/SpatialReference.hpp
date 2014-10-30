@@ -32,8 +32,7 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#ifndef INCLUDED_SPATIALREFERENCE_HPP
-#define INCLUDED_SPATIALREFERENCE_HPP
+#pragma once
 
 #include <pdal/pdal_internal.hpp>
 
@@ -83,9 +82,10 @@ public:
     void setWKT(std::string const& v)
         { m_wkt = v; }
 
-    /// Sets the SRS using GDAL's SetFromUserInput function. If GDAL is not linked, this
-    /// operation has no effect.
-    /// \param v - a string containing the definition (filename, proj4, wkt, etc).
+    /// Sets the SRS using GDAL's SetFromUserInput function. If GDAL is
+    /// not linked, this operation has no effect.
+    /// \param v - a string containing the definition (filename, proj4,
+    ///    wkt, etc).
     void setFromUserInput(std::string const& v);
 
     /// Returns the Proj.4 string describing the Spatial Reference System.
@@ -114,12 +114,15 @@ public:
 
 private:
     std::string m_wkt;
+    friend PDAL_DLL std::ostream& operator<<(std::ostream& ostr,
+        const SpatialReference& srs);
+    friend PDAL_DLL std::istream& operator>>(std::istream& istr,
+        SpatialReference& srs);
 };
 
-
-extern PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const SpatialReference& srs);
-extern PDAL_DLL std::istream& operator>>(std::istream& istr, SpatialReference& srs);
+PDAL_DLL std::ostream& operator<<(std::ostream& ostr,
+    const SpatialReference& srs);
+PDAL_DLL std::istream& operator>>(std::istream& istr, SpatialReference& srs);
 
 } // namespace pdal
 
-#endif

@@ -94,9 +94,32 @@ public:
         return strm;
     }
 
+    void get(std::string& s, size_t size)
+    {
+        // Could do this by appending to a string with a stream, but this
+        // is probably fast enough for now (there's only a simple increment
+        // to advance an istream iterator, which you'd have to call in a loop).
+        std::unique_ptr<char[]> buf(new char[size+1]);
+        m_stream->read(buf.get(), size);
+        buf[size] = '\0';
+        s = buf.get();
+    }
+
+    void get(std::vector<char>& buf)
+        { m_stream->read(&buf[0], buf.size()); }
+
+    void get(std::vector<unsigned char>& buf)
+        { m_stream->read((char *)&buf[0], buf.size()); }
+
+    void get(char *buf, size_t size)
+        { m_stream->read(buf, size); }
+
+    void get(unsigned char *buf, size_t size)
+        { m_stream->read((char *)buf, size); }
+
 protected:
     std::istream *m_stream;
-    std::istream *m_fstream; // Dup of above to facilitate cleanup;
+    std::istream *m_fstream; // Dup of above to facilitate cleanup.
 
 private:
     std::stack<std::istream *> m_streams;
@@ -107,27 +130,12 @@ private:
 class ILeStream : public IStream
 {
 public:
-    ILeStream() : IStream()
+    ILeStream()
     {}
     ILeStream(const std::string& filename) : IStream(filename)
     {}
     ILeStream(std::istream *stream) : IStream(stream)
     {}
-
-    void get(std::string& s, size_t size)
-    {
-        // Could do this by appending to a string with a stream, but this
-        // is probably fast enough for now (there's only a simple increment
-        // to advance an istream iterator, which you'd have to call in a loop).
-        std::unique_ptr<char[]> buf(new char[size+1]);
-        m_stream->get(buf.get(), size + 1);
-        s = buf.get();
-    }
-
-    void get(std::vector<char>& buf)
-    {
-        m_stream->read(&buf[0], buf.size());
-    }
 
     ILeStream& operator >> (uint8_t& v)
     {

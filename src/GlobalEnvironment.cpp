@@ -108,6 +108,7 @@ void GlobalEnvironment::getGDALEnvironment()
     if (!m_bIsGDALInitialized)
     {
         (void) GDALAllRegister();
+        (void) OGRRegisterAll();
         m_bIsGDALInitialized = true;
     }
 }

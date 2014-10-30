@@ -30,26 +30,20 @@ SET(PDAL_UNITTEST_TEST_SRC
     drivers/faux/FauxReaderTest.cpp
     FileUtilsTest.cpp
     filters/HexbinFilterTest.cpp
-#    filters/InPlaceReprojectionFilterTest.cpp
     filters/MergeTest.cpp
     drivers/las/LasReaderTest.cpp
-#ABELL - Need to fix these.
-#    drivers/las/LasWriterTest.cpp
+    drivers/las/LasWriterTest.cpp
     LogTest.cpp
     MetadataTest.cpp
-#    filters/MosaicFilterTest.cpp
     OptionsTest.cpp
     PipelineManagerTest.cpp
+    PointContextTest.cpp
     PointBufferTest.cpp
     drivers/qfit/QFITReaderTest.cpp
     filters/ReprojectionFilterTest.cpp
     filters/SortFilterTest.cpp
     drivers/sbet/SbetReaderTest.cpp
     drivers/sbet/SbetWriterTest.cpp
-#    filters/ScalingFilterTest.cpp
-#    filters/SelectorFilterTest.cpp
-#    SchemaLayoutTest.cpp
-#    SchemaTest.cpp
     SpatialReferenceTest.cpp
     filters/SplitterTest.cpp
 #    StageFactoryTest.cpp
@@ -140,16 +134,17 @@ if (WITH_NITRO)
     ENDFOREACH(file)
 endif (WITH_NITRO)
 
-if (WITH_PCL AND WITH_PCL_TEST)
-    set(PDAL_PCL_TEST_CPP
-        filters/PCLBlockFilterTest.cpp
-        )
 
-    FOREACH(file ${PDAL_PCL_TEST_CPP})
-        SET(PDAL_UNITTEST_TEST_SRC "${PDAL_UNITTEST_TEST_SRC};${file}"
-            CACHE INTERNAL "source files for test")
-    ENDFOREACH(file)
-endif (WITH_PCL AND WITH_PCL_TEST)
+# Removed WITH_PCL/WITH_PCL_TEST conditional - StageFactory now tests for PCL
+# internally. This will eventually be moved to plugins/pcl/test.
+set(PDAL_PCL_TEST_CPP
+    filters/PCLBlockFilterTest.cpp
+)
+
+FOREACH(file ${PDAL_PCL_TEST_CPP})
+    SET(PDAL_UNITTEST_TEST_SRC "${PDAL_UNITTEST_TEST_SRC};${file}"
+	CACHE INTERNAL "source files for test")
+ENDFOREACH(file)
 
 if (WITH_HDF5)
     set(PDAL_ICEBRIDGE_TEST_CPP

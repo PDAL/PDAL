@@ -236,7 +236,7 @@ private:
     std::string m_name;
     std::string m_value;
     std::string m_description; // optional field
-    options::OptionsPtr m_options; // any other Option instances this field may contain
+    options::OptionsPtr m_options; // any other Options instances this field may contain
 };
 
 
@@ -425,9 +425,12 @@ public:
         Option const* doMetadata(0);
         try
         {
-
             doMetadata = &getOption("metadata");
-        } catch (pdal::option_not_found&) { return boost::optional<T>(); }
+        }
+        catch (pdal::option_not_found&)
+        {
+            return boost::optional<T>();
+        }
 
         boost::optional<Options const&> meta = doMetadata->getOptions();
         if (meta)

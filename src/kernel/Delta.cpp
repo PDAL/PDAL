@@ -41,8 +41,8 @@
 
 namespace pdal { namespace kernel {
 
-Delta::Delta(int argc, const char* argv[])
-    : Application(argc, argv, "delta")
+Delta::Delta()
+    : Kernel()
     , m_outputStream(0)
     , m_3d(true)
     , m_OutputDetail(false)

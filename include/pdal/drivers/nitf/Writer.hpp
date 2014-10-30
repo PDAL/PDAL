@@ -63,7 +63,6 @@ private:
     virtual void write(const PointBuffer&);
 
     BOX3D m_bounds;
-    std::string m_filename;
     std::string m_cLevel;
     std::string m_sType;
     std::string m_oStationId;

@@ -35,6 +35,7 @@
 #pragma once
 
 #include <pdal/Stage.hpp>
+#include <pdal/kernel/Kernel.hpp>
 #include <pdal/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/filters/Stats.hpp>
@@ -50,18 +51,25 @@
 #include <boost/tokenizer.hpp>
 
 #include "Support.hpp"
-#include "Application.hpp"
-
 
 typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
 
+PDAL_C_START
+
+PDAL_DLL void PDALRegister_kernel_info(void* factory);
+
+PDAL_C_END
 
 namespace pdal { namespace kernel {
 
-class PDAL_DLL Info : public Application
+class PDAL_DLL Info : public Kernel
 {
 public:
-    Info(int argc, const char* argv[]);
+    SET_KERNEL_NAME ("drivers.info.kernel", "Info Kernel")
+    SET_KERNEL_LINK ("http://pdal.io/kernels/drivers.info.kernel.html")
+    SET_KERNEL_ENABLED (true)
+ 
+    Info();
     int execute(); // overrride
 
 private:

@@ -36,8 +36,8 @@
 #include <pdal/PointBuffer.hpp>
 
 #ifdef USE_PDAL_PLUGIN_SOCI
-MAKE_READER_CREATOR(sqliteReader, pdal::drivers::sqlite::Reader)
-CREATE_READER_PLUGIN(sqlite, pdal::drivers::sqlite::Reader)
+//MAKE_READER_CREATOR(sqliteReader, pdal::drivers::sqlite::Reader)
+CREATE_READER_PLUGIN(sqliteReader, pdal::drivers::sqlite::Reader)
 #endif
 
 
@@ -63,7 +63,7 @@ void SQLiteReader::initialize()
         bool bHaveSpatialite = m_session->doesTableExist("geometry_columns");
         log()->get(LogLevel::Debug) << "Have spatialite?: " <<
             bHaveSpatialite << std::endl;
-        m_session->spatialite();
+        m_session->spatialite(m_modulename);
 
         if (!bHaveSpatialite)
         {
@@ -155,6 +155,7 @@ void SQLiteReader::processOptions(const Options& options)
                 "spatialreference"));
     m_query = options.getValueOrThrow<std::string>("query");
     m_connection = options.getValueOrDefault<std::string>("connection", "");
+    m_modulename = options.getValueOrDefault<std::string>("module", "");
 }
 
 

@@ -89,10 +89,9 @@ endif(WIN32)
 
 # Choose package components
 option(WITH_APPS "Choose if PDAL utilities should be built" TRUE)
+option(WITH_GREYHOUND "Choose if Greyhound support should be built" FALSE)
+option(WITH_PCL "Choose if PCL support should be built" FALSE)
 option(WITH_TESTS "Choose if PDAL unit tests should be built" TRUE)
-
-option(WITH_STUBS "Use stubs if libraries are not enabled" FALSE)
-set(PDAL_STUB_DIR "${PDAL_SOURCE_DIR}/include/stubs")
 
 # Choose to use pkg-config or not
 option(WITH_PKGCONFIG "Choose whether a pkgconfig file (PDAL.pc) should be installed" TRUE)
@@ -265,39 +264,7 @@ if(Boost_FOUND)
 endif(Boost_FOUND)
 
 #------------------------------------------------------------------------------
-# settings for PCL
-#------------------------------------------------------------------------------
-
-option(WITH_PCL "Choose if PCL support should be built" FALSE)
-option(WITH_PCL_VISUALIZE "Choose if PCL was built with VTK support for visualization" FALSE)
-if(WITH_PCL)
-    find_package(PCL 1.7)
-    if(PCL_FOUND)
-        set(PDAL_HAVE_PCL 1)
-	if(WITH_PCL_VISUALIZE)
-	    set(PDAL_HAVE_PCL_VISUALIZE 1)
-	endif()
-        set(WITH_PCL_TEST 1)
-        include_directories(${PCL_INCLUDE_DIRS})
-        link_directories(${PCL_LIBRARY_DIRS})
-        add_definitions(${PCL_DEFINITIONS})
-	add_definitions("-fvisibility-inlines-hidden")
-        # PCL's configuration clobbers Boost find_package - do it again
-        find_package(Boost 1.52 COMPONENTS program_options thread iostreams filesystem system unit_test_framework random)
-
-        message(STATUS "...building with PCL")
-    else()
-        set(PCL_LIBRARIES "")
-    endif()
-elseif(WITH_STUBS)
-    set(PDAL_HAVE_PCL 1)
-    set(WITH_PCL_TEST 0)
-    include_directories(${PDAL_STUB_DIR})
-endif()
-
-
-#------------------------------------------------------------------------------
-# settings for all upstream project dependencies
+# settings for GDAL & related dependencies
 #------------------------------------------------------------------------------
 
 #
@@ -339,7 +306,7 @@ endif()
 #
 option(WITH_GEOTIFF "Choose if GeoTIFF support should be built" TRUE)
 if(WITH_GEOTIFF)
-    find_package(GeoTIFF 1.2.5)
+    find_package(GeoTIFF 1.3.0)
     if(GEOTIFF_FOUND)
         include_directories("${GEOTIFF_INCLUDE_DIR}")
         set(PDAL_HAVE_LIBGEOTIFF 1)
@@ -480,15 +447,13 @@ endif()
 #
 # ZLIB support - required
 #
-find_package(ZLIB)
+find_package(ZLIB REQUIRED)
 if(ZLIB_FOUND)
     set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} "${ZLIB_LIBRARY}")
 	include_directories(${ZLIB_INCLUDE_DIR})
 	mark_as_advanced(CLEAR ZLIB_INCLUDE_DIR)
 	mark_as_advanced(CLEAR ZLIB_LIBRARY)
 	set(PDAL_HAVE_ZLIB 1)
-else()
-    message(FATAL_ERROR "ZLIB support is required")
 endif()
 
 
@@ -552,62 +517,6 @@ if(WITH_HDF5)
         set(WITH_HDF5 FALSE)
         set(PDAL_HAVE_HDF5 0)
         message(STATUS "HDF5 not found")
-    endif()
-endif()
-
-
-#
-# Json - optional
-#
-option(WITH_JSON "Choose if JsonCpp support should be built" FALSE)
-if(WITH_JSON OR WITH_GREYHOUND)
-    find_package(JSONCPP)
-    if(JSONCPP_FOUND)
-        include_directories(${JSONCPP_INCLUDE_DIR})
-        add_definitions(-DHAVE_JSONCPP=1)
-        set(PDAL_HAVE_JSONCPP 1)
-        message(STATUS "Found Jsoncpp ${JSONCPP_INCLUDE_DIR} ${JSONCPP_LIBRARIES}")
-    else()
-        set(WITH_JSONCPP FALSE)
-        set(PDAL_HAVE_JSONCPP 0)
-        message(STATUS "Jsoncpp not found")
-    endif()
-endif()
-
-
-#
-# WebSocket++ - optional
-#
-option(WITH_WEBSOCKETPP "Choose if WebSocket++ support should be built" FALSE)
-if(WITH_WEBSOCKETPP OR WITH_GREYHOUND)
-    find_package(WEBSOCKETPP)
-    if(WEBSOCKETPP_FOUND)
-        include_directories(${WEBSOCKETPP_INCLUDE_DIR})
-        add_definitions(-D_WEBSOCKETPP_NULLPTR_TOKEN_=0)
-        add_definitions(-DHAVE_WEBSOCKETPP=1)
-        set(PDAL_HAVE_WEBSOCKETPP 1)
-        message(STATUS "Found WebSocket++ ${WEBSOCKETPP_INCLUDE_DIR} ${WEBSOCKETPP_LIBRARIES}")
-    else()
-        set(WITH_WEBSOCKETPP FALSE)
-        set(PDAL_HAVE_WEBSOCKETPP 0)
-        message(STATUS "WebSocket++ not found")
-    endif()
-endif()
-
-
-#
-# Greyhound - optional
-#
-option(WITH_GREYHOUND "Choose if Greyhound support should be built" FALSE)
-if(WITH_GREYHOUND)
-    if(WEBSOCKETPP_FOUND AND JSONCPP_FOUND)
-        set(WITH_GREYHOUND TRUE)
-        set(PDAL_HAVE_GREYHOUND 1)
-        message(STATUS "Building with Greyhound support")
-    else()
-        set(WITH_GREYHOUND FALSE)
-        set(PDAL_HAVE_GREYHOUND 0)
-        message(STATUS "Greyhound dependencies not found")
     endif()
 endif()
 
@@ -722,6 +631,7 @@ include_directories("${CMAKE_CURRENT_BINARY_DIR}/include")
 #------------------------------------------------------------------------------
 
 add_subdirectory(src)
+add_subdirectory(plugins)
 
 if(WITH_APPS)
   add_subdirectory(apps)

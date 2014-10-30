@@ -69,6 +69,7 @@ private:
     std::string m_query;
     std::string m_schemaFile;
     std::string m_connection;
+    std::string m_modulename;
     boost::optional<SpatialReference> m_spatialRef;
     PatchPtr m_patch;
 

@@ -49,8 +49,8 @@
 
 
 #ifdef USE_PDAL_PLUGIN_OCI
-MAKE_WRITER_CREATOR(ociWriter, pdal::drivers::oci::Writer)
-CREATE_WRITER_PLUGIN(oci, pdal::drivers::oci::Writer)
+//MAKE_WRITER_CREATOR(ociWriter, pdal::drivers::oci::Writer)
+CREATE_WRITER_PLUGIN(ociWriter, pdal::drivers::oci::Writer)
 #endif
 
 

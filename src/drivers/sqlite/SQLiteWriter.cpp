@@ -45,8 +45,8 @@
 #include <ogr_api.h>
 
 #ifdef USE_PDAL_PLUGIN_SQLITE
-MAKE_WRITER_CREATOR(sqliteWriter, pdal::drivers::sqlite::Writer)
-CREATE_WRITER_PLUGIN(sqlite, pdal::drivers::sqlite::Writer)
+//MAKE_WRITER_CREATOR(sqliteWriter, pdal::drivers::sqlite::Writer)
+CREATE_WRITER_PLUGIN(sqliteWriter, pdal::drivers::sqlite::Writer)
 #endif
 
 
@@ -90,6 +90,8 @@ void SQLiteWriter::processOptions(const Options& options)
         options.getValueOrThrow<std::string>("cloud_table_name");
     m_cloud_column =
         options.getValueOrDefault<std::string>("cloud_column_name", "id");
+    m_modulename =
+        options.getValueOrDefault<std::string>("module", "");
     m_srid =
         m_options.getValueOrDefault<boost::uint32_t>("srid", 4326);
     m_is3d = m_options.getValueOrDefault<bool>("is3d", false);
@@ -106,7 +108,7 @@ void SQLiteWriter::initialize()
         log()->get(LogLevel::Debug) << "Connected to database" << std::endl;
         bool bHaveSpatialite = m_session->doesTableExist("geometry_columns");
         log()->get(LogLevel::Debug) << "Have spatialite?: " << bHaveSpatialite << std::endl;
-        m_session->spatialite();
+        m_session->spatialite(m_modulename);
 
         if (!bHaveSpatialite)
         {

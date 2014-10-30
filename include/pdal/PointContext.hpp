@@ -118,6 +118,9 @@ public:
         registerDim(id, Dimension::defaultType(id));
     }
 
+    // Register the dimension with the requested type if it hasn't already
+    // been registered with a "larger" type.  If the type of the dimension
+    // is already larger, this does nothing.
     void registerDim(Dimension::Id::Enum id, Dimension::Type::Enum type)
     {
         Dimension::Detail& dd = m_dims->m_detail[id];

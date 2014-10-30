@@ -1,5 +1,9 @@
 #pragma once
 
+#include <pdal/Filter.hpp>
+#include <pdal/Reader.hpp>
+#include <pdal/Writer.hpp>
+
 namespace pdal
 {
 
@@ -33,6 +37,15 @@ class FilterTester : public StageTester
 public:
     static void filter(Filter *f, PointBuffer& buffer)
         { f->filter(buffer); }
+};
+
+//
+// Provide access to private members of Writer.
+class WriterTester : public StageTester
+{
+public:
+    static void write(Writer *w, PointBuffer& buffer)
+        { w->write(buffer); }
 };
 
 } //namespace pdal

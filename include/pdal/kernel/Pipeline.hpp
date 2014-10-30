@@ -32,24 +32,31 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_PDAL_KERNEL_PIPELINE_HPP
-#define INCLUDED_PDAL_KERNEL_PIPELINE_HPP
+#pragma once
 
-
+#include <pdal/kernel/Kernel.hpp>
 #include <pdal/PipelineReader.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineWriter.hpp>
 #include <pdal/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
 
-#include "Application.hpp"
+PDAL_C_START
+
+PDAL_DLL void PDALRegister_kernel_pipeline(void* factory);
+
+PDAL_C_END
 
 namespace pdal { namespace kernel {
     
-class PDAL_DLL Pipeline : public Application
+class PDAL_DLL Pipeline : public Kernel
 {
 public:
-    Pipeline(int argc, const char* argv[]);
+    SET_KERNEL_NAME ("drivers.pipeline.kernel", "Pipeline Kernel")
+    SET_KERNEL_LINK ("http://pdal.io/kernels/drivers.pipeline.kernel.html")
+    SET_KERNEL_ENABLED (true)
+
+    Pipeline();
     int execute();
 
 private:
@@ -62,4 +69,3 @@ private:
 };
 
 }} // pdal::kernel
-#endif

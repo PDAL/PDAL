@@ -44,7 +44,7 @@
 #include <cstdlib>
 #include <cctype>
 
-#ifdef PDAL_PLATFORM_WIN32
+#ifndef PDAL_PLATFORM_WIN32
 #include <cxxabi.h>
 #endif
 
@@ -435,7 +435,7 @@ static inline bool is_base64(unsigned char c)
     return (isalnum(c) || (c == '+') || (c == '/'));
 }
 
-vector<boost::uint8_t> Utils::base64_decode(string const& encoded_string)
+vector<uint8_t> Utils::base64_decode(string const& encoded_string)
 {
     const string base64_chars =
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -447,24 +447,23 @@ vector<boost::uint8_t> Utils::base64_decode(string const& encoded_string)
     int j = 0;
     int in_ = 0;
     unsigned char char_array_4[4], char_array_3[3];
-    vector<boost::uint8_t> ret;
+    vector<uint8_t> ret;
 
-    // while (in_len-- &&
-    //       ( encoded_string[in_] != '=') &&
-    //       ( isalnum(encoded_string[in_]) || (encoded_string[in_] == '+') || (encoded_string[in_] == '/'))
-    //       )
-
-    while (in_len-- && (encoded_string[in_] != '=') && is_base64(encoded_string[in_]))
+    while (in_len-- && (encoded_string[in_] != '=') &&
+        is_base64(encoded_string[in_]))
     {
         char_array_4[i++] = encoded_string[in_];
         in_++;
-        if (i ==4)
+        if (i == 4)
         {
             for (i = 0; i <4; i++)
-                char_array_4[i] = static_cast<unsigned char>(base64_chars.find(char_array_4[i]));
+                char_array_4[i] = static_cast<unsigned char>(
+                    base64_chars.find(char_array_4[i]));
 
-            char_array_3[0] = (char_array_4[0] << 2) + ((char_array_4[1] & 0x30) >> 4);
-            char_array_3[1] = ((char_array_4[1] & 0xf) << 4) + ((char_array_4[2] & 0x3c) >> 2);
+            char_array_3[0] = (char_array_4[0] << 2) +
+                ((char_array_4[1] & 0x30) >> 4);
+            char_array_3[1] = ((char_array_4[1] & 0xf) << 4) +
+                ((char_array_4[2] & 0x3c) >> 2);
             char_array_3[2] = ((char_array_4[2] & 0x3) << 6) + char_array_4[3];
 
             for (i = 0; (i < 3); i++)
@@ -479,15 +478,19 @@ vector<boost::uint8_t> Utils::base64_decode(string const& encoded_string)
             char_array_4[j] = 0;
 
         for (j = 0; j <4; j++)
-            char_array_4[j] = static_cast<unsigned char>(base64_chars.find(char_array_4[j]));
+            char_array_4[j] =
+                static_cast<unsigned char>(base64_chars.find(char_array_4[j]));
 
-        char_array_3[0] = (char_array_4[0] << 2) + ((char_array_4[1] & 0x30) >> 4);
-        char_array_3[1] = ((char_array_4[1] & 0xf) << 4) + ((char_array_4[2] & 0x3c) >> 2);
-        char_array_3[2] = ((char_array_4[2] & 0x3) << 6) + char_array_4[3];
+        char_array_3[0] = (char_array_4[0] << 2) +
+            ((char_array_4[1] & 0x30) >> 4);
+        char_array_3[1] = ((char_array_4[1] & 0xf) << 4) +
+            ((char_array_4[2] & 0x3c) >> 2);
+        char_array_3[2] = ((char_array_4[2] & 0x3) << 6) +
+            char_array_4[3];
 
-        for (j = 0; (j < i - 1); j++) ret.push_back(char_array_3[j]);
+        for (j = 0; (j < i - 1); j++)
+            ret.push_back(char_array_3[j]);
     }
-
     return ret;
 }
 
@@ -651,7 +654,7 @@ void Utils::wordWrap(string const& inputString, vector<string>& outputString,
 /// \return  Demangled string
 std::string Utils::demangle(const std::string& s)
 {
-#ifdef PDAL_PLATFORM_WIN32
+#ifndef PDAL_PLATFORM_WIN32
     int status;
     std::unique_ptr<char[], void (*)(void*)> result(
             abi::__cxa_demangle(s.c_str(), 0, 0, &status), std::free);

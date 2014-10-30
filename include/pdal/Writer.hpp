@@ -50,6 +50,8 @@ class UserCallback;
 /// End-stage consumer of PDAL pipeline
 class PDAL_DLL Writer : public Stage
 {
+    friend class WriterTester;
+
 public:
     /// Constructs an end-stage consumer of a pipeline of data -- a writer
     Writer() : m_callback(new UserCallback)
@@ -65,6 +67,7 @@ public:
 
 protected:
     std::unique_ptr<UserCallback> m_callback;
+    std::string m_filename;
     XForm m_xXform;
     XForm m_yXform;
     XForm m_zXform;

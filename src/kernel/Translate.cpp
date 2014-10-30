@@ -39,14 +39,15 @@
 #include <pdal/filters/Decimation.hpp>
 #include <pdal/filters/Reprojection.hpp>
 #include <pdal/kernel/Support.hpp>
+#include <pdal/StageFactory.hpp>
 
 namespace pdal
 {
 namespace kernel
 {
 
-Translate::Translate(int argc, const char* argv[]) :
-    Application(argc, argv, "translate"), m_bCompress(false),
+Translate::Translate() :
+    Kernel(), m_bCompress(false),
     m_input_srs(pdal::SpatialReference()),
     m_output_srs(pdal::SpatialReference()), m_bForwardMetadata(false),
     m_decimation_step(1), m_decimation_offset(0), m_decimation_leaf_size(1), m_decimation_limit(0)
@@ -265,15 +266,50 @@ Stage* Translate::makeTranslate(Options translateOptions, Stage* reader_stage)
         final_stage = next_stage;
     }
 
-    if (m_decimation_step > 1 || m_decimation_limit > 0)
+    if (boost::iequals(m_decimation_method, "VoxelGrid"))
+    {
+        StageFactory f;
+        StageFactory::FilterCreator* fc = f.getFilterCreator("filters.pclblock");
+        if (fc)
+        {
+            Stage* decimation_stage = fc();
+
+            Options decimationOptions;
+            std::ostringstream ss;
+            ss << "{";
+            ss << "  \"pipeline\": {";
+            ss << "    \"filters\": [{";
+            ss << "      \"name\": \"VoxelGrid\",";
+            ss << "      \"setLeafSize\": {";
+            ss << "        \"x\": " << m_decimation_leaf_size << ",";
+            ss << "        \"y\": " << m_decimation_leaf_size << ",";
+            ss << "        \"z\": " << m_decimation_leaf_size;
+            ss << "        }";
+            ss << "      }]";
+            ss << "    }";
+            ss << "}";
+            std::string json = ss.str();
+            decimationOptions.add<std::string>("json", json);
+            decimationOptions.add<bool>("debug", isDebug());
+            decimationOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
+            decimation_stage->setOptions(decimationOptions);
+            decimation_stage->setInput(final_stage);
+            final_stage = decimation_stage;
+        }
+        else
+        {
+            std::ostringstream oss;
+            oss << "Unable to create filter for type 'drivers.pclblock.filter'. Does a driver with this type name exist?";
+            throw pdal_error(oss.str());
+        }
+    }
+    else if (m_decimation_step > 1 || m_decimation_limit > 0)
     {
         Options decimationOptions;
         decimationOptions.add("debug", isDebug());
         decimationOptions.add("verbose", getVerboseLevel());
         decimationOptions.add("step", m_decimation_step);
         decimationOptions.add("offset", m_decimation_offset);
-        decimationOptions.add("leaf_size", m_decimation_leaf_size);
-        decimationOptions.add("method", m_decimation_method);
         decimationOptions.add("limit", m_decimation_limit);
         Stage *decimation_stage = new filters::Decimation();
         decimation_stage->setInput(final_stage);
@@ -358,7 +394,9 @@ int Translate::execute()
     // process the data, grabbing the PointBufferSet for visualization of the
     PointBufferSet pbSetOut = writer->execute(ctx);
 
-    visualize(*pbSetIn.begin(), *pbSetOut.begin());
+    if (isVisualize())
+        visualize(*pbSetOut.begin());
+    //visualize(*pbSetIn.begin(), *pbSetOut.begin());
 
     return 0;
 }

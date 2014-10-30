@@ -32,10 +32,10 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_PDAL_KERNEL_DELTA_HPP
-#define INCLUDED_PDAL_KERNEL_DELTA_HPP
+#pragma once
 
 #include <pdal/Stage.hpp>
+#include <pdal/kernel/Kernel.hpp>
 #include <pdal/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/KDIndex.hpp>
@@ -51,7 +51,11 @@
 #include <boost/accumulators/statistics/count.hpp>
 #include <boost/accumulators/statistics/density.hpp>
 
-#include "Application.hpp"
+PDAL_C_START
+
+PDAL_DLL void PDALRegister_kernel_delta(void* factory);
+
+PDAL_C_END
 
 namespace pdal { namespace kernel {
     
@@ -97,10 +101,14 @@ public:
     }       
 };
 
-class PDAL_DLL Delta : public Application
+class PDAL_DLL Delta : public Kernel
 {
 public:
-    Delta(int argc, const char* argv[]);
+    SET_KERNEL_NAME ("drivers.delta.kernel", "Delta Kernel")
+    SET_KERNEL_LINK ("http://pdal.io/kernels/drivers.delta.kernel.html")
+    SET_KERNEL_ENABLED (true)
+ 
+    Delta();
     int execute(); // overrride
     
 private:
@@ -133,5 +141,3 @@ private:
 };
 
 }} // pdal::kernel
-
-#endif

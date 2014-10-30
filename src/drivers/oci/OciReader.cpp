@@ -39,8 +39,8 @@
 #include <pdal/drivers/oci/OciReader.hpp>
 
 #ifdef USE_PDAL_PLUGIN_OCI
-MAKE_READER_CREATOR(ociReader, pdal::drivers::oci::Reader)
-CREATE_READER_PLUGIN(oci, pdal::drivers::oci::Reader)
+//MAKE_READER_CREATOR(ociReader, pdal::drivers::oci::Reader)
+CREATE_READER_PLUGIN(ociReader, pdal::drivers::oci::Reader)
 #endif
 
 namespace pdal
@@ -253,8 +253,19 @@ void OciReader::addDimensions(PointContextRef ctx)
     m_block->m_ctx = ctx;
     m_block->m_schema = fetchSchema(m_stmt, m_block);
     schema::DimInfoList& dims = m_block->m_schema.m_dims;
+
+    // Override XYZ to doubles and use those going forward
+    // we will apply any scaling set before handing it off 
+    // to PDAL.
+    ctx.registerDim(Dimension::Id::X);
+    ctx.registerDim(Dimension::Id::Y);
+    ctx.registerDim(Dimension::Id::Z);    
+
     for (auto di = dims.begin(); di != dims.end(); ++di)
+    {
         di->m_id = ctx.registerOrAssignDim(di->m_name, di->m_type);
+    }
+
     if (m_schemaFile.size())
     {
         schema::Writer writer(m_block->m_schema.dims(),

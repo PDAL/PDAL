@@ -108,7 +108,12 @@ void NitfReader::initialize()
     nitf.getLasOffset(m_offset, m_length);
     nitf.extractMetadata(m_metadata);
     nitf.close();
+    las::Reader::initialize();
+}
 
+
+void NitfReader::ready(PointContextRef ctx)
+{
 #if 0
     // When combined with setting REQUIRE_LIDAR_SEGMENTS, this little
     // snippet can be used to "pretend" there is a real LAS file
@@ -121,12 +126,9 @@ void NitfReader::initialize()
         m_length = 36437;
     }
 #endif
-
     // Initialize the LAS stuff with its own metadata node.
     MetadataNode lasNode = m_metadata.add(las::Reader::getName());
-    las::Reader::initialize(lasNode);
-
-    return;
+    las::Reader::ready(ctx, lasNode);
 }
 
 } // namespace nitf

@@ -1,11 +1,4 @@
 /******************************************************************************
- * $Id$
- *
- * Project:  pdal - http://pdal.org - A BSD library for LAS format data.
- * Purpose:  LAS bounds class
- * Author:   Howard Butler, hobu.inc@gmail.com
- *
- ******************************************************************************
  * Copyright (c) 2010, Howard Butler
  *
  * All rights reserved.
@@ -47,6 +40,12 @@
 #include <vector>
 #include <sstream>
 
+namespace
+{
+    const double LOWEST = (std::numeric_limits<double>::lowest)();
+    const double HIGHEST = (std::numeric_limits<double>::max)();
+}
+
 
 namespace pdal
 {
@@ -64,10 +63,6 @@ namespace pdal
 
 class PDAL_DLL BOX3D
 {
-private:
-    static const double LOWEST;
-    static const double HIGHEST;
-    
 public:
 
     BOX3D()

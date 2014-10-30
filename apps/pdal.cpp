@@ -33,36 +33,40 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/kernel/Kernel.hpp>
+#include <pdal/kernel/Kernels.hpp>
+#include <pdal/kernel/KernelFactory.hpp>
 #include <pdal/pdal_config.hpp>
 
 #include <boost/algorithm/string.hpp>
 
+using namespace pdal;
 namespace po = boost::program_options;
 
 std::string headline("------------------------------------------------------------------------------------------");
 
 void outputVersion()
 {
+    KernelFactory f;
+
     std::cout << headline << std::endl;
-    std::cout << "pdal " << "(" << pdal::GetFullVersionString() << ")" << std::endl;
+    std::cout << "pdal " << "(" << GetFullVersionString() << ")" << std::endl;
     std::cout << headline << std::endl;
     std::cout << "  available actions: " << std::endl;
     std::cout << "     - delta" << std::endl;
     std::cout << "     - diff" << std::endl;
-#ifdef PDAL_HAVE_PCL
-    std::cout << "     - ground" << std::endl;
-#endif
+    if (f.getKernelCreator("drivers.ground.kernel"))
+        std::cout << "     - ground" << std::endl;
     std::cout << "     - info" << std::endl;
-#ifdef PDAL_HAVE_PCL
-    std::cout << "     - pcl" << std::endl;
-#endif
+    if (f.getKernelCreator("drivers.pcl.kernel"))
+        std::cout << "     - pcl" << std::endl;
     std::cout << "     - pipeline" << std::endl;
     std::cout << "     - random" << std::endl;
+    std::cout << "     - sort" << std::endl;
+    if (f.getKernelCreator("drivers.smooth.kernel"))
+        std::cout << "     - smooth" << std::endl;
     std::cout << "     - translate" << std::endl;
-#ifdef PDAL_HAVE_PCL_VISUALIZE
-    std::cout << "     - view" << std::endl;
-#endif
+    if (f.getKernelCreator("drivers.view.kernel"))
+        std::cout << "     - view" << std::endl;
     std::cout << std::endl;
     std::cout << "See http://pdal.io/apps.html for more detail";
     
@@ -73,6 +77,8 @@ void outputVersion()
 
 int main(int argc, char* argv[])
 {
+    KernelFactory f;
+
     po::options_description options;
     po::positional_options_description positional;
     po::variables_map variables;
@@ -123,60 +129,68 @@ int main(int argc, char* argv[])
 
     if (boost::iequals(action, "translate"))
     {
-        pdal::kernel::Translate app(count, args);
-        return app.run();
+        kernel::Translate app;
+        return app.run(count, args, "translate");
     }
 
     if (boost::iequals(action, "info"))
     {
-        pdal::kernel::Info app(count, args);
-        return app.run();
+        kernel::Info app;
+        return app.run(count, args, "info");
     }
 
-#ifdef PDAL_HAVE_PCL
     if (boost::iequals(action, "ground"))
     {
-        pdal::kernel::Ground app(count, args);
-        return app.run();
+        std::unique_ptr<Kernel> app(f.createKernel("drivers.ground.kernel"));
+        return app->run(count, args, "ground");
     }
     
     if (boost::iequals(action, "pcl"))
     {
-        pdal::kernel::PCL app(count, args);
-        return app.run();
+        std::unique_ptr<Kernel> app(f.createKernel("drivers.pcl.kernel"));
+        return app->run(count, args, "pcl");
     }
-#endif
 
-#ifdef PDAL_HAVE_PCL_VISUALIZE
+    if (boost::iequals(action, "smooth"))
+    {
+        std::unique_ptr<Kernel> app(f.createKernel("drivers.smooth.kernel"));
+        return app->run(count, args, "smooth");
+    }
+ 
     if (boost::iequals(action, "view"))
     {
-        pdal::kernel::View app(count, args);
-        return app.run();
+        std::unique_ptr<Kernel> app(f.createKernel("drivers.view.kernel"));
+        return app->run(count, args, "view");
     }
-#endif
+
+    if (boost::iequals(action, "sort"))
+    {
+      kernel::Sort app;
+      return app.run(count, args, "sort");
+    }
 
     if (boost::iequals(action, "pipeline"))
     {
-        pdal::kernel::Pipeline app(count, args);
-        return app.run();
+        kernel::Pipeline app;
+        return app.run(count, args, "pipeline");
     }
 
     if (boost::iequals(action, "delta"))
     {
-        pdal::kernel::Delta app(count, args);
-        return app.run();
+        kernel::Delta app;
+        return app.run(count, args, "delta");
     }
     
     if (boost::iequals(action, "diff"))
     {
-        pdal::kernel::Diff app(count, args);
-        return app.run();
+        kernel::Diff app;
+        return app.run(count, args, "diff");
     }
 
     if (boost::iequals(action, "random"))
     {
-        pdal::kernel::Random app(count, args);
-        return app.run();
+        kernel::Random app;
+        return app.run(count, args, "random");
     }
 
     std::cerr << "Action '" << action <<"' not recognized" << std::endl << std::endl;

@@ -34,6 +34,7 @@
 
 #pragma once
 
+#include <pdal/filters/Attribute.hpp>
 #include <pdal/filters/ByteSwap.hpp>
 #include <pdal/filters/Cache.hpp>
 #include <pdal/filters/Chipper.hpp>
@@ -44,9 +45,6 @@
 #include <pdal/filters/HexBin.hpp>
 #include <pdal/filters/InPlaceReprojection.hpp>
 #include <pdal/filters/Merge.hpp>
-#ifdef PDAL_HAVE_PCL
-#include <pdal/filters/PCLBlock.hpp>
-#endif
 #ifdef PDAL_HAVE_PYTHON
 #include <pdal/filters/Predicate.hpp>
 #include <pdal/filters/Programmable.hpp>

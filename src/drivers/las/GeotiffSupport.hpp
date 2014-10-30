@@ -32,8 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_DRIVERS_LAS_GEOTIFFSUPPORT_HPP
-#define INCLUDED_DRIVERS_LAS_GEOTIFFSUPPORT_HPP
+#pragma once
 
 #include <pdal/pdal_internal.hpp>
 
@@ -58,26 +57,23 @@ typedef struct ST_TIFFS *ST_TIFF;
 #include <string>
 #include <stdexcept>
 
-namespace pdal { namespace drivers { namespace las {
-    
+namespace pdal
+{
+namespace drivers
+{
+namespace las
+{
 
 class PDAL_DLL GeotiffSupport
 {
 public:
-    enum GeotiffKeyType
-    {
-        Geotiff_KeyType_SHORT=1,
-        Geotiff_KeyType_DOUBLE=2,
-        Geotiff_KeyType_ASCII=3
-    };
-
-public:
-    GeotiffSupport();
+    GeotiffSupport() : m_gtiff(0), m_tiff(0)
+    {}
     ~GeotiffSupport();
     
     void resetTags();
-    int setKey(int tag, int count, GeotiffKeyType geotiff_key_type, void *data);
-    int getKey(int tag, int *count, int *st_type, void **data_ptr) const;
+    int setKey(int tag, void *data, int size, int type);
+    size_t getKey(int tag, int *count, void **data_ptr) const;
     void setTags();
 
     std::string getWkt(bool horizOnly, bool pretty) const;
@@ -92,7 +88,7 @@ private:
     ST_TIFF* m_tiff;
 };
 
+} // namespace las
+} // namespace drivers
+} // namespace pdal
 
-} } } // namespace
-
-#endif

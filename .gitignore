@@ -74,3 +74,5 @@ test/unit/CMakeScripts/
 src/gitsha.cpp
 .vagrant/
 test/unit/TestConfig.hpp
+*.pyc
+
