@@ -49,6 +49,7 @@ namespace plang
 }
 
 class PointBuffer;
+class PointBufferIter;
 
 typedef std::shared_ptr<PointBuffer> PointBufferPtr;
 typedef std::set<PointBufferPtr> PointBufferSet;
@@ -57,10 +58,14 @@ typedef std::set<PointBufferPtr> PointBufferSet;
 class PDAL_DLL PointBuffer
 {
     friend class plang::BufferedInvocation;
+    friend class PointRef;
 public:
     PointBuffer();
     PointBuffer(PointContextRef context) : m_context(context)
     {}
+
+    PointBufferIter begin();
+    PointBufferIter end();
 
     point_count_t size() const
         { return m_index.size(); }
@@ -136,6 +141,55 @@ public:
                 setField(dim, idx, e.u64);
                 break;
             case Dimension::Type::None:
+                break;
+        }
+    }
+
+    template <typename T>
+    bool compare(Dimension::Id::Enum dim, PointId id1, PointId id2)
+    {
+        return (getFieldInternal<T>(dim, id1) < getFieldInternal<T>(dim, id2));
+    }
+
+    bool compare(Dimension::Id::Enum dim, PointId id1, PointId id2)
+    {
+        Dimension::Detail *dd = m_context.dimDetail(dim);
+
+        switch (dd->type())
+        {
+            case Dimension::Type::Float:
+                return compare<float>(dim, id1, id2);
+                break;
+            case Dimension::Type::Double:
+                return compare<double>(dim, id1, id2);
+                break;
+            case Dimension::Type::Signed8:
+                return compare<int8_t>(dim, id1, id2);
+                break;
+            case Dimension::Type::Signed16:
+                return compare<int16_t>(dim, id1, id2);
+                break;
+            case Dimension::Type::Signed32:
+                return compare<int32_t>(dim, id1, id2);
+                break;
+            case Dimension::Type::Signed64:
+                return compare<int64_t>(dim, id1, id2);
+                break;
+            case Dimension::Type::Unsigned8:
+                return compare<uint8_t>(dim, id1, id2);
+                break;
+            case Dimension::Type::Unsigned16:
+                return compare<uint16_t>(dim, id1, id2);
+                break;
+            case Dimension::Type::Unsigned32:
+                return compare<uint32_t>(dim, id1, id2);
+                break;
+            case Dimension::Type::Unsigned64:
+                return compare<uint64_t>(dim, id1, id2);
+                break;
+            case Dimension::Type::None:
+            default:
+                return false;
                 break;
         }
     }

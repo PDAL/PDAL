@@ -36,10 +36,10 @@
 
 #include <random>
 
-#include <boost/cstdint.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
 #include <pdal/PointBuffer.hpp>
+#include <pdal/PointBufferIter.hpp>
 #include <pdal/drivers/las/Reader.hpp>
 #include <pdal/PDALUtils.hpp>
 #include "Support.hpp"
@@ -367,15 +367,6 @@ BOOST_AUTO_TEST_CASE(kdindex)
 **/
 
 
-static void set_points(PointBuffer& buf, PointId i,
-                       double x, double y, double z)
-{
-    buf.setField(Dimension::Id::X, i, x);
-    buf.setField(Dimension::Id::Y, i, y);
-    buf.setField(Dimension::Id::Z, i, z);
-}
-
-
 static void check_bounds(const BOX3D& box,
                          double minx, double maxx,
                          double miny, double maxy,
@@ -393,6 +384,14 @@ static void check_bounds(const BOX3D& box,
 
 BOOST_AUTO_TEST_CASE(calcBounds)
 {
+    auto set_points = [](PointBufferPtr buf, PointId i, double x, double y,
+        double z)
+    {
+        buf->setField(Dimension::Id::X, i, x);
+        buf->setField(Dimension::Id::Y, i, y);
+        buf->setField(Dimension::Id::Z, i, z);
+    };
+
     PointContext ctx;
     ctx.registerDim(Dimension::Id::X);
     ctx.registerDim(Dimension::Id::Y);
@@ -405,12 +404,12 @@ BOOST_AUTO_TEST_CASE(calcBounds)
     check_bounds(box_b0, lim_max, lim_min, lim_max, lim_min, lim_max, lim_min);
 
     PointBufferPtr b1(new PointBuffer(ctx));
-    set_points(*b1, 0, 0.0, 0.0, 0.0);
-    set_points(*b1, 1, 2.0, 2.0, 2.0);
+    set_points(b1, 0, 0.0, 0.0, 0.0);
+    set_points(b1, 1, 2.0, 2.0, 2.0);
 
     PointBufferPtr b2(new PointBuffer(ctx));
-    set_points(*b2, 0, 3.0, 3.0, 3.0);
-    set_points(*b2, 1, 1.0, 1.0, 1.0);
+    set_points(b2, 0, 3.0, 3.0, 3.0);
+    set_points(b2, 1, 1.0, 1.0, 1.0);
     
     PointBufferSet bs;
     bs.insert(b1);
@@ -426,5 +425,32 @@ BOOST_AUTO_TEST_CASE(calcBounds)
     check_bounds(box_bs, 0.0, 3.0, 0.0, 3.0, 0.0, 3.0);
 }
 
+BOOST_AUTO_TEST_CASE(sort)
+{
+    PointContext ctx;
+    PointBuffer buf(ctx);
+    const PointId NUM_PTS = 10000;
+
+    auto cmp = [](const PointRef& p1, const PointRef& p2)
+    {
+        return p1.compare(Dimension::Id::X, p2);
+    };
+
+    ctx.registerDim(Dimension::Id::X);
+
+    std::default_random_engine generator;
+    std::uniform_real_distribution<double> dist(0.0, 10000.0);
+    for (PointId i = 0; i < NUM_PTS; ++i)
+        buf.setField(Dimension::Id::X, i, dist(generator));    
+
+    std::sort(buf.begin(), buf.end(), cmp);
+
+    for (PointId i = 1; i < NUM_PTS; ++i)
+    {
+        double d1 = buf.getFieldAs<double>(Dimension::Id::X, i - 1);
+        double d2 = buf.getFieldAs<double>(Dimension::Id::X, i);
+        BOOST_CHECK(d1 <= d2);
+    }
+}
 
 BOOST_AUTO_TEST_SUITE_END()

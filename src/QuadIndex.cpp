@@ -40,7 +40,7 @@
 #include <pdal/PointBuffer.hpp>
 #include <pdal/Utils.hpp>
 
-namespace pdal
+namespace
 {
 
 // Helper classes for the quadtree implementation.
@@ -128,6 +128,11 @@ struct BBox
     const double halfWidth;
     const double halfHeight;
 };
+
+} // anonymous namespace
+
+namespace pdal
+{
 
 // Recursive quadtree implementation.
 struct Tree

@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Hobu Inc., hobu.inc@gmail.com
+* Copyright (c) 2014, Hobu Inc. (hobu@hobu.co)
 *
 * All rights reserved.
 *
@@ -32,29 +32,53 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "UnitTest.hpp"
+#pragma once
 
-#include <pdal/PipelineManager.hpp>
-#include <pdal/PipelineReader.hpp>
+#include <pdal/Filter.hpp>
+#include <pdal/PointBufferIter.hpp>
 
-#include "Support.hpp"
-
-BOOST_AUTO_TEST_SUITE(MergeTest)
-
-BOOST_AUTO_TEST_CASE(test1)
+namespace pdal
 {
-    using namespace pdal;
 
-    PipelineManager mgr;
-    PipelineReader specReader(mgr);
-    specReader.readPipeline(Support::datapath("filters/merge.xml"));
-    mgr.execute();
+namespace filters
+{
 
-    PointBufferSet pbSet = mgr.buffers();
+class PDAL_DLL Sort : public Filter
+{
+public:
+    SET_STAGE_NAME("filters.sort", "Sort Filter")
+    SET_STAGE_LINK("http://www.pdal.io/stages/filters.sort.html")
+    SET_STAGE_ENABLED(true)
 
-    BOOST_CHECK_EQUAL(pbSet.size(), 1);
-    PointBufferPtr buf = *pbSet.begin();
-    BOOST_CHECK_EQUAL(buf->size(), 2130);
-}
+    Sort()
+    {}
 
-BOOST_AUTO_TEST_SUITE_END()
+private:
+    // Dimension on which to sort.
+    Dimension::Id::Enum m_dim;
+    // Dimension name.
+    std::string m_dimName;
+
+    virtual void processOptions(const Options& options)
+        { m_dimName = options.getValueOrThrow<std::string>("dimension"); }
+
+    virtual void ready(PointContext ctx)
+        { m_dim = ctx.findDim(m_dimName); }
+
+    virtual void filter(PointBuffer& buf)
+    {
+        if (m_dim == Dimension::Id::Unknown)
+            return;
+
+        auto cmp = [this](const PointRef& p1, const PointRef& p2)
+            { return p1.compare(m_dim, p2); };
+
+        std::sort(buf.begin(), buf.end(), cmp);
+    }
+
+    Sort& operator=(const Sort&); // not implemented
+    Sort(const Sort&); // not implemented
+};
+
+} // namespace filters
+} // namespace pdal

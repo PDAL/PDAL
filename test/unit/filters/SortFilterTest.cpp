@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Hobu Inc., hobu.inc@gmail.com
+* Copyright (c) 2014, Hobu Inc. (hobu@hobu.co)
 *
 * All rights reserved.
 *
@@ -34,27 +34,70 @@
 
 #include "UnitTest.hpp"
 
+#include <random>
+
+#include <pdal/filters/Sort.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineReader.hpp>
+#include "../StageTester.hpp"
+#include "../Support.hpp"
 
-#include "Support.hpp"
+using namespace pdal;
 
-BOOST_AUTO_TEST_SUITE(MergeTest)
+BOOST_AUTO_TEST_SUITE(SortFilterTest)
 
-BOOST_AUTO_TEST_CASE(test1)
+BOOST_AUTO_TEST_CASE(simple)
 {
-    using namespace pdal;
+    Options opts;
 
+    opts.add("dimension", "X");
+
+    filters::Sort filter;
+    filter.setOptions(opts);
+
+    PointContext ctx;
+    PointBuffer buf(ctx);
+
+    ctx.registerDim(Dimension::Id::X);
+
+    std::default_random_engine generator;
+    std::uniform_real_distribution<double> dist(0.0, 10000.0);
+
+    for (PointId i = 0; i < 10000; ++i)
+        buf.setField(Dimension::Id::X, i, dist(generator));
+
+    filter.prepare(ctx);
+    FilterTester::ready(&filter, ctx);
+    FilterTester::filter(&filter, buf);
+    FilterTester::done(&filter, ctx);
+
+    for (PointId i = 1; i < 10000; ++i)
+    {
+        double d1 = buf.getFieldAs<double>(Dimension::Id::X, i - 1);
+        double d2 = buf.getFieldAs<double>(Dimension::Id::X, i);
+        BOOST_CHECK(d1 <= d2);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(pipeline)
+{
     PipelineManager mgr;
-    PipelineReader specReader(mgr);
-    specReader.readPipeline(Support::datapath("filters/merge.xml"));
+    PipelineReader reader(mgr);
+
+    reader.readPipeline(Support::datapath("filters/sort.xml"));
     mgr.execute();
 
     PointBufferSet pbSet = mgr.buffers();
 
     BOOST_CHECK_EQUAL(pbSet.size(), 1);
     PointBufferPtr buf = *pbSet.begin();
-    BOOST_CHECK_EQUAL(buf->size(), 2130);
+
+    for (PointId i = 1; i < buf->size(); ++i)
+    {
+        double d1 = buf->getFieldAs<double>(Dimension::Id::X, i - 1);
+        double d2 = buf->getFieldAs<double>(Dimension::Id::X, i);
+        BOOST_CHECK(d1 <= d2);
+    }
 }
 
 BOOST_AUTO_TEST_SUITE_END()
