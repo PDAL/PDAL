@@ -113,10 +113,6 @@ MAKE_FILTER_CREATOR(Sort, pdal::filters::Sort)
 MAKE_FILTER_CREATOR(Splitter, pdal::filters::Splitter)
 MAKE_FILTER_CREATOR(Stats, pdal::filters::Stats)
 
-#ifdef PDAL_HAVE_PCL
-MAKE_FILTER_CREATOR(PCLBlock, pdal::filters::PCLBlock)
-#endif
-
 #ifdef PDAL_HAVE_PYTHON
 MAKE_FILTER_CREATOR(Predicate, pdal::filters::Predicate)
 MAKE_FILTER_CREATOR(Programmable, pdal::filters::Programmable)
@@ -412,10 +408,6 @@ void StageFactory::registerKnownFilters()
     REGISTER_FILTER(Sort, pdal::filters::Sort);
     REGISTER_FILTER(Splitter, pdal::filters::Splitter);
     REGISTER_FILTER(Stats, pdal::filters::Stats);
-
-#ifdef PDAL_HAVE_PCL
-    REGISTER_FILTER(PCLBlock, pdal::filters::PCLBlock);
-#endif
 
 #ifdef PDAL_HAVE_PYTHON
     REGISTER_FILTER(Predicate, pdal::filters::Predicate);
