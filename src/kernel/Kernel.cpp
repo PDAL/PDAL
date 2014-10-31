@@ -58,7 +58,8 @@ namespace pdal
 
 
 Kernel::Kernel()
-    : m_isDebug(false)
+    : m_usestdin(false)
+    , m_isDebug(false)
     , m_verboseLevel(0)
     , m_showHelp(false)
     , m_showDrivers(false)
@@ -68,7 +69,6 @@ Kernel::Kernel()
     , m_hardCoreDebug(false)
     , m_reportDebug(false)
     , m_visualize(false)
-    , m_usestdin(false)
 {
 }
 
