@@ -33,9 +33,8 @@ if(JSONCPP_FOUND AND WEBSOCKETPP_FOUND)
 	drivers/WebSocketClient.hpp
     )
 
-    set(GREYHOUND_LIB_NAME pdal_plugin_reader_greyhound)
-    PDAL_ADD_PLUGIN(${GREYHOUND_LIB_NAME} reader greyhound ${srcs} ${incs})
-    target_link_libraries(${GREYHOUND_LIB_NAME} ${PDAL_LINKAGE} ${JSONCPP_LIBRARY})
+    set(deps ${JSONCPP_LIBRARY})
+    PDAL_ADD_PLUGIN(greyhound_reader_lib_name reader greyhound "${srcs}" "${incs}" "${deps}")
 else()
     message(STATUS "Building without Greyhound support")
 endif()

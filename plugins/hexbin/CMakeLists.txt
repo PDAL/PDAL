@@ -1,9 +1,9 @@
 #
-# Hexer plugin CMake configuration
+# HexBin plugin CMake configuration
 #
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
-include_directories(${PROJECT_SOURCE_DIR}/plugins/hexer)
+include_directories(${PROJECT_SOURCE_DIR}/plugins/hexbin)
 
 find_package(Hexer)
 if (HEXER_FOUND)
@@ -23,9 +23,8 @@ if (HEXER_FOUND)
         filters/HexBin.hpp
     )
 
-    set(HEXER_LIB_NAME pdal_plugin_filter_hexer)
-    PDAL_ADD_PLUGIN(${HEXER_LIB_NAME} filter hexer ${srcs} ${incs})
-    target_link_libraries(${HEXER_LIB_NAME} ${PDAL_LINKAGE} ${HEXER_LIBRARY})
+    set(deps ${HEXER_LIBRARY})
+    PDAL_ADD_PLUGIN(hexbin_filter_lib_name filter hexbin "${srcs}" "${incs}" "${deps}")
 
     #
     # HexBin tests
@@ -34,7 +33,7 @@ if (HEXER_FOUND)
         test/HexbinFilterTest.cpp
     )
 
-    PDAL_ADD_TEST(hexertest ${srcs})
+    PDAL_ADD_TEST(hexbintest "${srcs}")
 else()
     message(STATUS "Building without Hexer support")
 endif()

@@ -73,9 +73,8 @@ if(NITRO_FOUND)
 	drivers/NitfReader.hpp
     )
 
-    set(NITF_READER_LIB_NAME pdal_plugin_reader_nitf)
-    PDAL_ADD_PLUGIN(${NITF_READER_LIB_NAME} reader nitf ${srcs} ${incs})
-    target_link_libraries(${NITF_READER_LIB_NAME} ${PDAL_LINKAGE} ${NITRO_LIBRARIES})
+    set(deps ${NITRO_LIBRARIES})
+    PDAL_ADD_PLUGIN(nitf_reader_lib_name reader nitf "${srcs}" "${incs}" "${deps}")
 
     #
     # NITF Writer
@@ -92,16 +91,15 @@ if(NITRO_FOUND)
 	drivers/tre_plugins.hpp
     )
 
-    set(NITF_WRITER_LIB_NAME pdal_plugin_writer_nitf)
-    PDAL_ADD_PLUGIN(${NITF_WRITER_LIB_NAME} writer nitf ${srcs} ${incs})
-    target_link_libraries(${NITF_WRITER_LIB_NAME} ${PDAL_LINKAGE} ${NITRO_LIBRARIES})
+    set(deps ${NITRO_LIBRARIES})
+    PDAL_ADD_PLUGIN(nitf_writer_lib_name writer nitf "${srcs}" "${incs}" "${deps}")
 
     set(srcs
         test/NitfReaderTest.cpp
         test/NitfWriterTest.cpp
     )
 
-    PDAL_ADD_TEST(nitftest ${srcs})
+    PDAL_ADD_TEST(nitftest "${srcs}")
 else()
     message(STATUS "Building without NITF support")
 endif()

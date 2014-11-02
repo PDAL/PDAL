@@ -24,9 +24,8 @@ if(MRSID_FOUND)
         drivers/MrsidReader.hpp
     )
 
-    set(MRSID_LIB_NAME pdal_plugin_reader_mrsid)
-    PDAL_ADD_PLUGIN(${MRSID_LIB_NAME} reader mrsid ${srcs} ${incs})
-    target_link_libraries(${MRSID_LIB_NAME} ${PDAL_LINKAGE} ${MRSID_LIBRARY})
+    set(deps ${MRSID_LIBRARY})
+    PDAL_ADD_PLUGIN(mrsid_reader_lib_name reader mrsid "${srcs}" "${incs}" "${deps}")
 else()
     message(STATUS "Building without MrSID support")
 endif()

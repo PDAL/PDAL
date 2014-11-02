@@ -26,9 +26,8 @@ if (HDF5_FOUND)
 	drivers/Hdf5Handler.hpp
     )
 
-    set(ICEBRIDGE_LIB_NAME pdal_plugin_reader_icebridge)
-    PDAL_ADD_PLUGIN(${ICEBRIDGE_LIB_NAME} reader icebridge ${srcs} ${incs})
-    target_link_libraries(${ICEBRIDGE_LIB_NAME} ${PDAL_LINKAGE} ${HDF5_LIBRARIES})
+    set(deps ${HDF5_LIBRARIES})
+    PDAL_ADD_PLUGIN(icebridge_reader_lib_name reader icebridge "${srcs}" "${incs}" "${deps}")
 
     #
     # Icebridge tests
@@ -37,7 +36,7 @@ if (HDF5_FOUND)
         test/IcebridgeReaderTest.cpp
     )
 
-    PDAL_ADD_TEST(icetest ${srcs})
+    PDAL_ADD_TEST(icetest "${srcs}")
 else()
     message(STATUS "Building without Icebridge support")
 endif()

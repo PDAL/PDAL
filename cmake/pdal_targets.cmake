@@ -91,14 +91,19 @@ endmacro(PDAL_ADD_EXECUTABLE)
 #
 # Todo: handle windows/unix variants of the plugin name
 # Todo: accept deps for target_link_libraries
-macro(PDAL_ADD_PLUGIN _name _type _shortname _srcs _incs)
-    add_library(${_name} SHARED ${_srcs} ${_incs})
-    target_link_libraries(${_name} ${PDAL_LINKAGE} ${PDAL_LIB_NAME})
+macro(PDAL_ADD_PLUGIN _name _type _shortname _srcs _incs _deps)
+    if(WIN32)
+        set(${_name} "libpdal_plugin_${_type}_${_shortname}")
+    else()
+        set(${_name} "pdal_plugin_${_type}_${_shortname}")
+    endif()
+    add_library(${${_name}} SHARED ${_srcs} ${_incs})
+    target_link_libraries(${${_name}} ${PDAL_LINKAGE} ${PDAL_LIB_NAME} ${_deps})
 
     source_group("Header Files\\${_type}\\${_shortname}" FILES ${_incs})
     source_group("Source Files\\${_type}\\${_shortname}" FILES ${_srcs})
 
-    install(TARGETS ${_name}
+    install(TARGETS ${${_name}}
         RUNTIME DESTINATION ${PDAL_BIN_DIR}
         LIBRARY DESTINATION ${PDAL_LIB_DIR}
         ARCHIVE DESTINATION ${PDAL_LIB_DIR})
