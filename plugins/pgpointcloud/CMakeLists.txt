@@ -25,9 +25,8 @@ if (POSTGRESQL_FOUND)
 	drivers/PgReader.hpp
     )
 
-    set(PGPOINTCLOUD_READER_LIB_NAME pdal_plugin_reader_pgpointcloud)
-    PDAL_ADD_PLUGIN(${PGPOINTCLOUD_READER_LIB_NAME} reader pgpointcloud ${srcs} ${incs})
-    target_link_libraries(${PGPOINTCLOUD_READER_LIB_NAME} ${PDAL_LINKAGE} ${POSTGRESQL_LIBRARIES})
+    set(deps ${POSTGRESQL_LIBRARIES})
+    PDAL_ADD_PLUGIN(pgpointcloud_reader_lib_name reader pgpointcloud "${srcs}" "${incs}" "${deps}")
 
     #
     # PgPointCloud Writer
@@ -41,9 +40,8 @@ if (POSTGRESQL_FOUND)
 	drivers/PgWriter.hpp
     )
 
-    set(PGPOINTCLOUD_WRITER_LIB_NAME pdal_plugin_writer_pgpointcloud)
-    PDAL_ADD_PLUGIN(${PGPOINTCLOUD_WRITER_LIB_NAME} writer pgpointcloud ${srcs} ${incs})
-    target_link_libraries(${PGPOINTCLOUD_WRITER_LIB_NAME} ${PDAL_LINKAGE} ${POSTGRESQL_LIBRARIES})
+    set(deps ${POSTGRESQL_LIBRARIES})
+    PDAL_ADD_PLUGIN(pgpointcloud_writer_lib_name writer pgpointcloud "${srcs}" "${incs}" "${deps}")
 
     #
     # PgPointCloud tests
@@ -65,7 +63,7 @@ if (POSTGRESQL_FOUND)
 	    ${CMAKE_CURRENT_BINARY_DIR}/Pgtest-Support.hpp
 	)
 
-        PDAL_ADD_TEST(pgpointcloudtest ${srcs})
+        PDAL_ADD_TEST(pgpointcloudtest "${srcs}")
     endif()
 else()
     message(STATUS "Building without PgPointCloud support")

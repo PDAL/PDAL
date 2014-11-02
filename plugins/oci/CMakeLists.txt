@@ -26,9 +26,8 @@ if(ORACLE_FOUND)
 	drivers/OciWrapper.h
     )
 
-    set(OCI_READER_LIB_NAME pdal_plugin_reader_oci)
-    PDAL_ADD_PLUGIN(${OCI_READER_LIB_NAME} reader oci ${srcs} ${incs})
-    target_link_libraries(${OCI_READER_LIB_NAME} ${PDAL_LINKAGE} ${ORACLE_LIBRARY})
+    set(deps ${ORACLE_LIBRARY})
+    PDAL_ADD_PLUGIN(oci_reader_lib_name reader oci "${srcs}" "${incs}" "${deps}")
 
     #
     # OCI Writer
@@ -45,9 +44,8 @@ if(ORACLE_FOUND)
 	drivers/OciWriter.hpp
     )
 
-    set(OCI_WRITER_LIB_NAME pdal_plugin_writer_oci)
-    PDAL_ADD_PLUGIN(${OCI_WRITER_LIB_NAME} writer oci ${srcs} ${incs})
-    target_link_libraries(${OCI_WRITER_LIB_NAME} ${PDAL_LINKAGE} ${ORACLE_LIBRARY})
+    set(deps ${ORACLE_LIBRARY})
+    PDAL_ADD_PLUGIN(oci_writer_lib_name writer oci "${srcs}" "${incs}" "${deps}")
 
     #
     # OCI tests
@@ -57,7 +55,7 @@ if(ORACLE_FOUND)
 	    test/OCITest.cpp
 	)
 
-	PDAL_ADD_TEST(ocitest ${srcs})
+	PDAL_ADD_TEST(ocitest "${srcs}")
     endif()
 else()
     message(STATUS "Building without Oracle support")

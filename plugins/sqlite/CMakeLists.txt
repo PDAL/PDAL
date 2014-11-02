@@ -25,9 +25,8 @@ if (SQLITE3_FOUND)
 	drivers/SQLiteReader.hpp
     )
 
-    set(SQLITE_READER_LIB_NAME pdal_plugin_reader_sqlite)
-    PDAL_ADD_PLUGIN(${SQLITE_READER_LIB_NAME} reader sqlite ${srcs} ${incs})
-    target_link_libraries(${SQLITE_READER_LIB_NAME} ${PDAL_LINKAGE} ${SQLITE3_LIBRARY})
+    set(deps ${SQLITE3_LIBRARY})
+    PDAL_ADD_PLUGIN(sqlite_reader_lib_name reader sqlite "${srcs}" "${incs}" "${deps}")
 
     #
     # SQLite Writer
@@ -41,9 +40,8 @@ if (SQLITE3_FOUND)
 	drivers/SQLiteWriter.hpp
     )
 
-    set(SQLITE_WRITER_LIB_NAME pdal_plugin_writer_sqlite)
-    PDAL_ADD_PLUGIN(${SQLITE_WRITER_LIB_NAME} writer sqlite ${srcs} ${incs})
-    target_link_libraries(${SQLITE_WRITER_LIB_NAME} ${PDAL_LINKAGE} ${SQLITE3_LIBRARY})
+    set(deps ${SQLITE3_LIBRARY})
+    PDAL_ADD_PLUGIN(sqlite_writer_lib_name writer sqlite "${srcs}" "${incs}" "${deps}")
 
     #
     # SQLite tests
@@ -53,7 +51,7 @@ if (SQLITE3_FOUND)
 	    test/SqliteTest.cpp
 	)
 
-	PDAL_ADD_TEST(sqlitetest ${srcs})
+	PDAL_ADD_TEST(sqlitetest "${srcs}")
     endif()
 else()
     message(STATUS "Building without SQLite support")

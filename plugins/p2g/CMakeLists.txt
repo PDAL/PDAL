@@ -23,9 +23,8 @@ if (P2G_FOUND)
 	drivers/P2gWriter.hpp
     )
 
-    set(P2G_WRITER_LIB_NAME pdal_plugin_writer_p2g)
-    PDAL_ADD_PLUGIN(${P2G_WRITER_LIB_NAME} writer p2g ${srcs} ${incs})
-    target_link_libraries(${P2G_WRITER_LIB_NAME} ${PDAL_LINKAGE} ${P2G_LIBRARY})
+    set(deps ${P2G_LIBRARY})
+    PDAL_ADD_PLUGIN(p2g_writer_lib_name writer p2g "${srcs}" "${incs}" "${deps}")
 else()
     message(STATUS "Building without Points2grid support")
 endif()
