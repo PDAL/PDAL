@@ -93,7 +93,7 @@ endmacro(PDAL_ADD_EXECUTABLE)
 # Todo: accept deps for target_link_libraries
 macro(PDAL_ADD_PLUGIN _name _type _shortname _srcs _incs)
     add_library(${_name} SHARED ${_srcs} ${_incs})
-    target_link_libraries(${_name} ${PDAL_LIB_NAME} ${PCL_LIBRARIES})
+    target_link_libraries(${_name} ${PDAL_LINKAGE} ${PDAL_LIB_NAME})
 
     source_group("Header Files\\${_type}\\${_shortname}" FILES ${_incs})
     source_group("Source Files\\${_type}\\${_shortname}" FILES ${_srcs})
