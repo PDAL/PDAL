@@ -67,7 +67,7 @@ if(NITRO_FOUND)
 
     set(incs
         ${PDAL_LAS_INCS}
-	drivers/NitfFile.hp
+	drivers/NitfFile.hpp
 	drivers/MetadataReader.hpp
 	drivers/tre_plugins.hpp
 	drivers/NitfReader.hpp
