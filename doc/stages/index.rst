@@ -38,6 +38,7 @@ Filters
 .. toctree::
    :maxdepth: 1
 
+   filters.attribute
    filters.colorization
    filters.chipper
    filters.crop
