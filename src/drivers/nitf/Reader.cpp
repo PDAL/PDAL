@@ -107,6 +107,9 @@ void NitfReader::initialize()
     nitf.open();
     nitf.getLasOffset(m_offset, m_length);
     nitf.extractMetadata(m_metadata);
+    m_metadata.add("DESDATA_OFFSET", m_offset);
+    m_metadata.add("DESDATA_LENGTH", m_length);
+
     nitf.close();
     las::Reader::initialize();
 }
