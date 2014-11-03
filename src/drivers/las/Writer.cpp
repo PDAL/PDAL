@@ -434,7 +434,7 @@ void Writer::fillHeader(PointContextRef ctx)
     m_lasHeader.setCreationDOY(headerVal<uint16_t>("creation_year"));
     m_lasHeader.setCreationDOY(headerVal<uint16_t>("creation_doy"));
     m_lasHeader.setSoftwareId(headerVal<std::string>("software_id"));
-    m_lasHeader.setSoftwareId(headerVal<std::string>("system_id"));
+    m_lasHeader.setSystemId(headerVal<std::string>("system_id"));
     m_lasHeader.setProjectId(headerVal<boost::uuids::uuid>("project_id"));
 
     uint16_t reserved(0);
