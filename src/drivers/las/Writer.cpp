@@ -431,7 +431,7 @@ void Writer::fillHeader(PointContextRef ctx)
     m_lasHeader.setPointFormat((uint8_t)headerVal<unsigned>("format"));
     m_lasHeader.setPointLen(m_lasHeader.basePointLen());
     m_lasHeader.setVersionMinor((uint8_t)headerVal<unsigned>("minor_version"));
-    m_lasHeader.setCreationDOY(headerVal<uint16_t>("creation_year"));
+    m_lasHeader.setCreationYear(headerVal<uint16_t>("creation_year"));
     m_lasHeader.setCreationDOY(headerVal<uint16_t>("creation_doy"));
     m_lasHeader.setSoftwareId(headerVal<std::string>("software_id"));
     m_lasHeader.setSystemId(headerVal<std::string>("system_id"));
