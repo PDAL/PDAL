@@ -1,29 +1,31 @@
-USR_LOCAL="/usr/local"
-USR="/usr"
-OPT="/opt/local"
-TIFF_HOME=$USR_LOCAL
-LASZIP_HOME=$USR_LOCAL
-LIBXML2_HOME=$OPT
-GEOTIFF_HOME=$USR_LOCAL
-P2G_HOME=$USR_LOCAL
-SO_EXT=dylib
-EMBED=ON
+
+# Where do libs/bins go on 'make install'?
+INSTALL_PREFIX=${HOME}/pdal
+
+# Where are our dependencies installed?
+TIFF_HOME=/opt/local
+LASZIP_HOME=/usr/local
+LIBXML2_HOME=/opt/local
+GEOTIFF_HOME=/opt/local
+P2G_HOME=/usr/local
+PGSQL_HOME=/usr/pgsql-9.2
+
+# What to build with?
 CC=/usr/bin/gcc
 CXX=/usr/bin/g++
-CPPCLAGS=-I/usr/pgsql-9.2/include
+CPPCLAGS=-I${PGSQL_HOME}/include
+SO_EXT=dylib
 
-ORACLE_HOME=$HOME/oracle
-export ORACLE_HOME
 CONFIG="Unix Makefiles"
 
 if ! [ -z "$1" ]; then
     CONFIG="$1"
 fi
 
-cmake   -G "$CONFIG"  \
+cmake   -G "$CONFIG" \
         -DCMAKE_BUILD_TYPE=RelWithDebInfo \
-        -DCMAKE_INSTALL_PREFIX=${HOME}/pdal \
-        -DPDAL_EMBED_BOOST=${EMBED} \
+        -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} \
+        -DPDAL_EMBED_BOOST=ON \
         -DWITH_GDAL=ON \
         -DWITH_ICONV=ON \
         -DWITH_ORACLE=OFF \
@@ -42,14 +44,11 @@ cmake   -G "$CONFIG"  \
         -DLIBXML2_LIBRARIES=${LIBXML2_HOME}/lib/libxml2.${SO_EXT} \
         -DTIFF_INCLUDE_DIR=/${TIFF_HOME}/include \
         -DTIFF_LIBRARY=${TIFF_HOME}/lib/libtiff.${SO_EXT} \
-	-DPOSTGRESQL_INCLUDE_DIR=${USR_LOCAL}/pgsql/9.2/include \
-	-DPOSTGRESQL_LIBRARIES=${USR_LOCAL}/pgsql/9.2/lib/libpq.${SO_EXT} \
+	-DPOSTGRESQL_INCLUDE_DIR=${PGSQL_HOME}/include \
+	-DPOSTGRESQL_LIBRARIES=${PGSQL_HOME}/lib/libpq.${SO_EXT} \
 	../PDAL
 
 
-# -DLASZIP_INCLUDE_DIR=${LASZIP_HOME}/include \
-# -DLASZIP_LIBRARY=${LASZIP_HOME}/lib/liblaszip.${SO_EXT} \
-# -DUSE_PDAL_PLUGIN_SOCI=ON \
-# -DUSE_PDAL_PLUGIN_PCD=ON \
-# -DUSE_PDAL_PLUGIN_OCI=ON \
-# -DUSE_PDAL_PLUGIN_TEXT=ON \
+
+#	-DLASZIP_INCLUDE_DIR=${LASZIP_HOME}/include \
+#	-DLASZIP_LIBRARY=${LASZIP_HOME}/lib/liblaszip.${SO_EXT} \
