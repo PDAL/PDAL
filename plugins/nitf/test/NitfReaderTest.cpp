@@ -167,13 +167,13 @@ BOOST_AUTO_TEST_CASE(optionSrs)
     {
         BOOST_CHECK(rc);
 
-        std::unique_ptr<Reader> nitfReader(rc());
+        Stage* nitfReader = rc();
         nitfReader->setOptions(nitfOpts);
 
         Options lasOpts;
         lasOpts.add("filename", "/dev/null");
         drivers::las::Writer lasWriter;
-        lasWriter.setInput(&nitfReader);
+        lasWriter.setInput(nitfReader);
         lasWriter.setOptions(lasOpts);;
 
         lasWriter.prepare(ctx);
