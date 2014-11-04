@@ -93,7 +93,7 @@ endmacro(PDAL_ADD_EXECUTABLE)
 # Todo: accept deps for target_link_libraries
 macro(PDAL_ADD_PLUGIN _name _type _shortname _srcs _incs)
     add_library(${_name} SHARED ${_srcs} ${_incs})
-    target_link_libraries(${_name} ${PDAL_LIB_NAME} ${PCL_LIBRARIES})
+    target_link_libraries(${_name} ${PDAL_LINKAGE} ${PDAL_LIB_NAME})
 
     source_group("Header Files\\${_type}\\${_shortname}" FILES ${_incs})
     source_group("Source Files\\${_type}\\${_shortname}" FILES ${_srcs})
@@ -103,3 +103,18 @@ macro(PDAL_ADD_PLUGIN _name _type _shortname _srcs _incs)
         LIBRARY DESTINATION ${PDAL_LIB_DIR}
         ARCHIVE DESTINATION ${PDAL_LIB_DIR})
 endmacro(PDAL_ADD_PLUGIN)
+
+macro(PDAL_ADD_TEST _name _srcs)
+    include_directories(${PROJECT_SOURCE_DIR}/test/unit)
+    include_directories(${PROJECT_BINARY_DIR}/test/unit)
+    set(common_srcs
+        ${PROJECT_SOURCE_DIR}/test/unit/main.cpp
+        ${PROJECT_SOURCE_DIR}/test/unit/Support.cpp
+	${PROJECT_SOURCE_DIR}/test/unit/TestConfig.cpp
+    )
+    add_executable(${_name} ${_srcs} ${common_srcs})
+    set_target_properties(${_name} PROPERTIES COMPILE_DEFINITIONS PDAL_DLL_IMPORT)
+    add_definitions("-DBOOST_TEST_DYN_LINK")
+    target_link_libraries(${_name} ${PDAL_LINKAGE} ${PDAL_LIB_NAME})
+    add_test(${_name} "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${_name}" "${PROJECT_SOURCE_DIR}/test/data" --catch_system_errors=no)
+endmacro(PDAL_ADD_TEST)
