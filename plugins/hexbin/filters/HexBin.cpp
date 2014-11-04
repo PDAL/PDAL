@@ -39,7 +39,7 @@
 
 using namespace hexer;
 
-CREATE_FILTER_PLUGIN(hexer, pdal::filters::HexBin)
+CREATE_FILTER_PLUGIN(hexbin, pdal::filters::HexBin)
 
 namespace pdal
 {
