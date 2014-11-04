@@ -2,7 +2,7 @@
 # PCL plugin CMake configuration
 #
 # The PCL integration still has a few warts that need to be resolved:
-# 
+#
 #     1. src/kernel/Kernel.cpp requires PCL for invoking the PCLVisualizer with
 #        two point buffers.
 #
@@ -74,6 +74,7 @@ if(PCL_FOUND)
 
     set(PCD_READ_LIB_NAME pdal_plugin_reader_pcd)
     PDAL_ADD_PLUGIN(${PCD_READ_LIB_NAME} reader pcd ${srcs} ${incs})
+    target_link_libraries(${PCD_READ_LIB_NAME} ${PDAL_LINKAGE} ${PCL_LIBRARIES})
 
     #
     # PCD Writer
@@ -92,6 +93,7 @@ if(PCL_FOUND)
 
     set(PCD_WRITE_LIB_NAME pdal_plugin_writer_pcd)
     PDAL_ADD_PLUGIN(${PCD_WRITE_LIB_NAME} writer pcd ${srcs} ${incs})
+    target_link_libraries(${PCD_WRITE_LIB_NAME} ${PDAL_LINKAGE} ${PCL_LIBRARIES})
 
     #
     # PCLBlock Filter
@@ -110,7 +112,7 @@ if(PCL_FOUND)
 
     set(PCLBLOCK_LIB_NAME pdal_plugin_filter_pclblock)
     PDAL_ADD_PLUGIN(${PCLBLOCK_LIB_NAME} filter pclblock ${srcs} ${incs})
-
+    target_link_libraries(${PCLBLOCK_LIB_NAME} ${PDAL_LINKAGE} ${PCL_LIBRARIES})
     #
     # PCL Kernel
     #
