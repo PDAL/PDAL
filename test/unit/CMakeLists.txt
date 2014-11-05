@@ -106,4 +106,9 @@ if(LIBXML2_FOUND)
     list(APPEND PDAL_UNITTEST_SRCS XMLSchemaTest.cpp)
 endif()
 
+include_directories(
+    ${PROJECT_SOURCE_DIR}/include
+    ${GDAL_INCLUDE_DIR}
+    ${GEOTIFF_INCLUDE_DIR}
+)
 PDAL_ADD_TEST(pdal_test "${PDAL_UNITTEST_SRCS}")
