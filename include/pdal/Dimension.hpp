@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2016, Hobu Inc.
+ * Copyright (c) 2014, Hobu Inc.
  *
  * All rights reserved.
  *
@@ -41,6 +41,22 @@
 #include <boost/algorithm/string.hpp>
 
 #include <pdal/pdal_internal.hpp>
+
+//NOTE: How to add a predefined dimension.
+//
+// A dimension is easily added to PDAL by doing the following:
+// 1) Add an entry to the enumeration pdal::Dimension::Id::Enum with an
+//   appropriate name.
+// 2) Add an appropriate entry to the switch statement in the function
+//   pdal::Dimension::name() to supply the string name of the dimension.
+// 3) Add an appropriate entry to the switch statement in the function
+//   pdal::Dimension::id() to return the dimension ID given a matching
+//   name.  Make sure that names don't map to more than one dimension.
+// 4) Add an appropriate entry to the switch statement in the function
+//   pdal::Dimension::description() to return a description of the dimension.
+// 5) Add an appropriate entry to the switch statement in the function
+//   pdal::Dimension::defaultType() to return a type sufficiently
+//   large to hold values of the dimension for all relevant formats.
 
 //This should be generated from another format - JSON?
 namespace pdal
@@ -187,6 +203,9 @@ typedef std::vector<Id::Enum> IdList;
 static const int COUNT = std::numeric_limits<uint16_t>::max();
 static const int PROPRIETARY = 0xFF00;
 
+/// Get a description of a predefined dimension.
+/// \param[in] id  Dimension ID.
+/// \return  Dimension description.
 inline std::string description(Id::Enum id)
 {
     switch (id)
@@ -299,6 +318,11 @@ inline std::string description(Id::Enum id)
     return "";
 }
 
+/// Get a predefined dimension ID given a dimension name.  Multiple names
+/// may map to the same dimension for convenience.  Names are case-insensitive.
+/// \param[in] s  Name of dimension.
+/// \return  Dimension ID associated with the name.  Id::Unknown is returned
+///    if the name doesn't map to a predefined dimension.
 inline Id::Enum id(std::string s)
 {
     boost::to_upper(s);
@@ -393,6 +417,9 @@ inline Id::Enum id(std::string s)
     return Id::Unknown;
 }
 
+/// Get the name of a predefined dimension.
+/// \param[in] id  Dimension ID
+/// \return  Dimension name.
 inline std::string name(Id::Enum id)
 {
     switch (id)
@@ -492,6 +519,10 @@ inline std::string name(Id::Enum id)
 }
 
 
+/// Get the default storage type of a predefined dimension.
+/// \param[in] id  ID of the predefined dimension.
+/// \return  The dimension's default storage type.  An exception is thrown if
+///   the id doesn't represent a predefined dimension.
 inline Type::Enum defaultType(Id::Enum id)
 {
     using namespace Type;
@@ -592,6 +623,9 @@ inline Type::Enum defaultType(Id::Enum id)
     throw pdal_error("No type for undefined dimension ID.");
 }
 
+/// Get a string reresentation of a datatype.
+/// \param[in] dimtype  Dimension type.
+/// \return  String representation of dimension type.
 inline std::string interpretationName(Type::Enum dimtype)
 {
     switch (dimtype)
@@ -623,6 +657,9 @@ inline std::string interpretationName(Type::Enum dimtype)
 }
 
 
+/// Get the type corresponding to a type name.
+/// \param[in] s  Name of type.
+/// \return  Corresponding type enumeration value.
 inline Type::Enum type(std::string s)
 {
     boost::to_lower(s);
