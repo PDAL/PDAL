@@ -48,7 +48,7 @@ if (SQLITE3_FOUND)
     #
     if(BUILD_SQLITE_TESTS)
 	set(srcs
-	    test/SqliteTest.cpp
+    test/SQLiteTest.cpp
 	)
 
         set(deps ${sqlite_reader_lib_name} ${sqlite_writer_lib_name})
