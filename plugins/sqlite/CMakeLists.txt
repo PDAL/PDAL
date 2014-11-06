@@ -48,7 +48,7 @@ if (SQLITE3_FOUND)
     #
     if(BUILD_SQLITE_TESTS)
 	set(srcs
-	    test/SqliteTest.cpp
+    test/SQLiteTest.cpp
 	)
 
 	PDAL_ADD_TEST(sqlitetest "${srcs}")
