@@ -99,7 +99,8 @@ if(NITRO_FOUND)
         test/NitfWriterTest.cpp
     )
 
-    PDAL_ADD_TEST(nitftest "${srcs}")
+    set(deps ${nitf_reader_lib_name} ${nitf_writer_lib_name})
+    PDAL_ADD_TEST(nitftest "${srcs}" "${deps}")
 else()
     message(STATUS "Building without NITF support")
 endif()

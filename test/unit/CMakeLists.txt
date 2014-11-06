@@ -111,4 +111,5 @@ include_directories(
     ${GDAL_INCLUDE_DIR}
     ${GEOTIFF_INCLUDE_DIR}
 )
-PDAL_ADD_TEST(pdal_test "${PDAL_UNITTEST_SRCS}")
+set(deps ${PDAL_LIB_NAME})
+PDAL_ADD_TEST(pdal_test "${PDAL_UNITTEST_SRCS}" "${deps}")

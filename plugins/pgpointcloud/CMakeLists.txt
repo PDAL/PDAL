@@ -63,7 +63,8 @@ if (POSTGRESQL_FOUND)
 	    ${CMAKE_CURRENT_BINARY_DIR}/Pgtest-Support.hpp
 	)
 
-        PDAL_ADD_TEST(pgpointcloudtest "${srcs}")
+        set(deps ${pgpointcloud_reader_lib_name} ${pgpointcloud_writer_lib_name})
+        PDAL_ADD_TEST(pgpointcloudtest "${srcs}" "${deps}")
     endif()
 else()
     message(STATUS "Building without PgPointCloud support")

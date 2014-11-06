@@ -33,7 +33,7 @@ if (HEXER_FOUND)
         test/HexbinFilterTest.cpp
     )
 
-    PDAL_ADD_TEST(hexbintest "${srcs}")
+    PDAL_ADD_TEST(hexbintest "${srcs}" ${hexbin_filter_lib_name})
 else()
     message(STATUS "Building without Hexer support")
 endif()

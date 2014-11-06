@@ -36,7 +36,7 @@ if (HDF5_FOUND)
         test/IcebridgeReaderTest.cpp
     )
 
-    PDAL_ADD_TEST(icetest "${srcs}")
+    PDAL_ADD_TEST(icetest "${srcs}" ${icebridge_reader_lib_name})
 else()
     message(STATUS "Building without Icebridge support")
 endif()

@@ -55,7 +55,8 @@ if(ORACLE_FOUND)
 	    test/OCITest.cpp
 	)
 
-	PDAL_ADD_TEST(ocitest "${srcs}")
+        set(deps ${oci_reader_lib_name} ${oci_writer_lib_name})
+	PDAL_ADD_TEST(ocitest "${srcs}" "${deps}")
     endif()
 else()
     message(STATUS "Building without Oracle support")

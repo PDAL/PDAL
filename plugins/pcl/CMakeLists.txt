@@ -174,7 +174,8 @@ if(PCL_FOUND)
         test/PCLBlockFilterTest.cpp
     )
 
-    PDAL_ADD_TEST(pcltest "${srcs}")
+    set(deps ${pclvisualizer_lib_name} ${pcd_reader_lib_name} ${pcd_writer_lib_name} ${pclblock_filter_lib_name} ${pcl_kernel_lib_name} ${ground_kernel_lib_name} ${smooth_kernel_lib_name} ${view_kernel_lib_name})
+    PDAL_ADD_TEST(pcltest "${srcs}" "${deps}")
 else()
     message(STATUS "Building without PCL support")
 endif()
