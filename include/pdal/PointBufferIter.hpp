@@ -94,11 +94,9 @@ protected:
 
 public:
     typedef std::random_access_iterator_tag iterator_category;
-    typedef typename
-        std::iterator<iterator_category, PointRef>::value_type
+    typedef std::iterator<iterator_category, PointRef>::value_type
             value_type;
-    typedef typename
-        std::iterator<iterator_category, PointRef>::difference_type
+    typedef std::iterator<iterator_category, PointRef>::difference_type
             difference_type;
     typedef PointRef reference;
     typedef void * pointer;
