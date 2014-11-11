@@ -40,7 +40,7 @@
 
 pdal::Writer* createOciWriter();
 
-#include "common.hpp"
+#include "OciCommon.hpp"
 
 namespace pdal
 {
