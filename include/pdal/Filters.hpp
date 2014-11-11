@@ -42,7 +42,6 @@
 #include <pdal/filters/Crop.hpp>
 #include <pdal/filters/Decimation.hpp>
 #include <pdal/filters/Ferry.hpp>
-#include <pdal/filters/HexBin.hpp>
 #include <pdal/filters/InPlaceReprojection.hpp>
 #include <pdal/filters/Merge.hpp>
 #ifdef PDAL_HAVE_PYTHON

@@ -48,7 +48,7 @@ namespace drivers
 
 namespace nitf
 {
-    class Writer;
+    class NitfWriter;
 }
 
 namespace las
@@ -68,7 +68,7 @@ struct VlrOptionInfo
 class PDAL_DLL Writer : public pdal::Writer
 {
     friend class pdal::LasTester;
-    friend class nitf::Writer;
+    friend class nitf::NitfWriter;
 public:
     SET_STAGE_NAME("drivers.las.writer", "Las Writer")
     SET_STAGE_LINK("http://pdal.io/stages/drivers.las.writer.html")

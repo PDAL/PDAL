@@ -63,37 +63,9 @@ MAKE_READER_CREATOR(FauxReader, pdal::drivers::faux::Reader)
 MAKE_READER_CREATOR(LasReader, pdal::drivers::las::Reader)
 MAKE_READER_CREATOR(BpfReader, pdal::BpfReader)
 MAKE_READER_CREATOR(BufferReader, drivers::buffer::BufferReader)
-
-#ifdef PDAL_HAVE_ORACLE
-#ifndef USE_PDAL_PLUGIN_OCI
-MAKE_READER_CREATOR(OciReader, pdal::drivers::oci::OciReader)
-#endif
-#endif
-
-#ifdef PDAL_HAVE_NITRO
-MAKE_READER_CREATOR(NITFReader, pdal::drivers::nitf::NitfReader)
-#endif
-
-#ifdef PDAL_HAVE_SQLITE
-#ifndef USE_PDAL_PLUGIN_SQLITE
-MAKE_READER_CREATOR(SqliteReader, pdal::drivers::sqlite::SQLiteReader)
-#endif
-#endif
-
-#ifdef PDAL_HAVE_POSTGRESQL
-#ifndef USE_PDAL_PLUGIN_PGPOINTCLOUD
-MAKE_READER_CREATOR(PgPcReader, pdal::drivers::pgpointcloud::PgReader)
-#endif
-#endif
-
 MAKE_READER_CREATOR(QfitReader, pdal::drivers::qfit::Reader)
 MAKE_READER_CREATOR(TerrasolidReader, pdal::drivers::terrasolid::Reader)
-
 MAKE_READER_CREATOR(SbetReader, pdal::drivers::sbet::SbetReader)
-
-#ifdef PDAL_HAVE_HDF5
-MAKE_READER_CREATOR(IcebridgeReader, pdal::drivers::icebridge::Reader)
-#endif
 
 //
 // define the functions to create the filters
@@ -106,7 +78,6 @@ MAKE_FILTER_CREATOR(Colorization, pdal::filters::Colorization)
 MAKE_FILTER_CREATOR(Crop, pdal::filters::Crop)
 MAKE_FILTER_CREATOR(Decimation, pdal::filters::Decimation)
 MAKE_FILTER_CREATOR(Ferry, pdal::filters::Ferry)
-MAKE_FILTER_CREATOR(HexBin, pdal::filters::HexBin)
 MAKE_FILTER_CREATOR(Merge, pdal::filters::Merge)
 MAKE_FILTER_CREATOR(Reprojection, pdal::filters::Reprojection)
 MAKE_FILTER_CREATOR(Sort, pdal::filters::Sort)
@@ -122,38 +93,7 @@ MAKE_FILTER_CREATOR(Programmable, pdal::filters::Programmable)
 // define the functions to create the writers
 //
 MAKE_WRITER_CREATOR(LasWriter, pdal::drivers::las::Writer)
-
-#ifndef USE_PDAL_PLUGIN_TEXT
 MAKE_WRITER_CREATOR(TextWriter, pdal::drivers::text::Writer)
-#endif
-
-#ifdef PDAL_HAVE_ORACLE
-#ifndef USE_PDAL_PLUGIN_OCI
-MAKE_WRITER_CREATOR(OciWriter, pdal::drivers::oci::Writer)
-#endif
-#endif
-
-#ifdef PDAL_HAVE_P2G
-MAKE_WRITER_CREATOR(P2GWriter, pdal::drivers::p2g::P2gWriter)
-#endif
-
-#ifdef PDAL_HAVE_SQLITE
-#ifndef USE_PDAL_PLUGIN_SQLITE
-MAKE_WRITER_CREATOR(SqliteWriter, pdal::drivers::sqlite::SQLiteWriter)
-#endif
-#endif
-
-#ifdef PDAL_HAVE_POSTGRESQL
-#ifndef USE_PDAL_PLUGIN_PGPOINTCLOUD
-MAKE_WRITER_CREATOR(PgPcWriter, pdal::drivers::pgpointcloud::Writer)
-#endif
-#endif
-
-#ifdef PDAL_HAVE_NITRO
-#ifndef USE_PDAL_PLUGIN_NITF
-MAKE_WRITER_CREATOR(NitfWriter, pdal::drivers::nitf::Writer)
-#endif
-#endif
 
 StageFactory::StageFactory()
 {
@@ -180,13 +120,15 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
     drivers["las"] = "drivers.las.reader";
     drivers["laz"] = "drivers.las.reader";
     drivers["bin"] = "drivers.terrasolid.reader";
-
     if (f.getReaderCreator("drivers.greyhound.reader"))
         drivers["greyhound"] = "drivers.greyhound.reader";
     drivers["qi"] = "drivers.qfit.reader";
-    drivers["nitf"] = "drivers.nitf.reader";
-    drivers["ntf"] = "drivers.nitf.reader";
-    drivers["nsf"] = "drivers.nitf.reader";
+    if (f.getReaderCreator("drivers.nitf.reader"))
+    {
+        drivers["nitf"] = "drivers.nitf.reader";
+        drivers["ntf"] = "drivers.nitf.reader";
+        drivers["nsf"] = "drivers.nitf.reader";
+    }
     drivers["bpf"] = "drivers.bpf.reader";
     drivers["sbet"] = "drivers.sbet.reader";
     drivers["icebridge"] = "drivers.icebridge.reader";
@@ -223,7 +165,8 @@ std::string StageFactory::inferWriterDriver(const std::string& filename)
     drivers["json"] = "drivers.text.writer";
     drivers["xyz"] = "drivers.text.writer";
     drivers["txt"] = "drivers.text.writer";
-    drivers["ntf"] = "drivers.nitf.writer";
+    if (f.getWriterCreator("drivers.nitf.writer"))
+        drivers["ntf"] = "drivers.nitf.writer";
     drivers["sqlite"] = "drivers.sqlite.writer";
 
     if (boost::algorithm::iequals(filename, "STDOUT"))
@@ -360,35 +303,11 @@ void StageFactory::registerKnownReaders()
     REGISTER_READER(FauxReader, pdal::drivers::faux::Reader);
     REGISTER_READER(BufferReader, pdal::drivers::buffer::BufferReader);
     REGISTER_READER(LasReader, pdal::drivers::las::Reader);
-#ifdef PDAL_HAVE_ORACLE
-#ifndef USE_PDAL_PLUGIN_OCI
-    REGISTER_READER(OciReader, pdal::drivers::oci::OciReader);
-#endif
-#endif
-#ifdef PDAL_HAVE_NITRO
-    REGISTER_READER(NITFReader, pdal::drivers::nitf::NitfReader);
-#endif
-
-#ifdef PDAL_HAVE_SQLITE
-#ifndef USE_PDAL_PLUGIN_SQLITE
-    REGISTER_READER(SqliteReader, pdal::drivers::sqlite::SQLiteReader);
-#endif
-#endif
-
-#ifdef PDAL_HAVE_POSTGRESQL
-#ifndef USE_PDAL_PLUGIN_PGPOINTCLOUD
-    REGISTER_READER(PgPcReader, pdal::drivers::pgpointcloud::PgReader);
-#endif
-#endif
 
     REGISTER_READER(QfitReader, pdal::drivers::qfit::Reader);
     REGISTER_READER(TerrasolidReader, pdal::drivers::terrasolid::Reader);
     REGISTER_READER(BpfReader, pdal::BpfReader);
     REGISTER_READER(SbetReader, pdal::drivers::sbet::SbetReader);
-
-#ifdef PDAL_HAVE_HDF5
-    REGISTER_READER(IcebridgeReader, pdal::drivers::icebridge::Reader);
-#endif
 }
 
 
@@ -402,7 +321,6 @@ void StageFactory::registerKnownFilters()
     REGISTER_FILTER(Crop, pdal::filters::Crop);
     REGISTER_FILTER(Decimation, pdal::filters::Decimation);
     REGISTER_FILTER(Ferry, pdal::filters::Ferry);
-    REGISTER_FILTER(HexBin, pdal::filters::HexBin);
     REGISTER_FILTER(Merge, pdal::filters::Merge);
     REGISTER_FILTER(Reprojection, pdal::filters::Reprojection);
     REGISTER_FILTER(Sort, pdal::filters::Sort);
@@ -419,38 +337,7 @@ void StageFactory::registerKnownFilters()
 void StageFactory::registerKnownWriters()
 {
     REGISTER_WRITER(LasWriter, pdal::drivers::las::Writer);
-
-#ifndef USE_PDAL_PLUGIN_TEXT
     REGISTER_WRITER(TextWriter, pdal::drivers::text::Writer);
-#endif
-
-#ifdef PDAL_HAVE_ORACLE
-#ifndef USE_PDAL_PLUGIN_OCI
-    REGISTER_WRITER(OciWriter, pdal::drivers::oci::Writer);
-#endif
-#endif
-
-#ifdef PDAL_HAVE_P2G
-    REGISTER_WRITER(P2GWriter, pdal::drivers::p2g::P2gWriter);
-#endif
-
-#ifdef PDAL_HAVE_SQLITE
-#ifndef USE_PDAL_PLUGIN_SQLITE
-    REGISTER_WRITER(SqliteWriter, pdal::drivers::sqlite::SQLiteWriter);
-#endif
-#endif
-
-#ifdef PDAL_HAVE_POSTGRESQL
-#ifndef USE_PDAL_PLUGIN_PGPOINTCLOUD
-    REGISTER_WRITER(PgPcWriter, pdal::drivers::pgpointcloud::Writer);
-#endif
-#endif
-
-#ifdef PDAL_HAVE_NITRO
-#ifndef USE_PDAL_PLUGIN_NITF
-    REGISTER_WRITER(NitfWriter, pdal::drivers::nitf::Writer);
-#endif
-#endif
 }
 
 void StageFactory::loadPlugins()
@@ -564,11 +451,11 @@ void StageFactory::registerPlugin(std::string const& filename)
     }
 
     std::string base = basename.string();
+    std::string pluginName = boost::algorithm::ireplace_first_copy(base, "libpdal_plugin_", "");
 
-    std::string registerMethodName = "PDALRegister_" + \
-                                     boost::algorithm::ireplace_first_copy(base, "libpdal_plugin_", "");
+    std::string registerMethodName = "PDALRegister_" + pluginName;
 
-    std::string versionMethodName = "PDALRegister_version_" +  base.substr(base.find_last_of("_")+1, base.size());
+    std::string versionMethodName = "PDALRegister_version_" + pluginName;
 
     Utils::registerPlugin((void*)this, filename, registerMethodName, versionMethodName);
 

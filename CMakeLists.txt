@@ -89,12 +89,25 @@ endif(WIN32)
 
 # Choose package components
 option(WITH_APPS "Choose if PDAL utilities should be built" TRUE)
-option(WITH_GREYHOUND "Choose if Greyhound support should be built" FALSE)
-option(WITH_PCL "Choose if PCL support should be built" FALSE)
+option(BUILD_PLUGIN_GREYHOUND "Choose if Greyhound support should be built" FALSE)
+option(BUILD_PLUGIN_HEXBIN "Whether or not HexBin filter is built" FALSE)
+option(BUILD_PLUGIN_ICEBRIDGE "Choose if Icebridge support should be built" FALSE)
+option(BUILD_PLUGIN_MRSID "Choose if MrSID/LiDAR support should be built" FALSE)
+option(BUILD_PLUGIN_NITF "Choose if NITF support should be built (only install supported is from http://github.com/hobu/nitro)" TRUE)
+option(BUILD_PLUGIN_OCI "Choose if OCI support should be built" TRUE)
+option(BUILD_PLUGIN_P2G "Choose if Points2Grid support should be built" FALSE)
+option(BUILD_PLUGIN_PCL "Choose if PCL support should be built" FALSE)
+option(BUILD_PLUGIN_PGPOINTCLOUD "Choose if PostgreSQL PointCloud support should be built" TRUE)
+option(BUILD_PLUGIN_SQLITE "Choose if SQLite database support should be built" FALSE)
 option(WITH_TESTS "Choose if PDAL unit tests should be built" TRUE)
 
 # Choose to use pkg-config or not
 option(WITH_PKGCONFIG "Choose whether a pkgconfig file (PDAL.pc) should be installed" TRUE)
+
+# Choose dependent options
+cmake_dependent_option(BUILD_PGPOINTCLOUD_TESTS "Choose if PostgreSQL PointCloud tests should be built" OFF BUILD_PLUGIN_PGPOINTCLOUD OFF)
+cmake_dependent_option(BUILD_SQLITE_TESTS "Choose if SQLite tests should be built" OFF BUILD_PLUGIN_SQLITE OFF)
+cmake_dependent_option(BUILD_OCI_TESTS "Choose if OCI tests should be built" OFF BUILD_PLUGIN_OCI OFF)
 
 
 #------------------------------------------------------------------------------
@@ -323,71 +336,6 @@ endif()
 
 
 #
-# SQLite (optional)
-#
-option(WITH_SQLITE "Choose if sqlite database support should be built" FALSE)
-if (WITH_SQLITE)
-    find_package(SQLite3)
-    mark_as_advanced(CLEAR SQLITE3_INCLUDE_DIR)
-    mark_as_advanced(CLEAR SQLITE3_LIBRARY)
-    include_directories(${SQLITE3_INCLUDE_DIR})
-    set(PDAL_HAVE_SQLITE 1)
-endif()
-
-
-#
-# PGPointCloud (optional)
-#
-option(WITH_PGPOINTCLOUD "Choose if PostgreSQL PointCloud support should be built" TRUE)
-cmake_dependent_option(
-    WITH_PGPOINTCLOUD_TESTS
-    "Choose if PostgreSQL PointCloud tests should be built"
-    OFF
-    WITH_PGPOINTCLOUD
-    OFF
-    )
-if (WITH_PGPOINTCLOUD)
-    find_package(PostgreSQL)
-    if (POSTGRESQL_FOUND)
-        set(PDAL_HAVE_POSTGRESQL 1)
-        mark_as_advanced(CLEAR POSTGRESQL_INCLUDE_DIR)
-        mark_as_advanced(CLEAR POSTGRESQL_LIBRARIES)
-        include_directories(${POSTGRESQL_INCLUDE_DIR})
-        message(STATUS "..building with PgPointCloud")
-    else()
-        set(WITH_PGPOINTCLOUD FALSE)
-        set(POSTGRESQL_LIBRARIES "")
-    endif()
-endif()
-
-
-#
-# Nitro (optional)
-#
-option(WITH_NITRO "Choose if Nitro support (only install supported is from http://github.com/hobu/nitro)" TRUE)
-if(WITH_NITRO)
-    find_package(Nitro 2.6)
-    IF (NITRO_FOUND)
-        set(PDAL_HAVE_NITRO 1)
-        include_directories(${NITRO_INCLUDE_DIR})
-        include_directories("${NITRO_INCLUDE_DIR}/nitro/c++")
-        include_directories("${NITRO_INCLUDE_DIR}/nitro/c")
-        add_definitions("-D_REENTRANT")
-        if (WIN32)
-            add_definitions("-DSIZEOF_SIZE_T=4")
-            add_definitions("-DIMPORT_NITRO_API")
-        else()
-            add_definitions("-D__POSIX")
-        endif()
-        message(STATUS "...building with Nitro")
-    else()
-        set(WITH_NITRO FALSE)
-        set(NITRO_LIBRARIES "")
-    endif()
-endif()
-
-
-#
 # ICONV (optional)
 #
 # GDAL and libxml2 require iconv.  The library is supplied by OSGeo4W.
@@ -400,23 +348,6 @@ if(WITH_ICONV)
         mark_as_advanced(CLEAR ICONV_LIBRARIES)
         include_directories(${ICONV_INCLUDE_DIR})
         set(PDAL_HAVE_ICONV 1)
-    endif()
-endif()
-
-
-#
-# Oracle support (optional)
-#
-option(WITH_ORACLE "Choose if Oracle support should be built" TRUE)
-if(WITH_ORACLE)
-    find_package(Oracle)
-    if(ORACLE_FOUND)
-        include_directories(${ORACLE_INCLUDE_DIR})
-        set(PDAL_HAVE_ORACLE 1)
-        message(STATUS "...building with Oracle")
-    else()
-        set(WITH_ORACLE FALSE)
-        set(ORACLE_LIBRARY "")
     endif()
 endif()
 
@@ -458,80 +389,12 @@ endif()
 
 
 #
-# MrSID/LiDAR support (optional)
-#
-option(WITH_MRSID "Choose if MrSID/LiDAR support should be built" FALSE)
-
-if(WITH_MRSID)
-
-    set(MRSID_ROOT "/Users/hobu/installs/mrsid/Lidar_DSDK" CACHE STRING "Root directory of MrSID install")
-
-    find_package(MrSID)
-    if(MRSID_FOUND)
-        set(CMAKE_REQUIRED_LIBRARIES "${MRSID_LIBRARY}")
-        include_directories(${MRSID_INCLUDE_DIR})
-        add_definitions(-DHAVE_MRSID=1)
-        set(PDAL_HAVE_MRSID 1)
-    endif()
-endif()
-
-
-#
 # CARIS/BDB support (optional)
 #
 option(WITH_CARIS "Choose if CARIS/BDB support should be built" FALSE)
 if(WITH_CARIS)
     set(CARIS_FOUND 1)
     set(PDAL_HAVE_CARIS 1)
-endif()
-
-
-#
-# Points2Grid (optional)
-#
-option(WITH_P2G "Choose if Points2Grid support should be built" FALSE)
-if(WITH_P2G)
-    find_package(Points2Grid)
-    if(P2G_FOUND)
-        set(CMAKE_REQUIRED_LIBRARIES "${P2G_LIBRARY}")
-        include_directories(${P2G_INCLUDE_DIR})
-        add_definitions(-DHAVE_P2G=1)
-        set(PDAL_HAVE_P2G 1)
-    endif()
-endif()
-
-
-#
-# HDF5 - optional
-#
-option(WITH_HDF5 "Choose if HDF5 support should be built" FALSE)
-if(WITH_HDF5)
-    set (HDF5_FIND_COMPONENTS "CXX")
-    find_package(HDF5 COMPONENTS CXX)
-    if(HDF5_FOUND)
-        include_directories(${HDF5_INCLUDE_DIR})
-        add_definitions(-DHAVE_HDF5=1)
-        set(PDAL_HAVE_HDF5 1)
-        message(STATUS "Found HDF5")
-    else()
-        set(WITH_HDF5 FALSE)
-        set(PDAL_HAVE_HDF5 0)
-        message(STATUS "HDF5 not found")
-    endif()
-endif()
-
-
-#
-# Hexer - optional
-#
-option(WITH_HEXER "Whether or not hexbin filter is built" FALSE)
-if(WITH_HEXER)
-    find_package(Hexer)
-    if(HEXER_FOUND)
-        include_directories(${HEXER_INCLUDE_DIR})
-        add_definitions(-DHAVE_HEXER=1)
-        set(PDAL_HAVE_HEXER 1)
-    endif()
 endif()
 
 
@@ -559,13 +422,13 @@ endif()
 
 
 #
-# libxml2 (used iff ORACLE or PGPOINTCLOUD or SQLITE)
+# libxml2 (used iff OCI or PGPOINTCLOUD or SQLITE)
 #
 option(WITH_LIBXML2 "Choose if libxml2 support should be built " FALSE)
 if (WITH_LIBXML2 OR
-    (WITH_ORACLE OR
-     WIT_PGPOINTCLOUD OR
-     WITH_SQLITE))
+    (BUILD_PLUGIN_OCI OR
+     BUILD_PLUGIN_PGPOINTCLOUD OR
+     BUILD_PLUGIN_SQLITE))
     set(WITH_LIBXML2 TRUE)
 else()
     set(WITH_LIBXML2 FALSE)
@@ -582,21 +445,6 @@ if(WITH_LIBXML2)
         set(WITH_LIBXML2 FALSE)
         set(LIBXML2_LIBRARIES "")
     endif()
-endif()
-
-
-option(USE_PDAL_PLUGIN_TEXT "Build the text driver as a plugin rather than embedding" FALSE)
-option(USE_PDAL_PLUGIN_SOCI "Build the soci driver as a plugin rather than embedding" FALSE)
-option(USE_PDAL_PLUGIN_OCI "Build the oci driver as a plugin rather than embedding" FALSE)
-option(USE_PDAL_PLUGIN_MRSID "Build the MrSID driver as a plugin rather than embedding" FALSE)
-option(USE_PDAL_PLUGIN_CARIS "Build the Caris driver as a plugin rather than embedding" FALSE)
-option(USE_PDAL_PLUGIN_NITRO "Build the NITF writer as a plugin rather than embedding" FALSE)
-
-if (USE_PDAL_PLUGIN_TEXT OR USE_PDAL_PLUGIN_SOCI OR USE_PDAL_PLUGIN_OCI OR
-    USE_PDAL_PLUGIN_MRSID OR USE_PDAL_PLUGIN_CARIS OR USE_PDAL_PLUGIN_NITRO)
-  if (PDAL_BUILD_STATIC)
-    message(SEND_ERROR "Cannot build separate plugins with statically compiled PDAL")
-  endif()
 endif()
 
 
@@ -630,13 +478,6 @@ include_directories("${CMAKE_CURRENT_BINARY_DIR}/include")
 # subdirectory controls
 #------------------------------------------------------------------------------
 
-add_subdirectory(src)
-add_subdirectory(plugins)
-
-if(WITH_APPS)
-  add_subdirectory(apps)
-endif()
-
 if(WITH_TESTS)
   message(STATUS "Building with PDAL unit tests")
   enable_testing()
@@ -658,6 +499,14 @@ else()
     message(WARNING
       "CTest support requested but WITH_TESTS option not specified to build of PDAL unit tests")
   endif()
+endif()
+
+
+add_subdirectory(src)
+add_subdirectory(plugins)
+
+if(WITH_APPS)
+  add_subdirectory(apps)
 endif()
 
 
