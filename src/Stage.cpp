@@ -111,9 +111,6 @@ PointBufferSet Stage::execute(PointContextRef ctx )
 void Stage::l_initialize(PointContextRef ctx)
 {
     m_metadata = ctx.metadata().add(getName());
-    if (m_inputs.size()) {
-        Stage& prevStage = *m_inputs[0];
-    }
 }
 
 

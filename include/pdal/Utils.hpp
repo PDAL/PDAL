@@ -40,7 +40,7 @@
 #include <cassert>
 #include <stdexcept>
 #include <cmath>
-#include <ostream>
+#include <fstream>
 #include <istream>
 #include <limits>
 #include <cstring>
@@ -57,8 +57,10 @@ class PDAL_DLL Utils
 public:
     static void random_seed(unsigned int seed);
     static double random(double minimum, double maximum);
-    static double uniform(const double& minimum=0.0f, const double& maximum=1.0f, boost::uint32_t seed=0);
-    static double normal(const double& mean=0.0f, const double& sigma=1.0f, boost::uint32_t seed=0);
+    static double uniform(const double& minimum=0.0f,
+        const double& maximum=1.0f, boost::uint32_t seed=0);
+    static double normal(const double& mean=0.0f, const double& sigma=1.0f,
+        boost::uint32_t seed=0);
 
     // compares two values to within the datatype's epsilon
     template<class T>
@@ -142,12 +144,16 @@ public:
         return (r > 0.0) ? floor(r + 0.5) : ceil(r - 0.5);
     }
 
-    static inline std::vector<boost::uint8_t>hex_string_to_binary(std::string const& source)
+    static inline std::vector<boost::uint8_t>hex_string_to_binary(
+        std::string const& source)
     {
-        // Stolen from http://stackoverflow.com/questions/7363774/c-converting-binary-data-to-a-hex-string-and-back
-        static int nibbles[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0, 0, 10, 11, 12, 13, 14, 15 };
+        // Stolen from http://stackoverflow.com/questions/7363774/  ...
+        //    c-converting-binary-data-to-a-hex-string-and-back
+        static int nibbles[] =
+            { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0, 0,
+              10, 11, 12, 13, 14, 15 };
         std::vector<unsigned char> retval;
-        for (std::string::const_iterator it = source.begin(); it < source.end(); it += 2) {
+        for (auto it = source.begin(); it < source.end(); it += 2) {
             unsigned char v = 0;
             if (::isxdigit(*it))
                 v = (unsigned char)nibbles[::toupper(*it) - '0'] << 4;
@@ -246,6 +252,36 @@ public:
     template<typename T>
     static std::string typeidName()
         { return Utils::demangle(typeid(T).name()); }
+
+    struct RedirectCtx
+    {
+        std::ofstream *m_out;
+        std::streambuf *m_buf;
+    };
+
+    /// Redirect a stream to some file, by default /dev/null.
+    /// \param[in] out   Stream to redirect.
+    /// \param[in] file  Name of file where stream should be redirected.
+    /// \return  Context for stream restoration (see restore()).
+    static RedirectCtx redirect(std::ostream& out,
+        const std::string& file = "/dev/null")
+    {
+        RedirectCtx ctx;
+
+        ctx.m_out = new std::ofstream(file);
+        ctx.m_buf = out.rdbuf();
+        out.rdbuf(ctx.m_out->rdbuf());
+        return ctx;
+    }
+
+    /// Restore a stream redirected with redirect().
+    /// \param[in] out  Stream to be restored.
+    /// \param[in] ctx  Context returned from corresponding redirect() call.
+    static void restore(std::ostream& out, RedirectCtx ctx)
+    {
+        out.rdbuf(ctx.m_buf);
+        ctx.m_out->close();
+    }
 
 private:
     template<typename T>
