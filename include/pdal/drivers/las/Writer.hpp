@@ -41,6 +41,8 @@
 
 namespace pdal
 {
+class LasTester;
+
 namespace drivers
 {
 
@@ -65,6 +67,7 @@ struct VlrOptionInfo
 
 class PDAL_DLL Writer : public pdal::Writer
 {
+    friend class pdal::LasTester;
     friend class nitf::Writer;
 public:
     SET_STAGE_NAME("drivers.las.writer", "Las Writer")
@@ -121,6 +124,42 @@ private:
     Writer& operator=(const Writer&); // not implemented
     Writer(const Writer&); // not implemented
 };
+
+// Find the approriate value for the specified header field.
+/// \param  name - Name of header field.
+/// \return  Value of header field.
+template<typename T>
+T Writer::headerVal(const std::string& name)
+{
+    // The header values either come from options, or are overriden in
+    // the metadata for options which had the value FORWARD.  For those,
+    // grab the value from metadata if it exists, or use the default value,
+    // which was stuck on following the FORWARD value when processing options.
+    auto pred = [name](MetadataNode n)
+    {
+        return n.name() == name;
+    };
+
+    std::string val = m_headerVals[name];
+    if (val.find("FORWARD") == 0)
+    {
+        MetadataNode m = m_metadata.findChild(pred);
+        if (m.valid())
+            return m.value<T>();
+        val = val.substr(strlen("FORWARD"));
+    }
+    try
+    {
+        return boost::lexical_cast<T>(val);
+    }
+    catch (boost::bad_lexical_cast ex)
+    {
+        std::stringstream out;
+        out << "Couldn't convert option \"" << name << "\" with value \"" <<
+            val << "\" from string as necessary.";
+        throw pdal_error(out.str());
+    }
+}
 
 } // namespace las
 } // namespace drivers
