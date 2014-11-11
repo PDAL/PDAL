@@ -99,6 +99,7 @@ option(BUILD_PLUGIN_P2G "Choose if Points2Grid support should be built" FALSE)
 option(BUILD_PLUGIN_PCL "Choose if PCL support should be built" FALSE)
 option(BUILD_PLUGIN_PGPOINTCLOUD "Choose if PostgreSQL PointCloud support should be built" TRUE)
 option(BUILD_PLUGIN_SQLITE "Choose if SQLite database support should be built" FALSE)
+option(BUILD_PLUGIN_RIVLIB "Choose if RiVLib support should be built" FALSE)
 option(WITH_TESTS "Choose if PDAL unit tests should be built" TRUE)
 
 # Choose to use pkg-config or not
@@ -108,6 +109,7 @@ option(WITH_PKGCONFIG "Choose whether a pkgconfig file (PDAL.pc) should be insta
 cmake_dependent_option(BUILD_PGPOINTCLOUD_TESTS "Choose if PostgreSQL PointCloud tests should be built" OFF BUILD_PLUGIN_PGPOINTCLOUD OFF)
 cmake_dependent_option(BUILD_SQLITE_TESTS "Choose if SQLite tests should be built" OFF BUILD_PLUGIN_SQLITE OFF)
 cmake_dependent_option(BUILD_OCI_TESTS "Choose if OCI tests should be built" OFF BUILD_PLUGIN_OCI OFF)
+cmake_dependent_option(BUILD_RIVLIB_TESTS "Choose if RiVLib tests should be built" OFF BUILD_PLUGIN_RIVLIB OFF)
 
 
 #------------------------------------------------------------------------------

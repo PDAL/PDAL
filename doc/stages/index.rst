@@ -28,6 +28,7 @@ Readers & Writers
    drivers.pcd.reader
    drivers.pcd.writer
    drivers.qfit.reader
+   drivers.rxp.reader
    drivers.sbet.reader
    drivers.text.writer
 

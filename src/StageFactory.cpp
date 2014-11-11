@@ -133,7 +133,10 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
     drivers["sbet"] = "drivers.sbet.reader";
     drivers["icebridge"] = "drivers.icebridge.reader";
     drivers["sqlite"] = "drivers.sqlite.reader";
-    
+
+    if (f.getReaderCreator("drivers.rxp.reader"))
+        drivers["rxp"] = "drivers.rxp.reader";
+
     if (f.getReaderCreator("drivers.pcd.reader"))
         drivers["pcd"] = "drivers.pcd.reader";
 

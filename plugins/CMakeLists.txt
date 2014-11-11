@@ -37,3 +37,7 @@ endif()
 if(BUILD_PLUGIN_SQLITE)
     add_subdirectory(sqlite)
 endif()
+
+if(BUILD_PLUGIN_RIVLIB)
+    add_subdirectory(rxp)
+endif(BUILD_PLUGIN_RIVLIB)
