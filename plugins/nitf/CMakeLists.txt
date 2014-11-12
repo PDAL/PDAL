@@ -5,7 +5,7 @@
 include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(${PROJECT_SOURCE_DIR}/plugins/nitf)
 
-find_package(Nitro 2.6)
+find_package(Nitro 2.6 REQUIRED)
 if(NITRO_FOUND)
     message(STATUS "Building with NITF support")
 
@@ -101,6 +101,4 @@ if(NITRO_FOUND)
 
     set(deps ${nitf_reader_lib_name} ${nitf_writer_lib_name})
     PDAL_ADD_TEST(nitftest "${srcs}" "${deps}")
-else()
-    message(STATUS "Building without NITF support")
 endif()
