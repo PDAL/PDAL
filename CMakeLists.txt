@@ -106,10 +106,10 @@ option(WITH_TESTS "Choose if PDAL unit tests should be built" TRUE)
 option(WITH_PKGCONFIG "Choose whether a pkgconfig file (PDAL.pc) should be installed" TRUE)
 
 # Choose dependent options
-cmake_dependent_option(BUILD_PGPOINTCLOUD_TESTS "Choose if PostgreSQL PointCloud tests should be built" OFF BUILD_PLUGIN_PGPOINTCLOUD OFF)
-cmake_dependent_option(BUILD_SQLITE_TESTS "Choose if SQLite tests should be built" OFF BUILD_PLUGIN_SQLITE OFF)
-cmake_dependent_option(BUILD_OCI_TESTS "Choose if OCI tests should be built" OFF BUILD_PLUGIN_OCI OFF)
-cmake_dependent_option(BUILD_RIVLIB_TESTS "Choose if RiVLib tests should be built" OFF BUILD_PLUGIN_RIVLIB OFF)
+cmake_dependent_option(BUILD_PGPOINTCLOUD_TESTS "Choose if PostgreSQL PointCloud tests should be built" ON BUILD_PLUGIN_PGPOINTCLOUD ON)
+cmake_dependent_option(BUILD_SQLITE_TESTS "Choose if SQLite tests should be built" ON BUILD_PLUGIN_SQLITE ON)
+cmake_dependent_option(BUILD_OCI_TESTS "Choose if OCI tests should be built" ON BUILD_PLUGIN_OCI ON)
+cmake_dependent_option(BUILD_RIVLIB_TESTS "Choose if RiVLib tests should be built" ON BUILD_PLUGIN_RIVLIB ON)
 
 
 #------------------------------------------------------------------------------
