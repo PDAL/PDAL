@@ -149,7 +149,8 @@ BOOST_AUTO_TEST_CASE(metadata_options)
 
     // Since the option specifies forward and there is not associated
     // metadata, the value should be the default.
-    BOOST_CHECK_EQUAL(systemId, drivers::las::LasHeader::SYSTEM_IDENTIFIER);
+    drivers::las::LasHeader header;
+    BOOST_CHECK_EQUAL(systemId, header.getSystemIdentifier());
 
     // In this case, we should have metadata to override the default.
     uint8_t minorVersion =
