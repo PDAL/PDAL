@@ -35,9 +35,9 @@
 #pragma once
 
 #include <pdal/Writer.hpp>
+#include <pdal/Compression.hpp>
 #include <pdal/StageFactory.hpp>
 #include "SQLiteCommon.hpp"
-#include <pdal/third/nanoflann.hpp>
 
 namespace pdal
 {
@@ -101,6 +101,9 @@ private:
     std::string m_connection;
     std::string m_modulename;
     bool m_is3d;
+    bool m_doCompression;;
+    PatchPtr m_patch;
+    PointContextRef m_context;
 
 };
 

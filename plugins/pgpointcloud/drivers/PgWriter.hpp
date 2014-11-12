@@ -97,7 +97,7 @@ private:
     std::string m_table_name;
     std::string m_column_name;
     std::string m_connection;
-    CompressionType::Enum m_patch_compression_type;
+    compression::CompressionType::Enum m_patch_compression_type;
     uint32_t m_patch_capacity;
     uint32_t m_srid;
     uint32_t m_pcid;

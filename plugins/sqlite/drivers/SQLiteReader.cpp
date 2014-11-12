@@ -111,7 +111,7 @@ pdal::SpatialReference
 SQLiteReader::fetchSpatialReference(std::string const& query) const
 {
     // Fetch the WKT for the SRID to set the coordinate system of this stage
-    log()->get(LogLevel::Debug) << "Fetching schema object" << std::endl;
+    log()->get(LogLevel::Debug) << "Fetching srid object" << std::endl;
 
     // ::soci::row r;
     // ::soci::indicator ind = ::soci::i_null;
@@ -191,8 +191,22 @@ void SQLiteReader::addDimensions(PointContextRef ctx)
 
     column const& s = r->at(0); // First column is schema
 
-    m_patch->m_schema = schema::Reader(s.data).schema();
+    if (m_schemaFile.size())
+    {
+        std::ostream* out = FileUtils::createFile(m_schemaFile);
+        out->write(s.data.c_str(), s.data.size());
+        FileUtils::closeFile(out);
+    }
+
+    schema::Reader reader(s.data);
+
+    m_patch->m_metadata = reader.getMetadata();
+    m_patch->m_schema = reader.schema();
     m_patch->m_ctx = ctx;
+
+    ctx.registerDim(Dimension::Id::X);
+    ctx.registerDim(Dimension::Id::Y);
+    ctx.registerDim(Dimension::Id::Z);
 
     schema::DimInfoList& dims = m_patch->m_schema.m_dims;
     for (auto di = dims.begin(); di != dims.end(); ++di)
@@ -230,23 +244,58 @@ point_count_t SQLiteReader::readPatch(PointBuffer& buffer, point_count_t numPts)
 
     // Availability of positions already validated
     int32_t position = columns.find("POINTS")->second;
-    auto bytes = (*r)[position].blobBuf;
-    size_t size = (*r)[position].blobLen;
+
+    MetadataNode comp = m_patch->m_metadata.findChild("compression");
+    m_patch->m_isCompressed = boost::iequals(comp.value(), "lazperf");
+    m_patch->m_compVersion = m_patch->m_metadata.findChild("version").value();
+
     position = columns.find("NUM_POINTS")->second;
     int32_t count = boost::lexical_cast<int32_t>((*r)[position].data);
-    log()->get(LogLevel::Debug4) << "fetched patch with " << count <<
-        " points and " << size << " bytes bytesize: " << size << std::endl;
     m_patch->remaining = count;
     m_patch->count = count;
-    m_patch->bytes = bytes;
-    m_patch->byte_size = size;
+
+
+    log()->get(LogLevel::Debug3) << "patch compression? "
+                                 << m_patch->m_isCompressed << std::endl;
+
+    if (m_patch->m_isCompressed)
+        log()->get(LogLevel::Debug3) << "patch compression version: "
+                                     << m_patch->m_compVersion << std::endl;
+
+    position = columns.find("POINTS")->second;
+    const uint8_t* bytes(0);
+
+    size_t size (0);
+    if (m_patch->m_isCompressed)
+    {
+        m_patch->setBytes((*r)[position].blobBuf);
+        log()->get(LogLevel::Debug3) << "Compressed byte size: "
+                                     << m_patch->getBytes().size() << std::endl;
+        m_patch->decompress();
+        bytes = &(m_patch->getBytes()[0]);
+        size = m_patch->getBytes().size();
+        if (!size)
+            throw pdal_error("Compressed patch size was 0!");
+        log()->get(LogLevel::Debug3) << "Uncompressed byte size: " << size << std::endl;
+
+    } else
+    {
+        bytes = &((*r)[position].blobBuf[0]);
+        size = (*r)[position].blobLen;
+    }
+
+    log()->get(LogLevel::Debug4) << "fetched patch with "
+                                 << count << " points and "
+                                 << m_patch->getBytes().size()
+                                 << " bytes size: " << size << std::endl;
+
 
     point_count_t numRemaining = m_patch->remaining;
     PointId nextId = buffer.size();
     point_count_t numRead = 0;
 
     size_t offset = ((m_patch->count - m_patch->remaining) * m_point_size);
-    uint8_t *pos = &(m_patch->bytes.front()) + offset;
+    uint8_t const* pos = bytes + offset;
 
     schema::DimInfoList& dims = m_patch->m_schema.m_dims;
     while (numRead < numPts && numRemaining > 0)
@@ -259,17 +308,17 @@ point_count_t SQLiteReader::readPatch(PointBuffer& buffer, point_count_t numPts)
         }
 
         // Scale X, Y and Z
-        // double v = buffer.getFieldAs<double>(Dimension::Id::X, nextId);
-        // v = v * m_patch->xScale() + m_patch->xOffset();
-        // buffer.setField(Dimension::Id::X, nextId, v);
-        //
-        // v = buffer.getFieldAs<double>(Dimension::Id::Y, nextId);
-        // v = v * m_patch->yScale() + m_patch->yOffset();
-        // buffer.setField(Dimension::Id::Y, nextId, v);
-        //
-        // v = buffer.getFieldAs<double>(Dimension::Id::Z, nextId);
-        // v = v * m_patch->zScale() + m_patch->zOffset();
-        // buffer.setField(Dimension::Id::Z, nextId, v);
+        double v = buffer.getFieldAs<double>(Dimension::Id::X, nextId);
+        v = v * m_patch->xScale() + m_patch->xOffset();
+        buffer.setField(Dimension::Id::X, nextId, v);
+
+        v = buffer.getFieldAs<double>(Dimension::Id::Y, nextId);
+        v = v * m_patch->yScale() + m_patch->yOffset();
+        buffer.setField(Dimension::Id::Y, nextId, v);
+
+        v = buffer.getFieldAs<double>(Dimension::Id::Z, nextId);
+        v = v * m_patch->zScale() + m_patch->zOffset();
+        buffer.setField(Dimension::Id::Z, nextId, v);
 
         numRemaining--;
         nextId++;
@@ -277,7 +326,7 @@ point_count_t SQLiteReader::readPatch(PointBuffer& buffer, point_count_t numPts)
     }
 
     m_patch->remaining = numRemaining;
-
+//     std::cout << buffer << std::endl;
     return numRead;
 }
 

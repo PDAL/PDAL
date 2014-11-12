@@ -11,6 +11,12 @@ configure_file(
     "${CMAKE_CURRENT_BINARY_DIR}/TestConfig.hpp"
 )
 
+if (PDAL_HAVE_LAZPERF)
+    SET(PDAL_LAZPERF_SRC CompressionTest.cpp)
+endif()
+
+SET(PDAL_UNITTEST_TEST_SRC
+=======
 #
 # sources for the base library
 #
@@ -32,6 +38,9 @@ set(PDAL_UNITTEST_BASE_SRCS
     SupportTest.cpp
     UserCallbackTest.cpp
     UtilsTest.cpp
+    ${PDAL_UNITTEST_XMLSCHEMA_TEST}
+    ${PDAL_LAZPERF_SRC}
+    )
 )
 
 #

@@ -196,13 +196,16 @@ public:
 
     XMLSchema schema() const
         { return m_schema; }
+    MetadataNode getMetadata() const
+        { return m_metadata;}
+
 protected:
     void Initialize();
     void Load();
 
 private:
 #ifdef PDAL_HAVE_LIBXML2
-    pdal::Metadata LoadMetadata(xmlNode* node);
+    pdal::MetadataNode LoadMetadata(xmlNode* node, pdal::MetadataNode& input);
     std::string remapOldNames(std::string const& input);
 
     DocPtr m_doc;
@@ -220,6 +223,7 @@ private:
     std::string m_xsd;
     uint32_t m_field_position;
     XMLSchema m_schema;
+    MetadataNode m_metadata;
 
     Reader& operator=(const Reader&); // not implemented
     Reader(const Reader&); // not implemented;
@@ -230,7 +234,7 @@ class PDAL_DLL Writer
 {
 public:
     Writer(const Dimension::IdList& ids,
-        const std::vector<Dimension::Type::Enum>& types, 
+        const std::vector<Dimension::Type::Enum>& types,
         Orientation::Enum orientation= Orientation::PointMajor) :
             m_dims(ids), m_types(types), m_orientation(orientation)
         {}

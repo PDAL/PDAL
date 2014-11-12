@@ -71,7 +71,7 @@ PgWriter::PgWriter()
     , m_schema_name("")
     , m_table_name("")
     , m_column_name("")
-    , m_patch_compression_type(CompressionType::None)
+    , m_patch_compression_type(compression::CompressionType::None)
     , m_patch_capacity(400)
     , m_srid(0)
     , m_pcid(0)
@@ -296,6 +296,18 @@ uint32_t PgWriter::SetupSchema(uint32_t srid)
 
     // Create an XML output schema.
     schema::Writer writer(m_dims, m_types);
+    std::string compression;
+    /* If the writer specifies a compression, we should set that */
+    if (m_patch_compression_type == compression::CompressionType::Dimensional)
+        compression = "dimensional";
+    else if (m_patch_compression_type == compression::CompressionType::Ght)
+        compression = "ght";
+
+    Metadata metadata;
+    MetadataNode m = metadata.getNode();
+    m.add("compression", compression);
+
+    writer.setMetadata(m);
     std::string xml = writer.getXML();
 
     // Do any of the existing schemas match the one we want to use?
@@ -330,16 +342,7 @@ uint32_t PgWriter::SetupSchema(uint32_t srid)
         pcid = atoi(pcid_str);
     }
 
-    std::string compression;
-    /* If the writer specifies a compression, we should set that */
-    if (m_patch_compression_type == CompressionType::Dimensional)
-        compression = "dimensional";
-    else if (m_patch_compression_type == CompressionType::Ght)
-        compression = "ght";
 
-    Metadata metadata;
-    MetadataNode m = metadata.getNode();
-    m.add("compression", compression);
 
     const char* paramValues = xml.c_str();
     oss << "INSERT INTO pointcloud_formats (pcid, srid, schema) "
@@ -591,7 +594,7 @@ void PgWriter::writeTile(PointBuffer const& buffer)
 
     uint32_t num_points = buffer.size();
     int32_t pcid = m_pcid;
-    CompressionType::Enum compression_v = CompressionType::None;
+    compression::CompressionType::Enum compression_v = compression::CompressionType::None;
     uint32_t compression = static_cast<uint32_t>(compression_v);
 
 #ifdef BOOST_LITTLE_ENDIAN

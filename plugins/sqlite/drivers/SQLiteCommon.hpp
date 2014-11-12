@@ -38,6 +38,7 @@
 #include <pdal/Options.hpp>
 #include <pdal/Log.hpp>
 #include <pdal/XMLSchema.hpp>
+#include <pdal/Compression.hpp>
 
 #include <boost/algorithm/string.hpp>
 
@@ -115,17 +116,64 @@ typedef std::vector<row> records;
 class Patch
 {
 public:
-    Patch() : count(0), remaining(0), byte_size(0), bytes(0)
+    Patch() : count(0), remaining(0), m_isCompressed(false), m_compVersion(""), idx(0)
     {
     };
 
     point_count_t count;
     point_count_t remaining;
 
-    size_t byte_size;
-    std::vector<uint8_t> bytes;
     pdal::schema::XMLSchema m_schema;
     PointContextRef m_ctx;
+    MetadataNode m_metadata;
+//     compression::CompressionStream m_compStream;
+    bool m_isCompressed;
+    std::string m_compVersion;
+    std::vector<unsigned char> buf;
+    size_t idx;
+
+    void putBytes(const unsigned char* b, size_t len) {
+        while(len --) {
+            buf.push_back(*b++);
+        }
+    }
+
+    void putByte(const unsigned char b) {
+        buf.push_back(b);
+    }
+
+    unsigned char getByte() {
+        return buf[idx++];
+    }
+
+    void getBytes(unsigned char *b, int len) {
+        for (int i = 0 ; i < len ; i ++) {
+            b[i] = getByte();
+        }
+    }
+
+    void setBytes(const std::vector<uint8_t>& data)
+        {
+            buf = data;
+        }
+
+    const std::vector<uint8_t>& getBytes() const
+        {
+            return buf;
+        }
+    void decompress()
+        {
+            PointBufferPtr b = compression::Decompress<Patch>(m_ctx, *this, count, compression::CompressionType::Lazperf);
+            buf = b->getBytes();
+        }
+
+    inline void compress(const PointBuffer& buffer)
+        {
+            compression::Compress<Patch>(m_ctx, buffer, *this, compression::CompressionType::Lazperf, 0, buffer.size());
+        }
+    size_t byte_size()
+        { return buf.size(); }
+
     double xOffset() const
         { return m_schema.m_scale.m_x.m_offset; }
     double yOffset() const

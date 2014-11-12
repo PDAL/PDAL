@@ -2,7 +2,7 @@ USR_LOCAL="/usr/local"
 USR="/usr"
 TIFF_HOME=$USR_LOCAL
 LASZIP_HOME=$USR_LOCAL
-LIBXML2_HOME=$USR
+LIBXML2_HOME=/usr/local/Cellar/libxml2/2.9.2/
 GEOTIFF_HOME=$USR_LOCAL
 P2G_HOME=$USR_LOCAL
 HEXER_HOME="/usr/local"
@@ -12,6 +12,7 @@ SO_EXT=dylib
 # CXX=/usr/local/bin/g++-4.8
 
 ORACLE_HOME=$HOME/oracle
+LAZPERF_HOME=$HOME/dev/git/laz-perf
 export ORACLE_HOME
 CONFIG="Unix Makefiles"
 #CONFIG="Ninja"
@@ -32,6 +33,7 @@ CC=$CC CXX=$CXX cmake   -G "$CONFIG"  \
         -DWITH_MRSID=OFF \
         -DWITH_HDF5=ON \
         -DWITH_PCL=ON \
+        -DWITH_COMPRESSION=ON \
         -DWITH_PGPOINTCLOUD=ON \
         -DMRSID_INCLUDE_DIR=/Users/hobu/dev/release/mrsid/Lidar_DSDK/include \
         -DMRSID_LIBRARY=/Users/hobu/dev/release/mrsid/Lidar_DSDK/lib/liblti_lidar_dsdk.dylib \
@@ -46,6 +48,7 @@ CC=$CC CXX=$CXX cmake   -G "$CONFIG"  \
         -DLASZIP_LIBRARY=${LASZIP_HOME}/lib/liblaszip.${SO_EXT} \
         -DLIBXML2_INCLUDE_DIR=${LIBXML2_HOME}/include/libxml2 \
         -DLIBXML2_LIBRARIES=${LIBXML2_HOME}/lib/libxml2.${SO_EXT} \
+        -DLAZPERF_INCLUDE_DIR=${LAZPERF_HOME}/ \
         -DSQLITE3_INCLUDE_DIR=${SQLITE_HOME}/include \
         -DSQLITE3_LIBRARY=${SQLITE_HOME}/lib/libsqlite3.${SO_EXT}
 

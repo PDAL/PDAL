@@ -51,11 +51,12 @@ if(PCL_FOUND)
 	    PCLConversions.hpp
 	)
 
-        set(deps ${PCL_LIBRARIES})
-	PDAL_ADD_PLUGIN(pclvisualizer_lib_name writer pclvisualizer "${srcs}" "${incs}" "${deps}")
-    else()
-        message(STATUS "..building without PCL Visualization")
-    endif()
+    set(deps ${PCL_LIBRARIES})
+	set(PCLVIZ_LIB_NAME pdal_plugin_writer_pclvisualizer)
+	PDAL_ADD_PLUGIN(${PCLVIZ_LIB_NAME} writer pclvisualizer "${srcs}" "${incs}" "${deps}")
+else()
+    message(STATUS "..building without PCL Visualization")
+endif()
 
     #
     # PCD Reader
@@ -110,7 +111,7 @@ if(PCL_FOUND)
 
     set(deps ${PCL_LIBRARIES})
     PDAL_ADD_PLUGIN(pclblock_filter_lib_name filter pclblock "${srcs}" "${incs}" "${deps}")
-    
+
     #
     # PCL Kernel
     #

@@ -34,9 +34,12 @@
 
 #include "SQLiteWriter.hpp"
 #include <pdal/PointBuffer.hpp>
+#include <pdal/Charbuf.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/pdal_internal.hpp>
 #include <pdal/FileUtils.hpp>
+
+#include <boost/format.hpp>
 
 #include <sstream>
 
@@ -64,6 +67,7 @@ SQLiteWriter::SQLiteWriter()
     , m_pointSize(0)
     , m_orientation(Orientation::PointMajor)
     , m_is3d(false)
+    , m_doCompression(false)
 {}
 
 void SQLiteWriter::processOptions(const Options& options)
@@ -90,6 +94,7 @@ void SQLiteWriter::processOptions(const Options& options)
     m_srid =
         m_options.getValueOrDefault<boost::uint32_t>("srid", 4326);
     m_is3d = m_options.getValueOrDefault<bool>("is3d", false);
+    m_doCompression = m_options.getValueOrDefault<bool>("compression", false);
 }
 
 
@@ -119,10 +124,13 @@ void SQLiteWriter::initialize()
         oss << "Unable to connect to database with error '" << e.what() << "'";
         throw pdal_error(oss.str());
     }
+
+    m_patch = PatchPtr(new Patch());
 }
 
 void SQLiteWriter::ready(PointContextRef ctx)
 {
+    m_context = ctx;
     m_dims = ctx.dims();
     // Determine types for the dimensions.  We use the default types when
     // they exist, float otherwise.
@@ -134,6 +142,7 @@ void SQLiteWriter::ready(PointContextRef ctx)
         m_types.push_back(type);
         m_pointSize += Dimension::size(type);
     }
+    m_patch->m_ctx = ctx;
 }
 
 void SQLiteWriter::write(const PointBuffer& buffer)
@@ -448,6 +457,16 @@ void SQLiteWriter::CreateCloud()
         boost::to_lower_copy(m_block_table) << "',?) ";
 
     schema::Writer writer(m_dims, m_types);
+    pdal::Metadata metadata;
+    if (m_doCompression)
+    {
+
+        Metadata metadata;
+        MetadataNode m = metadata.getNode();
+        m.add("compression", "lazperf");
+        m.add("version", "1.0");
+        writer.setMetadata(m);
+    }
     std::string xml = writer.getXML();
 
     records rs;
@@ -492,66 +511,6 @@ void SQLiteWriter::CreateCloud()
 }
 
 
-namespace
-{
-
-void fillBuf(const PointBuffer& buf, char *pos, Dimension::Id::Enum d,
-    Dimension::Type::Enum type, PointId id)
-{
-    union
-    {
-        float f;
-        double d;
-        int8_t s8;
-        int16_t s16;
-        int32_t s32;
-        int64_t s64;
-        uint8_t u8;
-        uint16_t u16;
-        uint32_t u32;
-        uint64_t u64;
-    } e;  // e - for Everything.
-
-    switch (type)
-    {
-    case Dimension::Type::Float:
-        e.f = buf.getFieldAs<float>(d, id);
-        break;
-    case Dimension::Type::Double:
-        e.d = buf.getFieldAs<double>(d, id);
-        break;
-    case Dimension::Type::Signed8:
-        e.s8 = buf.getFieldAs<int8_t>(d, id);
-        break;
-    case Dimension::Type::Signed16:
-        e.s16 = buf.getFieldAs<int16_t>(d, id);
-        break;
-    case Dimension::Type::Signed32:
-        e.s32 = buf.getFieldAs<int32_t>(d, id);
-        break;
-    case Dimension::Type::Signed64:
-        e.s64 = buf.getFieldAs<int64_t>(d, id);
-        break;
-    case Dimension::Type::Unsigned8:
-        e.u8 = buf.getFieldAs<uint8_t>(d, id);
-        break;
-    case Dimension::Type::Unsigned16:
-        e.u16 = buf.getFieldAs<uint16_t>(d, id);
-        break;
-    case Dimension::Type::Unsigned32:
-        e.u32 = buf.getFieldAs<uint32_t>(d, id);
-        break;
-    case Dimension::Type::Unsigned64:
-        e.u64 = buf.getFieldAs<uint64_t>(d, id);
-        break;
-    case Dimension::Type::None:
-        break;
-    }
-    memcpy(pos, &e, Dimension::size(type));
-}
-
-} // anonymous namespace.
-
 void SQLiteWriter::writeTile(PointBuffer const& buffer)
 {
     using namespace std;
@@ -560,20 +519,30 @@ void SQLiteWriter::writeTile(PointBuffer const& buffer)
     boost::uint32_t point_data_length(0);
     boost::uint32_t schema_byte_size(0);
 
-    size_t outbufSize = m_pointSize * buffer.size();
-    std::unique_ptr<char> outbuf(new char[outbufSize]);
-    char *pos = outbuf.get();
+    size_t bufferSize = buffer.size() * m_context.pointSize();
 
-    for (PointId id = 0; id < buffer.size(); ++id)
+    if (m_doCompression)
     {
-        auto ti = m_types.begin();
-        for (auto di = m_dims.begin(); di != m_dims.end(); ++di, ++ti)
-        {
-            fillBuf(buffer, pos, *di, *ti, id);
-            pos += Dimension::size(*ti);
-        }
-        if (id % 100 == 0)
-            m_callback->invoke(id);
+        m_patch->compress(buffer);
+
+        size_t newSize = m_patch->getBytes().size();
+        double percent = (double) newSize/(double) bufferSize;
+        percent = percent * 100;
+        log()->get(LogLevel::Debug3) << "Compressing tile by "
+                                     << boost::str(boost::format("%.2f") % (100- percent))
+                                     <<"%" << std::endl;
+    }
+    else
+    {
+        std::vector<uint8_t> bytes;
+        bytes.resize(bufferSize);
+        Charbuf charstreambuf((char*)&bytes[0], bufferSize, 0);
+        std::ostream o(&charstreambuf);
+        buffer.getBytes(o, 0, buffer.size());
+
+        log()->get(LogLevel::Debug3) << "uncompressed size: " << bytes.size() << std::endl;
+        m_patch->setBytes(bytes);
+        log()->get(LogLevel::Debug3) << "uncompressed size: " << m_patch->getBytes().size() << std::endl;
     }
 
     records rs;
@@ -590,7 +559,7 @@ void SQLiteWriter::writeTile(PointBuffer const& buffer)
     r.push_back(column(m_obj_id));
     r.push_back(column(m_block_id));
     r.push_back(column(buffer.size()));
-    r.push_back(blob(outbuf.get(), outbufSize));
+    r.push_back(blob((const char*)(&m_patch->getBytes()[0]), m_patch->getBytes().size()));
     r.push_back(column(bounds));
     r.push_back(column(m_srid));
     r.push_back(column(box));

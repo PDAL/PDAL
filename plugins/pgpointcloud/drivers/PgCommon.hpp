@@ -40,6 +40,7 @@
 #include "libpq-fe.h"
 #include <pdal/pdal_error.hpp>
 #include <pdal/Options.hpp>
+#include <pdal/Compression.hpp>
 
 namespace pdal
 {
@@ -48,28 +49,16 @@ namespace drivers
 namespace pgpointcloud
 {
 
-namespace CompressionType
-{
-
-enum Enum
-{
-    None = 0,
-    Ght = 1,
-    Dimensional = 2,
-    Unknown = 256
-};
-
-} // namespace CompressionType
-
-
-inline CompressionType::Enum getCompressionType(
+inline pdal::compression::CompressionType::Enum getCompressionType(
     std::string const& compression_type)
 {
     if (boost::iequals(compression_type, "dimensional"))
-        return CompressionType::Dimensional;
+        return compression::CompressionType::Dimensional;
     else if (boost::iequals(compression_type, "ght"))
-        return CompressionType::Ght;
-    return CompressionType::None;
+        return compression::CompressionType::Ght;
+    else if (boost::iequals(compression_type, "laszperf"))
+        return compression::CompressionType::Lazperf;
+    return compression::CompressionType::None;
 }
 
 inline PGconn* pg_connect(std::string const& connection)
@@ -86,17 +75,17 @@ inline PGconn* pg_connect(std::string const& connection)
     PQconninfoOption *connOptions = PQconninfoParse(connection.c_str(), &errstr);
     if ( ! connOptions )
     {
-        throw pdal_error(errstr);      
+        throw pdal_error(errstr);
     }
 #endif
-   
+
     /* connect to database */
     conn = PQconnectdb(connection.c_str());
     if ( (!conn) || (PQstatus(conn) != CONNECTION_OK) )
     {
-        throw pdal_error("unable to connect to database");        
+        throw pdal_error("unable to connect to database");
     }
-    
+
     return conn;
 }
 
@@ -126,9 +115,9 @@ inline void pg_commit(PGconn* session)
 inline char* pg_query_once(PGconn* session, std::string const& sql)
 {
     PGresult *result = PQexec(session, sql.c_str());
-    
+
     if ( (!result) ||
-         PQresultStatus(result) != PGRES_TUPLES_OK || 
+         PQresultStatus(result) != PGRES_TUPLES_OK ||
          PQntuples(result) == 0 )
     {
         PQclear(result);
@@ -149,7 +138,7 @@ inline PGresult* pg_query_result(PGconn* session, std::string const& sql)
         errmsg = std::string(PQerrorMessage(session));
         throw pdal_error(errmsg);
     }
-        
+
     if ( PQresultStatus(result) != PGRES_TUPLES_OK )
     {
         errmsg = std::string(PQresultErrorMessage(result));
