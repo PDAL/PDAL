@@ -24,17 +24,18 @@ fi
 CC=$CC CXX=$CXX cmake   -G "$CONFIG"  \
         -DCMAKE_BUILD_TYPE=Debug \
         -DCMAKE_INSTALL_PREFIX=/Users/hobu \
-        -DWITH_ORACLE=ON \
+        -DBUILD_PLUGIN_OCI=ON \
         -DWITH_GEOTIFF=ON \
-        -DWITH_SQLITE=ON \
-        -DWITH_P2G=ON \
-        -DWITH_HEXER=ON \
-        -DWITH_NITRO=ON \
-        -DWITH_MRSID=OFF \
-        -DWITH_HDF5=ON \
-        -DWITH_PCL=ON \
+        -DBUILD_PLUGIN_SQLITE=ON \
+        -DBUILD_PLUGIN_PGPOINTCLOUD=ON \
+        -DBUILD_OCI_TESTS=ON \
+        -DBUILD_PLUGIN_HEXBIN=ON \
+        -DBUILD_PLUGIN_NITF=ON \
+        -DBUILD_PLUGIN_P2G=ON \
+        -DBUILD_PLUGIN_MRSID=OFF \
+        -DBUILD_PLUGIN_ICEBRIDGE=ON \
+        -DBUILD_PLUGIN_PCL=ON \
         -DWITH_COMPRESSION=ON \
-        -DWITH_PGPOINTCLOUD=ON \
         -DMRSID_INCLUDE_DIR=/Users/hobu/dev/release/mrsid/Lidar_DSDK/include \
         -DMRSID_LIBRARY=/Users/hobu/dev/release/mrsid/Lidar_DSDK/lib/liblti_lidar_dsdk.dylib \
         -DHEXER_INCLUDE_DIR=${HEXER_HOME}/include \
