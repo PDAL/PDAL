@@ -40,7 +40,7 @@
 
 #include "Support.hpp"
 #include "Pgtest-Support.hpp"
-
+#include "../drivers/PgCommon.hpp"
 
 
 using namespace pdal;
@@ -141,8 +141,13 @@ BOOST_AUTO_TEST_CASE(testWrite)
     if (wc)
     {
         BOOST_CHECK(wc);
+        const std::string file(Support::datapath("las/1.2-with-color.las"));
 
-        pdal::drivers::las::Reader reader(Support::datapath("las/1.2-with-color.las"));
+        const pdal::Option opt_filename("filename", file);
+        pdal::drivers::las::Reader reader;
+        pdal::Options options;
+        options.add(opt_filename);
+        reader.setOptions(options);
         std::unique_ptr<Writer> writer(wc());
         writer->setOptions(getWriterOptions());
         writer->setInput(&reader);
@@ -174,7 +179,13 @@ BOOST_AUTO_TEST_CASE(testNoPointcloudExtension)
 
         executeOnTestDb("DROP EXTENSION pointcloud");
 
-        pdal::drivers::las::Reader reader(Support::datapath("las/1.2-with-color.las"));
+        const std::string file(Support::datapath("las/1.2-with-color.las"));
+
+        const pdal::Option opt_filename("filename", file);
+        pdal::drivers::las::Reader reader;
+        pdal::Options options;
+        options.add(opt_filename);
+        reader.setOptions(options);
         std::unique_ptr<Writer> writer(wc());
         writer->setOptions(getWriterOptions());
         writer->setInput(&reader);
