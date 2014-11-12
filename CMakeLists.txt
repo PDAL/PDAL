@@ -376,7 +376,7 @@ if(WITH_LASZIP)
     endif()
 endif()
 
-option(WITH_COMPRESSION "Choose to use laz-perf compression for database drivers" TRUE)
+option(WITH_COMPRESSION "Choose to use laz-perf compression for database drivers" FALSE)
 if (WITH_COMPRESSION)
     find_package(Lazperf)
     if (LAZPERF_FOUND)

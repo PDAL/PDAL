@@ -36,6 +36,7 @@
 
 #include <boost/algorithm/string.hpp>
 
+#ifdef PDAL_HAVE_LAZPERF
 #include <tlaz/common/common.hpp>
 #include <tlaz/compressor.hpp>
 #include <tlaz/decompressor.hpp>
@@ -44,6 +45,7 @@
 #include <tlaz/decoder.hpp>
 #include <tlaz/formats.hpp>
 #include <tlaz/las.hpp>
+#endif
 
 #include <pdal/Dimension.hpp>
 #include <pdal/PointContext.hpp>
@@ -79,19 +81,6 @@ enum Enum
 } // namespace CompressionType
 
 
-inline std::string listDims(PointContextRef ctx)
-{
-    std::ostringstream oss;    const Dimension::IdList& dims = ctx.dims();
-    for (auto di = dims.begin(); di != dims.end(); ++di)
-    {
-            Dimension::Type::Enum t = ctx.dimType(*di);
-            size_t s = ctx.dimSize(*di);
-            std::string name = Dimension::name(*di);
-            std::string ty = Dimension::interpretationName(t);
-            oss << name << " (" << ty << ") size: " << s << std::endl;
-    }
-    return oss.str();
-}
 template <typename CompressionStream> inline void Compress(PointContextRef ctx,
               const PointBuffer& buffer,
               CompressionStream& output,
@@ -99,6 +88,8 @@ template <typename CompressionStream> inline void Compress(PointContextRef ctx,
               PointId start,
               PointId end)
 {
+
+#ifdef PDAL_HAVE_LAZPERF
     using namespace laszip;
     using namespace laszip::formats;
 
@@ -229,6 +220,7 @@ template <typename CompressionStream> inline void Compress(PointContextRef ctx,
     }
 
     encoder.done();
+#endif
 }
 
 
@@ -238,6 +230,8 @@ template <typename CompressionStream> inline PointBufferPtr Decompress(PointCont
                                                                        size_t howMany,
                                                                        CompressionType::Enum ctype)
 {
+    std::vector<uint8_t> output;
+#ifdef PDAL_HAVE_LAZPERF
     using namespace laszip;
     using namespace laszip::formats;
 
@@ -359,7 +353,6 @@ template <typename CompressionStream> inline PointBufferPtr Decompress(PointCont
     }
 
 
-    std::vector<uint8_t> output;
     output.resize(howMany * ctx.pointSize());
     uint8_t* pos = &(output[0]);
     size_t point_size = ctx.pointSize();
@@ -371,6 +364,7 @@ template <typename CompressionStream> inline PointBufferPtr Decompress(PointCont
         pos+=point_size;
     }
 
+#endif
     PointBufferPtr b = PointBufferPtr(new PointBuffer(output, ctx));
 
     return b;
