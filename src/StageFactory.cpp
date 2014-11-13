@@ -49,8 +49,11 @@
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/tokenizer.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include <sstream>
+#include <string>
+#include <vector>
 #include <stdio.h> // for funcptr
 
 namespace pdal
@@ -358,84 +361,94 @@ void StageFactory::loadPlugins()
     // For example, libpdal_plugin_writer_text or libpdal_plugin_filter_color
 
 
-    // If we don't have a driver path, we're not loading anything
+    // If we don't have a driver path, we'll default to /usr/local/lib and lib
 
     if (pluginDir.size() == 0)
-        return;
-
-    directory_iterator dir(pluginDir), it, end;
-
-    std::map<path, path> pluginFilenames;
-
-    // Collect candidate filenames in the above form. Prefer symlink files
-    // over hard files if their basenames are the same.
-    for (it = dir; it != end; ++it)
     {
-        path p = it->path();
+        pluginDir = "/usr/local/lib:./lib";
+    }
 
-        if (boost::algorithm::istarts_with(p.filename().string(), "libpdal_plugin"))
+    std::vector<std::string> pluginPathVec;
+    boost::algorithm::split(pluginPathVec, pluginDir, boost::algorithm::is_any_of(":"), boost::algorithm::token_compress_on);
+
+    for (auto pluginPath : pluginPathVec)
+    {
+        if (!boost::filesystem::is_directory(pluginPath))
+            continue;
+        directory_iterator dir(pluginPath);
+
+        std::map<path, path> pluginFilenames;
+
+        // Collect candidate filenames in the above form. Prefer symlink files
+        // over hard files if their basenames are the same.
+        for (auto it : dir)
         {
-            path extension = p.extension();
-            if (boost::algorithm::iends_with(extension.string(), "DLL") ||
-                    boost::algorithm::iends_with(extension.string(), "DYLIB") ||
-                    boost::algorithm::iends_with(extension.string(), "SO"))
+            path p = it.path();
+
+            if (boost::algorithm::istarts_with(p.filename().string(), "libpdal_plugin"))
             {
-                std::string basename;
-
-                // Step through the stems until the extension of the stem
-                // is empty. This is our basename.  For example,
-                // libpdal_plugin_writer_text.0.dylib will basename down to
-                // libpdal_plugin_writer_text and so will
-                // libpdal_plugin_writer_text.dylib
-                // copy the path so we can modify in place
-                path t = p;
-                for (; !t.extension().empty(); t = t.stem())
+                path extension = p.extension();
+                if (boost::algorithm::iends_with(extension.string(), "DLL") ||
+                        boost::algorithm::iends_with(extension.string(), "DYLIB") ||
+                        boost::algorithm::iends_with(extension.string(), "SO"))
                 {
-                    if (t.stem().extension().empty())
+                    std::string basename;
+
+                    // Step through the stems until the extension of the stem
+                    // is empty. This is our basename.  For example,
+                    // libpdal_plugin_writer_text.0.dylib will basename down to
+                    // libpdal_plugin_writer_text and so will
+                    // libpdal_plugin_writer_text.dylib
+                    // copy the path so we can modify in place
+                    path t = p;
+                    for (; !t.extension().empty(); t = t.stem())
                     {
-                        basename = t.stem().string();
+                        if (t.stem().extension().empty())
+                        {
+                            basename = t.stem().string();
+                        }
                     }
-                }
 
-                if (pluginFilenames.find(basename) == pluginFilenames.end())
-                {
-                    // We haven't already loaded a plugin with this basename,
-                    // load it.
-                    pluginFilenames.insert(std::pair<path, path>(basename, p));
-                }
-                else
-                {
-                    // We already have a filename with the basename of this
-                    // file.  If the basename of our current file is a symlink
-                    // we're going to replace what's in the map with ours because
-                    // we are going to presume that a symlink'd file is more
-                    // cannonical than a hard file of the same name.
-                    std::map<path, path>::iterator i = pluginFilenames.find(basename);
-                    if (it->symlink_status().type() == symlink_file)
+                    if (pluginFilenames.find(basename) == pluginFilenames.end())
                     {
-                        // Take the symlink over a hard SO
-                        i->second = p;
+                        // We haven't already loaded a plugin with this basename,
+                        // load it.
+                        pluginFilenames.insert(std::pair<path, path>(basename, p));
+                    }
+                    else
+                    {
+                        // We already have a filename with the basename of this
+                        // file.  If the basename of our current file is a symlink
+                        // we're going to replace what's in the map with ours because
+                        // we are going to presume that a symlink'd file is more
+                        // cannonical than a hard file of the same name.
+                        std::map<path, path>::iterator i = pluginFilenames.find(basename);
+                        if (it.symlink_status().type() == symlink_file)
+                        {
+                            // Take the symlink over a hard SO
+                            i->second = p;
+                        }
                     }
                 }
             }
         }
-    }
 
-    std::map<std::string, std::string> registerMethods;
+        std::map<std::string, std::string> registerMethods;
 
-    for (std::map<path, path>::iterator t = pluginFilenames.begin();
-            t!= pluginFilenames.end(); t ++)
-    {
-        // Basenames must be in the following form:
-        // libpdal_plugin_writer_text or libpdal_plugin_filter_color
-        // The last two tokens are the stage type and the stage name.
-        path basename = t->first;
-        path filename = t->second;
+        for (std::map<path, path>::iterator t = pluginFilenames.begin();
+                t!= pluginFilenames.end(); t ++)
+        {
+            // Basenames must be in the following form:
+            // libpdal_plugin_writer_text or libpdal_plugin_filter_color
+            // The last two tokens are the stage type and the stage name.
+            path basename = t->first;
+            path filename = t->second;
 
-        registerPlugin(filename.string());
-        // std::string methodName = "PDALRegister_" + boost::algorithm::ireplace_first_copy(basename.string(), "libpdal_plugin_", "");
-        // Utils::registerPlugin((void*)this, filename.string(), methodName);
+            registerPlugin(filename.string());
+            // std::string methodName = "PDALRegister_" + boost::algorithm::ireplace_first_copy(basename.string(), "libpdal_plugin_", "");
+            // Utils::registerPlugin((void*)this, filename.string(), methodName);
 
+        }
     }
 }
 
